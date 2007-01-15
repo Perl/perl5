@@ -1390,6 +1390,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     if (flags & SVf_OOK)	sv_catpv(d, "OOK,");
     if (flags & SVf_FAKE)	sv_catpv(d, "FAKE,");
     if (flags & SVf_READONLY)	sv_catpv(d, "READONLY,");
+    if (flags & SVf_BREAK)	sv_catpv(d, "BREAK,");
 
     if (flags & SVf_AMAGIC)	sv_catpv(d, "OVERLOAD,");
     if (flags & SVp_IOK)	sv_catpv(d, "pIOK,");
