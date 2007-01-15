@@ -81,7 +81,7 @@ See L<perlsyn/"Switch statements"> for details.
 C<use feature '~~'> tells the compiler to enable the Perl 6
 smart match C<~~> operator.
 
-See L<perlsyn/"Smart Matching in Detail"> for details.
+See L<perlsyn/"Smart matching in detail"> for details.
 
 =head2 The 'say' feature
 
