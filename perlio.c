@@ -796,7 +796,7 @@ PerlIO_find_layer(pTHX_ const char *name, STRLEN len, int load)
 	} else {
 	    SV * const pkgsv = newSVpvs("PerlIO");
 	    SV * const layer = newSVpvn(name, len);
-	    CV * const cv    = get_cv("PerlIO::Layer::NoWarnings", FALSE);
+	    CV * const cv    = Perl_get_cvn_flags(aTHX_ STR_WITH_LEN("PerlIO::Layer::NoWarnings"), 0);
 	    ENTER;
 	    SAVEINT(PL_in_load_module);
 	    if (cv) {

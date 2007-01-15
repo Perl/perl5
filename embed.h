@@ -647,6 +647,7 @@
 #define get_av			Perl_get_av
 #define get_hv			Perl_get_hv
 #define get_cv			Perl_get_cv
+#define get_cvn_flags		Perl_get_cvn_flags
 #define init_i18nl10n		Perl_init_i18nl10n
 #define init_i18nl14n		Perl_init_i18nl14n
 #define new_collate		Perl_new_collate
@@ -2858,6 +2859,7 @@
 #define get_av(a,b)		Perl_get_av(aTHX_ a,b)
 #define get_hv(a,b)		Perl_get_hv(aTHX_ a,b)
 #define get_cv(a,b)		Perl_get_cv(aTHX_ a,b)
+#define get_cvn_flags(a,b,c)	Perl_get_cvn_flags(aTHX_ a,b,c)
 #define init_i18nl10n(a)	Perl_init_i18nl10n(aTHX_ a)
 #define init_i18nl14n(a)	Perl_init_i18nl14n(aTHX_ a)
 #define new_collate(a)		Perl_new_collate(aTHX_ a)

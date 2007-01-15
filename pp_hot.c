@@ -2710,6 +2710,7 @@ PP(pp_entersub)
     default:
 	if (!SvROK(sv)) {
 	    const char *sym;
+	    STRLEN len;
 	    if (sv == &PL_sv_yes) {		/* unfound import, ignore */
 		if (hasargs)
 		    SP = PL_stack_base + POPMARK;
@@ -2719,16 +2720,22 @@ PP(pp_entersub)
 		mg_get(sv);
 		if (SvROK(sv))
 		    goto got_rv;
-		sym = SvPOKp(sv) ? SvPVX_const(sv) : NULL;
+		if (SvPOKp(sv)) {
+		    sym = SvPVX_const(sv);
+		    len = SvCUR(sv);
+		} else {
+		    sym = NULL;
+		    len = 0;
+		}
 	    }
 	    else {
-		sym = SvPV_nolen_const(sv);
+		sym = SvPV_const(sv, len);
             }
 	    if (!sym)
 		DIE(aTHX_ PL_no_usym, "a subroutine");
 	    if (PL_op->op_private & HINT_STRICT_REFS)
 		DIE(aTHX_ PL_no_symref, sym, "a subroutine");
-	    cv = get_cv(sym, TRUE);
+	    cv = get_cvn_flags(sym, len, GV_ADD|SvUTF8(sv));
 	    break;
 	}
   got_rv:

@@ -806,8 +806,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     HV *stash = NULL;
     const I32 no_init = flags & (GV_NOADD_NOINIT | GV_NOINIT);
     const I32 no_expand = flags & GV_NOEXPAND;
-    const I32 add =
-	flags & ~SVf_UTF8 & ~GV_NOADD_NOINIT & ~GV_NOEXPAND & ~GV_NOTQUAL;
+    const I32 add = flags & ~GV_NOADD_MASK;
     const char *const name_end = nambeg + full_len;
     const char *const name_em1 = name_end - 1;
 

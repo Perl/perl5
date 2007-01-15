@@ -1769,7 +1769,10 @@ PERL_CALLCONV AV*	Perl_get_av(pTHX_ const char* name, I32 create)
 PERL_CALLCONV HV*	Perl_get_hv(pTHX_ const char* name, I32 create)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV CV*	Perl_get_cv(pTHX_ const char* name, I32 create)
+PERL_CALLCONV CV*	Perl_get_cv(pTHX_ const char* name, I32 flags)
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV CV*	Perl_get_cvn_flags(pTHX_ const char* name, STRLEN len, I32 flags)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV int	Perl_init_i18nl10n(pTHX_ int printwarn);
@@ -2603,10 +2606,6 @@ PERL_CALLCONV int	Perl_yyparse(pTHX);
 PERL_CALLCONV void	Perl_parser_free(pTHX_ const yy_parser *)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV yy_parser*	Perl_parser_dup(pTHX_ const yy_parser *proto, CLONE_PARAMS* param)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-
 PERL_CALLCONV int	Perl_yywarn(pTHX_ const char* s)
 			__attribute__nonnull__(pTHX_1);
 
@@ -2863,6 +2862,10 @@ PERL_CALLCONV void	Perl_rvpv_dup(pTHX_ SV* dstr, const SV *sstr, CLONE_PARAMS* p
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
+
+PERL_CALLCONV yy_parser*	Perl_parser_dup(pTHX_ const yy_parser *proto, CLONE_PARAMS* param)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
 
 #endif
 PERL_CALLCONV PTR_TBL_t*	Perl_ptr_table_new(pTHX)

@@ -8,7 +8,7 @@ BEGIN {
 require 'test.pl';
 use strict qw(refs subs);
 
-plan(119);
+plan(121);
 
 # Test glob operations.
 
@@ -468,6 +468,12 @@ TODO: {
     my $glob2 = *{$name2};
 
     isnt ($glob1, $glob2, "We get different typeglobs");
+
+    *{$name1} = sub {"One"};
+    *{$name2} = sub {"Two"};
+
+    is (&{$name1}, "One");
+    is (&{$name2}, "Two");
 }
 
 # test derefs after list slice

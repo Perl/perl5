@@ -368,6 +368,7 @@ Perl_get_sv
 Perl_get_av
 Perl_get_hv
 Perl_get_cv
+Perl_get_cvn_flags
 Perl_init_i18nl10n
 Perl_init_i18nl14n
 Perl_new_collate
