@@ -156,21 +156,25 @@ for (@prgs){
     }
     die "$0: can't have OPTION regex and random\n"
         if $option_regex + $option_random > 1;
-    my $ok = 1;
-    if ( $results =~ s/^SKIPPED\n//) {
+    my $ok = 0;
+    if ($results =~ s/^SKIPPED\n//) {
 	print "$results\n" ;
+	$ok = 1;
     }
     elsif ($option_random) {
         $ok = randomMatch($results, $expected);
     }
-    elsif (($prefix  && (( $option_regex && $results !~ /^$expected/) ||
-			 (!$option_regex && $results !~ /^\Q$expected/))) or
-	   (!$prefix && (( $option_regex && $results !~ /^$expected/) ||
-			 (!$option_regex && $results ne $expected))))
-    {
-	print_err_line( $switch, $prog, $expected, $results, $todo );
-        $ok = 0;
+    elsif ($option_regex) {
+	$ok = $results =~ /^$expected/;
     }
+    elsif ($prefix) {
+	$ok = $results =~ /^\Q$expected/;
+    }
+    else {
+	$ok = $results eq $expected;
+    }
+ 
+    print_err_line( $switch, $prog, $expected, $results, $todo ) unless $ok;
 
     our $TODO = $todo ? $todo_reason : 0;
     ok($ok);
