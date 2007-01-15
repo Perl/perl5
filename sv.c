@@ -11025,6 +11025,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 			newSViv(PTR2IV(CALLREGDUPE(
 				INT2PTR(REGEXP *, SvIVX(regex)), param))))
 		;
+	    if (SvFLAGS(regex) & SVf_BREAK)
+		SvFLAGS(sv) |= SVf_BREAK; /* unrefcnted PL_curpm */
 	    av_push(PL_regex_padav, sv);
 	}
     }
