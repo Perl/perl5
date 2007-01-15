@@ -105,27 +105,19 @@ to C<use feature qw(switch ~~ say err state)>.
 sub import {
     my $class = shift;
     if (@_ == 0) {
-	require Carp;
-	Carp->import("croak");
 	croak("No features specified");
     }
     while (@_) {
 	my $name = shift(@_);
 	if ($name =~ /^:(.*)/) {
 	    if (!exists $feature_bundle{$1}) {
-		require Carp;
-		Carp->import("croak");
-		croak(sprintf('Feature bundle "%s" is not supported by Perl %vd',
-		    $1, $^V));
+		unknown_feature_bundle($1);
 	    }
 	    unshift @_, @{$feature_bundle{$1}};
 	    next;
 	}
 	if (!exists $feature{$name}) {
-	    require Carp;
-	    Carp->import("croak");
-	    croak(sprintf('Feature "%s" is not supported by Perl %vd',
-		$name, $^V));
+	    unknown_feature($name);
 	}
 	$^H{$feature{$name}} = 1;
     }
@@ -144,24 +136,35 @@ sub unimport {
 	my $name = shift;
 	if ($name =~ /^:(.*)/) {
 	    if (!exists $feature_bundle{$1}) {
-		require Carp;
-		Carp->import("croak");
-		croak(sprintf('Feature bundle "%s" is not supported by Perl %vd',
-		    $1, $^V));
+		unknown_feature_bundle($1);
 	    }
 	    unshift @_, @{$feature_bundle{$1}};
 	    next;
 	}
 	if (!exists($feature{$name})) {
-	    require Carp;
-	    Carp->import("croak");
-	    croak(sprintf('Feature "%s" is not supported by Perl %vd',
-		$name, $^V));
+	    unknown_feature($name);
 	}
 	else {
 	    delete $^H{$feature{$name}};
 	}
     }
+}
+
+sub unknown_feature {
+    my $feature = shift;
+    croak(sprintf('Feature "%s" is not supported by Perl %vd',
+	    $feature, $^V));
+}
+
+sub unknown_feature_bundle {
+    my $feature = shift;
+    croak(sprintf('Feature bundle "%s" is not supported by Perl %vd',
+	    $feature, $^V));
+}
+
+sub croak {
+    require Carp;
+    Carp::croak(@_);
 }
 
 1;
