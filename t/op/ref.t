@@ -8,7 +8,7 @@ BEGIN {
 require 'test.pl';
 use strict qw(refs subs);
 
-plan(102);
+plan(119);
 
 # Test glob operations.
 
@@ -414,19 +414,60 @@ TODO: {
 	'Accessing via the UTF8 byte sequence gives nothing');
 }
 
-TODO: {
+{
     no strict 'refs';
     $name1 = "\0Chalk";
     $name2 = "\0Cheese";
 
     isnt ($name1, $name2, "They differ");
 
-    is ($$name1, undef, 'Nothing before we start');
+    is ($$name1, undef, 'Nothing before we start (scalars)');
     is ($$name2, undef, 'Nothing before we start');
     $$name1 = "Yummy";
     is ($$name1, "Yummy", 'Accessing via the correct name works');
     is ($$name2, undef,
 	'Accessing via a different NUL-containing name gives nothing');
+
+    is ($name1->[0], undef, 'Nothing before we start (arrays)');
+    is ($name2->[0], undef, 'Nothing before we start');
+    $name1->[0] = "Yummy";
+    is ($name1->[0], "Yummy", 'Accessing via the correct name works');
+    is ($name2->[0], undef,
+	'Accessing via a different NUL-containing name gives nothing');
+
+    my (undef, $one) = @{$name1}[2,3];
+    my (undef, $two) = @{$name2}[2,3];
+    is ($one, undef, 'Nothing before we start (array slices)');
+    is ($two, undef, 'Nothing before we start');
+    @{$name1}[2,3] = ("Very", "Yummy");
+    (undef, $one) = @{$name1}[2,3];
+    (undef, $two) = @{$name2}[2,3];
+    is ($one, "Yummy", 'Accessing via the correct name works');
+    is ($two, undef,
+	'Accessing via a different NUL-containing name gives nothing');
+
+    is ($name1->{PWOF}, undef, 'Nothing before we start (hashes)');
+    is ($name2->{PWOF}, undef, 'Nothing before we start');
+    $name1->{PWOF} = "Yummy";
+    is ($name1->{PWOF}, "Yummy", 'Accessing via the correct name works');
+    is ($name2->{PWOF}, undef,
+	'Accessing via a different NUL-containing name gives nothing');
+
+    my (undef, $one) = @{$name1}{'SNIF', 'BEEYOOP'};
+    my (undef, $two) = @{$name2}{'SNIF', 'BEEYOOP'};
+    is ($one, undef, 'Nothing before we start (hash slices)');
+    is ($two, undef, 'Nothing before we start');
+    @{$name1}{'SNIF', 'BEEYOOP'} = ("Very", "Yummy");
+    (undef, $one) = @{$name1}{'SNIF', 'BEEYOOP'};
+    (undef, $two) = @{$name2}{'SNIF', 'BEEYOOP'};
+    is ($one, "Yummy", 'Accessing via the correct name works');
+    is ($two, undef,
+	'Accessing via a different NUL-containing name gives nothing');
+
+    $name1 = "Left"; $name2 = "Left\0Right";
+    my $glob2 = *{$name2};
+
+    isnt ($glob1, $glob2, "We get different typeglobs");
 }
 
 # test derefs after list slice
