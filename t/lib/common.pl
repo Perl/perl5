@@ -1,10 +1,10 @@
 # This code is used by lib/warnings.t and lib/feature.t
 
 BEGIN {
-    require Config; import Config;
     require './test.pl';
 }
 
+use Config;
 use File::Path;
 use File::Spec::Functions;
 
@@ -13,10 +13,10 @@ our $pragma_name;
 
 $| = 1;
 
-my $Is_MacOS   = $^O eq 'MacOS';
+my $Is_MacOS = $^O eq 'MacOS';
 my $tmpfile = "tmp0000";
 1 while -e ++$tmpfile;
-END {  if ($tmpfile) { 1 while unlink $tmpfile} }
+END { 1 while unlink $tmpfile }
 
 my @prgs = () ;
 my @w_files = () ;
@@ -160,24 +160,15 @@ for (@prgs){
     if ( $results =~ s/^SKIPPED\n//) {
 	print "$results\n" ;
     }
-    elsif ($option_random)
-    {
+    elsif ($option_random) {
         $ok = randomMatch($results, $expected);
     }
     elsif (($prefix  && (( $option_regex && $results !~ /^$expected/) ||
 			 (!$option_regex && $results !~ /^\Q$expected/))) or
 	   (!$prefix && (( $option_regex && $results !~ /^$expected/) ||
-			 (!$option_regex && $results ne $expected)))) {
-        my $err_line = "PROG: $switch\n$prog\n" .
-                       "EXPECTED:\n$expected\n" .
-                       "GOT:\n$results\n";
-        if ($todo) {
-            $err_line =~ s/^/# /mg;
-            print $err_line;  # Harness can't filter it out from STDERR.
-        }
-        else {
-            print STDERR $err_line;
-        }
+			 (!$option_regex && $results ne $expected))))
+    {
+	print_err_line( $switch, $prog, $expected, $results, $todo );
         $ok = 0;
     }
 
@@ -200,6 +191,22 @@ sub randomMatch
 
    return "@got" eq "@expected";
 
+}
+
+sub print_err_line {
+    my($switch, $prog, $expected, $results, $todo) = @_;
+    my $err_line = "PROG: $switch\n$prog\n" .
+		   "EXPECTED:\n$expected\n" .
+		   "GOT:\n$results\n";
+    if ($todo) {
+	$err_line =~ s/^/# /mg;
+	print $err_line;  # Harness can't filter it out from STDERR.
+    }
+    else {
+	print STDERR $err_line;
+    }
+
+    return 1;
 }
 
 1;
