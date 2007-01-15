@@ -10997,7 +10997,7 @@ S_scan_trans(pTHX_ char *start)
     }
   no_more:
 
-    tbl = PerlMemShared_calloc(complement&&!del?258:256, sizeof(short));
+    tbl = (short *)PerlMemShared_calloc(complement&&!del?258:256, sizeof(short));
     o = newPVOP(OP_TRANS, 0, (char*)tbl);
     o->op_private &= ~OPpTRANS_ALL;
     o->op_private |= del|squash|complement|
