@@ -43,31 +43,43 @@ risk. New syntactic constructs can be enabled by C<use feature 'foo'>,
 and will be parsed only when the appropriate feature pragma is in
 scope.
 
+=head2 Lexical effect
+
+Like other pragmas (C<use strict>, for example), features have a lexical
+effect.  C<use feature qw(foo)> will only make the feature "foo" available
+from that point to the end of the enclosing block.
+
+    {
+        use feature 'say';
+        say "say is available here";
+    }
+    print "But not here.\n";
+
 =head2 The 'switch' feature
 
 C<use feature 'switch'> tells the compiler to enable the Perl 6
-given/when construct from here to the end of the enclosing BLOCK.
+given/when construct.
 
 See L<perlsyn/"Switch statements"> for details.
 
 =head2 The '~~' feature
 
 C<use feature '~~'> tells the compiler to enable the Perl 6
-smart match C<~~> operator from here to the end of the enclosing BLOCK.
+smart match C<~~> operator.
 
 See L<perlsyn/"Smart Matching in Detail"> for details.
 
 =head2 The 'say' feature
 
 C<use feature 'say'> tells the compiler to enable the Perl 6
-C<say> function from here to the end of the enclosing BLOCK.
+C<say> function.
 
 See L<perlfunc/say> for details.
 
 =head2 the 'err' feature
 
 C<use feature 'err'> tells the compiler to enable the C<err>
-operator from here to the end of the enclosing BLOCK.
+operator.
 
 C<err> is a low-precedence variant of the C<//> operator:
 see C<perlop> for details.
@@ -79,7 +91,7 @@ The 'dor' feature is an alias for the 'err' feature.
 =head2 the 'state' feature
 
 C<use feature 'state'> tells the compiler to enable C<state>
-variables from here to the end of the enclosing BLOCK.
+variables.
 
 See L<perlsub/"Persistent Private Variables"> for details.
 
