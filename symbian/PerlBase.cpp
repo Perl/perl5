@@ -21,6 +21,7 @@ CPerlBase::CPerlBase()
 
 EXPORT_C void CPerlBase::Destruct()
 {
+    dTHX;
     iState = EPerlDestroying;
     if (iConsole) {
         iConsole->Printf(_L("[Any key to continue]"));
