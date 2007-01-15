@@ -783,6 +783,8 @@ PP(pp_rv2av)
 {
     dVAR; dSP; dTOPss;
     AV *av;
+    const I32 gimme = GIMME_V;
+    static const char return_array_to_lvalue_scalar[] = "Can't return hash to lvalue scalar context";
 
     if (SvROK(sv)) {
       wasref:
@@ -796,8 +798,8 @@ PP(pp_rv2av)
 	    RETURN;
 	}
 	else if (LVRET) {
-	    if (GIMME == G_SCALAR)
-		Perl_croak(aTHX_ "Can't return array to lvalue scalar context");
+	    if (gimme != G_ARRAY)
+		Perl_croak(aTHX_ return_array_to_lvalue_scalar);
 	    SETs((SV*)av);
 	    RETURN;
 	}
@@ -813,9 +815,8 @@ PP(pp_rv2av)
 		RETURN;
 	    }
 	    else if (LVRET) {
-		if (GIMME == G_SCALAR)
-		    Perl_croak(aTHX_ "Can't return array to lvalue"
-			       " scalar context");
+		if (gimme != G_ARRAY)
+		    Perl_croak(aTHX_ return_array_to_lvalue_scalar);
 		SETs((SV*)av);
 		RETURN;
 	    }
@@ -835,8 +836,8 @@ PP(pp_rv2av)
 			DIE(aTHX_ PL_no_usym, "an ARRAY");
 		    if (ckWARN(WARN_UNINITIALIZED))
 			report_uninit(sv);
-		    if (GIMME == G_ARRAY) {
-			(void)POPs;
+		    if (gimme == G_ARRAY) {
+			SP--;
 			RETURN;
 		    }
 		    RETSETUNDEF;
@@ -869,16 +870,15 @@ PP(pp_rv2av)
 		RETURN;
 	    }
 	    else if (LVRET) {
-		if (GIMME == G_SCALAR)
-		    Perl_croak(aTHX_ "Can't return array to lvalue"
-			       " scalar context");
+		if (gimme != G_ARRAY)
+		    Perl_croak(aTHX_ return_array_to_lvalue_scalar);
 		SETs((SV*)av);
 		RETURN;
 	    }
 	}
     }
 
-    if (GIMME == G_ARRAY) {
+    if (gimme == G_ARRAY) {
 	const I32 maxarg = AvFILL(av) + 1;
 	(void)POPs;			/* XXXX May be optimized away? */
 	EXTEND(SP, maxarg);
@@ -897,7 +897,7 @@ PP(pp_rv2av)
 	}
 	SP += maxarg;
     }
-    else if (GIMME_V == G_SCALAR) {
+    else if (gimme == G_SCALAR) {
 	dTARGET;
 	const I32 maxarg = AvFILL(av) + 1;
 	SETi(maxarg);
