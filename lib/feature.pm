@@ -92,6 +92,8 @@ The 'dor' feature is an alias for the 'err' feature.
 C<use feature 'state'> tells the compiler to enable C<state>
 variables from here to the end of the enclosing BLOCK.
 
+See L<perlsub/"Persistent Private Variables"> for details.
+
 =head1 FEATURE BUNDLES
 
 It's possible to load a whole slew of features in one go, using
