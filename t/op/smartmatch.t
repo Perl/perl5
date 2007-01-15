@@ -48,10 +48,7 @@ sub match_test {
     my $tstr = "$left ~~ $right";
     
     my $res;
-    {
-	use feature "~~";
-	$res = eval $tstr // "";	#/ <- fix syntax colouring
-    }
+    $res = eval $tstr // "";	#/ <- fix syntax colouring
 
     die $@ if $@ ne "";
     ok( ($yn =~ /!/ xor $res), "$tstr: $res");

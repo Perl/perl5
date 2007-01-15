@@ -4134,8 +4134,7 @@ Perl_yylex(pTHX)
 	/* FALL THROUGH */
     case '~':
 	if (s[1] == '~'
-	&& (PL_expect == XOPERATOR || PL_expect == XTERMORDORDOR)
-	&& FEATURE_IS_ENABLED("~~"))
+	    && (PL_expect == XOPERATOR || PL_expect == XTERMORDORDOR))
 	{
 	    s += 2;
 	    Eop(OP_SMARTMATCH);

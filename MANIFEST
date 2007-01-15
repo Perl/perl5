@@ -3349,7 +3349,6 @@ t/lib/dprof/V.pm		Perl code profiler tests
 t/lib/feature/err		Tests for enabling/disabling err feature
 t/lib/feature/nonesuch		Tests for enabling/disabling nonexistent feature
 t/lib/feature/say		Tests for enabling/disabling say feature
-t/lib/feature/smartmatch	Tests for enabling/disabling smartmatch feature
 t/lib/feature/switch		Tests for enabling/disabling switch feature
 t/lib/Filter/Simple/ExportTest.pm	Helper file for Filter::Simple tests
 t/lib/Filter/Simple/FilterOnlyTest.pm	Helper file for Filter::Simple tests
