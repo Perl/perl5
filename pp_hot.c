@@ -782,25 +782,30 @@ PP(pp_print)
 PP(pp_rv2av)
 {
     dVAR; dSP; dTOPss;
-    AV *av;
     const I32 gimme = GIMME_V;
-    static const char return_array_to_lvalue_scalar[] = "Can't return hash to lvalue scalar context";
+    static const char return_array_to_lvalue_scalar[] = "Can't return array to lvalue scalar context";
+    static const char return_hash_to_lvalue_scalar[] = "Can't return hash to lvalue scalar context";
+    static const char an_array[] = "an ARRAY";
+    static const char a_hash[] = "a HASH";
+    const bool is_pp_rv2av = PL_op->op_type == OP_RV2AV;
+    const U32 type = is_pp_rv2av ? SVt_PVAV : SVt_PVHV;
 
     if (SvROK(sv)) {
       wasref:
-	tryAMAGICunDEREF(to_av);
+	tryAMAGICunDEREF_var(is_pp_rv2av ? to_av_amg : to_hv_amg);
 
-	av = (AV*)SvRV(sv);
-	if (SvTYPE(av) != SVt_PVAV)
-	    DIE(aTHX_ "Not an ARRAY reference");
+	sv = SvRV(sv);
+	if (SvTYPE(sv) != type)
+	    DIE(aTHX_ "Not %s reference", is_pp_rv2av ? an_array : a_hash);
 	if (PL_op->op_flags & OPf_REF) {
-	    SETs((SV*)av);
+	    SETs(sv);
 	    RETURN;
 	}
 	else if (LVRET) {
 	    if (gimme != G_ARRAY)
-		Perl_croak(aTHX_ return_array_to_lvalue_scalar);
-	    SETs((SV*)av);
+		Perl_croak(aTHX_ is_pp_rv2av ? return_array_to_lvalue_scalar
+			   : return_hash_to_lvalue_scalar);
+	    SETs(sv);
 	    RETURN;
 	}
 	else if (PL_op->op_flags & OPf_MOD
@@ -808,16 +813,17 @@ PP(pp_rv2av)
 	    Perl_croak(aTHX_ PL_no_localize_ref);
     }
     else {
-	if (SvTYPE(sv) == SVt_PVAV) {
-	    av = (AV*)sv;
+	if (SvTYPE(sv) == type) {
 	    if (PL_op->op_flags & OPf_REF) {
-		SETs((SV*)av);
+		SETs(sv);
 		RETURN;
 	    }
 	    else if (LVRET) {
 		if (gimme != G_ARRAY)
-		    Perl_croak(aTHX_ return_array_to_lvalue_scalar);
-		SETs((SV*)av);
+		    Perl_croak(aTHX_
+			       is_pp_rv2av ? return_array_to_lvalue_scalar
+			       : return_hash_to_lvalue_scalar);
+		SETs(sv);
 		RETURN;
 	    }
 	}
@@ -833,7 +839,7 @@ PP(pp_rv2av)
 		if (!SvOK(sv)) {
 		    if (PL_op->op_flags & OPf_REF ||
 		      PL_op->op_private & HINT_STRICT_REFS)
-			DIE(aTHX_ PL_no_usym, "an ARRAY");
+			DIE(aTHX_ PL_no_usym, is_pp_rv2av ? an_array : a_hash);
 		    if (ckWARN(WARN_UNINITIALIZED))
 			report_uninit(sv);
 		    if (gimme == G_ARRAY) {
@@ -845,39 +851,47 @@ PP(pp_rv2av)
 		if ((PL_op->op_flags & OPf_SPECIAL) &&
 		    !(PL_op->op_flags & OPf_MOD))
 		{
-		    gv = (GV*)gv_fetchsv(sv, 0, SVt_PVAV);
+		    gv = (GV*)gv_fetchsv(sv, 0, type);
 		    if (!gv
 			&& (!is_gv_magical_sv(sv,0)
-			    || !(gv = (GV*)gv_fetchsv(sv, GV_ADD, SVt_PVAV))))
+			    || !(gv = (GV*)gv_fetchsv(sv, GV_ADD, type))))
 		    {
 			RETSETUNDEF;
 		    }
 		}
 		else {
 		    if (PL_op->op_private & HINT_STRICT_REFS)
-			DIE(aTHX_ PL_no_symref_sv, sv, "an ARRAY");
-		    gv = (GV*)gv_fetchsv(sv, GV_ADD, SVt_PVAV);
+			DIE(aTHX_ PL_no_symref_sv, sv,
+			    is_pp_rv2av ? an_array : a_hash);
+		    gv = (GV*)gv_fetchsv(sv, GV_ADD, type);
 		}
 	    }
 	    else {
 		gv = (GV*)sv;
 	    }
-	    av = GvAVn(gv);
+	    sv = is_pp_rv2av ? (SV*)GvAVn(gv) : (SV*)GvHVn(gv);
 	    if (PL_op->op_private & OPpLVAL_INTRO)
-		av = save_ary(gv);
+		sv = is_pp_rv2av ? (SV*)save_ary(gv) : (SV*)save_hash(gv);
 	    if (PL_op->op_flags & OPf_REF) {
-		SETs((SV*)av);
+		SETs(sv);
 		RETURN;
 	    }
 	    else if (LVRET) {
 		if (gimme != G_ARRAY)
-		    Perl_croak(aTHX_ return_array_to_lvalue_scalar);
-		SETs((SV*)av);
+		    Perl_croak(aTHX_
+			       is_pp_rv2av ? return_array_to_lvalue_scalar
+			       : return_hash_to_lvalue_scalar);
+		SETs(sv);
 		RETURN;
 	    }
 	}
     }
 
+    if (is_pp_rv2av) {
+	AV *const av = (AV*)sv;
+	/* The guts of pp_rv2av, with no intenting change to preserve history
+	   (until such time as we get tools that can do blame annotation across
+	   whitespace changes.  */
     if (gimme == G_ARRAY) {
 	const I32 maxarg = AvFILL(av) + 1;
 	(void)POPs;			/* XXXX May be optimized away? */
@@ -902,116 +916,17 @@ PP(pp_rv2av)
 	const I32 maxarg = AvFILL(av) + 1;
 	SETi(maxarg);
     }
-    RETURN;
-}
-
-PP(pp_rv2hv)
-{
-    dVAR; dSP; dTOPss;
-    HV *hv;
-    const I32 gimme = GIMME_V;
-    static const char return_hash_to_lvalue_scalar[] = "Can't return hash to lvalue scalar context";
-
-    if (SvROK(sv)) {
-      wasref:
-	tryAMAGICunDEREF(to_hv);
-
-	hv = (HV*)SvRV(sv);
-	if (SvTYPE(hv) != SVt_PVHV)
-	    DIE(aTHX_ "Not a HASH reference");
-	if (PL_op->op_flags & OPf_REF) {
-	    SETs((SV*)hv);
-	    RETURN;
-	}
-	else if (LVRET) {
-	    if (gimme != G_ARRAY)
-		Perl_croak(aTHX_ return_hash_to_lvalue_scalar );
-	    SETs((SV*)hv);
-	    RETURN;
-	}
-	else if (PL_op->op_flags & OPf_MOD
-		&& PL_op->op_private & OPpLVAL_INTRO)
-	    Perl_croak(aTHX_ PL_no_localize_ref);
-    }
-    else {
-	if (SvTYPE(sv) == SVt_PVHV) {
-	    hv = (HV*)sv;
-	    if (PL_op->op_flags & OPf_REF) {
-		SETs((SV*)hv);
-		RETURN;
-	    }
-	    else if (LVRET) {
-		if (gimme != G_ARRAY)
-		    Perl_croak(aTHX_ return_hash_to_lvalue_scalar );
-		SETs((SV*)hv);
-		RETURN;
-	    }
-	}
-	else {
-	    GV *gv;
-	
-	    if (SvTYPE(sv) != SVt_PVGV) {
-		if (SvGMAGICAL(sv)) {
-		    mg_get(sv);
-		    if (SvROK(sv))
-			goto wasref;
-		}
-		if (!SvOK(sv)) {
-		    if (PL_op->op_flags & OPf_REF ||
-		      PL_op->op_private & HINT_STRICT_REFS)
-			DIE(aTHX_ PL_no_usym, "a HASH");
-		    if (ckWARN(WARN_UNINITIALIZED))
-			report_uninit(sv);
-		    if (gimme == G_ARRAY) {
-			SP--;
-			RETURN;
-		    }
-		    RETSETUNDEF;
-		}
-		if ((PL_op->op_flags & OPf_SPECIAL) &&
-		    !(PL_op->op_flags & OPf_MOD))
-		{
-		    gv = (GV*)gv_fetchsv(sv, 0, SVt_PVHV);
-		    if (!gv
-			&& (!is_gv_magical_sv(sv,0)
-			    || !(gv = (GV*)gv_fetchsv(sv, GV_ADD, SVt_PVHV))))
-		    {
-			RETSETUNDEF;
-		    }
-		}
-		else {
-		    if (PL_op->op_private & HINT_STRICT_REFS)
-			DIE(aTHX_ PL_no_symref_sv, sv, "a HASH");
-		    gv = (GV*)gv_fetchsv(sv, GV_ADD, SVt_PVHV);
-		}
-	    }
-	    else {
-		gv = (GV*)sv;
-	    }
-	    hv = GvHVn(gv);
-	    if (PL_op->op_private & OPpLVAL_INTRO)
-		hv = save_hash(gv);
-	    if (PL_op->op_flags & OPf_REF) {
-		SETs((SV*)hv);
-		RETURN;
-	    }
-	    else if (LVRET) {
-		if (gimme != G_ARRAY)
-		    Perl_croak(aTHX_ return_hash_to_lvalue_scalar );
-		SETs((SV*)hv);
-		RETURN;
-	    }
-	}
-    }
-
+    } else {
+	/* The guts of pp_rv2hv  */
     if (gimme == G_ARRAY) { /* array wanted */
-	*PL_stack_sp = (SV*)hv;
+	*PL_stack_sp = sv;
 	return do_kv();
     }
     else if (gimme == G_SCALAR) {
 	dTARGET;
-    TARG = Perl_hv_scalar(aTHX_ hv);
+    TARG = Perl_hv_scalar(aTHX_ (HV*)sv);
 	SETTARG;
+    }
     }
     RETURN;
 }

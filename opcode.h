@@ -917,7 +917,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_do_kv),	/* Perl_pp_keys */
 	MEMBER_TO_FPTR(Perl_pp_delete),
 	MEMBER_TO_FPTR(Perl_pp_exists),
-	MEMBER_TO_FPTR(Perl_pp_rv2hv),
+	MEMBER_TO_FPTR(Perl_pp_rv2av),	/* Perl_pp_rv2hv */
 	MEMBER_TO_FPTR(Perl_pp_helem),
 	MEMBER_TO_FPTR(Perl_pp_hslice),
 	MEMBER_TO_FPTR(Perl_pp_unpack),

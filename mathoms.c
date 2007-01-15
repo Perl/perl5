@@ -1117,6 +1117,11 @@ PP(pp_bit_xor)
     return pp_bit_or();
 }
 
+PP(pp_rv2hv)
+{
+    return Perl_pp_rv2av(aTHX);
+}
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {

@@ -403,7 +403,7 @@ and C<PUSHu>.
 	    if ((SvAMAGIC(left)||SvAMAGIC(right))) {\
 		SV * const tmpsv = amagic_call(left, \
 				   right, \
-				   meth_enum, \
+				   (meth_enum), \
 				   (assign)? AMGf_assign: 0); \
 		if (tmpsv) { \
 		    SPAGAIN; \
@@ -437,7 +437,7 @@ and C<PUSHu>.
           if(0) goto am_again;  /* shut up unused warning */ \
 	  am_again: \
 	    if ((SvAMAGIC(arg))&&\
-		(tmpsv=AMG_CALLun_var(arg,meth_enum))) {\
+		(tmpsv=AMG_CALLun_var(arg,(meth_enum)))) {\
 	       SPAGAIN; if (shift) sp += shift; \
 	       set(tmpsv); ret; } \
 	} STMT_END
@@ -466,6 +466,8 @@ and C<PUSHu>.
     } STMT_END
 
 #define tryAMAGICunDEREF(meth) tryAMAGICunW(meth,setAGAIN,0,(void)0)
+#define tryAMAGICunDEREF_var(meth_enum) \
+	tryAMAGICunW_var(meth_enum,setAGAIN,0,(void)0)
 
 #define opASSIGN (PL_op->op_flags & OPf_STACKED)
 #define SETsv(sv)	STMT_START {					\
