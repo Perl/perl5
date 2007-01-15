@@ -46,7 +46,7 @@ scope.
 =head2 Lexical effect
 
 Like other pragmas (C<use strict>, for example), features have a lexical
-effect.  C<use feature qw(foo)> will only make the feature "foo" available
+effect. C<use feature qw(foo)> will only make the feature "foo" available
 from that point to the end of the enclosing block.
 
     {
@@ -54,6 +54,21 @@ from that point to the end of the enclosing block.
         say "say is available here";
     }
     print "But not here.\n";
+
+=head2 C<no feature>
+
+Features can also be turned off by using C<no feature "foo">. This too
+has lexical effect.
+
+    use feature 'say';
+    say "say is available here";
+    {
+        no feature 'say';
+        print "But not here.\n";
+    }
+    say "Yet it is here.";
+
+C<no feature> with no features specified will turn off all features.
 
 =head2 The 'switch' feature
 
