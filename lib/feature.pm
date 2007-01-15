@@ -1,6 +1,6 @@
 package feature;
 
-our $VERSION = '1.01';
+our $VERSION = '1.10';
 
 # (feature name) => (internal name, used in %^H)
 my %feature = (
@@ -12,9 +12,12 @@ my %feature = (
 );
 
 my %feature_bundle = (
-    "5.10" => [qw(switch ~~ say err state)],
+    "5.10.0" => [qw(switch ~~ say err state)],
 );
-
+# latest version here
+# keep it harcoded until we actually bump the version number to 5.10
+$feature_bundle{"5.10"} = $feature_bundle{"5.10.0"};
+#$feature_bundle{"5.10"} = $feature_bundle{sprintf("%vd",$^V)};
 
 # TODO:
 # - think about versioned features (use feature switch => 2)
@@ -110,8 +113,11 @@ See L<perlsub/"Persistent Private Variables"> for details.
 It's possible to load a whole slew of features in one go, using
 a I<feature bundle>. The name of a feature bundle is prefixed with
 a colon, to distinguish it from an actual feature. At present, the
-only feature bundle is C<use feature ":5.10">, which is equivalent
-to C<use feature qw(switch ~~ say err state)>.
+only feature bundles are C<use feature ":5.10"> and C<use feature ":5.10.0">,
+which both are equivalent to C<use feature qw(switch ~~ say err state)>.
+
+In the forthcoming 5.10.X perl releases, C<use feature ":5.10"> will be
+equivalent to the latest C<use feature ":5.10.X">.
 
 =cut
 
