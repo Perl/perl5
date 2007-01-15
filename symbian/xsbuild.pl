@@ -163,22 +163,9 @@ sub run_PL {
         print "\t(Running $dir\\$PL)\n";
     }
     my $cmd;
-    if ($CoreBuild) {
-	$ENV{PERL_CORE} = 1;
-        # Problem: the Config.pm we have in $BUILDROOT\\lib carries the
-        # version number of the Perl we are building, while the Perl
-        # we are running might have some other version.  Solution:
-        # temporarily replace the Config.pm with a patched version.
-        my $V = sprintf "%vd", $^V;
-        unlink("$BUILDROOT\\lib\\Config.pm.bak");
-	print "(patching $BUILDROOT\\lib\\Config.pm)\n";
-	system_echo("perl -pi.bak -e \"s:\\Q$R_V_SV:$V:\" $BUILDROOT\\lib\\Config.pm");
-    }
+    $ENV{PERL_CORE} = 1 if $CoreBuild;
     system_echo("perl -I$BUILDROOT\\lib -I$BUILDROOT\\xlib\\symbian -I$BUILDROOT\\t\\lib $PL") == 0
       or warn "$0: $PL failed.\n";
-    if ($CoreBuild) {
-        system_echo("copy $BUILDROOT\\lib\\Config.pm.bak $BUILDROOT\\lib\\Config.pm");
-    }
     if ( defined $file ) { -s $file or die "$0: No $file created.\n" }
 }
 
@@ -420,11 +407,56 @@ sub update_dir {
     print getcwd(), "]\n";
 }
 
+sub patch_config {
+    # Problem: the Config.pm we have in $BUILDROOT\\lib carries the
+    # version number of the Perl we are building, while the Perl
+    # we are running might have some other version.  Solution:
+    # temporarily replace the Config.pm with a patched version.
+    #
+    # Reverse patch will be done with this special script
+    my $config_restore_script = "$BUILDROOT\\lib\\symbian_config_restore.pl";
+    # make sure the patch script was not left from previous run
+    unlink $config_restore_script;
+    return unless $CoreBuild;
+    my $V = sprintf "%vd", $^V;
+    # create reverse patch script
+    if (open(RSCRIPT, ">$config_restore_script")) {
+        print RSCRIPT <<__EOF__;
+#!perl -pi.bak
+s:\\Q$V:$R_V_SV:
+__EOF__
+        close RSCRIPT;
+    } else {
+        die "$0: Cannot create $config_restore_script: $!";
+    }
+    # patch the config
+    unlink("$BUILDROOT\\lib\\Config.pm.bak");
+    print "(patching $BUILDROOT\\lib\\Config.pm)\n";
+    system_echo("perl -pi.bak -e \"s:\\Q$R_V_SV:$V:\" $BUILDROOT\\lib\\Config.pm");
+}
+
+sub restore_config {
+    my $config_restore_script = "$BUILDROOT\\lib\\symbian_config_restore.pl";
+    # this function should always return True
+    # because it's commonly used in error handling blocks as
+    #   &restore_config and die
+    return 1 unless -f $config_restore_script;
+    unlink("$BUILDROOT\\lib\\Config.pm.bak");
+    print "(restoring $BUILDROOT\\lib\\Config.pm)\n";
+    system_echo("perl -pi.bak $config_restore_script $BUILDROOT\\lib\\Config.pm");
+    unlink "$BUILDROOT\\lib\\Config.pm.bak", $config_restore_script;
+    # above command should always return 2 already,
+    # but i want to be absolutely sure that return value is True
+    return 1;
+}
+
 sub xsconfig {
     my ( $ext, $dir ) = @_;
     print "Configuring for $ext, directory '$dir'...\n";
     my $extu = $CoreBuild ? "$BUILDROOT\\lib\\ExtUtils" : "$PERLSDK\\lib\\ExtUtils";
     update_dir($dir) or die "$0: chdir '$dir': $!\n";
+    &patch_config;
+
     my $build  = dirname($ext);
     my $base   = basename($ext);
     my $basexs = "$base.xs";
@@ -545,7 +577,7 @@ sub xsconfig {
     }
     elsif ( $dir eq "ext\\Encode" ) {
         system_echo("perl bin\\enc2xs -Q -O -o def_t.c -f def_t.fnm") == 0
-          or die "$0: running enc2xs failed: $!\n";
+          or &restore_config and die "$0: running enc2xs failed: $!\n";
     }
 
     my @lst = sort keys %lst;
@@ -583,7 +615,7 @@ sub xsconfig {
             print "\tUsing $EXTVERSION for version...\n";
             $MM{VERSION} = $MM{XS_VERSION} = $EXTVERSION;
         }
-        die "$0: VERSION or XS_VERSION undefined\n"
+        (&restore_config and die "$0: VERSION or XS_VERSION undefined\n")
           unless defined $MM{VERSION} && defined $MM{XS_VERSION};
         if ( open( BASE_C, ">$basec" ) ) {
             print BASE_C <<__EOF__;
@@ -606,11 +638,13 @@ __EOF__
             && -s $basec
           )
         {
+            &restore_config;
             die "$0: perl xsubpp failed: $!\n";
         }
 
         print "\t_init.c\n";
-        open( _INIT_C, ">_init.c" ) or die "$!: _init.c: $!\n";
+        open( _INIT_C, ">_init.c" )
+            or &restore_config and die "$!: _init.c: $!\n";
         print _INIT_C <<__EOF__;
     #include "EXTERN.h"
     #include "perl.h"
@@ -654,6 +688,7 @@ __EOF__
                             && -s "$subbase.c"
                           )
                         {
+                            &restore_config;
                             die "$0: perl xsubpp failed: $!\n";
                         }
                         update_dir("..");
@@ -672,6 +707,8 @@ __EOF__
         write_mmp( $ext, $base, [ keys %incdir ], @src );
         write_makefile( $base, $build );
     }
+    &restore_config;
+
     my $lstname = $ext;
     $lstname =~ s:^ext\\::;
     $lstname =~ s:\\:-:g;
