@@ -17,19 +17,8 @@ my %feature_bundle = (
 );
 
 
-# Here are some notes that probably shouldn't be in the public
-# documentation, but which it's useful to have somewhere.
-#
-# One side-effect of the change is that C<prototype("CORE::continue")>
-# no longer throws the error C<Can't find an opnumber for "continue">.
-# One of the tests in t/op/cproto.t had to be changed to accommodate
-# this, but it really shouldn't affect real-world code.
-#
 # TODO:
-# - sort out the smartmatch semantics
-# - think about versioned features (use switch => 2)
-#
-# -- Robin 2005-12
+# - think about versioned features (use feature switch => 2)
 
 =head1 NAME
 
