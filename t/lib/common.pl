@@ -23,7 +23,7 @@ my @w_files = () ;
 
 if (@ARGV)
   { print "ARGV = [@ARGV]\n" ;
-    if ($^O eq 'MacOS') {
+    if ($Is_MacOS) {
       @w_files = map { s#^#:lib:$pragma_name:#; $_ } @ARGV
     } else {
       @w_files = map { s#^#./lib/$pragma_name/#; $_ } @ARGV
@@ -97,7 +97,7 @@ for (@prgs){
     }
 
     # fix up some paths
-    if ($^O eq 'MacOS') {
+    if ($Is_MacOS) {
 	$prog =~ s|require "./abc(d)?";|require ":abc$1";|g;
 	$prog =~ s|"\."|":"|g;
     }
@@ -131,7 +131,7 @@ for (@prgs){
     $results =~ s/Scalars leaked: \d+\n//g;
 
     # fix up some paths
-    if ($^O eq 'MacOS') {
+    if ($Is_MacOS) {
 	$results =~ s|:abc\.pm\b|abc.pm|g;
 	$results =~ s|:abc(d)?\b|./abc$1|g;
     }
