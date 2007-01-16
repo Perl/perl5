@@ -28,6 +28,1405 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.9		Maintenance release working toward v5.8.9
 --------------
 ____________________________________________________________________________
+[ 29832] By: nicholas                              on 2007/01/15  16:30:37
+        Log: Avoid a SEGV in DBI's test suite, discovered by Andreas.
+             Probably need to go through and audit to see if there are analagous
+             places that need tweaking.
+     Branch: maint-5.8/perl
+	   ! perl.c
+____________________________________________________________________________
+[ 29809] By: nicholas                              on 2007/01/14  13:47:07
+        Log: Integrate:
+             [ 26983]
+             Add gv_fetchpvs, which uses STR_WITH_LEN to call gv_fetchpvn_flags.
+             Many strlen()s saved.
+             
+             [ 27050]
+             Yet more instances of gv_fetchpv... that should be GV_ADD rather than
+             TRUE.
+             Convert two gv_fetchpvn_flags to gv_fetchpvs.
+             
+             [ 27053]
+             gv_fetchpvn_flags ranks highly in the profile, and the ::/' scanning
+             loop is iterated over millions of times. Add a flag GV_NOTQUAL purely
+             as an optimisation, when the caller is passing in a string that is
+             known not to contain any package separators.
+     Branch: maint-5.8/perl
+	  !> doio.c gv.c gv.h handy.h op.c perl.c pp_ctl.c pp_sort.c
+	  !> pp_sys.c toke.c util.c
+____________________________________________________________________________
+[ 29808] By: nicholas                              on 2007/01/14  13:22:20
+        Log: Integrate:
+             [ 26946]
+             SvREADONLY_off inside the magic routines is also dangerous on shared
+             hash key scalars, so decompose them to normal scalars if they ever
+             get here.
+             
+             [ 26954]
+             Simplify nested '#ifdef' by replacing it with '#elif defined()'
+     Branch: maint-5.8/perl
+	  !> mg.c
+____________________________________________________________________________
+[ 29807] By: nicholas                              on 2007/01/14  13:09:22
+        Log: Integrate:
+             [ 26901]
+             Change all NEWSV() to newSV() in the core and non-dual-lived modules.
+             Keep NEWSV() itself for backwards-compatibility outside of the core,
+             but don't advertise it any more.
+             (cf. change #25101).
+             
+             [ 27455]
+             Remove two NEWSV()s in the non-ithread dump code that got missed.
+     Branch: maint-5.8/perl
+	   ! op.c perl.c pp_ctl.c util.c
+	  !> av.c doio.c dump.c ext/ByteLoader/bytecode.h
+	  !> ext/Opcode/Opcode.xs ext/POSIX/POSIX.xs gv.c handy.h hv.c
+	  !> mathoms.c os2/OS2/REXX/REXX.xs pad.c pod/perlapi.pod
+	  !> pod/perlembed.pod pp.c pp_hot.c pp_pack.c pp_sys.c regexec.c
+	  !> scope.c sv.c toke.c vms/ext/Stdio/Stdio.xs
+____________________________________________________________________________
+[ 29806] By: nicholas                              on 2007/01/14  12:49:30
+        Log: Integrate:
+             [ 26765]
+             Move initialization of old values prior to moreswitches()
+             closer to their use and together with 'switches_done'.
+             
+             [ 26767]
+             Missing an initialisation, as spotted by Merijn's HP compiler.
+             
+             [ 26786]
+             Get rid of the following gcc format warnings by	simplifying the
+             getgroups implementation:
+             
+             mg.c: In function Perl_magic_get':
+             mg.c:1008: warning: long unsigned int format, gid_t arg (arg 3)
+             mg.c:1014: warning: long unsigned int format, gid_t arg (arg 3)
+             mg.c:1025: warning: long unsigned int format, unsigned int arg (arg 3)
+             
+             Since we already cast the numeric Gid_t values to an IV it should not
+             be too risky to also cast the Group_t values.  Converting these values
+             with Gid_t_f wasn't quite right anyway.
+             
+             [ 26787]
+             Refactor S_vdie_common so that Perl_vwarn can use it too.
+             
+             [ 26791]
+             Make $( and $) list the groups in the order they
+             are returned from the OS.  Linux seems to return
+             the gids sorted and it seemed wrong for perl to
+             reverse this order.
+             
+             [ 26893]
+             Suppress "statement not reached" warning from the Sun C compiler.
+     Branch: maint-5.8/perl
+	   ! mathoms.c proto.h
+	  !> doio.c embed.fnc embed.h mg.c toke.c util.c
+____________________________________________________________________________
+[ 29804] By: nicholas                              on 2007/01/14  12:22:41
+        Log: Integrate:
+             [ 26643]
+             Fix some compilation warnings
+             
+             [ 26674]
+             Subject: [PATCH] performance tweaking op.c
+             From: Andy Lester <andy@petdance.com>
+             Date: Fri, 6 Jan 2006 01:44:48 -0600
+             Message-ID: <20060106074448.GB3401@petdance.com>
+             
+             [ 26708]
+             Subject: [PATCH] blead: format warnings
+             Date: Sat, 07 Jan 2006 21:42:08 +0200
+             From: Jarkko Hietaniemi <jhietaniemi@gmail.com>
+             Message-ID: <43C01990.6020207@gmail.com>
+             
+             [ 26764]
+             Subject: [PATCH] It's the Barbie bus patch
+             From: Andy Lester <andy@petdance.com>
+             Date: Mon, 9 Jan 2006 23:42:43 -0600
+             Message-ID: <20060110054243.GA26165@petdance.com>
+     Branch: maint-5.8/perl
+	   ! hv.c op.c regcomp.c
+	  !> av.c doio.c embed.fnc embed.h gv.c mg.c pad.c pp_ctl.c
+	  !> pp_hot.c pp_sys.c proto.h reentr.c reentr.h regexec.c sv.c
+	  !> toke.c uconfig.sh util.c
+____________________________________________________________________________
+[ 29802] By: nicholas                              on 2007/01/14  00:36:51
+        Log: Integrate:
+             [ 23773]
+             If we know the length of the string constant, save a strlen()
+             
+             [ 25172]
+             Subject: [PATCH] The continuing plod through embed.fnc
+             From: Andy Lester <andy@petdance.com>
+             Date: Mon, 18 Jul 2005 10:37:38 -0500
+             Message-ID: <20050718153738.GB20193@petdance.com>
+             
+             [ 26635]
+             Introduce STR_WITH_LEN macro in the form suggested by Chip.
+             
+             [ 26636]
+             Fix typo in comment.
+             
+             [ 26640]
+             Removed unused part of string passed to sv_catpvn().
+             
+             [ 26641]
+             Introduce the macros newSVpvs(str) and sv_catpvs(sv, str).
+             Gets rid of many hardcoded string lengths.
+             
+             [ 26642]
+             Get rid of a few more hardcoded string lengths.
+             
+             [ 26645]
+             Get rid of a few more hardcoded string lengths.
+             
+             [ 26646]
+             Introduce newSVpvs_share() macro.
+             Gets rid of some hardcoded string lengths.
+             
+             [ 26647]
+             Get rid of hardcoded string length.
+             
+             [ 26648]
+             Add an extra NUL so that we can use sv_catpvs()
+             for "our @F=split..." and get rid of 15 and the
+             explaination for why it's there.
+             
+             [ 26649]
+             Make the new STR_WITH_LEN() affected compile under -Dusethreads.
+             Can't use STR_WITH_LEN() as argument to a macro :-(
+             
+             [ 26650]
+             Move all the xxxpvs() macros to handy.h.
+             This brings them closer to STR_WITH_LEN.  Besides only half
+             of them were sv-related after change 26649.
+             
+             [ 26671]
+             Replacing broken call to savepvn() with savepvs() to get threaded
+             Cygwin to compile again.
+             
+             [ 26676]
+             Subject: [PATCH] hv_fetchs() support
+             From: Andy Lester <andy@petdance.com>
+             Date: Fri, 6 Jan 2006 09:57:19 -0600
+             Message-ID: <20060106155719.GB9035@petdance.com>
+             
+             [ 26795]
+             A few more places that can use hv_fetchs().
+             Ref change 26676.
+     Branch: maint-5.8/perl
+	   ! op.c
+	  !> doop.c dump.c ext/POSIX/POSIX.xs gv.c handy.h hv.c locale.c
+	  !> malloc.c mg.c perl.c perlio.c pp.c pp_ctl.c pp_pack.c pp_sys.c
+	  !> regcomp.c sv.c sv.h taint.c thread.h toke.c universal.c utf8.c
+	  !> util.c xsutils.c
+____________________________________________________________________________
+[ 29801] By: nicholas                              on 2007/01/13  23:40:49
+        Log: Integrate:
+             [ 26598]
+             silence some compiler warnings
+             
+             [ 26608]
+             Fix release mode builds following change 26598
+             
+             [ 26633]
+             Silence compiler warning; ref change 26598
+     Branch: maint-5.8/perl
+	   ! cop.h
+	  !> op.c toke.c
+____________________________________________________________________________
+[ 29800] By: nicholas                              on 2007/01/13  23:25:42
+        Log: Integrate:
+             [ 26562]
+             Update copyrights for files modified in 2006
+             
+             [ 26564]
+             Subject: [patch] comment grammar and indentation, spurious tab
+             From: Jim Cromie <jim.cromie@gmail.com>
+             Date: Fri, 30 Dec 2005 22:45:55 -0700
+             Message-ID: <43B61B13.3050704@gmail.com>
+             
+             [ 26652]
+             More copyright updates
+             
+             [ 26732]
+             Update copyright years (including some years where we made changes but
+             did not update)
+     Branch: maint-5.8/perl
+	   ! sv.c
+	  !> cop.h deb.c doio.c dump.c hv.c locale.c mathoms.c mg.c mg.h
+	  !> perl.h perlio.c perlvars.h pp_ctl.c pp_pack.c pp_sort.c run.c
+	  !> scope.c sv.h taint.c thread.h
+____________________________________________________________________________
+[ 29799] By: nicholas                              on 2007/01/13  23:25:00
+        Log: Integrate:
+             [ 26602]
+             Bad symbols that are pretending to be dirhandles, should say they 
+             are dirhandles in their error messages.
+             
+             [ 26607]
+             perldiag.pod additions to go with change #26602.
+             
+             [ 26617]
+             Attemting to readdir() something that isn't a dirhandle should cause
+             a warning.
+             
+             [ 26631]
+             Add warnings for the various other *dir() functions when attempted
+             on invalid dirhandles.
+             
+             [ 26638]
+             Don't warn about invalid dirhandles in DirHandle::DESTROY().
+     Branch: maint-5.8/perl
+	  !> gv.c lib/DirHandle.pm pod/perldiag.pod pp_sys.c
+____________________________________________________________________________
+[ 29798] By: nicholas                              on 2007/01/13  22:58:25
+        Log: Integrate:
+             [ 26494]
+             Don't try to store PL_sv_undef in pads. (For now)
+             
+             [ 26518]
+             A GVs stash can be NULL, so don't call macros that assume otherwise
+             without checking.
+     Branch: maint-5.8/perl
+	  !> op.c pp.c
+____________________________________________________________________________
+[ 29797] By: nicholas                              on 2007/01/13  22:58:03
+        Log: Integrate:
+             [ 26538]
+             In the shared string table, if we add new entries to the head of the
+             linked list chain, then we don't need as much bookkeeping in the loop.
+     Branch: maint-5.8/perl
+	  !> hv.c
+____________________________________________________________________________
+[ 29795] By: nicholas                              on 2007/01/13  22:37:35
+        Log: Integrate:
+             [ 26524]
+             Subject: [PATCH] Fixing the SVREFCNT macro
+             From: Andy Lester <andy@petdance.com>
+             Date: Wed, 28 Dec 2005 13:30:51 -0600
+             Message-ID: <20051228193051.GD23207@petdance.com>
+     Branch: maint-5.8/perl
+	  !> sv.h
+____________________________________________________________________________
+[ 29794] By: nicholas                              on 2007/01/13  19:26:17
+        Log: Integrate:
+             [ 26532]
+             Subject: [PATCH] Perl_gv_fetchpv vs. gv_fetchpvn
+             From: Tels <nospam-abuse@bloodgate.com>
+             Date: Thu, 29 Dec 2005 18:32:10 +0100
+             Message-Id: <200512291832.20651@bloodgate.com>
+             
+             [ 26533]
+             Subject: [PATCH] perlio.c - gv_stashpvn() vs gv_stashpv()
+             From: Tels <nospam-abuse@bloodgate.com>
+             Date: Thu, 29 Dec 2005 18:57:43 +0100
+             Message-Id: <200512291857.59458@bloodgate.com>
+             
+             [ 26556]
+             Subject: [PATCH] Making 0 pointers to NULLs
+             From: Andy Lester <andy@petdance.com>
+             Date: Fri, 30 Dec 2005 23:05:58 -0600
+             Message-ID: <20051231050558.GA29093@petdance.com>
+             
+             [ 26558]
+             Subject: [PATCH] Making 0 pointers to NULLs
+             From: Andy Lester <andy@petdance.com>
+             Date: Fri, 30 Dec 2005 23:05:58 -0600
+             Message-ID: <20051231050558.GA29093@petdance.com>
+     Branch: maint-5.8/perl
+	  !> doio.c doop.c gv.c hv.c mg.c perlio.c pp.c pp_ctl.c pp_hot.c
+	  !> pp_sort.c regcomp.c regexec.c sv.c toke.c utf8.c util.c
+____________________________________________________________________________
+[ 29793] By: nicholas                              on 2007/01/13  18:59:04
+        Log: Integrate:
+             [ 26527]
+             Subject: [PATCH] Actual real consting of parms
+             From: Andy Lester <andy@petdance.com>
+             Date: Thu, 29 Dec 2005 01:15:09 -0600
+             Message-ID: <20051229071509.GA32653@petdance.com>
+     Branch: maint-5.8/perl
+	   ! sv.c
+	  !> proto.h
+____________________________________________________________________________
+[ 29792] By: nicholas                              on 2007/01/13  18:44:35
+        Log: Integrate:
+             [ 26526]
+             Subject: [PATCH] av.c cleanup, plus!
+             From: Andy Lester <andy@petdance.com>
+             Date: Wed, 28 Dec 2005 15:44:14 -0600
+             Message-ID: <20051228214414.GD26033@petdance.com>
+     Branch: maint-5.8/perl
+	   ! sv.c
+	  !> av.c dump.c gv.c perl.c toke.c
+____________________________________________________________________________
+[ 29791] By: nicholas                              on 2007/01/13  18:27:36
+        Log: Integrate:
+             [ 26505]
+             Subject: [PATCH] pre-likely cleanup
+             From: Andy Lester <andy@petdance.com> 
+             Date: Tue, 27 Dec 2005 14:39:39 -0600
+             Message-ID: <20051227203939.GC1781@petdance.com> 
+             
+             Includes a small fix to the changes in tryAMAGICbinW_var() in pp.h.
+     Branch: maint-5.8/perl
+	   ! toke.c
+	  !> av.c doop.c hv.c mg.c pp.c pp.h sv.c util.c
+____________________________________________________________________________
+[ 29789] By: nicholas                              on 2007/01/13  18:10:34
+        Log: Integrate:
+             [ 26461]
+             Subject: [PATCH] Speed up Perl_sv_derived_from
+             From: Andy Lester <andy@petdance.com>
+             Message-ID: <20051222220044.GH4370@petdance.com>
+             Date: Thu, 22 Dec 2005 16:00:44 -0600
+             
+             [ 26477]
+             For the rare case of EMFILE during require, save object code space
+             by using newSVpvf
+             (Would it be worth using it for all require failures?)
+             
+             [ 26500]
+             Refactor the require failure message generation to use 1 less temporary
+             SV, and to build as much text as possible with newSVpvf
+             
+             [ 26503]
+             gv_fetch_flags in newATTRSUB can actually be const.
+             Comment the logic behind the terms in the ternary that chooses the
+             flags value.
+             
+             [ 26517]
+             As the backreferences AV doesn't hold references on its contents,
+             surely it should have AvREAL turned off?
+             
+             [ 26534]
+             Reduce size of buffers for identifier names, as suggested in
+             
+             Subject: Stack usage (in gv_stashpvn and others)
+             From: Tels <nospam-abuse@bloodgate.com>
+             Date: Thu, 29 Dec 2005 18:40:49 +0100
+             Message-Id: <200512291840.50765@bloodgate.com>
+             
+             [ 26541]
+             Now that the backreference array has no NULL entries, and is correctly
+             marked as AvREAL_off(), there's no reason not to use sv_dup to clone
+             it.
+             
+             [ 26544]
+             Tweak S_init_main_stash so as allocate PL_curstname as a shared string
+             scalar, and hence avoid thrashing the shared string table for "main".
+             
+             [ 26550]
+             Remove unneeded test in Perl_hv_clear_placeholders.
+             Rejig S_hfreeentries to a double loop, which is clearer and smaller.
+             
+             [ 26552]
+             Turn a for loop that's almost a while into an honest-to-goodness while.
+     Branch: maint-5.8/perl
+	   ! gv.c hv.c
+	  !> op.c perl.c pp_ctl.c sv.c universal.c
+____________________________________________________________________________
+[ 29788] By: nicholas                              on 2007/01/13  17:39:10
+        Log: Integrate:
+             [ 26456]
+             Subject: [PATCH] Speedup (rn|n)?instr
+             From: Andy Lester <andy@petdance.com>
+             Message-ID: <20051222223839.GI4370@petdance.com>
+             Date: Thu, 22 Dec 2005 16:38:39 -0600
+             
+             [ 26509]
+             Fix 2 off-by-one errors in the call to ninstr().
+             This code managed to still work because of a bug
+             in how ninstr() treats empty search strings.
+             
+             [ 26510]
+             Remove test for NUL ending in r?instr().
+             This test is actually harmful because we will search
+             for any garbage found past the empty search string.
+             Ref change 26509.
+             
+             [ 26511]
+             Leaner ninstr().
+             The compiled function ended up 37% smaller on Linux/gcc.
+             I ought to be faster as well, but I did not try to measure that.
+             
+             [ 26512]
+             Use memchr() instead of ninstr() to locate the end-of-line.
+             The call to memchr() will faster.
+     Branch: maint-5.8/perl
+	  !> ext/Filter/Util/Call/Call.xs toke.c util.c
+____________________________________________________________________________
+[ 29787] By: nicholas                              on 2007/01/13  17:24:48
+        Log: Integrate:
+             [ 26450]
+             Subject: [PATCH] Ho! Ho! Ho!  Santa brings consting!
+             From: Andy Lester <andy@petdance.com>
+             Date: Thu, 22 Dec 2005 10:57:17 -0600
+             Message-ID: <20051222165717.GA2874@petdance.com>
+     Branch: maint-5.8/perl
+	   ! global.sym proto.h
+	  !> dump.c embed.fnc embed.h gv.c hv.c op.c pp.c pp_ctl.c pp_hot.c
+	  !> pp_sys.c regcomp.c sv.c toke.c universal.c
+____________________________________________________________________________
+[ 29785] By: nicholas                              on 2007/01/13  16:56:44
+        Log: Integrate:
+             [ 26446]
+             Add an optimisation to allow proxy constant subroutines to be copied
+             as proxy constant subroutines in a new symbol table where possible.
+             (Rather than converting them to full blown constant subroutines and
+             instantiating 2 typeglobs)
+             
+             [ 26448]
+             Regression tests for proxy subroutine glob assignment.
+             Fix a bug (it turns out that a typeglob isn't SvOK())
+             Remove stray debugging code.
+             
+             [ 26470]
+             Now that proxy subroutines can be unproxied in 2 places without
+             becoming the same newCONSTSUB, need an explicit check to avoid a
+             warning about subroutines being redefined, as there has never been
+             a warning when you assing the same subroutine to a glob's GvCV()
+             
+             [ 26482]
+             Unless the peephole optimiser already knows that we're in void context,
+             avoid even attempting the whole proxy constant sub copying
+             optimisation.
+     Branch: maint-5.8/perl
+	   ! op.c
+	  !> ext/B/t/concise-xs.t gv.c gv.h op.h pp.c pp_hot.c sv.c
+	  !> t/op/gv.t
+____________________________________________________________________________
+[ 29783] By: nicholas                              on 2007/01/13  16:30:48
+        Log: Integrate:
+             [ 26409]
+             Make gv_init recognise a reference-to-something in a symbol table as
+             meaning a constant subroutine with that thing as it value
+             
+             [ 26417]
+             Verify that the code for initialising typeglobs from other types works.
+             
+             [ 26422]
+             Croak if gv_init doesn't know how to create a typeglob from that type
+             of referant. Test that ARRAY, HASH, PVIO, CODE and FORMAT croak.
+             Globs are actually first class assignable objects, so test that you
+             can create a constant subroutine that returns one.
+             
+             [ 26425]
+             Add a GV_NOADD_NOINIT flag to gv_fetch{pv,pvn,sv} that disables
+             addition of new typeglobs, and also disables initialisation of any
+             typeglob placeholders. Needed to make the new constant subroutine
+             proxy references work efficiently.
+             
+             [ 26427]
+             Take care in toke.c not to convert constant subroutine reference
+             proxies into full blown PVGVs with PVCVs, and recognise them and inline
+             their values. Adds a new function gv_const_sv(gv) to return the value
+             of the constant subroutine from a GV, and adds a cv parameter to
+             S_intuit_method.
+     Branch: maint-5.8/perl
+	   ! toke.c
+	  !> embed.fnc embed.h gv.c gv.h pod/perldiag.pod proto.h t/op/gv.t
+____________________________________________________________________________
+[ 29782] By: nicholas                              on 2007/01/13  13:47:04
+        Log: Integrate:
+             [ 26411]
+             Assert that orig_keyword, gv and gvp aren't used before the main
+             keyword parser of Perl_yylex.
+             
+             [ 26412]
+             In Perl_yylex, make tmp a temporary variable local to the blocks in
+             which it is used.
+             
+             [ 26414]
+             In Perl_yylex, move the declaration of orig_keyword, gv and gvp down to
+             the block labelled keylookup.
+             
+             [ 26423]
+             Get the "cv" from the "gv" once, and be more careful so that we can
+             cope if either aren't their regular types.
+             cv_const_sv should verify the type of SV passed, instead of assuming
+             that it's a viable CV.
+     Branch: maint-5.8/perl
+	   ! toke.c
+	  !> op.c
+____________________________________________________________________________
+[ 29776] By: nicholas                              on 2007/01/12  14:24:33
+        Log: Integrate:
+             [ 26404]
+             Make sv_dump (and therefore Devel::Peek) report the value of the
+             constant in inlineable constant subroutines.
+     Branch: maint-5.8/perl
+	  !> dump.c ext/Devel/Peek/t/Peek.t
+____________________________________________________________________________
+[ 29775] By: nicholas                              on 2007/01/12  14:07:47
+        Log: Integrate:
+             [ 26334]
+             A suggestion by Yamashina Hio to speed up substitutions
+             with right-hand side expressions by freeing temporaries.
+             See :
+             
+             Subject: s///ge; consumes PL_tmps_stack in its loop
+             From: YAMASHINA Hio <hio@hio.jp>
+             Date: Tue, 30 Aug 2005 17:17:23 +0900
+             Message-Id: <20050830160113.9716.HIO@ymir.co.jp>
+             
+             [ 26369]
+             In Perl_apply, the name of the op can be found from PL_op_name, instead
+             of using local string constants.
+             
+             [ 26372]
+             Use PL_op_desc rather than literal strings in pp_ioctl
+             
+             [ 26392]
+             Move and const some definitions of variables used to save errno.
+             
+             [ 26437]
+             Localise the stash variable in pp_entersub().
+             
+             [ 26438]
+             For consistency sv_2cv should not leave the stash pointer uninitialised
+             for some cases. Although it seems that only pp_sort pays any attention
+             to it, of all the code on CPAN.
+             
+             [ 26444]
+             Remove unused variable 'stash' since change 26437.
+     Branch: maint-5.8/perl
+	  !> doio.c perlio.c pp_ctl.c pp_hot.c pp_sys.c sv.c
+____________________________________________________________________________
+[ 29773] By: nicholas                              on 2007/01/12  13:29:41
+        Log: Integrate:
+             [ 26301]
+             Merge common code from ptr_table_fetch and ptr_table_store into
+             S_ptr_table_find.
+             
+             [ 26310]
+             Fixes compile errors introduce with change #26301 when compiling
+             with ithreads and DEBUGGING.
+             
+             [ 26312]
+             A more efficient way to loop in ptr_table_clear
+             
+             [ 26313]
+             An alternative way of structuring ptr_table_clear so that the variables
+             can be assigned to at declaration time.
+             
+             [ 26317]
+             Subject: [PATCH] Code tweaks in sv.c
+             From: Andy Lester <andy@petdance.com>
+             Date: Fri, 9 Dec 2005 11:09:21 -0600
+             Message-ID: <20051209170921.GC16943@petdance.com>
+             
+             Includes a minor change the patch to account for code that moved
+             elsewhere.
+     Branch: maint-5.8/perl
+	  !> sv.c
+____________________________________________________________________________
+[ 29772] By: nicholas                              on 2007/01/12  13:28:49
+        Log: Integrate:
+             [ 26360]
+             Add a missing FREETMPS to match up with a SAVETMPS.  This change
+             fixes problems with nested sorts.  (RTs #7063 and #36430).
+             
+             [ 26361]
+             Again, FREETMPS not SAVETMPS!
+             
+             [ 26362]
+             Reverting change #26360 and #26361 since it appears that the bugs I
+             thought I fixed had been previously fixed with change #25953.
+     Branch: maint-5.8/perl
+	  !> pp_sort.c
+____________________________________________________________________________
+[ 29771] By: nicholas                              on 2007/01/12  13:01:39
+        Log: Integrate:
+             [ 26281]
+             Subject: [PATCH] More consting, and putting stuff in embed.fnc
+             From: Andy Lester <andy@petdance.com>
+             Date: Mon, 5 Dec 2005 13:46:13 -0600
+             Message-ID: <20051205194613.GB7791@petdance.com>
+             
+             [ 26287]
+             Add a ; that 26281 was lacking.
+             (Dear Mark, please can I have back one of the two that I sent you after
+             change 23614)
+     Branch: maint-5.8/perl
+	  !> deb.c doio.c dump.c embed.fnc embed.h hv.c hv.h locale.c mg.c
+	  !> op.c op.h pp.c pp_ctl.c pp_hot.c pp_pack.c pp_sort.c pp_sys.c
+	  !> proto.h regcomp.c sv.c taint.c toke.c utf8.c util.c
+____________________________________________________________________________
+[ 29770] By: nicholas                              on 2007/01/12  12:22:53
+        Log: Integrate:
+             [ 26199]
+             Subject: XS-assisted SWASHGET (esp. for t/uni/class.t speedup)
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Wed, 23 Nov 2005 17:57:34 +0900
+             Message-Id: <20051123175603.FFD5.BQW10602@nifty.com>
+             
+             And :
+             Message-Id: <20051123202935.4D9D.BQW10602@nifty.com>
+             
+             with some nits to use U8 instead of char more consistently
+             
+             [ 26203]
+             Subject: Re: XS-assisted SWASHGET (esp. for t/uni/class.t speedup)
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Fri, 25 Nov 2005 00:19:35 +0900
+             Message-Id: <20051125001031.24E3.BQW10602@nifty.com>
+             
+             Date: Fri, 25 Nov 2005 01:18:17 +0900
+             Message-Id: <20051125011410.24E9.BQW10602@nifty.com>
+             
+             [ 26229]
+             Subject: Re: XS-assisted SWASHGET (esp. for t/uni/class.t speedup)
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Sun, 27 Nov 2005 17:02:02 +0900
+             Message-Id: <20051127170016.A786.BQW10602@nifty.com>
+             
+             [ 26255]
+             Clarification and cleanup of the XS SWASHGET code
+             
+             Subject: Re: XS-assisted SWASHGET (esp. for t/uni/class.t speedup)
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Sun, 04 Dec 2005 16:28:35 +0900
+             Message-Id: <20051204162508.D726.BQW10602@nifty.com>
+             
+             [ 26256]
+             Rework the error messages from the swashget code.
+             
+             Subject: Re: XS-assisted SWASHGET (esp. for t/uni/class.t speedup)
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Sun, 04 Dec 2005 16:24:59 +0900
+             Message-Id: <20051204162431.D723.BQW10602@nifty.com>
+             
+             [ 26257]
+             Better variable names make code clearer
+             
+             Subject: Re: XS-assisted SWASHGET (esp. for t/uni/class.t speedup)
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Sun, 04 Dec 2005 16:24:29 +0900
+             Message-Id: <20051204162412.D720.BQW10602@nifty.com>
+     Branch: maint-5.8/perl
+	  !> embed.fnc embed.h lib/utf8_heavy.pl pod/perlapi.pod
+	  !> pod/perldiag.pod pod/perlintern.pod proto.h regexec.c
+	  !> t/op/pat.t universal.c utf8.c utf8.h utfebcdic.h
+____________________________________________________________________________
+[ 29769] By: nicholas                              on 2007/01/12  11:55:51
+        Log: Integrate:
+             [ 26090]
+             const'ing Netdb_host_t broke HP-UX and created warnings on gcc for a double const.  
+             Netdb_host_t is a macro that for a const pointer.
+             
+             [ 26147]
+             Subject: [PATCH] Sort subs now in embed.fnc
+             From: Andy Lester <andy@petdance.com>
+             Date: Thu, 17 Nov 2005 07:53:38 -0600
+             Message-ID: <20051117135338.GA31715@petdance.com>
+             
+             [ 26175]
+             Cleaning up some warnings generated by "gcc -W"
+             
+             [ 26179]
+             Declarations must come first, or some compilers aren't happy.
+             (spotted by Jarkko)
+     Branch: maint-5.8/perl
+	  !> deb.c embed.fnc embed.h ext/B/B.xs ext/Data/Dumper/Dumper.xs
+	  !> ext/PerlIO/encoding/encoding.xs mg.c op.c pp_sort.c pp_sys.c
+	  !> proto.h regcomp.c scope.c
+____________________________________________________________________________
+[ 29763] By: nicholas                              on 2007/01/12  01:57:13
+        Log: Integrate:
+             [ 25956]
+             Adjust test count
+     Branch: maint-5.8/perl
+	  !> ext/B/t/concise-xs.t
+____________________________________________________________________________
+[ 29760] By: nicholas                              on 2007/01/11  17:10:41
+        Log: Integrate:
+             [ 26082]
+             Subject: [PATCH] Const & local: Special Victims Unit
+             From: Andy Lester <andy@petdance.com>
+             Date: Thu, 10 Nov 2005 22:47:00 -0600
+             Message-ID: <20051111044700.GA24161@petdance.com>
+     Branch: maint-5.8/perl
+	  !> cop.h doio.c doop.c pp_hot.c pp_pack.c pp_sort.c pp_sys.c sv.c
+	  !> util.c
+____________________________________________________________________________
+[ 29759] By: nicholas                              on 2007/01/11  16:45:05
+        Log: Integrate:
+             [ 25953]
+             Subject: [PATCH] sort/multicall patch
+             From: Robin Houston <robin@cpan.org>
+             Date: Sat, 29 Oct 2005 21:33:07 +0100
+             Message-ID: <20051029203307.GA8869@rpc142.cs.man.ac.uk>
+             
+             [ 25954]
+             Regen headers
+             
+             [ 25957]
+             Remove last sort test, that was failing with and without threads.
+             Silence some warnings.
+             
+             [ 25979]
+             Fix test failures introduced by the change of flags on op_sort
+             
+             [ 25992]
+             Subject: Re: [PATCH] sort/multicall patch
+             From: Robin Houston <robin@cpan.org>
+             Date: Fri, 4 Nov 2005 15:20:29 +0000
+             Message-ID: <20051104152029.GA17169@rpc142.cs.man.ac.uk>
+             
+             [ 26054]
+             Subject: [PATCH] Re: [perl #32383] DProf breaks List::Util::shuffle
+             From: Robin Houston <robin@cpan.org>
+             Date: Tue, 8 Nov 2005 19:02:34 +0000
+             Message-ID: <20051108190234.GA25953@rpc142.cs.man.ac.uk>
+             
+             [ 27486]
+             Subject: [PATCH] Automatically SPAGAIN in the poor-man's-multicall API
+             From: Robin Houston <robin@cpan.org>
+             Date: Mon, 13 Mar 2006 12:48:21 +0000
+             Message-ID: <20060313124821.GA11203@rpc142.cs.man.ac.uk>
+             
+             [ 27487]
+             Forgot the ending \. Why did it still compile ?
+     Branch: maint-5.8/perl
+	   ! cop.h embed.fnc pp_sort.c proto.h utf8.c
+	  !> AUTHORS embedvar.h ext/B/t/f_sort.t ext/List/Util/multicall.h
+	  !> global.sym makedef.pl op.c opcode.h opcode.pl perlapi.h
+	  !> pod/perlapi.pod pod/perlcall.pod pod/perldiag.pod pp_ctl.c
+	  !> pp_hot.c sv.c t/op/sort.t
+____________________________________________________________________________
+[ 29755] By: nicholas                              on 2007/01/11  14:29:40
+        Log: Integrate:
+             [ 26028]
+             Subject: [PATCH] Consting and localizing: Part LXVIII
+             From: Andy Lester <andy@petdance.com>
+             Date: Fri, 4 Nov 2005 15:12:56 -0600
+             Message-ID: <20051104211256.GA12651@petdance.com>
+     Branch: maint-5.8/perl
+	  !> deb.c embed.fnc embed.h locale.c pp_sys.c scope.c universal.c
+	  !> utf8.c util.c
+____________________________________________________________________________
+[ 29754] By: nicholas                              on 2007/01/11  13:30:43
+        Log: Integrate:
+             [ 25941]
+             Subject: futimes [PATCH]
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 31 Oct 2005 13:53:53 -0800
+             Message-ID: <lrk6ft8ia6.fsf_-_@caliper.activestate.com>
+             
+             [ 25951]
+             Subject: Re: futimes [PATCH]
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 01 Nov 2005 00:02:37 -0800
+             Message-ID: <lrbr1494o2.fsf@caliper.activestate.com>
+     Branch: maint-5.8/perl
+	  !> doio.c handy.h pod/perlfunc.pod t/io/fs.t
+____________________________________________________________________________
+[ 29752] By: nicholas                              on 2007/01/11  12:41:42
+        Log: Integrate:
+             [ 25915]
+             Subject: [PATCH] Etta James presents: More consting
+             From: Andy Lester <andy@petdance.com>
+             Date: Sun, 30 Oct 2005 23:44:13 -0600
+             Message-ID: <20051031054413.GA10767@petdance.com>
+     Branch: maint-5.8/perl
+	   ! universal.c
+	  !> cop.h doop.c hv.c numeric.c op.c perl.c pp_hot.c pp_sys.c sv.c
+	  !> toke.c util.c
+____________________________________________________________________________
+[ 29746] By: nicholas                              on 2007/01/10  15:52:19
+        Log: Integrate:
+             [ 29729]
+             socketpair.t was written in 2001. At that time, Test::More got confused
+             if you forked under it. Test::More 0.47 added support to detect forking
+             which resolves this. Hence there is now no need to fork() in a BEGIN
+             block, which causes issues on Win32 due to how pseudofork works.
+     Branch: maint-5.8/perl
+	  !> ext/Socket/t/socketpair.t
+____________________________________________________________________________
+[ 29737] By: nicholas                              on 2007/01/09  21:23:37
+        Log: Conditionally compile out all op.c manipulation code for OP_THREADSV
+             unless we are building for 5005threads, as nothing else can generate
+             this op. (Arguably pre 5.8.0 time we could have changed the headers to
+             not even have this op usually, but it's a tad late now and my time
+             machine is still on pre-order).
+     Branch: maint-5.8/perl
+	   ! op.c
+____________________________________________________________________________
+[ 29735] By: nicholas                              on 2007/01/09  12:48:39
+        Log: We can get in the messy situation of the COP that PL_curcop pointed
+             to getting freed, and as part of the same free overloading decides
+             to look for DESTROY, which needs to *create* a GV, which in turn
+             was expecting that PL_curcop pointed to something valid. So set
+             PL_curcop to NULL if we're freeing the COP that it points to, and
+             make Perl_gv_init() cope with a NULL PL_curcop.
+     Branch: maint-5.8/perl
+	   ! gv.c op.c
+____________________________________________________________________________
+[ 29733] By: nicholas                              on 2007/01/09  11:12:58
+        Log: Integrate:
+             [ 25973]
+             More core test cleanups.  Mainly fixes to remove code that caused 
+             warnings, but there were a few bug fixes that were hidden by 
+             no using warnings.
+             
+             [ 26066]
+             I/O is UTF-8, not "UNICODE"
+             
+             [ 26070]
+             Add tests for two untested syntax error messages about \N
+             
+             [ 26178]
+             Subject: [PATCH] Pulling ancient RCS comments
+             From: Andy Lester <andy@petdance.com>
+             Date: Sat, 19 Nov 2005 00:16:39 -0600
+             Message-ID: <20051119061639.GA25086@petdance.com>
+             
+             [ 26347]
+             Convert range.t to test.pl
+     Branch: maint-5.8/perl
+	  !> (integrate 36 files)
+____________________________________________________________________________
+[ 29726] By: nicholas                              on 2007/01/08  23:25:40
+        Log: Unbreak 5005 threads - pp_threadsv can't be aliased to unimplemented_op
+             for the 5005 threads case.
+     Branch: maint-5.8/perl
+	   ! opcode.h opcode.pl
+____________________________________________________________________________
+[ 29725] By: nicholas                              on 2007/01/08  22:09:41
+        Log: Integrate:
+             [ 29695]
+             Update copyright years in .h files. Also, in .pl
+             files that generate .h files, so they'll be ready
+             next time.
+             
+             [just the .pl files for now]
+     Branch: maint-5.8/perl
+	  !> keywords.pl opcode.pl
+____________________________________________________________________________
+[ 29722] By: nicholas                              on 2007/01/08  18:06:13
+        Log: Integrate:
+             [ 26110]
+             Integrate:
+             [ 26108]
+             BEGIN blocks should start a new stack, as they can be called as a
+             side effect of "regular" Perl API calls within subroutines that have
+             already cached the current stack's address. If they don't, any stack
+             extension during the call may move the stack, rendering that cached
+             value invalid without the cachee realising. (For example, PP code
+             calling gv_fetchpv() which triggers a load of Errno.pm)
+             
+             [ 26234]
+             Revert change #26110 (already reverted in maintperl by change 26182)
+             
+             [ 27207]
+             Subject: Re: Perl_sighandler voodoo (was Re: Smoke [5.8.7] 26127 FAIL(XF) MSWin32 WinXP/.Net SP2 (x86/2 cpu))
+             From: Robin Houston <robin@cpan.org>
+             Date: Sun, 27 Nov 2005 00:43:13 +0000
+             Message-ID: <20051127004313.GA7007@rpc142.cs.man.ac.uk>
+             
+             Simplification of the code in my_exit_jump() that unwinds context
+             stacks
+     Branch: maint-5.8/perl
+	   ! t/io/open.t
+	  !> op.c perl.c
+____________________________________________________________________________
+[ 29721] By: nicholas                              on 2007/01/08  15:51:22
+        Log: Integrate:
+             [ 26126]
+             Don't warn about lack of docs for functions that appear twice in embed.fnc.
+             
+             [ 29138]
+             Modify autodoc.pl to add read-only editor boilerplate for perlapi.pod
+             and perlguts.pod
+             
+             [ 29146]
+             In vim, modelines are not taken into account if they begin on the
+             first character. Also, regenerate perlintern.pod.
+     Branch: maint-5.8/perl
+	  !> autodoc.pl pod/perlapi.pod pod/perlguts.pod pod/perlintern.pod
+____________________________________________________________________________
+[ 29720] By: nicholas                              on 2007/01/08  15:43:25
+        Log: Integrate:
+             [ 25703]
+             Add -C to allowed $PERL5OPT options
+             Add -C to the $PERL5OPT documentation (and added the missing -A too)
+             t/run/runenv.t Could use some more tests about how supported
+             and unsupported options in $PERL5OPT are handled
+     Branch: maint-5.8/perl
+	   ! pod/perldiag.pod pod/perlrun.pod
+	  !> perl.c
+____________________________________________________________________________
+[ 29163] By: nicholas                              on 2006/10/30  18:26:48
+        Log: Integrate:
+             [ 26177]
+             Subject: Reworked PERL_TRACK_MEMPOOL patch
+             From: "Jan Dubois" <jand@ActiveState.com>
+             Date: Fri, 18 Nov 2005 11:38:24 -0800
+             Message-ID: <003601c5ec77$a45eb260$2217a8c0@candy>
+             
+             [tweaked so as to remove the automatic define of -DPERL_TRACK_MEMPOOL
+             on -DDEBUGGING]
+     Branch: maint-5.8/perl
+	  !> perl.h util.c
+____________________________________________________________________________
+[ 29141] By: nicholas                              on 2006/10/29  22:02:32
+        Log: Integrate:
+             [The Perl_magic_killbackrefs change from:]
+             [ 24966]
+             Remove the reference loop between symbol tables and typeglobs.
+             Typeglobs now have a weak reference onto their symbol table.
+             
+             [ 26132]
+             Mark all places where perl needs to look at a possibly-freed scalar
+             with a macro SvIS_FREED(sv)
+     Branch: maint-5.8/perl
+	  !> av.c mg.c op.c pad.c pp_hot.c sv.h
+____________________________________________________________________________
+[ 29137] By: nicholas                              on 2006/10/29  20:23:57
+        Log: Integrate:
+             [ 26060]
+             Add a comment about possible future refactoring of the pad code.
+             
+             [ 26123]
+             Suppress gcc warnings when ignoring the return value of io_close(),
+             as suggested by Gisle Aas.
+             
+             [ 26124]
+             Fix indentation of apidoc for sv_2pvutf8
+             (so perlapi.pod is correctly generated)
+             
+             [ 26176]
+             Down with "warning: code has no effect"
+     Branch: maint-5.8/perl
+	  !> XSUB.h embed.fnc pad.c pod/perlapi.pod proto.h sv.c
+____________________________________________________________________________
+[ 29136] By: nicholas                              on 2006/10/29  20:01:41
+        Log: Integrate:
+             [ 26112]
+             Fix breakages that prevended -DPERL_POISON from compiling.
+     Branch: maint-5.8/perl
+	  !> handy.h sv.h
+____________________________________________________________________________
+[ 29135] By: nicholas                              on 2006/10/29  19:31:39
+        Log: Integrate:
+             [ 25917]
+             POD nit spotted by Jarkko
+             
+             [ 25938]
+             Further pod nit spotted by Jarkko
+             
+             [ 25944]
+             Fix nit in pod nit fix
+     Branch: maint-5.8/perl
+	  !> pod/perlhack.pod
+____________________________________________________________________________
+[ 29134] By: nicholas                              on 2006/10/29  19:28:47
+        Log: Integrate:
+             [ 25914]
+             Subject: [PATCH] S_tokereport's unused parm
+             From: Andy Lester <andy@petdance.com>
+             Date: Mon, 31 Oct 2005 00:04:59 -0600
+             Message-ID: <20051031060459.GC10767@petdance.com>
+     Branch: maint-5.8/perl
+	  !> embed.fnc embed.h proto.h toke.c
+____________________________________________________________________________
+[ 29132] By: nicholas                              on 2006/10/29  19:16:37
+        Log: Integrate:
+             [ 25808]
+             Subject: Re: [PATCH] Re: [perl #37350] $#{@$aref} in debugger gives: Bizarre copy of ARRAY in leave
+             From: Robin Houston <robin@cpan.org>
+             Date: Oct 14, 2005 1:54 AM
+             Message-ID: <20051013235457.GA23386@rpc142.cs.man.ac.uk>
+     Branch: maint-5.8/perl
+	   ! mathoms.c op.c t/op/array.t
+	  !> embed.fnc embed.h global.sym op.h proto.h
+____________________________________________________________________________
+[ 29129] By: nicholas                              on 2006/10/29  18:29:46
+        Log: Integrate:
+             [ 25697]
+             Subject: proposal [perl #34301]:  IO::Socket calls getpeername far too often
+             From: Peter.Dintelmann@Dresdner-Bank.com (Peter Dintelmann)
+             Date: Thu, 2 Jun 2005 13:34:49 +0200
+             Message-ID: <E9A2605289D8D7468B1A21EC24E59D2101852447@naimucx5.muc.allianz>
+             
+             [ 25861]
+             Subject: Re: IO::File performace issue
+             From: gisle@ActiveState.com (Gisle Aas)
+             Date: 27 Oct 2005 01:00:39 -0700
+             Message-ID: <lrvezjv17c.fsf@caliper.activestate.com>
+             
+             Also includes a version bump for IO::File.
+             
+             [ 26300]
+             Fixup the setsockopt usage message; missing OPTVAL.
+             
+             [ 26400]
+             Subject: [PATCH] latest switch/say/~~
+             From: Robin Houston <robin@cpan.org>
+             Date: Sat, 17 Dec 2005 20:44:31 +0000
+             Message-Id: <20051217204431.GB28940@rpc142.cs.man.ac.uk>
+             
+             [ 26405]
+             Attempt at making IO::Handle backwards compatible again
+             
+             [ 26481]
+             Given that IO::Socket is documented as exporting all of Socket's
+             exports, there's no need for IO::Socket::INET or IO::Socket::UNIX to
+             use both. (And re-exporting removes some of the efficiency of the new
+             constants implementation)
+             
+             [ 26868]
+             Don't warn about a directory being closed in the DESTROY for
+             IO::Dir.
+             
+             [ 26921]
+             Subject: Avoid most getprotobyname/number calls in IO::Socket::INET
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 18 Jan 2006 09:28:24 -0800
+             Message-ID: <lr3bjlbg3r.fsf@caliper.activestate.com>
+             
+             [ 26941]
+             Subject: Simplify &IO::Handle::say
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 24 Jan 2006 05:01:28 -0800
+             Message-ID: <lrzmll7pav.fsf@caliper.activestate.com>
+             
+             [ 27609]
+             Update to IO-1.23
+     Branch: maint-5.8/perl
+	  !> ext/IO/ChangeLog ext/IO/IO.pm ext/IO/lib/IO/Dir.pm
+	  !> ext/IO/lib/IO/File.pm ext/IO/lib/IO/Handle.pm
+	  !> ext/IO/lib/IO/Socket.pm ext/IO/lib/IO/Socket/INET.pm
+	  !> ext/IO/lib/IO/Socket/UNIX.pm ext/IO/t/io_multihomed.t
+	  !> ext/IO/t/io_pipe.t ext/IO/t/io_sock.t ext/IO/t/io_taint.t
+	  !> ext/IO/t/io_tell.t ext/IO/t/io_udp.t ext/IO/t/io_unix.t
+____________________________________________________________________________
+[ 29087] By: nicholas                              on 2006/10/22  23:09:33
+        Log: Integrate:
+             [ 27737]
+             Give more information in the panic in ss_dup. (Although I'm not sure
+             if croak() works at this point, given PerlIO's dependency on a
+             functional interpreter.)
+             
+             [ 29084]
+             Fix a bug introduced by change 29079
+             
+             [ 29086]
+             Fix the other bug introduced by change 29079
+     Branch: maint-5.8/perl
+	  !> sv.c
+____________________________________________________________________________
+[ 29081] By: nicholas                              on 2006/10/22  21:00:37
+        Log: No need to save the PVX to the save stack when saving a GV, as the
+             string buffer is only used as part of get/set magic when reading/
+             writing the stringified form. Keep the old save type in case any
+             code out there is still generating the old format on the save stack.
+     Branch: maint-5.8/perl
+	   ! scope.c scope.h sv.c
+____________________________________________________________________________
+[ 29080] By: nicholas                              on 2006/10/22  20:12:38
+        Log: Integrate:
+             [ 29079]
+             const the variable used for the save stack type in Perl_ss_dup().
+     Branch: maint-5.8/perl
+	  !> sv.c
+____________________________________________________________________________
+[ 29022] By: nicholas                              on 2006/10/15  09:41:52
+        Log: Integrate:
+             [ 25254]
+             Another typo fix
+     Branch: maint-5.8/perl
+	  !> XSUB.h pod/perlapi.pod
+____________________________________________________________________________
+[ 29021] By: nicholas                              on 2006/10/15  09:22:52
+        Log: Integrate:
+             [ 27987]
+             Subject: Re: [PATCH] use snprintf/strlcpy/strlcat when useful
+             From: Jarkko Hietaniemi <jhietaniemi@gmail.com>
+             Date: Tue, 25 Apr 2006 18:23:39 +0300
+             Message-ID: <444E3EFB.8020503@gmail.com>
+             
+             [ 27988]
+             Fix typo in function call
+     Branch: maint-5.8/perl
+	  !> op.c perl.h perlio.c pp_ctl.c regcomp.c sv.c toke.c
+	  !> universal.c util.c
+____________________________________________________________________________
+[ 29014] By: nicholas                              on 2006/10/14  16:42:04
+        Log: Integrate:
+             [ 25105]
+             Message-ID: <42D0F25E.3040801@gmail.com>
+             Date: Sun, 10 Jul 2005 13:03:10 +0300
+             From: Jarkko Hietaniemi <jhietaniemi@gmail.com>
+             Subject: [PATCH] yet another way of debugging memory allocations
+             
+             adds PERL_MEM_LOG and PERL_MEM_LOG_STDERR options
+             
+             [ 25109]
+             From: Jarkko Hietaniemi <jhietaniemi@gmail.com>
+             Date: Sun, 10 Jul 2005 21:50:27 +0300
+             Subject: [PATCH] yet another way of debugging memory allocations
+             Message-ID: <42D16DF3.4040806@gmail.com>
+             
+             tweak PERL_MEM_LOG
+             
+             [ 25115]
+             Subject: [patch: handy.c]  update Newx API pod to mention PERL_MEM_LOG build opt
+             From: Jim Cromie <jcromie@divsol.com>
+             Date: Mon, 11 Jul 2005 19:18:02 -0600
+             Message-ID: <42D31A4A.1020305@divsol.com>
+             
+             (with some minor tweaks)
+             
+             [ 25116]
+             Change New*() to Newx*() in various comments and documentation
+             
+             [ 25128]
+             Subject: Make PERL_MEM_LOG more portable.
+             From:  Jarkko Hietaniemi <jhietaniemi@gmail.com>
+             Date:  Mon, 11 Jul 2005 15:29:46 +0300
+             Message-Id:  <42D2663A.4050204@gmail.com>
+             
+             [ 27204]
+             Subject: Re: how to build with -DPERL_MEM_LOG ?
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Fri, 3 Feb 2006 11:55:58 -0500 (EST)
+             Message-ID: <Pine.SOC.4.62.0602031129530.9630@maxwell.phys.lafayette.edu>
+     Branch: maint-5.8/perl
+	  !> handy.h pod/perlapi.pod pod/perlhack.pod util.c x2p/a2p.h
+____________________________________________________________________________
+[ 29013] By: nicholas                              on 2006/10/14  15:13:34
+        Log: Integrate:
+             [ 25104]
+             silence some compiler warnings
+     Branch: maint-5.8/perl
+	  !> embed.fnc gv.h proto.h
+____________________________________________________________________________
+[ 28854] By: nicholas                              on 2006/09/16  17:19:07
+        Log: Integrate:
+             [ 24803]
+             hash key code cleanup
+     Branch: maint-5.8/perl
+	  !> embed.fnc hv.c hv.h proto.h
+____________________________________________________________________________
+[ 28852] By: nicholas                              on 2006/09/16  16:20:26
+        Log: Integrate:
+             [ 24352]
+             Skip PL_sig_sv when PERL_IMPLICIT_CONTEXT is defined
+             (rather than when PERL_IMPLICIT_SYS is defined)
+     Branch: maint-5.8/perl
+	  !> makedef.pl
+____________________________________________________________________________
+[ 28775] By: nicholas                              on 2006/09/02  16:01:36
+        Log: Integrate:
+             [ 28771]
+             Change the generation of {} and [] from 3 ops to 1, and avoid 1 mortal
+             on the tempstack, by augmenting pp_anonlist and pp_anonhash to accept
+             OPf_SPECIAL to mean "return a reference to the aggregate" on the stack
+             rather than the aggregate itself.
+     Branch: maint-5.8/perl
+	  !> ext/B/B/Deparse.pm ext/B/t/concise-xs.t ext/B/t/f_map.t
+	  !> ext/B/t/f_sort.t ext/Devel/Peek/t/Peek.t op.c op.h pp.c
+____________________________________________________________________________
+[ 28443] By: nicholas                              on 2006/06/27  22:39:26
+        Log: Integrate:
+             [ 28189]
+             A Configure probe for C99 variadic macros, based on code from Jarkko.
+             
+             [ 28263]
+             Oops. Fix bad #! lines when not using userelocatableinc
+             
+             [ 28283]
+             Re-generation after backports of
+             #28188 Only ask about MAD for 5.9.0 and greater. Otherwise silently
+             #28189 A Configure probe for C99 variadic macros, based on code from
+             #28202 Take advantage of the bug that binexp ignores the Configure
+             #28263 Oops. Fix bad #! lines when not using userelocatableinc
+             One small cleanup fix added. Some small re-ordering. Some whitespace.
+             
+             [ 28284]
+             If I needed this now, I'll probably need it next time too :)
+             
+             [ 28286]
+             HAS_HAS WAS NOW HAS
+     Branch: maint-5.8/perl
+	  !> Configure Cross/config.sh-arm-linux NetWare/config.wc
+	  !> Porting/Glossary Porting/config.sh config_h.SH configure.com
+	  !> epoc/config.sh handy.h plan9/config_sh.sample uconfig.sh
+	  !> win32/config.bc win32/config.gc win32/config.vc
+	  !> win32/config.vc64
+____________________________________________________________________________
+[ 28442] By: nicholas                              on 2006/06/27  22:20:20
+        Log: Integrate:
+             [ 28024]
+             OK, Win32 must no have snprintf()/vsnprintf 
+             
+             [ 28025]
+             I was mistaken.  Borland and gcc do have snprintf() and vsnprintf()
+             on Win32.
+             
+             [ 28026]
+             Subject: [PATCH] fix 27987 for MSVC (was Re: Smoke [5.9.4] 28020 FAIL(m) MSWin32 Win2000 SP4 (x86/1 cpu))
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Sun, 30 Apr 2006 15:15:24 +0200
+             Message-Id: <200604301515.24580.abe@ztreet.demon.nl>
+             
+             [ 28051]
+             Subject: RE: [PATCH] fix 27987 for MSVC (was Re: Smoke [5.9.4] 28020 FAIL(m) MSWin32 Win2000 SP4 (x86/1 cpu))
+             From: "Jan Dubois" <jand@ActiveState.com>
+             Date: Mon, 1 May 2006 18:55:11 -0700
+             Message-ID: <08ff01c66d8b$7282e320$2217a8c0@candy>
+             
+             Subject: Re: [PATCH] fix 27987 for MSVC (was Re: Smoke [5.9.4] 28020 FAIL(m)
+             From: "H.Merijn Brand" <h.m.brand@xs4all.nl>
+             Date: Tue, 2 May 2006 09:23:51 +0200
+             Message-ID: <20060502092351.7bae0896@pc09>
+             
+             [ 28052]
+             Ahem. And here's the rest of #28051...
+             
+             [ 28053]
+             Sigh. Third time lucky.
+     Branch: maint-5.8/perl
+	  !> win32/config.vc win32/config.vc64 win32/config_H.bc
+	  !> win32/config_H.gc win32/config_H.vc win32/config_H.vc64
+	  !> win32/win32.h
+____________________________________________________________________________
+[ 28441] By: nicholas                              on 2006/06/27  22:15:42
+        Log: Integrate:
+             [ 27863]
+             Support for -DDEBUGGING and its alias -DEBUGGING
+     Branch: maint-5.8/perl
+	  !> Configure INSTALL config_h.SH
+____________________________________________________________________________
+[ 28440] By: nicholas                              on 2006/06/27  22:00:05
+        Log: Integrate:
+             [ 27686]
+             First stab at a more reliable Glossary. This now is (again)
+             mostly generated. (Well, It's a repair to the existing version
+             "based on" a generated version, which is now well sorted, but
+             still incomplete for less obvious reasons).
+     Branch: maint-5.8/perl
+	  !> Porting/Glossary
+____________________________________________________________________________
+[ 28439] By: nicholas                              on 2006/06/27  21:54:10
+        Log: Integrate:
+             [ 27370]
+             Subject: [PATCH] Support for __builtin_expect and __builtin_choose_expr
+             From: Andy Lester <andy@petdance.com>
+             Date: Wed, 28 Dec 2005 15:34:08 -0600
+             Message-ID: <20051228213408.GB26033@petdance.com>
+             
+             [ 27372]
+             Make Win32 configuration changes for HAS_BUILTIN_CHOOSE_EXPR and
+             HAS_BUILTIN_EXPECT.
+             
+             [ 27373]
+             Add d_builtin_choose_expr and d_builtin_expect to configure.com as
+             'undef'.
+             
+             [ 27412]
+             Complete change #27407/27410 on Win32 and tidy up change #27372
+             
+             [ 27473]
+             Subject: [PATCH] Reapply change 24432
+             From: "Jan Dubois" <jand@ActiveState.com>
+             Date: Fri, 10 Mar 2006 18:21:39 -0800
+             Message-ID: <01b001c644b2$879a1f50$6062a8c0@candy>
+     Branch: maint-5.8/perl
+	  !> Configure Porting/Glossary config_h.SH configure.com perl.h
+	  !> win32/config.bc win32/config.gc win32/config.vc
+	  !> win32/config.vc64 win32/config_H.bc win32/config_H.gc
+	  !> win32/config_H.vc win32/config_H.vc64
+____________________________________________________________________________
+[ 28438] By: nicholas                              on 2006/06/27  21:34:26
+        Log: Integrate:
+             [ 27363]
+             Subject: [perl #38385] _h2ph_pre.ph / $Config{cppsymbols} omits gcc-3.4+ cpp "predefined macros" 
+             Date: Tue, 31 Jan 2006 09:50:32 -0800
+             From: Jason Vas Dias (via RT) <perlbug-followup@perl.org>
+             
+             [ 27367]
+             #27363 broke HP-UX (and others). if [[ ... ]] syntax not supported
+     Branch: maint-5.8/perl
+	  !> Configure utils/h2ph.PL
+____________________________________________________________________________
+[ 28437] By: nicholas                              on 2006/06/27  21:21:12
+        Log: Integrate:
+             [ 27189]
+             Subject: Patch for perl to compile/work on DragonFlyBSD
+             From: Robert Sebastian Gerus <arachnist@gmail.com>
+             Date: Tue, 14 Feb 2006 17:27:52 +0100
+             Message-ID: <4a1e16420602140827w17fd6595w@mail.gmail.com>
+             
+             [ 27190]
+             Added hints/dragonfly.sh for #27189
+             
+             [ 27263]
+             Additional hints needed to build threaded Perls on NetBSD.
+     Branch: maint-5.8/perl
+	  +> hints/dragonfly.sh
+	  !> Configure MANIFEST Makefile.SH hints/netbsd.sh
+____________________________________________________________________________
+[ 28436] By: nicholas                              on 2006/06/27  20:49:08
+        Log: Integrate:
+             [ 26606]
+             Add probe for snprintf () and vsnprintf ()
+             
+             Subject: [PATCH] snprintf() and vsnprintf() (was Re: [PATCH] Configure: stdio char (un)signedness)
+             From: Steve Peters <steve@fisharerojo.org>
+             Date: Mon, 2 Jan 2006 09:37:27 -0600
+             Message-ID: <20060102153727.GA14247@mccoy.peters.homeunix.org>
+             
+             [ 26630]
+             Add snprintf() and vsnprintf() to the various Win32 configuration 
+             files.
+             
+             [ 26632]
+             Added snprintf() and vsnprintf() to configure.com as 'undef'. 
+             
+             [ 26655]
+             Reorder changes made in change 26630
+             
+             (Keep the order in win32/config.* and win32/config_H.* the same as in
+             Configure and config_H.SH for easier diffing)
+             
+             [ 26668]
+             Test if the probed availability of v?snprintf () is
+             actually usable. Thanks to Russ and Jarkko.
+             
+             [ 26703]
+             Make v?snprintf available on VMS v7.3-2 and later and clean up
+             some other version-dependency checks.
+     Branch: maint-5.8/perl
+	  !> Configure Porting/Glossary config_h.SH configure.com handy.h
+	  !> win32/config.bc win32/config.gc win32/config.vc
+	  !> win32/config.vc64 win32/config_H.bc win32/config_H.gc
+	  !> win32/config_H.vc win32/config_H.vc64
+____________________________________________________________________________
+[ 28233] By: nicholas                              on 2006/05/19  15:01:03
+        Log: Integrate:
+             [ 28007]
+             Subject: two [PATCH]es: dVAR for malloc.c, and a signed/unsigned char*
+             From: Jarkko Hietaniemi <jhietaniemi@gmail.com>
+             Date: Fri, 28 Apr 2006 21:04:59 +0300
+             Message-ID: <4452594B.4040609@gmail.com>
+             [the signed/unsigned part]
+             
+             [ 28042]
+             Subject: [PATCH] signed vs unsigned char * nit
+             From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Date: Sat, 29 Apr 2006 20:59:29 +0300 (EEST)
+             Message-Id: <200604291759.k3THxTji032009@kosh.hut.fi>
+     Branch: maint-5.8/perl
+	  !> pp.c
+____________________________________________________________________________
+[ 28220] By: nicholas                              on 2006/05/17  21:36:24
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 28213] By: nicholas                              on 2006/05/16  22:44:31
         Log: Integrate:
              [ 28034]
