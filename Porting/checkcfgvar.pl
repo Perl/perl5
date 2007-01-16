@@ -30,6 +30,7 @@ my @CFG = (
 	   "win32/config.gc",
 	   "win32/config.vc",
 	   "win32/config.vc64",
+	   "win32/config.ce",
 	   "wince/config.ce",
 	   "configure.com",
 	  );
@@ -86,8 +87,10 @@ for my $cfg (@CFG) {
     read_file($cfg,
 	      sub {
 		  return if /^\#/ || /^\s*$/;
-		  return if $cfg eq 'configure.com' &&
-			    ! /^\$\s+WC "(\w+)='(.*)'"$/;
+		  if ($cfg eq 'configure.com') {
+		      s/(\s*!.*|\s*)$//; # remove trailing comments or whitespace
+		      return if ! /^\$\s+WC "(\w+)='(.*)'"$/;
+		  }
 		  # foo='bar'
 		  # foo=bar
 		  # $foo='bar' # VOS 5.8.x specialty

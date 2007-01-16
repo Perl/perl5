@@ -5,16 +5,24 @@ $Text::Wrap::columns = 80;
 my ($committer, $patch, $log);
 use Getopt::Long;
 
-my ($rank, $ta, @authors, %authors, %untraced, %patchers, %committers);
+my ($rank, $percentage, $cumulative, $reverse, $ta, @authors, %authors,
+    %untraced, %patchers, %committers);
 my $result = GetOptions ("rank" => \$rank,		    # rank authors
 			 "thanks-applied" => \$ta,	    # ranks committers
-			 "acknowledged=s"   => \@authors);  # authors files
+			 "acknowledged=s"   => \@authors ,  # authors files
+			 "percentage" => \$percentage,      # show as %age
+			 "cumulative" => \$cumulative,
+			 "reverse" => \$reverse,
+			);
 
 if (!$result or (($rank||0) + ($ta||0) + (@authors ? 1 : 0) != 1) or !@ARGV) {
   die <<"EOS";
 $0 --rank Changelogs                        # rank authors by patches
 $0 --acknowledged <authors file> Changelogs # Display unacknowledged authors
 $0 --thanks-applied Changelogs		    # ranks committers
+$0 --percentage ...                         # show rankings as percentages
+$0 --cumulative ...                         # show rankings cumulatively
+$0 --reverse ...                            # show rankings in reverse
 Specify stdin as - if needs be. Remember that option names can be abbreviated.
 EOS
 }
@@ -107,6 +115,7 @@ my %map = reverse (
 		   "paul.green\100stratus.com"
 		   => "paul_greenvos\100vos.stratus.com",
 		   "alian\100cpan.org" => "alian\100alianwebserver.com",
+		   "david.dyck\100fluke.com" => "dcd\100tc.fluke.com",
 		   # Maybe we should special case this to get real names out?
 		   "perlbug\100perl.org" => "perlbug-followup\100perl.org",
 		  );
@@ -115,7 +124,7 @@ my %map = reverse (
 
 $map{"autrijus\100egb.elixus.org"} = $map{"autrijus\100geb.elixus.org"}
   = $map{"autrijus\100gmail.com"} = $map{"autrijus\100ossf.iis.sinica.edu.tw"}
-  = "autrijus\100autrijus.org";
+  = $map{"autrijus\100autrijus.org"} = "cpan\100audreyt.org";
 $map{"ilya\100math.ohio-state.edu"} = $map{"ilya\100math.berkeley.edu"}
   = $map{"ilya\100math.berkeley.edu"} = "nospam-abuse\100ilyaz.org";
 $map{"philip.newton\100gmx.net"} = $map{"philip.newton\100datenrevision.de"}
@@ -189,6 +198,7 @@ $map{"h.m.brand\100hccnet.nl"} = $map{"merijn\100l1.procura.nl"} = "merijn";
 $map{"nik\100tiuk.ti.com"} = $map{"nick.ing-simmons\100elixent.com"} = "nick";
 $map{"hv\100crypt.org"} = "hv";
 $map{"gisle\100aas.no"} = "gisle";
+$map{"gsar\100cpan.org"} = "gsar";
 
 if (@authors) {
   my %raw;
@@ -269,15 +279,27 @@ if ($rank) {
 sub display_ordered {
   my $what = shift;
   my @sorted;
+  my $total;
   while (my ($name, $count) = each %$what) {
     push @{$sorted[$count]}, $name;
+    $total += $count;
   }
 
   my $i = @sorted;
-  return unless $i;
-  while (--$i) {
+  return unless @sorted;
+  my $sum = 0;
+  foreach my $i ($reverse ? 0 .. $#sorted : reverse 0 .. $#sorted) {
     next unless $sorted[$i];
-    print wrap ("$i:\t", "\t", join (" ", sort @{$sorted[$i]}), "\n");
+    my $prefix;
+    $sum += $i * @{$sorted[$i]};
+    # Value to display is either this one, or the cumulative sum.
+    my $value = $cumulative ? $sum : $i;
+    if ($percentage) {
+	$prefix = sprintf "%6.2f:\t", 100 * $value / $total;
+    } else {
+	$prefix = "$value:\t";
+    }
+    print wrap ($prefix, "\t", join (" ", sort @{$sorted[$i]}), "\n");
   }
 }
 

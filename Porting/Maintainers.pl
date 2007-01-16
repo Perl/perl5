@@ -14,7 +14,7 @@ package Maintainers;
 	'ams'		=> 'Abhijit Menon-Sen <ams@cpan.org>',
 	'andk'		=> 'Andreas J. Koenig <andk@cpan.org>',
 	'arandal'       => 'Allison Randal <allison@perl.org>',
-	'autrijus'	=> 'Audrey Tang <autrijus@cpan.org>',
+	'audreyt'	=> 'Audrey Tang <cpan@audreyt.org>',
 	'bbb'		=> 'Rob Brown <bbb@cpan.org>',
 	'craig'		=> 'Craig Berry <craigberry@mac.com>',
 	'dankogai'	=> 'Dan Kogai <dankogai@cpan.org>',
@@ -22,12 +22,14 @@ package Maintainers;
 	'dmanura'	=> 'David Manura <dmanura@cpan.org>',
 	'drolsky'	=> 'Dave Rolsky <drolsky@cpan.org>',
 	'elizabeth'	=> 'Elizabeth Mattijsen <liz@dijkmat.nl>',
+	'ferreira'	=> 'Adriano Ferreira <ferreira@cpan.org>',
 	'gbarr'		=> 'Graham Barr <gbarr@cpan.org>',
 	'gaas'		=> 'Gisle Aas <gaas@cpan.org>',
 	'gsar'		=> 'Gurusamy Sarathy <gsar@activestate.com>',
 	'ilyam'		=> 'Ilya Martynov <ilyam@cpan.org>',
 	'ilyaz'		=> 'Ilya Zakharevich <ilyaz@cpan.org>',
 	'jand'		=> 'Jan Dubois <jand@activestate.com>',
+	'jdhedden'	=> 'Jerry D. Hedden <jdhedden@cpan.org>',
 	'jhi'		=> 'Jarkko Hietaniemi <jhi@cpan.org>',
 	'jstowe'	=> 'Jonathan Stowe <jstowe@cpan.org>',
 	'jv'		=> 'Johan Vromans <jv@cpan.org>',
@@ -36,11 +38,14 @@ package Maintainers;
 	'laun'		=> 'Wolfgang Laun <Wolfgang.Laun@alcatel.at>',
 	'lstein'	=> 'Lincoln D. Stein <lds@cpan.org>',
 	'marekr'	=> 'Marek Rouchal <marekr@cpan.org>',
+	'markm'		=> 'Mark Mielke <markm@cpan.org>',
 	'mhx'		=> 'Marcus Holland-Moritz <mhx@cpan.org>',
 	'mjd'		=> 'Mark-Jason Dominus <mjd@plover.com>',
+	'msergeant'	=> 'Matt Sergeant <msergeant@cpan.org>',
+	'mshelor'	=> 'Mark Shelor <mshelor@cpan.org>',
 	'muir'		=> 'David Muir Sharnoff <muir@cpan.org>',
 	'neilb'		=> 'Neil Bowers <neilb@cpan.org>',
-	'ni-s'		=> 'Nick Ing-Simmons <nick@ing-simmons.net>',
+	'nuffin'	=> 'Yuval Kogman <nothingmuch@woobling.org>',
 	'p5p'		=> 'perl5-porters <perl5-porters@perl.org>',
 	'perlfaq'	=> 'perlfaq-workers <perlfaq-workers@perl.org>',
 	'petdance'	=> 'Andy Lester <andy@petdance.com>',
@@ -48,6 +53,7 @@ package Maintainers;
 	'pvhp'		=> 'Peter Prymmer <pvhp@best.com>',
 	'rclamp'	=> 'Richard Clamp <rclamp@cpan.org>',
 	'rgarcia'	=> 'Rafael Garcia-Suarez <rgarcia@cpan.org>',
+	'rkobes'	=> 'Randy Kobes <rkobes@cpan.org>',
 	'rmbarker'	=> 'Robin Barker <rmbarker@cpan.org>',
 	'rra'		=> 'Russ Allbery <rra@cpan.org>',
 	'sadahiro'	=> 'SADAHIRO Tomoyuki <SADAHIRO@cpan.org>',
@@ -56,7 +62,8 @@ package Maintainers;
 	'sburke'	=> 'Sean Burke <sburke@cpan.org>',
 	'mschwern'	=> 'Michael Schwern <mschwern@cpan.org>',
 	'smccam'	=> 'Stephen McCamant <smccam@cpan.org>',
-	'tels'		=> 'perl_dummy a-t bloodgate.com',
+	'smueller'	=> 'Steffen Mueller <smueller@cpan.org>',
+	'tels'		=> 'Tels <nospam-abuse@bloodgate.com>',
 	'tomhughes'	=> 'Tom Hughes <tomhughes@cpan.org>',
 	'tjenness'	=> 'Tim Jenness <tjenness@cpan.org>',
 	'tyemq'		=> 'Tye McQueen <tyemq@cpan.org>',
@@ -75,6 +82,13 @@ package Maintainers;
 		'FILES'		=> q[lib/Archive/Tar.pm lib/Archive/Tar],
 		'CPAN'		=> 1,
 		},
+
+	'AutoLoader' =>
+		{
+		'MAINTAINER'	=> 'smueller',
+		'FILES'		=> q[lib/AutoLoader.pm lib/AutoLoader.t],
+		'CPAN'		=> 1,
+	},
 
 	'assertions' =>
 		{
@@ -189,6 +203,13 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+        'Digest::SHA' =>
+                {
+                'MAINTAINER'    => 'mshelor',
+                'FILES'         => q[ext/Digest/SHA],
+                'CPAN'          => 1,
+                },
+
 	'Encode' =>
 		{
 		'MAINTAINER'	=> 'dankogai',
@@ -198,7 +219,7 @@ package Maintainers;
 
 	'encoding::warnings' =>
 		{
-		'MAINTAINER'	=> 'autrijus',
+		'MAINTAINER'	=> 'audreyt',
 		'FILES'		=> q[lib/encoding/warnings.pm lib/encoding/warnings],
 		'CPAN'		=> 1,
 		},
@@ -210,6 +231,13 @@ package Maintainers;
 		'CPAN'		=> 0,
 		},
 
+	'Exporter' =>
+		{
+		'MAINTAINER'	=> 'ferreira',
+		'FILES'		=> q[lib/Exporter.pm lib/Exporter.t lib/Exporter/Heavy.pm],
+		'CPAN'		=> 1,
+		},
+
 	'ExtUtils::CBuilder' =>
 		{
 		'MAINTAINER'	=> 'kwilliams',
@@ -217,11 +245,33 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'ExtUtils::Command' =>
+		{
+		'MAINTAINER'	=> 'rkobes',
+		'FILES'		=> q[lib/ExtUtils/Command.pm],
+		'CPAN'		=> 1,
+		},
+
+        'ExtUtils::Install' =>
+
+		{
+		'MAINTAINER' => 'yves',
+		'FILES' => q[lib/ExtUtils/{Install,Installed,Packlist}.pm],
+		'CPAN' => 1,
+		},
+
 	'ExtUtils::MakeMaker' =>
 		{
 		'MAINTAINER'	=> 'mschwern',
-		'FILES'		=> q[lib/ExtUtils/{Command,Install,Installed,Liblist,MakeMaker,Manifest,Mkbootstrap,Mksymlists,MM*,MY,Packlist,testlib}.pm lib/ExtUtils/{Command,Liblist,MakeMaker,MANIFEST.SKIP}
+		'FILES'	=> q[lib/ExtUtils/{Liblist,MakeMaker,Mkbootstrap,Mksymlists,MM*,MY,testlib}.pm lib/ExtUtils/{Command,Liblist,MakeMaker}
 				     lib/ExtUtils/t t/lib/MakeMaker t/lib/TieIn.pm t/lib/TieOut.pm],
+		'CPAN'		=> 1,
+		},
+
+	'ExtUtils::Manifest' =>
+		{
+		'MAINTAINER'	=> 'rkobes',
+		'FILES'		=> q[lib/ExtUtils/{Manifest.pm,MANIFEST.SKIP} lib/ExtUtils/t/Manifest.t],
 		'CPAN'		=> 1,
 		},
 
@@ -329,7 +379,14 @@ package Maintainers;
 	'Locale::Maketext' =>
 		{
 		'MAINTAINER'	=> 'petdance',
-		'FILES'		=> q[lib/Locale/Maketext.pm lib/Locale/Maketext],
+		'FILES'		=> q[lib/Locale/Maketext.pm lib/Locale/Maketext.pod lib/Locale/Maketext/ChangeLog lib/Locale/Maketext/{Guts,GutsLoader}.pm lib/Locale/Maketext/README lib/Locale/Maketext/TPJ13.pod lib/Locale/Maketext/t],
+		'CPAN'		=> 1,
+		},
+
+	'Locale::Maketext::Simple' =>
+		{
+		'MAINTAINER'	=> 'audreyt',
+		'FILES'		=> q[lib/Locale/Maketext/Simple.pm lib/Locale/Maketext/Simple],
 		'CPAN'		=> 1,
 		},
 
@@ -378,8 +435,22 @@ package Maintainers;
 
 	'Module::CoreList' =>
 		{
-		'MAINTAINER'	=> 'rclamp',
+		'MAINTAINER'	=> 'rgarcia',
 		'FILES'		=> q[lib/Module/CoreList lib/Module/CoreList.pm],
+		'CPAN'		=> 1,
+		},
+
+	'Module::Load' =>
+		{
+		'MAINTAINER'	=> 'kane',
+		'FILES'		=> q[lib/Module/Load lib/Module/Load.pm],
+		'CPAN'		=> 1,
+		},
+
+	'Module::Loaded' =>
+		{
+		'MAINTAINER'	=> 'kane',
+		'FILES'		=> q[lib/Module/Loaded lib/Module/Loaded.pm],
 		'CPAN'		=> 1,
 		},
 
@@ -397,6 +468,27 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'Object::Accessor' =>
+		{
+		'MAINTAINER'	=> 'kane',
+		'FILES'		=> q[lib/Object/Accessor.pm lib/Object/Accessor],
+		'CPAN'		=> 1,
+		},
+
+	'Package::Constants' =>
+		{
+		'MAINTAINER'	=> 'kane',
+		'FILES'		=> q[lib/Package/Constants lib/Package/Constants.pm],
+		'CPAN'		=> 1,
+		},
+
+	'Params::Check' =>
+		{
+		'MAINTAINER'	=> 'kane',
+		'FILES'		=> q[lib/Params/Check lib/Params/Check.pm],
+		'CPAN'		=> 1,
+		},
+
 	'perlebcdic' =>
 		{
 		'MAINTAINER'	=> 'pvhp',
@@ -408,15 +500,6 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'p5p',
 		'FILES'		=> q[ext/PerlIO],
-		'CPAN'		=> 0,
-		},
-
-	'perlio-doc' =>
-		{
-		'MAINTAINER'	=> 'ni-s',
-		'FILES'		=> q[pod/perlapio.pod
-				     pod/perliol.pod
-				     lib/PerlIO.pm],
 		'CPAN'		=> 0,
 		},
 
@@ -540,10 +623,24 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'Text::Soundex' =>
+		{
+		'MAINTAINER'	=> 'markm',
+		'FILES'		=> q[ext/Text/Soundex],
+		'CPAN'		=> 1,
+		},
+
 	'Term::ANSIColor' =>
 		{
 		'MAINTAINER'	=> 'rra',
 		'FILES'		=> q[lib/Term/ANSIColor.pm lib/Term/ANSIColor],
+		'CPAN'		=> 1,
+		},
+
+	'Term::UI' =>
+		{
+		'MAINTAINER'	=> 'kane',
+		'FILES'		=> q[lib/Term/UI.pm lib/Term/UI],
 		'CPAN'		=> 1,
 		},
 
@@ -593,15 +690,30 @@ package Maintainers;
 
 	'threads' =>
 		{
-		'MAINTAINER' => 'abergman',
-		'FILES'	 => q[ext/threads],
-		'CPAN'		=> 0,
+		'MAINTAINER'	=> 'jdhedden',
+		'FILES'		=> q[ext/threads/hints ext/threads/t
+				     ext/threads/threads.{pm,xs} ext/threads/typemap],
+		'CPAN'		=> 1,
+		},
+
+	'threads::shared' =>
+		{
+		'MAINTAINER'	=> 'jdhedden',
+		'FILES'		=> q[ext/threads/shared],
+		'CPAN'		=> 1,
 		},
 
 	'Tie::File' =>
 		{
 		'MAINTAINER'	=> 'mjd',
 		'FILES'		=> q[lib/Tie/File.pm lib/Tie/File],
+		'CPAN'		=> 1,
+		},
+
+	'Tie::RefHash' =>
+		{
+		'MAINTAINER'	=> 'nuffin',
+		'FILES'		=> q[lib/Tie/RefHash.pm lib/Tie/RefHash],
 		'CPAN'		=> 1,
 		},
 
@@ -618,6 +730,13 @@ package Maintainers;
 		'FILES'		=> q[lib/Time/Local.{pm,t}],
 		'CPAN'		=> 1,
 		},
+
+        'Time::Piece' =>
+                {
+                'MAINTAINER'    => 'msergeant',
+                'FILES'         => q[ext/Time/Piece],
+                'CPAN'          => 1,
+                },
 
 	'Unicode::Collate' =>
 		{
