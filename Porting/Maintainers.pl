@@ -62,6 +62,7 @@ package Maintainers;
 	'sburke'	=> 'Sean Burke <sburke@cpan.org>',
 	'mschwern'	=> 'Michael Schwern <mschwern@cpan.org>',
 	'smccam'	=> 'Stephen McCamant <smccam@cpan.org>',
+	'smueller'	=> 'Steffen Mueller <smueller@cpan.org>',
 	'tels'		=> 'perl_dummy a-t bloodgate.com',
 	'tomhughes'	=> 'Tom Hughes <tomhughes@cpan.org>',
 	'tjenness'	=> 'Tim Jenness <tjenness@cpan.org>',
@@ -81,6 +82,13 @@ package Maintainers;
 		'FILES'		=> q[lib/Archive/Tar.pm lib/Archive/Tar],
 		'CPAN'		=> 1,
 		},
+
+	'AutoLoader' =>
+		{
+		'MAINTAINER'	=> 'smueller',
+		'FILES'		=> q[lib/AutoLoader.pm lib/AutoLoader.t],
+		'CPAN'		=> 1,
+	},
 
 	'assertions' =>
 		{
