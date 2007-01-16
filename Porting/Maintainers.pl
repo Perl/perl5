@@ -41,7 +41,7 @@ package Maintainers;
 	'markm'		=> 'Mark Mielke <markm@cpan.org>',
 	'mhx'		=> 'Marcus Holland-Moritz <mhx@cpan.org>',
 	'mjd'		=> 'Mark-Jason Dominus <mjd@plover.com>',
-	'msergeant'	=> 'Matt Sergeant <msergeant@cpan.org>'.
+	'msergeant'	=> 'Matt Sergeant <msergeant@cpan.org>',
 	'mshelor'	=> 'Mark Shelor <mshelor@cpan.org>',
 	'muir'		=> 'David Muir Sharnoff <muir@cpan.org>',
 	'neilb'		=> 'Neil Bowers <neilb@cpan.org>',
