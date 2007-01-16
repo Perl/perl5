@@ -134,7 +134,7 @@ $define|true|[yY]*)
         # been added to the header files yet.  Let's hold off on using
         # them until they are a valid part of the API
         case "$osvers" in
-        [012].*|3.0)
+        [012].*|3.[0-1])
                 d_getprotobyname_r=$undef
                 d_getprotobynumber_r=$undef
                 d_getprotoent_r=$undef
