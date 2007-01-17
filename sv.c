@@ -3090,8 +3090,10 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    SvIV_set(dstr,  SvIVX(sstr));
 	    if (SvIsUV(sstr))
 		SvIsUV_on(dstr);
-	    if (SvTAINTED(sstr))
-		SvTAINT(dstr);
+	    /* SvTAINTED can only be true if the SV has taint magic, which in
+	       turn means that the SV type is PVMG (or greater). This is the
+	       case statement for SVt_IV, so this cannot be true (whatever gcov
+	       may say).  */
 	    return;
 	}
 	goto undef_sstr;
@@ -3111,8 +3113,10 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    }
 	    SvNV_set(dstr, SvNVX(sstr));
 	    (void)SvNOK_only(dstr);
-	    if (SvTAINTED(sstr))
-		SvTAINT(dstr);
+	    /* SvTAINTED can only be true if the SV has taint magic, which in
+	       turn means that the SV type is PVMG (or greater). This is the
+	       case statement for SVt_NV, so this cannot be true (whatever gcov
+	       may say).  */
 	    return;
 	}
 	goto undef_sstr;
@@ -3203,24 +3207,17 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	}
 	(void)SvOK_off(dstr);
 	SvRV_set(dstr, SvREFCNT_inc(SvRV(sstr)));
-	SvROK_on(dstr);
+	SvFLAGS(dstr) |= sflags & (SVf_IOK|SVp_IOK|SVf_NOK|SVp_NOK|SVf_ROK
+				   |SVf_AMAGIC);
 	if (sflags & SVp_NOK) {
-	    SvNOKp_on(dstr);
-	    /* Only set the public OK flag if the source has public OK.  */
-	    if (sflags & SVf_NOK)
-		SvFLAGS(dstr) |= SVf_NOK;
 	    SvNV_set(dstr, SvNVX(sstr));
 	}
 	if (sflags & SVp_IOK) {
-	    (void)SvIOKp_on(dstr);
-	    if (sflags & SVf_IOK)
-		SvFLAGS(dstr) |= SVf_IOK;
+	    /* Must do this otherwise some other overloaded use of 0x80000000
+	       gets confused. Probably SVprv_WEAKREF */
 	    if (sflags & SVf_IVisUV)
 		SvIsUV_on(dstr);
 	    SvIV_set(dstr, SvIVX(sstr));
-	}
-	if (SvAMAGIC(sstr)) {
-	    SvAMAGIC_on(dstr);
 	}
     }
     else if (sflags & SVp_POK) {
@@ -3263,22 +3260,18 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    *SvEND(dstr) = '\0';
 	    (void)SvPOK_only(dstr);
 	}
-	if (sflags & SVf_UTF8)
-	    SvUTF8_on(dstr);
 	if (sflags & SVp_NOK) {
-	    SvNOKp_on(dstr);
-	    if (sflags & SVf_NOK)
-		SvFLAGS(dstr) |= SVf_NOK;
 	    SvNV_set(dstr, SvNVX(sstr));
 	}
 	if (sflags & SVp_IOK) {
-	    (void)SvIOKp_on(dstr);
-	    if (sflags & SVf_IOK)
-		SvFLAGS(dstr) |= SVf_IOK;
+	    SvOOK_off(dstr);
+	    SvIV_set(dstr, SvIVX(sstr));
+	    /* Must do this otherwise some other overloaded use of 0x80000000
+	       gets confused. I guess SVpbm_VALID */
 	    if (sflags & SVf_IVisUV)
 		SvIsUV_on(dstr);
-	    SvIV_set(dstr, SvIVX(sstr));
 	}
+	SvFLAGS(dstr) |= sflags & (SVf_IOK|SVp_IOK|SVf_NOK|SVp_NOK|SVf_UTF8);
 	if ( SvVOK(sstr) ) {
 	    const MAGIC * const smg = mg_find(sstr,PERL_MAGIC_vstring);
 	    sv_magic(dstr, NULL, PERL_MAGIC_vstring,
@@ -3286,33 +3279,16 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    SvRMAGICAL_on(dstr);
 	} 
     }
-    else if (sflags & SVp_IOK) {
-	if (sflags & SVf_IOK)
-	    (void)SvIOK_only(dstr);
-	else {
-	    (void)SvOK_off(dstr);
-	    (void)SvIOKp_on(dstr);
+    else if (sflags & (SVp_IOK|SVp_NOK)) {
+	(void)SvOK_off(dstr);
+	SvFLAGS(dstr) |= sflags & (SVf_IOK|SVp_IOK|SVf_IVisUV|SVf_NOK|SVp_NOK);
+	if (sflags & SVp_IOK) {
+	    /* XXXX Do we want to set IsUV for IV(ROK)?  Be extra safe... */
+	    SvIV_set(dstr, SvIVX(sstr));
 	}
-	/* XXXX Do we want to set IsUV for IV(ROK)?  Be extra safe... */
-	if (sflags & SVf_IVisUV)
-	    SvIsUV_on(dstr);
-	SvIV_set(dstr, SvIVX(sstr));
 	if (sflags & SVp_NOK) {
-	    if (sflags & SVf_NOK)
-		(void)SvNOK_on(dstr);
-	    else
-		(void)SvNOKp_on(dstr);
 	    SvNV_set(dstr, SvNVX(sstr));
 	}
-    }
-    else if (sflags & SVp_NOK) {
-	if (sflags & SVf_NOK)
-	    (void)SvNOK_only(dstr);
-	else {
-	    (void)SvOK_off(dstr);
-	    SvNOKp_on(dstr);
-	}
-	SvNV_set(dstr, SvNVX(sstr));
     }
     else {
 	if (dtype == SVt_PVGV) {
