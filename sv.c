@@ -2930,6 +2930,115 @@ S_glob_assign(pTHX_ SV *dstr, SV *sstr, const int dtype)
     return;
 }
 
+static void
+S_pvgv_assign(pTHX_ SV *dstr, SV *sstr) {
+    SV * const sref = SvREFCNT_inc(SvRV(sstr));
+    SV *dref = NULL;
+    const int intro = GvINTRO(dstr);
+    SV **location;
+    U8 import_flag = 0;
+    const U32 stype = SvTYPE(sref);
+
+
+#ifdef GV_UNIQUE_CHECK
+    if (GvUNIQUE((GV*)dstr)) {
+	Perl_croak(aTHX_ PL_no_modify);
+    }
+#endif
+
+    if (intro) {
+	GvINTRO_off(dstr);	/* one-shot flag */
+	GvLINE(dstr) = CopLINE(PL_curcop);
+	GvEGV(dstr) = (GV*)dstr;
+    }
+    GvMULTI_on(dstr);
+    switch (stype) {
+    case SVt_PVCV:
+	location = (SV **) &GvCV(dstr);
+	import_flag = GVf_IMPORTED_CV;
+	goto common;
+    case SVt_PVHV:
+	location = (SV **) &GvHV(dstr);
+	import_flag = GVf_IMPORTED_HV;
+	goto common;
+    case SVt_PVAV:
+	location = (SV **) &GvAV(dstr);
+	import_flag = GVf_IMPORTED_AV;
+	goto common;
+    case SVt_PVIO:
+	location = (SV **) &GvIOp(dstr);
+	goto common;
+    case SVt_PVFM:
+	location = (SV **) &GvFORM(dstr);
+    default:
+	location = &GvSV(dstr);
+	import_flag = GVf_IMPORTED_SV;
+    common:
+	if (intro) {
+	    if (stype == SVt_PVCV) {
+		if (GvCVGEN(dstr) && GvCV(dstr) != (CV*)sref) {
+		    SvREFCNT_dec(GvCV(dstr));
+		    GvCV(dstr) = NULL;
+		    GvCVGEN(dstr) = 0; /* Switch off cacheness. */
+		    PL_sub_generation++;
+		}
+	    }
+	    SAVEGENERICSV(*location);
+	}
+	else
+	    dref = *location;
+	if (stype == SVt_PVCV && *location != sref) {
+	    CV* const cv = (CV*)*location;
+	    if (cv) {
+		if (!GvCVGEN((GV*)dstr) &&
+		    (CvROOT(cv) || CvXSUB(cv)))
+		    {
+			/* Redefining a sub - warning is mandatory if
+			   it was a const and its value changed. */
+			if (CvCONST(cv)	&& CvCONST((CV*)sref)
+			    && cv_const_sv(cv) == cv_const_sv((CV*)sref)) {
+			    /* They are 2 constant subroutines generated from
+			       the same constant. This probably means that
+			       they are really the "same" proxy subroutine
+			       instantiated in 2 places. Most likely this is
+			       when a constant is exported twice.  Don't warn.
+			    */
+			}
+			else if (ckWARN(WARN_REDEFINE)
+				 || (CvCONST(cv)
+				     && (!CvCONST((CV*)sref)
+					 || sv_cmp(cv_const_sv(cv),
+						   cv_const_sv((CV*)sref))))) {
+			    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
+					CvCONST(cv)
+					? "Constant subroutine %s::%s redefined"
+					: "Subroutine %s::%s redefined",
+					HvNAME_get(GvSTASH((GV*)dstr)),
+					GvENAME((GV*)dstr));
+			}
+		    }
+		if (!intro)
+		    cv_ckproto(cv, (GV*)dstr,
+			       SvPOK(sref) ? (char *)SvPVX_const(sref) : NULL);
+	    }
+	    GvCVGEN(dstr) = 0; /* Switch off cacheness. */
+	    GvASSUMECV_on(dstr);
+	    PL_sub_generation++;
+	}
+	*location = sref;
+	if (import_flag && !(GvFLAGS(dstr) & import_flag)
+	    && CopSTASH_ne(PL_curcop, GvSTASH(dstr))) {
+	    GvFLAGS(dstr) |= import_flag;
+	}
+	break;
+    }
+    if (dref)
+	SvREFCNT_dec(dref);
+    if (SvTAINTED(sstr))
+	SvTAINT(dstr);
+    return;
+}
+
 void
 Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 {
@@ -3023,7 +3132,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		GvMULTI_on(dstr);
 		return;
 	    }
-	    return S_glob_assign(aTHX_ dstr, sstr, dtype);
+	    S_glob_assign(aTHX_ dstr, sstr, dtype);
+	    return;
 	}
 	break;
     case SVt_PV:
@@ -3054,7 +3164,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 
     case SVt_PVGV:
 	if (dtype <= SVt_PVGV) {
-	    return S_glob_assign(aTHX_ dstr, sstr, dtype);
+	    S_glob_assign(aTHX_ dstr, sstr, dtype);
+	    return;
 	}
 	/* FALL THROUGH */
 
@@ -3063,8 +3174,10 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    mg_get(sstr);
 	    if ((int)SvTYPE(sstr) != stype) {
 		stype = SvTYPE(sstr);
-		if (stype == SVt_PVGV && dtype <= SVt_PVGV)
-		    return S_glob_assign(aTHX_ dstr, sstr, dtype);
+		if (stype == SVt_PVGV && dtype <= SVt_PVGV) {
+		    S_glob_assign(aTHX_ dstr, sstr, dtype);
+		    return;
+		}
 	    }
 	}
 	if (stype == SVt_PVLV)
@@ -3078,140 +3191,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
     if (sflags & SVf_ROK) {
 	if (dtype >= SVt_PV) {
 	    if (dtype == SVt_PVGV) {
-		SV * const sref = SvREFCNT_inc(SvRV(sstr));
-		SV *dref = NULL;
-		const int intro = GvINTRO(dstr);
-
-#ifdef GV_UNIQUE_CHECK
-                if (GvUNIQUE((GV*)dstr)) {
-                    Perl_croak(aTHX_ PL_no_modify);
-                }
-#endif
-
-		if (intro) {
-		    GvINTRO_off(dstr);	/* one-shot flag */
-		    GvLINE(dstr) = CopLINE(PL_curcop);
-		    GvEGV(dstr) = (GV*)dstr;
-		}
-		GvMULTI_on(dstr);
-		switch (SvTYPE(sref)) {
-		case SVt_PVAV:
-		    if (intro)
-			SAVEGENERICSV(GvAV(dstr));
-		    else
-			dref = (SV*)GvAV(dstr);
-		    GvAV(dstr) = (AV*)sref;
-		    if (!GvIMPORTED_AV(dstr)
-			&& CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
-		    {
-			GvIMPORTED_AV_on(dstr);
-		    }
-		    break;
-		case SVt_PVHV:
-		    if (intro)
-			SAVEGENERICSV(GvHV(dstr));
-		    else
-			dref = (SV*)GvHV(dstr);
-		    GvHV(dstr) = (HV*)sref;
-		    if (!GvIMPORTED_HV(dstr)
-			&& CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
-		    {
-			GvIMPORTED_HV_on(dstr);
-		    }
-		    break;
-		case SVt_PVCV:
-		    if (intro) {
-			if (GvCVGEN(dstr) && GvCV(dstr) != (CV*)sref) {
-			    SvREFCNT_dec(GvCV(dstr));
-			    GvCV(dstr) = Nullcv;
-			    GvCVGEN(dstr) = 0; /* Switch off cacheness. */
-			    PL_sub_generation++;
-			}
-			SAVEGENERICSV(GvCV(dstr));
-		    }
-		    else
-			dref = (SV*)GvCV(dstr);
-		    if (GvCV(dstr) != (CV*)sref) {
-			CV* const cv = GvCV(dstr);
-			if (cv) {
-			    if (!GvCVGEN((GV*)dstr) &&
-				(CvROOT(cv) || CvXSUB(cv)))
-			    {
- 				/* Redefining a sub - warning is mandatory if
- 				   it was a const and its value changed. */
-				if (CvCONST(cv)	&& CvCONST((CV*)sref)
-				    && cv_const_sv(cv)
-				    == cv_const_sv((CV*)sref)) {
-				    /* They are 2 constant subroutines
-				       generated from the same constant.
-				       This probably means that they are
-				       really the "same" proxy subroutine
-				       instantiated in 2 places. Most likely
-				       this is when a constant is exported
-				       twice.  Don't warn.  */
-				}
-				else if (ckWARN(WARN_REDEFINE)
- 				    || (CvCONST(cv)
- 					&& (!CvCONST((CV*)sref)
- 					    || sv_cmp(cv_const_sv(cv),
- 						      cv_const_sv((CV*)sref)))))
- 				{
- 				    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
- 					CvCONST(cv)
- 					? "Constant subroutine %s::%s redefined"
- 					: "Subroutine %s::%s redefined",
-					HvNAME_get(GvSTASH((GV*)dstr)),
- 					GvENAME((GV*)dstr));
- 				}
-			    }
-			    if (!intro)
-				cv_ckproto(cv, (GV*)dstr,
-					   SvPOK(sref)
-					   ? (char *)SvPVX_const(sref)
-					   : Nullch);
-			}
-			GvCV(dstr) = (CV*)sref;
-			GvCVGEN(dstr) = 0; /* Switch off cacheness. */
-			GvASSUMECV_on(dstr);
-			PL_sub_generation++;
-		    }
-		    if (!GvIMPORTED_CV(dstr)
-			&& CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
-		    {
-			GvIMPORTED_CV_on(dstr);
-		    }
-		    break;
-		case SVt_PVIO:
-		    if (intro)
-			SAVEGENERICSV(GvIOp(dstr));
-		    else
-			dref = (SV*)GvIOp(dstr);
-		    GvIOp(dstr) = (IO*)sref;
-		    break;
-		case SVt_PVFM:
-		    if (intro)
-			SAVEGENERICSV(GvFORM(dstr));
-		    else
-			dref = (SV*)GvFORM(dstr);
-		    GvFORM(dstr) = (CV*)sref;
-		    break;
-		default:
-		    if (intro)
-			SAVEGENERICSV(GvSV(dstr));
-		    else
-			dref = (SV*)GvSV(dstr);
-		    GvSV(dstr) = sref;
-		    if (!GvIMPORTED_SV(dstr)
-			&& CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
-		    {
-			GvIMPORTED_SV_on(dstr);
-		    }
-		    break;
-		}
-		if (dref)
-		    SvREFCNT_dec(dref);
-		if (SvTAINTED(sstr))
-		    SvTAINT(dstr);
+		S_pvgv_assign(aTHX_ dstr, sstr);
 		return;
 	    }
 	    if (SvPVX_const(dstr)) {
