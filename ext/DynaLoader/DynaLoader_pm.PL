@@ -68,7 +68,7 @@ unlink "DynaLoader.pm" if -f "DynaLoader.pm";
 open OUT, ">DynaLoader.pm" or die $!;
 print OUT <<'EOT';
 
-# Generated from DynaLoader.pm.PL
+# Generated from DynaLoader_pm.PL
 
 package DynaLoader;
 
