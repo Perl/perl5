@@ -2382,16 +2382,8 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		Gconvert(SvNVX(sv), NV_DIG, 0, tbuf);
 		len = strlen(tbuf);
 	    }
-	    if (SvROK(sv)) {	/* XXX Skip this when sv_pvn_force calls */
-		/* Sneaky stuff here */
-		SV * const tsv = newSVpvn(tbuf, len);
-
-		sv_2mortal(tsv);
-		if (lp)
-		    *lp = SvCUR(tsv);
-		return SvPVX(tsv);
-	    }
-	    else {
+	    assert(!SvROK(sv));
+	    {
 
 #ifdef FIXNEGATIVEZERO
 		if (len == 2 && tbuf[0] == '-' && tbuf[1] == '0') {
@@ -3079,8 +3071,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		sv_upgrade(dstr, SVt_IV);
 		break;
 	    case SVt_NV:
-		sv_upgrade(dstr, SVt_PVNV);
-		break;
 	    case SVt_RV:
 	    case SVt_PV:
 		sv_upgrade(dstr, SVt_PVIV);
@@ -3175,6 +3165,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    (void)SvUPGRADE(dstr, (U32)stype);
     }
 
+    /* dstr may have been upgraded.  */
+    dtype = SvTYPE(dstr);
     sflags = SvFLAGS(sstr);
 
     if (sflags & SVf_ROK) {

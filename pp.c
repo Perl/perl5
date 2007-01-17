@@ -2229,50 +2229,32 @@ PP(pp_bit_and)
     }
 }
 
-PP(pp_bit_xor)
-{
-    dSP; dATARGET; tryAMAGICbin(bxor,opASSIGN);
-    {
-      dPOPTOPssrl;
-      SvGETMAGIC(left);
-      SvGETMAGIC(right);
-      if (SvNIOKp(left) || SvNIOKp(right)) {
-	if (PL_op->op_private & HINT_INTEGER) {
-	  const IV i = (USE_LEFT(left) ? SvIV_nomg(left) : 0) ^ SvIV_nomg(right);
-	  SETi(i);
-	}
-	else {
-	  const UV u = (USE_LEFT(left) ? SvUV_nomg(left) : 0) ^ SvUV_nomg(right);
-	  SETu(u);
-	}
-      }
-      else {
-	do_vop(PL_op->op_type, TARG, left, right);
-	SETTARG;
-      }
-      RETURN;
-    }
-}
-
 PP(pp_bit_or)
 {
-    dSP; dATARGET; tryAMAGICbin(bor,opASSIGN);
+    dSP; dATARGET;
+    const int op_type = PL_op->op_type;
+
+    tryAMAGICbin_var((op_type == OP_BIT_OR ? bor_amg : bxor_amg), opASSIGN);
     {
       dPOPTOPssrl;
       SvGETMAGIC(left);
       SvGETMAGIC(right);
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (PL_op->op_private & HINT_INTEGER) {
-	  const IV i = (USE_LEFT(left) ? SvIV_nomg(left) : 0) | SvIV_nomg(right);
-	  SETi(i);
+	  const IV l = (USE_LEFT(left) ? SvIV_nomg(left) : 0);
+	  const IV r = SvIV_nomg(right);
+	  const IV result = op_type == OP_BIT_OR ? (l | r) : (l ^ r);
+	  SETi(result);
 	}
 	else {
-	  const UV u = (USE_LEFT(left) ? SvUV_nomg(left) : 0) | SvUV_nomg(right);
-	  SETu(u);
+	  const UV l = (USE_LEFT(left) ? SvUV_nomg(left) : 0);
+	  const UV r = SvUV_nomg(right);
+	  const UV result = op_type == OP_BIT_OR ? (l | r) : (l ^ r);
+	  SETu(result);
 	}
       }
       else {
-	do_vop(PL_op->op_type, TARG, left, right);
+	do_vop(op_type, TARG, left, right);
 	SETTARG;
       }
       RETURN;
@@ -2670,26 +2652,26 @@ PP(pp_sin)
     dSP; dTARGET;
     int amg_type = sin_amg;
     const char *neg_report = NULL;
-    NV (*func)(NV) = &Perl_sin;
+    NV (*func)(NV) = Perl_sin;
     const int op_type = PL_op->op_type;
 
     switch (op_type) {
     case OP_COS:
 	amg_type = cos_amg;
-	func = &Perl_cos;
+	func = Perl_cos;
 	break;
     case OP_EXP:
 	amg_type = exp_amg;
-	func = &Perl_exp;
+	func = Perl_exp;
 	break;
     case OP_LOG:
 	amg_type = log_amg;
-	func = &Perl_log;
+	func = Perl_log;
 	neg_report = "log";
 	break;
     case OP_SQRT:
 	amg_type = sqrt_amg;
-	func = &Perl_sqrt;
+	func = Perl_sqrt;
 	neg_report = "sqrt";
 	break;
     }

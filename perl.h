@@ -170,7 +170,7 @@ struct perl_thread;
 #endif
 
 #ifndef PERL_UNUSED_DECL
-#  ifdef HASATTRIBUTE_UNUSED
+#  if defined(HASATTRIBUTE_UNUSED) && !defined(__cplusplus)
 #    define PERL_UNUSED_DECL __attribute__unused__
 #  else
 #    define PERL_UNUSED_DECL
@@ -308,16 +308,6 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 
 #define WITH_THX(s) STMT_START { dTHX; s; } STMT_END
 #define WITH_THR(s) WITH_THX(s)
-
-/*
- * SOFT_CAST can be used for args to prototyped functions to retain some
- * type checking; it only casts if the compiler does not know prototypes.
- */
-#if defined(CAN_PROTOTYPE) && defined(DEBUGGING_COMPILE)
-#define SOFT_CAST(type)	
-#else
-#define SOFT_CAST(type)	(type)
-#endif
 
 #ifndef BYTEORDER  /* Should never happen -- byteorder is in config.h */
 #   define BYTEORDER 0x1234

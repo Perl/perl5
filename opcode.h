@@ -848,7 +848,7 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX) = {
 	MEMBER_TO_FPTR(Perl_pp_sne),
 	MEMBER_TO_FPTR(Perl_pp_scmp),
 	MEMBER_TO_FPTR(Perl_pp_bit_and),
-	MEMBER_TO_FPTR(Perl_pp_bit_xor),
+	MEMBER_TO_FPTR(Perl_pp_bit_or),	/* Perl_pp_bit_xor */
 	MEMBER_TO_FPTR(Perl_pp_bit_or),
 	MEMBER_TO_FPTR(Perl_pp_negate),
 	MEMBER_TO_FPTR(Perl_pp_i_negate),

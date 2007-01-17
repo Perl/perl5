@@ -1432,7 +1432,7 @@ perl_free(pTHXx)
 /* provide destructors to clean up the thread key when libperl is unloaded */
 #ifndef WIN32 /* handled during DLL_PROCESS_DETACH in win32/perllib.c */
 
-#if defined(__hpux) && __ux_version > 1020 && !defined(__GNUC__)
+#if defined(__hpux) && !(defined(__ux_version) && __ux_version <= 1020) && !defined(__GNUC__)
 #pragma fini "perl_fini"
 #endif
 
@@ -4347,6 +4347,8 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
     Perl_croak(aTHX_ "Can't do setuid (suidperl cannot exec perl)\n");
 #endif /* IAMSUID */
 #else /* !DOSUID */
+    PERL_UNUSED_ARG(fdscript);
+    PERL_UNUSED_ARG(suidscript);
     if (PL_euid != PL_uid || PL_egid != PL_gid) {	/* (suidperl doesn't exist, in fact) */
 #ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
 	PerlLIO_fstat(PerlIO_fileno(PL_rsfp),&PL_statbuf);	/* may be either wrapped or real suid */
@@ -4361,8 +4363,8 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	/* not set-id, must be wrapped */
     }
 #endif /* DOSUID */
-    (void)validarg;
-    (void)scriptname;
+    PERL_UNUSED_ARG(validarg);
+    PERL_UNUSED_ARG(scriptname);
 }
 
 STATIC void
