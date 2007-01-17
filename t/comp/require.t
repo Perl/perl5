@@ -11,7 +11,7 @@ $i = 1;
 
 my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
 my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
-my $total_tests = 31;
+my $total_tests = 32;
 if ($Is_EBCDIC || $Is_UTF8) { $total_tests -= 3; }
 print "1..$total_tests\n";
 
@@ -152,6 +152,16 @@ my $r = "threads";
 eval { require $r };
 $i++;
 if($@ =~ /Directory .*threads not allowed in require/) {
+    print "ok $i\n";
+} else {
+    print "not ok $i\n";
+}
+
+
+write_file('bleah.pm', qq(die "This is an expected error";\n));
+delete $INC{"bleah.pm"}; ++$::i;
+eval { CORE::require bleah; };
+if ($@ =~ /^This is an expected error/) {
     print "ok $i\n";
 } else {
     print "not ok $i\n";
