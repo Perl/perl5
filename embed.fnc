@@ -1109,7 +1109,7 @@ Ap	|void	|Slab_Free	|NN void *op
 
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 s	|void	|find_beginning
-s	|void	|forbid_setid	|NN const char * s
+s	|void	|forbid_setid	|const char flag|const int suidscript
 s	|void	|incpush	|NULLOK const char *dir|bool addsubdirs|bool addoldvers|bool usesep|bool canrelocate
 s	|void	|init_interp
 s	|void	|init_ids
@@ -1120,9 +1120,12 @@ s	|void	|init_postdump_symbols|int argc|NN char **argv|NULLOK char **env
 s	|void	|init_predump_symbols
 rs	|void	|my_exit_jump
 s	|void	|nuke_stacks
-s	|void	|open_script	|NN const char *scriptname|bool dosearch|NN SV *sv
+s	|int	|open_script	|NN const char *scriptname|bool dosearch \
+				|NN SV *sv|NN int *suidscript
 s	|void	|usage		|NN const char *name
-s	|void	|validate_suid	|NN const char *validarg|NN const char *scriptname
+s	|void	|validate_suid	|NN const char *validarg \
+				|NN const char *scriptname|int fdscript \
+				|int suidscript
 #  if defined(IAMSUID)
 s	|int	|fd_on_nosuid_fs|int fd
 #  endif

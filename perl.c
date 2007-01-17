@@ -1734,8 +1734,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     bool minus_f = FALSE;
 #endif
 
-    PL_fdscript = -1;
-    PL_suidscript = -1;
     sv_setpvn(PL_linestr,"",0);
     sv = newSVpvs("");		/* first used for -I flags */
     SAVEFREESV(sv);
@@ -1809,7 +1807,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    if (argv[1] && !strcmp(argv[1], "Dev:Pseudo"))
 		break;
 #endif
-	    forbid_setid("-e");
+	    forbid_setid('e', -1);
 	    if (!PL_e_script) {
 		PL_e_script = newSVpvs("");
 		filter_add(read_e_script, NULL);
@@ -1833,7 +1831,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    goto reswitch;
 
 	case 'I':	/* -I handled both here and in moreswitches() */
-	    forbid_setid("-I");
+	    forbid_setid('I', -1);
 	    if (!*++s && (s=argv[1]) != NULL) {
 		argc--,argv++;
 	    }
@@ -1850,12 +1848,12 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		Perl_croak(aTHX_ "No directory specified for -I");
 	    break;
 	case 'P':
-	    forbid_setid("-P");
+	    forbid_setid('P', -1);
 	    PL_preprocess = TRUE;
 	    s++;
 	    goto reswitch;
 	case 'S':
-	    forbid_setid("-S");
+	    forbid_setid('S', -1);
 	    dosearch = TRUE;
 	    s++;
 	    goto reswitch;
@@ -2159,36 +2157,45 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     TAINT_NOT;
     init_perllib();
 
-    open_script(scriptname,dosearch,sv);
+    {
+	int suidscript;
+	const int fdscript
+	    = open_script(scriptname, dosearch, sv, &suidscript);
 
-    validate_suid(validarg, scriptname);
+	validate_suid(validarg, scriptname, fdscript, suidscript);
 
 #ifndef PERL_MICRO
-#if defined(SIGCHLD) || defined(SIGCLD)
-    {
-#ifndef SIGCHLD
-#  define SIGCHLD SIGCLD
-#endif
-	Sighandler_t sigstate = rsignal_state(SIGCHLD);
-	if (sigstate == (Sighandler_t) SIG_IGN) {
-	    if (ckWARN(WARN_SIGNAL))
-		Perl_warner(aTHX_ packWARN(WARN_SIGNAL),
-			    "Can't ignore signal CHLD, forcing to default");
-	    (void)rsignal(SIGCHLD, (Sighandler_t)SIG_DFL);
+#  if defined(SIGCHLD) || defined(SIGCLD)
+	{
+#  ifndef SIGCHLD
+#    define SIGCHLD SIGCLD
+#  endif
+	    Sighandler_t sigstate = rsignal_state(SIGCHLD);
+	    if (sigstate == (Sighandler_t) SIG_IGN) {
+		if (ckWARN(WARN_SIGNAL))
+		    Perl_warner(aTHX_ packWARN(WARN_SIGNAL),
+				"Can't ignore signal CHLD, forcing to default");
+		(void)rsignal(SIGCHLD, (Sighandler_t)SIG_DFL);
+	    }
 	}
-    }
-#endif
+#  endif
 #endif
 
+	if (PL_doextract
 #ifdef MACOS_TRADITIONAL
-    if (PL_doextract || gMacPerl_AlwaysExtract) {
-#else
-    if (PL_doextract) {
+	    || gMacPerl_AlwaysExtract
 #endif
-	find_beginning();
-	if (cddir && PerlDir_chdir( (char *)cddir ) < 0)
-	    Perl_croak(aTHX_ "Can't chdir to %s",cddir);
+	    ) {
 
+	    /* This will croak if suidscript is >= 0, as -x cannot be used with
+	       setuid scripts.  */
+	    forbid_setid('x', suidscript);
+	    /* Hence you can't get here if suidscript >= 0  */
+
+	    find_beginning();
+	    if (cddir && PerlDir_chdir( (char *)cddir ) < 0)
+		Perl_croak(aTHX_ "Can't chdir to %s",cddir);
+	}
     }
 
     PL_main_cv = PL_compcv = (CV*)newSV(0);
@@ -3187,7 +3194,7 @@ Perl_moreswitches(pTHX_ char *s)
 	s++;
 	return s;
     case 'd':
-	forbid_setid("-d");
+	forbid_setid('d', -1);
 	s++;
 
         /* -dt indicates to the debugger that threads will be used */
@@ -3221,7 +3228,7 @@ Perl_moreswitches(pTHX_ char *s)
     case 'D':
     {	
 #ifdef DEBUGGING
-	forbid_setid("-D");
+	forbid_setid('D', -1);
 	s++;
 	PL_debug = get_debug_opts_flags( &s, 1) | DEBUG_TOP_FLAG;
 #else /* !DEBUGGING */
@@ -3253,7 +3260,7 @@ Perl_moreswitches(pTHX_ char *s)
 	}
 	return s;
     case 'I':	/* -I handled both here and in parse_body() */
-	forbid_setid("-I");
+	forbid_setid('I', -1);
 	++s;
 	while (*s && isSPACE(*s))
 	    ++s;
@@ -3302,10 +3309,10 @@ Perl_moreswitches(pTHX_ char *s)
 	}
 	return s;
     case 'M':
-	forbid_setid("-M");	/* XXX ? */
+	forbid_setid('M', -1);	/* XXX ? */
 	/* FALL THROUGH */
     case 'm':
-	forbid_setid("-m");	/* XXX ? */
+	forbid_setid('m', -1);	/* XXX ? */
 	if (*++s) {
 	    char *start;
 	    SV *sv;
@@ -3352,7 +3359,7 @@ Perl_moreswitches(pTHX_ char *s)
 	s++;
 	return s;
     case 's':
-	forbid_setid("-s");
+	forbid_setid('s', -1);
 	PL_doswitches = TRUE;
 	s++;
 	return s;
@@ -3642,9 +3649,9 @@ S_init_main_stash(pTHX)
     sv_setpvn(get_sv("/", TRUE), "\n", 1);
 }
 
-/* PSz 18 Nov 03  fdscript now global but do not change prototype */
-STATIC void
-S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
+STATIC int
+S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv,
+	      int *suidscript)
 {
 #ifndef IAMSUID
     const char *quote;
@@ -3652,9 +3659,9 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
     const char *cpp_discard_flag;
     const char *perl;
 #endif
+    int fdscript = -1;
 
-    PL_fdscript = -1;
-    PL_suidscript = -1;
+    *suidscript = -1;
 
     if (PL_e_script) {
 	PL_origfilename = savepvs("-e");
@@ -3665,7 +3672,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
 
 	if (strnEQ(scriptname, "/dev/fd/", 8) && isDIGIT(scriptname[8]) ) {
             const char *s = scriptname + 8;
-	    PL_fdscript = atoi(s);
+	    fdscript = atoi(s);
 	    while (isDIGIT(*s))
 		s++;
 	    if (*s) {
@@ -3678,7 +3685,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
 		 * Is it a mistake to use a similar /dev/fd/ construct for
 		 * suidperl?
 		 */
-		PL_suidscript = 1;
+		*suidscript = 1;
 		/* PSz 20 Feb 04  
 		 * Be supersafe and do some sanity-checks.
 		 * Still, can we be sure we got the right thing?
@@ -3700,8 +3707,8 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
     CopFILE_set(PL_curcop, PL_origfilename);
     if (*PL_origfilename == '-' && PL_origfilename[1] == '\0')
 	scriptname = (char *)"";
-    if (PL_fdscript >= 0) {
-	PL_rsfp = PerlIO_fdopen(PL_fdscript,PERL_SCRIPT_MODE);
+    if (fdscript >= 0) {
+	PL_rsfp = PerlIO_fdopen(fdscript,PERL_SCRIPT_MODE);
 #       if defined(HAS_FCNTL) && defined(F_SETFD)
 	    if (PL_rsfp)
                 /* ensure close-on-exec */
@@ -3721,7 +3728,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
  * perl with that fd as it has always done.
  */
     }
-    if (PL_suidscript != 1) {
+    if (*suidscript != 1) {
 	Perl_croak(aTHX_ "suidperl needs (suid) fd script\n");
     }
 #else /* IAMSUID */
@@ -3792,7 +3799,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
 	SvREFCNT_dec(cpp);
     }
     else if (!*scriptname) {
-	forbid_setid("program input from stdin");
+	forbid_setid(0, *suidscript);
 	PL_rsfp = PerlIO_stdin();
     }
     else {
@@ -3812,6 +3819,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
 	    Perl_croak(aTHX_ "Can't open perl script \"%s\": %s\n",
 		    CopFILE(PL_curcop), Strerror(errno));
     }
+    return fdscript;
 }
 
 /* Mention
@@ -3949,7 +3957,8 @@ S_fd_on_nosuid_fs(pTHX_ int fd)
 #endif /* IAMSUID */
 
 STATIC void
-S_validate_suid(pTHX_ const char *validarg, const char *scriptname)
+S_validate_suid(pTHX_ const char *validarg, const char *scriptname,
+		int fdscript, int suidscript)
 {
 #ifdef IAMSUID
     /* int which; */
@@ -3993,7 +4002,7 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname)
 	const char *s_end;
 
 #ifdef IAMSUID
-	if (PL_fdscript < 0 || PL_suidscript != 1)
+	if (fdscript < 0 || suidscript != 1)
 	    Perl_croak(aTHX_ "Need (suid) fdscript in suidperl\n");	/* We already checked this */
 	/* PSz 11 Nov 03
 	 * Since the script is opened by perl, not suidperl, some of these
@@ -4143,7 +4152,7 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname)
 	    Perl_croak(aTHX_ "Args must match #! line");
 
 #ifndef IAMSUID
-	if (PL_fdscript < 0 &&
+	if (fdscript < 0 &&
 	    PL_euid != PL_uid && (PL_statbuf.st_mode & S_ISUID) &&
 	    PL_euid == PL_statbuf.st_uid)
 	    if (!PL_do_undump)
@@ -4151,7 +4160,7 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname)
 FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 #endif /* IAMSUID */
 
-	if (PL_fdscript < 0 &&
+	if (fdscript < 0 &&
 	    PL_euid) {	/* oops, we're not the setuid root perl */
 	    /* PSz 18 Feb 04
 	     * When root runs a setuid script, we do not go through the same
@@ -4164,7 +4173,7 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 	     * might run also non-setuid ones, and deserves what he gets.
 	     * 
 	     * Or, we might drop the PL_euid check above (and rely just on
-	     * PL_fdscript to avoid loops), and do the execs
+	     * fdscript to avoid loops), and do the execs
 	     * even for root.
 	     */
 #ifndef IAMSUID
@@ -4272,7 +4281,7 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 #ifdef IAMSUID
     else if (PL_preprocess)	/* PSz 13 Nov 03  Caught elsewhere, useless(?!) here */
 	Perl_croak(aTHX_ "-P not allowed for setuid/setgid script\n");
-    else if (PL_fdscript < 0 || PL_suidscript != 1)
+    else if (fdscript < 0 || suidscript != 1)
 	/* PSz 13 Nov 03  Caught elsewhere, useless(?!) here */
 	Perl_croak(aTHX_ "(suid) fdscript needed in suidperl\n");
     else {
@@ -4365,7 +4374,6 @@ S_find_beginning(pTHX)
 
     /* skip forward in input to the real script? */
 
-    forbid_setid("-x");
 #ifdef MACOS_TRADITIONAL
     /* Since the Mac OS does not honor #! arguments for us, we do it ourselves */
 
@@ -4485,14 +4493,26 @@ Perl_doing_taint(int argc, char *argv[], char *envp[])
     return 0;
 }
 
+/* Passing the flag as a single char rather than a string is a slight space
+   optimisation.  The only message that isn't /^-.$/ is
+   "program input from stdin", which is substituted in place of '\0', which
+   could never be a command line flag.  */
 STATIC void
-S_forbid_setid(pTHX_ const char *s)
+S_forbid_setid(pTHX_ const char flag, const int suidscript)
 {
+    char string[3] = "-x";
+    const char *message = "program input from stdin";
+
+    if (flag) {
+	string[1] = flag;
+	message = string;
+    }
+
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
     if (PL_euid != PL_uid)
-        Perl_croak(aTHX_ "No %s allowed while running setuid", s);
+        Perl_croak(aTHX_ "No %s allowed while running setuid", message);
     if (PL_egid != PL_gid)
-        Perl_croak(aTHX_ "No %s allowed while running setgid", s);
+        Perl_croak(aTHX_ "No %s allowed while running setgid", message);
 #endif /* SETUID_SCRIPTS_ARE_SECURE_NOW */
     /* PSz 29 Feb 04
      * Checks for UID/GID above "wrong": why disallow
@@ -4516,11 +4536,11 @@ S_forbid_setid(pTHX_ const char *s)
      * 
      * Also see comments about root running a setuid script, elsewhere.
      */
-    if (PL_suidscript >= 0)
-        Perl_croak(aTHX_ "No %s allowed with (suid) fdscript", s);
+    if (suidscript >= 0)
+        Perl_croak(aTHX_ "No %s allowed with (suid) fdscript", message);
 #ifdef IAMSUID
     /* PSz 11 Nov 03  Catch it in suidperl, always! */
-    Perl_croak(aTHX_ "No %s allowed in suidperl", s);
+    Perl_croak(aTHX_ "No %s allowed in suidperl", message);
 #endif /* IAMSUID */
 }
 

@@ -574,9 +574,10 @@ PERLVARI(Irehash_seed, UV, 0)		/* 582 hash initializer */
 
 PERLVARI(Irehash_seed_set, bool, FALSE)	/* 582 hash initialized? */
 
-/* These two variables are needed to preserve 5.8.x bincompat because we can't
-   change function prototypes of two exported functions.  Probably should be
-   taken out of blead soon, and relevant prototypes changed.  */
+/* These two variables aren't used any more, but need to be kept for bincompat.
+   The irony is that they were added to avoid changing the prototypes of static
+   functions, which actualy could have been changed quite safely without
+   breaking bincompat.  */
 PERLVARI(Ifdscript, int, -1)	/* fd for script */
 PERLVARI(Isuidscript, int, -1)	/* fd for suid script */
 
