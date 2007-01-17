@@ -3171,15 +3171,14 @@ S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
     if (dtype != SVt_PVGV) {
 	const char * const name = GvNAME(sstr);
 	const STRLEN len = GvNAMELEN(sstr);
-	/* don't upgrade SVt_PVLV: it can hold a glob */
-	if (dtype != SVt_PVLV) {
+	{
 	    if (dtype >= SVt_PV) {
 		SvPV_free(dstr);
 		SvPV_set(dstr, 0);
 		SvLEN_set(dstr, 0);
 		SvCUR_set(dstr, 0);
 	    }
-	    sv_upgrade(dstr, SVt_PVGV);
+	    SvUPGRADE(dstr, SVt_PVGV);
 	    (void)SvOK_off(dstr);
 	    /* FIXME - why are we doing this, then turning it off and on again
 	       below?  */
