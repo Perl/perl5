@@ -731,6 +731,12 @@ sub update_cwd {
     $CWD =~ s!/!\\!g;
 }
 
+if (grep /^(Compress::Raw::Zlib|Cwd|Data::Dumper|Digest::SHA|Sys::Syslog|Time::HiRes)$/, @ARGV) {
+    &patch_config;
+    system_echo("perl -I$BUILDROOT\\lib -I$PERLSDK\\lib $BUILDROOT\\mkppport");
+    &restore_config;
+}
+
 for my $ext (@ARGV) {
 
     $ext =~ s!::!\\!g;
