@@ -2896,7 +2896,7 @@ copy-ish functions and macros use this underneath.
 */
 
 static void
-S_glob_assign(pTHX_ SV *dstr, SV *sstr, const int dtype)
+S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
 {
     if (dtype != SVt_PVGV) {
 	const char * const name = GvNAME(sstr);
@@ -2931,7 +2931,7 @@ S_glob_assign(pTHX_ SV *dstr, SV *sstr, const int dtype)
 }
 
 static void
-S_pvgv_assign(pTHX_ SV *dstr, SV *sstr) {
+S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr) {
     SV * const sref = SvREFCNT_inc(SvRV(sstr));
     SV *dref = NULL;
     const int intro = GvINTRO(dstr);
@@ -3120,21 +3120,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
     case SVt_RV:
 	if (dtype < SVt_RV)
 	    sv_upgrade(dstr, SVt_RV);
-	else if (dtype == SVt_PVGV &&
-		 SvROK(sstr) && SvTYPE(SvRV(sstr)) == SVt_PVGV) {
-	    sstr = SvRV(sstr);
-	    if (sstr == dstr) {
-		if (GvIMPORTED(dstr) != GVf_IMPORTED
-		    && CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
-		{
-		    GvIMPORTED_on(dstr);
-		}
-		GvMULTI_on(dstr);
-		return;
-	    }
-	    S_glob_assign(aTHX_ dstr, sstr, dtype);
-	    return;
-	}
 	break;
     case SVt_PV:
     case SVt_PVFM:
@@ -3164,7 +3149,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 
     case SVt_PVGV:
 	if (dtype <= SVt_PVGV) {
-	    S_glob_assign(aTHX_ dstr, sstr, dtype);
+	    S_glob_assign_glob(aTHX_ dstr, sstr, dtype);
 	    return;
 	}
 	/* FALL THROUGH */
@@ -3175,7 +3160,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    if ((int)SvTYPE(sstr) != stype) {
 		stype = SvTYPE(sstr);
 		if (stype == SVt_PVGV && dtype <= SVt_PVGV) {
-		    S_glob_assign(aTHX_ dstr, sstr, dtype);
+		    S_glob_assign_glob(aTHX_ dstr, sstr, dtype);
 		    return;
 		}
 	    }
@@ -3189,9 +3174,25 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
     sflags = SvFLAGS(sstr);
 
     if (sflags & SVf_ROK) {
+	if (dtype == SVt_PVGV &&
+	    SvROK(sstr) && SvTYPE(SvRV(sstr)) == SVt_PVGV) {
+	    sstr = SvRV(sstr);
+	    if (sstr == dstr) {
+		if (GvIMPORTED(dstr) != GVf_IMPORTED
+		    && CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
+		{
+		    GvIMPORTED_on(dstr);
+		}
+		GvMULTI_on(dstr);
+		return;
+	    }
+	    S_glob_assign_glob(aTHX_ dstr, sstr, dtype);
+	    return;
+	}
+
 	if (dtype >= SVt_PV) {
 	    if (dtype == SVt_PVGV) {
-		S_pvgv_assign(aTHX_ dstr, sstr);
+		S_glob_assign_ref(aTHX_ dstr, sstr);
 		return;
 	    }
 	    if (SvPVX_const(dstr)) {

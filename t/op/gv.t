@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 
 require './test.pl';
-plan( tests => 127 );
+plan( tests => 131 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -346,6 +346,25 @@ my $gr = eval '\*plunk' or die;
 is (ref $::{oonk}, 'SCALAR', "Export doesn't affect original");
 is (eval 'plunk', "Value", "Constant has correct value");
 is (ref \$::{plunk}, 'GLOB', "Symbol table has full typeglob");
+
+{
+    use vars qw($glook $smek $foof);
+    # Check reference assignment isn't affected by the SV type (bug #38439)
+    $glook = 3;
+    $smek = 4;
+    $foof = "halt and cool down";
+
+    my $rv = \*smek;
+    is($glook, 3);
+    *glook = $rv;
+    is($glook, 4);
+
+    my $pv = "";
+    $pv = \*smek;
+    is($foof, "halt and cool down");
+    *foof = $pv;
+    is($foof, 4);
+}
 
 format =
 .
