@@ -2895,6 +2895,41 @@ copy-ish functions and macros use this underneath.
 =cut
 */
 
+static void
+S_glob_assign(pTHX_ SV *dstr, SV *sstr, const int dtype)
+{
+    if (dtype != SVt_PVGV) {
+	const char * const name = GvNAME(sstr);
+	const STRLEN len = GvNAMELEN(sstr);
+	sv_upgrade(dstr, SVt_PVGV);
+	sv_magic(dstr, dstr, PERL_MAGIC_glob, Nullch, 0);
+	GvSTASH(dstr) = (HV*)SvREFCNT_inc(GvSTASH(sstr));
+	GvNAME(dstr) = savepvn(name, len);
+	GvNAMELEN(dstr) = len;
+	SvFAKE_on(dstr);	/* can coerce to non-glob */
+    }
+
+#ifdef GV_UNIQUE_CHECK
+    if (GvUNIQUE((GV*)dstr)) {
+	Perl_croak(aTHX_ PL_no_modify);
+    }
+#endif
+
+    (void)SvOK_off(dstr);
+    GvINTRO_off(dstr);		/* one-shot flag */
+    gp_free((GV*)dstr);
+    GvGP(dstr) = gp_ref(GvGP(sstr));
+    if (SvTAINTED(sstr))
+	SvTAINT(dstr);
+    if (GvIMPORTED(dstr) != GVf_IMPORTED
+	&& CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
+	{
+	    GvIMPORTED_on(dstr);
+	}
+    GvMULTI_on(dstr);
+    return;
+}
+
 void
 Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 {
@@ -2988,7 +3023,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		GvMULTI_on(dstr);
 		return;
 	    }
-	    goto glob_assign;
+	    return S_glob_assign(aTHX_ dstr, sstr, dtype);
 	}
 	break;
     case SVt_PV:
@@ -3019,37 +3054,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 
     case SVt_PVGV:
 	if (dtype <= SVt_PVGV) {
-  glob_assign:
-	    if (dtype != SVt_PVGV) {
-		const char * const name = GvNAME(sstr);
-		const STRLEN len = GvNAMELEN(sstr);
-		sv_upgrade(dstr, SVt_PVGV);
-		sv_magic(dstr, dstr, PERL_MAGIC_glob, Nullch, 0);
-		GvSTASH(dstr) = (HV*)SvREFCNT_inc(GvSTASH(sstr));
-		GvNAME(dstr) = savepvn(name, len);
-		GvNAMELEN(dstr) = len;
-		SvFAKE_on(dstr);	/* can coerce to non-glob */
-	    }
-
-#ifdef GV_UNIQUE_CHECK
-                if (GvUNIQUE((GV*)dstr)) {
-                    Perl_croak(aTHX_ PL_no_modify);
-                }
-#endif
-
-	    (void)SvOK_off(dstr);
-	    GvINTRO_off(dstr);		/* one-shot flag */
-	    gp_free((GV*)dstr);
-	    GvGP(dstr) = gp_ref(GvGP(sstr));
-	    if (SvTAINTED(sstr))
-		SvTAINT(dstr);
-	    if (GvIMPORTED(dstr) != GVf_IMPORTED
-		&& CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
-	    {
-		GvIMPORTED_on(dstr);
-	    }
-	    GvMULTI_on(dstr);
-	    return;
+	    return S_glob_assign(aTHX_ dstr, sstr, dtype);
 	}
 	/* FALL THROUGH */
 
@@ -3059,7 +3064,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    if ((int)SvTYPE(sstr) != stype) {
 		stype = SvTYPE(sstr);
 		if (stype == SVt_PVGV && dtype <= SVt_PVGV)
-		    goto glob_assign;
+		    return S_glob_assign(aTHX_ dstr, sstr, dtype);
 	    }
 	}
 	if (stype == SVt_PVLV)
