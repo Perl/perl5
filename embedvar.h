@@ -333,6 +333,7 @@
 #define PL_max_intro_pending	(PERL_GET_INTERP->Imax_intro_pending)
 #define PL_maxo			(PERL_GET_INTERP->Imaxo)
 #define PL_maxsysfd		(PERL_GET_INTERP->Imaxsysfd)
+#define PL_memory_debug_header	(PERL_GET_INTERP->Imemory_debug_header)
 #define PL_mess_sv		(PERL_GET_INTERP->Imess_sv)
 #define PL_min_intro_pending	(PERL_GET_INTERP->Imin_intro_pending)
 #define PL_minus_F		(PERL_GET_INTERP->Iminus_F)
@@ -758,6 +759,7 @@
 #define PL_sublex_info		(vTHX->Isublex_info)
 #define PL_subline		(vTHX->Isubline)
 #define PL_subname		(vTHX->Isubname)
+#define PL_suidscript		(vTHX->Isuidscript)
 #define PL_sv_arenaroot		(vTHX->Isv_arenaroot)
 #define PL_sv_count		(vTHX->Isv_count)
 #define PL_sv_lock_mutex	(vTHX->Isv_lock_mutex)
@@ -1090,6 +1092,7 @@
 #define PL_Isublex_info		PL_sublex_info
 #define PL_Isubline		PL_subline
 #define PL_Isubname		PL_subname
+#define PL_Isuidscript		PL_suidscript
 #define PL_Isv_arenaroot	PL_sv_arenaroot
 #define PL_Isv_count		PL_sv_count
 #define PL_Isv_lock_mutex	PL_sv_lock_mutex
