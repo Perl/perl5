@@ -7,7 +7,7 @@
 #
 package B;
 
-our $VERSION = '1.14';
+our $VERSION = '1.15';
 
 use XSLoader ();
 require Exporter;
@@ -119,7 +119,7 @@ sub walkoptree_slow {
     $op_count++; # just for statistics
     $level ||= 0;
     warn(sprintf("walkoptree: %d. %s\n", $level, peekop($op))) if $debug;
-    $op->$method($level);
+    $op->$method($level) if $op->can($method);
     if ($$op && ($op->flags & OPf_KIDS)) {
 	my $kid;
 	unshift(@parents, $op);
@@ -128,7 +128,11 @@ sub walkoptree_slow {
 	}
 	shift @parents;
     }
-    if (class($op) eq 'PMOP' && ref($op->pmreplroot) && ${$op->pmreplroot}) {
+    if (class($op) eq 'PMOP'
+	&& ref($op->pmreplroot)
+	&& ${$op->pmreplroot}
+	&& $op->pmreplroot->isa( 'B::OP' ))
+    {
 	unshift(@parents, $op);
 	walkoptree_slow($op->pmreplroot, $method, $level + 1);
 	shift @parents;
