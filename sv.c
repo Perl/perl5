@@ -2382,7 +2382,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		Gconvert(SvNVX(sv), NV_DIG, 0, tbuf);
 		len = strlen(tbuf);
 	    }
-	    assert(!SvROK(sv));
+
 	    {
 
 #ifdef FIXNEGATIVEZERO
