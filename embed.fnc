@@ -1079,10 +1079,6 @@ Ap	|void	|sys_intern_init
 ApR	|char *	|custom_op_name	|NN const OP* op
 ApR	|char *	|custom_op_desc	|NN const OP* op
 
-#if defined(PERL_OLD_COPY_ON_WRITE)
-pMX	|int	|sv_release_IVX	|NN SV *sv
-#endif
-
 Adp	|void	|sv_nosharing	|NULLOK SV *sv
 Adpbm	|void	|sv_nolocking	|NULLOK SV *sv
 #ifdef NO_MATHOMS
@@ -1450,7 +1446,7 @@ s	|STRLEN	|sv_pos_b2u_midway|NN const U8 *s|NN const U8 *const target \
 		|NN const U8 *end|STRLEN endu
 sn	|char *	|F0convert	|NV nv|NN char *endbuf|NN STRLEN *len
 #  if defined(PERL_OLD_COPY_ON_WRITE)
-sM	|void	|sv_release_COW	|NN SV *sv|NN const char *pvx|STRLEN len|NN SV *after
+sM	|void	|sv_release_COW	|NN SV *sv|NN const char *pvx|NN SV *after
 #  endif
 s	|SV *	|more_sv
 s	|void *	|more_bodies	|svtype sv_type

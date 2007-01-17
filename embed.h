@@ -1076,11 +1076,6 @@
 #endif
 #define custom_op_name		Perl_custom_op_name
 #define custom_op_desc		Perl_custom_op_desc
-#if defined(PERL_OLD_COPY_ON_WRITE)
-#ifdef PERL_CORE
-#define sv_release_IVX		Perl_sv_release_IVX
-#endif
-#endif
 #define sv_nosharing		Perl_sv_nosharing
 #ifdef NO_MATHOMS
 #else
@@ -3279,11 +3274,6 @@
 #endif
 #define custom_op_name(a)	Perl_custom_op_name(aTHX_ a)
 #define custom_op_desc(a)	Perl_custom_op_desc(aTHX_ a)
-#if defined(PERL_OLD_COPY_ON_WRITE)
-#ifdef PERL_CORE
-#define sv_release_IVX(a)	Perl_sv_release_IVX(aTHX_ a)
-#endif
-#endif
 #define sv_nosharing(a)		Perl_sv_nosharing(aTHX_ a)
 #ifdef NO_MATHOMS
 #else
@@ -3649,7 +3639,7 @@
 #endif
 #  if defined(PERL_OLD_COPY_ON_WRITE)
 #ifdef PERL_CORE
-#define sv_release_COW(a,b,c,d)	S_sv_release_COW(aTHX_ a,b,c,d)
+#define sv_release_COW(a,b,c)	S_sv_release_COW(aTHX_ a,b,c)
 #endif
 #  endif
 #ifdef PERL_CORE

@@ -668,7 +668,6 @@ Perl_sys_intern_clear
 Perl_sys_intern_init
 Perl_custom_op_name
 Perl_custom_op_desc
-Perl_sv_release_IVX
 Perl_sv_nosharing
 Perl_sv_nolocking
 Perl_sv_nounlocking

@@ -4010,9 +4010,9 @@ Perl_sv_usepvn_flags(pTHX_ SV *sv, char *ptr, STRLEN len, U32 flags)
    (which it can do by means other than releasing copy-on-write Svs)
    or by changing the other copy-on-write SVs in the loop.  */
 STATIC void
-S_sv_release_COW(pTHX_ register SV *sv, const char *pvx, STRLEN len, SV *after)
+S_sv_release_COW(pTHX_ register SV *sv, const char *pvx, SV *after)
 {
-    if (len) { /* this SV was SvIsCOW_normal(sv) */
+    { /* this SV was SvIsCOW_normal(sv) */
          /* we need to find the SV pointing to us.  */
         SV *current = SV_COW_NEXT_SV(after);
 
@@ -4036,18 +4036,7 @@ S_sv_release_COW(pTHX_ register SV *sv, const char *pvx, STRLEN len, SV *after)
             /* Make the SV before us point to the SV after us.  */
             SV_COW_NEXT_SV_SET(current, after);
         }
-    } else {
-        unshare_hek(SvSHARED_HEK_FROM_PV(pvx));
     }
-}
-
-int
-Perl_sv_release_IVX(pTHX_ register SV *sv)
-{
-    if (SvIsCOW(sv))
-        sv_force_normal_flags(sv, 0);
-    SvOOK_off(sv);
-    return 0;
 }
 #endif
 /*
@@ -4077,7 +4066,11 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 	    const char * const pvx = SvPVX_const(sv);
 	    const STRLEN len = SvLEN(sv);
 	    const STRLEN cur = SvCUR(sv);
-	    SV * const next = SV_COW_NEXT_SV(sv);   /* next COW sv in the loop. */
+	    /* next COW sv in the loop.  If len is 0 then this is a shared-hash
+	       key scalar, so we mustn't attempt to call SV_COW_NEXT_SV(), as
+	       we'll fail an assertion.  */
+	    SV * const next = len ? SV_COW_NEXT_SV(sv) : 0;
+
             if (DEBUG_C_TEST) {
                 PerlIO_printf(Perl_debug_log,
                               "Copy on write: Force normal %ld\n",
@@ -4098,7 +4091,11 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
                 SvCUR_set(sv, cur);
                 *SvEND(sv) = '\0';
             }
-            sv_release_COW(sv, pvx, len, next);
+	    if (len) {
+		sv_release_COW(sv, pvx, next);
+	    } else {
+		unshare_hek(SvSHARED_HEK_FROM_PV(pvx));
+	    }
             if (DEBUG_C_TEST) {
                 sv_dump(sv);
             }
@@ -5196,8 +5193,12 @@ Perl_sv_clear(pTHX_ register SV *sv)
                     PerlIO_printf(Perl_debug_log, "Copy on write: clear\n");
                     sv_dump(sv);
                 }
-                sv_release_COW(sv, SvPVX_const(sv), SvLEN(sv),
-			       SV_COW_NEXT_SV(sv));
+		if (SvLEN(sv)) {
+		    sv_release_COW(sv, SvPVX_const(sv), SV_COW_NEXT_SV(sv));
+		} else {
+		    unshare_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sv)));
+		}
+
                 /* And drop it here.  */
                 SvFAKE_off(sv);
             } else if (SvLEN(sv)) {

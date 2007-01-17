@@ -2908,12 +2908,6 @@ PERL_CALLCONV char *	Perl_custom_op_desc(pTHX_ const OP* op)
 			__attribute__nonnull__(pTHX_1);
 
 
-#if defined(PERL_OLD_COPY_ON_WRITE)
-PERL_CALLCONV int	Perl_sv_release_IVX(pTHX_ SV *sv)
-			__attribute__nonnull__(pTHX_1);
-
-#endif
-
 PERL_CALLCONV void	Perl_sv_nosharing(pTHX_ SV *sv);
 /* PERL_CALLCONV void	Perl_sv_nolocking(pTHX_ SV *sv); */
 #ifdef NO_MATHOMS
@@ -3890,10 +3884,10 @@ STATIC char *	S_F0convert(NV nv, char *endbuf, STRLEN *len)
 			__attribute__nonnull__(3);
 
 #  if defined(PERL_OLD_COPY_ON_WRITE)
-STATIC void	S_sv_release_COW(pTHX_ SV *sv, const char *pvx, STRLEN len, SV *after)
+STATIC void	S_sv_release_COW(pTHX_ SV *sv, const char *pvx, SV *after)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_4);
+			__attribute__nonnull__(pTHX_3);
 
 #  endif
 STATIC SV *	S_more_sv(pTHX);

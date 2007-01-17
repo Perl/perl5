@@ -1865,8 +1865,8 @@ Like C<sv_catsv> but doesn't process magic.
 				    sv_force_normal_flags(sv, SV_COW_DROP_PV)
 
 #ifdef PERL_OLD_COPY_ON_WRITE
-#  define SvRELEASE_IVX(sv)   ((void)((SvFLAGS(sv) & (SVf_OOK|SVf_READONLY|SVf_FAKE)) \
-				&& Perl_sv_release_IVX(aTHX_ sv)))
+#define SvRELEASE_IVX(sv)   \
+    ((SvIsCOW(sv) ? sv_force_normal_flags(sv, 0) : (void) 0), SvOOK_off(sv))
 #  define SvIsCOW_normal(sv)	(SvIsCOW(sv) && SvLEN(sv))
 #else
 #  define SvRELEASE_IVX(sv)   SvOOK_off(sv)
