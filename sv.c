@@ -3705,7 +3705,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    SvNV_set(dstr, SvNVX(sstr));
 	}
 	if (sflags & SVp_IOK) {
-	    SvRELEASE_IVX(dstr);
+	    SvOOK_off(dstr);
 	    SvIV_set(dstr, SvIVX(sstr));
 	    /* Must do this otherwise some other overloaded use of 0x80000000
 	       gets confused. I guess SVpbm_VALID */
