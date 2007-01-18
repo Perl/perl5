@@ -3457,6 +3457,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	break;
 
 	/* case SVt_BIND: */
+    case SVt_PVLV:
     case SVt_PVGV:
 	if (isGV_with_GP(sstr) && dtype <= SVt_PVGV) {
 	    glob_assign_glob(dstr, sstr, dtype);
@@ -3466,7 +3467,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	/*FALLTHROUGH*/
 
     case SVt_PVMG:
-    case SVt_PVLV:
 	if (SvGMAGICAL(sstr) && (flags & SV_GMAGIC)) {
 	    mg_get(sstr);
 	    if (SvTYPE(sstr) != stype) {
@@ -5155,7 +5155,6 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	}
 	else if (LvTYPE(sv) != 't') /* unless tie: unrefcnted fake SV**  */
 	    SvREFCNT_dec(LvTARG(sv));
-	goto freescalar;
     case SVt_PVGV:
 	if (isGV_with_GP(sv)) {
 	    gp_free((GV*)sv);
@@ -10046,20 +10045,16 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		    LvTARG(dstr) = (SV*)he_dup((HE*)LvTARG(dstr), 0, param);
 		else
 		    LvTARG(dstr) = sv_dup_inc(LvTARG(dstr), param);
-		break;
 	    case SVt_PVGV:
 		if(isGV_with_GP(sstr)) {
 		    if (GvNAME_HEK(dstr))
 			GvNAME_HEK(dstr) = hek_dup(GvNAME_HEK(dstr), param);
-		}
-
-		/* Don't call sv_add_backref here as it's going to be created
-		   as part of the magic cloning of the symbol table.  */
-		if(!SvVALID(dstr))
-		    GvSTASH(dstr) = hv_dup(GvSTASH(dstr), param);
-		if(isGV_with_GP(sstr)) {
+		    /* Don't call sv_add_backref here as it's going to be
+		       created as part of the magic cloning of the symbol
+		       table.  */
 		    /* Danger Will Robinson - GvGP(dstr) isn't initialised
 		       at the point of this comment.  */
+		    GvSTASH(dstr) = hv_dup(GvSTASH(dstr), param);
 		    GvGP(dstr)	= gp_dup(GvGP(sstr), param);
 		    (void)GpREFCNT_inc(GvGP(dstr));
 		} else
