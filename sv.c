@@ -443,7 +443,8 @@ static void
 do_clean_objs(pTHX_ SV *ref)
 {
     dVAR;
-    if (SvROK(ref)) {
+    assert (SvROK(ref));
+    {
 	SV * const target = SvRV(ref);
 	if (SvOBJECT(target)) {
 	    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning object ref:\n "), sv_dump(ref)));
@@ -469,7 +470,8 @@ static void
 do_clean_named_objs(pTHX_ SV *sv)
 {
     dVAR;
-    if (SvTYPE(sv) == SVt_PVGV && isGV_with_GP(sv) && GvGP(sv)) {
+    assert(SvTYPE(sv) == SVt_PVGV);
+    if (isGV_with_GP(sv) && GvGP(sv)) {
 	if ((
 #ifdef PERL_DONT_CREATE_GVSV
 	     GvSV(sv) &&
