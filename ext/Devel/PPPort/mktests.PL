@@ -4,13 +4,13 @@
 #
 ################################################################################
 #
-#  $Revision: 20 $
+#  $Revision: 26 $
 #  $Author: mhx $
-#  $Date: 2005/03/10 18:45:54 +0100 $
+#  $Date: 2006/07/21 19:21:39 +0200 $
 #
 ################################################################################
 #
-#  Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
+#  Version 3.x, Copyright (C) 2004-2006, Marcus Holland-Moritz.
 #  Version 2.x, Copyright (C) 2001, Paul Marquess.
 #  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 #
@@ -25,33 +25,42 @@ require "parts/ppptools.pl";
 
 my $template = do { local $/; <DATA> };
 
-my $file;
-for $file (glob 'parts/inc/*') {
-  my($testfile) = $file =~ /(\w+)$/;
-  $testfile = "t/$testfile.t";
+generate_tests();
 
-  my $spec = parse_partspec($file);
-  my $plan = 0;
+sub generate_tests
+{
+  my @tests;
+  my $file;
 
-  if (exists $spec->{tests}) {
-    exists $spec->{OPTIONS}{tests} &&
-    exists $spec->{OPTIONS}{tests}{plan}
-        or die "No plan for tests in $file\n";
-
-    print "generating $testfile\n";
-
-    my $tmpl = $template;
-    $tmpl =~ s/__SOURCE__/$file/mg;
-    $tmpl =~ s/__PLAN__/$spec->{OPTIONS}{tests}{plan}/mg;
-    $tmpl =~ s/^__TESTS__$/$spec->{tests}/mg;
-
-    open FH, ">$testfile" or die "$testfile: $!\n";
-    print FH $tmpl;
-    close FH;
+  for $file (all_files_in_dir('parts/inc')) {
+    my($testfile) = $file =~ /(\w+)\.?$/;  # VMS has a trailing dot
+    $testfile = "t/$testfile.t";
+  
+    my $spec = parse_partspec($file);
+    my $plan = 0;
+  
+    if (exists $spec->{tests}) {
+      exists $spec->{OPTIONS}{tests} &&
+      exists $spec->{OPTIONS}{tests}{plan}
+          or die "No plan for tests in $file\n";
+  
+      print "generating $testfile\n";
+  
+      my $tmpl = $template;
+      $tmpl =~ s/__SOURCE__/$file/mg;
+      $tmpl =~ s/__PLAN__/$spec->{OPTIONS}{tests}{plan}/mg;
+      $tmpl =~ s/^__TESTS__$/$spec->{tests}/mg;
+  
+      open FH, ">$testfile" or die "$testfile: $!\n";
+      print FH $tmpl;
+      close FH;
+  
+      push @tests, $testfile;
+    }
   }
+  
+  return @tests;
 }
-
-exit 0;
 
 __DATA__
 ################################################################################
@@ -77,12 +86,13 @@ BEGIN {
     unshift @INC, 't';
   }
 
-  eval "use Test";
-  if ($@) {
-    require 'testutil.pl';
-    print "1..__PLAN__\n";
+  sub load {
+    eval "use Test";
+    require 'testutil.pl' if $@;
   }
-  else {
+
+  if (__PLAN__) {
+    load();
     plan(tests => __PLAN__);
   }
 }
@@ -90,5 +100,13 @@ BEGIN {
 use Devel::PPPort;
 use strict;
 $^W = 1;
+
+package Devel::PPPort;
+use vars '@ISA';
+require DynaLoader;
+@ISA = qw(DynaLoader);
+bootstrap Devel::PPPort;
+
+package main;
 
 __TESTS__

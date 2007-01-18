@@ -1,5 +1,25 @@
 TODO:
 
+* try to make parts/apicheck.pl automatically find NEED_ #defines
+
+* implement snprintf with newSVpvf for >= 5.004, which is safer?
+
+* add support for my_vsnprintf?
+
+* try to perform some core consistency checks:
+
+  - check if 'd' flag in embed.fnc matches with
+    supplied documentation
+
+  - check if all public API is documented
+
+* check (during make regen?) if MAX_PERL in PPPort_pm.PL
+  needs to be updated
+
+* see if we can implement sv_catpvf() for < 5.004
+
+* MULTICALL ?
+
 * improve apicheck (things like utf8_mg_pos_init() are
   not currently checked)
 

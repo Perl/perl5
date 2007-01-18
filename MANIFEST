@@ -194,13 +194,14 @@ ext/Devel/Peek/t/Peek.t		See if Devel::Peek works
 ext/Devel/PPPort/apicheck_c.PL	Devel::PPPort apicheck generator
 ext/Devel/PPPort/Changes	Devel::PPPort changes
 ext/Devel/PPPort/devel/buildperl.pl	Devel::PPPort perl version builder
+ext/Devel/PPPort/devel/devtools.pl	Devel::PPPort development utilities
 ext/Devel/PPPort/devel/mkapidoc.sh	Devel::PPPort apidoc collector
 ext/Devel/PPPort/devel/mktodo	Devel::PPPort baseline/todo generator
 ext/Devel/PPPort/devel/mktodo.pl	Devel::PPPort baseline/todo generator
+ext/Devel/PPPort/devel/regenerate	Devel::PPPort API re-generator
 ext/Devel/PPPort/devel/scanprov	Devel::PPPort provided API scanner
 ext/Devel/PPPort/HACKERS	Devel::PPPort hackers documentation
 ext/Devel/PPPort/Makefile.PL	Devel::PPPort makefile writer
-ext/Devel/PPPort/MANIFEST	Devel::PPPort Manifest
 ext/Devel/PPPort/MANIFEST.SKIP	Devel::PPPort Manifest skip specs
 ext/Devel/PPPort/mktests.PL	Devel::PPPort test file writer
 ext/Devel/PPPort/module2.c	Devel::PPPort test file
@@ -232,9 +233,13 @@ ext/Devel/PPPort/parts/base/5008003	Devel::PPPort baseline todo file
 ext/Devel/PPPort/parts/base/5008004	Devel::PPPort baseline todo file
 ext/Devel/PPPort/parts/base/5008005	Devel::PPPort baseline todo file
 ext/Devel/PPPort/parts/base/5008006	Devel::PPPort baseline todo file
+ext/Devel/PPPort/parts/base/5008007	Devel::PPPort baseline todo file
+ext/Devel/PPPort/parts/base/5008008	Devel::PPPort baseline todo file
 ext/Devel/PPPort/parts/base/5009000	Devel::PPPort baseline todo file
 ext/Devel/PPPort/parts/base/5009001	Devel::PPPort baseline todo file
 ext/Devel/PPPort/parts/base/5009002	Devel::PPPort baseline todo file
+ext/Devel/PPPort/parts/base/5009003	Devel::PPPort baseline todo file
+ext/Devel/PPPort/parts/base/5009004	Devel::PPPort baseline todo file
 ext/Devel/PPPort/parts/embed.fnc	Devel::PPPort Perl API listing
 ext/Devel/PPPort/parts/inc/call	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/cop	Devel::PPPort include
@@ -243,19 +248,28 @@ ext/Devel/PPPort/parts/inc/format	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/grok	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/limits	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/magic	Devel::PPPort include
+ext/Devel/PPPort/parts/inc/memory	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/misc	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/mPUSH	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/MY_CXT	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/newCONSTSUB	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/newRV	Devel::PPPort include
+ext/Devel/PPPort/parts/inc/podtest	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/ppphbin	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/ppphdoc	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/ppphtest	Devel::PPPort include
-ext/Devel/PPPort/parts/inc/SvPV	Devel::PPPort include
+ext/Devel/PPPort/parts/inc/pvs	Devel::PPPort include
+ext/Devel/PPPort/parts/inc/snprintf	Devel::PPPort include
+ext/Devel/PPPort/parts/inc/strlfuncs	Devel::PPPort include
+ext/Devel/PPPort/parts/inc/SvREFCNT	Devel::PPPort include
+ext/Devel/PPPort/parts/inc/Sv_set	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/sv_xpvf	Devel::PPPort include
+ext/Devel/PPPort/parts/inc/SvPV	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/threads	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/uv	Devel::PPPort include
+ext/Devel/PPPort/parts/inc/variables	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/version	Devel::PPPort include
+ext/Devel/PPPort/parts/inc/warn	Devel::PPPort include
 ext/Devel/PPPort/parts/ppptools.pl	Devel::PPPort various utilities
 ext/Devel/PPPort/parts/todo/5004000	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5004010	Devel::PPPort todo file
@@ -282,14 +296,17 @@ ext/Devel/PPPort/parts/todo/5008003	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5008004	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5008005	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5008006	Devel::PPPort todo file
+ext/Devel/PPPort/parts/todo/5008007	Devel::PPPort todo file
+ext/Devel/PPPort/parts/todo/5008008	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5009000	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5009001	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5009002	Devel::PPPort todo file
+ext/Devel/PPPort/parts/todo/5009003	Devel::PPPort todo file
+ext/Devel/PPPort/parts/todo/5009004	Devel::PPPort todo file
+ext/Devel/PPPort/PPPort.xs	Devel::PPPort dummy PPPort.xs
 ext/Devel/PPPort/ppport_h.PL	Devel::PPPort ppport.h writer
-ext/Devel/PPPort/PPPort.pm	Devel::PPPort extension
 ext/Devel/PPPort/PPPort_pm.PL	Devel::PPPort PPPort.pm writer
-ext/Devel/PPPort/PPPort.xs	Devel::PPPort extension
-ext/Devel/PPPort/PPPort_xs.PL	Devel::PPPort PPPort.xs writer
+ext/Devel/PPPort/PPPort_xs.PL	Devel::PPPort RealPPPort.xs writer
 ext/Devel/PPPort/README		Devel::PPPort Readme
 ext/Devel/PPPort/soak		Devel::PPPort Test Harness to run under various Perls
 ext/Devel/PPPort/t/call.t	Devel::PPPort test file
@@ -298,18 +315,27 @@ ext/Devel/PPPort/t/exception.t	Devel::PPPort test file
 ext/Devel/PPPort/t/grok.t	Devel::PPPort test file
 ext/Devel/PPPort/t/limits.t	Devel::PPPort test file
 ext/Devel/PPPort/t/magic.t	Devel::PPPort test file
+ext/Devel/PPPort/t/memory.t	Devel::PPPort test file
 ext/Devel/PPPort/t/misc.t	Devel::PPPort test file
 ext/Devel/PPPort/t/mPUSH.t	Devel::PPPort test file
 ext/Devel/PPPort/t/MY_CXT.t	Devel::PPPort test file
 ext/Devel/PPPort/t/newCONSTSUB.t	Devel::PPPort test file
 ext/Devel/PPPort/t/newRV.t	Devel::PPPort test file
-ext/Devel/PPPort/TODO		Devel::PPPort Todo
+ext/Devel/PPPort/t/podtest.t	Devel::PPPort test file
 ext/Devel/PPPort/t/ppphtest.t	Devel::PPPort test file
-ext/Devel/PPPort/t/SvPV.t	Devel::PPPort test file
+ext/Devel/PPPort/t/pvs.t	Devel::PPPort test file
+ext/Devel/PPPort/t/snprintf.t	Devel::PPPort test file
+ext/Devel/PPPort/t/strlfuncs.t	Devel::PPPort test file
+ext/Devel/PPPort/t/SvREFCNT.t	Devel::PPPort test file
+ext/Devel/PPPort/t/Sv_set.t	Devel::PPPort test file
 ext/Devel/PPPort/t/sv_xpvf.t	Devel::PPPort test file
+ext/Devel/PPPort/t/SvPV.t	Devel::PPPort test file
 ext/Devel/PPPort/t/testutil.pl	Devel::PPPort test utilities
 ext/Devel/PPPort/t/threads.t	Devel::PPPort test file
 ext/Devel/PPPort/t/uv.t		Devel::PPPort test file
+ext/Devel/PPPort/t/variables.t	Devel::PPPort test file
+ext/Devel/PPPort/t/warn.t	Devel::PPPort test file
+ext/Devel/PPPort/TODO		Devel::PPPort Todo
 ext/Devel/PPPort/typemap	Devel::PPPort Typemap
 ext/Digest/MD5/Changes		Digest::MD5 extension changes
 ext/Digest/MD5/hints/dec_osf.pl	Hints for named architecture

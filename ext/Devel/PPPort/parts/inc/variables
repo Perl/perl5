@@ -1,0 +1,62 @@
+################################################################################
+##
+##  $Revision: 4 $
+##  $Author: mhx $
+##  $Date: 2006/01/14 18:07:58 +0100 $
+##
+################################################################################
+##
+##  Version 3.x, Copyright (C) 2004-2006, Marcus Holland-Moritz.
+##  Version 2.x, Copyright (C) 2001, Paul Marquess.
+##  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
+##
+##  This program is free software; you can redistribute it and/or
+##  modify it under the same terms as Perl itself.
+##
+################################################################################
+
+=provides
+
+PL_signals
+PERL_SIGNALS_UNSAFE_FLAG
+
+=implementation
+
+#ifndef PERL_SIGNALS_UNSAFE_FLAG
+
+#define PERL_SIGNALS_UNSAFE_FLAG 0x0001
+
+__NEED_VAR__ U32 PL_signals = PERL_SIGNALS_UNSAFE_FLAG;
+
+#endif
+
+=xsinit
+
+#define NEED_PL_signals
+
+=xsmisc
+
+U32 get_PL_signals_1(void)
+{
+  return PL_signals;
+}
+
+extern U32 get_PL_signals_2(void);
+extern U32 get_PL_signals_3(void);
+
+=xsubs
+
+int
+compare_PL_signals()
+	CODE:
+		{
+		  U32 ref = get_PL_signals_1();
+		  RETVAL = ref == get_PL_signals_2() && ref == get_PL_signals_3();
+		}
+	OUTPUT:
+		RETVAL
+
+=tests plan => 1
+
+ok(Devel::PPPort::compare_PL_signals());
+

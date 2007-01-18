@@ -21,19 +21,28 @@ BEGIN {
     unshift @INC, 't';
   }
 
-  eval "use Test";
-  if ($@) {
-    require 'testutil.pl';
-    print "1..10\n";
+  sub load {
+    eval "use Test";
+    require 'testutil.pl' if $@;
   }
-  else {
-    plan(tests => 10);
+
+  if (13) {
+    load();
+    plan(tests => 13);
   }
 }
 
 use Devel::PPPort;
 use strict;
 $^W = 1;
+
+package Devel::PPPort;
+use vars '@ISA';
+require DynaLoader;
+@ISA = qw(DynaLoader);
+bootstrap Devel::PPPort;
+
+package main;
 
 use Tie::Hash;
 my %h;
@@ -70,4 +79,9 @@ ok($h{sv}, 4711);
 
 &Devel::PPPort::sv_usepvn_mg($h{sv}, 'Perl');
 ok($h{sv}, 'Perl');
+
+my $ver = eval qq[qv("v1.2.0")];
+ok($[ < 5.009 || $@ eq '');
+ok($@ || Devel::PPPort::SvVSTRING_mg($ver));
+ok(!Devel::PPPort::SvVSTRING_mg(4711));
 

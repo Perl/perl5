@@ -1,16 +1,16 @@
 ################################################################################
 #
-#  PPPort_xs.PL -- generate PPPort.xs
+#  PPPort_xs.PL -- generate RealPPPort.xs
 #
 ################################################################################
 #
-#  $Revision: 8 $
+#  $Revision: 11 $
 #  $Author: mhx $
-#  $Date: 2005/01/31 08:10:55 +0100 $
+#  $Date: 2006/07/21 19:21:40 +0200 $
 #
 ################################################################################
 #
-#  Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
+#  Version 3.x, Copyright (C) 2004-2006, Marcus Holland-Moritz.
 #  Version 2.x, Copyright (C) 2001, Paul Marquess.
 #  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 #
@@ -40,7 +40,7 @@ END
 my $file;
 my $sec;
 
-for $file (glob 'parts/inc/*') {
+for $file (all_files_in_dir('parts/inc')) {
   my $spec = parse_partspec($file);
 
   my $msg = 0;
@@ -68,7 +68,7 @@ for $sec (keys %SECTION) {
   $data =~ s/^__\U$sec\E__$/$code/m;
 }
 
-open FH, ">PPPort.xs" or die "PPPort.xs: $!\n";
+open FH, ">RealPPPort.xs" or die "RealPPPort.xs: $!\n";
 print FH $data;
 close FH;
 
@@ -85,13 +85,13 @@ __DATA__
 *
 ********************************************************************************
 *
-*  $Revision: 8 $
+*  $Revision: 11 $
 *  $Author: mhx $
-*  $Date: 2005/01/31 08:10:55 +0100 $
+*  $Date: 2006/07/21 19:21:40 +0200 $
 *
 ********************************************************************************
 *
-*  Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
+*  Version 3.x, Copyright (C) 2004-2006, Marcus Holland-Moritz.
 *  Version 2.x, Copyright (C) 2001, Paul Marquess.
 *  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 *

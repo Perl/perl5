@@ -21,12 +21,13 @@ BEGIN {
     unshift @INC, 't';
   }
 
-  eval "use Test";
-  if ($@) {
-    require 'testutil.pl';
-    print "1..3\n";
+  sub load {
+    eval "use Test";
+    require 'testutil.pl' if $@;
   }
-  else {
+
+  if (3) {
+    load();
     plan(tests => 3);
   }
 }
@@ -34,6 +35,14 @@ BEGIN {
 use Devel::PPPort;
 use strict;
 $^W = 1;
+
+package Devel::PPPort;
+use vars '@ISA';
+require DynaLoader;
+@ISA = qw(DynaLoader);
+bootstrap Devel::PPPort;
+
+package main;
 
 &Devel::PPPort::call_newCONSTSUB_1();
 ok(&Devel::PPPort::test_value_1(), 1);

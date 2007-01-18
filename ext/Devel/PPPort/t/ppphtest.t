@@ -21,13 +21,14 @@ BEGIN {
     unshift @INC, 't';
   }
 
-  eval "use Test";
-  if ($@) {
-    require 'testutil.pl';
-    print "1..197\n";
+  sub load {
+    eval "use Test";
+    require 'testutil.pl' if $@;
   }
-  else {
-    plan(tests => 197);
+
+  if (203) {
+    load();
+    plan(tests => 203);
   }
 }
 
@@ -35,14 +36,31 @@ use Devel::PPPort;
 use strict;
 $^W = 1;
 
+package Devel::PPPort;
+use vars '@ISA';
+require DynaLoader;
+@ISA = qw(DynaLoader);
+bootstrap Devel::PPPort;
+
+package main;
+
+BEGIN {
+  if ($ENV{'SKIP_SLOW_TESTS'}) {
+    for (1 .. 203) {
+      skip("skip: SKIP_SLOW_TESTS", 0);
+    }
+    exit 0;
+  }
+}
+
 use File::Path qw/rmtree mkpath/;
 use Config;
 
 my $tmp = 'ppptmp';
 my $inc = '';
-my $perl = find_perl();
 my $isVMS = $^O eq 'VMS';
 my $isMAC = $^O eq 'MacOS';
+my $perl = find_perl();
 
 rmtree($tmp) if -d $tmp;
 mkpath($tmp) or die "mkpath $tmp: $!\n";
@@ -203,6 +221,9 @@ __DATA__
 my $o = ppport(qw(--help));
 ok($o =~ /^Usage:.*ppport\.h/m);
 ok($o =~ /--help/m);
+
+$o = ppport(qw(--version));
+ok($o =~ /^This is.*ppport.*\d+\.\d+(?:_?\d+)?\.$/);
 
 $o = ppport(qw(--nochanges));
 ok($o =~ /^Scanning.*test\.xs/mi);
@@ -754,4 +775,30 @@ newSViv();
 ---------------------------- Makefile.PL --------------------------------------
 
 newSViv();
+
+===============================================================================
+
+# check if explicit variables are handled propery
+
+my $o = ppport(qw(--copy=a));
+ok($o =~ /^Needs to include.*ppport\.h/m);
+ok($o =~ /^Uses PL_signals/m);
+ok($o =~ /^File needs PL_signals, adding static request/m);
+ok(eq_files('MyExt.xsa', 'MyExt.ra'));
+
+unlink qw(MyExt.xsa);
+
+---------------------------- MyExt.xs -----------------------------------------
+
+PL_signals = 123;
+if (PL_signals == 42)
+  foo();
+
+---------------------------- MyExt.ra -----------------------------------------
+
+#define NEED_PL_signals
+#include "ppport.h"
+PL_signals = 123;
+if (PL_signals == 42)
+  foo();
 
