@@ -3228,7 +3228,7 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
 
 /*{{{  PerlIO *my_popen(char *cmd, char *mode)*/
 PerlIO *
-Perl_my_popen(pTHX_ const char *cmd, const char *mode)
+Perl_my_popen(pTHX_ char *cmd, char *mode)
 {
     int sts;
     TAINT_ENV();
@@ -6419,7 +6419,7 @@ Perl_vms_do_aexec(pTHX_ SV *really,SV **mark,SV **sp)
 
 /* {{{bool vms_do_exec(char *cmd) */
 bool
-Perl_vms_do_exec(pTHX_ const char *cmd)
+Perl_vms_do_exec(pTHX_ char *cmd)
 {
   struct dsc$descriptor_s *vmscmd;
 
