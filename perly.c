@@ -258,8 +258,17 @@ S_clear_yystack(pTHX_  const yy_parser *parser)
      *   * a CV
      * but this would involve reworking all code (core and external) that
      * manipulate op trees.
-     */
+     *
+     * XXX DAPM 17/1/07 I've decided its too fragile for now, and so have
+     * disabled it */
 
+#define DISABLE_STACK_FREE
+
+
+#ifdef DISABLE_STACK_FREE
+    ps -= parser->yylen;
+    PERL_UNUSED_VAR(i);
+#else
     /* clear any reducing ops (1st pass) */
 
     for (i=0; i< parser->yylen; i++) {
@@ -275,6 +284,7 @@ S_clear_yystack(pTHX_  const yy_parser *parser)
 	    }
 	}
     }
+#endif
 
     /* now free whole the stack, including the just-reduced ops */
 
@@ -286,8 +296,10 @@ S_clear_yystack(pTHX_  const yy_parser *parser)
 		PAD_RESTORE_LOCAL(ps->comppad);
 	    }
 	    YYDPRINTF ((Perl_debug_log, "(freeing op)\n"));
+#ifndef DISABLE_STACK_FREE
 	    ps->val.opval->op_latefree  = 0;
 	    if (!(ps->val.opval->op_attached && !ps->val.opval->op_latefreed))
+#endif
 		op_free(ps->val.opval);
 	}
 	ps--;
@@ -362,10 +374,12 @@ Perl_yyparse (pTHX)
 
     YYDPRINTF ((Perl_debug_log, "Entering state %d\n", yystate));
 
+#ifndef DISABLE_STACK_FREE
     if (yy_type_tab[yystos[yystate]] == toketype_opval && ps->val.opval) {
 	ps->val.opval->op_latefree  = 1;
 	ps->val.opval->op_latefreed = 0;
     }
+#endif
 
     parser->yylen = 0;
 
@@ -522,6 +536,7 @@ Perl_yyparse (pTHX)
 
     }
 
+#ifndef DISABLE_STACK_FREE
     /* any just-reduced ops with the op_latefreed flag cleared need to be
      * freed; the rest need the flag resetting */
     {
@@ -536,6 +551,7 @@ Perl_yyparse (pTHX)
 	    }
 	}
     }
+#endif
 
     parser->ps = ps -= (parser->yylen-1);
 
