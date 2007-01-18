@@ -1130,13 +1130,13 @@ _cleaner2:
 	rm -rf .config
 	rm -f preload
 	rm -f testcompile compilelog
-	rm -rf lib/Encode
+	rm -rf lib/Encode lib/Hash
 	rm -f lib/ExtUtils/ParseXS/t/XSTest.c
 	rm -f lib/ExtUtils/ParseXS/t/XSTest$(OBJ_EXT)
 	rm -f lib/ExtUtils/ParseXS/t/XSTest$(DLSUFFIX)
 	-rmdir lib/B lib/Data
 	-rmdir lib/Filter/Util lib/IO/Socket lib/IO
-	-rmdir lib/List lib/MIME lib/Scalar lib/Sys 
+	-rmdir lib/List lib/MIME lib/Scalar lib/Sys
 	-rmdir lib/threads lib/XS
 
 _realcleaner:
