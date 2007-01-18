@@ -471,7 +471,8 @@ do_clean_named_objs(pTHX_ SV *sv)
 {
     dVAR;
     assert(SvTYPE(sv) == SVt_PVGV);
-    if (isGV_with_GP(sv) && GvGP(sv)) {
+    assert(isGV_with_GP(sv));
+    if (GvGP(sv)) {
 	if ((
 #ifdef PERL_DONT_CREATE_GVSV
 	     GvSV(sv) &&
@@ -506,7 +507,7 @@ Perl_sv_clean_objs(pTHX)
     visit(do_clean_objs, SVf_ROK, SVf_ROK);
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
     /* some barnacles may yet remain, clinging to typeglobs */
-    visit(do_clean_named_objs, SVt_PVGV, SVTYPEMASK);
+    visit(do_clean_named_objs, SVt_PVGV|SVpgv_GP, SVTYPEMASK|SVp_POK|SVpgv_GP);
 #endif
     PL_in_clean_objs = FALSE;
 }
