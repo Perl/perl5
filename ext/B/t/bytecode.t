@@ -19,7 +19,7 @@ BEGIN {
         print "1..0 # Skip -- Perl configured without B module\n";
         exit 0;
     }
-    if ($Config{ccflags} =~ /-DPERL_COPY_ON_WRITE/) {
+    if ($Config{ccflags} =~ /-DPERL_OLD_COPY_ON_WRITE/) {
 	print "1..0 # skip - no COW for now\n";
 	exit 0;
     }
