@@ -697,10 +697,10 @@ S_require_tie_mod(pTHX_ GV *gv, const char *varpv, SV* namesv, const char *methp
 	stash = gv_stashsv(namesv, FALSE);
 	if (!stash)
 	    Perl_croak( aTHX_ "panic: Can't use %%%s because %"SVf" is not available", 
-	        varpv, module);
+	        varpv, SVfARG(module));
 	else if (!gv_fetchmethod(stash, methpv))    
 	    Perl_croak( aTHX_ "panic: Can't use %%%s because %"SVf" does not support method %s", 
-	        varpv, module, methpv);
+	        varpv, SVfARG(module), methpv);
     }
     return stash;
 }
