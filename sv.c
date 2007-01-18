@@ -1036,10 +1036,6 @@ static const struct body_details bodies_by_type[] = {
 #define new_NOARENAZ(details) \
 	my_safecalloc((details)->body_size + (details)->offset)
 
-#if defined(DEBUGGING) && !defined(PERL_GLOBAL_STRUCT_PRIVATE)
-static bool done_sanity_check;
-#endif
-
 STATIC void *
 S_more_bodies (pTHX_ svtype sv_type)
 {
@@ -1049,10 +1045,9 @@ S_more_bodies (pTHX_ svtype sv_type)
     const size_t body_size = bdp->body_size;
     char *start;
     const char *end;
-
-    assert(bdp->arena_size);
-
 #if defined(DEBUGGING) && !defined(PERL_GLOBAL_STRUCT_PRIVATE)
+    static bool done_sanity_check;
+
     /* PERL_GLOBAL_STRUCT_PRIVATE cannot coexist with global
      * variables like done_sanity_check. */
     if (!done_sanity_check) {
@@ -1064,6 +1059,8 @@ S_more_bodies (pTHX_ svtype sv_type)
 	    assert (bodies_by_type[i].type == i);
     }
 #endif
+
+    assert(bdp->arena_size);
 
     start = (char*) Perl_get_arena(aTHX_ bdp->arena_size);
 
