@@ -1326,6 +1326,8 @@ Releases a Perl interpreter.  See L<perlembed>.
 void
 perl_free(pTHXx)
 {
+    dVAR;
+
     if (PL_veto_cleanup)
 	return;
 
