@@ -679,7 +679,7 @@ Perl_sv_free_arenas(pTHX)
    TBD: export properly for hv.c: S_more_he().
 */
 void*
-Perl_get_arena(pTHX_ int arena_size)
+Perl_get_arena(pTHX_ size_t arena_size)
 {
     dVAR;
     struct arena_desc* adesc;
@@ -704,7 +704,7 @@ Perl_get_arena(pTHX_ int arena_size)
     adesc = &((*aroot)->set[curr]);
     assert(!adesc->arena);
     
-    Newxz(adesc->arena, arena_size, char);
+    Newx(adesc->arena, arena_size, char);
     adesc->size = arena_size;
     DEBUG_m(PerlIO_printf(Perl_debug_log, "arena %d added: %p size %d\n", 
 			  curr, (void*)adesc->arena, arena_size));
