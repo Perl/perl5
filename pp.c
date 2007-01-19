@@ -4606,12 +4606,29 @@ PP(pp_split)
     if (!limit)
 	limit = maxiters + 2;
     if (pm->op_pmflags & PMf_WHITE) {
+        if (do_utf8 && !PL_utf8_space) { 
+            /* force PL_utf8_space to be loaded */
+            bool ok; 
+            ENTER; 
+            ok = is_utf8_space((const U8*)" "); 
+            assert(ok); 
+            LEAVE; 
+        } 
 	while (--limit) {
 	    m = s;
-	    while (m < strend &&
-		   !((pm->op_pmflags & PMf_LOCALE)
-		     ? isSPACE_LC(*m) : isSPACE(*m)))
-		++m;
+	    /* this one uses 'm' and is a negative test */
+	    if (do_utf8) {
+	        STRLEN uskip;
+                while (m < strend &&
+                       !( *m == ' ' || swash_fetch(PL_utf8_space,(U8*)m, do_utf8) ))
+	            m +=  UTF8SKIP(m);
+            } else if (pm->op_pmflags & PMf_LOCALE) {
+	        while (m < strend && !isSPACE_LC(*m))
+		    ++m;
+            } else {
+                while (m < strend && !isSPACE(*m))
+                    ++m;
+            }  
 	    if (m >= strend)
 		break;
 
@@ -4623,10 +4640,18 @@ PP(pp_split)
 	    XPUSHs(dstr);
 
 	    s = m + 1;
-	    while (s < strend &&
-		   ((pm->op_pmflags & PMf_LOCALE)
-		    ? isSPACE_LC(*s) : isSPACE(*s)))
-		++s;
+	    /* this one uses 's' and is a positive test */
+	    if (do_utf8) {
+                while (s < strend &&
+                       ( *s == ' ' || swash_fetch(PL_utf8_space,(U8*)s, do_utf8) ))
+	            s +=  UTF8SKIP(s);
+            } else if (pm->op_pmflags & PMf_LOCALE) {
+	        while (s < strend && isSPACE_LC(*s))
+		    ++s;
+            } else {
+                while (s < strend && isSPACE(*s))
+                    ++s;
+            } 	    
 	}
     }
     else if (rx->extflags & RXf_START_ONLY) {

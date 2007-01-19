@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 55;
+plan tests => 80;
 
 $FS = ':';
 
@@ -297,4 +297,38 @@ ok(@ary == 3 &&
     $x = \$a[2];
     is (ref $x, 'SCALAR', '#28938 - garbage after extend');
 }
-
+{
+    # check the special casing of split /\s/ and unicode
+    use charnames qw(:full);
+    # below test data is extracted from
+    # PropList-5.0.0.txt
+    # Date: 2006-06-07, 23:22:52 GMT [MD]
+    #
+    # Unicode Character Database
+    # Copyright (c) 1991-2006 Unicode, Inc.
+    # For terms of use, see http://www.unicode.org/terms_of_use.html
+    # For documentation, see UCD.html
+    my @spaces=(
+        0x0009..0x000A, # Cc   [5] <control-0009>..<control-000D>
+        0x000C..0x000D, # EXCLUDING \v aka ctl-000B aka vert-tab
+        0x0020,         # Zs       SPACE
+        0x0085,         # Cc       <control-0085>
+        0x00A0,         # Zs       NO-BREAK SPACE
+        0x1680,         # Zs       OGHAM SPACE MARK
+        0x180E,         # Zs       MONGOLIAN VOWEL SEPARATOR
+        0x2000..0x200A, # Zs  [11] EN QUAD..HAIR SPACE
+        0x2028,         # Zl       LINE SEPARATOR
+        0x2029,         # Zp       PARAGRAPH SEPARATOR
+        0x202F,         # Zs       NARROW NO-BREAK SPACE
+        0x205F,         # Zs       MEDIUM MATHEMATICAL SPACE
+        0x3000          # Zs       IDEOGRAPHIC SPACE
+    );
+    #diag "Have @{[0+@spaces]} to test\n";
+    foreach my $cp (@spaces) {
+        my $space = chr($cp);
+        my $str="A:$space:B\x{FFFF}";
+        chop $str;
+        my @res=split(/\s+/,$str);
+        is(0+@res,2) or do { diag sprintf "Char failed: 0x%x",$cp }
+    }
+}
