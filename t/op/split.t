@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 130;
+plan tests => 135;
 
 $FS = ':';
 
@@ -346,4 +346,15 @@ ok(@ary == 3 &&
         my @r3 = split(/\s+/, $s2);
         ok(@r3 == 3 && join('-', @r3) eq "-:A:-:B", "$msg - /\\s+/ No.2");
     }
+}
+
+{
+    my $src = "ABC \0 FOO \0  XYZ";
+    my @s = split(" \0 ", $src);
+    my @r = split(/ \0 /, $src);
+    is(scalar(@s), 3);
+    is($s[0], "ABC");
+    is($s[1], "FOO");
+    is($s[2]," XYZ");
+    is(join(':',@s), join(':',@r));
 }
