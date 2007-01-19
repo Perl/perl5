@@ -555,9 +555,6 @@ Perl_sv_clean_all(pTHX)
   the meta-info from the arena, we recover the 1st slot, formerly
   borrowed for list management.  The arena_set is about the size of an
   arena, avoiding the needless malloc overhead of a naive linked-list.
-  The arena_sets are themselves stored in an arena, but as arenas
-  themselves are never freed at run time, there is no need to chain the
-  arena_sets onto an arena_set root.
 
   The cost is 1 arena-set malloc per ~320 arena-mallocs, + the unused
   memory in the last arena-set (1/2 on average).  In trade, we get
@@ -568,10 +565,7 @@ Perl_sv_clean_all(pTHX)
 struct arena_desc {
     char       *arena;		/* the raw storage, allocated aligned */
     size_t      size;		/* its size ~4k typ */
-    int         unit_type;	/* useful for arena audits */
-    /* info for sv-heads (eventually)
-       int count, flags;
-    */
+    U32		misc;		/* type, and in future other things. */
 };
 
 struct arena_set;
@@ -585,8 +579,8 @@ struct arena_set;
 
 struct arena_set {
     struct arena_set* next;
-    int   set_size;		/* ie ARENAS_PER_SET */
-    int   curr;			/* index of next available arena-desc */
+    unsigned int   set_size;	/* ie ARENAS_PER_SET */
+    unsigned int   curr;	/* index of next available arena-desc */
     struct arena_desc set[ARENAS_PER_SET];
 };
 
@@ -604,7 +598,7 @@ Perl_sv_free_arenas(pTHX)
     dVAR;
     SV* sva;
     SV* svanext;
-    int i;
+    unsigned int i;
 
     /* Free arenas here, but be careful about fake ones.  (We assume
        contiguity of the fake ones with the corresponding real ones.) */
@@ -619,21 +613,23 @@ Perl_sv_free_arenas(pTHX)
     }
 
     {
-	struct arena_set *next, *aroot = (struct arena_set*) PL_body_arenas;
-	
-	for (; aroot; aroot = next) {
-	    const int max = aroot->curr;
-	    for (i=0; i<max; i++) {
+	struct arena_set *aroot = (struct arena_set*) PL_body_arenas;
+
+	while (aroot) {
+	    struct arena_set *current = aroot;
+	    i = aroot->curr;
+	    while (i--) {
 		assert(aroot->set[i].arena);
 		Safefree(aroot->set[i].arena);
 	    }
-	    next = aroot->next;
-	    Safefree(aroot);
+	    aroot = aroot->next;
+	    Safefree(current);
 	}
     }
     PL_body_arenas = 0;
 
-    for (i=0; i<PERL_ARENA_ROOTS_SIZE; i++)
+    i = PERL_ARENA_ROOTS_SIZE;
+    while (i--)
 	PL_body_roots[i] = 0;
 
     Safefree(PL_nice_chunk);
@@ -682,12 +678,12 @@ Perl_sv_free_arenas(pTHX)
    TBD: export properly for hv.c: S_more_he().
 */
 void*
-Perl_get_arena(pTHX_ size_t arena_size)
+Perl_get_arena(pTHX_ size_t arena_size, U32 misc)
 {
     dVAR;
     struct arena_desc* adesc;
     struct arena_set *aroot = (struct arena_set*) PL_body_arenas;
-    int curr;
+    unsigned int curr;
 
     /* shouldnt need this
     if (!arena_size)	arena_size = PERL_ARENA_SIZE;
@@ -711,6 +707,7 @@ Perl_get_arena(pTHX_ size_t arena_size)
     
     Newx(adesc->arena, arena_size, char);
     adesc->size = arena_size;
+    adesc->misc = misc;
     DEBUG_m(PerlIO_printf(Perl_debug_log, "arena %d added: %p size %d\n", 
 			  curr, (void*)adesc->arena, arena_size));
 
@@ -1067,7 +1064,7 @@ S_more_bodies (pTHX_ svtype sv_type)
 
     assert(bdp->arena_size);
 
-    start = (char*) Perl_get_arena(aTHX_ bdp->arena_size);
+    start = (char*) Perl_get_arena(aTHX_ bdp->arena_size, sv_type);
 
     end = start + bdp->arena_size - body_size;
 

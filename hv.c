@@ -43,7 +43,7 @@ S_more_he(pTHX)
     HE* he;
     HE* heend;
 
-    he = (HE*) Perl_get_arena(aTHX_ PERL_ARENA_SIZE);
+    he = (HE*) Perl_get_arena(aTHX_ PERL_ARENA_SIZE, HE_SVSLOT);
 
     heend = &he[PERL_ARENA_SIZE / sizeof(HE) - 1];
     PL_body_roots[HE_SVSLOT] = he;

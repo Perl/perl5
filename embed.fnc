@@ -1106,7 +1106,7 @@ s	|HV*	|require_tie_mod|NN GV *gv|NN const char *varpv|NN SV* namesv \
 #endif
 
 : #if defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
-paRxo	|void*	|get_arena	|size_t svtype
+paRxo	|void*	|get_arena	|size_t svtype|U32 misc
 : #endif
 
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
