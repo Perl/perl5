@@ -554,7 +554,10 @@ Perl_sv_clean_all(pTHX)
   arena_descs, each holding info for a single arena.  By separating
   the meta-info from the arena, we recover the 1st slot, formerly
   borrowed for list management.  The arena_set is about the size of an
-  arena, avoiding the needless malloc overhead of a naive linked-list
+  arena, avoiding the needless malloc overhead of a naive linked-list.
+  The arena_sets are themselves stored in an arena, but as arenas
+  themselves are never freed at run time, there is no need to chain the
+  arena_sets onto an arena_set root.
 
   The cost is 1 arena-set malloc per ~320 arena-mallocs, + the unused
   memory in the last arena-set (1/2 on average).  In trade, we get
@@ -683,7 +686,7 @@ Perl_get_arena(pTHX_ size_t arena_size)
 {
     dVAR;
     struct arena_desc* adesc;
-    struct arena_set *newroot, **aroot = (struct arena_set**) &PL_body_arenas;
+    struct arena_set *aroot = (struct arena_set*) PL_body_arenas;
     int curr;
 
     /* shouldnt need this
@@ -691,17 +694,19 @@ Perl_get_arena(pTHX_ size_t arena_size)
     */
 
     /* may need new arena-set to hold new arena */
-    if (!*aroot || (*aroot)->curr >= (*aroot)->set_size) {
+    if (!aroot || aroot->curr >= aroot->set_size) {
+	struct arena_set *newroot;
 	Newxz(newroot, 1, struct arena_set);
 	newroot->set_size = ARENAS_PER_SET;
-	newroot->next = *aroot;
-	*aroot = newroot;
+	newroot->next = aroot;
+	aroot = newroot;
+	PL_body_arenas = (void *) newroot;
 	DEBUG_m(PerlIO_printf(Perl_debug_log, "new arenaset %p\n", (void*)*aroot));
     }
 
     /* ok, now have arena-set with at least 1 empty/available arena-desc */
-    curr = (*aroot)->curr++;
-    adesc = &((*aroot)->set[curr]);
+    curr = aroot->curr++;
+    adesc = &(aroot->set[curr]);
     assert(!adesc->arena);
     
     Newx(adesc->arena, arena_size, char);
