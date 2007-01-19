@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq7 - General Perl Language Issues ($Revision: 1.28 $, $Date: 2005/12/31 00:54:37 $)
+perlfaq7 - General Perl Language Issues ($Revision: 7998 $)
 
 =head1 DESCRIPTION
 
@@ -213,20 +213,21 @@ See also L<perlsec/"Laundering and Detecting Tainted Data">.
 Closures are documented in L<perlref>.
 
 I<Closure> is a computer science term with a precise but
-hard-to-explain meaning. Closures are implemented in Perl as anonymous
-subroutines with lasting references to lexical variables outside their
-own scopes.  These lexicals magically refer to the variables that were
-around when the subroutine was defined (deep binding).
+hard-to-explain meaning. Usually, closures are implemented in Perl as
+anonymous subroutines with lasting references to lexical variables
+outside their own scopes. These lexicals magically refer to the
+variables that were around when the subroutine was defined (deep 
+binding).
 
-Closures make sense in any programming language where you can have the
-return value of a function be itself a function, as you can in Perl.
-Note that some languages provide anonymous functions but are not
-capable of providing proper closures: the Python language, for
+Closures are most often used in programming languages where you can
+have the return value of a function be itself a function, as you can
+in Perl. Note that some languages provide anonymous functions but are
+not capable of providing proper closures: the Python language, for
 example.  For more information on closures, check out any textbook on
 functional programming.  Scheme is a language that not only supports
 but encourages closures.
 
-Here's a classic function-generating function:
+Here's a classic non-closure function-generating function:
 
     sub add_function_generator {
       return sub { shift() + shift() };
@@ -235,10 +236,10 @@ Here's a classic function-generating function:
     $add_sub = add_function_generator();
     $sum = $add_sub->(4,5);                # $sum is 9 now.
 
-The closure works as a I<function template> with some customization
-slots left out to be filled later.  The anonymous subroutine returned
-by add_function_generator() isn't technically a closure because it
-refers to no lexicals outside its own scope.
+The anonymous subroutine returned by add_function_generator() isn't
+technically a closure because it refers to no lexicals outside its own
+scope.  Using a closure gives you a I<function template> with some
+customization slots left out to be filled later.
 
 Contrast this with the following make_adder() function, in which the
 returned anonymous function contains a reference to a lexical variable
@@ -269,6 +270,21 @@ C<< '$line = <STDIN>' >>, there would have been no way for the
 hypothetical timeout() function to access the lexical variable
 $line back in its caller's scope.
 
+Another use for a closure is to make a variable I<private> to a
+named subroutine, e.g. a counter that gets initialized at creation
+time of the sub and can only be modified from within the sub.
+This is sometimes used with a BEGIN block in package files to make
+sure a variable doesn't get meddled with during the lifetime of the
+package:
+
+    BEGIN {
+        my $id = 0;
+        sub next_id { ++$id }
+    }
+
+This is discussed in more detail in L<perlsub>, see the entry on
+I<Persistent Private Variables>.
+
 =head2 What is variable suicide and how can I prevent it?
 
 This problem was fixed in perl 5.004_05, so preventing it means upgrading
@@ -282,7 +298,7 @@ variable's value this way, but now it's much harder.  Take this code:
 
     my $f = 'foo';
     sub T {
-      while ($i++ < 3) { my $f = $f; $f .= $i; print $f, "\n" }
+      while ($i++ < 3) { my $f = $f; $f .= "bar"; print $f, "\n" }
     }
     T;
     print "Finally $f\n";
@@ -312,8 +328,8 @@ With the exception of regexes, you need to pass references to these
 objects.  See L<perlsub/"Pass by Reference"> for this particular
 question, and L<perlref> for information on references.
 
-See "Passing Regexes", below, for information on passing regular
-expressions.
+See "Passing Regexes", later in L<perlfaq7>, for information on
+passing regular expressions.
 
 =over 4
 
@@ -634,9 +650,9 @@ where they don't belong.
 This is explained in more depth in the L<perlsyn>.  Briefly, there's
 no official case statement, because of the variety of tests possible
 in Perl (numeric comparison, string comparison, glob comparison,
-regex matching, overloaded comparisons, ...).
-Larry couldn't decide how best to do this, so he left it out, even
-though it's been on the wish list since perl1.
+regex matching, overloaded comparisons, ...).  Larry couldn't decide
+how best to do this, so he left it out, even though it's been on the
+wish list since perl1.
 
 Starting from Perl 5.8 to get switch and case one can use the
 Switch extension and say:
@@ -942,7 +958,7 @@ If you see "bad interpreter - no such file or directory", the first
 line in your perl script (the "shebang" line) does not contain the
 right path to perl (or any other program capable of running scripts).
 Sometimes this happens when you move the script from one machine to
-another and each machine has a different path to perl---/usr/bin/perl
+another and each machine has a different path to perl--/usr/bin/perl
 versus /usr/local/bin/perl for instance. It may also indicate
 that the source machine has CRLF line terminators and the
 destination machine has LF only: the shell tries to find
@@ -959,6 +975,14 @@ explicitly:
 If you get a message like "perl: command not found", perl is not in
 your PATH, which might also mean that the location of perl is not
 where you expect it so you need to adjust your shebang line.
+
+=head1 REVISION
+
+Revision: $Revision: 7998 $
+
+Date: $Date: 2006-11-01 09:56:34 +0100 (mer, 01 nov 2006) $
+
+See L<perlfaq> for source control details and availability.
 
 =head1 AUTHOR AND COPYRIGHT
 
