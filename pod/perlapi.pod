@@ -628,14 +628,27 @@ Found in file cv.h
 =item get_cv
 X<get_cv>
 
-Returns the CV of the specified Perl subroutine.  If C<create> is set and
-the Perl subroutine does not exist then it will be declared (which has the
-same effect as saying C<sub name;>).  If C<create> is not set and the
-subroutine does not exist then NULL is returned.
+Uses C<strlen> to get the length of C<name>, then calls C<get_cvn_flags>.
 
 NOTE: the perl_ form of this function is deprecated.
 
-	CV*	get_cv(const char* name, I32 create)
+	CV*	get_cv(const char* name, I32 flags)
+
+=for hackers
+Found in file perl.c
+
+=item get_cvn_flags
+X<get_cvn_flags>
+
+Returns the CV of the specified Perl subroutine.  C<flags> are passed to
+C<gv_fetchpvn_flags>. If C<GV_ADD> is set and the Perl subroutine does not
+exist then it will be declared (which has the same effect as saying
+C<sub name;>).  If C<GV_ADD> is not set and the subroutine does not exist
+then NULL is returned.
+
+NOTE: the perl_ form of this function is deprecated.
+
+	CV*	get_cvn_flags(const char* name, STRLEN len, I32 flags)
 
 =for hackers
 Found in file perl.c
