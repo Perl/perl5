@@ -312,7 +312,7 @@ ApdR	|SV*	|hv_iterval	|NN HV* tb|NN HE* entry
 Ap	|void	|hv_ksplit	|NN HV* hv|IV newmax
 Apdbm	|void	|hv_magic	|NN HV* hv|NULLOK GV* gv|int how
 XEdpoM	|HV *	|refcounted_he_chain_2hv|NULLOK const struct refcounted_he *c
-XEpoM	|SV *	|refcounted_he_fetch|NN const struct refcounted_he *chain \
+XEpoM	|SV *	|refcounted_he_fetch|NULLOK const struct refcounted_he *chain \
 				|NULLOK SV *keysv|NULLOK const char *key \
 				|STRLEN klen, int flags, U32 hash
 dpoM	|void	|refcounted_he_free|NULLOK struct refcounted_he *he
