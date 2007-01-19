@@ -186,7 +186,7 @@ five bytes or more.
 
 =cut */
 STATIC STRLEN
-S_is_utf8_char_slow(pTHX_ const U8 *s, const STRLEN len)
+S_is_utf8_char_slow(const U8 *s, const STRLEN len)
 {
     U8 u = *s;
     STRLEN slen;

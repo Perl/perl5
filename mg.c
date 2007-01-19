@@ -358,7 +358,7 @@ Perl_mg_find(pTHX_ SV *sv, int type)
                 return mg;
         }
     }
-    return 0;
+    return NULL;
 }
 
 /*

@@ -1579,11 +1579,11 @@ STATIC HE*	S_new_he(pTHX)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
-STATIC HEK*	S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
+STATIC HEK*	S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
-STATIC void	S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store);
+STATIC void	S_hv_magic_check(HV *hv, bool *needs_copy, bool *needs_store);
 STATIC void	S_unshare_hek_or_pvn(pTHX_ const HEK* hek, const char* str, I32 len, U32 hash);
 STATIC HEK*	S_share_hek_flags(pTHX_ const char* str, I32 len, U32 hash, int flags)
 			__attribute__warn_unused_result__;
@@ -1603,7 +1603,7 @@ STATIC void	S_unwind_handler_stack(pTHX_ const void *p);
 #endif
 
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
-STATIC bool	S_is_handle_constructor(pTHX_ const OP *o, I32 numargs)
+STATIC bool	S_is_handle_constructor(const OP *o, I32 numargs)
 			__attribute__warn_unused_result__;
 
 STATIC I32	S_is_list_assignment(pTHX_ const OP *o)
@@ -1620,7 +1620,9 @@ STATIC OP*	S_new_logop(pTHX_ I32 type, I32 flags, OP **firstp, OP **otherp)
 
 STATIC void	S_simplify_sort(pTHX_ OP *o);
 STATIC const char*	S_gv_ename(pTHX_ GV *gv);
-STATIC bool	S_scalar_mod_type(pTHX_ const OP *o, I32 type);
+STATIC bool	S_scalar_mod_type(const OP *o, I32 type)
+			__attribute__warn_unused_result__;
+
 STATIC OP *	S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp);
 STATIC OP *	S_dup_attrlist(pTHX_ OP *o);
 STATIC void	S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my);
@@ -1752,7 +1754,7 @@ STATIC PerlIO *	S_check_type_and_open(pTHX_ const char *name, const char *mode)
 STATIC PerlIO *	S_doopen_pm(pTHX_ const char *name, const char *mode)
 			__attribute__warn_unused_result__;
 
-STATIC bool	S_path_is_absolute(pTHX_ const char *name)
+STATIC bool	S_path_is_absolute(const char *name)
 			__attribute__warn_unused_result__;
 
 STATIC I32	S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
@@ -1800,7 +1802,7 @@ STATIC regnode*	S_regatom(pTHX_ struct RExC_state_t *state, I32 *flagp);
 STATIC regnode*	S_regbranch(pTHX_ struct RExC_state_t *state, I32 *flagp, I32 first);
 STATIC void	S_reguni(pTHX_ const struct RExC_state_t *state, UV uv, char *s, STRLEN *lenp);
 STATIC regnode*	S_regclass(pTHX_ struct RExC_state_t *state);
-STATIC I32	S_regcurly(pTHX_ const char *)
+STATIC I32	S_regcurly(const char *)
 			__attribute__warn_unused_result__;
 
 STATIC regnode*	S_reg_node(pTHX_ struct RExC_state_t *state, U8 op);
@@ -1808,21 +1810,27 @@ STATIC regnode*	S_regpiece(pTHX_ struct RExC_state_t *state, I32 *flagp);
 STATIC void	S_reginsert(pTHX_ struct RExC_state_t *state, U8 op, regnode *opnd);
 STATIC void	S_regoptail(pTHX_ struct RExC_state_t *state, regnode *p, regnode *val);
 STATIC void	S_regtail(pTHX_ struct RExC_state_t *state, regnode *p, regnode *val);
-STATIC char*	S_regwhite(pTHX_ char *p, const char *e);
+STATIC char*	S_regwhite(char *p, const char *e)
+			__attribute__warn_unused_result__;
+
 STATIC char*	S_nextchar(pTHX_ struct RExC_state_t *state);
 #  ifdef DEBUGGING
 STATIC regnode*	S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l);
 STATIC void	S_put_byte(pTHX_ SV* sv, int c);
 #  endif
 STATIC void	S_scan_commit(pTHX_ struct RExC_state_t* state, struct scan_data_t *data);
-STATIC void	S_cl_anything(pTHX_ struct RExC_state_t* state, struct regnode_charclass_class *cl);
-STATIC int	S_cl_is_anything(pTHX_ const struct regnode_charclass_class *cl);
-STATIC void	S_cl_init(pTHX_ struct RExC_state_t* state, struct regnode_charclass_class *cl);
-STATIC void	S_cl_init_zero(pTHX_ struct RExC_state_t* state, struct regnode_charclass_class *cl);
-STATIC void	S_cl_and(pTHX_ struct regnode_charclass_class *cl, const struct regnode_charclass_class *and_with);
-STATIC void	S_cl_or(pTHX_ struct RExC_state_t* state, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with);
+STATIC void	S_cl_anything(struct RExC_state_t* state, struct regnode_charclass_class *cl);
+STATIC int	S_cl_is_anything(const struct regnode_charclass_class *cl)
+			__attribute__warn_unused_result__;
+
+STATIC void	S_cl_init(struct RExC_state_t* state, struct regnode_charclass_class *cl);
+STATIC void	S_cl_init_zero(struct RExC_state_t* state, struct regnode_charclass_class *cl);
+STATIC void	S_cl_and(struct regnode_charclass_class *cl, const struct regnode_charclass_class *and_with);
+STATIC void	S_cl_or(struct RExC_state_t* state, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with);
 STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t* state, regnode **scanp, I32 *deltap, regnode *last, struct scan_data_t *data, U32 flags);
-STATIC I32	S_add_data(pTHX_ struct RExC_state_t* state, I32 n, const char *s);
+STATIC I32	S_add_data(struct RExC_state_t* state, I32 n, const char *s)
+			__attribute__warn_unused_result__;
+
 STATIC void	S_re_croak2(pTHX_ const char* pat1, const char* pat2, ...)
 			__attribute__noreturn__;
 
@@ -1852,13 +1860,13 @@ STATIC void	S_cache_re(pTHX_ regexp *prog);
 STATIC U8*	S_reghop(pTHX_ U8 *pos, I32 off)
 			__attribute__warn_unused_result__;
 
-STATIC U8*	S_reghop3(pTHX_ U8 *pos, I32 off, U8 *lim)
+STATIC U8*	S_reghop3(U8 *pos, I32 off, U8 *lim)
 			__attribute__warn_unused_result__;
 
 STATIC U8*	S_reghopmaybe(pTHX_ U8 *pos, I32 off)
 			__attribute__warn_unused_result__;
 
-STATIC U8*	S_reghopmaybe3(pTHX_ U8 *pos, I32 off, U8 *lim)
+STATIC U8*	S_reghopmaybe3(U8 *pos, I32 off, U8 *lim)
 			__attribute__warn_unused_result__;
 
 STATIC char*	S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, const char *strend, I32 norun)
@@ -1904,6 +1912,14 @@ STATIC STRLEN	S_sv_pos_b2u_forwards(pTHX_ const U8 *s, const U8 *const target);
 STATIC STRLEN	S_sv_pos_b2u_midway(pTHX_ const U8 *s, const U8 *const target, const U8 *end, STRLEN endu);
 STATIC char *	S_stringify_regexp(pTHX_ SV *sv, MAGIC *mg, STRLEN *lp);
 STATIC char *	S_F0convert(NV nv, char *endbuf, STRLEN *len);
+STATIC SV *	S_more_sv(pTHX);
+STATIC void *	S_more_bodies(pTHX_ size_t size, svtype sv_type);
+STATIC bool	S_sv_2iuv_common(pTHX_ SV *sv);
+STATIC void	S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype);
+STATIC void	S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr);
+STATIC PTR_TBL_ENT_t *	S_ptr_table_find(PTR_TBL_t *tbl, const void *sv)
+			__attribute__warn_unused_result__;
+
 STATIC void	S_reset_amagic(pTHX_ SV *rv, const bool on);
 #endif
 
@@ -1996,7 +2012,7 @@ STATIC char*	S_stdize_locale(pTHX_ char* locs);
 #endif
 
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
-STATIC COP*	S_closest_cop(pTHX_ COP *cop, const OP *o);
+STATIC const COP*	S_closest_cop(pTHX_ const COP *cop, const OP *o);
 STATIC SV*	S_mess_alloc(pTHX);
 PERL_CALLCONV const char *	vdie_croak_common(pTHX_ const char *pat, va_list *args, STRLEN *msglen, I32* utf8);
 STATIC bool	S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8, bool warn);
@@ -2010,7 +2026,9 @@ STATIC NV	S_mulexp10(NV value, I32 exponent);
 #endif
 
 #if defined(PERL_IN_UTF8_C) || defined(PERL_DECL_PROT)
-STATIC STRLEN	S_is_utf8_char_slow(pTHX_ const U8 *s, const STRLEN len);
+STATIC STRLEN	S_is_utf8_char_slow(const U8 *s, const STRLEN len)
+			__attribute__warn_unused_result__;
+
 STATIC bool	S_is_utf8_common(pTHX_ const U8 *const p, SV **swash, const char * const swashname)
 			__attribute__warn_unused_result__;
 

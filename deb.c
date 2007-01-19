@@ -32,6 +32,8 @@ Perl_deb_nocontext(const char *pat, ...)
     va_start(args, pat);
     vdeb(pat, &args);
     va_end(args);
+#else
+    PERL_UNUSED_ARG(pat);
 #endif /* DEBUGGING */
 }
 #endif
@@ -53,7 +55,7 @@ void
 Perl_vdeb(pTHX_ const char *pat, va_list *args)
 {
 #ifdef DEBUGGING
-    char* file = OutCopFILE(PL_curcop);
+    const char* const file = OutCopFILE(PL_curcop);
 
 #ifdef USE_5005THREADS
     PerlIO_printf(Perl_debug_log, "0x%"UVxf" (%s:%ld)\t",

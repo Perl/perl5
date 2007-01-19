@@ -1348,6 +1348,12 @@
 #define sv_pos_b2u_midway	S_sv_pos_b2u_midway
 #define stringify_regexp	S_stringify_regexp
 #define F0convert		S_F0convert
+#define more_sv			S_more_sv
+#define more_bodies		S_more_bodies
+#define sv_2iuv_common		S_sv_2iuv_common
+#define glob_assign_glob	S_glob_assign_glob
+#define glob_assign_ref		S_glob_assign_ref
+#define ptr_table_find		S_ptr_table_find
 #define reset_amagic		S_reset_amagic
 #endif
 #endif
@@ -3139,8 +3145,8 @@
 #define hsplit(a)		S_hsplit(aTHX_ a)
 #define hfreeentries(a)		S_hfreeentries(aTHX_ a)
 #define new_he()		S_new_he(aTHX)
-#define save_hek_flags(a,b,c,d)	S_save_hek_flags(aTHX_ a,b,c,d)
-#define hv_magic_check(a,b,c)	S_hv_magic_check(aTHX_ a,b,c)
+#define save_hek_flags		S_save_hek_flags
+#define hv_magic_check		S_hv_magic_check
 #define unshare_hek_or_pvn(a,b,c,d)	S_unshare_hek_or_pvn(aTHX_ a,b,c,d)
 #define share_hek_flags(a,b,c,d)	S_share_hek_flags(aTHX_ a,b,c,d)
 #define hv_notallowed(a,b,c,d)	S_hv_notallowed(aTHX_ a,b,c,d)
@@ -3157,7 +3163,7 @@
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
-#define is_handle_constructor(a,b)	S_is_handle_constructor(aTHX_ a,b)
+#define is_handle_constructor	S_is_handle_constructor
 #define is_list_assignment(a)	S_is_list_assignment(aTHX_ a)
 #define cop_free(a)		S_cop_free(aTHX_ a)
 #define modkids(a,b)		S_modkids(aTHX_ a,b)
@@ -3166,7 +3172,7 @@
 #define new_logop(a,b,c,d)	S_new_logop(aTHX_ a,b,c,d)
 #define simplify_sort(a)	S_simplify_sort(aTHX_ a)
 #define gv_ename(a)		S_gv_ename(aTHX_ a)
-#define scalar_mod_type(a,b)	S_scalar_mod_type(aTHX_ a,b)
+#define scalar_mod_type		S_scalar_mod_type
 #define my_kid(a,b,c)		S_my_kid(aTHX_ a,b,c)
 #define dup_attrlist(a)		S_dup_attrlist(aTHX_ a)
 #define apply_attrs(a,b,c,d)	S_apply_attrs(aTHX_ a,b,c,d)
@@ -3273,7 +3279,7 @@
 #define doeval(a,b,c,d)		S_doeval(aTHX_ a,b,c,d)
 #define check_type_and_open(a,b)	S_check_type_and_open(aTHX_ a,b)
 #define doopen_pm(a,b)		S_doopen_pm(aTHX_ a,b)
-#define path_is_absolute(a)	S_path_is_absolute(aTHX_ a)
+#define path_is_absolute	S_path_is_absolute
 #define run_user_filter(a,b,c)	S_run_user_filter(aTHX_ a,b,c)
 #endif
 #endif
@@ -3317,13 +3323,13 @@
 #define regbranch(a,b,c)	S_regbranch(aTHX_ a,b,c)
 #define reguni(a,b,c,d)		S_reguni(aTHX_ a,b,c,d)
 #define regclass(a)		S_regclass(aTHX_ a)
-#define regcurly(a)		S_regcurly(aTHX_ a)
+#define regcurly		S_regcurly
 #define reg_node(a,b)		S_reg_node(aTHX_ a,b)
 #define regpiece(a,b)		S_regpiece(aTHX_ a,b)
 #define reginsert(a,b,c)	S_reginsert(aTHX_ a,b,c)
 #define regoptail(a,b,c)	S_regoptail(aTHX_ a,b,c)
 #define regtail(a,b,c)		S_regtail(aTHX_ a,b,c)
-#define regwhite(a,b)		S_regwhite(aTHX_ a,b)
+#define regwhite		S_regwhite
 #define nextchar(a)		S_nextchar(aTHX_ a)
 #endif
 #  ifdef DEBUGGING
@@ -3334,14 +3340,14 @@
 #  endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define scan_commit(a,b)	S_scan_commit(aTHX_ a,b)
-#define cl_anything(a,b)	S_cl_anything(aTHX_ a,b)
-#define cl_is_anything(a)	S_cl_is_anything(aTHX_ a)
-#define cl_init(a,b)		S_cl_init(aTHX_ a,b)
-#define cl_init_zero(a,b)	S_cl_init_zero(aTHX_ a,b)
-#define cl_and(a,b)		S_cl_and(aTHX_ a,b)
-#define cl_or(a,b,c)		S_cl_or(aTHX_ a,b,c)
+#define cl_anything		S_cl_anything
+#define cl_is_anything		S_cl_is_anything
+#define cl_init			S_cl_init
+#define cl_init_zero		S_cl_init_zero
+#define cl_and			S_cl_and
+#define cl_or			S_cl_or
 #define study_chunk(a,b,c,d,e,f)	S_study_chunk(aTHX_ a,b,c,d,e,f)
-#define add_data(a,b,c)		S_add_data(aTHX_ a,b,c)
+#define add_data		S_add_data
 #endif
 #ifdef PERL_CORE
 #endif
@@ -3361,9 +3367,9 @@
 #define regcppop()		S_regcppop(aTHX)
 #define cache_re(a)		S_cache_re(aTHX_ a)
 #define reghop(a,b)		S_reghop(aTHX_ a,b)
-#define reghop3(a,b,c)		S_reghop3(aTHX_ a,b,c)
+#define reghop3			S_reghop3
 #define reghopmaybe(a,b)	S_reghopmaybe(aTHX_ a,b)
-#define reghopmaybe3(a,b,c)	S_reghopmaybe3(aTHX_ a,b,c)
+#define reghopmaybe3		S_reghopmaybe3
 #define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)
 #define to_utf8_substr(a)	S_to_utf8_substr(aTHX_ a)
 #define to_byte_substr(a)	S_to_byte_substr(aTHX_ a)
@@ -3411,6 +3417,12 @@
 #define sv_pos_b2u_midway(a,b,c,d)	S_sv_pos_b2u_midway(aTHX_ a,b,c,d)
 #define stringify_regexp(a,b,c)	S_stringify_regexp(aTHX_ a,b,c)
 #define F0convert		S_F0convert
+#define more_sv()		S_more_sv(aTHX)
+#define more_bodies(a,b)	S_more_bodies(aTHX_ a,b)
+#define sv_2iuv_common(a)	S_sv_2iuv_common(aTHX_ a)
+#define glob_assign_glob(a,b,c)	S_glob_assign_glob(aTHX_ a,b,c)
+#define glob_assign_ref(a,b)	S_glob_assign_ref(aTHX_ a,b)
+#define ptr_table_find		S_ptr_table_find
 #define reset_amagic(a,b)	S_reset_amagic(aTHX_ a,b)
 #endif
 #endif
@@ -3490,7 +3502,7 @@
 #endif
 #if defined(PERL_IN_UTF8_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
-#define is_utf8_char_slow(a,b)	S_is_utf8_char_slow(aTHX_ a,b)
+#define is_utf8_char_slow	S_is_utf8_char_slow
 #define is_utf8_common(a,b,c)	S_is_utf8_common(aTHX_ a,b,c)
 #define swash_get(a,b,c)	S_swash_get(aTHX_ a,b,c)
 #endif
