@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 80;
+plan tests => 130;
 
 $FS = ':';
 
@@ -309,11 +309,15 @@ ok(@ary == 3 &&
     # For terms of use, see http://www.unicode.org/terms_of_use.html
     # For documentation, see UCD.html
     my @spaces=(
-        0x0009..0x000A, # Cc   [5] <control-0009>..<control-000D>
-        0x000C..0x000D, # EXCLUDING \v aka ctl-000B aka vert-tab
-        0x0020,         # Zs       SPACE
-        0x0085,         # Cc       <control-0085>
-        0x00A0,         # Zs       NO-BREAK SPACE
+	ord("\t"),      # Cc       <control-0009>
+	ord("\n"),      # Cc       <control-000A>
+	# not PerlSpace # Cc       <control-000B>
+	ord("\f"),      # Cc       <control-000C>
+	ord("\r"),      # Cc       <control-000D>
+	ord(" "),       # Zs       SPACE
+	ord("\N{NEL}"), # Cc       <control-0085>
+	ord("\N{NO-BREAK SPACE}"),
+			# Zs       NO-BREAK SPACE
         0x1680,         # Zs       OGHAM SPACE MARK
         0x180E,         # Zs       MONGOLIAN VOWEL SEPARATOR
         0x2000..0x200A, # Zs  [11] EN QUAD..HAIR SPACE
@@ -325,10 +329,21 @@ ok(@ary == 3 &&
     );
     #diag "Have @{[0+@spaces]} to test\n";
     foreach my $cp (@spaces) {
+	my $msg = sprintf "Space: U+%04x", $cp;
         my $space = chr($cp);
-        my $str="A:$space:B\x{FFFF}";
+        my $str="A:$space:B\x{FFFD}";
         chop $str;
+
         my @res=split(/\s+/,$str);
-        is(0+@res,2) or do { diag sprintf "Char failed: 0x%x",$cp }
+        ok(@res == 2 && join('-',@res) eq "A:-:B", "$msg - /\\s+/");
+
+        my $s2 = "$space$space:A:$space$space:B\x{FFFD}";
+        chop $s2;
+
+        my @r2 = split(' ',$s2);
+        ok(@r2 == 2 && join('-', @r2) eq ":A:-:B",  "$msg - ' '");
+
+        my @r3 = split(/\s+/, $s2);
+        ok(@r3 == 3 && join('-', @r3) eq "-:A:-:B", "$msg - /\\s+/ No.2");
     }
 }
