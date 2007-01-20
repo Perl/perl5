@@ -3419,9 +3419,15 @@ PerlIOStdio_fill(pTHX_ PerlIO *f)
 	if (PerlSIO_fflush(stdio) != 0)
 	    return EOF;
     }
-    c = PerlSIO_fgetc(stdio);
-    if (c == EOF)
-	return EOF;
+    for (;;) {
+	c = PerlSIO_fgetc(stdio);
+	if (c != EOF)
+	    break;
+	if (! PerlSIO_ferror(stdio) || errno != EINTR)
+	    return EOF;
+	PERL_ASYNC_CHECK();
+	SETERRNO(0,0);
+    }
 
 #if (defined(STDIO_PTR_LVALUE) && (defined(STDIO_CNT_LVALUE) || defined(STDIO_PTR_LVAL_SETS_CNT)))
 
