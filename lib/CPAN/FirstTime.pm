@@ -19,7 +19,7 @@ use File::Basename ();
 use File::Path ();
 use File::Spec ();
 use vars qw($VERSION $urllist);
-$VERSION = sprintf "%.6f", substr(q$Rev: 1379 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 1457 $,4)/1000000 + 5.4;
 
 =head1 NAME
 
@@ -242,6 +242,12 @@ Shall we use it as the general CPAN build and cache directory?
     }
 
     #
+    #= Config: auto_commit
+    #
+
+    my_yn_prompt(auto_commit => 0, $matcher);
+
+    #
     #= Cache size, Index expire
     #
 
@@ -318,9 +324,16 @@ Shall we use it as the general CPAN build and cache directory?
     #= External programs
     #
 
-    my @external_progs = qw/bzip2 gzip tar unzip make
-                      curl lynx wget ncftpget ncftp ftp
-                      gpg patch/;
+    my @external_progs = qw/bzip2 gzip tar unzip
+
+                            make
+
+                            curl lynx wget ncftpget ncftp ftp
+
+                            gpg
+
+                            patch applypatch
+                            /;
     my(@path) = split /$Config{'path_sep'}/, $ENV{'PATH'};
     if (!$matcher or "@external_progs" =~ /$matcher/) {
         $CPAN::Frontend->myprint($prompts{external_progs});
@@ -507,17 +520,40 @@ Shall we use it as the general CPAN build and cache directory?
     }
 
     #
-    #= the CPAN shell itself
+    #= the CPAN shell itself (prompt, color)
     #
 
     my_yn_prompt(commandnumber_in_prompt => 1, $matcher);
     my_yn_prompt(term_ornaments => 1, $matcher);
-    if ("colorize_output colorize_print colorize_warn" =~ $matcher) {
+    if ("colorize_output colorize_print colorize_warn colorize_debug" =~ $matcher) {
         my_yn_prompt(colorize_output => 0, $matcher);
         if ($CPAN::Config->{colorize_output}) {
+            if ($CPAN::META->has_inst("Term::ANSIColor")) {
+                my $T="gYw";
+                print "                                      on_  on_y ".
+                    "        on_ma           on_\n"; 
+                print "                   on_black on_red  green ellow ".
+                    "on_blue genta on_cyan white\n";
+
+                for my $FG ("", "bold",
+                            map {$_,"bold $_"} "black","red","green",
+                            "yellow","blue",
+                            "magenta",
+                            "cyan","white"){
+                    printf "%12s ", $FG;
+                    for my $BG ("",map {"on_$_"} qw(black red green yellow
+                                                    blue magenta cyan white)){
+                        print $FG||$BG ?
+                            Term::ANSIColor::colored("  $T  ","$FG $BG") : "  $T  ";
+                    }
+                    print "\n";
+                }
+                print "\n";
+            }
             for my $tuple (
                            ["colorize_print", "bold blue on_white"],
                            ["colorize_warn", "bold red on_white"],
+                           ["colorize_debug", "black on_cyan"],
                           ) {
                 my_dflt_prompt($tuple->[0] => $tuple->[1], $matcher);
                 if ($CPAN::META->has_inst("Term::ANSIColor")) {
@@ -598,7 +634,7 @@ Shall we use it as the general CPAN build and cache directory?
     $CPAN::Config->{inhibit_startup_message} = 0;
 
     $CPAN::Frontend->myprint("\n\n");
-    if ($matcher) {
+    if ($matcher && !$CPAN::Config->{auto_commit}) {
         $CPAN::Frontend->myprint("Please remember to call 'o conf commit' to ".
                                  "make the config permanent!\n\n");
     } else {
@@ -1417,13 +1453,15 @@ colorize_output => qq{
 
 When you have Term::ANSIColor installed, you can turn on colorized
 output to have some visual differences between normal CPAN.pm output,
-warnings, and the output of the modules being installed. Set your
-favorite colors after some experimenting with the Term::ANSIColor
-module. Do you want to turn on colored output?},
+warnings, debugging output, and the output of the modules being
+installed. Set your favorite colors after some experimenting with the
+Term::ANSIColor module. Do you want to turn on colored output?},
 
 colorize_print => qq{Color for normal output?},
 
 colorize_warn => qq{Color for warnings?},
+
+colorize_debug => qq{Color for debugging messages?},
 
 build_requires_install_policy_intro => qq{
 
@@ -1471,7 +1509,18 @@ host should be tried first.
 
 randomize_urllist => "Randomize parameter",
 
-);
+auto_commit_intro => qq{
+
+Normally CPAN.pm keeps config variables in memory and changes need to
+be saved in a separate 'o conf commit' command to make them permanent
+between sessions. If you set the 'auto_commit' option to true, changes
+to a config variable are always automatically committed to disk.
+
+},
+
+auto_commit => qq{Always commit changes to config variables to disk?},
+
+              );
 
 die "Coding error in \@prompts declaration.  Odd number of elements, above"
   if (@prompts % 2);
