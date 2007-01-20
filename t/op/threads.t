@@ -18,7 +18,7 @@ BEGIN {
        print "1..0 # Skip: no dynamic loading on miniperl, no threads\n";
        exit 0;
      }
-     plan(3);
+     plan(4);
 }
 use threads;
 
@@ -58,5 +58,15 @@ my $object = Foo->new;
 my $ref = $object;
 weaken $ref;
 threads->new(sub { $ref = $object } )->join; # $ref = $object causes problems
+print "ok";
+EOI
+
+# Change 24643 made the mistake of assuming that CvCONST can only be true on
+# XSUBs. Somehow it can also end up on perl subs.
+fresh_perl_is(<<'EOI', 'ok', { }, 'cloning constant subs');
+use constant x=>1;
+use threads;
+$SIG{__WARN__} = sub{};
+async sub {};
 print "ok";
 EOI

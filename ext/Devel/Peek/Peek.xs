@@ -39,7 +39,7 @@ DeadCode(pTHX)
 		int levels, tots = 0, levela, tota = 0, levelas, totas = 0;
 		int dumpit = 0;
 
-		if (CvXSUB(sv)) {
+		if (CvISXSUB(sv)) {
 		    continue;		/* XSUB */
 		}
 		if (!CvGV(sv)) {

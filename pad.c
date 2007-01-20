@@ -1358,8 +1358,8 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
     CvOWNER(cv)		= 0;
 #endif /* USE_5005THREADS */
 #ifdef USE_ITHREADS
-    CvFILE(cv)		= CvXSUB(proto) ? CvFILE(proto)
-					: savepv(CvFILE(proto));
+    CvFILE(cv)		= CvISXSUB(proto) ? CvFILE(proto)
+					  : savepv(CvFILE(proto));
 #else
     CvFILE(cv)		= CvFILE(proto);
 #endif

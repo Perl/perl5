@@ -153,7 +153,7 @@ Returns the stash of the CV.
 #define CvWEAKOUTSIDE_on(cv)	(CvFLAGS(cv) |= CVf_WEAKOUTSIDE)
 #define CvWEAKOUTSIDE_off(cv)	(CvFLAGS(cv) &= ~CVf_WEAKOUTSIDE)
 
-
+#define CvISXSUB(cv)		(CvXSUB(cv) ? TRUE : FALSE)
 /*
 =head1 CV reference counts and CvOUTSIDE
 

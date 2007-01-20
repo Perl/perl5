@@ -9570,7 +9570,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 		OP_REFCNT_LOCK;
 		CvROOT(dstr)	= OpREFCNT_inc(CvROOT(dstr));
 		OP_REFCNT_UNLOCK;
-		if (CvCONST(dstr)) {
+		if (CvCONST(dstr) && CvISXSUB(dstr)) {
 		    CvXSUBANY(dstr).any_ptr = GvUNIQUE(CvGV(dstr)) ?
 			SvREFCNT_inc(CvXSUBANY(dstr).any_ptr) :
 			sv_dup_inc((SV *)CvXSUBANY(dstr).any_ptr, param);
@@ -9587,7 +9587,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 		    CvWEAKOUTSIDE(sstr)
 		    ? cv_dup(    CvOUTSIDE(dstr), param)
 		    : cv_dup_inc(CvOUTSIDE(dstr), param);
-		if (!CvXSUB(dstr))
+		if (!CvISXSUB(dstr))
 		    CvFILE(dstr) = SAVEPV(CvFILE(dstr));
 		break;
 	    }

@@ -1517,7 +1517,7 @@ PP(pp_sort)
 		}
 	    }
 	    if (!(cv && CvROOT(cv))) {
-		if (cv && CvXSUB(cv)) {
+		if (cv && CvISXSUB(cv)) {
 		    is_xsub = 1;
 		}
 		else if (gv) {

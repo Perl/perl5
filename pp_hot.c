@@ -2620,7 +2620,7 @@ S_get_db_sub(pTHX_ SV **svp, CV *cv)
 	SvIV_set(dbsv, PTR2IV(cv));	/* Do it the quickest way  */
     }
 
-    if (CvXSUB(cv))
+    if (CvISXSUB(cv))
 	PL_curcopdb = PL_curcop;
     cv = GvCV(PL_DBsub);
     return cv;
@@ -2869,7 +2869,7 @@ try_autoload:
     }
 #endif /* USE_5005THREADS */
 
-    if (CvXSUB(cv)) {
+    if (CvISXSUB(cv)) {
 #ifdef PERL_XSUB_OLDSTYLE
 	if (CvOLDSTYLE(cv)) {
 	    I32 (*fp3)(int,int,int);

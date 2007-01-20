@@ -607,7 +607,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 	     packname, (int)len, name);
 
 #ifndef USE_5005THREADS
-    if (CvXSUB(cv)) {
+    if (CvISXSUB(cv)) {
         /* rather than lookup/init $AUTOLOAD here
          * only to have the XSUB do another lookup for $AUTOLOAD
          * and split that value on the last '::',
