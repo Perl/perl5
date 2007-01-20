@@ -269,66 +269,90 @@ perform the upgrade if necessary.  See C<svtype>.
 
 #define SvUPGRADE(sv, mt) (SvTYPE(sv) >= mt || sv_upgrade(sv, mt))
 
-#define SVs_PADBUSY	0x00000100	/* reserved for tmp or my already */
-#define SVs_PADTMP	0x00000200	/* in use as tmp */
-#define SVs_PADMY	0x00000400	/* in use a "my" variable */
-#define SVs_TEMP	0x00000800	/* string is stealable? */
-#define SVs_OBJECT	0x00001000	/* is "blessed" */
-#define SVs_GMG		0x00002000	/* has magical get method */
-#define SVs_SMG		0x00004000	/* has magical set method */
-#define SVs_RMG		0x00008000	/* has random magical methods */
+#define SVs_PADBUSY	0x00000100  /* reserved for tmp or my already */
+#define SVs_PADTMP	0x00000200  /* in use as tmp */
+#define SVs_PADMY	0x00000400  /* in use a "my" variable */
+#define SVs_TEMP	0x00000800  /* string is stealable? */
+#define SVs_OBJECT	0x00001000  /* is "blessed" */
+#define SVs_GMG		0x00002000  /* has magical get method */
+#define SVs_SMG		0x00004000  /* has magical set method */
+#define SVs_RMG		0x00008000  /* has random magical methods */
 
-#define SVf_IOK		0x00010000	/* has valid public integer value */
-#define SVf_NOK		0x00020000	/* has valid public numeric value */
-#define SVf_POK		0x00040000	/* has valid public pointer value */
-#define SVf_ROK		0x00080000	/* has a valid reference pointer */
+#define SVf_IOK		0x00010000  /* has valid public integer value */
+#define SVf_NOK		0x00020000  /* has valid public numeric value */
+#define SVf_POK		0x00040000  /* has valid public pointer value */
+#define SVf_ROK		0x00080000  /* has a valid reference pointer */
 
-#define SVf_FAKE	0x00100000	/* glob or lexical is just a copy */
-#define SVf_OOK		0x00200000	/* has valid offset value */
-#define SVf_BREAK	0x00400000	/* refcnt is artificially low - used
-					 * by SV's in final arena  cleanup */
-#define SVf_READONLY	0x00800000	/* may not be modified */
+#define SVf_FAKE	0x00100000  /* 0: glob or lexical is just a copy
+				       1: SV head arena wasn't malloc()ed
+				       2: in conjunction with SVf_READONLY
+					  marks a shared hash key scalar
+					  (SvLEN == 0) or a copy on write
+					  string (SvLEN != 0) [SvIsCOW(sv)]
+				       3: For PVCV, whether CvUNIQUE(cv)
+					  refers to an eval or once only
+					  [CvEVAL(cv), CvSPECIAL(cv)]
+				       4: Whether the regexp pointer is in
+					  fact an offset [SvREPADTMP(sv)]
+				       5: On a pad name SV, that slot in the
+					  frame AV is a REFCNT'ed reference
+					  to a lexical from "outside". */
+#define SVf_OOK		0x00200000  /* has valid offset value */
+#define SVf_BREAK	0x00400000  /* refcnt is artificially low - used by
+				       SV's in final arena  cleanup */
+#define SVf_READONLY	0x00800000  /* may not be modified */
 
 
-#define SVp_IOK		0x01000000	/* has valid non-public integer value */
-#define SVp_NOK		0x02000000	/* has valid non-public numeric value */
-#define SVp_POK		0x04000000	/* has valid non-public pointer value */
-#define SVp_SCREAM	0x08000000	/* has been studied? */
+#define SVp_IOK		0x01000000  /* has valid non-public integer value */
+#define SVp_NOK		0x02000000  /* has valid non-public numeric value */
+#define SVp_POK		0x04000000  /* has valid non-public pointer value */
+#define SVp_SCREAM	0x08000000  /* has been studied? */
+#define SVphv_CLONEABLE	0x08000000  /* PVHV (stashes) clone its objects */
 
-#define SVf_UTF8        0x20000000      /* SvPV is UTF-8 encoded */
-/* Ensure this value does not clash with the GV_ADD* flags in gv.h */
 
 #define SVf_THINKFIRST	(SVf_READONLY|SVf_ROK|SVf_FAKE)
 
 #define SVf_OK		(SVf_IOK|SVf_NOK|SVf_POK|SVf_ROK| \
 			 SVp_IOK|SVp_NOK|SVp_POK)
 
-#define SVf_AMAGIC	0x10000000      /* has magical overloaded methods */
-
 #define PRIVSHIFT 8	/* (SVp_?OK >> PRIVSHIFT) == SVf_?OK */
+
+#define SVf_AMAGIC	0x10000000  /* has magical overloaded methods */
+#define SVf_UTF8        0x20000000  /* SvPV is UTF-8 encoded
+				       This is also set on RVs whose overloaded
+				       stringification is UTF-8. This might
+				       only happen as a side effect of SvPV() */
+					   
+/* Ensure this value does not clash with the GV_ADD* flags in gv.h */
 
 /* Some private flags. */
 
-/* SVpad_OUR may be set on SVt_PV{NV,MG,GV} types */
-#define SVpad_OUR	0x80000000	/* pad name is "our" instead of "my" */
-#define SVpad_TYPED	0x40000000	/* Typed Lexical */
-
-#define SVf_IVisUV	0x80000000	/* use XPVUV instead of XPVIV */
-
-#define SVpfm_COMPILED	0x80000000	/* FORMLINE is compiled */
-
-#define SVpbm_VALID	0x80000000
+/* PVHV */
+#define SVphv_REHASH	0x10000000  /* PVHV is recalculating hash values */
+/* PVHV */
+#define SVphv_SHAREKEYS 0x20000000  /* PVHV keys live on shared string table */
+/* PVNV, PVMG, PVGV, presumably only inside pads */
+#define SVpad_TYPED	0x40000000  /* Typed Lexical */
+/* PVHV */
+#define SVphv_LAZYDEL	0x40000000  /* entry in xhv_eiter must be deleted */
+/* PVBM */
 #define SVpbm_TAIL	0x40000000
+/* ??? */
+#define SVrepl_EVAL	0x40000000  /* Replacement part of s///e */
 
-#define SVrepl_EVAL	0x40000000	/* Replacement part of s///e */
-
-#define SVphv_CLONEABLE	0x08000000	/* for stashes: clone its objects */
-#define SVphv_REHASH	0x10000000	/* HV is recalculating hash values */
-#define SVphv_SHAREKEYS 0x20000000	/* keys live on shared string table */
-#define SVphv_LAZYDEL	0x40000000	/* entry in xhv_eiter must be deleted */
-#define SVphv_HASKFLAGS	0x80000000	/* keys have flag byte after hash */
-
-#define SVprv_WEAKREF   0x80000000      /* Weak reference */
+/* PVNV, PVMG, PVGV, presumably only inside pads */
+#define SVpad_OUR	0x80000000  /* pad name is "our" instead of "my" */
+/* IV, PVIV, PVNV, PVMG, PVGV and (I assume) PVLV  */
+/* Presumably IVs aren't stored in pads */
+#define SVf_IVisUV	0x80000000  /* use XPVUV instead of XPVIV */
+/* PVHV */
+#define SVphv_HASKFLAGS	0x80000000  /* keys have flag byte after hash */
+/* PVFM */
+#define SVpfm_COMPILED	0x80000000  /* FORMLINE is compiled */
+/* PVBM */
+#define SVpbm_VALID	0x80000000
+/* RV upwards. However, SVf_ROK and SVp_IOK are exclusive  */
+#define SVprv_WEAKREF   0x80000000  /* Weak reference */
 
 typedef struct {
     IV		xiv_iv;		/* integer value or pv offset */
@@ -735,6 +759,8 @@ Set the actual length of the string which is in the SV.  See C<SvIV_set>.
 /*
 =for apidoc Am|bool|SvUTF8|SV* sv
 Returns a boolean indicating whether the SV contains UTF-8 encoded data.
+Call this after SvPV() in case any call to string overloading updates the
+internal flag.
 
 =for apidoc Am|void|SvUTF8_on|SV *sv
 Turn on the UTF-8 status of an SV (the data is not changed, just the flag).
