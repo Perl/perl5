@@ -1521,6 +1521,7 @@ lib/CPAN/Kwalify.pm		helper package for CPAN.pm
 lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
 lib/CPAN/PAUSE2003.pub		CPAN public key
 lib/CPAN/PAUSE2005.pub		CPAN public key
+lib/CPAN/PAUSE2007.pub		CPAN public key
 lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
 lib/CPAN/Queue.pm		queueing system for CPAN.pm
 lib/CPAN/SIGNATURE		CPAN public key
