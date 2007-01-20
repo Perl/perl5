@@ -232,6 +232,7 @@ while (<>) {
     my $prefix = " " x length $1;
     LOG: while (<>) {
       next if /^$/;
+      s/^\t/        /;
       if (s/^$prefix//) {
 	$log .= $_;
       } elsif (/^\s+Branch:/) {
