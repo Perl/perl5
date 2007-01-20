@@ -219,7 +219,7 @@ S_save_scalar_at(pTHX_ SV **sptr)
 SV *
 Perl_save_scalar(pTHX_ GV *gv)
 {
-    SV ** const sptr = &GvSV(gv);
+    SV ** const sptr = &GvSVn(gv);
     PL_localizing = 1;
     SvGETMAGIC(*sptr);
     PL_localizing = 0;
@@ -285,7 +285,9 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
 	    IoFLAGS(gp->gp_io) |= IOf_ARGV|IOf_START;
 	}
 	GvGP(gv) = gp_ref(gp);
+#ifndef PERL_DONT_CREATE_GVSV
 	GvSV(gv) = newSV(0);
+#endif
 	GvLINE(gv) = CopLINE(PL_curcop);
 	/* XXX Ideally this cast would be replaced with a change to const char*
 	   in the struct.  */
