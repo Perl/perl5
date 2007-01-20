@@ -836,9 +836,15 @@ PP(pp_rv2av)
 		    if (SvROK(sv))
 			goto wasref;
 		}
+		if (PL_op->op_private & HINT_STRICT_REFS) {
+		    if (SvOK(sv))
+			DIE(aTHX_ PL_no_symref_sv, sv,
+			    is_pp_rv2av ? an_array : a_hash);
+		    else
+			DIE(aTHX_ PL_no_usym, is_pp_rv2av ? an_array : a_hash);
+		}
 		if (!SvOK(sv)) {
-		    if (PL_op->op_flags & OPf_REF ||
-		      PL_op->op_private & HINT_STRICT_REFS)
+		    if (PL_op->op_flags & OPf_REF)
 			DIE(aTHX_ PL_no_usym, is_pp_rv2av ? an_array : a_hash);
 		    if (ckWARN(WARN_UNINITIALIZED))
 			report_uninit(sv);
@@ -860,9 +866,6 @@ PP(pp_rv2av)
 		    }
 		}
 		else {
-		    if (PL_op->op_private & HINT_STRICT_REFS)
-			DIE(aTHX_ PL_no_symref_sv, sv,
-			    is_pp_rv2av ? an_array : a_hash);
 		    gv = (GV*)gv_fetchsv(sv, GV_ADD, type);
 		}
 	    }
