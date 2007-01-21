@@ -4611,66 +4611,71 @@ START_EXTERN_C
 #  define MGVTBL_SET_CONST_MAGIC_GET(var,a,b,c,d,e,f,g,h) EXT_MGVTBL var
 #endif
 
+/* These all need to be 0, not NULL, as NULL can be (void*)0, which is a
+ * pointer to data, whereas we're assigning pointers to functions, which are
+ * not the same beast. ANSI doesn't allow the assignment from one to the other.
+ * (although most, but not all, compilers are prepared to do it)
+ */
 MGVTBL_SET(
     PL_vtbl_sv,
     MEMBER_TO_FPTR(Perl_magic_get),
     MEMBER_TO_FPTR(Perl_magic_set),
     MEMBER_TO_FPTR(Perl_magic_len),
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_env,
-    NULL,
+    0,
     MEMBER_TO_FPTR(Perl_magic_set_all_env),
-    NULL,
+    0,
     MEMBER_TO_FPTR(Perl_magic_clear_all_env),
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_envelem,
-    NULL,
+    0,
     MEMBER_TO_FPTR(Perl_magic_setenv),
-    NULL,
+    0,
     MEMBER_TO_FPTR(Perl_magic_clearenv),
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0
 );
 
-/* For now, hints magic will also use vtbl_sig, because it is all NULL  */
+/* For now, hints magic will also use vtbl_sig, because it is all 0  */
 MGVTBL_SET(
     PL_vtbl_sig,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
 );
 
 #ifdef PERL_MICRO
 MGVTBL_SET(
     PL_vtbl_sigelem,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
 );
 
 #else
@@ -4678,338 +4683,338 @@ MGVTBL_SET(
     PL_vtbl_sigelem,
     MEMBER_TO_FPTR(Perl_magic_getsig),
     MEMBER_TO_FPTR(Perl_magic_setsig),
-    NULL,
+    0,
     MEMBER_TO_FPTR(Perl_magic_clearsig),
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0
 );
 #endif
 
 MGVTBL_SET(
     PL_vtbl_pack,
-    NULL,
-    NULL,
+    0,
+    0,
     MEMBER_TO_FPTR(Perl_magic_sizepack),
     MEMBER_TO_FPTR(Perl_magic_wipepack),
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_packelem,
     MEMBER_TO_FPTR(Perl_magic_getpack),
     MEMBER_TO_FPTR(Perl_magic_setpack),
-    NULL,
+    0,
     MEMBER_TO_FPTR(Perl_magic_clearpack),
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_dbline,
-    NULL,
+    0,
     MEMBER_TO_FPTR(Perl_magic_setdbline),
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_isa,
-    NULL,
+    0,
     MEMBER_TO_FPTR(Perl_magic_setisa),
-    NULL,
+    0,
     MEMBER_TO_FPTR(Perl_magic_setisa),
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_isaelem,
-    NULL,
+    0,
     MEMBER_TO_FPTR(Perl_magic_setisa),
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET_CONST_MAGIC_GET(
     PL_vtbl_arylen,
     MEMBER_TO_FPTR(Perl_magic_getarylen),
     MEMBER_TO_FPTR(Perl_magic_setarylen),
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_arylen_p,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+    0,
+    0,
+    0,
+    0,
     MEMBER_TO_FPTR(Perl_magic_freearylen_p),
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_mglob,
-    NULL,
+    0,
     MEMBER_TO_FPTR(Perl_magic_setmglob),
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_nkeys,
     MEMBER_TO_FPTR(Perl_magic_getnkeys),
     MEMBER_TO_FPTR(Perl_magic_setnkeys),
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_taint,
     MEMBER_TO_FPTR(Perl_magic_gettaint),
     MEMBER_TO_FPTR(Perl_magic_settaint),
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_substr,
     MEMBER_TO_FPTR(Perl_magic_getsubstr),
     MEMBER_TO_FPTR(Perl_magic_setsubstr),
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_vec,
     MEMBER_TO_FPTR(Perl_magic_getvec),
     MEMBER_TO_FPTR(Perl_magic_setvec),
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_pos,
     MEMBER_TO_FPTR(Perl_magic_getpos),
     MEMBER_TO_FPTR(Perl_magic_setpos),
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_bm,
-    NULL,
+    0,
     MEMBER_TO_FPTR(Perl_magic_setbm),
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_fm,
-    NULL,
+    0,
     MEMBER_TO_FPTR(Perl_magic_setfm),
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_uvar,
     MEMBER_TO_FPTR(Perl_magic_getuvar),
     MEMBER_TO_FPTR(Perl_magic_setuvar),
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_defelem,
     MEMBER_TO_FPTR(Perl_magic_getdefelem),
     MEMBER_TO_FPTR(Perl_magic_setdefelem),
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_regexp,
-    NULL,
+    0,
     MEMBER_TO_FPTR(Perl_magic_setregexp),
-    NULL,
-    NULL,
+    0,
+    0,
     MEMBER_TO_FPTR(Perl_magic_freeregexp),
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_regdata,
-    NULL,
-    NULL,
+    0,
+    0,
     MEMBER_TO_FPTR(Perl_magic_regdata_cnt),
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_regdatum,
     MEMBER_TO_FPTR(Perl_magic_regdatum_get),
     MEMBER_TO_FPTR(Perl_magic_regdatum_set),
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_amagic,
-    NULL,
+    0,
     MEMBER_TO_FPTR(Perl_magic_setamagic),
-    NULL,
-    NULL,
+    0,
+    0,
     MEMBER_TO_FPTR(Perl_magic_setamagic),
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_amagicelem,
-    NULL,
+    0,
     MEMBER_TO_FPTR(Perl_magic_setamagic),
-    NULL,
-    NULL,
+    0,
+    0,
     MEMBER_TO_FPTR(Perl_magic_setamagic),
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_backref,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+    0,
+    0,
+    0,
+    0,
     MEMBER_TO_FPTR(Perl_magic_killbackrefs),
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_ovrld,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+    0,
+    0,
+    0,
+    0,
     MEMBER_TO_FPTR(Perl_magic_freeovrld),
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0
 );
 
 MGVTBL_SET(
     PL_vtbl_utf8,
-    NULL,
+    0,
     MEMBER_TO_FPTR(Perl_magic_setutf8),
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
 );
 #ifdef USE_LOCALE_COLLATE
 MGVTBL_SET(
     PL_vtbl_collxfrm,
-    NULL,
+    0,
     MEMBER_TO_FPTR(Perl_magic_setcollxfrm),
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
 );
 #endif
 
 MGVTBL_SET(
     PL_vtbl_hintselem,
-    NULL,
+    0,
     MEMBER_TO_FPTR(Perl_magic_sethint),
-    NULL,
+    0,
     MEMBER_TO_FPTR(Perl_magic_clearhint),
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    0,
+    0,
+    0,
+    0
 );
 
 #include "overload.h"
