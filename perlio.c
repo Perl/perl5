@@ -607,6 +607,8 @@ void
 PerlIO_list_push(pTHX_ PerlIO_list_t *list, PerlIO_funcs *funcs, SV *arg)
 {
     PerlIO_pair_t *p;
+    PERL_UNUSED_CONTEXT;
+
     if (list->cur >= list->len) {
 	list->len += 8;
 	if (list->array)

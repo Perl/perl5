@@ -1024,7 +1024,7 @@ S_more_bodies (pTHX_ svtype sv_type)
     assert(bdp->arena_size);
 
     if (!done_sanity_check) {
-	int i = SVt_LAST;
+	unsigned int i = SVt_LAST;
 
 	done_sanity_check = TRUE;
 
@@ -3330,10 +3330,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	if (dtype < SVt_PVNV)
 	    sv_upgrade(dstr, SVt_PVNV);
 	break;
-    case SVt_PVAV:
-    case SVt_PVHV:
-    case SVt_PVCV:
-    case SVt_PVIO:
+    default:
 	{
 	const char * const type = sv_reftype(sstr,0);
 	if (PL_op)
@@ -3350,7 +3347,9 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	}
 	/*FALLTHROUGH*/
 
-    default:
+    case SVt_PVMG:
+    case SVt_PVLV:
+    case SVt_PVBM:
 	if (SvGMAGICAL(sstr) && (flags & SV_GMAGIC)) {
 	    mg_get(sstr);
 	    if ((int)SvTYPE(sstr) != stype) {
@@ -6591,9 +6590,9 @@ Perl_newRV_noinc(pTHX_ SV *tmpRef)
  */
 
 SV *
-Perl_newRV(pTHX_ SV *tmpRef)
+Perl_newRV(pTHX_ SV *sv)
 {
-    return newRV_noinc(SvREFCNT_inc_simple(tmpRef));
+    return newRV_noinc(SvREFCNT_inc_simple_NN(sv));
 }
 
 /*
@@ -8849,6 +8848,7 @@ ptr_table_* functions.
 
 
 #define sv_dup_inc(s,t)	SvREFCNT_inc(sv_dup(s,t))
+#define sv_dup_inc_NN(s,t)	SvREFCNT_inc_NN(sv_dup(s,t))
 #define av_dup(s,t)	(AV*)sv_dup((SV*)s,t)
 #define av_dup_inc(s,t)	(AV*)SvREFCNT_inc(sv_dup((SV*)s,t))
 #define hv_dup(s,t)	(HV*)sv_dup((SV*)s,t)
@@ -10449,8 +10449,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	const I32 len = av_len((AV*)proto_perl->Iregex_padav);
 	SV* const * const regexen = AvARRAY((AV*)proto_perl->Iregex_padav);
 	IV i;
-	av_push(PL_regex_padav,
-		sv_dup_inc(regexen[0],param));
+	av_push(PL_regex_padav, sv_dup_inc_NN(regexen[0],param));
 	for(i = 1; i <= len; i++) {
 	    const SV * const regex = regexen[i];
 	    SV * const sv =

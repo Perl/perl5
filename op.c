@@ -340,24 +340,27 @@ void
 Perl_op_free(pTHX_ OP *o)
 {
     OPCODE type;
-    PADOFFSET refcnt;
 
     if (!o || o->op_seq == (U16)-1)
 	return;
 
+    type = o->op_type;
     if (o->op_private & OPpREFCOUNTED) {
-	switch (o->op_type) {
+	switch (type) {
 	case OP_LEAVESUB:
 	case OP_LEAVESUBLV:
 	case OP_LEAVEEVAL:
 	case OP_LEAVE:
 	case OP_SCOPE:
 	case OP_LEAVEWRITE:
+	    {
+	    PADOFFSET refcnt;
 	    OP_REFCNT_LOCK;
 	    refcnt = OpREFCNT_dec(o);
 	    OP_REFCNT_UNLOCK;
 	    if (refcnt)
 		return;
+	    }
 	    break;
 	default:
 	    break;
@@ -3441,9 +3444,10 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		if (PL_opargs[curop->op_type] & OA_DANGEROUS) {
 		    if (curop->op_type == OP_GV) {
 			GV *gv = cGVOPx_gv(curop);
-			if (gv == PL_defgv || (int)SvCUR(gv) == PL_generation)
+			if (gv == PL_defgv
+			    || (int)GvASSIGN_GENERATION(gv) == PL_generation)
 			    break;
-			SvCUR_set(gv, PL_generation);
+			GvASSIGN_GENERATION_set(gv, PL_generation);
 		    }
 		    else if (curop->op_type == OP_PADSV ||
 			     curop->op_type == OP_PADAV ||
@@ -3473,9 +3477,11 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 #else
 			    GV *gv = (GV*)((PMOP*)curop)->op_pmreplroot;
 #endif
-			    if (gv == PL_defgv || (int)SvCUR(gv) == PL_generation)
+			    if (gv == PL_defgv
+				|| (int)GvASSIGN_GENERATION(gv) == PL_generation)
 				break;
-			    SvCUR_set(gv, PL_generation);
+			    GvASSIGN_GENERATION_set(gv, PL_generation);
+			    GvASSIGN_GENERATION_set(gv, PL_generation);
 			}
 		    }
 		    else

@@ -896,11 +896,11 @@ PERL_CALLCONV OP*	Perl_newPVOP(pTHX_ I32 type, I32 flags, char* pv)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV SV*	Perl_newRV(pTHX_ SV* pref)
+PERL_CALLCONV SV*	Perl_newRV(pTHX_ SV* sv)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV SV*	Perl_newRV_noinc(pTHX_ SV *sv)
+PERL_CALLCONV SV*	Perl_newRV_noinc(pTHX_ SV* sv)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
