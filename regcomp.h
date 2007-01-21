@@ -18,7 +18,7 @@ typedef OP OP_4tree;			/* Will be redefined later. */
 #define PERL_ENABLE_EXTENDED_TRIE_OPTIMISATION 1
 
 /* Should the optimiser take positive assertions into account? */
-#define PERL_ENABLE_POSITIVE_ASSERTION_STUDY 1
+#define PERL_ENABLE_POSITIVE_ASSERTION_STUDY 0
 
 /* Not for production use: */
 #define PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS 0

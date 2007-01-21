@@ -1265,3 +1265,6 @@ a*(*F)	aaaab	n	-	-
 (?<!bar>ABC)foo	bar>ABCfoo	n	-	-
 (?<bar>)foo	bar>ABCfoo	y	$&	foo
 (?<bar>ABC)foo	bar>ABCfoo	y	$&	ABCfoo
+
+(?<=abcd(?<=(aaaabcd)))	..aaaabcd..	y	$1	aaaabcd
+(?=xy(?<=(aaxy)))	..aaxy..	y	$1	aaxy
