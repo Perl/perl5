@@ -836,38 +836,10 @@ PP(pp_rv2av)
 		    if (SvROK(sv))
 			goto wasref;
 		}
-		if (PL_op->op_private & HINT_STRICT_REFS) {
-		    if (SvOK(sv))
-			DIE(aTHX_ PL_no_symref_sv, sv,
-			    is_pp_rv2av ? an_array : a_hash);
-		    else
-			DIE(aTHX_ PL_no_usym, is_pp_rv2av ? an_array : a_hash);
-		}
-		if (!SvOK(sv)) {
-		    if (PL_op->op_flags & OPf_REF)
-			DIE(aTHX_ PL_no_usym, is_pp_rv2av ? an_array : a_hash);
-		    if (ckWARN(WARN_UNINITIALIZED))
-			report_uninit(sv);
-		    if (gimme == G_ARRAY) {
-			SP--;
-			RETURN;
-		    }
-		    RETSETUNDEF;
-		}
-		if ((PL_op->op_flags & OPf_SPECIAL) &&
-		    !(PL_op->op_flags & OPf_MOD))
-		{
-		    gv = (GV*)gv_fetchsv(sv, 0, type);
-		    if (!gv
-			&& (!is_gv_magical_sv(sv,0)
-			    || !(gv = (GV*)gv_fetchsv(sv, GV_ADD, type))))
-		    {
-			RETSETUNDEF;
-		    }
-		}
-		else {
-		    gv = (GV*)gv_fetchsv(sv, GV_ADD, type);
-		}
+		gv = Perl_softref2xv(aTHX_ sv, is_pp_rv2av ? an_array : a_hash,
+				     type, &sp);
+		if (!gv)
+		    RETURN;
 	    }
 	    else {
 		gv = (GV*)sv;

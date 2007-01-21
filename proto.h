@@ -3332,6 +3332,14 @@ STATIC SV*	S_refto(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1);
 
 #endif
+#if defined(PERL_IN_PP_C) || defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
+PERL_CALLCONV GV*	Perl_softref2xv(pTHX_ SV *const sv, const char *const what, const U32 type, SV ***spp)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_4);
+
+#endif
 
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
 STATIC I32	S_unpack_rec(pTHX_ struct tempsym* symptr, const char *s, const char *strbeg, const char *strend, const char **new_s)
