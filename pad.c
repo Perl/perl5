@@ -71,12 +71,13 @@ but only by their index allocated at compile time (which is usually
 in PL_op->op_targ), wasting a name SV for them doesn't make sense.
 
 The SVs in the names AV have their PV being the name of the variable.
-NV+1..IV inclusive is a range of cop_seq numbers for which the name is
-valid.  For typed lexicals name SV is SVt_PVMG and SvSTASH points at the
-type.  For C<our> lexicals, the type is SVt_PVGV, and GvSTASH points at the
-stash of the associated global (so that duplicate C<our> declarations in the
-same package can be detected).  SvCUR is sometimes hijacked to
-store the generation number during compilation.
+NV+1..IV inclusive is a range of cop_seq numbers for which the name is valid.
+For typed lexicals name SV is SVt_PVMG and SvSTASH points at the type.  For
+C<our> lexicals, the type is SVt_PVGV, and SvOURSTASH points at the stash of
+the associated global (so that duplicate C<our> declarations in the same
+package can be detected)(In 5.8.x and earlier SvOURSTASH is an alias for
+GvSTASH).  SvCUR is sometimes hijacked to store the generation number during
+compilation.
 
 If SvFAKE is set on the name SV then slot in the frame AVs are
 a REFCNT'ed references to a lexical from "outside". In this case,
@@ -312,7 +313,7 @@ Create a new name in the current pad at the specified offset.
 If C<typestash> is valid, the name is for a typed lexical; set the
 name's stash to that value.
 If C<ourstash> is valid, it's an our lexical, set the name's
-GvSTASH to that value
+SvOURSTASH to that value
 
 Also, if the name is @.. or %.., create a new array or hash for that slot
 
@@ -352,7 +353,8 @@ Perl_pad_add_name(pTHX_ char *name, HV* typestash, HV* ourstash, bool fake)
     }
     if (ourstash) {
 	SvPAD_OUR_on(namesv);
-	GvSTASH(namesv) = (HV*)SvREFCNT_inc_simple_NN((SV*) ourstash);
+	(HV*)SvREFCNT_inc_simple_NN((SV*) ourstash);
+	SvOURSTASH_set(namesv, ourstash);
     }
 
     av_store(PL_comppad_name, offset, namesv);
@@ -541,7 +543,7 @@ Perl_pad_check_dup(pTHX_ char *name, bool is_our, HV *ourstash)
 		&& sv != &PL_sv_undef
 		&& !SvFAKE(sv)
 		&& (SvIVX(sv) == PAD_MAX || SvIVX(sv) == 0)
-		&& ((SvPAD_OUR(sv)) && GvSTASH(sv) == ourstash)
+		&& SvOURSTASH(sv) == ourstash
 		&& strEQ(name, SvPVX_const(sv)))
 	    {
 		Perl_warner(aTHX_ packWARN(WARN_MISC),

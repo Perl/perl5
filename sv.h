@@ -900,6 +900,13 @@ in gv.h: */
 #define SvPAD_OUR_on(sv)	(SvFLAGS(sv) |= SVpad_OUR)
 #define SvPAD_OUR_off(sv)	(SvFLAGS(sv) &= ~SVpad_OUR)
 
+#define SvOURSTASH(sv)	(SvPAD_OUR(sv) ? GvSTASH(sv) : NULL)
+#define SvOURSTASH_set(sv, st)			\
+        STMT_START {				\
+	    assert(SvTYPE(sv) == SVt_PVGV);	\
+	    GvSTASH(sv) = st;			\
+	} STMT_END
+
 #define SvRV(sv) ((XRV*)  SvANY(sv))->xrv_rv
 #define SvRVx(sv) SvRV(sv)
 

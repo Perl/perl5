@@ -218,14 +218,15 @@ ling pad (lvalue) to C<gen>.  Note that C<SvCUR_set> is hijacked for this purpos
 
 */
 
-#define PAD_COMPNAME_FLAGS(po) SvFLAGS(*av_fetch(PL_comppad_name, (po), FALSE))
+#define PAD_COMPNAME_SV(po) (*av_fetch(PL_comppad_name, (po), FALSE))
+#define PAD_COMPNAME_FLAGS(po) SvFLAGS(PAD_COMPNAME_SV(po))
 #define PAD_COMPNAME_FLAGS_isOUR(po) (PAD_COMPNAME_FLAGS(po) & SVpad_OUR)
-#define PAD_COMPNAME_PV(po) SvPV_nolen(*av_fetch(PL_comppad_name, (po), FALSE))
+#define PAD_COMPNAME_PV(po) SvPV_nolen(PAD_COMPNAME_SV(po))
 
 #define PAD_COMPNAME_TYPE(po) pad_compname_type(po)
 
 #define PAD_COMPNAME_OURSTASH(po) \
-    (GvSTASH(*av_fetch(PL_comppad_name, (po), FALSE)))
+    (SvOURSTASH(PAD_COMPNAME_SV(po)))
 
 #define PAD_COMPNAME_GEN(po) SvCUR(AvARRAY(PL_comppad_name)[po])
 
