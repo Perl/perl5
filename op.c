@@ -6852,7 +6852,7 @@ Perl_peep(pTHX_ register OP *o)
 	    if (rop->op_type != OP_RV2HV || rop->op_first->op_type != OP_PADSV)
 		break;
 	    lexname = *av_fetch(PL_comppad_name, rop->op_first->op_targ, TRUE);
-	    if (!(SvFLAGS(lexname) & SVpad_TYPED))
+	    if (!SvPAD_TYPED(lexname))
 		break;
 	    fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE);
 	    if (!fields || !GvHV(*fields))
@@ -6903,7 +6903,7 @@ Perl_peep(pTHX_ register OP *o)
 	    if (rop->op_type != OP_RV2HV || rop->op_first->op_type != OP_PADSV)
 		break;
 	    lexname = *av_fetch(PL_comppad_name, rop->op_first->op_targ, TRUE);
-	    if (!(SvFLAGS(lexname) & SVpad_TYPED))
+	    if (!SvPAD_TYPED(lexname))
 		break;
 	    fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE);
 	    if (!fields || !GvHV(*fields))

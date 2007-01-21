@@ -5637,7 +5637,7 @@ S_pending_ident(pTHX)
 	    tmp = pad_findmy(PL_tokenbuf);
         if (tmp != NOT_IN_PAD) {
             /* might be an "our" variable" */
-            if (PAD_COMPNAME_FLAGS(tmp) & SVpad_OUR) {
+            if (PAD_COMPNAME_FLAGS_isOUR(tmp)) {
                 /* build ops for a bareword */
                 SV * const sym
 		  = newSVpv(HvNAME_get(PAD_COMPNAME_OURSTASH(tmp)), 0);
@@ -9823,7 +9823,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 	       add symbol table ops
 	    */
 	    if ((tmp = pad_findmy(d)) != NOT_IN_PAD) {
-		if (PAD_COMPNAME_FLAGS(tmp) & SVpad_OUR) {
+		if (PAD_COMPNAME_FLAGS_isOUR(tmp)) {
 		    SV * const sym = sv_2mortal(
 			    newSVpv(HvNAME_get(PAD_COMPNAME_OURSTASH(tmp)),0));
 		    sv_catpvs(sym, "::");

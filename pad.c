@@ -347,11 +347,11 @@ Perl_pad_add_name(pTHX_ char *name, HV* typestash, HV* ourstash, bool fake)
     sv_setpv(namesv, name);
 
     if (typestash) {
-	SvFLAGS(namesv) |= SVpad_TYPED;
+	SvPAD_TYPED_on(namesv);
 	SvSTASH_set(namesv, (HV*)SvREFCNT_inc_simple_NN((SV*)typestash));
     }
     if (ourstash) {
-	SvFLAGS(namesv) |= SVpad_OUR;
+	SvPAD_OUR_on(namesv);
 	GvSTASH(namesv) = (HV*)SvREFCNT_inc_simple_NN((SV*) ourstash);
     }
 
@@ -541,7 +541,7 @@ Perl_pad_check_dup(pTHX_ char *name, bool is_our, HV *ourstash)
 		&& sv != &PL_sv_undef
 		&& !SvFAKE(sv)
 		&& (SvIVX(sv) == PAD_MAX || SvIVX(sv) == 0)
-		&& ((SvFLAGS(sv) & SVpad_OUR) && GvSTASH(sv) == ourstash)
+		&& ((SvPAD_OUR(sv)) && GvSTASH(sv) == ourstash)
 		&& strEQ(name, SvPVX_const(sv)))
 	    {
 		Perl_warner(aTHX_ packWARN(WARN_MISC),
@@ -608,7 +608,7 @@ Perl_pad_findmy(pTHX_ char *name)
 	    if (   seq >  U_32(SvNVX(sv))	/* min */
 		&& seq <= (U32)SvIVX(sv))	/* max */
 		return off;
-	    else if ((SvFLAGS(sv) & SVpad_OUR)
+	    else if (SvPAD_OUR(sv)
 		    && U_32(SvNVX(sv)) == PAD_MAX) /* min */
 	    {
 		/* look for an our that's being introduced; this allows
@@ -805,7 +805,7 @@ found:
 	}
 	else if (!CvUNIQUE(PL_compcv)) {
 	    if (ckWARN(WARN_CLOSURE) && !SvFAKE(sv) && !CvUNIQUE(cv)
-		&& !(SvFLAGS(sv) & SVpad_OUR))
+		&& !(SvPAD_OUR(sv)))
 	    {
 		Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
 		    "Variable \"%s\" will not stay shared", name);
@@ -1565,7 +1565,7 @@ HV *
 Perl_pad_compname_type(pTHX_ const PADOFFSET po)
 {
     SV* const * const av = av_fetch(PL_comppad_name, po, FALSE);
-    if ( SvFLAGS(*av) & SVpad_TYPED ) {
+    if ( SvPAD_TYPED(*av) ) {
         return SvSTASH(*av);
     }
     return NULL;

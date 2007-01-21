@@ -1055,7 +1055,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (GvUNIQUE(sv))       sv_catpv(d, "UNIQUE,");
 	if (GvASSUMECV(sv))	sv_catpv(d, "ASSUMECV,");
 	if (GvIN_PAD(sv))       sv_catpv(d, "IN_PAD,");
-	if (flags & SVpad_OUR)	sv_catpv(d, "OUR,");
+	if (SvPAD_OUR(sv))	sv_catpv(d, "OUR,");
+	if (SvPAD_TYPED(sv))	sv_catpv(d, "TYPED,");
 	if (GvIMPORTED(sv)) {
 	    sv_catpv(d, "IMPORT");
 	    if (GvIMPORTED(sv) == GVf_IMPORTED)
@@ -1079,8 +1080,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (SvVALID(sv))	sv_catpv(d, "VALID,");
 	break;
     case SVt_PVMG:
-	if (flags & SVpad_TYPED)
-				sv_catpv(d, "TYPED,");
+	if (SvPAD_TYPED(sv))	sv_catpv(d, "TYPED,");
 	break;
     }
     /* SVphv_SHAREKEYS is also 0x20000000 */
