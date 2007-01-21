@@ -4009,7 +4009,7 @@ to add more than one instance of the same 'how'.
 void
 Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 namlen)
 {
-    const MGVTBL *vtable;
+    MGVTBL *vtable;
     MAGIC* mg;
 
     if (SvREADONLY(sv)) {

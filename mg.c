@@ -413,7 +413,7 @@ Perl_mg_localize(pTHX_ SV *sv, SV *nsv)
 {
     MAGIC *mg;
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
-	MGVTBL* const vtbl = mg->mg_virtual;
+	const MGVTBL* const vtbl = mg->mg_virtual;
 	switch (mg->mg_type) {
 	/* value magic types: don't copy */
 	case PERL_MAGIC_bm:
@@ -439,7 +439,7 @@ Perl_mg_localize(pTHX_ SV *sv, SV *nsv)
 	if ((mg->mg_flags & MGf_LOCAL) && vtbl->svt_local)
 	    (void)CALL_FPTR(vtbl->svt_local)(aTHX_ nsv, mg);
 	else
-	    sv_magicext(nsv, mg->mg_obj, mg->mg_type, vtbl,
+	    sv_magicext(nsv, mg->mg_obj, mg->mg_type, (MGVTBL *)vtbl,
 			    mg->mg_ptr, mg->mg_len);
 
 	/* container types should remain read-only across localization */
