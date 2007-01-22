@@ -52,11 +52,20 @@ my @neg_time =
      [ 1950, 04, 12, 9, 30, 31 ],
     );
 
+# Leap year tests
+my @years =
+    (
+     [ 1900 => 0 ],
+     [ 1947 => 0 ],
+     [ 1996 => 1 ],
+     [ 2000 => 1 ],
+     [ 2100 => 0 ],
+    );
+
 # Use 3 days before the start of the epoch because with Borland on
 # Win32 it will work for -3600 _if_ your time zone is +01:00 (or
 # greater).
-my $neg_epoch_ok =	# take into account systems with unsigned time too
-    (defined ((localtime(-259200))[0]) and (localtime(-259200))[5] == 69) ? 1 : 0;
+my $neg_epoch_ok = defined ((localtime(-259200))[0]) ? 1 : 0;
 
 # use vmsish 'time' makes for oddness around the Unix epoch
 if ($^O eq 'VMS') {
@@ -67,7 +76,8 @@ if ($^O eq 'VMS') {
 my $tests = (@time * 12);
 $tests += @neg_time * 12;
 $tests += @bad_time;
-$tests += 6;
+$tests += @years;
+$tests += 5;
 $tests += 2 if $ENV{PERL_CORE};
 $tests += 8 if $ENV{MAINTAINER};
 
@@ -148,14 +158,18 @@ for (@bad_time) {
     ok($hour == 2 || $hour == 3, 'hour should be 2 or 3');
 }
 
+for my $p (@years) {
+    my ( $year, $is_leap_year ) = @$p;
+
+    my $string = $is_leap_year ? 'is' : 'is not';
+    is( Time::Local::_is_leap_year($year), $is_leap_year,
+        "$year $string a leap year" );
+}
+
 SKIP:
 {
-    skip 'this platform does not support negative epochs.', 2
+    skip 'this platform does not support negative epochs.', 1
         unless $neg_epoch_ok;
-
-    eval { timegm(0,0,0,29,1,1900) };
-    like($@, qr/Day '29' out of range 1\.\.28/,
-         'does not accept leap day in 1900');
 
     eval { timegm(0,0,0,29,1,1904) };
     is($@, '', 'no error with leap day of 1904');
