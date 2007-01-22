@@ -372,6 +372,7 @@ PERL_CALLCONV void	Perl_gv_fullname(pTHX_ SV* sv, GV* gv);
 /* PERL_CALLCONV void	Perl_gv_fullname3(pTHX_ SV* sv, GV* gv, const char* prefix); */
 PERL_CALLCONV void	Perl_gv_fullname4(pTHX_ SV* sv, GV* gv, const char* prefix, bool keepmain);
 PERL_CALLCONV void	Perl_gv_init(pTHX_ GV* gv, HV* stash, const char* name, STRLEN len, int multi);
+PERL_CALLCONV void	Perl_gv_name_set(pTHX_ GV* gv, const char *name, U32 len, U32 flags);
 PERL_CALLCONV HV*	Perl_gv_stashpv(pTHX_ const char* name, I32 create);
 PERL_CALLCONV HV*	Perl_gv_stashpvn(pTHX_ const char* name, U32 namelen, I32 create);
 PERL_CALLCONV HV*	Perl_gv_stashsv(pTHX_ SV* sv, I32 create);
@@ -1795,9 +1796,7 @@ STATIC int	S_dooneliner(pTHX_ const char *cmd, const char *filename)
 			__attribute__warn_unused_result__;
 
 #  endif
-STATIC SV *	S_space_join_names_mortal(pTHX_ char *const *array)
-			__attribute__nonnull__(pTHX_1);
-
+STATIC SV *	S_space_join_names_mortal(pTHX_ char *const *array);
 #endif
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)

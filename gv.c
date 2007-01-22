@@ -212,8 +212,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     GvEGV(gv) = gv;
     sv_magic((SV*)gv, (SV*)gv, PERL_MAGIC_glob, NULL, 0);
     GvSTASH(gv) = (HV*)SvREFCNT_inc(stash);
-    GvNAME(gv) = savepvn(name, len);
-    GvNAMELEN(gv) = len;
+    gv_name_set(gv, name, len, GV_ADD);
     if (multi || doproto)              /* doproto means it _was_ mentioned */
 	GvMULTI_on(gv);
     if (doproto) {			/* Replicate part of newSUB here. */
@@ -2101,6 +2100,19 @@ Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags)
 	}
     }
     return FALSE;
+}
+
+void
+Perl_gv_name_set(pTHX_ GV *gv, const char *name, U32 len, U32 flags)
+{
+    if (len > I32_MAX)
+	Perl_croak(aTHX_ "panic: gv name too long (%"UVuf")", (UV) len);
+
+    if (!(flags & GV_ADD)) {
+	Safefree(GvXPVGV(gv)->xgv_name);
+    }
+    GvXPVGV(gv)->xgv_name = name ? savepvn(name, len) : NULL;
+    GvXPVGV(gv)->xgv_namelen = len;
 }
 
 /*

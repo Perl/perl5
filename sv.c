@@ -3097,8 +3097,7 @@ S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
 	sv_upgrade(dstr, SVt_PVGV);
 	sv_magic(dstr, dstr, PERL_MAGIC_glob, Nullch, 0);
 	GvSTASH(dstr) = (HV*)SvREFCNT_inc(GvSTASH(sstr));
-	GvNAME(dstr) = savepvn(name, len);
-	GvNAMELEN(dstr) = len;
+	gv_name_set((GV *)dstr, name, len, GV_ADD);
 	SvFAKE_on(dstr);	/* can coerce to non-glob */
     }
 
@@ -9481,7 +9480,8 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 		    LvTARG(dstr) = sv_dup_inc(LvTARG(dstr), param);
 		break;
 	    case SVt_PVGV:
-		GvNAME(dstr)	= SAVEPVN(GvNAME(dstr), GvNAMELEN(dstr));
+		GvXPVGV(dstr)->xgv_name	= SAVEPVN(GvNAME(dstr), GvNAMELEN(dstr));
+
 		GvSTASH(dstr)	= hv_dup_inc(GvSTASH(dstr), param);
 		GvGP(dstr)	= gp_dup(GvGP(dstr), param);
 		(void)GpREFCNT_inc(GvGP(dstr));
