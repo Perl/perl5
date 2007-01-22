@@ -104,6 +104,7 @@
 #endif
 #ifdef PERL_CORE
 #define convert			Perl_convert
+#define create_eval_scope	Perl_create_eval_scope
 #endif
 #define croak			Perl_croak
 #define vcroak			Perl_vcroak
@@ -156,6 +157,7 @@
 #define debstackptrs		Perl_debstackptrs
 #define delimcpy		Perl_delimcpy
 #ifdef PERL_CORE
+#define delete_eval_scope	Perl_delete_eval_scope
 #define deprecate		Perl_deprecate
 #define deprecate_old		Perl_deprecate_old
 #endif
@@ -2205,6 +2207,7 @@
 #endif
 #ifdef PERL_CORE
 #define convert(a,b,c)		Perl_convert(aTHX_ a,b,c)
+#define create_eval_scope(a)	Perl_create_eval_scope(aTHX_ a)
 #endif
 #define vcroak(a,b)		Perl_vcroak(aTHX_ a,b)
 #if defined(PERL_IMPLICIT_CONTEXT)
@@ -2240,6 +2243,7 @@
 #define debstackptrs()		Perl_debstackptrs(aTHX)
 #define delimcpy(a,b,c,d,e,f)	Perl_delimcpy(aTHX_ a,b,c,d,e,f)
 #ifdef PERL_CORE
+#define delete_eval_scope()	Perl_delete_eval_scope(aTHX)
 #define deprecate(a)		Perl_deprecate(aTHX_ a)
 #define deprecate_old(a)	Perl_deprecate_old(aTHX_ a)
 #endif

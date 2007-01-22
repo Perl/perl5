@@ -151,6 +151,7 @@ PERL_CALLCONV MAGIC*	Perl_condpair_magic(pTHX_ SV *sv);
 PERL_CALLCONV OP*	Perl_convert(pTHX_ I32 optype, I32 flags, OP* o)
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV PERL_CONTEXT*	Perl_create_eval_scope(pTHX_ U32 flags);
 PERL_CALLCONV void	Perl_croak(pTHX_ const char* pat, ...)
 			__attribute__noreturn__
 			__attribute__format__(__printf__,pTHX_1,pTHX_2);
@@ -254,6 +255,7 @@ PERL_CALLCONV I32	Perl_debop(pTHX_ OP* o);
 PERL_CALLCONV I32	Perl_debstack(pTHX);
 PERL_CALLCONV I32	Perl_debstackptrs(pTHX);
 PERL_CALLCONV char*	Perl_delimcpy(pTHX_ char* to, char* toend, char* from, char* fromend, int delim, I32* retlen);
+PERL_CALLCONV void	Perl_delete_eval_scope(pTHX);
 PERL_CALLCONV void	Perl_deprecate(pTHX_ char* s);
 PERL_CALLCONV void	Perl_deprecate_old(pTHX_ char* s);
 PERL_CALLCONV OP*	Perl_die(pTHX_ const char* pat, ...)
