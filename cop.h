@@ -716,7 +716,7 @@ L<perlcall>.
 #define G_KEEPERR      16	/* Append errors to $@, don't overwrite it */
 #define G_NODEBUG      32	/* Disable debugging at toplevel.  */
 #define G_METHOD       64       /* Calling method. */
-#define G_FAKINGEVAL  256	/* Faking en eval context for call_sv or
+#define G_FAKINGEVAL  256	/* Faking an eval context for call_sv or
 				   fold_constants. */
 
 /* flag bits for PL_in_eval */

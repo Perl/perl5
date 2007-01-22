@@ -3873,7 +3873,7 @@ Found in file sv.h
 =item SvIV
 X<SvIV>
 
-Coerces the given SV to an integer and returns it. See  C<SvIVx> for a
+Coerces the given SV to an integer and returns it. See C<SvIVx> for a
 version which guarantees to evaluate sv only once.
 
 	IV	SvIV(SV* sv)
@@ -4043,7 +4043,7 @@ Found in file sv.h
 =item SvNV
 X<SvNV>
 
-Coerce the given SV to a double and return it. See  C<SvNVx> for a version
+Coerce the given SV to a double and return it. See C<SvNVx> for a version
 which guarantees to evaluate sv only once.
 
 	NV	SvNV(SV* sv)
