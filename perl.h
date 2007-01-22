@@ -182,7 +182,7 @@ struct perl_thread;
  * but we cannot quite get rid of, such as "ax" in PPCODE+noargs xsubs
  */
 #ifndef PERL_UNUSED_ARG
-#  ifdef lint
+#  if defined(lint) && defined(S_SPLINT_S) /* www.splint.org */
 #    include <note.h>
 #    define PERL_UNUSED_ARG(x) NOTE(ARGUNUSED(x))
 #  else

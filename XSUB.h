@@ -83,7 +83,7 @@ is a lexical $_ in scope. (Lexical $_ is available in perl 5.9.2 and later)
 */
 
 #ifndef PERL_UNUSED_ARG
-#  ifdef lint
+#  if defined(lint) && defined(S_SPLINT_S) /* www.splint.org */
 #    include <note.h>
 #    define PERL_UNUSED_ARG(x) NOTE(ARGUNUSED(x))
 #  else
@@ -114,7 +114,7 @@ is a lexical $_ in scope. (Lexical $_ is available in perl 5.9.2 and later)
 
 #define dITEMS I32 items = SP - MARK
 
-#ifdef lint
+#if defined(lint) && defined(S_SPLINT_S) /* www.splint.org */
 #  define dXSARGS \
 	NOTE(ARGUNUSED(cv)) \
 	dSP; dAXMARK; dITEMS
