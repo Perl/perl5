@@ -1845,9 +1845,6 @@ STATIC I32	S_regmatch(pTHX_ regnode *prog)
 STATIC I32	S_regrepeat(pTHX_ const regnode *p, I32 max)
 			__attribute__warn_unused_result__;
 
-STATIC I32	S_regrepeat_hard(pTHX_ regnode *p, I32 max, I32 *lp)
-			__attribute__warn_unused_result__;
-
 STATIC I32	S_regtry(pTHX_ regexp *prog, char *startpos)
 			__attribute__warn_unused_result__;
 
