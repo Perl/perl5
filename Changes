@@ -28,6 +28,1038 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.9		Maintenance release working toward v5.8.9
 --------------
 ____________________________________________________________________________
+[ 29916] By: nicholas                              on 2007/01/22  16:26:58
+        Log: Integrate:
+             [ 27526]
+             reduce S_regrepeat_hard() callers from 3 to 1
+             
+             [ 27534]
+             inline, then delete, S_regrepeat_hard()
+             
+             [ 27535]
+             Restore a bit of change 27533 that change 27534 inadvertently unwound.
+             
+             [ 27569]
+             remove idential code branch from regmatch()
+     Branch: maint-5.8/perl
+	  !> embed.fnc embed.h proto.h regexec.c
+____________________________________________________________________________
+[ 29915] By: nicholas                              on 2007/01/22  15:49:59
+        Log: Integrate:
+             [ 27533]
+             sv_find() returning false, followed by sv_magic() to add the magic,
+             followed immediately by sv_find() to find it, is somewhat wasteful.
+             So use sv_magicext(). (All cases are also correct w.r.t. SvREADONLY())
+             
+             [ 27542]
+             Subject: [PATCH] Change the semantics of S_isa_lookup
+             From: Andy Lester <andy@petdance.com>
+             Date: Sat, 18 Mar 2006 00:28:45 -0600
+             Message-ID: <20060318062845.GA11607@petdance.com>
+             
+             [ 27548]
+             If the scalar has just been upgraded to SVt_RV, there's no way SvPVX
+             can be non-NULL, so no need to check.
+     Branch: maint-5.8/perl
+	  !> embed.fnc mg.c pp.c pp_ctl.c pp_hot.c proto.h regexec.c sv.c
+	  !> universal.c
+____________________________________________________________________________
+[ 29914] By: nicholas                              on 2007/01/22  15:29:10
+        Log: Integrate:
+             [ 27439]
+             MAD changes for bare skipspace()
+             
+             [ 27442]
+             Replace PL_nextval[PL_nexttoke].opval with the macro NEXTVAL_NEXTTOKE
+             as MAD conditionally changes this consistently in 27 places.
+     Branch: maint-5.8/perl
+	   ! toke.c
+____________________________________________________________________________
+[ 29913] By: nicholas                              on 2007/01/22  14:45:23
+        Log: Integrate:
+             [ 27213]
+             The two whitespace changes from
+             
+             Subject: arena-rework : consolidated patch
+             From: Jim Cromie <jim.cromie@gmail.com>
+             Message-ID: <43F0F649.9040205@gmail.com>
+             Date: Mon, 13 Feb 2006 14:12:41 -0700
+             
+             [ 27397]
+             Subject:  Re: [PATCH] Removed a redundant o->op_type
+             From: Paul Johnson <paul@pjcj.net>
+             Date: Tue, 28 Feb 2006 20:17:31 +0100
+             Message-ID: <20060228191731.GD20933@pjcj.net>
+             
+             [ 27414]
+             Subject: [PATCH] Removed unused check and assignment in pp_hot.c
+             From: andy@petdance.com (Andy Lester)
+             Date: Wed, 8 Mar 2006 00:45:29 -0600
+             Message-ID: <20060308064529.GA16499@petdance.com>
+             
+             [ 27423]
+             Change from Larry in the MAD code which seems to be unrelated to MAD.
+             
+             [ 27443]
+             Refactoring from Larry implicit in the MAD patch.
+             
+             [ 27444]
+             Another refactoring from Larry implicit in the MAD patch.
+             
+             [ 27451]
+             Avoid scribbling on the passed in command line string for -i in 
+             moreswitches.
+             
+             [ 27452]
+             Superior *printf-fu lets us avoid modifying source code.
+             
+             [ 27456]
+             Correct another gv_fetchpv() - it takes a bitmask of flags, not simply
+             TRUE/FALSE.
+             
+             [ 27458]
+             Tease apart the keyword/subroutine test in S_checkcomma.
+             
+             [ 27459]
+             Summon constman! S_checkcomma now has all 3 arguments const char.
+             
+             [ 27469]
+             Subject: [PATCH] Localizing some vars in S_checkcomma
+             From: andy@petdance.com (Andy Lester)
+             Message-ID: <20060310223100.GA13455@petdance.com>
+             Date: Fri, 10 Mar 2006 16:31:00 -0600
+             
+             [ 27470]
+             Subject: [PATCH] Sync up embed.fnc and doio.c
+             From: andy@petdance.com (Andy Lester)
+             Message-ID: <20060311071338.GA12490@petdance.com>
+             Date: Sat, 11 Mar 2006 01:13:38 -0600
+             
+             [ 27480]
+             isSPACE('\0') is false, so can simplify the condition in the for
+             loop. As the for loop is basically a while loop, write it as one, to
+             make its intentions clearer.
+             
+             [ 27493]
+             Subject: [PATCH] Do nothing in a GCC-friendly way
+             From: andy@petdance.com (Andy Lester)
+             Date: Mon, 13 Mar 2006 12:48:50 -0600
+             Message-ID: <20060313184850.GA16905@petdance.com>
+             
+             [ 27507]
+             Expunge references to HV_AMAGIC, HV_AMAGICbad and HV_AMAGICmb which
+             have been unused since revision 1.
+             
+             [ 27523]
+             Correct the macros in the comments in hv.c. Given the improvements in
+             compiler optimisation, and the almost irrelevance of instructions
+             executed over cache misses, maybe we should just remove the comments
+             by putting their code back in place of the o{ptimis,bfuscat}ed version.
+     Branch: maint-5.8/perl
+	   ! proto.h
+	  !> embed.fnc gv.c hv.c hv.h op.c perl.c pp_hot.c sv.h toke.c
+____________________________________________________________________________
+[ 29912] By: nicholas                              on 2007/01/21  23:33:27
+        Log: Integrate:
+             [ 26924]
+             Un-const magic virtual tables; this consting breaks the nasty
+             things done by Swig, as noticed by Audrey.
+             
+             [ 27361]
+             Subject: [PATCH] mgvtbl initialization
+             From: andy@petdance.com (Andy Lester)
+             Date: Wed, 1 Mar 2006 22:52:20 -0600
+             Message-ID: <20060302045220.GA15985@petdance.com>
+             
+             [ 28599]
+             Subject: [PATCH] make magic vtables const if PERL_GLOBAL_STRUCT_PRIVATE
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Mon, 17 Jul 2006 09:09:24 +0300
+             Message-ID: <44BB2994.5090609@iki.fi>
+             
+             [ 29910]
+             Restore the const to vtbl in Perl_mg_localize() removed in change
+             26924.
+             
+             [ 29911]
+             Assignments to function pointers can't be NULL, as that's a pointer to
+             data, and assigning pointers to data to pointers to functions is not
+             ANSI-conformant.
+     Branch: maint-5.8/perl
+	   ! mg.c
+	  !> embed.fnc mg.h perl.h pod/perlapi.pod pod/perlguts.pod proto.h
+	  !> sv.c
+____________________________________________________________________________
+[ 29909] By: nicholas                              on 2007/01/21  22:28:56
+        Log: Integrate:
+             [ 27327]
+             Abstract the specific use of SvCUR in GVs for detecting variables on
+             both sides of an assignment using GvASSIGN_GENERATION() and
+             GvASSIGN_GENERATION_set().
+             
+             [ 27337]
+             Fix code-before-declaration error (under VC++) from change #27334
+             
+             [ 27349]
+             Subject: [PATCH] Removed a redundant o->op_type
+             From: andy@petdance.com (Andy Lester)
+             Message-ID: <20060227202043.GA7783@petdance.com>
+             Date: Mon, 27 Feb 2006 14:20:43 -0600
+             
+             [ 27350]
+             In Perl_sv_setsv_flags, swap the default in the type based switch to
+             the "Bizarre copy" failure case.
+             
+             [ 27351]
+             Silence a VC++ warning with DEBUGGING builds
+             (signed/unsigned mismatch)
+             
+             [ 27355]
+             Subject: [PATCH] a buglet in fakesdio.h
+             From: Anton Berezin <tobez@tobez.org>
+             Date: Wed, 1 Mar 2006 16:56:13 +0100
+             Message-ID: <20060301155613.GA30368@heechee.tobez.org>
+             
+             [ 27360]
+             Subject: [PATCH] Non-null optimizations
+             From: andy@petdance.com (Andy Lester)
+             Date: Wed, 1 Mar 2006 22:13:45 -0600
+             Message-ID: <20060302041345.GA13731@petdance.com>
+     Branch: maint-5.8/perl
+	  !> embed.fnc fakesdio.h gv.h op.c perlio.c pod/perlapi.pod
+	  !> proto.h sv.c
+____________________________________________________________________________
+[ 29908] By: nicholas                              on 2007/01/21  21:58:40
+        Log: Integrate:
+             [ 27270]
+             Turn on match string copying when /e flag is set on a substitution.
+             
+             Subject: [PATCH] dodge a valgrind error (for maint or blead)
+             From: Jarkko Hietaniemi <jhietaniemi@gmail.com>
+             Date: Feb 22, 2006 8:16 PM
+             Message-ID: <43FCB896.7060106@gmail.com>
+             
+             [ 27320]
+             Given that Perl_gp_free() is refcount-dec-and-maybe-free for the glob
+             pointer, it's inconsistent that it only sets this GV's GvGP to 0 if
+             this GV happened to have the last reference. Why should this GV care if
+             it had the last reference? So always set it to 0. It's free. Gone.
+             
+             [ 27359]
+             Don't put strings with embedded NULs in the environment.
+             This makes things like -d:Foo=bar work again.
+             
+             [ 27402]
+             $[ = 2 should not warn.
+             
+             [ 27403]
+             This looks like a memory leak.
+             
+             [ 27436]
+             Fix a memory leak in ck_grep(), spotted by coverity:
+             perl -e'eval "grep" while 1'
+             
+             [ 27448]
+             The Coverity audit is upset that the scream_olds variable is not
+             directly initialized, although it is likely initialized after 
+             another variable takes a reference to it.
+             
+             [ 27476]
+             Possible NULL pointer reference found by Coverity checks.
+             
+             [ 27477]
+             Perl_newWHILEOP() had exactly the same lack of a NULL pointer check
+             that Perl_newLOOPOP() had and fixed in change #27476.  Maybe some 
+             refactoring is needed?
+             
+             [ 27515]
+             require should ignore directories found when searching @INC not just
+             die as soon as it finds one.  It should for instance be possible to
+             for require "File" to read the file "./File" even if there happens to
+             be a "File" directory in perl's standard library.
+             
+             This fixes the RT #24404 fix in change 26373.
+     Branch: maint-5.8/perl
+	  !> gv.c op.c perl.c pp_ctl.c pp_hot.c regexec.c t/comp/require.t
+	  !> t/lib/warnings/op
+____________________________________________________________________________
+[ 29906] By: nicholas                              on 2007/01/21  12:16:40
+        Log: Integrate:
+             [ 27306]
+             Replace usage of GvSTASH for storing the stash of C<our> with
+             OURSTASH. Set the stash with OURSTASH_SET.
+             
+             [ 29633]
+             With PAD_COMPNAME_GEN in SvUVX, SvCUR is trustworthy once more.
+             
+             [just the pad.h changes]
+             
+             [ 29679]
+             Rename OURSTASH to SvOURSTASH and OURSTASH_set to SvOURSTASH_set.
+     Branch: maint-5.8/perl
+	   ! pad.c
+	  !> dump.c pad.h sv.c sv.h
+____________________________________________________________________________
+[ 29904] By: nicholas                              on 2007/01/21  00:30:14
+        Log: Integrate:
+             [ 27301]
+             Subject: [PATCH] Perl_save_aelem can't be const
+             From: Andy Lester <andy@petdance.com>
+             Date: Thu, 23 Feb 2006 22:53:40 -0600
+             Message-ID: <20060224045340.GA6318@petdance.com>
+             
+             [ 27339]
+             ptr_table_find() is only defined with ithreads
+     Branch: maint-5.8/perl
+	  !> embed.fnc embed.h proto.h scope.c sv.c
+____________________________________________________________________________
+[ 29903] By: nicholas                              on 2007/01/21  00:16:12
+        Log: Integrate:
+             [ 27294]
+             Replace direct flags tests & manipulations for SVpad_TYPED and
+             SVpad_OUR with macros SvPAD_TYPED(), SvPAD_OUR() etc, to abstract
+             away the flags bits acutally used to store this information.
+     Branch: maint-5.8/perl
+	  !> XSUB.h dump.c op.c pad.c pad.h pp.c sv.c sv.h toke.c
+____________________________________________________________________________
+[ 29902] By: nicholas                              on 2007/01/20  23:57:28
+        Log: Integrate:
+             [ 27271]
+             Add a test for study() on tied scalars, by Andy Lester after
+             Rick Delaney
+             
+             [ 27272]
+             Mark some new study tests as TODO
+             
+             [ 27273]
+             Avoid C<study>ing any strings that might change underneath us, such
+             as tied scalars and scalars with overloaded stringification.
+             
+             [ 27274]
+             Fix typos and a missing bracket.
+     Branch: maint-5.8/perl
+	  +> t/op/studytied.t
+	  !> MANIFEST pp.c
+____________________________________________________________________________
+[ 29901] By: nicholas                              on 2007/01/20  23:44:56
+        Log: Integrate:
+             [ 27265]
+             Can merge the two arms of Perl_magic_getglob to save space.
+             
+             [ 27268]
+             Test warnings for converting globs to other forms.
+             
+             [ 27269]
+             sv_dump should report the PV for PVGVs, as it can get set.
+             (Typeglobs stringify via a call to GET magic, which uses the PV slot.)
+             
+             [ 27322]
+             With PERL_DONT_CREATE_GVSV, don't need to create a new GvSV in
+             Perl_save_scalar.
+     Branch: maint-5.8/perl
+	   ! dump.c
+	  !> ext/Devel/Peek/t/Peek.t mg.c scope.c t/op/gv.t
+____________________________________________________________________________
+[ 29899] By: nicholas                              on 2007/01/20  23:15:32
+        Log: Integrate:
+             [ 27258]
+             Document the many uses of SVf_FAKE.
+             
+             [ 27259]
+             Re-order the definitions of the private bits in SvFLAGS by value, so
+             that we can see where we're already double-booked.
+             
+             [ 27293]
+             Document a sixth use for SVf_FAKE
+             
+             [ 29554]
+             Turn a tab into 2 spaces to make more room for comments about SV flags.
+             Sorry about damaging the change history - dig through this change with
+             http://public.activestate.com/cgi-bin/perlbrowse?show_blame=Show+Annotated+File&filename=sv.h&rev=&change=29552
+             
+             [ 29559]
+             Better documentation for SVf_UTF8. Including SvPV() 1st, SvUTF() 2nd.
+     Branch: maint-5.8/perl
+	  !> sv.h
+____________________________________________________________________________
+[ 29898] By: nicholas                              on 2007/01/20  18:43:49
+        Log: Integrate:
+             [ 27241]
+             Add a new CvISXSUB() macro, for abstracting the test as to whether a
+             PVCV is perl or XS.
+             
+             [ 27267]
+             Change 24643 made the mistake of assuming that CvCONST can only be true
+             on XSUBs. Somehow it can also end up on perl subs. Bug spotted by and
+             test case from Marcus Holland-Moritz.
+     Branch: maint-5.8/perl
+	  !> cv.h dump.c ext/Devel/Peek/Peek.xs gv.c op.c pad.c pp_ctl.c
+	  !> pp_hot.c pp_sort.c sv.c t/op/threads.t
+____________________________________________________________________________
+[ 29897] By: nicholas                              on 2007/01/20  18:14:46
+        Log: Integrate:
+             [ 27178]
+             Remove a my_perl that slipped in
+             
+             [ 27300]
+             Subject: [PATCH] unused context warnings
+             From: andy@petdance.com (Andy Lester)
+             Date: Tue, 21 Feb 2006 00:27:11 -0600
+             Message-ID: <20060221062711.GA16160@petdance.com>
+     Branch: maint-5.8/perl
+	  !> deb.c embed.pl hv.c locale.c mathoms.c mg.c miniperlmain.c
+	  !> numeric.c op.c perl.c perl.h perlapi.c perlio.c pp_ctl.c
+	  !> regcomp.c scope.c sv.c toke.c universal.c utf8.c util.c
+____________________________________________________________________________
+[ 29896] By: nicholas                              on 2007/01/20  17:47:00
+        Log: Integrate:
+             [ 27177]
+             Subject: [PATCH] Sun Studio lint patches
+             From: andy@petdance.com (Andy Lester)
+             Date: Mon, 13 Feb 2006 23:46:17 -0600
+             Message-ID: <20060214054617.GA8824@petdance.com>
+     Branch: maint-5.8/perl
+	  !> Makefile.SH gv.c hv.c op.c pad.c perlio.c pp.c pp_ctl.c
+	  !> pp_hot.c regcomp.c sv.c toke.c utf8.c
+____________________________________________________________________________
+[ 29891] By: nicholas                              on 2007/01/20  00:30:02
+        Log: Integrate:
+             [ 27215]
+             Subject: arena-rework : consolidated patch
+             From: Jim Cromie <jim.cromie@gmail.com>
+             Message-ID: <43F0F649.9040205@gmail.com>
+             Date: Mon, 13 Feb 2006 14:12:41 -0700
+             
+             Tweaked somewhat to split the arena boolean from the arena_size,
+             and with the PTE still doubling-up with one of the SV types in the
+             array.
+             
+             [ 27290]
+             Using U8 rather than size type shrinks the body_details table.
+             
+             [ 27291]
+             Shrink struct body_details and hence sv.o slightly further by using
+             bitfields.
+             
+             [ 27292]
+             We have sufficient spare bits to store the SV type in body_details,
+             so add a small sanity check to ensure that we have the array in the
+             correct order.
+             
+             [ 27338]
+             Workaround for initialization errors on HP's pre-compiler
+             Do not ask me to explain. This re-definition works on AIX
+             and HP-UX. Let's await the smokes.
+             
+             [ 27405]
+             Remove the #define - ARENASETS are always on now.
+             
+             [ 29878]
+             Move C<static bool done_sanity_check;> inside the only function that
+             uses it.
+             
+             [ 29879]
+             As Perl_get_arena() is dealing with sizes, use size_t rather than int,
+             as it's both unsigned and semantically the correct width for a size.
+             As all arenas get cleared later on, can use Newx() rather than Newxz().
+             
+             [ 29881]
+             I think that it's clearer if aroot is only struct arena_set *
+             (rather than ** and constantly dereferneced). Move the declaration
+             of new_root into the block it is used in. Add a comment describing
+             where the arenas for arena_sets themselves aren't rooted anywhere.
+             
+             [ 29882]
+             Add a parameter to Perl_get_arena() to pass in the SV type, and record
+             this in the arena description. Change all sizes to unsigned values.
+             Make Perl_sv_free_arenas() loop downwards to free memory, simplifying
+             the logic. Remove my erroneous comment added in change 29881.
+     Branch: maint-5.8/perl
+	   ! sv.c
+	  !> embed.fnc embed.h hv.c perl.h pod/perlapi.pod proto.h sv.h
+____________________________________________________________________________
+[ 29890] By: nicholas                              on 2007/01/20  00:10:08
+        Log: Integrate:
+             [ 27172]
+             Teach checkAUTHORS.pl about Changelogs with leading tabs
+             in the log entries, and fix a malformed log entry in Changes5.005
+     Branch: maint-5.8/perl
+	  !> Changes5.005 Porting/checkAUTHORS.pl
+____________________________________________________________________________
+[ 29889] By: nicholas                              on 2007/01/19  23:58:44
+        Log: Integrate:
+             [ 27399]
+             FAQ sync. (FAQ now moved to svn)
+             
+             [ 27905]
+             Changes to perlfaq8 "How do I find out if I'm running interactively 
+             or not?" suggested by Slaven Rezic in RT #38901: perlfaq8 correction
+             
+             [ 28464]
+             s/have a more/have more/ typo fix in perlfaq4
+             
+             [ 28820]
+             FAQ sync
+             
+             [ 29034]
+             FAQ sync
+             
+             [ 29282]
+             FAQ sync
+     Branch: maint-5.8/perl
+	  !> pod/perlfaq.pod pod/perlfaq1.pod pod/perlfaq2.pod
+	  !> pod/perlfaq3.pod pod/perlfaq4.pod pod/perlfaq5.pod
+	  !> pod/perlfaq6.pod pod/perlfaq7.pod pod/perlfaq8.pod
+	  !> pod/perlfaq9.pod
+____________________________________________________________________________
+[ 29888] By: nicholas                              on 2007/01/19  21:24:46
+        Log: Integrate:
+             [ 26545]
+             Marcus Holland-Moritz suggested that assert should 
+             Perl_croak_nocontext rather than Perl_croak.
+             
+             [ 27136]
+             Subject: [PATCH] Trying my "remove the pTHXes" patch again
+             From: Andy Lester <andy@petdance.com>
+             Date: Thu, 9 Feb 2006 09:40:18 -0600
+             Message-ID: <20060209154018.GA14610@petdance.com>
+             
+             [ 27137]
+             Regenerated headers for change #27136.
+             
+             [ 27138]
+             Really regenerate headers
+             
+             [ 27140]
+             Fix breakage in S_set_csh() from change #27136.
+             
+             [ 27145]
+             Change 27136 seems to have inadvertently upset some compilers,
+             presumably where NULL was defined as 0, not (void *)0
+             
+             [ 27148]
+             Fix the effects of 27136 on Win32 with DEBUGGING and PERL_IMPLICIT_SYS
+             
+             [ 27152]
+             A better fix than 27148
+             
+             Subject: Win32 assert (was Re: Smoke [5.9.4] 27145 FAIL(M) MSWin32 WinXP/.Net SP2 (x86/2 cpu))
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Fri, 10 Feb 2006 14:58:47 +0000
+             Message-ID: <20060210145847.GA85020@plum.flirble.org>
+             
+             Subject: RE: Win32 assert (was Re: Smoke [5.9.4] 27145 FAIL(M) MSWin32 WinXP/.Net SP2 (x86/2 cpu))
+             From: "Jan Dubois" <jand@ActiveState.com>
+             Date: Fri, 10 Feb 2006 09:03:41 -0800
+             Message-ID: <024401c62e63$f1e53c10$6062a8c0@candy>
+     Branch: maint-5.8/perl
+	   ! embed.fnc embed.h proto.h sv.c
+	  !> Makefile.SH cc_runtime.h cop.h deb.c hv.c mg.c op.c op.h
+	  !> perl.c perl.h pp.c pp_ctl.c pp_sort.c regcomp.c regexec.c
+	  !> toke.c utf8.c util.c
+____________________________________________________________________________
+[ 29886] By: nicholas                              on 2007/01/19  20:40:06
+        Log: Integrate:
+             [ 27079]
+             Subject: [patch] arena rework - arena sets
+             From: Jim Cromie <jim.cromie@gmail.com>
+             Message-ID: <43DF4F66.4080808@gmail.com>
+             Date: Tue, 31 Jan 2006 04:52:06 -0700
+             
+             [ 27080]
+             Tweak arena sets to avoid assignment between different pointers.
+             
+             [ 27081]
+             Rejig the definition of ARENAS_PER_SET to maximise the size of the
+             array whilst keeping the structure within PERL_ARENA_SIZE.
+             
+             [ 27097]
+             Subject: [patch] rework arenas - repair arenasets
+             From: Jim Cromie <jim.cromie@gmail.com>
+             Message-ID: <43E5F012.1080203@gmail.com>
+             Date: Sun, 05 Feb 2006 05:31:14 -0700
+     Branch: maint-5.8/perl
+	  !> embed.fnc embed.h hv.c proto.h sv.c
+____________________________________________________________________________
+[ 29874] By: nicholas                              on 2007/01/18  16:26:05
+        Log: Integrate:
+             [ 27699]
+             Subject: [PATCH] ext/IO/t/io_unix.t
+             From: Jarkko Hietaniemi <jhietaniemi@gmail.com>
+             Date: Sun, 02 Apr 2006 21:57:19 +0300
+             Message-ID: <44301E8F.2060503@gmail.com>
+             
+             [ 29578]
+             Subject: [PATCH 5.8.8] Fixes for the test suite on OS/2
+             From: Ilya Zakharevich <nospam-abuse@ilyaz.org>
+             Date: Wed, 13 Dec 2006 18:32:22 -0800
+             Message-ID: <20061214023222.GA29084@powdermilk.math.berkeley.edu>
+     Branch: maint-5.8/perl
+	  !> ext/IO/t/io_unix.t lib/Time/Local.t os2/OS2/ExtAttr/t/os2_ea.t
+	  !> t/io/fs.t t/op/stat.t
+____________________________________________________________________________
+[ 29873] By: nicholas                              on 2007/01/18  16:11:31
+        Log: Integrate:
+             [ 28187]
+             Subject: t/uni/overload.t
+             From: Jarkko Hietaniemi <jhietaniemi@gmail.com>
+             Message-ID: <4465988C.9080407@gmail.com>
+             Date: Sat, 13 May 2006 11:27:56 +0300
+             
+             [ 28575]
+             overload.t has same locale problem with VMS that it has with dec_osf
+             
+             [ 29099]
+             Silence an expected warning (when playing with utf8ness and string overloading)
+     Branch: maint-5.8/perl
+	  !> t/uni/overload.t
+____________________________________________________________________________
+[ 29870] By: nicholas                              on 2007/01/18  12:45:46
+        Log: Integrate:
+             [ 24755]
+             s/PERL_COPY_ON_WRITE/PERL_OLD_COPY_ON_WRITE/g
+     Branch: maint-5.8/perl
+	  !> ext/B/t/bytecode.t
+____________________________________________________________________________
+[ 29869] By: nicholas                              on 2007/01/18  12:25:16
+        Log: Integrate:
+             [ 26866]
+             Upgrade to Devel::PPPort 3.07
+             
+             [ 26913]
+             find_perl() must be after environment initialization
+             
+             [ 26914]
+             Upgrade to Devel::PPPort 3.08
+             
+             [ 28259]
+             Upgrade to Devel::PPPort 3.08_01
+             
+             [ 28267]
+             Upgrade to Devel::PPPort 3.08_02
+             
+             [ 28307]
+             Upgrade to Devel::PPPort 3.08_03
+             
+             [ 28332]
+             Upgrade to Devel::PPPort 3.08_04
+             
+             [ 28420]
+             Upgrade to Devel::PPPort 3.08_05
+             
+             [ 28424]
+             Upgrade to Devel::PPPort 3.08_06
+             
+             [ 28474]
+             Upgrade to Devel::PPPort 3.08_07
+             
+             [ 28507]
+             Upgrade to Devel::PPPort 3.09
+             
+             [ 28605]
+             Upgrade to Devel::PPPort 3.09_01
+             
+             [ 28616]
+             Upgrade to Devel::PPPort 3.09_02
+             
+             [ 28714]
+             Upgrade to Devel::PPPort 3.10
+     Branch: maint-5.8/perl
+	  +> (branch 28 files)
+	   - ext/Devel/PPPort/MANIFEST ext/Devel/PPPort/PPPort.pm
+	  !> (integrate 89 files)
+____________________________________________________________________________
+[ 29865] By: nicholas                              on 2007/01/17  23:48:41
+        Log: Integrate:
+             [ 26670]
+             Make '-s' on the shebang line able to parse -foo=bar switches again.
+             This feature was broken by change 19695 some years ago
+             and integrated into perl-5.8.1.  perl-5.8.0 was fine.
+             Ref http://bugs.activestate.com/show_bug.cgi?id=43483
+     Branch: maint-5.8/perl
+	  !> perl.c t/run/switches.t
+____________________________________________________________________________
+[ 29864] By: nicholas                              on 2007/01/17  23:29:13
+        Log: Integrate:
+             [ 24912]
+             Same fix, for the test, now.
+             
+             [ 26321]
+             Disallow sprintf's vector handling for non-integer formats.
+             Avoids core dump for printf("%vs") and similar.
+             
+             [ 26326]
+             Drop "v" prefix from sprintf("%vd", $^V).
+             
+             The sprintf documentation has this example:
+             
+             printf "version is v%vd\n", $^V;
+             
+             and it printed 'version is vv5.9.3\n'.
+             
+             [ 26327]
+             Oops, change 26326 broke t/run/switches.t
+             Reverting change 24912 fixes it.
+             
+             [ 26339]
+             Add overflow check to EXPECT_NUMBER() used by sv_vcatpvfn().
+             sprintf() or printf() will now croak if any of the indexes and
+             widths specified in the format string are too large.
+             
+             [ 26342]
+             Remove tests that were not portable to 64bit ints.
+     Branch: maint-5.8/perl
+	   ! t/op/sprintf.t
+	  !> pod/perldiag.pod sv.c t/op/sprintf2.t t/run/switches.t
+____________________________________________________________________________
+[ 29863] By: nicholas                              on 2007/01/17  22:55:14
+        Log: Two regenerated headers.
+     Branch: maint-5.8/perl
+	   ! embedvar.h perlapi.h
+____________________________________________________________________________
+[ 29862] By: nicholas                              on 2007/01/17  22:53:30
+        Log: Integrate:
+             [ 26296]
+             Subject: [PATCH] All args in embed.fnc should be named
+             From: Andy Lester <andy@petdance.com>
+             Date: Wed, 7 Dec 2005 10:08:18 -0600
+             Message-ID: <20051207160818.GA13465@petdance.com>
+     Branch: maint-5.8/perl
+	   ! proto.h
+	  !> embed.fnc embed.pl pod/perlapi.pod
+____________________________________________________________________________
+[ 29861] By: nicholas                              on 2007/01/17  22:36:16
+        Log: Integrate:
+             [ 26881]
+             The current OP that is tested in doeval() can be a require(), an
+             eval() or a do(). When we test whether OPf_SPECIAL is set on it, be
+             sure to take into account that it's the eval-related meaning of
+             OPf_SPECIAL we're testing for, not the require-related one.
+             
+             [ 26883]
+             Regression test for change #26881
+             
+             [ 26891]
+             New t/comp/require.t tests should go before the conditional exit.
+     Branch: maint-5.8/perl
+	  !> pp_ctl.c t/comp/require.t
+____________________________________________________________________________
+[ 29860] By: nicholas                              on 2007/01/17  22:08:43
+        Log: Remove the new assertion integrated from blead. It might just not be
+             safe.
+     Branch: maint-5.8/perl
+	   ! sv.c
+____________________________________________________________________________
+[ 29859] By: nicholas                              on 2007/01/17  22:07:40
+        Log: Integrate:
+             [ 27126]
+             Merging pp_bit_or and pp_bit_xor shrinks the object code by about .7K.
+             The overloading tests are not free.
+             
+             [ 27127]
+             Borland's C compiler warns that the & is unnecessary.
+             
+             [ 27129]
+             Subject: [PATCH] Handle unused args
+             From: andy@petdance.com (Andy Lester)
+             Date: Tue, 7 Feb 2006 16:36:56 -0600
+             Message-ID: <20060207223656.GA5177@petdance.com>
+             
+             [ 27134]
+             Avoid calling all the scanning code in gv_fetchpvn_flags when saving
+             $1 etc, as we can perfom a hash lookup on %:: directly.
+             
+             [ 27161]
+             Remove SOFT_CAST() as it no longer does anything useful.
+             
+             [ 27194]
+             Get perl_fini() running on HP-UX again.
+             It was effectively disabled by change 24667 since
+             __ux_version is only available under DCE threads
+             which isn't used when perl is built on HP-UX 11
+             and later.
+             
+             [ 27203]
+             Subject: Problem compiling swigged c++ code with 5.8.8
+             From: Merijn Broeren <merijnb@iloquent.com>
+             Date: Wed, 15 Feb 2006 13:51:49 +0100
+             Message-ID: <20060215125148.GA12535@brugman.iloquent.nl>
+             
+             [ 27227]
+             SvROK(sv) will never be true when SvIOKp() or SvNOKp() is true, so the
+             code inside the if() test in sv_2pv_flags is dead and can be removed.
+             
+             [ 27235]
+             Remove the last (U16) cast for CV depths, missed by change 17835.
+             
+             [ 27279]
+             Remove un-needed case in Perl_sv_setsv_flags (sv_upgrade will cover
+             this one for us).
+             
+             [ 27282]
+             Recalculate dstr in Perl_sv_setsv_flags, as dstr may have been upgraded.
+             
+             [ 27288]
+             In XS_attributes__guess_stash, attempting to call Gv* on a PVMG is
+             bad and wrong.
+     Branch: maint-5.8/perl
+	  !> XSUB.h doio.c mathoms.c opcode.h opcode.pl pad.c perl.c perl.h
+	  !> pp.c pp.h pp_ctl.c pp_sys.c regcomp.c scope.h sv.c xsutils.c
+____________________________________________________________________________
+[ 29858] By: nicholas                              on 2007/01/17  21:17:52
+        Log: Integrate:
+             [ 26989]
+             Call gv_fetchpvn_flags where we already know the length.
+             
+             [ 27005]
+             Avoid a warning from the Irix C compiler.
+             
+             [ 27006]
+             Silence another Irix compiler warning.
+             
+             [ 27014]
+             Silence a warning from the MS compiler about signed/unsigned mismatch.
+             
+             [ 27056]
+             Death to magic characters!  No pun intended.
+             
+             [ 27064]
+             Fix file where internal XS functions are defined
+             
+             [ 27086]
+             bcc was issuing a warning about this line in Perl_sv_2cv, so tweak it
+             to keep it happy.
+             
+             [ 27089]
+             Without this Windows and Netware compilers should be complaining 
+             about perl.c having code before a declaration, *but only if compiling
+             with PERL_TRACK_MEMPOOL*. So, will it fix the smoke failures? Place
+             bets now.
+             
+             [ 27093]
+             Yes, I broke Win32 with change 27089 by having a { in the wrong place.
+             
+             [ 27102]
+             Subject: [PATCH] Cleaning up shadowed variables
+             From: Andy Lester <andy@petdance.com>
+             Date: Sun, 5 Feb 2006 21:56:43 -0600
+             Message-Id: <B375E848-FA07-479D-9571-FA3925106D16@petdance.com>
+             
+             [ 27112]
+             Given that the memory allocated in Perl_bytes_from_utf8 and
+             Perl_bytes_to_utf8 will immediately be written to, I see no need to
+             allocate it zeroed.
+     Branch: maint-5.8/perl
+	   ! toke.c
+	  !> doio.c ext/B/B.xs hv.c op.c perl.c pp_ctl.c sv.c universal.c
+	  !> utf8.c util.c
+____________________________________________________________________________
+[ 29856] By: nicholas                              on 2007/01/17  19:49:29
+        Log: Integrate:
+             [ 26981]
+             The flags manipulation in sv_setsv_flags can be more efficient.
+             
+             [ 26982]
+             Merge the IOK and NOK clauses together in sv_setsv_flags.
+             
+             [ 26987]
+             Squeeze more flag manipulations together in sv_setsv_flags.
+             
+             [ 26997]
+             Assert that IVs and NVs can never be tainted.
+             
+             [ 27043]
+             Correct my comment, so that it's actually useful. :-)
+             
+             [ 27107]
+             Remove a duplicate flag copy line from Perl_sv_setsv_flags.
+             
+             [ 27110]
+             I think that "merge Perl_sv_2[inpu]v" and "reduce duplication in
+             sv_setsv_flags" are about as done as they can be.
+             
+             [ 29855]
+             Replace SvRELEASE_IVX(dstr) with SvOOK_off(dstr) in sv_setsv_flags(),
+             because it's not possible for dstr to be COW at this point, due to an
+             earlier force_normal.
+     Branch: maint-5.8/perl
+	   ! sv.c
+	  !> pod/perltodo.pod
+____________________________________________________________________________
+[ 29854] By: nicholas                              on 2007/01/17  18:52:01
+        Log: Integrate:
+             [ 27066]
+             It's actually easier to get rid of PL_fdscript than we thought.
+             
+             [ 27068]
+             Oops. I *thought* that I had checked that all changed files were open.
+             Clearly not. (Fixes change 27066)
+             
+             [ 27069]
+             Passing the flag to S_forbit_setid as a single char rather than a
+             string is a slight space optimisation.
+             
+             [ 27070]
+             Eliminating PL_suidscript is more tricky, and requires changing the
+             prototype of Perl_moreswitches.
+             
+             [ 27072]
+             Change 27070 failed to initialise a variable. (But despite that still
+             passed all tests locally.)
+             
+             [ 27073]
+             Pull the variables fdscript and suidscript into a much smaller scope.
+             Replace suidscript with literal -1 where it could only have been -1.
+             (Re-indent the other code inside the new block creating the scope.
+             Rejig the indentation of the conditionals)
+             
+             [ 27074]
+             The MSDOS-only call to moreswitches will never reach forbid_setid, so
+             it can have a parameter of -1 without changing any behaviour.
+             I see no reason to forbid "command line" switches when they are
+             actually coming from the #! line of the script itself (as read by perl)
+             as they must have been written by the owner of the script, rather than
+             being crafted by the user manipulating the command line, and therefore
+             cannot be subverted. (Or alternatively, can be subverted as easily as
+             the rest of the script, and we're permitting *that* to be run)
+             
+             [ 27075]
+             And as we've now got to the point where all calls to Perl_moreswitches
+             have -1 as the second argument, we can remove the second argument,
+             which gets us back to where we started, only with the elimination of
+             a per-thread variable.
+             
+             [ 27076]
+             S_find_beginning is only called from one place, so by hoisting the
+             forbid_setid check for -x into the caller, we can eliminate the
+             suidscript parameter from S_find_beginning.
+             
+             [ 27077]
+             Remove obsolete comment.
+             
+             [ 27087]
+             Fixed embed.fnc entry for S_forbid_setid() and picked up a change in 
+             pod/perlapi.pod for good measure when regenerating files.
+     Branch: maint-5.8/perl
+	  !> embed.fnc embed.h embedvar.h intrpvar.h perl.c perlapi.h
+	  !> pod/perlapi.pod proto.h toke.c
+____________________________________________________________________________
+[ 29851] By: nicholas                              on 2007/01/17  15:41:23
+        Log: Integrate:
+             [ 27104]
+             Fix bug #38439 - reference to typeglob assignment needs to be based
+             on SvROK(sstr) rather than SvTYPE(sstr) == SVt_RV.
+             
+             [ 27111]
+             Rename S_glob_assign to S_glob_assign_glob
+             Rename S_pvgv_assign to S_glob_assign_ref
+             
+             I don't think that they share enough common code to merge them.
+     Branch: maint-5.8/perl
+	  !> sv.c t/op/gv.t
+____________________________________________________________________________
+[ 29850] By: nicholas                              on 2007/01/17  14:15:59
+        Log: Integrate:
+             [ 26978]
+             Pull the other large chunk of PVGV assignment code into S_pvgv_assign.
+             There seems to be some duplication with S_glob_assign.
+             
+             [ 26991]
+             C compilers don't let you return void. Pay attention gcc, and
+             stop aping Shildt.
+             
+             [ 27098]
+             Start to merge the 6 arms of S_pvgv_assign into one.
+             
+             [ 27099]
+             Merge the default case (GvSV) with the common code in S_pvgv_assign.
+             
+             [ 27100]
+             Merge the PVAV and PVHV clauses into the common code of S_pvgv_assign.
+             
+             [ 27101]
+             Merge the PVCV case into the common code in S_pvgv_assign.
+     Branch: maint-5.8/perl
+	  !> sv.c
+____________________________________________________________________________
+[ 29849] By: nicholas                              on 2007/01/17  13:51:31
+        Log: Integrate:
+             [ 26976]
+             Pull glob_assign out from sv_setsv_flags into a static function.
+             
+             [ 26977]
+             Remove goto glob_assign;
+     Branch: maint-5.8/perl
+	  !> sv.c
+____________________________________________________________________________
+[ 29847] By: nicholas                              on 2007/01/17  12:30:43
+        Log: Integrate:
+             [ 27027]
+             Intel C Compiler 9.0 hatefully defines __GNUC__.  Unfortunately, 
+             icc does not support gcc built-ins like __attribiute__.
+             
+             [ 27568]
+             Fix some test failures in t/op/cmp.t when compiling with the Intel
+             C++ Compiler on Linux.
+             
+             [ 28566]
+             Keep Intel C++ from claiming that it is gcc.
+             
+             [ 28728]
+             Additional floating point strictness is needed to get Intel cc to pass
+             its tests.
+     Branch: maint-5.8/perl
+	  !> hints/linux.sh perl.h
+____________________________________________________________________________
+[ 29846] By: nicholas                              on 2007/01/17  11:36:40
+        Log: Integrate:
+             [ 26474]
+             Create a struct to use as the header with PERL_TRACK_MEMPOOL, so that
+             other information can be stored in it.
+             
+             [ 26476]
+             If PERL_TRACK_MEMPOOL and PERL_POISON are in use, then scribble all
+             over memory to invalidate it just before free()ing it.
+             
+             [ 26478]
+             For PERL_TRACK_MEMPOOL with PERL_POISON, Poison the end of any block
+             being shrunk in realloc()
+             
+             [ 27084]
+             Enhance PERL_TRACK_MEMPOOL so that it also emulates the PerlHost
+             behaviour of freeing up all memory at thread exit. With this and
+             tools such as valgrind you will now get warnings as soon as you
+             read from the deallocated memory, rather than just a warning much
+             later about freeing to the wrong pool.
+             
+             [ 27088]
+             Don't export PL_memory_debug_header to Win32 (and others) unless 
+             PERL_TRACK_MEMPOOL is defined.
+             
+             [ 27151]
+             With PERL_POISON defined, ensure freshly malloc()ed memory isn't zeros,
+             and when PERL_TRACK_MEMPOOL is also defined scribble on any extension
+             added by realloc().
+             
+             [ 27343]
+             Subject: [PATCH] PERL_TRACK_MEMPOOL cripples environment after exit()
+             From: Marcus Holland-Moritz <mhx-perl@gmx.net>
+             Date: Sun, 26 Feb 2006 20:47:21 +0100
+             Message-ID: <20060226204721.00be2bff@r2d2>
+             
+             [ 27396]
+             Don't free thread memory if PERL_DESTRUCT_LEVEL is set to a non-zero
+             value as we're probably hunting memory leaks then
+     Branch: maint-5.8/perl
+	   ! perl.h
+	  !> embedvar.h intrpvar.h makedef.pl miniperlmain.c perl.c
+	  !> perlapi.h pod/perltodo.pod sv.c util.c
+____________________________________________________________________________
+[ 29840] By: nicholas                              on 2007/01/16  08:45:48
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 29832] By: nicholas                              on 2007/01/15  16:30:37
         Log: Avoid a SEGV in DBI's test suite, discovered by Andreas.
              Probably need to go through and audit to see if there are analagous
