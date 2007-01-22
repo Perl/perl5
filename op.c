@@ -1074,12 +1074,13 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	if (!(o->op_private & OPpCONST_ARYBASE))
 	    goto nomod;
 	if (PL_eval_start && PL_eval_start->op_type == OP_CONST) {
-	    PL_compiling.cop_arybase = (I32)SvIV(cSVOPx(PL_eval_start)->op_sv);
+	    CopARYBASE_set(&PL_compiling,
+			   (I32)SvIV(cSVOPx(PL_eval_start)->op_sv));
 	    PL_eval_start = 0;
 	}
 	else if (!type) {
-	    SAVEI32(PL_compiling.cop_arybase);
-	    PL_compiling.cop_arybase = 0;
+	    SAVECOPARYBASE(&PL_compiling);
+	    CopARYBASE_set(&PL_compiling, 0);
 	}
 	else if (type == OP_REFGEN)
 	    goto nomod;
@@ -1949,7 +1950,7 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
     /* If there were syntax errors, don't try to close a block */
     if (PL_yynerrs) return retval;
     LEAVE_SCOPE(floor);
-    PL_compiling.op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
+    CopHINTS_set(&PL_compiling, PL_hints);
     if (needblockscope)
 	PL_hints |= HINT_BLOCK_SCOPE; /* propagate out */
     pad_leavemy();
@@ -3520,7 +3521,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	    PL_eval_start = 0;
 	else {
 	    op_free(o);
-	    o = newSVOP(OP_CONST, 0, newSViv(PL_compiling.cop_arybase));
+	    o = newSVOP(OP_CONST, 0, newSViv(CopARYBASE_get(&PL_compiling)));
 	    o->op_private |= OPpCONST_ARYBASE;
 	}
     }
@@ -3543,11 +3544,11 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 	cop->op_ppaddr = PL_ppaddr[ OP_NEXTSTATE ];
     }
     cop->op_flags = (U8)flags;
-    cop->op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
+    CopHINTS_set(cop, PL_hints);
 #ifdef NATIVE_HINTS
     cop->op_private |= NATIVE_HINTS;
 #endif
-    PL_compiling.op_private = cop->op_private;
+    CopHINTS_set(&PL_compiling, CopHINTS_get(cop));
     cop->op_next = (OP*)cop;
 
     if (label) {
@@ -3555,7 +3556,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 	PL_hints |= HINT_BLOCK_SCOPE;
     }
     cop->cop_seq = seq;
-    cop->cop_arybase = PL_curcop->cop_arybase;
+    CopARYBASE_set(cop, CopARYBASE_get(PL_curcop));
     if (specialWARN(PL_curcop->cop_warnings))
         cop->cop_warnings = PL_curcop->cop_warnings ;
     else
@@ -4623,7 +4624,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    call_list(oldscope, PL_beginav);
 
 	    PL_curcop = &PL_compiling;
-	    PL_compiling.op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
+	    CopHINTS_set(&PL_compiling, PL_hints);
 	    LEAVE;
 	}
 	else if (strEQ(s, "END") && !PL_error_count) {
@@ -6684,7 +6685,7 @@ Perl_peep(pTHX_ register OP *o)
 		    pop->op_next->op_type == OP_AELEM &&
 		    !(pop->op_next->op_private &
 		      (OPpLVAL_INTRO|OPpLVAL_DEFER|OPpDEREF|OPpMAYBE_LVSUB)) &&
-		    (i = SvIV(((SVOP*)pop)->op_sv) - PL_curcop->cop_arybase)
+		    (i = SvIV(((SVOP*)pop)->op_sv) - CopARYBASE_get(PL_curcop))
 				<= 255 &&
 		    i >= 0)
 		{

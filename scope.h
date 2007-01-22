@@ -48,6 +48,7 @@
 #define SAVEt_SHARED_PVREF	37
 #define SAVEt_BOOL		38
 #define SAVEt_SAVESWITCHSTACK	40
+#define SAVEt_COP_ARYBASE	41
 #define SAVEt_RE_STATE		42
 #define SAVEt_GP_NEW		43
 
@@ -180,6 +181,15 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 	SWITCHSTACK((f),(t));				\
 	PL_curstackinfo->si_stack = (t);		\
     } STMT_END
+
+#define SAVECOPARYBASE(c) \
+    STMT_START {					\
+	SSCHECK(3);					\
+	SSPUSHINT(CopARYBASE_get(c));			\
+	SSPUSHPTR(c);					\
+	SSPUSHINT(SAVEt_COP_ARYBASE);			\
+    } STMT_END
+
 
 #ifdef USE_ITHREADS
 #  define SAVECOPSTASH(c)	SAVEPPTR(CopSTASHPV(c))

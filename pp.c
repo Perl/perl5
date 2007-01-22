@@ -328,7 +328,7 @@ PP(pp_pos)
 		I32 i = mg->mg_len;
 		if (DO_UTF8(sv))
 		    sv_pos_b2u(sv, &i);
-		PUSHi(i + PL_curcop->cop_arybase);
+		PUSHi(i + CopARYBASE_get(PL_curcop));
 		RETURN;
 	    }
 	}
@@ -2906,7 +2906,7 @@ PP(pp_substr)
     I32 fail;
     const I32 lvalue = PL_op->op_flags & OPf_MOD || LVRET;
     const char *tmps;
-    const I32 arybase = PL_curcop->cop_arybase;
+    const I32 arybase = CopARYBASE_get(PL_curcop);
     SV *repl_sv = NULL;
     const char *repl = NULL;
     STRLEN repl_len;
@@ -3105,7 +3105,7 @@ PP(pp_index)
     I32 retval;
     const char *big_p;
     const char *little_p;
-    const I32 arybase = PL_curcop->cop_arybase;
+    const I32 arybase = CopARYBASE_get(PL_curcop);
     bool big_utf8;
     bool little_utf8;
     const bool is_index = PL_op->op_type == OP_INDEX;
@@ -3722,7 +3722,7 @@ PP(pp_aslice)
     register const I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
 
     if (SvTYPE(av) == SVt_PVAV) {
-	const I32 arybase = PL_curcop->cop_arybase;
+	const I32 arybase = CopARYBASE_get(PL_curcop);
 	if (lval && PL_op->op_private & OPpLVAL_INTRO) {
 	    register SV **svp;
 	    I32 max = -1;
@@ -3986,7 +3986,7 @@ PP(pp_lslice)
     SV ** const lastlelem = PL_stack_base + POPMARK;
     SV ** const firstlelem = PL_stack_base + POPMARK + 1;
     register SV ** const firstrelem = lastlelem + 1;
-    const I32 arybase = PL_curcop->cop_arybase;
+    const I32 arybase = CopARYBASE_get(PL_curcop);
     I32 is_something_there = PL_op->op_flags & OPf_MOD;
 
     register const I32 max = lastrelem - lastlelem;
@@ -4096,7 +4096,7 @@ PP(pp_splice)
 	if (offset < 0)
 	    offset += AvFILLp(ary) + 1;
 	else
-	    offset -= PL_curcop->cop_arybase;
+	    offset -= CopARYBASE_get(PL_curcop);
 	if (offset < 0)
 	    DIE(aTHX_ PL_no_aelem, i);
 	if (++MARK < SP) {

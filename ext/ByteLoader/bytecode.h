@@ -348,6 +348,7 @@ typedef char *pvindex;
 		name, strlen(name), cv, 0))
 
 #define BSET_xhv_name(hv, name)	hv_name_set((HV*)hv, name, strlen(name), 0)
+#define BSET_cop_arybase(c, b) CopARYBASE_set(c, b)
 
 /* NOTE: the bytecode header only sanity-checks the bytecode. If a script cares about
  * what version of Perl it's being called under, it should do a 'use 5.006_001' or
