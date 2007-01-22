@@ -1244,6 +1244,9 @@
 #define dooneliner		S_dooneliner
 #endif
 #  endif
+#ifdef PERL_CORE
+#define space_join_names_mortal	S_space_join_names_mortal
+#endif
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
 #if defined(PERL_CORE) || defined(PERL_EXT)
@@ -3319,6 +3322,9 @@
 #define dooneliner(a,b)		S_dooneliner(aTHX_ a,b)
 #endif
 #  endif
+#ifdef PERL_CORE
+#define space_join_names_mortal(a)	S_space_join_names_mortal(aTHX_ a)
+#endif
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
 #if defined(PERL_CORE) || defined(PERL_EXT)

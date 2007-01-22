@@ -1793,6 +1793,9 @@ STATIC int	S_dooneliner(pTHX_ const char *cmd, const char *filename)
 			__attribute__warn_unused_result__;
 
 #  endif
+STATIC SV *	S_space_join_names_mortal(pTHX_ char *const *array)
+			__attribute__nonnull__(pTHX_1);
+
 #endif
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
