@@ -190,7 +190,7 @@ p	|OP*	|vdie		|NULLOK const char* pat|NULLOK va_list* args
 p	|OP*	|die_where	|NULLOK char* message|STRLEN msglen
 Ap	|void	|dounwind	|I32 cxix
 pmb	|bool	|do_aexec	|NULLOK SV* really|NN SV** mark|NN SV** sp
-p	|bool	|do_aexec5	|NULLOK SV* really|NN SV** mark|NN SV** sp|int fd|int flag
+p	|bool	|do_aexec5	|NULLOK SV* really|NN SV** mark|NN SV** sp|int fd|int do_report
 Ap	|int	|do_binmode	|NN PerlIO *fp|int iotype|int mode
 p	|void	|do_chop	|NN SV* asv|NN SV* sv
 Ap	|bool	|do_close	|NN GV* gv|bool not_implicit
@@ -208,7 +208,7 @@ Ap	|int	|do_spawn	|NN char* cmd
 Ap	|int	|do_spawn_nowait|NN char* cmd
 #endif
 #if !defined(WIN32)
-p	|bool	|do_exec3	|NN char* cmd|int fd|int flag
+p	|bool	|do_exec3	|NN char* cmd|int fd|int do_report
 #endif
 p	|void	|do_execfree
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
@@ -1348,7 +1348,8 @@ s	|char*	|scan_word	|NN char *s|NN char *dest|STRLEN destlen \
 				|int allow_package|NN STRLEN *slp
 sR	|char*	|skipspace	|NN char *s
 sR	|char*	|swallow_bom	|NN U8 *s
-s	|void	|checkcomma	|NN char *s|NN const char *name|NN const char *what
+s	|void	|checkcomma	|NN const char *s|NN const char *name \
+				|NN const char *what
 s	|void	|force_ident	|NN const char *s|int kind
 s	|void	|incline	|NN char *s
 s	|int	|intuit_method	|NN char *s|NULLOK GV *gv|NULLOK CV *cv

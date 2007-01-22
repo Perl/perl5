@@ -263,7 +263,7 @@ PERL_CALLCONV OP*	Perl_vdie(pTHX_ const char* pat, va_list* args);
 PERL_CALLCONV OP*	Perl_die_where(pTHX_ char* message, STRLEN msglen);
 PERL_CALLCONV void	Perl_dounwind(pTHX_ I32 cxix);
 /* PERL_CALLCONV bool	Perl_do_aexec(pTHX_ SV* really, SV** mark, SV** sp); */
-PERL_CALLCONV bool	Perl_do_aexec5(pTHX_ SV* really, SV** mark, SV** sp, int fd, int flag);
+PERL_CALLCONV bool	Perl_do_aexec5(pTHX_ SV* really, SV** mark, SV** sp, int fd, int do_report);
 PERL_CALLCONV int	Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode);
 PERL_CALLCONV void	Perl_do_chop(pTHX_ SV* asv, SV* sv);
 PERL_CALLCONV bool	Perl_do_close(pTHX_ GV* gv, bool not_implicit);
@@ -281,7 +281,7 @@ PERL_CALLCONV int	Perl_do_spawn(pTHX_ char* cmd);
 PERL_CALLCONV int	Perl_do_spawn_nowait(pTHX_ char* cmd);
 #endif
 #if !defined(WIN32)
-PERL_CALLCONV bool	Perl_do_exec3(pTHX_ char* cmd, int fd, int flag);
+PERL_CALLCONV bool	Perl_do_exec3(pTHX_ char* cmd, int fd, int do_report);
 #endif
 PERL_CALLCONV void	Perl_do_execfree(pTHX);
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
@@ -1964,7 +1964,7 @@ STATIC char*	S_skipspace(pTHX_ char *s)
 STATIC char*	S_swallow_bom(pTHX_ U8 *s)
 			__attribute__warn_unused_result__;
 
-STATIC void	S_checkcomma(pTHX_ char *s, const char *name, const char *what);
+STATIC void	S_checkcomma(pTHX_ const char *s, const char *name, const char *what);
 STATIC void	S_force_ident(pTHX_ const char *s, int kind);
 STATIC void	S_incline(pTHX_ char *s);
 STATIC int	S_intuit_method(pTHX_ char *s, GV *gv, CV *cv);

@@ -779,7 +779,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     {
 	const HE *counter = HeNEXT(entry);
 
-	xhv->xhv_keys++; /* HvKEYS(hv)++ */
+	xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
 	if (!counter) {				/* initial entry? */
 	    xhv->xhv_fill++; /* HvFILL(hv)++ */
 	} else if (xhv->xhv_keys > (IV)xhv->xhv_max) {
@@ -1055,7 +1055,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		HvLAZYDEL_on(hv);
 	    else
 		hv_free_ent(hv, entry);
-	    xhv->xhv_keys--; /* HvKEYS(hv)-- */
+	    xhv->xhv_keys--; /* HvTOTALKEYS(hv)-- */
 	    if (xhv->xhv_keys == 0)
 	        HvHASKFLAGS_off(hv);
 	}
@@ -1989,7 +1989,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
 	    }
             Safefree(HeKEY_hek(entry));
             del_HE(entry);
-            xhv->xhv_keys--; /* HvKEYS(hv)-- */
+            xhv->xhv_keys--; /* HvTOTALKEYS(hv)-- */
         }
     }
 
@@ -2079,7 +2079,7 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 	HeVAL(entry) = Nullsv;
 	HeNEXT(entry) = next;
 	*head = entry;
-	xhv->xhv_keys++; /* HvKEYS(hv)++ */
+	xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
 	if (!next) {			/* initial entry? */
 	    xhv->xhv_fill++; /* HvFILL(hv)++ */
 	} else if (xhv->xhv_keys > (IV)xhv->xhv_max /* HvKEYS(hv) > HvMAX(hv) */) {

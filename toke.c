@@ -861,15 +861,10 @@ S_check_uni(pTHX)
     if ((t = strchr(s, '(')) && t < PL_bufptr)
 	return;
 
-    /* XXX Things like this are just so nasty.  We shouldn't be modifying
-    source code, even if we realquick set it back. */
     if (ckWARN_d(WARN_AMBIGUOUS)){
-	const char ch = *s;
-        *s = '\0';
         Perl_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
-		   "Warning: Use of \"%s\" without parentheses is ambiguous",
-		   PL_last_uni);
-        *s = ch;
+		   "Warning: Use of \"%.*s\" without parentheses is ambiguous",
+		   (int)(s - PL_last_uni), PL_last_uni);
     }
 }
 
@@ -3027,13 +3022,14 @@ Perl_yylex(pTHX)
 		CopLINE_dec(PL_curcop);
 		incline(s);
 	    }
-	    d = PL_bufend;
-	    while (s < d && *s != '\n')
-		s++;
-	    if (s < d)
-		s++;
-	    else if (s > d) /* Found by Ilya: feed random input to Perl. */
-	      Perl_croak(aTHX_ "panic: input overflow");
+	    d = s;
+	    while (d < PL_bufend && *d != '\n')
+		d++;
+	    if (d < PL_bufend)
+		d++;
+	    else if (d > PL_bufend) /* Found by Ilya: feed random input to Perl. */
+		Perl_croak(aTHX_ "panic: input overflow");
+	    s = d;
 	    incline(s);
 	    if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
 		PL_bufptr = s;
@@ -9001,21 +8997,21 @@ unknown:
 }
 
 STATIC void
-S_checkcomma(pTHX_ register char *s, const char *name, const char *what)
+S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
 {
-    const char *w;
 
     if (*s == ' ' && s[1] == '(') {	/* XXX gotta be a better way */
 	if (ckWARN(WARN_SYNTAX)) {
 	    int level = 1;
+	    const char *w;
 	    for (w = s+2; *w && level; w++) {
 		if (*w == '(')
 		    ++level;
 		else if (*w == ')')
 		    --level;
 	    }
-	    if (*w)
-		for (; *w && isSPACE(*w); w++) ;
+	    while (isSPACE(*w))
+		++w;
 	    if (!*w || !strchr(";|})]oaiuw!=", *w))	/* an advisory hack only... */
 		Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 			    "%s (...) interpreted as function",name);
@@ -9028,17 +9024,18 @@ S_checkcomma(pTHX_ register char *s, const char *name, const char *what)
     while (s < PL_bufend && isSPACE(*s))
 	s++;
     if (isIDFIRST_lazy_if(s,UTF)) {
-	w = s++;
+	const char * const w = s++;
 	while (isALNUM_lazy_if(s,UTF))
 	    s++;
 	while (s < PL_bufend && isSPACE(*s))
 	    s++;
 	if (*s == ',') {
-	    int kw;
-	    *s = '\0'; /* XXX If we didn't do this, we could const a lot of toke.c */
-	    kw = keyword((char *)w, s - w) || get_cv(w, FALSE) != 0;
-	    *s = ',';
-	    if (kw)
+	    GV* gv;
+	    if (keyword((char *)w, s - w))
+		return;
+
+	    gv = gv_fetchpvn_flags(w, s - w, 0, SVt_PVCV);
+	    if (gv && GvCVu(gv))
 		return;
 	    Perl_croak(aTHX_ "No comma allowed after %s", what);
 	}
@@ -9447,9 +9444,9 @@ S_scan_subst(pTHX_ char *start)
 	pm->op_pmflags |= PMf_EVAL;
 	while (es-- > 0)
 	    sv_catpv(repl, es ? "eval " : "do ");
-	sv_catpvs(repl, "{ ");
+	sv_catpvs(repl, "{");
 	sv_catsv(repl, PL_lex_repl);
-	sv_catpvs(repl, " }");
+	sv_catpvs(repl, "}");
 	SvEVALED_on(repl);
 	SvREFCNT_dec(PL_lex_repl);
 	PL_lex_repl = repl;

@@ -1352,7 +1352,7 @@ GV *
 Perl_newGVgen(pTHX_ char *pack)
 {
     return gv_fetchpv(Perl_form(aTHX_ "%s::_GEN_%ld", pack, (long)PL_gensym++),
-		      TRUE, SVt_PVGV);
+		      GV_ADD, SVt_PVGV);
 }
 
 /* hopefully this is only called on local symbol table entries */

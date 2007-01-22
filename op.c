@@ -374,7 +374,6 @@ Perl_op_free(pTHX_ OP *o)
 	    op_free(kid);
 	}
     }
-    type = o->op_type;
     if (type == OP_NULL)
 	type = (OPCODE)o->op_targ;
 
@@ -3639,7 +3638,9 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 
     scalarboolean(first);
     /* optimize "!a && b" to "a || b", and "!a || b" to "a && b" */
-    if (first->op_type == OP_NOT && (first->op_flags & OPf_SPECIAL)) {
+    if (first->op_type == OP_NOT
+	&& (first->op_flags & OPf_SPECIAL)
+	&& (first->op_flags & OPf_KIDS)) {
 	if (type == OP_AND || type == OP_OR) {
 	    if (type == OP_AND)
 		type = OP_OR;
