@@ -4938,7 +4938,7 @@ Perl_sys_intern_init(pTHX)
     for (i=0; i < SIG_SIZE; i++) {
     	w32_sighandler[i] = SIG_DFL;
     }
-#  ifdef MULTIPLICTY
+#  ifdef MULTIPLICITY
     if (my_perl == PL_curinterp) {
 #  else
     {
