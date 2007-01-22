@@ -1176,19 +1176,26 @@ PerlIO_push(pTHX_ PerlIO *f, PERLIO_FUNCS_DECL(*tab), const char *mode, SV *arg)
 	    goto mismatch;
 	}
 	/* Real layer with a data area */
-	Newxc(l,tab->size,char,PerlIOl);
-	if (l && f) {
-	    Zero(l, tab->size, char);
-	    l->next = *f;
-	    l->tab = (PerlIO_funcs*) tab;
-	    *f = l;
-	    PerlIO_debug("PerlIO_push f=%p %s %s %p\n", (void*)f, tab->name,
-			(mode) ? mode : "(Null)", (void*)arg);
-	    if (*l->tab->Pushed &&
-		(*l->tab->Pushed) (aTHX_ f, mode, arg, (PerlIO_funcs*) tab) != 0) {
-		PerlIO_pop(aTHX_ f);
-		return NULL;
+	if (f) {
+	    char *temp;
+	    Newxz(temp, tab->size, char);
+	    l = (PerlIOl*)temp;
+	    if (l) {
+		l->next = *f;
+		l->tab = (PerlIO_funcs*) tab;
+		*f = l;
+		PerlIO_debug("PerlIO_push f=%p %s %s %p\n",
+			     (void*)f, tab->name,
+			     (mode) ? mode : "(Null)", (void*)arg);
+		if (*l->tab->Pushed &&
+		    (*l->tab->Pushed)
+		      (aTHX_ f, mode, arg, (PerlIO_funcs*) tab) != 0) {
+		    PerlIO_pop(aTHX_ f);
+		    return NULL;
+		}
 	    }
+	    else
+		return NULL;
 	}
     }
     else if (f) {
@@ -2842,9 +2849,8 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 		    f = PerlIO_allocate(aTHX);
 		}
 		if ((f = PerlIO_push(aTHX_ f, self, mode, PerlIOArg))) {
-		    PerlIOStdio * const s = PerlIOSelf(f, PerlIOStdio);
-		    s->stdio = stdio;
-		    PerlIOUnix_refcnt_inc(fileno(s->stdio));
+		    PerlIOSelf(f, PerlIOStdio)->stdio = stdio;
+		    PerlIOUnix_refcnt_inc(fileno(stdio));
 		}
 		return f;
 	    }
@@ -2903,31 +2909,7 @@ PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
     f->_fileno = -1;
     return 1;
 #  elif defined(__sun__)
-#    if defined(_LP64)
-    /* On solaris, if _LP64 is defined, the FILE structure is this:
-     *
-     *  struct FILE {
-     *      long __pad[16];
-     *  };
-     *
-     * It turns out that the fd is stored in the top 32 bits of
-     * file->__pad[4]. The lower 32 bits contain flags. file->pad[5] appears
-     * to contain a pointer or offset into another structure. All the
-     * remaining fields are zero.
-     *
-     * We set the top bits to -1 (0xFFFFFFFF).
-     */
-    f->__pad[4] |= 0xffffffff00000000L;
-    assert(fileno(f) == 0xffffffff);
-#    else /* !defined(_LP64) */
-    /* _file is just a unsigned char :-(
-       Not clear why we dup() rather than using -1
-       even if that would be treated as 0xFF - so will
-       a dup fail ...
-     */
-    f->_file = PerlLIO_dup(fileno(f));
-#    endif /* defined(_LP64) */
-    return 1;
+    return 0;
 #  elif defined(__hpux)
     f->__fileH = 0xff;
     f->__fileL = 0xff;
@@ -2998,7 +2980,6 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
     }
     else {
         const int fd = fileno(stdio);
-	int socksfd = 0;
 	int invalidate = 0;
 	IV result = 0;
 	int saveerr = 0;
@@ -3010,36 +2991,26 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	 */
     	int optval;
     	Sock_size_t optlen = sizeof(int);
-    	if (getsockopt(fd, SOL_SOCKET, SO_TYPE, (void *) &optval, &optlen) == 0) {
-            socksfd = 1;
+	if (getsockopt(fd, SOL_SOCKET, SO_TYPE, (void *) &optval, &optlen) == 0)
 	    invalidate = 1;
-    	}
 #endif
-    	if (PerlIOUnix_refcnt_dec(fd) > 0) {
-	    /* File descriptor still in use */
+	if (PerlIOUnix_refcnt_dec(fd) > 0) /* File descriptor still in use */
 	    invalidate = 1;
-	    socksfd = 0;
-	}
 	if (invalidate) {
-   	    /* For STD* handles don't close the stdio at all
-	       this is because we have shared the FILE * too
-   	     */
-	    if (stdio == stdin) {
-	    	/* Some stdios are buggy fflush-ing inputs */
-	    	return 0;
-	    }
-	    else if (stdio == stdout || stdio == stderr) {
-	    	return PerlIO_flush(f);
-	    }
+	    /* For STD* handles, don't close stdio, since we shared the FILE *, too. */
+	    if (stdio == stdin) /* Some stdios are buggy fflush-ing inputs */
+		return 0;
+	    if (stdio == stdout || stdio == stderr)
+		return PerlIO_flush(f);
             /* Tricky - must fclose(stdio) to free memory but not close(fd)
 	       Use Sarathy's trick from maint-5.6 to invalidate the
 	       fileno slot of the FILE *
 	    */
 	    result = PerlIO_flush(f);
 	    saveerr = errno;
-    	    if (!(invalidate = PerlIOStdio_invalidate_fileno(aTHX_ stdio))) {
-	    	dupfd = PerlLIO_dup(fd);
-	    }
+	    invalidate = PerlIOStdio_invalidate_fileno(aTHX_ stdio);
+	    if (!invalidate)
+		dupfd = PerlLIO_dup(fd);
 	}
         result = PerlSIO_fclose(stdio);
 	/* We treat error from stdio as success if we invalidated
@@ -3049,10 +3020,10 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	    errno = saveerr;
 	    result = 0;
 	}
-	if (socksfd) {
-	    /* in SOCKS case let close() determine return value */
-	    result = close(fd);
-	}
+#ifdef SOCKS5_VERSION_NAME
+	/* in SOCKS' case, let close() determine return value */
+	result = close(fd);
+#endif
 	if (dupfd) {
 	    PerlLIO_dup2(dupfd,fd);
 	    PerlLIO_close(dupfd);
@@ -3670,6 +3641,8 @@ PerlIOBuf_fill(pTHX_ PerlIO *f)
 
     if (!b->buf)
 	PerlIO_get_base(f);     /* allocate via vtable */
+
+    assert(b->buf); /* The b->buf does get allocated via the vtable system. */
 
     b->ptr = b->end = b->buf;
 
