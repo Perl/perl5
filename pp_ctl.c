@@ -3615,7 +3615,6 @@ Perl_create_eval_scope(pTHX_ U32 flags)
 
     PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), PL_stack_sp);
     PUSHEVAL(cx, 0, 0);
-    PL_eval_root = PL_op;	/* Only needed so that goto works right. */
 
     PL_in_eval = EVAL_INEVAL;
     if (flags & G_KEEPERR)
