@@ -140,6 +140,7 @@ use Carp;
 use File::Spec 0.8;
 use File::Path qw/ rmtree /;
 use Fcntl 1.03;
+use IO::Seekable; # For SEEK_*
 use Errno;
 require VMS::Stdio if $^O eq 'VMS';
 
@@ -155,8 +156,7 @@ require Symbol if $] < 5.006;
 
 ### For the OO interface
 use base qw/ IO::Handle IO::Seekable /;
-use overload '""' => "STRINGIFY";
-
+use overload '""' => "STRINGIFY", fallback => 1;
 
 # use 'our' on v5.6.0
 use vars qw($VERSION @EXPORT_OK %EXPORT_TAGS $DEBUG $KEEP_ALL);
@@ -199,7 +199,7 @@ Exporter::export_tags('POSIX','mktemp','seekable');
 
 # Version number
 
-$VERSION = '0.17';
+$VERSION = '0.18';
 
 # This is a list of characters that can be used in random filenames
 
@@ -483,12 +483,6 @@ sub _gettemp {
       #      but may have O_NOINHERIT. This may or may not be in Fcntl.
       local $^F = 2;
 
-      # Store callers umask
-      my $umask = umask();
-
-      # Set a known umask
-      umask(066);
-
       # Attempt to open the file
       my $open_success = undef;
       if ( $^O eq 'VMS' and $options{"unlink_on_close"} && !$KEEP_ALL) {
@@ -503,15 +497,13 @@ sub _gettemp {
       }
       if ( $open_success ) {
 
-	# Reset umask
-	umask($umask) if defined $umask;
+	# in case of odd umask force rw
+	chmod(0600, $path);
 
 	# Opened successfully - return file handle and name
 	return ($fh, $path);
 
       } else {
-	# Reset umask
-	umask($umask) if defined $umask;
 
 	# Error opening file - abort with error
 	# if the reason was anything but EEXIST
@@ -525,23 +517,13 @@ sub _gettemp {
       }
     } elsif ($options{"mkdir"}) {
 
-      # Store callers umask
-      my $umask = umask();
-
-      # Set a known umask
-      umask(066);
-
       # Open the temp directory
       if (mkdir( $path, 0700)) {
-	# created okay
-	# Reset umask
-	umask($umask) if defined $umask;
+	# in case of odd umask
+	chmod(0700, $path);
 
 	return undef, $path;
       } else {
-
-	# Reset umask
-	umask($umask) if defined $umask;
 
 	# Abort with error if the reason for failure was anything
 	# except EEXIST
@@ -655,10 +637,7 @@ sub _replace_XX {
 # force a file to be readonly when written to certain temp locations
 sub _force_writable {
   my $file = shift;
-  my $umask = umask();
-  umask(066);
   chmod 0600, $file;
-  umask($umask) if defined $umask;
 }
 
 
@@ -985,8 +964,9 @@ object is no longer required.
 Note that there is no method to obtain the filehandle from the
 C<File::Temp> object. The object itself acts as a filehandle. Also,
 the object is configured such that it stringifies to the name of the
-temporary file. The object isa C<IO::Handle> and isa C<IO::Seekable>
-so all those methods are available.
+temporary file, and can be compared to a filename directly. The object
+isa C<IO::Handle> and isa C<IO::Seekable> so all those methods are
+available.
 
 =over 4
 
@@ -2273,14 +2253,14 @@ as a standard part of perl from v5.6.1.
 
 L<POSIX/tmpnam>, L<POSIX/tmpfile>, L<File::Spec>, L<File::Path>
 
-See L<IO::File> and L<File::MkTemp>, L<Apachae::TempFile> for
+See L<IO::File> and L<File::MkTemp>, L<Apache::TempFile> for
 different implementations of temporary file handling.
 
 =head1 AUTHOR
 
 Tim Jenness E<lt>tjenness@cpan.orgE<gt>
 
-Copyright (C) 1999-2006 Tim Jenness and the UK Particle Physics and
+Copyright (C) 1999-2007 Tim Jenness and the UK Particle Physics and
 Astronomy Research Council. All Rights Reserved.  This program is free
 software; you can redistribute it and/or modify it under the same
 terms as Perl itself.
