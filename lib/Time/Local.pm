@@ -92,7 +92,7 @@ sub timegm {
     my ( $sec, $min, $hour, $mday, $month, $year ) = @_;
 
     # Need to check leap year before altering the value
-    my $leap_year = _is_leap_year($year)
+    my $leap_year = _is_leap_year($year);
 
     if ( $year >= 1000 ) {
         $year -= 1900;
