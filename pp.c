@@ -3943,15 +3943,19 @@ PP(pp_hslice)
 		if (!svp || *svp == &PL_sv_undef) {
 		    DIE(aTHX_ PL_no_helem_sv, keysv);
 		}
-		if (localizing) {
-		    if (preeminent)
-		        save_helem(hv, keysv, svp);
-		    else {
-			STRLEN keylen;
-			const char * const key = SvPV_const(keysv, keylen);
-			SAVEDELETE(hv, savepvn(key,keylen), keylen);
+		if (HvNAME_get(hv) && isGV(*svp))
+		    save_gp((GV*)*svp, !(PL_op->op_flags & OPf_SPECIAL));
+		else {
+		    if (localizing) {
+			if (preeminent)
+			    save_helem(hv, keysv, svp);
+			else {
+			    STRLEN keylen;
+			    const char * const key = SvPV_const(keysv, keylen);
+			    SAVEDELETE(hv, savepvn(key,keylen), keylen);
+			}
 		    }
-                }
+		}
 	    }
 	    *MARK = svp ? *svp : &PL_sv_undef;
 	}
