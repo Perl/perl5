@@ -16,7 +16,7 @@ sub _carp {
 
 
 use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS $TODO);
-$VERSION = '0.66';
+$VERSION = '0.67';
 $VERSION = eval $VERSION;    # make the alpha version come out as a number
 
 use Test::Builder::Module;
