@@ -189,7 +189,7 @@ sub great_circle_waypoint {
     my $z = $A * sin($lat0)                + $B * sin($lat1);
 
     my $theta = atan2($y, $x);
-    my $phi   = atan2($z, sqrt($x*$x + $y*$y));
+    my $phi   = acos($z);
     
     return ($theta, $phi);
 }
@@ -647,7 +647,7 @@ The midpoint between London and Tokyo being
 
     my @M = great_circle_midpoint(@L, @T);
 
-or about 68.11N 24.74E, in the Finnish Lapland.
+or about 89.16N 68.93E, practically at the North Pole.
 
 =head2 CAVEAT FOR GREAT CIRCLE FORMULAS
 

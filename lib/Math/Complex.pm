@@ -9,11 +9,11 @@ package Math::Complex;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $Inf);
 
-$VERSION = 1.36;
+$VERSION = 1.37;
 
 BEGIN {
     unless ($^O eq 'unicosmk') {
-        my $e = $!;
+        local $!;
 	# We do want an arithmetic overflow, Inf INF inf Infinity:.
         undef $Inf unless eval <<'EOE' and $Inf =~ /^inf(?:inity)?$/i;
 	  local $SIG{FPE} = sub {die};
@@ -27,7 +27,6 @@ EOE
 	    $Inf = $t + "1e99999999999999999999999999999999";
 EOE
 	}
-        $! = $e; # Clear ERANGE.
     }
     $Inf = "Inf" if !defined $Inf || !($Inf > 0); # Desperation.
 }

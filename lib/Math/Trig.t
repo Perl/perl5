@@ -207,37 +207,37 @@ use Math::Trig ':radial';
 
     ok(near($lon, $London[0]));
 
-    ok(near($lat, $pip2 - $London[1]));
+    ok(near($lat, $London[1]));
 
     ($lon, $lat) = great_circle_waypoint(@London, @Tokyo, 1.0);
 
     ok(near($lon, $Tokyo[0]));
 
-    ok(near($lat, $pip2 - $Tokyo[1]));
+    ok(near($lat, $Tokyo[1]));
 
     ($lon, $lat) = great_circle_waypoint(@London, @Tokyo, 0.5);
 
-    ok(near($lon, 1.55609593577679)); # 89.1577 E
+    ok(near($lon, 1.55609593577679)); # 89.16 E
 
-    ok(near($lat, 1.20296099733328)); # 68.9246 N
+    ok(near($lat, 0.36783532946162)); # 68.93 N
 
     ($lon, $lat) = great_circle_midpoint(@London, @Tokyo);
 
-    ok(near($lon, 1.55609593577679)); # 89.1577 E
+    ok(near($lon, 1.55609593577679)); # 89.16 E
 
-    ok(near($lat, 1.20296099733328)); # 68.9246 N
+    ok(near($lat, 0.367835329461615)); # 68.93 N
 
     ($lon, $lat) = great_circle_waypoint(@London, @Tokyo, 0.25);
 
-    ok(near($lon, 0.516073562850837)); # 29.5688 E
+    ok(near($lon, 0.516073562850837)); # 29.57 E
 
-    ok(near($lat, 1.170565013391510)); # 67.0684 N
+    ok(near($lat, 0.400231313403387)); # 67.07 N
 
     ($lon, $lat) = great_circle_waypoint(@London, @Tokyo, 0.75);
 
-    ok(near($lon, 2.17494903805952)); # 124.6154 E
+    ok(near($lon, 2.17494903805952)); # 124.62 E
 
-    ok(near($lat, 0.952987032741305)); # 54.6021 N
+    ok(near($lat, 0.617809294053591)); # 54.60 N
 
     use Math::Trig 'great_circle_destination';
 
