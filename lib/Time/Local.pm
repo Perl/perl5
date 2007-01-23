@@ -91,6 +91,9 @@ sub _timegm {
 sub timegm {
     my ( $sec, $min, $hour, $mday, $month, $year ) = @_;
 
+    # Need to check leap year before altering the value
+    my $leap_year = _is_leap_year($year)
+
     if ( $year >= 1000 ) {
         $year -= 1900;
     }
@@ -111,7 +114,7 @@ sub timegm {
 
 	my $md = $MonthDays[$month];
         ++$md
-            if $month == 1 && _is_leap_year($year);
+            if $month == 1 && $leap_year;
 
         croak "Day '$mday' out of range 1..$md"  if $mday > $md or $mday < 1;
         croak "Hour '$hour' out of range 0..23"  if $hour > 23  or $hour < 0;
