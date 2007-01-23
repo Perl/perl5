@@ -2,6 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
+    @INC = qw(. ../lib);
     require './test.pl';
 }
 plan tests => 114;
