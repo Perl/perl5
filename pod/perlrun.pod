@@ -1056,7 +1056,8 @@ layer specification strings (which is also used to decode the PERLIO
 environment variable) treats the colon as a separator.
 
 An unset or empty PERLIO is equivalent to the default set of layers for
-your platforms, for example C<:unix:perlio>.
+your platform, for example C<:unix:perlio> on UNIX-like systems
+and C<:unix:crlf> on Windows and other DOS-like systems.
 
 The list becomes the default for I<all> perl's IO. Consequently only built-in
 layers can appear in this list, as external layers (such as :encoding()) need
