@@ -100,7 +100,7 @@ than one place.
 X<scalar> X<string> X<character>
 
 C<chomp>, C<chop>, C<chr>, C<crypt>, C<hex>, C<index>, C<lc>, C<lcfirst>,
-C<length>, C<oct>, C<ord>, C<pack>, C<q/STRING/>, C<qq/STRING/>, C<reverse>,
+C<length>, C<oct>, C<ord>, C<pack>, C<q//>, C<qq//>, C<reverse>,
 C<rindex>, C<sprintf>, C<substr>, C<tr///>, C<uc>, C<ucfirst>, C<y///>
 
 =item Regular expressions and pattern matching
@@ -122,7 +122,7 @@ C<pop>, C<push>, C<shift>, C<splice>, C<unshift>
 =item Functions for list data
 X<list>
 
-C<grep>, C<join>, C<map>, C<qw/STRING/>, C<reverse>, C<sort>, C<unpack>
+C<grep>, C<join>, C<map>, C<qw//>, C<reverse>, C<sort>, C<unpack>
 
 =item Functions for real %HASHes
 X<hash>
@@ -180,7 +180,7 @@ C<reset>, C<scalar>, C<state>, C<undef>, C<wantarray>
 X<process> X<pid> X<process id>
 
 C<alarm>, C<exec>, C<fork>, C<getpgrp>, C<getppid>, C<getpriority>, C<kill>,
-C<pipe>, C<qx/STRING/>, C<setpgrp>, C<setpriority>, C<sleep>, C<system>,
+C<pipe>, C<qx//>, C<setpgrp>, C<setpriority>, C<sleep>, C<system>,
 C<times>, C<wait>, C<waitpid>
 
 =item Keywords related to perl modules
@@ -233,7 +233,7 @@ X<perl5>
 
 C<abs>, C<bless>, C<break>, C<chomp>, C<chr>, C<continue>, C<default>, 
 C<exists>, C<formline>, C<given>, C<glob>, C<import>, C<lc>, C<lcfirst>,
-C<lock>, C<map>, C<my>, C<no>, C<our>, C<prototype>, C<qr>, C<qw>, C<qx>,
+C<lock>, C<map>, C<my>, C<no>, C<our>, C<prototype>, C<qr//>, C<qw//>, C<qx//>,
 C<readline>, C<readpipe>, C<ref>, C<sub>*, C<sysopen>, C<tie>, C<tied>, C<uc>,
 C<ucfirst>, C<untie>, C<use>, C<when>
 
@@ -4156,7 +4156,7 @@ like a Perl function.  Otherwise, the string describing the equivalent
 prototype is returned.
 
 =item push ARRAY,LIST
-X<push>, X<stack>
+X<push> X<stack>
 
 Treats ARRAY as a stack, and pushes the values of LIST
 onto the end of ARRAY.  The length of ARRAY increases by the length of
