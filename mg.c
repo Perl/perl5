@@ -1051,8 +1051,8 @@ Perl_magic_getuvar(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 {
-    STRLEN len, klen;
-    const char *s = SvPV_const(sv,len);
+    STRLEN len = 0, klen;
+    const char *s = SvOK(sv) ? SvPV_const(sv,len) : "";
     const char * const ptr = MgPV_const(mg,klen);
     my_setenv((char *)ptr, (char *)s);
 
@@ -1062,7 +1062,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
     if (!len) {
 	SV ** const valp = hv_fetch(GvHVn(PL_envgv), ptr, klen, FALSE);
 	if (valp)
-	    s = SvPV_const(*valp, len);
+	    s = SvOK(*valp) ? SvPV_const(*valp, len) : "";
     }
 #endif
 

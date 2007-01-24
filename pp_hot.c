@@ -358,8 +358,15 @@ PP(pp_eq)
     }
 #endif
     {
+#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+      dPOPTOPnnrl;
+      if (Perl_isnan(left) || Perl_isnan(right))
+	  RETSETNO;
+      SETs(boolSV(left == right));
+#else
       dPOPnv;
       SETs(boolSV(TOPn == value));
+#endif
       RETURN;
     }
 }
@@ -1816,7 +1823,8 @@ PP(pp_helem)
 		if (!preeminent) {
 		    STRLEN keylen;
 		    const char * const key = SvPV_const(keysv, keylen);
-		    SAVEDELETE(hv, savepvn(key,keylen), keylen);
+		    SAVEDELETE(hv, savepvn(key,keylen),
+			       SvUTF8(keysv) ? -(I32)keylen : keylen);
 		} else
 		    save_helem(hv, keysv, svp);
             }

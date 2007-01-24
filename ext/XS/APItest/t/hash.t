@@ -55,6 +55,12 @@ main_tests (\@keys, \@testkeys, ' [utf8 hash]');
       "hv_store doesn't insert a key with the raw utf8 on a tied hash");
 }
 
+
+foreach my $in ("", "N", "a\0b") {
+    my $got = XS::APItest::Hash::test_share_unshare_pvn($in);
+    is ($got, $in, "test_share_unshare_pvn");
+}
+
 exit;
 
 ################################   The End   ################################

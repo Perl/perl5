@@ -5,7 +5,7 @@ BEGIN {
     @INC = qw(. ../lib);
     require './test.pl';
 }
-plan tests => 95;
+plan tests => 113;
 
 my $list_assignment_supported = 1;
 
@@ -368,4 +368,51 @@ sub f { ok(0 == $[); }
 	}
 	::ok(f1() eq "f1", "localised sub restored");
 	::ok(f2() eq "f2", "localised sub restored");
+}
+
+# Localising unicode keys (bug #38815)
+{
+    my %h;
+    $h{"\243"} = "pound";
+    $h{"\302\240"} = "octects";
+    is(scalar keys %h, 2);
+    {
+	my $unicode = chr 256;
+	my $ambigous = "\240" . $unicode;
+	chop $ambigous;
+	local $h{$unicode} = 256;
+	local $h{$ambigous} = 160;
+
+	is(scalar keys %h, 4);
+	is($h{"\243"}, "pound");
+	is($h{$unicode}, 256);
+	is($h{$ambigous}, 160);
+	is($h{"\302\240"}, "octects");
+    }
+    is(scalar keys %h, 2);
+    is($h{"\243"}, "pound");
+    is($h{"\302\240"}, "octects");
+}
+
+# And with slices
+{
+    my %h;
+    $h{"\243"} = "pound";
+    $h{"\302\240"} = "octects";
+    is(scalar keys %h, 2);
+    {
+	my $unicode = chr 256;
+	my $ambigous = "\240" . $unicode;
+	chop $ambigous;
+	local @h{$unicode, $ambigous} = (256, 160);
+
+	is(scalar keys %h, 4);
+	is($h{"\243"}, "pound");
+	is($h{$unicode}, 256);
+	is($h{$ambigous}, 160);
+	is($h{"\302\240"}, "octects");
+    }
+    is(scalar keys %h, 2);
+    is($h{"\243"}, "pound");
+    is($h{"\302\240"}, "octects");
 }

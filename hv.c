@@ -1928,7 +1928,6 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
     register HE *entry;
     register HE **oentry;
     HE **first;
-    bool found = 0;
     bool is_utf8 = FALSE;
     int k_flags = 0;
     const char * const save = str;
@@ -1959,10 +1958,8 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
     first = oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     if (hek) {
         for (entry = *oentry; entry; oentry = &HeNEXT(entry), entry = *oentry) {
-            if (HeKEY_hek(entry) != hek)
-                continue;
-            found = 1;
-            break;
+            if (HeKEY_hek(entry) == hek)
+                break;
         }
     } else {
         const int flags_masked = k_flags & HVhek_MASK;
@@ -1975,13 +1972,12 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
                 continue;
             if (HeKFLAGS(entry) != flags_masked)
                 continue;
-            found = 1;
             break;
         }
     }
 
-    if (found) {
-        if (--HeVAL(entry) == Nullsv) {
+    if (entry) {
+        if (--HeVAL(entry) == NULL) {
             *oentry = HeNEXT(entry);
             if (!*first) {
 		/* There are now no entries in our slot.  */
@@ -1994,7 +1990,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
     }
 
     UNLOCK_STRTAB_MUTEX;
-    if (!found && ckWARN_d(WARN_INTERNAL))
+    if (!entry && ckWARN_d(WARN_INTERNAL))
 	Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
                     "Attempt to free non-existent shared string '%s'%s"
                     pTHX__FORMAT,

@@ -597,7 +597,7 @@ if ($opened) {
 	}
     }
     close FROM_CHILD;
-    print + (@data?"not ":""), "ok ", $test++, " - too litle output\n";
+    print + (@data?"not ":""), "ok ", $test++, " - too little output\n";
     exit;
 }
 
