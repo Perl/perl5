@@ -2937,6 +2937,7 @@ S_check_type_and_open(pTHX_ const char *name, const char *mode)
 {
     Stat_t st;
     const int st_rc = PerlLIO_stat(name, &st);
+
     if (st_rc < 0 || S_ISDIR(st.st_mode) || S_ISBLK(st.st_mode)) {
 	return NULL;
     }
@@ -3127,7 +3128,7 @@ PP(pp_require)
 	{
 	    namesv = newSV(0);
 	    for (i = 0; i <= AvFILL(ar); i++) {
-		SV *dirsv = *av_fetch(ar, i, TRUE);
+		SV * const dirsv = *av_fetch(ar, i, TRUE);
 
 		if (SvROK(dirsv)) {
 		    int count;
@@ -3180,7 +3181,7 @@ PP(pp_require)
 			}
 
 			if (SvTYPE(arg) == SVt_PVGV) {
-			    IO *io = GvIO((GV *)arg);
+			    IO * const io = GvIO((GV *)arg);
 
 			    ++filter_has_file;
 
