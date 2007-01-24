@@ -578,7 +578,8 @@ struct loop {
 
 /* no longer used anywhere in core */
 #ifndef PERL_CORE
-#define cv_ckproto(cv, gv, p) cv_ckproto_len(cv, gv, p, p ? strlen(p) : 0)
+#define cv_ckproto(cv, gv, p) \
+   cv_ckproto_len((cv), (gv), (p), (p) ? strlen(p) : 0)
 #endif
 
 #ifdef USE_REENTRANT_API
