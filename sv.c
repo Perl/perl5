@@ -8861,6 +8861,9 @@ ptr_table_* functions.
 #endif
 
 
+/* Certain cases in Perl_ss_dup have been merged, by relying on the fact
+   that currently av_dup, gv_dup and hv_dup are the same as sv_dup.
+   If this changes, please unmerge ss_dup.  */
 #define sv_dup_inc(s,t)	SvREFCNT_inc(sv_dup(s,t))
 #define sv_dup_inc_NN(s,t)	SvREFCNT_inc_NN(sv_dup(s,t))
 #define av_dup(s,t)	(AV*)sv_dup((SV*)s,t)
@@ -9810,17 +9813,19 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	const I32 type = POPINT(ss,ix);
 	TOPINT(nss,ix) = type;
 	switch (type) {
+	case SAVEt_HELEM:		/* hash element */
+	    sv = (SV*)POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
+	    /* fall through */
 	case SAVEt_ITEM:			/* normal string */
-	    sv = (SV*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
-	    sv = (SV*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
-	    break;
         case SAVEt_SV:				/* scalar reference */
 	    sv = (SV*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
-	    gv = (GV*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = gv_dup_inc(gv, param);
+	    /* fall through */
+	case SAVEt_FREESV:
+	case SAVEt_MORTALIZESV:
+	    sv = (SV*)POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
 	    break;
 	case SAVEt_GENERIC_PVREF:		/* generic char* */
 	    c = (char*)POPPTR(ss,ix);
@@ -9841,17 +9846,15 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = svp_dup_inc((SV**)ptr, proto_perl);/* XXXXX */
 	    break;
-        case SAVEt_AV:				/* array reference */
-	    av = (AV*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = av_dup_inc(av, param);
-	    gv = (GV*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = gv_dup(gv, param);
-	    break;
         case SAVEt_HV:				/* hash reference */
-	    hv = (HV*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = hv_dup_inc(hv, param);
-	    gv = (GV*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = gv_dup(gv, param);
+        case SAVEt_AV:				/* array reference */
+	    sv = POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
+	    /* fall through */
+	case SAVEt_COMPPAD:
+	case SAVEt_NSTAB:
+	    sv = POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = sv_dup(sv, param);
 	    break;
 	case SAVEt_INT:				/* int reference */
 	    ptr = POPPTR(ss,ix);
@@ -9862,12 +9865,15 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	case SAVEt_LONG:			/* long reference */
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
+	    /* fall through */
+	case SAVEt_CLEARSV:
 	    longval = (long)POPLONG(ss,ix);
 	    TOPLONG(nss,ix) = longval;
 	    break;
 	case SAVEt_I32:				/* I32 reference */
 	case SAVEt_I16:				/* I16 reference */
 	case SAVEt_I8:				/* I8 reference */
+	case SAVEt_COP_ARYBASE:			/* call CopARYBASE_set */
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
 	    i = POPINT(ss,ix);
@@ -9879,6 +9885,8 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    iv = POPIV(ss,ix);
 	    TOPIV(nss,ix) = iv;
 	    break;
+	case SAVEt_HPTR:			/* HV* reference */
+	case SAVEt_APTR:			/* AV* reference */
 	case SAVEt_SPTR:			/* SV* reference */
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
@@ -9897,22 +9905,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    c = (char*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = pv_dup(c);
 	    break;
-	case SAVEt_HPTR:			/* HV* reference */
-	    ptr = POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
-	    hv = (HV*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = hv_dup(hv, param);
-	    break;
-	case SAVEt_APTR:			/* AV* reference */
-	    ptr = POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
-	    av = (AV*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = av_dup(av, param);
-	    break;
-	case SAVEt_NSTAB:
-	    gv = (GV*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = gv_dup(gv, param);
-	    break;
 	case SAVEt_GP_OLD:			/* scalar reference */
 	case SAVEt_GP_NEW:			/* scalar reference */
 	    gp = (GP*)POPPTR(ss,ix);
@@ -9929,11 +9921,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 		TOPIV(nss,ix) = iv;
 	    }
             break;
-	case SAVEt_FREESV:
-	case SAVEt_MORTALIZESV:
-	    sv = (SV*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
-	    break;
 	case SAVEt_FREEOP:
 	    ptr = POPPTR(ss,ix);
 	    if (ptr && (((OP*)ptr)->op_private & OPpREFCOUNTED)) {
@@ -9962,15 +9949,13 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    c = (char*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = pv_dup_inc(c);
 	    break;
-	case SAVEt_CLEARSV:
-	    longval = POPLONG(ss,ix);
-	    TOPLONG(nss,ix) = longval;
-	    break;
 	case SAVEt_DELETE:
 	    hv = (HV*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = hv_dup_inc(hv, param);
 	    c = (char*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = pv_dup_inc(c);
+	    /* fall through */
+	case SAVEt_STACK_POS:		/* Position on Perl stack */
 	    i = POPINT(ss,ix);
 	    TOPINT(nss,ix) = i;
 	    break;
@@ -9996,10 +9981,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    TOPINT(nss,ix) = i;
 	    ix -= i;
 	    break;
-	case SAVEt_STACK_POS:		/* Position on Perl stack */
-	    i = POPINT(ss,ix);
-	    TOPINT(nss,ix) = i;
-	    break;
 	case SAVEt_AELEM:		/* array element */
 	    sv = (SV*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
@@ -10008,14 +9989,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    av = (AV*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = av_dup_inc(av, param);
 	    break;
-	case SAVEt_HELEM:		/* hash element */
-	    sv = (SV*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
-	    sv = (SV*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
-	    hv = (HV*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = hv_dup_inc(hv, param);
-	    break;
 	case SAVEt_OP:
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = ptr;
@@ -10023,10 +9996,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	case SAVEt_HINTS:
 	    i = POPINT(ss,ix);
 	    TOPINT(nss,ix) = i;
-	    break;
-	case SAVEt_COMPPAD:
-	    av = (AV*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = av_dup(av, param);
 	    break;
 	case SAVEt_PADSV:
 	    longval = (long)POPLONG(ss,ix);
