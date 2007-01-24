@@ -9771,7 +9771,7 @@ ____________________________________________________________________________
 	   ! t/comp/parser.t
 ____________________________________________________________________________
 [ 27911] By: davem                                 on 2006/04/20  12:33:09
-        Log: regmatch(): raplace magic value -1000 with symbolic CHRTEST_VOID
+        Log: regmatch(): replace magic value -1000 with symbolic CHRTEST_VOID
      Branch: perl
 	   ! regexec.c
 ____________________________________________________________________________
