@@ -127,6 +127,7 @@
 #endif
 #ifdef PERL_CORE
 #define cv_ckproto		Perl_cv_ckproto
+#define cv_ckproto_len		Perl_cv_ckproto_len
 #define cv_clone		Perl_cv_clone
 #endif
 #define gv_const_sv		Perl_gv_const_sv
@@ -2213,6 +2214,7 @@
 #endif
 #ifdef PERL_CORE
 #define cv_ckproto(a,b,c)	Perl_cv_ckproto(aTHX_ a,b,c)
+#define cv_ckproto_len(a,b,c,d)	Perl_cv_ckproto_len(aTHX_ a,b,c,d)
 #define cv_clone(a)		Perl_cv_clone(aTHX_ a)
 #endif
 #define gv_const_sv(a)		Perl_gv_const_sv(aTHX_ a)

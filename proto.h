@@ -206,6 +206,7 @@ PERL_CALLCONV int	Perl_printf_nocontext(const char* fmt, ...)
 
 #endif
 PERL_CALLCONV void	Perl_cv_ckproto(pTHX_ CV* cv, GV* gv, char* p);
+PERL_CALLCONV void	Perl_cv_ckproto_len(pTHX_ const CV* cv, const GV* gv, const char* p, const STRLEN len);
 PERL_CALLCONV CV*	Perl_cv_clone(pTHX_ CV* proto);
 PERL_CALLCONV SV*	Perl_gv_const_sv(pTHX_ GV* gv)
 			__attribute__warn_unused_result__;

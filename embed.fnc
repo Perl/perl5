@@ -160,7 +160,9 @@ Afnp	|void	|sv_setpvf_mg_nocontext|NN SV* sv|NN const char* pat|...
 Afnp	|int	|fprintf_nocontext|NN PerlIO* stream|NN const char* fmt|...
 Afnp	|int	|printf_nocontext|NN const char* fmt|...
 #endif
-p	|void	|cv_ckproto	|NN CV* cv|NULLOK GV* gv|NULLOK char* p
+pb	|void	|cv_ckproto	|NN CV* cv|NULLOK GV* gv|NULLOK char* p
+p	|void	|cv_ckproto_len	|NN const CV* cv|NULLOK const GV* gv\
+				|NULLOK const char* p|const STRLEN len
 pd	|CV*	|cv_clone	|NN CV* proto
 ApdR	|SV*	|gv_const_sv	|NN GV* gv
 ApdR	|SV*	|cv_const_sv	|NULLOK CV* cv

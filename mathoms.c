@@ -1223,6 +1223,12 @@ Perl_sv_usepvn(pTHX_ SV *sv, char *ptr, STRLEN len)
     sv_usepvn_flags(sv,ptr,len, 0);
 }
 
+void
+Perl_cv_ckproto(pTHX_ CV *cv, GV *gv, char *p)
+{
+    cv_ckproto_len(cv, gv, p, p ? strlen(p) : 0);
+}
+
 /*
 =for apidoc unpack_str
 
@@ -1244,7 +1250,6 @@ Perl_unpack_str(pTHX_ char *pat, char *patend, char *s, char *strbeg,
 
 /* Whilst this should really be STATIC, it was not in 5.8.7, hence something
    may have linked against it.  */
-void
 S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8)
 {
 }
