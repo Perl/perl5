@@ -211,7 +211,7 @@ S_do_trans_complex(pTHX_ SV *sv)
 
 		if (comp > 0xff) {
 		    if (!complement) {
-			Copy(s, d, len, U8);
+			Move(s, d, len, U8);
 			d += len;
 		    }
 		    else {
@@ -239,7 +239,7 @@ S_do_trans_complex(pTHX_ SV *sv)
 		    continue;
 		}
 		else if (ch == -1) {	/* -1 is unmapped character */
-		    Copy(s, d, len, U8);
+		    Move(s, d, len, U8);
 		    d += len;
 		}
 		else if (ch == -2)      /* -2 is delete character */
@@ -273,7 +273,7 @@ S_do_trans_complex(pTHX_ SV *sv)
 		    matches++;
 		}
 		else if (ch == -1) {	/* -1 is unmapped character */
-		    Copy(s, d, len, U8);
+		    Move(s, d, len, U8);
 		    d += len;
 		}
 		else if (ch == -2)      /* -2 is delete character */
