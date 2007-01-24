@@ -1624,7 +1624,12 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     SV* dsv1;
 #endif
     PERL_UNUSED_ARG(data);
-    RX_MATCH_UTF8_set(prog,do_utf8);
+
+    /* Be paranoid... */
+    if (prog == NULL || startpos == NULL) {
+	Perl_croak(aTHX_ "NULL regexp parameter");
+	return 0;
+    }
 
     PL_regcc = 0;
 
@@ -1633,11 +1638,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     PL_regnarrate = DEBUG_r_TEST;
 #endif
 
-    /* Be paranoid... */
-    if (prog == NULL || startpos == NULL) {
-	Perl_croak(aTHX_ "NULL regexp parameter");
-	return 0;
-    }
+    RX_MATCH_UTF8_set(prog, do_utf8);
 
     multiline = PL_multiline | (prog->reganch & PMf_MULTILINE);
 

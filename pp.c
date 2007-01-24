@@ -2451,13 +2451,11 @@ PP(pp_complement)
 	if (SvUTF8(TARG)) {
 	  /* Calculate exact length, let's not estimate. */
 	  STRLEN targlen = 0;
-	  U8 *result;
-	  U8 *send;
 	  STRLEN l;
 	  UV nchar = 0;
 	  UV nwide = 0;
+	  U8 * const send = tmps + len;
 
-	  send = tmps + len;
 	  while (tmps < send) {
 	    const UV c = utf8n_to_uvchr(tmps, send-tmps, &l, UTF8_ALLOW_ANYUV);
 	    tmps += UTF8SKIP(tmps);
@@ -2471,30 +2469,37 @@ PP(pp_complement)
 	  tmps -= len;
 
 	  if (nwide) {
+	      U8 *result;
+	      U8 *p;
+
 	      Newxz(result, targlen + 1, U8);
+	      p = result;
 	      while (tmps < send) {
 		  const UV c = utf8n_to_uvchr(tmps, send-tmps, &l, UTF8_ALLOW_ANYUV);
 		  tmps += UTF8SKIP(tmps);
-		  result = uvchr_to_utf8_flags(result, ~c, UNICODE_ALLOW_ANY);
+		  p = uvchr_to_utf8_flags(p, ~c, UNICODE_ALLOW_ANY);
 	      }
-	      *result = '\0';
-	      result -= targlen;
+	      *p = '\0';
 	      sv_setpvn(TARG, (char*)result, targlen);
 	      SvUTF8_on(TARG);
+	      Safefree(result);
 	  }
 	  else {
+	      U8 *result;
+	      U8 *p;
+
 	      Newxz(result, nchar + 1, U8);
+	      p = result;
 	      while (tmps < send) {
 		  const U8 c = (U8)utf8n_to_uvchr(tmps, 0, &l, UTF8_ALLOW_ANY);
 		  tmps += UTF8SKIP(tmps);
-		  *result++ = ~c;
+		  *p++ = ~c;
 	      }
-	      *result = '\0';
-	      result -= nchar;
+	      *p = '\0';
 	      sv_setpvn(TARG, (char*)result, nchar);
 	      SvUTF8_off(TARG);
+	      Safefree(result);
 	  }
-	  Safefree(result);
 	  SETs(TARG);
 	  RETURN;
 	}
@@ -4155,7 +4160,6 @@ PP(pp_splice)
     I32 newlen;
     I32 after;
     I32 diff;
-    SV **tmparyval = NULL;
     const MAGIC * const mg = SvTIED_mg((SV*)ary, PERL_MAGIC_tied);
 
     if (mg) {
@@ -4221,6 +4225,7 @@ PP(pp_splice)
     }
 
     if (diff < 0) {				/* shrinking the area */
+	SV **tmparyval;
 	if (newlen) {
 	    Newx(tmparyval, newlen, SV*);	/* so remember insertion */
 	    Copy(MARK, tmparyval, newlen, SV*);
@@ -4281,15 +4286,14 @@ PP(pp_splice)
 	}
     }
     else {					/* no, expanding (or same) */
+	SV** tmparyval = NULL;
 	if (length) {
 	    Newx(tmparyval, length, SV*);	/* so remember deletion */
 	    Copy(AvARRAY(ary)+offset, tmparyval, length, SV*);
 	}
 
 	if (diff > 0) {				/* expanding */
-
 	    /* push up or down? */
-
 	    if (offset < after && diff <= AvARRAY(ary) - AvALLOC(ary)) {
 		if (offset) {
 		    src = AvARRAY(ary);
@@ -4330,7 +4334,6 @@ PP(pp_splice)
 			dst++;
 		    }
 		}
-		Safefree(tmparyval);
 	    }
 	    MARK += length - 1;
 	}
@@ -4341,10 +4344,10 @@ PP(pp_splice)
 		while (length-- > 0)
 		    SvREFCNT_dec(tmparyval[length]);
 	    }
-	    Safefree(tmparyval);
 	}
 	else
 	    *MARK = &PL_sv_undef;
+	Safefree(tmparyval);
     }
     SP = MARK;
     RETURN;

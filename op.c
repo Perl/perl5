@@ -2099,7 +2099,7 @@ Perl_fold_constants(pTHX_ register OP *o)
 {
     register OP *curop;
     I32 type = o->op_type;
-    SV *sv;
+    SV *sv = NULL;
     int ret = 0;
     I32 oldscope;
     OP *old_next;
@@ -2204,6 +2204,7 @@ Perl_fold_constants(pTHX_ register OP *o)
 	goto nope;
 
     op_free(o);
+    assert(sv);
     if (type == OP_RV2GV)
 	return newGVOP(OP_GV, 0, (GV*)sv);
     return newSVOP(OP_CONST, 0, sv);
@@ -3945,7 +3946,9 @@ whileline, OP *expr, OP *block, OP *cont, I32 has_my)
 	cont = append_elem(OP_LINESEQ, cont, unstack);
     }
 
+    assert(block);
     listop = append_list(OP_LINESEQ, (LISTOP*)block, (LISTOP*)cont);
+    assert(listop);
     redo = LINKLIST(listop);
 
     if (expr) {
@@ -6270,6 +6273,7 @@ Perl_ck_split(pTHX_ OP *o)
 
     if (!kid->op_sibling)
 	append_elem(OP_SPLIT, o, newSVOP(OP_CONST, 0, newSViv(0)));
+    assert(kid->op_sibling);
 
     kid = kid->op_sibling;
     scalar(kid);

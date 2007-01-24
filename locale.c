@@ -277,6 +277,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     }
     if (!setlocale_failure) {
 #ifdef USE_LOCALE_CTYPE
+	Safefree(curctype);
 	if (! (curctype =
 	       setlocale(LC_CTYPE,
 			 (!done && (lang || PerlEnv_getenv("LC_CTYPE")))
@@ -286,6 +287,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 	    curctype = savepv(curctype);
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
+	Safefree(curcoll);
 	if (! (curcoll =
 	       setlocale(LC_COLLATE,
 			 (!done && (lang || PerlEnv_getenv("LC_COLLATE")))
@@ -295,6 +297,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 	    curcoll = savepv(curcoll);
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
+	Safefree(curnum);
 	if (! (curnum =
 	       setlocale(LC_NUMERIC,
 			 (!done && (lang || PerlEnv_getenv("LC_NUMERIC")))
@@ -451,12 +454,15 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #endif /* ! LC_ALL */
 
 #ifdef USE_LOCALE_CTYPE
+	Safefree(curctype);
 	curctype = savepv(setlocale(LC_CTYPE, NULL));
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
+	Safefree(curcoll);
 	curcoll = savepv(setlocale(LC_COLLATE, NULL));
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
+	Safefree(curnum);
 	curnum = savepv(setlocale(LC_NUMERIC, NULL));
 #endif /* USE_LOCALE_NUMERIC */
     }

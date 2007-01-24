@@ -6443,6 +6443,8 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
 {
     register SV *sv;
     bool is_utf8 = FALSE;
+    const char *const orig_src = src;
+
     if (len < 0) {
 	STRLEN tmplen = -len;
         is_utf8 = TRUE;
@@ -6463,6 +6465,8 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
     SvPOK_on(sv);
     if (is_utf8)
         SvUTF8_on(sv);
+    if (src != orig_src)
+	Safefree(src);
     return sv;
 }
 

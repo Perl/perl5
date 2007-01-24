@@ -1269,16 +1269,17 @@ PP(pp_enterwrite)
     else
 	fgv = gv;
 
+    if (!fgv) {
+	DIE(aTHX_ "Not a format reference");
+    }
     cv = GvFORM(fgv);
     if (!cv) {
-	if (fgv) {
-	    SV * const tmpsv = sv_newmortal();
-	    const char *name;
-	    gv_efullname4(tmpsv, fgv, NULL, FALSE);
-	    name = SvPV_nolen_const(tmpsv);
-	    if (name && *name)
-		DIE(aTHX_ "Undefined format \"%s\" called", name);
-	}
+	SV * const tmpsv = sv_newmortal();
+	const char *name;
+	gv_efullname4(tmpsv, fgv, NULL, FALSE);
+	name = SvPV_nolen_const(tmpsv);
+	if (name && *name)
+	    DIE(aTHX_ "Undefined format \"%s\" called", name);
 	DIE(aTHX_ "Not a format reference");
     }
     if (CvCLONE(cv))
@@ -1293,16 +1294,18 @@ PP(pp_leavewrite)
     dSP;
     GV * const gv = cxstack[cxstack_ix].blk_sub.gv;
     register IO * const io = GvIOp(gv);
-    PerlIO * const ofp = IoOFP(io);
+    PerlIO *ofp;
     PerlIO *fp;
     SV **newsp;
     I32 gimme;
     register PERL_CONTEXT *cx;
 
+    if (!io || !(ofp = IoOFP(io)))
+        goto forget_top;
+
     DEBUG_f(PerlIO_printf(Perl_debug_log, "left=%ld, todo=%ld\n",
 	  (long)IoLINES_LEFT(io), (long)FmLINES(PL_formtarget)));
-    if (!io || !ofp)
-	goto forget_top;
+
     if (IoLINES_LEFT(io) < FmLINES(PL_formtarget) &&
 	PL_formtarget != PL_toptarget)
     {
@@ -5205,7 +5208,6 @@ PP(pp_ggrent)
     }
 
     if (grent) {
-	SV *sv;
 	PUSHs(sv_2mortal(newSVpv(grent->gr_name, 0)));
 
 #ifdef GRPASSWD
