@@ -57,10 +57,15 @@ Perl_vdeb(pTHX_ const char *pat, va_list *args)
 {
 #ifdef DEBUGGING
     dVAR;
-    const char* const file = OutCopFILE(PL_curcop);
+    const char* const file = PL_curcop ? OutCopFILE(PL_curcop) : "<null>";
+    const char* const display_file = file ? file : "<free>";
+    const long line = PL_curcop ? (long)CopLINE(PL_curcop) : 0;
 
-    PerlIO_printf(Perl_debug_log, "(%s:%ld)\t", (file ? file : "<free>"),
-		  (long)CopLINE(PL_curcop));
+    if (DEBUG_v_TEST)
+	PerlIO_printf(Perl_debug_log, "(%ld:%s:%ld)\t",
+		      (long)PerlProc_getpid(), display_file, line);
+    else
+	PerlIO_printf(Perl_debug_log, "(%s:%ld)\t", display_file, line);
     (void) PerlIO_vprintf(Perl_debug_log, pat, *args);
 #else
     PERL_UNUSED_CONTEXT;
