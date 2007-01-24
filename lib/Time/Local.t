@@ -77,7 +77,7 @@ my $tests = (@time * 12);
 $tests += @neg_time * 12;
 $tests += @bad_time;
 $tests += @years;
-$tests += 5;
+$tests += 10;
 $tests += 2 if $ENV{PERL_CORE};
 $tests += 8 if $ENV{MAINTAINER};
 
@@ -171,8 +171,25 @@ SKIP:
     skip 'this platform does not support negative epochs.', 1
         unless $neg_epoch_ok;
 
+    eval { timegm(0,0,0,29,1,1900) };
+    like($@, qr/Day '29' out of range 1\.\.28/,
+         'does not accept leap day in 1900');
+
+    eval { timegm(0,0,0,29,1,200) };
+    like($@, qr/Day '29' out of range 1\.\.28/,
+         'does not accept leap day in 2100 (year passed as 200)');
+
+    eval { timegm(0,0,0,29,1,0) };
+    is($@, '', 'no error with leap day of 2000 (year passed as 0)');
+
     eval { timegm(0,0,0,29,1,1904) };
     is($@, '', 'no error with leap day of 1904');
+
+    eval { timegm(0,0,0,29,1,4) };
+    is($@, '', 'no error with leap day of 2004 (year passed as 4)');
+
+    eval { timegm(0,0,0,29,1,96) };
+    is($@, '', 'no error with leap day of 1996 (year passed as 96)');
 }
 
 if ($ENV{MAINTAINER}) {
