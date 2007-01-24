@@ -839,7 +839,9 @@ Apdmb	|void	|sv_unref	|NN SV* sv
 Apd	|void	|sv_unref_flags	|NN SV* sv|U32 flags
 Apd	|void	|sv_untaint	|NN SV* sv
 Apd	|bool	|sv_upgrade	|NN SV* sv|U32 mt
-Apd	|void	|sv_usepvn	|NN SV* sv|NULLOK char* ptr|STRLEN len
+Apdmb	|void	|sv_usepvn	|NN SV* sv|NULLOK char* ptr|STRLEN len
+Apd	|void	|sv_usepvn_flags|NN SV* sv|NULLOK char* ptr|STRLEN len\
+				|U32 flags
 Apd	|void	|sv_vcatpvfn	|NN SV* sv|NN const char* pat|STRLEN patlen \
 				|NULLOK va_list* args|NULLOK SV** svargs|I32 svmax \
 				|NULLOK bool *maybe_tainted
@@ -954,7 +956,7 @@ Apd	|void	|sv_setnv_mg	|NN SV *sv|NV num
 Apd	|void	|sv_setpv_mg	|NN SV *sv|NULLOK const char *ptr
 Apd	|void	|sv_setpvn_mg	|NN SV *sv|NN const char *ptr|STRLEN len
 Apd	|void	|sv_setsv_mg	|NN SV *dstr|NULLOK SV *sstr
-Apd	|void	|sv_usepvn_mg	|NN SV *sv|NULLOK char *ptr|STRLEN len
+Apdbm	|void	|sv_usepvn_mg	|NN SV *sv|NULLOK char *ptr|STRLEN len
 ApR	|MGVTBL*|get_vtbl	|int vtbl_id
 Ap	|char*	|pv_display	|NN SV *dsv|NN char *pv|STRLEN cur|STRLEN len \
 				|STRLEN pvlim

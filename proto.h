@@ -1260,7 +1260,8 @@ PERL_CALLCONV int	Perl_sv_unmagic(pTHX_ SV* sv, int type);
 PERL_CALLCONV void	Perl_sv_unref_flags(pTHX_ SV* sv, U32 flags);
 PERL_CALLCONV void	Perl_sv_untaint(pTHX_ SV* sv);
 PERL_CALLCONV bool	Perl_sv_upgrade(pTHX_ SV* sv, U32 mt);
-PERL_CALLCONV void	Perl_sv_usepvn(pTHX_ SV* sv, char* ptr, STRLEN len);
+/* PERL_CALLCONV void	Perl_sv_usepvn(pTHX_ SV* sv, char* ptr, STRLEN len); */
+PERL_CALLCONV void	Perl_sv_usepvn_flags(pTHX_ SV* sv, char* ptr, STRLEN len, U32 flags);
 PERL_CALLCONV void	Perl_sv_vcatpvfn(pTHX_ SV* sv, const char* pat, STRLEN patlen, va_list* args, SV** svargs, I32 svmax, bool *maybe_tainted);
 PERL_CALLCONV void	Perl_sv_vsetpvfn(pTHX_ SV* sv, const char* pat, STRLEN patlen, va_list* args, SV** svargs, I32 svmax, bool *maybe_tainted);
 PERL_CALLCONV NV	Perl_str_to_version(pTHX_ SV *sv)
@@ -1398,7 +1399,7 @@ PERL_CALLCONV void	Perl_sv_setnv_mg(pTHX_ SV *sv, NV num);
 PERL_CALLCONV void	Perl_sv_setpv_mg(pTHX_ SV *sv, const char *ptr);
 PERL_CALLCONV void	Perl_sv_setpvn_mg(pTHX_ SV *sv, const char *ptr, STRLEN len);
 PERL_CALLCONV void	Perl_sv_setsv_mg(pTHX_ SV *dstr, SV *sstr);
-PERL_CALLCONV void	Perl_sv_usepvn_mg(pTHX_ SV *sv, char *ptr, STRLEN len);
+/* PERL_CALLCONV void	Perl_sv_usepvn_mg(pTHX_ SV *sv, char *ptr, STRLEN len); */
 PERL_CALLCONV MGVTBL*	Perl_get_vtbl(pTHX_ int vtbl_id)
 			__attribute__warn_unused_result__;
 

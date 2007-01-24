@@ -3612,57 +3612,58 @@ Perl_sv_setpv_mg(pTHX_ register SV *sv, register const char *ptr)
 }
 
 /*
-=for apidoc sv_usepvn
+=for apidoc sv_usepvn_flags
 
 Tells an SV to use C<ptr> to find its string value.  Normally the
 string is stored inside the SV but sv_usepvn allows the SV to use an
 outside string.  The C<ptr> should point to memory that was allocated
-by C<malloc>.  The string length, C<len>, must be supplied.  This
-function will realloc (i.e. move) the memory pointed to by C<ptr>,
+by C<malloc>.  The string length, C<len>, must be supplied.  By default
+this function will realloc (i.e. move) the memory pointed to by C<ptr>,
 so that pointer should not be freed or used by the programmer after
 giving it to sv_usepvn, and neither should any pointers from "behind"
-that pointer (e.g. ptr + 1) be used.  Does not handle 'set' magic.
-See C<sv_usepvn_mg>.
+that pointer (e.g. ptr + 1) be used.
+
+If C<flags> & SV_SMAGIC is true, will call SvSETMAGIC. If C<flags> &
+SV_HAS_TRAILING_NUL is true, then C<ptr[len]> must be NUL, and the realloc
+I<may> be skipped. (i.e. the buffer is actually at least 1 byte longer than
+C<len>, and already meets the requirements for storing in C<SvPVX>)
 
 =cut
 */
 
 void
-Perl_sv_usepvn(pTHX_ register SV *sv, register char *ptr, register STRLEN len)
+Perl_sv_usepvn_flags(pTHX_ SV *sv, char *ptr, STRLEN len, U32 flags)
 {
     STRLEN allocate;
     SV_CHECK_THINKFIRST(sv);
     (void)SvUPGRADE(sv, SVt_PV);
     if (!ptr) {
 	(void)SvOK_off(sv);
+	if (flags & SV_SMAGIC)
+	    SvSETMAGIC(sv);
 	return;
     }
     if (SvPVX_const(sv))
 	SvPV_free(sv);
 
-    allocate = PERL_STRLEN_ROUNDUP(len + 1);
-    ptr = saferealloc (ptr, allocate);
+    if (flags & SV_HAS_TRAILING_NUL)
+	assert(ptr[len] == '\0');
+
+    allocate = (flags & SV_HAS_TRAILING_NUL)
+	? len + 1: PERL_STRLEN_ROUNDUP(len + 1);
+    if (!(flags & SV_HAS_TRAILING_NUL)) {
+	ptr = saferealloc (ptr, allocate);
+    }
     SvPV_set(sv, ptr);
     SvCUR_set(sv, len);
     SvLEN_set(sv, allocate);
-    *SvEND(sv) = '\0';
+    if (!(flags & SV_HAS_TRAILING_NUL)) {
+	*SvEND(sv) = '\0';
+    }
     (void)SvPOK_only_UTF8(sv);		/* validate pointer */
     SvTAINT(sv);
-}
-
-/*
-=for apidoc sv_usepvn_mg
-
-Like C<sv_usepvn>, but also handles 'set' magic.
-
-=cut
-*/
-
-void
-Perl_sv_usepvn_mg(pTHX_ register SV *sv, register char *ptr, register STRLEN len)
-{
-    sv_usepvn(sv,ptr,len);
-    SvSETMAGIC(sv);
+    if (flags & SV_SMAGIC)
+	SvSETMAGIC(sv);
 }
 
 /*
