@@ -1619,10 +1619,10 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     char *scream_olds = NULL;
     SV* oreplsv = GvSV(PL_replgv);
     const bool do_utf8 = DO_UTF8(sv);
-    const I32 multiline = PL_multiline | (prog->reganch & PMf_MULTILINE);
+    I32 multiline;
 #ifdef DEBUGGING
-    SV * const dsv0 = PERL_DEBUG_PAD_ZERO(0);
-    SV * const dsv1 = PERL_DEBUG_PAD_ZERO(1);
+    SV* dsv0;
+    SV* dsv1;
 #endif
     PERL_UNUSED_ARG(data);
     RX_MATCH_UTF8_set(prog,do_utf8);
@@ -1639,6 +1639,13 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	Perl_croak(aTHX_ "NULL regexp parameter");
 	return 0;
     }
+
+    multiline = PL_multiline | (prog->reganch & PMf_MULTILINE);
+
+#ifdef DEBUGGING
+    dsv0 = PERL_DEBUG_PAD_ZERO(0);
+    dsv1 = PERL_DEBUG_PAD_ZERO(1);
+#endif
 
     minlen = prog->minlen;
     if (strend - startpos < minlen) {
@@ -3122,7 +3129,7 @@ S_regmatch(pTHX_ regnode *prog)
 		/* No need to save/restore up to this paren */
 		I32 parenfloor = scan->flags;
 
-		if (OP(PREVOPER(next)) == NOTHING) /* LONGJMP */
+		if (next && (OP(PREVOPER(next)) == NOTHING)) /* LONGJMP */
 		    next += ARG(next);
 		cc.oldcc = PL_regcc;
 		PL_regcc = &cc;
@@ -3357,7 +3364,7 @@ S_regmatch(pTHX_ regnode *prog)
 	  do_branch:
 	    {
 		c1 = OP(scan);
-		if (OP(next) != c1)	/* No choice. */
+		if (!next || OP(next) != c1)	/* No choice. */
 		    next = inner;	/* Avoid recursion. */
 		else {
 		    const I32 lastparen = *PL_reglastparen;
