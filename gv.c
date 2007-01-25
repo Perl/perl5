@@ -171,7 +171,7 @@ Perl_newGP(pTHX_ GV *const gv)
     Newxz(gp, 1, GP);
 
 #ifndef PERL_DONT_CREATE_GVSV
-    gp->gv_sv = newSV(0);
+    gp->gp_sv = newSV(0);
 #endif
 
     gp->gp_line = PL_curcop ? CopLINE(PL_curcop) : 0;
