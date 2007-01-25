@@ -154,6 +154,9 @@ Returns the stash of the CV.
 #define CvWEAKOUTSIDE_off(cv)	(CvFLAGS(cv) &= ~CVf_WEAKOUTSIDE)
 
 #define CvISXSUB(cv)		(CvXSUB(cv) ? TRUE : FALSE)
+/* Flags for newXS_flags  */
+#define XS_DYNAMIC_FILENAME	0x01	/* The filename isn't static  */
+
 /*
 =head1 CV reference counts and CvOUTSIDE
 
