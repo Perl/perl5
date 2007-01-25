@@ -99,7 +99,7 @@ S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
     HEK_KEY(hek)[len] = 0;
     HEK_LEN(hek) = len;
     HEK_HASH(hek) = hash;
-    HEK_FLAGS(hek) = (unsigned char)flags_masked;
+    HEK_FLAGS(hek) = (unsigned char)flags_masked | HVhek_UNSHARED;
 
     if (flags & HVhek_FREEKEY)
 	Safefree(str);
@@ -1494,10 +1494,9 @@ Perl_hv_clear(pTHX_ HV *hv)
     }
 
     hfreeentries(hv);
-    xhv->xhv_placeholders = 0; /* HvPLACEHOLDERS(hv) = 0 */
-    if (xhv->xhv_array /* HvARRAY(hv) */)
-	(void)memzero(xhv->xhv_array /* HvARRAY(hv) */,
-		      (xhv->xhv_max+1 /* HvMAX(hv)+1 */) * sizeof(HE*));
+    HvPLACEHOLDERS_set(hv, 0);
+    if (HvARRAY(hv))
+	Zero(HvARRAY(hv), xhv->xhv_max+1 /* HvMAX(hv)+1 */, HE*);
 
     if (SvRMAGICAL(hv))
 	mg_clear((SV*)hv);
@@ -2073,6 +2072,13 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 	HE *const next = *head;
 	entry = new_HE();
 	HeKEY_hek(entry) = save_hek_flags(str, len, hash, flags_masked);
+	/* save_hek_flags defaults to adding the "unshared" flag, and whilst
+	   it would be possible to change all its other callers to add it,
+	   I feel it's safer to explicity remove it in the one place that
+	   doesn't need it, as that prevents bugs-that-might-have-been if
+	   someone merges in a change that adds another call to save_hek_flags
+	*/
+	HeKFLAGS(entry) &= ~HVhek_UNSHARED;
 	HeVAL(entry) = Nullsv;
 	HeNEXT(entry) = next;
 	*head = entry;

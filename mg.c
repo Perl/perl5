@@ -1684,7 +1684,7 @@ SV *
 Perl_magic_scalarpack(pTHX_ HV *hv, MAGIC *mg)
 {
     dSP;
-    SV *retval = &PL_sv_undef;
+    SV *retval;
     SV * const tied = SvTIED_obj((SV*)hv, mg);
     HV * const pkg = SvSTASH((SV*)SvRV(tied));
    
@@ -1710,6 +1710,8 @@ Perl_magic_scalarpack(pTHX_ HV *hv, MAGIC *mg)
 
     if (call_method("SCALAR", G_SCALAR))
         retval = *PL_stack_sp--; 
+    else
+	retval = &PL_sv_undef;
     POPSTACK;
     LEAVE;
     return retval;
@@ -1898,7 +1900,7 @@ int
 Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 {
     STRLEN len;
-    const char *tmps = SvPV_const(sv, len);
+    const char * const tmps = SvPV_const(sv, len);
     SV * const lsv = LvTARG(sv);
     I32 lvoff = LvTARGOFF(sv);
     I32 lvlen = LvTARGLEN(sv);
@@ -1911,10 +1913,11 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 	SvUTF8_on(lsv);
     }
     else if (lsv && SvUTF8(lsv)) {
+	const char *utf8;
 	sv_pos_u2b(lsv, &lvoff, &lvlen);
-	tmps = (char*)bytes_to_utf8((U8*)tmps, &len);
-	sv_insert(lsv, lvoff, lvlen, (char *)tmps, len);
-	Safefree(tmps);
+	utf8 = (char*)bytes_to_utf8((U8*)tmps, &len);
+	sv_insert(lsv, lvoff, lvlen, (char *)utf8, len);
+	Safefree(utf8);
     }
     else
         sv_insert(lsv, lvoff, lvlen, (char *)tmps, len);

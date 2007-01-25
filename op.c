@@ -223,6 +223,7 @@ Perl_allocmy(pTHX_ char *name)
 	    /* 1999-02-27 mjd@plover.com */
 	    char *p;
 	    p = strchr(name, '\0');
+	    assert(p);
 	    /* The next block assumes the buffer is at least 205 chars
 	       long.  At present, it's always at least 256 chars. */
 	    if (p - name > 200) {
@@ -1119,15 +1120,14 @@ Perl_mod(pTHX_ OP *o, I32 type)
 		CV *cv;
 		OP *okid;
 
-		if (kid->op_type == OP_PUSHMARK)
-		    goto skip_kids;
-		if (kid->op_type != OP_NULL || kid->op_targ != OP_LIST)
-		    Perl_croak(aTHX_
-			       "panic: unexpected lvalue entersub "
-			       "args: type/targ %ld:%"UVuf,
-			       (long)kid->op_type, (UV)kid->op_targ);
-		kid = kLISTOP->op_first;
-	      skip_kids:
+		if (kid->op_type != OP_PUSHMARK) {
+		    if (kid->op_type != OP_NULL || kid->op_targ != OP_LIST)
+			Perl_croak(aTHX_
+				"panic: unexpected lvalue entersub "
+				"args: type/targ %ld:%"UVuf,
+				(long)kid->op_type, (UV)kid->op_targ);
+		    kid = kLISTOP->op_first;
+		}
 		while (kid->op_sibling)
 		    kid = kid->op_sibling;
 		if (!(kid->op_type == OP_NULL && kid->op_targ == OP_RV2CV)) {
@@ -4739,7 +4739,7 @@ Perl_newXS_flags(pTHX_ const char *name, XSUBADDR_t subaddr,
 		 const char *const filename, const char *const proto,
 		 U32 flags)
 {
-    CV *cv = newXS(name, subaddr, filename);
+    CV *cv = newXS((char*)name, subaddr, (char*)filename);
 
     if (flags & XS_DYNAMIC_FILENAME) {
 	/* We need to "make arrangements" (ie cheat) to ensure that the
@@ -5614,6 +5614,7 @@ Perl_ck_fun(pTHX_ OP *o)
 			    else if (kid->op_type == OP_AELEM
 				     || kid->op_type == OP_HELEM)
 			    {
+				 OP *firstop;
 				 OP *op = ((BINOP*)kid)->op_first;
 				 name = NULL;
 				 if (op) {
@@ -5623,10 +5624,10 @@ Perl_ck_fun(pTHX_ OP *o)
 					   "[]" : "{}";
 				      if (((op->op_type == OP_RV2AV) ||
 					   (op->op_type == OP_RV2HV)) &&
-					  (op = ((UNOP*)op)->op_first) &&
-					  (op->op_type == OP_GV)) {
+					  (firstop = ((UNOP*)op)->op_first) &&
+					  (firstop->op_type == OP_GV)) {
 					   /* packagevar $a[] or $h{} */
-					   GV * const gv = cGVOPx_gv(op);
+					   GV * const gv = cGVOPx_gv(firstop);
 					   if (gv)
 						tmpstr =
 						     Perl_newSVpvf(aTHX_
