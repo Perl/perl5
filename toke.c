@@ -794,19 +794,19 @@ S_incline(pTHX_ char *s)
 	    char *tmpbuf, *tmpbuf2;
 	    GV **gvp, *gv2;
 	    STRLEN tmplen2 = strlen(s);
-	    if (tmplen + 3 < sizeof smallbuf)
+	    if (tmplen + 2 < sizeof smallbuf)
 		tmpbuf = smallbuf;
 	    else
-		Newx(tmpbuf, tmplen + 3, char);
-	    if (tmplen2 + 3 < sizeof smallbuf2)
+		Newx(tmpbuf, tmplen + 2, char);
+	    if (tmplen2 + 2 < sizeof smallbuf2)
 		tmpbuf2 = smallbuf2;
 	    else
-		Newx(tmpbuf2, tmplen2 + 3, char);
+		Newx(tmpbuf2, tmplen2 + 2, char);
 	    tmpbuf[0] = tmpbuf2[0] = '_';
 	    tmpbuf[1] = tmpbuf2[1] = '<';
-	    memcpy(tmpbuf + 2, cf, ++tmplen);
-	    memcpy(tmpbuf2 + 2, s, ++tmplen2);
-	    ++tmplen; ++tmplen2;
+	    memcpy(tmpbuf + 2, cf, tmplen);
+	    memcpy(tmpbuf2 + 2, s, tmplen2);
+	    tmplen += 2; tmplen2 += 2;
 	    gvp = (GV**)hv_fetch(PL_defstash, tmpbuf, tmplen, FALSE);
 	    if (gvp) {
 		gv2 = *(GV**)hv_fetch(PL_defstash, tmpbuf2, tmplen2, TRUE);

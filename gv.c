@@ -742,14 +742,13 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
     HV *stash;
     GV *tmpgv;
 
-    if (namelen + 3 < sizeof smallbuf)
+    if (namelen + 2 < sizeof smallbuf)
 	tmpbuf = smallbuf;
     else
-	Newx(tmpbuf, namelen + 3, char);
+	Newx(tmpbuf, namelen + 2, char);
     Copy(name,tmpbuf,namelen,char);
     tmpbuf[namelen++] = ':';
     tmpbuf[namelen++] = ':';
-    tmpbuf[namelen] = '\0';
     tmpgv = gv_fetchpvn_flags(tmpbuf, namelen, flags, SVt_PVHV);
     if (tmpbuf != smallbuf)
 	Safefree(tmpbuf);
@@ -835,14 +834,13 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		char smallbuf[128];
 		char *tmpbuf;
 
-		if (len + 3 < (I32)sizeof (smallbuf))
+		if (len + 2 < (I32)sizeof (smallbuf))
 		    tmpbuf = smallbuf;
 		else
-		    Newx(tmpbuf, len+3, char);
+		    Newx(tmpbuf, len+2, char);
 		Copy(name, tmpbuf, len, char);
 		tmpbuf[len++] = ':';
 		tmpbuf[len++] = ':';
-		tmpbuf[len] = '\0';
 		gvp = (GV**)hv_fetch(stash,tmpbuf,len,add);
 		gv = gvp ? *gvp : NULL;
 		if (gv && gv != (GV*)&PL_sv_undef) {
