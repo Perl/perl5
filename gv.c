@@ -105,7 +105,7 @@ GV *
 Perl_gv_fetchfile(pTHX_ const char *name)
 {
     dVAR;
-    char smallbuf[256];
+    char smallbuf[128];
     char *tmpbuf;
     STRLEN tmplen;
     GV *gv;

@@ -790,7 +790,7 @@ S_incline(pTHX_ char *s)
 	if (tmplen > 7 && strnEQ(cf, "(eval ", 6)) {
 	    /* must copy *{"::_<(eval N)[oldfilename:L]"}
 	     * to *{"::_<newfilename"} */
-	    char smallbuf[256], smallbuf2[256];
+	    char smallbuf[128], smallbuf2[128];
 	    char *tmpbuf, *tmpbuf2;
 	    GV **gvp, *gv2;
 	    STRLEN tmplen2 = strlen(s);
