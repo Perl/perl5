@@ -1358,12 +1358,10 @@ Found in file gv.c
 =item gv_stashpv
 X<gv_stashpv>
 
-Returns a pointer to the stash for a specified package.  C<name> should
-be a valid UTF-8 string and must be null-terminated.  If C<create> is set
-then the package will be created if it does not already exist.  If C<create>
-is not set and the package does not exist then NULL is returned.
+Returns a pointer to the stash for a specified package.  Uses C<strlen> to
+determine the length of C<name, then calls C<gv_stashpvn()>.
 
-	HV*	gv_stashpv(const char* name, I32 create)
+	HV*	gv_stashpv(const char* name, I32 flags)
 
 =for hackers
 Found in file gv.c
@@ -1371,13 +1369,15 @@ Found in file gv.c
 =item gv_stashpvn
 X<gv_stashpvn>
 
-Returns a pointer to the stash for a specified package.  C<name> should
-be a valid UTF-8 string.  The C<namelen> parameter indicates the length of
-the C<name>, in bytes.  If C<create> is set then the package will be
-created if it does not already exist.  If C<create> is not set and the
-package does not exist then NULL is returned.
+Returns a pointer to the stash for a specified package.  The C<namelen>
+parameter indicates the length of the C<name>, in bytes.  C<flags> is passed
+to C<gv_fetchpvn_flags()>, so if set to C<GV_ADD> then the package will be
+created if it does not already exist.  If the package does not exist and
+C<flags> is 0 (or any other setting that does not create packages) then NULL
+is returned.
 
-	HV*	gv_stashpvn(const char* name, U32 namelen, I32 create)
+
+	HV*	gv_stashpvn(const char* name, U32 namelen, I32 flags)
 
 =for hackers
 Found in file gv.c
@@ -1395,10 +1395,9 @@ Found in file handy.h
 =item gv_stashsv
 X<gv_stashsv>
 
-Returns a pointer to the stash for a specified package, which must be a
-valid UTF-8 string.  See C<gv_stashpv>.
+Returns a pointer to the stash for a specified package.  See C<gv_stashpvn>.
 
-	HV*	gv_stashsv(SV* sv, I32 create)
+	HV*	gv_stashsv(SV* sv, I32 flags)
 
 =for hackers
 Found in file gv.c

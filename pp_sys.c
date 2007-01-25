@@ -844,7 +844,7 @@ PP(pp_tie)
 	/* Not clear why we don't call call_method here too.
 	 * perhaps to get different error message ?
 	 */
-	stash = gv_stashsv(*MARK, FALSE);
+	stash = gv_stashsv(*MARK, 0);
 	if (!stash || !(gv = gv_fetchmethod(stash, methname))) {
 	    DIE(aTHX_ "Can't locate object method \"%s\" via package \"%"SVf"\"",
 		 methname, SVfARG(*MARK));
@@ -946,7 +946,7 @@ PP(pp_dbmopen)
 
     HV * const hv = (HV*)POPs;
     SV * const sv = sv_2mortal(newSVpvs("AnyDBM_File"));
-    stash = gv_stashsv(sv, FALSE);
+    stash = gv_stashsv(sv, 0);
     if (!stash || !(gv = gv_fetchmethod(stash, "TIEHASH"))) {
 	PUTBACK;
 	require_pv("AnyDBM_File.pm");

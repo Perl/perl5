@@ -1560,7 +1560,7 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
     dSP;
     const size_t pkg_len = strlen(pkg);
     const size_t name_len = strlen(name);
-    HV * const stash = gv_stashpvn(pkg, pkg_len, FALSE);
+    HV * const stash = gv_stashpvn(pkg, pkg_len, 0);
     SV* errsv_save;
 
     PUSHSTACKi(PERLSI_MAGIC);

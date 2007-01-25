@@ -814,12 +814,12 @@ in the stash C<Baz::> in C<Bar::>'s stash.
 
 To get the stash pointer for a particular package, use the function:
 
-    HV*  gv_stashpv(const char* name, I32 create)
-    HV*  gv_stashsv(SV*, I32 create)
+    HV*  gv_stashpv(const char* name, I32 flags)
+    HV*  gv_stashsv(SV*, I32 flags)
 
 The first function takes a literal string, the second uses the string stored
 in the SV.  Remember that a stash is just a hash table, so you get back an
-C<HV*>.  The C<create> flag will create a new package if it is set.
+C<HV*>.  The C<flags> flag will create a new package if it is set to GV_ADD.
 
 The name that C<gv_stash*v> wants is the name of the package whose symbol table
 you want.  The default package is called C<main>.  If you have multiply nested
@@ -1187,7 +1187,7 @@ to do this.
     CODE:
         hash = newHV();
         tie = newRV_noinc((SV*)newHV());
-        stash = gv_stashpv("MyTie", TRUE);
+        stash = gv_stashpv("MyTie", GV_ADD);
         sv_bless(tie, stash);
         hv_magic(hash, (GV*)tie, PERL_MAGIC_tied);
         RETVAL = newRV_noinc(hash);

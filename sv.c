@@ -7769,7 +7769,7 @@ Perl_newSVrv(pTHX_ SV *rv, const char *classname)
     SvROK_on(rv);
 
     if (classname) {
-	HV* const stash = gv_stashpv(classname, TRUE);
+	HV* const stash = gv_stashpv(classname, GV_ADD);
 	(void)sv_bless(rv, stash);
     }
     return sv;

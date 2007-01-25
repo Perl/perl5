@@ -388,7 +388,7 @@ typedef struct stcxt {
   STMT_START {										\
 	SV *self = newSV(sizeof(stcxt_t) - 1);			\
 	SV *my_sv = newRV_noinc(self);					\
-	sv_bless(my_sv, gv_stashpv("Storable::Cxt", TRUE));	\
+	sv_bless(my_sv, gv_stashpv("Storable::Cxt", GV_ADD));	\
 	cxt = (stcxt_t *)SvPVX(self);					\
 	Zero(cxt, 1, stcxt_t);							\
 	cxt->my_sv = my_sv;								\
@@ -1047,7 +1047,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 	SV *ref;								\
 	HV *stash;								\
 	TRACEME(("blessing 0x%"UVxf" in %s", PTR2UV(s), (p))); \
-	stash = gv_stashpv((p), TRUE);			\
+	stash = gv_stashpv((p), GV_ADD);			\
 	ref = newRV_noinc(s);					\
 	(void) sv_bless(ref, stash);			\
 	SvRV_set(ref, NULL);						\
@@ -6377,7 +6377,7 @@ PROTOTYPES: ENABLE
 
 BOOT:
 {
-    HV *stash = gv_stashpvn("Storable", 8, TRUE);
+    HV *stash = gv_stashpvn("Storable", 8, GV_ADD);
     newCONSTSUB(stash, "BIN_MAJOR", newSViv(STORABLE_BIN_MAJOR));
     newCONSTSUB(stash, "BIN_MINOR", newSViv(STORABLE_BIN_MINOR));
     newCONSTSUB(stash, "BIN_WRITE_MINOR", newSViv(STORABLE_BIN_WRITE_MINOR));

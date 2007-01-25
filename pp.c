@@ -578,7 +578,7 @@ PP(pp_bless)
 	if (len == 0 && ckWARN(WARN_MISC))
 	    Perl_warner(aTHX_ packWARN(WARN_MISC),
 		   "Explicit blessing to '' (assuming package main)");
-	stash = gv_stashpvn(ptr, len, TRUE);
+	stash = gv_stashpvn(ptr, len, GV_ADD);
     }
 
     (void)sv_bless(TOPs, stash);

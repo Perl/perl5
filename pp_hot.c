@@ -2993,7 +2993,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 				    : "on an undefined value");
 	    }
 	    /* assume it's a package name */
-	    stash = gv_stashpvn(packname, packlen, FALSE);
+	    stash = gv_stashpvn(packname, packlen, 0);
 	    if (!stash)
 		packsv = sv;
             else {
@@ -3085,7 +3085,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	}
 	
 	/* we're relying on gv_fetchmethod not autovivifying the stash */
-	if (gv_stashpvn(packname, packlen, FALSE)) {
+	if (gv_stashpvn(packname, packlen, 0)) {
 	    Perl_croak(aTHX_
 		       "Can't locate object method \"%s\" via package \"%.*s\"",
 		       leaf, (int)packlen, packname);

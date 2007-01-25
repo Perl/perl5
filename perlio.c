@@ -902,7 +902,7 @@ XS(XS_io_MODIFY_SCALAR_ATTRIBUTES)
 SV *
 PerlIO_tab_sv(pTHX_ PerlIO_funcs *tab)
 {
-    HV * const stash = gv_stashpvs("PerlIO::Layer", TRUE);
+    HV * const stash = gv_stashpvs("PerlIO::Layer", GV_ADD);
     SV * const sv = sv_bless(newRV_noinc(newSViv(PTR2IV(tab))), stash);
     return sv;
 }

@@ -3492,7 +3492,7 @@ Perl_package(pTHX_ OP *o)
     save_item(PL_curstname);
 
     name = SvPV_const(cSVOPo->op_sv, len);
-    PL_curstash = gv_stashpvn(name, len, TRUE);
+    PL_curstash = gv_stashpvn(name, len, GV_ADD);
     sv_setpvn(PL_curstname, name, len);
 
     PL_hints |= HINT_BLOCK_SCOPE;

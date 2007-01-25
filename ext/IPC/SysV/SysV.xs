@@ -216,7 +216,7 @@ SHMLBA()
 
 BOOT:
 {
-    HV *stash = gv_stashpvn("IPC::SysV", 9, TRUE);
+    HV *stash = gv_stashpvn("IPC::SysV", 9, GV_ADD);
     /*
      * constant subs for IPC::SysV
      */
