@@ -1244,7 +1244,6 @@ ERsn	|I32	|regcurly	|NN const char *
 Es	|regnode*|reg_node	|NN struct RExC_state_t *state|U8 op
 Es	|regnode*|regpiece	|NN struct RExC_state_t *state|NN I32 *flagp
 Es	|void	|reginsert	|NN struct RExC_state_t *state|U8 op|NN regnode *opnd
-Es	|void	|regoptail	|NN const struct RExC_state_t *state|NN regnode *p|NN const regnode *val
 Es	|void	|regtail	|NN const struct RExC_state_t *state|NN regnode *p|NN const regnode *val
 EsRn	|char*	|regwhite	|NN char *p|NN const char *e
 Es	|char*	|nextchar	|NN struct RExC_state_t *state
@@ -1281,8 +1280,8 @@ ERs	|bool	|reginclass	|NN const regnode *n|NN const U8 *p|NULLOK STRLEN *lenp\
 Es	|CHECKPOINT|regcppush	|I32 parenfloor
 Es	|char*|regcppop
 Es	|void	|cache_re	|NN regexp *prog
-ERsn	|U8*	|reghop3	|NN U8 *pos|I32 off|NN U8 *lim
-ERsn	|U8*	|reghopmaybe3	|NN U8 *pos|I32 off|NN U8 *lim
+ERsn	|U8*	|reghop3	|NN U8 *pos|I32 off|NN const U8 *lim
+ERsn	|U8*	|reghopmaybe3	|NN U8 *pos|I32 off|NN const U8 *lim
 ERs	|char*	|find_byclass	|NN regexp * prog|NN const regnode *c|NN char *s|NN const char *strend|I32 norun
 Es	|void	|to_utf8_substr	|NN regexp * prog
 Es	|void	|to_byte_substr	|NN regexp * prog

@@ -1819,7 +1819,6 @@ STATIC I32	S_regcurly(const char *)
 STATIC regnode*	S_reg_node(pTHX_ struct RExC_state_t *state, U8 op);
 STATIC regnode*	S_regpiece(pTHX_ struct RExC_state_t *state, I32 *flagp);
 STATIC void	S_reginsert(pTHX_ struct RExC_state_t *state, U8 op, regnode *opnd);
-STATIC void	S_regoptail(pTHX_ const struct RExC_state_t *state, regnode *p, const regnode *val);
 STATIC void	S_regtail(pTHX_ const struct RExC_state_t *state, regnode *p, const regnode *val);
 STATIC char*	S_regwhite(char *p, const char *e)
 			__attribute__warn_unused_result__;
@@ -1865,10 +1864,10 @@ STATIC bool	S_reginclass(pTHX_ const regnode *n, const U8 *p, STRLEN *lenp, bool
 STATIC CHECKPOINT	S_regcppush(pTHX_ I32 parenfloor);
 STATIC char*	S_regcppop(pTHX);
 STATIC void	S_cache_re(pTHX_ regexp *prog);
-STATIC U8*	S_reghop3(U8 *pos, I32 off, U8 *lim)
+STATIC U8*	S_reghop3(U8 *pos, I32 off, const U8 *lim)
 			__attribute__warn_unused_result__;
 
-STATIC U8*	S_reghopmaybe3(U8 *pos, I32 off, U8 *lim)
+STATIC U8*	S_reghopmaybe3(U8 *pos, I32 off, const U8 *lim)
 			__attribute__warn_unused_result__;
 
 STATIC char*	S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *strend, I32 norun)

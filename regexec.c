@@ -127,7 +127,6 @@
     : (U8*)NULL)			\
 )
 
-#define reghopmaybe3_c(pos,off,lim) ((char*)reghopmaybe3((U8*)pos, off, (U8*)lim))
 #define HOP3(pos,off,lim) (PL_reg_match_utf8 ? reghop3((U8*)pos, off, (U8*)lim) : (U8*)(pos + off))
 #define HOP3c(pos,off,lim) ((char*)HOP3(pos,off,lim))
 
@@ -600,7 +599,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		t = s - prog->check_offset_max;
 		if (s - strpos > prog->check_offset_max  /* signed-corrected t > strpos */
 		    && (!do_utf8
-			|| ((t = reghopmaybe3_c(s, -(prog->check_offset_max), strpos))
+			|| ((t = (char*)reghopmaybe3((U8*)s, -(prog->check_offset_max), (U8*)strpos))
 			    && t > strpos)))
 		    NOOP;
 		else
@@ -721,7 +720,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     t = s - prog->check_offset_max;
     if (s - strpos > prog->check_offset_max  /* signed-corrected t > strpos */
         && (!do_utf8
-	    || ((t = reghopmaybe3_c(s, -prog->check_offset_max, strpos))
+	    || ((t = (char*)reghopmaybe3((U8*)s, -prog->check_offset_max, (U8*)strpos))
 		 && t > strpos))) {
 	/* Fixed substring is found far enough so that the match
 	   cannot start at strpos. */
@@ -4486,7 +4485,7 @@ S_reginclass(pTHX_ register const regnode *n, register const U8* p, STRLEN* lenp
 }
 
 STATIC U8 *
-S_reghop3(U8 *s, I32 off, U8* lim)
+S_reghop3(U8 *s, I32 off, const U8* lim)
 {
     if (off >= 0) {
 	while (off-- && s < lim) {
@@ -4510,7 +4509,7 @@ S_reghop3(U8 *s, I32 off, U8* lim)
 }
 
 STATIC U8 *
-S_reghopmaybe3(U8* s, I32 off, U8* lim)
+S_reghopmaybe3(U8* s, I32 off, const U8* lim)
 {
     if (off >= 0) {
 	while (off-- && s < lim) {
