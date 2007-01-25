@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.57';
+our $VERSION = '1.58';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -47,17 +47,22 @@ sub import
 
     # Handle args
     while (my $sym = shift) {
-        if ($sym =~ /^stack/i) {
-            threads->set_stack_size(shift);
-
-        } elsif ($sym =~ /^exit/i) {
-            my $flag = shift;
-            $threads::thread_exit_only = $flag =~ /^thread/i;
+        if ($sym =~ /^(?:stack|exit)/i) {
+            if (defined(my $arg = shift)) {
+                if ($sym =~ /^stack/i) {
+                    threads->set_stack_size($arg);
+                } else {
+                    $threads::thread_exit_only = $arg =~ /^thread/i;
+                }
+            } else {
+                require Carp;
+                Carp::croak("threads: Missing argument for option: $sym");
+            }
 
         } elsif ($sym =~ /^str/i) {
             import overload ('""' => \&tid);
 
-        } elsif ($sym =~ /(?:all|yield)/) {
+        } elsif ($sym =~ /^(?:all|yield)$/) {
             push(@EXPORT, qw(yield));
 
         } else {
@@ -133,7 +138,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.57
+This document describes threads version 1.58
 
 =head1 SYNOPSIS
 
@@ -230,8 +235,11 @@ for emulating fork() on Windows.
 
 The I<threads> API is loosely based on the old Thread.pm API. It is very
 important to note that variables are not shared between threads, all variables
-are by default thread local.  To use shared variables one must use
-L<threads::shared>.
+are by default thread local.  To use shared variables one must also use
+L<threads::shared>:
+
+    use threads;
+    use threads::shared;
 
 It is also important to note that you must enable threads by doing C<use
 threads> as early as possible in the script itself, and that it is not
@@ -949,7 +957,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.57/threads.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.58/threads.pm>
 
 L<threads::shared>, L<perlthrtut>
 

@@ -45,12 +45,12 @@ typedef perl_os_thread pthread_t;
 #endif
 
 /* Values for 'state' member */
-#define PERL_ITHR_DETACHED           1 /* thread has been detached */
-#define PERL_ITHR_JOINED             2 /* thread has been joined */
-#define PERL_ITHR_FINISHED           4 /* thread has finished execution */
+#define PERL_ITHR_DETACHED           1 /* Thread has been detached */
+#define PERL_ITHR_JOINED             2 /* Thread has been joined */
+#define PERL_ITHR_FINISHED           4 /* Thread has finished execution */
 #define PERL_ITHR_THREAD_EXIT_ONLY   8 /* exit() only exits current thread */
-#define PERL_ITHR_NONVIABLE         16 /* thread creation failed */
-#define PERL_ITHR_DIED              32 /* thread finished by dying */
+#define PERL_ITHR_NONVIABLE         16 /* Thread creation failed */
+#define PERL_ITHR_DIED              32 /* Thread finished by dying */
 
 #define PERL_ITHR_UNCALLABLE  (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)
 
@@ -61,7 +61,7 @@ typedef struct _ithread {
     PerlInterpreter *interp;    /* The threads interpreter */
     UV tid;                     /* Threads module's thread id */
     perl_mutex mutex;           /* Mutex for updating things in this struct */
-    int count;                  /* reference count. See S_ithread_create */
+    int count;                  /* Reference count. See S_ithread_create. */
     int state;                  /* Detached, joined, finished, etc. */
     int gimme;                  /* Context of create */
     SV *init_function;          /* Code to run */
@@ -133,7 +133,10 @@ S_ithread_get(pTHX)
 
 /* Free any data (such as the Perl interpreter) attached to an ithread
  * structure.  This is a bit like undef on SVs, where the SV isn't freed,
- * but the PVX is.  Must be called with thread->mutex already held.
+ * but the PVX is.  Must be called with thread->mutex already locked.  Also,
+ * must be called with MY_POOL.create_destruct_mutex unlocked as destruction
+ * of the interpreter can lead to recursive destruction calls that could
+ * lead to a deadlock on that mutex.
  */
 STATIC void
 S_ithread_clear(pTHX_ ithread *thread)
@@ -171,8 +174,8 @@ S_ithread_clear(pTHX_ ithread *thread)
 
 /* Decrement the refcount of an ithread, and if it reaches zero, free it.
  * Must be called with the mutex held.
- * On return, mutex is released (or destroyed) */
-
+ * On return, mutex is released (or destroyed).
+ */
 STATIC void
 S_ithread_free(pTHX_ ithread *thread)
 {
@@ -187,8 +190,8 @@ S_ithread_free(pTHX_ ithread *thread)
             MUTEX_UNLOCK(&thread->mutex);
             return;
         }
-        assert((thread->state & PERL_ITHR_FINISHED)
-            && (thread->state & PERL_ITHR_UNCALLABLE));
+        assert((thread->state & PERL_ITHR_FINISHED) &&
+               (thread->state & PERL_ITHR_UNCALLABLE));
     }
     MUTEX_UNLOCK(&thread->mutex);
 
@@ -225,15 +228,14 @@ S_ithread_free(pTHX_ ithread *thread)
 
     /* total_threads >= 1 is used to veto cleanup by the main thread,
      * should it happen to exit while other threads still exist.
-     * Decrement this as the very last thing in the thread's existence,
-     * otherwise MY_POOL and global state such as PL_op_mutex may get
-     * freed while we're still using it
+     * Decrement this as the very last thing in the thread's existence.
+     * Otherwise, MY_POOL and global state such as PL_op_mutex may get
+     * freed while we're still using it.
      */
     MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
     MY_POOL.total_threads--;
     MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
 }
-
 
 
 static void
@@ -243,7 +245,6 @@ S_ithread_count_inc(pTHX_ ithread *thread)
     thread->count++;
     MUTEX_UNLOCK(&thread->mutex);
 }
-
 
 
 /* Warn if exiting with any unjoined threads */
@@ -273,10 +274,10 @@ S_exit_warning(pTHX)
     return (veto_cleanup);
 }
 
-/* Called from perl_destruct() in each thread. If it's the main thread,
- * stop it from freeing everything if there are other threads still
- * running */
 
+/* Called from perl_destruct() in each thread.  If it's the main thread,
+ * stop it from freeing everything if there are other threads still running.
+ */
 int
 Perl_ithread_hook(pTHX)
 {
@@ -301,10 +302,9 @@ ithread_mg_free(pTHX_ SV *sv, MAGIC *mg)
 {
     ithread *thread = (ithread *)mg->mg_ptr;
     MUTEX_LOCK(&thread->mutex);
-    S_ithread_free(aTHX_ thread); /* releases MUTEX */
+    S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
     return (0);
 }
-
 
 int
 ithread_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
@@ -535,14 +535,14 @@ S_ithread_run(void * arg)
         my_exit(exit_code);
     }
 
-    /* at this point the interpreter may have been freed, so call
-     * free in the context of of the 'main' interpreter. That can't have
-     * been freed, due to the veto_cleanup mechanism */
-
+    /* At this point, the interpreter may have been freed, so call
+     * free in the the context of of the 'main' interpreter which
+     * can't have been freed due to the veto_cleanup mechanism.
+     */
     aTHX = MY_POOL.main_thread.interp;
 
     MUTEX_LOCK(&thread->mutex);
-    S_ithread_free(aTHX_ thread); /* releases MUTEX */
+    S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
 
 #ifdef WIN32
     return ((DWORD)0);
@@ -631,13 +631,13 @@ S_ithread_create(
     thread->prev->next = thread;
     MY_POOL.total_threads++;
 
-    /* 1 ref to be held by the local var 'thread' in S_ithread_run()
+    /* 1 ref to be held by the local var 'thread' in S_ithread_run().
      * 1 ref to be held by the threads object that we assume we will
-     *       be embedded in upon our return
-     * 1 ref to be the responsibility of join/detach, so we don't get freed
-             until join/detach, even if no thread objects remain. This
-             allows the following to work:
-        	 { threads->new(sub{...}); } threads->object(1)->join;
+     *      be embedded in upon our return.
+     * 1 ref to be the responsibility of join/detach, so we don't get
+     *      freed until join/detach, even if no thread objects remain.
+     *      This allows the following to work:
+     *          { threads->new(sub{...}); } threads->object(1)->join;
      */
     thread->count = 3;
 
@@ -803,7 +803,7 @@ S_ithread_create(
         MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
         sv_2mortal(params);
         thread->state |= PERL_ITHR_NONVIABLE;
-        S_ithread_free(aTHX_ thread); /* releases MUTEX */
+        S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
 #ifndef WIN32
         if (ckWARN_d(WARN_THREADS)) {
             if (rc_stack_size) {
@@ -1064,7 +1064,7 @@ ithread_join(...)
         ithread *thread;
         ithread *current_thread;
         int join_err;
-        AV *params;
+        AV *params = NULL;
         int len;
         int ii;
 #ifdef WIN32
@@ -1120,7 +1120,7 @@ ithread_join(...)
         MUTEX_LOCK(&thread->mutex);
         /* Get the return value from the call_sv */
         /* Objects do not survive this process - FIXME */
-        {
+        if (! (thread->gimme & G_VOID)) {
             AV *params_copy;
             PerlInterpreter *other_perl;
             CLONE_PARAMS clone_params;
@@ -1147,7 +1147,7 @@ ithread_join(...)
         if (! (thread->state & PERL_ITHR_DIED)) {
             S_ithread_clear(aTHX_ thread);
         }
-        S_ithread_free(aTHX_ thread); /* releases MUTEX */
+        S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
 
         /* If no return values, then just return */
         if (! params) {
@@ -1217,8 +1217,7 @@ ithread_detach(...)
         {
             S_ithread_clear(aTHX_ thread);
         }
-        S_ithread_free(aTHX_ thread); /* releases MUTEX */
-
+        S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
 
 
 void
@@ -1391,6 +1390,9 @@ ithread_set_stack_size(...)
         }
         if (sv_isobject(ST(0))) {
             Perl_croak(aTHX_ "Cannot change stack size of an existing thread");
+        }
+        if (! looks_like_number(ST(1))) {
+            Perl_croak(aTHX_ "Stack size must be numeric");
         }
 
         old_size = MY_POOL.default_stack_size;
