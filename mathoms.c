@@ -1266,10 +1266,12 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, char *patend, register SV **beglist, SV 
     packlist(cat, pat, patend, beglist, endlist);
 }
 
+bool
 /* Whilst this should really be STATIC, it was not in 5.8.7, hence something
    may have linked against it.  */
 S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8)
 {
+    return FALSE;
 }
 #endif /* NO_MATHOMS */
 
