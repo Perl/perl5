@@ -2311,6 +2311,15 @@ PERL_CALLCONV OP*	Perl_ck_repeat(pTHX_ OP *o)
 PERL_CALLCONV OP*	Perl_ck_require(pTHX_ OP *o)
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV int	Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(3);
+
+PERL_CALLCONV int	Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap)
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(3);
+
+
 PERL_CALLCONV OP*	Perl_ck_return(pTHX_ OP *o)
 			__attribute__warn_unused_result__;
 

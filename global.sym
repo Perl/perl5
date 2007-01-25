@@ -737,4 +737,6 @@ Perl_ckwarn_d
 Perl_gv_fetchpvn_flags
 Perl_gv_fetchsv
 Perl_my_sprintf
+Perl_my_snprintf
+Perl_my_vsnprintf
 # ex: set ro:

@@ -1657,6 +1657,9 @@ dp	|bool	|is_gv_magical_sv|NN SV *name|U32 flags
 Apnod	|int	|my_sprintf	|NN char *buffer|NN const char *pat|...
 #endif
 
+Apnodf	|int	|my_snprintf	|NN char *buffer|const Size_t len|NN const char *format|...
+Apnod	|int	|my_vsnprintf	|NN char *buffer|const Size_t len|NN const char *format|va_list ap
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:

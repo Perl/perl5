@@ -2227,6 +2227,21 @@ Fill the sv with current working directory
 =for hackers
 Found in file util.c
 
+=item my_snprintf
+X<my_snprintf>
+
+The C library C<snprintf> functionality, if available and
+standards-compliant (uses C<vsnprintf>, actually).  However, if the
+C<vsnprintf> is not available, will unfortunately use the unsafe
+C<vsprintf> which can overrun the buffer (there is an overrun check,
+but that may be too late).  Consider using C<sv_vcatpvf> instead, or
+getting C<vsnprintf>.
+
+	int	my_snprintf(char *buffer, const Size_t len, const char *format, ...)
+
+=for hackers
+Found in file util.c
+
 =item my_sprintf
 X<my_sprintf>
 
@@ -2235,6 +2250,20 @@ the length of the string written to the buffer. Only rare pre-ANSI systems
 need the wrapper function - usually this is a direct call to C<sprintf>.
 
 	int	my_sprintf(char *buffer, const char *pat, ...)
+
+=for hackers
+Found in file util.c
+
+=item my_vsnprintf
+X<my_vsnprintf>
+
+The C library C<vsnprintf> if available and standards-compliant.
+However, if if the C<vsnprintf> is not available, will unfortunately
+use the unsafe C<vsprintf> which can overrun the buffer (there is an
+overrun check, but that may be too late).  Consider using
+C<sv_vcatpvf> instead, or getting C<vsnprintf>.
+
+	int	my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap)
 
 =for hackers
 Found in file util.c
