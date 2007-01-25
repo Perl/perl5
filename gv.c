@@ -154,10 +154,31 @@ Perl_gv_const_sv(pTHX_ GV *gv)
     return SvROK(gv) ? SvRV(gv) : NULL;
 }
 
+GP *
+Perl_newGP(pTHX_ GV *const gv)
+{
+    GP *gp;
+    const char *const file
+	= (PL_curcop && CopFILE(PL_curcop)) ? CopFILE(PL_curcop) : "";
+    Newxz(gp, 1, GP);
+
+#ifndef PERL_DONT_CREATE_GVSV
+    gp->gp_sv = newSV(0);
+#endif
+
+    gp->gp_line = PL_curcop ? CopLINE(PL_curcop) : 0;
+    /* XXX Ideally this cast would be replaced with a change to const char*
+       in the struct.  */
+    gp->gp_file = (char *) file;
+    gp->gp_egv = gv;
+    gp->gp_refcnt = 1;
+
+    return gp;
+}
+
 void
 Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 {
-    register GP *gp;
     const bool doproto = SvTYPE(gv) > SVt_NULL;
     const char * const proto = (doproto && SvPOK(gv)) ? SvPVX_const(gv) : NULL;
     SV *const has_constant = doproto && SvROK(gv) ? SvRV(gv) : NULL;
@@ -188,28 +209,8 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 	} else
 	    Safefree(SvPVX_mutable(gv));
     }
-    Newxz(gp, 1, GP);
-    GvGP(gv) = gp_ref(gp);
-#ifdef PERL_DONT_CREATE_GVSV
-    GvSV(gv) = NULL;
-#else
-    GvSV(gv) = newSV(0);
-#endif
-    if (PL_curcop) {
-	/* We can get in the messy situation of the COP that PL_curcop pointed
-	   to getting freed, and as part of the same free overloading decides
-	   to look for DESTROY, which gets us in here, needing to *create* a
-	   GV.  */
-	GvLINE(gv) = CopLINE(PL_curcop);
-	/* XXX Ideally this cast would be replaced with a change to const char*
-	   in the struct.  */
-	GvFILE(gv) = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : (char *) "";
-    } else {
-	GvLINE(gv) = 0;
-	GvFILE(gv) = (char *) "";
-    }
-    GvCVGEN(gv) = 0;
-    GvEGV(gv) = gv;
+
+    GvGP(gv) = Perl_newGP(aTHX_ gv);
     sv_magic((SV*)gv, (SV*)gv, PERL_MAGIC_glob, NULL, 0);
     GvSTASH(gv) = (HV*)SvREFCNT_inc(stash);
     gv_name_set(gv, name, len, GV_ADD);
