@@ -745,7 +745,6 @@ Set the actual length of the string which is in the SV.  See C<SvIV_set>.
 #define SvIOK_notUV(sv)		((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV))	\
 				 == SVf_IOK)
 
-#define SvVOK(sv)		(SvMAGICAL(sv) && mg_find(sv,'V'))
 #define SvIsUV(sv)		(SvFLAGS(sv) & SVf_IVisUV)
 #define SvIsUV_on(sv)		(SvFLAGS(sv) |= SVf_IVisUV)
 #define SvIsUV_off(sv)		(SvFLAGS(sv) &= ~SVf_IVisUV)
@@ -794,6 +793,12 @@ in gv.h: */
 				 SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC|	\
 						  SVf_IVisUV),		\
 				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
+
+#define SvVOK(sv)		(SvMAGICAL(sv)				\
+				 && mg_find(sv,PERL_MAGIC_vstring))
+/* returns the vstring magic, if any */
+#define SvVSTRING_mg(sv)	(SvMAGICAL(sv) \
+				 ? mg_find(sv,PERL_MAGIC_vstring) : NULL)
 
 #define SvOOK(sv)		(SvFLAGS(sv) & SVf_OOK)
 #define SvOOK_on(sv)		((void)SvIOK_off(sv), SvFLAGS(sv) |= SVf_OOK)

@@ -3469,12 +3469,14 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		SvIsUV_on(dstr);
 	}
 	SvFLAGS(dstr) |= sflags & (SVf_IOK|SVp_IOK|SVf_NOK|SVp_NOK|SVf_UTF8);
-	if ( SvVOK(sstr) ) {
-	    const MAGIC * const smg = mg_find(sstr,PERL_MAGIC_vstring);
-	    sv_magic(dstr, NULL, PERL_MAGIC_vstring,
-		     smg->mg_ptr, smg->mg_len);
-	    SvRMAGICAL_on(dstr);
-	} 
+	{
+	    const MAGIC * const smg = SvVSTRING_mg(sstr);
+	    if (smg) {
+		sv_magic(dstr, NULL, PERL_MAGIC_vstring,
+			 smg->mg_ptr, smg->mg_len);
+		SvRMAGICAL_on(dstr);
+	    }
+	}
     }
     else if (sflags & (SVp_IOK|SVp_NOK)) {
 	(void)SvOK_off(dstr);
