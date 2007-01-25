@@ -299,6 +299,7 @@ Perl_newRANGE
 Perl_newSLICEOP
 Perl_newSTATEOP
 Perl_newSUB
+Perl_newXS_flags
 Perl_newXS
 Perl_newAV
 Perl_newAVREF

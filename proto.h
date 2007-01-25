@@ -840,10 +840,7 @@ PERL_CALLCONV OP*	Perl_newSTATEOP(pTHX_ I32 flags, char* label, OP* o)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV CV*	Perl_newSUB(pTHX_ I32 floor, OP* o, OP* proto, OP* block);
-PERL_CALLCONV CV *	Perl_newXS_flags(pTHX_ const char *name, XSUBADDR_t subaddr, const char *const filename, const char *const proto, U32 flags)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
-
+PERL_CALLCONV CV *	Perl_newXS_flags(pTHX_ const char *name, XSUBADDR_t subaddr, const char *const filename, const char *const proto, U32 flags);
 PERL_CALLCONV CV*	Perl_newXS(pTHX_ char* name, XSUBADDR_t f, char* filename);
 PERL_CALLCONV AV*	Perl_newAV(pTHX)
 			__attribute__malloc__
