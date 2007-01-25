@@ -2164,6 +2164,7 @@ Perl_fold_constants(pTHX_ register OP *o)
     PL_op = curop;
 
     oldscope = PL_scopestack_ix;
+    push_return(NULL);
     create_eval_scope(G_FAKINGEVAL);
 
     PL_warnhook = PERL_WARNHOOK_FATAL;
@@ -2206,8 +2207,10 @@ Perl_fold_constants(pTHX_ register OP *o)
     PL_warnhook = oldwarnhook;
     PL_diehook  = olddiehook;
 
-    if (PL_scopestack_ix > oldscope)
+    if (PL_scopestack_ix > oldscope) {
 	delete_eval_scope();
+	pop_return();
+    }
 
     if (ret)
 	goto nope;
