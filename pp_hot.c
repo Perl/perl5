@@ -2267,13 +2267,13 @@ PP(pp_subst)
 	}
 	rxtainted |= RX_MATCH_TAINTED(rx);
 	dstr = newSVpvn(m, s-m);
+	SAVEFREESV(dstr);
 	if (DO_UTF8(TARG))
 	    SvUTF8_on(dstr);
 	PL_curpm = pm;
 	if (!c) {
 	    register PERL_CONTEXT *cx;
 	    SPAGAIN;
-	    (void)ReREFCNT_inc(rx);
 	    PUSHSUBST(cx);
 	    RETURNOP(cPMOP->op_pmreplroot);
 	}
@@ -2312,7 +2312,6 @@ PP(pp_subst)
 	SvLEN_set(TARG, SvLEN(dstr));
 	doutf8 |= DO_UTF8(dstr);
 	SvPV_set(dstr, NULL);
-	sv_free(dstr);
 
 	TAINT_IF(rxtainted & 1);
 	SPAGAIN;
