@@ -1447,7 +1447,7 @@ Perl_warner(pTHX_ U32  err, const char* pat,...)
 void
 Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 {
-    if (ckDEAD(err)) {
+    if (PL_warnhook == PERL_WARNHOOK_FATAL || ckDEAD(err)) {
 	SV * const msv = vmess(pat, args);
 	STRLEN msglen;
 	const char * const message = SvPV_const(msv, msglen);

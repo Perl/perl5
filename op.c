@@ -2103,6 +2103,8 @@ Perl_fold_constants(pTHX_ register OP *o)
     int ret = 0;
     I32 oldscope;
     OP *old_next;
+    SV * const oldwarnhook = PL_warnhook;
+    SV * const olddiehook  = PL_diehook;
     dJMPENV;
 
     if (PL_opargs[type] & OA_RETSCALAR)
@@ -2164,6 +2166,8 @@ Perl_fold_constants(pTHX_ register OP *o)
     oldscope = PL_scopestack_ix;
     create_eval_scope(G_FAKINGEVAL);
 
+    PL_warnhook = PERL_WARNHOOK_FATAL;
+    PL_diehook  = NULL;
 
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
     CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vcall_runops));
@@ -2192,10 +2196,15 @@ Perl_fold_constants(pTHX_ register OP *o)
     default:
 	JMPENV_POP;
 	/* Don't expect 1 (setjmp failed) or 2 (something called my_exit)  */
+	PL_warnhook = oldwarnhook;
+	PL_diehook  = olddiehook;
+	/* XXX note that this croak may fail as we've already blown away
+	 * the stack - eg any nested evals */
 	Perl_croak(aTHX_ "panic: fold_constants JMPENV_PUSH returned %d", ret);
     }
-
     JMPENV_POP;
+    PL_warnhook = oldwarnhook;
+    PL_diehook  = olddiehook;
 
     if (PL_scopestack_ix > oldscope)
 	delete_eval_scope();
