@@ -2079,7 +2079,7 @@ OP *
 Perl_fold_constants(pTHX_ register OP *o)
 {
     register OP *curop;
-    I32 type = o->op_type;
+    volatile I32 type = o->op_type;
     SV *sv = NULL;
     int ret = 0;
     I32 oldscope;

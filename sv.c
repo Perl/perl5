@@ -2716,7 +2716,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	/* some Xenix systems wipe out errno here */
 #ifdef apollo
 	if (SvNVX(sv) == 0.0)
-	    (void)strcpy(s,"0");
+	    my_strlcpy(s, "0", SvLEN(sv));
 	else
 #endif /*apollo*/
 	{
@@ -2725,7 +2725,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	errno = olderrno;
 #ifdef FIXNEGATIVEZERO
         if (*s == '-' && s[1] == '0' && !s[2])
-	    strcpy(s,"0");
+	    my_strlcpy(s, "0", SvLEN(s));
 #endif
 	while (*s) s++;
 #ifdef hcx
@@ -3648,8 +3648,10 @@ Perl_sv_usepvn_flags(pTHX_ SV *sv, char *ptr, STRLEN len, U32 flags)
     if (SvPVX_const(sv))
 	SvPV_free(sv);
 
+#ifdef DEBUGGING
     if (flags & SV_HAS_TRAILING_NUL)
 	assert(ptr[len] == '\0');
+#endif
 
     allocate = (flags & SV_HAS_TRAILING_NUL)
 	? len + 1: PERL_STRLEN_ROUNDUP(len + 1);
