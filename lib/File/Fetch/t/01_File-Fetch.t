@@ -9,6 +9,12 @@ use Cwd             qw[cwd];
 use File::Basename  qw[basename];
 use Data::Dumper;
 
+use_ok('File::Fetch');
+
+### optionally set debugging ###
+$File::Fetch::DEBUG = $File::Fetch::DEBUG   = 1 if $ARGV[0];
+$IPC::Cmd::DEBUG    = $IPC::Cmd::DEBUG      = 1 if $ARGV[0];
+
 unless( $ENV{PERL_CORE} ) {
     warn qq[
 
@@ -23,14 +29,21 @@ to no fault of the module itself.
 
 ];
 
-    sleep 3;
+    sleep 3 unless $File::Fetch::DEBUG;
 }
 
-use_ok('File::Fetch');
-use_ok('File::Fetch::Item');
-
-### optionally set debugging ###
-$File::Fetch::DEBUG = $File::Fetch::DEBUG = 1 if $ARGV[0];
+### show us the tools IPC::Cmd will use to run binary programs
+if( $File::Fetch::DEBUG ) {
+    ### stupid 'used only once' warnings ;(
+    diag( "IPC::Run enabled: " . 
+            $IPC::Cmd::USE_IPC_RUN || $IPC::Cmd::USE_IPC_RUN );
+    diag( "IPC::Run available: " . IPC::Cmd->can_use_ipc_run );
+    diag( "IPC::Run vesion: $IPC::Run::VERSION" );
+    diag( "IPC::Open3 enabled: " . 
+            $IPC::Cmd::USE_IPC_OPEN3 || $IPC::Cmd::USE_IPC_OPEN3 );
+    diag( "IPC::Open3 available: " . IPC::Cmd->can_use_ipc_open3 );
+    diag( "IPC::Open3 vesion: $IPC::Open3::VERSION" );
+}
 
 ### _parse_uri tests
 my $map = [
@@ -47,10 +60,10 @@ my $map = [
         file    => 'foo.txt',
     },
     {	uri	=> 'rsync://cpan.pair.com/CPAN/MIRRORING.FROM',
-	scheme	=> 'rsync',
-	host	=> 'cpan.pair.com',
-	path	=> '/CPAN/',
-	file	=> 'MIRRORING.FROM',
+        scheme	=> 'rsync',
+        host	=> 'cpan.pair.com',
+        path	=> '/CPAN/',
+        file	=> 'MIRRORING.FROM',
     },
 ];
 
@@ -67,21 +80,15 @@ for my $entry (@$map ) {
     }
 }
 
-### File::Fetch::Item tests ###
-for my $entry (@$map) {
-    my $ffi = File::Fetch::Item->new( %$entry );
-    isa_ok( $ffi, 'File::Fetch::Item' );
-
-    for my $acc ( keys %$entry ) {
-        is( $ffi->$acc(), $entry->{$acc},
-                    "   Accessor '$acc' ok" );
-    }
-}
-
 ### File::Fetch->new tests ###
 for my $entry (@$map) {
     my $ff = File::Fetch->new( uri => $entry->{uri} );
-    isa_ok( $ff, "File::Fetch::Item" );
+    isa_ok( $ff, "File::Fetch" );
+
+    for my $acc ( keys %$entry ) {
+        is( $ff->$acc(), $entry->{$acc},
+                    "   Accessor '$acc' ok" );
+    }
 }
 
 ### fetch() tests ###
@@ -109,10 +116,12 @@ for my $entry (@$map) {
 }
 
 ### http:// tests ###
-{   my $uri = 'http://www.cpan.org/index.html';
-
-    for (qw[lwp wget curl lynx]) {
-        _fetch_uri( http => $uri, $_ );
+{   for my $uri ( 'http://www.cpan.org/index.html',
+                  'http://www.cpan.org/index.html?q=1&y=2'
+    ) {
+        for (qw[lwp wget curl lynx]) {
+            _fetch_uri( http => $uri, $_ );
+        }
     }
 }
 
@@ -130,7 +139,7 @@ sub _fetch_uri {
     my $method  = shift or return;
 
     SKIP: {
-        skip "'$method' fetching tests disabled under perl core", 3
+        skip "'$method' fetching tests disabled under perl core", 4
                 if $ENV{PERL_CORE};
     
         ### stupid warnings ###
@@ -144,12 +153,14 @@ sub _fetch_uri {
         my $file = $ff->fetch( to => 'tmp' );
     
         SKIP: {
-            skip "You do not have '$method' installed", 2
+            skip "You do not have '$method' installed/available", 3
                 if $File::Fetch::METHOD_FAIL->{$method} &&
                    $File::Fetch::METHOD_FAIL->{$method};
     
             ok( $file,      "   File ($file) fetched using $method" );
-            ok( -s $file,   "   File ($file) has size" );
+            ok( -s $file,   "   File has size" );
+            is( basename($file), $ff->output_file,
+                            "   File has expected name" );
     
             unlink $file;
         }
