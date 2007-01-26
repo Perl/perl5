@@ -142,16 +142,18 @@ rm -f _cflags.c _cflags$_exe
 case "$gccversion" in
 '') ;;
 *)
-  # If we have -Duse64bitint (or equivalent) in effect and the quadtype
-  # has become 'long long', gcc -pedantic becomes unbearable (moreso
-  # when combined with -Wall) because long long and LL and %lld|%Ld
-  # become warn-worthy.  So let's drop the -pedantic in that case.
-  case "$quadtype:$sPRId64" in
-  "long long"*|*lld*|*Ld*)
-    ccflags="`echo $ccflags|sed 's/-pedantic/ /'`"
-    warn="`echo $warn|sed 's/-pedantic/ /'`"
-    ;;
-  esac
+  if [ "$gccansipedantic" = "" ]; then
+    # If we have -Duse64bitint (or equivalent) in effect and the quadtype
+    # has become 'long long', gcc -pedantic becomes unbearable (moreso
+    # when combined with -Wall) because long long and LL and %lld|%Ld
+    # become warn-worthy.  So let's drop the -pedantic in that case.
+    case "$quadtype:$sPRId64" in
+    "long long"*|*lld*|*Ld*)
+      ccflags="`echo $ccflags|sed 's/-pedantic/ /'`"
+      warn="`echo $warn|sed 's/-pedantic/ /'`"
+      ;;
+    esac
+  fi
   # Using certain features (like the gcc statement expressions)
   # requires knowing whether -pedantic has been specified.
   case "$warn$ccflags" in
