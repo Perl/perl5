@@ -575,6 +575,16 @@ its performance to be measured, and its bugs to be easily demonstrated.
 Allow to delete functions. One can already undef them, but they're still
 in the stash.
 
+=head2 C</w> regex modifier
+
+That flag would enable to match whole words, and also to interpolate
+arrays as alternations. With it, C</P/w> would be roughly equivalent to:
+
+    do { local $"='|'; /\b(?:P)\b/ }
+
+See L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-01/msg00400.html>
+for the discussion.
+
 =head2 optional optimizer
 
 Make the peephole optimizer optional. Currently it performs two tasks as
