@@ -697,7 +697,7 @@ Perl_get_arena(pTHX_ size_t arena_size, U32 misc)
 	newroot->next = aroot;
 	aroot = newroot;
 	PL_body_arenas = (void *) newroot;
-	DEBUG_m(PerlIO_printf(Perl_debug_log, "new arenaset %p\n", aroot));
+	DEBUG_m(PerlIO_printf(Perl_debug_log, "new arenaset %p\n", (void*)aroot));
     }
 
     /* ok, now have arena-set with at least 1 empty/available arena-desc */
@@ -3352,7 +3352,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
     stype = SvTYPE(sstr);
     dtype = SvTYPE(dstr);
 
-    SvAMAGIC_off(dstr);
+    (void)SvAMAGIC_off(dstr);
     if ( SvVOK(dstr) )
     {
 	/* need to nuke the magic */
@@ -7744,7 +7744,7 @@ Perl_newSVrv(pTHX_ SV *rv, const char *classname)
     new_SV(sv);
 
     SV_CHECK_THINKFIRST_COW_DROP(rv);
-    SvAMAGIC_off(rv);
+    (void)SvAMAGIC_off(rv);
 
     if (SvTYPE(rv) >= SVt_PVMG) {
 	const U32 refcnt = SvREFCNT(rv);
@@ -7921,7 +7921,7 @@ Perl_sv_bless(pTHX_ SV *sv, HV *stash)
     if (Gv_AMG(stash))
 	SvAMAGIC_on(sv);
     else
-	SvAMAGIC_off(sv);
+	(void)SvAMAGIC_off(sv);
 
     if(SvSMAGICAL(tmpRef))
         if(mg_find(tmpRef, PERL_MAGIC_ext) || mg_find(tmpRef, PERL_MAGIC_uvar))
