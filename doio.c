@@ -1392,6 +1392,19 @@ Perl_my_lstat(pTHX)
     return PL_laststatval;
 }
 
+static void
+S_exec_failed(pTHX_ const char *cmd, int fd, int do_report)
+{
+    const int e = errno;
+    if (ckWARN(WARN_EXEC))
+	Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
+		    cmd, Strerror(e));
+    if (do_report) {
+	PerlLIO_write(fd, (void*)&e, sizeof(int));
+	PerlLIO_close(fd);
+    }
+}
+
 bool
 Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 	       int fd, int do_report)
@@ -1423,15 +1436,7 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 	else
 	    PerlProc_execvp(PL_Argv[0],EXEC_ARGV_CAST(PL_Argv));
 	PERL_FPU_POST_EXEC
-	if (ckWARN(WARN_EXEC))
-	    Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
-		(really ? tmps : PL_Argv[0]), Strerror(errno));
-	if (do_report) {
-	    const int e = errno;
-
-	    PerlLIO_write(fd, (void*)&e, sizeof(int));
-	    PerlLIO_close(fd);
-	}
+ 	S_exec_failed(aTHX_ (really ? tmps : PL_Argv[0]), fd, do_report);
     }
     do_execfree();
 #endif
@@ -1500,6 +1505,7 @@ Perl_do_exec3(pTHX_ char *incmd, int fd, int do_report)
 		  PerlProc_execl(PL_cshname, "csh", flags, ncmd, NULL);
 		  PERL_FPU_POST_EXEC
 		  *s = '\'';
+ 		  S_exec_failed(aTHX_ PL_cshname, fd, do_report);
 		  Safefree(cmd);
 		  return FALSE;
 	      }
@@ -1547,6 +1553,7 @@ Perl_do_exec3(pTHX_ char *incmd, int fd, int do_report)
 	    PERL_FPU_PRE_EXEC
 	    PerlProc_execl(PL_sh_path, "sh", "-c", cmd, NULL);
 	    PERL_FPU_POST_EXEC
+ 	    S_exec_failed(aTHX_ PL_sh_path, fd, do_report);
 	    Safefree(cmd);
 	    return FALSE;
 	}
@@ -1574,14 +1581,7 @@ Perl_do_exec3(pTHX_ char *incmd, int fd, int do_report)
 	    do_execfree();
 	    goto doshell;
 	}
-	if (ckWARN(WARN_EXEC))
-	    Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
-		PL_Argv[0], Strerror(errno));
-	if (do_report) {
-	    const int e = errno;
-	    PerlLIO_write(fd, (const void*)&e, sizeof(int));
-	    PerlLIO_close(fd);
-	}
+ 	S_exec_failed(aTHX_ PL_Argv[0], fd, do_report);
     }
     do_execfree();
     Safefree(cmd);

@@ -9499,6 +9499,8 @@ S_scan_subst(pTHX_ char *start)
 	    sv_catpv(repl, es ? "eval " : "do ");
 	sv_catpvs(repl, "{");
 	sv_catsv(repl, PL_lex_repl);
+	if (strchr(SvPVX(PL_lex_repl), '#'))
+	    sv_catpvs(repl, "\n");
 	sv_catpvs(repl, "}");
 	SvEVALED_on(repl);
 	SvREFCNT_dec(PL_lex_repl);
