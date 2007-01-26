@@ -1369,6 +1369,25 @@ keywords.pl			Program to write keywords.h
 lib/abbrev.pl			An abbreviation table builder
 lib/AnyDBM_File.pm		Perl module to emulate dbmopen
 lib/AnyDBM_File.t		See if AnyDBM_File works
+lib/Archive/Extract.pm	Archive::Extract
+lib/Archive/Extract/t/01_Archive-Extract.t	Archive::Extract tests
+lib/Archive/Extract/t/src/double_dir.zip.packed	Archive::Extract tests
+lib/Archive/Extract/t/src/x.bz2.packed	Archive::Extract tests
+lib/Archive/Extract/t/src/x.gz.packed	Archive::Extract tests
+lib/Archive/Extract/t/src/x.jar.packed	Archive::Extract tests
+lib/Archive/Extract/t/src/x.par.packed	Archive::Extract tests
+lib/Archive/Extract/t/src/x.tar.gz.packed	Archive::Extract tests
+lib/Archive/Extract/t/src/x.tar.packed	Archive::Extract tests
+lib/Archive/Extract/t/src/x.tgz.packed	Archive::Extract tests
+lib/Archive/Extract/t/src/x.zip.packed	Archive::Extract tests
+lib/Archive/Extract/t/src/y.jar.packed	Archive::Extract tests
+lib/Archive/Extract/t/src/y.par.packed	Archive::Extract tests
+lib/Archive/Extract/t/src/y.tar.bz2.packed	Archive::Extract tests
+lib/Archive/Extract/t/src/y.tar.gz.packed	Archive::Extract tests
+lib/Archive/Extract/t/src/y.tar.packed	Archive::Extract tests
+lib/Archive/Extract/t/src/y.tbz.packed	Archive::Extract tests
+lib/Archive/Extract/t/src/y.tgz.packed	Archive::Extract tests
+lib/Archive/Extract/t/src/y.zip.packed	Archive::Extract tests
 lib/Archive/Tar/bin/ptar	the ptar utility
 lib/Archive/Tar/bin/ptardiff	the ptardiff utility
 lib/Archive/Tar/Constant.pm	Archive::Tar

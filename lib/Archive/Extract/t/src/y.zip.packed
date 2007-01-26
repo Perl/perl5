@@ -1,0 +1,21 @@
+#########################################################################
+This is a binary file that was packed with the 'uupacktool.pl' which
+is included in the Perl distribution.
+
+To unpack this file use the following command:
+
+     uupacktool.pl -u /Users/kane/sources/perl-dev/perl-current-archive-extract.7657/lib/Archive/Extract/t/src/y.zip.packed /Users/kane/sources/perl-dev/perl-current-archive-extract.7657/lib/Archive/Extract/t/src/y.zip
+
+To recreate it use the following command:
+
+     uupacktool.pl -p /Users/kane/sources/perl-dev/perl-current-archive-extract.7657/lib/Archive/Extract/t/src/y.zip /Users/kane/sources/perl-dev/perl-current-archive-extract.7657/lib/Archive/Extract/t/src/y.zip.packed
+
+Created at Fri Jan 26 14:27:58 2007
+#########################################################################
+__UU__
+M4$L#!`H``````,NBB#$````````````````"`!``>2]56`P`M%6W06Y4MT'U
+M`10`4$L#!`H``````,NBB#$````````````````#`!``>2]Z55@,`+15MT%N
+M5+=!]0$4`%!+`0(5`PH``````,NBB#$````````````````"``P`````````
+M$$#M00````!Y+U58"`"T5;=!;E2W05!+`0(5`PH``````,NBB#$`````````
+M```````#``P``````````$"D@3````!Y+WI56`@`M%6W06Y4MT%02P4&````
+/``(``@!Y````80``````

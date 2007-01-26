@@ -1,0 +1,19 @@
+#########################################################################
+This is a binary file that was packed with the 'uupacktool.pl' which
+is included in the Perl distribution.
+
+To unpack this file use the following command:
+
+     uupacktool.pl -u /Users/kane/sources/perl-dev/perl-current-archive-extract.7657/lib/Archive/Extract/t/src/y.tgz.packed /Users/kane/sources/perl-dev/perl-current-archive-extract.7657/lib/Archive/Extract/t/src/y.tgz
+
+To recreate it use the following command:
+
+     uupacktool.pl -p /Users/kane/sources/perl-dev/perl-current-archive-extract.7657/lib/Archive/Extract/t/src/y.tgz /Users/kane/sources/perl-dev/perl-current-archive-extract.7657/lib/Archive/Extract/t/src/y.tgz.packed
+
+Created at Fri Jan 26 14:27:58 2007
+#########################################################################
+__UU__
+M'XL(`````````^W1,0Z#,`R%81\E-R"F><EY&,I2J4.!`4Y?JH@5J4,JH?[?
+M\H98LF.OG347=T6JF6O&/M6LS*-+6;TK6W2_%5E0^]',EFD>7B'88WC>S^KV
+MLG$\>3\^<N1%K-W6O,=G'SFE;^XO%0L_6>*?WQ\```````````````#`=;T!
+(N@>.G``H````
