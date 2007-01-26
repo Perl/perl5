@@ -5,6 +5,8 @@ use warnings;
 use Getopt::Long;
 use File::Basename;
 
+Getopt::Long::Configure('no_ignore_case');
+
 our $LastUpdate = -M $0;
 
 sub handle_file {
@@ -27,7 +29,7 @@ sub handle_file {
         }
         my ($head, $body) = split /__UU__\n/, $str;
         die "Can't unpack malformed data in '$file'\n"
-            if !$head or !$body;
+            if !$head;
         $outstr = unpack 'u', $body;
 
     } else {
@@ -62,7 +64,8 @@ EOFBLURB
         open my $outfh, ">", $outfile
             or die "Could not open $outfile for writing: $!";
         binmode $outfh;
-        print $outfh $outstr;
+        ### $outstr might be empty, if the file was empty
+        print $outfh $outstr if $outstr;
         close $outfh;
 
         chmod $mode, $outfile;
@@ -156,7 +159,7 @@ Options:
 }
 
 my $opts = {};
-GetOptions($opts,'u','p','c','m:s','s','d=s','v','h');
+GetOptions($opts,'u','p','c', 'D', 'm:s','s','d=s','v','h');
 
 die "Can't pack and unpack at the same time!\n", usage()
     if $opts->{'u'} && $opts->{'p'};
