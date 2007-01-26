@@ -6,7 +6,7 @@ use Getopt::Long;
 use File::Basename;
 use Cwd;
 
-unshift @INC, dirname $0 or '.';
+unshift @INC, dirname $0 || '.';
 do "sanity.pl" or die $@;
 
 my $CoreBuild = -d "ext" && -f "perl.h" && -d "symbian" && -f "perl.c";
@@ -509,14 +509,14 @@ sub xsconfig {
         }
     }
     if ( my @c = glob("*.c *.cpp */*.c */*.cpp") ) {
-	@c = grep { ! m:^zlib-src/: } @c if $ext eq 'ext\Compress\Raw\Zlib';
+	map { s:^zlib-src/:: } @c if $ext eq 'ext\Compress\Raw\Zlib';
         for my $c (@c) {
             $c =~ s:/:\\:g;
             $src{$c}++;
         }
     }
     if ( my @h = glob("*.h */*.h") ) {
-        @h = grep { ! m:^zlib-src/: } @h if $ext eq 'ext\Compress\Raw\Zlib';
+        map { s:^zlib-src/:: } @h if $ext eq 'ext\Compress\Raw\Zlib';
         for my $h (@h) {
             $h =~ s:/:\\:g;
             $h = dirname($h);

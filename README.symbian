@@ -402,7 +402,7 @@ We maintain the binary incompatibility.
 
 0.4.1: December 2006
 
-  - Perl 5.9.4 (patch level 29622)
+  - Perl 5.9.5 (patch level 30002)
   - added extensions: Compress/Raw/Zlib, Digest/SHA,
     Hash/Util, Math/BigInt/FastCalc, Text/Soundex, Time/Piece
   - port to S90 1.1 by alexander smishlajev
