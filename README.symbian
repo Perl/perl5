@@ -12,7 +12,7 @@ This document describes various features of the Symbian operating
 system that will affect how Perl version 5 (hereafter just Perl)
 is compiled and/or runs.
 
-B<NOTE: this port (as of 0.2.0) does not compile into a Symbian
+B<NOTE: this port (as of 0.4.1) does not compile into a Symbian
 OS GUI application, but instead it results in a Symbian DLL.>
 The DLL includes a C++ class called CPerlBase, which one can then
 (derive from and) use to embed Perl into applications, see F<symbian/README>.
@@ -28,13 +28,13 @@ mainly as demonstrations.
 
 =head2 Compiling Perl on Symbian
 
-(0) You need to have the Symbian SDK installed.
+(0) You need to have the appropriate Symbian SDK installed.
 
     These instructions have been tested under various Nokia Series 60
     Symbian SDKs (1.2 to 2.6, 2.8 should also work, 1.2 compiles but
     does not work), Series 80 2.0, and Nokia 7710 (Series 90) SDK.
     You can get the SDKs from Forum Nokia (http://www.forum.nokia.com/).
-    A very rough port ("it compiles") to UIQ 2.0 has also been made.
+    A very rough port ("it compiles") to UIQ 2.1 has also been made.
 
     A prerequisite for any of the SDKs is to install ActivePerl
     from ActiveState, http://www.activestate.com/Products/ActivePerl/
@@ -98,9 +98,9 @@ mainly as demonstrations.
         S60 2.8 | -  | +  | (not tested in a device)
         S80 2.6 | -  | +  | 9300
         S90 1.1 | +  | -  | 7710
-        UIQ 2.0 | -  | +  | (not tested in a device)
+        UIQ 2.1 | -  | +  | (not tested in a device)
 
-    (*) Compiles but does not work, unfortunately.
+    (*) Compiles but does not work, unfortunately, a problem with Symbian.
 
     If you are using the 'make' directly, it is the GNU make from the SDKs,
     and it will invoke the right make commands for the Windows emulator
@@ -302,7 +302,7 @@ Lots.  See F<symbian\TODO>.
 
 =head1 WARNING
 
-As of Perl Symbian port version 0.2.0 any part of Perl's standard
+As of Perl Symbian port version 0.4.1 any part of Perl's standard
 regression test suite has not been run on a real Symbian device using
 the ported Perl, so innumerable bugs may lie in wait.  Therefore there
 is absolutely no warranty.
@@ -310,11 +310,12 @@ is absolutely no warranty.
 =head1 NOTE
 
 When creating and extending application programming interfaces (APIs)
-for Symbian or Series 60 or Series 80 it is suggested that trademarks,
-registered trademarks, or trade names are not used in the API names.
-Instead, developers should consider basing the API naming in the existing
-(C++) public component and API naming, modified as appropriate by the rules
-of the programming language the new APIs are for.
+for Symbian or Series 60 or Series 80 or Series 90 it is suggested
+that trademarks, registered trademarks, or trade names are not used in
+the API names.  Instead, developers should consider basing the API
+naming in the existing (C++, or maybe Java) public component and API
+naming, modified as appropriate by the rules of the programming
+language the new APIs are for.
   
 Nokia is a registered trademark of Nokia Corporation. Nokia's product
 names are trademarks or registered trademarks of Nokia.  Other product
@@ -404,7 +405,7 @@ We maintain the binary incompatibility.
   - Perl 5.9.4 (patch level 29622)
   - added extensions: Compress/Raw/Zlib, Digest/SHA,
     Hash/Util, Math/BigInt/FastCalc, Text/Soundex, Time/Piece
-  - port to S90 1.1 by Alexander Smishlajev
+  - port to S90 1.1 by alexander smishlajev
 
 We maintain the binary incompatibility.
 

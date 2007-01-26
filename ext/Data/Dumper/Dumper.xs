@@ -439,7 +439,13 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	(*levelp)++;
 	ipad = sv_x(aTHX_ Nullsv, SvPVX_const(xpad), SvCUR(xpad), *levelp);
 
-	if (realtype <= SVt_PVBM) {			     /* scalar ref */
+	if (
+#if PERL_VERSION < 9
+		realtype <= SVt_PVBM
+#else
+		realtype <= SVt_PVMG
+#endif
+	) {			     /* scalar ref */
 	    SV * const namesv = newSVpvn("${", 2);
 	    sv_catpvn(namesv, name, namelen);
 	    sv_catpvn(namesv, "}", 1);

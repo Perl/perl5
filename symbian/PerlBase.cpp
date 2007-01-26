@@ -1,5 +1,5 @@
 /* Copyright (c) 2004-2005 Nokia. All rights reserved. */
- 
+
 /* The CPerlBase class is licensed under the same terms as Perl itself. */
 
 /* See PerlBase.pod for documentation. */
@@ -193,7 +193,7 @@ EXPORT_C TInt CPerlBase::RunScriptL(const TDesC& aFileName,
     Argv = 0;
     return error == 0 ? KErrNone : KErrGeneral;
 }
-    
+
 
 EXPORT_C int CPerlBase::Parse(int argc, char *argv[], char *envp[])
 {
@@ -230,7 +230,7 @@ EXPORT_C int CPerlBase::Run()
         iState = EPerlRunning;
         int ran = perl_run(iPerl);
         iState = (ran == 0) ? EPerlSuccess : EPerlFailure;
-        return ran; 
+        return ran;
     } else
         return -1;
 }
@@ -264,7 +264,7 @@ int CPerlBase::ConsoleReadLine()
                 iConsoleBuffer[offset++] = 0;
             }
             break;
-        } 
+        }
         else {
             TBool doBackward  = EFalse;
             TBool doBackspace = EFalse;
@@ -318,26 +318,26 @@ int CPerlBase::ConsoleRead(const int fd, char* buf, int n)
         errno = EIO;
         return -1;
     }
-   
+
     if (n < 0) {
         errno = EINVAL;
         return -1;
     }
-    
+
     if (n == 0)
         return 0;
- 
+
     TBuf8<4 * KPerlConsoleBufferMaxTChars> aBufferUtf8;
     TBuf16<KPerlConsoleBufferMaxTChars>    aBufferUtf16;
     int length = ConsoleReadLine();
-    int i;    
+    int i;
 
     iConsoleUsed += length;
 
     aBufferUtf16.SetLength(length);
     for (i = 0; i < length; i++)
         aBufferUtf16[i] = iConsoleBuffer[i];
-    aBufferUtf8.SetLength(4 * length); 
+    aBufferUtf8.SetLength(4 * length);
 
     CnvUtfConverter::ConvertFromUnicodeToUtf8(aBufferUtf8, aBufferUtf16);
 
@@ -358,7 +358,7 @@ int CPerlBase::ConsoleRead(const int fd, char* buf, int n)
             return -1;
         }
         buf[i] = u;
-    } 
+    }
 #endif
     if (nUtf8 < n)
         buf[nUtf8] = 0;
