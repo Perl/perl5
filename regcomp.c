@@ -6155,7 +6155,9 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep)
         char *s; 
         char *p, *pend;        
         STRLEN charlen = 1;
+#ifdef DEBUGGING
         char * parse_start = name-3; /* needed for the offsets */
+#endif
         GET_RE_DEBUG_FLAGS_DECL;     /* needed for the offsets */
         
         ret = reg_node(pRExC_state,
@@ -6488,7 +6490,9 @@ tryagain:
 	case 'P':
 	    {	
 		char* const oldregxend = RExC_end;
+#ifdef DEBUGGING
 		char* parse_start = RExC_parse - 2;
+#endif
 
 		if (RExC_parse[1] == '{') {
 		  /* a lovely hack--pretend we saw [\pX] instead */
