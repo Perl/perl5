@@ -125,7 +125,7 @@ use Exporter ();
 use strict;
 use warnings;
 
-our $VERSION = "1.08";
+our $VERSION = "1.09";
 our @ISA = qw( Exporter );
 our @EXPORT = qw( mkpath rmtree );
 
@@ -167,10 +167,11 @@ sub mkpath {
 	my $parent = File::Basename::dirname($path);
 	unless (-d $parent or $path eq $parent) {
 	    push(@created,mkpath($parent, $verbose, $mode));
- 	}
+	}
 	print "mkdir $path\n" if $verbose;
 	unless (mkdir($path,$mode)) {
-	    my $e = $!;
+	    my ($e, $e1) = ($!, $^E);
+	    $e .= "; $e1" if $e ne $e1;
 	    # allow for another process to have created it meanwhile
 	    $! = $e, croak ("mkdir $path: $e") unless -d $path;
 	}
