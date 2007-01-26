@@ -2080,7 +2080,7 @@ Perl_fold_constants(pTHX_ register OP *o)
 {
     register OP *curop;
     volatile I32 type = o->op_type;
-    SV *sv = NULL;
+    volatile SV *sv = NULL;
     int ret = 0;
     I32 oldscope;
     OP *old_next;
@@ -6373,7 +6373,7 @@ Perl_ck_subr(pTHX_ OP *o)
     int optional = 0;
     I32 arg = 0;
     I32 contextclass = 0;
-    char *e = NULL;
+    const char *e = NULL;
 
     o->op_private |= OPpENTERSUB_HASTARG;
     for (cvop = o2; cvop->op_sibling; cvop = cvop->op_sibling) ;

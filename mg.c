@@ -1233,14 +1233,12 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
 	SV** svp = NULL;
 	if (strEQ(s,"__DIE__"))
 	    svp = &PL_diehook;
-	else if (strEQ(s,"__WARN__"))
+	else if (strEQ(s,"__WARN__") && PL_warnhook != PERL_WARNHOOK_FATAL)
 	    svp = &PL_warnhook;
-	else
-	    Perl_croak(aTHX_ "No such hook: %s", s);
 	if (svp && *svp) {
-            SV * const to_dec = *svp;
+	    SV *const to_dec = *svp;
 	    *svp = NULL;
-    	    SvREFCNT_dec(to_dec);
+	    SvREFCNT_dec(to_dec);
 	}
     }
     else {
@@ -1396,7 +1394,8 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	    Perl_croak(aTHX_ "No such hook: %s", s);
 	i = 0;
 	if (*svp) {
-	    to_dec = *svp;
+	    if (*svp != PERL_WARNHOOK_FATAL)
+		to_dec = *svp;
 	    *svp = NULL;
 	}
     }

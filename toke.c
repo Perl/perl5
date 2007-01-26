@@ -1437,6 +1437,7 @@ S_scan_const(pTHX_ char *start)
     UV uv;
 #ifdef EBCDIC
     UV literal_endpoint = 0;
+    bool native_range = TRUE; /* turned to FALSE if the first endpoint is Unicode. */
 #endif
 
     const char * const leaveit = /* set of acceptably-backslashed characters */
@@ -1460,7 +1461,15 @@ S_scan_const(pTHX_ char *start)
 		I32 min;			/* first character in range */
 		I32 max;			/* last character in range */
 
-		if (has_utf8) {
+#ifdef EBCDIC
+		UV uvmax = 0;
+#endif
+
+		if (has_utf8
+#ifdef EBCDIC
+		    && !native_range
+#endif
+		    ) {
 		    char * const c = (char*)utf8_hop((U8*)d, -1);
 		    char *e = d++;
 		    while (e-- > c)
@@ -1473,12 +1482,43 @@ S_scan_const(pTHX_ char *start)
 		}
 
 		i = d - SvPVX_const(sv);		/* remember current offset */
+#ifdef EBCDIC
+                SvGROW(sv,
+		       SvLEN(sv) + (has_utf8 ?
+				    (512 - UTF_CONTINUATION_MARK +
+				     UNISKIP(0x100))
+				    : 256));
+                /* How many two-byte within 0..255: 128 in UTF-8,
+		 * 96 in UTF-8-mod. */
+#else
 		SvGROW(sv, SvLEN(sv) + 256);	/* never more than 256 chars in a range */
+#endif
 		d = SvPVX(sv) + i;		/* refresh d after realloc */
-		d -= 2;				/* eat the first char and the - */
-
-		min = (U8)*d;			/* first char in range */
-		max = (U8)d[1];			/* last char in range  */
+#ifdef EBCDIC
+                if (has_utf8) {
+                    int j;
+                    for (j = 0; j <= 1; j++) {
+                        char * const c = (char*)utf8_hop((U8*)d, -1);
+                        const UV uv    = utf8n_to_uvchr((U8*)c, d - c, NULL, 0);
+                        if (j)
+                            min = (U8)uv;
+                        else if (uv < 256)
+                            max = (U8)uv;
+                        else {
+                            max = (U8)0xff; /* only to \xff */
+                            uvmax = uv; /* \x{100} to uvmax */
+                        }
+                        d = c; /* eat endpoint chars */
+                     }
+                }
+               else {
+#endif
+		   d -= 2;		/* eat the first char and the - */
+		   min = (U8)*d;	/* first char in range */
+		   max = (U8)d[1];	/* last char in range  */
+#ifdef EBCDIC
+	       }
+#endif
 
                 if (min > max) {
 		    Perl_croak(aTHX_
@@ -1503,7 +1543,29 @@ S_scan_const(pTHX_ char *start)
 		else
 #endif
 		    for (i = min; i <= max; i++)
-			*d++ = (char)i;
+#ifdef EBCDIC
+                        if (has_utf8) {
+                            const U8 ch = (U8)NATIVE_TO_UTF(i);
+                            if (UNI_IS_INVARIANT(ch))
+                                *d++ = (U8)i;
+                            else {
+                                *d++ = (U8)UTF8_EIGHT_BIT_HI(ch);
+                                *d++ = (U8)UTF8_EIGHT_BIT_LO(ch);
+                            }
+                        }
+                        else
+#endif
+                            *d++ = (char)i;
+ 
+#ifdef EBCDIC
+                if (uvmax) {
+                    d = (char*)uvchr_to_utf8((U8*)d, 0x100);
+                    if (uvmax > 0x101)
+                        *d++ = (char)UTF_TO_NATIVE(0xff);
+                    if (uvmax > 0x100)
+                        d = (char*)uvchr_to_utf8((U8*)d, uvmax);
+                }
+#endif
 
 		/* mark the range as done, and continue */
 		dorange = FALSE;
@@ -1519,7 +1581,11 @@ S_scan_const(pTHX_ char *start)
 		if (didrange) {
 		    Perl_croak(aTHX_ "Ambiguous range in transliteration operator");
 		}
-		if (has_utf8) {
+		if (has_utf8
+#ifdef EBCDIC
+		    && !native_range
+#endif
+		    ) {
 		    *d++ = (char)UTF_TO_NATIVE(0xff);	/* use illegal utf8 byte--see pmtrans */
 		    s++;
 		    continue;
@@ -1531,6 +1597,7 @@ S_scan_const(pTHX_ char *start)
 		didrange = FALSE;
 #ifdef EBCDIC
 		literal_endpoint = 0;
+		native_range = TRUE;
 #endif
 	    }
 	}
@@ -1640,8 +1707,8 @@ S_scan_const(pTHX_ char *start)
 		    if ((isALPHA(*s) || isDIGIT(*s)) &&
 			ckWARN(WARN_MISC))
 			Perl_warner(aTHX_ packWARN(WARN_MISC),
-			       "Unrecognized escape \\%c passed through",
-			       *s);
+				    "Unrecognized escape \\%c passed through",
+				    *s);
 		    /* default action is to copy the quoted character */
 		    goto default_action;
 		}
@@ -1739,6 +1806,10 @@ S_scan_const(pTHX_ char *start)
 				(PL_lex_repl ? OPpTRANS_FROM_UTF
 					     : OPpTRANS_TO_UTF);
 			}
+#ifdef EBCDIC
+			if (uv > 255 && !dorange)
+			    native_range = FALSE;
+#endif
                     }
 		    else {
 		        *d++ = (char)uv;
@@ -1816,6 +1887,10 @@ S_scan_const(pTHX_ char *start)
 			SvGROW(sv, (SvLEN(sv) + len - (e - s + 4)));
 			d = SvPVX(sv) + (d - odest);
 		    }
+#ifdef EBCDIC
+		    if (!dorange)
+			native_range = FALSE; /* \N{} is guessed to be Unicode */
+#endif
 		    Copy(str, d, len, char);
 		    d += len;
 		    SvREFCNT_dec(res);
@@ -1889,6 +1964,10 @@ S_scan_const(pTHX_ char *start)
 	    }
 	    d = (char*)uvchr_to_utf8((U8*)d, nextuv);
 	    has_utf8 = TRUE;
+#ifdef EBCDIC
+	    if (uv > 255 && !dorange)
+		native_range = FALSE;
+#endif
 	}
 	else {
 	    *d++ = NATIVE_TO_NEED(has_utf8,*s++);
@@ -9993,7 +10072,7 @@ STATIC char *
 S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 {
     SV *sv;				/* scalar value: string */
-    char *tmps;				/* temp string, used for delimiter matching */
+    const char *tmps;			/* temp string, used for delimiter matching */
     register char *s = start;		/* current position in the buffer */
     register char term;			/* terminating character */
     register char *to;			/* current position in the sv's data */
@@ -11006,6 +11085,15 @@ S_swallow_bom(pTHX_ U8 *s)
 		  goto utf16be;
 	     }
 	}
+#ifdef EBCDIC
+    case 0xDD:
+        if (slen > 3 && s[1] == 0x73 && s[2] == 0x66 && s[3] == 0x73) {
+            if (DEBUG_p_TEST || DEBUG_T_TEST) PerlIO_printf(Perl_debug_log, "UTF-8 script encoding (BOM)\n");
+            s += 4;                      /* UTF-8 */
+        }
+        break;
+#endif
+
     default:
 	 if (slen > 3 && s[1] == 0 && s[2] != 0 && s[3] == 0) {
 		  /* Leading bytes

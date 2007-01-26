@@ -4216,11 +4216,27 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			 STRLEN foldlen;
 			 const UV f = to_uni_fold(natvalue, foldbuf, &foldlen);
 
+#ifdef EBCDIC /* RD t/uni/fold ff and 6b */
+			 if (RExC_precomp[0] == ':' &&
+			     RExC_precomp[1] == '[' &&
+			     (f == 0xDF || f == 0x92)) {
+			     f = NATIVE_TO_UNI(f);
+                        }
+#endif
 			 /* If folding and foldable and a single
 			  * character, insert also the folded version
 			  * to the charclass. */
 			 if (f != value) {
+#ifdef EBCDIC /* RD tunifold ligatures s,t fb05, fb06 */
+			     if ((RExC_precomp[0] == ':' &&
+				  RExC_precomp[1] == '[' &&
+				  (f == 0xA2 &&
+				   (value == 0xFB05 || value == 0xFB06))) ?
+				 foldlen == ((STRLEN)UNISKIP(f) - 1) :
+				 foldlen == (STRLEN)UNISKIP(f) )
+#else
 			      if (foldlen == (STRLEN)UNISKIP(f))
+#endif
 				  Perl_sv_catpvf(aTHX_ listsv,
 						 "%04"UVxf"\n", f);
 			      else {

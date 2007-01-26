@@ -1699,9 +1699,9 @@ PP(pp_sort)
 			    : ( overloading ? S_amagic_ncmp : S_sv_ncmp ) )
 			: ( IN_LOCALE_RUNTIME
 			    ? ( overloading
-				? S_amagic_cmp_locale
-				: sv_cmp_locale_static)
-			    : ( overloading ? S_amagic_cmp : sv_cmp_static)));
+				? (SVCOMPARE_t)S_amagic_cmp_locale
+				: (SVCOMPARE_t)sv_cmp_locale_static)
+			    : ( overloading ? (SVCOMPARE_t)S_amagic_cmp : (SVCOMPARE_t)sv_cmp_static)));
 	}
 	if (priv & OPpSORT_REVERSE) {
 	    SV **q = start+max-1;
