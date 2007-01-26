@@ -36,7 +36,7 @@ my @path_consts_fifo = check qw(
 my @sys_consts = check qw(
     _SC_ARG_MAX _SC_CHILD_MAX _SC_CLK_TCK _SC_JOB_CONTROL
     _SC_NGROUPS_MAX _SC_OPEN_MAX _SC_PAGESIZE _SC_SAVED_IDS
-    _SC_STREAM_MAX _SC_TZNAME_MAX _SC_VERSION
+    _SC_STREAM_MAX _SC_VERSION _SC_TZNAME_MAX
 );
 
 my $tests = 2 * 3 * @path_consts +
@@ -151,6 +151,13 @@ END {
     1 while unlink($fifo);
 }
 
+SKIP: {
+    if($^O eq 'cygwin') {
+        pop @sys_consts;
+        skip("No _SC_TZNAME_MAX on Cygwin", 3);
+    }
+        
+}
 # testing sysconf()
 for my $constant (@sys_consts) {
 	$! = 0;
