@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 13;
+plan tests => 14;
 
 eval { for (\2) { $_ = <FH> } };
 like($@, 'Modification of a read-only value attempted', '[perl #19566]');
@@ -82,6 +82,10 @@ SKIP: {
     close F;
   }
 }
+
+fresh_perl_is('BEGIN{<>}', '',
+              { switches => ['-w'], stdin => '', stderr => 1 },
+              'No ARGVOUT used only once warning');
 
 __DATA__
 moo
