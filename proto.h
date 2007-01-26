@@ -624,6 +624,9 @@ PERL_CALLCONV void	Perl_gv_efullname4(pTHX_ SV* sv, const GV* gv, const char* pr
 PERL_CALLCONV GV*	Perl_gv_fetchfile(pTHX_ const char* name)
 			__attribute__nonnull__(pTHX_1);
 
+PERL_CALLCONV GV*	Perl_gv_fetchfile_flags(pTHX_ const char *const name, const STRLEN len, const U32 flags)
+			__attribute__nonnull__(pTHX_1);
+
 PERL_CALLCONV GV*	Perl_gv_fetchmeth(pTHX_ HV* stash, const char* name, STRLEN len, I32 level)
 			__attribute__nonnull__(pTHX_2);
 
@@ -1929,6 +1932,11 @@ PERL_CALLCONV char*	Perl_savepvn(pTHX_ const char* pv, I32 len)
 PERL_CALLCONV char*	Perl_savesharedpv(pTHX_ const char* pv)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
+
+PERL_CALLCONV char*	Perl_savesharedpvn(pTHX_ const char *const pv, const STRLEN len)
+			__attribute__malloc__
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV char*	Perl_savesvpv(pTHX_ SV* sv)
 			__attribute__malloc__
@@ -3991,7 +3999,7 @@ STATIC bool	S_feature_is_enabled(pTHX_ const char* name, STRLEN namelen)
 STATIC void	S_force_ident(pTHX_ const char *s, int kind)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC void	S_incline(pTHX_ char *s)
+STATIC void	S_incline(pTHX_ const char *s)
 			__attribute__nonnull__(pTHX_1);
 
 STATIC int	S_intuit_method(pTHX_ char *s, GV *gv, CV *cv)

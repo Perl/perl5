@@ -278,6 +278,8 @@ Ap	|void	|gv_efullname	|NN SV* sv|NN const GV* gv
 Apmb	|void	|gv_efullname3	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix
 Ap	|void	|gv_efullname4	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix|bool keepmain
 Ap	|GV*	|gv_fetchfile	|NN const char* name
+Ap	|GV*	|gv_fetchfile_flags|NN const char *const name|const STRLEN len\
+				|const U32 flags
 Apd	|GV*	|gv_fetchmeth	|NULLOK HV* stash|NN const char* name|STRLEN len|I32 level
 Apd	|GV*	|gv_fetchmeth_autoload	|NULLOK HV* stash|NN const char* name|STRLEN len|I32 level
 Apdmb	|GV*	|gv_fetchmethod	|NULLOK HV* stash|NN const char* name
@@ -704,6 +706,7 @@ p	|I32	|same_dirent	|NN const char* a|NN const char* b
 Apda	|char*	|savepv		|NULLOK const char* pv
 Apda	|char*	|savepvn	|NULLOK const char* pv|I32 len
 Apda	|char*	|savesharedpv	|NULLOK const char* pv
+Apda	|char*	|savesharedpvn	|NN const char *const pv|const STRLEN len
 Apda	|char*	|savesvpv	|NN SV* sv
 Ap	|void	|savestack_grow
 Ap	|void	|savestack_grow_cnt	|I32 need
@@ -1488,7 +1491,7 @@ s	|void	|checkcomma	|NN const char *s|NN const char *name \
 				|NN const char *what
 s	|bool	|feature_is_enabled|NN const char* name|STRLEN namelen
 s	|void	|force_ident	|NN const char *s|int kind
-s	|void	|incline	|NN char *s
+s	|void	|incline	|NN const char *s
 s	|int	|intuit_method	|NN char *s|NULLOK GV *gv|NULLOK CV *cv
 s	|int	|intuit_more	|NN char *s
 s	|I32	|lop		|I32 f|int x|NN char *s

@@ -735,13 +735,12 @@ Perl_lex_end(pTHX)
  */
 
 STATIC void
-S_incline(pTHX_ char *s)
+S_incline(pTHX_ const char *s)
 {
     dVAR;
-    char *t;
-    char *n;
-    char *e;
-    char ch;
+    const char *t;
+    const char *n;
+    const char *e;
 
     CopLINE_inc(PL_curcop);
     if (*s++ != '#')
@@ -781,9 +780,8 @@ S_incline(pTHX_ char *s)
     if (*e != '\n' && *e != '\0')
 	return;		/* false alarm */
 
-    ch = *t;
-    *t = '\0';
     if (t - s > 0) {
+	const STRLEN len = t - s;
 #ifndef USE_ITHREADS
 	const char * const cf = CopFILE(PL_curcop);
 	STRLEN tmplen = cf ? strlen(cf) : 0;
@@ -793,7 +791,7 @@ S_incline(pTHX_ char *s)
 	    char smallbuf[128], smallbuf2[128];
 	    char *tmpbuf, *tmpbuf2;
 	    GV **gvp, *gv2;
-	    STRLEN tmplen2 = strlen(s);
+	    STRLEN tmplen2 = len;
 	    if (tmplen + 2 <= sizeof smallbuf)
 		tmpbuf = smallbuf;
 	    else
@@ -823,9 +821,8 @@ S_incline(pTHX_ char *s)
 	}
 #endif
 	CopFILE_free(PL_curcop);
-	CopFILE_set(PL_curcop, s);
+	CopFILE_setn(PL_curcop, s, len);
     }
-    *t = ch;
     CopLINE_set(PL_curcop, atoi(n)-1);
 }
 

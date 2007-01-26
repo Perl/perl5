@@ -266,6 +266,7 @@
 #define gv_efullname		Perl_gv_efullname
 #define gv_efullname4		Perl_gv_efullname4
 #define gv_fetchfile		Perl_gv_fetchfile
+#define gv_fetchfile_flags	Perl_gv_fetchfile_flags
 #define gv_fetchmeth		Perl_gv_fetchmeth
 #define gv_fetchmeth_autoload	Perl_gv_fetchmeth_autoload
 #define gv_fetchmethod_autoload	Perl_gv_fetchmethod_autoload
@@ -718,6 +719,7 @@
 #define savepv			Perl_savepv
 #define savepvn			Perl_savepvn
 #define savesharedpv		Perl_savesharedpv
+#define savesharedpvn		Perl_savesharedpvn
 #define savesvpv		Perl_savesvpv
 #define savestack_grow		Perl_savestack_grow
 #define savestack_grow_cnt	Perl_savestack_grow_cnt
@@ -2469,6 +2471,7 @@
 #define gv_efullname(a,b)	Perl_gv_efullname(aTHX_ a,b)
 #define gv_efullname4(a,b,c,d)	Perl_gv_efullname4(aTHX_ a,b,c,d)
 #define gv_fetchfile(a)		Perl_gv_fetchfile(aTHX_ a)
+#define gv_fetchfile_flags(a,b,c)	Perl_gv_fetchfile_flags(aTHX_ a,b,c)
 #define gv_fetchmeth(a,b,c,d)	Perl_gv_fetchmeth(aTHX_ a,b,c,d)
 #define gv_fetchmeth_autoload(a,b,c,d)	Perl_gv_fetchmeth_autoload(aTHX_ a,b,c,d)
 #define gv_fetchmethod_autoload(a,b,c)	Perl_gv_fetchmethod_autoload(aTHX_ a,b,c)
@@ -2927,6 +2930,7 @@
 #define savepv(a)		Perl_savepv(aTHX_ a)
 #define savepvn(a,b)		Perl_savepvn(aTHX_ a,b)
 #define savesharedpv(a)		Perl_savesharedpv(aTHX_ a)
+#define savesharedpvn(a,b)	Perl_savesharedpvn(aTHX_ a,b)
 #define savesvpv(a)		Perl_savesvpv(aTHX_ a)
 #define savestack_grow()	Perl_savestack_grow(aTHX)
 #define savestack_grow_cnt(a)	Perl_savestack_grow_cnt(aTHX_ a)

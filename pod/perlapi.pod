@@ -2323,6 +2323,18 @@ which is shared between threads.
 =for hackers
 Found in file util.c
 
+=item savesharedpvn
+X<savesharedpvn>
+
+A version of C<savepvn()> which allocates the duplicate string in memory
+which is shared between threads. (With the specific difference that a NULL
+pointer is not acceptable)
+
+	char*	savesharedpvn(const char *const pv, const STRLEN len)
+
+=for hackers
+Found in file util.c
+
 =item savesvpv
 X<savesvpv>
 

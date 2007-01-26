@@ -160,8 +160,10 @@ struct cop {
 				 
 #  ifdef NETWARE
 #    define CopFILE_set(c,pv)	((c)->cop_file = savepv(pv))
+#    define CopFILE_setn(c,pv,l)  ((c)->cop_file = savepv((pv),(l)))
 #  else
 #    define CopFILE_set(c,pv)	((c)->cop_file = savesharedpv(pv))
+#    define CopFILE_setn(c,pv,l)  ((c)->cop_file = savesharedpvn((pv),(l)))
 #  endif
 
 #  define CopFILESV(c)		(CopFILE(c) \
@@ -203,6 +205,7 @@ struct cop {
 #  define CopFILEGV(c)		((c)->cop_filegv)
 #  define CopFILEGV_set(c,gv)	((c)->cop_filegv = (GV*)SvREFCNT_inc(gv))
 #  define CopFILE_set(c,pv)	CopFILEGV_set((c), gv_fetchfile(pv))
+#  define CopFILE_setn(c,pv,l)	CopFILEGV_set((c), gv_fetchfile_flags((pv),(l),0))
 #  define CopFILESV(c)		(CopFILEGV(c) ? GvSV(CopFILEGV(c)) : NULL)
 #  define CopFILEAV(c)		(CopFILEGV(c) ? GvAV(CopFILEGV(c)) : NULL)
 #  ifdef DEBUGGING

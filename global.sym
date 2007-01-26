@@ -133,6 +133,7 @@ Perl_gv_efullname
 Perl_gv_efullname3
 Perl_gv_efullname4
 Perl_gv_fetchfile
+Perl_gv_fetchfile_flags
 Perl_gv_fetchmeth
 Perl_gv_fetchmeth_autoload
 Perl_gv_fetchmethod
@@ -406,6 +407,7 @@ Perl_rsignal_state
 Perl_savepv
 Perl_savepvn
 Perl_savesharedpv
+Perl_savesharedpvn
 Perl_savesvpv
 Perl_savestack_grow
 Perl_savestack_grow_cnt

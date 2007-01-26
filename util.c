@@ -953,6 +953,27 @@ Perl_savesharedpv(pTHX_ const char *pv)
 }
 
 /*
+=for apidoc savesharedpvn
+
+A version of C<savepvn()> which allocates the duplicate string in memory
+which is shared between threads. (With the specific difference that a NULL
+pointer is not acceptable)
+
+=cut
+*/
+char *
+Perl_savesharedpvn(pTHX_ const char *const pv, const STRLEN len)
+{
+    char *const newaddr = (char*)PerlMemShared_malloc(len + 1);
+    assert(pv);
+    if (!newaddr) {
+	return write_no_mem();
+    }
+    newaddr[len] = '\0';
+    return (char*)memcpy(newaddr, pv, len);
+}
+
+/*
 =for apidoc savesvpv
 
 A version of C<savepv()>/C<savepvn()> which gets the string to duplicate from

@@ -104,31 +104,39 @@ Perl_gv_IOadd(pTHX_ register GV *gv)
 GV *
 Perl_gv_fetchfile(pTHX_ const char *name)
 {
+    return gv_fetchfile_flags(name, strlen(name), 0);
+}
+
+GV *
+Perl_gv_fetchfile_flags(pTHX_ const char *const name, const STRLEN namelen,
+			const U32 flags)
+{
     dVAR;
     char smallbuf[128];
     char *tmpbuf;
-    STRLEN tmplen;
+    const STRLEN tmplen = namelen + 2;
     GV *gv;
+
+    PERL_UNUSED_ARG(flags);
 
     if (!PL_defstash)
 	return NULL;
 
-    tmplen = strlen(name);
-    if (tmplen + 2 <= sizeof smallbuf)
+    if (tmplen <= sizeof smallbuf)
 	tmpbuf = smallbuf;
     else
 	Newx(tmpbuf, tmplen, char);
     /* This is where the debugger's %{"::_<$filename"} hash is created */
     tmpbuf[0] = '_';
     tmpbuf[1] = '<';
-    memcpy(tmpbuf + 2, name, tmplen);
-    gv = *(GV**)hv_fetch(PL_defstash, tmpbuf, tmplen + 2, TRUE);
+    memcpy(tmpbuf + 2, name, namelen);
+    gv = *(GV**)hv_fetch(PL_defstash, tmpbuf, tmplen, TRUE);
     if (!isGV(gv)) {
-	gv_init(gv, PL_defstash, tmpbuf, tmplen + 2, FALSE);
+	gv_init(gv, PL_defstash, tmpbuf, tmplen, FALSE);
 #ifdef PERL_DONT_CREATE_GVSV
-	GvSV(gv) = newSVpvn(name, tmplen);
+	GvSV(gv) = newSVpvn(name, namelen);
 #else
-	sv_setpvn(GvSV(gv), name, tmplen);
+	sv_setpvn(GvSV(gv), name, namelen);
 #endif
 	if (PERLDB_LINE)
 	    hv_magic(GvHVn(gv_AVadd(gv)), NULL, PERL_MAGIC_dbfile);
