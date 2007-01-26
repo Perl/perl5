@@ -1653,6 +1653,14 @@ Apo	|bool	|ckwarn_d	|U32 w
 
 px	|void	|my_clearenv
 
+#ifndef HAS_STRLCAT
+Apno	|Size_t	|my_strlcat	|NULLOK char *dst|NULLOK const char *src|Size_t size
+#endif
+
+#ifndef HAS_STRLCPY
+Apno     |Size_t |my_strlcpy     |NULLOK char *dst|NULLOK const char *src|Size_t size
+#endif
+
 Ap	|GV*	|gv_fetchpvn_flags|NN const char* name|STRLEN len|I32 flags|I32 sv_type
 Ap	|GV*	|gv_fetchsv|NN SV *name|I32 flags|I32 sv_type
 dp	|bool	|is_gv_magical_sv|NN SV *name|U32 flags

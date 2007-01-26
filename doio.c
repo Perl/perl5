@@ -257,17 +257,10 @@ Perl_do_openn(pTHX_ GV *gv, register char *oname, I32 len, int as_raw,
 	    }
 	    mode[0] = 'w';
 	    writing = 1;
-#ifdef HAS_STRLCAT
             if (out_raw)
-                strlcat(mode, "b", PERL_MODE_MAX - 1);
+                my_strlcat(mode, "b", PERL_MODE_MAX - 1);
             else if (out_crlf)
-                strlcat(mode, "t", PERL_MODE_MAX - 1); 
-#else
-	    if (out_raw)
-		strcat(mode, "b");
-	    else if (out_crlf)
-		strcat(mode, "t");
-#endif
+                my_strlcat(mode, "t", PERL_MODE_MAX - 1); 
 	    if (num_svs > 1) {
 		fp = PerlProc_popen_list(mode, num_svs, svp);
 	    }
@@ -295,17 +288,10 @@ Perl_do_openn(pTHX_ GV *gv, register char *oname, I32 len, int as_raw,
 	    }
 	    writing = 1;
 
-#ifdef HAS_STRLCAT
             if (out_raw)
-                strlcat(mode, "b", PERL_MODE_MAX - 1);
+                my_strlcat(mode, "b", PERL_MODE_MAX - 1);
             else if (out_crlf)
-                strlcat(mode, "t", PERL_MODE_MAX - 1);
-#else
-	    if (out_raw)
-		strcat(mode, "b");
-	    else if (out_crlf)
-		strcat(mode, "t");
-#endif
+                my_strlcat(mode, "t", PERL_MODE_MAX - 1);
 	    if (*type == '&') {
 	      duplicity:
 		dodup = PERLIO_DUP_FD;
@@ -428,17 +414,10 @@ Perl_do_openn(pTHX_ GV *gv, register char *oname, I32 len, int as_raw,
 		type++;
 	    } while (isSPACE(*type));
 	    mode[0] = 'r';
-#ifdef HAS_STRLCAT
             if (in_raw)
-                strlcat(mode, "b", PERL_MODE_MAX - 1);
+                my_strlcat(mode, "b", PERL_MODE_MAX - 1);
             else if (in_crlf)
-                strlcat(mode, "t", PERL_MODE_MAX - 1);
-#else
-	    if (in_raw)
-		strcat(mode, "b");
-	    else if (in_crlf)
-		strcat(mode, "t");
-#endif
+                my_strlcat(mode, "t", PERL_MODE_MAX - 1);
 	    if (*type == '&') {
 		goto duplicity;
 	    }
@@ -489,17 +468,10 @@ Perl_do_openn(pTHX_ GV *gv, register char *oname, I32 len, int as_raw,
 	    TAINT_PROPER("piped open");
 	    mode[0] = 'r';
 
-#ifdef HAS_STRLCAT
             if (in_raw)
-                strlcat(mode, "b", PERL_MODE_MAX - 1);
+                my_strlcat(mode, "b", PERL_MODE_MAX - 1);
             else if (in_crlf)
-                strlcat(mode, "t", PERL_MODE_MAX - 1);
-#else
-	    if (in_raw)
-		strcat(mode, "b");
-	    else if (in_crlf)
-		strcat(mode, "t");
-#endif
+                my_strlcat(mode, "t", PERL_MODE_MAX - 1);
 
 	    if (num_svs > 1) {
 		fp = PerlProc_popen_list(mode,num_svs,svp);
@@ -527,17 +499,10 @@ Perl_do_openn(pTHX_ GV *gv, register char *oname, I32 len, int as_raw,
 		;
 	    mode[0] = 'r';
 
-#ifdef HAS_STRLCAT
             if (in_raw)
-                strlcat(mode, "b", PERL_MODE_MAX - 1);
+                my_strlcat(mode, "b", PERL_MODE_MAX - 1);
             else if (in_crlf)
-                strlcat(mode, "t", PERL_MODE_MAX - 1);
-#else
-	    if (in_raw)
-		strcat(mode, "b");
-	    else if (in_crlf)
-		strcat(mode, "t");
-#endif
+                my_strlcat(mode, "t", PERL_MODE_MAX - 1);
 
 	    if (*name == '-' && name[1] == '\0') {
 		fp = PerlIO_stdin();
@@ -1461,10 +1426,9 @@ Perl_do_exec3(pTHX_ char *incmd, int fd, int do_report)
     char *cmd;
 
     /* Make a copy so we can change it */
-    const int cmdlen = strlen(incmd);
-    Newx(cmd, cmdlen+1, char);
-    strncpy(cmd, incmd, cmdlen);
-    cmd[cmdlen] = 0;
+    const Size_t cmdlen = strlen(incmd) + 1;
+    Newx(cmd, cmdlen, char);
+    my_strlcpy(cmd, incmd, cmdlen);
 
     while (*cmd && isSPACE(*cmd))
 	cmd++;
@@ -1476,19 +1440,11 @@ Perl_do_exec3(pTHX_ char *incmd, int fd, int do_report)
         char flags[PERL_FLAGS_MAX];
 	if (strnEQ(cmd,PL_cshname,PL_cshlen) &&
 	    strnEQ(cmd+PL_cshlen," -c",3)) {
-#ifdef HAS_STRLCPY
-          strlcpy(flags, "-c", PERL_FLAGS_MAX);
-#else
-	  strcpy(flags,"-c");
-#endif
+          my_strlcpy(flags, "-c", PERL_FLAGS_MAX);
 	  s = cmd+PL_cshlen+3;
 	  if (*s == 'f') {
 	      s++;
-#ifdef HAS_STRLCPY
-              strlcat(flags, "f", PERL_FLAGS_MAX - 2);
-#else
-	      strcat(flags,"f");
-#endif
+              my_strlcat(flags, "f", PERL_FLAGS_MAX - 2);
 	  }
 	  if (*s == ' ')
 	      s++;
@@ -2290,7 +2246,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 	STRLEN len;
 
 	const char *mbuf = SvPV_const(mstr, len);
-	const I32 n = ((I32)len > msize) ? msize : (I32)len;
+	const I32 n = (len > msize) ? msize : len;
 	Copy(mbuf, shm + mpos, n, char);
 	if (n < msize)
 	    memzero(shm + mpos + n, msize - n);

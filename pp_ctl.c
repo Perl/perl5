@@ -3411,9 +3411,7 @@ PP(pp_entereval)
     CV* runcv;
     U32 seq;
     const char * const fakestr = "_<(eval )";
-#ifdef HAS_STRLCPY
     const int fakelen = 9 + 1;
-#endif
 
     if (!SvPV_nolen_const(sv))
 	RETPUSHUNDEF;
@@ -3490,11 +3488,7 @@ PP(pp_entereval)
     if (PERLDB_INTER && was != (I32)PL_sub_generation /* Some subs defined here. */
 	&& ret != PL_op->op_next) {	/* Successive compilation. */
 	/* Copy in anything fake and short. */
-#ifdef HAS_STRLCPY
-	strlcpy(safestr, fakestr, fakelen);
-#else
-	strcpy(safestr, fakestr);
-#endif /* #ifdef HAS_STRLCPY */
+	my_strlcpy(safestr, fakestr, fakelen);
     }
     return DOCATCH(ret);
 }

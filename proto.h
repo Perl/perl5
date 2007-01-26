@@ -2335,6 +2335,14 @@ PERL_CALLCONV OP*	Perl_ck_rfun(pTHX_ OP *o)
 PERL_CALLCONV OP*	Perl_ck_rvconst(pTHX_ OP *o)
 			__attribute__warn_unused_result__;
 
+#ifndef HAS_STRLCAT
+PERL_CALLCONV Size_t	Perl_my_strlcat(char *dst, const char *src, Size_t size);
+#endif
+
+#ifndef HAS_STRLCPY
+PERL_CALLCONV Size_t	Perl_my_strlcpy(char *dst, const char *src, Size_t size);
+#endif
+
 PERL_CALLCONV OP*	Perl_ck_sassign(pTHX_ OP *o)
 			__attribute__warn_unused_result__;
 

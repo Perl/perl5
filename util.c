@@ -2988,7 +2988,7 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext,
 	    if ((strlen(tmpbuf) + strlen(scriptname)
 		 + MAX_EXT_LEN) >= sizeof tmpbuf)
 		continue;	/* don't search dir with too-long name */
-	    strcat(tmpbuf, scriptname);
+	    my_strlcat(tmpbuf, scriptname, sizeof(tmpbuf));
 #else  /* !VMS */
 
 #ifdef DOSISH
@@ -3020,11 +3020,11 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext,
 		len = strlen(scriptname);
 		if (len+MAX_EXT_LEN+1 >= sizeof(tmpbuf))
 		    break;
-		/* FIXME? Convert to memcpy  */
-		cur = strcpy(tmpbuf, scriptname);
+		my_strlcpy(tmpbuf, scriptname, sizeof(tmpbuf));
+		cur = tmpbuf;
 	    }
 	} while (extidx >= 0 && ext[extidx]	/* try an extension? */
-		 && strcpy(tmpbuf+len, ext[extidx++]));
+		 && my_strlcpy(tmpbuf+len, ext[extidx++], sizeof(tmpbuf) - len));
 #endif
     }
 #endif
@@ -3084,13 +3084,7 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext,
 	    if (len == 2 && tmpbuf[0] == '.')
 		seen_dot = 1;
 #endif
-#ifdef HAS_STRLCAT
-	    (void)strlcpy(tmpbuf + len, scriptname, sizeof(tmpbuf) - len);
-#else
-	    /* FIXME? Convert to memcpy by storing previous strlen(scriptname)
-	     */
-	    (void)strcpy(tmpbuf + len, scriptname);
-#endif /* #ifdef HAS_STRLCAT */
+	    (void)my_strlcpy(tmpbuf + len, scriptname, sizeof(tmpbuf) - len);
 #endif  /* !VMS */
 
 #ifdef SEARCH_EXTS
@@ -3107,7 +3101,7 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext,
 #ifdef SEARCH_EXTS
 	    } while (  retval < 0		/* not there */
 		    && extidx>=0 && ext[extidx]	/* try an extension? */
-		    && strcpy(tmpbuf+len, ext[extidx++])
+		    && my_strlcpy(tmpbuf+len, ext[extidx++], sizeof(tmpbuf) - len)
 		);
 #endif
 	    if (retval < 0)
@@ -5061,6 +5055,39 @@ Perl_my_clearenv(pTHX)
 #  endif /* PERL_IMPLICIT_SYS || WIN32 */
 #endif /* PERL_MICRO */
 }
+
+#ifndef HAS_STRLCAT
+Size_t
+Perl_my_strlcat(char *dst, const char *src, Size_t size)
+{
+    Size_t used, length, copy;
+
+    used = strlen(dst);
+    length = strlen(src);
+    if (size > 0 && used < size - 1) {
+        copy = (length >= size - used) ? size - used - 1 : length;
+        memcpy(dst + used, src, copy);
+        dst[used + copy] = '\0';
+    }
+    return used + length;
+}
+#endif
+
+#ifndef HAS_STRLCPY
+Size_t
+Perl_my_strlcpy(char *dst, const char *src, Size_t size)
+{
+    Size_t length, copy;
+
+    length = strlen(src);
+    if (size > 0) {
+        copy = (length >= size) ? size - 1 : length;
+        memcpy(dst, src, copy);
+        dst[copy] = '\0';
+    }
+    return length;
+}
+#endif
 
 /*
  * Local variables:
