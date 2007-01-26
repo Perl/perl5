@@ -1626,8 +1626,7 @@ S_scan_const(pTHX_ char *start)
 		/* FALL THROUGH */
 	    default:
 	        {
-		    if (isALNUM(*s) &&
-			*s != '_' &&
+		    if ((isALPHA(*s) || isDIGIT(*s)) &&
 			ckWARN(WARN_MISC))
 			Perl_warner(aTHX_ packWARN(WARN_MISC),
 			       "Unrecognized escape \\%c passed through",
@@ -5623,7 +5622,7 @@ static int
 S_pending_ident(pTHX)
 {
     register char *d;
-    register I32 tmp = 0;
+    PADOFFSET tmp = 0;
     /* pit holds the identifier we read and pending_ident is reset */
     char pit = PL_pending_ident;
     PL_pending_ident = 0;
@@ -9871,12 +9870,11 @@ S_scan_inputsymbol(pTHX_ char *start)
 	   filehandle
 	*/
 	if (*d == '$') {
-	    I32 tmp;
-
 	    /* try to find it in the pad for this block, otherwise find
 	       add symbol table ops
 	    */
-	    if ((tmp = pad_findmy(d)) != NOT_IN_PAD) {
+	    const PADOFFSET tmp = pad_findmy(d);
+	    if (tmp != NOT_IN_PAD) {
 		if (PAD_COMPNAME_FLAGS_isOUR(tmp)) {
 		    SV * const sym = sv_2mortal(
 			    newSVpv(HvNAME_get(PAD_COMPNAME_OURSTASH(tmp)),0));

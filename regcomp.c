@@ -3553,7 +3553,7 @@ S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
 STATIC regnode *
 S_regclass(pTHX_ RExC_state_t *pRExC_state)
 {
-    register UV value;
+    register UV value = 0;
     register UV nextvalue;
     register IV prevvalue = OOB_UNICODE;
     register IV range = 0;

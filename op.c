@@ -660,7 +660,7 @@ Perl_scalar(pTHX_ OP *o)
 	    else
 		scalar(kid);
 	}
-	WITH_THR(PL_curcop = &PL_compiling);
+	PL_curcop = &PL_compiling;
 	break;
     case OP_SCOPE:
     case OP_LINESEQ:
@@ -671,7 +671,7 @@ Perl_scalar(pTHX_ OP *o)
 	    else
 		scalar(kid);
 	}
-	WITH_THR(PL_curcop = &PL_compiling);
+	PL_curcop = &PL_compiling;
 	break;
     case OP_SORT:
 	if (ckWARN(WARN_VOID))
@@ -977,7 +977,7 @@ Perl_list(pTHX_ OP *o)
 	    else
 		list(kid);
 	}
-	WITH_THR(PL_curcop = &PL_compiling);
+	PL_curcop = &PL_compiling;
 	break;
     case OP_SCOPE:
     case OP_LINESEQ:
@@ -987,7 +987,7 @@ Perl_list(pTHX_ OP *o)
 	    else
 		list(kid);
 	}
-	WITH_THR(PL_curcop = &PL_compiling);
+	PL_curcop = &PL_compiling;
 	break;
     case OP_REQUIRE:
 	/* all requires must return a boolean value */
