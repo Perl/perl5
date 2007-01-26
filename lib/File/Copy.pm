@@ -23,7 +23,7 @@ sub mv;
 # package has not yet been updated to work with Perl 5.004, and so it
 # would be a Bad Thing for the CPAN module to grab it and replace this
 # module.  Therefore, we set this module's version higher than 2.0.
-$VERSION = '2.09';
+$VERSION = '2.10';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -64,6 +64,14 @@ sub _catname {
     return File::Spec->catfile($to, basename($from));
 }
 
+# _eq($from, $to) tells whether $from and $to are identical
+# works for strings and references
+sub _eq {
+    return $_[0] == $_[1] if ref $_[0] && ref $_[1];
+    return $_[0] eq $_[1] if !ref $_[0] && !ref $_[1];
+    return "";
+}
+
 sub copy {
     croak("Usage: copy(FROM, TO [, BUFFERSIZE]) ")
       unless(@_ == 2 || @_ == 3);
@@ -82,7 +90,7 @@ sub copy {
                             || UNIVERSAL::isa($to, 'IO::Handle'))
 			 : (ref(\$to) eq 'GLOB'));
 
-    if ($from eq $to) { # works for references, too
+    if (_eq($from, $to)) { # works for references, too
 	carp("'$from' and '$to' are identical (not copied)");
         # The "copy" was a success as the source and destination contain
         # the same data.
