@@ -17,6 +17,10 @@ case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
 
+if ! test -f config.h; then
+    . ./config_h.SH
+fi
+
 warn=''
 
 # Add -Wall for the core modules iff gcc and not already -Wall
