@@ -9,13 +9,14 @@ use Locale::Maketext::Simple Style => 'gettext';
 use Carp        ();
 use File::Spec  ();
 use FileHandle  ();
+use version     qw[qv];
 
 BEGIN {
     use vars        qw[ $VERSION @ISA $VERBOSE $CACHE @EXPORT_OK 
                         $FIND_VERSION $ERROR $CHECK_INC_HASH];
     use Exporter;
     @ISA            = qw[Exporter];
-    $VERSION        = '0.14';
+    $VERSION        = '0.16';
     $VERBOSE        = 0;
     $FIND_VERSION   = 1;
     $CHECK_INC_HASH = 0;
@@ -239,28 +240,11 @@ sub check_install {
                     $in_pod = /^=(?!cut)/ ? 1 : /^=cut/ ? 0 : $in_pod;
                     next if $in_pod;
                     
-                    ### skip commented out lines, they won't eval to anything.
-                    next if /^\s*#/;
-        
-                    ### the following regexp comes from the ExtUtils::MakeMaker
-                    ### documentation.
-                    ### Following #18892, which tells us the original
-                    ### regex breaks under -T, we must modifiy it so
-                    ### it captures the entire expression, and eval /that/
-                    ### rather than $_, which is insecure.
-                    if ( /([\$*][\w\:\']*\bVERSION\b.*\=.*)/ ) {
-         
-                        ### this will eval the version in to $VERSION if it
-                        ### was declared as $VERSION in the module.
-                        ### else the result will be in $res.
-                        ### this is a fix on skud's Module::InstalledVersion
-         
-                        local $VERSION;
-                        my $res = eval $1;
-         
-                        ### default to '0.0' if there REALLY is no version
-                        ### all to satisfy warnings
-                        $href->{version} = $VERSION || $res || '0.0';
+                    ### try to find a version declaration in this string.
+                    my $ver = __PACKAGE__->_parse_version( $_ );
+
+                    if( defined $ver ) {
+                        $href->{version} = $ver;
         
                         last DIR;
                     }
@@ -290,6 +274,63 @@ sub check_install {
     }
 
     return $href;
+}
+
+sub _parse_version {
+    my $self    = shift;
+    my $str     = shift or return;
+    my $verbose = shift or 0;
+
+    ### skip commented out lines, they won't eval to anything.
+    return if $str =~ /^\s*#/;
+        
+    ### the following regexp & eval statement comes from the 
+    ### ExtUtils::MakeMaker source (EU::MM_Unix->parse_version) 
+    ### Following #18892, which tells us the original
+    ### regex breaks under -T, we must modifiy it so
+    ### it captures the entire expression, and eval /that/
+    ### rather than $_, which is insecure.
+
+    if( $str =~ /(?<!\\)([\$*])(([\w\:\']*)\bVERSION)\b.*\=/ ) {
+        
+        print "Evaluating: $str\n" if $verbose;
+        
+        ### this creates a string to be eval'd, like:
+        # package Module::Load::Conditional::_version;
+        # no strict;
+        # 
+        # local $VERSION;
+        # $VERSION=undef; do {
+        #     use version; $VERSION = qv('0.0.3');
+        # }; $VERSION        
+        
+        my $eval = qq{
+            package Module::Load::Conditional::_version;
+            no strict;
+
+            local $1$2;
+            \$$2=undef; do {
+                $str
+            }; \$$2
+        };
+        
+        print "Evaltext: $eval\n" if $verbose;
+        
+        my $result = do {
+            local $^W = 0;
+            eval($eval); 
+        };
+        
+        
+        my $rv = defined $result ? $result : '0.0';
+
+        print( $@ ? "Error: $@\n" : "Result: $rv\n" ) if $verbose;
+
+        return $rv;
+    }
+    
+    ### unable to find a version in this string
+    return;
 }
 
 =head2 $bool = can_load( modules => { NAME => VERSION [,NAME => VERSION] }, [verbose => BOOL, nocache => BOOL] )

@@ -19,7 +19,7 @@ use File::Spec ();
 use Test::More tests => 23;
 
 ### case 1 ###
-use_ok( 'Module::Load::Conditional' ) or diag "Module.pm not found.  Dying", die;
+use_ok( 'Module::Load::Conditional' );
 
 ### stupid stupid warnings ###
 {   $Module::Load::Conditional::VERBOSE =   

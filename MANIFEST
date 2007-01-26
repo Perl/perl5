@@ -975,12 +975,12 @@ ext/POSIX/t/time.t		See if POSIX time-related functions work
 ext/POSIX/t/waitpid.t		See if waitpid works
 ext/POSIX/typemap		POSIX extension interface types
 ext/re/hints/mpeix.pl		Hints for re for named architecture
+ext/re/lib/re/Tie/Hash/NamedCapture.pm	Implements %- and %+ behaviour
 ext/re/Makefile.PL		re extension makefile writer
 ext/re/re_comp.h		re extension wrapper for regcomp.h
 ext/re/re.pm			re extension Perl module
 ext/re/re_top.h			re extension symbol hiding header
 ext/re/re.xs			re extension external subroutines
-ext/re/lib/re/Tie/Hash/NamedCapture.pm	Implements %- and %+ behaviour
 ext/re/t/lexical_debug.pl	generate debug output for lexical re 'debug'
 ext/re/t/lexical_debug.t	test that lexical re 'debug' works
 ext/re/t/re_funcs.t		see if exportable funcs from re.pm work
@@ -2039,6 +2039,7 @@ lib/Module/CoreList/t/corelist.t	Module::CoreList
 lib/Module/CoreList/t/find_modules.t	Module::CoreList
 lib/Module/Load/Conditional.pm	Module::Conditional
 lib/Module/Load/Conditional/t/01_Module_Load_Conditional.t	Module::Conditional tests
+lib/Module/Load/Conditional/t/02_Parse_Version.t	Module::Load::Conditional tests
 lib/Module/Load/Conditional/t/to_load/Commented.pm	Module::Conditional tests
 lib/Module/Load/Conditional/t/to_load/InPod.pm	Module::Load::Conditional tests
 lib/Module/Load/Conditional/t/to_load/LoadIt.pm	Module::Conditional tests
@@ -3565,12 +3566,12 @@ t/op/readline.t			See if <> / readline / rcatline work
 t/op/read.t			See if read() works
 t/op/recurse.t			See if deep recursion works
 t/op/ref.t			See if refs and objects work
+t/op/regexp_kmod.t		See if regexp /k modifier works as expected
 t/op/regexp_noamp.t		See if regular expressions work with optimizations
 t/op/regexp_notrie.t		See if regular expressions work without trie optimisation
 t/op/regexp_qr_embed.t		See if regular expressions work with embedded qr//
 t/op/regexp_qr.t		See if regular expressions work as qr//
 t/op/regexp.t			See if regular expressions work
-t/op/regexp_kmod.t		See if regexp /k modifier works as expected
 t/op/regexp_trielist.t		See if regular expressions work with trie optimisation
 t/op/regmesg.t			See if one can get regular expression errors
 t/op/repeat.t			See if x operator works
