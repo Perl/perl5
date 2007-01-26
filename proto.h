@@ -288,9 +288,7 @@ PERL_CALLCONV bool	Perl_do_exec3(pTHX_ char* cmd, int fd, int do_report);
 #endif
 PERL_CALLCONV void	Perl_do_execfree(pTHX);
 #ifdef PERL_IN_DOIO_C
-STATIC void	S_exec_failed(pTHX_ const char *cmd, int fd, int do_report)
-			__attribute__nonnull__(pTHX_1);
-
+STATIC void	S_exec_failed(pTHX_ const char *cmd, int fd, int do_report);
 #endif
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 PERL_CALLCONV I32	Perl_do_ipcctl(pTHX_ I32 optype, SV** mark, SV** sp);
@@ -2317,15 +2315,6 @@ PERL_CALLCONV OP*	Perl_ck_repeat(pTHX_ OP *o)
 PERL_CALLCONV OP*	Perl_ck_require(pTHX_ OP *o)
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV int	Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
-			__attribute__nonnull__(1)
-			__attribute__nonnull__(3);
-
-PERL_CALLCONV int	Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap)
-			__attribute__nonnull__(1)
-			__attribute__nonnull__(3);
-
-
 PERL_CALLCONV OP*	Perl_ck_return(pTHX_ OP *o)
 			__attribute__warn_unused_result__;
 
@@ -2334,14 +2323,6 @@ PERL_CALLCONV OP*	Perl_ck_rfun(pTHX_ OP *o)
 
 PERL_CALLCONV OP*	Perl_ck_rvconst(pTHX_ OP *o)
 			__attribute__warn_unused_result__;
-
-#ifndef HAS_STRLCAT
-PERL_CALLCONV Size_t	Perl_my_strlcat(char *dst, const char *src, Size_t size);
-#endif
-
-#ifndef HAS_STRLCPY
-PERL_CALLCONV Size_t	Perl_my_strlcpy(char *dst, const char *src, Size_t size);
-#endif
 
 PERL_CALLCONV OP*	Perl_ck_sassign(pTHX_ OP *o)
 			__attribute__warn_unused_result__;
@@ -2401,6 +2382,14 @@ PERL_CALLCONV bool	Perl_ckwarn_d(pTHX_ U32 w);
 
 PERL_CALLCONV void	Perl_my_clearenv(pTHX);
 
+#ifndef HAS_STRLCAT
+PERL_CALLCONV Size_t	Perl_my_strlcat(char *dst, const char *src, Size_t size);
+#endif
+
+#ifndef HAS_STRLCPY
+PERL_CALLCONV Size_t	Perl_my_strlcpy(char *dst, const char *src, Size_t size);
+#endif
+
 PERL_CALLCONV GV*	Perl_gv_fetchpvn_flags(pTHX_ const char* name, STRLEN len, I32 flags, I32 sv_type);
 PERL_CALLCONV GV*	Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, I32 sv_type);
 PERL_CALLCONV bool	Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags);
@@ -2408,6 +2397,11 @@ PERL_CALLCONV bool	Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags);
 #ifndef SPRINTF_RETURNS_STRLEN
 PERL_CALLCONV int	Perl_my_sprintf(char *buffer, const char *pat, ...);
 #endif
+
+PERL_CALLCONV int	Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
+			__attribute__format__(__printf__,3,4);
+
+PERL_CALLCONV int	Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap);
 
 END_EXTERN_C
 /*

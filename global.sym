@@ -734,11 +734,11 @@ Perl_hv_assert
 Perl_gv_SVadd
 Perl_ckwarn
 Perl_ckwarn_d
+Perl_my_strlcat
+Perl_my_strlcpy
 Perl_gv_fetchpvn_flags
 Perl_gv_fetchsv
 Perl_my_sprintf
 Perl_my_snprintf
 Perl_my_vsnprintf
-Perl_my_strlcat
-Perl_my_strlcpy
 # ex: set ro:
