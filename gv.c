@@ -113,22 +113,22 @@ Perl_gv_fetchfile(pTHX_ const char *name)
     if (!PL_defstash)
 	return NULL;
 
-    tmplen = strlen(name) + 2;
-    if (tmplen < sizeof smallbuf)
+    tmplen = strlen(name);
+    if (tmplen + 2 <= sizeof smallbuf)
 	tmpbuf = smallbuf;
     else
-	Newx(tmpbuf, tmplen + 1, char);
+	Newx(tmpbuf, tmplen, char);
     /* This is where the debugger's %{"::_<$filename"} hash is created */
     tmpbuf[0] = '_';
     tmpbuf[1] = '<';
-    memcpy(tmpbuf + 2, name, tmplen - 1);
-    gv = *(GV**)hv_fetch(PL_defstash, tmpbuf, tmplen, TRUE);
+    memcpy(tmpbuf + 2, name, tmplen);
+    gv = *(GV**)hv_fetch(PL_defstash, tmpbuf, tmplen + 2, TRUE);
     if (!isGV(gv)) {
-	gv_init(gv, PL_defstash, tmpbuf, tmplen, FALSE);
+	gv_init(gv, PL_defstash, tmpbuf, tmplen + 2, FALSE);
 #ifdef PERL_DONT_CREATE_GVSV
-	GvSV(gv) = newSVpvn(name, tmplen - 2);
+	GvSV(gv) = newSVpvn(name, tmplen);
 #else
-	sv_setpvn(GvSV(gv), name, tmplen - 2);
+	sv_setpvn(GvSV(gv), name, tmplen);
 #endif
 	if (PERLDB_LINE)
 	    hv_magic(GvHVn(gv_AVadd(gv)), NULL, PERL_MAGIC_dbfile);
@@ -742,7 +742,7 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
     HV *stash;
     GV *tmpgv;
 
-    if (namelen + 2 < sizeof smallbuf)
+    if (namelen + 2 <= sizeof smallbuf)
 	tmpbuf = smallbuf;
     else
 	Newx(tmpbuf, namelen + 2, char);
@@ -834,7 +834,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		char smallbuf[128];
 		char *tmpbuf;
 
-		if (len + 2 < (I32)sizeof (smallbuf))
+		if (len + 2 <= (I32)sizeof (smallbuf))
 		    tmpbuf = smallbuf;
 		else
 		    Newx(tmpbuf, len+2, char);

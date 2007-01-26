@@ -794,11 +794,11 @@ S_incline(pTHX_ char *s)
 	    char *tmpbuf, *tmpbuf2;
 	    GV **gvp, *gv2;
 	    STRLEN tmplen2 = strlen(s);
-	    if (tmplen + 2 < sizeof smallbuf)
+	    if (tmplen + 2 <= sizeof smallbuf)
 		tmpbuf = smallbuf;
 	    else
 		Newx(tmpbuf, tmplen + 2, char);
-	    if (tmplen2 + 2 < sizeof smallbuf2)
+	    if (tmplen2 + 2 <= sizeof smallbuf2)
 		tmpbuf2 = smallbuf2;
 	    else
 		Newx(tmpbuf2, tmplen2 + 2, char);
