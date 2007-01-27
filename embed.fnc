@@ -566,7 +566,9 @@ ApdaR	|HV*	|newHV
 ApaR	|HV*	|newHVhv	|NULLOK HV* hv
 Apa	|IO*	|newIO
 Apa	|OP*	|newLISTOP	|I32 type|I32 flags|NULLOK OP* first|NULLOK OP* last
+#ifdef USE_ITHREADS
 Apa	|OP*	|newPADOP	|I32 type|I32 flags|NULLOK SV* sv
+#endif
 Apa	|OP*	|newPMOP	|I32 type|I32 flags
 Apa	|OP*	|newPVOP	|I32 type|I32 flags|NULLOK char* pv
 Apa	|SV*	|newRV		|NN SV* sv

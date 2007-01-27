@@ -562,7 +562,9 @@
 #define newHVhv			Perl_newHVhv
 #define newIO			Perl_newIO
 #define newLISTOP		Perl_newLISTOP
+#ifdef USE_ITHREADS
 #define newPADOP		Perl_newPADOP
+#endif
 #define newPMOP			Perl_newPMOP
 #define newPVOP			Perl_newPVOP
 #define newRV			Perl_newRV
@@ -2775,7 +2777,9 @@
 #define newHVhv(a)		Perl_newHVhv(aTHX_ a)
 #define newIO()			Perl_newIO(aTHX)
 #define newLISTOP(a,b,c,d)	Perl_newLISTOP(aTHX_ a,b,c,d)
+#ifdef USE_ITHREADS
 #define newPADOP(a,b,c)		Perl_newPADOP(aTHX_ a,b,c)
+#endif
 #define newPMOP(a,b)		Perl_newPMOP(aTHX_ a,b)
 #define newPVOP(a,b,c)		Perl_newPVOP(aTHX_ a,b,c)
 #define newRV(a)		Perl_newRV(aTHX_ a)

@@ -3421,6 +3421,7 @@ Perl_newSVOP(pTHX_ I32 type, I32 flags, SV *sv)
     return CHECKOP(type, svop);
 }
 
+#ifdef USE_ITHREADS
 OP *
 Perl_newPADOP(pTHX_ I32 type, I32 flags, SV *sv)
 {
@@ -3442,6 +3443,7 @@ Perl_newPADOP(pTHX_ I32 type, I32 flags, SV *sv)
 	padop->op_targ = pad_alloc(type, SVs_PADTMP);
     return CHECKOP(type, padop);
 }
+#endif
 
 OP *
 Perl_newGVOP(pTHX_ I32 type, I32 flags, GV *gv)
