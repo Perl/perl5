@@ -102,7 +102,11 @@ is a lexical $_ in scope. (Lexical $_ is available in perl 5.9.2 and later)
 #  if defined(HASATTRIBUTE_UNUSED) && !defined(__cplusplus)
 #    define XS(name) void name(pTHX_ CV* cv __attribute__unused__)
 #  else
-#    define XS(name) void name(pTHX_ CV* cv)
+#    ifdef __cplusplus
+#      define XS(name) extern "C" void name(pTHX_ CV* cv)
+#    else
+#      define XS(name) void name(pTHX_ CV* cv)
+#    endif
 #  endif
 #endif
 

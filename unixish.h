@@ -138,5 +138,7 @@
 
 #define dXSUB_SYS
 
+#ifndef NO_ENVIRON_ARRAY
 #define USE_ENVIRON_ARRAY
+#endif
 

@@ -280,10 +280,18 @@ struct perl_thread;
  * PERL_CALLCONV to be something special.  See also the
  * definition of XS() in XSUB.h. */
 #ifndef PERL_EXPORT_C
-#  define PERL_EXPORT_C extern
+#  ifdef __cplusplus
+#    define PERL_EXPORT_C extern "C"
+#  else
+#    define PERL_EXPORT_C extern
+#  endif
 #endif
 #ifndef PERL_XS_EXPORT_C
-#  define PERL_XS_EXPORT_C
+#  ifdef __cplusplus
+#    define PERL_XS_EXPORT_C extern "C"
+#  else
+#    define PERL_XS_EXPORT_C
+#  endif
 #endif
 
 #ifdef OP_IN_REGISTER
@@ -527,11 +535,11 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #endif
 
 #if defined(HAS_SYSCALL) && !defined(HAS_SYSCALL_PROTO) && !defined(PERL_MICRO)
-int syscall(int, ...);
+EXTERN_C int syscall(int, ...);
 #endif
 
 #if defined(HAS_USLEEP) && !defined(HAS_USLEEP_PROTO) && !defined(PERL_MICRO)
-int usleep(unsigned int);
+EXTERN_C int usleep(unsigned int);
 #endif
 
 #ifdef PERL_MICRO /* Last chance to export Perl_my_swap */
@@ -1073,6 +1081,10 @@ int sockatmark(int) __THROW;
 # else
 int sockatmark(int);
 # endif
+#endif
+
+#if defined(__SUNPRO_CC)
+EXTERN_C char *crypt(const char *, const char *);
 #endif
 
 #ifdef SETERRNO
@@ -4336,7 +4348,11 @@ struct tempsym; /* defined in pp_pack.c */
 #include "pp.h"
 
 #ifndef PERL_CALLCONV
-#  define PERL_CALLCONV
+#  ifdef __cplusplus
+#    define PERL_CALLCONV extern "C"
+#  else
+#    define PERL_CALLCONV
+#  endif
 #endif
 #undef PERL_CKDEF
 #undef PERL_PPDEF
