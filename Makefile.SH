@@ -95,7 +95,7 @@ true)
 		linklibperl="-L `pwd | sed 's/\/UU$//'` -Wl,+s -Wl,+b$archlibexp/CORE -lperl"
 		;;
 	os390*)
-            shrpldflags='-W l,dll'
+            shrpldflags='-W l,XPLINK,dll'
 	    linklibperl='libperl.x'
 	    DPERL_EXTERNAL_GLOB=''
 	    ;;

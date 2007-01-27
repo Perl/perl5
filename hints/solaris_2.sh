@@ -404,13 +404,6 @@ EOM
 	if test "`arch`" = i86pc -a `uname -r` = 5.6 && \
 	   ${cc:-cc} try.c -lpthread >/dev/null 2>&1 && ./a.out; then
 	    d_sigsetjmp=$undef
-	    cat << 'EOM' >&2
-
-You will see a *** WHOA THERE!!! ***  message from Configure for
-d_sigsetjmp.  Keep the recommended value.  See hints/solaris_2.sh
-for more information.
-
-EOM
 	fi
 
 	# These prototypes should be visible since we using
@@ -548,12 +541,13 @@ EOM
 		    ccflags="$ccflags -mcpu=v9"
 		fi 
 		ccflags="$ccflags -m64"
-		if test $processor = sparc -a X`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null` != X; then
-		    # This adds in -Wa,-xarch=v9.  I suspect that's superfluous,
-		    # since the -m64 above should do that already.  Someone
-		    # with gcc-3.x.x, please test with gcc -v.   A.D. 20-Nov-2003
-		    ccflags="$ccflags -Wa,`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
-		fi
+
+		# This adds in -Wa,-xarch=v9.  I suspect that's superfluous,
+		# since the -m64 above should do that already.  Someone
+		# with gcc-3.x.x, please test with gcc -v.   A.D. 20-Nov-2003
+#		if test $processor = sparc -a X`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null` != X; then
+#		    ccflags="$ccflags -Wa,`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
+#		fi
 		ldflags="$ldflags -m64"
 		lddlflags="$lddlflags -G -m64"
 		;;
@@ -634,21 +628,11 @@ rm -f try.c try.o try a.out
 # (2) #include <dlfcn.h> is needed, *and* a cast to (void*(*)())
 # is needed for the &dlopen.  Adding any of these would require changing
 # a delicate spot in Configure, so easier just to force our guess here
-# for Solaris.
+# for Solaris.  Much the same goes for dlerror().
 case "$cc" in
-*g++*|/opt/SUNWspro/bin/CC) d_dlopen='define' ;;
-esac
-
-# The Sun C++ doesn't define the global environ array.
-case "$cc" in
-/opt/SUNWspro/bin/CC)
-  for o in NO_ENVIRON_ARRAY PERL_USE_SAFE_PUTENV
-  do
-    case "$ccflags" in
-    *$o*) ;;
-    *) ccflags="$ccflags $o" ;;
-    esac
-  done
+*g++*|*CC*)
+  d_dlopen='define'
+  d_dlerror='define'
   ;;
 esac
 

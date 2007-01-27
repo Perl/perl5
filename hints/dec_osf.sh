@@ -71,7 +71,7 @@ esac
 case "$isgcc" in
 gcc)	if [ "X$gccversion" = "X" ]; then
 	    # Done too late in Configure if hinted
-	    gccversion=`$cc --version | sed 's/.*(GCC) *//'`
+	    gccversion=`$cc -dumpversion`
 	fi
 	set $gccversion
 	if test "$1" -lt 2 -o \( "$1" -eq 2 -a \( "$2" -lt 95 -o \( "$2" -eq 95 -a "$3" -lt 3 \) \) \); then

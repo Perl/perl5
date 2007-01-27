@@ -53,6 +53,9 @@ esac;
 # Win9x problem with non-blocking read from a closed pipe
 d_eofnblk='define'
 
+# suppress auto-import warnings
+ldflags="$ldflags -Wl,--enable-auto-import"
+
 # strip exe's and dll's
 #ldflags="$ldflags -s"
 #ccdlflags="$ccdlflags -s"

@@ -89,6 +89,15 @@ case "`${cc:-cc} -V 2>&1`" in
     optimize='-xO2'
     cccdlflags='-KPIC'
     lddlflags='-G -Bdynamic'
+    # Sun C doesn't support gcc attributes, but, in many cases, doesn't
+    # complain either.  Not all cases, though.
+    d_attribute_format='undef'
+    d_attribute_malloc='undef'
+    d_attribute_nonnull='undef'
+    d_attribute_noreturn='undef'
+    d_attribute_pure='undef'
+    d_attribute_unused='undef'
+    d_attribute_warn_unused_result='undef'
     ;;
 esac
 
@@ -99,8 +108,18 @@ case "$optimize" in
     case "`uname -m`" in
         ppc*)
             # on ppc, it seems that gcc (at least gcc 3.3.2) isn't happy
-	    # with -O2 ; so downgrade to -O1.
+            # with -O2 ; so downgrade to -O1.
             optimize='-O1'
+        ;;
+        ia64*)
+            # This architecture has had various problems with gcc's
+            # in the 3.2, 3.3, and 3.4 releases when optimized to -O2.  See
+            # RT #37156 for a discussion of the problem.
+            case "`${cc:-gcc} -v 2>&1`" in
+            *"version 3.2"*|*"version 3.3"*|*"version 3.4"*)
+                ccflags="-fno-delete-null-pointer-checks $ccflags"
+            ;;
+            esac
         ;;
     esac
     ;;
@@ -263,6 +282,7 @@ case "`uname -m`" in
 sparc*)
 	case "$cccdlflags" in
 	*-fpic*) cccdlflags="`echo $cccdlflags|sed 's/-fpic/-fPIC/'`" ;;
+	*-fPIC*) ;;
 	*)	 cccdlflags="$cccdlflags -fPIC" ;;
 	esac
 	;;
@@ -344,3 +364,11 @@ case "$cc" in
        ;;
 esac
 
+# If using g++, the Configure scan for dlopen() and (especially)
+# dlerror() might fail, easier just to forcibly hint them in.
+case "$cc" in
+*g++*)
+  d_dlopen='define'
+  d_dlerror='define'
+  ;;
+esac
