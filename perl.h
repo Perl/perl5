@@ -1083,6 +1083,13 @@ int sockatmark(int);
 # endif
 #endif
 
+#if defined(__osf__) && defined(__cplusplus) && !defined(_XOPEN_SOURCE_EXTENDED)
+EXTERN_C int fchdir(int);
+EXTERN_C int flock(int, int);
+EXTERN_C int fseeko(FILE *, off_t, int);
+EXTERN_C off_t ftello(FILE *);
+#endif
+
 #if defined(__SUNPRO_CC)
 EXTERN_C char *crypt(const char *, const char *);
 #endif

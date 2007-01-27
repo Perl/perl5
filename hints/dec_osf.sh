@@ -161,6 +161,17 @@ esac
 # Be nauseatingly ANSI
 ccflags="$ccflags $_ccflags_strict_ansi"
 
+# g++ needs a lot of definitions to see the same set of
+# prototypes from <unistd.h> et alia as cxx/cc see.
+# Note that we cannot define _XOPEN_SOURCE_EXTENDED or
+# its moral equivalent, _XOPEN_SOURCE=500 (which would
+# define a lot of the required prototypes for us), because
+# the gcc-processed version of <sys/wait.h> contains fatally
+# conflicting prototypes for wait3().
+case "$cc" in
+*g++*) ccflags="$ccflags -D_XOPEN_SOURCE -D_OSF_SOURCE -D_AES_SOURCE -D_BSD -D_POSIX_C_SOURCE=199309L -D_POSIX_PII_SOCKET" ;;
+esac
+
 # for gcc the Configure knows about the -fpic:
 # position-independent code for dynamic loading
 
@@ -179,10 +190,21 @@ case "$optimize" in
 	;;
 esac
 
+case "$isgcc" in
+gcc)	;;
+*)	case "$optimize" in
+	*-O*)	# With both -O and -g, the -g must be -g3.
+		optimize="`echo $optimize | sed 's/-g[1-4]*/-g3/'`"
+		;;
+	esac
+	;;
+esac
+
 ## Optimization limits
 case "$isgcc" in
 gcc) #  gcc 3.2.1 wants a lot of memory for -O3'ing toke.c
 cat >try.c <<EOF
+#include <stdio.h>
 #include <sys/resource.h>
 
 int main ()
@@ -359,7 +381,7 @@ $define|true|[yY]*)
 extern int foo;	
 EOF
 	$cc -c pthread.c 2> pthread.err
-	if grep -q "unrecognized compiler" pthread.err; then
+	if egrep -q "unrecognized compiler|syntax error" pthread.err; then
 	    cat >&4 <<EOF
 ***
 *** I'm sorry but your C compiler ($cc) cannot be used to

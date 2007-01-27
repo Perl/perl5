@@ -112,6 +112,11 @@ int mkstemp(char*);
 	else							\
 		SETERRNO(EBADF, SS_IVCHAN)
 
+#if defined(__osf__) && _XOPEN_SOURCE < 500
+extern int   fseeko(FILE *, off_t, int);
+extern off_t ftello(FILE *);
+#endif
+
 #ifndef USE_SFIO
 
 EXTERN_C int perlsio_binmode(FILE *fp, int iotype, int mode);
