@@ -3482,8 +3482,7 @@ void
 Perl_package(pTHX_ OP *o)
 {
     dVAR;
-    const char *name;
-    STRLEN len;
+    SV *const sv = cSVOPo->op_sv;
 #ifdef PERL_MAD
     OP *pegop;
 #endif
@@ -3491,9 +3490,8 @@ Perl_package(pTHX_ OP *o)
     save_hptr(&PL_curstash);
     save_item(PL_curstname);
 
-    name = SvPV_const(cSVOPo->op_sv, len);
-    PL_curstash = gv_stashpvn(name, len, GV_ADD);
-    sv_setpvn(PL_curstname, name, len);
+    PL_curstash = gv_stashsv(sv, GV_ADD);
+    sv_setsv(PL_curstname, sv);
 
     PL_hints |= HINT_BLOCK_SCOPE;
     PL_copline = NOLINE;
