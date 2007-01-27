@@ -788,25 +788,40 @@ S_incline(pTHX_ const char *s)
 	if (tmplen > 7 && strnEQ(cf, "(eval ", 6)) {
 	    /* must copy *{"::_<(eval N)[oldfilename:L]"}
 	     * to *{"::_<newfilename"} */
-	    char smallbuf[128], smallbuf2[128];
-	    char *tmpbuf, *tmpbuf2;
-	    GV **gvp, *gv2;
+	    /* However, the long form of evals is only turned on by the
+	       debugger - usually they're "(eval %lu)" */
+	    char smallbuf[128];
+	    char *tmpbuf;
+	    GV **gvp;
 	    STRLEN tmplen2 = len;
 	    if (tmplen + 2 <= sizeof smallbuf)
 		tmpbuf = smallbuf;
 	    else
 		Newx(tmpbuf, tmplen + 2, char);
-	    if (tmplen2 + 2 <= sizeof smallbuf2)
-		tmpbuf2 = smallbuf2;
-	    else
-		Newx(tmpbuf2, tmplen2 + 2, char);
-	    tmpbuf[0] = tmpbuf2[0] = '_';
-	    tmpbuf[1] = tmpbuf2[1] = '<';
+	    tmpbuf[0] = '_';
+	    tmpbuf[1] = '<';
 	    memcpy(tmpbuf + 2, cf, tmplen);
-	    memcpy(tmpbuf2 + 2, s, tmplen2);
-	    tmplen += 2; tmplen2 += 2;
+	    tmplen += 2;
 	    gvp = (GV**)hv_fetch(PL_defstash, tmpbuf, tmplen, FALSE);
 	    if (gvp) {
+		char *tmpbuf2;
+		GV *gv2;
+
+		if (tmplen2 + 2 <= sizeof smallbuf)
+		    tmpbuf2 = smallbuf;
+		else
+		    Newx(tmpbuf2, tmplen2 + 2, char);
+
+		if (tmpbuf2 != smallbuf || tmpbuf != smallbuf) {
+		    /* Either they malloc'd it, or we malloc'd it,
+		       so no prefix is present in ours.  */
+		    tmpbuf2[0] = '_';
+		    tmpbuf2[1] = '<';
+		}
+
+		memcpy(tmpbuf2 + 2, s, tmplen2);
+		tmplen2 += 2;
+
 		gv2 = *(GV**)hv_fetch(PL_defstash, tmpbuf2, tmplen2, TRUE);
 		if (!isGV(gv2)) {
 		    gv_init(gv2, PL_defstash, tmpbuf2, tmplen2, FALSE);
@@ -815,9 +830,10 @@ S_incline(pTHX_ const char *s)
 		    GvHV(gv2) = (HV*)SvREFCNT_inc(GvHV(*gvp));
 		    GvAV(gv2) = (AV*)SvREFCNT_inc(GvAV(*gvp));
 		}
+
+		if (tmpbuf2 != smallbuf) Safefree(tmpbuf2);
 	    }
 	    if (tmpbuf != smallbuf) Safefree(tmpbuf);
-	    if (tmpbuf2 != smallbuf2) Safefree(tmpbuf2);
 	}
 #endif
 	CopFILE_free(PL_curcop);
