@@ -2,9 +2,10 @@
 # Demand-load module list
 #
 package Encode::Config;
-our $VERSION = do { my @r = ( q$Revision: 2.2 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.3 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 use strict;
+use warnings;
 
 our %ExtModule = (
 
