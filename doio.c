@@ -2218,7 +2218,8 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
     SETERRNO(0,0);
     if (shmctl(id, IPC_STAT, &shmds) == -1)
 	return -1;
-    if (mpos < 0 || msize < 0 || (size_t)mpos + msize > shmds.shm_segsz) {
+    if (mpos < 0 || msize < 0
+	|| (size_t)mpos + msize > (size_t)shmds.shm_segsz) {
 	SETERRNO(EFAULT,SS_ACCVIO);		/* can't do as caller requested */
 	return -1;
     }

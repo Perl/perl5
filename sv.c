@@ -3359,7 +3359,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
     case SVt_PVBM:
 	if (SvGMAGICAL(sstr) && (flags & SV_GMAGIC)) {
 	    mg_get(sstr);
-	    if ((int)SvTYPE(sstr) != stype) {
+	    if (SvTYPE(sstr) != stype) {
 		stype = SvTYPE(sstr);
 		if (stype == SVt_PVGV && dtype <= SVt_PVGV) {
 		    glob_assign_glob(dstr, sstr, dtype);
@@ -4792,8 +4792,8 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
 			*/
 			SAVEI8(PL_utf8cache);
 			PL_utf8cache = 0;
-			Perl_croak(aTHX_ "panic: sv_len_utf8 cache %"UVf
-				   " real %"UVf" for %"SVf,
+			Perl_croak(aTHX_ "panic: sv_len_utf8 cache %"UVuf
+				   " real %"UVuf" for %"SVf,
 				   (UV) ulen, (UV) real, (void*)sv);
 		    }
 		}
@@ -4950,8 +4950,8 @@ S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const start,
 		   infinitely while printing error messages.  */
 		SAVEI8(PL_utf8cache);
 		PL_utf8cache = 0;
-		Perl_croak(aTHX_ "panic: sv_pos_u2b_cache cache %"UVf
-			   " real %"UVf" for %"SVf,
+		Perl_croak(aTHX_ "panic: sv_pos_u2b_cache cache %"UVuf
+			   " real %"UVuf" for %"SVf,
 			   (UV) boffset, (UV) real_boffset, (void*)sv);
 	    }
 	}
@@ -5083,8 +5083,8 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *sv, MAGIC **mgp, STRLEN byte, STRLEN utf8,
 	       infinitely while printing error messages.  */
 	    SAVEI8(PL_utf8cache);
 	    PL_utf8cache = 0;
-	    Perl_croak(aTHX_ "panic: utf8_mg_pos_cache_update cache %"UVf
-		       " real %"UVf" for %"SVf, (UV) utf8, (UV) realutf8, (void*)sv);
+	    Perl_croak(aTHX_ "panic: utf8_mg_pos_cache_update cache %"UVuf
+		       " real %"UVuf" for %"SVf, (UV) utf8, (UV) realutf8, (void*)sv);
 	}
     }
 
@@ -5329,8 +5329,8 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 		   infinitely while printing error messages.  */
 		SAVEI8(PL_utf8cache);
 		PL_utf8cache = 0;
-		Perl_croak(aTHX_ "panic: sv_pos_b2u cache %"UVf
-			   " real %"UVf" for %"SVf,
+		Perl_croak(aTHX_ "panic: sv_pos_b2u cache %"UVuf
+			   " real %"UVuf" for %"SVf,
 			   (UV) len, (UV) real_len, (void*)sv);
 	    }
 	}
@@ -6361,7 +6361,7 @@ Perl_newSVpv(pTHX_ const char *s, STRLEN len)
     register SV *sv;
 
     new_SV(sv);
-    sv_setpvn(sv,s,len ? len : strlen(s));
+    sv_setpvn(sv, s, len || s == NULL ? len : strlen(s));
     return sv;
 }
 

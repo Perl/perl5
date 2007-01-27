@@ -1422,7 +1422,7 @@ EXTERN_C char *crypt(const char *, const char *);
  * that should be true only if the snprintf()/vsnprintf() are true
  * to the standard. */
 
-#if defined(HAS_SNPRINTF) && defined(HAS_C99_VARIADIC_MACROS) && !(defined(DEBUGGING) && !defined(PERL_USE_GCC_BRACE_GROUPS))
+#if defined(HAS_SNPRINTF) && defined(HAS_C99_VARIADIC_MACROS) && !(defined(DEBUGGING) && !defined(PERL_USE_GCC_BRACE_GROUPS)) && !defined(PERL_GCC_PEDANTIC)
 #  ifdef PERL_USE_GCC_BRACE_GROUPS
 #      define my_snprintf(buffer, len, ...) ({ int __len__ = snprintf(buffer, len, __VA_ARGS__); if ((len) > 0 && (Size_t)__len__ >= (len)) Perl_croak(aTHX_ "panic: snprintf buffer overflow"); __len__; })
 #      define PERL_MY_SNPRINTF_GUARDED
@@ -1434,7 +1434,7 @@ EXTERN_C char *crypt(const char *, const char *);
 #  define PERL_MY_SNPRINTF_GUARDED
 #endif
 
-#if defined(HAS_VSNPRINTF) && defined(HAS_C99_VARIADIC_MACROS) && !(defined(DEBUGGING) && !defined(PERL_USE_GCC_BRACE_GROUPS))
+#if defined(HAS_VSNPRINTF) && defined(HAS_C99_VARIADIC_MACROS) && !(defined(DEBUGGING) && !defined(PERL_USE_GCC_BRACE_GROUPS)) && !defined(PERL_GCC_PEDANTIC)
 #  ifdef PERL_USE_GCC_BRACE_GROUPS
 #      define my_vsnprintf(buffer, len, ...) ({ int __len__ = vsnprintf(buffer, len, __VA_ARGS__); if ((len) > 0 && (Size_t)__len__ >= (len)) Perl_croak(aTHX_ "panic: vsnprintf buffer overflow"); __len__; })
 #      define PERL_MY_VSNPRINTF_GUARDED
@@ -2942,15 +2942,16 @@ typedef pthread_key_t	perl_key;
 #ifndef SVf256
 #  define SVf256 SVf_precision("256")
 #endif
- 
-#ifndef UVf
-#  define UVf UVuf
-#endif
 
 #ifndef PERL_CORE
 #  ifndef DieNull
 #    define DieNull Perl_vdie(aTHX_ Nullch, Null(va_list *))
 #  endif
+#endif
+ 
+/* not used; but needed for backward compatibilty with XS code? - RMB */ 
+#ifndef UVf
+#  define UVf UVuf
 #endif
 
 /* Because 5.8.x has to keep using %_ for SVf, which will make the format
