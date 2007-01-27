@@ -713,8 +713,8 @@ md5(...)
 		}
 	    }
 	    if (msg) {
-		char *f = (ix == F_BIN) ? "md5" :
-                          (ix == F_HEX) ? "md5_hex" : "md5_base64";
+	        const char *f = (ix == F_BIN) ? "md5" :
+		                (ix == F_HEX) ? "md5_hex" : "md5_base64";
 	        warn("&Digest::MD5::%s function %s", f, msg);
 	    }
 	}

@@ -935,7 +935,7 @@ glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last,
 	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
 		readdirfunc = (Direntry_t *(*)(DIR *))pglob->gl_readdir;
 	else
-		readdirfunc = my_readdir;
+		readdirfunc = (Direntry_t *(*)(DIR *))my_readdir;
 	while ((dp = (*readdirfunc)(dirp))) {
 		register U8 *sc;
 		register Char *dc;

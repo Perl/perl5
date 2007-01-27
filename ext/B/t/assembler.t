@@ -254,6 +254,7 @@ strconst    => [ '""', '"another string"' ], # no NUL
 op_tr_array => [ join( ',', 256, 0..255 ) ],
 PADOFFSET   => undef,
 long        => undef,
+svtype      => undef,
 	      );
 
 # Erronous operand values
@@ -277,7 +278,8 @@ pvcontents  => [ '"spurious arg"' ],
 strconst    => [  'no quote"',  '"with NUL '."\0".' char"' ], # no NUL
 op_tr_array => undef, # op_pv_tr is no longer exactly 256 shorts
 PADOFFSET   => undef,
-long	     => undef,
+long	    => undef,
+svtype	    => undef,
 	      );
 
 
