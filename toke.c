@@ -5533,7 +5533,7 @@ Perl_yylex(pTHX)
 			}
 		    }
 		    if (probable_sub) {
-			gv = gv_fetchpv(PL_tokenbuf, TRUE, SVt_PVCV);
+			gv = gv_fetchpv(PL_tokenbuf, GV_ADD, SVt_PVCV);
 			op_free(yylval.opval);
 			yylval.opval = newCVREF(0, newGVOP(OP_GV, 0, gv));
 			yylval.opval->op_private |= OPpENTERSUB_NOPAREN;
