@@ -197,7 +197,7 @@ pmb	|bool	|do_aexec	|NULLOK SV* really|NN SV** mark|NN SV** sp
 p	|bool	|do_aexec5	|NULLOK SV* really|NN SV** mark|NN SV** sp|int fd|int do_report
 Ap	|int	|do_binmode	|NN PerlIO *fp|int iotype|int mode
 p	|void	|do_chop	|NN SV* asv|NN SV* sv
-Ap	|bool	|do_close	|NN GV* gv|bool not_implicit
+Ap	|bool	|do_close	|NULLOK GV* gv|bool not_implicit
 p	|bool	|do_eof		|NN GV* gv
 
 #ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
@@ -981,9 +981,9 @@ Apd     |char*  |pv_pretty      |NN SV *dsv|NN char const * const str\
 Afp	|void	|dump_indent	|I32 level|NN PerlIO *file|NN const char* pat|...
 Ap	|void	|dump_vindent	|I32 level|NN PerlIO *file|NN const char* pat \
 				|NULLOK va_list *args
-Ap	|void	|do_gv_dump	|I32 level|NN PerlIO *file|NN char *name|NN GV *sv
-Ap	|void	|do_gvgv_dump	|I32 level|NN PerlIO *file|NN char *name|NN GV *sv
-Ap	|void	|do_hv_dump	|I32 level|NN PerlIO *file|NN char *name|NN HV *sv
+Ap	|void	|do_gv_dump	|I32 level|NN PerlIO *file|NN char *name|NULLOK GV *sv
+Ap	|void	|do_gvgv_dump	|I32 level|NN PerlIO *file|NN char *name|NULLOK GV *sv
+Ap	|void	|do_hv_dump	|I32 level|NN PerlIO *file|NN char *name|NULLOK HV *sv
 Ap	|void	|do_magic_dump	|I32 level|NN PerlIO *file|NN MAGIC *mg|I32 nest \
 				|I32 maxnest|bool dumpops|STRLEN pvlim
 Ap	|void	|do_op_dump	|I32 level|NN PerlIO *file|NULLOK OP *o
