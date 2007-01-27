@@ -51,7 +51,7 @@ $ use64bitall = "n"
 $ use64bitint = "n"
 $ uselargefiles = "n"
 $ usestdstat = "n"
-$ usedecterm = "y"
+$ usedecterm = "n"
 $ usesitecustomize = "n"
 $ C_Compiler_Replace = "CC="
 $ thread_upcalls = "MTU="
@@ -2557,11 +2557,31 @@ $     d_unlink_all_versions = "define"
 $ ELSE
 $     d_unlink_all_versions = "undef"
 $ ENDIF
-$ bool_dflt = "y"
-$ IF F$TYPE(usedecterm) .NES. "" 
+$!
+$! To avoid 'SYSTEM-F-PROTINSTALL, protected images must be installed'
+$! at run time, we must check that the DECterm image is both present
+$! and installed as a known image.
+$!
+$ decterm_capable = "FALSE"
+$ dflt = "SYS$SHARE:DECW$TERMINALSHR12.EXE"
+$ IF F$SEARCH(dflt) .NES. "" 
+$ THEN 
+$    decterm_capable = F$FILE_ATTRIBUTES(dflt, "KNOWN")
+$ ELSE
+$     dflt = "SYS$SHARE:DECW$TERMINALSHR.EXE"
+$     IF F$SEARCH(dflt) .NES. "" THEN decterm_capable = F$FILE_ATTRIBUTES(dflt, "KNOWN")
+$ ENDIF
+$!
+$ IF F$TYPE(usedecterm) .NES. ""
 $ THEN
-$       dflt = f$search("SYS$SHARE:DECW$TERMINALSHR*.EXE")
-$       IF dflt .EQS. "" THEN bool_dflt = "n"
+$       if usedecterm .or. usedecterm .eqs. "define"
+$       then
+$         bool_dflt="y"
+$       else
+$         bool_dflt="n"
+$       endif
+$ ELSE
+$       bool_dflt="n"
 $ ENDIF
 $ IF .NOT. use_debugging_perl THEN bool_dflt = "n"
 $ echo ""
@@ -2571,6 +2591,11 @@ $ echo "If this does not make any sense to you, just accept the default '" + boo
 $ rp = "Build with DECterm Perl debugger support, if available? [''bool_dflt'] "
 $ GOSUB myread
 $ usedecterm=ans
+$ IF (usedecterm .OR. usedecterm .EQS. "define") .AND. .NOT. decterm_capable
+$ THEN
+$     echo4 "No installed DECterm image found, disabling..."
+$     usedecterm = "n"
+$ ENDIF
 $! CC Flags
 $ echo ""
 $ echo "Your compiler may want other flags.  For this question you should include"
