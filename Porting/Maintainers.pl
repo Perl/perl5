@@ -63,7 +63,7 @@ package Maintainers;
 	'mschwern'	=> 'Michael Schwern <mschwern@cpan.org>',
 	'smccam'	=> 'Stephen McCamant <smccam@cpan.org>',
 	'smueller'	=> 'Steffen Mueller <smueller@cpan.org>',
-	'tels'		=> 'perl_dummy a-t bloodgate.com',
+	'tels'		=> 'Tels <nospam-abuse@bloodgate.com>',
 	'tomhughes'	=> 'Tom Hughes <tomhughes@cpan.org>',
 	'tjenness'	=> 'Tim Jenness <tjenness@cpan.org>',
 	'tyemq'		=> 'Tye McQueen <tyemq@cpan.org>',
