@@ -677,6 +677,7 @@ Perl_lex_start(pTHX_ SV *line)
     SAVEDESTRUCTOR_X(restore_rsfp, PL_rsfp);
     SAVEINT(PL_expect);
 
+    PL_copline = NOLINE;
     PL_lex_state = LEX_NORMAL;
     PL_expect = XSTATE;
     Newx(parser->lex_brackstack, 120, char);
