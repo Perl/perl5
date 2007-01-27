@@ -3452,9 +3452,9 @@ Perl_newGVOP(pTHX_ I32 type, I32 flags, GV *gv)
     assert(gv);
 #ifdef USE_ITHREADS
     GvIN_PAD_on(gv);
-    return newPADOP(type, flags, SvREFCNT_inc_simple(gv));
+    return newPADOP(type, flags, SvREFCNT_inc_simple_NN(gv));
 #else
-    return newSVOP(type, flags, SvREFCNT_inc_simple(gv));
+    return newSVOP(type, flags, SvREFCNT_inc_simple_NN(gv));
 #endif
 }
 
