@@ -17,8 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 244;
-
+plan tests => 246;
 
 $| = 1;
 
@@ -1135,3 +1134,22 @@ TERNARY_CONDITIONALS: {
     eval { local $0, eval '1' };
     test $@ eq '';
 }
+
+{
+    package AUTOLOAD_TAINT;
+    sub AUTOLOAD {
+        our $AUTOLOAD;
+        return if $AUTOLOAD =~ /DESTROY/;
+        if ($AUTOLOAD =~ /untainted/) {
+            main::ok(!main::tainted($AUTOLOAD), '$AUTOLOAD can be untainted');
+        } else {
+            main::ok(main::tainted($AUTOLOAD), '$AUTOLOAD can be tainted');
+        }
+    }
+
+    package main;
+    my $o = bless [], 'AUTOLOAD_TAINT';
+    $o->$TAINT;
+    $o->untainted;
+}
+

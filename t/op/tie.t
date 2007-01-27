@@ -547,3 +547,13 @@ tie $h, "main";
 print $h,"\n";
 EXPECT
 3.3
+########
+# Bug 37731
+sub foo::TIESCALAR { bless {value => $_[1]}, $_[0] }
+sub foo::FETCH { $_[0]->{value} }
+tie my $VAR, 'foo', '42';
+foreach my $var ($VAR) {
+    print +($var eq $VAR) ? "yes\n" : "no\n";
+}
+EXPECT
+yes
