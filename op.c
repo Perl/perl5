@@ -3433,8 +3433,8 @@ Perl_newPADOP(pTHX_ I32 type, I32 flags, SV *sv)
     padop->op_padix = pad_alloc(type, SVs_PADTMP);
     SvREFCNT_dec(PAD_SVl(padop->op_padix));
     PAD_SETSV(padop->op_padix, sv);
-    if (sv)
-	SvPADTMP_on(sv);
+    assert(sv);
+    SvPADTMP_on(sv);
     padop->op_next = (OP*)padop;
     padop->op_flags = (U8)flags;
     if (PL_opargs[type] & OA_RETSCALAR)
@@ -3449,9 +3449,9 @@ OP *
 Perl_newGVOP(pTHX_ I32 type, I32 flags, GV *gv)
 {
     dVAR;
+    assert(gv);
 #ifdef USE_ITHREADS
-    if (gv)
-	GvIN_PAD_on(gv);
+    GvIN_PAD_on(gv);
     return newPADOP(type, flags, SvREFCNT_inc_simple(gv));
 #else
     return newSVOP(type, flags, SvREFCNT_inc_simple(gv));

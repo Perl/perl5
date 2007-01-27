@@ -1552,7 +1552,8 @@ PERL_CALLCONV OP*	Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP* first, OP* last)
 #ifdef USE_ITHREADS
 PERL_CALLCONV OP*	Perl_newPADOP(pTHX_ I32 type, I32 flags, SV* sv)
 			__attribute__malloc__
-			__attribute__warn_unused_result__;
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_3);
 
 #endif
 PERL_CALLCONV OP*	Perl_newPMOP(pTHX_ I32 type, I32 flags)
