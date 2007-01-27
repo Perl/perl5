@@ -375,7 +375,7 @@ c4 = globals.c perlio.c perlapi.c numeric.c mathoms.c locale.c pp_pack.c pp_sort
 c = $(c1) $(c2) $(c3) $(c4) miniperlmain.c perlmain.c opmini.c
 
 obj1 = $(mallocobj) gv$(OBJ_EXT) toke$(OBJ_EXT) perly$(OBJ_EXT) op$(OBJ_EXT) pad$(OBJ_EXT) regcomp$(OBJ_EXT) dump$(OBJ_EXT) util$(OBJ_EXT) mg$(OBJ_EXT) reentr$(OBJ_EXT)
-obj2 = hv$(OBJ_EXT) av$(OBJ_EXT) run$(OBJ_EXT) pp_hot$(OBJ_EXT) sv$(OBJ_EXT) pp$(OBJ_EXT) scope$(OBJ_EXT) pp_ctl$(OBJ_EXT) pp_sys$(OBJ_EXT)
+obj2 = hv$(OBJ_EXT) av$(OBJ_EXT) perl$(OBJ_EXT) run$(OBJ_EXT) pp_hot$(OBJ_EXT) sv$(OBJ_EXT) pp$(OBJ_EXT) scope$(OBJ_EXT) pp_ctl$(OBJ_EXT) pp_sys$(OBJ_EXT)
 obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) utf8$(OBJ_EXT) taint$(OBJ_EXT) deb$(OBJ_EXT) universal$(OBJ_EXT) xsutils$(OBJ_EXT) globals$(OBJ_EXT) perlio$(OBJ_EXT) perlapi$(OBJ_EXT) numeric$(OBJ_EXT) mathoms$(OBJ_EXT) locale$(OBJ_EXT) pp_pack$(OBJ_EXT) pp_sort$(OBJ_EXT)
 
 obj = $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
@@ -397,19 +397,46 @@ lintflags = \
     -erroff=E_BAD_SIGN_EXTEND \
     -erroff=E_BLOCK_DECL_UNUSED \
     -erroff=E_CASE_FALLTHRU \
+    -erroff=E_CONST_EXPR \
     -erroff=E_CONSTANT_CONDITION \
+    -erroff=E_END_OF_LOOP_CODE_NOT_REACHED \
     -erroff=E_EQUALITY_NOT_ASSIGNMENT \
     -erroff=E_EXPR_NULL_EFFECT \
     -erroff=E_FALSE_LOGICAL_EXPR \
     -erroff=E_INCL_NUSD \
-    -erroff=E_INDISTING_FROM_TRUNC \
     -erroff=E_LOOP_EMPTY \
     -erroff=E_MAIN_PARAM \
     -erroff=E_POINTER_TO_OBJECT \
     -erroff=E_PTRDIFF_OVERFLOW \
     -erroff=E_SHIFT_CNT_NEG_TOO_BIG_L \
     -erroff=E_STATIC_UNUSED \
-    -erroff=E_TRUE_LOGICAL_EXPR \
+    -erroff=E_TRUE_LOGICAL_EXPR
+
+splintflags = \
+    -I/usr/lib/gcc/i486-linux-gnu/4.0.2/include/ \
+    -D__builtin_va_list=va_list \
+    -Dsigjmp_buf=jmp_buf \
+    -warnposix \
+    \
+    +boolint \
+    +charintliteral \
+    -fixedformalarray \
+    -mustfreefresh \
+    -nestedextern \
+    -predboolint \
+    -predboolothers \
+    -preproc \
+    -boolops \
+    -shadow \
+    -nullstate \
+    +longintegral \
+    +matchanyintegral \
+    -type \
+    \
+    +line-len 999 \
+    +weak
+
+splintfiles = $(c1)
 
 .c$(OBJ_EXT):
 	$(CCCMD) $(PLDLFLAGS) $*.c
@@ -515,9 +542,9 @@ CCDLFLAGS		= `echo $ccdlflags|sed -e 's@-bE:.*/perl\.exp@-bE:perl.exp@'`
 LIBPERL_NONSHR		= libperl_nonshr$(LIB_EXT)
 MINIPERL_NONSHR		= miniperl_nonshr$(EXE_EXT)
 
-$(LIBPERL_NONSHR): perl$(OBJ_EXT) $(obj)
+$(LIBPERL_NONSHR): $(obj)
 	$(RMS) $(LIBPERL_NONSHR)
-	$(AR) rcu $(LIBPERL_NONSHR) perl$(OBJ_EXT) $(obj)
+	$(AR) rcu $(LIBPERL_NONSHR) $(obj)
 
 $(MINIPERL_NONSHR): $(LIBPERL_NONSHR) miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT)
 	$(CC) $(LDFLAGS) -o $(MINIPERL_NONSHR) miniperlmain$(OBJ_EXT) \
@@ -550,7 +577,7 @@ os2)
 MINIPERLEXP		= miniperl
 
 perl5.def: $(MINIPERLEXP) makedef.pl config.sh $(SYM) $(SYMH) miniperl.map
-	./$(MINIPERLEXP) makedef.pl PLATFORM=os2 -DPERL_DLL=$(PERL_DLL) CC_FLAGS="$(OPTIMIZE)" > perl.exp
+	./$(MINIPERLEXP) makedef.pl PLATFORM=os2 -DPERL_DLL=$(PERL_DLL) CC_FLAGS="$(OPTIMIZE)" > perl5.def
 
 !NO!SUBS!
 	;;
@@ -564,12 +591,12 @@ Makefile: $Makefile_s
 !GROK!THIS!
 else
 	$spitshell >>Makefile <<'!NO!SUBS!'
-$(LIBPERL): $& perl$(OBJ_EXT) $(obj) $(LIBPERLEXPORT)
+$(LIBPERL): $& $(obj) $(LIBPERLEXPORT)
 !NO!SUBS!
 	case "$useshrplib" in
 	true)
 		$spitshell >>Makefile <<'!NO!SUBS!'
-	$(LD) -o $@ $(SHRPLDFLAGS) perl$(OBJ_EXT) $(obj) $(libs)
+	$(LD) -o $@ $(SHRPLDFLAGS) $(obj) $(libs)
 !NO!SUBS!
 		case "$osname" in
 		aix)
@@ -584,7 +611,7 @@ $(LIBPERL): $& perl$(OBJ_EXT) $(obj) $(LIBPERLEXPORT)
 	*)
 		$spitshell >>Makefile <<'!NO!SUBS!'
 	rm -f $(LIBPERL)
-	$(AR) rcu $(LIBPERL) perl$(OBJ_EXT) $(obj)
+	$(AR) rcu $(LIBPERL) $(obj)
 	@$(ranlib) $(LIBPERL)
 !NO!SUBS!
 		;;
@@ -606,18 +633,18 @@ $(LIBPERL): $& perl$(OBJ_EXT) $(obj) $(LIBPERLEXPORT)
 	case "${osname}${osvers}" in
 	aix*|beos*)
 		$spitshell >>Makefile <<'!NO!SUBS!'
-miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
+miniperl: $& miniperlmain$(OBJ_EXT) $(obj) opmini$(OBJ_EXT)
 	$(CC) -o miniperl $(CLDFLAGS) \
 	    `echo $(obj) | sed 's/ op$(OBJ_EXT) / /'` \
-	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) perl$(OBJ_EXT) $(libs)
+	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) $(libs)
 	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
 !NO!SUBS!
 		;;
 	next4*)
 		$spitshell >>Makefile <<'!NO!SUBS!'
-miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
+miniperl: $& miniperlmain$(OBJ_EXT) $(obj) opmini$(OBJ_EXT)
 	$(CC) -o miniperl `echo $(obj) | sed 's/ op$(OBJ_EXT) / /'` \
-	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) perl$(OBJ_EXT) $(libs)
+	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) $(libs)
 	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
 !NO!SUBS!
 		;;
@@ -685,8 +712,8 @@ perl.valgrind.config: config.sh
 
 perl.config.dashg:
 	@echo "Checking optimize='-g' in config.sh..."
-	@grep "^optimize="     config.sh
-	@egrep "^optimize='(-g|.*-g[1-3].*)'" config.sh >/dev/null || exit 1
+	@grep "^optimize=" config.sh
+	@egrep "^optimize='(.*-g.*)'" config.sh >/dev/null || exit 1
 
 perl.third.config: config.sh
 	@echo "To build perl.third you must Configure -Doptimize=-g -Uusemymalloc, checking..."
@@ -803,6 +830,7 @@ lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl$(EXE_EXT) minimod.pl $(CONFIGP
 	$(LDLIBPTH) ./miniperl minimod.pl > lib/ExtUtils/Miniperl.pm
 
 lib/re.pm: ext/re/re.pm
+	@-rm -f $@
 	cp ext/re/re.pm lib/re.pm
 
 $(plextract):	miniperl$(EXE_EXT) $(CONFIGPM) x2p/s2p
@@ -823,7 +851,7 @@ uni.data: miniperl$(EXE_EXT) $(CONFIGPM) lib/unicore/mktables
 	touch uni.data
 
 extra.pods: miniperl$(EXE_EXT)
-	-@test -f extra.pods && rm -f `cat extra.pods`
+	-@test ! -f extra.pods || rm -f `cat extra.pods`
 	-@rm -f extra.pods
 	-@for x in `grep -l '^=[a-z]' README.* | grep -v README.vms` ; do \
 	    nx=`echo $$x | sed -e "s/README\.//"`; \
@@ -836,13 +864,13 @@ extra.pods: miniperl$(EXE_EXT)
 	-@test -f pod/perl589delta.pod && cd pod && $(LNS) perl589delta.pod perldelta.pod && cd .. && echo "pod/perldelta.pod" >> extra.pods # See buildtoc
 
 extras.make: perl$(EXE_EXT)
-	-@test -s extras.lst && PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(LDLIBPTH) ./perl -Ilib -MCPAN -e '@ARGV&&make(@ARGV)' `cat extras.lst`
+	-@test ! -s extras.lst || PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(LDLIBPTH) ./perl -Ilib -MCPAN -e '@ARGV&&make(@ARGV)' `cat extras.lst`
 
 extras.test: perl$(EXE_EXT)
-	-@test -s extras.lst && PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(LDLIBPTH) ./perl -Ilib -MCPAN -e '@ARGV&&test(@ARGV)' `cat extras.lst`
+	-@test ! -s extras.lst || PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(LDLIBPTH) ./perl -Ilib -MCPAN -e '@ARGV&&test(@ARGV)' `cat extras.lst`
 
 extras.install: perl$(EXE_EXT)
-	-@test -s extras.lst && PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(LDLIBPTH) ./perl -Ilib -MCPAN -e '@ARGV&&install(@ARGV)' `cat extras.lst`
+	-@test ! -s extras.lst || PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(LDLIBPTH) ./perl -Ilib -MCPAN -e '@ARGV&&install(@ARGV)' `cat extras.lst`
 
 .PHONY: install install-strip install-all install-verbose install-silent \
 	no-install install.perl install.man install.html
@@ -1056,6 +1084,7 @@ _mopup:
 	-rm -f perlld cygwin.c ld2 libperl*.def libperl*.dll cygperl*.dll *.exe.stackdump
 	-rm -f perl$(EXE_EXT) suidperl$(EXE_EXT) miniperl$(EXE_EXT) $(LIBPERL) libperl.* microperl
 	-rm -f opcode.h-old opnames.h-old pp.sym-old pp_proto.h-old
+	-rm -f config.over
 
 # Do not 'make _tidy' directly.
 _tidy:
@@ -1114,6 +1143,10 @@ _verycleaner:
 lint: $(c)
 	rm -f *.ln
 	lint $(lintflags) -DPERL_CORE -D_REENTRANT -DDEBUGGING -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 $(c)
+
+.PHONY: splint
+splint: $(c)
+	splint $(splintflags) -DPERL_CORE -D_REENTRANT -DDEBUGGING -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 $(splintfiles)
 
 # Need to unset during recursion to go out of loop.
 # The README below ensures that the dependency list is never empty and
@@ -1355,7 +1388,7 @@ tags:	TAGS
 	perl emacs/e2ctags.pl TAGS > tags
 
 ctags:
-	ctags -f Tags -N --totals --languages=c --langmap=c:+.h *.c *.h
+	ctags -f Tags -N --totals --languages=c --langmap=c:+.h --exclude=opmini.c *.c *.h
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 # If this runs make out of memory, delete /usr/include lines.
