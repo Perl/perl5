@@ -106,6 +106,13 @@ use File::Spec;
 
 $VERSION = "1.48";
 
+
+# needed for VMS-specific filename translation
+if( $^O eq 'VMS' ) {
+    require VMS::Filespec;
+    VMS::Filespec->import;
+}
+
 sub cwd2 {
    my $cwd = getcwd();
    # getcwd might fail if it hasn't access to the current directory.
@@ -124,6 +131,7 @@ sub init
    # perl invoked with -e or script is on C<STDIN>
    $Script = $RealScript = $0;
    $Bin    = $RealBin    = cwd2();
+   $Bin = VMS::Filespec::unixify($Bin) if $^O eq 'VMS';
   }
  else
   {
@@ -131,7 +139,9 @@ sub init
 
    if ($^O eq 'VMS')
     {
-     ($Bin,$Script) = VMS::Filespec::rmsexpand($0) =~ /(.*\])(.*)/s;
+     ($Bin,$Script) = VMS::Filespec::rmsexpand($0) =~ /(.*[\]>]+)(.*)/s;
+     # C<use disk:[dev]/lib> isn't going to work, so unixify first
+     ($Bin = VMS::Filespec::unixify($Bin)) =~ s/\/\z//;
      ($RealBin,$RealScript) = ($Bin,$Script);
     }
    else
