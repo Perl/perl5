@@ -1086,7 +1086,7 @@ B::SV
 COP_warnings(o)
 	B::COP	o
 
-B::SV
+void
 COP_io(o)
 	B::COP	o
 

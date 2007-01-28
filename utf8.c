@@ -1721,6 +1721,7 @@ Perl_swash_fetch(pTHX_ SV *swash, U8 *ptr, bool do_utf8)
 	return (tmps[off] << 24) + (tmps[off+1] << 16) + (tmps[off+2] << 8) + tmps[off + 3] ;
     }
     Perl_croak(aTHX_ "panic: swash_fetch got swatch of unexpected bit width");
+    NORETURN_FUNCTION_END;
 }
 
 /* Note:

@@ -2200,7 +2200,7 @@ Perl_fold_constants(pTHX_ register OP *o)
     assert(sv);
     if (type == OP_RV2GV)
 	return newGVOP(OP_GV, 0, (GV*)sv);
-    return newSVOP(OP_CONST, 0, sv);
+    return newSVOP(OP_CONST, 0, (SV*)sv);
 
  nope:
     return o;
