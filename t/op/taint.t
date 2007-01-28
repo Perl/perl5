@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 246;
+plan tests => 249;
 
 $| = 1;
 
@@ -44,6 +44,7 @@ my $Is_MSWin32  = $^O eq 'MSWin32';
 my $Is_NetWare  = $^O eq 'NetWare';
 my $Is_Dos      = $^O eq 'dos';
 my $Is_Cygwin   = $^O eq 'cygwin';
+my $Is_OpenBSD  = $^O eq 'openbsd';
 my $Invoke_Perl = $Is_VMS      ? 'MCR Sys$Disk:[]Perl.' :
                   $Is_MSWin32  ? '.\perl'               :
                   $Is_MacOS    ? ':perl'                :
@@ -1153,3 +1154,33 @@ TERNARY_CONDITIONALS: {
     $o->untainted;
 }
 
+
+# opening '|-' should not trigger $ENV{PATH} check
+
+{
+    SKIP: {
+	skip "fork() is not available", 3 unless $Config{'d_fork'};
+	skip "opening |- is not stable on threaded OpenBSD with taint", 3
+            if $Config{useithreads} && $Is_OpenBSD;
+
+	$ENV{'PATH'} = $TAINT;
+	local $SIG{'PIPE'} = 'IGNORE';
+	eval {
+	    my $pid = open my $pipe, '|-';
+	    if (!defined $pid) {
+		die "open failed: $!";
+	    }
+	    if (!$pid) {
+		kill 'KILL', $$;	# child suicide
+	    }
+	    close $pipe;
+	};
+	test $@ !~ /Insecure \$ENV/, 'fork triggers %ENV check';
+	test $@ eq '',               'pipe/fork/open/close failed';
+	eval {
+	    open my $pipe, "|$Invoke_Perl -e 1";
+	    close $pipe;
+	};
+	test $@ =~ /Insecure \$ENV/, 'popen neglects %ENV check';
+    }
+}
