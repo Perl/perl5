@@ -10673,7 +10673,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    break;
 	case SAVEt_PARSER:
 	    ptr = POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = parser_dup(ptr, param);
+	    TOPPTR(nss,ix) = parser_dup((const yy_parser*)ptr, param);
 	    break;
 	default:
 	    Perl_croak(aTHX_
