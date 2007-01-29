@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }   
 
-plan tests => 280;
+plan tests => 1292;
 
 is(
     sprintf("%.40g ",0.01),
@@ -26,6 +26,15 @@ for my $i (1, 5, 10, 20, 50, 100) {
     my $expect = $string."  "x$i;  # followed by 2*$i spaces
     is(sprintf($utf8_format, 3*$i, $string), $expect,
        "width calculation under utf8 upgrade, length=$i");
+}
+
+# check simultaneous width & precision with wide characters
+for my $i (1, 3, 5, 10) {
+    my $string = "\x{0410}"x($i+10);   # cyrillic capital A
+    my $expect = "\x{0410}"x$i;        # cut down to exactly $i characters
+    my $format = "%$i.${i}s";
+    is(sprintf($format, $string), $expect,
+       "width & precision interplay with utf8 strings, length=$i");
 }
 
 # Used to mangle PL_sv_undef
@@ -77,3 +86,52 @@ for (int(~0/2+1), ~0, "9999999999999999999") {
 	is ($bad, 0, "pattern '%v' . chr $ord");
     }
 }
+
+sub mysprintf_int_flags {
+    my ($fmt, $num) = @_;
+    die "wrong format $fmt" if $fmt !~ /^%([-+ 0]+)([1-9][0-9]*)d\z/;
+    my $flag  = $1;
+    my $width = $2;
+    my $sign  = $num < 0 ? '-' :
+		$flag =~ /\+/ ? '+' :
+		$flag =~ /\ / ? ' ' :
+		'';
+    my $abs   = abs($num);
+    my $padlen = $width - length($sign.$abs);
+    return
+	$flag =~ /0/ && $flag !~ /-/ # do zero padding
+	    ? $sign . '0' x $padlen . $abs
+	    : $flag =~ /-/ # left or right
+		? $sign . $abs . ' ' x $padlen
+		: ' ' x $padlen . $sign . $abs;
+}
+
+# Whole tests for "%4d" with 2 to 4 flags;
+# total counts: 3 * (4**2 + 4**3 + 4**4) == 1008
+
+my @flags = ("-", "+", " ", "0");
+for my $num (0, -1, 1) {
+    for my $f1 (@flags) {
+	for my $f2 (@flags) {
+	    for my $f3 ('', @flags) { # '' for doubled flags
+		my $flag = $f1.$f2.$f3;
+		my $width = 4;
+		my $fmt   = '%'."${flag}${width}d";
+		my $result = sprintf($fmt, $num);
+		my $expect = mysprintf_int_flags($fmt, $num);
+		is($result, $expect, qq/sprintf("$fmt",$num)/);
+
+	        next if $f3 eq '';
+
+		for my $f4 (@flags) { # quadrupled flags
+		    my $flag = $f1.$f2.$f3.$f4;
+		    my $fmt   = '%'."${flag}${width}d";
+		    my $result = sprintf($fmt, $num);
+		    my $expect = mysprintf_int_flags($fmt, $num);
+		    is($result, $expect, qq/sprintf("$fmt",$num)/);
+		}
+	    }
+	}
+    }
+}
+

@@ -3891,7 +3891,7 @@ EXTCONST char PL_no_aelem[]
 EXTCONST char PL_no_helem[]
   INIT("Modification of non-creatable hash value attempted, subscript \"%s\"");
 EXTCONST char PL_no_helem_sv[]
-  INIT("Modification of non-creatable hash value attempted, subscript \""SVf"\"");
+  INIT("Modification of non-creatable hash value attempted, subscript \"%"SVf"\"");
 EXTCONST char PL_no_modify[]
   INIT("Modification of a read-only value attempted");
 EXTCONST char PL_no_mem[]

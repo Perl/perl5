@@ -1425,11 +1425,13 @@ Perl_do_exec3(pTHX_ char *incmd, int fd, int do_report)
 {
     register char **a;
     register char *s;
+    char *buf;
     char *cmd;
 
     /* Make a copy so we can change it */
     const Size_t cmdlen = strlen(incmd) + 1;
-    Newx(cmd, cmdlen, char);
+    Newx(buf, cmdlen, char);
+    cmd = buf;
     my_strlcpy(cmd, incmd, cmdlen);
 
     while (*cmd && isSPACE(*cmd))
@@ -1464,7 +1466,7 @@ Perl_do_exec3(pTHX_ char *incmd, int fd, int do_report)
 		  PERL_FPU_POST_EXEC
 		  *s = '\'';
  		  S_exec_failed(aTHX_ PL_cshname, fd, do_report);
-		  Safefree(cmd);
+		  Safefree(buf);
 		  return FALSE;
 	      }
 	  }
@@ -1512,7 +1514,7 @@ Perl_do_exec3(pTHX_ char *incmd, int fd, int do_report)
 	    PerlProc_execl(PL_sh_path, "sh", "-c", cmd, (char *)NULL);
 	    PERL_FPU_POST_EXEC
  	    S_exec_failed(aTHX_ PL_sh_path, fd, do_report);
-	    Safefree(cmd);
+	    Safefree(buf);
 	    return FALSE;
 	}
     }
@@ -1542,7 +1544,7 @@ Perl_do_exec3(pTHX_ char *incmd, int fd, int do_report)
  	S_exec_failed(aTHX_ PL_Argv[0], fd, do_report);
     }
     do_execfree();
-    Safefree(cmd);
+    Safefree(buf);
     return FALSE;
 }
 
