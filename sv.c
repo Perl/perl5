@@ -1534,8 +1534,6 @@ Like C<sv_setuv>, but also handles 'set' magic.
 void
 Perl_sv_setuv_mg(pTHX_ register SV *sv, UV u)
 {
-    sv_setiv(sv, 0);
-    SvIsUV_on(sv);
     sv_setuv(sv,u);
     SvSETMAGIC(sv);
 }
@@ -2089,7 +2087,11 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
 {
     if (!sv)
 	return 0;
-    if (SvGMAGICAL(sv)) {
+    if (SvGMAGICAL(sv) || SvTYPE(sv) == SVt_PVBM) {
+	/* PVBMs use the same flag bit as SVf_IVisUV, so must let them
+	   cache IVs just in case. In practice it seems that they never
+	   actually anywhere accessible by user Perl code, let alone get used
+	   in anything other than a string context.  */
 	if (flags & SV_GMAGIC)
 	    mg_get(sv);
 	if (SvIOKp(sv))
@@ -2168,7 +2170,9 @@ Perl_sv_2uv_flags(pTHX_ register SV *sv, I32 flags)
 {
     if (!sv)
 	return 0;
-    if (SvGMAGICAL(sv)) {
+    if (SvGMAGICAL(sv) || SvTYPE(sv) == SVt_PVBM) {
+	/* PVBMs use the same flag bit as SVf_IVisUV, so must let them
+	   cache IVs just in case.  */
 	if (flags & SV_GMAGIC)
 	    mg_get(sv);
 	if (SvIOKp(sv))
@@ -2242,7 +2246,9 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 {
     if (!sv)
 	return 0.0;
-    if (SvGMAGICAL(sv)) {
+    if (SvGMAGICAL(sv) || SvTYPE(sv) == SVt_PVBM) {
+	/* PVBMs use the same flag bit as SVf_IVisUV, so must let them
+	   cache IVs just in case.  */
 	mg_get(sv);
 	if (SvNOKp(sv))
 	    return SvNVX(sv);
@@ -2729,7 +2735,6 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
     if (SvIOK(sv) || ((SvIOKp(sv) && !SvNOKp(sv)))) {
 	/* I'm assuming that if both IV and NV are equally valid then
 	   converting the IV is going to be more efficient */
-	const U32 isIOK = SvIOK(sv);
 	const U32 isUIOK = SvIsUV(sv);
 	char buf[TYPE_CHARS(UV)];
 	char *ebuf, *ptr;
@@ -2743,12 +2748,6 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	SvCUR_set(sv, ebuf - ptr);
 	s = SvEND(sv);
 	*s = '\0';
-	if (isIOK)
-	    SvIOK_on(sv);
-	else
-	    SvIOKp_on(sv);
-	if (isUIOK)
-	    SvIsUV_on(sv);
     }
     else if (SvNOKp(sv)) {
 	const int olderrno = errno;

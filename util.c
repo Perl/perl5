@@ -489,6 +489,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
     if (len == 0)		/* TAIL might be on a zero-length string. */
 	return;
     (void)SvUPGRADE(sv, SVt_PVBM);
+    SvIOK_off(sv);
     if (len > 2) {
 	const unsigned char *sb;
 	const U8 mlen = (len>255) ? 255 : (U8)len;
@@ -676,12 +677,14 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	return b;
     }
 
-    {	/* Do actual FBM.  */
+    /* Do actual FBM.  */
+    if (littlelen > (STRLEN)(bigend - big))
+	return NULL;
+
+    {
 	register const unsigned char * const table = little + littlelen + FBM_TABLE_OFFSET;
 	register const unsigned char *oldlittle;
 
-	if (littlelen > (STRLEN)(bigend - big))
-	    return NULL;
 	--littlelen;			/* Last char found by table lookup */
 
 	s = big + littlelen;
