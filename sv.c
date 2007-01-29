@@ -2669,11 +2669,10 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		    const char *buffer_end;
 
 		    if (SvOBJECT(referent)) {
-			const char *const name = HvNAME_get(SvSTASH(referent));
+			stashname = HvNAME_get(SvSTASH(referent));
 
-			if (name) {
-			    stashnamelen = strlen(name);
-
+			if (stashname) {
+			    stashnamelen = strlen(stashname);
 			    SvUTF8_off(sv);
 			} else {
 			    stashname = "__ANON__";
