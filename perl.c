@@ -321,8 +321,8 @@ perl_construct(pTHXx)
     sv_setpvn(PERL_DEBUG_PAD(1), "", 0);	/* ext/re needs these */
     sv_setpvn(PERL_DEBUG_PAD(2), "", 0);	/* even without DEBUGGING. */
 #ifdef USE_ITHREADS
-    PL_regex_padav = newAV();
-    av_push(PL_regex_padav,(SV*)newAV());    /* First entry is an array of empty elements */
+    /* First entry is an array of empty elements */
+    Perl_av_create_and_push(aTHX_ &PL_regex_padav,(SV*)newAV());
     PL_regex_pad = AvARRAY(PL_regex_padav);
 #endif
 #ifdef USE_REENTRANT_API
@@ -1796,10 +1796,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    {
 		SV *opts_prog;
 
-		if (!PL_preambleav)
-		    PL_preambleav = newAV();
-		av_push(PL_preambleav,
-			newSVpvs("use Config;"));
+		Perl_av_create_and_push(aTHX_ &PL_preambleav, newSVpvs("use Config;"));
 		if (*++s != ':')  {
 		    STRLEN opts;
 		
@@ -2060,10 +2057,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 
 #ifdef USE_SITECUSTOMIZE
     if (!minus_f) {
-	if (!PL_preambleav)
-	    PL_preambleav = newAV();
-	av_unshift(PL_preambleav, 1);
-	(void)av_store(PL_preambleav, 0, Perl_newSVpvf(aTHX_ "BEGIN { do '%s/sitecustomize.pl' }", SITELIB_EXP));
+	(void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
+					     Perl_newSVpvf(aTHX_ "BEGIN { do '%s/sitecustomize.pl' }", SITELIB_EXP));
     }
 #endif
 
@@ -3182,8 +3177,6 @@ Perl_moreswitches(pTHX_ char *s)
 	return s;
     case 'A':
 	forbid_setid('A', -1);
-	if (!PL_preambleav)
-	    PL_preambleav = newAV();
 	s++;
 	{
 	    char * const start = s;
@@ -3200,7 +3193,7 @@ Perl_moreswitches(pTHX_ char *s)
 	    else if (*s != '\0') {
 		Perl_croak(aTHX_ "Can't use '%c' after -A%.*s", *s, (int)(s-start), start);
 	    }
-	    av_push(PL_preambleav, sv);
+	    Perl_av_create_and_push(aTHX_ &PL_preambleav, sv);
 	    return s;
 	}
     case 'M':
@@ -3238,9 +3231,7 @@ Perl_moreswitches(pTHX_ char *s)
 		sv_catpvs(sv,  "\0)");
 	    }
 	    s += strlen(s);
-	    if (!PL_preambleav)
-		PL_preambleav = newAV();
-	    av_push(PL_preambleav, sv);
+	    Perl_av_create_and_push(aTHX_ &PL_preambleav, sv);
 	}
 	else
 	    Perl_croak(aTHX_ "Missing argument to -%c", *(s-1));
@@ -5134,21 +5125,15 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	if (PL_savebegin) {
 	    if (paramList == PL_beginav) {
 		/* save PL_beginav for compiler */
-		if (! PL_beginav_save)
-		    PL_beginav_save = newAV();
-		av_push(PL_beginav_save, (SV*)cv);
+		Perl_av_create_and_push(aTHX_ &PL_beginav_save, (SV*)cv);
 	    }
 	    else if (paramList == PL_checkav) {
 		/* save PL_checkav for compiler */
-		if (! PL_checkav_save)
-		    PL_checkav_save = newAV();
-		av_push(PL_checkav_save, (SV*)cv);
+		Perl_av_create_and_push(aTHX_ &PL_checkav_save, (SV*)cv);
 	    }
 	    else if (paramList == PL_unitcheckav) {
 		/* save PL_unitcheckav for compiler */
-		if (! PL_unitcheckav_save)
-		    PL_unitcheckav_save = newAV();
-		av_push(PL_unitcheckav_save, (SV*)cv);
+		Perl_av_create_and_push(aTHX_ &PL_unitcheckav_save, (SV*)cv);
 	    }
 	} else {
 	    if (!PL_madskills)

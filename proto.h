@@ -158,6 +158,10 @@ PERL_CALLCONV AV*	Perl_av_make(pTHX_ I32 size, SV** svp)
 PERL_CALLCONV SV*	Perl_av_pop(pTHX_ AV* ar)
 			__attribute__nonnull__(pTHX_1);
 
+PERL_CALLCONV void	Perl_av_create_and_push(pTHX_ AV **const avp, SV *const val)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
 PERL_CALLCONV void	Perl_av_push(pTHX_ AV* ar, SV* val)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
@@ -174,6 +178,10 @@ PERL_CALLCONV SV**	Perl_av_store(pTHX_ AV* ar, I32 key, SV* val)
 
 PERL_CALLCONV void	Perl_av_undef(pTHX_ AV* ar)
 			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV SV**	Perl_av_create_and_unshift_one(pTHX_ AV **const avp, SV *const val)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
 
 PERL_CALLCONV void	Perl_av_unshift(pTHX_ AV* ar, I32 num)
 			__attribute__nonnull__(pTHX_1);

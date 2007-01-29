@@ -106,11 +106,13 @@ Apd	|void	|av_fill	|NN AV* ar|I32 fill
 ApdR	|I32	|av_len		|NN const AV* ar
 ApdR	|AV*	|av_make	|I32 size|NN SV** svp
 Apd	|SV*	|av_pop		|NN AV* ar
+ApdoxM	|void	|av_create_and_push|NN AV **const avp|NN SV *const val
 Apd	|void	|av_push	|NN AV* ar|NN SV* val
 p	|void	|av_reify	|NN AV* ar
 ApdR	|SV*	|av_shift	|NN AV* ar
 Apd	|SV**	|av_store	|NN AV* ar|I32 key|NULLOK SV* val
 Apd	|void	|av_undef	|NN AV* ar
+ApdoxM	|SV**	|av_create_and_unshift_one|NN AV **const avp|NN SV *const val
 Apd	|void	|av_unshift	|NN AV* ar|I32 num
 Apo	|SV**	|av_arylen_p	|NN AV* av
 pR	|OP*	|bind_match	|I32 type|NN OP* left|NN OP* pat

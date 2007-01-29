@@ -710,10 +710,9 @@ Perl_nextargv(pTHX_ register GV *gv)
     if (io && (IoFLAGS(io) & IOf_ARGV) && (IoFLAGS(io) & IOf_START)) {
 	IoFLAGS(io) &= ~IOf_START;
 	if (PL_inplace) {
-	    if (!PL_argvout_stack)
-		PL_argvout_stack = newAV();
 	    assert(PL_defoutgv);
-	    av_push(PL_argvout_stack, SvREFCNT_inc_simple_NN(PL_defoutgv));
+	    Perl_av_create_and_push(aTHX_ &PL_argvout_stack,
+				    SvREFCNT_inc_simple_NN(PL_defoutgv));
 	}
     }
     if (PL_filemode & (S_ISUID|S_ISGID)) {

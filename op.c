@@ -5410,10 +5410,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    SAVECOPFILE(&PL_compiling);
 	    SAVECOPLINE(&PL_compiling);
 
-	    if (!PL_beginav)
-		PL_beginav = newAV();
 	    DEBUG_x( dump_sub(gv) );
-	    av_push(PL_beginav, (SV*)cv);
+	    Perl_av_create_and_push(aTHX_ &PL_beginav, (SV*)cv);
 	    GvCV(gv) = 0;		/* cv has been hijacked */
 	    call_list(oldscope, PL_beginav);
 
@@ -5422,39 +5420,28 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    LEAVE;
 	}
 	else if (strEQ(s, "END") && !PL_error_count) {
-	    if (!PL_endav)
-		PL_endav = newAV();
 	    DEBUG_x( dump_sub(gv) );
-	    av_unshift(PL_endav, 1);
-	    av_store(PL_endav, 0, (SV*)cv);
+	    Perl_av_create_and_unshift_one(aTHX_ &PL_endav, (SV*)cv);
 	    GvCV(gv) = 0;		/* cv has been hijacked */
 	}
 	else if (strEQ(s, "UNITCHECK") && !PL_error_count) {
 	    /* It's never too late to run a unitcheck block */
-	    if (!PL_unitcheckav)
-		PL_unitcheckav = newAV();
 	    DEBUG_x( dump_sub(gv) );
-	    av_unshift(PL_unitcheckav, 1);
-	    av_store(PL_unitcheckav, 0, (SV*)cv);
+	    Perl_av_create_and_unshift_one(aTHX_ &PL_unitcheckav, (SV*)cv);
 	    GvCV(gv) = 0;		/* cv has been hijacked */
 	}
 	else if (strEQ(s, "CHECK") && !PL_error_count) {
-	    if (!PL_checkav)
-		PL_checkav = newAV();
 	    DEBUG_x( dump_sub(gv) );
 	    if (PL_main_start && ckWARN(WARN_VOID))
 		Perl_warner(aTHX_ packWARN(WARN_VOID), "Too late to run CHECK block");
-	    av_unshift(PL_checkav, 1);
-	    av_store(PL_checkav, 0, (SV*)cv);
+	    Perl_av_create_and_unshift_one(aTHX_ &PL_checkav, (SV*)cv);
 	    GvCV(gv) = 0;		/* cv has been hijacked */
 	}
 	else if (strEQ(s, "INIT") && !PL_error_count) {
-	    if (!PL_initav)
-		PL_initav = newAV();
 	    DEBUG_x( dump_sub(gv) );
 	    if (PL_main_start && ckWARN(WARN_VOID))
 		Perl_warner(aTHX_ packWARN(WARN_VOID), "Too late to run INIT block");
-	    av_push(PL_initav, (SV*)cv);
+	    Perl_av_create_and_push(aTHX_ &PL_initav, (SV*)cv);
 	    GvCV(gv) = 0;		/* cv has been hijacked */
 	}
     }
@@ -5651,33 +5638,23 @@ Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
 	    goto done;
 
 	if (strEQ(s, "BEGIN")) {
-	    if (!PL_beginav)
-		PL_beginav = newAV();
-	    av_push(PL_beginav, (SV*)cv);
+	    Perl_av_create_and_push(aTHX_ &PL_beginav, (SV*)cv);
 	    GvCV(gv) = 0;		/* cv has been hijacked */
 	}
 	else if (strEQ(s, "END")) {
-	    if (!PL_endav)
-		PL_endav = newAV();
-	    av_unshift(PL_endav, 1);
-	    av_store(PL_endav, 0, (SV*)cv);
+	    Perl_av_create_and_unshift_one(aTHX_ &PL_endav, (SV*)cv);
 	    GvCV(gv) = 0;		/* cv has been hijacked */
 	}
 	else if (strEQ(s, "CHECK")) {
-	    if (!PL_checkav)
-		PL_checkav = newAV();
 	    if (PL_main_start && ckWARN(WARN_VOID))
 		Perl_warner(aTHX_ packWARN(WARN_VOID), "Too late to run CHECK block");
-	    av_unshift(PL_checkav, 1);
-	    av_store(PL_checkav, 0, (SV*)cv);
+	    Perl_av_create_and_unshift_one(aTHX_ &PL_checkav, (SV*)cv);
 	    GvCV(gv) = 0;		/* cv has been hijacked */
 	}
 	else if (strEQ(s, "INIT")) {
-	    if (!PL_initav)
-		PL_initav = newAV();
 	    if (PL_main_start && ckWARN(WARN_VOID))
 		Perl_warner(aTHX_ packWARN(WARN_VOID), "Too late to run INIT block");
-	    av_push(PL_initav, (SV*)cv);
+	    Perl_av_create_and_push(aTHX_ &PL_initav, (SV*)cv);
 	    GvCV(gv) = 0;		/* cv has been hijacked */
 	}
     }

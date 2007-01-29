@@ -487,6 +487,24 @@ Perl_av_undef(pTHX_ register AV *av)
 }
 
 /*
+
+=for apidoc av_create_and_push
+
+Push an SV onto the end of the array, creating the array if necessary.
+A small internal helper function to remove a commonly duplicated idiom.
+
+=cut
+*/
+
+void
+Perl_av_create_and_push(pTHX_ AV **const avp, SV *const val)
+{
+    if (!*avp)
+	*avp = newAV();
+    av_push(*avp, val);
+}
+
+/*
 =for apidoc av_push
 
 Pushes an SV onto the end of the array.  The array will grow automatically
@@ -565,6 +583,26 @@ Perl_av_pop(pTHX_ register AV *av)
     if (SvSMAGICAL(av))
 	mg_set((SV*)av);
     return retval;
+}
+
+/*
+
+=for apidoc av_create_and_unshift_one
+
+Unshifts an SV onto the beginning of the array, creating the array if
+necessary.
+A small internal helper function to remove a commonly duplicated idiom.
+
+=cut
+*/
+
+SV **
+Perl_av_create_and_unshift_one(pTHX_ AV **const avp, SV *const val)
+{
+    if (!*avp)
+	*avp = newAV();
+    av_unshift(*avp, 1);
+    return av_store(*avp, 0, val);
 }
 
 /*
