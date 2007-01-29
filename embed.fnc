@@ -279,6 +279,7 @@ p	|OP*	|gen_constant_list|NULLOK OP* o
 #if !defined(HAS_GETENV_LEN)
 p	|char*	|getenv_len	|NN const char* key|NN unsigned long *len
 #endif
+pox	|void	|get_db_sub	|NULLOK SV **svp|NN CV *cv
 Ap	|void	|gp_free	|NULLOK GV* gv
 Ap	|GP*	|gp_ref		|NULLOK GP* gp
 Ap	|GV*	|gv_AVadd	|NN GV* gv
@@ -1220,7 +1221,6 @@ sR	|I32	|run_user_filter|int idx|NN SV *buf_sv|int maxlen
 s	|int	|do_maybe_phash	|NN AV *ary|NN SV **lelem|NN SV **firstlelem \
 				|NN SV **relem|NN SV **lastrelem
 s	|void	|do_oddball	|NN HV *hash|NN SV **relem|NN SV **firstrelem
-sR	|CV*	|get_db_sub	|NN SV **svp|NN CV *cv
 sR	|SV*	|method_common	|NN SV* meth|NULLOK U32* hashp
 #endif
 
@@ -1369,6 +1369,8 @@ sR	|char*	|scan_subst	|NN char *start
 sR	|char*	|scan_trans	|NN char *start
 s	|char*	|scan_word	|NN char *s|NN char *dest|STRLEN destlen \
 				|int allow_package|NN STRLEN *slp
+s	|void	|update_debugger_info|NULLOK SV *orig_sv \
+				|NULLOK const char *buf|STRLEN len
 sR	|char*	|skipspace	|NN char *s
 sR	|char*	|swallow_bom	|NN U8 *s
 s	|void	|checkcomma	|NN const char *s|NN const char *name \

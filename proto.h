@@ -354,6 +354,8 @@ PERL_CALLCONV OP*	Perl_gen_constant_list(pTHX_ OP* o);
 #if !defined(HAS_GETENV_LEN)
 PERL_CALLCONV char*	Perl_getenv_len(pTHX_ const char* key, unsigned long *len);
 #endif
+PERL_CALLCONV void	Perl_get_db_sub(pTHX_ SV **svp, CV *cv);
+
 PERL_CALLCONV void	Perl_gp_free(pTHX_ GV* gv);
 PERL_CALLCONV GP*	Perl_gp_ref(pTHX_ GP* gp);
 PERL_CALLCONV GV*	Perl_gv_AVadd(pTHX_ GV* gv);
@@ -1780,9 +1782,6 @@ STATIC I32	S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
 STATIC int	S_do_maybe_phash(pTHX_ AV *ary, SV **lelem, SV **firstlelem, SV **relem, SV **lastrelem);
 STATIC void	S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem);
-STATIC CV*	S_get_db_sub(pTHX_ SV **svp, CV *cv)
-			__attribute__warn_unused_result__;
-
 STATIC SV*	S_method_common(pTHX_ SV* meth, U32* hashp)
 			__attribute__warn_unused_result__;
 
@@ -1965,6 +1964,7 @@ STATIC char*	S_scan_trans(pTHX_ char *start)
 			__attribute__warn_unused_result__;
 
 STATIC char*	S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp);
+STATIC void	S_update_debugger_info(pTHX_ SV *orig_sv, const char *buf, STRLEN len);
 STATIC char*	S_skipspace(pTHX_ char *s)
 			__attribute__warn_unused_result__;
 

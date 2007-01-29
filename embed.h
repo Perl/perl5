@@ -1229,7 +1229,6 @@
 #ifdef PERL_CORE
 #define do_maybe_phash		S_do_maybe_phash
 #define do_oddball		S_do_oddball
-#define get_db_sub		S_get_db_sub
 #define method_common		S_method_common
 #endif
 #endif
@@ -1393,6 +1392,7 @@
 #define scan_subst		S_scan_subst
 #define scan_trans		S_scan_trans
 #define scan_word		S_scan_word
+#define update_debugger_info	S_update_debugger_info
 #define skipspace		S_skipspace
 #define swallow_bom		S_swallow_bom
 #define checkcomma		S_checkcomma
@@ -2373,6 +2373,8 @@
 #define getenv_len(a,b)		Perl_getenv_len(aTHX_ a,b)
 #endif
 #endif
+#ifdef PERL_CORE
+#endif
 #define gp_free(a)		Perl_gp_free(aTHX_ a)
 #define gp_ref(a)		Perl_gp_ref(aTHX_ a)
 #define gv_AVadd(a)		Perl_gv_AVadd(aTHX_ a)
@@ -3324,7 +3326,6 @@
 #ifdef PERL_CORE
 #define do_maybe_phash(a,b,c,d,e)	S_do_maybe_phash(aTHX_ a,b,c,d,e)
 #define do_oddball(a,b,c)	S_do_oddball(aTHX_ a,b,c)
-#define get_db_sub(a,b)		S_get_db_sub(aTHX_ a,b)
 #define method_common(a,b)	S_method_common(aTHX_ a,b)
 #endif
 #endif
@@ -3487,6 +3488,7 @@
 #define scan_subst(a)		S_scan_subst(aTHX_ a)
 #define scan_trans(a)		S_scan_trans(aTHX_ a)
 #define scan_word(a,b,c,d,e)	S_scan_word(aTHX_ a,b,c,d,e)
+#define update_debugger_info(a,b,c)	S_update_debugger_info(aTHX_ a,b,c)
 #define skipspace(a)		S_skipspace(aTHX_ a)
 #define swallow_bom(a)		S_swallow_bom(aTHX_ a)
 #define checkcomma(a,b,c)	S_checkcomma(aTHX_ a,b,c)

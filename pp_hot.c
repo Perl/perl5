@@ -2614,44 +2614,6 @@ PP(pp_leavesublv)
     return pop_return();
 }
 
-
-STATIC CV *
-S_get_db_sub(pTHX_ SV **svp, CV *cv)
-{
-    SV * const dbsv = GvSVn(PL_DBsub);
-
-    save_item(dbsv);
-    if (!PERLDB_SUB_NN) {
-	GV * const gv = CvGV(cv);
-
-	if ( (CvFLAGS(cv) & (CVf_ANON | CVf_CLONED))
-	     || strEQ(GvNAME(gv), "END")
-	     || ((GvCV(gv) != cv) && /* Could be imported, and old sub redefined. */
-		 !( (SvTYPE(*svp) == SVt_PVGV) && (GvCV((GV*)*svp) == cv) ))) {
-	    /* Use GV from the stack as a fallback. */
-	    /* GV is potentially non-unique, or contain different CV. */
-	    SV * const tmp = newRV((SV*)cv);
-	    sv_setsv(dbsv, tmp);
-	    SvREFCNT_dec(tmp);
-	}
-	else {
-	    gv_efullname3(dbsv, gv, NULL);
-	}
-    }
-    else {
-	const int type = SvTYPE(dbsv);
-	if (type < SVt_PVIV && type != SVt_IV)
-	    sv_upgrade(dbsv, SVt_PVIV);
-	(void)SvIOK_on(dbsv);
-	SvIV_set(dbsv, PTR2IV(cv));	/* Do it the quickest way  */
-    }
-
-    if (CvISXSUB(cv))
-	PL_curcopdb = PL_curcop;
-    cv = GvCV(PL_DBsub);
-    return cv;
-}
-
 PP(pp_entersub)
 {
     dSP; dPOPss;
@@ -2756,7 +2718,11 @@ try_autoload:
 
     gimme = GIMME_V;
     if ((PL_op->op_private & OPpENTERSUB_DB) && GvCV(PL_DBsub) && !CvNODEBUG(cv)) {
-	cv = get_db_sub(&sv, cv);
+	 Perl_get_db_sub(aTHX_ &sv, cv);
+	 if (CvISXSUB(cv))
+	     PL_curcopdb = PL_curcop;
+	 cv = GvCV(PL_DBsub);
+
 	if (!cv || (!CvXSUB(cv) && !CvSTART(cv)))
 	    DIE(aTHX_ "No DB::sub routine defined");
     }
