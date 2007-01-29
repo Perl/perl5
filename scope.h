@@ -56,6 +56,7 @@
 /* There may just be something out there hand building save stacks.  */
 #  define SAVEt_GP	SAVEt_GP_OLD
 #endif
+#define SAVEt_STACK_CXPOS	44
 
 #ifndef SCOPE_SAVES_SIGNAL_MASK
 #define SCOPE_SAVES_SIGNAL_MASK 0
@@ -190,6 +191,14 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 	SSPUSHINT(SAVEt_COP_ARYBASE);			\
     } STMT_END
 
+
+#define SAVESTACK_CXPOS() \
+    STMT_START {                                  \
+        SSCHECK(3);                               \
+        SSPUSHINT(cxstack[cxstack_ix].blk_oldsp); \
+        SSPUSHINT(cxstack_ix);                    \
+        SSPUSHINT(SAVEt_STACK_CXPOS);             \
+    } STMT_END
 
 #ifdef USE_ITHREADS
 #  define SAVECOPSTASH(c)	SAVEPPTR(CopSTASHPV(c))
