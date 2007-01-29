@@ -5638,8 +5638,18 @@ Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
 	    goto done;
 
 	if (strEQ(s, "BEGIN")) {
+	    const I32 oldscope = PL_scopestack_ix;
+	    ENTER;
+	    SAVECOPFILE(&PL_compiling);
+	    SAVECOPLINE(&PL_compiling);
+
 	    Perl_av_create_and_push(aTHX_ &PL_beginav, (SV*)cv);
 	    GvCV(gv) = 0;		/* cv has been hijacked */
+	    call_list(oldscope, PL_beginav);
+
+	    PL_curcop = &PL_compiling;
+	    CopHINTS_set(&PL_compiling, PL_hints);
+	    LEAVE;
 	}
 	else if (strEQ(s, "END")) {
 	    Perl_av_create_and_unshift_one(aTHX_ &PL_endav, (SV*)cv);

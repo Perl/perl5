@@ -35,9 +35,17 @@ sub G_KEEPERR()	{  16 }
 sub G_NODEBUG()	{  32 }
 sub G_METHOD()	{  64 }
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
-bootstrap XS::APItest $VERSION;
+use vars '$WARNINGS_ON_BOOTSTRAP';
+if ($WARNINGS_ON_BOOTSTRAP) {
+    bootstrap XS::APItest $VERSION;
+} else {
+    local $^W;
+    # Need $W false by default, as some tests run under -w, and under -w we
+    # can get warnings about "Too late to run CHECK" block (and INIT block)
+    bootstrap XS::APItest $VERSION;
+}
 
 1;
 __END__

@@ -566,3 +566,28 @@ sv_setsv_cow_hashkey_core()
 
 bool
 sv_setsv_cow_hashkey_notcore()
+
+void
+BEGIN()
+    CODE:
+	sv_inc(get_sv("XS::APItest::BEGIN_called", GV_ADD|GV_ADDMULTI));
+
+void
+CHECK()
+    CODE:
+	sv_inc(get_sv("XS::APItest::CHECK_called", GV_ADD|GV_ADDMULTI));
+
+void
+UNITCHECK()
+    CODE:
+	sv_inc(get_sv("XS::APItest::CHECK_called", GV_ADD|GV_ADDMULTI));
+
+void
+INIT()
+    CODE:
+	sv_inc(get_sv("XS::APItest::INIT_called", GV_ADD|GV_ADDMULTI));
+
+void
+END()
+    CODE:
+	sv_inc(get_sv("XS::APItest::END_called", GV_ADD|GV_ADDMULTI));

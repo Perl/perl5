@@ -1230,6 +1230,7 @@ ext/XS/APItest/t/op.t		XS::APItest: tests for OP related APIs
 ext/XS/APItest/t/printf.t	XS::APItest extension
 ext/XS/APItest/t/push.t		XS::APItest extension
 ext/XS/APItest/t/svsetsv.t	Test behaviour of sv_setsv with/without PERL_CORE
+ext/XS/APItest/t/xs_special_subs.t	Test that XS BEGIN/CHECK/INIT/END work
 ext/XS/Typemap/Makefile.PL	XS::Typemap extension
 ext/XS/Typemap/README		XS::Typemap extension
 ext/XS/Typemap/stdio.c		XS::Typemap extension
