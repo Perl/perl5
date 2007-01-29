@@ -2621,15 +2621,14 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    setproctitle("%s", s);
 #   endif
 	}
-#endif
-#if defined(__hpux) && defined(PSTAT_SETCMD)
+#elif defined(__hpux) && defined(PSTAT_SETCMD)
 	if (PL_origalen != 1) {
 	     union pstun un;
 	     s = SvPV_const(sv, len);
 	     un.pst_command = (char *)s;
 	     pstat(PSTAT_SETCMD, un, len, 0, 0);
 	}
-#endif
+#else
 	if (PL_origalen > 1) {
 	    /* PL_origalen is set in perl_parse(). */
 	    s = SvPV_force(sv,len);
@@ -2640,20 +2639,26 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    }
 	    else {
 		/* Shorter than original, will be padded. */
+#ifdef PERL_DARWIN
+		/* Special case for Mac OS X: see [perl #38868] */
+		const int pad = 0;
+#else
+		/* Is the space counterintuitive?  Yes.
+		 * (You were expecting \0?)
+		 * Does it work?  Seems to.  (In Linux 2.4.20 at least.)
+		 * --jhi */
+		const int pad = ' ';
+#endif
 		Copy(s, PL_origargv[0], len, char);
 		PL_origargv[0][len] = 0;
 		memset(PL_origargv[0] + len + 1,
-		       /* Is the space counterintuitive?  Yes.
-			* (You were expecting \0?)  
-			* Does it work?  Seems to.  (In Linux 2.4.20 at least.)
-			* --jhi */
-		       (int)' ',
-		       PL_origalen - len - 1);
+		       pad,  PL_origalen - len - 1);
 	    }
 	    PL_origargv[0][PL_origalen-1] = 0;
 	    for (i = 1; i < PL_origargc; i++)
 		PL_origargv[i] = 0;
 	}
+#endif
 	UNLOCK_DOLLARZERO_MUTEX;
 	break;
 #endif
