@@ -852,7 +852,7 @@ struct xpv {
 	+ sizeof (((type*)SvANY((SV*)0))->last_member)
 
 static const struct body_details bodies_by_type[] = {
-    {0, 0, 0, SVt_NULL, FALSE, NONV, NOARENA},
+    {0, 0, 0, SVt_NULL, FALSE, NONV, NOARENA, 0},
 
     { sizeof(xiv_allocated), sizeof(IV),
       + relative_STRUCT_OFFSET(xiv_allocated, XPVIV, xiv_iv),
@@ -2669,17 +2669,12 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		    const char *buffer_end;
 
 		    if (SvOBJECT(referent)) {
-			const HEK *const name = HvNAME_HEK(SvSTASH(referent));
+			const char *const name = HvNAME_get(SvSTASH(referent));
 
 			if (name) {
-			    stashname = HEK_KEY(name);
-			    stashnamelen = HEK_LEN(name);
+			    stashnamelen = strlen(name);
 
-			    if (HEK_UTF8(name)) {
-				SvUTF8_on(sv);
-			    } else {
-				SvUTF8_off(sv);
-			    }
+			    SvUTF8_off(sv);
 			} else {
 			    stashname = "__ANON__";
 			    stashnamelen = 8;
