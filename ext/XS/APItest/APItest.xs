@@ -580,7 +580,7 @@ CHECK()
 void
 UNITCHECK()
     CODE:
-	sv_inc(get_sv("XS::APItest::CHECK_called", GV_ADD|GV_ADDMULTI));
+	sv_inc(get_sv("XS::APItest::UNITCHECK_called", GV_ADD|GV_ADDMULTI));
 
 void
 INIT()

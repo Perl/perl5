@@ -18,7 +18,7 @@ my(@XSStack);	# Stack of conditionals and INCLUDEs
 my($XSS_work_idx, $cpp_next_tmp);
 
 use vars qw($VERSION);
-$VERSION = '2.17_01';
+$VERSION = '2.17_02';
 
 use vars qw(%input_expr %output_expr $ProtoUsed @InitFileCode $FH $proto_re $Overload $errors $Fallback
 	    $cplusplus $hiertype $WantPrototypes $WantVersionChk $except $WantLineNumbers
@@ -981,6 +981,12 @@ EOF
     print "\n    /* End of Initialisation Section */\n\n" ;
   }
 
+  if ($] >= 5.009) {
+    print <<'EOF';
+    if (PL_unitcheckav)
+         call_list(PL_scopestack_ix, PL_unitcheckav);
+EOF
+  }
   print Q(<<"EOF");
 #    XSRETURN_YES;
 #]]

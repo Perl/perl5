@@ -5634,7 +5634,7 @@ Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
 	else
 	    s = name;
 
-	if (*s != 'B' && *s != 'E' && *s != 'C' && *s != 'I')
+	if (*s != 'B' && *s != 'E' && *s != 'C' && *s != 'I' && *s != 'U')
 	    goto done;
 
 	if (strEQ(s, "BEGIN")) {
@@ -5659,6 +5659,11 @@ Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
 	    if (PL_main_start && ckWARN(WARN_VOID))
 		Perl_warner(aTHX_ packWARN(WARN_VOID), "Too late to run CHECK block");
 	    Perl_av_create_and_unshift_one(aTHX_ &PL_checkav, (SV*)cv);
+	    GvCV(gv) = 0;		/* cv has been hijacked */
+	}
+	else if (strEQ(s, "UNITCHECK")) {
+	    /* It's never too late to run a unitcheck block */
+	    Perl_av_create_and_unshift_one(aTHX_ &PL_unitcheckav, (SV*)cv);
 	    GvCV(gv) = 0;		/* cv has been hijacked */
 	}
 	else if (strEQ(s, "INIT")) {
