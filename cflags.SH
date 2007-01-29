@@ -17,6 +17,10 @@ case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
 
+if ! test -f config.h; then
+    . ./config_h.SH
+fi
+
 warn=''
 
 # Add -Wall for the core modules iff gcc and not already -Wall
@@ -30,76 +34,140 @@ Intel*) ;; # The Intel C++ plays gcc on TV but is not really it.
     ;;
 esac
 
-# The gcc -ansi -pedantic require their own dance, too.
-case "$gccversion" in
-'') ;;
-Intel*) ;; # Is that you, Intel C++?
-*)  case "$gccansipedantic" in
-    define)
-	case "$gccversion" in
-	[12]*) ;; # gcc versions 1 (gasp!) and 2 are not good for this.
-	*)  case "$osname" in
-	    # Add -ansi -pedantic only for known platforms.
-	    aix|dec_osf|freebsd|hpux|irix|linux)
-		ansipedantic="-ansi -pedantic" ;;
-	    solaris)
-# Can't add -ansi for Solaris.
-# Off_t/off_t is a struct in Solaris with largefiles, and with -ansi
-# that struct cannot be compared with a flat integer, such as a STRLEN.
-# The -ansi will also cause a lot of noise in Solaris because of:
-# /usr/include/sys/resource.h:148: warning: `struct rlimit64' declared inside parameter list
-		ansipedantic="-pedantic" ;;
-	    esac
-	    for i in $ansipedantic
-	    do
-		case "$ccflags" in
-		*$i*) ;;
-		*) warn="$warn $i" ;;
-		esac
-	    done
-	    case "$warn$ccflags" in
-	    *-pedantic*) warn="$warn -DPERL_GCC_PEDANTIC" ;;
-	    esac
-	    ;;
-	esac
-	;;
-    esac
-    ;;
-esac
+# Create a test source file for testing what options can be fed to
+# gcc in this system; include a selection of most common and commonly
+# hairy include files.
+
+cat >_cflags.c <<__EOT__
+#include "EXTERN.h"
+#include "perl.h"
+/* The stdio.h, errno.h, and setjmp.h should be there in any ANSI C89. */
+#include <stdio.h>
+#include <errno.h>
+#include <setjmp.h>
+/* Just in case the inclusion of perl.h did not
+ * pull in enough system headers, let's try again. */
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#ifdef I_STDDEF
+#include <stddef.h>
+#endif
+#ifdef I_STDARG
+#include <stdarg.h>
+#endif
+#ifdef I_LIMITS
+#include <limits.h>
+#endif
+#ifdef I_DIRENT
+#include <dirent.h>
+#endif
+#ifdef I_UNISTD
+#include <unistd.h>
+#endif
+#ifdef I_SYSTYPES
+#include <sys/types.h>
+#endif
+#ifdef I_SYSPARAM
+#include <sys/param.h>
+#endif
+#ifdef I_SYSRESOURCE
+#include <sys/resource.h>
+#endif
+#ifdef I_SYSSELECT
+#include <sys/select.h>
+#endif
+#if defined(HAS_SOCKET) && !defined(VMS) && !defined(WIN32) /* See perl.h. */
+#include <sys/socket.h>
+#endif
+#ifdef I_SYSSTAT
+#include <sys/stat.h>
+#endif
+#ifdef I_SYSTIME
+#include <sys/time.h>
+#endif
+#ifdef I_SYSTIMES
+#include <sys/times.h>
+#endif
+#ifdef I_SYSWAIT
+#include <sys/wait.h>
+#endif
+/* The gcc -ansi can cause a lot of noise in Solaris because of:
+ /usr/include/sys/resource.h:148: warning: 'struct rlimit64' declared inside parameter list
+ */
+int main(int argc, char *argv[]) {
+
+/* Add here test code found to be problematic in some gcc platform. */
+
+/* Off_t/off_t is a struct in Solaris with largefiles, and with gcc -ansi
+ * that struct cannot be compared in some gcc releases with a flat
+ * integer, such as a STRLEN. */
+
+  Off_t t0a = 2;
+  STRLEN t0b = 3;
+  int t0c = t0a == t0b;
+
+  return 0;
+}
+__EOT__
+
+stdflags=''
 
 # Further gcc warning options.
 case "$gccversion" in
 '') ;;
-[12]*) ;;
-Intel*) ;; # Haven't we been through this already?
-*)  for opt in '' extra declaration-after-statement endif-labels
+[12]*) ;; # gcc versions 1 (gasp!) and 2 are not good for this.
+Intel*) ;; # # Is that you, Intel C++?
+*)  for opt in -ansi -pedantic -std=c89 -W -Wextra -Wdeclaration-after-statement -Wendif-labels
     do
        case " $ccflags " in
-       *"-W$opt "*) ;;
-       *) case "`echo >_cflags.c | $cc -W$opt -c _cflags.c -o _cflags.o 2>&1`" in
+       *" $opt "*) ;; # Skip if already there.
+       *) rm -f _cflags$_exe
+          case "`$cc $cflags $opt _cflags.c -o _cflags$_exe 2>&1`" in
           *"unrecognized"*) ;;
           *"Invalid"*) ;;
-          *) warn="$warn -W$opt" ;;
+          *"is valid for C"*) ;;
+          *) if test -x _cflags$_exe
+             then
+               case "$opt" in
+               -std*) stdflags="$stdflags $opt" ;;
+               *) warn="$warn $opt" ;;
+               esac
+             fi
+             ;;
           esac
           ;;
        esac
-       rm -f _cflags.c cflags.o
     done
     ;;
 esac
+rm -f _cflags.c _cflags$_exe
 
-# If we have g++, we cannot have the -Wdeclaration-after-statement.
-# Some g++s accept it but then whine about it with every file.
-case "$cc" in
-*g++*) warn="`echo $warn|sed 's/-Wdeclaration-after-statement/ /'`" ;;
+case "$gccversion" in
+'') ;;
+*)
+  if [ "$gccansipedantic" = "" ]; then
+    # If we have -Duse64bitint (or equivalent) in effect and the quadtype
+    # has become 'long long', gcc -pedantic becomes unbearable (moreso
+    # when combined with -Wall) because long long and LL and %lld|%Ld
+    # become warn-worthy.  So let's drop the -pedantic in that case.
+    case "$quadtype:$sPRId64" in
+    "long long"*|*lld*|*Ld*)
+      ccflags="`echo $ccflags|sed 's/-pedantic/ /'`"
+      warn="`echo $warn|sed 's/-pedantic/ /'`"
+      ;;
+    esac
+  fi
+  # Using certain features (like the gcc statement expressions)
+  # requires knowing whether -pedantic has been specified.
+  case "$warn$ccflags" in
+  *-pedantic*) warn="$warn -DPERL_GCC_PEDANTIC" ;;
+  esac
+  ;;
 esac
 
-# stdflags currently unused.
-stdflags=''
-
-extra=''
-
 # Code to set any extra flags here.
+extra=''
 
 echo "Extracting cflags (with variable substitutions)"
 : This section of the file will have variable substitutions done on it.
@@ -226,18 +294,27 @@ for file do
 
 case "$cc" in
 *g++*)
-  # We need to remove this also in here (removed early earlier).
-  ccflags="`echo $ccflags|sed 's/-Wdeclaration-after-statement/ /'`"
+  # Extra paranoia in case people have bad canned ccflags:
+  # bad in the sense that the flags are accepted by g++,
+  # but then whined about.
+  for f in -Wdeclaration-after-statement -std=c89
+  do
+    ccflags="`echo $ccflags|sed 's/$f/ /'`"
+  done
   ;;
 esac
 
 case "$cc" in
 *g++*)
   # Without -Wno-unused-variable g++ 4.x compiles are rather unwatchable
-  # because of all the warnings about Perl___notused, and g++ doesn't
-  # do __attribute__((unused)) (and even if at some stage it will), people
-  # do have older gcc installations.  Yes, we lose some valid warnings.
-  for o in -Wno-unused-variable
+  # because of all the warnings about Perl___notused, and g++ doesn't do
+  # __attribute__((unused)) (and even if at some stage it may, people do
+  # have older gcc installations), and ((void)x) isn't enough to silence
+  # the noises about XS functions not using their cv parameter, so we need
+  # the -Wno-unused-parameter too.
+  # Yes, we lose some valid warnings, but hopefully other compilers
+  # (like gcc) will still pick up those warnings.
+  for o in -Wno-unused-variable -Wno-unused-parameter
   do
     case "$warn" in
     *$o*) ;;
