@@ -4519,7 +4519,8 @@ Perl_yylex(pTHX)
 		    PL_last_lop = PL_oldbufptr;
 		    PL_last_lop_op = OP_ENTERSUB;
 		    /* Is there a prototype? */
-		    if (SvPOK(cv)) {
+		    if (SvPOK(cv))
+		    {
 			STRLEN protolen;
 			const char *proto = SvPV_const((SV*)cv, protolen);
 			if (!protolen)
@@ -5481,7 +5482,7 @@ Perl_yylex(pTHX)
 		char tmpbuf[sizeof PL_tokenbuf];
 		SSize_t tboffset = 0;
 		expectation attrful;
-		bool have_name, have_proto, bad_proto;
+		bool have_name, have_proto;
 		const int key = tmp;
 
 		s = skipspace(s);
@@ -5525,6 +5526,8 @@ Perl_yylex(pTHX)
 		/* Look for a prototype */
 		if (*s == '(') {
 		    char *p;
+		    bool bad_proto = FALSE;
+		    const bool warnsyntax = ckWARN(WARN_SYNTAX);
 
 		    s = scan_str(s,FALSE,FALSE);
 		    if (!s)
@@ -5532,16 +5535,15 @@ Perl_yylex(pTHX)
 		    /* strip spaces and check for bad characters */
 		    d = SvPVX(PL_lex_stuff);
 		    tmp = 0;
-		    bad_proto = FALSE;
 		    for (p = d; *p; ++p) {
 			if (!isSPACE(*p)) {
 			    d[tmp++] = *p;
-			    if (!strchr("$@%*;[]&\\", *p))
+			    if (warnsyntax && !strchr("$@%*;[]&\\", *p))
 				bad_proto = TRUE;
 			}
 		    }
 		    d[tmp] = '\0';
-		    if (bad_proto && ckWARN(WARN_SYNTAX))
+		    if (bad_proto)
 			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 				    "Illegal character in prototype for %"SVf" : %s",
 				    (void*)PL_subname, d);

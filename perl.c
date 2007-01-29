@@ -546,7 +546,7 @@ Shuts down a Perl interpreter.  See L<perlembed>.
 int
 perl_destruct(pTHXx)
 {
-    volatile int destruct_level;  /* 0=none, 1=full, 2=full with checks */
+    VOL int destruct_level;  /* 0=none, 1=full, 2=full with checks */
     HV *hv;
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
     pid_t child;
@@ -2668,7 +2668,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
     LOGOP myop;		/* fake syntax tree node */
     UNOP method_op;
     I32 oldmark;
-    volatile I32 retval = 0;
+    VOL I32 retval = 0;
     I32 oldscope;
     bool oldcatch = CATCH_GET;
     int ret;
@@ -2830,8 +2830,8 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 {
     dSP;
     UNOP myop;		/* fake syntax tree node */
-    volatile I32 oldmark = SP - PL_stack_base;
-    volatile I32 retval = 0;
+    VOL I32 oldmark = SP - PL_stack_base;
+    VOL I32 retval = 0;
     int ret;
     OP* const oldop = PL_op;
     dJMPENV;
