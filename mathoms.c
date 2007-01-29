@@ -1181,15 +1181,6 @@ Perl_save_I16(pTHX_ I16 *intp)
 }
 
 void
-Perl_save_I8(pTHX_ I8 *bytep)
-{
-    SSCHECK(3);
-    SSPUSHINT(*bytep);
-    SSPUSHPTR(bytep);
-    SSPUSHINT(SAVEt_I8);
-}
-
-void
 Perl_save_iv(pTHX_ IV *ivp)
 {
     SSCHECK(3);
@@ -1220,16 +1211,6 @@ Perl_save_list(pTHX_ register SV **sarg, I32 maxsarg)
 	SSPUSHINT(SAVEt_ITEM);
     }
 }
-
-void
-Perl_save_destructor(pTHX_ DESTRUCTORFUNC_NOCONTEXT_t f, void* p)
-{
-    SSCHECK(3);
-    SSPUSHDPTR(f);
-    SSPUSHPTR(p);
-    SSPUSHINT(SAVEt_DESTRUCTOR);
-}
-
 
 /*
 =for apidoc sv_usepvn_mg

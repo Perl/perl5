@@ -357,6 +357,15 @@ Perl_save_bool(pTHX_ bool *boolp)
 }
 
 void
+Perl_save_I8(pTHX_ I8 *bytep)
+{
+    SSCHECK(3);
+    SSPUSHINT(*bytep);
+    SSPUSHPTR(bytep);
+    SSPUSHINT(SAVEt_I8);
+}
+
+void
 Perl_save_I32(pTHX_ I32 *intp)
 {
     SSCHECK(3);
@@ -489,6 +498,15 @@ Perl_save_delete(pTHX_ HV *hv, char *key, I32 klen)
     SSPUSHPTR(key);
     SSPUSHPTR(SvREFCNT_inc_simple(hv));
     SSPUSHINT(SAVEt_DELETE);
+}
+
+void
+Perl_save_destructor(pTHX_ DESTRUCTORFUNC_NOCONTEXT_t f, void* p)
+{
+    SSCHECK(3);
+    SSPUSHDPTR(f);
+    SSPUSHPTR(p);
+    SSPUSHINT(SAVEt_DESTRUCTOR);
 }
 
 void

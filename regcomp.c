@@ -1662,25 +1662,21 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
     return min;
 }
 
-STATIC I32
-S_add_data(RExC_state_t *pRExC_state, I32 n, const char *s)
+STATIC U32
+S_add_data(RExC_state_t *pRExC_state, U32 n, const char *s)
 {
-    if (RExC_rx->data) {
-	const U32 count = RExC_rx->data->count;
-	Renewc(RExC_rx->data,
-	       sizeof(*RExC_rx->data) + sizeof(void*) * (count + n - 1),
-	       char, struct reg_data);
+    U32 count = RExC_rx->data ? RExC_rx->data->count : 0;
+
+    Renewc(RExC_rx->data,
+	   sizeof(*RExC_rx->data) + sizeof(void*) * (count + n - 1),
+	   char, struct reg_data);
+    if(count)
 	Renew(RExC_rx->data->what, count + n, U8);
-	RExC_rx->data->count += n;
-    }
-    else {
-	Newxc(RExC_rx->data, sizeof(*RExC_rx->data) + sizeof(void*) * (n - 1),
-	     char, struct reg_data);
+    else
 	Newx(RExC_rx->data->what, n, U8);
-	RExC_rx->data->count = n;
-    }
-    Copy(s, RExC_rx->data->what + RExC_rx->data->count - n, n, U8);
-    return RExC_rx->data->count - n;
+    RExC_rx->data->count = count + n;
+    Copy(s, RExC_rx->data->what + count, n, U8);
+    return count;
 }
 
 void
@@ -2023,7 +2019,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    && !(data.start_class->flags & ANYOF_EOS)
 	    && !cl_is_anything(data.start_class))
 	{
-	    const I32 n = add_data(pRExC_state, 1, "f");
+	    const U32 n = add_data(pRExC_state, 1, "f");
 
 	    Newx(RExC_rx->data->data[n], 1,
 		struct regnode_charclass_class);
@@ -2079,7 +2075,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	if (!(data.start_class->flags & ANYOF_EOS)
 	    && !cl_is_anything(data.start_class))
 	{
-	    const I32 n = add_data(pRExC_state, 1, "f");
+	    const U32 n = add_data(pRExC_state, 1, "f");
 
 	    Newx(RExC_rx->data->data[n], 1,
 		struct regnode_charclass_class);
@@ -2199,7 +2195,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 		/* FALL THROUGH */
 	    case '{':           /* (?{...}) */
 	    {
-		I32 count = 1, n = 0;
+		I32 count = 1;
+		U32 n = 0;
 		char c;
 		char *s = RExC_parse;
 

@@ -1278,7 +1278,7 @@ Esn	|void	|cl_or		|NN const struct RExC_state_t* state|NN struct regnode_charcla
 Es	|I32	|study_chunk	|NN struct RExC_state_t* state|NN regnode **scanp \
 				|NN I32 *deltap|NN regnode *last|NULLOK struct scan_data_t *data \
 				|U32 flags
-EsRn	|I32	|add_data	|NN struct RExC_state_t* state|I32 n|NN const char *s
+EsRn	|U32	|add_data	|NN struct RExC_state_t* state|U32 n|NN const char *s
 rs	|void	|re_croak2	|NN const char* pat1|NN const char* pat2|...
 Es	|I32	|regpposixcc	|NN struct RExC_state_t* state|I32 value
 Es	|void	|checkposixcc	|NN struct RExC_state_t* state
@@ -1334,7 +1334,6 @@ s	|STRLEN	|sv_pos_u2b_cached|NN SV *sv|NN MAGIC **mgp \
 		|STRLEN uoffset|STRLEN uoffset0|STRLEN boffset0
 s	|void	|utf8_mg_pos_cache_update|NN SV *sv|NN MAGIC **mgp \
 		|STRLEN byte|STRLEN utf8|STRLEN blen
-s	|STRLEN	|sv_pos_b2u_forwards|NN const U8 *s|NN const U8 *const target
 s	|STRLEN	|sv_pos_b2u_midway|NN const U8 *s|NN const U8 *const target \
 		|NN const U8 *end|STRLEN endu
 s	|char *	|stringify_regexp|NN SV *sv|NN MAGIC *mg|NULLOK STRLEN *lp

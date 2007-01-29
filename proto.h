@@ -154,7 +154,7 @@ PERL_CALLCONV OP*	Perl_convert(pTHX_ I32 optype, I32 flags, OP* o)
 PERL_CALLCONV PERL_CONTEXT*	Perl_create_eval_scope(pTHX_ U32 flags);
 PERL_CALLCONV void	Perl_croak(pTHX_ const char* pat, ...)
 			__attribute__noreturn__
-			__attribute__format__(__printf__,pTHX_1,pTHX_2);
+			__attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
 
 PERL_CALLCONV void	Perl_vcroak(pTHX_ const char* pat, va_list* args)
 			__attribute__noreturn__;
@@ -260,7 +260,7 @@ PERL_CALLCONV void	Perl_delete_eval_scope(pTHX);
 PERL_CALLCONV void	Perl_deprecate(pTHX_ char* s);
 PERL_CALLCONV void	Perl_deprecate_old(pTHX_ char* s);
 PERL_CALLCONV OP*	Perl_die(pTHX_ const char* pat, ...)
-			__attribute__format__(__printf__,pTHX_1,pTHX_2);
+			__attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
 
 PERL_CALLCONV OP*	Perl_vdie(pTHX_ const char* pat, va_list* args);
 PERL_CALLCONV OP*	Perl_die_where(pTHX_ char* message, STRLEN msglen);
@@ -1844,7 +1844,7 @@ STATIC void	S_cl_init_zero(const struct RExC_state_t* state, struct regnode_char
 STATIC void	S_cl_and(struct regnode_charclass_class *cl, const struct regnode_charclass_class *and_with);
 STATIC void	S_cl_or(const struct RExC_state_t* state, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with);
 STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t* state, regnode **scanp, I32 *deltap, regnode *last, struct scan_data_t *data, U32 flags);
-STATIC I32	S_add_data(struct RExC_state_t* state, I32 n, const char *s)
+STATIC U32	S_add_data(struct RExC_state_t* state, U32 n, const char *s)
 			__attribute__warn_unused_result__;
 
 STATIC void	S_re_croak2(pTHX_ const char* pat1, const char* pat2, ...)
@@ -1916,7 +1916,6 @@ STATIC STRLEN	S_sv_pos_u2b_forwards(const U8 *const start, const U8 *const send,
 STATIC STRLEN	S_sv_pos_u2b_midway(const U8 *const start, const U8 *send, STRLEN uoffset, STRLEN uend);
 STATIC STRLEN	S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const start, const U8 *const send, STRLEN uoffset, STRLEN uoffset0, STRLEN boffset0);
 STATIC void	S_utf8_mg_pos_cache_update(pTHX_ SV *sv, MAGIC **mgp, STRLEN byte, STRLEN utf8, STRLEN blen);
-STATIC STRLEN	S_sv_pos_b2u_forwards(pTHX_ const U8 *s, const U8 *const target);
 STATIC STRLEN	S_sv_pos_b2u_midway(pTHX_ const U8 *s, const U8 *const target, const U8 *end, STRLEN endu);
 STATIC char *	S_stringify_regexp(pTHX_ SV *sv, MAGIC *mg, STRLEN *lp);
 STATIC char *	S_F0convert(NV nv, char *endbuf, STRLEN *len);

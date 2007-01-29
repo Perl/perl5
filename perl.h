@@ -1095,6 +1095,10 @@ EXTERN_C char *crypt(const char *, const char *);
 EXTERN_C char **environ;
 #endif
 
+#if defined(__OpenBSD__) && defined(__cplusplus)
+EXTERN_C char **environ;
+#endif
+
 #ifdef SETERRNO
 # undef SETERRNO  /* SOCKS might have defined this */
 #endif
@@ -3021,6 +3025,13 @@ typedef pthread_key_t	perl_key;
 #  define NORETURN_FUNCTION_END /* NOTREACHED */
 #else
 #  define NORETURN_FUNCTION_END /* NOTREACHED */ return 0
+#endif
+
+/* Some OS warn on NULL format to printf */
+#ifdef PRINTF_FORMAT_NULL_OK
+#  define __attribute__format__null_ok__(x,y,z)  __attribute__format__(x,y,z)
+#else
+#  define __attribute__format__null_ok__(x,y,z)  
 #endif
 
 #ifdef HAS_BUILTIN_EXPECT
