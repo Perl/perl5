@@ -3126,8 +3126,11 @@ PP(pp_require)
 	    for (i = 0; i <= AvFILL(ar); i++) {
 		SV * const dirsv = *av_fetch(ar, i, TRUE);
 
+		if (SvTIED_mg((SV*)ar, PERL_MAGIC_tied))
+		    mg_get(dirsv);
 		if (SvROK(dirsv)) {
 		    int count;
+		    SV **svp;
 		    SV *loader = dirsv;
 
 		    if (SvTYPE(SvRV(loader)) == SVt_PVAV
@@ -3154,6 +3157,11 @@ PP(pp_require)
 		    else
 			count = call_sv(loader, G_ARRAY);
 		    SPAGAIN;
+
+		    /* Adjust file name if the hook has set an %INC entry */
+		    svp = hv_fetch(GvHVn(PL_incgv), name, len, 0);
+		    if (svp)
+			tryname = SvPVX_const(*svp);
 
 		    if (count > 0) {
 			int i = 0;
