@@ -1,3 +1,5 @@
+#!perl -w
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -7,7 +9,9 @@ BEGIN {
         print "1..0 # Skip: XS::APItest was not built\n";
         exit 0;
     }
-    $XS::APItest::WARNINGS_ON_BOOTSTRAP++;
+    # Hush the used only once warning.
+    $XS::APItest::WARNINGS_ON_BOOTSTRAP = $MacPerl::Architecture;
+    $XS::APItest::WARNINGS_ON_BOOTSTRAP = 1;
 }
 
 use strict;
