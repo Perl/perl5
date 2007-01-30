@@ -82,6 +82,8 @@ typedef struct regexp {
         /* Information about the match that isn't often used */
 	char *precomp;		/* pre-compilation regular expression */
 	I32 prelen;		/* length of precomp */
+	char *wrapped;          /* wrapped version of the pattern */
+	I32 wraplen;		/* length of wrapped */
 	I32 seen_evals;         /* number of eval groups in the pattern - for security checks */ 
         HV *paren_names;	/* Optional hash of paren names */
         
@@ -138,7 +140,7 @@ typedef struct regexp_engine {
 #define RXf_START_ONLY		0x00000200 /* Pattern is /^/ */
 #define RXf_WHITE		0x00000400 /* Pattern is /\s+/ */
 
-/* 0xF800 of extflags is used by (RXf_)PMf_COMPILETIME */
+/* 0x1F800 of extflags is used by (RXf_)PMf_COMPILETIME */
 #define RXf_PMf_LOCALE  	0x00000800 /* use locale */
 #define RXf_PMf_MULTILINE	0x00001000 /* /m         */
 #define RXf_PMf_SINGLELINE	0x00002000 /* /s         */
@@ -154,6 +156,34 @@ typedef struct regexp_engine {
     case MULTILINE_PAT_MOD: *(pmfl) |= RXf_PMf_MULTILINE;  break;   \
     case SINGLE_PAT_MOD:    *(pmfl) |= RXf_PMf_SINGLELINE; break;   \
     case XTENDED_PAT_MOD:   *(pmfl) |= RXf_PMf_EXTENDED;   break
+
+/* chars and strings used as regex pattern modifiers
+ * Singlular is a 'c'har, plural is a "string"
+ */
+#define EXEC_PAT_MOD         'e'
+#define KEEPCOPY_PAT_MOD     'k'
+#define ONCE_PAT_MOD         'o'
+#define GLOBAL_PAT_MOD       'g'
+#define CONTINUE_PAT_MOD     'c'
+#define MULTILINE_PAT_MOD    'm'
+#define SINGLE_PAT_MOD       's'
+#define IGNORE_PAT_MOD       'i'
+#define XTENDED_PAT_MOD      'x'
+
+#define ONCE_PAT_MODS        "o"
+#define KEEPCOPY_PAT_MODS    "k"
+#define EXEC_PAT_MODS        "e"
+#define LOOP_PAT_MODS        "gc"
+
+#define STD_PAT_MODS        "msix"
+
+#define INT_PAT_MODS    STD_PAT_MODS    KEEPCOPY_PAT_MODS
+
+#define EXT_PAT_MODS    ONCE_PAT_MODS   KEEPCOPY_PAT_MODS
+#define QR_PAT_MODS     STD_PAT_MODS    EXT_PAT_MODS
+#define M_PAT_MODS      QR_PAT_MODS     LOOP_PAT_MODS
+#define S_PAT_MODS      M_PAT_MODS      EXEC_PAT_MODS
+
 
 /* What we have seen */
 #define RXf_LOOKBEHIND_SEEN	0x00020000

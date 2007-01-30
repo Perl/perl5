@@ -662,7 +662,7 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data, I32 *min
     }
     data->last_end = -1;
     data->flags &= ~SF_BEFORE_EOL;
-    DEBUG_STUDYDATA("cl_anything: ",data,0);
+    DEBUG_STUDYDATA("commit: ",data,0);
 }
 
 /* Can match anything (initialization) */
@@ -2050,6 +2050,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         /* needed for dumping*/
         DEBUG_r(if (optimize) {
             regnode *opt = convert;
+
             while ( ++opt < optimize) {
                 Set_Node_Offset_Length(opt,0,0);
             }
@@ -4139,8 +4140,64 @@ Perl_re_compile(pTHX_ char *exp, char *xend, PMOP *pm)
     r->engine= RE_ENGINE_PTR;
     r->refcnt = 1;
     r->prelen = xend - exp;
-    r->precomp = savepvn(RExC_precomp, r->prelen);
     r->extflags = pm->op_pmflags & RXf_PMf_COMPILETIME;
+    {
+        bool has_k     = ((r->extflags & RXf_PMf_KEEPCOPY) == RXf_PMf_KEEPCOPY);
+	bool has_minus = ((r->extflags & RXf_PMf_STD_PMMOD) != RXf_PMf_STD_PMMOD);
+	bool has_runon = ((RExC_seen & REG_SEEN_RUN_ON_COMMENT)==REG_SEEN_RUN_ON_COMMENT);
+	U16 reganch = (U16)((r->extflags & RXf_PMf_STD_PMMOD) >> 12);
+	const char *fptr = STD_PAT_MODS;        /*"msix"*/
+	char *p;
+        r->wraplen = r->prelen + has_minus + has_k + has_runon
+            + (sizeof(STD_PAT_MODS) - 1)
+            + (sizeof("(?:)") - 1);
+
+        Newx(r->wrapped, r->wraplen, char );
+        p = r->wrapped;
+        *p++='('; *p++='?';
+        if (has_k)
+            *p++ = KEEPCOPY_PAT_MOD; /*'k'*/
+        {
+            char *r = p + (sizeof(STD_PAT_MODS) - 1) + has_minus - 1;
+            char *colon = r + 1;
+            char ch;
+
+            while((ch = *fptr++)) {
+                if(reganch & 1)
+                    *p++ = ch;
+                else
+                    *r-- = ch;
+                reganch >>= 1;
+            }
+            if(has_minus) {
+                *r = '-';
+                p = colon;
+            }
+        }
+
+        *p++=':';
+        Copy(RExC_precomp, p, r->prelen, char);
+        r->precomp = p;
+        p += r->prelen;
+        if (has_runon)
+            *p++='\n';
+        *p=')';
+
+
+        if (0)
+            PerlIO_printf(Perl_debug_log,
+            "RExC_precomp: %.*s\nr->precomp: %.*s\nr->wrapped:%.*s\n",
+            r->prelen,
+            RExC_precomp,
+            r->prelen,
+            r->precomp,
+            r->wraplen,
+            r->wrapped
+        );
+
+
+    }
+
     r->intflags = 0;
     r->nparens = RExC_npar - 1;	/* set early to validate backrefs */
     
@@ -6654,9 +6711,7 @@ tryagain:
 
     case '#':
 	if (RExC_flags & RXf_PMf_EXTENDED) {
-	    while (RExC_parse < RExC_end && *RExC_parse != '\n')
-		RExC_parse++;
-	    if (RExC_parse < RExC_end)
+	    if ( reg_skipcomment( pRExC_state ) )
 		goto tryagain;
 	}
 	/* FALL THROUGH */
@@ -6685,7 +6740,7 @@ tryagain:
 		char * const oldp = p;
 
 		if (RExC_flags & RXf_PMf_EXTENDED)
-		    p = regwhite(p, RExC_end);
+		    p = regwhite( pRExC_state, p );
 		switch (*p) {
 		case '^':
 		case '$':
@@ -6833,13 +6888,13 @@ tryagain:
 			ender = *p++;
 		    break;
 		}
-		if (RExC_flags & RXf_PMf_EXTENDED)
-		    p = regwhite(p, RExC_end);
+		if ( RExC_flags & RXf_PMf_EXTENDED)
+		    p = regwhite( pRExC_state, p );
 		if (UTF && FOLD) {
 		    /* Prime the casefolded buffer. */
 		    ender = toFOLD_uni(ender, tmpbuf, &foldlen);
 		}
-		if (ISMULT2(p)) { /* Back off on ?+*. */
+		if (p < RExC_end && ISMULT2(p)) { /* Back off on ?+*. */
 		    if (len)
 			p = oldp;
 		    else if (UTF) {
@@ -6941,15 +6996,22 @@ tryagain:
 }
 
 STATIC char *
-S_regwhite(char *p, const char *e)
+S_regwhite( RExC_state_t *pRExC_state, char *p )
 {
+    const char *e = RExC_end;
     while (p < e) {
 	if (isSPACE(*p))
 	    ++p;
 	else if (*p == '#') {
+            bool ended = 0;
 	    do {
-		p++;
-	    } while (p < e && *p != '\n');
+		if (*p++ == '\n') {
+		    ended = 1;
+		    break;
+		}
+	    } while (p < e);
+	    if (!ended)
+	        RExC_seen |= REG_SEEN_RUN_ON_COMMENT;
 	}
 	else
 	    break;
@@ -7731,6 +7793,49 @@ parseit:
 #undef _C_C_T_
 
 
+/* reg_skipcomment()
+
+   Absorbs an /x style # comments from the input stream.
+   Returns true if there is more text remaining in the stream.
+   Will set the REG_SEEN_RUN_ON_COMMENT flag if the comment
+   terminates the pattern without including a newline.
+
+   Note its the callers responsibility to ensure that we are
+   actually in /x mode
+
+*/
+
+STATIC bool
+S_reg_skipcomment(pTHX_ RExC_state_t *pRExC_state)
+{
+    bool ended = 0;
+    while (RExC_parse < RExC_end)
+        if (*RExC_parse++ == '\n') {
+            ended = 1;
+            break;
+        }
+    if (!ended) {
+        /* we ran off the end of the pattern without ending
+           the comment, so we have to add an \n when wrapping */
+        RExC_seen |= REG_SEEN_RUN_ON_COMMENT;
+        return 0;
+    } else
+        return 1;
+}
+
+/* nextchar()
+
+   Advance that parse position, and optionall absorbs
+   "whitespace" from the inputstream.
+
+   Without /x "whitespace" means (?#...) style comments only,
+   with /x this means (?#...) and # comments and whitespace proper.
+
+   Returns the RExC_parse point from BEFORE the scan occurs.
+
+   This is the /x friendly way of saying RExC_parse++.
+*/
+
 STATIC char*
 S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 {
@@ -7753,9 +7858,8 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 		continue;
 	    }
 	    else if (*RExC_parse == '#') {
-		while (RExC_parse < RExC_end)
-		    if (*RExC_parse++ == '\n') break;
-		continue;
+	        if ( reg_skipcomment( pRExC_state ) )
+	            continue;
 	    }
 	}
 	return retval;
@@ -8524,10 +8628,6 @@ Perl_pregfree(pTHX_ struct regexp *r)
 	return;
 	
     CALLREGFREE_PVT(r); /* free the private data */
-    
-    /* gcov results gave these as non-null 100% of the time, so there's no
-       optimisation in checking them before calling Safefree  */
-    Safefree(r->precomp);
     RX_MATCH_COPY_FREE(r);
 #ifdef PERL_OLD_COPY_ON_WRITE
     if (r->saved_copy)
@@ -8545,8 +8645,8 @@ Perl_pregfree(pTHX_ struct regexp *r)
 	Safefree(r->substrs);
     }
     if (r->paren_names)
-            SvREFCNT_dec(r->paren_names);
-    
+        SvREFCNT_dec(r->paren_names);
+    Safefree(r->wrapped);
     Safefree(r->startp);
     Safefree(r->endp);
     Safefree(r);
@@ -8738,11 +8838,14 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
     } else 
         ret->substrs = NULL;    
 
-    ret->precomp        = SAVEPVN(r->precomp, r->prelen);
+    ret->wrapped        = SAVEPVN(r->wrapped, r->wraplen);
+    ret->precomp        = ret->wrapped + (r->precomp - r->wrapped);
+    ret->prelen         = r->prelen;
+    ret->wraplen        = r->wraplen;
+
     ret->refcnt         = r->refcnt;
     ret->minlen         = r->minlen;
     ret->minlenret      = r->minlenret;
-    ret->prelen         = r->prelen;
     ret->nparens        = r->nparens;
     ret->lastparen      = r->lastparen;
     ret->lastcloseparen = r->lastcloseparen;
@@ -8809,8 +8912,8 @@ Perl_regdupe_internal(pTHX_ const regexp *r, CLONE_PARAMS *param)
         reti->swap = NULL;
     }
 
-
     reti->regstclass = NULL;
+
     if (ri->data) {
 	struct reg_data *d;
         const int count = ri->data->count;
@@ -8915,83 +9018,18 @@ Perl_regdupe_internal(pTHX_ const regexp *r, CLONE_PARAMS *param)
     
  */
 #ifndef PERL_IN_XSUB_RE
+
 char *
 Perl_reg_stringify(pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags, I32 *haseval ) {
     dVAR;
     const regexp * const re = (regexp *)mg->mg_obj;
-
-    if (!mg->mg_ptr) {
-	const char *fptr = STD_PAT_MODS;        /*"msix"*/
-	char reflags[7];
-	char ch;
-	bool hask = ((re->extflags & RXf_PMf_KEEPCOPY) == RXf_PMf_KEEPCOPY);
-	bool hasm = ((re->extflags & RXf_PMf_STD_PMMOD) != RXf_PMf_STD_PMMOD);
-        U16 reganch = (U16)((re->extflags & RXf_PMf_STD_PMMOD) >> 12);
-        bool need_newline = 0;
-        int left = 0;
-	int right = 4 + hask;
-        if (hask) 
-            reflags[left++] = KEEPCOPY_PAT_MOD; /*'k'*/
-	while((ch = *fptr++)) {
-	    if(reganch & 1) {
-		reflags[left++] = ch;
-	    }
-	    else {
-		reflags[right--] = ch;
-	    }
-	    reganch >>= 1;
-	}
-	if(hasm) {
-	    reflags[left] = '-';
-	    left = 5 + hask;
-	}
-        /* printf("[%*.7s]\n",left,reflags); */
-	mg->mg_len = re->prelen + 4 + left;
-	/*
-	 * If /x was used, we have to worry about a regex ending with a
-	 * comment later being embedded within another regex. If so, we don't
-	 * want this regex's "commentization" to leak out to the right part of
-	 * the enclosing regex, we must cap it with a newline.
-	 *
-	 * So, if /x was used, we scan backwards from the end of the regex. If
-	 * we find a '#' before we find a newline, we need to add a newline
-	 * ourself. If we find a '\n' first (or if we don't find '#' or '\n'),
-	 * we don't need to add anything.  -jfriedl
-	 */
-	if (PMf_EXTENDED & re->extflags) {
-	    const char *endptr = re->precomp + re->prelen;
-	    while (endptr >= re->precomp) {
-		const char c = *(endptr--);
-		if (c == '\n')
-		    break; /* don't need another */
-		if (c == '#') {
-		    /* we end while in a comment, so we need a newline */
-		    mg->mg_len++; /* save space for it */
-		    need_newline = 1; /* note to add it */
-		    break;
-		}
-	    }
-	}
-
-	Newx(mg->mg_ptr, mg->mg_len + 1 + left, char);
-	mg->mg_ptr[0] = '(';
-	mg->mg_ptr[1] = '?';
-	Copy(reflags, mg->mg_ptr+2, left, char);
-	*(mg->mg_ptr+left+2) = ':';
-	Copy(re->precomp, mg->mg_ptr+3+left, re->prelen, char);
-	if (need_newline)
-	    mg->mg_ptr[mg->mg_len - 2] = '\n';
-	mg->mg_ptr[mg->mg_len - 1] = ')';
-	mg->mg_ptr[mg->mg_len] = 0;
-    }
     if (haseval) 
         *haseval = re->seen_evals;
     if (flags)    
 	*flags = ((re->extflags & RXf_UTF8) ? 1 : 0);
-    
     if (lp)
-	*lp = mg->mg_len;
-    return mg->mg_ptr;
+	*lp = re->wraplen;
+    return re->wrapped;
 }
 
 /*

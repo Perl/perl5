@@ -134,6 +134,35 @@ array itself.
 =for hackers
 Found in file av.c
 
+=item av_create_and_push
+X<av_create_and_push>
+
+Push an SV onto the end of the array, creating the array if necessary.
+A small internal helper function to remove a commonly duplicated idiom.
+
+NOTE: this function is experimental and may change or be
+removed without notice.
+
+	void	av_create_and_push(AV **const avp, SV *const val)
+
+=for hackers
+Found in file av.c
+
+=item av_create_and_unshift_one
+X<av_create_and_unshift_one>
+
+Unshifts an SV onto the beginning of the array, creating the array if
+necessary.
+A small internal helper function to remove a commonly duplicated idiom.
+
+NOTE: this function is experimental and may change or be
+removed without notice.
+
+	SV**	av_create_and_unshift_one(AV **const avp, SV *const val)
+
+=for hackers
+Found in file av.c
+
 =item av_delete
 X<av_delete>
 

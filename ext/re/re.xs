@@ -120,7 +120,7 @@ PPCODE:
                modifiers" in this scenario. 
             */
 
-            char *fptr = "msix";
+            char *fptr = INT_PAT_MODS;
             char ch;
             U16 match_flags = (U16)((re->extflags & PMf_COMPILETIME) >> 12);
 
@@ -140,11 +140,8 @@ PPCODE:
             XSRETURN(2);
         } else {
             /* Scalar, so use the string that Perl would return */
-            if (!mg->mg_ptr) 
-                CALLREG_STRINGIFY(mg,0,0);
-            
             /* return the pattern in (?msix:..) format */
-            pattern = sv_2mortal(newSVpvn(mg->mg_ptr,mg->mg_len));
+            pattern = sv_2mortal(newSVpvn(re->wrapped,re->wraplen));
             if (re->extflags & RXf_UTF8) 
                 SvUTF8_on(pattern);
             XPUSHs(pattern);

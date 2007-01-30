@@ -3635,12 +3635,15 @@ STATIC U32	S_join_exact(pTHX_ struct RExC_state_t *state, regnode *scan, I32 *mi
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 
-STATIC char*	S_regwhite(char *p, const char *e)
+STATIC char *	S_regwhite(struct RExC_state_t *state, char *p)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(2);
 
-STATIC char*	S_nextchar(pTHX_ struct RExC_state_t *state)
+STATIC char *	S_nextchar(pTHX_ struct RExC_state_t *state)
+			__attribute__nonnull__(pTHX_1);
+
+STATIC bool	S_reg_skipcomment(pTHX_ struct RExC_state_t *state)
 			__attribute__nonnull__(pTHX_1);
 
 STATIC void	S_scan_commit(pTHX_ const struct RExC_state_t* state, struct scan_data_t *data, I32 *minlenp, int is_inf)

@@ -1333,6 +1333,7 @@
 #define join_exact		S_join_exact
 #define regwhite		S_regwhite
 #define nextchar		S_nextchar
+#define reg_skipcomment		S_reg_skipcomment
 #define scan_commit		S_scan_commit
 #define cl_anything		S_cl_anything
 #define cl_is_anything		S_cl_is_anything
@@ -3542,6 +3543,7 @@
 #define join_exact(a,b,c,d,e,f)	S_join_exact(aTHX_ a,b,c,d,e,f)
 #define regwhite		S_regwhite
 #define nextchar(a)		S_nextchar(aTHX_ a)
+#define reg_skipcomment(a)	S_reg_skipcomment(aTHX_ a)
 #define scan_commit(a,b,c,d)	S_scan_commit(aTHX_ a,b,c,d)
 #define cl_anything		S_cl_anything
 #define cl_is_anything		S_cl_is_anything

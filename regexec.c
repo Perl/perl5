@@ -498,7 +498,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	/* end shift should be non negative here */
     }
 
-#ifdef DEBUGGING	/* 7/99: reports of failure (with the older version) */
+#ifdef QDEBUGGING	/* 7/99: reports of failure (with the older version) */
     if (end_shift < 0)
 	Perl_croak(aTHX_ "panic: end_shift: %"IVdf" pattern:\n%s\n ",
 		   (IV)end_shift, prog->precomp);
