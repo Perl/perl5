@@ -2134,6 +2134,8 @@ phooey:
 }
 
 
+
+
 /*
  - regtry - try match at specific point
  */
@@ -3574,6 +3576,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
             } else {
                 nochange_depth = 0;
             }    
+            {   regexp *ocurpm = PM_GETRE(PL_curpm);
+		char *osubbeg = rex->subbeg;
+		STRLEN osublen = rex->sublen;
 	    {
 		/* execute the code in the {...} */
 		dSP;
@@ -3581,6 +3586,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		OP_4tree * const oop = PL_op;
 		COP * const ocurcop = PL_curcop;
 		PAD *old_comppad;
+
 	    
 		n = ARG(scan);
 		PL_op = (OP_4tree*)rexi->data->data[n];
@@ -3593,6 +3599,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
                     SV *sv_mrk = get_sv("REGMARK", 1);
                     sv_setsv(sv_mrk, sv_yes_mark);
                 }
+                /* make sure that $1 and friends are available with nested eval */
+                PM_SETRE(PL_curpm,rex);
+                rex->subbeg = ocurpm->subbeg;
+                rex->sublen = ocurpm->sublen;
 
 		CALLRUNOPS(aTHX);			/* Scalar context. */
 		SPAGAIN;
@@ -3606,6 +3616,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		PL_op = oop;
 		PAD_RESTORE_LOCAL(old_comppad);
 		PL_curcop = ocurcop;
+
 		if (!logical) {
 		    /* /(?{...})/ */
 		    sv_setsv(save_scalar(PL_replgv), ret);
@@ -3651,6 +3662,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    }
 		}
 		rei = RXi_GET(re);
+
+                /* restore PL_curpm after the eval */
+                PM_SETRE(PL_curpm,ocurpm);
+                rex->sublen = osublen;
+                rex->subbeg = osubbeg;
+
                 DEBUG_EXECUTE_r(
                     debug_start_match(re, do_utf8, locinput, PL_regeol, 
                         "Matching embedded");
@@ -3664,7 +3681,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
                         Renew(PL_reg_start_tmp, PL_reg_start_tmpl, char*);
                     else
                         Newx(PL_reg_start_tmp, PL_reg_start_tmpl, char*);
-                }               	
+                }
+
 
         eval_recurse_doit: /* Share code with GOSUB below this line */                		
 		/* run the pattern returned from (??{...}) */
@@ -3700,6 +3718,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		/* now continue from first node in postoned RE */
 		PUSH_YES_STATE_GOTO(EVAL_AB, startpoint);
 		/* NOTREACHED */
+	    }
+	    /* restore PL_curpm after the eval */
+	    PM_SETRE(PL_curpm,ocurpm);
+            rex->sublen = osublen;
+            rex->subbeg = osubbeg;
 	    }
 	    /* logical is 1,   /(?(?{...})X|Y)/ */
 	    sw = (bool)SvTRUE(ret);

@@ -4256,7 +4256,23 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     $x =~ s/(.)\K/$1/g;
     ok($x eq "aabbccddee");
 }
+sub kt
+{
+    return '4' if $_[0] eq '09028623';
+}
 
+{   # Nested EVAL using PL_curpm (via $1 or friends)
+    my $re;
+    our $grabit = qr/ ([0-6][0-9]{7}) (??{ kt $1 }) [890] /x;
+    $re = qr/^ ( (??{ $grabit }) ) $ /x;
+    my @res = '0902862349' =~ $re;
+    iseq(join("-",@res),"0902862349",
+        'PL_curpm is set properly on nested eval');
+
+    our $qr = qr/ (o) (??{ $1 }) /x;
+    ok( 'boob'=~/( b (??{ $qr }) b )/x && 1,
+        "PL_curpm, nested eval");
+}
 
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
@@ -4307,7 +4323,7 @@ ok($@=~/\QSequence \k... not terminated in regex;\E/);
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 1620;
+    $::TestCount = 1622;
     print "1..$::TestCount\n";
 }
 

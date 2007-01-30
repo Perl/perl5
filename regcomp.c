@@ -4669,8 +4669,9 @@ Perl_reg_named_buff_get(pTHX_ SV* namesv, const REGEXP * const from_re, U32 flag
                 SV* sv_dat=HeVAL(he_str);
                 I32 *nums=(I32*)SvPVX(sv_dat);
                 for ( i=0; i<SvIVX(sv_dat); i++ ) {
-                    if ((I32)(rx->lastparen) >= nums[i] &&
-                        rx->endp[nums[i]] != -1) 
+                    if ((I32)(rx->nparens) >= nums[i]
+                        && rx->startp[nums[i]] != -1
+                        && rx->endp[nums[i]] != -1)
                     {
                         ret = reg_numbered_buff_get(nums[i],rx,NULL,0);
                         if (!retarray) 
