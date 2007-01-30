@@ -3293,6 +3293,11 @@ STATIC OP*	S_newGIVWHENOP(pTHX_ OP* cond, OP *block, I32 enter_opcode, I32 leave
 			__attribute__nonnull__(pTHX_2);
 
 STATIC OP*	S_ref_array_or_hash(pTHX_ OP* cond);
+STATIC void	S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv, CV *const cv)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+
 #endif
 #if defined(PL_OP_SLAB_ALLOC)
 PERL_CALLCONV void*	Perl_Slab_Alloc(pTHX_ int m, size_t sz)
