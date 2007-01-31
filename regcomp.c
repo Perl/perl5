@@ -5075,8 +5075,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     nextchar(pRExC_state);
                     return ret;
                 }
-                goto unknown;
-	    case '<':           /* (?<...) */
+                RExC_parse++;
+		vFAIL3("Sequence (%.*s...) not recognized", RExC_parse-seqstart, seqstart);
+		/*NOTREACHED*/
+            case '<':           /* (?<...) */
 		if (*RExC_parse == '!')
 		    paren = ',';
 		else if (*RExC_parse != '=') 
@@ -5091,8 +5093,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     		        SIZE_ONLY ?  /* reverse test from the others */
     		        REG_RSN_RETURN_NAME : 
     		        REG_RSN_RETURN_NULL);
-		    if (RExC_parse == name_start)
-		        goto unknown;
+		    if (RExC_parse == name_start) {
+		        RExC_parse++;
+		        vFAIL3("Sequence (%.*s...) not recognized", RExC_parse-seqstart, seqstart);
+		        /*NOTREACHED*/
+                    }
 		    if (*RExC_parse != paren)
 		        vFAIL2("Sequence (?%c... not terminated",
 		            paren=='>' ? '<' : paren);
@@ -5261,8 +5266,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		/* FALL THROUGH*/
 	    case '?':           /* (??...) */
 		is_logical = 1;
-		if (*RExC_parse != '{')
-		    goto unknown;
+		if (*RExC_parse != '{') {
+		    RExC_parse++;
+		    vFAIL3("Sequence (%.*s...) not recognized", RExC_parse-seqstart, seqstart);
+		    /*NOTREACHED*/
+		}
 		paren = *RExC_parse++;
 		/* FALL THROUGH */
 	    case '{':           /* (?{...}) */
@@ -5508,8 +5516,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         }
 	                break;
                     case '-':
-                        if (flagsp == &negflags)
-                            goto unknown;
+                        if (flagsp == &negflags) {
+                            RExC_parse++;
+		            vFAIL3("Sequence (%.*s...) not recognized", RExC_parse-seqstart, seqstart);
+		            /*NOTREACHED*/
+		        }
 			flagsp = &negflags;
 		        wastedflags = 0;  /* reset so (?g-c) warns twice */
 		        break;
@@ -5529,7 +5540,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		        }
 		        /*NOTREACHED*/
                     default:
-                    unknown:
 		        RExC_parse++;
 		        vFAIL3("Sequence (%.*s...) not recognized", RExC_parse-seqstart, seqstart);
 		        /*NOTREACHED*/
