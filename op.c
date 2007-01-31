@@ -5368,8 +5368,6 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     }
 
     if (name || aname) {
-	const char * const tname = (name ? name : aname);
-
 	if (PERLDB_SUBLINE && PL_curstash != PL_debstash) {
 	    SV * const sv = newSV(0);
 	    SV * const tmpstr = sv_newmortal();
@@ -5395,8 +5393,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    }
 	}
 
-	if (!PL_error_count)
-	    process_special_blocks(tname, gv, cv);
+	if (name && !PL_error_count)
+	    process_special_blocks(name, gv, cv);
     }
 
   done:
