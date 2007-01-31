@@ -1798,6 +1798,8 @@ lib/Getopt/Long/t/gol-basic.t	See if Getopt::Long works
 lib/Getopt/Long/t/gol-compat.t	See if Getopt::Long works
 lib/Getopt/Long/t/gol-linkage.t	See if Getopt::Long works
 lib/Getopt/Long/t/gol-oo.t	See if Getopt::Long works
+lib/Getopt/Long/t/gol-xargv.t	See if Getopt::Long works
+lib/Getopt/Long/t/gol-xstring.t	See if Getopt::Long works
 lib/getopt.pl			Perl library supporting option parsing
 lib/getopts.pl			Perl library supporting option parsing
 lib/Getopt/Std.pm		Fetch command options (getopt, getopts)
