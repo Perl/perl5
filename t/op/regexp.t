@@ -41,6 +41,9 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
 }
+use strict;
+use vars qw($iters $numtests $bang $ffff $nulnul $OP);
+use vars qw($qr $skip_amp $qr_embed); # set by our callers
 
 $iters = shift || 1;		# Poor man performance suite, 10000 is OK.
 
@@ -68,22 +71,21 @@ while (<TESTS>) {
     }
     chomp;
     s/\\n/\n/g;
-    ($pat, $subject, $result, $repl, $expect, $reason) = split(/\t/,$_,6);
-    $input = join(':',$pat,$subject,$result,$repl,$expect);
-    infty_subst(\$pat);
-    infty_subst(\$expect);
+    my ($pat, $subject, $result, $repl, $expect, $reason) = split(/\t/,$_,6);
+    my $input = join(':',$pat,$subject,$result,$repl,$expect);
     $pat = "'$pat'" unless $pat =~ /^[:'\/]/;
     $pat =~ s/(\$\{\w+\})/$1/eeg;
     $pat =~ s/\\n/\n/g;
     $subject = eval qq("$subject");
     $expect  = eval qq("$expect");
     $expect = $repl = '-' if $skip_amp and $input =~ /\$[&\`\']/;
-    $skip = ($skip_amp ? ($result =~ s/B//i) : ($result =~ s/B//));
+    my $skip = ($skip_amp ? ($result =~ s/B//i) : ($result =~ s/B//));
     $reason = 'skipping $&' if $reason eq  '' && $skip_amp;
     $result =~ s/B//i unless $skip;
 
-    for $study ('', 'study $subject') {
- 	$c = $iters;
+    for my $study ('', 'study $subject') {
+	my $c = $iters;
+	my ($code, $match, $got);
         if ($repl eq 'pos') {
             $code= <<EOFCODE;
                 $study;
@@ -103,12 +105,12 @@ EOFCODE
         else {
             $code= <<EOFCODE;
                 $study;
-                \$match = (\$subject =~ $OP$pat$addg) while \$c--;
+                \$match = (\$subject =~ $OP$pat) while \$c--;
                 \$got = "$repl";
 EOFCODE
         }
         eval $code;
-	chomp( $err = $@ );
+	chomp( my $err = $@ );
 	if ($result eq 'c') {
 	    if ($err !~ m!^\Q$expect!) { print "not ok $. (compile) $input => `$err'\n"; next TEST }
 	    last;  # no need to study a syntax error
@@ -142,11 +144,3 @@ EOFCODE
 }
 
 close(TESTS);
-
-sub infty_subst                             # Special-case substitution
-{                                           #  of $reg_infty and friends
-    my $tp = shift;
-    $$tp =~ s/,\$reg_infty_m}/,$reg_infty_m}/o;
-    $$tp =~ s/,\$reg_infty_p}/,$reg_infty_p}/o;
-    $$tp =~ s/,\$reg_infty}/,$reg_infty}/o;
-}

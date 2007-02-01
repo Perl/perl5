@@ -497,7 +497,7 @@ a(?{}})b	-	c	-
 a(?{"{"})b	-	c	-	Sequence (?{...}) not terminated or not {}-balanced
 a(?{"\{"})b	cabd	y	$&	ab
 a(?{"{"}})b	-	c	-	Unmatched right curly bracket
-a(?{$bl="\{"}).b	caxbd	y	$bl	{
+a(?{$::bl="\{"}).b	caxbd	y	$::bl	{
 x(~~)*(?:(?:F)?)?	x~~	y	-	-
 ^a(?#xxx){3}c	aaac	y	$&	aaac
 '^a (?#xxx) (?#yyy) {3}c'x	aaac	y	$&	aaac
