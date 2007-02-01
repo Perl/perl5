@@ -37,24 +37,34 @@
 # Note that columns 2,3 and 5 are all enclosed in double quotes and then
 # evalled; so something like a\"\x{100}$1 has length 3+length($1).
 
+my $file;
 BEGIN {
+    $iters = shift || 1;	# Poor man performance suite, 10000 is OK.
+
+    # Do this open before any chdir
+    $file = shift;
+    if (defined $file) {
+	open TESTS, $file or die "Can't open $file";
+    }
+
     chdir 't' if -d 't';
     @INC = '../lib';
 }
+
 use strict;
 use warnings FATAL=>"all";
 use vars qw($iters $numtests $bang $ffff $nulnul $OP);
 use vars qw($qr $skip_amp $qr_embed); # set by our callers
 
-$iters = shift || 1;		# Poor man performance suite, 10000 is OK.
 
-open(TESTS,'op/re_tests') || open(TESTS,'t/op/re_tests') || open(TESTS,':op:re_tests') ||
-	die "Can't open re_tests";
+if (!defined $file) {
+    open(TESTS,'op/re_tests') || open(TESTS,'t/op/re_tests')
+	|| open(TESTS,':op:re_tests') || die "Can't open re_tests";
+}
 
-while (<TESTS>) { }
-$numtests = $.;
-seek(TESTS,0,0);
-$. = 0;
+my @tests = <TESTS>;
+
+close TESTS;
 
 $bang = sprintf "\\%03o", ord "!"; # \41 would not be portable.
 $ffff  = chr(0xff) x 2;
@@ -62,11 +72,13 @@ $nulnul = "\0" x 2;
 $OP = $qr ? 'qr' : 'm';
 
 $| = 1;
-print "1..$numtests\n# $iters iterations\n";
+printf "1..%d\n# $iters iterations\n", scalar @tests;
+my $test;
 TEST:
-while (<TESTS>) {
+foreach (@tests) {
+    $test++;
     if (!/\S/ || /^\s*#/) {
-        print "ok $. # (Blank line or comment)\n";
+        print "ok $test # (Blank line or comment)\n";
         if (/\S/) { print $_ };
         next;
     }
@@ -78,8 +90,8 @@ while (<TESTS>) {
     $pat = "'$pat'" unless $pat =~ /^[:'\/]/;
     $pat =~ s/(\$\{\w+\})/$1/eeg;
     $pat =~ s/\\n/\n/g;
-    $subject = eval qq("$subject");
-    $expect  = eval qq("$expect");
+    $subject = eval qq("$subject"); die $@ if $@;
+    $expect  = eval qq("$expect"); die $@ if $@;
     $expect = $repl = '-' if $skip_amp and $input =~ /\$[&\`\']/;
     my $skip = ($skip_amp ? ($result =~ s/B//i) : ($result =~ s/B//));
     $reason = 'skipping $&' if $reason eq  '' && $skip_amp;
@@ -120,35 +132,35 @@ EOFCODE
 	}
 	chomp( my $err = $@ );
 	if ($result eq 'c') {
-	    if ($err !~ m!^\Q$expect!) { print "not ok $. (compile) $input => `$err'\n"; next TEST }
+	    if ($err !~ m!^\Q$expect!) { print "not ok $test (compile) $input => `$err'\n"; next TEST }
 	    last;  # no need to study a syntax error
 	}
 	elsif ( $skip ) {
-	    print "ok $. # skipped", length($reason) ? " $reason" : '', "\n";
+	    print "ok $test # skipped", length($reason) ? " $reason" : '', "\n";
 	    next TEST;
 	}
 	elsif ($@) {
-	    print "not ok $. $input => error `$err'\n$code\n$@\n"; next TEST;
+	    print "not ok $test $input => error `$err'\n$code\n$@\n"; next TEST;
 	}
 	elsif ($result eq 'n') {
-	    if ($match) { print "not ok $. ($study) $input => false positive\n"; next TEST }
+	    if ($match) { print "not ok $test ($study) $input => false positive\n"; next TEST }
 	}
 	else {
 	    if (!$match || $got ne $expect) {
 	        eval { require Data::Dumper };
 		if ($@) {
-		    print "not ok $. ($study) $input => `$got', match=$match\n$code\n";
+		    print "not ok $test ($study) $input => `$got', match=$match\n$code\n";
 		}
 		else { # better diagnostics
 		    my $s = Data::Dumper->new([$subject],['subject'])->Useqq(1)->Dump;
 		    my $g = Data::Dumper->new([$got],['got'])->Useqq(1)->Dump;
-		    print "not ok $. ($study) $input => `$got', match=$match\n$s\n$g\n$code\n";
+		    print "not ok $test ($study) $input => `$got', match=$match\n$s\n$g\n$code\n";
 		}
 		next TEST;
 	    }
 	}
     }
-    print "ok $.\n";
+    print "ok $test\n";
 }
 
-close(TESTS);
+1;
