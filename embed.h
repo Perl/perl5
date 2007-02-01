@@ -1382,6 +1382,7 @@
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define reghopmaybe3		S_reghopmaybe3
 #define find_byclass		S_find_byclass
+#define swap_match_buff		S_swap_match_buff
 #define to_utf8_substr		S_to_utf8_substr
 #define to_byte_substr		S_to_byte_substr
 #define reg_check_named_buff_matched	S_reg_check_named_buff_matched
@@ -3591,6 +3592,7 @@
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define reghopmaybe3		S_reghopmaybe3
 #define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)
+#define swap_match_buff(a)	S_swap_match_buff(aTHX_ a)
 #define to_utf8_substr(a)	S_to_utf8_substr(aTHX_ a)
 #define to_byte_substr(a)	S_to_byte_substr(aTHX_ a)
 #define reg_check_named_buff_matched(a,b)	S_reg_check_named_buff_matched(aTHX_ a,b)

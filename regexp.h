@@ -310,16 +310,41 @@ typedef struct regmatch_state {
 	    struct regmatch_state *prev_yes_state;
 	} yes;
 
-	struct {
+        /* branchlike members */
+        /* this is a fake union member that matches the first elements
+         * of each member that needs to behave like a branch */
+        struct {
 	    /* this first element must match u.yes */
 	    struct regmatch_state *prev_yes_state;
-	    reg_trie_accepted *accept_buff;
+	    U32 lastparen;
+	    CHECKPOINT cp;
+	    
+        } branchlike;
+        	    
+	struct {
+	    /* the first elements must match u.branchlike */
+	    struct regmatch_state *prev_yes_state;
+	    U32 lastparen;
+	    CHECKPOINT cp;
+	    
+	    regnode *next_branch; /* next branch node */
+	} branch;
+
+	struct {
+	    /* the first elements must match u.branchlike */
+	    struct regmatch_state *prev_yes_state;
+	    U32 lastparen;
+	    CHECKPOINT cp;
+
+	    reg_trie_accepted *accept_buff; /* accepting states we have seen */
 	    U32		accepted; /* how many accepting states we have seen */
 	    U16         *jump;  /* positive offsets from me */
 	    regnode	*B;	/* node following the trie */
 	    regnode	*me;	/* Which node am I - needed for jump tries*/
 	} trie;
 
+        /* special types - these members are used to store state for special
+           regops like eval, if/then, lookaround and the markpoint state */
 	struct {
 	    /* this first element must match u.yes */
 	    struct regmatch_state *prev_yes_state;
@@ -335,6 +360,28 @@ typedef struct regmatch_state {
 	    U32        close_paren; /* which close bracket is our end */
 	} eval;
 
+	struct {
+	    /* this first element must match u.yes */
+	    struct regmatch_state *prev_yes_state;
+	    I32 wanted;
+	    I32 logical;	/* saved copy of 'logical' var */
+	    regnode  *me; /* the IFMATCH/SUSPEND/UNLESSM node  */
+	} ifmatch; /* and SUSPEND/UNLESSM */
+	
+	struct {
+	    /* this first element must match u.yes */
+	    struct regmatch_state *prev_yes_state;
+	    struct regmatch_state *prev_mark;
+	    SV* mark_name;
+	    char *mark_loc;
+	} mark;
+	
+	struct {
+	    int val;
+	} keeper;
+
+        /* quantifiers - these members are used for storing state for
+           for the regops used to implement quantifiers */
 	struct {
 	    /* this first element must match u.yes */
 	    struct regmatch_state *prev_yes_state;
@@ -365,14 +412,6 @@ typedef struct regmatch_state {
 	struct {
 	    /* this first element must match u.yes */
 	    struct regmatch_state *prev_yes_state;
-	    U32 lastparen;
-	    regnode *next_branch; /* next branch node */
-	    CHECKPOINT cp;
-	} branch;
-
-	struct {
-	    /* this first element must match u.yes */
-	    struct regmatch_state *prev_yes_state;
 	    I32 c1, c2;		/* case fold search */
 	    CHECKPOINT cp;
 	    I32 alen;		/* length of first-matched A string */
@@ -393,25 +432,6 @@ typedef struct regmatch_state {
 	    regnode *A, *B;	/* the nodes corresponding to /A*B/  */
 	} curly; /* and CURLYN/PLUS/STAR */
 
-	struct {
-	    /* this first element must match u.yes */
-	    struct regmatch_state *prev_yes_state;
-	    I32 wanted;
-	    I32 logical;	/* saved copy of 'logical' var */
-	    regnode  *me; /* the IFMATCH/SUSPEND/UNLESSM node  */
-	} ifmatch; /* and SUSPEND/UNLESSM */
-	
-	struct {
-	    /* this first element must match u.yes */
-	    struct regmatch_state *prev_yes_state;
-	    struct regmatch_state *prev_mark;
-	    SV* mark_name;
-	    char *mark_loc;
-	} mark;
-	
-	struct {
-	    int val;
-	} keeper;
     } u;
 } regmatch_state;
 

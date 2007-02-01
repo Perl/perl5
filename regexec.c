@@ -1646,6 +1646,33 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	return s;
 }
 
+void 
+S_swap_match_buff (pTHX_ regexp *prog) {
+    I32 *t;
+    RXi_GET_DECL(prog,progi);
+
+    if (!progi->swap) {
+    /* We have to be careful. If the previous successful match
+       was from this regex we don't want a subsequent paritally
+       successful match to clobber the old results. 
+       So when we detect this possibility we add a swap buffer
+       to the re, and switch the buffer each match. If we fail
+       we switch it back, otherwise we leave it swapped.
+    */
+        Newxz(progi->swap, 1, regexp_paren_ofs);
+        /* no need to copy these */
+        Newxz(progi->swap->startp, prog->nparens + 1, I32);
+        Newxz(progi->swap->endp, prog->nparens + 1, I32);
+    }
+    t = progi->swap->startp;
+    progi->swap->startp = prog->startp;
+    prog->startp = t;
+    t = progi->swap->endp;
+    progi->swap->endp = prog->endp;
+    prog->endp = t;
+}    
+
+
 /*
  - regexec_flags - match a regexp against a string
  */
@@ -1674,6 +1701,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     I32 multiline;
     RXi_GET_DECL(prog,progi);
     regmatch_info reginfo;  /* create some info to pass to regtry etc */
+    bool swap_on_fail = 0;
 
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -1751,26 +1779,9 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    reginfo.ganch = strbeg;
     }
     if (PL_curpm && (PM_GETRE(PL_curpm) == prog)) {
-        I32 *t;
-        if (!progi->swap) {
-        /* We have to be careful. If the previous successful match
-           was from this regex we don't want a subsequent paritally
-           successful match to clobber the old results. 
-           So when we detect this possibility we add a swap buffer
-           to the re, and switch the buffer each match. If we fail
-           we switch it back, otherwise we leave it swapped.
-        */
-            Newxz(progi->swap, 1, regexp_paren_ofs);
-            /* no need to copy these */
-            Newxz(progi->swap->startp, prog->nparens + 1, I32);
-            Newxz(progi->swap->endp, prog->nparens + 1, I32);
-        }
-        t = progi->swap->startp;
-        progi->swap->startp = prog->startp;
-        prog->startp = t;
-        t = progi->swap->endp;
-        progi->swap->endp = prog->endp;
-        prog->endp = t;
+        swap_on_fail = 1;
+        swap_match_buff(prog); /* do we need a save destructor here for
+                                  eval dies? */
     }
     if (!(flags & REXEC_CHECKED) && (prog->check_substr != NULL || prog->check_utf8 != NULL)) {
 	re_scream_pos_data d;
@@ -2120,16 +2131,10 @@ phooey:
 			  PL_colors[4], PL_colors[5]));
     if (PL_reg_eval_set)
 	restore_pos(aTHX_ prog);
-    if (progi->swap) {
+    if (swap_on_fail) 
         /* we failed :-( roll it back */
-        I32 *t;
-        t = progi->swap->startp;
-        progi->swap->startp = prog->startp;
-        prog->startp = t;
-        t = progi->swap->endp;
-        progi->swap->endp = prog->endp;
-        prog->endp = t;
-    }
+        swap_match_buff(prog);
+    
     return 0;
 }
 
@@ -2869,7 +2874,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		ST.B = next;
 		ST.jump = trie->jump;
 		ST.me = scan;
-                
 	        /*
         	   traverse the TRIE keeping track of all accepting states
         	   we transition through until we get to a failing node.
@@ -2967,13 +2971,25 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			PL_colors[4], (IV)ST.accepted, PL_colors[5] );
 		);
 	    }}
-
-	    /* FALL THROUGH */
+            goto trie_first_try; /* jump into the fail handler */
+	    /* NOTREACHED */
 	case TRIE_next_fail: /* we failed - try next alterative */
+            if ( ST.jump) {
+                REGCP_UNWIND(ST.cp);
+	        for (n = *PL_reglastparen; n > ST.lastparen; n--)
+		    PL_regendp[n] = -1;
+	        *PL_reglastparen = n;
+	    }
+          trie_first_try:
             if (do_cutgroup) {
                 do_cutgroup = 0;
                 no_final = 0;
             }
+
+            if ( ST.jump) {
+                ST.lastparen = *PL_reglastparen;
+	        REGCP_SET(ST.cp);
+            }	        
 	    if ( ST.accepted == 1 ) {
 		/* only one choice left - just continue */
 		DEBUG_EXECUTE_r({
@@ -3014,8 +3030,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		
 		continue; /* execute rest of RE */
 	    }
-
-	    if (!ST.accepted-- ) {
+	    
+	    if ( !ST.accepted-- ) {
 	        DEBUG_EXECUTE_r({
 		    PerlIO_printf( Perl_debug_log,
 			"%*s  %sTRIE failed...%s\n",
@@ -3026,7 +3042,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		FREETMPS;
 		LEAVE;
 		sayNO_SILENT;
-	    }
+		/*NOTREACHED*/
+	    } 
 
 	    /*
 	       There are at least two accepting states left.  Presumably

@@ -3791,6 +3791,9 @@ STATIC char*	S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, cons
 			__attribute__nonnull__(pTHX_3)
 			__attribute__nonnull__(pTHX_4);
 
+STATIC void	S_swap_match_buff(pTHX_ regexp * prog)
+			__attribute__nonnull__(pTHX_1);
+
 STATIC void	S_to_utf8_substr(pTHX_ regexp * prog)
 			__attribute__nonnull__(pTHX_1);
 
