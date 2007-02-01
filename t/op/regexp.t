@@ -42,6 +42,7 @@ BEGIN {
     @INC = '../lib';
 }
 use strict;
+use warnings FATAL=>"all";
 use vars qw($iters $numtests $bang $ffff $nulnul $OP);
 use vars qw($qr $skip_amp $qr_embed); # set by our callers
 
@@ -72,6 +73,7 @@ while (<TESTS>) {
     chomp;
     s/\\n/\n/g;
     my ($pat, $subject, $result, $repl, $expect, $reason) = split(/\t/,$_,6);
+    $reason = '' unless defined $reason;
     my $input = join(':',$pat,$subject,$result,$repl,$expect);
     $pat = "'$pat'" unless $pat =~ /^[:'\/]/;
     $pat =~ s/(\$\{\w+\})/$1/eeg;
@@ -109,7 +111,13 @@ EOFCODE
                 \$got = "$repl";
 EOFCODE
         }
-        eval $code;
+	{
+	    # Probably we should annotate specific tests with which warnings
+	    # categories they're known to trigger, and hence should be
+	    # disabled just for that test
+	    no warnings qw(uninitialized regexp);
+	    eval $code;
+	}
 	chomp( my $err = $@ );
 	if ($result eq 'c') {
 	    if ($err !~ m!^\Q$expect!) { print "not ok $. (compile) $input => `$err'\n"; next TEST }
