@@ -5690,10 +5690,18 @@ S_to_utf8_substr(pTHX_ register regexp *prog)
 	    SV* const sv = newSVsv(prog->substrs->data[i].substr);
 	    prog->substrs->data[i].utf8_substr = sv;
 	    sv_utf8_upgrade(sv);
-	    if (SvVALID(prog->substrs->data[i].substr))
-		fbm_compile(sv, 0);
-	    if (SvTAIL(prog->substrs->data[i].substr))
-		SvTAIL_on(sv);
+	    if (SvVALID(prog->substrs->data[i].substr)) {
+		const U8 flags = BmFLAGS(prog->substrs->data[i].substr);
+		if (flags & FBMcf_TAIL) {
+		    /* Trim the trailing \n that fbm_compile added last
+		       time.  */
+		    SvCUR_set(sv, SvCUR(sv) - 1);
+		    /* Whilst this makes the SV technically "invalid" (as its
+		       buffer is no longer followed by "\0") when fbm_compile()
+		       adds the "\n" back, a "\0" is restored.  */
+		}
+		fbm_compile(sv, flags);
+	    }
 	    if (prog->substrs->data[i].substr == prog->check_substr)
 		prog->check_utf8 = sv;
 	}
@@ -5710,10 +5718,16 @@ S_to_byte_substr(pTHX_ register regexp *prog)
 	    && !prog->substrs->data[i].substr) {
 	    SV* sv = newSVsv(prog->substrs->data[i].utf8_substr);
 	    if (sv_utf8_downgrade(sv, TRUE)) {
-		if (SvVALID(prog->substrs->data[i].utf8_substr))
-		    fbm_compile(sv, 0);
-		if (SvTAIL(prog->substrs->data[i].utf8_substr))
-		    SvTAIL_on(sv);
+		if (SvVALID(prog->substrs->data[i].utf8_substr)) {
+		    const U8 flags
+			= BmFLAGS(prog->substrs->data[i].utf8_substr);
+		    if (flags & FBMcf_TAIL) {
+			/* Trim the trailing \n that fbm_compile added last
+			   time.  */
+			SvCUR_set(sv, SvCUR(sv) - 1);
+		    }
+		    fbm_compile(sv, flags);
+		}	    
 	    } else {
 		SvREFCNT_dec(sv);
 		sv = &PL_sv_undef;

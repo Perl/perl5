@@ -504,7 +504,6 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	    = (unsigned char*)(SvPVX_mutable(sv) + len + PERL_FBM_TABLE_OFFSET);
 	s = table - 1 - PERL_FBM_TABLE_OFFSET;	/* last char */
 	memset((void*)table, mlen, 256);
-	BmFLAGS(sv) = (U8)flags;
 	i = 0;
 	sb = s - mlen + 1;			/* first char (maybe) */
 	while (s >= sb) {
@@ -524,6 +523,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	    frequency = PL_freq[s[i]];
 	}
     }
+    BmFLAGS(sv) = (U8)flags;
     BmRARE(sv) = s[rarest];
     BmPREVIOUS(sv) = rarest;
     BmUSEFUL(sv) = 100;			/* Initial value */
