@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.51';
+$VERSION = '1.53';
 require 5.005;
 
 require Exporter;
@@ -67,7 +67,7 @@ my $LOG_10_A = length($LOG_10)-1;
 my $LOG_2 = 
  '0.6931471805599453094172321214581765680755001343602552541206800094933936220';
 my $LOG_2_A = length($LOG_2)-1;
-my $HALF = '0.5';			# made into an object if necc.
+my $HALF = '0.5';			# made into an object if nec.
 
 ##############################################################################
 # the old code had $rnd_mode, so we need to support it, too
@@ -80,7 +80,10 @@ BEGIN
   {
   # when someone set's $rnd_mode, we catch this and check the value to see
   # whether it is valid or not. 
-  $rnd_mode   = 'even'; tie $rnd_mode, 'Math::BigFloat'; 
+  $rnd_mode   = 'even'; tie $rnd_mode, 'Math::BigFloat';
+
+  # we need both of them in this package:
+  *as_int = \&as_number;
   }
  
 ##############################################################################
@@ -92,7 +95,7 @@ BEGIN
         fint facmp fcmp fzero fnan finf finc fdec flog ffac fneg
 	fceil ffloor frsft flsft fone flog froot
       /;
-  # valid method's that can be hand-ed up (for AUTOLOAD)
+  # valid methods that can be handed up (for AUTOLOAD)
   my %hand_ups = map { $_ => 1 }  
    qw / is_nan is_inf is_negative is_positive is_pos is_neg
         accuracy precision div_scale round_mode fabs fnot
@@ -100,8 +103,8 @@ BEGIN
 	bone binf bnan bzero
       /;
 
-  sub method_alias { exists $methods{$_[0]||''}; } 
-  sub method_hand_up { exists $hand_ups{$_[0]||''}; } 
+  sub _method_alias { exists $methods{$_[0]||''}; } 
+  sub _method_hand_up { exists $hand_ups{$_[0]||''}; } 
 }
 
 ##############################################################################
@@ -1953,9 +1956,6 @@ sub bpow
   return $x->bnan() if $x->{sign} eq $nan || $y->{sign} eq $nan;
   return $x if $x->{sign} =~ /^[+-]inf$/;
   
-  # -2 ** -2 => NaN
-  return $x->bnan() if $x->{sign} eq '-' && $y->{sign} eq '-';
-
   # cache the result of is_zero
   my $y_is_zero = $y->is_zero();
   return $x->bone() if $y_is_zero;
@@ -1993,7 +1993,7 @@ sub bpow
     {
     # modify $x in place!
     my $z = $x->copy(); $x->bone();
-    return $x->bdiv($z,$a,$p,$r);	# round in one go (might ignore y's A!)
+    return scalar $x->bdiv($z,$a,$p,$r);	# round in one go (might ignore y's A!)
     }
   $x->round($a,$p,$r,$y);
   }
@@ -2206,6 +2206,11 @@ sub brsft
   return $x if $x->{sign} !~ /^[+-]$/;	# nan, +inf, -inf
 
   $n = 2 if !defined $n; $n = $self->new($n);
+
+  # negative amount?
+  return $x->blsft($y->copy()->babs(),$n) if $y->{sign} =~ /^-/;
+
+  # the following call to bdiv() will return either quo or (quo,reminder):
   $x->bdiv($n->bpow($y),$a,$p,$r,$y);
   }
 
@@ -2225,6 +2230,10 @@ sub blsft
   return $x if $x->{sign} !~ /^[+-]$/;	# nan, +inf, -inf
 
   $n = 2 if !defined $n; $n = $self->new($n);
+
+  # negative amount?
+  return $x->brsft($y->copy()->babs(),$n) if $y->{sign} =~ /^-/;
+
   $x->bmul($n->bpow($y),$a,$p,$r,$y);
   }
 
@@ -2245,7 +2254,7 @@ sub AUTOLOAD
   my $c = $1 || $class;
   no strict 'refs';
   $c->import() if $IMPORT == 0;
-  if (!method_alias($name))
+  if (!_method_alias($name))
     {
     if (!defined $name)
       {
@@ -2253,7 +2262,7 @@ sub AUTOLOAD
       require Carp;
       Carp::croak ("$c: Can't call a method without name");
       }
-    if (!method_hand_up($name))
+    if (!_method_hand_up($name))
       {
       # delayed load of Carp and avoid recursion	
       require Carp;
@@ -2368,7 +2377,7 @@ sub import
   if ((defined $mbilib) && ($MBI eq 'Math::BigInt::Calc'))
     {
     # MBI already loaded
-    Math::BigInt->import('lib',"$lib,$mbilib", 'objectify');
+    Math::BigInt->import('try',"$lib,$mbilib", 'objectify');
     }
   else
     {
@@ -2381,7 +2390,7 @@ sub import
     # Perl < 5.6.0 dies with "out of memory!" when eval() and ':constant' is
     # used in the same script, or eval inside import(). So we require MBI:
     require Math::BigInt;
-    Math::BigInt->import( lib => $lib, 'objectify' );
+    Math::BigInt->import( try => $lib, 'objectify' );
     }
   if ($@)
     {
@@ -2479,6 +2488,25 @@ sub as_bin
     }
   $z = Math::BigInt->new( $x->{sign} . $MBI->_num($z));
   $z->as_bin();
+  }
+
+sub as_oct
+  {
+  # return number as octal digit string (only for integers defined)
+  my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
+
+  return $x->bstr() if $x->{sign} !~ /^[+-]$/;  # inf, nan etc
+  return '0' if $x->is_zero();
+
+  return $nan if $x->{_es} ne '+';		# how to do 1e-1 in hex!?
+
+  my $z = $MBI->_copy($x->{_m});
+  if (! $MBI->_is_zero($x->{_e}))		# > 0 
+    {
+    $MBI->_lsft( $z, $x->{_e},10);
+    }
+  $z = Math::BigInt->new( $x->{sign} . $MBI->_num($z));
+  $z->as_oct();
   }
 
 sub as_number
@@ -2582,9 +2610,9 @@ Math::BigFloat - Arbitrary size floating point math package
 
   $x->bmod($y);			# modulus ($x % $y)
   $x->bpow($y);			# power of arguments ($x ** $y)
-  $x->blsft($y);		# left shift
-  $x->brsft($y);		# right shift 
-				# return (quo,rem) or quo if scalar
+  $x->blsft($y, $n);		# left shift by $y places in base $n
+  $x->brsft($y, $n);		# right shift by $y places in base $n
+				# returns (quo,rem) or quo if in scalar context
   
   $x->blog();			# logarithm of $x to base e (Euler's number)
   $x->blog($base);		# logarithm of $x to base $base (f.i. 2)
@@ -2973,7 +3001,7 @@ don't specify it onem but if you specify one, it will try to load them.
 Actually, the lib loading order would be "Bar,Baz,Calc", and then
 "Foo,Bar,Baz,Calc", but independent of which lib exists, the result is the
 same as trying the latter load alone, except for the fact that one of Bar or
-Baz might be loaded needlessly in an intermediate step (and thus hang around
+Baz might be loaded needlessly in an intermidiate step (and thus hang around
 and waste memory). If neither Bar nor Baz exist (or don't work/compile), they
 will still be tried to be loaded, but this is not as time/memory consuming as
 actually loading one of them. Still, this type of usage is not recommended due
@@ -2994,7 +3022,7 @@ You can even load Math::BigInt afterwards:
 But this has the same problems like #5, it will first load Calc
 (Math::BigFloat needs Math::BigInt and thus loads it) and then later Bar or
 Baz, depending on which of them works and is usable/loadable. Since this
-loads Calc unnecc., it is not recommended.
+loads Calc unnec., it is not recommended.
 
 Since it also possible to just require Math::BigFloat, this poses the question
 about what libary this will use:
@@ -3041,7 +3069,7 @@ reasoning and details.
 
 =item bdiv
 
-The following will probably not do what you expect:
+The following will probably not print what you expect:
 
 	print $c->bdiv(123.456),"\n";
 
@@ -3050,6 +3078,23 @@ bdiv() will modify $c, so be careful. You probably want to use
 	
 	print $c / 123.456,"\n";
 	print scalar $c->bdiv(123.456),"\n";  # or if you want to modify $c
+
+instead.
+
+=item brsft
+
+The following will probably not print what you expect:
+
+	my $c = Math::BigFloat->new('3.14159');
+        print $c->brsft(3,10),"\n";	# prints 0.00314153.1415
+
+It prints both quotient and remainder, since print calls C<brsft()> in list
+context. Also, C<< $c->brsft() >> will modify $c, so be careful.
+You probably want to use
+
+	print scalar $c->copy()->brsft(3,10),"\n";
+	# or if you really want to modify $c
+        print scalar $c->brsft(3,10),"\n";
 
 instead.
 
@@ -3128,8 +3173,7 @@ L<Math::BigInt::BitVect>, L<Math::BigInt::Pari> and  L<Math::BigInt::GMP>.
 The pragmas L<bignum>, L<bigint> and L<bigrat> might also be of interest
 because they solve the autoupgrading/downgrading issue, at least partly.
 
-The package at
-L<http://search.cpan.org/search?mode=module&query=Math%3A%3ABigInt> contains
+The package at L<http://search.cpan.org/~tels/Math-BigInt> contains
 more documentation including a full version history, testcases, empty
 subclass files and benchmarks.
 
@@ -3141,7 +3185,7 @@ the same terms as Perl itself.
 =head1 AUTHORS
 
 Mark Biggar, overloaded interface by Ilya Zakharevich.
-Completely rewritten by Tels L<http://bloodgate.com> in 2001 - 2004, and still
-at it in 2005.
+Completely rewritten by Tels L<http://bloodgate.com> in 2001 - 2006, and still
+at it in 2007.
 
 =cut

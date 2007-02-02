@@ -11,7 +11,7 @@ use vars qw/@ISA $VERSION $BASE $BASE_LEN/;
 
 @ISA = qw(DynaLoader);
 
-$VERSION = '0.10_01';
+$VERSION = '0.11';
 
 bootstrap Math::BigInt::FastCalc $VERSION;
 
@@ -33,7 +33,7 @@ BEGIN
     gcd
     pow root sqrt log_int fac
     digit check
-    from_hex from_bin as_hex as_bin
+    from_hex from_bin from_oct as_hex as_bin as_oct
     zeros length base_len
     xor or and
     /)
@@ -113,7 +113,7 @@ Original math code by Mark Biggar, rewritten by Tels L<http://bloodgate.com/>
 in late 2000.
 Seperated from BigInt and shaped API with the help of John Peacock.
 Fixed, sped-up and enhanced by Tels http://bloodgate.com 2001-2003.
-Further streamlining (api_version 1 etc) by Tels 2004-2005.
+Further streamlining (api_version 1 etc.) by Tels 2004-2007.
 
 =head1 SEE ALSO
 

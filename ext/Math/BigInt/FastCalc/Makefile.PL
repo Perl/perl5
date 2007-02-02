@@ -1,15 +1,14 @@
 use ExtUtils::MakeMaker;
 
-my @extra;
-my $PERL_CORE = grep $_ eq "PERL_CORE=1", @ARGV;
-push @extra, 'MAN3PODS' => {} if $PERL_CORE;
-push @extra, 'INSTALLDIRS'  => 'perl' if $] >= 5.00903;
+use strict;
 
 WriteMakefile(
     'NAME'		=> 'Math::BigInt::FastCalc',
-    'VERSION_FROM'	=> 'FastCalc.pm',	# finds $VERSION
+    'VERSION_FROM'	=> 'FastCalc.pm',
     'PREREQ_PM'		=> {
-	Math::BigInt => 1.76,
+	'Math::BigInt' => 1.79,
     },
-    @extra,
-);
+    INSTALLDIRS		=> 'perl',
+    PREREQ_FATAL	=> 1,
+    MAN3PODS		=> {},
+ );

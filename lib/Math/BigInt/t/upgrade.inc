@@ -1277,10 +1277,13 @@ abc:12:NaN
 2:2:4
 2:3:8
 3:3:27
-2:-1:NaN
--2:-1:NaN
-2:-2:NaN
--2:-2:NaN
+2:-1:0.5^
+-2:-1:-0.5^
+2:-2:0.25^
+# Y is even => result positive
+-2:-2:0.25^
+# Y is odd => result negative
+-2:-3:-0.125^
 +inf:1234500012:inf
 -inf:1234500012:inf
 -inf:1234500013:-inf

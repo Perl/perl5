@@ -8,11 +8,12 @@ BEGIN
   $| = 1;
   chdir 't' if -d 't';
   unshift @INC, '../lib';		# for running manually
-  if ($^O eq 'unicos') {
+  if ($^O eq 'unicos')			# the tests hang under "unicos"
+    {
     print "1..0\n";
     exit(0);
-  }
-  plan tests => 308;
+    }
+  plan tests => 322;
   }
 
 use Math::BigInt::Calc;
@@ -363,19 +364,36 @@ ok ($C->_str(scalar $C->_or($x,$y)),7);
 $x = $C->_new("5"); $y = $C->_new("3");
 ok ($C->_str(scalar $C->_and($x,$y)),1);
 
-# _from_hex, _from_bin
+# _from_hex, _from_bin, _from_oct
 ok ($C->_str( $C->_from_hex("0xFf")),255);
 ok ($C->_str( $C->_from_bin("0b10101011")),160+11);
+ok ($C->_str( $C->_from_oct("0100")), 8*8);
+ok ($C->_str( $C->_from_oct("01000")), 8*8*8);
+ok ($C->_str( $C->_from_oct("010001")), 8*8*8*8+1);
+ok ($C->_str( $C->_from_oct("010007")), 8*8*8*8+7);
 
-# _as_hex, _as_bin
+# _as_hex, _as_bin, as_oct
 ok ($C->_str( $C->_from_hex( $C->_as_hex( $C->_new("128")))), 128);
 ok ($C->_str( $C->_from_bin( $C->_as_bin( $C->_new("128")))), 128);
+ok ($C->_str( $C->_from_oct( $C->_as_oct( $C->_new("128")))), 128);
+
+ok ($C->_str( $C->_from_oct( $C->_as_oct( $C->_new("123456")))), 123456);
+ok ($C->_str( $C->_from_oct( $C->_as_oct( $C->_new("123456789")))), "123456789");
+ok ($C->_str( $C->_from_oct( $C->_as_oct( $C->_new("1234567890123")))), "1234567890123");
+
+my $long = '123456789012345678901234567890';
+ok ($C->_str( $C->_from_hex( $C->_as_hex( $C->_new($long)))), $long);
+ok ($C->_str( $C->_from_bin( $C->_as_bin( $C->_new($long)))), $long);
+ok ($C->_str( $C->_from_oct( $C->_as_oct( $C->_new($long)))), $long);
 ok ($C->_str( $C->_from_hex( $C->_as_hex( $C->_new("0")))), 0);
 ok ($C->_str( $C->_from_bin( $C->_as_bin( $C->_new("0")))), 0);
+ok ($C->_str( $C->_from_oct( $C->_as_oct( $C->_new("0")))), 0);
 ok ($C->_as_hex( $C->_new("0")), '0x0');
 ok ($C->_as_bin( $C->_new("0")), '0b0');
+ok ($C->_as_oct( $C->_new("0")), '00');
 ok ($C->_as_hex( $C->_new("12")), '0xc');
 ok ($C->_as_bin( $C->_new("12")), '0b1100');
+ok ($C->_as_oct( $C->_new("64")), '0100');
 
 # _check
 $x = $C->_new("123456789");

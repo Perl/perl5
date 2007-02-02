@@ -6,7 +6,7 @@ use strict;
 
 use vars qw/$VERSION/;
 
-$VERSION = '0.47';
+$VERSION = '0.48';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -272,7 +272,7 @@ sub _add
   return $x if (@$y == 1) && $y->[0] == 0;		# $x + 0 => $x
   if ((@$x == 1) && $x->[0] == 0)			# 0 + $y => $y->copy
     {
-    # twice as slow as $x = [ @$y ], but necc. to retain $x as ref :(
+    # twice as slow as $x = [ @$y ], but nec. to retain $x as ref :(
     @$x = @$y; return $x;		
     }
  
@@ -1740,7 +1740,7 @@ sub _as_hex
   while (@$x1 != 1 || $x1->[0] != 0)		# _is_zero()
     {
     ($x1, $xr) = _div($c,$x1,$x10000);
-    $es .= unpack($h,pack('v',$xr->[0]));	# XXX TODO: why pack('v',...)?
+    $es .= unpack($h,pack('V',$xr->[0]));
     }
   $es = reverse $es;
   $es =~ s/^[0]+//;   # strip leading zeros
@@ -1778,12 +1778,60 @@ sub _as_bin
   while (!(@$x1 == 1 && $x1->[0] == 0))		# _is_zero()
     {
     ($x1, $xr) = _div($c,$x1,$x10000);
-    $es .= unpack($b,pack('v',$xr->[0]));	# XXX TODO: why pack('v',...)?
-    # $es .= unpack($b,$xr->[0]);
+    $es .= unpack($b,pack('v',$xr->[0]));
     }
   $es = reverse $es;
   $es =~ s/^[0]+//;   # strip leading zeros
   '0b' . $es;					# return result prepended with 0b
+  }
+
+sub _as_oct
+  {
+  # convert a decimal number to octal (ref to array, return ref to string)
+  my ($c,$x) = @_;
+
+  # fit's into one element (handle also 0 case)
+  return sprintf("0%o",$x->[0]) if @$x == 1;
+
+  my $x1 = _copy($c,$x);
+
+  my $es = '';
+  my $xr;
+  my $x1000 = [ 0100000 ];
+  while (@$x1 != 1 || $x1->[0] != 0)		# _is_zero()
+    {
+    ($x1, $xr) = _div($c,$x1,$x1000);
+    $es .= reverse sprintf("%05o", $xr->[0]);
+    }
+  $es = reverse $es;
+  $es =~ s/^[0]+//;   # strip leading zeros
+  '0' . $es;					# return result prepended with 0
+  }
+
+sub _from_oct
+  {
+  # convert a octal number to decimal (ref to string, return ref to array)
+  my ($c,$os) = @_;
+
+  # for older Perls, play safe
+  my $m = [ 0100000 ];
+  my $d = 5;					# 5 digits at a time
+
+  my $mul = _one();
+  my $x = _zero();
+
+  my $len = int( (length($os)-1)/$d );		# $d digit parts, w/o the '0'
+  my $val; my $i = -$d;
+  while ($len >= 0)
+    {
+    $val = substr($os,$i,$d);			# get oct digits
+    $val = oct($val);
+    $i -= $d; $len --;
+    my $adder = [ $val ];
+    _add ($c, $x, _mul ($c, $adder, $mul ) ) if $val != 0;
+    _mul ($c, $mul, $m ) if $len >= 0; 		# skip last mul
+    }
+  $x;
   }
 
 sub _from_hex
@@ -1808,7 +1856,7 @@ sub _from_hex
   while ($len >= 0)
     {
     $val = substr($hs,$i,$d);			# get hex digits
-    $val =~ s/^[+-]?0x// if $len == 0;		# for last part only because
+    $val =~ s/^0x// if $len == 0;		# for last part only because
     $val = hex($val);				# hex does not like wrong chars
     $i -= $d; $len --;
     my $adder = [ $val ];
@@ -2008,6 +2056,7 @@ Math::BigInt v1.70 or later:
 
 	_from_hex(str)	return ref to new object from ref to hexadecimal string
 	_from_bin(str)	return ref to new object from ref to binary string
+	_from_oct(str)	return ref to new object from ref to octal string
 	
 	_as_hex(str)	return string containing the value as
 			unsigned hex string, with the '0x' prepended.
@@ -2092,7 +2141,7 @@ Original math code by Mark Biggar, rewritten by Tels L<http://bloodgate.com/>
 in late 2000.
 Seperated from BigInt and shaped API with the help of John Peacock.
 
-Fixed, speed-up, streamlined and enhanced by Tels 2001 - 2005.
+Fixed, speed-up, streamlined and enhanced by Tels 2001 - 2007.
 
 =head1 SEE ALSO
 
