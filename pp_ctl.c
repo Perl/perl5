@@ -3413,8 +3413,6 @@ PP(pp_entereval)
     const char * const fakestr = "_<(eval )";
     const int fakelen = 9 + 1;
 
-    if (!SvPV_nolen_const(sv))
-	RETPUSHUNDEF;
     TAINT_PROPER("eval");
 
     ENTER;

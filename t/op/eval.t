@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..91\n";
+print "1..92\n";
 
 eval 'print "ok 1\n";';
 
@@ -438,3 +438,12 @@ print "ok ",$test++," - #20798 (used to dump core)\n";
   eval $code;
   print   $c   eq 'V'  ? "ok " : "# '$c' ne 'V'\nnot ok ", $test++, "\n";
 }
+# eval undef should be the same as eval "" barring any warnings
+
+{
+    local $@ = "foo";
+    eval undef;
+    print "not " unless $@ eq "";
+    print "ok $test # eval unef \n"; $test++;
+}
+
