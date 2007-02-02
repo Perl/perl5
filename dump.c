@@ -1525,7 +1525,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	Perl_dump_indent(aTHX_ level, file, "  COP_HIGH = %"UVuf"\n",
 			 (UV) COP_SEQ_RANGE_HIGH(sv));
     } else if ((type >= SVt_PVNV && type != SVt_PVAV && type != SVt_PVHV
-		&& type != SVt_PVCV && type != SVt_PVFM && !isGV_with_GP(sv))
+		&& type != SVt_PVCV && type != SVt_PVFM && !isGV_with_GP(sv)
+		&& !SvVALID(sv))
 	       || type == SVt_NV) {
 	STORE_NUMERIC_LOCAL_SET_STANDARD();
 	/* %Vg doesn't work? --jhi */
@@ -1780,6 +1781,12 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    if (LvTYPE(sv) != 't' && LvTYPE(sv) != 'T')
 		do_sv_dump(level+1, file, LvTARG(sv), nest+1, maxnest,
 		    dumpops, pvlim);
+	}
+	if (SvVALID(sv)) {
+	    Perl_dump_indent(aTHX_ level, file, "  FLAGS = %u\n", (U8)BmFLAGS(sv));
+	    Perl_dump_indent(aTHX_ level, file, "  RARE = %u\n", (U8)BmRARE(sv));
+	    Perl_dump_indent(aTHX_ level, file, "  PREVIOUS = %"UVuf"\n", BmPREVIOUS(sv));
+	    Perl_dump_indent(aTHX_ level, file, "  USEFUL = %"IVdf"\n", BmUSEFUL(sv));
 	}
 	if (!isGV_with_GP(sv))
 	    break;
