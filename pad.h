@@ -30,7 +30,20 @@ typedef U64TYPE PADOFFSET;
 #   endif
 #endif
 #define NOT_IN_PAD ((PADOFFSET) -1)
- 
+
+/* B.xs needs these for the benefit of B::Deparse */ 
+/* Low range end is exclusive (valid from the cop seq after this one) */
+#define COP_SEQ_RANGE_LOW(sv)			U_32(SvNVX(sv))
+/* High range end is inclusive (valid up to this cop seq) */
+#define COP_SEQ_RANGE_HIGH(sv)			U_32(SvUVX(sv))
+
+#define PARENT_PAD_INDEX(sv)			U_32(SvNVX(sv))
+#define PARENT_FAKELEX_FLAGS(sv)		U_32(SvUVX(sv))
+
+/* Flags set in the SvIVX field of FAKE namesvs */
+    
+#define PAD_FAKELEX_ANON   1 /* the lex is declared in an ANON, or ... */
+#define PAD_FAKELEX_MULTI  2 /* the lex can be instantiated multiple times */
 
 /* flags for the pad_new() function */
 
