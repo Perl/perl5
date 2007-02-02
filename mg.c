@@ -1186,7 +1186,7 @@ Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
 #endif
     	    /* cache state so we don't fetch it again */
     	    if(sigstate == (Sighandler_t) SIG_IGN)
-    	    	sv_setpv(sv,"IGNORE");
+    	    	sv_setpvs(sv,"IGNORE");
     	    else
     	    	sv_setsv(sv,&PL_sv_undef);
 	    PL_psig_ptr[i] = SvREFCNT_inc_simple_NN(sv);

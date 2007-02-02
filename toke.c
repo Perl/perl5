@@ -1026,10 +1026,10 @@ S_skipspace(pTHX_ register char *s)
 	    /* XXX these shouldn't really be added here, can't set PL_faketokens */
 	    if (PL_minus_p) {
 #ifdef PERL_MAD
-		sv_catpv(PL_linestr,
+		sv_catpvs(PL_linestr,
 			 ";}continue{print or die qq(-p destination: $!\\n);}");
 #else
-		sv_setpv(PL_linestr,
+		sv_setpvs(PL_linestr,
 			 ";}continue{print or die qq(-p destination: $!\\n);}");
 #endif
 		PL_minus_n = PL_minus_p = 0;
@@ -6599,8 +6599,8 @@ Perl_yylex(pTHX)
 		    if (PL_madskills)
 			nametoke = newSVpvn(s, d - s);
 #endif
-		    if (strchr(tmpbuf, ':'))
-			sv_setpv(PL_subname, tmpbuf);
+		    if (memchr(tmpbuf, ':', len))
+			sv_setpvn(PL_subname, tmpbuf, len);
 		    else {
 			sv_setsv(PL_subname,PL_curstname);
 			sv_catpvs(PL_subname,"::");

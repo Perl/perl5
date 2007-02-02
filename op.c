@@ -4899,7 +4899,7 @@ Perl_cv_ckproto_len(pTHX_ const CV *cv, const GV *gv, const char *p,
 
 	if (gv)
 	    gv_efullname3(name = sv_newmortal(), gv, NULL);
-	sv_setpv(msg, "Prototype mismatch:");
+	sv_setpvs(msg, "Prototype mismatch:");
 	if (name)
 	    Perl_sv_catpvf(aTHX_ msg, " sub %"SVf, SVfARG(name));
 	if (SvPOK(cv))

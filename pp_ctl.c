@@ -2971,7 +2971,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	}
 	else {
 	    if (!*msg) {
-	        sv_setpv(ERRSV, "Compilation error");
+	        sv_setpvs(ERRSV, "Compilation error");
 	    }
 	}
 	PERL_UNUSED_VAR(newsp);
