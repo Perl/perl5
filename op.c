@@ -2920,7 +2920,9 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 	else {
 	    OP *lastop = NULL;
 	    for (curop = LINKLIST(repl); curop!=repl; curop = LINKLIST(curop)) {
-		if (PL_opargs[curop->op_type] & OA_DANGEROUS) {
+		if (curop->op_type == OP_SCOPE
+			|| curop->op_type == OP_LEAVE
+			|| (PL_opargs[curop->op_type] & OA_DANGEROUS)) {
 #ifdef USE_5005THREADS
 		    if (curop->op_type == OP_THREADSV) {
 			repl_has_vars = 1;
@@ -2947,7 +2949,8 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 		    else if (curop->op_type == OP_PADSV ||
 			     curop->op_type == OP_PADAV ||
 			     curop->op_type == OP_PADHV ||
-			     curop->op_type == OP_PADANY) {
+			     curop->op_type == OP_PADANY)
+		    {
 			repl_has_vars = 1;
 		    }
 		    else if (curop->op_type == OP_PUSHRE)
