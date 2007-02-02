@@ -1249,6 +1249,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	}
 	/* FALL THROUGH */
     default:
+    evaled_or_uv:
 	if (SvEVALED(sv))	sv_catpv(d, "EVALED,");
 	if (SvIsUV(sv) && !(flags & SVf_ROK))	sv_catpv(d, "IsUV,");
 	break;
@@ -1258,7 +1259,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	break;
     case SVt_PVMG:
 	if (SvPAD_TYPED(sv))	sv_catpv(d, "TYPED,");
-	break;
+	goto evaled_or_uv;
     }
     /* SVphv_SHAREKEYS is also 0x20000000 */
     if ((type != SVt_PVHV) && SvUTF8(sv))

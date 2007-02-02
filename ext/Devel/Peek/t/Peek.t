@@ -4,15 +4,17 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require Config; import Config;
-    if ($Config{'extensions'} !~ /\bPeek\b/) {
+    if ($Config{'extensions'} !~ /\bDevel\/Peek\b/) {
         print "1..0 # Skip: Devel::Peek was not built\n";
         exit 0;
     }
 }
 
+require "./test.pl";
+
 use Devel::Peek;
 
-print "1..23\n";
+plan(24);
 
 our $DEBUG = 0;
 open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
@@ -33,9 +35,7 @@ sub do_test {
 	    print $pattern, "\n" if $DEBUG;
 	    my $dump = <IN>;
 	    print $dump, "\n"    if $DEBUG;
-	    print "got:\n[\n$dump\n]\nexpected:\n[\n$pattern\n]\nnot "
-		unless $dump =~ /\A$pattern\Z/ms;
-	    print "ok $_[0]\n";
+	    like( $dump, qr/\A$pattern\Z/ms );
 	    close(IN);
             return $1;
 	} else {
@@ -51,6 +51,9 @@ our   $b;
 my    $c;
 local $d = 0;
 
+END {
+    1 while unlink("peek$$");
+}
 do_test( 1,
 	$a = "foo",
 'SV = PV\\($ADDR\\) at $ADDR
@@ -453,10 +456,6 @@ do_test(21,
     MG_VIRTUAL = &PL_vtbl_taint
     MG_TYPE = PERL_MAGIC_taint\\(t\\)');
 
-END {
-  1 while unlink("peek$$");
-}
-
 # blessed refs
 do_test(22,
 	bless(\\undef, 'Foobar'),
@@ -515,3 +514,13 @@ do_test(23,
     OUTSIDE_SEQ = 0
     PADLIST = 0x0
     OUTSIDE = 0x0 \\(null\\)');	
+
+# isUV should show on PVMG
+do_test(24,
+	do { my $v = $1; $v = ~0; $v },
+'SV = PVMG\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(IOK,pIOK,IsUV\\)
+  UV = \d+
+  NV = 0
+  PV = 0');
