@@ -225,7 +225,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 	    /* newCONSTSUB takes ownership of the reference from us.  */
 	    GvCV(gv) = newCONSTSUB(stash, (char *)name, has_constant);
 	} else {
-	    /* XXX unsafe for threads if eval_owner isn't held */
+	    /* XXX unsafe for 5005 threads if eval_owner isn't held */
 	    (void) start_subparse(0,0);	/* Create empty CV in compcv. */
 	    GvCV(gv) = PL_compcv;
 	}

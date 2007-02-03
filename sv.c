@@ -99,7 +99,7 @@ start of the interpreter.
 
 Manipulation of any of the PL_*root pointers is protected by enclosing
 LOCK_SV_MUTEX; ... UNLOCK_SV_MUTEX calls which should Do the Right Thing
-if threads are enabled.
+if 5005 threads are enabled.
 
 The function visit() scans the SV arenas list, and calls a specified
 function for each SV it finds which is still live - ie which has an SvTYPE
@@ -152,7 +152,7 @@ Public API:
 
 /*
  * nice_chunk and nice_chunk size need to be set
- * and queried under the protection of sv_mutex
+ * and queried under the protection of sv_mutex for 5005 threads
  */
 void
 Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
@@ -180,7 +180,7 @@ Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
 	--PL_sv_count;					\
     } STMT_END
 
-/* sv_mutex must be held while calling uproot_SV() */
+/* sv_mutex must be held while calling uproot_SV() for 5005 threads */
 #define uproot_SV(p) \
     STMT_START {					\
 	(p) = PL_sv_root;				\
@@ -191,7 +191,7 @@ Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
 
 /* make some more SVs by adding another arena */
 
-/* sv_mutex must be held while calling more_sv() */
+/* sv_mutex must be held while calling more_sv() for 5005 threads */
 STATIC SV*
 S_more_sv(pTHX)
 {

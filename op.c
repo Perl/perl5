@@ -4675,7 +4675,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     return cv;
 }
 
-/* XXX unsafe for threads if eval_owner isn't held */
+/* XXX unsafe for 5005 threads if eval_owner isn't held */
 /*
 =for apidoc newCONSTSUB
 
