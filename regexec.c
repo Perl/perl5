@@ -4317,55 +4317,60 @@ restore_pos(pTHX_ void *arg)
 STATIC void
 S_to_utf8_substr(pTHX_ register regexp *prog)
 {
-    if (prog->float_substr && !prog->float_utf8) {
-	SV* const sv = newSVsv(prog->float_substr);
-	prog->float_utf8 = sv;
-	sv_utf8_upgrade(sv);
-	if (SvTAIL(prog->float_substr))
-	    SvTAIL_on(sv);
-	if (prog->float_substr == prog->check_substr)
-	    prog->check_utf8 = sv;
-    }
-    if (prog->anchored_substr && !prog->anchored_utf8) {
-	SV* const sv = newSVsv(prog->anchored_substr);
-	prog->anchored_utf8 = sv;
-	sv_utf8_upgrade(sv);
-	if (SvTAIL(prog->anchored_substr))
-	    SvTAIL_on(sv);
-	if (prog->anchored_substr == prog->check_substr)
-	    prog->check_utf8 = sv;
-    }
+    int i = 1;
+    do {
+	if (prog->substrs->data[i].substr
+	    && !prog->substrs->data[i].utf8_substr) {
+	    SV* const sv = newSVsv(prog->substrs->data[i].substr);
+	    prog->substrs->data[i].utf8_substr = sv;
+	    sv_utf8_upgrade(sv);
+	    if (SvVALID(prog->substrs->data[i].substr)) {
+		const U8 flags = SvTAIL(prog->substrs->data[i].substr)
+		    ? FBMcf_TAIL : 0;
+		if (flags) {
+		    /* Trim the trailing \n that fbm_compile added last
+		       time.  */
+		    SvCUR_set(sv, SvCUR(sv) - 1);
+		    /* Whilst this makes the SV technically "invalid" (as its
+		       buffer is no longer followed by "\0") when fbm_compile()
+		       adds the "\n" back, a "\0" is restored.  */
+		}
+		fbm_compile(sv, flags);
+	    }
+	    if (prog->substrs->data[i].substr == prog->check_substr)
+		prog->check_utf8 = sv;
+	}
+    } while (i--);
 }
 
 STATIC void
 S_to_byte_substr(pTHX_ register regexp *prog)
 {
-    if (prog->float_utf8 && !prog->float_substr) {
-	SV* sv = newSVsv(prog->float_utf8);
-	prog->float_substr = sv;
-	if (sv_utf8_downgrade(sv, TRUE)) {
-	    if (SvTAIL(prog->float_utf8))
-		SvTAIL_on(sv);
-	} else {
-	    SvREFCNT_dec(sv);
-	    prog->float_substr = sv = &PL_sv_undef;
+    int i = 1;
+    do {
+	if (prog->substrs->data[i].utf8_substr
+	    && !prog->substrs->data[i].substr) {
+	    SV* sv = newSVsv(prog->substrs->data[i].utf8_substr);
+	    if (sv_utf8_downgrade(sv, TRUE)) {
+		if (SvVALID(prog->substrs->data[i].utf8_substr)) {
+		    const U8 flags = SvTAIL(prog->substrs->data[i].utf8_substr)
+			? FBMcf_TAIL : 0;
+		    if (flags) {
+			/* Trim the trailing \n that fbm_compile added last
+			   time.  */
+			SvCUR_set(sv, SvCUR(sv) - 1);
+		    }
+		    fbm_compile(sv, flags);
+		}	    
+	    } else {
+		SvREFCNT_dec(sv);
+		sv = &PL_sv_undef;
+	    }
+	    prog->substrs->data[i].substr = sv;
+	    if (prog->substrs->data[i].utf8_substr == prog->check_utf8)
+		prog->check_substr = sv;
 	}
-	if (prog->float_utf8 == prog->check_utf8)
-	    prog->check_substr = sv;
-    }
-    if (prog->anchored_utf8 && !prog->anchored_substr) {
-	SV* sv = newSVsv(prog->anchored_utf8);
-	prog->anchored_substr = sv;
-	if (sv_utf8_downgrade(sv, TRUE)) {
-	    if (SvTAIL(prog->anchored_utf8))
-		SvTAIL_on(sv);
-	} else {
-	    SvREFCNT_dec(sv);
-	    prog->anchored_substr = sv = &PL_sv_undef;
-	}
-	if (prog->anchored_utf8 == prog->check_utf8)
-	    prog->check_substr = sv;
-    }
+    } while (i--);
 }
 
 /*

@@ -374,6 +374,9 @@ struct reg_data {
     void* data[1];
 };
 
+/* Code in S_to_utf8_substr() and S_to_byte_substr() in regexec.c accesses
+   anchored* and float* via array indexes 0 and 1.  */
+
 struct reg_substr_datum {
     I32 min_offset;
     I32 max_offset;
