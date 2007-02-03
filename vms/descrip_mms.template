@@ -256,7 +256,7 @@ MYEXT = DynaLoader
 # object files for these extensions; the trailing comma is required if
 # there are any object files specified
 # These must be built separately, or you must add rules below to build them
-myextobj = [.ext.dynaloader]dl_vms$(O),
+myextobj = [.ext.DynaLoader]dl_vms$(O),
 EXT = $(MYEXT)
 extobj = $(myextobj)
 
@@ -295,7 +295,7 @@ obj = $(obj0) $(obj1) $(obj2) $(obj3) $(obj4)
 h0 = av.h cc_runtime.h config.h cop.h cv.h embed.h embedvar.h
 h1 = EXTERN.h form.h gv.h handy.h hv.h INTERN.h intrpvar.h
 h2 = iperlsys.h keywords.h mg.h nostdio.h op.h opcode.h opnames.h pad.h
-h3 = patchlevel.h perl.h perlapi.h perlio.h perlsdio.h perlvars.h perly.h
+h3 = parser.h patchlevel.h perl.h perlapi.h perlio.h perlsdio.h perlvars.h perly.h
 h4 = pp.h pp_proto.h proto.h regcomp.h regexp.h regnodes.h scope.h
 h5 = sv.h thrdvar.h thread.h utf8.h util.h vmsish.h warnings.h
 h6 = xsub.h $(SOCKH) $(THREADH)
@@ -308,7 +308,7 @@ ac3 = $(ARCHCORE)form.h $(ARCHCORE)gv.h $(ARCHCORE)handy.h $(ARCHCORE)hv.h
 ac4 = $(ARCHCORE)INTERN.h $(ARCHCORE)intrpvar.h $(ARCHCORE)iperlsys.h
 ac5 = $(ARCHCORE)keywords.h $(ARCHCORE)mg.h $(ARCHCORE)nostdio.h
 ac6 = $(ARCHCORE)op.h $(ARCHCORE)opcode.h $(ARCHCORE)opnames.h 
-ac7 = $(ARCHCORE)pad.h $(ARCHCORE)patchlevel.h $(ARCHCORE)perl.h
+ac7 = $(ARCHCORE)pad.h $(ARCHCORE)parser.h $(ARCHCORE)patchlevel.h $(ARCHCORE)perl.h
 ac8 = $(ARCHCORE)perlapi.h $(ARCHCORE)perlio.h $(ARCHCORE)perlsdio.h
 ac9 = $(ARCHCORE)perlsfio.h $(ARCHCORE)perlvars.h $(ARCHCORE)perly.h $(ARCHCORE)pp.h
 .ifdef THREADED
@@ -509,29 +509,29 @@ unidatafiles.ts : $(MINIPERL_EXE) [.lib]Config.pm [.lib.unicore]mktables
 	@ If F$Search("$(MMS$TARGET)").nes."" Then Delete/NoLog/NoConfirm $(MMS$TARGET);*
 	@ Copy/NoConfirm _NLA0: $(MMS$TARGET)
  
-[.ext.dynaloader]dl_vms.c : [.ext.dynaloader]dl_vms.xs $(ARCHDIR)Config.pm [.lib.ExtUtils]XSSymSet.pm $(MINIPERL_EXE) [.lib.VMS]Filespec.pm 
+[.ext.DynaLoader]dl_vms.c : [.ext.DynaLoader]dl_vms.xs $(ARCHDIR)Config.pm [.lib.ExtUtils]XSSymSet.pm $(MINIPERL_EXE) [.lib.VMS]Filespec.pm 
 	$(XSUBPP) $(MMS$SOURCE) >$(MMS$TARGET)
 
-[.ext.dynaloader]dl_vms$(O) : [.ext.dynaloader]dl_vms.c
-	$(CC) $(CFLAGS) /Include=([],[.ext.dynaloader])/Object=$(MMS$TARGET) $(MMS$SOURCE)
+[.ext.DynaLoader]dl_vms$(O) : [.ext.DynaLoader]dl_vms.c
+	$(CC) $(CFLAGS) /Include=([],[.ext.DynaLoader])/Object=$(MMS$TARGET) $(MMS$SOURCE)
 
-[.lib]DynaLoader.pm : [.ext.Dynaloader]Dynaloader.pm
+[.lib]DynaLoader.pm : [.ext.DynaLoader]DynaLoader.pm
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib]
 	@ If F$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
 	@ $(MINIPERL) -e "use AutoSplit; autosplit_lib_modules(@ARGV)" [.lib]DynaLoader.pm
 
-[.lib]XSLoader.pm : [.ext.Dynaloader]XSLoader.pm
+[.lib]XSLoader.pm : [.ext.DynaLoader]XSLoader.pm
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib]
 	@ If F$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
 	@ $(MINIPERL) -e "use AutoSplit; autosplit_lib_modules(@ARGV)" [.lib]XSLoader.pm
 
-[.ext.dynaloader]dynaloader.pm : [.ext.dynaloader]dynaloader_pm.pl
+[.ext.DynaLoader]DynaLoader.pm : [.ext.DynaLoader]DynaLoader_pm.PL
 	$(MINIPERL) $(MMS$SOURCE)
-	@ Rename/Log dynaloader.pm [.ext.dynaloader]
+	@ Rename/Log DynaLoader.pm [.ext.DynaLoader]
 
-[.ext.dynaloader]xsloader.pm : [.ext.dynaloader]xsloader_pm.pl
+[.ext.DynaLoader]XSLoader.pm : [.ext.DynaLoader]XSLoader_pm.PL
 	$(MINIPERL) $(MMS$SOURCE)
-	@ Rename/Log xsloader.pm [.ext.dynaloader]
+	@ Rename/Log XSLoader.pm [.ext.DynaLoader]
 
 dynext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary makeppport
        @make_ext "$(MINIPERL_EXE)" "$(MMS)"
@@ -1482,6 +1482,9 @@ $(ARCHCORE)opnames.h : opnames.h
 $(ARCHCORE)pad.h : pad.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/NoConfirm/Log $(MMS$SOURCE) $(ARCHCORE)
+$(ARCHCORE)parser.h : parser.h
+	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
+	Copy/NoConfirm/Log $(MMS$SOURCE) $(ARCHCORE)
 $(ARCHCORE)patchlevel.h : patchlevel.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/NoConfirm/Log $(MMS$SOURCE) $(ARCHCORE)
@@ -1723,11 +1726,11 @@ tidy : cleanlis
 	- If F$Search("VMS.C;-1")   .nes."" Then Purge/NoConfirm/Log VMS.C
 	- If F$Search("Perlmain.C;-1")   .nes."" Then Purge/NoConfirm/Log Perlmain.C
 	- If F$Search("Perlshr_Gbl*.Mar;-1")   .nes."" Then Purge/NoConfirm/Log Perlshr_Gbl*.Mar
-	- If F$Search("[.Ext.DynaLoader]DL_VMS$(O);-1").nes."" Then Purge/NoConfirm/Log [.Ext.DynaLoader]DL_VMS$(O)
-	- If F$Search("[.Ext.DynaLoader]DL_VMS.C;-1").nes."" Then Purge/NoConfirm/Log [.Ext.DynaLoader]DL_VMS.C
-	- If F$Search("[.Ext.Opcode...];-1").nes."" Then Purge/NoConfirm/Log [.Ext.Opcode]
-	- If F$Search("[.VMS.Ext...]*.C;-1").nes."" Then Purge/NoConfirm/Log [.VMS.Ext...]*.C
-	- If F$Search("[.VMS.Ext...]*$(O);-1").nes."" Then Purge/NoConfirm/Log [.VMS.Ext...]*$(O)
+	- If F$Search("[.ext.DynaLoader]DL_VMS$(O);-1").nes."" Then Purge/NoConfirm/Log [.ext.DynaLoader]DL_VMS$(O)
+	- If F$Search("[.ext.DynaLoader]DL_VMS.C;-1").nes."" Then Purge/NoConfirm/Log [.ext.DynaLoader]DL_VMS.C
+	- If F$Search("[.ext.Opcode...];-1").nes."" Then Purge/NoConfirm/Log [.ext.Opcode]
+	- If F$Search("[.vms.ext...]*.C;-1").nes."" Then Purge/NoConfirm/Log [.vms.ext...]*.C
+	- If F$Search("[.vms.ext...]*$(O);-1").nes."" Then Purge/NoConfirm/Log [.vms.ext...]*$(O)
 	- If F$Search("[.Lib.Auto...]*.al;-1").nes."" Then Purge/NoConfirm/Log [.Lib.Auto...]*.al
 	- If F$Search("[.Lib.Auto...]autosplit.ix;-1").nes."" Then Purge/NoConfirm/Log [.Lib.Auto...]autosplit.ix
 	- If F$Search("[.Lib]DynaLoader.pm;-1").nes."" Then Purge/NoConfirm/Log [.Lib]DynaLoader.pm
@@ -1758,12 +1761,12 @@ clean : tidy cleantest
 	- If F$Search("Perlmain.C")   .nes."" Then Delete/NoConfirm/Log Perlmain.C;*
 	- If F$Search("Perlshr_Gbl*.Mar")   .nes."" Then Delete/NoConfirm/Log Perlshr_Gbl*.Mar;*
 	- If F$Search("*.TS").nes."" Then Delete/NoConfirm/Log *.TS;*
-	- If F$Search("[.Ext.DynaLoader]DL_VMS$(O)").nes."" Then Delete/NoConfirm/Log [.Ext.DynaLoader]DL_VMS$(O);*
-	- If F$Search("[.Ext.DynaLoader]DL_VMS.C").nes."" Then Delete/NoConfirm/Log [.Ext.DynaLoader]DL_VMS.C;*
-	- If F$Search("[.Ext.DynaLoader]DynaLoader.pm").nes."" Then Delete/NoConfirm/Log [.Ext.DynaLoader]DynaLoader.pm;*
-	- If F$Search("[.Ext.DynaLoader]XSLoader.pm").nes."" Then Delete/NoConfirm/Log [.Ext.DynaLoader]XSLoader.pm;*
-	- If F$Search("[.VMS.Ext...]*.C").nes."" Then Delete/NoConfirm/Log [.VMS.Ext...]*.C;*
-	- If F$Search("[.VMS.Ext...]*$(O)").nes."" Then Delete/NoConfirm/Log [.VMS.Ext...]*$(O);*
+	- If F$Search("[.ext.DynaLoader]DL_VMS$(O)").nes."" Then Delete/NoConfirm/Log [.ext.DynaLoader]DL_VMS$(O);*
+	- If F$Search("[.ext.DynaLoader]DL_VMS.C").nes."" Then Delete/NoConfirm/Log [.ext.DynaLoader]DL_VMS.C;*
+	- If F$Search("[.ext.DynaLoader]DynaLoader.pm").nes."" Then Delete/NoConfirm/Log [.ext.DynaLoader]DynaLoader.pm;*
+	- If F$Search("[.ext.DynaLoader]XSLoader.pm").nes."" Then Delete/NoConfirm/Log [.ext.DynaLoader]XSLoader.pm;*
+	- If F$Search("[.vms.ext...]*.C").nes."" Then Delete/NoConfirm/Log [.vms.ext...]*.C;*
+	- If F$Search("[.vms.ext...]*$(O)").nes."" Then Delete/NoConfirm/Log [.vms.ext...]*$(O);*
 	- If F$Search("[.pod]*.com").nes."" Then Delete/NoConfirm/Log [.pod]*.com;*
 	- If F$Search("[.pod]perldelta.pod").nes."" Then Delete/NoConfirm/Log [.pod]perldelta.pod;*
 	- @extra_pods CLEAN
