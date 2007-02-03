@@ -962,14 +962,22 @@ X<\t> X<\n> X<\r> X<\f> X<\b> X<\a> X<\e> X<\x> X<\0> X<\c> X<\N>
     \b		backspace       (BS)
     \a		alarm (bell)    (BEL)
     \e		escape          (ESC)
-    \033	octal char	(ESC)
-    \x1b	hex char	(ESC)
-    \x{263a}	wide hex char	(SMILEY)
-    \c[		control char    (ESC)
+    \033	octal char	(example: ESC)
+    \x1b	hex char	(example: ESC)
+    \x{263a}	wide hex char	(example: SMILEY)
+    \c[		control char    (example: ESC)
     \N{name}	named Unicode character
 
+The character following C<\c> is mapped to some other character by
+converting letters to upper case and then (on ASCII systems) by inverting
+the 7th bit (0x40). The most interesting range is from '@' to '_'
+(0x40 through 0x5F), resulting in a control character from 0x00
+through 0x1F. A '?' maps to the DEL character. On EBCDIC systems only
+'@', the letters, '[', '\', ']', '^', '_' and '?' will work, resulting
+in 0x00 through 0x1F and 0x7F.
+
 B<NOTE>: Unlike C and other languages, Perl has no \v escape sequence for
-the vertical tab (VT - ASCII 11).
+the vertical tab (VT - ASCII 11), but you may use C<\ck> or C<\x0b>.
 
 The following escape sequences are available in constructs that interpolate
 but not in transliterations.
