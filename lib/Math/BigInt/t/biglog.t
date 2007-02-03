@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# Test blog function (and bpow, since it uses blog).
+# Test blog function (and bpow, since it uses blog), as well as bexp().
 
 # It is too slow to be simple included in bigfltpm.inc, where it would get
 # executed 3 times. One time would be under BareCalc, which shouldn't make any
@@ -11,7 +11,7 @@
 # it at all (which did lead to wrong answers for 0 < $x < 1 in blog() in
 # versions up to v1.63, and for bsqrt($x) when $x << 1 for instance).
 
-use Test;
+use Test::More;
 use strict;
 
 BEGIN
@@ -37,7 +37,7 @@ BEGIN
     }
   print "# INC = @INC\n";
 
-  plan tests => 56;
+  plan tests => 66;
   }
 
 use Math::BigFloat;
@@ -45,15 +45,47 @@ use Math::BigInt;
 
 my $cl = "Math::BigInt";
 
+#############################################################################
 # test log($n) in BigInt (broken until 1.80)
 
-ok ($cl->new(2)->blog(), '0');
-ok ($cl->new(288)->blog(), '5');
-ok ($cl->new(2000)->blog(), '7');
+is ($cl->new(2)->blog(), '0', "blog(2)");
+is ($cl->new(288)->blog(), '5',"blog(288)");
+is ($cl->new(2000)->blog(), '7', "blog(2000)");
 
 #############################################################################
+# test exp($n) in BigInt
+
+is ($cl->new(1)->bexp(), '2', "bexp(1)");
+is ($cl->new(2)->bexp(), '7',"bexp(2)");
+is ($cl->new(3)->bexp(), '20', "bexp(3)");
+
+#############################################################################
+#############################################################################
+# BigFloat tests
+
+#############################################################################
+# test log(2, N) where N > 67 (broken until 1.82)
 
 $cl = "Math::BigFloat";
+
+# These tests can take quite a while, but are nec. Maybe protect them with
+# some alarm()?
+
+# this triggers the calculation and caching of ln(2):
+ok ($cl->new(5)->blog(undef,71), 
+'1.6094379124341003746007593332261876395256013542685177219126478914741790');
+
+# if the cache was correct, we should get this result, fast:
+ok ($cl->new(2)->blog(undef,71), 
+'0.69314718055994530941723212145817656807550013436025525412068000949339362');
+
+ok ($cl->new(10)->blog(undef,71), 
+'2.3025850929940456840179914546843642076011014886287729760333279009675726');
+
+ok ($cl->new(21)->blog(undef,71), 
+'3.0445224377234229965005979803657054342845752874046106401940844835750742');
+
+#############################################################################
 
 # These tests are now really fast, since they collapse to blog(10), basically
 # Don't attempt to run them with older versions. You are warned.
@@ -107,12 +139,12 @@ ok ($cl->new('1.2')->bpow('0.3',10),  '1.056219968');
 ok ($cl->new('10')->bpow('0.6',10),   '3.981071706');
 
 # blog should handle bigint input
-ok (Math::BigFloat::blog(Math::BigInt->new(100),10), 2);
+is (Math::BigFloat::blog(Math::BigInt->new(100),10), 2, "blog(100)");
 
 # some integer results
-ok ($cl->new(2)->bpow(32)->blog(2),  '32');	# 2 ** 32
-ok ($cl->new(3)->bpow(32)->blog(3),  '32');	# 3 ** 32
-ok ($cl->new(2)->bpow(65)->blog(2),  '65');	# 2 ** 65
+is ($cl->new(2)->bpow(32)->blog(2),  '32', "2 ** 32");
+is ($cl->new(3)->bpow(32)->blog(3),  '32', "3 ** 32");
+is ($cl->new(2)->bpow(65)->blog(2),  '65', "2 ** 65");
 
 # test for bug in bsqrt() not taking negative _e into account
 test_bpow ('200','0.5',10,      '14.14213562');
@@ -138,6 +170,18 @@ test_bpow ('9.86902225','0.5',undef, '3.1415');
 
 test_bpow ('0.2','0.41',10,   '0.5169187652');
 
+#############################################################################
+# test bexp()
+
+is ($cl->new(1)->bexp(), '2.718281828459045235360287471352662497757', 'bexp(1)');
+is ($cl->new(2)->bexp(40), $cl->new(1)->bexp(45)->bpow(2,40), 'bexp(2)'); 
+
+is ($cl->new("12.5")->bexp(61), $cl->new(1)->bexp(65)->bpow(12.5,61), 'bexp(12.5)'); 
+
+# all done
+1;
+
+#############################################################################
 sub test_bpow
   {
   my ($x,$y,$scale,$result) = @_;
@@ -145,4 +189,5 @@ sub test_bpow
   print "# Tried: $x->bpow($y,$scale);\n"
    unless ok ($cl->new($x)->bpow($y,$scale),$result);
   }
+
 

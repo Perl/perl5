@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 use 5.006002;
 
-$VERSION = '1.80';
+$VERSION = '1.82';
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(objectify bgcd blcm); 
@@ -81,10 +81,9 @@ use overload
                "$_[1]" cmp $_[0]->bstr() :
                $_[0]->bstr() cmp "$_[1]" },
 
-# make cos()/sin()/exp() "work" with BigInt's or subclasses
+# make cos()/sin()/atan2() "work" with BigInt's or subclasses
 'cos'	=>	sub { cos($_[0]->numify()) }, 
 'sin'	=>	sub { sin($_[0]->numify()) }, 
-'exp'	=>	sub { exp($_[0]->numify()) }, 
 'atan2'	=>	sub { $_[2] ?
 			atan2($_[1],$_[0]->numify()) :
 			atan2($_[0]->numify(),$_[1]) },
@@ -95,6 +94,7 @@ use overload
 
 # log(N) is log(N, e), where e is Euler's number
 'log'	=>	sub { $_[0]->copy()->blog($_[1], undef); }, 
+'exp'	=>	sub { $_[0]->copy()->bexp($_[1]); }, 
 'int'	=>	sub { $_[0]->copy(); }, 
 'neg'	=>	sub { $_[0]->copy()->bneg(); }, 
 'abs'	=>	sub { $_[0]->copy()->babs(); },
@@ -1145,6 +1145,7 @@ sub bsub
   
   # set up parameters
   my ($self,$x,$y,@r) = (ref($_[0]),@_);
+
   # objectify is costly, so avoid it
   if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
     {
@@ -1262,6 +1263,37 @@ sub blog
   return $x->bnan() unless defined $rc;		# not possible to take log?
   $x->{value} = $rc;
   $x->round(@r);
+  }
+
+sub bexp
+  {
+  # Calculate e ** $x (Euler's number to the power of X), truncated to
+  # an integer value.
+  my ($self,$x,@r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
+  return $x if $x->modify('bexp');
+
+  # inf, -inf, NaN, <0 => NaN
+  return $x->bnan() if $x->{sign} eq 'NaN';
+  return $x->bone() if $x->is_zero();
+  return $x if $x->{sign} eq '+inf';
+  return $x->bzero() if $x->{sign} eq '-inf';
+
+  my $u;
+  {
+    # run through Math::BigFloat unless told otherwise
+    local $upgrade = 'Math::BigFloat' unless defined $upgrade;
+    # calculate result, truncate it to integer
+    $u = $upgrade->bexp($upgrade->new($x),@r);
+  }
+
+  if (!defined $upgrade)
+    {
+    $u = $u->as_int();
+    # modify $x in place
+    $x->{value} = $u->{value};
+    $x->round(@r);
+    }
+  else { $x = $u; }
   }
 
 sub blcm 
@@ -2055,7 +2087,8 @@ sub exponent
     }
   return $self->bone() if $x->is_zero();
 
-  $self->new($x->_trailing_zeros());
+  # 12300 => 2 trailing zeros => exponent is 2
+  $self->new( $CALC->_zeros($x->{value}) );
   }
 
 sub mantissa
@@ -2069,8 +2102,9 @@ sub mantissa
     return $self->new($x->{sign});
     }
   my $m = $x->copy(); delete $m->{_p}; delete $m->{_a};
+
   # that's a bit inefficient:
-  my $zeros = $m->_trailing_zeros();
+  my $zeros = $CALC->_zeros($m->{value});
   $m->brsft($zeros,10) if $zeros != 0;
   $m;
   }
@@ -2343,7 +2377,7 @@ sub objectify
     }
 
   my $up = ${"$a[0]::upgrade"};
-  #print "Now in objectify, my class is today $a[0], count = $count\n";
+  # print STDERR "# Now in objectify, my class is today $a[0], count = $count\n";
   if ($count == 0)
     {
     while (@_)
@@ -2366,7 +2400,7 @@ sub objectify
     while ($count > 0)
       {
       $count--; 
-      $k = shift; 
+      $k = shift;
       if (!ref($k))
         {
         $k = $a[0]->new($k);
@@ -2830,8 +2864,8 @@ Math::BigInt - Arbitrary size integer/float math package
   $x->bmodinv($mod);	   # the inverse of $x in the given modulus $mod
 
   $x->bpow($y);		   # power of arguments (x ** y)
-  $x->blsft($y);	   # left shift in base 10
-  $x->brsft($y);	   # right shift in base 10
+  $x->blsft($y);	   # left shift in base 2
+  $x->brsft($y);	   # right shift in base 2
 			   # returns (quo,rem) or quo if in scalar context
   $x->blsft($y,$n);	   # left shift by $y places in base $n
   $x->brsft($y,$n);	   # right shift by $y places in base $n
@@ -2846,6 +2880,10 @@ Math::BigInt - Arbitrary size integer/float math package
   $x->broot($y);	   # $y'th root of $x (e.g. $y == 3 => cubic root)
   $x->bfac();		   # factorial of $x (1*2*3*4*..$x)
 
+  $x->blog();		   # logarithm of $x to base e (Euler's number)
+  $x->blog($base);	   # logarithm of $x to base $base (f.i. 2)
+  $x->bexp();		   # calculate e ** $x where e is Euler's number
+  
   $x->round($A,$P,$mode);  # round to accuracy or precision using mode $mode
   $x->bround($n);	   # accuracy: preserve $n digits
   $x->bfround($n);	   # round to $nth digit, no-op for BigInts
@@ -3362,14 +3400,32 @@ is exactly equivalent to
 
 	$x->bpow($y);			# power of arguments (x ** y)
 
+=head2 blog()
+
+	$x->blog($base, $accuracy);	# logarithm of x to the base $base
+
+If C<$base> is not defined, Euler's number (e) is used:
+
+	print $x->blog(undef, 100);	# log(x) to 100 digits
+
+=head2 bexp()
+
+	$x->bexp($accuracy);		# calculate e ** X
+
+Calculates the expression C<e ** $x> where C<e> is Euler's number.
+
+This method was added in v1.82 of Math::BigInt (April 2007).
+
+See also L<blog()>.
+
 =head2 blsft()
 
-	$x->blsft($y);		# left shift
+	$x->blsft($y);		# left shift in base 2
 	$x->blsft($y,$n);	# left shift, in base $n (like 10)
 
 =head2 brsft()
 
-	$x->brsft($y);		# right shift 
+	$x->brsft($y);		# right shift in base 2
 	$x->brsft($y,$n);	# right shift, in base $n (like 10)
 
 =head2 band()
@@ -4239,6 +4295,8 @@ is in effect, they will always hand up their work:
 =item div()
 
 =item blog()
+
+=item bexp()
 
 =back
 

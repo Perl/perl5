@@ -1,7 +1,7 @@
 package bigint;
-require 5.005;
+use 5.006002;
 
-$VERSION = '0.07';
+$VERSION = '0.09';
 use Exporter;
 @ISA		= qw( Exporter );
 @EXPORT_OK	= qw( ); 
@@ -54,10 +54,23 @@ sub upgrade
 #    {
 #    $Math::BigInt::upgrade = $_[0];
 #    }
-  return $Math::BigInt::upgrade;
+  $Math::BigInt::upgrade;
   }
 
-sub _constant
+sub _binary_constant
+  {
+  # this takes a binary/hexadecimal/octal constant string and returns it
+  # as string suitable for new. Basically it converts octal to decimal, and
+  # passes every thing else unmodified back.
+  my $string = shift;
+
+  return Math::BigInt->new($string) if $string =~ /^0[bx]/;
+
+  # so it must be an octal constant
+  Math::BigInt->from_oct($string);
+  }
+
+sub _float_constant
   {
   # this takes a floating point constant string and returns it truncated to
   # integer. For instance, '4.5' => '4', '1.234e2' => '123' etc
@@ -94,7 +107,7 @@ sub _constant
     return $sign.$$miv.$$mfv.'E'.$ec; 		# 123.45e+3 => 12345e1
     }
   $mfv = substr($$mfv,0,$ec);
-  return $sign.$$miv.$mfv; 			# 123.45e+1 => 1234
+  $sign.$$miv.$mfv; 				# 123.45e+1 => 1234
   }
 
 sub import 
@@ -163,7 +176,7 @@ sub import
     require Math::BigInt if $_lite == 0;	# not already loaded?
     $class = 'Math::BigInt';			# regardless of MBIL or not
     }
-  push @import, 'lib' => $lib if $lib ne '';
+  push @import, 'try' => $lib if $lib ne '';
   # Math::BigInt::Trace or plain Math::BigInt
   $class->import(@import);
 
@@ -180,7 +193,9 @@ sub import
     }
   # we take care of floating point constants, since BigFloat isn't available
   # and BigInt doesn't like them:
-  overload::constant float => sub { Math::BigInt->new( _constant(shift) ); };
+  overload::constant float => sub { Math::BigInt->new( _float_constant(shift) ); };
+  # Take care of octal/hexadecimal constants
+  overload::constant binary => sub { _binary_constant(shift) };
 
   $self->export_to_level(1,$self,@a);           # export inf and NaN
   }
@@ -228,6 +243,8 @@ than or equal to zero. See Math::BigInt's bround() function for details.
 
 	perl -Mbigint=a,2 -le 'print 12345+1'
 
+Note that setting precision and accurary at the same time is not possible.
+
 =item p or precision
 
 This sets the precision for all math operations. The argument can be any
@@ -239,6 +256,8 @@ integer and are ignore like negative values.
 See Math::BigInt's bfround() function for details.
 
 	perl -Mbignum=p,5 -le 'print 123456789+123'
+
+Note that setting precision and accurary at the same time is not possible.
 
 =item t or trace
 
@@ -252,13 +271,19 @@ Load a different math lib, see L<MATH LIBRARY>.
 	perl -Mbigint=l,GMP -e 'print 2 ** 512'
 
 Currently there is no way to specify more than one library on the command
-line. This will be hopefully fixed soon ;)
+line. This means the following does not work:
+
+	perl -Mbignum=l,GMP,Pari -e 'print 2 ** 512'
+
+This will be hopefully fixed soon ;)
 
 =item v or version
 
 This prints out the name and version of all modules used and then exits.
 
 	perl -Mbigint=v
+
+=back
 
 =head2 Math Library
 
@@ -305,6 +330,29 @@ minus infinity. You will get '+inf' when dividing a positive number by 0, and
 Since all numbers are now objects, you can use all functions that are part of
 the BigInt API. You can only use the bxxx() notation, and not the fxxx()
 notation, though. 
+
+=over 2
+
+=item inf()
+
+A shortcut to return Math::BigInt->binf(). Useful because Perl does not always
+handle bareword C<inf> properly.
+
+=item NaN()
+
+A shortcut to return Math::BigInt->bnan(). Useful because Perl does not always
+handle bareword C<NaN> properly.
+
+=item upgrade()
+
+Return the class that numbers are upgraded to, is in fact returning
+C<$Math::BigInt::upgrade>.
+
+=back
+
+=head2 MATH LIBRARY
+
+Math with the numbers is done (by default) by a module called
 
 =head2 Caveat
 
@@ -364,6 +412,7 @@ to compare them to the results under -Mbignum or -Mbigrat:
 	perl -Mbigint -le 'print log(2)'
 	perl -Mbigint -le 'print 2 ** 0.5'
 	perl -Mbigint=a,65 -le 'print 2 ** 0.2'
+	perl -Mbignum=a,65,l,GMP -le 'print 7 ** 7777'
 
 =head1 LICENSE
 
@@ -380,6 +429,6 @@ as L<Math::BigInt::BitVect>, L<Math::BigInt::Pari> and  L<Math::BigInt::GMP>.
 
 =head1 AUTHORS
 
-(C) by Tels L<http://bloodgate.com/> in early 2002 - 2005.
+(C) by Tels L<http://bloodgate.com/> in early 2002 - 2007.
 
 =cut
