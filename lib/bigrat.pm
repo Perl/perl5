@@ -1,13 +1,14 @@
 package bigrat;
-require 5.005;
+use 5.006002;
 
-$VERSION = '0.08';
+$VERSION = '0.09';
 require Exporter;
 @ISA		= qw( Exporter );
 @EXPORT_OK	= qw( ); 
 @EXPORT		= qw( inf NaN ); 
 
 use strict;
+use overload;
 
 ############################################################################## 
 
@@ -56,7 +57,20 @@ sub upgrade
 #    $Math::BigInt::upgrade = $_[0];
 #    $Math::BigFloat::upgrade = $_[0];
 #    }
-  return $Math::BigInt::upgrade;
+  $Math::BigInt::upgrade;
+  }
+
+sub _binary_constant
+  {
+  # this takes a binary/hexadecimal/octal constant string and returns it
+  # as string suitable for new. Basically it converts octal to decimal, and
+  # passes every thing else unmodified back.
+  my $string = shift;
+
+  return Math::BigInt->new($string) if $string =~ /^0[bx]/;
+
+  # so it must be an octal constant
+  Math::BigInt->from_oct($string);
   }
 
 sub import 
@@ -159,6 +173,10 @@ sub import
     print "Math::BigRat\t\t v$Math::BigRat::VERSION\n";
     exit;
     }
+
+  # Take care of octal/hexadecimal constants
+  overload::constant binary => sub { _binary_constant(shift) };
+
   $self->export_to_level(1,$self,@a);           # export inf and NaN
   }
 
@@ -236,7 +254,30 @@ the BigInt or BigFloat API. It is wise to use only the bxxx() notation, and not
 the fxxx() notation, though. This makes you independed on the fact that the
 underlying object might morph into a different class than BigFloat.
 
-=head2 Caveat
+=over 2
+
+=item inf()
+
+A shortcut to return Math::BigInt->binf(). Useful because Perl does not always
+handle bareword C<inf> properly.
+
+=item NaN()
+
+A shortcut to return Math::BigInt->bnan(). Useful because Perl does not always
+handle bareword C<NaN> properly.
+
+=item upgrade()
+
+Return the class that numbers are upgraded to, is in fact returning
+C<$Math::BigInt::upgrade>.
+
+=back
+
+=head2 MATH LIBRARY
+
+Math with the numbers is done (by default) by a module called
+
+=head2 Cavaet
 
 But a warning is in order. When using the following to make a copy of a number,
 only a shallow copy will be made.
@@ -289,6 +330,8 @@ than or equal to zero. See Math::BigInt's bround() function for details.
 
 	perl -Mbigrat=a,50 -le 'print sqrt(20)'
 
+Note that setting precision and accurary at the same time is not possible.
+
 =item p or precision
 
 This sets the precision for all math operations. The argument can be any
@@ -297,6 +340,8 @@ a positive value rounds to this digit left from the dot. 0 or 1 mean round to
 integer. See Math::BigInt's bfround() function for details.
 
 	perl -Mbigrat=p,-50 -le 'print sqrt(20)'
+
+Note that setting precision and accurary at the same time is not possible.
 
 =item t or trace
 
@@ -310,13 +355,19 @@ Load a different math lib, see L<MATH LIBRARY>.
 	perl -Mbigrat=l,GMP -e 'print 2 ** 512'
 
 Currently there is no way to specify more than one library on the command
-line. This will be hopefully fixed soon ;)
+line. This means the following does not work:
+
+	perl -Mbignum=l,GMP,Pari -e 'print 2 ** 512'
+
+This will be hopefully fixed soon ;)
 
 =item v or version
 
 This prints out the name and version of all modules used and then exits.
 
 	perl -Mbigrat=v
+
+=back
 
 =head1 EXAMPLES
  
@@ -325,6 +376,7 @@ This prints out the name and version of all modules used and then exits.
 	perl -Mbigrat -le 'print 4.5+2*255'
 	perl -Mbigrat -le 'print 3/7 + 5/7 + 8/3'	
 	perl -Mbigrat -le 'print 12->is_odd()';
+	perl -Mbignum=l,GMP -le 'print 7 ** 7777'
 
 =head1 LICENSE
 
@@ -340,6 +392,6 @@ as L<Math::BigInt::BitVect>, L<Math::BigInt::Pari> and  L<Math::BigInt::GMP>.
 
 =head1 AUTHORS
 
-(C) by Tels L<http://bloodgate.com/> in early 2002 - 2005.
+(C) by Tels L<http://bloodgate.com/> in early 2002 - 2007.
 
 =cut

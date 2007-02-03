@@ -1,13 +1,14 @@
 package bignum;
-require 5.005;
+use 5.006002;
 
-$VERSION = '0.17';
+$VERSION = '0.19';
 use Exporter;
 @EXPORT_OK 	= qw( ); 
 @EXPORT 	= qw( inf NaN ); 
 @ISA 		= qw( Exporter );
 
 use strict;
+use overload;
 
 ############################################################################## 
 
@@ -55,7 +56,20 @@ sub upgrade
 #    $Math::BigInt::upgrade = $_[0];
 #    $Math::BigFloat::upgrade = $_[0];
 #    }
-  return $Math::BigInt::upgrade;
+  $Math::BigInt::upgrade;
+  }
+
+sub _binary_constant
+  {
+  # this takes a binary/hexadecimal/octal constant string and returns it
+  # as string suitable for new. Basically it converts octal to decimal, and
+  # passes every thing else unmodified back.
+  my $string = shift;
+
+  return Math::BigInt->new($string) if $string =~ /^0[bx]/;
+
+  # so it must be an octal constant
+  Math::BigInt->from_oct($string);
   }
 
 sub import 
@@ -141,7 +155,7 @@ sub import
     require Math::BigInt if $_lite == 0;	# not already loaded?
     $class = 'Math::BigInt';			# regardless of MBIL or not
     }
-  push @import, 'lib' => $lib if $lib ne ''; 
+  push @import, 'try' => $lib if $lib ne ''; 
   # Math::BigInt::Trace or plain Math::BigInt
   $class->import(@import, upgrade => $upgrade);
 
@@ -168,6 +182,10 @@ sub import
     print "Math::BigFloat\t\t v$Math::BigFloat::VERSION\n";
     exit;
     }
+
+  # Take care of octal/hexadecimal constants
+  overload::constant 'binary' => sub { _binary_constant(shift) };
+
   $self->export_to_level(1,$self,@a);		# export inf and NaN
   }
 
@@ -307,6 +325,8 @@ than or equal to zero. See Math::BigInt's bround() function for details.
 
 	perl -Mbignum=a,50 -le 'print sqrt(20)'
 
+Note that setting precision and accurary at the same time is not possible.
+
 =item p or precision
 
 This sets the precision for all math operations. The argument can be any
@@ -315,6 +335,8 @@ a positive value rounds to this digit left from the dot. 0 or 1 mean round to
 integer. See Math::BigInt's bfround() function for details.
 
 	perl -Mbignum=p,-50 -le 'print sqrt(20)'
+
+Note that setting precision and accurary at the same time is not possible.
 
 =item t or trace
 
@@ -328,13 +350,19 @@ Load a different math lib, see L<MATH LIBRARY>.
 	perl -Mbignum=l,GMP -e 'print 2 ** 512'
 
 Currently there is no way to specify more than one library on the command
-line. This will be hopefully fixed soon ;)
+line. This means the following does not work:
+
+	perl -Mbignum=l,GMP,Pari -e 'print 2 ** 512'
+
+This will be hopefully fixed soon ;)
 
 =item v or version
 
 This prints out the name and version of all modules used and then exits.
 
 	perl -Mbignum=v
+
+=back
 
 =head2 Methods
 
@@ -466,6 +494,7 @@ Some cool command line examples to impress the Python crowd ;)
 	perl -Mbignum -le 'print log(2)'
 	perl -Mbignum -le 'print 2 ** 0.5'
 	perl -Mbignum=a,65 -le 'print 2 ** 0.2'
+	perl -Mbignum=a,65,l,GMP -le 'print 7 ** 7777'
 
 =head1 LICENSE
 
@@ -481,6 +510,6 @@ as L<Math::BigInt::BitVect>, L<Math::BigInt::Pari> and  L<Math::BigInt::GMP>.
 
 =head1 AUTHORS
 
-(C) by Tels L<http://bloodgate.com/> in early 2002, 2003.
+(C) by Tels L<http://bloodgate.com/> in early 2002 - 2007.
 
 =cut

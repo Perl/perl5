@@ -10,7 +10,7 @@ BEGIN
   $| = 1;
   chdir 't' if -d 't';
   unshift @INC, '../lib';
-  plan tests => 32;
+  plan tests => 36;
   }
 
 use bigint;
@@ -40,7 +40,19 @@ foreach (qw/
   {
   my ($x,$y) = split /:/;
   print "# Try $x\n";
-  ok (bigint::_constant("$x"),"$y");
+  ok (bigint::_float_constant("$x"),"$y");
+  }
+
+foreach (qw/ 
+  0100:64
+  0200:128
+  0x100:256
+  0b1001:9
+  /)
+  {
+  my ($x,$y) = split /:/;
+  print "# Try $x\n";
+  ok (bigint::_binary_constant("$x"),"$y");
   }
 
 ###############################################################################
