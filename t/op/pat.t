@@ -3781,5 +3781,30 @@ sub iseq($$;$) {
     ok(@w==0);
 }    
 
+{
+    use charnames ":full";
+    ok("\N{ROMAN NUMERAL ONE}" =~ /\p{Alphabetic}/, "I =~ Alphabetic");
+    ok("\N{ROMAN NUMERAL ONE}" =~ /\p{Uppercase}/,  "I =~ Uppercase");
+    ok("\N{ROMAN NUMERAL ONE}" !~ /\p{Lowercase}/,  "I !~ Lowercase");
+    ok("\N{ROMAN NUMERAL ONE}" =~ /\p{IDStart}/,    "I =~ ID_Start");
+    ok("\N{ROMAN NUMERAL ONE}" =~ /\p{IDContinue}/, "I =~ ID_Continue");
+    ok("\N{SMALL ROMAN NUMERAL ONE}" =~ /\p{Alphabetic}/, "i =~ Alphabetic");
+    ok("\N{SMALL ROMAN NUMERAL ONE}" !~ /\p{Uppercase}/,  "i !~ Uppercase");
+    ok("\N{SMALL ROMAN NUMERAL ONE}" =~ /\p{Lowercase}/,  "i =~ Lowercase");
+    ok("\N{SMALL ROMAN NUMERAL ONE}" =~ /\p{IDStart}/,    "i =~ ID_Start");
+    ok("\N{SMALL ROMAN NUMERAL ONE}" =~ /\p{IDContinue}/, "i =~ ID_Continue");
+}
+
+{
+# requirement of Unicode Technical Standard #18, 1.7 Code Points
+# cf. http://www.unicode.org/reports/tr18/#Supplementary_Characters
+    for my $u (0x7FF, 0x800, 0xFFFF, 0x10000) {
+        no warnings 'utf8'; # oops
+        my $c = chr $u;
+        my $x = sprintf '%04X', $u;
+        ok( "A${c}B" =~ /A[\0-\x{10000}]B/, "unicode range - $x");
+    }
+}
+
 # Don't forget to update this!
-BEGIN{print "1..1253\n"};
+BEGIN{print "1..1267\n"};
