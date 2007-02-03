@@ -13,7 +13,8 @@
 
 package Math::BigRat;
 
-require 5.005_03;
+# anythig older is untested, and unlikely to work
+use 5.006002;
 use strict;
 
 use Math::BigFloat;
@@ -22,7 +23,7 @@ use vars qw($VERSION @ISA $upgrade $downgrade
 
 @ISA = qw(Math::BigFloat);
 
-$VERSION = '0.15';
+$VERSION = '0.17';
 
 use overload;			# inherit overload from Math::BigFloat
 
@@ -228,13 +229,13 @@ sub new
       $self->{sign} = '+';					# no sign => '+'
       $self->{_n} = undef;
       $self->{_d} = undef;
-      if ($n =~ /^([+-]?)0*(\d+)\z/)				# first part ok?
+      if ($n =~ /^([+-]?)0*([0-9]+)\z/)				# first part ok?
 	{
 	$self->{sign} = $1 || '+';				# no sign => '+'
 	$self->{_n} = $MBI->_new($2 || 0);
         }
 
-      if ($d =~ /^([+-]?)0*(\d+)\z/)				# second part ok?
+      if ($d =~ /^([+-]?)0*([0-9]+)\z/)				# second part ok?
 	{
 	$self->{sign} =~ tr/+-/-+/ if ($1 || '') eq '-';	# negate if second part neg.
 	$self->{_d} = $MBI->_new($2 || 0);
@@ -290,7 +291,7 @@ sub new
   else
     {
     # for simple forms, use $MBI directly
-    if ($n =~ /^([+-]?)0*(\d+)\z/)
+    if ($n =~ /^([+-]?)0*([0-9]+)\z/)
       {
       $self->{sign} = $1 || '+';
       $self->{_n} = $MBI->_new($2 || 0);
@@ -1308,6 +1309,44 @@ sub as_hex
   $s . $MBI->_as_hex($x->{_n});
   }
 
+sub as_oct
+  {
+  my ($self,$x) = ref($_[0]) ? (undef,$_[0]) : objectify(1,@_);
+
+  return $x unless $x->is_int();
+
+  my $s = $x->{sign}; $s = '' if $s eq '+';
+  $s . $MBI->_as_oct($x->{_n});
+  }
+
+##############################################################################
+
+sub from_hex
+  {
+  my $class = shift;
+
+  $class->new(@_);
+  }
+
+sub from_bin
+  {
+  my $class = shift;
+
+  $class->new(@_);
+  }
+
+sub from_oct
+  {
+  my $class = shift;
+
+  my @parts;
+  for my $c (@_)
+    {
+    push @parts, Math::BigInt->from_oct($c);
+    }
+  $class->new ( @parts );
+  }
+
 ##############################################################################
 # import
 
@@ -1316,6 +1355,7 @@ sub import
   my $self = shift;
   my $l = scalar @_;
   my $lib = ''; my @a;
+  my $try = 'try';
 
   for ( my $i = 0; $i < $l ; $i++)
     {
@@ -1336,9 +1376,10 @@ sub import
       $downgrade = $_[$i+1];		# or undef to disable
       $i++;
       }
-    elsif ($_[$i] eq 'lib')
+    elsif ($_[$i] =~ /^(lib|try|only)\z/)
       {
       $lib = $_[$i+1] || '';		# default Calc
+      $try = $1;			# lib, try or only
       $i++;
       }
     elsif ($_[$i] eq 'with')
@@ -1365,7 +1406,7 @@ sub import
     $lib = join(",", @c);
     }
   my @import = ('objectify');
-  push @import, lib => $lib if $lib ne '';
+  push @import, $try => $lib if $lib ne '';
 
   # MBI already loaded, so feed it our lib arguments
   Math::BigInt->import( @import );
@@ -1410,33 +1451,27 @@ for arbitrary big rational numbers.
 
 =head2 MATH LIBRARY
 
-Math with the numbers is done (by default) by a module called
-Math::BigInt::Calc. This is equivalent to saying:
+You can change the underlying module that does the low-level
+math operations by using:
 
-	use Math::BigRat lib => 'Calc';
+	use Math::BigRat try => 'GMP';
 
-You can change this by using:
-
-	use Math::BigRat lib => 'BitVect';
+Note: This needs Math::BigInt::GMP installed.
 
 The following would first try to find Math::BigInt::Foo, then
 Math::BigInt::Bar, and when this also fails, revert to Math::BigInt::Calc:
 
+	use Math::BigRat try => 'Foo,Math::BigInt::Bar';
+
+If you want to get warned when the fallback occurs, replace "try" with
+"lib":
+
 	use Math::BigRat lib => 'Foo,Math::BigInt::Bar';
 
-Calc.pm uses as internal format an array of elements of some decimal base
-(usually 1e7, but this might be different for some systems) with the least
-significant digit first, while BitVect.pm uses a bit vector of base 2, most
-significant bit first. Other modules might use even different means of
-representing the numbers. See the respective module documentation for further
-details.
+If you want the code to die instead, replace "try" with
+"only":
 
-Currently the following replacement libraries exist, search for them at CPAN:
-
-	Math::BigInt::BitVect
-	Math::BigInt::GMP
-	Math::BigInt::Pari
-	Math::BigInt::FastCalc
+	use Math::BigRat only => 'Foo,Math::BigInt::Bar';
 
 =head1 METHODS
 
@@ -1485,7 +1520,21 @@ Returns a copy of the denominator (the part under the line) as positive BigInt.
 Return a list consisting of (signed) numerator and (unsigned) denominator as
 BigInts.
 
-=head2 as_int()
+=head2 numify()
+
+	my $y = $x->numify();
+
+Returns the object as a scalar. This will lose some data if the object
+cannot be represented by a normal Perl scalar (integer or float), so
+use as_int() instead.
+
+This routine is automatically used whenever a scalar is required:
+
+	my $x = Math::BigRat->new('3/1');
+	@array = (1,2,3);
+	$y = $array[$x];		# set $y to 3
+
+=head2 as_int()/as_number()
 
 	$x = Math::BigRat->new('13/7');
 	print $x->as_int(),"\n";		# '1'
@@ -1507,6 +1556,42 @@ Returns the BigRat as hexadecimal string. Works only for integers.
 	print $x->as_bin(),"\n";		# '0x1101'
 
 Returns the BigRat as binary string. Works only for integers. 
+
+=head2 as_oct()
+
+	$x = Math::BigRat->new('13');
+	print $x->as_oct(),"\n";		# '015'
+
+Returns the BigRat as octal string. Works only for integers. 
+
+=head2 from_hex()/from_bin()/from_oct()
+
+	my $h = Math::BigRat->from_hex('0x10');
+	my $b = Math::BigRat->from_bin('0b10000000');
+	my $o = Math::BigRat->from_oct('020');
+
+Create a BigRat from an hexadecimal, binary or octal number
+in string form.
+
+=head2 length()
+
+	$len = $x->length();
+
+Return the length of $x in digitis for integer values.
+
+=head2 digit()
+
+	print Math::BigRat->new('123/1')->digit(1);	# 1
+	print Math::BigRat->new('123/1')->digit(-1);	# 3
+
+Return the N'ths digit from X when X is an integer value.
+
+=head2 bnorm()
+
+	$x->bnorm();
+
+Reduce the number to the shortest form. This routine is called
+automatically whenever it is needed.
 
 =head2 bfac()
 
@@ -1536,6 +1621,12 @@ Are not yet implemented.
 
 Set $x to the remainder of the division of $x by $y.
 
+=head2 bneg()
+
+	$x->bneg();
+
+Used to negate the object in-place.
+
 =head2 is_one()
 
 	print "$x is 1\n" if $x->is_one();
@@ -1548,7 +1639,7 @@ Return true if $x is exactly one, otherwise false.
 
 Return true if $x is exactly zero, otherwise false.
 
-=head2 is_pos()
+=head2 is_pos()/is_positive()
 
 	print "$x is >= 0\n" if $x->is_positive();
 
@@ -1557,7 +1648,7 @@ false. Please note that '+inf' is also positive, while 'NaN' and '-inf' aren't.
 
 C<is_positive()> is an alias for C<is_pos()>.
 
-=head2 is_neg()
+=head2 is_neg()/is_negative()
 
 	print "$x is < 0\n" if $x->is_negative();
 
@@ -1604,7 +1695,53 @@ Truncate $x to an integer value.
 
 Calculate the square root of $x.
 
-=head2 config
+=head2 broot()
+	
+	$x->broot($n);
+
+Calculate the N'th root of $x.
+
+=head2 badd()/bmul()/bsub()/bdiv()/bdec()/binc()
+
+Please see the documentation in L<Math::BigInt>.
+
+=head2 copy()
+
+	my $z = $x->copy();
+
+Makes a deep copy of the object.
+
+Please see the documentation in L<Math::BigInt> for further details.
+
+=head2 bstr()/bsstr()
+
+	my $x = Math::BigInt->new('8/4');
+	print $x->bstr(),"\n";			# prints 1/2
+	print $x->bsstr(),"\n";			# prints 1/2
+
+Return a string representating this object.
+
+=head2 bacmp()/bcmp()
+
+Used to compare numbers.
+
+Please see the documentation in L<Math::BigInt> for further details.
+
+=head2 blsft()/brsft()
+
+Used to shift numbers left/right.
+
+Please see the documentation in L<Math::BigInt> for further details.
+
+=head2 bpow()
+
+	$x->bpow($y);
+
+Compute $x ** $y.
+
+Please see the documentation in L<Math::BigInt> for further details.
+
+=head2 config()
 
         use Data::Dumper;
 
@@ -1683,6 +1820,6 @@ may contain more documentation and examples as well as testcases.
 
 =head1 AUTHORS
 
-(C) by Tels L<http://bloodgate.com/> 2001 - 2005.
+(C) by Tels L<http://bloodgate.com/> 2001 - 2007.
 
 =cut
