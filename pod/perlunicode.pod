@@ -317,8 +317,7 @@ You can also use negation in both C<\p{}> and C<\P{}> by introducing a caret
 equal to C<\P{Tamil}>.
 
 B<NOTE: the properties, scripts, and blocks listed here are as of
-Unicode 3.2.0, March 2002, or Perl 5.8.0, July 2002.  Unicode 4.0.0
-came out in April 2003, and Perl 5.8.1 in September 2003.>
+Unicode 5.0.0 in July 2006.>
 
 =over 4
 
@@ -425,16 +424,23 @@ such as in C<\p{Latin}> or C<\p{Cyrillic}>, are as follows:
 
     Arabic
     Armenian
+    Balinese
     Bengali
     Bopomofo
+    Braille
+    Buginese
     Buhid
     CanadianAboriginal
     Cherokee
+    Coptic
+    Cuneiform
+    Cypriot
     Cyrillic
     Deseret
     Devanagari
     Ethiopic
     Georgian
+    Glagolitic
     Gothic
     Greek
     Gujarati
@@ -447,25 +453,39 @@ such as in C<\p{Latin}> or C<\p{Cyrillic}>, are as follows:
     Inherited
     Kannada
     Katakana
+    Kharoshthi
     Khmer
     Lao
     Latin
+    Limbu
+    LinearB
     Malayalam
     Mongolian
     Myanmar
+    NewTaiLue
+    Nko
     Ogham
     OldItalic
+    OldPersian
     Oriya
+    Osmanya
+    PhagsPa
+    Phoenician
     Runic
+    Shavian
     Sinhala
+    SylotiNagri
     Syriac
     Tagalog
     Tagbanwa
+    TaiLe
     Tamil
     Telugu
     Thaana
     Thai
     Tibetan
+    Tifinagh
+    Ugaritic
     Yi
 
 =item Extended property classes
@@ -479,7 +499,6 @@ properties, defined by the F<PropList> Unicode database:
     Deprecated
     Diacritic
     Extender
-    GraphemeLink
     HexDigit
     Hyphen
     Ideographic
@@ -491,31 +510,44 @@ properties, defined by the F<PropList> Unicode database:
     OtherAlphabetic
     OtherDefaultIgnorableCodePoint
     OtherGraphemeExtend
+    OtherIDStart
+    OtherIDContinue
     OtherLowercase
     OtherMath
     OtherUppercase
+    PatternSyntax
+    PatternWhiteSpace
     QuotationMark
     Radical
     SoftDotted
+    STerm
     TerminalPunctuation
     UnifiedIdeograph
+    VariationSelector
     WhiteSpace
 
 and there are further derived properties:
 
-    Alphabetic      Lu + Ll + Lt + Lm + Lo + OtherAlphabetic
-    Lowercase       Ll + OtherLowercase
-    Uppercase       Lu + OtherUppercase
-    Math            Sm + OtherMath
+    Alphabetic  =  Lu + Ll + Lt + Lm + Lo + Nl + OtherAlphabetic
+    Lowercase   =  Ll + OtherLowercase
+    Uppercase   =  Lu + OtherUppercase
+    Math        =  Sm + OtherMath
 
-    ID_Start        Lu + Ll + Lt + Lm + Lo + Nl
-    ID_Continue     ID_Start + Mn + Mc + Nd + Pc
+    IDStart     =  Lu + Ll + Lt + Lm + Lo + Nl + OtherIDStart
+    IDContinue  =  IDStart + Mn + Mc + Nd + Pc + OtherIDContinue
 
-    Any             Any character
-    Assigned        Any non-Cn character (i.e. synonym for \P{Cn})
-    Unassigned      Synonym for \p{Cn}
-    Common          Any character (or unassigned code point)
-                    not explicitly assigned to a script
+    DefaultIgnorableCodePoint
+                =  OtherDefaultIgnorableCodePoint
+                   + Cf + Cc + Cs + Noncharacters + VariationSelector
+                   - WhiteSpace - FFF9..FFFB (Annotation Characters)
+
+    Any         =  Any code points (i.e. U+0000 to U+10FFFF)
+    Assigned    =  Any non-Cn code points (i.e. synonym for \P{Cn})
+    Unassigned  =  Synonym for \p{Cn}
+    ASCII       =  ASCII (i.e. U+0000 to U+007F)
+
+    Common      =  Any character (or unassigned code point)
+                   not explicitly assigned to a script
 
 =item Use of "Is" Prefix
 
@@ -535,9 +567,9 @@ blocks. It does not, for example, contain digits, because digits are
 shared across many scripts. Digits and similar groups, like
 punctuation, are in a category called C<Common>.
 
-For more about scripts, see the UTR #24:
+For more about scripts, see the UAX#24 "Script Names":
 
-   http://www.unicode.org/unicode/reports/tr24/
+   http://www.unicode.org/reports/tr24/
 
 For more about blocks, see:
 
@@ -551,12 +583,17 @@ for block tests to avoid confusion.
 
 These block names are supported:
 
+    InAegeanNumbers
     InAlphabeticPresentationForms
+    InAncientGreekMusicalNotation
+    InAncientGreekNumbers
     InArabic
     InArabicPresentationFormsA
     InArabicPresentationFormsB
+    InArabicSupplement
     InArmenian
     InArrows
+    InBalinese
     InBasicLatin
     InBengali
     InBlockElements
@@ -564,6 +601,7 @@ These block names are supported:
     InBopomofoExtended
     InBoxDrawing
     InBraillePatterns
+    InBuginese
     InBuhid
     InByzantineMusicalSymbols
     InCJKCompatibility
@@ -571,27 +609,38 @@ These block names are supported:
     InCJKCompatibilityIdeographs
     InCJKCompatibilityIdeographsSupplement
     InCJKRadicalsSupplement
+    InCJKStrokes
     InCJKSymbolsAndPunctuation
     InCJKUnifiedIdeographs
     InCJKUnifiedIdeographsExtensionA
     InCJKUnifiedIdeographsExtensionB
     InCherokee
     InCombiningDiacriticalMarks
+    InCombiningDiacriticalMarksSupplement
     InCombiningDiacriticalMarksforSymbols
     InCombiningHalfMarks
     InControlPictures
+    InCoptic
+    InCountingRodNumerals
+    InCuneiform
+    InCuneiformNumbersAndPunctuation
     InCurrencySymbols
+    InCypriotSyllabary
     InCyrillic
-    InCyrillicSupplementary
+    InCyrillicSupplement
     InDeseret
     InDevanagari
     InDingbats
     InEnclosedAlphanumerics
     InEnclosedCJKLettersAndMonths
     InEthiopic
+    InEthiopicExtended
+    InEthiopicSupplement
     InGeneralPunctuation
     InGeometricShapes
     InGeorgian
+    InGeorgianSupplement
+    InGlagolitic
     InGothic
     InGreekExtended
     InGreekAndCoptic
@@ -613,13 +662,20 @@ These block names are supported:
     InKannada
     InKatakana
     InKatakanaPhoneticExtensions
+    InKharoshthi
     InKhmer
+    InKhmerSymbols
     InLao
     InLatin1Supplement
     InLatinExtendedA
     InLatinExtendedAdditional
     InLatinExtendedB
+    InLatinExtendedC
+    InLatinExtendedD
     InLetterlikeSymbols
+    InLimbu
+    InLinearBIdeograms
+    InLinearBSyllabary
     InLowSurrogates
     InMalayalam
     InMathematicalAlphanumericSymbols
@@ -627,17 +683,28 @@ These block names are supported:
     InMiscellaneousMathematicalSymbolsA
     InMiscellaneousMathematicalSymbolsB
     InMiscellaneousSymbols
+    InMiscellaneousSymbolsAndArrows
     InMiscellaneousTechnical
+    InModifierToneLetters
     InMongolian
     InMusicalSymbols
     InMyanmar
+    InNKo
+    InNewTaiLue
     InNumberForms
     InOgham
     InOldItalic
+    InOldPersian
     InOpticalCharacterRecognition
     InOriya
+    InOsmanya
+    InPhagspa
+    InPhoenician
+    InPhoneticExtensions
+    InPhoneticExtensionsSupplement
     InPrivateUseArea
     InRunic
+    InShavian
     InSinhala
     InSmallFormVariants
     InSpacingModifierLetters
@@ -646,21 +713,30 @@ These block names are supported:
     InSupplementalArrowsA
     InSupplementalArrowsB
     InSupplementalMathematicalOperators
+    InSupplementalPunctuation
     InSupplementaryPrivateUseAreaA
     InSupplementaryPrivateUseAreaB
+    InSylotiNagri
     InSyriac
     InTagalog
     InTagbanwa
     InTags
+    InTaiLe
+    InTaiXuanJingSymbols
     InTamil
     InTelugu
     InThaana
     InThai
     InTibetan
+    InTifinagh
+    InUgaritic
     InUnifiedCanadianAboriginalSyllabics
     InVariationSelectors
+    InVariationSelectorsSupplement
+    InVerticalForms
     InYiRadicals
     InYiSyllables
+    InYijingHexagramSymbols
 
 =back
 
@@ -845,9 +921,8 @@ See L<Encode>.
 
 The following list of Unicode support for regular expressions describes
 all the features currently supported.  The references to "Level N"
-and the section numbers refer to the Unicode Technical Report 18,
-"Unicode Regular Expression Guidelines", version 6 (Unicode 3.2.0,
-Perl 5.8.0).
+and the section numbers refer to the Unicode Technical Standard #18,
+"Unicode Regular Expressions", version 11, in May 2005.
 
 =over 4
 
@@ -855,37 +930,42 @@ Perl 5.8.0).
 
 Level 1 - Basic Unicode Support
 
-        2.1 Hex Notation                        - done          [1]
-            Named Notation                      - done          [2]
-        2.2 Categories                          - done          [3][4]
-        2.3 Subtraction                         - MISSING       [5][6]
-        2.4 Simple Word Boundaries              - done          [7]
-        2.5 Simple Loose Matches                - done          [8]
-        2.6 End of Line                         - MISSING       [9][10]
+        RL1.1   Hex Notation                        - done          [1]
+        RL1.2   Properties                          - done          [2][3]
+        RL1.2a  Compatibility Properties            - done          [4]
+        RL1.3   Subtraction and Intersection        - MISSING       [5]
+        RL1.4   Simple Word Boundaries              - done          [6]
+        RL1.5   Simple Loose Matches                - done          [7]
+        RL1.6   Line Boundaries                     - MISSING       [8]
+        RL1.7   Supplementary Code Points           - done          [9]
 
-        [ 1] \x{...}
-        [ 2] \N{...}
-        [ 3] . \p{...} \P{...}
-        [ 4] support for scripts (see UTR#24 Script Names), blocks,
-             binary properties, enumerated non-binary properties, and
-             numeric properties (as listed in UTR#18 Other Properties)
-        [ 5] have negation
-        [ 6] can use regular expression look-ahead [a]
-             or user-defined character properties [b] to emulate subtraction
-        [ 7] include Letters in word characters
-        [ 8] note that Perl does Full case-folding in matching, not Simple:
+        [1]  \x{...}
+        [2]  \p{...} \P{...}
+        [3]  supports not only minimal list (general category, scripts,
+             Alphabetic, Lowercase, Uppercase, WhiteSpace,
+             NoncharacterCodePoint, DefaultIgnorableCodePoint, Any,
+             ASCII, Assigned), but also bidirectional types, blocks, etc.
+             (see L</"Unicode Character Properties">)
+        [4]  \d \D \s \S \w \W \X [:prop:] [:^prop:]
+        [5]  can use regular expression look-ahead [a] or
+             user-defined character properties [b] to emulate set operations
+        [6]  \b \B
+        [7]  note that Perl does Full case-folding in matching, not Simple:
              for example U+1F88 is equivalent with U+1F00 U+03B9,
              not with 1F80.  This difference matters for certain Greek
              capital letters with certain modifiers: the Full case-folding
              decomposes the letter, while the Simple case-folding would map
              it to a single character.
-        [ 9] see UTR #13 Unicode Newline Guidelines
-        [10] should do ^ and $ also on \x{85}, \x{2028} and \x{2029}
-             (should also affect <>, $., and script line numbers)
-             (the \x{85}, \x{2028} and \x{2029} do match \s)
+        [8]  should do ^ and $ also on U+000B (\v in C), FF (\f), CR (\r),
+             CRLF (\r\n), NEL (U+0085), LS (U+2028), and PS (U+2029);
+             should also affect <>, $., and script line numbers;
+             should not split lines within CRLF [c] (i.e. there is no empty
+             line between \r and \n)
+        [9]  UTF-8/UTF-EBDDIC used in perl allows not only U+10000 to U+10FFFF
+             but also beyond U+10FFFF [d]
 
 [a] You can mimic class subtraction using lookahead.
-For example, what UTR #18 might write as
+For example, what UTS#18 might write as
 
     [{Greek}-[{UNASSIGNED}]]
 
@@ -901,40 +981,62 @@ But in this particular example, you probably really want
 which will match assigned characters known to be part of the Greek script.
 
 Also see the Unicode::Regex::Set module, it does implement the full
-UTR #18 grouping, intersection, union, and removal (subtraction) syntax.
+UTS#18 grouping, intersection, union, and removal (subtraction) syntax.
 
-[b] See L</"User-Defined Character Properties">.
+[b] '+' for union, '-' for removal (set-difference), '&' for intersection
+(see L</"User-Defined Character Properties">)
+
+[c] Try the C<:crlf> layer (see L<PerlIO>).
+
+[d] Avoid C<use warning 'utf8';> (or say C<no warning 'utf8';>) to allow
+U+FFFF (C<\x{FFFF}>).
 
 =item *
 
 Level 2 - Extended Unicode Support
 
-        3.1 Surrogates                          - MISSING	[11]
-        3.2 Canonical Equivalents               - MISSING       [12][13]
-        3.3 Locale-Independent Graphemes        - MISSING       [14]
-        3.4 Locale-Independent Words            - MISSING       [15]
-        3.5 Locale-Independent Loose Matches    - MISSING       [16]
+        RL2.1   Canonical Equivalents           - MISSING       [10][11]
+        RL2.2   Default Grapheme Clusters       - MISSING       [12][13]
+        RL2.3   Default Word Boundaries         - MISSING       [14]
+        RL2.4   Default Loose Matches           - MISSING       [15]
+        RL2.5   Name Properties                 - MISSING       [16]
+        RL2.6   Wildcard Properties             - MISSING
 
-        [11] Surrogates are solely a UTF-16 concept and Perl's internal
-             representation is UTF-8.  The Encode module does UTF-16, though.
-        [12] see UTR#15 Unicode Normalization
-        [13] have Unicode::Normalize but not integrated to regexes
-        [14] have \X but at this level . should equal that
-        [15] need three classes, not just \w and \W
-        [16] see UTR#21 Case Mappings
+        [10] see UAX#15 "Unicode Normalization Forms"
+        [11] have Unicode::Normalize but not integrated to regexes
+        [12] have \X but at this level . should equal that
+        [13] UAX#29 "Text Boundaries" considers CRLF and Hangul syllable
+             clusters as a single grapheme cluster.
+        [14] see UAX#29, Word Boundaries
+        [15] see UAX#21 "Case Mappings"
+        [16] have \N{...} but neither compute names of CJK Ideographs
+             and Hangul Syllables nor use a loose match [e]
+
+[e] C<\N{...}> allows namespaces (see L<charnames>).
 
 =item *
 
-Level 3 - Locale-Sensitive Support
+Level 3 - Tailored Support
 
-        4.1 Locale-Dependent Categories         - MISSING
-        4.2 Locale-Dependent Graphemes          - MISSING       [16][17]
-        4.3 Locale-Dependent Words              - MISSING
-        4.4 Locale-Dependent Loose Matches      - MISSING
-        4.5 Locale-Dependent Ranges             - MISSING
+        RL3.1   Tailored Punctuation            - MISSING
+        RL3.2   Tailored Grapheme Clusters      - MISSING       [17][18]
+        RL3.3   Tailored Word Boundaries        - MISSING
+        RL3.4   Tailored Loose Matches          - MISSING
+        RL3.5   Tailored Ranges                 - MISSING
+        RL3.6   Context Matching                - MISSING       [19]
+        RL3.7   Incremental Matches             - MISSING
+      ( RL3.8   Unicode Set Sharing )
+        RL3.9   Possible Match Sets             - MISSING
+        RL3.10  Folded Matching                 - MISSING       [20]
+        RL3.11  Submatchers                     - MISSING
 
-        [16] see UTR#10 Unicode Collation Algorithms
-        [17] have Unicode::Collate but not integrated to regexes
+        [17] see UAX#10 "Unicode Collation Algorithms"
+        [18] have Unicode::Collate but not integrated to regexes
+        [19] have (?<=x) and (?=x), but look-aheads or look-behinds should see
+             outside of the target substring
+        [20] need insensitive matching for linguistic features other than case;
+             for example, hiragana to katakana, wide and narrow, simplified Han
+             to traditional Han (see UTR#30 "Character Foldings")
 
 =back
 
