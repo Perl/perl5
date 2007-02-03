@@ -68,23 +68,19 @@ S_new_he(pTHX)
     HE* he;
     void ** const root = &PL_body_roots[HE_SVSLOT];
 
-    LOCK_SV_MUTEX;
     if (!*root)
 	S_more_he(aTHX);
     he = (HE*) *root;
     assert(he);
     *root = HeNEXT(he);
-    UNLOCK_SV_MUTEX;
     return he;
 }
 
 #define new_HE() new_he()
 #define del_HE(p) \
     STMT_START { \
-	LOCK_SV_MUTEX; \
 	HeNEXT(p) = (HE*)(PL_body_roots[HE_SVSLOT]);	\
 	PL_body_roots[HE_SVSLOT] = p; \
-	UNLOCK_SV_MUTEX; \
     } STMT_END
 
 

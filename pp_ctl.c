@@ -2874,7 +2874,6 @@ Perl_find_runcv(pTHX_ U32 *db_seqp)
  * outside is the lexically enclosing CV (if any) that invoked us.
  */
 
-/* With USE_5005THREADS, eval_owner must be held on entry to doeval */
 STATIC OP *
 S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 {

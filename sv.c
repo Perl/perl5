@@ -104,10 +104,6 @@ At the time of very final cleanup, sv_free_arenas() is called from
 perl_destruct() to physically free all the arenas allocated since the
 start of the interpreter.
 
-Manipulation of any of the PL_*root pointers is protected by enclosing
-LOCK_SV_MUTEX; ... UNLOCK_SV_MUTEX calls which should Do the Right Thing
-if threads are enabled.
-
 The function visit() scans the SV arenas list, and calls a specified
 function for each SV it finds which is still live - ie which has an SvTYPE
 other than all 1's, and a non-zero SvREFCNT. visit() is used by the
@@ -157,17 +153,12 @@ Public API:
  * "A time to plant, and a time to uproot what was planted..."
  */
 
-/*
- * nice_chunk and nice_chunk size need to be set
- * and queried under the protection of sv_mutex
- */
 void
 Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
 {
     dVAR;
     void *new_chunk;
     U32 new_chunk_size;
-    LOCK_SV_MUTEX;
     new_chunk = (void *)(chunk);
     new_chunk_size = (chunk_size);
     if (new_chunk_size > PL_nice_chunk_size) {
@@ -177,7 +168,6 @@ Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
     } else {
 	Safefree(chunk);
     }
-    UNLOCK_SV_MUTEX;
 }
 
 #ifdef DEBUG_LEAKING_SCALARS
@@ -209,7 +199,6 @@ Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
 	--PL_sv_count;					\
     } STMT_END
 
-/* sv_mutex must be held while calling uproot_SV() */
 #define uproot_SV(p) \
     STMT_START {					\
 	(p) = PL_sv_root;				\
@@ -220,7 +209,6 @@ Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
 
 /* make some more SVs by adding another arena */
 
-/* sv_mutex must be held while calling more_sv() */
 STATIC SV*
 S_more_sv(pTHX)
 {
@@ -250,12 +238,10 @@ S_new_SV(pTHX)
 {
     SV* sv;
 
-    LOCK_SV_MUTEX;
     if (PL_sv_root)
 	uproot_SV(sv);
     else
 	sv = S_more_sv(aTHX);
-    UNLOCK_SV_MUTEX;
     SvANY(sv) = 0;
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = 0;
@@ -273,12 +259,10 @@ S_new_SV(pTHX)
 #else
 #  define new_SV(p) \
     STMT_START {					\
-	LOCK_SV_MUTEX;					\
 	if (PL_sv_root)					\
 	    uproot_SV(p);				\
 	else						\
 	    (p) = S_more_sv(aTHX);			\
-	UNLOCK_SV_MUTEX;				\
 	SvANY(p) = 0;					\
 	SvREFCNT(p) = 1;				\
 	SvFLAGS(p) = 0;					\
@@ -292,12 +276,10 @@ S_new_SV(pTHX)
 
 #define del_SV(p) \
     STMT_START {					\
-	LOCK_SV_MUTEX;					\
 	if (DEBUG_D_TEST)				\
 	    del_sv(p);					\
 	else						\
 	    plant_SV(p);				\
-	UNLOCK_SV_MUTEX;				\
     } STMT_END
 
 STATIC void
@@ -720,10 +702,8 @@ Perl_get_arena(pTHX_ size_t arena_size, U32 misc)
 #define del_body(thing, root)			\
     STMT_START {				\
 	void ** const thing_copy = (void **)thing;\
-	LOCK_SV_MUTEX;				\
 	*thing_copy = *root;			\
 	*root = (void*)thing_copy;		\
-	UNLOCK_SV_MUTEX;			\
     } STMT_END
 
 /* 
@@ -1094,11 +1074,9 @@ S_more_bodies (pTHX_ svtype sv_type)
 #define new_body_inline(xpv, sv_type) \
     STMT_START { \
 	void ** const r3wt = &PL_body_roots[sv_type]; \
-	LOCK_SV_MUTEX; \
 	xpv = (PTR_TBL_ENT_t*) (*((void **)(r3wt))      \
 	  ? *((void **)(r3wt)) : more_bodies(sv_type)); \
 	*(r3wt) = *(void**)(xpv); \
-	UNLOCK_SV_MUTEX; \
     } STMT_END
 
 #ifndef PURIFY

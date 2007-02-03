@@ -5467,7 +5467,6 @@ S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
     }
 }
 
-/* XXX unsafe for threads if eval_owner isn't held */
 /*
 =for apidoc newCONSTSUB
 

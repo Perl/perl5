@@ -255,7 +255,6 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 	    if (exported_constant)
 		GvIMPORTED_CV_on(gv);
 	} else {
-	    /* XXX unsafe for threads if eval_owner isn't held */
 	    (void) start_subparse(0,0);	/* Create empty CV in compcv. */
 	    GvCV(gv) = PL_compcv;
 	}
