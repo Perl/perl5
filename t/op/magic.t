@@ -257,7 +257,7 @@ EOF
     s{\\}{/}g;
     ok((($Is_MSWin32 || $Is_os2) ? uc($_) eq uc($s1) : $_ eq $s1), " :$_:!=:$s1:");
     $_ = `$perl $script`;
-    s/\.exe//i if $Is_Dos or $Is_os2;
+    s/\.exe//i if $Is_Dos or $Is_os2 or $Is_Cygwin;
     s{./$perl}{$perl} if $Is_BeOS; # revert BeOS execvp() side-effect
     s{\\}{/}g;
     ok((($Is_MSWin32 || $Is_os2) ? uc($_) eq uc($s1) : $_ eq $s1), " :$_:!=:$s1: after `$perl $script`");

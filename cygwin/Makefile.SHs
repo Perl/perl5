@@ -22,7 +22,7 @@ case $PERL_CONFIG_SH in
 	;;
 esac
 
-addtopath=`pwd`
+addtopath=`pwd | sed -e 's/ /\\\ /g'`
 $spitshell >>Makefile <<!GROK!THIS!
 
 cygwin.c: cygwin/cygwin.c
@@ -34,9 +34,10 @@ ld2: $& Makefile perlld ${src}/cygwin/ld2.in
 	@$sed s,@buildpath@,$addtopath,g <${src}/cygwin/ld2.in >ld2
 	@chmod a+x ld2
 	@echo "installing ld2 into $installbin"
-# install is included in Cygwin distributions, and we make a note of th
+# install is included in Cygwin distributions, and we make a note of the
 # requirement in the README.cygwin file. However, let's give them
 # a warning.
+	@test -d ${installbin} || mkdir -p ${installbin}
 	@/usr/bin/install -c -m 755 ld2 ${installbin}/ld2
 	@if test ! -f  ${installbin}/ld2; then \
 		echo "*************************************************" ; \
@@ -104,13 +105,13 @@ perlmain$(OBJ_EXT): perlmain.c
 
 # library used to make statically linked executables
 # miniperl is linked against it to avoid libperl.dll locking
-$(LIBPERL)$(LIB_EXT): $& perl$(OBJ_EXT) $(cwobj)
-	$(AR) rcu $@ perl$(OBJ_EXT) $(cwobj)
+$(LIBPERL)$(LIB_EXT): $& $(cwobj)
+	$(AR) rcu $@ $(cwobj)
 
 # dll and import library
-$(LIBPERL).dll$(LIB_EXT): $& perl$(OBJ_EXT) $(cwobj) ld2
+$(LIBPERL).dll$(LIB_EXT): $& $(cwobj) ld2
 	$(LDLIBPTH) ld2 $(SHRPLDFLAGS) -o $(LIBPERL)$(DLSUFFIX) \
-	perl$(OBJ_EXT) $(cwobj) $(libs)
+	$(cwobj) $(libs)
 
 # How to build executables.
 
@@ -145,8 +146,8 @@ $spitshell >>Makefile <<'!NO!SUBS!'
 cwobj = $(obj)
 
 # perl library
-$(LIBPERL)$(LIB_EXT): $& perl$(OBJ_EXT) $(cwobj)
-	$(AR) rcu $@ perl$(OBJ_EXT) $(cwobj)
+$(LIBPERL)$(LIB_EXT): $& $(cwobj)
+	$(AR) rcu $@ $(cwobj)
 
 # How to build executables.
 
@@ -204,5 +205,13 @@ distdir: miniperl
 	-mkdir $(DIST_DIRECTORY)
 	./miniperl '-MExtUtils::Manifest' \
 	-e "ExtUtils::Manifest::manicopy(ExtUtils::Manifest::maniread(),'$(DIST_DIRECTORY)')"
+
+cygwin1.dll: /bin/cygwin1.dll
+	cp /bin/cygwin1.dll .
+
+cygcrypt-0.dll: /bin/cygcrypt-0.dll
+	cp /bin/cygcrypt-0.dll .
+
+test_prep: cygwin1.dll cygcrypt-0.dll
 
 !NO!SUBS!
