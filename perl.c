@@ -171,7 +171,12 @@ S_init_tls_and_interp(PerlInterpreter *my_perl)
 	MUTEX_INIT(&PL_my_ctx_mutex);
 #  endif
     }
-    else {
+#if defined(USE_ITHREADS)
+    else
+#else
+    /* This always happens for non-ithreads  */
+#endif
+    {
 	PERL_SET_THX(my_perl);
     }
 }
