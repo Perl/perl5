@@ -75,5 +75,4 @@ sub compile_module {
 __DATA__
 ByteLoader
 CPAN::FirstTime
-DynaLoader
 Pod::Plainer

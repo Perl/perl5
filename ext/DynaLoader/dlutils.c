@@ -8,6 +8,12 @@
  *                      files when the interpreter exits
  */
 
+#ifndef START_MY_CXT /* Some IDEs try compiling this standalone. */
+#   include "EXTERN.h"
+#   include "perl.h"
+#   include "XSUB.h"
+#endif
+
 #ifndef XS_VERSION
 #  define XS_VERSION "0"
 #endif
@@ -110,6 +116,7 @@ dl_generic_private_init(pTHX)	/* called by dl_*.xs dl_private_init() */
 }
 
 
+#ifndef SYMBIAN
 /* SaveError() takes printf style args and saves the result in dl_last_error */
 static void
 SaveError(pTHX_ const char* pat, ...)
@@ -133,4 +140,5 @@ SaveError(pTHX_ const char* pat, ...)
     sv_setpvn(MY_CXT.x_dl_last_error, message, len) ;
     DLDEBUG(2,PerlIO_printf(Perl_debug_log, "DynaLoader: stored error msg '%s'\n",dl_last_error));
 }
+#endif
 

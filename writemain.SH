@@ -39,8 +39,8 @@ args=''
 : Remove any .a suffixes and any leading path components
 for file in $orig ; do
         case "$file" in
-           *.a)  file=`echo $file | sed 's/\.a//g'`
-                 ;;
+           *.a)  file=`echo $file | sed 's/\.a//g'`;;
+           *.o)  file=`echo $file | sed 's/\.o//g'`;;
         esac
 	case "$file" in
 	ext/*)	file=`echo $file | sed 's:ext/\(.*\)/[^/]*:\1:'`

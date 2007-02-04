@@ -425,7 +425,7 @@ rather than print it to STDOUT.
  perl -MExtUtils::Embed -e ldopts
 
 
-This will print arguments for linking with B<libperl.a>, B<DynaLoader> and 
+This will print arguments for linking with B<libperl> and
 extensions found in B<$Config{static_ext}>.  This includes libraries
 found in B<$Config{libs}> and the first ModuleName.a library
 for each extension that is found by searching B<@INC> or the path 
@@ -439,16 +439,7 @@ are picked up from the B<extralibs.ld> file in the same directory.
 
 This will do the same as the above example, along with printing additional arguments for linking with the B<Socket> extension.
 
-
- perl -MExtUtils::Embed -e ldopts -- DynaLoader
-
-
-This will print arguments for linking with just the B<DynaLoader> extension
-and B<libperl.a>.
-
-
  perl -MExtUtils::Embed -e ldopts -- -std Msql -- -L/usr/msql/lib -lmsql
-
 
 Any arguments after the second '--' token are additional linker
 arguments that will be examined for potential conflict.  If there is no
