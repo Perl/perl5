@@ -914,10 +914,10 @@ static const struct body_details bodies_by_type[] = {
     { sizeof(XPVIO), sizeof(XPVIO), 0, SVt_PVIO, TRUE, HADNV,
       HASARENA, FIT_ARENA(24, sizeof(XPVIO)) },
 
+    /* These two are the 17th and 18th entries in the array, so beyond the
+       all the regular SV types.  */
     { sizeof(struct ptr_tbl_ent), /* This is used for PTEs.  */
-      0, 0, PTE_SVSLOT, FALSE, NONV,
-      NOARENA /* IVS don't need an arena  */,
-      /* But PTEs need to know the size of their arena  */
+      0, 0, 0, FALSE, NONV, NOARENA,
       FIT_ARENA(0, sizeof(struct ptr_tbl_ent))
     },
 
