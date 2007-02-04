@@ -109,7 +109,10 @@ BEGIN {
 # perl_parse, and in turn that is typically the static function xs_init
 # defined in the same place as the caller to perl_parse, and at the same time,
 # so compiled in and installed as binaries now deployed.)
-$XS_VERSION = '1.05';
+
+BEGIN {
+    $XS_VERSION = '1.05';
+}
 
 require AutoLoader;
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;
