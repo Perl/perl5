@@ -335,9 +335,7 @@ is($@, "");
 # (see RT #38207 - Useless localization of constant ($[) in getopts.pl}
 {
     local $[ = 1;
-    local $TODO = "local() not currently working correctly with \$[";
     ok(1 == $[);
-    undef $TODO;
     f();
 }
 
