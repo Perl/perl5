@@ -27,9 +27,25 @@ package DynaLoader;
 #
 # Tim.Bunce@ig.co.uk, August 1994
 
-use vars qw($VERSION *AUTOLOAD);
+use vars qw($VERSION *AUTOLOAD $XS_VERSION);
 
 $VERSION = '1.05';	# avoid typo warning
+
+# See http://rt.perl.org/rt3//Public/Bug/Display.html?id=32539
+# for why we need this. Basically any embedded code will have 1.05 hard-coded
+# in it as the XS_VERSION to check against. If a shared libperl is upgraded,
+# then it will pull in a newer DynaLoader.pm file, because the shared libperl
+# provides the paths for @INC. The file in @INC provides the
+# $DynaLoader::XS_VERSION that the existing embedded code checks against, so
+# we must keep this value constant, else bootstrap_DynaLoader will croak()
+# Whilst moving bootstrap_DynaLoader to the shared libperl is the correct
+# long-term fix, it doesn't help current installations, as they're still
+# going to find the boot_DynaLoader linked to them (with its hard-coded 1.05)
+# (It's found via a passed in function pointer in the xsinit parameter to
+# perl_parse, and in turn that is typically the static function xs_init
+# defined in the same place as the caller to perl_parse, and at the same time,
+# so compiled in and installed as binaries now deployed.)
+$XS_VERSION = '1.05';
 
 require AutoLoader;
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;

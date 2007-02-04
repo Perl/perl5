@@ -8,6 +8,7 @@ WriteMakefile(
     SKIP	=> [qw(dynamic dynamic_lib dynamic_bs)],
     XSPROTOARG => '-noprototypes', 		# XXX remove later?
     VERSION_FROM => 'DynaLoader_pm.PL',
+    XS_VERSION  => '1.05',
     PL_FILES	=> {'DynaLoader_pm.PL'=>'DynaLoader.pm',
 		    'XSLoader_pm.PL'=>'XSLoader.pm'},
     PM		=> {'DynaLoader.pm' => '$(INST_LIBDIR)/DynaLoader.pm',
