@@ -2886,6 +2886,7 @@ win32_pclose(PerlIO *pf)
 	childpid = 0;
 
     if (!childpid) {
+        UNLOCK_FDPID_MUTEX;
 	errno = EBADF;
         return -1;
     }

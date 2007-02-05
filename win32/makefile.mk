@@ -326,27 +326,37 @@ BUILDOPT	+= -DPERL_IMPLICIT_SYS
 PROCESSOR_ARCHITECTURE *= x86
 
 .IF "$(WIN64)" == ""
+# When we are running from a 32bit cmd.exe on AMD64 then
+# PROCESSOR_ARCHITECTURE is set to x86 and PROCESSOR_ARCHITEW6432
+# is set to AMD64
 .IF "$(PROCESSOR_ARCHITEW6432)" != ""
 PROCESSOR_ARCHITECTURE	!= $(PROCESSOR_ARCHITEW6432)
 WIN64			= define
-.ELIF "$(PROCESSOR_ARCHITECTURE)" == "IA64"
+.ELIF "$(PROCESSOR_ARCHITECTURE)" == "AMD64" || "$(PROCESSOR_ARCHITECTURE)" == "IA64"
 WIN64			= define
 .ELSE
 WIN64			= undef
 .ENDIF
 .ENDIF
 
+ARCHITECTURE = $(PROCESSOR_ARCHITECTURE)
+.IF "$(ARCHITECTURE)" == "AMD64"
+ARCHITECTURE	= x64
+.ENDIF
+.IF "$(ARCHITECTURE)" == "IA64"
+ARCHITECTURE	= ia64
+.ENDIF
+
 .IF "$(USE_5005THREADS)" == "define"
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-thread
 .ELIF "$(USE_MULTI)" == "define"
-ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-multi
+ARCHNAME	= MSWin32-$(ARCHITECTURE)-multi
 .ELSE
 .IF "$(USE_PERLIO)" == "define"
-ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-perlio
+ARCHNAME	= MSWin32-$(ARCHITECTURE)-perlio
 .ELSE
-ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
+ARCHNAME	= MSWin32-$(ARCHITECTURE)
 .ENDIF
-ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
 .ENDIF
 
 .IF "$(USE_ITHREADS)" == "define"
@@ -367,6 +377,7 @@ LIBDIR		= ..\lib
 EXTDIR		= ..\ext
 PODDIR		= ..\pod
 EXTUTILSDIR	= $(LIBDIR)\ExtUtils
+HTMLDIR		= .\html
 
 #
 INST_SCRIPT	= $(INST_TOP)$(INST_VER)\bin
@@ -374,7 +385,6 @@ INST_BIN	= $(INST_SCRIPT)$(INST_ARCH)
 INST_LIB	= $(INST_TOP)$(INST_VER)\lib
 INST_ARCHLIB	= $(INST_LIB)$(INST_ARCH)
 INST_COREDIR	= $(INST_ARCHLIB)\CORE
-INST_POD	= $(INST_LIB)\pod
 INST_HTML	= $(INST_TOP)$(INST_VER)\html
 
 #
@@ -544,15 +554,7 @@ OPTIMIZE	+= -O1
 
 .IF "$(WIN64)" == "define"
 DEFINES		+= -DWIN64 -DCONSERVATIVE
-OPTIMIZE	+= -Wp64 -Op
-.ENDIF
-
-# the string-pooling option -Gf is deprecated in VC++ 7.x and will be removed
-# in later versions, so use read-only string-pooling (-GF) instead
-.IF "$(CCTYPE)" == "MSVC70FREE" || "$(CCTYPE)" == "MSVC70"
-STRPOOL		= -GF
-.ELSE
-STRPOOL		= -Gf
+OPTIMIZE	+= -Wp64 -fp:precise
 .ENDIF
 
 .IF "$(USE_PERLCRT)" != "define"
@@ -563,17 +565,20 @@ LIBBASEFILES	= $(CRYPT_LIB) \
 		oldnames.lib kernel32.lib user32.lib gdi32.lib winspool.lib \
 		comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib \
 		netapi32.lib uuid.lib ws2_32.lib mpr.lib winmm.lib \
-		version.lib
+		version.lib odbc32.lib odbccp32.lib
 
-# win64 doesn't have some libs
-.IF "$(WIN64)" != "define"
-LIBBASEFILES	+= odbc32.lib odbccp32.lib
+# The 64 bit Platform SDK compilers contain a runtime library that doesn't
+# include the buffer overrun verification code used by the /GS switch.
+# Since the code links against libraries that are compiled with /GS, this
+# "security cookie verification" must be included via bufferoverlow.lib.
+.IF "$(WIN64)" == "define"
+LIBBASEFILES    = $(LIBBASEFILES) bufferoverflowU.lib
 .ENDIF
 
 # we add LIBC here, since we may be using PerlCRT.dll
 LIBFILES	= $(LIBBASEFILES) $(LIBC)
 
-EXTRACFLAGS	= -nologo $(STRPOOL) -W3
+EXTRACFLAGS	= -nologo -GF -W3
 CFLAGS		= $(EXTRACFLAGS) $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS	= -nologo -nodefaultlib $(LINK_DBG) \
@@ -757,8 +762,8 @@ CFGH_TMPL	= config_H.vc
 PERLIMPLIB	*= ..\perl58$(a)
 PERLDLL		= ..\perl58.dll
 
-XCOPY		= xcopy /f /r /i /d
-RCOPY		= xcopy /f /r /i /e /d
+XCOPY		= xcopy /f /r /i /d /y
+RCOPY		= xcopy /f /r /i /e /d /y
 NOOP		= @rem
 
 #
@@ -906,11 +911,6 @@ STATIC_EXT	=
 NONXS_EXT	= Errno
 
 DYNALOADER	= $(EXTDIR)\DynaLoader\DynaLoader
-
-POD2HTML	= $(PODDIR)\pod2html
-POD2MAN		= $(PODDIR)\pod2man
-POD2LATEX	= $(PODDIR)\pod2latex
-POD2TEXT	= $(PODDIR)\pod2text
 
 # vars must be separated by "\t+~\t+", since we're using the tempfile
 # version of config_sh.pl (we were overflowing someone's buffer by
@@ -1258,7 +1258,7 @@ Extensions_realclean :
 
 
 doc: $(PERLEXE)
-	$(PERLEXE) -I..\lib ..\installhtml --podroot=.. --htmldir=./html \
+	$(PERLEXE) -I..\lib ..\installhtml --podroot=.. --htmldir=$(HTMLDIR) \
 	    --podpath=pod:lib:ext:utils --htmlroot="file://$(INST_HTML:s,:,|,)"\
 	    --libpod=perlfunc:perlguts:perlvar:perlrun:perlop --recurse
 
@@ -1313,8 +1313,6 @@ utils: $(PERLEXE) $(X2P)
 # Note that the pod cleanup in this next section is parsed (and regenerated
 # by pod/buildtoc so please check that script before making changes here
 
-# the doubled rmdir calls are needed because older cmd shells
-# don't understand /q
 distclean: realclean
 	-del /f $(MINIPERL) $(PERLEXE) $(PERLDLL) $(GLOBEXE) \
 		$(PERLIMPLIB) ..\miniperl$(a) $(MINIMOD)
@@ -1346,30 +1344,19 @@ distclean: realclean
 	-del /f $(LIBDIR)\Time\HiRes.pm
 	-del /f $(LIBDIR)\Unicode\Normalize.pm
 	-del /f $(LIBDIR)\Win32.pm
-	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO
-	-if exist $(LIBDIR)\IO rmdir /s $(LIBDIR)\IO
 	-if exist $(LIBDIR)\B rmdir /s /q $(LIBDIR)\B
-	-if exist $(LIBDIR)\B rmdir /s $(LIBDIR)\B
 	-if exist $(LIBDIR)\Data rmdir /s /q $(LIBDIR)\Data
-	-if exist $(LIBDIR)\Data rmdir /s $(LIBDIR)\Data
 	-if exist $(LIBDIR)\Encode rmdir /s /q $(LIBDIR)\Encode
-	-if exist $(LIBDIR)\Encode rmdir /s $(LIBDIR)\Encode
 	-if exist $(LIBDIR)\Filter\Util rmdir /s /q $(LIBDIR)\Filter\Util
-	-if exist $(LIBDIR)\Filter\Util rmdir /s $(LIBDIR)\Filter\Util
-	-if exist $(LIBDIR)\MIME rmdir /s /q $(LIBDIR)\MIME
-	-if exist $(LIBDIR)\MIME rmdir /s $(LIBDIR)\MIME
-	-if exist $(LIBDIR)\List rmdir /s /q $(LIBDIR)\List
-	-if exist $(LIBDIR)\List rmdir /s $(LIBDIR)\List
 	-if exist $(LIBDIR)\Hash rmdir /s /q $(LIBDIR)\Hash
-	-if exist $(LIBDIR)\Hash rmdir /s $(LIBDIR)\Hash
+	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO
+	-if exist $(LIBDIR)\IO\Uncompress rmdir /s /q $(LIBDIR)\IO\Uncompress
+	-if exist $(LIBDIR)\List rmdir /s /q $(LIBDIR)\List
+	-if exist $(LIBDIR)\MIME rmdir /s /q $(LIBDIR)\MIME
 	-if exist $(LIBDIR)\Scalar rmdir /s /q $(LIBDIR)\Scalar
-	-if exist $(LIBDIR)\Scalar rmdir /s $(LIBDIR)\Scalar
 	-if exist $(LIBDIR)\Sys rmdir /s /q $(LIBDIR)\Sys
-	-if exist $(LIBDIR)\Sys rmdir /s $(LIBDIR)\Sys
 	-if exist $(LIBDIR)\threads rmdir /s /q $(LIBDIR)\threads
-	-if exist $(LIBDIR)\threads rmdir /s $(LIBDIR)\threads
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
-	-if exist $(LIBDIR)\XS rmdir /s $(LIBDIR)\XS
 	-cd $(PODDIR) && del /f *.html *.bat checkpods \
 	    perlaix.pod perlamiga.pod perlapollo.pod perlbeos.pod \
 	    perlbs2000.pod perlce.pod perlcn.pod perlcygwin.pod \
@@ -1395,9 +1382,10 @@ distclean: realclean
 	-cd .. && del /s *$(a) *.map *.pdb *.ilk *.tds *.bs *$(o) .exists pm_to_blib
 	-cd $(EXTDIR) && del /s *.def Makefile Makefile.old
 	-if exist $(AUTODIR) rmdir /s /q $(AUTODIR)
-	-if exist $(AUTODIR) rmdir /s $(AUTODIR)
 	-if exist $(COREDIR) rmdir /s /q $(COREDIR)
-	-if exist $(COREDIR) rmdir /s $(COREDIR)
+	-if exist pod2htmd.tmp del pod2htmd.tmp
+	-if exist pod2htmi.tmp del pod2htmi.tmp
+	-if exist $(HTMLDIR) rmdir /s /q $(HTMLDIR)
 
 install : all installbare installhtml
 
@@ -1410,7 +1398,7 @@ installbare : $(RIGHTMAKE) utils
 	$(XCOPY) bin\*.bat $(INST_SCRIPT)\*.*
 
 installhtml : doc
-	$(RCOPY) html\*.* $(INST_HTML)\*.*
+	$(RCOPY) $(HTMLDIR)\*.* $(INST_HTML)\*.*
 
 inst_lib : $(CONFIGPM)
 	copy splittree.pl ..
@@ -1460,8 +1448,6 @@ _test : $(RIGHTMAKE)
 .ENDIF
 	cd ..\t && $(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
 
-# the doubled rmdir calls are needed because older cmd shells
-# don't understand /q
 _clean :
 	-@erase miniperlmain$(o)
 	-@erase $(MINIPERL)
@@ -1475,11 +1461,8 @@ _clean :
 	-@erase $(PERLDLL)
 	-@erase $(CORE_OBJ)
 	-if exist $(MINIDIR) rmdir /s /q $(MINIDIR)
-	-if exist $(MINIDIR) rmdir /s $(MINIDIR)
 	-if exist $(UNIDATADIR1) rmdir /s /q $(UNIDATADIR1)
-	-if exist $(UNIDATADIR1) rmdir /s $(UNIDATADIR1)
 	-if exist $(UNIDATADIR2) rmdir /s /q $(UNIDATADIR2)
-	-if exist $(UNIDATADIR2) rmdir /s $(UNIDATADIR2)
 	-@erase $(UNIDATAFILES)
 	-@erase $(WIN32_OBJ)
 	-@erase $(DLL_OBJ)

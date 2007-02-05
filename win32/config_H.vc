@@ -1093,9 +1093,16 @@
  *	This symbol is intended to be used along with CPPRUN in the same manner
  *	symbol CPPMINUS is used with CPPSTDIN. It contains either "-" or "".
  */
-#define CPPSTDIN "cppstdin"
-#define CPPMINUS ""
-#define CPPRUN "cl -nologo -E"
+
+#ifndef __GNUC__
+#   define CPPSTDIN "cppstdin"
+#   define CPPMINUS ""
+#   define CPPRUN "cl -nologo -E"
+#else
+#   define CPPSTDIN "gcc -E"
+#   define CPPMINUS "-"
+#   define CPPRUN "gcc -E"
+#endif
 #define CPPLAST ""
 
 /* HAS__FWALK:
@@ -1128,7 +1135,9 @@
  *	This symbol is defined if the C compiler can cast negative
  *	or large floating point numbers to 32-bit ints.
  */
-/*#define	CASTI32		/**/
+#ifdef __GNUC__
+#   define	CASTI32		/**/
+#endif
 
 /* CASTNEGFLOAT:
  *	This symbol is defined if the C compiler can cast negative
@@ -1900,7 +1909,11 @@
  */
 #define HAS_LONG_DOUBLE		/**/
 #ifdef HAS_LONG_DOUBLE
-#define LONG_DOUBLESIZE 10		/**/
+#   ifndef __GNUC__
+#	define LONG_DOUBLESIZE 10		/**/
+#   else
+#	define LONG_DOUBLESIZE 12		/**/
+#   endif
 #endif
 
 /* HAS_LONG_LONG:
@@ -3055,7 +3068,11 @@
 /* Off_t_size:
  *	This symbol holds the number of bytes used by the Off_t.
  */
-#define Off_t __int64		/* <offset> type */
+#ifndef __GNUC__
+#   define Off_t __int64		/* <offset> type */
+#else
+#   define Off_t long long		/* <offset> type */
+#endif
 #define LSEEKSIZE 8		/* <offset> size */
 #define Off_t_size 8	/* <offset> size */
 
@@ -3163,8 +3180,13 @@
  */
 /*#define HAS_QUAD	/**/
 #ifdef HAS_QUAD
-#   define Quad_t __int64	/**/
-#   define Uquad_t unsigned __int64	/**/
+#   ifndef __GNUC__
+#	define Quad_t __int64	/**/
+#	define Uquad_t unsigned __int64	/**/
+#   else
+#	define Quad_t long long	/**/
+#	define Uquad_t unsigned long long	/**/
+#   endif
 #   define QUADKIND 5	/**/
 #   define QUAD_IS_INT	1
 #   define QUAD_IS_LONG	2
@@ -3259,8 +3281,13 @@
 #define	I32TYPE		long	/**/
 #define	U32TYPE		unsigned long	/**/
 #ifdef HAS_QUAD
-#define	I64TYPE		__int64	/**/
-#define	U64TYPE		unsigned __int64	/**/
+#   ifndef __GNUC__
+#	define	I64TYPE		__int64	/**/
+#	define	U64TYPE		unsigned __int64	/**/
+#   else
+#	define	I64TYPE		long long	/**/
+#	define	U64TYPE		unsigned long long	/**/
+#   endif
 #endif
 #define	NVTYPE		double		/**/
 #define	IVSIZE		4		/**/
