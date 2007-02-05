@@ -7,4 +7,5 @@ BEGIN {
 }
 
 our $pragma_name = "warnings";
+our $UTF8 = (${^OPEN} || "") =~ /:utf8/;
 require "../t/lib/common.pl";
