@@ -1,29 +1,30 @@
 # This code is used by lib/warnings.t and lib/feature.t
 
 BEGIN {
-    require Config; import Config;
     require './test.pl';
 }
 
+use Config;
 use File::Path;
 use File::Spec::Functions;
 
 use strict;
+use warnings;
 our $pragma_name;
 
 $| = 1;
 
-my $Is_MacOS   = $^O eq 'MacOS';
+my $Is_MacOS = $^O eq 'MacOS';
 my $tmpfile = "tmp0000";
 1 while -e ++$tmpfile;
-END {  if ($tmpfile) { 1 while unlink $tmpfile} }
+END { 1 while unlink $tmpfile }
 
 my @prgs = () ;
 my @w_files = () ;
 
 if (@ARGV)
   { print "ARGV = [@ARGV]\n" ;
-    if ($^O eq 'MacOS') {
+    if ($Is_MacOS) {
       @w_files = map { s#^#:lib:$pragma_name:#; $_ } @ARGV
     } else {
       @w_files = map { s#^#./lib/$pragma_name/#; $_ } @ARGV
@@ -73,7 +74,16 @@ for (@prgs){
     my($prog,$expected) = split(/\nEXPECT(?:\n|$)/, $_, 2);
 
     my ($todo, $todo_reason);
-    $todo = $prog =~ s/^#\s*TODO(.*)\n//m and $todo_reason = $1;
+    $todo = $prog =~ s/^#\s*TODO\s*(.*)\n//m and $todo_reason = $1;
+    # If the TODO reason starts ? then it's taken as a code snippet to evaluate
+    # This provides the flexibility to have conditional TODOs
+    if ($todo_reason && $todo_reason =~ s/^\?//) {
+	my $temp = eval $todo_reason;
+	if ($@) {
+	    die "# In TODO code reason:\n# $todo_reason\n$@";
+	}
+	$todo_reason = $temp;
+    }
     if ( $prog =~ /--FILE--/) {
         my(@files) = split(/\n--FILE--\s*([^\s\n]*)\s*\n/, $prog) ;
 	shift @files ;
@@ -97,7 +107,7 @@ for (@prgs){
     }
 
     # fix up some paths
-    if ($^O eq 'MacOS') {
+    if ($Is_MacOS) {
 	$prog =~ s|require "./abc(d)?";|require ":abc$1";|g;
 	$prog =~ s|"\."|":"|g;
     }
@@ -131,7 +141,7 @@ for (@prgs){
     $results =~ s/Scalars leaked: \d+\n//g;
 
     # fix up some paths
-    if ($^O eq 'MacOS') {
+    if ($Is_MacOS) {
 	$results =~ s|:abc\.pm\b|abc.pm|g;
 	$results =~ s|:abc(d)?\b|./abc$1|g;
     }
@@ -156,30 +166,25 @@ for (@prgs){
     }
     die "$0: can't have OPTION regex and random\n"
         if $option_regex + $option_random > 1;
-    my $ok = 1;
-    if ( $results =~ s/^SKIPPED\n//) {
+    my $ok = 0;
+    if ($results =~ s/^SKIPPED\n//) {
 	print "$results\n" ;
+	$ok = 1;
     }
-    elsif ($option_random)
-    {
+    elsif ($option_random) {
         $ok = randomMatch($results, $expected);
     }
-    elsif (($prefix  && (( $option_regex && $results !~ /^$expected/) ||
-			 (!$option_regex && $results !~ /^\Q$expected/))) or
-	   (!$prefix && (( $option_regex && $results !~ /^$expected/) ||
-			 (!$option_regex && $results ne $expected)))) {
-        my $err_line = "PROG: $switch\n$prog\n" .
-                       "EXPECTED:\n$expected\n" .
-                       "GOT:\n$results\n";
-        if ($todo) {
-            $err_line =~ s/^/# /mg;
-            print $err_line;  # Harness can't filter it out from STDERR.
-        }
-        else {
-            print STDERR $err_line;
-        }
-        $ok = 0;
+    elsif ($option_regex) {
+	$ok = $results =~ /^$expected/;
     }
+    elsif ($prefix) {
+	$ok = $results =~ /^\Q$expected/;
+    }
+    else {
+	$ok = $results eq $expected;
+    }
+ 
+    print_err_line( $switch, $prog, $expected, $results, $todo ) unless $ok;
 
     our $TODO = $todo ? $todo_reason : 0;
     ok($ok);
@@ -200,6 +205,22 @@ sub randomMatch
 
    return "@got" eq "@expected";
 
+}
+
+sub print_err_line {
+    my($switch, $prog, $expected, $results, $todo) = @_;
+    my $err_line = "PROG: $switch\n$prog\n" .
+		   "EXPECTED:\n$expected\n" .
+		   "GOT:\n$results\n";
+    if ($todo) {
+	$err_line =~ s/^/# /mg;
+	print $err_line;  # Harness can't filter it out from STDERR.
+    }
+    else {
+	print STDERR $err_line;
+    }
+
+    return 1;
 }
 
 1;
