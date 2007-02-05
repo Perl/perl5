@@ -9,6 +9,7 @@ use File::Path;
 use File::Spec::Functions;
 
 use strict;
+use warnings;
 our $pragma_name;
 
 $| = 1;
@@ -76,7 +77,7 @@ for (@prgs){
     $todo = $prog =~ s/^#\s*TODO\s*(.*)\n//m and $todo_reason = $1;
     # If the TODO reason starts ? then it's taken as a code snippet to evaluate
     # This provides the flexibility to have conditional TODOs
-    if ($todo_reason =~ s/^\?//) {
+    if ($todo_reason && $todo_reason =~ s/^\?//) {
 	my $temp = eval $todo_reason;
 	if ($@) {
 	    die "# In TODO code reason:\n# $todo_reason\n$@";
