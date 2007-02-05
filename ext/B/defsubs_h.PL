@@ -53,6 +53,13 @@ foreach my $const (qw(
  {
   doconst($const);
  }
+
+if ($] < 5.009) {
+    # This is only present in 5.10, but it's useful to B::Deparse to be able
+    # to import a dummy value from B
+    doconst(OPpPAD_STATE);
+}
+
 foreach my $file (qw(op.h cop.h))
  {
   my $path = $^O eq 'MacOS' ? ":::$file" : "../../$file";
