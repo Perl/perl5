@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess <pmqs@cpan.org>
- last modified 11th November 2005
- version 1.814
+ last modified 4th February 2007
+ version 1.815
 
  All comments/suggestions/problems are welcome
 
@@ -114,6 +114,7 @@
         1.812 - no change
         1.813 - no change
         1.814 - no change
+        1.814 - C++ casting fixes
 
 */
 
