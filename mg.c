@@ -2140,6 +2140,7 @@ Perl_magic_setbm(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_UNUSED_ARG(mg);
     sv_unmagic(sv, PERL_MAGIC_bm);
+    SvTAIL_off(sv);
     SvVALID_off(sv);
     return 0;
 }

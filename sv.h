@@ -1012,6 +1012,9 @@ in gv.h: */
 #define BmUSEFUL(sv)	((XPVBM*)  SvANY(sv))->xbm_useful
 #define BmPREVIOUS(sv)	((XPVBM*)  SvANY(sv))->xbm_previous
 
+#define PERL_FBM_TABLE_OFFSET 2	/* Number of bytes between EOS and table */
+#define PERL_FBM_FLAGS_OFFSET_FROM_TABLE -1
+
 #define FmLINES(sv)	((XPVFM*)  SvANY(sv))->xfm_lines
 
 #define LvTYPE(sv)	((XPVLV*)  SvANY(sv))->xlv_type

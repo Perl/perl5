@@ -451,8 +451,6 @@ Perl_rninstr(pTHX_ register const char *big, const char *bigend, const char *lit
     return NULL;
 }
 
-#define FBM_TABLE_OFFSET 2	/* Number of bytes between EOS and table*/
-
 /* As a space optimization, we do not compile tables for strings of length
    0 and 1, and for strings of length 2 unless FBMcf_TAIL.  These are
    special-cased in fbm_instr().
@@ -476,7 +474,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
     register const U8 *s;
     register U32 i;
     STRLEN len;
-    I32 rarest = 0;
+    U32 rarest = 0;
     U32 frequency = 256;
 
     if (flags & FBMcf_TAIL) {
@@ -495,11 +493,12 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	const U8 mlen = (len>255) ? 255 : (U8)len;
 	register U8 *table;
 
-	Sv_Grow(sv, len + 256 + FBM_TABLE_OFFSET);
-	table = (unsigned char*)(SvPVX_mutable(sv) + len + FBM_TABLE_OFFSET);
-	s = table - 1 - FBM_TABLE_OFFSET;	/* last char */
+	Sv_Grow(sv, len + 256 + PERL_FBM_TABLE_OFFSET);
+	table
+	    = (unsigned char*)(SvPVX_mutable(sv) + len + PERL_FBM_TABLE_OFFSET);
+	s = table - 1 - PERL_FBM_TABLE_OFFSET;	/* last char */
 	memset((void*)table, mlen, 256);
-	table[-1] = (U8)flags;
+	table[PERL_FBM_FLAGS_OFFSET_FROM_TABLE] = (U8)flags;
 	i = 0;
 	sb = s - mlen + 1;			/* first char (maybe) */
 	while (s >= sb) {
@@ -519,7 +518,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	}
     }
     BmRARE(sv) = s[rarest];
-    BmPREVIOUS(sv) = (U16)rarest;
+    BmPREVIOUS(sv) = rarest;
     BmUSEFUL(sv) = 100;			/* Initial value */
     if (flags & FBMcf_TAIL)
 	SvTAIL_on(sv);
@@ -682,7 +681,8 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	return NULL;
 
     {
-	register const unsigned char * const table = little + littlelen + FBM_TABLE_OFFSET;
+	register const unsigned char * const table
+	    = little + littlelen + PERL_FBM_TABLE_OFFSET;
 	register const unsigned char *oldlittle;
 
 	--littlelen;			/* Last char found by table lookup */
@@ -717,7 +717,8 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	    }
 	}
       check_end:
-	if ( s == bigend && (table[-1] & FBMcf_TAIL)
+	if ( s == bigend
+	     && (table[PERL_FBM_FLAGS_OFFSET_FROM_TABLE] & FBMcf_TAIL)
 	     && memEQ((char *)(bigend - littlelen),
 		      (char *)(oldlittle - littlelen), littlelen) )
 	    return (char*)bigend - littlelen;
