@@ -1556,8 +1556,10 @@ setuid perl scripts securely.\n");
 			break;
 	      }
 	 }
+
+#ifndef PERL_USE_SAFE_PUTENV
 	 /* Can we grab env area too to be used as the area for $0? */
-	 if (s && PL_origenviron) {
+	 if (s && PL_origenviron && !PL_use_safe_putenv) {
 	      if ((PL_origenviron[0] == s + 1)
 		  ||
 		  (aligned &&
@@ -1589,6 +1591,8 @@ setuid perl scripts securely.\n");
 		   }
 	      }
 	 }
+#endif /* !defined(PERL_USE_SAFE_PUTENV) */
+
 	 PL_origalen = s ? s - PL_origargv[0] + 1 : 0;
     }
 
@@ -4687,7 +4691,6 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    environ[0] = NULL;
 	}
 	if (env) {
-          char** origenv = environ;
 	  char *s;
 	  SV *sv;
 	  for (; *env; env++) {
@@ -4702,11 +4705,6 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    (void)hv_store(hv, *env, s - *env, sv, 0);
 	    if (env_is_not_environ)
 	        mg_set(sv);
-	    if (origenv != environ) {
-	      /* realloc has shifted us */
-	      env = (env - origenv) + environ;
-	      origenv = environ;
-	    }
 	  }
       }
 #endif /* USE_ENVIRON_ARRAY */
