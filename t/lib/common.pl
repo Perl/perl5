@@ -73,7 +73,16 @@ for (@prgs){
     my($prog,$expected) = split(/\nEXPECT(?:\n|$)/, $_, 2);
 
     my ($todo, $todo_reason);
-    $todo = $prog =~ s/^#\s*TODO(.*)\n//m and $todo_reason = $1;
+    $todo = $prog =~ s/^#\s*TODO\s*(.*)\n//m and $todo_reason = $1;
+    # If the TODO reason starts ? then it's taken as a code snippet to evaluate
+    # This provides the flexibility to have conditional TODOs
+    if ($todo_reason =~ s/^\?//) {
+	my $temp = eval $todo_reason;
+	if ($@) {
+	    die "# In TODO code reason:\n# $todo_reason\n$@";
+	}
+	$todo_reason = $temp;
+    }
     if ( $prog =~ /--FILE--/) {
         my(@files) = split(/\n--FILE--\s*([^\s\n]*)\s*\n/, $prog) ;
 	shift @files ;
