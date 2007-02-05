@@ -44,8 +44,8 @@ while (@{$optref} && $optref->[0] =~ /^([\w_]+)=(.*)$/) {
     shift(@{$optref});
 }
 
-my @dynamic = FindExt::dynamic_extensions();
-my @noxs    = FindExt::noxs_extensions();
+my @dynamic = FindExt::dynamic_ext();
+my @noxs    = FindExt::nonxs_ext();
 my @known   = sort(@dynamic,split(/\s+/,$opt{'staticext'}),@noxs);
 $opt{'known_extensions'} = join(' ',@known);
 

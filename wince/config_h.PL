@@ -18,7 +18,6 @@ while (@ARGV && $ARGV[0] =~ /^([\w_]+)=(.*)$/)
  }
 
 $opt{CONFIG_H} ||= 'config.h';
-$opt{CORE_DIR} ||= '../lib/CORE';
 
 warn "Writing $opt{CONFIG_H}\n";
 
@@ -53,7 +52,7 @@ eval $str;
 die "$str:$@" if $@;
 
 open(H,">$file.new") || die "Cannot open $file.new:$!";
-binmode H;		# no CRs (which cause a spurious rebuild)
+#binmode H;		# no CRs (which cause a spurious rebuild)
 while (<SH>)
  {
   last if /^$term$/o;
