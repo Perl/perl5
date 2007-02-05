@@ -2185,6 +2185,7 @@ PP(pp_goto)
 		dounwind(cxix);
 	    TOPBLOCK(cx);
 	    SPAGAIN;
+	    /* ban goto in eval: see <20050521150056.GC20213@iabyn.com> */
 	    if (CxTYPE(cx) == CXt_EVAL) {
 		if (CxREALEVAL(cx))
 		    DIE(aTHX_ "Can't goto subroutine from an eval-string");
@@ -2237,6 +2238,7 @@ PP(pp_goto)
 	    SAVETMPS;
 	    SAVEFREESV(cv); /* later, undo the 'avoid premature free' hack */
 	    if (CvISXSUB(cv)) {
+		OP* retop = pop_return();
 		if (reified) {
 		    I32 index;
 		    for (index=0; index<items; index++)
@@ -2261,21 +2263,20 @@ PP(pp_goto)
 		    SV **newsp;
 		    I32 gimme;
 
+		    /* XS subs don't have a CxSUB, so pop it */
+		    POPBLOCK(cx, PL_curpm);
 		    /* Push a mark for the start of arglist */
 		    PUSHMARK(mark);
 		    PUTBACK;
 		    (void)(*CvXSUB(cv))(aTHX_ cv);
 
-		    /* Pop the current context like a decent sub should */
-		    POPBLOCK(cx, PL_curpm);
-		    /* Do _not_ use PUTBACK, keep the XSUB's return stack! */
 
 		    /* Put these at the bottom since the vars are set but not used */
 		    PERL_UNUSED_VAR(newsp);
 		    PERL_UNUSED_VAR(gimme);
 		}
 		LEAVE;
-		return pop_return();
+		return retop;
 	    }
 	    else {
 		AV* const padlist = CvPADLIST(cv);
