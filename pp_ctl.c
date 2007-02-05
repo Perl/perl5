@@ -2566,22 +2566,12 @@ S_docatch(pTHX_ OP *o)
 {
     int ret;
     OP * const oldop = PL_op;
-    OP *retop;
-    volatile PERL_SI *cursi = PL_curstackinfo;
     dJMPENV;
 
 #ifdef DEBUGGING
     assert(CATCH_GET == TRUE);
 #endif
     PL_op = o;
-
-    /* Normally, the leavetry at the end of this block of ops will
-     * pop an op off the return stack and continue there. By setting
-     * the op to Nullop, we force an exit from the inner runops()
-     * loop. DAPM.
-     */
-    retop = pop_return();
-    push_return(Nullop);
 
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
  redo_body:
@@ -2591,6 +2581,7 @@ S_docatch(pTHX_ OP *o)
 #endif
     switch (ret) {
     case 0:
+	cxstack[cxstack_ix].blk_eval.cur_top_env = PL_top_env;
 #ifndef PERL_FLEXIBLE_EXCEPTIONS
  redo_body:
 	docatch_body();
@@ -2598,14 +2589,20 @@ S_docatch(pTHX_ OP *o)
 	break;
     case 3:
 	/* die caught by an inner eval - continue inner loop */
-	if (PL_restartop && cursi == PL_curstackinfo) {
+
+	/* NB XXX we rely on the old popped CxEVAL still being at the top
+	 * of the stack; the way die_where() currently works, this
+	 * assumption is valid. In theory The cur_top_env value should be
+	 * returned in another global, the way retop (aka PL_restartop)
+	 * is. */
+
+	if (PL_restartop
+	    && cxstack[cxstack_ix+1].blk_eval.cur_top_env == PL_top_env)
+	{
 	    PL_op = PL_restartop;
 	    PL_restartop = 0;
 	    goto redo_body;
 	}
-	/* a die in this eval - continue in outer loop */
-	if (!PL_restartop)
-	    break;
 	/* FALL THROUGH */
     default:
 	JMPENV_POP;
@@ -2615,7 +2612,7 @@ S_docatch(pTHX_ OP *o)
     }
     JMPENV_POP;
     PL_op = oldop;
-    return retop;
+    return NULL;
 }
 
 OP *
@@ -3616,15 +3613,12 @@ PP(pp_leavetry)
     dSP;
     SV **newsp;
     PMOP *newpm;
-    OP* retop;
     I32 gimme;
     register PERL_CONTEXT *cx;
     I32 optype;
 
     POPBLOCK(cx,newpm);
     POPEVAL(cx);
-    retop = pop_return();
-    PERL_UNUSED_VAR(optype);
 
     TAINT_NOT;
     if (gimme == G_VOID)
@@ -3658,7 +3652,7 @@ PP(pp_leavetry)
 
     LEAVE;
     sv_setpvn(ERRSV,"",0);
-    RETURNOP(retop);
+    RETURN;
 }
 
 STATIC OP *
