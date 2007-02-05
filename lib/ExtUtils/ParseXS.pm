@@ -18,7 +18,7 @@ my(@XSStack);	# Stack of conditionals and INCLUDEs
 my($XSS_work_idx, $cpp_next_tmp);
 
 use vars qw($VERSION);
-$VERSION = '2.17_02';
+$VERSION = '2.18';
 
 use vars qw(%input_expr %output_expr $ProtoUsed @InitFileCode $FH $proto_re $Overload $errors $Fallback
 	    $cplusplus $hiertype $WantPrototypes $WantVersionChk $except $WantLineNumbers
@@ -203,8 +203,7 @@ sub process_file {
   $size = qr[,\s* (??{ $bal }) ]x; # Third arg (to setpvn)
 
   foreach my $key (keys %output_expr) {
-    #use re 'eval';
-    BEGIN { $^H |= 0x00200000};
+    BEGIN { $^H |= 0x00200000 }; # Equivalent to: use re 'eval', but hardcoded so we can compile re.xs
 
     my ($t, $with_size, $arg, $sarg) =
       ($output_expr{$key} =~
@@ -457,7 +456,7 @@ EOF
 					     \b ( \w+ | length\( \s*\w+\s* \) )
 					     \s* $ /x);
 	  next unless defined($pre) && length($pre);
-	  my $out_type;
+	  my $out_type = '';
 	  my $inout_var;
 	  if ($process_inout and s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\s+//) {
 	    my $type = $1;
@@ -987,6 +986,7 @@ EOF
          call_list(PL_scopestack_ix, PL_unitcheckav);
 EOF
   }
+
   print Q(<<"EOF");
 #    XSRETURN_YES;
 #]]
