@@ -299,7 +299,7 @@ case "$cc" in
   # but then whined about.
   for f in -Wdeclaration-after-statement -std=c89
   do
-    ccflags="`echo $ccflags|sed 's/$f/ /'`"
+    ccflags=`echo $ccflags|sed 's/$f/ /'`
   done
   ;;
 esac
