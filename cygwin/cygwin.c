@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <process.h>
 #include <sys/cygwin.h>
+#include <alloca.h>
 
 /*
  * pp_system() implemented via spawn()

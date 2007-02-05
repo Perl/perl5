@@ -31,7 +31,7 @@ libswanted=`echo " $libswanted " | sed -e 's/ util / /g'`
 #   (with cygwin 1.5.7, cygipc is deprecated in favor of the builtin cygserver)
 libswanted="$libswanted gdbm_compat"
 test -z "$optimize" && optimize='-O2'
-ccflags="$ccflags -DPERL_USE_SAFE_PUTENV"
+ccflags="$ccflags -DPERL_USE_SAFE_PUTENV -U__STRICT_ANSI__"
 # - otherwise i686-cygwin
 archname='cygwin'
 
