@@ -22,7 +22,7 @@ use Net::Config;
 use Fcntl qw(O_WRONLY O_RDONLY O_APPEND O_CREAT O_TRUNC);
 # use AutoLoader qw(AUTOLOAD);
 
-$VERSION = "2.75";
+$VERSION = "2.77_01";
 @ISA     = qw(Exporter Net::Cmd IO::Socket::INET);
 
 # Someday I will "use constant", when I am not bothered to much about
@@ -1118,7 +1118,7 @@ sub response
 sub parse_response
 {
  return ($1, $2 eq "-")
-    if $_[1] =~ s/^(\d\d\d)(.?)//o;
+    if $_[1] =~ s/^(\d\d\d)([- ]?)//o;
 
  my $ftp = shift;
 
@@ -1217,10 +1217,20 @@ sub _STOR { shift->command("STOR",@_)->response() == CMD_INFO }
 sub _STOU { shift->command("STOU",@_)->response() == CMD_INFO }
 sub _RNFR { shift->command("RNFR",@_)->response() == CMD_MORE }
 sub _REST { shift->command("REST",@_)->response() == CMD_MORE }
-sub _USER { shift->command("user",@_)->response() } # A certain brain dead firewall :-)
 sub _PASS { shift->command("PASS",@_)->response() }
 sub _ACCT { shift->command("ACCT",@_)->response() }
 sub _AUTH { shift->command("AUTH",@_)->response() }
+
+sub _USER {
+  my $ftp = shift;
+  my $ok = $ftp->command("USER",@_)->response();
+
+  # A certain brain dead firewall :-)
+  $ok = $ftp->command("user",@_)->response()
+    unless $ok == CMD_MORE or $ok == CMD_OK;
+
+  $ok;
+}
 
 sub _SMNT { shift->unsupported(@_) }
 sub _MODE { shift->unsupported(@_) }

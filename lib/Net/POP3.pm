@@ -13,7 +13,7 @@ use Net::Cmd;
 use Carp;
 use Net::Config;
 
-$VERSION = "2.28";
+$VERSION = "2.28_2";
 
 @ISA = qw(Net::Cmd IO::Socket::INET);
 
@@ -380,12 +380,19 @@ sub capa {
     # Fake a capability here
     $capabilities{APOP} = '' if ($this->banner() =~ /<.*>/);
 
-    return \%capabilities unless $this->_CAPA();
-
-    $capa = $this->read_until_dot();
-    %capabilities = map { /^\s*(\S+)\s*(.*)/ } @$capa;
-    $capabilities{APOP} = '' if ($this->banner() =~ /<.*>/);
-
+    if ($this->_CAPA()) {
+      $capabilities{CAPA} = 1;
+      $capa = $this->read_until_dot();
+      %capabilities = (%capabilities, map { /^\s*(\S+)\s*(.*)/ } @$capa);
+    }
+    else {
+      # Check AUTH for SASL capabilities
+      if ( $this->command('AUTH')->response() == CMD_OK ) {
+          my $mechanism = $this->read_until_dot();
+          $capabilities{SASL} = join " ", map { m/([A-Z0-9_-]+)/ } @{ $mechanism };
+      }
+    }
+    
     return ${*$this}{'net_pop3e_capabilities'} = \%capabilities;
 }
 
@@ -410,7 +417,25 @@ sub auth {
 
     if (ref($username) and UNIVERSAL::isa($username,'Authen::SASL')) {
       $sasl = $username;
-      $sasl->mechanism($mechanisms);
+      my $user_mech = $sasl->mechanism || '';
+      my @user_mech = split(/\s+/, $user_mech);
+      my %user_mech; @user_mech{@user_mech} = ();
+
+      my @server_mech = split(/\s+/,$mechanisms);
+      my @mech = @user_mech
+      				? grep { exists $user_mech{$_} } @server_mech
+      				: @server_mech;
+      unless (@mech) {
+        $self->set_status(500,
+                             [ 'Client SASL mechanisms (',
+                               join(', ', @user_mech),
+                               ') do not match the SASL mechnism the server announces (',
+                               join(', ', @server_mech), ')',
+                             ]);
+        return 0;
+      }
+
+      $sasl->mechanism(join(" ",@mech));
     }
     else {
       die "auth(username, password)" if not length $username;
@@ -423,8 +448,29 @@ sub auth {
 
     # We should probably allow the user to pass the host, but I don't
     # currently know and SASL mechanisms that are used by smtp that need it
-    my $client = $sasl->client_new('pop3',${*$self}{'net_pop3_host'},0);
-    my $str    = $client->client_start;
+    my ( $hostname ) = split /:/ , ${*$self}{'net_pop3_host'};
+    my $client = eval { $sasl->client_new('pop',$hostname,0) };
+    
+    unless ($client) {
+      my $mech = $sasl->mechanism;
+      $self->set_status(500, [
+         " Authen::SASL failure: $@",
+         '(please check if your local Authen::SASL installation',
+         "supports mechanism '$mech'"
+       ]);
+      return 0;
+    }
+    
+    my ($token) = $client->client_start
+      or do {
+        my $mech = $client->mechanism;
+        $self->set_status(500, [
+          ' Authen::SASL failure:  $client->client_start ',
+          "mechanism '$mech' hostname #$hostname#",
+          $client->error
+        ]);
+        return 0;
+      };
 
     # We dont support sasl mechanisms that encrypt the socket traffic.
     # todo that we would really need to change the ISA hierarchy
@@ -433,17 +479,29 @@ sub auth {
     my @cmd = ("AUTH", $client->mechanism);
     my $code;
 
-    push @cmd, MIME::Base64::encode_base64($str,'')
-      if defined $str and length $str;
+    push @cmd, MIME::Base64::encode_base64($token,'')
+      if defined $token and length $token;
 
     while (($code = $self->command(@cmd)->response()) == CMD_MORE) {
+
+      my ( $token ) = $client->client_step(
+	MIME::Base64::decode_base64(
+	  ($self->message)[0]
+	)
+      ) or do {
+        $self->set_status(500, [
+          ' Authen::SASL failure:  $client->client_step ',
+          "mechanism '", $client->mechanism ," hostname #$hostname#, ",
+          $client->error
+        ]);
+        return 0;
+      };
+
       @cmd = (MIME::Base64::encode_base64(
-	$client->client_step(
-	  MIME::Base64::decode_base64(
-	    ($self->message)[0]
-	  )
-	), ''
-      ));
+                  defined $token ?  $token : '',
+                  ''
+             )
+      );
     }
 
     $code == CMD_OK;

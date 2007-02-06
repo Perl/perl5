@@ -1,3 +1,16 @@
+libnet 1.20  -- Fri Feb  2 19:42:51 CST 2007
+
+Bug Fixes
+  * Fixed incorrect handling of CRLF that straddled two blocks
+  * Fix bug in response() which was too liberal in what it thought was a response line
+  * Silence uninitialized value warnings in Net::Cmd during testing on Win32
+  * Documentations typos and updates
+
+Enhancements
+  * Added support for ORCPT into Net::SMTP
+  * Support for servers that expect the USER command in upper or lower case. Try USER
+    first then try user if that fails
+
 libnet 1.19  -- Wed Jun 30 14:53:48 BST 2004
 
 Bug Fixes

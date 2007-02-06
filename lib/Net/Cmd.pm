@@ -1,6 +1,6 @@
 # Net::Cmd.pm $Id: //depot/libnet/Net/Cmd.pm#34 $
 #
-# Copyright (c) 1995-1997 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# Copyright (c) 1995-2006 Graham Barr <gbarr@pobox.com>. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
@@ -21,7 +21,9 @@ BEGIN {
   }
 }
 
-$VERSION = "2.26_01";
+my $doUTF8 = eval { require utf8 };
+
+$VERSION = "2.27";
 @ISA     = qw(Exporter);
 @EXPORT  = qw(CMD_INFO CMD_OK CMD_MORE CMD_REJECT CMD_ERROR CMD_PENDING);
 
@@ -266,7 +268,9 @@ sub getline
   {
    my $timeout = $cmd->timeout || undef;
    my $rout;
-   if (select($rout=$rin, undef, undef, $timeout))
+
+   my $select_ret = select($rout=$rin, undef, undef, $timeout);
+   if ($select_ret > 0)
     {
      unless (sysread($cmd, $buf="", 1024))
       {
@@ -287,7 +291,8 @@ sub getline
     }
    else
     {
-     carp("$cmd: Timeout") if($cmd->debug);
+     my $msg = $select_ret ? "Error or Interrupted: $!" : "Timeout";
+     carp("$cmd: $msg") if($cmd->debug);
      return undef;
     }
   }
@@ -389,6 +394,8 @@ sub datasend
  my $cmd = shift;
  my $arr = @_ == 1 && ref($_[0]) ? $_[0] : \@_;
  my $line = join("" ,@$arr);
+
+ utf8::encode($line) if $doUTF8;
 
  return 0 unless defined(fileno($cmd));
 
@@ -767,12 +774,8 @@ Graham Barr <gbarr@pobox.com>
 
 =head1 COPYRIGHT
 
-Copyright (c) 1995-1997 Graham Barr. All rights reserved.
+Copyright (c) 1995-2006 Graham Barr. All rights reserved.
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
-
-=for html <hr>
-
-I<$Id: //depot/libnet/Net/Cmd.pm#34 $>
 
 =cut

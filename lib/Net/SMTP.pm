@@ -16,7 +16,7 @@ use IO::Socket;
 use Net::Cmd;
 use Net::Config;
 
-$VERSION = "2.29";
+$VERSION = "2.30";
 
 @ISA = qw(Net::Cmd IO::Socket::INET);
 
@@ -382,6 +382,18 @@ sub recipient
         }
       }
 
+     if(defined($v = delete $opt{ORcpt}))
+      {
+       if(exists $esmtp->{DSN})
+        {
+	 $opts .= " ORCPT=" . $v;
+        }
+       else
+        {
+	 carp 'Net::SMTP::recipient: DSN option not supported by host';
+        }
+      }
+
      carp 'Net::SMTP::recipient: unknown option(s) '
 		. join(" ", keys %opt)
 		. ' - ignored'
@@ -628,7 +640,7 @@ Example:
 
 
     $smtp = Net::SMTP->new('mailhost',
-			   Hello => 'my.mail.domain'
+			   Hello => 'my.mail.domain',
 			   Timeout => 30,
                            Debug   => 1,
 			  );
@@ -636,14 +648,14 @@ Example:
     # the same
     $smtp = Net::SMTP->new(
 			   Host => 'mailhost',
-			   Hello => 'my.mail.domain'
+			   Hello => 'my.mail.domain',
 			   Timeout => 30,
                            Debug   => 1,
 			  );
 
     # Connect to the default server from Net::config
     $smtp = Net::SMTP->new(
-			   Hello => 'my.mail.domain'
+			   Hello => 'my.mail.domain',
 			   Timeout => 30,
 			  );
 
@@ -732,6 +744,7 @@ The C<recipient> method can also pass additional case-sensitive OPTIONS as an
 anonymous hash using key and value pairs.  Possible options are:
 
   Notify  => ['NEVER'] or ['SUCCESS','FAILURE','DELAY']  (see below)
+  ORcpt   => <ORCPT>
   SkipBad => 1        (to ignore bad addresses)
 
 If C<SkipBad> is true the C<recipient> will not return an error when a bad
@@ -777,6 +790,11 @@ any conditions."
   {Notify => ['SUCCESS','FAILURE','DELAY']}
 
   $smtp->recipient(@recipients, { Notify => ['FAILURE','DELAY'], SkipBad => 1 });  # Good
+
+ORcpt is also part of the SMTP DSN extension according to RFC3461.
+It is used to pass along the original recipient that the mail was first
+sent to.  The machine that generates a DSN will use this address to inform
+the sender, because he can't know if recipients get rewritten by mail servers.
 
 =item to ( ADDRESS [, ADDRESS [...]] )
 
