@@ -159,7 +159,7 @@ sub search_paths {
 
             next unless $plugin =~ m!(?:[a-z\d]+)[a-z\d]!i;
 
-            my $err = eval { $self->handle_finding_plugin($plugin) };
+            my $err = $self->handle_finding_plugin($plugin);
             carp "Couldn't require $plugin : $err" if $err;
              
             push @plugins, $plugin;
@@ -215,7 +215,7 @@ sub handle_innerpackages {
 
 
     foreach my $plugin (Devel::InnerPackage::list_packages($path)) {
-        my $err = eval { $self->handle_finding_plugin($plugin) };
+        my $err = $self->handle_finding_plugin($plugin);
         #next if $err;
         #next unless $INC{$plugin};
         push @plugins, $plugin;
@@ -228,6 +228,7 @@ sub handle_innerpackages {
 sub _require {
     my $self = shift;
     my $pack = shift;
+    local $@;
     eval "CORE::require $pack";
     return $@;
 }
