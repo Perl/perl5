@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.58';
+our $VERSION = '1.59';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -138,7 +138,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.58
+This document describes threads version 1.59
 
 =head1 SYNOPSIS
 
@@ -406,7 +406,7 @@ to the more natural forms:
 
 C<async> creates a thread to execute the block immediately following
 it.  This block is treated as an anonymous subroutine, and so must have a
-semi-colon after the closing brace.  Like C<threads->create()>, C<async>
+semicolon after the closing brace.  Like C<threads-E<gt>create()>, C<async>
 returns a I<threads> object.
 
 =item $thr->error()
@@ -476,7 +476,7 @@ If C<exit()> really is needed, then consider using the following:
     threads->exit() if threads->can('exit');   # Thread friendly
     exit(status);
 
-=item use threads 'exit' => 'thread_only'
+=item use threads 'exit' => 'threads_only'
 
 This globally overrides the default behavior of calling C<exit()> inside a
 thread, and effectively causes such calls to behave the same as
@@ -496,16 +496,15 @@ thread only.
 =item $thr->set_thread_exit_only(boolean)
 
 This can be used to change the I<exit thread only> behavior for a thread after
-it has been created.  With a I<true> argument, C<exit()> will cause the only
-the thread to exit.  With a I<false> argument, C<exit()> will terminate the
+it has been created.  With a I<true> argument, C<exit()> will cause only the
+thread to exit.  With a I<false> argument, C<exit()> will terminate the
 application.
 
 The I<main> thread is unaffected by this call.
 
 =item threads->set_thread_exit_only(boolean)
 
-Class method for use inside a thread to changes its own behavior for
-C<exit()>.
+Class method for use inside a thread to change its own behavior for C<exit()>.
 
 The I<main> thread is unaffected by this call.
 
@@ -521,13 +520,13 @@ thread.
 =item $thr->is_running()
 
 Returns true if a thread is still running (i.e., if its entry point function
-has not yet finished/exited).
+has not yet finished or exited).
 
 =item $thr->is_joinable()
 
 Returns true if the thread has finished running, is not detached and has not
-yet been joined.  In other works, the thread is ready to be joined and will
-not I<block>.
+yet been joined.  In other words, the thread is ready to be joined, and a call
+to C<$thr-E<gt>join()> will not I<block>.
 
 =item $thr->is_detached()
 
@@ -552,7 +551,7 @@ the appropriate type to be returned from C<-E<gt>join()>.
 
 Because thread creation and thread joining may occur in different contexts, it
 may be desirable to state the context explicitly to the thread's entry point
-function.  This may be done by calling C<-E<gt>create()> with a parameter hash
+function.  This may be done by calling C<-E<gt>create()> with a hash reference
 as the first argument:
 
     my $thr = threads->create({'context' => 'list'}, \&foo);
@@ -569,7 +568,7 @@ returning a value (i.e., I<void> context), you would do the following:
     ...
     $thr->join();
 
-The context type may also be used as the I<key> in the parameter hash followed
+The context type may also be used as the I<key> in the hash reference followed
 by a I<true> value:
 
     threads->create({'scalar' => 1}, \&foo);
@@ -598,8 +597,9 @@ L<wantarray()|perlfunc/"wantarray">.
 
 =head2 threads->wantarray()
 
-Class method to return the current thread's context.  This is the same as
-running L<wantarray()|perlfunc/"wantarray"> in the current thread.
+Class method to return the current thread's context.  This returns the same
+value as running L<wantarray()|perlfunc/"wantarray"> inside the current
+thread's entry point function.
 
 =head1 THREAD STACK SIZE
 
@@ -613,9 +613,9 @@ By tuning the stack size to more accurately reflect your application's needs,
 you may significantly reduce your application's memory usage, and increase the
 number of simultaneously running threads.
 
-N.B., on Windows, Address space allocation granularity is 64 KB, therefore,
-setting the stack smaller than that on Win32 Perl will not save any more
-memory.
+Note that on Windows, address space allocation granularity is 64 KB,
+therefore, setting the stack smaller than that on Win32 Perl will not save any
+more memory.
 
 =over
 
@@ -668,8 +668,8 @@ threaded applications.
 
 =item threads->create({'stack_size' => VALUE}, FUNCTION, ARGS)
 
-The stack size an individual threads may also be specified.  This may be done
-by calling C<-E<gt>create()> with a parameter hash as the first argument:
+To specify a particular stack size for any individual thread, call
+C<-E<gt>create()> with a hash reference as the first argument:
 
     my $thr = threads->create({'stack_size' => 32*4096}, \&foo, @args);
 
@@ -746,7 +746,7 @@ and I<resume> capabilities:
         ...
     }
 
-    # Create a semaphore and send it to a thread
+    # Create a semaphore and pass it to a thread
     my $sema = Thread::Semaphore->new();
     my $thr = threads->create('thr_func', $sema);
 
@@ -799,7 +799,7 @@ cause for the failure.
 
 A thread terminated in some manner other than just returning from its entry
 point function, or by using C<threads-E<gt>exit()>.  For example, the thread
-may have terminated because of a error, or by using C<die>.
+may have terminated because of an error, or by using C<die>.
 
 =item Using minimum thread stack size of #
 
@@ -863,7 +863,7 @@ problem.
 
 =item Using non-threadsafe modules
 
-Unfortunately, you may encounter Perl modules are not I<threadsafe>.  For
+Unfortunately, you may encounter Perl modules that are not I<threadsafe>.  For
 example, they may crash the Perl interpreter during execution, or may dump
 core on termination.  Depending on the module and the requirements of your
 application, it may be possible to work around such difficulties.
@@ -912,7 +912,7 @@ signalling behavior is only in effect in the following situations:
 
 =over 4
 
-=item * Perl was been built with C<PERL_OLD_SIGNALS> (see C<perl -V>).
+=item * Perl has been built with C<PERL_OLD_SIGNALS> (see C<perl -V>).
 
 =item * The environment variable C<PERL_SIGNALS> is set to C<unsafe> (see L<perlrun/"PERL_SIGNALS">).
 
@@ -939,7 +939,7 @@ reconstituting it in the joining thread.
 
 =item Perl Bugs and the CPAN Version of L<threads>
 
-Support for threads extents beyond the code in this module (i.e.,
+Support for threads extends beyond the code in this module (i.e.,
 F<threads.pm> and F<threads.xs>), and into the Perl iterpreter itself.  Older
 versions of Perl contain bugs that may manifest themselves despite using the
 latest version of L<threads> from CPAN.  There is no workaround for this other
@@ -957,7 +957,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.58/threads.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.59/threads.pm>
 
 L<threads::shared>, L<perlthrtut>
 

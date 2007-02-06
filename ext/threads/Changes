@@ -1,5 +1,8 @@
 Revision history for Perl extension threads.
 
+1.59 - Mon Feb  5 16:05:44 EST 2007
+	- POD tweaks per Wolfgang Laun
+
 1.58 Wed Jan 24 13:15:34 EST 2007
 	- Fix race conditions on thread destruction (Dave Mitchell)
 	- Ignore thread return value(s) in void context
