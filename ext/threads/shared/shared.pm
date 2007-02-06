@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.06';
+our $VERSION = '1.07';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -73,7 +73,7 @@ threads::shared - Perl extension for sharing data structures between threads
 
 =head1 VERSION
 
-This document describes threads::shared version 1.06
+This document describes threads::shared version 1.07
 
 =head1 SYNOPSIS
 
@@ -170,16 +170,16 @@ L<refaddr()|Scalar::Util/"refaddr EXPR">).  Otherwise, returns C<undef>.
 
 C<lock> places a lock on a variable until the lock goes out of scope.  If the
 variable is locked by another thread, the C<lock> call will block until it's
-available.  C<lock> is recursive, so multiple calls to C<lock> are safe -- the
-variable will remain locked until the outermost lock on the variable goes out
-of scope.
+available.  Multiple calls to C<lock> by the same thread from within
+dynamically nested scopes are safe -- the variable will remain locked until
+the outermost lock on the variable goes out of scope.
 
-If a container object, such as a hash or array, is locked, all the elements of
-that container are not locked.  For example, if a thread does a C<lock @a>,
-any other thread doing a C<lock($a[12])> won't block.
+Locking a container object, such as a hash or array, doesn't lock the elements
+of that container. For example, if a thread does a C<lock(@a)>, any other
+thread doing a C<lock($a[12])> won't block.
 
-C<lock> will traverse up references exactly I<one> level.  C<lock(\$a)> is
-equivalent to C<lock($a)>, while C<lock(\\$a)> is not.
+C<lock()> follows references exactly I<one> level.  C<lock(\$a)> is equivalent
+to C<lock($a)>, while C<lock(\\$a)> is not.
 
 Note that you cannot explicitly unlock a variable; you can only wait for the
 lock to go out of scope.  This is most easily accomplished by locking the
@@ -277,7 +277,7 @@ a C<cond_wait> on the locked variable, rather than only one.
 =head1 OBJECTS
 
 L<threads::shared> exports a version of L<bless()|perlfunc/"bless REF"> that
-works on shared objects such that i<blessings> propagate across threads.
+works on shared objects such that I<blessings> propagate across threads.
 
   # Create a shared 'foo' object
   my $foo;
@@ -342,11 +342,11 @@ Therefore, populate such variables B<after> declaring them as shared.  (Scalar
 and scalar refs are not affected by this problem.)
 
 It is often not wise to share an object unless the class itself has been
-written to support sharing. For example, an object's destructor may get called
-multiple times, one for each thread's scope exit.  Another example, is that
-the contents of hash-based objects will be lost due to the above mentioned
-limitation.  See F<examples/class.pl> (in the CPAN distribution of this
-module) for how to create a class that supports object sharing.
+written to support sharing.  For example, an object's destructor may get
+called multiple times, once for each thread's scope exit.  Another danger is
+that the contents of hash-based objects will be lost due to the above
+mentioned limitation.  See F<examples/class.pl> (in the CPAN distribution of
+this module) for how to create a class that supports object sharing.
 
 Does not support C<splice> on arrays!
 
@@ -368,7 +368,7 @@ L<threads::shared> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads-shared>
 
 Annotated POD for L<threads::shared>:
-L<http://annocpan.org/~JDHEDDEN/threads-shared-1.06/shared.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-shared-1.07/shared.pm>
 
 L<threads>, L<perlthrtut>
 
