@@ -98,6 +98,11 @@
 #  define THREAD_CREATE_NEEDS_STACK (32*1024)
 #endif
 
+#ifdef __VMS
+  /* Default is 1024 on VAX, 8192 otherwise */
+#  define THREAD_CREATE_NEEDS_STACK (32*1024)
+#endif
+
 #ifdef I_MACH_CTHREADS
 
 /* cthreads interface */

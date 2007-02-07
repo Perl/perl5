@@ -60,6 +60,10 @@ $isvax = `\$ Write Sys\$Output \(F\$GetSyI(\"HW_MODEL\") .LE. 1024 .AND. F\$GetS
 chomp $isvax;
 print "\$isvax: \\$isvax\\\n" if $debug;
 
+$isi64 = `\$ Write Sys\$Output \(F\$GetSyI(\"HW_MODEL\") .GE. 4096`;
+chomp $isi64;
+print "\$isi64: \\$isi64\\\n" if $debug;
+
 print "Input \$cc_cmd: \\$cc_cmd\\\n" if $debug;
 $docc = ($cc_cmd !~ /^~~/);
 print "\$docc = $docc\n" if $debug;
@@ -258,8 +262,14 @@ if ($isvax) {
 }
 
 unless ($isgcc) {
-  print OPTBLD "PSECT_ATTR=\$GLOBAL_RO_VARS,PIC,NOEXE,RD,NOWRT,SHR\n";
-  print OPTBLD "PSECT_ATTR=\$GLOBAL_RW_VARS,PIC,NOEXE,RD,WRT,NOSHR\n";
+  if ($isi64) {
+    print OPTBLD "PSECT_ATTR=\$GLOBAL_RO_VARS,NOEXE,RD,NOWRT,SHR\n";
+    print OPTBLD "PSECT_ATTR=\$GLOBAL_RW_VARS,NOEXE,RD,WRT,NOSHR\n";
+  }
+  else {
+    print OPTBLD "PSECT_ATTR=\$GLOBAL_RO_VARS,PIC,NOEXE,RD,NOWRT,SHR\n";
+    print OPTBLD "PSECT_ATTR=\$GLOBAL_RW_VARS,PIC,NOEXE,RD,WRT,NOSHR\n";
+  }
 }
 print OPTBLD "case_sensitive=yes\n" if $care_about_case;
 foreach $var (sort (keys %vars,keys %cvars)) {

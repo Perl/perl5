@@ -52,7 +52,8 @@ $ use64bitint = "n"
 $ uselargefiles = "n"
 $ usesitecustomize = "n"
 $ C_Compiler_Replace = "CC="
-$ Thread_Live_Dangerously = "MT="
+$ thread_upcalls = "MTU="
+$ thread_kernel = "MTK="
 $ use_two_pot_malloc = "N"
 $ use_pack_malloc = "N"
 $ use_debugmalloc = "N"
@@ -903,7 +904,7 @@ $   config_symbols1 ="|installprivlib|installscript|installsitearch|installsitel
 $   config_symbols2 ="|prefix|privlib|privlibexp|scriptdir|sitearch|sitearchexp|sitebin|sitelib|sitelib_stem|sitelibexp|try_cxx|use64bitall|use64bitint|"
 $   config_symbols3 ="|usecasesensitive|usedefaulttypes|usedevel|useieee|useithreads|usemultiplicity|usemymalloc|usedebugging_perl|useperlio|usesecurelog|"
 $   config_symbols4 ="|usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|uselargefiles|usesitecustomize|"
-$   config_symbols5 ="|buildmake|builder|"
+$   config_symbols5 ="|buildmake|builder|usethreadupcalls|usekernelthreads"
 $!  
 $   open/read CONFIG 'config_sh'
 $   rd_conf_loop:
@@ -1194,6 +1195,9 @@ $   prefixbase = prefix - "]"
 $!  Add _ROOT to make install PERL_ROOT differ from build directory.
 $   prefix = prefixbase + "_ROOT.]"
 $ ENDIF
+$ ! more redundant scrubbing of values
+$ prefix = prefix - "000000."
+$ IF F$LOCATE(".]",prefix) .EQ. F$LENGTH(prefix) THEN prefix = prefix - "]" + ".]"
 $ src = prefix
 $!: determine root of directory hierarchy where package will be installed.
 $ dflt = prefix
@@ -2430,28 +2434,50 @@ $       use_5005_threads="N"
 $     ELSE
 $       use_5005_threads="Y"
 $     ENDIF
-$     ! Are they on VMS 7.1 on an alpha or itanium?
-$     if (archname.nes."VMS_VAX").and.("''f$extract(1,3, f$getsyi(""version""))'".ges."7.1")
+$     ! Are they on VMS 7.1 or greater?
+$     IF "''f$extract(1,3, f$getsyi(""version""))'" .GES. "7.1"
 $     THEN
 $       echo ""
-$       echo "Threaded perl can be linked to use multiple kernel threads"
-$       echo "and system upcalls on VMS 7.1+ on Alpha systems.  This feature"
-$       echo "allows multiple threads to execute simultaneously on an SMP"
-$       echo "system as well as preventing a single thread from blocking"
-$       echo "all the threads in a program, even on a single-processor"
-$       echo "machine.  Unfortunately, this feature isn't safe on an"
-$       echo "unpatched 7.1 system (several OS patches were required when"
-$       echo "this procedure was written)."
-$       bool_dflt = "n"
-$       rp = "Enable multiple kernel threads and upcalls? [''bool_dflt'] "
+$	echo "Threaded Perl can be linked to use system upcalls on your system. This feature"
+$	echo "allows the thread scheduler to be made aware of system events (such as I/O)"
+$	echo "so as to prevent a single thread from blocking all the threads in a program,"
+$	echo "even on a single-processor machine."
+$	bool_dflt = "y"
+$	IF f$type(usethreadupcalls) .NES. ""
+$	THEN
+$       	if .not. usethreadupcalls .or. usethreadupcalls .eqs. "undef" then bool_dflt="n"
+$	ENDIF
+$       rp = "Enable thread upcalls? [''bool_dflt'] "
 $       gosub myread
-$       if ans
+$       IF ans
 $       THEN
-$         Thread_Live_Dangerously = "MT=MT=1"
+$           thread_upcalls = "MTU=MTU=1"
+$	    usethreadupcalls = "define"
+$     	    ! Are they on alpha or itanium?
+$	    IF (archname .NES. "VMS_VAX") .AND. ("''f$extract(1,3, f$getsyi(""version""))'" .GES. "7.2")
+$     	    THEN
+$       	echo ""
+$       	echo "Threaded Perl can be linked to use multiple kernel threads on your system."
+$       	echo "This feature allows multiple user threads to make use of multiple CPUs on
+$		echo "a multi-processor machine."
+$       	bool_dflt = "n"
+$		IF f$type(usekernelthreads) .nes. ""
+$		THEN
+$       		if usekernelthreads .or. usekernelthreads .eqs. "define" then bool_dflt="y"
+$		ENDIF
+$       	rp = "Enable multiple kernel threads? [''bool_dflt'] "
+$       	gosub myread
+$       	IF ans
+$		THEN
+$           	    thread_kernel = "MTK=MTK=1"
+$	    	    usekernelthreads = "define"
+$           ENDIF
 $       ENDIF
 $     ENDIF
 $   ENDIF
 $ ENDIF
+$ IF F$TYPE(usethreadupcalls) .EQS. "" THEN usethreadupcalls = "undef"
+$ IF F$TYPE(usekernelthreads) .EQS. "" THEN usekernelthreads = "undef"
 $ IF archname .NES. "VMS_VAX"
 $ THEN
 $! Case sensitive?
@@ -5652,8 +5678,8 @@ $ WC "d_bincompat3='undef'"
 $! WC "d_bsdpgrp='undef'"
 $ WC "d_bsdgetpgrp='undef'"
 $ WC "d_bsdsetpgrp='undef'"
-$ WC "d_builtin_choose_expr='undef'"
-$ WC "d_builtin_expect='undef'"
+$ WC "d_builtin_choose_expr='undef'" ! GCC only
+$ WC "d_builtin_expect='undef'" ! GCC only
 $ WC "d_bzero='" + d_bzero + "'"
 $ WC "d_casti32='define'"
 $ WC "d_castneg='define'"
@@ -6256,9 +6282,14 @@ $ WC "shmattype='" + " '"
 $ WC "shortsize='" + shortsize + "'"
 $ WC "shrplib='define'"
 $ WC "sig_name='" + sig_name + "'"
-$ tmp = "sig_name_init='" + sig_name_init + "'"
-$ WC/symbol tmp
-$ DELETE/SYMBOL tmp
+$ IF (f$length(sig_name_init) .GE. 1024)
+$ THEN
+$     tmp = "sig_name_init='" + sig_name_init + "'"
+$     WC/symbol tmp
+$     DELETE/SYMBOL tmp
+$ ELSE
+$     WC "sig_name_init='" + sig_name_init + "'"
+$ ENDIF
 $ WC "sig_num='" + sig_num + "'"
 $ WC "sig_num_init='" + sig_num_init + "'"
 $ WC "sig_count='" + sig_count + "'"
@@ -6314,6 +6345,7 @@ $ WC "usedl='" + usedl + "'"
 $ WC "usefaststdio='" + usefaststdio + "'"
 $ WC "useieee='" + useieee + "'"                    ! VMS-specific
 $ WC "useithreads='" + useithreads + "'"
+$ WC "usekernelthreads='" + usekernelthreads + "'"	! VMS-specific
 $ WC "uselargefiles='" + uselargefiles + "'"
 $ WC "uselongdouble='" + uselongdouble + "'"
 $ WC "usemorebits='" + usemorebits + "'"
@@ -6327,6 +6359,7 @@ $ WC "usesecurelog='" + usesecurelog + "'"  ! VMS-specific
 $ WC "usesitecustomize='" + usesitecustomize + "'"
 $ WC "usesocks='undef'"
 $ WC "usethreads='" + usethreads + "'"
+$ WC "usethreadupcalls='" + usethreadupcalls + "'"	! VMS-specific
 $ WC "usevendorprefix='" + "'" ! try to say no, though we'll be ignored as of MM 5.90_01
 $ WC "usevfork='true'"
 $ WC "usevmsdebug='" + usevmsdebug + "'"     ! VMS-specific
@@ -6645,7 +6678,7 @@ $ echo4 "Extracting ''defmakefile' (with variable substitutions)"
 $ DEFINE/USER_MODE sys$output 'UUmakefile'
 $ mcr []munchconfig 'config_sh' 'Makefile_SH' "''DECC_REPLACE'" "''DECCXX_REPLACE'" "''ARCH_TYPE'" "''GNUC_REPLACE'" -
 "''SOCKET_REPLACE'" "''THREAD_REPLACE'" "''C_Compiler_Replace'" "''MALLOC_REPLACE'" -
-"''Thread_Live_Dangerously'" "PV=''version'" "FLAGS=FLAGS=''extra_flags'" "''LARGEFILE_REPLACE'"
+"''THREAD_UPCALLS'" "''THREAD_KERNEL'" "PV=''version'" "FLAGS=FLAGS=''extra_flags'" "''LARGEFILE_REPLACE'"
 $! Clean up after ourselves
 $ DELETE/NOLOG/NOCONFIRM []munchconfig.exe;
 $!
@@ -6886,8 +6919,6 @@ $!----------------------------------------------
 $ pcsi_producer = f$trnlnm("PCSI_PRODUCER")
 $ if pcsi_producer .eqs. ""
 $ then
-$   prefix = prefix - "000000."
-$   IF F$LOCATE(".]",prefix) .EQ. F$LENGTH(prefix) THEN prefix = prefix - "]" + ".]"
 $   WRITE CONFIG "$ define/translation=concealed ''vms_prefix' ''prefix'"
 $ else
 $  WRITE CONFIG "$ myproc = f$environment(""PROCEDURE"")"
@@ -6902,12 +6933,6 @@ $  WRITE CONFIG "$ then"
 $  WRITE CONFIG "$  define/translation=concealed ''vms_prefix' 'myroot_dev'['myroot_dir'.]"
 $  WRITE CONFIG "$ endif"
 $ endif
-$
-$ prefix = prefix - "000000."
-$ IF F$LOCATE(".]",prefix) .EQ. F$LENGTH(prefix) THEN prefix = prefix - "]" + ".]" 
-$ WRITE CONFIG "$ define/translation=concealed ''vms_prefix' ''prefix'"
-
-
 $ WRITE CONFIG "$ ext = "".exe"""
 $ IF sharedperl
 $ THEN
@@ -6939,9 +6964,6 @@ $   THEN
 $     WRITE CONFIG "$ set command ''vms_prefix':[000000]''packageup'.CLD"
 $   ENDIF
 $ ENDIF !  perl_symbol
-$ WRITE CONFIG "$ define/nolog pod2text ''vms_prefix':[lib.pod]pod2text.com"
-$ WRITE CONFIG "$ define/nolog pod2html ''vms_prefix':[lib.pod]pod2html.com"
-$ WRITE CONFIG "$ define/nolog pod2man  ''vms_prefix':[lib.pod]pod2man.com"
 $!
 $ IF (tzneedset)
 $ THEN
@@ -6964,16 +6986,16 @@ $ WRITE CONFIG "$ h2ph       == """ + perl_setup_perl + " ''vms_prefix':[utils]h
 $ WRITE CONFIG "$ h2xs       == """ + perl_setup_perl + " ''vms_prefix':[utils]h2xs.com"""
 $ WRITE CONFIG "$ instmodsh  == """ + perl_setup_perl + " ''vms_prefix':[utils]instmodsh.com"""
 $ WRITE CONFIG "$ libnetcfg  == """ + perl_setup_perl + " ''vms_prefix':[utils]libnetcfg.com"""
-$ WRITE CONFIG "$ perlbug    == """ + perl_setup_perl + " ''vms_prefix':[lib]perlbug.com"""
+$ WRITE CONFIG "$ perlbug    == """ + perl_setup_perl + " ''vms_prefix':[utils]perlbug.com"""
 $ WRITE CONFIG "$!perlcc     == """ + perl_setup_perl + " ''vms_prefix':[utils]perlcc.com"""
-$ WRITE CONFIG "$ perldoc    == """ + perl_setup_perl + " ''vms_prefix':[lib.pods]perldoc.com """"-t"""""""
+$ WRITE CONFIG "$ perldoc    == """ + perl_setup_perl + " ''vms_prefix':[utils]perldoc.com """"-t"""""""
 $ WRITE CONFIG "$ perlivp    == """ + perl_setup_perl + " ''vms_prefix':[utils]perlivp.com"""
 $ WRITE CONFIG "$ piconv     == """ + perl_setup_perl + " ''vms_prefix':[utils]piconv.com"""
 $ WRITE CONFIG "$ pl2pm      == """ + perl_setup_perl + " ''vms_prefix':[utils]pl2pm.com"""
-$ WRITE CONFIG "$ pod2html   == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2html"""
-$ WRITE CONFIG "$ pod2latex  == """ + perl_setup_perl + " ''vms_prefix':[lib.pod]pod2latex.com"""
-$ WRITE CONFIG "$ pod2text   == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2text"""
-$ WRITE CONFIG "$!pod2man    == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2man"""
+$ WRITE CONFIG "$ pod2html   == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2html.com"""
+$ WRITE CONFIG "$ pod2latex  == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2latex.com"""
+$ WRITE CONFIG "$ pod2text   == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2text.com"""
+$ WRITE CONFIG "$!pod2man    == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2man.com"""
 $ WRITE CONFIG "$ pod2usage  == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2usage.com"""
 $ WRITE CONFIG "$ podchecker == """ + perl_setup_perl + " ''vms_prefix':[utils]podchecker.com"""
 $ WRITE CONFIG "$ podselect  == """ + perl_setup_perl + " ''vms_prefix':[utils]podselect.com"""
