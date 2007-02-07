@@ -192,12 +192,13 @@ flush(fp)
 
 char *
 getname(fp)
-       PerlIO * fp
+	PerlIO * fp
 	PROTOTYPE: $
 	CODE:
+            FILE *stdio = PerlIO_exportFILE(fp,0);
 	    char fname[NAM$C_MAXRSS+1];
 	    ST(0) = sv_newmortal();
-           if (PerlIO_getname(fp,fname) != NULL) sv_setpv(ST(0),fname);
+            if (fgetname(stdio,fname) != NULL) sv_setpv(ST(0),fname);
 
 void
 rewind(fp)
@@ -348,7 +349,7 @@ vmsopen(spec,...)
 	        break;
 	    }
            if (fp != Null(FILE*)) {
-             pio_fp = PerlIO_importFILE(fp,mode);
+             pio_fp = PerlIO_fdopen(fileno(fp),mode);
              fh = newFH(pio_fp,(mode[1] ? '+' : (mode[0] == 'r' ? '<' : (mode[0] == 'a' ? 'a' : '>'))));
 	     ST(0) = (fh ? sv_2mortal(fh) : &PL_sv_undef);
 	    }
@@ -363,8 +364,7 @@ vmssysopen(spec,mode,perm,...)
 	CODE:
 	    char *args[8];
 	    int i, myargc, fd;
-	    FILE *fp;
-           PerlIO *pio_fp;
+	    PerlIO *pio_fp;
 	    SV *fh;
 	    STRLEN n_a;
 	    if (!spec || !*spec) {
@@ -407,8 +407,7 @@ vmssysopen(spec,mode,perm,...)
 	    }
 	    i = mode & 3;
 	    if (fd >= 0 &&
-              ((fp = fdopen(fd, &("r\000w\000r+"[2*i]))) != Null(FILE*))) {
-             pio_fp = PerlIO_importFILE(fp,&("r\000w\000r+"[2*i]));
+              ((pio_fp = PerlIO_fdopen(fd, &("r\000w\000r+"[2*i]))) != Null(PerlIO*))) {
              fh = newFH(pio_fp,"<>++"[i]);
 	     ST(0) = (fh ? sv_2mortal(fh) : &PL_sv_undef);
 	    }

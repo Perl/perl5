@@ -50,6 +50,7 @@ $ use_vmsdebug_perl = "n"
 $ use64bitall = "n"
 $ use64bitint = "n"
 $ uselargefiles = "n"
+$ usedecterm = "n"
 $ usesitecustomize = "n"
 $ C_Compiler_Replace = "CC="
 $ thread_upcalls = "MTU="
@@ -904,7 +905,7 @@ $   config_symbols1 ="|installprivlib|installscript|installsitearch|installsitel
 $   config_symbols2 ="|prefix|privlib|privlibexp|scriptdir|sitearch|sitearchexp|sitebin|sitelib|sitelib_stem|sitelibexp|try_cxx|use64bitall|use64bitint|"
 $   config_symbols3 ="|usecasesensitive|usedefaulttypes|usedevel|useieee|useithreads|usemultiplicity|usemymalloc|usedebugging_perl|useperlio|usesecurelog|"
 $   config_symbols4 ="|usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|uselargefiles|usesitecustomize|"
-$   config_symbols5 ="|buildmake|builder|usethreadupcalls|usekernelthreads"
+$   config_symbols5 ="|buildmake|builder|usethreadupcalls|usekernelthreads|usedecterm"
 $!  
 $   open/read CONFIG 'config_sh'
 $   rd_conf_loop:
@@ -2026,7 +2027,10 @@ $   DELETE/NOLOG/NOCONFIRM cxxvers.*;
 $   echo "You are using CXX ''line'"
 $   cxxversion = line
 $   ccversion = line
+$   d_cplusplus = "define"
 $   CALL Cxx_demangler_cleanup
+$ ELSE
+$   d_cplusplus = "undef"
 $ ENDIF
 $!
 $Cxx_demangler_cleanup: SUBROUTINE
@@ -2552,6 +2556,45 @@ $     d_unlink_all_versions = "define"
 $ ELSE
 $     d_unlink_all_versions = "undef"
 $ ENDIF
+$!
+$! To avoid 'SYSTEM-F-PROTINSTALL, protected images must be installed'
+$! at run time, we must check that the DECterm image is both present
+$! and installed as a known image.
+$!
+$ decterm_capable = "FALSE"
+$ dflt = "SYS$SHARE:DECW$TERMINALSHR12.EXE"
+$ IF F$SEARCH(dflt) .NES. "" 
+$ THEN 
+$    decterm_capable = F$FILE_ATTRIBUTES(dflt, "KNOWN")
+$ ELSE
+$     dflt = "SYS$SHARE:DECW$TERMINALSHR.EXE"
+$     IF F$SEARCH(dflt) .NES. "" THEN decterm_capable = F$FILE_ATTRIBUTES(dflt, "KNOWN")
+$ ENDIF
+$!
+$ IF F$TYPE(usedecterm) .NES. ""
+$ THEN
+$       if usedecterm .or. usedecterm .eqs. "define"
+$       then
+$         bool_dflt="y"
+$       else
+$         bool_dflt="n"
+$       endif
+$ ELSE
+$       bool_dflt="n"
+$ ENDIF
+$ IF .NOT. use_debugging_perl THEN bool_dflt = "n"
+$ echo ""
+$ echo "Perl can be built to support DECterms from the Perl debugger"
+$ echo ""
+$ echo "If this does not make any sense to you, just accept the default '" + bool_dflt + "'."
+$ rp = "Build with DECterm Perl debugger support, if available? [''bool_dflt'] "
+$ GOSUB myread
+$ usedecterm=ans
+$ IF (usedecterm .OR. usedecterm .EQS. "define") .AND. .NOT. decterm_capable
+$ THEN
+$     echo4 "No installed DECterm image found, disabling..."
+$     usedecterm = "n"
+$ ENDIF
 $! CC Flags
 $ echo ""
 $ echo "Your compiler may want other flags.  For this question you should include"
@@ -2688,6 +2731,7 @@ $   IF xxx .EQS. "DynaLoader" THEN goto ext_loop     ! omit
 $   IF xxx .EQS. "SDBM_File/sdbm" THEN goto ext_loop ! sub extension - omit
 $   IF xxx .EQS. "Devel/PPPort/harness" THEN goto ext_loop ! sub extension - omit
 $   IF F$EXTRACT(0,7,xxx) .EQS. "Encode/" THEN goto ext_loop  ! sub extension - omit
+$   IF F$EXTRACT(0,5,xxx) .EQS. "Win32" THEN goto ext_loop  ! no Win32 API here
 $   IF xxx .EQS. "B/C" THEN goto ext_loop  ! sub extension - omit
 $   IF F$EXTRACT(0,8,line) .EQS. "vms/ext/" THEN -
       xxx = "VMS/" + F$EXTRACT(8,line_len - 20,line)
@@ -5694,7 +5738,7 @@ $ WC "d_class='undef'"
 $ WC "d_cmsghdr_s='undef'"
 $ WC "d_const='define'"
 $ WC "d_copysignl='define'"
-$ WC "d_cplusplus='undef'"
+$ WC "d_cplusplus='" + d_cplusplus + "'"
 $ WC "d_crypt='define'"
 $ WC "d_csh='undef'"
 $ WC "d_cuserid='define'"
@@ -6609,6 +6653,7 @@ $! Alas this does not help to build Fcntl
 $!   WC "#define PERL_IGNORE_FPUSIG SIGFPE"
 $ ENDIF
 $ IF kill_by_sigprc .EQS. "define" then WC "#define KILL_BY_SIGPRC"
+$ IF usedecterm .OR. usedecterm .EQS. "define" then WC "#define USE_VMS_DECTERM"
 $ IF unlink_all_versions .OR. unlink_all_versions .EQS. "define" THEN -
     WC "#define UNLINK_ALL_VERSIONS"
 $ CLOSE CONFIG
@@ -6684,11 +6729,23 @@ $!   ENDIF
 $ ELSE
 $   LARGEFILE_REPLACE = "LARGEFILE="
 $ ENDIF
+$ IF usedecterm .OR. usedecterm .EQS. "define"
+$ THEN
+$   IF F$SEARCH("SYS$SHARE:DECW$TERMINALSHR12.EXE") .nes. ""
+$   THEN
+$      DECTERM_REPLACE = "DECTERMLIB=DECTERMLIB=DECW$TERMINALSHR12/SHARE"
+$   ELSE
+$      DECTERM_REPLACE = "DECTERMLIB=DECTERMLIB=DECW$TERMINALSHR/SHARE"
+$   ENDIF
+$ ELSE
+$   DECTERM_REPLACE = "DECTERMLIB=DECTERMLIB="
+$ ENDIF
 $ echo4 "Extracting ''defmakefile' (with variable substitutions)"
 $ DEFINE/USER_MODE sys$output 'UUmakefile'
 $ mcr []munchconfig 'config_sh' 'Makefile_SH' "''DECC_REPLACE'" "''DECCXX_REPLACE'" "''ARCH_TYPE'" "''GNUC_REPLACE'" -
 "''SOCKET_REPLACE'" "''THREAD_REPLACE'" "''C_Compiler_Replace'" "''MALLOC_REPLACE'" -
-"''THREAD_UPCALLS'" "''THREAD_KERNEL'" "PV=''version'" "FLAGS=FLAGS=''extra_flags'" "''LARGEFILE_REPLACE'"
+"''THREAD_UPCALLS'" "''THREAD_KERNEL'" "PV=''version'" "FLAGS=FLAGS=''extra_flags'" "''LARGEFILE_REPLACE'" -
+"''DECTERM_REPLACE'"
 $! Clean up after ourselves
 $ DELETE/NOLOG/NOCONFIRM []munchconfig.exe;
 $!
