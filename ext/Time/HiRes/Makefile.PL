@@ -342,17 +342,26 @@ sub has_clock_nanosleep {
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#include <time.h>
 int main(int argc, char** argv)
 {
     int ret;
-    struct timerspec ts1;
-    struct timerspec ts2;
+    struct timespec ts1;
+    struct timespec ts2;
     ts1.tv_sec  = 0;
     ts1.tv_nsec = 750000000;;
     ret = clock_nanosleep(CLOCK_MONOTONIC, 0, &ts1, &ts2);
     ret == 0 ? exit(0) : exit(errno ? errno : -1);
 }
 EOM
+}
+
+sub DEFINE {
+    my ($def, $val) = @_;
+    my $define = defined $val ? "$def=$val" : $def ;
+    unless ($DEFINE =~ /(?:^| )-D\Q$define\E(?: |$)/) {
+	$DEFINE .= " -D$define";
+    }
 }
 
 sub init {
@@ -614,7 +623,7 @@ int main(int argc, char** argv) {
 }
 EOM
       $has_stat_st_xtimespec++;
-      $DEFINE .= ' -DTIME_HIRES_STAT=1';
+      DEFINE('TIME_HIRES_STAT', 1);
     }
 
     if ($has_stat_st_xtimespec) {
@@ -634,7 +643,7 @@ int main(int argc, char** argv) {
 }
 EOM
       $has_stat_st_xtimensec++;
-      $DEFINE .= ' -DTIME_HIRES_STAT=2';
+      DEFINE('TIME_HIRES_STAT', 2);
     }
 
     if ($has_stat_st_xtimensec) {
@@ -654,7 +663,7 @@ int main(int argc, char** argv) {
 }
 EOM
       $has_stat_st_xtime_n++;
-      $DEFINE .= ' -DTIME_HIRES_STAT=3';
+      DEFINE('TIME_HIRES_STAT', 3);
     }
 
     if ($has_stat_st_xtime_n) {
@@ -674,7 +683,7 @@ int main(int argc, char** argv) {
 }
 EOM
       $has_stat_st_xtim++;
-      $DEFINE .= ' -DTIME_HIRES_STAT=4';
+      DEFINE('TIME_HIRES_STAT', 4);
     }
 
     if ($has_stat_st_xtim) {
@@ -694,7 +703,7 @@ int main(int argc, char** argv) {
 }
 EOM
       $has_stat_st_uxtime++;
-      $DEFINE .= ' -DTIME_HIRES_STAT=5';
+      DEFINE('TIME_HIRES_STAT', 5);
     }
 
     if ($has_stat_st_uxtime) {
@@ -716,7 +725,7 @@ EOM
         print "Looking for <w32api/windows.h>... ";
         if (has_include('w32api/windows.h')) {
 	    $has_w32api_windows_h++;
-	    $DEFINE .= ' -DHAS_W32API_WINDOWS_H';
+	    DEFINE('HAS_W32API_WINDOWS_H');
 	}
         if ($has_w32api_windows_h) {
 	    print "found.\n";
@@ -742,7 +751,7 @@ sub doMakefile {
 	    'AUTHOR'    => 'Jarkko Hietaniemi <jhi@iki.fi>',
 	    'ABSTRACT_FROM' => 'HiRes.pm',
 	);
-	$DEFINE .= " -DATLEASTFIVEOHOHFIVE";
+	DEFINE('ATLEASTFIVEOHOHFIVE');
     }
 
     push (@makefileopts,
@@ -826,7 +835,7 @@ sub main {
     }
 
     if ($^O =~ /Win32/i) {
-      $DEFINE = '-DSELECT_IS_BROKEN';
+      DEFINE('SELECT_IS_BROKEN');
       $LIBS = [];
       print "System is $^O, skipping full configure...\n";
     } else {

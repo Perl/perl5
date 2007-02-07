@@ -817,31 +817,24 @@ NV
 nanosleep(nsec)
         NV nsec
 	PREINIT:
-	int status = -1;
-	struct timeval Ta, Tb;
+	struct timespec sleepfor, unslept;
 	CODE:
-	gettimeofday(&Ta, NULL);
-	if (items > 0) {
-	    struct timespec ts1;
-	    if (nsec > 1E9) {
-		IV sec = (IV) (nsec / 1E9);
-		if (sec) {
-		    sleep(sec);
-		    nsec -= 1E9 * sec;
-		}
-	    } else if (nsec < 0.0)
-	        croak("Time::HiRes::nanosleep(%"NVgf"): negative time not invented yet", nsec);
-	    ts1.tv_sec  = (IV) (nsec / 1E9);
-	    ts1.tv_nsec = (IV) nsec - (IV) (ts1.tv_sec * NV_1E9);
-	    status = nanosleep(&ts1, NULL);
+	if (nsec < 0.0)
+	    croak("Time::HiRes::nanosleep(%"NVgf"): negative time not invented yet", nsec);
+	sleepfor.tv_sec = nsec / 1e9;
+	sleepfor.tv_nsec = nsec - ((NV)sleepfor.tv_sec) * 1e9;
+	if (!nanosleep(&sleepfor, &unslept)) {
+	    RETVAL = nsec;
 	} else {
-	    PerlProc_pause();
-	    status = 0;
+	    sleepfor.tv_sec -= unslept.tv_sec;
+	    sleepfor.tv_nsec -= unslept.tv_nsec;
+	    if (sleepfor.tv_nsec < 0) {
+		sleepfor.tv_sec--;
+		sleepfor.tv_nsec += 1000000000;
+	    }
+	    RETVAL = ((NV)sleepfor.tv_sec) * 1e9 + ((NV)sleepfor.tv_nsec);
 	}
-	gettimeofday(&Tb, NULL);
-	RETVAL = status == 0 ? 1E3*(1E6*(Tb.tv_sec-Ta.tv_sec)+(NV)((IV)Tb.tv_usec-(IV)Ta.tv_usec)) : -1;
-
-	OUTPUT:
+    OUTPUT:
 	RETVAL
 
 #else  /* #if defined(TIME_HIRES_NANOSLEEP) */
@@ -1145,27 +1138,28 @@ clock_getres(clock_id = 0)
 #if defined(TIME_HIRES_CLOCK_NANOSLEEP) && defined(TIMER_ABSTIME)
 
 NV
-clock_nanosleep(clock_id = CLOCK_REALTIME, sec = 0.0, flags = 0)
+clock_nanosleep(clock_id, nsec, flags = 0)
 	int clock_id
-	NV  sec
+	NV  nsec
 	int flags
     PREINIT:
-	int status = -1;
-	struct timespec ts;
-	struct timeval Ta, Tb;
+	struct timespec sleepfor, unslept;
     CODE:
-	gettimeofday(&Ta, NULL);
-	if (items > 1) {
-	    ts.tv_sec  = (IV) sec;
-	    ts.tv_nsec = (sec - (NV) ts.tv_sec) * (NV) 1E9;
-	    status = clock_nanosleep(clock_id, flags, &ts, NULL);
+	if (nsec < 0.0)
+	    croak("Time::HiRes::clock_nanosleep(..., %"NVgf"): negative time not invented yet", nsec);
+	sleepfor.tv_sec = nsec / 1e9;
+	sleepfor.tv_nsec = nsec - ((NV)sleepfor.tv_sec) * 1e9;
+	if (!clock_nanosleep(clock_id, flags, &sleepfor, &unslept)) {
+	    RETVAL = nsec;
 	} else {
-	    PerlProc_pause();
-	    status = 0;
+	    sleepfor.tv_sec -= unslept.tv_sec;
+	    sleepfor.tv_nsec -= unslept.tv_nsec;
+	    if (sleepfor.tv_nsec < 0) {
+		sleepfor.tv_sec--;
+		sleepfor.tv_nsec += 1000000000;
+	    }
+	    RETVAL = ((NV)sleepfor.tv_sec) * 1e9 + ((NV)sleepfor.tv_nsec);
 	}
-	gettimeofday(&Tb, NULL);
-	RETVAL = status == 0 ? 1E3*(1E6*(Tb.tv_sec-Ta.tv_sec)+(NV)((IV)Tb.tv_usec-(IV)Ta.tv_usec)) : -1;
-
     OUTPUT:
 	RETVAL
 

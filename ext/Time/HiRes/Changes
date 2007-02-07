@@ -1,5 +1,11 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9705	[2007-02-06]
+	- nanosleep() and clock_nanosleep() detection and use were
+	  quite broken; in Linux -lrt needed; fixes from Zefram
+	- [internal] slightly cleaner building of $DEFINE in Makefile.PL,
+	  should avoid double/conflicting -D flags
+
 1.9704	[2007-01-01]
 	- allow 10% of slop in test #14 (testing difference between
 	  CORE::time() and Time::HiRes::time()), there seem to be often

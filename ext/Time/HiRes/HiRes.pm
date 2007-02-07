@@ -23,7 +23,7 @@ require DynaLoader;
 		 stat
 		);
 	
-$VERSION = '1.9704';
+$VERSION = '1.9705';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -119,8 +119,8 @@ Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
   $realtime   = clock_gettime(CLOCK_REALTIME);
   $resolution = clock_getres(CLOCK_REALTIME);
 
-  clock_nanosleep(CLOCK_REALTIME, 1.5);
-  clock_nanosleep(CLOCK_REALTIME, time() + 10, TIMER_ABSTIME);
+  clock_nanosleep(CLOCK_REALTIME, 1.5e9);
+  clock_nanosleep(CLOCK_REALTIME, time()*1e9 + 10e9, TIMER_ABSTIME);
 
   my $ticktock = clock();
 
@@ -347,10 +347,10 @@ specified by C<$which>.  All implementations that support POSIX high
 resolution timers are supposed to support at least the C<$which> value
 of C<CLOCK_REALTIME>, see L</clock_gettime>.
 
-=item clock_nanosleep ( $which, $seconds, $flags = 0)
+=item clock_nanosleep ( $which, $nanoseconds, $flags = 0)
 
-Sleeps for the number of seconds (1e9ths of a second) specified.
-Returns the number of seconds actually slept.  The $which is the
+Sleeps for the number of nanoseconds (1e9ths of a second) specified.
+Returns the number of nanoseconds actually slept.  The $which is the
 "clock id", as with clock_gettime() and clock_getres().  The flags
 default to zero but C<TIMER_ABSTIME> can specified (must be exported
 explicitly) which means that C<$nanoseconds> is not a time interval

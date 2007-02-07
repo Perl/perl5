@@ -560,7 +560,7 @@ if ($have_clock_getres) {
 
 if ($have_clock_nanosleep &&
     has_symbol('CLOCK_REALTIME')) {
-    my $s = 1.5;
+    my $s = 1.5e9;
     my $t = clock_nanosleep(&CLOCK_REALTIME, $s);
     my $r = abs(1 - $t / $s);
     if ($r < 2 * $limit) {
