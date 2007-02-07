@@ -1901,7 +1901,6 @@ lib/Test/Harness/t/harness.t	Test::Harness test
 lib/Test/Harness/t/inc_taint.t	Test::Harness test
 lib/Test/Harness/t/nonumbers.t	Test::Harness test
 lib/Test/Harness/t/ok.t		Test::Harness test
-lib/Test/Harness/t/pod.t	Test::Harness test
 lib/Test/Harness/t/point-parse.t	Test::Harness test
 lib/Test/Harness/t/point.t	Test::Harness test
 lib/Test/Harness/t/prove-globbing.t	Test::Harness::Straps test
@@ -1995,6 +1994,7 @@ lib/Text/Abbrev.t		Test Text::Abbrev
 lib/Text/Balanced/Changes	Text::Balanced
 lib/Text/Balanced.pm		Text::Balanced
 lib/Text/Balanced/README	Text::Balanced
+lib/Text/Balanced/t/00-load.t	See if Text::Balanced works
 lib/Text/Balanced/t/extbrk.t	See if Text::Balanced works
 lib/Text/Balanced/t/extcbk.t	See if Text::Balanced works
 lib/Text/Balanced/t/extdel.t	See if Text::Balanced works
@@ -2003,6 +2003,7 @@ lib/Text/Balanced/t/extqlk.t	See if Text::Balanced works
 lib/Text/Balanced/t/exttag.t	See if Text::Balanced works
 lib/Text/Balanced/t/extvar.t	See if Text::Balanced works
 lib/Text/Balanced/t/gentag.t	See if Text::Balanced works
+lib/Text/Balanced/t/pod.t	See if Text::Balanced works
 lib/Text/ParseWords.pm		Perl module to split words on arbitrary delimiter
 lib/Text/ParseWords.t		See if Text::ParseWords works
 lib/Text/ParseWords/taint.t	See if Text::ParseWords works with tainting
