@@ -103,7 +103,10 @@ $extensions =~ s|/|::|g;
 
 for my $module (sort keys %modules) {
     SKIP: {
-        skip "$module not available", 1 if $extensions !~ /\b$module\b/;
+        if ($extensions !~ /\b$module\b/) {
+            delete($modules{$module});
+            skip "$module not available", 3;
+        }
         eval "use $module";
         is( $@, '', "loading $module" );
     }
