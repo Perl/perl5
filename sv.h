@@ -260,7 +260,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SvREFCNT_dec(sv)	sv_free((SV*)(sv))
 
 #define SVTYPEMASK	0xff
-#define SvTYPE(sv)	(svtype)((sv)->sv_flags & SVTYPEMASK)
+#define SvTYPE(sv)	((svtype)((sv)->sv_flags & SVTYPEMASK))
 
 /* Sadly there are some parts of the core that have pointers to already-freed
    SV heads, and rely on being able to tell that they are now free. So mark
