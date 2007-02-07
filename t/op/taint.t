@@ -1223,9 +1223,9 @@ SKIP:
     is ($val, 0, "eval doesn't like tainted strings");
     like ($@, qr/^Insecure dependency in eval/);
 
-    # Rather nice code to get a tainted by from Rick Delaney
-    open 0 or die $!;
-    $tainted=(<0>,<0>);
+    # Rather nice code to get a tainted undef by from Rick Delaney
+    open FH, "test.pl" or die $!;
+    $tainted=(<FH>,<FH>);
 
     eval 'eval $tainted';
     like ($@, qr/^Insecure dependency in eval/);
