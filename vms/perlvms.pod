@@ -367,6 +367,30 @@ The PERL5LIB and PERLLIB logical names work as documented in L<perl>,
 except that the element separator is '|' instead of ':'.  The
 directory specifications may use either VMS or Unix syntax.
 
+=head1 PERL_VMS_EXCEPTION_DEBUG
+
+The PERL_VMS_EXCEPTION_DEBUG being defined as "ENABLE" will cause the VMS
+debugger to be invoked if a fatal exception that is not otherwise
+handled is raised.  The purpose of this is to allow debugging of
+internal Perl problems that would cause such a condition.
+
+This allows the programmer to look at the execution stack and variables to
+find out the cause of the exception.  As the debugger is being invoked as
+the Perl interpreter is about to do a fatal exit, continuing the execution
+in debug mode is usally not practical.
+
+Starting Perl in the VMS debugger may change the program execution
+profile in a way that such problems are not reproduced.
+
+The C<kill> function can be used to test this functionality from within
+a program.
+
+In typical VMS style, only the first letter of the value of this logical
+name is actually checked in a case insensitive mode, and it is considered
+enabled if it is the value "T","1" or "E".
+
+This logical name must be defined before Perl is started.
+
 =head1 Command line
 
 =head2 I/O redirection and backgrounding

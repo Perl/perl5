@@ -21,7 +21,7 @@ foreach $test (@tests) {
   $expect = undef if $expect eq 'undef';
   $rslt = eval "$func('$arg')";
   is($@, '', "eval ${func}('$arg')");
-  is($rslt, $expect, "${func}('$arg'): '$rslt'");
+  is(lc($rslt), lc($expect), "${func}('$arg'): '$rslt'");
 }
 
 $defwarn = <<'EOW';
@@ -32,10 +32,10 @@ $defwarn = <<'EOW';
 EOW
 
 is(uc(rmsexpand('[]')),   "\U$ENV{DEFAULT}", 'rmsexpand()') || print $defwarn;
-is(rmsexpand('from.here'),"\L$ENV{DEFAULT}from.here") || print $defwarn;
-is(rmsexpand('from'),     "\L$ENV{DEFAULT}from")      || print $defwarn;
+is(lc(rmsexpand('from.here')),"\L$ENV{DEFAULT}from.here") || print $defwarn;
+is(lc(rmsexpand('from')),     "\L$ENV{DEFAULT}from")      || print $defwarn;
 
-is(rmsexpand('from.here','cant:[get.there];2'),
+is(lc(rmsexpand('from.here','cant:[get.there];2')),
    'cant:[get.there]from.here;2')                     || print $defwarn;
 
 
