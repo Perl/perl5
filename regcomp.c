@@ -4962,6 +4962,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     const I32 oregflags = RExC_flags;
     bool have_branch = 0;
     bool is_open = 0;
+    I32 freeze_paren = 0;
+    I32 after_freeze = 0;
 
     /* for (?g), (?gc), and (?o) warnings; warning
        about (?c) will warn about (?g) -- japhy    */
@@ -5212,6 +5214,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	            nextchar(pRExC_state);
 	            return ret;
 	        }
+	        break;
+	    case '|':           /* (?|...) */
+	        /* branch reset, behave like a (?:...) except that
+	           buffers in alternations share the same numbers */
+	        paren = ':'; 
+	        after_freeze = freeze_paren = RExC_npar;
+	        break;
 	    case ':':           /* (?:...) */
 	    case '>':           /* (?>...) */
 		break;
@@ -5668,6 +5677,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	if (SIZE_ONLY)
 	    RExC_extralen += 2;		/* Account for LONGJMP. */
 	nextchar(pRExC_state);
+	if (freeze_paren) {
+	    if (RExC_npar > after_freeze)
+	        after_freeze = RExC_npar;
+            RExC_npar = freeze_paren;	    
+        }
         br = regbranch(pRExC_state, &flags, 0, depth+1);
 
 	if (br == NULL)
@@ -5769,7 +5783,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    FAIL("Junk on end of regexp");	/* "Can't happen". */
 	/* NOTREACHED */
     }
-
+    if (after_freeze)
+        RExC_npar = after_freeze;
     return(ret);
 }
 

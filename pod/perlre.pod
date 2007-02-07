@@ -711,6 +711,29 @@ is equivalent to the more verbose
 
     /(?:(?s-i)more.*than).*million/i
 
+=item C<(?|pattern)>
+X<(?|)> X<Branch reset>
+
+This is the "branch reset" pattern, which has the special property
+that the capture buffers are numbered from the same starting point
+in each branch. 
+
+Normally capture buffers in a pattern are number sequentially, left
+to right in the pattern. Inside of this construct this behaviour is
+overriden so that the captures buffers in each branch share the same
+numbers. The numbering in each branch will be as normal, and any 
+buffers following the use of this pattern will be numbered as though
+the construct contained only one branch, that being the one with the
+most capture buffers in it.
+
+Consider the following pattern. The numbers underneath are which
+buffer number the captured content will be stored in.
+
+
+    # before  ---------------branch-reset----------- after        
+    / ( a )  (?| x ( y ) z | (p (q) r) | (t) u (v) ) ( z ) /x
+    # 1            2         2  3        2     3     4  
+
 =item Look-Around Assertions
 X<look-around assertion> X<lookaround assertion> X<look-around> X<lookaround>
 

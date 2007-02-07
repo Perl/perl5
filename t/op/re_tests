@@ -1270,3 +1270,13 @@ a*(*F)	aaaab	n	-	-
 (?=xy(?<=(aaxy)))	..aaxy..	y	$1	aaxy
 
 X(\w+)(?=\s)|X(\w+)	Xab	y	[$1-$2]	[-ab]
+
+#check that branch reset works ok.
+(?|a(.)b|d(.(o).)d|i(.)(.)j)(.)	d!o!da	y	$1-$2-$3	!o!-o-a
+(?|a(.)b|d(.(o).)d|i(.)(.)j)(.)	aabc	y	$1-$2-$3	a--c
+(?|a(.)b|d(.(o).)d|i(.)(.)j)(.)	ixyjp	y	$1-$2-$3	x-y-p
+(?|(?|(a)|(b))|(?|(c)|(d)))	a	y	$1	a
+(?|(?|(a)|(b))|(?|(c)|(d)))	b	y	$1	b
+(?|(?|(a)|(b))|(?|(c)|(d)))	c	y	$1	c
+(?|(?|(a)|(b))|(?|(c)|(d)))	d	y	$1	d
+(.)(?|(.)(.)x|(.)d)(.)	abcde	y	$1-$2-$3-$4-$5-	b-c--e--
