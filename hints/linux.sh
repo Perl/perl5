@@ -311,9 +311,12 @@ cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
         ccflags="-D_REENTRANT -D_GNU_SOURCE -DTHREADS_HAVE_PIDS $ccflags"
-        set `echo X "$libswanted "| sed -e 's/ c / pthread c /'`
-        shift
-        libswanted="$*"
+        if echo $libswanted | grep -v pthread >/dev/null
+        then
+            set `echo X "$libswanted "| sed -e 's/ c / pthread c /'`
+            shift
+            libswanted="$*"
+        fi
 
 	# Somehow at least in Debian 2.2 these manage to escape
 	# the #define forest of <features.h> and <time.h> so that
@@ -371,4 +374,38 @@ case "$cc" in
   d_dlopen='define'
   d_dlerror='define'
   ;;
+esac
+
+# Under some circumstances libdb can get built in such a way as to
+# need pthread explicitly linked.
+
+libdb_needs_pthread="N"
+
+if echo " $libswanted " | grep -v " pthread " >/dev/null
+then
+   if echo " $libswanted " | grep " db " >/dev/null
+   then
+     for DBDIR in $glibpth
+     do
+       DBLIB="$DBDIR/libdb.so"
+       if [ -f $DBLIB ]
+       then
+         if nm -u $DBLIB | grep pthread >/dev/null
+         then
+           if ldd $DBLIB | grep pthread >/dev/null
+           then
+             libdb_needs_pthread="N"
+           else
+             libdb_needs_pthread="Y"
+           fi
+         fi
+       fi
+     done
+   fi
+fi
+
+case "$libdb_needs_pthread" in
+  "Y")
+    libswanted="$libswanted pthread"
+    ;;
 esac
