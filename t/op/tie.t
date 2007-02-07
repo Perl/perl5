@@ -548,6 +548,13 @@ print $h,"\n";
 EXPECT
 3.3
 ########
+sub TIESCALAR { bless {} }
+sub FETCH { shift()->{i} ++ }
+tie $h, "main";
+print $h.$h;
+EXPECT
+01
+########
 # Bug 37731
 sub foo::TIESCALAR { bless {value => $_[1]}, $_[0] }
 sub foo::FETCH { $_[0]->{value} }
