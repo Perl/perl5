@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 257;
+plan tests => 260;
 
 $| = 1;
 
@@ -1213,4 +1213,20 @@ SKIP:
     $val = $TAINT;
     $val = $n;
     is ($val, '7000000000', 'Assignment to tainted variable');
+}
+
+{
+    local $::TODO = "eval currently ignores tainting";
+    my $val = 0;
+    my $tainted = '1' . $TAINT;
+    eval '$val = eval $tainted;';
+    is ($val, 0, "eval doesn't like tainted strings");
+    like ($@, qr/^Insecure dependency in eval/);
+
+    # Rather nice code to get a tainted by from Rick Delaney
+    open 0 or die $!;
+    $tainted=(<0>,<0>);
+
+    eval 'eval $tainted';
+    like ($@, qr/^Insecure dependency in eval/);
 }
