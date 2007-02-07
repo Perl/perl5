@@ -736,7 +736,7 @@ prime_env_iter(void)
   for (i = 0; env_tables[i]; i++) {
      if (!have_sym && (tmpdsc.dsc$a_pointer = env_tables[i]->dsc$a_pointer) &&
          !str$case_blind_compare(&tmpdsc,&clisym)) have_sym = 1;
-     if (!have_lnm && !str$case_blind_compare(env_tables[i],&crtlenv)) have_lnm = 1;
+     if (!have_lnm && str$case_blind_compare(env_tables[i],&crtlenv)) have_lnm = 1;
   }
   if (have_sym || have_lnm) {
     long int syiitm = SYI$_MAXBUF, dviitm = DVI$_DEVNAM;
@@ -1045,7 +1045,7 @@ Perl_vmssetenv(pTHX_ char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
         case LIB$_NOSUCHSYM: case SS$_NOLOGNAM:
           set_errno(EINVAL); break;
         case SS$_NOPRIV:
-          set_errno(EACCES);
+          set_errno(EACCES); break;
         default:
           _ckvmssts(retsts);
           set_errno(EVMSERR);
@@ -1452,7 +1452,7 @@ Perl_my_sigaction (pTHX_ int sig, const struct sigaction* act,
    than signalling with an unrecognized (and unhandled by CRTL) code.
 */
 
-#define _MY_SIG_MAX 17
+#define _MY_SIG_MAX 28
 
 static unsigned int
 Perl_sig_to_vmscondition_int(int sig)
@@ -1480,7 +1480,18 @@ Perl_sig_to_vmscondition_int(int sig)
         SS$_ASTFLT,         /* 14 SIGALRM  */
         4,                  /* 15 SIGTERM  */
         0,                  /* 16 SIGUSR1  */
-        0                   /* 17 SIGUSR2  */
+        0,                  /* 17 SIGUSR2  */
+        0,                  /* 18 */
+        0,                  /* 19 */
+        0,                  /* 20 SIGCHLD  */
+        0,                  /* 21 SIGCONT  */
+        0,                  /* 22 SIGSTOP  */
+        0,                  /* 23 SIGTSTP  */
+        0,                  /* 24 SIGTTIN  */
+        0,                  /* 25 SIGTTOU  */
+        0,                  /* 26 */
+        0,                  /* 27 */
+        0                   /* 28 SIGWINCH  */
     };
 
 #if __VMS_VER >= 60200000
@@ -1489,6 +1500,12 @@ Perl_sig_to_vmscondition_int(int sig)
         initted = 1;
         sig_code[16] = C$_SIGUSR1;
         sig_code[17] = C$_SIGUSR2;
+#if __CRTL_VER >= 70000000
+        sig_code[20] = C$_SIGCHLD;
+#endif
+#if __CRTL_VER >= 70300000
+        sig_code[28] = C$_SIGWINCH;
+#endif
     }
 #endif
 
@@ -7537,15 +7554,23 @@ Perl_my_localtime(pTHX_ const time_t *timep)
 #define time(t)      my_time(t)
 
 
-/* my_utime - update modification time of a file
- * calling sequence is identical to POSIX utime(), but under
- * VMS only the modification time is changed; ODS-2 does not
- * maintain access times.  Restrictions differ from the POSIX
+/* my_utime - update modification/access time of a file
+ *
+ * VMS 7.3 and later implementation
+ * Only the UTC translation is home-grown. The rest is handled by the
+ * CRTL utime(), which will take into account the relevant feature
+ * logicals and ODS-5 volume characteristics for true access times.
+ *
+ * pre VMS 7.3 implementation:
+ * The calling sequence is identical to POSIX utime(), but under
+ * VMS with ODS-2, only the modification time is changed; ODS-2 does
+ * not maintain access times.  Restrictions differ from the POSIX
  * definition in that the time can be changed as long as the
  * caller has permission to execute the necessary IO$_MODIFY $QIO;
  * no separate checks are made to insure that the caller is the
  * owner of the file or has special privs enabled.
  * Code here is based on Joe Meadows' FILE utility.
+ *
  */
 
 /* Adjustment from Unix epoch (01-JAN-1970 00:00:00.00)
@@ -7557,6 +7582,29 @@ static const long int utime_baseadjust[2] = { 0x4beb4000, 0x7c9567 };
 /*{{{int my_utime(const char *path, const struct utimbuf *utimes)*/
 int Perl_my_utime(pTHX_ const char *file, const struct utimbuf *utimes)
 {
+#if __CRTL_VER >= 70300000
+  struct utimbuf utc_utimes, *utc_utimesp;
+
+  if (utimes != NULL) {
+    utc_utimes.actime = utimes->actime;
+    utc_utimes.modtime = utimes->modtime;
+# ifdef VMSISH_TIME
+    /* If input was local; convert to UTC for sys svc */
+    if (VMSISH_TIME) {
+      utc_utimes.actime = _toutc(utimes->actime);
+      utc_utimes.modtime = _toutc(utimes->modtime);
+    }
+# endif
+    utc_utimesp = &utc_utimes;
+  }
+  else {
+    utc_utimesp = NULL;
+  }
+
+  return utime(file, utc_utimesp);
+
+#else /* __CRTL_VER < 70300000 */
+
   register int i;
   int sts;
   long int bintime[2], len = 2, lowbit, unixtime,
@@ -7584,14 +7632,17 @@ int Perl_my_utime(pTHX_ const char *file, const struct utimbuf *utimes)
   struct dsc$descriptor fibdsc = {sizeof(myfib), DSC$K_DTYPE_Z, DSC$K_CLASS_S,(char *) &myfib},
                         devdsc = {0,DSC$K_DTYPE_T, DSC$K_CLASS_S,0},
                         fnmdsc = {0,DSC$K_DTYPE_T, DSC$K_CLASS_S,0};
-
+	
   if (file == NULL || *file == '\0') {
-    set_errno(ENOENT);
-    set_vaxc_errno(LIB$_INVARG);
+    SETERRNO(ENOENT, LIB$_INVARG);
     return -1;
   }
-  if (do_tovmsspec((char *)file,vmsspec,0) == NULL) return -1;
 
+  /* Convert to VMS format ensuring that it will fit in 255 characters */
+  if (do_rmsexpand(file, vmsspec, 0, NULL, PERL_RMSEXPAND_M_VMS) == NULL) {
+      SETERRNO(ENOENT, LIB$_INVARG);
+      return -1;
+  }
   if (utimes != NULL) {
     /* Convert Unix time    (seconds since 01-JAN-1970 00:00:00.00)
      * to VMS quadword time (100 nsec intervals since 01-JAN-1858 00:00:00.00).
@@ -7608,14 +7659,12 @@ int Perl_my_utime(pTHX_ const char *file, const struct utimbuf *utimes)
     unixtime >>= 1;  secscale <<= 1;
     retsts = lib$emul(&secscale, &unixtime, &lowbit, bintime);
     if (!(retsts & 1)) {
-      set_errno(EVMSERR);
-      set_vaxc_errno(retsts);
+      SETERRNO(EVMSERR, retsts);
       return -1;
     }
     retsts = lib$addx(bintime,utime_baseadjust,bintime,&len);
     if (!(retsts & 1)) {
-      set_errno(EVMSERR);
-      set_vaxc_errno(retsts);
+      SETERRNO(EVMSERR, retsts);
       return -1;
     }
   }
@@ -7623,8 +7672,7 @@ int Perl_my_utime(pTHX_ const char *file, const struct utimbuf *utimes)
     /* Just get the current time in VMS format directly */
     retsts = sys$gettim(bintime);
     if (!(retsts & 1)) {
-      set_errno(EVMSERR);
-      set_vaxc_errno(retsts);
+      SETERRNO(EVMSERR, retsts);
       return -1;
     }
   }
@@ -7706,6 +7754,9 @@ int Perl_my_utime(pTHX_ const char *file, const struct utimbuf *utimes)
   }
 
   return 0;
+
+#endif /* #if __CRTL_VER >= 70300000 */
+
 }  /* end of my_utime() */
 /*}}}*/
 
@@ -7865,12 +7916,13 @@ Perl_cando_by_name(pTHX_ I32 bit, Uid_t effective, const char *fname)
   static struct dsc$descriptor_s usrdsc =
          {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, usrname};
   char vmsname[NAM$C_MAXRSS+1], fileified[NAM$C_MAXRSS+1];
-  unsigned long int objtyp = ACL$C_FILE, access, retsts, privused, iosb[2];
+  unsigned long int objtyp = ACL$C_FILE, access, retsts, privused, iosb[2], flags;
   unsigned short int retlen, trnlnm_iter_count;
   struct dsc$descriptor_s namdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
   union prvdef curprv;
-  struct itmlst_3 armlst[3] = {{sizeof access, CHP$_ACCESS, &access, &retlen},
-         {sizeof privused, CHP$_PRIVUSED, &privused, &retlen},{0,0,0,0}};
+  struct itmlst_3 armlst[4] = {{sizeof access, CHP$_ACCESS, &access, &retlen},
+         {sizeof privused, CHP$_PRIVUSED, &privused, &retlen},
+         {sizeof flags, CHP$_FLAGS, &flags, &retlen},{0,0,0,0}};
   struct itmlst_3 jpilst[3] = {{sizeof curprv, JPI$_CURPRIV, &curprv, &retlen},
          {sizeof usrname, JPI$_USERNAME, &usrname, &usrdsc.dsc$w_length},
          {0,0,0,0}};
@@ -7901,13 +7953,21 @@ Perl_cando_by_name(pTHX_ I32 bit, Uid_t effective, const char *fname)
 
   switch (bit) {
     case S_IXUSR: case S_IXGRP: case S_IXOTH:
-      access = ARM$M_EXECUTE; break;
+      access = ARM$M_EXECUTE; 
+      flags = CHP$M_READ;
+      break;
     case S_IRUSR: case S_IRGRP: case S_IROTH:
-      access = ARM$M_READ; break;
+      access = ARM$M_READ; 
+      flags = CHP$M_READ | CHP$M_USEREADALL;
+      break;
     case S_IWUSR: case S_IWGRP: case S_IWOTH:
-      access = ARM$M_WRITE; break;
+      access = ARM$M_WRITE; 
+      flags = CHP$M_READ | CHP$M_WRITE;
+      break;
     case S_IDUSR: case S_IDGRP: case S_IDOTH:
-      access = ARM$M_DELETE; break;
+      access = ARM$M_DELETE; 
+      flags = CHP$M_READ | CHP$M_WRITE;
+      break;
     default:
       return FALSE;
   }

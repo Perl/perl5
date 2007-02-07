@@ -881,9 +881,10 @@ and not traditional VMS behavior.
 
 =item utime LIST
 
-Since ODS-2, the VMS file structure for disk files, does not keep
-track of access times, this operator changes only the modification
-time of the file (VMS revision date).
+This operator changes only the modification time of the file (VMS 
+revision date) on ODS-2 volumes and ODS-5 volumes without access 
+dates enabled. On ODS-5 volumes with access dates enabled, the 
+true access time is modified.
 
 =item waitpid PID,FLAGS
 
