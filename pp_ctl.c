@@ -3444,6 +3444,7 @@ PP(pp_entereval)
     }
     sv = POPs;
 
+    TAINT_IF(SvTAINTED(sv));
     TAINT_PROPER("eval");
 
     ENTER;

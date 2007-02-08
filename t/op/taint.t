@@ -1216,7 +1216,6 @@ SKIP:
 }
 
 {
-    local $::TODO = "eval currently ignores tainting";
     my $val = 0;
     my $tainted = '1' . $TAINT;
     eval '$val = eval $tainted;';
@@ -1225,7 +1224,8 @@ SKIP:
 
     # Rather nice code to get a tainted undef by from Rick Delaney
     open FH, "test.pl" or die $!;
-    $tainted=(<FH>,<FH>);
+    seek FH, 0, 2 or die $!;
+    $tainted = <FH>;
 
     eval 'eval $tainted';
     like ($@, qr/^Insecure dependency in eval/);
