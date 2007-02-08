@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 249;
+plan tests => 252;
 
 $| = 1;
 
@@ -1167,4 +1167,20 @@ TERNARY_CONDITIONALS: {
 	};
 	test $@ =~ /Insecure \$ENV/, 'popen neglects %ENV check';
     }
+}
+
+{
+    my $val = 0;
+    my $tainted = '1' . $TAINT;
+    eval '$val = eval $tainted;';
+    is ($val, 0, "eval doesn't like tainted strings");
+    like ($@, qr/^Insecure dependency in eval/);
+
+    # Rather nice code to get a tainted undef by from Rick Delaney
+    open FH, "test.pl" or die $!;
+    seek FH, 0, 2 or die $!;
+    $tainted = <FH>;
+
+    eval 'eval $tainted';
+    like ($@, qr/^Insecure dependency in eval/);
 }

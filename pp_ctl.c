@@ -3411,6 +3411,7 @@ PP(pp_entereval)
     const char * const fakestr = "_<(eval )";
     const int fakelen = 9 + 1;
 
+    TAINT_IF(SvTAINTED(sv));
     TAINT_PROPER("eval");
 
     ENTER;
