@@ -344,7 +344,7 @@ filehandle to a file, use C<binmode> on the filehandle.
 
 An optional third parameter can be used to specify the buffer
 size used for copying. This is the number of bytes from the
-first file, that wil be held in memory at any given time, before
+first file, that will be held in memory at any given time, before
 being written to the second file. The default buffer size depends
 upon the file, but will generally be the whole file (up to 2Mb), or
 1k for filehandles that do not reference files (eg. sockets).
