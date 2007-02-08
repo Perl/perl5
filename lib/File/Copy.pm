@@ -24,7 +24,7 @@ sub mv;
 # package has not yet been updated to work with Perl 5.004, and so it
 # would be a Bad Thing for the CPAN module to grab it and replace this
 # module.  Therefore, we set this module's version higher than 2.0.
-$VERSION = '2.09';
+$VERSION = '2.10';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -55,6 +55,14 @@ sub _catname {
     return File::Spec->catfile($to, basename($from));
 }
 
+# _eq($from, $to) tells whether $from and $to are identical
+# works for strings and references
+sub _eq {
+    return $_[0] == $_[1] if ref $_[0] && ref $_[1];
+    return $_[0] eq $_[1] if !ref $_[0] && !ref $_[1];
+    return "";
+}
+
 sub copy {
     croak("Usage: copy(FROM, TO [, BUFFERSIZE]) ")
       unless(@_ == 2 || @_ == 3);
@@ -73,7 +81,7 @@ sub copy {
                             || UNIVERSAL::isa($to, 'IO::Handle'))
 			 : (ref(\$to) eq 'GLOB'));
 
-    if ($from eq $to) { # works for references, too
+    if (_eq($from, $to)) { # works for references, too
 	carp("'$from' and '$to' are identical (not copied)");
         # The "copy" was a success as the source and destination contain
         # the same data.
@@ -249,7 +257,8 @@ unless (defined &syscopy) {
 	    # preserve MPE file attributes.
 	    return system('/bin/cp', '-f', $_[0], $_[1]) == 0;
 	};
-    } elsif ($^O eq 'MSWin32') {
+    } elsif ($^O eq 'MSWin32' && defined &DynaLoader::boot_DynaLoader) {
+	# Win32::CopyFile() fill only work if we can load Win32.xs
 	*syscopy = sub {
 	    return 0 unless @_ == 2;
 	    return Win32::CopyFile(@_, 1);
@@ -305,7 +314,8 @@ one place to another.
 
 =over 4
 
-=item *
+=item copy
+X<copy> X<cp>
 
 The C<copy> function takes two
 parameters: a file to copy from and a file to copy to. Either
@@ -325,7 +335,7 @@ filehandle to a file, use C<binmode> on the filehandle.
 
 An optional third parameter can be used to specify the buffer
 size used for copying. This is the number of bytes from the
-first file, that wil be held in memory at any given time, before
+first file, that will be held in memory at any given time, before
 being written to the second file. The default buffer size depends
 upon the file, but will generally be the whole file (up to 2Mb), or
 1k for filehandles that do not reference files (eg. sockets).
@@ -333,7 +343,8 @@ upon the file, but will generally be the whole file (up to 2Mb), or
 You may use the syntax C<use File::Copy "cp"> to get at the
 "cp" alias for this function. The syntax is I<exactly> the same.
 
-=item *
+=item move
+X<move> X<mv> X<rename>
 
 The C<move> function also takes two parameters: the current name
 and the intended name of the file to be moved.  If the destination
@@ -349,7 +360,8 @@ copy of the file under the destination name.
 You may use the "mv" alias for this function in the same way that
 you may use the "cp" alias for C<copy>.
 
-=back
+=item syscopy
+X<syscopy>
 
 File::Copy also provides the C<syscopy> routine, which copies the
 file specified in the first parameter to the file specified in the
@@ -363,7 +375,7 @@ this calls C<Win32::CopyFile>.
 On Mac OS (Classic), C<syscopy> calls C<Mac::MoreFiles::FSpFileCopy>,
 if available.
 
-=head2 Special behaviour if C<syscopy> is defined (OS/2, VMS and Win32)
+B<Special behaviour if C<syscopy> is defined (OS/2, VMS and Win32)>
 
 If both arguments to C<copy> are not file handles,
 then C<copy> will perform a "system copy" of
@@ -378,9 +390,8 @@ The system copy routine may also be called directly under VMS and OS/2
 as C<File::Copy::syscopy> (or under VMS as C<File::Copy::rmscopy>, which
 is the routine that does the actual work for syscopy).
 
-=over 4
-
 =item rmscopy($from,$to[,$date_flag])
+X<rmscopy>
 
 The first and second arguments may be strings, typeglobs, typeglob
 references, or objects inheriting from IO::Handle;
@@ -439,13 +450,13 @@ E.g.
   copy("file1", "tmp");        # creates the file 'tmp' in the current directory
   copy("file1", ":tmp:");      # creates :tmp:file1
   copy("file1", ":tmp");       # same as above
-  copy("file1", "tmp");        # same as above, if 'tmp' is a directory (but don't do   
+  copy("file1", "tmp");        # same as above, if 'tmp' is a directory (but don't do
                                # that, since it may cause confusion, see example #1)
   copy("file1", "tmp:file1");  # error, since 'tmp:' is not a volume
   copy("file1", ":tmp:file1"); # ok, partial path
   copy("file1", "DataHD:");    # creates DataHD:file1
-  
-  move("MacintoshHD:fileA", "DataHD:fileB"); # moves (don't copies) files from one 
+
+  move("MacintoshHD:fileA", "DataHD:fileB"); # moves (don't copies) files from one
                                              # volume to another
 
 =back
