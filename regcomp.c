@@ -4182,20 +4182,6 @@ Perl_re_compile(pTHX_ char *exp, char *xend, PMOP *pm)
         if (has_runon)
             *p++='\n';
         *p=')';
-
-
-        if (0)
-            PerlIO_printf(Perl_debug_log,
-            "RExC_precomp: %.*s\nr->precomp: %.*s\nr->wrapped:%.*s\n",
-            r->prelen,
-            RExC_precomp,
-            r->prelen,
-            r->precomp,
-            r->wraplen,
-            r->wrapped
-        );
-
-
     }
 
     r->intflags = 0;
