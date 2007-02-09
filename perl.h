@@ -3409,6 +3409,10 @@ long vtohl(long n);
 #define U_I(what) ((unsigned int)U_32(what))
 #define U_L(what) U_32(what)
 
+#ifdef HAS_SIGNBIT
+#  define Perl_signbit signbit
+#endif
+
 /* These do not care about the fractional part, only about the range. */
 #define NV_WITHIN_IV(nv) (I_V(nv) >= IV_MIN && I_V(nv) <= IV_MAX)
 #define NV_WITHIN_UV(nv) ((nv)>=0.0 && U_V(nv) >= UV_MIN && U_V(nv) <= UV_MAX)

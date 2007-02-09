@@ -1937,6 +1937,11 @@ d_sigaction (d_sigaction.U):
 	This variable conditionally defines the HAS_SIGACTION symbol, which
 	indicates that the Vr4 sigaction() routine is available.
 
+d_signbit (d_signbit.U):
+	This variable conditionally defines the HAS_SIGNBIT symbol, which
+	indicates to the C program that the signbit() routine is available
+	and safe to use with perl's intern NV type.
+
 d_sigprocmask (d_sigprocmask.U):
 	This variable conditionally defines HAS_SIGPROCMASK
 	if sigprocmask() is available to examine or change the signal mask

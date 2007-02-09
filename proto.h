@@ -4593,6 +4593,11 @@ STATIC void	S_curmad(pTHX_ char slot, SV *sv);
 PERL_CALLCONV int	Perl_madlex(pTHX);
 PERL_CALLCONV int	Perl_madparse(pTHX);
 #endif
+#if !defined(HAS_SIGNBIT)
+PERL_CALLCONV int	Perl_signbit(NV f)
+			__attribute__pure__;
+
+#endif
 
 END_EXTERN_C
 /*

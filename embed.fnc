@@ -1831,6 +1831,9 @@ s	|void	|curmad		|char slot|NULLOK SV *sv
 Mp	|int	|madlex
 Mp	|int	|madparse
 #endif
+#if !defined(HAS_SIGNBIT)
+AMdnoP	|int	|Perl_signbit	|NV f
+#endif
 
 END_EXTERN_C
 /*

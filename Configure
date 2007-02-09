@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Jan  8 08:32:35 CET 2007 [metaconfig 3.0 PL70]
+# Generated on Sat Feb 10 17:48:04 CET 2007 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -700,6 +700,7 @@ d_shmctl=''
 d_shmdt=''
 d_shmget=''
 d_sigaction=''
+d_signbit=''
 d_sigprocmask=''
 d_sigsetjmp=''
 usesitecustomize=''
@@ -1262,29 +1263,10 @@ elif test -d c:/. -o -n "$is_os2" ; then
 fi
 
 i_whoami=''
-ccname=''
-ccversion=''
-perllibs=''
-: set useposix=false in your hint file to disable the POSIX extension.
-useposix=true
-: set useopcode=false in your hint file to disable the Opcode extension.
-useopcode=true
 : Trailing extension.  Override this in a hint file, if needed.
 : Extra object files, if any, needed on this platform.
 archobjs=''
 archname=''
-: Possible local include directories to search.
-: Set locincpth to "" in a hint file to defeat local include searches.
-locincpth="/usr/local/include /opt/local/include /usr/gnu/include"
-locincpth="$locincpth /opt/gnu/include /usr/GNU/include /opt/GNU/include"
-:
-: no include file wanted by default
-inclwanted=''
-
-: Enable -DEBUGGING and -DDEBUGGING from the command line
-EBUGGING=''
-DEBUGGING=old
-
 groupstype=''
 libnames=''
 : change the next line if compiling for Xenix/286 on Xenix/386
@@ -1312,17 +1294,36 @@ ignore_versioned_solibs=''
 siteman1dir=''
 siteman3dir=''
 sitescript=''
+: set usethreads on the Configure command line to enable threads.
+usereentrant='undef'
+: full support for void wanted by default
+defvoidused=15
+
+: Possible local include directories to search.
+: Set locincpth to "" in a hint file to defeat local include searches.
+locincpth="/usr/local/include /opt/local/include /usr/gnu/include"
+locincpth="$locincpth /opt/gnu/include /usr/GNU/include /opt/GNU/include"
+:
+: no include file wanted by default
+inclwanted=''
+
+: Enable -DEBUGGING and -DDEBUGGING from the command line
+EBUGGING=''
+DEBUGGING=old
+
+ccname=''
+ccversion=''
+perllibs=''
+: set useposix=false in your hint file to disable the POSIX extension.
+useposix=true
+: set useopcode=false in your hint file to disable the Opcode extension.
+useopcode=true
 archname64=''
 ccflags_uselargefiles=''
 ldflags_uselargefiles=''
 libswanted_uselargefiles=''
 : set usemultiplicity on the Configure command line to enable multiplicity.
 : set usesocks on the Configure command line to enable socks.
-: set usethreads on the Configure command line to enable threads.
-usereentrant='undef'
-: full support for void wanted by default
-defvoidused=15
-
 : List of libraries we want.
 : If anyone needs extra -lxxx, put those in a hint file.
 libswanted="sfio socket bind inet nsl nm ndbm gdbm dbm db malloc dl dld ld sun"
@@ -16964,6 +16965,51 @@ fi
 set d_sigaction; eval $setvar
 $rm -f try try$_o try.c
 
+: see if this is a sunmath.h system
+set sunmath.h i_sunmath
+eval $inhdr
+
+: see if signbit exists
+$echo $n "Checking to see if you have signbit() available to work on $nvtype... $c" >&4
+$cat >try.c <<EOCP
+#$i_math I_MATH
+#$i_sunmath I_SUNMATH
+#ifdef I_MATH
+#  include <math.h>
+#endif
+#ifdef I_SUNMATH  /* Solaris special math library */
+#  include <sunmath.h>
+#endif
+#define NV $nvtype
+int main(int argc, char **argv)
+{
+    NV x = 0.0;
+    NV y = -0.0;
+    if ((signbit(x) == 0) && (signbit(y) != 0))
+	return 0;
+    else
+	return 1;
+}
+EOCP
+val="$undef"
+set try
+if eval $compile; then
+    if $run ./try; then
+        $echo "Yes." >&4
+	val="$define"
+    else
+        $echo "Signbit seems to be available, but doesn't work as I expected."
+        $echo "I won't use it." >&4
+	val="$undef"
+    fi
+else
+    $echo "Nope." >&4
+    dflt="$undef"
+fi
+set d_signbit
+eval $setvar
+$rm -f try.* try
+
 : see if sigprocmask exists
 set sigprocmask d_sigprocmask
 eval $inlibc
@@ -20851,10 +20897,6 @@ val=$val3; set i_termios; eval $setvar
 set stddef.h i_stddef
 eval $inhdr
 
-: see if this is a sunmath.h system
-set sunmath.h i_sunmath
-eval $inhdr
-
 : see if sys/access.h is available
 set sys/access.h i_sysaccess
 eval $inhdr
@@ -21846,6 +21888,7 @@ d_shmctl='$d_shmctl'
 d_shmdt='$d_shmdt'
 d_shmget='$d_shmget'
 d_sigaction='$d_sigaction'
+d_signbit='$d_signbit'
 d_sigprocmask='$d_sigprocmask'
 d_sigsetjmp='$d_sigsetjmp'
 d_sitearch='$d_sitearch'
