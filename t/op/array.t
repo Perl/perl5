@@ -7,7 +7,7 @@ BEGIN {
 
 require 'test.pl';
 
-plan (99);
+plan (107);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -328,5 +328,34 @@ sub test_arylen {
     is("$x $y $z", "1 1 2");
 }
 
+{
+    # I don't think that it's safe to fix bug #37350 in maint
+    my @array = (1..4);
+    $#{@array} = 7;
+    is ($#{4}, -1);
+    is ($#array, 7);
+
+    my $x;
+    $#{$x} = 3;
+    is(scalar @$x, 4);
+
+    push @{@array}, 23;
+    is ($array[8], 23);
+}
+{
+    # Bug #37350 -- once more with a global
+    use vars '@array';
+    @array = (1..4);
+    $#{@array} = 7;
+    is ($#{4}, -1);
+    is ($#array, 7);
+
+    my $x;
+    $#{$x} = 3;
+    is(scalar @$x, 4);
+
+    push @{@array}, 23;
+    is ($array[8], 23);
+}
 
 "We're included by lib/Tie/Array/std.t so we need to return something true";
