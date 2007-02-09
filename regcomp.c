@@ -5609,7 +5609,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    if (!SIZE_ONLY ){
 	        if (!RExC_nestroot) 
 	            RExC_nestroot = parno;
-	        if (RExC_seen & REG_SEEN_RECURSE) {
+	        if (RExC_seen & REG_SEEN_RECURSE
+	            && !RExC_open_parens[parno-1])
+	        {
 		    DEBUG_OPTIMISE_MORE_r(PerlIO_printf(Perl_debug_log,
 			"Setting open paren #%"IVdf" to %d\n", 
 			(IV)parno, REG_NODE_NUM(ret)));
