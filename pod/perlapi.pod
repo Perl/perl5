@@ -768,7 +768,7 @@ len > cur and pv[cur] is "\0".
 
 Note that the final string may be up to 7 chars longer than pvlim.
 
-	char*	pv_display(SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
+	char*	pv_display(SV *dsv, char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
 
 =for hackers
 Found in file dump.c
@@ -873,7 +873,7 @@ X<pack_cat>
 The engine implementing pack() Perl function. Note: parameters next_in_list and
 flags are not used. This call should not be used; use packlist instead.
 
-	void	pack_cat(SV *cat, const char *pat, const char *patend, SV **beglist, SV **endlist, SV ***next_in_list, U32 flags)
+	void	pack_cat(SV *cat, char *pat, char *patend, SV **beglist, SV **endlist, SV ***next_in_list, U32 flags)
 
 =for hackers
 Found in file mathoms.c
@@ -1239,6 +1239,19 @@ Return the SV from the GV.
 
 =for hackers
 Found in file gv.h
+
+=item gv_const_sv
+X<gv_const_sv>
+
+If C<gv> is a typeglob whose subroutine entry is a constant sub eligible for
+inlining, or C<gv> is a placeholder reference that would be promoted to such
+a typeglob, then returns the value returned by the sub.  Otherwise, returns
+NULL.
+
+	SV*	gv_const_sv(GV* gv)
+
+=for hackers
+Found in file gv.c
 
 =item gv_fetchmeth
 X<gv_fetchmeth>
@@ -2133,6 +2146,16 @@ X<Poison>
 PoisonWith(0xEF) for catching access to freed memory.
 
 	void	Poison(void* dest, int nitems, type)
+
+=for hackers
+Found in file handy.h
+
+=item PoisonFree
+X<PoisonFree>
+
+PoisonWith(0xEF) for catching access to freed memory.
+
+	void	PoisonFree(void* dest, int nitems, type)
 
 =for hackers
 Found in file handy.h
@@ -4299,7 +4322,7 @@ X<SvSTASH_set>
 
 Set the value of the STASH pointer in sv to val.  See C<SvIV_set>.
 
-	void	SvSTASH_set(SV* sv, STASH* val)
+	void	SvSTASH_set(SV* sv, HV* val)
 
 =for hackers
 Found in file sv.h
@@ -4396,6 +4419,8 @@ Found in file sv.h
 X<SvUTF8>
 
 Returns a boolean indicating whether the SV contains UTF-8 encoded data.
+Call this after SvPV() in case any call to string overloading updates the
+internal flag.
 
 	bool	SvUTF8(SV* sv)
 

@@ -162,47 +162,47 @@ PERL_CALLCONV void	Perl_vcroak(pTHX_ const char* pat, va_list* args)
 #if defined(PERL_IMPLICIT_CONTEXT)
 PERL_CALLCONV void	Perl_croak_nocontext(const char* pat, ...)
 			__attribute__noreturn__
-			__attribute__format__(__printf__,1,2);
+			__attribute__format__null_ok__(__printf__,1,2);
 
 PERL_CALLCONV OP*	Perl_die_nocontext(const char* pat, ...)
-			__attribute__format__(__printf__,1,2);
+			__attribute__format__null_ok__(__printf__,1,2);
 
 PERL_CALLCONV void	Perl_deb_nocontext(const char* pat, ...)
-			__attribute__format__(__printf__,1,2);
+			__attribute__format__null_ok__(__printf__,1,2);
 
 PERL_CALLCONV char*	Perl_form_nocontext(const char* pat, ...)
-			__attribute__format__(__printf__,1,2);
+			__attribute__format__null_ok__(__printf__,1,2);
 
 PERL_CALLCONV void	Perl_load_module_nocontext(U32 flags, SV* name, SV* ver, ...);
 PERL_CALLCONV SV*	Perl_mess_nocontext(const char* pat, ...)
-			__attribute__format__(__printf__,1,2);
+			__attribute__format__null_ok__(__printf__,1,2);
 
 PERL_CALLCONV void	Perl_warn_nocontext(const char* pat, ...)
-			__attribute__format__(__printf__,1,2);
+			__attribute__format__null_ok__(__printf__,1,2);
 
 PERL_CALLCONV void	Perl_warner_nocontext(U32 err, const char* pat, ...)
-			__attribute__format__(__printf__,2,3);
+			__attribute__format__null_ok__(__printf__,2,3);
 
 PERL_CALLCONV SV*	Perl_newSVpvf_nocontext(const char* pat, ...)
-			__attribute__format__(__printf__,1,2);
+			__attribute__format__null_ok__(__printf__,1,2);
 
 PERL_CALLCONV void	Perl_sv_catpvf_nocontext(SV* sv, const char* pat, ...)
-			__attribute__format__(__printf__,2,3);
+			__attribute__format__null_ok__(__printf__,2,3);
 
 PERL_CALLCONV void	Perl_sv_setpvf_nocontext(SV* sv, const char* pat, ...)
-			__attribute__format__(__printf__,2,3);
+			__attribute__format__null_ok__(__printf__,2,3);
 
 PERL_CALLCONV void	Perl_sv_catpvf_mg_nocontext(SV* sv, const char* pat, ...)
-			__attribute__format__(__printf__,2,3);
+			__attribute__format__null_ok__(__printf__,2,3);
 
 PERL_CALLCONV void	Perl_sv_setpvf_mg_nocontext(SV* sv, const char* pat, ...)
-			__attribute__format__(__printf__,2,3);
+			__attribute__format__null_ok__(__printf__,2,3);
 
 PERL_CALLCONV int	Perl_fprintf_nocontext(PerlIO* stream, const char* fmt, ...)
-			__attribute__format__(__printf__,2,3);
+			__attribute__format__null_ok__(__printf__,2,3);
 
 PERL_CALLCONV int	Perl_printf_nocontext(const char* fmt, ...)
-			__attribute__format__(__printf__,1,2);
+			__attribute__format__null_ok__(__printf__,1,2);
 
 #endif
 PERL_CALLCONV void	Perl_cv_ckproto(pTHX_ CV* cv, GV* gv, char* p);
@@ -248,7 +248,7 @@ PERL_CALLCONV I32	Perl_cxinc(pTHX)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV void	Perl_deb(pTHX_ const char* pat, ...)
-			__attribute__format__(__printf__,pTHX_1,pTHX_2);
+			__attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
 
 PERL_CALLCONV void	Perl_vdeb(pTHX_ const char* pat, va_list* args);
 PERL_CALLCONV void	Perl_debprofdump(pTHX);
@@ -346,7 +346,7 @@ PERL_CALLCONV PADOFFSET	Perl_find_threadsv(pTHX_ const char *name);
 PERL_CALLCONV OP*	Perl_force_list(pTHX_ OP* arg);
 PERL_CALLCONV OP*	Perl_fold_constants(pTHX_ OP* arg);
 PERL_CALLCONV char*	Perl_form(pTHX_ const char* pat, ...)
-			__attribute__format__(__printf__,pTHX_1,pTHX_2);
+			__attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
 
 PERL_CALLCONV char*	Perl_vform(pTHX_ const char* pat, va_list* args);
 PERL_CALLCONV void	Perl_free_tmps(pTHX);
@@ -355,7 +355,6 @@ PERL_CALLCONV OP*	Perl_gen_constant_list(pTHX_ OP* o);
 PERL_CALLCONV char*	Perl_getenv_len(pTHX_ const char* key, unsigned long *len);
 #endif
 PERL_CALLCONV void	Perl_get_db_sub(pTHX_ SV **svp, CV *cv);
-
 PERL_CALLCONV void	Perl_gp_free(pTHX_ GV* gv);
 PERL_CALLCONV GP*	Perl_gp_ref(pTHX_ GP* gp);
 PERL_CALLCONV GV*	Perl_gv_AVadd(pTHX_ GV* gv);
@@ -716,7 +715,7 @@ PERL_CALLCONV void	Perl_markstack_grow(pTHX);
 PERL_CALLCONV char*	Perl_mem_collxfrm(pTHX_ const char* s, STRLEN len, STRLEN* xlen);
 #endif
 PERL_CALLCONV SV*	Perl_mess(pTHX_ const char* pat, ...)
-			__attribute__format__(__printf__,pTHX_1,pTHX_2);
+			__attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
 
 PERL_CALLCONV SV*	Perl_vmess(pTHX_ const char* pat, va_list* args);
 PERL_CALLCONV void	Perl_qerror(pTHX_ SV* err);
@@ -954,7 +953,7 @@ PERL_CALLCONV SV*	Perl_newSVpvn_share(pTHX_ const char* s, I32 len, U32 hash)
 PERL_CALLCONV SV*	Perl_newSVpvf(pTHX_ const char* pat, ...)
 			__attribute__malloc__
 			__attribute__warn_unused_result__
-			__attribute__format__(__printf__,pTHX_1,pTHX_2);
+			__attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
 
 PERL_CALLCONV SV*	Perl_vnewSVpvf(pTHX_ const char* pat, va_list* args)
 			__attribute__malloc__
@@ -1186,7 +1185,7 @@ PERL_CALLCONV void	Perl_sv_add_arena(pTHX_ char* ptr, U32 size, U32 flags);
 PERL_CALLCONV int	Perl_sv_backoff(pTHX_ SV* sv);
 PERL_CALLCONV SV*	Perl_sv_bless(pTHX_ SV* sv, HV* stash);
 PERL_CALLCONV void	Perl_sv_catpvf(pTHX_ SV* sv, const char* pat, ...)
-			__attribute__format__(__printf__,pTHX_2,pTHX_3);
+			__attribute__format__null_ok__(__printf__,pTHX_2,pTHX_3);
 
 PERL_CALLCONV void	Perl_sv_vcatpvf(pTHX_ SV* sv, const char* pat, va_list* args);
 PERL_CALLCONV void	Perl_sv_catpv(pTHX_ SV* sv, const char* ptr);
@@ -1244,7 +1243,7 @@ PERL_CALLCONV void	Perl_sv_replace(pTHX_ SV* sv, SV* nsv);
 PERL_CALLCONV void	Perl_sv_report_used(pTHX);
 PERL_CALLCONV void	Perl_sv_reset(pTHX_ char* s, HV* stash);
 PERL_CALLCONV void	Perl_sv_setpvf(pTHX_ SV* sv, const char* pat, ...)
-			__attribute__format__(__printf__,pTHX_2,pTHX_3);
+			__attribute__format__null_ok__(__printf__,pTHX_2,pTHX_3);
 
 PERL_CALLCONV void	Perl_sv_vsetpvf(pTHX_ SV* sv, const char* pat, va_list* args);
 PERL_CALLCONV void	Perl_sv_setiv(pTHX_ SV* sv, IV num);
@@ -1347,11 +1346,11 @@ PERL_CALLCONV UV	Perl_get_hash_seed(pTHX)
 PERL_CALLCONV void	Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op);
 PERL_CALLCONV void	Perl_report_uninit(pTHX);
 PERL_CALLCONV void	Perl_warn(pTHX_ const char* pat, ...)
-			__attribute__format__(__printf__,pTHX_1,pTHX_2);
+			__attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
 
 PERL_CALLCONV void	Perl_vwarn(pTHX_ const char* pat, va_list* args);
 PERL_CALLCONV void	Perl_warner(pTHX_ U32 err, const char* pat, ...)
-			__attribute__format__(__printf__,pTHX_2,pTHX_3);
+			__attribute__format__null_ok__(__printf__,pTHX_2,pTHX_3);
 
 PERL_CALLCONV void	Perl_vwarner(pTHX_ U32 err, const char* pat, va_list* args);
 PERL_CALLCONV void	Perl_watch(pTHX_ char** addr);
@@ -1390,14 +1389,14 @@ PERL_CALLCONV int	Perl_runops_debug(pTHX);
 PERL_CALLCONV SV*	Perl_sv_lock(pTHX_ SV *sv);
 #endif
 PERL_CALLCONV void	Perl_sv_catpvf_mg(pTHX_ SV *sv, const char* pat, ...)
-			__attribute__format__(__printf__,pTHX_2,pTHX_3);
+			__attribute__format__null_ok__(__printf__,pTHX_2,pTHX_3);
 
 PERL_CALLCONV void	Perl_sv_vcatpvf_mg(pTHX_ SV* sv, const char* pat, va_list* args);
 PERL_CALLCONV void	Perl_sv_catpv_mg(pTHX_ SV *sv, const char *ptr);
 /* PERL_CALLCONV void	Perl_sv_catpvn_mg(pTHX_ SV *sv, const char *ptr, STRLEN len); */
 /* PERL_CALLCONV void	Perl_sv_catsv_mg(pTHX_ SV *dstr, SV *sstr); */
 PERL_CALLCONV void	Perl_sv_setpvf_mg(pTHX_ SV *sv, const char* pat, ...)
-			__attribute__format__(__printf__,pTHX_2,pTHX_3);
+			__attribute__format__null_ok__(__printf__,pTHX_2,pTHX_3);
 
 PERL_CALLCONV void	Perl_sv_vsetpvf_mg(pTHX_ SV* sv, const char* pat, va_list* args);
 PERL_CALLCONV void	Perl_sv_setiv_mg(pTHX_ SV *sv, IV i);
@@ -1415,7 +1414,7 @@ PERL_CALLCONV char*	Perl_pv_display(pTHX_ SV *dsv, char *pv, STRLEN cur, STRLEN 
 PERL_CALLCONV char*	Perl_pv_escape(pTHX_ SV *dsv, char const * const str, const STRLEN count, const STRLEN max, STRLEN * const escaped, const U32 flags);
 PERL_CALLCONV char*	Perl_pv_pretty(pTHX_ SV *dsv, char const * const str, const STRLEN count, const STRLEN max, char const * const start_color, char const * const end_color, const U32 flags);
 PERL_CALLCONV void	Perl_dump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
-			__attribute__format__(__printf__,pTHX_3,pTHX_4);
+			__attribute__format__null_ok__(__printf__,pTHX_3,pTHX_4);
 
 PERL_CALLCONV void	Perl_dump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args);
 PERL_CALLCONV void	Perl_do_gv_dump(pTHX_ I32 level, PerlIO *file, char *name, GV *sv);
@@ -2400,7 +2399,7 @@ PERL_CALLCONV int	Perl_my_sprintf(char *buffer, const char *pat, ...);
 #endif
 
 PERL_CALLCONV int	Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
-			__attribute__format__(__printf__,3,4);
+			__attribute__format__null_ok__(__printf__,3,4);
 
 PERL_CALLCONV int	Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap);
 
