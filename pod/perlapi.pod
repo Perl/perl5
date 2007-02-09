@@ -1388,7 +1388,7 @@ Found in file gv.c
 X<gv_stashpv>
 
 Returns a pointer to the stash for a specified package.  Uses C<strlen> to
-determine the length of C<name, then calls C<gv_stashpvn()>.
+determine the length of C<name>, then calls C<gv_stashpvn()>.
 
 	HV*	gv_stashpv(const char* name, I32 flags)
 

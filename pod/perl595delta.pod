@@ -127,8 +127,6 @@ safer form of back-reference notation as well as allowing relative
 backreferences. This should make it easier to generate and embed patterns
 that contain backreferences. (Yves Orton)
 
-=back
-
 =item Regexp::Keep internalized
 
 The functionality of Jeff Pinyan's module Regexp::Keep has been added to
@@ -143,6 +141,8 @@ that can now be converted to
   s/foo\Kbar//g
 
 which is much more efficient.
+
+=back
 
 =head2 The C<_> prototype
 

@@ -716,7 +716,7 @@ S_require_tie_mod(pTHX_ GV *gv, const char *varpv, SV* namesv, const char *methp
 =for apidoc gv_stashpv
 
 Returns a pointer to the stash for a specified package.  Uses C<strlen> to
-determine the length of C<name, then calls C<gv_stashpvn()>.
+determine the length of C<name>, then calls C<gv_stashpvn()>.
 
 =cut
 */
