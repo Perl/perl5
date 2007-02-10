@@ -2312,6 +2312,7 @@ os2/perlrexx.c			Support perl interpreter embedded in REXX
 os2/perlrexx.cmd		Test perl interpreter embedded in REXX
 overload.h			generated overload enum and name table
 overload.pl			generate overload.h
+uupacktool.pl			Pack/unpack files to the .packed format
 pad.c				Scratchpad functions
 pad.h				Scratchpad headers
 patchlevel.h			The current patch level of perl
@@ -3122,7 +3123,7 @@ win32/include/netdb.h		Win32 port
 win32/include/sys/socket.h	Win32 port
 win32/Makefile			Win32 makefile for NMAKE (Visual C++ build)
 win32/makefile.mk		Win32 makefile for DMAKE (BC++, VC++ builds)
-win32/makeico.pl		script to create perlexe.ico image file
+win32/perlexe.ico.packd		uupacktool.pl packed perlexe.ico image file, 'packd' ext is deliberate!
 win32/mdelete.bat		multifile delete
 win32/perlexe.rc		associated perl binary with icon
 win32/perlglob.c		Win32 port

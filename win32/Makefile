@@ -1020,8 +1020,8 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 <<
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 
-$(PERLEXE_ICO): $(MINIPERL) makeico.pl
-	$(MINIPERL) makeico.pl > $@
+$(PERLEXE_ICO): $(MINIPERL) ..\uupacktool.pl $(PERLEXE_ICO).packd
+	$(MINIPERL) -I..\lib ..\uupacktool.pl -u $(PERLEXE_ICO).packd $(PERLEXE_ICO)
 
 $(PERLEXE_RES): perlexe.rc $(PERLEXE_ICO)
 
@@ -1280,7 +1280,7 @@ minitest : $(MINIPERL) $(GLOBEXE) $(CONFIGPM) utils $(UNIDATAFILES)
 	cd ..\t && \
 	$(MINIPERL) -I..\lib harness base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t
 
-test-prep : all utils
+test-prep : all utils unpack_files
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
 	$(XCOPY) $(PERLDLL) ..\t\$(NULL)
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
@@ -1289,6 +1289,12 @@ test : test-prep
 	cd ..\t
 	$(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
 	cd ..\win32
+
+unpack_files:
+	$(MINIPERL) -I..\lib ..\uupacktool.pl -u -d .. -m
+
+cleanup_unpacked_files:
+	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\uupacktool.pl -c -d .. -m
 
 test-notty : test-prep
 	set PERL_SKIP_TTY_TEST=1
@@ -1330,9 +1336,11 @@ _clean :
 	-@$(DEL) *.pdb
 	-@$(DEL) Extensions_static
 
-clean : Extensions_clean _clean
+_preclean : cleanup_unpacked_files
 
-realclean : Extensions_realclean MakePPPort_clean _clean
+clean : _preclean Extensions_clean _clean
+
+realclean : _preclean Extensions_realclean MakePPPort_clean _clean
 
 # Handy way to run perlbug -ok without having to install and run the
 # installed perlbug. We don't re-run the tests here - we trust the user.
