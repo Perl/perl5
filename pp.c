@@ -251,17 +251,17 @@ Perl_softref2xv(pTHX_ SV *const sv, const char *const what, const U32 type,
     if ((PL_op->op_flags & OPf_SPECIAL) &&
 	!(PL_op->op_flags & OPf_MOD))
 	{
-	    gv = (GV*)gv_fetchsv(sv, 0, type);
+	    gv = gv_fetchsv(sv, 0, type);
 	    if (!gv
 		&& (!is_gv_magical_sv(sv,0)
-		    || !(gv = (GV*)gv_fetchsv(sv, GV_ADD, type))))
+		    || !(gv = gv_fetchsv(sv, GV_ADD, type))))
 		{
 		    **spp = &PL_sv_undef;
 		    return NULL;
 		}
 	}
     else {
-	gv = (GV*)gv_fetchsv(sv, GV_ADD, type);
+	gv = gv_fetchsv(sv, GV_ADD, type);
     }
     return gv;
 }
