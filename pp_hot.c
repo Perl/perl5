@@ -1172,7 +1172,8 @@ PP(pp_qr)
     if (pm->op_pmdynflags & PMdf_TAINTED)
         SvTAINTED_on(rv);
     sv_magic(sv,(SV*)ReREFCNT_inc(PM_GETRE(pm)), PERL_MAGIC_qr,0,0);
-    RETURNX(PUSHs(rv));
+    XPUSHs(rv);
+    RETURN;
 }
 
 PP(pp_match)
