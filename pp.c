@@ -219,6 +219,45 @@ PP(pp_rv2gv)
     RETURN;
 }
 
+/* Helper function for pp_rv2sv and pp_rv2av  */
+GV *
+Perl_softref2xv(pTHX_ SV *const sv, const char *const what, const U32 type,
+		SV ***spp)
+{
+    GV *gv;
+
+    if (!SvOK(sv)) {
+	if (PL_op->op_flags & OPf_REF || PL_op->op_private & HINT_STRICT_REFS)
+	    Perl_die(aTHX_ PL_no_usym, what);
+	if (ckWARN(WARN_UNINITIALIZED))
+	    report_uninit();
+	if (type != SVt_PV && GIMME_V == G_ARRAY) {
+	    (*spp)--;
+	    return NULL;
+	}
+	**spp = &PL_sv_undef;
+	return NULL;
+    }
+    if ((PL_op->op_flags & OPf_SPECIAL) &&
+	!(PL_op->op_flags & OPf_MOD))
+	{
+	    gv = gv_fetchsv(sv, 0, type);
+	    if (!gv
+		&& (!is_gv_magical_sv(sv,0)
+		    || !(gv = gv_fetchsv(sv, GV_ADD, type))))
+		{
+		    **spp = &PL_sv_undef;
+		    return NULL;
+		}
+	}
+    else {
+	if (PL_op->op_private & HINT_STRICT_REFS)
+	    Perl_die(aTHX_ PL_no_symref_sv, sv, what);
+	gv = gv_fetchsv(sv, GV_ADD, type);
+    }
+    return gv;
+}
+
 PP(pp_rv2sv)
 {
     GV *gv = NULL;
@@ -246,30 +285,9 @@ PP(pp_rv2sv)
 		if (SvROK(sv))
 		    goto wasref;
 	    }
-	    if (!SvOK(sv)) {
-		if (PL_op->op_flags & OPf_REF ||
-		    PL_op->op_private & HINT_STRICT_REFS)
-		    DIE(aTHX_ PL_no_usym, "a SCALAR");
-		if (ckWARN(WARN_UNINITIALIZED))
-		    report_uninit();
-		RETSETUNDEF;
-	    }
-	    if ((PL_op->op_flags & OPf_SPECIAL) &&
-		!(PL_op->op_flags & OPf_MOD))
-	    {
-		gv = (GV*)gv_fetchsv(sv, 0, SVt_PV);
-		if (!gv
-		    && (!is_gv_magical_sv(sv, 0)
-			|| !(gv = (GV*)gv_fetchsv(sv, GV_ADD, SVt_PV))))
-		{
-		    RETSETUNDEF;
-		}
-	    }
-	    else {
-		if (PL_op->op_private & HINT_STRICT_REFS)
-		    DIE(aTHX_ PL_no_symref_sv, sv, "a SCALAR");
-		gv = (GV*)gv_fetchsv(sv, GV_ADD, SVt_PV);
-	    }
+	    gv = Perl_softref2xv(aTHX_ sv, "a SCALAR", SVt_PV, &sp);
+	    if (!gv)
+		RETURN;
 	}
 	sv = GvSVn(gv);
     }

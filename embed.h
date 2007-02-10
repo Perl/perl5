@@ -1183,6 +1183,8 @@
 #define refto			S_refto
 #endif
 #endif
+#if defined(PERL_IN_PP_C) || defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
+#endif
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define unpack_rec		S_unpack_rec
@@ -3278,6 +3280,10 @@
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define refto(a)		S_refto(aTHX_ a)
+#endif
+#endif
+#if defined(PERL_IN_PP_C) || defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
 #endif
 #endif
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
