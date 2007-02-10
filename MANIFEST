@@ -153,7 +153,6 @@ ext/ByteLoader/Makefile.PL	Bytecode loader makefile writer
 ext/Cwd/Changes			Cwd extension Changelog
 ext/Cwd/Cwd.xs			Cwd extension external subroutines
 ext/Cwd/Makefile.PL		Cwd extension makefile maker
-ext/Cwd/ppport.h		portability header for Cwd
 ext/Cwd/t/cwd.t			See if Cwd works
 ext/Cwd/t/taint.t		See if Cwd works with taint
 ext/Cwd/t/win32.t		See if Cwd works on Win32
@@ -976,7 +975,6 @@ ext/Time/HiRes/hints/svr4.pl	Hints for Time::HiRes for named architecture
 ext/Time/HiRes/HiRes.pm		Time::HiRes extension
 ext/Time/HiRes/HiRes.xs		Time::HiRes extension
 ext/Time/HiRes/Makefile.PL	Time::HiRes extension
-ext/Time/HiRes/ppport.h		portability header for Time::HiRes
 ext/Time/HiRes/t/HiRes.t	Test for Time::HiRes
 ext/Time/HiRes/typemap		Time::HiRes extension
 ext/Unicode/Normalize/Changes	Unicode::Normalize
@@ -2186,6 +2184,8 @@ mint/README			MiNT port
 mint/stdio.h			MiNT port
 mint/sys/time.h			MiNT port
 mint/time.h			MiNT port
+mkppport			A script that distributes ppport.h
+mkppport.lst			List of extensions that need a ppport.h
 mpeix/mpeix.c			MPE/iX port
 mpeix/mpeixish.h		MPE/iX port
 mpeix/mpeix_setjmp.c		MPE/iX port
@@ -3109,7 +3109,6 @@ win32/ext/Win32API/File/ExtUtils/Myconst2perl.pm	Win32API::File extension
 win32/ext/Win32API/File/File.pm				Win32API::File extension
 win32/ext/Win32API/File/File.xs				Win32API::File extension
 win32/ext/Win32API/File/Makefile.PL			Win32API::File extension makefile write
-win32/ext/Win32API/File/ppport.h			Win32API::File extension
 win32/ext/Win32API/File/README				Win32API::File extension Readme
 win32/ext/Win32API/File/t/file.t			See if Win32API::File extension works
 win32/ext/Win32API/File/t/tie.t				See if Win32API::File extension works

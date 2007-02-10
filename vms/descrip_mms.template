@@ -526,7 +526,7 @@ unidatafiles.ts : $(MINIPERL_EXE) [.lib]Config.pm [.lib.unicore]mktables
 	$(MINIPERL) $(MMS$SOURCE)
 	@ Rename/Log XSLoader.pm [.ext.DynaLoader]
 
-dynext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary
+dynext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary makeppport
        @make_ext "$(MINIPERL_EXE)" "$(MMS)"
 
 [.lib]lib.pm : [.lib]lib_pm.PL
@@ -673,6 +673,9 @@ preplibrary : $(MINIPERL_EXE) $(LIBPREREQ)
 	@ Write Sys$Output "Autosplitting Perl library . . ."
 	@ Create/Directory [.lib.auto]
 	@ $(MINIPERL) -e "use AutoSplit; autosplit_lib_modules(@ARGV)" [.lib]*.pm [.lib.*]*.pm [.lib.*.*]*.pm
+
+makeppport : $(MINIPERL_EXE) $(ARCHDIR)Config.pm
+	$(MINIPERL) mkppport
 
 [.lib.pods]perl.pod : [.pod]perl.pod
 	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
@@ -1721,6 +1724,7 @@ clean : tidy cleantest
 
 realclean : clean
 	- @make_ext "$(MINIPERL_EXE)" "$(MMS)" realclean
+	- $(MINIPERL) mkppport "--clean"
 	- If F$Search("*$(OLB)").nes."" Then Delete/NoConfirm/Log *$(OLB);*
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*
 	- If F$Search("config.h").nes."" Then Delete/NoConfirm/Log config.h;*
