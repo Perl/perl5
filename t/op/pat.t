@@ -4299,6 +4299,22 @@ sub kt
     }
 }
 
+{
+    my $res="";
+
+    if ('1' =~ /(?|(?<digit>1)|(?<digit>2))/) {
+      $res = "@{$- {digit}}";
+    }
+    iseq($res,"1",
+        "Check that (?|...) doesnt cause dupe entries in the names array");
+    #---
+    $res="";
+    if ('11' =~ /(?|(?<digit>1)|(?<digit>2))(?&digit)/) {
+      $res = "@{$- {digit}}";
+    }
+    iseq($res, "1",
+        "Check that (?&..) to a buffer inside a (?|...) goes to the leftmost");
+}
 
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
@@ -4349,7 +4365,7 @@ ok($@=~/\QSequence \k... not terminated in regex;\E/);
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 1636;
+    $::TestCount = 1638;
     print "1..$::TestCount\n";
 }
 

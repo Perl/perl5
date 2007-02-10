@@ -5168,11 +5168,26 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                             Perl_croak(aTHX_
                                 "panic: paren_name hash element allocation failed");
                         } else if ( SvPOK(sv_dat) ) {
-                            IV count=SvIV(sv_dat);
-                            I32 *pv=(I32*)SvGROW(sv_dat,SvCUR(sv_dat)+sizeof(I32)+1);
-                            SvCUR_set(sv_dat,SvCUR(sv_dat)+sizeof(I32));
-                            pv[count]=RExC_npar;
-                            SvIVX(sv_dat)++;
+                            /* (?|...) can mean we have dupes so scan to check
+                               its already been stored. Maybe a flag indicating
+                               we are inside such a construct would be useful,
+                               but the arrays are likely to be quite small, so
+                               for now we punt -- dmq */
+                            IV count = SvIV(sv_dat);
+                            I32 *pv = (I32*)SvPVX(sv_dat);
+                            IV i;
+                            for ( i = 0 ; i < count ; i++ ) {
+                                if ( pv[i] == RExC_npar ) {
+                                    count = 0;
+                                    break;
+                                }
+                            }
+                            if ( count ) {
+                                pv = (I32*)SvGROW(sv_dat, SvCUR(sv_dat) + sizeof(I32)+1);
+                                SvCUR_set(sv_dat, SvCUR(sv_dat) + sizeof(I32));
+                                pv[count] = RExC_npar;
+                                SvIVX(sv_dat)++;
+                            }
                         } else {
                             (void)SvUPGRADE(sv_dat,SVt_PVNV);
                             sv_setpvn(sv_dat, (char *)&(RExC_npar), sizeof(I32));
