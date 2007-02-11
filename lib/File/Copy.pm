@@ -346,7 +346,7 @@ An optional third parameter can be used to specify the buffer
 size used for copying. This is the number of bytes from the
 first file, that will be held in memory at any given time, before
 being written to the second file. The default buffer size depends
-upon the file, but will generally be the whole file (up to 2Mb), or
+upon the file, but will generally be the whole file (up to 2MB), or
 1k for filehandles that do not reference files (eg. sockets).
 
 You may use the syntax C<use File::Copy "cp"> to get at the
@@ -384,7 +384,7 @@ this calls C<Win32::CopyFile>.
 On Mac OS (Classic), C<syscopy> calls C<Mac::MoreFiles::FSpFileCopy>,
 if available.
 
-B<Special behaviour if C<syscopy> is defined (OS/2, VMS and Win32)>
+B<Special behaviour if C<syscopy> is defined (OS/2, VMS and Win32)>:
 
 If both arguments to C<copy> are not file handles,
 then C<copy> will perform a "system copy" of
