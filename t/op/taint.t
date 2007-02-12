@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 252;
+plan tests => 255;
 
 $| = 1;
 
@@ -1183,4 +1183,26 @@ TERNARY_CONDITIONALS: {
 
     eval 'eval $tainted';
     like ($@, qr/^Insecure dependency in eval/);
+}
+
+SKIP:
+{
+    my $got_dualvar;
+    eval 'use Scalar::Util "dualvar"; $got_dualvar++';
+    skip "No Scalar::Util::dualvar" unless $got_dualvar;
+    my $a = Scalar::Util::dualvar(3, $^X);
+    my $b = $a + 5;
+    is ($b, 8, "Arithmetic on tainted dualvars works");
+}
+
+{
+    # 40708
+    my $n  = 7e9;
+    8e9 - $n;
+
+    my $val = $n;
+    is ($val, '7000000000', 'Assignment to untainted variable');
+    $val = $TAINT;
+    $val = $n;
+    is ($val, '7000000000', 'Assignment to tainted variable');
 }

@@ -2252,7 +2252,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	mg_get(sv);
 	if (SvNOKp(sv))
 	    return SvNVX(sv);
-	if (SvPOKp(sv) && SvLEN(sv)) {
+	if ((SvPOKp(sv) && SvLEN(sv)) && !SvIOKp(sv)) {
 	    if (!SvIOKp(sv) && ckWARN(WARN_NUMERIC) &&
 		!grok_number(SvPVX_const(sv), SvCUR(sv), NULL))
 		not_a_number(sv);
@@ -4284,7 +4284,7 @@ Perl_sv_unmagic(pTHX_ SV *sv, int type)
     }
     if (!SvMAGIC(sv)) {
 	SvMAGICAL_off(sv);
-       SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_NOK|SVp_POK)) >> PRIVSHIFT;
+	SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
     }
 
     return 0;
