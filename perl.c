@@ -5116,7 +5116,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 {
     dVAR;
     SV *atsv;
-    const line_t oldline = CopLINE(PL_curcop);
+    const line_t oldline = PL_curcop ? CopLINE(PL_curcop) : 0;
     CV *cv;
     STRLEN len;
     int ret;
