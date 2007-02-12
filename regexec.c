@@ -122,8 +122,11 @@
 /* TODO: Combine JUMPABLE and HAS_TEXT to cache OP(rn) */
 
 /* for use after a quantifier and before an EXACT-like node -- japhy */
-#define JUMPABLE(rn) ( \
-    OP(rn) == OPEN || OP(rn) == CLOSE || OP(rn) == EVAL || \
+/* it would be nice to rework regcomp.sym to generate this stuff. sigh */
+#define JUMPABLE(rn) (      \
+    OP(rn) == OPEN ||       \
+    (OP(rn) == CLOSE && (!cur_eval || cur_eval->u.eval.close_paren != ARG(rn))) || \
+    OP(rn) == EVAL ||   \
     OP(rn) == SUSPEND || OP(rn) == IFMATCH || \
     OP(rn) == PLUS || OP(rn) == MINMOD || \
     OP(rn) == KEEPS || (PL_regkind[OP(rn)] == VERB) || \
@@ -4394,6 +4397,12 @@ NULL
 		    && UCHARAT(PL_reginput) != ST.c2)
 	    {
 		/* simulate B failing */
+		DEBUG_OPTIMISE_r(
+		    PerlIO_printf(Perl_debug_log,
+		        "%*s  CURLYM Fast bail c1=%"IVdf" c2=%"IVdf"\n",
+		        (int)(REPORT_CODE_OFF+(depth*2)),"",
+		        (IV)ST.c1,(IV)ST.c2
+		));
 		state_num = CURLYM_B_fail;
 		goto reenter_switch;
 	    }
