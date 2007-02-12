@@ -260,10 +260,10 @@ ext/Devel/PPPort/parts/inc/ppphtest	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/pvs	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/snprintf	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/strlfuncs	Devel::PPPort include
+ext/Devel/PPPort/parts/inc/SvPV	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/SvREFCNT	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/Sv_set	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/sv_xpvf	Devel::PPPort include
-ext/Devel/PPPort/parts/inc/SvPV	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/threads	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/uv	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/variables	Devel::PPPort include
@@ -302,9 +302,9 @@ ext/Devel/PPPort/parts/todo/5009001	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5009002	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5009003	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5009004	Devel::PPPort todo file
-ext/Devel/PPPort/PPPort.xs	Devel::PPPort dummy PPPort.xs
 ext/Devel/PPPort/ppport_h.PL	Devel::PPPort ppport.h writer
 ext/Devel/PPPort/PPPort_pm.PL	Devel::PPPort PPPort.pm writer
+ext/Devel/PPPort/PPPort.xs	Devel::PPPort dummy PPPort.xs
 ext/Devel/PPPort/PPPort_xs.PL	Devel::PPPort RealPPPort.xs writer
 ext/Devel/PPPort/README		Devel::PPPort Readme
 ext/Devel/PPPort/soak		Devel::PPPort Test Harness to run under various Perls
@@ -320,21 +320,21 @@ ext/Devel/PPPort/t/mPUSH.t	Devel::PPPort test file
 ext/Devel/PPPort/t/MY_CXT.t	Devel::PPPort test file
 ext/Devel/PPPort/t/newCONSTSUB.t	Devel::PPPort test file
 ext/Devel/PPPort/t/newRV.t	Devel::PPPort test file
+ext/Devel/PPPort/TODO		Devel::PPPort Todo
 ext/Devel/PPPort/t/podtest.t	Devel::PPPort test file
 ext/Devel/PPPort/t/ppphtest.t	Devel::PPPort test file
 ext/Devel/PPPort/t/pvs.t	Devel::PPPort test file
 ext/Devel/PPPort/t/snprintf.t	Devel::PPPort test file
 ext/Devel/PPPort/t/strlfuncs.t	Devel::PPPort test file
+ext/Devel/PPPort/t/SvPV.t	Devel::PPPort test file
 ext/Devel/PPPort/t/SvREFCNT.t	Devel::PPPort test file
 ext/Devel/PPPort/t/Sv_set.t	Devel::PPPort test file
 ext/Devel/PPPort/t/sv_xpvf.t	Devel::PPPort test file
-ext/Devel/PPPort/t/SvPV.t	Devel::PPPort test file
 ext/Devel/PPPort/t/testutil.pl	Devel::PPPort test utilities
 ext/Devel/PPPort/t/threads.t	Devel::PPPort test file
 ext/Devel/PPPort/t/uv.t		Devel::PPPort test file
 ext/Devel/PPPort/t/variables.t	Devel::PPPort test file
 ext/Devel/PPPort/t/warn.t	Devel::PPPort test file
-ext/Devel/PPPort/TODO		Devel::PPPort Todo
 ext/Devel/PPPort/typemap	Devel::PPPort Typemap
 ext/Digest/MD5/Changes		Digest::MD5 extension changes
 ext/Digest/MD5/hints/dec_osf.pl	Hints for named architecture
@@ -996,10 +996,10 @@ ext/Unicode/Normalize/t/test.t	Unicode::Normalize
 ext/util/make_ext		Used by Makefile to execute extension Makefiles
 ext/XS/APItest/APItest.pm	XS::APItest extension
 ext/XS/APItest/APItest.xs	XS::APItest extension
+ext/XS/APItest/exception.c	XS::APItest extension
 ext/XS/APItest/Makefile.PL	XS::APItest extension
 ext/XS/APItest/MANIFEST		XS::APItest extension
 ext/XS/APItest/README		XS::APItest extension
-ext/XS/APItest/exception.c	XS::APItest extension
 ext/XS/APItest/t/call.t		XS::APItest extension
 ext/XS/APItest/t/exception.t	XS::APItest extension
 ext/XS/APItest/t/hash.t		XS::APItest extension
@@ -1316,12 +1316,12 @@ lib/CPAN/PAUSE2003.pub		CPAN public key
 lib/CPAN/PAUSE2005.pub		CPAN public key
 lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
 lib/CPAN/SIGNATURE		CPAN public key
-lib/CPAN/Tarzip.pm		helper package for CPAN.pm
 lib/CPAN/t/01loadme.t		See if CPAN the module works
 lib/CPAN/t/02nox.t		See if CPAN::Nox works
 lib/CPAN/t/03pkgs.t		See if CPAN::Version works
 lib/CPAN/t/10version.t		See if CPAN the module works
 lib/CPAN/t/11mirroredby.t		See if CPAN::Mirrored::By works
+lib/CPAN/Tarzip.pm		helper package for CPAN.pm
 lib/CPAN/Version.pm		Simple math with different flavors of version strings
 lib/ctime.pl			A ctime workalike
 lib/Cwd.pm			Various cwd routines (getcwd, fastcwd, chdir)
@@ -2131,8 +2131,8 @@ lib/unicore/LineBreak.txt	Unicode character database
 lib/unicore/Makefile		Unicode character database
 lib/unicore/mktables		Unicode character database generator
 lib/unicore/mktables.lst	File list for mktables
-lib/unicore/NamedSqProv.txt	Unicode character database
 lib/unicore/NamedSequences.txt	Unicode character database
+lib/unicore/NamedSqProv.txt	Unicode character database
 lib/unicore/NamesList.txt	Unicode character database
 lib/unicore/NormalizationCorrections.txt	Unicode character database
 lib/unicore/PropertyAliases.txt	Unicode character database
@@ -2312,7 +2312,6 @@ os2/perlrexx.c			Support perl interpreter embedded in REXX
 os2/perlrexx.cmd		Test perl interpreter embedded in REXX
 overload.h			generated overload enum and name table
 overload.pl			generate overload.h
-uupacktool.pl			Pack/unpack files to the .packed format
 pad.c				Scratchpad functions
 pad.h				Scratchpad headers
 patchlevel.h			The current patch level of perl
@@ -2635,8 +2634,8 @@ t/io/through.t			See if pipe passes data intact
 t/io/utf8.t			See if file seeking works
 t/japh/abigail.t		Obscure tests
 t/lib/1_compile.t		See if the various libraries and extensions compile
-t/lib/commonsense.t		See if configuration meets basic needs
 t/lib/common.pl			Helper for lib/{warnings,feature}.t
+t/lib/commonsense.t		See if configuration meets basic needs
 t/lib/compmod.pl		Helper for 1_compile.t
 t/lib/contains_pod.xr		Pod-Parser test file
 t/lib/cygwin.t			Builtin cygwin function tests
@@ -2866,9 +2865,9 @@ t/op/read.t			See if read() works
 t/op/recurse.t			See if deep recursion works
 t/op/ref.t			See if refs and objects work
 t/op/regexp_noamp.t		See if regular expressions work with optimizations
-t/op/regexp.t			See if regular expressions work
-t/op/regexp_qr.t		See if regular expressions work as qr//
 t/op/regexp_qr_embed.t		See if regular expressions work with embedded qr//
+t/op/regexp_qr.t		See if regular expressions work as qr//
+t/op/regexp.t			See if regular expressions work
 t/op/regmesg.t			See if one can get regular expression errors
 t/op/repeat.t			See if x operator works
 t/op/re_tests			Regular expressions for regexp.t
@@ -2895,8 +2894,8 @@ t/op/subst_wamp.t		See if substitution works with $& present
 t/op/sub.t			See if subroutines work
 t/op/sysio.t			See if sysread and syswrite work
 t/op/taint.t			See if tainting works
-t/op/threads.t			Misc. tests for perl features with threads
 t/op/threads_create.pl		Ancillary file for t/op/threads.t
+t/op/threads.t			Misc. tests for perl features with threads
 t/op/tiearray.t			See if tie for arrays works
 t/op/tiehandle.t		See if tie for handles works
 t/op/tie.t			See if tie/untie functions work
@@ -3023,6 +3022,7 @@ utils/splain.PL			Stand-alone version of diagnostics.pm
 utils/xsubpp.PL			External subroutine preprocessor
 uts/sprintf_wrap.c		sprintf wrapper for UTS
 uts/strtol_wrap.c		strtol wrapper for UTS
+uupacktool.pl			Pack/unpack files to the .packed format
 vmesa/Makefile			VM/ESA Makefile
 vmesa/vmesa.c			VM/ESA-specific C code for Perl core
 vmesa/vmesaish.h		VM/ESA-specific C header for Perl core
@@ -3098,9 +3098,6 @@ win32/config.vc			Win32 base line config.sh (Visual C++ build)
 win32/config.vc64		Win64 base line config.sh (Visual C++ build)
 win32/distclean.bat		Remove _ALL_ files not listed here in MANIFEST
 win32/dl_win32.xs		Win32 port
-win32/ext/Win32/Makefile.PL	Win32 extension makefile writer
-win32/ext/Win32/Win32.pm	Win32 extension Perl module
-win32/ext/Win32/Win32.xs	Win32 extension external subroutines
 win32/ext/Win32API/File/buffers.h			Win32API::File extension
 win32/ext/Win32API/File/cFile.h				Win32API::File extension
 win32/ext/Win32API/File/cFile.pc			Win32API::File extension
@@ -3114,6 +3111,9 @@ win32/ext/Win32API/File/README				Win32API::File extension Readme
 win32/ext/Win32API/File/t/file.t			See if Win32API::File extension works
 win32/ext/Win32API/File/t/tie.t				See if Win32API::File extension works
 win32/ext/Win32API/File/typemap				Win32API::File extension interface types
+win32/ext/Win32/Makefile.PL	Win32 extension makefile writer
+win32/ext/Win32/Win32.pm	Win32 extension Perl module
+win32/ext/Win32/Win32.xs	Win32 extension external subroutines
 win32/fcrypt.c			crypt() implementation
 win32/FindExt.pm		Scan for extensions
 win32/genmk95.pl		Perl code to generate command.com-usable makefile.95
@@ -3123,8 +3123,8 @@ win32/include/netdb.h		Win32 port
 win32/include/sys/socket.h	Win32 port
 win32/Makefile			Win32 makefile for NMAKE (Visual C++ build)
 win32/makefile.mk		Win32 makefile for DMAKE (BC++, VC++ builds)
-win32/perlexe.ico.packd		uupacktool.pl packed perlexe.ico image file, 'packd' ext is deliberate!
 win32/mdelete.bat		multifile delete
+win32/perlexe.ico.packd		uupacktool.pl packed perlexe.ico image file, 'packd' ext is deliberate!
 win32/perlexe.rc		associated perl binary with icon
 win32/perlglob.c		Win32 port
 win32/perlhost.h		Perl "host" implementation
