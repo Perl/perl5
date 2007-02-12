@@ -158,7 +158,7 @@ if required:
 
   $v  = version->new(1.002);     # 1.002, but compares like 1.2.0
   $v  = version->new(1.002003);  # 1.002003
-  $v2 = version->new( "1.2.3");  # v1.2.3
+  $v2 = version->new("1.2.3");   # v1.2.3
 
 In specific, version numbers initialized as L<Numeric Versions> will
 stringify in Numeric form.  Version numbers initialized as L<Extended Versions>
@@ -209,7 +209,7 @@ a single decimal point, e.g.:
                                    # Prints
   $v = version->new( "v1.200");    # v1.200.0
   $v = version->new("v1.20.0");    # v1.20.0
-  $v = qv("v1.2.3);                # v1.2.3
+  $v = qv("v1.2.3");               # v1.2.3
   $v = qv("1.2.3");                # v1.2.3
   $v = qv("1.20");                 # v1.20.0
 
@@ -248,7 +248,10 @@ equivalent and sorts alpha-numerically as would be expected.
 
 Overloading has been used with version objects to provide a natural
 interface for their use.  All mathematical operations are forbidden,
-since they don't make any sense for base version objects.
+since they don't make any sense for base version objects.  Consequently,
+there is no overloaded numification available.  If you want to use a
+version object in a numeric context for some reason, see the L<numify>
+object method.
 
 =over 4
 
@@ -284,9 +287,15 @@ object, either as a class method:
 or as an object method:
 
   $v1 = version->new(12.3);
+  $v2 = $v1->new(12.3);
+
+and in each case, $v1 and $v2 will be identical.  NOTE: if you create
+a new object using an existing object like this:
+
   $v2 = $v1->new();
 
-and in each case, $v1 and $v2 will be identical.
+the new object B<will not> be a clone of the existing object.  In the
+example case, $v2 will be an empty object of the same type as $v1.
 
 =back
 
@@ -512,13 +521,22 @@ leading 'v' character (also bare).  For example:
   $vs1 = 1.2.3; # encoded as \1\2\3
   $vs2 = v1.2;  # encoded as \1\2 
 
-However, the use of v-strings to initialize version objects with this 
-module is only possible with Perl 5.8.1 or better (which contain special
-code to enable it).  Their use is B<strongly> discouraged in all 
-circumstances (especially the leading 'v' style), since the meaning will
-change depending on which Perl you are running.  It is better to directly 
-use L<"Extended Versions"> to ensure the proper interpretation.
+However, the use of bare v-strings to initialize version objects is
+B<strongly> discouraged in all circumstances (especially the leading 
+'v' style), since the meaning will change depending on which Perl you 
+are running.  It is better to directly use L<"Extended Versions"> to 
+ensure the proper interpretation.
 
+If you insist on using bare v-strings with Perl > 5.6.0, be aware of the 
+following limitations:
+
+1) For Perl releases 5.6.0 through 5.8.0, the v-string code merely guesses, 
+based on some characteristics of v-strings.  You B<must> use a three part
+version, e.g. 1.2.3 or v1.2.3 in order for this heuristic to be successful.
+
+2) For Perl releases 5.8.1 and later, v-strings have changed in the Perl
+core to be magical, which means that the version.pm code can automatically
+determine whether the v-string encoding was used.
 
 =head2 Types of Versions Objects
 
@@ -570,6 +588,8 @@ trailing (or leading) zeros, in the L<Version Normal> form.  For example,
 
   $newver = version->new("12.3.1_1");
   print $newver; # v12.3.1_1
+
+=back
 
 =head2 Replacement UNIVERSAL::VERSION
 
