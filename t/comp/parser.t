@@ -285,8 +285,6 @@ sub check ($$$) {
     my ($file, $line, $name) =  @_;
     my (undef, $got_file, $got_line) = caller;
     like ($got_file, $file, "file of $name");
-    local $TODO;
-    $TODO = "For some wrong reason PL_copline is 1" if $line == 51;
     is ($got_line, $line, "line of $name");
 }
 
