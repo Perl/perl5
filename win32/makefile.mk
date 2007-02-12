@@ -1494,7 +1494,11 @@ distclean: realclean
 	-del /f bin\*.bat
 	-del /f perllibst.h
 	-del /f $(PERLEXE_ICO) perl.base
+	ren ..\lib\Net\Changes.libnet Changes.tenbil
+	ren ..\lib\Net\README.libnet  README.tenbil	
 	-cd .. && del /s *$(a) *.map *.pdb *.ilk *.tds *.bs *$(o) .exists pm_to_blib
+	ren ..\lib\Net\Changes.tenbil Changes.libnet
+	ren ..\lib\Net\README.tenbil  README.libnet	
 	-cd $(EXTDIR) && del /s *.def Makefile Makefile.old
 	-if exist $(AUTODIR) rmdir /s /q $(AUTODIR)
 	-if exist $(COREDIR) rmdir /s /q $(COREDIR)
@@ -1603,7 +1607,11 @@ _clean :
 	-@erase $(WIN32_OBJ)
 	-@erase $(DLL_OBJ)
 	-@erase $(X2P_OBJ)
+	ren ..\lib\Net\Changes.libnet Changes.tenbil
+	ren ..\lib\Net\README.libnet  README.tenbil	
 	-@erase ..\*$(o) ..\*$(a) ..\*.exp *$(o) *$(a) *.exp *.res
+	ren ..\lib\Net\Changes.tenbil Changes.libnet
+	ren ..\lib\Net\README.tenbil  README.libnet	
 	-@erase ..\t\*.exe ..\t\*.dll ..\t\*.bat
 	-@erase ..\x2p\*.exe ..\x2p\*.bat
 	-@erase *.ilk
