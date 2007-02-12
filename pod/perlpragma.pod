@@ -138,3 +138,10 @@ or complex structures, you should serialise them, for example with C<pack>.
 The deletion of a hash key from C<%^H> is recorded, and as ever can be
 distinguished from the existence of a key with value C<undef> with
 C<exists>.
+
+B<Don't> attempt to store references to data structures as integers which
+are retrieved via C<caller> and converted back, as this will not be threadsafe.
+Accesses would be to the structure without locking (which is not safe for
+Perl's scalars), and either the structure has to leak, or it has to be
+freed when its creating thread terminates, which may be before the optree
+referencing it is deleted, if other threads outlive it.
