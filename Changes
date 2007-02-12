@@ -7287,16 +7287,16 @@ ____________________________________________________________________________
              
              [ 25772]
              Subject: [patch@25763] Fix VMS error/exit handling, update kill function
-	From: "John E. Malmberg" <wb8tyw@qsl.net>
-	Message-id: <4351F393.8030809@qsl.net>
+             From: "John E. Malmberg" <wb8tyw@qsl.net>
+             Message-id: <4351F393.8030809@qsl.net>
              Date: Sun, 16 Oct 2005 02:30:43 -0400
 
              
              [ 25810]
              Subject: [patch@25809]restore documented exit behavior
-	From: "John E. Malmberg" <wb8tyw@qsl.net>
+             From: "John E. Malmberg" <wb8tyw@qsl.net>
              Date: Thu, 20 Oct 2005 18:21:20 -0400
-	Message-id: <43581860.3020108@qsl.net>
+             Message-id: <43581860.3020108@qsl.net>
 
              
              [ 25839]
@@ -7346,14 +7346,14 @@ ____________________________________________________________________________
              Subject: patch for blead - Perlvms.pod update
              From: "John E. Malmberg" <wb8tyw@qsl.net>
              Date: Fri, 14 Oct 2005 21:15:26 -0400
-	Message-id: <4350582E.4070209@qsl.net>
+             Message-id: <4350582E.4070209@qsl.net>
 
              
              [ 25761]
              Subject: [patch@blead] perlport.pod
              From: "John E. Malmberg" <wb8tyw@qsl.net>
-	Date: Fri, 14 Oct 2005 23:48:20 -0400
-	Message-id: <43507C04.8050003@qsl.net>
+             Date: Fri, 14 Oct 2005 23:48:20 -0400
+             Message-id: <43507C04.8050003@qsl.net>
      Branch: maint-5.8/perl
 	   ! vms/vms.c
 	  !> doio.c mg.c pod/perlport.pod pp_ctl.c pp_sys.c util.c
