@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq1 - General Questions About Perl ($Revision: 7997 $)
+perlfaq1 - General Questions About Perl ($Revision: 8539 $)
 
 =head1 DESCRIPTION
 
@@ -157,7 +157,7 @@ See L<perlhist> for a history of Perl revisions.
 Ponie stands for "Perl On the New Internal Engine", started by Arthur
 Bergman from Fotango in 2003, and subsequently run as a project of The
 Perl Foundation. It was abandoned in 2006
-L<http://www.nntp.perl.org/group/perl.ponie.dev/487> .
+(http://www.nntp.perl.org/group/perl.ponie.dev/487).
 
 Instead of using the current Perl internals, Ponie aimed to create a
 new one that would provide a translation path from Perl 5 to Perl 6
@@ -220,7 +220,7 @@ Things that make Perl easier to learn: Unix experience, almost any kind
 of programming experience, an understanding of regular expressions, and
 the ability to understand other people's code.  If there's something you
 need to do, then it's probably already been done, and a working example is
-usually available for free.  Don't forget the new perl modules, either.
+usually available for free.  Don't forget Perl modules, either.
 They're discussed in Part 3 of this FAQ, along with CPAN, which is
 discussed in Part 2.
 
@@ -390,15 +390,15 @@ You might find these links useful:
 
 =head1 REVISION
 
-Revision: $Revision: 7997 $
+Revision: $Revision: 8539 $
 
-Date: $Date: 2006-11-01 09:29:17 +0100 (mer, 01 nov 2006) $
+Date: $Date: 2007-01-11 00:07:14 +0100 (jeu, 11 jan 2007) $
 
 See L<perlfaq> for source control details and availability.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2006 Tom Christiansen, Nathan Torkington, and
+Copyright (c) 1997-2007 Tom Christiansen, Nathan Torkington, and
 other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it

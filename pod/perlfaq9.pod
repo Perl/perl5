@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq9 - Networking ($Revision: 8076 $)
+perlfaq9 - Networking ($Revision: 8539 $)
 
 =head1 DESCRIPTION
 
@@ -665,15 +665,15 @@ http://search.cpan.org/search?query=RPC&mode=all ).
 
 =head1 REVISION
 
-Revision: $Revision: 8076 $
+Revision: $Revision: 8539 $
 
-Date: $Date: 2006-11-15 14:53:23 +0100 (mer, 15 nov 2006) $
+Date: $Date: 2007-01-11 00:07:14 +0100 (jeu, 11 jan 2007) $
 
 See L<perlfaq> for source control details and availability.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2006 Tom Christiansen, Nathan Torkington, and
+Copyright (c) 1997-2007 Tom Christiansen, Nathan Torkington, and
 other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it

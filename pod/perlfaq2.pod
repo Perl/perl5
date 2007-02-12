@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 7996 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 8539 $)
 
 =head1 DESCRIPTION
 
@@ -67,6 +67,16 @@ should be sacrificed to the Sun gods.  But that doesn't help you.
 What you need to do is get a binary version of gcc for your system
 first.  Consult the Usenet FAQs for your operating system for
 information on where to get such a binary version.
+
+You might look around the net for a pre-built binary of Perl (or a 
+C compiler!) that meets your needs, though:
+
+For Windows, Vanilla Perl (http://vanillaperl.com/) comes with a 
+bundled C compiler. ActivePerl is a pre-compiled version of Perl
+ready-to-use.
+
+For Sun systems, SunFreeware.com provides binaries of most popular 
+applications, including compilers and Perl.
 
 =head2 I copied the perl binary from one machine to another, but scripts don't work.
 
@@ -510,15 +520,15 @@ the I<What is CPAN?> question earlier in this document.
 
 =head1 REVISION
 
-Revision: $Revision: 7996 $
+Revision: $Revision: 8539 $
 
-Date: $Date: 2006-11-01 09:24:38 +0100 (mer, 01 nov 2006) $
+Date: $Date: 2007-01-11 00:07:14 +0100 (jeu, 11 jan 2007) $
 
 See L<perlfaq> for source control details and availability.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2006 Tom Christiansen, Nathan Torkington, and
+Copyright (c) 1997-2007 Tom Christiansen, Nathan Torkington, and
 other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it

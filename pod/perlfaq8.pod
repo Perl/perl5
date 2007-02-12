@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq8 - System Interaction ($Revision: 6628 $)
+perlfaq8 - System Interaction ($Revision: 8539 $)
 
 =head1 DESCRIPTION
 
@@ -804,8 +804,9 @@ this code could and probably should be written as
 	system("cat /etc/termcap") == 0
 	or die "cat program failed!";
 
-which will get the output quickly (as it is generated, instead of only
-at the end) and also check the return value.
+which will echo the cat command's output as it is generated, instead
+of waiting until the program has completed to print it out. It also
+checks the return value.
 
 C<system> also provides direct control over whether shell wildcard
 processing may take place, whereas backticks do not.
@@ -1257,15 +1258,15 @@ but other times it is not.  Modern programs C<use Socket;> instead.
 
 =head1 REVISION
 
-Revision: $Revision: 6628 $
+Revision: $Revision: 8539 $
 
-Date: $Date: 2006-07-09 14:46:14 +0200 (dim, 09 jui 2006) $
+Date: $Date: 2007-01-11 00:07:14 +0100 (jeu, 11 jan 2007) $
 
 See L<perlfaq> for source control details and availability.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2006 Tom Christiansen, Nathan Torkington, and
+Copyright (c) 1997-2007 Tom Christiansen, Nathan Torkington, and
 other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it
