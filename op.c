@@ -2186,7 +2186,6 @@ Perl_fold_constants(pTHX_ register OP *o)
 
     if (PL_scopestack_ix > oldscope) {
 	delete_eval_scope();
-	pop_return();
     }
 
     if (ret)

@@ -3573,6 +3573,7 @@ Perl_delete_eval_scope(pTHX)
     POPEVAL(cx);
     PL_curpm = newpm;
     LEAVE;
+    pop_return();
     PERL_UNUSED_VAR(newsp);
     PERL_UNUSED_VAR(gimme);
     PERL_UNUSED_VAR(optype);

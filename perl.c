@@ -2773,7 +2773,6 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 
 	if (PL_scopestack_ix > oldscope) {
 	    delete_eval_scope();
-	    pop_return();
 	}
 	JMPENV_POP;
     }
