@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq6 - Regular Expressions ($Revision: 7910 $)
+perlfaq6 - Regular Expressions ($Revision: 8539 $)
 
 =head1 DESCRIPTION
 
@@ -338,32 +338,63 @@ The use of C<\Q> causes the <.> in the regex to be treated as a
 regular character, so that C<P.> matches a C<P> followed by a dot.
 
 =head2 What is C</o> really for?
-X</o>
+X</o, regular expressions> X<compile, regular expressions>
 
-Using a variable in a regular expression match forces a re-evaluation
-(and perhaps recompilation) each time the regular expression is
-encountered.  The C</o> modifier locks in the regex the first time
-it's used.  This always happens in a constant regular expression, and
-in fact, the pattern was compiled into the internal format at the same
-time your entire program was.
+(contributed by brian d foy)
 
-Use of C</o> is irrelevant unless variable interpolation is used in
-the pattern, and if so, the regex engine will neither know nor care
-whether the variables change after the pattern is evaluated the I<very
-first> time.
+The C</o> option for regular expressions (documented in L<perlop> and
+L<perlreref>) tells Perl to compile the regular expression only once.
+This is only useful when the pattern contains a variable. Perls 5.6
+and later handle this automatically if the pattern does not change.
 
-C</o> is often used to gain an extra measure of efficiency by not
-performing subsequent evaluations when you know it won't matter
-(because you know the variables won't change), or more rarely, when
-you don't want the regex to notice if they do.
+Since the match operator C<m//>, the substitution operator C<s///>,
+and the regular expression quoting operator C<qr//> are double-quotish
+constructs, you can interpolate variables into the pattern. See the
+answer to "How can I quote a variable to use in a regex?" for more
+details.
 
-For example, here's a "paragrep" program:
+This example takes a regular expression from the argument list and
+prints the lines of input that match it:
 
-	$/ = '';  # paragraph mode
-	$pat = shift;
-	while (<>) {
-		print if /$pat/o;
-	}
+	my $pattern = shift @ARGV;
+	
+	while( <> ) {
+		print if m/$pattern/;
+		}
+
+Versions of Perl prior to 5.6 would recompile the regular expression
+for each iteration, even if C<$pattern> had not changed. The C</o>
+would prevent this by telling Perl to compile the pattern the first
+time, then reuse that for subsequent iterations:
+
+	my $pattern = shift @ARGV;
+	
+	while( <> ) {
+		print if m/$pattern/o; # useful for Perl < 5.6
+		}
+
+In versions 5.6 and later, Perl won't recompile the regular expression
+if the variable hasn't changed, so you probably don't need the C</o>
+option. It doesn't hurt, but it doesn't help either. If you want any
+version of Perl to compile the regular expression only once even if
+the variable changes (thus, only using its initial value), you still
+need the C</o>.
+
+You can watch Perl's regular expression engine at work to verify for
+yourself if Perl is recompiling a regular expression. The C<use re
+'debug'> pragma (comes with Perl 5.005 and later) shows the details.
+With Perls before 5.6, you should see C<re> reporting that its
+compiling the regular expression on each iteration. With Perl 5.6 or
+later, you should only see C<re> report that for the first iteration.
+
+	use re 'debug';
+	
+	$regex = 'Perl';
+	foreach ( qw(Perl Java Ruby Python) ) {
+		print STDERR "-" x 73, "\n";
+		print STDERR "Trying $_...\n";
+		print STDERR "\t$_ is good!\n" if m/$regex/;
+		}
 
 =head2 How do I use a regular expression to strip C style comments from a file?
 
@@ -684,14 +715,14 @@ string where the last match left off.  The regular
 expression engine cannot skip over any characters to find
 the next match with this anchor, so C<\G> is similar to the
 beginning of string anchor, C<^>.  The C<\G> anchor is typically
-used with the C<g> flag.  It uses the value of pos()
+used with the C<g> flag.  It uses the value of C<pos()>
 as the position to start the next match.  As the match
-operator makes successive matches, it updates pos() with the
+operator makes successive matches, it updates C<pos()> with the
 position of the next character past the last match (or the
 first character of the next match, depending on how you like
-to look at it). Each string has its own pos() value.
+to look at it). Each string has its own C<pos()> value.
 
-Suppose you want to match all of consective pairs of digits
+Suppose you want to match all of consecutive pairs of digits
 in a string like "1122a44" and stop matching when you
 encounter non-digits.  You want to match C<11> and C<22> but
 the letter <a> shows up between C<22> and C<44> and you want
@@ -701,7 +732,7 @@ the C<a> and still matches C<44>.
 	$_ = "1122a44";
 	my @pairs = m/(\d\d)/g;   # qw( 11 22 44 )
 
-If you use the \G anchor, you force the match after C<22> to
+If you use the C<\G> anchor, you force the match after C<22> to
 start with the C<a>.  The regular expression cannot match
 there since it does not find a digit, so the next match
 fails and the match operator returns the pairs it already
@@ -719,7 +750,7 @@ still need the C<g> flag.
 		print "Found $1\n";
 		}
 
-After the match fails at the letter C<a>, perl resets pos()
+After the match fails at the letter C<a>, perl resets C<pos()>
 and the next match on the same string starts at the beginning.
 
 	$_ = "1122a44";
@@ -730,13 +761,13 @@ and the next match on the same string starts at the beginning.
 
 	print "Found $1 after while" if m/(\d\d)/g; # finds "11"
 
-You can disable pos() resets on fail with the C<c> flag.
-Subsequent matches start where the last successful match
-ended (the value of pos()) even if a match on the same
-string as failed in the meantime. In this case, the match
-after the while() loop starts at the C<a> (where the last
-match stopped), and since it does not use any anchor it can
-skip over the C<a> to find "44".
+You can disable C<pos()> resets on fail with the C<c> flag, documented
+in L<perlop> and L<perlreref>. Subsequent matches start where the last
+successful match ended (the value of C<pos()>) even if a match on the
+same string has failed in the meantime. In this case, the match after
+the C<while()> loop starts at the C<a> (where the last match stopped),
+and since it does not use any anchor it can skip over the C<a> to find
+C<44>.
 
 	$_ = "1122a44";
 	while( m/\G(\d\d)/gc )
@@ -761,7 +792,7 @@ which works in 5.004 or later.
 		}
 	}
 
-For each line, the PARSER loop first tries to match a series
+For each line, the C<PARSER> loop first tries to match a series
 of digits followed by a word boundary.  This match has to
 start at the place the last match left off (or the beginning
 of the string on the first match). Since C<m/ \G( \d+\b
@@ -953,15 +984,15 @@ Or...
 
 =head1 REVISION
 
-Revision: $Revision: 7910 $
+Revision: $Revision: 8539 $
 
-Date: $Date: 2006-10-07 22:38:54 +0200 (sam, 07 oct 2006) $
+Date: $Date: 2007-01-11 00:07:14 +0100 (jeu, 11 jan 2007) $
 
 See L<perlfaq> for source control details and availability.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2006 Tom Christiansen, Nathan Torkington, and
+Copyright (c) 1997-2007 Tom Christiansen, Nathan Torkington, and
 other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it

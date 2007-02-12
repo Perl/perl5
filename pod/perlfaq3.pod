@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 7875 $)
+perlfaq3 - Programming Tools ($Revision: 8539 $)
 
 =head1 DESCRIPTION
 
@@ -982,15 +982,15 @@ to process and install a Perl distribution.
 
 =head1 REVISION
 
-Revision: $Revision: 7875 $
+Revision: $Revision: 8539 $
 
-Date: $Date: 2006-10-04 22:39:26 +0200 (mer, 04 oct 2006) $
+Date: $Date: 2007-01-11 00:07:14 +0100 (jeu, 11 jan 2007) $
 
 See L<perlfaq> for source control details and availability.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2006 Tom Christiansen, Nathan Torkington, and
+Copyright (c) 1997-2007 Tom Christiansen, Nathan Torkington, and
 other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it

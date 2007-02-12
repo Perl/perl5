@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 7996 $)
+perlfaq4 - Data Manipulation ($Revision: 8539 $)
 
 =head1 DESCRIPTION
 
@@ -17,7 +17,7 @@ exactly.  Some real numbers lose precision in the process.  This is a
 problem with how computers store numbers and affects all computer
 languages, not just Perl.
 
-L<perlnumber> show the gory details of number representations and
+L<perlnumber> shows the gory details of number representations and
 conversions.
 
 To limit the number of decimal places in your numbers, you can use the
@@ -362,17 +362,16 @@ pseudorandom generator than comes with your operating system, look at
 
 =head2 How do I get a random number between X and Y?
 
-To get a random number between two values, you can use the
-C<rand()> builtin to get a random number between 0 and
+To get a random number between two values, you can use the C<rand()>
+builtin to get a random number between 0 and 1. From there, you shift
+that into the range that you want.
 
-C<rand($x)> returns a number such that
-C<< 0 <= rand($x) < $x >>. Thus what you want to have perl
-figure out is a random number in the range from 0 to the
-difference between your I<X> and I<Y>.
+C<rand($x)> returns a number such that C<< 0 <= rand($x) < $x >>. Thus
+what you want to have perl figure out is a random number in the range
+from 0 to the difference between your I<X> and I<Y>.
 
-That is, to get a number between 10 and 15, inclusive, you
-want a random number between 0 and 5 that you can then add
-to 10.
+That is, to get a number between 10 and 15, inclusive, you want a
+random number between 0 and 5 that you can then add to 10.
 
 	my $number = 10 + int rand( 15-10+1 );
 
@@ -491,14 +490,14 @@ give you the same time of day, only the day before.
 
 	print "Yesterday was $yesterday\n";
 
-You can also use the C<Date::Calc> module using its Today_and_Now
+You can also use the C<Date::Calc> module using its C<Today_and_Now>
 function.
 
 	use Date::Calc qw( Today_and_Now Add_Delta_DHMS );
 
 	my @date_time = Add_Delta_DHMS( Today_and_Now(), -1, 0, 0, 0 );
 
-	print "@date\n";
+	print "@date_time\n";
 
 Most people try to use the time rather than the calendar to figure out
 dates, but that assumes that days are twenty-four hours each.  For
@@ -1799,15 +1798,57 @@ in the 5.004 release or later of Perl for more detail.
 
 =head2 How do I process an entire hash?
 
-Use the each() function (see L<perlfunc/each>) if you don't care
-whether it's sorted:
+(contributed by brian d foy)
 
-	while ( ($key, $value) = each %hash) {
-		print "$key = $value\n";
+There are a couple of ways that you can process an entire hash. You
+can get a list of keys, then go through each key, or grab a one
+key-value pair at a time.
+
+To go through all of the keys, use the C<keys> function. This extracts
+all of the keys of the hash and gives them back to you as a list. You
+can then get the value through the particular key you're processing:
+
+	foreach my $key ( keys %hash ) {
+		my $value = $hash{$key}
+		...
 		}
 
-If you want it sorted, you'll have to use foreach() on the result of
-sorting the keys as shown in an earlier question.
+Once you have the list of keys, you can process that list before you
+process the hashh elements. For instance, you can sort the keys so you
+can process them in lexical order:
+
+	foreach my $key ( sort keys %hash ) {
+		my $value = $hash{$key}
+		...
+		}
+
+Or, you might want to only process some of the items. If you only want
+to deal with the keys that start with C<text:>, you can select just
+those using C<grep>:
+
+	foreach my $key ( grep /^text:/, keys %hash ) {
+		my $value = $hash{$key}
+		...
+		}
+
+If the hash is very large, you might not want to create a long list of
+keys. To save some memory, you can grab on key-value pair at a time using
+C<each()>, which returns a pair you haven't seen yet:
+
+	while( my( $key, $value ) = each( %hash ) ) {
+		...
+		}
+
+The C<each> operator returns the pairs in apparently random order, so if
+ordering matters to you, you'll have to stick with the C<keys> method.
+
+The C<each()> operator can be a bit tricky though. You can't add or
+delete keys of the hash while you're using it without possibly
+skipping or re-processing some pairs after Perl internally rehashes
+all of the elements. Additionally, a hash has only one iterator, so if
+you use C<keys>, C<values>, or C<each> on the same hash, you can reset
+the iterator and mess up your processing. See the C<each> entry in
+L<perlfunc> for more details.
 
 =head2 What happens if I add or remove keys from a hash while iterating over it?
 
@@ -2219,15 +2260,15 @@ the C<PDL> module from CPAN instead--it makes number-crunching easy.
 
 =head1 REVISION
 
-Revision: $Revision: 7996 $
+Revision: $Revision: 8539 $
 
-Date: $Date: 2006-11-01 09:24:38 +0100 (mer, 01 nov 2006) $
+Date: $Date: 2007-01-11 00:07:14 +0100 (jeu, 11 jan 2007) $
 
 See L<perlfaq> for source control details and availability.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2006 Tom Christiansen, Nathan Torkington, and
+Copyright (c) 1997-2007 Tom Christiansen, Nathan Torkington, and
 other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 8075 $)
+perlfaq5 - Files and Formats ($Revision: 8579 $)
 
 =head1 DESCRIPTION
 
@@ -117,17 +117,25 @@ be sure that you're supposed to do that on every line!
    close $out;
 
 To change only a particular line, the input line number, C<$.>, is
-useful. Use C<next> to skip all lines up to line 5, make a change and
-print the result, then stop further processing with C<last>.
+useful. First read and print the lines up to the one you  want to
+change. Next, read the single line you want to change, change it, and
+print it. After that, read the rest of the lines and print those:
 
-	while( <$in> )
+	while( <$in> )   # print the lines before the change
 		{
-		next unless $. == 5;
-		s/\b(perl)\b/Perl/g;
 		print $out $_;
-		last;
+		last if $. == 4; # line number before change
 		}
 
+	my $line = <$in>;
+	$line =~ s/\b(perl)\b/Perl/g;
+	print $out $line;
+
+	while( <$in> )   # print the rest of the lines
+		{
+		print $out $_;
+		}
+		
 To skip lines, use the looping controls. The C<next> in this example
 skips comment lines, and the C<last> stops all processing once it
 encounters either C<__END__> or C<__DATA__>.
@@ -1160,9 +1168,17 @@ a copied one.
 Error checking, as always, has been left as an exercise for the reader.
 
 =head2 How do I close a file descriptor by number?
-X<file, closing file descriptors>
+X<file, closing file descriptors> X<POSIX> X<close>
 
-This should rarely be necessary, as the Perl close() function is to be
+If, for some reason, you have a file descriptor instead of a
+filehandle (perhaps you used C<POSIX::open>), you can use the
+C<close()> function from the C<POSIX> module:
+
+	use POSIX ();
+	
+	POSIX::close( $fd );
+	
+This should rarely be necessary, as the Perl Cclose()> function is to be
 used for things that Perl opened itself, even if it was a dup of a
 numeric descriptor as with MHCONTEXT above.  But if you really have
 to, you may be able to do this:
@@ -1171,12 +1187,11 @@ to, you may be able to do this:
 	$rc = syscall(&SYS_close, $fd + 0);  # must force numeric
 	die "can't sysclose $fd: $!" unless $rc == -1;
 
-Or, just use the fdopen(3S) feature of open():
+Or, just use the fdopen(3S) feature of C<open()>:
 
 	{
-	local *F;
-	open F, "<&=$fd" or die "Cannot reopen fd=$fd: $!";
-	close F;
+	open my( $fh ), "<&=$fd" or die "Cannot reopen fd=$fd: $!";
+	close $fh;
 	}
 
 =head2 Why can't I use "C:\temp\foo" in DOS paths?  Why doesn't `C:\temp\foo.exe` work?
@@ -1265,15 +1280,15 @@ If your array contains lines, just print them:
 
 =head1 REVISION
 
-Revision: $Revision: 8075 $
+Revision: $Revision: 8579 $
 
-Date: $Date: 2006-11-15 02:26:49 +0100 (mer, 15 nov 2006) $
+Date: $Date: 2007-01-14 19:28:09 +0100 (dim, 14 jan 2007) $
 
 See L<perlfaq> for source control details and availability.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2006 Tom Christiansen, Nathan Torkington, and
+Copyright (c) 1997-2007 Tom Christiansen, Nathan Torkington, and
 other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it
