@@ -2282,6 +2282,19 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that the localtime_r routine
  *	is available to localtime re-entrantly.
  */
+/* LOCALTIME_R_NEEDS_TZSET:
+ *	Many libc's localtime_r implementations do not call tzset,
+ *	making them differ from localtime(), and making timezone
+ *	changes using $ENV{TZ} without explicitly calling tzset
+ *	impossible. This symbol makes us call tzset before localtime_r
+ */
+#$d_localtime_r_needs_tzset LOCALTIME_R_NEEDS_TZSET /**/
+#ifdef LOCALTIME_R_NEEDS_TZSET
+#define L_R_TZSET tzset(),
+#else
+#define L_R_TZSET
+#endif
+
 /* LOCALTIME_R_PROTO:
  *	This symbol encodes the prototype of localtime_r.
  *	It is zero if d_localtime_r is undef, and one of the
