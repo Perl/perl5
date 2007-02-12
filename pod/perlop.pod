@@ -1070,7 +1070,7 @@ This usage is vaguely deprecated, which means it just might possibly
 be removed in some distant future version of Perl, perhaps somewhere
 around the year 2168.
 
-=item m/PATTERN/cgimosx
+=item m/PATTERN/cgimosxk
 X<m> X<operator, match>
 X<regexp, options> X<regexp> X<regex, options> X<regex>
 X</c> X</i> X</m> X</o> X</s> X</x>
