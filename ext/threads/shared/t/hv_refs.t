@@ -97,7 +97,7 @@ ok(10, keys %foo == 0, "And make sure we realy have deleted the values");
 }
 {
     my $object : shared = &share({});
-    threads->new(sub {
+    threads->create(sub {
                      bless $object, 'test1';
                  })->join;
     ok(16, ref($object) eq 'test1', "blessing does work");

@@ -637,7 +637,7 @@ S_ithread_create(
      * 1 ref to be the responsibility of join/detach, so we don't get
      *      freed until join/detach, even if no thread objects remain.
      *      This allows the following to work:
-     *          { threads->new(sub{...}); } threads->object(1)->join;
+     *          { threads->create(sub{...}); } threads->object(1)->join;
      */
     thread->count = 3;
 
@@ -896,6 +896,8 @@ ithread_create(...)
                 switch (*str) {
                     case 'a':
                     case 'A':
+                    case 'l':
+                    case 'L':
                         context = G_ARRAY;
                         break;
                     case 's':
@@ -911,6 +913,10 @@ ithread_create(...)
                 }
             } else if (hv_exists(specs, "array", 5)) {
                 if (SvTRUE(*hv_fetch(specs, "array", 5, 0))) {
+                    context = G_ARRAY;
+                }
+            } else if (hv_exists(specs, "list", 4)) {
+                if (SvTRUE(*hv_fetch(specs, "list", 4, 0))) {
                     context = G_ARRAY;
                 }
             } else if (hv_exists(specs, "scalar", 6)) {
@@ -1067,9 +1073,7 @@ ithread_join(...)
         AV *params = NULL;
         int len;
         int ii;
-#ifdef WIN32
-        DWORD waitcode;
-#else
+#ifndef WIN32
         int rc_join;
         void *retval;
 #endif

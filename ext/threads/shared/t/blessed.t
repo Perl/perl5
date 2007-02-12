@@ -48,7 +48,7 @@ my $sref = \do{ my $x };
 share($sref);
 $sobj = $sref;
 
-threads->new(sub {
+threads->create(sub {
                 # Bless objects
                 bless $hobj, 'foo';
                 bless $aobj, 'bar';

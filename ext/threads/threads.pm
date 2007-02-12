@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.59';
+our $VERSION = '1.61';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -98,7 +98,7 @@ sub exit
     # Class method only
     if (ref($class)) {
         require Carp;
-        Carp::croak("Usage: threads->exit(status)");
+        Carp::croak('Usage: threads->exit(status)');
     }
 
     $class->set_thread_exit_only(1);
@@ -138,7 +138,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.59
+This document describes threads version 1.61
 
 =head1 SYNOPSIS
 
@@ -560,8 +560,10 @@ as the first argument:
 
 In the above, the threads object is returned to the parent thread in scalar
 context, and the thread's entry point function C<foo> will be called in list
-context such that the parent thread can receive a list from the C<-E<gt>join()>
-call.  Similarly, if you need the threads object, but your thread will not be
+(array) context such that the parent thread can receive a list (array) from
+the C<-E<gt>join()> call.  (C<'array'> is synonymous with C<'list'>.)
+
+Similarly, if you need the threads object, but your thread will not be
 returning a value (i.e., I<void> context), you would do the following:
 
     my $thr = threads->create({'context' => 'void'}, \&foo);
@@ -957,7 +959,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.59/threads.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.61/threads.pm>
 
 L<threads::shared>, L<perlthrtut>
 

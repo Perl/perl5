@@ -26,7 +26,7 @@ use threads;
 # Attempt to free unreferenced scalar: SV 0x40173f3c
 fresh_perl_is(<<'EOI', 'ok', { }, 'delete() under threads');
 use threads;
-threads->new(sub { my %h=(1,2); delete $h{1}})->join for 1..2;
+threads->create(sub { my %h=(1,2); delete $h{1}})->join for 1..2;
 print "ok";
 EOI
 
@@ -40,7 +40,7 @@ my $data = "a";
 my $obj = \$data;
 my $copy = $obj;
 Scalar::Util::weaken($copy);
-threads->new(sub { 1 })->join for (1..1);
+threads->create(sub { 1 })->join for (1..1);
 print "ok";
 EOI
 
@@ -57,7 +57,7 @@ use Scalar::Util qw(weaken);
 my $object = Foo->new;
 my $ref = $object;
 weaken $ref;
-threads->new(sub { $ref = $object } )->join; # $ref = $object causes problems
+threads->create(sub { $ref = $object } )->join; # $ref = $object causes problems
 print "ok";
 EOI
 
@@ -83,7 +83,7 @@ sub do_sort_threads {
    my $nthreads = shift;
    my @kids = ();
    for my $i (1..$nthreads) {
-      my $t = threads->new(\&do_sort_one_thread, $i);
+      my $t = threads->create(\&do_sort_one_thread, $i);
       print "# parent $$: continue\n";
       push(@kids, $t);
    }
