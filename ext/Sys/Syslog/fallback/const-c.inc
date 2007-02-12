@@ -24,7 +24,7 @@ static int
 constant_7 (pTHX_ const char *name, IV *iv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
-     LOG_ERR LOG_FTP LOG_LPR LOG_PID */
+     LOG_ERR LOG_FTP LOG_LPR LOG_PID LOG_RAS */
   /* Offset 4 gives the best switch position.  */
   switch (name[4]) {
   case 'E':
@@ -65,6 +65,17 @@ constant_7 (pTHX_ const char *name, IV *iv_return) {
     /*                   ^        */
 #ifdef LOG_PID
       *iv_return = LOG_PID;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'R':
+    if (memEQ(name, "LOG_RAS", 7)) {
+    /*                   ^        */
+#ifdef LOG_RAS
+      *iv_return = LOG_RAS;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -253,7 +264,7 @@ constant_9 (pTHX_ const char *name, IV *iv_return, const char **pv_return) {
       *pv_return = _PATH_LOG;
       return PERL_constant_ISPV;
 #else
-      *pv_return = "/dev/log";
+      *pv_return = "";
       return PERL_constant_ISPV;
 #endif
     }
@@ -442,12 +453,12 @@ static int
 constant_11 (pTHX_ const char *name, IV *iv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
-     LOG_FACMASK LOG_PRIMASK LOG_WARNING */
-  /* Offset 6 gives the best switch position.  */
-  switch (name[6]) {
-  case 'C':
+     LOG_FACMASK LOG_INSTALL LOG_LAUNCHD LOG_NETINFO LOG_PRIMASK LOG_WARNING */
+  /* Offset 4 gives the best switch position.  */
+  switch (name[4]) {
+  case 'F':
     if (memEQ(name, "LOG_FACMASK", 11)) {
-    /*                     ^           */
+    /*                   ^             */
 #ifdef LOG_FACMASK
       *iv_return = LOG_FACMASK;
       return PERL_constant_ISIV;
@@ -457,8 +468,41 @@ constant_11 (pTHX_ const char *name, IV *iv_return) {
     }
     break;
   case 'I':
+    if (memEQ(name, "LOG_INSTALL", 11)) {
+    /*                   ^             */
+#ifdef LOG_INSTALL
+      *iv_return = LOG_INSTALL;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'L':
+    if (memEQ(name, "LOG_LAUNCHD", 11)) {
+    /*                   ^             */
+#ifdef LOG_LAUNCHD
+      *iv_return = LOG_LAUNCHD;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'N':
+    if (memEQ(name, "LOG_NETINFO", 11)) {
+    /*                   ^             */
+#ifdef LOG_NETINFO
+      *iv_return = LOG_NETINFO;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'P':
     if (memEQ(name, "LOG_PRIMASK", 11)) {
-    /*                     ^           */
+    /*                   ^             */
 #ifdef LOG_PRIMASK
       *iv_return = LOG_PRIMASK;
       return PERL_constant_ISIV;
@@ -467,9 +511,9 @@ constant_11 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
-  case 'R':
+  case 'W':
     if (memEQ(name, "LOG_WARNING", 11)) {
-    /*                     ^           */
+    /*                   ^             */
 #ifdef LOG_WARNING
       *iv_return = LOG_WARNING;
       return PERL_constant_ISIV;
@@ -495,18 +539,19 @@ constant (pTHX_ const char *name, STRLEN len, IV *iv_return, const char **pv_ret
      Regenerate these constant functions by feeding this entire source file to
      perl -x
 
-#!/usr/bin/perl5.8.5 -w
+#!perl -w
 use ExtUtils::Constant qw (constant_types C_constant XS_constant);
 
 my $types = {map {($_, 1)} qw(IV PV)};
 my @names = (qw(LOG_ALERT LOG_AUTH LOG_AUTHPRIV LOG_CONS LOG_CRIT LOG_CRON
 	       LOG_DAEMON LOG_DEBUG LOG_EMERG LOG_ERR LOG_FACMASK LOG_FTP
-	       LOG_INFO LOG_KERN LOG_LFMT LOG_LOCAL0 LOG_LOCAL1 LOG_LOCAL2
-	       LOG_LOCAL3 LOG_LOCAL4 LOG_LOCAL5 LOG_LOCAL6 LOG_LOCAL7 LOG_LPR
-	       LOG_MAIL LOG_NDELAY LOG_NEWS LOG_NFACILITIES LOG_NOTICE
-	       LOG_NOWAIT LOG_ODELAY LOG_PERROR LOG_PID LOG_PRIMASK LOG_SYSLOG
+	       LOG_INFO LOG_INSTALL LOG_KERN LOG_LAUNCHD LOG_LFMT LOG_LOCAL0
+	       LOG_LOCAL1 LOG_LOCAL2 LOG_LOCAL3 LOG_LOCAL4 LOG_LOCAL5
+	       LOG_LOCAL6 LOG_LOCAL7 LOG_LPR LOG_MAIL LOG_NDELAY LOG_NETINFO
+	       LOG_NEWS LOG_NFACILITIES LOG_NOTICE LOG_NOWAIT LOG_ODELAY
+	       LOG_PERROR LOG_PID LOG_PRIMASK LOG_RAS LOG_REMOTEAUTH LOG_SYSLOG
 	       LOG_USER LOG_UUCP LOG_WARNING),
-            {name=>"_PATH_LOG", type=>"PV", default=>["PV", "\"/dev/log\""]});
+            {name=>"_PATH_LOG", type=>"PV", default=>["PV", "\"\""]});
 
 print constant_types(); # macro defs
 foreach (C_constant ("Sys::Syslog", 'constant', 'IV', $types, undef, 3, @names) ) {
@@ -537,6 +582,16 @@ __END__
     if (memEQ(name, "LOG_AUTHPRIV", 12)) {
 #ifdef LOG_AUTHPRIV
       *iv_return = LOG_AUTHPRIV;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 14:
+    if (memEQ(name, "LOG_REMOTEAUTH", 14)) {
+#ifdef LOG_REMOTEAUTH
+      *iv_return = LOG_REMOTEAUTH;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
