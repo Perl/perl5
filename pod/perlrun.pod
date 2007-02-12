@@ -305,6 +305,10 @@ are as follows; listing the letters is equal to summing the numbers.
 =for documenting_the_underdocumented
 perl.h gives W/128 as PERL_UNICODE_WIDESYSCALLS "/* for Sarathy */"
 
+=for todo
+perltodo mentions Unicode in %ENV and filenames. I guess that these will be
+options e and f (or F).
+
 For example, C<-COE> and C<-C6> will both turn on UTF-8-ness on both
 STDOUT and STDERR.  Repeating letters is just redundant, not cumulative
 nor toggling.

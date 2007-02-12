@@ -25,32 +25,10 @@ programming languages offer you 1 line of immortality?
 The roadmap to 5.10 envisages feature based releases, as various items in this
 TODO are completed.
 
-=head2 Needed for a 5.9.4 release
+=head2 Needed for the final 5.10.0 release
 
-=over
-
-=item *
-
-Review assertions. Review syntax to combine assertions. Assertions could take
-advantage of the lexical pragmas work. L</What hooks would assertions need?>
-
-=back
-
-=head2 Needed for a 5.9.5 release
-
-=over
-
-=item *
-Implement L</_ prototype character>
-
-=item *
-Implement L</state variables>
-
-=back
-
-=head2 Needed for a 5.9.6 release
-
-Stabilisation. If all goes well, this will be the equivalent of a 5.10-beta.
+Review perlguts. Significant changes have occured since 5.8, and we can't
+release a new version without making sure these are covered.
 
 =head1 Tasks that only need Perl knowledge
 
@@ -73,6 +51,9 @@ The addition of C<Pod::Simple> and its related modules may make this task
 easier to complete.
 
 =head2 Parallel testing
+
+(This probably impacts much more than the core: also the Test::Harness
+and TAP::* modules on CPAN.)
 
 The core regression test suite is getting ever more comprehensive, which has
 the side effect that it takes longer to run. This isn't so good. Investigate
@@ -102,17 +83,15 @@ Pugs already does parallel testing - can their approach be re-used?
 
 =head2 Make Schwern poorer
 
-We should have for everything. When all the core's modules are tested,
+We should have tests for everything. When all the core's modules are tested,
 Schwern has promised to donate to $500 to TPF. We may need volunteers to
 hold him upside down and shake vigorously in order to actually extract the
 cash.
 
-See F<t/lib/1_compile.t> for the 3 remaining modules that need tests.
-
 =head2 Improve the coverage of the core tests
 
-Use Devel::Cover to ascertain the core's test coverage, then add tests that
-are currently missing.
+Use Devel::Cover to ascertain the core modules's test coverage, then add
+tests that are currently missing.
 
 =head2 test B
 
@@ -150,22 +129,39 @@ Ilya observed that use POSIX; eats memory like there's no tomorrow, and at
 various times worked to cut it down. There is probably still fat to cut out -
 for example POSIX passes Exporter some very memory hungry data structures.
 
+=head2 embed.pl/makedef.pl
 
+There is a script F<embed.pl> that generates several header files to prefix
+all of Perl's symbols in a consistent way, to provide some semblance of
+namespace support in C<C>. Functions are declared in F<embed.fnc>, variables
+in F<interpvar.h> and F<thrdvar.h>. Quite a few of the functions and variables
+are conditionally declared there, using C<#ifdef>. However, F<embed.pl>
+doesn't understand the C macros, so the rules about which symbols are present
+when is duplicated in F<makedef.pl>. Writing things twice is bad, m'kay.
+It would be good to teach C<embed.pl> to understand the conditional
+compilation, and hence remove the duplication, and the mistakes it has caused.
 
+=head2 use strict; and AutoLoad
 
+Currently if you write
 
+    package Whack;
+    use AutoLoader 'AUTOLOAD';
+    use strict;
+    1;
+    __END__
+    sub bloop {
+        print join (' ', No, strict, here), "!\n";
+    }
 
+then C<use strict;> isn't in force within the autoloaded subroutines. It would
+be more consistent (and less surprising) to arrange for all lexical pragmas
+in force at the __END__ block to be in force within each autoloaded subroutine.
 
 =head1 Tasks that need a little sysadmin-type knowledge
 
 Or if you prefer, tasks that you would learn from, and broaden your skills
 base...
-
-=head2 Relocatable perl
-
-The C level patches needed to create a relocatable perl binary are done, as
-is the work on F<Config.pm>. All that's left to do is the C<Configure> tweaking
-to let people specify how they want to do the install.
 
 =head2 make HTML install work
 
@@ -192,9 +188,7 @@ C<endservent>, two or more C<=items> giving the different parameter lists, such
 as
 
     =item substr EXPR,OFFSET,LENGTH,REPLACEMENT
-    
     =item substr EXPR,OFFSET,LENGTH
-    
     =item substr EXPR,OFFSET
 
 and different parameter lists having different meanings. (eg C<select>)
@@ -271,7 +265,7 @@ wanted to perform perl level coverage, and another to specify C level
 coverage, and have C<Configure> and the F<Makefile> do all the right things
 automatically.
 
-=head2 Make Config.pm cope with differences between build and installed perl
+=head2 Make Config.pm cope with differences between built and installed perl
 
 Quite often vendors ship a perl binary compiled with their (pay-for)
 compilers.  People install a free compiler, such as gcc. To work out how to
@@ -285,13 +279,6 @@ possibly involving probing at install time or later, so that the C<%Config> in
 a binary distribution better describes the installed machine, when the
 installed machine differs from the build machine in some significant way.
 
-=head2 make parallel builds work
-
-Currently parallel builds (such as C<make -j3>) don't work reliably. We believe
-that this is due to incomplete dependency specification in the F<Makefile>.
-It would be good if someone were able to track down the causes of these
-problems, so that parallel builds worked properly.
-
 =head2 linker specification files
 
 Some platforms mandate that you provide a list of a shared library's external
@@ -304,8 +291,17 @@ C<Configure> to enable it. This would allow Unix users to test that the
 export list is correct, and to build a perl that does not pollute the global
 namespace with private symbols.
 
+=head2 Cross-compile support
 
+Currently C<Configure> understands C<-Dusecrosscompile> option. This option
+arranges for building C<miniperl> for TARGET machine, so this C<miniperl> is
+assumed then to be copied to TARGET machine and used as a replacement of full
+C<perl> executable.
 
+This could be done little differently. Namely C<miniperl> should be built for
+HOST and then full C<perl> with extensions should be compiled for TARGET.
+This, however, might require extra trickery for %Config: we have one config
+first for HOST and then another for TARGET.
 
 =head1 Tasks that need a little C knowledge
 
@@ -334,18 +330,6 @@ such that it's trivial for the Pumpking to flag "this is an official release"
 when making a tarball, yet leave the default source saying "I'm not the
 official release".
 
-=head2 Tidy up global variables
-
-There's a note in F<intrpvar.h>
-
-  /* These two variables are needed to preserve 5.8.x bincompat because
-     we can't change function prototypes of two exported functions.
-     Probably should be taken out of blead soon, and relevant prototypes
-     changed.  */
-
-So doing this, and removing any of the unused variables still present would
-be good.
-
 =head2 Ordering of "global" variables.
 
 F<thrdvar.h> and F<intrpvarh> define the "global" variables that need to be
@@ -361,48 +345,82 @@ typically requiring 4 byte alignment, and then an odd C<bool> later on.
 to review the ordering of the variables, to see how much alignment padding can
 be removed.
 
-=head2 am I hot or not?
+It's also worth checking that all variables are actually used. Perl 5.8.0
+shipped with C<PL_nrs> still defined in F<thrdvar.h>, despite it being unused
+since a change over a year earlier. Had this been spotted before release, it
+could have been removed, but now it has to remain in the 5.8.x releases to
+keep the structure the same size, to retain binary compatibility.
 
-The idea of F<pp_hot.c> is that it contains the I<hot> ops, the ops that are
-most commonly used. The idea is that by grouping them, their object code will
-be adjacent in the executable, so they have a greater chance of already being
-in the CPU cache (or swapped in) due to being near another op already in use.
+It's probably worth checking if all need to be the types they are. For example
+
+    PERLVAR(Ierror_count, I32)	/* how many errors so far, max 10 */
+
+might work as well if stored in a signed (or unsigned) 8 bit value, if the
+comment is accurate. C<PL_multi_open> and C<PL_multi_close> can probably
+become C<char>s. Finding variables to downsize coupled with rearrangement
+could shrink the interpreter structure; a size saving which is multiplied by
+the number of threads running.
+
+=head2 Profile Perl - am I hot or not?
+
+The Perl source code is stable enough that it makes sense to profile it,
+identify and optimise the hotspots. It would be good to measure the
+performance of the Perl interpreter using free tools such as cachegrind,
+gprof, and dtrace, and work to reduce the bottlenecks they reveal.
+
+As part of this, the idea of F<pp_hot.c> is that it contains the I<hot> ops,
+the ops that are most commonly used. The idea is that by grouping them, their
+object code will be adjacent in the executable, so they have a greater chance
+of already being in the CPU cache (or swapped in) due to being near another op
+already in use.
 
 Except that it's not clear if these really are the most commonly used ops. So
-anyone feeling like exercising their skill with coverage and profiling tools
-might want to determine what ops I<really> are the most commonly used. And in
-turn suggest evictions and promotions to achieve a better F<pp_hot.c>.
+as part of exercising your skills with coverage and profiling tools you might
+want to determine what ops I<really> are the most commonly used. And in turn
+suggest evictions and promotions to achieve a better F<pp_hot.c>.
 
+=head2 Allocate OPs from arenas
 
+Currently all new OP structures are individually malloc()ed and free()d.
+All C<malloc> implementations have space overheads, and are now as fast as
+custom allocates so it would both use less memory and less CPU to allocate
+the various OP structures from arenas. The SV arena code can probably be
+re-used for this.
 
+=head2 Improve win32/wince.c
+
+Currently, numerous functions look virtually, if not completely,
+identical in both C<win32/wince.c> and C<win32/win32.c> files, which can't
+be good.
+
+=head2 Use secure CRT functions when building with VC8 on Win32
+
+Visual C++ 2005 (VC++ 8.x) deprecated a number of CRT functions on the basis
+that they were "unsafe" and introduced differently named secure versions of
+them as replacements, e.g. instead of writing
+
+    FILE* f = fopen(__FILE__, "r");
+
+one should now write
+
+    FILE* f;
+    errno_t err = fopen_s(&f, __FILE__, "r"); 
+
+Currently, the warnings about these deprecations have been disabled by adding
+-D_CRT_SECURE_NO_DEPRECATE to the CFLAGS. It would be nice to remove that
+warning suppressant and actually make use of the new secure CRT functions.
+
+There is also a similar issue with POSIX CRT function names like fileno having
+been deprecated in favour of ISO C++ conformant names like _fileno. These
+warnings are also currently suppressed with the compiler option /wd4996. It
+might be nice to do as Microsoft suggest here too, although, unlike the secure
+functions issue, there is presumably little or no benefit in this case.
 
 =head1 Tasks that need a knowledge of XS
 
 These tasks would need C knowledge, and roughly the level of knowledge of
 the perl API that comes from writing modules that use XS to interface to
 C.
-
-=head2 IPv6
-
-Clean this up. Check everything in core works
-
-=head2 shrink C<GV>s, C<CV>s
-
-By removing unused elements and careful re-ordering, the structures for C<AV>s
-and C<HV>s have recently been shrunk considerably. It's probable that the same
-approach would find savings in C<GV>s and C<CV>s, if not all the other
-larger-than-C<PVMG> types.
-
-=head2 Implicit Latin 1 => Unicode translation
-
-Conversions from byte strings to UTF-8 currently map high bit characters
-to Unicode without translation (or, depending on how you look at it, by
-implicitly assuming that the byte strings are in Latin-1). As perl assumes
-the C locale by default, upgrading a string to UTF-8 may change the
-meaning of its contents regarding character classes, case mapping, etc.
-This should probably emit a warning (at least).
-
-This task is incremental - even a little bit of work on it will help.
 
 =head2 autovivification
 
@@ -437,6 +455,11 @@ L<perlrun>.)
 
 Currently the %ENV entries are always byte strings.
 
+=head2 Unicode and glob()
+
+Currently glob patterns and filenames returned from File::Glob::glob()
+are always byte strings.
+
 =head2 use less 'memory'
 
 Investigate trade offs to switch out perl's choices on memory usage.
@@ -462,8 +485,57 @@ system() accepts a LIST syntax (and a PROGRAM LIST syntax) to avoid
 running a shell. readpipe() (the function behind qx//) could be similarly
 extended.
 
+=head2 strcat(), strcpy(), strncat(), strncpy(), sprintf(), vsprintf()
 
+Maybe create a utility that checks after each libperl.a creation that
+none of the above (nor sprintf(), vsprintf(), or *SHUDDER* gets())
+ever creep back to libperl.a.
 
+  nm libperl.a | ./miniperl -alne '$o = $F[0] if /:$/; print "$o $F[1]" if $F[0] eq "U" && $F[1] =~ /^(?:strn?c(?:at|py)|v?sprintf|gets)$/'
+
+Note, of course, that this will only tell whether B<your> platform
+is using those naughty interfaces.
+
+=head2 Audit the code for destruction ordering assumptions
+
+Change 25773 notes
+
+    /* Need to check SvMAGICAL, as during global destruction it may be that
+       AvARYLEN(av) has been freed before av, and hence the SvANY() pointer
+       is now part of the linked list of SV heads, rather than pointing to
+       the original body.  */
+    /* FIXME - audit the code for other bugs like this one.  */
+
+adding the C<SvMAGICAL> check to
+
+    if (AvARYLEN(av) && SvMAGICAL(AvARYLEN(av))) {
+        MAGIC *mg = mg_find (AvARYLEN(av), PERL_MAGIC_arylen);
+
+Go through the core and look for similar assumptions that SVs have particular
+types, as all bets are off during global destruction.
+
+=head2 Extend PerlIO and PerlIO::Scalar
+
+PerlIO::Scalar doesn't know how to truncate().  Implementing this
+would require extending the PerlIO vtable.
+
+Similarly the PerlIO vtable doesn't know about formats (write()), or
+about stat(), or chmod()/chown(), utime(), or flock().
+
+(For PerlIO::Scalar it's hard to see what e.g. mode bits or ownership
+would mean.)
+
+PerlIO doesn't do directories or symlinks, either: mkdir(), rmdir(),
+opendir(), closedir(), seekdir(), rewinddir(), glob(); symlink(),
+readlink().
+
+=head2 -C on the #! line
+
+It should be possible to make -C work correctly if found on the #! line,
+given that all perl command line options are strict ASCII, and -C changes
+only the interpretation of non-ASCII characters, and not for the script file
+handle. To make it work needs some investigation of the ordering of function
+calls during startup, and (by implication) a bit of tweaking of that order.
 
 
 =head1 Tasks that need a knowledge of the interpreter
@@ -471,10 +543,10 @@ extended.
 These tasks would need C knowledge, and knowledge of how the interpreter works,
 or a willingness to learn.
 
-=head2 lexical pragmas
+=head2 Implement $value ~~ 0 .. $range
 
-Document the new support for lexical pragmas in 5.9.3 and how %^H works.
-Maybe C<re>, C<encoding>, maybe other pragmas could be made lexical.
+It would be nice to extend the syntax of the C<~~> operator to also
+understand numeric (and maybe alphanumeric) ranges.
 
 =head2 Attach/detach debugger from running program
 
@@ -493,27 +565,25 @@ slices. This would be good to fix.
 The old perltodo notes that lvalue functions don't work in the debugger. This
 would be good to fix.
 
-=head2 _ prototype character
-
-Study the possibility of adding a new prototype character, C<_>, meaning
-"this argument defaults to $_".
-
-=head2 state variables
-
-C<my $foo if 0;> is deprecated, and should be replaced with
-C<state $x = "initial value\n";> the syntax from Perl 6.
-
 =head2 regexp optimiser optional
 
 The regexp optimiser is not optional. It should configurable to be, to allow
 its performance to be measured, and its bugs to be easily demonstrated.
 
-=head2 UNITCHECK
+=head2 delete &function
 
-Introduce a new special block, UNITCHECK, which is run at the end of a
-compilation unit (module, file, eval(STRING) block). This will correspond to
-the Perl 6 CHECK. Perl 5's CHECK cannot be changed or removed because the
-O.pm/B.pm backend framework depends on it.
+Allow to delete functions. One can already undef them, but they're still
+in the stash.
+
+=head2 C</w> regex modifier
+
+That flag would enable to match whole words, and also to interpolate
+arrays as alternations. With it, C</P/w> would be roughly equivalent to:
+
+    do { local $"='|'; /\b(?:P)\b/ }
+
+See L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-01/msg00400.html>
+for the discussion.
 
 =head2 optional optimizer
 
@@ -560,9 +630,23 @@ investigate what hooks would need to be added to make it possible to provide
 the full assertion support from a CPAN module, so that we aren't constraining
 the imagination of future CPAN authors.
 
+=head2 Properly Unicode safe tokeniser and pads.
 
+The tokeniser isn't actually very UTF-8 clean. C<use utf8;> is a hack -
+variable names are stored in stashes as raw bytes, without the utf-8 flag
+set. The pad API only takes a C<char *> pointer, so that's all bytes too. The
+tokeniser ignores the UTF-8-ness of C<PL_rsfp>, or any SVs returned from
+source filters.  All this could be fixed.
 
+=head2 The yada yada yada operators
 
+Perl 6's Synopsis 3 says:
+
+I<The ... operator is the "yada, yada, yada" list operator, which is used as
+the body in function prototypes. It complains bitterly (by calling fail)
+if it is ever executed. Variant ??? calls warn, and !!! calls die.>
+
+Those would be nice to add to Perl 5. That could be done without new ops.
 
 =head1 Big projects
 
@@ -575,6 +659,8 @@ Generally make ithreads more robust. See also L</iCOW>
 
 This task is incremental - even a little bit of work on it will help, and
 will be greatly appreciated.
+
+Fix Perl_sv_dup, et al so that threads can return objects.
 
 =head2 iCOW
 
@@ -590,3 +676,9 @@ Fix (or rewrite) the implementation of the C</(?{...})/> closures.
 
 This will allow the use of a regex from inside (?{ }), (??{ }) and
 (?(?{ })|) constructs.
+
+=head2 Add class set operations to regexp engine
+
+Apparently these are quite useful. Anyway, Jeffery Friedl wants them.
+
+demerphq has this on his todo list, but right at the bottom.  
