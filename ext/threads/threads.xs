@@ -637,7 +637,7 @@ S_ithread_create(
      * 1 ref to be the responsibility of join/detach, so we don't get
      *      freed until join/detach, even if no thread objects remain.
      *      This allows the following to work:
-     *          { threads->new(sub{...}); } threads->object(1)->join;
+     *          { threads->create(sub{...}); } threads->object(1)->join;
      */
     thread->count = 3;
 

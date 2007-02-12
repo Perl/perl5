@@ -48,7 +48,7 @@ my $sref = \do{ my $x };
 share($sref);
 $sobj = $sref;
 
-threads->new(sub {
+threads->create(sub {
                 # Bless objects
                 bless $hobj, 'foo';
                 bless $aobj, 'bar';
@@ -99,7 +99,7 @@ ok(23, ref($$hobj{'array'}) eq 'yang', "blessed array in hash");
 ok(24, ref($$hobj{'scalar'}) eq 'baz', "blessed scalar in hash");
 ok(25, ${$$hobj{'scalar'}} eq '3', "blessed scalar in hash contents");
 
-threads->new(sub {
+threads->create(sub {
                 # Rebless objects
                 bless $hobj, 'oof';
                 bless $aobj, 'rab';

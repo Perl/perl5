@@ -212,7 +212,7 @@ $Base++;
             lock($counter);
             if ($n > 0) {
                 $counter++;
-                $th = threads->new(\&broad, $n-1);
+                $th = threads->create(\&broad, $n-1);
                 cond_wait($counter);
                 $counter += 10;
             }
@@ -224,7 +224,7 @@ $Base++;
         $th->join if $th;
     }
 
-    threads->new(\&broad, 3)->join;
+    threads->create(\&broad, 3)->join;
     ok(2, $counter == 33, "cond_broadcast: all three threads woken");
 
     $Base += 2;
@@ -243,7 +243,7 @@ $Base++;
             lock($r);
             if ($n > 0) {
                 $$r++;
-                $th = threads->new(\&broad2, $n-1);
+                $th = threads->create(\&broad2, $n-1);
                 cond_wait($r);
                 $$r += 10;
             }
@@ -255,7 +255,7 @@ $Base++;
         $th->join if $th;
     }
 
-    threads->new(\&broad2, 3)->join;;
+    threads->create(\&broad2, 3)->join;;
     ok(2, $$r == 33, "cond_broadcast: ref: all three threads woken");
 
     $Base += 2;

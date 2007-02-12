@@ -2007,7 +2007,7 @@ comma, i.e.  C<_aMY_CXT>, C<aMY_CXT_>, C<_pMY_CXT> and C<pMY_CXT_>.
 =item MY_CXT_CLONE
 
 By default, when a new interpreter is created as a copy of an existing one
-(eg via C<<threads->new()>>), both interpreters share the same physical
+(eg via C<<threads->create()>>), both interpreters share the same physical
 my_cxt_t structure. Calling C<MY_CXT_CLONE> (typically via the package's
 C<CLONE()> function), causes a byte-for-byte copy of the structure to be
 taken, and any future dMY_CXT will cause the copy to be accessed instead.

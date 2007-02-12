@@ -610,7 +610,7 @@ without it we only clone the data and zero the stacks,
 with it we copy the stacks and the new perl interpreter is
 ready to run at the exact same point as the previous one.
 The pseudo-fork code uses COPY_STACKS while the
-threads->new doesn't.
+threads->create doesn't.
 
 CLONEf_KEEP_PTR_TABLE
 perl_clone keeps a ptr_table with the pointer of the old

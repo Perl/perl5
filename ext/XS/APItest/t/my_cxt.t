@@ -50,7 +50,7 @@ sub do_thread {
 
 SKIP: {
     skip "No threads", 4 unless $threads;
-    threads->new(\&do_thread)->join;
+    threads->create(\&do_thread)->join;
 }
 
 is(my_cxt_getint(), 1234,  "int value preserved after join");

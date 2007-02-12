@@ -1849,7 +1849,7 @@ sub DB {
 	lock($DBGR);
 	my $tid;
 	if ($ENV{PERL5DB_THREADED}) {
-		$tid = eval { "[".threads->self->tid."]" };
+		$tid = eval { "[".threads->tid."]" };
 	}
 
     # Check for whether we should be running continuously or not.
@@ -4660,7 +4660,7 @@ sub cmd_e {
 		print "threads not loaded($ENV{PERL5DB_THREADED})
 		please run the debugger with PERL5DB_THREADED=1 set in the environment\n";
 	} else {
-		my $tid = threads->self->tid;
+		my $tid = threads->tid;
 		print "thread id: $tid\n";
 	}
 } ## end sub cmd_e
@@ -4682,7 +4682,7 @@ sub cmd_E {
 		print "threads not loaded($ENV{PERL5DB_THREADED})
 		please run the debugger with PERL5DB_THREADED=1 set in the environment\n";
 	} else {
-		my $tid = threads->self->tid;
+		my $tid = threads->tid;
 		print "thread ids: ".join(', ', 
 			map { ($tid == $_->tid ? '<'.$_->tid.'>' : $_->tid) } threads->list
 		)."\n"; 
