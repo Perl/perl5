@@ -12745,7 +12745,7 @@ Index: mg.c
     related to the numeric values of $! and $^E.  This patch *REPLACES*
     the one I posted earlier, which was only effective for $!.
 
-    [Some of this is superceded by similar stuff in the VMS patches.]
+    [Some of this is superseded by similar stuff in the VMS patches.]
 
 Index: op.c
 
