@@ -56,8 +56,6 @@
 
 #include "XSUB.h"
 
-#define PERLIO_MAX_REFCOUNTABLE_FD 2048
-
 #ifdef __Lynx__
 /* Missing proto on LynxOS */
 int mkstemp(char*);
@@ -2266,7 +2264,44 @@ PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 #ifdef USE_THREADS
 perl_mutex PerlIO_mutex;
 #endif
-int PerlIO_fd_refcnt[PERLIO_MAX_REFCOUNTABLE_FD];
+
+/* Must be called with PerlIO_mutex locked.  */
+static void
+S_more_refcounted_fds(pTHX_ const int new_fd) {
+    const int old_max = PL_perlio_fd_refcnt_size;
+    const int new_max = 16 + (new_fd & ~15);
+    int *new_array;
+
+    PerlIO_debug("More fds - old=%d, need %d, new=%d\n",
+		 old_max, new_fd, new_max);
+
+    if (new_fd < old_max) {
+	return;
+    }
+
+    assert (new_max > new_fd);
+
+    new_array
+	= PerlMemShared_realloc(PL_perlio_fd_refcnt, new_max * sizeof(int));
+
+    if (!new_array) {
+#ifdef USE_THREADS
+	MUTEX_UNLOCK(&PerlIO_mutex);
+#endif
+	/* Can't use PerlIO to write as it allocates memory */
+	PerlLIO_write(PerlIO_fileno(Perl_error_log),
+		      PL_no_mem, strlen(PL_no_mem));
+	my_exit(1);
+    }
+
+    PL_perlio_fd_refcnt_size = new_max;
+    PL_perlio_fd_refcnt = new_array;
+
+    PerlIO_debug("Zeroing %p, %d\n", new_array + old_max, new_max - old_max);
+
+    Zero(new_array + old_max, new_max - old_max, int);
+}
+
 
 void
 PerlIO_init(pTHX)
@@ -2282,12 +2317,18 @@ PerlIO_init(pTHX)
 void
 PerlIOUnix_refcnt_inc(int fd)
 {
-    if (fd >= 0 && fd < PERLIO_MAX_REFCOUNTABLE_FD) {
+    dTHX;
+    if (fd >= 0) {
+
 #ifdef USE_THREADS
 	MUTEX_LOCK(&PerlIO_mutex);
 #endif
-	PerlIO_fd_refcnt[fd]++;
-	PerlIO_debug("fd %d refcnt=%d\n",fd,PerlIO_fd_refcnt[fd]);
+	if (fd >= PL_perlio_fd_refcnt_size)
+	    S_more_refcounted_fds(aTHX_ fd);
+
+	PL_perlio_fd_refcnt[fd]++;
+	PerlIO_debug("fd %d refcnt=%d\n",fd,PL_perlio_fd_refcnt[fd]);
+
 #ifdef USE_THREADS
 	MUTEX_UNLOCK(&PerlIO_mutex);
 #endif
@@ -2297,12 +2338,18 @@ PerlIOUnix_refcnt_inc(int fd)
 int
 PerlIOUnix_refcnt_dec(int fd)
 {
+    dTHX;
     int cnt = 0;
-    if (fd >= 0 && fd < PERLIO_MAX_REFCOUNTABLE_FD) {
+    if (fd >= 0) {
 #ifdef USE_THREADS
 	MUTEX_LOCK(&PerlIO_mutex);
 #endif
-	cnt = --PerlIO_fd_refcnt[fd];
+	/* XXX should this be a panic?  */
+	if (fd >= PL_perlio_fd_refcnt_size)
+	    S_more_refcounted_fds(aTHX_ fd);
+
+	/* XXX should this be a panic if it drops below 0?  */
+	cnt = --PL_perlio_fd_refcnt[fd];
 	PerlIO_debug("fd %d refcnt=%d\n",fd,cnt);
 #ifdef USE_THREADS
 	MUTEX_UNLOCK(&PerlIO_mutex);
@@ -2534,7 +2581,7 @@ PerlIOUnix_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
     if (flags & PERLIO_DUP_FD) {
 	fd = PerlLIO_dup(fd);
     }
-    if (fd >= 0 && fd < PERLIO_MAX_REFCOUNTABLE_FD) {
+    if (fd >= 0) {
 	f = PerlIOBase_dup(aTHX_ f, o, param, flags);
 	if (f) {
 	    /* If all went well overwrite fd in dup'ed lay with the dup()'ed fd */

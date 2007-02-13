@@ -1688,11 +1688,6 @@
 #ifdef PERL_CORE
 #define my_swabn		Perl_my_swabn
 #endif
-#define gv_fetchpvn_flags	Perl_gv_fetchpvn_flags
-#define gv_fetchsv		Perl_gv_fetchsv
-#ifdef PERL_CORE
-#define is_gv_magical_sv	Perl_is_gv_magical_sv
-#endif
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
@@ -1754,6 +1749,11 @@
 #ifndef HAS_STRLCAT
 #endif
 #ifndef HAS_STRLCPY
+#endif
+#define gv_fetchpvn_flags	Perl_gv_fetchpvn_flags
+#define gv_fetchsv		Perl_gv_fetchsv
+#ifdef PERL_CORE
+#define is_gv_magical_sv	Perl_is_gv_magical_sv
 #endif
 #ifndef SPRINTF_RETURNS_STRLEN
 #endif
@@ -3786,11 +3786,6 @@
 #ifdef PERL_CORE
 #define my_swabn		Perl_my_swabn
 #endif
-#define gv_fetchpvn_flags(a,b,c,d)	Perl_gv_fetchpvn_flags(aTHX_ a,b,c,d)
-#define gv_fetchsv(a,b,c)	Perl_gv_fetchsv(aTHX_ a,b,c)
-#ifdef PERL_CORE
-#define is_gv_magical_sv(a,b)	Perl_is_gv_magical_sv(aTHX_ a,b)
-#endif
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
@@ -3852,6 +3847,11 @@
 #ifndef HAS_STRLCAT
 #endif
 #ifndef HAS_STRLCPY
+#endif
+#define gv_fetchpvn_flags(a,b,c,d)	Perl_gv_fetchpvn_flags(aTHX_ a,b,c,d)
+#define gv_fetchsv(a,b,c)	Perl_gv_fetchsv(aTHX_ a,b,c)
+#ifdef PERL_CORE
+#define is_gv_magical_sv(a,b)	Perl_is_gv_magical_sv(aTHX_ a,b)
 #endif
 #ifndef SPRINTF_RETURNS_STRLEN
 #endif

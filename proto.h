@@ -1465,11 +1465,9 @@ PERL_CALLCONV OP *	Perl_my_attrs(pTHX_ OP *o, OP *attrs);
 PERL_CALLCONV void	Perl_boot_core_xsutils(pTHX);
 #if defined(USE_ITHREADS)
 PERL_CALLCONV PERL_CONTEXT*	Perl_cx_dup(pTHX_ PERL_CONTEXT* cx, I32 ix, I32 max, CLONE_PARAMS* param)
-			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV PERL_SI*	Perl_si_dup(pTHX_ PERL_SI* si, CLONE_PARAMS* param)
-			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV ANY*	Perl_ss_dup(pTHX_ PerlInterpreter* proto_perl, CLONE_PARAMS* param)
@@ -1477,11 +1475,9 @@ PERL_CALLCONV ANY*	Perl_ss_dup(pTHX_ PerlInterpreter* proto_perl, CLONE_PARAMS* 
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV void*	Perl_any_dup(pTHX_ void* v, PerlInterpreter* proto_perl)
-			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV HE*	Perl_he_dup(pTHX_ HE* e, bool shared, CLONE_PARAMS* param)
-			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV REGEXP*	Perl_re_dup(pTHX_ REGEXP* r, CLONE_PARAMS* param)
@@ -1489,23 +1485,18 @@ PERL_CALLCONV REGEXP*	Perl_re_dup(pTHX_ REGEXP* r, CLONE_PARAMS* param)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV PerlIO*	Perl_fp_dup(pTHX_ PerlIO* fp, char type, CLONE_PARAMS* param)
-			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV DIR*	Perl_dirp_dup(pTHX_ DIR* dp)
-			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV GP*	Perl_gp_dup(pTHX_ GP* gp, CLONE_PARAMS* param)
-			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV MAGIC*	Perl_mg_dup(pTHX_ MAGIC* mg, CLONE_PARAMS* param)
-			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV SV*	Perl_sv_dup(pTHX_ SV* sstr, CLONE_PARAMS* param)
-			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV void	Perl_rvpv_dup(pTHX_ SV* dstr, SV *sstr, CLONE_PARAMS* param);
@@ -1708,10 +1699,7 @@ STATIC SV*	S_refto(pTHX_ SV* sv)
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
 PERL_CALLCONV GV*	Perl_softref2xv(pTHX_ SV *const sv, const char *const what, const U32 type, SV ***spp)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_4);
+			__attribute__warn_unused_result__;
 
 #endif
 

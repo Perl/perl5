@@ -77,3 +77,8 @@ PERLVARI(Gcsighandlerp,	Sighandler_t, Perl_csighandler)	/* Pointer to C-level si
 #ifndef PERL_USE_SAFE_PUTENV
 PERLVARI(Guse_safe_putenv, int, 1)
 #endif
+
+#ifdef USE_PERLIO
+PERLVARI(Gperlio_fd_refcnt, int*, 0) /* Pointer to array of fd refcounts.  */
+PERLVARI(Gperlio_fd_refcnt_size, int, 0) /* Size of the array */
+#endif
