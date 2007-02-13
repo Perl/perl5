@@ -250,7 +250,7 @@ some of the compilers on some of the platforms tested.)
 
 It's now possible to build a C<perl-static.exe> that doesn't depend
 on C<perl59.dll> on Win32. See the Win32 makefiles for details.
-(Steve Hay)
+(Vadim Konovalov)
 
 =head2 Ports
 
