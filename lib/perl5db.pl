@@ -498,10 +498,10 @@ where it has to go.
 
 package DB;
 
-use IO::Handle;
+BEGIN {eval 'use IO::Handle'};	# Needed for flush only? breaks under miniperl
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
-$VERSION = 1.28;
+$VERSION = 1.29;
 
 $header = "perl5db.pl version $VERSION";
 
@@ -927,7 +927,9 @@ sub eval {
 #   + wrapped restart and enabled rerun [-n] (go back n steps) command.
 # Changes: 1.28: Oct 12, 2004 Richard Foley <richard.foley@rfi.net>
 #   + Added threads support (inc. e and E commands)
-####################################################################
+# Changes: 1.29: Nov 28, 2006 Bo Lindbergh <blgl@hagernas.com> 
+#   + Added macosx_get_fork_TTY support 
+########################################################################
 
 =head1 DEBUGGER INITIALIZATION
 
@@ -1339,7 +1341,7 @@ else {
     # child debugger, and mark us as the parent, so we'll know to set up
     # more TTY's is we have to.
     $ENV{PERLDB_PIDS} = "$$";
-    $pids             = "{pid=$$}";
+    $pids             = "[pid=$$]";
     $term_pid         = $$;
 }
 
@@ -1442,29 +1444,36 @@ if ( defined $ENV{PERLDB_OPTS} ) {
 
 The last thing we do during initialization is determine which subroutine is
 to be used to obtain a new terminal when a new debugger is started. Right now,
-the debugger only handles X Windows and OS/2.
+the debugger only handles X Windows, OS/2, and Mac OS X (darwin).
 
 =cut
 
 # Set up the get_fork_TTY subroutine to be aliased to the proper routine.
 # Works if you're running an xterm or xterm-like window, or you're on
-# OS/2. This may need some expansion: for instance, this doesn't handle
-# OS X Terminal windows.
+# OS/2, or on Mac OS X. This may need some expansion.
 
-if (
-    not defined &get_fork_TTY    # no routine exists,
-    and defined $ENV{TERM}       # and we know what kind
-                                 # of terminal this is,
-    and $ENV{TERM} eq 'xterm'    # and it's an xterm,
-#   and defined $ENV{WINDOWID}   # and we know what window this is, <- wrong metric
-    and defined $ENV{DISPLAY}    # and what display it's on,
-  )
+if (not defined &get_fork_TTY)       # only if no routine exists
 {
-    *get_fork_TTY = \&xterm_get_fork_TTY;    # use the xterm version
+    if (defined $ENV{TERM}                       # If we know what kind
+                                                 # of terminal this is,
+        and $ENV{TERM} eq 'xterm'                # and it's an xterm,
+        and defined $ENV{DISPLAY}                # and what display it's on,
+      )
+    {
+        *get_fork_TTY = \&xterm_get_fork_TTY;    # use the xterm version
+    }
+    elsif ( $^O eq 'os2' ) {                     # If this is OS/2,
+        *get_fork_TTY = \&os2_get_fork_TTY;      # use the OS/2 version
+    }
+    elsif ( $^O eq 'darwin'                      # If this is Mac OS X
+            and defined $ENV{TERM_PROGRAM}       # and we're running inside
+            and $ENV{TERM_PROGRAM}
+                eq 'Apple_Terminal'              # Terminal.app
+            )
+    {
+        *get_fork_TTY = \&macosx_get_fork_TTY;   # use the Mac OS X version
+    }
 } ## end if (not defined &get_fork_TTY...
-elsif ( $^O eq 'os2' ) {                     # If this is OS/2,
-    *get_fork_TTY = \&os2_get_fork_TTY;      # use the OS/2 version
-}
 
 # untaint $^O, which may have been tainted by the last statement.
 # see bug [perl #24674]
@@ -3427,8 +3436,10 @@ any variables we might want to address in the C<DB> package.
                 $onetimedumpDepth = undef;
             }
             elsif ( $term_pid == $$ ) {
-                STDOUT->flush();
-                STDERR->flush();
+		eval {		# May run under miniperl, when not available...
+                    STDOUT->flush();
+                    STDERR->flush();
+		};
 
                 # XXX If this is the master pid, print a newline.
                 print $OUT "\n";
@@ -6078,9 +6089,10 @@ is tasked with doing all the necessary operating system mojo to get a new
 TTY (and probably another window) and to direct the new debugger to read and
 write there.
 
-The debugger provides C<get_fork_TTY> functions which work for X Windows and
-OS/2. Other systems are not supported. You are encouraged to write 
-C<get_fork_TTY> functions which work for I<your> platform and contribute them.
+The debugger provides C<get_fork_TTY> functions which work for X Windows,
+OS/2, and Mac OS X. Other systems are not supported. You are encouraged
+to write C<get_fork_TTY> functions which work for I<your> platform
+and contribute them.
 
 =head3 C<xterm_get_fork_TTY>
 
@@ -6123,65 +6135,75 @@ XXX It behooves an OS/2 expert to write the necessary documentation for this!
 =cut
 
 # This example function resets $IN, $OUT itself
-sub os2_get_fork_TTY {
-    local $^F = 40;    # XXXX Fixme!
+my $c_pipe = 0;
+sub os2_get_fork_TTY { # A simplification of the following (and works without):
     local $\  = '';
-    my ( $in1, $out1, $in2, $out2 );
-
-    # Having -d in PERL5OPT would lead to a disaster...
-    local $ENV{PERL5OPT} = $ENV{PERL5OPT} if $ENV{PERL5OPT};
-    $ENV{PERL5OPT} =~ s/(?:^|(?<=\s))-d\b//  if $ENV{PERL5OPT};
-    $ENV{PERL5OPT} =~ s/(?:^|(?<=\s))-d\B/-/ if $ENV{PERL5OPT};
-    print $OUT "Making kid PERL5OPT->`$ENV{PERL5OPT}'.\n" if $ENV{PERL5OPT};
-    local $ENV{PERL5LIB} = $ENV{PERL5LIB} ? $ENV{PERL5LIB} : $ENV{PERLLIB};
-    $ENV{PERL5LIB} = '' unless defined $ENV{PERL5LIB};
-    $ENV{PERL5LIB} = join ';', @ini_INC, split /;/, $ENV{PERL5LIB};
     ( my $name = $0 ) =~ s,^.*[/\\],,s;
-    my @args;
-
-    if (
-            pipe $in1, $out1
-        and pipe $in2, $out2
-
-        # system P_SESSION will fail if there is another process
-        # in the same session with a "dependent" asynchronous child session.
-        and @args = (
-            $rl, fileno $in1, fileno $out2, "Daughter Perl debugger $pids $name"
-        )
-        and (
-            ( $kpid = CORE::system 4, $^X, '-we',
-                <<'ES', @args ) >= 0    # P_SESSION
-END {sleep 5 unless $loaded}
-BEGIN {open STDIN,  '</dev/con' or warn "reopen stdin: $!"}
-use OS2::Process;
-
-my ($rl, $in) = (shift, shift);        # Read from $in and pass through
-set_title pop;
-system P_NOWAIT, $^X, '-we', <<EOS or die "Cannot start a grandkid";
-  open IN, '<&=$in' or die "open <&=$in: \$!";
-  \$| = 1; print while sysread IN, \$_, 1<<16;
-EOS
-
-my $out = shift;
-open OUT, ">&=$out" or die "Cannot open &=$out for writing: $!";
-select OUT;    $| = 1;
-require Term::ReadKey if $rl;
-Term::ReadKey::ReadMode(4) if $rl; # Nodelay on kbd.  Pipe is automatically nodelay...
-print while sysread STDIN, $_, 1<<($rl ? 16 : 0);
-ES
-            or warn "system P_SESSION: $!, $^E" and 0
-        )
-        and close $in1
-        and close $out2
-      )
-    {
-        $pidprompt = '';    # Shown anyway in titlebar
-        reset_IN_OUT( $in2, $out1 );
-        $tty = '*reset*';
-        return '';          # Indicate that reset_IN_OUT is called
-    } ## end if (pipe $in1, $out1 and...
-    return;
+    my %opt = (	title => "Daughter Perl debugger $pids $name",
+		($rl ? (read_by_key => 1) : ()) );
+    require OS2::Process;
+    my ($in, $out, $pid) = eval { OS2::Process::io_term(related => 0, %opt) }
+      or return;
+    $pidprompt = '';    # Shown anyway in titlebar
+    reset_IN_OUT($in, $out);
+    $tty = '*reset*';
+    return '';          # Indicate that reset_IN_OUT is called
 } ## end sub os2_get_fork_TTY
+
+=head3 C<macosx_get_fork_TTY>
+
+The Mac OS X version uses AppleScript to tell Terminal.app to create
+a new window.
+
+=cut
+
+# Notes about Terminal.app's AppleScript support,
+# (aka things that might break in future OS versions).
+#
+# The "do script" command doesn't return a reference to the new window
+# it creates, but since it appears frontmost and windows are enumerated
+# front to back, we can use "first window" === "window 1".
+#
+# There's no direct accessor for the tty device name, so we fiddle
+# with the window title options until it says what we want.
+#
+# Since "do script" is implemented by supplying the argument (plus a
+# return character) as terminal input, there's a potential race condition
+# where the debugger could beat the shell to reading the command.
+# To prevent this, we wait for the screen to clear before proceeding.
+#
+# Tested and found to be functional in Mac OS X 10.3.9 and 10.4.8.
+
+sub macosx_get_fork_TTY
+{
+    my($pipe,$tty);
+
+    return unless open($pipe,'-|','/usr/bin/osascript','-e',<<'__SCRIPT__');
+tell application "Terminal"
+    do script "clear;exec sleep 100000"
+    tell first window
+        set title displays shell path to false
+        set title displays window size to false
+        set title displays file name to false
+        set title displays device name to true
+        set title displays custom title to true
+        set custom title to ""
+        copy name to thetitle
+        set custom title to "forked perl debugger"
+        repeat while (length of first paragraph of (get contents)) > 0
+            delay 0.1
+        end repeat
+    end tell
+end tell
+"/dev/" & thetitle
+__SCRIPT__
+
+    $tty=readline($pipe);
+    close($pipe);
+    return unless defined($tty) && $tty =~ m(^/dev/);
+    chomp $tty;
+    return $tty;
+}
 
 =head2 C<create_IN_OUT($flags)>
 
@@ -6231,9 +6253,10 @@ EOP
 
 EOP
         print_help(<<EOP);
-  I know how to switch the output to a different window in xterms
-  and OS/2 consoles only.  For a manual switch, put the name of the created I<TTY>
-  in B<\$DB::fork_TTY>, or define a function B<DB::get_fork_TTY()> returning this.
+  I know how to switch the output to a different window in xterms, OS/2
+  consoles, and Mac OS X Terminal.app only.  For a manual switch, put the name
+  of the created I<TTY> in B<\$DB::fork_TTY>, or define a function
+  B<DB::get_fork_TTY()> returning this.
 
   On I<UNIX>-like systems one can get the name of a I<TTY> for the given window
   by typing B<tty>, and disconnect the I<shell> from I<TTY> by B<sleep 1000000>.
@@ -6366,9 +6389,13 @@ sub readline {
         $OUT->write( join( '', @_ ) );
 
         # Receive anything there is to receive.
-        my $stuff;
-        $IN->recv( $stuff, 2048 );    # XXX "what's wrong with sysread?"
-                                      # XXX Don't know. You tell me.
+        $stuff;
+        my $stuff = '';
+        my $buf;
+        do {
+            $IN->recv( $buf = '', 2048 );   # XXX "what's wrong with sysread?"
+                                            # XXX Don't know. You tell me.
+        } while length $buf and ($stuff .= $buf) !~ /\n/;
 
         # What we got.
         $stuff;
