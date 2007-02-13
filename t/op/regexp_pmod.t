@@ -10,8 +10,8 @@ use strict;
 use warnings;
 
 our @tests = (
-    # /k     Pattern   PRE     MATCH   POST
-    [ 'k',   "456",    "123-", "456",  "-789"],
+    # /p     Pattern   PRE     MATCH   POST
+    [ 'p',   "456",    "123-", "456",  "-789"],
     [ '',    "(456)",  "123-", "456",  "-789"],
     [ '',    "456",    undef,  undef,  undef ],
 );
@@ -24,11 +24,11 @@ sub _u($$) { "$_[0] is ".(defined $_[1] ? "'$_[1]'" : "undef") }
 
 $_ = '123-456-789';
 foreach my $test (@tests) {
-    my ($k, $pat,$l,$m,$r) = @$test;
-    my $test_name = "/$pat/$k";
-    my $ok = ok($k ? /$pat/k : /$pat/, $test_name);
+    my ($p, $pat,$l,$m,$r) = @$test;
+    my $test_name = "/$pat/$p";
+    my $ok = ok($p ? /$pat/p : /$pat/, $test_name);
     SKIP: {
-        skip "/$pat/$k failed to match", 3
+        skip "/$pat/$p failed to match", 3
             unless $ok;
         is(${^PREMATCH},  $l,_u "$test_name: ^PREMATCH",$l);
         is(${^MATCH},     $m,_u "$test_name: ^MATCH",$m );
@@ -36,4 +36,4 @@ foreach my $test (@tests) {
     }
 }
 is($W,"","No warnings should be produced");
-ok(!defined ${^MATCH}, "No /k in scope so ^MATCH is undef");
+ok(!defined ${^MATCH}, "No /p in scope so ^MATCH is undef");

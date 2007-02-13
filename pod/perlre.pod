@@ -27,15 +27,6 @@ L<perlop/"Gory details of parsing quoted constructs">.
 
 =over 4
 
-=item i
-X</i> X<regex, case-insensitive> X<regexp, case-insensitive>
-X<regular expression, case-insensitive>
-
-Do case-insensitive pattern matching.
-
-If C<use locale> is in effect, the case map is taken from the current
-locale.  See L<perllocale>.
-
 =item m
 X</m> X<regex, multiline> X<regexp, multiline> X<regular expression, multiline>
 
@@ -54,10 +45,25 @@ Used together, as /ms, they let the "." match any character whatsoever,
 while still allowing "^" and "$" to match, respectively, just after
 and just before newlines within the string.
 
+=item i
+X</i> X<regex, case-insensitive> X<regexp, case-insensitive>
+X<regular expression, case-insensitive>
+
+Do case-insensitive pattern matching.
+
+If C<use locale> is in effect, the case map is taken from the current
+locale.  See L<perllocale>.
+
 =item x
 X</x>
 
 Extend your pattern's legibility by permitting whitespace and comments.
+
+=item p
+X</p> X<regex, preserve> X<regexp, preserve>
+
+Preserve the string matched such that ${^PREMATCH}, {$^MATCH}, and
+${^POSTMATCH} are available for use after matching.
 
 =back
 
@@ -593,11 +599,11 @@ X<$&> X<$`> X<$'>
 As a workaround for this problem, Perl 5.10 introduces C<${^PREMATCH}>,
 C<${^MATCH}> and C<${^POSTMATCH}>, which are equivalent to C<$`>, C<$&>
 and C<$'>, B<except> that they are only guaranteed to be defined after a
-successful match that was executed with the C</k> (keep-copy) modifier.
+successful match that was executed with the C</p> (preserve) modifier.
 The use of these variables incurs no global performance penalty, unlike
 their punctuation char equivalents, however at the trade-off that you
 have to tell perl when you want to use them.
-X</k> X<k modifier>
+X</p> X<p modifier>
 
 Backslashed metacharacters in Perl are alphanumeric, such as C<\b>,
 C<\w>, C<\n>.  Unlike some other regular expression languages, there

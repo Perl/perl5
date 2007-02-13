@@ -17,12 +17,12 @@ use re qw(is_regexp regexp_pattern regmust
           regname regnames regnames_count 
           regnames_iterinit regnames_iternext);
 {
-    my $qr=qr/foo/ki;
+    my $qr=qr/foo/pi;
     ok(is_regexp($qr),'is_regexp($qr)');
     ok(!is_regexp(''),'is_regexp("")');
     is((regexp_pattern($qr))[0],'foo','regexp_pattern[0]');
-    is((regexp_pattern($qr))[1],'ik','regexp_pattern[1]');
-    is(regexp_pattern($qr),'(?ki-xsm:foo)','scalar regexp_pattern');
+    is((regexp_pattern($qr))[1],'ip','regexp_pattern[1]');
+    is(regexp_pattern($qr),'(?pi-xsm:foo)','scalar regexp_pattern');
     ok(!regexp_pattern(''),'!regexp_pattern("")');
 }
 {

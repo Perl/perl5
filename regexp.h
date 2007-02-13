@@ -161,9 +161,13 @@ typedef struct regexp_engine {
 
 /* chars and strings used as regex pattern modifiers
  * Singlular is a 'c'har, plural is a "string"
+ *
+ * NOTE, KEEPCOPY was originally 'k', but was changed to 'p' for preserve
+ * for compatibility reasons with Regexp::Common which highjacked (?k:...)
+ * for its own uses. So 'k' is out as well.
  */
 #define EXEC_PAT_MOD         'e'
-#define KEEPCOPY_PAT_MOD     'k'
+#define KEEPCOPY_PAT_MOD     'p'
 #define ONCE_PAT_MOD         'o'
 #define GLOBAL_PAT_MOD       'g'
 #define CONTINUE_PAT_MOD     'c'
@@ -173,7 +177,7 @@ typedef struct regexp_engine {
 #define XTENDED_PAT_MOD      'x'
 
 #define ONCE_PAT_MODS        "o"
-#define KEEPCOPY_PAT_MODS    "k"
+#define KEEPCOPY_PAT_MODS    "p"
 #define EXEC_PAT_MODS        "e"
 #define LOOP_PAT_MODS        "gc"
 

@@ -234,7 +234,7 @@ X<${^MATCH}>
 This is similar to C<$&> (C<$POSTMATCH>) except that it does not incur the
 performance penalty associated with that variable, and is only guaranteed
 to return a defined value when the pattern was compiled or executed with
-the C</k> modifier.
+the C</p> modifier.
 
 =item $PREMATCH
 
@@ -257,7 +257,7 @@ X<${^PREMATCH}>
 This is similar to C<$`> ($PREMATCH) except that it does not incur the
 performance penalty associated with that variable, and is only guaranteed
 to return a defined value when the pattern was compiled or executed with
-the C</k> modifier.
+the C</p> modifier.
 
 =item $POSTMATCH
 
@@ -286,7 +286,7 @@ X<${^POSTMATCH}>
 This is similar to C<$'> (C<$POSTMATCH>) except that it does not incur the
 performance penalty associated with that variable, and is only guaranteed
 to return a defined value when the pattern was compiled or executed with
-the C</k> modifier.
+the C</p> modifier.
 
 =item $LAST_PAREN_MATCH
 

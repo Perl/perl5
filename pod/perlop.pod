@@ -1049,33 +1049,77 @@ matching and related activities.
 
 =over 8
 
-=item ?PATTERN?
-X<?>
+=item qr/STRING/msixpo
+X<qr> X</i> X</m> X</o> X</s> X</x>
 
-This is just like the C</pattern/> search, except that it matches only
-once between calls to the reset() operator.  This is a useful
-optimization when you want to see only the first occurrence of
-something in each file of a set of files, for instance.  Only C<??>
-patterns local to the current package are reset.
+This operator quotes (and possibly compiles) its I<STRING> as a regular
+expression.  I<STRING> is interpolated the same way as I<PATTERN>
+in C<m/PATTERN/>.  If "'" is used as the delimiter, no interpolation
+is done.  Returns a Perl value which may be used instead of the
+corresponding C</STRING/imosx> expression.
 
-    while (<>) {
-	if (?^$?) {
-			    # blank line between header and body
-	}
-    } continue {
-	reset if eof;	    # clear ?? status for next file
+For example,
+
+    $rex = qr/my.STRING/is;
+    s/$rex/foo/;
+
+is equivalent to
+
+    s/my.STRING/foo/is;
+
+The result may be used as a subpattern in a match:
+
+    $re = qr/$pattern/;
+    $string =~ /foo${re}bar/;	# can be interpolated in other patterns
+    $string =~ $re;		# or used standalone
+    $string =~ /$re/;		# or this way
+
+Since Perl may compile the pattern at the moment of execution of qr()
+operator, using qr() may have speed advantages in some situations,
+notably if the result of qr() is used standalone:
+
+    sub match {
+	my $patterns = shift;
+	my @compiled = map qr/$_/i, @$patterns;
+	grep {
+	    my $success = 0;
+	    foreach my $pat (@compiled) {
+		$success = 1, last if /$pat/;
+	    }
+	    $success;
+	} @_;
     }
 
-This usage is vaguely deprecated, which means it just might possibly
-be removed in some distant future version of Perl, perhaps somewhere
-around the year 2168.
+Precompilation of the pattern into an internal representation at
+the moment of qr() avoids a need to recompile the pattern every
+time a match C</$pat/> is attempted.  (Perl has many other internal
+optimizations, but none would be triggered in the above example if
+we did not use qr() operator.)
 
-=item m/PATTERN/cgimosxk
+Options are:
+
+    m	Treat string as multiple lines.
+    s	Treat string as single line. (Make . match a newline)
+    i	Do case-insensitive pattern matching.
+    x	Use extended regular expressions.
+    p	When matching preserve a copy of the matched string so
+        that ${^PREMATCH}, ${^MATCH}, ${^POSTMATCH} will be defined.
+    o	Compile pattern only once.
+
+If a precompiled pattern is embedded in a larger pattern then the effect
+of 'msixp' will be propagated appropriately.  The effect of the 'o'
+modifier has is not propagated, being restricted to those patterns
+explicitly using it.
+
+See L<perlre> for additional information on valid syntax for STRING, and
+for a detailed look at the semantics of regular expressions.
+
+=item m/PATTERN/msixpogc
 X<m> X<operator, match>
 X<regexp, options> X<regexp> X<regex, options> X<regex>
 X</c> X</i> X</m> X</o> X</s> X</x>
 
-=item /PATTERN/cgimosxk
+=item /PATTERN/msixpogc
 
 Searches a string for a pattern match, and in scalar context returns
 true if it succeeds, false if it fails.  If no string is specified
@@ -1086,17 +1130,11 @@ rather tightly.)  See also L<perlre>.  See L<perllocale> for
 discussion of additional considerations that apply when C<use locale>
 is in effect.
 
-Options are:
+Options are as described in qr// in addition to the following match
+process modifiers
 
-    i	Do case-insensitive pattern matching.
-    m	Treat string as multiple lines.
-    s	Treat string as single line.
-    x	Use extended regular expressions.
     g	Match globally, i.e., find all occurrences.
     c	Do not reset search position on a failed match when /g is in effect.
-    o	Compile pattern only once.
-    k	Keep a copy of the matched string so that ${^MATCH} and friends
-	will be defined.
 
 If "/" is the delimiter then the initial C<m> is optional.  With the C<m>
 you can use any pair of non-alphanumeric, non-whitespace characters
@@ -1256,6 +1294,137 @@ Here is the output (split into several lines):
  lowercase lowercase line-noise lowercase lowercase line-noise
  MiXeD line-noise. That's all!
 
+=item ?PATTERN?
+X<?>
+
+This is just like the C</pattern/> search, except that it matches only
+once between calls to the reset() operator.  This is a useful
+optimization when you want to see only the first occurrence of
+something in each file of a set of files, for instance.  Only C<??>
+patterns local to the current package are reset.
+
+    while (<>) {
+	if (?^$?) {
+			    # blank line between header and body
+	}
+    } continue {
+	reset if eof;	    # clear ?? status for next file
+    }
+
+This usage is vaguely deprecated, which means it just might possibly
+be removed in some distant future version of Perl, perhaps somewhere
+around the year 2168.
+
+=item s/PATTERN/REPLACEMENT/msixpogce
+X<substitute> X<substitution> X<replace> X<regexp, replace>
+X<regexp, substitute> X</e> X</g> X</i> X</m> X</o> X</s> X</x>
+
+Searches a string for a pattern, and if found, replaces that pattern
+with the replacement text and returns the number of substitutions
+made.  Otherwise it returns false (specifically, the empty string).
+
+If no string is specified via the C<=~> or C<!~> operator, the C<$_>
+variable is searched and modified.  (The string specified with C<=~> must
+be scalar variable, an array element, a hash element, or an assignment
+to one of those, i.e., an lvalue.)
+
+If the delimiter chosen is a single quote, no interpolation is
+done on either the PATTERN or the REPLACEMENT.  Otherwise, if the
+PATTERN contains a $ that looks like a variable rather than an
+end-of-string test, the variable will be interpolated into the pattern
+at run-time.  If you want the pattern compiled only once the first time
+the variable is interpolated, use the C</o> option.  If the pattern
+evaluates to the empty string, the last successfully executed regular
+expression is used instead.  See L<perlre> for further explanation on these.
+See L<perllocale> for discussion of additional considerations that apply
+when C<use locale> is in effect.
+
+Options are as with m// with the addition of the following replacement
+specific options:
+
+    e	Evaluate the right side as an expression.
+    ee  Evaluate the right side as a string then eval the result
+
+Any non-alphanumeric, non-whitespace delimiter may replace the
+slashes.  If single quotes are used, no interpretation is done on the
+replacement string (the C</e> modifier overrides this, however).  Unlike
+Perl 4, Perl 5 treats backticks as normal delimiters; the replacement
+text is not evaluated as a command.  If the
+PATTERN is delimited by bracketing quotes, the REPLACEMENT has its own
+pair of quotes, which may or may not be bracketing quotes, e.g.,
+C<s(foo)(bar)> or C<< s<foo>/bar/ >>.  A C</e> will cause the
+replacement portion to be treated as a full-fledged Perl expression
+and evaluated right then and there.  It is, however, syntax checked at
+compile-time. A second C<e> modifier will cause the replacement portion
+to be C<eval>ed before being run as a Perl expression.
+
+Examples:
+
+    s/\bgreen\b/mauve/g;		# don't change wintergreen
+
+    $path =~ s|/usr/bin|/usr/local/bin|;
+
+    s/Login: $foo/Login: $bar/; # run-time pattern
+
+    ($foo = $bar) =~ s/this/that/;	# copy first, then change
+
+    $count = ($paragraph =~ s/Mister\b/Mr./g);  # get change-count
+
+    $_ = 'abc123xyz';
+    s/\d+/$&*2/e;		# yields 'abc246xyz'
+    s/\d+/sprintf("%5d",$&)/e;	# yields 'abc  246xyz'
+    s/\w/$& x 2/eg;		# yields 'aabbcc  224466xxyyzz'
+
+    s/%(.)/$percent{$1}/g;	# change percent escapes; no /e
+    s/%(.)/$percent{$1} || $&/ge;	# expr now, so /e
+    s/^=(\w+)/pod($1)/ge;	# use function call
+
+    # expand variables in $_, but dynamics only, using
+    # symbolic dereferencing
+    s/\$(\w+)/${$1}/g;
+
+    # Add one to the value of any numbers in the string
+    s/(\d+)/1 + $1/eg;
+
+    # This will expand any embedded scalar variable
+    # (including lexicals) in $_ : First $1 is interpolated
+    # to the variable name, and then evaluated
+    s/(\$\w+)/$1/eeg;
+
+    # Delete (most) C comments.
+    $program =~ s {
+	/\*	# Match the opening delimiter.
+	.*?	# Match a minimal number of characters.
+	\*/	# Match the closing delimiter.
+    } []gsx;
+
+    s/^\s*(.*?)\s*$/$1/;	# trim whitespace in $_, expensively
+
+    for ($variable) {		# trim whitespace in $variable, cheap
+	s/^\s+//;
+	s/\s+$//;
+    }
+
+    s/([^ ]*) *([^ ]*)/$2 $1/;	# reverse 1st two fields
+
+Note the use of $ instead of \ in the last example.  Unlike
+B<sed>, we use the \<I<digit>> form in only the left hand side.
+Anywhere else it's $<I<digit>>.
+
+Occasionally, you can't use just a C</g> to get all the changes
+to occur that you might want.  Here are two common cases:
+
+    # put commas in the right places in an integer
+    1 while s/(\d)(\d\d\d)(?!\d)/$1,$2/g;
+
+    # expand tabs to 8-column spacing
+    1 while s/\t+/' ' x (length($&)*8 - length($`)%8)/e;
+
+=back
+
+=head2 Quote-Like Operators
+X<operator, quote-like>
+
 =item q/STRING/
 X<q> X<quote, single> X<'> X<''>
 
@@ -1280,64 +1449,6 @@ A double-quoted, interpolated string.
      (*** The previous line contains the naughty word "$1".\n)
 		if /\b(tcl|java|python)\b/i;      # :-)
     $baz = "\n";		# a one-character string
-
-=item qr/STRING/imosx
-X<qr> X</i> X</m> X</o> X</s> X</x>
-
-This operator quotes (and possibly compiles) its I<STRING> as a regular
-expression.  I<STRING> is interpolated the same way as I<PATTERN>
-in C<m/PATTERN/>.  If "'" is used as the delimiter, no interpolation
-is done.  Returns a Perl value which may be used instead of the
-corresponding C</STRING/imosx> expression.
-
-For example,
-
-    $rex = qr/my.STRING/is;
-    s/$rex/foo/;
-
-is equivalent to
-
-    s/my.STRING/foo/is;
-
-The result may be used as a subpattern in a match:
-
-    $re = qr/$pattern/;
-    $string =~ /foo${re}bar/;	# can be interpolated in other patterns
-    $string =~ $re;		# or used standalone
-    $string =~ /$re/;		# or this way
-
-Since Perl may compile the pattern at the moment of execution of qr()
-operator, using qr() may have speed advantages in some situations,
-notably if the result of qr() is used standalone:
-
-    sub match {
-	my $patterns = shift;
-	my @compiled = map qr/$_/i, @$patterns;
-	grep {
-	    my $success = 0;
-	    foreach my $pat (@compiled) {
-		$success = 1, last if /$pat/;
-	    }
-	    $success;
-	} @_;
-    }
-
-Precompilation of the pattern into an internal representation at
-the moment of qr() avoids a need to recompile the pattern every
-time a match C</$pat/> is attempted.  (Perl has many other internal
-optimizations, but none would be triggered in the above example if
-we did not use qr() operator.)
-
-Options are:
-
-    i	Do case-insensitive pattern matching.
-    m	Treat string as multiple lines.
-    o	Compile pattern only once.
-    s	Treat string as single line.
-    x	Use extended regular expressions.
-
-See L<perlre> for additional information on valid syntax for STRING, and
-for a detailed look at the semantics of regular expressions.
 
 =item qx/STRING/
 X<qx> X<`> X<``> X<backtick>
@@ -1459,117 +1570,6 @@ put comments into a multi-line C<qw>-string.  For this reason, the
 C<use warnings> pragma and the B<-w> switch (that is, the C<$^W> variable)
 produces warnings if the STRING contains the "," or the "#" character.
 
-=item s/PATTERN/REPLACEMENT/egimosxk
-X<substitute> X<substitution> X<replace> X<regexp, replace>
-X<regexp, substitute> X</e> X</g> X</i> X</m> X</o> X</s> X</x>
-
-Searches a string for a pattern, and if found, replaces that pattern
-with the replacement text and returns the number of substitutions
-made.  Otherwise it returns false (specifically, the empty string).
-
-If no string is specified via the C<=~> or C<!~> operator, the C<$_>
-variable is searched and modified.  (The string specified with C<=~> must
-be scalar variable, an array element, a hash element, or an assignment
-to one of those, i.e., an lvalue.)
-
-If the delimiter chosen is a single quote, no interpolation is
-done on either the PATTERN or the REPLACEMENT.  Otherwise, if the
-PATTERN contains a $ that looks like a variable rather than an
-end-of-string test, the variable will be interpolated into the pattern
-at run-time.  If you want the pattern compiled only once the first time
-the variable is interpolated, use the C</o> option.  If the pattern
-evaluates to the empty string, the last successfully executed regular
-expression is used instead.  See L<perlre> for further explanation on these.
-See L<perllocale> for discussion of additional considerations that apply
-when C<use locale> is in effect.
-
-Options are:
-
-    i	Do case-insensitive pattern matching.
-    m	Treat string as multiple lines.
-    s	Treat string as single line.
-    x	Use extended regular expressions.
-    g	Replace globally, i.e., all occurrences.
-    o	Compile pattern only once.
-    k	Keep a copy of the original string so ${^MATCH} and friends
-	will be defined.
-    e	Evaluate the right side as an expression.
-
-
-Any non-alphanumeric, non-whitespace delimiter may replace the
-slashes.  If single quotes are used, no interpretation is done on the
-replacement string (the C</e> modifier overrides this, however).  Unlike
-Perl 4, Perl 5 treats backticks as normal delimiters; the replacement
-text is not evaluated as a command.  If the
-PATTERN is delimited by bracketing quotes, the REPLACEMENT has its own
-pair of quotes, which may or may not be bracketing quotes, e.g.,
-C<s(foo)(bar)> or C<< s<foo>/bar/ >>.  A C</e> will cause the
-replacement portion to be treated as a full-fledged Perl expression
-and evaluated right then and there.  It is, however, syntax checked at
-compile-time. A second C<e> modifier will cause the replacement portion
-to be C<eval>ed before being run as a Perl expression.
-
-Examples:
-
-    s/\bgreen\b/mauve/g;		# don't change wintergreen
-
-    $path =~ s|/usr/bin|/usr/local/bin|;
-
-    s/Login: $foo/Login: $bar/; # run-time pattern
-
-    ($foo = $bar) =~ s/this/that/;	# copy first, then change
-
-    $count = ($paragraph =~ s/Mister\b/Mr./g);  # get change-count
-
-    $_ = 'abc123xyz';
-    s/\d+/$&*2/e;		# yields 'abc246xyz'
-    s/\d+/sprintf("%5d",$&)/e;	# yields 'abc  246xyz'
-    s/\w/$& x 2/eg;		# yields 'aabbcc  224466xxyyzz'
-
-    s/%(.)/$percent{$1}/g;	# change percent escapes; no /e
-    s/%(.)/$percent{$1} || $&/ge;	# expr now, so /e
-    s/^=(\w+)/pod($1)/ge;	# use function call
-
-    # expand variables in $_, but dynamics only, using
-    # symbolic dereferencing
-    s/\$(\w+)/${$1}/g;
-
-    # Add one to the value of any numbers in the string
-    s/(\d+)/1 + $1/eg;
-
-    # This will expand any embedded scalar variable
-    # (including lexicals) in $_ : First $1 is interpolated
-    # to the variable name, and then evaluated
-    s/(\$\w+)/$1/eeg;
-
-    # Delete (most) C comments.
-    $program =~ s {
-	/\*	# Match the opening delimiter.
-	.*?	# Match a minimal number of characters.
-	\*/	# Match the closing delimiter.
-    } []gsx;
-
-    s/^\s*(.*?)\s*$/$1/;	# trim whitespace in $_, expensively
-
-    for ($variable) {		# trim whitespace in $variable, cheap
-	s/^\s+//;
-	s/\s+$//;
-    }
-
-    s/([^ ]*) *([^ ]*)/$2 $1/;	# reverse 1st two fields
-
-Note the use of $ instead of \ in the last example.  Unlike
-B<sed>, we use the \<I<digit>> form in only the left hand side.
-Anywhere else it's $<I<digit>>.
-
-Occasionally, you can't use just a C</g> to get all the changes
-to occur that you might want.  Here are two common cases:
-
-    # put commas in the right places in an integer
-    1 while s/(\d)(\d\d\d)(?!\d)/$1,$2/g;
-
-    # expand tabs to 8-column spacing
-    1 while s/\t+/' ' x (length($&)*8 - length($`)%8)/e;
 
 =item tr/SEARCHLIST/REPLACEMENTLIST/cds
 X<tr> X<y> X<transliterate> X</c> X</d> X</s>
