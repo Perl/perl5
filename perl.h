@@ -5179,8 +5179,7 @@ typedef struct am_table_short AMTS;
 
 /* Fetches the SV that keeps the per-interpreter data. */
 #define dMY_CXT_SV \
-	SV *my_cxt_sv = *hv_fetch(PL_modglobal, MY_CXT_KEY,		\
-				  sizeof(MY_CXT_KEY)-1, TRUE)
+	SV *my_cxt_sv = *hv_fetchs(PL_modglobal, MY_CXT_KEY, TRUE)
 
 /* This declaration should be used within all functions that use the
  * interpreter-local data. */
