@@ -863,7 +863,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		 * XXX Does the new way break anything?
 		 */
 		paren = atoi(mg->mg_ptr); /* $& is in [0] */
-		reg_numbered_buff_get( paren, rx, sv, 0);
+		CALLREG_NUMBUF(rx,paren,sv);
 		break;
 	    }
 	    sv_setsv(sv,&PL_sv_undef);
@@ -872,7 +872,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '+':
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	    if (rx->lastparen) {
-	        reg_numbered_buff_get( rx->lastparen, rx, sv, 0);
+	        CALLREG_NUMBUF(rx,rx->lastparen,sv);
 	        break;
 	    }
 	}
@@ -881,7 +881,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '\016':		/* ^N */
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	    if (rx->lastcloseparen) {
-	        reg_numbered_buff_get( rx->lastcloseparen, rx, sv, 0);
+	        CALLREG_NUMBUF(rx,rx->lastcloseparen,sv);
 	        break;
 	    }
 
@@ -891,16 +891,16 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '`':
       do_prematch_fetch:
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	  reg_numbered_buff_get( -2, rx, sv, 0);
-	  break;
+	    CALLREG_NUMBUF(rx,-2,sv);
+	    break;
 	}
 	sv_setsv(sv,&PL_sv_undef);
 	break;
     case '\'':
       do_postmatch_fetch:
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	  reg_numbered_buff_get( -1, rx, sv, 0);
-	  break;
+	    CALLREG_NUMBUF(rx,-1,sv);
+	    break;
 	}
 	sv_setsv(sv,&PL_sv_undef);
 	break;

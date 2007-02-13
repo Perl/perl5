@@ -22,6 +22,8 @@ extern char*	my_re_intuit_start (pTHX_ regexp *prog, SV *sv, char *strpos,
 extern SV*	my_re_intuit_string (pTHX_ regexp *prog);
 
 extern void	my_regfree (pTHX_ struct regexp* r);
+extern SV*      my_reg_numbered_buff_get(pTHX_ const REGEXP * const rx, I32 paren, SV* usesv);
+extern SV*      my_reg_named_buff_get(pTHX_ const REGEXP * const rx, SV* namesv, U32 flags);
 #if defined(USE_ITHREADS)
 extern void*	my_regdupe (pTHX_ const regexp *r, CLONE_PARAMS *param);
 #endif
@@ -36,6 +38,8 @@ const struct regexp_engine my_reg_engine = {
         my_re_intuit_start, 
         my_re_intuit_string, 
         my_regfree, 
+        my_reg_numbered_buff_get,
+        my_reg_named_buff_get,
 #if defined(USE_ITHREADS)
         my_regdupe 
 #endif
@@ -213,7 +217,7 @@ PPCODE:
 {
     re = get_re_arg( aTHX_ qr, 1, NULL);
     if (SvPOK(sv) && re && re->paren_names) {
-        bufs = Perl_reg_named_buff_get(aTHX_ sv, re ,all && SvTRUE(all));
+        bufs = CALLREG_NAMEDBUF(re,sv,all && SvTRUE(all));
         if (bufs) {
             if (all && SvTRUE(all))
                 XPUSHs(newRV(bufs));

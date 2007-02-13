@@ -111,6 +111,8 @@ typedef struct regexp_engine {
 			    struct re_scream_pos_data_s *data);
     SV*	    (*checkstr) (pTHX_ regexp *prog);
     void    (*free) (pTHX_ struct regexp* r);
+    SV*     (*numbered_buff_get) (pTHX_ const REGEXP * const rx, I32 paren, SV* usesv);
+    SV*     (*named_buff_get)(pTHX_ const REGEXP * const rx, SV* namesv, U32 flags);
 #ifdef USE_ITHREADS
     void* (*dupe) (pTHX_ const regexp *r, CLONE_PARAMS *param);
 #endif    

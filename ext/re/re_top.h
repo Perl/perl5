@@ -16,6 +16,8 @@
 #define Perl_regfree_internal   my_regfree
 #define Perl_re_intuit_string   my_re_intuit_string
 #define Perl_regdupe_internal   my_regdupe
+#define Perl_reg_numbered_buff_get  my_reg_numbered_buff_get
+#define Perl_reg_named_buff_get  my_reg_named_buff_get
 
 #define PERL_NO_GET_CONTEXT
 

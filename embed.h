@@ -698,6 +698,8 @@
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define reg_named_buff_get	Perl_reg_named_buff_get
 #define reg_numbered_buff_get	Perl_reg_numbered_buff_get
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regprop			Perl_regprop
 #endif
 #define repeatcpy		Perl_repeatcpy
@@ -2915,7 +2917,9 @@
 #define regnext(a)		Perl_regnext(aTHX_ a)
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define reg_named_buff_get(a,b,c)	Perl_reg_named_buff_get(aTHX_ a,b,c)
-#define reg_numbered_buff_get(a,b,c,d)	Perl_reg_numbered_buff_get(aTHX_ a,b,c,d)
+#define reg_numbered_buff_get(a,b,c)	Perl_reg_numbered_buff_get(aTHX_ a,b,c)
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regprop(a,b,c)		Perl_regprop(aTHX_ a,b,c)
 #endif
 #define repeatcpy(a,b,c,d)	Perl_repeatcpy(aTHX_ a,b,c,d)

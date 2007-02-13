@@ -1888,11 +1888,14 @@ PERL_CALLCONV regnode*	Perl_regnext(pTHX_ regnode* p)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV SV*	Perl_reg_named_buff_get(pTHX_ SV* namesv, const REGEXP * const from_re, U32 flags)
+
+PERL_CALLCONV SV*	Perl_reg_named_buff_get(pTHX_ const REGEXP * const rx, SV* namesv, U32 flags)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+PERL_CALLCONV SV*	Perl_reg_numbered_buff_get(pTHX_ const REGEXP * const rx, I32 paren, SV* usesv)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV SV*	Perl_reg_numbered_buff_get(pTHX_ I32 paren, const REGEXP * const rx, SV* usesv, U32 flags)
-			__attribute__nonnull__(pTHX_2);
 
 PERL_CALLCONV void	Perl_regprop(pTHX_ const regexp *prog, SV* sv, const regnode* o)
 			__attribute__nonnull__(pTHX_2)

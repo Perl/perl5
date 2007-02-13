@@ -4692,58 +4692,53 @@ reStudy:
     return(r);
 }
 
-#undef CORE_ONLY_BLOCK
 #undef RE_ENGINE_PTR
 
-#ifndef PERL_IN_XSUB_RE
+
 SV*
-Perl_reg_named_buff_get(pTHX_ SV* namesv, const REGEXP * const from_re, U32 flags)
+Perl_reg_named_buff_get(pTHX_ const REGEXP * const rx, SV* namesv, U32 flags)
 {
     AV *retarray = NULL;
     SV *ret;
     if (flags & 1) 
         retarray=newAV();
-    
-    if (from_re || PL_curpm) {
-        const REGEXP * const rx = from_re ? from_re : PM_GETRE(PL_curpm);
-        if (rx && rx->paren_names) {            
-            HE *he_str = hv_fetch_ent( rx->paren_names, namesv, 0, 0 );
-            if (he_str) {
-                IV i;
-                SV* sv_dat=HeVAL(he_str);
-                I32 *nums=(I32*)SvPVX(sv_dat);
-                for ( i=0; i<SvIVX(sv_dat); i++ ) {
-                    if ((I32)(rx->nparens) >= nums[i]
-                        && rx->startp[nums[i]] != -1
-                        && rx->endp[nums[i]] != -1)
-                    {
-                        ret = reg_numbered_buff_get(nums[i],rx,NULL,0);
-                        if (!retarray) 
-                            return ret;
-                    } else {
-                        ret = newSVsv(&PL_sv_undef);
-                    }
-                    if (retarray) {
-                        SvREFCNT_inc(ret); 
-                        av_push(retarray, ret);
-                    }
+
+    if (rx && rx->paren_names) {
+        HE *he_str = hv_fetch_ent( rx->paren_names, namesv, 0, 0 );
+        if (he_str) {
+            IV i;
+            SV* sv_dat=HeVAL(he_str);
+            I32 *nums=(I32*)SvPVX(sv_dat);
+            for ( i=0; i<SvIVX(sv_dat); i++ ) {
+                if ((I32)(rx->nparens) >= nums[i]
+                    && rx->startp[nums[i]] != -1
+                    && rx->endp[nums[i]] != -1)
+                {
+                    ret = CALLREG_NUMBUF(rx,nums[i],NULL);
+                    if (!retarray)
+                        return ret;
+                } else {
+                    ret = newSVsv(&PL_sv_undef);
                 }
-                if (retarray)
-                    return (SV*)retarray;
+                if (retarray) {
+                    SvREFCNT_inc(ret);
+                    av_push(retarray, ret);
+                }
             }
+            if (retarray)
+                return (SV*)retarray;
         }
     }
     return NULL;
 }
 
 SV*
-Perl_reg_numbered_buff_get(pTHX_ I32 paren, const REGEXP * const rx, SV* usesv, U32 flags)
+Perl_reg_numbered_buff_get(pTHX_ const REGEXP * const rx, I32 paren, SV* usesv)
 {
     char *s = NULL;
     I32 i = 0;
     I32 s1, t1;
     SV *sv = usesv ? usesv : newSVpvs("");
-    PERL_UNUSED_ARG(flags);
         
     if (!rx->subbeg) {
         sv_setsv(sv,&PL_sv_undef);
@@ -4812,7 +4807,7 @@ Perl_reg_numbered_buff_get(pTHX_ I32 paren, const REGEXP * const rx, SV* usesv, 
     }
     return sv;
 }
-#endif
+
 
 /* Scans the name of a named buffer from the pattern.
  * If flags is REG_RSN_RETURN_NULL returns null.

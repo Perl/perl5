@@ -219,6 +219,13 @@
 #define CALLREGFREE_PVT(prog) \
     if(prog) CALL_FPTR((prog)->engine->free)(aTHX_ (prog))
 
+#define CALLREG_NUMBUF(rx,paren,usesv) \
+    CALL_FPTR((rx)->engine->numbered_buff_get)(aTHX_ (rx),(paren),(usesv))
+
+#define CALLREG_NAMEDBUF(rx,name,flags) \
+    CALL_FPTR((rx)->engine->named_buff_get)(aTHX_ (rx),(name),(flags))
+
+
 #if defined(USE_ITHREADS)         
 #define CALLREGDUPE(prog,param) \
     Perl_re_dup(aTHX_ (prog),(param))

@@ -691,8 +691,10 @@ Ap	|I32	|regexec_flags	|NN regexp* prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg|I32 minend \
 				|NN SV* screamer|NULLOK void* data|U32 flags
 ApR	|regnode*|regnext	|NN regnode* p
-EXp	|SV*|reg_named_buff_get	|NN SV* namesv|NULLOK const REGEXP * const from_re|U32 flags
-EXp	|SV*|reg_numbered_buff_get|I32 paren|NN const REGEXP * const rx|NULLOK SV* usesv|U32 flags
+
+EXp	|SV*|reg_named_buff_get	|NN const REGEXP * const rx|NN SV* namesv|U32 flags
+EXp	|SV*|reg_numbered_buff_get|NN const REGEXP * const rx|I32 paren|NULLOK SV* usesv
+
 Ep	|void	|regprop	|NULLOK const regexp *prog|NN SV* sv|NN const regnode* o
 Ap	|void	|repeatcpy	|NN char* to|NN const char* from|I32 len|I32 count
 ApP	|char*	|rninstr	|NN const char* big|NN const char* bigend \
