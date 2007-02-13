@@ -74,5 +74,3 @@ sub compile_module {
 # and vice-versa.  The list should only shrink.
 __DATA__
 ByteLoader
-CPAN::FirstTime
-Pod::Plainer
