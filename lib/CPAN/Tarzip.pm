@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION @ISA $BUGHUNTING);
 use CPAN::Debug;
 use File::Basename ();
-$VERSION = sprintf "%.6f", substr(q$Rev: 1301 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 1525 $,4)/1000000 + 5.4;
 # module is internal to CPAN.pm
 
 @ISA = qw(CPAN::Debug);
@@ -210,7 +210,7 @@ sub untar {
     # should be default until Archive::Tar handles bzip2
     $prefer = 1;
   } elsif (
-           $CPAN::META->has_inst("Archive::Tar")
+           $CPAN::META->has_usable("Archive::Tar")
            &&
            $CPAN::META->has_inst("Compress::Zlib") ) {
     $prefer = 2;
@@ -257,7 +257,7 @@ installed. Can't continue.
       return 1;
     }
   } elsif ($prefer==2) { # 2 => modules
-    unless ($CPAN::META->has_inst("Archive::Tar")) {
+    unless ($CPAN::META->has_usable("Archive::Tar")) {
       $CPAN::Frontend->mydie("Archive::Tar not installed, please install it to continue");
     }
     my $tar = Archive::Tar->new($file,1);

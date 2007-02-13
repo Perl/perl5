@@ -48,7 +48,7 @@ use strict;
 # Hope that makes sense, my head is a bit off:-) -- AK
 
 use vars qw{ @All $VERSION };
-$VERSION = sprintf "%.6f", substr(q$Rev: 979 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 1486 $,4)/1000000 + 5.4;
 
 # CPAN::Queue::new ;
 sub new {
@@ -117,13 +117,15 @@ sub jumpqueue {
             # CPAN->debug("i[$i]this[$All[$i]{qmod}]what[$what]") if $CPAN::DEBUG;
             if ($All[$i]{qmod} eq $what){
                 $jumped++;
-                if ($jumped > 100) { # one's OK if e.g. just
-                                     # processing now; more are OK if
-                                     # user typed it several times
+                if ($jumped > 25) { # one's OK if e.g. just processing
+                                    # now; more are OK if user typed
+                                    # it several times
+                    my $sleep = sprintf "%.1f", $jumped/10;
                     $CPAN::Frontend->mywarn(
-qq{Object [$what] queued more than 100 times, ignoring}
+qq{Warning: Object [$what] queued $jumped times, sleeping $sleep secs!\n}
 				 );
-                    next WHAT;
+                    $CPAN::Frontend->mysleep($sleep);
+                    # next WHAT;
                 }
             }
         }

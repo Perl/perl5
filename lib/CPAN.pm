@@ -1,7 +1,7 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.88_69';
+$CPAN::VERSION = '1.88_73';
 $CPAN::VERSION = eval $CPAN::VERSION;
 
 use CPAN::HandleConfig;
@@ -64,13 +64,13 @@ use vars qw(
             $AUTOLOAD
             $Be_Silent
             $CONFIG_DIRTY
-            $DEBUG
             $Defaultdocs
             $Defaultrecent
             $Frontend
             $GOTOSHELL
             $HAS_USABLE
             $Have_warned
+            $MAX_RECURSION
             $META
             $RUN_DEGRADED
             $Signal
@@ -82,6 +82,8 @@ use vars qw(
             @Defaultsites
             @EXPORT
            );
+
+$MAX_RECURSION = 32;
 
 @CPAN::ISA = qw(CPAN::Debug Exporter);
 
@@ -98,6 +100,7 @@ use vars qw(
              get
              install
              install_tested
+             is_tested
              make
              mkmyconfig
              notest
@@ -179,14 +182,7 @@ sub shell {
                 $CPAN::Frontend->mywarn("Terminal does not support AddHistory.\n");
                 last;
             }
-            my($fh) = FileHandle->new;
-            open $fh, "<$histfile" or last;
-            local $/ = "\n";
-            while (<$fh>) {
-                chomp;
-                $term->AddHistory($_);
-            }
-            close $fh;
+            $META->readhist($term,$histfile);
         }}
         for ($CPAN::Config->{term_ornaments}) { # alias
             local $Term::ReadLine::termcap_nowarn = 1;
@@ -374,14 +370,28 @@ sub _yaml_loadfile {
     return +[] unless -s $local_file;
     my $yaml_module = _yaml_module;
     if ($CPAN::META->has_inst($yaml_module)) {
-        my $code = UNIVERSAL::can($yaml_module, "LoadFile");
-        my @yaml;
-        eval { @yaml = $code->($local_file); };
-        if ($@) {
-            # this shall not be done by the frontend
-            die CPAN::Exception::yaml_process_error->new($yaml_module,$local_file,"parse",$@);
+        my $code;
+        if ($code = UNIVERSAL::can($yaml_module, "LoadFile")) {
+            my @yaml;
+            eval { @yaml = $code->($local_file); };
+            if ($@) {
+                # this shall not be done by the frontend
+                die CPAN::Exception::yaml_process_error->new($yaml_module,$local_file,"parse",$@);
+            }
+            return \@yaml;
+        } elsif ($code = UNIVERSAL::can($yaml_module, "Load")) {
+            local *FH;
+            open FH, $local_file or die "Could not open '$local_file': $!";
+            local $/;
+            my $ystream = <FH>;
+            my @yaml;
+            eval { @yaml = $code->($ystream); };
+            if ($@) {
+                # this shall not be done by the frontend
+                die CPAN::Exception::yaml_process_error->new($yaml_module,$local_file,"parse",$@);
+            }
+            return \@yaml;
         }
-        return \@yaml;
     } else {
         # this shall not be done by the frontend
         die CPAN::Exception::yaml_not_installed->new($yaml_module, $local_file, "parse");
@@ -394,12 +404,16 @@ sub _yaml_dumpfile {
     my($self,$local_file,@what) = @_;
     my $yaml_module = _yaml_module;
     if ($CPAN::META->has_inst($yaml_module)) {
+        my $code;
         if (UNIVERSAL::isa($local_file, "FileHandle")) {
-            my $code = UNIVERSAL::can($yaml_module, "Dump");
+            $code = UNIVERSAL::can($yaml_module, "Dump");
             eval { print $local_file $code->(@what) };
-        } else {
-            my $code = UNIVERSAL::can($yaml_module, "DumpFile");
+        } elsif ($code = UNIVERSAL::can($yaml_module, "DumpFile")) {
             eval { $code->($local_file,@what); };
+        } elsif ($code = UNIVERSAL::can($yaml_module, "Dump")) {
+            local *FH;
+            open FH, ">$local_file" or die "Could not open '$local_file': $!";
+            print FH $code->(@what);
         }
         if ($@) {
             die CPAN::Exception::yaml_process_error->new($yaml_module,$local_file,"dump",$@);
@@ -466,11 +480,13 @@ use strict;
                                     clean
                                     cvs_import
                                     dump
+                                    failed
                                     force
                                     fforce
                                     hosts
                                     install
                                     install_tested
+                                    is_tested
                                     look
                                     ls
                                     make
@@ -519,6 +535,10 @@ use strict;
 package CPAN::Exception::RecursiveDependency;
 use strict;
 use overload '""' => "as_string";
+
+# a module sees its distribution (no version)
+# a distribution sees its prereqs (which are module names) (usually with versions)
+# a bundle sees its module names and/or its distributions (no version)
 
 sub new {
     my($class) = shift;
@@ -709,10 +729,11 @@ sub _perl_fingerprint {
     if (defined $dll) {
         $mtime_dll = (-f $dll ? (stat(_))[9] : '-1');
     }
+    my $mtime_perl = (-f $^X ? (stat(_))[9] : '-1');
     my $this_fingerprint = {
                             '$^X' => $^X,
                             sitearchexp => $Config::Config{sitearchexp},
-                            'mtime_$^X' => (stat $^X)[9],
+                            'mtime_$^X' => $mtime_perl,
                             'mtime_dll' => $mtime_dll,
                            };
     if ($other_fingerprint) {
@@ -1064,6 +1085,16 @@ sub has_usable {
                                         }
                                     },
                                   ],
+               'Archive::Tar' => [
+                                  sub {require Archive::Tar;
+                                       unless (Archive::Tar::->VERSION >= 1.00) {
+                                            for ("Will not use Archive::Tar, need 1.00\n") {
+                                                $CPAN::Frontend->mywarn($_);
+                                                die $_;
+                                            }
+                                       }
+                                  },
+                                 ],
               };
     if ($usable->{$mod}) {
         for my $c (0..$#{$usable->{$mod}}) {
@@ -1128,7 +1159,7 @@ sub has_inst {
 	$CPAN::Frontend->mysleep(3);
     } elsif ($mod eq "Digest::SHA"){
         if ($Have_warned->{"Digest::SHA"}++) {
-            $CPAN::Frontend->myprint(qq{CPAN: checksum security checks disabled}.
+            $CPAN::Frontend->myprint(qq{CPAN: checksum security checks disabled }.
                                      qq{because Digest::SHA not installed.\n});
         } else {
             $CPAN::Frontend->mywarn(qq{
@@ -1208,6 +1239,19 @@ sub cleanup {
       $CPAN::Frontend->mywarn("Warning: Configuration not saved.\n");
   }
   $CPAN::Frontend->myprint("Lockfile removed.\n");
+}
+
+#-> sub CPAN::readhist
+sub readhist {
+    my($self,$term,$histfile) = @_;
+    my($fh) = FileHandle->new;
+    open $fh, "<$histfile" or last;
+    local $/ = "\n";
+    while (<$fh>) {
+        chomp;
+        $term->AddHistory($_);
+    }
+    close $fh;
 }
 
 #-> sub CPAN::savehist
@@ -1327,8 +1371,11 @@ sub tidyup {
     my($toremove) = shift @{$self->{FIFO}};
     unless ($toremove =~ /\.yml$/) {
         $CPAN::Frontend->myprint(sprintf(
-                                         "DEL: $toremove (%.1f>%.1f MB)\n",
-                                         $self->{DU}, $self->{'MAX'})
+                                         "DEL(%.1f>%.1fMB): %s \n",
+                                         $self->{DU},
+                                         $self->{MAX},
+                                         $toremove,
+                                        )
                                 );
     }
     return if $CPAN::Signal;
@@ -1436,7 +1483,22 @@ sub _clean_cache {
     $self->debug("have to rmtree $dir, will free $self->{SIZE}{$dir}")
 	if $CPAN::DEBUG;
     File::Path::rmtree($dir);
-    unlink "$dir.yml"; # may fail
+    my $id_deleted = 0;
+    if ($dir !~ /\.yml$/ && -f "$dir.yml") {
+        my $yaml_module = CPAN::_yaml_module;
+        if ($CPAN::META->has_inst($yaml_module)) {
+            my($peek_yaml) = CPAN->_yaml_loadfile("$dir.yml");
+            if (my $id = $peek_yaml->[0]{distribution}{ID}) {
+                $CPAN::META->delete("CPAN::Distribution", $id);
+                # $CPAN::Frontend->mywarn (" +++\n");
+                $id_deleted++;
+            }
+        }
+        unlink "$dir.yml"; # may fail
+        unless ($id_deleted) {
+            CPAN->debug("no distro found associated with '$dir'");
+        }
+    }
     $self->{DU} -= $self->{SIZE}{$dir};
     delete $self->{SIZE}{$dir};
 }
@@ -1470,6 +1532,7 @@ sub scan_cache {
     return if $self->{SCAN} eq 'never';
     $CPAN::Frontend->mydie("Unknown scan_cache argument: $self->{SCAN}")
 	unless $self->{SCAN} eq 'atstart';
+    return unless $CPAN::META->{LOCK};
     $CPAN::Frontend->myprint(
 			     sprintf("Scanning cache %s for sizes\n",
 				     $self->{ID}));
@@ -1724,7 +1787,7 @@ sub o {
                 CPAN::HandleConfig->prettyprint($k);
 	    }
 	    $CPAN::Frontend->myprint("\n");
-	} else {
+        } else {
             if (CPAN::HandleConfig->edit(@o_what)) {
             } else {
                 $CPAN::Frontend->myprint(qq{Type 'o conf' to view all configuration }.
@@ -1841,7 +1904,7 @@ sub hosts {
         $S{end} ||= $last->{end};
         my $dltime = $last->{end} - $start;
         my $dlsize = $last->{filesize} || 0;
-        my $url = $last->{thesiteurl}->text;
+        my $url = ref $last->{thesiteurl} ? $last->{thesiteurl}->text : $last->{thesiteurl};
         my $s = $S{ok}{$url} ||= {};
         $s->{n}++;
         $s->{dlsize} ||= 0;
@@ -1904,6 +1967,7 @@ sub reload {
                     "CPAN/Kwalify.pm",
                     "CPAN/Queue.pm",
                     "CPAN/Reporter.pm",
+                    "CPAN/SQLite.pm",
                     "CPAN/Tarzip.pm",
                     "CPAN/Version.pm",
                    );
@@ -2127,7 +2191,7 @@ sub report {
                                 # re-run (as documented)
 }
 
-# experimental (compare with _is_tested)
+# compare with is_tested
 #-> sub CPAN::Shell::install_tested
 sub install_tested {
     my($self,@some) = @_;
@@ -2141,8 +2205,8 @@ sub install_tested {
             $CPAN::Frontend->mywarn("No YAML file for $b available, skipping\n");
             next;
         }
-        my $yaml_content = CPAN::_yaml_loadfile($yaml);
-        my $id = $yaml_content->[0]{ID};
+        my $yaml_content = CPAN->_yaml_loadfile($yaml);
+        my $id = $yaml_content->[0]{distribution}{ID};
         unless ($id){
             $CPAN::Frontend->mywarn("No ID found in '$yaml', skipping\n");
             next;
@@ -2442,11 +2506,11 @@ sub status {
     }
 }
 
-# experimental (must run after failed or similar [I think])
-# intended as a preparation ot install_tested
+# compare with install_tested
 #-> sub CPAN::Shell::is_tested
-sub _is_tested {
+sub is_tested {
     my($self) = @_;
+    CPAN::Index->reload;
     for my $b (reverse $CPAN::META->_list_sorted_descending_is_tested) {
         my $time;
         if ($CPAN::META->{is_tested}{$b}) {
@@ -2727,7 +2791,7 @@ sub print_ornamented {
         my $color_on = eval { Term::ANSIColor::color($ornament) } || "";
         if ($@) {
             print "Term::ANSIColor rejects color[$ornament]: $@\n
-Please choose a different color (Hint: try 'o conf init color.*')\n";
+Please choose a different color (Hint: try 'o conf init /color/')\n";
         }
         print $color_on,
             $swhat,
@@ -2819,6 +2883,7 @@ sub unrecoverable_error {
 #-> sub CPAN::Shell::mysleep ;
 sub mysleep {
     my($self, $sleep) = @_;
+    use Time::HiRes qw(sleep);
     sleep $sleep;
 }
 
@@ -2861,6 +2926,8 @@ sub rematein {
     # enter the queue but not its copy. How do they get a sensible
     # test_count?
 
+    my $needs_recursion_protection = "make|test|install";
+
     # construct the queue
     my($s,@s,@qcopy);
   STHING: foreach $s (@some) {
@@ -2887,7 +2954,10 @@ sub rematein {
 	}
 	if (0) {
         } elsif (ref $obj) {
-            $obj->color_cmd_tmps(0,1);
+            if ($meth =~ /^($needs_recursion_protection)$/) {
+                # silly for look or dump
+                $obj->color_cmd_tmps(0,1);
+            }
             CPAN::Queue->new(qmod => $obj->id, reqtype => "c");
             push @qcopy, $obj;
 	} elsif ($CPAN::META->exists('CPAN::Author',uc($s))) {
@@ -2927,6 +2997,15 @@ to find objects with matching identifiers.
         my $s = $q->as_string;
         my $reqtype = $q->reqtype || "";
         $obj = CPAN::Shell->expandany($s);
+        unless ($obj) {
+            # don't know how this can happen, maybe we should panic,
+            # but maybe we get a solution from the first user who hits
+            # this unfortunate exception?
+            $CPAN::Frontend->mywarn("Warning: Could not expand string '$s' ".
+                                    "to an object. Skipping.");
+            $CPAN::Frontend->mysleep(5);
+            next;
+        }
         $obj->{reqtype} ||= "";
         {
             # force debugging because CPAN::SQLite somehow delivers us
@@ -3002,8 +3081,10 @@ to find objects with matching identifiers.
         }
 	CPAN::Queue->delete_first($s);
     }
-    for my $obj (@qcopy) {
-        $obj->color_cmd_tmps(0,0);
+    if ($meth =~ /^($needs_recursion_protection)$/) {
+        for my $obj (@qcopy) {
+            $obj->color_cmd_tmps(0,0);
+        }
     }
 }
 
@@ -3233,6 +3314,7 @@ sub _new_stats {
 sub _add_to_statistics {
     my($self,$stats) = @_;
     my $yaml_module = CPAN::_yaml_module;
+    $self->debug("yaml_module[$yaml_module]") if $CPAN::DEBUG;
     if ($CPAN::META->has_inst($yaml_module)) {
         $stats->{thesiteurl} = $ThesiteURL;
         if (CPAN->has_inst("Time::HiRes")) {
@@ -3254,7 +3336,7 @@ sub _add_to_statistics {
         # arbitrary hardcoded constants until somebody demands to have
         # them settable
         while (
-               @{$fullstats->{history}} > 9999
+               @{$fullstats->{history}} > 999
                || $time - $fullstats->{history}[0]{start} > 30*86400  # one month
               ) {
             shift @{$fullstats->{history}}
@@ -3563,7 +3645,9 @@ sub localize {
     if ($ret) {
         $stats->{filesize} = -s $ret;
     }
+    $self->debug("before _add_to_statistics") if $CPAN::DEBUG;
     $self->_add_to_statistics($stats);
+    $self->debug("after _add_to_statistics") if $CPAN::DEBUG;
     if ($ret) {
         unlink "$aslocal.bak$$";
         return $ret;
@@ -4202,7 +4286,7 @@ sub cpl {
     $pos ||= 0;
     CPAN->debug("word [$word] line[$line] pos[$pos]") if $CPAN::DEBUG;
     $line =~ s/^\s*//;
-    if ($line =~ s/^(force\s*)//) {
+    if ($line =~ s/^((?:notest|f?force)\s*)//) {
 	$pos -= length($1);
     }
     my @return;
@@ -5372,7 +5456,11 @@ sub pretty_id {
     substr($id,5);
 }
 
-# mark as dirty/clean
+# mark as dirty/clean for the sake of recursion detection. $color=1
+# means "in use", $color=0 means "not in use anymore". $color=2 means
+# we have determined prereqs now and thus insist on passing this
+# through (at least) once again.
+
 #-> sub CPAN::Distribution::color_cmd_tmps ;
 sub color_cmd_tmps {
     my($self) = shift;
@@ -5382,8 +5470,9 @@ sub color_cmd_tmps {
     # a distribution needs to recurse into its prereq_pms
 
     return if exists $self->{incommandcolor}
+        && $color==1
         && $self->{incommandcolor}==$color;
-    if ($depth>=100){
+    if ($depth>=$CPAN::MAX_RECURSION){
         $CPAN::Frontend->mydie(CPAN::Exception::RecursiveDependency->new($ancestors));
     }
     # warn "color_cmd_tmps $depth $color " . $self->id; # sleep 1;
@@ -5407,7 +5496,7 @@ sub color_cmd_tmps {
         # as we are at the end of a command, we'll give up this
         # reminder of a broken test. Other commands may test this guy
         # again. Maybe 'badtestcnt' should be renamed to
-        # 'makte_test_failed_within_command'?
+        # 'make_test_failed_within_command'?
         delete $self->{badtestcnt};
     }
     $self->{incommandcolor} = $color;
@@ -5745,8 +5834,10 @@ EOF
     my $prefer_installer = "eumm"; # eumm|mb
     if (-f File::Spec->catfile($packagedir,"Build.PL")) {
         if ($mpl_exists) { # they *can* choose
-            $prefer_installer = CPAN::HandleConfig->prefs_lookup($self,
-                                                                 q{prefer_installer});
+            if ($CPAN::META->has_inst("Module::Build")) {
+                $prefer_installer = CPAN::HandleConfig->prefs_lookup($self,
+                                                                     q{prefer_installer});
+            }
         } else {
             $prefer_installer = "mb";
         }
@@ -7190,6 +7281,13 @@ sub _find_prefs {
 # CPAN::Distribution::prefs
 sub prefs {
     my($self) = @_;
+    if (exists $self->{negative_prefs_cache}
+        &&
+        $self->{negative_prefs_cache} != $CPAN::CurrentCommandId
+       ) {
+        delete $self->{negative_prefs_cache};
+        delete $self->{prefs};
+    }
     if (exists $self->{prefs}) {
         return $self->{prefs}; # XXX comment out during debugging
     }
@@ -7219,7 +7317,8 @@ $filler2 $bs $filler2
             return $self->{prefs};
         }
     }
-    return +{};
+    $self->{negative_prefs_cache} = $CPAN::CurrentCommandId;
+    return $self->{prefs} = +{};
 }
 
 # CPAN::Distribution::make_x_arg
@@ -7280,6 +7379,7 @@ sub follow_prereqs {
                c => "commandline",
               );
     my($filler1,$filler2,$filler3,$filler4);
+    # $DB::single=1;
     my $unsat = "Unsatisfied dependencies detected during";
     my $w = length($unsat) > length($pretty_id) ? length($unsat) : length($pretty_id);
     {
@@ -7319,7 +7419,7 @@ of modules we are processing right now?", "yes");
             # warn "calling color_cmd_tmps(0,1)";
             my $any = CPAN::Shell->expandany($p);
             if ($any) {
-                $any->color_cmd_tmps(0,1);
+                $any->color_cmd_tmps(0,2);
             } else {
                 $CPAN::Frontend->mywarn("Warning (maybe a bug): Cannot expand prereq '$p'\n");
                 $CPAN::Frontend->mysleep(2);
@@ -7341,19 +7441,21 @@ sub unsat_prereq {
     my $prereq_pm = $self->prereq_pm or return;
     my(@need);
     my %merged = (%{$prereq_pm->{requires}||{}},%{$prereq_pm->{build_requires}||{}});
+    my @merged = %merged;
+    CPAN->debug("all merged_prereqs[@merged]") if $CPAN::DEBUG;
   NEED: while (my($need_module, $need_version) = each %merged) {
-        my($available_version,$available_file);
+        my($available_version,$available_file,$nmo);
         if ($need_module eq "perl") {
             $available_version = $];
             $available_file = $^X;
         } else {
-            my $nmo = $CPAN::META->instance("CPAN::Module",$need_module);
+            $nmo = $CPAN::META->instance("CPAN::Module",$need_module);
             next if $nmo->uptodate;
             $available_file = $nmo->available_file;
 
             # if they have not specified a version, we accept any installed one
             if (not defined $need_version or
-                $need_version eq "0" or
+                $need_version == 0 or
                 $need_version eq "undef") {
                 next if defined $available_file;
             }
@@ -7410,13 +7512,71 @@ sub unsat_prereq {
         }
         if ($self->{sponsored_mods}{$need_module}++){
             # We have already sponsored it and for some reason it's still
-            # not available. So we do nothing. Or what should we do?
+            # not available. So we do ... what??
+
             # if we push it again, we have a potential infinite loop
-            next;
+
+            # The following "next" was a very problematic construct.
+            # It helped a lot but broke some day and must be replaced.
+
+            # We must be able to deal with modules that come again and
+            # again as a prereq and have themselves prereqs and the
+            # queue becomes long but finally we would find the correct
+            # order. The RecursiveDependency check should trigger a
+            # die when it's becoming too weird. Unfortunately removing
+            # this next breaks many other things.
+
+            # The bug that brought this up is described in Todo under
+            # "5.8.9 cannot install Compress::Zlib"
+
+            # next; # this is the next that must go away
+
+            # The following "next NEED" are fine and the error message
+            # explains well what is going on. For example when the DBI
+            # fails and consequently DBD::SQLite fails and now we are
+            # processing CPAN::SQLite. Then we must have a "next" for
+            # DBD::SQLite. How can we get it and how can we identify
+            # all other cases we must identify?
+
+            my $do = $nmo->distribution;
+            next NEED unless $do; # not on CPAN
+          NOSAYER: for my $nosayer (
+                                    "unwrapped",
+                                    "writemakefile",
+                                    "signature_verify",
+                                    "make",
+                                    "make_test",
+                                    "install",
+                                    "make_clean",
+                                   ) {
+                if (
+                    $do->{$nosayer}
+                    &&(UNIVERSAL::can($do->{$nosayer},"failed") ?
+                       $do->{$nosayer}->failed :
+                       $do->{$nosayer} =~ /^NO/)
+                   ) {
+                    if ($nosayer eq "make_test"
+                        &&
+                        $do->{make_test}{COMMANDID} != $CPAN::CurrentCommandId
+                       ) {
+                        next NOSAYER;
+                    }
+                    $CPAN::Frontend->mywarn("Warning: Prerequisite ".
+                                            "'$need_module => $need_version' ".
+                                            "for '$self->{ID}' failed when ".
+                                            "processing '$do->{ID}' with ".
+                                            "'$nosayer => $do->{$nosayer}'. Continuing, ".
+                                            "but chances to succeed are limited.\n"
+                                           );
+                    next NEED;
+                }
+            }
         }
         my $needed_as = exists $prereq_pm->{requires}{$need_module} ? "r" : "b";
         push @need, [$need_module,$needed_as];
     }
+    my @unfolded = map { "[".join(",",@$_)."]" } @need;
+    CPAN->debug("returning from unsat_prereq[@unfolded]") if $CPAN::DEBUG;
     @need;
 }
 
@@ -7437,6 +7597,7 @@ sub read_yaml {
                                               # cannot read YAML's own
                                               # META.yml
     }
+    # not "authoritative"
     if (not exists $self->{yaml_content}{dynamic_config}
         or $self->{yaml_content}{dynamic_config}
        ) {
@@ -7451,7 +7612,7 @@ sub read_yaml {
 sub prereq_pm {
     my($self) = @_;
     $self->{prereq_pm_detected} ||= 0;
-    CPAN->debug("prereq_pm_detected[$self->{prereq_pm_detected}]") if $CPAN::DEBUG;
+    CPAN->debug("ID[$self->{ID}]prereq_pm_detected[$self->{prereq_pm_detected}]") if $CPAN::DEBUG;
     return $self->{prereq_pm} if $self->{prereq_pm_detected};
     return unless $self->{writemakefile}  # no need to have succeeded
                                           # but we must have run it
@@ -7516,13 +7677,17 @@ sub prereq_pm {
 
                 #  Regexp modified by A.Speer to remember actual version of file
                 #  PREREQ_PM hash key wants, then add to
-                while ( $p =~ m/(?:\s)([\w\:]+)=>q\[(.*?)\],?/g ){
+                while ( $p =~ m/(?:\s)([\w\:]+)=>(q\[.*?\]|undef),?/g ){
                     # In case a prereq is mentioned twice, complain.
                     if ( defined $req->{$1} ) {
                         warn "Warning: PREREQ_PM mentions $1 more than once, ".
                             "last mention wins";
                     }
-                    $req->{$1} = $2;
+                    my($m,$n) = ($1,$2);
+                    if ($n =~ /^q\[(.*?)\]$/) {
+                        $n = $1;
+                    }
+                    $req->{$m} = $n;
                 }
                 last;
             }
@@ -7597,11 +7762,17 @@ sub test {
     local $ENV{MAKEFLAGS}; # protect us from outer make calls
 
     $CPAN::Frontend->myprint("Running $make test\n");
-    if (my @prereq = $self->unsat_prereq){
-        unless ($prereq[0][0] eq "perl") {
-            return 1 if $self->follow_prereqs(@prereq); # signal success to the queuerunner
-        }
-    }
+
+#    if (my @prereq = $self->unsat_prereq){
+#        if ( $CPAN::DEBUG ) {
+#            require Data::Dumper;
+#            CPAN->debug(sprintf "unsat_prereq[%s]", Data::Dumper::Dumper(\@prereq));
+#        }
+#        unless ($prereq[0][0] eq "perl") {
+#            return 1 if $self->follow_prereqs(@prereq); # signal success to the queuerunner
+#        }
+#    }
+
   EXCUSE: {
 	my @e;
         unless (exists $self->{make} or exists $self->{later}) {
@@ -7617,8 +7788,11 @@ sub test {
             ) and push @e, "Can't test without successful make";
 
         $self->{badtestcnt} ||= 0;
-        $self->{badtestcnt} > 0 and
+        if ($self->{badtestcnt} > 0) {
+            require Data::Dumper;
+            CPAN->debug(sprintf "NOREPEAT[%s]", Data::Dumper::Dumper($self)) if $CPAN::DEBUG;
             push @e, "Won't repeat unsuccessful test during this command";
+        }
 
         exists $self->{later} and length($self->{later}) and
             push @e, $self->{later};
@@ -7672,6 +7846,11 @@ sub test {
     } else {
         $system = join " ", $self->_make_command(), "test";
     }
+    my $make_test_arg = $self->make_x_arg("test");
+    $system = sprintf("%s%s",
+                      $system,
+                      $make_test_arg ? " $make_test_arg" : "",
+                     );
     my($tests_ok);
     my %env;
     while (my($k,$v) = each %ENV) {
@@ -7750,7 +7929,7 @@ sub test {
 
             # local $CPAN::DEBUG = 16; # Distribution
             for my $m (keys %{$self->{sponsored_mods}}) {
-                my $m_obj = CPAN::Shell->expand("Module",$m);
+                my $m_obj = CPAN::Shell->expand("Module",$m) or next;
                 # XXX we need available_version which reflects
                 # $ENV{PERL5LIB} so that already tested but not yet
                 # installed modules are counted.
@@ -7917,7 +8096,10 @@ sub install {
     if (my $goto = $self->prefs->{goto}) {
         return $self->goto($goto);
     }
-    $self->test;
+    $DB::single=1;
+    unless ($self->{badtestcnt}) {
+        $self->test;
+    }
     if ($CPAN::Signal){
       delete $self->{force_update};
       return;
@@ -8333,8 +8515,9 @@ sub color_cmd_tmps {
     # to recurse into its prereq_pms, a bundle needs to recurse into its modules
 
     return if exists $self->{incommandcolor}
+        && $color==1
         && $self->{incommandcolor}==$color;
-    if ($depth>=100){
+    if ($depth>=$CPAN::MAX_RECURSION){
         $CPAN::Frontend->mydie(CPAN::Exception::RecursiveDependency->new($ancestors));
     }
     # warn "color_cmd_tmps $depth $color " . $self->id; # sleep 1;
@@ -8522,62 +8705,6 @@ Going to $meth that.
 	my $obj = $CPAN::META->instance($type,$s);
         $obj->{reqtype} = $self->{reqtype};
 	$obj->$meth();
-        if ($obj->isa('CPAN::Bundle')
-            &&
-            exists $obj->{install_failed}
-            &&
-            ref($obj->{install_failed}) eq "HASH"
-           ) {
-          for (keys %{$obj->{install_failed}}) {
-            $self->{install_failed}{$_} = undef; # propagate faiure up
-                                                 # to me in a
-                                                 # recursive call
-            $fail{$s} = 1; # the bundle itself may have succeeded but
-                           # not all children
-          }
-        } else {
-          my $success;
-          $success = $obj->can("uptodate") ? $obj->uptodate : 0;
-          $success ||= $obj->{install} && $obj->{install} eq "YES";
-          if ($success) {
-            delete $self->{install_failed}{$s};
-          } else {
-            $fail{$s} = 1;
-          }
-        }
-    }
-
-    # recap with less noise
-    if ( $meth eq "install" ) {
-	if (%fail) {
-	    require Text::Wrap;
-	    my $raw = sprintf(qq{Bundle summary:
-The following items in bundle %s had installation problems:},
-			      $self->id
-			     );
-	    $CPAN::Frontend->myprint(Text::Wrap::fill("","",$raw));
-	    $CPAN::Frontend->myprint("\n");
-	    my $paragraph = "";
-            my %reported;
-	    for $s ($self->contains) {
-              if ($fail{$s}){
-		$paragraph .= "$s ";
-                $self->{install_failed}{$s} = undef;
-                $reported{$s} = undef;
-              }
-	    }
-            my $report_propagated;
-            for $s (sort keys %{$self->{install_failed}}) {
-              next if exists $reported{$s};
-              $paragraph .= "and the following items had problems
-during recursive bundle calls: " unless $report_propagated++;
-              $paragraph .= "$s ";
-            }
-	    $CPAN::Frontend->myprint(Text::Wrap::fill("  ","  ",$paragraph));
-	    $CPAN::Frontend->myprint("\n");
-	} else {
-	    $self->{install} = 'YES';
-	}
     }
 }
 
@@ -8675,9 +8802,41 @@ sub color_cmd_tmps {
     # a module needs to recurse to its cpan_file
 
     return if exists $self->{incommandcolor}
+        && $color==1
         && $self->{incommandcolor}==$color;
-    return if $depth>=1 && $self->uptodate;
-    if ($depth>=100){
+    return if $color==0 && !$self->{incommandcolor};
+    if ($color>=1) {
+        if ( $self->uptodate ) {
+            $self->{incommandcolor} = $color;
+            return;
+        } elsif (my $have_version = $self->available_version) {
+            # maybe what we have is good enough
+            if (@$ancestors) {
+                my $who_asked_for_me = $ancestors->[-1];
+                my $obj = CPAN::Shell->expandany($who_asked_for_me);
+                if (0) {
+                } elsif ($obj->isa("CPAN::Bundle")) {
+                    # bundles cannot specify a minimum version
+                    return;
+                } elsif ($obj->isa("CPAN::Distribution")) {
+                    if (my $prereq_pm = $obj->prereq_pm) {
+                        for my $k (keys %$prereq_pm) {
+                            if (my $want_version = $prereq_pm->{$k}{$self->id}) {
+                                if (CPAN::Version->vcmp($have_version,$want_version) >= 0) {
+                                    $self->{incommandcolor} = $color;
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        $self->{incommandcolor} = $color; # set me before recursion,
+                                          # so we can break it
+    }
+    if ($depth>=$CPAN::MAX_RECURSION){
         $CPAN::Frontend->mydie(CPAN::Exception::RecursiveDependency->new($ancestors));
     }
     # warn "color_cmd_tmps $depth $color " . $self->id; # sleep 1;
@@ -8735,17 +8894,22 @@ sub as_glimpse {
 sub dslip_status {
     my($self) = @_;
     my($stat);
+    # development status
     @{$stat->{D}}{qw,i c a b R M S,}     = qw,idea
                                               pre-alpha alpha beta released
                                               mature standard,;
+    # support level
     @{$stat->{S}}{qw,m d u n a,}         = qw,mailing-list
                                               developer comp.lang.perl.*
                                               none abandoned,;
+    # language
     @{$stat->{L}}{qw,p c + o h,}         = qw,perl C C++ other hybrid,;
+    # interface
     @{$stat->{I}}{qw,f r O p h n,}       = qw,functions
                                               references+ties
                                               object-oriented pragma
                                               hybrid none,;
+    # public licence
     @{$stat->{P}}{qw,p g l b a o d r n,} = qw,Standard-Perl
                                               GPL LGPL
                                               BSD Artistic
@@ -9213,11 +9377,13 @@ CPAN - query, download and build perl modules from CPAN sites
 
 Interactive mode:
 
-  perl -MCPAN -e shell;
+  perl -MCPAN -e shell
 
-Batch mode:
+--or--
 
-  use CPAN;
+  cpan
+
+Basic commands:
 
   # Modules:
 
@@ -9246,14 +9412,13 @@ Batch mode:
 
 =head1 DESCRIPTION
 
-The CPAN module is designed to automate the make and install of perl
-modules and extensions. It includes some primitive searching
-capabilities and knows how to use Net::FTP or LWP (or some external
-download clients) to fetch the raw data from the net.
+The CPAN module automates or at least simplifies the make and install
+of perl modules and extensions. It includes some primitive searching
+capabilities and knows how to use Net::FTP or LWP or some external
+download clients to fetch the distributions from the net.
 
-Distributions are fetched from one or more of the mirrored CPAN
-(Comprehensive Perl Archive Network) sites and unpacked in a dedicated
-directory.
+These are fetched from one or more of the mirrored CPAN (Comprehensive
+Perl Archive Network) sites and unpacked in a dedicated directory.
 
 The CPAN module also supports the concept of named and versioned
 I<bundles> of modules. Bundles simplify the handling of sets of
@@ -9274,11 +9439,15 @@ The interactive mode is entered by running
 
     perl -MCPAN -e shell
 
-which puts you into a readline interface. If Term::ReadKey and either
-Term::ReadLine::Perl or Term::ReadLine::Gnu are installed it supports
-both history and command completion.
+or
 
-Once you are on the command line, type 'h' to get a one page help
+    cpan
+
+which puts you into a readline interface. If C<Term::ReadKey> and
+either C<Term::ReadLine::Perl> or C<Term::ReadLine::Gnu> are installed
+it supports both history and command completion.
+
+Once you are on the command line, type C<h> to get a one page help
 screen and the rest should be self-explanatory.
 
 The function call C<shell> takes two optional arguments, one is the
@@ -9308,7 +9477,7 @@ displayed with the rather verbose method C<as_string>, but if we find
 more than one, we display each object with the terse method
 C<as_glimpse>.
 
-=item get, make, test, install, clean  modules or distributions
+=item C<get>, C<make>, C<test>, C<install>, C<clean> modules or distributions
 
 These commands take any number of arguments and investigate what is
 necessary to perform the action. If the argument is a distribution
@@ -9341,7 +9510,7 @@ has been run successfully before. Same for install runs.
 The C<force> pragma may precede another command (currently: C<get>,
 C<make>, C<test>, or C<install>) and executes the command from scratch
 and tries to continue in case of some errors. See the section below on
-The C<force> and the C<fforce> pragma.
+the C<force> and the C<fforce> pragma.
 
 The C<notest> pragma may be used to skip the test part in the build
 process.
@@ -9356,7 +9525,7 @@ A C<clean> command results in a
 
 being executed within the distribution file's working directory.
 
-=item readme, perldoc, look module or distribution
+=item C<readme>, C<perldoc>, C<look> module or distribution
 
 C<readme> displays the README file of the associated distribution.
 C<Look> gets and untars (if not yet done) the distribution file,
@@ -9364,9 +9533,9 @@ changes to the appropriate directory and opens a subshell process in
 that directory. C<perldoc> displays the pod documentation of the
 module in html or plain text format.
 
-=item ls author
+=item C<ls> author
 
-=item ls globbing_expression
+=item C<ls> globbing_expression
 
 The first form lists all distribution files in and below an author's
 CPAN directory as they are stored in the CHECKUMS files distributed on
@@ -9386,7 +9555,7 @@ Note that globbing only lists directories explicitly asked for, for
 example FOO/* will not list FOO/bar/Acme-Sthg-n.nn.tar.gz. This may be
 regarded as a bug and may be changed in future versions.
 
-=item failed
+=item C<failed>
 
 The C<failed> command reports all distributions that failed on one of
 C<make>, C<test> or C<install> for some reason in the currently
@@ -9584,6 +9753,631 @@ module or not.
 
 The typical usage case is for private modules or working copies of
 projects from remote repositories on the local disk.
+
+=head1 CONFIGURATION
+
+When the CPAN module is used for the first time, a configuration
+dialog tries to determine a couple of site specific options. The
+result of the dialog is stored in a hash reference C< $CPAN::Config >
+in a file CPAN/Config.pm.
+
+The default values defined in the CPAN/Config.pm file can be
+overridden in a user specific file: CPAN/MyConfig.pm. Such a file is
+best placed in $HOME/.cpan/CPAN/MyConfig.pm, because $HOME/.cpan is
+added to the search path of the CPAN module before the use() or
+require() statements. The mkmyconfig command writes this file for you.
+
+The C<o conf> command has various bells and whistles:
+
+=over
+
+=item completion support
+
+If you have a ReadLine module installed, you can hit TAB at any point
+of the commandline and C<o conf> will offer you completion for the
+built-in subcommands and/or config variable names.
+
+=item displaying some help: o conf help
+
+Displays a short help
+
+=item displaying current values: o conf [KEY]
+
+Displays the current value(s) for this config variable. Without KEY
+displays all subcommands and config variables.
+
+Example:
+
+  o conf shell
+
+=item changing of scalar values: o conf KEY VALUE
+
+Sets the config variable KEY to VALUE. The empty string can be
+specified as usual in shells, with C<''> or C<"">
+
+Example:
+
+  o conf wget /usr/bin/wget
+
+=item changing of list values: o conf KEY SHIFT|UNSHIFT|PUSH|POP|SPLICE|LIST
+
+If a config variable name ends with C<list>, it is a list. C<o conf
+KEY shift> removes the first element of the list, C<o conf KEY pop>
+removes the last element of the list. C<o conf KEYS unshift LIST>
+prepends a list of values to the list, C<o conf KEYS push LIST>
+appends a list of valued to the list.
+
+Likewise, C<o conf KEY splice LIST> passes the LIST to the according
+splice command.
+
+Finally, any other list of arguments is taken as a new list value for
+the KEY variable discarding the previous value.
+
+Examples:
+
+  o conf urllist unshift http://cpan.dev.local/CPAN
+  o conf urllist splice 3 1
+  o conf urllist http://cpan1.local http://cpan2.local ftp://ftp.perl.org
+
+=item reverting to saved: o conf defaults
+
+Reverts all config variables to the state in the saved config file.
+
+=item saving the config: o conf commit
+
+Saves all config variables to the current config file (CPAN/Config.pm
+or CPAN/MyConfig.pm that was loaded at start).
+
+=back
+
+The configuration dialog can be started any time later again by
+issuing the command C< o conf init > in the CPAN shell. A subset of
+the configuration dialog can be run by issuing C<o conf init WORD>
+where WORD is any valid config variable or a regular expression.
+
+=head2 Config Variables
+
+Currently the following keys in the hash reference $CPAN::Config are
+defined:
+
+  applypatch         path to external prg
+  auto_commit        commit all changes to config variables to disk
+  build_cache        size of cache for directories to build modules
+  build_dir          locally accessible directory to build modules
+  build_dir_reuse    boolean if distros in build_dir are persistent
+  build_requires_install_policy
+                     to install or not to install when a module is
+                     only needed for building. yes|no|ask/yes|ask/no
+  bzip2              path to external prg
+  cache_metadata     use serializer to cache metadata
+  commands_quote     prefered character to use for quoting external
+                     commands when running them. Defaults to double
+                     quote on Windows, single tick everywhere else;
+                     can be set to space to disable quoting
+  check_sigs         if signatures should be verified
+  colorize_debug     Term::ANSIColor attributes for debugging output
+  colorize_output    boolean if Term::ANSIColor should colorize output
+  colorize_print     Term::ANSIColor attributes for normal output
+  colorize_warn      Term::ANSIColor attributes for warnings
+  commandnumber_in_prompt
+                     boolean if you want to see current command number
+  cpan_home          local directory reserved for this package
+  curl               path to external prg
+  dontload_hash      DEPRECATED
+  dontload_list      arrayref: modules in the list will not be
+                     loaded by the CPAN::has_inst() routine
+  ftp                path to external prg
+  ftp_passive        if set, the envariable FTP_PASSIVE is set for downloads
+  ftp_proxy          proxy host for ftp requests
+  getcwd             see below
+  gpg                path to external prg
+  gzip		     location of external program gzip
+  histfile           file to maintain history between sessions
+  histsize           maximum number of lines to keep in histfile
+  http_proxy         proxy host for http requests
+  inactivity_timeout breaks interactive Makefile.PLs or Build.PLs
+                     after this many seconds inactivity. Set to 0 to
+                     never break.
+  index_expire       after this many days refetch index files
+  inhibit_startup_message
+                     if true, does not print the startup message
+  keep_source_where  directory in which to keep the source (if we do)
+  lynx               path to external prg
+  make               location of external make program
+  make_arg	     arguments that should always be passed to 'make'
+  make_install_make_command
+                     the make command for running 'make install', for
+                     example 'sudo make'
+  make_install_arg   same as make_arg for 'make install'
+  makepl_arg	     arguments passed to 'perl Makefile.PL'
+  mbuild_arg	     arguments passed to './Build'
+  mbuild_install_arg arguments passed to './Build install'
+  mbuild_install_build_command
+                     command to use instead of './Build' when we are
+                     in the install stage, for example 'sudo ./Build'
+  mbuildpl_arg       arguments passed to 'perl Build.PL'
+  ncftp              path to external prg
+  ncftpget           path to external prg
+  no_proxy           don't proxy to these hosts/domains (comma separated list)
+  pager              location of external program more (or any pager)
+  password           your password if you CPAN server wants one
+  patch              path to external prg
+  prefer_installer   legal values are MB and EUMM: if a module comes
+                     with both a Makefile.PL and a Build.PL, use the
+                     former (EUMM) or the latter (MB); if the module
+                     comes with only one of the two, that one will be
+                     used in any case
+  prerequisites_policy
+                     what to do if you are missing module prerequisites
+                     ('follow' automatically, 'ask' me, or 'ignore')
+  prefs_dir          local directory to store per-distro build options
+  proxy_user         username for accessing an authenticating proxy
+  proxy_pass         password for accessing an authenticating proxy
+  randomize_urllist  add some randomness to the sequence of the urllist
+  scan_cache	     controls scanning of cache ('atstart' or 'never')
+  shell              your favorite shell
+  show_upload_date   boolean if commands should try to determine upload date
+  tar                location of external program tar
+  term_is_latin      if true internal UTF-8 is translated to ISO-8859-1
+                     (and nonsense for characters outside latin range)
+  term_ornaments     boolean to turn ReadLine ornamenting on/off
+  test_report        email test reports (if CPAN::Reporter is installed)
+  unzip              location of external program unzip
+  urllist	     arrayref to nearby CPAN sites (or equivalent locations)
+  use_sqlite         use CPAN::SQLite for metadata storage (fast and lean)
+  username           your username if you CPAN server wants one
+  wait_list          arrayref to a wait server to try (See CPAN::WAIT)
+  wget               path to external prg
+  yaml_module        which module to use to read/write YAML files
+
+You can set and query each of these options interactively in the cpan
+shell with the C<o conf> or the C<o conf init> command as specified below.
+
+=over 2
+
+=item C<o conf E<lt>scalar optionE<gt>>
+
+prints the current value of the I<scalar option>
+
+=item C<o conf E<lt>scalar optionE<gt> E<lt>valueE<gt>>
+
+Sets the value of the I<scalar option> to I<value>
+
+=item C<o conf E<lt>list optionE<gt>>
+
+prints the current value of the I<list option> in MakeMaker's
+neatvalue format.
+
+=item C<o conf E<lt>list optionE<gt> [shift|pop]>
+
+shifts or pops the array in the I<list option> variable
+
+=item C<o conf E<lt>list optionE<gt> [unshift|push|splice] E<lt>listE<gt>>
+
+works like the corresponding perl commands.
+
+=item interactive editing: o conf init [MATCH|LIST]
+
+Runs an interactive configuration dialog for matching variables.
+Without argument runs the dialog over all supported config variables.
+To specify a MATCH the argument must be enclosed by slashes.
+
+Examples:
+
+  o conf init ftp_passive ftp_proxy
+  o conf init /color/
+
+Note: this method of setting config variables often provides more
+explanation about the functioning of a variable than the manpage.
+
+=back
+
+=head2 CPAN::anycwd($path): Note on config variable getcwd
+
+CPAN.pm changes the current working directory often and needs to
+determine its own current working directory. Per default it uses
+Cwd::cwd but if this doesn't work on your system for some reason,
+alternatives can be configured according to the following table:
+
+=over 4
+
+=item cwd
+
+Calls Cwd::cwd
+
+=item getcwd
+
+Calls Cwd::getcwd
+
+=item fastcwd
+
+Calls Cwd::fastcwd
+
+=item backtickcwd
+
+Calls the external command cwd.
+
+=back
+
+=head2 Note on the format of the urllist parameter
+
+urllist parameters are URLs according to RFC 1738. We do a little
+guessing if your URL is not compliant, but if you have problems with
+C<file> URLs, please try the correct format. Either:
+
+    file://localhost/whatever/ftp/pub/CPAN/
+
+or
+
+    file:///home/ftp/pub/CPAN/
+
+=head2 The urllist parameter has CD-ROM support
+
+The C<urllist> parameter of the configuration table contains a list of
+URLs that are to be used for downloading. If the list contains any
+C<file> URLs, CPAN always tries to get files from there first. This
+feature is disabled for index files. So the recommendation for the
+owner of a CD-ROM with CPAN contents is: include your local, possibly
+outdated CD-ROM as a C<file> URL at the end of urllist, e.g.
+
+  o conf urllist push file://localhost/CDROM/CPAN
+
+CPAN.pm will then fetch the index files from one of the CPAN sites
+that come at the beginning of urllist. It will later check for each
+module if there is a local copy of the most recent version.
+
+Another peculiarity of urllist is that the site that we could
+successfully fetch the last file from automatically gets a preference
+token and is tried as the first site for the next request. So if you
+add a new site at runtime it may happen that the previously preferred
+site will be tried another time. This means that if you want to disallow
+a site for the next transfer, it must be explicitly removed from
+urllist.
+
+=head2 Maintaining the urllist parameter
+
+If you have YAML.pm (or some other YAML module configured in
+C<yaml_module>) installed, CPAN.pm collects a few statistical data
+about recent downloads. You can view the statistics with the C<hosts>
+command or inspect them directly by looking into the C<FTPstats.yml>
+file in your C<cpan_home> directory.
+
+To get some interesting statistics it is recommended to set the
+C<randomize_urllist> parameter that introduces some amount of
+randomness into the URL selection.
+
+=head2 The C<requires> and C<build_requires> dependency declarations
+
+Since CPAN.pm version 1.88_51 modules declared as C<build_requires> by
+a distribution are treated differently depending on the config
+variable C<build_requires_install_policy>. By setting
+C<build_requires_install_policy> to C<no> such a module is not being
+installed. It is only built and tested and then kept in the list of
+tested but uninstalled modules. As such it is available during the
+build of the dependent module by integrating the path to the
+C<blib/arch> and C<blib/lib> directories in the environment variable
+PERL5LIB. If C<build_requires_install_policy> is set ti C<yes>, then
+both modules declared as C<requires> and those declared as
+C<build_requires> are treated alike. By setting to C<ask/yes> or
+C<ask/no>, CPAN.pm asks the user and sets the default accordingly.
+
+=head2 Configuration for individual distributions (I<Distroprefs>)
+
+(B<Note:> This feature has been introduced in CPAN.pm 1.8854 and is
+still considered beta quality)
+
+Distributions on the CPAN usually behave according to what we call the
+CPAN mantra. Or since the event of Module::Build we should talk about
+two mantras:
+
+    perl Makefile.PL     perl Build.PL
+    make                 ./Build
+    make test            ./Build test
+    make install         ./Build install
+
+But some modules cannot be built with this mantra. They try to get
+some extra data from the user via the environment, extra arguments or
+interactively thus disturbing the installation of large bundles like
+Phalanx100 or modules with many dependencies like Plagger.
+
+The distroprefs system of C<CPAN.pm> addresses this problem by
+allowing the user to specify extra informations and recipes in YAML
+files to either
+
+=over
+
+=item
+
+pass additional arguments to one of the four commands,
+
+=item
+
+set environment variables
+
+=item
+
+instantiate an Expect object that reads from the console, waits for
+some regular expressions and enters some answers
+
+=item
+
+temporarily override assorted C<CPAN.pm> configuration variables
+
+=item
+
+disable the installation of an object altogether
+
+=back
+
+See the YAML and Data::Dumper files that come with the C<CPAN.pm>
+distribution in the C<distroprefs/> directory for examples.
+
+=head2 Filenames
+
+The YAML files themselves must have the C<.yml> extension, all other
+files are ignored (for two exceptions see I<Fallback Data::Dumper and
+Storable> below). The containing directory can be specified in
+C<CPAN.pm> in the C<prefs_dir> config variable. Try C<o conf init
+prefs_dir> in the CPAN shell to set and activate the distroprefs
+system.
+
+Every YAML file may contain arbitrary documents according to the YAML
+specification and every single document is treated as an entity that
+can specify the treatment of a single distribution.
+
+The names of the files can be picked freely, C<CPAN.pm> always reads
+all files (in alphabetical order) and takes the key C<match> (see
+below in I<Language Specs>) as a hashref containing match criteria
+that determine if the current distribution matches the YAML document
+or not.
+
+=head2 Fallback Data::Dumper and Storable
+
+If neither your configured C<yaml_module> nor YAML.pm is installed
+CPAN.pm falls back to using Data::Dumper and Storable and looks for
+files with the extensions C<.dd> or C<.st> in the C<prefs_dir>
+directory. These files are expected to contain one or more hashrefs.
+For Data::Dumper generated files, this is expected to be done with by
+defining C<$VAR1>, C<$VAR2>, etc. The YAML shell would produce these
+with the command
+
+    ysh < somefile.yml > somefile.dd
+
+For Storable files the rule is that they must be constructed such that
+C<Storable::retrieve(file)> returns an array reference and the array
+elements represent one distropref object each. The conversion from
+YAML would look like so:
+
+    perl -MYAML=LoadFile -MStorable=nstore -e '
+        @y=LoadFile(shift);
+        nstore(\@y, shift)' somefile.yml somefile.st
+
+In bootstrapping situations it is usually sufficient to translate only
+a few YAML files to Data::Dumper for the crucial modules like
+C<YAML::Syck>, C<YAML.pm> and C<Expect.pm>. If you prefer Storable
+over Data::Dumper, remember to pull out a Storable version that writes
+an older format than all the other Storable versions that will need to
+read them.
+
+=head2 Blueprint
+
+The following example contains all supported keywords and structures
+with the exception of C<eexpect> which can be used instead of
+C<expect>.
+
+  ---
+  comment: "Demo"
+  match:
+    module: "Dancing::Queen"
+    distribution: "^CHACHACHA/Dancing-"
+    perl: "/usr/local/cariba-perl/bin/perl"
+  disabled: 1
+  cpanconfig:
+    make: gmake
+  pl:
+    args:
+      - "--somearg=specialcase"
+
+    env: {}
+
+    expect:
+      - "Which is your favorite fruit"
+      - "apple\n"
+
+  make:
+    args:
+      - all
+      - extra-all
+
+    env: {}
+
+    expect: []
+
+    commendline: "echo SKIPPING make"
+
+  test:
+    args: []
+
+    env: {}
+
+    expect: []
+
+  install:
+    args: []
+
+    env:
+      WANT_TO_INSTALL: YES
+
+    expect:
+      - "Do you really want to install"
+      - "y\n"
+
+  patches:
+    - "ABCDE/Fedcba-3.14-ABCDE-01.patch"
+
+
+=head2 Language Specs
+
+Every YAML document represents a single hash reference. The valid keys
+in this hash are as follows:
+
+=over
+
+=item comment [scalar]
+
+A comment
+
+=item cpanconfig [hash]
+
+Temporarily override assorted C<CPAN.pm> configuration variables.
+
+Supported are: C<build_requires_install_policy>, C<check_sigs>,
+C<make>, C<make_install_make_command>, C<prefer_installer>,
+C<test_report>. Please report as a bug when you need another one
+supported.
+
+=item disabled [boolean]
+
+Specifies that this distribution shall not be processed at all.
+
+=item goto [string]
+
+The canonical name of a delegate distribution that shall be installed
+instead. Useful when a new version, although it tests OK itself,
+breaks something else or a developer release or a fork is already
+uploaded that is better than the last released version.
+
+=item install [hash]
+
+Processing instructions for the C<make install> or C<./Build install>
+phase of the CPAN mantra. See below under I<Processiong Instructions>.
+
+=item make [hash]
+
+Processing instructions for the C<make> or C<./Build> phase of the
+CPAN mantra. See below under I<Processiong Instructions>.
+
+=item match [hash]
+
+A hashref with one or more of the keys C<distribution>, C<modules>, or
+C<perl> that specify if a document is targeted at a specific CPAN
+distribution.
+
+The corresponding values are interpreted as regular expressions. The
+C<distribution> related one will be matched against the canonical
+distribution name, e.g. "AUTHOR/Foo-Bar-3.14.tar.gz".
+
+The C<module> related one will be matched against I<all> modules
+contained in the distribution until one module matches.
+
+The C<perl> related one will be matched against C<$^X>.
+
+If more than one restriction of C<module>, C<distribution>, and
+C<perl> is specified, the results of the separately computed match
+values must all match. If this is the case then the hashref
+represented by the YAML document is returned as the preference
+structure for the current distribution.
+
+=item patches [array]
+
+An array of patches on CPAN or on the local disk to be applied in
+order via the external patch program. If the value for the C<-p>
+parameter is C<0> or C<1> is determined by reading the patch
+beforehand.
+
+Note: if the C<applypatch> program is installed and C<CPAN::Config>
+knows about it B<and> a patch is written by the C<makepatch> program,
+then C<CPAN.pm> lets C<applypatch> apply the patch. Both C<makepatch>
+and C<applypatch> are available from CPAN in the C<JV/makepatch-*>
+distribution.
+
+=item pl [hash]
+
+Processing instructions for the C<perl Makefile.PL> or C<perl
+Build.PL> phase of the CPAN mantra. See below under I<Processiong
+Instructions>.
+
+=item test [hash]
+
+Processing instructions for the C<make test> or C<./Build test> phase
+of the CPAN mantra. See below under I<Processiong Instructions>.
+
+=back
+
+=head2 Processing Instructions
+
+=over
+
+=item args [array]
+
+Arguments to be added to the command line
+
+=item commandline
+
+A full commandline that will be executed as it stands by a system
+call. During the execution the environment variable PERL will is set
+to $^X. If C<commandline> is specified, the content of C<args> is not
+used.
+
+=item eexpect [hash]
+
+Extended C<expect>. This is a hash reference with three allowed keys,
+C<mode>, C<timeout>, and C<talk>.
+
+C<mode> may have the values C<deterministic> for the case where all
+questions come in the order written down and C<anyorder> for the case
+where the questions may come in any order. The default mode is
+C<deterministic>.
+
+C<timeout> denotes a timeout in seconds. Floating point timeouts are
+OK. In the case of a C<mode=deterministic> the timeout denotes the
+timeout per question, in the case of C<mode=anyorder> it denotes the
+timeout per byte received from the stream or questions.
+
+C<talk> is a reference to an array that contains alternating questions
+and answers. Questions are regular expressions and answers are literal
+strings. The Expect module will then watch the stream coming from the
+execution of the external program (C<perl Makefile.PL>, C<perl
+Build.PL>, C<make>, etc.).
+
+In the case of C<mode=deterministic> the CPAN.pm will inject the
+according answer as soon as the stream matches the regular expression.
+In the case of C<mode=anyorder> the CPAN.pm will answer a question as
+soon as the timeout is reached for the next byte in the input stream.
+In the latter case it removes the according question/answer pair from
+the array, so if you want to answer the question C<Do you really want
+to do that> several times, then it must be included in the array at
+least as often as you want this answer to be given.
+
+=item env [hash]
+
+Environment variables to be set during the command
+
+=item expect [array]
+
+C<< expect: <array> >> is a short notation for
+
+  eexpect:
+    mode: deterministic
+    timeout: 15
+    talk: <array>
+
+=back
+
+=head2 Schema verification with C<Kwalify>
+
+If you have the C<Kwalify> module installed (which is part of the
+Bundle::CPANxxl), then all your distroprefs files are checked for
+syntactical correctness.
+
+=head2 Example Distroprefs Files
+
+C<CPAN.pm> comes with a collection of example YAML files. Note that these
+are really just examples and should not be used without care because
+they cannot fit everybody's purpose. After all the authors of the
+packages that ask questions had a need to ask, so you should watch
+their questions and adjust the examples to your environment and your
+needs. You have beend warned:-)
 
 =head1 PROGRAMMER'S INTERFACE
 
@@ -9836,12 +10630,22 @@ its dependencies, use CPAN::Shell->install.
 
 Note that install() gives no meaningful return value. See uptodate().
 
+=item CPAN::Distribution::install_tested()
+
+Install all the distributions that have been tested sucessfully but
+not yet installed. See also C<is_tested>.
+
 =item CPAN::Distribution::isa_perl()
 
 Returns 1 if this distribution file seems to be a perl distribution.
 Normally this is derived from the file name only, but the index from
 CPAN can contain a hint to achieve a return value of true for other
 filenames too.
+
+=item CPAN::Distribution::is_tested()
+
+List all the distributions that have been tested sucessfully but not
+yet installed. See also C<install_tested>.
 
 =item CPAN::Distribution::look()
 
@@ -9880,10 +10684,13 @@ attributes are optional.
 =item CPAN::Distribution::prereq_pm()
 
 Returns the hash reference that has been announced by a distribution
-as the merge of the C<requires> element and the C<build_requires>
-element of the META.yml or the C<PREREQ_PM> hash in the
-C<Makefile.PL>. Note: works only after an attempt has been made to
-C<make> the distribution. Returns undef otherwise.
+as the the C<requires> and C<build_requires> elements. These can be
+declared either by the C<META.yml> (if authoritative) or can be
+deposited after the run of C<Build.PL> in the file C<./_build/prereqs>
+or after the run of C<Makfile.PL> written as the C<PREREQ_PM> hash in
+a comment in the produced C<Makefile>. I<Note>: this method only works
+after an attempt has been made to C<make> the distribution. Returns
+undef otherwise.
 
 =item CPAN::Distribution::readme()
 
@@ -9895,7 +10702,8 @@ through the pager specified in C<$CPAN::Config->{pager}>.
 Returns the content of the META.yml of this distro as a hashref. Note:
 works only after an attempt has been made to C<make> the distribution.
 Returns undef otherwise. Also returns undef if the content of META.yml
-is dynamic.
+is not authoritative. (The rules about what exactly makes the content
+authoritative are still in flux.)
 
 =item CPAN::Distribution::test()
 
@@ -10275,326 +11083,6 @@ distributions, authors and bundles. If the object already exists, this
 method returns the object, otherwise it calls the constructor.
 
 =back
-
-=head1 CONFIGURATION
-
-When the CPAN module is used for the first time, a configuration
-dialog tries to determine a couple of site specific options. The
-result of the dialog is stored in a hash reference C< $CPAN::Config >
-in a file CPAN/Config.pm.
-
-The default values defined in the CPAN/Config.pm file can be
-overridden in a user specific file: CPAN/MyConfig.pm. Such a file is
-best placed in $HOME/.cpan/CPAN/MyConfig.pm, because $HOME/.cpan is
-added to the search path of the CPAN module before the use() or
-require() statements. The mkmyconfig command writes this file for you.
-
-The C<o conf> command has various bells and whistles:
-
-=over
-
-=item completion support
-
-If you have a ReadLine module installed, you can hit TAB at any point
-of the commandline and C<o conf> will offer you completion for the
-built-in subcommands and/or config variable names.
-
-=item displaying some help: o conf help
-
-Displays a short help
-
-=item displaying current values: o conf [KEY]
-
-Displays the current value(s) for this config variable. Without KEY
-displays all subcommands and config variables.
-
-Example:
-
-  o conf shell
-
-=item changing of scalar values: o conf KEY VALUE
-
-Sets the config variable KEY to VALUE. The empty string can be
-specified as usual in shells, with C<''> or C<"">
-
-Example:
-
-  o conf wget /usr/bin/wget
-
-=item changing of list values: o conf KEY SHIFT|UNSHIFT|PUSH|POP|SPLICE|LIST
-
-If a config variable name ends with C<list>, it is a list. C<o conf
-KEY shift> removes the first element of the list, C<o conf KEY pop>
-removes the last element of the list. C<o conf KEYS unshift LIST>
-prepends a list of values to the list, C<o conf KEYS push LIST>
-appends a list of valued to the list.
-
-Likewise, C<o conf KEY splice LIST> passes the LIST to the according
-splice command.
-
-Finally, any other list of arguments is taken as a new list value for
-the KEY variable discarding the previous value.
-
-Examples:
-
-  o conf urllist unshift http://cpan.dev.local/CPAN
-  o conf urllist splice 3 1
-  o conf urllist http://cpan1.local http://cpan2.local ftp://ftp.perl.org
-
-=item interactive editing: o conf init [MATCH|LIST]
-
-Runs an interactive configuration dialog for matching variables.
-Without argument runs the dialog over all supported config variables.
-To specify a MATCH the argument must be enclosed by slashes.
-
-Examples:
-
-  o conf init ftp_passive ftp_proxy
-  o conf init /color/
-
-=item reverting to saved: o conf defaults
-
-Reverts all config variables to the state in the saved config file.
-
-=item saving the config: o conf commit
-
-Saves all config variables to the current config file (CPAN/Config.pm
-or CPAN/MyConfig.pm that was loaded at start).
-
-=back
-
-The configuration dialog can be started any time later again by
-issuing the command C< o conf init > in the CPAN shell. A subset of
-the configuration dialog can be run by issuing C<o conf init WORD>
-where WORD is any valid config variable or a regular expression.
-
-=head2 Config Variables
-
-Currently the following keys in the hash reference $CPAN::Config are
-defined:
-
-  applypatch         path to external prg
-  auto_commit        commit all changes to config variables to disk
-  build_cache        size of cache for directories to build modules
-  build_dir          locally accessible directory to build modules
-  build_dir_reuse    boolean if distros in build_dir are persistent
-  build_requires_install_policy
-                     to install or not to install: when a module is
-                     only needed for building. yes|no|ask/yes|ask/no
-  bzip2              path to external prg
-  cache_metadata     use serializer to cache metadata
-  commands_quote     prefered character to use for quoting external
-                     commands when running them. Defaults to double
-                     quote on Windows, single tick everywhere else;
-                     can be set to space to disable quoting
-  check_sigs         if signatures should be verified
-  colorize_debug     Term::ANSIColor attributes for debugging output
-  colorize_output    boolean if Term::ANSIColor should colorize output
-  colorize_print     Term::ANSIColor attributes for normal output
-  colorize_warn      Term::ANSIColor attributes for warnings
-  commandnumber_in_prompt
-                     boolean if you want to see current command number
-  cpan_home          local directory reserved for this package
-  curl               path to external prg
-  dontload_hash      DEPRECATED
-  dontload_list      arrayref: modules in the list will not be
-                     loaded by the CPAN::has_inst() routine
-  ftp                path to external prg
-  ftp_passive        if set, the envariable FTP_PASSIVE is set for downloads
-  ftp_proxy          proxy host for ftp requests
-  getcwd             see below
-  gpg                path to external prg
-  gzip		     location of external program gzip
-  histfile           file to maintain history between sessions
-  histsize           maximum number of lines to keep in histfile
-  http_proxy         proxy host for http requests
-  inactivity_timeout breaks interactive Makefile.PLs or Build.PLs
-                     after this many seconds inactivity. Set to 0 to
-                     never break.
-  index_expire       after this many days refetch index files
-  inhibit_startup_message
-                     if true, does not print the startup message
-  keep_source_where  directory in which to keep the source (if we do)
-  lynx               path to external prg
-  make               location of external make program
-  make_arg	     arguments that should always be passed to 'make'
-  make_install_make_command
-                     the make command for running 'make install', for
-                     example 'sudo make'
-  make_install_arg   same as make_arg for 'make install'
-  makepl_arg	     arguments passed to 'perl Makefile.PL'
-  mbuild_arg	     arguments passed to './Build'
-  mbuild_install_arg arguments passed to './Build install'
-  mbuild_install_build_command
-                     command to use instead of './Build' when we are
-                     in the install stage, for example 'sudo ./Build'
-  mbuildpl_arg       arguments passed to 'perl Build.PL'
-  ncftp              path to external prg
-  ncftpget           path to external prg
-  no_proxy           don't proxy to these hosts/domains (comma separated list)
-  pager              location of external program more (or any pager)
-  password           your password if you CPAN server wants one
-  patch              path to external prg
-  prefer_installer   legal values are MB and EUMM: if a module comes
-                     with both a Makefile.PL and a Build.PL, use the
-                     former (EUMM) or the latter (MB); if the module
-                     comes with only one of the two, that one will be
-                     used in any case
-  prerequisites_policy
-                     what to do if you are missing module prerequisites
-                     ('follow' automatically, 'ask' me, or 'ignore')
-  prefs_dir          local directory to store per-distro build options
-  proxy_user         username for accessing an authenticating proxy
-  proxy_pass         password for accessing an authenticating proxy
-  randomize_urllist  add some randomness to the sequence of the urllist
-  scan_cache	     controls scanning of cache ('atstart' or 'never')
-  shell              your favorite shell
-  show_upload_date   boolean if commands should try to determine upload date
-  tar                location of external program tar
-  term_is_latin      if true internal UTF-8 is translated to ISO-8859-1
-                     (and nonsense for characters outside latin range)
-  term_ornaments     boolean to turn ReadLine ornamenting on/off
-  test_report        email test reports (if CPAN::Reporter is installed)
-  unzip              location of external program unzip
-  urllist	     arrayref to nearby CPAN sites (or equivalent locations)
-  use_sqlite         use CPAN::SQLite for metadata storage (fast and lean)
-  username           your username if you CPAN server wants one
-  wait_list          arrayref to a wait server to try (See CPAN::WAIT)
-  wget               path to external prg
-  yaml_module        which module to use to read/write YAML files
-
-You can set and query each of these options interactively in the cpan
-shell with the command set defined within the C<o conf> command:
-
-=over 2
-
-=item C<o conf E<lt>scalar optionE<gt>>
-
-prints the current value of the I<scalar option>
-
-=item C<o conf E<lt>scalar optionE<gt> E<lt>valueE<gt>>
-
-Sets the value of the I<scalar option> to I<value>
-
-=item C<o conf E<lt>list optionE<gt>>
-
-prints the current value of the I<list option> in MakeMaker's
-neatvalue format.
-
-=item C<o conf E<lt>list optionE<gt> [shift|pop]>
-
-shifts or pops the array in the I<list option> variable
-
-=item C<o conf E<lt>list optionE<gt> [unshift|push|splice] E<lt>listE<gt>>
-
-works like the corresponding perl commands.
-
-=back
-
-=head2 CPAN::anycwd($path): Note on config variable getcwd
-
-CPAN.pm changes the current working directory often and needs to
-determine its own current working directory. Per default it uses
-Cwd::cwd but if this doesn't work on your system for some reason,
-alternatives can be configured according to the following table:
-
-=over 2
-
-=item cwd
-
-Calls Cwd::cwd
-
-=item getcwd
-
-Calls Cwd::getcwd
-
-=item fastcwd
-
-Calls Cwd::fastcwd
-
-=item backtickcwd
-
-Calls the external command cwd.
-
-=back
-
-=head2 Note on the format of the urllist parameter
-
-urllist parameters are URLs according to RFC 1738. We do a little
-guessing if your URL is not compliant, but if you have problems with
-C<file> URLs, please try the correct format. Either:
-
-    file://localhost/whatever/ftp/pub/CPAN/
-
-or
-
-    file:///home/ftp/pub/CPAN/
-
-=head2 urllist parameter has CD-ROM support
-
-The C<urllist> parameter of the configuration table contains a list of
-URLs that are to be used for downloading. If the list contains any
-C<file> URLs, CPAN always tries to get files from there first. This
-feature is disabled for index files. So the recommendation for the
-owner of a CD-ROM with CPAN contents is: include your local, possibly
-outdated CD-ROM as a C<file> URL at the end of urllist, e.g.
-
-  o conf urllist push file://localhost/CDROM/CPAN
-
-CPAN.pm will then fetch the index files from one of the CPAN sites
-that come at the beginning of urllist. It will later check for each
-module if there is a local copy of the most recent version.
-
-Another peculiarity of urllist is that the site that we could
-successfully fetch the last file from automatically gets a preference
-token and is tried as the first site for the next request. So if you
-add a new site at runtime it may happen that the previously preferred
-site will be tried another time. This means that if you want to disallow
-a site for the next transfer, it must be explicitly removed from
-urllist.
-
-=head2 Maintaining the urllist parameter
-
-If you have YAML.pm (or some other YAML module configured in
-C<yaml_module>) installed, CPAN.pm collects a few statistical data
-about recent downloads. You can view the statistics with the C<hosts>
-command or inspect them directly by looking into the C<FTPstats.yml>
-file in your C<cpan_home> directory.
-
-To get some interesting statistics it is recommended to set the
-C<randomize_urllist> parameter that introduces some amount of
-randomness into the URL selection.
-
-=head2 prefs_dir for avoiding interactive questions (ALPHA)
-
-(B<Note:> This feature has been introduced in CPAN.pm 1.8854 and is
-still considered experimental and may still be changed)
-
-The files in the directory specified in C<prefs_dir> are YAML files
-that specify how CPAN.pm shall treat distributions that deviate from
-the normal non-interactive model of building and installing CPAN
-modules.
-
-Some modules try to get some data from the user interactively thus
-disturbing the installation of large bundles like Phalanx100 or
-modules like Plagger.
-
-CPAN.pm can use YAML files to either pass additional arguments to one
-of the four commands, set environment variables or instantiate an
-Expect object that reads from the console and enters answers on your
-behalf (latter option requires Expect.pm installed). A further option
-is to apply patches from the local disk or from CPAN.
-
-CPAN.pm comes with a couple of such YAML files. The structure is
-currently not documented because in flux. Please see the distroprefs
-directory of the CPAN distribution for examples and follow the
-C<00.README> file in there.
-
-Please note that setting the environment variable PERL_MM_USE_DEFAULT
-to a true value can also get you a long way if you want to always pick
-the default answers. But this only works if the author of a package
-used the prompt function provided by ExtUtils::MakeMaker and if the
-defaults are OK for you.
 
 =head1 SECURITY
 
