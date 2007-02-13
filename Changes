@@ -2656,7 +2656,7 @@ ____________________________________________________________________________
 	   ! sv.c t/op/pat.t t/op/re_tests t/op/regexp.t toke.c
 ____________________________________________________________________________
 [ 28956] By: nicholas                              on 2006/10/07  13:53:36
-        Log: Change sprintf() to my_sprintf(), and use the returnled length from
+        Log: Change sprintf() to my_sprintf(), and use the returned length from
              that and my_snprintf() to avoid calls to strlen()
      Branch: perl
 	   ! ext/Data/Dumper/Dumper.xs
