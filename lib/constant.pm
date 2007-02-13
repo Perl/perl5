@@ -5,7 +5,7 @@ use 5.006_00;
 use warnings::register;
 
 our($VERSION, %declared);
-$VERSION = '1.07';
+$VERSION = '1.08';
 
 #=======================================================================
 
@@ -111,9 +111,6 @@ sub import {
 		    $symtab->{$name} = \$scalar;
 		    Internals::inc_sub_generation;
 		} else {
-		    if(!exists $symtab->{$name}) {
-			print STDERR "$name $scalar\n";
-		    }
 		    *$full_name = sub () { $scalar };
 		}
 	    } elsif (@_) {
