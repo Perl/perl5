@@ -194,18 +194,18 @@ LINE: while (<CPP>) {
   while (/^#.*vmsish\.h/i .. /^#.*perl\.h/i) {
     while (/__VMS_PROTOTYPES__/i .. /__VMS_SEPYTOTORP__/i) {
       print "vms_proto>> $_" if $debug > 2;
-      if (/^\s*EXT/) { &scan_var($_);  }
+      if (/^\s*EXT(CONST|\s+)/) { &scan_var($_);  }
       else        { &scan_func($_); }
       last LINE unless defined($_ = <CPP>);
     }
     print "vmsish.h>> $_" if $debug > 2;
-    if (/^\s*EXT/) { &scan_var($_); }
+    if (/^\s*EXT(CONST|\s+)/) { &scan_var($_); }
     last LINE unless defined($_ = <CPP>);
   }    
   while (/^#.*opcode\.h/i .. /^#.*perl\.h/i) {
     print "opcode.h>> $_" if $debug > 2;
     if (/^OP \*\s/) { &scan_func($_); }
-    if (/^\s*EXT/) { &scan_var($_); }
+    if (/^\s*EXT(CONST|\s+)/) { &scan_var($_); }
     last LINE unless defined($_ = <CPP>);
   }
   # Check for transition to new header file
@@ -221,12 +221,12 @@ LINE: while (<CPP>) {
   }
   if ($ckfunc) {
     print "$scanname>> $_" if $debug > 2;
-    if (/^\s*EXT/) { &scan_var($_);  }
+    if (/^\s*EXT(CONST|\s+)/) { &scan_var($_);  }
     else           { &scan_func($_); }
   }
   else {
     print $_ if $debug > 3 && ($debug > 5 || length($_));
-    if (/^\s*EXT/) { &scan_var($_); }
+    if (/^\s*EXT(CONST|\s+)/) { &scan_var($_); }
   }
 }
 close CPP;

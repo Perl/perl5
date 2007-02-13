@@ -335,6 +335,12 @@ C<SV*>.
 #define Perl_sharepvn(sv, len, hash) HEK_KEY(share_hek(sv, len, hash))
 #define sharepvn(sv, len, hash)	     Perl_sharepvn(sv, len, hash)
 
+/* These don't exist for 5.8.x, but there will be fewer merge conflicts in
+   various *ish.h headers if they are defined as no-ops.  */
+
+#define HINTS_REFCNT_INIT            NOOP
+#define HINTS_REFCNT_TERM            NOOP
+
 /*
  * Local variables:
  * c-indentation-style: bsd

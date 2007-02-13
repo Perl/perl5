@@ -1,7 +1,10 @@
 /*
- * perlio.c Copyright (c) 1996-2006, Nick Ing-Simmons You may distribute
- * under the terms of either the GNU General Public License or the
- * Artistic License, as specified in the README file.
+ * perlio.c
+ * Copyright (c) 1996-2006, Nick Ing-Simmons
+ * Copyright (c) 2006, 2007, Larry Wall and others
+ *
+ * You may distribute under the terms of either the GNU General Public License
+ * or the Artistic License, as specified in the README file.
  */
 
 /*
@@ -2261,11 +2264,7 @@ PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
     return f;
 }
 
-#ifdef USE_THREADS
-perl_mutex PerlIO_mutex;
-#endif
-
-/* Must be called with PerlIO_mutex locked.  */
+/* Must be called with PL_perlio_mutex locked. */
 static void
 S_more_refcounted_fds(pTHX_ const int new_fd) {
     const int old_max = PL_perlio_fd_refcnt_size;
@@ -2281,12 +2280,13 @@ S_more_refcounted_fds(pTHX_ const int new_fd) {
 
     assert (new_max > new_fd);
 
-    new_array
-	= PerlMemShared_realloc(PL_perlio_fd_refcnt, new_max * sizeof(int));
+    /* Use plain realloc() since we need this memory to be really
+     * global and visible to all the interpreters and/or threads. */
+    new_array = (int*) realloc(PL_perlio_fd_refcnt, new_max * sizeof(int));
 
     if (!new_array) {
-#ifdef USE_THREADS
-	MUTEX_UNLOCK(&PerlIO_mutex);
+#ifdef USE_ITHREADS
+	MUTEX_UNLOCK(&PL_perlio_mutex);
 #endif
 	/* Can't use PerlIO to write as it allocates memory */
 	PerlLIO_write(PerlIO_fileno(Perl_error_log),
@@ -2306,12 +2306,8 @@ S_more_refcounted_fds(pTHX_ const int new_fd) {
 void
 PerlIO_init(pTHX)
 {
- /* Place holder for stdstreams call ??? */
-#ifdef USE_THREADS
-    MUTEX_INIT(&PerlIO_mutex);
-#else
+    /* MUTEX_INIT(&PL_perlio_mutex) is done in PERL_SYS_INIT3(). */
     PERL_UNUSED_CONTEXT;
-#endif
 }
 
 void
@@ -2320,18 +2316,25 @@ PerlIOUnix_refcnt_inc(int fd)
     dTHX;
     if (fd >= 0) {
 
-#ifdef USE_THREADS
-	MUTEX_LOCK(&PerlIO_mutex);
+#ifdef USE_ITHREADS
+	MUTEX_LOCK(&PL_perlio_mutex);
 #endif
 	if (fd >= PL_perlio_fd_refcnt_size)
 	    S_more_refcounted_fds(aTHX_ fd);
 
 	PL_perlio_fd_refcnt[fd]++;
-	PerlIO_debug("fd %d refcnt=%d\n",fd,PL_perlio_fd_refcnt[fd]);
+	if (PL_perlio_fd_refcnt[fd] <= 0) {
+	    Perl_croak(aTHX_ "refcnt_inc: fd %d: %d <= 0\n",
+		       fd, PL_perlio_fd_refcnt[fd]);
+	}
+	PerlIO_debug("refcnt_inc: fd %d refcnt=%d\n",
+		     fd, PL_perlio_fd_refcnt[fd]);
 
-#ifdef USE_THREADS
-	MUTEX_UNLOCK(&PerlIO_mutex);
+#ifdef USE_ITHREADS
+	MUTEX_UNLOCK(&PL_perlio_mutex);
 #endif
+    } else {
+	Perl_croak(aTHX_ "refcnt_inc: fd %d < 0\n", fd);
     }
 }
 
@@ -2341,19 +2344,24 @@ PerlIOUnix_refcnt_dec(int fd)
     dTHX;
     int cnt = 0;
     if (fd >= 0) {
-#ifdef USE_THREADS
-	MUTEX_LOCK(&PerlIO_mutex);
+#ifdef USE_ITHREADS
+	MUTEX_LOCK(&PL_perlio_mutex);
 #endif
-	/* XXX should this be a panic?  */
-	if (fd >= PL_perlio_fd_refcnt_size)
-	    S_more_refcounted_fds(aTHX_ fd);
-
-	/* XXX should this be a panic if it drops below 0?  */
+	if (fd >= PL_perlio_fd_refcnt_size) {
+	    Perl_croak(aTHX_ "refcnt_dec: fd %d >= refcnt_size %d\n",
+		       fd, PL_perlio_fd_refcnt_size);
+	}
+	if (PL_perlio_fd_refcnt[fd] <= 0) {
+	    Perl_croak(aTHX_ "refcnt_dec: fd %d: %d <= 0\n",
+		       fd, PL_perlio_fd_refcnt[fd]);
+	}
 	cnt = --PL_perlio_fd_refcnt[fd];
-	PerlIO_debug("fd %d refcnt=%d\n",fd,cnt);
-#ifdef USE_THREADS
-	MUTEX_UNLOCK(&PerlIO_mutex);
+	PerlIO_debug("refcnt_dec: fd %d refcnt=%d\n", fd, cnt);
+#ifdef USE_ITHREADS
+	MUTEX_UNLOCK(&PL_perlio_mutex);
 #endif
+    } else {
+	Perl_croak(aTHX_ "refcnt_dec: fd %d < 0\n", fd);
     }
     return cnt;
 }
@@ -2367,6 +2375,7 @@ PerlIO_cleanup(pTHX)
 #else
     PerlIO_debug("Cleanup layers\n");
 #endif
+
     /* Raise STDIN..STDERR refcount so we don't close them */
     for (i=0; i < 3; i++)
 	PerlIOUnix_refcnt_inc(i);
@@ -2382,6 +2391,32 @@ PerlIO_cleanup(pTHX)
     if (PL_def_layerlist) {
 	PerlIO_list_free(aTHX_ PL_def_layerlist);
 	PL_def_layerlist = NULL;
+    }
+}
+
+void PerlIO_teardown(pTHX) /* Call only from PERL_SYS_TERM(). */
+{
+    
+#ifdef DEBUGGING
+    {
+	/* By now all filehandles should have been closed, so any
+	 * stray (non-STD-)filehandles indicate *possible* (PerlIO)
+	 * errors. */
+	int i;
+	for (i = 3; i < PL_perlio_fd_refcnt_size; i++) {
+	    if (PL_perlio_fd_refcnt[i])
+		PerlIO_debug("PerlIO_cleanup: fd %d refcnt=%d\n",
+			     i, PL_perlio_fd_refcnt[i]);
+	}
+    }
+#endif
+    /* Not bothering with PL_perlio_mutex since by now
+     * all the interpreters are gone. */
+    if (PL_perlio_fd_refcnt_size /* Assuming initial size of zero. */
+        && PL_perlio_fd_refcnt) {
+	free(PL_perlio_fd_refcnt); /* To match realloc() in S_more_refcounted_fds(). */
+	PL_perlio_fd_refcnt = NULL;
+	PL_perlio_fd_refcnt_size = 0;
     }
 }
 

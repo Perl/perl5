@@ -82,3 +82,7 @@ PERLVARI(Guse_safe_putenv, int, 1)
 PERLVARI(Gperlio_fd_refcnt, int*, 0) /* Pointer to array of fd refcounts.  */
 PERLVARI(Gperlio_fd_refcnt_size, int, 0) /* Size of the array */
 #endif
+
+#if defined(USE_ITHREADS)
+PERLVAR(Gperlio_mutex, perl_mutex)    /* Mutex for perlio fd refcounts */
+#endif

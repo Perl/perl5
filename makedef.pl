@@ -713,6 +713,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    PL_sharedsv_space
 		    PL_sharedsv_space_mutex
 		    PL_dollarzero_mutex
+		    PL_perlio_mutex
 		    Perl_dirp_dup
 		    Perl_cx_dup
 		    Perl_si_dup
@@ -1019,13 +1020,30 @@ if ($define{'USE_PERLIO'}) {
 	emit_symbols \@layer_syms;
 	emit_symbols [qw(perlsio_binmode)];
     }
+    if ($define{'USE_ITHREADS'}) {
+	emit_symbols [qw(
+			PL_perlio_mutex
+			)];
+    }
+    else {
+	skip_symbols [qw(
+			PL_perlio_mutex
+			)];
+    }
 } else {
 	# -Uuseperlio
 	# Skip the PerlIO layer symbols - although
 	# nothing should have exported them any way
 	skip_symbols \@layer_syms;
-	skip_symbols [qw(perlsio_binmode)];
-        skip_symbols [qw(PL_def_layerlist PL_known_layers PL_perlio)];
+	skip_symbols [qw(
+			perlsio_binmode
+			PL_def_layerlist
+			PL_known_layers
+			PL_perlio
+			PL_perlio_debug_fd
+			PL_perlio_fd_refcnt
+			PL_perlio_fd_refcnt_size
+			)];
 
 	# Also do NOT add abstraction symbols from $perlio_sym
 	# abstraction is done as #define to stdio

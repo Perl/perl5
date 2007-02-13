@@ -2491,10 +2491,10 @@ typedef struct clone_params CLONE_PARAMS;
 #    if HAS_FLOATINGPOINT_H
 #      include <floatingpoint.h>
 #    endif
-#    define PERL_FPU_INIT fpsetmask(0);
+#    define PERL_FPU_INIT fpsetmask(0)
 #  else
 #    if defined(SIGFPE) && defined(SIG_IGN) && !defined(PERL_MICRO)
-#      define PERL_FPU_INIT       PL_sigfpe_saved = (Sighandler_t) signal(SIGFPE, SIG_IGN);
+#      define PERL_FPU_INIT       PL_sigfpe_saved = (Sighandler_t) signal(SIGFPE, SIG_IGN)
 #      define PERL_FPU_PRE_EXEC   { Sigsave_t xfpe; rsignal_save(SIGFPE, PL_sigfpe_saved, &xfpe);
 #      define PERL_FPU_POST_EXEC    rsignal_restore(SIGFPE, &xfpe); }
 #    else
@@ -3797,6 +3797,24 @@ typedef Sighandler_t Sigsave_t;
 # define RUNOPS_DEFAULT Perl_runops_debug
 #else
 # define RUNOPS_DEFAULT Perl_runops_standard
+#endif
+
+#ifdef USE_PERLIO
+EXTERN_C void PerlIO_teardown(pTHX);
+# ifdef USE_ITHREADS
+#  define PERLIO_INIT MUTEX_INIT(&PL_perlio_mutex)
+#  define PERLIO_TERM 				\
+	STMT_START {				\
+		PerlIO_teardown(aTHX);		\
+		MUTEX_DESTROY(&PL_perlio_mutex);\
+	} STMT_END
+# else
+#  define PERLIO_INIT
+#  define PERLIO_TERM	PerlIO_teardown(aTHX)
+# endif
+#else
+#  define PERLIO_INIT
+#  define PERLIO_TERM
 #endif
 
 #ifdef MYMALLOC
