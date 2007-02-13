@@ -14,7 +14,7 @@ between 5.8.0 and 5.9.4.
 =head2 Tainting and printf
 
 When perl is run under taint mode, C<printf()> and C<sprintf()> will now
-reject any tainted format argument. (Rafael Garcia-SUarez)
+reject any tainted format argument. (Rafael Garcia-Suarez)
 
 =head2 undef and signal handlers
 
@@ -116,7 +116,7 @@ quantifiers. (Yves Orton)
 
 =item Backtracking control verbs
 
-The regex engine now supports a number of special purpose backtrack
+The regex engine now supports a number of special-purpose backtrack
 control verbs: (*THEN), (*PRUNE), (*MARK), (*SKIP), (*COMMIT), (*FAIL)
 and (*ACCEPT). See L<perlre> for their descriptions. (Yves Orton)
 
@@ -125,7 +125,7 @@ and (*ACCEPT). See L<perlre> for their descriptions. (Yves Orton)
 A new syntax C<\g{N}> or C<\gN> where "N" is a decimal integer allows a
 safer form of back-reference notation as well as allowing relative
 backreferences. This should make it easier to generate and embed patterns
-that contain backreferences. (Yves Orton)
+that contain backreferences. See L<perlre/"Capture buffers">. (Yves Orton)
 
 =item Regexp::Keep internalized
 
@@ -225,6 +225,11 @@ anymore, and will require parentheses to be added after the function name:
     require Carp;
     Carp::confess "argh";
 
+=item C<Attribute::Handlers>
+
+C<Attribute::Handlers> can now report the caller's file and line number.
+(David Feldman)
+
 =back
 
 =head1 Utility Changes
@@ -240,6 +245,12 @@ anymore, and will require parentheses to be added after the function name:
 Efforts have been made to make perl and the core XS modules compilable
 with various C++ compilers (although the situation is not perfect with
 some of the compilers on some of the platforms tested.)
+
+=head2 Static build on Win32
+
+It's now possible to build a C<perl-static.exe> that doesn't depend
+on C<perl59.dll> on Win32. See the Win32 makefiles for details.
+(Steve Hay)
 
 =head2 Ports
 
