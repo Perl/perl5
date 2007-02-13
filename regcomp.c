@@ -186,10 +186,11 @@ typedef struct RExC_state_t {
  * Flags to be passed up and down.
  */
 #define	WORST		0	/* Worst case. */
-#define	HASWIDTH	0x1	/* Known to match non-null strings. */
-#define	SIMPLE		0x2	/* Simple enough to be STAR/PLUS operand. */
-#define	SPSTART		0x4	/* Starts with * or +. */
-#define TRYAGAIN	0x8	/* Weeded out a declaration. */
+#define	HASWIDTH	0x01	/* Known to match non-null strings. */
+#define	SIMPLE		0x02	/* Simple enough to be STAR/PLUS operand. */
+#define	SPSTART		0x04	/* Starts with * or +. */
+#define TRYAGAIN	0x08	/* Weeded out a declaration. */
+#define POSTPONED	0x10    /* (?1),(?&name), (??{...}) or similar */
 
 #define REG_NODE_NUM(x) ((x) ? (int)((x)-RExC_emit_start) : -1)
 
@@ -5242,6 +5243,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		if (*RExC_parse != ')')
 		    FAIL("Sequence (?R) not terminated");
 		ret = reg_node(pRExC_state, GOSTART);
+		*flagp |= POSTPONED;
 		nextchar(pRExC_state);
 		return ret;
 		/*notreached*/
@@ -5322,6 +5324,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 Set_Node_Length(ret, 1 + regarglen[OP(ret)]); /* MJD */
 		Set_Node_Offset(ret, parse_start); /* MJD */
 
+                *flagp |= POSTPONED;
                 nextchar(pRExC_state);
                 return ret;
             } /* named and numeric backreferences */
@@ -5338,6 +5341,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    vFAIL3("Sequence (%.*s...) not recognized", RExC_parse-seqstart, seqstart);
 		    /*NOTREACHED*/
 		}
+		*flagp |= POSTPONED;
 		paren = *RExC_parse++;
 		/* FALL THROUGH */
 	    case '{':           /* (?{...}) */
@@ -6016,7 +6020,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	goto do_curly;
     }
   nest_check:
-    if (!SIZE_ONLY && !(flags&HASWIDTH) && max > REG_INFTY/3 && ckWARN(WARN_REGEXP)) {
+    if (!SIZE_ONLY && !(flags&(HASWIDTH|POSTPONED)) && max > REG_INFTY/3 && ckWARN(WARN_REGEXP)) {
 	vWARN3(RExC_parse,
 	       "%.*s matches null string many times",
 	       (int)(RExC_parse >= origparse ? RExC_parse - origparse : 0),
@@ -6451,7 +6455,7 @@ tryagain:
 		}
 		return(NULL);
 	}
-	*flagp |= flags&(HASWIDTH|SPSTART|SIMPLE);
+	*flagp |= flags&(HASWIDTH|SPSTART|SIMPLE|POSTPONED);
 	break;
     case '|':
     case ')':
