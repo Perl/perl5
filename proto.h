@@ -102,8 +102,8 @@ PERL_CALLCONV AV*	Perl_av_make(pTHX_ I32 size, SV** svp)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV SV*	Perl_av_pop(pTHX_ AV* ar);
-PERL_CALLCONV void	Perl_av_push(pTHX_ AV* ar, SV* val);
 PERL_CALLCONV void	Perl_av_create_and_push(pTHX_ AV **const avp, SV *const val);
+PERL_CALLCONV void	Perl_av_push(pTHX_ AV* ar, SV* val);
 PERL_CALLCONV void	Perl_av_reify(pTHX_ AV* ar);
 PERL_CALLCONV SV*	Perl_av_shift(pTHX_ AV* ar)
 			__attribute__warn_unused_result__;
@@ -383,7 +383,7 @@ PERL_CALLCONV GP *	Perl_newGP(pTHX_ GV *const gv);
 PERL_CALLCONV void	Perl_gv_init(pTHX_ GV* gv, HV* stash, const char* name, STRLEN len, int multi);
 PERL_CALLCONV void	Perl_gv_name_set(pTHX_ GV* gv, const char *name, U32 len, U32 flags);
 PERL_CALLCONV HV*	Perl_gv_stashpv(pTHX_ const char* name, I32 flags);
-PERL_CALLCONV HV*	Perl_gv_stashpvn(pTHX_ const char* name, U32 namelen, I32 create);
+PERL_CALLCONV HV*	Perl_gv_stashpvn(pTHX_ const char* name, U32 namelen, I32 flags);
 PERL_CALLCONV HV*	Perl_gv_stashsv(pTHX_ SV* sv, I32 flags);
 PERL_CALLCONV void	Perl_hv_clear(pTHX_ HV* tb);
 PERL_CALLCONV void	Perl_hv_delayfree_ent(pTHX_ HV* hv, HE* entry);
@@ -899,8 +899,7 @@ PERL_CALLCONV OP*	Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP* first, OP* last)
 
 PERL_CALLCONV OP*	Perl_newPADOP(pTHX_ I32 type, I32 flags, SV* sv)
 			__attribute__malloc__
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_3);
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV OP*	Perl_newPMOP(pTHX_ I32 type, I32 flags)
 			__attribute__malloc__
@@ -1508,8 +1507,6 @@ PERL_CALLCONV SV*	Perl_sv_dup(pTHX_ SV* sstr, CLONE_PARAMS* param)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV void	Perl_rvpv_dup(pTHX_ SV* dstr, SV *sstr, CLONE_PARAMS* param);
-#if defined(HAVE_INTERP_INTERN)
-PERL_CALLCONV void	Perl_sys_intern_dup(pTHX_ struct interp_intern* src, struct interp_intern* dst);
 #endif
 PERL_CALLCONV PTR_TBL_t*	Perl_ptr_table_new(pTHX)
 			__attribute__malloc__
@@ -1523,6 +1520,10 @@ PERL_CALLCONV void	Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldsv, void 
 PERL_CALLCONV void	Perl_ptr_table_split(pTHX_ PTR_TBL_t *tbl);
 PERL_CALLCONV void	Perl_ptr_table_clear(pTHX_ PTR_TBL_t *tbl);
 PERL_CALLCONV void	Perl_ptr_table_free(pTHX_ PTR_TBL_t *tbl);
+#if defined(USE_ITHREADS)
+#  if defined(HAVE_INTERP_INTERN)
+PERL_CALLCONV void	Perl_sys_intern_dup(pTHX_ struct interp_intern* src, struct interp_intern* dst);
+#  endif
 #endif
 #if defined(HAVE_INTERP_INTERN)
 PERL_CALLCONV void	Perl_sys_intern_clear(pTHX);
@@ -1925,11 +1926,9 @@ STATIC void *	S_more_bodies(pTHX_ svtype sv_type);
 STATIC bool	S_sv_2iuv_common(pTHX_ SV *sv);
 STATIC void	S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype);
 STATIC void	S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr);
-#  if defined(USE_ITHREADS)
 STATIC PTR_TBL_ENT_t *	S_ptr_table_find(PTR_TBL_t *tbl, const void *sv)
 			__attribute__warn_unused_result__;
 
-#  endif
 STATIC void	S_reset_amagic(pTHX_ SV *rv, const bool on);
 #endif
 

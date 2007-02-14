@@ -9181,6 +9181,8 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS* param)
     return mgret;
 }
 
+#endif /* USE_ITHREADS */
+
 /* create a new pointer-mapping table */
 
 PTR_TBL_t *
@@ -9324,10 +9326,11 @@ Perl_ptr_table_free(pTHX_ PTR_TBL_t *tbl)
     Safefree(tbl);
 }
 
+#if defined(USE_ITHREADS)
+
 #ifdef DEBUGGING
 char *PL_watch_pvx;
 #endif
-
 
 void
 Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)

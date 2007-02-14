@@ -454,9 +454,13 @@ PERLVAR(ISock,		struct IPerlSock*)
 PERLVAR(IProc,		struct IPerlProc*)
 #endif
 
-#if defined(USE_ITHREADS)
+#if defined(USE_THREADS)
 PERLVAR(Iptr_table,	PTR_TBL_t*)
+#else
+/* Can't make that variable appear here in the interpreter structure for 5.8.9,
+   as it would break binary compatibility.  */
 #endif
+
 PERLVARI(Ibeginav_save, AV*, NULL)	/* save BEGIN{}s when compiling */
 
 #ifdef USE_5005THREADS
@@ -611,3 +615,7 @@ PERLVARI(Idumper_fd, int, -1)
 
 PERLVARA(Ibody_roots, PERL_ARENA_ROOTS_SIZE, void*) /* array of body roots */
 PERLVAR(Ibody_arenas, void*) /* pointer to list of body-arenas */
+
+#if !defined(USE_THREADS)
+PERLVAR(Iptr_table,	PTR_TBL_t*)
+#endif
