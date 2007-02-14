@@ -16,8 +16,8 @@ $| = 1;
 
 my $Is_MacOS = $^O eq 'MacOS';
 my $tmpfile = "tmp0000";
-# 1 while -e ++$tmpfile;
-# END { 1 while unlink $tmpfile }
+1 while -e ++$tmpfile;
+END { 1 while unlink $tmpfile }
 
 my @prgs = () ;
 my @w_files = () ;
