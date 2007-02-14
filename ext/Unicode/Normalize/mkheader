@@ -363,7 +363,7 @@ EOF
 	next if ! $val{ $p };
 	for (my $r = 0; $r < 256; $r++) {
 	    next if ! $val{ $p }{ $r };
-	    printf "$type ${head}_%02x_%02x [256] = {\n", $p, $r;
+	    printf "static $type ${head}_%02x_%02x [256] = {\n", $p, $r;
 	    for (my $c = 0; $c < 256; $c++) {
 		print "\t", defined $val{$p}{$r}{$c}
 		    ? "($type)".$val{$p}{$r}{$c}
@@ -376,7 +376,7 @@ EOF
     }
     foreach my $p (sort { $a <=> $b } keys %val) {
 	next if ! $val{ $p };
-	printf "$type* ${head}_%02x [256] = {\n", $p;
+	printf "static $type* ${head}_%02x [256] = {\n", $p;
 	for (my $r = 0; $r < 256; $r++) {
 	    print $val{ $p }{ $r }
 		? sprintf("${head}_%02x_%02x", $p, $r)
@@ -386,7 +386,7 @@ EOF
 	}
 	print "};\n\n";
     }
-    print "$type** $head [] = {\n";
+    print "static $type** $head [] = {\n";
     for (my $p = 0; $p <= 0x10; $p++) {
 	print $val{ $p } ? sprintf("${head}_%02x", $p) : "NULL";
 	print ','  if $p != 0x10;
