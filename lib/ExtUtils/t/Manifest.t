@@ -100,7 +100,7 @@ is( $res, 'bar', 'bar reported as new' );
 ($res, $warn) = do { local $ExtUtils::Manifest::Quiet = 1; 
                      catch_warning( \&skipcheck ) 
                 };
-ok( ! defined $warn, 'disabled warnings' );
+cmp_ok( $warn, 'eq', '', 'disabled warnings' );
 
 # add a skip file with a rule to skip itself (and the nonexistent glob '*baz*')
 add_file( 'MANIFEST.SKIP', "baz\n.SKIP" );

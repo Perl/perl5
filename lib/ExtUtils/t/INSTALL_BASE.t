@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# Tests INSTALLBASE
+# Tests INSTALL_BASE
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {
@@ -35,7 +35,7 @@ END {
 
 ok( chdir('Big-Dummy'), "chdir'd to Big-Dummy") || diag("chdir failed; $!");
 
-my @mpl_out = run(qq{$perl Makefile.PL "INSTALLBASE=../dummy-install"});
+my @mpl_out = run(qq{$perl Makefile.PL "INSTALL_BASE=../dummy-install"});
 END { rmtree '../dummy-install'; }
 
 cmp_ok( $?, '==', 0, 'Makefile.PL exited with zero' ) ||

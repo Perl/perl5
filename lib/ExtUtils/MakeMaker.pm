@@ -1,4 +1,4 @@
-# $Id: /local/schwern.org/CPAN/ExtUtils-MakeMaker/trunk/lib/ExtUtils/MakeMaker.pm 4535 2005-05-20T23:08:34.937906Z schwern  $
+# $Id: /local/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker.pm 19606 2006-10-10T01:01:21.319714Z schwern  $
 package ExtUtils::MakeMaker;
 
 BEGIN {require 5.005_03;}
@@ -21,8 +21,8 @@ use vars qw(
 use vars qw($Revision);
 use strict;
 
-$VERSION = '6.30';
-($Revision = q$Revision: 4535 $) =~ /Revision:\s+(\S+)/;
+$VERSION = '6.31';
+($Revision) = q$Revision: 19606 $ =~ /Revision:\s+(\S+)/;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&WriteMakefile &writeMakefile $Verbose &prompt);
@@ -85,6 +85,7 @@ my %Special_Sigs = (
  PL_FILES           => 'hash',
  PM                 => 'hash',
  PMLIBDIRS          => 'array',
+ PMLIBPARENTDIRS    => 'array',
  PREREQ_PM          => 'hash',
  SKIP               => 'array',
  TYPEMAPS           => 'array',
@@ -208,13 +209,13 @@ sub full_setup {
 
     AUTHOR ABSTRACT ABSTRACT_FROM BINARY_LOCATION
     C CAPI CCFLAGS CONFIG CONFIGURE DEFINE DIR DISTNAME DL_FUNCS DL_VARS
-    EXCLUDE_EXT EXE_FILES FIRST_MAKEFILE
+    EXCLUDE_EXT EXE_FILES EXTRA_META FIRST_MAKEFILE
     FULLPERL FULLPERLRUN FULLPERLRUNINST
     FUNCLIST H IMPORTS
 
     INST_ARCHLIB INST_SCRIPT INST_BIN INST_LIB INST_MAN1DIR INST_MAN3DIR
     INSTALLDIRS
-    DESTDIR PREFIX INSTALLBASE
+    DESTDIR PREFIX INSTALL_BASE
     PERLPREFIX      SITEPREFIX      VENDORPREFIX
     INSTALLPRIVLIB  INSTALLSITELIB  INSTALLVENDORLIB
     INSTALLARCHLIB  INSTALLSITEARCH INSTALLVENDORARCH
@@ -222,16 +223,16 @@ sub full_setup {
     INSTALLMAN1DIR          INSTALLMAN3DIR
     INSTALLSITEMAN1DIR      INSTALLSITEMAN3DIR
     INSTALLVENDORMAN1DIR    INSTALLVENDORMAN3DIR
-    INSTALLSCRIPT 
+    INSTALLSCRIPT   INSTALLSITESCRIPT  INSTALLVENDORSCRIPT
     PERL_LIB        PERL_ARCHLIB 
     SITELIBEXP      SITEARCHEXP 
 
-    INC INCLUDE_EXT LDFROM LIB LIBPERL_A LIBS
-    LINKTYPE MAKEAPERL MAKEFILE MAKEFILE_OLD MAN1PODS MAN3PODS MAP_TARGET 
+    INC INCLUDE_EXT LDFROM LIB LIBPERL_A LIBS LICENSE
+    LINKTYPE MAKE MAKEAPERL MAKEFILE MAKEFILE_OLD MAN1PODS MAN3PODS MAP_TARGET 
     MYEXTLIB NAME NEEDS_LINKING NOECHO NO_META NORECURS NO_VC OBJECT OPTIMIZE 
     PERL_MALLOC_OK PERL PERLMAINCC PERLRUN PERLRUNINST PERL_CORE
     PERL_SRC PERM_RW PERM_RWX
-    PL_FILES PM PM_FILTER PMLIBDIRS POLLUTE PPM_INSTALL_EXEC
+    PL_FILES PM PM_FILTER PMLIBDIRS PMLIBPARENTDIRS POLLUTE PPM_INSTALL_EXEC
     PPM_INSTALL_SCRIPT PREREQ_FATAL PREREQ_PM PREREQ_PRINT PRINT_PREREQ
     SIGN SKIP TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
     XS_VERSION clean depend dist dynamic_lib linkext macro realclean
@@ -281,7 +282,10 @@ sub full_setup {
     push @Overridable, qw[
 
  libscan makeaperl needs_linking perm_rw perm_rwx
- subdir_x test_via_harness test_via_script init_PERL
+ subdir_x test_via_harness test_via_script 
+
+ init_VERSION init_dist init_INST init_INSTALL init_DEST init_dirscan
+ init_PM init_MANPODS init_xs init_PERL init_DIRFILESEP init_linker
                          ];
 
     push @MM_Sections, qw[
@@ -300,9 +304,9 @@ sub full_setup {
     # we will use all these variables in the Makefile
     @Get_from_Config = 
         qw(
-           ar cc cccdlflags ccdlflags dlext dlsrc ld lddlflags ldflags libc
-           lib_ext obj_ext osname osvers ranlib sitelibexp sitearchexp so
-           exe_ext full_ar
+           ar cc cccdlflags ccdlflags dlext dlsrc exe_ext full_ar ld 
+           lddlflags ldflags libc lib_ext obj_ext osname osvers ranlib 
+           sitelibexp sitearchexp so
           );
 
     # 5.5.3 doesn't have any concept of vendor libs
@@ -491,6 +495,7 @@ sub new {
 
     ($self->{NAME_SYM} = $self->{NAME}) =~ s/\W+/_/g;
 
+    $self->init_MAKE;
     $self->init_main;
     $self->init_VERSION;
     $self->init_dist;
@@ -498,10 +503,13 @@ sub new {
     $self->init_INSTALL;
     $self->init_DEST;
     $self->init_dirscan;
+    $self->init_PM;
+    $self->init_MANPODS;
     $self->init_xs;
     $self->init_PERL;
     $self->init_DIRFILESEP;
     $self->init_linker;
+    $self->init_ABSTRACT;
 
     if (! $self->{PERL_SRC} ) {
         require VMS::Filespec if $Is_VMS;
@@ -1022,7 +1030,7 @@ The generated Makefile enables the user of the extension to invoke
 The Makefile to be produced may be altered by adding arguments of the
 form C<KEY=VALUE>. E.g.
 
-  perl Makefile.PL PREFIX=~
+  perl Makefile.PL INSTALL_BASE=~
 
 Other interesting targets in the generated Makefile are
 
@@ -1084,7 +1092,7 @@ INSTALLDIRS according to the following table:
   INST_ARCHLIB   INSTALLARCHLIB  INSTALLSITEARCH     INSTALLVENDORARCH
   INST_LIB       INSTALLPRIVLIB  INSTALLSITELIB      INSTALLVENDORLIB
   INST_BIN       INSTALLBIN      INSTALLSITEBIN      INSTALLVENDORBIN
-  INST_SCRIPT    INSTALLSCRIPT   INSTALLSCRIPT       INSTALLSCRIPT
+  INST_SCRIPT    INSTALLSCRIPT   INSTALLSITESCRIPT   INSTALLVENDORSCRIPT
   INST_MAN1DIR   INSTALLMAN1DIR  INSTALLSITEMAN1DIR  INSTALLVENDORMAN1DIR
   INST_MAN3DIR   INSTALLMAN3DIR  INSTALLSITEMAN3DIR  INSTALLVENDORMAN3DIR
 
@@ -1110,17 +1118,48 @@ C<UNINST> variable.
     make install UNINST=1
 
 
+=head2 INSTALL_BASE
+
+INSTALL_BASE can be passed into Makefile.PL to change where your
+module will be installed.  INSTALL_BASE is more like what everyone
+else calls "prefix" than PREFIX is.
+
+To have everything installed in your home directory, do the following.
+
+    perl Makefile.PL INSTALL_BASE=~
+
+Like PREFIX, it sets several INSTALL* attributes at once.  Unlike
+PREFIX it is easy to predict where the module will end up.  The
+installation pattern looks like this:
+
+    INSTALLARCHLIB     INSTALL_BASE/lib/perl5/$Config{archname}
+    INSTALLPRIVLIB     INSTALL_BASE/lib/perl5
+    INSTALLBIN         INSTALL_BASE/bin
+    INSTALLSCRIPT      INSTALL_BASE/bin
+    INSTALLMAN1DIR     INSTALL_BASE/man/man1
+    INSTALLMAN3DIR     INSTALL_BASE/man/man3
+
+INSTALL_BASE in MakeMaker and C<--install_base> in Module::Build (as
+of 0.28) install to the same location.  If you want MakeMaker and
+Module::Build to install to the same location simply set INSTALL_BASE
+and C<--install_base> to the same location.
+
+INSTALL_BASE was added in 6.31.
+
+
 =head2 PREFIX and LIB attribute
 
 PREFIX and LIB can be used to set several INSTALL* attributes in one
-go. The quickest way to install a module in a non-standard place might
-be
+go.  Here's an example for installing into your home directory.
 
     perl Makefile.PL PREFIX=~
 
 This will install all files in the module under your home directory,
 with man pages and libraries going into an appropriate place (usually
-~/man and ~/lib).
+~/man and ~/lib).  How the exact location is determined is complicated
+and depends on how your Perl was configured.  INSTALL_BASE works more
+like what other build systems call "prefix" than PREFIX and we
+recommend you use that instead.
 
 Another way to specify many INSTALL directories with a single
 parameter is LIB.
@@ -1545,7 +1584,7 @@ Defaults to $Config{installprivlib}.
 =item INSTALLSCRIPT
 
 Used by 'make install' which copies files from INST_SCRIPT to this
-directory.
+directory if INSTALLDIRS=perl.
 
 =item INSTALLSITEARCH
 
@@ -1572,6 +1611,11 @@ $(SITEPREFIX)/man/man$(MAN*EXT).
 
 If set to 'none', no man pages will be installed.
 
+=item INSTALLSITESCRIPT
+
+Used by 'make install' which copies files from INST_SCRIPT to this
+directory if INSTALLDIRS is set to site (default).
+
 =item INSTALLVENDORARCH
 
 Used by 'make install', which copies files from INST_ARCHLIB to this
@@ -1595,6 +1639,11 @@ These directories get the man pages at 'make install' time if
 INSTALLDIRS=vendor.  Defaults to $(VENDORPREFIX)/man/man$(MAN*EXT).
 
 If set to 'none', no man pages will be installed.
+
+=item INSTALLVENDORSCRIPT
+
+Used by 'make install' which copies files from INST_SCRIPT to this
+directory if INSTALLDIRS is set to is set to vendor.
 
 =item INST_ARCHLIB
 
@@ -1679,11 +1728,34 @@ you specify a scalar as in
 
 MakeMaker will turn it into an array with one element.
 
+=item LICENSE
+
+The licensing terms of your distribution.  Generally its "perl" for the
+same license as Perl itself.
+
+See L<Module::Build::Authoring> for the list of options.
+
+Defaults to "unknown".
+
 =item LINKTYPE
 
 'static' or 'dynamic' (default unless usedl=undef in
 config.sh). Should only be used to force static linking (also see
 linkext below).
+
+=item MAKE
+
+Variant of make you intend to run the generated Makefile with.  This
+parameter lets Makefile.PL know what make quirks to account for when
+generating the Makefile.
+
+MakeMaker also honors the MAKE environment variable.  This parameter
+takes precedent.
+
+Currently the only significant values are 'dmake' and 'nmake' for Windows
+users.
+
+Defaults to $Config{make}.
 
 =item MAKEAPERL
 
@@ -1937,7 +2009,7 @@ done.  For instance, you would need to say:
 
   {'PM_FILTER' => 'grep -v \\"^\\#\\"'}
 
-to remove all the leading coments on the fly during the build.  The
+to remove all the leading comments on the fly during the build.  The
 extra \\ are necessary, unfortunately, because this variable is interpolated
 within the context of a Perl program built on the command line, and double
 quotes are what is used with the -e switch to build that command line.  The
@@ -2090,7 +2162,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    $VERSION = sprintf "%d.%03d", q$Revision: 4535 $ =~ /(\d+)/g;
+    $VERSION = (q$Revision: 19606 $) =~ /(\d+)/g;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 
@@ -2161,7 +2233,7 @@ passed to the method as a hash.
 
 =item depend
 
-  {ANY_TARGET => ANY_DEPENDECY, ...}
+  {ANY_TARGET => ANY_DEPENDENCY, ...}
 
 (ANY_TARGET must not be given a double-colon rule by MakeMaker.)
 
@@ -2271,7 +2343,7 @@ Some of the most common mistakes:
 
 =item C<< MAN3PODS => ' ' >>
 
-This is commonly used to supress the creation of man pages.  MAN3PODS
+This is commonly used to suppress the creation of man pages.  MAN3PODS
 takes a hash ref not a string, but the above worked by accident in old
 versions of MakeMaker.
 
@@ -2489,8 +2561,15 @@ Same as the PERL_CORE parameter.  The parameter overrides this.
 
 =head1 SEE ALSO
 
-ExtUtils::MM_Unix, ExtUtils::Manifest ExtUtils::Install,
-ExtUtils::Embed
+L<Module::Build> is a pure-Perl alternative to MakeMaker which does
+not rely on make or any other external utility.  It is easier to
+extend to suit your needs.
+
+L<Module::Install> is a wrapper around MakeMaker which adds features
+not normally available.
+
+L<ExtUtils::ModuleMaker> and L<Module::Starter> are both modules to
+help you setup your distribution.
 
 =head1 AUTHORS
 

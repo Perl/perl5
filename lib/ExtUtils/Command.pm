@@ -10,9 +10,9 @@ use File::Path qw(rmtree);
 require Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 @ISA       = qw(Exporter);
-@EXPORT    = qw(cp rm_f rm_rf mv cat eqtime mkpath touch test_f chmod 
+@EXPORT    = qw(cp rm_f rm_rf mv cat eqtime mkpath touch test_f test_d chmod 
                 dos2unix);
-$VERSION = '1.09';
+$VERSION = '1.11';
 
 my $Is_VMS = $^O eq 'VMS';
 
@@ -22,16 +22,17 @@ ExtUtils::Command - utilities to replace common UNIX commands in Makefiles etc.
 
 =head1 SYNOPSIS
 
-  perl -MExtUtils::Command  -e cat files... > destination
-  perl -MExtUtils::Command  -e mv source... destination
-  perl -MExtUtils::Command  -e cp source... destination
-  perl -MExtUtils::Command  -e touch files...
-  perl -MExtUtils::Command  -e rm_f files...
-  perl -MExtUtils::Command  -e rm_rf directories...
-  perl -MExtUtils::Command  -e mkpath directories...
-  perl -MExtUtils::Command  -e eqtime source destination
-  perl -MExtUtils::Command  -e test_f file
-  perl -MExtUtils::Command  -e chmod mode files...
+  perl -MExtUtils::Command       -e cat files... > destination
+  perl -MExtUtils::Command       -e mv source... destination
+  perl -MExtUtils::Command       -e cp source... destination
+  perl -MExtUtils::Command       -e touch files...
+  perl -MExtUtils::Command       -e rm_f files...
+  perl -MExtUtils::Command       -e rm_rf directories...
+  perl -MExtUtils::Command       -e mkpath directories...
+  perl -MExtUtils::Command       -e eqtime source destination
+  perl -MExtUtils::Command       -e test_f file
+  perl -MExtUtils::Command       -e test_d directory
+  perl -MExtUtils::Command       -e chmod mode files...
   ...
 
 =head1 DESCRIPTION
@@ -45,8 +46,6 @@ them easier to deal with in Makefiles.
 I<NOT>
 
   perl -MExtUtils::Command -e 'some_command qw(some files to work on)'
-
-For that use L<Shell::Command>.
 
 Filenames with * and ? will be glob expanded.
 
@@ -62,9 +61,7 @@ sub expand_wildcards
 }
 
 
-=item cat
-
-    cat file ...
+=item cat 
 
 Concatenates all files mentioned on command line to STDOUT.
 
@@ -76,11 +73,9 @@ sub cat ()
  print while (<>);
 }
 
-=item eqtime
+=item eqtime src dst
 
-    eqtime source destination
-
-Sets modified time of destination to that of source.
+Sets modified time of dst to that of src
 
 =cut 
 
@@ -91,11 +86,9 @@ sub eqtime
  utime((stat($src))[8,9],$dst);
 }
 
-=item rm_rf
+=item rm_rf files....
 
-    rm_rf files or directories ...
-
-Removes files and directories - recursively (even if readonly)
+Removes directories - recursively (even if readonly)
 
 =cut 
 
@@ -105,9 +98,7 @@ sub rm_rf
  rmtree([grep -e $_,@ARGV],0,0);
 }
 
-=item rm_f
-
-    rm_f file ...
+=item rm_f files....
 
 Removes files (even if readonly)
 
@@ -124,7 +115,7 @@ sub rm_f {
         chmod(0777, $file);
 
         next if _unlink($file);
-
+            
         carp "Cannot delete $file: $!";
     }
 }
@@ -140,9 +131,7 @@ sub _unlink {
 }
 
 
-=item touch
-
-    touch file ...
+=item touch files ...
 
 Makes files exist, with current timestamp 
 
@@ -158,10 +147,7 @@ sub touch {
     }
 }
 
-=item mv
-
-    mv source_file destination_file
-    mv source_file source_file destination_dir
+=item mv source... destination
 
 Moves source to destination.  Multiple sources are allowed if
 destination is an existing directory.
@@ -184,12 +170,9 @@ sub mv {
     return !$nok;
 }
 
-=item cp
+=item cp source... destination
 
-    cp source_file destination_file
-    cp source_file source_file destination_dir
-
-Copies sources to the destination.  Multiple sources are allowed if
+Copies source to destination.  Multiple sources are allowed if
 destination is an existing directory.
 
 Returns true if all copies succeeded, false otherwise.
@@ -210,9 +193,7 @@ sub cp {
     return $nok;
 }
 
-=item chmod
-
-    chmod mode files ...
+=item chmod mode files...
 
 Sets UNIX like permissions 'mode' on all the files.  e.g. 0666
 
@@ -241,11 +222,9 @@ sub chmod {
     chmod(oct $mode,@ARGV) || die "Cannot chmod ".join(' ',$mode,@ARGV).":$!";
 }
 
-=item mkpath
+=item mkpath directory...
 
-    mkpath directory ...
-
-Creates directories, including any parent directories.
+Creates directory, including any parent directories.
 
 =cut 
 
@@ -255,9 +234,7 @@ sub mkpath
  File::Path::mkpath([@ARGV],0,0777);
 }
 
-=item test_f
-
-    test_f file
+=item test_f file
 
 Tests if a file exists
 
@@ -268,9 +245,18 @@ sub test_f
  exit !-f $ARGV[0];
 }
 
-=item dos2unix
+=item test_d directory
 
-    dos2unix files or dirs ...
+Tests if a directory exists
+
+=cut 
+
+sub test_d
+{
+ exit !-d $ARGV[0];
+}
+
+=item dos2unix
 
 Converts DOS and OS/2 linefeeds to Unix style recursively.
 
@@ -304,16 +290,21 @@ sub dos2unix {
 
 =back
 
+=head1 BUGS
+
+Should probably be Auto/Self loaded.
+
 =head1 SEE ALSO 
 
-Shell::Command which is these same functions but take arguments normally.
-
+ExtUtils::MakeMaker, ExtUtils::MM_Unix, ExtUtils::MM_Win32
 
 =head1 AUTHOR
 
 Nick Ing-Simmons C<ni-s@cpan.org>
 
-Currently maintained by Michael G Schwern C<schwern@pobox.com>.
+Maintained by Michael G Schwern C<schwern@pobox.com> within the
+ExtUtils-MakeMaker package and, as a separate CPAN package, by
+Randy Kobes C<r.kobes@uwinnipeg.ca>.
 
 =cut
 
