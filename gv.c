@@ -317,7 +317,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     /* UNIVERSAL methods should be callable without a stash */
     if (!stash) {
 	level = -1;  /* probably appropriate */
-	if(!(stash = gv_stashpvs("UNIVERSAL", FALSE)))
+	if(!(stash = gv_stashpvs("UNIVERSAL", 0)))
 	    return 0;
     }
 
@@ -363,7 +363,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 	    HV* basestash;
 
 	    packlen -= 7;
-	    basestash = gv_stashpvn(hvname, packlen, TRUE);
+	    basestash = gv_stashpvn(hvname, packlen, GV_ADD);
 	    gvp = (GV**)hv_fetchs(basestash, "ISA", FALSE);
 	    if (gvp && (gv = *gvp) != (GV*)&PL_sv_undef && (av = GvAV(gv))) {
 		gvp = (GV**)hv_fetchs(stash, "ISA", TRUE);
@@ -383,7 +383,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 	I32 items = AvFILLp(av) + 1;
 	while (items--) {
 	    SV* const sv = *svp++;
-	    HV* const basestash = gv_stashsv(sv, FALSE);
+	    HV* const basestash = gv_stashsv(sv, 0);
 	    if (!basestash) {
 		if (ckWARN(WARN_MISC))
 		    Perl_warner(aTHX_ packWARN(WARN_MISC), "Can't locate package %"SVf" for @%s::ISA",
@@ -400,7 +400,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     /* if at top level, try UNIVERSAL */
 
     if (level == 0 || level == -1) {
-	lastchance = gv_stashpvs("UNIVERSAL", FALSE);
+	lastchance = gv_stashpvs("UNIVERSAL", 0);
 
 	if (lastchance) {
 	    if ((gv = gv_fetchmeth(lastchance, name, len,
@@ -531,20 +531,20 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 	    SV * const tmpstr = sv_2mortal(Perl_newSVpvf(aTHX_ "%s::SUPER",
 						  CopSTASHPV(PL_curcop)));
 	    /* __PACKAGE__::SUPER stash should be autovivified */
-	    stash = gv_stashpvn(SvPVX_const(tmpstr), SvCUR(tmpstr), TRUE);
+	    stash = gv_stashpvn(SvPVX_const(tmpstr), SvCUR(tmpstr), GV_ADD);
 	    DEBUG_o( Perl_deb(aTHX_ "Treating %s as %s::%s\n",
 			 origname, HvNAME_get(stash), name) );
 	}
 	else {
             /* don't autovifify if ->NoSuchStash::method */
-            stash = gv_stashpvn(origname, nsplit - origname, FALSE);
+            stash = gv_stashpvn(origname, nsplit - origname, 0);
 
 	    /* however, explicit calls to Pkg::SUPER::method may
 	       happen, and may require autovivification to work */
 	    if (!stash && (nsplit - origname) >= 7 &&
 		strnEQ(nsplit - 7, "::SUPER", 7) &&
-		gv_stashpvn(origname, nsplit - origname - 7, FALSE))
-	      stash = gv_stashpvn(origname, nsplit - origname, TRUE);
+		gv_stashpvn(origname, nsplit - origname - 7, 0))
+	      stash = gv_stashpvn(origname, nsplit - origname, GV_ADD);
 	}
 	ostash = stash;
     }
@@ -667,7 +667,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 STATIC void
 S_require_errno(pTHX_ GV *gv)
 {
-    HV* stash = gv_stashpvs("Errno", FALSE);
+    HV* stash = gv_stashpvs("Errno", 0);
 
     if (!stash || !(gv_fetchmethod(stash, "TIEHASH"))) {
 	dSP;
@@ -678,7 +678,7 @@ S_require_errno(pTHX_ GV *gv)
                          newSVpvs("Errno"), NULL);
 	LEAVE;
 	SPAGAIN;
-	stash = gv_stashpvs("Errno", FALSE);
+	stash = gv_stashpvs("Errno", 0);
 	if (!stash || !(gv_fetchmethod(stash, "TIEHASH")))
 	    Perl_croak(aTHX_ "Can't use %%! because Errno.pm is not available");
     }
@@ -687,10 +687,8 @@ S_require_errno(pTHX_ GV *gv)
 /*
 =for apidoc gv_stashpv
 
-Returns a pointer to the stash for a specified package.  C<name> should
-be a valid UTF-8 string and must be null-terminated.  If C<create> is set
-then the package will be created if it does not already exist.  If C<create>
-is not set and the package does not exist then NULL is returned.
+Returns a pointer to the stash for a specified package.  Uses C<strlen> to
+determine the length of C<name, then calls C<gv_stashpvn()>.
 
 =cut
 */
@@ -704,17 +702,19 @@ Perl_gv_stashpv(pTHX_ const char *name, I32 create)
 /*
 =for apidoc gv_stashpvn
 
-Returns a pointer to the stash for a specified package.  C<name> should
-be a valid UTF-8 string.  The C<namelen> parameter indicates the length of
-the C<name>, in bytes.  If C<create> is set then the package will be
-created if it does not already exist.  If C<create> is not set and the
-package does not exist then NULL is returned.
+Returns a pointer to the stash for a specified package.  The C<namelen>
+parameter indicates the length of the C<name>, in bytes.  C<flags> is passed
+to C<gv_fetchpvn_flags()>, so if set to C<GV_ADD> then the package will be
+created if it does not already exist.  If the package does not exist and
+C<flags> is 0 (or any other setting that does not create packages) then NULL
+is returned.
+
 
 =cut
 */
 
 HV*
-Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 create)
+Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
 {
     char smallbuf[128];
     char *tmpbuf;
@@ -728,11 +728,11 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 create)
     Copy(name,tmpbuf,namelen,char);
     tmpbuf[namelen++] = ':';
     tmpbuf[namelen++] = ':';
-    tmpgv = gv_fetchpvn_flags(tmpbuf, namelen, create, SVt_PVHV);
+    tmpgv = gv_fetchpvn_flags(tmpbuf, namelen, flags, SVt_PVHV);
     if (tmpbuf != smallbuf)
 	Safefree(tmpbuf);
     if (!tmpgv)
-	return 0;
+	return NULL;
     if (!GvHV(tmpgv))
 	GvHV(tmpgv) = newHV();
     stash = GvHV(tmpgv);
@@ -744,18 +744,17 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 create)
 /*
 =for apidoc gv_stashsv
 
-Returns a pointer to the stash for a specified package, which must be a
-valid UTF-8 string.  See C<gv_stashpv>.
+Returns a pointer to the stash for a specified package.  See C<gv_stashpvn>.
 
 =cut
 */
 
 HV*
-Perl_gv_stashsv(pTHX_ SV *sv, I32 create)
+Perl_gv_stashsv(pTHX_ SV *sv, I32 flags)
 {
     STRLEN len;
     const char * const ptr = SvPV_const(sv,len);
-    return gv_stashpvn(ptr, len, create);
+    return gv_stashpvn(ptr, len, flags);
 }
 
 
@@ -1022,15 +1021,15 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 			{
 			    const char *pname;
 			    av_push(av, newSVpvn(pname = "NDBM_File",9));
-			    gv_stashpvn(pname, 9, TRUE);
+			    gv_stashpvn(pname, 9, GV_ADD);
 			    av_push(av, newSVpvn(pname = "DB_File",7));
-			    gv_stashpvn(pname, 7, TRUE);
+			    gv_stashpvn(pname, 7, GV_ADD);
 			    av_push(av, newSVpvn(pname = "GDBM_File",9));
-			    gv_stashpvn(pname, 9, TRUE);
+			    gv_stashpvn(pname, 9, GV_ADD);
 			    av_push(av, newSVpvn(pname = "SDBM_File",9));
-			    gv_stashpvn(pname, 9, TRUE);
+			    gv_stashpvn(pname, 9, GV_ADD);
 			    av_push(av, newSVpvn(pname = "ODBM_File",9));
-			    gv_stashpvn(pname, 9, TRUE);
+			    gv_stashpvn(pname, 9, GV_ADD);
 			}
 		}
 		break;

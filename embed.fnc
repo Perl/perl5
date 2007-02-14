@@ -306,9 +306,9 @@ Ap	|void	|gv_fullname4	|NN SV* sv|NN GV* gv|NULLOK const char* prefix|bool keepm
 pMox	|GP *	|newGP		|NN GV *const gv
 Ap	|void	|gv_init	|NN GV* gv|NULLOK HV* stash|NN const char* name|STRLEN len|int multi
 Ap	|void	|gv_name_set	|NN GV* gv|NULLOK const char *name|U32 len|U32 flags
-Apd	|HV*	|gv_stashpv	|NN const char* name|I32 create
-Apd	|HV*	|gv_stashpvn	|NN const char* name|U32 namelen|I32 create
-Apd	|HV*	|gv_stashsv	|NULLOK SV* sv|I32 create
+Apd	|HV*	|gv_stashpv	|NN const char* name|I32 flags
+Apd	|HV*	|gv_stashpvn	|NN const char* name|U32 namelen|I32 flags
+Apd	|HV*	|gv_stashsv	|NULLOK SV* sv|I32 flags
 Apd	|void	|hv_clear	|NULLOK HV* tb
 Ap	|void	|hv_delayfree_ent|NN HV* hv|NULLOK HE* entry
 Apd	|SV*	|hv_delete	|NULLOK HV* tb|NN const char* key|I32 klen|I32 flags
@@ -566,7 +566,7 @@ ApdaR	|HV*	|newHV
 ApaR	|HV*	|newHVhv	|NULLOK HV* hv
 Apa	|IO*	|newIO
 Apa	|OP*	|newLISTOP	|I32 type|I32 flags|NULLOK OP* first|NULLOK OP* last
-Apa	|OP*	|newPADOP	|I32 type|I32 flags|NULLOK SV* sv
+Apa	|OP*	|newPADOP	|I32 type|I32 flags|NN SV* sv
 Apa	|OP*	|newPMOP	|I32 type|I32 flags
 Apa	|OP*	|newPVOP	|I32 type|I32 flags|NULLOK char* pv
 Apa	|SV*	|newRV		|NN SV* sv

@@ -2279,7 +2279,7 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 	if (indirgv && GvCVu(indirgv))
 	    return 0;
 	/* filehandle or package name makes it a method */
-	if (!gv || GvIO(indirgv) || gv_stashpvn(tmpbuf, len, FALSE)) {
+	if (!gv || GvIO(indirgv) || gv_stashpvn(tmpbuf, len, 0)) {
 	    s = PEEKSPACE(s);
 	    if ((PL_bufend - s) >= 2 && *s == '=' && *(s+1) == '>')
 		return 0;	/* no assumptions -- "=>" quotes bearword */
@@ -2496,7 +2496,7 @@ S_find_in_my_stash(pTHX_ const char *pkgname, I32 len)
             pkgname = SvPV_nolen_const(sv);
     }
 
-    return gv_stashpv(pkgname, FALSE);
+    return gv_stashpv(pkgname, 0);
 }
 
 STATIC char *
@@ -4576,7 +4576,7 @@ Perl_yylex(pTHX)
 			    d = PL_tokenbuf;
 			    while (isLOWER(*d))
 				d++;
-			    if (!*d && !gv_stashpv(PL_tokenbuf,FALSE))
+			    if (!*d && !gv_stashpv(PL_tokenbuf, 0))
 				Perl_warner(aTHX_ packWARN(WARN_RESERVED), PL_warn_reserved,
 				       PL_tokenbuf);
 			}
@@ -5308,7 +5308,7 @@ Perl_yylex(pTHX)
 		*PL_tokenbuf = '\0';
 		s = force_word(s,WORD,TRUE,TRUE,FALSE);
 		if (isIDFIRST_lazy_if(PL_tokenbuf,UTF))
-		    gv_stashpvn(PL_tokenbuf, strlen(PL_tokenbuf), TRUE);
+		    gv_stashpvn(PL_tokenbuf, strlen(PL_tokenbuf), GV_ADD);
 		else if (*s == '<')
 		    yyerror("<> should be quotes");
 	    }

@@ -108,7 +108,7 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, const HV* const name_stash,
 	    I32 items = AvFILLp(av) + 1;
 	    while (items--) {
 		SV* const sv = *svp++;
-		HV* const basestash = gv_stashsv(sv, FALSE);
+		HV* const basestash = gv_stashsv(sv, 0);
 		if (!basestash) {
 		    if (ckWARN(WARN_MISC))
 			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
@@ -155,11 +155,11 @@ Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
 	stash = SvOBJECT(sv) ? SvSTASH(sv) : NULL;
     }
     else {
-        stash = gv_stashsv(sv, FALSE);
+        stash = gv_stashsv(sv, 0);
     }
 
     if (stash) {
-	HV * const name_stash = gv_stashpv(name, FALSE);
+	HV * const name_stash = gv_stashpv(name, 0);
 	return isa_lookup(stash, name, name_stash, strlen(name), 0);
     }
     else
@@ -272,7 +272,7 @@ XS(XS_UNIVERSAL_can)
             pkg = SvSTASH(sv);
     }
     else {
-        pkg = gv_stashsv(sv, FALSE);
+        pkg = gv_stashsv(sv, 0);
     }
 
     if (pkg) {
@@ -301,7 +301,7 @@ XS(XS_UNIVERSAL_VERSION)
         pkg = SvSTASH(sv);
     }
     else {
-        pkg = gv_stashsv(ST(0), FALSE);
+        pkg = gv_stashsv(ST(0), 0);
     }
 
     gvp = pkg ? (GV**)hv_fetchs(pkg, "VERSION", FALSE) : NULL;

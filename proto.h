@@ -382,9 +382,9 @@ PERL_CALLCONV void	Perl_gv_fullname4(pTHX_ SV* sv, GV* gv, const char* prefix, b
 PERL_CALLCONV GP *	Perl_newGP(pTHX_ GV *const gv);
 PERL_CALLCONV void	Perl_gv_init(pTHX_ GV* gv, HV* stash, const char* name, STRLEN len, int multi);
 PERL_CALLCONV void	Perl_gv_name_set(pTHX_ GV* gv, const char *name, U32 len, U32 flags);
-PERL_CALLCONV HV*	Perl_gv_stashpv(pTHX_ const char* name, I32 create);
+PERL_CALLCONV HV*	Perl_gv_stashpv(pTHX_ const char* name, I32 flags);
 PERL_CALLCONV HV*	Perl_gv_stashpvn(pTHX_ const char* name, U32 namelen, I32 create);
-PERL_CALLCONV HV*	Perl_gv_stashsv(pTHX_ SV* sv, I32 create);
+PERL_CALLCONV HV*	Perl_gv_stashsv(pTHX_ SV* sv, I32 flags);
 PERL_CALLCONV void	Perl_hv_clear(pTHX_ HV* tb);
 PERL_CALLCONV void	Perl_hv_delayfree_ent(pTHX_ HV* hv, HE* entry);
 PERL_CALLCONV SV*	Perl_hv_delete(pTHX_ HV* tb, const char* key, I32 klen, I32 flags);
@@ -899,7 +899,8 @@ PERL_CALLCONV OP*	Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP* first, OP* last)
 
 PERL_CALLCONV OP*	Perl_newPADOP(pTHX_ I32 type, I32 flags, SV* sv)
 			__attribute__malloc__
-			__attribute__warn_unused_result__;
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_3);
 
 PERL_CALLCONV OP*	Perl_newPMOP(pTHX_ I32 type, I32 flags)
 			__attribute__malloc__
