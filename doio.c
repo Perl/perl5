@@ -1196,32 +1196,24 @@ bool
 Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 {
     dVAR;
-    register const char *tmps;
-    STRLEN len;
-    U8 *tmpbuf = NULL;
-    bool happy = TRUE;
-
     /* assuming fp is checked earlier */
     if (!sv)
 	return TRUE;
-    switch (SvTYPE(sv)) {
-    case SVt_NULL:
-	if (ckWARN(WARN_UNINITIALIZED))
-	    report_uninit(sv);
-	return TRUE;
-    case SVt_IV:
-	if (SvIOK(sv)) {
-	    assert(!SvGMAGICAL(sv));
-	    if (SvIsUV(sv))
-		PerlIO_printf(fp, "%"UVuf, (UV)SvUVX(sv));
-	    else
-		PerlIO_printf(fp, "%"IVdf, (IV)SvIVX(sv));
-	    return !PerlIO_error(fp);
-	}
-	/* FALL THROUGH */
-    default:
+    if (SvTYPE(sv) == SVt_IV && SvIOK(sv)) {
+	assert(!SvGMAGICAL(sv));
+	if (SvIsUV(sv))
+	    PerlIO_printf(fp, "%"UVuf, (UV)SvUVX(sv));
+	else
+	    PerlIO_printf(fp, "%"IVdf, (IV)SvIVX(sv));
+	return !PerlIO_error(fp);
+    }
+    else {
+	STRLEN len;
 	/* Do this first to trigger any overloading.  */
-	tmps = SvPV_const(sv, len);
+	const char *tmps = SvPV_const(sv, len);
+	U8 *tmpbuf = NULL;
+	bool happy = TRUE;
+
 	if (PerlIO_isutf8(fp)) {
 	    if (!SvUTF8(sv)) {
 		/* We don't modify the original scalar.  */
@@ -1246,18 +1238,17 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 		}
 	    }
 	}
-	break;
+	/* To detect whether the process is about to overstep its
+	 * filesize limit we would need getrlimit().  We could then
+	 * also transparently raise the limit with setrlimit() --
+	 * but only until the system hard limit/the filesystem limit,
+	 * at which we would get EPERM.  Note that when using buffered
+	 * io the write failure can be delayed until the flush/close. --jhi */
+	if (len && (PerlIO_write(fp,tmps,len) == 0))
+	    happy = FALSE;
+	Safefree(tmpbuf);
+	return happy ? !PerlIO_error(fp) : FALSE;
     }
-    /* To detect whether the process is about to overstep its
-     * filesize limit we would need getrlimit().  We could then
-     * also transparently raise the limit with setrlimit() --
-     * but only until the system hard limit/the filesystem limit,
-     * at which we would get EPERM.  Note that when using buffered
-     * io the write failure can be delayed until the flush/close. --jhi */
-    if (len && (PerlIO_write(fp,tmps,len) == 0))
-	happy = FALSE;
-    Safefree(tmpbuf);
-    return happy ? !PerlIO_error(fp) : FALSE;
 }
 
 I32
