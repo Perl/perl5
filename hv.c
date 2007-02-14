@@ -1569,15 +1569,14 @@ Perl_hv_clear_placeholders(pTHX_ HV *hv)
 STATIC void
 S_hfreeentries(pTHX_ HV *hv)
 {
-    register HE **array;
+    /* This is the array that we're going to restore  */
+    HE **const orig_array = HvARRAY(hv);
     I32 i;
 
-
-    if (!HvARRAY(hv))
+    if (!orig_array)
 	return;
 
     i = HvMAX(hv);
-    array = HvARRAY(hv);
     /* make everyone else think the array is empty, so that the destructors
      * called for freed entries can't recusively mess with us */
     HvARRAY(hv) = Null(HE**); 
@@ -1586,7 +1585,7 @@ S_hfreeentries(pTHX_ HV *hv)
 
     do {
 	/* Loop down the linked list heads  */
-	HE *entry = array[i];
+	HE *entry = orig_array[i];
 
 	while (entry) {
 	    register HE * const oentry = entry;
@@ -1595,7 +1594,7 @@ S_hfreeentries(pTHX_ HV *hv)
 	}
     } while (--i >= 0);
 
-    HvARRAY(hv) = array;
+    HvARRAY(hv) = orig_array;
     (void)hv_iterinit(hv);
 }
 
@@ -2136,7 +2135,7 @@ Perl_hv_assert(pTHX_ HV *hv)
 	    withflags++;
 	    if (HeKWASUTF8(entry)) {
 		PerlIO_printf(Perl_debug_log,
-			    "hash key has both WASUFT8 and UTF8: '%.*s'\n",
+			    "hash key has both WASUTF8 and UTF8: '%.*s'\n",
 			    (int) HeKLEN(entry),  HeKEY(entry));
 		bad = 1;
 	    }

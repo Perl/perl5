@@ -25,6 +25,8 @@
 
 #define yychar	PL_yychar
 #define yylval	PL_yylval
+static int
+S_pending_ident(pTHX);
 
 static const char ident_too_long[] = "Identifier too long";
 static const char commaless_variable_list[] = "comma-less variable list";

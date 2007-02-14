@@ -299,7 +299,7 @@ perform the upgrade if necessary.  See C<svtype>.
 					  to a lexical from "outside". */
 #define SVf_OOK		0x00200000  /* has valid offset value */
 #define SVf_BREAK	0x00400000  /* refcnt is artificially low - used by
-				       SV's in final arena  cleanup */
+				       SV's in final arena cleanup */
 #define SVf_READONLY	0x00800000  /* may not be modified */
 
 
@@ -1117,7 +1117,7 @@ the SV if the SV does not contain a string.  The SV may cache the
 stringified form becoming C<SvPOK>.  Handles 'get' magic.
 
 =for apidoc Am|IV|SvIV|SV* sv
-Coerces the given SV to an integer and returns it. See  C<SvIVx> for a
+Coerces the given SV to an integer and returns it. See C<SvIVx> for a
 version which guarantees to evaluate sv only once.
 
 =for apidoc Am|IV|SvIV_nomg|SV* sv
@@ -1128,7 +1128,7 @@ Coerces the given SV to an integer and returns it. Guarantees to evaluate
 sv only once. Use the more efficient C<SvIV> otherwise.
 
 =for apidoc Am|NV|SvNV|SV* sv
-Coerce the given SV to a double and return it. See  C<SvNVx> for a version
+Coerce the given SV to a double and return it. See C<SvNVx> for a version
 which guarantees to evaluate sv only once.
 
 =for apidoc Am|NV|SvNVx|SV* sv
