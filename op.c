@@ -2854,7 +2854,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 	STRLEN plen;
 	SV * const pat = ((SVOP*)expr)->op_sv;
 	const char *p = SvPV_const(pat, plen);
-	if ((o->op_flags & OPf_SPECIAL) && (*p == ' ' && p[1] == '\0')) {
+	if ((o->op_flags & OPf_SPECIAL) && (plen == 1 && *p == ' ')) {
 	    U32 was_readonly = SvREADONLY(pat);
 
 	    if (was_readonly) {

@@ -4593,7 +4593,11 @@ PP(pp_split)
     base = SP - PL_stack_base;
     orig = s;
     if (pm->op_pmflags & PMf_SKIPWHITE) {
-	if (pm->op_pmflags & PMf_LOCALE) {
+	if (do_utf8) {
+	    while (*s == ' ' || is_utf8_space((U8*)s))
+		s += UTF8SKIP(s);
+	}
+	else if (pm->op_pmflags & PMf_LOCALE) {
 	    while (isSPACE_LC(*s))
 		s++;
 	}
@@ -4612,10 +4616,23 @@ PP(pp_split)
     if (pm->op_pmflags & PMf_WHITE) {
 	while (--limit) {
 	    m = s;
-	    while (m < strend &&
-		   !((pm->op_pmflags & PMf_LOCALE)
-		     ? isSPACE_LC(*m) : isSPACE(*m)))
-		++m;
+	    /* this one uses 'm' and is a negative test */
+	    if (do_utf8) {
+		while (m < strend && !( *m == ' ' || is_utf8_space((U8*)m) )) {
+		    const int t = UTF8SKIP(m);
+		    /* is_utf8_space returns FALSE for malform utf8 */
+		    if (strend - m < t)
+			m = strend;
+		    else
+			m += t;
+		}
+            } else if (pm->op_pmflags & PMf_LOCALE) {
+	        while (m < strend && !isSPACE_LC(*m))
+		    ++m;
+            } else {
+                while (m < strend && !isSPACE(*m))
+                    ++m;
+            }  
 	    if (m >= strend)
 		break;
 
@@ -4626,11 +4643,23 @@ PP(pp_split)
 		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 
-	    s = m + 1;
-	    while (s < strend &&
-		   ((pm->op_pmflags & PMf_LOCALE)
-		    ? isSPACE_LC(*s) : isSPACE(*s)))
-		++s;
+	    /* skip the whitespace found last */
+	    if (do_utf8)
+		s = m + UTF8SKIP(m);
+	    else
+		s = m + 1;
+
+	    /* this one uses 's' and is a positive test */
+	    if (do_utf8) {
+		while (s < strend && ( *s == ' ' || is_utf8_space((U8*)s) ))
+	            s +=  UTF8SKIP(s);
+            } else if (pm->op_pmflags & PMf_LOCALE) {
+	        while (s < strend && isSPACE_LC(*s))
+		    ++s;
+            } else {
+                while (s < strend && isSPACE(*s))
+                    ++s;
+            } 	    
 	}
     }
     else if (rx->precomp[0] == '^' && rx->precomp[1] == '\0') {
