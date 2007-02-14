@@ -142,7 +142,7 @@ PP(pp_sassign)
 		SV *const value = SvRV(cv);
 
 		SvUPGRADE((SV *)gv, SVt_RV);
-		SvROK_on(gv);
+		SvPCS_IMPORTED_on(gv);
 		SvRV_set(gv, value);
 		SvREFCNT_inc(value);
 		SETs(right);

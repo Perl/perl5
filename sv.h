@@ -282,6 +282,10 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVf_NOK		0x00020000  /* has valid public numeric value */
 #define SVf_POK		0x00040000  /* has valid public pointer value */
 #define SVf_ROK		0x00080000  /* has a valid reference pointer */
+#define SVprv_PCS_IMPORTED  SVp_SCREAM  /* RV is a proxy for a constant
+				       subroutine in another package. Set the
+				       CvIMPORTED_CV_ON() if it needs to be
+				       expanded to a real GV */
 
 #define SVf_FAKE	0x00100000  /* 0: glob or lexical is just a copy
 				       1: SV head arena wasn't malloc()ed
@@ -840,6 +844,11 @@ in gv.h: */
 				  == (SVf_ROK|SVprv_WEAKREF))
 #define SvWEAKREF_on(sv)	(SvFLAGS(sv) |=  (SVf_ROK|SVprv_WEAKREF))
 #define SvWEAKREF_off(sv)	(SvFLAGS(sv) &= ~(SVf_ROK|SVprv_WEAKREF))
+
+#define SvPCS_IMPORTED(sv)	((SvFLAGS(sv) & (SVf_ROK|SVprv_PCS_IMPORTED)) \
+				 == (SVf_ROK|SVprv_PCS_IMPORTED))
+#define SvPCS_IMPORTED_on(sv)	(SvFLAGS(sv) |=  (SVf_ROK|SVprv_PCS_IMPORTED))
+#define SvPCS_IMPORTED_off(sv)	(SvFLAGS(sv) &= ~(SVf_ROK|SVprv_PCS_IMPORTED))
 
 #define SvTHINKFIRST(sv)	(SvFLAGS(sv) & SVf_THINKFIRST)
 
