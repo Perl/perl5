@@ -3,8 +3,8 @@
 # Time-stamp: <26/10/01 15:10:06 keuchel@keuchelnt>
 
 SRCDIR     = ..
-PV         = 59
-INST_VER   = 5.9.4
+PV         = 58
+INST_VER   = 5.8.8
 
 # INSTALL_ROOT specifies a path where this perl will be installed on CE device
 INSTALL_ROOT=/netzwerk/sprache/perl
@@ -394,6 +394,14 @@ CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 PERL_MALLOC	= undef
 !ENDIF
 
+!IF "$(USE_5005THREADS)" == ""
+USE_5005THREADS	= undef
+!ENDIF
+
+!IF "$(USE_5005THREADS)" == "define"
+USE_ITHREADS	= undef
+!ENDIF
+
 !IF "$(USE_MULTI)" == ""
 USE_MULTI	= undef
 !ENDIF
@@ -414,15 +422,16 @@ USE_PERLIO	= undef
 USE_PERLCRT	= undef
 !ENDIF
 
-!IF "$(USE_IMP_SYS)$(USE_MULTI)" == "defineundef"
+!IF "$(USE_IMP_SYS)$(USE_MULTI)$(USE_5005THREADS)" == "defineundefundef"
 USE_MULTI	= define
 !ENDIF
 
 !IF "$(USE_ITHREADS)$(USE_MULTI)" == "defineundef"
 USE_MULTI	= define
+USE_5005THREADS	= undef
 !ENDIF
 
-!IF "$(USE_MULTI)" != "undef"
+!IF "$(USE_MULTI)$(USE_5005THREADS)" != "undefundef"
 BUILDOPT	= $(BUILDOPT) -DPERL_IMPLICIT_CONTEXT
 !ENDIF
 
@@ -718,7 +727,9 @@ CFG_VARS = \
  "make=nmake" \
  "static_ext=$(STATIC_EXT)" \
  "dynamic_ext=$(DYNAMIC_EXT)" \
+ "use5005threads=$(USE_5005THREADS)" \
  "useithreads=$(USE_ITHREADS)" \
+ "usethreads=$(USE_5005THREADS)" \
  "usemultiplicity=$(USE_MULTI)" \
  "useperlio=$(USE_PERLIO)" \
  "LINK_FLAGS=$(LDLIBPATH) $(LINK_FLAGS) $(SUBSYS)" \

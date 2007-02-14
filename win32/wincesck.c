@@ -57,6 +57,14 @@ XCE_EXPORT struct protoent *xcegetprotobynumber(int number);
 
 #define TO_SOCKET(X) (X)
 
+#ifdef USE_5005THREADS
+#define StartSockets() \
+    STMT_START {					\
+	if (!wsock_started)				\
+	    start_sockets();				\
+       set_socktype();                         \
+    } STMT_END
+#else
 #define StartSockets() \
     STMT_START {					\
 	if (!wsock_started) {				\
@@ -64,6 +72,7 @@ XCE_EXPORT struct protoent *xcegetprotobynumber(int number);
 	    set_socktype();				\
 	}						\
     } STMT_END
+#endif
 
 #define SOCKET_TEST(x, y) \
     STMT_START {					\

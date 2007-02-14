@@ -354,7 +354,7 @@ has_shell_metachars(char *ptr)
  * the library functions will get the correct environment
  */
 PerlIO *
-Perl_my_popen(pTHX_ const char *cmd, const char *mode)
+Perl_my_popen(pTHX_ char *cmd, char *mode)
 {
   printf("popen(%s)\n", cmd);
 
@@ -629,7 +629,7 @@ Perl_do_spawn_nowait(pTHX_ char *cmd)
 }
 
 bool
-Perl_do_exec(pTHX_ const char *cmd)
+Perl_do_exec(pTHX_ char *cmd)
 {
     do_spawn2(aTHX_ cmd, EXECF_EXEC);
     return FALSE;
@@ -640,7 +640,7 @@ Perl_do_exec(pTHX_ const char *cmd)
  * return the pointer to the current file name.
  */
 DllExport DIR *
-win32_opendir(const char *filename)
+win32_opendir(char *filename)
 {
     dTHX;
     DIR			*dirp;
@@ -819,7 +819,7 @@ win32_closedir(DIR *dirp)
 /////!!!!!!!!!!! return here and do right stuff!!!!
 
 DllExport DIR *
-win32_opendir(const char *filename)
+win32_opendir(char *filename)
 {
   return opendir(filename);
 }
@@ -2660,7 +2660,6 @@ Perl_win32_init(int *argcp, char ***argvp)
 DllExport void
 Perl_win32_term(void)
 {
-    HINTS_REFCNT_TERM;
     OP_REFCNT_TERM;
     MALLOC_TERM;
 }
