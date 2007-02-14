@@ -588,6 +588,7 @@ Perl_lex_start(pTHX_ SV *line)
     SAVEINT(PL_expect);
     SAVEINT(PL_lex_expect);
 
+    PL_copline = NOLINE;
     PL_lex_state = LEX_NORMAL;
     PL_lex_defer = 0;
     PL_expect = XSTATE;
@@ -2942,7 +2943,7 @@ Perl_yylex(pTHX)
 	    }
 	    if (PL_doextract) {
 		/* Incest with pod. */
-		if (*s == '=' && strnEQ(s, "=cut", 4)) {
+		if (*s == '=' && strnEQ(s, "=cut", 4) && !isALPHA(s[4])) {
 		    sv_setpvn(PL_linestr, "", 0);
 		    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 		    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
