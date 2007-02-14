@@ -4,6 +4,10 @@
 #
 #            Edit mktests.PL and/or parts/inc/newRV instead.
 #
+#  This file was automatically generated from the definition files in the
+#  parts/inc/ subdirectory by mktests.PL. To learn more about how all this
+#  works, please read the F<HACKERS> file that came with this distribution.
+#
 ################################################################################
 
 BEGIN {

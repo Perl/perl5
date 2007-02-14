@@ -1,7 +1,6 @@
 5.009001
 SvIV_nomg                      # U
 SvUV_nomg                      # U
-hv_assert                      # U
 hv_clear_placeholders          # U
 hv_scalar                      # U
 scan_version                   # E (Perl_scan_version)

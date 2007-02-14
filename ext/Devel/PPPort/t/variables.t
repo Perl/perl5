@@ -4,6 +4,10 @@
 #
 #            Edit mktests.PL and/or parts/inc/variables instead.
 #
+#  This file was automatically generated from the definition files in the
+#  parts/inc/ subdirectory by mktests.PL. To learn more about how all this
+#  works, please read the F<HACKERS> file that came with this distribution.
+#
 ################################################################################
 
 BEGIN {
@@ -26,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (1) {
+  if (36) {
     load();
-    plan(tests => 1);
+    plan(tests => 36);
   }
 }
 
@@ -45,4 +49,18 @@ bootstrap Devel::PPPort;
 package main;
 
 ok(Devel::PPPort::compare_PL_signals());
+
+ok(!defined(&Devel::PPPort::PL_sv_undef()));
+ok(&Devel::PPPort::PL_sv_yes());
+ok(!&Devel::PPPort::PL_sv_no());
+ok(&Devel::PPPort::PL_na("abcd"), 4);
+ok(&Devel::PPPort::PL_Sv(), "mhx");
+ok(defined &Devel::PPPort::PL_copline());
+ok(&Devel::PPPort::PL_hexdigit() =~ /^[0-9a-zA-Z]+$/);
+ok(defined &Devel::PPPort::PL_hints());
+ok(&Devel::PPPort::PL_ppaddr("mhx"), "MHX");
+
+for (&Devel::PPPort::other_variables()) {
+  ok($_ != 0);
+}
 

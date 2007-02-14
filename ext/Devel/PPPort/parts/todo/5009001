@@ -1,5 +1,4 @@
 5.009001
-hv_assert                      # U
 hv_clear_placeholders          # U
 hv_scalar                      # U
 scan_version                   # E (Perl_scan_version)

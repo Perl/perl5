@@ -5,9 +5,9 @@
 #
 ################################################################################
 #
-#  $Revision: 9 $
+#  $Revision: 10 $
 #  $Author: mhx $
-#  $Date: 2006/05/28 20:42:53 +0200 $
+#  $Date: 2006/12/02 09:58:34 +0100 $
 #
 ################################################################################
 #
@@ -39,6 +39,7 @@ my %opt = (
   force   => 0,
   test    => 0,
   install => 1,
+  'test-archives' => 0,
 );
 
 my %config = (
@@ -110,6 +111,7 @@ GetOptions(\%opt, qw(
   force
   test
   install!
+  test-archives+
 )) or pod2usage(2);
 
 if (exists $opt{config}) {
@@ -137,6 +139,24 @@ if (exists $opt{perl}) {
 }
 else {
   @perls = sort keys %perl;
+}
+
+if ($opt{'test-archives'}) {
+  my $test = 'test';
+  my $cwd = cwd;
+  -d $test or mkpath($test);
+  chdir $test or die "chdir $test: $!\n";
+  for my $perl (@perls) {
+    eval {
+      my $d = extract_source($perl{$perl});
+      rmtree($d) if -e $d;
+    };
+    warn $@ if $@;
+  }
+  chdir $cwd or die "chdir $cwd: $!\n";
+  print STDERR "cleaning up\n";
+  rmtree($test);
+  exit 0;
 }
 
 my %current;
@@ -211,7 +231,8 @@ sub extract_source
 {
   my $perl = shift;
 
-  print "reading $perl->{source}\n";
+  my $what = $opt{'test-archives'} ? 'test' : 'read';
+  print "${what}ing $perl->{source}\n";
 
   my $target;
 
@@ -222,17 +243,19 @@ sub extract_source
     $target = $t;
   }
 
-  if (-d $target) {
-    print "removing old build directory $target\n";
-    rmtree($target);
+  if ($opt{'test-archives'} == 0 || $opt{'test-archives'} > 1) {
+    if (-d $target) {
+      print "removing old build directory $target\n";
+      rmtree($target);
+    }
+
+    print "extracting $perl->{source}\n";
+
+    Archive::Tar->extract_archive($perl->{source})
+        or die "extract failed: " . Archive::Tar->error() . "\n";
+
+    -d $target or die "oooops, $target not found\n";
   }
-
-  print "extracting $perl->{source}\n";
-
-  Archive::Tar->extract_archive($perl->{source})
-      or die "extract failed: " . Archive::Tar->error() . "\n";
-
-  -d $target or die "oooops, $target not found\n";
 
   return $target;
 }
