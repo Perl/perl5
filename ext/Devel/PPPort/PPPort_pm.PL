@@ -4,13 +4,13 @@
 #
 ################################################################################
 #
-#  $Revision: 50 $
+#  $Revision: 51 $
 #  $Author: mhx $
-#  $Date: 2006/12/01 13:13:28 +0100 $
+#  $Date: 2007/01/02 12:32:27 +0100 $
 #
 ################################################################################
 #
-#  Version 3.x, Copyright (C) 2004-2006, Marcus Holland-Moritz.
+#  Version 3.x, Copyright (C) 2004-2007, Marcus Holland-Moritz.
 #  Version 2.x, Copyright (C) 2001, Paul Marquess.
 #  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 #
@@ -339,13 +339,13 @@ __DATA__
 #
 ################################################################################
 #
-#  $Revision: 50 $
+#  $Revision: 51 $
 #  $Author: mhx $
-#  $Date: 2006/12/01 13:13:28 +0100 $
+#  $Date: 2007/01/02 12:32:27 +0100 $
 #
 ################################################################################
 #
-#  Version 3.x, Copyright (C) 2004-2006, Marcus Holland-Moritz.
+#  Version 3.x, Copyright (C) 2004-2007, Marcus Holland-Moritz.
 #  Version 2.x, Copyright (C) 2001, Paul Marquess.
 #  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 #
@@ -482,7 +482,7 @@ Version 3.x was ported back to CPAN by Marcus Holland-Moritz.
 
 =head1 COPYRIGHT
 
-Version 3.x, Copyright (C) 2004-2006, Marcus Holland-Moritz.
+Version 3.x, Copyright (C) 2004-2007, Marcus Holland-Moritz.
 
 Version 2.x, Copyright (C) 2001, Paul Marquess.
 
@@ -502,7 +502,7 @@ package Devel::PPPort;
 use strict;
 use vars qw($VERSION $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.10_02 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.11 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 sub _init_data
 {

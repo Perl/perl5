@@ -1,5 +1,19 @@
 TODO:
 
+* On 14/12/06, Nicholas Clark <nick@ccl4.org> wrote:
+  > On Thu, Dec 14, 2006 at 05:03:24AM +0100, Andreas J. Koenig wrote:
+  >  
+  > > Params::Validate and Clone suffer from the same cold:  
+  >
+  > The same patch will make both compile and pass tests.
+  > I'm wondering if it might be better to totally drop SVt_PBVM and let source
+  > code fail to compile.  
+  
+  I don't think so. Because :
+  1. your redefinition of SVt_PBVM is probably what most XS modules want
+  2. anyway, if we remove it from the core, it might appear in Devel::PPPort :)
+
+
 * check which of the following we need to support:
 
     amagic_generation
