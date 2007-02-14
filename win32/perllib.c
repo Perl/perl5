@@ -51,7 +51,7 @@ win32_checkTLS(PerlInterpreter *host_perl)
     dTHX;
     if (host_perl != my_perl) {
 	int *nowhere = NULL;
-#ifdef _WIN_CE
+#ifdef UNDER_CE
 	printf(" ... bad in win32_checkTLS\n");
 	printf("  %08X ne %08X\n",host_perl,my_perl);
 #endif
