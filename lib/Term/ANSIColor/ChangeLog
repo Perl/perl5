@@ -1,3 +1,18 @@
+2006-07-12  Russ Allbery  <rra@stanford.edu>
+
+	* ANSIColor.pm: Version 1.11 released.
+
+2006-06-22  Russ Allbery  <rra@stanford.edu>
+
+	* ANSIColor.pm: Clarify in the documentation the behavior of
+	terminals when background colors are set across newlines, and
+	rewrite some of the examples to avoid doing things that confuse
+	the terminal.  Fix a couple of spelling errors.
+
+	* test.pl: Moved to...
+	* t/basic.t: ...here.
+	* t/pod.t: New test for POD validity.
+
 2005-08-21  Russ Allbery  <rra@stanford.edu>
 
 	* ANSIColor.pm: Version 1.10 released.
