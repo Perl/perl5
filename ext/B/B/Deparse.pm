@@ -20,7 +20,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LOCKED CVf_LVALUE CVf_ASSERTION
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = 0.80;
+$VERSION = 0.81;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -1316,21 +1316,25 @@ sub find_scope {
     carp("Undefined op in find_scope") if !defined $op;
     return ($scope_st, $scope_en) unless $op->flags & OPf_KIDS;
 
-    for (my $o=$op->first; $$o; $o=$o->sibling) {
-	if ($o->name =~ /^pad.v$/ && $o->private & OPpLVAL_INTRO) {
-	    my $s = int($self->padname_sv($o->targ)->COP_SEQ_RANGE_LOW);
-	    my $e = $self->padname_sv($o->targ)->COP_SEQ_RANGE_HIGH;
-	    $scope_st = $s if !defined($scope_st) || $s < $scope_st;
-	    $scope_en = $e if !defined($scope_en) || $e > $scope_en;
-	}
-	elsif (is_state($o)) {
-	    my $c = $o->cop_seq;
-	    $scope_st = $c if !defined($scope_st) || $c < $scope_st;
-	    $scope_en = $c if !defined($scope_en) || $c > $scope_en;
-	}
-	elsif ($o->flags & OPf_KIDS) {
-	    ($scope_st, $scope_en) =
-		$self->find_scope($o, $scope_st, $scope_en)
+    my @queue = ($op);
+    while(my $op = shift @queue ) {
+	for (my $o=$op->first; $$o; $o=$o->sibling) {
+	    if ($o->name =~ /^pad.v$/ && $o->private & OPpLVAL_INTRO) {
+		my $s = int($self->padname_sv($o->targ)->COP_SEQ_RANGE_LOW);
+		my $e = $self->padname_sv($o->targ)->COP_SEQ_RANGE_HIGH;
+		$scope_st = $s if !defined($scope_st) || $s < $scope_st;
+		$scope_en = $e if !defined($scope_en) || $e > $scope_en;
+		return ($scope_st, $scope_en);
+	    }
+	    elsif (is_state($o)) {
+		my $c = $o->cop_seq;
+		$scope_st = $c if !defined($scope_st) || $c < $scope_st;
+		$scope_en = $c if !defined($scope_en) || $c > $scope_en;
+		return ($scope_st, $scope_en);
+	    }
+	    elsif ($o->flags & OPf_KIDS) {
+		unshift (@queue, $o);
+	    }
 	}
     }
 
