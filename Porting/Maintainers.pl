@@ -46,6 +46,7 @@ package Maintainers;
 	'muir'		=> 'David Muir Sharnoff <muir@cpan.org>',
 	'neilb'		=> 'Neil Bowers <neilb@cpan.org>',
 	'nuffin'	=> 'Yuval Kogman <nothingmuch@woobling.org>',
+	'osfameron'	=> 'Hakim Cassimally <osfameron@perl.org>',
 	'p5p'		=> 'perl5-porters <perl5-porters@perl.org>',
 	'perlfaq'	=> 'perlfaq-workers <perlfaq-workers@perl.org>',
 	'petdance'	=> 'Andy Lester <andy@petdance.com>',
@@ -603,7 +604,7 @@ package Maintainers;
 
 	'Pod::Perldoc' =>
 		{
-		'MAINTAINER'	=> 'sburke',
+		'MAINTAINER'	=> 'osfameron',
 		'FILES'		=> q[lib/Pod/Perldoc.pm lib/Pod/Perldoc],
 		'CPAN'		=> 1,
 		},
