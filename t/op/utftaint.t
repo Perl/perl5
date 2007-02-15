@@ -143,10 +143,15 @@ for my $ary ([ascii => 'perl'], [latin1 => "\xB6"]) {
     is(tainted($taint), tainted($arg), "tainted: $encode, downgrade down");
 }
 
-fresh_perl_is('$a = substr $^X, 0, 0; /\x{100}/i; /$a\x{100}/i || print q,ok,',
-	      'ok', {switches => ["-T", "-l"]},
-	      "matching a regexp is taint agnostic");
+{
+    my @keys = qw(CDPATH IFS ENV BASH_ENV);
+    push @keys, qw(PATH) unless $^O eq 'MSWin32';
+    local @ENV{@keys} = (undef) x scalar(@keys);
+    fresh_perl_is('$a = substr $^X, 0, 0; /\x{100}/i; /$a\x{100}/i || print q,ok,',
+		  'ok', {switches => ["-T", "-l"]},
+		  "matching a regexp is taint agnostic");
 
-fresh_perl_is('$a = substr $^X, 0, 0; /$a\x{100}/i || print q,ok,',
-	      'ok', {switches => ["-T", "-l"]},
-	      "therefore swash_init should be taint agnostic");
+    fresh_perl_is('$a = substr $^X, 0, 0; /$a\x{100}/i || print q,ok,',
+		  'ok', {switches => ["-T", "-l"]},
+		  "therefore swash_init should be taint agnostic");
+}

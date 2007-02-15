@@ -237,7 +237,7 @@ sub bootstrap {
     my $bs = $file;
     $bs =~ s/(\.\w+)?(;\d*)?$/\.bs/;
     if (-s $bs) { # only read file if it's not empty
-        eval { do $bs; };
+        do $bs;
         warn "$bs: $@\n" if $@;
     }
 

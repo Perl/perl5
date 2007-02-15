@@ -2407,7 +2407,7 @@ Uses C<dumpvar.pl> to dump out the current values for selected variables.
                     @vars     = split( ' ', $2 );
 
                     # If main::dumpvar isn't here, get it.
-                    do 'dumpvar.pl' unless defined &main::dumpvar;
+                    do 'dumpvar.pl' || die $@ unless defined &main::dumpvar;
                     if ( defined &main::dumpvar ) {
 
                         # We got it. Turn off subroutine entry/exit messages
@@ -2606,7 +2606,7 @@ above the current one and then displays then using C<dumpvar.pl>.
                       and next CMD;
 
                     # Load up dumpvar if we don't have it. If we can, that is.
-                    do 'dumpvar.pl' unless defined &main::dumpvar;
+                    do 'dumpvar.pl' || die $@ unless defined &main::dumpvar;
                     defined &main::dumpvar
                       or print $OUT "dumpvar.pl not available.\n"
                       and next CMD;
@@ -5584,7 +5584,7 @@ sub dumpit {
 
     # Load dumpvar.pl unless we've already got the sub we need from it.
     unless ( defined &main::dumpValue ) {
-        do 'dumpvar.pl';
+        do 'dumpvar.pl' or die $@;
     }
 
     # If the load succeeded (or we already had dumpvalue()), go ahead

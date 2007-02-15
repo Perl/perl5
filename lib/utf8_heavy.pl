@@ -194,7 +194,7 @@ sub SWASHNEW {
 		return $Cache{$class, $file};
 	    }
 
-	    $list = do $file;
+	    $list = do $file; die $@ if $@;
 	}
 
         $ListSorted = 1; ## we know that these lists are sorted
