@@ -15,78 +15,13 @@ BEGIN {
     $is_epoc = $^O eq 'epoc';
     $is_vms = $^O eq 'VMS';
     $is_macos = $^O eq 'MacOS';
-    $VERSION = '5.60';
+    $VERSION = '5.63';
 }
 
 AUTOLOAD {
     my $sub = $AUTOLOAD;
-    my $filename;
-    # Braces used to preserve $1 et al.
-    {
-	# Try to find the autoloaded file from the package-qualified
-	# name of the sub. e.g., if the sub needed is
-	# Getopt::Long::GetOptions(), then $INC{Getopt/Long.pm} is
-	# something like '/usr/lib/perl5/Getopt/Long.pm', and the
-	# autoload file is '/usr/lib/perl5/auto/Getopt/Long/GetOptions.al'.
-	#
-	# However, if @INC is a relative path, this might not work.  If,
-	# for example, @INC = ('lib'), then $INC{Getopt/Long.pm} is
-	# 'lib/Getopt/Long.pm', and we want to require
-	# 'auto/Getopt/Long/GetOptions.al' (without the leading 'lib').
-	# In this case, we simple prepend the 'auto/' and let the
-	# C<require> take care of the searching for us.
+    my $filename = AutoLoader::find_filename( $sub );
 
-	my ($pkg,$func) = ($sub =~ /(.*)::([^:]+)$/);
-	$pkg =~ s#::#/#g;
-	if (defined($filename = $INC{"$pkg.pm"})) {
-	    if ($is_macos) {
-		$pkg =~ tr#/#:#;
-		$filename =~ s#^(.*)$pkg\.pm\z#$1auto:$pkg:$func.al#s;
-	    } else {
-		$filename =~ s#^(.*)$pkg\.pm\z#$1auto/$pkg/$func.al#s;
-	    }
-
-	    # if the file exists, then make sure that it is a
-	    # a fully anchored path (i.e either '/usr/lib/auto/foo/bar.al',
-	    # or './lib/auto/foo/bar.al'.  This avoids C<require> searching
-	    # (and failing) to find the 'lib/auto/foo/bar.al' because it
-	    # looked for 'lib/lib/auto/foo/bar.al', given @INC = ('lib').
-
-	    if (-r $filename) {
-		unless ($filename =~ m|^/|s) {
-		    if ($is_dosish) {
-			unless ($filename =~ m{^([a-z]:)?[\\/]}is) {
-			     if ($^O ne 'NetWare') {
-					$filename = "./$filename";
-				} else {
-					$filename = "$filename";
-				}
-			}
-		    }
-		    elsif ($is_epoc) {
-			unless ($filename =~ m{^([a-z?]:)?[\\/]}is) {
-			     $filename = "./$filename";
-			}
-		    }
-		    elsif ($is_vms) {
-			# XXX todo by VMSmiths
-			$filename = "./$filename";
-		    }
-		    elsif (!$is_macos) {
-			$filename = "./$filename";
-		    }
-		}
-	    }
-	    else {
-		$filename = undef;
-	    }
-	}
-	unless (defined $filename) {
-	    # let C<require> do the searching
-	    $filename = "auto/$sub.al";
-	    $filename =~ s#::#/#g;
-	}
-    }
     my $save = $@;
     local $!; # Do not munge the value. 
     eval { local $SIG{__DIE__}; require $filename };
@@ -116,6 +51,95 @@ AUTOLOAD {
     goto &$sub;
 }
 
+sub can {
+    my ($self, $method) = @_;
+
+    my $parent          = $self->SUPER::can( $method );
+    return $parent if $parent;
+
+    my $package         = ref( $self ) || $self;
+    my $filename        = AutoLoader::find_filename( $package . '::' . $method );
+    local $@;
+    return unless eval { require $filename };
+
+    no strict 'refs';
+    return \&{ $package . '::' . $method };
+}
+
+sub find_filename {
+    my $sub = shift;
+    my $filename;
+    # Braces used to preserve $1 et al.
+    {
+	# Try to find the autoloaded file from the package-qualified
+	# name of the sub. e.g., if the sub needed is
+	# Getopt::Long::GetOptions(), then $INC{Getopt/Long.pm} is
+	# something like '/usr/lib/perl5/Getopt/Long.pm', and the
+	# autoload file is '/usr/lib/perl5/auto/Getopt/Long/GetOptions.al'.
+	#
+	# However, if @INC is a relative path, this might not work.  If,
+	# for example, @INC = ('lib'), then $INC{Getopt/Long.pm} is
+	# 'lib/Getopt/Long.pm', and we want to require
+	# 'auto/Getopt/Long/GetOptions.al' (without the leading 'lib').
+	# In this case, we simple prepend the 'auto/' and let the
+	# C<require> take care of the searching for us.
+
+	my ($pkg,$func) = ($sub =~ /(.*)::([^:]+)$/);
+	$pkg =~ s#::#/#g;
+	if (defined($filename = $INC{"$pkg.pm"})) {
+	    if ($is_macos) {
+		$pkg =~ tr#/#:#;
+		$filename = undef
+		  unless $filename =~ s#^(.*)$pkg\.pm\z#$1auto:$pkg:$func.al#s;
+	    } else {
+		$filename = undef
+		  unless $filename =~ s#^(.*)$pkg\.pm\z#$1auto/$pkg/$func.al#s;
+	    }
+
+	    # if the file exists, then make sure that it is a
+	    # a fully anchored path (i.e either '/usr/lib/auto/foo/bar.al',
+	    # or './lib/auto/foo/bar.al'.  This avoids C<require> searching
+	    # (and failing) to find the 'lib/auto/foo/bar.al' because it
+	    # looked for 'lib/lib/auto/foo/bar.al', given @INC = ('lib').
+
+	    if (defined $filename and -r $filename) {
+		unless ($filename =~ m|^/|s) {
+		    if ($is_dosish) {
+			unless ($filename =~ m{^([a-z]:)?[\\/]}is) {
+			    if ($^O ne 'NetWare') {
+				$filename = "./$filename";
+			    } else {
+				$filename = "$filename";
+			    }
+			}
+		    }
+		    elsif ($is_epoc) {
+			unless ($filename =~ m{^([a-z?]:)?[\\/]}is) {
+			     $filename = "./$filename";
+			}
+		    }
+		    elsif ($is_vms) {
+			# XXX todo by VMSmiths
+			$filename = "./$filename";
+		    }
+		    elsif (!$is_macos) {
+			$filename = "./$filename";
+		    }
+		}
+	    }
+	    else {
+		$filename = undef;
+	    }
+	}
+	unless (defined $filename) {
+	    # let C<require> do the searching
+	    $filename = "auto/$sub.al";
+	    $filename =~ s#::#/#g;
+	}
+    }
+    return $filename;
+}
+
 sub import {
     my $pkg = shift;
     my $callpkg = caller;
@@ -125,9 +149,11 @@ sub import {
     #
 
     if ($pkg eq 'AutoLoader') {
-	no strict 'refs';
-	*{ $callpkg . '::AUTOLOAD' } = \&AUTOLOAD
-	    if @_ and $_[0] =~ /^&?AUTOLOAD$/;
+	if ( @_ and $_[0] =~ /^&?AUTOLOAD$/ ) {
+	    no strict 'refs';
+	    *{ $callpkg . '::AUTOLOAD' } = \&AUTOLOAD;
+	    *{ $callpkg . '::can'      } = \&can;
+	}
     }
 
     #
@@ -171,9 +197,12 @@ sub unimport {
     my $callpkg = caller;
 
     no strict 'refs';
-    my $symname = $callpkg . '::AUTOLOAD';
-    undef *{ $symname } if \&{ $symname } == \&AUTOLOAD;
-    *{ $symname } = \&{ $symname };
+
+    for my $exported (qw( AUTOLOAD can )) {
+	my $symname = $callpkg . '::' . $exported;
+	undef *{ $symname } if \&{ $symname } == \&{ $exported };
+	*{ $symname } = \&{ $symname };
+    }
 }
 
 1;
