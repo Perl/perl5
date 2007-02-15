@@ -928,6 +928,7 @@ ext/threads/hints/linux.pl	thread shared variables
 ext/threads/Makefile.PL		ithreads
 ext/Thread/specific.tx		Test thread-specific user data
 ext/threads/README		ithreads
+ext/threads/shared/Changes	Changes for threads::shared
 ext/threads/shared/hints/linux.pl	thread shared variables
 ext/threads/shared/Makefile.PL	thread shared variables
 ext/threads/shared/README	thread shared variables
@@ -946,7 +947,6 @@ ext/threads/shared/t/shared_attr.t	Test :shared attribute
 ext/threads/shared/t/sv_refs.t	thread shared variables
 ext/threads/shared/t/sv_simple.t	thread shared variables
 ext/threads/shared/t/wait.t	Test cond_wait and cond_timedwait
-ext/threads/shared/typemap	thread::shared types
 ext/threads/t/basic.t		ithreads
 ext/threads/t/end.t		Test end functions
 ext/threads/threads.pm		ithreads

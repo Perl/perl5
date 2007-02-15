@@ -9,6 +9,7 @@ ext/Compress/Raw/Zlib
 ext/Cwd
 ext/Digest/SHA
 ext/Sys/Syslog
+ext/threads/shared
 ext/Time/HiRes
 
 win32/ext/Win32API/File
