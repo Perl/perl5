@@ -1,48 +1,57 @@
+use strict;
+use warnings;
+
 BEGIN {
-    chdir 't' if -d 't';
-    push @INC, '../lib';
-    require Config; import Config;
-    unless ($Config{'useithreads'}) {
-	print "1..0 # Skip: no useithreads\n";
- 	exit 0;	
+    if ($ENV{'PERL_CORE'}){
+        chdir 't';
+        unshift @INC, '../lib';
+    }
+    use Config;
+    if (! $Config{'useithreads'}) {
+        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        exit(0);
     }
 }
 
 use ExtUtils::testlib;
-use strict;
-BEGIN { print "1..64\n" };
-use threads;
 
-
-print "ok 1\n";
-
-
-
-
-sub ok {	
+sub ok {
     my ($id, $ok, $name) = @_;
-    
-    # You have to do it this way or VMS will get confused.
-    print $ok ? "ok $id - $name\n" : "not ok $id - $name\n";
 
-    printf "# Failed test at line %d\n", (caller)[2] unless $ok;
-    
-    return $ok;
+    # You have to do it this way or VMS will get confused.
+    if ($ok) {
+        print("ok $id - $name\n");
+    } else {
+        print("not ok $id - $name\n");
+        printf("# Failed test at line %d\n", (caller)[2]);
+    }
+
+    return ($ok);
 }
 
+BEGIN {
+    $| = 1;
+    print("1..63\n");   ### Number of tests that will be run ###
+};
 
-ok(2,1,"");
+use threads;
+ok(1, 1, 'Loaded');
 
+### Start of Testing ###
 
 my @threads;
-for(3..33) {
-  ok($_,1,"Multiple thread test");
-  push @threads ,threads->create(sub { my $i = shift; for(1..500000) { $i++}},$_);
+for (2..32) {
+    ok($_, 1, "Multiple thread test");
+    push(@threads , threads->create(sub {
+                                        my $i = shift;
+                                        for (1..500000) { $i++ }
+                                    }, $_));
 }
 
-my $i = 34;
-for(@threads) {
-  $_->join;
-  ok($i++,1,"Thread joined");
+my $i = 33;
+for (@threads) {
+    $_->join;
+    ok($i++, 1 ,"Thread joined");
 }
 
+# EOF

@@ -31,7 +31,9 @@ sub ok {
 
 BEGIN {
     $| = 1;
-    print("1..63\n");   ### Number of tests that will be run ###
+    print("1..4\n");   ### Number of tests that will be run ###
+
+    $ENV{'PERL5_ITHREADS_STACK_SIZE'} = 196608;
 };
 
 use threads;
@@ -39,20 +41,11 @@ ok(1, 1, 'Loaded');
 
 ### Start of Testing ###
 
-sub test9 {
-    my $i = shift;
-    for (1..500000) { $i++ };
-}
-my @threads;
-for (2..32) {
-    ok($_, 1, "Multiple thread test");
-    push(@threads, threads->create('test9', $_));
-}
-
-my $i = 33;
-for (@threads) {
-    $_->join;
-    ok($i++, 1, "Thread joined");
-}
+ok(2, threads->get_stack_size() == 48*4096,
+        '$ENV{PERL5_ITHREADS_STACK_SIZE}');
+ok(3, threads->set_stack_size(32*4096) == 48*4096,
+        'Set returns previous value');
+ok(4, threads->get_stack_size() == 32*4096,
+        'Get stack size');
 
 # EOF
