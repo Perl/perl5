@@ -5669,7 +5669,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     }
     else if (paren != '?')		/* Not Conditional */
 	ret = br;
-    *flagp |= flags & (SPSTART | HASWIDTH);
+    *flagp |= flags & (SPSTART | HASWIDTH | POSTPONED);
     lastbr = br;
     while (*RExC_parse == '|') {
 	if (!SIZE_ONLY && RExC_extralen) {
@@ -5690,9 +5690,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    return(NULL);
         REGTAIL(pRExC_state, lastbr, br);               /* BRANCH -> BRANCH. */
 	lastbr = br;
-	if (flags&HASWIDTH)
-	    *flagp |= HASWIDTH;
-	*flagp |= flags&SPSTART;
+	*flagp |= flags & (SPSTART | HASWIDTH | POSTPONED);
     }
 
     if (have_branch || paren != ':') {
@@ -5833,7 +5831,7 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
 	}
 	else if (ret == NULL)
 	    ret = latest;
-	*flagp |= flags&HASWIDTH;
+	*flagp |= flags&(HASWIDTH|POSTPONED);
 	if (chain == NULL) 	/* First piece. */
 	    *flagp |= flags&SPSTART;
 	else {
