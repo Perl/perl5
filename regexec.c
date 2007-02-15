@@ -2640,7 +2640,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
     bool result = 0;	    /* return value of S_regmatch */
     int depth = 0;	    /* depth of backtrack stack */
-    int nochange_depth = 0; /* depth of GOSUB recursion with nochange*/
+    U32 nochange_depth = 0; /* depth of GOSUB recursion with nochange */
+    const U32 max_nochange_depth =
+        (3 * rex->nparens > MAX_RECURSE_EVAL_NOCHANGE_DEPTH) ?
+        3 * rex->nparens : MAX_RECURSE_EVAL_NOCHANGE_DEPTH;
+            
     regmatch_state *yes_state = NULL; /* state to pop to on success of
 							    subpattern */
     /* mark_state piggy backs on the yes_state logic so that when we unwind 
@@ -3568,7 +3572,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
             if (cur_eval && cur_eval->locinput==locinput) {
                 if (cur_eval->u.eval.close_paren == (U32)ARG(scan)) 
                     Perl_croak(aTHX_ "Infinite recursion in regex");
-                if ( ++nochange_depth > MAX_RECURSE_EVAL_NOCHANGE_DEPTH ) 
+                if ( ++nochange_depth > max_nochange_depth )
                     Perl_croak(aTHX_ 
                         "Pattern subroutine nesting without pos change"
                         " exceeded limit in regex");
@@ -3589,7 +3593,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
             /* NOTREACHED */
         case EVAL:  /*   /(?{A})B/   /(??{A})B/  and /(?(?{A})X|Y)B/   */        
             if (cur_eval && cur_eval->locinput==locinput) {
-                if ( ++nochange_depth > MAX_RECURSE_EVAL_NOCHANGE_DEPTH ) 
+		if ( ++nochange_depth > max_nochange_depth )
                     Perl_croak(aTHX_ "EVAL without pos change exceeded limit in regex");
             } else {
                 nochange_depth = 0;
@@ -3738,6 +3742,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    cur_curlyx = ST.prev_curlyx;
 	    /* XXXX This is too dramatic a measure... */
 	    PL_reg_maxiter = 0;
+            if ( nochange_depth > 0 );
+	        nochange_depth--;
 	    sayYES;
 
 
@@ -3754,6 +3760,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    cur_curlyx = ST.prev_curlyx;
 	    /* XXXX This is too dramatic a measure... */
 	    PL_reg_maxiter = 0;
+	    if ( nochange_depth > 0 );
+	        nochange_depth--;
 	    sayNO_SILENT;
 #undef ST
 
@@ -4774,6 +4782,8 @@ NULL
 		DEBUG_EXECUTE_r(
 		    PerlIO_printf(Perl_debug_log, "%*s  EVAL trying tail ... %"UVxf"\n",
 				      REPORT_CODE_OFF+depth*2, "",PTR2UV(cur_eval)););
+                if ( nochange_depth > 0 );
+	            nochange_depth++;
 		PUSH_YES_STATE_GOTO(EVAL_AB,
 			st->u.eval.prev_eval->u.eval.B); /* match B */
 	    }

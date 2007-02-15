@@ -300,7 +300,7 @@ typedef struct {
 /* structures for holding and saving the state maintained by regmatch() */
 
 #ifndef MAX_RECURSE_EVAL_NOCHANGE_DEPTH
-#define MAX_RECURSE_EVAL_NOCHANGE_DEPTH 50
+#define MAX_RECURSE_EVAL_NOCHANGE_DEPTH 1000
 #endif
 
 typedef I32 CHECKPOINT;
