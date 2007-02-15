@@ -1394,7 +1394,7 @@ I32
 BmUSEFUL(sv)
 	B::BM	sv
 
-U16
+U32
 BmPREVIOUS(sv)
 	B::BM	sv
 

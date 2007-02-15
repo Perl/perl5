@@ -1062,7 +1062,6 @@ DllExport int
 win32_kill(int pid, int sig)
 {
     dTHX;
-    HANDLE hProcess;
     long child;
     int retval;
 #ifdef USE_ITHREADS
@@ -1070,7 +1069,7 @@ win32_kill(int pid, int sig)
 	/* it is a pseudo-forked child */
 	child = find_pseudo_pid(-pid);
 	if (child >= 0) {
-	    hProcess = w32_pseudo_child_handles[child];
+	    HANDLE hProcess = w32_pseudo_child_handles[child];
 	    switch (sig) {
 	    case 0:
 		/* "Does process exist?" use of kill */
