@@ -38,7 +38,8 @@ the numeric mode to use when creating the directories
 =back
 
 It returns a list of all directories (including intermediates, determined
-using the Unix '/' separator) created.
+using the Unix '/' separator) created.  In scalar context it returns
+the number of directories created.
 
 If a system error prevents a directory from being created, then the
 C<mkpath> function throws a fatal error with C<Carp::croak>. This error
@@ -81,8 +82,8 @@ than VMS is settled.  (defaults to FALSE)
 
 =back
 
-It returns the number of files successfully deleted.  Symlinks are
-simply deleted and not followed.
+It returns the number of files, directories and symlinks successfully
+deleted.  Symlinks are simply deleted and not followed.
 
 B<NOTE:> There are race conditions internal to the implementation of
 C<rmtree> making it unsafe to use on directory trees which may be
@@ -125,7 +126,7 @@ use Exporter ();
 use strict;
 use warnings;
 
-our $VERSION = "1.08";
+our $VERSION = "1.09";
 our @ISA = qw( Exporter );
 our @EXPORT = qw( mkpath rmtree );
 
@@ -157,10 +158,11 @@ sub mkpath {
 	my $parent = File::Basename::dirname($path);
 	unless (-d $parent or $path eq $parent) {
 	    push(@created,mkpath($parent, $verbose, $mode));
- 	}
+	}
 	print "mkdir $path\n" if $verbose;
 	unless (mkdir($path,$mode)) {
-	    my $e = $!;
+	    my ($e, $e1) = ($!, $^E);
+	    $e .= "; $e1" if $e ne $e1;
 	    # allow for another process to have created it meanwhile
 	    $! = $e, croak ("mkdir $path: $e") unless -d $path;
 	}

@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.10';
+our $VERSION = '1.11';
 require Exporter;
 require Cwd;
 
@@ -56,7 +56,7 @@ C<&wanted> function on each file or subdirectory in the directory.
   finddepth(\&wanted,  @directories);
   finddepth(\%options, @directories);
 
-C<finddepth()> works just like C<find()> except that is invokes the
+C<finddepth()> works just like C<find()> except that it invokes the
 C<&wanted> function for a directory I<after> invoking it for the
 directory's contents.  It does a postorder traversal instead of a
 preorder traversal, working from the bottom of the directory tree up
@@ -215,7 +215,8 @@ through a collection of variables.
 
 =back
 
-Don't modify these variables.
+The above variables have all been localized and may be changed without
+effecting data outside of the wanted function.
 
 For example, when examining the file F</some/path/foo.ext> you will have:
 
@@ -779,6 +780,8 @@ sub _find_dir($$$) {
 	$dir_pref= ($p_dir =~ /:$/) ? $p_dir : "$p_dir:"; # preface
     } elsif ($^O eq 'MSWin32') {
 	$dir_pref = ($p_dir =~ m|\w:/$| ? $p_dir : "$p_dir/" );
+    } elsif ($^O eq 'VMS') {
+	$dir_pref = ($p_dir =~ m/[\]>]+$/ ? $p_dir : "$p_dir/" );
     }
     else {
 	$dir_pref= ( $p_dir eq '/' ? '/' : "$p_dir/" );
@@ -952,6 +955,17 @@ sub _find_dir($$$) {
 		$dir_name = ($p_dir =~ m|\w:/$| ? "$p_dir$dir_rel" : "$p_dir/$dir_rel");
 		$dir_pref = "$dir_name/";
 	    }
+	    elsif ($^O eq 'VMS') {
+                if ($p_dir =~ m/[\]>]+$/) {
+                    $dir_name = $p_dir;
+                    $dir_name =~ s/([\]>]+)$/.$dir_rel$1/;
+                    $dir_pref = $dir_name;
+                }
+                else {
+                    $dir_name = "$p_dir/$dir_rel";
+                    $dir_pref = "$dir_name/";
+                }
+	    }
 	    else {
 		$dir_name = ($p_dir eq '/' ? "/$dir_rel" : "$p_dir/$dir_rel");
 		$dir_pref = "$dir_name/";
@@ -1118,7 +1132,7 @@ sub _find_dir_symlnk($$$) {
 
 	    # ignore if invalid symlink
 	    unless (defined $new_loc) {
-	        if ($dangling_symlinks) {
+	        if (!defined -l _ && $dangling_symlinks) {
 	            if (ref $dangling_symlinks eq 'CODE') {
 	                $dangling_symlinks->($FN, $dir_pref);
 	            } else {
