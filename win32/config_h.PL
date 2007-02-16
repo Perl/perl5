@@ -31,9 +31,9 @@ $patchlevel = qq["$patchlevel"];
 open(SH,"<$name") || die "Cannot open $name:$!";
 while (<SH>)
  {
-  last if /^sed/;
+  last if /^\s*sed/;
  }
-($term,$file,$pat) = /^sed\s+<<(\S+)\s+>(\S+)\s+(.*)$/;
+($term,$file,$pat) = /^\s*sed\s+<<(\S+)\s+>(\S+)\s+(.*)$/;
 
 $file =~ s/^\$(\w+)$/$opt{$1}/g;
 
