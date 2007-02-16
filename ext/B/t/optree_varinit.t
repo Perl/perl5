@@ -23,14 +23,6 @@ skip "no perlio in this build", 22 unless $Config::Config{useperlio};
 
 pass("OPTIMIZER TESTS - VAR INITIALIZATION");
 
-my @open_todo;
-sub open_todo {
-    if (((caller 0)[10]||{})->{open}) {
-	@open_todo = (skip => "\$^OPEN is set");
-    }
-}
-open_todo;
-
 checkOptree ( name	=> 'sub {my $a}',
 	      bcopts	=> '-exec',
 	      code	=> sub {my $a},

@@ -32,14 +32,6 @@ $SIG{__WARN__} = sub {
 #################################
 pass("CANONICAL B::Concise EXAMPLE");
 
-my @open_todo;
-sub open_todo {
-    if (((caller 0)[10]||{})->{open}) {
-	@open_todo = (skip => "\$^OPEN is set");
-    }
-}
-open_todo;
-
 checkOptree ( name	=> 'canonical example w -basic',
 	      bcopts	=> '-basic',
 	      code	=>  sub{$a=$b+42},

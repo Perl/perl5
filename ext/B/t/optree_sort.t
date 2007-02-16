@@ -24,14 +24,6 @@ skip "no perlio in this build", 11 unless $Config::Config{useperlio};
 
 pass("SORT OPTIMIZATION");
 
-my @open_todo;
-sub open_todo {
-    if (((caller 0)[10]||{})->{open}) {
-	@open_todo = (skip => "\$^OPEN is set");
-    }
-}
-open_todo;
-
 checkOptree ( name	=> 'sub {sort @a}',
 	      code	=> sub {sort @a},
 	      bcopts	=> '-exec',

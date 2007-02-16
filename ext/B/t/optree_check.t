@@ -36,13 +36,6 @@ SKIP: {
     skip "no perlio in this build", $tests
     unless $Config::Config{useperlio};
 
-my @open_todo;
-sub open_todo {
-    if (((caller 0)[10]||{})->{open}) {
-	@open_todo = (skip => "\$^OPEN is set");
-    }
-}
-open_todo;
 
 pass("REGEX TEST HARNESS SELFTEST");
 

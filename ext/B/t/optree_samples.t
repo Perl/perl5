@@ -25,14 +25,6 @@ pass("GENERAL OPTREE EXAMPLES");
 
 pass("IF,THEN,ELSE, ?:");
 
-my @open_todo;
-sub open_todo {
-    if (((caller 0)[10]||{})->{open}) {
-	@open_todo = (skip => "\$^OPEN is set");
-    }
-}
-open_todo;
-
 checkOptree ( name	=> '-basic sub {if shift print then,else}',
 	      bcopts	=> '-basic',
 	      code	=> sub { if (shift) { print "then" }

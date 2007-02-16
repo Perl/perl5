@@ -47,14 +47,6 @@ my @warnings_todo;
    . "propagated to 5.8.x")
     if $] < 5.009;
 
-my @open_todo;
-sub open_todo {
-    if (((caller 0)[10]||{})->{open}) {
-	@open_todo = (skip => "\$^OPEN is set");
-    }
-}
-open_todo;
-
 checkOptree ( name	=> 'BEGIN',
 	      bcopts	=> 'BEGIN',
 	      prog	=> $src,

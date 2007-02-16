@@ -21,14 +21,6 @@ plan tests => 1;
 SKIP: {
 skip "no perlio in this build", 1 unless $Config::Config{useperlio};
 
-my @open_todo;
-sub open_todo {
-    if (((caller 0)[10]||{})->{open}) {
-	@open_todo = (skip => "\$^OPEN is set");
-    }
-}
-open_todo;
-
 # The regression this is testing is that the first aelemfast, derived
 # from a lexical array, is supposed to be a BASEOP "<0>", while the
 # second, from a global, is an SVOP "<$>" or a PADOP "<#>" depending

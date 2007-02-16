@@ -1,13 +1,23 @@
 package OptreeCheck;
 use base 'Exporter';
+use strict;
+use warnings;
+use vars qw(@open_todo $TODO);
 require "test.pl";
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 # now export checkOptree, and those test.pl functions used by tests
 our @EXPORT = qw( checkOptree plan skip skip_all pass is like unlike
-		  require_ok runperl );
+		  require_ok runperl @open_todo);
 
+
+# This is a bit of a kludge. Really we need to find a way to encode in the
+# golden results that the hints wll differ because ${^OPEN} is set.
+
+if (((caller 0)[10]||{})->{'open'}) {
+    @open_todo = (skip => "\${^OPEN} is set");
+}
 
 =head1 NAME
 
@@ -429,7 +439,7 @@ sub checkOptree {
 	$tc->checkErrs();
 
       TODO:
-	foreach $want (@{$modes{$gOpts{testmode}}}) {
+	foreach my $want (@{$modes{$gOpts{testmode}}}) {
 	    local $TODO = $tc->{todo} if $tc->{todo};
 
 	    $tc->{cross} = $msgs{"$want-$thrstat"};
@@ -438,7 +448,7 @@ sub checkOptree {
 	    $tc->mylike();
 	}
     }
-    $res;
+    return;
 }
 
 sub newTestCases {
@@ -449,7 +459,7 @@ sub newTestCases {
     $tc->label();
 
     # cpy globals into each test
-    foreach $k (keys %gOpts) {
+    foreach my $k (keys %gOpts) {
 	if ($gOpts{$k}) {
 	    $tc->{$k} = $gOpts{$k} unless defined $tc->{$k};
 	}
@@ -508,7 +518,11 @@ sub getRendering {
 	    # treat as source, and wrap into subref 
 	    #  in caller's package ( to test arg-fixup, comment next line)
 	    my $pkg = '{ package '.caller(1) .';';
-	    $code = eval "$pkg sub { $code } }";
+	    {
+		no strict;
+		no warnings;
+		$code = eval "$pkg sub { $code } }";
+	    }
 	    # return errors
 	    if ($@) { chomp $@; push @errs, $@ }
 	}
@@ -559,6 +573,7 @@ sub checkErrs {
 
     # check for agreement, by hash (order less important)
     my (%goterrs, @got);
+    $tc->{goterrs} ||= [];
     @goterrs{@{$tc->{goterrs}}} = (1) x scalar @{$tc->{goterrs}};
     
     foreach my $k (keys %{$tc->{errs}}) {
@@ -573,7 +588,7 @@ sub checkErrs {
     if (%{$tc->{errs}} or %{$tc->{goterrs}}) {
 	$tc->diag_or_fail();
     }
-    fail("FORCED: $tc->{name}:\n$rendering") if $gOpts{fail}; # silly ?
+    fail("FORCED: $tc->{name}:\n") if $gOpts{fail}; # silly ?
 }
 
 sub diag_or_fail {
@@ -691,7 +706,6 @@ sub mkCheckRex {
     $str = "(-e .*?)?(B::Concise::compile.*?)?\n" . $str
 	unless $tc->{noanchors} or $tc->{rxnoorder};
     
-    eval "use re 'debug'" if $debug;
     my $qr = ($tc->{noanchors})	? qr/$str/ms : qr/^$str$/ms ;
     no re 'debug';
 
@@ -879,7 +893,7 @@ sub mydumper {
 	or do{
 	    print "Sorry, Data::Dumper is not available\n";
 	    print "half hearted attempt:\n";
-	    foreach $it (@_) {
+	    foreach my $it (@_) {
 		if (ref $it eq 'HASH') {
 		    print " $_ => $it->{$_}\n" foreach sort keys %$it;
 		}
@@ -963,13 +977,6 @@ sub OptreeCheck::gentest {
 	my $af = q{expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT'};
 	$testcode =~ s/$b4/$af/;
 	
-	my $got;
-	if ($internal_retest) {
-	    $got = runperl( prog => "$preamble $testcode", stderr => 1,
-			    #switches => ["-I../ext/B/t", "-MOptreeCheck"], 
-			    verbose => 1);
-	    print "got: $got\n";
-	}
 	return $testcode;
     }
     return '';
@@ -987,7 +994,7 @@ sub OptreeCheck::processExamples {
 	$/ = "";
 	my @chunks = <$fh>;
 	print preamble (scalar @chunks);
-	foreach $t (@chunks) {
+	foreach my $t (@chunks) {
 	    print "\n\n=for gentest\n\n# chunk: $t=cut\n\n";
 	    print OptreeCheck::gentest ($t);
 	}
