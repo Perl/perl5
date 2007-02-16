@@ -3218,11 +3218,6 @@ $   d_quad = "define"
 $   quadtype = "long long"
 $   uquadtype = "unsigned long long"
 $   quadkind  = "QUAD_IS_LONG_LONG"
-$   d_frexpl = "define"
-$   d_isnan = "define"
-$   d_isnanl = "define"
-$   d_modfl = "define"
-$   d_modflproto = "define"
 $ ELSE
 $   d_PRId64 = "undef"
 $   d_PRIXU64 = "undef"
@@ -3239,11 +3234,26 @@ $   d_quad = "undef"
 $   quadtype = "long"
 $   uquadtype = "unsigned long"
 $   quadkind  = "QUAD_IS_LONG"
+$ ENDIF
+$!
+$ IF archname .NES. "VMS_VAX"
+$ THEN
+$   d_frexpl = "define"
+$   d_modfl = "define"
+$   d_modflproto = "define"
+$ ELSE
 $   d_frexpl = "undef"
-$   d_isnan = "undef"
-$   d_isnanl = "undef"
 $   d_modfl = "undef"
 $   d_modflproto = "undef"
+$ ENDIF
+$!
+$ IF usieee .OR. useieee .EQS. "define"
+$ THEN
+$   d_isnan = "define"
+$   d_isnanl = "define"
+$ ELSE
+$   d_isnan = "undef"
+$   d_isnanl = "undef"
 $ ENDIF
 $!
 $! Now some that we build up
