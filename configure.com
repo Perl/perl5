@@ -3247,7 +3247,7 @@ $   d_modfl = "undef"
 $   d_modflproto = "undef"
 $ ENDIF
 $!
-$ IF usieee .OR. useieee .EQS. "define"
+$ IF useieee .OR. useieee .EQS. "define"
 $ THEN
 $   d_isnan = "define"
 $   d_isnanl = "define"
