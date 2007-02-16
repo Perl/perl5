@@ -250,7 +250,7 @@ sub send {
     my $peer  = $_[3] || $sock->peername;
 
     croak 'send: Cannot determine peer address'
-	 unless($peer);
+	 unless(defined $peer);
 
     my $r = defined(getpeername($sock))
 	? send($sock, $_[1], $flags)
