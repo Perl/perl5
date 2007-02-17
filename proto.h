@@ -4602,6 +4602,11 @@ PERL_CALLCONV int	Perl_signbit(NV f)
 
 #endif
 
+PERL_CALLCONV void	Perl_emulate_cop_io(pTHX_ const COP *const c, SV *const sv)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:

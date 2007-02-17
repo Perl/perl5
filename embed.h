@@ -4078,6 +4078,8 @@
 #endif
 #if !defined(HAS_SIGNBIT)
 #endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
+#endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
 #define ck_chdir(a)		Perl_ck_chdir(aTHX_ a)

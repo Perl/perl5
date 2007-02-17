@@ -666,6 +666,32 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
     } \
 } STMT_END
 
+void
+Perl_emulate_cop_io(pTHX_ const COP *const c, SV *const sv)
+{
+    if (!(CopHINTS_get(c) & (HINT_LEXICAL_IO_IN|HINT_LEXICAL_IO_OUT)))
+	sv_setsv(sv, &PL_sv_undef);
+    else {
+	sv_setpvs(sv, "");
+	SvUTF8_off(sv);
+	if ((CopHINTS_get(c) & HINT_LEXICAL_IO_IN)) {
+	    SV *const value = Perl_refcounted_he_fetch(aTHX_
+						       c->cop_hints_hash,
+						       0, "open<", 5, 0, 0);
+	    assert(value);
+	    sv_catsv(sv, value);
+	}
+	sv_catpvs(sv, "\0");
+	if ((CopHINTS_get(c) & HINT_LEXICAL_IO_OUT)) {
+	    SV *const value = Perl_refcounted_he_fetch(aTHX_
+						       c->cop_hints_hash,
+						       0, "open>", 5, 0, 0);
+	    assert(value);
+	    sv_catsv(sv, value);
+	}
+    }
+}
+
 int
 Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 {
@@ -769,14 +795,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    SvTAINTED_off(sv);
 	}
 	else if (strEQ(remaining, "PEN")) {
-	    if (!(CopHINTS_get(&PL_compiling) & HINT_LEXICAL_IO))
-		sv_setsv(sv, &PL_sv_undef);
-            else {
-	        sv_setsv(sv,
-			 Perl_refcounted_he_fetch(aTHX_
-						  PL_compiling.cop_hints_hash,
-						  0, "open", 4, 0, 0));
-	    }
+	    Perl_emulate_cop_io(aTHX_ &PL_compiling, sv);
 	}
 	break;
     case '\020':		
@@ -2241,11 +2260,33 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    }
 	}
 	else if (strEQ(mg->mg_ptr, "\017PEN")) {
-	    PL_compiling.cop_hints |= HINT_LEXICAL_IO;
-	    PL_hints |= HINT_LOCALIZE_HH | HINT_LEXICAL_IO;
+	    STRLEN len;
+	    const char *const start = SvPV(sv, len);
+	    const char *out = memchr(start, '\0', len);
+	    SV *tmp;
+	    struct refcounted_he *tmp_he;
+
+
+	    PL_compiling.cop_hints |= HINT_LEXICAL_IO_IN | HINT_LEXICAL_IO_OUT;
+	    PL_hints
+		|= HINT_LOCALIZE_HH | HINT_LEXICAL_IO_IN | HINT_LEXICAL_IO_OUT;
+
+	    /* Opening for input is more common than opening for output, so
+	       ensure that hints for input are sooner on linked list.  */
+	    tmp = sv_2mortal(out ? newSVpvn(out + 1, start + len - out - 1)
+			     : newSVpvs(""));
+	    SvFLAGS(tmp) |= SvUTF8(sv);
+
+	    tmp_he
+		= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints_hash, 
+					 sv_2mortal(newSVpvs("open>")), tmp);
+
+	    /* The UTF-8 setting is carried over  */
+	    sv_setpvn(tmp, start, out ? (STRLEN)(out - start) : len);
+
 	    PL_compiling.cop_hints_hash
-		= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints_hash,
-					 sv_2mortal(newSVpvs("open")), sv);
+		= Perl_refcounted_he_new(aTHX_ tmp_he,
+					 sv_2mortal(newSVpvs("open<")), tmp);
 	}
 	break;
     case '\020':	/* ^P */

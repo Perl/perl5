@@ -1837,6 +1837,8 @@ Mp	|int	|madparse
 AMdnoP	|int	|Perl_signbit	|NV f
 #endif
 
+XEMop	|void	|emulate_cop_io	|NN const COP *const c|NN SV *const sv
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:

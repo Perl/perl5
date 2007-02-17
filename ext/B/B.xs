@@ -302,18 +302,14 @@ make_warnings_object(pTHX_ SV *arg, STRLEN *warnings)
 static SV *
 make_cop_io_object(pTHX_ SV *arg, COP *cop)
 {
-    if (CopHINTS_get(cop) & HINT_LEXICAL_IO) {
-	/* I feel you should be able to simply SvREFCNT_inc the return value
-	   from this, but if you do (and restore the line
-	   my $ioix = $cop->io->ix;
-	   in B::COP::bsave in Bytecode.pm, then you get errors about
-	   "attempt to free temp prematurely ... during global destruction.
-	   The SV's flags are consistent with the error, but quite how the
-	   temp escaped from the save stack is not clear.  */
-	SV *value = Perl_refcounted_he_fetch(aTHX_ cop->cop_hints_hash,
-					     0, "open", 4, 0, 0);
+    SV *const value = newSV(0);
+
+    Perl_emulate_cop_io(cop, value);
+
+    if(SvOK(value)) {
 	return make_temp_object(aTHX_ arg, newSVsv(value));
     } else {
+	SvREFCNT_dec(value);
 	return make_sv_object(aTHX_ arg, NULL);
     }
 }

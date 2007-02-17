@@ -628,8 +628,8 @@ our %hints; # used to display each COP's op_hints values
 @hints{2,512,1024} = ('$', '&', '*');
 # integers, locale, bytes, arybase
 @hints{1,4,8,16,32} = ('i', 'l', 'b', '[');
-# block scope, localise %^H, $^OPEN
-@hints{256,131072,262144} = ('{','%','<');
+# block scope, localise %^H, $^OPEN (in), $^OPEN (out)
+@hints{256,131072,262144,524288} = ('{','%','<','>');
 # overload new integer, float, binary, string, re
 @hints{4096,8192,16384,32768,65536} = ('I', 'F', 'B', 'S', 'R');
 # taint and eval

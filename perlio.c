@@ -5114,30 +5114,30 @@ const char *
 Perl_PerlIO_context_layers(pTHX_ const char *mode)
 {
     dVAR;
-    const char *type = NULL;
+    const char *direction = NULL;
+    SV *layers;
     /*
      * Need to supply default layer info from open.pm
      */
-    if (PL_curcop && PL_curcop->cop_hints & HINT_LEXICAL_IO) {
-	SV * const layers
-	    = Perl_refcounted_he_fetch(aTHX_ PL_curcop->cop_hints_hash, 0,
-				       "open", 4, 0, 0);
-	assert(layers);
-	if (SvOK(layers)) {
-	    STRLEN len;
-	    type = SvPV_const(layers, len);
-	    if (type && mode && mode[0] != 'r') {
-		/*
-		 * Skip to write part, which is separated by a '\0'
-		 */
-		STRLEN read_len = strlen(type);
-		if (read_len < len) {
-		    type += read_len + 1;
-		}
-	    }
-	}
+
+    if (!PL_curcop)
+	return NULL;
+
+    if (mode && mode[0] != 'r') {
+	if (PL_curcop->cop_hints & HINT_LEXICAL_IO_OUT)
+	    direction = "open>";
+    } else {
+	if (PL_curcop->cop_hints & HINT_LEXICAL_IO_IN)
+	    direction = "open<";
     }
-    return type;
+    if (!direction)
+	return NULL;
+
+    layers = Perl_refcounted_he_fetch(aTHX_ PL_curcop->cop_hints_hash,
+				      0, direction, 5, 0, 0);
+
+    assert(layers);
+    return SvOK(layers) ? SvPV_nolen_const(layers) : NULL;
 }
 
 

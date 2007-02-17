@@ -15,7 +15,7 @@ our @EXPORT = qw( checkOptree plan skip skip_all pass is like unlike
 # This is a bit of a kludge. Really we need to find a way to encode in the
 # golden results that the hints wll differ because ${^OPEN} is set.
 
-if (((caller 0)[10]||{})->{'open'}) {
+if (((caller 0)[10]||{})->{'open<'}) {
     @open_todo = (skip => "\${^OPEN} is set");
 }
 
