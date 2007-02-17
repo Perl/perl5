@@ -9,7 +9,7 @@
 
 package Data::Dumper;
 
-$VERSION = '2.121_08';
+$VERSION = '2.121_11';
 
 #$| = 1;
 
@@ -101,16 +101,26 @@ sub new {
   return bless($s, $c);
 }
 
-sub init_refaddr_format {
-  require Config;
-  my $f = $Config::Config{uvxformat};
-  $f =~ tr/"//d;
-  our $refaddr_format = "0x%" . $f;
-}
+if ($] >= 5.006) {
+  # Packed numeric addresses take less memory. Plus pack is faster than sprintf
+  *init_refaddr_format = sub {};
 
-sub format_refaddr {
-  require Scalar::Util;
-  sprintf our $refaddr_format, Scalar::Util::refaddr(shift);
+  *format_refaddr  = sub {
+    require Scalar::Util;
+    pack "J", Scalar::Util::refaddr(shift);
+  };
+} else {
+  *init_refaddr_format = sub {
+    require Config;
+    my $f = $Config::Config{uvxformat};
+    $f =~ tr/"//d;
+    our $refaddr_format = "0x%" . $f;
+  };
+
+  *format_refaddr = sub {
+    require Scalar::Util;
+    sprintf our $refaddr_format, Scalar::Util::refaddr(shift);
+  }
 }
 
 #
@@ -119,6 +129,7 @@ sub format_refaddr {
 sub Seen {
   my($s, $g) = @_;
   if (defined($g) && (ref($g) eq 'HASH'))  {
+    init_refaddr_format();
     my($k, $v, $id);
     while (($k, $v) = each %$g) {
       if (defined $v and ref $v) {
@@ -218,6 +229,11 @@ sub Dumpperl {
     }
     else {
       $name = "\$" . $s->{varname} . $i;
+    }
+
+    # Ensure hash iterator is reset
+    if (ref($val) eq 'HASH') {
+        keys(%$val);
     }
 
     my $valstr;
