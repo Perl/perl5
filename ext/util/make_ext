@@ -123,12 +123,7 @@ if test ! -f $makefile ; then
 	test -f Makefile.PL && ../$depth/miniperl -I../$depth/lib Makefile.PL INSTALLDIRS=perl PERL_CORE=1 $passthru
 fi
 if test ! -f $makefile ; then
-	if test -f Makefile.SH; then
-		echo "Warning: Writing $makefile from old-style Makefile.SH!"
-		sh Makefile.SH
-	else
-		echo "Warning: No Makefile!"
-	fi
+	echo "Warning: No Makefile!"
 fi
 
 case "$target" in
@@ -136,10 +131,10 @@ clean)		;;
 realclean)	;;
 *)	# Give makefile an opportunity to rewrite itself.
 	# reassure users that life goes on...
-	$MAKE config $passthru || echo "$MAKE config failed, continuing anyway..."
+	$MAKE config MAKE=$MAKE $passthru || echo "$MAKE config failed, continuing anyway..."
 	;;
 esac
 
-$MAKE $makeopts $target $makeargs $passthru || exit
+$MAKE $makeopts $target MAKE=$MAKE $makeargs $passthru || exit
 
 exit $?
