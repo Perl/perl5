@@ -304,7 +304,7 @@ make_cop_io_object(pTHX_ SV *arg, COP *cop)
 {
     SV *const value = newSV(0);
 
-    Perl_emulate_cop_io(cop, value);
+    Perl_emulate_cop_io(aTHX_ cop, value);
 
     if(SvOK(value)) {
 	return make_temp_object(aTHX_ arg, newSVsv(value));

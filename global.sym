@@ -736,4 +736,5 @@ Perl_my_cxt_index
 Perl_my_strlcat
 Perl_my_strlcpy
 Perl_signbit
+Perl_emulate_cop_io
 # ex: set ro:
