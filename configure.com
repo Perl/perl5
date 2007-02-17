@@ -544,8 +544,9 @@ $       THEN
 $! 17-DEC-1999 Improved to turn "[.foo.bar]baz.c_buz" into
 $! "[.foo.bar]baz_c.buz" to cover unzipped archives and put
 $! "[.foo.bar]baz.c_buz,baz_c.buz" into missing list if neither is found.
-$         basename[f$locate(".",basename),1] := _
-$         dot_ele = F$ELEMENT(dots - 1,"_",basename)
+$         dotloc = f$locate(".",basename)
+$         basename[dotloc,1] := "_"
+$         dot_ele = F$ELEMENT(dots - 1,"_",f$extract(dotloc,f$length(basename),basename))
 $         basename = -
             f$extract(0,f$length(basename)-(f$length(dot_ele)+1),basename) -
               + "." + dot_ele
