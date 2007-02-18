@@ -11149,8 +11149,8 @@ S_scan_heredoc(pTHX_ register char *s)
 	s--;
 #endif
 
-    tmpstr = newSV(79);
-    sv_upgrade(tmpstr, SVt_PVIV);
+    tmpstr = newSV_type(SVt_PVIV);
+    SvGROW(tmpstr, 80);
     if (term == '\'') {
 	op_type = OP_CONST;
 	SvIV_set(tmpstr, -1);
@@ -11555,8 +11555,8 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
     /* create a new SV to hold the contents.  79 is the SV's initial length.
        What a random number. */
-    sv = newSV(79);
-    sv_upgrade(sv, SVt_PVIV);
+    sv = newSV_type(SVt_PVIV);
+    SvGROW(sv, 80);
     SvIV_set(sv, termcode);
     (void)SvPOK_only(sv);		/* validate pointer */
 

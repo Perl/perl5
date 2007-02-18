@@ -262,8 +262,8 @@ perl_construct(pTHXx)
     if (!PL_linestr) {
 	PL_curcop = &PL_compiling;	/* needed by ckWARN, right away */
 
-	PL_linestr = newSV(79);
-	sv_upgrade(PL_linestr,SVt_PVIV);
+	PL_linestr = newSV_type(SVt_PVIV);
+	SvGROW(PL_linestr, 80);
 
 	if (!SvREADONLY(&PL_sv_undef)) {
 	    /* set read-only and try to insure than we wont see REFCNT==0
