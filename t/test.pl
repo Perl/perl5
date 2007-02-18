@@ -276,7 +276,7 @@ sub like_yn ($$$@) {
 	unshift(@mess, "#      got '$got'\n",
 		"# expected /$expected/\n");
     }
-    local $Level = 2;
+    local $Level = $Level + 1;
     _ok($pass, _where(), $name, @mess);
 }
 
