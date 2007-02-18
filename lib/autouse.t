@@ -51,13 +51,12 @@ use autouse 'Carp' => qw(carp croak);
 }
 
 
-# Test that autouse's lazy module loading works.  We assume that nothing
-# involved in this test uses Text::Soundex, which is pretty safe.
-use autouse 'Text::Soundex' => qw(soundex);
+# Test that autouse's lazy module loading works.
+use autouse 'Errno' => qw(EPERM);
 
-my $mod_file = 'Text/Soundex.pm'; # just fine and portable for %INC
+my $mod_file = 'Errno.pm';   # just fine and portable for %INC
 ok( !exists $INC{$mod_file} );
-ok( soundex('Basset'), 'B230' );
+ok( EPERM, 1 );
 ok( exists $INC{$mod_file} );
 
 use autouse Env => "something";
