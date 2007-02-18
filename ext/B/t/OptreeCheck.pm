@@ -2,21 +2,22 @@ package OptreeCheck;
 use base 'Exporter';
 use strict;
 use warnings;
-use vars qw(@open_todo $TODO);
+use vars qw($TODO $Level $using_open);
 require "test.pl";
 
 our $VERSION = '0.02';
 
 # now export checkOptree, and those test.pl functions used by tests
 our @EXPORT = qw( checkOptree plan skip skip_all pass is like unlike
-		  require_ok runperl @open_todo);
+		  require_ok runperl);
 
 
-# This is a bit of a kludge. Really we need to find a way to encode in the
-# golden results that the hints wll differ because ${^OPEN} is set.
+# The hints flags will differ if ${^OPEN} is set.
+# The approach taken is to put the hints-with-open in the golden results, and
+# flag that they need to be taken out if ${^OPEN} is set.
 
 if (((caller 0)[10]||{})->{'open<'}) {
-    @open_todo = (skip => "\${^OPEN} is set");
+    $using_open = 1;
 }
 
 =head1 NAME
@@ -438,6 +439,7 @@ sub checkOptree {
 	$tc->getRendering();	# get the actual output
 	$tc->checkErrs();
 
+	local $Level = $Level + 2;
       TODO:
 	foreach my $want (@{$modes{$gOpts{testmode}}}) {
 	    local $TODO = $tc->{todo} if $tc->{todo};
@@ -682,9 +684,37 @@ sub mkCheckRex {
     # $str =~ s/(?<!\\)([\[\]\(\)*.\$\@\#\|{}])/\\$1/msg;
 
     # treat dbstate like nextstate (no in-debugger false reports)
-    $str =~ s/(?:next|db)state(\\\(.*?\\\))/(?:next|db)state(.*?)/msg;
+    # Note also that there may be 1 level of () nexting, if there's an eval
+    # Seems easiest to explicitly match the eval, rather than trying to parse
+    # for full balancing and then substitute .*?
+    # In which case, we can continue to match for the eval in the rexexp built
+    # from the golden result.
+
+    $str =~ s!(?:next|db)state
+	      \\\(			# opening literal ( (backslash escaped)
+	      [^()]*?			# not ()
+	      (\\\(eval\ \d+\\\)	# maybe /eval \d+/ in ()
+	       [^()]*?			# which might be followed by something
+	      )?
+	      \\\)			# closing literal )
+	     !'(?:next|db)state\\([^()]*?' .
+	      ($1 && '\\(eval \\d+\\)[^()]*')	# Match the eval if present
+	      . '\\)'!msgxe;
     # widened for -terse mode
     $str =~ s/(?:next|db)state/(?:next|db)state/msg;
+    if (!$using_open && $tc->{strip_open_hints}) {
+      $str =~ s[(			# capture
+		 \(\?:next\|db\)state	# the regexp matching next/db state
+		 .*			# all sorts of things follow it
+		 v			# The opening v
+		)
+		(?:(:>,<,%,\\{)		# hints when open.pm is in force
+		   |(:>,<,%))		# (two variations)
+		(\ ->[0-9a-z]+)?
+		$
+	       ]
+	[$1 . ($2 && ':{') . $4]xegm;	# change to the hints without open.pm
+      }
 
     # don't care about:
     $str =~ s/:-?\d+,-?\d+/:-?\\d+,-?\\d+/msg;		# FAKE line numbers

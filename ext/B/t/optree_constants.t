@@ -101,12 +101,12 @@ for $func (sort keys %$want) {
 		  expect  => <<EOT_EOT, expect_nt => <<EONT_EONT);
 3  <1> leavesub[2 refs] K/REFC,1 ->(end)
 -     <\@> lineseq KP ->3
-1        <;> dbstate(main 1163 OptreeCheck.pm:511]:1) v ->2
+1        <;> dbstate(main 833 (eval 44):1) v ->2
 2        <\$> const[$want->{$func}[0] $want->{$func}[1]] s ->3
 EOT_EOT
 3  <1> leavesub[2 refs] K/REFC,1 ->(end)
 -     <\@> lineseq KP ->3
-1        <;> dbstate(main 1163 OptreeCheck.pm:511]:1) v ->2
+1        <;> dbstate(main 833 (eval 44):1) v ->2
 2        <\$> const($want->{$func}[0] $want->{$func}[1]) s ->3
 EONT_EONT
 
@@ -189,11 +189,11 @@ sub printem {
 
 checkOptree ( name	=> 'call many in a print statement',
 	      code	=> \&printem,
-	      @open_todo,
+	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 9  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->9
-# 1        <;> nextstate(main 635 optree_constants.t:163) v ->2
+# 1        <;> nextstate(main 635 optree_constants.t:163) v:>,<,% ->2
 # 8        <@> prtf sK ->9
 # 2           <0> pushmark s ->3
 # 3           <$> const[PV "myint %d mystr %s myfl %f pi %f\n"] s ->4
@@ -204,7 +204,7 @@ checkOptree ( name	=> 'call many in a print statement',
 EOT_EOT
 # 9  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->9
-# 1        <;> nextstate(main 635 optree_constants.t:163) v ->2
+# 1        <;> nextstate(main 635 optree_constants.t:163) v:>,<,% ->2
 # 8        <@> prtf sK ->9
 # 2           <0> pushmark s ->3
 # 3           <$> const(PV "myint %d mystr %s myfl %f pi %f\n") s ->4

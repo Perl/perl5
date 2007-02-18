@@ -29,16 +29,16 @@ skip "no perlio in this build", 1 unless $Config::Config{useperlio};
 
 checkOptree ( name	=> 'OP_AELEMFAST opclass',
 	      code	=> sub { my @x; our @y; $x[0] + $y[0]},
-	      @open_todo,
+	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # a  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->a
-# 1        <;> nextstate(main 634 optree_misc.t:25) v ->2
+# 1        <;> nextstate(main 634 optree_misc.t:25) v:>,<,% ->2
 # 2        <0> padav[@x:634,636] vM/LVINTRO ->3
-# 3        <;> nextstate(main 635 optree_misc.t:25) v ->4
+# 3        <;> nextstate(main 635 optree_misc.t:25) v:>,<,% ->4
 # 5        <1> rv2av[t4] vK/OURINTR,1 ->6
 # 4           <#> gv[*y] s ->5
-# 6        <;> nextstate(main 636 optree_misc.t:25) v:{ ->7
+# 6        <;> nextstate(main 636 optree_misc.t:25) v:>,<,%,{ ->7
 # 9        <2> add[t6] sK/2 ->a
 # -           <1> ex-aelem sK/2 ->8
 # 7              <0> aelemfast[@x:634,636] sR* ->8
@@ -50,12 +50,12 @@ checkOptree ( name	=> 'OP_AELEMFAST opclass',
 EOT_EOT
 # a  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->a
-# 1        <;> nextstate(main 634 optree_misc.t:27) v ->2
+# 1        <;> nextstate(main 634 optree_misc.t:27) v:>,<,% ->2
 # 2        <0> padav[@x:634,636] vM/LVINTRO ->3
-# 3        <;> nextstate(main 635 optree_misc.t:27) v ->4
+# 3        <;> nextstate(main 635 optree_misc.t:27) v:>,<,% ->4
 # 5        <1> rv2av[t3] vK/OURINTR,1 ->6
 # 4           <$> gv(*y) s ->5
-# 6        <;> nextstate(main 636 optree_misc.t:27) v:{ ->7
+# 6        <;> nextstate(main 636 optree_misc.t:27) v:>,<,%,{ ->7
 # 9        <2> add[t4] sK/2 ->a
 # -           <1> ex-aelem sK/2 ->8
 # 7              <0> aelemfast[@x:634,636] sR* ->8
