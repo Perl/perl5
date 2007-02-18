@@ -6801,14 +6801,35 @@ $   ENDIF
 $ ELSE
 $   DECTERM_REPLACE = "DECTERMLIB=DECTERMLIB="
 $ ENDIF
+$!
+$! In order not to stress the tiny command buffer on pre-7.3-2 systems,
+$! we put the following substitutions in a file and pass the file to
+$! munchconfig.
+$!
+$ open/write CONFIG extra_subs.txt
+$ WC := write CONFIG
+$ WC "''DECC_REPLACE'"
+$ WC "''DECCXX_REPLACE'"
+$ WC "''ARCH_TYPE'"
+$ WC "''GNUC_REPLACE'"
+$ WC "''SOCKET_REPLACE'"
+$ WC "''THREAD_REPLACE'"
+$ WC "''C_Compiler_Replace'"
+$ WC "''MALLOC_REPLACE'"
+$ WC "''THREAD_UPCALLS'"
+$ WC "''THREAD_KERNEL'"
+$ WC "PV=''version'"
+$ WC "FLAGS=FLAGS=''extra_flags'"
+$ WC "''LARGEFILE_REPLACE'"
+$ WC "''DECTERM_REPLACE'"
+$ close CONFIG
+$!
 $ echo4 "Extracting ''defmakefile' (with variable substitutions)"
 $ DEFINE/USER_MODE sys$output 'UUmakefile'
-$ mcr []munchconfig 'config_sh' 'Makefile_SH' "''DECC_REPLACE'" "''DECCXX_REPLACE'" "''ARCH_TYPE'" "''GNUC_REPLACE'" -
-"''SOCKET_REPLACE'" "''THREAD_REPLACE'" "''C_Compiler_Replace'" "''MALLOC_REPLACE'" -
-"''THREAD_UPCALLS'" "''THREAD_KERNEL'" "PV=''version'" "FLAGS=FLAGS=''extra_flags'" "''LARGEFILE_REPLACE'" -
-"''DECTERM_REPLACE'"
+$ mcr []munchconfig 'config_sh' 'Makefile_SH' -f extra_subs.txt
 $! Clean up after ourselves
 $ DELETE/NOLOG/NOCONFIRM []munchconfig.exe;
+$ DELETE/NOLOG/NOCONFIRM []extra_subs.txt;
 $!
 $ echo4 "Extracting make_ext.com (without variable substitutions)"
 $ Create Sys$Disk:[-]make_ext.com
