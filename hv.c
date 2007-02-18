@@ -1397,9 +1397,7 @@ HV *
 Perl_newHV(pTHX)
 {
     register XPVHV* xhv;
-    HV * const hv = (HV*)newSV(0);
-
-    sv_upgrade((SV *)hv, SVt_PVHV);
+    HV * const hv = (HV*)newSV_type(SVt_PVHV);
     xhv = (XPVHV*)SvANY(hv);
     assert(!SvOK(hv));
 #ifndef NODEFAULT_SHAREKEYS
@@ -2589,8 +2587,7 @@ S_refcounted_he_value(pTHX_ const struct refcounted_he *he)
     case HVrhek_PV:
 	/* Create a string SV that directly points to the bytes in our
 	   structure.  */
-	value = newSV(0);
-	sv_upgrade(value, SVt_PV);
+	value = newSV_type(SVt_PV);
 	SvPV_set(value, (char *) he->refcounted_he_data + 1);
 	SvCUR_set(value, he->refcounted_he_val.refcounted_he_u_len);
 	/* This stops anything trying to free it  */

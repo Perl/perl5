@@ -1642,6 +1642,10 @@ PERL_CALLCONV SV*	Perl_newSVsv(pTHX_ SV* old)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV SV*	Perl_newSV_type(pTHX_ svtype type)
+			__attribute__malloc__
+			__attribute__warn_unused_result__;
+
 PERL_CALLCONV OP*	Perl_newUNOP(pTHX_ I32 type, I32 flags, OP* first)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;

@@ -924,8 +924,7 @@ S_update_debugger_info(pTHX_ SV *orig_sv, const char *buf, STRLEN len)
 {
     AV *av = CopFILEAVx(PL_curcop);
     if (av) {
-	SV * const sv = newSV(0);
-	sv_upgrade(sv, SVt_PVMG);
+	SV * const sv = newSV_type(SVt_PVMG);
 	if (orig_sv)
 	    sv_setsv(sv, orig_sv);
 	else
@@ -12385,8 +12384,7 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
     save_item(PL_subname);
     SAVESPTR(PL_compcv);
 
-    PL_compcv = (CV*)newSV(0);
-    sv_upgrade((SV *)PL_compcv, is_format ? SVt_PVFM : SVt_PVCV);
+    PL_compcv = (CV*)newSV_type(is_format ? SVt_PVFM : SVt_PVCV);
     CvFLAGS(PL_compcv) |= flags;
 
     PL_subline = CopLINE(PL_curcop);

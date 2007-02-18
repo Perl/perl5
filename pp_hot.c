@@ -1944,8 +1944,7 @@ PP(pp_iter)
 	if (lv)
 	    SvREFCNT_dec(LvTARG(lv));
 	else {
-	    lv = cx->blk_loop.iterlval = newSV(0);
-	    sv_upgrade(lv, SVt_PVLV);
+	    lv = cx->blk_loop.iterlval = newSV_type(SVt_PVLV);
 	    LvTYPE(lv) = 'y';
 	    sv_magic(lv, NULL, PERL_MAGIC_defelem, NULL, 0);
 	}

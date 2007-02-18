@@ -5634,8 +5634,7 @@ Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
     if (cv)				/* must reuse cv if autoloaded */
 	cv_undef(cv);
     else {
-	cv = (CV*)newSV(0);
-	sv_upgrade((SV *)cv, SVt_PVCV);
+	cv = (CV*)newSV_type(SVt_PVCV);
 	if (name) {
 	    GvCV(gv) = cv;
 	    GvCVGEN(gv) = 0;

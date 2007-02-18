@@ -2133,8 +2133,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	}
     }
 
-    PL_main_cv = PL_compcv = (CV*)newSV(0);
-    sv_upgrade((SV *)PL_compcv, SVt_PVCV);
+    PL_main_cv = PL_compcv = (CV*)newSV_type(SVt_PVCV);
     CvUNIQUE_on(PL_compcv);
 
     CvPADLIST(PL_compcv) = pad_new(0);
@@ -4645,11 +4644,9 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
     dVAR;
     GV* tmpgv;
 
-    PL_toptarget = newSV(0);
-    sv_upgrade(PL_toptarget, SVt_PVFM);
+    PL_toptarget = newSV_type(SVt_PVFM);
     sv_setpvn(PL_toptarget, "", 0);
-    PL_bodytarget = newSV(0);
-    sv_upgrade(PL_bodytarget, SVt_PVFM);
+    PL_bodytarget = newSV_type(SVt_PVFM);
     sv_setpvn(PL_bodytarget, "", 0);
     PL_formtarget = PL_bodytarget;
 

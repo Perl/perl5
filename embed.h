@@ -583,6 +583,7 @@
 #define vnewSVpvf		Perl_vnewSVpvf
 #define newSVrv			Perl_newSVrv
 #define newSVsv			Perl_newSVsv
+#define newSV_type		Perl_newSV_type
 #define newUNOP			Perl_newUNOP
 #define newWHENOP		Perl_newWHENOP
 #define newWHILEOP		Perl_newWHILEOP
@@ -2804,6 +2805,7 @@
 #define vnewSVpvf(a,b)		Perl_vnewSVpvf(aTHX_ a,b)
 #define newSVrv(a,b)		Perl_newSVrv(aTHX_ a,b)
 #define newSVsv(a)		Perl_newSVsv(aTHX_ a)
+#define newSV_type(a)		Perl_newSV_type(aTHX_ a)
 #define newUNOP(a,b,c)		Perl_newUNOP(aTHX_ a,b,c)
 #define newWHENOP(a,b)		Perl_newWHENOP(aTHX_ a,b)
 #define newWHILEOP(a,b,c,d,e,f,g,h)	Perl_newWHILEOP(aTHX_ a,b,c,d,e,f,g,h)

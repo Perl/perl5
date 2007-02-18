@@ -362,9 +362,7 @@ Creates a new AV.  The reference count is set to 1.
 AV *
 Perl_newAV(pTHX)
 {
-    register AV * const av = (AV*)newSV(0);
-
-    sv_upgrade((SV *)av, SVt_PVAV);
+    register AV * const av = (AV*)newSV_type(SVt_PVAV);
     /* sv_upgrade does AvREAL_only()  */
     AvALLOC(av) = 0;
     AvARRAY(av) = NULL;
@@ -385,9 +383,7 @@ will have a reference count of 1.
 AV *
 Perl_av_make(pTHX_ register I32 size, register SV **strp)
 {
-    register AV * const av = (AV*)newSV(0);
-
-    sv_upgrade((SV *) av,SVt_PVAV);
+    register AV * const av = (AV*)newSV_type(SVt_PVAV);
     /* sv_upgrade does AvREAL_only()  */
     if (size) {		/* "defined" was returning undef for size==0 anyway. */
         register SV** ary;

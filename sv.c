@@ -7168,6 +7168,25 @@ Perl_newSVuv(pTHX_ UV u)
 }
 
 /*
+=for apidoc newSV_type
+
+Creates a new SV, of the type specificied.  The reference count for the new SV
+is set to 1.
+
+=cut
+*/
+
+SV *
+Perl_newSV_type(pTHX_ svtype type)
+{
+    register SV *sv;
+
+    new_SV(sv);
+    sv_upgrade(sv, type);
+    return sv;
+}
+
+/*
 =for apidoc newRV_noinc
 
 Creates an RV wrapper for an SV.  The reference count for the original
@@ -7180,10 +7199,7 @@ SV *
 Perl_newRV_noinc(pTHX_ SV *tmpRef)
 {
     dVAR;
-    register SV *sv;
-
-    new_SV(sv);
-    sv_upgrade(sv, SVt_RV);
+    register SV *sv = newSV_type(SVt_RV);
     SvTEMP_off(tmpRef);
     SvRV_set(sv, tmpRef);
     SvROK_on(sv);

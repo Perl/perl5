@@ -2658,9 +2658,8 @@ S_save_lines(pTHX_ AV *array, SV *sv)
 
     while (s && s < send) {
 	const char *t;
-	SV * const tmpstr = newSV(0);
+	SV * const tmpstr = newSV_type(SVt_PVMG);
 
-	sv_upgrade(tmpstr, SVt_PVMG);
 	t = strchr(s, '\n');
 	if (t)
 	    t++;
@@ -2887,8 +2886,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     PUSHMARK(SP);
 
     SAVESPTR(PL_compcv);
-    PL_compcv = (CV*)newSV(0);
-    sv_upgrade((SV *)PL_compcv, SVt_PVCV);
+    PL_compcv = (CV*)newSV_type(SVt_PVCV);
     CvEVAL_on(PL_compcv);
     assert(CxTYPE(&cxstack[cxstack_ix]) == CXt_EVAL);
     cxstack[cxstack_ix].blk_eval.cv = PL_compcv;
