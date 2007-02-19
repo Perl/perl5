@@ -117,10 +117,10 @@ use Getopt::Std;
 use Carp;
 use Test::More tests => ( # per-pkg tests (function ct + require_ok)
 			  40 + 16	# Data::Dumper, Digest::MD5
-			  + 511 + 234	# B::Deparse, B
+			  + 512 + 235	# B::Deparse, B
 			  + 588 + 189	# POSIX, IO::Socket
 			  + 330 * ($] > 5.009)
-			  + 14 * ($] >= 5.009003)
+			  + 15 * ($] >= 5.009003)
 			  - 349);	# fudge
 
 require_ok("B::Concise");
@@ -178,7 +178,7 @@ my $testpkgs = {
 		     PMf_EVAL PMf_EXTENDED PMf_FOLD PMf_GLOBAL PMf_KEEP
 		     PMf_MULTILINE PMf_ONCE PMf_SINGLELINE PMf_SKIPWHITE
 		     POSTFIX SVf_FAKE SVf_IOK SVf_NOK SVf_POK SVf_ROK
-		     SVpad_OUR SVs_RMG SVs_SMG SWAP_CHILDREN
+		     SVpad_OUR SVs_RMG SVs_SMG SWAP_CHILDREN OPpPAD_STATE
 		     /],
 		 },
 
