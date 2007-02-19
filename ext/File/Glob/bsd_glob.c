@@ -1141,7 +1141,7 @@ g_opendir(register Char *str, glob_t *pglob)
 	}
 
 	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
-		return((*pglob->gl_opendir)(buf));
+		return((DIR*)(*pglob->gl_opendir)(buf));
 
 	return(PerlDir_open(buf));
 }

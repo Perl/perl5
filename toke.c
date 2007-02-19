@@ -2822,7 +2822,8 @@ Perl_yylex(pTHX)
 	    PL_last_uni = 0;
 	    PL_last_lop = 0;
 	    if (PL_lex_brackets) {
-		yyerror((PL_lex_formbrack
+		yyerror((char *)
+			(PL_lex_formbrack
 			 ? "Format not terminated"
 			 : "Missing right curly or square bracket"));
 	    }
@@ -3487,7 +3488,8 @@ Perl_yylex(pTHX)
 		       context messages from yyerror().
 		    */
 		    PL_bufptr = s;
-		    yyerror( (*s
+		    yyerror( (char *)
+			     (*s
 			      ? Perl_form(aTHX_ "Invalid separator character "
 					  "%c%c%c in attribute list", q, *s, q)
 			      : "Unterminated attribute list" ) );
