@@ -1,7 +1,7 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.88_73';
+$CPAN::VERSION = '1.88_76';
 $CPAN::VERSION = eval $CPAN::VERSION;
 
 use CPAN::HandleConfig;
@@ -3334,10 +3334,11 @@ sub _add_to_statistics {
         push @debug, time if $sdebug;
         push @{$fullstats->{history}}, $stats;
         # arbitrary hardcoded constants until somebody demands to have
-        # them settable
+        # them settable; YAML.pm 0.62 is unacceptably slow with 999;
+        # YAML::Syck 0.82 has no noticable performance problem with 999;
         while (
-               @{$fullstats->{history}} > 999
-               || $time - $fullstats->{history}[0]{start} > 30*86400  # one month
+               @{$fullstats->{history}} > 99
+               || $time - $fullstats->{history}[0]{start} > 14*86400
               ) {
             shift @{$fullstats->{history}}
         }
@@ -9645,6 +9646,9 @@ current date and a counter.
 
 =head2 hosts
 
+Note: this feature is still in alpha state and may change in future
+versions of CPAN.pm
+
 This commands provides a statistical overview over recent download
 activities. The data for this is collected in the YAML file
 C<FTPstats.yml> in your C<cpan_home> directory. If no YAML module is
@@ -9728,6 +9732,9 @@ The first example will be driven by an object of the class
 CPAN::Module, the second by an object of class CPAN::Distribution.
 
 =head2 Integrating local directories
+
+Note: this feature is still in alpha state and may change in future
+versions of CPAN.pm
 
 Distribution objects are normally distributions from the CPAN, but
 there is a slightly degenerate case for Distribution objects, too, of
@@ -11327,10 +11334,14 @@ You will most probably also want to configure something like this:
 
   o conf makepl_arg "LIB=~/myperl/lib \
                     INSTALLMAN1DIR=~/myperl/man/man1 \
-                    INSTALLMAN3DIR=~/myperl/man/man3"
+                    INSTALLMAN3DIR=~/myperl/man/man3 \
+                    INSTALLSCRIPT=~/myperl/bin \
+                    INSTALLBIN=~/myperl/bin"
+
+and then (oh joy) the equivalent command for Module::Build.
 
 You can make this setting permanent like all C<o conf> settings with
-C<o conf commit>.
+C<o conf commit> or by setting C<auto_commit> beforehand.
 
 You will have to add ~/myperl/man to the MANPATH environment variable
 and also tell your perl programs to look into ~/myperl/lib, e.g. by
