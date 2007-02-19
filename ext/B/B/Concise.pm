@@ -590,16 +590,14 @@ $priv{"flip"}{64} = $priv{"flop"}{64} = "LINENUM";
 $priv{"list"}{64} = "GUESSED";
 $priv{"delete"}{64} = "SLICE";
 $priv{"exists"}{64} = "SUB";
-$priv{$_}{64} = "LOCALE"
-  for ("sort", "prtf", "sprintf", "slt", "sle", "seq", "sne", "sgt", "sge",
-       "scmp", "lc", "uc", "lcfirst", "ucfirst");
-@{$priv{"sort"}}{1,2,4,8,16} = ("NUM", "INT", "REV", "INPLACE","DESC");
+@{$priv{"sort"}}{1,2,4,8,16,32,64} = ("NUM", "INT", "REV", "INPLACE","DESC","QSORT","STABLE");
 $priv{"threadsv"}{64} = "SVREFd";
 @{$priv{$_}}{16,32,64,128} = ("INBIN","INCR","OUTBIN","OUTCR")
   for ("open", "backtick");
 $priv{"exit"}{128} = "VMS";
 $priv{$_}{2} = "FTACCESS"
   for ("ftrread", "ftrwrite", "ftrexec", "fteread", "ftewrite", "fteexec");
+$priv{"entereval"}{2} = "HAS_HH";
 if ($] >= 5.009) {
   # Stacked filetests are post 5.8.x
   $priv{$_}{4} = "FTSTACKED"
