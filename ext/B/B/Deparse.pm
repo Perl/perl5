@@ -1,5 +1,6 @@
 # B::Deparse.pm
-# Copyright (c) 1998-2000, 2002, 2003 Stephen McCamant. All rights reserved.
+# Copyright (c) 1998-2000, 2002, 2003, 2004, 2005, 2006 Stephen McCamant.
+# All rights reserved.
 # This module is free software; you can redistribute and/or modify
 # it under the same terms as Perl itself.
 
@@ -1188,6 +1189,7 @@ sub deparse_root {
     local(@$self{qw'curstash warnings hints'})
       = @$self{qw'curstash warnings hints'};
     my @kids;
+    return if null $op->first; # Can happen, e.g., for Bytecode without -k
     for (my $kid = $op->first->sibling; !null($kid); $kid = $kid->sibling) {
 	push @kids, $kid;
     }
@@ -2520,7 +2522,7 @@ sub pp_cond_expr {
 	    (is_scope($false) || is_ifelse_cont($false))
 	    and $self->{'expand'} < 7) {
 	$cond = $self->deparse($cond, 8);
-	$true = $self->deparse($true, 8);
+	$true = $self->deparse($true, 6);
 	$false = $self->deparse($false, 8);
 	return $self->maybe_parens("$cond ? $true : $false", $cx, 8);
     }
