@@ -528,6 +528,7 @@ BOOT:
 #define B_main_root()	PL_main_root
 #define B_main_start()	PL_main_start
 #define B_amagic_generation()	PL_amagic_generation
+#define B_sub_generation()	PL_sub_generation
 #define B_defstash()	PL_defstash
 #define B_curstash()	PL_curstash
 #define B_dowarn()	PL_dowarn
@@ -573,6 +574,9 @@ B_main_start()
 
 long 
 B_amagic_generation()
+
+long
+B_sub_generation()
 
 B::AV
 B_comppadlist()
