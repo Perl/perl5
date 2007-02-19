@@ -2,7 +2,6 @@ package re::Tie::Hash::NamedCapture;
 use strict;
 use warnings;
 our $VERSION     = "0.01";
-no re 'debug';
 use re qw(is_regexp
           regname
           regnames

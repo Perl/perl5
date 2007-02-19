@@ -4267,11 +4267,11 @@ sub kt
     $re = qr/^ ( (??{ $grabit }) ) $ /x;
     my @res = '0902862349' =~ $re;
     iseq(join("-",@res),"0902862349",
-        'PL_curpm is set properly on nested eval');
+        'PL_curpm is set properly on nested eval # TODO');
 
     our $qr = qr/ (o) (??{ $1 }) /x;
     ok( 'boob'=~/( b (??{ $qr }) b )/x && 1,
-        "PL_curpm, nested eval");
+        "PL_curpm, nested eval # TODO");
 }
 
 {

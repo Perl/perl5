@@ -138,7 +138,6 @@ sub bits {
         } elsif ($s eq 'debug' or $s eq 'debugcolor') {
 	    setcolor() if $s =~/color/i;
 	    _load_unload($on);
-	    last;
         } elsif (exists $bitmask{$s}) {
 	    $bits |= $bitmask{$s};
 	} elsif ($EXPORT_OK{$s}) {
