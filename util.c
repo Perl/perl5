@@ -5158,13 +5158,14 @@ Perl_stashpv_hvname_match(pTHX_ const COP *c, const HV *hv)
 
 #ifdef PERL_GLOBAL_STRUCT
 
+#define PERL_GLOBAL_STRUCT_INIT
+#include "opcode.h" /* the ppaddr and check */
+
 struct perl_vars *
 Perl_init_global_struct(pTHX)
 {
     struct perl_vars *plvarsp = NULL;
-#ifdef PERL_GLOBAL_STRUCT
-#  define PERL_GLOBAL_STRUCT_INIT
-#  include "opcode.h" /* the ppaddr and check */
+# ifdef PERL_GLOBAL_STRUCT
     const IV nppaddr = sizeof(Gppaddr)/sizeof(Perl_ppaddr_t);
     const IV ncheck  = sizeof(Gcheck) /sizeof(Perl_check_t);
 #  ifdef PERL_GLOBAL_STRUCT_PRIVATE
@@ -5192,10 +5193,14 @@ Perl_init_global_struct(pTHX)
 #  undef PERLVARIC
 #  undef PERLVARISC
 #  ifdef PERL_GLOBAL_STRUCT
-    plvarsp->Gppaddr = PerlMem_malloc(nppaddr * sizeof(Perl_ppaddr_t));
+    plvarsp->Gppaddr =
+	(Perl_ppaddr_t*)
+	PerlMem_malloc(nppaddr * sizeof(Perl_ppaddr_t));
     if (!plvarsp->Gppaddr)
         exit(1);
-    plvarsp->Gcheck  = PerlMem_malloc(ncheck  * sizeof(Perl_check_t));
+    plvarsp->Gcheck  =
+	(Perl_check_t*)
+	PerlMem_malloc(ncheck  * sizeof(Perl_check_t));
     if (!plvarsp->Gcheck)
         exit(1);
     Copy(Gppaddr, plvarsp->Gppaddr, nppaddr, Perl_ppaddr_t); 
@@ -5204,8 +5209,8 @@ Perl_init_global_struct(pTHX)
 #  ifdef PERL_SET_VARS
     PERL_SET_VARS(plvarsp);
 #  endif
-#  undef PERL_GLOBAL_STRUCT_INIT
-#endif
+# undef PERL_GLOBAL_STRUCT_INIT
+# endif
     return plvarsp;
 }
 
@@ -5216,16 +5221,16 @@ Perl_init_global_struct(pTHX)
 void
 Perl_free_global_struct(pTHX_ struct perl_vars *plvarsp)
 {
-#ifdef PERL_GLOBAL_STRUCT
+# ifdef PERL_GLOBAL_STRUCT
 #  ifdef PERL_UNSET_VARS
     PERL_UNSET_VARS(plvarsp);
 #  endif
     free(plvarsp->Gppaddr);
     free(plvarsp->Gcheck);
-#    ifdef PERL_GLOBAL_STRUCT_PRIVATE
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
     free(plvarsp);
-#    endif
-#endif
+#  endif
+# endif
 }
 
 #endif /* PERL_GLOBAL_STRUCT */

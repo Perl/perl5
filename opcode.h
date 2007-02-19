@@ -1898,7 +1898,8 @@ EXTCONST U32 PL_opargs[] = {
 };
 #endif
 
+#endif /* !PERL_GLOBAL_STRUCT_INIT */
+
 END_EXTERN_C
 
-#endif /* !PERL_GLOBAL_STRUCT_INIT */
 /* ex: set ro: */

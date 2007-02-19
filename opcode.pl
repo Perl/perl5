@@ -365,9 +365,10 @@ print <<END;
 };
 #endif
 
+#endif /* !PERL_GLOBAL_STRUCT_INIT */
+
 END_EXTERN_C
 
-#endif /* !PERL_GLOBAL_STRUCT_INIT */
 END
 
 if (keys %OP_IS_SOCKET) {
