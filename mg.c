@@ -2262,7 +2262,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	else if (strEQ(mg->mg_ptr, "\017PEN")) {
 	    STRLEN len;
 	    const char *const start = SvPV(sv, len);
-	    const char *out = memchr(start, '\0', len);
+	    const char *out = (const char*)memchr(start, '\0', len);
 	    SV *tmp;
 	    struct refcounted_he *tmp_he;
 
