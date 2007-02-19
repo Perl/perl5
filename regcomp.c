@@ -4710,8 +4710,9 @@ Perl_reg_named_buff_get(pTHX_ const REGEXP * const rx, SV* namesv, U32 flags)
             SV* sv_dat=HeVAL(he_str);
             I32 *nums=(I32*)SvPVX(sv_dat);
             for ( i=0; i<SvIVX(sv_dat); i++ ) {
-		if ((I32)(rx->lastparen) >= nums[i] &&
-		    rx->endp[nums[i]] != -1)
+		if ((I32)(rx->nparens) >= nums[i]
+			&& rx->startp[nums[i]] != -1
+			&& rx->endp[nums[i]] != -1)
                 {
                     ret = CALLREG_NUMBUF(rx,nums[i],NULL);
                     if (!retarray)
