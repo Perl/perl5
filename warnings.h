@@ -91,8 +91,9 @@
 #define isWARNf_on(c,x)	(IsSet((U8 *)(c + 1), 2*(x)+1))
 
 #define DUP_WARNINGS(p)		\
-    (STRLEN*)(specialWARN(p) ? (p)	\
-    : CopyD(p, PerlMemShared_malloc(sizeof(*p)+*p), sizeof(*p)+*p, char))
+    (specialWARN(p) ? (STRLEN*)(p)	\
+    : (STRLEN*)CopyD(p, PerlMemShared_malloc(sizeof(*p)+*p), sizeof(*p)+*p, \
+		     			     char))
 
 #define ckWARN(w)		Perl_ckwarn(aTHX_ packWARN(w))
 #define ckWARN2(w1,w2)		Perl_ckwarn(aTHX_ packWARN2(w1,w2))

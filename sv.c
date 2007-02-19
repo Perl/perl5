@@ -10503,7 +10503,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 		    TOPPTR(nss,ix) = ptr;
 		    o = (OP*)ptr;
 		    OP_REFCNT_LOCK;
-		    OpREFCNT_inc(o);
+		    (void) OpREFCNT_inc(o);
 		    OP_REFCNT_UNLOCK;
 		    break;
 		default:
