@@ -1649,7 +1649,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	return s;
 }
 
-void 
+static void 
 S_swap_match_buff (pTHX_ regexp *prog) {
     I32 *t;
     RXi_GET_DECL(prog,progi);
