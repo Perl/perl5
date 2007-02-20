@@ -50,6 +50,9 @@ case "$osvers" in
         ;;
 esac;
 
+# compile Win32CORE "module" as static
+static_ext="$static_ext Win32CORE"
+
 # Win9x problem with non-blocking read from a closed pipe
 d_eofnblk='define'
 

@@ -197,9 +197,16 @@ void
 init_os_extras(void)
 {
     char *file = __FILE__;
+    CV *cv;
     dTHX;
 
     newXS("Cwd::cwd", Cygwin_cwd, file);
     newXS("Cygwin::winpid_to_pid", XS_Cygwin_winpid_to_pid, file);
     newXS("Cygwin::pid_to_winpid", XS_Cygwin_pid_to_winpid, file);
+
+    if ((cv = get_cv("Win32CORE::bootstrap", 0))) {
+	dSP;
+	PUSHMARK(SP);
+	(void)call_sv((SV *)cv, G_EVAL|G_DISCARD|G_VOID);
+    }
 }

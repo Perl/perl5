@@ -21018,7 +21018,7 @@ find_extensions='
 	case "$xxx" in
 	    DynaLoader|dynaload) ;;
 	    *)
-	    if $test -f $xxx/$xxx.xs; then
+	    if $test -f $xxx/$xxx.xs -o -f $xxx/$xxx.c; then
 		known_extensions="$known_extensions $1$xxx";
 	    elif $test -f $xxx/Makefile.PL; then
 		nonxs_extensions="$nonxs_extensions $1$xxx";
@@ -21134,7 +21134,7 @@ for xxx in $known_extensions ; do
                         esac
 		esac
 		;;
-	Win32)
+	Win32*)
 		case "$osname" in
 		cygwin) avail_ext="$avail_ext $xxx" ;;
 		esac

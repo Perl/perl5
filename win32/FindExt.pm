@@ -82,7 +82,7 @@ sub find_ext
     closedir $dh;
     for my $xxx (@items) {
         if ($xxx ne "DynaLoader") {
-            if (-f "$xxx/$xxx.xs") {
+            if (-f "$xxx/$xxx.xs" || -f "$xxx/$xxx.c" ) {
                 $ext{"$_[0]$xxx"} = $static{"$_[0]$xxx"} ? 'static' : 'dynamic';
             } elsif (-f "$xxx/Makefile.PL") {
                 $ext{"$_[0]$xxx"} = 'nonxs';

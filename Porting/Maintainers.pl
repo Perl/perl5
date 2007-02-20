@@ -800,14 +800,14 @@ package Maintainers;
 	'win32' =>
 		{
 		'MAINTAINER'	=> 'jand',
-		'FILES'		=> q[win32 README.win32 t/win32],
+		'FILES'		=> q[win32 README.win32 t/win32 ext/Win32 ext/Win32CORE],
 		'CPAN'		=> 0,
 		},
 
 	'Win32API::File' =>
 		{
 		'MAINTAINER'	=> 'tyemq',
-		'FILES'		=> q[win32/ext/Win32API/File],
+		'FILES'		=> q[ext/Win32API/File],
 		'CPAN'		=> 1,
 		},
 

@@ -11,5 +11,4 @@ ext/Data/Dumper
 ext/Digest/SHA
 ext/Sys/Syslog
 ext/Time/HiRes
-
-win32/ext/Win32API/File
+ext/Win32API/File

@@ -938,7 +938,7 @@ SETARGV_OBJ	= setargv$(o)
 
 # specify static extensions here
 #STATIC_EXT	= Cwd Compress/Raw/Zlib
-STATIC_EXT	= 
+STATIC_EXT	= Win32CORE
 
 DYNALOADER	= $(EXTDIR)\DynaLoader\DynaLoader
 
@@ -1336,26 +1336,26 @@ MakePPPort_clean:
 Extensions : buildext.pl $(PERLDEP) $(CONFIGPM)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) --dynamic
-	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --dynamic
+	-if exist ext $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --dynamic
 
 Extensions_reonly : buildext.pl $(PERLDEP) $(CONFIGPM)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) --dynamic +re
-	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --dynamic +re
+	-if exist ext $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --dynamic +re
 
 Extensions_static : buildext.pl $(PERLDEP) $(CONFIGPM)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) --static
-	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --static
+	-if exist ext $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --static
 	$(MINIPERL) -I..\lib buildext.pl --list-static-libs > Extensions_static
 
 Extensions_clean :
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) clean
-	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext clean
+	-if exist $(MINIPERL) if exist ext $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext clean
 
 Extensions_realclean :
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) realclean
-	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext realclean
+	-if exist $(MINIPERL) if exist ext $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext realclean
 
 #-------------------------------------------------------------------------------
 

@@ -1215,6 +1215,23 @@ ext/util/make_ext		Used by Makefile to execute extension Makefiles
 ext/Win32/Makefile.PL		Win32 extension makefile writer
 ext/Win32/Win32.pm		Win32 extension Perl module
 ext/Win32/Win32.xs		Win32 extension external subroutines
+ext/Win32API/File/buffers.h	Win32API::File extension
+ext/Win32API/File/cFile.h	Win32API::File extension
+ext/Win32API/File/cFile.pc	Win32API::File extension
+ext/Win32API/File/Changes	Win32API::File extension changes
+ext/Win32API/File/const2perl.h	Win32API::File extension
+ext/Win32API/File/ExtUtils/Myconst2perl.pm	Win32API::File extension
+ext/Win32API/File/File.pm	Win32API::File extension
+ext/Win32API/File/File.xs	Win32API::File extension
+ext/Win32API/File/Makefile.PL	Win32API::File extension makefile write
+ext/Win32API/File/README	Win32API::File extension Readme
+ext/Win32API/File/t/file.t	See if Win32API::File extension works
+ext/Win32API/File/t/tie.t	See if Win32API::File extension works
+ext/Win32API/File/typemap	Win32API::File extension interface types
+ext/Win32CORE/Makefile.PL	Win32CORE extension
+ext/Win32CORE/t/win32core.t	Win32CORE extension
+ext/Win32CORE/Win32CORE.c	Win32CORE extension
+ext/Win32CORE/Win32CORE.pm	Win32CORE extension (stubs for Win32 CORE subs)
 ext/XS/APItest/APItest.pm	XS::APItest extension
 ext/XS/APItest/APItest.xs	XS::APItest extension
 ext/XS/APItest/core.c		Test API functions when PERL_CORE is defined
@@ -3832,19 +3849,6 @@ win32/config.vc			Win32 base line config.sh (Visual C++ build)
 win32/config.vc64		Win64 base line config.sh (Visual C++ build)
 win32/distclean.bat		Remove _ALL_ files not listed here in MANIFEST
 win32/dl_win32.xs		Win32 port
-win32/ext/Win32API/File/buffers.h			Win32API::File extension
-win32/ext/Win32API/File/cFile.h				Win32API::File extension
-win32/ext/Win32API/File/cFile.pc			Win32API::File extension
-win32/ext/Win32API/File/Changes				Win32API::File extension changes
-win32/ext/Win32API/File/const2perl.h			Win32API::File extension
-win32/ext/Win32API/File/ExtUtils/Myconst2perl.pm	Win32API::File extension
-win32/ext/Win32API/File/File.pm				Win32API::File extension
-win32/ext/Win32API/File/File.xs				Win32API::File extension
-win32/ext/Win32API/File/Makefile.PL			Win32API::File extension makefile write
-win32/ext/Win32API/File/README				Win32API::File extension Readme
-win32/ext/Win32API/File/t/file.t			See if Win32API::File extension works
-win32/ext/Win32API/File/t/tie.t				See if Win32API::File extension works
-win32/ext/Win32API/File/typemap				Win32API::File extension interface types
 win32/fcrypt.c			crypt() implementation
 win32/FindExt.pm		Scan for extensions
 win32/genmk95.pl		Perl code to generate command.com-usable makefile.95

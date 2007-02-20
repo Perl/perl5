@@ -233,7 +233,12 @@ $ok= ! DeleteFile( "Moved.cp" )
 $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 35
 
-system( "attrib -r Moved.cp" );
+if ($^O eq 'cygwin') {
+    chmod( 0200 | 07777 & (stat("Moved.cp"))[2], "Moved.cp" );
+}
+else {
+    system( "attrib -r Moved.cp" );
+}
 
 $ok= DeleteFile( "Moved.cp" );
 $ok or print "# ",fileLastError(),"\n";
