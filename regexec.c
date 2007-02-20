@@ -5169,6 +5169,9 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
     register char *loceol = PL_regeol;
     register I32 hardcount = 0;
     register bool do_utf8 = PL_reg_match_utf8;
+#ifndef DEBUGGING
+    PERL_UNUSED_ARG(depth);
+#endif
 
     scan = PL_reginput;
     if (max == REG_INFTY)
