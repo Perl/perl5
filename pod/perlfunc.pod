@@ -2827,13 +2827,13 @@ more elements in the returned value.
 
 translates a list of numbers to the corresponding characters.  And
 
-    %hash = map { getkey($_) => $_ } @array;
+    %hash = map { get_a_key_for($_) => $_ } @array;
 
 is just a funny way to write
 
     %hash = ();
-    foreach $_ (@array) {
-	$hash{getkey($_)} = $_;
+    foreach (@array) {
+	$hash{get_a_key_for($_)} = $_;
     }
 
 Note that C<$_> is an alias to the list value, so it can be used to
@@ -2844,8 +2844,8 @@ most cases.  See also L</grep> for an array composed of those items of
 the original list for which the BLOCK or EXPR evaluates to true.
 
 If C<$_> is lexical in the scope where the C<map> appears (because it has
-been declared with C<my $_>) then, in addition to being locally aliased to
-the list elements, C<$_> keeps being lexical inside the block; i.e. it
+been declared with C<my $_>), then, in addition to being locally aliased to
+the list elements, C<$_> keeps being lexical inside the block; that is, it
 can't be seen from the outside, avoiding any potential side-effects.
 
 C<{> starts both hash references and blocks, so C<map { ...> could be either
@@ -2865,7 +2865,7 @@ such as using a unary C<+> to give perl some help:
 
     %hash = map  ( lc($_), 1 ), @array  # evaluates to (1, @array)
 
-or to force an anon hash constructor use C<+{>
+or to force an anon hash constructor use C<+{>:
 
    @hashes = map +{ lc($_), 1 }, @array # EXPR, so needs , at end
 
