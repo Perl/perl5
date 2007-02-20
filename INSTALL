@@ -163,9 +163,8 @@ way to make a "bundle" of your currently installed modules.
 The complete perl5 source tree takes up about 60 MB of disk space.
 After completing make, it takes up roughly 100 MB, though the actual
 total is likely to be quite system-dependent.  The installation
-directories need something on the order of 45 MB, though again that
-value is system-dependent.  A perl build with debug symbols and
--DDEBUGGING will require something on the order of 10 MB extra.
+directories need something on the order of 50 MB, though again that
+value is quite system-dependent.
 
 =head1 Start with a Fresh Distribution
 
@@ -194,17 +193,15 @@ version and architecture-specific questions and answers.  For example,
 the default directory for architecture-dependent library modules
 includes the version name.  By default, Configure will reuse your old
 name (e.g. /opt/perl/lib/i86pc-solaris/5.003) even if you're running
-Configure for a different version, e.g. 5.004.  Yes, Configure should
-probably check and correct for this, but it doesn't.  Similarly, if you
-used a shared libperl.so (see below) with version numbers, you will
-probably want to adjust them as well.
+Configure for a different version, e.g. 5.004.  Similarly, if you used
+a shared libperl.so (see below) with version numbers, you will probably
+want to adjust them as well.
 
 Also, be careful to check your architecture name.  For example, some
-Linux distributions use i386, while others may use i486.  If you build
-it yourself, Configure uses the output of the arch command, which
-might be i586 or i686 instead.  If you pick up a precompiled binary, or
-compile extensions on different systems, they might not all agree on
-the architecture name.
+Linux distributions use i386, but Configure uses the output of the arch
+command, which might be i686 instead.  If you pick up a precompiled
+binary, or compile extensions on different systems, they might not all
+agree on the architecture name.
 
 In short, if you wish to use your old config.sh, I recommend running
 Configure interactively rather than blindly accepting the defaults.
@@ -651,14 +648,11 @@ C<perl_construct()> call.
 =head2 Installation Directories
 
 The installation directories can all be changed by answering the
-appropriate questions in Configure.  For convenience, all the
-installation questions are near the beginning of Configure.
-Do not include trailing slashes on directory names.
-
-I highly recommend running Configure interactively to be sure it puts
-everything where you want it.  At any point during the Configure
-process, you can answer a question with  &-d  and Configure will use
-the defaults from then on.  Alternatively, you can
+appropriate questions in Configure.  For convenience, all the installation
+questions are near the beginning of Configure.  Do not include trailing
+slashes on directory names.  At any point during the Configure process,
+you can answer a question with  &-d  and Configure will use the defaults
+from then on.  Alternatively, you can
 
 	grep '^install' config.sh
 
@@ -836,22 +830,11 @@ entries to @INC.
 
 =item Man Pages
 
-In versions 5.005_57 and earlier, the default was to store module man
-pages in a version-specific directory, such as
-/usr/local/lib/perl5/$version/man/man3.  The default for 5.005_58 and
-after is /usr/local/man/man3 so that most users can find the man pages
-without resetting MANPATH.
-
-You can continue to use the old default from the command line with
-
-	sh Configure -Dman3dir=/usr/local/lib/perl5/5.9.0/man/man3
-
-Some users also prefer to use a .3pm suffix.  You can do that with
+By default, man pages will be installed in $man1dir and $man3dir, which
+are normally /usr/local/man/man1 and /usr/local/man/man3.  If you
+want to use a .3pm suffix for perl man pages, you can do that with
 
 	sh Configure -Dman3ext=3pm
-
-Again, these are just the defaults, and can be changed as you run
-Configure.
 
 =item HTML pages
 
@@ -901,10 +884,8 @@ wish to install perl into a different directory and use that
 management software to move perl to its final destination.  This
 section describes how to do that.
 
-Suppose you want to install perl under the /tmp/perl5 directory.  You
-could edit config.sh and change all the install* variables to point to
-/tmp/perl5 instead of /usr/local, or you could simply use the
-following command line:
+To install perl under the /tmp/perl5 directory, use the following
+command line:
 
 	sh Configure -Dinstallprefix=/tmp/perl5
 
@@ -2218,13 +2199,13 @@ indicate the alternate name on the "make install" line, such as:
     make install PERLNAME=myperl
 
 You can separately change the base used for versioned names (like
-"perl5.005") by setting PERLNAME_VERBASE, like
+"perl5.8.9") by setting PERLNAME_VERBASE, like
 
     make install PERLNAME=perl5 PERLNAME_VERBASE=perl
 
 This can be useful if you have to install perl as "perl5" (e.g. to
 avoid conflicts with an ancient version in /usr/bin supplied by your vendor).
-Without this the versioned binary would be called "perl55.005".
+Without this the versioned binary would be called "perl55.8.8".
 
 =head2 Installing perl under a different directory
 
@@ -2235,7 +2216,6 @@ the DESTDIR variable during C<make install>, with a command like
 
 DESTDIR is automatically prepended to all the installation paths.  See
 the example in L<"Creating an installable tar archive"> above.
-
 
 =head2 Installed files
 
@@ -2250,10 +2230,10 @@ make install will install the following:
     binaries
 
 	perl,
-	    perl5.nnn	where nnn is the current release number.  This
+	    perl5.n.n	where 5.n.n is the current release number.  This
 			will be a link to perl.
 	suidperl,
-	    sperl5.nnn	If you requested setuid emulation.
+	    sperl5.n.n	If you requested setuid emulation.
 	a2p          	awk-to-perl translator
 
     scripts
@@ -2329,8 +2309,8 @@ with 5.8.2, simply replace the '#!/usr/local/bin/perl' line at the
 top of the script with the particular version you want to run, e.g.
 #!/usr/local/bin/perl5.8.2.
 
-Usually, most extensions will probably not need to be recompiled to use
-with a newer version of Perl Here is how it is supposed to work.
+Usually, most extensions will probably not need to be recompiled to be
+used with a newer version of Perl.  Here is how it is supposed to work.
 (These examples assume you accept all the Configure defaults.)
 
 Suppose you already have version 5.005_03 installed.  The directories
