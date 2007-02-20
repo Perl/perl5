@@ -1,5 +1,13 @@
 #!perl -w
 
+BEGIN {
+    use Config;
+    if ($Config{extensions} !~ /\bEncode\b/) {
+	print "1..0 # Skip: no Encode\n";
+	exit 0;
+    }
+}
+
 use Test::More tests => 1;
 
 BEGIN {
