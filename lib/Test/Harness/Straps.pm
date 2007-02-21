@@ -296,7 +296,7 @@ sub analyze_file {
 
     $results->set_wait($?);
     if ( $? && $self->{_is_vms} ) {
-        eval q{use vmsish "status"; $results->set_exit($?); };
+        $results->set_exit($?);
     }
     else {
         $results->set_exit( _wait2exit($?) );
