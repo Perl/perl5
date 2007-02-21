@@ -1067,9 +1067,7 @@ ithread_join(...)
         AV *params = NULL;
         int len;
         int ii;
-#ifdef WIN32
-        DWORD waitcode;
-#else
+#ifndef WIN32
         int rc_join;
         void *retval;
 #endif
