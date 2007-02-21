@@ -8001,8 +8001,8 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
     register regnode *place;
     const int offset = regarglen[(U8)op];
     const int size = NODE_STEP_REGNODE + offset;
-    PERL_UNUSED_ARG(depth);
     GET_RE_DEBUG_FLAGS_DECL;
+    PERL_UNUSED_ARG(depth);
 /* (PL_regkind[(U8)op] == CURLY ? EXTRA_STEP_2ARGS : 0); */
     DEBUG_PARSE_FMT("inst"," - %s",reg_name[op]);
     if (SIZE_ONLY) {
