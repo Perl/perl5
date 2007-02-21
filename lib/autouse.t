@@ -56,7 +56,7 @@ use autouse 'Errno' => qw(EPERM);
 
 my $mod_file = 'Errno.pm';   # just fine and portable for %INC
 ok( !exists $INC{$mod_file} );
-ok( EPERM, 1 );
+ok( EPERM ); # test if non-zero
 ok( exists $INC{$mod_file} );
 
 use autouse Env => "something";
