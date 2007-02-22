@@ -1,4 +1,4 @@
-# $Id: /local/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker.pm 19606 2006-10-10T01:01:21.319714Z schwern  $
+# $Id: /local/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker.pm 27436 2007-02-21T15:59:55.429725Z schwern  $
 package ExtUtils::MakeMaker;
 
 BEGIN {require 5.005_03;}
@@ -10,9 +10,9 @@ use File::Path;
 
 use vars qw(
             @ISA @EXPORT @EXPORT_OK
-            $VERSION $Verbose %Config 
+            $VERSION $Verbose %Config
             @Prepend_parent @Parent
-            %Recognized_Att_Keys @Get_from_Config @MM_Sections @Overridable 
+            %Recognized_Att_Keys @Get_from_Config @MM_Sections @Overridable
             $Filename
            );
 
@@ -21,12 +21,13 @@ use vars qw(
 use vars qw($Revision);
 use strict;
 
-$VERSION = '6.31_01';
-($Revision) = q$Revision: 19606 $ =~ /Revision:\s+(\S+)/;
+$VERSION = '6.32_01';
+($Revision) = q$Revision: 27436 $ =~ /Revision:\s+(\S+)/;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&WriteMakefile &writeMakefile $Verbose &prompt);
-@EXPORT_OK = qw($VERSION &neatvalue &mkbootstrap &mksymlists);
+@EXPORT_OK = qw($VERSION &neatvalue &mkbootstrap &mksymlists
+                &WriteEmptyMakefile);
 
 # These will go away once the last of the Win32 & VMS specific code is 
 # purged.
@@ -630,7 +631,7 @@ END
 }
 
 sub WriteEmptyMakefile {
-    Carp::croak "WriteEmptyMakefile: Need even number of args" if @_ % 2;
+    Carp::croak "WriteEmptyMakefile: Need an even number of args" if @_ % 2;
 
     my %att = @_;
     my $self = MM->new(\%att);
@@ -1126,7 +1127,8 @@ else calls "prefix" than PREFIX is.
 
 To have everything installed in your home directory, do the following.
 
-    perl Makefile.PL INSTALL_BASE=~
+    # Unix users, INSTALL_BASE=~ works fine
+    perl Makefile.PL INSTALL_BASE=/path/to/your/home/dir
 
 Like PREFIX, it sets several INSTALL* attributes at once.  Unlike
 PREFIX it is easy to predict where the module will end up.  The
@@ -1152,7 +1154,8 @@ INSTALL_BASE was added in 6.31.
 PREFIX and LIB can be used to set several INSTALL* attributes in one
 go.  Here's an example for installing into your home directory.
 
-    perl Makefile.PL PREFIX=~
+    # Unix users, PREFIX=~ works fine
+    perl Makefile.PL PREFIX=/path/to/your/home/dir
 
 This will install all files in the module under your home directory,
 with man pages and libraries going into an appropriate place (usually
@@ -2162,7 +2165,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    $VERSION = (q$Revision: 19606 $) =~ /(\d+)/g;
+    $VERSION = (q$Revision: 27436 $) =~ /(\d+)/g;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 
@@ -2504,7 +2507,8 @@ to create the Module, but this is a normal state of things, then you
 can create a F<Makefile> which does nothing, but succeeds on all the
 "usual" build targets.  To do so, use
 
-   ExtUtils::MakeMaker::WriteEmptyMakefile();
+    use ExtUtils::MakeMaker qw(WriteEmptyMakefile);
+    WriteEmptyMakefile();
 
 instead of WriteMakefile().
 

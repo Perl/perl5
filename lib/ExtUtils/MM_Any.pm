@@ -2,7 +2,7 @@ package ExtUtils::MM_Any;
 
 use strict;
 use vars qw($VERSION @ISA);
-$VERSION = '0.14';
+$VERSION = '0.15';
 
 use Carp;
 use File::Spec;
@@ -674,10 +674,6 @@ sub manifypods_target {
     # populate manXpods & dependencies:
     foreach my $name (keys %{$self->{MAN1PODS}}, keys %{$self->{MAN3PODS}}) {
         $dependencies .= " \\\n\t$name";
-    }
-
-    foreach my $name (keys %{$self->{MAN3PODS}}) {
-        $dependencies .= " \\\n\t$name"
     }
 
     my $manify = <<END;

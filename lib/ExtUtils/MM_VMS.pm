@@ -18,7 +18,7 @@ use File::Basename;
 # $Revision can't be on the same line or SVN/K gets confused
 use vars qw($Revision
             $VERSION @ISA);
-$VERSION = '5.74';
+$VERSION = '5.75';
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;

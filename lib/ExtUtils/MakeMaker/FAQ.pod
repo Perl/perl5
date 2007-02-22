@@ -25,6 +25,7 @@ If you're not the Perl administrator you probably don't have
 permission to install a module to its default location.  Then you
 should install it for your own use into your home directory like so:
 
+    # Non-unix folks, replace ~ with /path/to/your/home/dir
     perl Makefile.PL INSTALL_BASE=~
 
 This will put modules into F<~/lib/perl5>, man pages into F<~/man> and
@@ -35,6 +36,11 @@ set your C<PERL5LIB> environment variable to F<~/lib/perl5> or tell
 each of your programs to look in that directory with the following:
 
     use lib "$ENV{HOME}/lib/perl5";
+
+or if $ENV{HOME} isn't set and you don't want to set it for some
+reason, do it the long way.
+
+    use lib "/path/to/your/home/dir/lib/perl5";
 
 
 =item How do I get MakeMaker and Module::Build to install to the same place?
