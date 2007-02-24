@@ -1,13 +1,13 @@
 package ExtUtils::Constant::Base;
 
 use strict;
-use vars qw($VERSION $is_perl56);
+use vars qw($VERSION);
 use Carp;
 use Text::Wrap;
 use ExtUtils::Constant::Utils qw(C_stringify perl_stringify);
-$VERSION = '0.03';
+$VERSION = '0.03_01';
 
-$is_perl56 = ($] < 5.007 && $] > 5.005_50);
+use constant is_perl56 => ($] < 5.007 && $] > 5.005_50);
 
 
 =head1 NAME
@@ -237,7 +237,7 @@ sub dump_names {
         next if $_->{utf8} eq 'no';
         # Copy the hashref, as we don't want to mess with the caller's hashref.
         $_ = {%$_};
-        unless ($is_perl56) {
+        unless (is_perl56) {
           utf8::decode ($_->{name});
         } else {
           $_->{name} = pack 'U*', unpack 'U0U*', $_->{name};
@@ -515,7 +515,7 @@ sub switch_clause {
   foreach my $i ($namelen - 1, 0 .. ($namelen - 2)) {
     my ($min, $max) = (~0, 0);
     my %spread;
-    if ($is_perl56) {
+    if (is_perl56) {
       # Need proper Unicode preserving hash keys for bytes in range 128-255
       # here too, for some reason. grr 5.6.1 yet again.
       tie %spread, 'ExtUtils::Constant::Aaargh56Hash';
@@ -728,7 +728,7 @@ sub normalise_items
           $item = {%$item};
         }
         # Encode the name as utf8 bytes.
-        unless ($is_perl56) {
+        unless (is_perl56) {
           utf8::encode($name);
         } else {
 #          warn "Was >$name< " . length ${name};
@@ -886,7 +886,7 @@ sub C_constant {
     ($namelen, $items) = @$breakout;
   } else {
     $items = {};
-    if ($is_perl56) {
+    if (is_perl56) {
       # Need proper Unicode preserving hash keys.
       require ExtUtils::Constant::Aaargh56Hash;
       tie %$items, 'ExtUtils::Constant::Aaargh56Hash';
