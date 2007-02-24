@@ -588,6 +588,11 @@ Warning: Use of "rand" without parentheses is ambiguous at - line 8.
 Warning: Use of "rand" without parentheses is ambiguous at - line 10.
 ########
 # toke.c
+use warnings "ambiguous";
+print for keys %+; # should not warn
+EXPECT
+########
+# toke.c
 sub fred {};
 -fred ;
 EXPECT

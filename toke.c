@@ -4132,7 +4132,8 @@ Perl_yylex(pTHX)
 	    Mop(OP_MODULO);
 	}
 	PL_tokenbuf[0] = '%';
-	s = scan_ident(s, PL_bufend, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, TRUE);
+	s = scan_ident(s, PL_bufend, PL_tokenbuf + 1,
+		sizeof PL_tokenbuf - 1, FALSE);
 	if (!PL_tokenbuf[1]) {
 	    PREREF('%');
 	}
