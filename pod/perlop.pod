@@ -1050,7 +1050,7 @@ matching and related activities.
 =over 8
 
 =item qr/STRING/msixpo
-X<qr> X</i> X</m> X</o> X</s> X</x>
+X<qr> X</i> X</m> X</o> X</s> X</x> X</p>
 
 This operator quotes (and possibly compiles) its I<STRING> as a regular
 expression.  I<STRING> is interpolated the same way as I<PATTERN>
@@ -1117,7 +1117,7 @@ for a detailed look at the semantics of regular expressions.
 =item m/PATTERN/msixpogc
 X<m> X<operator, match>
 X<regexp, options> X<regexp> X<regex, options> X<regex>
-X</c> X</i> X</m> X</o> X</s> X</x>
+X</m> X</s> X</i> X</x> X</p> X</o> X</g> X</c>
 
 =item /PATTERN/msixpogc
 
@@ -1130,8 +1130,8 @@ rather tightly.)  See also L<perlre>.  See L<perllocale> for
 discussion of additional considerations that apply when C<use locale>
 is in effect.
 
-Options are as described in qr// in addition to the following match
-process modifiers
+Options are as described in C<qr//>; in addition, the following match
+process modifiers are available:
 
     g	Match globally, i.e., find all occurrences.
     c	Do not reset search position on a failed match when /g is in effect.
@@ -1152,7 +1152,7 @@ the trailing delimiter.  This avoids expensive run-time recompilations,
 and is useful when the value you are interpolating won't change over
 the life of the script.  However, mentioning C</o> constitutes a promise
 that you won't change the variables in the pattern.  If you change them,
-Perl won't even notice.  See also L<"qr/STRING/imosx">.
+Perl won't even notice.  See also L<"qr/STRING/msixpo">.
 
 If the PATTERN evaluates to the empty string, the last
 I<successfully> matched regular expression is used instead. In this
@@ -1317,7 +1317,7 @@ around the year 2168.
 
 =item s/PATTERN/REPLACEMENT/msixpogce
 X<substitute> X<substitution> X<replace> X<regexp, replace>
-X<regexp, substitute> X</e> X</g> X</i> X</m> X</o> X</s> X</x>
+X<regexp, substitute> X</m> X</s> X</i> X</x> X</p> X</o> X</g> X</c> X</e>
 
 Searches a string for a pattern, and if found, replaces that pattern
 with the replacement text and returns the number of substitutions
@@ -1424,6 +1424,8 @@ to occur that you might want.  Here are two common cases:
 
 =head2 Quote-Like Operators
 X<operator, quote-like>
+
+=over 4
 
 =item q/STRING/
 X<q> X<quote, single> X<'> X<''>
