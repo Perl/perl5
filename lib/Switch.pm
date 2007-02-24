@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 
-$VERSION = '2.12';
+$VERSION = '2.13';
 
 
 # LOAD FILTERING MODULE...
@@ -101,7 +101,18 @@ sub filter_blocks
 		if (defined $pos[0])
 		{
 			my $pre = substr($source,$pos[0],$pos[1]); # matched prefix
-			$text .= $pre . substr($source,$pos[2],$pos[18]-$pos[2]);
+                        my $iEol;
+                        if( substr($source,$pos[4],$pos[5]) eq '/' && # 1st delimiter
+                            substr($source,$pos[2],$pos[3]) eq '' && # no op like 'm'
+                            index( substr($source,$pos[16],$pos[17]), 'x' ) == -1 && # no //x
+                            ($iEol = index( $source, "\n", $pos[4] )) > 0         &&
+                            $iEol < $pos[8] ){ # embedded newlines
+                            # If this is a pattern, it isn't compatible with Switch. Backup past 1st '/'.
+                            pos( $source ) = $pos[6];
+			    $text .= $pre . substr($source,$pos[2],$pos[6]-$pos[2]);
+			} else {
+			    $text .= $pre . substr($source,$pos[2],$pos[18]-$pos[2]);
+			}
 			next component;
 		}
 		if ($source =~ m/\G\s*($pod_or_DATA)/gc) {
@@ -849,7 +860,11 @@ Bug reports and other feedback are most welcome.
 
 =head1 LIMITATIONS
 
-Due to the heuristic nature of Switch.pm's source parsing, the presence
+Due to the heuristic nature of Switch.pm's source parsing, the presence of
+regexes with embedded newlines that are specified with raw C</.../>
+delimiters and don't have a modifier C<//x> are indistinguishable from
+code chunks beginning with the division operator C</>. As a workaround
+you must use C<m/.../> or C<m?...?> for such patterns. Also, the presence
 of regexes specified with raw C<?...?> delimiters may cause mysterious
 errors. The workaround is to use C<m?...?> instead.
 
