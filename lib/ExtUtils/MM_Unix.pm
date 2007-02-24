@@ -18,7 +18,7 @@ use vars qw($VERSION @ISA
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.51_01';
+$VERSION = '1.51_02';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -1129,7 +1129,7 @@ eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
 	
 	# Print out the new #! line (or equivalent).
 	local $\;
-	undef $/;
+	local $/;
 	print FIXOUT $shb, <FIXIN>;
 	close FIXIN;
 	close FIXOUT;
