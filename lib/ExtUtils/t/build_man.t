@@ -42,11 +42,9 @@ ok( chdir 'Big-Dummy', "chdir'd to Big-Dummy" ) ||
 
 ok( my $stdout = tie *STDOUT, 'TieOut' );
 
-SKIP: {
-    skip ("installman3dir is null", 1)
-	if !$Config{installman3dir} or
-	    $Config{installman3dir} !~ /\S/ or
-	    $Config{installman3dir} eq 'none';
+{
+    local $Config{installman3dir} = File::Spec->catdir(qw(t lib));
+
     my $mm = WriteMakefile(
         NAME            => 'Big::Dummy',
         VERSION_FROM    => 'lib/Big/Dummy.pm',
@@ -56,8 +54,6 @@ SKIP: {
 }
 
 {
-    local $Config{installman3dir} = File::Spec->catdir(qw(t lib));
-
     my $mm = WriteMakefile(
         NAME            => 'Big::Dummy',
         VERSION_FROM    => 'lib/Big/Dummy.pm',
