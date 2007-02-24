@@ -330,12 +330,27 @@ previous Perls in the following ways:
 
 =over 4
 
-=item Long running opcodes
+=item Long-running opcodes
 
-As Perl interpreter only looks at the signal flags when it about to
-execute a new opcode if a signal arrives during a long running opcode
-(e.g. a regular expression operation on a very large string) then
-signal will not be seen until operation completes.
+As the Perl interpreter only looks at the signal flags when it is about
+to execute a new opcode, a signal that arrives during a long-running
+opcode (e.g. a regular expression operation on a very large string) will
+not be seen until the current opcode completes.
+
+N.B. If a signal of any given type fires multiple times during an opcode 
+(such as from a fine-grained timer), the handler for that signal will
+only be called once after the opcode completes, and all the other
+instances will be discarded.  Furthermore, if your system's signal queue
+gets flooded to the point that there are signals that have been raised
+but not yet caught (and thus not deferred) at the time an opcode
+completes, those signals may well be caught and deferred during
+subsequent opcodes, with sometimes surprising results.  For example, you
+may see alarms delivered even after calling C<alarm(0)> as the latter
+stops the raising of alarms but does not cancel the delivery of alarms
+raised but not yet caught.  Do not depend on the behaviors described in
+this paragraph as they are side effects of the current implementation and
+may change in future versions of Perl.
+
 
 =item Interrupting IO
 
@@ -387,18 +402,10 @@ C<waitpid> calls will always be retried.
 
 =item Signals as "faults"
 
-Certain signals e.g. SEGV, ILL, BUS are generated as a result of
-virtual memory or other "faults". These are normally fatal and there
-is little a Perl-level handler can do with them. (In particular the
-old signal scheme was particularly unsafe in such cases.)  However if
-a %SIG handler is set the new scheme simply sets a flag and returns as
-described above. This may cause the operating system to try the
-offending machine instruction again and - as nothing has changed - it
-will generate the signal again. The result of this is a rather odd
-"loop". In future Perl's signal mechanism may be changed to avoid this
-- perhaps by simply disallowing %SIG handlers on signals of that
-type. Until then the work-round is not to set a %SIG handler on those
-signals. (Which signals they are is operating system dependent.)
+Certain signals, e.g. SEGV, ILL, and BUS, are generated as a result of
+virtual memory or other "faults". These are normally fatal and there is
+little a Perl-level handler can do with them, so Perl now delivers them
+immediately rather than attempting to defer them.
 
 =item Signals triggered by operating system state
 
