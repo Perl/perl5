@@ -1,6 +1,6 @@
 package AutoSplit;
 
-use 5.009004; # due to "my $_"
+use 5.009005; # due to "my $_" and new regexp features
 use Exporter ();
 use Config qw(%Config);
 use File::Basename ();
@@ -147,14 +147,18 @@ if (defined (&Dos::UseLFN)) {
 my $Is_VMS = ($^O eq 'VMS');
 
 # allow checking for valid ': attrlist' attachments
-# (we use 'our' rather than 'my' here, due to the rather complex and buggy
-# behaviour of lexicals with qr// and (??{$lex}) )
-our $nested;
-$nested = qr{ \( (?: (?> [^()]+ ) | (??{ $nested }) )* \) }x;
-our $one_attr = qr{ (?> (?! \d) \w+ (?:$nested)? ) (?:\s*\:\s*|\s+(?!\:)) }x;
-our $attr_list = qr{ \s* : \s* (?: $one_attr )* }x;
 
-
+my $attr_list = qr{
+    \s* : \s*
+    (?:
+	# one attribute
+	(?> # no backtrack
+	    (?! \d) \w+
+	    (?<nested> \( (?: [^()]++ | (?&nested)++ )*+ \) ) ?
+	)
+	(?: \s* : \s* | \s+ (?! :) )
+    )*
+}x;
 
 sub autosplit{
     my($file, $autodir,  $keep, $ckal, $ckmt) = @_;
