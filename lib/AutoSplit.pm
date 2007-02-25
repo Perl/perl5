@@ -1,6 +1,6 @@
 package AutoSplit;
 
-use 5.006_001;
+use 5.009004; # due to "my $_"
 use Exporter ();
 use Config qw(%Config);
 use File::Basename ();
@@ -10,7 +10,7 @@ use strict;
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, $Verbose, $Keep, $Maxlen,
     $CheckForAutoloader, $CheckModTime);
 
-$VERSION = "1.04_01";
+$VERSION = "1.05";
 @ISA = qw(Exporter);
 @EXPORT = qw(&autosplit &autosplit_lib_modules);
 @EXPORT_OK = qw($Verbose $Keep $Maxlen $CheckForAutoloader $CheckModTime);
@@ -175,11 +175,11 @@ sub carp{
 # This function is used during perl building/installation
 # ./miniperl -e 'use AutoSplit; autosplit_lib_modules(@ARGV)' ...
 
-sub autosplit_lib_modules{
+sub autosplit_lib_modules {
     my(@modules) = @_; # list of Module names
 
-    while(defined($_ = shift @modules)){
-    	while (m#(.*?[^:])::([^:].*)#) { # in case specified as ABC::XYZ
+    while (defined(my $_ = shift @modules)) {
+	while (m#([^:]+)::([^:].*)#) { # in case specified as ABC::XYZ
 	    $_ = catfile($1, $2);
 	}
 	s|\\|/|g;		# bug in ksh OS/2
