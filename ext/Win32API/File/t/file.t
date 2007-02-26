@@ -4,7 +4,20 @@
 
 ######################### We start with some black magic to print on failure.
 
-BEGIN { $|= 1; print "1..267\n"; }
+BEGIN {
+    $|= 1;
+
+    # when building perl, skip this test if Win32API::File isn't being built
+    if ( $ENV{PERL_CORE} ) {
+	require Config;
+	if ( $Config::Config{extensions} !~ m:(?<!\S)Win32API/File(?!\S): ) {
+	    print "1..0 # Skip Win32API::File extension not built\n";
+	    exit();
+	}
+    }
+
+    print "1..267\n";
+}
 END {print "not ok 1\n" unless $loaded;}
 
 # Win32API::File does an implicit "require Win32", but
