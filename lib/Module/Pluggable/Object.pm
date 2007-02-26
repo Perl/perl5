@@ -1,5 +1,7 @@
 package Module::Pluggable::Object;
 
+$VERSION = '3.5_01';
+
 use strict;
 use File::Find ();
 use File::Basename;
