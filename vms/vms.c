@@ -80,7 +80,6 @@ struct item_list_3 {
  */
 #ifdef sys$getdviw
 #undef sys$getdviw
-#endif
 int sys$getdviw
        (unsigned long efn,
 	unsigned short chan,
@@ -90,6 +89,7 @@ int sys$getdviw
 	void * (astadr)(unsigned long),
 	void * astprm,
 	void * nullarg);
+#endif
 
 #if __CRTL_VER >= 70300000 && !defined(__VAX)
 
@@ -627,13 +627,15 @@ int scnt;
     return count;
 }
 
-
-int SYS$FILESCAN
+#ifdef sys$filescan
+#undef sys$filescan
+int sys$filescan
    (const struct dsc$descriptor_s * srcstr,
     struct filescan_itmlst_2 * valuelist,
     unsigned long * fldflags,
     struct dsc$descriptor_s *auxout,
     unsigned short * retlen);
+#endif
 
 /* vms_split_path - Verify that the input file specification is a
  * VMS format file specification, and provide pointers to the components of
@@ -739,7 +741,7 @@ const int verspec = 7;
     item_list[8].length = 0;
     item_list[8].component = NULL;
 
-    status = SYS$FILESCAN
+    status = sys$filescan
        ((const struct dsc$descriptor_s *)&path_desc, item_list,
 	&flags, NULL, NULL);
     _ckvmssts_noperl(status); /* All failure status values indicate a coding error */
@@ -4761,7 +4763,7 @@ mp_do_rmsexpand
   char * vmsfspec, *tmpfspec;
   char * esa, *cp, *out = NULL;
   char * tbuf;
-  char * esal;
+  char * esal = NULL;
   char * outbufl;
   struct FAB myfab = cc$rms_fab;
   rms_setup_nam(mynam);
@@ -4881,7 +4883,8 @@ mp_do_rmsexpand
     if (outbufl != NULL)
 	PerlMem_free(outbufl);
     PerlMem_free(esa);
-    PerlMem_free(esal);
+    if (esal != NULL) 
+	PerlMem_free(esal);
     set_vaxc_errno(retsts);
     if      (retsts == RMS$_PRV) set_errno(EACCES);
     else if (retsts == RMS$_DEV) set_errno(ENODEV);
@@ -4900,7 +4903,8 @@ mp_do_rmsexpand
     if (outbufl != NULL)
 	PerlMem_free(outbufl);
     PerlMem_free(esa);
-    PerlMem_free(esal);
+    if (esal != NULL) 
+	PerlMem_free(esal);
     set_vaxc_errno(retsts);
     if      (retsts == RMS$_PRV) set_errno(EACCES);
     else                         set_errno(EVMSERR);
@@ -4955,7 +4959,7 @@ mp_do_rmsexpand
   if (trimver || trimtype) {
     if (defspec && *defspec) {
       char *defesal = NULL;
-      defesal = PerlMem_malloc(NAML$C_MAXRSS + 1);
+      defesal = PerlMem_malloc(VMS_MAXRSS + 1);
       if (defesal != NULL) {
 	struct FAB deffab = cc$rms_fab;
 	rms_setup_nam(defnam);
@@ -5057,7 +5061,8 @@ mp_do_rmsexpand
     if (isunix) {
       if (do_tounixspec(esa,outbuf,0,fs_utf8) == NULL) {
 	if (out) Safefree(out);
-	PerlMem_free(esal);
+	if (esal != NULL)
+	    PerlMem_free(esal);
 	PerlMem_free(esa);
 	if (outbufl != NULL)
 	    PerlMem_free(outbufl);
@@ -5072,7 +5077,8 @@ mp_do_rmsexpand
     if (do_tounixspec(outbuf,tmpfspec,0,fs_utf8) == NULL) {
 	if (out) Safefree(out);
 	PerlMem_free(esa);
-	PerlMem_free(esal);
+	if (esal != NULL)
+	    PerlMem_free(esal);
 	PerlMem_free(tmpfspec);
 	if (outbufl != NULL)
 	    PerlMem_free(outbufl);
@@ -5085,7 +5091,8 @@ mp_do_rmsexpand
   rms_set_rsal(mynam, NULL, 0, NULL, 0);
   sts = rms_free_search_context(&myfab); /* Free search context */
   PerlMem_free(esa);
-  PerlMem_free(esal);
+  if (esal != NULL)
+     PerlMem_free(esal);
   if (outbufl != NULL)
      PerlMem_free(outbufl);
   return outbuf;
