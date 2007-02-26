@@ -3,7 +3,7 @@ package Module::Pluggable::Object;
 use strict;
 use File::Find ();
 use File::Basename;
-use File::Spec::Functions qw(splitdir catdir abs2rel);
+use File::Spec::Functions qw(splitdir catdir curdir catfile abs2rel);
 use Carp qw(croak carp);
 use Devel::InnerPackage;
 use Data::Dumper;
@@ -145,17 +145,48 @@ sub search_paths {
             # untaint the file; accept .pm only
             next unless ($file) = ($file =~ /(.*$file_regex)$/); 
             # parse the file to get the name
-            my ($name, $directory) = fileparse($file, $file_regex);
+            my ($name, $directory, $suffix) = fileparse($file, $file_regex);
 
             $directory = abs2rel($directory, $sp);
+
+            # If we have a mixed-case package name, assume case has been preserved
+            # correctly.  Otherwise, root through the file to locate the case-preserved
+            # version of the package name.
+            my @pkg_dirs = ();
+            if ( $name eq lc($name) || $name eq uc($name) ) {
+                my $pkg_file = catfile($sp, $directory, "$name$suffix");
+                open PKGFILE, "<$pkg_file" or die "search_paths: Can't open $pkg_file: $!";
+                my $in_pod = 0;
+                while ( my $line = <PKGFILE> ) {
+                    $in_pod = 1 if $line =~ m/^=\w/;
+                    $in_pod = 0 if $line =~ /^=cut/;
+                    next if ($in_pod || $line =~ /^=cut/);  # skip pod text
+                    next if $line =~ /^\s*#/;               # and comments
+                    if ( $line =~ m/^\s*package\s+(.*::)?($name)\s*;/i ) {
+                        @pkg_dirs = split /::/, $1;
+                        $name = $2;
+                        last;
+                    }
+                }
+                close PKGFILE;
+            }
+
             # then create the class name in a cross platform way
             $directory =~ s/^[a-z]://i if($^O =~ /MSWin32|dos/);       # remove volume
+            my @dirs = ();
             if ($directory) {
                 ($directory) = ($directory =~ /(.*)/);
+                @dirs = grep(length($_), splitdir($directory)) 
+                    unless $directory eq curdir();
+                for my $d (reverse @dirs) {
+                    my $pkg_dir = pop @pkg_dirs; 
+                    last unless defined $pkg_dir;
+                    $d =~ s/\Q$pkg_dir\E/$pkg_dir/i;  # Correct case
+                }
             } else {
                 $directory = "";
             }
-            my $plugin = join "::", splitdir catdir($searchpath, $directory, $name);
+            my $plugin = join '::', $searchpath, @dirs, $name;
 
             next unless $plugin =~ m!(?:[a-z\d]+)[a-z\d]!i;
 
