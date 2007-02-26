@@ -109,6 +109,7 @@ typedef struct RExC_state_t {
     char	*parse;			/* Input-scan pointer. */
     I32		whilem_seen;		/* number of WHILEM in this expr */
     regnode	*emit_start;		/* Start of emitted-code area */
+    regnode	*emit_bound;		/* First regnode outside of the allocated space */
     regnode	*emit;			/* Code-emit pointer; &regdummy = don't = compiling */
     I32		naughty;		/* How bad is this pattern? */
     I32		sawback;		/* Did we see \1, ...? */
@@ -156,6 +157,7 @@ typedef struct RExC_state_t {
 #endif
 #define RExC_emit	(pRExC_state->emit)
 #define RExC_emit_start	(pRExC_state->emit_start)
+#define RExC_emit_bound	(pRExC_state->emit_bound)
 #define RExC_naughty	(pRExC_state->naughty)
 #define RExC_sawback	(pRExC_state->sawback)
 #define RExC_seen	(pRExC_state->seen)
@@ -4115,11 +4117,6 @@ Perl_re_compile(pTHX_ char *exp, char *xend, PMOP *pm)
     if (RExC_whilem_seen > 15)
 	RExC_whilem_seen = 15;
 
-#ifdef DEBUGGING
-    /* Make room for a sentinel value at the end of the program */
-    RExC_size++;
-#endif
-
     /* Allocate space and zero-initialize. Note, the two step process 
        of zeroing when in debug mode, thus anything assigned has to 
        happen after that */
@@ -4215,11 +4212,8 @@ Perl_re_compile(pTHX_ char *exp, char *xend, PMOP *pm)
     RExC_npar = 1;
     RExC_emit_start = ri->program;
     RExC_emit = ri->program;
-#ifdef DEBUGGING
-    /* put a sentinal on the end of the program so we can check for
-       overwrites */
-    ri->program[RExC_size].type = 255;
-#endif
+    RExC_emit_bound = ri->program + RExC_size + 1;
+
     /* Store the count of eval-groups for security checks: */
     RExC_rx->seen_evals = RExC_seen_evals;
     REGC((U8)REG_MAGIC, (char*) RExC_emit++);
@@ -4885,7 +4879,7 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags) {
         PerlIO_printf(Perl_debug_log,"%16s","");                \
                                                                 \
     if (SIZE_ONLY)                                              \
-       num=RExC_size;                                           \
+       num = RExC_size + 1;                                     \
     else                                                        \
        num=REG_NODE_NUM(RExC_emit);                             \
     if (RExC_lastnum!=num)                                      \
@@ -5519,6 +5513,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    }
 		    else
                         REGTAIL(pRExC_state, ret, ender);
+                    RExC_size++; /* XXX WHY do we need this?!!
+                                    For large programs it seems to be required
+                                    but I can't figure out why. -- dmq*/
 		    return ret;
 		}
 		else {
@@ -7747,7 +7744,7 @@ parseit:
         return ret;
     /****** !SIZE_ONLY AFTER HERE *********/
 
-    if( stored == 1 && value < 256
+    if( stored == 1 && (value < 128 || (value < 256 && !UTF))
         && !( ANYOF_FLAGS(ret) & ( ANYOF_FLAGS_ALL ^ ANYOF_FOLD ) )
     ) {
         /* optimize single char class to an EXACT node
@@ -7897,11 +7894,9 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 	RExC_size += 1;
 	return(ret);
     }
-#ifdef DEBUGGING
-    if (OP(RExC_emit) == 255)
-        Perl_croak(aTHX_ "panic: reg_node overrun trying to emit %s: %d ",
-            reg_name[op], OP(RExC_emit));
-#endif  
+    if (RExC_emit >= RExC_emit_bound)
+        Perl_croak(aTHX_ "panic: reg_node overrun trying to emit %d", op);
+
     NODE_ALIGN_FILL(ret);
     ptr = ret;
     FILL_ADVANCE_NODE(ptr, op);
@@ -7952,10 +7947,9 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 	*/
 	return(ret);
     }
-#ifdef DEBUGGING
-    if (OP(RExC_emit) == 255)
-        Perl_croak(aTHX_ "panic: reganode overwriting end of allocated program space");
-#endif 
+    if (RExC_emit >= RExC_emit_bound)
+        Perl_croak(aTHX_ "panic: reg_node overrun trying to emit %d", op);
+
     NODE_ALIGN_FILL(ret);
     ptr = ret;
     FILL_ADVANCE_NODE_ARG(ptr, op, arg);
@@ -8015,19 +8009,19 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
     dst = RExC_emit;
     if (RExC_open_parens) {
         int paren;
-        DEBUG_PARSE_FMT("inst"," - %"IVdf, (IV)RExC_npar);
+        /*DEBUG_PARSE_FMT("inst"," - %"IVdf, (IV)RExC_npar);*/
         for ( paren=0 ; paren < RExC_npar ; paren++ ) {
             if ( RExC_open_parens[paren] >= opnd ) {
-                DEBUG_PARSE_FMT("open"," - %d",size);
+                /*DEBUG_PARSE_FMT("open"," - %d",size);*/
                 RExC_open_parens[paren] += size;
             } else {
-                DEBUG_PARSE_FMT("open"," - %s","ok");
+                /*DEBUG_PARSE_FMT("open"," - %s","ok");*/
             }
             if ( RExC_close_parens[paren] >= opnd ) {
-                DEBUG_PARSE_FMT("close"," - %d",size);
+                /*DEBUG_PARSE_FMT("close"," - %d",size);*/
                 RExC_close_parens[paren] += size;
             } else {
-                DEBUG_PARSE_FMT("close"," - %s","ok");
+                /*DEBUG_PARSE_FMT("close"," - %s","ok");*/
             }
         }
     }

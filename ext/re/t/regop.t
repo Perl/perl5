@@ -252,8 +252,8 @@ Matching stclass EXACTF <.> against ".exe"
 #Guessed: match at offset 0
 #%MATCHED%
 #Freeing REx: "[q]"
-Got 108 bytes for offset annotations.
-Offsets: [13]
+Got 100 bytes for offset annotations.
+Offsets: [12]
 1:1[3] 3:4[0]
 %MATCHED%        
 Freeing REx: "[q]"

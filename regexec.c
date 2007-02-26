@@ -2684,9 +2684,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
     GET_RE_DEBUG_FLAGS_DECL;
 #endif
 
-    DEBUG_OPTIMISE_r( {    
+    DEBUG_OPTIMISE_r( DEBUG_EXECUTE_r({
 	    PerlIO_printf(Perl_debug_log,"regmatch start\n");
-    });
+    }));
     /* on first ever call to regmatch, allocate first slab */
     if (!PL_regmatch_slab) {
 	Newx(PL_regmatch_slab, 1, regmatch_slab);
