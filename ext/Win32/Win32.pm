@@ -263,22 +263,19 @@ Win32 - Interfaces to some Win32 API Functions
 
 =head1 DESCRIPTION
 
-Perl on Win32 contains several functions to access Win32 APIs.  Some
-are included in Perl itself (on Win32) and some are only available
-after explicitly requesting the Win32 module with:
-
-	use Win32;
-
-The builtin functions are marked as [CORE] and the other ones
-as [EXT] in the following alphabetical listing.
+The Win32 module contains functions to access Win32 APIs.
 
 =head2 Alphabetical Listing of Win32 Functions
+
+It is recommended to C<use Win32;> before any of these functions;
+however, for backwards compatibility, those marked as [CORE] will
+automatically do this for you.
 
 =over
 
 =item Win32::AbortSystemShutdown(MACHINE)
 
-[EXT] Aborts a system shutdown (started by the
+Aborts a system shutdown (started by the
 InitiateSystemShutdown function) on the specified MACHINE.
 
 =item Win32::BuildNumber()
@@ -304,7 +301,7 @@ B<not> work on Windows 9x.
 
 =item Win32::ExpandEnvironmentStrings(STRING)
 
-[EXT] Takes STRING and replaces all referenced environment variable
+Takes STRING and replaces all referenced environment variable
 names with their defined values.  References to environment variables
 take the form C<%VariableName%>.  Case is ignored when looking up the
 VariableName in the environment.  If the variable is not found then the
@@ -348,18 +345,18 @@ between two backslashes) on this file system.
 
 =item Win32::FreeLibrary(HANDLE)
 
-[EXT] Unloads a previously loaded dynamic-link library.  The HANDLE is
+Unloads a previously loaded dynamic-link library.  The HANDLE is
 no longer valid after this call.  See L<LoadLibrary|Win32::LoadLibrary(LIBNAME)>
 for information on dynamically loading a library.
 
 =item Win32::GetArchName()
 
-[EXT] Use of this function is deprecated.  It is equivalent with
+Use of this function is deprecated.  It is equivalent with
 $ENV{PROCESSOR_ARCHITECTURE}.  This might not work on Win9X.
 
 =item Win32::GetChipName()
 
-[EXT] Returns the processor type: 386, 486 or 586 for Intel processors,
+Returns the processor type: 386, 486 or 586 for Intel processors,
 21064 for the Alpha chip.
 
 =item Win32::GetCwd()
@@ -370,14 +367,14 @@ a feature is not available under Windows 95.
 
 =item Win32::GetFileVersion(FILENAME)
 
-[EXT] Returns the file version number from the VERSIONINFO resource of
+Returns the file version number from the VERSIONINFO resource of
 the executable file or DLL.  This is a tuple of four 16 bit numbers.
 In list context these four numbers will be returned.  In scalar context
 they are concatenated into a string, separated by dots.
 
 =item Win32::GetFolderPath(FOLDER [, CREATE])
 
-[EXT] Returns the full pathname of one of the Windows special folders.
+Returns the full pathname of one of the Windows special folders.
 The folder will be created if it doesn't exist and the optional CREATE
 argument is true.  The following FOLDER constants are defined by the
 Win32 module, but only exported on demand:
@@ -521,7 +518,7 @@ be one of the following integer values:
 
 =item Win32::GetOSName()
 
-[EXT] In scalar context returns the name of the Win32 operating system
+In scalar context returns the name of the Win32 operating system
 being used.  In list context returns a two element list of the OS name
 and whatever edition information is known about the particular build
 (for Win9X boxes) and whatever service packs have been installed.
@@ -554,7 +551,7 @@ Win32::GetLongPathName.
 
 =item Win32::GetProcAddress(INSTANCE, PROCNAME)
 
-[EXT] Returns the address of a function inside a loaded library.  The
+Returns the address of a function inside a loaded library.  The
 information about what you can do with this address has been lost in
 the mist of time.  Use the Win32::API module instead of this deprecated
 function.
@@ -567,7 +564,7 @@ on WinNT and 55ms on Win9X).
 
 =item Win32::GuidGen()
 
-[EXT] Creates a globally unique 128 bit integer that can be used as a
+Creates a globally unique 128 bit integer that can be used as a
 persistent identifier in a distributed setting. To a very high degree
 of certainty this function returns a unique value. No other
 invocation, on the same or any other system (networked or not), should
@@ -582,7 +579,7 @@ of hex digits with surrounding braces.  For example:
 
 (MACHINE, MESSAGE, TIMEOUT, FORCECLOSE, REBOOT)
 
-[EXT] Shutsdown the specified MACHINE, notifying users with the
+Shutsdown the specified MACHINE, notifying users with the
 supplied MESSAGE, within the specified TIMEOUT interval.  Forces
 closing of all documents without prompting the user if FORCECLOSE is
 true, and reboots the machine if REBOOT is true.  This function works
@@ -590,7 +587,7 @@ only on WinNT.
 
 =item Win32::IsAdminUser()
 
-[EXT] Returns non zero if the account in whose security context the
+Returns non zero if the account in whose security context the
 current process/thread is running belongs to the local group of
 Administrators in the built-in system domain; returns 0 if not.
 Returns the undefined value and prints a warning if an error occurred.
@@ -606,7 +603,7 @@ This function always returns 1 on Win9X.
 
 =item Win32::LoadLibrary(LIBNAME)
 
-[EXT] Loads a dynamic link library into memory and returns its module
+Loads a dynamic link library into memory and returns its module
 handle.  This handle can be used with Win32::GetProcAddress and
 Win32::FreeLibrary.  This function is deprecated.  Use the Win32::API
 module instead.
@@ -617,17 +614,17 @@ module instead.
 
 =item Win32::LookupAccountName(SYSTEM, ACCOUNT, DOMAIN, SID, SIDTYPE)
 
-[EXT] Looks up ACCOUNT on SYSTEM and returns the domain name the SID and
+Looks up ACCOUNT on SYSTEM and returns the domain name the SID and
 the SID type.
 
 =item Win32::LookupAccountSID(SYSTEM, SID, ACCOUNT, DOMAIN, SIDTYPE)
 
-[EXT] Looks up SID on SYSTEM and returns the account name, domain name,
+Looks up SID on SYSTEM and returns the account name, domain name,
 and the SID type.
 
 =item Win32::MsgBox(MESSAGE [, FLAGS [, TITLE]])
 
-[EXT] Create a dialogbox containing MESSAGE.  FLAGS specifies the
+Create a dialogbox containing MESSAGE.  FLAGS specifies the
 required icon and buttons according to the following table:
 
 	0 = OK
@@ -662,7 +659,7 @@ The function returns the menu id of the selected push button:
 
 =item Win32::RegisterServer(LIBRARYNAME)
 
-[EXT] Loads the DLL LIBRARYNAME and calls the function DllRegisterServer.
+Loads the DLL LIBRARYNAME and calls the function DllRegisterServer.
 
 =item Win32::SetChildShowWindow(SHOWWINDOW)
 
@@ -672,9 +669,10 @@ processes if Perl itself is not running from a console.  Calling
 SetChildShowWindow(0) will make these new console windows invisible.
 Calling SetChildShowWindow() without arguments reverts system() to the
 default behavior.  The return value of SetChildShowWindow() is the
-previous setting or C<undef>.
+previous setting or C<undef>.  This function is only available in
+MSWin32 builds of perl.
 
-[EXT] The following symbolic constants for SHOWWINDOW are available
+The following symbolic constants for SHOWWINDOW are available
 (but not exported) from the Win32 module: SW_HIDE, SW_SHOWNORMAL,
 SW_SHOWMINIMIZED, SW_SHOWMAXIMIZED and SW_SHOWNOACTIVATE.
 
@@ -704,7 +702,7 @@ instead.
 
 =item Win32::UnregisterServer(LIBRARYNAME)
 
-[EXT] Loads the DLL LIBRARYNAME and calls the function
+Loads the DLL LIBRARYNAME and calls the function
 DllUnregisterServer.
 
 =back
