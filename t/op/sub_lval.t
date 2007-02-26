@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>68;
+plan tests=>69;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -538,4 +538,15 @@ TODO: {
     }
 
     is($line, "zeroonetwothree");
+}
+
+{
+    package Foo;
+    sub AUTOLOAD :lvalue { *{$AUTOLOAD} };
+    package main;
+    my $foo = bless {},"Foo";
+    my $result;
+    $foo->bar = sub { $result = "bar" };
+    $foo->bar;
+    is ($result, 'bar', "RT #41550");
 }

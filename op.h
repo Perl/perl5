@@ -203,14 +203,14 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpLVAL_DEFER		16	/* Defer creation of array/hash elem */
   /* OP_RV2?V, OP_GVSV, OP_ENTERITER only */
 #define OPpOUR_INTRO		16	/* Variable was in an our() */
-  /* OP_RV2[AH]V, OP_PAD[AH]V, OP_[AH]ELEM */
+  /* OP_RV2[AGH]V, OP_PAD[AH]V, OP_[AH]ELEM */
 #define OPpMAYBE_LVSUB		8	/* We might be an lvalue to return */
   /* OP_PADSV only */
 #define OPpPAD_STATE		16	/* is a "state" pad */
   /* for OP_RV2?V, lower bits carry hints (currently only HINT_STRICT_REFS) */
 
   /* OP_RV2GV only */
-#define OPpDONT_INIT_GV		8	/* Call gv_fetchpv with GV_NOINIT */
+#define OPpDONT_INIT_GV		4	/* Call gv_fetchpv with GV_NOINIT */
 /* (Therefore will return whatever is currently in the symbol table, not
    guaranteed to be a PVGV)  */
 
