@@ -483,6 +483,14 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'Module::Pluggable' =>
+		{
+		'MAINTAINER'	=> 'simonw',
+		'FILES'		=> q[lib/Module/Pluggable lib/Module/Pluggable.pm
+				     lib/Devel/InnerPackage.pm],
+		'CPAN'		=> 1,
+		},
+
 	'Net::Ping' =>
 		{
 		'MAINTAINER'	=> 'bbb',
