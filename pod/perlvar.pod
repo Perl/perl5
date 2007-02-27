@@ -344,17 +344,20 @@ Similar to C<@+>, the C<%+> hash allows access to the named capture
 buffers, should they exist, in the last successful match in the
 currently active dynamic scope.
 
-C<$+{foo}> is equivalent to C<$1> after the following match:
+For example, C<$+{foo}> is equivalent to C<$1> after the following match:
 
-  'foo'=~/(?<foo>foo)/;
+  'foo' =~ /(?<foo>foo)/;
 
-The underlying behaviour of %+ is provided by the L<re::Tie::Hash::NamedCapture>
-module.
+The keys of the C<%+> hash list only the names of buffers that have
+captured (and that are thus associated to defined values).
 
-B<Note:> As C<%-> and C<%+> are tied views into a common internal hash
+The underlying behaviour of C<%+> is provided by the
+L<re::Tie::Hash::NamedCapture> module.
+
+B<Note:> C<%-> and C<%+> are tied views into a common internal hash
 associated with the last successful regular expression. Therefore mixing
 iterative access to them via C<each> may have unpredictable results.
-Likewise, if the last successful match changes then the results may be
+Likewise, if the last successful match changes, then the results may be
 surprising.
 
 =item HANDLE->input_line_number(EXPR)
@@ -615,16 +618,20 @@ After a match against some variable $var:
 =item %-
 X<%->
 
-Similar to %+, this variable allows access to the named capture
-buffers that were defined in the last successful match. It returns
-a reference to an array containing one value per buffer of a given
-name in the pattern.
+Similar to C<%+>, this variable allows access to the named capture buffers
+in the last successful match in the currently active dynamic scope. To
+each capture buffer name found in the regular expression, it associates a
+reference to an array containing the list of values captured by all
+buffers with that name (should there be several of them), in the order
+where they appear.
 
-    if ('1234'=~/(?<A>1)(?<B>2)(?<A>3)(?<B>4)/) {
-        foreach my $name (sort keys(%-)) {
-            my $ary = $-{$name};
+Here's an example:
+
+    if ('1234' =~ /(?<A>1)(?<B>2)(?<A>3)(?<B>4)/) {
+        foreach my $bufname (sort keys %-) {
+            my $ary = $-{$bufname};
             foreach my $idx (0..$#$ary) {
-                print "\$-{$name}[$idx] : ",
+                print "\$-{$bufname}[$idx] : ",
                       (defined($ary->[$idx]) ? "'$ary->[$idx]'" : "undef"),
                       "\n";
             }
@@ -638,12 +645,16 @@ would print out:
     $-{B}[0] : '2'
     $-{B}[1] : '4'
 
-The behaviour of %- is implemented via the L<re::Tie::Hash::NamedCapture> module.
+The keys of the C<%-> hash correspond to all buffer names found in
+the regular expression.
 
-Note that C<%-> and C<%+> are tied views into a common internal hash
+The behaviour of C<%-> is implemented via the
+L<re::Tie::Hash::NamedCapture> module.
+
+B<Note:> C<%-> and C<%+> are tied views into a common internal hash
 associated with the last successful regular expression. Therefore mixing
 iterative access to them via C<each> may have unpredictable results.
-Likewise, if the last successful match changes then the results may be
+Likewise, if the last successful match changes, then the results may be
 surprising.
 
 =item HANDLE->format_name(EXPR)
