@@ -92,12 +92,12 @@ array refs listing the contents of each capture buffer whose name is the
 same as the associated hash key. If none of these buffers were involved in
 the match, the contents of that array ref will be as many C<undef> values
 as there are capture buffers with that name. In other words, the tied hash
-will behave as the C<%-> array.
+will behave as C<%->.
 
 When the C<all> parameter is omitted or false, then the tied hash elements
 will be the contents of the leftmost defined buffer with the name of the
-associated hash key. In other words, the tied hash will behave as the
-C<%+> array.
+associated hash key. In other words, the tied hash will behave as
+C<%+>.
 
 The keys of C<%->-like hashes correspond to all buffer names found in the
 regular expression; the keys of C<%+>-like hashes list only the names of
