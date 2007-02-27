@@ -1,6 +1,14 @@
 use strict;
 use Test;
-BEGIN { plan tests => 3 }
+BEGIN {
+    use Config;
+    if ($Config::Config{'extensions'} !~ /\bEncode\b/) {
+      print "1..0 # Skip: Encode was not built\n";
+      exit 0;
+    }
+
+    plan tests => 3;
+}
 
 {
     use encoding::warnings;

@@ -3,6 +3,12 @@ BEGIN {
         chdir 't';
         @INC = '../lib';
     }
+
+    use Config;
+    if ($Config::Config{'extensions'} !~ /\bEncode\b/) {
+      print "1..0 # Skip: Encode was not built\n";
+      exit 0;
+    }
 }
 
 #use Pod::Simple::Debug (10);
