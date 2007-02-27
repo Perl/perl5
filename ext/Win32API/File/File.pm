@@ -15,19 +15,17 @@ $VERSION= '0.1001_01';
 use base qw( Exporter DynaLoader Tie::Handle IO::File );
 
 # Math::BigInt optimizations courtesy of Tels
+my $_64BITINT;
 BEGIN {
-	require Math::BigInt;
-	if (defined($Math::BigInt::VERSION) && $Math::BigInt::VERSION >= 1.60) {
-	    Math::BigInt->import(lib => 'GMP');
-	}
+    $_64BITINT = defined($Config{use64bitint}) &&
+                 ($Config{use64bitint} eq 'define');
+
+    require Math::BigInt unless $_64BITINT;
 }
 
-my $_64BITINT  = defined $Config{use64bitint} &&
-		 $Config{use64bitint} eq 'define';
+my $THIRTY_TWO = $_64BITINT ? 32 : Math::BigInt->new(32);
 
-my $THIRTY_TWO = $_64BITINT ? 32 : new Math::BigInt 32;
-
-my $FFFFFFFF   = $_64BITINT ? 0xFFFFFFFF : new Math::BigInt 0xFFFFFFFF;
+my $FFFFFFFF   = $_64BITINT ? 0xFFFFFFFF : Math::BigInt->new(0xFFFFFFFF);
 
 @EXPORT= qw();
 %EXPORT_TAGS= (
@@ -237,7 +235,7 @@ sub set { Win32API::File::_fileLastError($_[1]); return $_[0] }
 
 package Win32API::File;
 
-my $_error = new Win32API::File::_error;
+my $_error = Win32API::File::_error->new();
 
 sub fileLastError {
     croak 'Usage: ',__PACKAGE__,'::fileLastError( [$setWin32ErrCode] )'	if @_ > 1;
@@ -367,7 +365,7 @@ sub getFileSize {
 
     my $low_size = GetFileSize($handle, $high_size);
 
-    my $retval = $_64BITINT ? $high_size : new Math::BigInt $high_size;
+    my $retval = $_64BITINT ? $high_size : Math::BigInt->new($high_size);
 
     $retval <<= $THIRTY_TWO;
     $retval +=  $low_size;
@@ -395,8 +393,10 @@ sub setFilePointer {
     my $retval = SetFilePointer($handle, $pos_low, $pos_high, $from_where);
 
     if (defined $pos_high && $pos_high != 0) {
-	$retval   = new Math::BigInt $retval   unless $_64BITINT;
-	$pos_high = new Math::BigInt $pos_high unless $_64BITINT;
+	if (! $_64BITINT) {
+	    $retval   = Math::BigInt->new($retval);
+	    $pos_high = Math::BigInt->new($pos_high);
+	}
 
 	$retval += $pos_high << $THIRTY_TWO;
     }
@@ -840,7 +840,7 @@ WARNING: this is new code, use at your own risk.
 
 This version of C<Win32API::File> can be used like an C<IO::File> object:
 
-  my $file = new Win32API::File "+> foo";
+  my $file = Win32API::File->new("+> foo");
   binmode $file;
   print $file "hello there\n";
   seek $file, 0, 0;
