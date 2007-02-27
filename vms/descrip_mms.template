@@ -1717,9 +1717,8 @@ cleanlis :
 	- If F$Search("*.Map").nes."" Then Delete/NoConfirm/Log *.Map;*
 
 cleantest :
-        - If F$Search("[.t]Perl.").nes."" Then Delete/NoConfirm/Log [.t]Perl.;*
+        - If F$Search("[.t]Perl$(E)").nes."" Then Delete/NoConfirm/Log [.t]Perl$(E);*
         - If F$Search("[.t]VMSPIPE.COM").nes."" Then Delete/NoConfirm/Log [.t]VMSPIPE.COM;*
-        - If F$Search("[.t]Echo.exe").nes."" Then Delete/NoConfirm/Log [.t]Echo.exe;*
 
 tidy : cleanlis
 	- If F$Search("[...]*.Opt;-1").nes."" Then Purge/NoConfirm/Log [...]*.Opt
