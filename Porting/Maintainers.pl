@@ -46,6 +46,7 @@ package Maintainers;
 	'muir'		=> 'David Muir Sharnoff <muir@cpan.org>',
 	'neilb'		=> 'Neil Bowers <neilb@cpan.org>',
 	'nuffin'	=> 'Yuval Kogman <nothingmuch@woobling.org>',
+	'osfameron'	=> 'Hakim Cassimally <osfameron@perl.org>',
 	'p5p'		=> 'perl5-porters <perl5-porters@perl.org>',
 	'perlfaq'	=> 'perlfaq-workers <perlfaq-workers@perl.org>',
 	'petdance'	=> 'Andy Lester <andy@petdance.com>',
@@ -75,6 +76,13 @@ package Maintainers;
 # latest one from CPAN) or 0 (there is no valid CPAN release).
 
 %Modules = (
+
+	'Archive::Extract' =>
+		{
+		'MAINTAINER'	=> 'kane',
+		'FILES'		=> q[lib/Archive/Extract.pm lib/Archive/Extract],
+		'CPAN'		=> 1,
+		},
 
 	'Archive::Tar' =>
 		{
@@ -289,6 +297,13 @@ package Maintainers;
 		'CPAN'		=> 0,
 		},
 
+	'File::Fetch' =>
+		{
+		'MAINTAINER'	=> 'kane',
+		'FILES'		=> q[lib/File/Fetch.pm lib/File/Fetch],
+		'CPAN'		=> 1,
+		},
+
 	'File::Spec' =>
 		{
 		'MAINTAINER'	=> 'kwilliams',
@@ -351,6 +366,13 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'tomhughes',
 		'FILES'		=> q[lib/IO/Zlib.pm lib/IO/Zlib],
+		'CPAN'		=> 1,
+		},
+
+	'IPC::Cmd' =>
+		{
+		'MAINTAINER'	=> 'kane',
+		'FILES'		=> q[lib/IPC/Cmd lib/IPC/Cmd.pm],
 		'CPAN'		=> 1,
 		},
 
@@ -450,7 +472,15 @@ package Maintainers;
 	'Module::Load' =>
 		{
 		'MAINTAINER'	=> 'kane',
-		'FILES'		=> q[lib/Module/Load lib/Module/Load.pm],
+		'FILES'		=> q[lib/Module/Load/t lib/Module/Load.pm],
+		'CPAN'		=> 1,
+		},
+
+	'Module::Load::Conditional' =>
+		{
+		'MAINTAINER'	=> 'kane',
+		'FILES'		=> q[lib/Module/Load/Conditional
+				     lib/Module/Load/Conditional.pm],
 		'CPAN'		=> 1,
 		},
 
@@ -458,6 +488,14 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/Module/Loaded lib/Module/Loaded.pm],
+		'CPAN'		=> 1,
+		},
+
+	'Module::Pluggable' =>
+		{
+		'MAINTAINER'	=> 'simonw',
+		'FILES'		=> q[lib/Module/Pluggable lib/Module/Pluggable.pm
+				     lib/Devel/InnerPackage.pm],
 		'CPAN'		=> 1,
 		},
 
@@ -582,7 +620,7 @@ package Maintainers;
 
 	'Pod::Perldoc' =>
 		{
-		'MAINTAINER'	=> 'sburke',
+		'MAINTAINER'	=> 'osfameron',
 		'FILES'		=> q[lib/Pod/Perldoc.pm lib/Pod/Perldoc],
 		'CPAN'		=> 1,
 		},

@@ -180,6 +180,7 @@ $map{"beau\100beaucox.com"} = "?";
 
 $map{"rgarciasuarez\100mandrakesoft.com"}
   = $map{"rgarciasuarez\100mandriva.com"}
+  = $map{"rgarciasuarez\100gmail.com"}
   = $map{"raphel.garcia-suarez\100hexaflux.com"} = "rgs";
 $map{"jhietaniemi\100gmail.com"} = $map{"jhi\100kosh.hut.fi"}
   = $map{"jhi\100cc.hut.fi"} = $map{"jarkko.hietaniemi\100nokia.com"} = "jhi";
