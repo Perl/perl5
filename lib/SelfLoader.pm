@@ -49,7 +49,10 @@ AUTOLOAD {
     }
     print STDERR "SelfLoader::AUTOLOAD eval: $SL_code\n" if DEBUG;
 
-    eval $SL_code;
+    {
+	no strict;
+	eval $SL_code;
+    }
     if ($@) {
         $@ =~ s/ at .*\n//;
         croak $@;
@@ -131,6 +134,7 @@ sub _load_stubs {
         }
     }
     push(@stubs, $self->_add_to_cache($name, $currpack, \@lines, $protoype));
+    no strict;
     eval join('', @stubs) if @stubs;
 }
 
