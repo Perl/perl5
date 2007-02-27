@@ -419,8 +419,8 @@ SWITCHES
 -Mstrict='}); print "Just another Perl Hacker"; ({'
 -l
 SKIP: No longer works in 5.8.2 and beyond.
-MSWin32
-NetWare
+SKIP_OS: MSWin32
+SKIP_OS: NetWare
 
 #######  rand
 srand 123456;$-=rand$_--=>@[[$-,$_]=@[[$_,$-]for(reverse+1..(@[=split
