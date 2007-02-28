@@ -4361,11 +4361,31 @@ ok($@=~/\QSequence \k... not terminated in regex;\E/);
     iseq($_,"!Bang!1!Bang!2!Bang!3!Bang!");
 }
 
+# test for keys in %+ and %-
+{
+    my $_ = "abcdef";
+    /(?<foo>a)|(?<foo>b)/;
+    iseq( (join ",", sort keys %+), "foo" );
+    iseq( (join ",", sort keys %-), "foo" );
+    iseq( (join ",", sort values %+), "a" );
+    iseq( (join ",", sort map "@$_", values %-), "a " );
+    /(?<bar>a)(?<bar>b)(?<quux>.)/;
+    iseq( (join ",", sort keys %+), "bar,quux" );
+    iseq( (join ",", sort keys %-), "bar,quux" );
+    iseq( (join ",", sort values %+), "a,c" ); # leftmost
+    iseq( (join ",", sort map "@$_", values %-), "a b,c" );
+    /(?<un>a)(?<deux>c)?/; # second buffer won't capture
+    iseq( (join ",", sort keys %+), "un" );
+    iseq( (join ",", sort keys %-), "deux,un" );
+    iseq( (join ",", sort values %+), "a" );
+    iseq( (join ",", sort map "@$_", values %-), ",a" );
+}
+
 # Put new tests above the dotted line about a page above this comment
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 1638;
+    $::TestCount = 1650;
     print "1..$::TestCount\n";
 }
 
