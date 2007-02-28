@@ -896,7 +896,7 @@ INSTALL_DEPENDENCE = all
 
 install.perl:	$(INSTALL_DEPENDENCE) installperl
 	$(LDLIBPTH) ./perl installperl --destdir=$(DESTDIR) $(INSTALLFLAGS) $(STRIPFLAGS)
-	$(MAKE) extras.install
+	-@test ! -s extras.lst || $(MAKE) extras.install
 
 install.man:	all installman
 	$(LDLIBPTH) ./perl installman --destdir=$(DESTDIR) $(INSTALLFLAGS)
