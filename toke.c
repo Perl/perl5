@@ -2024,7 +2024,7 @@ S_scan_const(pTHX_ char *start)
 		    *d++ = NATIVE_TO_NEED(has_utf8,*s++);
 	    }
 	    else if (s[2] == '{' /* This should match regcomp.c */
-		     || ((s[2] == 'p' || s[2] == '?') && s[3] == '{'))
+		    || (s[2] == '?' && s[3] == '{'))
 	    {
 		I32 count = 1;
 		char *regparse = s + (s[2] == '{' ? 3 : 4);

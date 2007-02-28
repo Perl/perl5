@@ -5319,10 +5319,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
             } /* named and numeric backreferences */
             /* NOT REACHED */
 
-	    case 'p':           /* (?p...) */
-		if (SIZE_ONLY && ckWARN2(WARN_DEPRECATED, WARN_REGEXP))
-		    vWARNdep(RExC_parse, "(?p{}) is deprecated - use (??{})");
-		/* FALL THROUGH*/
 	    case '?':           /* (??...) */
 		is_logical = 1;
 		if (*RExC_parse != '{') {
