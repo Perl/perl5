@@ -67,8 +67,9 @@ my %flags = (
     STATE           => 0x080000,
     OPTIMISEM       => 0x100000,
     STACK           => 0x280000,
+    BUFFERS         => 0x400000,
 );
-$flags{ALL} = -1;
+$flags{ALL} = -1 & ~($flags{OFFSETS}|$flags{OFFSETSDBG}|$flags{BUFFERS});
 $flags{All} = $flags{all} = $flags{DUMP} | $flags{EXECUTE};
 $flags{Extra} = $flags{EXECUTE} | $flags{COMPILE};
 $flags{More} = $flags{MORE} = $flags{All} | $flags{TRIEC} | $flags{TRIEM} | $flags{STATE};
@@ -323,6 +324,11 @@ Enable debugging of start point optimisations.
 
 Turns on all "extra" debugging options.
 
+=item BUFFERS
+
+Enable debugging the capture buffer storage during match. Warning,
+this can potentially produce extremely large output.
+
 =item TRIEM
 
 Enable enhanced TRIE debugging. Enhances both TRIEE
@@ -373,7 +379,7 @@ These are useful shortcuts to save on the typing.
 
 =item ALL
 
-Enable all compile and execute options at once.
+Enable all options at once except OFFSETS, OFFSETSDBG and BUFFERS
 
 =item All
 

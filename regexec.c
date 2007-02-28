@@ -193,7 +193,7 @@ S_regcppush(pTHX_ I32 parenfloor)
 	SSPUSHINT(PL_regstartp[p]);
 	SSPUSHPTR(PL_reg_start_tmp[p]);
 	SSPUSHINT(p);
-	DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+	DEBUG_BUFFERS_r(PerlIO_printf(Perl_debug_log,
 	  "     saving \\%"UVuf" %"IVdf"(%"IVdf")..%"IVdf"\n",
 		      (UV)p, (IV)PL_regstartp[p],
 		      (IV)(PL_reg_start_tmp[p] - PL_bostr),
@@ -263,7 +263,7 @@ S_regcppop(pTHX_ const regexp *rex)
 	tmps = SSPOPINT;
 	if (paren <= *PL_reglastparen)
 	    PL_regendp[paren] = tmps;
-	DEBUG_EXECUTE_r(
+	DEBUG_BUFFERS_r(
 	    PerlIO_printf(Perl_debug_log,
 			  "     restoring \\%"UVuf" to %"IVdf"(%"IVdf")..%"IVdf"%s\n",
 			  (UV)paren, (IV)PL_regstartp[paren],
@@ -272,7 +272,7 @@ S_regcppop(pTHX_ const regexp *rex)
 			  (paren > *PL_reglastparen ? "(no)" : ""));
 	);
     }
-    DEBUG_EXECUTE_r(
+    DEBUG_BUFFERS_r(
 	if (*PL_reglastparen + 1 <= rex->nparens) {
 	    PerlIO_printf(Perl_debug_log,
 			  "     restoring \\%"IVdf"..\\%"IVdf" to undef\n",
@@ -3568,8 +3568,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
             regnode *startpoint;
 
 	case GOSTART:
-	case GOSUB: /*    /(...(?1))/      */
-            if (cur_eval && cur_eval->locinput==locinput) {
+	case GOSUB: /*    /(...(?1))/   /(...(?&foo))/   */
+	    if (cur_eval && cur_eval->locinput==locinput) {
                 if (cur_eval->u.eval.close_paren == (U32)ARG(scan)) 
                     Perl_croak(aTHX_ "Infinite recursion in regex");
                 if ( ++nochange_depth > max_nochange_depth )
@@ -3742,7 +3742,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    cur_curlyx = ST.prev_curlyx;
 	    /* XXXX This is too dramatic a measure... */
 	    PL_reg_maxiter = 0;
-            if ( nochange_depth > 0 );
+            if ( nochange_depth )
 	        nochange_depth--;
 	    sayYES;
 
@@ -3760,7 +3760,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    cur_curlyx = ST.prev_curlyx;
 	    /* XXXX This is too dramatic a measure... */
 	    PL_reg_maxiter = 0;
-	    if ( nochange_depth > 0 );
+	    if ( nochange_depth )
 	        nochange_depth--;
 	    sayNO_SILENT;
 #undef ST
@@ -4755,8 +4755,6 @@ NULL
 	    if (cur_eval) {
 		/* we've just finished A in /(??{A})B/; now continue with B */
 		I32 tmpix;
-
-
 		st->u.eval.toggle_reg_flags
 			    = cur_eval->u.eval.toggle_reg_flags;
 		PL_reg_flags ^= st->u.eval.toggle_reg_flags; 
@@ -4782,9 +4780,10 @@ NULL
 		DEBUG_EXECUTE_r(
 		    PerlIO_printf(Perl_debug_log, "%*s  EVAL trying tail ... %"UVxf"\n",
 				      REPORT_CODE_OFF+depth*2, "",PTR2UV(cur_eval)););
-                if ( nochange_depth > 0 );
-	            nochange_depth++;
-		PUSH_YES_STATE_GOTO(EVAL_AB,
+                if ( nochange_depth )
+	            nochange_depth--;
+
+                PUSH_YES_STATE_GOTO(EVAL_AB,
 			st->u.eval.prev_eval->u.eval.B); /* match B */
 	    }
 

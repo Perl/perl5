@@ -695,6 +695,7 @@ re.pm, especially to the documentation.
 #define RE_DEBUG_EXTRA_OFFDEBUG    0x040000
 #define RE_DEBUG_EXTRA_STATE       0x080000
 #define RE_DEBUG_EXTRA_OPTIMISE    0x100000
+#define RE_DEBUG_EXTRA_BUFFERS     0x400000
 /* combined */
 #define RE_DEBUG_EXTRA_STACK       0x280000
 
@@ -732,6 +733,9 @@ re.pm, especially to the documentation.
     if (re_debug_flags & RE_DEBUG_EXTRA_STATE) x )
 #define DEBUG_STACK_r(x) DEBUG_r( \
     if (re_debug_flags & RE_DEBUG_EXTRA_STACK) x )
+#define DEBUG_BUFFERS_r(x) DEBUG_r( \
+    if (re_debug_flags & RE_DEBUG_EXTRA_BUFFERS) x )
+
 #define DEBUG_OPTIMISE_MORE_r(x) DEBUG_r( \
     if ((RE_DEBUG_EXTRA_OPTIMISE|RE_DEBUG_COMPILE_OPTIMISE) == \
          (re_debug_flags & (RE_DEBUG_EXTRA_OPTIMISE|RE_DEBUG_COMPILE_OPTIMISE)) ) x )
