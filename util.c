@@ -4082,12 +4082,12 @@ an RV.
 Function must be called with an already existing SV like
 
     sv = newSV(0);
-    s = scan_version(s,SV *sv, bool qv);
+    s = scan_version(s, SV *sv, bool qv);
 
 Performs some preprocessing to the string to ensure that
 it has the correct characteristics of a version.  Flags the
 object if it contains an underscore (which denotes this
-is a alpha version).  The boolean qv denotes that the version
+is an alpha version).  The boolean qv denotes that the version
 should be interpreted as if it had multiple decimals, even if
 it doesn't.
 

@@ -2615,7 +2615,7 @@ S_refcounted_he_value(pTHX_ const struct refcounted_he *he)
 /*
 =for apidoc refcounted_he_chain_2hv
 
-Generates an returns a C<HV *> by walking up the tree starting at the passed
+Generates and returns a C<HV *> by walking up the tree starting at the passed
 in C<struct refcounted_he *>.
 
 =cut
