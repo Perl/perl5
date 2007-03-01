@@ -113,7 +113,7 @@ Return the SV from the GV.
 
 #define GvLINE(gv)	(GvGP(gv)->gp_line)
 #define GvFILE_HEK(gv)	(GvGP(gv)->gp_file_hek)
-#define GvFILE(gv)	HEK_KEY(GvFILE_HEK(gv))
+#define GvFILE(gv)	(GvFILE_HEK(gv) ? HEK_KEY(GvFILE_HEK(gv)) : NULL)
 #define GvFILEGV(gv)	(gv_fetchfile(GvFILE(gv)))
 
 #define GvEGV(gv)	(GvGP(gv)->gp_egv)
