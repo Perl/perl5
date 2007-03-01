@@ -15,7 +15,7 @@ use Module::Build::Base;
 
 use vars qw($VERSION @ISA);
 @ISA = qw(Module::Build::Base);
-$VERSION = '0.2806';
+$VERSION = '0.2806_01';
 $VERSION = eval $VERSION;
 
 # Okay, this is the brute-force method of finding out what kind of
@@ -26,6 +26,7 @@ my %OSTYPES = qw(
 		 aix       Unix
 		 bsdos     Unix
 		 dgux      Unix
+		 dragonfly Unix
 		 dynixptx  Unix
 		 freebsd   Unix
 		 linux     Unix
