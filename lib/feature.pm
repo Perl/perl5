@@ -36,6 +36,8 @@ feature - Perl pragma to enable new syntactic features
 	default		  { say "None of the above" }
     }
 
+    use feature ':5.10'; # loads all features available in perl 5.10
+
 =head1 DESCRIPTION
 
 It is usually impossible to add new syntax to Perl without breaking
