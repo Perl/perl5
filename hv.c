@@ -2289,6 +2289,7 @@ Perl_unsharepvn(pTHX_ const char *str, I32 len, U32 hash)
 void
 Perl_unshare_hek(pTHX_ HEK *hek)
 {
+    assert(hek);
     unshare_hek_or_pvn(hek, NULL, 0, 0);
 }
 
