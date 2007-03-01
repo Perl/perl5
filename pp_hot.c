@@ -788,7 +788,7 @@ PP(pp_rv2av)
     static const char an_array[] = "an ARRAY";
     static const char a_hash[] = "a HASH";
     const bool is_pp_rv2av = PL_op->op_type == OP_RV2AV;
-    const U32 type = is_pp_rv2av ? SVt_PVAV : SVt_PVHV;
+    const svtype type = is_pp_rv2av ? SVt_PVAV : SVt_PVHV;
 
     if (SvROK(sv)) {
       wasref:

@@ -7302,7 +7302,7 @@ Perl_ck_join(pTHX_ OP *o)
 	    const STRLEN len = re ? re->prelen : 6;
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 			"/%.*s/ should probably be written as \"%.*s\"",
-			len, pmstr, len, pmstr);
+			(int)len, pmstr, (int)len, pmstr);
 	}
     }
     return ck_fun(o);
