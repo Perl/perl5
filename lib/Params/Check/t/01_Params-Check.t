@@ -347,3 +347,25 @@ use constant TRUE   => sub { 1 };
     like( last_error, qr/for .*::inner by .*::outer$/,
                             "right caller with CALLER_DEPTH" );
 }
+
+### test: #23824: Bug concering the loss of the last_error 
+### message when checking recursively.
+{   ok( 1,                      "Test last_error() on recursive check() call" ); 
+    
+    ### allow sub to call
+    my $clear   = sub { check( {}, {} ) if shift; 1; };
+
+    ### recursively call check() or not?
+    for my $recurse ( 0, 1 ) {         
+  
+        check(  
+            { a => { defined => 1 },
+              b => { allow   => sub { $clear->( $recurse ) } },
+            },
+            { a => undef, b => undef }
+        );       
+    
+        ok( last_error(),       "   last_error() with recurse: $recurse" );
+    }
+}
+

@@ -12,13 +12,13 @@ BEGIN {
     use vars        qw[ @ISA $VERSION @EXPORT_OK $VERBOSE $ALLOW_UNKNOWN
                         $STRICT_TYPE $STRIP_LEADING_DASHES $NO_DUPLICATES
                         $PRESERVE_CASE $ONLY_ALLOW_DEFINED $WARNINGS_FATAL
-                        $SANITY_CHECK_TEMPLATE $CALLER_DEPTH
+                        $SANITY_CHECK_TEMPLATE $CALLER_DEPTH $_ERROR_STRING
                     ];
 
     @ISA        =   qw[ Exporter ];
     @EXPORT_OK  =   qw[check allow last_error];
 
-    $VERSION                = '0.25';
+    $VERSION                = '0.26';
     $VERBOSE                = $^W ? 1 : 0;
     $NO_DUPLICATES          = 0;
     $STRIP_LEADING_DASHES   = 0;
@@ -335,8 +335,10 @@ sub check {
 
         ### check if we have an allow handler, to validate against ###
         ### allow() will report its own errors ###
-        if( exists $tmpl{'allow'} and
-            not allow($args{$key}, $tmpl{'allow'})
+        if( exists $tmpl{'allow'} and not do {
+                local $_ERROR_STRING;
+                allow( $args{$key}, $tmpl{'allow'} )
+            }         
         ) {
             ### stringify the value in the error report -- we don't want dumps
             ### of objects, but we do want to see *roughly* what we passed
@@ -550,7 +552,7 @@ It is exported upon request.
 
 =cut
 
-{   my $ErrorString = '';
+{   $_ERROR_STRING = '';
 
     sub _store_error {
         my($err, $verbose, $offset) = @_[0..2];
@@ -562,14 +564,14 @@ It is exported upon request.
 
         carp $err if $verbose;
 
-        $ErrorString .= $err . "\n";
+        $_ERROR_STRING .= $err . "\n";
     }
 
     sub _clear_error {
-        $ErrorString = '';
+        $_ERROR_STRING = '';
     }
 
-    sub last_error { $ErrorString }
+    sub last_error { $_ERROR_STRING }
 }
 
 1;
