@@ -19,7 +19,16 @@ reject any tainted format argument. (Rafael Garcia-Suarez)
 =head2 undef and signal handlers
 
 Undefining or deleting a signal handler via C<undef $SIG{FOO}> is now
-equivalent to setting it to C<'DEFAULT'>.
+equivalent to setting it to C<'DEFAULT'>. (Rafael)
+
+=head2 strictures and array/hash dereferencing in defined()
+
+C<defined @$foo> and C<defined %$bar> are now subject to C<strict 'refs'>
+(that is, C<$foo> and C<$bar> shall be proper references there.)
+(Nicholas Clark)
+
+(However, C<defined(@foo)> and C<defined(%bar)> are discouraged constructs
+anyway.)
 
 =head2 Removal of the bytecode compiler and of perlcc
 
@@ -81,19 +90,26 @@ atomic or "possessive" in nature. (Yves Orton)
 It is now possible to name capturing parenthesis in a pattern and refer to
 the captured contents by name. The naming syntax is C<< (?<NAME>....) >>.
 It's possible to backreference to a named buffer with the C<< \k<NAME> >>
-syntax. In code, the new magical hash C<%+> can be used to access the
-contents of the buffers.
+syntax. In code, the new magical hashes C<%+> and C<%-> can be used to
+access the contents of the capture buffers.
 
 Thus, to replace all doubled chars, one could write
 
     s/(?<letter>.)\k<letter>/$+{letter}/g
 
-Only buffers with defined contents will be "visible" in the hash, so
+Only buffers with defined contents will be "visible" in the C<%+> hash, so
 it's possible to do something like
 
     foreach my $name (keys %+) {
         print "content of buffer '$name' is $+{$name}\n";
     }
+
+The C<%-> hash is a bit more complete, since it will contain array refs
+holding values from all capture buffers similarly named, if there should
+be many of them.
+
+C<%+> and C<%-> are implemented as tied hashes through the new module
+C<re::Tie::Hash::NamedCapture>.
 
 Users exposed to the .NET regex engine will find that the perl
 implementation differs in that the numerical ordering of the buffers
@@ -127,7 +143,7 @@ safer form of back-reference notation as well as allowing relative
 backreferences. This should make it easier to generate and embed patterns
 that contain backreferences. See L<perlre/"Capture buffers">. (Yves Orton)
 
-=item Regexp::Keep internalized
+=item C<\K> escape
 
 The functionality of Jeff Pinyan's module Regexp::Keep has been added to
 the core. You can now use in regular expressions the special escape C<\K>
@@ -140,7 +156,7 @@ that can now be converted to
 
   s/foo\Kbar//g
 
-which is much more efficient.
+which is much more efficient. (Yves Orton)
 
 =back
 
@@ -153,7 +169,7 @@ use it at the end of a prototype, or before a semicolon.
 
 This has a small incompatible consequence: the prototype() function has
 been adjusted to return C<_> for some built-ins in appropriate cases (for
-example, C<prototype('CORE::rmdir')>). (Rafael Garcia-Suarez)
+example, C<prototype('CORE::rmdir')>). (Rafael)
 
 =head2 UNITCHECK blocks
 
@@ -170,13 +186,17 @@ for more information. (Alex Gough)
 =head2 readpipe() is now overridable
 
 The built-in function readpipe() is now overridable. Overriding it permits
-also to override its operator counterpart, C<qx//> (a.k.a. C<``>). (Rafael
-Garcia-Suarez)
+also to override its operator counterpart, C<qx//> (a.k.a. C<``>). (Rafael)
 
 =head2 UCD 5.0.0
 
 The copy of the Unicode Character Database included in Perl 5.9 has
 been updated to version 5.0.0.
+
+=head2 Smart match
+
+The smart match operator (C<~~>) is now available by default (you don't
+need to enable it with C<use feature> any longer). (Michael G Schwern)
 
 =head1 Modules and Pragmas
 
@@ -204,6 +224,35 @@ C<Term::UI> simplifies the task to ask questions at a terminal prompt.
 
 C<Object::Accessor> provides an interface to create per-object accessors.
 
+=item *
+
+C<Module::Pluggable> is a simple framework to create modules that accept
+pluggable sub-modules.
+
+=item *
+
+C<Module::Load::Conditional> provides simple ways to query and possibly
+load installed modules.
+
+=item *
+
+C<Time::Piece> provides an object oriented interface to time functions,
+overriding the built-ins localtime() and gmtime().
+
+=item *
+
+C<IPC::Cmd> helps to find and run external commands, possibly
+interactively.
+
+=item *
+
+C<File::Fetch> provide a simple generic file fetching mechanism.
+
+=item *
+
+C<Archive::Extract> is a generic archive extraction mechanism
+for F<.tar> (plain, gziped or bzipped) or F<.zip> files.
+
 =back
 
 =head2 Module changes
@@ -213,6 +262,7 @@ C<Object::Accessor> provides an interface to create per-object accessors.
 =item C<base>
 
 The C<base> pragma now warns if a class tries to inherit from itself.
+(Curtis "Ovid" Poe)
 
 =item C<warnings>
 
@@ -225,10 +275,32 @@ anymore, and will require parentheses to be added after the function name:
     require Carp;
     Carp::confess "argh";
 
+=item C<less>
+
+C<less> now does something useful (or at least it tries to). In fact, it
+has been turned into a lexical pragma. So, in your modules, you can now
+test whether your users have requested to use less CPU, or less memory,
+less magic, or maybe even less fat. See L<less> for more. (Joshua ben
+Jore)
+
 =item C<Attribute::Handlers>
 
 C<Attribute::Handlers> can now report the caller's file and line number.
 (David Feldman)
+
+=item C<B::Lint>
+
+C<B::Lint> is now based on C<Module::Pluggable>, and so can be extended
+with plugins. (Joshua ben Jore)
+
+=item C<B>
+
+It's now possible to access the lexical pragma hints (C<%^H>) by using the
+method B::COP::hints_hash(). It returns a C<B::RHE> object, which in turn
+can be used to get a hash reference via the method B::RHE::HASH(). (Joshua
+ben Jore)
+
+=for p5p XXX document this in B.pm too
 
 =back
 
@@ -260,7 +332,7 @@ Perl has been reported to work on MidnightBSD.
 
 PerlIO::scalar will now prevent writing to read-only scalars. Moreover,
 seek() is now supported with PerlIO::scalar-based filehandles, the
-underlying string being zero-filled as needed.
+underlying string being zero-filled as needed. (Rafael, Jarkko Hietaniemi)
 
 study() never worked for UTF-8 strings, but could lead to false results.
 It's now a no-op on UTF-8 data. (Yves Orton)
@@ -268,11 +340,14 @@ It's now a no-op on UTF-8 data. (Yves Orton)
 The signals SIGILL, SIGBUS and SIGSEGV are now always delivered in an
 "unsafe" manner (contrary to other signals, that are deferred until the
 perl interpreter reaches a reasonably stable state; see
-L<perlipc/"Deferred Signals (Safe Signals)">).
+L<perlipc/"Deferred Signals (Safe Signals)">). (Rafael)
 
 When a module or a file is loaded through an @INC-hook, and when this hook
 has set a filename entry in %INC, __FILE__ is now set for this module
-accordingly to the contents of that %INC entry.
+accordingly to the contents of that %INC entry. (Rafael)
+
+The C<-w> and C<-t> switches can now be used together without messing
+up what categories of warnings are activated or not. (Rafael)
 
 =head1 New or Changed Diagnostics
 
@@ -281,6 +356,10 @@ accordingly to the contents of that %INC entry.
 The anonymous hash and array constructors now take 1 op in the optree
 instead of 3, now that pp_anonhash and pp_anonlist return a reference to
 an hash/array when the op is flagged with OPf_SPECIAL (Nicholas Clark).
+
+=for p5p XXX have we some docs on how to create regexp engine plugins, since that's now possible ? (perlreguts)
+
+=for p5p XXX new BIND SV type, #29544, #29642
 
 =head1 Known Problems
 
