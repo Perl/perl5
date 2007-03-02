@@ -29,6 +29,8 @@ use Pod::Man;
 $loaded = 1;
 print "ok 1\n";
 
+my $have_encoding = eval { require PerlIO::encoding; 1; } && ! $@;
+
 my $parser = Pod::Man->new or die "Cannot create parser\n";
 my $n = 2;
 while (<DATA>) {
@@ -36,9 +38,8 @@ while (<DATA>) {
     open (TMP, '> tmp.pod') or die "Cannot create tmp.pod: $!\n";
 
     # We have a test in ISO 8859-1 encoding.  Make sure that nothing strange
-    # happens if Perl thinks the world is Unicode.  Wrap this in eval so that
-    # older versions of Perl don't croak.
-    eval { binmode (\*TMP, ':encoding(iso-8859-1)') };
+    # happens if Perl thinks the world is Unicode.
+    binmode (\*TMP, ':encoding(iso-8859-1)') if $have_encoding;
 
     while (<DATA>) {
         last if $_ eq "###\n";
