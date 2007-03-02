@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 
 require './test.pl';
-plan( tests => 159 );
+plan( tests => 160 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -480,6 +480,10 @@ foreach my $value ([1,2,3], {1=>2}, *STDOUT{IO}, \&ok, *STDOUT{FORMAT}) {
     $CORE::GLOBAL::{"readline"}=[];
     eval "no warnings; <STDOUT>";
     is($@, '', "Can't trip up readline overloading");
+
+    $CORE::GLOBAL::{"readpipe"}=[];
+    eval "`` if 0";
+    is($@, '', "Can't trip up readpipe overloading");
 }
 __END__
 Perl

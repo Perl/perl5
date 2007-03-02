@@ -2922,7 +2922,7 @@ S_readpipe_override(pTHX)
 		&& GvCVu(gv_readpipe) && GvIMPORTED_CV(gv_readpipe))
 	    ||
 	    ((gvp = (GV**)hv_fetchs(PL_globalstash, "readpipe", FALSE))
-	     && (gv_readpipe = *gvp) != (GV*)&PL_sv_undef
+	     && (gv_readpipe = *gvp) && isGV_with_GP(gv_readpipe)
 	     && GvCVu(gv_readpipe) && GvIMPORTED_CV(gv_readpipe)))
     {
 	PL_lex_op = (OP*)newUNOP(OP_ENTERSUB, OPf_STACKED,
