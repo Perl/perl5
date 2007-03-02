@@ -542,7 +542,10 @@ functionality has moved from "discipline" to "layer".  All documentation
 of this version of Perl therefore refers to "layers" rather than to
 "disciplines".  Now back to the regularly scheduled documentation...>
 
-To mark FILEHANDLE as UTF-8, use C<:utf8>.
+To mark FILEHANDLE as UTF-8, use C<:utf8> or C<:encoding(utf8)>.
+C<:utf8> just marks the data as UTF-8 without further checking,
+while C<:encoding(utf8)> checks the data for actually being valid
+UTF-8. More details can be found in L<PerlIO::encoding>.
 
 In general, binmode() should be called after open() but before any I/O
 is done on the filehandle.  Calling binmode() will normally flush any
