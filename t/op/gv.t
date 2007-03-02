@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 
 require './test.pl';
-plan( tests => 154 );
+plan( tests => 155 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -453,6 +453,12 @@ foreach my $value ([1,2,3], {1=>2}, *STDOUT{IO}, \&ok, *STDOUT{FORMAT}) {
 	"PERL_DONT_CREATE_GVSV shouldn't affect thingy syntax under strict");
 }
 
+{
+    # Bug reported by broquaint on IRC
+    *slosh::{HASH}->{ISA}=[];
+    slosh->import;
+    pass("gv_fetchmeth coped with the unexpected");
+}
 __END__
 Perl
 Rules

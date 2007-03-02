@@ -368,7 +368,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     }
 
     gvp = (GV**)hv_fetchs(stash, "ISA", FALSE);
-    av = (gvp && (gv = *gvp) && gv != (GV*)&PL_sv_undef) ? GvAV(gv) : NULL;
+    av = (gvp && (gv = *gvp) && isGV_with_GP(gv)) ? GvAV(gv) : NULL;
 
     /* create and re-create @.*::SUPER::ISA on demand */
     if (!av || !SvMAGIC(av)) {
