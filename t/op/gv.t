@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 
 require './test.pl';
-plan( tests => 155 );
+plan( tests => 159 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -458,6 +458,28 @@ foreach my $value ([1,2,3], {1=>2}, *STDOUT{IO}, \&ok, *STDOUT{FORMAT}) {
     *slosh::{HASH}->{ISA}=[];
     slosh->import;
     pass("gv_fetchmeth coped with the unexpected");
+
+    # An audit found these:
+    {
+	package slosh;
+	sub rip {
+	    my $s = shift;
+	    $s->SUPER::rip;
+	}
+    }
+    eval {slosh->rip;};
+    like ($@, qr/^Can't locate object method "rip"/, "Even with SUPER");
+
+    is(slosh->isa('swoosh'), '');
+
+    $CORE::GLOBAL::{"lock"}=[];
+    eval "no warnings; lock";
+    like($@, qr/^Not enough arguments for lock/,
+       "Can't trip up general keyword overloading");
+
+    $CORE::GLOBAL::{"readline"}=[];
+    eval "no warnings; <STDOUT>";
+    is($@, '', "Can't trip up readline overloading");
 }
 __END__
 Perl

@@ -62,7 +62,7 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, const HV* const name_stash,
 
     gvp = (GV**)hv_fetchs(stash, "::ISA::CACHE::", FALSE);
 
-    if (gvp && (gv = *gvp) != (GV*)&PL_sv_undef && (subgen = GvSV(gv))
+    if (gvp && (gv = *gvp) && isGV_with_GP(gv) && (subgen = GvSV(gv))
 	&& (hv = GvHV(gv)))
     {
 	if (SvIV(subgen) == (IV)PL_sub_generation) {
@@ -87,7 +87,7 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, const HV* const name_stash,
 
     gvp = (GV**)hv_fetchs(stash, "ISA", FALSE);
 
-    if (gvp && (gv = *gvp) != (GV*)&PL_sv_undef && (av = GvAV(gv))) {
+    if (gvp && (gv = *gvp) && isGV_with_GP(gv) && (av = GvAV(gv))) {
 	if (!hv || !subgen) {
 	    gvp = (GV**)hv_fetchs(stash, "::ISA::CACHE::", TRUE);
 

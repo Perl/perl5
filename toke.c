@@ -5166,7 +5166,7 @@ Perl_yylex(pTHX)
 		}
 		if (!ogv &&
 		    (gvp = (GV**)hv_fetch(PL_globalstash,PL_tokenbuf,len,FALSE)) &&
-		    (gv = *gvp) != (GV*)&PL_sv_undef &&
+		    (gv = *gvp) && isGV_with_GP(gv) &&
 		    GvCVu(gv) && GvIMPORTED_CV(gv))
 		{
 		    ogv = gv;
@@ -11378,7 +11378,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 		&& GvCVu(gv_readline) && GvIMPORTED_CV(gv_readline))
 		||
 		((gvp = (GV**)hv_fetchs(PL_globalstash, "readline", FALSE))
-		&& (gv_readline = *gvp) != (GV*)&PL_sv_undef
+		 && (gv_readline = *gvp) && isGV_with_GP(gv_readline)
 		&& GvCVu(gv_readline) && GvIMPORTED_CV(gv_readline)))
 	    readline_overriden = TRUE;
 

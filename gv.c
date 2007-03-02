@@ -380,7 +380,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 	    packlen -= 7;
 	    basestash = gv_stashpvn(hvname, packlen, GV_ADD);
 	    gvp = (GV**)hv_fetchs(basestash, "ISA", FALSE);
-	    if (gvp && (gv = *gvp) != (GV*)&PL_sv_undef && (av = GvAV(gv))) {
+	    if (gvp && (gv = *gvp) && isGV_with_GP(gv) && (av = GvAV(gv))) {
 		gvp = (GV**)hv_fetchs(stash, "ISA", TRUE);
 		if (!gvp || !(gv = *gvp))
 		    Perl_croak(aTHX_ "Cannot create %s::ISA", hvname);
