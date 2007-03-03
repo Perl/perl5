@@ -18,6 +18,8 @@ my %feature_bundle = (
 $feature_bundle{"5.10"} = $feature_bundle{"5.10.0"};
 #$feature_bundle{"5.10"} = $feature_bundle{sprintf("%vd",$^V)};
 
+$feature_bundle{"5.9.5"} = $feature_bundle{"5.10.0"};
+
 # TODO:
 # - think about versioned features (use feature switch => 2)
 
@@ -112,6 +114,33 @@ which both are equivalent to C<use feature qw(switch say err state)>.
 
 In the forthcoming 5.10.X perl releases, C<use feature ":5.10"> will be
 equivalent to the latest C<use feature ":5.10.X">.
+
+=head1 IMPLICIT LOADING
+
+There are two ways to load the C<feature> pragma implicitly :
+
+=over 4
+
+=item *
+
+By using the C<-E> switch on the command-line instead of C<-e>. It enables
+all available features in the main compilation unit (that is, the one-liner.)
+
+=item *
+
+By requiring explicitly a minimal Perl version number for your program, with
+the C<use VERSION> construct, and when the version is higher than or equal to
+5.9.5. That is,
+
+    use 5.9.5;
+
+will do an implicit
+
+    use feature ':5.9.5';
+
+and so on.
+
+=back
 
 =cut
 

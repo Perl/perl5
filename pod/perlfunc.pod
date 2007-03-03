@@ -6815,7 +6815,7 @@ except that Module I<must> be a bareword.
 
 VERSION may be either a numeric argument such as 5.006, which will be
 compared to C<$]>, or a literal of the form v5.6.1, which will be compared
-to C<$^V> (aka $PERL_VERSION.  A fatal error is produced if VERSION is
+to C<$^V> (aka $PERL_VERSION).  A fatal error is produced if VERSION is
 greater than the version of the current Perl interpreter; Perl will not
 attempt to parse the rest of the file.  Compare with L</require>, which can
 do a similar check at run time.
@@ -6832,6 +6832,10 @@ version should be used instead.
 This is often useful if you need to check the current Perl version before
 C<use>ing library modules that have changed in incompatible ways from
 older versions of Perl.  (We try not to do this more than we have to.)
+
+If the specified perl version is greater than or equal to 5.9.5, C<use
+VERSION> will also load the C<feature> pragma and enable all features
+available in the requested version.  See L<feature>.
 
 The C<BEGIN> forces the C<require> and C<import> to happen at compile time.  The
 C<require> makes sure the module is loaded into memory if it hasn't been

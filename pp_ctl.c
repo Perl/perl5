@@ -3102,7 +3102,18 @@ PP(pp_require)
 		    SVfARG(vnormal(sv)), SVfARG(vnormal(PL_patchlevel)));
 	}
 
-	    RETPUSHYES;
+	/* If we request a version >= 5.9.5, load feature.pm with the
+	 * feature bundle that corresponds to the required version.
+	 * We do this only with use, not require. */
+	if (PL_compcv && vcmp(sv, sv_2mortal(upg_version(newSVnv(5.009005)))) >= 0) {
+	    SV *const importsv = vnormal(sv);
+	    *SvPVX_mutable(importsv) = ':';
+	    ENTER;
+	    Perl_load_module(aTHX_ 0, newSVpvs("feature"), NULL, importsv, NULL);
+	    LEAVE;
+	}
+
+	RETPUSHYES;
     }
     name = SvPV_const(sv, len);
     if (!(name && len > 0 && *name))
