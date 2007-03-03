@@ -98,7 +98,7 @@ SKIP: {
 }
 
 # Now try to load well known XS modules
-my $extensions = $Config{'extensions'};
+my $extensions = $Config{'dynamic_ext'};
 $extensions =~ s|/|::|g;
 
 for my $module (sort keys %modules) {
