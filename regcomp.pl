@@ -157,10 +157,15 @@ while (++$ind <= $lastregop) {
 print OUT <<EOP;
 };
 
+#endif /* REG_COMP_C */
+
 /* reg_name[] - Opcode/state names in string form, for debugging */
 
 #ifdef DEBUGGING
-const char * reg_name[] = {
+#  ifndef DOINIT
+EXTCONST char * PL_reg_name[];
+#  else
+EXTCONST char * PL_reg_name[] = {
 EOP
 
 $ind = 0;
@@ -181,12 +186,8 @@ while (++$ind <= $tot) {
 
 print OUT <<EOP;
 };
+#  endif /* DOINIT */
 #endif /* DEBUGGING */
-#else
-#ifdef DEBUGGING
-extern const char * reg_name[];
-#endif
-#endif /* REG_COMP_C */
 
 /* ex: set ro: */
 EOP

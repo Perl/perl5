@@ -7900,7 +7900,7 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
     if (RExC_offsets) {         /* MJD */
 	MJD_OFFSET_DEBUG(("%s:%d: (op %s) %s %"UVuf" (len %"UVuf") (max %"UVuf").\n", 
               "reg_node", __LINE__, 
-              reg_name[op],
+              PL_reg_name[op],
               (UV)(RExC_emit - RExC_emit_start) > RExC_offsets[0] 
 		? "Overwriting end of array!\n" : "OK",
               (UV)(RExC_emit - RExC_emit_start),
@@ -7954,7 +7954,7 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 	MJD_OFFSET_DEBUG(("%s(%d): (op %s) %s %"UVuf" <- %"UVuf" (max %"UVuf").\n", 
               "reganode",
 	      __LINE__,
-	      reg_name[op],
+	      PL_reg_name[op],
               (UV)(RExC_emit - RExC_emit_start) > RExC_offsets[0] ? 
               "Overwriting end of array!\n" : "OK",
               (UV)(RExC_emit - RExC_emit_start),
@@ -7994,7 +7994,7 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
     GET_RE_DEBUG_FLAGS_DECL;
     PERL_UNUSED_ARG(depth);
 /* (PL_regkind[(U8)op] == CURLY ? EXTRA_STEP_2ARGS : 0); */
-    DEBUG_PARSE_FMT("inst"," - %s",reg_name[op]);
+    DEBUG_PARSE_FMT("inst"," - %s",PL_reg_name[op]);
     if (SIZE_ONLY) {
 	RExC_size += size;
 	return;
@@ -8029,7 +8029,7 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
 	    MJD_OFFSET_DEBUG(("%s(%d): (op %s) %s copy %"UVuf" -> %"UVuf" (max %"UVuf").\n",
                   "reg_insert",
 		  __LINE__,
-		  reg_name[op],
+		  PL_reg_name[op],
                   (UV)(dst - RExC_emit_start) > RExC_offsets[0] 
 		    ? "Overwriting end of array!\n" : "OK",
                   (UV)(src - RExC_emit_start),
@@ -8048,7 +8048,7 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
 	MJD_OFFSET_DEBUG(("%s(%d): (op %s) %s %"UVuf" <- %"UVuf" (max %"UVuf").\n", 
               "reginsert",
 	      __LINE__,
-	      reg_name[op],
+	      PL_reg_name[op],
               (UV)(place - RExC_emit_start) > RExC_offsets[0] 
               ? "Overwriting end of array!\n" : "OK",
               (UV)(place - RExC_emit_start),
@@ -8092,7 +8092,7 @@ S_regtail(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val,U32 de
             PerlIO_printf(Perl_debug_log, "~ %s (%d) %s %s\n",
                 SvPV_nolen_const(mysv), REG_NODE_NUM(scan),
                     (temp == NULL ? "->" : ""),
-                    (temp == NULL ? reg_name[OP(val)] : "")
+                    (temp == NULL ? PL_reg_name[OP(val)] : "")
             );
         });
         if (temp == NULL)
@@ -8173,7 +8173,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val,
             PerlIO_printf(Perl_debug_log, "~ %s (%d) -> %s\n",
                 SvPV_nolen_const(mysv),
                 REG_NODE_NUM(scan),
-                reg_name[exact]);
+                PL_reg_name[exact]);
         });
 	if (temp == NULL)
 	    break;
@@ -8331,7 +8331,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	/* It would be nice to FAIL() here, but this may be called from
 	   regexec.c, and it would be hard to supply pRExC_state. */
 	Perl_croak(aTHX_ "Corrupted regexp opcode %d > %d", (int)OP(o), (int)REGNODE_MAX);
-    sv_catpv(sv, reg_name[OP(o)]); /* Take off const! */
+    sv_catpv(sv, PL_reg_name[OP(o)]); /* Take off const! */
 
     k = PL_regkind[OP(o)];
 
@@ -8360,7 +8360,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
         const reg_trie_data * const trie
 	    = (reg_trie_data*)progi->data->data[!IS_TRIE_AC(op) ? n : ac->trie];
         
-        Perl_sv_catpvf(aTHX_ sv, "-%s",reg_name[o->flags]);
+        Perl_sv_catpvf(aTHX_ sv, "-%s",PL_reg_name[o->flags]);
         DEBUG_TRIE_COMPILE_r(
             Perl_sv_catpvf(aTHX_ sv,
                 "<S:%"UVuf"/%"IVdf" W:%"UVuf" L:%"UVuf"/%"UVuf" C:%"UVuf"/%"UVuf">",

@@ -2485,7 +2485,7 @@ regmatch(), slabs allocated since entry are freed.
 	PerlIO_printf(Perl_debug_log,			    \
 	    "    %*s"pp" %s%s%s%s%s\n",			    \
 	    depth*2, "",				    \
-	    reg_name[st->resume_state],                     \
+	    PL_reg_name[st->resume_state],                     \
 	    ((st==yes_state||st==mark_state) ? "[" : ""),   \
 	    ((st==yes_state) ? "Y" : ""),                   \
 	    ((st==mark_state) ? "M" : ""),                  \
@@ -5008,7 +5008,7 @@ NULL
                     }
                     PerlIO_printf(Perl_error_log, "%*s#%-3d %-10s %s\n",
                         REPORT_CODE_OFF + 2 + depth * 2,"",
-                        curd, reg_name[cur->resume_state],
+                        curd, PL_reg_name[cur->resume_state],
                         (curyes == cur) ? "yes" : ""
                     );
                     if (curyes == cur)
