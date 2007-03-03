@@ -2085,7 +2085,7 @@ $Include_dirs:
 $!: What should the include directory be ? (.TLB text libraries)
 $ dflt = gcclib_olb 
 $ rp = "Where are the include files you want to use? "
-$ IF f$length( rp + "[''dflt'] " ).gt.76
+$ IF f$length( rp + "[''dflt'] " ) .GT. 76
 $ THEN rp = F$FAO("!AS!/!AS",rp,"[''dflt'] ")
 $ ELSE rp = rp + "[''dflt'] "
 $ ENDIF
@@ -2478,7 +2478,7 @@ $	    IF (archname .NES. "VMS_VAX") .AND. ("''f$extract(1,3, f$getsyi(""version"
 $     	    THEN
 $       	echo ""
 $       	echo "Threaded Perl can be linked to use multiple kernel threads on your system."
-$       	echo "This feature allows multiple user threads to make use of multiple CPUs on
+$       	echo "This feature allows multiple user threads to make use of multiple CPUs on"
 $		echo "a multi-processor machine."
 $       	bool_dflt = "n"
 $		IF f$type(usekernelthreads) .nes. ""
@@ -2491,6 +2491,7 @@ $       	IF ans
 $		THEN
 $           	    thread_kernel = "MTK=MTK=1"
 $	    	    usekernelthreads = "define"
+$           	ENDIF
 $           ENDIF
 $       ENDIF
 $     ENDIF
@@ -5628,7 +5629,7 @@ $!
 $!	Use the same list of signals the CRTL does for recent systems, but cook our own for very old systems.
 $!	Note that the list controls what signals can be caught by name as well as what can be raised via kill().
 $!
-$       if  vms_ver .LT. "6.2"
+$       if  vms_ver .LTS. "6.2"
 $	then
 $!          since SIGBUS and SIGSEGV indistinguishable, make them the same here.
 $           sig_name="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ABRT"
@@ -6839,7 +6840,7 @@ $!++ make_ext.com
 $!   NOTE: This file is extracted as part of the VMS configuration process.
 $!   Any changes made to it directly will be lost.  If you need to make any
 $!   changes, please edit the template in Configure.Com instead.
-$    def = F$Environment("Default")
+$    mydefault = F$Environment("Default")
 $!   p1 - how to invoke miniperl (passed in from descrip.mms)
 $    p1 = F$Edit(p1,"Upcase,Compress,Trim")
 $    If F$Locate("MCR ",p1).eq.0 Then p1 = F$Extract(3,255,p1)
@@ -6897,7 +6898,7 @@ $    If redesc Then -
        miniperl "-I[''up'.lib]" Makefile.PL "INST_LIB=[''up'.lib]" "INST_ARCHLIB=[''up'.lib]"  "PERL_CORE=1"
 $    makeutil 'targ'
 $    i = i + 1
-$    Set Def &def
+$    Set Def &mydefault
 $    Goto next_ext
 $ done:
 $    sts = $Status
