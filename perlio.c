@@ -134,6 +134,7 @@ perlsio_binmode(FILE *fp, int iotype, int mode)
      */
 #ifdef DOSISH
 #  if defined(atarist) || defined(__MINT__)
+    PERL_UNUSED_ARG(iotype);
     if (!fflush(fp)) {
         if (mode & O_BINARY)
             ((FILE *) fp)->_flag |= _IOBIN;
@@ -144,6 +145,7 @@ perlsio_binmode(FILE *fp, int iotype, int mode)
     return 0;
 #  else
     dTHX;
+    PERL_UNUSED_ARG(iotype);
 #ifdef NETWARE
     if (PerlLIO_setmode(fp, mode) != -1) {
 #else
@@ -174,6 +176,9 @@ document
 #else
 #  if defined(USEMYBINMODE)
     dTHX;
+#    if defined(__CYGWIN__)
+    PERL_UNUSED_ARG(iotype);
+#    endif
     if (my_binmode(fp, iotype, mode) != FALSE)
         return 1;
     else
@@ -914,6 +919,7 @@ XS(XS_PerlIO__Layer__NoWarnings)
      */
     dVAR;
     dXSARGS;
+    PERL_UNUSED_ARG(cv);
     if (items)
     	PerlIO_debug("warning:%s\n",SvPV_nolen_const(ST(0)));
     XSRETURN(0);
@@ -923,6 +929,7 @@ XS(XS_PerlIO__Layer__find)
 {
     dVAR;
     dXSARGS;
+    PERL_UNUSED_ARG(cv);
     if (items < 2)
 	Perl_croak(aTHX_ "Usage class->find(name[,load])");
     else {

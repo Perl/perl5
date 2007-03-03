@@ -313,6 +313,7 @@ XS(XS_UNIVERSAL_isa)
 {
     dVAR;
     dXSARGS;
+    PERL_UNUSED_ARG(cv);
 
     if (items != 2)
 	Perl_croak(aTHX_ "Usage: UNIVERSAL::isa(reference, kind)");
@@ -341,6 +342,7 @@ XS(XS_UNIVERSAL_can)
     const char *name;
     SV   *rv;
     HV   *pkg = NULL;
+    PERL_UNUSED_ARG(cv);
 
     if (items != 2)
 	Perl_croak(aTHX_ "Usage: UNIVERSAL::can(object-ref, method)");
@@ -379,6 +381,7 @@ XS(XS_UNIVERSAL_DOES)
 {
     dVAR;
     dXSARGS;
+    PERL_UNUSED_ARG(cv);
 
     if (items != 2)
 	Perl_croak(aTHX_ "Usage: invocant->does(kind)");
@@ -403,6 +406,7 @@ XS(XS_UNIVERSAL_VERSION)
     GV *gv;
     SV *sv;
     const char *undef;
+    PERL_UNUSED_ARG(cv);
 
     if (SvROK(ST(0))) {
         sv = (SV*)SvRV(ST(0));
@@ -475,6 +479,7 @@ XS(XS_version_new)
 {
     dVAR;
     dXSARGS;
+    PERL_UNUSED_ARG(cv);
     if (items > 3)
 	Perl_croak(aTHX_ "Usage: version::new(class, version)");
     SP -= items;
@@ -510,6 +515,7 @@ XS(XS_version_stringify)
 {
      dVAR;
      dXSARGS;
+     PERL_UNUSED_ARG(cv);
      if (items < 1)
 	  Perl_croak(aTHX_ "Usage: version::stringify(lobj, ...)");
      SP -= items;
@@ -533,6 +539,7 @@ XS(XS_version_numify)
 {
      dVAR;
      dXSARGS;
+     PERL_UNUSED_ARG(cv);
      if (items < 1)
 	  Perl_croak(aTHX_ "Usage: version::numify(lobj, ...)");
      SP -= items;
@@ -556,6 +563,7 @@ XS(XS_version_normal)
 {
      dVAR;
      dXSARGS;
+     PERL_UNUSED_ARG(cv);
      if (items < 1)
 	  Perl_croak(aTHX_ "Usage: version::normal(lobj, ...)");
      SP -= items;
@@ -579,6 +587,7 @@ XS(XS_version_vcmp)
 {
      dVAR;
      dXSARGS;
+     PERL_UNUSED_ARG(cv);
      if (items < 1)
 	  Perl_croak(aTHX_ "Usage: version::vcmp(lobj, ...)");
      SP -= items;
@@ -624,6 +633,7 @@ XS(XS_version_boolean)
 {
     dVAR;
     dXSARGS;
+    PERL_UNUSED_ARG(cv);
     if (items < 1)
 	Perl_croak(aTHX_ "Usage: version::boolean(lobj, ...)");
     SP -= items;
@@ -642,6 +652,7 @@ XS(XS_version_noop)
 {
     dVAR;
     dXSARGS;
+    PERL_UNUSED_ARG(cv);
     if (items < 1)
 	Perl_croak(aTHX_ "Usage: version::noop(lobj, ...)");
     if (sv_derived_from(ST(0), "version"))
@@ -657,6 +668,7 @@ XS(XS_version_is_alpha)
 {
     dVAR;
     dXSARGS;
+    PERL_UNUSED_ARG(cv);
     if (items != 1)
 	Perl_croak(aTHX_ "Usage: version::is_alpha(lobj)");
     SP -= items;
@@ -677,6 +689,7 @@ XS(XS_version_qv)
 {
     dVAR;
     dXSARGS;
+    PERL_UNUSED_ARG(cv);
     if (items != 1)
 	Perl_croak(aTHX_ "Usage: version::qv(ver)");
     SP -= items;
@@ -721,6 +734,7 @@ XS(XS_utf8_is_utf8)
 {
      dVAR;
      dXSARGS;
+     PERL_UNUSED_ARG(cv);
      if (items != 1)
 	  Perl_croak(aTHX_ "Usage: utf8::is_utf8(sv)");
      else {
@@ -737,6 +751,7 @@ XS(XS_utf8_valid)
 {
      dVAR;
      dXSARGS;
+     PERL_UNUSED_ARG(cv);
      if (items != 1)
 	  Perl_croak(aTHX_ "Usage: utf8::valid(sv)");
     else {
@@ -755,6 +770,7 @@ XS(XS_utf8_encode)
 {
     dVAR;
     dXSARGS;
+    PERL_UNUSED_ARG(cv);
     if (items != 1)
 	Perl_croak(aTHX_ "Usage: utf8::encode(sv)");
     sv_utf8_encode(ST(0));
@@ -765,6 +781,7 @@ XS(XS_utf8_decode)
 {
     dVAR;
     dXSARGS;
+    PERL_UNUSED_ARG(cv);
     if (items != 1)
 	Perl_croak(aTHX_ "Usage: utf8::decode(sv)");
     else {
@@ -780,6 +797,7 @@ XS(XS_utf8_upgrade)
 {
     dVAR;
     dXSARGS;
+    PERL_UNUSED_ARG(cv);
     if (items != 1)
 	Perl_croak(aTHX_ "Usage: utf8::upgrade(sv)");
     else {
@@ -797,6 +815,7 @@ XS(XS_utf8_downgrade)
 {
     dVAR;
     dXSARGS;
+    PERL_UNUSED_ARG(cv);
     if (items < 1 || items > 2)
 	Perl_croak(aTHX_ "Usage: utf8::downgrade(sv, failok=0)");
     else {
@@ -815,6 +834,7 @@ XS(XS_utf8_native_to_unicode)
  dVAR;
  dXSARGS;
  const UV uv = SvUV(ST(0));
+ PERL_UNUSED_ARG(cv);
 
  if (items > 1)
      Perl_croak(aTHX_ "Usage: utf8::native_to_unicode(sv)");
@@ -828,6 +848,7 @@ XS(XS_utf8_unicode_to_native)
  dVAR;
  dXSARGS;
  const UV uv = SvUV(ST(0));
+ PERL_UNUSED_ARG(cv);
 
  if (items > 1)
      Perl_croak(aTHX_ "Usage: utf8::unicode_to_native(sv)");
@@ -841,6 +862,7 @@ XS(XS_Internals_SvREADONLY)	/* This is dangerous stuff. */
     dVAR;
     dXSARGS;
     SV * const sv = SvRV(ST(0));
+    PERL_UNUSED_ARG(cv);
 
     if (items == 1) {
 	 if (SvREADONLY(sv))
@@ -867,6 +889,7 @@ XS(XS_Internals_SvREFCNT)	/* This is dangerous stuff. */
     dVAR;
     dXSARGS;
     SV * const sv = SvRV(ST(0));
+    PERL_UNUSED_ARG(cv);
 
     if (items == 1)
 	 XSRETURN_IV(SvREFCNT(sv) - 1); /* Minus the ref created for us. */
@@ -882,6 +905,7 @@ XS(XS_Internals_hv_clear_placehold)
 {
     dVAR;
     dXSARGS;
+    PERL_UNUSED_ARG(cv);
 
     if (items != 1)
 	Perl_croak(aTHX_ "Usage: UNIVERSAL::hv_clear_placeholders(hv)");
@@ -902,6 +926,7 @@ XS(XS_PerlIO_get_layers)
 {
     dVAR;
     dXSARGS;
+    PERL_UNUSED_ARG(cv);
     if (items < 1 || items % 2 == 0)
 	Perl_croak(aTHX_ "Usage: PerlIO_get_layers(filehandle[,args])");
 #ifdef USE_PERLIO
@@ -1048,6 +1073,7 @@ XS(XS_Internals_HvREHASH)	/* Subject to change  */
 {
     dVAR;
     dXSARGS;
+    PERL_UNUSED_ARG(cv);
     if (SvROK(ST(0))) {
 	const HV * const hv = (HV *) SvRV(ST(0));
 	if (items == 1 && SvTYPE(hv) == SVt_PVHV) {

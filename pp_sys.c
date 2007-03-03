@@ -3341,7 +3341,7 @@ PP(pp_fttext)
 
 #if defined(DOSISH) || defined(USEMYBINMODE)
     /* ignore trailing ^Z on short files */
-    if (len && len < sizeof(tbuf) && tbuf[len-1] == 26)
+    if (len && len < (I32)sizeof(tbuf) && tbuf[len-1] == 26)
 	--len;
 #endif
 
