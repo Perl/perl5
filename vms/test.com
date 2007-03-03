@@ -59,7 +59,7 @@ $       EndIf
 $   EndIf
 $!
 $!  Pick up a copy of perl to use for the tests
-$   If F$Search("Perl.").nes."" Then Delete/Log/NoConfirm Perl'exe';*
+$   If F$Search("Perl''exe'").nes."" Then Delete/Log/NoConfirm Perl'exe';*
 $   If PERL_TEST_DRIVER .eqs. "minitest"
 $   Then
 $       Copy/Log/NoConfirm [-]miniperl'exe' []Perl'exe'
