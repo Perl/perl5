@@ -478,7 +478,7 @@ foreach my $value ([1,2,3], {1=>2}, *STDOUT{IO}, \&ok, *STDOUT{FORMAT}) {
        "Can't trip up general keyword overloading");
 
     $CORE::GLOBAL::{"readline"}=[];
-    eval "no warnings; <STDOUT>";
+    eval "<STDOUT> if 0";
     is($@, '', "Can't trip up readline overloading");
 
     $CORE::GLOBAL::{"readpipe"}=[];
