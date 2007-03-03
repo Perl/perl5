@@ -3,6 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    $INC{"feature.pm"} = 1; # so we don't attempt to load feature.pm
 }
 
 print "1..59\n";
