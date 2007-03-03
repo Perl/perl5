@@ -1,6 +1,6 @@
 package Math::BigInt::FastCalc;
 
-use 5.005;
+use 5.006002;
 use strict;
 # use warnings;	# dont use warnings for older Perls
 
@@ -11,7 +11,7 @@ use vars qw/@ISA $VERSION $BASE $BASE_LEN/;
 
 @ISA = qw(DynaLoader);
 
-$VERSION = '0.11';
+$VERSION = '0.12';
 
 bootstrap Math::BigInt::FastCalc $VERSION;
 

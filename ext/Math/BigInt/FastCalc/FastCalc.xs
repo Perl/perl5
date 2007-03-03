@@ -230,51 +230,44 @@ _num(class,x)
 
 ##############################################################################
 
-void
+#define CONSTANT_OBJ(int)		\
+    RETVAL = newAV();			\
+    sv_2mortal((SV*)RETVAL);		\
+    av_push (RETVAL, newSViv( int ));
+
+AV *
 _zero(class)
-  INIT:
-    AV* a;
-
   CODE:
-    a = newAV();
-    av_push (a, newSViv( 0 ));		/* zero */
-    ST(0) = newRV_noinc((SV*) a);
+    CONSTANT_OBJ(0)
+  OUTPUT:
+    RETVAL
 
 ##############################################################################
 
-void
+AV *
 _one(class)
-  INIT:
-    AV* a;
-
   CODE:
-    a = newAV();
-    av_push (a, newSViv( 1 ));		/* one */
-    ST(0) = newRV_noinc((SV*) a);
+    CONSTANT_OBJ(1)
+  OUTPUT:
+    RETVAL
 
 ##############################################################################
 
-void
+AV *
 _two(class)
-  INIT:
-    AV* a;
-
   CODE:
-    a = newAV();
-    av_push (a, newSViv( 2 ));		/* two */
-    ST(0) = newRV_noinc((SV*) a);
+    CONSTANT_OBJ(2)
+  OUTPUT:
+    RETVAL
 
 ##############################################################################
 
-void
+AV *
 _ten(class)
-  INIT:
-    AV* a;
-
   CODE:
-    a = newAV();
-    av_push (a, newSViv( 10 ));		/* ten */
-    ST(0) = newRV_noinc((SV*) a);
+    CONSTANT_OBJ(10)
+  OUTPUT:
+    RETVAL
 
 ##############################################################################
 
@@ -388,15 +381,15 @@ _len(class,x)
   INIT:
     AV*	a;
     SV*	temp;
-    IV	elems;
+    NV	elems;
     STRLEN len;
 
   CODE:
     a = (AV*)SvRV(x);			/* ref to aray, don't check ref */
-    elems = av_len(a);			/* number of elems in array */
+    elems = (NV) av_len(a);		/* number of elems in array */
     temp = *av_fetch(a, elems, 0);	/* fetch last element */
     SvPV(temp, len);			/* convert to string & store length */
-    len += (IV) XS_BASE_LEN * elems;
+    len += XS_BASE_LEN * elems;
     ST(0) = newSViv(len);
 
 ##############################################################################

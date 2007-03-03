@@ -883,6 +883,7 @@ ext/Math/BigInt/FastCalc/Makefile.PL	Math::BigInt::FastCalc extension
 ext/Math/BigInt/FastCalc/t/bigintfc.t	Math::BigInt::FastCalc extension
 ext/Math/BigInt/FastCalc/t/bootstrap.t	Math::BigInt::FastCalc extension
 ext/Math/BigInt/FastCalc/t/mbi_rand.t	Math::BigInt::FastCalc extension
+ext/Math/BigInt/FastCalc/t/leak.t	test for memory leaks in Math::BigInt::FastCalc
 ext/MIME/Base64/Base64.pm	MIME::Base64 extension
 ext/MIME/Base64/Base64.xs	MIME::Base64 extension
 ext/MIME/Base64/Changes		MIME::Base64 extension
