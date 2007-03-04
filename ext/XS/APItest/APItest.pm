@@ -19,7 +19,7 @@ our @EXPORT = qw( print_double print_int print_long
 		  call_sv call_pv call_method eval_sv eval_pv require_pv
 		  G_SCALAR G_ARRAY G_VOID G_DISCARD G_EVAL G_NOARGS
 		  G_KEEPERR G_NODEBUG G_METHOD
-		  exception mycroak strtab
+		  apitest_exception mycroak strtab
 		  my_cxt_getint my_cxt_getsv my_cxt_setint my_cxt_setsv
 		  sv_setsv_cow_hashkey_core sv_setsv_cow_hashkey_notcore
 );

@@ -10,7 +10,11 @@ static void throws_exception(int throw_e)
     croak("boo\n");
 }
 
-int exception(int throw_e)
+/* Don't give this the same name as exection() in ext/Devel/PPPort/module3.c
+   as otherwise building entirely staticly will cause a test to fail, as
+   PPPort's execption() gets used in place of this one.  */
+   
+int apitest_exception(int throw_e)
 {
   dTHR;
   dXCPT;

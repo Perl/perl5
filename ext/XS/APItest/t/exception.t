@@ -19,7 +19,7 @@ my $rv;
 
 $XS::APItest::exception_caught = undef;
 
-$rv = eval { exception(0) };
+$rv = eval { apitest_exception(0) };
 is($@, '');
 ok(defined $rv);
 is($rv, 42);
@@ -27,7 +27,7 @@ is($XS::APItest::exception_caught, 0);
 
 $XS::APItest::exception_caught = undef;
 
-$rv = eval { exception(1) };
+$rv = eval { apitest_exception(1) };
 is($@, "boo\n");
 ok(not defined $rv);
 is($XS::APItest::exception_caught, 1);
