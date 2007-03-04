@@ -1,6 +1,12 @@
 CHANGES
 -------
 
+  2.004 3 March 2007
+
+      * Fixed lvalue substr issue
+
+      * Remove redundant code from Zlib.xs
+
   2.003 2 January 2007
 
       * Added explicit version checking

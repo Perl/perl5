@@ -7,16 +7,16 @@ use warnings;
 use bytes;
 
 
-use IO::Compress::Base 2.003 ;
-use IO::Compress::Base::Common  2.003 qw(:Status createSelfTiedObject);
-use IO::Compress::Adapter::Deflate  2.003 ;
+use IO::Compress::Base 2.004 ;
+use IO::Compress::Base::Common  2.004 qw(:Status createSelfTiedObject);
+use IO::Compress::Adapter::Deflate  2.004 ;
 
 require Exporter ;
 
 
 our ($VERSION, @ISA, @EXPORT_OK, %DEFLATE_CONSTANTS, %EXPORT_TAGS, $RawDeflateError);
 
-$VERSION = '2.003';
+$VERSION = '2.004';
 $RawDeflateError = '';
 
 @ISA = qw(Exporter IO::Compress::Base);
@@ -141,8 +141,8 @@ sub getZlibParams
 {
     my $self = shift ;
 
-    use IO::Compress::Base::Common  2.003 qw(:Parse);
-    use Compress::Raw::Zlib  2.003 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+    use IO::Compress::Base::Common  2.004 qw(:Parse);
+    use Compress::Raw::Zlib  2.004 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 
     
     return (

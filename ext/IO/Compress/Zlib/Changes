@@ -1,6 +1,28 @@
 CHANGES
 -------
 
+  2.004 3 March 2007
+
+      * IO::Compress::Zip 
+
+        - Added Zip64 documentation.
+
+        - Fixed extended timestamp.  
+          Creation time isn't available in Unix so only store the
+          modification time and the last access time in the extended field.
+
+        - Fixed file mode.
+
+        - Added ExtAttr option to control the value of the "external file
+          attributes" field in the central directory.
+
+        - Added Unix2 extended attribute ("Ux"). 
+          This stores the UID & GID.
+
+      * IO::Compress::Gzip 
+
+        - Fixed 050interop-gzip.t for Windows 
+
   2.003 2 January 2007
 
       * Added explicit version checking

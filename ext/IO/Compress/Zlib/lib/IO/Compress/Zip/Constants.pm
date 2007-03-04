@@ -7,7 +7,7 @@ require Exporter;
 
 our ($VERSION, @ISA, @EXPORT, %ZIP_CM_MIN_VERSIONS);
 
-$VERSION = '2.003';
+$VERSION = '2.004';
 
 @ISA = qw(Exporter);
 
@@ -16,6 +16,7 @@ $VERSION = '2.003';
     ZIP_CM_STORE
     ZIP_CM_DEFLATE
     ZIP_CM_BZIP2
+    ZIP_CM_LZMA
     
     ZIP_LOCAL_HDR_SIG
     ZIP_DATA_HDR_SIG
@@ -33,7 +34,10 @@ $VERSION = '2.003';
 
     ZIP_EXTRA_ID_ZIP64
     ZIP_EXTRA_ID_EXT_TIMESTAMP
-    ZIP_EXTRA_ID_INFO_ZIP_UNIX
+    ZIP_EXTRA_ID_INFO_ZIP_UNIX2
+
+    ZIP_OS_CODE_UNIX
+    ZIP_OS_CODE_DEFAULT
 
     ZIP_IFA_TEXT_MASK
 
@@ -46,6 +50,7 @@ $VERSION = '2.003';
 use constant ZIP_CM_STORE                      => 0 ;
 use constant ZIP_CM_DEFLATE                    => 8 ;
 use constant ZIP_CM_BZIP2                      => 12 ;
+use constant ZIP_CM_LZMA                       => 14 ; # Not Supported yet
 
 # General Purpose Flag
 use constant ZIP_GP_FLAG_ENCRYPTED_MASK        => 1 ;
@@ -66,10 +71,13 @@ use constant ZIP64_END_CENTRAL_LOC_HDR_SIG     => 0x07064b50;
 use constant ZIP64_ARCHIVE_EXTRA_SIG           => 0x08064b50;
 use constant ZIP64_DIGITAL_SIGNATURE_SIG       => 0x05054b50;
 
+use constant ZIP_OS_CODE_UNIX                  => 3;
+use constant ZIP_OS_CODE_DEFAULT               => 3;
+
 # Extra Field ID's
 use constant ZIP_EXTRA_ID_ZIP64                => pack "v", 1;
 use constant ZIP_EXTRA_ID_EXT_TIMESTAMP        => "UT";
-use constant ZIP_EXTRA_ID_INFO_ZIP_UNIX        => "Ux";
+use constant ZIP_EXTRA_ID_INFO_ZIP_UNIX2       => "Ux";
 
 use constant ZIP64_MIN_VERSION                 => 45;
 
@@ -77,6 +85,7 @@ use constant ZIP64_MIN_VERSION                 => 45;
             ZIP_CM_STORE()                      => 20,
             ZIP_CM_DEFLATE()                    => 20,
             ZIP_CM_BZIP2()                      => 46,
+            ZIP_CM_LZMA()                       => 63,
             );
 
 

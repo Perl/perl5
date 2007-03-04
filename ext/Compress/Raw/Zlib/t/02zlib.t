@@ -701,8 +701,7 @@ if ($] >= 5.005)
     ok my $k = new Compress::Raw::Zlib::Inflate ( -AppendOutput => 1,
                                              -ConsumeInput => 1 ) ;
      
-#    cmp_ok $k->inflate(substr($X, 0, -1), $Z), '==', Z_STREAM_END ; ;
-    cmp_ok $k->inflate(substr($X, 0), $Z), '==', Z_STREAM_END ; ;
+    cmp_ok $k->inflate(substr($X, 0, -1), $Z), '==', Z_STREAM_END ; ;
      
     ok $hello eq $Z ;
     is $X, $append;
@@ -755,7 +754,10 @@ foreach (1 .. 2)
     
     cmp_ok  $x->flush(substr($Answer, length($Answer))), '==', Z_OK ;
      
+    #cmp_ok length $Answer, ">", 0 ;
+
     my @Answer = split('', $Answer) ;
+    
      
     my $k;
     ok(($k, $err) = new Compress::Raw::Zlib::Inflate(-AppendOutput => 1) );

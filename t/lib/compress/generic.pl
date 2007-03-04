@@ -18,7 +18,7 @@ BEGIN
     $extra = 1
         if $st ;
 
-    plan(tests => 639 + $extra) ;
+    plan(tests => 641 + $extra) ;
 }
 
 sub myGZreadFile
@@ -653,7 +653,9 @@ EOT
 
             my %opts = () ;
             my $iow = new $CompressClass $name, %opts;
+            is $iow->input_line_number, undef; 
             $iow->print($str) ;
+            is $iow->input_line_number, undef; 
             $iow->close ;
 
             my @tmp;

@@ -10,12 +10,12 @@ our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS);
 @ISA    = qw(Exporter );
 
 
-$VERSION = '2.003';
+$VERSION = '2.004';
 
 use constant G_EOF => 0 ;
 use constant G_ERR => -1 ;
 
-use IO::Compress::Base::Common 2.003 ;
+use IO::Compress::Base::Common 2.004 ;
 #use Parse::Parameters ;
 
 use IO::File ;
@@ -301,6 +301,8 @@ sub checkParams
                     'Scan'          => [1, 1, Parse_boolean,  0],
                     'InputLength'   => [1, 1, Parse_unsigned, undef],
                     'BinModeOut'    => [1, 1, Parse_boolean,  0],
+                    #'Encode'        => [1, 1, Parse_any,       undef],
+
                    #'ConsumeInput'  => [1, 1, Parse_boolean,  0],
 
                     $self->getExtraParams(),
@@ -378,6 +380,11 @@ sub _create
 
         my $buff = "" ;
         *$obj->{Buffer} = \$buff ;
+    }
+
+    if ($got->parsed('Encode')) { 
+        my $want_encoding = $got->value('Encode');
+        *$obj->{Encoding} = getEncoding($obj, $class, $want_encoding);
     }
 
 
@@ -807,19 +814,19 @@ sub _raw_read
         $self->postBlockChk($buffer, $before_len) == STATUS_OK
             or return G_ERR;
 
-        $self->filterUncompressed($buffer);
-
-        # TODO uncompress filter goes here    
-
-
         $buf_len = length($$buffer) - $before_len;
-
     
         *$self->{CompSize}->add($beforeC_len - length $temp_buf) ;
 
         *$self->{InflatedBytesRead} += $buf_len ;
         *$self->{TotalInflatedBytesRead} += $buf_len ;
         *$self->{UnCompSize}->add($buf_len) ;
+
+        $self->filterUncompressed($buffer);
+
+        if (*$self->{Encoding}) {
+            $$buffer = *$self->{Encoding}->decode($$buffer);
+        }
     }
 
     if ($status == STATUS_ENDSTREAM) {
@@ -1271,11 +1278,14 @@ sub seek
     # Walk the file to the new offset
     my $offset = $target - $here ;
 
-    my $buffer ;
-    $self->read($buffer, $offset) == $offset
-        or return 0 ;
+    my $got;
+    while (($got = $self->read(my $buffer, min($offset, *$self->{BlockSize})) ) > 0)
+    {
+        $offset -= $got;
+        last if $offset == 0 ;
+    }
 
-    return 1 ;
+    return $offset == 0 ? 1 : 0 ;
 }
 
 sub fileno

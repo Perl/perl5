@@ -19,7 +19,7 @@ BEGIN
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 166 + $extra ;
+    plan tests => 165 + $extra ;
 
 }
 
@@ -31,13 +31,6 @@ sub run
     my $UncompressClass = getInverse($CompressClass);
     my $Error           = getErrorRef($CompressClass);
     my $UnError         = getErrorRef($UncompressClass);
-
-
-
-
-    # Check zlib_version and ZLIB_VERSION are the same.
-    is Compress::Raw::Zlib::zlib_version, ZLIB_VERSION, 
-        "ZLIB_VERSION matches Compress::Raw::Zlib::zlib_version" ;
 
     # Tests     
     #   destination is a file that doesn't exist -- should work ok unless AnyDeflate

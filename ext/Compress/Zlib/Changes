@@ -1,6 +1,10 @@
 CHANGES
 -------
 
+  2.004 3 March 2007
+
+      * rewrote memGzip using IO::Compress::Gzip::gzip
+
   2.003 2 January 2007
 
       * Added explicit version checking

@@ -857,8 +857,8 @@ if ($] >= 5.005)
      
     ok $k = inflateInit() ;
      
-    #$Z = $k->inflate(substr($Y, 0, -1)) ;
-    $Z = $k->inflate(substr($Y, 0)) ;
+    $Z = $k->inflate(substr($Y, 0, -1)) ;
+    #$Z = $k->inflate(substr($Y, 0)) ;
      
     ok $contents eq $Z ;
     is $Y, $append;

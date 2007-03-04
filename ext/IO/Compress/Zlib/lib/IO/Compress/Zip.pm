@@ -4,21 +4,21 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.003 qw(:Status createSelfTiedObject);
-use IO::Compress::RawDeflate 2.003 ;
-use IO::Compress::Adapter::Deflate 2.003 ;
-use IO::Compress::Adapter::Identity 2.003 ;
-use IO::Compress::Zlib::Extra 2.003 ;
-use IO::Compress::Zip::Constants 2.003 ;
+use IO::Compress::Base::Common  2.004 qw(:Status createSelfTiedObject);
+use IO::Compress::RawDeflate 2.004 ;
+use IO::Compress::Adapter::Deflate 2.004 ;
+use IO::Compress::Adapter::Identity 2.004 ;
+use IO::Compress::Zlib::Extra 2.004 ;
+use IO::Compress::Zip::Constants 2.004 ;
 
 
-use Compress::Raw::Zlib  2.003 qw(crc32) ;
+use Compress::Raw::Zlib  2.004 qw(crc32) ;
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.003 ; 
+           import  IO::Compress::Adapter::Bzip2 2.004 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.003 ; 
+           import  IO::Compress::Bzip2 2.004 ; 
          } ;
 }
 
@@ -27,7 +27,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $ZipError);
 
-$VERSION = '2.003';
+$VERSION = '2.004';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -139,6 +139,8 @@ sub mkHeader
     my $extra = '';
     my $ctlExtra = '';
     my $empty = 0;
+    my $osCode = $param->value('OS_Code') ;
+    my $extFileAttr = 0 ;
 
     if (*$self->{ZipData}{Zip64}) {
         $empty = 0xFFFF;
@@ -164,11 +166,18 @@ sub mkHeader
             $ctlExtra .= mkExtendedTime($param->value('MTime'));
         }
 
-    #    if ( $param->value('UID'))
-    #    {
-    #        $extra    .= mkUnixExtra( $param->value('UID'), $param->value('GID'));
-    #        $ctlExtra .= mkUnixExtra();
-    #    }
+        if ( $param->value('UID') && $osCode == ZIP_OS_CODE_UNIX)
+        {
+            $extra    .= mkUnix2Extra( $param->value('UID'), $param->value('GID'));
+            $ctlExtra .= mkUnix2Extra();
+        }
+
+        # TODO - this code assumes Unix.
+        #$extFileAttr = 0666 << 16 
+        #    if $osCode == ZIP_OS_CODE_UNIX ;
+
+        $extFileAttr = $param->value('ExtAttr') 
+            if defined $param->value('ExtAttr') ;
 
         $extra .= $param->value('ExtraFieldLocal') 
             if defined $param->value('ExtraFieldLocal');
@@ -176,12 +185,6 @@ sub mkHeader
         $ctlExtra .= $param->value('ExtraFieldCentral') 
             if defined $param->value('ExtraFieldCentral');
     }
-
-
-    # TODO - this code assumes Unix.
-    my $extAttr = 0;
-    $extAttr = $param->value('Mode') << 16
-        if defined $param->value('Mode') ;
 
     my $gpFlag = 0 ;    
     $gpFlag |= ZIP_GP_FLAG_STREAMING_MASK
@@ -233,7 +236,7 @@ sub mkHeader
     $ctl .= pack 'v', length $comment ;  # file comment length
     $ctl .= pack 'v', 0          ; # disk number start 
     $ctl .= pack 'v', $ifa       ; # internal file attributes
-    $ctl .= pack 'V', $extAttr   ; # external file attributes
+    $ctl .= pack 'V', $extFileAttr   ; # external file attributes
     if (! *$self->{ZipData}{Zip64}) {
         $ctl .= pack 'V', *$self->{ZipData}{Offset}->get32bit()  ; # offset to local header
     }
@@ -438,8 +441,8 @@ sub getExtraParams
 {
     my $self = shift ;
 
-    use IO::Compress::Base::Common  2.003 qw(:Parse);
-    use Compress::Raw::Zlib  2.003 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+    use IO::Compress::Base::Common  2.004 qw(:Parse);
+    use Compress::Raw::Zlib  2.004 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 
     my @Bzip2 = ();
     
@@ -462,6 +465,7 @@ sub getExtraParams
             'Name'      => [0, 1, Parse_any,       ''],
             'Time'      => [0, 1, Parse_any,       undef],
             'exTime'    => [0, 1, Parse_any,       undef],
+            'ExtAttr'   => [0, 1, Parse_any,       0],
             'OS_Code'   => [0, 1, Parse_unsigned,  $Compress::Raw::Zlib::gzip_os_code],
             
            'TextFlag'  => [0, 1, Parse_boolean,   0],
@@ -497,10 +501,11 @@ sub getFileInfo
     {
         $params->value('MTime' => $mtime) ;
         $params->value('ATime' => $atime) ;
-        $params->value('CTime' => $ctime) ;
+        $params->value('CTime' => undef) ; # No Creation time
     }
 
-    $params->value('Mode' => $mode) ;
+    $params->value('ExtAttr' => $mode << 16) 
+        if ! $params->parsed('ExtAttr');
 
     $params->value('UID' => $uid) ;
     $params->value('GID' => $gid) ;
@@ -526,12 +531,11 @@ sub mkExtendedTime
         $bit <<= 1 ;
     }
 
-    #return "UT" . pack("v C", length($times) + 1, $flags) . $times;
     return IO::Compress::Zlib::Extra::mkSubField(ZIP_EXTRA_ID_EXT_TIMESTAMP,
                                                  pack("C", $flags) .  $times);
 }
 
-sub mkUnixExtra
+sub mkUnix2Extra
 {
     my $ids = '';
     for my $id (@_)
@@ -539,8 +543,8 @@ sub mkUnixExtra
         $ids .= pack("v", $id);
     }
 
-    #return "Ux" . pack("v", length $ids) . $ids;
-    return IO::Compress::Zlib::Extra::mkSubField(ZIP_EXTRA_ID_INFO_ZIP_UNIX, $ids);
+    return IO::Compress::Zlib::Extra::mkSubField(ZIP_EXTRA_ID_INFO_ZIP_UNIX2, 
+                                                 $ids);
 }
 
 
@@ -630,10 +634,15 @@ compressed data to files or buffer.
 
 
 
-
 The primary purpose of this module is to provide streaming write access to
 zip files and buffers. It is not a general-purpose file archiver. If that
 is what you want, check out C<Archive::Zip>.
+
+At present three compression methods are supported by IO::Compress::Zip,
+namely Store (no compression at all), Deflate and Bzip2.
+
+Note that to create Bzip2 content, the module C<IO::Compress::Bzip2> must
+be installed.
 
 
 
@@ -719,10 +728,10 @@ If the C<$input> parameter is any other type, C<undef> will be returned.
 
 
 In addition, if C<$input> is a simple filename, the default values for
-the C<Name>, C<Time> and C<exTime> options will be sourced from that file.
+the C<Name>, C<Time>, C<ExtAttr> and C<exTime> options will be sourced from that file.
 
 If you do not want to use these defaults they can be overridden by
-explicitly setting the C<Name>, C<Time> and C<exTime> options or by setting the
+explicitly setting the C<Name>, C<Time>, C<ExtAttr> and C<exTime> options or by setting the
 C<Minimal> parameter.
 
 
@@ -988,6 +997,13 @@ Sets the last modified time field in the zip header to $number.
 This field defaults to the time the C<IO::Compress::Zip> object was created
 if this option is not specified.
 
+=item C<< ExtAttr => $attr >>
+
+This option controls the "external file attributes" field in the central
+header of the zip file. This is a 4 byte field.
+
+This option defaults to 0.
+
 =item C<< exTime => [$atime, $mtime, $ctime] >>
 
 This option expects an array reference with exactly three elements:
@@ -997,6 +1013,11 @@ time, last modification time and creation time respectively.
 It uses these values to set the extended timestamp field in the local zip
 header to the three values, $atime, $mtime, $ctime and sets the extended
 timestamp field in the central zip header to C<$mtime>.
+
+If any of the three values is C<undef> that time value will not be used.
+So, for example, to set only the C<$mtime> you would use this
+
+    exTime => [undef, $mtime, undef]
 
 If the C<Minimal> option is set to true, this option will be ignored.
 
@@ -1047,7 +1068,22 @@ is 0), the output file must be seekable.
 
 The default is 1.
 
+=item C<< Zip64 => 0|1 >>
 
+Create a Zip64 zip file/buffer. This option should only be used if you want
+to store files larger than 4 Gig.
+
+If you intend to manipulate the Zip64 zip files created with this module
+using an external zip/unzip make sure that it supports streaming Zip64.  
+
+In particular, if you are using Info-Zip you need to have zip version 3.x
+or better to update a Zip64 archive and unzip version 6.x to read a zip64
+archive. At the time of writing both are beta status.
+
+When the C<Zip64> option is enabled, the C<Stream> option I<must> be
+enabled as well.
+
+The default is 0.
 
 =item C<< TextFlag => 0|1 >>
 
@@ -1093,6 +1129,9 @@ Alternatively the list of subfields can by supplied as a scalar, thus
 
     ExtraField => $rawdata
 
+The Extended Time field, set using the C<exTime> option, is an example of
+an extended field.
+
 
 
 If the C<Minimal> option is set to true, this option will be ignored.
@@ -1102,7 +1141,8 @@ The maximum size of an extra field 65535 bytes.
 =item C<< Minimal => 1|0 >>
 
 If specified, this option will disable the creation of all extended fields
-in the zip local and central headers.
+in the zip local and central headers. So the C<exTime>, C<ExtraFieldLocal>
+and C<ExtraFieldCentral> options will be ignored.
 
 This parameter defaults to 0.
 

@@ -3,7 +3,7 @@
  * Created : 22nd January 1996
  * Version : 2.000
  *
- *   Copyright (c) 1995-2005 Paul Marquess. All rights reserved.
+ *   Copyright (c) 1995-2007 Paul Marquess. All rights reserved.
  *   This program is free software; you can redistribute it and/or
  *   modify it under the same terms as Perl itself.
  *
@@ -150,8 +150,6 @@ typedef di_stream * inflateStream ;
 typedef di_stream * Compress__Raw__Zlib__inflateStream ;
 typedef di_stream * Compress__Raw__Zlib__inflateScanStream ;
 
-#define GZERRNO "Compress::Zlib::gzerrno"
-
 #define ZMALLOC(to, typ) ((to = (typ *)safemalloc(sizeof(typ))), \
                                 Zero(to,1,typ))
 
@@ -283,51 +281,6 @@ int error_no ;
     return errstr ;
 }
 
-#if 0
-static void
-#ifdef CAN_PROTOTYPE
-SetGzErrorNo(int error_no)
-#else
-SetGzErrorNo(error_no)
-int error_no ;
-#endif
-{
-    dTHX;
-    char * errstr ;
-    SV * gzerror_sv = perl_get_sv(GZERRNO, FALSE) ;
-  
-    if (error_no == Z_ERRNO) {
-        error_no = errno ;
-        errstr = Strerror(errno) ;
-    }
-    else
-        /* errstr = gzerror(fil, &error_no) ; */
-        errstr = (char*) my_z_errmsg[2 - error_no]; 
-
-    if (SvIV(gzerror_sv) != error_no) {
-        sv_setiv(gzerror_sv, error_no) ;
-        sv_setpv(gzerror_sv, errstr) ;
-        SvIOK_on(gzerror_sv) ;
-    }
-
-}
-
-
-static void
-#ifdef CAN_PROTOTYPE
-SetGzError(gzFile file)
-#else
-SetGzError(file)
-gzFile file ;
-#endif
-{
-    int error_no ;
-
-    (void)gzerror(file, &error_no) ;
-    SetGzErrorNo(error_no) ;
-}
-
-#endif
 
 #ifdef MAGIC_APPEND
 
@@ -987,10 +940,10 @@ deflate (s, buf, output)
     if (RETVAL == Z_OK) {
         SvPOK_only(output);
         SvCUR_set(output, cur_length + increment - s->stream.avail_out) ;
+        SvSETMAGIC(output);
     }
     OUTPUT:
 	RETVAL
-	output
   
 
 void
@@ -1091,10 +1044,10 @@ flush(s, output, f=Z_FINISH)
     if (RETVAL == Z_OK) {
         SvPOK_only(output);
         SvCUR_set(output, cur_length + increment - s->stream.avail_out) ;
+        SvSETMAGIC(output);
     }
     OUTPUT:
 	RETVAL
-	output
 
 
 DualType
@@ -1402,6 +1355,7 @@ inflate (s, buf, output, eof=FALSE)
         if (out_utf8)
             sv_utf8_upgrade(output);
 #endif        
+        SvSETMAGIC(output);
 
         if (s->flags & FLAG_CRC32 )
             s->crc32 = crc32(s->crc32, 
@@ -1425,8 +1379,6 @@ inflate (s, buf, output, eof=FALSE)
     }
     OUTPUT:
 	RETVAL
-	buf
-	output
 
 uLong
 inflateCount(s)
@@ -1488,7 +1440,6 @@ inflateSync (s, buf)
     }
     OUTPUT:
 	RETVAL
-	buf
 
 void
 DESTROY(s)

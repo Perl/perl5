@@ -1,9 +1,9 @@
 
                              Compress::Raw::Zlib
 
-                             Version 2.003
+                             Version 2.004
 
-                             2nd January 2007
+                              3rd March 2007
 
 
        Copyright (c) 2005-2007 Paul Marquess. All rights reserved.
@@ -391,7 +391,7 @@ To help me help you, I need all of the following information:
           $VERSION = "1.05" ;
 
 
-     c. The version of zlib you have installed.
+     c. The version of zlib you have used.
         If you have successfully installed Compress::Raw::Zlib, this one-liner
         will tell you:
 

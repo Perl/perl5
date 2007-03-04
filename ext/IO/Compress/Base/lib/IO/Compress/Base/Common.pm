@@ -9,15 +9,16 @@ use Scalar::Util qw(blessed readonly);
 use File::GlobMapper;
 
 require Exporter;
-our ($VERSION, @ISA, @EXPORT, %EXPORT_TAGS);
+our ($VERSION, @ISA, @EXPORT, %EXPORT_TAGS, $HAS_ENCODE);
 @ISA = qw(Exporter);
-$VERSION = '2.003';
+$VERSION = '2.004';
 
 @EXPORT = qw( isaFilehandle isaFilename whatIsInput whatIsOutput 
               isaFileGlobString cleanFileGlobString oneTarget
               setBinModeInput setBinModeOutput
               ckInOutParams 
               createSelfTiedObject
+              getEncoding
 
               WANT_CODE
               WANT_EXT
@@ -41,11 +42,39 @@ use constant STATUS_OK        => 0;
 use constant STATUS_ENDSTREAM => 1;
 use constant STATUS_EOF       => 2;
 use constant STATUS_ERROR     => -1;
-#use constant STATUS_OK        =>  0;
-#use constant STATUS_ENDSTREAM =>  1;
-#use constant STATUS_ERROR     =>  2;
-#use constant STATUS_EOF       =>  3;
           
+sub hasEncode()
+{
+    if (! defined $HAS_ENCODE) {
+        eval
+        {
+            require Encode;
+            Encode->import();
+        };
+
+        $HAS_ENCODE = $@ ? 0 : 1 ;
+    }
+
+    return $HAS_ENCODE;
+}
+
+sub getEncoding($$$)
+{
+    my $obj = shift;
+    my $class = shift ;
+    my $want_encoding = shift ;
+
+    $obj->croakError("$class: Encode module needed to use -Encode")
+        if ! hasEncode();
+
+    my $encoding = Encode::find_encoding($want_encoding);
+
+    $obj->croakError("$class: Encoding '$want_encoding' is not available")
+       if ! $encoding;
+
+    return $encoding;
+}
+
 our ($needBinmode);
 $needBinmode = ($^O eq 'MSWin32' || 
                     ($] >= 5.006 && eval ' ${^UNICODE} || ${^UTF8LOCALE} '))

@@ -8,17 +8,17 @@ use Carp ;
 use IO::Handle ;
 use Scalar::Util qw(dualvar);
 
-use IO::Compress::Base::Common 2.003 ;
-use Compress::Raw::Zlib 2.003 ;
-use IO::Compress::Gzip 2.003 ;
-use IO::Uncompress::Gunzip 2.003 ;
+use IO::Compress::Base::Common 2.004 ;
+use Compress::Raw::Zlib 2.004 ;
+use IO::Compress::Gzip 2.004 ;
+use IO::Uncompress::Gunzip 2.004 ;
 
 use strict ;
 use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.003';
+$VERSION = '2.004';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -438,35 +438,19 @@ sub inflate
 
 package Compress::Zlib ;
 
-use IO::Compress::Gzip::Constants 2.003 ;
+use IO::Compress::Gzip::Constants 2.004 ;
 
 sub memGzip($)
 {
-  my $x = new Compress::Raw::Zlib::Deflate(
-                      -AppendOutput  => 1,
-                      -CRC32         => 1,
-                      -ADLER32       => 0,
-                      -Level         => Z_BEST_COMPRESSION(),
-                      -WindowBits    => - MAX_WBITS(),
-                     )
-      or return undef ;
- 
-  # write a minimal gzip header
-  my $output = GZIP_MINIMUM_HEADER ;
- 
+  my $out;
+
   # if the deflation buffer isn't a reference, make it one
   my $string = (ref $_[0] ? $_[0] : \$_[0]) ;
 
-  my $status = $x->deflate($string, \$output) ;
-  $status == Z_OK()
+  IO::Compress::Gzip::gzip($string, \$out, Minimal => 1)
       or return undef ;
- 
-  $status = $x->flush(\$output) ;
-  $status == Z_OK()
-      or return undef ;
- 
-  return $output . pack("V V", $x->crc32(), $x->total_in()) ;
- 
+
+  return $out;
 }
 
 

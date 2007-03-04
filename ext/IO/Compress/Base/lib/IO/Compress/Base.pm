@@ -6,7 +6,7 @@ require 5.004 ;
 use strict ;
 use warnings;
 
-use IO::Compress::Base::Common 2.003 ;
+use IO::Compress::Base::Common 2.004 ;
 
 use IO::File ;
 use Scalar::Util qw(blessed readonly);
@@ -17,21 +17,12 @@ use Carp ;
 use Symbol;
 use bytes;
 
-our (@ISA, $VERSION, $got_encode);
+our (@ISA, $VERSION);
 #@ISA    = qw(Exporter IO::File);
 
-$VERSION = '2.003';
+$VERSION = '2.004';
 
 #Can't locate object method "SWASHNEW" via package "utf8" (perhaps you forgot to load "utf8"?) at .../ext/Compress-Zlib/Gzip/blib/lib/Compress/Zlib/Common.pm line 16.
-
-#$got_encode = 0;
-#eval
-#{
-#    require Encode;
-#    Encode->import('encode', 'find_encoding');
-#};
-#
-#$got_encode = 1 unless $@;
 
 sub saveStatus
 {
@@ -157,7 +148,7 @@ sub checkParams
         {
             # Generic Parameters
             'AutoClose' => [1, 1, Parse_boolean,   0],
-           #'Encoding'  => [1, 1, Parse_any,       undef],
+            #'Encode'    => [1, 1, Parse_any,       undef],
             'Strict'    => [0, 1, Parse_boolean,   1],
             'Append'    => [1, 1, Parse_boolean,   0],
             'BinModeIn' => [1, 1, Parse_boolean,   0],
@@ -229,19 +220,10 @@ sub _create
 
 
 
-#    TODO - encoding
-#    if ($got->parsed('Encoding')) { 
-#        $obj->croakError("$class: Encode module needed to use -Encoding")
-#            if ! $got_encode;
-#
-#        my $want_encoding = $got->value('Encoding');
-#        my $encoding = find_encoding($want_encoding);
-#
-#        $obj->croakError("$class: Encoding '$want_encoding' is not available")
-#           if ! $encoding;
-#
-#        *$obj->{Encoding} = $encoding;
-#    }
+    if ($got->parsed('Encode')) { 
+        my $want_encoding = $got->value('Encode');
+        *$obj->{Encoding} = getEncoding($obj, $class, $want_encoding);
+    }
 
     $obj->ckParams($got)
         or $obj->croakError("${class}: " . $obj->error());
@@ -616,14 +598,14 @@ sub syswrite
 
     return 0 if ! defined $$buffer || length $$buffer == 0 ;
 
-    my $buffer_length = defined $$buffer ? length($$buffer) : 0 ;
-    *$self->{UnCompSize}->add($buffer_length) ;
+    if (*$self->{Encoding}) {
+        $$buffer = *$self->{Encoding}->encode($$buffer);
+    }
 
     $self->filterUncompressed($buffer);
 
-#    if (*$self->{Encoding}) {
-#        $$buffer = *$self->{Encoding}->encode($$buffer);
-#    }
+    my $buffer_length = defined $$buffer ? length($$buffer) : 0 ;
+    *$self->{UnCompSize}->add($buffer_length) ;
 
     my $outBuffer='';
     my $status = *$self->{Compress}->compr($buffer, $outBuffer) ;

@@ -35,6 +35,9 @@ WriteMakefile(
         : ()
     ),
 
+    ((ExtUtils::MakeMaker->VERSION() gt '6.30') ?
+        ('LICENSE'  => 'perl')         : ()),
+    
 ) ;
 
 # end of file Makefile.PL
