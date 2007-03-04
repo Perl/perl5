@@ -94,7 +94,7 @@ while (<DATA>)
     $try .= "\$y = $class->new('$args[1]');";
     if ($f eq "bcmp")
       {
-      $try .= '$x <=> $y;';
+      $try .= '$x->bcmp($y);';
       } elsif ($f eq "bround") {
       $try .= "$round_mode; \$x->bround(\$y);";
       } elsif ($f eq "bacmp"){

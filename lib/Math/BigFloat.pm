@@ -13,7 +13,7 @@ package Math::BigFloat;
 #   _p	: precision
 
 $VERSION = '1.53';
-require 5.005;
+require 5.006002;
 
 require Exporter;
 @ISA =       qw(Exporter Math::BigInt);
@@ -25,9 +25,20 @@ use vars qw/$AUTOLOAD $accuracy $precision $div_scale $round_mode $rnd_mode
 my $class = "Math::BigFloat";
 
 use overload
-'<=>'	=>	sub { $_[2] ?
+'<=>'	=>	sub { my $rc = $_[2] ?
                       ref($_[0])->bcmp($_[1],$_[0]) : 
-                      ref($_[0])->bcmp($_[0],$_[1])},
+                      ref($_[0])->bcmp($_[0],$_[1]); 
+		      $rc = 1 unless defined $rc;
+		      $rc <=> 0;
+		},
+# we need '>=' to get things like "1 >= NaN" right:
+'>='	=>	sub { my $rc = $_[2] ?
+                      ref($_[0])->bcmp($_[1],$_[0]) : 
+                      ref($_[0])->bcmp($_[0],$_[1]);
+		      # if there was a NaN involved, return false
+		      return '' unless defined $rc;
+		      $rc >= 0;
+		},
 'int'	=>	sub { $_[0]->as_number() },		# 'trunc' to bigint
 ;
 
@@ -101,6 +112,7 @@ BEGIN
         accuracy precision div_scale round_mode fabs fnot
         objectify upgrade downgrade
 	bone binf bnan bzero
+	bsub
       /;
 
   sub _method_alias { exists $methods{$_[0]||''}; } 
@@ -127,7 +139,7 @@ sub new
 
   my $self = {}; bless $self, $class;
   # shortcut for bigints and its subclasses
-  if ((ref($wanted)) && (ref($wanted) ne $class))
+  if ((ref($wanted)) && UNIVERSAL::can( $wanted, "as_number"))
     {
     $self->{_m} = $wanted->as_number()->{value}; # get us a bigint copy
     $self->{_e} = $MBI->_zero();
@@ -135,7 +147,7 @@ sub new
     $self->{sign} = $wanted->sign();
     return $self->bnorm();
     }
-  # else: got a string
+  # else: got a string or something maskerading as number (with overload)
 
   # handle '+inf', '-inf' first
   if ($wanted =~ /^[+-]?inf\z/)
@@ -746,7 +758,6 @@ sub blog
 
   # also takes care of the "error in _find_round_parameters?" case
   return $x->bnan() if $x->{sign} ne '+' || $x->is_zero();
-
 
   # no rounding at all, so must use fallback
   if (scalar @params == 0)

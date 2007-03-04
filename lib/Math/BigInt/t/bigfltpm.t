@@ -27,7 +27,7 @@ BEGIN
   print "# INC = @INC\n";
 
   plan tests => 2042
-	+ 2;		# own tests
+	+ 3;		# own tests
   }
 
 use Math::BigInt lib => 'Calc';
@@ -39,5 +39,9 @@ $CL = "Math::BigInt::Calc";
 
 ok ($class->config()->{class},$class);
 ok ($class->config()->{with}, $CL);
+
+# bug #17447: Can't call method Math::BigFloat->bsub, not a valid method
+my $c = new Math::BigFloat( '123.3' );
+ok ($c->fsub(123) eq '0.3', 1); # calling fsub on a BigFloat works
  
 require 'bigfltpm.inc';	# all tests here for sharing

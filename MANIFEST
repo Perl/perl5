@@ -1955,6 +1955,8 @@ lib/Math/BigInt/t/mbi_ali.t	Tests for BigInt
 lib/Math/BigInt/t/mbimbf.inc	Actual BigInt/BigFloat accuracy, precision and fallback, round_mode tests
 lib/Math/BigInt/t/mbimbf.t	BigInt/BigFloat accuracy, precision and fallback, round_mode
 lib/Math/BigInt/t/mbi_rand.t	Test Math::BigInt randomly
+lib/Math/BigInt/t/nan_cmp.t	overloaded comparision involving NaN
+lib/Math/BigInt/t/new_ovld.t	test overloaded numbers in BigFloat's new()
 lib/Math/BigInt/Trace.pm	bignum tracing
 lib/Math/BigInt/t/req_mbf0.t	test: require Math::BigFloat; ->bzero();
 lib/Math/BigInt/t/req_mbf1.t	test: require Math::BigFloat; ->bone();

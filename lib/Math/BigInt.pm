@@ -16,9 +16,9 @@ package Math::BigInt;
 # underlying lib might change the reference!
 
 my $class = "Math::BigInt";
-use 5.005;
+use 5.006002;
 
-$VERSION = '1.79';
+$VERSION = '1.80';
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(objectify bgcd blcm); 
@@ -62,10 +62,20 @@ use overload
 # not supported by Perl yet
 '..'	=>	\&_pointpoint,
 
-# we might need '==' and '!=' to get things like "NaN == NaN" right
-'<=>'	=>	sub { $_[2] ?
+'<=>'	=>	sub { my $rc = $_[2] ?
                       ref($_[0])->bcmp($_[1],$_[0]) : 
-                      $_[0]->bcmp($_[1]); },
+                      $_[0]->bcmp($_[1]); 
+		      $rc = 1 unless defined $rc;
+		      $rc <=> 0;
+		},
+# we need '>=' to get things like "1 >= NaN" right:
+'>='	=>	sub { my $rc = $_[2] ?
+                      ref($_[0])->bcmp($_[1],$_[0]) : 
+                      $_[0]->bcmp($_[1]);
+		      # if there was a NaN involved, return false
+		      return '' unless defined $rc;
+		      $rc >= 0;
+		},
 'cmp'	=>	sub {
          $_[2] ? 
                "$_[1]" cmp $_[0]->bstr() :
@@ -83,7 +93,8 @@ use overload
 #'hex'	=>	sub { print "hex"; $_[0]; }, 
 #'oct'	=>	sub { print "oct"; $_[0]; }, 
 
-'log'	=>	sub { $_[0]->copy()->blog($_[1]); }, 
+# log(N) is log(N, e), where e is Euler's number
+'log'	=>	sub { $_[0]->copy()->blog($_[1], undef); }, 
 'int'	=>	sub { $_[0]->copy(); }, 
 'neg'	=>	sub { $_[0]->copy()->bneg(); }, 
 'abs'	=>	sub { $_[0]->copy()->babs(); },
@@ -1225,7 +1236,7 @@ sub blog
     {
     ($self,$x,$base,@r) = objectify(1,ref($x),@_);
     }
-  
+
   return $x if $x->modify('blog');
 
   # inf, -inf, NaN, <0 => NaN
@@ -1235,6 +1246,18 @@ sub blog
   return $upgrade->blog($upgrade->new($x),$base,@r) if 
     defined $upgrade;
 
+  # fix for bug #24969:
+  # the default base is e (Euler's number) which is not an integer
+  if (!defined $base)
+    {
+    require Math::BigFloat;
+    my $u = Math::BigFloat->blog(Math::BigFloat->new($x))->as_int();
+    # modify $x in place
+    $x->{value} = $u->{value};
+    $x->{sign} = $u->{sign};
+    return $x;
+    }
+  
   my ($rc,$exact) = $CALC->_log_int($x->{value},$base->{value});
   return $x->bnan() unless defined $rc;		# not possible to take log?
   $x->{value} = $rc;
@@ -1404,7 +1427,7 @@ sub bmul
     {
     ($self,$x,$y,@r) = objectify(2,@_);
     }
-  
+
   return $x if $x->modify('bmul');
 
   return $x->bnan() if (($x->{sign} eq $nan) || ($y->{sign} eq $nan));
@@ -1802,7 +1825,7 @@ sub brsft
       $bin =~ s/^-0b//;			# strip '-0b' prefix
       $bin =~ tr/10/01/;		# flip bits
       # now shift
-      if (CORE::length($bin) <= $y)
+      if ($y >= CORE::length($bin))
         {
 	$bin = '0'; 			# shifting to far right creates -1
 					# 0, because later increment makes 
@@ -2351,7 +2374,7 @@ sub objectify
       elsif (!defined $up && ref($k) ne $a[0])
 	{
 	# foreign object, try to convert to integer
-        $k->can('as_number') ?  $k = $k->as_number() : $k = $a[0]->new($k);
+        $k->can('as_number') ? $k = $k->as_number() : $k = $a[0]->new($k);
 	}
       push @a,$k;
       }

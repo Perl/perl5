@@ -114,7 +114,7 @@ while (<DATA>)
       }
     if ($f eq "bcmp")
       {
-      $try .= '$x <=> $y;';
+      $try .= '$x->bcmp($y);';
       } elsif ($f eq "bround") {
       $try .= "$round_mode; \$x->bround(\$y);";
       } elsif ($f eq "broot") {

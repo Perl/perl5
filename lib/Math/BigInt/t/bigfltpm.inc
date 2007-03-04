@@ -110,7 +110,7 @@ while (<DATA>)
         $try .= ", \$z" if (defined $args[2]);
         $try .= " );";
       } elsif ($f eq "fcmp") {
-        $try .= '$x <=> $y;';
+        $try .= '$x->fcmp($y);';
       } elsif ($f eq "facmp") {
         $try .= '$x->facmp($y);';
       } elsif ($f eq "fpow") {

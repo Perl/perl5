@@ -37,13 +37,23 @@ BEGIN
     }
   print "# INC = @INC\n";
 
-  plan tests => 53;
+  plan tests => 56;
   }
 
 use Math::BigFloat;
 use Math::BigInt;
 
-my $cl = "Math::BigFloat";
+my $cl = "Math::BigInt";
+
+# test log($n) in BigInt (broken until 1.80)
+
+ok ($cl->new(2)->blog(), '0');
+ok ($cl->new(288)->blog(), '5');
+ok ($cl->new(2000)->blog(), '7');
+
+#############################################################################
+
+$cl = "Math::BigFloat";
 
 # These tests are now really fast, since they collapse to blog(10), basically
 # Don't attempt to run them with older versions. You are warned.
