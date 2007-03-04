@@ -498,13 +498,25 @@ END_OF_HEAD
     # still generate an index, but surround it with an html comment.
     # that way some other program can extract it if desired.
     $index =~ s/--+/-/g;
-    print HTML "<p><a name=\"__index__\"></a></p>\n";
-    print HTML "<!-- INDEX BEGIN -->\n";
-    print HTML "<!--\n" unless $Doindex;
-    print HTML $index;
-    print HTML "-->\n" unless $Doindex;
-    print HTML "<!-- INDEX END -->\n\n";
-    print HTML "<hr />\n" if $Doindex and $index;
+
+    my $hr = ($Doindex and $index) ? qq(<hr name="index" />) : "";
+
+    unless ($Doindex)
+    {
+        $index = qq(<!--\n$index\n-->\n);
+    }
+
+    print HTML << "END_OF_INDEX";
+
+<!-- INDEX BEGIN -->
+<div name="index">
+<p><a name=\"__index__\"></a></p>
+$index
+$hr
+</div>
+<!-- INDEX END -->
+
+END_OF_INDEX
 
     # now convert this file
     my $after_item;             # set to true after an =item
