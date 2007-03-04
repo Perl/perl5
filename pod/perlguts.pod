@@ -2431,8 +2431,8 @@ To fix this, some people formed Unicode, Inc. and
 produced a new character set containing all the characters you can
 possibly think of and more. There are several ways of representing these
 characters, and the one Perl uses is called UTF-8. UTF-8 uses
-a variable number of bytes to represent a character, instead of just
-one. You can learn more about Unicode at http://www.unicode.org/
+a variable number of bytes to represent a character. You can learn more
+about Unicode and Perl's Unicode model in L<perlunicode>.
 
 =head2 How can I recognise a UTF-8 string?
 
@@ -2443,16 +2443,17 @@ C<v196.172>. Unfortunately, the non-Unicode string C<chr(196).chr(172)>
 has that byte sequence as well. So you can't tell just by looking - this
 is what makes Unicode input an interesting problem.
 
-The API function C<is_utf8_string> can help; it'll tell you if a string
-contains only valid UTF-8 characters. However, it can't do the work for
-you. On a character-by-character basis, C<is_utf8_char> will tell you
-whether the current character in a string is valid UTF-8.
+In general, you either have to know what you're dealing with, or you
+have to guess.  The API function C<is_utf8_string> can help; it'll tell
+you if a string contains only valid UTF-8 characters. However, it can't
+do the work for you. On a character-by-character basis, C<is_utf8_char>
+will tell you whether the current character in a string is valid UTF-8. 
 
 =head2 How does UTF-8 represent Unicode characters?
 
 As mentioned above, UTF-8 uses a variable number of bytes to store a
-character. Characters with values 1...128 are stored in one byte, just
-like good ol' ASCII. Character 129 is stored as C<v194.129>; this
+character. Characters with values 0...127 are stored in one byte, just
+like good ol' ASCII. Character 128 is stored as C<v194.128>; this
 continues up to character 191, which is C<v194.191>. Now we've run out of
 bits (191 is binary C<10111111>) so we move on; 192 is C<v195.128>. And
 so it goes on, moving to three bytes at character 2048.
@@ -2509,9 +2510,11 @@ So don't do that!
 =head2 How does Perl store UTF-8 strings?
 
 Currently, Perl deals with Unicode strings and non-Unicode strings
-slightly differently. If a string has been identified as being UTF-8
-encoded, Perl will set a flag in the SV, C<SVf_UTF8>. You can check and
-manipulate this flag with the following macros:
+slightly differently. A flag in the SV, C<SVf_UTF8>, indicates that the
+string is internally encoded as UTF-8. Without it, the byte value is the
+codepoint number and vice versa (in other words, the string is encoded
+as iso-8859-1). You can check and manipulate this flag with the
+following macros:
 
     SvUTF8(sv)
     SvUTF8_on(sv)
@@ -2523,7 +2526,7 @@ C<length>, C<substr> and other string handling operations will have
 undesirable results.
 
 The problem comes when you have, for instance, a string that isn't
-flagged is UTF-8, and contains a byte sequence that could be UTF-8 -
+flagged as UTF-8, and contains a byte sequence that could be UTF-8 -
 especially when combining non-UTF-8 and UTF-8 strings.
 
 Never forget that the C<SVf_UTF8> flag is separate to the PV value; you
@@ -2541,7 +2544,7 @@ manipulating SVs. More specifically, you cannot expect to do this:
 
 The C<char*> string does not tell you the whole story, and you can't
 copy or reconstruct an SV just by copying the string value. Check if the
-old SV has the UTF-8 flag set, and act accordingly:
+old SV has the UTF8 flag set, and act accordingly:
 
     p = SvPV(sv, len);
     frobnicate(p);
@@ -2554,14 +2557,14 @@ not it's dealing with UTF-8 data, so that it can handle the string
 appropriately.
 
 Since just passing an SV to an XS function and copying the data of
-the SV is not enough to copy the UTF-8 flags, even less right is just
+the SV is not enough to copy the UTF8 flags, even less right is just
 passing a C<char *> to an XS function.
 
 =head2 How do I convert a string to UTF-8?
 
-If you're mixing UTF-8 and non-UTF-8 strings, you might find it necessary
-to upgrade one of the strings to UTF-8. If you've got an SV, the easiest
-way to do this is:
+If you're mixing UTF-8 and non-UTF-8 strings, it is necessary to upgrade
+one of the strings to UTF-8. If you've got an SV, the easiest way to do
+this is:
 
     sv_utf8_upgrade(sv);
 
@@ -2572,7 +2575,7 @@ However, you must not do this, for example:
 
 If you do this in a binary operator, you will actually change one of the
 strings that came into the operator, and, while it shouldn't be noticeable
-by the end user, it can cause problems.
+by the end user, it can cause problems in deficient code.
 
 Instead, C<bytes_to_utf8> will give you a UTF-8-encoded B<copy> of its
 string argument. This is useful for having the data available for

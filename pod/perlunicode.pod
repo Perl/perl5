@@ -10,6 +10,10 @@ Unicode support is an extensive requirement. While Perl does not
 implement the Unicode standard or the accompanying technical reports
 from cover to cover, Perl does support many Unicode features.
 
+People who want to learn to use Unicode in Perl, should probably read
+L<the Perl Unicode tutorial|perlunitut> before reading this reference
+document.
+
 =over 4
 
 =item Input and Output Layers
@@ -20,15 +24,15 @@ the ":utf8" layer.  Other encodings can be converted to Perl's
 encoding on input or from Perl's encoding on output by use of the
 ":encoding(...)"  layer.  See L<open>.
 
-To indicate that Perl source itself is using a particular encoding,
-see L<encoding>.
+To indicate that Perl source itself is in UTF-8, use C<use utf8;>.
 
 =item Regular Expressions
 
 The regular expression compiler produces polymorphic opcodes.  That is,
 the pattern adapts to the data and automatically switches to the Unicode
-character scheme when presented with Unicode data--or instead uses
-a traditional byte scheme when presented with byte data.
+character scheme when presented with data that is internally encoded in
+UTF-8 -- or instead uses a traditional byte scheme when presented with
+byte data.
 
 =item C<use utf8> still needed to enable UTF-8/UTF-EBCDIC in scripts
 
@@ -38,9 +42,6 @@ included to enable recognition of UTF-8 in the Perl scripts themselves
 ASCII-based machines or to recognize UTF-EBCDIC on EBCDIC-based
 machines.  B<These are the only times when an explicit C<use utf8>
 is needed.>  See L<utf8>.
-
-You can also use the C<encoding> pragma to change the default encoding
-of the data in your script; see L<encoding>.
 
 =item BOM-marked scripts and UTF-16 scripts autodetected
 
@@ -57,11 +58,6 @@ implicit upgrading from byte strings to Unicode strings assumes that
 they were encoded in I<ISO 8859-1 (Latin-1)>, but Unicode strings are
 downgraded with UTF-8 encoding.  This happens because the first 256
 codepoints in Unicode happens to agree with Latin-1.  
-
-If you wish to interpret byte strings as UTF-8 instead, use the
-C<encoding> pragma:
-
-    use encoding 'utf8';
 
 See L</"Byte and Character Semantics"> for more details.
 
@@ -112,9 +108,7 @@ If strings operating under byte semantics and strings with Unicode
 character data are concatenated, the new string will be created by
 decoding the byte strings as I<ISO 8859-1 (Latin-1)>, even if the
 old Unicode string used EBCDIC.  This translation is done without
-regard to the system's native 8-bit encoding.  To change this for
-systems with non-Latin-1 and non-EBCDIC native encodings, use the
-C<encoding> pragma.  See L<encoding>.
+regard to the system's native 8-bit encoding. 
 
 Under character semantics, many operations that formerly operated on
 bytes now operate on characters. A character in Perl is
@@ -134,17 +128,16 @@ Character semantics have the following effects:
 Strings--including hash keys--and regular expression patterns may
 contain characters that have an ordinal value larger than 255.
 
-If you use a Unicode editor to edit your program, Unicode characters
-may occur directly within the literal strings in one of the various
-Unicode encodings (UTF-8, UTF-EBCDIC, UCS-2, etc.), but will be recognized
-as such and converted to Perl's internal representation only if the
-appropriate L<encoding> is specified.
+If you use a Unicode editor to edit your program, Unicode characters may
+occur directly within the literal strings in UTF-8 encoding, or UTF-16.
+(The former requires a BOM or C<use utf8>, the latter requires a BOM.)
 
-Unicode characters can also be added to a string by using the
-C<\x{...}> notation.  The Unicode code for the desired character, in
-hexadecimal, should be placed in the braces. For instance, a smiley
-face is C<\x{263A}>.  This encoding scheme only works for characters
-with a code of 0x100 or above.
+Unicode characters can also be added to a string by using the C<\x{...}>
+notation.  The Unicode code for the desired character, in hexadecimal,
+should be placed in the braces. For instance, a smiley face is
+C<\x{263A}>.  This encoding scheme only works for all characters, but
+for characters under 0x100, note that Perl may use an 8 bit encoding
+internally, for optimization and/or backward compatibility.
 
 Additionally, if you
 
@@ -163,8 +156,7 @@ names.
 =item *
 
 Regular expressions match characters instead of bytes.  "." matches
-a character instead of a byte.  The C<\C> pattern is provided to force
-a match a single byte--a C<char> in C, hence C<\C>.
+a character instead of a byte.
 
 =item *
 
@@ -173,17 +165,13 @@ bytes and match against the character properties specified in the
 Unicode properties database.  C<\w> can be used to match a Japanese
 ideograph, for instance.
 
-(However, and as a limitation of the current implementation, using
-C<\w> or C<\W> I<inside> a C<[...]> character class will still match
-with byte semantics.)
-
 =item *
 
 Named Unicode properties, scripts, and block ranges may be used like
 character classes via the C<\p{}> "matches property" construct and
 the C<\P{}> negation, "doesn't match property".
 
-See L</"Unicode  Character Properties"> for more details.
+See L</"Unicode Character Properties"> for more details.
 
 You can define your own character properties and use them
 in the regular expression with the C<\p{}> or C<\P{}> construct.
@@ -1441,7 +1429,7 @@ Unicode is discouraged.
 =head2 Interaction with Extensions
 
 When Perl exchanges data with an extension, the extension should be
-able to understand the UTF-8 flag and act accordingly. If the
+able to understand the UTF8 flag and act accordingly. If the
 extension doesn't know about the flag, it's likely that the extension
 will return incorrectly-flagged data.
 
@@ -1544,7 +1532,7 @@ A scalar that is going to be passed to some extension
 
 Be it Compress::Zlib, Apache::Request or any extension that has no
 mention of Unicode in the manpage, you need to make sure that the
-UTF-8 flag is stripped off. Note that at the time of this writing
+UTF8 flag is stripped off. Note that at the time of this writing
 (October 2002) the mentioned modules are not UTF-8-aware. Please
 check the documentation to verify if this is still true.
 
@@ -1558,7 +1546,7 @@ check the documentation to verify if this is still true.
 A scalar we got back from an extension
 
 If you believe the scalar comes back as UTF-8, you will most likely
-want the UTF-8 flag restored:
+want the UTF8 flag restored:
 
   if ($] > 5.007) {
     require Encode;
@@ -1620,7 +1608,7 @@ A large scalar that you know can only contain ASCII
 
 Scalars that contain only ASCII and are marked as UTF-8 are sometimes
 a drag to your program. If you recognize such a situation, just remove
-the UTF-8 flag:
+the UTF8 flag:
 
   utf8::downgrade($val) if $] > 5.007;
 
@@ -1628,7 +1616,7 @@ the UTF-8 flag:
 
 =head1 SEE ALSO
 
-L<perluniintro>, L<encoding>, L<Encode>, L<open>, L<utf8>, L<bytes>,
+L<perlunitut>, L<perluniintro>, L<Encode>, L<open>, L<utf8>, L<bytes>,
 L<perlretut>, L<perlvar/"${^UNICODE}">
 
 =cut

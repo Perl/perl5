@@ -2809,7 +2809,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 Copies a stringified representation of the source SV into the
 destination SV.  Automatically performs any necessary mg_get and
 coercion of numeric values into strings.  Guaranteed to preserve
-UTF-8 flag even from overloaded objects.  Similar in nature to
+UTF8 flag even from overloaded objects.  Similar in nature to
 sv_2pv[_flags] but operates directly on an SV instead of just the
 string.  Mostly uses sv_2pv_flags to do its work, except when that
 would lose the UTF-8'ness of the PV.

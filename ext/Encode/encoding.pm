@@ -307,6 +307,14 @@ Will print C<2>, because C<$string> is upgraded as UTF-8.  Without
 C<use encoding 'utf8';>, it will print C<4> instead, since C<$string>
 is three octets when interpreted as Latin-1.
 
+=head2 Side effects
+
+If the C<encoding> pragma is in scope then the lengths returned are
+calculated from the length of C<$/> in Unicode characters, which is not
+always the same as the length of C<$/> in the native encoding.
+
+This pragma affects utf8::upgrade, but not utf8::downgrade.
+
 =head1 FEATURES THAT REQUIRE 5.8.1
 
 Some of the features offered by this pragma requires perl 5.8.1.  Most

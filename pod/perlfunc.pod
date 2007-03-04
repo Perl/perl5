@@ -759,10 +759,6 @@ You can actually chomp anything that's an lvalue, including an assignment:
 If you chomp a list, each element is chomped, and the total number of
 characters removed is returned.
 
-If the C<encoding> pragma is in scope then the lengths returned are
-calculated from the length of C<$/> in Unicode characters, which is not
-always the same as the length of C<$/> in the native encoding.
-
 Note that parentheses are necessary when you're chomping anything
 that is not a simple variable.  This is because C<chomp $cwd = `pwd`;>
 is interpreted as C<(chomp $cwd) = `pwd`;>, rather than as
@@ -839,9 +835,7 @@ X<chr> X<character> X<ASCII> X<Unicode>
 
 Returns the character represented by that NUMBER in the character set.
 For example, C<chr(65)> is C<"A"> in either ASCII or Unicode, and
-chr(0x263a) is a Unicode smiley face.  Note that characters from 128
-to 255 (inclusive) are by default not encoded in UTF-8 Unicode for
-backward compatibility reasons (but see L<encoding>).
+chr(0x263a) is a Unicode smiley face.  
 
 Negative values give the Unicode replacement character (chr(0xfffd)),
 except under the L<bytes> pragma, where low eight bits of the value
@@ -851,10 +845,10 @@ If NUMBER is omitted, uses C<$_>.
 
 For the reverse, use L</ord>.
 
-Note that under the C<bytes> pragma the NUMBER is masked to
-the low eight bits.
+Note that characters from 128 to 255 (inclusive) are by default
+internally not encoded as UTF-8 for backward compatibility reasons.
 
-See L<perlunicode> and L<encoding> for more about Unicode.
+See L<perlunicode> for more about Unicode.
 
 =item chroot FILENAME
 X<chroot> X<root>
@@ -2664,7 +2658,11 @@ For that, use C<scalar @array> and C<scalar keys %hash> respectively.
 
 Note the I<characters>: if the EXPR is in Unicode, you will get the
 number of characters, not the number of bytes.  To get the length
-in bytes, use C<do { use bytes; length(EXPR) }>, see L<bytes>.
+of the internal string in bytes, use C<bytes::length(EXPR)>, see
+L<bytes>.  Note that the internal encoding is variable, and the number
+of bytes usually meaningless.  To get the number of bytes that the
+string would have when encoded as UTF-8, use
+C<length(Encoding::encode_utf8(EXPR))>.
 
 =item link OLDFILE,NEWFILE
 X<link>
@@ -3113,7 +3111,7 @@ You may use the three-argument form of open to specify IO "layers"
 that affect how the input and output are processed (see L<open> and
 L<PerlIO> for more details). For example
 
-  open(FH, "<:utf8", "file")
+  open(FH, "<:encoding(UTF-8)", "file")
 
 will open the UTF-8 encoded file containing Unicode characters,
 see L<perluniintro>. Note that if layers are specified in the
@@ -3419,7 +3417,7 @@ or Unicode) value of the first character of EXPR.  If EXPR is omitted,
 uses C<$_>.
 
 For the reverse, see L</chr>.
-See L<perlunicode> and L<encoding> for more about Unicode.
+See L<perlunicode> for more about Unicode.
 
 =item our EXPR
 X<our> X<global>
@@ -7000,13 +6998,10 @@ If an element off the end of the string is written to, Perl will first
 extend the string with sufficiently many zero bytes.   It is an error
 to try to write off the beginning of the string (i.e. negative OFFSET).
 
-The string should not contain any character with the value > 255 (which
-can only happen if you're using UTF-8 encoding).  If it does, it will be
-treated as something that is not UTF-8 encoded.  When the C<vec> was
-assigned to, other parts of your program will also no longer consider the
-string to be UTF-8 encoded.  In other words, if you do have such characters
-in your string, vec() will operate on the actual byte string, and not the
-conceptual character string.
+If the string happens to be encoded as UTF-8 internally (and thus has
+the UTF8 flag set), this is ignored by C<vec>, and it operates on the
+internal byte string, not the conceptual character string, even if you
+only have characters with values less than 256. 
 
 Strings created with C<vec> can also be manipulated with the logical
 operators C<|>, C<&>, C<^>, and C<~>.  These operators will assume a bit

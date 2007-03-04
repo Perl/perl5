@@ -278,21 +278,7 @@ encodings, I/O, and certain special cases:
 
 When you combine legacy data and Unicode the legacy data needs
 to be upgraded to Unicode.  Normally ISO 8859-1 (or EBCDIC, if
-applicable) is assumed.  You can override this assumption by
-using the C<encoding> pragma, for example
-
-    use encoding 'latin2'; # ISO 8859-2
-
-in which case literals (string or regular expressions), C<chr()>,
-and C<ord()> in your whole script are assumed to produce Unicode
-characters from ISO 8859-2 code points.  Note that the matching for
-encoding names is forgiving: instead of C<latin2> you could have
-said C<Latin 2>, or C<iso8859-2>, or other variations.  With just
-
-    use encoding;
-
-the environment variable C<PERL_ENCODING> will be consulted.
-If that variable isn't set, the encoding pragma will fail.
+applicable) is assumed. 
 
 The C<Encode> module knows about many encodings and has interfaces
 for doing conversions between those encodings:
@@ -404,8 +390,8 @@ the file "text.utf8", encoded as UTF-8:
     while (<$nihongo>) { print $unicode $_ }
 
 The naming of encodings, both by the C<open()> and by the C<open>
-pragma, is similar to the C<encoding> pragma in that it allows for
-flexible names: C<koi8-r> and C<KOI8R> will both be understood.
+pragma allows for flexible names: C<koi8-r> and C<KOI8R> will both be
+understood.
 
 Common encodings recognized by ISO, MIME, IANA, and various other
 standardisation organisations are recognised; for a more detailed
@@ -885,7 +871,7 @@ to UTF-8 bytes and back, the code works even with older Perl 5 versions.
 
 =head1 SEE ALSO
 
-L<perlunicode>, L<Encode>, L<encoding>, L<open>, L<utf8>, L<bytes>,
+L<perlunitut>, L<perlunicode>, L<Encode>, L<open>, L<utf8>, L<bytes>,
 L<perlretut>, L<perlrun>, L<Unicode::Collate>, L<Unicode::Normalize>,
 L<Unicode::UCD>
 

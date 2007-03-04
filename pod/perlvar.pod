@@ -1310,7 +1310,7 @@ The revision, version, and subversion of the Perl interpreter, represented
 as a string composed of characters with those ordinals.  Thus in Perl v5.6.0
 it equals C<chr(5) . chr(6) . chr(0)> and will return true for
 C<$^V eq v5.6.0>.  Note that the characters in this string value can
-potentially be in Unicode range.
+potentially be greater than 255.
 
 This variable first appeared in perl 5.6.0; earlier versions of perl will
 see an undefined value.
