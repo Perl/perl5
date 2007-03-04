@@ -121,7 +121,7 @@ The C<:mmap> layer will not exist if platform does not support C<mmap()>.
 
 =item :utf8
 
-Declares that the stream accepts perl's internal encoding of
+Declares that the stream accepts perl's I<internal> encoding of
 characters.  (Which really is UTF-8 on ASCII machines, but is
 UTF-EBCDIC on EBCDIC machines.)  This allows any character perl can
 represent to be read from or written to the stream. The UTF-X encoding

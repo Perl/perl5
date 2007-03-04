@@ -115,6 +115,7 @@ POD = \
 	perltoot.pod	\
 	perltrap.pod	\
 	perlunicode.pod	\
+	perlunifaq.pod	\
 	perluniintro.pod	\
 	perlunitut.pod	\
 	perlutil.pod	\
@@ -223,6 +224,7 @@ MAN = \
 	perltoot.man	\
 	perltrap.man	\
 	perlunicode.man	\
+	perlunifaq.man	\
 	perluniintro.man	\
 	perlunitut.man	\
 	perlutil.man	\
@@ -330,6 +332,7 @@ HTML = \
 	perltoot.html	\
 	perltrap.html	\
 	perlunicode.html	\
+	perlunifaq.html	\
 	perluniintro.html	\
 	perlunitut.html	\
 	perlutil.html	\
@@ -439,6 +442,7 @@ TEX = \
 	perltoot.tex	\
 	perltrap.tex	\
 	perlunicode.tex	\
+	perlunifaq.tex	\
 	perluniintro.tex	\
 	perlunitut.tex	\
 	perlutil.tex	\

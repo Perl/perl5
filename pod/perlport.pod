@@ -672,12 +672,9 @@ ISO 8859-1 bytes beyond 0x7f into your strings might cause trouble
 later.  If the bytes are native 8-bit bytes, you can use the C<bytes>
 pragma.  If the bytes are in a string (regular expression being a
 curious string), you can often also use the C<\xHH> notation instead
-of embedding the bytes as-is.  If they are in some particular legacy
-encoding (ether single-byte or something more complicated), you can
-use the C<encoding> pragma.  (If you want to write your code in UTF-8,
-you can use either the C<utf8> pragma, or the C<encoding> pragma.)
-The C<bytes> and C<utf8> pragmata are available since Perl 5.6.0, and
-the C<encoding> pragma since Perl 5.8.0.
+of embedding the bytes as-is.  (If you want to write your code in UTF-8,
+you can use the C<utf8>.) The C<bytes> and C<utf8> pragmata are
+available since Perl 5.6.0.
 
 =head2 System Resources
 
