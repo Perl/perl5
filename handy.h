@@ -246,10 +246,10 @@ Like C<newSVpvn>, but takes a literal string instead of a string/length pair.
 Like C<newSVpvn_share>, but takes a literal string instead of a string/length
 pair and omits the hash parameter.
 
-=for apidoc Am|SV*|sv_catpvs|SV* sv|const char* s
+=for apidoc Am|void|sv_catpvs|SV* sv|const char* s
 Like C<sv_catpvn>, but takes a literal string instead of a string/length pair.
 
-=for apidoc Am|SV*|sv_setpvs|SV* sv|const char* s
+=for apidoc Am|void|sv_setpvs|SV* sv|const char* s
 Like C<sv_setpvn>, but takes a literal string instead of a string/length pair.
 
 =head1 Memory Management
