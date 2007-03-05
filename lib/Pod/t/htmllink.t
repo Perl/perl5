@@ -10,17 +10,16 @@ BEGIN {
 use strict;
 use Test::More tests => 1;
 
-TODO: {
-    local $TODO = "item 2 doesn't work as expected";
-    convert_n_test("htmllink", "html links");
-}
+convert_n_test("htmllink", "html links");
 
 __DATA__
+<?xml version="1.0" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title>htmllink - Test HTML links</title>
-<link rev="made" href="mailto:" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:[PERLADMIN]" />
 </head>
 
 <body style="background-color: white">
@@ -105,24 +104,25 @@ __DATA__
 <h2><a name="section_three">section three</a></h2>
 <p>This is section three.</p>
 <dl>
-<dt><strong><a name="item_item1">item1</a></strong><br />
-</dt>
+<dt><strong><a name="item_item1">item1</a></strong>
+
 <dd>
-This is item one.
+<p>This is item one.</p>
 </dd>
-<p></p>
-<dt><strong><a name="item_item_2">item 2</a></strong><br />
-</dt>
+</li>
+<dt><strong><a name="item_item_2">item 2</a></strong>
+
 <dd>
-This is item two.
+<p>This is item two.</p>
 </dd>
-<p></p>
-<dt><strong><a name="item_item_three">item three</a></strong><br />
-</dt>
+</li>
+<dt><strong><a name="item_item_three">item three</a></strong>
+
 <dd>
-This is item three.
+<p>This is item three.</p>
 </dd>
-<p></p></dl>
+</li>
+</dl>
 
 </body>
 
