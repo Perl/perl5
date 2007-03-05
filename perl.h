@@ -3811,7 +3811,14 @@ EXTERN_C void PerlIO_teardown(pTHX);
 	} STMT_END
 # else
 #  define PERLIO_INIT
-#  define PERLIO_TERM	PerlIO_teardown(aTHX)
+#  ifdef USE_5005THREADS
+/* This is an expedient hack, as PerlIO_teardown doesn't use the passed in
+ * value, but it's easier to give it something here, rather than special
+ * casing its prototype.  */
+#   define PERLIO_TERM	PerlIO_teardown(NULL)
+#  else
+#   define PERLIO_TERM	PerlIO_teardown(aTHX)
+#  endif
 # endif
 #else
 #  define PERLIO_INIT
