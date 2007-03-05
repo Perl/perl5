@@ -221,9 +221,9 @@ C<gmtime>, C<localtime>, C<time>, C<times>
 X<perl5>
 
 C<abs>, C<bless>, C<chomp>, C<chr>, C<exists>, C<formline>, C<glob>,
-C<import>, C<lc>, C<lcfirst>, C<map>, C<my>, C<no>, C<our>, C<prototype>,
-C<qx>, C<qw>, C<readline>, C<readpipe>, C<ref>, C<sub*>, C<sysopen>, C<tie>,
-C<tied>, C<uc>, C<ucfirst>, C<untie>, C<use>
+C<import>, C<lc>, C<lcfirst>, C<lock>, C<map>, C<my>, C<no>, C<our>,
+C<prototype>, C<qr>, C<qw>, C<qx>, C<readline>, C<readpipe>, C<ref>,
+C<sub>*, C<sysopen>, C<tie>, C<tied>, C<uc>, C<ucfirst>, C<untie>, C<use>
 
 * - C<sub> was a keyword in perl4, but in perl5 it is an
 operator, which can be used in expressions.
@@ -2559,10 +2559,12 @@ same as the number actually killed).
     $cnt = kill 1, $child1, $child2;
     kill 9, @goners;
 
-If SIGNAL is zero, no signal is sent to the process.  This is a
-useful way to check that a child process is alive and hasn't changed
-its UID.  See L<perlport> for notes on the portability of this
-construct.
+If SIGNAL is zero, no signal is sent to the process, but the kill(2)
+system call will check whether it's possible to send a signal to it (that
+means, to be brief, that the process is owned by the same user, or we are
+the super-user).  This is a useful way to check that a child process is
+alive and hasn't changed its UID.  See L<perlport> for notes on the
+portability of this construct.
 
 Unlike in the shell, if SIGNAL is negative, it kills
 process groups instead of processes.  (On System V, a negative I<PROCESS>
@@ -3667,29 +3669,32 @@ C<P> is C<undef>, similarly for unpack().
 The C</> template character allows packing and unpacking of a sequence of
 items where the packed structure contains a packed item count followed by 
 the packed items themselves.
-You write I<length-item>C</>I<sequence-item>.
 
-The I<length-item> can be any C<pack> template letter, and describes
-how the length value is packed.  The ones likely to be of most use are
-integer-packing ones like C<n> (for Java strings), C<w> (for ASN.1 or
-SNMP) and C<N> (for Sun XDR).
+For C<pack> you write I<length-item>C</>I<sequence-item> and the
+I<length-item> describes how the length value is packed. The ones likely
+to be of most use are integer-packing ones like C<n> (for Java strings),
+C<w> (for ASN.1 or SNMP) and C<N> (for Sun XDR).
 
 For C<pack>, the I<sequence-item> may have a repeat count, in which case
 the minimum of that and the number of available items is used as argument
 for the I<length-item>. If it has no repeat count or uses a '*', the number
-of available items is used. For C<unpack> the repeat count is always obtained
-by decoding the packed item count, and the I<sequence-item> must not have a
-repeat count.
+of available items is used.
+
+For C<unpack> an internal stack of integer arguments unpacked so far is
+used. You write C</>I<sequence-item> and the repeat count is obtained by
+popping off the last element from the stack. The I<sequence-item> must not
+have a repeat count.
 
 If the I<sequence-item> refers to a string type (C<"A">, C<"a"> or C<"Z">),
 the I<length-item> is a string length, not a number of strings. If there is
 an explicit repeat count for pack, the packed string will be adjusted to that
 given length.
 
-    unpack 'C/a', "\04Gurusamy";        gives 'Guru'
-    unpack 'a3/A* A*', '007 Bond  J ';  gives (' Bond','J')
-    pack 'n/a* w/a*','hello,','world';  gives "\000\006hello,\005world"
-    pack 'a/C2', ord('a') .. ord('z');  gives '2ab'
+    unpack 'C/a', "\04Gurusamy";            gives ('Guru')
+    unpack 'a3/A A*', '007 Bond  J ';       gives (' Bond', 'J')
+    unpack 'a3 x2 /A A*', '007: Bond, J.';  gives ('Bond, J', '.')
+    pack 'n/a* w/a*','hello,','world';      gives "\000\006hello,\005world"
+    pack 'a/C2', ord('a') .. ord('z');      gives '2ab'
 
 The I<length-item> is not returned explicitly from C<unpack>.
 
@@ -6390,6 +6395,8 @@ seconds, for this process and the children of this process.
 
 In scalar context, C<times> returns C<$user>.
 
+Note that times for children are included only after they terminate.
+
 =item tr///
 
 The transliteration operator.  Same as C<y///>.  See L<perlop>.
@@ -6406,6 +6413,9 @@ otherwise.
 
 The behavior is undefined if LENGTH is greater than the length of the
 file.
+
+The position in the file of FILEHANDLE is left unchanged.  You may want to
+call L<seek> before writing to the file.
 
 =item uc EXPR
 X<uc> X<uppercase> X<toupper>

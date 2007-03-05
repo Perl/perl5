@@ -94,21 +94,9 @@ from) C<\015\012>, depending on whether you're reading or writing.
 Unix does the same thing on ttys in canonical mode.  C<\015\012>
 is commonly referred to as CRLF.
 
-A common cause of unportable programs is the misuse of chop() to trim
-newlines:
-
-    # XXX UNPORTABLE!
-    while(<FILE>) {
-        chop;
-        @array = split(/:/);
-        #...
-    }
-
-You can get away with this on Unix and Mac OS (they have a single
-character end-of-line), but the same program will break under DOSish
-perls because you're only chop()ing half the end-of-line.  Instead,
-chomp() should be used to trim newlines.  The L<Dunce::Files> module 
-can help audit your code for misuses of chop().
+To trim trailing newlines from text lines use chomp().  With default 
+settings that function looks for a trailing C<\n> character and thus 
+trims in a portable way.
 
 When dealing with binary files (or text files in binary mode) be sure
 to explicitly set $/ to the appropriate value for your file format
@@ -1923,8 +1911,11 @@ Not implemented. (S<Mac OS>, MPE/iX, S<RISC OS>)
 Link count not updated because hard links are not quite that hard
 (They are sort of half-way between hard and soft links). (AmigaOS)
 
-Hard links are implemented on Win32 (Windows NT and Windows 2000)
-under NTFS only.
+Hard links are implemented on Win32 under NTFS only. They are
+natively supported on Windows 2000 and later.  On Windows NT they
+are implemented using the Windows POSIX subsystem support and the
+Perl process will need Administrator or Backup Operator privileges
+to create hard links.
 
 Available on 64 bit OpenVMS 8.2 and later.  (VMS)
 

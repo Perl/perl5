@@ -119,7 +119,7 @@ well as subroutine and method calls, and the anonymous
 constructors C<[]> and C<{}>.
 
 See also L<Quote and Quote-like Operators> toward the end of this section,
-as well as L<"I/O Operators">.
+as well as L</"I/O Operators">.
 
 =head2 The Arrow Operator
 X<arrow> X<dereference> X<< -> >>
@@ -260,7 +260,9 @@ operands C<$a> and C<$b>: If C<$b> is positive, then C<$a % $b> is
 C<$a> minus the largest multiple of C<$b> that is not greater than
 C<$a>.  If C<$b> is negative, then C<$a % $b> is C<$a> minus the
 smallest multiple of C<$b> that is not less than C<$a> (i.e. the
-result will be less than or equal to zero). 
+result will be less than or equal to zero).  If the operands
+C<$a> and C<$b> are floting point values, only the integer portion 
+of C<$a> and C<$b> will be used in the operation.
 Note that when C<use integer> is in scope, "%" gives you direct access
 to the modulus operator as implemented by your C compiler.  This
 operator is not as well defined for negative operands, but it will
@@ -734,7 +736,8 @@ its left argument, throws that value away, then evaluates its right
 argument and returns that value.  This is just like C's comma operator.
 
 In list context, it's just the list argument separator, and inserts
-both its arguments into the list.
+both its arguments into the list.  These arguments are also evaluated
+from left to right.
 
 The C<< => >> operator is a synonym for the comma, but forces any word
 (consisting entirely of word characters) to its left to be interpreted
@@ -1305,6 +1308,15 @@ when the program is done:
 
     system("program args 1>program.stdout 2>program.stderr");
 
+The STDIN filehandle used by the command is inherited from Perl's STDIN.
+For example:
+
+    open BLAM, "blam" || die "Can't open: $!";
+    open STDIN, "<&BLAM";
+    print `sort`;
+
+will print the sorted contents of the file "blam".
+
 Using single-quote as a delimiter protects the command from Perl's
 double-quote interpolation, passing it on to the shell instead:
 
@@ -1345,7 +1357,7 @@ when they're the right way to get something done.  Perl was made to be
 a glue language, and one of the things it glues together is commands.
 Just understand what you're getting yourself into.
 
-See L<"I/O Operators"> for more discussion.
+See L</"I/O Operators"> for more discussion.
 
 =item qw/STRING/
 X<qw> X<quote, list> X<quote, words>

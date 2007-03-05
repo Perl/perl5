@@ -500,7 +500,7 @@ Here are examples of C<//s> and C<//m> in action:
     $x =~ /girl.Who/m;  # doesn't match, "." doesn't match "\n"
     $x =~ /girl.Who/sm; # matches, "." matches "\n"
 
-Most of the time, the default behavior is what is want, but C<//s> and
+Most of the time, the default behavior is what is wanted, but C<//s> and
 C<//m> are occasionally very useful.  If C<//m> is being used, the start
 of the string can still be matched with C<\A> and the end of string
 can still be matched with the anchors C<\Z> (matches both the end and

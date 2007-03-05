@@ -1122,6 +1122,11 @@ X<unpack_str>
 The engine implementing unpack() Perl function. Note: parameters strbeg, new_s
 and ocnt are not used. This call should not be used, use unpackstring instead.
 
+	I32	unpack_str(const char *pat, const char *patend, const char *s, const char *strbeg, const char *strend, char **new_s, I32 ocnt, U32 flags)
+
+=for hackers
+Found in file mathoms.c
+
 	I32	unpack_str(char *pat, char *patend, char *s, char *strbeg, char *strend, char **new_s, I32 ocnt, U32 flags)
 
 =for hackers
@@ -4592,9 +4597,9 @@ Found in file sv.h
 =item sv_derived_from
 X<sv_derived_from>
 
-Returns a boolean indicating whether the SV is derived from the specified
-class.  This is the function that implements C<UNIVERSAL::isa>.  It works
-for class names as well as for objects.
+Returns a boolean indicating whether the SV is derived from the specified class
+I<at the C level>.  To check derivation at the Perl level, call C<isa()> as a
+normal Perl method.
 
 	bool	sv_derived_from(SV* sv, const char* name)
 
@@ -6426,6 +6431,8 @@ Converts a string C<s> of length C<len> from UTF-8 into byte encoding.
 Unlike C<bytes_to_utf8>, this over-writes the original string, and
 updates len to contain the new length.
 Returns zero on failure, setting C<len> to -1.
+
+If you need a copy of the string, see C<bytes_from_utf8>.
 
 NOTE: this function is experimental and may change or be
 removed without notice.
