@@ -1159,11 +1159,18 @@ a VMS format directory, then C<readdir> should return F<a.>, and
 again with the optionally the exact case.
 
 RMS had an eight level limit on directory depths from any rooted logical
-(allowing 16 levels overall) prior to VMS 7.2.  Hence
-C<PERL_ROOT:[LIB.2.3.4.5.6.7.8]> is a valid directory specification but
-C<PERL_ROOT:[LIB.2.3.4.5.6.7.8.9]> is not.  F<Makefile.PL> authors might
-have to take this into account, but at least they can refer to the former
-as C</PERL_ROOT/lib/2/3/4/5/6/7/8/>.
+(allowing 16 levels overall) prior to VMS 7.2, and even with versions of
+VMS on VAX up through 7.3.  Hence C<PERL_ROOT:[LIB.2.3.4.5.6.7.8]> is a
+valid directory specification but C<PERL_ROOT:[LIB.2.3.4.5.6.7.8.9]> is
+not.  F<Makefile.PL> authors might have to take this into account, but at
+least they can refer to the former as C</PERL_ROOT/lib/2/3/4/5/6/7/8/>.
+
+Pumpkings and module integrators can easily see whether files with too many
+directory levels have snuck into the core by running the following in the
+top-level source directory:
+
+   $ perl -ne "$_=~s/\s+.*//; print if scalar(split /\//) > 8;" < MANIFEST
+
 
 The VMS::Filespec module, which gets installed as part of the build
 process on VMS, is a pure Perl module that can easily be installed on
@@ -1219,9 +1226,7 @@ F<README.vms> (installed as L<README_vms>), L<perlvms>
 
 =item *
 
-vmsperl list, majordomo@perl.org
-
-(Put the words C<subscribe vmsperl> in message body.)
+vmsperl list, vmsperl-subscribe@perl.org
 
 =item *
 

@@ -158,6 +158,8 @@ then C<use strict;> isn't in force within the autoloaded subroutines. It would
 be more consistent (and less surprising) to arrange for all lexical pragmas
 in force at the __END__ block to be in force within each autoloaded subroutine.
 
+There's a similar problem with SelfLoader.
+
 =head1 Tasks that need a little sysadmin-type knowledge
 
 Or if you prefer, tasks that you would learn from, and broaden your skills

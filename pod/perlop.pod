@@ -937,14 +937,22 @@ X<\t> X<\n> X<\r> X<\f> X<\b> X<\a> X<\e> X<\x> X<\0> X<\c> X<\N>
     \b		backspace       (BS)
     \a		alarm (bell)    (BEL)
     \e		escape          (ESC)
-    \033	octal char	(ESC)
-    \x1b	hex char	(ESC)
-    \x{263a}	wide hex char	(SMILEY)
-    \c[		control char    (ESC)
+    \033	octal char	(example: ESC)
+    \x1b	hex char	(example: ESC)
+    \x{263a}	wide hex char	(example: SMILEY)
+    \c[		control char    (example: ESC)
     \N{name}	named Unicode character
 
+The character following C<\c> is mapped to some other character by
+converting letters to upper case and then (on ASCII systems) by inverting
+the 7th bit (0x40). The most interesting range is from '@' to '_'
+(0x40 through 0x5F), resulting in a control character from 0x00
+through 0x1F. A '?' maps to the DEL character. On EBCDIC systems only
+'@', the letters, '[', '\', ']', '^', '_' and '?' will work, resulting
+in 0x00 through 0x1F and 0x7F.
+
 B<NOTE>: Unlike C and other languages, Perl has no \v escape sequence for
-the vertical tab (VT - ASCII 11).
+the vertical tab (VT - ASCII 11), but you may use C<\ck> or C<\x0b>.
 
 The following escape sequences are available in constructs that interpolate
 but not in transliterations.
@@ -1040,7 +1048,7 @@ around the year 2168.
 =item m/PATTERN/cgimosx
 X<m> X<operator, match>
 X<regexp, options> X<regexp> X<regex, options> X<regex>
-X</c> X</i> X</m> X</o> X</s> X</x>
+X</m> X</s> X</i> X</x> X</o> X</g> X</c>
 
 =item /PATTERN/cgimosx
 
@@ -1053,7 +1061,8 @@ rather tightly.)  See also L<perlre>.  See L<perllocale> for
 discussion of additional considerations that apply when C<use locale>
 is in effect.
 
-Options are:
+Options are as described in C<qr//>; in addition, the following match
+process modifiers are available:
 
     c	Do not reset search position on a failed match when /g is in effect.
     g	Match globally, i.e., find all occurrences.
@@ -1079,7 +1088,7 @@ the trailing delimiter.  This avoids expensive run-time recompilations,
 and is useful when the value you are interpolating won't change over
 the life of the script.  However, mentioning C</o> constitutes a promise
 that you won't change the variables in the pattern.  If you change them,
-Perl won't even notice.  See also L<"qr/STRING/imosx">.
+Perl won't even notice.  See also L<"qr/STRING/msixo">.
 
 If the PATTERN evaluates to the empty string, the last
 I<successfully> matched regular expression is used instead. In this
@@ -1212,6 +1221,8 @@ Here is the output (split into several lines):
  lowercase lowercase line-noise lowercase lowercase line-noise
  MiXeD line-noise. That's all!
 
+=over 4
+
 =item q/STRING/
 X<q> X<quote, single> X<'> X<''>
 
@@ -1237,7 +1248,7 @@ A double-quoted, interpolated string.
 		if /\b(tcl|java|python)\b/i;      # :-)
     $baz = "\n";		# a one-character string
 
-=item qr/STRING/imosx
+=item qr/STRING/msixo
 X<qr> X</i> X</m> X</o> X</s> X</x>
 
 This operator quotes (and possibly compiles) its I<STRING> as a regular
