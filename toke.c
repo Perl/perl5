@@ -765,8 +765,7 @@ S_update_debugger_info(pTHX_ SV *orig_sv, const char *buf, STRLEN len)
 {
     AV *av = CopFILEAVx(PL_curcop);
     if (av) {
-	SV * const sv = newSV(0);
-	sv_upgrade(sv, SVt_PVMG);
+	SV * const sv = newSV_type(SVt_PVMG);
 	if (orig_sv)
 	    sv_setsv(sv, orig_sv);
 	else
@@ -9787,8 +9786,8 @@ S_scan_heredoc(pTHX_ register char *s)
     }
     s += SvCUR(herewas);
 
-    tmpstr = newSV(79);
-    sv_upgrade(tmpstr, SVt_PVIV);
+    tmpstr = newSV_type(SVt_PVIV);
+    SvGROW(tmpstr, 80);
     if (term == '\'') {
 	op_type = OP_CONST;
 	SvIV_set(tmpstr, -1);
@@ -10157,8 +10156,8 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
     /* create a new SV to hold the contents.  79 is the SV's initial length.
        What a random number. */
-    sv = newSV(79);
-    sv_upgrade(sv, SVt_PVIV);
+    sv = newSV_type(SVt_PVIV);
+    SvGROW(sv, 80);
     SvIV_set(sv, termcode);
     (void)SvPOK_only(sv);		/* validate pointer */
 
@@ -10906,8 +10905,7 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
     save_item(PL_subname);
     SAVESPTR(PL_compcv);
 
-    PL_compcv = (CV*)newSV(0);
-    sv_upgrade((SV *)PL_compcv, is_format ? SVt_PVFM : SVt_PVCV);
+    PL_compcv = (CV*)newSV_type(is_format ? SVt_PVFM : SVt_PVCV);
     CvFLAGS(PL_compcv) |= flags;
 
     PL_subline = CopLINE(PL_curcop);

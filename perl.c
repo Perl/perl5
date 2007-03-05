@@ -279,8 +279,8 @@ perl_construct(pTHXx)
 
 	PL_curcop = &PL_compiling;	/* needed by ckWARN, right away */
 
-	PL_linestr = newSV(79);
-	sv_upgrade(PL_linestr,SVt_PVIV);
+	PL_linestr = newSV_type(SVt_PVIV);
+	SvGROW(PL_linestr, 80);
 
 	if (!SvREADONLY(&PL_sv_undef)) {
 	    /* set read-only and try to insure than we wont see REFCNT==0
@@ -2202,8 +2202,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	}
     }
 
-    PL_main_cv = PL_compcv = (CV*)newSV(0);
-    sv_upgrade((SV *)PL_compcv, SVt_PVCV);
+    PL_main_cv = PL_compcv = (CV*)newSV_type(SVt_PVCV);
     CvUNIQUE_on(PL_compcv);
 
     CvPADLIST(PL_compcv) = pad_new(0);
@@ -4711,11 +4710,9 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 {
     GV* tmpgv;
 
-    PL_toptarget = newSV(0);
-    sv_upgrade(PL_toptarget, SVt_PVFM);
+    PL_toptarget = newSV_type(SVt_PVFM);
     sv_setpvn(PL_toptarget, "", 0);
-    PL_bodytarget = newSV(0);
-    sv_upgrade(PL_bodytarget, SVt_PVFM);
+    PL_bodytarget = newSV_type(SVt_PVFM);
     sv_setpvn(PL_bodytarget, "", 0);
     PL_formtarget = PL_bodytarget;
 

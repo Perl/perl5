@@ -338,7 +338,8 @@ PADOFFSET
 Perl_pad_add_name(pTHX_ char *name, HV* typestash, HV* ourstash, bool fake)
 {
     const PADOFFSET offset = pad_alloc(OP_PADSV, SVs_PADMY);
-    SV* const namesv = newSV(0);
+    SV* const namesv
+	= newSV_type(ourstash ? SVt_PVGV : typestash ? SVt_PVMG : SVt_PVNV);
 
     ASSERT_CURPAD_ACTIVE("pad_add_name");
 
@@ -349,7 +350,6 @@ Perl_pad_add_name(pTHX_ char *name, HV* typestash, HV* ourstash, bool fake)
 	  )
     );
 
-    sv_upgrade(namesv, ourstash ? SVt_PVGV : typestash ? SVt_PVMG : SVt_PVNV);
     sv_setpv(namesv, name);
 
     if (typestash) {
@@ -469,8 +469,7 @@ PADOFFSET
 Perl_pad_add_anon(pTHX_ SV* sv, OPCODE op_type)
 {
     PADOFFSET ix;
-    SV* const name = newSV(0);
-    sv_upgrade(name, SVt_PVNV);
+    SV* const name = newSV_type(SVt_PVNV);
     sv_setpvn(name, "&", 1);
     /* Are these two actually ever read? */
     COP_SEQ_RANGE_HIGH_set(name, ~0);
@@ -1358,8 +1357,7 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
     ENTER;
     SAVESPTR(PL_compcv);
 
-    cv = PL_compcv = (CV*)newSV(0);
-    sv_upgrade((SV *)cv, SvTYPE(proto));
+    cv = PL_compcv = (CV*)newSV_type(SvTYPE(proto));
     CvFLAGS(cv) = CvFLAGS(proto) & ~(CVf_CLONE|CVf_WEAKOUTSIDE);
     CvCLONED_on(cv);
 

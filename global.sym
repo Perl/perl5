@@ -332,6 +332,7 @@ Perl_newSVpvf
 Perl_vnewSVpvf
 Perl_newSVrv
 Perl_newSVsv
+Perl_newSV_type
 Perl_newUNOP
 Perl_newWHILEOP
 Perl_newWHILEOP8

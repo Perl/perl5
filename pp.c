@@ -313,8 +313,7 @@ PP(pp_av2arylen)
     AV *const av = (AV*)TOPs;
     SV *sv = AvARYLEN(av);
     if (!sv) {
-	AvARYLEN(av) = sv = newSV(0);
-	sv_upgrade(sv, SVt_IV);
+	AvARYLEN(av) = sv = newSV_type(SVt_PVMG);
 	sv_magic(sv, (SV*)av, PERL_MAGIC_arylen, NULL, 0);
     }
     SETs(sv);

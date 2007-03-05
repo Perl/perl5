@@ -1320,9 +1320,7 @@ HV *
 Perl_newHV(pTHX)
 {
     register XPVHV* xhv;
-    HV * const hv = (HV*)newSV(0);
-
-    sv_upgrade((SV *)hv, SVt_PVHV);
+    HV * const hv = (HV*)newSV_type(SVt_PVHV);
     xhv = (XPVHV*)SvANY(hv);
     SvPOK_off(hv);
     SvNOK_off(hv);
