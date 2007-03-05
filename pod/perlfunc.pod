@@ -596,13 +596,17 @@ returns the caller's package name if there is a caller, that is, if
 we're in a subroutine or C<eval> or C<require>, and the undefined value
 otherwise.  In list context, returns
 
+    # 0         1          2
     ($package, $filename, $line) = caller;
 
 With EXPR, it returns some extra information that the debugger uses to
 print a stack trace.  The value of EXPR indicates how many call frames
 to go back before the current one.
 
+    #  0         1          2      3            4
     ($package, $filename, $line, $subroutine, $hasargs,
+
+    #  5          6          7            8       9
     $wantarray, $evaltext, $is_require, $hints, $bitmask) = caller($i);
 
 Here $subroutine may be C<(eval)> if the frame is not a subroutine
@@ -632,6 +636,7 @@ previous time C<caller> was called.
 =item chdir EXPR
 X<chdir>
 X<cd>
+X<directory, change>
 
 =item chdir FILEHANDLE
 
@@ -922,7 +927,7 @@ function, or use this relation:
 
 =item crypt PLAINTEXT,SALT
 X<crypt> X<digest> X<hash> X<salt> X<plaintext> X<password>
-X<decrypt> X<cryptography> X<passwd>
+X<decrypt> X<cryptography> X<passwd> X<encrypt>
 
 Creates a digest string exactly like the crypt(3) function in the C
 library (assuming that you actually have a version there that has not
@@ -1460,6 +1465,7 @@ there was an error.
 
 =item eval EXPR
 X<eval> X<try> X<catch> X<evaluate> X<parse> X<execute>
+X<error, handling> X<exception, handling>
 
 =item eval BLOCK
 
@@ -1956,7 +1962,7 @@ character may be taken to mean the beginning of an array name.
 C<formline> always returns true.  See L<perlform> for other examples.
 
 =item getc FILEHANDLE
-X<getc> X<getchar>
+X<getc> X<getchar> X<character> X<file, read>
 
 =item getc
 
@@ -2270,49 +2276,12 @@ X<gmtime> X<UTC> X<Greenwich>
 
 =item gmtime
 
-Converts a time as returned by the time function to an 9-element list
-with the time localized for the standard Greenwich time zone.
-Typically used as follows:
+Works just like L<localtime> but the returned values are
+localized for the standard Greenwich time zone.
 
-    #  0    1    2     3     4    5     6     7     8
-    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
-					    gmtime(time);
-
-All list elements are numeric, and come straight out of the C `struct
-tm'.  $sec, $min, and $hour are the seconds, minutes, and hours of the
-specified time.  $mday is the day of the month, and $mon is the month
-itself, in the range C<0..11> with 0 indicating January and 11
-indicating December.  $year is the number of years since 1900.  That
-is, $year is C<123> in year 2023.  $wday is the day of the week, with
-0 indicating Sunday and 3 indicating Wednesday.  $yday is the day of
-the year, in the range C<0..364> (or C<0..365> in leap years).  $isdst
-is always C<0>.
-
-Note that the $year element is I<not> simply the last two digits of
-the year.  If you assume it is then you create non-Y2K-compliant
-programs--and you wouldn't want to do that, would you?
-
-The proper way to get a complete 4-digit year is simply:
-
-	$year += 1900;
-
-And to get the last two digits of the year (e.g., '01' in 2001) do:
-
-	$year = sprintf("%02d", $year % 100);
-
-If EXPR is omitted, C<gmtime()> uses the current time (C<gmtime(time)>).
-
-In scalar context, C<gmtime()> returns the ctime(3) value:
-
-    $now_string = gmtime;  # e.g., "Thu Oct 13 04:54:34 1994"
-
-If you need local time instead of GMT use the L</localtime> builtin. 
-See also the C<timegm> function provided by the C<Time::Local> module,
-and the strftime(3) and mktime(3) functions available via the L<POSIX> module.
-
-This scalar value is B<not> locale dependent (see L<perllocale>), but is
-instead a Perl builtin.  To get somewhat similar but locale dependent date
-strings, see the example in L</localtime>.
+Note: when called in list context, $isdst, the last value
+returned by gmtime is always C<0>.  There is no
+Daylight Saving Time in GMT.
 
 See L<perlport/gmtime> for portability concerns.
 
@@ -2429,7 +2398,7 @@ you've set the C<$[> variable to--but don't do that).  If the substring
 is not found, C<index> returns one less than the base, ordinarily C<-1>.
 
 =item int EXPR
-X<int> X<integer> X<truncate> X<trunc>
+X<int> X<integer> X<truncate> X<trunc> X<floor>
 
 =item int
 
@@ -2563,8 +2532,8 @@ If SIGNAL is zero, no signal is sent to the process, but the kill(2)
 system call will check whether it's possible to send a signal to it (that
 means, to be brief, that the process is owned by the same user, or we are
 the super-user).  This is a useful way to check that a child process is
-alive and hasn't changed its UID.  See L<perlport> for notes on the
-portability of this construct.
+alive (even if only as a zombie) and hasn't changed its UID.  See
+L<perlport> for notes on the portability of this construct.
 
 Unlike in the shell, if SIGNAL is negative, it kills
 process groups instead of processes.  (On System V, a negative I<PROCESS>
@@ -2665,7 +2634,7 @@ be placed in parentheses.  See L<perlsub/"Temporary Values via local()">
 for details, including issues with tied arrays and hashes.
 
 =item localtime EXPR
-X<localtime>
+X<localtime> X<ctime>
 
 =item localtime
 
@@ -2694,6 +2663,9 @@ of the year.  That is, C<$year> is C<123> in year 2023.  The proper way
 to get a complete 4-digit year is simply:
 
     $year += 1900;
+
+Otherwise you create non-Y2K-compliant programs--and you wouldn't want
+to do that, would you?
 
 To get the last two digits of the year (e.g., '01' in 2001) do:
 
@@ -2731,6 +2703,13 @@ Note that the C<%a> and C<%b>, the short forms of the day of the week
 and the month of the year, may not necessarily be three characters wide.
 
 See L<perlport/localtime> for portability concerns.
+
+The L<Time::gmtime> and L<Time::localtime> modules provides a convenient,
+by-name access mechanism to the gmtime() and localtime() functions,
+respectively.
+
+For a comprehensive date and time representation look at the
+L<DateTime> module on CPAN.
 
 =item lock THING
 X<lock>
@@ -2853,6 +2832,9 @@ Note that according to the POSIX 1003.1-1996 the FILENAME may have any
 number of trailing slashes.  Some operating and filesystems do not get
 this right, so Perl automatically removes all trailing slashes to keep
 everyone happy.
+
+In order to recursively create a directory structure look at
+the C<mkpath> function of the L<File::Path> module.
 
 =item msgctl ID,CMD,ARG
 X<msgctl>
@@ -4107,7 +4089,7 @@ large or too small, then your version of Perl was probably compiled
 with the wrong number of RANDBITS.)
 
 =item read FILEHANDLE,SCALAR,LENGTH,OFFSET
-X<read>
+X<read> X<file, read>
 
 =item read FILEHANDLE,SCALAR,LENGTH
 
@@ -4287,6 +4269,9 @@ Builtin types include:
     REF
     GLOB
     LVALUE
+    FORMAT
+    IO
+    Regexp
 
 If the referenced object has been blessed into a package, then that package
 name is returned instead.  You can think of C<ref> as a C<typeof> operator.
@@ -4312,6 +4297,9 @@ boundaries, even though the system I<mv> command sometimes compensates
 for this.  Other restrictions include whether it works on directories,
 open files, or pre-existing files.  Check L<perlport> and either the
 rename(2) manpage or equivalent system documentation for details.
+
+For a platform independent C<move> function look at the L<File::Copy>
+module.
 
 =item require VERSION
 X<require>
@@ -4433,12 +4421,13 @@ A filehandle, from which the file will be read.
 
 =item 2
 
-A reference to a subroutine. If there is no file handle, then this subroutine
-is expected to generate one line of source code per call, writing the line
-into C<$_> and returning 1, then returning 0 at "end of FILE" If there is a
-file handle then the subroutine will be called to act a simple source filter,
-with the line as read in C<$_>. Again, return 1 for each valid line, and 0
-after all lines have been returned.
+A reference to a subroutine. If there is no filehandle (previous item),
+then this subroutine is expected to generate one line of source code per
+call, writing the line into C<$_> and returning 1, then returning 0 at
+"end of file". If there is a filehandle, then the subroutine will be
+called to act a simple source filter, with the line as read in C<$_>.
+Again, return 1 for each valid line, and 0 after all lines have been
+returned.
 
 =item 3
 
@@ -4583,6 +4572,9 @@ X<rmdir> X<rd> X<directory, remove>
 Deletes the directory specified by FILENAME if that directory is
 empty.  If it succeeds it returns true, otherwise it returns false and
 sets C<$!> (errno).  If FILENAME is omitted, uses C<$_>.
+
+To remove a directory tree recursively (C<rm -rf> on unix) look at
+the C<rmtree> function of the L<File::Path> module.
 
 =item s///
 
@@ -5723,7 +5715,7 @@ for a seed can fall prey to the mathematical property that
 one-third of the time.  So don't do that.
 
 =item stat FILEHANDLE
-X<stat> X<file, status>
+X<stat> X<file, status> X<ctime>
 
 =item stat EXPR
 
@@ -5783,7 +5775,7 @@ In scalar context, C<stat> returns a boolean value indicating success
 or failure, and, if successful, sets the information associated with
 the special filehandle C<_>.
 
-The File::stat module provides a convenient, by-name access mechanism:
+The L<File::stat> module provides a convenient, by-name access mechanism:
 
     use File::stat;
     $sb = stat($filename);
@@ -5805,7 +5797,7 @@ You can import symbolic mode constants (C<S_IF*>) and functions
     printf "Permissions are %04o\n", S_IMODE($mode), "\n";
 
     $is_setuid     =  $mode & S_ISUID;
-    $is_setgid     =  S_ISDIR($mode);
+    $is_directory  =  S_ISDIR($mode);
 
 You could write the last two using the C<-u> and C<-d> operators.
 The commonly available C<S_IF*> constants are
@@ -5945,6 +5937,13 @@ that far from the end of the string.  If LENGTH is omitted, returns
 everything to the end of the string.  If LENGTH is negative, leaves that
 many characters off the end of the string.
 
+    my $s = "The black cat climbed the green tree";
+    my $color  = substr $s, 4, 5;	# black
+    my $middle = substr $s, 4, -11;	# black cat climbed the
+    my $end    = substr $s, 14;		# climbed the green tree
+    my $tail   = substr $s, -4;		# tree
+    my $z      = substr $s, -4, 2;	# tr
+
 You can use the substr() function as an lvalue, in which case EXPR
 must itself be an lvalue.  If you assign something shorter than LENGTH,
 the string will shrink, and if you assign something longer than LENGTH,
@@ -5969,6 +5968,9 @@ replacement string as the 4th argument.  This allows you to replace
 parts of the EXPR and return what was there before in one operation,
 just as you can with splice().
 
+    my $s = "The black cat climbed the green tree";
+    my $z = substr $s, 14, 7, "jumped from";	# climbed
+    # $s is now "The black cat jumped from the green tree"
 
 =item symlink OLDFILE,NEWFILE
 X<symlink> X<link> X<symbolic link> X<link, symbolic>
@@ -6380,10 +6382,14 @@ a prominent exception being Mac OS Classic which uses 00:00:00, January 1,
 1904 in the current local time zone for its epoch.
 
 For measuring time in better granularity than one second,
-you may use either the Time::HiRes module (from CPAN, and starting from
+you may use either the L<Time::HiRes> module (from CPAN, and starting from
 Perl 5.8 part of the standard distribution), or if you have
 gettimeofday(2), you may be able to use the C<syscall> interface of Perl.
 See L<perlfaq8> for details.
+
+For date and time processing look at the many related modules on CPAN.
+For a comprehensive date and time representation look at the
+L<DateTime> module.
 
 =item times
 X<times>
@@ -6510,7 +6516,7 @@ parameter.  Examples:
 Note that this is a unary operator, not a list operator.
 
 =item unlink LIST
-X<unlink> X<delete> X<remove> X<rm>
+X<unlink> X<delete> X<remove> X<rm> X<del>
 
 =item unlink
 
@@ -7028,7 +7034,7 @@ The status is returned in C<$?> and C<{^CHILD_ERROR_NATIVE}>.  If you say
     #...
     do {
 	$kid = waitpid(-1, WNOHANG);
-    } until $kid > 0;
+    } while $kid > 0;
 
 then you can do a non-blocking wait for all pending zombie processes.
 Non-blocking wait is available on machines supporting either the

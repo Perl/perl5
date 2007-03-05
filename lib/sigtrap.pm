@@ -8,7 +8,7 @@ sigtrap - Perl pragma to enable simple signal handling
 
 use Carp;
 
-$VERSION = 1.02;
+$VERSION = 1.03;
 $Verbose ||= 0;
 
 sub import {
@@ -180,7 +180,8 @@ The handler used for subsequently installed signals calls C<die>
 
 I<your-handler> will be used as the handler for subsequently installed
 signals.  I<your-handler> can be any value which is valid as an
-assignment to an element of C<%SIG>.
+assignment to an element of C<%SIG>. See L<perlvar> for examples of
+handler functions.
 
 =back
 

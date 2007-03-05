@@ -293,7 +293,7 @@ while you are still testing extensions that you use "C<make test>".  If you
 try to run the test script all by itself, you will get a fatal error.
 Another reason it is important to use "C<make test>" to run your test
 script is that if you are testing an upgrade to an already-existing version,
-using "C<make test>" insures that you will test your new extension, not the
+using "C<make test>" ensures that you will test your new extension, not the
 already-existing version.
 
 When Perl sees a C<use extension;>, it searches for a file with the same name

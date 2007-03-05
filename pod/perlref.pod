@@ -210,17 +210,18 @@ that most Perl programmers need trouble themselves about to begin with.
 =item 5.
 X<constructor> X<new>
 
-References are often returned by special subroutines called constructors.
-Perl objects are just references to a special type of object that happens to know
-which package it's associated with.  Constructors are just special
-subroutines that know how to create that association.  They do so by
-starting with an ordinary reference, and it remains an ordinary reference
-even while it's also being an object.  Constructors are often
-named new() and called indirectly:
+References are often returned by special subroutines called constructors.  Perl
+objects are just references to a special type of object that happens to know
+which package it's associated with.  Constructors are just special subroutines
+that know how to create that association.  They do so by starting with an
+ordinary reference, and it remains an ordinary reference even while it's also
+being an object.  Constructors are often named C<new()>.  You I<can> call them
+indirectly:
 
-    $objref = new Doggie (Tail => 'short', Ears => 'long');
+    $objref = new Doggie( Tail => 'short', Ears => 'long' );
 
-But don't have to be:
+But that can produce ambiguous syntax in certain cases, so it's often
+better to use the direct method invocation approach:
 
     $objref   = Doggie->new(Tail => 'short', Ears => 'long');
 
@@ -329,7 +330,6 @@ However, a "simple scalar" includes an identifier that itself uses method
     print $$$$refrefref;
 
 =item 2.
-X<${}> X<@{}> X<%{}>
 
 Anywhere you'd put an identifier (or chain of identifiers) as part of a
 variable or subroutine name, you can replace the identifier with a
@@ -366,7 +366,6 @@ called %hashref, not dereferencing through $hashref to the hash
 it's presumably referencing.  That would be case 3.
 
 =item 3.
-X<autovivification> X<< -> >> X<arrow>
 
 Subroutine calls and lookups of individual array elements arise often
 enough that it gets cumbersome to use method 2.  As a form of
@@ -404,7 +403,6 @@ Well, okay, not entirely like C's arrays, actually.  C doesn't know how
 to grow its arrays on demand.  Perl does.
 
 =item 4.
-X<encapsulation>
 
 If a reference happens to be a reference to an object, then there are
 probably methods to access the things referred to, and you should probably
@@ -453,6 +451,12 @@ dereferenced by C<@{...}> and stuck into the double-quoted string. This
 chicanery is also useful for arbitrary expressions:
 
     print "That yields @{[$n + 5]} widgets\n";
+
+Similarly, an expression that returns a reference to a scalar can be
+dereferenced via C<${...}>. Thus, the above expression may be written
+as:
+
+    print "That yields ${\($n + 5)} widgets\n";
 
 =head2 Symbolic references
 X<reference, symbolic> X<reference, soft>
