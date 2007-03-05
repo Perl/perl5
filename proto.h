@@ -2398,6 +2398,11 @@ PERL_CALLCONV bool	Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags);
 #ifndef SPRINTF_RETURNS_STRLEN
 PERL_CALLCONV int	Perl_my_sprintf(char *buffer, const char *pat, ...);
 #endif
+#if !defined(HAS_SIGNBIT)
+PERL_CALLCONV int	Perl_signbit(NV f)
+			__attribute__pure__;
+
+#endif
 
 PERL_CALLCONV int	Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
 			__attribute__format__null_ok__(__printf__,3,4);

@@ -903,8 +903,8 @@ $!
 $   config_symbols0 ="|archlib|archlibexp|bin|binexp|builddir|cf_email|config_sh|installarchlib|installbin|installman1dir|installman3dir|"
 $   config_symbols1 ="|installprivlib|installscript|installsitearch|installsitelib|most|oldarchlib|oldarchlibexp|osname|pager|perl_symbol|perl_verb|"
 $   config_symbols2 ="|prefix|privlib|privlibexp|scriptdir|sitearch|sitearchexp|sitebin|sitelib|sitelib_stem|sitelibexp|try_cxx|use64bitall|use64bitint|"
-$   config_symbols3 ="|usecasesensitive|usedefaulttypes|usedevel|useieee|useithreads|usemultiplicity|usemymalloc|usedebugging_perl|useperlio|usesecurelog|"
-$   config_symbols4 ="|usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|uselargefiles|usesitecustomize|"
+$   config_symbols3 ="|usecasesensitive|usedefaulttypes|usedevel|useieee|useithreads|uselongdouble|usemultiplicity|usemymalloc|usedebugging_perl|"
+$   config_symbols4 ="|useperlio|usesecurelog||usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|uselargefiles|usesitecustomize|"
 $   config_symbols5 ="|buildmake|builder|usethreadupcalls|usekernelthreads|usedecterm"
 $!  
 $   open/read CONFIG 'config_sh'
@@ -2351,7 +2351,6 @@ $   THEN
 $     echo ""
 $     echo "Since you have chosen a maximally 64-bit build, I'm also turning on"
 $     echo "the use of 64-bit integers."
-$     echo "I am also setting the default to use large files if available."
 $     use64bitint="Y"
 $   ENDIF
 $!
@@ -2368,6 +2367,20 @@ $   echo "If this does not make any sense to you, just accept the default '" + b
 $   rp = "Try to understand large files, if available? [''bool_dflt'] "
 $   GOSUB myread
 $   uselargefiles=ans
+$!
+$   bool_dflt = "n"
+$   IF F$TYPE(uselongdouble) .NES. "" 
+$   THEN
+$       IF uselongdouble .OR. uselongdouble .eqs. "define" THEN bool_dflt = "y"
+$   ENDIF
+$   echo ""
+$   echo "Perl can be built to take advantage of long doubles which"
+$   echo "(if available) may give more accuracy and range for floating point numbers."
+$   echo ""
+$   echo "If this does not make any sense to you, just accept the default '" + bool_dflt + "'."
+$   rp = "Try to use long doubles, if available? [''bool_dflt'] "
+$   GOSUB myread
+$   uselongdouble = ans
 $!
 $ ENDIF ! not VAX && >= 7.1
 $!
@@ -3072,12 +3085,15 @@ $!
 $ ccdlflags=""
 $ cccdlflags=""
 $!
+$! FIXME -- This section does not really handle all the different permutations 
+$! of 64-bitness, and it does not provide for the /POINTER_SIZE=64 compiler
+$! option that would be necessary to support the "explicit 64-bit interfaces"
+$! promised by -Dusemorebits.
+$!
+$ usemorebits = "undef"
 $ IF use64bitint .OR. use64bitint .EQS. "define"
 $ THEN
 $   use64bitint = "define"
-$   uselongdouble = "define"
-$   alignbytes="16"
-$   usemorebits = "define"
 $   ivdformat="""Ld"""
 $   uvuformat="""Lu"""
 $   uvoformat="""Lo"""
@@ -3085,8 +3101,6 @@ $   uvxformat="""Lx"""
 $   uvXUformat="""LX"""
 $ ELSE
 $   use64bitint = "undef"
-$   uselongdouble = "undef"
-$   usemorebits = "undef"
 $   ivdformat="""ld"""
 $   uvuformat="""lu"""
 $   uvoformat="""lo"""
@@ -3095,10 +3109,13 @@ $   uvXUformat="""lX"""
 $ ENDIF
 $ IF uselongdouble .OR. uselongdouble .EQS. "define"
 $ THEN
+$   uselongdouble = "define"
+$   alignbytes="16"
 $   nveformat="""Le"""
 $   nvfformat="""Lf"""
 $   nvgformat="""Lg"""
 $ ELSE
+$   uselongdouble = "undef"
 $   nveformat="""e"""
 $   nvfformat="""f"""
 $   nvgformat="""g"""
@@ -5396,10 +5413,14 @@ $ IF use64bitint .OR. use64bitint .EQS. "define"
 $ THEN
 $   ivtype = "''i64type'"
 $   uvtype = "''u64type'"
-$   nvtype="long double"
 $ ELSE
 $   i64size="undef"
 $   u64size="undef"
+$ ENDIF
+$!
+$ IF uselongdouble .OR. uselongdouble .EQS. "define"
+$ THEN
+$   nvtype="long double"
 $ ENDIF
 $!
 $ tmp = "''ivtype'"
@@ -5512,6 +5533,35 @@ $   WS "}"
 $   CS
 $   GOSUB compile
 $   nv_preserves_uv_bits = tmp
+$ ENDIF
+$!
+$! Check for signbit (must already know nvtype)
+$!
+$ echo4 "Checking to see if you have signbit() available to work on ''nvtype'..."
+$ OS
+$ WS "#if defined(__DECC) || defined(__DECCXX)"
+$ WS "#include <stdlib.h>"
+$ WS "#endif"
+$ WS "#include <fp.h>"
+$ WS "#include <stdio.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "    ''nvtype' x = 0.0;"
+$ WS "    ''nvtype' y = -0.0;"
+$ WS "    if ((signbit(x) == 0) && (signbit(y) != 0))"
+$ WS "        printf(""1\n"");"
+$ WS "    else"
+$ WS "        printf(""0\n"");"
+$ WS "}"
+$ CS
+$ GOSUB compile
+$ IF tmp .EQS. "1" 
+$ THEN 
+$     d_signbit = "define"
+$     echo4 "Yes."
+$ ELSE
+$     d_signbit = "undef"
+$     echo4 "Nope."
 $ ENDIF
 $!
 $ echo4 "Checking if kill() uses SYS$FORCEX or can't be called from a signal handler..."
@@ -5746,6 +5796,7 @@ $ WC "d_c99_variadic_macros='undef'"
 $ WC "d_dbl_dig='define'"
 $ WC "d_dbminitproto='undef'"
 $ WC "d_difftime='define'"
+$ WC "d_dir_dd_fd='undef'"
 $ WC "d_dirfd='undef'"
 $ if (vms_ver .GES. "8.2") .AND. (archname .NES. "VMS_VAX")
 $ then
@@ -5978,6 +6029,7 @@ $ WC "d_sfio='undef'"
 $ WC "d_shm='undef'"
 $ WC "d_shmatprototype='undef'"
 $ WC "d_sigaction='" + d_sigaction + "'"
+$ WC "d_signbit='" + d_signbit + "'"
 $ WC "d_sigprocmask='" + d_sigprocmask + "'"
 $ WC "d_sigsetjmp='" + d_sigsetjmp + "'"
 $ WC "d_sitearch='define'"

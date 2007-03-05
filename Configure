@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Dec  5 15:35:51 CET 2006 [metaconfig 3.0 PL70]
+# Generated on Sat Feb 10 17:48:04 CET 2007 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -59,6 +59,18 @@ if test -f /dev/cputype -a -f /dev/drivers -a -f /dev/osversion; then
 *** I'm sorry but this system looks like Plan 9 and Plan 9 doesn't do
 *** Configure that well.  (Plan 9 is close to UNIX but not close enough.)
 *** Please read the README.plan9 for further instructions.
+*** Cannot continue, aborting.
+***
+EOF
+	exit 1
+fi
+
+if test ! -c /dev/null ; then
+	cat >&4 <<EOF
+***
+*** I'm sorry, but /dev/null appears to be a file rather than a device.
+*** Please consult your operating sytem's notes for making a device
+*** in /dev.
 *** Cannot continue, aborting.
 ***
 EOF
@@ -354,6 +366,7 @@ d_attribute_noreturn=''
 d_attribute_pure=''
 d_attribute_unused=''
 d_attribute_warn_unused_result=''
+d_printf_format_null=''
 d_bcmp=''
 d_bcopy=''
 d_builtin_choose_expr=''
@@ -380,6 +393,7 @@ crypt_r_proto=''
 d_crypt_r=''
 d_csh=''
 full_csh=''
+d_ctermid=''
 ctermid_r_proto=''
 d_ctermid_r=''
 ctime_r_proto=''
@@ -388,6 +402,7 @@ d_cuserid=''
 d_dbl_dig=''
 d_dbminitproto=''
 d_difftime=''
+d_dir_dd_fd=''
 d_dirfd=''
 d_dlerror=''
 d_dlopen=''
@@ -685,6 +700,7 @@ d_shmctl=''
 d_shmdt=''
 d_shmget=''
 d_sigaction=''
+d_signbit=''
 d_sigprocmask=''
 d_sigsetjmp=''
 usesitecustomize=''
@@ -1247,29 +1263,10 @@ elif test -d c:/. -o -n "$is_os2" ; then
 fi
 
 i_whoami=''
-ccname=''
-ccversion=''
-perllibs=''
-: set useposix=false in your hint file to disable the POSIX extension.
-useposix=true
-: set useopcode=false in your hint file to disable the Opcode extension.
-useopcode=true
 : Trailing extension.  Override this in a hint file, if needed.
 : Extra object files, if any, needed on this platform.
 archobjs=''
 archname=''
-: Possible local include directories to search.
-: Set locincpth to "" in a hint file to defeat local include searches.
-locincpth="/usr/local/include /opt/local/include /usr/gnu/include"
-locincpth="$locincpth /opt/gnu/include /usr/GNU/include /opt/GNU/include"
-:
-: no include file wanted by default
-inclwanted=''
-
-: Enable -DEBUGGING and -DDEBUGGING from the command line
-EBUGGING=''
-DEBUGGING=old
-
 groupstype=''
 libnames=''
 : change the next line if compiling for Xenix/286 on Xenix/386
@@ -1283,6 +1280,7 @@ glibpth="/lib /usr/lib $xlibpth"
 glibpth="$glibpth /usr/ccs/lib /usr/ucblib /usr/local/lib"
 test -f /usr/shlib/libc.so && glibpth="/usr/shlib $glibpth"
 test -f /shlib/libc.so     && glibpth="/shlib $glibpth"
+test -d /usr/lib64         && glibpth="$glibpth /lib64 /usr/lib64 /usr/local/lib64"
 
 : Private path used by Configure to find libraries.  Its value
 : is prepended to libpth. This variable takes care of special
@@ -1296,17 +1294,36 @@ ignore_versioned_solibs=''
 siteman1dir=''
 siteman3dir=''
 sitescript=''
+: set usethreads on the Configure command line to enable threads.
+usereentrant='undef'
+: full support for void wanted by default
+defvoidused=15
+
+: Possible local include directories to search.
+: Set locincpth to "" in a hint file to defeat local include searches.
+locincpth="/usr/local/include /opt/local/include /usr/gnu/include"
+locincpth="$locincpth /opt/gnu/include /usr/GNU/include /opt/GNU/include"
+:
+: no include file wanted by default
+inclwanted=''
+
+: Enable -DEBUGGING and -DDEBUGGING from the command line
+EBUGGING=''
+DEBUGGING=old
+
+ccname=''
+ccversion=''
+perllibs=''
+: set useposix=false in your hint file to disable the POSIX extension.
+useposix=true
+: set useopcode=false in your hint file to disable the Opcode extension.
+useopcode=true
 archname64=''
 ccflags_uselargefiles=''
 ldflags_uselargefiles=''
 libswanted_uselargefiles=''
 : set usemultiplicity on the Configure command line to enable multiplicity.
 : set usesocks on the Configure command line to enable socks.
-: set usethreads on the Configure command line to enable threads.
-usereentrant='undef'
-: full support for void wanted by default
-defvoidused=15
-
 : List of libraries we want.
 : If anyone needs extra -lxxx, put those in a hint file.
 libswanted="sfio socket bind inet nsl nm ndbm gdbm dbm db malloc dl dld ld sun"
@@ -3935,9 +3952,21 @@ $startsh
 EOS
 cat <<'EOSC' >>whoa
 dflt=y
-echo " "
-echo "*** WHOA THERE!!! ***" >&4
-echo "    The $hint value for \$$var on this machine was \"$was\"!" >&4
+case "$hint" in
+    recommended)
+	case "$hintfile" in
+	'')	echo "The $hint value for \$$var on this machine was \"$was\"!" >&4
+		;;
+	*)	echo "Hmm.  Based on the hints in hints/$hintfile.sh, " >&4
+		echo "the $hint value for \$$var on this machine was \"$was\"!" >&4
+		;;
+	esac
+	;;
+    *)	echo " "
+	echo "*** WHOA THERE!!! ***" >&4
+	echo "    The $hint value for \$$var on this machine was \"$was\"!" >&4
+	;;
+esac
 rp="    Keep the $hint value?"
 . ./myread
 case "$ans" in
@@ -4023,6 +4052,62 @@ EOM
 esac
 
 	
+: get the patchlevel
+echo " "
+echo "Getting the current patchlevel..." >&4
+if $test -r $rsrc/patchlevel.h;then
+	revision=`awk '/define[ 	]+PERL_REVISION/ {print $3}' $rsrc/patchlevel.h`
+	patchlevel=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $rsrc/patchlevel.h`
+	subversion=`awk '/define[ 	]+PERL_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
+	api_revision=`awk '/define[ 	]+PERL_API_REVISION/ {print $3}' $rsrc/patchlevel.h`
+	api_version=`awk '/define[ 	]+PERL_API_VERSION/ {print $3}' $rsrc/patchlevel.h`
+	api_subversion=`awk '/define[ 	]+PERL_API_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
+	perl_patchlevel=`egrep 'define PERL_PATCHNUM [0-9][0-9]|,"MAINT[0-9][0-9]*"' $rsrc/patchlevel.h|sed 's/[^0-9]//g'`
+else
+	revision=0
+	patchlevel=0
+	subversion=0
+	api_revision=0
+	api_version=0
+	api_subversion=0
+	perl_patchlevel=0
+	$echo "(You do not have patchlevel.h.  Eek.)"
+fi
+if $test -r $rsrc/.patch ; then
+	if $test "X$perl_patchlevel" = "X" || $test "`cat $rsrc/.patch`" -gt "$perl_patchlevel" ; then
+		perl_patchlevel=`cat $rsrc/.patch`
+	fi
+fi
+: Define a handy string here to avoid duplication in myconfig.SH and configpm.
+version_patchlevel_string="version $patchlevel subversion $subversion"
+case "$perl_patchlevel" in
+0|'') ;;
+*) version_patchlevel_string="$version_patchlevel_string patch $perl_patchlevel" ;;
+esac
+
+$echo "(You have $package $version_patchlevel_string.)"
+
+case "$osname" in
+dos|vms)
+	: XXX Should be a Configure test for double-dots in filenames.
+	version=`echo $revision $patchlevel $subversion | \
+		 $awk '{ printf "%d_%d_%d\n", $1, $2, $3 }'`
+	api_versionstring=`echo $api_revision $api_version $api_subversion | \
+		 $awk '{ printf "%d_%d_%d\n", $1, $2, $3 }'`
+	;;
+*)
+	version=`echo $revision $patchlevel $subversion | \
+		 $awk '{ printf "%d.%d.%d\n", $1, $2, $3 }'`
+	api_versionstring=`echo $api_revision $api_version $api_subversion | \
+		 $awk '{ printf "%d.%d.%d\n", $1, $2, $3 }'`
+	;;
+esac
+: Special case the 5.005_xx maintenance series, which used 5.005
+: without any subversion label as a subdirectory in $sitelib
+if test "${api_revision}${api_version}${api_subversion}" = "550"; then
+	api_versionstring='5.005'
+fi
+
 case "$usethreads" in
 $define|true|[yY]*)     dflt='y';;
 *)     # Catch case where user specified ithreads or 5005threads but
@@ -4059,8 +4144,9 @@ esac
 set usethreads
 eval $setvar
 
-case "$usethreads" in
-$define)
+if $test $patchlevel -lt 9; then
+    case "$usethreads" in
+    $define)
 	$cat <<EOM
 
 Since release 5.6, Perl has had two different threading implementations,
@@ -4097,14 +4183,14 @@ EOM
 	set use5005threads
 	eval $setvar
 	;;
-*)
+    *)
 	useithreads="$undef"
 	use5005threads="$undef"
 	;;
-esac
+    esac
 
-case "$useithreads$use5005threads" in
-"$define$define")
+    case "$useithreads$use5005threads" in
+    "$define$define")
 	$cat >&4 <<EOM
 
 You cannot have both the ithreads and the 5.005 threads enabled
@@ -4114,7 +4200,35 @@ much less stable than the ithreads.
 EOM
 	use5005threads="$undef"
 	;;
-esac
+    esac
+
+else
+: perl-5.9.x and later
+
+    use5005threads="$undef"
+    case "$usethreads" in
+    $define)
+	: Default to ithreads unless overridden on command line or with
+	: old config.sh
+	dflt='y'
+	case "$useithreads" in
+		$undef|false|[nN]*) dflt='n';;
+	esac
+	rp='Use the newer interpreter-based ithreads?'
+	. ./myread
+	case "$ans" in
+	y|Y)    val="$define" ;;
+	*)      val="$undef" ;;
+	esac
+	set useithreads
+	eval $setvar
+	;;
+    *)
+	useithreads="$undef"
+	;;
+    esac
+
+fi
 
 if test X"$usethreads" = "X$define" -a "X$useperlio" = "Xundef"; then
 	cat >&4 <<EOF
@@ -4881,7 +4995,7 @@ case "$EBUGGING" in
 esac
 
 case "$DEBUGGING" in
--g|$define)
+-g|both|$define)
     case "$optimize" in
 	*-g*) ;;
 	*)    optimize="$optimize -g" ;;
@@ -4952,20 +5066,6 @@ default|recommended)
 				echo "Leaving current flags $ccflags alone." 2>&1
 				;;
 			*) dflt="$dflt -pipe" ;;
-			esac
-		else
-			echo "Nope, it doesn't, but that's ok." 2>&1
-		fi
-
-		echo "Checking if your compiler accepts -Wdeclaration-after-statement" 2>&1
-		echo 'int main(void) { return 0; }' > gcctest.c
-		if $cc -Wdeclaration-after-statement -o gcctest gcctest.c; then
-			echo "Yes, it does." 2>&1
-			case "$ccflags" in
-			*-Wdeclaration-after-statement*)
-				echo "Leaving current flags $ccflags alone." 2>&1
-				;;
-			*) dflt="$dflt -Wdeclaration-after-statement" ;;
 			esac
 		else
 			echo "Nope, it doesn't, but that's ok." 2>&1
@@ -5970,62 +6070,6 @@ prefixit='case "$3" in
 	esac;;
 esac'
 
-: get the patchlevel
-echo " "
-echo "Getting the current patchlevel..." >&4
-if $test -r $rsrc/patchlevel.h;then
-	revision=`awk '/define[ 	]+PERL_REVISION/ {print $3}' $rsrc/patchlevel.h`
-	patchlevel=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $rsrc/patchlevel.h`
-	subversion=`awk '/define[ 	]+PERL_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
-	api_revision=`awk '/define[ 	]+PERL_API_REVISION/ {print $3}' $rsrc/patchlevel.h`
-	api_version=`awk '/define[ 	]+PERL_API_VERSION/ {print $3}' $rsrc/patchlevel.h`
-	api_subversion=`awk '/define[ 	]+PERL_API_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
-	perl_patchlevel=`egrep 'define PERL_PATCHNUM [0-9][0-9]|,"MAINT[0-9][0-9]*"' $rsrc/patchlevel.h|sed 's/[^0-9]//g'`
-else
-	revision=0
-	patchlevel=0
-	subversion=0
-	api_revision=0
-	api_version=0
-	api_subversion=0
-	perl_patchlevel=0
-	$echo "(You do not have patchlevel.h.  Eek.)"
-fi
-if $test -r $rsrc/.patch ; then
-	if $test "X$perl_patchlevel" = "X" || $test "`cat $rsrc/.patch`" -gt "$perl_patchlevel" ; then
-		perl_patchlevel=`cat $rsrc/.patch`
-	fi
-fi
-: Define a handy string here to avoid duplication in myconfig.SH and configpm.
-version_patchlevel_string="version $patchlevel subversion $subversion"
-case "$perl_patchlevel" in
-0|'') ;;
-*) version_patchlevel_string="$version_patchlevel_string patch $perl_patchlevel" ;;
-esac
-
-$echo "(You have $package $version_patchlevel_string.)"
-
-case "$osname" in
-dos|vms)
-	: XXX Should be a Configure test for double-dots in filenames.
-	version=`echo $revision $patchlevel $subversion | \
-		 $awk '{ printf "%d_%d_%d\n", $1, $2, $3 }'`
-	api_versionstring=`echo $api_revision $api_version $api_subversion | \
-		 $awk '{ printf "%d_%d_%d\n", $1, $2, $3 }'`
-	;;
-*)
-	version=`echo $revision $patchlevel $subversion | \
-		 $awk '{ printf "%d.%d.%d\n", $1, $2, $3 }'`
-	api_versionstring=`echo $api_revision $api_version $api_subversion | \
-		 $awk '{ printf "%d.%d.%d\n", $1, $2, $3 }'`
-	;;
-esac
-: Special case the 5.005_xx maintenance series, which used 5.005
-: without any subversion label as a subdirectory in $sitelib
-if test "${api_revision}${api_version}${api_subversion}" = "550"; then
-	api_versionstring='5.005'
-fi
-
 : determine installation style
 : For now, try to deduce it from prefix unless it is already set.
 : Reproduce behavior of 5.005 and earlier, maybe drop that in 5.7.
@@ -6362,30 +6406,34 @@ use File::Basename;
 \$archname = "$archname";
 EOPL
 	$cat >> getverlist <<'EOPL'
+# The list found is store twice for each entry: the original name, and
+# the binary broken down version as pack "sss", so sorting is easy and
+# unambiguous. This will work for all versions that have a maximum of
+# three digit groups, separate by '.'s or '_'s. Names are extended with
+# ".0.0" to ensure at least three elements for the pack.
+#					-- H.Merijn Brand (m)'06 23-10-2006
+
 # Can't have leading @ because metaconfig interprets it as a command!
 ;@inc_version_list=();
 # XXX Redo to do opendir/readdir?
 if (-d $stem) {
     chdir($stem);
-    ;@candidates = glob("5.*");
+    ;@candidates = map {
+	[ $_, pack "sss", split m/[._]/, "$_.0.0" ] } glob("5.*");
 }
 else {
     ;@candidates = ();
 }
 
-# XXX ToDo:  These comparisons must be reworked when two-digit
-# subversions come along, so that 5.7.10 compares as greater than
-# 5.7.3!  By that time, hope that 5.6.x is sufficiently
-# widespread that we can use the built-in version vectors rather
-# than reinventing them here.  For 5.6.0, however, we must
-# assume this script will likely be run by 5.005_0x.  --AD 1/2000.
+($pversion, $aversion, $vsn5005) = map {
+    pack "sss", split m/[._]/, "$_.0.0" } $version, $api_versionstring, "5.005";
 foreach $d (@candidates) {
-    if ($d lt $version) {
-	if ($d ge $api_versionstring) {
-	    unshift(@inc_version_list, grep { -d } "$d/$archname", $d);
+    if ($d->[1] lt $pversion) {
+	if ($d->[1] ge $aversion) {
+	    unshift(@inc_version_list, grep { -d } $d->[0]."/$archname", $d->[0]);
 	}
-	elsif ($d ge "5.005") {
-	    unshift(@inc_version_list, grep { -d } $d);
+	elsif ($d->[1] ge $vsn5005) {
+	    unshift(@inc_version_list, grep { -d } $d->[0]);
 	}
     }
     else {
@@ -7139,32 +7187,6 @@ $rm -f try try.* glibc.ver
 set d_gnulibc
 eval $setvar
 
-echo " "
-echo "Checking for C++..." >&4
-cat >try.c <<'EOCP'
-#include <stdio.h>
-int main(void)
-{
-#ifdef __cplusplus
-    printf("define\n");
-#else
-    printf("undef\n");
-#endif
-    return 0;
-}
-EOCP
-set try
-if eval $compile_ok && $run ./try > cplusplus; then
-	val=`$cat cplusplus`
-	echo "You are using a C++ compiler."
-else
-	val="$undef"
-	echo "You are not using a C++ compiler."
-fi
-$rm -f try try.* cplusplus
-set d_cplusplus
-eval $setvar
-
 : see if nm is to be used to determine whether a symbol is defined or not
 case "$usenm" in
 '')
@@ -7611,6 +7633,33 @@ yes)
 	*) echo "$sym() NOT found." >&4;;
 	esac;;
 esac'
+
+
+echo " "
+echo "Checking for C++..." >&4
+cat >try.c <<'EOCP'
+#include <stdio.h>
+int main(void)
+{
+#ifdef __cplusplus
+    printf("define\n");
+#else
+    printf("undef\n");
+#endif
+    return 0;
+}
+EOCP
+set try
+if eval $compile_ok && $run ./try >cplusplus$$; then
+	val=`$cat cplusplus$$`
+	echo "You are using a C++ compiler."
+else
+	val="$undef"
+	echo "You are not using a C++ compiler."
+fi
+$rm -f try try.* cplusplus$$
+set d_cplusplus
+eval $setvar
 
 : see if dlopen exists
 xxx_runnm="$runnm"
@@ -9973,6 +10022,50 @@ set d_attribute_format
 eval $setvar
 $rm -f attrib*
 
+: Look for GCC-style attribute format with null format allowed
+case "$d_printf_format_null" in
+'') case "$d_attribute_format" in
+    $define)
+	echo " "
+	echo "Checking whether your compiler allows __printf__ format to be null ..." >&4
+$cat >attrib.c <<EOCP
+#include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+int null_printf (char* pat,...) __attribute__((__format__(__printf__,1,2)));
+int null_printf (char* pat,...) { return (int)pat; }
+int main () { exit(null_printf(NULL)); }
+EOCP
+	if $cc $ccflags -o attrib attrib.c >attrib.out 2>&1 ; then
+	    : run the executable in case it produces a run-time warning
+	    if $run ./attrib >>attrib.out 2>&1; then
+		if $contains 'warning' attrib.out >/dev/null 2>&1; then
+		    echo "Your C compiler doesn't allow __printf__ format to be null."
+		    val="$undef"
+		else
+		    echo "Your C compiler allows __printf__ format to be null."
+		    val="$define"
+		fi
+	    else
+	    echo "Your C compiler executable failed with __printf__ format null."
+	    val="$undef"
+	fi
+    else
+	echo "Your C compiler fails with __printf__ format null."
+	val="$undef"
+    fi
+    ;;
+    *)  val="$undef" ;;
+    esac
+;;
+*)  val="$d_printf_format_null" ;;
+esac
+set d_printf_format_null
+eval $setvar
+$rm -f attrib*
+
 : Look for GCC-style attribute malloc
 case "$d_attribute_malloc" in
 '')
@@ -11001,6 +11094,10 @@ case "$full_csh" in
 '') full_csh=$csh ;;
 esac
 
+: see if ctermid exists
+set ctermid d_ctermid
+eval $inlibc
+
 : see if ctermid_r exists
 set ctermid_r d_ctermid_r
 eval $inlibc
@@ -11240,6 +11337,42 @@ fi
 set d_dirnamlen
 eval $setvar
 $rm -f try.c
+
+: Look for DIR.dd_fd
+case "$i_dirent" in
+"$define")
+    echo "Checking to see if DIR has a dd_fd member variable" >&4
+    $cat >try.c <<EOCP
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#include <dirent.h>
+
+int main() {
+    DIR dir;
+    dir.dd_fd = 1;
+    return 0;
+}
+EOCP
+    val=$undef
+    set try
+    if eval $compile; then
+        echo "Yes, it does."
+        val="$define"
+    else
+        echo "No, it does not."
+        val="$undef"
+    fi
+    ;;
+*)
+    echo "You don't have a <dirent.h>, so not checking for dd_fd." >&4
+    val="$undef"
+    ;;
+esac
+set d_dir_dd_fd
+eval $setvar
+$rm -f try try.*
 
 : see if this is an sysdir system
 set sys/dir.h i_sysdir
@@ -15167,10 +15300,9 @@ int main() {
       if (($uvtype)d != (u - 1))
         break;
 #ifdef SIGFPE
-      if (bletched) {
+      if (bletched)
 	break;
 #endif
-      }	
     }
     printf("%d\n", ((i == n) ? -n : i));
     exit(0);
@@ -15191,7 +15323,7 @@ case "$nv_preserves_uv_bits" in
 [1-9]*)	$echo "Your NVs can preserve only $nv_preserves_uv_bits bits of your UVs."  2>&1
 	d_nv_preserves_uv="$undef" ;;
 *)	$echo "Can't figure out how many bits your NVs preserve." 2>&1
-	nv_preserves_uv_bits="$undef" ;;
+	nv_preserves_uv_bits="0" ;;
 esac
 
 $rm -f try.* try
@@ -16832,6 +16964,51 @@ else
 fi
 set d_sigaction; eval $setvar
 $rm -f try try$_o try.c
+
+: see if this is a sunmath.h system
+set sunmath.h i_sunmath
+eval $inhdr
+
+: see if signbit exists
+$echo $n "Checking to see if you have signbit() available to work on $nvtype... $c" >&4
+$cat >try.c <<EOCP
+#$i_math I_MATH
+#$i_sunmath I_SUNMATH
+#ifdef I_MATH
+#  include <math.h>
+#endif
+#ifdef I_SUNMATH  /* Solaris special math library */
+#  include <sunmath.h>
+#endif
+#define NV $nvtype
+int main(int argc, char **argv)
+{
+    NV x = 0.0;
+    NV y = -0.0;
+    if ((signbit(x) == 0) && (signbit(y) != 0))
+	return 0;
+    else
+	return 1;
+}
+EOCP
+val="$undef"
+set try
+if eval $compile; then
+    if $run ./try; then
+        $echo "Yes." >&4
+	val="$define"
+    else
+        $echo "Signbit seems to be available, but doesn't work as I expected."
+        $echo "I won't use it." >&4
+	val="$undef"
+    fi
+else
+    $echo "Nope." >&4
+    dflt="$undef"
+fi
+set d_signbit
+eval $setvar
+$rm -f try.* try
 
 : see if sigprocmask exists
 set sigprocmask d_sigprocmask
@@ -20320,6 +20497,26 @@ eval $inhdr
 set fp_class.h i_fp_class
 eval $inhdr
 
+: see if gdbm.h is available
+set gdbm.h t_gdbm
+eval $inhdr
+case "$t_gdbm" in
+$define)
+	: see if gdbm_open exists
+	set gdbm_open d_gdbm_open
+	eval $inlibc
+	case "$d_gdbm_open" in
+	$undef)
+		t_gdbm="$undef"
+		echo "We won't be including <gdbm.h>"
+		;;
+	esac
+	;;
+esac
+val="$t_gdbm"
+set i_gdbm
+eval $setvar
+
 : see if this is a ieeefp.h system
 case "$i_ieeefp" in
 '' ) set ieeefp.h i_ieeefp
@@ -20700,10 +20897,6 @@ val=$val3; set i_termios; eval $setvar
 set stddef.h i_stddef
 eval $inhdr
 
-: see if this is a sunmath.h system
-set sunmath.h i_sunmath
-eval $inhdr
-
 : see if sys/access.h is available
 set sys/access.h i_sysaccess
 eval $inhdr
@@ -20807,26 +21000,6 @@ case "$d_vfork" in
 	;;
 esac
 
-: see if gdbm.h is available
-set gdbm.h t_gdbm
-eval $inhdr
-case "$t_gdbm" in
-$define)
-	: see if gdbm_open exists
-	set gdbm_open d_gdbm_open
-	eval $inlibc
-	case "$d_gdbm_open" in
-	$undef)
-		t_gdbm="$undef"
-		echo "We won't be including <gdbm.h>"
-		;;
-	esac
-	;;
-esac
-val="$t_gdbm"
-set i_gdbm
-eval $setvar
-
 echo " "
 echo "Looking for extensions..." >&4
 : If we are using the old config.sh, known_extensions may contain
@@ -20842,24 +21015,24 @@ nonxs_extensions=''
 : NOTE: recursion limit of 10 to prevent runaway in case of symlink madness
 find_extensions='
     for xxx in *; do
-       case "$xxx" in
-           DynaLoader|dynaload) ;;
-           *)
-           if $test -f $xxx/$xxx.xs; then
-               known_extensions="$known_extensions $1$xxx";
-           elif $test -f $xxx/Makefile.PL; then
-               nonxs_extensions="$nonxs_extensions $1$xxx";
-           else
-               if $test -d $xxx -a $# -lt 10; then
-                   set $1$xxx/ $*;
-                   cd "$xxx";
-                   eval $find_extensions;
-                   cd ..;
-                   shift;
-               fi;
-           fi
-           ;;
-       esac;
+	case "$xxx" in
+	    DynaLoader|dynaload) ;;
+	    *)
+	    if $test -f $xxx/$xxx.xs; then
+		known_extensions="$known_extensions $1$xxx";
+	    elif $test -f $xxx/Makefile.PL; then
+		nonxs_extensions="$nonxs_extensions $1$xxx";
+	    else
+		if $test -d $xxx -a $# -lt 10; then
+		    set $1$xxx/ $*;
+		    cd "$xxx";
+		    eval $find_extensions;
+		    cd ..;
+		    shift;
+		fi;
+	    fi
+	    ;;
+	esac;
     done'
 tdir=`pwd`
 cd "$rsrc/ext"
@@ -20870,12 +21043,13 @@ eval $find_extensions
 # recursive find above (and adding in general recursive finding breaks
 # SDBM_File/sdbm).  A.D.  10/25/2001.
 known_extensions="$known_extensions threads/shared"
-set X $nonxs_extensions
-shift
-nonxs_extensions="$*"
 set X $known_extensions
 shift
 known_extensions="$*"
+#  Ditto for IO/Compress/Base and IO/Compress/Zlib
+set X $nonxs_extensions
+shift
+nonxs_extensions="$*"
 cd "$tdir"
 
 : Now see which are supported on this system.
@@ -20888,12 +21062,12 @@ for xxx in $known_extensions ; do
 		esac
 		;;
 	GDBM_File|gdbm_fil)
-		case "$i_gdbm" in 
+		case "$i_gdbm" in
 		$define) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
 	I18N/Langinfo|i18n_lan)
-		case "$i_langinfo$d_nl_langinfo" in 
+		case "$i_langinfo$d_nl_langinfo" in
 		$define$define) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
@@ -20911,7 +21085,7 @@ for xxx in $known_extensions ; do
 		    ;;
 		esac
 		;;
-	ODBM_File|odbm_fil) 
+	ODBM_File|odbm_fil)
 		case "${i_dbm}${i_rpcsvcdbm}" in
 		*"${define}"*)
 		    case "$osname-$use64bitint" in
@@ -20936,7 +21110,7 @@ for xxx in $known_extensions ; do
 		esac
 		;;
 	Socket|socket)
-		case "$d_socket" in 
+		case "$d_socket" in
 		true|$define|y)
 		    case "$osname" in
 		    beos) ;; # not unless BONE
@@ -20947,7 +21121,7 @@ for xxx in $known_extensions ; do
 		;;
 	Sys/Syslog|sys/syslog)
 		: XXX syslog requires socket
-		case "$d_socket" in 
+		case "$d_socket" in
 		true|$define|y) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
@@ -20988,7 +21162,7 @@ for xxx in $known_extensions ; do
 		;;
 	IPC/SysV|ipc/sysv)
 		: XXX Do we need a useipcsysv variable here
-		case "${d_msg}${d_sem}${d_shm}" in 
+		case "${d_msg}${d_sem}${d_shm}" in
 		*"${define}"*) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
@@ -21078,11 +21252,11 @@ EOM
 		previous)
 			if test X"$dynamic_ext" != X"$avail_ext"; then
 				$cat <<EOM
-NOTICE:  Your previous config.sh list may be incorrect. 
-The extensions now available to you are 
+NOTICE:  Your previous config.sh list may be incorrect.
+The extensions now available to you are
 	${avail_ext}
 but the default list from your previous config.sh is
-	${dynamic_ext} 
+	${dynamic_ext}
 
 EOM
 			fi
@@ -21114,7 +21288,7 @@ EOM
 		shift
 		dflt="$*"
 		;;
-	*)  dflt="$static_ext" 
+	*)  dflt="$static_ext"
 		;;
 	esac
 
@@ -21130,8 +21304,8 @@ EOM
 	;;
 *)
 	$cat <<EOM
-A number of extensions are supplied with $package.  Answer "none" 
-to include no extensions. 
+A number of extensions are supplied with $package.  Answer "none"
+to include no extensions.
 Note that DynaLoader is always built and need not be mentioned here.
 
 EOM
@@ -21143,11 +21317,11 @@ EOM
 		previous)
 			if test X"$static_ext" != X"$avail_ext"; then
 				$cat <<EOM
-NOTICE:  Your previous config.sh list may be incorrect. 
-The extensions now available to you are 
+NOTICE:  Your previous config.sh list may be incorrect.
+The extensions now available to you are
 	${avail_ext}
 but the default list from your previous config.sh is
-	${static_ext} 
+	${static_ext}
 
 EOM
 			fi
@@ -21167,7 +21341,7 @@ EOM
 	esac
 	;;
 esac
-#        
+#
 # Encode is a special case.  If we are building Encode as a static
 # extension, we need to explicitly list its subextensions as well.
 # For other nested extensions, this is handled automatically by
@@ -21426,12 +21600,14 @@ d_cplusplus='$d_cplusplus'
 d_crypt='$d_crypt'
 d_crypt_r='$d_crypt_r'
 d_csh='$d_csh'
+d_ctermid='$d_ctermid'
 d_ctermid_r='$d_ctermid_r'
 d_ctime_r='$d_ctime_r'
 d_cuserid='$d_cuserid'
 d_dbl_dig='$d_dbl_dig'
 d_dbminitproto='$d_dbminitproto'
 d_difftime='$d_difftime'
+d_dir_dd_fd='$d_dir_dd_fd'
 d_dirfd='$d_dirfd'
 d_dirnamlen='$d_dirnamlen'
 d_dlerror='$d_dlerror'
@@ -21624,6 +21800,7 @@ d_phostname='$d_phostname'
 d_pipe='$d_pipe'
 d_poll='$d_poll'
 d_portable='$d_portable'
+d_printf_format_null='$d_printf_format_null'
 d_procselfexe='$d_procselfexe'
 d_pseudofork='$d_pseudofork'
 d_pthread_atfork='$d_pthread_atfork'
@@ -21705,6 +21882,7 @@ d_shmctl='$d_shmctl'
 d_shmdt='$d_shmdt'
 d_shmget='$d_shmget'
 d_sigaction='$d_sigaction'
+d_signbit='$d_signbit'
 d_sigprocmask='$d_sigprocmask'
 d_sigsetjmp='$d_sigsetjmp'
 d_snprintf='$d_snprintf'

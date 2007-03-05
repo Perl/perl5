@@ -534,15 +534,15 @@ d_const (d_const.U):
 	indicates to the C program that this C compiler knows about the
 	const type.
 
-d_cplusplus (d_cplusplus.U):
-	This variable conditionally defines the USE_CPLUSPLUS symbol, which
-	indicates that a C++ compiler was used to compiled Perl and will be
-	used to compile extensions.
-
 d_copysignl (d_copysignl.U):
 	This variable conditionally defines the HAS_COPYSIGNL symbol, which
 	indicates to the C program that the copysignl() routine is available.
 	If aintl is also present we can emulate modfl.
+
+d_cplusplus (d_cplusplus.U):
+	This variable conditionally defines the USE_CPLUSPLUS symbol, which
+	indicates that a C++ compiler was used to compiled Perl and will be
+	used to compile extensions.
 
 d_crypt (d_crypt.U):
 	This variable conditionally defines the CRYPT symbol, which
@@ -587,6 +587,11 @@ d_dbminitproto (d_dbminitproto.U):
 d_difftime (d_difftime.U):
 	This variable conditionally defines the HAS_DIFFTIME symbol, which
 	indicates to the C program that the difftime() routine is available.
+
+d_dir_dd_fd (d_dir_dd_fd.U)
+	This variable conditionally defines the HAS_DIR_DD_FD symbol, which
+	indicates that the DIR directory stream type contains a member
+	variable called dd_fd.
 
 d_dirfd (d_dirfd.U):
 	This variable conditionally defines the HAS_DIRFD constant,
@@ -1540,6 +1545,10 @@ d_PRIi64 (quadfio.U):
 	This variable conditionally defines the PERL_PRIi64 symbol, which
 	indiciates that stdio has a symbol to print 64-bit decimal numbers.
 
+d_printf_format_null:
+	This variable conditionally defines PRINTF_FORMAT_NULL_OK, which
+	indicates the C compiler allows printf-like formats to be null.
+
 d_PRIo64 (quadfio.U):
 	This variable conditionally defines the PERL_PRIo64 symbol, which
 	indiciates that stdio has a symbol to print 64-bit octal numbers.
@@ -1927,6 +1936,11 @@ d_shmget (d_shmget.U):
 d_sigaction (d_sigaction.U):
 	This variable conditionally defines the HAS_SIGACTION symbol, which
 	indicates that the Vr4 sigaction() routine is available.
+
+d_signbit (d_signbit.U):
+	This variable conditionally defines the HAS_SIGNBIT symbol, which
+	indicates to the C program that the signbit() routine is available
+	and safe to use with perl's intern NV type.
 
 d_sigprocmask (d_sigprocmask.U):
 	This variable conditionally defines HAS_SIGPROCMASK
@@ -4741,7 +4755,7 @@ uquadtype (quadtype.U):
 use5005threads (usethreads.U):
 	This variable conditionally defines the USE_5005THREADS symbol,
 	and indicates that Perl should be built to use the 5.005-based
-	threading implementation.
+	threading implementation. Only valid up to 5.8.x.
 
 use64bitall (use64bits.U):
 	This variable conditionally defines the USE_64_BIT_ALL symbol,

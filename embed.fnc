@@ -1688,6 +1688,9 @@ Apnod	|int	|my_sprintf	|NN char *buffer|NN const char *pat|...
 
 Apnodf	|int	|my_snprintf	|NN char *buffer|const Size_t len|NN const char *format|...
 Apnod	|int	|my_vsnprintf	|NN char *buffer|const Size_t len|NN const char *format|va_list ap
+#if !defined(HAS_SIGNBIT)
+AMdnoP	|int	|Perl_signbit	|NV f
+#endif
 
 END_EXTERN_C
 /*
