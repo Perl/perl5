@@ -154,7 +154,7 @@ sub scan_func {
 
   for my $line (@lines) {
     print "\tchecking for global routine\n" if $debug > 1;
-    $line =~ s/\b(IV|Off_t|Size_t|SSize_t|void)\b//i;
+    $line =~ s/\b(IV|Off_t|Size_t|SSize_t|void|int)\b//i;
     if ( $line =~ /(\w+)\s*\(/ ) {
       print "\troutine name is \\$1\\\n" if $debug > 1;
       if ($1 eq 'main' || $1 eq 'perl_init_ext' || $1 eq '__attribute__format__'
@@ -174,10 +174,9 @@ if ($use_mymalloc) {
   $fcns{'Perl_mfree'}++;
 }
 
+$preprocess_list = "${dir}perl.h + ${dir}perlapi.h + ${dir}regcomp.h";
 if ($use_perlio) {
-  $preprocess_list = "${dir}perl.h+${dir}perlapi.h,${dir}perliol.h";
-} else {
-  $preprocess_list = "${dir}perl.h+${dir}perlapi.h";
+  $preprocess_list .= " + ${dir}perliol.h";
 }
 
 $used_expectation_enum = $used_opcode_enum = 0; # avoid warnings
@@ -188,7 +187,7 @@ if ($docc) {
 else {
   open(CPP,"$cpp_file") or die "$0: Can't read preprocessed file $cpp_file: $!\n";
 }
-%checkh = map { $_,1 } qw( thread bytecode byterun proto perlapi perlio perlvars intrpvar thrdvar );
+%checkh = map { $_,1 } qw( thread bytecode byterun proto perlapi perlio perlvars intrpvar regcomp thrdvar );
 $ckfunc = 0;
 LINE: while (<CPP>) {
   while (/^#.*vmsish\.h/i .. /^#.*perl\.h/i) {
@@ -390,6 +389,5 @@ exec "\$ \@$drvrname" if $isvax;
 __END__
 
 # Oddball cases, so we can keep the perl.h scan above simple
-regkind=vars    # declared in regcomp.h
-simple=vars     # declared in regcomp.h
-varies=vars     # declared in regcomp.h
+#Foo=vars    # uncommented becomes PL_Foo
+#Bar=funcs   # uncommented becomes Perl_Bar
