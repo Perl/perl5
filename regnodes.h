@@ -456,10 +456,9 @@ static const char reg_off_by_arg[] = {
 
 /* reg_name[] - Opcode/state names in string form, for debugging */
 
-#ifdef DEBUGGING
-#  ifndef DOINIT
+#ifndef DOINIT
 EXTCONST char * PL_reg_name[];
-#  else
+#else
 EXTCONST char * PL_reg_name[] = {
 	"END",                   	/* 0000 */
 	"SUCCEED",               	/* 0x01 */
@@ -588,7 +587,6 @@ EXTCONST char * PL_reg_name[] = {
 	"KEEPS_next",            	/* REGNODE_MAX +0x27 */
 	"KEEPS_next_fail",       	/* REGNODE_MAX +0x28 */
 };
-#  endif /* DOINIT */
-#endif /* DEBUGGING */
+#endif /* DOINIT */
 
 /* ex: set ro: */

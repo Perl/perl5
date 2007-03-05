@@ -161,10 +161,9 @@ print OUT <<EOP;
 
 /* reg_name[] - Opcode/state names in string form, for debugging */
 
-#ifdef DEBUGGING
-#  ifndef DOINIT
+#ifndef DOINIT
 EXTCONST char * PL_reg_name[];
-#  else
+#else
 EXTCONST char * PL_reg_name[] = {
 EOP
 
@@ -186,8 +185,7 @@ while (++$ind <= $tot) {
 
 print OUT <<EOP;
 };
-#  endif /* DOINIT */
-#endif /* DEBUGGING */
+#endif /* DOINIT */
 
 /* ex: set ro: */
 EOP

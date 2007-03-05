@@ -593,7 +593,6 @@ unless ($define{'DEBUGGING'}) {
 		    Perl_sv_peek
 		    Perl_hv_assert
 		    PL_block_type
-		    PL_reg_name
 		    PL_watchaddr
 		    PL_watchok
 		    PL_watch_pvx
