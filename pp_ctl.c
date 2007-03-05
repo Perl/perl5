@@ -291,8 +291,7 @@ PP(pp_substcont)
 	SV * const sv = cx->sb_targ;
 	MAGIC *mg;
 	I32 i;
-	if (SvTYPE(sv) < SVt_PVMG)
-	    SvUPGRADE(sv, SVt_PVMG);
+	SvUPGRADE(sv, SVt_PVMG);
 	if (!(mg = mg_find(sv, PERL_MAGIC_regex_global))) {
 #ifdef PERL_OLD_COPY_ON_WRITE
 	    if (SvIsCOW(sv))

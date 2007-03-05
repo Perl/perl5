@@ -4349,9 +4349,7 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, const MGVTBL *vtable,
     dVAR;
     MAGIC* mg;
 
-    if (SvTYPE(sv) < SVt_PVMG) {
-	SvUPGRADE(sv, SVt_PVMG);
-    }
+    SvUPGRADE(sv, SVt_PVMG);
     Newxz(mg, 1, MAGIC);
     mg->mg_moremagic = SvMAGIC(sv);
     SvMAGIC_set(sv, mg);
