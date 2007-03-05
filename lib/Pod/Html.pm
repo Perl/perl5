@@ -1528,11 +1528,11 @@ sub process_text1($$;$$){
 	$res = "&$escape;";
 
     } elsif( $func eq 'F' ){
-	# F<filename> - italizice
-	$res = '<em>' . process_text1( $lev, $rstr ) . '</em>';
+	# F<filename> - italicize
+	$res = '<em class="file">' . process_text1( $lev, $rstr ) . '</em>';
 
     } elsif( $func eq 'I' ){
-	# I<text> - italizice
+	# I<text> - italicize
 	$res = '<em>' . process_text1( $lev, $rstr ) . '</em>';
 
     } elsif( $func eq 'L' ){

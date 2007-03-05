@@ -173,7 +173,7 @@ HTML
 <hr />
 <h1><a name="see_also">SEE ALSO</a></h1>
 <p>See also <a href="/t/htmlescp.html">Test Page 2</a>, the <a href="/Your/Module.html">the Your::Module manpage</a> and <a href="/Their/Module.html">the Their::Module manpage</a>
-manpages and the other interesting file <em>/usr/local/my/module/rocks</em>
+manpages and the other interesting file <em class="file">/usr/local/my/module/rocks</em>
 as well.</p>
 
 </body>
