@@ -98,6 +98,7 @@ POD = \
 	perlre.pod	\
 	perlref.pod	\
 	perlreftut.pod	\
+	perlreguts.pod	\
 	perlrequick.pod	\
 	perlreref.pod	\
 	perlretut.pod	\
@@ -115,6 +116,7 @@ POD = \
 	perltrap.pod	\
 	perlunicode.pod	\
 	perluniintro.pod	\
+	perlunitut.pod	\
 	perlutil.pod	\
 	perlvar.pod	\
 	perlxs.pod	\
@@ -204,6 +206,7 @@ MAN = \
 	perlre.man	\
 	perlref.man	\
 	perlreftut.man	\
+	perlreguts.man	\
 	perlrequick.man	\
 	perlreref.man	\
 	perlretut.man	\
@@ -221,6 +224,7 @@ MAN = \
 	perltrap.man	\
 	perlunicode.man	\
 	perluniintro.man	\
+	perlunitut.man	\
 	perlutil.man	\
 	perlvar.man	\
 	perlxs.man	\
@@ -310,6 +314,7 @@ HTML = \
 	perlre.html	\
 	perlref.html	\
 	perlreftut.html	\
+	perlreguts.html	\
 	perlrequick.html	\
 	perlreref.html	\
 	perlretut.html	\
@@ -326,6 +331,7 @@ HTML = \
 	perltrap.html	\
 	perlunicode.html	\
 	perluniintro.html	\
+	perlunitut.html	\
 	perlutil.html	\
 	perlvar.html	\
 	perlxs.html	\
@@ -416,6 +422,7 @@ TEX = \
 	perlre.tex	\
 	perlref.tex	\
 	perlreftut.tex	\
+	perlreguts.tex	\
 	perlrequick.tex	\
 	perlreref.tex	\
 	perlretut.tex	\
@@ -433,6 +440,7 @@ TEX = \
 	perltrap.tex	\
 	perlunicode.tex	\
 	perluniintro.tex	\
+	perlunitut.tex	\
 	perlutil.tex	\
 	perlvar.tex	\
 	perlxs.tex	\
