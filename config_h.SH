@@ -20,8 +20,11 @@ esac
 case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
-echo "Extracting $CONFIG_H (with variable substitutions)"
-sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-def!#undef!'
+case "$CONFIG_H" in
+already-done) echo "Not re-extracting config.h" ;;
+*)
+    echo "Extracting $CONFIG_H (with variable substitutions)"
+    sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-def!#undef!'
 /*
  * This file was produced by running the config_h.SH script, which
  * gets its values from $CONFIG_SH, which is generally produced by
@@ -367,13 +370,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to create an inter-process channel.
  */
 #$d_pipe HAS_PIPE		/**/
-
-/* HAS_POLL:
- *	This symbol, if defined, indicates that the poll routine is
- *	available to poll active file descriptors. You may safely
- *	include <poll.h> when this symbol is defined.
- */
-#$d_poll HAS_POLL		/**/
 
 /* HAS_READDIR:
  *	This symbol, if defined, indicates that the readdir routine is
@@ -4104,7 +4100,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* I_POLL:
  *	This symbol, if defined, indicates that <poll.h> exists and
- *	should be included.
+ *	should be included. (see also HAS_POLL)
  */
 #$i_poll	I_POLL		/**/
 
@@ -4490,5 +4486,14 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$usesocks	USE_SOCKS		/**/
 #endif
 
+/* HAS_POLL:
+ *	This symbol, if defined, indicates that the poll routine is
+ *	available to poll active file descriptors. You may safely
+ *	include <poll.h> when both this symbol *and* I_POLL are defined.
+ */
+#$d_poll HAS_POLL		/**/
+
 #endif
 !GROK!THIS!
+    ;;
+esac

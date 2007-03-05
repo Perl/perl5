@@ -17,8 +17,9 @@ case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
 
-if ! test -f config.h; then
+if test -f config_h.SH && ! test -f config.h; then
     . ./config_h.SH
+    CONFIG_H=already-done
 fi
 
 warn=''
@@ -299,7 +300,7 @@ case "$cc" in
   # but then whined about.
   for f in -Wdeclaration-after-statement -std=c89
   do
-    ccflags="`echo $ccflags|sed 's/$f/ /'`"
+    ccflags=`echo $ccflags|sed 's/$f/ /'`
   done
   ;;
 esac
