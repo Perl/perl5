@@ -100,7 +100,7 @@ than one place.
 X<scalar> X<string> X<character>
 
 C<chomp>, C<chop>, C<chr>, C<crypt>, C<hex>, C<index>, C<lc>, C<lcfirst>,
-C<length>, C<oct>, C<ord>, C<pack>, C<q/STRING/>, C<qq/STRING/>, C<reverse>,
+C<length>, C<oct>, C<ord>, C<pack>, C<q//>, C<qq//>, C<reverse>,
 C<rindex>, C<sprintf>, C<substr>, C<tr///>, C<uc>, C<ucfirst>, C<y///>
 
 =item Regular expressions and pattern matching
@@ -122,7 +122,7 @@ C<pop>, C<push>, C<shift>, C<splice>, C<unshift>
 =item Functions for list data
 X<list>
 
-C<grep>, C<join>, C<map>, C<qw/STRING/>, C<reverse>, C<sort>, C<unpack>
+C<grep>, C<join>, C<map>, C<qw//>, C<reverse>, C<sort>, C<unpack>
 
 =item Functions for real %HASHes
 X<hash>
@@ -169,7 +169,7 @@ C<scalar>, C<undef>, C<wantarray>
 X<process> X<pid> X<process id>
 
 C<alarm>, C<exec>, C<fork>, C<getpgrp>, C<getppid>, C<getpriority>, C<kill>,
-C<pipe>, C<qx/STRING/>, C<setpgrp>, C<setpriority>, C<sleep>, C<system>,
+C<pipe>, C<qx//>, C<setpgrp>, C<setpriority>, C<sleep>, C<system>,
 C<times>, C<wait>, C<waitpid>
 
 =item Keywords related to perl modules
@@ -222,7 +222,7 @@ X<perl5>
 
 C<abs>, C<bless>, C<chomp>, C<chr>, C<exists>, C<formline>, C<glob>,
 C<import>, C<lc>, C<lcfirst>, C<lock>, C<map>, C<my>, C<no>, C<our>,
-C<prototype>, C<qr>, C<qw>, C<qx>, C<readline>, C<readpipe>, C<ref>,
+C<prototype>, C<qr//>, C<qw//>, C<qx//>, C<readline>, C<readpipe>, C<ref>,
 C<sub>*, C<sysopen>, C<tie>, C<tied>, C<uc>, C<ucfirst>, C<untie>, C<use>
 
 * - C<sub> was a keyword in perl4, but in perl5 it is an
@@ -506,8 +506,8 @@ If LAYER is omitted or specified as C<:raw> the filehandle is made
 suitable for passing binary data. This includes turning off possible CRLF
 translation and marking it as bytes (as opposed to Unicode characters).
 Note that, despite what may be implied in I<"Programming Perl"> (the
-Camel) or elsewhere, C<:raw> is I<not> the simply inverse of C<:crlf>
--- other layers which would affect binary nature of the stream are
+Camel) or elsewhere, C<:raw> is I<not> simply the inverse of C<:crlf>
+-- other layers which would affect the binary nature of the stream are
 I<also> disabled. See L<PerlIO>, L<perlrun> and the discussion about the
 PERLIO environment variable.
 
@@ -830,10 +830,11 @@ X<close>
 
 =item close
 
-Closes the file or pipe associated with the file handle, returning
-true only if IO buffers are successfully flushed and closes the system
-file descriptor.  Closes the currently selected filehandle if the
-argument is omitted.
+Closes the file or pipe associated with the file handle, flushes the IO
+buffers, and closes the system file descriptor.  Returns true if those
+operations have succeeded and if no error was reported by any PerlIO
+layer.  Closes the currently selected filehandle if the argument is
+omitted.
 
 You don't have to close FILEHANDLE if you are immediately going to do
 another C<open> on it, because C<open> will close it for you.  (See
@@ -1240,13 +1241,17 @@ trapped within an eval(), $@ contains the reference.  This behavior permits
 a more elaborate exception handling implementation using objects that
 maintain arbitrary state about the nature of the exception.  Such a scheme
 is sometimes preferable to matching particular string values of $@ using
-regular expressions.  Here's an example:
+regular expressions.  Because $@ is a global variable, and eval() may be
+used within object implementations, care must be taken that analyzing the
+error object doesn't replace the reference in the global variable.  The
+easiest solution is to make a local copy of the reference before doing
+other manipulations.  Here's an example:
 
     use Scalar::Util 'blessed';
 
     eval { ... ; die Some::Module::Exception->new( FOO => "bar" ) };
-    if ($@) {
-        if (blessed($@) && $@->isa("Some::Module::Exception")) {
+    if (my $ev_err = $@) {
+        if (blessed($ev_err) && $ev_err->isa("Some::Module::Exception")) {
             # handle Some::Module::Exception
         }
         else {
@@ -4003,9 +4008,10 @@ X<printf>
 Equivalent to C<print FILEHANDLE sprintf(FORMAT, LIST)>, except that C<$\>
 (the output record separator) is not appended.  The first argument
 of the list will be interpreted as the C<printf> format. See C<sprintf>
-for an explanation of the format argument. If C<use locale> is in effect,
-the character used for the decimal point in formatted real numbers is
-affected by the LC_NUMERIC locale.  See L<perllocale>.
+for an explanation of the format argument.  If C<use locale> is in effect,
+and POSIX::setlocale() has been called, the character used for the decimal
+separator in formatted floating point numbers is affected by the LC_NUMERIC
+locale.  See L<perllocale> and L<POSIX>.
 
 Don't fall into the trap of using a C<printf> when a simple
 C<print> would do.  The C<print> is more efficient and less
@@ -4026,7 +4032,7 @@ like a Perl function.  Otherwise, the string describing the equivalent
 prototype is returned.
 
 =item push ARRAY,LIST
-X<push>, X<stack>
+X<push> X<stack>
 
 Treats ARRAY as a stack, and pushes the values of LIST
 onto the end of ARRAY.  The length of ARRAY increases by the length of
@@ -5411,9 +5417,8 @@ one or more of:
    +       prefix positive number with a plus sign
    -       left-justify within the field
    0       use zeros, not spaces, to right-justify
-   #       ensure the leading "0" for any octal,
-           prefix non-zero hexadecimal with "0x" or "0X",
-           prefix non-zero binary with "0b"
+   #       prefix non-zero octal with "0", non-zero hex with "0x"
+           or "0X", non-zero binary with "0b"
 
 For example:
 
@@ -5636,9 +5641,10 @@ index, the C<$> may need to be escaped:
 
 =back
 
-If C<use locale> is in effect, the character used for the decimal
-point in formatted real numbers is affected by the LC_NUMERIC locale.
-See L<perllocale>.
+If C<use locale> is in effect, and POSIX::setlocale() has been called,
+the character used for the decimal separator in formatted floating
+point numbers is affected by the LC_NUMERIC locale.  See L<perllocale>
+and L<POSIX>.
 
 =item sqrt EXPR
 X<sqrt> X<root> X<square root>
@@ -7068,8 +7074,8 @@ This function should have been named wantlist() instead.
 =item warn LIST
 X<warn> X<warning> X<STDERR>
 
-Produces a message on STDERR just like C<die>, but doesn't exit or throw
-an exception.
+Prints the value of LIST to STDERR.  If the last element of LIST does
+not end in a newline, appends the same text as C<die> does.
 
 If LIST is empty and C<$@> already contains a value (typically from a
 previous eval) that value is used after appending C<"\t...caught">

@@ -1945,7 +1945,7 @@ script or script file.
 
 =item string lengths in `y' command differ
 
-The translation table strings in a B<y> commanf must have equal lengths.
+The translation table strings in a B<y> command must have equal lengths.
 
 =item undefined label `%s'
 

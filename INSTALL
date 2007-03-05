@@ -475,33 +475,6 @@ line with
 
 or interactively at the appropriate Configure prompt.
 
-With the PerlIO abstraction layer, there is another possibility for
-the underlying IO calls, AT&T's "sfio".  This has superior performance
-to stdio.h in many cases, and is extensible by the use of "discipline"
-modules ("Native" PerlIO has them too).  Sfio currently only builds on
-a subset of the UNIX platforms perl supports.  Because the data
-structures are completely different from stdio, perl extension modules
-or external libraries may not work.  This configuration exists to
-allow these issues to be worked on.
-
-This option requires the 'sfio' package to have been built and installed.
-The latest sfio is available from http://www.research.att.com/sw/tools/sfio/
-
-You select this option by
-
-	sh Configure -Duseperlio -Dusesfio
-
-If you have already selected -Duseperlio, and if Configure detects
-that you have sfio, then sfio will be the default suggested by
-Configure.
-
-Note:  On some systems, sfio's iffe configuration script fails to
-detect that you have an atexit function (or equivalent).  Apparently,
-this is a problem at least for some versions of Linux and SunOS 4.
-Configure should detect this problem and warn you about problems with
-_exit vs. exit.  If you have this problem, the fix is to go back to
-your sfio sources and correct iffe's guess about atexit.
-
 =head3 Algorithmic Complexity Attacks on Hashes
 
 In Perls 5.8.0 and earlier it was easy to create degenerate hashes.

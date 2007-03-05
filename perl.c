@@ -452,7 +452,7 @@ Perl_dump_sv_child(pTHX_ SV *sv)
        it to dump out to.  We can't let it hold open the file descriptor when it
        forks, as the file descriptor it will dump to can turn out to be one end
        of pipe that some other process will wait on for EOF. (So as it would
-       be open, the wait would be forever.  */
+       be open, the wait would be forever.)  */
 
     msg.msg_control = control.control;
     msg.msg_controllen = sizeof(control.control);

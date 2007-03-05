@@ -117,7 +117,7 @@ step back a bit and think about what you want to do and how Perl can
 do it.
 
 However, it is important to remember that Perl threads cannot magically
-do things unless your operating systems threads allows it. So if your
+do things unless your operating system's threads allow it. So if your
 system blocks the entire process on C<sleep()>, Perl usually will, as well.
 
 B<Perl Threads Are Different.>
@@ -621,7 +621,7 @@ threads to have the I<lock> at any one time.
 =head2 Basic semaphores
 
 Semaphores have two methods, C<down()> and C<up()>: C<down()> decrements the resource
-count, while up increments it. Calls to C<down()> will block if the
+count, while C<up()> increments it. Calls to C<down()> will block if the
 semaphore's current count would decrement below zero.  This program
 gives a quick demonstration:
 
@@ -690,12 +690,12 @@ of these defaults simply by passing in different values:
 If C<down()> attempts to decrement the counter below zero, it blocks until
 the counter is large enough.  Note that while a semaphore can be created
 with a starting count of zero, any C<up()> or C<down()> always changes the
-counter by at least one, and so C<$semaphore->down(0)> is the same as
-C<$semaphore->down(1)>.
+counter by at least one, and so C<< $semaphore->down(0) >> is the same as
+C<< $semaphore->down(1) >>.
 
 The question, of course, is why would you do something like this? Why
 create a semaphore with a starting count that's not one, or why
-decrement/increment it by more than one? The answer is resource
+decrement or increment it by more than one? The answer is resource
 availability.  Many resources that you want to manage access for can be
 safely used by more than one thread at once.
 
@@ -718,9 +718,10 @@ threads quietly block and unblock themselves.
 Larger increments or decrements are handy in those cases where a
 thread needs to check out or return a number of resources at once.
 
-=head2 cond_wait() and cond_signal()
+=head2 Waiting for a Condition
 
-These two functions can be used in conjunction with locks to notify
+The functions C<cond_wait()> and C<cond_signal()>
+can be used in conjunction with locks to notify
 co-operating threads that a resource has become available. They are
 very similar in use to the functions found in C<pthreads>. However
 for most purposes, queues are simpler to use and more intuitive. See
@@ -778,7 +779,7 @@ C<tid()> is a thread object method that returns the thread ID of the
 thread the object represents.  Thread IDs are integers, with the main
 thread in a program being 0.  Currently Perl assigns a unique TID to
 every thread ever created in your program, assigning the first thread
-to be created a tid of 1, and increasing the tid by 1 for each new
+to be created a TID of 1, and increasing the TID by 1 for each new
 thread that's created.  When used as a class method, C<threads-E<gt>tid()>
 can be used by a thread to get its own TID.
 
@@ -868,14 +869,14 @@ number is, it's a number that's only evenly divisible by itself and 1.)
 The bulk of the work is done by the C<check_num()> subroutine, which
 takes a reference to its input queue and a prime number that it's
 responsible for.  After pulling in the input queue and the prime that
-the subroutine's checking (line 20), we create a new queue (line 22)
+the subroutine is checking (line 20), we create a new queue (line 22)
 and reserve a scalar for the thread that we're likely to create later
 (line 21).
 
 The while loop from lines 23 to line 31 grabs a scalar off the input
 queue and checks against the prime this thread is responsible
-for.  Line 24 checks to see if there's a remainder when we modulo the
-number to be checked against our prime.  If there is one, the number
+for.  Line 24 checks to see if there's a remainder when we divide the
+number to be checked by our prime.  If there is one, the number
 must not be evenly divisible by our prime, so we need to either pass
 it on to the next thread if we've created one (line 26) or create a
 new thread if we haven't.
@@ -999,7 +1000,7 @@ the root directory of all the threads changes, and no thread can
 undo it (as opposed to C<chdir()>).
 
 Further examples of process-scope changes include C<umask()> and
-changing uids/gids.
+changing uids and gids.
 
 Thinking of mixing C<fork()> and threads?  Please lie down and wait
 until the feeling passes.  Be aware that the semantics of C<fork()> vary
@@ -1020,7 +1021,9 @@ threads.  See L<threads/"THREAD SIGNALLING> for more details.)
 
 Whether various library calls are thread-safe is outside the control
 of Perl.  Calls often suffering from not being thread-safe include:
-C<localtime()>, C<gmtime()>, C<get{gr,host,net,proto,serv,pw}*()>, C<readdir()>,
+C<localtime()>, C<gmtime()>,  functions fetching user, group and
+network information (such as C<getgrent()>, C<gethostent()>,
+C<getnetent()> and so on), C<readdir()>,
 C<rand()>, and C<srand()> -- in general, calls that depend on some global
 external state.
 

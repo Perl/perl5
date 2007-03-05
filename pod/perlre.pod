@@ -112,7 +112,8 @@ newline at the end), and Perl does certain optimizations with the
 assumption that the string contains only one line.  Embedded newlines
 will not be matched by "^" or "$".  You may, however, wish to treat a
 string as a multi-line buffer, such that the "^" will match after any
-newline within the string, and "$" will match before any newline.  At the
+newline within the string (except if the newline is the last character in
+the string), and "$" will match before any newline.  At the
 cost of a little more overhead, you can do this by using the /m modifier
 on the pattern match operator.  (Older programs did this by setting C<$*>,
 but this practice is now deprecated.)
@@ -679,6 +680,13 @@ inside the same regular expression.
 The assignment to C<$^R> above is properly localized, so the old
 value of C<$^R> is restored if the assertion is backtracked; compare
 L<"Backtracking">.
+
+Due to an unfortunate implementation issue, the Perl code contained in these
+blocks is treated as a compile time closure that can have seemingly bizarre
+consequences when used with lexically scoped variables inside of subroutines
+or loops.  There are various workarounds for this, including simply using
+global variables instead.  If you are using this construct and strange results
+occur then check for the use of lexically scoped variables.
 
 For reasons of security, this construct is forbidden if the regular
 expression involves run-time interpolation of variables, unless the

@@ -77,7 +77,7 @@ Enabling the C<utf8> pragma has the following effect:
 =item *
 
 Bytes in the source text that have their high-bit set will be treated
-as being part of a literal UTF-8 character.  This includes most
+as being part of a literal UTF-X sequence.  This includes most
 literals such as identifier names, string constants, and constant
 regular expression patterns.
 
@@ -89,20 +89,24 @@ treated as being part of a literal UTF-EBCDIC character.
 Note that if you have bytes with the eighth bit on in your script
 (for example embedded Latin-1 in your string literals), C<use utf8>
 will be unhappy since the bytes are most probably not well-formed
-UTF-8.  If you want to have such bytes and use utf8, you can disable
-utf8 until the end the block (or file, if at top level) by C<no utf8;>.
+UTF-X.  If you want to have such bytes under C<use utf8>, you can disable
+this pragma until the end the block (or file, if at top level) by
+C<no utf8;>.
 
-If you want to automatically upgrade your 8-bit legacy bytes to UTF-8,
+If you want to automatically upgrade your 8-bit legacy bytes to Unicode,
 use the L<encoding> pragma instead of this pragma.  For example, if
-you want to implicitly upgrade your ISO 8859-1 (Latin-1) bytes to UTF-8
+you want to implicitly upgrade your ISO 8859-1 (Latin-1) bytes to Unicode
 as used in e.g. C<chr()> and C<\x{...}>, try this:
 
     use encoding "latin-1";
     my $c = chr(0xc4);
     my $x = "\x{c5}";
 
-In case you are wondering: yes, C<use encoding 'utf8';> works much
-the same as C<use utf8;>.
+In case you are wondering: C<use encoding 'utf8';> is mostly the same as
+C<use utf8;>, except that C<use encoding> marks all string literals in the
+source code as Unicode, regardless of whether they contain any high-bit bytes.
+Moreover, C<use encoding> installs IO layers on C<STDIN> and C<STDOUT> to work
+with Unicode strings; see L<encoding> for details.
 
 =head2 Utility functions
 

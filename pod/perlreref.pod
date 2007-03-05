@@ -50,7 +50,7 @@ as the L</"SEE ALSO"> section in this document.
      as a double quoted string unless a single-quote (') is the delimiter.
 
   ?pattern? is like m/pattern/ but matches only once. No alternate
-      delimiters can be used. Must be reset with L<reset|perlfunc/reset>.
+      delimiters can be used.  Must be reset with reset().
 
 =head2 SYNTAX
 

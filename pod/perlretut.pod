@@ -308,7 +308,7 @@ string is the earliest point at which the regexp can match.
                          # 'yes', 'Yes', 'YES', etc.
 
 This regexp displays a common task: perform a case-insensitive
-match.  Perl provides away of avoiding all those brackets by simply
+match.  Perl provides a way of avoiding all those brackets by simply
 appending an C<'i'> to the end of the match.  Then C</[yY][eE][sS]/;>
 can be rewritten as C</yes/i;>.  The C<'i'> stands for
 case-insensitive and is an example of a B<modifier> of the matching
@@ -362,7 +362,7 @@ character, or the match fails.  Then
     /[^0-9]/;  # matches a non-numeric character
     /[a^]at/;  # matches 'aat' or '^at'; here '^' is ordinary
 
-Now, even C<[0-9]> can be a bother the write multiple times, so in the
+Now, even C<[0-9]> can be a bother to write multiple times, so in the
 interest of saving keystrokes and making regexps more readable, Perl
 has several abbreviations for common character classes:
 
@@ -432,7 +432,7 @@ You might wonder why C<'.'> matches everything but C<"\n"> - why not
 every character? The reason is that often one is matching against
 lines and would like to ignore the newline characters.  For instance,
 while the string C<"\n"> represents one line, we would like to think
-of as empty.  Then
+of it as empty.  Then
 
     ""   =~ /^$/;    # matches
     "\n" =~ /^$/;    # matches, "\n" is ignored
@@ -502,7 +502,7 @@ Here are examples of C<//s> and C<//m> in action:
 
 Most of the time, the default behavior is what is wanted, but C<//s> and
 C<//m> are occasionally very useful.  If C<//m> is being used, the start
-of the string can still be matched with C<\A> and the end of string
+of the string can still be matched with C<\A> and the end of the string
 can still be matched with the anchors C<\Z> (matches both the end and
 the newline before, like C<$>), and C<\z> (matches only the end):
 
@@ -521,7 +521,7 @@ choices are described in the next section.
 
 =head2 Matching this or that
 
-Sometimes we would like to our regexp to be able to match different
+Sometimes we would like our regexp to be able to match different
 possible words or character strings.  This is accomplished by using
 the B<alternation> metacharacter C<|>.  To match C<dog> or C<cat>, we
 form the regexp C<dog|cat>.  As before, perl will try to match the
