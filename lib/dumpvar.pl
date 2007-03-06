@@ -377,6 +377,7 @@ sub dumpglob {
       unwrap(\@entry,3+$off,$m) ;
       print( (' ' x $off) .  ")\n" );
     }
+    if ($key eq '-') { eval { require re::Tie::Hash::NamedCapture } }
     if ($key ne "main::" && $key ne "DB::" && %entry
 	&& ($dumpPackages or $key !~ /::$/)
 	&& ($key !~ /^_</ or $dumpDBFiles)
