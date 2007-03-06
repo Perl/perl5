@@ -381,15 +381,15 @@ _len(class,x)
   INIT:
     AV*	a;
     SV*	temp;
-    NV	elems;
+    IV	elems;
     STRLEN len;
 
   CODE:
     a = (AV*)SvRV(x);			/* ref to aray, don't check ref */
-    elems = (NV) av_len(a);		/* number of elems in array */
+    elems = av_len(a);			/* number of elems in array */
     temp = *av_fetch(a, elems, 0);	/* fetch last element */
     SvPV(temp, len);			/* convert to string & store length */
-    len += XS_BASE_LEN * elems;
+    len += (IV) XS_BASE_LEN * elems;
     ST(0) = newSViv(len);
 
 ##############################################################################
