@@ -677,11 +677,11 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
  * that implements the logic of automatical ties like %! and %-
  *
  * The "gv" parameter should be the glob.
- * "varpv" holds the name of the var, used for error messages
- * "namesv" holds the module name
+ * "varpv" holds the name of the var, used for error messages.
+ * "namesv" holds the module name. Its refcount will be decremented.
  * "methpv" holds the method name to test for to check that things
- *   are working reasonably close to as expected
- * "flags" if flag & 1 then save the scalar before loading.
+ *   are working reasonably close to as expected.
+ * "flags": if flag & 1 then save the scalar before loading.
  * For the protection of $! to work (it is set by this routine)
  * the sv slot must already be magicalized.
  */
@@ -690,25 +690,29 @@ S_require_tie_mod(pTHX_ GV *gv, const char *varpv, SV* namesv, const char *methp
 {
     dVAR;
     HV* stash = gv_stashsv(namesv, 0);
-    
+
     if (!stash || !(gv_fetchmethod(stash, methpv))) {
-        SV *module = newSVsv(namesv);
+	SV *module = newSVsv(namesv);
+	char varname = *varpv; /* varpv might be clobbered by load_module,
+				  so save it. For the moment it's always
+				  a single char. */
 	dSP;
 	PUTBACK;
 	ENTER;
 	if ( flags & 1 )
-	    save_scalar(gv); 
-        Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, module, NULL);
+	    save_scalar(gv);
+	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, module, NULL);
 	LEAVE;
 	SPAGAIN;
 	stash = gv_stashsv(namesv, 0);
 	if (!stash)
-	    Perl_croak( aTHX_ "panic: Can't use %%%s because %"SVf" is not available", 
-	        varpv, SVfARG(module));
-	else if (!gv_fetchmethod(stash, methpv))    
-	    Perl_croak( aTHX_ "panic: Can't use %%%s because %"SVf" does not support method %s", 
-	        varpv, SVfARG(module), methpv);
+	    Perl_croak(aTHX_ "panic: Can't use %%%c because %"SVf" is not available",
+		    varname, SVfARG(namesv));
+	else if (!gv_fetchmethod(stash, methpv))
+	    Perl_croak(aTHX_ "panic: Can't use %%%c because %"SVf" does not support method %s",
+		    varname, SVfARG(namesv), methpv);
     }
+    SvREFCNT_dec(namesv);
     return stash;
 }
 
@@ -996,14 +1000,12 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	if (add) {
 	    GvMULTI_on(gv);
 	    gv_init_sv(gv, sv_type);
-	    if (sv_type == SVt_PVHV && len == 1 ) {
+	    if (len == 1 && (sv_type == SVt_PVHV || sv_type == SVt_PVGV)) {
 	        if (*name == '!')
 		    require_tie_mod(gv, "!", newSVpvs("Errno"), "TIEHASH", 1);
-		else
-		if (*name == '-' || *name == '+') 
-		     require_tie_mod(gv, name, newSVpvs("re::Tie::Hash::NamedCapture"), "FETCH", 0);
-		
-            }		    
+		else if (*name == '-' || *name == '+')
+		    require_tie_mod(gv, name, newSVpvs("re::Tie::Hash::NamedCapture"), "FETCH", 0);
+	    }
 	}
 	return gv;
     } else if (no_init) {
