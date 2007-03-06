@@ -6,7 +6,7 @@
 
 package IO::Zlib;
 
-$VERSION = "1.04_02";
+$VERSION = "1.05_01";
 
 =head1 NAME
 
@@ -256,10 +256,6 @@ No filename, no open.
 
 We must know how much to read.
 
-=item IO::Zlib::READ: OFFSET is not supported
-
-Offsets of gzipped streams are not supported.
-
 =item IO::Zlib::WRITE: too long LENGTH
 
 The LENGTH must be less than or equal to the buffer size.
@@ -389,6 +385,7 @@ sub _alias {
         *IO::Handle::gzread     = \&gzread_external;
         *IO::Handle::gzwrite    = \&gzwrite_external;
         *IO::Handle::gzreadline = \&gzreadline_external;
+        *IO::Handle::gzeof      = \&gzeof_external;
         *IO::Handle::gzclose    = \&gzclose_external;
 	$gzip_used = 1;
     } else {
@@ -398,6 +395,7 @@ sub _alias {
         *gzread     = \&Compress::Zlib::gzread;
         *gzwrite    = \&Compress::Zlib::gzwrite;
         *gzreadline = \&Compress::Zlib::gzreadline;
+        *gzeof      = \&Compress::Zlib::gzeof;
     }
     $aliased = 1;
 }
@@ -438,7 +436,6 @@ sub OPEN
     croak "IO::Zlib::open: needs a filename" unless defined($filename);
 
     $self->{'file'} = gzopen($filename,$mode);
-    $self->{'eof'} = 0;
 
     return defined($self->{'file'}) ? $self : undef;
 }
@@ -452,7 +449,6 @@ sub CLOSE
     my $status = $self->{'file'}->gzclose();
 
     delete $self->{'file'};
-    delete $self->{'eof'};
 
     return ($status == 0) ? 1 : undef;
 }
@@ -462,18 +458,15 @@ sub READ
     my $self = shift;
     my $bufref = \$_[0];
     my $nbytes = $_[1];
-    my $offset = $_[2];
+    my $offset = $_[2] || 0;
 
     croak "IO::Zlib::READ: NBYTES must be specified" unless defined($nbytes);
-    croak "IO::Zlib::READ: OFFSET is not supported" if defined($offset) && $offset != 0;
 
-    return 0 if $self->{'eof'};
+    $$bufref = "" unless defined($$bufref);
 
-    my $bytesread = $self->{'file'}->gzread($$bufref,$nbytes);
+    my $bytesread = $self->{'file'}->gzread(substr($$bufref,$offset),$nbytes);
 
     return undef if $bytesread < 0;
-
-    $self->{'eof'} = 1 if $bytesread < $nbytes;
 
     return $bytesread;
 }
@@ -505,17 +498,21 @@ sub WRITE
     my $length = shift;
     my $offset = shift;
 
-    croak "IO::Zlib::WRITE: too long LENGTH" unless $length <= length($buf);
-    croak "IO::Zlib::WRITE: OFFSET not supported" if defined($offset) && $offset != 0;
+    croak "IO::Zlib::WRITE: too long LENGTH" unless $offset + $length <= length($buf);
 
-    return $self->{'file'}->gzwrite(substr($buf,0,$length));
+    return $self->{'file'}->gzwrite(substr($buf,$offset,$length));
 }
 
 sub EOF
 {
     my $self = shift;
 
-    return $self->{'eof'};
+    return $self->{'file'}->gzeof();
+}
+
+sub FILENO
+{
+    return undef;
 }
 
 sub new
@@ -641,6 +638,10 @@ sub gzreadline_external {
     # See the comment in gzread_external().
     $_[1] = readline($_[0]);
     return defined $_[1] ? length($_[1]) : -1;
+}
+
+sub gzeof_external {
+    return eof($_[0]);
 }
 
 sub gzclose_external {

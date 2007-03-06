@@ -20,7 +20,7 @@ sub ok
 
 $name="test.gz";
 
-print "1..19\n";
+print "1..23\n";
 
 @text = (<<EOM, <<EOM, <<EOM, <<EOM) ;
 this is line 1
@@ -39,22 +39,26 @@ ok(2, $file->print($text));
 ok(3, $file->close());
 
 ok(4, $file = IO::Zlib->new($name, "rb"));
-ok(5, $file->getline() eq $text[0]);
-ok(6, $file->getline() eq $text[1]);
-ok(7, $file->getline() eq $text[2]);
-ok(8, $file->getline() eq $text[3]);
-ok(9, !defined($file->getline()));
-ok(10, $file->close());
+ok(5, !$file->eof());
+ok(6, $file->getline() eq $text[0]);
+ok(7, $file->getline() eq $text[1]);
+ok(8, $file->getline() eq $text[2]);
+ok(9, $file->getline() eq $text[3]);
+ok(10, !defined($file->getline()));
+ok(11, $file->eof());
+ok(12, $file->close());
 
-ok(11, $file = IO::Zlib->new($name, "rb"));
+ok(13, $file = IO::Zlib->new($name, "rb"));
+ok(14, !$file->eof());
 eval '$file->getlines';
-ok(12, $@ =~ /^IO::Zlib::getlines: must be called in list context /);
-ok(13, @lines = $file->getlines());
-ok(14, @lines == @text);
-ok(15, $lines[0] eq $text[0]);
-ok(16, $lines[1] eq $text[1]);
-ok(17, $lines[2] eq $text[2]);
-ok(18, $lines[3] eq $text[3]);
-ok(19, $file->close());
+ok(15, $@ =~ /^IO::Zlib::getlines: must be called in list context /);
+ok(16, @lines = $file->getlines());
+ok(17, @lines == @text);
+ok(18, $lines[0] eq $text[0]);
+ok(19, $lines[1] eq $text[1]);
+ok(20, $lines[2] eq $text[2]);
+ok(21, $lines[3] eq $text[3]);
+ok(22, $file->eof());
+ok(23, $file->close());
 
 unlink($name);
