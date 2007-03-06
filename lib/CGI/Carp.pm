@@ -145,6 +145,42 @@ of the error message that caused the script to die.  Example:
 In order to correctly intercept compile-time errors, you should call
 set_message() from within a BEGIN{} block.
 
+=head1 DOING MORE THAN PRINTING A MESSAGE IN THE EVENT OF PERL ERRORS
+
+If fatalsToBrowser in conjunction with set_message does not provide 
+you with all of the functionality you need, you can go one step 
+further by specifying a function to be executed any time a script
+calls "die", has a syntax error, or dies unexpectedly at runtime
+with a line like "undef->explode();". 
+
+    use CGI::Carp qw(set_die_handler);
+    BEGIN {
+       sub handle_errors {
+          my $msg = shift;
+          print "content-type: text/html\n\n";
+          print "<h1>Oh gosh</h1>";
+          print "<p>Got an error: $msg</p>";
+
+          #proceed to send an email to a system administrator,
+          #write a detailed message to the browser and/or a log,
+          #etc....
+      }
+      set_die_handler(\&handle_errors);
+    }
+
+Notice that if you use set_die_handler(), you must handle sending
+HTML headers to the browser yourself if you are printing a message.
+
+If you use set_die_handler(), you will most likely interfere with 
+the behavior of fatalsToBrowser, so you must use this or that, not 
+both. 
+
+Using set_die_handler() sets SIG{__DIE__} (as does fatalsToBrowser),
+and there is only one SIG{__DIE__}. This means that if you are 
+attempting to set SIG{__DIE__} yourself, you may interfere with 
+this module's functionality, or this module may interfere with 
+your module's functionality.
+
 =head1 MAKING WARNINGS APPEAR AS HTML COMMENTS
 
 It is now also possible to make non-fatal errors appear as HTML
@@ -283,12 +319,13 @@ use File::Spec;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(confess croak carp);
-@EXPORT_OK = qw(carpout fatalsToBrowser warningsToBrowser wrap set_message set_progname cluck ^name= die);
+@EXPORT_OK = qw(carpout fatalsToBrowser warningsToBrowser wrap set_message set_die_handler set_progname cluck ^name= die);
 
 $main::SIG{__WARN__}=\&CGI::Carp::warn;
 
-$CGI::Carp::VERSION    = '1.29';
-$CGI::Carp::CUSTOM_MSG = undef;
+$CGI::Carp::VERSION     = '1.29';
+$CGI::Carp::CUSTOM_MSG  = undef;
+$CGI::Carp::DIE_HANDLER = undef;
 
 
 # fancy import routine detects and handles 'errorWrap' specially.
@@ -388,6 +425,10 @@ sub ineval {
 sub die {
   my ($arg,@rest) = @_;
 
+  if ($DIE_HANDLER) {
+      &$DIE_HANDLER($arg,@rest);
+  }
+
   if ( ineval() )  {
     if (!ref($arg)) {
       $arg = join("",($arg,@rest)) || "Died";
@@ -419,6 +460,25 @@ sub die {
 sub set_message {
     $CGI::Carp::CUSTOM_MSG = shift;
     return $CGI::Carp::CUSTOM_MSG;
+}
+
+sub set_die_handler {
+
+    my ($handler) = shift;
+    
+    #setting SIG{__DIE__} here is necessary to catch runtime
+    #errors which are not called by literally saying "die",
+    #such as the line "undef->explode();". however, doing this
+    #will interfere with fatalsToBrowser, which also sets 
+    #SIG{__DIE__} in the import() function above (or the 
+    #import() function above may interfere with this). for
+    #this reason, you should choose to either set the die
+    #handler here, or use fatalsToBrowser, not both. 
+    $main::SIG{__DIE__} = $handler;
+    
+    $CGI::Carp::DIE_HANDLER = $handler; 
+    
+    return $CGI::Carp::DIE_HANDLER;
 }
 
 sub confess { CGI::Carp::die Carp::longmess @_; }
