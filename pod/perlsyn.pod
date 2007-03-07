@@ -512,16 +512,16 @@ use loop control "operators" within an expression.  That's just the binary
 comma operator in scalar context.  See L<perlop/"Comma Operator">.)
 
 or
-
+	
     SWITCH: {
 	/^abc/ && do { $abc = 1; last SWITCH; };
 	/^def/ && do { $def = 1; last SWITCH; };
 	/^xyz/ && do { $xyz = 1; last SWITCH; };
 	$nothing = 1;
-    }
-
+	}
+	
 or formatted so it stands out more as a "proper" C<switch> statement:
-
+	
     SWITCH: {
 	/^abc/ 	    && do {
 			    $abc = 1;
