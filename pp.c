@@ -2556,12 +2556,19 @@ PP(pp_i_multiply)
 
 PP(pp_i_divide)
 {
+    IV num;
     dSP; dATARGET; tryAMAGICbin(div,opASSIGN);
     {
       dPOPiv;
       if (value == 0)
-	DIE(aTHX_ "Illegal division by zero");
-      value = POPi / value;
+	  DIE(aTHX_ "Illegal division by zero");
+      num = POPi;
+
+      /* avoid FPE_INTOVF on some platforms when num is IV_MIN */
+      if (value == -1)
+          value = - num;
+      else
+          value = num / value;
       PUSHi( value );
       RETURN;
     }
@@ -2576,7 +2583,11 @@ PP(pp_i_modulo_0)
 	  dPOPTOPiirl;
 	  if (!right)
 	       DIE(aTHX_ "Illegal modulus zero");
-	  SETi( left % right );
+	  /* avoid FPE_INTOVF on some platforms when left is IV_MIN */
+	  if (right == -1)
+	      SETi( 0 );
+	  else
+	      SETi( left % right );
 	  RETURN;
      }
 }
@@ -2593,7 +2604,11 @@ PP(pp_i_modulo_1)
 	  dPOPTOPiirl;
 	  if (!right)
 	       DIE(aTHX_ "Illegal modulus zero");
-	  SETi( left % PERL_ABS(right) );
+	  /* avoid FPE_INTOVF on some platforms when left is IV_MIN */
+	  if (right == -1)
+	      SETi( 0 );
+	  else
+	      SETi( left % PERL_ABS(right) );
 	  RETURN;
      }
 }
@@ -2634,7 +2649,11 @@ PP(pp_i_modulo)
 	       }
 	  }
 #endif
-	  SETi( left % right );
+	  /* avoid FPE_INTOVF on some platforms when left is IV_MIN */
+	  if (right == -1)
+	      SETi( 0 );
+	  else
+	      SETi( left % right );
 	  RETURN;
      }
 }

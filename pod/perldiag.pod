@@ -1917,8 +1917,8 @@ operations.
 
 =item Integer overflow in format string for %s
 
-(F) The indexes and widths specified in the format string of printf()
-or sprintf() are too large.  The numbers must not overflow the size of
+(F) The indexes and widths specified in the format string of C<printf()>
+or C<sprintf()> are too large.  The numbers must not overflow the size of
 integers for your architecture.
 
 =item Internal disaster in regex; marked by <-- HERE in m/%s/
