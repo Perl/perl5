@@ -221,7 +221,7 @@ file.
 
 =item * ReadLine 
 
-If false, a dummy  ReadLine is used, so you can debug
+if false, a dummy ReadLine is used, so you can debug
 ReadLine applications.
 
 =item * NonStop 
@@ -236,6 +236,16 @@ pipe, a short "emacs like" message is used.
 =item * RemotePort 
 
 host:port to connect to on remote host for remote debugging.
+
+=item * HistFile
+
+file to store session history to. There is no default and so no
+history file is written unless this variable is explicitly set.
+
+=item * HistSize
+
+number of commands to store to the file specified in C<HistFile>.
+Default is 100.
 
 =back
 
@@ -501,7 +511,7 @@ package DB;
 BEGIN {eval 'use IO::Handle'};	# Needed for flush only? breaks under miniperl
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
-$VERSION = 1.29;
+$VERSION = 1.30;
 
 $header = "perl5db.pl version $VERSION";
 
@@ -929,6 +939,8 @@ sub eval {
 #   + Added threads support (inc. e and E commands)
 # Changes: 1.29: Nov 28, 2006 Bo Lindbergh <blgl@hagernas.com> 
 #   + Added macosx_get_fork_TTY support 
+# Changes: 1.30: Mar 06, 2007 Andreas Koenig <andk@cpan.org>
+#   + Added HistFile, HistSize
 ########################################################################
 
 =head1 DEBUGGER INITIALIZATION
@@ -1077,7 +1089,7 @@ are to be accepted.
 =cut
 
 @options = qw(
-  CommandSet
+  CommandSet   HistFile      HistSize
   hashDepth    arrayDepth    dumpDepth
   DumpDBFiles  DumpPackages  DumpReused
   compactDump  veryCompact   quote
@@ -1123,6 +1135,8 @@ state.
     RemotePort    => \$remoteport,
     windowSize    => \$window,
     WarnAssertions => \$warnassertions,
+    HistFile      => \$histfile,
+    HistSize      => \$histsize,
 );
 
 =pod
@@ -1237,7 +1251,7 @@ signalLevel($signalLevel);
 =pod
 
 The pager to be used is needed next. We try to get it from the
-environment first.  if it's not defined there, we try to find it in
+environment first.  If it's not defined there, we try to find it in
 the Perl C<Config.pm>.  If it's not there, we default to C<more>. We
 then call the C<pager()> function to save the pager name.
 
@@ -6066,6 +6080,8 @@ sub setterm {
 
     $term->MinLine(2);
 
+    &load_hist();
+
     if ( $term->Features->{setHistory} and "@hist" ne "?" ) {
         $term->SetHistory(@hist);
     }
@@ -6075,6 +6091,34 @@ sub setterm {
     ornaments($ornaments) if defined $ornaments;
     $term_pid = $$;
 } ## end sub setterm
+
+sub load_hist {
+    $histfile //= option_val("HistFile", undef);
+    return unless defined $histfile;
+    open my $fh, "<", $histfile or return;
+    local $/ = "\n";
+    @hist = ();
+    while (<$fh>) {
+        chomp;
+        push @hist, $_;
+    }
+    close $fh;
+}
+
+sub save_hist {
+    return unless defined $histfile;
+    eval { require File::Path } or return;
+    eval { require File::Basename } or return;
+    File::Path::mkpath(File::Basename::dirname($histfile));
+    open my $fh, ">", $histfile or die "Could not open '$histfile': $!";
+    $histsize //= option_val("HistSize",100);
+    my @copy = grep { $_ ne '?' } @hist;
+    my $start = scalar(@copy) > $histsize ? scalar(@copy)-$histsize : 0;
+    for ($start .. $#copy) {
+        print $fh "$copy[$_]\n";
+    }
+    close $fh or die "Could not write '$histfile': $!";
+}
 
 =head1 GET_FORK_TTY EXAMPLE FUNCTIONS
 
@@ -7238,7 +7282,7 @@ B<R>        Pure-man-restart of debugger, some of debugger state
 B<o> [I<opt>] ...    Set boolean option to true
 B<o> [I<opt>B<?>]    Query options
 B<o> [I<opt>B<=>I<val>] [I<opt>=B<\">I<val>B<\">] ... 
-        Set options.  Use quotes in spaces in value.
+        Set options.  Use quotes if spaces in value.
     I<recallCommand>, I<ShellBang>    chars used to recall command or spawn shell;
     I<pager>            program for output of \"|cmd\";
     I<tkRunning>            run Tk while prompting (with ReadLine);
@@ -7414,7 +7458,7 @@ B<R>        Pure-man-restart of debugger, some of debugger state
 B<O> [I<opt>] ...    Set boolean option to true
 B<O> [I<opt>B<?>]    Query options
 B<O> [I<opt>B<=>I<val>] [I<opt>=B<\">I<val>B<\">] ... 
-        Set options.  Use quotes in spaces in value.
+        Set options.  Use quotes if spaces in value.
     I<recallCommand>, I<ShellBang>    chars used to recall command or spawn shell;
     I<pager>            program for output of \"|cmd\";
     I<tkRunning>            run Tk while prompting (with ReadLine);
@@ -9041,8 +9085,12 @@ END {
     $fall_off_end = 1 unless $inhibit_exit;
 
     # Do not stop in at_exit() and destructors on exit:
-    $DB::single = !$fall_off_end && !$runnonstop;
-    DB::fake::at_exit() unless $fall_off_end or $runnonstop;
+    if ($fall_off_end or $runnonstop) {
+        &save_hist();
+    } else {
+        $DB::single = 1;
+        DB::fake::at_exit();
+    }
 } ## end END
 
 =head1 PRE-5.8 COMMANDS
