@@ -1448,20 +1448,36 @@ sub process_puretext {
     foreach my $word (@words) {
 	# skip space runs
  	next if $word =~ /^\s*$/;
-	# see if we can infer a link
-	if( $notinIS && $word =~ /^(\w+)\((.*)\)$/ ) {
+	# see if we can infer a link or a function call
+	#
+	# NOTE: This is a word based search, it won't automatically
+	# mark "substr($var, 1, 2)" because the 1st word would be "substr($var"
+	# User has to enclose those with proper C<>
+
+	if( $notinIS && $word =~
+	    m/
+		^([a-z_]{2,})                 # The function name
+		\(
+		    ([0-9][a-z]*              # Manual page(1) or page(1M)
+		    |[^)]*[\$\@\%][^)]+       # ($foo), (1, @foo), (%hash)
+		    |                         # ()
+		    )
+		\)
+		([.,;]?)$                     # a possible punctuation follows
+	    /xi
+	) {
 	    # has parenthesis so should have been a C<> ref
             ## try for a pagename (perlXXX(1))?
-            my( $func, $args ) = ( $1, $2 );
+            my( $func, $args, $rest ) = ( $1, $2, $3 || '' );
             if( $args =~ /^\d+$/ ){
                 my $url = page_sect( $word, '' );
                 if( defined $url ){
-                    $word = "<a href=\"$url\">the $word manpage</a>";
+                    $word = qq(<a href="$url" class="man">the $word manpage</a>$rest);
                     next;
                 }
             }
             ## try function name for a link, append tt'ed argument list
-            $word = emit_C( $func, '', "($args)");
+            $word = emit_C( $func, '', "($args)") . $rest;
 
 #### disabled. either all (including $\W, $\w+{.*} etc.) or nothing.
 ##      } elsif( $notinIS && $word =~ /^[\$\@%&*]+\w+$/) {
