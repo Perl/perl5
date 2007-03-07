@@ -6987,7 +6987,11 @@ S_pending_ident(pTHX)
     if (pit == '@' && PL_lex_state != LEX_NORMAL && !PL_lex_brackets) {
         GV *gv = gv_fetchpv(PL_tokenbuf+1, 0, SVt_PVAV);
         if ((!gv || ((PL_tokenbuf[0] == '@') ? !GvAV(gv) : !GvHV(gv)))
-             && ckWARN(WARN_AMBIGUOUS))
+		&& ckWARN(WARN_AMBIGUOUS)
+		/* DO NOT warn for @- and @+ */
+		&& !( PL_tokenbuf[2] == '\0' &&
+		    ( PL_tokenbuf[1] == '-' || PL_tokenbuf[1] == '+' ))
+	   )
         {
             /* Downgraded from fatal to warning 20000522 mjd */
             Perl_warner(aTHX_ packWARN(WARN_AMBIGUOUS),

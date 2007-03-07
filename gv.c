@@ -1225,7 +1225,10 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
             SvREADONLY_on(tie);
             SvREADONLY_on(av);
 
-	    require_tie_mod(gv, name, stashname, "FETCH", 0);
+	    if (sv_type == SVt_PVHV)
+		require_tie_mod(gv, name, stashname, "FETCH", 0);
+	    else
+		SvREFCNT_dec(stashname);
 
 	    break;
 	}

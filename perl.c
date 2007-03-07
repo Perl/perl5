@@ -4721,11 +4721,6 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
     if (PL_minus_a) {
       (void) get_av("main::F", TRUE | GV_ADDMULTI);
     }
-    /* touch @- and @+ arrays to prevent spurious warnings 20020415 MJD */
-    /* (but don't load the glob, since that requires loading
-     * re::Tie::Hash::NamedCapture, and miniperl can't do that */
-    (void) hv_fetch(PL_defstash, "-", 1, GV_ADDMULTI);
-    (void) hv_fetch(PL_defstash, "+", 1, GV_ADDMULTI);
 }
 
 STATIC void
