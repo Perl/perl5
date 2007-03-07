@@ -1211,8 +1211,8 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     	    HV *const hv_tie = newHV();
             SV *tie = newRV_noinc((SV*)hv_tie);
 
-            sv_bless(tie, gv_stashsv(stashname,GV_ADD));
-            hv_magic(hv, (GV*)tie, PERL_MAGIC_tied);    
+	    sv_bless(tie, gv_stashsv(stashname, GV_ADD));
+	    hv_magic(hv, (GV*)tie, PERL_MAGIC_tied);
             sv_magic((SV*)av, (plus ? (SV*)av : NULL), PERL_MAGIC_regdata, NULL, 0);
             sv_magic(GvSVn(gv), (SV*)gv, PERL_MAGIC_sv, name, len);
 
@@ -1220,15 +1220,12 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
                 SvREADONLY_on(GvSVn(gv));
             else
                 Perl_hv_store(aTHX_ hv_tie, STR_WITH_LEN("all"), newSViv(1), 0);
-            
+
             SvREADONLY_on(hv);
             SvREADONLY_on(tie);
             SvREADONLY_on(av);
-                
-            if (sv_type == SVt_PVHV) 
-                require_tie_mod(gv, name, stashname, "FETCH", 0);
-	    else
-		SvREFCNT_dec(stashname);
+
+	    require_tie_mod(gv, name, stashname, "FETCH", 0);
 
 	    break;
 	}
