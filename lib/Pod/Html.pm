@@ -231,7 +231,6 @@ This program is distributed under the Artistic License.
 
 =cut
 
-
 my($Cachedir);
 my($Dircache, $Itemcache);
 my @Begin_Stack;
@@ -1130,7 +1129,7 @@ my $EmittedItem;
 
 sub emit_item_tag($$$){
     my( $otext, $text, $compact ) = @_;
-    my $item = fragment_id( $text );
+    my $item = fragment_id( $text , -generate);
 
     $EmittedItem = $item;
     ### print STDERR "emit_item_tag=$item ($text)\n";
@@ -1139,9 +1138,9 @@ sub emit_item_tag($$$){
     if ($Items_Named{$item}++) {
 	print HTML process_text( \$otext );
     } else {
-        my $name = 'item_' . $item;
+        my $name = $item;
         $name = anchorify($name);
-	print HTML qq{<a name="$name">}, process_text( \$otext ), '</a>';
+	print HTML qq{<a name="$name" class="item">}, process_text( \$otext ), '</a>';
     }
     print HTML "</strong>\n";
     undef( $EmittedItem );
@@ -1997,7 +1996,8 @@ sub htmlify {
     $heading =~ s/\s+\Z//;
     $heading =~ s/\A\s+//;
     # The hyphen is a disgrace to the English language.
-    $heading =~ s/[-"?]//g;
+    # $heading =~ s/[-"?]//g;
+    $heading =~ s/["?]//g;
     $heading = lc( $heading );
     return $heading;
 }
@@ -2073,14 +2073,70 @@ sub depod1($;$$){
   return $res;
 }
 
+{
+    my %seen;   # static fragment record hash
+
+sub fragment_id_readable {
+    my $text     = shift;
+    my $generate = shift;   # optional flag
+
+    my $orig = $text;
+
+    # just clean the punctuation and leave the words for the
+    # fragment identifier.
+    $text =~ s/([[:punct:]\s])+/$1/g;
+    $text =~ s/[[:punct:]\s]+\Z//g;
+
+    #   "=item --version", remove leading punctuation.
+    $text =~ s/^[-[:punct:]]//;
+
+    unless ($text)
+    {
+        # Nothing left after removing punctuation, so leave it as is
+        # E.g. if option is named: "=item -#"
+
+        $text = $orig;
+    }
+
+    if ($generate) {
+        if ( exists $seen{$text} ) {
+            # This already exists, make it unique
+            $seen{$text}++;
+            $text = $text . $seen{$text};
+        } else {
+            $seen{$text} = 1;  # first time seen this fragment
+        }
+    }
+
+    $text;
+}}
+
+my @HC;
+sub fragment_id_obfusticated {  # This was the old "_2d_2d__"
+    my $text     = shift;
+    my $generate = shift;   # optional flag
+
+    # text? Normalize by obfusticating the fragment id to make it unique
+    $text =~ s/\s+/_/sg;
+
+    $text =~ s{(\W)}{
+        defined( $HC[ord($1)] ) ? $HC[ord($1)]
+        : ( $HC[ord($1)] = sprintf( "%%%02X", ord($1) ) ) }gxe;
+    $text = substr( $text, 0, 50 );
+
+    $text;
+}
+
 #
 # fragment_id - construct a fragment identifier from:
 #   a) =item text
 #   b) contents of C<...>
 #
-my @HC;
+
 sub fragment_id {
-    my $text = shift();
+    my $text     = shift;
+    my $generate = shift;   # optional flag
+
     $text =~ s/\s+\Z//s;
     if( $text ){
 	# a method or function?
@@ -2101,12 +2157,7 @@ sub fragment_id {
 	return $1 if $text =~ m{^([a-z\d_]+)(\s+[A-Z,/& ][A-Z\d,/& ]*)?$};
 	return $1 if $text =~ m{^([a-z\d]+)\s+Module(\s+[A-Z\d,/& ]+)?$};
 
-	# text? normalize!
-	$text =~ s/\s+/_/sg;
-	$text =~ s{(\W)}{
-         defined( $HC[ord($1)] ) ? $HC[ord($1)]
-                 : ( $HC[ord($1)] = sprintf( "%%%02X", ord($1) ) ) }gxe;
-        $text = substr( $text, 0, 50 );
+	fragment_id_readable($text, $generate);
     } else {
 	return undef();
     }
