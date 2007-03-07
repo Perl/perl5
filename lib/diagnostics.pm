@@ -549,6 +549,7 @@ sub splainthis {
     return 0 if $TRACEONLY;
     $_ = shift;
     local $\;
+    local $!;
     ### &finish_compilation unless %msg;
     s/\.?\n+$//;
     my $orig = $_;
