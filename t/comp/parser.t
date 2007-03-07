@@ -9,7 +9,7 @@ BEGIN {
 }
 
 require "./test.pl";
-plan( tests => 92 );
+plan( tests => 94 );
 
 eval '%@x=0;';
 like( $@, qr/^Can't modify hash dereference in repeat \(x\)/, '%@x=0' );
@@ -191,6 +191,12 @@ EOF
     like($@, qr/That use of \$\[ is unsupported/,
              'cannot assign list of <1 elements to $[');
 }
+
+# tests for "Bad name"
+eval q{ foo::$bar };
+like( $@, qr/Bad name after foo::/, 'Bad name after foo::' );
+eval q{ foo''bar };
+like( $@, qr/Bad name after foo'/, 'Bad name after foo\'' );
 
 eval q{ s/x/#/e };
 is( $@, '', 'comments in s///e' );
