@@ -1,8 +1,6 @@
-#!perl -w
-
-# tests for Win32::GetLongPathName()
-
-$^O =~ /^MSWin/ or print("1..0 # not win32\n" ), exit;
+use strict;
+use Test;
+use Win32;
 
 my @paths = qw(
     /
@@ -41,7 +39,8 @@ if ($drive) {
 my %expect;
 @expect{@paths} = map { my $x = $_; $x =~ s,(.[/\\])[/\\]+,$1,g; $x } @paths;
 
-print "1.." . @paths . "\n";
+plan tests => scalar(@paths);
+
 my $i = 1;
 for (@paths) {
     my $got = Win32::GetLongPathName($_);

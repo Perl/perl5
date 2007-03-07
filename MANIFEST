@@ -1214,6 +1214,13 @@ ext/Unicode/Normalize/t/test.t	Unicode::Normalize
 ext/Unicode/Normalize/t/tie.t	Unicode::Normalize
 ext/util/make_ext		Used by Makefile to execute extension Makefiles
 ext/Win32/Makefile.PL		Win32 extension makefile writer
+ext/Win32/t/ExpandEnvironmentStrings.t	See if Win32 extension works
+ext/Win32/t/GetFileVersion.t	See if Win32 extension works
+ext/Win32/t/GetFolderPath.t	See if Win32 extension works
+ext/Win32/t/GetFullPathName.t	See if Win32 extension works
+ext/Win32/t/GetLongPathName.t	See if Win32 extension works
+ext/Win32/t/GetOSVersion.t	See if Win32 extension works
+ext/Win32/t/GuidGen.t		See if Win32 extension works
 ext/Win32/Win32.pm		Win32 extension Perl module
 ext/Win32/Win32.xs		Win32 extension external subroutines
 ext/Win32API/File/buffers.h	Win32API::File extension
@@ -3750,8 +3757,6 @@ t/uni/tr_sjis.t			See if Unicode tr/// in sjis works
 t/uni/tr_utf8.t			See if Unicode tr/// in utf8 works
 t/uni/upper.t			See if Unicode casing works
 t/uni/write.t			See if Unicode formats work
-t/win32/getosversion.t		Test if Win32::GetOSVersion() works
-t/win32/longpath.t		Test if Win32::GetLongPathName() works
 t/win32/system.t		See if system works in Win*
 t/win32/system_tests		Test runner for system.t
 t/x2p/s2p.t			See if s2p/psed work
