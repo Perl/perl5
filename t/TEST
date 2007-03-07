@@ -262,6 +262,7 @@ EOT
     my $good_files = 0;
     my $tested_files  = 0;
     my $totmax = 0;
+    my %failed_tests;
 
     while (my $test = shift @tests) {
         my $test_start_time = $show_elapsed_time ? Time::HiRes::time() : 0;
@@ -367,9 +368,11 @@ EOT
 	    if ($ENV{PERL_VALGRIND}) {
 		my $valgrind
 	           = defined $ENV{VALGRIND} ? $ENV{VALGRIND} : 'valgrind';
-		$perl = "$valgrind --suppressions=perl.supp --leak-check=yes "
-			        . "--leak-resolution=high --show-reachable=yes "
-			        . "--num-callers=50 --log-fd=3 $perl";
+		my $vg_opts = defined $ENV{VG_OPTS} ? $ENV{VG_OPTS}
+		    :   "--suppressions=perl.supp --leak-check=yes "
+			. "--leak-resolution=high --show-reachable=yes "
+			. "--num-callers=50"; 
+		$perl = "$valgrind --log-fd=3 $vg_opts $perl";
 		$redir = "3>$valgrind_log";
 	    }
 	    my $run = "$perl" . _quote_args("$testswitch $switch $utf8")
@@ -513,7 +516,14 @@ EOT
 		    warn "$0: Failed to open '$valgrind_log': $!\n";
 		}
 	    }
-	    if (@valgrind) {
+	    if ($ENV{VG_OPTS} =~ /cachegrind/) {
+		if (rename $valgrind_log, "$test.valgrind") {
+		    $valgrind++;
+		} else {
+		    warn "$0: Failed to create '$test.valgrind': $!\n";
+		}
+	    }
+	    elsif (@valgrind) {
 		my $leaks = 0;
 		my $errors = 0;
 		for my $i (0..$#valgrind) {
@@ -566,10 +576,10 @@ EOT
 	if (defined $failure) {
 	    print "${te}$failure\n";
 	    $::bad_files++;
-	    $_ = $test;
-	    if (/^base/) {
-		die "Failed a basic test--cannot continue.\n";
+	    if ($test =~ /^base/) {
+		die "Failed a basic test ($test) -- cannot continue.\n";
 	    }
+	    ++$failed_tests{$test};
 	}
 	else {
 	    if ($max) {
@@ -601,11 +611,10 @@ EOT
     }
     else {
 	my $pct = $tested_files ? sprintf("%.2f", ($tested_files - $::bad_files) / $tested_files * 100) : "0.00";
-	if ($::bad_files == 1) {
-	    warn "Failed 1 test script out of $tested_files, $pct% okay.\n";
-	}
-	else {
-	    warn "Failed $::bad_files test scripts out of $tested_files, $pct% okay.\n";
+	my $s = $::bad_files == 1 ? "" : "s";
+	warn "Failed $::bad_files test$s out of $tested_files, $pct% okay.\n";
+	for my $test ( sort keys %failed_tests ) {
+	    print "\t$test\n";
 	}
 	warn <<'SHRDLU_1';
 ### Since not all tests were successful, you may want to run some of
@@ -652,3 +661,5 @@ SHRDLU_5
     }
 }
 exit ($::bad_files != 0);
+
+# ex: set ts=8 sts=4 sw=4 noet:
