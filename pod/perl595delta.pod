@@ -109,7 +109,7 @@ holding values from all capture buffers similarly named, if there should
 be many of them.
 
 C<%+> and C<%-> are implemented as tied hashes through the new module
-C<re::Tie::Hash::NamedCapture>.
+C<Tie::Hash::NamedCapture>.
 
 Users exposed to the .NET regex engine will find that the perl
 implementation differs in that the numerical ordering of the buffers

@@ -352,7 +352,7 @@ The keys of the C<%+> hash list only the names of buffers that have
 captured (and that are thus associated to defined values).
 
 The underlying behaviour of C<%+> is provided by the
-L<re::Tie::Hash::NamedCapture> module.
+L<Tie::Hash::NamedCapture> module.
 
 B<Note:> C<%-> and C<%+> are tied views into a common internal hash
 associated with the last successful regular expression. Therefore mixing
@@ -649,7 +649,7 @@ The keys of the C<%-> hash correspond to all buffer names found in
 the regular expression.
 
 The behaviour of C<%-> is implemented via the
-L<re::Tie::Hash::NamedCapture> module.
+L<Tie::Hash::NamedCapture> module.
 
 B<Note:> C<%-> and C<%+> are tied views into a common internal hash
 associated with the last successful regular expression. Therefore mixing

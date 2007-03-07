@@ -977,7 +977,6 @@ ext/POSIX/t/time.t		See if POSIX time-related functions work
 ext/POSIX/t/waitpid.t		See if waitpid works
 ext/POSIX/typemap		POSIX extension interface types
 ext/re/hints/mpeix.pl		Hints for re for named architecture
-ext/re/lib/re/Tie/Hash/NamedCapture.pm	Implements %- and %+ behaviour
 ext/re/Makefile.PL		re extension makefile writer
 ext/re/re_comp.h		re extension wrapper for regcomp.h
 ext/re/re.pm			re extension Perl module
@@ -2488,6 +2487,7 @@ lib/Pod/t/user.t		See if Pod::LaTeX works
 lib/Pod/t/utils.t		Test for Pod::ParseUtils
 lib/Pod/Usage.pm		Pod-Parser - print usage messages
 lib/pwd.pl			Routines to keep track of PWD environment variable
+lib/Tie/Hash/NamedCapture.pm	Implements %- and %+ behaviour
 lib/Search/Dict.pm		Perform binary search on dictionaries
 lib/Search/Dict.t		See if Search::Dict works
 lib/SelectSaver.pm		Enforce proper select scoping
@@ -3629,6 +3629,7 @@ t/op/regexp_qr.t		See if regular expressions work as qr//
 t/op/regexp.t			See if regular expressions work
 t/op/regexp_trielist.t		See if regular expressions work with trie optimisation
 t/op/regexp_email.t		See if regex recursion works by parsing email addresses
+t/op/regexp_namedcapture.t	Make sure glob assignment doesn't break named capture
 t/op/regmesg.t			See if one can get regular expression errors
 t/op/repeat.t			See if x operator works
 t/op/re_tests			Regular expressions for regexp.t

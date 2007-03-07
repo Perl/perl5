@@ -4610,6 +4610,7 @@ PERL_CALLCONV void	Perl_emulate_cop_io(pTHX_ const COP *const c, SV *const sv)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
+PERL_CALLCONV regexp *	Perl_get_re_arg(pTHX_ SV *sv, U32 flags, MAGIC **mgp);
 
 END_EXTERN_C
 /*

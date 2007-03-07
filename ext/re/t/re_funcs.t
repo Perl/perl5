@@ -72,10 +72,10 @@ if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){
 }    
 {
     use warnings;
-    require re::Tie::Hash::NamedCapture;
+    require Tie::Hash::NamedCapture;
     my $qr = qr/(?<foo>foo)/;
     if ( 'foo' =~ /$qr/ ) {
-        tie my %hash,"re::Tie::Hash::NamedCapture",re => $qr;
+        tie my %hash,"Tie::Hash::NamedCapture",re => $qr;
         if ('bar'=~/bar/) {
             # last successful match is now different
             is($hash{foo},'foo'); # prints foo

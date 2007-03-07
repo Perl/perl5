@@ -1,23 +1,15 @@
-package re::Tie::Hash::NamedCapture;
+package Tie::Hash::NamedCapture;
 
 use strict;
 use warnings;
 
-our $VERSION = "0.02";
-
-no re 'debug';
-use re qw(is_regexp
-          regname
-          regnames
-          regnames_count
-          regnames_iterinit
-          regnames_iternext);
+our $VERSION = "0.03";
 
 sub TIEHASH {
     my $classname = shift;
     my $hash = {@_};
 
-    if ($hash->{re} && !is_regexp($hash->{re})) {
+    if ($hash->{re} && !re::is_regexp($hash->{re})) {
         die "'re' parameter to ",__PACKAGE__,"->TIEHASH must be a qr//"
     }
 
@@ -25,7 +17,7 @@ sub TIEHASH {
 }
 
 sub FETCH {
-    return regname($_[1],$_[0]->{re},$_[0]->{all});
+    return re::regname($_[1],$_[0]->{re},$_[0]->{all});
 }
 
 sub STORE {
@@ -34,16 +26,16 @@ sub STORE {
 }
 
 sub FIRSTKEY {
-    regnames_iterinit($_[0]->{re});
+    re::regnames_iterinit($_[0]->{re});
     return $_[0]->NEXTKEY;
 }
 
 sub NEXTKEY {
-    return regnames_iternext($_[0]->{re},$_[0]->{all});
+    return re::regnames_iternext($_[0]->{re},$_[0]->{all});
 }
 
 sub EXISTS {
-    return defined regname( $_[1], $_[0]->{re},$_[0]->{all});
+    return defined re::regname( $_[1], $_[0]->{re},$_[0]->{all});
 }
 
 sub DELETE {
@@ -57,7 +49,7 @@ sub CLEAR {
 }
 
 sub SCALAR {
-    return scalar regnames($_[0]->{re},$_[0]->{all});
+    return scalar re::regnames($_[0]->{re},$_[0]->{all});
 }
 
 1;
@@ -66,14 +58,14 @@ __END__
 
 =head1 NAME
 
-re::Tie::Hash::NamedCapture - Named regexp capture buffers
+Tie::Hash::NamedCapture - Named regexp capture buffers
 
 =head1 SYNOPSIS
 
-    tie my %hash, "re::Tie::Hash::NamedCapture";
+    tie my %hash, "Tie::Hash::NamedCapture";
     # %hash now behaves like %+
 
-    tie my %hash, "re::Tie::Hash::NamedCapture", re => $qr, all => 1;
+    tie my %hash, "Tie::Hash::NamedCapture", re => $qr, all => 1;
     # %hash now access buffers from regexp in $qr like %-
 
 =head1 DESCRIPTION
@@ -107,7 +99,7 @@ For instance:
 
     my $qr = qr/(?<foo>bar)/;
     if ( 'bar' =~ $qr ) {
-        tie my %hash, "re::Tie::Hash::NamedCapture", re => $qr;
+        tie my %hash, "Tie::Hash::NamedCapture", re => $qr;
         print $+{foo};    # prints "bar"
         print $hash{foo}; # prints "bar" too
         if ( 'bar' =~ /bar/ ) {

@@ -1004,7 +1004,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	        if (*name == '!')
 		    require_tie_mod(gv, "!", newSVpvs("Errno"), "TIEHASH", 1);
 		else if (*name == '-' || *name == '+')
-		    require_tie_mod(gv, name, newSVpvs("re::Tie::Hash::NamedCapture"), "FETCH", 0);
+		    require_tie_mod(gv, name, newSVpvs("Tie::Hash::NamedCapture"), "FETCH", 0);
 	    }
 	}
 	return gv;
@@ -1198,6 +1198,8 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
             /* magicalization must be done before require_tie_mod is called */
 	    if (sv_type == SVt_PVHV)
 		require_tie_mod(gv, "!", newSVpvs("Errno"), "TIEHASH", 1);
+            /* NOTE: Errno.pm does the tieing of %! itself when it is executed. 
+               This is different to the way %+ and %- are handled. */
 
 	    break;
 	case '-':
@@ -1205,7 +1207,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	GvMULTI_on(gv); /* no used once warnings here */
         {
             bool plus = (*name == '+');
-            SV *stashname = newSVpvs("re::Tie::Hash::NamedCapture");
+            SV *stashname = newSVpvs("Tie::Hash::NamedCapture");
             AV* const av = GvAVn(gv);
     	    HV *const hv = GvHVn(gv);
     	    HV *const hv_tie = newHV();
@@ -1215,7 +1217,9 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    hv_magic(hv, (GV*)tie, PERL_MAGIC_tied);
             sv_magic((SV*)av, (plus ? (SV*)av : NULL), PERL_MAGIC_regdata, NULL, 0);
             sv_magic(GvSVn(gv), (SV*)gv, PERL_MAGIC_sv, name, len);
-
+        
+            /* NOTE: Tie::Hash::NamedCapture does NOT do the tie of %- or %+ itself. 
+               This is different to the way %! is handled. */
             if (plus)
                 SvREADONLY_on(GvSVn(gv));
             else
@@ -1224,13 +1228,10 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
             SvREADONLY_on(hv);
             SvREADONLY_on(tie);
             SvREADONLY_on(av);
-
-	    if (sv_type == SVt_PVHV)
-		require_tie_mod(gv, name, stashname, "FETCH", 0);
-	    else
-		SvREFCNT_dec(stashname);
-
-	    break;
+            
+            require_tie_mod(gv, name, stashname, "FETCH", 0);
+	    
+            break;
 	}
 	case '*':
 	case '#':
