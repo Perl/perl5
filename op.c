@@ -1041,6 +1041,17 @@ S_modkids(pTHX_ OP *o, I32 type)
     return o;
 }
 
+/* Propagate lvalue ("modifiable") context to an op and its children.
+ * 'type' represents the context type, roughly based on the type of op that
+ * would do the modifying, although local() is represented by OP_NULL.
+ * It's responsible for detecting things that can't be modified,  flag
+ * things that need to behave specially in an lvalue context (e.g., "$$x = 5"
+ * might have to vivify a reference in $x), and so on.
+ *
+ * For example, "$a+1 = 2" would cause mod() to be called with o being
+ * OP_ADD and type being OP_SASSIGN, and would output an error.
+ */
+
 OP *
 Perl_mod(pTHX_ OP *o, I32 type)
 {
