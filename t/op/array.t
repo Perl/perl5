@@ -7,7 +7,7 @@ BEGIN {
 
 require 'test.pl';
 
-plan (107);
+plan (127);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -318,14 +318,64 @@ sub test_arylen {
 }
 
 {
-    our($x,$y,$z) = (1..3);
-    our($y,$z) = ($x,$y);
-    is("$x $y $z", "1 1 2");
+    use vars '@array';
+
+    my $outer = \$#array;
+    is ($$outer, -1);
+    is (scalar @array, 0);
+
+    $$outer = 3;
+    is ($$outer, 3);
+    is (scalar @array, 4);
+
+    my $ref = \@array;
+
+    my $inner;
+    {
+	local @array;
+	$inner = \$#array;
+
+	is ($$inner, -1);
+	is (scalar @array, 0);
+	$$outer = 6;
+
+	is (scalar @$ref, 7);
+
+	is ($$inner, -1);
+	is (scalar @array, 0);
+
+	$$inner = 42;
+    }
+
+    is (scalar @array, 7);
+    is ($$outer, 6);
+
+    is ($$inner, undef, "orphaned $#foo is always undef");
+
+    is (scalar @array, 7);
+    is ($$outer, 6);
+
+    $$inner = 1;
+
+    is (scalar @array, 7);
+    is ($$outer, 6);
+
+    $$inner = 503; # Bang!
+
+    is (scalar @array, 7);
+    is ($$outer, 6);
 }
+
 {
-    our($x,$y,$z) = (1..3);
-    (our $y, our $z) = ($x,$y);
-    is("$x $y $z", "1 1 2");
+    # Bug #36211
+    use vars '@array';
+    for (1,2) {
+	{
+	    local @a;
+	    is ($#a, -1);
+	    @a=(1..4)
+	}
+    }
 }
 
 {
@@ -357,5 +407,19 @@ sub test_arylen {
     push @{@array}, 23;
     is ($array[8], 23);
 }
+
+# more tests for AASSIGN_COMMON
+
+{
+    our($x,$y,$z) = (1..3);
+    our($y,$z) = ($x,$y);
+    is("$x $y $z", "1 1 2");
+}
+{
+    our($x,$y,$z) = (1..3);
+    (our $y, our $z) = ($x,$y);
+    is("$x $y $z", "1 1 2");
+}
+
 
 "We're included by lib/Tie/Array/std.t so we need to return something true";
