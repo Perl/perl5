@@ -78,6 +78,7 @@ h Reference Manual
   perllocale		Perl locale support
   perluniintro		Perl Unicode introduction
   perlunicode		Perl Unicode support
+  perlunifaq		Perl Unicode FAQ
   perlunitut		Perl Unicode tutorial
   perlebcdic		Considerations for running Perl on EBCDIC platforms
 
