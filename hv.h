@@ -303,7 +303,7 @@ C<SV*>.
 #define HeHASH(he)		HEK_HASH(HeKEY_hek(he))
 #define HePV(he,lp)		((HeKLEN(he) == HEf_SVKEY) ?		\
 				 SvPV(HeKEY_sv(he),lp) :		\
-				 ((lp = HeKLEN(he)) >= 0))		\
+				 ((lp = HeKLEN(he)), HeKEY(he)))
 
 #define HeSVKEY(he)		((HeKEY(he) && 				\
 				  HeKLEN(he) == HEf_SVKEY) ?		\
