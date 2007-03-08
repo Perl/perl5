@@ -1190,47 +1190,32 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    goto magicalize;
 
 	case '!':
-	GvMULTI_on(gv);    
+	    GvMULTI_on(gv);
 	    /* If %! has been used, automatically load Errno.pm. */
 
 	    sv_magic(GvSVn(gv), (SV*)gv, PERL_MAGIC_sv, name, len);
 
             /* magicalization must be done before require_tie_mod is called */
-	    if (sv_type == SVt_PVHV)
+	    if (sv_type == SVt_PVHV || sv_type == SVt_PVGV)
 		require_tie_mod(gv, "!", newSVpvs("Errno"), "TIEHASH", 1);
-            /* NOTE: Errno.pm does the tieing of %! itself when it is executed. 
-               This is different to the way %+ and %- are handled. */
 
 	    break;
 	case '-':
 	case '+':
 	GvMULTI_on(gv); /* no used once warnings here */
         {
-            bool plus = (*name == '+');
-            SV *stashname = newSVpvs("Tie::Hash::NamedCapture");
             AV* const av = GvAVn(gv);
-    	    HV *const hv = GvHVn(gv);
-    	    HV *const hv_tie = newHV();
-            SV *tie = newRV_noinc((SV*)hv_tie);
+	    SV* const avc = (*name == '+') ? (SV*)av : NULL;
 
-	    sv_bless(tie, gv_stashsv(stashname, GV_ADD));
-	    hv_magic(hv, (GV*)tie, PERL_MAGIC_tied);
-            sv_magic((SV*)av, (plus ? (SV*)av : NULL), PERL_MAGIC_regdata, NULL, 0);
+	    sv_magic((SV*)av, avc, PERL_MAGIC_regdata, NULL, 0);
             sv_magic(GvSVn(gv), (SV*)gv, PERL_MAGIC_sv, name, len);
-        
-            /* NOTE: Tie::Hash::NamedCapture does NOT do the tie of %- or %+ itself. 
-               This is different to the way %! is handled. */
-            if (plus)
+            if (avc)
                 SvREADONLY_on(GvSVn(gv));
-            else
-                Perl_hv_store(aTHX_ hv_tie, STR_WITH_LEN("all"), newSViv(1), 0);
-
-            SvREADONLY_on(hv);
-            SvREADONLY_on(tie);
             SvREADONLY_on(av);
-            
-            require_tie_mod(gv, name, stashname, "FETCH", 0);
-	    
+
+            if (sv_type == SVt_PVHV || sv_type == SVt_PVGV)
+                require_tie_mod(gv, name, newSVpvs("Tie::Hash::NamedCapture"), "FETCH", 0);
+
             break;
 	}
 	case '*':

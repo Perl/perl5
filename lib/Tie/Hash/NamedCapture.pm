@@ -3,17 +3,23 @@ package Tie::Hash::NamedCapture;
 use strict;
 use warnings;
 
-our $VERSION = "0.03";
+our $VERSION = "0.04";
 
 sub TIEHASH {
     my $classname = shift;
-    my $hash = {@_};
+    my %opts = @_;
 
-    if ($hash->{re} && !re::is_regexp($hash->{re})) {
-        die "'re' parameter to ",__PACKAGE__,"->TIEHASH must be a qr//"
+    if ($opts{re} && !re::is_regexp($opts{re})) {
+	require Carp;
+	Carp::croak("'re' parameter to " . __PACKAGE__
+	    . "->TIEHASH must be a qr//.");
     }
 
-    return bless $hash, $classname;
+    my $self = bless {
+	all => $opts{all},
+	re  => $opts{re},
+    }, $classname;
+    return $self;
 }
 
 sub FETCH {
@@ -51,6 +57,9 @@ sub CLEAR {
 sub SCALAR {
     return scalar re::regnames($_[0]->{re},$_[0]->{all});
 }
+
+tie %+, __PACKAGE__;
+tie %-, __PACKAGE__, all => 1;
 
 1;
 
