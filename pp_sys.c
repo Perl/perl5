@@ -437,6 +437,7 @@ PP(pp_warn)
     else if (SP == MARK) {
 	tmpsv = &PL_sv_no;
 	EXTEND(SP, 1);
+	SP = MARK + 1;
     }
     else {
 	tmpsv = TOPs;
