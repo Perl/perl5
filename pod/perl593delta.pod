@@ -117,7 +117,7 @@ been updated to 4.1.0.
 =head2 C<no VERSION>
 
 You can now use C<no> followed by a version number to specify that you
-want to use a version of perl inferior to the specified one.
+want to use a version of perl older than the specified one.
 
 =head2 Recursive sort subs
 

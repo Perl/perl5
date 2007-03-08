@@ -2999,6 +2999,8 @@ X<no>
 
 =item no Module
 
+=item no VERSION
+
 See the C<use> function, of which C<no> is the opposite.
 
 =item oct EXPR
@@ -6814,12 +6816,14 @@ package.  It is exactly equivalent to
 
 except that Module I<must> be a bareword.
 
-VERSION may be either a numeric argument such as 5.006, which will be
-compared to C<$]>, or a literal of the form v5.6.1, which will be compared
-to C<$^V> (aka $PERL_VERSION).  A fatal error is produced if VERSION is
-greater than the version of the current Perl interpreter; Perl will not
-attempt to parse the rest of the file.  Compare with L</require>, which can
-do a similar check at run time.
+In the peculiar C<use VERSION> form, VERSION may be either a numeric
+argument such as 5.006, which will be compared to C<$]>, or a literal of
+the form v5.6.1, which will be compared to C<$^V> (aka $PERL_VERSION).  A
+fatal error is produced if VERSION is greater than the version of the
+current Perl interpreter; Perl will not attempt to parse the rest of the
+file.  Compare with L</require>, which can do a similar check at run time.
+Symmetrically, C<no VERSION> allows you to specify that you want a version
+of perl older than the specified one.
 
 Specifying VERSION as a literal of the form v5.6.1 should generally be
 avoided, because it leads to misleading error messages under earlier
@@ -6834,9 +6838,9 @@ This is often useful if you need to check the current Perl version before
 C<use>ing library modules that have changed in incompatible ways from
 older versions of Perl.  (We try not to do this more than we have to.)
 
-If the specified perl version is greater than or equal to 5.9.5, C<use
-VERSION> will also load the C<feature> pragma and enable all features
-available in the requested version.  See L<feature>.
+Also, if the specified perl version is greater than or equal to 5.9.5,
+C<use VERSION> will also load the C<feature> pragma and enable all
+features available in the requested version.  See L<feature>.
 
 The C<BEGIN> forces the C<require> and C<import> to happen at compile time.  The
 C<require> makes sure the module is loaded into memory if it hasn't been
