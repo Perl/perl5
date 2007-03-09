@@ -399,6 +399,17 @@ if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a 2>/dev/null|")) {
         trylocale($_);
     }
     close(LOCALES);
+} elsif ($^O eq 'openbsd' && -e '/usr/share/locale') {
+
+   # OpenBSD doesn't have a locale executable, so reading /usr/share/locale
+   # is much easier and faster than the last resort method.
+
+    opendir(LOCALES, '/usr/share/locale');
+    while ($_ = readdir(LOCALES)) {
+        chomp;
+        trylocale($_);
+    }
+    close(LOCALES);
 } else {
 
     # This is going to be slow.

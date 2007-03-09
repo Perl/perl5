@@ -14,10 +14,14 @@ sub expected {
     is(ref($object), $package);
     my $r = qr/^\Q$package\E=(\w+)\(0x([0-9a-f]+)\)$/;
     like("$object", $r);
-    "$object" =~ $r;
-    is($1, $type);
-    # in 64-bit platforms hex warns for 32+ -bit values
-    cmp_ok(do {no warnings 'portable'; hex($2)}, '==', $object);
+    if ("$object" =~ $r) {
+	is($1, $type);
+	# in 64-bit platforms hex warns for 32+ -bit values
+	cmp_ok(do {no warnings 'portable'; hex($2)}, '==', $object);
+    }
+    else {
+	fail(); fail();
+    }
 }
 
 # test blessing simple types

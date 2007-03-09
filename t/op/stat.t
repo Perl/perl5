@@ -30,7 +30,7 @@ $Is_Rhapsody= $^O eq 'rhapsody';
 
 $Is_Dosish  = $Is_Dos || $Is_OS2 || $Is_MSWin32 || $Is_NetWare || $Is_Cygwin;
 
-$Is_UFS     = $Is_Darwin && (() = `df -t ufs .`) == 2;
+$Is_UFS     = $Is_Darwin && (() = `df -t ufs . 2>/dev/null`) == 2;
 
 my($DEV, $INO, $MODE, $NLINK, $UID, $GID, $RDEV, $SIZE,
    $ATIME, $MTIME, $CTIME, $BLKSIZE, $BLOCKS) = (0..12);

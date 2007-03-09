@@ -186,7 +186,12 @@ sub try_strftime {
 
 $lc = &POSIX::setlocale(&POSIX::LC_TIME, 'C') if $Config{d_setlocale};
 try_strftime("Wed Feb 28 00:00:00 1996 059", 0,0,0, 28,1,96);
-try_strftime("Thu Feb 29 00:00:60 1996 060", 60,0,-24, 30,1,96);
+SKIP: {
+    skip("VC++ 8 regards 60 seconds as an invalid parameter", 1)
+	if $Config{cc} eq 'cl' and $Config{ccversion} =~ /^(\d+)/ and $1 >= 14;
+
+    try_strftime("Thu Feb 29 00:00:60 1996 060", 60,0,-24, 30,1,96);
+}
 try_strftime("Fri Mar 01 00:00:00 1996 061", 0,0,-24, 31,1,96);
 try_strftime("Sun Feb 28 00:00:00 1999 059", 0,0,0, 28,1,99);
 try_strftime("Mon Mar 01 00:00:00 1999 060", 0,0,24, 28,1,99);

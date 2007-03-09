@@ -59,7 +59,8 @@ is( &qw('amper'), "qw-amper", "&qw() is func" );
 
 # qx operator
 can_ok( 'main', "qx" );
-eval "qx('unqualified')";
+eval "qx('unqualified'".
+     ($^O eq 'MSWin32' ? " 2>&1)" : ")");
 SKIP: {
     skip("external command not portable on VMS", 1) if $^O eq 'VMS';
     TODO: {

@@ -1,6 +1,8 @@
-#!./perl -w
+#!./perl
 
 # Regression tests for attributes.pm and the C< : attrs> syntax.
+
+use warnings;
 
 BEGIN {
     chdir 't' if -d 't';
@@ -80,6 +82,10 @@ like $@, qr/^SCALAR package attribute may clash with future reserved word: ["']?
 
 eval 'my A $x : plugh plover;';
 like $@, qr/^SCALAR package attributes may clash with future reserved words: ["']?plugh["']? /;
+
+no warnings 'reserved';
+eval 'my A $x : plugh;';
+is $@, '';
 
 eval 'package Cat; my Cat @socks;';
 like $@, qr/^Can't declare class for non-scalar \@socks in "my"/;
