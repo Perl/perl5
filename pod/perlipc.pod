@@ -386,6 +386,10 @@ try something like the following:
                      POSIX::SigAction->new(sub { die "alarm" }))
           or die "Error setting SIGALRM handler: $!\n";
 
+Another way to disable the safe signal behavior locally is to use
+the C<Perl::Unsafe::Signals> module from CPAN (which will affect
+all signals).
+
 =item Restartable system calls
 
 On systems that supported it, older versions of Perl used the
