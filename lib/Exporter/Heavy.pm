@@ -196,6 +196,7 @@ sub heavy_export {
 	(*{"${callpkg}::$sym"} = \&{"${pkg}::$sym"}, next)
 	    unless $sym =~ s/^(\W)//;
 	$type = $1;
+	no warnings 'once';
 	*{"${callpkg}::$sym"} =
 	    $type eq '&' ? \&{"${pkg}::$sym"} :
 	    $type eq '$' ? \${"${pkg}::$sym"} :
