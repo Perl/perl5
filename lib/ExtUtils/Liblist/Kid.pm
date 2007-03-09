@@ -389,7 +389,7 @@ sub _vms_ext {
   if ($self->{PERL_SRC}) {
     my($lib,$locspec,$type);
     foreach $lib (@crtls) { 
-      if (($locspec,$type) = $lib =~ m!^([\w$\-]+)(/\w+)?! and $locspec =~ /perl/i) {
+      if (($locspec,$type) = $lib =~ m!^([\w\$-]+)(/\w+)?! and $locspec =~ /perl/i) {
         if    (lc $type eq '/share')   { $locspec .= $Config{'exe_ext'}; }
         elsif (lc $type eq '/library') { $locspec .= $Config{'lib_ext'}; }
         else                           { $locspec .= $Config{'obj_ext'}; }
