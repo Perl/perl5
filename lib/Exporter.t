@@ -171,7 +171,7 @@ eval { Yet::More::Testing->require_version(10); 1 };
 
 my $warnings;
 BEGIN {
-    $SIG{__WARN__} = sub { $warnings = join '', @_ };
+    local $SIG{__WARN__} = sub { $warnings = join '', @_ };
     package Testing::Unused::Vars;
     @ISA = qw(Exporter);
     @EXPORT = qw(this $TODO that);
@@ -206,7 +206,6 @@ package The::Import;
 
 use Exporter 'import';
 
-eval { import() };
 ::ok(\&import == \&Exporter::import, "imported the import routine");
 
 @EXPORT = qw( wibble );
