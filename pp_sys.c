@@ -3442,15 +3442,14 @@ PP(pp_chdir)
 #ifdef HAS_FCHDIR
 	IO* const io = GvIO(gv);
 	if (io) {
-	    if (IoIFP(io)) {
-		PUSHi(fchdir(PerlIO_fileno(IoIFP(io))) >= 0);
-	    }
-	    else if (IoDIRP(io)) {
+	    if (IoDIRP(io)) {
 #ifdef HAS_DIRFD
 		PUSHi(fchdir(dirfd(IoDIRP(io))) >= 0);
 #else
 		DIE(aTHX_ PL_no_func, "dirfd");
 #endif
+	    } else if (IoIFP(io)) {
+                PUSHi(fchdir(PerlIO_fileno(IoIFP(io))) >= 0);
 	    }
 	    else {
 		if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
