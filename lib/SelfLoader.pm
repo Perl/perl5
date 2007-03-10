@@ -1,9 +1,8 @@
 package SelfLoader;
-# use Carp;
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(AUTOLOAD);
-$VERSION = "1.0904";
+$VERSION = "1.10";
 sub Version {$VERSION}
 $DEBUG = 0;
 
@@ -17,7 +16,10 @@ $nested = qr{ \( (?: (?> [^()]+ ) | (??{ $nested }) )* \) }x;
 our $one_attr = qr{ (?> (?! \d) \w+ (?:$nested)? ) (?:\s*\:\s*|\s+(?!\:)) }x;
 our $attr_list = qr{ \s* : \s* (?: $one_attr )* }x;
 
-sub croak { require Carp; goto &Carp::croak }
+# in croak and carp, protect $@ from "require Carp;" RT #40216
+
+sub croak { { local $@; require Carp; } goto &Carp::croak }
+sub carp { { local $@; require Carp; } goto &Carp::carp }
 
 AUTOLOAD {
     print STDERR "SelfLoader::AUTOLOAD for $AUTOLOAD\n" if $DEBUG;
@@ -35,7 +37,10 @@ AUTOLOAD {
     }
     print STDERR "SelfLoader::AUTOLOAD eval: $SL_code\n" if $DEBUG;
 
-    eval $SL_code;
+    {
+	no strict;
+	eval $SL_code;
+    }
     if ($@) {
         $@ =~ s/ at .*\n//;
         croak $@;
@@ -57,7 +62,14 @@ sub _load_stubs {
 
     print STDERR "SelfLoader::load_stubs($callpack)\n" if $DEBUG;
     croak("$callpack doesn't contain an __DATA__ token")
-        unless fileno($fh);
+        unless defined fileno($fh);
+    # Protect: fork() shares the file pointer between the parent and the kid
+    if(sysseek($fh, tell($fh), 0)) {
+      open my $nfh, '<&', $fh or croak "reopen: $!";# dup() the fd
+      close $fh or die "close: $1";                 # autocloses, but be paranoid
+      open $fh, '<&', $nfh or croak "reopen2: $!";  # dup() the fd "back"
+      close $nfh or die "close after reopen: $1";   # autocloses, but be paranoid
+    }
     $Cache{"${currpack}::<DATA"} = 1;   # indicate package is cached
 
     local($/) = "\n";
@@ -108,6 +120,7 @@ sub _load_stubs {
         }
     }
     push(@stubs, $self->_add_to_cache($name, $currpack, \@lines, $protoype));
+    no strict;
     eval join('', @stubs) if @stubs;
 }
 
@@ -115,7 +128,7 @@ sub _load_stubs {
 sub _add_to_cache {
     my($self,$fullname,$pack,$lines, $protoype) = @_;
     return () unless $fullname;
-    (require Carp), Carp::carp("Redefining sub $fullname")
+    carp("Redefining sub $fullname")
       if exists $Cache{$fullname};
     $Cache{$fullname} = join('', "package $pack; ",@$lines);
     print STDERR "SelfLoader cached $fullname: $Cache{$fullname}" if $DEBUG;

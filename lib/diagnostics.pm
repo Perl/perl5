@@ -185,7 +185,7 @@ use 5.006;
 use Carp;
 $Carp::Internal{__PACKAGE__.""}++;
 
-our $VERSION = 1.15;
+our $VERSION = 1.16;
 our $DEBUG;
 our $VERBOSE;
 our $PRETTY;
@@ -466,12 +466,12 @@ sub import {
 				    $PRETTY++;
 				    next;
 			       };
-
-	/^-t(race)?$/ 		&& do {
+	# matches trace and traceonly for legacy doc mixup reasons
+	/^-t(race(only)?)?$/	&& do {
 				    $TRACEONLY++;
 				    next;
 			       };
-	/^-w(arntrace)?$/ 		&& do {
+	/^-w(arntrace)?$/ 	&& do {
 				    $WARNTRACE++;
 				    next;
 			       };
@@ -550,6 +550,7 @@ sub splainthis {
     return 0 if $TRACEONLY;
     local $_ = shift;
     local $\;
+    local $!;
     ### &finish_compilation unless %msg;
     s/\.?\n+$//;
     my $orig = $_;
@@ -562,6 +563,7 @@ sub splainthis {
     # but be aware of messsages containing " at this-or-that"
     my $real = 0;
     my @secs = split( / at / );
+    return unless @secs;
     $_ = $secs[0];
     for my $i ( 1..$#secs ){
         if( $secs[$i] =~ /.+? (?:line|chunk) \d+/ ){

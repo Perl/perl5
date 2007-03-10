@@ -1,7 +1,7 @@
 package Text::ParseWords;
 
 use vars qw($VERSION @ISA @EXPORT $PERL_SINGLE_QUOTE);
-$VERSION = "3.24";
+$VERSION = "3.25";
 
 require 5.000;
 
@@ -12,9 +12,17 @@ use Exporter;
 
 
 sub shellwords {
-    my(@lines) = @_;
-    $lines[$#lines] =~ s/\s+$//;
-    return(quotewords('\s+', 0, @lines));
+    my (@lines) = @_;
+    my @allwords;
+
+    foreach my $line (@lines) {
+	$line =~ s/^\s+//;
+	my @words = parse_line('\s+', 0, $line);
+	pop @words if (@words and !defined $words[-1]);
+	return() unless (@words || !length($line));
+	push(@allwords, @words);
+    }
+    return(@allwords);
 }
 
 
@@ -125,7 +133,7 @@ sub old_shellwords {
 		Carp::carp("Unmatched single quote: $_");
 		return();
 	    }
-	    elsif (s/\A\\(.)//s) {
+	    elsif (s/\A\\(.?)//s) {
 		$snippet = $1;
 	    }
 	    elsif (s/\A([^\s\\'"]+)//) {

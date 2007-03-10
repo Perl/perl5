@@ -209,13 +209,15 @@ sub addhistory {}
 
 sub findConsole {
     my $console;
+    my $consoleOUT;
 
     if ($^O eq 'MacOS') {
         $console = "Dev:Console";
     } elsif (-e "/dev/tty") {
 	$console = "/dev/tty";
     } elsif (-e "con" or $^O eq 'MSWin32') {
-	$console = "con";
+       $console = 'CONIN$';
+       $consoleOUT = 'CONOUT$';
     } else {
 	$console = "sys\$command";
     }
@@ -231,10 +233,10 @@ sub findConsole {
       }
     }
 
-    my $consoleOUT = $console;
+    $consoleOUT = $console unless defined $consoleOUT;
     $console = "&STDIN" unless defined $console;
     if (!defined $consoleOUT) {
-      $consoleOUT = defined fileno(STDERR) ? "&STDERR" : "&STDOUT";
+      $consoleOUT = defined fileno(STDERR) && $^O ne 'MSWin32' ? "&STDERR" : "&STDOUT";
     }
     ($console,$consoleOUT);
 }
@@ -247,8 +249,13 @@ sub new {
   if (@_==2) {
     my($console, $consoleOUT) = $_[0]->findConsole;
 
-    open(FIN, "<$console"); 
-    open(FOUT,">$consoleOUT");
+
+    # the Windows CONIN$ needs GENERIC_WRITE mode to allow
+    # a SetConsoleMode() if we end up using Term::ReadKey
+    open FIN, (  $^O eq 'MSWin32' && $console eq 'CONIN$' ) ? "+<$console" :
+                                                              "<$console";
+    open FOUT,">$consoleOUT";
+
     #OUT->autoflush(1);		# Conflicts with debugger?
     my $sel = select(FOUT);
     $| = 1;				# for DB::OUT
