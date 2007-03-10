@@ -9,7 +9,7 @@ BEGIN {
 
 use Config;
 require "test.pl";
-plan(tests => 41);
+plan(tests => 48);
 
 my $IsVMS   = $^O eq 'VMS';
 my $IsMacOS = $^O eq 'MacOS';
@@ -46,7 +46,7 @@ SKIP: {
 $Cwd = abs_path;
 
 SKIP: {
-    skip("no fchdir", 9) unless $has_fchdir;
+    skip("no fchdir", 16) unless $has_fchdir;
     my $has_dirfd = ($Config{d_dirfd} || "") eq "define";
     ok(opendir(my $dh, "."), "opendir .");
     ok(open(my $fh, "<", "op"), "open op");
@@ -58,7 +58,7 @@ SKIP: {
     else {
        eval { chdir($dh); };
        like($@, qr/^The dirfd function is unimplemented at/, "dirfd is unimplemented");
-       chdir "..";
+       chdir ".." or die $!;
     }
 
     # same with bareword file handles
@@ -73,9 +73,30 @@ SKIP: {
     else {
        eval { chdir(DH); };
        like($@, qr/^The dirfd function is unimplemented at/, "dirfd is unimplemented");
-       chdir "..";
+       chdir ".." or die $!;
     }
     ok(-d "op", "verify that we are back");
+
+    # And now the ambiguous case
+    ok(opendir(H, "op"), "opendir op") or diag $!;
+    ok(open(H, "<", "base"), "open base") or diag $!;
+    if (($Config{d_dirfd} || "") eq "define") {
+	ok(chdir(H), "fchdir to op");
+	ok(-f "chdir.t", "verify that we are in 'op'");
+	chdir ".." or die $!;
+    }
+    else {
+	eval { chdir(H); };
+	like($@, qr/^The dirfd function is unimplemented at/,
+	     "dirfd is unimplemented");
+	SKIP: {
+	    skip("dirfd is unimplemented");
+	}
+    }
+    ok(closedir(H), "closedir");
+    ok(chdir(H), "fchdir to base");
+    ok(-f "cond.t", "verify that we are in 'base'");
+    chdir ".." or die $!;
 }
 
 SKIP: {
