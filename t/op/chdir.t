@@ -14,6 +14,9 @@ plan(tests => 41);
 my $IsVMS   = $^O eq 'VMS';
 my $IsMacOS = $^O eq 'MacOS';
 
+# For an op regression test, I don't want to rely on "use constant" working.
+my $has_fchdir = ($Config{d_fchdir} || "") eq "define";
+
 # Might be a little early in the testing process to start using these,
 # but I can't think of a way to write this test without them.
 use File::Spec::Functions qw(:DEFAULT splitdir rel2abs splitpath);
@@ -43,12 +46,13 @@ SKIP: {
 $Cwd = abs_path;
 
 SKIP: {
-    skip("no fchdir", 9) unless ($Config{d_fchdir} || "") eq "define";
+    skip("no fchdir", 9) unless $has_fchdir;
+    my $has_dirfd = ($Config{d_dirfd} || "") eq "define";
     ok(opendir(my $dh, "."), "opendir .");
     ok(open(my $fh, "<", "op"), "open op");
     ok(chdir($fh), "fchdir op");
     ok(-f "chdir.t", "verify that we are in op");
-    if (($Config{d_dirfd} || "") eq "define") {
+    if ($has_dirfd) {
        ok(chdir($dh), "fchdir back");
     }
     else {
@@ -63,7 +67,7 @@ SKIP: {
     *FH = $fh;
     ok(chdir FH, "fchdir op bareword");
     ok(-f "chdir.t", "verify that we are in op");
-    if (($Config{d_dirfd} || "") eq "define") {
+    if ($has_dirfd) {
        ok(chdir DH, "fchdir back bareword");
     }
     else {
@@ -75,7 +79,7 @@ SKIP: {
 }
 
 SKIP: {
-    skip("has fchdir", 1) if ($Config{d_fchdir} || "") eq "define";
+    skip("has fchdir", 1) if $has_fchdir;
     opendir(my $dh, "op");
     eval { chdir($dh); };
     like($@, qr/^The fchdir function is unimplemented at/, "fchdir is unimplemented");
