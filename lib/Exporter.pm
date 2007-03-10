@@ -9,7 +9,7 @@ require 5.006;
 our $Debug = 0;
 our $ExportLevel = 0;
 our $Verbose ||= 0;
-our $VERSION = '5.59';
+our $VERSION = '5.60';
 our (%Cache);
 # Carp does this now for us, so we can finally live w/o Carp
 #$Carp::Internal{Exporter} = 1;
