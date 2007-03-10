@@ -8,7 +8,7 @@ BEGIN {
 require 'test.pl';
 use strict qw(refs subs);
 
-plan(121);
+plan(128);
 
 # Test glob operations.
 
@@ -495,14 +495,29 @@ is ( (sub {"bar"})[0]->(), "bar", 'code deref from list slice w/ ->' );
 
 # test dereferencing errors
 {
-    eval q/ ${*STDOUT{IO}} /;
-    like($@, qr/Not a SCALAR reference/);
-    eval q/ @{*STDOUT{IO}} /;
-    like($@, qr/Not an ARRAY reference/);
-    eval q/ %{*STDOUT{IO}} /;
-    like($@, qr/Not a HASH reference/);
-    eval q/ &{*STDOUT{IO}} /;
-    like($@, qr/Not a CODE reference/);
+    format STDERR =
+.
+    my $ref;
+    foreach $ref (*STDOUT{IO}, *STDERR{FORMAT}) {
+	eval q/ $$ref /;
+	like($@, qr/Not a SCALAR reference/, "Scalar dereference");
+	eval q/ @$ref /;
+	like($@, qr/Not an ARRAY reference/, "Array dereference");
+	eval q/ %$ref /;
+	like($@, qr/Not a HASH reference/, "Hash dereference");
+	eval q/ &$ref /;
+	like($@, qr/Not a CODE reference/, "Code dereference");
+    }
+
+    $ref = *STDERR{FORMAT};
+    eval q/ *$ref /;
+    like($@, qr/Not a GLOB reference/, "Glob dereference");
+
+    $ref = *STDOUT{IO};
+    eval q/ *$ref /;
+    is($@, '', "Glob dereference of PVIO is acceptable");
+
+    is($ref, *{$ref}{IO}, "IO slot of the temporary glob is set correctly");
 }
 
 # Bit of a hack to make test.pl happy. There are 3 more tests after it leaves.
