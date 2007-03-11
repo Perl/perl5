@@ -249,7 +249,8 @@ is( $files->{foobar}, '',    '          preserved old entries' );
         'mymanifest.skip excluded via mydefault.skip' );
     ok( ! exists $files->{'mydefault.skip'},
         'mydefault.skip excluded via mydefault.skip' );
-    $Files{"$_.bak"}++ for (qw(MANIFEST MANIFEST.SKIP));
+    my $extsep = $Is_VMS ? '_' : '.';
+    $Files{"$_.bak"}++ for ('MANIFEST', "MANIFEST${extsep}SKIP");
 }
 
 add_file('MANIFEST'   => 'Makefile.PL');
