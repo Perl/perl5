@@ -101,9 +101,11 @@ typedef char *pvindex;
 	arg = arg ? savepv(arg) : arg;			\
     } STMT_END
 
-#define BSET_ldspecsv(sv, arg) STMT_START {				  \
-	assert(arg < sizeof(specialsv_list) / sizeof(specialsv_list[0])); \
-	sv = specialsv_list[arg];					  \
+#define BSET_ldspecsv(sv, arg) STMT_START {				\
+	if(arg >= sizeof(specialsv_list) / sizeof(specialsv_list[0])) {	\
+	    Perl_croak(aTHX_ "Out of range special SV number %d", arg);	\
+	}								\
+	sv = specialsv_list[arg];					\
     } STMT_END
 
 #define BSET_ldspecsvx(sv, arg) STMT_START {	\
@@ -331,7 +333,7 @@ typedef char *pvindex;
 	    GvCV(CvGV(cv)) = 0;               /* cv has been hijacked */\
             call_list(oldscope, PL_beginav);		\
             PL_curcop = &PL_compiling;			\
-            PL_compiling.op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);\
+            CopHINTS_set(&PL_compiling, PL_hints);	\
             LEAVE;					\
 	} STMT_END
 #define BSET_push_init(ary,cv)				\
