@@ -925,7 +925,7 @@
 #define unpack_str		Perl_unpack_str
 #define unpackstring		Perl_unpackstring
 #define unsharepvn		Perl_unsharepvn
-#if defined(PERL_CORE) || defined(PERL_EXT)
+#ifdef PERL_CORE
 #define unshare_hek		Perl_unshare_hek
 #endif
 #ifdef PERL_MAD
@@ -3142,7 +3142,7 @@
 #define unpack_str(a,b,c,d,e,f,g,h)	Perl_unpack_str(aTHX_ a,b,c,d,e,f,g,h)
 #define unpackstring(a,b,c,d,e)	Perl_unpackstring(aTHX_ a,b,c,d,e)
 #define unsharepvn(a,b,c)	Perl_unsharepvn(aTHX_ a,b,c)
-#if defined(PERL_CORE) || defined(PERL_EXT)
+#ifdef PERL_CORE
 #define unshare_hek(a)		Perl_unshare_hek(aTHX_ a)
 #endif
 #ifdef PERL_MAD

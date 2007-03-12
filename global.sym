@@ -563,7 +563,6 @@ Perl_unlnk
 Perl_unpack_str
 Perl_unpackstring
 Perl_unsharepvn
-Perl_unshare_hek
 Perl_utf16_to_utf8
 Perl_utf16_to_utf8_reversed
 Perl_utf8_length
