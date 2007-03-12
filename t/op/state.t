@@ -10,7 +10,7 @@ BEGIN {
 use strict;
 use feature "state";
 
-plan tests => 34;
+plan tests => 37;
 
 ok( ! defined state $uninit, q(state vars are undef by default) );
 
@@ -165,3 +165,13 @@ $ls = statelist2();
 is($ls, "2/3", 'list assignment to state scalars');
 $ls = statelist2();
 is($ls, "3/4", 'list assignment to state scalars');
+
+# Recursion
+
+sub noseworth {
+    my $level = shift;
+    state $recursed_state = 123;
+    is($recursed_state, 123, "state kept through recursion ($level)");
+    noseworth($level - 1) if $level;
+}
+noseworth(2);

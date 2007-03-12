@@ -1619,7 +1619,10 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 	for ( ;ix > 0; ix--) {
 	    if (names_fill >= ix && names[ix] != &PL_sv_undef) {
 		const char sigil = SvPVX_const(names[ix])[0];
-		if ((SvFLAGS(names[ix]) & SVf_FAKE) || sigil == '&') {
+		if ((SvFLAGS(names[ix]) & SVf_FAKE)
+			|| (SvFLAGS(names[ix]) & SVpad_STATE)
+			|| sigil == '&')
+		{
 		    /* outer lexical or anon code */
 		    av_store(newpad, ix, SvREFCNT_inc(oldpad[ix]));
 		}
