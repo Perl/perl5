@@ -103,6 +103,10 @@ sub _validate {
     }
 }
 
+sub _clear_cache {
+    %vcache = ();
+}
+
 sub yaml {
     my($schema_name) = @_;
     my $content = do {

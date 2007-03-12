@@ -19,7 +19,7 @@ use File::Basename ();
 use File::Path ();
 use File::Spec ();
 use vars qw($VERSION $urllist);
-$VERSION = sprintf "%.6f", substr(q$Rev: 1536 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 1612 $,4)/1000000 + 5.4;
 
 =head1 NAME
 
@@ -387,10 +387,30 @@ Shall we use it as the general CPAN build and cache directory?
             }
 
             $path ||= find_exe($progcall,\@path);
-            {
+            unless ($path){ # not -e $path, because find_exe already checked that
                 local $"=";";
-                $CPAN::Frontend->mywarn("Warning: $progcall not found in PATH[@path]\n") unless
-                    $path; # not -e $path, because find_exe already checked that
+                $CPAN::Frontend->mywarn("Warning: $progcall not found in PATH[@path]\n");
+                if ($progname eq "make") {
+                    $CPAN::Frontend->mywarn("ALERT: 'make' is an essential tool for ".
+                                            "building perl Modules. Please make sure you ".
+                                            "have 'make' (or some equivalent) ".
+                                            "working.\n"
+                                           );
+                    if ($^O eq "MSWin32") {
+                        $CPAN::Frontend->mywarn("
+Windows users may want to follow this procedure when back in the CPAN shell:
+
+    look YVES/scripts/alien_nmake.pl
+    perl alien_nmake.pl
+
+This will install nmake on your system which can be used as a 'make'
+substitute. You can then revisit this dialog with
+
+    o conf init make
+
+");
+                    }
+                }
             }
             $ans = prompt("Where is your $progname program?",$path) || $path;
             $CPAN::Config->{$progname} = $ans;

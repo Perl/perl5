@@ -1,7 +1,7 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.88_77';
+$CPAN::VERSION = '1.88_78';
 $CPAN::VERSION = eval $CPAN::VERSION;
 
 use CPAN::HandleConfig;
@@ -34,7 +34,7 @@ use Text::Wrap ();
 BEGIN {
     if (File::Spec->can("rel2abs")) {
         for my $inc (@INC) {
-            $inc = File::Spec->rel2abs($inc);
+            $inc = File::Spec->rel2abs($inc) unless ref $inc;
         }
     }
 }
@@ -42,6 +42,7 @@ no lib ".";
 
 require Mac::BuildTools if $^O eq 'MacOS';
 $ENV{PERL5_CPAN_IS_RUNNING}=1;
+$ENV{PERL5_CPANPLUS_IS_RUNNING}=1; # https://rt.cpan.org/Ticket/Display.html?id=23735
 
 END { $CPAN::End++; &cleanup; }
 
@@ -66,6 +67,7 @@ use vars qw(
             $CONFIG_DIRTY
             $Defaultdocs
             $Defaultrecent
+            $Echo_readline
             $Frontend
             $GOTOSHELL
             $HAS_USABLE
@@ -222,8 +224,15 @@ ReadLine support %s
     my $last_term_ornaments;
   SHELLCOMMAND: while () {
 	if ($Suppress_readline) {
+            if ($Echo_readline) {
+                $|=1;
+            }
 	    print $prompt;
 	    last SHELLCOMMAND unless defined ($_ = <> );
+            if ($Echo_readline) {
+                # backdoor: I could not find a way to record sessions
+                print $_;
+            }
 	    chomp;
 	} else {
 	    last SHELLCOMMAND unless
@@ -1421,17 +1430,21 @@ sub disk_usage {
     return if $CPAN::Signal;
     my($Du) = 0;
     if (-e $dir) {
-        unless (-x $dir) {
-            unless (chmod 0755, $dir) {
-                $CPAN::Frontend->mywarn("I have neither the -x permission nor the ".
-                                        "permission to change the permission; cannot ".
-                                        "estimate disk usage of '$dir'\n");
-                $CPAN::Frontend->mysleep(5);
-                return;
+        if (-d $dir) {
+            unless (-x $dir) {
+                unless (chmod 0755, $dir) {
+                    $CPAN::Frontend->mywarn("I have neither the -x permission nor the ".
+                                            "permission to change the permission; cannot ".
+                                            "estimate disk usage of '$dir'\n");
+                    $CPAN::Frontend->mysleep(5);
+                    return;
+                }
             }
+        } elsif (-f $dir) {
+            # nothing to say, no matter what the permissions
         }
     } else {
-        $CPAN::Frontend->mywarn("Directory '$dir' has gone. Cannot continue.\n");
+        $CPAN::Frontend->mywarn("File or directory '$dir' has gone, ignoring\n");
         return;
     }
     find(
@@ -3002,8 +3015,9 @@ to find objects with matching identifiers.
             # but maybe we get a solution from the first user who hits
             # this unfortunate exception?
             $CPAN::Frontend->mywarn("Warning: Could not expand string '$s' ".
-                                    "to an object. Skipping.");
+                                    "to an object. Skipping.\n");
             $CPAN::Frontend->mysleep(5);
+            CPAN::Queue->delete_first($s);
             next;
         }
         $obj->{reqtype} ||= "";
@@ -5709,10 +5723,6 @@ EOF
     } else {
         $self->{was_uncompressed}++ unless $ct->gtest();
 	$local_file = $self->handle_singlefile($local_file);
-#    } else {
-#	$self->{archived} = "NO";
-#        $self->safe_chdir($sub_wd);
-#        return;
     }
 
     # we are still in the tmp directory!
@@ -5846,6 +5856,11 @@ EOF
     return unless $self->patch;
     if (lc($prefer_installer) eq "mb") {
         $self->{modulebuild} = 1;
+    } elsif ($self->{archived} eq "patch") {
+        # not an edge case, nothing to install for sure
+        my $why = "A patch file cannot be installed";
+        $CPAN::Frontend->mywarn("Refusing to handle this file: $why\n");
+        $self->{writemakefile} = CPAN::Distrostatus->new("NO $why");
     } elsif (! $mpl_exists) {
         $self->_edge_cases($mpl,$packagedir,$local_file);
     }
@@ -6194,6 +6209,8 @@ sub handle_singlefile {
 
     if ( $local_file =~ /\.pm(\.(gz|Z))?(?!\n)\Z/ ){
 	$self->{archived} = "pm";
+    } elsif ( $local_file =~ /\.patch(\.(gz|bz2))?(?!\n)\Z/ ) {
+	$self->{archived} = "patch";
     } else {
 	$self->{archived} = "maybe_pl";
     }
@@ -6206,8 +6223,11 @@ sub handle_singlefile {
             $self->{unwrapped} = CPAN::Distrostatus->new("NO -- uncompressing failed");
         }
     } else {
-        File::Copy::cp($local_file,".");
-        $self->{unwrapped} = CPAN::Distrostatus->new("NO -- copying failed");
+        if (File::Copy::cp($local_file,".")) {
+            $self->{unwrapped} = CPAN::Distrostatus->new("YES");
+        } else {
+            $self->{unwrapped} = CPAN::Distrostatus->new("NO -- copying failed");
+        }
     }
     return $to;
 }
@@ -7235,8 +7255,10 @@ sub _find_prefs {
                     my $ok = 1;
                     # do not take the order of C<keys %$match> because
                     # "module" is by far the slowest
-                    for my $sub_attribute (qw(distribution perl module)) {
+                    my $saw_valid_subkeys = 0;
+                    for my $sub_attribute (qw(distribution perl perlconfig module)) {
                         next unless exists $match->{$sub_attribute};
+                        $saw_valid_subkeys++;
                         my $qr = eval "qr{$distropref->{match}{$sub_attribute}}";
                         if ($sub_attribute eq "module") {
                             my $okm = 0;
@@ -7254,6 +7276,14 @@ sub _find_prefs {
                         } elsif ($sub_attribute eq "perl") {
                             my $okp = $^X =~ /$qr/;
                             $ok &&= $okp;
+			} elsif ($sub_attribute eq "perlconfig") {
+			    for my $perlconfigkey (keys %{$match->{perlconfig}}) {
+				my $perlconfigval = $match->{perlconfig}->{$perlconfigkey};
+				# XXX should probably warn if Config does not exist
+				my $okpc = $Config::Config{$perlconfigkey} =~ /$perlconfigval/;
+				$ok &&= $okpc;
+				last if $ok == 0;
+			    }
                         } else {
                             $CPAN::Frontend->mydie("Nonconforming .$thisexte file '$abs': ".
                                                    "unknown sub_attribut '$sub_attribute'. ".
@@ -7261,6 +7291,12 @@ sub _find_prefs {
                                                    "remove, cannot continue.");
                         }
                         last if $ok == 0; # short circuit
+                    }
+                    unless ($saw_valid_subkeys) {
+                        $CPAN::Frontend->mydie("Nonconforming .$thisexte file '$abs': ".
+                                               "missing match/* subattribute. ".
+                                               "Please ".
+                                               "remove, cannot continue.");
                     }
                     #CPAN->debug(sprintf "ok[%d]", $ok) if $CPAN::DEBUG;
                     if ($ok) {
@@ -10178,6 +10214,8 @@ C<expect>.
     module: "Dancing::Queen"
     distribution: "^CHACHACHA/Dancing-"
     perl: "/usr/local/cariba-perl/bin/perl"
+    perlconfig:
+      archname: "freebsd"
   disabled: 1
   cpanconfig:
     make: gmake
@@ -10266,9 +10304,9 @@ CPAN mantra. See below under I<Processiong Instructions>.
 
 =item match [hash]
 
-A hashref with one or more of the keys C<distribution>, C<modules>, or
-C<perl> that specify if a document is targeted at a specific CPAN
-distribution.
+A hashref with one or more of the keys C<distribution>, C<modules>,
+C<perl>, and C<perlconfig> that specify if a document is targeted at a
+specific CPAN distribution or installation.
 
 The corresponding values are interpreted as regular expressions. The
 C<distribution> related one will be matched against the canonical
@@ -10278,6 +10316,10 @@ The C<module> related one will be matched against I<all> modules
 contained in the distribution until one module matches.
 
 The C<perl> related one will be matched against C<$^X>.
+
+The value associated with C<perlconfig> is itself a hashref that is
+matched against corresponding values in the C<%Config::Config> hash
+living in the C< Config.pm > module.
 
 If more than one restriction of C<module>, C<distribution>, and
 C<perl> is specified, the results of the separately computed match

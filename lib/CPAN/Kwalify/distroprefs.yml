@@ -12,14 +12,11 @@ mapping:
         type: text
       perl:
         type: text
-  cpan_config:
-    type: map
-    mapping:
-      prefer_installer:
-        type: text
-        enum:
-          - EUMM
-          - MB
+      perlconfig:
+        type: map
+        mapping:
+          =:
+            type: text
   install:
     &args_env_expect
     type: map
