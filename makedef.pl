@@ -393,6 +393,7 @@ elsif ($PLATFORM eq 'aix') {
 		     Perl_sys_intern_clear
 		     Perl_sys_intern_dup
 		     Perl_sys_intern_init
+		     Perl_my_sprintf
 		     PL_cryptseen
 		     PL_opsave
 		     PL_statusvalue_vms
@@ -1514,17 +1515,6 @@ sub output_symbol {
 
 1;
 __DATA__
-# extra globals not included above.
-Perl_cxinc
-perl_alloc
-perl_alloc_using
-perl_clone
-perl_clone_using
-perl_construct
-perl_destruct
-perl_free
-perl_parse
-perl_run
 # Oddities from PerlIO
 PerlIO_binmode
 PerlIO_getpos
