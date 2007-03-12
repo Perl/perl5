@@ -126,43 +126,45 @@ EONT_EONT
 
 
 checkOptree ( name	=> 'myyes() as coderef',
-	      code	=> 'sub a() { 1==1 }; print a',
+	      prog	=> 'sub a() { 1==1 }; print a',
 	      noanchors => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->5
-# 1        <;> nextstate(main 810 (eval 47):1) v ->2
-# 4        <@> print sK ->5
-# 2           <0> pushmark s ->3
-# 3           <$> const[SPECIAL sv_yes] s ->4
+# 6  <@> leave[1 ref] vKP/REFC ->(end)
+# 1     <0> enter ->2
+# 2     <;> nextstate(main 2 -e:1) v:{ ->3
+# 5     <@> print vK ->6
+# 3        <0> pushmark s ->4
+# 4        <$> const[SPECIAL sv_yes] s ->5
 EOT_EOT
-# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->5
-# 1        <;> nextstate(main 810 (eval 47):1) v ->2
-# 4        <@> print sK ->5
-# 2           <0> pushmark s ->3
-# 3           <$> const(SPECIAL sv_yes) s ->4
+# 6  <@> leave[1 ref] vKP/REFC ->(end)
+# 1     <0> enter ->2
+# 2     <;> nextstate(main 2 -e:1) v:{ ->3
+# 5     <@> print vK ->6
+# 3        <0> pushmark s ->4
+# 4        <$> const(SPECIAL sv_yes) s ->5
 EONT_EONT
 
 
+# Need to do this as a prog, not code, as only the first constant to use
+# PL_sv_no actually gets to use the real thing - every one following is
+# copied.
 checkOptree ( name	=> 'myno() as coderef',
-	      code	=> 'sub a() { 1!=1 }; print a',
+	      prog	=> 'sub a() { 1!=1 }; print a',
 	      noanchors => 1,
-	      todo	=> '- SPECIAL sv_no renders as PVNV 0',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->5
-# 1        <;> nextstate(main 810 (eval 47):1) v ->2
-# 4        <@> print sK ->5
-# 2           <0> pushmark s ->3
-# 3           <$> const[PVNV 0] s ->4
+# 6  <@> leave[1 ref] vKP/REFC ->(end)
+# 1     <0> enter ->2
+# 2     <;> nextstate(main 2 -e:1) v:{ ->3
+# 5     <@> print vK ->6
+# 3        <0> pushmark s ->4
+# 4        <$> const[SPECIAL sv_no] s ->5
 EOT_EOT
-# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->5
-# 1        <;> nextstate(main 810 (eval 47):1) v ->2
-# 4        <@> print sK ->5
-# 2           <0> pushmark s ->3
-# 3           <$> const(PVNV 0) s ->4
+# 6  <@> leave[1 ref] vKP/REFC ->(end)
+# 1     <0> enter ->2
+# 2     <;> nextstate(main 2 -e:1) v:{ ->3
+# 5     <@> print vK ->6
+# 3        <0> pushmark s ->4
+# 4        <$> const(SPECIAL sv_no) s ->5
 EONT_EONT
 
 
