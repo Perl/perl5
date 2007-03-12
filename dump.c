@@ -1012,7 +1012,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 		ENTER;
 		SAVEFREESV(tmpsv);
 #ifdef PERL_MAD
-		/* FIXME - it this making unwarranted assumptions about the
+		/* FIXME - is this making unwarranted assumptions about the
 		   UTF-8 cleanliness of the dump file handle?  */
 		SvUTF8_on(tmpsv);
 #endif
@@ -1923,7 +1923,7 @@ Perl_debop(pTHX_ const OP *o)
 	if (cGVOPo_gv) {
 	    SV * const sv = newSV(0);
 #ifdef PERL_MAD
-	    /* FIXME - it this making unwarranted assumptions about the
+	    /* FIXME - is this making unwarranted assumptions about the
 	       UTF-8 cleanliness of the dump file handle?  */
 	    SvUTF8_on(sv);
 #endif
