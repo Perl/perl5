@@ -203,9 +203,9 @@ sub escape {
   # force bytes while preserving backward compatibility -- dankogai
   $toencode = pack("C*", unpack("C*", $toencode));
     if ($EBCDIC) {
-      $toencode=~s/([^a-zA-Z0-9_.-])/uc sprintf("%%%02x",$E2A[ord($1)])/eg;
+      $toencode=~s/([^a-zA-Z0-9_.~-])/uc sprintf("%%%02x",$E2A[ord($1)])/eg;
     } else {
-      $toencode=~s/([^a-zA-Z0-9_.-])/uc sprintf("%%%02x",ord($1))/eg;
+      $toencode=~s/([^a-zA-Z0-9_.~-])/uc sprintf("%%%02x",ord($1))/eg;
     }
   return $toencode;
 }
@@ -258,13 +258,13 @@ sub expire_calc {
     # specifying the date yourself
     my($offset);
     if (!$time || (lc($time) eq 'now')) {
-        $offset = 0;
+      $offset = 0;
     } elsif ($time=~/^\d+/) {
-        return $time;
-    } elsif ($time=~/^([+-]?(?:\d+|\d*\.\d*))([mhdMy])/) {
-        $offset = ($mult{$2} || 1)*$1;
+      return $time;
+    } elsif ($time=~/^([+-]?(?:\d+|\d*\.\d*))([smhdMy])/) {
+      $offset = ($mult{$2} || 1)*$1;
     } else {
-        return $time;
+      return $time;
     }
     return (time+$offset);
 }

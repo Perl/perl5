@@ -18,8 +18,8 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.221 2006/09/28 17:04:10 lstein Exp $';
-$CGI::VERSION='3.25';
+$CGI::revision = '$Id: CGI.pm,v 1.227 2007/02/23 23:03:16 lstein Exp $';
+$CGI::VERSION='3.27';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -494,6 +494,8 @@ sub init {
   my $self = shift;
   my($query_string,$meth,$content_length,$fh,@lines) = ('','','','');
 
+  my $is_xforms;
+
   my $initializer = shift;  # for backward compatibility
   local($/) = "\n";
 
@@ -541,9 +543,50 @@ sub init {
 	  last METHOD;
       } 
 
+      # Process XForms postings. We know that we have XForms in the
+      # following cases:
+      # method eq 'POST' && content-type eq 'application/xml'
+      # method eq 'POST' && content-type =~ /multipart\/related.+start=/
+      # There are more cases, actually, but for now, we don't support other
+      # methods for XForm posts.
+      # In a XForm POST, the QUERY_STRING is parsed normally.
+      # If the content-type is 'application/xml', we just set the param
+      # XForms:Model (referring to the xml syntax) param containing the
+      # unparsed XML data.
+      # In the case of multipart/related we set XForms:Model as above, but
+      # the other parts are available as uploads with the Content-ID as the
+      # the key.
+      # See the URL below for XForms specs on this issue.
+      # http://www.w3.org/TR/2006/REC-xforms-20060314/slice11.html#submit-options
+      if ($meth eq 'POST' && defined($ENV{'CONTENT_TYPE'})) {
+              if ($ENV{'CONTENT_TYPE'} eq 'application/xml') {
+                      my($param) = 'XForms:Model';
+                      my($value) = '';
+                      $self->add_parameter($param);
+                      $self->read_from_client(\$value,$content_length,0)
+                        if $content_length > 0;
+                      push (@{$self->{$param}},$value);
+                      $is_xforms = 1;
+              } elsif ($ENV{'CONTENT_TYPE'} =~ /multipart\/related.+boundary=\"?([^\";,]+)\"?.+start=\"?\<?([^\"\>]+)\>?\"?/) {
+                      my($boundary,$start) = ($1,$2);
+                      my($param) = 'XForms:Model';
+                      $self->add_parameter($param);
+                      my($value) = $self->read_multipart_related($start,$boundary,$content_length,0);
+                      push (@{$self->{$param}},$value);
+                      if ($MOD_PERL) {
+                              $query_string = $self->r->args;
+                      } else {
+                              $query_string = $ENV{'QUERY_STRING'} if defined $ENV{'QUERY_STRING'};
+                              $query_string ||= $ENV{'REDIRECT_QUERY_STRING'} if defined $ENV{'REDIRECT_QUERY_STRING'};
+                      }
+                      $is_xforms = 1;
+              }
+      }
+
+
       # If initializer is defined, then read parameters
       # from it.
-      if (defined($initializer)) {
+      if (!$is_xforms && defined($initializer)) {
 	  if (UNIVERSAL::isa($initializer,'CGI')) {
 	      $query_string = $initializer->query_string;
 	      last METHOD;
@@ -594,7 +637,7 @@ sub init {
 
       # If method is GET or HEAD, fetch the query from
       # the environment.
-      if ($meth=~/^(GET|HEAD)$/) {
+      if ($is_xforms || $meth=~/^(GET|HEAD)$/) {
 	  if ($MOD_PERL) {
 	    $query_string = $self->r->args;
 	  } else {
@@ -630,7 +673,7 @@ sub init {
   }
 
 # YL: Begin Change for XML handler 10/19/2001
-    if ($meth eq 'POST'
+    if (!$is_xforms && $meth eq 'POST'
         && defined($ENV{'CONTENT_TYPE'})
         && $ENV{'CONTENT_TYPE'} !~ m|^application/x-www-form-urlencoded|
 	&& $ENV{'CONTENT_TYPE'} !~ m|^multipart/form-data| ) {
@@ -1652,8 +1695,10 @@ END_OF_FUNC
 sub _style {
     my ($self,$style) = @_;
     my (@result);
+
     my $type = 'text/css';
     my $rel  = 'stylesheet';
+
 
     my $cdata_start = $XHTML ? "\n<!--/* <![CDATA[ */" : "\n<!-- ";
     my $cdata_end   = $XHTML ? "\n/* ]]> */-->\n" : " -->\n";
@@ -1666,8 +1711,8 @@ sub _style {
            rearrange([qw(SRC CODE VERBATIM TYPE ALTERNATE FOO)],
                       ('-foo'=>'bar',
                        ref($s) eq 'ARRAY' ? @$s : %$s));
-       $type  = $stype if $stype;
-       $rel   = 'alternate stylesheet' if $alternate;
+       my $type = defined $stype ? $stype : 'text/css';
+       my $rel  = $alternate ? 'alternate stylesheet' : 'stylesheet';
        my $other = @other ? join ' ',@other : '';
 
        if (ref($src) eq "ARRAY") # Check to see if the $src variable is an array reference
@@ -1710,19 +1755,17 @@ sub _script {
     foreach $script (@scripts) {
 	my($src,$code,$language);
 	if (ref($script)) { # script is a hash
-	    ($src,$code,$language, $type) =
-		rearrange([SRC,CODE,LANGUAGE,TYPE],
+	    ($src,$code,$type) =
+		rearrange(['SRC','CODE',['LANGUAGE','TYPE']],
 				 '-foo'=>'bar',	# a trick to allow the '-' to be omitted
 				 ref($script) eq 'ARRAY' ? @$script : %$script);
-            # User may not have specified language
-            $language ||= 'JavaScript';
-            unless (defined $type) {
-                $type = lc $language;
-                # strip '1.2' from 'javascript1.2'
-                $type =~ s/^(\D+).*$/text\/$1/;
+            $type ||= 'text/javascript';
+            unless ($type =~ m!\w+/\w+!) {
+                $type =~ s/[\d.]+$//;
+                $type = "text/$type";
             }
 	} else {
-	    ($src,$code,$language, $type) = ('',$script,'JavaScript', 'text/javascript');
+	    ($src,$code,$type) = ('',$script, 'text/javascript');
 	}
 
     my $comment = '//';  # javascript by default
@@ -1740,7 +1783,6 @@ sub _script {
    }
      my(@satts);
      push(@satts,'src'=>$src) if $src;
-     push(@satts,'language'=>$language) unless defined $type;
      push(@satts,'type'=>$type);
      $code = $cdata_start . $code . $cdata_end if defined $code;
      push(@result,$self->script({@satts},$code || ''));
@@ -2292,15 +2334,14 @@ sub _box_group {
 
     my($name,$values,$defaults,$linebreak,$labels,$attributes,
        $rows,$columns,$rowheaders,$colheaders,
-       $override,$nolabels,$tabindex,@other) =
+       $override,$nolabels,$tabindex,$disabled,@other) =
        rearrange([      NAME,[VALUES,VALUE],[DEFAULT,DEFAULTS],LINEBREAK,LABELS,ATTRIBUTES,
-		        ROWS,[COLUMNS,COLS],ROWHEADERS,COLHEADERS,
-			[OVERRIDE,FORCE],NOLABELS,TABINDEX
+		        ROWS,[COLUMNS,COLS],[ROWHEADERS,ROWHEADER],[COLHEADERS,COLHEADER],
+			[OVERRIDE,FORCE],NOLABELS,TABINDEX,DISABLED
                  ],@_);
-    my($result,$checked);
 
+    my($result,$checked,@elements,@values);
 
-    my(@elements,@values);
     @values = $self->_set_values_and_labels($values,\$labels,$name);
     my %checked = $self->previous_or_default($name,$defaults,$override);
 
@@ -2320,10 +2361,21 @@ sub _box_group {
       }
     }
     %tabs = map {$_=>$self->element_tab} @values unless %tabs;
-
     my $other = @other ? "@other " : '';
     my $radio_checked;
+
+    # for disabling groups of radio/checkbox buttons
+    my %disabled;
+    foreach (@{$disabled}) {
+   	$disabled{$_}=1;
+    }
+
     foreach (@values) {
+    	 my $disable="";
+	 if ($disabled{$_}) {
+		$disable="disabled='1'";
+	 }
+
         my $checkit = $self->_checked($box_type eq 'radio' ? ($checked{$_} && !$radio_checked++)
                                                            : $checked{$_});
 	my($break);
@@ -2338,16 +2390,18 @@ sub _box_group {
 	    $label = $_;
 	    $label = $labels->{$_} if defined($labels) && defined($labels->{$_});
 	    $label = $self->escapeHTML($label,1);
+            $label = "<span style=\"color:gray\">$label</span>" if $disabled{$_};
 	}
         my $attribs = $self->_set_attributes($_, $attributes);
         my $tab     = $tabs{$_};
 	$_=$self->escapeHTML($_);
+
         if ($XHTML) {
            push @elements,
               CGI::label(
-                   qq(<input type="$box_type" name="$name" value="$_" $checkit$other$tab$attribs/>$label)).${break};
+                   qq(<input type="$box_type" name="$name" value="$_" $checkit$other$tab$attribs$disable/>$label)).${break};
         } else {
-           push(@elements,qq/<input type="$box_type" name="$name" value="$_"$checkit$other$tab$attribs>${label}${break}/);
+            push(@elements,qq/<input type="$box_type" name="$name" value="$_"$checkit$other$tab$attribs$disable>${label}${break}/);
         }
     }
     $self->register_parameter($name);
@@ -2658,11 +2712,11 @@ sub url {
 	    $url .= $vh;
 	} else {
 	    $url .= server_name();
-	    my $port = $self->server_port;
-	    $url .= ":" . $port
-		unless (lc($protocol) eq 'http'  && $port == 80)
-		    || (lc($protocol) eq 'https' && $port == 443);
 	}
+        my $port = $self->server_port;
+	$url .= ":" . $port
+	  unless (lc($protocol) eq 'http'  && $port == 80)
+		|| (lc($protocol) eq 'https' && $port == 443);
         return $url if $base;
 	$url .= $uri;
     } elsif ($relative) {
@@ -3417,6 +3471,110 @@ sub read_multipart {
     }
 }
 END_OF_FUNC
+
+#####
+# subroutine: read_multipart_related
+#
+# Read multipart/related data and store it into our parameters.  The
+# first parameter sets the start of the data. The part identified by
+# this Content-ID will not be stored as a file upload, but will be
+# returned by this method.  All other parts will be available as file
+# uploads accessible by their Content-ID
+#####
+'read_multipart_related' => <<'END_OF_FUNC',
+sub read_multipart_related {
+    my($self,$start,$boundary,$length) = @_;
+    my($buffer) = $self->new_MultipartBuffer($boundary,$length);
+    return unless $buffer;
+    my(%header,$body);
+    my $filenumber = 0;
+    my $returnvalue;
+    while (!$buffer->eof) {
+	%header = $buffer->readHeader;
+
+	unless (%header) {
+	    $self->cgi_error("400 Bad request (malformed multipart POST)");
+	    return;
+	}
+
+	my($param) = $header{'Content-ID'}=~/\<([^\>]*)\>/;
+        $param .= $TAINTED;
+
+	# If this is the start part, then just read the data and assign it
+	# to our return variable.
+	if ( $param eq $start ) {
+	    $returnvalue = $buffer->readBody;
+            $returnvalue .= $TAINTED;
+	    next;
+	}
+
+	# add this parameter to our list
+	$self->add_parameter($param);
+
+	my ($tmpfile,$tmp,$filehandle);
+      UPLOADS: {
+	  # If we get here, then we are dealing with a potentially large
+	  # uploaded form.  Save the data to a temporary file, then open
+	  # the file for reading.
+
+	  # skip the file if uploads disabled
+	  if ($DISABLE_UPLOADS) {
+	      while (defined($data = $buffer->read)) { }
+	      last UPLOADS;
+	  }
+
+	  # choose a relatively unpredictable tmpfile sequence number
+          my $seqno = unpack("%16C*",join('',localtime,grep {defined $_} values %ENV));
+          for (my $cnt=10;$cnt>0;$cnt--) {
+	    next unless $tmpfile = new CGITempFile($seqno);
+	    $tmp = $tmpfile->as_string;
+	    last if defined($filehandle = Fh->new($param,$tmp,$PRIVATE_TEMPFILES));
+            $seqno += int rand(100);
+          }
+          die "CGI open of tmpfile: $!\n" unless defined $filehandle;
+	  $CGI::DefaultClass->binmode($filehandle) if $CGI::needs_binmode 
+                     && defined fileno($filehandle);
+
+	  my ($data);
+	  local($\) = '';
+          my $totalbytes;
+          while (defined($data = $buffer->read)) {
+              if (defined $self->{'.upload_hook'})
+               {
+                  $totalbytes += length($data);
+                   &{$self->{'.upload_hook'}}($param ,$data, $totalbytes, $self->{'.upload_data'});
+              }
+              print $filehandle $data if ($self->{'use_tempfile'});
+          }
+
+	  # back up to beginning of file
+	  seek($filehandle,0,0);
+
+      ## Close the filehandle if requested this allows a multipart MIME
+      ## upload to contain many files, and we won't die due to too many
+      ## open file handles. The user can access the files using the hash
+      ## below.
+      close $filehandle if $CLOSE_UPLOAD_FILES;
+	  $CGI::DefaultClass->binmode($filehandle) if $CGI::needs_binmode;
+
+	  # Save some information about the uploaded file where we can get
+	  # at it later.
+	  # Use the typeglob as the key, as this is guaranteed to be
+	  # unique for each filehandle.  Don't use the file descriptor as
+	  # this will be re-used for each filehandle if the
+	  # close_upload_files feature is used.
+	  $self->{'.tmpfiles'}->{$$filehandle}= {
+              hndl => $filehandle,
+	      name => $tmpfile,
+	      info => {%header},
+	  };
+	  push(@{$self->{$param}},$filehandle);
+      }
+    }
+    return $returnvalue;
+}
+END_OF_FUNC
+
 
 'upload' =><<'END_OF_FUNC',
 sub upload {
@@ -4600,7 +4758,7 @@ all.
 This causes the indicated autoloaded methods to be compiled up front,
 rather than deferred to later.  This is useful for scripts that run
 for an extended period of time under FastCGI or mod_perl, and for
-those destined to be crunched by Malcom Beattie's Perl compiler.  Use
+those destined to be crunched by Malcolm Beattie's Perl compiler.  Use
 it in conjunction with the methods or method families you plan to use.
 
    use CGI qw(-compile :standard :html3);
@@ -5073,20 +5231,20 @@ Use the B<-noScript> parameter to pass some HTML text that will be displayed on
 browsers that do not have JavaScript (or browsers where JavaScript is turned
 off).
 
-Netscape 3.0 recognizes several attributes of the <script> tag,
-including LANGUAGE and SRC.  The latter is particularly interesting,
-as it allows you to keep the JavaScript code in a file or CGI script
-rather than cluttering up each page with the source.  To use these
-attributes pass a HASH reference in the B<-script> parameter containing
-one or more of -language, -src, or -code:
+The <script> tag, has several attributes including "type" and src.
+The latter is particularly interesting, as it allows you to keep the
+JavaScript code in a file or CGI script rather than cluttering up each
+page with the source.  To use these attributes pass a HASH reference
+in the B<-script> parameter containing one or more of -type, -src, or
+-code:
 
     print $q->start_html(-title=>'The Riddle of the Sphinx',
-			 -script=>{-language=>'JAVASCRIPT',
+			 -script=>{-type=>'JAVASCRIPT',
                                    -src=>'/javascript/sphinx.js'}
 			 );
 
     print $q->(-title=>'The Riddle of the Sphinx',
-	       -script=>{-language=>'PERLSCRIPT',
+	       -script=>{-type=>'PERLSCRIPT',
 			 -code=>'print "hello world!\n;"'}
 	       );
 
@@ -5094,32 +5252,27 @@ one or more of -language, -src, or -code:
 A final feature allows you to incorporate multiple <script> sections into the
 header.  Just pass the list of script sections as an array reference.
 this allows you to specify different source files for different dialects
-of JavaScript.  Example:     
+of JavaScript.  Example:
 
      print $q->start_html(-title=>'The Riddle of the Sphinx',
                           -script=>[
-                                    { -language => 'JavaScript1.0',
+                                    { -type => 'text/javascript',
                                       -src      => '/javascript/utilities10.js'
                                     },
-                                    { -language => 'JavaScript1.1',
+                                    { -type => 'text/javascript',
                                       -src      => '/javascript/utilities11.js'
                                     },
-                                    { -language => 'JavaScript1.2',
+                                    { -type => 'text/jscript',
                                       -src      => '/javascript/utilities12.js'
                                     },
-                                    { -language => 'JavaScript28.2',
+                                    { -type => 'text/ecmascript',
                                       -src      => '/javascript/utilities219.js'
                                     }
                                  ]
                              );
 
-If this looks a bit extreme, take my advice and stick with straight CGI scripting.  
-
-See
-
-   http://home.netscape.com/eng/mozilla/2.0/handbook/javascript/
-
-for more information about JavaScript.
+The option "-language" is a synonym for -type, and is supported for
+backwad compatibility.
 
 The old-style positional parameters are as follows:
 
@@ -6149,6 +6302,7 @@ selected items can be retrieved with:
 				-values=>['eenie','meenie','minie','moe'],
 				-default=>['eenie','moe'],
 				-linebreak=>'true',
+                                -disabled => ['moe'],
         -labels=>\%labels,
         -attributes=>\%attributes);
 
@@ -6201,13 +6355,14 @@ printed next to them.  If not provided, the values will be used as the
 default.
 
 
-Modern browsers can take advantage of the optional parameters
-B<-rows>, and B<-columns>.  These parameters cause checkbox_group() to
-return an HTML3 compatible table containing the checkbox group
-formatted with the specified number of rows and columns.  You can
-provide just the -columns parameter if you wish; checkbox_group will
-calculate the correct number of rows for you.
+The optional parameters B<-rows>, and B<-columns> cause
+checkbox_group() to return an HTML3 compatible table containing the
+checkbox group formatted with the specified number of rows and
+columns.  You can provide just the -columns parameter if you wish;
+checkbox_group will calculate the correct number of rows for you.
 
+The option b<-disabled> takes an array of checkbox values and disables
+them by greying them out (this may not be supported by all browsers).
 
 The optional B<-attributes> argument is provided to assign any of the
 common HTML attributes to an individual menu item. It's a pointer to
@@ -6359,7 +6514,7 @@ the -columns parameter if you wish; radio_group will calculate the
 correct number of rows for you.
 
 To include row and column headings in the returned table, you
-can use the B<-rowheader> and B<-colheader> parameters.  Both
+can use the B<-rowheaders> and B<-colheaders> parameters.  Both
 of these accept a pointer to an array of headings to use.
 The headings are just decorative.  They don't reorganize the
 interpretation of the radio buttons -- they're still a single named
@@ -6986,10 +7141,8 @@ Should you wish to incorporate a verbatim stylesheet that includes
 arbitrary formatting in the header, you may pass a -verbatim tag to
 the -style hash, as follows:
 
-print start_html (-STYLE  =>  {-verbatim => '@import
-url("/server-common/css/'.$cssFile.'");',
-                      -src      =>  '/server-common/css/core.css'});
-</blockquote></pre>
+print start_html (-style  =>  {-verbatim => '@import url("/server-common/css/'.$cssFile.'");',
+                  -src    =>  '/server-common/css/core.css'});
 
 
 This will generate an HTML header that contains this:

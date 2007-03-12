@@ -1,6 +1,19 @@
+  Version 3.27
+  1. Applied patch from Steve Taylor that allows checkbox_groups to be
+  disabled with a new -disabled=> option.
+
+  Version 3.26
+  1. Fixed alternate stylesheet behavior so that it is insensitive to order of declarations.
+  2. Patch from John Binns to allow users to provide a callback to CGI::Carp.
+  3. Added "~" as an unreserved character in escape().
+  4. Patch from Chris Fedde to prevent HTTP_HOST from inhibiting SERVER_PORT in url() generation.
+  5. Fixed outdated documentation (and behavior) of -language in start_html -script option.
+  6. Fixed bug in seconds calculation in CGI::Util::expire_calc.
+
   Version 3.25
   1. Fixed the link to the Netscape frames page.
   2. Added ability to specify an alternate stylesheet.
+  3. Add support for XForms POST submssion both as application/xml or as multipart/related
 
   Version 3.24
   1. In startform(), if request_uri() returns undef, then falls back
