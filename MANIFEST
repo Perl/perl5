@@ -3124,7 +3124,7 @@ pod/perltoot.pod		Perl OO tutorial, part 1
 pod/perltrap.pod		Perl traps for the unwary
 pod/perlunicode.pod		Perl Unicode support
 pod/perluniintro.pod		Perl Unicode introduction
-pod/perlunifaq.pod              Perl Unicode FAQ
+pod/perlunifaq.pod		Perl Unicode FAQ
 pod/perlunitut.pod		Perl Unicode tutorial
 pod/perlutil.pod		utilities packaged with the Perl distribution
 pod/perlvar.pod			Perl predefined variables
