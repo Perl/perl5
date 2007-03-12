@@ -722,12 +722,10 @@ X<(?|)> X<Branch reset>
 
 This is the "branch reset" pattern, which has the special property
 that the capture buffers are numbered from the same starting point
-in each branch. It is available starting from perl 5.10.
+in each alternation branch. It is available starting from perl 5.10.
 
-Normally capture buffers in a pattern are numbered sequentially,
-from left to right.  Inside this construct that behaviour is
-overridden so that the capture buffers are shared between all the
-branches and take their values from the branch that matched.
+Capture buffers are numbered from left to right, but inside this
+construct the numbering is restarted for each branch.
 
 The numbering within each branch will be as normal, and any buffers
 following this construct will be numbered as though the construct
