@@ -3906,10 +3906,11 @@ Perl_yylex(pTHX)
 #endif
 #ifdef PERL_MAD
 	PL_realtokenstart = -1;
-	s = SKIPSPACE0(s);
-#else
-	s++;
+	if (!PL_thiswhite)
+	    PL_thiswhite = newSVpvs("");
+	sv_catpvn(PL_thiswhite, s, 1);
 #endif
+	s++;
 	goto retry;
     case '#':
     case '\n':
