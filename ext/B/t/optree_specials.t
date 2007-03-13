@@ -27,7 +27,7 @@ BEGIN {
 use OptreeCheck;	# ALSO DOES @ARGV HANDLING !!!!!!
 use Config;
 
-plan tests => 8;
+plan tests => 7 + ($] > 5.009 ? 1 : 0);
 
 require_ok("B::Concise");
 
@@ -144,11 +144,12 @@ EOT_EOT
 # 2              <$> gvsv(*chk) s ->3
 EONT_EONT
 
-checkOptree ( name	=> 'UNITCHECK',
-	      bcopts	=> 'UNITCHECK',
-	      prog	=> $src,
-	      strip_open_hints => 1,
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+if ($] >= 5.009) {
+    checkOptree ( name	=> 'UNITCHECK',
+		  bcopts=> 'UNITCHECK',
+		  prog	=> $src,
+		  strip_open_hints => 1,
+		  expect=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # UNITCHECK 1:
 # 4  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->4
@@ -165,7 +166,7 @@ EOT_EOT
 # -           <1> ex-rv2sv sKRM/1 ->3
 # 2              <$> gvsv(*uc) s ->3
 EONT_EONT
-
+}
 
 checkOptree ( name	=> 'INIT',
 	      bcopts	=> 'INIT',

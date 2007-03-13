@@ -44,20 +44,28 @@ sub myno () { return 1!=1 }
 sub pi () { 3.14159 };
 
 my $want = {	# expected types, how value renders in-line, todos (maybe)
-    myfl	=> [ 'NV', myfl ],
-    myint	=> [ 'IV', myint ],
     mystr	=> [ 'PV', '"'.mystr.'"' ],
     myhref	=> [ 'RV', '\\\\HASH'],
-    myundef	=> [ 'NULL', ],
     pi		=> [ 'NV', pi ],
-    myaref	=> [ 'RV', '\\\\' ],
     myglob	=> [ 'RV', '\\\\' ],
-    myrex	=> [ 'RV', '\\\\' ],
     mysub	=> [ 'RV', '\\\\' ],
     myunsub	=> [ 'RV', '\\\\' ],
     # these are not inlined, at least not per BC::Concise
     #myyes	=> [ 'RV', ],
     #myno	=> [ 'RV', ],
+    $] > 5.009 ? (
+    myaref	=> [ 'RV', '\\\\' ],
+    myfl	=> [ 'NV', myfl ],
+    myint	=> [ 'IV', myint ],
+    myrex	=> [ 'RV', '\\\\' ],
+    myundef	=> [ 'NULL', ],
+    ) : (
+    myaref	=> [ 'PVIV', '' ],
+    myfl	=> [ 'PVNV', myfl ],
+    myint	=> [ 'PVIV', myint ],
+    myrex	=> [ 'PVNV', '' ],
+    myundef	=> [ 'PVIV', ],
+    )
 };
 
 use constant WEEKDAYS
@@ -128,17 +136,18 @@ EONT_EONT
 checkOptree ( name	=> 'myyes() as coderef',
 	      prog	=> 'sub a() { 1==1 }; print a',
 	      noanchors => 1,
+	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 6  <@> leave[1 ref] vKP/REFC ->(end)
 # 1     <0> enter ->2
-# 2     <;> nextstate(main 2 -e:1) v:{ ->3
+# 2     <;> nextstate(main 2 -e:1) v:>,<,%,{ ->3
 # 5     <@> print vK ->6
 # 3        <0> pushmark s ->4
 # 4        <$> const[SPECIAL sv_yes] s ->5
 EOT_EOT
 # 6  <@> leave[1 ref] vKP/REFC ->(end)
 # 1     <0> enter ->2
-# 2     <;> nextstate(main 2 -e:1) v:{ ->3
+# 2     <;> nextstate(main 2 -e:1) v:>,<,%,{ ->3
 # 5     <@> print vK ->6
 # 3        <0> pushmark s ->4
 # 4        <$> const(SPECIAL sv_yes) s ->5
@@ -151,27 +160,25 @@ EONT_EONT
 checkOptree ( name	=> 'myno() as coderef',
 	      prog	=> 'sub a() { 1!=1 }; print a',
 	      noanchors => 1,
+	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 6  <@> leave[1 ref] vKP/REFC ->(end)
 # 1     <0> enter ->2
-# 2     <;> nextstate(main 2 -e:1) v:{ ->3
+# 2     <;> nextstate(main 2 -e:1) v:>,<,%,{ ->3
 # 5     <@> print vK ->6
 # 3        <0> pushmark s ->4
 # 4        <$> const[SPECIAL sv_no] s ->5
 EOT_EOT
 # 6  <@> leave[1 ref] vKP/REFC ->(end)
 # 1     <0> enter ->2
-# 2     <;> nextstate(main 2 -e:1) v:{ ->3
+# 2     <;> nextstate(main 2 -e:1) v:>,<,%,{ ->3
 # 5     <@> print vK ->6
 # 3        <0> pushmark s ->4
 # 4        <$> const(SPECIAL sv_no) s ->5
 EONT_EONT
 
 
-checkOptree ( name	=> 'constant sub returning list',
-	      code	=> \&WEEKDAYS,
-	      noanchors => 1,
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+my ($expect, $expect_nt) = (<<'EOT_EOT', <<'EONT_EONT');
 # 3  <1> leavesub[2 refs] K/REFC,1 ->(end)
 # -     <@> lineseq K ->3
 # 1        <;> nextstate(constant 61 constant.pm:118) v:*,& ->2
@@ -183,16 +190,23 @@ EOT_EOT
 # 2        <0> padav[@list:FAKE:m:71] ->3
 EONT_EONT
 
+if($] < 5.009) {
+    # 5.8.x doesn't add the m flag to padav
+    s/FAKE:m:\d+/FAKE/ foreach ($expect, $expect_nt);
+}
+
+checkOptree ( name	=> 'constant sub returning list',
+	      code	=> \&WEEKDAYS,
+	      noanchors => 1,
+	      expect => $expect, expect_nt => $expect_nt);
+
 
 sub printem {
     printf "myint %d mystr %s myfl %f pi %f\n"
 	, myint, mystr, myfl, pi;
 }
 
-checkOptree ( name	=> 'call many in a print statement',
-	      code	=> \&printem,
-	      strip_open_hints => 1,
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+my ($expect, $expect_nt) = (<<'EOT_EOT', <<'EONT_EONT');
 # 9  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->9
 # 1        <;> nextstate(main 635 optree_constants.t:163) v:>,<,% ->2
@@ -216,6 +230,18 @@ EOT_EOT
 # 7           <$> const(NV 3.14159) s ->8
 EONT_EONT
 
+if($] < 5.009) {
+    # 5.8.x's use constant has larger types
+    foreach ($expect, $expect_nt) {
+	s/IV 42/PV$&/;
+	s/NV 1.41/PV$&/;
+    }
+}
+
+checkOptree ( name	=> 'call many in a print statement',
+	      code	=> \&printem,
+	      strip_open_hints => 1,
+	      expect => $expect, expect_nt => $expect_nt);
 
 } #skip
 

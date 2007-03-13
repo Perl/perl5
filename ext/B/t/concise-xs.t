@@ -119,9 +119,9 @@ use Test::More tests => ( # per-pkg tests (function ct + require_ok)
 			  40 + 16	# Data::Dumper, Digest::MD5
 			  + 517 + 239	# B::Deparse, B
 			  + 595 + 190	# POSIX, IO::Socket
-			  + 3 * ($] > 5.009)
-			  + 16 * ($] >= 5.009003)
-			  - 22);	# fudge
+			  + 346 * ($] > 5.009)
+			  + 17 * ($] >= 5.009003)
+			  - 366);	# fudge
 
 require_ok("B::Concise");
 
@@ -157,8 +157,7 @@ my $testpkgs = {
 		  formfeed end_av dowarn diehook defstash curstash
 		  cstring comppadlist check_av cchar cast_I32 bootstrap
 		  begin_av amagic_generation sub_generation address
-		  unitcheck_av
-		  )],
+		  ), $] > 5.009 ? ('unitcheck_av') : ()],
     },
 
     B::Deparse => { dflt => 'perl',	# 235 functions
@@ -214,8 +213,8 @@ my $testpkgs = {
 			     register_domain recv protocol peername
 			     new listen import getsockopt croak
 			     connected connect configure confess close
-			     carp bind atmark accept blocking
-			     /],
+			     carp bind atmark accept
+			     /, $] > 5.009 ? ('blocking') : () ],
 
 		    XS => [qw/ unpack_sockaddr_un unpack_sockaddr_in
 			   sockatmark sockaddr_family pack_sockaddr_un

@@ -714,7 +714,28 @@ sub mkCheckRex {
 		$
 	       ]
 	[$1 . ($2 && ':{') . $4]xegm;	# change to the hints without open.pm
-      }
+    }
+
+    if ($] < 5.009) {
+	# 5.8.x doesn't provide the hints in the OP, which means that
+	# B::Concise doesn't show the symbolic hints. So strip all the
+	# symbolic hints from the golden results.
+	$str =~ s[(			# capture
+		   \(\?:next\|db\)state	# the regexp matching next/db state
+		   .*			# all sorts of things follow it
+		  v			# The opening v
+		  )
+		  :(?:\\[{*]		# \{ or \*
+		      |[^,\\])		# or other symbols on their own
+		    (?:,
+		     (?:\\[{*]
+			|[^,\\])
+		      )*		# maybe some more joined with commas
+		(\ ->[0-9a-z]+)?
+		$
+	       ]
+	[$1$2]xgm;			# change to the hints without flags
+    }
 
     # don't care about:
     $str =~ s/:-?\d+,-?\d+/:-?\\d+,-?\\d+/msg;		# FAKE line numbers

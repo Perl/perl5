@@ -23,7 +23,6 @@ foreach my $const (qw(
 		      CVf_LVALUE
 		      CVf_METHOD
 		      CVf_NODEBUG
-		      CVf_ISXSUB
 		      CVf_UNIQUE
 		      CVf_WEAKOUTSIDE
 		      GVf_IMPORTED_AV
@@ -58,6 +57,11 @@ if ($] < 5.009) {
     # This is only present in 5.10, but it's useful to B::Deparse to be able
     # to import a dummy value from B
     doconst(OPpPAD_STATE);
+}
+
+if ($] >= 5.009) {
+    # Constant not present in 5.8.x
+    doconst(CVf_ISXSUB);
 }
 
 foreach my $file (qw(op.h cop.h))

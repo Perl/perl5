@@ -21,9 +21,10 @@ require Exporter;
 		sub_generation amagic_generation perlstring
 		walkoptree_slow walkoptree walkoptree_exec walksymtable
 		parents comppadlist sv_undef compile_stats timing_info
-		begin_av init_av unitcheck_av check_av end_av regex_padav
-		dowarn defstash curstash warnhook diehook inc_gv
+		begin_av init_av check_av end_av regex_padav dowarn defstash
+		curstash warnhook diehook inc_gv
 		);
+push @EXPORT_OK, qw(unitcheck_av) if $] > 5.009;
 
 sub OPf_KIDS ();
 use strict;

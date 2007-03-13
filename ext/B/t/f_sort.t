@@ -664,10 +664,7 @@ use sort 'stable';
 
 =cut
 
-checkOptree(note   => q{},
-	    bcopts => q{-exec},
-	    code   => q{use sort 'stable'; @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old; },
-	    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+my ($expect, $expect_nt) = (<<'EOT_EOT', <<'EONT_EONT');
 # 1  <;> nextstate(main 656 (eval 40):1) v:%,{
 # 2  <0> pushmark s
 # 3  <0> pushmark s
@@ -692,7 +689,16 @@ EOT_EOT
 # a  <2> aassign[t6] KS/COMMON
 # b  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
-    
+
+if($] < 5.009) {
+    # 5.8.x doesn't show the /STABLE flag, so massage the golden results.
+    s!/STABLE!!s foreach ($expect, $expect_nt);
+}
+
+checkOptree(note   => q{},
+	    bcopts => q{-exec},
+	    code   => q{use sort 'stable'; @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old; },
+	    expect => $expect, expect_nt => $expect_nt);
 
 =for gentest
 

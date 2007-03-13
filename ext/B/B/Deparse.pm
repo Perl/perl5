@@ -608,6 +608,7 @@ sub init {
 				? $self->{'ambient_warnings'} & WARN_MASK
 				: undef;
     $self->{'hints'}    = $self->{'ambient_hints'};
+    $self->{'hints'} &= 0xFF if $] < 5.009;
 
     # also a convenient place to clear out subs_declared
     delete $self->{'subs_declared'};

@@ -251,6 +251,7 @@ make_sv_object(pTHX_ SV *arg, SV *sv)
     return arg;
 }
 
+#if PERL_VERSION >= 9
 static SV *
 make_temp_object(pTHX_ SV *arg, SV *temp)
 {
@@ -313,6 +314,7 @@ make_cop_io_object(pTHX_ SV *arg, COP *cop)
 	return make_sv_object(aTHX_ arg, NULL);
     }
 }
+#endif
 
 static SV *
 make_mg_object(pTHX_ SV *arg, MAGIC *mg)
@@ -565,7 +567,9 @@ typedef IO	*B__IO;
 
 typedef MAGIC	*B__MAGIC;
 typedef HE      *B__HE;
+#if PERL_VERSION >= 9
 typedef struct refcounted_he	*B__RHE;
+#endif
 
 MODULE = B	PACKAGE = B	PREFIX = B_
 
@@ -623,8 +627,12 @@ B_init_av()
 B::AV
 B_check_av()
 
+#if PERL_VERSION >= 9
+
 B::AV
 B_unitcheck_av()
+
+#endif
 
 B::AV
 B_begin_av()
@@ -1139,6 +1147,10 @@ LOOP_lastop(o)
 #define COP_arybase(o)	CopARYBASE_get(o)
 #define COP_line(o)	CopLINE(o)
 #define COP_hints(o)	CopHINTS_get(o)
+#if PERL_VERSION < 9
+#  define COP_warnings(o)  o->cop_warnings
+#  define COP_io(o)	o->cop_io
+#endif
 
 MODULE = B	PACKAGE = B::COP		PREFIX = COP_
 
@@ -1175,6 +1187,8 @@ U32
 COP_line(o)
 	B::COP	o
 
+#if PERL_VERSION >= 9
+
 void
 COP_warnings(o)
 	B::COP	o
@@ -1189,10 +1203,6 @@ COP_io(o)
 	ST(0) = make_cop_io_object(aTHX_ sv_newmortal(), o);
 	XSRETURN(1);
 
-U32
-COP_hints(o)
-	B::COP	o
-
 B::RHE
 COP_hints_hash(o)
 	B::COP o
@@ -1200,6 +1210,22 @@ COP_hints_hash(o)
 	RETVAL = o->cop_hints_hash;
     OUTPUT:
 	RETVAL
+
+#else
+
+B::SV
+COP_warnings(o)
+	B::COP	o
+
+B::SV
+COP_io(o)
+	B::COP	o
+
+#endif
+
+U32
+COP_hints(o)
+	B::COP	o
 
 MODULE = B	PACKAGE = B::SV
 
@@ -1882,6 +1908,8 @@ HeSVKEY_force(he)
 
 MODULE = B	PACKAGE = B::RHE	PREFIX = RHE_
 
+#if PERL_VERSION >= 9
+
 SV*
 RHE_HASH(h)
 	B::RHE h
@@ -1889,3 +1917,5 @@ RHE_HASH(h)
 	RETVAL = newRV( (SV*)Perl_refcounted_he_chain_2hv(aTHX_ h) );
     OUTPUT:
 	RETVAL
+
+#endif
