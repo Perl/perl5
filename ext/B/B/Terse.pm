@@ -1,6 +1,6 @@
 package B::Terse;
 
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 
 use strict;
 use B qw(class);
