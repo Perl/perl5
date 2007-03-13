@@ -14,7 +14,6 @@ print OUT <<"END";
 END
 
 foreach my $const (qw(
-		      AVf_REAL
 		      CVf_ANON
 		      CVf_ASSERTION
 		      CVf_CLONE
@@ -63,7 +62,10 @@ if ($] < 5.009) {
 if ($] >= 5.009) {
     # Constant not present in 5.8.x
     doconst(CVf_ISXSUB);
-}
+} else {
+    # Constant not present after 5.8.x
+    doconst(AVf_REAL);
+}  
 
 foreach my $file (qw(op.h cop.h))
  {
