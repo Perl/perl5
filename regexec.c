@@ -2314,7 +2314,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
 STATIC regmatch_state *
 S_push_slab(pTHX)
 {
-#if PERL_VERSION < 9
+#if PERL_VERSION < 9 && !defined(PERL_CORE)
     dMY_CXT;
 #endif
     regmatch_slab *s = PL_regmatch_slab->next;
@@ -2614,7 +2614,7 @@ S_reg_check_named_buff_matched(pTHX_ const regexp *rex, const regnode *scan) {
 STATIC I32			/* 0 failure, 1 success */
 S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 {
-#if PERL_VERSION < 9
+#if PERL_VERSION < 9 && !defined(PERL_CORE)
     dMY_CXT;
 #endif
     dVAR;
