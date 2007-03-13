@@ -9,7 +9,7 @@ BEGIN {
 use Config;
 use File::Spec;
 
-plan tests => 95;
+plan tests => 101;
 
 my $Perl = which_perl();
 
@@ -480,11 +480,22 @@ ok(unlink($f), 'unlink tmp file');
 }
 
 SKIP: {
-    skip "No dirfd()", 3 unless $Config{d_dirfd};
+    skip "No dirfd()", 9 unless $Config{d_dirfd};
     ok(opendir(DIR, "."), 'Can open "." dir') || diag "Can't open '.':  $!";
     ok(stat(DIR), "stat() on dirhandle works"); 
     ok(-d -r _ , "chained -x's on dirhandle"); 
-    closedir DIR;
+    ok(-d DIR, "-d on a dirhandle works");
+
+    # And now for the ambigious bareword case
+    ok(open(DIR, "TEST"), 'Can open "TEST" dir')
+	|| diag "Can't open 'TEST':  $!";
+    my $size = (stat(DIR))[7];
+    ok(defined $size, "stat() on bareword works");
+    is($size, -s "TEST", "size returned by stat of bareword is for the file");
+    ok(-f _, "ambiguous bareword uses file handle, not dir handle");
+    ok(-f DIR);
+    closedir DIR or die $!;
+    close DIR or die $!;
 }
 
 {
