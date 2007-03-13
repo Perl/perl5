@@ -129,10 +129,12 @@ ext/B/t/f_map.t			converted to optreeCheck()s
 ext/B/t/f_sort			optree test raw material
 ext/B/t/f_sort.t		optree test raw material
 ext/B/t/lint.t		See if B::Lint works
+ext/B/t/pluglib/B/Lint/Plugin/Test.pm	See if B::Lint works
 ext/B/Todo		Compiler backend Todo list
 ext/B/t/OptreeCheck.pm		optree comparison tool
 ext/B/t/optree_check.t		test OptreeCheck apparatus
 ext/B/t/optree_concise.t	more B::Concise tests
+ext/B/t/optree_constants.t	B::Concise rendering of optimized constant subs
 ext/B/t/optree_misc.t		misc optree tests
 ext/B/t/optree_samples.t	various basic codes: if for while
 ext/B/t/optree_sort.t		inplace sort optimization regression
@@ -143,6 +145,7 @@ ext/B/t/showlex.t	See if B::ShowLex works
 ext/B/t/stash.t		See if B::Stash works
 ext/B/t/terse.t		See if B::Terse works
 ext/B/t/xref.t		See if B::Xref works
+ext/B/t/pragma.t	See if user pragmas work.
 ext/B/typemap			Compiler backend interface types
 ext/ByteLoader/bytecode.h	Bytecode header for bytecode loader
 ext/ByteLoader/ByteLoader.pm	Bytecode loader Perl module

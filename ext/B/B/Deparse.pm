@@ -20,7 +20,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LOCKED CVf_LVALUE CVf_ASSERTION
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = 0.80;
+$VERSION = 0.81;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -607,7 +607,8 @@ sub init {
     $self->{'warnings'} = defined ($self->{'ambient_warnings'})
 				? $self->{'ambient_warnings'} & WARN_MASK
 				: undef;
-    $self->{'hints'}    = $self->{'ambient_hints'} & 0xFF;
+    $self->{'hints'}    = $self->{'ambient_hints'};
+    $self->{'hints'} &= 0xFF if $] < 5.009;
 
     # also a convenient place to clear out subs_declared
     delete $self->{'subs_declared'};
@@ -630,10 +631,13 @@ sub compile {
 	    print qq(BEGIN { \$/ = $fs; \$\\ = $bs; }\n);
 	}
 	my @BEGINs  = B::begin_av->isa("B::AV") ? B::begin_av->ARRAY : ();
+	my @UNITCHECKs = B::unitcheck_av->isa("B::AV")
+	    ? B::unitcheck_av->ARRAY
+	    : ();
 	my @CHECKs  = B::check_av->isa("B::AV") ? B::check_av->ARRAY : ();
 	my @INITs   = B::init_av->isa("B::AV") ? B::init_av->ARRAY : ();
 	my @ENDs    = B::end_av->isa("B::AV") ? B::end_av->ARRAY : ();
-	for my $block (@BEGINs, @CHECKs, @INITs, @ENDs) {
+	for my $block (@BEGINs, @UNITCHECKs, @CHECKs, @INITs, @ENDs) {
 	    $self->todo($block, 0);
 	}
 	$self->stash_subs();
@@ -1313,21 +1317,25 @@ sub find_scope {
     carp("Undefined op in find_scope") if !defined $op;
     return ($scope_st, $scope_en) unless $op->flags & OPf_KIDS;
 
-    for (my $o=$op->first; $$o; $o=$o->sibling) {
-	if ($o->name =~ /^pad.v$/ && $o->private & OPpLVAL_INTRO) {
-	    my $s = int($self->padname_sv($o->targ)->COP_SEQ_RANGE_LOW);
-	    my $e = $self->padname_sv($o->targ)->COP_SEQ_RANGE_HIGH;
-	    $scope_st = $s if !defined($scope_st) || $s < $scope_st;
-	    $scope_en = $e if !defined($scope_en) || $e > $scope_en;
-	}
-	elsif (is_state($o)) {
-	    my $c = $o->cop_seq;
-	    $scope_st = $c if !defined($scope_st) || $c < $scope_st;
-	    $scope_en = $c if !defined($scope_en) || $c > $scope_en;
-	}
-	elsif ($o->flags & OPf_KIDS) {
-	    ($scope_st, $scope_en) =
-		$self->find_scope($o, $scope_st, $scope_en)
+    my @queue = ($op);
+    while(my $op = shift @queue ) {
+	for (my $o=$op->first; $$o; $o=$o->sibling) {
+	    if ($o->name =~ /^pad.v$/ && $o->private & OPpLVAL_INTRO) {
+		my $s = int($self->padname_sv($o->targ)->COP_SEQ_RANGE_LOW);
+		my $e = $self->padname_sv($o->targ)->COP_SEQ_RANGE_HIGH;
+		$scope_st = $s if !defined($scope_st) || $s < $scope_st;
+		$scope_en = $e if !defined($scope_en) || $e > $scope_en;
+		return ($scope_st, $scope_en);
+	    }
+	    elsif (is_state($o)) {
+		my $c = $o->cop_seq;
+		$scope_st = $c if !defined($scope_st) || $c < $scope_st;
+		$scope_en = $c if !defined($scope_en) || $c > $scope_en;
+		return ($scope_st, $scope_en);
+	    }
+	    elsif ($o->flags & OPf_KIDS) {
+		unshift (@queue, $o);
+	    }
 	}
     }
 
@@ -1402,9 +1410,9 @@ sub pp_nextstate {
 	$self->{'warnings'} = $warning_bits;
     }
 
-    if ($self->{'hints'} != $op->private) {
-	push @text, declare_hints($self->{'hints'}, $op->private);
-	$self->{'hints'} = $op->private;
+    if ($self->{'hints'} != $op->hints) {
+	push @text, declare_hints($self->{'hints'}, $op->hints);
+	$self->{'hints'} = $op->hints;
     }
 
     # This should go after of any branches that add statements, to
@@ -1735,7 +1743,7 @@ sub pp_require {
 
 sub pp_scalar {
     my $self = shift;
-    my($op, $cv) = @_;
+    my($op, $cx) = @_;
     my $kid = $op->first;
     if (not null $kid->sibling) {
 	# XXX Was a here-doc
@@ -1753,7 +1761,7 @@ sub padval {
 
 sub anon_hash_or_list {
     my $self = shift;
-    my $op = shift;
+    my($op, $cx) = @_;
 
     my($pre, $post) = @{{"anonlist" => ["[","]"],
 			 "anonhash" => ["{","}"]}->{$op->name}};
@@ -1763,13 +1771,18 @@ sub anon_hash_or_list {
 	$expr = $self->deparse($op, 6);
 	push @exprs, $expr;
     }
+    if ($pre eq "{" and $cx < 1) {
+	# Disambiguate that it's not a block
+	$pre = "+{";
+    }
     return $pre . join(", ", @exprs) . $post;
 }
 
 sub pp_anonlist {
-    my ($self, $op) = @_;
+    my $self = shift;
+    my ($op, $cx) = @_;
     if ($op->flags & OPf_SPECIAL) {
-	return $self->anon_hash_or_list($op);
+	return $self->anon_hash_or_list($op, $cx);
     }
     warn "Unexpected op pp_" . $op->name() . " without OPf_SPECIAL";
     return 'XXX';
@@ -1784,7 +1797,7 @@ sub pp_refgen {
     if ($kid->name eq "null") {
 	$kid = $kid->first;
 	if ($kid->name eq "anonlist" || $kid->name eq "anonhash") {
-	    return $self->anon_hash_or_list($op);
+	    return $self->anon_hash_or_list($op, $cx);
 	} elsif (!null($kid->sibling) and
 		 $kid->sibling->name eq "anoncode") {
 	    return "sub " .
@@ -2692,6 +2705,10 @@ sub pp_null {
 	return $self->pp_list($op, $cx);
     } elsif ($op->first->name eq "enter") {
 	return $self->pp_leave($op, $cx);
+    } elsif ($op->first->name eq "leave") {
+	return $self->pp_leave($op->first, $cx);
+    } elsif ($op->first->name eq "scope") {
+	return $self->pp_scope($op->first, $cx);
     } elsif ($op->targ == OP_STRINGIFY) {
 	return $self->dquote($op, $cx);
     } elsif (!null($op->first->sibling) and
@@ -2910,17 +2927,15 @@ sub is_subscriptable {
     }
 }
 
-sub elem {
+sub elem_or_slice_array_name
+{
     my $self = shift;
-    my ($op, $cx, $left, $right, $padname) = @_;
-    my($array, $idx) = ($op->first, $op->first->sibling);
-    unless ($array->name eq $padname) { # Maybe this has been fixed	
-	$array = $array->first; # skip rv2av (or ex-rv2av in _53+)
-    }
+    my ($array, $left, $padname, $allow_arrow) = @_;
+
     if ($array->name eq $padname) {
-	$array = $self->padany($array);
+	return $self->padany($array);
     } elsif (is_scope($array)) { # ${expr}[0]
-	$array = "{" . $self->deparse($array, 0) . "}";
+	return "{" . $self->deparse($array, 0) . "}";
     } elsif ($array->name eq "gv") {
 	$array = $self->gv_name($self->gv_or_padgv($array));
 	if ($array !~ /::/) {
@@ -2928,14 +2943,19 @@ sub elem {
 	    $array = $self->{curstash}.'::'.$array
 		if $self->lex_in_scope($prefix . $array);
 	}
-    } elsif (is_scalar $array) { # $x[0], $$x[0], ...
-	$array = $self->deparse($array, 24);
+	return $array;
+    } elsif (!$allow_arrow || is_scalar $array) { # $x[0], $$x[0], ...
+	return $self->deparse($array, 24);
     } else {
-	# $x[20][3]{hi} or expr->[20]
-	my $arrow = is_subscriptable($array) ? "" : "->";
-	return $self->deparse($array, 24) . $arrow .
-	    $left . $self->deparse($idx, 1) . $right;
+	return undef;
     }
+}
+
+sub elem_or_slice_single_index
+{
+    my $self = shift;
+    my ($idx) = @_;
+
     $idx = $self->deparse($idx, 1);
 
     # Outer parens in an array index will confuse perl
@@ -2966,7 +2986,28 @@ sub elem {
     #
     $idx =~ s/^([A-Za-z_]\w*)$/$1()/;
 
-    return "\$" . $array . $left . $idx . $right;
+    return $idx;
+}
+
+sub elem {
+    my $self = shift;
+    my ($op, $cx, $left, $right, $padname) = @_;
+    my($array, $idx) = ($op->first, $op->first->sibling);
+
+    $idx = $self->elem_or_slice_single_index($idx);
+
+    unless ($array->name eq $padname) { # Maybe this has been fixed	
+	$array = $array->first; # skip rv2av (or ex-rv2av in _53+)
+    }
+    if (my $array_name=$self->elem_or_slice_array_name
+	    ($array, $left, $padname, 1)) {
+	return "\$" . $array_name . $left . $idx . $right;
+    } else {
+	# $x[20][3]{hi} or expr->[20]
+	my $arrow = is_subscriptable($array) ? "" : "->";
+	return $self->deparse($array, 24) . $arrow . $left . $idx . $right;
+    }
+
 }
 
 sub pp_aelem { maybe_local(@_, elem(@_, "[", "]", "padav")) }
@@ -2998,13 +3039,7 @@ sub slice {
     $array = $last;
     $array = $array->first
 	if $array->name eq $regname or $array->name eq "null";
-    if (is_scope($array)) {
-	$array = "{" . $self->deparse($array, 0) . "}";
-    } elsif ($array->name eq $padname) {
-	$array = $self->padany($array);
-    } else {
-	$array = $self->deparse($array, 24);
-    }
+    $array = $self->elem_or_slice_array_name($array,$left,$padname,0);
     $kid = $op->first->sibling; # skip pushmark
     if ($kid->name eq "list") {
 	$kid = $kid->first->sibling; # skip list, pushmark
@@ -3013,7 +3048,7 @@ sub slice {
 	}
 	$list = join(", ", @elems);
     } else {
-	$list = $self->deparse($kid, 1);
+	$list = $self->elem_or_slice_single_index($kid);
     }
     return "\@" . $array . $left . $list . $right;
 }
@@ -3606,7 +3641,7 @@ sub const {
 	return $self->maybe_parens("\\" . $self->const($ref, 20), $cx, 20);
     } elsif ($sv->FLAGS & SVf_POK) {
 	my $str = $sv->PV;
-	if ($str =~ /[^ -~]/) { # ASCII for non-printing
+	if ($str =~ /[[:^print:]]/) {
 	    return single_delim("qq", '"', uninterp escape_str unback $str);
 	} else {
 	    return single_delim("q", "'", unback $str);
@@ -4013,7 +4048,7 @@ sub pure_string {
         return 0 unless '"' eq $self->gv_name($self->gv_or_padgv($gvop));
 
 	return 0 unless ${$join_op->sibling} eq ${$op->last};
-	return 0 unless $op->last->name =~ /^(rv2|pad)av$/;
+	return 0 unless $op->last->name =~ /^(?:[ah]slice|(?:rv2|pad)av)$/;
     }
     elsif ($type eq 'concat') {
 	return $self->pure_string($op->first)
@@ -4698,6 +4733,13 @@ have a compile-time side-effect, such as the obscure
     my $x if 0;
 
 which is not, consequently, deparsed correctly.
+
+=item *
+
+Lexical (my) variables declared in scopes external to a subroutine
+appear in code2ref output text as package variables. This is a tricky
+problem, as perl has no native facility for refering to a lexical variable
+defined within a different scope, although L<PadWalker> is a good start.
 
 =item *
 

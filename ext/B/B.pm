@@ -7,7 +7,7 @@
 #
 package B;
 
-our $VERSION = '1.14';
+our $VERSION = '1.15';
 
 use XSLoader ();
 require Exporter;
@@ -21,9 +21,10 @@ require Exporter;
 		sub_generation amagic_generation perlstring
 		walkoptree_slow walkoptree walkoptree_exec walksymtable
 		parents comppadlist sv_undef compile_stats timing_info
-		begin_av init_av check_av end_av regex_padav dowarn
-		defstash curstash warnhook diehook inc_gv
+		begin_av init_av check_av end_av regex_padav dowarn defstash
+		curstash warnhook diehook inc_gv
 		);
+push @EXPORT_OK, qw(unitcheck_av) if $] > 5.009;
 
 sub OPf_KIDS ();
 use strict;
@@ -119,7 +120,7 @@ sub walkoptree_slow {
     $op_count++; # just for statistics
     $level ||= 0;
     warn(sprintf("walkoptree: %d. %s\n", $level, peekop($op))) if $debug;
-    $op->$method($level);
+    $op->$method($level) if $op->can($method);
     if ($$op && ($op->flags & OPf_KIDS)) {
 	my $kid;
 	unshift(@parents, $op);
@@ -128,7 +129,11 @@ sub walkoptree_slow {
 	}
 	shift @parents;
     }
-    if (class($op) eq 'PMOP' && ref($op->pmreplroot) && ${$op->pmreplroot}) {
+    if (class($op) eq 'PMOP'
+	&& ref($op->pmreplroot)
+	&& ${$op->pmreplroot}
+	&& $op->pmreplroot->isa( 'B::OP' ))
+    {
 	unshift(@parents, $op);
 	walkoptree_slow($op->pmreplroot, $method, $level + 1);
 	shift @parents;
@@ -383,6 +388,10 @@ Returns the AV object (i.e. in class B::AV) representing INIT blocks.
 =item check_av
 
 Returns the AV object (i.e. in class B::AV) representing CHECK blocks.
+
+=item unitcheck_av
+
+Returns the AV object (i.e. in class B::AV) representing UNITCHECK blocks.
 
 =item begin_av
 
@@ -1113,6 +1122,8 @@ Only when perl was compiled with ithreads.
 =item warnings
 
 =item io
+
+=item hints
 
 =back
 

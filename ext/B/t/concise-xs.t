@@ -117,11 +117,11 @@ use Getopt::Std;
 use Carp;
 use Test::More tests => ( # per-pkg tests (function ct + require_ok)
 			  40 + 16	# Data::Dumper, Digest::MD5
-			  + 512 + 235	# B::Deparse, B
-			  + 588 + 189	# POSIX, IO::Socket
-			  + 330 * ($] > 5.009)
-			  + 15 * ($] >= 5.009003)
-			  - 349);	# fudge
+			  + 517 + 239	# B::Deparse, B
+			  + 595 + 190	# POSIX, IO::Socket
+			  + 345 * ($] > 5.009)
+			  + 17 * ($] >= 5.009003)
+			  - 365);	# fudge
 
 require_ok("B::Concise");
 
@@ -157,7 +157,7 @@ my $testpkgs = {
 		  formfeed end_av dowarn diehook defstash curstash
 		  cstring comppadlist check_av cchar cast_I32 bootstrap
 		  begin_av amagic_generation sub_generation address
-		  )],
+		  ), $] > 5.009 ? ('unitcheck_av') : ()],
     },
 
     B::Deparse => { dflt => 'perl',	# 235 functions
@@ -214,7 +214,7 @@ my $testpkgs = {
 			     new listen import getsockopt croak
 			     connected connect configure confess close
 			     carp bind atmark accept
-			     /],
+			     /, $] > 5.009 ? ('blocking') : () ],
 
 		    XS => [qw/ unpack_sockaddr_un unpack_sockaddr_in
 			   sockatmark sockaddr_family pack_sockaddr_un

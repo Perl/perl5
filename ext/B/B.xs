@@ -21,6 +21,9 @@ typedef FILE * InputStream;
 
 static const char* const svclassnames[] = {
     "B::NULL",
+#if PERL_VERSION >= 9
+    "B::BIND",
+#endif
     "B::IV",
     "B::NV",
     "B::RV",
@@ -28,7 +31,9 @@ static const char* const svclassnames[] = {
     "B::PVIV",
     "B::PVNV",
     "B::PVMG",
+#if PERL_VERSION <= 8
     "B::BM",
+#endif
 #if PERL_VERSION >= 9
     "B::GV",
 #endif
@@ -245,6 +250,71 @@ make_sv_object(pTHX_ SV *arg, SV *sv)
     sv_setiv(newSVrv(arg, type), iv);
     return arg;
 }
+
+#if PERL_VERSION >= 9
+static SV *
+make_temp_object(pTHX_ SV *arg, SV *temp)
+{
+    SV *target;
+    const char *const type = svclassnames[SvTYPE(temp)];
+    const IV iv = PTR2IV(temp);
+
+    target = newSVrv(arg, type);
+    sv_setiv(target, iv);
+
+    /* Need to keep our "temp" around as long as the target exists.
+       Simplest way seems to be to hang it from magic, and let that clear
+       it up.  No vtable, so won't actually get in the way of anything.  */
+    sv_magicext(target, temp, PERL_MAGIC_sv, NULL, NULL, 0);
+    /* magic object has had its reference count increased, so we must drop
+       our reference.  */
+    SvREFCNT_dec(temp);
+    return arg;
+}
+
+static SV *
+make_warnings_object(pTHX_ SV *arg, STRLEN *warnings)
+{
+    const char *type = 0;
+    dMY_CXT;
+    IV iv = sizeof(specialsv_list)/sizeof(SV*);
+
+    /* Counting down is deliberate. Before the split between make_sv_object
+       and make_warnings_obj there appeared to be a bug - Nullsv and pWARN_STD
+       were both 0, so you could never get a B::SPECIAL for pWARN_STD  */
+
+    while (iv--) {
+	if ((SV*)warnings == specialsv_list[iv]) {
+	    type = "B::SPECIAL";
+	    break;
+	}
+    }
+    if (type) {
+	sv_setiv(newSVrv(arg, type), iv);
+	return arg;
+    } else {
+	/* B assumes that warnings are a regular SV. Seems easier to keep it
+	   happy by making them into a regular SV.  */
+	return make_temp_object(aTHX_ arg,
+				newSVpvn((char *)(warnings + 1), *warnings));
+    }
+}
+
+static SV *
+make_cop_io_object(pTHX_ SV *arg, COP *cop)
+{
+    SV *const value = newSV(0);
+
+    Perl_emulate_cop_io(aTHX_ cop, value);
+
+    if(SvOK(value)) {
+	return make_temp_object(aTHX_ arg, newSVsv(value));
+    } else {
+	SvREFCNT_dec(value);
+	return make_sv_object(aTHX_ arg, NULL);
+    }
+}
+#endif
 
 static SV *
 make_mg_object(pTHX_ SV *arg, MAGIC *mg)
@@ -496,6 +566,10 @@ typedef GV	*B__GV;
 typedef IO	*B__IO;
 
 typedef MAGIC	*B__MAGIC;
+typedef HE      *B__HE;
+#if PERL_VERSION >= 9
+typedef struct refcounted_he	*B__RHE;
+#endif
 
 MODULE = B	PACKAGE = B	PREFIX = B_
 
@@ -510,9 +584,9 @@ BOOT:
     specialsv_list[1] = &PL_sv_undef;
     specialsv_list[2] = &PL_sv_yes;
     specialsv_list[3] = &PL_sv_no;
-    specialsv_list[4] = pWARN_ALL;
-    specialsv_list[5] = pWARN_NONE;
-    specialsv_list[6] = pWARN_STD;
+    specialsv_list[4] = (SV *) pWARN_ALL;
+    specialsv_list[5] = (SV *) pWARN_NONE;
+    specialsv_list[6] = (SV *) pWARN_STD;
 #if PERL_VERSION <= 8
 #  define CVf_ASSERTION	0
 #  define OPpPAD_STATE 0
@@ -552,6 +626,13 @@ B_init_av()
 
 B::AV
 B_check_av()
+
+#if PERL_VERSION >= 9
+
+B::AV
+B_unitcheck_av()
+
+#endif
 
 B::AV
 B_begin_av()
@@ -1065,8 +1146,11 @@ LOOP_lastop(o)
 #define COP_cop_seq(o)	o->cop_seq
 #define COP_arybase(o)	CopARYBASE_get(o)
 #define COP_line(o)	CopLINE(o)
-#define COP_warnings(o)	o->cop_warnings
-#define COP_io(o)	o->cop_io
+#define COP_hints(o)	CopHINTS_get(o)
+#if PERL_VERSION < 9
+#  define COP_warnings(o)  o->cop_warnings
+#  define COP_io(o)	o->cop_io
+#endif
 
 MODULE = B	PACKAGE = B::COP		PREFIX = COP_
 
@@ -1103,12 +1187,44 @@ U32
 COP_line(o)
 	B::COP	o
 
+#if PERL_VERSION >= 9
+
+void
+COP_warnings(o)
+	B::COP	o
+	PPCODE:
+	ST(0) = make_warnings_object(aTHX_ sv_newmortal(), o->cop_warnings);
+	XSRETURN(1);
+
+void
+COP_io(o)
+	B::COP	o
+	PPCODE:
+	ST(0) = make_cop_io_object(aTHX_ sv_newmortal(), o);
+	XSRETURN(1);
+
+B::RHE
+COP_hints_hash(o)
+	B::COP o
+    CODE:
+	RETVAL = o->cop_hints_hash;
+    OUTPUT:
+	RETVAL
+
+#else
+
 B::SV
 COP_warnings(o)
 	B::COP	o
 
 B::SV
 COP_io(o)
+	B::COP	o
+
+#endif
+
+U32
+COP_hints(o)
 	B::COP	o
 
 MODULE = B	PACKAGE = B::SV
@@ -1665,10 +1781,18 @@ CvSTASH(cv)
 B::OP
 CvSTART(cv)
 	B::CV	cv
+    CODE:
+	RETVAL = CvISXSUB(cv) ? NULL : CvSTART(cv);
+    OUTPUT:
+	RETVAL
 
 B::OP
 CvROOT(cv)
 	B::CV	cv
+    CODE:
+	RETVAL = CvISXSUB(cv) ? NULL : CvROOT(cv);
+    OUTPUT:
+	RETVAL
 
 B::GV
 CvGV(cv)
@@ -1698,7 +1822,7 @@ void
 CvXSUB(cv)
 	B::CV	cv
     CODE:
-	ST(0) = sv_2mortal(newSViv(PTR2IV(CvXSUB(cv))));
+	ST(0) = sv_2mortal(newSViv(CvISXSUB(cv) ? PTR2IV(CvXSUB(cv)) : 0));
 
 
 void
@@ -1707,7 +1831,7 @@ CvXSUBANY(cv)
     CODE:
 	ST(0) = CvCONST(cv) ?
 	    make_sv_object(aTHX_ sv_newmortal(),(SV *)CvXSUBANY(cv).any_ptr) :
-	    sv_2mortal(newSViv(CvXSUBANY(cv).any_iv));
+	    sv_2mortal(newSViv(CvISXSUB(cv) ? CvXSUBANY(cv).any_iv : 0));
 
 MODULE = B    PACKAGE = B::CV
 
@@ -1767,3 +1891,31 @@ HvARRAY(hv)
 		PUSHs(make_sv_object(aTHX_ sv_newmortal(), sv));
 	    }
 	}
+
+MODULE = B	PACKAGE = B::HE		PREFIX = He
+
+B::SV
+HeVAL(he)
+	B::HE he
+
+U32
+HeHASH(he)
+	B::HE he
+
+B::SV
+HeSVKEY_force(he)
+	B::HE he
+
+MODULE = B	PACKAGE = B::RHE	PREFIX = RHE_
+
+#if PERL_VERSION >= 9
+
+SV*
+RHE_HASH(h)
+	B::RHE h
+    CODE:
+	RETVAL = newRV( (SV*)Perl_refcounted_he_chain_2hv(aTHX_ h) );
+    OUTPUT:
+	RETVAL
+
+#endif
