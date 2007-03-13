@@ -14,7 +14,7 @@ END { print STDERR @warnings }
 
 
 use strict;
-use Test::More tests => 95;
+use Test::More tests => 96;
 my $TB = Test::More->builder;
 
 BEGIN { use_ok('constant'); }
@@ -182,6 +182,7 @@ eval q{
     use constant 'BEGIN' => 1 ;
     use constant 'INIT' => 1 ;
     use constant 'CHECK' => 1 ;
+    use constant 'UNITCHECK' => 1;
     use constant 'END' => 1 ;
     use constant 'DESTROY' => 1 ;
     use constant 'AUTOLOAD' => 1 ;
@@ -195,13 +196,14 @@ eval q{
     use constant 'SIG' => 1 ;
 };
 
-is @warnings, 15 ;
+is @warnings, 16 ;
 my @Expected_Warnings = 
   (
    qr/^Constant name 'BEGIN' is a Perl keyword at/,
    qr/^Constant subroutine BEGIN redefined at/,
    qr/^Constant name 'INIT' is a Perl keyword at/,
    qr/^Constant name 'CHECK' is a Perl keyword at/,
+   qr/^Constant name 'UNITCHECK' is a Perl keyword at/,
    qr/^Constant name 'END' is a Perl keyword at/,
    qr/^Constant name 'DESTROY' is a Perl keyword at/,
    qr/^Constant name 'AUTOLOAD' is a Perl keyword at/,
