@@ -9,7 +9,7 @@ BEGIN {
 use Config;
 use File::Spec;
 
-plan tests => 101;
+plan tests => 107;
 
 my $Perl = which_perl();
 
@@ -510,11 +510,23 @@ SKIP: {
     #PVIO's hold dirhandle information, so let's test them too.
 
     SKIP: {
-        skip "No dirfd()", 3 unless $Config{d_dirfd};
+        skip "No dirfd()", 9 unless $Config{d_dirfd};
         ok(opendir(DIR, "."), 'Can open "." dir') || diag "Can't open '.':  $!";
         ok(stat(*DIR{IO}), "stat() on *DIR{IO} works");
+	ok(-d _ , "The special file handle _ is set correctly"); 
         ok(-d -r *DIR{IO} , "chained -x's on *DIR{IO}");
-        closedir DIR;
+
+	# And now for the ambigious bareword case
+	ok(open(DIR, "TEST"), 'Can open "TEST" dir')
+	    || diag "Can't open 'TEST':  $!";
+	my $size = (stat(*DIR{IO}))[7];
+	ok(defined $size, "stat() on *THINGY{IO} works");
+	is($size, -s "TEST",
+	   "size returned by stat of *THINGY{IO} is for the file");
+	ok(-f _, "ambiguous *THINGY{IO} uses file handle, not dir handle");
+	ok(-f *DIR{IO});
+	closedir DIR or die $!;
+	close DIR or die $!;
     }
 }
 
