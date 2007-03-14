@@ -4417,6 +4417,14 @@ name is returned instead.  You can think of C<ref> as a C<typeof> operator.
 	print "r is not a reference at all.\n";
     }
 
+The return value C<LVALUE> indicates a reference to an lvalue that is not
+a variable. You get this from taking the reference of function calls like
+C<pos()> or C<substr()>. C<VSTRING> is returned if the reference points
+to a L<version string|perldata\"Version Strings">.
+
+The result C<Regexp> indicates that the argument is a regular expression
+resulting from C<qr//>.
+
 See also L<perlref>.
 
 =item rename OLDNAME,NEWNAME
