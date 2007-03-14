@@ -1505,6 +1505,24 @@ sub process_text {
     $$tref = $res;
 }
 
+sub process_text_rfc_links {
+    my $text = shift;
+
+    #  For every "RFCnnnn" or "RFC nnn" link it to the authoritative
+    #  source. Do not use (i) option here. Require RFC to be written in
+    #  in capital letters.
+
+    $text =~ s{
+         (?=^\S)            # positive lookahead, make sure this is "text" paragraph
+         (.*?)              # Grab leading text
+         (?<=[^<>])         # Make sure this is not an URL already
+           (RFC\s*(\d{1,5}))(?=\s) # max 5 digits
+    }
+    {$1<a href="http://www.ietf.org/rfc/rfc$3.txt">$2</a>}gx;
+
+    $text;
+}
+
 sub process_text1($$;$$){
     my( $lev, $rstr, $func, $closing ) = @_;
     my $res = '';
@@ -1693,6 +1711,7 @@ sub process_text1($$;$$){
 	} else {
 	    warn "$0: $Podfile: undelimited $func<> in paragraph $Paragraph.\n" unless $Quiet;
 	}
+	$res = process_text_rfc_links($res);
     }
     return $res;
 }
