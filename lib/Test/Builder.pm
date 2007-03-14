@@ -8,7 +8,7 @@ $^C ||= 0;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.36';
+$VERSION = '0.68';
 $VERSION = eval $VERSION;    # make the alpha version come out as a number
 
 # Make Test::Builder thread-safe for ithreads.
@@ -364,8 +364,9 @@ sub skip_all {
 
 =head2 Running tests
 
-These actually run the tests, analogous to the functions in
-Test::More.
+These actually run the tests, analogous to the functions in Test::More.
+
+They all return true if the test passed, false if the test failed.
 
 $name is always optional.
 
@@ -464,26 +465,22 @@ sub _unoverload {
     my $self  = shift;
     my $type  = shift;
 
-    local($@,$!);
-
-    eval { require overload } || return;
+    $self->_try(sub { require overload } ) || return;
 
     foreach my $thing (@_) {
-        eval { 
-            if( _is_object($$thing) ) {
-                if( my $string_meth = overload::Method($$thing, $type) ) {
-                    $$thing = $$thing->$string_meth();
-                }
+        if( $self->_is_object($$thing) ) {
+            if( my $string_meth = overload::Method($$thing, $type) ) {
+                $$thing = $$thing->$string_meth();
             }
-        };
+        }
     }
 }
 
 
 sub _is_object {
-    my $thing = shift;
+    my($self, $thing) = @_;
 
-    return eval { ref $thing && $thing->isa('UNIVERSAL') } ? 1 : 0;
+    return $self->_try(sub { ref $thing && $thing->isa('UNIVERSAL') }) ? 1 : 0;
 }
 
 
@@ -676,97 +673,6 @@ sub unlike {
     $self->_regex_ok($this, $regex, '!~', $name);
 }
 
-=item B<maybe_regex>
-
-  $Test->maybe_regex(qr/$regex/);
-  $Test->maybe_regex('/$regex/');
-
-Convenience method for building testing functions that take regular
-expressions as arguments, but need to work before perl 5.005.
-
-Takes a quoted regular expression produced by qr//, or a string
-representing a regular expression.
-
-Returns a Perl value which may be used instead of the corresponding
-regular expression, or undef if it's argument is not recognised.
-
-For example, a version of like(), sans the useful diagnostic messages,
-could be written as:
-
-  sub laconic_like {
-      my ($self, $this, $regex, $name) = @_;
-      my $usable_regex = $self->maybe_regex($regex);
-      die "expecting regex, found '$regex'\n"
-          unless $usable_regex;
-      $self->ok($this =~ m/$usable_regex/, $name);
-  }
-
-=cut
-
-
-sub maybe_regex {
-    my ($self, $regex) = @_;
-    my $usable_regex = undef;
-
-    return $usable_regex unless defined $regex;
-
-    my($re, $opts);
-
-    # Check for qr/foo/
-    if( ref $regex eq 'Regexp' ) {
-        $usable_regex = $regex;
-    }
-    # Check for '/foo/' or 'm,foo,'
-    elsif( ($re, $opts)        = $regex =~ m{^ /(.*)/ (\w*) $ }sx           or
-           (undef, $re, $opts) = $regex =~ m,^ m([^\w\s]) (.+) \1 (\w*) $,sx
-         )
-    {
-        $usable_regex = length $opts ? "(?$opts)$re" : $re;
-    }
-
-    return $usable_regex;
-};
-
-sub _regex_ok {
-    my($self, $this, $regex, $cmp, $name) = @_;
-
-    my $ok = 0;
-    my $usable_regex = $self->maybe_regex($regex);
-    unless (defined $usable_regex) {
-        $ok = $self->ok( 0, $name );
-        $self->diag("    '$regex' doesn't look much like a regex to me.");
-        return $ok;
-    }
-
-    {
-        my $test;
-        my $code = $self->_caller_context;
-
-        local($@, $!);
-
-        # Yes, it has to look like this or 5.4.5 won't see the #line directive.
-        # Don't ask me, man, I just work here.
-        $test = eval "
-$code" . q{$test = $this =~ /$usable_regex/ ? 1 : 0};
-
-        $test = !$test if $cmp eq '!~';
-
-        local $Level = $Level + 1;
-        $ok = $self->ok( $test, $name );
-    }
-
-    unless( $ok ) {
-        $this = defined $this ? "'$this'" : 'undef';
-        my $match = $cmp eq '=~' ? "doesn't match" : "matches";
-        $self->diag(sprintf <<DIAGNOSTIC, $this, $match, $regex);
-                  %s
-    %13s '%s'
-DIAGNOSTIC
-
-    }
-
-    return $ok;
-}
 
 =item B<cmp_ok>
 
@@ -795,8 +701,7 @@ sub cmp_ok {
 
     my $test;
     {
-        local($@,$!);   # don't interfere with $@
-                        # eval() sometimes resets $!
+        local($@,$!,$SIG{__DIE__});  # isolate eval
 
         my $code = $self->_caller_context;
 
@@ -844,6 +749,14 @@ sub _caller_context {
     return $code;
 }
 
+=back
+
+
+=head2 Other Testing Methods
+
+These are methods which are used in the course of writing a test but are not themselves tests.
+
+=over 4
 
 =item B<BAIL_OUT>
 
@@ -969,7 +882,163 @@ test.
 =back
 
 
+=head2 Test building utility methods
+
+These methods are useful when writing your own test methods.
+
+=over 4
+
+=item B<maybe_regex>
+
+  $Test->maybe_regex(qr/$regex/);
+  $Test->maybe_regex('/$regex/');
+
+Convenience method for building testing functions that take regular
+expressions as arguments, but need to work before perl 5.005.
+
+Takes a quoted regular expression produced by qr//, or a string
+representing a regular expression.
+
+Returns a Perl value which may be used instead of the corresponding
+regular expression, or undef if it's argument is not recognised.
+
+For example, a version of like(), sans the useful diagnostic messages,
+could be written as:
+
+  sub laconic_like {
+      my ($self, $this, $regex, $name) = @_;
+      my $usable_regex = $self->maybe_regex($regex);
+      die "expecting regex, found '$regex'\n"
+          unless $usable_regex;
+      $self->ok($this =~ m/$usable_regex/, $name);
+  }
+
+=cut
+
+
+sub maybe_regex {
+    my ($self, $regex) = @_;
+    my $usable_regex = undef;
+
+    return $usable_regex unless defined $regex;
+
+    my($re, $opts);
+
+    # Check for qr/foo/
+    if( ref $regex eq 'Regexp' ) {
+        $usable_regex = $regex;
+    }
+    # Check for '/foo/' or 'm,foo,'
+    elsif( ($re, $opts)        = $regex =~ m{^ /(.*)/ (\w*) $ }sx           or
+           (undef, $re, $opts) = $regex =~ m,^ m([^\w\s]) (.+) \1 (\w*) $,sx
+         )
+    {
+        $usable_regex = length $opts ? "(?$opts)$re" : $re;
+    }
+
+    return $usable_regex;
+};
+
+sub _regex_ok {
+    my($self, $this, $regex, $cmp, $name) = @_;
+
+    my $ok = 0;
+    my $usable_regex = $self->maybe_regex($regex);
+    unless (defined $usable_regex) {
+        $ok = $self->ok( 0, $name );
+        $self->diag("    '$regex' doesn't look much like a regex to me.");
+        return $ok;
+    }
+
+    {
+        my $test;
+        my $code = $self->_caller_context;
+
+        local($@, $!, $SIG{__DIE__}); # isolate eval
+
+        # Yes, it has to look like this or 5.4.5 won't see the #line directive.
+        # Don't ask me, man, I just work here.
+        $test = eval "
+$code" . q{$test = $this =~ /$usable_regex/ ? 1 : 0};
+
+        $test = !$test if $cmp eq '!~';
+
+        local $Level = $Level + 1;
+        $ok = $self->ok( $test, $name );
+    }
+
+    unless( $ok ) {
+        $this = defined $this ? "'$this'" : 'undef';
+        my $match = $cmp eq '=~' ? "doesn't match" : "matches";
+        $self->diag(sprintf <<DIAGNOSTIC, $this, $match, $regex);
+                  %s
+    %13s '%s'
+DIAGNOSTIC
+
+    }
+
+    return $ok;
+}
+
+
+# I'm not ready to publish this.  It doesn't deal with array return
+# values from the code or context.
+=begin private
+
+=item B<_try>
+
+    my $return_from_code          = $Test->try(sub { code });
+    my($return_from_code, $error) = $Test->try(sub { code });
+
+Works like eval BLOCK except it ensures it has no effect on the rest of the test (ie. $@ is not set) nor is effected by outside interference (ie. $SIG{__DIE__}) and works around some quirks in older Perls.
+
+$error is what would normally be in $@.
+
+It is suggested you use this in place of eval BLOCK.
+
+=cut
+
+sub _try {
+    my($self, $code) = @_;
+    
+    local $!;               # eval can mess up $!
+    local $@;               # don't set $@ in the test
+    local $SIG{__DIE__};    # don't trip an outside DIE handler.
+    my $return = eval { $code->() };
+    
+    return wantarray ? ($return, $@) : $return;
+}
+
+=end private
+
+
+=item B<is_fh>
+
+    my $is_fh = $Test->is_fh($thing);
+
+Determines if the given $thing can be used as a filehandle.
+
+=cut
+
+sub is_fh {
+    my $self = shift;
+    my $maybe_fh = shift;
+    return 0 unless defined $maybe_fh;
+
+    return 1 if ref \$maybe_fh eq 'GLOB'; # its a glob
+
+    return eval { $maybe_fh->isa("GLOB") }       ||
+           eval { $maybe_fh->isa("IO::Handle") } ||
+           # 5.5.4's tied() and can() doesn't like getting undef
+           eval { (tied($maybe_fh) || '')->can('TIEHANDLE') };
+}
+
+
+=back
+
+
 =head2 Test style
+
 
 =over 4
 
@@ -982,13 +1051,17 @@ test failed.
 
 Defaults to 1.
 
-Setting $Test::Builder::Level overrides.  This is typically useful
+Setting L<$Test::Builder::Level> overrides.  This is typically useful
 localized:
 
-    {
-        local $Test::Builder::Level = 2;
-        $Test->ok($test);
+    sub my_ok {
+        my $test = shift;
+
+        local $Test::Builder::Level = $Test::Builder::Level + 1;
+        $TB->ok($test);
     }
+
+To be polite to other functions wrapping your own you usually want to increment C<$Level> rather than set it to a constant.
 
 =cut
 
@@ -1254,7 +1327,7 @@ sub _new_fh {
     my($file_or_fh) = shift;
 
     my $fh;
-    if( $self->_is_fh($file_or_fh) ) {
+    if( $self->is_fh($file_or_fh) ) {
         $fh = $file_or_fh;
     }
     else {
@@ -1265,21 +1338,6 @@ sub _new_fh {
     }
 
     return $fh;
-}
-
-
-sub _is_fh {
-    my $self = shift;
-    my $maybe_fh = shift;
-    return 0 unless defined $maybe_fh;
-
-    return 1 if ref \$maybe_fh eq 'GLOB'; # its a glob
-
-    return UNIVERSAL::isa($maybe_fh,               'GLOB')       ||
-           UNIVERSAL::isa($maybe_fh,               'IO::Handle') ||
-
-           # 5.5.4's tied() and can() doesn't like getting undef
-           UNIVERSAL::can((tied($maybe_fh) || ''), 'TIEHANDLE');
 }
 
 

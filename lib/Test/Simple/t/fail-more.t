@@ -45,8 +45,12 @@ sub main::err_ok ($) {
 package main;
 
 require Test::More;
-my $Total = 29;
+my $Total = 30;
 Test::More->import(tests => $Total);
+
+# This should all work in the presence of a __DIE__ handler.
+local $SIG{__DIE__} = sub { $TB->ok(0, "DIE handler called: ".join "", @_); };
+
 
 my $tb = Test::More->builder;
 $tb->use_numbers(0);
@@ -142,6 +146,7 @@ ERR
 can_ok('Mooble::Hooble::Yooble', qw(this that));
 can_ok('Mooble::Hooble::Yooble', ());
 can_ok(undef, undef);
+can_ok([], "foo");
 err_ok( <<ERR );
 #   Failed test 'Mooble::Hooble::Yooble->can(...)'
 #   at $0 line 52.
@@ -153,6 +158,9 @@ err_ok( <<ERR );
 #   Failed test '->can(...)'
 #   at $0 line 54.
 #     can_ok() called with empty class or reference
+#   Failed test 'ARRAY->can('foo')'
+#   at t/fail-more.t line 55.
+#     ARRAY->can('foo') failed
 ERR
 
 #line 55
@@ -293,6 +301,7 @@ not ok - fail()
 not ok - Mooble::Hooble::Yooble->can(...)
 not ok - Mooble::Hooble::Yooble->can(...)
 not ok - ->can(...)
+not ok - ARRAY->can('foo')
 not ok - The object isa Wibble
 not ok - My Wibble isa Wibble
 not ok - Another Wibble isa Wibble

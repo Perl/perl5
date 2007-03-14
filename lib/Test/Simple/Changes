@@ -1,3 +1,38 @@
+0.68  Tue Mar 13 17:27:26 PDT 2007
+    Bug fixes
+    * If your code has a $SIG{__DIE__} handler in some cases functions like
+      use_ok(), require_ok(), can_ok() and isa_ok() could trigger that
+      handler. [rt.cpan.org 23509]
+    - Minor improvement to TB's filehandle detection in the case of overridden
+      isa(). [rt.cpan.org 20890]
+    - Will now install as a core module in 5.6.2 which ships with Test::More.
+      [rt.cpan.org 25163]
+
+    New Features
+    - Test::Builder->is_fh() provides a way to determine if a thing
+      can be used as a filehandle.
+
+    Documentation improvements
+    - Improved the docs for $Test::Builder::Level showing the encouraged
+      use (increment, don't set)
+    - Documented the return value of Test::Builder's test methods
+    - Split out TB's method documentation to differenciate between test
+      methods (ok, is_eq...), methods useful in testing (skip, BAILOUT...)
+      and methods useful for building your own tests (maybe_regex...).
+
+    Test fixes
+    - We required too old a version of Test::Pod::Coverage.  Need 1.08 and not
+      1.00. [rt.cpan.org 25351]
+
+0.67  Mon Jan 22 13:27:40 PST 2007
+    Test fixes
+    - t/pod_coverage.t would fail if Test::Pod::Coverage between 1.07 and
+      1.00 were installed as it depended on all_modules being exported.
+      [rt.cpan.org 24483]
+
+0.66  Sun Dec  3 15:25:45 PST 2006
+    - Restore 5.4.5 compatibility (unobe@cpan.org) [rt.cpan.org 20513]
+
 0.65  Fri Nov 10 10:26:51 CST 2006
 
 0.64_03  Sun Nov  5 13:09:55 EST 2006
