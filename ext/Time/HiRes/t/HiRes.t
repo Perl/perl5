@@ -247,6 +247,9 @@ unless (   defined &Time::HiRes::gettimeofday
     }
 } else {
     use Time::HiRes qw(time alarm sleep);
+    eval { require POSIX };
+    my $use_sigaction =
+	!$@ && defined &POSIX::sigaction && &POSIX::SIGALRM > 0;
 
     my ($f, $r, $i, $not, $ok);
 
@@ -260,7 +263,20 @@ unless (   defined &Time::HiRes::gettimeofday
 
     $r = [Time::HiRes::gettimeofday()];
     $i = 5;
-    $SIG{ALRM} = "tick";
+    my $oldaction;
+    if ($use_sigaction) {
+	$oldaction = new POSIX::SigAction;
+	printf "# sigaction tick, ALRM = %d\n", &POSIX::SIGALRM;
+	# Perl's deferred signals may be too wimpy to break through
+	# a restartable select(), so use POSIX::sigaction if available.
+	POSIX::sigaction(&POSIX::SIGALRM, POSIX::SigAction->new("tick"),
+			 $oldaction)
+	    or die "Error setting SIGALRM handler with sigaction: $!\n";
+    } else {
+	print "# SIG tick\n";
+	$SIG{ALRM} = "tick";
+    }
+
     while ($i > 0)
     {
 	alarm(0.3);
@@ -295,14 +311,18 @@ unless (   defined &Time::HiRes::gettimeofday
 	print "# Tick! $i $ival\n";
 	my $exp = 0.3 * (5 - $i);
 	# This test is more sensitive, so impose a softer limit.
-	if (abs($ival/$exp - 1) > 3*$limit) {
+	if (abs($ival/$exp - 1) > 4*$limit) {
 	    my $ratio = abs($ival/$exp);
 	    $not = "tick: $exp sleep took $ival ratio $ratio";
 	    $i = 0;
 	}
     }
 
-    alarm(0); # can't cancel usig %SIG
+    if ($use_sigaction) {
+	POSIX::sigaction(&POSIX::SIGALRM, $oldaction);
+    } else {
+	alarm(0); # can't cancel usig %SIG
+    }
 
     print $not ? "not ok 17 # $not\n" : "ok 17 # $ok\n";
 }
@@ -613,9 +633,10 @@ if ($have_ualarm) {
 	my $dt = $t1 - $t0;
 	print "# dt = $dt\n";
 	my $r = $dt / ($n/1e6);
+	print "# r = $r\n";
 	ok $i,
 	($n < 1_000_000 || # Too much noise.
-	 $r >= 0.9 && $r <= 1.5), "ualarm($n) close enough";
+	 $r >= 0.8 && $r <= 1.6), "ualarm($n) close enough";
     }
 } else {
     print "# No ualarm\n";
