@@ -30,28 +30,7 @@
 */
 
 #ifdef PERL_EXT_RE_BUILD
-/* need to replace pregcomp et al, so enable that */
-#  ifndef PERL_IN_XSUB_RE
-#    define PERL_IN_XSUB_RE
-#  endif
-/* need access to debugger hooks */
-#  if defined(PERL_EXT_RE_DEBUG) && !defined(DEBUGGING)
-#    define DEBUGGING
-#  endif
-#endif
-
-#ifdef PERL_IN_XSUB_RE
-/* We *really* need to overwrite these symbols: */
-#  define Perl_regexec_flags my_regexec
-#  define Perl_regdump my_regdump
-#  define Perl_regprop my_regprop
-#  define Perl_re_intuit_start my_re_intuit_start
-/* *These* symbols are masked to allow static link. */
-#  define Perl_pregexec my_pregexec
-#  define Perl_reginitcolors my_reginitcolors
-#  define Perl_regclass_swash my_regclass_swash
-
-#  define PERL_NO_GET_CONTEXT
+#include "re_top.h"
 #endif
 
 /*
@@ -90,7 +69,11 @@
 #define PERL_IN_REGEXEC_C
 #include "perl.h"
 
-#include "regcomp.h"
+#ifdef PERL_IN_XSUB_RE
+#  include "re_comp.h"
+#else
+#  include "regcomp.h"
+#endif
 
 #define RF_tainted	1		/* tainted information used? */
 #define RF_warned	2		/* warned about big count? */
@@ -301,6 +284,7 @@ typedef struct re_cc_state
  * pregexec and friends
  */
 
+#ifndef PERL_IN_XSUB_RE
 /*
  - pregexec - match a regexp against a string
  */
@@ -316,7 +300,7 @@ Perl_pregexec(pTHX_ register regexp *prog, char *stringarg, register char *stren
 	regexec_flags(prog, stringarg, strend, strbeg, minend, screamer, NULL,
 		      nosave ? 0 : REXEC_COPY_STR);
 }
-
+#endif
 STATIC void
 S_cache_re(pTHX_ regexp *prog)
 {
@@ -4066,6 +4050,7 @@ S_regrepeat(pTHX_ const regnode *p, I32 max)
 }
 
 
+#ifndef PERL_IN_XSUB_RE
 /*
 - regclass_swash - prepare the utf8 swash
 */
@@ -4111,6 +4096,7 @@ Perl_regclass_swash(pTHX_ register regnode* node, bool doinit, SV** listsvp, SV 
 
     return sw;
 }
+#endif
 
 /*
  - reginclass - determine if a character falls into a character class
