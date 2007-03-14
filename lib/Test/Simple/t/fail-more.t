@@ -159,7 +159,7 @@ err_ok( <<ERR );
 #   at $0 line 54.
 #     can_ok() called with empty class or reference
 #   Failed test 'ARRAY->can('foo')'
-#   at t/fail-more.t line 55.
+#   at $0 line 55.
 #     ARRAY->can('foo') failed
 ERR
 
