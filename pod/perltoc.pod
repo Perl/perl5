@@ -2137,109 +2137,109 @@ X<portability> X<Unix> X<portable>
 -I<X> FILEHANDLE
 X<-r>X<-w>X<-x>X<-o>X<-R>X<-W>X<-X>X<-O>X<-e>X<-z>X<-s>X<-f>X<-d>X<-l>X<-p>
 X<-S>X<-b>X<-c>X<-t>X<-u>X<-g>X<-k>X<-T>X<-B>X<-M>X<-A>X<-C>, -I<X> EXPR,
--I<X>, abs VALUE X<abs> X<absolute>, abs, accept NEWSOCKET,GENERICSOCKET
-X<accept>, alarm SECONDS X<alarm> X<SIGALRM> X<timer>, alarm, atan2 Y,X
-X<atan2> X<arctangent> X<tan> X<tangent>, bind SOCKET,NAME X<bind>, binmode
-FILEHANDLE, LAYER X<binmode> X<binary> X<text> X<DOS> X<Windows>, binmode
-FILEHANDLE, bless REF,CLASSNAME X<bless>, bless REF, caller EXPR X<caller>
-X<call stack> X<stack> X<stack trace>, caller, chdir EXPR X<chdir> X<cd>
-X<directory, change>, chdir FILEHANDLE, chdir DIRHANDLE, chdir, chmod LIST
-X<chmod> X<permission> X<mode>, chomp VARIABLE X<chomp>
-X<INPUT_RECORD_SEPARATOR> X<$/> X<newline> X<eol>, chomp( LIST ), chomp,
-chop VARIABLE X<chop>, chop( LIST ), chop, chown LIST X<chown> X<owner>
-X<user> X<group>, chr NUMBER X<chr> X<character> X<ASCII> X<Unicode>, chr,
-chroot FILENAME X<chroot> X<root>, chroot, close FILEHANDLE X<close>,
-close, closedir DIRHANDLE X<closedir>, connect SOCKET,NAME X<connect>,
-continue BLOCK X<continue>, cos EXPR X<cos> X<cosine> X<acos> X<arccosine>,
-cos, crypt PLAINTEXT,SALT X<crypt> X<digest> X<hash> X<salt> X<plaintext>
-X<password> X<decrypt> X<cryptography> X<passwd> X<encrypt>, dbmclose HASH
-X<dbmclose>, dbmopen HASH,DBNAME,MASK X<dbmopen> X<dbm> X<ndbm> X<sdbm>
-X<gdbm>, defined EXPR X<defined> X<undef> X<undefined>, defined, delete
-EXPR X<delete>, die LIST X<die> X<throw> X<exception> X<raise> X<$@>
-X<abort>, do BLOCK X<do> X<block>, do SUBROUTINE(LIST) X<do>, do EXPR
-X<do>, dump LABEL X<dump> X<core> X<undump>, dump, each HASH X<each>
-X<hash, iterator>, eof FILEHANDLE X<eof> X<end of file> X<end-of-file>, eof
-(), eof, eval EXPR X<eval> X<try> X<catch> X<evaluate> X<parse> X<execute>
-X<error, handling> X<exception, handling>, eval BLOCK, eval, exec LIST
-X<exec> X<execute>, exec PROGRAM LIST, exists EXPR X<exists>
-X<autovivification>, exit EXPR X<exit> X<terminate> X<abort>, exit, exp
-EXPR X<exp> X<exponential> X<antilog> X<antilogarithm> X<e>, exp, fcntl
-FILEHANDLE,FUNCTION,SCALAR X<fcntl>, fileno FILEHANDLE X<fileno>, flock
-FILEHANDLE,OPERATION X<flock> X<lock> X<locking>, fork X<fork> X<child>
-X<parent>, format X<format>, formline PICTURE,LIST X<formline>, getc
-FILEHANDLE X<getc> X<getchar> X<character> X<file, read>, getc, getlogin
-X<getlogin> X<login>, getpeername SOCKET X<getpeername> X<peer>, getpgrp
-PID X<getpgrp> X<group>, getppid X<getppid> X<parent> X<pid>, getpriority
-WHICH,WHO X<getpriority> X<priority> X<nice>, getpwnam NAME X<getpwnam>
-X<getgrnam> X<gethostbyname> X<getnetbyname> X<getprotobyname> X<getpwuid>
-X<getgrgid> X<getservbyname> X<gethostbyaddr> X<getnetbyaddr>
-X<getprotobynumber> X<getservbyport> X<getpwent> X<getgrent> X<gethostent>
-X<getnetent> X<getprotoent> X<getservent> X<setpwent> X<setgrent>
-X<sethostent> X<setnetent> X<setprotoent> X<setservent> X<endpwent>
-X<endgrent> X<endhostent> X<endnetent> X<endprotoent> X<endservent>,
-getgrnam NAME, gethostbyname NAME, getnetbyname NAME, getprotobyname NAME,
-getpwuid UID, getgrgid GID, getservbyname NAME,PROTO, gethostbyaddr
-ADDR,ADDRTYPE, getnetbyaddr ADDR,ADDRTYPE, getprotobynumber NUMBER,
-getservbyport PORT,PROTO, getpwent, getgrent, gethostent, getnetent,
-getprotoent, getservent, setpwent, setgrent, sethostent STAYOPEN, setnetent
-STAYOPEN, setprotoent STAYOPEN, setservent STAYOPEN, endpwent, endgrent,
-endhostent, endnetent, endprotoent, endservent, getsockname SOCKET
-X<getsockname>, getsockopt SOCKET,LEVEL,OPTNAME X<getsockopt>, glob EXPR
-X<glob> X<wildcard> X<filename, expansion> X<expand>, glob, gmtime EXPR
-X<gmtime> X<UTC> X<Greenwich>, gmtime, goto LABEL X<goto> X<jump> X<jmp>,
-goto EXPR, goto &NAME, grep BLOCK LIST X<grep>, grep EXPR,LIST, hex EXPR
-X<hex> X<hexadecimal>, hex, import LIST X<import>, index
-STR,SUBSTR,POSITION X<index> X<indexOf> X<InStr>, index STR,SUBSTR, int
-EXPR X<int> X<integer> X<truncate> X<trunc> X<floor>, int, ioctl
-FILEHANDLE,FUNCTION,SCALAR X<ioctl>, join EXPR,LIST X<join>, keys HASH
-X<keys> X<key>, kill SIGNAL, LIST X<kill> X<signal>, last LABEL X<last>
-X<break>, last, lc EXPR X<lc> X<lowercase>, lc, lcfirst EXPR X<lcfirst>
-X<lowercase>, lcfirst, length EXPR X<length> X<size>, length, link
-OLDFILE,NEWFILE X<link>, listen SOCKET,QUEUESIZE X<listen>, local EXPR
-X<local>, localtime EXPR X<localtime> X<ctime>, localtime, lock THING
-X<lock>, log EXPR X<log> X<logarithm> X<e> X<ln> X<base>, log, lstat EXPR
-X<lstat>, lstat, m//, map BLOCK LIST X<map>, map EXPR,LIST, mkdir
-FILENAME,MASK X<mkdir> X<md> X<directory, create>, mkdir FILENAME, msgctl
-ID,CMD,ARG X<msgctl>, msgget KEY,FLAGS X<msgget>, msgrcv
-ID,VAR,SIZE,TYPE,FLAGS X<msgrcv>, msgsnd ID,MSG,FLAGS X<msgsnd>, my EXPR
-X<my>, my TYPE EXPR, my EXPR : ATTRS, my TYPE EXPR : ATTRS, next LABEL
-X<next> X<continue>, next, no Module VERSION LIST X<no>, no Module VERSION,
-no Module LIST, no Module, oct EXPR X<oct> X<octal> X<hex> X<hexadecimal>
-X<binary> X<bin>, oct, open FILEHANDLE,EXPR X<open> X<pipe> X<file, open>
-X<fopen>, open FILEHANDLE,MODE,EXPR, open FILEHANDLE,MODE,EXPR,LIST, open
-FILEHANDLE,MODE,REFERENCE, open FILEHANDLE, opendir DIRHANDLE,EXPR
-X<opendir>, ord EXPR X<ord> X<encoding>, ord, our EXPR X<our> X<global>,
-our EXPR TYPE, our EXPR : ATTRS, our TYPE EXPR : ATTRS, pack TEMPLATE,LIST
-X<pack>, package NAMESPACE X<package> X<module> X<namespace>, package, pipe
-READHANDLE,WRITEHANDLE X<pipe>, pop ARRAY X<pop> X<stack>, pop, pos SCALAR
-X<pos> X<match, position>, pos, print FILEHANDLE LIST X<print>, print LIST,
-print, printf FILEHANDLE FORMAT, LIST X<printf>, printf FORMAT, LIST,
-prototype FUNCTION X<prototype>, push ARRAY,LIST X<push> X<stack>,
-q/STRING/, qq/STRING/, qr/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR
-X<quotemeta> X<metacharacter>, quotemeta, rand EXPR X<rand> X<random>,
-rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET X<read> X<file, read>, read
-FILEHANDLE,SCALAR,LENGTH, readdir DIRHANDLE X<readdir>, readline EXPR
-X<readline> X<gets> X<fgets>, readlink EXPR X<readlink>, readlink, readpipe
-EXPR X<readpipe>, recv SOCKET,SCALAR,LENGTH,FLAGS X<recv>, redo LABEL
-X<redo>, redo, ref EXPR X<ref> X<reference>, ref, rename OLDNAME,NEWNAME
-X<rename> X<move> X<mv> X<ren>, require VERSION X<require>, require EXPR,
-require, reset EXPR X<reset>, reset, return EXPR X<return>, return, reverse
-LIST X<reverse> X<rev> X<invert>, rewinddir DIRHANDLE X<rewinddir>, rindex
-STR,SUBSTR,POSITION X<rindex>, rindex STR,SUBSTR, rmdir FILENAME X<rmdir>
-X<rd> X<directory, remove>, rmdir, s///, scalar EXPR X<scalar> X<context>,
-seek FILEHANDLE,POSITION,WHENCE X<seek> X<fseek> X<filehandle, position>,
-seekdir DIRHANDLE,POS X<seekdir>, select FILEHANDLE X<select> X<filehandle,
-default>, select, select RBITS,WBITS,EBITS,TIMEOUT X<select>, semctl
-ID,SEMNUM,CMD,ARG X<semctl>, semget KEY,NSEMS,FLAGS X<semget>, semop
-KEY,OPSTRING X<semop>, send SOCKET,MSG,FLAGS,TO X<send>, send
-SOCKET,MSG,FLAGS, setpgrp PID,PGRP X<setpgrp> X<group>, setpriority
-WHICH,WHO,PRIORITY X<setpriority> X<priority> X<nice> X<renice>, setsockopt
-SOCKET,LEVEL,OPTNAME,OPTVAL X<setsockopt>, shift ARRAY X<shift>, shift,
-shmctl ID,CMD,ARG X<shmctl>, shmget KEY,SIZE,FLAGS X<shmget>, shmread
-ID,VAR,POS,SIZE X<shmread> X<shmwrite>, shmwrite ID,STRING,POS,SIZE,
-shutdown SOCKET,HOW X<shutdown>, sin EXPR X<sin> X<sine> X<asin>
-X<arcsine>, sin, sleep EXPR X<sleep> X<pause>, sleep, socket
-SOCKET,DOMAIN,TYPE,PROTOCOL X<socket>, socketpair
+-I<X> DIRHANDLE, -I<X>, abs VALUE X<abs> X<absolute>, abs, accept
+NEWSOCKET,GENERICSOCKET X<accept>, alarm SECONDS X<alarm> X<SIGALRM>
+X<timer>, alarm, atan2 Y,X X<atan2> X<arctangent> X<tan> X<tangent>, bind
+SOCKET,NAME X<bind>, binmode FILEHANDLE, LAYER X<binmode> X<binary> X<text>
+X<DOS> X<Windows>, binmode FILEHANDLE, bless REF,CLASSNAME X<bless>, bless
+REF, caller EXPR X<caller> X<call stack> X<stack> X<stack trace>, caller,
+chdir EXPR X<chdir> X<cd> X<directory, change>, chdir FILEHANDLE, chdir
+DIRHANDLE, chdir, chmod LIST X<chmod> X<permission> X<mode>, chomp VARIABLE
+X<chomp> X<INPUT_RECORD_SEPARATOR> X<$/> X<newline> X<eol>, chomp( LIST ),
+chomp, chop VARIABLE X<chop>, chop( LIST ), chop, chown LIST X<chown>
+X<owner> X<user> X<group>, chr NUMBER X<chr> X<character> X<ASCII>
+X<Unicode>, chr, chroot FILENAME X<chroot> X<root>, chroot, close
+FILEHANDLE X<close>, close, closedir DIRHANDLE X<closedir>, connect
+SOCKET,NAME X<connect>, continue BLOCK X<continue>, cos EXPR X<cos>
+X<cosine> X<acos> X<arccosine>, cos, crypt PLAINTEXT,SALT X<crypt>
+X<digest> X<hash> X<salt> X<plaintext> X<password> X<decrypt>
+X<cryptography> X<passwd> X<encrypt>, dbmclose HASH X<dbmclose>, dbmopen
+HASH,DBNAME,MASK X<dbmopen> X<dbm> X<ndbm> X<sdbm> X<gdbm>, defined EXPR
+X<defined> X<undef> X<undefined>, defined, delete EXPR X<delete>, die LIST
+X<die> X<throw> X<exception> X<raise> X<$@> X<abort>, do BLOCK X<do>
+X<block>, do SUBROUTINE(LIST) X<do>, do EXPR X<do>, dump LABEL X<dump>
+X<core> X<undump>, dump, each HASH X<each> X<hash, iterator>, eof
+FILEHANDLE X<eof> X<end of file> X<end-of-file>, eof (), eof, eval EXPR
+X<eval> X<try> X<catch> X<evaluate> X<parse> X<execute> X<error, handling>
+X<exception, handling>, eval BLOCK, eval, exec LIST X<exec> X<execute>,
+exec PROGRAM LIST, exists EXPR X<exists> X<autovivification>, exit EXPR
+X<exit> X<terminate> X<abort>, exit, exp EXPR X<exp> X<exponential>
+X<antilog> X<antilogarithm> X<e>, exp, fcntl FILEHANDLE,FUNCTION,SCALAR
+X<fcntl>, fileno FILEHANDLE X<fileno>, flock FILEHANDLE,OPERATION X<flock>
+X<lock> X<locking>, fork X<fork> X<child> X<parent>, format X<format>,
+formline PICTURE,LIST X<formline>, getc FILEHANDLE X<getc> X<getchar>
+X<character> X<file, read>, getc, getlogin X<getlogin> X<login>,
+getpeername SOCKET X<getpeername> X<peer>, getpgrp PID X<getpgrp> X<group>,
+getppid X<getppid> X<parent> X<pid>, getpriority WHICH,WHO X<getpriority>
+X<priority> X<nice>, getpwnam NAME X<getpwnam> X<getgrnam> X<gethostbyname>
+X<getnetbyname> X<getprotobyname> X<getpwuid> X<getgrgid> X<getservbyname>
+X<gethostbyaddr> X<getnetbyaddr> X<getprotobynumber> X<getservbyport>
+X<getpwent> X<getgrent> X<gethostent> X<getnetent> X<getprotoent>
+X<getservent> X<setpwent> X<setgrent> X<sethostent> X<setnetent>
+X<setprotoent> X<setservent> X<endpwent> X<endgrent> X<endhostent>
+X<endnetent> X<endprotoent> X<endservent>, getgrnam NAME, gethostbyname
+NAME, getnetbyname NAME, getprotobyname NAME, getpwuid UID, getgrgid GID,
+getservbyname NAME,PROTO, gethostbyaddr ADDR,ADDRTYPE, getnetbyaddr
+ADDR,ADDRTYPE, getprotobynumber NUMBER, getservbyport PORT,PROTO, getpwent,
+getgrent, gethostent, getnetent, getprotoent, getservent, setpwent,
+setgrent, sethostent STAYOPEN, setnetent STAYOPEN, setprotoent STAYOPEN,
+setservent STAYOPEN, endpwent, endgrent, endhostent, endnetent,
+endprotoent, endservent, getsockname SOCKET X<getsockname>, getsockopt
+SOCKET,LEVEL,OPTNAME X<getsockopt>, glob EXPR X<glob> X<wildcard>
+X<filename, expansion> X<expand>, glob, gmtime EXPR X<gmtime> X<UTC>
+X<Greenwich>, gmtime, goto LABEL X<goto> X<jump> X<jmp>, goto EXPR, goto
+&NAME, grep BLOCK LIST X<grep>, grep EXPR,LIST, hex EXPR X<hex>
+X<hexadecimal>, hex, import LIST X<import>, index STR,SUBSTR,POSITION
+X<index> X<indexOf> X<InStr>, index STR,SUBSTR, int EXPR X<int> X<integer>
+X<truncate> X<trunc> X<floor>, int, ioctl FILEHANDLE,FUNCTION,SCALAR
+X<ioctl>, join EXPR,LIST X<join>, keys HASH X<keys> X<key>, kill SIGNAL,
+LIST X<kill> X<signal>, last LABEL X<last> X<break>, last, lc EXPR X<lc>
+X<lowercase>, lc, lcfirst EXPR X<lcfirst> X<lowercase>, lcfirst, length
+EXPR X<length> X<size>, length, link OLDFILE,NEWFILE X<link>, listen
+SOCKET,QUEUESIZE X<listen>, local EXPR X<local>, localtime EXPR
+X<localtime> X<ctime>, localtime, lock THING X<lock>, log EXPR X<log>
+X<logarithm> X<e> X<ln> X<base>, log, lstat EXPR X<lstat>, lstat, m//, map
+BLOCK LIST X<map>, map EXPR,LIST, mkdir FILENAME,MASK X<mkdir> X<md>
+X<directory, create>, mkdir FILENAME, msgctl ID,CMD,ARG X<msgctl>, msgget
+KEY,FLAGS X<msgget>, msgrcv ID,VAR,SIZE,TYPE,FLAGS X<msgrcv>, msgsnd
+ID,MSG,FLAGS X<msgsnd>, my EXPR X<my>, my TYPE EXPR, my EXPR : ATTRS, my
+TYPE EXPR : ATTRS, next LABEL X<next> X<continue>, next, no Module VERSION
+LIST X<no>, no Module VERSION, no Module LIST, no Module, oct EXPR X<oct>
+X<octal> X<hex> X<hexadecimal> X<binary> X<bin>, oct, open FILEHANDLE,EXPR
+X<open> X<pipe> X<file, open> X<fopen>, open FILEHANDLE,MODE,EXPR, open
+FILEHANDLE,MODE,EXPR,LIST, open FILEHANDLE,MODE,REFERENCE, open FILEHANDLE,
+opendir DIRHANDLE,EXPR X<opendir>, ord EXPR X<ord> X<encoding>, ord, our
+EXPR X<our> X<global>, our EXPR TYPE, our EXPR : ATTRS, our TYPE EXPR :
+ATTRS, pack TEMPLATE,LIST X<pack>, package NAMESPACE X<package> X<module>
+X<namespace>, package, pipe READHANDLE,WRITEHANDLE X<pipe>, pop ARRAY
+X<pop> X<stack>, pop, pos SCALAR X<pos> X<match, position>, pos, print
+FILEHANDLE LIST X<print>, print LIST, print, printf FILEHANDLE FORMAT, LIST
+X<printf>, printf FORMAT, LIST, prototype FUNCTION X<prototype>, push
+ARRAY,LIST X<push> X<stack>, q/STRING/, qq/STRING/, qr/STRING/, qx/STRING/,
+qw/STRING/, quotemeta EXPR X<quotemeta> X<metacharacter>, quotemeta, rand
+EXPR X<rand> X<random>, rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET X<read>
+X<file, read>, read FILEHANDLE,SCALAR,LENGTH, readdir DIRHANDLE X<readdir>,
+readline EXPR X<readline> X<gets> X<fgets>, readlink EXPR X<readlink>,
+readlink, readpipe EXPR X<readpipe>, recv SOCKET,SCALAR,LENGTH,FLAGS
+X<recv>, redo LABEL X<redo>, redo, ref EXPR X<ref> X<reference>, ref,
+rename OLDNAME,NEWNAME X<rename> X<move> X<mv> X<ren>, require VERSION
+X<require>, require EXPR, require, reset EXPR X<reset>, reset, return EXPR
+X<return>, return, reverse LIST X<reverse> X<rev> X<invert>, rewinddir
+DIRHANDLE X<rewinddir>, rindex STR,SUBSTR,POSITION X<rindex>, rindex
+STR,SUBSTR, rmdir FILENAME X<rmdir> X<rd> X<directory, remove>, rmdir,
+s///, scalar EXPR X<scalar> X<context>, seek FILEHANDLE,POSITION,WHENCE
+X<seek> X<fseek> X<filehandle, position>, seekdir DIRHANDLE,POS X<seekdir>,
+select FILEHANDLE X<select> X<filehandle, default>, select, select
+RBITS,WBITS,EBITS,TIMEOUT X<select>, semctl ID,SEMNUM,CMD,ARG X<semctl>,
+semget KEY,NSEMS,FLAGS X<semget>, semop KEY,OPSTRING X<semop>, send
+SOCKET,MSG,FLAGS,TO X<send>, send SOCKET,MSG,FLAGS, setpgrp PID,PGRP
+X<setpgrp> X<group>, setpriority WHICH,WHO,PRIORITY X<setpriority>
+X<priority> X<nice> X<renice>, setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL
+X<setsockopt>, shift ARRAY X<shift>, shift, shmctl ID,CMD,ARG X<shmctl>,
+shmget KEY,SIZE,FLAGS X<shmget>, shmread ID,VAR,POS,SIZE X<shmread>
+X<shmwrite>, shmwrite ID,STRING,POS,SIZE, shutdown SOCKET,HOW X<shutdown>,
+sin EXPR X<sin> X<sine> X<asin> X<arcsine>, sin, sleep EXPR X<sleep>
+X<pause>, sleep, socket SOCKET,DOMAIN,TYPE,PROTOCOL X<socket>, socketpair
 SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL X<socketpair>, sort SUBNAME LIST
 X<sort> X<qsort> X<quicksort> X<mergesort>, sort BLOCK LIST, sort LIST,
 splice ARRAY,OFFSET,LENGTH,LIST X<splice>, splice ARRAY,OFFSET,LENGTH,
@@ -2249,12 +2249,12 @@ X<sprintf>, format parameter index, flags, vector flag, (minimum) width,
 precision, or maximum width X<precision>, size, order of arguments, sqrt
 EXPR X<sqrt> X<root> X<square root>, sqrt, srand EXPR X<srand> X<seed>
 X<randseed>, srand, stat FILEHANDLE X<stat> X<file, status> X<ctime>, stat
-EXPR, stat, study SCALAR X<study>, study, sub NAME BLOCK X<sub>, sub NAME
-(PROTO) BLOCK, sub NAME : ATTRS BLOCK, sub NAME (PROTO) : ATTRS BLOCK,
-substr EXPR,OFFSET,LENGTH,REPLACEMENT X<substr> X<substring> X<mid> X<left>
-X<right>, substr EXPR,OFFSET,LENGTH, substr EXPR,OFFSET, symlink
-OLDFILE,NEWFILE X<symlink> X<link> X<symbolic link> X<link, symbolic>,
-syscall NUMBER, LIST X<syscall> X<system call>, sysopen
+EXPR, stat DIRHANDLE, stat, study SCALAR X<study>, study, sub NAME BLOCK
+X<sub>, sub NAME (PROTO) BLOCK, sub NAME : ATTRS BLOCK, sub NAME (PROTO) :
+ATTRS BLOCK, substr EXPR,OFFSET,LENGTH,REPLACEMENT X<substr> X<substring>
+X<mid> X<left> X<right>, substr EXPR,OFFSET,LENGTH, substr EXPR,OFFSET,
+symlink OLDFILE,NEWFILE X<symlink> X<link> X<symbolic link> X<link,
+symbolic>, syscall NUMBER, LIST X<syscall> X<system call>, sysopen
 FILEHANDLE,FILENAME,MODE X<sysopen>, sysopen
 FILEHANDLE,FILENAME,MODE,PERMS, sysread FILEHANDLE,SCALAR,LENGTH,OFFSET
 X<sysread>, sysread FILEHANDLE,SCALAR,LENGTH, sysseek
@@ -5304,16 +5304,23 @@ callback
 
 =item Structure of a Regexp Program
 
-regnode_1, regnode_2, regnode_string, regnode_charclass,
-regnode_charclass_class
+C<regnode_1>, C<regnode_2>, C<regnode_string>, C<regnode_charclass>,
+C<regnode_charclass_class>
 
 =back
 
-=item PROCESS OVERVIEW
+=item Process Overview
+
+A. Compilation, 1. Parsing for size, 2. Parsing for construction, 3.
+Peep-hole optimisation and analysis, B. Execution, 4. Start position and
+no-match optimisations, 5. Program execution
 
 =over 4
 
 =item Compilation
+
+anchored fixed strings, floating fixed strings, minimum and maximum length
+requirements, start class, Beginning/End of line positions
 
 =item Execution
 
@@ -5323,13 +5330,21 @@ regnode_charclass_class
 
 =over 4
 
-=item UNICODE and Localization Support
+=item Unicode and Localisation Support
+
+=item Base Struct
+
+-, -, -, -
+
+=item De-allocation and Cloning
 
 =back
 
+=item SEE ALSO
+
 =item AUTHOR
 
-=item LICENSE
+=item LICENCE
 
 =item REFERENCES
 
@@ -5455,8 +5470,7 @@ PoisonNew X<PoisonNew>, PoisonWith X<PoisonWith>, Renew X<Renew>, Renewc
 X<Renewc>, Safefree X<Safefree>, savepv X<savepv>, savepvn X<savepvn>,
 savepvs X<savepvs>, savesharedpv X<savesharedpv>, savesharedpvn
 X<savesharedpvn>, savesvpv X<savesvpv>, StructCopy X<StructCopy>, Zero
-savepvs X<savepvs>, savesharedpv X<savesharedpv>, savesvpv X<savesvpv>,
-StructCopy X<StructCopy>, Zero X<Zero>, ZeroD X<ZeroD>
+X<Zero>, ZeroD X<ZeroD>
 
 =item Miscellaneous Functions
 
@@ -10206,16 +10220,6 @@ threads->is_detached()
 
 =back
 
-=item THREAD CONTEXT
-
-=over 4
-
-=item Explicit context
-
-=item Implicit context
-
-=back
-
 =item THREAD STACK SIZE
 
 threads->get_stack_size();, $size = $thr->get_stack_size();, $old_size =
@@ -11185,7 +11189,7 @@ $keep, $check, $modtime
 objects
 
 sv_undef, sv_yes, sv_no, svref_2object(SVREF), amagic_generation, init_av,
-check_av, begin_av, end_av, comppadlist, regex_padav, main_cv
+check_av, unitcheck_av, begin_av, end_av, comppadlist, regex_padav, main_cv
 
 =item Functions for Examining the Symbol Table
 
@@ -12125,6 +12129,8 @@ other) error log
 
 =back
 
+=item DOING MORE THAN PRINTING A MESSAGE IN THE EVENT OF PERL ERRORS
+
 =item MAKING WARNINGS APPEAR AS HTML COMMENTS
 
 =item OVERRIDING THE NAME OF THE PROGRAM
@@ -12605,19 +12611,15 @@ C<d_builtin_expect>, C<d_bzero>, C<d_c99_variadic_macros>, C<d_casti32>,
 C<d_castneg>, C<d_charvspr>, C<d_chown>, C<d_chroot>, C<d_chsize>,
 C<d_class>, C<d_clearenv>, C<d_closedir>, C<d_cmsghdr_s>, C<d_const>,
 C<d_copysignl>, C<d_cplusplus>, C<d_crypt>, C<d_crypt_r>, C<d_csh>,
-C<d_ctermid_r>, C<d_ctime_r>, C<d_cuserid>, C<d_dbl_dig>,
-C<d_dbminitproto>, C<d_difftime>, C<d_dirfd>, C<d_dirnamlen>, C<d_dlerror>,
-C<d_dlopen>, C<d_dlsymun>, C<d_dosuid>, C<d_drand48_r>, C<d_drand48proto>,
-C<d_dup2>, C<d_eaccess>, C<d_endgrent>, C<d_endgrent_r>, C<d_endhent>,
-C<d_copysignl>, C<d_crypt>, C<d_crypt_r>, C<d_csh>, C<d_ctermid_r>,
-C<d_ctime_r>, C<d_cuserid>, C<d_dbl_dig>, C<d_dbminitproto>, C<d_difftime>,
-C<d_dirfd>, C<d_dirnamlen>, C<d_dlerror>, C<d_dlopen>, C<d_dlsymun>,
-C<d_dosuid>, C<d_drand48_r>, C<d_drand48proto>, C<d_dup2>, C<d_eaccess>,
-C<d_endgrent>, C<d_endgrent_r>, C<d_endhent>, C<d_endhostent_r>,
-C<d_endnent>, C<d_endnetent_r>, C<d_endpent>, C<d_endprotoent_r>,
-C<d_endpwent>, C<d_endpwent_r>, C<d_endsent>, C<d_endservent_r>,
-C<d_eofnblk>, C<d_eunice>, C<d_faststdio>, C<d_fchdir>, C<d_fchmod>,
-C<d_fchown>, C<d_fcntl>, C<d_fcntl_can_lock>, C<d_fd_macros>, C<d_fd_set>,
+C<d_ctermid>, C<d_ctermid_r>, C<d_ctime_r>, C<d_cuserid>, C<d_dbl_dig>,
+C<d_dbminitproto>, C<d_difftime>, C<d_dir_dd_fd>, C<d_dirfd>,
+C<d_dirnamlen>, C<d_dlerror>, C<d_dlopen>, C<d_dlsymun>, C<d_dosuid>,
+C<d_drand48_r>, C<d_drand48proto>, C<d_dup2>, C<d_eaccess>, C<d_endgrent>,
+C<d_endgrent_r>, C<d_endhent>, C<d_endhostent_r>, C<d_endnent>,
+C<d_endnetent_r>, C<d_endpent>, C<d_endprotoent_r>, C<d_endpwent>,
+C<d_endpwent_r>, C<d_endsent>, C<d_endservent_r>, C<d_eofnblk>,
+C<d_eunice>, C<d_faststdio>, C<d_fchdir>, C<d_fchmod>, C<d_fchown>,
+C<d_fcntl>, C<d_fcntl_can_lock>, C<d_fd_macros>, C<d_fd_set>,
 C<d_fds_bits>, C<d_fgetpos>, C<d_finite>, C<d_finitel>, C<d_flexfnam>,
 C<d_flock>, C<d_flockproto>, C<d_fork>, C<d_fp_class>, C<d_fpathconf>,
 C<d_fpclass>, C<d_fpclassify>, C<d_fpclassl>, C<d_fpos64_t>, C<d_frexpl>,
@@ -12657,51 +12659,51 @@ C<d_off64_t>, C<d_old_pthread_create_joinable>, C<d_oldpthreads>,
 C<d_oldsock>, C<d_open3>, C<d_pathconf>, C<d_pause>,
 C<d_perl_otherlibdirs>, C<d_phostname>, C<d_pipe>, C<d_poll>,
 C<d_portable>, C<d_PRId64>, C<d_PRIeldbl>, C<d_PRIEUldbl>, C<d_PRIfldbl>,
-C<d_PRIFUldbl>, C<d_PRIgldbl>, C<d_PRIGUldbl>, C<d_PRIi64>, C<d_PRIo64>,
-C<d_PRIu64>, C<d_PRIx64>, C<d_PRIXU64>, C<d_procselfexe>, C<d_pseudofork>,
-C<d_pthread_atfork>, C<d_pthread_attr_setscope>, C<d_pthread_yield>,
-C<d_pwage>, C<d_pwchange>, C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>,
-C<d_pwgecos>, C<d_pwpasswd>, C<d_pwquota>, C<d_qgcvt>, C<d_quad>,
-C<d_random_r>, C<d_readdir>, C<d_readdir64_r>, C<d_readdir_r>,
-C<d_readlink>, C<d_readv>, C<d_recvmsg>, C<d_rename>, C<d_rewinddir>,
-C<d_rmdir>, C<d_safebcpy>, C<d_safemcpy>, C<d_sanemcmp>, C<d_sbrkproto>,
-C<d_scalbnl>, C<d_sched_yield>, C<d_scm_rights>, C<d_SCNfldbl>,
-C<d_seekdir>, C<d_select>, C<d_sem>, C<d_semctl>, C<d_semctl_semid_ds>,
-C<d_semctl_semun>, C<d_semget>, C<d_semop>, C<d_sendmsg>, C<d_setegid>,
-C<d_seteuid>, C<d_setgrent>, C<d_setgrent_r>, C<d_setgrps>, C<d_sethent>,
-C<d_sethostent_r>, C<d_setitimer>, C<d_setlinebuf>, C<d_setlocale>,
-C<d_setlocale_r>, C<d_setnent>, C<d_setnetent_r>, C<d_setpent>,
-C<d_setpgid>, C<d_setpgrp>, C<d_setpgrp2>, C<d_setprior>,
-C<d_setproctitle>, C<d_setprotoent_r>, C<d_setpwent>, C<d_setpwent_r>,
-C<d_setregid>, C<d_setresgid>, C<d_setresuid>, C<d_setreuid>, C<d_setrgid>,
-C<d_setruid>, C<d_setsent>, C<d_setservent_r>, C<d_setsid>, C<d_setvbuf>,
-C<d_sfio>, C<d_shm>, C<d_shmat>, C<d_shmatprototype>, C<d_shmctl>,
-C<d_shmdt>, C<d_shmget>, C<d_sigaction>, C<d_signbit>, C<d_sigprocmask>,
-C<d_sigsetjmp>, C<d_sitearch>, C<d_snprintf>, C<d_sockatmark>,
-C<d_sockatmarkproto>, C<d_socket>, C<d_socklen_t>, C<d_sockpair>,
-C<d_socks5_init>, C<d_sprintf_returns_strlen>, C<d_sqrtl>, C<d_srand48_r>,
-C<d_srandom_r>, C<d_sresgproto>, C<d_sresuproto>, C<d_statblks>,
-C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>,
-C<d_stdio_ptr_lval>, C<d_stdio_ptr_lval_nochange_cnt>,
-C<d_stdio_ptr_lval_sets_cnt>, C<d_stdio_stream_array>, C<d_stdiobase>,
-C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>,
-C<d_strerror>, C<d_strerror_r>, C<d_strftime>, C<d_strlcat>, C<d_strlcpy>,
-C<d_strtod>, C<d_strtol>, C<d_strtold>, C<d_strtoll>, C<d_strtoq>,
-C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>,
-C<d_symlink>, C<d_syscall>, C<d_syscallproto>, C<d_sysconf>,
-C<d_sysernlst>, C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>,
-C<d_tcsetpgrp>, C<d_telldir>, C<d_telldirproto>, C<d_time>, C<d_times>,
-C<d_tm_tm_gmtoff>, C<d_tm_tm_zone>, C<d_tmpnam_r>, C<d_truncate>,
-C<d_ttyname_r>, C<d_tzname>, C<d_u32align>, C<d_ualarm>, C<d_umask>,
-C<d_uname>, C<d_union_semun>, C<d_unordered>, C<d_unsetenv>, C<d_usleep>,
-C<d_usleepproto>, C<d_ustat>, C<d_vendorarch>, C<d_vendorbin>,
-C<d_vendorlib>, C<d_vendorscript>, C<d_vfork>, C<d_void_closedir>,
-C<d_voidsig>, C<d_voidtty>, C<d_volatile>, C<d_vprintf>, C<d_vsnprintf>,
-C<d_wait4>, C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>, C<d_writev>,
-C<d_xenix>, C<date>, C<db_hashtype>, C<db_prefixtype>, C<db_version_major>,
-C<db_version_minor>, C<db_version_patch>, C<defvoidused>, C<direntrytype>,
-C<dlext>, C<dlsrc>, C<doublesize>, C<drand01>, C<drand48_r_proto>,
-C<dynamic_ext>
+C<d_PRIFUldbl>, C<d_PRIgldbl>, C<d_PRIGUldbl>, C<d_PRIi64>,
+C<d_printf_format_null>, C<d_PRIo64>, C<d_PRIu64>, C<d_PRIx64>,
+C<d_PRIXU64>, C<d_procselfexe>, C<d_pseudofork>, C<d_pthread_atfork>,
+C<d_pthread_attr_setscope>, C<d_pthread_yield>, C<d_pwage>, C<d_pwchange>,
+C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>, C<d_pwpasswd>,
+C<d_pwquota>, C<d_qgcvt>, C<d_quad>, C<d_random_r>, C<d_readdir>,
+C<d_readdir64_r>, C<d_readdir_r>, C<d_readlink>, C<d_readv>, C<d_recvmsg>,
+C<d_rename>, C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>, C<d_safemcpy>,
+C<d_sanemcmp>, C<d_sbrkproto>, C<d_scalbnl>, C<d_sched_yield>,
+C<d_scm_rights>, C<d_SCNfldbl>, C<d_seekdir>, C<d_select>, C<d_sem>,
+C<d_semctl>, C<d_semctl_semid_ds>, C<d_semctl_semun>, C<d_semget>,
+C<d_semop>, C<d_sendmsg>, C<d_setegid>, C<d_seteuid>, C<d_setgrent>,
+C<d_setgrent_r>, C<d_setgrps>, C<d_sethent>, C<d_sethostent_r>,
+C<d_setitimer>, C<d_setlinebuf>, C<d_setlocale>, C<d_setlocale_r>,
+C<d_setnent>, C<d_setnetent_r>, C<d_setpent>, C<d_setpgid>, C<d_setpgrp>,
+C<d_setpgrp2>, C<d_setprior>, C<d_setproctitle>, C<d_setprotoent_r>,
+C<d_setpwent>, C<d_setpwent_r>, C<d_setregid>, C<d_setresgid>,
+C<d_setresuid>, C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>,
+C<d_setservent_r>, C<d_setsid>, C<d_setvbuf>, C<d_sfio>, C<d_shm>,
+C<d_shmat>, C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>,
+C<d_sigaction>, C<d_signbit>, C<d_sigprocmask>, C<d_sigsetjmp>,
+C<d_sitearch>, C<d_snprintf>, C<d_sockatmark>, C<d_sockatmarkproto>,
+C<d_socket>, C<d_socklen_t>, C<d_sockpair>, C<d_socks5_init>,
+C<d_sprintf_returns_strlen>, C<d_sqrtl>, C<d_srand48_r>, C<d_srandom_r>,
+C<d_sresgproto>, C<d_sresuproto>, C<d_statblks>, C<d_statfs_f_flags>,
+C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>,
+C<d_stdio_ptr_lval_nochange_cnt>, C<d_stdio_ptr_lval_sets_cnt>,
+C<d_stdio_stream_array>, C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>,
+C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>, C<d_strerror>, C<d_strerror_r>,
+C<d_strftime>, C<d_strlcat>, C<d_strlcpy>, C<d_strtod>, C<d_strtol>,
+C<d_strtold>, C<d_strtoll>, C<d_strtoq>, C<d_strtoul>, C<d_strtoull>,
+C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>, C<d_symlink>, C<d_syscall>,
+C<d_syscallproto>, C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>,
+C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
+C<d_telldirproto>, C<d_time>, C<d_times>, C<d_tm_tm_gmtoff>,
+C<d_tm_tm_zone>, C<d_tmpnam_r>, C<d_truncate>, C<d_ttyname_r>, C<d_tzname>,
+C<d_u32align>, C<d_ualarm>, C<d_umask>, C<d_uname>, C<d_union_semun>,
+C<d_unordered>, C<d_unsetenv>, C<d_usleep>, C<d_usleepproto>, C<d_ustat>,
+C<d_vendorarch>, C<d_vendorbin>, C<d_vendorlib>, C<d_vendorscript>,
+C<d_vfork>, C<d_void_closedir>, C<d_voidsig>, C<d_voidtty>, C<d_volatile>,
+C<d_vprintf>, C<d_vsnprintf>, C<d_wait4>, C<d_waitpid>, C<d_wcstombs>,
+C<d_wctomb>, C<d_writev>, C<d_xenix>, C<date>, C<db_hashtype>,
+C<db_prefixtype>, C<db_version_major>, C<db_version_minor>,
+C<db_version_patch>, C<defvoidused>, C<direntrytype>, C<dlext>, C<dlsrc>,
+C<doublesize>, C<drand01>, C<drand48_r_proto>, C<dynamic_ext>
 
 =item e
 
@@ -13237,6 +13239,34 @@ Dumper
 =item BUGS
 
 =item SEE ALSO
+
+=back
+
+=head2 Devel::InnerPackage - find all the inner packages of a package
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=over 4
+
+=item list_packages <package name>
+
+=back
+
+=back
+
+=over 4
+
+=item AUTHOR
+
+=item COPYING
+
+=item BUGS
 
 =back
 
@@ -18170,7 +18200,8 @@ ffround ( +$scale ), ffround ( -$scale ), ffround ( 0 ), fround  ( +$scale
 
 =item CAVEATS
 
-stringify, bstr(), bdiv, Modifying and =, bpow, precision() vs. accuracy()
+stringify, bstr(), bdiv, brsft, Modifying and =, bpow, precision() vs.
+accuracy()
 
 =item SEE ALSO
 
@@ -18194,114 +18225,132 @@ Input, Output
 
 =over 4
 
-=item config
+=item config()
 
-=item accuracy
+=item accuracy()
 
-=item precision
+=item precision()
 
-=item brsft
+=item brsft()
 
-=item new
+=item new()
 
-=item bnan
+=item from_oct()
 
-=item bzero
+=item from_hex()
 
-=item binf
+=item from_bin()
 
-=item bone
+=item bnan()
+
+=item bzero()
+
+=item binf()
+
+=item bone()
 
 =item is_one()/is_zero()/is_nan()/is_inf()
 
-=item is_pos()/is_neg()
+=item is_pos()/is_neg()/is_positive()/is_negative()
 
 	$x->is_pos();			# true if > 0
 	$x->is_neg();			# true if < 0
 
 =item is_odd()/is_even()/is_int()
 
-=item bcmp
+=item bcmp()
 
-=item bacmp
+=item bacmp()
 
-=item sign
+=item sign()
 
-=item digit
+=item digit()
 
-=item bneg
+=item bneg()
 
-=item babs
+=item babs()
 
-=item bnorm
+=item bnorm()
 
-=item bnot
+=item bnot()
 
-=item binc
+=item binc()
 
-=item bdec
+=item bdec()
 
-=item badd
+=item badd()
 
-=item bsub
+=item bsub()
 
-=item bmul
+=item bmul()
 
-=item bdiv
+=item bdiv()
 
-=item bmod
+=item bmod()
 
-=item bmodinv
+=item bmodinv()
 
-=item bmodpow
+=item bmodpow()
 
-=item bpow
+=item bpow()
 
-=item blsft
+=item blsft()
 
-=item brsft
+=item brsft()
 
-=item band
+=item band()
 
-=item bior
+=item bior()
 
-=item bxor
+=item bxor()
 
-=item bnot
+=item bnot()
 
-=item bsqrt
+=item bsqrt()
 
-=item bfac
+=item bfac()
 
-=item round
+=item round()
 
-=item bround
+=item bround()
 
-=item bfround
+=item bfround()
 
-=item bfloor
+=item bfloor()
 
-=item bceil
+=item bceil()
 
-=item bgcd
+=item bgcd()
 
-=item blcm
+=item blcm()
 
-=item exponent
+=item exponent()
 
-=item mantissa
+=item mantissa()
 
-=item parts
+=item parts()
 
-=item copy
+=item copy()
 
-=item as_int
+=item as_int()/as_number()
 
-=item bsstr
+=item bsstr()
 
-=item as_hex
+=item as_hex()
 
-=item as_bin
+=item as_bin()
+
+=item as_oct()
+
+=item numify()
+
+=item modify()
+
+=item upgrade()/downgrade()
+
+=item div_scale()
+
+=item round_mode()
 
 =back
 
@@ -18317,8 +18366,8 @@ Input, Output
 
 =item Rounding mode R
 
-'trunc', 'even', 'odd', '+inf', '-inf', 'zero', Precision, Accuracy
-(significant digits), Setting/Accessing, Creating numbers, Usage,
+'trunc', 'even', 'odd', '+inf', '-inf', 'zero', 'common', Precision,
+Accuracy (significant digits), Setting/Accessing, Creating numbers, Usage,
 Precedence, Overriding globals, Local settings, Rounding, Default values,
 Remarks
 
@@ -18473,11 +18522,23 @@ the same terms as Perl itself.
 
 =item parts()
 
-=item as_int()
+=item numify()
+
+=item as_int()/as_number()
 
 =item as_hex()
 
 =item as_bin()
+
+=item as_oct()
+
+=item from_hex()/from_bin()/from_oct()
+
+=item length()
+
+=item digit()
+
+=item bnorm()
 
 =item bfac()
 
@@ -18487,13 +18548,15 @@ the same terms as Perl itself.
 
 =item bmod()
 
+=item bneg()
+
 =item is_one()
 
 =item is_zero()
 
-=item is_pos()
+=item is_pos()/is_positive()
 
-=item is_neg()
+=item is_neg()/is_negative()
 
 =item is_int()
 
@@ -18511,7 +18574,23 @@ the same terms as Perl itself.
 
 	$x->bsqrt();
 
-=item config
+=item broot()
+
+	$x->broot($n);
+
+=item badd()/bmul()/bsub()/bdiv()/bdec()/binc()
+
+=item copy()
+
+=item bstr()/bsstr()
+
+=item bacmp()/bcmp()
+
+=item blsft()/brsft()
+
+=item bpow()
+
+=item config()
 
 =back
 
@@ -18761,6 +18840,86 @@ Storable use
 =over 4
 
 =item DESCRIPTION
+
+=back
+
+=head2 Module::Pluggable - automatically give your module the ability to
+have plugins
+
+=over 4
+
+=item SYNOPSIS
+
+=item EXAMPLE
+
+=item DESCRIPTION
+
+=item ADVANCED USAGE
+
+=item INNER PACKAGES
+
+=item OPTIONS
+
+=over 4
+
+=item sub_name
+
+=item search_path
+
+=item search_dirs 
+
+=item instantiate
+
+=item require
+
+=item inner
+
+=item only
+
+=item except
+
+=item package
+
+=item file_regex
+
+=back
+
+=item METHODs
+
+=over 4
+
+=item search_path
+
+=back
+
+=item FUTURE PLANS
+
+=item AUTHOR
+
+=item COPYING
+
+=item BUGS
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Pluggable::Object - automatically give your module the
+ability to have plugins
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=item COPYING
+
+=item BUGS
+
+=item SEE ALSO
 
 =back
 
@@ -21098,6 +21257,8 @@ set_prototype CODEREF, PROTOTYPE, tainted EXPR, weaken REF
 =item Multiple packages and fully qualified subroutine names
 
 =back
+
+B<_make_cmd>
 
 =head2 Shell - run shell commands transparently within perl
 

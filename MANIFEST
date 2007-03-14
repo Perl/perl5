@@ -129,7 +129,6 @@ ext/B/t/f_map.t			converted to optreeCheck()s
 ext/B/t/f_sort			optree test raw material
 ext/B/t/f_sort.t		optree test raw material
 ext/B/t/lint.t		See if B::Lint works
-ext/B/t/pluglib/B/Lint/Plugin/Test.pm	See if B::Lint works
 ext/B/Todo		Compiler backend Todo list
 ext/B/t/OptreeCheck.pm		optree comparison tool
 ext/B/t/optree_check.t		test OptreeCheck apparatus
@@ -141,11 +140,12 @@ ext/B/t/optree_sort.t		inplace sort optimization regression
 ext/B/t/optree_specials.t	BEGIN, END, etc code
 ext/B/t/optree_varinit.t	my,our,local var init optimization
 ext/B/t/o.t		See if O works
+ext/B/t/pluglib/B/Lint/Plugin/Test.pm	See if B::Lint works
+ext/B/t/pragma.t	See if user pragmas work.
 ext/B/t/showlex.t	See if B::ShowLex works
 ext/B/t/stash.t		See if B::Stash works
 ext/B/t/terse.t		See if B::Terse works
 ext/B/t/xref.t		See if B::Xref works
-ext/B/t/pragma.t	See if user pragmas work.
 ext/B/typemap			Compiler backend interface types
 ext/ByteLoader/bytecode.h	Bytecode header for bytecode loader
 ext/ByteLoader/ByteLoader.pm	Bytecode loader Perl module
@@ -807,9 +807,9 @@ ext/POSIX/t/waitpid.t		See if waitpid works
 ext/POSIX/typemap		POSIX extension interface types
 ext/re/hints/mpeix.pl		Hints for re for named architecture
 ext/re/Makefile.PL		re extension makefile writer
-ext/re/re_top.h			re extension symbol hiding header
 ext/re/re_comp.h		re extension wrapper for regcomp.h
 ext/re/re.pm			re extension Perl module
+ext/re/re_top.h			re extension symbol hiding header
 ext/re/re.xs			re extension external subroutines
 ext/re/t/re.t			see if re pragma works
 ext/Safe/t/safe1.t		See if Safe works
@@ -1948,9 +1948,9 @@ lib/Search/Dict.pm		Perform binary search on dictionaries
 lib/Search/Dict.t		See if Search::Dict works
 lib/SelectSaver.pm		Enforce proper select scoping
 lib/SelectSaver.t		See if SelectSaver works
+lib/SelfLoader-buggy.t		See if SelfLoader works
 lib/SelfLoader.pm		Load functions only on demand
 lib/SelfLoader.t		See if SelfLoader works
-lib/SelfLoader-buggy.t		See if SelfLoader works
 lib/Shell.pm			Make AUTOLOADed system() calls
 lib/Shell.t			Tests for above
 lib/shellwords.pl		Perl library to split into words with shell quoting
@@ -2975,8 +2975,8 @@ t/op/regmesg.t			See if one can get regular expression errors
 t/op/repeat.t			See if x operator works
 t/op/re_tests			Regular expressions for regexp.t
 t/op/reverse.t			See if reverse operator works
-t/op/rxcode.t			See if /(?{ code })/ works
 t/op/runlevel.t			See if die() works from perl_call_*()
+t/op/rxcode.t			See if /(?{ code })/ works
 t/op/sleep.t			See if sleep works
 t/op/sort.t			See if sort works
 t/op/splice.t			See if splice works
