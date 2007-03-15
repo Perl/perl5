@@ -20,6 +20,7 @@ package Storable; @ISA = qw(Exporter DynaLoader);
 );
 
 use AutoLoader;
+use FileHandle;
 use vars qw($canonical $forgive_me $VERSION);
 
 $VERSION = '2.15_02';
@@ -116,7 +117,8 @@ EOM
 
 sub file_magic {
     my $file = shift;
-    open(my $fh, "<", $file) || die "Can't open '$file': $!";
+    my $fh = new FileHandle;
+    open($fh, "<". $file) || die "Can't open '$file': $!";
     binmode($fh);
     defined(sysread($fh, my $buf, 32)) || die "Can't read from '$file': $!";
     close($fh);

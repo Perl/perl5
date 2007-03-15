@@ -385,7 +385,7 @@ plan tests => 31 + 2 * @tests;
 my $file = "xx-$$.pst";
 
 is(eval { Storable::file_magic($file) }, undef, "empty file give undef");
-like($@, qr/^Can't open '\Q$file\E':/, "...and croaks");
+like($@, qq{/^Can't open '\Q$file\E':/}, "...and croaks");
 is(Storable::file_magic(__FILE__), undef, "not an image");
 
 store({}, $file);
@@ -395,15 +395,24 @@ store({}, $file);
     ok($info, "got info");
     is($info->{file}, $file, "file set");
     is($info->{hdrsize}, 11 + length($Config{byteorder}), "hdrsize");
-    like($info->{version}, qr/^2\.\d+$/, "sane version");
+    like($info->{version}, q{/^2\.\d+$/}, "sane version");
     is($info->{version_nv}, Storable::BIN_WRITE_VERSION_NV, "version_nv match");
     is($info->{major}, 2, "sane major");
     ok($info->{minor}, "have minor");
     ok($info->{minor} >= Storable::BIN_WRITE_MINOR, "large enough minor");
 
     ok(!$info->{netorder}, "no netorder");
-    for (qw(byteorder intsize longsize ptrsize nvsize)) {
-	is($info->{$_}, $Config{$_}, "$_ match Config");
+
+    my %attrs = (
+        nvsize  => 5.006, 
+        ptrsize => 5.005, 
+        map {$_ => 5.004} qw(byteorder intsize longsize)
+    );
+    for my $attr (keys %attrs) {
+        SKIP: {
+            skip "attribute $attr not available on this version of Perl", 1 if $attrs{$attr} > $];
+            is($info->{$attr}, $Config{$attr}, "$attr match Config");
+        }
     }
 }
 
@@ -414,7 +423,7 @@ nstore({}, $file);
     ok($info, "got info");
     is($info->{file}, $file, "file set");
     is($info->{hdrsize}, 6, "hdrsize");
-    like($info->{version}, qr/^2\.\d+$/, "sane version");
+    like($info->{version}, q{/^2\.\d+$/}, "sane version");
     is($info->{version_nv}, Storable::BIN_WRITE_VERSION_NV, "version_nv match");
     is($info->{major}, 2, "sane major");
     ok($info->{minor}, "have minor");
