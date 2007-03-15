@@ -6291,7 +6291,11 @@ static SV *dclone(pTHX_ SV *sv)
 	 * Tied elements seem to need special handling.
 	 */
 
-	if (SvTYPE(sv) == SVt_PVLV && SvRMAGICAL(sv) && mg_find(sv, 'p')) {
+	if ((SvTYPE(sv) == SVt_PVLV
+#if PERL_VERSION < 6
+	     || SvTYPE(sv) == SVt_PVMG
+#endif
+	     ) && SvRMAGICAL(sv) && mg_find(sv, 'p')) {
 		mg_get(sv);
 	}
 
