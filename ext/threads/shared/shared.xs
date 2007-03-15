@@ -412,7 +412,6 @@ Perl_sharedsv_find(pTHX_ SV *sv)
 void
 Perl_sharedsv_associate(pTHX_ SV *sv, SV *ssv)
 {
-    dTHXc;
     MAGIC *mg = 0;
 
     /* If we are asked for any private ops we need a thread */
@@ -551,14 +550,43 @@ Perl_sharedsv_share(pTHX_ SV *sv)
 }
 
 
-#if defined(WIN32) || defined(OS2)
+#ifdef WIN32
+/* Number of milliseconds from 1/1/1601 to 1/1/1970 */
+#define EPOCH_BIAS      11644473600000.
+
+/* Returns relative time in milliseconds.  (Adapted from Time::HiRes.) */
+STATIC DWORD
+S_abs_2_rel_milli(double abs)
+{
+    double rel;
+
+    /* Get current time (in units of 100 nanoseconds since 1/1/1601) */
+    union {
+        FILETIME         ft;
+        unsigned __int64 i64;
+    } now;
+
+    GetSystemTimeAsFileTime(&now.ft);
+
+    /* Relative time in milliseconds */
+    rel = (abs * 1000.) - (((double)now.i64 / 10000.) - EPOCH_BIAS);
+
+    if (rel <= 0.0) {
+        return (0);
+    }
+    return (DWORD)rel;
+}
+
+#else
+# if defined(OS2)
 #  define ABS2RELMILLI(abs)             \
     do {                                \
         abs -= (double)time(NULL);      \
         if (abs > 0) { abs *= 1000; }   \
         else         { abs  = 0;    }   \
     } while (0)
-#endif /* WIN32 || OS2 */
+# endif /* OS2 */
+#endif /* WIN32 */
 
 /* Do OS-specific condition timed wait */
 
@@ -571,12 +599,10 @@ Perl_sharedsv_cond_timedwait(perl_cond *cond, perl_mutex *mut, double abs)
 #  ifdef WIN32
     int got_it = 0;
 
-    ABS2RELMILLI(abs);
-
     cond->waiters++;
     MUTEX_UNLOCK(mut);
     /* See comments in win32/win32thread.h COND_WAIT vis-a-vis race */
-    switch (WaitForSingleObject(cond->sem, (DWORD)abs)) {
+    switch (WaitForSingleObject(cond->sem, S_abs_2_rel_milli(abs))) {
         case WAIT_OBJECT_0:   got_it = 1; break;
         case WAIT_TIMEOUT:                break;
         default:
@@ -708,7 +734,7 @@ sharedsv_scalar_store(pTHX_ SV *sv, SV *ssv)
         SV *sobj = Perl_sharedsv_find(aTHX_ obj);
         if (sobj) {
             SHARED_CONTEXT;
-            SvUPGRADE(ssv, SVt_RV);
+            (void)SvUPGRADE(ssv, SVt_RV);
             sv_setsv_nomg(ssv, &PL_sv_undef);
 
             SvRV_set(ssv, SvREFCNT_inc(sobj));
@@ -1253,6 +1279,9 @@ NEXTKEY(SV *obj, SV *oldkey)
         char* key = NULL;
         I32 len = 0;
         HE* entry;
+
+        PERL_UNUSED_VAR(oldkey);
+
         ENTER_LOCK;
         SHARED_CONTEXT;
         entry = hv_iternext((HV*) sobj);

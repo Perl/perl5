@@ -1,6 +1,12 @@
 Revision history for Perl extension threads::shared.
 
-1.07 - Mon Feb  5 15:41:50 EST 2007
+1.08 Wed Mar 14 12:40:57 EDT 2007
+	- Sub-second resolution for cont_timedwait under WIN32
+	    (courtesy of Dean Arnold)
+	- Fix compiler warnings
+	- Upgraded ppport.h to Devel::PPPort 3.11
+
+1.07 Wed Feb  7 10:44:22 EST 2007
 	- POD tweaks per Wolfgang Laun
 
 1.06 Wed Dec 20 14:01:57 EST 2006

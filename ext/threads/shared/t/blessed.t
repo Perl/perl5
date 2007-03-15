@@ -99,7 +99,7 @@ ok(23, ref($$hobj{'array'}) eq 'yang', "blessed array in hash");
 ok(24, ref($$hobj{'scalar'}) eq 'baz', "blessed scalar in hash");
 ok(25, ${$$hobj{'scalar'}} eq '3', "blessed scalar in hash contents");
 
-threads->create(sub {
+threads->new(sub {
                 # Rebless objects
                 bless $hobj, 'oof';
                 bless $aobj, 'rab';

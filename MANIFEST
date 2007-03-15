@@ -1133,6 +1133,7 @@ ext/threads/shared/t/no_share.t	Tests for disabled share on variables.
 ext/threads/shared/t/shared_attr.t	Test :shared attribute
 ext/threads/shared/t/sv_refs.t	thread shared variables
 ext/threads/shared/t/sv_simple.t	thread shared variables
+ext/threads/shared/t/waithires.t	Test sub-second cond_timedwait
 ext/threads/shared/t/wait.t	Test cond_wait and cond_timedwait
 ext/threads/t/basic.t		ithreads
 ext/threads/t/blocks.t		Test threads in special blocks
