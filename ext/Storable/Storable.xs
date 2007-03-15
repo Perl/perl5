@@ -6292,7 +6292,7 @@ static SV *dclone(pTHX_ SV *sv)
 	 */
 
 	if ((SvTYPE(sv) == SVt_PVLV
-#if PERL_VERSION < 6
+#if PERL_VERSION < 8
 	     || SvTYPE(sv) == SVt_PVMG
 #endif
 	     ) && SvRMAGICAL(sv) && mg_find(sv, 'p')) {
