@@ -1178,10 +1178,14 @@ term	:	termbinop
 			{ $$ = newUNOP(IVAL($1), 0, $2);
 			  TOKEN_GETMAD($1,$$,'o');
 			}
-	|	REQUIRE                              /* require, $_ implied *//* FIMXE for MAD needed? */
-			{ $$ = newOP(OP_REQUIRE, $1 ? OPf_SPECIAL : 0); }
-	|	REQUIRE term                         /* require Foo *//* FIMXE for MAD needed? */
-			{ $$ = newUNOP(OP_REQUIRE, $1 ? OPf_SPECIAL : 0, $2); }
+	|	REQUIRE                              /* require, $_ implied */
+			{ $$ = newOP(OP_REQUIRE, $1 ? OPf_SPECIAL : 0);
+			  TOKEN_GETMAD($1,$$,'o');
+			}
+	|	REQUIRE term                         /* require Foo */
+			{ $$ = newUNOP(OP_REQUIRE, $1 ? OPf_SPECIAL : 0, $2);
+			  TOKEN_GETMAD($1,$$,'o');
+			}
 	|	UNIOPSUB
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, scalar($1)); }
 	|	UNIOPSUB term                        /* Sub treated as unop */
