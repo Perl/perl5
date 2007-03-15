@@ -10,7 +10,6 @@
 use strict;
 use warnings;
 use Carp;
-use lib '/home/larry/src/p55';
 
 use P5AST;
 use P5re;
@@ -19,7 +18,7 @@ my $dowarn = 0;
 my $YAML = 0;
 my $deinterpolate;
 
-while (@ARGV and $ARGV[0] =~ /^-/) {
+while (@ARGV and $ARGV[0] =~ /^-./) {
     my $switch = shift;
     if ($switch eq '-w') {
 	$dowarn = 1;
@@ -698,7 +697,7 @@ sub ast {
 	return P5AST::listop->new(Kids => [@before,@retval]);
     }
 
-    push @retval, $self->madness('o (');
+    push @retval, $self->madness('o ( [ {');
 
     my @newkids;
     for my $kid (@{$$self{Kids}}) {
@@ -715,7 +714,7 @@ sub ast {
     }
     push @retval, @newkids;
 
-    push @retval, $self->madness(')');
+    push @retval, $self->madness('} ] )');
     return $self->newtype->new(Kids => [@before,@retval,@after]);
 }
 
