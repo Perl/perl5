@@ -394,7 +394,7 @@ my %msg;
                         $toks[$i] = '[\da-f]+';
                    }
                 } elsif( length( $toks[$i] ) ){
-                    $toks[$i] =~ s/^.*$/\Q$&\E/;
+                    $toks[$i] = quotemeta $toks[$i];
                     $conlen += length( $toks[$i] );
                 }
             }  
