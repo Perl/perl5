@@ -125,8 +125,8 @@ and it is called thusly
 			   $wday, $yday, $isdst);
 
 The C<$mon> is zero-based: January equals C<0>.  The C<$year> is
-1900-based: 2001 equals C<101>.  The C<$wday>, C<$yday>, and C<$isdst>
-default to zero (and the first two are usually ignored anyway).
+1900-based: 2001 equals C<101>.  C<$wday> and C<$yday> default to zero
+(and are usually ignored anyway), and C<$isdst> defaults to -1.
 
 =item asin
 
@@ -857,7 +857,7 @@ Convert date/time info to a calendar time.
 
 Synopsis:
 
-	mktime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = 0)
+	mktime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = -1)
 
 The month (C<mon>), weekday (C<wday>), and yearday (C<yday>) begin at zero.
 I.e. January is 0, not 1; Sunday is 0, not 1; January 1st is 0, not 1.  The

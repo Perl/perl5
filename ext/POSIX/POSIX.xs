@@ -1727,7 +1727,7 @@ tcsendbreak(fd, duration)
 	int		duration
 
 char *
-asctime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = 0)
+asctime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = -1)
 	int		sec
 	int		min
 	int		hour
@@ -1781,7 +1781,7 @@ difftime(time1, time2)
 	Time_t		time2
 
 SysRetLong
-mktime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = 0)
+mktime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = -1)
 	int		sec
 	int		min
 	int		hour
