@@ -535,8 +535,7 @@ you can use the Configure command line option -Uusedl.
 
 Currently, for most systems, the main perl executable is built by
 linking the "perl library" libperl.a with perlmain.o, your static
-extensions (usually just DynaLoader.a) and various extra libraries,
-such as -lm.
+extensions, and various extra libraries, such as -lm.
 
 On some systems that support dynamic loading, it may be possible to
 replace libperl.a with a shared libperl.so.  If you anticipate building
