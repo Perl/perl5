@@ -2,8 +2,11 @@
 
 # Tests for the coderef-in-@INC feature
 
-my $can_fork = 0;
-my $minitest = $ENV{PERL_CORE_MINITEST};
+use Config;
+
+my $can_fork   = 0;
+my $minitest   = $ENV{PERL_CORE_MINITEST};
+my $has_perlio = $Config{useperlio};
 
 BEGIN {
     chdir 't' if -d 't';
@@ -11,9 +14,7 @@ BEGIN {
 }
 
 if (!$minitest) {
-    use Config; 
-    if (PerlIO::Layer->find('perlio') && $Config{d_fork} &&
-	eval 'require POSIX; 1') {
+    if ($Config{d_fork} && eval 'require POSIX; 1') {
 	$can_fork = 1;
     }
 }
@@ -212,27 +213,32 @@ is( $ret, 'abc', 'do "abc.pl" sees return value' );
 
 exit if $minitest;
 
-pop @INC;
+SKIP: {
+    skip( "No PerlIO available", 3 ) unless $has_perlio;
+    pop @INC;
 
-push @INC, sub {
-    my ($cr, $filename) = @_;
-    my $module = $filename; $module =~ s,/,::,g; $module =~ s/\.pm$//;
-    open my $fh, '<', \"package $module; sub complain { warn q() }; \$::file = __FILE__;"
-	or die $!;
-    $INC{$filename} = "/custom/path/to/$filename";
-    return $fh;
-};
+    push @INC, sub {
+        my ($cr, $filename) = @_;
+        my $module = $filename; $module =~ s,/,::,g; $module =~ s/\.pm$//;
+        open my $fh, '<',
+             \"package $module; sub complain { warn q() }; \$::file = __FILE__;"
+	    or die $!;
+        $INC{$filename} = "/custom/path/to/$filename";
+        return $fh;
+    };
 
-require Publius::Vergilius::Maro;
-is( $INC{'Publius/Vergilius/Maro.pm'}, '/custom/path/to/Publius/Vergilius/Maro.pm', '%INC set correctly');
-is( our $file, '/custom/path/to/Publius/Vergilius/Maro.pm', '__FILE__ set correctly' );
-{
-    my $warning;
-    local $SIG{__WARN__} = sub { $warning = shift };
-    Publius::Vergilius::Maro::complain();
-    like( $warning, qr{something's wrong at /custom/path/to/Publius/Vergilius/Maro.pm}, 'warn() reports correct file source' );
+    require Publius::Vergilius::Maro;
+    is( $INC{'Publius/Vergilius/Maro.pm'},
+        '/custom/path/to/Publius/Vergilius/Maro.pm', '%INC set correctly');
+    is( our $file, '/custom/path/to/Publius/Vergilius/Maro.pm',
+        '__FILE__ set correctly' );
+    {
+        my $warning;
+        local $SIG{__WARN__} = sub { $warning = shift };
+        Publius::Vergilius::Maro::complain();
+        like( $warning, qr{something's wrong at /custom/path/to/Publius/Vergilius/Maro.pm}, 'warn() reports correct file source' );
+    }
 }
-
 pop @INC;
 
 if ($can_fork) {
