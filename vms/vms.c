@@ -6094,8 +6094,9 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts, int * u
     if ((*cp2 == '^')) {
 	/* EFS file escape, pass the next character as is */
 	/* Fix me: HEX encoding for UNICODE not implemented */
-	cp2++;
-	*(cp1++) = *cp2;
+	*(cp1++) = *(++cp2);
+        /* An escaped dot stays as is -- don't convert to slash */
+        if (*cp2 == '.') cp2++;
     }
     if (*cp2 == ':') {
       *(cp1++) = '/';
@@ -6133,7 +6134,10 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts, int * u
     }
     else *(cp1++) = *cp2;
   }
-  while (*cp2) *(cp1++) = *(cp2++);
+  while (*cp2) {
+    if ((*cp2 == '^') && (*(cp2+1) == '.')) cp2++;  /* '^.' --> '.' */
+    *(cp1++) = *(cp2++);
+  }
   *cp1 = '\0';
 
   /* This still leaves /000000/ when working with a

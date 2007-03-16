@@ -62,6 +62,7 @@ __some_:[__where_.__over_]__the_.__rainbow_    unixify /__some_/__where_/__over_
 [-]	unixify		../
 [--]	unixify		../../
 [...]	unixify		.../
+__lyrics_:[__are_.__very_^.__sappy_]__but_^.__rhymes_^.__are_.__true_    unixify /__lyrics_/__are_/__very_.__sappy_/__but_.__rhymes_.__are_.__true_
 
 # and back again
 /__some_/__where_/__over_/__the_.__rainbow_    vmsify  __some_:[__where_.__over_]__the_.__rainbow_
