@@ -165,12 +165,6 @@ S_save_scalar_at(pTHX_ SV **sptr)
     SV * const osv = *sptr;
     register SV * const sv = *sptr = newSV(0);
 
-#ifdef PERL_MAD
-    /* FIXME for MAD - this is causing ext/Safe/t/safeops.t to abort.  */
-    if (PL_formfeed && sv == PL_formfeed)
-	abort();
-#endif
-
     if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv) && SvTYPE(osv) != SVt_PVGV) {
 	if (SvGMAGICAL(osv)) {
 	    const bool oldtainted = PL_tainted;
