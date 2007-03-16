@@ -31,7 +31,7 @@ not to, in which case we will explain why.
 
 When speaking about regexes we need to distinguish between their source
 code form and their internal form. In this document we will use the term
-"pattern" when we speak of their textual, source code form, the term
+"pattern" when we speak of their textual, source code form, and the term
 "program" when we speak of their internal representation. These
 correspond to the terms I<S-regex> and I<B-regex> that Mark Jason
 Dominus employs in his paper on "Rx" ([1] in L</REFERENCES>).
@@ -43,7 +43,7 @@ specified in a mini-language, and then applies those constraints to a
 target string, and determines whether or not the string satisfies the
 constraints. See L<perlre> for a full definition of the language.
 
-So in less grandiose terms the first part of the job is to turn a pattern into
+In less grandiose terms, the first part of the job is to turn a pattern into
 something the computer can efficiently use to find the matching point in
 the string, and the second part is performing the search itself.
 
@@ -178,7 +178,7 @@ indicating which characters are included in the class.
 
 There is also a larger form of a char class structure used to represent
 POSIX char classes called C<regnode_charclass_class> which has an
-additional 4-byte (32-bit) bitmap indicating which POSIX char class
+additional 4-byte (32-bit) bitmap indicating which POSIX char classes
 have been included.
 
     regnode_charclass_class  U32 arg1;
@@ -332,12 +332,12 @@ first C<|> symbol it sees.
 
 C<regbranch()> in turn calls C<regpiece()> which
 handles "things" followed by a quantifier. In order to parse the
-"things", C<regatom()> is called. This is the lowest level routine which
+"things", C<regatom()> is called. This is the lowest level routine, which
 parses out constant strings, character classes, and the
 various special symbols like C<$>. If C<regatom()> encounters a "("
 character it in turn calls C<reg()>.
 
-The routine C<regtail()> is called by both C<reg()>, C<regbranch()>
+The routine C<regtail()> is called by both C<reg()> and C<regbranch()>
 in order to "set the tail pointer" correctly. When executing and
 we get to the end of a branch, we need to go to the node following the
 grouping parens. When parsing, however, we don't know where the end will
@@ -544,9 +544,9 @@ the C<$> symbol has been converted into an C<EOL> regop, a special piece of
 code that looks for C<\n> or the end of the string.
 
 The next pointer for C<BRANCH>es is interesting in that it points at where
-execution should go if the branch fails. When executing if the engine
+execution should go if the branch fails. When executing, if the engine
 tries to traverse from a branch to a C<regnext> that isn't a branch then
-the engine will know that the entire set of branches have failed.
+the engine will know that the entire set of branches has failed.
 
 =head3 Peep-hole Optimisation and Analysis
 
@@ -589,13 +589,13 @@ optimisations along these lines:
 
 =back
 
-Another form of optimisation that can occur is post-parse "peep-hole"
-optimisations, where inefficient constructs are replaced by
-more efficient constructs. An example of this are C<TAIL> regops which are used
-during parsing to mark the end of branches and the end of groups. These
-regops are used as place-holders during construction and "always match"
-so they can be "optimised away" by making the things that point to the
-C<TAIL> point to thing that the C<TAIL> points to, thus "skipping" the node.
+Another form of optimisation that can occur is the post-parse "peep-hole"
+optimisation, where inefficient constructs are replaced by more efficient
+constructs. The C<TAIL> regops which are used during parsing to mark the end
+of branches and the end of groups are examples of this. These regops are used
+as place-holders during construction and "always match" so they can be
+"optimised away" by making the things that point to the C<TAIL> point to the
+thing that C<TAIL> points to, thus "skipping" the node.
 
 Another optimisation that can occur is that of "C<EXACT> merging" which is
 where two consecutive C<EXACT> nodes are merged into a single
@@ -625,8 +625,8 @@ have a somewhat incestuous relationship with overlap between their functions,
 and C<pregexec()> may even call C<re_intuit_start()> on its own. Nevertheless
 other parts of the the perl source code may call into either, or both.
 
-Execution of the interpreter itself used to be recursive. Due to the
-efforts of Dave Mitchell in the 5.9.x development track, it is now iterative. Now an
+Execution of the interpreter itself used to be recursive, but thanks to the
+efforts of Dave Mitchell in the 5.9.x development track, that has changed: now an
 internal stack is maintained on the heap and the routine is fully
 iterative. This can make it tricky as the code is quite conservative
 about what state it stores, with the result that that two consecutive lines in the
@@ -744,7 +744,7 @@ tricky this can be:
 =head2 Base Structures
 
 There are two structures used to store a compiled regular expression.
-One, the regexp structure is considered to be perl's property, and the
+One, the regexp structure, is considered to be perl's property, and the
 other is considered to be the property of the regex engine which
 compiled the regular expression; in the case of the stock engine this
 structure is called regexp_internal.
@@ -825,8 +825,8 @@ the regexp is automatically freed by a call to pregfree.
 =item C<engine>
 
 This field points at a regexp_engine structure which contains pointers
-to the subroutine that are to be used for performing a match. It
-is the compiling routines responsibility to populate this field before
+to the subroutines that are to be used for performing a match. It
+is the compiling routine's responsibility to populate this field before
 returning the regexp object.
 
 =item C<precomp> C<prelen> 
@@ -911,8 +911,8 @@ patterns.
 
 =head3 Engine Private Data About Pattern
 
-Additionally regexp.h contains the following "private" definition which is perl
-specific and is only of curiosity value to other engine implementations.
+Additionally, regexp.h contains the following "private" definition which is
+perl-specific and is only of curiosity value to other engine implementations.
 
     typedef struct regexp_internal {
             regexp_paren_ofs *swap; /* Swap copy of *startp / *endp */
@@ -933,7 +933,7 @@ specific and is only of curiosity value to other engine implementations.
 =item C<swap>
 
 C<swap> is an extra set of startp/endp stored in a C<regexp_paren_ofs>
-struct. This is used when the last successful match was from same pattern
+struct. This is used when the last successful match was from the same pattern
 as the current pattern, so that a partial match doesn't overwrite the
 previous match's results. When this field is data filled the matching
 engine will swap buffers before every match attempt. If the match fails,
@@ -943,7 +943,7 @@ is populated on demand and is by default null.
 =item C<offsets>
 
 Offsets holds a mapping of offset in the C<program>
-to offset in the C<precomp> string. This is only used by ActiveStates
+to offset in the C<precomp> string. This is only used by ActiveState's
 visual regex debugger.
 
 =item C<regstclass>
@@ -1001,14 +1001,14 @@ a constant structure of the following format:
     #endif    
     } regexp_engine;
 
-When a regexp is compiled its C<engine> field is then set to point at
+When a regexp is compiled, its C<engine> field is then set to point at
 the appropriate structure so that when it needs to be used Perl can find
 the right routines to do so.
 
 In order to install a new regexp handler, C<$^H{regcomp}> is set
 to an integer which (when casted appropriately) resolves to one of these
-structures. When compiling the C<comp> method is executed, and the
-resulting regexp structures engine field is expected to point back at
+structures. When compiling, the C<comp> method is executed, and the
+resulting regexp structure's engine field is expected to point back at
 the same structure.
 
 The pTHX_ symbol in the definition is a macro used by perl under threading
@@ -1062,7 +1062,7 @@ for optimising matches.
 
 Called by perl when it is freeing a regexp pattern so that the engine
 can release any resources pointed to by the C<pprivate> member of the
-regexp structure. This is only responsible for freeing private data,
+regexp structure. This is only responsible for freeing private data;
 perl will handle releasing anything else contained in the regexp structure.
 
 =item dupe
@@ -1074,7 +1074,7 @@ can be used by mutiple threads. This routine is expected to handle the
 duplication of any private data pointed to by the C<pprivate> member of
 the regexp structure.  It will be called with the preconstructed new
 regexp structure as an argument, the C<pprivate> member will point at
-the B<old> private structue, and it is this routines responsibility to
+the B<old> private structue, and it is this routine's responsibility to
 construct a copy and return a pointer to it (which perl will then use to
 overwrite the field as passed to this routine.)
 
@@ -1090,7 +1090,7 @@ On unthreaded builds this field doesn't exist.
 
 Any patch that adds data items to the regexp will need to include
 changes to F<sv.c> (C<Perl_re_dup()>) and F<regcomp.c> (C<pregfree()>). This
-involves freeing or cloning items in the regexes data array based
+involves freeing or cloning items in the regexp's data array based
 on the data item's type.
 
 =head1 SEE ALSO
