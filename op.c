@@ -4246,12 +4246,12 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 		trueop = newUNOP(OP_NULL, 0, trueop);
 		op_getmad(first,trueop,'C');
 		op_getmad(falseop,trueop,'e');
-	    }
-	    /* FIXME for MAD - should there be an ELSE here?  */
-#else
-	    op_free(first);
-	    op_free(falseop);
+	    } else
 #endif
+	    {
+		op_free(first);
+		op_free(falseop);
+	    }
 	    return trueop;
 	}
 	else {
@@ -4260,12 +4260,12 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 		falseop = newUNOP(OP_NULL, 0, falseop);
 		op_getmad(first,falseop,'C');
 		op_getmad(trueop,falseop,'t');
-	    }
-	    /* FIXME for MAD - should there be an ELSE here?  */
-#else
-	    op_free(first);
-	    op_free(trueop);
+	    } else
 #endif
+	    {
+		op_free(first);
+		op_free(trueop);
+	    }
 	    return falseop;
 	}
     }
