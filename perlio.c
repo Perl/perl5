@@ -2879,6 +2879,7 @@ PerlIO_importFILE(FILE *stdio, const char *mode)
 	if ((f = PerlIO_push(aTHX_(f = PerlIO_allocate(aTHX)), PERLIO_FUNCS_CAST(&PerlIO_stdio), mode, NULL))) {
 	    s = PerlIOSelf(f, PerlIOStdio);
 	    s->stdio = stdio;
+	    PerlIOUnix_refcnt_inc(fileno(stdio));
 	}
     }
     return f;
