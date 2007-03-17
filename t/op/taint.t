@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 260;
+plan tests => 261;
 
 $| = 1;
 
@@ -1230,3 +1230,35 @@ SKIP:
     eval 'eval $tainted';
     like ($@, qr/^Insecure dependency in eval/);
 }
+
+# This may bomb out with the alarm signal so keep it last
+SKIP: {
+    skip "No alarm()"  unless $Config{d_alarm};
+    # Test from RT #41831]
+    # [PATCH] Bug & fix: hang when using study + taint mode (perl 5.6.1, 5.8.x)
+
+    my $DATA = <<'END' . $TAINT;
+line1 is here
+line2 is here
+line3 is here
+line4 is here
+
+END
+
+    #study $DATA;
+
+    ## don't set $SIG{ALRM}, since we'd never get to a user-level handler as
+    ## perl is stuck in a regexp infinite loop!
+
+    alarm(10);
+
+    if ($DATA =~ /^line2.*line4/m) {
+	fail("Should not be a match")
+    } else {
+	pass("Match on tainted multiline data should fail promptly");
+    }
+
+    alarm(0);
+}
+__END__
+# Keep the previous test last
