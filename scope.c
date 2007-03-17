@@ -182,10 +182,6 @@ Perl_save_scalar(pTHX_ GV *gv)
 {
     dVAR;
     SV ** const sptr = &GvSVn(gv);
-#ifdef PERL_MAD
-    if (PL_formfeed && *sptr == PL_formfeed)
-	abort();
-#endif
     PL_localizing = 1;
     SvGETMAGIC(*sptr);
     PL_localizing = 0;
@@ -202,10 +198,6 @@ void
 Perl_save_generic_svref(pTHX_ SV **sptr)
 {
     dVAR;
-#ifdef PERL_MAD
-    if (PL_formfeed && *sptr == PL_formfeed)
-	abort();
-#endif
     SSCHECK(3);
     SSPUSHPTR(sptr);
     SSPUSHPTR(SvREFCNT_inc(*sptr));
@@ -321,11 +313,6 @@ Perl_save_item(pTHX_ register SV *item)
 {
     dVAR;
     register SV * const sv = newSVsv(item);
-
-#ifdef PERL_MAD
-    if (PL_formfeed && item == PL_formfeed)
-	abort();
-#endif
 
     SSCHECK(3);
     SSPUSHPTR(item);		/* remember the pointer */
@@ -565,10 +552,6 @@ SV*
 Perl_save_svref(pTHX_ SV **sptr)
 {
     dVAR;
-#ifdef PERL_MAD
-    if (PL_formfeed && *sptr == PL_formfeed)
-	abort();
-#endif
     SvGETMAGIC(*sptr);
     SSCHECK(3);
     SSPUSHPTR(sptr);
