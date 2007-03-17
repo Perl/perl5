@@ -4236,38 +4236,24 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 
     scalarboolean(first);
     if (first->op_type == OP_CONST) {
+	/* Left or right arm of the conditional?  */
+	const bool left = SvTRUE(((SVOP*)first)->op_sv);
+	OP *live = left ? trueop : falseop;
+	OP *const dead = left ? falseop : trueop;
         if (first->op_private & OPpCONST_BARE &&
 	    first->op_private & OPpCONST_STRICT) {
 	    no_bareword_allowed(first);
 	}
-	if (SvTRUE(((SVOP*)first)->op_sv)) {
-#ifdef PERL_MAD
-	    if (PL_madskills) {
-		trueop = newUNOP(OP_NULL, 0, trueop);
-		op_getmad(first,trueop,'C');
-		op_getmad(falseop,trueop,'e');
-	    } else
-#endif
-	    {
-		op_free(first);
-		op_free(falseop);
-	    }
-	    return trueop;
+	if (PL_madskills) {
+	    /* This is all dead code when PERL_MAD is not defined.  */
+	    live = newUNOP(OP_NULL, 0, live);
+	    op_getmad(first, live, 'C');
+	    op_getmad(dead, live, left ? 'e' : 't');
+	} else {
+	    op_free(first);
+	    op_free(dead);
 	}
-	else {
-#ifdef PERL_MAD
-	    if (PL_madskills) {
-		falseop = newUNOP(OP_NULL, 0, falseop);
-		op_getmad(first,falseop,'C');
-		op_getmad(trueop,falseop,'t');
-	    } else
-#endif
-	    {
-		op_free(first);
-		op_free(trueop);
-	    }
-	    return falseop;
-	}
+	return live;
     }
     NewOp(1101, logop, 1, LOGOP);
     logop->op_type = OP_COND_EXPR;
