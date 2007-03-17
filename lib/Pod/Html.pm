@@ -3,7 +3,7 @@ use strict;
 require Exporter;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION = 1.07;
+$VERSION = 1.08;
 @ISA = qw(Exporter);
 @EXPORT = qw(pod2html htmlify);
 @EXPORT_OK = qw(anchorify);
@@ -1508,17 +1508,15 @@ sub process_text {
 sub process_text_rfc_links {
     my $text = shift;
 
-    #  For every "RFCnnnn" or "RFC nnn" link it to the authoritative
-    #  source. Do not use (i) option here. Require RFC to be written in
+    # For every "RFCnnnn" or "RFC nnn", link it to the authoritative
+    # ource. Do not use the /i modifier here. Require "RFC" to be written in
     #  in capital letters.
 
     $text =~ s{
-         (?=^\S)            # positive lookahead, make sure this is "text" paragraph
-         (.*?)              # Grab leading text
-         (?<=[^<>])         # Make sure this is not an URL already
-           (RFC\s*(\d{1,5}))(?=\s) # max 5 digits
+	(?<=[^<>[:alpha:]])           # Make sure this is not an URL already
+	(RFC\s*([0-9]{1,5}))(?![0-9]) # max 5 digits
     }
-    {$1<a href="http://www.ietf.org/rfc/rfc$3.txt">$2</a>}gx;
+    {<a href="http://www.ietf.org/rfc/rfc$3.txt" class="rfc">$1</a>}gx;
 
     $text;
 }
