@@ -80,7 +80,7 @@ a[b-d]e	ace	y	$&	ace
 a[b-d]	aac	y	$&	ac
 a[-b]	a-	y	$&	a-
 a[b-]	a-	y	$&	a-
-a[b-a]	-	c	-	Invalid [] range "b-a"
+a[b-a]	-	c	-	Invalid [] range \"b-a\"
 a[]b	-	c	-	Unmatched [
 a[	-	c	-	Unmatched [
 a]	a]	y	$&	a]
@@ -144,7 +144,7 @@ a\	-	c	-	Search pattern not terminated
 a\(b	a(b	y	$&-$1	a(b-
 a\(*b	ab	y	$&	ab
 a\(*b	a((b	y	$&	a((b
-a\\b	a\b	y	$&	a\b
+a\\b	a\\b	y	$&	a\\b
 abc)	-	c	-	Unmatched )
 (abc	-	c	-	Unmatched (
 ((a))	abc	y	$&-$1-$2	a-a-a
@@ -245,8 +245,8 @@ multiple words	multiple words, yeah	y	$&	multiple words
 (.*)c(.*)	abcde	y	$&-$1-$2	abcde-ab-de
 \((.*), (.*)\)	(a, b)	y	($2, $1)	(b, a)
 [k]	ab	n	-	-
-abcd	abcd	y	$&-\$&-\\$&	abcd-$&-\abcd
-a(bc)d	abcd	y	$1-\$1-\\$1	bc-$1-\bc
+abcd	abcd	y	$&-\$&-\\$&	abcd-\$&-\\abcd
+a(bc)d	abcd	y	$1-\$1-\\$1	bc-\$1-\\bc
 a[-]?c	ac	y	$&	ac
 (abc)\1	abcabc	y	$1	abc
 ([a-c]*)\1	abcabc	y	$1	abc
@@ -310,7 +310,7 @@ a[-]?c	ac	y	$&	ac
 'a[b-d]'i	AAC	y	$&	AC
 'a[-b]'i	A-	y	$&	A-
 'a[b-]'i	A-	y	$&	A-
-'a[b-a]'i	-	c	-	Invalid [] range "b-a"
+'a[b-a]'i	-	c	-	Invalid [] range \"b-a\"
 'a[]b'i	-	c	-	Unmatched [
 'a['i	-	c	-	Unmatched [
 'a]'i	A]	y	$&	A]
@@ -331,7 +331,7 @@ a[-]?c	ac	y	$&	ac
 'a\(b'i	A(B	y	$&-$1	A(B-
 'a\(*b'i	AB	y	$&	AB
 'a\(*b'i	A((B	y	$&	A((B
-'a\\b'i	A\B	y	$&	A\B
+'a\\b'i	A\\B	y	$&	A\\B
 'abc)'i	-	c	-	Unmatched )
 '(abc'i	-	c	-	Unmatched (
 '((a))'i	ABC	y	$&-$1-$2	A-A-A
@@ -393,8 +393,8 @@ a[-]?c	ac	y	$&	ac
 '(.*)c(.*)'i	ABCDE	y	$&-$1-$2	ABCDE-AB-DE
 '\((.*), (.*)\)'i	(A, B)	y	($2, $1)	(B, A)
 '[k]'i	AB	n	-	-
-'abcd'i	ABCD	y	$&-\$&-\\$&	ABCD-$&-\ABCD
-'a(bc)d'i	ABCD	y	$1-\$1-\\$1	BC-$1-\BC
+'abcd'i	ABCD	y	$&-\$&-\\$&	ABCD-\$&-\\ABCD
+'a(bc)d'i	ABCD	y	$1-\$1-\\$1	BC-\$1-\\BC
 'a[-]?c'i	AC	y	$&	AC
 '(abc)\1'i	ABCABC	y	$1	ABC
 '([a-c]*)\1'i	ABCABC	y	$1	ABC
