@@ -1963,11 +1963,17 @@ typedef union re_unwind_t {
 #define POSCACHE_SUCCESS 0	/* caching success rather than failure */
 #define POSCACHE_SEEN 1		/* we know what we're caching */
 #define POSCACHE_START 2	/* the real cache: this bit maps to pos 0 */
+
 #define CACHEsayYES STMT_START { \
     if (cache_offset | cache_bit) { \
-	if (!(PL_reg_poscache[0] & (1<<POSCACHE_SEEN))) \
-	    PL_reg_poscache[0] |= (1<<POSCACHE_SUCCESS) || (1<<POSCACHE_SEEN); \
-        else if (!(PL_reg_poscache[0] & (1<<POSCACHE_SUCCESS))) { \
+	if (!(PL_reg_poscache[0] & (1<<POSCACHE_SEEN))) { \
+	    PL_reg_poscache[0] |= (1<<POSCACHE_SUCCESS) | (1<<POSCACHE_SEEN); \
+	    PL_reg_poscache[cache_offset] |= (1<<cache_bit); \
+	} \
+        else if (PL_reg_poscache[0] & (1<<POSCACHE_SUCCESS)) { \
+	    PL_reg_poscache[cache_offset] |= (1<<cache_bit); \
+	} \
+	else { \
 	    /* cache records failure, but this is success */ \
 	    DEBUG_r( \
 		PerlIO_printf(Perl_debug_log, \
@@ -1979,11 +1985,17 @@ typedef union re_unwind_t {
     } \
     sayYES; \
 } STMT_END
+
 #define CACHEsayNO STMT_START { \
     if (cache_offset | cache_bit) { \
-	if (!(PL_reg_poscache[0] & (1<<POSCACHE_SEEN))) \
+	if (!(PL_reg_poscache[0] & (1<<POSCACHE_SEEN))) { \
 	    PL_reg_poscache[0] |= (1<<POSCACHE_SEEN); \
-        else if ((PL_reg_poscache[0] & (1<<POSCACHE_SUCCESS))) { \
+	    PL_reg_poscache[cache_offset] |= (1<<cache_bit); \
+	} \
+        else if (!(PL_reg_poscache[0] & (1<<POSCACHE_SUCCESS))) { \
+	    PL_reg_poscache[cache_offset] |= (1<<cache_bit); \
+	} \
+	else { \
 	    /* cache records success, but this is failure */ \
 	    DEBUG_r( \
 		PerlIO_printf(Perl_debug_log, \
@@ -3019,7 +3031,6 @@ S_regmatch(pTHX_ regnode *prog)
 			    /* cache records failure */
 			    sayNO_SILENT;
 		    }
-		    PL_reg_poscache[cache_offset] |= (1<<cache_bit);
 		}
 		}
 
