@@ -1960,51 +1960,10 @@ typedef union re_unwind_t {
 #define sayNO_SILENT goto do_no
 #define saySAME(x) if (x) goto yes; else goto no
 
-#define POSCACHE_SUCCESS 0	/* caching success rather than failure */
-#define POSCACHE_SEEN 1		/* we know what we're caching */
-#define POSCACHE_START 2	/* the real cache: this bit maps to pos 0 */
-
-#define CACHEsayYES STMT_START { \
-    if (cache_offset | cache_bit) { \
-	if (!(PL_reg_poscache[0] & (1<<POSCACHE_SEEN))) { \
-	    PL_reg_poscache[0] |= (1<<POSCACHE_SUCCESS) | (1<<POSCACHE_SEEN); \
-	    PL_reg_poscache[cache_offset] |= (1<<cache_bit); \
-	} \
-        else if (PL_reg_poscache[0] & (1<<POSCACHE_SUCCESS)) { \
-	    PL_reg_poscache[cache_offset] |= (1<<cache_bit); \
-	} \
-	else { \
-	    /* cache records failure, but this is success */ \
-	    DEBUG_r( \
-		PerlIO_printf(Perl_debug_log, \
-		    "%*s  (remove success from failure cache)\n", \
-		    REPORT_CODE_OFF+PL_regindent*2, "") \
-	    ); \
-	    PL_reg_poscache[cache_offset] &= ~(1<<cache_bit); \
-	} \
-    } \
-    sayYES; \
-} STMT_END
-
 #define CACHEsayNO STMT_START { \
-    if (cache_offset | cache_bit) { \
-	if (!(PL_reg_poscache[0] & (1<<POSCACHE_SEEN))) { \
-	    PL_reg_poscache[0] |= (1<<POSCACHE_SEEN); \
-	    PL_reg_poscache[cache_offset] |= (1<<cache_bit); \
-	} \
-        else if (!(PL_reg_poscache[0] & (1<<POSCACHE_SUCCESS))) { \
-	    PL_reg_poscache[cache_offset] |= (1<<cache_bit); \
-	} \
-	else { \
-	    /* cache records success, but this is failure */ \
-	    DEBUG_r( \
-		PerlIO_printf(Perl_debug_log, \
-		    "%*s  (remove failure from success cache)\n", \
-		    REPORT_CODE_OFF+PL_regindent*2, "") \
-	    ); \
-	    PL_reg_poscache[cache_offset] &= ~(1<<cache_bit); \
-	} \
-    } \
+    if (cache_offset | cache_bit) \
+       PL_reg_poscache[cache_offset] |= \
+	    (1<<cache_bit); \
     sayNO; \
 } STMT_END
 
@@ -2993,7 +2952,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    PL_reg_leftiter = PL_reg_maxiter;
 		}
 		if (PL_reg_leftiter-- == 0) {
-		    const I32 size = (PL_reg_maxiter + 7 + POSCACHE_START)/8;
+		    const I32 size = (PL_reg_maxiter + 7)/8;
 		    if (PL_reg_poscache) {
 			if ((I32)PL_reg_poscache_size < size) {
 			    Renew(PL_reg_poscache, size, char);
@@ -3014,7 +2973,7 @@ S_regmatch(pTHX_ regnode *prog)
 		if (PL_reg_leftiter < 0) {
 		    cache_offset = locinput - PL_bostr;
 
-		    cache_offset = (scan->flags & 0xf) - 1 + POSCACHE_START
+		    cache_offset = (scan->flags & 0xf) - 1
 			    + cache_offset * (scan->flags>>4);
 		    cache_bit = cache_offset % 8;
 		    cache_offset /= 8;
@@ -3024,12 +2983,7 @@ S_regmatch(pTHX_ regnode *prog)
 				      "%*s  already tried at this position...\n",
 				      REPORT_CODE_OFF+PL_regindent*2, "")
 			);
-			if (PL_reg_poscache[0] & (1<<POSCACHE_SUCCESS))
-			    /* cache records success */
-			    sayYES;
-			else
-			    /* cache records failure */
-			    sayNO_SILENT;
+			sayNO; /* cache records failure */
 		    }
 		}
 		}
@@ -3044,7 +2998,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    REGCP_SET(lastcp);
 		    if (regmatch(cc->next)) {
 			regcpblow(cp);
-			CACHEsayYES;	/* All done. */
+			sayYES;	/* All done. */
 		    }
 		    REGCP_UNWIND(lastcp);
 		    regcppop();
@@ -3076,7 +3030,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    REGCP_SET(lastcp);
 		    if (regmatch(cc->scan)) {
 			regcpblow(cp);
-			CACHEsayYES;
+			sayYES;
 		    }
 		    REGCP_UNWIND(lastcp);
 		    regcppop();
@@ -3094,7 +3048,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    REGCP_SET(lastcp);
 		    if (regmatch(cc->scan)) {
 			regcpblow(cp);
-			CACHEsayYES;
+			sayYES;
 		    }
 		    REGCP_UNWIND(lastcp);
 		    regcppop();		/* Restore some previous $<digit>s? */
@@ -3118,7 +3072,7 @@ S_regmatch(pTHX_ regnode *prog)
 		if (PL_regcc)
 		    ln = PL_regcc->cur;
 		if (regmatch(cc->next))
-		    CACHEsayYES;
+		    sayYES;
 		if (PL_regcc)
 		    PL_regcc->cur = ln;
 		PL_regcc = cc;
