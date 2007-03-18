@@ -132,6 +132,39 @@ Perl_mg_magical(pTHX_ SV *sv)
     }
 }
 
+
+/* is this container magic (%ENV, $1 etc), or value magic (pos, taint etc)? */
+
+STATIC bool
+S_is_container_magic(const MAGIC *mg)
+{
+    switch (mg->mg_type) {
+    case PERL_MAGIC_bm:
+    case PERL_MAGIC_fm:
+    case PERL_MAGIC_regex_global:
+    case PERL_MAGIC_nkeys:
+#ifdef USE_LOCALE_COLLATE
+    case PERL_MAGIC_collxfrm:
+#endif
+    case PERL_MAGIC_qr:
+    case PERL_MAGIC_taint:
+    case PERL_MAGIC_vec:
+    case PERL_MAGIC_vstring:
+    case PERL_MAGIC_utf8:
+    case PERL_MAGIC_substr:
+    case PERL_MAGIC_defelem:
+    case PERL_MAGIC_arylen:
+    case PERL_MAGIC_pos:
+    case PERL_MAGIC_backref:
+    case PERL_MAGIC_arylen_p:
+    case PERL_MAGIC_rhash:
+    case PERL_MAGIC_symtab:
+	return 0;
+    default:
+	return 1;
+    }
+}
+
 /*
 =for apidoc mg_get
 
@@ -414,30 +447,8 @@ Perl_mg_localize(pTHX_ SV *sv, SV *nsv)
     MAGIC *mg;
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	const MGVTBL* const vtbl = mg->mg_virtual;
-	switch (mg->mg_type) {
-	/* value magic types: don't copy */
-	case PERL_MAGIC_bm:
-	case PERL_MAGIC_fm:
-	case PERL_MAGIC_regex_global:
-	case PERL_MAGIC_nkeys:
-#ifdef USE_LOCALE_COLLATE
-	case PERL_MAGIC_collxfrm:
-#endif
-	case PERL_MAGIC_qr:
-	case PERL_MAGIC_taint:
-	case PERL_MAGIC_vec:
-	case PERL_MAGIC_vstring:
-	case PERL_MAGIC_utf8:
-	case PERL_MAGIC_substr:
-	case PERL_MAGIC_defelem:
-	case PERL_MAGIC_arylen:
-	case PERL_MAGIC_pos:
-	case PERL_MAGIC_backref:
-	case PERL_MAGIC_arylen_p:
-	case PERL_MAGIC_rhash:
-	case PERL_MAGIC_symtab:
+	if (!S_is_container_magic(mg))
 	    continue;
-	}
 		
 	if ((mg->mg_flags & MGf_LOCAL) && vtbl->svt_local)
 	    (void)CALL_FPTR(vtbl->svt_local)(aTHX_ nsv, mg);
