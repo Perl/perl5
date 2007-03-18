@@ -271,6 +271,8 @@ Perl_mg_set(pTHX_ SV *sv)
 	    mg->mg_flags &= ~MGf_GSKIP;	/* setting requires another read */
 	    (SSPTR(mgs_ix, MGS*))->mgs_flags = 0;
 	}
+	if (PL_localizing == 2 && !S_is_container_magic(mg))
+	    continue;
 	if (vtbl && vtbl->svt_set)
 	    CALL_FPTR(vtbl->svt_set)(aTHX_ sv, mg);
     }
