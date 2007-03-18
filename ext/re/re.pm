@@ -1,6 +1,6 @@
 package re;
 
-our $VERSION = 0.05;
+our $VERSION = 0.06_01;
 
 =head1 NAME
 
@@ -97,6 +97,13 @@ sub setcolor {
 
 my $installed = 0;
 
+sub _load_unload {
+    my $on = shift;
+    require XSLoader;
+    XSLoader::load('re');
+    install($on);
+}
+
 sub bits {
     my $on = shift;
     my $bits = 0;
@@ -108,15 +115,7 @@ sub bits {
         my $s=$_[$idx];
 	if ($s eq 'debug' or $s eq 'debugcolor') {
 	    setcolor() if $s eq 'debugcolor';
-	    require XSLoader;
-	    XSLoader::load('re');
-	    if ($on) {
-		install() unless $installed;
-		$installed=1;
-	    } else {
-		uninstall() if $installed;
-		$installed=0;
-	    }
+	    _load_unload($on);
         } elsif (exists $bitmask{$s}) {
 	    $bits |= $bitmask{$s};
 	} else {
