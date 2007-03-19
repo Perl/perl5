@@ -1023,10 +1023,16 @@ X<PERL5LIB>
 A list of directories in which to look for Perl library
 files before looking in the standard library and the current
 directory.  Any architecture-specific directories under the specified
-locations are automatically included if they exist.  If PERL5LIB is not
-defined, PERLLIB is used.  Directories are separated (like in PATH) by
-a colon on unixish platforms and by a semicolon on Windows (the proper
-path separator being given by the command C<perl -V:path_sep>).
+locations are automatically included if they exist. The checking if
+the specified directories and their architecture-specific
+subdirectories exist is only done once at interpreter startup time and
+not repeated later. So PERL5LIB has no effect for directories that are
+created at runtime.
+
+If PERL5LIB is not defined, PERLLIB is used.  Directories are separated
+(like in PATH) by a colon on unixish platforms and by a semicolon on
+Windows (the proper path separator being given by the command C<perl
+-V:path_sep>).
 
 When running taint checks (either because the program was running setuid
 or setgid, or the B<-T> switch was used), neither variable is used.
