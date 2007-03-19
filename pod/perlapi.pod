@@ -2656,11 +2656,12 @@ X<upg_version>
 
 In-place upgrade of the supplied SV to a version object.
 
-    SV *sv = upg_version(SV *sv);
+    SV *sv = upg_version(SV *sv, bool qv);
 
-Returns a pointer to the upgraded SV.
+Returns a pointer to the upgraded SV.  Set the boolean qv if you want
+to force this SV to be interpreted as an "extended" version.
 
-	SV*	upg_version(SV *ver)
+	SV*	upg_version(SV *ver, bool qv)
 
 =for hackers
 Found in file util.c

@@ -400,8 +400,8 @@ SKIP: {
     }
 
 SKIP: 	{
-	skip 'Cannot test bare v-strings with Perl < 5.8.1', 4
-		if $] < 5.008_001; 
+	skip 'Cannot test bare v-strings with Perl < 5.6.0', 4
+		if $] < 5.006_000; 
 	diag "Tests with v-strings" if $Verbose;
 	$version = $CLASS->new(1.2.3);
 	ok("$version" eq "v1.2.3", '"$version" eq 1.2.3');
@@ -468,26 +468,26 @@ EOF
 	close F;
 
 	eval "use lib '.'; use www 0.000008;";
-	like ($@, qr/^www version 0.000008 \(v0.0.8\) required/,
+	like ($@, qr/^www version 0.000008 required/,
 	    "Make sure very small versions don't freak"); 
 	eval "use lib '.'; use www 1;";
-	like ($@, qr/^www version 1.000 \(v1.0.0\) required/,
+	like ($@, qr/^www version 1.000 required/,
 	    "Comparing vs. version with no decimal"); 
 	eval "use lib '.'; use www 1.;";
-	like ($@, qr/^www version 1.000 \(v1.0.0\) required/,
+	like ($@, qr/^www version 1.000 required/,
 	    "Comparing vs. version with decimal only"); 
 
-	if ( $] < 5.006_002 ) {
+	if ( $] < 5.006_000 ) {
 	    unlink 'www.pm';
-	    skip 'Cannot "use" extended versions with Perl < 5.6.2', 3; 
+	    skip 'Cannot "use" extended versions with Perl < 5.6.0', 3; 
 	}
-	eval "use lib '.'; use www 0.0.8;";
-	like ($@, qr/^www version 0.000008 \(v0.0.8\) required/,
-	    "Make sure very small versions don't freak"); 
+	eval "use lib '.'; use www v0.0.8;";
+	my $regex = "^www version v0.0.8 required";
+	like ($@, qr/$regex/, "Make sure very small versions don't freak"); 
 
-	eval "use lib '.'; use www 0.0.4;";
-	unlike($@, qr/^www version 0.000004 \(v0.0.4\) required/,
-	    'Succeed - required == VERSION');
+	$regex =~ s/8/4/; # set for second test
+	eval "use lib '.'; use www v0.0.4;";
+	unlike($@, qr/$regex/, 'Succeed - required == VERSION');
 	cmp_ok ( "www"->VERSION, 'eq', '0.000004', 'No undef warnings' );
 
 	unlink 'www.pm';
@@ -507,6 +507,26 @@ EOF
     ok(defined(&{"main\::qv"}), "make sure we exported qv() properly");
     isa_ok( qv(1.2), "vvv");
     unlink 'vvv.pm';
+
+SKIP: {
+	if ( $] < 5.006_000 ) {
+	    skip 'Cannot "use" extended versions with Perl < 5.6.0', 3; 
+	}
+	open F, ">uuu.pm" or die "Cannot open uuu.pm: $!\n";
+	print F <<"EOF";
+package uuu;
+\$VERSION = 1.0;
+1;
+EOF
+	close F;
+	eval "use lib '.'; use uuu 1.001;";
+	like ($@, qr/^uuu version 1.001 required/,
+	    "User typed numeric so we error with numeric"); 
+	eval "use lib '.'; use uuu v1.1.0;";
+	like ($@, qr/^uuu version v1.1.0 required/,
+	    "User typed extended so we error with extended"); 
+	unlink 'uuu.pm';
+    }
 
 SKIP: {
 	# test locale handling
@@ -534,6 +554,7 @@ SKIP: {
     eval 'my $v = $CLASS->new("1._1");';
     unlike($@, qr/^Invalid version format \(alpha with zero width\)/,
     	"Invalid version format 1._1");
+
 }
 
 1;

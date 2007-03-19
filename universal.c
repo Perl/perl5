@@ -457,7 +457,7 @@ XS(XS_UNIVERSAL_VERSION)
         sv_setsv(nsv, sv);
         sv = nsv;
 	if ( !sv_derived_from(sv, "version"))
-	    upg_version(sv);
+	    upg_version(sv, FALSE);
         undef = NULL;
     }
     else {
@@ -483,19 +483,23 @@ XS(XS_UNIVERSAL_VERSION)
 
 	if ( !sv_derived_from(req, "version")) {
 	    /* req may very well be R/O, so create a new object */
-	    SV * const nsv = sv_newmortal();
-	    sv_setsv(nsv, req);
-	    req = nsv;
-	    upg_version(req);
+	    req = sv_2mortal( new_version(req) );
 	}
 
-	if ( vcmp( req, sv ) > 0 )
-	    Perl_croak(aTHX_ "%s version %"SVf" (%"SVf") required--"
-		       "this is only version %"SVf" (%"SVf")", HvNAME_get(pkg),
-		       SVfARG(vnumify(req)),
+	if ( vcmp( req, sv ) > 0 ) {
+	    if ( hv_exists((HV*)SvRV(req), "qv", 2 ) ) {
+		Perl_croak(aTHX_ "%s version %"SVf" required--"
+		       "this is only version %"SVf"", HvNAME_get(pkg),
 		       SVfARG(vnormal(req)),
-		       SVfARG(vnumify(sv)),
 		       SVfARG(vnormal(sv)));
+	    } else {
+		Perl_croak(aTHX_ "%s version %"SVf" required--"
+		       "this is only version %"SVf"", HvNAME_get(pkg),
+		       SVfARG(vnumify(req)),
+		       SVfARG(vnumify(sv)));
+	    }
+	}
+
     }
 
     if ( SvOK(sv) && sv_derived_from(sv, "version") ) {
@@ -728,29 +732,10 @@ XS(XS_version_qv)
     {
 	SV *	ver = ST(0);
 	if ( !SvVOK(ver) ) { /* only need to do with if not already v-string */
-	    SV * const vs = sv_newmortal();
-	    char *version;
-	    if ( SvNOK(ver) ) /* may get too much accuracy */
-	    {
-		char tbuf[64];
-#ifdef USE_LOCALE_NUMERIC
-		char *loc = setlocale(LC_NUMERIC, "C");
-#endif
-		STRLEN len = my_snprintf(tbuf, sizeof(tbuf), "%.9"NVgf, SvNVX(ver));
-#ifdef USE_LOCALE_NUMERIC
-		setlocale(LC_NUMERIC, loc);
-#endif
-		while (tbuf[len-1] == '0' && len > 0) len--;
-		version = savepvn(tbuf, len);
-	    }
-	    else
-	    {
-		version = savesvpv(ver);
-	    }
-	    (void)scan_version(version,vs,TRUE);
-	    Safefree(version);
-
-	    PUSHs(vs);
+	    SV * const rv = sv_newmortal();
+	    sv_setsv(rv,ver); /* make a duplicate */
+	    upg_version(rv, TRUE);
+	    PUSHs(rv);
 	}
 	else
 	{

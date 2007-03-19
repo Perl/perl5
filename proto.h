@@ -1674,7 +1674,7 @@ PERL_CALLCONV const char*	Perl_scan_version(pTHX_ const char *vstr, SV *sv, bool
 PERL_CALLCONV SV*	Perl_new_version(pTHX_ SV *ver)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV SV*	Perl_upg_version(pTHX_ SV *ver)
+PERL_CALLCONV SV*	Perl_upg_version(pTHX_ SV *ver, bool qv)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV bool	Perl_vverify(pTHX_ SV *vs)

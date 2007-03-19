@@ -139,39 +139,39 @@ if ($^O eq 'MacOS') {
     is ($@, '');
 
     eval "use lib v100.105";
-    like ($@, qr/lib version 100.105 \(v100\.105\.0\) required--this is only version 35.360 \(v35\.360\.0\)/);
+    like ($@, qr/lib version v100.105.0 required--this is only version v35\.360\.0/);
 
     eval "use lib 33.55";
     is ($@, '');
 
     eval "use lib 100.105";
-    like ($@, qr/lib version 100.105 \(v100\.105\.0\) required--this is only version 35.360 \(v35\.360\.0\)/);
+    like ($@, qr/lib version 100.105 required--this is only version 35.360/);
 
     local $lib::VERSION = '35.36';
     eval "use lib v33.55";
     like ($@, '');
 
     eval "use lib v100.105";
-    like ($@, qr/lib version 100.105 \(v100\.105\.0\) required--this is only version 35.360 \(v35\.360\.0\)/);
+    like ($@, qr/lib version v100.105.0 required--this is only version v35\.360\.0/);
 
     eval "use lib 33.55";
     is ($@, '');
 
     eval "use lib 100.105";
-    like ($@, qr/lib version 100.105 \(v100\.105\.0\) required--this is only version 35.360 \(v35\.360\.0\)/);
+    like ($@, qr/lib version 100.105 required--this is only version 35.360/);
 
     local $lib::VERSION = v35.36;
     eval "use lib v33.55";
     is ($@, '');
 
     eval "use lib v100.105";
-    like ($@, qr/lib version 100.105 \(v100\.105\.0\) required--this is only version 35.036000 \(v35\.36\.0\)/);
+    like ($@, qr/lib version v100.105.0 required--this is only version v35\.36\.0/);
 
     eval "use lib 33.55";
     is ($@, '');
 
     eval "use lib 100.105";
-    like ($@, qr/lib version 100.105 \(v100\.105\.0\) required--this is only version 35.036000 \(v35\.36\.0\)/);
+    like ($@, qr/lib version 100.105 required--this is only version 35.036000/);
 }
 
 

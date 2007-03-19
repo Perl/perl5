@@ -114,7 +114,7 @@ ok ! $a->can("export_tags");	# a method in Exporter
 cmp_ok eval { $a->VERSION }, '==', 2.718;
 
 ok ! (eval { $a->VERSION(2.719) });
-like $@, qr/^Alice version 2.719 \(v2\.719\.0\) required--this is only version 2.718 \(v2\.718\.0\) at /;
+like $@, qr/^Alice version 2.719 required--this is only version 2.718 at /;
 
 ok (eval { $a->VERSION(2.718) });
 is $@, '';

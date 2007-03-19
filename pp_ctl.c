@@ -3089,7 +3089,7 @@ PP(pp_require)
 
 	sv = new_version(sv);
 	if (!sv_derived_from(PL_patchlevel, "version"))
-	    upg_version(PL_patchlevel);
+	    upg_version(PL_patchlevel, TRUE);
 	if (cUNOP->op_first->op_type == OP_CONST && cUNOP->op_first->op_private & OPpCONST_NOVER) {
 	    if ( vcmp(sv,PL_patchlevel) <= 0 )
 		DIE(aTHX_ "Perls since %"SVf" too modern--this is %"SVf", stopped",
@@ -3104,7 +3104,7 @@ PP(pp_require)
 	/* If we request a version >= 5.9.5, load feature.pm with the
 	 * feature bundle that corresponds to the required version.
 	 * We do this only with use, not require. */
-	if (PL_compcv && vcmp(sv, sv_2mortal(upg_version(newSVnv(5.009005)))) >= 0) {
+	if (PL_compcv && vcmp(sv, sv_2mortal(upg_version(newSVnv(5.009005), FALSE))) >= 0) {
 	    SV *const importsv = vnormal(sv);
 	    *SvPVX_mutable(importsv) = ':';
 	    ENTER;

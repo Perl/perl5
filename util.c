@@ -4326,7 +4326,7 @@ Perl_new_version(pTHX_ SV *ver)
 	}
     }
 #endif
-    return upg_version(rv);
+    return upg_version(rv, FALSE);
 }
 
 /*
@@ -4334,24 +4334,25 @@ Perl_new_version(pTHX_ SV *ver)
 
 In-place upgrade of the supplied SV to a version object.
 
-    SV *sv = upg_version(SV *sv);
+    SV *sv = upg_version(SV *sv, bool qv);
 
-Returns a pointer to the upgraded SV.
+Returns a pointer to the upgraded SV.  Set the boolean qv if you want
+to force this SV to be interpreted as an "extended" version.
 
 =cut
 */
 
 SV *
-Perl_upg_version(pTHX_ SV *ver)
+Perl_upg_version(pTHX_ SV *ver, bool qv)
 {
     const char *version, *s;
-    bool qv = 0;
 #ifdef SvVOK
     const MAGIC *mg;
 #endif
 
-    if ( SvNOK(ver) ) /* may get too much accuracy */ 
+    if ( SvNOK(ver) && !( SvPOK(ver) && sv_len(ver) == 3 ) )
     {
+	/* may get too much accuracy */ 
 	char tbuf[64];
 #ifdef USE_LOCALE_NUMERIC
 	char *loc = setlocale(LC_NUMERIC, "C");
@@ -4371,7 +4372,35 @@ Perl_upg_version(pTHX_ SV *ver)
 #endif
     else /* must be a string or something like a string */
     {
-	version = savepv(SvPV_nolen(ver));
+	STRLEN len;
+	version = savepv(SvPV(ver,len));
+#ifndef SvVOK
+#  if PERL_VERSION > 5
+	/* This will only be executed for 5.6.0 - 5.8.0 inclusive */
+	if ( len == 3 && !instr(version,".") && !instr(version,"_") ) {
+	    /* may be a v-string */
+	    SV * const nsv = sv_newmortal();
+	    const char *nver;
+	    const char *pos;
+	    int saw_period = 0;
+	    sv_setpvf(nsv,"%vd",ver);
+	    pos = nver = savepv(SvPV_nolen(nsv));
+
+	    /* scan the resulting formatted string */
+	    while ( *pos == '.' || isDIGIT(*pos) ) {
+		if ( *pos == '.' )
+		    saw_period++ ;
+		pos++;
+	    }
+
+	    /* is definitely a v-string */
+	    if ( saw_period == 2 ) {	
+		Safefree(version);
+		version = nver;
+	    }
+	}
+#  endif
+#endif
     }
 
     s = scan_version(version, ver, qv);

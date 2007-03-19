@@ -3279,7 +3279,7 @@ Perl_moreswitches(pTHX_ char *s)
 	return s;
     case 'v':
 	if (!sv_derived_from(PL_patchlevel, "version"))
-	    upg_version(PL_patchlevel);
+	    upg_version(PL_patchlevel, TRUE);
 #if !defined(DGUX)
 	PerlIO_printf(PerlIO_stdout(),
 		Perl_form(aTHX_ "\nThis is perl, %"SVf
