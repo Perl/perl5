@@ -325,15 +325,11 @@ SYNCH_REFS: {
       if (($to < 0) || ($^O eq 'os2')) {
         ok(2,!$ok, "$test: timeout");
       } else {
-        # This is a bit problematic, as scheduling and compute latencies
-        # can inject delays in our computation. For now, assume -10/+20%
-        # is reasonable
-        if (! ok(2, ! $ok &&
-                    ($delta > (0.9 * $to)) &&
-                    ($delta < (1.2 * $to)),
-                        "$test: timeout"))
-        {
+        if (ok(2, ! $ok, "$test: timeout")) {
+          # Timing tests can be problematic
+          if (($delta < (0.9 * $to)) || ($delta > (1.0 + $to))) {
             print(STDERR "# Timeout: specified=$to  actual=$delta secs.\n");
+          }
         }
       }
     }
