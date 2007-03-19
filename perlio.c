@@ -3552,6 +3552,7 @@ PerlIO_exportFILE(PerlIO * f, const char *mode)
 	    if ((f2 = PerlIO_push(aTHX_ f, PERLIO_FUNCS_CAST(&PerlIO_stdio), buf, NULL))) {
 		PerlIOStdio *s = PerlIOSelf((f = f2), PerlIOStdio);
 		s->stdio = stdio;
+		PerlIOUnix_refcnt_inc(fileno(stdio));
 		/* Link previous lower layers under new one */
 		*PerlIONext(f) = l;
 	    }
@@ -3591,6 +3592,9 @@ PerlIO_releaseFILE(PerlIO *p, FILE *f)
 	    PerlIOStdio *s = PerlIOSelf(&l, PerlIOStdio);
 	    if (s->stdio == f) {
 		dTHX;
+		const int fd = fileno(f);
+		if (fd >= 0)
+		    PerlIOUnix_refcnt_dec(fd);
 		PerlIO_pop(aTHX_ p);
 		return;
 	    }
