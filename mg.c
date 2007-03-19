@@ -2002,13 +2002,11 @@ Perl_magic_settaint(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
     PERL_UNUSED_ARG(sv);
-    /* update taint status unless we're restoring at scope exit */
-    if (PL_localizing != 2) {
-	if (PL_tainted)
-	    mg->mg_len |= 1;
-	else
-	    mg->mg_len &= ~1;
-    }
+    /* update taint status */
+    if (PL_tainted)
+	mg->mg_len |= 1;
+    else
+	mg->mg_len &= ~1;
     return 0;
 }
 
