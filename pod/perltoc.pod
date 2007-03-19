@@ -5365,7 +5365,9 @@ G_VOID X<G_VOID>
 
 =item Array Manipulation Functions
 
-AvFILL X<AvFILL>, av_clear X<av_clear>, av_delete X<av_delete>, av_exists
+AvFILL X<AvFILL>, av_clear X<av_clear>, av_create_and_push
+X<av_create_and_push>, av_create_and_unshift_one
+X<av_create_and_unshift_one>, av_delete X<av_delete>, av_exists
 X<av_exists>, av_extend X<av_extend>, av_fetch X<av_fetch>, av_fill
 X<av_fill>, av_len X<av_len>, av_make X<av_make>, av_pop X<av_pop>, av_push
 X<av_push>, av_shift X<av_shift>, av_store X<av_store>, av_undef
@@ -5576,27 +5578,28 @@ X<newSV>, newSVhek X<newSVhek>, newSViv X<newSViv>, newSVnv X<newSVnv>,
 newSVpv X<newSVpv>, newSVpvf X<newSVpvf>, newSVpvn X<newSVpvn>,
 newSVpvn_share X<newSVpvn_share>, newSVpvs X<newSVpvs>, newSVpvs_share
 X<newSVpvs_share>, newSVrv X<newSVrv>, newSVsv X<newSVsv>, newSVuv
-X<newSVuv>, sv_2bool X<sv_2bool>, sv_2cv X<sv_2cv>, sv_2io X<sv_2io>,
-sv_2iv_flags X<sv_2iv_flags>, sv_2mortal X<sv_2mortal>, sv_2nv X<sv_2nv>,
-sv_2pvbyte X<sv_2pvbyte>, sv_2pvutf8 X<sv_2pvutf8>, sv_2pv_flags
-X<sv_2pv_flags>, sv_2uv_flags X<sv_2uv_flags>, sv_backoff X<sv_backoff>,
-sv_bless X<sv_bless>, sv_catpv X<sv_catpv>, sv_catpvf X<sv_catpvf>,
-sv_catpvf_mg X<sv_catpvf_mg>, sv_catpvn X<sv_catpvn>, sv_catpvn_flags
-X<sv_catpvn_flags>, sv_catpvs X<sv_catpvs>, sv_catpv_mg X<sv_catpv_mg>,
-sv_catsv X<sv_catsv>, sv_catsv_flags X<sv_catsv_flags>, sv_chop X<sv_chop>,
-sv_clear X<sv_clear>, sv_cmp X<sv_cmp>, sv_cmp_locale X<sv_cmp_locale>,
-sv_collxfrm X<sv_collxfrm>, sv_copypv X<sv_copypv>, sv_dec X<sv_dec>, sv_eq
-X<sv_eq>, sv_force_normal_flags X<sv_force_normal_flags>, sv_free
-X<sv_free>, sv_gets X<sv_gets>, sv_grow X<sv_grow>, sv_inc X<sv_inc>,
-sv_insert X<sv_insert>, sv_isa X<sv_isa>, sv_isobject X<sv_isobject>,
-sv_len X<sv_len>, sv_len_utf8 X<sv_len_utf8>, sv_magic X<sv_magic>,
-sv_magicext X<sv_magicext>, sv_mortalcopy X<sv_mortalcopy>, sv_newmortal
-X<sv_newmortal>, sv_newref X<sv_newref>, sv_pos_b2u X<sv_pos_b2u>,
-sv_pos_u2b X<sv_pos_u2b>, sv_pvbyten_force X<sv_pvbyten_force>,
-sv_pvn_force X<sv_pvn_force>, sv_pvn_force_flags X<sv_pvn_force_flags>,
-sv_pvutf8n_force X<sv_pvutf8n_force>, sv_reftype X<sv_reftype>, sv_replace
-X<sv_replace>, sv_reset X<sv_reset>, sv_rvweaken X<sv_rvweaken>, sv_setiv
-X<sv_setiv>, sv_setiv_mg X<sv_setiv_mg>, sv_setnv X<sv_setnv>, sv_setnv_mg
+X<newSVuv>, newSV_type X<newSV_type>, sv_2bool X<sv_2bool>, sv_2cv
+X<sv_2cv>, sv_2io X<sv_2io>, sv_2iv_flags X<sv_2iv_flags>, sv_2mortal
+X<sv_2mortal>, sv_2nv X<sv_2nv>, sv_2pvbyte X<sv_2pvbyte>, sv_2pvutf8
+X<sv_2pvutf8>, sv_2pv_flags X<sv_2pv_flags>, sv_2uv_flags X<sv_2uv_flags>,
+sv_backoff X<sv_backoff>, sv_bless X<sv_bless>, sv_catpv X<sv_catpv>,
+sv_catpvf X<sv_catpvf>, sv_catpvf_mg X<sv_catpvf_mg>, sv_catpvn
+X<sv_catpvn>, sv_catpvn_flags X<sv_catpvn_flags>, sv_catpvs X<sv_catpvs>,
+sv_catpv_mg X<sv_catpv_mg>, sv_catsv X<sv_catsv>, sv_catsv_flags
+X<sv_catsv_flags>, sv_chop X<sv_chop>, sv_clear X<sv_clear>, sv_cmp
+X<sv_cmp>, sv_cmp_locale X<sv_cmp_locale>, sv_collxfrm X<sv_collxfrm>,
+sv_copypv X<sv_copypv>, sv_dec X<sv_dec>, sv_eq X<sv_eq>,
+sv_force_normal_flags X<sv_force_normal_flags>, sv_free X<sv_free>, sv_gets
+X<sv_gets>, sv_grow X<sv_grow>, sv_inc X<sv_inc>, sv_insert X<sv_insert>,
+sv_isa X<sv_isa>, sv_isobject X<sv_isobject>, sv_len X<sv_len>, sv_len_utf8
+X<sv_len_utf8>, sv_magic X<sv_magic>, sv_magicext X<sv_magicext>,
+sv_mortalcopy X<sv_mortalcopy>, sv_newmortal X<sv_newmortal>, sv_newref
+X<sv_newref>, sv_pos_b2u X<sv_pos_b2u>, sv_pos_u2b X<sv_pos_u2b>,
+sv_pvbyten_force X<sv_pvbyten_force>, sv_pvn_force X<sv_pvn_force>,
+sv_pvn_force_flags X<sv_pvn_force_flags>, sv_pvutf8n_force
+X<sv_pvutf8n_force>, sv_reftype X<sv_reftype>, sv_replace X<sv_replace>,
+sv_reset X<sv_reset>, sv_rvweaken X<sv_rvweaken>, sv_setiv X<sv_setiv>,
+sv_setiv_mg X<sv_setiv_mg>, sv_setnv X<sv_setnv>, sv_setnv_mg
 X<sv_setnv_mg>, sv_setpv X<sv_setpv>, sv_setpvf X<sv_setpvf>, sv_setpvf_mg
 X<sv_setpvf_mg>, sv_setpviv X<sv_setpviv>, sv_setpviv_mg X<sv_setpviv_mg>,
 sv_setpvn X<sv_setpvn>, sv_setpvn_mg X<sv_setpvn_mg>, sv_setpvs

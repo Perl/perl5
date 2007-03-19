@@ -134,6 +134,35 @@ array itself.
 =for hackers
 Found in file av.c
 
+=item av_create_and_push
+X<av_create_and_push>
+
+Push an SV onto the end of the array, creating the array if necessary.
+A small internal helper function to remove a commonly duplicated idiom.
+
+NOTE: this function is experimental and may change or be
+removed without notice.
+
+	void	av_create_and_push(AV **const avp, SV *const val)
+
+=for hackers
+Found in file av.c
+
+=item av_create_and_unshift_one
+X<av_create_and_unshift_one>
+
+Unshifts an SV onto the beginning of the array, creating the array if
+necessary.
+A small internal helper function to remove a commonly duplicated idiom.
+
+NOTE: this function is experimental and may change or be
+removed without notice.
+
+	SV**	av_create_and_unshift_one(AV **const avp, SV *const val)
+
+=for hackers
+Found in file av.c
+
 =item av_delete
 X<av_delete>
 
@@ -188,8 +217,14 @@ Found in file av.c
 =item av_fill
 X<av_fill>
 
-Ensure than an array has a given number of elements, equivalent to
+Set the highest index in the array to the given number, equivalent to
 Perl's C<$#array = $fill;>.
+
+The number of elements in the an array will be C<fill + 1> after
+av_fill() returns.  If the array was previously shorter then the
+additional elements appended are set to C<PL_sv_undef>.  If the array
+was longer, then the excess elements are freed.  C<av_fill(av, -1)> is
+the same as C<av_clear(av)>.
 
 	void	av_fill(AV* ar, I32 fill)
 
@@ -199,8 +234,8 @@ Found in file av.c
 =item av_len
 X<av_len>
 
-Returns the highest index in the array.  Returns -1 if the array is
-empty.
+Returns the highest index in the array.  The number of elements in the
+array is C<av_len(av) + 1>.  Returns -1 if the array is empty.
 
 	I32	av_len(AV* ar)
 
@@ -1121,11 +1156,6 @@ X<unpack_str>
 
 The engine implementing unpack() Perl function. Note: parameters strbeg, new_s
 and ocnt are not used. This call should not be used, use unpackstring instead.
-
-	I32	unpack_str(const char *pat, const char *patend, const char *s, const char *strbeg, const char *strend, char **new_s, I32 ocnt, U32 flags)
-
-=for hackers
-Found in file mathoms.c
 
 	I32	unpack_str(char *pat, char *patend, char *s, char *strbeg, char *strend, char **new_s, I32 ocnt, U32 flags)
 
@@ -4844,6 +4874,17 @@ Creates a new SV and copies an unsigned integer into it.
 The reference count for the SV is set to 1.
 
 	SV*	newSVuv(UV u)
+
+=for hackers
+Found in file sv.c
+
+=item newSV_type
+X<newSV_type>
+
+Creates a new SV, of the type specificied.  The reference count for the new SV
+is set to 1.
+
+	SV*	newSV_type(svtype type)
 
 =for hackers
 Found in file sv.c
