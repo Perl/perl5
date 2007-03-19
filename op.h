@@ -111,6 +111,8 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPf_STACKED	64	/* Some arg is arriving on the stack. */
 #define OPf_SPECIAL	128	/* Do something weird for this op: */
 				/*  On local LVAL, don't init local value. */
+				/*  On OP_CONST, value is the hints hash for
+				    eval, so return a copy from pp_const() */
 				/*  On OP_SORT, subroutine is inlined. */
 				/*  On OP_NOT, inversion was implicit. */
 				/*  On OP_LEAVE, don't restore curpm. */

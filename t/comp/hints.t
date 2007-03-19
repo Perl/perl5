@@ -8,7 +8,7 @@ BEGIN {
 }
 
 
-BEGIN { print "1..15\n"; }
+BEGIN { print "1..17\n"; }
 BEGIN {
     print "not " if exists $^H{foo};
     print "ok 1 - \$^H{foo} doesn't exist initially\n";
@@ -93,3 +93,16 @@ print "not " if length $result;
 print "ok 15 - double-freeing hints hash\n";
 print "# got: $result\n" if length $result;
 
+{
+    BEGIN{$^H{x}=1};
+    for(1..2) {
+        eval q(
+            print $^H{x}==1 && !$^H{y} ? "ok\n" : "not ok\n";
+            $^H{y} = 1;
+        );
+        if ($@) {
+            (my $str = $@)=~s/^/# /gm;
+            print "not ok\n$str\n";
+        }
+    }
+}
