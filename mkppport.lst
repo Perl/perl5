@@ -8,7 +8,6 @@
 ext/Compress/Raw/Zlib
 ext/Cwd
 ext/Data/Dumper
-ext/Digest/SHA
 ext/Sys/Syslog
 ext/Time/HiRes
 ext/Win32API/File
