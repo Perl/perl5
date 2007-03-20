@@ -116,7 +116,7 @@ ApdR	|AV*	|av_make	|I32 size|NN SV** svp
 Apd	|SV*	|av_pop		|NULLOK AV* ar
 ApdoxM	|void	|av_create_and_push|NN AV **const avp|NN SV *const val
 Apd	|void	|av_push	|NULLOK AV* ar|NN SV* val
-p	|void	|av_reify	|NN AV* ar
+EXp	|void	|av_reify	|NN AV* ar
 ApdR	|SV*	|av_shift	|NULLOK AV* ar
 Apd	|SV**	|av_store	|NULLOK AV* ar|I32 key|NULLOK SV* val
 Apd	|void	|av_undef	|NULLOK AV* ar
@@ -405,10 +405,10 @@ ApR	|bool	|is_utf8_mark	|NN U8 *p
 p	|OP*	|jmaybe		|NN OP* arg
 pP	|I32	|keyword	|NN char* d|I32 len
 Ap	|void	|leave_scope	|I32 base
-p	|void	|lex_end
+EXp	|void	|lex_end
 p	|void	|lex_start	|NULLOK SV* line
 Ap	|void	|op_null	|NN OP* o
-p	|void	|op_clear	|NN OP* o
+EXp	|void	|op_clear	|NN OP* o
 p	|OP*	|linklist	|NN OP* o
 p	|OP*	|list		|NULLOK OP* o
 p	|OP*	|listkids	|NULLOK OP* o
@@ -482,7 +482,7 @@ p	|char*	|mem_collxfrm	|NN const char* s|STRLEN len|NN STRLEN* xlen
 #endif
 Afp	|SV*	|mess		|NN const char* pat|...
 Ap	|SV*	|vmess		|NN const char* pat|NULLOK va_list* args
-p	|void	|qerror		|NN SV* err
+EXp	|void	|qerror		|NN SV* err
 Apd	|void	|sortsv		|NN SV** array|size_t num_elts|NN SVCOMPARE_t cmp
 Apd	|int	|mg_clear	|NN SV* sv
 Apd	|int	|mg_copy	|NN SV* sv|NN SV* nsv|NULLOK const char* key|I32 klen
@@ -495,7 +495,7 @@ Apd	|void	|mg_magical	|NN SV* sv
 Apd	|int	|mg_set		|NN SV* sv
 Ap	|I32	|mg_size	|NN SV* sv
 Ap	|void	|mini_mktime	|NN struct tm *pm
-p	|OP*	|mod		|NULLOK OP* o|I32 type
+EXp	|OP*	|mod		|NULLOK OP* o|I32 type
 p	|int	|mode_from_discipline|NULLOK SV* discp
 Ap	|char*	|moreswitches	|NN char* s
 p	|OP*	|my		|NN OP* o
@@ -752,7 +752,7 @@ Ap	|char*	|screaminstr	|NN SV *bigstr|NN SV *littlestr|I32 start_shift \
 #if !defined(VMS)
 p	|I32	|setenv_getix	|NN char* nam
 #endif
-p	|void	|setdefout	|NULLOK GV* gv
+EXp	|void	|setdefout	|NULLOK GV* gv
 Ap	|HEK*	|share_hek	|NN const char* str|I32 len|U32 hash
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 nop	|Signal_t |sighandler_va|int sig|...
@@ -923,7 +923,7 @@ Apd	|U8*	|uvuni_to_utf8_flags	|NN U8 *d|UV uv|UV flags
 Apd	|char*	|pv_uni_display	|NN SV *dsv|NN U8 *spv|STRLEN len \
 				|STRLEN pvlim|UV flags
 ApdR	|char*	|sv_uni_display	|NN SV *dsv|NN SV *ssv|STRLEN pvlim|UV flags
-p	|void	|vivify_defelem	|NN SV* sv
+EXp	|void	|vivify_defelem	|NN SV* sv
 p	|void	|vivify_ref	|NN SV* sv|U32 to_what
 p	|I32	|wait4pid	|Pid_t pid|NN int* statusp|int flags
 p	|U32	|parse_unicode_opts|NN char **popt
@@ -942,7 +942,7 @@ p	|int	|yyerror	|NN char* s
 #ifdef USE_PURE_BISON
 p	|int	|yylex_r	|NULLOK YYSTYPE *lvalp|NULLOK int *lcharp
 #endif
-p	|int	|yylex
+EXp	|int	|yylex
 p	|int	|yyparse
 p	|int	|yywarn		|NN char* s
 #if defined(MYMALLOC)
