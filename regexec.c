@@ -1997,7 +1997,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    SV * const prop = sv_newmortal();
 	    regprop(prog, prop, c);
 	    {
-		RE_PV_QUOTED_DECL(quoted,UTF,PERL_DEBUG_PAD_ZERO(1),
+		RE_PV_QUOTED_DECL(quoted,do_utf8,PERL_DEBUG_PAD_ZERO(1),
 		    s,strend-s,60);
 		PerlIO_printf(Perl_debug_log,
 		    "Matching stclass %.*s against %s (%d chars)\n",

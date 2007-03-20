@@ -775,7 +775,7 @@ must be able to correctly build a regexp structure.
 
     typedef struct regexp {
             /* what engine created this regexp? */
-            const struct regexp_engine* engine; 
+            const struct regexp_engine* engine;
             
             /* Information about the match that the perl core uses to manage things */
             U32 extflags;           /* Flags used both externally and internally */
@@ -829,10 +829,10 @@ to the subroutines that are to be used for performing a match. It
 is the compiling routine's responsibility to populate this field before
 returning the regexp object.
 
-=item C<precomp> C<prelen> 
+=item C<precomp> C<prelen>
 
 Used for debugging purposes. C<precomp> holds a copy of the pattern
-that was compiled. 
+that was compiled.
 
 =item C<extflags>
 
@@ -841,22 +841,22 @@ contains a \G or a ^ or $ symbol.
 
 =item C<minlen> C<minlenret>
 
-C<minlen> is the minimum string length required for the pattern to match. 
-This is used to prune the search space by not bothering to match any 
-closer to the end of a string than would allow a match. For instance 
-there is no point in even starting the regex engine if the minlen is 
-10 but the string is only 5 characters long. There is no way that the 
+C<minlen> is the minimum string length required for the pattern to match.
+This is used to prune the search space by not bothering to match any
+closer to the end of a string than would allow a match. For instance
+there is no point in even starting the regex engine if the minlen is
+10 but the string is only 5 characters long. There is no way that the
 pattern can match.
 
 C<minlenret> is the minimum length of the string that would be found
-in $& after a match. 
+in $& after a match.
 
 The difference between C<minlen> and C<minlenret> can be seen in the
 following pattern:
 
   /ns(?=\d)/
 
-where the C<minlen> would be 3 but the minlen ret would only be 2 as 
+where the C<minlen> would be 3 but the minlen ret would only be 2 as
 the \d is required to match but is not actually included in the matched
 content. This distinction is particularly important as the substitution
 logic uses the C<minlenret> to tell whether it can do in-place substition
@@ -889,7 +889,7 @@ occur at a floating offset from the start of the pattern. Used to do
 Fast-Boyer-Moore searches on the string to find out if its worth using
 the regex engine at all, and if so where in the string to search.
 
-=item C<startp>, C<endp>, 
+=item C<startp>, C<endp>
 
 These fields store arrays that are used to hold the offsets of the begining
 and end of each capture group that has matched. -1 is used to indicate no match.
@@ -903,8 +903,8 @@ patterns.
 
 =item C<seen_evals>
 
-This stores the number of eval groups in the pattern. This is used 
-for security purposes when embedding compiled regexes into larger 
+This stores the number of eval groups in the pattern. This is used
+for security purposes when embedding compiled regexes into larger
 patterns.
 
 =back
@@ -1028,6 +1028,17 @@ Compile the pattern between exp and xend using the flags contained in
 pm and return a pointer to a prepared regexp structure that can perform
 the match.
 
+The utf8'ness of the string can be found by testing
+
+   pm->op_pmdynflags & PMdf_CMP_UTF8
+
+Additional various flags reflecting the modifiers used are contained in
+
+   pm->op_pmflags
+
+some of these have exact equivelents in re->extflags. See regcomp.h and op.h
+for details of these values.   
+
 =item exec
 
     I32 exec(regexp* prog,
@@ -1046,7 +1057,7 @@ Execute a regexp.
 Find the start position where a regex match should be attempted,
 or possibly whether the regex engine should not be run because the
 pattern can't match. This is called as appropriate by the core
-depending on the values of the extflags member of the regexp 
+depending on the values of the extflags member of the regexp
 structure.
 
 =item checkstr

@@ -124,7 +124,10 @@ typedef struct RExC_state_t {
     regnode	**open_parens;		/* pointers to open parens */
     regnode	**close_parens;		/* pointers to close parens */
     regnode	*opend;			/* END node in program */
-    I32		utf8;
+    I32		utf8;		/* whether the pattern is utf8 or not */
+    I32		orig_utf8;	/* whether the pattern was originally in utf8 */
+				/* XXX use this for future optimisation of case
+				 * where pattern must be upgraded to utf8. */
     HV		*charnames;		/* cache of named sequences */
     HV		*paren_names;		/* Paren names */
     
@@ -168,6 +171,7 @@ typedef struct RExC_state_t {
 #define RExC_seen_zerolen	(pRExC_state->seen_zerolen)
 #define RExC_seen_evals	(pRExC_state->seen_evals)
 #define RExC_utf8	(pRExC_state->utf8)
+#define RExC_orig_utf8	(pRExC_state->orig_utf8)
 #define RExC_charnames  (pRExC_state->charnames)
 #define RExC_open_parens	(pRExC_state->open_parens)
 #define RExC_close_parens	(pRExC_state->close_parens)
@@ -1375,16 +1379,17 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
         const U8 *scan = (U8*)NULL;
         U32 wordlen      = 0;         /* required init */
-        STRLEN chars=0;
+        STRLEN chars = 0;
+        bool set_bit = trie->bitmap ? 1 : 0; /*store the first char in the bitmap?*/
 
         if (OP(noper) == NOTHING) {
             trie->minlen= 0;
             continue;
         }
-        if (trie->bitmap) {
-            TRIE_BITMAP_SET(trie,*uc);
-            if ( folder ) TRIE_BITMAP_SET(trie,folder[ *uc ]);            
-        }
+        if ( set_bit ) /* bitmap only alloced when !(UTF&&Folding) */
+            TRIE_BITMAP_SET(trie,*uc); /* store the raw first byte
+                                          regardless of encoding */
+
         for ( ; uc < e ; uc += len ) {
             TRIE_CHARCOUNT(trie)++;
             TRIE_READ_CHAR;
@@ -1395,6 +1400,13 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                     if ( folder )
                         trie->charmap[ folder[ uvc ] ] = trie->charmap[ uvc ];
                     TRIE_STORE_REVCHAR;
+                }
+                if ( set_bit ) {
+                    /* store the codepoint in the bitmap, and if its ascii
+                       also store its folded equivelent. */
+                    TRIE_BITMAP_SET(trie,uvc);
+                    if ( folder ) TRIE_BITMAP_SET(trie,folder[ uvc ]);
+                    set_bit = 0; /* We've done our bit :-) */
                 }
             } else {
                 SV** svpp;
@@ -4052,16 +4064,18 @@ Perl_re_compile(pTHX_ char *exp, char *xend, PMOP *pm)
     if (exp == NULL)
 	FAIL("NULL regexp argument");
 
-    RExC_utf8 = pm->op_pmdynflags & PMdf_CMP_UTF8;
+    RExC_utf8 = RExC_orig_utf8 = pm->op_pmdynflags & PMdf_CMP_UTF8;
 
-    RExC_precomp = exp;
     DEBUG_COMPILE_r({
         SV *dsv= sv_newmortal();
         RE_PV_QUOTED_DECL(s, RExC_utf8,
-            dsv, RExC_precomp, (xend - exp), 60);
+            dsv, exp, (xend - exp), 60);
         PerlIO_printf(Perl_debug_log, "%sCompiling REx%s %s\n",
 		       PL_colors[4],PL_colors[5],s);
     });
+
+redo_first_pass:
+    RExC_precomp = exp;
     RExC_flags = pm->op_pmflags;
     RExC_sawback = 0;
 
@@ -4099,6 +4113,25 @@ Perl_re_compile(pTHX_ char *exp, char *xend, PMOP *pm)
     if (reg(pRExC_state, 0, &flags,1) == NULL) {
 	RExC_precomp = NULL;
 	return(NULL);
+    }
+    if (RExC_utf8 && !RExC_orig_utf8) {
+        /* It's possible to write a regexp in ascii that represents unicode
+        codepoints outside of the byte range, such as via \x{100}. If we
+        detect such a sequence we have to convert the entire pattern to utf8
+        and then recompile, as our sizing calculation will have been based
+        on 1 byte == 1 character, but we will need to use utf8 to encode
+        at least some part of the pattern, and therefore must convert the whole
+        thing.
+        XXX: somehow figure out how to make this less expensive...
+        -- dmq */
+        STRLEN len = xend-exp;
+        DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
+	    "UTF8 mismatch! Converting to utf8 for resizing and compile\n"));
+        exp = (char*)Perl_bytes_to_utf8(aTHX_ (U8*)exp, &len);
+        xend = exp + len;
+        RExC_orig_utf8 = RExC_utf8;
+        SAVEFREEPV(exp);
+        goto redo_first_pass;
     }
     DEBUG_PARSE_r({
         PerlIO_printf(Perl_debug_log, 
@@ -4956,7 +4989,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     GET_RE_DEBUG_FLAGS_DECL;
     DEBUG_PARSE("reg ");
 
-
     *flagp = 0;				/* Tentatively. */
 
 
@@ -5796,6 +5828,7 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
     I32 flags = 0, c = 0;
     GET_RE_DEBUG_FLAGS_DECL;
     DEBUG_PARSE("brnc");
+
     if (first)
 	ret = NULL;
     else {

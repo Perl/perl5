@@ -4316,6 +4316,16 @@ sub kt
         "Check that (?&..) to a buffer inside a (?|...) goes to the leftmost");
 }
 
+{
+    use warnings;
+    local $Message = "ASCII pattern that really is utf8";
+    my @w;
+    local $SIG{__WARN__}=sub{push @w,"@_"};
+    my $c=qq(\x{DF}); 
+    ok($c=~/${c}|\x{100}/);
+    ok(@w==0);
+}    
+
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
 # Keep the following tests last -- they may crash perl
@@ -4385,7 +4395,7 @@ ok($@=~/\QSequence \k... not terminated in regex;\E/);
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 1650;
+    $::TestCount = 1652;
     print "1..$::TestCount\n";
 }
 
