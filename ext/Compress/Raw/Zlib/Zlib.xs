@@ -58,9 +58,11 @@
 #  define AT_LEAST_ZLIB_1_2_3
 #endif
 
-#define NEED_sv_2pvbyte
-#define NEED_sv_2pv_nolen
-#include "ppport.h"
+#ifdef USE_PPPORT_H
+#  define NEED_sv_2pvbyte
+#  define NEED_sv_2pv_nolen
+#  include "ppport.h"
+#endif
 
 #if PERL_REVISION == 5 && (PERL_VERSION < 8 || (PERL_VERSION == 8 && PERL_SUBVERSION < 4 ))
 

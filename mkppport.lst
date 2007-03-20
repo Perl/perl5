@@ -5,7 +5,6 @@
 # This file is read by mkppport at build time.
 #
 
-ext/Compress/Raw/Zlib
 ext/Cwd
 ext/Data/Dumper
 ext/Sys/Syslog
