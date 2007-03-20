@@ -3771,5 +3771,15 @@ sub iseq($$;$) {
     iseq($count,1,"should have matched once only [RT#36046]");
 }
 
+{
+    use warnings;
+    local $Message = "ASCII pattern that really is utf8";
+    my @w;
+    local $SIG{__WARN__}=sub{push @w,"@_"};
+    my $c=qq(\x{DF}); 
+    ok($c=~/${c}|\x{100}/);
+    ok(@w==0);
+}    
+
 # Don't forget to update this!
-BEGIN{print "1..1251\n"};
+BEGIN{print "1..1253\n"};

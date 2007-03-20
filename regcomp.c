@@ -117,7 +117,10 @@ typedef struct RExC_state_t {
     I32		extralen;
     I32		seen_zerolen;
     I32		seen_evals;
-    I32		utf8;
+    I32		utf8;		/* whether the pattern is utf8 or not */
+    I32		orig_utf8;	/* whether the pattern was originally in utf8 */
+				/* XXX use this for future optimisation of case
+				 * where pattern must be upgraded to utf8. */
 #if ADD_TO_REGEXEC
     char 	*starttry;		/* -Dr: where regtry was called. */
 #define RExC_starttry	(pRExC_state->starttry)
@@ -143,6 +146,7 @@ typedef struct RExC_state_t {
 #define RExC_seen_zerolen	(pRExC_state->seen_zerolen)
 #define RExC_seen_evals	(pRExC_state->seen_evals)
 #define RExC_utf8	(pRExC_state->utf8)
+#define RExC_orig_utf8	(pRExC_state->orig_utf8)
 
 #define	ISMULT1(c)	((c) == '*' || (c) == '+' || (c) == '?')
 #define	ISMULT2(s)	((*s) == '*' || (*s) == '+' || (*s) == '?' || \
@@ -1720,15 +1724,17 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     if (exp == NULL)
 	FAIL("NULL regexp argument");
 
-    RExC_utf8 = pm->op_pmdynflags & PMdf_CMP_UTF8;
+    RExC_utf8 = RExC_orig_utf8 = pm->op_pmdynflags & PMdf_CMP_UTF8;
 
-    RExC_precomp = exp;
     DEBUG_r({
 	 if (!PL_colorset) reginitcolors();
 	 PerlIO_printf(Perl_debug_log, "%sCompiling REx%s `%s%*s%s'\n",
 		       PL_colors[4],PL_colors[5],PL_colors[0],
 		       (int)(xend - exp), RExC_precomp, PL_colors[1]);
     });
+
+redo_first_pass:
+    RExC_precomp = exp;
     RExC_flags = pm->op_pmflags;
     RExC_sawback = 0;
 
@@ -1753,6 +1759,25 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     if (reg(pRExC_state, 0, &flags) == NULL) {
 	RExC_precomp = NULL;
 	return(NULL);
+    }
+    if (RExC_utf8 && !RExC_orig_utf8) {
+        /* It's possible to write a regexp in ascii that represents unicode
+        codepoints outside of the byte range, such as via \x{100}. If we
+        detect such a sequence we have to convert the entire pattern to utf8
+        and then recompile, as our sizing calculation will have been based
+        on 1 byte == 1 character, but we will need to use utf8 to encode
+        at least some part of the pattern, and therefore must convert the whole
+        thing.
+        XXX: somehow figure out how to make this less expensive...
+        -- dmq */
+        STRLEN len = xend-exp;
+        DEBUG_r(PerlIO_printf(Perl_debug_log,
+	    "UTF8 mismatch! Converting to utf8 for resizing and compile\n"));
+        exp = (char*)Perl_bytes_to_utf8(aTHX_ (U8*)exp, &len);
+        xend = exp + len;
+        RExC_orig_utf8 = RExC_utf8;
+        SAVEFREEPV(exp);
+        goto redo_first_pass;
     }
     DEBUG_r(PerlIO_printf(Perl_debug_log, "size %"IVdf" ", (IV)RExC_size));
 
