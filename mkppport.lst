@@ -5,6 +5,5 @@
 # This file is read by mkppport at build time.
 #
 
-ext/Cwd
 ext/Time/HiRes
 ext/Win32API/File

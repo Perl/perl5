@@ -1,8 +1,10 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#define NEED_sv_2pv_nolen
-#include "ppport.h"
+#ifdef USE_PPPORT_H
+#   define NEED_sv_2pv_nolen
+#   include "ppport.h"
+#endif
 
 #ifdef I_UNISTD
 #   include <unistd.h>
