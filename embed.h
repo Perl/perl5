@@ -64,7 +64,7 @@
 #define av_make			Perl_av_make
 #define av_pop			Perl_av_pop
 #define av_push			Perl_av_push
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define av_reify		Perl_av_reify
 #endif
 #define av_shift		Perl_av_shift
@@ -377,12 +377,14 @@
 #define keyword			Perl_keyword
 #endif
 #define leave_scope		Perl_leave_scope
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define lex_end			Perl_lex_end
+#endif
+#ifdef PERL_CORE
 #define lex_start		Perl_lex_start
 #endif
 #define op_null			Perl_op_null
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define op_clear		Perl_op_clear
 #endif
 #define op_refcnt_lock		Perl_op_refcnt_lock
@@ -465,7 +467,7 @@
 #endif
 #define mess			Perl_mess
 #define vmess			Perl_vmess
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define qerror			Perl_qerror
 #endif
 #define sortsv			Perl_sortsv
@@ -483,8 +485,10 @@
 #define mg_set			Perl_mg_set
 #define mg_size			Perl_mg_size
 #define mini_mktime		Perl_mini_mktime
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define mod			Perl_mod
+#endif
+#ifdef PERL_CORE
 #define mode_from_discipline	Perl_mode_from_discipline
 #endif
 #define moreswitches		Perl_moreswitches
@@ -793,7 +797,7 @@
 #define setenv_getix		Perl_setenv_getix
 #endif
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define setdefout		Perl_setdefout
 #endif
 #define share_hek		Perl_share_hek
@@ -963,8 +967,10 @@
 #define uvuni_to_utf8_flags	Perl_uvuni_to_utf8_flags
 #define pv_uni_display		Perl_pv_uni_display
 #define sv_uni_display		Perl_sv_uni_display
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define vivify_defelem		Perl_vivify_defelem
+#endif
+#ifdef PERL_CORE
 #define vivify_ref		Perl_vivify_ref
 #define wait4pid		Perl_wait4pid
 #define parse_unicode_opts	Perl_parse_unicode_opts
@@ -986,7 +992,11 @@
 #ifdef PERL_CORE
 #define write_to_stderr		Perl_write_to_stderr
 #define yyerror			Perl_yyerror
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define yylex			Perl_yylex
+#endif
+#ifdef PERL_CORE
 #define yyparse			Perl_yyparse
 #define parser_free		Perl_parser_free
 #define yywarn			Perl_yywarn
@@ -2297,7 +2307,7 @@
 #define av_make(a,b)		Perl_av_make(aTHX_ a,b)
 #define av_pop(a)		Perl_av_pop(aTHX_ a)
 #define av_push(a,b)		Perl_av_push(aTHX_ a,b)
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define av_reify(a)		Perl_av_reify(aTHX_ a)
 #endif
 #define av_shift(a)		Perl_av_shift(aTHX_ a)
@@ -2605,12 +2615,14 @@
 #define keyword(a,b,c)		Perl_keyword(aTHX_ a,b,c)
 #endif
 #define leave_scope(a)		Perl_leave_scope(aTHX_ a)
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define lex_end()		Perl_lex_end(aTHX)
+#endif
+#ifdef PERL_CORE
 #define lex_start(a)		Perl_lex_start(aTHX_ a)
 #endif
 #define op_null(a)		Perl_op_null(aTHX_ a)
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define op_clear(a)		Perl_op_clear(aTHX_ a)
 #endif
 #define op_refcnt_lock()	Perl_op_refcnt_lock(aTHX)
@@ -2691,7 +2703,7 @@
 #endif
 #endif
 #define vmess(a,b)		Perl_vmess(aTHX_ a,b)
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define qerror(a)		Perl_qerror(aTHX_ a)
 #endif
 #define sortsv(a,b,c)		Perl_sortsv(aTHX_ a,b,c)
@@ -2709,8 +2721,10 @@
 #define mg_set(a)		Perl_mg_set(aTHX_ a)
 #define mg_size(a)		Perl_mg_size(aTHX_ a)
 #define mini_mktime(a)		Perl_mini_mktime(aTHX_ a)
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define mod(a,b)		Perl_mod(aTHX_ a,b)
+#endif
+#ifdef PERL_CORE
 #define mode_from_discipline(a)	Perl_mode_from_discipline(aTHX_ a)
 #endif
 #define moreswitches(a)		Perl_moreswitches(aTHX_ a)
@@ -3017,7 +3031,7 @@
 #define setenv_getix(a)		Perl_setenv_getix(aTHX_ a)
 #endif
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define setdefout(a)		Perl_setdefout(aTHX_ a)
 #endif
 #define share_hek(a,b,c)	Perl_share_hek(aTHX_ a,b,c)
@@ -3183,8 +3197,10 @@
 #define uvuni_to_utf8_flags(a,b,c)	Perl_uvuni_to_utf8_flags(aTHX_ a,b,c)
 #define pv_uni_display(a,b,c,d,e)	Perl_pv_uni_display(aTHX_ a,b,c,d,e)
 #define sv_uni_display(a,b,c,d)	Perl_sv_uni_display(aTHX_ a,b,c,d)
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define vivify_defelem(a)	Perl_vivify_defelem(aTHX_ a)
+#endif
+#ifdef PERL_CORE
 #define vivify_ref(a,b)		Perl_vivify_ref(aTHX_ a,b)
 #define wait4pid(a,b,c)		Perl_wait4pid(aTHX_ a,b,c)
 #define parse_unicode_opts(a)	Perl_parse_unicode_opts(aTHX_ a)
@@ -3204,7 +3220,11 @@
 #ifdef PERL_CORE
 #define write_to_stderr(a,b)	Perl_write_to_stderr(aTHX_ a,b)
 #define yyerror(a)		Perl_yyerror(aTHX_ a)
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define yylex()			Perl_yylex(aTHX)
+#endif
+#ifdef PERL_CORE
 #define yyparse()		Perl_yyparse(aTHX)
 #define parser_free(a)		Perl_parser_free(aTHX_ a)
 #define yywarn(a)		Perl_yywarn(aTHX_ a)

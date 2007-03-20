@@ -45,6 +45,7 @@ Perl_av_len
 Perl_av_make
 Perl_av_pop
 Perl_av_push
+Perl_av_reify
 Perl_av_shift
 Perl_av_store
 Perl_av_undef
@@ -235,7 +236,9 @@ Perl_is_utf8_punct
 Perl_is_utf8_xdigit
 Perl_is_utf8_mark
 Perl_leave_scope
+Perl_lex_end
 Perl_op_null
+Perl_op_clear
 Perl_op_refcnt_lock
 Perl_op_refcnt_unlock
 Perl_load_module
@@ -249,6 +252,7 @@ Perl_grok_oct
 Perl_markstack_grow
 Perl_mess
 Perl_vmess
+Perl_qerror
 Perl_sortsv
 Perl_sortsv_flags
 Perl_mg_clear
@@ -261,6 +265,7 @@ Perl_mg_magical
 Perl_mg_set
 Perl_mg_size
 Perl_mini_mktime
+Perl_mod
 Perl_moreswitches
 Perl_my_atof
 Perl_my_bcopy
@@ -454,6 +459,7 @@ Perl_scan_hex
 Perl_scan_num
 Perl_scan_oct
 Perl_screaminstr
+Perl_setdefout
 Perl_share_hek
 Perl_csighandler
 Perl_stack_grow
@@ -582,12 +588,14 @@ Perl_uvchr_to_utf8_flags
 Perl_uvuni_to_utf8_flags
 Perl_pv_uni_display
 Perl_sv_uni_display
+Perl_vivify_defelem
 Perl_seed
 Perl_warn
 Perl_vwarn
 Perl_warner
 Perl_vwarner
 Perl_whichsig
+Perl_yylex
 Perl_dump_mstats
 Perl_get_mstats
 Perl_safesysmalloc
