@@ -758,7 +758,6 @@ sub mkCheckRex {
 	unless $tc->{noanchors} or $tc->{rxnoorder};
     
     my $qr = ($tc->{noanchors})	? qr/$str/ms : qr/^$str$/ms ;
-    no re 'debug';
 
     $tc->{rex}		= $qr;
     $tc->{rexstr}	= $str;
