@@ -1,7 +1,9 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#include "ppport.h"
+#ifdef USE_PPPORT_H
+#  include "ppport.h"
+#endif
 
 #ifdef I_SYSLOG
 #include <syslog.h>

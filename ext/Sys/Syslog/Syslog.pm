@@ -9,7 +9,7 @@ require 5.006;
 require Exporter;
 
 {   no strict 'vars';
-    $VERSION = '0.18';
+    $VERSION = '0.18_01';
     @ISA = qw(Exporter);
 
     %EXPORT_TAGS = (

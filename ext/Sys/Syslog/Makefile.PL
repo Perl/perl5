@@ -18,6 +18,11 @@ WriteMakefile(
     dist            => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean           => { FILES => 'Sys-Syslog-*' }, 
     realclean       => { FILES => 'const-c.inc const-xs.inc macros.all' },
+    (
+        (grep { $_ eq 'PERL_CORE=1' } @ARGV)
+            ? ()
+            : ('DEFINE' => '-DUSE_PPPORT_H')
+    ),
 );
 
 my $_PATH_LOG;
