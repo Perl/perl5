@@ -119,7 +119,7 @@ case "$gccversion" in
 '') ;;
 [12]*) ;; # gcc versions 1 (gasp!) and 2 are not good for this.
 Intel*) ;; # # Is that you, Intel C++?
-*)  for opt in -ansi -pedantic -std=c89 -W -Wextra -Wdeclaration-after-statement -Wendif-labels
+*)  for opt in -ansi -pedantic -std=c89 -W -Wextra -Wdeclaration-after-statement -Wendif-labels -Wc++-compat
     do
        case " $ccflags " in
        *" $opt "*) ;; # Skip if already there.
