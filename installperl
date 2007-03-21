@@ -834,7 +834,8 @@ sub installlib {
     # ignore the Makefiles
     return if $name =~ /^makefile$/i;
     # ignore the test extensions
-    return if $dir =~ m{ext/XS/(?:APItest|Typemap)/};
+    return if $dir =~ m{\bXS/(?:APItest|Typemap)\b};
+    return if $name =~ m{\b(?:APItest|Typemap)\.pm$};
     # ignore the demo files
     return if $dir =~ /\bdemos?\b/;
 
