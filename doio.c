@@ -1832,7 +1832,8 @@ nothing in the core.
 		    if (GvIO(gv) && IoIFP(GvIOp(gv))) {
 #ifdef HAS_FUTIMES
 			APPLY_TAINT_PROPER();
-			if (futimes(PerlIO_fileno(IoIFP(GvIOn(gv))), utbufp))
+			if (futimes(PerlIO_fileno(IoIFP(GvIOn(gv))),
+                            (struct timeval *) utbufp))
 			    tot--;
 #else
 			Perl_die(aTHX_ PL_no_func, "futimes");
@@ -1850,7 +1851,7 @@ nothing in the core.
 		    const char * const name = SvPV_nolen_const(*mark);
 		    APPLY_TAINT_PROPER();
 #ifdef HAS_FUTIMES
-		    if (utimes(name, utbufp))
+		    if (utimes(name, (struct timeval *)utbufp))
 #else
 		    if (PerlLIO_utime(name, utbufp))
 #endif
