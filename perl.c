@@ -1857,6 +1857,21 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef PERL_MALLOC_WRAP
 			     " PERL_MALLOC_WRAP"
 #  endif
+#  ifdef PERL_MEM_LOG
+			     " PERL_MEM_LOG"
+#  endif
+#  ifdef PERL_MEM_LOG_ENV
+			     " PERL_MEM_LOG_ENV"
+#  endif
+#  ifdef PERL_MEM_LOG_ENV_FD
+			     " PERL_MEM_LOG_ENV_FD"
+#  endif
+#  ifdef PERL_MEM_LOG_STDERR
+			     " PERL_MEM_LOG_STDERR"
+#  endif
+#  ifdef PERL_MEM_LOG_TIMESTAMP
+			     " PERL_MEM_LOG_TIMESTAMP"
+#  endif
 #  ifdef PERL_NEED_APPCTX
 			     " PERL_NEED_APPCTX"
 #  endif
@@ -1866,15 +1881,18 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef PERL_OLD_COPY_ON_WRITE
 			     " PERL_OLD_COPY_ON_WRITE"
 #  endif
+#  ifdef PERL_POISON
+			     " PERL_POISON"
+#  endif
 #  ifdef PERL_TRACK_MEMPOOL
 			     " PERL_TRACK_MEMPOOL"
 #  endif
 #  ifdef PERL_USE_SAFE_PUTENV
 			     " PERL_USE_SAFE_PUTENV"
 #  endif
-#ifdef PERL_USES_PL_PIDSTATUS
+#  ifdef PERL_USES_PL_PIDSTATUS
 			     " PERL_USES_PL_PIDSTATUS"
-#endif
+#  endif
 #  ifdef PL_OP_SLAB_ALLOC
 			     " PL_OP_SLAB_ALLOC"
 #  endif
