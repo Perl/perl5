@@ -40,7 +40,7 @@ my @names = (qw(
             {name=>"SEEK_END", default=>["IV", "2"]},
             {name=>"_S_IFMT", macro=>"S_IFMT", value=>"S_IFMT"});
 WriteConstants(
-    PROXYSUBS => 1,
+    ($] > 5.009002 ? (PROXYSUBS => 1) : ()),
     NAME => 'Fcntl',
     NAMES => \@names,
 );
