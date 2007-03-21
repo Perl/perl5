@@ -928,13 +928,13 @@ static const struct body_details bodies_by_type[] = {
       copy_length(XPVAV, xmg_stash)
       - relative_STRUCT_OFFSET(xpvav_allocated, XPVAV, xav_fill),
       + relative_STRUCT_OFFSET(xpvav_allocated, XPVAV, xav_fill),
-      SVt_PVAV, TRUE, HADNV, HASARENA, FIT_ARENA(0, sizeof(xpvav_allocated)) },
+      SVt_PVAV, TRUE, NONV, HASARENA, FIT_ARENA(0, sizeof(xpvav_allocated)) },
 
     { sizeof(xpvhv_allocated),
       copy_length(XPVHV, xmg_stash)
       - relative_STRUCT_OFFSET(xpvhv_allocated, XPVHV, xhv_fill),
       + relative_STRUCT_OFFSET(xpvhv_allocated, XPVHV, xhv_fill),
-      SVt_PVHV, TRUE, HADNV, HASARENA, FIT_ARENA(0, sizeof(xpvhv_allocated)) },
+      SVt_PVHV, TRUE, NONV, HASARENA, FIT_ARENA(0, sizeof(xpvhv_allocated)) },
 
     /* 56 */
     { sizeof(xpvcv_allocated), sizeof(xpvcv_allocated),
