@@ -1320,7 +1320,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
 	 * NV slot, but the new one does, then we need to initialise the
 	 * freshly created NV slot with whatever the correct bit pattern is
 	 * for 0.0  */
-	if (old_type_details->zero_nv && !new_type_details->zero_nv)
+	if (old_type_details->zero_nv && !new_type_details->zero_nv
+	    && !isGV_with_GP(sv))
 	    SvNV_set(sv, 0);
 #endif
 
