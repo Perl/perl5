@@ -258,11 +258,13 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 {
     dTHX;
     Malloc_t ptr;
+#ifdef DEBUGGING
     const MEM_SIZE total_size = size * count
-#ifdef PERL_TRACK_MEMPOOL
+#ifdef   PERL_TRACK_MEMPOOL
 	+ sTHX
 #endif
 	;
+#endif
 
 #ifdef HAS_64K_LIMIT
     if (total_size > 0xffff) {
