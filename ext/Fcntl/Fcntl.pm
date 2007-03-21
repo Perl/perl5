@@ -60,7 +60,10 @@ our($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS, $AUTOLOAD);
 require Exporter;
 use XSLoader ();
 @ISA = qw(Exporter);
-$VERSION = "1.05";
+BEGIN {
+  $VERSION = "1.05";
+}
+
 # Items to export into callers namespace by default
 # (move infrequently used names to @EXPORT_OK below)
 @EXPORT =
@@ -206,18 +209,23 @@ $VERSION = "1.05";
                   )],
 );
 
-sub S_IFMT  { @_ ? ( $_[0] & _S_IFMT() ) : _S_IFMT()  }
+# Force the constants to become inlined
+BEGIN {
+  XSLoader::load 'Fcntl', $VERSION;
+}
+
+sub S_IFMT  { @_ ? ( $_[0] & _S_IFMT ) : _S_IFMT  }
 sub S_IMODE { $_[0] & 07777 }
 
-sub S_ISREG    { ( $_[0] & _S_IFMT() ) == S_IFREG()   }
-sub S_ISDIR    { ( $_[0] & _S_IFMT() ) == S_IFDIR()   }
-sub S_ISLNK    { ( $_[0] & _S_IFMT() ) == S_IFLNK()   }
-sub S_ISSOCK   { ( $_[0] & _S_IFMT() ) == S_IFSOCK()  }
-sub S_ISBLK    { ( $_[0] & _S_IFMT() ) == S_IFBLK()   }
-sub S_ISCHR    { ( $_[0] & _S_IFMT() ) == S_IFCHR()   }
-sub S_ISFIFO   { ( $_[0] & _S_IFMT() ) == S_IFIFO()   }
-sub S_ISWHT    { ( $_[0] & _S_IFMT() ) == S_IFWHT()   }
-sub S_ISENFMT  { ( $_[0] & _S_IFMT() ) == S_IFENFMT() }
+sub S_ISREG    { ( $_[0] & _S_IFMT ) == S_IFREG   }
+sub S_ISDIR    { ( $_[0] & _S_IFMT ) == S_IFDIR   }
+sub S_ISLNK    { ( $_[0] & _S_IFMT ) == S_IFLNK   }
+sub S_ISSOCK   { ( $_[0] & _S_IFMT ) == S_IFSOCK  }
+sub S_ISBLK    { ( $_[0] & _S_IFMT ) == S_IFBLK   }
+sub S_ISCHR    { ( $_[0] & _S_IFMT ) == S_IFCHR   }
+sub S_ISFIFO   { ( $_[0] & _S_IFMT ) == S_IFIFO   }
+sub S_ISWHT    { ( $_[0] & _S_IFMT ) == S_IFWHT   }
+sub S_ISENFMT  { ( $_[0] & _S_IFMT ) == S_IFENFMT }
 
 sub AUTOLOAD {
     (my $constname = $AUTOLOAD) =~ s/.*:://;
@@ -230,7 +238,5 @@ sub AUTOLOAD {
     *$AUTOLOAD = sub { $val };
     goto &$AUTOLOAD;
 }
-
-XSLoader::load 'Fcntl', $VERSION;
 
 1;
