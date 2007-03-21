@@ -896,6 +896,8 @@ ithread_create(...)
                 switch (*str) {
                     case 'a':
                     case 'A':
+                    case 'l':
+                    case 'L':
                         context = G_ARRAY;
                         break;
                     case 's':
@@ -911,6 +913,10 @@ ithread_create(...)
                 }
             } else if (hv_exists(specs, "array", 5)) {
                 if (SvTRUE(*hv_fetch(specs, "array", 5, 0))) {
+                    context = G_ARRAY;
+                }
+            } else if (hv_exists(specs, "list", 4)) {
+                if (SvTRUE(*hv_fetch(specs, "list", 4, 0))) {
                     context = G_ARRAY;
                 }
             } else if (hv_exists(specs, "scalar", 6)) {

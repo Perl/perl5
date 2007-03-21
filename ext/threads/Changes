@@ -1,5 +1,10 @@
 Revision history for Perl extension threads.
 
+1.61 Wed Mar 21 16:09:15 EDT 2007
+	- Fix 'list/array' context - both keywords are supported
+	- Upgraded ppport.h to Devel::PPPort 3.11
+	- Removed embed.t - unreliable
+
 1.59 - Mon Feb  5 16:05:44 EST 2007
 	- POD tweaks per Wolfgang Laun
 

@@ -65,7 +65,7 @@ sub foo
     my $wantarray = wantarray();
 
     if ($wantarray) {
-        ok($context eq 'array', 'Array context');
+        ok($context eq 'array', 'Array/list context');
         return ('array');
     } elsif (defined($wantarray)) {
         ok($context eq 'scalar', 'Scalar context');
@@ -108,8 +108,8 @@ sub bar
     my $wantarray = threads->wantarray();
 
     if ($wantarray) {
-        ok($context eq 'array', 'Array context');
-        return ('array');
+        ok($context eq 'list', 'Array/list context');
+        return ('list');
     } elsif (defined($wantarray)) {
         ok($context eq 'scalar', 'Scalar context');
         return 'scalar';
@@ -119,11 +119,11 @@ sub bar
     }
 }
 
-($thr) = threads->create('bar', 'array');
+($thr) = threads->create('bar', 'list');
 my $ctx = $thr->wantarray();
 ok($ctx, 'Implicit array context');
 ($res) = $thr->join();
-ok($res eq 'array', 'Implicit array context');
+ok($res eq 'list', 'Implicit array context');
 
 $thr = threads->create('bar', 'scalar');
 $ctx = $thr->wantarray();
@@ -138,11 +138,11 @@ ok(! defined($ctx), 'Implicit void context');
 $res = $thr->join();
 ok(! defined($res), 'Implicit void context');
 
-$thr = threads->create({'context' => 'array'}, 'bar', 'array');
+$thr = threads->create({'context' => 'list'}, 'bar', 'list');
 $ctx = $thr->wantarray();
 ok($ctx, 'Explicit array context');
 ($res) = $thr->join();
-ok($res eq 'array', 'Explicit array context');
+ok($res eq 'list', 'Explicit array context');
 
 ($thr) = threads->create({'scalar' => 'scalar'}, 'bar', 'scalar');
 $ctx = $thr->wantarray();
