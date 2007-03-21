@@ -1922,7 +1922,7 @@ STATIC void
 S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
 {
     register XPVHV* xhv;
-    register HE *entry;
+    HE *entry;
     register HE **oentry;
     HE **first;
     bool is_utf8 = FALSE;
