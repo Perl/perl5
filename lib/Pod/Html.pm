@@ -2099,13 +2099,12 @@ sub fragment_id_readable {
 
     my $orig = $text;
 
-    # just clean the punctuation and leave the words for the
-    # fragment identifier.
-    $text =~ s/([[:punct:]\s])+/$1/g;
-    $text =~ s/[[:punct:]\s]+\Z//g;
-
-    #   "=item --version", remove leading punctuation.
-    $text =~ s/^[-[:punct:]]//;
+    # leave the words for the fragment identifier,
+    # change everything else to underbars.
+    $text =~ s/[^A-Za-z0-9_]+/_/g; # do not use \W to avoid locale dependency.
+    $text =~ s/_{2,}/_/g;
+    $text =~ s/\A_//;
+    $text =~ s/_\Z//;
 
     unless ($text)
     {
@@ -2129,11 +2128,11 @@ sub fragment_id_readable {
 }}
 
 my @HC;
-sub fragment_id_obfusticated {  # This was the old "_2d_2d__"
+sub fragment_id_obfuscated {  # This was the old "_2d_2d__"
     my $text     = shift;
     my $generate = shift;   # optional flag
 
-    # text? Normalize by obfusticating the fragment id to make it unique
+    # text? Normalize by obfuscating the fragment id to make it unique
     $text =~ s/\s+/_/sg;
 
     $text =~ s{(\W)}{
@@ -2174,9 +2173,9 @@ sub fragment_id {
 	return $1 if $text =~ m{^([a-z\d_]+)(\s+[A-Z,/& ][A-Z\d,/& ]*)?$};
 	return $1 if $text =~ m{^([a-z\d]+)\s+Module(\s+[A-Z\d,/& ]+)?$};
 
-	fragment_id_readable($text, $generate);
+	return fragment_id_readable($text, $generate);
     } else {
-	return undef();
+	return;
     }
 }
 
