@@ -8,7 +8,6 @@
 ext/Cwd
 ext/Data/Dumper
 ext/Sys/Syslog
-ext/threads/shared
 ext/Time/HiRes
 
 win32/ext/Win32API/File
