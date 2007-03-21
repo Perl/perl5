@@ -101,11 +101,7 @@ typedef OP OP_4tree;			/* Will be redefined later. */
 /* This is the stuff that used to live in regexp.h that was truly
    private to the engine itself. It now lives here. */
 
-/* swap buffer for paren structs */
-typedef struct regexp_paren_ofs {
-    I32 *startp;
-    I32 *endp;
-} regexp_paren_ofs;
+
 
  typedef struct regexp_internal {
         int name_list_idx;	/* Optional data index of an array of paren names */
@@ -118,7 +114,6 @@ typedef struct regexp_paren_ofs {
             U32 proglen;
         } u;
 
-        regexp_paren_ofs *swap; /* Swap copy of *startp / *endp */                                   
         regnode *regstclass;    /* Optional startclass as identified or constructed
                                    by the optimiser */
         struct reg_data *data;	/* Additional miscellaneous data used by the program.

@@ -4267,11 +4267,11 @@ sub kt
     $re = qr/^ ( (??{ $grabit }) ) $ /x;
     my @res = '0902862349' =~ $re;
     iseq(join("-",@res),"0902862349",
-        'PL_curpm is set properly on nested eval # TODO');
+        'PL_curpm is set properly on nested eval');
 
     our $qr = qr/ (o) (??{ $1 }) /x;
     ok( 'boob'=~/( b (??{ $qr }) b )/x && 1,
-        "PL_curpm, nested eval # TODO");
+        "PL_curpm, nested eval");
 }
 
 {
@@ -4325,7 +4325,17 @@ sub kt
     ok($c=~/${c}|\x{100}/);
     ok(@w==0);
 }    
-
+{
+    local $Message = "corruption of match results of qr// across scopes";
+    my $qr=qr/(fo+)(ba+r)/;
+    'foobar'=~/$qr/;
+    iseq("$1$2","foobar");
+    {
+        'foooooobaaaaar'=~/$qr/;
+        iseq("$1$2",'foooooobaaaaar');    
+    }
+    iseq("$1$2","foobar");
+}    
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
 # Keep the following tests last -- they may crash perl
@@ -4395,7 +4405,7 @@ ok($@=~/\QSequence \k... not terminated in regex;\E/);
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 1652;
+    $::TestCount = 1655;
     print "1..$::TestCount\n";
 }
 

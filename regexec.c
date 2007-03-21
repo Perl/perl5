@@ -1652,9 +1652,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 static void 
 S_swap_match_buff (pTHX_ regexp *prog) {
     I32 *t;
-    RXi_GET_DECL(prog,progi);
 
-    if (!progi->swap) {
+    if (!prog->swap) {
     /* We have to be careful. If the previous successful match
        was from this regex we don't want a subsequent paritally
        successful match to clobber the old results. 
@@ -1662,16 +1661,16 @@ S_swap_match_buff (pTHX_ regexp *prog) {
        to the re, and switch the buffer each match. If we fail
        we switch it back, otherwise we leave it swapped.
     */
-        Newxz(progi->swap, 1, regexp_paren_ofs);
+        Newxz(prog->swap, 1, regexp_paren_ofs);
         /* no need to copy these */
-        Newxz(progi->swap->startp, prog->nparens + 1, I32);
-        Newxz(progi->swap->endp, prog->nparens + 1, I32);
+        Newxz(prog->swap->startp, prog->nparens + 1, I32);
+        Newxz(prog->swap->endp, prog->nparens + 1, I32);
     }
-    t = progi->swap->startp;
-    progi->swap->startp = prog->startp;
+    t = prog->swap->startp;
+    prog->swap->startp = prog->startp;
     prog->startp = t;
-    t = progi->swap->endp;
-    progi->swap->endp = prog->endp;
+    t = prog->swap->endp;
+    prog->swap->endp = prog->endp;
     prog->endp = t;
 }    
 
@@ -2610,6 +2609,10 @@ S_reg_check_named_buff_matched(pTHX_ const regexp *rex, const regnode *scan) {
     }
     return 0;
 }
+
+#define SETREX(Re1,Re2) \
+    if (PL_reg_eval_set) PM_SETRE((PL_reg_curpm), (Re2)); \
+    Re1 = (Re2)
 
 STATIC I32			/* 0 failure, 1 success */
 S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
@@ -3654,8 +3657,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    }
 
 		    if (mg) {
-			re = (regexp *)mg->mg_obj;
-			(void)ReREFCNT_inc(re);
+			re = reg_temp_copy((regexp *)mg->mg_obj); /*XXX:dmq*/
 		    }
 		    else {
 			STRLEN len;
@@ -3674,6 +3676,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			PL_regsize = osize;
 		    }
 		}
+                RX_MATCH_COPIED_off(re);
+                re->subbeg = rex->subbeg;
+                re->sublen = rex->sublen;
 		rei = RXi_GET(re);
                 DEBUG_EXECUTE_r(
                     debug_start_match(re, do_utf8, locinput, PL_regeol, 
@@ -3715,7 +3720,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
 		ST.prev_rex = rex;
 		ST.prev_curlyx = cur_curlyx;
-		rex = re;
+		SETREX(rex,re);
 		rexi = rei;
 		cur_curlyx = NULL;
 		ST.B = next;
@@ -3735,7 +3740,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    /* note: this is called twice; first after popping B, then A */
 	    PL_reg_flags ^= ST.toggle_reg_flags; 
 	    ReREFCNT_dec(rex);
-	    rex = ST.prev_rex;
+	    SETREX(rex,ST.prev_rex);
 	    rexi = RXi_GET(rex);
 	    regcpblow(ST.cp);
 	    cur_eval = ST.prev_eval;
@@ -3751,7 +3756,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    /* note: this is called twice; first after popping B, then A */
 	    PL_reg_flags ^= ST.toggle_reg_flags; 
 	    ReREFCNT_dec(rex);
-	    rex = ST.prev_rex;
+	    SETREX(rex,ST.prev_rex);
 	    rexi = RXi_GET(rex); 
 	    PL_reginput = locinput;
 	    REGCP_UNWIND(ST.lastcp);
@@ -4760,7 +4765,7 @@ NULL
 		PL_reg_flags ^= st->u.eval.toggle_reg_flags; 
 
 		st->u.eval.prev_rex = rex;		/* inner */
-		rex  = cur_eval->u.eval.prev_rex;	/* outer */
+		SETREX(rex,cur_eval->u.eval.prev_rex);
 		rexi = RXi_GET(rex);
 		cur_curlyx = cur_eval->u.eval.prev_curlyx;
 		ReREFCNT_inc(rex);

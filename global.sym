@@ -390,6 +390,7 @@ Perl_regdump
 Perl_regclass_swash
 Perl_pregexec
 Perl_pregfree
+Perl_reg_temp_copy
 Perl_regfree_internal
 Perl_reg_stringify
 Perl_regdupe_internal

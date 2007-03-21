@@ -118,9 +118,9 @@ PP(pp_regcomp)
 	    mg = mg_find(sv, PERL_MAGIC_qr);
     }
     if (mg) {
-	regexp * const re = (regexp *)mg->mg_obj;
+	regexp * const re = reg_temp_copy((regexp *)mg->mg_obj);
 	ReREFCNT_dec(PM_GETRE(pm));
-	PM_SETRE(pm, ReREFCNT_inc(re));
+	PM_SETRE(pm, re);
     }
     else {
 	STRLEN len;

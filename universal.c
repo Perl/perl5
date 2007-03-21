@@ -333,11 +333,11 @@ Perl_boot_core_UNIVERSAL(pTHX)
     newXSproto("Internals::inc_sub_generation",XS_Internals_inc_sub_generation,
 	       file, "");
     newXSproto("re::is_regexp", XS_re_is_regexp, file, "$");
-    newXSproto("re::regname", XS_re_regname, file, ";$$$");
-    newXSproto("re::regnames", XS_re_regnames, file, ";$$");
-    newXSproto("re::regnames_iterinit", XS_re_regnames_iterinit, file, ";$");
-    newXSproto("re::regnames_iternext", XS_re_regnames_iternext, file, ";$$");
-    newXSproto("re::regnames_count", XS_re_regnames_count, file, ";$");
+    newXSproto("re::regname", XS_re_regname, file, ";$$");
+    newXSproto("re::regnames", XS_re_regnames, file, ";$");
+    newXSproto("re::regnames_iterinit", XS_re_regnames_iterinit, file, "");
+    newXSproto("re::regnames_iternext", XS_re_regnames_iternext, file, ";$");
+    newXSproto("re::regnames_count", XS_re_regnames_count, file, "");
 }
 
 
@@ -1143,31 +1143,23 @@ XS(XS_re_regname)
 
     dVAR; 
     dXSARGS;
-    if (items < 1 || items > 3)
-       Perl_croak(aTHX_ "Usage: %s(%s)", "re::regname", "sv, qr = NULL, all = NULL");
+    if (items < 1 || items > 2)
+       Perl_croak(aTHX_ "Usage: %s(%s)", "re::regname", "name[, all ]");
     PERL_UNUSED_VAR(cv); /* -W */
     PERL_UNUSED_VAR(ax); /* -Wall */
     SP -= items;
     {
 	SV *	sv = ST(0);
-	SV *	qr;
 	SV *	all;
-        regexp *re = NULL;
+        regexp *re = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
         SV *bufs = NULL;
 
 	if (items < 2)
-	    qr = NULL;
-	else {
-	    qr = ST(1);
-	}
-
-	if (items < 3)
 	    all = NULL;
 	else {
-	    all = ST(2);
+	    all = ST(1);
 	}
         {
-            re = Perl_get_re_arg( aTHX_ qr, 1, NULL);
             if (SvPOK(sv) && re && re->paren_names) {
                 bufs = CALLREG_NAMEDBUF(re,sv,all && SvTRUE(all));
                 if (bufs) {
@@ -1189,30 +1181,22 @@ XS(XS_re_regnames)
 {
     dVAR; 
     dXSARGS;
-    if (items < 0 || items > 2)
-       Perl_croak(aTHX_ "Usage: %s(%s)", "re::regnames", "sv = NULL, all = NULL");
+    if (items < 0 || items > 1)
+       Perl_croak(aTHX_ "Usage: %s(%s)", "re::regnames", "[all]");
     PERL_UNUSED_VAR(cv); /* -W */
     PERL_UNUSED_VAR(ax); /* -Wall */
     SP -= items;
     {
-	SV *	sv;
 	SV *	all;
-        regexp *re = NULL;
+        regexp *re = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
         IV count = 0;
 
 	if (items < 1)
-	    sv = NULL;
-	else {
-	    sv = ST(0);
-	}
-
-	if (items < 2)
 	    all = NULL;
 	else {
-	    all = ST(1);
+	    all = ST(0);
 	}
         {
-            re = Perl_get_re_arg( aTHX_  sv, 1, NULL );
             if (re && re->paren_names) {
                 HV *hv= re->paren_names;
                 (void)hv_iterinit(hv);
@@ -1259,29 +1243,19 @@ XS(XS_re_regnames_iterinit)
 {
     dVAR; 
     dXSARGS;
-    if (items < 0 || items > 1)
-       Perl_croak(aTHX_ "Usage: %s(%s)", "re::regnames_iterinit", "sv = NULL");
+    if (items != 0 )
+       Perl_croak(aTHX_ "Usage: %s(%s)", "re::regnames_iterinit");
     PERL_UNUSED_VAR(cv); /* -W */
     PERL_UNUSED_VAR(ax); /* -Wall */
     SP -= items;
     {
-	SV *	sv;
-        regexp *re = NULL;
-
-	if (items < 1)
-	    sv = NULL;
-	else {
-	    sv = ST(0);
-	}
-        {
-            re = Perl_get_re_arg( aTHX_  sv, 1, NULL );
-            if (re && re->paren_names) {
-                (void)hv_iterinit(re->paren_names);
-                XPUSHs(newSViv(HvTOTALKEYS(re->paren_names)));
-            } else {
-                XSRETURN_UNDEF;
-            }  
-        }
+        regexp *re = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
+        if (re && re->paren_names) {
+            (void)hv_iterinit(re->paren_names);
+            XPUSHs(newSViv(HvTOTALKEYS(re->paren_names)));
+        } else {
+            XSRETURN_UNDEF;
+        }  
 	PUTBACK;
 	return;
     }
@@ -1292,60 +1266,50 @@ XS(XS_re_regnames_iternext)
 {
     dVAR; 
     dXSARGS;
-    if (items < 0 || items > 2)
-       Perl_croak(aTHX_ "Usage: %s(%s)", "re::regnames_iternext", "sv = NULL, all = NULL");
+    if (items < 0 || items > 1)
+       Perl_croak(aTHX_ "Usage: %s(%s)", "re::regnames_iternext", "[all]");
     PERL_UNUSED_VAR(cv); /* -W */
     PERL_UNUSED_VAR(ax); /* -Wall */
     SP -= items;
     {
-	SV *	sv;
 	SV *	all;
-        regexp *re;
+        regexp *re = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
 	if (items < 1)
-	    sv = NULL;
-	else {
-	    sv = ST(0);
-	}
-
-	if (items < 2)
 	    all = NULL;
 	else {
-	    all = ST(1);
+	    all = ST(0);
 	}
-        {
-            re = Perl_get_re_arg( aTHX_  sv, 1, NULL ); 
-            if (re && re->paren_names) {
-                HV *hv= re->paren_names;
-                while (1) {
-                    HE *temphe = hv_iternext_flags(hv,0);
-                    if (temphe) {
-                        IV i;
-                        IV parno = 0;
-                        SV* sv_dat = HeVAL(temphe);
-                        I32 *nums = (I32*)SvPVX(sv_dat);
-                        for ( i = 0; i < SvIVX(sv_dat); i++ ) {
-                            if ((I32)(re->lastcloseparen) >= nums[i] &&
-                                re->startp[nums[i]] != -1 &&
-                                re->endp[nums[i]] != -1)
-                            {
-                                parno = nums[i];
-                                break;
-                            }
+        if (re && re->paren_names) {
+            HV *hv= re->paren_names;
+            while (1) {
+                HE *temphe = hv_iternext_flags(hv,0);
+                if (temphe) {
+                    IV i;
+                    IV parno = 0;
+                    SV* sv_dat = HeVAL(temphe);
+                    I32 *nums = (I32*)SvPVX(sv_dat);
+                    for ( i = 0; i < SvIVX(sv_dat); i++ ) {
+                        if ((I32)(re->lastcloseparen) >= nums[i] &&
+                            re->startp[nums[i]] != -1 &&
+                            re->endp[nums[i]] != -1)
+                        {
+                            parno = nums[i];
+                            break;
                         }
-                        if (parno || (all && SvTRUE(all))) {
-                            STRLEN len;
-                            char *pv = HePV(temphe, len);
-                            XPUSHs(newSVpvn(pv,len));
-                            XSRETURN(1);    
-                        }
-                    } else {
-                        break;
                     }
+                    if (parno || (all && SvTRUE(all))) {
+                        STRLEN len;
+                        char *pv = HePV(temphe, len);
+                        XPUSHs(newSVpvn(pv,len));
+                        XSRETURN(1);    
+                    }
+                } else {
+                    break;
                 }
             }
-            XSRETURN_UNDEF;
-        }    
+        }
+        XSRETURN_UNDEF;
 	PUTBACK;
 	return;
     }
@@ -1354,22 +1318,16 @@ XS(XS_re_regnames_iternext)
 
 XS(XS_re_regnames_count)
 {
-    SV *	sv;
-    regexp *re = NULL;
+    regexp *re = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
     dVAR; 
     dXSARGS;
 
-    if (items < 0 || items > 1)
-       Perl_croak(aTHX_ "Usage: %s(%s)", "re::regnames_count", "sv = NULL");
+    if (items != 0)
+       Perl_croak(aTHX_ "Usage: %s(%s)", "re::regnames_count", "");
     PERL_UNUSED_VAR(cv); /* -W */
     PERL_UNUSED_VAR(ax); /* -Wall */
     SP -= items;
-    if (items < 1)
-        sv = NULL;
-    else {
-        sv = ST(0);
-    }
-    re = Perl_get_re_arg( aTHX_  sv, 1, NULL );
+    
     if (re && re->paren_names) {
         XPUSHs(newSViv(HvTOTALKEYS(re->paren_names)));
     } else {

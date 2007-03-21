@@ -42,19 +42,14 @@ use re qw(is_regexp regexp_pattern regmust
 
 
 if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){
-    my $qr = qr/(?<foo>foo)(?<bar>bar)/;    
-    my @names = sort +regnames($qr);
-    is("@names","","regnames");
-    @names = sort +regnames($qr,1);
-    is("@names","bar foo","regnames - all");
-    @names = sort +regnames();
+    my @names = sort +regnames();
     is("@names","A B","regnames");
-    @names = sort +regnames(undef,1);
+    @names = sort +regnames(1);
     is("@names","A B C","regnames");
-    is(join("", @{regname("A",undef,1)}),"13");
-    is(join("", @{regname("B",undef,1)}),"24");    
+    is(join("", @{regname("A",1)}),"13");
+    is(join("", @{regname("B",1)}),"24");    
     {
-        if ('foobar'=~/$qr/) {
+        if ('foobar'=~/(?<foo>foo)(?<bar>bar)/) {
             regnames_iterinit();
             my @res;
             while (defined(my $key=regnames_iternext)) {
@@ -68,20 +63,7 @@ if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){
         }
     }
     is(regnames_count(),3);
-    is(regnames_count($qr),2);
-}    
-{
-    use warnings;
-    require Tie::Hash::NamedCapture;
-    my $qr = qr/(?<foo>foo)/;
-    if ( 'foo' =~ /$qr/ ) {
-        tie my %hash,"Tie::Hash::NamedCapture",re => $qr;
-        if ('bar'=~/bar/) {
-            # last successful match is now different
-            is($hash{foo},'foo'); # prints foo
-        }
-    }
 }    
 # New tests above this line, don't forget to update the test count below!
-use Test::More tests => 23;
+use Test::More tests => 19;
 # No tests here!

@@ -282,6 +282,8 @@ do_test(15,
       MG_VIRTUAL = $ADDR
       MG_TYPE = PERL_MAGIC_qr\(r\)
       MG_OBJ = $ADDR
+        PAT = "\(\?-xism:tic\)"
+        REFCNT = 2
     STASH = $ADDR\\t"Regexp"');
 
 do_test(16,

@@ -1263,8 +1263,20 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
 	        Perl_dump_indent(aTHX_ level, file, "      MINMATCH\n");
         }
 	if (mg->mg_obj) {
-	    Perl_dump_indent(aTHX_ level, file, "    MG_OBJ = 0x%"UVxf"\n", PTR2UV(mg->mg_obj));
-	    if (mg->mg_flags & MGf_REFCOUNTED)
+	    Perl_dump_indent(aTHX_ level, file, "    MG_OBJ = 0x%"UVxf"\n", 
+	        PTR2UV(mg->mg_obj));
+            if (mg->mg_type == PERL_MAGIC_qr) {
+                regexp *re=(regexp *)mg->mg_obj;
+                SV *dsv= sv_newmortal();
+                const char * const s =  pv_pretty(dsv, re->wrapped, re->wraplen, 
+                    60, NULL, NULL,
+                    ( PERL_PV_PRETTY_QUOTE | PERL_PV_ESCAPE_RE | PERL_PV_PRETTY_ELIPSES |
+                    ((re->extflags & RXf_UTF8) ? PERL_PV_ESCAPE_UNI : 0))
+                );
+                Perl_dump_indent(aTHX_ level+1, file, "    PAT = %s\n", s);    
+                Perl_dump_indent(aTHX_ level+1, file, "    REFCNT = %"IVdf"\n", (IV*)re->refcnt);
+            }
+            if (mg->mg_flags & MGf_REFCOUNTED)
 		do_sv_dump(level+2, file, mg->mg_obj, nest+1, maxnest, dumpops, pvlim); /* MG is already +1 */
 	}
         if (mg->mg_len)

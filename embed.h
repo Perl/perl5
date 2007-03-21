@@ -685,6 +685,9 @@
 #define regclass_swash		Perl_regclass_swash
 #define pregexec		Perl_pregexec
 #define pregfree		Perl_pregfree
+#if defined(PERL_CORE) || defined(PERL_EXT)
+#define reg_temp_copy		Perl_reg_temp_copy
+#endif
 #define regfree_internal	Perl_regfree_internal
 #define reg_stringify		Perl_reg_stringify
 #if defined(USE_ITHREADS)
@@ -2906,6 +2909,9 @@
 #define regclass_swash(a,b,c,d,e)	Perl_regclass_swash(aTHX_ a,b,c,d,e)
 #define pregexec(a,b,c,d,e,f,g)	Perl_pregexec(aTHX_ a,b,c,d,e,f,g)
 #define pregfree(a)		Perl_pregfree(aTHX_ a)
+#if defined(PERL_CORE) || defined(PERL_EXT)
+#define reg_temp_copy(a)	Perl_reg_temp_copy(aTHX_ a)
+#endif
 #define regfree_internal(a)	Perl_regfree_internal(aTHX_ a)
 #define reg_stringify(a,b,c,d)	Perl_reg_stringify(aTHX_ a,b,c,d)
 #if defined(USE_ITHREADS)

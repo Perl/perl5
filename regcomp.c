@@ -4183,7 +4183,7 @@ redo_first_pass:
             + (sizeof(STD_PAT_MODS) - 1)
             + (sizeof("(?:)") - 1);
 
-        Newx(r->wrapped, r->wraplen, char );
+        Newx(r->wrapped, r->wraplen + 1, char );
         p = r->wrapped;
         *p++='('; *p++='?';
         if (has_k)
@@ -4206,13 +4206,14 @@ redo_first_pass:
             }
         }
 
-        *p++=':';
+        *p++ = ':';
         Copy(RExC_precomp, p, r->prelen, char);
         r->precomp = p;
         p += r->prelen;
         if (has_runon)
-            *p++='\n';
-        *p=')';
+            *p++ = '\n';
+        *p++ = ')';
+        *p = 0;
     }
 
     r->intflags = 0;
@@ -8665,30 +8666,92 @@ Perl_pregfree(pTHX_ struct regexp *r)
 
     if (!r || (--r->refcnt > 0))
 	return;
-	
-    CALLREGFREE_PVT(r); /* free the private data */
+    if (r->mother_re) {
+        ReREFCNT_dec(r->mother_re);
+    } else {
+        CALLREGFREE_PVT(r); /* free the private data */
+        if (r->paren_names)
+            SvREFCNT_dec(r->paren_names);
+        Safefree(r->wrapped);
+    }        
+    if (r->substrs) {
+        if (r->anchored_substr)
+            SvREFCNT_dec(r->anchored_substr);
+        if (r->anchored_utf8)
+            SvREFCNT_dec(r->anchored_utf8);
+        if (r->float_substr)
+            SvREFCNT_dec(r->float_substr);
+        if (r->float_utf8)
+            SvREFCNT_dec(r->float_utf8);
+	Safefree(r->substrs);
+    }
     RX_MATCH_COPY_FREE(r);
 #ifdef PERL_OLD_COPY_ON_WRITE
     if (r->saved_copy)
-	SvREFCNT_dec(r->saved_copy);
+        SvREFCNT_dec(r->saved_copy);
 #endif
-    if (r->substrs) {
-	if (r->anchored_substr)
-	    SvREFCNT_dec(r->anchored_substr);
-	if (r->anchored_utf8)
-	    SvREFCNT_dec(r->anchored_utf8);
-	if (r->float_substr)
-	    SvREFCNT_dec(r->float_substr);
-	if (r->float_utf8)
-	    SvREFCNT_dec(r->float_utf8);
-	Safefree(r->substrs);
+    if (r->swap) {
+        Safefree(r->swap->startp);
+        Safefree(r->swap->endp);
+        Safefree(r->swap);
     }
-    if (r->paren_names)
-        SvREFCNT_dec(r->paren_names);
-    Safefree(r->wrapped);
     Safefree(r->startp);
     Safefree(r->endp);
     Safefree(r);
+}
+
+/*  reg_temp_copy()
+    
+    This is a hacky workaround to the structural issue of match results
+    being stored in the regexp structure which is in turn stored in
+    PL_curpm/PL_reg_curpm. The problem is that due to qr// the pattern
+    could be PL_curpm in multiple contexts, and could require multiple
+    result sets being associated with the pattern simultaneously, such
+    as when doing a recursive match with (??{$qr})
+    
+    The solution is to make a lightweight copy of the regexp structure 
+    when a qr// is returned from the code executed by (??{$qr}) this
+    lightweight copy doesnt actually own any of its data except for
+    the starp/end and the actual regexp structure itself. 
+    
+*/    
+    
+    
+regexp *
+Perl_reg_temp_copy (pTHX_ struct regexp *r) {
+    regexp *ret;
+    register const I32 npar = r->nparens+1;
+    (void)ReREFCNT_inc(r);
+    Newx(ret, 1, regexp);
+    StructCopy(r, ret, regexp);
+    Newx(ret->startp, npar, I32);
+    Copy(r->startp, ret->startp, npar, I32);
+    Newx(ret->endp, npar, I32);
+    Copy(r->endp, ret->endp, npar, I32);
+    ret->refcnt = 1;
+    if (r->substrs) {
+        struct reg_substr_datum *s;
+        I32 i;
+        Newx(ret->substrs, 1, struct reg_substr_data);
+        for (s = ret->substrs->data, i = 0; i < 3; i++, s++) {
+            s->min_offset = r->substrs->data[i].min_offset;
+            s->max_offset = r->substrs->data[i].max_offset;
+            s->end_shift  = r->substrs->data[i].end_shift;
+            s->substr     = SvREFCNT_inc(r->substrs->data[i].substr);
+            s->utf8_substr = SvREFCNT_inc(r->substrs->data[i].utf8_substr);
+        }
+    }        
+    RX_MATCH_COPIED_off(ret);
+#ifdef PERL_OLD_COPY_ON_WRITE
+    /* this is broken. */
+    assert(0); 
+    if (ret->saved_copy)
+        ret->saved_copy=NULL;
+#endif
+    ret->mother_re = r; 
+    ret->swap = NULL;
+    
+    return ret;
 }
 #endif
 
@@ -8814,11 +8877,7 @@ Perl_regfree_internal(pTHX_ struct regexp *r)
 	Safefree(ri->data->what);
 	Safefree(ri->data);
     }
-    if (ri->swap) {
-        Safefree(ri->swap->startp);
-        Safefree(ri->swap->endp);
-        Safefree(ri->swap);
-    }
+
     Safefree(ri);
 }
 
@@ -8848,7 +8907,7 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
 {
     dVAR;
     regexp *ret;
-    int i, npar;
+    I32 i, npar;
     struct reg_substr_datum *s;
 
     if (!r)
@@ -8864,6 +8923,14 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
     Copy(r->startp, ret->startp, npar, I32);
     Newx(ret->endp, npar, I32);
     Copy(r->endp, ret->endp, npar, I32);
+    if(r->swap) {
+        Newx(ret->swap, 1, regexp_paren_ofs);
+        /* no need to copy these */
+        Newx(ret->swap->startp, npar, I32);
+        Newx(ret->swap->endp, npar, I32);
+    } else {
+        ret->swap = NULL;
+    }
 
     if (r->substrs) {
         Newx(ret->substrs, 1, struct reg_substr_data);
@@ -8877,11 +8944,12 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
     } else 
         ret->substrs = NULL;    
 
-    ret->wrapped        = SAVEPVN(r->wrapped, r->wraplen);
+    ret->wrapped        = SAVEPVN(r->wrapped, r->wraplen+1);
     ret->precomp        = ret->wrapped + (r->precomp - r->wrapped);
     ret->prelen         = r->prelen;
     ret->wraplen        = r->wraplen;
 
+    ret->mother_re      = NULL;
     ret->refcnt         = r->refcnt;
     ret->minlen         = r->minlen;
     ret->minlenret      = r->minlenret;
@@ -8942,14 +9010,6 @@ Perl_regdupe_internal(pTHX_ const regexp *r, CLONE_PARAMS *param)
     Newxc(reti, sizeof(regexp_internal) + (len+1)*sizeof(regnode), char, regexp_internal);
     Copy(ri->program, reti->program, len+1, regnode);
     
-    if(ri->swap) {
-        Newx(reti->swap, 1, regexp_paren_ofs);
-        /* no need to copy these */
-        Newx(reti->swap->startp, npar, I32);
-        Newx(reti->swap->endp, npar, I32);
-    } else {
-        reti->swap = NULL;
-    }
 
     reti->regstclass = NULL;
 

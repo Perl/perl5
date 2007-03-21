@@ -31,6 +31,7 @@ struct reg_substr_data;
 struct reg_data;
 
 struct regexp_engine;
+struct regexp;
 
 struct reg_substr_datum {
     I32 min_offset;
@@ -48,11 +49,19 @@ struct reg_substr_data {
 #else
 #define SV_SAVED_COPY
 #endif
+
+/* swap buffer for paren structs */
+typedef struct regexp_paren_ofs {
+    I32 *startp;
+    I32 *endp;
+} regexp_paren_ofs;
+
 /* this is ordered such that the most commonly used 
    fields are at the start of the struct */
 typedef struct regexp {
         /* what engine created this regexp? */
 	const struct regexp_engine* engine; 
+	struct regexp* mother_re; /* what re is this a lightweight copy of? */
 	
 	/* Information about the match that the perl core uses to manage things */
 	U32 extflags;           /* Flags used both externally and internally */
@@ -71,8 +80,10 @@ typedef struct regexp {
         /* Data about the last/current match. These are modified during matching*/
         U32 lastparen;		/* last open paren matched */
 	U32 lastcloseparen;	/* last close paren matched */
+        regexp_paren_ofs *swap; /* Swap copy of *startp / *endp */ 
         I32 *startp;            /* Array of offsets from start of string (@-) */
 	I32 *endp;              /* Array of offsets from start of string (@+) */
+
 	char *subbeg;		/* saved or original string 
 				   so \digit works forever. */
 	I32 sublen;		/* Length of string pointed by subbeg */
@@ -215,7 +226,6 @@ typedef struct regexp_engine {
 #define RXf_COPY_DONE   	0x10000000
 #define RXf_TAINTED_SEEN	0x20000000
 /* two bits here  */
-
 
 #define RX_HAS_CUTGROUP(prog) ((prog)->intflags & PREGf_CUTGROUP_SEEN)
 #define RX_MATCH_TAINTED(prog)	((prog)->extflags & RXf_TAINTED_SEEN)

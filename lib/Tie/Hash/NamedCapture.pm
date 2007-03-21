@@ -3,27 +3,18 @@ package Tie::Hash::NamedCapture;
 use strict;
 use warnings;
 
-our $VERSION = "0.04";
+our $VERSION = "0.05";
 
 sub TIEHASH {
     my $classname = shift;
     my %opts = @_;
 
-    if ($opts{re} && !re::is_regexp($opts{re})) {
-	require Carp;
-	Carp::croak("'re' parameter to " . __PACKAGE__
-	    . "->TIEHASH must be a qr//.");
-    }
-
-    my $self = bless {
-	all => $opts{all},
-	re  => $opts{re},
-    }, $classname;
+    my $self = bless { all => $opts{all} }, $classname;
     return $self;
 }
 
 sub FETCH {
-    return re::regname($_[1],$_[0]->{re},$_[0]->{all});
+    return re::regname($_[1],$_[0]->{all});
 }
 
 sub STORE {
@@ -32,16 +23,16 @@ sub STORE {
 }
 
 sub FIRSTKEY {
-    re::regnames_iterinit($_[0]->{re});
+    re::regnames_iterinit();
     return $_[0]->NEXTKEY;
 }
 
 sub NEXTKEY {
-    return re::regnames_iternext($_[0]->{re},$_[0]->{all});
+    return re::regnames_iternext($_[0]->{all});
 }
 
 sub EXISTS {
-    return defined re::regname( $_[1], $_[0]->{re},$_[0]->{all});
+    return defined re::regname( $_[1], $_[0]->{all});
 }
 
 sub DELETE {
@@ -55,7 +46,7 @@ sub CLEAR {
 }
 
 sub SCALAR {
-    return scalar re::regnames($_[0]->{re},$_[0]->{all});
+    return scalar re::regnames($_[0]->{all});
 }
 
 tie %+, __PACKAGE__;
@@ -74,19 +65,13 @@ Tie::Hash::NamedCapture - Named regexp capture buffers
     tie my %hash, "Tie::Hash::NamedCapture";
     # %hash now behaves like %+
 
-    tie my %hash, "Tie::Hash::NamedCapture", re => $qr, all => 1;
+    tie my %hash, "Tie::Hash::NamedCapture", all => 1;
     # %hash now access buffers from regexp in $qr like %-
 
 =head1 DESCRIPTION
 
 This module is used to implement the special hashes C<%+> and C<%->, but it
-can be used independently.
-
-When the C<re> parameter is set to a C<qr//> expression, then the tied
-hash is bound to that particular regexp and will return the results of its
-last successful match. If the parameter is omitted, then the hash behaves
-just as C<$1> does by referencing the last successful match in the
-currently active dynamic scope.
+can be used to tie other variables as you choose.
 
 When the C<all> parameter is provided, then the tied hash elements will be
 array refs listing the contents of each capture buffer whose name is the
@@ -103,20 +88,6 @@ C<%+>.
 The keys of C<%->-like hashes correspond to all buffer names found in the
 regular expression; the keys of C<%+>-like hashes list only the names of
 buffers that have captured (and that are thus associated to defined values).
-
-For instance:
-
-    my $qr = qr/(?<foo>bar)/;
-    if ( 'bar' =~ $qr ) {
-        tie my %hash, "Tie::Hash::NamedCapture", re => $qr;
-        print $+{foo};    # prints "bar"
-        print $hash{foo}; # prints "bar" too
-        if ( 'bar' =~ /bar/ ) {
-            # last successful match is now different
-            print $+{foo};    # prints nothing (undef)
-            print $hash{foo}; # still prints "bar"
-        }
-    }
 
 =head1 SEE ALSO
 
