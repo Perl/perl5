@@ -391,7 +391,7 @@ loop	:	label WHILE '(' remember texpr ')' mintro mblock cont
 			  forop = newUNOP(OP_NULL, 0, append_elem(OP_LINESEQ,
 				newSTATEOP(0,
 					   CopLABEL_alloc(($1)->tk_lval.pval),
-					   ($5 ? newOP(OP_NULL, 0) : $5) ),
+					   ($5 ? $5 : newOP(OP_NULL, 0)) ),
 				forop));
 
 			  token_getmad($2,forop,'3');

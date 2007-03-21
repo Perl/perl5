@@ -325,7 +325,7 @@ case 2:
 			  forop = newUNOP(OP_NULL, 0, append_elem(OP_LINESEQ,
 				newSTATEOP(0,
 					   CopLABEL_alloc(((ps[(1) - (12)].val.p_tkval))->tk_lval.pval),
-					   ((ps[(5) - (12)].val.opval) ? newOP(OP_NULL, 0) : (ps[(5) - (12)].val.opval)) ),
+					   ((ps[(5) - (12)].val.opval) ? (ps[(5) - (12)].val.opval) : newOP(OP_NULL, 0)) ),
 				forop));
 
 			  token_getmad((ps[(2) - (12)].val.i_tkval),forop,'3');
