@@ -390,6 +390,8 @@ C<SV*>.
    between threads (because it hangs from OPs, which are shared), hence the
    alternate definition and mutex.  */
 
+struct refcounted_he;
+
 #ifdef PERL_CORE
 
 /* Gosh. This really isn't a good name any longer.  */
@@ -406,6 +408,7 @@ struct refcounted_he {
 	IV                refcounted_he_u_iv;
 	UV                refcounted_he_u_uv;
 	STRLEN            refcounted_he_u_len;
+	void		 *refcounted_he_u_ptr;	/* Might be useful in future */
     } refcounted_he_val;
     /* First byte is flags. Then NUL-terminated value. Then for ithreads,
        non-NUL terminated key.  */
@@ -414,12 +417,22 @@ struct refcounted_he {
 
 /* Flag bits are HVhek_UTF8, HVhek_WASUTF8, then */
 #define HVrhek_undef	0x00 /* Value is undef. */
-#define HVrhek_PV	0x10 /* Value is a string. */
-#define HVrhek_IV	0x20 /* Value is IV/UV. */
-#define HVrhek_delete	0x30 /* Value is placeholder - signifies delete. */
-#define HVrhek_typemask	0x30
-#define HVrhek_UTF8	0x40 /* string value is utf8. */
-#define HVrhek_UV	0x40 /* integer value is UV. */
+#define HVrhek_delete	0x10 /* Value is placeholder - signifies delete. */
+#define HVrhek_IV	0x20 /* Value is IV. */
+#define HVrhek_UV	0x30 /* Value is UV. */
+#define HVrhek_PV	0x40 /* Value is a (byte) string. */
+#define HVrhek_PV_UTF8	0x50 /* Value is a (utf8) string. */
+/* Two spare. As these have to live in the optree, you can't store anything
+   interpreter specific, such as SVs. :-( */
+#define HVrhek_typemask 0x70
+
+#ifdef USE_ITHREADS
+/* A big expression to find the key offset */
+#define REF_HE_KEY(chain)						\
+	((((chain->refcounted_he_data[0] & 0x60) == 0x40)		\
+	    ? chain->refcounted_he_val.refcounted_he_u_len + 1 : 0)	\
+	 + 1 + chain->refcounted_he_data)
+#endif
 
 #  ifdef USE_ITHREADS
 #    define HINTS_REFCNT_LOCK		MUTEX_LOCK(&PL_hints_mutex)

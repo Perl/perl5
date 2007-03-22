@@ -2581,11 +2581,13 @@ S_refcounted_he_value(pTHX_ const struct refcounted_he *he)
 	value = &PL_sv_placeholder;
 	break;
     case HVrhek_IV:
-	value = (he->refcounted_he_data[0] & HVrhek_UV)
-	    ? newSVuv(he->refcounted_he_val.refcounted_he_u_iv)
-	    : newSViv(he->refcounted_he_val.refcounted_he_u_uv);
+	value = newSViv(he->refcounted_he_val.refcounted_he_u_iv);
+	break;
+    case HVrhek_UV:
+	value = newSVuv(he->refcounted_he_val.refcounted_he_u_uv);
 	break;
     case HVrhek_PV:
+    case HVrhek_PV_UTF8:
 	/* Create a string SV that directly points to the bytes in our
 	   structure.  */
 	value = newSV_type(SVt_PV);
@@ -2595,7 +2597,7 @@ S_refcounted_he_value(pTHX_ const struct refcounted_he *he)
 	SvLEN_set(value, 0);
 	SvPOK_on(value);
 	SvREADONLY_on(value);
-	if (he->refcounted_he_data[0] & HVrhek_UTF8)
+	if ((he->refcounted_he_data[0] & HVrhek_typemask) == HVrhek_PV_UTF8)
 	    SvUTF8_on(value);
 	break;
     default:
@@ -2604,14 +2606,6 @@ S_refcounted_he_value(pTHX_ const struct refcounted_he *he)
     }
     return value;
 }
-
-#ifdef USE_ITHREADS
-/* A big expression to find the key offset */
-#define REF_HE_KEY(chain) \
-	((((chain->refcounted_he_data[0] & HVrhek_typemask) == HVrhek_PV) \
-	    ? chain->refcounted_he_val.refcounted_he_u_len + 1 : 0)	  \
-	 + 1 + chain->refcounted_he_data)
-#endif
 
 /*
 =for apidoc refcounted_he_chain_2hv
@@ -2821,7 +2815,6 @@ Perl_refcounted_he_new(pTHX_ struct refcounted_he *const parent,
 	value_len = 0;
 	key_offset = 1;
     }
-    flags = value_type;
 
 #ifdef USE_ITHREADS
     he = (struct refcounted_he*)
@@ -2840,17 +2833,19 @@ Perl_refcounted_he_new(pTHX_ struct refcounted_he *const parent,
     if (value_type == HVrhek_PV) {
 	Copy(value_p, he->refcounted_he_data + 1, value_len + 1, char);
 	he->refcounted_he_val.refcounted_he_u_len = value_len;
-	if (SvUTF8(value)) {
-	    flags |= HVrhek_UTF8;
-	}
+	/* Do it this way so that the SvUTF8() test is after the SvPV, in case
+	   the value is overloaded, and doesn't yet have the UTF-8flag set.  */
+	if (SvUTF8(value))
+	    value_type = HVrhek_PV_UTF8;
     } else if (value_type == HVrhek_IV) {
 	if (SvUOK(value)) {
 	    he->refcounted_he_val.refcounted_he_u_uv = SvUVX(value);
-	    flags |= HVrhek_UV;
+	    value_type = HVrhek_UV;
 	} else {
 	    he->refcounted_he_val.refcounted_he_u_iv = SvIVX(value);
 	}
     }
+    flags = value_type;
 
     if (is_utf8) {
 	/* Hash keys are always stored normalised to (yes) ISO-8859-1.
