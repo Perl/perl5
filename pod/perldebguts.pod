@@ -191,9 +191,8 @@ Some functions are provided to simplify customization.
 
 =item *
 
-See L<perldebug/"Options"> for description of options parsed by
-C<DB::parse_options(string)> parses debugger options; see
-L<pperldebug/Options> for a description of options recognized.
+See L<perldebug/"Configurable Options"> for a description of options parsed by
+C<DB::parse_options(string)>.
 
 =item *
 
