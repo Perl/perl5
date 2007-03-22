@@ -1273,8 +1273,9 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
                     ( PERL_PV_PRETTY_QUOTE | PERL_PV_ESCAPE_RE | PERL_PV_PRETTY_ELIPSES |
                     ((re->extflags & RXf_UTF8) ? PERL_PV_ESCAPE_UNI : 0))
                 );
-                Perl_dump_indent(aTHX_ level+1, file, "    PAT = %s\n", s);    
-                Perl_dump_indent(aTHX_ level+1, file, "    REFCNT = %"IVdf"\n", (IV*)re->refcnt);
+		Perl_dump_indent(aTHX_ level+1, file, "    PAT = %s\n", s);
+		Perl_dump_indent(aTHX_ level+1, file, "    REFCNT = %"IVdf"\n",
+			(IV)re->refcnt);
             }
             if (mg->mg_flags & MGf_REFCOUNTED)
 		do_sv_dump(level+2, file, mg->mg_obj, nest+1, maxnest, dumpops, pvlim); /* MG is already +1 */
