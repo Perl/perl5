@@ -1124,6 +1124,7 @@ distclean: realclean
 	-del /f $(LIBDIR)\Unicode\Normalize.pm
 	-del /f $(LIBDIR)\Math\BigInt\FastCalc.pm
 	-del /f $(LIBDIR)\Win32.pm
+	-del /f $(LIBDIR)\Win32CORE.pm
 	-del /f $(LIBDIR)\Win32API\File.pm
 	-del /f $(LIBDIR)\Win32API\File\cFile.pc
 	-if exist $(LIBDIR)\B rmdir /s /q $(LIBDIR)\B
