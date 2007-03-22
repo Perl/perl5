@@ -4956,7 +4956,7 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags) {
 
 /* this idea is borrowed from STR_WITH_LEN in handy.h */
 #define CHECK_WORD(s,v,l)  \
-    (((sizeof(s)-1)==(l)) && (strnEQ(start_verb, (s ""), (sizeof(s)-1))))
+    (((sizeof(s)-1)==(l)) && (memEQ(start_verb, (s ""), (sizeof(s)-1))))
 
 STATIC regnode *
 S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
