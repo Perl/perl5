@@ -623,7 +623,7 @@ characters that are used in several European languages is in the next
 range, up to 255. After some more Latin extensions we find the character
 sets from languages using non-Roman alphabets, interspersed with a
 variety of symbol sets such as currency symbols, Zapf Dingbats or Braille.
-(You might want to visit L<www.unicode.org> for a look at some of
+(You might want to visit L<http://www.unicode.org/> for a look at some of
 them - my personal favourites are Telugu and Kannada.)
 
 The Unicode character sets associates characters with integers. Encoding
@@ -668,7 +668,7 @@ sequences and generally have a friendlier interface.
 
 The pack code C<w> has been added to support a portable binary data
 encoding scheme that goes way beyond simple integers. (Details can
-be found at L<Casbah.org>, the Scarab project.)  A BER (Binary Encoded
+be found at L<http://Casbah.org/>, the Scarab project.)  A BER (Binary Encoded
 Representation) compressed unsigned integer stores base 128
 digits, most significant digit first, with as few digits as possible.
 Bit eight (the high bit) is set on each byte except the last. There
