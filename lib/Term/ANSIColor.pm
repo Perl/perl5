@@ -32,7 +32,7 @@ use Exporter ();
                                  ON_CYAN ON_WHITE)]);
 Exporter::export_ok_tags ('constants');
 
-$VERSION = '1.11';
+$VERSION = '1.11_01';
 
 ##############################################################################
 # Internal data structures
@@ -227,7 +227,7 @@ Term::ANSIColor - Color screen output using ANSI escape sequences
 
 This module has two interfaces, one through color() and colored() and the
 other through constants.  It also offers the utility function uncolor(),
-which has to be explicitly imported to be used (see L<SYNOPSIS>).
+which has to be explicitly imported to be used (see L</SYNOPSIS>).
 
 color() takes any number of strings as arguments and considers them to be
 space-separated lists of attributes.  It then forms and returns the escape
