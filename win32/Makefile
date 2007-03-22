@@ -498,6 +498,7 @@ LIBBASEFILES    = $(LIBBASEFILES) bufferoverflowU.lib
 # we add LIBC here, since we may be using PerlCRT.dll
 LIBFILES	= $(LIBBASEFILES) $(LIBC)
 
+#EXTRACFLAGS	= -nologo -GF -W4 -wd4127 -wd4706
 EXTRACFLAGS	= -nologo -GF -W3
 CFLAGS		= $(EXTRACFLAGS) $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
@@ -1140,14 +1141,17 @@ MakePPPort_clean:
 
 #-------------------------------------------------------------------------------
 Extensions: buildext.pl $(PERLDEP) $(CONFIGPM)
+	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) --dynamic
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --dynamic
 
 Extensions_reonly: buildext.pl $(PERLDEP) $(CONFIGPM)
+	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) --dynamic +re
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --dynamic +re
 
 Extensions_static : buildext.pl $(PERLDEP) $(CONFIGPM)
+	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) --static
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --static
 	$(MINIPERL) -I..\lib buildext.pl --list-static-libs > Extensions_static
@@ -1365,7 +1369,7 @@ test-reonly : reonly utils
 	$(XCOPY) $(PERLDLL) ..\t\$(NULL)
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 	cd ..\t
-	$(PERLEXE) -I..\lib harness $(OPT) -re \bpat\b \breg
+	$(PERLEXE) -I..\lib harness $(OPT) -re \bpat\b \breg \bre\b \bsubst \brxcode $(EXTRA)
 	cd ..\win32
 	
 regen :
