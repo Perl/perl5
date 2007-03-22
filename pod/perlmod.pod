@@ -323,9 +323,7 @@ and before the run time begins, in LIFO order.  C<CHECK> code blocks are used
 in the Perl compiler suite to save the compiled state of the program.
 
 C<INIT> blocks are run just before the Perl runtime begins execution, in
-"first in, first out" (FIFO) order. For example, the code generators
-documented in L<perlcc> make use of C<INIT> blocks to initialize and
-resolve pointers to XSUBs.
+"first in, first out" (FIFO) order.
 
 When you use the B<-n> and B<-p> switches to Perl, C<BEGIN> and
 C<END> work just as they do in B<awk>, as a degenerate case.
