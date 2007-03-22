@@ -1322,8 +1322,6 @@ Perl_newHV(pTHX)
     register XPVHV* xhv;
     HV * const hv = (HV*)newSV_type(SVt_PVHV);
     xhv = (XPVHV*)SvANY(hv);
-    SvPOK_off(hv);
-    SvNOK_off(hv);
 #ifndef NODEFAULT_SHAREKEYS
     HvSHAREKEYS_on(hv);         /* key-sharing on by default */
 #endif
