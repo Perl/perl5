@@ -177,7 +177,7 @@ subsequent call to setlocale().
 If no second argument is provided and the category is LC_ALL, the
 result is implementation-dependent.  It may be a string of
 concatenated locales names (separator also implementation-dependent)
-or a single locale name.  Please consult your L<setlocale(3)> for
+or a single locale name.  Please consult your setlocale(3) man page for
 details.
 
 If a second argument is given and it corresponds to a valid locale,
@@ -197,11 +197,11 @@ be noticed, depending on your system's C library.
 If the second argument does not correspond to a valid locale, the locale
 for the category is not changed, and the function returns I<undef>.
 
-For further information about the categories, consult L<setlocale(3)>.
+For further information about the categories, consult setlocale(3).
 
 =head2 Finding locales
 
-For locales available in your system, consult also L<setlocale(3)> to
+For locales available in your system, consult also setlocale(3) to
 see whether it leads to the list of available locales (search for the
 I<SEE ALSO> section).  If that fails, try the following command lines:
 
@@ -289,7 +289,7 @@ than the PERL_BADLANG approach, but setting LC_ALL (or
 other locale variables) may affect other programs as well, not just
 Perl.  In particular, external programs run from within Perl will see
 these changes.  If you make the new settings permanent (read on), all
-programs you run see the changes.  See L<ENVIRONMENT> for
+programs you run see the changes.  See L<"ENVIRONMENT"> for
 the full list of relevant environment variables and L<USING LOCALES>
 for their effects in Perl.  Effects in other programs are 
 easily deducible.  For example, the variable LC_COLLATE may well affect

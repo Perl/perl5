@@ -524,7 +524,10 @@ functionality has moved from "discipline" to "layer".  All documentation
 of this version of Perl therefore refers to "layers" rather than to
 "disciplines".  Now back to the regularly scheduled documentation...>
 
-To mark FILEHANDLE as UTF-8, use C<:utf8>.
+To mark FILEHANDLE as UTF-8, use C<:utf8> or C<:encoding(utf8)>.
+C<:utf8> just marks the data as UTF-8 without further checking,
+while C<:encoding(utf8)> checks the data for actually being valid
+UTF-8. More details can be found in L<PerlIO::encoding>.
 
 In general, binmode() should be called after open() but before any I/O
 is done on the filehandle.  Calling binmode() will normally flush any
@@ -1367,19 +1370,10 @@ B<WARNING>: Any files opened at the time of the dump will I<not>
 be open any more when the program is reincarnated, with possible
 resulting confusion on the part of Perl.
 
-This function is now largely obsolete, partly because it's very
-hard to convert a core file into an executable, and because the
-real compiler backends for generating portable bytecode and compilable
-C code have superseded it.  That's why you should now invoke it as
-C<CORE::dump()>, if you don't want to be warned against a possible
+This function is now largely obsolete, mostly because it's very hard to
+convert a core file into an executable. That's why you should now invoke
+it as C<CORE::dump()>, if you don't want to be warned against a possible
 typo.
-
-If you're looking to use L<dump> to speed up your program, consider
-generating bytecode or native C code as described in L<perlcc>.  If
-you're just trying to accelerate a CGI script, consider using the
-C<mod_perl> extension to B<Apache>, or the CPAN module, CGI::Fast.
-You might also consider autoloading or selfloading, which at least
-make your program I<appear> to run faster.
 
 =item each HASH
 X<each> X<hash, iterator>
@@ -4295,6 +4289,14 @@ name is returned instead.  You can think of C<ref> as a C<typeof> operator.
 	print "r is not a reference at all.\n";
     }
 
+The return value C<LVALUE> indicates a reference to an lvalue that is not
+a variable. You get this from taking the reference of function calls like
+C<pos()> or C<substr()>. C<VSTRING> is returned if the reference points
+to a L<version string|perldata\"Version Strings">.
+
+The result C<Regexp> indicates that the argument is a regular expression
+resulting from C<qr//>.
+
 See also L<perlref>.
 
 =item rename OLDNAME,NEWNAME
@@ -4682,8 +4684,8 @@ X<select> X<filehandle, default>
 
 =item select
 
-Returns the currently selected filehandle.  Sets the current default
-filehandle for output, if FILEHANDLE is supplied.  This has two
+Returns the currently selected filehandle.  If FILEHANDLE is supplied,
+sets the new current default filehandle for output.  This has two
 effects: first, a C<write> or a C<print> without a filehandle will
 default to this FILEHANDLE.  Second, references to variables related to
 output will refer to this output channel.  For example, if you have to

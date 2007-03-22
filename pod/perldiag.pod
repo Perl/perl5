@@ -4634,7 +4634,7 @@ the version number.
 =item Warning: something's wrong
 
 (W) You passed warn() an empty string (the equivalent of C<warn "">) or
-you called it with no args and C<$_> was empty.
+you called it with no args and C<$@> was empty.
 
 =item Warning: unable to close filehandle %s properly
 

@@ -386,6 +386,10 @@ try something like the following:
                      POSIX::SigAction->new(sub { die "alarm" }))
           or die "Error setting SIGALRM handler: $!\n";
 
+Another way to disable the safe signal behavior locally is to use
+the C<Perl::Unsafe::Signals> module from CPAN (which will affect
+all signals).
+
 =item Restartable system calls
 
 On systems that supported it, older versions of Perl used the
@@ -539,7 +543,7 @@ output doesn't wind up on the user's terminal).
 The fork() has to come before the setsid() to ensure that you aren't a
 process group leader (the setsid() will fail if you are).  If your
 system doesn't have the setsid() function, open F</dev/tty> and use the
-C<TIOCNOTTY> ioctl() on it instead.  See L<tty(4)> for details.
+C<TIOCNOTTY> ioctl() on it instead.  See tty(4) for details.
 
 Non-Unix users should check their Your_OS::Process module for other
 solutions.

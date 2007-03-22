@@ -27,15 +27,6 @@ L<perlop/"Gory details of parsing quoted constructs">.
 
 =over 4
 
-=item i
-X</i> X<regex, case-insensitive> X<regexp, case-insensitive>
-X<regular expression, case-insensitive>
-
-Do case-insensitive pattern matching.
-
-If C<use locale> is in effect, the case map is taken from the current
-locale.  See L<perllocale>.
-
 =item m
 X</m> X<regex, multiline> X<regexp, multiline> X<regular expression, multiline>
 
@@ -58,10 +49,25 @@ Together, as /ms, they let the "." match any character whatsoever,
 while still allowing "^" and "$" to match, respectively, just after
 and just before newlines within the string.
 
+=item i
+X</i> X<regex, case-insensitive> X<regexp, case-insensitive>
+X<regular expression, case-insensitive>
+
+Do case-insensitive pattern matching.
+
+If C<use locale> is in effect, the case map is taken from the current
+locale.  See L<perllocale>.
+
 =item x
 X</x>
 
 Extend your pattern's legibility by permitting whitespace and comments.
+
+=item p
+X</p> X<regex, preserve> X<regexp, preserve>
+
+Preserve the string matched such that ${^PREMATCH}, {$^MATCH}, and
+${^POSTMATCH} are available for use after matching.
 
 =back
 
