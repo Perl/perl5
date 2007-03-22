@@ -230,7 +230,7 @@ END
 
 for (@ops) {
     $_ eq "custom" and next;
-    if ($_ eq threadsv) {
+    if ($_ eq 'threadsv') {
 	# Big threadsv special case
 	my $name = $alias{$_};
 	print <<"EOT";
