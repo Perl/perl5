@@ -359,7 +359,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     }
 
     gvp = (GV**)hv_fetchs(stash, "ISA", FALSE);
-    av = (gvp && (gv = *gvp) && gv != (GV*)&PL_sv_undef) ? GvAV(gv) : NULL;
+    av = (gvp && (gv = *gvp) && isGV_with_GP(gv)) ? GvAV(gv) : NULL;
 
     /* create and re-create @.*::SUPER::ISA on demand */
     if (!av || !SvMAGIC(av)) {
@@ -371,7 +371,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 	    packlen -= 7;
 	    basestash = gv_stashpvn(hvname, packlen, GV_ADD);
 	    gvp = (GV**)hv_fetchs(basestash, "ISA", FALSE);
-	    if (gvp && (gv = *gvp) != (GV*)&PL_sv_undef && (av = GvAV(gv))) {
+	    if (gvp && (gv = *gvp) && isGV_with_GP(gv) && (av = GvAV(gv))) {
 		gvp = (GV**)hv_fetchs(stash, "ISA", TRUE);
 		if (!gvp || !(gv = *gvp))
 		    Perl_croak(aTHX_ "Cannot create %s::ISA", hvname);
@@ -677,11 +677,12 @@ S_require_errno(pTHX_ GV *gv)
 
     if (!stash || !(gv_fetchmethod(stash, "TIEHASH"))) {
 	dSP;
-	PUTBACK;
 	ENTER;
 	save_scalar(gv); /* keep the value of $! */
+	PUSHSTACKi(PERLSI_MAGIC);
         Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
                          newSVpvs("Errno"), NULL);
+	POPSTACK;
 	LEAVE;
 	SPAGAIN;
 	stash = gv_stashpvs("Errno", 0);

@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 
 require './test.pl';
-plan( tests => 147 );
+plan( tests => 152 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -408,6 +408,34 @@ foreach my $value ([1,2,3], {1=>2}, *STDOUT{IO}, \&ok, *STDOUT{FORMAT}) {
     $proto = eval 'prototype \&oonk';
     like ($@, qr/^Cannot convert a reference to $type to typeglob/,
 	  "Cannot upgrade ref-to-$type to typeglob");
+}
+{
+    # Bug reported by broquaint on IRC
+    *slosh::{HASH}->{ISA}=[];
+    slosh->import;
+    pass("gv_fetchmeth coped with the unexpected");
+
+    # An audit found these:
+    {
+	package slosh;
+	sub rip {
+	    my $s = shift;
+	    $s->SUPER::rip;
+	}
+    }
+    eval {slosh->rip;};
+    like ($@, qr/^Can't locate object method "rip"/, "Even with SUPER");
+
+    is(slosh->isa('swoosh'), '');
+
+    $CORE::GLOBAL::{"lock"}=[];
+    eval "no warnings; lock";
+    like($@, qr/^Not enough arguments for lock/,
+       "Can't trip up general keyword overloading");
+
+    $CORE::GLOBAL::{"readline"}=[];
+    eval "<STDOUT> if 0";
+    is($@, '', "Can't trip up readline overloading");
 }
 __END__
 Perl

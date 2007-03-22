@@ -844,6 +844,7 @@ PP(pp_rv2av)
 	    sv = (SV*)avhv_keys((AV*)sv);
 
 	TARG = Perl_hv_scalar(aTHX_ (HV *)sv);
+	SPAGAIN;
 	SETTARG;
     }
     }

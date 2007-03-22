@@ -516,6 +516,7 @@ STATIC void
 S_cop_free(pTHX_ COP* cop)
 {
     Safefree(cop->cop_label);   /* FIXME: treaddead ??? */
+    cop->cop_label = NULL;
     CopFILE_free(cop);
     CopSTASH_free(cop);
     if (! specialWARN(cop->cop_warnings))
@@ -2726,6 +2727,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    bits = 8;
 
 	Safefree(cPVOPo->op_pv);
+	cPVOPo->op_pv = NULL;
 
 	swash = (SV*)swash_init("utf8", "", listsv, bits, none);
 #ifdef USE_ITHREADS
@@ -4198,7 +4200,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 	/* for XSUBs CvFILE point directly to static memory; __FILE__ */
 	Safefree(CvFILE(cv));
     }
-    CvFILE(cv) = 0;
+    CvFILE(cv) = NULL;
 #endif
 
     if (!CvISXSUB(cv) && CvROOT(cv)) {
