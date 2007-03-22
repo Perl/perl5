@@ -1129,8 +1129,9 @@ my $EmittedItem;
 
 sub emit_item_tag($$$){
     my( $otext, $text, $compact ) = @_;
-    my $item = fragment_id( $text , -generate);
-
+    my $item = fragment_id( depod($text) , -generate);
+    Carp::confess("Undefined fragment '$text' (".depod($text).") from fragment_id() in emit_item_tag() in $Podfile")
+        if !defined $item;
     $EmittedItem = $item;
     ### print STDERR "emit_item_tag=$item ($text)\n";
 
@@ -1186,7 +1187,7 @@ sub process_item {
     # all the list variants:
     if( $text =~ /\A\*/ ){ # bullet
         $emitted = emit_li( 'ul' );
-        if ($text =~ /\A\*\s+(.+)\Z/s ) { # with additional text
+        if ($text =~ /\A\*\s+(\S.*)\Z/s ) { # with additional text
             my $tag = $1;
             $otext =~ s/\A\*\s+//;
             emit_item_tag( $otext, $tag, 1 );
@@ -1194,7 +1195,7 @@ sub process_item {
 
     } elsif( $text =~ /\A\d+/ ){ # numbered list
         $emitted = emit_li( 'ol' );
-        if ($text =~ /\A(?>\d+\.?)\s*(.+)\Z/s ) { # with additional text
+        if ($text =~ /\A(?>\d+\.?)\s*(\S.*)\Z/s ) { # with additional text
             my $tag = $1;
             $otext =~ s/\A\d+\.?\s*//;
             emit_item_tag( $otext, $tag, 1 );
@@ -1300,8 +1301,8 @@ sub process_begin {
 sub process_end {
     my($whom, $text) = @_;
     $whom = lc($whom);
-    if ($Begin_Stack[-1] ne $whom ) {
-	die "Unmatched begin/end at chunk $Paragraph\n"
+    if (!defined $Begin_Stack[-1] or $Begin_Stack[-1] ne $whom ) {
+	Carp::confess("Unmatched begin/end at chunk $Paragraph in pod $Podfile\n")
     }
     pop( @Begin_Stack );
 }
@@ -1494,8 +1495,8 @@ sub process_puretext {
 #
 
 sub process_text1($$;$$);
-sub pattern ($) { $_[0] ? '[^\S\n]+'.('>' x ($_[0] + 1)) : '>' }
-sub closing ($) { local($_) = shift; (defined && s/\s+$//) ? length : 0 }
+sub pattern ($) { $_[0] ? '\s+'.('>' x ($_[0] + 1)) : '>' }
+sub closing ($) { local($_) = shift; (defined && s/\s+\z//) ? length : 0 }
 
 sub process_text {
     return if $Ignore;
@@ -1516,7 +1517,7 @@ sub process_text_rfc_links {
 	(?<=[^<>[:alpha:]])           # Make sure this is not an URL already
 	(RFC\s*([0-9]{1,5}))(?![0-9]) # max 5 digits
     }
-    {<a href="http://www.ietf.org/rfc/rfc$3.txt" class="rfc">$1</a>}gx;
+    {<a href="http://www.ietf.org/rfc/rfc$2.txt" class="rfc">$1</a>}gx;
 
     $text;
 }
@@ -1596,7 +1597,11 @@ sub process_text1($$;$$){
 	# check for link patterns
 	if( $par =~ m{^([^/]+?)/(?!")(.*?)$} ){     # name/ident
             # we've got a name/ident (no quotes)
-            ( $page, $ident ) = ( $1, $2 );
+            if (length $2) {
+                ( $page, $ident ) = ( $1, $2 );
+            } else {
+                ( $page, $section ) = ( $1, $2 );
+            }
             ### print STDERR "--> L<$par> to page $page, ident $ident\n";
 
 	} elsif( $par =~ m{^(.*?)/"?(.*?)"?$} ){ # [name]/"section"
@@ -1684,11 +1689,11 @@ sub process_text1($$;$$){
 
     } elsif( $func eq 'X' ){
 	# X<> - ignore
-	$$rstr =~ s/^[^>]*>//;
-
+	warn "$0: $Podfile: invalid X<> in paragraph $Paragraph.\n"
+	    unless $$rstr =~ s/^[^>]*>// or $Quiet;
     } elsif( $func eq 'Z' ){
 	# Z<> - empty
-	warn "$0: $Podfile: invalid X<> in paragraph $Paragraph.\n"
+	warn "$0: $Podfile: invalid Z<> in paragraph $Paragraph.\n"
 	    unless $$rstr =~ s/^>// or $Quiet;
 
     } else {
@@ -1706,8 +1711,10 @@ sub process_text1($$;$$){
 	}
 	if( $lev == 1 ){
 	    $res .= pure_text( $$rstr );
-	} else {
-	    warn "$0: $Podfile: undelimited $func<> in paragraph $Paragraph.\n" unless $Quiet;
+	} elsif( ! $Quiet ) {
+            my $snippet = substr($$rstr,0,60);
+            warn "$0: $Podfile: undelimited $func<> in paragraph $Paragraph: '$snippet'.\n" 
+                
 	}
 	$res = process_text_rfc_links($res);
     }
@@ -1722,7 +1729,7 @@ sub go_ahead($$$){
     my $res = '';
     my @closing = ($closing);
     while( $$rstr =~
-      s/\A(.*?)(([BCEFILSXZ])<(<+[^\S\n]+)?|@{[pattern $closing[0]]})//s ){
+      s/\A(.*?)(([BCEFILSXZ])<(<+\s+)?|@{[pattern $closing[0]]})//s ){
 	$res .= $1;
 	unless( $3 ){
 	    shift @closing;
@@ -1732,7 +1739,10 @@ sub go_ahead($$$){
 	}
 	$res .= $2;
     }
-    warn "$0: $Podfile: undelimited $func<> in paragraph $Paragraph.\n" unless $Quiet;
+    unless ($Quiet) {
+        my $snippet = substr($$rstr,0,60);
+        warn "$0: $Podfile: undelimited $func<> in paragraph $Paragraph (go_ahead): '$snippet'.\n" 
+    }	        
     return $res;
 }
 
@@ -1928,10 +1938,13 @@ sub coderef($$){
     my( $url );
 
     my $fid = fragment_id( $item );
+    
     if( defined( $page ) && $page ne "" ){
 	# we have been given a $page...
 	$page =~ s{::}{/}g;
 
+        Carp::confess("Undefined fragment '$item' from fragment_id() in coderef() in $Podfile")
+            if !defined $fid;    
 	# Do we take it? Item could be a section!
 	my $base = $Items{$fid} || "";
 	$base =~ s{[^/]*/}{};
