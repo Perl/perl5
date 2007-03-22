@@ -1020,12 +1020,18 @@ in gv.h: */
 		     }							\
 		 } STMT_END
 
-#define BmRARE(sv)	((XPVBM*)  SvANY(sv))->xbm_rare
-#define BmUSEFUL(sv)	((XPVBM*)  SvANY(sv))->xbm_useful
-#define BmPREVIOUS(sv)	((XPVBM*)  SvANY(sv))->xbm_previous
 
 #define PERL_FBM_TABLE_OFFSET 2	/* Number of bytes between EOS and table */
 #define PERL_FBM_FLAGS_OFFSET_FROM_TABLE -1
+
+#define BmFLAGS(sv)	((SvVALID(sv) && SvPOK(sv) &&			\
+			  (SvLEN(sv) > (SvCUR(sv) + PERL_FBM_TABLE_OFFSET))) \
+			 ? SvPVX(sv)[SvCUR(sv) + PERL_FBM_TABLE_OFFSET	 \
+				     + PERL_FBM_FLAGS_OFFSET_FROM_TABLE] \
+			 : 0)
+#define BmRARE(sv)	((XPVBM*)  SvANY(sv))->xbm_rare
+#define BmUSEFUL(sv)	((XPVBM*)  SvANY(sv))->xbm_useful
+#define BmPREVIOUS(sv)	((XPVBM*)  SvANY(sv))->xbm_previous
 
 #define FmLINES(sv)	((XPVFM*)  SvANY(sv))->xfm_lines
 
