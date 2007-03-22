@@ -1243,8 +1243,8 @@ XS(XS_re_regnames_iterinit)
 {
     dVAR; 
     dXSARGS;
-    if (items != 0 )
-       Perl_croak(aTHX_ "Usage: %s(%s)", "re::regnames_iterinit");
+    if (items != 0)
+	Perl_croak(aTHX_ "Usage: re::regnames_iterinit()");
     PERL_UNUSED_VAR(cv); /* -W */
     PERL_UNUSED_VAR(ax); /* -Wall */
     SP -= items;
