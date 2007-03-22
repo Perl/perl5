@@ -205,18 +205,12 @@ SYNC_SHARED: {
         die "$test: unknown test\n";
       }
       $delta = time() - $delta;
-      if (($to < 0) || ($^O eq 'os2')) {
-        ok(2, ! defined($ok), "$test: timeout");
-      } else {
-        # This is a bit problematic, as scheduling and compute latencies
-        # can inject delays in our computation. For now, assume -10/+20%
-        # is reasonable
-        if (! ok(2, ! defined($ok) &&
-                    ($delta > (0.9 * $to)) &&
-                    ($delta < (1.2 * $to)),
-                        "$test: timeout"))
-        {
-            print(STDERR "# Timeout: specified=$to  actual=$delta secs.\n");
+      ok(2, ! defined($ok), "$test: timeout");
+
+      if (($to > 0) && ($^O ne 'os2')) {
+        # Timing tests can be problematic
+        if (($delta < (0.9 * $to)) || ($delta > (1.0 + $to))) {
+          print(STDERR "# Timeout: specified=$to  actual=$delta secs.\n");
         }
       }
     }
@@ -322,14 +316,12 @@ SYNCH_REFS: {
         die "$test: unknown test\n";
       }
       $delta = time() - $delta;
-      if (($to < 0) || ($^O eq 'os2')) {
-        ok(2,!$ok, "$test: timeout");
-      } else {
-        if (ok(2, ! $ok, "$test: timeout")) {
-          # Timing tests can be problematic
-          if (($delta < (0.9 * $to)) || ($delta > (1.0 + $to))) {
-            print(STDERR "# Timeout: specified=$to  actual=$delta secs.\n");
-          }
+      ok(2, ! $ok, "$test: timeout");
+
+      if (($to > 0) && ($^O ne 'os2')) {
+        # Timing tests can be problematic
+        if (($delta < (0.9 * $to)) || ($delta > (1.0 + $to))) {
+          print(STDERR "# Timeout: specified=$to  actual=$delta secs.\n");
         }
       }
     }
