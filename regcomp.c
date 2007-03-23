@@ -4954,10 +4954,6 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags) {
 #define REGTAIL_STUDY(x,y,z) regtail((x),(y),(z),depth+1)
 #endif
 
-/* this idea is borrowed from STR_WITH_LEN in handy.h */
-#define CHECK_WORD(s,v,l)  \
-    (((sizeof(s)-1)==(l)) && (memEQ(start_verb, (s ""), (sizeof(s)-1))))
-
 STATIC regnode *
 S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     /* paren: Parenthesized? 0=top, 1=(, inside: changed to letter. */
@@ -5026,39 +5022,39 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    
 	    switch ( *start_verb ) {
             case 'A':  /* (*ACCEPT) */
-                if ( CHECK_WORD("ACCEPT",start_verb,verb_len) ) {
+                if ( memEQs(start_verb,verb_len,"ACCEPT") ) {
 		    op = ACCEPT;
 		    internal_argval = RExC_nestroot;
 		}
 		break;
             case 'C':  /* (*COMMIT) */
-                if ( CHECK_WORD("COMMIT",start_verb,verb_len) )
+                if ( memEQs(start_verb,verb_len,"COMMIT") )
                     op = COMMIT;
                 break;
             case 'F':  /* (*FAIL) */
-                if ( verb_len==1 || CHECK_WORD("FAIL",start_verb,verb_len) ) {
+                if ( verb_len==1 || memEQs(start_verb,verb_len,"FAIL") ) {
 		    op = OPFAIL;
 		    argok = 0;
 		}
 		break;
             case ':':  /* (*:NAME) */
 	    case 'M':  /* (*MARK:NAME) */
-	        if ( verb_len==0 || CHECK_WORD("MARK",start_verb,verb_len) ) {
+	        if ( verb_len==0 || memEQs(start_verb,verb_len,"MARK") ) {
                     op = MARKPOINT;
                     argok = -1;
                 }
                 break;
             case 'P':  /* (*PRUNE) */
-                if ( CHECK_WORD("PRUNE",start_verb,verb_len) )
+                if ( memEQs(start_verb,verb_len,"PRUNE") )
                     op = PRUNE;
                 break;
             case 'S':   /* (*SKIP) */  
-                if ( CHECK_WORD("SKIP",start_verb,verb_len) ) 
+                if ( memEQs(start_verb,verb_len,"SKIP") ) 
                     op = SKIP;
                 break;
             case 'T':  /* (*THEN) */
                 /* [19:06] <TimToady> :: is then */
-                if ( CHECK_WORD("THEN",start_verb,verb_len) ) {
+                if ( memEQs(start_verb,verb_len,"THEN") ) {
                     op = CUTGROUP;
                     RExC_seen |= REG_SEEN_CUTGROUP;
                 }
