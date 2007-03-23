@@ -42,7 +42,7 @@ foreach my $file (
     next;
   }
 
-    my $precooked = $file;
+    my $precooked = source_path($file);
     my $outstring;
     my $compstring;
     $precooked =~ s<\.pod><o.txt>s;
