@@ -421,13 +421,13 @@ Perl_ninstr(pTHX_ const char *big, const char *bigend, const char *little, const
         bigend -= lend - little;
     OUTER:
         while (big <= bigend) {
-            if (*big++ != first)
-                goto OUTER;
-            for (x=big,s=little; s < lend; x++,s++) {
-                if (*s != *x)
-                    goto OUTER;
+            if (*big++ == first) {
+                for (x=big,s=little; s < lend; x++,s++) {
+                    if (*s != *x)
+                        goto OUTER;
+                }
+                return (char*)(big-1);
             }
-            return (char*)(big-1);
         }
     }
     return NULL;
