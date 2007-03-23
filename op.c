@@ -3776,20 +3776,17 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 
     scalarboolean(first);
     if (first->op_type == OP_CONST) {
+	/* Left or right arm of the conditional?  */
+	const bool left = SvTRUE(((SVOP*)first)->op_sv);
+	OP *const live = left ? trueop : falseop;
+	OP *const dead = left ? falseop : trueop;
         if (first->op_private & OPpCONST_BARE &&
 	    first->op_private & OPpCONST_STRICT) {
 	    no_bareword_allowed(first);
 	}
-	if (SvTRUE(((SVOP*)first)->op_sv)) {
-	    op_free(first);
-	    op_free(falseop);
-	    return trueop;
-	}
-	else {
-	    op_free(first);
-	    op_free(trueop);
-	    return falseop;
-	}
+	op_free(first);
+	op_free(dead);
+	return live;
     }
     NewOp(1101, logop, 1, LOGOP);
     logop->op_type = OP_COND_EXPR;
