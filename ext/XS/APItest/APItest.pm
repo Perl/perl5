@@ -36,9 +36,38 @@ sub G_KEEPERR()	{  16 }
 sub G_NODEBUG()	{  32 }
 sub G_METHOD()	{  64 }
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
-bootstrap XS::APItest $VERSION;
+use vars '$WARNINGS_ON_BOOTSTRAP';
+use vars map "\$${_}_called_PP", qw(BEGIN CHECK INIT END);
+
+# Do these here to verify that XS code and Perl code get called at the same
+# times
+BEGIN {
+    $BEGIN_called_PP++;
+}
+{
+    # Need $W false by default, as some tests run under -w, and under -w we
+    # can get warnings about "Too late to run CHECK" block (and INIT block)
+    no warnings 'void';
+    CHECK {
+	$CHECK_called_PP++;
+    }
+    INIT {
+	$INIT_called_PP++;
+    }
+}
+END {
+    $END_called_PP++;
+}
+
+if ($WARNINGS_ON_BOOTSTRAP) {
+    bootstrap XS::APItest $VERSION;
+} else {
+    # More CHECK and INIT blocks that could warn:
+    local $^W;
+    bootstrap XS::APItest $VERSION;
+}
 
 1;
 __END__
