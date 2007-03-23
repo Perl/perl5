@@ -1,3 +1,11 @@
+3.11_01 - 2007-03-23
+
+    * added support for the following API
+        PL_expect
+        load_module
+        vload_module
+      (thanks to Nicholas Clark for providing a patch)
+
 3.11 - 2007-02-14
 
     * happy new year!

@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 51 $
+#  $Revision: 52 $
 #  $Author: mhx $
-#  $Date: 2007/01/02 12:32:27 +0100 $
+#  $Date: 2007/03/23 16:27:19 +0100 $
 #
 ################################################################################
 #
@@ -284,6 +284,7 @@ sub make_embed
   my $f = shift;
   my $n = $f->{name};
   my $a = do { my $x = 'a'; join ',', map { $x++ } 1 .. @{$f->{args}} };
+  my $lastarg = ${$f->{args}}[-1];
 
   if ($f->{flags}{n}) {
     if ($f->{flags}{p}) {
@@ -303,6 +304,10 @@ UNDEF
     if ($f->{flags}{p}) {
       if ($f->{flags}{f}) {
         return "#define Perl_$n $DPPP(my_$n)";
+      }
+      elsif (@$lastarg && $lastarg->[0] =~ /\.\.\./) {
+        return $undef . "#define $n $DPPP(my_$n)\n" .
+                        "#define Perl_$n $DPPP(my_$n)";
       }
       else {
         return $undef . "#define $n($a) $DPPP(my_$n)(aTHX_ $a)\n" .
@@ -339,9 +344,9 @@ __DATA__
 #
 ################################################################################
 #
-#  $Revision: 51 $
+#  $Revision: 52 $
 #  $Author: mhx $
-#  $Date: 2007/01/02 12:32:27 +0100 $
+#  $Date: 2007/03/23 16:27:19 +0100 $
 #
 ################################################################################
 #
@@ -502,7 +507,7 @@ package Devel::PPPort;
 use strict;
 use vars qw($VERSION $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.11 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.11_01 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 sub _init_data
 {

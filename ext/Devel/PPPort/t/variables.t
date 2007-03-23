@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (36) {
+  if (37) {
     load();
-    plan(tests => 36);
+    plan(tests => 37);
   }
 }
 

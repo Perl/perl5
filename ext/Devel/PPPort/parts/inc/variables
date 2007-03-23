@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 7 $
+##  $Revision: 8 $
 ##  $Author: mhx $
-##  $Date: 2007/01/02 12:32:31 +0100 $
+##  $Date: 2007/03/23 16:24:34 +0100 $
 ##
 ################################################################################
 ##
@@ -71,6 +71,7 @@ __NEED_VAR__ U32 PL_signals = D_PPP_PERL_SIGNALS_INIT;
 #  define PL_dirty                  dirty
 #  define PL_dowarn                 dowarn
 #  define PL_errgv                  errgv
+#  define PL_expect                 expect
 #  define PL_hexdigit               hexdigit
 #  define PL_hints                  hints
 #  define PL_laststatval            laststatval
@@ -210,6 +211,7 @@ other_variables()
 		ppp_TESTVAR(PL_dirty);
 		ppp_TESTVAR(PL_dowarn);
 		ppp_TESTVAR(PL_errgv);
+		ppp_TESTVAR(PL_expect);
 		ppp_TESTVAR(PL_laststatval);
 		ppp_TESTVAR(PL_no_modify);
 		ppp_TESTVAR(PL_perl_destruct_level);
@@ -225,7 +227,7 @@ other_variables()
 		ppp_TESTVAR(PL_tainting);
 		XSRETURN(count);
 
-=tests plan => 36
+=tests plan => 37
 
 ok(Devel::PPPort::compare_PL_signals());
 

@@ -85,7 +85,6 @@ is_utf8_punct                  # U
 is_utf8_space                  # U
 is_utf8_upper                  # U
 is_utf8_xdigit                 # U
-load_module                    # U
 magic_dump                     # U
 mess                           # E (Perl_mess)
 my_atof                        # U
@@ -148,7 +147,6 @@ utf8_distance                  # U
 utf8_hop                       # U
 vcroak                         # U
 vform                          # U
-vload_module                   # U
 vmess                          # U
 vwarn                          # U
 vwarner                        # U
