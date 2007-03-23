@@ -10352,6 +10352,15 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_compiling = proto_perl->Icompiling;
 
+    /* RE engine - function pointers -- must initilize these before 
+       re_dup() is called. dmq. */
+    PL_regcompp		= proto_perl->Tregcompp;
+    PL_regexecp		= proto_perl->Tregexecp;
+    PL_regint_start	= proto_perl->Tregint_start;
+    PL_regint_string	= proto_perl->Tregint_string;
+    PL_regfree		= proto_perl->Tregfree;
+    PL_regdupe		= proto_perl->Iregdupe;
+
     /* These two PVs will be free'd special way so must set them same way op.c does */
     PL_compiling.cop_stashpv = savesharedpv(PL_compiling.cop_stashpv);
     ptr_table_store(PL_ptr_table, proto_perl->Icompiling.cop_stashpv, PL_compiling.cop_stashpv);
@@ -10424,16 +10433,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     sv_setpvn(PERL_DEBUG_PAD(0), "", 0);	/* For regex debugging. */
     sv_setpvn(PERL_DEBUG_PAD(1), "", 0);	/* ext/re needs these */
     sv_setpvn(PERL_DEBUG_PAD(2), "", 0);	/* even without DEBUGGING. */
-
-   
-    /* RE engine - function pointers -- must initilize these before 
-       re_dup() is called. dmq. */
-    PL_regcompp		= proto_perl->Tregcompp;
-    PL_regexecp		= proto_perl->Tregexecp;
-    PL_regint_start	= proto_perl->Tregint_start;
-    PL_regint_string	= proto_perl->Tregint_string;
-    PL_regfree		= proto_perl->Tregfree;
-    PL_regdupe		= proto_perl->Iregdupe;
 
     PL_reginterp_cnt	= 0;
     PL_reg_starttry	= 0;
