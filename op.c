@@ -5405,7 +5405,7 @@ S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
     const char *const name = colon ? colon + 1 : fullname;
 
     if (*name == 'B') {
-	if (memEQ(name, "BEGIN", 5)) {
+	if (strEQ(name, "BEGIN")) {
 	    const I32 oldscope = PL_scopestack_ix;
 	    ENTER;
 	    SAVECOPFILE(&PL_compiling);
