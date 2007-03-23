@@ -1793,8 +1793,6 @@ phooey:
 STATIC I32			/* 0 failure, 1 success */
 S_regtry(pTHX_ regexp *prog, char *startpos)
 {
-    register I32 *sp;
-    register I32 *ep;
     CHECKPOINT lastcp;
 
 #ifdef DEBUGGING
@@ -1901,9 +1899,9 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
      * on those tests seems to be returning null fields from matches.
      * --jhi */
 #if 1
-    sp = prog->startp;
-    ep = prog->endp;
     if (prog->nparens) {
+	I32 *sp = prog->startp;
+	I32 *ep = prog->endp;
 	register I32 i;
 	for (i = prog->nparens; i > (I32)*PL_reglastparen; i--) {
 	    *++sp = -1;
