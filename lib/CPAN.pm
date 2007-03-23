@@ -1,7 +1,7 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.88_78';
+$CPAN::VERSION = '1.88_79';
 $CPAN::VERSION = eval $CPAN::VERSION;
 
 use CPAN::HandleConfig;
@@ -370,6 +370,19 @@ sub _yaml_module () {
         # $CPAN::Frontend->mywarn("'$yaml_module' not installed, falling back to 'YAML'\n");
         $yaml_module = "YAML";
     }
+    if ($yaml_module eq "YAML"
+        &&
+        $CPAN::META->has_inst($yaml_module)
+        &&
+        $YAML::VERSION < 0.60
+        &&
+        !$Have_warned->{"YAML"}++
+       ) {
+        $CPAN::Frontend->mywarn("Warning: YAML version '$YAML::VERSION' is too low, please upgrade!\n".
+                                "I'll continue but problems are *very* likely to happen.\n"
+                               );
+        $CPAN::Frontend->mysleep(5);
+    }
     return $yaml_module;
 }
 
@@ -552,20 +565,65 @@ use overload '""' => "as_string";
 sub new {
     my($class) = shift;
     my($deps) = shift;
-    my @deps;
-    my %seen;
-    for my $dep (@$deps) {
-        push @deps, $dep;
-        last if $seen{$dep}++;
+    my (@deps,%seen,$loop_starts_with);
+  DCHAIN: for my $dep (@$deps) {
+        push @deps, {name => $dep, display_as => $dep};
+        if ($seen{$dep}++){
+            $loop_starts_with = $dep;
+            last DCHAIN;
+        }
+    }
+    my $in_loop = 0;
+    for my $i (0..$#deps) {
+        my $x = $deps[$i]{name};
+        $in_loop ||= $x eq $loop_starts_with;
+        my $xo = CPAN::Shell->expandany($x) or next;
+        if ($xo->isa("CPAN::Module")) {
+            my $have = $xo->inst_version || "N/A";
+            my($want,$d,$want_type);
+            if ($i>0 and $d = $deps[$i-1]{name}) {
+                my $do = CPAN::Shell->expandany($d);
+                $want = $do->{prereq_pm}{requires}{$x};
+                if (defined $want) {
+                    $want_type = "requires: ";
+                } else {
+                    $want = $do->{prereq_pm}{build_requires}{$x};
+                    if (defined $want) {
+                        $want_type = "build_requires: ";
+                    } else {
+                        $want_type = "unknown status";
+                        $want = "???";
+                    }
+                }
+            } else {
+                $want = $xo->cpan_version;
+                $want_type = "want: ";
+            }
+            $deps[$i]{have} = $have;
+            $deps[$i]{want_type} = $want_type;
+            $deps[$i]{want} = $want;
+            $deps[$i]{display_as} = "$x (have: $have; $want_type$want)";
+        } elsif ($xo->isa("CPAN::Distribution")) {
+            $deps[$i]{display_as} = $xo->pretty_id;
+            if ($in_loop) {
+                $xo->{make} = CPAN::Distrostatus->new("NO cannot resolve circular dependency");
+            } else {
+                $xo->{make} = CPAN::Distrostatus->new("NO one dependency ($loop_starts_with) is a circular dependency");
+            }
+            $xo->store_persistent_state; # otherwise I will not reach
+                                         # all involved parties for
+                                         # the next session
+        }
     }
     bless { deps => \@deps }, $class;
 }
 
 sub as_string {
     my($self) = shift;
-    "\nRecursive dependency detected:\n    " .
-        join("\n => ", @{$self->{deps}}) .
-            ".\nCannot continue.\n";
+    my $ret = "\nRecursive dependency detected:\n    ";
+    $ret .= join("\n => ", map {$_->{display_as}} @{$self->{deps}});
+    $ret .= ".\nCannot resolve.\n";
+    $ret;
 }
 
 package CPAN::Exception::yaml_not_installed;
@@ -2968,8 +3026,22 @@ sub rematein {
 	if (0) {
         } elsif (ref $obj) {
             if ($meth =~ /^($needs_recursion_protection)$/) {
-                # silly for look or dump
-                $obj->color_cmd_tmps(0,1);
+                # it would be silly to check for recursion for look or dump
+                # (we are in CPAN::Shell::rematein)
+                CPAN->debug("Going to test against recursion") if $CPAN::DEBUG;
+                eval {  $obj->color_cmd_tmps(0,1); };
+                if ($@){
+                    if (ref $@
+                        and $@->isa("CPAN::Exception::RecursiveDependency")) {
+                        $CPAN::Frontend->mywarn($@);
+                    } else {
+                        if (0) {
+                            require Carp;
+                            Carp::confess(sprintf "DEBUG: \$\@[%s]ref[%s]", $@, ref $@);
+                        }
+                        die;
+                    }
+                }
             }
             CPAN::Queue->new(qmod => $obj->id, reqtype => "c");
             push @qcopy, $obj;
@@ -3362,7 +3434,7 @@ sub _add_to_statistics {
         # need no eval because if this fails, it is serious
         my $sfile = File::Spec->catfile($CPAN::Config->{cpan_home},"FTPstats.yml");
         CPAN->_yaml_dumpfile("$sfile.$$",$fullstats);
-        if ( $sdebug||$CPAN::DEBUG ) {
+        if ( $sdebug ) {
             local $CPAN::DEBUG = 512; # FTP
             push @debug, time;
             CPAN->debug(sprintf("DEBUG history: before_read[%d]before[%d]at[%d]".
@@ -5488,7 +5560,7 @@ sub color_cmd_tmps {
         && $color==1
         && $self->{incommandcolor}==$color;
     if ($depth>=$CPAN::MAX_RECURSION){
-        $CPAN::Frontend->mydie(CPAN::Exception::RecursiveDependency->new($ancestors));
+        die(CPAN::Exception::RecursiveDependency->new($ancestors));
     }
     # warn "color_cmd_tmps $depth $color " . $self->id; # sleep 1;
     my $prereq_pm = $self->prereq_pm;
@@ -5618,7 +5690,7 @@ sub get {
             # note: not intended to be persistent but at least visible
             # during this session
         } else {
-            if (exists $self->{build_dir}) {
+            if (exists $self->{build_dir} && -d $self->{build_dir}) {
                 # this deserves print, not warn:
                 $CPAN::Frontend->myprint("  Has already been unwrapped into directory ".
                                          "$self->{build_dir}\n"
@@ -6811,8 +6883,20 @@ is part of the perl-%s distribution. To install that, you need to run
             push @e, $err;
         }
 
-	defined $self->{make} and push @e,
-            "Has already been made";
+	if (defined $self->{make}) {
+            if ($self->{make}->failed) {
+                if ($self->{force_update}) {
+                    # Trying an already failed 'make' (unless somebody else blocks)
+                } else {
+                    # introduced for turning recursion detection into a distrostatus
+                    $CPAN::Frontend->mywarn("Could not make: ".substr($self->{make},3)."\n");
+                    $self->store_persistent_state;
+                    return;
+                }
+            } else {
+                push @e, "Has already been made";
+            }
+        }
 
         if (exists $self->{later} and length($self->{later})) {
             if ($self->unsat_prereq) {
@@ -6953,7 +7037,6 @@ is part of the perl-%s distribution. To install that, you need to run
                     ->new("NO '$system' returned status $ret");
                 $CPAN::Frontend->mywarn("Warning: No success on command[$system]\n");
                 $self->store_persistent_state;
-                $self->store_persistent_state;
                 return;
             }
 	}
@@ -6978,7 +7061,15 @@ is part of the perl-%s distribution. To install that, you need to run
             $self->store_persistent_state;
             return;
         } else {
-            return 1 if $self->follow_prereqs(@prereq); # signal success to the queuerunner
+            my $follow = eval { $self->follow_prereqs(@prereq); };
+            if (0) {
+            } elsif ($follow){
+                # signal success to the queuerunner
+                return 1;
+            } elsif ($@ && ref $@ && $@->isa("CPAN::Exception::RecursiveDependency")) {
+                $CPAN::Frontend->mywarn($@);
+                return;
+            }
         }
     }
     if ($CPAN::Signal){
@@ -7491,10 +7582,13 @@ sub unsat_prereq {
             $available_file = $nmo->available_file;
 
             # if they have not specified a version, we accept any installed one
-            if (not defined $need_version or
-                $need_version == 0 or
-                $need_version eq "undef") {
-                next if defined $available_file;
+            if (defined $available_file
+                and ( # a few quick shortcurcuits
+                     not defined $need_version
+                     or $need_version eq '0'    # "==" would trigger warning when not numeric
+                     or $need_version eq "undef"
+                    )) {
+                next NEED;
             }
 
             $available_version = $nmo->available_version;
@@ -8047,6 +8141,12 @@ sub clean {
         $CPAN::Frontend->mywarn("Distribution has no own directory, nothing to do.\n");
         return 1;
     }
+    if (exists $self->{writemakefile}
+        and $self->{writemakefile}->failed
+       ) {
+        $CPAN::Frontend->mywarn("No Makefile, don't know how to 'make clean'\n");
+        return 1;
+    }
   EXCUSE: {
 	my @e;
         exists $self->{make_clean} and $self->{make_clean} eq "YES" and
@@ -8555,7 +8655,7 @@ sub color_cmd_tmps {
         && $color==1
         && $self->{incommandcolor}==$color;
     if ($depth>=$CPAN::MAX_RECURSION){
-        $CPAN::Frontend->mydie(CPAN::Exception::RecursiveDependency->new($ancestors));
+        die(CPAN::Exception::RecursiveDependency->new($ancestors));
     }
     # warn "color_cmd_tmps $depth $color " . $self->id; # sleep 1;
 
@@ -8874,7 +8974,7 @@ sub color_cmd_tmps {
                                           # so we can break it
     }
     if ($depth>=$CPAN::MAX_RECURSION){
-        $CPAN::Frontend->mydie(CPAN::Exception::RecursiveDependency->new($ancestors));
+        die(CPAN::Exception::RecursiveDependency->new($ancestors));
     }
     # warn "color_cmd_tmps $depth $color " . $self->id; # sleep 1;
 
@@ -11511,7 +11611,7 @@ ExtUtils::MakeMaker focused Makefile.PL?
 
 http://search.cpan.org/search?query=Module::Build::Convert
 
-http://accognoscere.org/papers/perl-module-build-convert/module-build-convert.html
+http://www.refcnt.org/papers/module-build-convert
 
 =item 15)
 
