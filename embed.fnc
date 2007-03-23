@@ -1139,6 +1139,8 @@ sR	|OP*	|too_many_arguments|NN OP *o|NN const char* name
 #if defined(PERL_FLEXIBLE_EXCEPTIONS)
 s	|void*	|vcall_runops	|va_list args
 #endif
+s	|void	|process_special_blocks	|NN const char *const fullname\
+					|NN GV *const gv|NN CV *const cv
 #endif
 #if defined(PL_OP_SLAB_ALLOC)
 Apa	|void*	|Slab_Alloc	|int m|size_t sz

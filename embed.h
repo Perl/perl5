@@ -1137,6 +1137,9 @@
 #define vcall_runops		S_vcall_runops
 #endif
 #endif
+#ifdef PERL_CORE
+#define process_special_blocks	S_process_special_blocks
+#endif
 #endif
 #if defined(PL_OP_SLAB_ALLOC)
 #define Slab_Alloc		Perl_Slab_Alloc
@@ -3238,6 +3241,9 @@
 #ifdef PERL_CORE
 #define vcall_runops(a)		S_vcall_runops(aTHX_ a)
 #endif
+#endif
+#ifdef PERL_CORE
+#define process_special_blocks(a,b,c)	S_process_special_blocks(aTHX_ a,b,c)
 #endif
 #endif
 #if defined(PL_OP_SLAB_ALLOC)

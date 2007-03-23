@@ -1660,6 +1660,7 @@ STATIC OP*	S_too_many_arguments(pTHX_ OP *o, const char* name)
 #if defined(PERL_FLEXIBLE_EXCEPTIONS)
 STATIC void*	S_vcall_runops(pTHX_ va_list args);
 #endif
+STATIC void	S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv, CV *const cv);
 #endif
 #if defined(PL_OP_SLAB_ALLOC)
 PERL_CALLCONV void*	Perl_Slab_Alloc(pTHX_ int m, size_t sz)

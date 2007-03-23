@@ -4639,9 +4639,6 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     }
 
     if (name || aname) {
-	const char *s;
-	const char * const tname = (name ? name : aname);
-
 	if (PERLDB_SUBLINE && PL_curstash != PL_debstash) {
 	    SV * const sv = newSV(0);
 	    SV * const tmpstr = sv_newmortal();
@@ -4667,15 +4664,25 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    }
 	}
 
-	if ((s = strrchr(tname,':')))
-	    s++;
-	else
-	    s = tname;
+	if (name && !PL_error_count)
+	    process_special_blocks(name, gv, cv);
+    }
 
-	if (*s != 'B' && *s != 'E' && *s != 'C' && *s != 'I')
-	    goto done;
+  done:
+    PL_copline = NOLINE;
+    LEAVE_SCOPE(floor);
+    return cv;
+}
 
-	if (strEQ(s, "BEGIN") && !PL_error_count) {
+STATIC void
+S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
+			 CV *const cv)
+{
+    const char *const colon = strrchr(fullname,':');
+    const char *const name = colon ? colon + 1 : fullname;
+
+    if (*name == 'B') {
+	if (strEQ(name, "BEGIN")) {
 	    const I32 oldscope = PL_scopestack_ix;
 	    ENTER;
 	    SAVECOPFILE(&PL_compiling);
@@ -4690,31 +4697,38 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    CopHINTS_set(&PL_compiling, PL_hints);
 	    LEAVE;
 	}
-	else if (strEQ(s, "END") && !PL_error_count) {
-	    DEBUG_x( dump_sub(gv) );
-	    Perl_av_create_and_unshift_one(aTHX_ &PL_endav, (SV*)cv);
-	    GvCV(gv) = 0;		/* cv has been hijacked */
-	}
-	else if (strEQ(s, "CHECK") && !PL_error_count) {
-	    DEBUG_x( dump_sub(gv) );
-	    if (PL_main_start && ckWARN(WARN_VOID))
-		Perl_warner(aTHX_ packWARN(WARN_VOID), "Too late to run CHECK block");
-	    Perl_av_create_and_unshift_one(aTHX_ &PL_checkav, (SV*)cv);
-	    GvCV(gv) = 0;		/* cv has been hijacked */
-	}
-	else if (strEQ(s, "INIT") && !PL_error_count) {
-	    DEBUG_x( dump_sub(gv) );
-	    if (PL_main_start && ckWARN(WARN_VOID))
-		Perl_warner(aTHX_ packWARN(WARN_VOID), "Too late to run INIT block");
-	    Perl_av_create_and_push(aTHX_ &PL_initav, (SV*)cv);
-	    GvCV(gv) = 0;		/* cv has been hijacked */
-	}
+	else
+	    return;
+    } else {
+	if (*name == 'E') {
+	    if strEQ(name, "END") {
+		DEBUG_x( dump_sub(gv) );
+		Perl_av_create_and_unshift_one(aTHX_ &PL_endav, (SV*)cv);
+	    } else
+		return;
+	} else if (*name == 'C') {
+	    if (strEQ(name, "CHECK")) {
+		if (PL_main_start && ckWARN(WARN_VOID))
+		    Perl_warner(aTHX_ packWARN(WARN_VOID),
+				"Too late to run CHECK block");
+		Perl_av_create_and_unshift_one(aTHX_ &PL_checkav, (SV*)cv);
+	    }
+	    else
+		return;
+	} else if (*name == 'I') {
+	    if (strEQ(name, "INIT")) {
+		if (PL_main_start && ckWARN(WARN_VOID))
+		    Perl_warner(aTHX_ packWARN(WARN_VOID),
+				"Too late to run INIT block");
+		Perl_av_create_and_push(aTHX_ &PL_initav, (SV*)cv);
+	    }
+	    else
+		return;
+	} else
+	    return;
+	DEBUG_x( dump_sub(gv) );
+	GvCV(gv) = 0;		/* cv has been hijacked */
     }
-
-  done:
-    PL_copline = NOLINE;
-    LEAVE_SCOPE(floor);
-    return cv;
 }
 
 /* XXX unsafe for 5005 threads if eval_owner isn't held */
@@ -4890,51 +4904,11 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
 				   an external constant string */
     CvXSUB(cv) = subaddr;
 
-    if (name) {
-	const char *s = strrchr(name,':');
-	if (s)
-	    s++;
-	else
-	    s = name;
-
-	if (*s != 'B' && *s != 'E' && *s != 'C' && *s != 'I')
-	    goto done;
-
-	if (strEQ(s, "BEGIN")) {
-	    const I32 oldscope = PL_scopestack_ix;
-	    ENTER;
-	    SAVECOPFILE(&PL_compiling);
-	    SAVECOPLINE(&PL_compiling);
-
-	    Perl_av_create_and_push(aTHX_ &PL_beginav, (SV*)cv);
-	    GvCV(gv) = 0;		/* cv has been hijacked */
-	    call_list(oldscope, PL_beginav);
-
-	    PL_curcop = &PL_compiling;
-	    CopHINTS_set(&PL_compiling, PL_hints);
-	    LEAVE;
-	}
-	else if (strEQ(s, "END")) {
-	    Perl_av_create_and_unshift_one(aTHX_ &PL_endav, (SV*)cv);
-	    GvCV(gv) = 0;		/* cv has been hijacked */
-	}
-	else if (strEQ(s, "CHECK")) {
-	    if (PL_main_start && ckWARN(WARN_VOID))
-		Perl_warner(aTHX_ packWARN(WARN_VOID), "Too late to run CHECK block");
-	    Perl_av_create_and_unshift_one(aTHX_ &PL_checkav, (SV*)cv);
-	    GvCV(gv) = 0;		/* cv has been hijacked */
-	}
-	else if (strEQ(s, "INIT")) {
-	    if (PL_main_start && ckWARN(WARN_VOID))
-		Perl_warner(aTHX_ packWARN(WARN_VOID), "Too late to run INIT block");
-	    Perl_av_create_and_push(aTHX_ &PL_initav, (SV*)cv);
-	    GvCV(gv) = 0;		/* cv has been hijacked */
-	}
-    }
+    if (name)
+	process_special_blocks(name, gv, cv);
     else
 	CvANON_on(cv);
 
-done:
     return cv;
 }
 
