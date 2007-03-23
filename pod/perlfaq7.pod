@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq7 - General Perl Language Issues ($Revision: 8539 $)
+perlfaq7 - General Perl Language Issues ($Revision: 9309 $)
 
 =head1 DESCRIPTION
 
@@ -647,24 +647,8 @@ where they don't belong.
 
 =head2 How do I create a switch or case statement?
 
-This is explained in more depth in the L<perlsyn>.  Briefly, there's
-no official case statement, because of the variety of tests possible
-in Perl (numeric comparison, string comparison, glob comparison,
-regex matching, overloaded comparisons, ...).  Larry couldn't decide
-how best to do this, so he left it out, even though it's been on the
-wish list since perl1.
-
-Starting from Perl 5.8 to get switch and case one can use the
-Switch extension and say:
-
-	use Switch;
-
-after which one has switch and case.  It is not as fast as it could be
-because it's not really part of the language (it's done using source
-filters) but it is available, and it's very flexible.
-
-But if one wants to use pure Perl, the general answer is to write a
-construct like this:
+If one wants to use pure Perl and to be compatible with Perl versions
+prior to 5.10, the general answer is to write a construct like this:
 
     for ($variable_to_test) {
 	if    (/pat1/)  { }     # do something
@@ -673,8 +657,8 @@ construct like this:
 	else            { }     # default
     }
 
-Here's a simple example of a switch based on pattern matching, this
-time lined up in a way to make it look more like a switch statement.
+Here's a simple example of a switch based on pattern matching,
+lined up in a way to make it look more like a switch statement.
 We'll do a multiway conditional based on the type of reference stored
 in $whatchamacallit:
 
@@ -708,8 +692,7 @@ in $whatchamacallit:
 
     }
 
-See C<perlsyn/"Basic BLOCKs and Switch Statements"> for many other
-examples in this style.
+See L<perlsyn> for other examples in this style.
 
 Sometimes you should change the positions of the constant and the variable.
 For example, let's say you wanted to test which of many answers you were
@@ -742,6 +725,15 @@ A totally different approach is to create a hash of function references.
     } else {
         print "No such command: $string\n";
     }
+
+Note that starting from version 5.10, Perl has now a native switch
+statement. See L<perlsyn>.
+
+Starting from Perl 5.8, a source filter module, C<Switch>, can also be
+used to get switch and case. Its use is now discouraged, because it's
+not fully compatible with the native switch of Perl 5.10, and because,
+as it's implemented as a source filter, it doesn't always work as intended
+when complex syntax is involved.
 
 =head2 How can I catch accesses to undefined variables, functions, or methods?
 
@@ -978,9 +970,9 @@ where you expect it so you need to adjust your shebang line.
 
 =head1 REVISION
 
-Revision: $Revision: 8539 $
+Revision: $Revision: 9309 $
 
-Date: $Date: 2007-01-11 00:07:14 +0100 (jeu, 11 jan 2007) $
+Date: $Date: 2007-03-23 15:28:16 +0100 (Fri, 23 Mar 2007) $
 
 See L<perlfaq> for source control details and availability.
 

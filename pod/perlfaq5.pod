@@ -1282,7 +1282,7 @@ If your array contains lines, just print them:
 
 Revision: $Revision: 8579 $
 
-Date: $Date: 2007-01-14 19:28:09 +0100 (dim, 14 jan 2007) $
+Date: $Date: 2007-01-14 19:28:09 +0100 (Sun, 14 Jan 2007) $
 
 See L<perlfaq> for source control details and availability.
 
