@@ -8,6 +8,8 @@
 
 typedef BOOL (WINAPI *PFNSHGetSpecialFolderPath)(HWND, char*, int, BOOL);
 typedef HRESULT (WINAPI *PFNSHGetFolderPath)(HWND, int, HANDLE, DWORD, LPTSTR);
+typedef int (__stdcall *PFNDllRegisterServer)(void);
+typedef int (__stdcall *PFNDllUnregisterServer)(void);
 #ifndef CSIDL_FLAG_CREATE
 #   define CSIDL_FLAG_CREATE               0x8000
 #endif
@@ -357,14 +359,14 @@ XS(w32_RegisterServer)
     dXSARGS;
     BOOL result = FALSE;
     HINSTANCE hnd;
-    FARPROC func;
 
     if (items != 1)
 	croak("usage: Win32::RegisterServer($libname)\n");
 
     hnd = LoadLibraryA(SvPV_nolen(ST(0)));
     if (hnd) {
-	func = GetProcAddress(hnd, "DllRegisterServer");
+	PFNDllRegisterServer func;
+	func = (PFNDllRegisterServer)GetProcAddress(hnd, "DllRegisterServer");
 	if (func && func() == 0)
 	    result = TRUE;
 	FreeLibrary(hnd);
@@ -378,14 +380,14 @@ XS(w32_UnregisterServer)
     dXSARGS;
     BOOL result = FALSE;
     HINSTANCE hnd;
-    FARPROC func;
 
     if (items != 1)
 	croak("usage: Win32::UnregisterServer($libname)\n");
 
     hnd = LoadLibraryA(SvPV_nolen(ST(0)));
     if (hnd) {
-	func = GetProcAddress(hnd, "DllUnregisterServer");
+	PFNDllUnregisterServer func;
+	func = (PFNDllUnregisterServer)GetProcAddress(hnd, "DllUnregisterServer");
 	if (func && func() == 0)
 	    result = TRUE;
 	FreeLibrary(hnd);
