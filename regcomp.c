@@ -8903,8 +8903,7 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
 {
     dVAR;
     regexp *ret;
-    I32 i, npar;
-    struct reg_substr_datum *s;
+    I32 npar;
 
     if (!r)
 	return (REGEXP *)NULL;
@@ -8929,14 +8928,20 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
     }
 
     if (r->substrs) {
+	struct reg_substr_datum *s;
+	const struct reg_substr_datum *s_end;
+
         Newx(ret->substrs, 1, struct reg_substr_data);
-        for (s = ret->substrs->data, i = 0; i < 3; i++, s++) {
-            s->min_offset = r->substrs->data[i].min_offset;
-            s->max_offset = r->substrs->data[i].max_offset;
-            s->end_shift  = r->substrs->data[i].end_shift;
-            s->substr     = sv_dup_inc(r->substrs->data[i].substr, param);
-            s->utf8_substr = sv_dup_inc(r->substrs->data[i].utf8_substr, param);
-        }
+	StructCopy(r->substrs, ret->substrs, struct reg_substr_data);
+
+	s = ret->substrs->data;
+	s_end
+	    = s + sizeof(ret->substrs->data) / sizeof(struct reg_substr_datum);
+
+	do {
+            s->substr      = sv_dup_inc(s->substr, param);
+            s->utf8_substr = sv_dup_inc(s->utf8_substr, param);
+        } while (++s < s_end);
     } else 
         ret->substrs = NULL;    
 
