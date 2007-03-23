@@ -21,6 +21,10 @@
 #include "vmem.h"
 #include "vdir.h"
 
+#ifndef WC_NO_BEST_FIT_CHARS
+#  define WC_NO_BEST_FIT_CHARS 0x00000400
+#endif
+
 START_EXTERN_C
 extern char *		g_win32_get_privlib(const char *pl);
 extern char *		g_win32_get_sitelib(const char *pl);
@@ -2226,16 +2230,15 @@ char*
 CPerlHost::GetChildDir(void)
 {
     dTHX;
-    int length;
     char* ptr;
+    size_t length;
+
     Newx(ptr, MAX_PATH+1, char);
-    if(ptr) {
-	m_pvDir->GetCurrentDirectoryA(MAX_PATH+1, ptr);
-	length = strlen(ptr);
-	if (length > 3) {
-	    if ((ptr[length-1] == '\\') || (ptr[length-1] == '/'))
-		ptr[length-1] = 0;
-	}
+    m_pvDir->GetCurrentDirectoryA(MAX_PATH+1, ptr);
+    length = strlen(ptr);
+    if (length > 3) {
+        if ((ptr[length-1] == '\\') || (ptr[length-1] == '/'))
+            ptr[length-1] = 0;
     }
     return ptr;
 }

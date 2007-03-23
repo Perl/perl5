@@ -21,6 +21,9 @@
 #else
    LPWSTR* WINAPI CommandLineToArgvW(LPCWSTR lpCommandLine, int * pNumArgs);
 #endif
+#ifndef WC_NO_BEST_FIT_CHARS
+#  define WC_NO_BEST_FIT_CHARS 0x00000400
+#endif
 #include <winnt.h>
 #include <io.h>
 #include <signal.h>
@@ -155,21 +158,48 @@ IsWinNT(void)
 EXTERN_C void
 set_w32_module_name(void)
 {
+    /* this function may be called at DLL_PROCESS_ATTACH time */
     char* ptr;
-    GetModuleFileName((HMODULE)((w32_perldll_handle == INVALID_HANDLE_VALUE)
-				? GetModuleHandle(NULL)
-				: w32_perldll_handle),
-		      w32_module_name, sizeof(w32_module_name));
+    HMODULE module = (HMODULE)((w32_perldll_handle == INVALID_HANDLE_VALUE)
+                               ? GetModuleHandle(NULL)
+                               : w32_perldll_handle);
 
-    /* remove \\?\ prefix */
-    if (memcmp(w32_module_name, "\\\\?\\", 4) == 0)
-        memmove(w32_module_name, w32_module_name+4, strlen(w32_module_name+4)+1);
+    OSVERSIONINFO osver; /* g_osver may not yet be initialized */
+    osver.dwOSVersionInfoSize = sizeof(osver);
+    GetVersionEx(&osver);
 
-    /* try to get full path to binary (which may be mangled when perl is
-     * run from a 16-bit app) */
-    /*PerlIO_printf(Perl_debug_log, "Before %s\n", w32_module_name);*/
-    (void)win32_longpath(w32_module_name);
-    /*PerlIO_printf(Perl_debug_log, "After  %s\n", w32_module_name);*/
+    if (osver.dwPlatformId == VER_PLATFORM_WIN32_NT) {
+        WCHAR modulename[MAX_PATH];
+        WCHAR fullname[MAX_PATH];
+        char *ansi;
+
+        GetModuleFileNameW(module, modulename, sizeof(modulename)/sizeof(WCHAR));
+
+        /* Make sure we get an absolute pathname in case the module was loaded
+         * explicitly by LoadLibrary() with a relative path. */
+        GetFullPathNameW(modulename, sizeof(fullname)/sizeof(WCHAR), fullname, NULL);
+
+        /* remove \\?\ prefix */
+        if (memcmp(fullname, L"\\\\?\\", 4*sizeof(WCHAR)) == 0)
+            memmove(fullname, fullname+4, (wcslen(fullname+4)+1)*sizeof(WCHAR));
+
+        ansi = win32_ansipath(fullname);
+        my_strlcpy(w32_module_name, ansi, sizeof(w32_module_name));
+        win32_free(ansi);
+    }
+    else {
+        GetModuleFileName(module, w32_module_name, sizeof(w32_module_name));
+
+        /* remove \\?\ prefix */
+        if (memcmp(w32_module_name, "\\\\?\\", 4) == 0)
+            memmove(w32_module_name, w32_module_name+4, strlen(w32_module_name+4)+1);
+
+        /* try to get full path to binary (which may be mangled when perl is
+         * run from a 16-bit app) */
+        /*PerlIO_printf(Perl_debug_log, "Before %s\n", w32_module_name);*/
+        win32_longpath(w32_module_name);
+        /*PerlIO_printf(Perl_debug_log, "After  %s\n", w32_module_name);*/
+    }
 
     /* normalize to forward slashes */
     ptr = w32_module_name;
@@ -754,6 +784,10 @@ win32_opendir(char *filename)
     char		scanname[MAX_PATH+3];
     Stat_t		sbuf;
     WIN32_FIND_DATAA	aFindData;
+    WIN32_FIND_DATAW	wFindData;
+    bool                using_wide;
+    char		buffer[MAX_PATH*2];
+    char		*ptr;
 
     len = strlen(filename);
     if (len > MAX_PATH)
@@ -781,7 +815,15 @@ win32_opendir(char *filename)
     scanname[len] = '\0';
 
     /* do the FindFirstFile call */
-    dirp->handle = FindFirstFileA(PerlDir_mapA(scanname), &aFindData);
+    if (IsWinNT()) {
+        WCHAR wscanname[sizeof(scanname)];
+        MultiByteToWideChar(CP_ACP, 0, scanname, -1, wscanname, sizeof(wscanname)/sizeof(WCHAR));
+	dirp->handle = FindFirstFileW(PerlDir_mapW(wscanname), &wFindData);
+        using_wide = TRUE;
+    }
+    else {
+ 	dirp->handle = FindFirstFileA(PerlDir_mapA(scanname), &aFindData);
+    }
     if (dirp->handle == INVALID_HANDLE_VALUE) {
 	DWORD err = GetLastError();
 	/* FindFirstFile() fails on empty drives! */
@@ -803,16 +845,31 @@ win32_opendir(char *filename)
 	return NULL;
     }
 
+    if (using_wide) {
+        BOOL use_default = FALSE;
+        WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS,
+                            wFindData.cFileName, -1,
+                            buffer, sizeof(buffer), NULL, &use_default);
+        if (use_default && *wFindData.cAlternateFileName) {
+            WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS,
+                                wFindData.cAlternateFileName, -1,
+                                buffer, sizeof(buffer), NULL, NULL);
+        }
+        ptr = buffer;
+    }
+    else {
+        ptr = aFindData.cFileName;
+    }
     /* now allocate the first part of the string table for
      * the filenames that we find.
      */
-    idx = strlen(aFindData.cFileName)+1;
+    idx = strlen(ptr)+1;
     if (idx < 256)
-	dirp->size = 128;
+	dirp->size = 256;
     else
 	dirp->size = idx;
     Newx(dirp->start, dirp->size, char);
-    strcpy(dirp->start, aFindData.cFileName);
+    strcpy(dirp->start, ptr);
     dirp->nfiles++;
     dirp->end = dirp->curr = dirp->start;
     dirp->end += idx;
@@ -841,16 +898,37 @@ win32_readdir(DIR *dirp)
 	dirp->curr += len + 1;
 	if (dirp->curr >= dirp->end) {
 	    dTHX;
-	    BOOL		res;
-	    WIN32_FIND_DATAA	aFindData;
+	    BOOL res;
+            WIN32_FIND_DATAA aFindData;
+	    char buffer[MAX_PATH*2];
+            char *ptr;
 
 	    /* finding the next file that matches the wildcard
 	     * (which should be all of them in this directory!).
 	     */
-            res = FindNextFileA(dirp->handle, &aFindData);
+	    if (IsWinNT()) {
+                WIN32_FIND_DATAW wFindData;
+		res = FindNextFileW(dirp->handle, &wFindData);
+		if (res) {
+                    BOOL use_default = FALSE;
+                    WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS,
+                                        wFindData.cFileName, -1,
+                                        buffer, sizeof(buffer), NULL, &use_default);
+                    if (use_default && *wFindData.cAlternateFileName) {
+                        WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS,
+                                            wFindData.cAlternateFileName, -1,
+                                            buffer, sizeof(buffer), NULL, NULL);
+                    }
+                    ptr = buffer;
+                }
+            }
+            else {
+                res = FindNextFileA(dirp->handle, &aFindData);
+                ptr = aFindData.cFileName;
+            }
 	    if (res) {
 		long endpos = dirp->end - dirp->start;
-		long newsize = endpos + strlen(aFindData.cFileName) + 1;
+		long newsize = endpos + strlen(ptr) + 1;
 		/* bump the string table size by enough for the
 		 * new name and its null terminator */
 		while (newsize > dirp->size) {
@@ -859,7 +937,7 @@ win32_readdir(DIR *dirp)
 		    Renew(dirp->start, dirp->size, char);
 		    dirp->curr = dirp->start + curpos;
 		}
-		strcpy(dirp->start + endpos, aFindData.cFileName);
+		strcpy(dirp->start + endpos, ptr);
 		dirp->end = dirp->start + newsize;
 		dirp->nfiles++;
 	    }
@@ -1391,6 +1469,71 @@ win32_longpath(char *path)
     }
     strcpy(path,tmpbuf);
     return path;
+}
+
+static void
+out_of_memory()
+{
+    if (PL_curinterp) {
+        dTHX;
+        /* Can't use PerlIO to write as it allocates memory */
+        PerlLIO_write(PerlIO_fileno(Perl_error_log),
+                      PL_no_mem, strlen(PL_no_mem));
+        my_exit(1);
+    }
+    exit(1);
+}
+
+/* The win32_ansipath() function takes a Unicode filename and converts it
+ * into the current Windows codepage. If some characters cannot be mapped,
+ * then it will convert the short name instead.
+ *
+ * The buffer to the ansi pathname must be freed with win32_free() when it
+ * it no longer needed.
+ *
+ * The argument to win32_ansipath() must exist before this function is
+ * called; otherwise there is no way to determine the short path name.
+ *
+ * Ideas for future refinement:
+ * - Only convert those segments of the path that are not in the current
+ *   codepage, but leave the other segments in their long form.
+ * - If the resulting name is longer than MAX_PATH, start converting
+ *   additional path segments into short names until the full name
+ *   is shorter than MAX_PATH.  Shorten the filename part last!
+ */
+DllExport char *
+win32_ansipath(const WCHAR *widename)
+{
+    char *name;
+    BOOL use_default = FALSE;
+    size_t widelen = wcslen(widename)+1;
+    int len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, widename, widelen,
+                                  NULL, 0, NULL, NULL);
+    name = win32_malloc(len);
+    if (!name)
+        out_of_memory();
+
+    WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, widename, widelen,
+                        name, len, NULL, &use_default);
+    if (use_default) {
+        DWORD shortlen = GetShortPathNameW(widename, NULL, 0);
+        if (shortlen) {
+            WCHAR *shortname = win32_malloc(shortlen*sizeof(WCHAR));
+            if (!shortname)
+                out_of_memory();
+            shortlen = GetShortPathNameW(widename, shortname, shortlen)+1;
+
+            len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, shortname, shortlen,
+                                      NULL, 0, NULL, NULL);
+            name = win32_realloc(name, len);
+            if (!name)
+                out_of_memory();
+            WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, shortname, shortlen,
+                                name, len, NULL, NULL);
+            win32_free(shortname);
+        }
+    }
+    return name;
 }
 
 DllExport char *
@@ -4484,6 +4627,100 @@ win32_signal(int sig, Sighandler_t subcode)
 
 #ifdef HAVE_INTERP_INTERN
 
+static void
+ansify_path(void)
+{
+    OSVERSIONINFO osver; /* g_osver may not yet be initialized */
+    size_t len;
+    char *ansi_path;
+    WCHAR *wide_path;
+    WCHAR *wide_dir;
+
+    /* there is no Unicode environment on Windows 9X */
+    osver.dwOSVersionInfoSize = sizeof(osver);
+    GetVersionEx(&osver);
+    if (osver.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
+        return;
+
+    /* fetch Unicode version of PATH */
+    len = 2000;
+    wide_path = win32_malloc(len*sizeof(WCHAR));
+    while (wide_path) {
+        size_t newlen = GetEnvironmentVariableW(L"PATH", wide_path, len);
+        if (newlen < len)
+            break;
+        len = newlen;
+        wide_path = win32_realloc(wide_path, len*sizeof(WCHAR));
+    }
+    if (!wide_path)
+        return;
+
+    /* convert to ANSI pathnames */
+    wide_dir = wide_path;
+    ansi_path = NULL;
+    while (wide_dir) {
+        WCHAR *sep = wcschr(wide_dir, ';');
+        char *ansi_dir;
+        size_t ansi_len;
+        size_t wide_len;
+
+        if (sep)
+            *sep++ = '\0';
+
+        /* remove quotes around pathname */
+        if (*wide_dir == '"')
+            ++wide_dir;
+        wide_len = wcslen(wide_dir);
+        if (wide_len && wide_dir[wide_len-1] == '"')
+            wide_dir[wide_len-1] = '\0';
+
+        /* append ansi_dir to ansi_path */
+        ansi_dir = win32_ansipath(wide_dir);
+        ansi_len = strlen(ansi_dir);
+        if (ansi_path) {
+            size_t newlen = len + 1 + ansi_len;
+            ansi_path = win32_realloc(ansi_path, newlen+1);
+            if (!ansi_path)
+                break;
+            ansi_path[len] = ';';
+            memcpy(ansi_path+len+1, ansi_dir, ansi_len+1);
+            len = newlen;
+        }
+        else {
+            len = ansi_len;
+            ansi_path = win32_malloc(5+len+1);
+            if (!ansi_path)
+                break;
+            memcpy(ansi_path, "PATH=", 5);
+            memcpy(ansi_path+5, ansi_dir, len+1);
+            len += 5;
+        }
+        win32_free(ansi_dir);
+        wide_dir = sep;
+    }
+
+    if (ansi_path) {
+        /* Update C RTL environ array.  This will only have full effect if
+         * perl_parse() is later called with `environ` as the `env` argument.
+         * Otherwise S_init_postdump_symbols() will overwrite PATH again.
+         *
+         * We do have to ansify() the PATH before Perl has been fully
+         * initialized because S_find_script() uses the PATH when perl
+         * is being invoked with the -S option.  This happens before %ENV
+         * is initialized in S_init_postdump_symbols().
+         *
+         * XXX Is this a bug? Should S_find_script() use the environment
+         * XXX passed in the `env` arg to parse_perl()?
+         */
+        putenv(ansi_path);
+        /* Keep system environment in sync because S_init_postdump_symbols()
+         * will not call mg_set() if it initializes %ENV from `environ`.
+         */
+        SetEnvironmentVariableA("PATH", ansi_path+5);
+        win32_free(ansi_path);
+    }
+    win32_free(wide_path);
+}
 
 static void
 win32_csighandler(int sig)
@@ -4527,6 +4764,8 @@ Perl_sys_intern_init(pTHX)
 	/* Push our handler on top */
 	SetConsoleCtrlHandler(win32_ctrlhandler,TRUE);
     }
+
+    ansify_path();
 }
 
 void

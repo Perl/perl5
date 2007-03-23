@@ -1219,6 +1219,7 @@ if ($PLATFORM =~ /^win(?:32|ce)$/) {
 			    win32_rewinddir
 			    win32_closedir
 			    win32_longpath
+			    win32_ansipath
 			    win32_os_id
 			    win32_getpid
 			    win32_crypt
