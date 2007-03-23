@@ -2398,6 +2398,7 @@ lib/Pod/Simple/t/html03.t	Pod::Simple test file
 lib/Pod/Simple/t/htmlbat.t	Pod::Simple test file
 lib/Pod/Simple/TiedOutFH.pm	Pod::Simple::TiedOutFH
 lib/Pod/Simple/t/items.t	Pod::Simple test file
+lib/Pod/Simple/t/items02.t	Pod::Simple test file
 lib/Pod/Simple/t/itemstar.t	Pod::Simple test file
 lib/Pod/Simple/t/junk1o.txt	Pod::Simple test file
 lib/Pod/Simple/t/junk1.pod	Pod::Simple test file
