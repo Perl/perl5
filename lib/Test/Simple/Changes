@@ -1,3 +1,13 @@
+0.70  Thu Mar 15 15:53:05 PDT 2007
+    Bug Fixes
+    * The change to is_fh() in 0.68 broke the case where a reference to
+      a tied filehandle is used for perl 5.6 and back.  This made the tests
+      puke their guts out.
+
+0.69  Wed Mar 14 06:43:35 PDT 2007
+    Test fixes
+    - Minor filename compatibility fix to t/fail-more.t [rt.cpan.org 25428]
+
 0.68  Tue Mar 13 17:27:26 PDT 2007
     Bug fixes
     * If your code has a $SIG{__DIE__} handler in some cases functions like
