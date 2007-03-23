@@ -882,8 +882,8 @@ ext/Math/BigInt/FastCalc/FastCalc.xs	Math::BigInt::FastCalc extension
 ext/Math/BigInt/FastCalc/Makefile.PL	Math::BigInt::FastCalc extension
 ext/Math/BigInt/FastCalc/t/bigintfc.t	Math::BigInt::FastCalc extension
 ext/Math/BigInt/FastCalc/t/bootstrap.t	Math::BigInt::FastCalc extension
-ext/Math/BigInt/FastCalc/t/mbi_rand.t	Math::BigInt::FastCalc extension
 ext/Math/BigInt/FastCalc/t/leak.t	test for memory leaks in Math::BigInt::FastCalc
+ext/Math/BigInt/FastCalc/t/mbi_rand.t	Math::BigInt::FastCalc extension
 ext/MIME/Base64/Base64.pm	MIME::Base64 extension
 ext/MIME/Base64/Base64.xs	MIME::Base64 extension
 ext/MIME/Base64/Changes		MIME::Base64 extension
@@ -1213,16 +1213,6 @@ ext/Unicode/Normalize/t/split.t	Unicode::Normalize
 ext/Unicode/Normalize/t/test.t	Unicode::Normalize
 ext/Unicode/Normalize/t/tie.t	Unicode::Normalize
 ext/util/make_ext		Used by Makefile to execute extension Makefiles
-ext/Win32/Makefile.PL		Win32 extension makefile writer
-ext/Win32/t/ExpandEnvironmentStrings.t	See if Win32 extension works
-ext/Win32/t/GetFileVersion.t	See if Win32 extension works
-ext/Win32/t/GetFolderPath.t	See if Win32 extension works
-ext/Win32/t/GetFullPathName.t	See if Win32 extension works
-ext/Win32/t/GetLongPathName.t	See if Win32 extension works
-ext/Win32/t/GetOSVersion.t	See if Win32 extension works
-ext/Win32/t/GuidGen.t		See if Win32 extension works
-ext/Win32/Win32.pm		Win32 extension Perl module
-ext/Win32/Win32.xs		Win32 extension external subroutines
 ext/Win32API/File/buffers.h	Win32API::File extension
 ext/Win32API/File/cFile.h	Win32API::File extension
 ext/Win32API/File/cFile.pc	Win32API::File extension
@@ -1240,6 +1230,16 @@ ext/Win32CORE/Makefile.PL	Win32CORE extension
 ext/Win32CORE/t/win32core.t	Win32CORE extension
 ext/Win32CORE/Win32CORE.c	Win32CORE extension
 ext/Win32CORE/Win32CORE.pm	Win32CORE extension (stubs for Win32 CORE subs)
+ext/Win32/Makefile.PL		Win32 extension makefile writer
+ext/Win32/t/ExpandEnvironmentStrings.t	See if Win32 extension works
+ext/Win32/t/GetFileVersion.t	See if Win32 extension works
+ext/Win32/t/GetFolderPath.t	See if Win32 extension works
+ext/Win32/t/GetFullPathName.t	See if Win32 extension works
+ext/Win32/t/GetLongPathName.t	See if Win32 extension works
+ext/Win32/t/GetOSVersion.t	See if Win32 extension works
+ext/Win32/t/GuidGen.t		See if Win32 extension works
+ext/Win32/Win32.pm		Win32 extension Perl module
+ext/Win32/Win32.xs		Win32 extension external subroutines
 ext/XS/APItest/APItest.pm	XS::APItest extension
 ext/XS/APItest/APItest.xs	XS::APItest extension
 ext/XS/APItest/core.c		Test API functions when PERL_CORE is defined
@@ -1257,8 +1257,8 @@ ext/XS/APItest/t/op.t		XS::APItest: tests for OP related APIs
 ext/XS/APItest/t/printf.t	XS::APItest extension
 ext/XS/APItest/t/push.t		XS::APItest extension
 ext/XS/APItest/t/svsetsv.t	Test behaviour of sv_setsv with/without PERL_CORE
-ext/XS/APItest/t/xs_special_subs.t	Test that XS BEGIN/CHECK/INIT/END work
 ext/XS/APItest/t/xs_special_subs_require.t	for require too
+ext/XS/APItest/t/xs_special_subs.t	Test that XS BEGIN/CHECK/INIT/END work
 ext/XS/Typemap/Makefile.PL	XS::Typemap extension
 ext/XS/Typemap/README		XS::Typemap extension
 ext/XS/Typemap/stdio.c		XS::Typemap extension
@@ -2320,22 +2320,6 @@ lib/Pod/Simple/t/begin.t	Pod::Simple test file
 lib/Pod/Simple/t/cbacks.t	Pod::Simple test file
 lib/Pod/Simple/t/chunking.t	Pod::Simple test file
 lib/Pod/Simple/t/closeys.t	Pod::Simple test file
-lib/Pod/Simple/t/corpus/cp1256.txt	Pod::Simple test file
-lib/Pod/Simple/t/corpus/cp1256.xml	Pod::Simple test file
-lib/Pod/Simple/t/corpus/iso6.txt	Pod::Simple test file
-lib/Pod/Simple/t/corpus/iso6.xml	Pod::Simple test file
-lib/Pod/Simple/t/corpus/fet_cont.txt	Pod::Simple test file
-lib/Pod/Simple/t/corpus/fet_cont.xml	Pod::Simple test file
-lib/Pod/Simple/t/corpus/fet_dup.txt	Pod::Simple test file
-lib/Pod/Simple/t/corpus/fet_dup.xml	Pod::Simple test file
-lib/Pod/Simple/t/corpus/koi8r.txt	Pod::Simple test file
-lib/Pod/Simple/t/corpus/koi8r.xml	Pod::Simple test file
-lib/Pod/Simple/t/corpus/lat1frim.txt	Pod::Simple test file
-lib/Pod/Simple/t/corpus/lat1frim.xml	Pod::Simple test file
-lib/Pod/Simple/t/corpus/lat1fr.txt	Pod::Simple test file
-lib/Pod/Simple/t/corpus/lat1fr.xml	Pod::Simple test file
-lib/Pod/Simple/t/corpus/8859_7.pod	Pod::Simple test file
-lib/Pod/Simple/t/corpus/8859_7.xml	Pod::Simple test file
 lib/Pod/Simple/t/corpus/2202jp.txt.packed	Pod::Simple test file
 lib/Pod/Simple/t/corpus/2202jp.xml	Pod::Simple test file
 lib/Pod/Simple/t/corpus/2202jpx.txt.packed	Pod::Simple test file
@@ -2344,23 +2328,39 @@ lib/Pod/Simple/t/corpus/2202jpy.txt.packed	Pod::Simple test file
 lib/Pod/Simple/t/corpus/2202jpy.xml	Pod::Simple test file
 lib/Pod/Simple/t/corpus/2202jpz.txt	Pod::Simple test file
 lib/Pod/Simple/t/corpus/2202jpz.xml	Pod::Simple test file
+lib/Pod/Simple/t/corpus2/fiqhakbar_iso6.txt	Pod::Simple test file
+lib/Pod/Simple/t/corpus2/fiqhakbar_iso6.xml	Pod::Simple test file
+lib/Pod/Simple/t/corpus2/polish_implicit_utf8.txt	Pod::Simple test file
+lib/Pod/Simple/t/corpus2/polish_utf16be_bom.txt.packed	Pod::Simple test file
+lib/Pod/Simple/t/corpus2/polish_utf16le_bom.txt.packed	Pod::Simple test file
+lib/Pod/Simple/t/corpus2/polish_utf8_bom2.txt	Pod::Simple test file
+lib/Pod/Simple/t/corpus2/polish_utf8_bom2.xml	Pod::Simple test file
+lib/Pod/Simple/t/corpus2/polish_utf8_bom.txt	Pod::Simple test file
+lib/Pod/Simple/t/corpus2/polish_utf8_bom.xml	Pod::Simple test file
+lib/Pod/Simple/t/corpus/8859_7.pod	Pod::Simple test file
+lib/Pod/Simple/t/corpus/8859_7.xml	Pod::Simple test file
+lib/Pod/Simple/t/corpus/cp1256.txt	Pod::Simple test file
+lib/Pod/Simple/t/corpus/cp1256.xml	Pod::Simple test file
+lib/Pod/Simple/t/corpus/fet_cont.txt	Pod::Simple test file
+lib/Pod/Simple/t/corpus/fet_cont.xml	Pod::Simple test file
+lib/Pod/Simple/t/corpus/fet_dup.txt	Pod::Simple test file
+lib/Pod/Simple/t/corpus/fet_dup.xml	Pod::Simple test file
+lib/Pod/Simple/t/corpus/iso6.txt	Pod::Simple test file
+lib/Pod/Simple/t/corpus/iso6.xml	Pod::Simple test file
+lib/Pod/Simple/t/corpus/koi8r.txt	Pod::Simple test file
+lib/Pod/Simple/t/corpus/koi8r.xml	Pod::Simple test file
 lib/Pod/Simple/t/corpus/laozi38b.txt		Pod::Simple test file
 lib/Pod/Simple/t/corpus/laozi38b.xml		Pod::Simple test file
 lib/Pod/Simple/t/corpus/laozi38p.pod		Pod::Simple test file
 lib/Pod/Simple/t/corpus/laozi38p.xml		Pod::Simple test file
 lib/Pod/Simple/t/corpus/laozi38.txt		Pod::Simple test file
 lib/Pod/Simple/t/corpus/laozi38.xml		Pod::Simple test file
+lib/Pod/Simple/t/corpus/lat1frim.txt	Pod::Simple test file
+lib/Pod/Simple/t/corpus/lat1frim.xml	Pod::Simple test file
+lib/Pod/Simple/t/corpus/lat1fr.txt	Pod::Simple test file
+lib/Pod/Simple/t/corpus/lat1fr.xml	Pod::Simple test file
 lib/Pod/Simple/t/corpus/nonesuch.txt		Pod::Simple test file
 lib/Pod/Simple/t/corpus/nonesuch.xml		Pod::Simple test file
-lib/Pod/Simple/t/corpus2/fiqhakbar_iso6.txt	Pod::Simple test file
-lib/Pod/Simple/t/corpus2/fiqhakbar_iso6.xml	Pod::Simple test file
-lib/Pod/Simple/t/corpus2/polish_implicit_utf8.txt	Pod::Simple test file
-lib/Pod/Simple/t/corpus2/polish_utf8_bom2.txt	Pod::Simple test file
-lib/Pod/Simple/t/corpus2/polish_utf8_bom2.xml	Pod::Simple test file
-lib/Pod/Simple/t/corpus2/polish_utf8_bom.txt	Pod::Simple test file
-lib/Pod/Simple/t/corpus2/polish_utf8_bom.xml	Pod::Simple test file
-lib/Pod/Simple/t/corpus2/polish_utf16be_bom.txt.packed	Pod::Simple test file
-lib/Pod/Simple/t/corpus2/polish_utf16le_bom.txt.packed	Pod::Simple test file
 lib/Pod/Simple/t/corpus/pasternak_cp1251.txt	Pod::Simple test file
 lib/Pod/Simple/t/corpus/pasternak_cp1251.xml	Pod::Simple test file
 lib/Pod/Simple/t/corpus/plain_explicit.txt	Pod::Simple test file
@@ -2381,6 +2381,7 @@ lib/Pod/Simple/t/corpus/thai_iso11.xml		Pod::Simple test file
 lib/Pod/Simple/t/encod01.t	Pod::Simple test file
 lib/Pod/Simple/t/encod02.t	Pod::Simple test file
 lib/Pod/Simple/t/encod03.t	Pod::Simple test file
+lib/Pod/Simple/t/end_over.t	Pod::Simple test file
 lib/Pod/Simple/TextContent.pm	get the text content of Pod
 lib/Pod/Simple/Text.pm		format Pod as plaintext
 lib/Pod/Simple/t/fcodes_e.t	Pod::Simple test file
@@ -2390,12 +2391,11 @@ lib/Pod/Simple/t/fcodes.t	Pod::Simple test file
 lib/Pod/Simple/t/fornot.t	Pod::Simple test file
 lib/Pod/Simple/t/for.t		Pod::Simple test file
 lib/Pod/Simple/t/fullstop.t	Pod::Simple test file
-lib/Pod/Simple/t/end_over.t	Pod::Simple test file
 lib/Pod/Simple/t/heads.t	Pod::Simple test file
-lib/Pod/Simple/t/htmlbat.t	Pod::Simple test file
 lib/Pod/Simple/t/html01.t	Pod::Simple test file
 lib/Pod/Simple/t/html02.t	Pod::Simple test file
 lib/Pod/Simple/t/html03.t	Pod::Simple test file
+lib/Pod/Simple/t/htmlbat.t	Pod::Simple test file
 lib/Pod/Simple/TiedOutFH.pm	Pod::Simple::TiedOutFH
 lib/Pod/Simple/t/items.t	Pod::Simple test file
 lib/Pod/Simple/t/itemstar.t	Pod::Simple test file
@@ -2404,14 +2404,6 @@ lib/Pod/Simple/t/junk1.pod	Pod::Simple test file
 lib/Pod/Simple/t/junk2o.txt	Pod::Simple test file
 lib/Pod/Simple/t/junk2.pod	Pod::Simple test file
 lib/Pod/Simple/t/linkclas.t	Pod::Simple test file
-lib/Pod/Simple/t/testlib2/hinkhonk/Glunk.pod	Pod::Simple test file
-lib/Pod/Simple/t/testlib2/hinkhonk/readme.txt	Pod::Simple test file
-lib/Pod/Simple/t/testlib2/hinkhonk/Vliff.pm	Pod::Simple test file
-lib/Pod/Simple/t/testlib2/pod/perlthng.pod	Pod::Simple test file
-lib/Pod/Simple/t/testlib2/pod/perlzuk.pod	Pod::Simple test file
-lib/Pod/Simple/t/testlib2/Suzzle.pm		Pod::Simple test file
-lib/Pod/Simple/t/testlib2/squaa/Vliff.pm	Pod::Simple test file
-lib/Pod/Simple/t/testlib2/squaa/Wowo.pod	Pod::Simple test file
 lib/Pod/Simple/t/perlcygo.txt	Pod::Simple test file
 lib/Pod/Simple/t/perlcyg.pod	Pod::Simple test file
 lib/Pod/Simple/t/perlfaqo.txt	Pod::Simple test file
@@ -2425,7 +2417,6 @@ lib/Pod/Simple/Transcode.pm	Pod::Simple::Transcode
 lib/Pod/Simple/TranscodeSmart.pm	Pod::Simple::TranscodeSmart
 lib/Pod/Simple/t/reinit.t	Pod::Simple test file
 lib/Pod/Simple/t/render.t	Pod::Simple test file
-lib/Pod/Simple/t/tiedfh.t	Pod::Simple test file
 lib/Pod/Simple/t/search05.t	Pod::Simple test file
 lib/Pod/Simple/t/search10.t	Pod::Simple test file
 lib/Pod/Simple/t/search12.t	Pod::Simple test file
@@ -2451,10 +2442,19 @@ lib/Pod/Simple/t/testlib1/zikzik.pod		Pod::Simple test file
 lib/Pod/Simple/t/testlib1/Zonk/Fiddle.txt	Pod::Simple test file
 lib/Pod/Simple/t/testlib1/Zonk/Pronk.pm		Pod::Simple test file
 lib/Pod/Simple/t/testlib1/Zonk/Veng.pm		Pod::Simple test file
-lib/Pod/Simple/t/verb_fmt.t	Pod::Simple test file
-lib/Pod/Simple/t/verbatim.t		Pod::Simple test file
-lib/Pod/Simple/t/x_nixer.t		Pod::Simple test file
+lib/Pod/Simple/t/testlib2/hinkhonk/Glunk.pod	Pod::Simple test file
+lib/Pod/Simple/t/testlib2/hinkhonk/readme.txt	Pod::Simple test file
+lib/Pod/Simple/t/testlib2/hinkhonk/Vliff.pm	Pod::Simple test file
+lib/Pod/Simple/t/testlib2/pod/perlthng.pod	Pod::Simple test file
+lib/Pod/Simple/t/testlib2/pod/perlzuk.pod	Pod::Simple test file
+lib/Pod/Simple/t/testlib2/squaa/Vliff.pm	Pod::Simple test file
+lib/Pod/Simple/t/testlib2/squaa/Wowo.pod	Pod::Simple test file
+lib/Pod/Simple/t/testlib2/Suzzle.pm		Pod::Simple test file
 lib/Pod/Simple/t/testlib3/squaa/Vliff.pm	Pod::Simple test file
+lib/Pod/Simple/t/tiedfh.t	Pod::Simple test file
+lib/Pod/Simple/t/verbatim.t		Pod::Simple test file
+lib/Pod/Simple/t/verb_fmt.t	Pod::Simple test file
+lib/Pod/Simple/t/x_nixer.t		Pod::Simple test file
 lib/Pod/Simple/XMLOutStream.pm	turn Pod into XML
 lib/Pod/t/basic.cap		podlators test
 lib/Pod/t/basic.clr		podlators test
@@ -2493,7 +2493,6 @@ lib/Pod/t/user.t		See if Pod::LaTeX works
 lib/Pod/t/utils.t		Test for Pod::ParseUtils
 lib/Pod/Usage.pm		Pod-Parser - print usage messages
 lib/pwd.pl			Routines to keep track of PWD environment variable
-lib/Tie/Hash/NamedCapture.pm	Implements %- and %+ behaviour
 lib/Search/Dict.pm		Perform binary search on dictionaries
 lib/Search/Dict.t		See if Search::Dict works
 lib/SelectSaver.pm		Enforce proper select scoping
@@ -2731,6 +2730,7 @@ lib/Tie/File/t/41_heap.t	Unit tests for Tie::File::Heap
 lib/Tie/File/t/42_offset.t	Unit tests for the offset method
 lib/Tie/Handle.pm		Base class for tied handles
 lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
+lib/Tie/Hash/NamedCapture.pm	Implements %- and %+ behaviour
 lib/Tie/Hash.pm			Base class for tied hashes
 lib/Tie/Memoize.pm		Base class for memoized tied hashes
 lib/Tie/Memoize.t		Test for Memoize.t
@@ -3129,8 +3129,8 @@ pod/perltooc.pod		Perl OO tutorial, part 2
 pod/perltoot.pod		Perl OO tutorial, part 1
 pod/perltrap.pod		Perl traps for the unwary
 pod/perlunicode.pod		Perl Unicode support
-pod/perluniintro.pod		Perl Unicode introduction
 pod/perlunifaq.pod		Perl Unicode FAQ
+pod/perluniintro.pod		Perl Unicode introduction
 pod/perlunitut.pod		Perl Unicode tutorial
 pod/perlutil.pod		utilities packaged with the Perl distribution
 pod/perlvar.pod			Perl predefined variables
@@ -3433,8 +3433,8 @@ t/lib/Math/BigInt/Subclass.pm	Empty subclass of BigInt for test
 t/lib/Math/BigRat/Test.pm		Math::BigRat test helper
 t/lib/mypragma.pm		An example user pragma
 t/lib/mypragma.t		Test the example user pragma
-t/lib/no_load.t			Test that some modules don't load others
 t/lib/NoExporter.pm			Part of Test-Simple
+t/lib/no_load.t			Test that some modules don't load others
 t/lib/proxy_constant_subs.t	Test that Proxy Constant Subs behave correctly
 t/lib/sample-tests/bailout		Test data for Test::Harness
 t/lib/sample-tests/bignum		Test data for Test::Harness
@@ -3627,15 +3627,15 @@ t/op/readline.t			See if <> / readline / rcatline work
 t/op/read.t			See if read() works
 t/op/recurse.t			See if deep recursion works
 t/op/ref.t			See if refs and objects work
-t/op/regexp_pmod.t		See if regexp /p modifier works as expected
+t/op/regexp_email.t		See if regex recursion works by parsing email addresses
+t/op/regexp_namedcapture.t	Make sure glob assignment doesn't break named capture
 t/op/regexp_noamp.t		See if regular expressions work with optimizations
 t/op/regexp_notrie.t		See if regular expressions work without trie optimisation
+t/op/regexp_pmod.t		See if regexp /p modifier works as expected
 t/op/regexp_qr_embed.t		See if regular expressions work with embedded qr//
 t/op/regexp_qr.t		See if regular expressions work as qr//
 t/op/regexp.t			See if regular expressions work
 t/op/regexp_trielist.t		See if regular expressions work with trie optimisation
-t/op/regexp_email.t		See if regex recursion works by parsing email addresses
-t/op/regexp_namedcapture.t	Make sure glob assignment doesn't break named capture
 t/op/regmesg.t			See if one can get regular expression errors
 t/op/repeat.t			See if x operator works
 t/op/re_tests			Regular expressions for regexp.t
