@@ -37,17 +37,17 @@ sub source_path {
 
 my($here1, $here2, $here3);
 
-if(        -e ($here1 = source_path(  'test_lib'      ))) {
+if(        -e ($here1 = source_path(  'testlib1'      ))) {
   die "But where's $here2?"
-    unless -e ($here2 = source_path(  'other_test_lib'));
+    unless -e ($here2 = source_path(  'testlib2'));
   die "But where's $here3?"
-    unless -e ($here3 = source_path(  'yet_another_test_lib'));
+    unless -e ($here3 = source_path(  'testlib3'));
 
-} elsif(   -e ($here1 = File::Spec->catdir($cwd, 't', 'test_lib'      ))) {
+} elsif(   -e ($here1 = File::Spec->catdir($cwd, 't', 'testlib1'      ))) {
   die "But where's $here2?"
-    unless -e ($here2 = File::Spec->catdir($cwd, 't', 'other_test_lib'));
+    unless -e ($here2 = File::Spec->catdir($cwd, 't', 'testlib2'));
   die "But where's $here3?"
-    unless -e ($here3 = File::Spec->catdir($cwd, 't', 'yet_another_test_lib'));
+    unless -e ($here3 = File::Spec->catdir($cwd, 't', 'testlib3'));
 
 } else {
   die "Can't find the test corpora";

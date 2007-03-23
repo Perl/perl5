@@ -40,12 +40,12 @@ sub source_path {
 }
 
 my($here1, $here2);
-if(        -e ($here1 = source_path('test_lib'))) {
+if(        -e ($here1 = source_path('testlib1'))) {
   die "But where's $here2?"
-    unless -e ($here2 = source_path('other_test_lib'));
-} elsif(   -e ($here1 = File::Spec->catdir($cwd, 't', 'test_lib'      ))) {
+    unless -e ($here2 = source_path('testlib2'));
+} elsif(   -e ($here1 = File::Spec->catdir($cwd, 't', 'testlib1'      ))) {
   die "But where's $here2?"
-    unless -e ($here2 = File::Spec->catdir($cwd, 't', 'other_test_lib'));
+    unless -e ($here2 = File::Spec->catdir($cwd, 't', 'testlib2'));
 } else {
   die "Can't find the test corpora";
 }
@@ -69,12 +69,12 @@ print $p;
 
 {
 my $names = join "|", sort values %$where2name;
-ok $names, "Blorm|Sizzlesuzzle|Zonk::Pronk|hink_honk::Glunk|hink_honk::Vliff|perlfliff|perlthang|perlzuk|squaa|squaa::Glunk|squaa::Vliff|squaa::Wowo|zikzik";
+ok $names, "Blorm|Suzzle|Zonk::Pronk|hinkhonk::Glunk|hinkhonk::Vliff|perlflif|perlthng|perlzuk|squaa|squaa::Glunk|squaa::Vliff|squaa::Wowo|zikzik";
 }
 
 {
 my $names = join "|", sort keys %$name2where;
-ok $names, "Blorm|Sizzlesuzzle|Zonk::Pronk|hink_honk::Glunk|hink_honk::Vliff|perlfliff|perlthang|perlzuk|squaa|squaa::Glunk|squaa::Vliff|squaa::Wowo|zikzik";
+ok $names, "Blorm|Suzzle|Zonk::Pronk|hinkhonk::Glunk|hinkhonk::Vliff|perlflif|perlthng|perlzuk|squaa|squaa::Glunk|squaa::Vliff|squaa::Wowo|zikzik";
 }
 
 ok( ($name2where->{'squaa'} || 'huh???'), '/squaa\.pm$/');

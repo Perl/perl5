@@ -1,7 +1,9 @@
 BEGIN {
-    chdir 't';
     if($ENV{PERL_CORE}) {
+        chdir 't';
         @INC = '../lib';
+    } else {
+        push @INC, '../lib';
     }
 }
 
@@ -19,6 +21,8 @@ BEGIN {
 
 $Pod::Simple::Text::FREAKYMODE = 1;
 use Pod::Simple::TiedOutFH ();
+
+chdir 't' unless $ENV{PERL_CORE};
 
 sub source_path {
     my $file = shift;
@@ -38,7 +42,7 @@ foreach my $file (
   "junk1.pod",
   "junk2.pod",
   "perlcyg.pod",
-  "perlfaq3.pod",
+  "perlfaq.pod",
   "perlvar.pod",
 ) {
 
@@ -50,7 +54,7 @@ foreach my $file (
 
   my @out;
   my $precooked = source_path($file);
-  $precooked =~ s<\.pod><_out.txt>s;
+  $precooked =~ s<\.pod><o.txt>s;
   unless(-e $precooked) {
     ok 0;
     print "# But $precooked doesn't exist!!\n";
