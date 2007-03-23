@@ -140,27 +140,27 @@ sub _make_search_callback {
       if( $self->{'_dirs_visited'}{$file} ) {
         $verbose and print "Directory '$file' already seen, skipping.\n";
         return 'PRUNE';
-      } else {
-        $self->{'_dirs_visited'}{$file} = 1;
-        print "Looking in dir $file\n" if $verbose;   # and fallthru
       }
 
-      return if $laborious;  # these override pruning
+      print "Looking in dir $file\n" if $verbose;
 
-      if( m/^(\d+\.[\d_]{3,})\z/s
-        and do { my $x = $1; $x =~ tr/_//d; $x != $] }
-      ) {
-        $verbose and print "Perl $] version mismatch on $_, skipping.\n";
-        return 'PRUNE';
-      }
+      unless ($laborious) { # $laborious overrides pruning
+        if( m/^(\d+\.[\d_]{3,})\z/s
+             and do { my $x = $1; $x =~ tr/_//d; $x != $] }
+           ) {
+          $verbose and print "Perl $] version mismatch on $_, skipping.\n";
+          return 'PRUNE';
+        }
 
-      if( m/^([A-Za-z][a-zA-Z0-9_]*)\z/s ) {
-        $verbose and print "$_ is a well-named module subdir.  Looking....\n";
-      } else {
-        $verbose and print "$_ is a fishy directory name.  Skipping.\n";
-        return 'PRUNE';
-      }
+        if( m/^([A-Za-z][a-zA-Z0-9_]*)\z/s ) {
+          $verbose and print "$_ is a well-named module subdir.  Looking....\n";
+        } else {
+          $verbose and print "$_ is a fishy directory name.  Skipping.\n";
+          return 'PRUNE';
+        }
+      } # end unless $laborious
 
+      $self->{'_dirs_visited'}{$file} = 1;
       return; # (not pruning);
     }
 
@@ -790,8 +790,8 @@ is called.
 
 Unless you set this attribute to a true value, Pod::Search will 
 apply Perl-specific heuristics to find the correct module PODs quickly.
-This attribute's default value is true.  You won't normally need
-to set this to false.
+This attribute's default value is false.  You won't normally need
+to set this to true.
 
 Specifically: Turning on this option will disable the heuristics for
 seeing only files with Perl-like extensions, omitting subdirectories
