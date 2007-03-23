@@ -199,7 +199,7 @@ Perl_sv_does(pTHX_ SV *sv, const char *name)
     if (sv_isobject(sv)) {
 	classname = sv_reftype(SvRV(sv),TRUE);
     } else {
-	classname = SvPV(sv,PL_na);
+	classname = SvPV_nolen(sv);
     }
 
     if (strEQ(name,classname))
