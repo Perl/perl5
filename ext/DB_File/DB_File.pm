@@ -1,10 +1,10 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (pmqs@cpan.org)
-# last modified 11th November 2005
-# version 1.814
+# last modified 4th February 2007
+# version 1.815
 #
-#     Copyright (c) 1995-2005 Paul Marquess. All rights reserved.
+#     Copyright (c) 1995-2007 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
 #     modify it under the same terms as Perl itself.
 
@@ -165,7 +165,7 @@ our ($db_version, $use_XSLoader, $splice_end_array, $Error);
 use Carp;
 
 
-$VERSION = "1.81401" ;
+$VERSION = "1.815" ;
 
 {
     local $SIG{__WARN__} = sub {$splice_end_array = "@_";};
@@ -259,6 +259,10 @@ sub tie_hash_or_array
 {
     my (@arg) = @_ ;
     my $tieHASH = ( (caller(1))[3] =~ /TIEHASH/ ) ;
+
+    use File::Spec;
+    $arg[1] = File::Spec->rel2abs($arg[1]) 
+        if defined $arg[1] ;
 
     $arg[4] = tied %{ $arg[4] } 
 	if @arg >= 5 && ref $arg[4] && $arg[4] =~ /=HASH/ && tied %{ $arg[4] } ;
