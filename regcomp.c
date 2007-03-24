@@ -8730,10 +8730,28 @@ Perl_reg_temp_copy (pTHX_ struct regexp *r) {
             s->min_offset = r->substrs->data[i].min_offset;
             s->max_offset = r->substrs->data[i].max_offset;
             s->end_shift  = r->substrs->data[i].end_shift;
-            s->substr     = SvREFCNT_inc(r->substrs->data[i].substr);
-            s->utf8_substr = SvREFCNT_inc(r->substrs->data[i].utf8_substr);
+            if (i < 2) {
+		s->substr      = SvREFCNT_inc(r->substrs->data[i].substr);
+            	s->utf8_substr = SvREFCNT_inc(r->substrs->data[i].utf8_substr);
+	    }
         }
-    }        
+	if (r->check_substr == r->anchored_substr)
+	    ret->check_substr = ret->anchored_substr;
+	else if (r->check_substr == r->float_substr)
+	    ret->check_substr = ret->float_substr;
+	else {
+	    assert(!r->check_substr);
+	    ret->check_substr = NULL;
+	}
+	if (r->check_utf8 == r->anchored_utf8)
+	    ret->check_utf8 = ret->anchored_utf8;
+	else if (r->check_utf8 == r->float_utf8)
+	    ret->check_utf8 = ret->float_utf8;
+	else {
+	    assert(!r->check_utf8);
+	    ret->check_utf8 = NULL;
+	}
+    }
     RX_MATCH_COPIED_off(ret);
 #ifdef PERL_OLD_COPY_ON_WRITE
     /* this is broken. */
