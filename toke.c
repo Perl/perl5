@@ -6417,7 +6417,7 @@ Perl_yylex(pTHX)
 
 	case KEY_readpipe:
 	    set_csh();
-	    UNI(OP_BACKTICK);
+	    UNIDOR(OP_BACKTICK);
 
 	case KEY_rewinddir:
 	    UNI(OP_REWINDDIR);
