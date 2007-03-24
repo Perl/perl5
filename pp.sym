@@ -30,6 +30,7 @@ Perl_ck_match
 Perl_ck_method
 Perl_ck_null
 Perl_ck_open
+Perl_ck_readline
 Perl_ck_repeat
 Perl_ck_require
 Perl_ck_return

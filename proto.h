@@ -3159,6 +3159,10 @@ PERL_CALLCONV OP*	Perl_ck_open(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
+PERL_CALLCONV OP*	Perl_ck_readline(pTHX_ OP *o)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+
 PERL_CALLCONV OP*	Perl_ck_repeat(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);

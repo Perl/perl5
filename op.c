@@ -6725,6 +6725,22 @@ Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 }
 
 OP *
+Perl_ck_readline(pTHX_ OP *o)
+{
+    if (!(o->op_flags & OPf_KIDS)) {
+	OP * const newop
+	    = newUNOP(OP_READLINE, 0, newGVOP(OP_GV, 0, PL_argvgv));
+#ifdef PERL_MAD
+	op_getmad(o,newop,'O');
+#else
+	op_free(o);
+#endif
+	return newop;
+    }
+    return o;
+}
+
+OP *
 Perl_ck_rfun(pTHX_ OP *o)
 {
     const OPCODE type = o->op_type;
@@ -6910,8 +6926,13 @@ Perl_ck_open(pTHX_ OP *o)
     }
     if (o->op_type == OP_BACKTICK) {
 	if (!(o->op_flags & OPf_KIDS)) {
+	    OP * const newop = newUNOP(OP_BACKTICK, 0, newDEFSVOP());
+#ifdef PERL_MAD
+	    op_getmad(o,newop,'O');
+#else
 	    op_free(o);
-	    return newUNOP(OP_BACKTICK, 0, newDEFSVOP());
+#endif
+	    return newop;
 	}
 	return o;
     }

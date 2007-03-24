@@ -4259,14 +4259,17 @@ C<chdir> there, it would have been testing the wrong file.
     closedir DIR;
 
 =item readline EXPR
+
+=item readline
 X<readline> X<gets> X<fgets>
 
-Reads from the filehandle whose typeglob is contained in EXPR.  In scalar
-context, each call reads and returns the next line, until end-of-file is
-reached, whereupon the subsequent call returns undef.  In list context,
-reads until end-of-file is reached and returns a list of lines.  Note that
-the notion of "line" used here is however you may have defined it
-with C<$/> or C<$INPUT_RECORD_SEPARATOR>).  See L<perlvar/"$/">.
+Reads from the filehandle whose typeglob is contained in EXPR (or from
+*ARGV if EXPR is not provided).  In scalar context, each call reads and
+returns the next line, until end-of-file is reached, whereupon the
+subsequent call returns undef.  In list context, reads until end-of-file
+is reached and returns a list of lines.  Note that the notion of "line"
+used here is however you may have defined it with C<$/> or
+C<$INPUT_RECORD_SEPARATOR>).  See L<perlvar/"$/">.
 
 When C<$/> is set to C<undef>, when readline() is in scalar
 context (i.e. file slurp mode), and when an empty file is read, it

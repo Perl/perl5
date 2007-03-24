@@ -1187,7 +1187,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* bless */
 	MEMBER_TO_FPTR(Perl_ck_open),	/* backtick */
 	MEMBER_TO_FPTR(Perl_ck_glob),	/* glob */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* readline */
+	MEMBER_TO_FPTR(Perl_ck_readline),	/* readline */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* rcatline */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* regcmaybe */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* regcreset */

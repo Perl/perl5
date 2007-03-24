@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 17;
+plan tests => 18;
 
 eval { for (\2) { $_ = <FH> } };
 like($@, 'Modification of a read-only value attempted', '[perl #19566]');
@@ -82,6 +82,10 @@ SKIP: {
 fresh_perl_is('BEGIN{<>}', '',
               { switches => ['-w'], stdin => '', stderr => 1 },
               'No ARGVOUT used only once warning');
+
+fresh_perl_is('print readline', 'foo',
+              { switches => ['-w'], stdin => 'foo', stderr => 1 },
+              'readline() defaults to *ARGV');
 
 my $obj = bless [];
 $obj .= <DATA>;
