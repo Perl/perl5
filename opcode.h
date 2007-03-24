@@ -1558,7 +1558,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00002206,	/* srefgen */
 	0x0001368c,	/* ref */
 	0x00122804,	/* bless */
-	0x00003608,	/* backtick */
+	0x00013688,	/* backtick */
 	0x00012808,	/* glob */
 	0x0001d608,	/* readline */
 	0x00000c08,	/* rcatline */

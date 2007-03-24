@@ -594,7 +594,7 @@ bless		bless			ck_fun		s@	S S?
 
 # Pushy I/O.
 
-backtick	quoted execution (``, qx)	ck_open		t%	S
+backtick	quoted execution (``, qx)	ck_open		tu%	S?
 # glob defaults its first arg to $_
 glob		glob			ck_glob		t@	S?
 readline	<HANDLE>		ck_null		t%	F?
