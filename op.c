@@ -6908,8 +6908,13 @@ Perl_ck_open(pTHX_ OP *o)
 		o->op_private |= OPpOPEN_OUT_CRLF;
 	}
     }
-    if (o->op_type == OP_BACKTICK)
+    if (o->op_type == OP_BACKTICK) {
+	if (!(o->op_flags & OPf_KIDS)) {
+	    op_free(o);
+	    return newUNOP(OP_BACKTICK, 0, newDEFSVOP());
+	}
 	return o;
+    }
     {
 	 /* In case of three-arg dup open remove strictness
 	  * from the last arg if it is a bareword. */

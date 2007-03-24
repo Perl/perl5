@@ -4305,6 +4305,8 @@ error, returns the undefined value and sets C<$!> (errno).  If EXPR is
 omitted, uses C<$_>.
 
 =item readpipe EXPR
+
+=item readpipe
 X<readpipe>
 
 EXPR is executed as a system command.
@@ -4315,6 +4317,7 @@ multi-line) string.  In list context, returns a list of lines
 This is the internal function implementing the C<qx/EXPR/>
 operator, but you can use it directly.  The C<qx/EXPR/>
 operator is discussed in more detail in L<perlop/"I/O Operators">.
+If EXPR is omitted, uses C<$_>.
 
 =item recv SOCKET,SCALAR,LENGTH,FLAGS
 X<recv>

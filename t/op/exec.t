@@ -19,7 +19,7 @@ my $Is_Win32 = $^O eq 'MSWin32';
 
 skip_all("Tests mostly usesless on MacOS") if $^O eq 'MacOS';
 
-plan(tests => 21);
+plan(tests => 22);
 
 my $Perl = which_perl();
 
@@ -106,6 +106,10 @@ is( <<`END`,                    "ok\n",     '<<`HEREDOC`' );
 $Perl -le "print 'ok'"
 END
 
+{
+    my $_ = qq($Perl -le "print 'ok'");
+    is( readpipe, "ok\n", 'readpipe default argument' );
+}
 
 TODO: {
     my $tnum = curr_test();
