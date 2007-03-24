@@ -4,7 +4,7 @@ use strict;
 require ExtUtils::MM;
 
 use vars qw(@ISA $VERSION);
-$VERSION = 0.02;
+$VERSION = 0.03;
 @ISA = qw(ExtUtils::MM);
 
 {

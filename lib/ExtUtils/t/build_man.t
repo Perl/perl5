@@ -15,11 +15,17 @@ BEGIN {
 use strict;
 use Test::More tests => 9;
 
+use File::Spec;
 use TieOut;
 use MakeMaker::Test::Utils;
 use MakeMaker::Test::Setup::BFD;
 
 use ExtUtils::MakeMaker;
+use ExtUtils::MakeMaker::Config;
+
+# Simulate an installation which has man page generation turned off to
+# ensure these tests will still work.
+$Config{installman3dir} = 'none';
 
 chdir 't';
 
@@ -37,6 +43,8 @@ ok( chdir 'Big-Dummy', "chdir'd to Big-Dummy" ) ||
 ok( my $stdout = tie *STDOUT, 'TieOut' );
 
 {
+    local $Config{installman3dir} = File::Spec->catdir(qw(t lib));
+
     my $mm = WriteMakefile(
         NAME            => 'Big::Dummy',
         VERSION_FROM    => 'lib/Big/Dummy.pm',
