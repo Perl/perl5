@@ -1663,8 +1663,8 @@ S_swap_match_buff (pTHX_ regexp *prog) {
     */
         Newxz(prog->swap, 1, regexp_paren_ofs);
         /* no need to copy these */
-        Newxz(prog->swap->startp, prog->nparens + 1, I32);
-        Newxz(prog->swap->endp, prog->nparens + 1, I32);
+        Newxz(prog->swap->startp, 2 * (prog->nparens + 1), I32);
+	prog->swap->endp = prog->swap->startp + prog->nparens + 1;
     }
     t = prog->swap->startp;
     prog->swap->startp = prog->startp;
