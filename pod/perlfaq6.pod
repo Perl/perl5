@@ -986,7 +986,7 @@ Or...
 
 Revision: $Revision: 8539 $
 
-Date: $Date: 2007-01-11 00:07:14 +0100 (jeu, 11 jan 2007) $
+Date: $Date: 2007-01-11 00:07:14 +0100 (Thu, 11 Jan 2007) $
 
 See L<perlfaq> for source control details and availability.
 
