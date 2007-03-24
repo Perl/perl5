@@ -1233,7 +1233,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	assert(new_type_details->arena);
 	assert(new_type_details->arena_size);
 	/* This points to the start of the allocated area.  */
-	new_body_inline(new_body, new_type);
+	new_body_inline(new_body, (svtype)new_type);
 	Zero(new_body, new_type_details->body_size, char);
 	new_body = ((char *)new_body) - new_type_details->offset;
 #else
@@ -1294,7 +1294,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	   we fake things so that arena is false for all 16 types..  */
 	if(new_type_details->arena) {
 	    /* This points to the start of the allocated area.  */
-	    new_body_inline(new_body, new_type);
+	    new_body_inline(new_body, (svtype)new_type);
 	    Zero(new_body, new_type_details->body_size, char);
 	    new_body = ((char *)new_body) - new_type_details->offset;
 	} else {
