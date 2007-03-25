@@ -4772,9 +4772,6 @@ Perl_win32_init(int *argcp, char ***argvp)
         *(FARPROC*)&pfnProcess32Next            = GetProcAddress(module, "Process32Next");
     }
 
-    g_osver.dwOSVersionInfoSize = sizeof(g_osver);
-    GetVersionEx(&g_osver);
-
     ansify_path();
 }
 
