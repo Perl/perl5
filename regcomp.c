@@ -8726,31 +8726,15 @@ Perl_reg_temp_copy (pTHX_ struct regexp *r) {
         struct reg_substr_datum *s;
         I32 i;
         Newx(ret->substrs, 1, struct reg_substr_data);
-        for (s = ret->substrs->data, i = 0; i < 3; i++, s++) {
-            s->min_offset = r->substrs->data[i].min_offset;
-            s->max_offset = r->substrs->data[i].max_offset;
-            s->end_shift  = r->substrs->data[i].end_shift;
-            if (i < 2) {
-		s->substr      = SvREFCNT_inc(r->substrs->data[i].substr);
-            	s->utf8_substr = SvREFCNT_inc(r->substrs->data[i].utf8_substr);
-	    }
-        }
-	if (r->check_substr == r->anchored_substr)
-	    ret->check_substr = ret->anchored_substr;
-	else if (r->check_substr == r->float_substr)
-	    ret->check_substr = ret->float_substr;
-	else {
-	    assert(!r->check_substr);
-	    ret->check_substr = NULL;
-	}
-	if (r->check_utf8 == r->anchored_utf8)
-	    ret->check_utf8 = ret->anchored_utf8;
-	else if (r->check_utf8 == r->float_utf8)
-	    ret->check_utf8 = ret->float_utf8;
-	else {
-	    assert(!r->check_utf8);
-	    ret->check_utf8 = NULL;
-	}
+	StructCopy(r->substrs, ret->substrs, struct reg_substr_data);
+
+	SvREFCNT_inc_void(ret->anchored_substr);
+	SvREFCNT_inc_void(ret->anchored_utf8);
+	SvREFCNT_inc_void(ret->float_substr);
+	SvREFCNT_inc_void(ret->float_utf8);
+
+	/* check_substr and check_utf8, if non-NULL, point to either their
+	   anchored or float namesakes, and don't hold a second reference.  */
     }
     RX_MATCH_COPIED_off(ret);
 #ifdef PERL_OLD_COPY_ON_WRITE
