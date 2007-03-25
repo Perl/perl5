@@ -8882,12 +8882,11 @@ Perl_regfree_internal(pTHX_ struct regexp *r)
 #define SAVEPVN(p,n)	((p) ? savepvn(p,n) : NULL)
 
 /* 
-   regdupe - duplicate a regexp. 
+   re_dup - duplicate a regexp. 
    
-   This routine is called by sv.c's re_dup and is expected to clone a 
-   given regexp structure. It is a no-op when not under USE_ITHREADS. 
-   (Originally this *was* re_dup() for change history see sv.c)
-   
+   This routine is expected to clone a given regexp structure. It is not
+   compiler under USE_ITHREADS.
+
    After all of the core data stored in struct regexp is duplicated
    the regexp_engine.dupe method is used to copy any private data
    stored in the *pprivate pointer. This allows extensions to handle
@@ -8926,20 +8925,33 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
     }
 
     if (r->substrs) {
-	struct reg_substr_datum *s;
-	const struct reg_substr_datum *s_end;
-
+	/* Do it this way to avoid reading from *r after the StructCopy().
+	   That way, if any of the sv_dup_inc()s dislodge *r from the L1
+	   cache, it doesn't matter.  */
+	const bool anchored = r->check_substr == r->anchored_substr;
         Newx(ret->substrs, 1, struct reg_substr_data);
 	StructCopy(r->substrs, ret->substrs, struct reg_substr_data);
 
-	s = ret->substrs->data;
-	s_end
-	    = s + sizeof(ret->substrs->data) / sizeof(struct reg_substr_datum);
+	ret->anchored_substr = sv_dup_inc(ret->anchored_substr, param);
+	ret->anchored_utf8 = sv_dup_inc(ret->anchored_utf8, param);
+	ret->float_substr = sv_dup_inc(ret->float_substr, param);
+	ret->float_utf8 = sv_dup_inc(ret->float_utf8, param);
 
-	do {
-            s->substr      = sv_dup_inc(s->substr, param);
-            s->utf8_substr = sv_dup_inc(s->utf8_substr, param);
-        } while (++s < s_end);
+	/* check_substr and check_utf8, if non-NULL, point to either their
+	   anchored or float namesakes, and don't hold a second reference.  */
+
+	if (ret->check_substr) {
+	    if (anchored) {
+		assert(r->check_utf8 == r->anchored_utf8);
+		ret->check_substr = ret->anchored_substr;
+		ret->check_utf8 = ret->anchored_utf8;
+	    } else {
+		assert(r->check_substr == r->float_substr);
+		assert(r->check_utf8 == r->float_utf8);
+		ret->check_substr = ret->float_substr;
+		ret->check_utf8 = ret->float_utf8;
+	    }
+	}
     } else 
         ret->substrs = NULL;    
 
