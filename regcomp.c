@@ -8723,8 +8723,6 @@ Perl_reg_temp_copy (pTHX_ struct regexp *r) {
     ret->endp = ret->startp + npar;
     ret->refcnt = 1;
     if (r->substrs) {
-        struct reg_substr_datum *s;
-        I32 i;
         Newx(ret->substrs, 1, struct reg_substr_data);
 	StructCopy(r->substrs, ret->substrs, struct reg_substr_data);
 
