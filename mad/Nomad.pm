@@ -519,13 +519,8 @@ sub hash {
     for my $kid (@{$$self{Kids}}) {
 	my ($k,$v) = $kid->pair($self, @_);
 	$firstthing ||= $k;
-	if ($k =~ /^[_#]$/) {	# rekey whitespace according to preceding entry
-	    $k .= $lastthing;	# (which is actually the token the whitespace is before)
-	}
-	else {
-	    $k .= 'x' while exists $hash{$k};
-	    $lastthing = $k;
-	}
+        $k .= 'x' while exists $hash{$k};
+        $lastthing = $k;
 	$hash{$k} = $v;
     }
     $hash{FIRST} = $firstthing;
