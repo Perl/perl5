@@ -11997,6 +11997,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 
     case OP_PRTF:
     case OP_PRINT:
+    case OP_SAY:
 	/* skip filehandle as it can't produce 'undef' warning  */
 	o = cUNOPx(obase)->op_first;
 	if ((obase->op_flags & OPf_STACKED) && o->op_type == OP_PUSHMARK)

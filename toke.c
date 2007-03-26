@@ -2646,7 +2646,8 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
      */
 
     if (*start == '$') {
-	if (gv || PL_last_lop_op == OP_PRINT || isUPPER(*PL_tokenbuf))
+	if (gv || PL_last_lop_op == OP_PRINT || PL_last_lop_op == OP_SAY ||
+		isUPPER(*PL_tokenbuf))
 	    return 0;
 #ifdef PERL_MAD
 	len = start - SvPVX(PL_linestr);
