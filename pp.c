@@ -3115,7 +3115,7 @@ PP(pp_substr)
 	    }
 	}
 
-	if (! lvalue)
+	if (GIMME_V != G_VOID && !lvalue)
 	    sv_setpvn(TARG, tmps, rem);
 #ifdef USE_LOCALE_COLLATE
 	sv_unmagic(TARG, PERL_MAGIC_collxfrm);
