@@ -258,14 +258,19 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 {
     dTHX;
     Malloc_t ptr;
-#if defined(DEBUGGING) || defined(HAS_64K_LIMIT) || defined(PERL_TRACK_MEMPOOL)
-    const MEM_SIZE total_size = size * count
-#ifdef   PERL_TRACK_MEMPOOL
-	+ sTHX
-#endif
-	;
-#endif
+    MEM_SIZE total_size = 0;
 
+    /* Even though calloc() for zero bytes is strange, be robust. */
+    if (size && (count <= (MEM_SIZE)~0 / size))
+	total_size = size * count;
+    else
+	Perl_croak_nocontext(PL_memory_wrap);
+#ifdef PERL_TRACK_MEMPOOL
+    if (sTHX <= (MEM_SIZE)~0 - (MEM_SIZE)total_size)
+	total_size += sTHX;
+    else
+	Perl_croak_nocontext(PL_memory_wrap);
+#endif
 #ifdef HAS_64K_LIMIT
     if (total_size > 0xffff) {
 	PerlIO_printf(Perl_error_log,
@@ -280,11 +285,15 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 #ifdef PERL_TRACK_MEMPOOL
     /* Have to use malloc() because we've added some space for our tracking
        header.  */
-    ptr = (Malloc_t)PerlMem_malloc(total_size);
+    /* malloc(0) is non-portable. */
+    ptr = (Malloc_t)PerlMem_malloc(total_size ? total_size : 1);
 #else
     /* Use calloc() because it might save a memset() if the memory is fresh
        and clean from the OS.  */
-    ptr = (Malloc_t)PerlMem_calloc(count, size);
+    if (count && size)
+	ptr = (Malloc_t)PerlMem_calloc(count, size);
+    else /* calloc(0) is non-portable. */
+	ptr = (Malloc_t)PerlMem_calloc(count ? count : 1, size ? size : 1);
 #endif
     PERL_ALLOC_CHECK(ptr);
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) calloc %ld x %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)count,(long)total_size));
