@@ -1209,8 +1209,8 @@ XS(XS_re_regnames)
                         I32 *nums = (I32*)SvPVX(sv_dat);
                         for ( i = 0; i < SvIVX(sv_dat); i++ ) {
                             if ((I32)(re->lastcloseparen) >= nums[i] &&
-                                re->startp[nums[i]] != -1 &&
-                                re->endp[nums[i]] != -1)
+                                re->offs[nums[i]].start != -1 &&
+                                re->offs[nums[i]].end != -1)
                             {
                                 parno = nums[i];
                                 break;
@@ -1291,8 +1291,8 @@ XS(XS_re_regnames_iternext)
                     I32 *nums = (I32*)SvPVX(sv_dat);
                     for ( i = 0; i < SvIVX(sv_dat); i++ ) {
                         if ((I32)(re->lastcloseparen) >= nums[i] &&
-                            re->startp[nums[i]] != -1 &&
-                            re->endp[nums[i]] != -1)
+                            re->offs[nums[i]].start != -1 &&
+                            re->offs[nums[i]].end != -1)
                         {
                             parno = nums[i];
                             break;

@@ -521,7 +521,8 @@ Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
 
 		/* return the last filled */
 		while ( paren >= 0
-			&& (rx->startp[paren] == -1 || rx->endp[paren] == -1) )
+			&& (rx->offs[paren].start == -1
+			    || rx->offs[paren].end == -1) )
 		    paren--;
 		return (U32)paren;
 	    }
@@ -544,8 +545,8 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 	    if (paren < 0)
 		return 0;
 	    if (paren <= (I32)rx->nparens &&
-		(s = rx->startp[paren]) != -1 &&
-		(t = rx->endp[paren]) != -1)
+		(s = rx->offs[paren].start) != -1 &&
+		(t = rx->offs[paren].end) != -1)
 		{
 		    register I32 i;
 		    if (mg->mg_obj)		/* @+ */
@@ -592,8 +593,8 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 	    paren = atoi(mg->mg_ptr); /* $& is in [0] */
 	  getparen:
 	    if (paren <= (I32)rx->nparens &&
-		(s1 = rx->startp[paren]) != -1 &&
-		(t1 = rx->endp[paren]) != -1)
+		(s1 = rx->offs[paren].start) != -1 &&
+		(t1 = rx->offs[paren].end) != -1)
 	    {
 		i = t1 - s1;
 	      getlen:
@@ -636,8 +637,8 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 	return 0;
     case '`':
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	    if (rx->startp[0] != -1) {
-		i = rx->startp[0];
+	    if (rx->offs[0].start != -1) {
+		i = rx->offs[0].start;
 		if (i > 0) {
 		    s1 = 0;
 		    t1 = i;
@@ -648,10 +649,10 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 	return 0;
     case '\'':
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	    if (rx->endp[0] != -1) {
-		i = rx->sublen - rx->endp[0];
+	    if (rx->offs[0].end != -1) {
+		i = rx->sublen - rx->offs[0].end;
 		if (i > 0) {
-		    s1 = rx->endp[0];
+		    s1 = rx->offs[0].end;
 		    t1 = rx->sublen;
 		    goto getlen;
 		}

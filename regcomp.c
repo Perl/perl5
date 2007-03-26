@@ -4695,8 +4695,7 @@ reStudy:
             ARG2L_SET( scan, RExC_open_parens[ARG(scan)-1] - scan );
         }
     }
-    Newxz(r->startp, RExC_npar * 2, I32);
-    r->endp = r->startp + RExC_npar;
+    Newxz(r->offs, RExC_npar, regexp_paren_pair);
     /* assume we don't need to swap parens around before we match */
 
     DEBUG_DUMP_r({
@@ -4739,8 +4738,8 @@ Perl_reg_named_buff_get(pTHX_ const REGEXP * const rx, SV* namesv, U32 flags)
             I32 *nums=(I32*)SvPVX(sv_dat);
             for ( i=0; i<SvIVX(sv_dat); i++ ) {
 		if ((I32)(rx->nparens) >= nums[i]
-			&& rx->startp[nums[i]] != -1
-			&& rx->endp[nums[i]] != -1)
+			&& rx->offs[nums[i]].start != -1
+			&& rx->offs[nums[i]].end != -1)
                 {
                     ret = CALLREG_NUMBUF(rx,nums[i],NULL);
                     if (!retarray)
@@ -4773,21 +4772,21 @@ Perl_reg_numbered_buff_get(pTHX_ const REGEXP * const rx, I32 paren, SV* usesv)
         return sv;
     } 
     else               
-    if (paren == -2 && rx->startp[0] != -1) {
+    if (paren == -2 && rx->offs[0].start != -1) {
         /* $` */
-	i = rx->startp[0];
+	i = rx->offs[0].start;
 	s = rx->subbeg;
     }
     else 
-    if (paren == -1 && rx->endp[0] != -1) {
+    if (paren == -1 && rx->offs[0].end != -1) {
         /* $' */
-	s = rx->subbeg + rx->endp[0];
-	i = rx->sublen - rx->endp[0];
+	s = rx->subbeg + rx->offs[0].end;
+	i = rx->sublen - rx->offs[0].end;
     } 
     else
     if ( 0 <= paren && paren <= (I32)rx->nparens &&
-        (s1 = rx->startp[paren]) != -1 &&
-        (t1 = rx->endp[paren]) != -1)
+        (s1 = rx->offs[paren].start) != -1 &&
+        (t1 = rx->offs[paren].end) != -1)
     {
         /* $& $1 ... */
         i = t1 - s1;
@@ -8686,11 +8685,8 @@ Perl_pregfree(pTHX_ struct regexp *r)
     if (r->saved_copy)
         SvREFCNT_dec(r->saved_copy);
 #endif
-    if (r->swap) {
-        Safefree(r->swap->startp);
-        Safefree(r->swap);
-    }
-    Safefree(r->startp);
+    Safefree(r->swap);
+    Safefree(r->offs);
     Safefree(r);
 }
 
@@ -8718,9 +8714,8 @@ Perl_reg_temp_copy (pTHX_ struct regexp *r) {
     (void)ReREFCNT_inc(r);
     Newx(ret, 1, regexp);
     StructCopy(r, ret, regexp);
-    Newx(ret->startp, npar * 2, I32);
-    Copy(r->startp, ret->startp, npar * 2, I32);
-    ret->endp = ret->startp + npar;
+    Newx(ret->offs, npar, regexp_paren_pair);
+    Copy(r->offs, ret->offs, npar, regexp_paren_pair);
     ret->refcnt = 1;
     if (r->substrs) {
         Newx(ret->substrs, 1, struct reg_substr_data);
@@ -8911,14 +8906,11 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
     npar = r->nparens+1;
     Newx(ret, 1, regexp);
     StructCopy(r, ret, regexp);
-    Newx(ret->startp, npar * 2, I32);
-    Copy(r->startp, ret->startp, npar * 2, I32);
-    ret->endp = ret->startp + npar;
+    Newx(ret->offs, npar, regexp_paren_pair);
+    Copy(r->offs, ret->offs, npar, regexp_paren_pair);
     if(ret->swap) {
-        Newx(ret->swap, 1, regexp_paren_ofs);
         /* no need to copy these */
-        Newx(ret->swap->startp, npar * 2, I32);
-	ret->swap->endp = ret->swap->startp + npar;
+        Newx(ret->swap, npar, regexp_paren_pair);
     }
 
     if (ret->substrs) {

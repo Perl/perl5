@@ -279,14 +279,14 @@ PP(pp_substcont)
 	s = orig + (m - s);
 	cx->sb_strend = s + (cx->sb_strend - m);
     }
-    cx->sb_m = m = rx->startp[0] + orig;
+    cx->sb_m = m = rx->offs[0].start + orig;
     if (m > s) {
 	if (DO_UTF8(dstr) && !SvUTF8(cx->sb_targ))
 	    sv_catpvn_utf8_upgrade(dstr, s, m - s, nsv);
 	else
 	    sv_catpvn(dstr, s, m-s);
     }
-    cx->sb_s = rx->endp[0] + orig;
+    cx->sb_s = rx->offs[0].end + orig;
     { /* Update the pos() information. */
 	SV * const sv = cx->sb_targ;
 	MAGIC *mg;
@@ -345,8 +345,8 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
     *p++ = PTR2UV(rx->subbeg);
     *p++ = (UV)rx->sublen;
     for (i = 0; i <= rx->nparens; ++i) {
-	*p++ = (UV)rx->startp[i];
-	*p++ = (UV)rx->endp[i];
+	*p++ = (UV)rx->offs[i].start;
+	*p++ = (UV)rx->offs[i].end;
     }
 }
 
@@ -373,8 +373,8 @@ Perl_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
     rx->subbeg = INT2PTR(char*,*p++);
     rx->sublen = (I32)(*p++);
     for (i = 0; i <= rx->nparens; ++i) {
-	rx->startp[i] = (I32)(*p++);
-	rx->endp[i] = (I32)(*p++);
+	rx->offs[i].start = (I32)(*p++);
+	rx->offs[i].end = (I32)(*p++);
     }
 }
 

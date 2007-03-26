@@ -50,11 +50,10 @@ struct reg_substr_data {
 #define SV_SAVED_COPY
 #endif
 
-/* swap buffer for paren structs */
-typedef struct regexp_paren_ofs {
-    I32 *startp;
-    I32 *endp;
-} regexp_paren_ofs;
+typedef struct regexp_paren_pair {
+    I32 start;
+    I32 end;
+} regexp_paren_pair;
 
 /* this is ordered such that the most commonly used 
    fields are at the start of the struct */
@@ -80,9 +79,8 @@ typedef struct regexp {
         /* Data about the last/current match. These are modified during matching*/
         U32 lastparen;		/* last open paren matched */
 	U32 lastcloseparen;	/* last close paren matched */
-        regexp_paren_ofs *swap; /* Swap copy of *startp / *endp */ 
-        I32 *startp;            /* Array of offsets from start of string (@-) */
-	I32 *endp;              /* Array of offsets from start of string (@+) */
+        regexp_paren_pair *swap;  /* Swap copy of *offs */ 
+        regexp_paren_pair *offs;  /* Array of offsets for (@-) and (@+) */
 
 	char *subbeg;		/* saved or original string 
 				   so \digit works forever. */
@@ -469,8 +467,7 @@ typedef struct regmatch_slab {
 #define PL_bostr		PL_reg_state.re_state_bostr
 #define PL_reginput		PL_reg_state.re_state_reginput
 #define PL_regeol		PL_reg_state.re_state_regeol
-#define PL_regstartp		PL_reg_state.re_state_regstartp
-#define PL_regendp		PL_reg_state.re_state_regendp
+#define PL_regoffs		PL_reg_state.re_state_regoffs
 #define PL_reglastparen		PL_reg_state.re_state_reglastparen
 #define PL_reglastcloseparen	PL_reg_state.re_state_reglastcloseparen
 #define PL_reg_start_tmp	PL_reg_state.re_state_reg_start_tmp
@@ -496,8 +493,7 @@ struct re_save_state {
     char *re_state_bostr;
     char *re_state_reginput;		/* String-input pointer. */
     char *re_state_regeol;		/* End of input, for $ check. */
-    I32 *re_state_regstartp;		/* Pointer to startp array. */
-    I32 *re_state_regendp;		/* Ditto for endp. */
+    regexp_paren_pair *re_state_regoffs;  /* Pointer to start/end pairs */
     U32 *re_state_reglastparen;		/* Similarly for lastparen. */
     U32 *re_state_reglastcloseparen;	/* Similarly for lastcloseparen. */
     char **re_state_reg_start_tmp;	/* from regexec.c */

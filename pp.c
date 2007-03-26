@@ -4762,7 +4762,7 @@ PP(pp_split)
 		s = orig + (m - s);
 		strend = s + (strend - m);
 	    }
-	    m = rx->startp[0] + orig;
+	    m = rx->offs[0].start + orig;
 	    dstr = newSVpvn(s, m-s);
 	    if (make_mortal)
 		sv_2mortal(dstr);
@@ -4772,8 +4772,8 @@ PP(pp_split)
 	    if (rx->nparens) {
 		I32 i;
 		for (i = 1; i <= (I32)rx->nparens; i++) {
-		    s = rx->startp[i] + orig;
-		    m = rx->endp[i] + orig;
+		    s = rx->offs[i].start + orig;
+		    m = rx->offs[i].end + orig;
 
 		    /* japhy (07/27/01) -- the (m && s) test doesn't catch
 		       parens that didn't match -- they should be set to
@@ -4790,7 +4790,7 @@ PP(pp_split)
 		    XPUSHs(dstr);
 		}
 	    }
-	    s = rx->endp[0] + orig;
+	    s = rx->offs[0].end + orig;
 	}
     }
 

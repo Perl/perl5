@@ -10616,10 +10616,9 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 		    = pv_dup(old_state->re_state_reginput);
 		new_state->re_state_regeol
 		    = pv_dup(old_state->re_state_regeol);
-		new_state->re_state_regstartp
-		    = (I32*) any_dup(old_state->re_state_regstartp, proto_perl);
-		new_state->re_state_regendp
-		    = (I32*) any_dup(old_state->re_state_regendp, proto_perl);
+		new_state->re_state_regoffs
+		    = (regexp_paren_pair*)
+			any_dup(old_state->re_state_regoffs, proto_perl);
 		new_state->re_state_reglastparen
 		    = (U32*) any_dup(old_state->re_state_reglastparen, 
 			      proto_perl);

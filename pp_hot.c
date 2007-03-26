@@ -1246,19 +1246,19 @@ PP(pp_match)
 
     /* XXXX What part of this is needed with true \G-support? */
     if ((global = dynpm->op_pmflags & PMf_GLOBAL)) {
-	rx->startp[0] = -1;
+	rx->offs[0].start = -1;
 	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
 	    MAGIC* const mg = mg_find(TARG, PERL_MAGIC_regex_global);
 	    if (mg && mg->mg_len >= 0) {
 		if (!(rx->extflags & RXf_GPOS_SEEN))
-		    rx->endp[0] = rx->startp[0] = mg->mg_len;
+		    rx->offs[0].end = rx->offs[0].start = mg->mg_len;
 		else if (rx->extflags & RXf_ANCH_GPOS) {
 		    r_flags |= REXEC_IGNOREPOS;
-		    rx->endp[0] = rx->startp[0] = mg->mg_len;
+		    rx->offs[0].end = rx->offs[0].start = mg->mg_len;
 		} else if (rx->extflags & RXf_GPOS_FLOAT) 
 		    gpos = mg->mg_len;
 		else 
-		    rx->endp[0] = rx->startp[0] = mg->mg_len;
+		    rx->offs[0].end = rx->offs[0].start = mg->mg_len;
 		minmatch = (mg->mg_flags & MGf_MINMATCH) ? rx->gofs + 1 : 0;
 		update_minmatch = 0;
 	    }
@@ -1274,8 +1274,8 @@ PP(pp_match)
 	r_flags |= REXEC_SCREAM;
 
 play_it_again:
-    if (global && rx->startp[0] != -1) {
-	t = s = rx->endp[0] + truebase - rx->gofs;
+    if (global && rx->offs[0].start != -1) {
+	t = s = rx->offs[0].end + truebase - rx->gofs;
 	if ((s + rx->minlen) > strend || s < truebase)
 	    goto nope;
 	if (update_minmatch++)
@@ -1322,10 +1322,10 @@ play_it_again:
 	EXTEND_MORTAL(nparens + i);
 	for (i = !i; i <= nparens; i++) {
 	    PUSHs(sv_newmortal());
-	    if ((rx->startp[i] != -1) && rx->endp[i] != -1 ) {
-		const I32 len = rx->endp[i] - rx->startp[i];
-		s = rx->startp[i] + truebase;
-	        if (rx->endp[i] < 0 || rx->startp[i] < 0 ||
+	    if ((rx->offs[i].start != -1) && rx->offs[i].end != -1 ) {
+		const I32 len = rx->offs[i].end - rx->offs[i].start;
+		s = rx->offs[i].start + truebase;
+	        if (rx->offs[i].end < 0 || rx->offs[i].start < 0 ||
 		    len < 0 || len > strend - s)
 		    DIE(aTHX_ "panic: pp_match start/end pointers");
 		sv_setpvn(*SP, s, len);
@@ -1346,16 +1346,17 @@ play_it_again:
 		    mg = sv_magicext(TARG, NULL, PERL_MAGIC_regex_global,
 				     &PL_vtbl_mglob, NULL, 0);
 		}
-		if (rx->startp[0] != -1) {
-		    mg->mg_len = rx->endp[0];
-		    if (rx->startp[0] + rx->gofs == (UV)rx->endp[0])
+		if (rx->offs[0].start != -1) {
+		    mg->mg_len = rx->offs[0].end;
+		    if (rx->offs[0].start + rx->gofs == (UV)rx->offs[0].end)
 			mg->mg_flags |= MGf_MINMATCH;
 		    else
 			mg->mg_flags &= ~MGf_MINMATCH;
 		}
 	    }
-	    had_zerolen = (rx->startp[0] != -1
-			   && rx->startp[0] + rx->gofs == (UV)rx->endp[0]);
+	    had_zerolen = (rx->offs[0].start != -1
+			   && (rx->offs[0].start + rx->gofs
+			       == (UV)rx->offs[0].end));
 	    PUTBACK;			/* EVAL blocks may use stack */
 	    r_flags |= REXEC_IGNOREPOS | REXEC_NOT_FIRST;
 	    goto play_it_again;
@@ -1380,9 +1381,9 @@ play_it_again:
 		mg = sv_magicext(TARG, NULL, PERL_MAGIC_regex_global,
 				 &PL_vtbl_mglob, NULL, 0);
 	    }
-	    if (rx->startp[0] != -1) {
-		mg->mg_len = rx->endp[0];
-		if (rx->startp[0] + rx->gofs == (UV)rx->endp[0])
+	    if (rx->offs[0].start != -1) {
+		mg->mg_len = rx->offs[0].end;
+		if (rx->offs[0].start + rx->gofs == (UV)rx->offs[0].end)
 		    mg->mg_flags |= MGf_MINMATCH;
 		else
 		    mg->mg_flags &= ~MGf_MINMATCH;
@@ -1406,13 +1407,13 @@ yup:					/* Confirmed by INTUIT */
     if (global) {
 	/* FIXME - should rx->subbeg be const char *?  */
 	rx->subbeg = (char *) truebase;
-	rx->startp[0] = s - truebase;
+	rx->offs[0].start = s - truebase;
 	if (RX_MATCH_UTF8(rx)) {
 	    char * const t = (char*)utf8_hop((U8*)s, rx->minlenret);
-	    rx->endp[0] = t - truebase;
+	    rx->offs[0].end = t - truebase;
 	}
 	else {
-	    rx->endp[0] = s - truebase + rx->minlenret;
+	    rx->offs[0].end = s - truebase + rx->minlenret;
 	}
 	rx->sublen = strend - truebase;
 	goto gotcha;
@@ -1441,12 +1442,12 @@ yup:					/* Confirmed by INTUIT */
 	}
 	rx->sublen = strend - t;
 	RX_MATCH_COPIED_on(rx);
-	off = rx->startp[0] = s - t;
-	rx->endp[0] = off + rx->minlenret;
+	off = rx->offs[0].start = s - t;
+	rx->offs[0].end = off + rx->minlenret;
     }
     else {			/* startp/endp are used by @- @+. */
-	rx->startp[0] = s - truebase;
-	rx->endp[0] = s - truebase + rx->minlenret;
+	rx->offs[0].start = s - truebase;
+	rx->offs[0].end = s - truebase + rx->minlenret;
     }
     /* including rx->nparens in the below code seems highly suspicious.
        -dmq */
@@ -2135,8 +2136,8 @@ PP(pp_subst)
 	SvSCREAM_off(TARG);	/* disable possible screamer */
 	if (once) {
 	    rxtainted |= RX_MATCH_TAINTED(rx);
-	    m = orig + rx->startp[0];
-	    d = orig + rx->endp[0];
+	    m = orig + rx->offs[0].start;
+	    d = orig + rx->offs[0].end;
 	    s = orig;
 	    if (m - s > strend - d) {  /* faster to shorten from end */
 		if (clen) {
@@ -2178,7 +2179,7 @@ PP(pp_subst)
 		if (iters++ > maxiters)
 		    DIE(aTHX_ "Substitution loop");
 		rxtainted |= RX_MATCH_TAINTED(rx);
-		m = rx->startp[0] + orig;
+		m = rx->offs[0].start + orig;
 		if ((i = m - s)) {
 		    if (s != d)
 			Move(s, d, i, char);
@@ -2188,7 +2189,7 @@ PP(pp_subst)
 		    Copy(c, d, clen, char);
 		    d += clen;
 		}
-		s = rx->endp[0] + orig;
+		s = rx->offs[0].end + orig;
 	    } while (CALLREGEXEC(rx, s, strend, orig, s == m,
 				 TARG, NULL,
 				 /* don't match same null twice */
@@ -2251,12 +2252,12 @@ PP(pp_subst)
 		s = orig + (m - s);
 		strend = s + (strend - m);
 	    }
-	    m = rx->startp[0] + orig;
+	    m = rx->offs[0].start + orig;
 	    if (doutf8 && !SvUTF8(dstr))
 		sv_catpvn_utf8_upgrade(dstr, s, m - s, nsv);
             else
 		sv_catpvn(dstr, s, m-s);
-	    s = rx->endp[0] + orig;
+	    s = rx->offs[0].end + orig;
 	    if (clen)
 		sv_catpvn(dstr, c, clen);
 	    if (once)
