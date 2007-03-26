@@ -2148,8 +2148,6 @@ STATIC I32			/* 0 failure, 1 success */
 S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
 {
     dVAR;
-    register I32 *sp;
-    register I32 *ep;
     CHECKPOINT lastcp;
     regexp *prog = reginfo->prog;
     RXi_GET_DECL(prog,progi);
@@ -2259,9 +2257,9 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
      * on those tests seems to be returning null fields from matches.
      * --jhi */
 #if 1
-    sp = PL_regstartp;
-    ep = PL_regendp;
     if (prog->nparens) {
+	I32 *sp = PL_regstartp;
+	I32 *ep = PL_regendp;
 	register I32 i;
 	for (i = prog->nparens; i > (I32)*PL_reglastparen; i--) {
 	    *++sp = -1;
