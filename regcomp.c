@@ -8909,20 +8909,19 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
 
     
     npar = r->nparens+1;
-    Newxz(ret, 1, regexp);
+    Newx(ret, 1, regexp);
+    StructCopy(r, ret, regexp);
     Newx(ret->startp, npar * 2, I32);
     Copy(r->startp, ret->startp, npar * 2, I32);
     ret->endp = ret->startp + npar;
-    if(r->swap) {
+    if(ret->swap) {
         Newx(ret->swap, 1, regexp_paren_ofs);
         /* no need to copy these */
         Newx(ret->swap->startp, npar * 2, I32);
 	ret->swap->endp = ret->swap->startp + npar;
-    } else {
-        ret->swap = NULL;
     }
 
-    if (r->substrs) {
+    if (ret->substrs) {
 	/* Do it this way to avoid reading from *r after the StructCopy().
 	   That way, if any of the sv_dup_inc()s dislodge *r from the L1
 	   cache, it doesn't matter.  */
@@ -8950,41 +8949,26 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
 		ret->check_utf8 = ret->float_utf8;
 	    }
 	}
-    } else 
-        ret->substrs = NULL;    
+    }
 
-    ret->wrapped        = SAVEPVN(r->wrapped, r->wraplen+1);
-    ret->precomp        = ret->wrapped + (r->precomp - r->wrapped);
-    ret->prelen         = r->prelen;
-    ret->wraplen        = r->wraplen;
+    ret->wrapped        = SAVEPVN(ret->wrapped, ret->wraplen+1);
+    ret->precomp        = ret->wrapped + (ret->precomp - ret->wrapped);
+    ret->paren_names    = hv_dup_inc(ret->paren_names, param);
 
-    ret->mother_re      = NULL;
-    ret->refcnt         = r->refcnt;
-    ret->minlen         = r->minlen;
-    ret->minlenret      = r->minlenret;
-    ret->nparens        = r->nparens;
-    ret->lastparen      = r->lastparen;
-    ret->lastcloseparen = r->lastcloseparen;
-    ret->intflags       = r->intflags;
-    ret->extflags       = r->extflags;
-
-    ret->sublen         = r->sublen;
-
-    ret->engine         = r->engine;
-    
-    ret->paren_names    = hv_dup_inc(r->paren_names, param);
+    if (ret->pprivate)
+	RXi_SET(ret,CALLREGDUPE_PVT(ret,param));
 
     if (RX_MATCH_COPIED(ret))
-	ret->subbeg  = SAVEPVN(r->subbeg, r->sublen);
+	ret->subbeg  = SAVEPVN(ret->subbeg, ret->sublen);
     else
 	ret->subbeg = NULL;
 #ifdef PERL_OLD_COPY_ON_WRITE
     ret->saved_copy = NULL;
 #endif
-    
-    ret->pprivate = r->pprivate;
-    if (ret->pprivate) 
-        RXi_SET(ret,CALLREGDUPE_PVT(ret,param));
+
+    ret->mother_re      = NULL;
+    ret->gofs = 0;
+    ret->seen_evals = 0;
     
     ptr_table_store(PL_ptr_table, r, ret);
     return ret;
