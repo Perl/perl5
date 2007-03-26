@@ -10444,7 +10444,11 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
 	    }
 	    while (isSPACE(*w))
 		++w;
-	    if (!*w || !strchr(";|})]oaiuw!=", *w))	/* an advisory hack only... */
+	    /* the list of chars below is for end of statements or
+	     * block / parens, boolean operators (&&, ||, //) and branch
+	     * constructs (or, and, if, until, unless, while, err, for).
+	     * Not a very solid hack... */
+	    if (!*w || !strchr(";&/|})]oaiuwef!=", *w))
 		Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 			    "%s (...) interpreted as function",name);
 	}

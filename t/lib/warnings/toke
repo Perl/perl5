@@ -279,9 +279,14 @@ Possible attempt to put comments in qw() list at - line 3.
 ########
 # toke.c
 use warnings 'syntax' ;
-print ("")
+print ("");
+print ("") and $x = 1;
+print ("") or die;
+print ("") // die;
+print (1+2) * 3 if 0; # only this one should warn
+print (1+2) if 0;
 EXPECT
-print (...) interpreted as function at - line 3.
+print (...) interpreted as function at - line 7.
 ########
 # toke.c
 no warnings 'syntax' ;
@@ -291,9 +296,10 @@ EXPECT
 ########
 # toke.c
 use warnings 'syntax' ;
-printf ("")
+printf ("");
+printf ("") . '';
 EXPECT
-printf (...) interpreted as function at - line 3.
+printf (...) interpreted as function at - line 4.
 ########
 # toke.c
 no warnings 'syntax' ;
@@ -303,9 +309,10 @@ EXPECT
 ########
 # toke.c
 use warnings 'syntax' ;
-sort ("")
+sort ("");
+sort ("") . '';
 EXPECT
-sort (...) interpreted as function at - line 3.
+sort (...) interpreted as function at - line 4.
 ########
 # toke.c
 no warnings 'syntax' ;
