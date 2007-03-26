@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+package Nomad;
 
 # Suboptimal things:
 #	ast type info is generally still implicit
@@ -14,28 +14,47 @@ use Carp;
 use P5AST;
 use P5re;
 
-my $dowarn = 0;
-my $YAML = 0;
 my $deinterpolate;
 
-while (@ARGV and $ARGV[0] =~ /^-./) {
-    my $switch = shift;
-    if ($switch eq '-w') {
-	$dowarn = 1;
-    }
-    elsif ($switch eq '-Y') {
-	$YAML = 1;
-    }
-    elsif ($switch eq '-d') {
-	$deinterpolate = 1;
-    }
-    else {
-	die "Unrecognized switch: -$switch";
-    }
-}
+sub xml_to_p5 {
+    my %options = @_;
 
-@ARGV = ('foo.xml') unless @ARGV;
-my $filename = shift;
+
+    my $filename = $options{'input'} or die;
+    $deinterpolate = $options{'deinterpolate'};
+    my $YAML = $options{'YAML'};
+
+    local $SIG{__DIE__} = sub {
+        my $e = shift;
+        $e =~ s/\n$/\n    [NODE $filename line $::prevstate->{line}]/ if $::prevstate;
+        confess $e;
+    };
+
+    # parse file
+    use XML::Parser;
+    my $p1 = XML::Parser->new(Style => 'Objects', Pkg => 'PLXML');
+    $p1->setHandlers('Char' => sub { warn "Chars $_[1]" if $_[1] =~ /\S/; });
+
+    # First slurp XML into tree of objects.
+
+    my $root = $p1->parsefile($filename);
+
+    # Now turn XML tree into something more like an AST.
+
+    PLXML::prepreproc($root->[0]);
+    my $ast = P5AST->new('Kids' => [$root->[0]->ast()]);
+    #::t($ast);
+
+    if ($YAML) {
+        require YAML::Syck;
+        return YAML::Syck::Dump($ast);
+    }
+
+    # Finally, walk AST to produce new program.
+
+    my $text = $ast->p5text();	# returns encoded, must output raw
+    return $text;
+}
 
 $::curstate = 0;
 $::prevstate = 0;
@@ -92,12 +111,6 @@ my %madtype = (
 #    'V' => 'p5::version',
     'X' => 'p5::token',
 );
-
-$SIG{__DIE__} = sub {
-    my $e = shift;
-    $e =~ s/\n$/\n    [NODE $filename line $::prevstate->{line}]/ if $::prevstate;
-    confess $e;
-};
 
 use Data::Dumper;
 $Data::Dumper::Indent = 1;
@@ -338,31 +351,6 @@ sub encnum {
 }
 
 use PLXML;
-
-use XML::Parser;
-my $p1 = new XML::Parser(Style => 'Objects', Pkg => 'PLXML');
-$p1->setHandlers('Char' => sub { warn "Chars $_[1]" if $_[1] =~ /\S/; });
-
-# First slurp XML into tree of objects.
-
-my $root = $p1->parsefile($filename);
-
-# Now turn XML tree into something more like an AST.
-
-PLXML::prepreproc($root->[0]);
-my $ast = P5AST->new('Kids' => [$root->[0]->ast()]);
-#::t($ast);
-
-if ($YAML) {
-    require YAML::Syck;
-    print YAML::Syck::Dump($ast);
-    exit;
-}
-
-# Finally, walk AST to produce new program.
-
-my $text = $ast->p5text();	# returns encoded, must output raw
-print $text;
 
 package p5::text;
 
@@ -967,22 +955,22 @@ BEGIN {
 	    my @args = $self->madness('A');
 	    my $module = $module[-1]{Kids}[-1];
 	    if ($module->uni eq 'bytes') {
-		$::curenc = ::encnum('iso-8859-1');
+		$::curenc = Nomad::encnum('iso-8859-1');
 	    }
 	    elsif ($module->uni eq 'utf8') {
 		if ($$self{mp}{o} eq 'no') {
-		    $::curenc = ::encnum('iso-8859-1');
+		    $::curenc = Nomad::encnum('iso-8859-1');
 		}
 		else {
-		    $::curenc = ::encnum('utf-8');
+		    $::curenc = Nomad::encnum('utf-8');
 		}
 	    }
 	    elsif ($module->uni eq 'encoding') {
 		if ($$self{mp}{o} eq 'no') {
-		    $::curenc = ::encnum('iso-8859-1');
+		    $::curenc = Nomad::encnum('iso-8859-1');
 		}
 		else {
-		    $::curenc = ::encnum(eval $args[0]->p5text); # XXX bletch
+		    $::curenc = Nomad::encnum(eval $args[0]->p5text); # XXX bletch
 		}
 	    }
 	    # (Surrounding {} ends up here if use is only thing in block.)

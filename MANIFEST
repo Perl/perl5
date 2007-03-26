@@ -2830,6 +2830,7 @@ mad/p55				Perl 5 to Perl 5 translator - driver for nomad
 mad/P5AST.pm			Used by nomad
 mad/P5re.pm			Used by nomad
 mad/PLXML.pm			Used by nomad
+mad/t/p55.t			Test for the Perl 5 to Perl 5 translator
 makeaperl.SH			perl script that produces a new perl binary
 makedef.pl			Create symbol export lists for linking
 makedepend.SH			Precursor to makedepend
