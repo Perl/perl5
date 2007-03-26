@@ -4487,11 +4487,6 @@ struct perl_vars *PL_VarsPtr;
 struct interpreter {
 #  include "thrdvar.h"
 #  include "intrpvar.h"
-/*
- * The following is a buffer where new variables must
- * be defined to maintain binary compatibility with previous versions
- */
-PERLVARA(object_compatibility,30,	char)
 };
 
 #else
