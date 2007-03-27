@@ -2056,9 +2056,9 @@ your Foo.xs:
         #include "perl.h"
         #include "XSUB.h"
 
-        static my_private_function(int arg1, int arg2);
+        STATIC void my_private_function(int arg1, int arg2);
 
-        static SV *
+        STATIC void
         my_private_function(int arg1, int arg2)
         {
             dTHX;       /* fetch context */
@@ -2096,9 +2096,9 @@ the Perl guts:
         #include "XSUB.h"
 
         /* pTHX_ only needed for functions that call Perl API */
-        static my_private_function(pTHX_ int arg1, int arg2);
+        STATIC void my_private_function(pTHX_ int arg1, int arg2);
 
-        static SV *
+        STATIC void
         my_private_function(pTHX_ int arg1, int arg2)
         {
             /* dTHX; not needed here, because THX is an argument */
