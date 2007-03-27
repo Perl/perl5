@@ -3925,6 +3925,17 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		lop = lop->op_sibling;
 	    }
 	}
+	else if (((left->op_private & (OPpLVAL_INTRO | OPpPAD_STATE))
+		    == (OPpLVAL_INTRO | OPpPAD_STATE))
+		&& (   left->op_type == OP_PADSV
+		    || left->op_type == OP_PADAV
+		    || left->op_type == OP_PADHV
+		    || left->op_type == OP_PADANY))
+	{
+	    o->op_private |= OPpASSIGN_STATE;
+	    /* hijacking PADSTALE for uninitialized state variables */
+	    SvPADSTALE_on(PAD_SVl(left->op_targ));
+	}
 
 	if (right && right->op_type == OP_SPLIT) {
 	    OP* tmpop = ((LISTOP*)right)->op_first;

@@ -130,8 +130,11 @@ PP(pp_sassign)
     else if (PL_op->op_private & OPpASSIGN_STATE) {
 	if (SvPADSTALE(right))
 	    SvPADSTALE_off(right);
-	else
+	else {
+	    (void)POPs;
+	    PUSHs(right);
 	    RETURN; /* ignore assignment */
+	}
     }
     if (PL_tainting && PL_tainted && !SvTAINTED(left))
 	TAINT_NOT;
@@ -969,6 +972,12 @@ PP(pp_aassign)
     int duplicates = 0;
     SV **firsthashrelem = NULL;	/* "= 0" keeps gcc 2.95 quiet  */
 
+    if (PL_op->op_private & OPpASSIGN_STATE) {
+	if (SvPADSTALE(*firstlelem))
+	    SvPADSTALE_off(*firstlelem);
+	else
+	    RETURN; /* ignore assignment */
+    }
 
     PL_delaymagic = DM_DELAY;		/* catch simultaneous items */
     gimme = GIMME_V;
@@ -985,12 +994,6 @@ PP(pp_aassign)
 		*relem = sv_mortalcopy(sv);
 	    }
 	}
-    }
-    if (PL_op->op_private & OPpASSIGN_STATE) {
-	if (SvPADSTALE(*firstlelem))
-	    SvPADSTALE_off(*firstlelem);
-	else
-	    RETURN; /* ignore assignment */
     }
 
     relem = firstrelem;

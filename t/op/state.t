@@ -10,7 +10,7 @@ BEGIN {
 use strict;
 use feature "state";
 
-plan tests => 37;
+plan tests => 46;
 
 ok( ! defined state $uninit, q(state vars are undef by default) );
 
@@ -20,23 +20,27 @@ sub stateful {
     state $x;
     state $y = 1;
     my $z = 2;
-    return ($x++, $y++, $z++);
+    state ($t) = 3;
+    return ($x++, $y++, $z++, $t++);
 }
 
-my ($x, $y, $z) = stateful();
+my ($x, $y, $z, $t) = stateful();
 is( $x, 0, 'uninitialized state var' );
 is( $y, 1, 'initialized state var' );
 is( $z, 2, 'lexical' );
+is( $t, 3, 'initialized state var, list syntax' );
 
-($x, $y, $z) = stateful();
+($x, $y, $z, $t) = stateful();
 is( $x, 1, 'incremented state var' );
 is( $y, 2, 'incremented state var' );
 is( $z, 2, 'reinitialized lexical' );
+is( $t, 4, 'incremented state var, list syntax' );
 
-($x, $y, $z) = stateful();
+($x, $y, $z, $t) = stateful();
 is( $x, 2, 'incremented state var' );
 is( $y, 3, 'incremented state var' );
 is( $z, 2, 'reinitialized lexical' );
+is( $t, 5, 'incremented state var, list syntax' );
 
 # in a nested block
 
@@ -126,6 +130,18 @@ is( $xsize, 0, 'uninitialized state array' );
 $xsize = stateful_array();
 is( $xsize, 1, 'uninitialized state array after one iteration' );
 
+sub stateful_array_init {
+    state @x = (1, 2);
+    push @x, 'x';
+    return $#x;
+}
+
+$xsize = stateful_array_init();
+is( $xsize, 2, 'initialized state array' );
+
+$xsize = stateful_array_init();
+is( $xsize, 3, 'initialized state array after one iteration' );
+
 # hash state vars
 
 sub stateful_hash {
@@ -138,6 +154,17 @@ is( $xhval, 0, 'uninitialized state hash' );
 
 $xhval = stateful_hash();
 is( $xhval, 1, 'uninitialized state hash after one iteration' );
+
+sub stateful_hash_init {
+    state %hx = (foo => 10);
+    return $hx{foo}++;
+}
+
+$xhval = stateful_hash_init();
+is( $xhval, 10, 'initialized state hash' );
+
+$xhval = stateful_hash_init();
+is( $xhval, 11, 'initialized state hash after one iteration' );
 
 # state declaration with a list
 
@@ -175,3 +202,10 @@ sub noseworth {
     noseworth($level - 1) if $level;
 }
 noseworth(2);
+
+# Assignment return value
+
+sub pugnax { my $x = state $y = 42; $y++; $x; }
+
+is( pugnax(), 42, 'scalar state assignment return value' );
+is( pugnax(), 43, 'scalar state assignment return value' );
