@@ -1489,10 +1489,10 @@ You can specify extra modules or module bundles to be fetched from the
 CPAN and installed as part of the Perl build.  Either use the -Dextras=...
 command line parameter to Configure, for example like this:
 
-	Configure -Dextras="Compress::Zlib Bundle::LWP DBI"
+	Configure -Dextras="Bundle::LWP DBI"
 
 or answer first 'y' to the question 'Install any extra modules?' and
-then answer "Compress::Zlib Bundle::LWP DBI" to the 'Extras?' question.
+then answer "Bundle::LWP DBI" to the 'Extras?' question.
 The module or the bundle names are as for the CPAN module 'install' command.
 This will only work if those modules are to be built as dynamic
 extensions.  If you wish to include those extra modules as static
@@ -1505,8 +1505,7 @@ do not, using the extra modules option will die horribly.
 
 Also notice that you yourself are responsible for satisfying any extra
 dependencies such as external headers or libraries BEFORE trying the build.
-For example: you will need to have the zlib.h header and the libz
-library installed for the Compress::Zlib, or the Foo database specific
+For example: you will need to have the Foo database specific
 headers and libraries installed for the DBD::Foo module.  The Configure
 process or the Perl build process will not help you with these.
 
