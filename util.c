@@ -261,12 +261,12 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
     MEM_SIZE total_size = 0;
 
     /* Even though calloc() for zero bytes is strange, be robust. */
-    if (size && (count <= (MEM_SIZE)~0 / size))
+    if (size && (count <= MEM_SIZE_MAX / size))
 	total_size = size * count;
     else
 	Perl_croak_nocontext(PL_memory_wrap);
 #ifdef PERL_TRACK_MEMPOOL
-    if (sTHX <= (MEM_SIZE)~0 - (MEM_SIZE)total_size)
+    if (sTHX <= MEM_SIZE_MAX - (MEM_SIZE)total_size)
 	total_size += sTHX;
     else
 	Perl_croak_nocontext(PL_memory_wrap);

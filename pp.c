@@ -1537,7 +1537,7 @@ PP(pp_repeat)
 		SvCUR_set(TARG, 0);
 	    else {
 		const STRLEN max = (UV)count * len;
-		if (len > ((MEM_SIZE)~0)/count)
+		if (len > MEM_SIZE_MAX / count)
 		     Perl_croak(aTHX_ oom_string_extend);
 	        MEM_WRAP_CHECK_1(max, char, oom_string_extend);
 		SvGROW(TARG, max + 1);
