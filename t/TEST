@@ -499,7 +499,7 @@ EOT
 		$good_files++;
 	    }
 	    else {
-		print "${te}skipping test on this platform\n";
+		print "${te}skipped\n";
 		$tested_files -= 1;
 	    }
 	}
