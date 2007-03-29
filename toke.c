@@ -5421,8 +5421,9 @@ Perl_yylex(pTHX)
 				    PL_nextwhite = 0;
 				}
 			    }
+			    else
 #endif
-			    goto its_constant;
+				goto its_constant;
 			}
 		    }
 #ifdef PERL_MAD
@@ -5469,7 +5470,7 @@ Perl_yylex(pTHX)
 				"Ambiguous use of -%s resolved as -&%s()",
 				PL_tokenbuf, PL_tokenbuf);
 		    /* Check for a constant sub */
-		    if ((sv = gv_const_sv(gv))) {
+		    if ((sv = gv_const_sv(gv)) && !PL_madskills) {
 		  its_constant:
 			SvREFCNT_dec(((SVOP*)yylval.opval)->op_sv);
 			((SVOP*)yylval.opval)->op_sv = SvREFCNT_inc_simple(sv);
