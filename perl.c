@@ -5173,8 +5173,6 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 #endif
 	    atsv = ERRSV;
 	    (void)SvPV_const(atsv, len);
-	    if (PL_madskills && PL_minus_c && paramList == PL_beginav)
-		break;	/* not really trying to run, so just wing it */
 	    if (len) {
 		PL_curcop = &PL_compiling;
 		CopLINE_set(PL_curcop, oldline);
@@ -5205,8 +5203,6 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	    PL_curcop = &PL_compiling;
 	    CopLINE_set(PL_curcop, oldline);
 	    JMPENV_POP;
-	    if (PL_madskills && PL_minus_c && paramList == PL_beginav)
-		return;	/* not really trying to run, so just wing it */
 	    if (PL_statusvalue && !(PL_exit_flags & PERL_EXIT_EXPECTED)) {
 		if (paramList == PL_beginav)
 		    Perl_croak(aTHX_ "BEGIN failed--compilation aborted");
