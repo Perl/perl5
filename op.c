@@ -7515,6 +7515,10 @@ Perl_ck_subr(pTHX_ OP *o)
 	o->op_private |= OPpENTERSUB_DB;
     while (o2 != cvop) {
 	OP* o3;
+	if (PL_madskills && o2->op_type == OP_STUB) {
+	    o2 = o2->op_sibling;
+	    continue;
+	}
 	if (PL_madskills && o2->op_type == OP_NULL)
 	    o3 = ((UNOP*)o2)->op_first;
 	else
