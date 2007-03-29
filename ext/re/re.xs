@@ -24,6 +24,7 @@ extern SV*	my_re_intuit_string (pTHX_ regexp *prog);
 extern void	my_regfree (pTHX_ struct regexp* r);
 extern SV*      my_reg_numbered_buff_get(pTHX_ const REGEXP * const rx, I32 paren, SV* usesv);
 extern SV*      my_reg_named_buff_get(pTHX_ const REGEXP * const rx, SV* namesv, U32 flags);
+extern SV*      my_reg_qr_pkg(pTHX_ const REGEXP * const rx);
 #if defined(USE_ITHREADS)
 extern void*	my_regdupe (pTHX_ const regexp *r, CLONE_PARAMS *param);
 #endif
@@ -40,6 +41,7 @@ const struct regexp_engine my_reg_engine = {
         my_regfree, 
         my_reg_numbered_buff_get,
         my_reg_named_buff_get,
+        my_reg_qr_pkg,
 #if defined(USE_ITHREADS)
         my_regdupe 
 #endif

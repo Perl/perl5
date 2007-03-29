@@ -453,13 +453,14 @@ EXTCONST U8 PL_simple[] = {
 EXTCONST regexp_engine PL_core_reg_engine;
 #else /* DOINIT */
 EXTCONST regexp_engine PL_core_reg_engine = { 
-	Perl_re_compile,
+        Perl_re_compile,
         Perl_regexec_flags, 
         Perl_re_intuit_start,
         Perl_re_intuit_string, 
         Perl_regfree_internal, 
         Perl_reg_numbered_buff_get,
         Perl_reg_named_buff_get,
+        Perl_reg_qr_pkg,
 #if defined(USE_ITHREADS)        
         Perl_regdupe_internal
 #endif        

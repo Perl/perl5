@@ -225,6 +225,8 @@
 #define CALLREG_NAMEDBUF(rx,name,flags) \
     CALL_FPTR((rx)->engine->named_buff_get)(aTHX_ (rx),(name),(flags))
 
+#define CALLREG_QRPKG(rx) \
+    CALL_FPTR((rx)->engine->qr_pkg)(aTHX_ (rx))
 
 #if defined(USE_ITHREADS)         
 #define CALLREGDUPE(prog,param) \

@@ -1902,6 +1902,9 @@ PERL_CALLCONV SV*	Perl_reg_named_buff_get(pTHX_ const REGEXP * const rx, SV* nam
 PERL_CALLCONV SV*	Perl_reg_numbered_buff_get(pTHX_ const REGEXP * const rx, I32 paren, SV* usesv)
 			__attribute__nonnull__(pTHX_1);
 
+PERL_CALLCONV SV*	Perl_reg_qr_pkg(pTHX_ const REGEXP * const rx)
+			__attribute__nonnull__(pTHX_1);
+
 
 PERL_CALLCONV void	Perl_regprop(pTHX_ const regexp *prog, SV* sv, const regnode* o)
 			__attribute__nonnull__(pTHX_2)

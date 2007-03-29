@@ -18,6 +18,7 @@
 #define Perl_regdupe_internal   my_regdupe
 #define Perl_reg_numbered_buff_get  my_reg_numbered_buff_get
 #define Perl_reg_named_buff_get  my_reg_named_buff_get
+#define Perl_reg_qr_pkg  my_reg_qr_pkg
 
 #define PERL_NO_GET_CONTEXT
 

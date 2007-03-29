@@ -1178,12 +1178,13 @@ PP(pp_qr)
 {
     dVAR; dSP;
     register PMOP * const pm = cPMOP;
+    REGEXP * rx = PM_GETRE(pm);
+    SV * const pkg = CALLREG_QRPKG(rx);
     SV * const rv = sv_newmortal();
-    SV * const sv = newSVrv(rv, "Regexp");
-    regexp *re = PM_GETRE(pm);
-    if (re->extflags & RXf_TAINTED)
+    SV * const sv = newSVrv(rv, SvPV_nolen(pkg));
+    if (rx->extflags & RXf_TAINTED)
         SvTAINTED_on(rv);
-    sv_magic(sv,(SV*)ReREFCNT_inc(re), PERL_MAGIC_qr,0,0);
+    sv_magic(sv,(SV*)ReREFCNT_inc(rx), PERL_MAGIC_qr,0,0);
     XPUSHs(rv);
     RETURN;
 }

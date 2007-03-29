@@ -407,6 +407,7 @@ Perl_regexec_flags
 Perl_regnext
 Perl_reg_named_buff_get
 Perl_reg_numbered_buff_get
+Perl_reg_qr_pkg
 Perl_repeatcpy
 Perl_rninstr
 Perl_rsignal

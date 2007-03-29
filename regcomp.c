@@ -4836,6 +4836,12 @@ Perl_reg_numbered_buff_get(pTHX_ const REGEXP * const rx, I32 paren, SV* usesv)
     return sv;
 }
 
+SV*
+Perl_reg_qr_pkg(pTHX_ const REGEXP * const rx)
+{
+	PERL_UNUSED_ARG(rx);
+	return newSVpvs("Regexp");
+}
 
 /* Scans the name of a named buffer from the pattern.
  * If flags is REG_RSN_RETURN_NULL returns null.

@@ -696,6 +696,7 @@ ApR	|regnode*|regnext	|NN regnode* p
 
 EXp	|SV*|reg_named_buff_get	|NN const REGEXP * const rx|NN SV* namesv|U32 flags
 EXp	|SV*|reg_numbered_buff_get|NN const REGEXP * const rx|I32 paren|NULLOK SV* usesv
+EXp	|SV*|reg_qr_pkg|NN const REGEXP * const rx
 
 Ep	|void	|regprop	|NULLOK const regexp *prog|NN SV* sv|NN const regnode* o
 Ap	|void	|repeatcpy	|NN char* to|NN const char* from|I32 len|I32 count
