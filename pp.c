@@ -3014,13 +3014,13 @@ PP(pp_substr)
     I32 pos;
     I32 rem;
     I32 fail;
-    const int num_args = PL_op->op_private & 7;
-    const I32 lvalue = num_args <= 3 && ( PL_op->op_flags & OPf_MOD || LVRET );
+    const I32 lvalue = PL_op->op_flags & OPf_MOD || LVRET;
     const char *tmps;
     const I32 arybase = CopARYBASE_get(PL_curcop);
     SV *repl_sv = NULL;
     const char *repl = NULL;
     STRLEN repl_len;
+    const int num_args = PL_op->op_private & 7;
     bool repl_need_utf8_upgrade = FALSE;
     bool repl_is_utf8 = FALSE;
 
@@ -3115,8 +3115,7 @@ PP(pp_substr)
 	    }
 	}
 
-	if (GIMME_V != G_VOID && !lvalue)
-	    sv_setpvn(TARG, tmps, rem);
+	sv_setpvn(TARG, tmps, rem);
 #ifdef USE_LOCALE_COLLATE
 	sv_unmagic(TARG, PERL_MAGIC_collxfrm);
 #endif
