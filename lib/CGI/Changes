@@ -1,3 +1,9 @@
+  Version 3.28
+  1. Applied patch from Allen Day that makes Cookie parsing RFC2109 compliant
+	(attribute/values can be separated by commas as well as semicolons).
+  2. Applied patch from Stephan Struckmann that allows script_name() to be set correctly.
+  3. Fixed problem with url(-full) in which port number appears twice.
+
   Version 3.27
   1. Applied patch from Steve Taylor that allows checkbox_groups to be
   disabled with a new -disabled=> option.

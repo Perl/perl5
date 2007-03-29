@@ -18,8 +18,8 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.227 2007/02/23 23:03:16 lstein Exp $';
-$CGI::VERSION='3.27';
+$CGI::revision = '$Id: CGI.pm,v 1.229 2007/03/29 15:35:40 lstein Exp $';
+$CGI::VERSION='3.28';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -2707,7 +2707,8 @@ sub url {
     if ($full) {
 	my $protocol = $self->protocol();
 	$url = "$protocol://";
-	my $vh = http('x_forwarded_host') || http('host');
+	my $vh = http('x_forwarded_host') || http('host') || '';
+        $vh =~ s/\:\d+$//;  # some clients add the port number (incorrectly). Get rid of it.
 	if ($vh) {
 	    $url .= $vh;
 	} else {
@@ -3052,7 +3053,7 @@ END_OF_FUNC
 sub script_name {
     my ($self,@p) = self_or_default(@_);
     if (@p) {
-        $self->{'.script_name'} = shift;
+        $self->{'.script_name'} = shift @p;
     } elsif (!exists $self->{'.script_name'}) {
         my ($script_name,$path_info) = $self->_name_and_path_from_env();
         $self->{'.script_name'} = $script_name;
