@@ -797,9 +797,6 @@ goto		goto			ck_null		ds}
 exit		exit			ck_exit		ds%	S?
 # continued below
 
-#nswitch	numeric switch		ck_null		d	
-#cswitch	character switch	ck_null		d	
-
 # I/O.
 
 open		open			ck_open		ismt@	F S? L
