@@ -78,8 +78,11 @@ SKIP: {
     ok(-d "op", "verify that we are back");
 
     # And now the ambiguous case
-    ok(opendir(H, "op"), "opendir op") or diag $!;
-    ok(open(H, "<", "base"), "open base") or diag $!;
+    {
+	no warnings qw<io deprecated>;
+	ok(opendir(H, "op"), "opendir op") or diag $!;
+	ok(open(H, "<", "base"), "open base") or diag $!;
+    }
     if (($Config{d_dirfd} || "") eq "define") {
 	ok(chdir(H), "fchdir to op");
 	ok(-f "chdir.t", "verify that we are in 'op'");

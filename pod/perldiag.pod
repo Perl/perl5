@@ -2836,6 +2836,20 @@ that isn't open.  Check your control flow.  See also L<perlfunc/-X>.
 
 (S internal) An internal warning that the grammar is screwed up.
 
+=item Opening dirhandle %s also as a file
+
+(W io deprecated) You used open() to associate a filehandle to
+a symbol (glob or scalar) that already holds a dirhandle.
+Although legal, this idiom might render your code confusing
+and is deprecated.
+
+=item Opening filehandle %s also as a directory
+
+(W io deprecated) You used opendir() to associate a dirhandle to
+a symbol (glob or scalar) that already holds a filehandle.
+Although legal, this idiom might render your code confusing
+and is deprecated.
+
 =item Operation "%s": no method found, %s
 
 (F) An attempt was made to perform an overloaded operation for which no
