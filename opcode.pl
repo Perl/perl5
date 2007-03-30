@@ -829,9 +829,6 @@ leavewhen	leave when block	ck_null		1
 break		break			ck_null		0
 continue	continue		ck_null		0
 
-#nswitch	numeric switch		ck_null		d	
-#cswitch	character switch	ck_null		d	
-
 # I/O.
 
 open		open			ck_open		ismt@	F S? L
