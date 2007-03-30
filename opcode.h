@@ -131,6 +131,7 @@ EXTCONST char* const PL_op_name[] = {
 	"i_negate",
 	"not",
 	"complement",
+	"smartmatch",
 	"atan2",
 	"sin",
 	"cos",
@@ -195,9 +196,11 @@ EXTCONST char* const PL_op_name[] = {
 	"and",
 	"or",
 	"xor",
+	"dor",
 	"cond_expr",
 	"andassign",
 	"orassign",
+	"dorassign",
 	"method",
 	"entersub",
 	"leavesub",
@@ -224,6 +227,14 @@ EXTCONST char* const PL_op_name[] = {
 	"dump",
 	"goto",
 	"exit",
+	"setstate",
+	"method_named",
+	"entergiven",
+	"leavegiven",
+	"enterwhen",
+	"leavewhen",
+	"break",
+	"continue",
 	"open",
 	"close",
 	"pipe_op",
@@ -243,6 +254,7 @@ EXTCONST char* const PL_op_name[] = {
 	"leavewrite",
 	"prtf",
 	"print",
+	"say",
 	"sysopen",
 	"sysseek",
 	"sysread",
@@ -381,18 +393,6 @@ EXTCONST char* const PL_op_name[] = {
 	"getlogin",
 	"syscall",
 	"lock",
-	"setstate",
-	"method_named",
-	"dor",
-	"dorassign",
-	"entergiven",
-	"leavegiven",
-	"enterwhen",
-	"leavewhen",
-	"break",
-	"continue",
-	"smartmatch",
-	"say",
 	"custom",
 };
 #endif
@@ -499,6 +499,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"integer negation (-)",
 	"not",
 	"1's complement (~)",
+	"smart match",
 	"atan2",
 	"sin",
 	"cos",
@@ -563,9 +564,11 @@ EXTCONST char* const PL_op_desc[] = {
 	"logical and (&&)",
 	"logical or (||)",
 	"logical xor",
+	"defined or (//)",
 	"conditional expression",
 	"logical and assignment (&&=)",
 	"logical or assignment (||=)",
+	"defined or assignment (//=)",
 	"method lookup",
 	"subroutine entry",
 	"subroutine exit",
@@ -592,6 +595,14 @@ EXTCONST char* const PL_op_desc[] = {
 	"dump",
 	"goto",
 	"exit",
+	"set statement info",
+	"method with known name",
+	"given()",
+	"leave given block",
+	"when()",
+	"leave when block",
+	"break",
+	"continue",
 	"open",
 	"close",
 	"pipe",
@@ -611,6 +622,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"write exit",
 	"printf",
 	"print",
+	"say",
 	"sysopen",
 	"sysseek",
 	"sysread",
@@ -749,18 +761,6 @@ EXTCONST char* const PL_op_desc[] = {
 	"getlogin",
 	"syscall",
 	"lock",
-	"set statement info",
-	"method with known name",
-	"defined or (//)",
-	"defined or assignment (//=)",
-	"given()",
-	"leave given block",
-	"when()",
-	"leave when block",
-	"break",
-	"continue",
-	"smart match",
-	"say",
 	"unknown custom operator",
 };
 #endif
@@ -881,6 +881,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_i_negate),
 	MEMBER_TO_FPTR(Perl_pp_not),
 	MEMBER_TO_FPTR(Perl_pp_complement),
+	MEMBER_TO_FPTR(Perl_pp_smartmatch),
 	MEMBER_TO_FPTR(Perl_pp_atan2),
 	MEMBER_TO_FPTR(Perl_pp_sin),
 	MEMBER_TO_FPTR(Perl_pp_sin),	/* Perl_pp_cos */
@@ -945,9 +946,11 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_and),
 	MEMBER_TO_FPTR(Perl_pp_or),
 	MEMBER_TO_FPTR(Perl_pp_xor),
+	MEMBER_TO_FPTR(Perl_pp_defined),	/* Perl_pp_dor */
 	MEMBER_TO_FPTR(Perl_pp_cond_expr),
 	MEMBER_TO_FPTR(Perl_pp_and),	/* Perl_pp_andassign */
 	MEMBER_TO_FPTR(Perl_pp_or),	/* Perl_pp_orassign */
+	MEMBER_TO_FPTR(Perl_pp_defined),	/* Perl_pp_dorassign */
 	MEMBER_TO_FPTR(Perl_pp_method),
 	MEMBER_TO_FPTR(Perl_pp_entersub),
 	MEMBER_TO_FPTR(Perl_pp_leavesub),
@@ -974,6 +977,14 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_goto),	/* Perl_pp_dump */
 	MEMBER_TO_FPTR(Perl_pp_goto),
 	MEMBER_TO_FPTR(Perl_pp_exit),
+	MEMBER_TO_FPTR(Perl_pp_setstate),
+	MEMBER_TO_FPTR(Perl_pp_method_named),
+	MEMBER_TO_FPTR(Perl_pp_entergiven),
+	MEMBER_TO_FPTR(Perl_pp_leavegiven),
+	MEMBER_TO_FPTR(Perl_pp_enterwhen),
+	MEMBER_TO_FPTR(Perl_pp_leavewhen),
+	MEMBER_TO_FPTR(Perl_pp_break),
+	MEMBER_TO_FPTR(Perl_pp_continue),
 	MEMBER_TO_FPTR(Perl_pp_open),
 	MEMBER_TO_FPTR(Perl_pp_close),
 	MEMBER_TO_FPTR(Perl_pp_pipe_op),
@@ -993,6 +1004,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_leavewrite),
 	MEMBER_TO_FPTR(Perl_pp_prtf),
 	MEMBER_TO_FPTR(Perl_pp_print),
+	MEMBER_TO_FPTR(Perl_pp_print),	/* Perl_pp_say */
 	MEMBER_TO_FPTR(Perl_pp_sysopen),
 	MEMBER_TO_FPTR(Perl_pp_sysseek),
 	MEMBER_TO_FPTR(Perl_pp_sysread),
@@ -1131,18 +1143,6 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_getlogin),
 	MEMBER_TO_FPTR(Perl_pp_syscall),
 	MEMBER_TO_FPTR(Perl_pp_lock),
-	MEMBER_TO_FPTR(Perl_pp_setstate),
-	MEMBER_TO_FPTR(Perl_pp_method_named),
-	MEMBER_TO_FPTR(Perl_pp_defined),	/* Perl_pp_dor */
-	MEMBER_TO_FPTR(Perl_pp_defined),	/* Perl_pp_dorassign */
-	MEMBER_TO_FPTR(Perl_pp_entergiven),
-	MEMBER_TO_FPTR(Perl_pp_leavegiven),
-	MEMBER_TO_FPTR(Perl_pp_enterwhen),
-	MEMBER_TO_FPTR(Perl_pp_leavewhen),
-	MEMBER_TO_FPTR(Perl_pp_break),
-	MEMBER_TO_FPTR(Perl_pp_continue),
-	MEMBER_TO_FPTR(Perl_pp_smartmatch),
-	MEMBER_TO_FPTR(Perl_pp_print),	/* Perl_pp_say */
 	MEMBER_TO_FPTR(Perl_unimplemented_op),	/* Perl_pp_custom */
 }
 #endif
@@ -1260,6 +1260,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* i_negate */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* not */
 	MEMBER_TO_FPTR(Perl_ck_bitop),	/* complement */
+	MEMBER_TO_FPTR(Perl_ck_smartmatch),	/* smartmatch */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* atan2 */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* sin */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* cos */
@@ -1324,9 +1325,11 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* and */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* or */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* xor */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* dor */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* cond_expr */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* andassign */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* orassign */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* dorassign */
 	MEMBER_TO_FPTR(Perl_ck_method),	/* method */
 	MEMBER_TO_FPTR(Perl_ck_subr),	/* entersub */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* leavesub */
@@ -1353,6 +1356,14 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* dump */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* goto */
 	MEMBER_TO_FPTR(Perl_ck_exit),	/* exit */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* setstate */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* method_named */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* entergiven */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* leavegiven */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* enterwhen */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* leavewhen */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* break */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* continue */
 	MEMBER_TO_FPTR(Perl_ck_open),	/* open */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* close */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* pipe_op */
@@ -1372,6 +1383,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* leavewrite */
 	MEMBER_TO_FPTR(Perl_ck_listiob),	/* prtf */
 	MEMBER_TO_FPTR(Perl_ck_listiob),	/* print */
+	MEMBER_TO_FPTR(Perl_ck_listiob),	/* say */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* sysopen */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* sysseek */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* sysread */
@@ -1510,18 +1522,6 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* getlogin */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* syscall */
 	MEMBER_TO_FPTR(Perl_ck_rfun),	/* lock */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* setstate */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* method_named */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* dor */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* dorassign */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* entergiven */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* leavegiven */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* enterwhen */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* leavewhen */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* break */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* continue */
-	MEMBER_TO_FPTR(Perl_ck_smartmatch),	/* smartmatch */
-	MEMBER_TO_FPTR(Perl_ck_listiob),	/* say */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* custom */
 }
 #endif
@@ -1633,6 +1633,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x0000231e,	/* i_negate */
 	0x00002216,	/* not */
 	0x0000220e,	/* complement */
+	0x00000404,	/* smartmatch */
 	0x0002290e,	/* atan2 */
 	0x0001378e,	/* sin */
 	0x0001378e,	/* cos */
@@ -1697,9 +1698,11 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000600,	/* and */
 	0x00000600,	/* or */
 	0x00022406,	/* xor */
+	0x00000600,	/* dor */
 	0x00000640,	/* cond_expr */
 	0x00000604,	/* andassign */
 	0x00000604,	/* orassign */
+	0x00000604,	/* dorassign */
 	0x00000240,	/* method */
 	0x00004249,	/* entersub */
 	0x00000200,	/* leavesub */
@@ -1726,6 +1729,14 @@ EXTCONST U32 PL_opargs[] = {
 	0x00001a44,	/* dump */
 	0x00001a44,	/* goto */
 	0x00013644,	/* exit */
+	0x00001404,	/* setstate */
+	0x00000c40,	/* method_named */
+	0x00000640,	/* entergiven */
+	0x00000200,	/* leavegiven */
+	0x00000640,	/* enterwhen */
+	0x00000200,	/* leavewhen */
+	0x00000000,	/* break */
+	0x00000000,	/* continue */
 	0x0052c81d,	/* open */
 	0x0001d614,	/* close */
 	0x000cc814,	/* pipe_op */
@@ -1745,6 +1756,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000200,	/* leavewrite */
 	0x0005c815,	/* prtf */
 	0x0005c815,	/* print */
+	0x0005c815,	/* say */
 	0x1222c804,	/* sysopen */
 	0x0022c804,	/* sysseek */
 	0x122ec81d,	/* sysread */
@@ -1883,18 +1895,6 @@ EXTCONST U32 PL_opargs[] = {
 	0x0000000c,	/* getlogin */
 	0x0004281d,	/* syscall */
 	0x0000f604,	/* lock */
-	0x00001404,	/* setstate */
-	0x00000c40,	/* method_named */
-	0x00000600,	/* dor */
-	0x00000604,	/* dorassign */
-	0x00000640,	/* entergiven */
-	0x00000200,	/* leavegiven */
-	0x00000640,	/* enterwhen */
-	0x00000200,	/* leavewhen */
-	0x00000000,	/* break */
-	0x00000000,	/* continue */
-	0x00000404,	/* smartmatch */
-	0x0005c815,	/* say */
 	0x00000000,	/* custom */
 };
 #endif

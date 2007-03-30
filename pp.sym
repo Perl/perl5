@@ -142,6 +142,7 @@ Perl_pp_negate
 Perl_pp_i_negate
 Perl_pp_not
 Perl_pp_complement
+Perl_pp_smartmatch
 Perl_pp_atan2
 Perl_pp_sin
 Perl_pp_cos
@@ -206,9 +207,11 @@ Perl_pp_flop
 Perl_pp_and
 Perl_pp_or
 Perl_pp_xor
+Perl_pp_dor
 Perl_pp_cond_expr
 Perl_pp_andassign
 Perl_pp_orassign
+Perl_pp_dorassign
 Perl_pp_method
 Perl_pp_entersub
 Perl_pp_leavesub
@@ -235,6 +238,14 @@ Perl_pp_redo
 Perl_pp_dump
 Perl_pp_goto
 Perl_pp_exit
+Perl_pp_setstate
+Perl_pp_method_named
+Perl_pp_entergiven
+Perl_pp_leavegiven
+Perl_pp_enterwhen
+Perl_pp_leavewhen
+Perl_pp_break
+Perl_pp_continue
 Perl_pp_open
 Perl_pp_close
 Perl_pp_pipe_op
@@ -254,6 +265,7 @@ Perl_pp_enterwrite
 Perl_pp_leavewrite
 Perl_pp_prtf
 Perl_pp_print
+Perl_pp_say
 Perl_pp_sysopen
 Perl_pp_sysseek
 Perl_pp_sysread
@@ -392,17 +404,5 @@ Perl_pp_egrent
 Perl_pp_getlogin
 Perl_pp_syscall
 Perl_pp_lock
-Perl_pp_setstate
-Perl_pp_method_named
-Perl_pp_dor
-Perl_pp_dorassign
-Perl_pp_entergiven
-Perl_pp_leavegiven
-Perl_pp_enterwhen
-Perl_pp_leavewhen
-Perl_pp_break
-Perl_pp_continue
-Perl_pp_smartmatch
-Perl_pp_say
 
 # ex: set ro:
