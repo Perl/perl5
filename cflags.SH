@@ -17,7 +17,7 @@ case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
 
-if test -f config_h.SH && ! test -f config.h; then
+if test -f config_h.SH -a ! -f config.h; then
     . ./config_h.SH
     CONFIG_H=already-done
 fi
@@ -119,7 +119,7 @@ case "$gccversion" in
 '') ;;
 [12]*) ;; # gcc versions 1 (gasp!) and 2 are not good for this.
 Intel*) ;; # # Is that you, Intel C++?
-*)  for opt in -ansi -pedantic -std=c89 -W -Wextra -Wdeclaration-after-statement -Wendif-labels
+*)  for opt in -ansi -pedantic -std=c89 -W -Wextra -Wdeclaration-after-statement -Wendif-labels -Wc++-compat
     do
        case " $ccflags " in
        *" $opt "*) ;; # Skip if already there.
