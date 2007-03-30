@@ -1054,6 +1054,4 @@ smartmatch	smart match		ck_smartmatch	s2
 
 say		say			ck_listiob	ims@	F? L
 
-# Add new ops before this, the custom operator.
-
 custom		unknown custom operator		ck_null		0
