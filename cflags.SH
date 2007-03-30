@@ -17,7 +17,7 @@ case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
 
-if test -f config_h.SH && ! test -f config.h; then
+if test -f config_h.SH -a ! -f config.h; then
     . ./config_h.SH
     CONFIG_H=already-done
 fi
