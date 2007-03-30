@@ -4810,10 +4810,8 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 	    d->what[i] = r->data->what[i];
 	    switch (d->what[i]) {
 	    case 's':
+	    case 'p': /* actually an AV, but the dup function is identical.  */
 		d->data[i] = sv_dup_inc((SV *)r->data->data[i], param);
-		break;
-	    case 'p':
-		d->data[i] = av_dup_inc((AV *)r->data->data[i], param);
 		break;
 	    case 'f':
 		/* This is cheating. */
