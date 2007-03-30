@@ -1143,6 +1143,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_continue),
 	MEMBER_TO_FPTR(Perl_pp_smartmatch),
 	MEMBER_TO_FPTR(Perl_pp_print),	/* Perl_pp_say */
+	MEMBER_TO_FPTR(Perl_unimplemented_op),	/* Perl_pp_custom */
 }
 #endif
 #ifdef PERL_PPADDR_INITED

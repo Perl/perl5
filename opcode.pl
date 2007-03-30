@@ -46,7 +46,7 @@ my %alias;
 # Format is "this function" => "does these op names"
 my @raw_alias = (
 		 Perl_do_kv => [qw( keys values )],
-		 Perl_unimplemented_op => [qw(padany mapstart)],
+		 Perl_unimplemented_op => [qw(padany mapstart custom)],
 		 # All the ops with a body of { return NORMAL; }
 		 Perl_pp_null => [qw(scalar regcmaybe lineseq scope)],
 
@@ -240,7 +240,6 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 END
 
 for (@ops) {
-    $_ eq "custom" and next;
     if (my $name = $alias{$_}) {
 	print "\tMEMBER_TO_FPTR($name),\t/* Perl_pp_$_ */\n";
     }
@@ -523,7 +522,8 @@ sub tab {
 
 __END__
 
-# New ops always go at the end, just before 'custom'
+# New ops always go at the end
+# The restriction on having custom as the last op has been removed
 
 # A recapitulation of the format of this file:
 # The file consists of five columns: the name of the op, an English
