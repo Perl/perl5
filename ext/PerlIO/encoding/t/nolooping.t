@@ -1,6 +1,10 @@
 #!perl -w
 
-use Test::More tests => 1;
+use Config;
+
+use Test::More $Config{useperlio}
+    ? (tests => 1)
+    : (skip_all => 'No PerlIO enabled');
 
 BEGIN {
     $SIG{__WARN__} = sub { $warn .= $_[0] };

@@ -14,6 +14,10 @@ BEGIN {
 	print "1..0 # Skip: no /dev/null\n";
 	exit 0;
     }
+    if (!-c "/dev/tty") {
+	print "1..0 # Skip: no /dev/tty\n";
+	exit 0;
+    }
 }
 
 plan(1);
