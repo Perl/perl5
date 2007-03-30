@@ -4767,6 +4767,7 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 {
     REGEXP *ret;
     int len, npar;
+    Size_t size;
 
     if (!r)
 	return (REGEXP *)NULL;
@@ -4777,15 +4778,16 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
     len = r->offsets[0];
     npar = r->nparens+1;
 
-    Newxc(ret, sizeof(regexp) + (len+1)*sizeof(regnode), char, regexp);
-    Copy(r->program, ret->program, len+1, regnode);
+    size = sizeof(regexp) + (len+1)*sizeof(regnode);
+    Newxc(ret, size, char, regexp);
+    Copy(r, ret, size, char);
 
     Newx(ret->startp, npar, I32);
     Copy(r->startp, ret->startp, npar, I32);
     Newx(ret->endp, npar, I32);
     Copy(r->startp, ret->startp, npar, I32);
 
-    if (r->substrs) {
+    if (ret->substrs) {
 	/* Do it this way to avoid reading from *r after the StructCopy().
 	   That way, if any of the sv_dup_inc()s dislodge *r from the L1
 	   cache, it doesn't matter.  */
@@ -4813,11 +4815,13 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 		ret->check_utf8 = ret->float_utf8;
 	    }
 	}
-    } else 
-        ret->substrs = NULL;    
+    }
+
+    Newx(ret->offsets, 2*len+1, U32);
+    Copy(r->offsets, ret->offsets, 2*len+1, U32);
 
     ret->regstclass = NULL;
-    if (r->data) {
+    if (ret->data) {
 	struct reg_data *d;
         const int count = r->data->count;
 	int i;
@@ -4856,31 +4860,16 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 
 	ret->data = d;
     }
-    else
-	ret->data = NULL;
 
-    Newx(ret->offsets, 2*len+1, U32);
-    Copy(r->offsets, ret->offsets, 2*len+1, U32);
-
-    ret->precomp        = SAVEPVN(r->precomp, r->prelen);
-    ret->refcnt         = r->refcnt;
-    ret->minlen         = r->minlen;
-    ret->prelen         = r->prelen;
-    ret->nparens        = r->nparens;
-    ret->lastparen      = r->lastparen;
-    ret->lastcloseparen = r->lastcloseparen;
-    ret->reganch        = r->reganch;
-
-    ret->sublen         = r->sublen;
+    ret->precomp        = SAVEPVN(ret->precomp, ret->prelen);
 
     if (RX_MATCH_COPIED(ret))
-	ret->subbeg  = SAVEPVN(r->subbeg, r->sublen);
+	ret->subbeg  = SAVEPVN(ret->subbeg, ret->sublen);
     else
 	ret->subbeg = NULL;
 
     ptr_table_store(PL_ptr_table, (regexp *)r, ret);
     return ret;
-    return NULL;    
 }
 #endif    
 
