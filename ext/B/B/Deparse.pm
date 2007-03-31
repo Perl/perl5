@@ -3725,8 +3725,10 @@ sub dq {
 sub pp_backtick {
     my $self = shift;
     my($op, $cx) = @_;
-    # skip pushmark
-    return single_delim("qx", '`', $self->dq($op->first->sibling));
+    # skip pushmark if it exists (readpipe() vs ``)
+    my $child = $op->first->sibling->isa('B::NULL')
+	? $op->first->first : $op->first->sibling;
+    return single_delim("qx", '`', $self->dq($child));
 }
 
 sub dquote {
