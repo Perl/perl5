@@ -5,6 +5,8 @@ Storable.pm		    The perl side of Storable
 Storable.xs		    The C side of Storable
 ChangeLog		    Changes since baseline
 hints/linux.pl		    Hint file to drop gcc to -O2
+hints/gnukfreebsd.pl	    Hint file to drop gcc to -O2
+hints/gnuknetbsd.pl	    Hint file to drop gcc to -O2
 # ppport.h		    Compatibility header
 t/HAS_ATTACH.pm		    For auto-requiring of modules for STORABLE_attach
 t/HAS_HOOK.pm		    For auto-requiring of modules for STORABLE_thaw
