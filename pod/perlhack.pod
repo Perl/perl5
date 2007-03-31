@@ -2844,6 +2844,22 @@ But in any case, try to keep the features and operating systems separate.
 
 =back
 
+=head2 Problematic System Interfaces
+
+=over 4
+
+=item *
+
+malloc(0), realloc(0), calloc(0, 0) are nonportable.  To be portable
+allocate at least one byte.  (In general you should rarely need to
+work at this low level, but instead use the various malloc wrappers.)
+
+=item *
+
+snprintf() - the return type is unportable.  Use my_snprintf() instead.
+
+=back
+
 =head2 Security problems
 
 Last but not least, here are various tips for safer coding.

@@ -255,11 +255,23 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 {
     dTHX;
     Malloc_t ptr;
+    MEM_SIZE total_size = 0;
 
+    /* Even though calloc() for zero bytes is strange, be robust. */
+    if (size && (count <= (MEM_SIZE)~0 / size))
+	total_size = size * count;
+    else
+	Perl_croak_nocontext(PL_memory_wrap);
+#ifdef PERL_TRACK_MEMPOOL
+    if (sTHX <= (MEM_SIZE)~0 - (MEM_SIZE)total_size)
+	total_size += sTHX;
+    else
+	Perl_croak_nocontext(PL_memory_wrap);
+#endif
 #ifdef HAS_64K_LIMIT
-    if (size * count > 0xffff) {
+    if (total_size > 0xffff) {
 	PerlIO_printf(Perl_error_log,
-		      "Allocation too large: %lx\n", size * count) FLUSH;
+		      "Allocation too large: %lx\n", total_size) FLUSH;
 	my_exit(1);
     }
 #endif /* HAS_64K_LIMIT */
@@ -267,20 +279,28 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
     if ((long)size < 0 || (long)count < 0)
 	Perl_croak_nocontext("panic: calloc");
 #endif
-    size *= count;
 #ifdef PERL_TRACK_MEMPOOL
-    size += sTHX;
+    /* Have to use malloc() because we've added some space for our tracking
+       header.  */
+    /* malloc(0) is non-portable. */
+    ptr = (Malloc_t)PerlMem_malloc(total_size ? total_size : 1);
+#else
+    /* Use calloc() because it might save a memset() if the memory is fresh
+       and clean from the OS.  */
+    if (count && size)
+	ptr = (Malloc_t)PerlMem_calloc(count, size);
+    else /* calloc(0) is non-portable. */
+	ptr = (Malloc_t)PerlMem_calloc(count ? count : 1, size ? size : 1);
 #endif
-    ptr = (Malloc_t)PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
     PERL_ALLOC_CHECK(ptr);
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) calloc %ld x %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)count,(long)size));
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) calloc %ld x %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)count,(long)total_size));
     if (ptr != NULL) {
-	memset((void*)ptr, 0, size);
 #ifdef PERL_TRACK_MEMPOOL
 	{
 	    struct perl_memory_debug_header *const header
 		= (struct perl_memory_debug_header *)ptr;
 
+	    memset((void*)ptr, 0, total_size);
 	    header->interpreter = aTHX;
 	    /* Link us into the list.  */
 	    header->prev = &PL_memory_debug_header;
@@ -288,7 +308,7 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 	    PL_memory_debug_header.next = header;
 	    header->next->prev = header;
 #  ifdef PERL_POISON
-	    header->size = size;
+	    header->size = total_size;
 #  endif
 	    ptr = (Malloc_t)((char*)ptr+sTHX);
 	}
