@@ -84,13 +84,13 @@ typedef struct regexp {
 
 	char *subbeg;		/* saved or original string 
 				   so \digit works forever. */
-	I32 sublen;		/* Length of string pointed by subbeg */
 	SV_SAVED_COPY           /* If non-NULL, SV which is COW from original */
+	I32 sublen;		/* Length of string pointed by subbeg */
         
         
         /* Information about the match that isn't often used */
-	const char *precomp;	/* pre-compilation regular expression */
 	I32 prelen;		/* length of precomp */
+	const char *precomp;	/* pre-compilation regular expression */
 	/* wrapped can't be const char*, as it is returned by sv_2pv_flags */
 	char *wrapped;          /* wrapped version of the pattern */
 	I32 wraplen;		/* length of wrapped */
@@ -373,8 +373,8 @@ typedef struct regmatch_state {
 					    inner and outer rexen */
 	    CHECKPOINT	cp;	/* remember current savestack indexes */
 	    CHECKPOINT	lastcp;
-	    regnode	*B;	/* the node following us  */
 	    U32        close_paren; /* which close bracket is our end */
+	    regnode	*B;	/* the node following us  */
 	} eval;
 
 	struct {
@@ -403,12 +403,12 @@ typedef struct regmatch_state {
 	    /* this first element must match u.yes */
 	    struct regmatch_state *prev_yes_state;
 	    struct regmatch_state *prev_curlyx; /* previous cur_curlyx */
+	    regnode	*A, *B;	/* the nodes corresponding to /A*B/  */
 	    CHECKPOINT	cp;	/* remember current savestack index */
 	    bool	minmod;
 	    int		parenfloor;/* how far back to strip paren data */
 	    int		min;	/* the minimal number of A's to match */
 	    int		max;	/* the maximal number of A's to match */
-	    regnode	*A, *B;	/* the nodes corresponding to /A*B/  */
 
 	    /* these two are modified by WHILEM */
 	    int		count;	/* how many instances of A we've matched */
@@ -491,6 +491,9 @@ typedef struct regmatch_slab {
 
 struct re_save_state {
     U32 re_state_reg_flags;		/* from regexec.c */
+    U32 re_state_reg_start_tmpl;	/* from regexec.c */
+    I32 re_state_reg_eval_set;		/* from regexec.c */
+    bool re_state_reg_match_utf8;	/* from regexec.c */
     char *re_state_bostr;
     char *re_state_reginput;		/* String-input pointer. */
     char *re_state_regeol;		/* End of input, for $ check. */
@@ -498,20 +501,17 @@ struct re_save_state {
     U32 *re_state_reglastparen;		/* Similarly for lastparen. */
     U32 *re_state_reglastcloseparen;	/* Similarly for lastcloseparen. */
     char **re_state_reg_start_tmp;	/* from regexec.c */
-    U32 re_state_reg_start_tmpl;	/* from regexec.c */
-    I32 re_state_reg_eval_set;		/* from regexec.c */
-    bool re_state_reg_match_utf8;	/* from regexec.c */
     MAGIC *re_state_reg_magic;		/* from regexec.c */
-    I32 re_state_reg_oldpos;		/* from regexec.c */
     PMOP *re_state_reg_oldcurpm;	/* from regexec.c */
     PMOP *re_state_reg_curpm;		/* from regexec.c */
     char *re_state_reg_oldsaved;	/* old saved substr during match */
     STRLEN re_state_reg_oldsavedlen;	/* old length of saved substr during match */
+    STRLEN re_state_reg_poscache_size;	/* size of pos cache of WHILEM */
+    I32 re_state_reg_oldpos;		/* from regexec.c */
     I32 re_state_reg_maxiter;		/* max wait until caching pos */
     I32 re_state_reg_leftiter;		/* wait until caching pos */
-    char *re_state_reg_poscache;	/* cache of pos of WHILEM */
-    STRLEN re_state_reg_poscache_size;	/* size of pos cache of WHILEM */
     U32 re_state_regsize;		/* from regexec.c */
+    char *re_state_reg_poscache;	/* cache of pos of WHILEM */
     char *re_state_reg_starttry;	/* from regexec.c */
 #ifdef PERL_OLD_COPY_ON_WRITE
     SV *re_state_nrs;			/* was placeholder: unused since 5.8.0 (5.7.2 patch #12027 for bug ID 20010815.012). Used to save rx->saved_copy */
