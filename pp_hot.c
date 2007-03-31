@@ -3024,6 +3024,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 		     && SvOBJECT(ob))))
     {
 	Perl_croak(aTHX_ "Can't call method \"%s\" on unblessed reference",
+		   (SvSCREAM(meth) && strEQ(name,"isa")) ? "DOES" :
 		   name);
     }
 

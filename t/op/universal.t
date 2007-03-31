@@ -10,7 +10,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 110;
+plan tests => 111;
 
 $a = {};
 bless $a, "Bob";
@@ -222,4 +222,9 @@ package Bodine;
 Bodine->isa('Pig');
 *isa = \&UNIVERSAL::isa;
 eval { isa({}, 'HASH') };
-::is($@, '', "*isa correctly found")
+::is($@, '', "*isa correctly found");
+
+package main;
+eval { UNIVERSAL::DOES([], "foo") };
+like( $@, qr/Can't call method "DOES" on unblessed reference/,
+    'DOES call error message says DOES, not isa' );
