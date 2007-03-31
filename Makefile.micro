@@ -5,6 +5,7 @@ CFLAGS = $(DEFINES) $(OPTIMIZE)
 LIBS = -lm
 _O = .o
 ENV = env
+PERL = perl
 
 all:	microperl
 
@@ -35,6 +36,11 @@ clean:
 distclean:	clean
 
 # The microconfiguration.
+
+# Cannot use $$ in the command line itself, so using var expansion instead.
+Config = '$$Config{$$1}'
+patch_uconfig:
+	$(PERL) -MConfig -pi -e "s/^((?:short|int|long(?:dbl|long)?|ptr|double|[iun]v|u?quad|[iu]\d+|fpos|lseek)(?:size|type)|byteorder|d_quad|quadkind|use64.+)=.*/\\1='"$(Config)"'/g" uconfig.shx
 
 regen_uconfig uconfig.h: uconfig.sh
 	$(ENV) CONFIG_SH=uconfig.sh CONFIG_H=uconfig.h sh ./config_h.SH
