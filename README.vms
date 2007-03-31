@@ -32,9 +32,13 @@ compiler is required to build Perl.  VAX C is *not* ANSI compliant, as it
 died a natural death some time before the standard was set.  Therefore 
 VAX C will not compile Perl 5.005 or later.  We are sorry about that.
 
-If you are stuck without Compaq (formerly DEC) C consider trying Gnu C
-instead, though there have been no recent reports of builds using Gnu C. 
-There is minimal support for Compaq C++ but this support is not complete;
+There have been no recent reports of builds using Gnu C, but latent
+(and most likely outdated) support for it is still present in various
+parts of the sources.  Currently the HP (formerly Compaq, and even 
+more formerly DEC) C compiler is the only viable alternative for
+building Perl.
+
+There is minimal support for HP C++ but this support is not complete;
 if you get it working please write to the vmsperl list (for info see
 L</"Mailing Lists">).
 
@@ -53,11 +57,6 @@ There are still some unimplemented system functions, and of course we
 could use modules implementing useful VMS system services, so if you'd like
 to lend a hand we'd love to have you.  Join the Perl Porting Team Now!
 
-The current sources and build procedures have been tested on a VAX using
-DEC C, and on an AXP using DEC C. If you run into problems with
-other compilers, please let us know.  (Note: DEC C was renamed to Compaq C
-around version 6.2).
-
 There are issues with various versions of DEC C, so if you're not running a
 relatively modern version, check the "DEC C issues" section later on in this
 document.
@@ -70,7 +69,7 @@ In addition to VMS and DCL you will need two things:
 
 =item 1  A C compiler. 
 
-DEC (now Compaq) C or gcc for VMS (AXP or VAX).
+HP (formerly Compaq, more formerly DEC) C for VMS (VAX, Alpha, or Itanium).
 
 =item 2  A make tool. 
 
@@ -92,23 +91,25 @@ You may also want to have on hand:
 
 A de-compressor for *.gz and *.tgz files available from a number 
 of web/ftp sites and is distributed on the OpenVMS Freeware CD-ROM 
-from Compaq.
+from HP.
 
-    http://www.fsf.org/order/ftp.html
-    http://www.openvms.compaq.com/freeware/
+    http://www.hp.com/go/openvms/freeware/
     http://www.crinoid.com/utils/
 
 =item 2  VMS TAR 
 
 For reading and writing unix tape archives (*.tar files).  Vmstar is also 
 available from a number of web/ftp sites and is distributed on the OpenVMS
-Freeware CD-ROM from Compaq.
+Freeware CD-ROM from HP.
 
-    ftp://ftp.lp.se/vms/
-    http://www.openvms.compaq.com/freeware/
+    http://www.hp.com/go/openvms/freeware/
 
 Recent versions of VMS tar on ODS-5 volumes may extract tape archive
 files with ^. escaped periods in them.  See below for further workarounds.
+
+A port of GNU tar is also available as part of the GNV package:
+
+    http://gnv.sourceforge.net/
 
 =item 3  UNZIP.EXE for VMS
 
@@ -116,10 +117,10 @@ A combination decompressor and archive reader/writer for *.zip files.
 Unzip is available from a number of web/ftp sites.
 
     http://www.info-zip.org/UnZip.html
-    http://www.openvms.compaq.com/freeware/
-    ftp://ftp.openvms.compaq.com/
+    http://www.hp.com/go/openvms/freeware/
+    ftp://ftp.hp.com/pub/openvms
     ftp://ftp.madgoat.com/madgoat/
-    ftp://ftp.process.com/vms-freeware/
+    ftp://ftp.process.com/vms-freeware/fileserv
 
 =item 4  MOST
 
@@ -139,7 +140,7 @@ distribution) and applied with GNU patch.  VMS ports of these utilities are
 available here:
 
     http://www.crinoid.com/utils/
-    http://www.openvms.compaq.com/freeware/
+    http://www.hp.com/go/openvms/freeware/
 
 =back
 
@@ -520,8 +521,8 @@ to NOT INSTALL PERL.EXE with PRIVs!
 
 =head2 Running h2ph to create perl header files (optional) on VMS
 
-If using DEC C or Compaq C ensure that you have extracted loose versions
-of your compiler's header or *.H files.  Be sure to check the contents of:
+If using HP C, ensure that you have extracted loose versions of your 
+compiler's header or *.H files.  Be sure to check the contents of:
 
     SYS$LIBRARY:DECC$RTLDEF.TLB
     SYS$LIBRARY:SYS$LIB_C.TLB
@@ -744,7 +745,7 @@ Vmsperl pages on the web include:
     http://www-ang.kfunigraz.ac.at/~binder/perl.html
     http://lists.perl.org/showlist.cgi?name=vmsperl
     http://archive.develooper.com/vmsperl@perl.org/
-    http://www.openvms.compaq.com/openvms/products/ips/apache/csws_modperl.html
+    http://h71000.www7.hp.com/openvms/products/ips/apache/csws_modperl.html
 
 =head1 SEE ALSO
 
