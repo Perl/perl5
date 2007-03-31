@@ -89,8 +89,9 @@ typedef struct regexp {
         
         
         /* Information about the match that isn't often used */
-	char *precomp;		/* pre-compilation regular expression */
+	const char *precomp;	/* pre-compilation regular expression */
 	I32 prelen;		/* length of precomp */
+	/* wrapped can't be const char*, as it is returned by sv_2pv_flags */
 	char *wrapped;          /* wrapped version of the pattern */
 	I32 wraplen;		/* length of wrapped */
 	I32 seen_evals;         /* number of eval groups in the pattern - for security checks */ 
