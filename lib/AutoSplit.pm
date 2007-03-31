@@ -1,6 +1,5 @@
 package AutoSplit;
 
-use 5.009005; # due to "my $_" and new regexp features
 use Exporter ();
 use Config qw(%Config);
 use File::Basename ();
@@ -146,9 +145,14 @@ if (defined (&Dos::UseLFN)) {
 }
 my $Is_VMS = ($^O eq 'VMS');
 
-# allow checking for valid ': attrlist' attachments
+# allow checking for valid ': attrlist' attachments.
+# extra jugglery required to support both 5.8 and 5.9/5.10 features
+# (support for 5.8 required for cross-compiling environments)
 
-my $attr_list = qr{
+my $attr_list = 
+  $] >= 5.009005 ?
+  eval <<'__QR__'
+  qr{
     \s* : \s*
     (?:
 	# one attribute
@@ -158,7 +162,18 @@ my $attr_list = qr{
 	)
 	(?: \s* : \s* | \s+ (?! :) )
     )*
-}x;
+  }x
+__QR__
+  :
+  do {
+    # In pre-5.9.5 world we have to do dirty tricks.
+    # (we use 'our' rather than 'my' here, due to the rather complex and buggy
+    # behaviour of lexicals with qr// and (??{$lex}) )
+    our $trick1; # yes, cannot our and assign at the same time.
+    $trick1 = qr{ \( (?: (?> [^()]+ ) | (??{ $trick1 }) )* \) }x;
+    our $trick2 = qr{ (?> (?! \d) \w+ (?:$trick1)? ) (?:\s*\:\s*|\s+(?!\:)) }x;
+    qr{ \s* : \s* (?: $trick2 )* }x;
+  };
 
 sub autosplit{
     my($file, $autodir,  $keep, $ckal, $ckmt) = @_;
@@ -181,8 +196,8 @@ sub carp{
 
 sub autosplit_lib_modules {
     my(@modules) = @_; # list of Module names
-
-    while (defined(my $_ = shift @modules)) {
+    local $_; # Avoid clobber.
+    while (defined($_ = shift @modules)) {
 	while (m#([^:]+)::([^:].*)#) { # in case specified as ABC::XYZ
 	    $_ = catfile($1, $2);
 	}

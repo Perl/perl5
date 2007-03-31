@@ -459,7 +459,7 @@ static const char reg_off_by_arg[] = {
 #ifndef DOINIT
 EXTCONST char * PL_reg_name[];
 #else
-EXTCONST char * PL_reg_name[] = {
+EXTCONST char * const PL_reg_name[] = {
 	"END",                   	/* 0000 */
 	"SUCCEED",               	/* 0x01 */
 	"BOL",                   	/* 0x02 */

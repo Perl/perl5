@@ -164,7 +164,7 @@ print OUT <<EOP;
 #ifndef DOINIT
 EXTCONST char * PL_reg_name[];
 #else
-EXTCONST char * PL_reg_name[] = {
+EXTCONST char * const PL_reg_name[] = {
 EOP
 
 $ind = 0;

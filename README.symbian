@@ -69,16 +69,19 @@ mainly as demonstrations.
 
 	perl symbian\config.pl
 
-    You must use the cmd.exe, the Cygwin shell will not work
-    (the PATH must include the SDK tools, including a Perl,
-    which should be the case under cmd.exe)
+    You must use the cmd.exe, the Cygwin shell will not work.
+    The PATH must include the SDK tools, including a Perl,
+    which should be the case under cmd.exe.  If you do not
+    have that, see the end of symbian\sdk.pl for notes of
+    how your environment should be set up for Symbian compiles.
 
 (4) Build the project, either by
 
 	make all
 
     in cmd.exe or by using either the Metrowerks CodeWarrior
-    or the Visual C++ 6.0.
+    or the Visual C++ 6.0, or the Visual Studio 8 (the Visual C++
+    2005 Express Edition works fine).
 
     If you use the VC IDE, you will have to run F<symbian\config.pl>
     first using the cmd.exe, and then run 'make win.mf vc6.mf' to generate
@@ -95,7 +98,7 @@ mainly as demonstrations.
         S60 2.0 | +  | +  | 6600
         S60 2.1 | -  | +  | 6670
         S60 2.6 | +  | +  | 6630    
-        S60 2.8 | -  | +  | (not tested in a device)
+        S60 2.8 | +  | +  | (not tested in a device)
         S80 2.6 | -  | +  | 9300
         S90 1.1 | +  | -  | 7710
         UIQ 2.1 | -  | +  | (not tested in a device)
@@ -330,6 +333,8 @@ Jarkko Hietaniemi
 
 Copyright (c) 2004-2005 Nokia.  All rights reserved.
 
+Copyright (c) 2006-2007 Jarkko Hietaniemi.
+
 =head1 LICENSE
 
 The Symbian port is licensed under the same terms as Perl itself.
@@ -400,12 +405,25 @@ We maintain the binary incompatibility.
 
 We maintain the binary incompatibility.
 
+=item *
+
 0.4.1: December 2006
 
-  - Perl 5.9.5 (patch level 30002)
+  - Perl 5.9.5-to-be (patch level 30002)
   - added extensions: Compress/Raw/Zlib, Digest/SHA,
     Hash/Util, Math/BigInt/FastCalc, Text/Soundex, Time/Piece
   - port to S90 1.1 by alexander smishlajev
+
+We maintain the binary incompatibility.
+
+=item *
+
+0.4.2: March 2007
+
+  - catchup with Perl 5.9.5-to-be (patch level 30812)
+  - tested to build with Microsoft Visual C++ 2005 Express Edition
+    (which uses Microsoft Visual C 8, instead of the old VC6),
+    SDK used for testing S60_2nd_FP3 aka 8.1a
 
 We maintain the binary incompatibility.
 
