@@ -5013,8 +5013,8 @@ struct am_table {
   U32 flags;
   U32 was_ok_sub;
   long was_ok_am;
-  CV* table[NofAMmeth];
   long fallback;
+  CV* table[NofAMmeth];
 };
 struct am_table_short {
   U32 flags;

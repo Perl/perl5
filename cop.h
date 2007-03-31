@@ -748,11 +748,11 @@ L<perlcall>.
 struct stackinfo {
     AV *		si_stack;	/* stack for current runlevel */
     PERL_CONTEXT *	si_cxstack;	/* context stack for runlevel */
+    struct stackinfo *	si_prev;
+    struct stackinfo *	si_next;
     I32			si_cxix;	/* current context index */
     I32			si_cxmax;	/* maximum allocated index */
     I32			si_type;	/* type of runlevel */
-    struct stackinfo *	si_prev;
-    struct stackinfo *	si_next;
     I32			si_markoff;	/* offset where markstack begins for us.
 					 * currently used only with DEBUGGING,
 					 * but not #ifdef-ed for bincompat */

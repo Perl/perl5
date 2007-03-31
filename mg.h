@@ -30,9 +30,9 @@ struct magic {
     U16		mg_private;
     char	mg_type;
     U8		mg_flags;
+    I32		mg_len;
     SV*		mg_obj;
     char*	mg_ptr;
-    I32		mg_len;
 };
 
 #define MGf_TAINTEDDIR 1        /* PERL_MAGIC_envelem only */
