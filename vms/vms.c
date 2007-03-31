@@ -11961,6 +11961,7 @@ Perl_vms_start_glob
 	}
     }
     if ((tmpfp = PerlIO_tmpfile()) != NULL) {
+	int found = 0;
 	Stat_t st;
 	int stat_sts;
 	stat_sts = PerlLIO_stat(SvPVX_const(tmpglob),&st);
@@ -11990,6 +11991,8 @@ Perl_vms_start_glob
 				&dfltdsc,NULL,&rms_sts,&lff_flags);
 	    if (!$VMS_STATUS_SUCCESS(sts))
 		break;
+
+	    found++;
 
 	    /* with varying string, 1st word of buffer contains result length */
 	    rstr[rslt->length] = '\0';
@@ -12038,6 +12041,14 @@ Perl_vms_start_glob
 	    ok = (PerlIO_puts(tmpfp,begin) != EOF);
 	}
 	if (cxt) (void)lib$find_file_end(&cxt);
+
+	if (!found) {
+	    /* Be POSIXish: return the input pattern when no matches */
+	    begin = SvPVX(tmpglob);
+	    strcat(begin,"\n");
+	    ok = (PerlIO_puts(tmpfp,begin) != EOF);
+	}
+
 	if (ok && sts != RMS$_NMF &&
 	    sts != RMS$_DNF && sts != RMS_FNF) ok = 0;
 	if (!ok) {
