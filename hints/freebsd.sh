@@ -138,9 +138,20 @@ case "$osvers" in
 *)
 	ccflags="${ccflags} -DHAS_FPSETMASK -DHAS_FLOATINGPOINT_H"
 	if /usr/bin/file -L /usr/lib/libc.so | /usr/bin/grep -vq "not stripped" ; then
-	    usenm=false
+	    # Respect a command-line override
+	    test -z "$usenm" && usenm=false
 	fi
         ;;
+esac
+
+
+# If we are using g++ we must use nm and force ourselves to use
+# the /usr/lib/libc.a because the symbol scanning tricks of 
+# Configure will crash and burn horribly.
+case "$cc" in
+*g++*) usenm=true
+       libc='/usr/lib/libc.a'
+       ;;
 esac
 
 cat <<'EOM' >&4
