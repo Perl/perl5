@@ -1690,7 +1690,6 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     I32 end_shift = 0;			/* Same for the end. */		/* CC */
     I32 scream_pos = -1;		/* Internal iterator of scream. */
     char *scream_olds = NULL;
-    SV* const oreplsv = GvSV(PL_replgv);
     const bool do_utf8 = (bool)DO_UTF8(sv);
     I32 multiline;
     RXi_GET_DECL(prog,progi);
@@ -2076,14 +2075,8 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 got_it:
     RX_MATCH_TAINTED_set(prog, PL_reg_flags & RF_tainted);
 
-    if (PL_reg_eval_set) {
-	/* Preserve the current value of $^R */
-	if (oreplsv != GvSV(PL_replgv))
-	    sv_setsv(oreplsv, GvSV(PL_replgv));/* So that when GvSV(replgv) is
-						  restored, the value remains
-						  the same. */
+    if (PL_reg_eval_set)
 	restore_pos(aTHX_ prog);
-    }
     if (prog->paren_names) 
         (void)hv_iterinit(prog->paren_names);
 
@@ -2655,6 +2648,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
                                during a successfull match */
     U32 lastopen = 0;       /* last open we saw */
     bool has_cutgroup = RX_HAS_CUTGROUP(rex) ? 1 : 0;   
+
+    SV* const oreplsv = GvSV(PL_replgv);
                
     
     /* these three flags are set by various ops to signal information to
@@ -3955,15 +3950,6 @@ NULL
 	}
 
 	case CURLYX_end: /* just finished matching all of A*B */
-	    if (PL_reg_eval_set){
-		SV *pres= GvSV(PL_replgv);
-		SvREFCNT_inc(pres);
-		regcpblow(ST.cp);
-		sv_setsv(GvSV(PL_replgv), pres);
-		SvREFCNT_dec(pres);
-	    } else {
-		regcpblow(ST.cp);
-	    }
 	    cur_curlyx = ST.prev_curlyx;
 	    sayYES;
 	    /* NOTREACHED */
@@ -5081,6 +5067,15 @@ yes:
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%sMatch successful!%s\n",
 			  PL_colors[4], PL_colors[5]));
 
+    if (PL_reg_eval_set) {
+	/* each successfully executed (?{...}) block does the equivalent of
+	 *   local $^R = do {...}
+	 * When popping the save stack, all these locals would be undone;
+	 * bypass this by setting the outermost saved $^R to the latest
+	 * value */
+	if (oreplsv != GvSV(PL_replgv))
+	    sv_setsv(oreplsv, GvSV(PL_replgv));
+    }
     result = 1;
     goto final_exit;
 
@@ -5137,6 +5132,7 @@ no_silent:
         sv_setsv(sv_err, sv_commit);
         sv_setsv(sv_mrk, sv_yes_mark);
     }
+
     /* restore original high-water mark */
     PL_regmatch_slab  = orig_slab;
     PL_regmatch_state = orig_state;

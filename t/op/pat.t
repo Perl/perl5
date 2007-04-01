@@ -4127,6 +4127,16 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
         iseq($^R,'last regexp code result');
     }
     iseq($^R,'Nothing');
+
+    {
+        local $^R = "Bad";
+        ok('x foofoo y' =~ m{
+         (foo|bar)\1 # this time without the +
+        (?{"last regexp code result"})
+        }x);
+        iseq($^R,'last regexp code result');
+    }
+    iseq($^R,'Nothing');
 }
 {
     local $Message="RT#22395";
@@ -4405,7 +4415,7 @@ ok($@=~/\QSequence \k... not terminated in regex;\E/);
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 1655;
+    $::TestCount = 1658;
     print "1..$::TestCount\n";
 }
 
