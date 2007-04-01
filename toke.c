@@ -655,6 +655,7 @@ Perl_lex_start(pTHX_ SV *line)
 	}
     }
     SAVEI32(PL_curforce);
+    PL_curforce = -1;
 #else
     if (PL_lex_state == LEX_KNOWNEXT) {
 	I32 toke = PL_nexttoke;

@@ -411,10 +411,6 @@ perl_construct(pTHXx)
     PL_timesbase.tms_cstime = 0;
 #endif
 
-#ifdef PERL_MAD
-    PL_curforce = -1;
-#endif
-
     ENTER;
 }
 
