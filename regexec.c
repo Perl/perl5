@@ -2592,6 +2592,26 @@ S_reg_check_named_buff_matched(pTHX_ const regexp *rex, const regnode *scan) {
     return 0;
 }
 
+
+/* free all slabs above current one  - called during LEAVE_SCOPE */
+
+STATIC void
+S_clear_backtrack_stack(pTHX_ void *p)
+{
+    regmatch_slab *s = PL_regmatch_slab->next;
+    PERL_UNUSED_ARG(p);
+
+    if (!s)
+	return;
+    PL_regmatch_slab->next = NULL;
+    while (s) {
+	regmatch_slab * const osl = s;
+	s = s->next;
+	Safefree(osl);
+    }
+}
+
+
 #define SETREX(Re1,Re2) \
     if (PL_reg_eval_set) PM_SETRE((PL_reg_curpm), (Re2)); \
     Re1 = (Re2)
@@ -2609,8 +2629,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
     regexp *rex = reginfo->prog;
     RXi_GET_DECL(rex,rexi);
     
-    regmatch_slab  *orig_slab;
-    regmatch_state *orig_state;
+    I32	oldsave;
 
     /* the current state. This is a cached copy of PL_regmatch_state */
     register regmatch_state *st;
@@ -2682,10 +2701,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	PL_regmatch_state = SLAB_FIRST(PL_regmatch_slab);
     }
 
-    /* remember current high-water mark for exit */
-    /* XXX this should be done with SAVE* instead */
-    orig_slab  = PL_regmatch_slab;
-    orig_state = PL_regmatch_state;
+    oldsave = PL_savestack_ix;
+    SAVEDESTRUCTOR_X(S_clear_backtrack_stack, NULL);
+    SAVEVPTR(PL_regmatch_slab);
+    SAVEVPTR(PL_regmatch_state);
 
     /* grab next free state slot */
     st = ++PL_regmatch_state;
@@ -5133,20 +5152,8 @@ no_silent:
         sv_setsv(sv_mrk, sv_yes_mark);
     }
 
-    /* restore original high-water mark */
-    PL_regmatch_slab  = orig_slab;
-    PL_regmatch_state = orig_state;
-
-    /* free all slabs above current one */
-    if (orig_slab->next) {
-	regmatch_slab *sl = orig_slab->next;
-	orig_slab->next = NULL;
-	while (sl) {
-	    regmatch_slab * const osl = sl;
-	    sl = sl->next;
-	    Safefree(osl);
-	}
-    }
+    /* clean up; in particular, free all slabs above current one */
+    LEAVE_SCOPE(oldsave);
 
     return result;
 }
