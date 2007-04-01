@@ -8694,12 +8694,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 			goto unknown;
 		    }
 		    vecsv = sv_newmortal();
-		    /* scan_vstring is expected to be called during
-		     * tokenization, so we need to fake up the end
-		     * of the buffer for it
-		     */
-		    PL_bufend = version + veclen;
-		    scan_vstring(version, vecsv);
+		    scan_vstring(version, version + veclen, vecsv);
 		    vecstr = (U8*)SvPV_const(vecsv, veclen);
 		    vec_utf8 = DO_UTF8(vecsv);
 		    Safefree(version);

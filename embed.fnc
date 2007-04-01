@@ -596,7 +596,7 @@ Apa	|OP*	|newWHILEOP	|I32 flags|I32 debuggable|NULLOK LOOP* loop \
 				|I32 whileline|NULLOK OP* expr|NULLOK OP* block|NULLOK OP* cont \
 				|I32 has_my
 Apa	|PERL_SI*|new_stackinfo|I32 stitems|I32 cxitems
-Ap	|char*	|scan_vstring	|NN const char *vstr|NN SV *sv
+Ap	|char*	|scan_vstring	|NN const char *vstr|NN const char *end|NN SV *sv
 Apd	|const char*	|scan_version	|NN const char *vstr|NN SV *sv|bool qv
 Apd	|SV*	|new_version	|NN SV *ver
 Apd	|SV*	|upg_version	|NN SV *ver|bool qv

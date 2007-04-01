@@ -1663,9 +1663,10 @@ PERL_CALLCONV PERL_SI*	Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV char*	Perl_scan_vstring(pTHX_ const char *vstr, SV *sv)
+PERL_CALLCONV char*	Perl_scan_vstring(pTHX_ const char *vstr, const char *end, SV *sv)
 			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
 
 PERL_CALLCONV const char*	Perl_scan_version(pTHX_ const char *vstr, SV *sv, bool qv)
 			__attribute__nonnull__(pTHX_1)

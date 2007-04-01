@@ -12222,7 +12222,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     case 'v':
 vstring:
 		sv = newSV(5); /* preallocate storage space */
-		s = scan_vstring(s,sv);
+		s = scan_vstring(s, PL_bufend, sv);
 	break;
     }
 
@@ -12704,28 +12704,29 @@ vstring, as well as updating the passed in sv.
 Function must be called like
 
 	sv = newSV(5);
-	s = scan_vstring(s,sv);
+	s = scan_vstring(s,e,sv);
 
+where s and e are the start and end of the string.
 The sv should already be large enough to store the vstring
 passed in, for performance reasons.
 
 */
 
 char *
-Perl_scan_vstring(pTHX_ const char *s, SV *sv)
+Perl_scan_vstring(pTHX_ const char *s, const char *e, SV *sv)
 {
     dVAR;
     const char *pos = s;
     const char *start = s;
     if (*pos == 'v') pos++;  /* get past 'v' */
-    while (pos < PL_bufend && (isDIGIT(*pos) || *pos == '_'))
+    while (pos < e && (isDIGIT(*pos) || *pos == '_'))
 	pos++;
     if ( *pos != '.') {
 	/* this may not be a v-string if followed by => */
 	const char *next = pos;
-	while (next < PL_bufend && isSPACE(*next))
+	while (next < e && isSPACE(*next))
 	    ++next;
-	if ((PL_bufend - next) >= 2 && *next == '=' && next[1] == '>' ) {
+	if ((e - next) >= 2 && *next == '=' && next[1] == '>' ) {
 	    /* return string not v-string */
 	    sv_setpvn(sv,(char *)s,pos-s);
 	    return (char *)pos;
@@ -12765,13 +12766,13 @@ Perl_scan_vstring(pTHX_ const char *s, SV *sv)
 	    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
 	    if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(rev)))
 		 SvUTF8_on(sv);
-	    if (pos + 1 < PL_bufend && *pos == '.' && isDIGIT(pos[1]))
+	    if (pos + 1 < e && *pos == '.' && isDIGIT(pos[1]))
 		 s = ++pos;
 	    else {
 		 s = pos;
 		 break;
 	    }
-	    while (pos < PL_bufend && (isDIGIT(*pos) || *pos == '_'))
+	    while (pos < e && (isDIGIT(*pos) || *pos == '_'))
 		 pos++;
 	}
 	SvPOK_on(sv);
