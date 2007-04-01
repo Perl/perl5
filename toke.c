@@ -615,8 +615,7 @@ S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 
 /*
  * Perl_lex_start
- * Initialize variables.  Uses the Perl save_stack to save its state (for
- * recursive calls to the parser).
+ * Create a parser object and initialise its parser and lexer fields
  */
 
 void
@@ -640,6 +639,9 @@ Perl_lex_start(pTHX_ SV *line)
     parser->stack->state = 0;
     parser->yyerrstatus = 0;
     parser->yychar = YYEMPTY;		/* Cause a token to be read.  */
+
+    /* on scope exit, free this parser and restore any outer one */
+    SAVEPARSER(parser);
 
     /* initialise lexer state */
 
@@ -712,6 +714,20 @@ Perl_lex_start(pTHX_ SV *line)
     PL_last_lop = PL_last_uni = NULL;
     PL_rsfp = 0;
 }
+
+
+/* delete a parser object */
+
+void
+Perl_parser_free(pTHX_  const yy_parser *parser)
+{
+    Safefree(parser->stack);
+    Safefree(parser->lex_brackstack);
+    Safefree(parser->lex_casestack);
+    PL_parser = parser->old_parser;
+    Safefree(parser);
+}
+
 
 /*
  * Perl_lex_end

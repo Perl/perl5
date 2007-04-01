@@ -306,20 +306,6 @@ S_clear_yystack(pTHX_  const yy_parser *parser)
     }
 }
 
-/* delete a parser object */
-
-#ifndef PERL_IN_MADLY_C
-void
-Perl_parser_free(pTHX_  const yy_parser *parser)
-{
-    S_clear_yystack(aTHX_ parser);
-    Safefree(parser->stack);
-    Safefree(parser->lex_brackstack);
-    Safefree(parser->lex_casestack);
-    PL_parser = parser->old_parser;
-    Safefree(parser);
-}
-#endif
 
 /*----------.
 | yyparse.  |
@@ -362,8 +348,8 @@ Perl_yyparse (pTHX)
     parser = PL_parser;
     ps = parser->ps;
 
-    ENTER;  /* force parser free before we return */
-    SAVEPARSER(parser);
+    ENTER;  /* force parser stack cleanup before we return */
+    SAVEDESTRUCTOR_X(S_clear_yystack, parser);
 
 /*------------------------------------------------------------.
 | yynewstate -- Push a new state, which is found in yystate.  |
@@ -691,7 +677,7 @@ Perl_yyparse (pTHX)
     goto yyreturn;
 
   yyreturn:
-    LEAVE;			/* force parser free before we return */
+    LEAVE;	/* force parser stack cleanup before we return */
     return yyresult;
 }
 
