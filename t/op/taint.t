@@ -45,7 +45,7 @@ my $Is_NetWare  = $^O eq 'NetWare';
 my $Is_Dos      = $^O eq 'dos';
 my $Is_Cygwin   = $^O eq 'cygwin';
 my $Is_OpenBSD  = $^O eq 'openbsd';
-my $Invoke_Perl = $Is_VMS      ? 'MCR Sys$Disk:[]Perl.' :
+my $Invoke_Perl = $Is_VMS      ? 'MCR Sys$Disk:[]Perl.exe' :
                   $Is_MSWin32  ? '.\perl'               :
                   $Is_MacOS    ? ':perl'                :
                   $Is_NetWare  ? 'perl'                 : 
