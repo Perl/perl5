@@ -235,10 +235,9 @@ Perl_Slab_Free(pTHX_ void *op)
 #  endif
 	
 #ifdef PERL_DEBUG_READONLY_OPS
+	U32 count = PL_slab_count;
 	/* Need to remove this slab from our list of slabs */
-	{
-	    U32 count = PL_slab_count;
-
+	if (count) {
 	    while (count--) {
 		if (PL_slabs[count] == slab) {
 		    /* Found it. Move the entry at the end to overwrite it.  */
