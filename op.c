@@ -116,6 +116,7 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 void *
 Perl_Slab_Alloc(pTHX_ int m, size_t sz)
 {
+    PERL_UNUSED_ARG(m);
     /*
      * To make incrementing use count easy PL_OpSlab is an I32 *
      * To make inserting the link to slab PL_OpPtr is I32 **
@@ -138,12 +139,12 @@ Perl_Slab_Alloc(pTHX_ int m, size_t sz)
 	    abort();
 	}
 #else
-        PL_OpPtr = (I32 **) PerlMemShared_malloc(PERL_SLAB_SIZE*sizeof(I32*)); 
+
+        PL_OpPtr = (I32 **) PerlMemShared_calloc(PERL_SLAB_SIZE,sizeof(I32*)); 
 #endif
     	if (!PL_OpPtr) {
 	    return NULL;
 	}
-	Zero(PL_OpPtr,PERL_SLAB_SIZE,I32 **);
 	/* We reserve the 0'th I32 sized chunk as a use count */
 	PL_OpSlab = (I32 *) PL_OpPtr;
 	/* Reduce size by the use count word, and by the size we need.
