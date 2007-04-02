@@ -1840,6 +1840,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef NO_MATHOMS
                             " NO_MATHOMS"
 #  endif
+#  ifdef PERL_DEBUG_READONLY_OPS
+			     " PERL_DEBUG_READONLY_OPS"
+#  endif
 #  ifdef PERL_DONT_CREATE_GVSV
 			     " PERL_DONT_CREATE_GVSV"
 #  endif
@@ -2373,10 +2376,6 @@ perl_run(pTHXx)
     JMPENV_POP;
     return ret;
 }
-
-#ifdef PERL_DEBUG_READONLY_OPS
-#  include <sys/mman.h>
-#endif
 
 STATIC void
 S_run_body(pTHX_ I32 oldscope)
