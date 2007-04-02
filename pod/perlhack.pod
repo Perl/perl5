@@ -3395,7 +3395,46 @@ If you see in a debugger a memory area mysteriously full of 0xABABABAB
 or 0xEFEFEFEF, you may be seeing the effect of the Poison() macros,
 see L<perlclib>.
 
+=item *
+
+Under ithreads the optree is read only. If you want to enforce this, to check
+for write accesses from buggy code, compile with C<-DPL_OP_SLAB_ALLOC> to
+enable the OP slab allocator and C<-DPERL_DEBUG_READONLY_OPS> to enable code
+that allocates op memory via C<mmap>, and sets it read-only at run time.
+Any write access to an op results in a C<SIGBUS> and abort.
+
+This code is intended for development only, and may not be portable even to
+all Unix variants. Also, it is an 80% solution, in that it isn't able to make
+all ops read only. Specifically it
+
+=over
+
+=item 1
+
+Only sets read-only on all slabs of ops at C<CHECK> time, hence ops allocated
+later via C<require> or C<eval> will be re-write
+
+=item 2
+
+Turns an entire slab of ops read-write if the refcount of any op in the slab
+needs to be decreased.
+
+=item 3
+
+Turns an entire slab of ops read-write if any op from the slab is freed.
+
 =back
+
+It's not possible to turn the slabs to read-only after an action requiring
+read-write access, as either can happen during op tree building time, so
+there may still be legitimate write access.
+
+However, as an 80% solution it is still effective, as currently it catches
+a write access during the generation of F<Config.pm>, which means that we
+can't yet build F<perl> with this enabled.
+
+=back
+
 
 =head1 CONCLUSION
 

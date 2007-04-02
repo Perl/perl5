@@ -527,6 +527,11 @@ PERLVARI(Iutf8cache, I8, -1)	/* Is the utf8 caching code enabled? */
 PERLVARI(Iutf8cache, I8, 1)	/* Is the utf8 caching code enabled? */
 #endif
 
+#ifdef PERL_DEBUG_READONLY_OPS
+PERLVARI(Islabs, I32**, NULL)	/* Array of slabs that have been allocated */
+PERLVARI(Islab_count, U32, 0)	/* Size of the array */
+#endif
+
 /* New variables must be added to the very end, before this comment,
  * for binary compatibility (the offsets of the old members must not change).
  * (Don't forget to add your variable also to perl_clone()!)

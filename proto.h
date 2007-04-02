@@ -3322,6 +3322,14 @@ PERL_CALLCONV void*	Perl_Slab_Alloc(pTHX_ int m, size_t sz)
 PERL_CALLCONV void	Perl_Slab_Free(pTHX_ void *op)
 			__attribute__nonnull__(pTHX_1);
 
+#  if defined(PERL_DEBUG_READONLY_OPS)
+PERL_CALLCONV void	Perl_pending_Slabs_to_ro(pTHX);
+#    if defined(PERL_IN_OP_C)
+STATIC void	S_Slab_to_rw(pTHX_ void *op)
+			__attribute__nonnull__(pTHX_1);
+
+#    endif
+#  endif
 #endif
 
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)

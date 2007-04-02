@@ -1222,6 +1222,12 @@ s	|void	|process_special_blocks	|NN const char *const fullname\
 #if defined(PL_OP_SLAB_ALLOC)
 Apa	|void*	|Slab_Alloc	|int m|size_t sz
 Ap	|void	|Slab_Free	|NN void *op
+#  if defined(PERL_DEBUG_READONLY_OPS)
+poxM	|void	|pending_Slabs_to_ro
+#    if defined(PERL_IN_OP_C)
+s	|void	|Slab_to_rw	|NN void *op
+#    endif
+#  endif
 #endif
 
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)

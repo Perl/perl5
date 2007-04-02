@@ -1240,6 +1240,11 @@ perl_destruct(pTHXx)
 #endif
     PL_sv_count = 0;
 
+#ifdef PERL_DEBUG_READONLY_OPS
+    free(PL_slabs);
+    PL_slabs = NULL;
+    PL_slab_count = 0;
+#endif
 
 #if defined(PERLIO_LAYERS)
     /* No more IO - including error messages ! */
@@ -2369,6 +2374,9 @@ perl_run(pTHXx)
     return ret;
 }
 
+#ifdef PERL_DEBUG_READONLY_OPS
+#  include <sys/mman.h>
+#endif
 
 STATIC void
 S_run_body(pTHX_ I32 oldscope)
@@ -2406,6 +2414,9 @@ S_run_body(pTHX_ I32 oldscope)
 	    sv_setiv(PL_DBsingle, 1);
 	if (PL_initav)
 	    call_list(oldscope, PL_initav);
+#ifdef PERL_DEBUG_READONLY_OPS
+	Perl_pending_Slabs_to_ro(aTHX);
+#endif
     }
 
     /* do it */

@@ -1217,6 +1217,13 @@
 #if defined(PL_OP_SLAB_ALLOC)
 #define Slab_Alloc		Perl_Slab_Alloc
 #define Slab_Free		Perl_Slab_Free
+#  if defined(PERL_DEBUG_READONLY_OPS)
+#    if defined(PERL_IN_OP_C)
+#ifdef PERL_CORE
+#define Slab_to_rw		S_Slab_to_rw
+#endif
+#    endif
+#  endif
 #endif
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
@@ -3446,6 +3453,15 @@
 #if defined(PL_OP_SLAB_ALLOC)
 #define Slab_Alloc(a,b)		Perl_Slab_Alloc(aTHX_ a,b)
 #define Slab_Free(a)		Perl_Slab_Free(aTHX_ a)
+#  if defined(PERL_DEBUG_READONLY_OPS)
+#ifdef PERL_CORE
+#endif
+#    if defined(PERL_IN_OP_C)
+#ifdef PERL_CORE
+#define Slab_to_rw(a)		S_Slab_to_rw(aTHX_ a)
+#endif
+#    endif
+#  endif
 #endif
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
