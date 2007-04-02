@@ -3315,7 +3315,7 @@ STATIC void	S_process_special_blocks(pTHX_ const char *const fullname, GV *const
 
 #endif
 #if defined(PL_OP_SLAB_ALLOC)
-PERL_CALLCONV void*	Perl_Slab_Alloc(pTHX_ int m, size_t sz)
+PERL_CALLCONV void*	Perl_Slab_Alloc(pTHX_ size_t sz)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 

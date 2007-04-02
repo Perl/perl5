@@ -3451,7 +3451,7 @@
 #endif
 #endif
 #if defined(PL_OP_SLAB_ALLOC)
-#define Slab_Alloc(a,b)		Perl_Slab_Alloc(aTHX_ a,b)
+#define Slab_Alloc(a)		Perl_Slab_Alloc(aTHX_ a)
 #define Slab_Free(a)		Perl_Slab_Free(aTHX_ a)
 #  if defined(PERL_DEBUG_READONLY_OPS)
 #ifdef PERL_CORE

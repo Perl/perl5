@@ -1220,7 +1220,7 @@ s	|void	|process_special_blocks	|NN const char *const fullname\
 					|NN GV *const gv|NN CV *const cv
 #endif
 #if defined(PL_OP_SLAB_ALLOC)
-Apa	|void*	|Slab_Alloc	|int m|size_t sz
+Apa	|void*	|Slab_Alloc	|size_t sz
 Ap	|void	|Slab_Free	|NN void *op
 #  if defined(PERL_DEBUG_READONLY_OPS)
 poxM	|void	|pending_Slabs_to_ro

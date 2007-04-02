@@ -590,9 +590,9 @@ struct loop {
 
 #if defined(PL_OP_SLAB_ALLOC)
 #define NewOp(m,var,c,type)	\
-	(var = (type *) Perl_Slab_Alloc(aTHX_ m,c*sizeof(type)))
+	(var = (type *) Perl_Slab_Alloc(aTHX_ c*sizeof(type)))
 #define NewOpSz(m,var,size)	\
-	(var = (OP *) Perl_Slab_Alloc(aTHX_ m,size))
+	(var = (OP *) Perl_Slab_Alloc(aTHX_ size))
 #define FreeOp(p) Perl_Slab_Free(aTHX_ p)
 #else
 #define NewOp(m, var, c, type)	\

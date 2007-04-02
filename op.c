@@ -114,9 +114,8 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 #endif
 
 void *
-Perl_Slab_Alloc(pTHX_ int m, size_t sz)
+Perl_Slab_Alloc(pTHX_ size_t sz)
 {
-    PERL_UNUSED_ARG(m);
     /*
      * To make incrementing use count easy PL_OpSlab is an I32 *
      * To make inserting the link to slab PL_OpPtr is I32 **
