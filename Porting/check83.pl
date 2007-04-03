@@ -11,6 +11,10 @@ use strict;
 # "no filename shall be longer than eight and a suffix if present
 # not longer than three".
 
+# The 8-level depth rule is for older VMS systems that likely won't
+# even be able to unpack the tarball if more than eight levels 
+# (including the top of the source tree) are present.
+
 my %seen;
 my $maxl = 30; # make up a limit for a maximum filename length
 
@@ -48,6 +52,10 @@ if (open(MANIFEST, "MANIFEST")) {
 	}
 	if (tr/././ > 1) {
 	    print "more than one dot: $_\n";
+	    next;
+	}
+	if ((my $slashes = $_ =~ tr|\/|\/|) > 7) {
+	    print "more than eight levels deep: $_\n";
 	    next;
 	}
 	while (m!/|\z!g) {

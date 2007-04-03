@@ -639,6 +639,13 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'Shell' =>
+		{
+		'MAINTAINER'	=> 'ferreira',
+		'FILES'		=> q[lib/Shell.pm lib/Shell.t],
+		'CPAN'		=> 1,
+		},
+
 	'Storable' =>
 		{
 		'MAINTAINER'	=> 'ams',
