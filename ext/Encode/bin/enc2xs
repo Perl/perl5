@@ -271,6 +271,9 @@ if ($doC)
 
     # push(@{$encoding{$name}},outstring(\*C,$e2u->{Cname}.'_def',$erep));
    }
+  my $cpp = ($Config{d_cplusplus} || '') eq 'define';
+  my $exta = $cpp ? 'extern "C" ' : "static";
+  my $extb = $cpp ? 'extern "C" ' : "";
   foreach my $enc (sort cmp_name keys %encoding)
    {
     # my ($e2u,$u2e,$rep,$min_el,$max_el,$rsym) = @{$encoding{$enc}};
@@ -282,9 +285,9 @@ if ($doC)
     $sym =~ s/\W+/_/g;
     my @info = ($e2u->{Cname},$u2e->{Cname},"${sym}_rep_character",$replen,
         $min_el,$max_el);
-    print C "static const U8 ${sym}_rep_character[] = \"$rep\";\n";
-    print C "static const char ${sym}_enc_name[] = \"$enc\";\n\n";
-    print C "const encode_t $sym = \n";
+    print C "${exta} const U8 ${sym}_rep_character[] = \"$rep\";\n";
+    print C "${exta} const char ${sym}_enc_name[] = \"$enc\";\n\n";
+    print C "${extb} const encode_t $sym = \n";
     # This is to make null encoding work -- dankogai
     for (my $i = (scalar @info) - 1;  $i >= 0; --$i){
     $info[$i] ||= 1;
