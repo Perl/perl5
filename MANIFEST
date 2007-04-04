@@ -3640,6 +3640,7 @@ t/op/regexp.t			See if regular expressions work
 t/op/regexp_trielist.t		See if regular expressions work with trie optimisation
 t/op/regmesg.t			See if one can get regular expression errors
 t/op/repeat.t			See if x operator works
+t/op/reset.t			See if reset operator works
 t/op/re_tests			Regular expressions for regexp.t
 t/op/reverse.t			See if reverse operator works
 t/op/runlevel.t			See if die() works from perl_call_*()
