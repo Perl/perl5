@@ -12,11 +12,22 @@ use Config;
 use Test::More;
 my %modules;
 
+my $db_file;
+BEGIN {
+    use Config;
+    foreach (qw/SDBM_File GDBM_File ODBM_File NDBM_File DB_File/) {
+        if ($Config{extensions} =~ /\b$_\b/) {
+            $db_file = $_;
+            last;
+        }
+    }
+}
+
 %modules = (
    # ModuleName  => q| code to check that it was loaded |,
     'Cwd'        => q| ::is( ref Cwd->can('fastcwd'),'CODE' ) |,         # 5.7 ?
     'File::Glob' => q| ::is( ref File::Glob->can('doglob'),'CODE' ) |,   # 5.6
-    'SDBM_File'  => q| ::is( ref SDBM_File->can('TIEHASH'), 'CODE' ) |,  # 5.0
+    $db_file     => q| ::is( ref $db_file->can('TIEHASH'), 'CODE' ) |,  # 5.0
     'Socket'     => q| ::is( ref Socket->can('inet_aton'),'CODE' ) |,    # 5.0
     'Time::HiRes'=> q| ::is( ref Time::HiRes->can('usleep'),'CODE' ) |,  # 5.7.3
 );
