@@ -449,8 +449,12 @@ Perl_op_free(pTHX_ OP *o)
 
     /* COP* is not cleared by op_clear() so that we may track line
      * numbers etc even after null() */
-    if (type == OP_NEXTSTATE || type == OP_SETSTATE || type == OP_DBSTATE)
+    if (type == OP_NEXTSTATE || type == OP_SETSTATE || type == OP_DBSTATE) {
+#ifdef PERL_DEBUG_READONLY_OPS
+	Slab_to_rw(o);
+#endif
 	cop_free((COP*)o);
+    }
 
     op_clear(o);
     if (o->op_latefree) {

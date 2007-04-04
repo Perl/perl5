@@ -707,7 +707,15 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_I32:				/* I32 reference */
 	    ptr = SSPOPPTR;
+#ifdef PERL_DEBUG_READONLY_OPS
+	    {
+		const I32 val = SSPOPINT;
+		if (*(I32*)ptr != val)
+		    *(I32*)ptr = val;
+	    }
+#else
 	    *(I32*)ptr = (I32)SSPOPINT;
+#endif
 	    break;
 	case SAVEt_SPTR:			/* SV* reference */
 	    ptr = SSPOPPTR;
