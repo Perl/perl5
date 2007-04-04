@@ -796,6 +796,13 @@ unless ($define{'PL_OP_SLAB_ALLOC'}) {
                     )];
 }
 
+unless ($define{'PERL_DEBUG_READONLY_OPS'}) {
+    skip_symbols [qw(
+		    PL_slab_count
+		    PL_slabs
+                  )];
+}
+
 unless ($define{'THREADS_HAVE_PIDS'}) {
     skip_symbols [qw(PL_ppid)];
 }
