@@ -4567,8 +4567,8 @@ PP(pp_split)
 	DIE(aTHX_ "panic: pp_split");
     rx = PM_GETRE(pm);
 
-    TAINT_IF((pm->op_pmflags & PMf_LOCALE) &&
-	     (pm->op_pmflags & (PMf_WHITE | PMf_SKIPWHITE)));
+    TAINT_IF((rx->extflags & RXf_PMf_LOCALE) &&
+	     (rx->extflags & (RXf_WHITE | RXf_SKIPWHITE)));
 
     RX_MATCH_UTF8_set(rx, do_utf8);
 
@@ -4608,12 +4608,12 @@ PP(pp_split)
     }
     base = SP - PL_stack_base;
     orig = s;
-    if (pm->op_pmflags & PMf_SKIPWHITE) {
+    if (rx->extflags & RXf_SKIPWHITE) {
 	if (do_utf8) {
 	    while (*s == ' ' || is_utf8_space((U8*)s))
 		s += UTF8SKIP(s);
 	}
-	else if (pm->op_pmflags & PMf_LOCALE) {
+	else if (rx->extflags & RXf_PMf_LOCALE) {
 	    while (isSPACE_LC(*s))
 		s++;
 	}
@@ -4622,13 +4622,13 @@ PP(pp_split)
 		s++;
 	}
     }
-    if (pm->op_pmflags & PMf_MULTILINE) {
+    if (rx->extflags & PMf_MULTILINE) {
 	multiline = 1;
     }
 
     if (!limit)
 	limit = maxiters + 2;
-    if (pm->op_pmflags & PMf_WHITE) {
+    if (rx->extflags & RXf_WHITE) {
 	while (--limit) {
 	    m = s;
 	    /* this one uses 'm' and is a negative test */
@@ -4641,7 +4641,7 @@ PP(pp_split)
 		    else
 			m += t;
 		}
-            } else if (pm->op_pmflags & PMf_LOCALE) {
+            } else if (rx->extflags & RXf_PMf_LOCALE) {
 	        while (m < strend && !isSPACE_LC(*m))
 		    ++m;
             } else {
@@ -4668,7 +4668,7 @@ PP(pp_split)
 	    if (do_utf8) {
 		while (s < strend && ( *s == ' ' || is_utf8_space((U8*)s) ))
 	            s +=  UTF8SKIP(s);
-            } else if (pm->op_pmflags & PMf_LOCALE) {
+            } else if (rx->extflags & RXf_PMf_LOCALE) {
 	        while (s < strend && isSPACE_LC(*s))
 		    ++s;
             } else {

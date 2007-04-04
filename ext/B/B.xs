@@ -988,8 +988,6 @@ LISTOP_children(o)
 #define PMOP_pmstash(o)		o->op_pmstash
 #endif
 #define PMOP_pmflags(o)		o->op_pmflags
-#define PMOP_pmpermflags(o)	o->op_pmpermflags
-#define PMOP_pmdynflags(o)      o->op_pmdynflags
 
 MODULE = B	PACKAGE = B::PMOP		PREFIX = PMOP_
 
@@ -1044,14 +1042,6 @@ U32
 PMOP_pmflags(o)
 	B::PMOP		o
 
-U32
-PMOP_pmpermflags(o)
-	B::PMOP		o
-
-U8
-PMOP_pmdynflags(o)
-        B::PMOP         o
-
 void
 PMOP_precomp(o)
 	B::PMOP		o
@@ -1061,6 +1051,16 @@ PMOP_precomp(o)
 	rx = PM_GETRE(o);
 	if (rx)
 	    sv_setpvn(ST(0), rx->precomp, rx->prelen);
+
+void
+PMOP_reflags(o)
+	B::PMOP		o
+	REGEXP *	rx = NO_INIT
+    CODE:
+	ST(0) = sv_newmortal();
+	rx = PM_GETRE(o);
+	if (rx)
+	    sv_setuv(ST(0), rx->extflags);
 
 #define SVOP_sv(o)     cSVOPo->op_sv
 #define SVOP_gv(o)     ((GV*)cSVOPo->op_sv)

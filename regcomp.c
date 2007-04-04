@@ -4017,7 +4017,7 @@ extern const struct regexp_engine my_reg_engine;
 
 #ifndef PERL_IN_XSUB_RE 
 regexp *
-Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
+Perl_pregcomp(pTHX_ char *exp, char *xend, U32 pm_flags)
 {
     dVAR;
     HV * const table = GvHV(PL_hintgv);
@@ -4032,15 +4032,15 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
                 PerlIO_printf(Perl_debug_log, "Using engine %"UVxf"\n",
                     SvIV(*ptr));
             });            
-            return CALLREGCOMP_ENG(eng, exp, xend, pm);
+            return CALLREGCOMP_ENG(eng, exp, xend, pm_flags);
         } 
     }
-    return Perl_re_compile(aTHX_ exp, xend, pm);
+    return Perl_re_compile(aTHX_ exp, xend, pm_flags);
 }
 #endif
 
 regexp *
-Perl_re_compile(pTHX_ char *exp, char *xend, PMOP *pm)
+Perl_re_compile(pTHX_ char *exp, char *xend, U32 pm_flags)
 {
     dVAR;
     register regexp *r;
@@ -4064,7 +4064,7 @@ Perl_re_compile(pTHX_ char *exp, char *xend, PMOP *pm)
     if (exp == NULL)
 	FAIL("NULL regexp argument");
 
-    RExC_utf8 = RExC_orig_utf8 = pm->op_pmdynflags & PMdf_CMP_UTF8;
+    RExC_utf8 = RExC_orig_utf8 = pm_flags & RXf_UTF8;
 
     DEBUG_COMPILE_r({
         SV *dsv= sv_newmortal();
@@ -4076,7 +4076,7 @@ Perl_re_compile(pTHX_ char *exp, char *xend, PMOP *pm)
 
 redo_first_pass:
     RExC_precomp = exp;
-    RExC_flags = pm->op_pmflags;
+    RExC_flags = pm_flags;
     RExC_sawback = 0;
 
     RExC_seen = 0;
@@ -4171,7 +4171,7 @@ redo_first_pass:
     r->engine= RE_ENGINE_PTR;
     r->refcnt = 1;
     r->prelen = xend - exp;
-    r->extflags = pm->op_pmflags & RXf_PMf_COMPILETIME;
+    r->extflags = pm_flags;
     {
         bool has_k     = ((r->extflags & RXf_PMf_KEEPCOPY) == RXf_PMf_KEEPCOPY);
 	bool has_minus = ((r->extflags & RXf_PMf_STD_PMMOD) != RXf_PMf_STD_PMMOD);
@@ -4239,7 +4239,7 @@ redo_first_pass:
     RExC_rxi = ri;
 
     /* Second pass: emit code. */
-    RExC_flags = pm->op_pmflags;	/* don't let top level (?i) bleed */
+    RExC_flags = pm_flags;	/* don't let top level (?i) bleed */
     RExC_parse = exp;
     RExC_end = xend;
     RExC_naughty = 0;
@@ -4291,8 +4291,9 @@ reStudy:
 #endif    
 
     /* Dig out information for optimizations. */
-    r->extflags = pm->op_pmflags & RXf_PMf_COMPILETIME; /* Again? */
-    pm->op_pmflags = RExC_flags;
+    r->extflags = pm_flags; /* Again? */
+    /*dmq: removed as part of de-PMOP: pm->op_pmflags = RExC_flags; */
+ 
     if (UTF)
         r->extflags |= RXf_UTF8;	/* Unicode in it? */
     ri->regstclass = NULL;

@@ -558,20 +558,26 @@ S_pm_description(pTHX_ const PMOP *pm)
     const REGEXP * regex = PM_GETRE(pm);
     const U32 pmflags = pm->op_pmflags;
 
-    if (pm->op_pmdynflags & PMdf_USED)
-	sv_catpv(desc, ",USED");
-    if (pm->op_pmdynflags & PMdf_TAINTED)
-	sv_catpv(desc, ",TAINTED");
-
     if (pmflags & PMf_ONCE)
 	sv_catpv(desc, ",ONCE");
+#ifdef USE_ITHREADS
+    if (SvREADONLY(PL_regex_pad[pm->op_pmoffset]))
+        sv_catpv(desc, ":USED");
+#else
+    if (pmflags & PMf_USED)
+        sv_catpv(desc, ":USED");
+#endif
+    if (regex->extflags & RXf_TAINTED)
+	sv_catpv(desc, ",TAINTED");
+
+
     if (regex && regex->check_substr) {
 	if (!(regex->extflags & RXf_NOSCAN))
 	    sv_catpv(desc, ",SCANFIRST");
 	if (regex->extflags & RXf_CHECK_ALL)
 	    sv_catpv(desc, ",ALL");
     }
-    if (pmflags & PMf_SKIPWHITE)
+    if (regex->extflags & RXf_SKIPWHITE)
 	sv_catpv(desc, ",SKIPWHITE");
     if (pmflags & PMf_CONST)
 	sv_catpv(desc, ",CONST");

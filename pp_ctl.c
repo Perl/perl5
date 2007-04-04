@@ -76,6 +76,7 @@ PP(pp_regcomp)
     register PMOP *pm = (PMOP*)cLOGOP->op_other;
     SV *tmpstr;
     MAGIC *mg = NULL;
+    regexp * re;
 
     /* prevent recompiling under /o and ithreads. */
 #if defined(USE_ITHREADS)
@@ -125,14 +126,14 @@ PP(pp_regcomp)
     else {
 	STRLEN len;
 	const char *t = SvPV_const(tmpstr, len);
-	regexp * const re = PM_GETRE(pm);
+	re = PM_GETRE(pm);
 
 	/* Check against the last compiled regexp. */
 	if (!re || !re->precomp || re->prelen != (I32)len ||
 	    memNE(re->precomp, t, len))
 	{
 	    const regexp_engine *eng = re ? re->engine : NULL;
-
+            U32 pm_flags = pm->op_pmflags & PMf_COMPILETIME;
 	    if (re) {
 	        ReREFCNT_dec(re);
 		PM_SETRE(pm, NULL);	/* crucial if regcomp aborts */
@@ -146,50 +147,42 @@ PP(pp_regcomp)
 	    if (PL_op->op_flags & OPf_SPECIAL)
 		PL_reginterp_cnt = I32_MAX; /* Mark as safe.  */
 
-	    pm->op_pmflags = pm->op_pmpermflags;	/* reset case sensitivity */
 	    if (DO_UTF8(tmpstr))
-		pm->op_pmdynflags |= PMdf_DYN_UTF8;
-	    else {
-		pm->op_pmdynflags &= ~PMdf_DYN_UTF8;
-		if (pm->op_pmdynflags & PMdf_UTF8)
-		    t = (char*)bytes_to_utf8((U8*)t, &len);
-	    }
+		pm_flags |= RXf_UTF8;
+
 	    if (eng) 
-	        PM_SETRE(pm, CALLREGCOMP_ENG(eng,(char *)t, (char *)t + len, pm));
+	        PM_SETRE(pm, CALLREGCOMP_ENG(eng,(char *)t, (char *)t + len, pm_flags));
             else
-                PM_SETRE(pm, CALLREGCOMP((char *)t, (char *)t + len, pm));
-                
-	    if (!DO_UTF8(tmpstr) && (pm->op_pmdynflags & PMdf_UTF8))
-		Safefree(t);
+                PM_SETRE(pm, CALLREGCOMP((char *)t, (char *)t + len, pm_flags));
+
 	    PL_reginterp_cnt = 0;	/* XXXX Be extra paranoid - needed
 					   inside tie/overload accessors.  */
 	}
     }
+    
+    re = PM_GETRE(pm);
 
 #ifndef INCOMPLETE_TAINTS
     if (PL_tainting) {
 	if (PL_tainted)
-	    pm->op_pmdynflags |= PMdf_TAINTED;
+	    re->extflags |= RXf_TAINTED;
 	else
-	    pm->op_pmdynflags &= ~PMdf_TAINTED;
+	    re->extflags &= ~RXf_TAINTED;
     }
 #endif
 
     if (!PM_GETRE(pm)->prelen && PL_curpm)
 	pm = PL_curpm;
-    else if (PM_GETRE(pm)->extflags & RXf_WHITE)
-	pm->op_pmflags |= PMf_WHITE;
-    else
-	pm->op_pmflags &= ~PMf_WHITE;
 
-    /* XXX runtime compiled output needs to move to the pad */
+
+#if !defined(USE_ITHREADS)
+    /* can't change the optree at runtime either */
+    /* PMf_KEEP is handled differently under threads to avoid these problems */
     if (pm->op_pmflags & PMf_KEEP) {
 	pm->op_private &= ~OPpRUNTIME;	/* no point compiling again */
-#if !defined(USE_ITHREADS)
-	/* XXX can't change the optree at runtime either */
 	cLOGOP->op_first->op_next = PL_op->op_next;
-#endif
     }
+#endif
     RETURN;
 }
 

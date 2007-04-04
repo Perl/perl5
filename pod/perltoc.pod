@@ -12534,8 +12534,8 @@ children
 
 =item B::PMOP Methods
 
-pmreplroot, pmreplstart, pmnext, pmregexp, pmflags, pmdynflags,
-pmpermflags, precomp, pmoffset
+pmreplroot, pmreplstart, pmnext, pmregexp, pmflags, extflags, 
+precomp, pmoffset
 
 =item B::SVOP METHOD
 

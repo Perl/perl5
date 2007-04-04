@@ -112,7 +112,7 @@ typedef struct re_scream_pos_data_s
  * Any regex engine implementation must be able to build one of these.
  */
 typedef struct regexp_engine {
-    regexp* (*comp) (pTHX_ char* exp, char* xend, PMOP* pm);
+    regexp* (*comp) (pTHX_ char* exp, char* xend, U32 pm_flags);
     I32	    (*exec) (pTHX_ regexp* prog, char* stringarg, char* strend,
 			    char* strbeg, I32 minend, SV* screamer,
 			    void* data, U32 flags);
@@ -149,6 +149,7 @@ typedef struct regexp_engine {
 #define RXf_ANCH_SINGLE         (RXf_ANCH_SBOL|RXf_ANCH_GPOS)
 
 /* Flags indicating special patterns */
+#define RXf_SKIPWHITE		0x00000100 /* Pattern is for a split / / */
 #define RXf_START_ONLY		0x00000200 /* Pattern is /^/ */
 #define RXf_WHITE		0x00000400 /* Pattern is /\s+/ */
 
@@ -224,7 +225,8 @@ typedef struct regexp_engine {
 /* Copy and tainted info */
 #define RXf_COPY_DONE   	0x10000000
 #define RXf_TAINTED_SEEN	0x20000000
-/* two bits here  */
+#define RXf_TAINTED             0x80000000 /* this pattern is tainted */
+
 
 #define RX_HAS_CUTGROUP(prog) ((prog)->intflags & PREGf_CUTGROUP_SEEN)
 #define RX_MATCH_TAINTED(prog)	((prog)->extflags & RXf_TAINTED_SEEN)

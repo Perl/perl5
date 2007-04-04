@@ -7269,7 +7269,11 @@ Perl_sv_reset(pTHX_ register const char *s, HV *stash)
 	if (mg) {
 	    PMOP *pm = (PMOP *) mg->mg_obj;
 	    while (pm) {
-		pm->op_pmdynflags &= ~PMdf_USED;
+#ifdef USE_ITHREADS
+                SvREADONLY_off(PL_regex_pad[pm->op_pmoffset]);
+#else
+		pm->op_pmflags &= ~PMf_USED;
+#endif
 		pm = pm->op_pmnext;
 	    }
 	}

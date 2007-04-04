@@ -327,8 +327,6 @@ struct pmop {
     REGEXP *    op_pmregexp;            /* compiled expression */
 #endif
     U32		op_pmflags;
-    U32		op_pmpermflags;
-    U8		op_pmdynflags;
 #ifdef USE_ITHREADS
     char *	op_pmstashpv;
 #else
@@ -351,19 +349,18 @@ struct pmop {
 #define PM_SETRE_SAFE PM_SETRE
 #endif
 
-#define PMdf_USED	0x01		/* pm has been used once already */
-#define PMdf_TAINTED	0x02		/* pm compiled from tainted pattern */
-#define PMdf_UTF8	0x04		/* pm compiled from utf8 data */
-#define PMdf_DYN_UTF8	0x08
-
-#define PMdf_CMP_UTF8	(PMdf_UTF8|PMdf_DYN_UTF8)
 
 #define PMf_RETAINT	0x0001		/* taint $1 etc. if target tainted */
-#define PMf_ONCE	0x0002		/* use pattern only once per reset */
+#define PMf_ONCE	0x0002		/* match successfully only once per
+                                           reset, with related flag RXf_USED
+                                           in re->extflags holding state */
+
 #define PMf_UNUSED	0x0004		/* free for use */
 #define PMf_MAYBE_CONST	0x0008		/* replacement contains variables */
-#define PMf_SKIPWHITE	0x0010		/* skip leading whitespace for split */
-#define PMf_WHITE	0x0020		/* pattern is \s+ */
+
+#define PMf_USED        0x0010          /* PMf_ONCE has matched successfully.
+                                           Not used under threading. */
+
 #define PMf_CONST	0x0040		/* subst replacement is constant */
 #define PMf_KEEP	0x0080		/* keep 1st runtime pattern forever */
 #define PMf_GLOBAL	0x0100		/* pattern had a g modifier */

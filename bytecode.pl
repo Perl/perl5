@@ -314,8 +314,6 @@ op_pmreplrootgv	*(SV**)&cPMOP->op_pmreplroot		svindex
 #endif
 pregcomp	PL_op					pvcontents	x
 op_pmflags	cPMOP->op_pmflags			U16
-op_pmpermflags	cPMOP->op_pmpermflags			U16
-op_pmdynflags	cPMOP->op_pmdynflags			U8
 op_sv		cSVOP->op_sv				svindex
 op_padix	cPADOP->op_padix			PADOFFSET
 op_pv		cPVOP->op_pv				pvcontents

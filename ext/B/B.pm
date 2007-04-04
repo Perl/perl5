@@ -1047,9 +1047,7 @@ This returns the op description from the global C PL_op_desc array
 
 =item pmflags
 
-=item pmdynflags
-
-=item pmpermflags
+=item extflags
 
 =item precomp
 

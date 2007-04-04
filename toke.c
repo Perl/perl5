@@ -10860,8 +10860,6 @@ S_scan_pat(pTHX_ char *start, I32 type)
             "Use of /c modifier is meaningless without /g" );
     }
 
-    pm->op_pmpermflags = pm->op_pmflags;
-
     PL_lex_op = (OP*)pm;
     yylval.ival = OP_MATCH;
     return s;
@@ -10962,7 +10960,6 @@ S_scan_subst(pTHX_ char *start)
 	PL_lex_repl = repl;
     }
 
-    pm->op_pmpermflags = pm->op_pmflags;
     PL_lex_op = (OP*)pm;
     yylval.ival = OP_SUBST;
     return s;

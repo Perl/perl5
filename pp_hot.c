@@ -1180,9 +1180,10 @@ PP(pp_qr)
     register PMOP * const pm = cPMOP;
     SV * const rv = sv_newmortal();
     SV * const sv = newSVrv(rv, "Regexp");
-    if (pm->op_pmdynflags & PMdf_TAINTED)
+    regexp *re = PM_GETRE(pm);
+    if (re->extflags & RXf_TAINTED)
         SvTAINTED_on(rv);
-    sv_magic(sv,(SV*)ReREFCNT_inc(PM_GETRE(pm)), PERL_MAGIC_qr,0,0);
+    sv_magic(sv,(SV*)ReREFCNT_inc(re), PERL_MAGIC_qr,0,0);
     XPUSHs(rv);
     RETURN;
 }
@@ -1222,19 +1223,27 @@ PP(pp_match)
     if (!s)
 	DIE(aTHX_ "panic: pp_match");
     strend = s + len;
-    rxtainted = ((pm->op_pmdynflags & PMdf_TAINTED) ||
+    rxtainted = ((rx->extflags & RXf_TAINTED) ||
 		 (PL_tainted && (pm->op_pmflags & PMf_RETAINT)));
     TAINT_NOT;
 
     RX_MATCH_UTF8_set(rx, DO_UTF8(TARG));
 
     /* PMdf_USED is set after a ?? matches once */
-    if (pm->op_pmdynflags & PMdf_USED) {
+    if (
+#ifdef USE_ITHREADS
+        SvREADONLY(PL_regex_pad[pm->op_pmoffset])
+#else
+        pm->op_pmflags & PMf_USED
+#endif
+    ) {
       failure:
 	if (gimme == G_ARRAY)
 	    RETURN;
 	RETPUSHNO;
     }
+
+
 
     /* empty pattern special-cased to use last successful pattern if possible */
     if (!rx->prelen && PL_curpm) {
@@ -1271,7 +1280,7 @@ PP(pp_match)
        match. Test for the unsafe vars will fail as well*/
     if (( /* !global &&  */ rx->nparens) 
 	    || SvTEMP(TARG) || PL_sawampersand ||
-	    (pm->op_pmflags & (PMf_EVAL|PMf_KEEPCOPY)))
+	    (rx->extflags & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY)))
 	r_flags |= REXEC_COPY_STR;
     if (SvSCREAM(TARG))
 	r_flags |= REXEC_SCREAM;
@@ -1294,7 +1303,7 @@ play_it_again:
 	    goto nope;
 	if ( (rx->extflags & RXf_CHECK_ALL)
 	     && !PL_sawampersand
-	     && !(pm->op_pmflags & PMf_KEEPCOPY)
+	     && !(rx->extflags & RXf_PMf_KEEPCOPY)
 	     && ((rx->extflags & RXf_NOSCAN)
 		 || !((rx->extflags & RXf_INTUIT_TAIL)
 		      && (r_flags & REXEC_SCREAM)))
@@ -1304,8 +1313,13 @@ play_it_again:
     if (CALLREGEXEC(rx, (char*)s, (char *)strend, (char*)truebase, minmatch, TARG, INT2PTR(void*, gpos), r_flags))
     {
 	PL_curpm = pm;
-	if (dynpm->op_pmflags & PMf_ONCE)
-	    dynpm->op_pmdynflags |= PMdf_USED;
+	if (dynpm->op_pmflags & PMf_ONCE) {
+#ifdef USE_ITHREADS
+            SvREADONLY_on(PL_regex_pad[dynpm->op_pmoffset]);
+#else
+	    dynpm->op_pmflags |= PMf_USED;
+#endif
+        }
 	goto gotcha;
     }
     else
@@ -1401,8 +1415,13 @@ yup:					/* Confirmed by INTUIT */
 	RX_MATCH_TAINTED_on(rx);
     TAINT_IF(RX_MATCH_TAINTED(rx));
     PL_curpm = pm;
-    if (dynpm->op_pmflags & PMf_ONCE)
-	dynpm->op_pmdynflags |= PMdf_USED;
+    if (dynpm->op_pmflags & PMf_ONCE) {
+#ifdef USE_ITHREADS
+        SvREADONLY_on(PL_regex_pad[dynpm->op_pmoffset]);
+#else
+        dynpm->op_pmflags |= PMf_USED;
+#endif
+    }
     if (RX_MATCH_COPIED(rx))
 	Safefree(rx->subbeg);
     RX_MATCH_COPIED_off(rx);
@@ -1421,7 +1440,7 @@ yup:					/* Confirmed by INTUIT */
 	rx->sublen = strend - truebase;
 	goto gotcha;
     }
-    if (PL_sawampersand || pm->op_pmflags & PMf_KEEPCOPY) {
+    if (PL_sawampersand || rx->extflags & RXf_PMf_KEEPCOPY) {
 	I32 off;
 #ifdef PERL_OLD_COPY_ON_WRITE
 	if (SvIsCOW(TARG) || (SvFLAGS(TARG) & CAN_COW_MASK) == CAN_COW_FLAGS) {
@@ -2035,7 +2054,7 @@ PP(pp_subst)
     s = SvPV_mutable(TARG, len);
     if (!SvPOKp(TARG) || SvTYPE(TARG) == SVt_PVGV)
 	force_on_match = 1;
-    rxtainted = ((pm->op_pmdynflags & PMdf_TAINTED) ||
+    rxtainted = ((rx->extflags & RXf_TAINTED) ||
 		 (PL_tainted && (pm->op_pmflags & PMf_RETAINT)));
     if (PL_tainted)
 	rxtainted |= 2;
@@ -2058,7 +2077,7 @@ PP(pp_subst)
 	rx = PM_GETRE(pm);
     }
     r_flags = (rx->nparens || SvTEMP(TARG) || PL_sawampersand
-	    || (pm->op_pmflags & (PMf_EVAL|PMf_KEEPCOPY)) )
+	    || (rx->extflags & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY)) )
 	       ? REXEC_COPY_STR : 0;
     if (SvSCREAM(TARG))
 	r_flags |= REXEC_SCREAM;
@@ -2073,7 +2092,7 @@ PP(pp_subst)
 	/* How to do it in subst? */
 /*	if ( (rx->extflags & RXf_CHECK_ALL)
 	     && !PL_sawampersand
-	     && !(pm->op_pmflags & PMf_KEEPCOPY)
+	     && !(rx->extflags & RXf_KEEPCOPY)
 	     && ((rx->extflags & RXf_NOSCAN)
 		 || !((rx->extflags & RXf_INTUIT_TAIL)
 		      && (r_flags & REXEC_SCREAM))))

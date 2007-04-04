@@ -987,7 +987,7 @@ than the default one.  Each engine is supposed to provide access to
 a constant structure of the following format:
 
     typedef struct regexp_engine {
-        regexp* (*comp) (pTHX_ char* exp, char* xend, PMOP* pm);
+        regexp* (*comp) (pTHX_ char* exp, char* xend, U32 pm_flags);
         I32     (*exec) (pTHX_ regexp* prog, char* stringarg, char* strend,
                                 char* strbeg, I32 minend, SV* screamer,
                                 void* data, U32 flags);
@@ -1022,22 +1022,28 @@ The routines are as follows:
 
 =item comp
 
-    regexp* comp(char *exp, char *xend, PMOP pm);
+    regexp* comp(char *exp, char *xend, U32 pm_flags);
 
 Compile the pattern between exp and xend using the flags contained in
 pm and return a pointer to a prepared regexp structure that can perform
-the match.
+the match. pm flags will have the following flag bits set as determined
+by the context that comp() has been called from:
 
-The utf8'ness of the string can be found by testing
+    RXf_UTF8	 	 pattern is encoded in UTF8
+    RXf_PMf_LOCALE  	 use locale
+    RXf_PMf_MULTILINE	 /m
+    RXf_PMf_SINGLELINE	 /s
+    RXf_PMf_FOLD    	 /i
+    RXf_PMf_EXTENDED	 /x
+    RXf_PMf_KEEPCOPY	 /k
+    RXf_SKIPWHITE	 split ' ' or split with no args
 
-   pm->op_pmdynflags & PMdf_CMP_UTF8
-
-Additional various flags reflecting the modifiers used are contained in
-
-   pm->op_pmflags
-
-some of these have exact equivelents in re->extflags. See regcomp.h and op.h
-for details of these values.   
+In general these flags should be preserved in regex->extflags after
+compilation, although it is possible the regex includes constructs that
+changes them. The perl engine for instance may upgrade non-utf8 strings
+to utf8 if the pattern includes constructs such as C<\x{...}> that can only
+match unicode values. RXf_SKIPWHITE should always be preserved verbatim
+in regex->extflags.
 
 =item exec
 

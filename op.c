@@ -611,6 +611,7 @@ clear_pmop:
 #ifdef USE_ITHREADS
 	if(PL_regex_pad) {        /* We could be in destruction */
             av_push((AV*) PL_regex_pad[0],(SV*) PL_regex_pad[(cPMOPo)->op_pmoffset]);
+            SvREADONLY_off(PL_regex_pad[(cPMOPo)->op_pmoffset]);
 	    SvREPADTMP_on(PL_regex_pad[(cPMOPo)->op_pmoffset]);
             PM_SETRE(cPMOPo, (cPMOPo)->op_pmoffset);
         }
@@ -3268,10 +3269,10 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
     pmop->op_private = (U8)(0 | (flags >> 8));
 
     if (PL_hints & HINT_RE_TAINT)
-	pmop->op_pmpermflags |= PMf_RETAINT;
+	pmop->op_pmflags |= PMf_RETAINT;
     if (PL_hints & HINT_LOCALE)
-	pmop->op_pmpermflags |= PMf_LOCALE;
-    pmop->op_pmflags = pmop->op_pmpermflags;
+	pmop->op_pmflags |= PMf_LOCALE;
+
 
 #ifdef USE_ITHREADS
     if (av_len((AV*) PL_regex_pad[0]) > -1) {
@@ -3361,6 +3362,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	STRLEN plen;
 	SV * const pat = ((SVOP*)expr)->op_sv;
 	const char *p = SvPV_const(pat, plen);
+	U32 pm_flags = pm->op_pmflags & PMf_COMPILETIME;
 	if ((o->op_flags & OPf_SPECIAL) && (plen == 1 && *p == ' ')) {
 	    U32 was_readonly = SvREADONLY(pat);
 
@@ -3379,16 +3381,13 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	    SvFLAGS(pat) |= was_readonly;
 
 	    p = SvPV_const(pat, plen);
-	    pm->op_pmflags |= PMf_SKIPWHITE;
+	    pm_flags |= RXf_SKIPWHITE;
 	}
         if (DO_UTF8(pat))
-	    pm->op_pmdynflags |= PMdf_UTF8;
+	    pm_flags |= RXf_UTF8;
 	/* FIXME - can we make this function take const char * args?  */
-	PM_SETRE(pm, CALLREGCOMP((char*)p, (char*)p + plen, pm));
-	if (PM_GETRE(pm)->extflags & RXf_WHITE)
-	    pm->op_pmflags |= PMf_WHITE;
-	else
-	    pm->op_pmflags &= ~PMf_WHITE;
+	PM_SETRE(pm, CALLREGCOMP((char*)p, (char*)p + plen, pm_flags));
+
 #ifdef PERL_MAD
 	op_getmad(expr,(OP*)pm,'e');
 #else
@@ -3481,13 +3480,11 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 		     || PM_GETRE(pm)->extflags & RXf_EVAL_SEEN)))
 	{
 	    pm->op_pmflags |= PMf_CONST;	/* const for long enough */
-	    pm->op_pmpermflags |= PMf_CONST;	/* const for long enough */
 	    prepend_elem(o->op_type, scalar(repl), o);
 	}
 	else {
 	    if (curop == repl && !PM_GETRE(pm)) { /* Has variables. */
 		pm->op_pmflags |= PMf_MAYBE_CONST;
-		pm->op_pmpermflags |= PMf_MAYBE_CONST;
 	    }
 	    NewOp(1101, rcop, 1, LOGOP);
 	    rcop->op_type = OP_SUBSTCONT;
