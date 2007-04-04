@@ -31,11 +31,14 @@ my $libperl_copied;
 my $testlib;
 my @cmd;
 my (@cmd2) if $^O eq 'VMS';
-
+# Don't use ccopts() here as we may want to overwrite an existing
+# perl with a new one with inconsistent header files, meaning
+# the usual value for perl_inc(), which is used by ccopts(),
+# will be wrong.
 if ($^O eq 'VMS') {
     push(@cmd,$cc,"/Obj=$obj");
     my (@incs) = ($inc);
-    my $crazy = ccopts();
+    my $crazy = ccflags();
     if ($crazy =~ s#/inc[^=/]*=([\w\$\_\-\.\[\]\:]+)##i) {
         push(@incs,$1);
     }
@@ -66,7 +69,8 @@ if ($^O eq 'VMS') {
        # instead of libperl.a.
        push @cmd, "-non_shared";
    }
-   push(@cmd,"-I$inc",ccopts(),'embed_test.c');
+
+   push(@cmd,"-I$inc",ccflags(),'embed_test.c');
    if ($^O eq 'MSWin32') {
     $inc = File::Spec->catdir($inc,'win32');
     push(@cmd,"-I$inc");
@@ -149,8 +153,7 @@ unlink("embed_test.map","embed_test.lis") if $^O eq 'VMS';
 unlink(glob("./*.dll")) if $^O eq 'cygwin';
 unlink($testlib)	       if $libperl_copied;
 
-# gcc -g -I.. -L../ -o perl_test perl_test.c -lperl `../perl -I../lib -MExtUtils::Embed -I../ -e ccopts -e ldopts`
-
+# gcc -g -I.. -L../ -o perl_test perl_test.c -lperl `../perl -I../lib -MExtUtils::Embed -I../ -e ccflags -e ldopts`
 __END__
 
 /* perl_test.c */
