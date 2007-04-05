@@ -1200,12 +1200,12 @@ EXTERN_C char *crypt(const char *, const char *);
 EXTERN_C char **environ;
 #endif
 
-#if defined(__OpenBSD__) && defined(__cplusplus)
+#if defined(__cplusplus)
+#  if defined(__OpenBSD__) || defined(__FreeBSD__)
 EXTERN_C char **environ;
-#endif
-
-#if defined(__CYGWIN__) && defined(__cplusplus)
+#  elif defined(__CYGWIN__)
 EXTERN_C char *crypt(const char *, const char *);
+#endif
 #endif
 
 #ifdef SETERRNO
