@@ -1201,7 +1201,7 @@ EXTERN_C char **environ;
 #endif
 
 #if defined(__cplusplus)
-#  if defined(__OpenBSD__) || defined(__FreeBSD__)
+#  if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__)
 EXTERN_C char **environ;
 #  elif defined(__CYGWIN__)
 EXTERN_C char *crypt(const char *, const char *);
