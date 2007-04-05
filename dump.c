@@ -2037,8 +2037,7 @@ Perl_debprofdump(pTHX)
  *    XML variants of most of the above routines
  */
 
-STATIC
-void
+STATIC void
 S_xmldump_attr(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
 {
     va_list args;

@@ -384,7 +384,7 @@ Perl_allocmy(pTHX_ const char *const name)
 /* free the body of an op without examining its contents.
  * Always use this rather than FreeOp directly */
 
-void
+static void
 S_op_destroy(pTHX_ OP *o)
 {
     if (o->op_latefree) {
@@ -4795,8 +4795,7 @@ S_ref_array_or_hash(pTHX_ OP *cond)
    op_other if the match fails.)
  */
 
-STATIC
-OP *
+STATIC OP *
 S_newGIVWHENOP(pTHX_ OP *cond, OP *block,
 		   I32 enter_opcode, I32 leave_opcode,
 		   PADOFFSET entertarg)
@@ -4850,8 +4849,7 @@ S_newGIVWHENOP(pTHX_ OP *cond, OP *block,
    
    [*] possibly surprising
  */
-STATIC
-bool
+STATIC bool
 S_looks_like_bool(pTHX_ const OP *o)
 {
     dVAR;

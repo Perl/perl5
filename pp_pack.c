@@ -1179,8 +1179,7 @@ Perl_unpackstring(pTHX_ const char *pat, const char *patend, const char *s, cons
     return unpack_rec(&sym, s, s, strend, NULL );
 }
 
-STATIC
-I32
+STATIC I32
 S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const char *strend, const char **new_s )
 {
     dVAR; dSP;

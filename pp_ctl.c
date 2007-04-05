@@ -3730,8 +3730,7 @@ PP(pp_leavegiven)
 }
 
 /* Helper routines used by pp_smartmatch */
-STATIC
-PMOP *
+STATIC PMOP *
 S_make_matcher(pTHX_ regexp *re)
 {
     dVAR;
@@ -3744,8 +3743,7 @@ S_make_matcher(pTHX_ regexp *re)
     return matcher;
 }
 
-STATIC
-bool
+STATIC bool
 S_matcher_matches_sv(pTHX_ PMOP *matcher, SV *sv)
 {
     dVAR;
@@ -3759,8 +3757,7 @@ S_matcher_matches_sv(pTHX_ PMOP *matcher, SV *sv)
     return (SvTRUEx(POPs));
 }
 
-STATIC
-void
+STATIC void
 S_destroy_matcher(pTHX_ PMOP *matcher)
 {
     dVAR;
@@ -3778,8 +3775,7 @@ PP(pp_smartmatch)
 /* This version of do_smartmatch() implements the
  * table of smart matches that is found in perlsyn.
  */
-STATIC
-OP *
+STATIC OP *
 S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 {
     dVAR;
