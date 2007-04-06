@@ -70,8 +70,6 @@ SKIP:
 {
     eval {require threads; 1} or
 	skip "No threads", 4;
-    local $::TODO
-	= "Currently performs a read from free()d memory, and may crash";
     foreach my $eight ('/', '?') {
 	foreach my $nine ('/', '?') {
 	    my $copy = $prog;

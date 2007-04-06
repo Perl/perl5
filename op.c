@@ -428,8 +428,12 @@ Perl_op_free(pTHX_ OP *o)
 	    OP_REFCNT_LOCK;
 	    refcnt = OpREFCNT_dec(o);
 	    OP_REFCNT_UNLOCK;
-	    if (refcnt)
+	    if (refcnt) {
+		/* Need to find and remove any pattern match ops from the list
+		   we maintain for reset().  */
+		find_and_forget_pmops(o);
 		return;
+	    }
 	    }
 	    break;
 	default:
@@ -650,6 +654,25 @@ S_forget_pmop(pTHX_ PMOP *const o, U32 flags)
     }
     if (flags)
 	PmopSTASH_free(o);
+}
+
+STATIC void
+S_find_and_forget_pmops(pTHX_ OP *o)
+{
+    if (o->op_flags & OPf_KIDS) {
+        OP *kid = cUNOPo->op_first;
+	while (kid) {
+	    switch (kid->op_type) {
+	    case OP_SUBST:
+	    case OP_PUSHRE:
+	    case OP_MATCH:
+	    case OP_QR:
+		forget_pmop((PMOP*)kid, 0);
+	    }
+	    find_and_forget_pmops(kid);
+	    kid = kid->op_sibling;
+	}
+    }
 }
 
 void

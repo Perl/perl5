@@ -3243,6 +3243,9 @@ STATIC I32	S_is_list_assignment(pTHX_ const OP *o)
 STATIC void	S_forget_pmop(pTHX_ PMOP *const o, U32 flags)
 			__attribute__nonnull__(pTHX_1);
 
+STATIC void	S_find_and_forget_pmops(pTHX_ OP *o)
+			__attribute__nonnull__(pTHX_1);
+
 STATIC void	S_cop_free(pTHX_ COP *cop)
 			__attribute__nonnull__(pTHX_1);
 
