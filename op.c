@@ -8031,8 +8031,6 @@ Perl_peep(pTHX_ register OP *o)
 	    peep(cLOOP->op_lastop);
 	    break;
 
-	case OP_QR:
-	case OP_MATCH:
 	case OP_SUBST:
 	    o->op_opt = 1;
 	    while (cPMOP->op_pmreplstart &&
@@ -8427,6 +8425,10 @@ Perl_peep(pTHX_ register OP *o)
 	}
 
 	
+	case OP_QR:
+	case OP_MATCH:
+	    assert (!cPMOP->op_pmreplstart);
+	    /* FALL THROUGH */
 	default:
 	    o->op_opt = 1;
 	    break;
