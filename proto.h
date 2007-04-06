@@ -3240,6 +3240,9 @@ STATIC bool	S_is_handle_constructor(const OP *o, I32 numargs)
 STATIC I32	S_is_list_assignment(pTHX_ const OP *o)
 			__attribute__warn_unused_result__;
 
+STATIC void	S_forget_pmop(pTHX_ PMOP *const o, U32 flags)
+			__attribute__nonnull__(pTHX_1);
+
 STATIC void	S_cop_free(pTHX_ COP *cop)
 			__attribute__nonnull__(pTHX_1);
 
