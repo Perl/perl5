@@ -320,7 +320,6 @@ struct pmop {
     OP *	op_last;
     OP *	op_pmreplroot; /* (type is really union {OP*,GV*,PADOFFSET}) */
     OP *	op_pmreplstart;
-    PMOP *	op_pmnext;		/* list of all scanpats */
 #ifdef USE_ITHREADS
     IV          op_pmoffset;
 #else

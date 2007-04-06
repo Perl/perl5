@@ -1192,6 +1192,7 @@
 #define ck_unpack		Perl_ck_unpack
 #define is_handle_constructor	S_is_handle_constructor
 #define is_list_assignment	S_is_list_assignment
+#define forget_pmop		S_forget_pmop
 #define cop_free		S_cop_free
 #define modkids			S_modkids
 #define scalarboolean		S_scalarboolean
@@ -3429,6 +3430,7 @@
 #define ck_unpack(a)		Perl_ck_unpack(aTHX_ a)
 #define is_handle_constructor	S_is_handle_constructor
 #define is_list_assignment(a)	S_is_list_assignment(aTHX_ a)
+#define forget_pmop(a,b)	S_forget_pmop(aTHX_ a,b)
 #define cop_free(a)		S_cop_free(aTHX_ a)
 #define modkids(a,b)		S_modkids(aTHX_ a,b)
 #define scalarboolean(a)	S_scalarboolean(aTHX_ a)

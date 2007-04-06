@@ -1016,9 +1016,13 @@ B::OP
 PMOP_pmreplstart(o)
 	B::PMOP		o
 
+#if PERL_VERSION < 9
+
 B::PMOP
 PMOP_pmnext(o)
 	B::PMOP		o
+
+#endif
 
 #ifdef USE_ITHREADS
 

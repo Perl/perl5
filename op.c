@@ -581,28 +581,7 @@ Perl_op_clear(pTHX_ OP *o)
     case OP_MATCH:
     case OP_QR:
 clear_pmop:
-	{
-	    HV * const pmstash = PmopSTASH(cPMOPo);
-	    if (pmstash && !SvIS_FREED(pmstash)) {
-		MAGIC * const mg = mg_find((SV*)pmstash, PERL_MAGIC_symtab);
-		if (mg) {
-		    PMOP *pmop = (PMOP*) mg->mg_obj;
-		    PMOP *lastpmop = NULL;
-		    while (pmop) {
-			if (cPMOPo == pmop) {
-			    if (lastpmop)
-				lastpmop->op_pmnext = pmop->op_pmnext;
-			    else
-				mg->mg_obj = (SV*) pmop->op_pmnext;
-			    break;
-			}
-			lastpmop = pmop;
-			pmop = pmop->op_pmnext;
-		    }
-		}
-	    }
-	    PmopSTASH_free(cPMOPo);
-	}
+	forget_pmop(cPMOPo, 1);
 	cPMOPo->op_pmreplroot = NULL;
         /* we use the "SAFE" version of the PM_ macros here
          * since sv_clean_all might release some PMOPs
@@ -639,6 +618,38 @@ S_cop_free(pTHX_ COP* cop)
     if (! specialWARN(cop->cop_warnings))
 	PerlMemShared_free(cop->cop_warnings);
     Perl_refcounted_he_free(aTHX_ cop->cop_hints_hash);
+}
+
+STATIC void
+S_forget_pmop(pTHX_ PMOP *const o, U32 flags)
+{
+    HV * const pmstash = PmopSTASH(o);
+    if (pmstash && !SvIS_FREED(pmstash)) {
+	MAGIC * const mg = mg_find((SV*)pmstash, PERL_MAGIC_symtab);
+	if (mg) {
+	    PMOP **const array = (PMOP**) mg->mg_ptr;
+	    U32 count = mg->mg_len / sizeof(PMOP**);
+	    U32 i = count;
+
+	    while (i--) {
+		if (array[i] == o) {
+		    /* Found it. Move the entry at the end to overwrite it.  */
+		    array[i] = array[--count];
+		    mg->mg_len = count * sizeof(PMOP**);
+		    /* Could realloc smaller at this point always, but probably
+		       not worth it. Probably worth free()ing if we're the
+		       last.  */
+		    if(!count) {
+			Safefree(mg->mg_ptr);
+			mg->mg_ptr = NULL;
+		    }
+		    break;
+		}
+	    }
+	}
+    }
+    if (flags)
+	PmopSTASH_free(o);
 }
 
 void
@@ -3292,15 +3303,17 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
     }
 #endif
 
-        /* link into pm list */
+    /* append to pm list */
     if (type != OP_TRANS && PL_curstash) {
 	MAGIC *mg = mg_find((SV*)PL_curstash, PERL_MAGIC_symtab);
-
+	U32 elements;
 	if (!mg) {
 	    mg = sv_magicext((SV*)PL_curstash, 0, PERL_MAGIC_symtab, 0, 0, 0);
 	}
-	pmop->op_pmnext = (PMOP*)mg->mg_obj;
-	mg->mg_obj = (SV*)pmop;
+	elements = mg->mg_len / sizeof(PMOP**);
+	Renewc(mg->mg_ptr, elements + 1, PMOP*, char);
+	((PMOP**)mg->mg_ptr) [elements++] = pmop;
+	mg->mg_len = elements * sizeof(PMOP**);
 	PmopSTASH_set(pmop,PL_curstash);
     }
 

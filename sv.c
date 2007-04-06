@@ -7267,14 +7267,17 @@ Perl_sv_reset(pTHX_ register const char *s, HV *stash)
     if (!*s) {		/* reset ?? searches */
 	MAGIC * const mg = mg_find((SV *)stash, PERL_MAGIC_symtab);
 	if (mg) {
-	    PMOP *pm = (PMOP *) mg->mg_obj;
-	    while (pm) {
+	    const U32 count = mg->mg_len / sizeof(PMOP**);
+	    PMOP **pmp = (PMOP**) mg->mg_ptr;
+	    PMOP *const *const end = pmp + count;
+
+	    while (pmp < end) {
 #ifdef USE_ITHREADS
-                SvREADONLY_off(PL_regex_pad[pm->op_pmoffset]);
+                SvREADONLY_off(PL_regex_pad[(*pmp)->op_pmoffset]);
 #else
-		pm->op_pmflags &= ~PMf_USED;
+		(*pmp)->op_pmflags &= ~PMf_USED;
 #endif
-		pm = pm->op_pmnext;
+		++pmp;
 	    }
 	}
 	return;
@@ -9650,9 +9653,6 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS* param)
 	    /* The backref AV has its reference count deliberately bumped by
 	       1.  */
 	    nmg->mg_obj = SvREFCNT_inc(av_dup_inc((AV*) mg->mg_obj, param));
-	}
-	else if (mg->mg_type == PERL_MAGIC_symtab) {
-	    nmg->mg_obj	= mg->mg_obj;
 	}
 	else {
 	    nmg->mg_obj	= (mg->mg_flags & MGf_REFCOUNTED)
