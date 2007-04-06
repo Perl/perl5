@@ -326,6 +326,11 @@ struct pmop {
     REGEXP *    op_pmregexp;            /* compiled expression */
 #endif
     U32		op_pmflags;
+    /* This field is only needed so that PMOPs can delete themselves from the
+       list held by the stash. In turn, that list is only needed for reset
+       to work correctly, and is now only a list of ops used by ?? matches,
+       which are rare. Hence it would be useful if we could find a way to
+       shave it. */
 #ifdef USE_ITHREADS
     char *	op_pmstashpv;
 #else

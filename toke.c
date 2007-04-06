@@ -10841,8 +10841,28 @@ S_scan_pat(pTHX_ char *start, I32 type)
     }
 
     pm = (PMOP*)newPMOP(type, 0);
-    if (PL_multi_open == '?')
+    if (PL_multi_open == '?') {
+	/* This is the only point in the code that sets PMf_ONCE:  */
 	pm->op_pmflags |= PMf_ONCE;
+
+	/* Hence it's safe to do this bit of PMOP book-keeping here, which
+	   allows us to restrict the list needed by reset to just the ??
+	   matches.  */
+	assert(type != OP_TRANS);
+	if (PL_curstash) {
+	    MAGIC *mg = mg_find((SV*)PL_curstash, PERL_MAGIC_symtab);
+	    U32 elements;
+	    if (!mg) {
+		mg = sv_magicext((SV*)PL_curstash, 0, PERL_MAGIC_symtab, 0, 0,
+				 0);
+	    }
+	    elements = mg->mg_len / sizeof(PMOP**);
+	    Renewc(mg->mg_ptr, elements + 1, PMOP*, char);
+	    ((PMOP**)mg->mg_ptr) [elements++] = pm;
+	    mg->mg_len = elements * sizeof(PMOP**);
+	    PmopSTASH_set(pm,PL_curstash);
+	}
+    }
 #ifdef PERL_MAD
     modstart = s;
 #endif

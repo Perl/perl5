@@ -3326,20 +3326,6 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
     }
 #endif
 
-    /* append to pm list */
-    if (type != OP_TRANS && PL_curstash) {
-	MAGIC *mg = mg_find((SV*)PL_curstash, PERL_MAGIC_symtab);
-	U32 elements;
-	if (!mg) {
-	    mg = sv_magicext((SV*)PL_curstash, 0, PERL_MAGIC_symtab, 0, 0, 0);
-	}
-	elements = mg->mg_len / sizeof(PMOP**);
-	Renewc(mg->mg_ptr, elements + 1, PMOP*, char);
-	((PMOP**)mg->mg_ptr) [elements++] = pmop;
-	mg->mg_len = elements * sizeof(PMOP**);
-	PmopSTASH_set(pmop,PL_curstash);
-    }
-
     return CHECKOP(type, pmop);
 }
 
