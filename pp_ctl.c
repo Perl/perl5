@@ -302,7 +302,7 @@ PP(pp_substcont)
 	(void)ReREFCNT_inc(rx);
     cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
     rxres_save(&cx->sb_rxres, rx);
-    RETURNOP(pm->op_pmreplstart);
+    RETURNOP(pm->op_pmstashstartu.op_pmreplstart);
 }
 
 void

@@ -319,23 +319,20 @@ struct pmop {
     OP *	op_first;
     OP *	op_last;
     OP *	op_pmreplroot; /* (type is really union {OP*,GV*,PADOFFSET}) */
-    OP *	op_pmreplstart;
 #ifdef USE_ITHREADS
     IV          op_pmoffset;
 #else
     REGEXP *    op_pmregexp;            /* compiled expression */
 #endif
     U32		op_pmflags;
-    /* This field is only needed so that PMOPs can delete themselves from the
-       list held by the stash. In turn, that list is only needed for reset
-       to work correctly, and is now only a list of ops used by ?? matches,
-       which are rare. Hence it would be useful if we could find a way to
-       shave it. */
+    union {
+	OP *	op_pmreplstart;	/* Only used in OP_SUBST */
 #ifdef USE_ITHREADS
-    char *	op_pmstashpv;
+	char *	op_pmstashpv;	/* Only used in OP_MATCH, with PMf_ONCE set */
 #else
-    HV *	op_pmstash;
+	HV *	op_pmstash;
 #endif
+    }		op_pmstashstartu;
 };
 
 #ifdef USE_ITHREADS
@@ -357,7 +354,9 @@ struct pmop {
 #define PMf_RETAINT	0x0001		/* taint $1 etc. if target tainted */
 #define PMf_ONCE	0x0002		/* match successfully only once per
                                            reset, with related flag RXf_USED
-                                           in re->extflags holding state */
+                                           in re->extflags holding state.
+					   This is used only for ?? matches,
+					   and only on OP_MATCH and OP_QR */
 
 #define PMf_UNUSED	0x0004		/* free for use */
 #define PMf_MAYBE_CONST	0x0008		/* replacement contains variables */
@@ -386,18 +385,35 @@ struct pmop {
 
 #ifdef USE_ITHREADS
 
-#  define PmopSTASHPV(o)	((o)->op_pmstashpv)
-#  define PmopSTASHPV_set(o,pv)	(PmopSTASHPV(o) = savesharedpv(pv))
+#  define PmopSTASHPV(o)						\
+    (((o)->op_pmflags & PMf_ONCE) ? (o)->op_pmstashstartu.op_pmstashpv : NULL)
+#  if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#    define PmopSTASHPV_set(o,pv)	({				\
+	assert((o)->op_pmflags & PMf_ONCE);				\
+	((o)->op_pmstashstartu.op_pmstashpv = savesharedpv(pv));	\
+    })
+#  else
+#    define PmopSTASHPV_set(o,pv)					\
+    ((o)->op_pmstashstartu.op_pmstashpv = savesharedpv(pv))
+#  endif
 #  define PmopSTASH(o)		(PmopSTASHPV(o) \
-				 ? gv_stashpv(PmopSTASHPV(o),GV_ADD) : NULL)
+				 ? gv_stashpv((o)->op_pmstashstartu.op_pmstashpv,GV_ADD) : NULL)
 #  define PmopSTASH_set(o,hv)	PmopSTASHPV_set(o, ((hv) ? HvNAME_get(hv) : NULL))
 #  define PmopSTASH_free(o)	PerlMemShared_free(PmopSTASHPV(o))
 
 #else
-#  define PmopSTASH(o)		((o)->op_pmstash)
-#  define PmopSTASH_set(o,hv)	((o)->op_pmstash = (hv))
+#  define PmopSTASH(o)							\
+    (((o)->op_pmflags & PMf_ONCE) ? (o)->op_pmstashstartu.op_pmstash : NULL)
+#  if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#    define PmopSTASH_set(o,hv)		({				\
+	assert((o)->op_pmflags & PMf_ONCE);				\
+	((o)->op_pmstashstartu.op_pmstash = (hv));			\
+    })
+#  else
+#    define PmopSTASH_set(o,hv)	((o)->op_pmstashstartu.op_pmstash = (hv))
+#  endif
 #  define PmopSTASHPV(o)	(PmopSTASH(o) ? HvNAME_get(PmopSTASH(o)) : NULL)
-   /* op_pmstash is not refcounted */
+   /* op_pmstashstartu.op_pmstash is not refcounted */
 #  define PmopSTASHPV_set(o,pv)	PmopSTASH_set((o), gv_stashpv(pv,GV_ADD))
 #  define PmopSTASH_free(o)    
 #endif

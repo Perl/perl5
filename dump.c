@@ -673,13 +673,13 @@ S_sequence(pTHX_ register const OP *o)
 	    sequence_tail(cLOOPo->op_lastop);
 	    break;
 
-	case OP_QR:
-	case OP_MATCH:
 	case OP_SUBST:
 	    hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
-	    sequence_tail(cPMOPo->op_pmreplstart);
+	    sequence_tail(cPMOPo->op_pmstashstartu.op_pmreplstart);
 	    break;
 
+	case OP_QR:
+	case OP_MATCH:
 	case OP_HELEM:
 	    break;
 

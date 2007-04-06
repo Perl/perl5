@@ -513,7 +513,11 @@ oplist(pTHX_ OP *o, SV **SP)
 	XPUSHs(opsv);
         switch (o->op_type) {
 	case OP_SUBST:
+#if PERL_VERSION >= 9
+            SP = oplist(aTHX_ cPMOPo->op_pmstashstartu.op_pmreplstart, SP);
+#else
             SP = oplist(aTHX_ cPMOPo->op_pmreplstart, SP);
+#endif
             continue;
 	case OP_SORT:
 	    if (o->op_flags & OPf_STACKED && o->op_flags & OPf_SPECIAL) {
@@ -978,14 +982,18 @@ LISTOP_children(o)
         RETVAL
 
 #define PMOP_pmreplroot(o)	o->op_pmreplroot
-#define PMOP_pmreplstart(o)	o->op_pmreplstart
+#if PERL_VERSION >= 9
+#  define PMOP_pmreplstart(o)	o->op_pmstashstartu.op_pmreplstart
+#else
+#  define PMOP_pmreplstart(o)	o->op_pmreplstart
+#endif
 #define PMOP_pmnext(o)		o->op_pmnext
 #define PMOP_pmregexp(o)	PM_GETRE(o)
 #ifdef USE_ITHREADS
 #define PMOP_pmoffset(o)	o->op_pmoffset
-#define PMOP_pmstashpv(o)	o->op_pmstashpv
+#define PMOP_pmstashpv(o)	PmopSTASHPV(o);
 #else
-#define PMOP_pmstash(o)		o->op_pmstash
+#define PMOP_pmstash(o)		PmopSTASH(o);
 #endif
 #define PMOP_pmflags(o)		o->op_pmflags
 

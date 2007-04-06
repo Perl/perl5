@@ -3525,7 +3525,8 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	    repl->op_next = (OP*)rcop;
 
 	    pm->op_pmreplroot = scalar((OP*)rcop);
-	    pm->op_pmreplstart = LINKLIST(rcop);
+	    assert(!(pm->op_pmflags & PMf_ONCE));
+	    pm->op_pmstashstartu.op_pmreplstart = LINKLIST(rcop);
 	    rcop->op_next = 0;
 	}
     }
@@ -8033,10 +8034,12 @@ Perl_peep(pTHX_ register OP *o)
 
 	case OP_SUBST:
 	    o->op_opt = 1;
-	    while (cPMOP->op_pmreplstart &&
-		   cPMOP->op_pmreplstart->op_type == OP_NULL)
-		cPMOP->op_pmreplstart = cPMOP->op_pmreplstart->op_next;
-	    peep(cPMOP->op_pmreplstart);
+	    assert(!(cPMOP->op_pmflags & PMf_ONCE));
+	    while (cPMOP->op_pmstashstartu.op_pmreplstart &&
+		   cPMOP->op_pmstashstartu.op_pmreplstart->op_type == OP_NULL)
+		cPMOP->op_pmstashstartu.op_pmreplstart
+		    = cPMOP->op_pmstashstartu.op_pmreplstart->op_next;
+	    peep(cPMOP->op_pmstashstartu.op_pmreplstart);
 	    break;
 
 	case OP_EXEC:
@@ -8427,7 +8430,9 @@ Perl_peep(pTHX_ register OP *o)
 	
 	case OP_QR:
 	case OP_MATCH:
-	    assert (!cPMOP->op_pmreplstart);
+	    if (!(cPMOP->op_pmflags & PMf_ONCE)) {
+		assert (!cPMOP->op_pmstashstartu.op_pmreplstart);
+	    }
 	    /* FALL THROUGH */
 	default:
 	    o->op_opt = 1;
