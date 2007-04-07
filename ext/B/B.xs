@@ -487,7 +487,12 @@ walkoptree(pTHX_ SV *opsv, const char *method)
 	}
     }
     if (o && (cc_opclass(aTHX_ o) == OPc_PMOP) && o->op_type != OP_PUSHRE
-	    && (kid = cPMOPo->op_pmreplroot))
+#if PERL_VERSION >= 9
+	    && (kid = cPMOPo->op_pmreplrootu.op_pmreplroot)
+#else
+	    && (kid = cPMOPo->op_pmreplroot)
+#endif
+	)
     {
 	sv_setiv(newSVrv(opsv, cc_opclassname(aTHX_ kid)), PTR2IV(kid));
 	walkoptree(aTHX_ opsv, method);
@@ -981,7 +986,6 @@ LISTOP_children(o)
     OUTPUT:
         RETVAL
 
-#define PMOP_pmreplroot(o)	o->op_pmreplroot
 #if PERL_VERSION >= 9
 #  define PMOP_pmreplstart(o)	o->op_pmstashstartu.op_pmreplstart
 #else
@@ -999,6 +1003,8 @@ LISTOP_children(o)
 
 MODULE = B	PACKAGE = B::PMOP		PREFIX = PMOP_
 
+#if PERL_VERSION <= 8
+
 void
 PMOP_pmreplroot(o)
 	B::PMOP		o
@@ -1008,17 +1014,42 @@ PMOP_pmreplroot(o)
 	root = o->op_pmreplroot;
 	/* OP_PUSHRE stores an SV* instead of an OP* in op_pmreplroot */
 	if (o->op_type == OP_PUSHRE) {
-#ifdef USE_ITHREADS
+#  ifdef USE_ITHREADS
             sv_setiv(ST(0), INT2PTR(PADOFFSET,root) );
-#else
+#  else
 	    sv_setiv(newSVrv(ST(0), root ?
 			     svclassnames[SvTYPE((SV*)root)] : "B::SV"),
 		     PTR2IV(root));
-#endif
+#  endif
 	}
 	else {
 	    sv_setiv(newSVrv(ST(0), cc_opclassname(aTHX_ root)), PTR2IV(root));
 	}
+
+#else
+
+void
+PMOP_pmreplroot(o)
+	B::PMOP		o
+    CODE:
+	ST(0) = sv_newmortal();
+	if (o->op_type == OP_PUSHRE) {
+#  ifdef USE_ITHREADS
+            sv_setiv(ST(0), o->op_pmreplrootu.op_pmtargetoff);
+#  else
+	    GV *const target = o->op_pmreplrootu.op_pmtargetgv;
+	    sv_setiv(newSVrv(ST(0), target ?
+			     svclassnames[SvTYPE((SV*)target)] : "B::SV"),
+		     PTR2IV(target));
+#  endif
+	}
+	else {
+	    OP *const root = o->op_pmreplrootu.op_pmreplroot; 
+	    sv_setiv(newSVrv(ST(0), cc_opclassname(aTHX_ root)),
+		     PTR2IV(root));
+	}
+
+#endif
 
 B::OP
 PMOP_pmreplstart(o)

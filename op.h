@@ -318,13 +318,20 @@ struct pmop {
     BASEOP
     OP *	op_first;
     OP *	op_last;
-    OP *	op_pmreplroot; /* (type is really union {OP*,GV*,PADOFFSET}) */
 #ifdef USE_ITHREADS
     IV          op_pmoffset;
 #else
     REGEXP *    op_pmregexp;            /* compiled expression */
 #endif
     U32		op_pmflags;
+    union {
+	OP *	op_pmreplroot;		/* For OP_SUBST */
+#ifdef USE_ITHREADS
+	PADOFFSET  op_pmtargetoff;	/* For OP_PUSHRE */
+#else
+	GV *	op_pmtargetgv;
+#endif
+    }	op_pmreplrootu;
     union {
 	OP *	op_pmreplstart;	/* Only used in OP_SUBST */
 #ifdef USE_ITHREADS

@@ -569,24 +569,24 @@ Perl_op_clear(pTHX_ OP *o)
 	}
 	break;
     case OP_SUBST:
-	op_free(cPMOPo->op_pmreplroot);
+	op_free(cPMOPo->op_pmreplrootu.op_pmreplroot);
 	goto clear_pmop;
     case OP_PUSHRE:
 #ifdef USE_ITHREADS
-        if (INT2PTR(PADOFFSET, cPMOPo->op_pmreplroot)) {
+        if (cPMOPo->op_pmreplrootu.op_pmtargetoff) {
 	    /* No GvIN_PAD_off here, because other references may still
 	     * exist on the pad */
-	    pad_swipe(INT2PTR(PADOFFSET, cPMOPo->op_pmreplroot), TRUE);
+	    pad_swipe(cPMOPo->op_pmreplrootu.op_pmtargetoff, TRUE);
 	}
 #else
-	SvREFCNT_dec((SV*)cPMOPo->op_pmreplroot);
+	SvREFCNT_dec((SV*)cPMOPo->op_pmreplrootu.op_pmtargetgv);
 #endif
 	/* FALL THROUGH */
     case OP_MATCH:
     case OP_QR:
 clear_pmop:
 	forget_pmop(cPMOPo, 1);
-	cPMOPo->op_pmreplroot = NULL;
+	cPMOPo->op_pmreplrootu.op_pmreplroot = NULL;
         /* we use the "SAFE" version of the PM_ macros here
          * since sv_clean_all might release some PMOPs
          * after PL_regex_padav has been cleared
@@ -793,7 +793,7 @@ Perl_scalar(pTHX_ OP *o)
 	break;
     case OP_SPLIT:
 	if ((kid = cLISTOPo->op_first) && kid->op_type == OP_PUSHRE) {
-	    if (!kPMOP->op_pmreplroot)
+	    if (!kPMOP->op_pmreplrootu.op_pmreplroot)
 		deprecate_old("implicit split to @_");
 	}
 	/* FALL THROUGH */
@@ -1088,7 +1088,7 @@ Perl_scalarvoid(pTHX_ OP *o)
 	return scalar(o);
     case OP_SPLIT:
 	if ((kid = cLISTOPo->op_first) && kid->op_type == OP_PUSHRE) {
-	    if (!kPMOP->op_pmreplroot)
+	    if (!kPMOP->op_pmreplrootu.op_pmreplroot)
 		deprecate_old("implicit split to @_");
 	}
 	break;
@@ -3524,7 +3524,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	    rcop->op_next = LINKLIST(repl);
 	    repl->op_next = (OP*)rcop;
 
-	    pm->op_pmreplroot = scalar((OP*)rcop);
+	    pm->op_pmreplrootu.op_pmreplroot = scalar((OP*)rcop);
 	    assert(!(pm->op_pmflags & PMf_ONCE));
 	    pm->op_pmstashstartu.op_pmreplstart = LINKLIST(rcop);
 	    rcop->op_next = 0;
@@ -4007,19 +4007,24 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 			    break;
 		    }
 		    else if (curop->op_type == OP_PUSHRE) {
-			if (((PMOP*)curop)->op_pmreplroot) {
 #ifdef USE_ITHREADS
-			    GV *gv = (GV*)PAD_SVl(INT2PTR(PADOFFSET,
-					((PMOP*)curop)->op_pmreplroot));
-#else
-			    GV *gv = (GV*)((PMOP*)curop)->op_pmreplroot;
-#endif
+			if (((PMOP*)curop)->op_pmreplrootu.op_pmtargetoff) {
+			    GV *const gv = (GV*)PAD_SVl(((PMOP*)curop)->op_pmreplrootu.op_pmtargetoff);
 			    if (gv == PL_defgv
 				|| (int)GvASSIGN_GENERATION(gv) == PL_generation)
 				break;
 			    GvASSIGN_GENERATION_set(gv, PL_generation);
+			}
+#else
+			GV *const gv
+			    = ((PMOP*)curop)->op_pmreplrootu.op_pmtargetgv;
+			if (gv) {
+			    if (gv == PL_defgv
+				|| (int)GvASSIGN_GENERATION(gv) == PL_generation)
+				break;
 			    GvASSIGN_GENERATION_set(gv, PL_generation);
 			}
+#endif
 		    }
 		    else
 			break;
@@ -4077,12 +4082,20 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		    !(o->op_private & OPpASSIGN_COMMON) )
 		{
 		    tmpop = ((UNOP*)left)->op_first;
-		    if (tmpop->op_type == OP_GV && !pm->op_pmreplroot) {
+		    if (tmpop->op_type == OP_GV
 #ifdef USE_ITHREADS
-			pm->op_pmreplroot = INT2PTR(OP*, cPADOPx(tmpop)->op_padix);
+			&& !pm->op_pmreplrootu.op_pmtargetoff
+#else
+			&& !pm->op_pmreplrootu.op_pmtargetgv
+#endif
+			) {
+#ifdef USE_ITHREADS
+			pm->op_pmreplrootu.op_pmtargetoff
+			    = cPADOPx(tmpop)->op_padix;
 			cPADOPx(tmpop)->op_padix = 0;	/* steal it */
 #else
-			pm->op_pmreplroot = (OP*)cSVOPx(tmpop)->op_sv;
+			pm->op_pmreplrootu.op_pmtargetgv
+			    = (GV*)cSVOPx(tmpop)->op_sv;
 			cSVOPx(tmpop)->op_sv = NULL;	/* steal it */
 #endif
 			pm->op_pmflags |= PMf_ONCE;

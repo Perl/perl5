@@ -4572,13 +4572,15 @@ PP(pp_split)
 
     RX_MATCH_UTF8_set(rx, do_utf8);
 
-    if (pm->op_pmreplroot) {
 #ifdef USE_ITHREADS
-	ary = GvAVn((GV*)PAD_SVl(INT2PTR(PADOFFSET, pm->op_pmreplroot)));
-#else
-	ary = GvAVn((GV*)pm->op_pmreplroot);
-#endif
+    if (pm->op_pmreplrootu.op_pmtargetoff) {
+	ary = GvAVn((GV*)PAD_SVl(pm->op_pmreplrootu.op_pmtargetoff));
     }
+#else
+    if (pm->op_pmreplrootu.op_pmtargetgv) {
+	ary = GvAVn(pm->op_pmreplrootu.op_pmtargetgv);
+    }
+#endif
     else if (gimme != G_ARRAY)
 	ary = GvAVn(PL_defgv);
     else

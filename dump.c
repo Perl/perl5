@@ -538,9 +538,9 @@ Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
 	     (pm->op_private & OPpRUNTIME) ? " (RUNTIME)" : "");
     else
 	Perl_dump_indent(aTHX_ level, file, "PMf_PRE (RUNTIME)\n");
-    if (pm->op_type != OP_PUSHRE && pm->op_pmreplroot) {
+    if (pm->op_type != OP_PUSHRE && pm->op_pmreplrootu.op_pmreplroot) {
 	Perl_dump_indent(aTHX_ level, file, "PMf_REPL = ");
-	op_dump(pm->op_pmreplroot);
+	op_dump(pm->op_pmreplrootu.op_pmreplroot);
     }
     if (pm->op_pmflags || (PM_GETRE(pm) && PM_GETRE(pm)->check_substr)) {
 	SV * const tmpsv = pm_description(pm);
@@ -2461,10 +2461,10 @@ Perl_do_pmop_xmldump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
     }
 
     level--;
-    if (pm->op_type != OP_PUSHRE && pm->op_pmreplroot) {
+    if (pm->op_type != OP_PUSHRE && pm->op_pmreplrootu.op_pmreplroot) {
 	Perl_xmldump_indent(aTHX_ level, file, ">\n");
 	Perl_xmldump_indent(aTHX_ level+1, file, "<pm_repl>\n");
-	do_op_xmldump(level+2, file, pm->op_pmreplroot);
+	do_op_xmldump(level+2, file, pm->op_pmreplrootu.op_pmreplroot);
 	Perl_xmldump_indent(aTHX_ level+1, file, "</pm_repl>\n");
 	Perl_xmldump_indent(aTHX_ level, file, "</pmop>\n");
     }

@@ -2261,7 +2261,7 @@ PP(pp_subst)
 	    register PERL_CONTEXT *cx;
 	    SPAGAIN;
 	    PUSHSUBST(cx);
-	    RETURNOP(cPMOP->op_pmreplroot);
+	    RETURNOP(cPMOP->op_pmreplrootu.op_pmreplroot);
 	}
 	r_flags |= REXEC_IGNOREPOS | REXEC_NOT_FIRST;
 	do {
