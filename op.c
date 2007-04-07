@@ -7894,12 +7894,6 @@ Perl_peep(pTHX_ register OP *o)
 	  ignore_optimization:
 	    o->op_opt = 1;
 	    break;
-	case OP_STUB:
-	    if ((o->op_flags & OPf_WANT) != OPf_WANT_LIST) {
-		o->op_opt = 1;
-		break; /* Scalar stub must produce undef.  List stub is noop */
-	    }
-	    goto nothin;
 	case OP_NULL:
 	    if (o->op_targ == OP_NEXTSTATE
 		|| o->op_targ == OP_DBSTATE
@@ -7917,10 +7911,15 @@ Perl_peep(pTHX_ register OP *o)
 		continue;
 	    }
 	    break;
+	case OP_STUB:
+	    if ((o->op_flags & OPf_WANT) != OPf_WANT_LIST) {
+		o->op_opt = 1;
+		break; /* Scalar stub must produce undef.  List stub is noop */
+	    }
+	    /* FALL THROUGH */
 	case OP_SCALAR:
 	case OP_LINESEQ:
 	case OP_SCOPE:
-	  nothin:
 	    if (oldop && o->op_next) {
 		oldop->op_next = o->op_next;
 		continue;
