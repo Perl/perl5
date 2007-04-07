@@ -1,7 +1,5 @@
 package Module::Pluggable::Object;
 
-$VERSION = '3.5_01';
-
 use strict;
 use File::Find ();
 use File::Basename;
@@ -9,6 +7,10 @@ use File::Spec::Functions qw(splitdir catdir curdir catfile abs2rel);
 use Carp qw(croak carp);
 use Devel::InnerPackage;
 use Data::Dumper;
+use vars qw($VERSION);
+
+$VERSION = '3.6';
+
 
 sub new {
     my $class = shift;
