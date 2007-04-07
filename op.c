@@ -7882,7 +7882,7 @@ Perl_peep(pTHX_ register OP *o)
 	    if (o->op_next && o->op_next->op_type == OP_STRINGIFY) {
 		if (o->op_next->op_private & OPpTARGET_MY) {
 		    if (o->op_flags & OPf_STACKED) /* chained concats */
-			goto ignore_optimization;
+			break; /* ignore_optimization */
 		    else {
 			/* assert(PL_opargs[o->op_type] & OA_TARGLEX); */
 			o->op_targ = o->op_next->op_targ;
@@ -7892,7 +7892,6 @@ Perl_peep(pTHX_ register OP *o)
 		}
 		op_null(o->op_next);
 	    }
-	  ignore_optimization:
 	    break;
 	case OP_STUB:
 	    if ((o->op_flags & OPf_WANT) != OPf_WANT_LIST) {
