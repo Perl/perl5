@@ -1,10 +1,10 @@
 #
-# $Id: Encode.pm,v 2.18 2006/06/03 20:28:48 dankogai Exp dankogai $
+# $Id: Encode.pm,v 2.19 2007/04/06 12:53:41 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
 use warnings;
-our $VERSION = "2.18_01";
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.19 $ =~ /(\d+)/g;
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -210,7 +210,7 @@ predefine_encodings(1);
 #
 
 sub predefine_encodings {
-    use Encode::Encoding;
+    require Encode::Encoding;
     no warnings 'redefine';
     my $use_xs = shift;
     if ($ON_EBCDIC) {
@@ -658,6 +658,12 @@ constants via C<use Encode qw(:fallback_all)>.
  XMLCREF       0x0400
 
 =back
+
+=item Encode::LEAVE_SRC
+
+If the C<Encode::LEAVE_SRC> bit is not set, but I<CHECK> is, then the second
+argument to C<encode()> or C<decode()> may be assigned to by the functions. If
+you're not interested in this, then bitwise-or the bitmask with it.
 
 =head2 coderef for CHECK
 

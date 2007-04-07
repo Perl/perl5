@@ -1,5 +1,5 @@
 #!./perl
-# $Id: piconv,v 2.2 2006/05/03 18:24:10 dankogai Exp $
+# $Id: piconv,v 2.3 2007/04/06 12:53:41 dankogai Exp dankogai $
 #
 use 5.8.0;
 use strict;
@@ -40,7 +40,7 @@ $Opt{from} || $Opt{to} || help();
 my $from = $Opt{from} || $locale or help("from_encoding unspecified");
 my $to   = $Opt{to}   || $locale or help("to_encoding unspecified");
 $Opt{string} and Encode::from_to($Opt{string}, $from, $to) and print $Opt{string} and exit;
-my $scheme = exists $Scheme{$Opt{Scheme}} ? $Opt{Scheme} :  'from_to';
+my $scheme = exists $Scheme{$Opt{scheme}} ? $Opt{scheme} :  'from_to';
 $Opt{check} ||= $Opt{c};
 $Opt{perlqq}   and $Opt{check} = Encode::PERLQQ;
 $Opt{htmlcref} and $Opt{check} = Encode::HTMLCREF;
@@ -245,6 +245,9 @@ implementation.
 =item perlio
 
 The new perlIO layer is used.  NI-S' favorite.
+
+You should use this option if you are using UTF-16 and others which
+linefeed is not $/.
 
 =back
 

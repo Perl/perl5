@@ -3,7 +3,7 @@ use strict;
 use warnings;
 no warnings 'redefine';
 use Encode;
-our $VERSION = do { my @r = ( q$Revision: 2.6 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.7 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 sub DEBUG () { 0 }
 
 use base qw(Exporter);
@@ -189,8 +189,9 @@ sub init_aliases {
         'greek'    => 'iso-8859-7',
         'hebrew'   => 'iso-8859-8',
         'thai'     => 'iso-8859-11',
-        'tis620'   => 'iso-8859-11',
     );
+    # RT #20781
+    define_alias(qr/\btis-?620\b/i  => '"iso-8859-11"');
 
     # At least AIX has IBM-NNN (surprisingly...) instead of cpNNN.
     # And Microsoft has their own naming (again, surprisingly).
