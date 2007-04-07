@@ -5144,6 +5144,11 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	if (!SvVALID(sv) && GvSTASH(sv))
 		sv_del_backref((SV*)GvSTASH(sv), sv);
 	}
+	/* FIXME. There are probably more unreferenced pointers to SVs in the
+	   interpreter struct that we should check and tidy in a similar
+	   fashion to this:  */
+	if ((GV*)sv == PL_last_in_gv)
+	    PL_last_in_gv = NULL;
     case SVt_PVMG:
     case SVt_PVNV:
     case SVt_PVIV:
