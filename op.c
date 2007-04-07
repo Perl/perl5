@@ -7825,13 +7825,15 @@ Perl_peep(pTHX_ register OP *o)
     for (; o; o = o->op_next) {
 	if (o->op_opt)
 	    break;
+	/* By default, this op has now been optimised. A couple of cases below
+	   clear this again.  */
+	o->op_opt = 1;
 	PL_op = o;
 	switch (o->op_type) {
 	case OP_SETSTATE:
 	case OP_NEXTSTATE:
 	case OP_DBSTATE:
 	    PL_curcop = ((COP*)o);		/* for warnings */
-	    o->op_opt = 1;
 	    break;
 
 	case OP_CONST:
@@ -7874,7 +7876,6 @@ Perl_peep(pTHX_ register OP *o)
 		o->op_targ = ix;
 	    }
 #endif
-	    o->op_opt = 1;
 	    break;
 
 	case OP_CONCAT:
@@ -7892,8 +7893,12 @@ Perl_peep(pTHX_ register OP *o)
 		op_null(o->op_next);
 	    }
 	  ignore_optimization:
-	    o->op_opt = 1;
 	    break;
+	case OP_STUB:
+	    if ((o->op_flags & OPf_WANT) != OPf_WANT_LIST) {
+		break; /* Scalar stub must produce undef.  List stub is noop */
+	    }
+	    goto nothin;
 	case OP_NULL:
 	    if (o->op_targ == OP_NEXTSTATE
 		|| o->op_targ == OP_DBSTATE
@@ -7906,25 +7911,17 @@ Perl_peep(pTHX_ register OP *o)
 	       has already occurred. This doesn't fix the real problem,
 	       though (See 20010220.007). AMS 20010719 */
 	    /* op_seq functionality is now replaced by op_opt */
-	    if (oldop && o->op_next) {
-		oldop->op_next = o->op_next;
-		continue;
-	    }
-	    break;
-	case OP_STUB:
-	    if ((o->op_flags & OPf_WANT) != OPf_WANT_LIST) {
-		o->op_opt = 1;
-		break; /* Scalar stub must produce undef.  List stub is noop */
-	    }
+	    o->op_opt = 0;
 	    /* FALL THROUGH */
 	case OP_SCALAR:
 	case OP_LINESEQ:
 	case OP_SCOPE:
+	nothin:
 	    if (oldop && o->op_next) {
 		oldop->op_next = o->op_next;
+		o->op_opt = 0;
 		continue;
 	    }
-	    o->op_opt = 1;
 	    break;
 
 	case OP_PADAV:
@@ -7961,7 +7958,6 @@ Perl_peep(pTHX_ register OP *o)
 			o->op_flags |= OPf_SPECIAL;
 		    o->op_type = OP_AELEMFAST;
 		}
-    		o->op_opt = 1;
 		break;
 	    }
 
@@ -7998,7 +7994,6 @@ Perl_peep(pTHX_ register OP *o)
 		op_null(o->op_next);
 	    }
 
-	    o->op_opt = 1;
 	    break;
 
 	case OP_MAPWHILE:
@@ -8011,7 +8006,6 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_DORASSIGN:
 	case OP_COND_EXPR:
 	case OP_RANGE:
-	    o->op_opt = 1;
 	    while (cLOGOP->op_other->op_type == OP_NULL)
 		cLOGOP->op_other = cLOGOP->op_other->op_next;
 	    peep(cLOGOP->op_other); /* Recursive calls are not replaced by fptr calls */
@@ -8019,7 +8013,6 @@ Perl_peep(pTHX_ register OP *o)
 
 	case OP_ENTERLOOP:
 	case OP_ENTERITER:
-	    o->op_opt = 1;
 	    while (cLOOP->op_redoop->op_type == OP_NULL)
 		cLOOP->op_redoop = cLOOP->op_redoop->op_next;
 	    peep(cLOOP->op_redoop);
@@ -8032,7 +8025,6 @@ Perl_peep(pTHX_ register OP *o)
 	    break;
 
 	case OP_SUBST:
-	    o->op_opt = 1;
 	    assert(!(cPMOP->op_pmflags & PMf_ONCE));
 	    while (cPMOP->op_pmstashstartu.op_pmreplstart &&
 		   cPMOP->op_pmstashstartu.op_pmreplstart->op_type == OP_NULL)
@@ -8042,7 +8034,6 @@ Perl_peep(pTHX_ register OP *o)
 	    break;
 
 	case OP_EXEC:
-	    o->op_opt = 1;
 	    if (o->op_next && o->op_next->op_type == OP_NEXTSTATE
 		&& ckWARN(WARN_SYNTAX))
 	    {
@@ -8068,8 +8059,6 @@ Perl_peep(pTHX_ register OP *o)
 	    SV **svp, *sv;
 	    const char *key = NULL;
 	    STRLEN keylen;
-
-	    o->op_opt = 1;
 
 	    if (((BINOP*)o)->op_last->op_type != OP_CONST)
 		break;
@@ -8197,8 +8186,6 @@ Perl_peep(pTHX_ register OP *o)
 
 	    /* make @a = sort @a act in-place */
 
-	    o->op_opt = 1;
-
 	    oright = cUNOPx(oright)->op_sibling;
 	    if (!oright)
 		break;
@@ -8289,7 +8276,6 @@ Perl_peep(pTHX_ register OP *o)
 	    OP *ourmark, *theirmark, *ourlast, *iter, *expushmark, *rv2av;
 	    OP *gvop = NULL;
 	    LISTOP *enter, *exlist;
-	    o->op_opt = 1;
 
 	    enter = (LISTOP *) o->op_next;
 	    if (!enter)
@@ -8380,13 +8366,6 @@ Perl_peep(pTHX_ register OP *o)
 	    UNOP *refgen, *rv2cv;
 	    LISTOP *exlist;
 
-	    /* I do not understand this, but if o->op_opt isn't set to 1,
-	       various tests in ext/B/t/bytecode.t fail with no readily
-	       apparent cause.  */
-
-	    o->op_opt = 1;
-
-
 	    if ((o->op_flags && OPf_WANT) != OPf_WANT_VOID)
 		break;
 
@@ -8432,9 +8411,6 @@ Perl_peep(pTHX_ register OP *o)
 	    if (!(cPMOP->op_pmflags & PMf_ONCE)) {
 		assert (!cPMOP->op_pmstashstartu.op_pmreplstart);
 	    }
-	    /* FALL THROUGH */
-	default:
-	    o->op_opt = 1;
 	    break;
 	}
 	oldop = o;
