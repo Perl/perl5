@@ -3497,7 +3497,6 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 				|| (int)GvASSIGN_GENERATION(gv) == PL_generation)
 				break;
 			    GvASSIGN_GENERATION_set(gv, PL_generation);
-			    GvASSIGN_GENERATION_set(gv, PL_generation);
 			}
 		    }
 		    else
