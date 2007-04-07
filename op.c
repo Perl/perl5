@@ -216,6 +216,24 @@ S_Slab_to_rw(pTHX_ void *op)
 		  slab, (unsigned long) PERL_SLAB_SIZE*sizeof(I32*), errno);
     }
 }
+
+OP *
+Perl_op_refcnt_inc(pTHX_ OP *o)
+{
+    if(o) {
+	Slab_to_rw(o);
+	++o->op_targ;
+    }
+    return o;
+
+}
+
+PADOFFSET
+Perl_op_refcnt_dec(pTHX_ OP *o)
+{
+    Slab_to_rw(o);
+    return --o->op_targ;
+}
 #else
 #  define Slab_to_rw(op)
 #endif
@@ -249,17 +267,12 @@ Perl_Slab_Free(pTHX_ void *op)
 		    PL_slabs[count] = PL_slabs[--PL_slab_count];
 		    /* Could realloc smaller at this point, but probably not
 		       worth it.  */
-		    goto gotcha;
+		    if(munmap(slab, PERL_SLAB_SIZE*sizeof(I32*))) {
+			perror("munmap failed");
+			abort();
+		    }
+		    break;
 		}
-		
-	    }
-	    Perl_croak(aTHX_
-		       "panic: Couldn't find slab at %p (%lu allocated)",
-		       slab, (unsigned long) PL_slabs);
-	gotcha:
-	    if(munmap(slab, PERL_SLAB_SIZE*sizeof(I32*))) {
-		perror("munmap failed");
-		abort();
 	    }
 	}
 #else
@@ -422,9 +435,6 @@ Perl_op_free(pTHX_ OP *o)
 	case OP_LEAVEWRITE:
 	    {
 	    PADOFFSET refcnt;
-#ifdef PERL_DEBUG_READONLY_OPS
-	    Slab_to_rw(o);
-#endif
 	    OP_REFCNT_LOCK;
 	    refcnt = OpREFCNT_dec(o);
 	    OP_REFCNT_UNLOCK;
@@ -451,12 +461,13 @@ Perl_op_free(pTHX_ OP *o)
     if (type == OP_NULL)
 	type = (OPCODE)o->op_targ;
 
+#ifdef PERL_DEBUG_READONLY_OPS
+    Slab_to_rw(o);
+#endif
+
     /* COP* is not cleared by op_clear() so that we may track line
      * numbers etc even after null() */
     if (type == OP_NEXTSTATE || type == OP_SETSTATE || type == OP_DBSTATE) {
-#ifdef PERL_DEBUG_READONLY_OPS
-	Slab_to_rw(o);
-#endif
 	cop_free((COP*)o);
     }
 

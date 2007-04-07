@@ -590,8 +590,13 @@ struct loop {
 #endif
 
 #define OpREFCNT_set(o,n)		((o)->op_targ = (n))
-#define OpREFCNT_inc(o)			((o) ? (++(o)->op_targ, (o)) : NULL)
-#define OpREFCNT_dec(o)			(--(o)->op_targ)
+#ifdef PERL_DEBUG_READONLY_OPS
+#  define OpREFCNT_inc(o)		Perl_op_refcnt_inc(aTHX_ o)
+#  define OpREFCNT_dec(o)		Perl_op_refcnt_dec(aTHX_ o)
+#else
+#  define OpREFCNT_inc(o)		((o) ? (++(o)->op_targ, (o)) : NULL)
+#  define OpREFCNT_dec(o)		(--(o)->op_targ)
+#endif
 
 /* flags used by Perl_load_module() */
 #define PERL_LOADMOD_DENY		0x1

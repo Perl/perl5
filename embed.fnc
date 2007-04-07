@@ -1227,6 +1227,8 @@ Apa	|void*	|Slab_Alloc	|size_t sz
 Ap	|void	|Slab_Free	|NN void *op
 #  if defined(PERL_DEBUG_READONLY_OPS)
 poxM	|void	|pending_Slabs_to_ro
+poxM	|OP *	|op_refcnt_inc	|NULLOK OP *o
+poxM	|PADOFFSET	|op_refcnt_dec	|NN OP *o
 #    if defined(PERL_IN_OP_C)
 s	|void	|Slab_to_rw	|NN void *op
 #    endif

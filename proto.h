@@ -3331,6 +3331,10 @@ PERL_CALLCONV void	Perl_Slab_Free(pTHX_ void *op)
 
 #  if defined(PERL_DEBUG_READONLY_OPS)
 PERL_CALLCONV void	Perl_pending_Slabs_to_ro(pTHX);
+PERL_CALLCONV OP *	Perl_op_refcnt_inc(pTHX_ OP *o);
+PERL_CALLCONV PADOFFSET	Perl_op_refcnt_dec(pTHX_ OP *o)
+			__attribute__nonnull__(pTHX_1);
+
 #    if defined(PERL_IN_OP_C)
 STATIC void	S_Slab_to_rw(pTHX_ void *op)
 			__attribute__nonnull__(pTHX_1);
