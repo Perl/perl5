@@ -1,5 +1,5 @@
 #
-# $Id: H2Z.pm,v 2.2 2006/06/03 20:28:48 dankogai Exp dankogai $
+# $Id: H2Z.pm,v 2.2 2006/06/03 20:28:48 dankogai Exp $
 #
 
 package Encode::JP::H2Z;
@@ -7,7 +7,7 @@ package Encode::JP::H2Z;
 use strict;
 use warnings;
 
-our $RCSID = q$Id: H2Z.pm,v 2.2 2006/06/03 20:28:48 dankogai Exp dankogai $;
+our $RCSID = q$Id: H2Z.pm,v 2.2 2006/06/03 20:28:48 dankogai Exp $;
 our $VERSION = do { my @r = ( q$Revision: 2.2 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 use Encode::CJKConstants qw(:all);

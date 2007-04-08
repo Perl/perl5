@@ -1,5 +1,5 @@
 #
-# $Id: UTF7.pm,v 2.4 2006/06/03 20:28:48 dankogai Exp dankogai $
+# $Id: UTF7.pm,v 2.4 2006/06/03 20:28:48 dankogai Exp $
 #
 package Encode::Unicode::UTF7;
 use strict;

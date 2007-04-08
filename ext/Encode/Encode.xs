@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.10 2006/06/03 20:28:48 dankogai Exp dankogai $
+ $Id: Encode.xs,v 2.11 2007/04/06 12:53:41 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -333,7 +333,7 @@ process_utf8(pTHX_ SV* dst, U8* s, U8* e, int check,
                                );
 #if 1 /* perl-5.8.6 and older do not check UTF8_ALLOW_LONG */
         if (strict && uv > PERL_UNICODE_MAX)
-        ulen = -1;
+        ulen = (STRLEN) -1;
 #endif
             if (ulen == -1) {
                 if (strict) {
@@ -481,7 +481,8 @@ CODE:
     	/* Native bytes - can always encode */
     U8 *d = (U8 *) SvGROW(dst, 2*slen+1); /* +1 or assertion will botch */
     	while (s < e) {
-    	    UV uv = NATIVE_TO_UNI((UV) *s++);
+    	    UV uv = NATIVE_TO_UNI((UV) *s);
+	    s++; /* Above expansion of NATIVE_TO_UNI() is safer this way. */
             if (UNI_IS_INVARIANT(uv))
             	*d++ = (U8)UTF_TO_NATIVE(uv);
             else {
@@ -756,15 +757,11 @@ CODE:
 {
     if (SvGMAGICAL(sv)) /* it could be $1, for example */
     sv = newSVsv(sv); /* GMAGIG will be done */
-    if (SvPOK(sv)) {
     RETVAL = SvUTF8(sv) ? TRUE : FALSE;
     if (RETVAL &&
         check  &&
         !is_utf8_string((U8*)SvPVX(sv), SvCUR(sv)))
         RETVAL = FALSE;
-    } else {
-    RETVAL = FALSE;
-    }
     if (sv != ST(0))
     SvREFCNT_dec(sv); /* it was a temp copy */
 }

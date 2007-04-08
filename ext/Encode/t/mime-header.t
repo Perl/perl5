@@ -1,5 +1,5 @@
 #
-# $Id: mime-header.t,v 2.2 2006/05/03 18:24:10 dankogai Exp $
+# $Id: mime-header.t,v 2.3 2007/04/06 12:53:41 dankogai Exp dankogai $
 # This script is written in utf8
 #
 BEGIN {
@@ -23,7 +23,7 @@ no utf8;
 
 use strict;
 #use Test::More qw(no_plan);
-use Test::More tests => 11;
+use Test::More tests => 12;
 use_ok("Encode::MIME::Header");
 
 my $eheader =<<'EOS';
@@ -116,4 +116,7 @@ is(Encode::encode('MIME-Q', $dheader), $qheader, "Double decode Q");
     is(Encode::encode('MIME-Q' => $pound_1024), '=?UTF-8?Q?=C2=A31024?=',
        'pound 1024');
 }
+
+is(Encode::encode('MIME-Q', "\x{fc}"), '=?UTF-8?Q?=C3=BC?=', 'Encode latin1 characters');
+
 __END__;

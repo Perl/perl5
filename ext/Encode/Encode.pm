@@ -1,10 +1,10 @@
 #
-# $Id: Encode.pm,v 2.18 2006/06/03 20:28:48 dankogai Exp dankogai $
+# $Id: Encode.pm,v 2.19 2007/04/06 12:53:41 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.18 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.19 $ =~ /(\d+)/g;
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -210,7 +210,7 @@ predefine_encodings(1);
 #
 
 sub predefine_encodings {
-    use Encode::Encoding;
+    require Encode::Encoding;
     no warnings 'redefine';
     my $use_xs = shift;
     if ($ON_EBCDIC) {
@@ -406,10 +406,10 @@ iso-8859-1 (also known as Latin1),
   $octets = encode("iso-8859-1", $string);
 
 B<CAVEAT>: When you run C<$octets = encode("utf8", $string)>, then $octets
-B<may not be equal to> $string.  Though they both contain the same data, the utf8 flag
-for $octets is B<always> off.  When you encode anything, utf8 flag of
+B<may not be equal to> $string.  Though they both contain the same data, the UTF8 flag
+for $octets is B<always> off.  When you encode anything, UTF8 flag of
 the result is always off, even when it contains completely valid utf8
-string. See L</"The UTF-8 flag"> below.
+string. See L</"The UTF8 flag"> below.
 
 If the $string is C<undef> then C<undef> is returned.
 
@@ -427,8 +427,8 @@ For example, to convert ISO-8859-1 data to a string in Perl's internal format:
 
 B<CAVEAT>: When you run C<$string = decode("utf8", $octets)>, then $string
 B<may not be equal to> $octets.  Though they both contain the same data,
-the utf8 flag for $string is on unless $octets entirely consists of
-ASCII data (or EBCDIC on EBCDIC machines).  See L</"The UTF-8 flag">
+the UTF8 flag for $string is on unless $octets entirely consists of
+ASCII data (or EBCDIC on EBCDIC machines).  See L</"The UTF8 flag">
 below.
 
 If the $string is C<undef> then C<undef> is returned.
@@ -458,11 +458,11 @@ B<CAVEAT>: The following operations look the same but are not quite so;
   $data = decode("iso-8859-1", $data);  #2
 
 Both #1 and #2 make $data consist of a completely valid UTF-8 string
-but only #2 turns utf8 flag on.  #1 is equivalent to
+but only #2 turns UTF8 flag on.  #1 is equivalent to
 
   $data = encode("utf8", decode("iso-8859-1", $data));
 
-See L</"The UTF-8 flag"> below.
+See L</"The UTF8 flag"> below.
 
 =item $octets = encode_utf8($string);
 
@@ -659,6 +659,12 @@ constants via C<use Encode qw(:fallback_all)>.
 
 =back
 
+=item Encode::LEAVE_SRC
+
+If the C<Encode::LEAVE_SRC> bit is not set, but I<CHECK> is, then the second
+argument to C<encode()> or C<decode()> may be assigned to by the functions. If
+you're not interested in this, then bitwise-or the bitmask with it.
+
 =head2 coderef for CHECK
 
 As of Encode 2.12 CHECK can also be a code reference which takes the
@@ -684,13 +690,13 @@ arguments are taken as aliases for I<$object>.
 
 See L<Encode::Encoding> for more details.
 
-=head1 The UTF-8 flag
+=head1 The UTF8 flag
 
-Before the introduction of utf8 support in perl, The C<eq> operator
+Before the introduction of Unicode support in perl, The C<eq> operator
 just compared the strings represented by two scalars. Beginning with
-perl 5.8, C<eq> compares two strings with simultaneous consideration
-of I<the utf8 flag>. To explain why we made it so, I will quote page
-402 of C<Programming Perl, 3rd ed.>
+perl 5.8, C<eq> compares two strings with simultaneous consideration of
+I<the UTF8 flag>. To explain why we made it so, I will quote page 402 of
+C<Programming Perl, 3rd ed.>
 
 =over 2
 
@@ -719,27 +725,27 @@ byte-oriented Perl and a character-oriented Perl.
 Back when C<Programming Perl, 3rd ed.> was written, not even Perl 5.6.0
 was born and many features documented in the book remained
 unimplemented for a long time.  Perl 5.8 corrected this and the introduction
-of the UTF-8 flag is one of them.  You can think of this perl notion as of a
-byte-oriented mode (utf8 flag off) and a character-oriented mode (utf8
+of the UTF8 flag is one of them.  You can think of this perl notion as of a
+byte-oriented mode (UTF8 flag off) and a character-oriented mode (UTF8
 flag on).
 
-Here is how Encode takes care of the utf8 flag.
+Here is how Encode takes care of the UTF8 flag.
 
 =over 2
 
 =item *
 
-When you encode, the resulting utf8 flag is always off.
+When you encode, the resulting UTF8 flag is always off.
 
 =item *
 
-When you decode, the resulting utf8 flag is on unless you can
+When you decode, the resulting UTF8 flag is on unless you can
 unambiguously represent data.  Here is the definition of
 dis-ambiguity.
 
 After C<$utf8 = decode('foo', $octet);>,
 
-  When $octet is...   The utf8 flag in $utf8 is
+  When $octet is...   The UTF8 flag in $utf8 is
   ---------------------------------------------
   In ASCII only (or EBCDIC only)            OFF
   In ISO-8859-1                              ON
@@ -750,7 +756,7 @@ As you see, there is one exception, In ASCII.  That way you can assume
 Goal #1.  And with Encode Goal #2 is assumed but you still have to be
 careful in such cases mentioned in B<CAVEAT> paragraphs.
 
-This utf8 flag is not visible in perl scripts, exactly for the same
+This UTF8 flag is not visible in perl scripts, exactly for the same
 reason you cannot (or you I<don't have to>) see if a scalar contains a
 string, integer, or floating point number.   But you can still peek
 and poke these if you will.  See the section below.
@@ -766,7 +772,7 @@ implementation.  As such, they are efficient but may change.
 
 =item is_utf8(STRING [, CHECK])
 
-[INTERNAL] Tests whether the UTF-8 flag is turned on in the STRING.
+[INTERNAL] Tests whether the UTF8 flag is turned on in the STRING.
 If CHECK is true, also checks the data in STRING for being well-formed
 UTF-8.  Returns true if successful, false otherwise.
 
@@ -774,22 +780,22 @@ As of perl 5.8.1, L<utf8> also has utf8::is_utf8().
 
 =item _utf8_on(STRING)
 
-[INTERNAL] Turns on the UTF-8 flag in STRING.  The data in STRING is
+[INTERNAL] Turns on the UTF8 flag in STRING.  The data in STRING is
 B<not> checked for being well-formed UTF-8.  Do not use unless you
 B<know> that the STRING is well-formed UTF-8.  Returns the previous
-state of the UTF-8 flag (so please don't treat the return value as
+state of the UTF8 flag (so please don't treat the return value as
 indicating success or failure), or C<undef> if STRING is not a string.
 
 =item _utf8_off(STRING)
 
-[INTERNAL] Turns off the UTF-8 flag in STRING.  Do not use frivolously.
-Returns the previous state of the UTF-8 flag (so please don't treat the
+[INTERNAL] Turns off the UTF8 flag in STRING.  Do not use frivolously.
+Returns the previous state of the UTF8 flag (so please don't treat the
 return value as indicating success or failure), or C<undef> if STRING is
 not a string.
 
 =back
 
-=head1 UTF-8 vs. utf8
+=head1 UTF-8 vs. utf8 vs. UTF8
 
   ....We now view strings not as sequences of bytes, but as sequences
   of numbers in the range 0 .. 2**32-1 (or in the case of 64-bit
@@ -836,6 +842,8 @@ goes "liberal"
   find_encoding("utf_8")->name  # ditto. "_" are treated as "-"
   find_encoding("UTF8")->name  # is 'utf8'.
 
+The UTF8 flag is internally called UTF8, without a hyphen. It indicates
+whether a string is internally encoded as utf8, also without a hypen.
 
 =head1 SEE ALSO
 

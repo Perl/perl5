@@ -1,8 +1,33 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.17 2006/06/03 20:28:48 dankogai Exp dankogai $
+# $Id: Changes,v 2.19 2007/04/06 12:53:41 dankogai Exp dankogai $
 #
-$Revision: 2.17 $ $Date: 2006/06/03 20:28:48 $
+$Revision: 2.19 $ $Date: 2007/04/06 12:53:41 $
+! lib/Encode/JP/JIS7.pm
++ t/jis7-fallback.t
+  encode('iso-2022-jp') fallback support added by MIYAGAWA++
+  decode()'s fallback remains unchanged (FB_PERLQQ) since UTF-8
+  contains all characters in iso-2022-jp so there's no need for fancy stuff.
+  Message-Id: <693254b90704060526s6d850320h71cdda50dfbf7eba@mail.gmail.com>
+! Encode.pm
+  #25216 ([PATCH] Encode.pm: postpone the load of Encode::Encoding)
+  http://rt.cpan.org/NoAuth/Bug.html?id=#25216
+! lib/Encode/MIME/Header.pm t/mime-header.t
+  #24418 (Encode::MIME::Header: wrong encoding with latin1 characters)
+  http://rt.cpan.org/NoAuth/Bug.html?id=#24418
+! Encode.pm
+  #23876 (Add documentation for LEAVE_SRC)
+  http://rt.cpan.org/NoAuth/Bug.html?id=#23876
+! lib/Encode/Alias.pm t/Aliases.t
+  #20781: Thai encoding needs alias for tis-620
+  http://rt.cpan.org/NoAuth/Bug.html?id=#20781
+! bin/piconv AUTHORS
+  #20344: piconv: wrong conversion of utf-16le encoded files (with PATCH)
+  http://rt.cpan.org/NoAuth/Bug.html?id=#20344
+! Encode.pm Encode.xs bin/enc2xs encoding.pm t/Aliases.t t/utf8strict.t
+  Imported from bleedperl's 2.18_01
+
+2.18 2006/06/03 20:28:48
 ! bin/enc2xs
   overhauled the -C option
   - added ascii-ctrl', 'null', 'utf-8-strict' to core
