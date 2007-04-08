@@ -1,5 +1,12 @@
 #!perl -w
 
+BEGIN {
+    if ($^O eq 'VMS') {
+        print "1..0 # Skip: can't handle misspelled plugin names\n";
+        exit;
+    }
+}
+
 use strict;
 use FindBin;
 use lib "$FindBin::Bin/lib";
