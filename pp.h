@@ -59,7 +59,7 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 	STMT_START {					\
 	    if (++PL_markstack_ptr == PL_markstack_max)	\
 	    markstack_grow();				\
-	    *PL_markstack_ptr = (p) - PL_stack_base;	\
+	    *PL_markstack_ptr = (I32)((p) - PL_stack_base);\
 	} STMT_END
 
 #define TOPMARK		(*PL_markstack_ptr)
@@ -68,7 +68,7 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 #define dSP		SV **sp = PL_stack_sp
 #define djSP		dSP
 #define dMARK		register SV **mark = PL_stack_base + POPMARK
-#define dORIGMARK	const I32 origmark = mark - PL_stack_base
+#define dORIGMARK	const I32 origmark = (I32)(mark - PL_stack_base)
 #define ORIGMARK	(PL_stack_base + origmark)
 
 #define SPAGAIN		sp = PL_stack_sp
