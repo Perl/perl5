@@ -1,8 +1,8 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.88_79';
-$CPAN::VERSION = eval $CPAN::VERSION;
+$CPAN::VERSION = '1.90';
+$CPAN::VERSION = eval $CPAN::VERSION if $CPAN::VERSION =~ /_/;
 
 use CPAN::HandleConfig;
 use CPAN::Version;
@@ -207,7 +207,7 @@ sub shell {
     $try_detect_readline = $term->ReadLine eq "Term::ReadLine::Stub" if $term;
     my $rl_avail = $Suppress_readline ? "suppressed" :
 	($term->ReadLine ne "Term::ReadLine::Stub") ? "enabled" :
-	    "available (try 'install Bundle::CPAN')";
+	    "available (maybe install Bundle::CPAN or Bundle::CPANxxl?)";
 
     unless ($CPAN::Config->{'inhibit_startup_message'}){
         $CPAN::Frontend->myprint(
@@ -645,7 +645,7 @@ use strict;
 use overload '""' => "as_string";
 
 sub new {
-    my($class,$module,$file,$during,$error) = shift;
+    my($class,$module,$file,$during,$error) = @_;
     bless { module => $module,
             file => $file,
             during => $during,
@@ -654,10 +654,31 @@ sub new {
 
 sub as_string {
     my($self) = shift;
-    "Alert: While trying to $self->{during} YAML file\n".
-        "  $self->{file}\n".
-            "with '$self->{module}' the following error was encountered:\n".
-                "  $self->{error}\n";
+    if ($self->{during}) {
+        if ($self->{file}) {
+            if ($self->{module}) {
+                if ($self->{error}) {
+                    return "Alert: While trying to '$self->{during}' YAML file\n".
+                        " '$self->{file}'\n".
+                            "with '$self->{module}' the following error was encountered:\n".
+                                "  $self->{error}\n";
+                } else {
+                    return "Alert: While trying to '$self->{during}' YAML file\n".
+                        " '$self->{file}'\n".
+                            "with '$self->{module}' some unknown error was encountered\n";
+                }
+            } else {
+                return "Alert: While trying to '$self->{during}' YAML file\n".
+                    " '$self->{file}'\n".
+                        "some unknown error was encountered\n";
+            }
+        } else {
+            return "Alert: While trying to '$self->{during}' some YAML file\n".
+                    "some unknown error was encountered\n";
+        }
+    } else {
+        return "Alert: unknown error encountered\n";
+    }
 }
 
 package CPAN::Prompt; use overload '""' => "as_string";
@@ -1558,9 +1579,18 @@ sub _clean_cache {
     if ($dir !~ /\.yml$/ && -f "$dir.yml") {
         my $yaml_module = CPAN::_yaml_module;
         if ($CPAN::META->has_inst($yaml_module)) {
-            my($peek_yaml) = CPAN->_yaml_loadfile("$dir.yml");
-            if (my $id = $peek_yaml->[0]{distribution}{ID}) {
+            my($peek_yaml) = eval { CPAN->_yaml_loadfile("$dir.yml"); };
+            if ($@) {
+                $CPAN::Frontend->mywarn("(parse error on '$dir.yml' removing anyway)");
+                unlink "$dir.yml" or
+                    $CPAN::Frontend->mywarn("(Could not unlink '$dir.yml': $!)");
+                return;
+            } elsif (my $id = $peek_yaml->[0]{distribution}{ID}) {
                 $CPAN::META->delete("CPAN::Distribution", $id);
+
+                # XXX we should restore the state NOW, otherise this
+                # distro does not exist until we read an index. BUG ALERT(?)
+
                 # $CPAN::Frontend->mywarn (" +++\n");
                 $id_deleted++;
             }
@@ -3151,11 +3181,13 @@ to find objects with matching identifiers.
                 require overload;
                 $serialized = overload::StrVal($obj);
             }
+            CPAN->debug("Going to panic. meth[$meth]s[$s]") if $CPAN::DEBUG;
             $CPAN::Frontend->mydie("Panic: obj[$serialized] cannot meth[$meth]");
         } elsif ($obj->$meth()){
             CPAN::Queue->delete($s);
+            CPAN->debug("From queue deleted. meth[$meth]s[$s]") if $CPAN::DEBUG;
         } else {
-            CPAN->debug("failed");
+            CPAN->debug("Failed. pragma[@pragma]meth[$meth]") if $CPAN::DEBUG;
         }
 
         $obj->undelay;
@@ -4575,9 +4607,13 @@ sub reanimate_build_dir {
         sort { $b->[1] <=> $a->[1] }
             map { [ $_, -M File::Spec->catfile($d,$_) ] }
                 grep {/\.yml$/} readdir $dh;
-  DISTRO: for $dirent (@candidates) {
+  DISTRO: for $i (0..$#candidates) {
+        my $dirent = $candidates[$i];
         my $y = eval {CPAN->_yaml_loadfile(File::Spec->catfile($d,$dirent))};
-        die $@ if $@;
+        if ($@) {
+            warn "Error while parsing file '$dirent'; error: '$@'";
+            next DISTRO;
+        }
         my $c = $y->[0];
         if ($c && CPAN->_perl_fingerprint($c->{perl})) {
             my $key = $c->{distribution}{ID};
@@ -4595,7 +4631,9 @@ sub reanimate_build_dir {
             my $do
                 = $CPAN::META->{readwrite}{'CPAN::Distribution'}{$key}
                     = $c->{distribution};
-            delete $do->{badtestcnt};
+            for my $skipper (qw(badtestcnt notest force_update)) {
+                delete $do->{$skipper};
+            }
             # $DB::single = 1;
             if ($do->{make_test}
                 && $do->{build_dir}
@@ -4617,8 +4655,9 @@ sub reanimate_build_dir {
         }
     }
     $CPAN::Frontend->myprint(sprintf(
-                                     "DONE\nFound %s old builds, restored the state of %s\n",
+                                     "DONE\nFound %s old build%s, restored the state of %s\n",
                                      @candidates ? sprintf("%d",scalar @candidates) : "no",
+                                     @candidates==1 ? "" : "s",
                                      $restored || "none",
                                     ));
 }
@@ -5695,7 +5734,7 @@ sub get {
                 $CPAN::Frontend->myprint("  Has already been unwrapped into directory ".
                                          "$self->{build_dir}\n"
                                         );
-                return;
+                return 1;
             }
 
             # although we talk about 'force' we shall not test on
@@ -6226,12 +6265,14 @@ sub _signature_business {
                                            );
 
                     my $wrap =
-                        sprintf(qq{I'd recommend removing %s. Its signature
-is invalid. Maybe you have configured your 'urllist' with
-a bad URL. Please check this array with 'o conf urllist', and
-retry. For more information, try opening a subshell with
+                        sprintf(qq{I'd recommend removing %s. Some error occured    }.
+                                qq{while checking its signature, so it could        }.
+                                qq{be invalid. Maybe you have configured            }.
+                                qq{your 'urllist' with a bad URL. Please check this }.
+                                qq{array with 'o conf urllist' and retry. Or        }.
+                                qq{examine the distribution in a subshell. Try
   look %s
-and there run
+and run
   cpansign -v
 },
                                 $self->{localfile},
@@ -6740,7 +6781,7 @@ sub force {
 #-> sub CPAN::Distribution::notest ;
 sub notest {
   my($self, $method) = @_;
-  # warn "XDEBUG: set notest for $self $method";
+  # $CPAN::Frontend->mywarn("XDEBUG: set notest for $self $method");
   $self->{"notest"}++; # name should probably have been force_install
 }
 
@@ -6748,7 +6789,7 @@ sub notest {
 sub unnotest {
   my($self) = @_;
   # warn "XDEBUG: deleting notest";
-  delete $self->{'notest'};
+  delete $self->{notest};
 }
 
 #-> sub CPAN::Distribution::unforce ;
@@ -6889,7 +6930,9 @@ is part of the perl-%s distribution. To install that, you need to run
                     # Trying an already failed 'make' (unless somebody else blocks)
                 } else {
                     # introduced for turning recursion detection into a distrostatus
-                    $CPAN::Frontend->mywarn("Could not make: ".substr($self->{make},3)."\n");
+                    my $error = length $self->{make}>3
+                        ? substr($self->{make},3) : "Unknown error";
+                    $CPAN::Frontend->mywarn("Could not make: $error\n");
                     $self->store_persistent_state;
                     return;
                 }
@@ -6898,17 +6941,9 @@ is part of the perl-%s distribution. To install that, you need to run
             }
         }
 
-        if (exists $self->{later} and length($self->{later})) {
+        if ($self->{later}) { # see also undelay
             if ($self->unsat_prereq) {
                 push @e, $self->{later};
-# RT ticket 18438 raises doubts if the deletion of {later} is valid.
-# YAML-0.53 triggered the later hodge-podge here, but my margin notes
-# are not sufficient to be sure if we really must/may do the delete
-# here. SO I accept the suggested patch for now. If we trigger a bug
-# again, I must go into deep contemplation about the {later} flag.
-
-#            } else {
-#                delete $self->{later};
             }
         }
 
@@ -7648,7 +7683,8 @@ sub unsat_prereq {
             # if we push it again, we have a potential infinite loop
 
             # The following "next" was a very problematic construct.
-            # It helped a lot but broke some day and must be replaced.
+            # It helped a lot but broke some day and had to be
+            # replaced.
 
             # We must be able to deal with modules that come again and
             # again as a prereq and have themselves prereqs and the
@@ -7660,7 +7696,7 @@ sub unsat_prereq {
             # The bug that brought this up is described in Todo under
             # "5.8.9 cannot install Compress::Zlib"
 
-            # next; # this is the next that must go away
+            # next; # this is the next that had to go away
 
             # The following "next NEED" are fine and the error message
             # explains well what is going on. For example when the DBI
@@ -7680,26 +7716,39 @@ sub unsat_prereq {
                                     "install",
                                     "make_clean",
                                    ) {
-                if (
-                    $do->{$nosayer}
-                    &&(UNIVERSAL::can($do->{$nosayer},"failed") ?
-                       $do->{$nosayer}->failed :
-                       $do->{$nosayer} =~ /^NO/)
-                   ) {
-                    if ($nosayer eq "make_test"
-                        &&
-                        $do->{make_test}{COMMANDID} != $CPAN::CurrentCommandId
-                       ) {
-                        next NOSAYER;
+                if ($do->{$nosayer}) {
+                    if (UNIVERSAL::can($do->{$nosayer},"failed") ?
+                        $do->{$nosayer}->failed :
+                        $do->{$nosayer} =~ /^NO/) {
+                        if ($nosayer eq "make_test"
+                            &&
+                            $do->{make_test}{COMMANDID} != $CPAN::CurrentCommandId
+                           ) {
+                            next NOSAYER;
+                        }
+                        $CPAN::Frontend->mywarn("Warning: Prerequisite ".
+                                                "'$need_module => $need_version' ".
+                                                "for '$self->{ID}' failed when ".
+                                                "processing '$do->{ID}' with ".
+                                                "'$nosayer => $do->{$nosayer}'. Continuing, ".
+                                                "but chances to succeed are limited.\n"
+                                               );
+                        next NEED;
+                    } else { # the other guy succeeded
+                        if ($nosayer eq "install") {
+                            # we had this with
+                            # DMAKI/DateTime-Calendar-Chinese-0.05.tar.gz
+                            # 2007-03
+                            $CPAN::Frontend->mywarn("Warning: Prerequisite ".
+                                                    "'$need_module => $need_version' ".
+                                                    "for '$self->{ID}' already installed ".
+                                                    "but installation looks suspicious. ".
+                                                    "Skipping another installation attempt, ".
+                                                    "to prevent looping endlessly.\n"
+                                                   );
+                            next NEED;
+                        }
                     }
-                    $CPAN::Frontend->mywarn("Warning: Prerequisite ".
-                                            "'$need_module => $need_version' ".
-                                            "for '$self->{ID}' failed when ".
-                                            "processing '$do->{ID}' with ".
-                                            "'$nosayer => $do->{$nosayer}'. Continuing, ".
-                                            "but chances to succeed are limited.\n"
-                                           );
-                    next NEED;
                 }
             }
         }
@@ -7906,7 +7955,9 @@ sub test {
 
   EXCUSE: {
 	my @e;
-        unless (exists $self->{make} or exists $self->{later}) {
+        if ($self->{make} or $self->{later}) {
+            # go ahead
+        } else {
             push @e,
                 "Make had some problems, won't test";
         }
@@ -7917,7 +7968,6 @@ sub test {
              $self->{make}->failed :
              $self->{make} =~ /^NO/
             ) and push @e, "Can't test without successful make";
-
         $self->{badtestcnt} ||= 0;
         if ($self->{badtestcnt} > 0) {
             require Data::Dumper;
@@ -7925,21 +7975,25 @@ sub test {
             push @e, "Won't repeat unsuccessful test during this command";
         }
 
-        exists $self->{later} and length($self->{later}) and
-            push @e, $self->{later};
+        push @e, $self->{later} if $self->{later};
 
         if (exists $self->{build_dir}) {
-            if ($CPAN::META->{is_tested}{$self->{build_dir}}
-                &&
-                exists $self->{make_test}
-                &&
-                !(
-                  UNIVERSAL::can($self->{make_test},"failed") ?
-                  $self->{make_test}->failed :
-                  $self->{make_test} =~ /^NO/
-                 )
-               ) {
-                push @e, "Has already been tested successfully";
+            if (exists $self->{make_test}) {
+                if (
+                    UNIVERSAL::can($self->{make_test},"failed") ?
+                    $self->{make_test}->failed :
+                    $self->{make_test} =~ /^NO/
+                   ) {
+                    if (
+                        UNIVERSAL::can($self->{make_test},"commandid")
+                        &&
+                        $self->{make_test}->commandid == $CPAN::CurrentCommandId
+                       ) {
+                        push @e, "Has already been tested within this command";
+                    }
+                } else {
+                    push @e, "Has already been tested successfully";
+                }
             }
         } elsif (!@e) {
             push @e, "Has no own directory";
@@ -8233,7 +8287,7 @@ sub install {
     if (my $goto = $self->prefs->{goto}) {
         return $self->goto($goto);
     }
-    $DB::single=1;
+    # $DB::single=1;
     unless ($self->{badtestcnt}) {
         $self->test;
     }
@@ -8245,7 +8299,9 @@ sub install {
     $CPAN::Frontend->myprint("Running $make install\n");
   EXCUSE: {
 	my @e;
-	unless (exists $self->{make} or exists $self->{later}) {
+	if ($self->{make} or $self->{later}) {
+            # go ahead
+        } else {
             push @e,
                 "Make had some problems, won't install";
         }
@@ -8282,15 +8338,16 @@ sub install {
                 $self->{install}->text eq "YES" :
                 $self->{install} =~ /^YES/
                ) {
-                push @e, "Already done";
+                $CPAN::Frontend->myprint("  Already done\n");
+                $CPAN::META->is_installed($self->{build_dir});
+                return 1;
             } else {
                 # comment in Todo on 2006-02-11; maybe retry?
                 push @e, "Already tried without success";
             }
         }
 
-        exists $self->{later} and length($self->{later}) and
-            push @e, $self->{later};
+        push @e, $self->{later} if $self->{later};
 
 	$CPAN::Frontend->myprint(join "", map {"  $_\n"} @e) and return if @e;
         unless (chdir $self->{build_dir}) {
@@ -8632,6 +8689,7 @@ sub look {
     $CPAN::Frontend->myprint($self->as_string);
 }
 
+#-> CPAN::Bundle::undelay
 sub undelay {
     my $self = shift;
     delete $self->{later};
@@ -9276,10 +9334,11 @@ sub fforce {
     $self->{force_update} = 2;
 }
 
+#-> sub CPAN::Module::notest ;
 sub notest {
     my($self) = @_;
-    # warn "XDEBUG: set notest for Module";
-    $self->{'notest'}++;
+    # $CPAN::Frontend->mywarn("XDEBUG: set notest for Module");
+    $self->{notest}++;
 }
 
 #-> sub CPAN::Module::rematein ;
@@ -9311,7 +9370,7 @@ sub rematein {
             $pack->force($meth);
         }
     }
-    $pack->notest($meth) if exists $self->{'notest'};
+    $pack->notest($meth) if exists $self->{notest} && $self->{notest};
 
     $pack->{reqtype} ||= "";
     CPAN->debug("dist-reqtype[$pack->{reqtype}]".
@@ -9337,17 +9396,18 @@ sub rematein {
             $pack->{reqtype} = $self->{reqtype};
         }
 
-    eval {
+    my $success = eval {
 	$pack->$meth();
     };
     my $err = $@;
     $pack->unforce if $pack->can("unforce") && exists $self->{force_update};
-    $pack->unnotest if $pack->can("unnotest") && exists $self->{'notest'};
+    $pack->unnotest if $pack->can("unnotest") && exists $self->{notest};
     delete $self->{force_update};
-    delete $self->{'notest'};
+    delete $self->{notest};
     if ($err) {
 	die $err;
     }
+    return $success;
 }
 
 #-> sub CPAN::Module::perldoc ;

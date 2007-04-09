@@ -19,7 +19,7 @@ use File::Basename ();
 use File::Path ();
 use File::Spec ();
 use vars qw($VERSION $urllist);
-$VERSION = sprintf "%.6f", substr(q$Rev: 1612 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 1669 $,4)/1000000 + 5.4;
 
 =head1 NAME
 
@@ -1297,7 +1297,7 @@ Your choice: },
 make_arg => qq{Parameters for the 'make' command?
 Typical frequently used setting:
 
-    -j3              # dual processor system
+    -j3              # dual processor system (on GNU make)
 
 Your choice: },
 
