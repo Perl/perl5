@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.53';
+$VERSION = '1.54';
 require 5.006002;
 
 require Exporter;
@@ -89,7 +89,7 @@ sub STORE       { $rnd_mode = $_[0]->round_mode($_[1]); }
 
 BEGIN
   {
-  # when someone set's $rnd_mode, we catch this and check the value to see
+  # when someone sets $rnd_mode, we catch this and check the value to see
   # whether it is valid or not. 
   $rnd_mode   = 'even'; tie $rnd_mode, 'Math::BigFloat';
 
@@ -103,8 +103,8 @@ BEGIN
   # valid method aliases for AUTOLOAD
   my %methods = map { $_ => 1 }  
    qw / fadd fsub fmul fdiv fround ffround fsqrt fmod fstr fsstr fpow fnorm
-        fint facmp fcmp fzero fnan finf finc fdec flog ffac fneg
-	fceil ffloor frsft flsft fone flog froot
+        fint facmp fcmp fzero fnan finf finc fdec ffac fneg
+	fceil ffloor frsft flsft fone flog froot fexp
       /;
   # valid methods that can be handed up (for AUTOLOAD)
   my %hand_ups = map { $_ => 1 }  
@@ -812,6 +812,7 @@ sub blog
   local $Math::BigFloat::downgrade = undef;
 
   # upgrade $x if $x is not a BigFloat (handle BigInt input)
+  # XXX TODO: rebless!
   if (!$x->isa('Math::BigFloat'))
     {
     $x = Math::BigFloat->new($x);
@@ -844,7 +845,8 @@ sub blog
 
   if ($done == 0)
     {
-    # first calculate the log to base e (using reduction by 10 (and probably 2))
+    # base is undef, so base should be e (Euler's number), so first calculate the
+    # log to base e (using reduction by 10 (and probably 2)):
     $self->_log_10($x,$scale);
 
     # and if a different base was requested, convert it
@@ -876,6 +878,153 @@ sub blog
   $x;
   }
 
+sub bexp
+  {
+  # Calculate e ** X (Euler's constant to the power of X)
+  my ($self,$x,$a,$p,$r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
+
+  return $x->binf() if $x->{sign} eq '+inf';
+  return $x->bzero() if $x->{sign} eq '-inf';
+
+  # we need to limit the accuracy to protect against overflow
+  my $fallback = 0;
+  my ($scale,@params);
+  ($x,@params) = $x->_find_round_parameters($a,$p,$r);
+
+  # also takes care of the "error in _find_round_parameters?" case
+  return $x if $x->{sign} eq 'NaN';
+
+  # no rounding at all, so must use fallback
+  if (scalar @params == 0)
+    {
+    # simulate old behaviour
+    $params[0] = $self->div_scale();	# and round to it as accuracy
+    $params[1] = undef;			# P = undef
+    $scale = $params[0]+4; 		# at least four more for proper round
+    $params[2] = $r;			# round mode by caller or undef
+    $fallback = 1;			# to clear a/p afterwards
+    }
+  else
+    {
+    # the 4 below is empirical, and there might be cases where it's not enough...
+    $scale = abs($params[0] || $params[1]) + 4;	# take whatever is defined
+    }
+
+  return $x->bone(@params) if $x->is_zero();
+
+  if (!$x->isa('Math::BigFloat'))
+    {
+    $x = Math::BigFloat->new($x);
+    $self = ref($x);
+    }
+  
+  # when user set globals, they would interfere with our calculation, so
+  # disable them and later re-enable them
+  no strict 'refs';
+  my $abr = "$self\::accuracy"; my $ab = $$abr; $$abr = undef;
+  my $pbr = "$self\::precision"; my $pb = $$pbr; $$pbr = undef;
+  # we also need to disable any set A or P on $x (_find_round_parameters took
+  # them already into account), since these would interfere, too
+  delete $x->{_a}; delete $x->{_p};
+  # need to disable $upgrade in BigInt, to avoid deep recursion
+  local $Math::BigInt::upgrade = undef;
+  local $Math::BigFloat::downgrade = undef;
+
+  my $x_org = $x->copy();
+  delete $x_org->{_a}; delete $x_org->{_p};
+
+  # We use the following Taylor series:
+
+  #           x    x^2   x^3   x^4
+  #  e = 1 + --- + --- + --- + --- ...
+  #           1!    2!    3!    4!
+
+  # The difference for each term is X and N, which would result in:
+  # 2 copy, 2 mul, 2 add, 1 inc, 1 div operations per term
+
+  # But it is faster to compute exp(1) and then raising it to the
+  # given power, esp. if $x is really big and an integer because:
+
+  #  * The numerator is always 1, making the computation faster
+  #  * the series converges faster in the case of x == 1
+  #  * We can also easily check when we have reached our limit: when the
+  #    term to be added is smaller than "1E$scale", we can stop - f.i.
+  #    scale == 5, and we have 1/40320, then we stop since 1/40320 < 1E-5.
+  #  * we can compute the *exact* result by simulating bigrat math:
+
+  #  1   1    gcd(3,4) = 1    1*24 + 1*6    5
+  #  - + -                  = ---------- =  --                 
+  #  6   24                      6*24       24
+
+  # We do not compute the gcd() here, but simple do:
+  #  1   1    1*24 + 1*6   30
+  #  - + -  = --------- =  --                 
+  #  6   24       6*24     144
+
+  # In general:
+  #  a   c    a*d + c*b 	and note that c is always 1 and d = (b*f)
+  #  - + -  = ---------
+  #  b   d       b*d
+
+  # This leads to:         which can be reduced by b to:
+  #  a   1     a*b*f + b    a*f + 1
+  #  - + -   = --------- =  -------
+  #  b   b*f     b*b*f        b*f
+
+  # The first terms in the series are:
+
+  # 1     1    1    1    1    1     1     1     13700
+  # -- + -- + -- + -- + -- + --- + --- + ---- = -----
+  # 1     1    2    6   24   120   720   5040   5040
+
+  # Note that we cannot simple reduce 13700/5040 to 685/252.
+
+  # So we start with A / B = 13490 / 5040 and F = 8
+  my $A = $MBI->_new(13700);
+  my $B = $MBI->_new(5040);
+  my $F = $MBI->_new(8);
+
+  # Code based on big rational math:
+  my $limit = $MBI->_new('1' . '0' x ($scale - 2));	# scale=5 => 100000
+
+  # while $B is not yet too big (making 1/$B too small)
+  while ($MBI->_acmp($B,$limit) < 0)
+    {
+    # calculate $a * $f + 1
+    $A = $MBI->_mul($A, $F);
+    $A = $MBI->_inc($A);
+    # calculate $b * $f
+    $B = $MBI->_mul($B, $F);
+    # increment f
+    $F = $MBI->_inc($F);
+    }
+
+  $x = $self->new($MBI->_str($A))->bdiv($MBI->_str($B), $scale);
+
+  delete $x->{_a}; delete $x->{_p};
+  # raise $x to the wanted power
+  $x->bpow($x_org, $scale) unless $x_org->is_one();
+
+  # shortcut to not run through _find_round_parameters again
+  if (defined $params[0])
+    {
+    $x->bround($params[0],$params[2]);		# then round accordingly
+    }
+  else
+    {
+    $x->bfround($params[1],$params[2]);		# then round accordingly
+    }
+  if ($fallback)
+    {
+    # clear a/p after round, since user did not request it
+    delete $x->{_a}; delete $x->{_p};
+    }
+  # restore globals
+  $$abr = $ab; $$pbr = $pb;
+
+  $x;						# return modified $x
+  }
+
 sub _log
   {
   # internal log function to calculate ln() based on Taylor series.
@@ -884,6 +1033,8 @@ sub _log
 
   # in case of $x == 1, result is 0
   return $x->bzero() if $x->is_one();
+
+  # XXX TODO: rewrite this in a similiar manner to bexp()
 
   # http://www.efunda.com/math/taylor_series/logarithmic.cfm?search_string=log
 
@@ -931,7 +1082,7 @@ sub _log
     # if we truncated $over and $below we might get 0.12345. Does this matter
     # for the end result? So we give $over and $below 4 more digits to be
     # on the safe side (unscientific error handling as usual... :+D
-    
+
     $next = $over->copy->bround($scale+4)->bdiv(
       $below->copy->bmul($factor)->bround($scale+4), 
       $scale);
@@ -950,8 +1101,8 @@ sub _log
       $steps++; print "step $steps = $x\n" if $steps % 10 == 0;
       }
     }
-  $x->bmul($f);					# $x *= 2
   print "took $steps steps\n" if DEBUG;
+  $x->bmul($f);					# $x *= 2
   }
 
 sub _log_10
@@ -960,19 +1111,27 @@ sub _log_10
   # and then "correcting" the result to the proper one. Modifies $x in place.
   my ($self,$x,$scale) = @_;
 
-  # taking blog() from numbers greater than 10 takes a *very long* time, so we
+  # Taking blog() from numbers greater than 10 takes a *very long* time, so we
   # break the computation down into parts based on the observation that:
-  #  blog(x*y) = blog(x) + blog(y)
-  # We set $y here to multiples of 10 so that $x is below 1 (the smaller $x is
-  # the faster it get's, especially because 2*$x takes about 10 times as long,
-  # so by dividing $x by 10 we make it at least factor 100 faster...)
+  #  blog(X*Y) = blog(X) + blog(Y)
+  # We set Y here to multiples of 10 so that $x becomes below 1 - the smaller
+  # $x is the faster it gets. Since 2*$x takes about 10 times as
+  # long, we make it faster by about a factor of 100 by dividing $x by 10.
 
-  # The same observation is valid for numbers smaller than 0.1 (e.g. computing
-  # log(1) is fastest, and the farther away we get from 1, the longer it takes)
-  # so we also 'break' this down by multiplying $x with 10 and subtract the
+  # The same observation is valid for numbers smaller than 0.1, e.g. computing
+  # log(1) is fastest, and the further away we get from 1, the longer it takes.
+  # So we also 'break' this down by multiplying $x with 10 and subtract the
   # log(10) afterwards to get the correct result.
 
-  # calculate nr of digits before dot
+  # To get $x even closer to 1, we also divide by 2 and then use log(2) to
+  # correct for this. For instance if $x is 2.4, we use the formula:
+  #  blog(2.4 * 2) == blog (1.2) + blog(2)
+  # and thus calculate only blog(1.2) and blog(2), which is faster in total
+  # than calculating blog(2.4).
+
+  # In addition, the values for blog(2) and blog(10) are cached.
+
+  # Calculate nr of digits before dot:
   my $dbd = $MBI->_num($x->{_e});
   $dbd = -$dbd if $x->{_es} eq '-';
   $dbd += $MBI->_len($x->{_m});
@@ -990,9 +1149,10 @@ sub _log_10
     # we can use the cached value in these cases
     if ($scale <= $LOG_10_A)
       {
-      $x->bzero(); $x->badd($LOG_10);
+      $x->bzero(); $x->badd($LOG_10);		# modify $x in place
       $calc = 0; 				# no need to calc, but round
       }
+    # if we can't use the shortcut, we continue normally
     }
   else
     {
@@ -1003,9 +1163,10 @@ sub _log_10
       # we can use the cached value in these cases
       if ($scale <= $LOG_2_A)
         {
-        $x->bzero(); $x->badd($LOG_2);
+        $x->bzero(); $x->badd($LOG_2);		# modify $x in place
         $calc = 0; 				# no need to calc, but round
         }
+      # if we can't use the shortcut, we continue normally
       }
     }
 
@@ -1028,6 +1189,8 @@ sub _log_10
   my $l_10;				# value of ln(10) to A of $scale
   my $l_2;				# value of ln(2) to A of $scale
 
+  my $two = $self->new(2);
+
   # $x == 2 => 1, $x == 13 => 2, $x == 0.1 => 0, $x == 0.01 => -1
   # so don't do this shortcut for 1 or 0
   if (($dbd > 1) || ($dbd < 0))
@@ -1049,10 +1212,40 @@ sub _log_10
       }
     else
       {
-      # else: slower, compute it (but don't cache it, because it could be big)
+      # else: slower, compute and cache result
       # also disable downgrade for this code path
       local $Math::BigFloat::downgrade = undef;
-      $l_10 = $self->new(10)->blog(undef,$scale);	# scale+4, actually
+
+      # shorten the time to calculate log(10) based on the following:
+      # log(1.25 * 8) = log(1.25) + log(8)
+      #               = log(1.25) + log(2) + log(2) + log(2)
+
+      # first get $l_2 (and possible compute and cache log(2))
+      $LOG_2 = $self->new($LOG_2,undef,undef) unless ref $LOG_2;
+      if ($scale <= $LOG_2_A)
+        {
+        # use cached value
+        $l_2 = $LOG_2->copy();			# copy() for the mul below
+        }
+      else
+        {
+        # else: slower, compute and cache result
+        $l_2 = $two->copy(); $self->_log($l_2, $scale); # scale+4, actually
+        $LOG_2 = $l_2->copy();			# cache the result for later
+						# the copy() is for mul below
+        $LOG_2_A = $scale;
+        }
+
+      # now calculate log(1.25):
+      $l_10 = $self->new('1.25'); $self->_log($l_10, $scale); # scale+4, actually
+
+      # log(1.25) + log(2) + log(2) + log(2):
+      $l_10->badd($l_2);
+      $l_10->badd($l_2);
+      $l_10->badd($l_2);
+      $LOG_10 = $l_10->copy();		# cache the result for later
+					# the copy() is for mul below
+      $LOG_10_A = $scale;
       }
     $dbd-- if ($dbd > 1); 		# 20 => dbd=2, so make it dbd=1	
     $l_10->bmul( $self->new($dbd));	# log(10) * (digits_before_dot-1)
@@ -1075,31 +1268,33 @@ sub _log_10
   $HALF = $self->new($HALF) unless ref($HALF);
 
   my $twos = 0;				# default: none (0 times)	
-  my $two = $self->new(2);
-  while ($x->bacmp($HALF) <= 0)
+  while ($x->bacmp($HALF) <= 0)		# X <= 0.5
     {
     $twos--; $x->bmul($two);
     }
-  while ($x->bacmp($two) >= 0)
+  while ($x->bacmp($two) >= 0)		# X >= 2
     {
     $twos++; $x->bdiv($two,$scale+4);		# keep all digits
     }
-  # $twos > 0 => did mul 2, < 0 => did div 2 (never both)
-  # calculate correction factor based on ln(2)
+  # $twos > 0 => did mul 2, < 0 => did div 2 (but we never did both)
+  # So calculate correction factor based on ln(2):
   if ($twos != 0)
     {
     $LOG_2 = $self->new($LOG_2,undef,undef) unless ref $LOG_2;
     if ($scale <= $LOG_2_A)
       {
       # use cached value
-      $l_2 = $LOG_2->copy();			# copy for mul
+      $l_2 = $LOG_2->copy();			# copy() for the mul below
       }
     else
       {
-      # else: slower, compute it (but don't cache it, because it could be big)
+      # else: slower, compute and cache result
       # also disable downgrade for this code path
       local $Math::BigFloat::downgrade = undef;
-      $l_2 = $two->blog(undef,$scale);	# scale+4, actually
+      $l_2 = $two->copy(); $self->_log($l_2, $scale); # scale+4, actually
+      $LOG_2 = $l_2->copy();			# cache the result for later
+						# the copy() is for mul below
+      $LOG_2_A = $scale;
       }
     $l_2->bmul($twos);		# * -2 => subtract, * 2 => add
     }
@@ -1107,7 +1302,9 @@ sub _log_10
   $self->_log($x,$scale);			# need to do the "normal" way
   $x->badd($l_10) if defined $l_10; 		# correct it by ln(10)
   $x->badd($l_2) if defined $l_2;		# and maybe by ln(2)
+
   # all done, $x contains now the result
+  $x;
   }
 
 sub blcm 
@@ -1919,7 +2116,7 @@ sub _pow
     {
     # we calculate the next term, and add it to the last
     # when the next term is below our limit, it won't affect the outcome
-    # anymore, so we stop
+    # anymore, so we stop:
     $next = $over->copy()->bdiv($below,$scale);
     last if $next->bacmp($limit) <= 0;
     $x->badd($next);
@@ -2627,6 +2824,7 @@ Math::BigFloat - Arbitrary size floating point math package
   
   $x->blog();			# logarithm of $x to base e (Euler's number)
   $x->blog($base);		# logarithm of $x to base $base (f.i. 2)
+  $x->bexp();			# calculate e ** $x where e is Euler's number
   
   $x->band($y);			# bit-wise and
   $x->bior($y);			# bit-wise inclusive or

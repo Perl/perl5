@@ -18,6 +18,20 @@ MODULE = Math::BigInt::FastCalc		PACKAGE = Math::BigInt::FastCalc
  #  * added __strip_zeros(), _copy()
  # 2004-08-13 0.07 Tels
  #  * added _is_two(), _is_ten(), _ten()
+ # 2007-04-02 0.08 Tels
+ #  * plug leaks by creating mortals
+
+#define RETURN_MORTAL_INT(value)		\
+      ST(0) = sv_2mortal(newSViv(value));	\
+      XSRETURN(1);
+
+#define RETURN_MORTAL_BOOL(temp, comp)			\
+      ST(0) = sv_2mortal(boolSV( SvIV(temp) == comp));
+
+#define CONSTANT_OBJ(int)			\
+    RETVAL = newAV();				\
+    sv_2mortal((SV*)RETVAL);			\
+    av_push (RETVAL, newSViv( int ));
 
 void 
 _set_XS_BASE(BASE, BASE_LEN)
@@ -230,11 +244,6 @@ _num(class,x)
 
 ##############################################################################
 
-#define CONSTANT_OBJ(int)		\
-    RETVAL = newAV();			\
-    sv_2mortal((SV*)RETVAL);		\
-    av_push (RETVAL, newSViv( int ));
-
 AV *
 _zero(class)
   CODE:
@@ -281,7 +290,7 @@ _is_even(class, x)
   CODE:
     a = (AV*)SvRV(x);		/* ref to aray, don't check ref */
     temp = *av_fetch(a, 0, 0);	/* fetch first element */
-    ST(0) = boolSV((SvIV(temp) & 1) == 0);
+    ST(0) = sv_2mortal(boolSV((SvIV(temp) & 1) == 0));
 
 ##############################################################################
 
@@ -295,7 +304,7 @@ _is_odd(class, x)
   CODE:
     a = (AV*)SvRV(x);		/* ref to aray, don't check ref */
     temp = *av_fetch(a, 0, 0);	/* fetch first element */
-    ST(0) = boolSV((SvIV(temp) & 1) != 0);
+    ST(0) = sv_2mortal(boolSV((SvIV(temp) & 1) != 0));
 
 ##############################################################################
 
@@ -314,7 +323,7 @@ _is_one(class, x)
       XSRETURN(1);			/* len != 1, can't be '1' */
       }
     temp = *av_fetch(a, 0, 0);		/* fetch first element */
-    ST(0) = boolSV((SvIV(temp) == 1));
+    RETURN_MORTAL_BOOL(temp, 1);
 
 ##############################################################################
 
@@ -333,7 +342,7 @@ _is_two(class, x)
       XSRETURN(1);			/* len != 1, can't be '2' */
       }
     temp = *av_fetch(a, 0, 0);		/* fetch first element */
-    ST(0) = boolSV((SvIV(temp) == 2));
+    RETURN_MORTAL_BOOL(temp, 2);
 
 ##############################################################################
 
@@ -352,7 +361,7 @@ _is_ten(class, x)
       XSRETURN(1);			/* len != 1, can't be '10' */
       }
     temp = *av_fetch(a, 0, 0);		/* fetch first element */
-    ST(0) = boolSV((SvIV(temp) == 10));
+    RETURN_MORTAL_BOOL(temp, 10);
 
 ##############################################################################
 
@@ -371,7 +380,7 @@ _is_zero(class, x)
       XSRETURN(1);			/* len != 1, can't be '0' */
       }
     temp = *av_fetch(a, 0, 0);		/* fetch first element */
-    ST(0) = boolSV((SvIV(temp) == 0));
+    RETURN_MORTAL_BOOL(temp, 0);
 
 ##############################################################################
 
@@ -390,7 +399,7 @@ _len(class,x)
     temp = *av_fetch(a, elems, 0);	/* fetch last element */
     SvPV(temp, len);			/* convert to string & store length */
     len += (IV) XS_BASE_LEN * elems;
-    ST(0) = newSViv(len);
+    ST(0) = sv_2mortal(newSViv(len));
 
 ##############################################################################
 
@@ -418,13 +427,11 @@ _acmp(class, cx, cy);
 
     if (diff > 0)
       {
-      ST(0) = newSViv(1);		/* len differs: X > Y */
-      XSRETURN(1);
+      RETURN_MORTAL_INT(1);		/* len differs: X > Y */
       }
-    if (diff < 0)
+    else if (diff < 0)
       {
-      ST(0) = newSViv(-1);		/* len differs: X < Y */
-      XSRETURN(1);
+      RETURN_MORTAL_INT(-1);		/* len differs: X < Y */
       }
     /* both have same number of elements, so check length of last element
        and see if it differes */
@@ -435,13 +442,11 @@ _acmp(class, cx, cy);
     diff_str = (I32)lenx - (I32)leny;
     if (diff_str > 0)
       {
-      ST(0) = newSViv(1);		/* same len, but first elems differs in len */
-      XSRETURN(1);
+      RETURN_MORTAL_INT(1);		/* same len, but first elems differs in len */
       }
     if (diff_str < 0)
       {
-      ST(0) = newSViv(-1);		/* same len, but first elems differs in len */
-      XSRETURN(1);
+      RETURN_MORTAL_INT(-1);		/* same len, but first elems differs in len */
       }
     /* same number of digits, so need to make a full compare */
     diff_nv = 0;
@@ -458,13 +463,11 @@ _acmp(class, cx, cy);
       } 
     if (diff_nv > 0)
       {
-      ST(0) = newSViv(1);
-      XSRETURN(1);
+      RETURN_MORTAL_INT(1);
       }
     if (diff_nv < 0)
       {
-      ST(0) = newSViv(-1);
-      XSRETURN(1);
+      RETURN_MORTAL_INT(-1);
       }
-    ST(0) = newSViv(0);		/* equal */
+    ST(0) = sv_2mortal(newSViv(0));		/* X and Y are equal */
 
