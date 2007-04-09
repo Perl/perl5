@@ -164,7 +164,22 @@ _matherr(struct _exception *a)
 }
 #endif
 
-#if _MSC_VER >= 1400
+/* VS2005 (MSC version 14) provides a mechanism to set an invalid
+ * parameter handler.  This functionality is not available in the
+ * 64-bit compiler from the Platform SDK, which unfortunately also
+ * believes itself to be MSC version 14.
+ *
+ * There is no #define related to _set_invalid_parameter_handler(),
+ * but we can check for one of the constants defined for
+ * _set_abort_behavior(), which was introduced into stdlib.h at
+ * the same time.
+ */
+
+#if _MSC_VER >= 1400 && defined(_WRITE_ABORT_MSG)
+#  define SET_INVALID_PARAMETER_HANDLER
+#endif
+
+#ifdef SET_INVALID_PARAMETER_HANDLER
 void my_invalid_parameter_handler(const wchar_t* expression,
     const wchar_t* function, 
     const wchar_t* file, 
@@ -4648,7 +4663,7 @@ win32_ctrlhandler(DWORD dwCtrlType)
 }
 
 
-#if _MSC_VER >= 1400
+#ifdef SET_INVALID_PARAMETER_HANDLER
 #  include <crtdbg.h>
 #endif
 
@@ -4755,7 +4770,7 @@ Perl_win32_init(int *argcp, char ***argvp)
 {
     HMODULE module;
 
-#if _MSC_VER >= 1400
+#ifdef SET_INVALID_PARAMETER_HANDLER
     _invalid_parameter_handler oldHandler, newHandler;
     newHandler = my_invalid_parameter_handler;
     oldHandler = _set_invalid_parameter_handler(newHandler);

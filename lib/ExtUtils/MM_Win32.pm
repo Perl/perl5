@@ -29,7 +29,7 @@ use vars qw(@ISA $VERSION);
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
-$VERSION = '1.14';
+$VERSION = '1.14_01';
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 
@@ -341,7 +341,8 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)$(DFSEP).
       push(@m,
        q{	$(LD) -out:$@ $(LDDLFLAGS) }.$ldfrom.q{ $(OTHERLDFLAGS) }
       .q{$(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) -def:$(EXPORT_LIST)});
-      if ($Config{cc} eq 'cl' and $Config{ccversion} =~ /^(\d+)/ and $1 >= 14) {	# VC 2005 (aka VC 8) or higher
+      # VS2005 (aka VC 8) or higher, but not for 64-bit compiler from Platform SDK
+      if ($Config{ivsize} == 4 && $Config{cc} eq 'cl' and $Config{ccversion} =~ /^(\d+)/ and $1 >= 14) {
         push(@m,
           q{	
 	mt -nologo -manifest $@.manifest -outputresource:$@;2 && del $@.manifest});
