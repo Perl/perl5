@@ -286,20 +286,29 @@ sub _evaluate_version_line {
 
   # Some of this code came from the ExtUtils:: hierarchy.
 
-  my $eval = qq{q#  Hide from _packages_inside()
-		 #; package Module::Build::ModuleInfo::_version;
-		 no strict;
+  # We compile into $vsub because 'use version' would cause
+  # compiletime/runtime issues with local()
+  my $vsub;
+  my $eval = qq{BEGIN { q#  Hide from _packages_inside()
+    #; package Module::Build::ModuleInfo::_version;
+    no strict;
 
-		 local $sigil$var;
-		 \$$var=undef; do {
-		   $line
-		 }; \$$var
-		};
+    local $sigil$var;
+    \$$var=undef;
+      \$vsub = sub {
+        $line;
+        \$$var
+      };
+  }};
 
   local $^W;
-  # Try and get the $VERSION
-  my $result = eval $eval;
-  warn "Error evaling version line '$eval' in $self->{filename}: $@\n" if $@;
+  # Try to get the $VERSION
+  eval $eval;
+  warn "Error evaling version line '$eval' in $self->{filename}: $@\n"
+    if $@;
+  (ref($vsub) eq 'CODE') or
+    die "failed to build version sub for $self->{filename}";
+  my $result = $vsub->();
 
   # Bless it into our own version class
   $result = Module::Build::Version->new($result);

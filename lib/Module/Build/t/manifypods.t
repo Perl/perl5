@@ -147,7 +147,7 @@ is( $mb2->{properties}->{libdoc_dirs}->[0], 'foo', 'override libdoc_dirs' );
 
 # Make sure we can find our own action documentation
 ok  $mb2->get_action_docs('build');
-ok !$mb2->get_action_docs('foo');
+ok !eval{$mb2->get_action_docs('foo')};
 
 # Make sure those docs are the correct ones
 foreach ('testcover', 'disttest') {

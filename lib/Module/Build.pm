@@ -15,7 +15,7 @@ use Module::Build::Base;
 
 use vars qw($VERSION @ISA);
 @ISA = qw(Module::Build::Base);
-$VERSION = '0.2806_01';
+$VERSION = '0.2807';
 $VERSION = eval $VERSION;
 
 # Okay, this is the brute-force method of finding out what kind of
@@ -162,12 +162,12 @@ action), 'test', and 'install'.  Other actions defined so far include:
   distdir                        retest      
   distmeta                       skipcheck   
   distsign                       test        
-  disttest                       testcover   
-  docs                           testdb      
-  fakeinstall                    testpod     
-  help                           testpodcoverage
-  html                           versioninstall
-  install                                    
+  disttest                       testall     
+  docs                           testcover   
+  fakeinstall                    testdb      
+  help                           testpod     
+  html                           testpodcoverage
+  install                        versioninstall
 
 
 You can run the 'help' action for a complete list of actions.
@@ -584,6 +584,33 @@ You may also pass several C<test_files> arguments separately:
 or use a C<glob()>-style pattern:
 
   ./Build test --test_files 't/01-*.t'
+
+=item testall
+
+[verion 0.2807]
+
+[Note: the 'testall' action and the code snippets below are currently
+in alpha stage, see
+L<"http://www.nntp.perl.org/group/perl.module.build/2007/03/msg584.html"> ]
+
+Runs the C<test> action plus each of the C<test$type> actions defined by
+the keys of the C<test_types> parameter.
+
+Currently, you need to define the ACTION_test$type method yourself and
+enumerate them in the test_types parameter.
+
+  my $mb = Module::Build->subclass(
+    code => q(
+      sub ACTION_testspecial { shift->generic_test(type => 'special'); }
+      sub ACTION_testauthor  { shift->generic_test(type => 'author'); }
+    )
+  )->new(
+    ...
+    test_types  => {
+      special => '.st',
+      author  => '.at',
+    },
+    ...
 
 =item testcover
 

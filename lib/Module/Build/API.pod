@@ -1013,6 +1013,17 @@ by C<ExtUtils::MakeMaker>.  This method also creates some temporary
 data in a directory called C<_build/>.  Both of these will be removed
 when the C<realclean> action is performed.
 
+Among the files created in C<_build/> is a F<_build/prereqs> file
+containing the set of prerequisites for this distribution, as a hash
+of hashes.  This file may be C<eval()>-ed to obtain the authoritative
+set of prereqs, which might be different from the contents of META.yml
+(because F<Build.PL> might have set them dynamically).  But fancy
+developers take heed: do not put any fancy custom runtime code in the
+F<_build/prereqs> file, leave it as a static declaration containing
+only strings and numbers.  Similarly, do not alter the structure of
+the internal C<< $self->{properties}{requires} >> (etc.) data members,
+because that's where this data comes from.
+
 =item current_action()
 
 [version 0.28]
@@ -1410,10 +1421,15 @@ C<"wallet">).  The user will be asked the question once.
 
 If C<prompt()> detects that it is not running interactively and there
 is nothing on STDIN or if the PERL_MM_USE_DEFAULT environment variable
-is set to true, the $default will be used without prompting.  This
-prevents automated processes from blocking on user input.
+is set to true, the $default will be used without prompting.
 
-If no $default is provided an empty string will be used instead.
+To prevent automated processes from blocking, the user must either set
+PERL_MM_USE_DEFAULT or attach something to STDIN (this can be a
+pipe/file containing a scripted set of answers or /dev/null.)
+
+If no $default is provided an empty string will be used instead.  In
+non-interactive mode, the absence of $default is an error (though
+explicitly passing C<undef()> as the default is valid as of 0.27.)
 
 This method may be called as a class or object method.
 

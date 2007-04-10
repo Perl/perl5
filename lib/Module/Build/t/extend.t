@@ -2,7 +2,7 @@
 
 use strict;
 use lib $ENV{PERL_CORE} ? '../lib/Module/Build/t/lib' : 't/lib';
-use MBTest tests => 64;
+use MBTest tests => 65;
 
 use Cwd ();
 my $cwd = Cwd::cwd;
@@ -231,10 +231,12 @@ print "Hello, World!\n";
   $ENV{PERL_MM_USE_DEFAULT} = 1;
 
   eval{ $mb->y_n('Is this a question?') };
+  print "\n"; # fake <enter> because the prompt prints before the checks
   like $@, qr/ERROR:/,
        'Do not allow default-less y_n() for unattended builds';
 
   eval{ $ans = $mb->prompt('Is this a question?') };
+  print "\n"; # fake <enter> because the prompt prints before the checks
   like $@, qr/ERROR:/,
        'Do not allow default-less prompt() for unattended builds';
 
@@ -266,6 +268,9 @@ print "Hello, World!\n";
 
     $ans = $mb->y_n("Is this a question", 'y');
     ok $ans, "  y_n() with a default";
+
+    my @ans = $mb->prompt("Is this a question", undef);
+    is_deeply([@ans], [undef], "  prompt() with undef() default");
   }
 
 }

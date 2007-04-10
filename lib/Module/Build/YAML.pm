@@ -104,29 +104,22 @@ sub _yaml_chunk {
 sub _yaml_value {
   my ($value) = @_;
   # undefs become ~
-  if (! defined $value) {
-    return("~");
-  }
+  return '~' if not defined $value;
+
   # empty strings will become empty strings
-  elsif (! defined $value || $value eq "") {
-    return('""');
-  }
-  # quote and escape strings with special values
-  elsif ($value =~ /["'`~\n!\@\#^\&\*\(\)\{\}\[\]\|<>\?]/) {
-    if ($value !~ /['`~\n!\#^\&\*\(\)\{\}\[\]\|\?]/) {  # nothing but " or @ or < or > (email addresses)
-      return("'" . $value . "'");
-    }
-    else {
-      $value =~ s/\n/\\n/g;    # handle embedded newlines
-      $value =~ s/"/\\"/g;     # handle embedded quotes
-      return('"' . $value . '"');
-    }
-  }
+  return '""' if $value eq '';
+
   # allow simple scalars (without embedded quote chars) to be unquoted
   # (includes $%_+=-\;:,./)
-  else {
-    return($value);
-  }
+  return $value if $value !~ /["'`~\n!\@\#^\&\*\(\)\{\}\[\]\|<>\?]/;
+
+  # quote and escape strings with special values
+  return "'$value'"
+    if $value !~ /['`~\n!\#^\&\*\(\)\{\}\[\]\|\?]/;  # nothing but " or @ or < or > (email addresses)
+
+  $value =~ s/\n/\\n/g;    # handle embedded newlines
+  $value =~ s/"/\\"/g;     # handle embedded quotes
+  return qq{"$value"};
 }
 
 1;

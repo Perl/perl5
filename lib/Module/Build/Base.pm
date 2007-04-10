@@ -74,7 +74,8 @@ sub resume {
   unless ($self->allow_mb_mismatch) {
     my $mb_version = $Module::Build::VERSION;
     die(" * ERROR: Configuration was initially created with Module::Build version '$self->{properties}{mb_version}',\n".
-	"   but we are now using version '$mb_version'.  Please re-run the Build.PL or Makefile.PL script.\n")
+	"   but we are now using version '$mb_version'.  Please re-run the Build.PL or Makefile.PL script,\n".
+	"   or use --allow_mb_mismatch 1 to skip this version check.\n")
     if $mb_version ne $self->{properties}{mb_version};
   }
   
@@ -94,7 +95,7 @@ sub new_from_context {
   # as it is during resume() (and thereafter).
   {
     local @ARGV = $package->unparse_args(\%args);
-    do 'Build.PL';
+    do './Build.PL';
     die $@ if $@;
   }
   return $package->resume;
@@ -469,9 +470,11 @@ sub _is_interactive {
   return -t STDIN && (-t STDOUT || !(-f STDOUT || -c STDOUT)) ;   # Pipe?
 }
 
+# NOTE this is a blocking operation if(-t STDIN)
 sub _is_unattended {
   my $self = shift;
-  return $ENV{PERL_MM_USE_DEFAULT} || ( !$self->_is_interactive && eof STDIN );
+  return $ENV{PERL_MM_USE_DEFAULT} ||
+    ( !$self->_is_interactive && eof STDIN );
 }
 
 sub _readline {
@@ -488,25 +491,30 @@ sub prompt {
   my $mess = shift
     or die "prompt() called without a prompt message";
 
-  my $def;
-  if ( $self->_is_unattended && !@_ ) {
+  # use a list to distinguish a default of undef() from no default
+  my @def;
+  @def = (shift) if @_;
+  # use dispdef for output
+  my @dispdef = scalar(@def) ?
+    ('[', (defined($def[0]) ? $def[0] . ' ' : ''), ']') :
+    (' ', '');
+
+  local $|=1;
+  print "$mess ", @dispdef;
+
+  if ( $self->_is_unattended && !@def ) {
     die <<EOF;
 ERROR: This build seems to be unattended, but there is no default value
 for this question.  Aborting.
 EOF
   }
-  $def = shift if @_;
-  ($def, my $dispdef) = defined $def ? ($def, "[$def] ") : ('', ' ');
-
-  local $|=1;
-  print "$mess $dispdef";
 
   my $ans = $self->_readline();
 
   if ( !defined($ans)        # Ctrl-D or unattended
        or !length($ans) ) {  # User hit return
-    print "$def\n";
-    $ans = $def;
+    print "$dispdef[1]\n";
+    $ans = scalar(@def) ? $def[0] : '';
   }
 
   return $ans;
@@ -519,13 +527,6 @@ sub y_n {
   die "y_n() called without a prompt message" unless $mess;
   die "Invalid default value: y_n() default must be 'y' or 'n'"
     if $def && $def !~ /^[yn]/i;
-
-  if ( $self->_is_unattended && !$def ) {
-    die <<EOF;
-ERROR: This build seems to be unattended, but there is no default value
-for this question.  Aborting.
-EOF
-  }
 
   my $answer;
   while (1) { # XXX Infinite or a large number followed by an exception ?
@@ -1008,7 +1009,7 @@ sub read_config {
   my ($self) = @_;
   
   my $file = $self->config_file('build_params')
-    or die "No build_params?";
+    or die "Can't find 'build_params' in " . $self->config_dir;
   my $fh = IO::File->new($file) or die "Can't read '$file': $!";
   my $ref = eval do {local $/; <$fh>};
   die if $@;
@@ -1857,34 +1858,32 @@ sub known_actions {
 }
 
 sub get_action_docs {
-  my ($self, $action, $actions) = @_;
-  $actions ||= $self->known_actions;
-  $@ = '';
-  ($@ = "No known action '$action'\n"), return
-    unless $actions->{$action};
-  
+  my ($self, $action) = @_;
+  my $actions = $self->known_actions;
+  die "No known action '$action'" unless $actions->{$action};
+
   my ($files_found, @docs) = (0);
   foreach my $class ($self->super_classes) {
     (my $file = $class) =~ s{::}{/}g;
     $file = $INC{$file . '.pm'} or next;
     my $fh = IO::File->new("< $file") or next;
     $files_found++;
-    
+
     # Code below modified from /usr/bin/perldoc
-    
+
     # Skip to ACTIONS section
     local $_;
     while (<$fh>) {
       last if /^=head1 ACTIONS\s/;
     }
-    
+
     # Look for our action
     my ($found, $inlist) = (0, 0);
     while (<$fh>) {
       if (/^=item\s+\Q$action\E\b/)  {
-	$found = 1;
+        $found = 1;
       } elsif (/^=(item|back)/) {
-	last if $found > 1 and not $inlist;
+        last if $found > 1 and not $inlist;
       }
       next unless $found;
       push @docs, $_;
@@ -1967,8 +1966,8 @@ sub ACTION_help {
   my $actions = $self->known_actions;
   
   if (@{$self->{args}{ARGV}}) {
-    my $msg = $self->get_action_docs($self->{args}{ARGV}[0], $actions) || "$@\n";
-    print $msg;
+    my $msg = eval {$self->get_action_docs($self->{args}{ARGV}[0], $actions)};
+    print $@ ? "$@\n" : $msg;
     return;
   }
 
@@ -2013,13 +2012,62 @@ sub ACTION_retest {
   $self->do_tests;
 }
 
+sub ACTION_testall {
+  my ($self) = @_;
+
+  my @types;
+  for my $action (grep { $_ ne 'all' } $self->get_test_types) {
+    # XXX We can't just dispatch because we get multiple summaries but
+    # we'll need to dispatch to support custom setup/teardown in the
+    # action.  To support that, we'll need to call something besides
+    # Harness::runtests() because we'll need to collect the results in
+    # parts, then run the summary.
+    push(@types, $action);
+    #$self->_call_action( "test$action" );
+  }
+  $self->generic_test(types => ['default', @types]);
+}
+
+sub get_test_types {
+  my ($self) = @_;
+
+  my $t = $self->{properties}->{test_types};
+  return ( defined $t ? ( keys %$t ) : () );
+}
+
 
 sub ACTION_test {
   my ($self) = @_;
+  $self->generic_test(type => 'default');
+}
+
+sub generic_test {
+  my $self = shift;
+  (@_ % 2) and croak('Odd number of elements in argument hash');
+  my %args = @_;
+
   my $p = $self->{properties};
-  
+
+  my @types = (
+    (exists($args{type})  ? $args{type} : ()), 
+    (exists($args{types}) ? @{$args{types}} : ()),
+  );
+  @types or croak "need some types of tests to check";
+
+  my %test_types = (
+    default => '.t',
+    (defined($p->{test_types}) ? %{$p->{test_types}} : ()),
+  );
+
+  for my $type (@types) {
+    croak "$type not defined in test_types!"
+      unless defined $test_types{ $type };
+  }
+
+  # we use local here because it ends up two method calls deep
+  local $p->{test_file_exts} = [ @test_types{@types} ];
   $self->depends_on('code');
-  
+
   # Protect others against our @INC changes
   local @INC = @INC;
 
@@ -2083,8 +2131,12 @@ sub test_files {
 
 sub expand_test_dir {
   my ($self, $dir) = @_;
-  return sort @{$self->rscan_dir($dir, qr{^[^.].*\.t$})} if $self->recursive_test_files;
-  return sort glob File::Spec->catfile($dir, "*.t");
+  my $exts = $self->{properties}{test_file_exts} || ['.t'];
+
+  return sort map { @{$self->rscan_dir($dir, qr{^[^.].*\Q$_\E$})} } @$exts
+    if $self->recursive_test_files;
+
+  return sort map { glob File::Spec->catfile($dir, "*$_") } @$exts;
 }
 
 sub ACTION_testdb {
@@ -2263,7 +2315,7 @@ sub find_script_files {
 sub find_test_files {
   my $self = shift;
   my $p = $self->{properties};
-  
+
   if (my $files = $p->{test_files}) {
     $files = [keys %$files] if UNIVERSAL::isa($files, 'HASH');
     $files = [map { -d $_ ? $self->expand_test_dir($_) : $_ }
@@ -2350,7 +2402,7 @@ eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
     rename("$file.new", $file)
       or die "Can't rename $file.new to $file: $!";
     
-    unlink "$file.bak"
+    $self->delete_filetree("$file.bak")
       or $self->log_warn("Couldn't clean up $file.bak, leaving it there");
     
     $self->do_system($c->get('eunicefix'), $file) if $c->get('eunicefix') ne ':';
@@ -3995,7 +4047,8 @@ sub do_system {
   my %seen;
   my $sep = $self->config('path_sep');
   local $ENV{PERL5LIB} = 
-    ( length($ENV{PERL5LIB}) < 500
+    ( !exists($ENV{PERL5LIB}) ? '' :
+      length($ENV{PERL5LIB}) < 500
       ? $ENV{PERL5LIB}
       : join $sep, grep { ! $seen{$_}++ and -d $_ } split($sep, $ENV{PERL5LIB})
     );
@@ -4045,7 +4098,14 @@ sub copy_if_modified {
   File::Path::mkpath(File::Basename::dirname($to_path), 0, oct(777));
   
   $self->log_info("Copying $file -> $to_path\n") if $args{verbose};
-  File::Copy::copy($file, $to_path) or die "Can't copy('$file', '$to_path'): $!";
+  
+  if ($^O eq 'os2') {# copy will not overwrite; 0x1 = overwrite
+    chmod 0666, $to_path;
+    File::Copy::syscopy($file, $to_path, 0x1) or die "Can't copy('$file', '$to_path'): $!";
+  } else {
+    File::Copy::copy($file, $to_path) or die "Can't copy('$file', '$to_path'): $!";
+  }
+
   # mode is read-only + (executable if source is executable)
   my $mode = oct(444) | ( $self->is_executable($file) ? oct(111) : 0 );
   chmod( $mode, $to_path );
@@ -4137,3 +4197,5 @@ modify it under the same terms as Perl itself.
 perl(1), Module::Build(3)
 
 =cut
+
+# vim:ts=8:sw=2:et:sta:sts=2

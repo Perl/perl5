@@ -74,16 +74,26 @@ sub slurp {
   return scalar <$fh>;
 }
 
+sub exe_exts {
+  # Some extensions we should know about if we're looking for executables
+
+  if ($^O eq 'MSWin32') {
+    return split($Config{path_sep}, $ENV{PATHEXT} || '.com;.exe;.bat');
+  }
+  if ($^O eq 'os2') {
+    return qw(.exe .com .pl .cmd .bat .sh .ksh);
+  }
+  return;
+}
+
 sub find_in_path {
   my $thing = shift;
   
   my @path = split $Config{path_sep}, $ENV{PATH};
-  my @exe_ext = $^O eq 'MSWin32' ? ('', # may have extension already
-    split($Config{path_sep}, $ENV{PATHEXT} || '.com;.exe;.bat')) :
-    ('');
+  my @exe_ext = exe_exts();
   foreach (@path) {
     my $fullpath = File::Spec->catfile($_, $thing);
-    foreach my $ext ( @exe_ext ) {
+    foreach my $ext ( '', @exe_ext ) {
       return "$fullpath$ext" if -e "$fullpath$ext";
     }
   }
