@@ -1,7 +1,7 @@
 package bignum;
 use 5.006002;
 
-$VERSION = '0.19';
+$VERSION = '0.20';
 use Exporter;
 @EXPORT_OK 	= qw( ); 
 @EXPORT 	= qw( inf NaN ); 
@@ -492,6 +492,7 @@ Some cool command line examples to impress the Python crowd ;)
 	perl -Mbignum -le 'print 3/7 + 5/7 + 8/3'
 	perl -Mbignum -le 'print 123->is_odd()'
 	perl -Mbignum -le 'print log(2)'
+	perl -Mbignum -le 'print exp(1)'
 	perl -Mbignum -le 'print 2 ** 0.5'
 	perl -Mbignum=a,65 -le 'print 2 ** 0.2'
 	perl -Mbignum=a,65,l,GMP -le 'print 7 ** 7777'

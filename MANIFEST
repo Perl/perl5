@@ -1471,6 +1471,7 @@ lib/bigint.pl			An arbitrary precision integer arithmetic package
 lib/bigintpl.t			See if bigint.pl works
 lib/bigint.pm			bignum
 lib/bignum.pm			bignum
+lib/bignum/t/bigexp.t		See if bignum works
 lib/bignum/t/bigint.t		See if bigint works
 lib/bignum/t/bignum.t		See if bignum works
 lib/bignum/t/bigrat.t		See if bigrat works
