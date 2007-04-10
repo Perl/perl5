@@ -115,25 +115,13 @@
  * without the prefix (e.g., sv, tmp or obj).
  */
 
-/* Patch status:
- *
- * Perl 5.8.8 contains threads::shared patches up to 26626 (equivalent to
- * blead patches 26350+26351).
- *
- * The CPAN version of threads::shared contains the following blead patches:
- *      26569 (applicable to 5.9.3 only)
- *      26684
- *      26693
- *      26695
- */
-
 #define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
 #ifdef HAS_PPPORT_H
-#define NEED_vnewSVpvf
-#define NEED_warner
+#  define NEED_vnewSVpvf
+#  define NEED_warner
 #  include "ppport.h"
 #  include "shared.h"
 #endif
@@ -562,15 +550,14 @@ S_abs_2_rel_milli(double abs)
 
     /* Get current time (in units of 100 nanoseconds since 1/1/1601) */
     union {
-        FILETIME         ft;
-        unsigned __int64 i64;
+        FILETIME ft;
+        __int64  i64;   /* 'signed' to keep compilers happy */
     } now;
 
     GetSystemTimeAsFileTime(&now.ft);
 
     /* Relative time in milliseconds */
     rel = (abs * 1000.) - (((double)now.i64 / 10000.) - EPOCH_BIAS);
-
     if (rel <= 0.0) {
         return (0);
     }

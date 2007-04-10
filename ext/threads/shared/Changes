@@ -1,7 +1,12 @@
 Revision history for Perl extension threads::shared.
 
-1.08 Wed Mar 14 12:40:57 EDT 2007
-	- Sub-second resolution for cont_timedwait under WIN32
+1.09 Mon Apr  9 16:49:30 EDT 2007
+	- Modify stress test to not hang under MSWin32
+	- Fix casting issue under MSWin32
+	- Subversion repository on Google
+
+1.08 Fri Mar 16 08:31:50 EDT 2007
+	- Sub-second resolution for cont_timedwait under MSWin32
 	    (courtesy of Dean Arnold)
 	- Fix compiler warnings
 	- Upgraded ppport.h to Devel::PPPort 3.11
