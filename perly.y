@@ -503,7 +503,7 @@ peg	:	PEG
 	;
 
 format	:	FORMAT startformsub formname block
-			{ SvREFCNT_inc(PL_compcv);
+			{ SvREFCNT_inc_simple_void(PL_compcv);
 #ifdef MAD
 			  $$ = newFORM($2, $3, $4);
 			  prepend_madprops($1->tk_mad, $$, 'F');
@@ -522,7 +522,7 @@ formname:	WORD		{ $$ = $1; }
 
 /* Unimplemented "my sub foo { }" */
 mysubrout:	MYSUB startsub subname proto subattrlist subbody
-			{ SvREFCNT_inc(PL_compcv);
+			{ SvREFCNT_inc_simple_void(PL_compcv);
 #ifdef MAD
 			  $$ = newMYSUB($2, $3, $4, $5, $6);
 			  token_getmad($1,$$,'d');
@@ -535,7 +535,7 @@ mysubrout:	MYSUB startsub subname proto subattrlist subbody
 
 /* Subroutine definition */
 subrout	:	SUB startsub subname proto subattrlist subbody
-			{ SvREFCNT_inc(PL_compcv);
+			{ SvREFCNT_inc_simple_void(PL_compcv);
 #ifdef MAD
 			  OP* o = newSVOP(OP_ANONCODE, 0,
 			    (SV*)newATTRSUB($2, $3, $4, $5, $6));
@@ -642,7 +642,7 @@ package :	PACKAGE WORD ';'
 use	:	USE startsub
 			{ CvSPECIAL_on(PL_compcv); /* It's a BEGIN {} */ }
 		    WORD WORD listexpr ';'
-			{ SvREFCNT_inc(PL_compcv);
+			{ SvREFCNT_inc_simple_void(PL_compcv);
 #ifdef MAD
 			  $$ = utilize(IVAL($1), $2, $4, $5, $6);
 			  token_getmad($1,$$,'o');
@@ -748,7 +748,7 @@ listop	:	LSTOP indirob argexpr /* map {...} @args or print $fh @args */
 			  TOKEN_GETMAD($4,$$,')');
 			}
 	|	LSTOPSUB startanonsub block /* sub f(&@);   f { foo } ... */
-			{ SvREFCNT_inc(PL_compcv);
+			{ SvREFCNT_inc_simple_void(PL_compcv);
 			  $<opval>$ = newANONATTRSUB($2, 0, Nullop, $3); }
 		    listexpr		%prec LSTOP  /* ... @bar */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
@@ -1002,7 +1002,7 @@ anonymous:	'[' expr ']'
 			  TOKEN_GETMAD($3,$$,'}');
 			}
 	|	ANONSUB startanonsub proto subattrlist block	%prec '('
-			{ SvREFCNT_inc(PL_compcv);
+			{ SvREFCNT_inc_simple_void(PL_compcv);
 			  $$ = newANONATTRSUB($2, $3, $4, $5);
 			  TOKEN_GETMAD($1,$$,'o');
 			  OP_GETMAD($3,$$,'s');

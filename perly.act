@@ -454,7 +454,7 @@ case 2:
 
   case 61:
 #line 506 "perly.y"
-    { SvREFCNT_inc(PL_compcv);
+    { SvREFCNT_inc_simple_void(PL_compcv);
 #ifdef MAD
 			  (yyval.opval) = newFORM((ps[(2) - (4)].val.ival), (ps[(3) - (4)].val.opval), (ps[(4) - (4)].val.opval));
 			  prepend_madprops((ps[(1) - (4)].val.i_tkval)->tk_mad, (yyval.opval), 'F');
@@ -479,7 +479,7 @@ case 2:
 
   case 64:
 #line 525 "perly.y"
-    { SvREFCNT_inc(PL_compcv);
+    { SvREFCNT_inc_simple_void(PL_compcv);
 #ifdef MAD
 			  (yyval.opval) = newMYSUB((ps[(2) - (6)].val.ival), (ps[(3) - (6)].val.opval), (ps[(4) - (6)].val.opval), (ps[(5) - (6)].val.opval), (ps[(6) - (6)].val.opval));
 			  token_getmad((ps[(1) - (6)].val.i_tkval),(yyval.opval),'d');
@@ -492,7 +492,7 @@ case 2:
 
   case 65:
 #line 538 "perly.y"
-    { SvREFCNT_inc(PL_compcv);
+    { SvREFCNT_inc_simple_void(PL_compcv);
 #ifdef MAD
 			  OP* o = newSVOP(OP_ANONCODE, 0,
 			    (SV*)newATTRSUB((ps[(2) - (6)].val.ival), (ps[(3) - (6)].val.opval), (ps[(4) - (6)].val.opval), (ps[(5) - (6)].val.opval), (ps[(6) - (6)].val.opval)));
@@ -620,7 +620,7 @@ case 2:
 
   case 81:
 #line 645 "perly.y"
-    { SvREFCNT_inc(PL_compcv);
+    { SvREFCNT_inc_simple_void(PL_compcv);
 #ifdef MAD
 			  (yyval.opval) = utilize(IVAL((ps[(1) - (7)].val.i_tkval)), (ps[(2) - (7)].val.ival), (ps[(4) - (7)].val.opval), (ps[(5) - (7)].val.opval), (ps[(6) - (7)].val.opval));
 			  token_getmad((ps[(1) - (7)].val.i_tkval),(yyval.opval),'o');
@@ -757,7 +757,7 @@ case 2:
 
   case 97:
 #line 751 "perly.y"
-    { SvREFCNT_inc(PL_compcv);
+    { SvREFCNT_inc_simple_void(PL_compcv);
 			  (yyval.opval) = newANONATTRSUB((ps[(2) - (3)].val.ival), 0, Nullop, (ps[(3) - (3)].val.opval)); ;}
     break;
 
@@ -1113,7 +1113,7 @@ case 2:
 
   case 140:
 #line 1005 "perly.y"
-    { SvREFCNT_inc(PL_compcv);
+    { SvREFCNT_inc_simple_void(PL_compcv);
 			  (yyval.opval) = newANONATTRSUB((ps[(2) - (5)].val.ival), (ps[(3) - (5)].val.opval), (ps[(4) - (5)].val.opval), (ps[(5) - (5)].val.opval));
 			  TOKEN_GETMAD((ps[(1) - (5)].val.i_tkval),(yyval.opval),'o');
 			  OP_GETMAD((ps[(3) - (5)].val.opval),(yyval.opval),'s');

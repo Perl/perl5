@@ -4749,7 +4749,7 @@ Perl_reg_named_buff_get(pTHX_ const REGEXP * const rx, SV* namesv, U32 flags)
                     ret = newSVsv(&PL_sv_undef);
                 }
                 if (retarray) {
-                    SvREFCNT_inc(ret);
+                    SvREFCNT_inc_simple_void(ret);
                     av_push(retarray, ret);
                 }
             }
@@ -5131,7 +5131,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     if (!SIZE_ONLY) {
                         num = add_data( pRExC_state, 1, "S" );
                         RExC_rxi->data->data[num]=(void*)sv_dat;
-                        SvREFCNT_inc(sv_dat);
+                        SvREFCNT_inc_simple_void(sv_dat);
                     }
                     RExC_sawback = 1;
                     ret = reganode(pRExC_state,
@@ -5466,7 +5466,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	            if (!SIZE_ONLY) {
                         num = add_data( pRExC_state, 1, "S" );
                         RExC_rxi->data->data[num]=(void*)sv_dat;
-                        SvREFCNT_inc(sv_dat);
+                        SvREFCNT_inc_simple_void(sv_dat);
                     }
                     ret = reganode(pRExC_state,NGROUPP,num);
                     goto insert_if_check_paren;
@@ -6664,7 +6664,7 @@ tryagain:
                 if (!SIZE_ONLY) {
                     num = add_data( pRExC_state, 1, "S" );
                     RExC_rxi->data->data[num]=(void*)sv_dat;
-                    SvREFCNT_inc(sv_dat);
+                    SvREFCNT_inc_simple_void(sv_dat);
                 }
 
                 RExC_sawback = 1;
