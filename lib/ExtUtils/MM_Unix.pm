@@ -18,7 +18,7 @@ use vars qw($VERSION @ISA
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.52_02';
+$VERSION = '1.52_03';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -1574,12 +1574,9 @@ sub init_main {
 
     unless ($self->{PERL_SRC}){
 	my($dir);
-	foreach $dir ($Updir,
-                  $self->catdir($Updir,$Updir),
-                  $self->catdir($Updir,$Updir,$Updir),
-                  $self->catdir($Updir,$Updir,$Updir,$Updir),
-                  $self->catdir($Updir,$Updir,$Updir,$Updir,$Updir))
+	foreach my $dir_count (1..8) # 8 is the VMS limit for nesting
         {
+            $dir = $self->catdir(($Updir) x $dir_count);
 	    if (
 		-f $self->catfile($dir,"config_h.SH")
 		&&
