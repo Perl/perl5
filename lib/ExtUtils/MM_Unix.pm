@@ -18,7 +18,7 @@ use vars qw($VERSION @ISA
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.51_02';
+$VERSION = '1.52_02';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
