@@ -4416,7 +4416,7 @@ ok($@=~/\QSequence \k... not terminated in regex;\E/);
     my $_ = "aoeu \xe6var ook";
     /^ \w+ \s (?<eek>\S+)/x;
 
-    iseq( length($`), 4, 'length $`' );
+    iseq( length($`), 0, 'length $`' );
     iseq( length($'), 4, q[length $'] );
     iseq( length($&), 9, 'length $&' );
     iseq( length($1), 4, 'length $1' );
