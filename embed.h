@@ -1192,7 +1192,11 @@
 #define ck_unpack		Perl_ck_unpack
 #define is_handle_constructor	S_is_handle_constructor
 #define is_list_assignment	S_is_list_assignment
-#define forget_pmop		S_forget_pmop
+#endif
+#  ifdef USE_ITHREADS
+#  else
+#  endif
+#ifdef PERL_CORE
 #define find_and_forget_pmops	S_find_and_forget_pmops
 #define cop_free		S_cop_free
 #define modkids			S_modkids
@@ -3431,7 +3435,15 @@
 #define ck_unpack(a)		Perl_ck_unpack(aTHX_ a)
 #define is_handle_constructor	S_is_handle_constructor
 #define is_list_assignment(a)	S_is_list_assignment(aTHX_ a)
-#define forget_pmop(a,b)	S_forget_pmop(aTHX_ a,b)
+#endif
+#  ifdef USE_ITHREADS
+#ifdef PERL_CORE
+#endif
+#  else
+#ifdef PERL_CORE
+#endif
+#  endif
+#ifdef PERL_CORE
 #define find_and_forget_pmops(a)	S_find_and_forget_pmops(aTHX_ a)
 #define cop_free(a)		S_cop_free(aTHX_ a)
 #define modkids(a,b)		S_modkids(aTHX_ a,b)

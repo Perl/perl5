@@ -407,6 +407,11 @@ S_op_destroy(pTHX_ OP *o)
     FreeOp(o);
 }
 
+#ifdef USE_ITHREADS
+#  define forget_pmop(a,b)	S_forget_pmop(aTHX_ a,b)
+#else
+#  define forget_pmop(a,b)	S_forget_pmop(aTHX_ a)
+#endif
 
 /* Destructor */
 
@@ -636,7 +641,11 @@ S_cop_free(pTHX_ COP* cop)
 }
 
 STATIC void
-S_forget_pmop(pTHX_ PMOP *const o, U32 flags)
+S_forget_pmop(pTHX_ PMOP *const o
+#ifdef USE_ITHREADS
+	      , U32 flags
+#endif
+	      )
 {
     HV * const pmstash = PmopSTASH(o);
     if (pmstash && !SvIS_FREED(pmstash)) {
@@ -665,8 +674,10 @@ S_forget_pmop(pTHX_ PMOP *const o, U32 flags)
     }
     if (PL_curpm == o) 
 	PL_curpm = NULL;
+#ifdef USE_ITHREADS
     if (flags)
 	PmopSTASH_free(o);
+#endif
 }
 
 STATIC void

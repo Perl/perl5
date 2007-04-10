@@ -422,6 +422,8 @@ struct pmop {
 #  define PmopSTASHPV(o)	(PmopSTASH(o) ? HvNAME_get(PmopSTASH(o)) : NULL)
    /* op_pmstashstartu.op_pmstash is not refcounted */
 #  define PmopSTASHPV_set(o,pv)	PmopSTASH_set((o), gv_stashpv(pv,GV_ADD))
+/* Note that if this becomes non-empty, then S_forget_pmop in op.c will need
+   changing */
 #  define PmopSTASH_free(o)    
 #endif
 

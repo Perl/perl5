@@ -1195,7 +1195,11 @@ pR	|OP*	|ck_trunc	|NN OP *o
 pR	|OP*	|ck_unpack	|NN OP *o
 sRn	|bool	|is_handle_constructor|NN const OP *o|I32 numargs
 sR	|I32	|is_list_assignment|NULLOK const OP *o
-s	|void	|forget_pmop	|NN PMOP *const o|U32 flags
+#  ifdef USE_ITHREADS
+so	|void	|forget_pmop	|NN PMOP *const o|U32 flags
+#  else
+so	|void	|forget_pmop	|NN PMOP *const o
+#  endif
 s	|void	|find_and_forget_pmops	|NN OP *o
 s	|void	|cop_free	|NN COP *cop
 s	|OP*	|modkids	|NULLOK OP *o|I32 type
