@@ -1853,7 +1853,7 @@ ctermid(s = 0)
 	char *          s = 0;
     CODE:
 #ifdef HAS_CTERMID_R
-	s = safemalloc((size_t) L_ctermid);
+	s = (char *) safemalloc((size_t) L_ctermid);
 #endif
 	RETVAL = ctermid(s);
     OUTPUT:
