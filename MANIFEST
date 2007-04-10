@@ -1571,6 +1571,98 @@ lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
 lib/CPAN/PAUSE2003.pub		CPAN public key
 lib/CPAN/PAUSE2005.pub		CPAN public key
 lib/CPAN/PAUSE2007.pub		CPAN public key
+lib/CPANPLUS/Backend.pm	CPANPLUS
+lib/CPANPLUS/Backend/RV.pm	CPANPLUS
+lib/CPANPLUS/bin/cpan2dist	the cpan2dist utility
+lib/CPANPLUS/bin/cpanp	the cpanp utility
+lib/CPANPLUS/bin/cpanp-run-perl	the cpanp-run-perl utility
+lib/CPANPLUS/Config.pm	CPANPLUS
+lib/CPANPLUS/Configure.pm	CPANPLUS
+lib/CPANPLUS/Configure/Setup.pm	CPANPLUS
+lib/CPANPLUS/Dist/Base.pm	CPANPLUS
+lib/CPANPLUS/Dist/MM.pm	CPANPLUS
+lib/CPANPLUS/Dist.pm	CPANPLUS
+lib/CPANPLUS/Dist/Sample.pm	CPANPLUS
+lib/CPANPLUS/Error.pm	CPANPLUS
+lib/CPANPLUS/FAQ.pod	CPANPLUS
+lib/CPANPLUS/Hacking.pod	CPANPLUS
+lib/CPANPLUS/inc.pm	CPANPLUS
+lib/CPANPLUS/Internals/Constants.pm	CPANPLUS
+lib/CPANPLUS/Internals/Constants/Report.pm	CPANPLUS
+lib/CPANPLUS/Internals/Extract.pm	CPANPLUS
+lib/CPANPLUS/Internals/Fetch.pm	CPANPLUS
+lib/CPANPLUS/Internals.pm	CPANPLUS
+lib/CPANPLUS/Internals/Report.pm	CPANPLUS
+lib/CPANPLUS/Internals/Search.pm	CPANPLUS
+lib/CPANPLUS/Internals/Source.pm	CPANPLUS
+lib/CPANPLUS/Internals/Utils/Autoflush.pm	CPANPLUS
+lib/CPANPLUS/Internals/Utils.pm	CPANPLUS
+lib/CPANPLUS/Module/Author/Fake.pm	CPANPLUS
+lib/CPANPLUS/Module/Author.pm	CPANPLUS
+lib/CPANPLUS/Module/Checksums.pm	CPANPLUS
+lib/CPANPLUS/Module/Fake.pm	CPANPLUS
+lib/CPANPLUS/Module.pm	CPANPLUS
+lib/CPANPLUS/Module/Signature.pm	CPANPLUS
+lib/CPANPLUS.pm	CPANPLUS
+lib/CPANPLUS/Selfupdate.pm	CPANPLUS
+lib/CPANPLUS/Shell/Classic.pm	CPANPLUS
+lib/CPANPLUS/Shell/Default/Plugins/HOWTO.pod	CPANPLUS
+lib/CPANPLUS/Shell/Default/Plugins/Remote.pm	CPANPLUS
+lib/CPANPLUS/Shell/Default/Plugins/Source.pm	CPANPLUS
+lib/CPANPLUS/Shell/Default.pm	CPANPLUS
+lib/CPANPLUS/Shell.pm	CPANPLUS
+lib/CPANPLUS/t/00_CPANPLUS-Inc.t	CPANPLUS tests
+lib/CPANPLUS/t/00_CPANPLUS-Internals-Utils.t	CPANPLUS tests
+lib/CPANPLUS/t/01_CPANPLUS-Configure.t	CPANPLUS tests
+lib/CPANPLUS/t/02_CPANPLUS-Internals.t	CPANPLUS tests
+lib/CPANPLUS/t/03_CPANPLUS-Internals-Source.t	CPANPLUS tests
+lib/CPANPLUS/t/04_CPANPLUS-Module.t	CPANPLUS tests
+lib/CPANPLUS/t/05_CPANPLUS-Internals-Fetch.t	CPANPLUS tests
+lib/CPANPLUS/t/06_CPANPLUS-Internals-Constants.t	CPANPLUS tests
+lib/CPANPLUS/t/07_CPANPLUS-Internals-Extract.t	CPANPLUS tests
+lib/CPANPLUS/t/08_CPANPLUS-Backend.t	CPANPLUS tests
+lib/CPANPLUS/t/09_CPANPLUS-Internals-Search.t	CPANPLUS tests
+lib/CPANPLUS/t/10_CPANPLUS-Error.t	CPANPLUS tests
+lib/CPANPLUS/t/19_CPANPLUS-Dist.t	CPANPLUS tests
+lib/CPANPLUS/t/20_CPANPLUS-Dist-MM.t	CPANPLUS tests
+lib/CPANPLUS/t/21_CPANPLUS-Dist-No-Build.t	CPANPLUS tests
+lib/CPANPLUS/t/30_CPANPLUS-Internals-Selfupdate.t	CPANPLUS tests
+lib/CPANPLUS/t/40_CPANPLUS-Internals-Report.t	CPANPLUS tests
+lib/CPANPLUS/t/dummy-CPAN/authors/01mailrc.txt.gz.packed	CPANPLUS tests
+lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUNOXS/Bundle-Foo-Bar-0.01.tar.gz.packed	CPANPLUS tests
+lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUNOXS/CHECKSUMS	CPANPLUS tests
+lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUNOXS/Foo-Bar-0.01.readme	CPANPLUS tests
+lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUNOXS/Foo-Bar-0.01.tar.gz.packed	CPANPLUS tests
+lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUNOXS/perl5.005_03.tar.gz.packed	CPANPLUS tests
+lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUXS/CHECKSUMS	CPANPLUS tests
+lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUXS/Foo-Bar-0.01.readme	CPANPLUS tests
+lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUXS/Foo-Bar-0.01.tar.gz.packed	CPANPLUS tests
+lib/CPANPLUS/t/dummy-CPAN/authors/id/M/MB/MBNOXS/CHECKSUMS	CPANPLUS tests
+lib/CPANPLUS/t/dummy-CPAN/authors/id/M/MB/MBNOXS/Foo-Bar-0.01.readme	CPANPLUS tests
+lib/CPANPLUS/t/dummy-CPAN/authors/id/M/MB/MBNOXS/Foo-Bar-0.01.tar.gz.packed	CPANPLUS tests
+lib/CPANPLUS/t/dummy-CPAN/authors/id/M/MB/MBXS/CHECKSUMS	CPANPLUS tests
+lib/CPANPLUS/t/dummy-CPAN/authors/id/M/MB/MBXS/Foo-Bar-0.01.readme	CPANPLUS tests
+lib/CPANPLUS/t/dummy-CPAN/authors/id/M/MB/MBXS/Foo-Bar-0.01.tar.gz.packed	CPANPLUS tests
+lib/CPANPLUS/t/dummy-CPAN/modules/02packages.details.txt.gz.packed	CPANPLUS tests
+lib/CPANPLUS/t/dummy-CPAN/modules/03modlist.data.gz.packed	CPANPLUS tests
+lib/CPANPLUS/t/dummy-cpanplus/01mailrc.txt.gz.packed	CPANPLUS tests
+lib/CPANPLUS/t/dummy-cpanplus/02packages.details.txt.gz.packed	CPANPLUS tests
+lib/CPANPLUS/t/dummy-cpanplus/03modlist.data.gz.packed	CPANPLUS tests
+lib/CPANPLUS/t/dummy-cpanplus/sourcefiles.2.15.stored.packed	CPANPLUS tests
+lib/CPANPLUS/t/dummy-localmirror/01mailrc.txt.gz.packed	CPANPLUS tests
+lib/CPANPLUS/t/dummy-localmirror/02packages.details.txt.gz.packed	CPANPLUS tests
+lib/CPANPLUS/t/dummy-localmirror/03modlist.data.gz.packed	CPANPLUS tests
+lib/CPANPLUS/t/dummy-localmirror/authors/id/E/EU/EUNOXS/Bundle-Foo-Bar-0.01.tar.gz.packed	CPANPLUS tests
+lib/CPANPLUS/t/dummy-localmirror/authors/id/E/EU/EUNOXS/CHECKSUMS	CPANPLUS tests
+lib/CPANPLUS/t/dummy-localmirror/authors/id/E/EU/EUNOXS/Foo-Bar-0.01.tar.gz.packed	CPANPLUS tests
+lib/CPANPLUS/t/dummy-localmirror/authors/id/E/EU/EUNOXS/perl5.005_03.tar.gz.packed	CPANPLUS tests
+lib/CPANPLUS/t/dummy-localmirror/authors/id/E/EU/EUXS/CHECKSUMS	CPANPLUS tests
+lib/CPANPLUS/t/dummy-localmirror/authors/id/E/EU/EUXS/Foo-Bar-0.01.tar.gz.packed	CPANPLUS tests
+lib/CPANPLUS/t/dummy-localmirror/authors/id/M/MB/MBNOXS/CHECKSUMS	CPANPLUS tests
+lib/CPANPLUS/t/dummy-localmirror/authors/id/M/MB/MBNOXS/Foo-Bar-0.01.tar.gz.packed	CPANPLUS tests
+lib/CPANPLUS/t/dummy-localmirror/authors/id/M/MB/MBXS/CHECKSUMS	CPANPLUS tests
+lib/CPANPLUS/t/dummy-localmirror/authors/id/M/MB/MBXS/Foo-Bar-0.01.tar.gz.packed	CPANPLUS tests
+lib/CPANPLUS/t/inc/conf.pl	CPANPLUS tests
 lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
 lib/CPAN/Queue.pm		queueing system for CPAN.pm
 lib/CPAN/SIGNATURE		CPAN public key
@@ -2398,8 +2490,8 @@ lib/Pod/Simple/t/html02.t	Pod::Simple test file
 lib/Pod/Simple/t/html03.t	Pod::Simple test file
 lib/Pod/Simple/t/htmlbat.t	Pod::Simple test file
 lib/Pod/Simple/TiedOutFH.pm	Pod::Simple::TiedOutFH
-lib/Pod/Simple/t/items.t	Pod::Simple test file
 lib/Pod/Simple/t/items02.t	Pod::Simple test file
+lib/Pod/Simple/t/items.t	Pod::Simple test file
 lib/Pod/Simple/t/itemstar.t	Pod::Simple test file
 lib/Pod/Simple/t/junk1o.txt	Pod::Simple test file
 lib/Pod/Simple/t/junk1.pod	Pod::Simple test file
@@ -3784,7 +3876,10 @@ util.h				Dummy header
 utils/c2ph.PL			program to translate dbx stabs to perl
 utils/config_data.PL		Module::Build tool
 utils/corelist.PL		Module::CoreList
+utils/cpan2dist.PL	the cpan2dist utility
 utils/cpan.PL			easily interact with CPAN from the command line
+utils/cpanp.PL	the cpanp utility
+utils/cpanp-run-perl.PL	the cpanp-run-perl utility
 utils/dprofpp.PL		Perl code profile post-processor
 utils/enc2xs.PL			Encode module generator
 utils/h2ph.PL			A thing to turn C .h files into perl .ph files

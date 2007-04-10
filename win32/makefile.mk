@@ -746,6 +746,9 @@ UTILS		=			\
 		..\utils\prove		\
 		..\utils\ptar		\
 		..\utils\ptardiff	\
+		..\utils\cpanp-run-perl	\
+		..\utils\cpanp	\
+		..\utils\cpan2dist	\
 		..\utils\shasum		\
 		..\utils\instmodsh	\
 		..\pod\checkpods	\
@@ -1487,7 +1490,7 @@ distclean: realclean
 	    podchecker podselect
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs \
 	    perldoc perlivp dprofpp libnetcfg enc2xs piconv cpan *.bat \
-	    xsubpp instmodsh prove ptar ptardiff shasum corelist config_data
+	    xsubpp instmodsh prove ptar ptardiff cpanp-run-perl cpanp cpan2dist shasum corelist config_data
 	-cd ..\x2p && del /f find2perl s2p psed *.bat
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new \
 	    perlmainst.c

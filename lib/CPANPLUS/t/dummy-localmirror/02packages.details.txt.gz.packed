@@ -1,0 +1,25 @@
+#########################################################################
+This is a binary file that was packed with the 'uupacktool.pl' which
+is included in the Perl distribution.
+
+To unpack this file use the following command:
+
+     uupacktool.pl -u lib/CPANPLUS/t/dummy-localmirror/02packages.details.txt.gz.packed lib/CPANPLUS/t/dummy-localmirror/02packages.details.txt.gz
+
+To recreate it use the following command:
+
+     uupacktool.pl -p lib/CPANPLUS/t/dummy-localmirror/02packages.details.txt.gz lib/CPANPLUS/t/dummy-localmirror/02packages.details.txt.gz.packed
+
+Created at Sat Apr  7 13:06:49 2007
+#########################################################################
+__UU__
+M'XL("-%#OT4``S`R<&%C:V%G97,N9&5T86EL<RYT>'0`E=-1:]LP$`#@=_^*
+M>]C#!K&D.IB"GAJGR=B6=&5M:-^&:ET3,5LRTKE>]NLG-2TM(6FWX\!@WWVZ
+M`WEN&I3P'*+H5/U+K3$PC:1,$QC]IFSU8_%2`QNB3G(^#`/KT#>L=BV?7DXN
+M>.MTWV#@1Y1S#+4W'1EGHW:Y*P&K6@QP[WJKP5C0QF--SF_APZ.I>MHX'[C1
+M/)NZIF]M>!JE>P6,X`%]B/`HOJ9-]L426HTZGSLO8=*3:Q6AAGND>@/>]60L
+MAM'N\`@A:%?W+5I2:3R6W7A#D<BK;3JM;;0)-*C4_/$!"C86Q2>XV\+$:H\J
+ML&\.K5F?*6M:%7?.%I'/IW$G2NTGXK0LLX4*E*\ZG0:1<(-Z!&,!7Y6%0H@"
+M1"F+F*?P>7F=97/GI*R4EW*VDO+V"O9",'&2GC,^6\6\O>*Q(X\->?K"2'FV
+M_O-*659O*4N^K&+^DW+Q?=_94U+!.T[:Z;CSM-.[SOXV_^M4\<K%RR^/>8><
+B74]^B)L.^MA$CU$<X-+_4S(ARI]B_.QD?P$Z!("8DP,`````

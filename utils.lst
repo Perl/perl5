@@ -23,6 +23,9 @@ utils/pl2pm
 utils/prove
 utils/ptar
 utils/ptardiff
+utils/cpanp-run-perl
+utils/cpanp
+utils/cpan2dist
 utils/shasum
 utils/splain
 utils/xsubpp
