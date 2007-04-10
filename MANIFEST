@@ -1645,10 +1645,6 @@ lib/CPANPLUS/t/dummy-CPAN/authors/id/M/MB/MBXS/Foo-Bar-0.01.readme	CPANPLUS test
 lib/CPANPLUS/t/dummy-CPAN/authors/id/M/MB/MBXS/Foo-Bar-0.01.tar.gz.packed	CPANPLUS tests
 lib/CPANPLUS/t/dummy-CPAN/modules/02packages.details.txt.gz.packed	CPANPLUS tests
 lib/CPANPLUS/t/dummy-CPAN/modules/03modlist.data.gz.packed	CPANPLUS tests
-lib/CPANPLUS/t/dummy-cpanplus/01mailrc.txt.gz.packed	CPANPLUS tests
-lib/CPANPLUS/t/dummy-cpanplus/02packages.details.txt.gz.packed	CPANPLUS tests
-lib/CPANPLUS/t/dummy-cpanplus/03modlist.data.gz.packed	CPANPLUS tests
-lib/CPANPLUS/t/dummy-cpanplus/sourcefiles.2.15.stored.packed	CPANPLUS tests
 lib/CPANPLUS/t/dummy-localmirror/01mailrc.txt.gz.packed	CPANPLUS tests
 lib/CPANPLUS/t/dummy-localmirror/02packages.details.txt.gz.packed	CPANPLUS tests
 lib/CPANPLUS/t/dummy-localmirror/03modlist.data.gz.packed	CPANPLUS tests
