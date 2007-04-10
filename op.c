@@ -663,6 +663,8 @@ S_forget_pmop(pTHX_ PMOP *const o, U32 flags)
 	    }
 	}
     }
+    if (PL_curpm == o) 
+	PL_curpm = NULL;
     if (flags)
 	PmopSTASH_free(o);
 }
