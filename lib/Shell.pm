@@ -6,7 +6,8 @@ use File::Spec::Functions;
 
 our($capture_stderr, $raw, $VERSION, $AUTOLOAD);
 
-$VERSION = '0.72';
+$VERSION = '0.72_01';
+$VERSION = eval $VERSION;
 
 sub new { bless \my $foo, shift }
 sub DESTROY { }
@@ -205,10 +206,14 @@ quotes (C<">) on Windows.
 
 =head2 Configuration
 
-If you set $Shell::capture_stderr to true, the module will attempt to
+If you set $Shell::capture_stderr to 1, the module will attempt to
 capture the standard error output of the process as well. This is
 done by adding C<2E<gt>&1> to the command line, so don't try this on
 a system not supporting this redirection.
+
+Setting $Shell::capture_stderr to -1 will send standard error to the
+bit bucket (i.e., the equivalent of adding C<2E<gt>/dev/null> to the
+command line).  The same caveat regarding redirection applies.
 
 If you set $Shell::raw to true no quoting whatsoever is done.
 
