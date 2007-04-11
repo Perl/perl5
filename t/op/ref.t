@@ -467,7 +467,7 @@ TODO: {
     $name1 = "Left"; $name2 = "Left\0Right";
     my $glob2 = *{$name2};
 
-    isnt ($glob1, $glob2, "We get different typeglobs");
+    is ($glob1, undef, "We get different typeglobs. In fact, undef");
 
     *{$name1} = sub {"One"};
     *{$name2} = sub {"Two"};
