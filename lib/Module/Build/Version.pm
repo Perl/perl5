@@ -1,6 +1,10 @@
 package Module::Build::Version;
 use strict;
 
+use vars qw($VERSION);
+$VERSION = '0.58_01';
+$VERSION = eval $VERSION;
+
 eval "use version 0.70";
 if ($@) { # can't locate version files, use our own
 
