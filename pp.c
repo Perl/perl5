@@ -145,6 +145,9 @@ PP(pp_rv2gv)
     }
     else {
 	if (SvTYPE(sv) != SVt_PVGV) {
+	    char *sym;
+	    STRLEN len;
+
 	    if (SvGMAGICAL(sv)) {
 		mg_get(sv);
 		if (SvROK(sv))
@@ -188,13 +191,14 @@ PP(pp_rv2gv)
 		    report_uninit();
 		RETSETUNDEF;
 	    }
+	    sym = SvPV(sv,len);
 	    if ((PL_op->op_flags & OPf_SPECIAL) &&
 		!(PL_op->op_flags & OPf_MOD))
 	    {
-		SV * temp = (SV*)gv_fetchsv(sv, 0, SVt_PVGV);
+		SV * temp = (SV*)gv_fetchpv(sym, 0, SVt_PVGV);
 		if (!temp
-		    && (!is_gv_magical_sv(sv,0)
-			|| !(sv = (SV*)gv_fetchsv(sv, GV_ADD, SVt_PVGV)))) {
+		    && (!is_gv_magical(sym,len,0)
+			|| !(sv = (SV*)gv_fetchpv(sym, GV_ADD, SVt_PVGV)))) {
 		    RETSETUNDEF;
 		}
 		sv = temp;
@@ -209,7 +213,7 @@ PP(pp_rv2gv)
 		       things.  */
 		    RETURN;
 		}
-		sv = (SV*)gv_fetchsv(sv, GV_ADD, SVt_PVGV);
+		sv = (SV*)gv_fetchpv(sym, GV_ADD, SVt_PVGV);
 	    }
 	}
     }
@@ -224,6 +228,8 @@ GV *
 Perl_softref2xv(pTHX_ SV *const sv, const char *const what, const U32 type,
 		SV ***spp)
 {
+    char *sym;
+    STRLEN len;
     GV *gv;
 
     if (!SvOK(sv)) {
@@ -238,13 +244,14 @@ Perl_softref2xv(pTHX_ SV *const sv, const char *const what, const U32 type,
 	**spp = &PL_sv_undef;
 	return NULL;
     }
+    sym = SvPV(sv, len);
     if ((PL_op->op_flags & OPf_SPECIAL) &&
 	!(PL_op->op_flags & OPf_MOD))
 	{
-	    gv = gv_fetchsv(sv, 0, type);
+	    gv = gv_fetchpv(sym, 0, type);
 	    if (!gv
-		&& (!is_gv_magical_sv(sv,0)
-		    || !(gv = gv_fetchsv(sv, GV_ADD, type))))
+		&& (!is_gv_magical(sym, len, 0)
+		    || !(gv = gv_fetchpv(sym, GV_ADD, type))))
 		{
 		    **spp = &PL_sv_undef;
 		    return NULL;
@@ -253,7 +260,7 @@ Perl_softref2xv(pTHX_ SV *const sv, const char *const what, const U32 type,
     else {
 	if (PL_op->op_private & HINT_STRICT_REFS)
 	    Perl_die(aTHX_ PL_no_symref_sv, sv, what);
-	gv = gv_fetchsv(sv, GV_ADD, type);
+	gv = gv_fetchpv(sym, GV_ADD, type);
     }
     return gv;
 }

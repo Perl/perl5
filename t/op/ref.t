@@ -8,7 +8,7 @@ BEGIN {
 require 'test.pl';
 use strict qw(refs subs);
 
-plan(117);
+plan (117);
 
 # Test glob operations.
 
@@ -420,15 +420,18 @@ TODO: {
     is ($$name2, undef, 'Nothing before we start');
     $$name1 = "Yummy";
     is ($$name1, "Yummy", 'Accessing via the correct name works');
-    is ($$name2, undef,
-	'Accessing via a different NUL-containing name gives nothing');
+    # OK. For 5.8.x I think we're going to have to keep the NUL truncating
+    # behaviour, as it's the sort of thing that I can imagine someone relying
+    # on.
+    is ($$name2, "Yummy",
+	'Accessing via a different NUL-containing name gives the same thing');
 
     is ($name1->[0], undef, 'Nothing before we start (arrays)');
     is ($name2->[0], undef, 'Nothing before we start');
     $name1->[0] = "Yummy";
     is ($name1->[0], "Yummy", 'Accessing via the correct name works');
-    is ($name2->[0], undef,
-	'Accessing via a different NUL-containing name gives nothing');
+    is ($name2->[0], "Yummy",
+	'Accessing via a different NUL-containing name gives the same thing');
 
     my (undef, $one) = @{$name1}[2,3];
     my (undef, $two) = @{$name2}[2,3];
@@ -438,15 +441,15 @@ TODO: {
     (undef, $one) = @{$name1}[2,3];
     (undef, $two) = @{$name2}[2,3];
     is ($one, "Yummy", 'Accessing via the correct name works');
-    is ($two, undef,
-	'Accessing via a different NUL-containing name gives nothing');
+    is ($two, "Yummy",
+	'Accessing via a different NUL-containing name gives the same thing');
 
     is ($name1->{PWOF}, undef, 'Nothing before we start (hashes)');
     is ($name2->{PWOF}, undef, 'Nothing before we start');
     $name1->{PWOF} = "Yummy";
     is ($name1->{PWOF}, "Yummy", 'Accessing via the correct name works');
-    is ($name2->{PWOF}, undef,
-	'Accessing via a different NUL-containing name gives nothing');
+    is ($name2->{PWOF}, "Yummy",
+	'Accessing via a different NUL-containing name gives the same thing');
 
     my (undef, $one) = @{$name1}{'SNIF', 'BEEYOOP'};
     my (undef, $two) = @{$name2}{'SNIF', 'BEEYOOP'};
@@ -456,8 +459,8 @@ TODO: {
     (undef, $one) = @{$name1}{'SNIF', 'BEEYOOP'};
     (undef, $two) = @{$name2}{'SNIF', 'BEEYOOP'};
     is ($one, "Yummy", 'Accessing via the correct name works');
-    is ($two, undef,
-	'Accessing via a different NUL-containing name gives nothing');
+    is ($two, "Yummy",
+	'Accessing via a different NUL-containing name gives the same thing');
 
     $name1 = "Left"; $name2 = "Left\0Right";
     my $glob2 = *{$name2};
