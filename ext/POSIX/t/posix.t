@@ -82,7 +82,7 @@ SKIP: {
 	# finish the test.
 	# For others (darwin & freebsd), let the test fail without crashing.
 	my $todo = $^O eq 'netbsd' && $Config{osvers}=~/^1\.6/;
-	my $why_todo = "# TODO $^O $Config{osvers} seems to loose blocked signals";
+	my $why_todo = "# TODO $^O $Config{osvers} seems to lose blocked signals";
 	if (!$todo) { 
 	  kill 'HUP', $$; 
 	} else {
