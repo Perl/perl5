@@ -17660,6 +17660,9 @@ EOM
 		   d_strtoul="$undef"
 		   ;;
 		esac
+	else
+		echo "(I can't seem to compile the test program--assuming it doesn't)"
+		d_strtoul="$undef"
 	fi
 	;;
 esac
@@ -17714,6 +17717,9 @@ EOM
 		   d_strtoull="$undef"
 		   ;;
 		esac
+	else
+		echo "(I can't seem to compile the test program--assuming it doesn't)"
+		d_strtoull="$undef"
 	fi
 	;;
 esac
@@ -17766,6 +17772,9 @@ EOM
 		   d_strtouq="$undef"
 		   ;;
 		esac
+	else
+		echo "(I can't seem to compile the test program--assuming it doesn't)"
+		d_strtouq="$undef"
 	fi
 	;;
 esac
