@@ -2170,8 +2170,8 @@ lib/Module/Build/t/pod_parser.t	Module::Build
 lib/Module/Build/t/ppm.t	Module::Build
 lib/Module/Build/t/runthrough.t	Module::Build
 lib/Module/Build/t/signature.t	Module::Build
-lib/Module/Build/t/test_type.t	Module::Build
 lib/Module/Build/t/test_types.t	Module::Build
+lib/Module/Build/t/test_type.t	Module::Build
 lib/Module/Build/t/tilde.t	Module::Build
 lib/Module/Build/t/versions.t	Module::Build
 lib/Module/Build/t/xs.t		Module::Build
