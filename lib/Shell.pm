@@ -6,7 +6,7 @@ use File::Spec::Functions;
 
 our($capture_stderr, $raw, $VERSION, $AUTOLOAD);
 
-$VERSION = '0.7';
+$VERSION = '0.72';
 
 sub new { bless \my $foo, shift }
 sub DESTROY { }
@@ -34,16 +34,12 @@ use constant OS => $^O;
 
 =begin private
 
-=over
-
 =item B<_make_cmd>
 
   $sub = _make_cmd($cmd);
   $sub = $shell->_make_cmd($cmd);
 
 Creates a closure which invokes the system command C<$cmd>.
-
-=back
 
 =end private
 
