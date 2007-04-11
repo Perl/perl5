@@ -567,18 +567,20 @@ S_pm_description(pTHX_ const PMOP *pm)
     if (pmflags & PMf_USED)
         sv_catpv(desc, ":USED");
 #endif
-    if (regex->extflags & RXf_TAINTED)
-	sv_catpv(desc, ",TAINTED");
 
-
-    if (regex && regex->check_substr) {
-	if (!(regex->extflags & RXf_NOSCAN))
-	    sv_catpv(desc, ",SCANFIRST");
-	if (regex->extflags & RXf_CHECK_ALL)
-	    sv_catpv(desc, ",ALL");
+    if (regex) {
+        if (regex->extflags & RXf_TAINTED)
+            sv_catpv(desc, ",TAINTED");
+        if (regex->check_substr) {
+            if (!(regex->extflags & RXf_NOSCAN))
+                sv_catpv(desc, ",SCANFIRST");
+            if (regex->extflags & RXf_CHECK_ALL)
+                sv_catpv(desc, ",ALL");
+        }
+        if (regex->extflags & RXf_SKIPWHITE)
+            sv_catpv(desc, ",SKIPWHITE");
     }
-    if (regex->extflags & RXf_SKIPWHITE)
-	sv_catpv(desc, ",SKIPWHITE");
+
     if (pmflags & PMf_CONST)
 	sv_catpv(desc, ",CONST");
     if (pmflags & PMf_KEEP)
