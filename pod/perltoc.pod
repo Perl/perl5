@@ -5439,6 +5439,60 @@ callback
 
 =back
 
+=head2 perlreapi - perl regular expression plugin interface
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item comp
+
+RXf_SKIPWHITE, RXf_START_ONLY, RXf_WHITE, RXf_PMf_LOCALE,
+RXf_PMf_MULTILINE, RXf_PMf_SINGLELINE, RXf_PMf_FOLD, RXf_PMf_EXTENDED,
+RXf_PMf_KEEPCOPY, RXf_UTF8
+
+=item exec
+
+=item intuit
+
+=item checkstr
+
+=item free
+
+=item numbered_buff_get
+
+=item named_buff_get
+
+=item qr_pkg
+
+=item dupe
+
+=back
+
+=item The REGEXP structure
+
+C<engine>, C<mother_re>, C<extflags>, C<minlen> C<minlenret>, C<gofs>,
+C<substrs>, C<nparens>, C<lasparen>, and C<lastcloseparen>, C<intflags>,
+C<pprivate>, C<swap>, C<offs>, C<precomp> C<prelen>, C<paren_names>,
+C<reg_substr_data>, C<startp>, C<endp>, C<subbeg> C<sublen> C<saved_copy>,
+C<wrapped> C<wraplen>, C<seen_evals>, C<refcnt>
+
+=over 4
+
+=item De-allocation and Cloning
+
+=back
+
+=item HISTORY
+
+=item AUTHORS
+
+=item LICENSE
+
+=back
+
 =head2 perlreguts - Description of the Perl regular expression engine.
 
 =over 4
@@ -5485,17 +5539,7 @@ requirements, start class, Beginning/End of line positions
 
 =item Base Structures
 
-C<refcnt>, C<engine>, C<precomp> C<prelen>, C<extflags>, C<minlen>
-C<minlenret>, C<gofs>, C<nparens>, C<lasparen>, and C<lastcloseparen>,
-C<paren_names>, C<reg_substr_data>, C<startp>, C<endp>, C<subbeg> C<sublen>
-C<saved_copy>, C<seen_evals>, C<swap>, C<offsets>, C<regstclass>, C<data>,
-C<program>
-
-=item Pluggable Interface
-
-comp, exec, intuit, checkstr, free, dupe
-
-=item De-allocation and Cloning
+C<swap>, C<offsets>, C<regstclass>, C<data>, C<program>
 
 =back
 
@@ -12361,7 +12405,9 @@ $ae->extract_path, $ae->files
 
 Mime magic support
 
-=item AUTHORS
+=item BUG REPORTS
+
+=item AUTHOR
 
 =item COPYRIGHT
 
@@ -16742,32 +16788,6 @@ Dumper
 
 =back
 
-=head2 Devel::Arena - Perl extension for inspecting the core's arena
-structures
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item EXPORT
-
-sv_stats [DONT_SHARE], shared_string_table, sizes, HEK_size STRING,
-shared_string_table_effectiveness, write_stats_at_END
-
-=back
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
 =head2 Devel::DProf - a Perl code profiler
 
 =over 4
@@ -16924,59 +16944,6 @@ perl 5.6.1, perl 5.6.0, perl 5.005_03, perl 5.005, perl 5.004_05, perl
 =item SYNOPSIS
 
 =item DESCRIPTION
-
-=back
-
-=head2 Devel::Size - Perl extension for finding the memory usage of Perl
-variables
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item FUNCTIONS
-
-=over 4
-
-=item size($ref)
-
-=item total_size($ref)
-
-=back
-
-=item EXPORT
-
-=item UNDERSTANDING MEMORY ALLOCATION
-
-=over 4
-
-=item The C library
-
-=item Perl
-
-=back
-
-=item DANGERS
-
-=item Messages: texts originating from this module.
-
-=over 4
-
-=item Errors
-
-=item warnings
-
-=back
-
-=item BUGS
-
-=item AUTHOR
-
-=item COPYRIGHT
-
-=item SEE ALSO
 
 =back
 

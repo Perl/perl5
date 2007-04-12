@@ -102,9 +102,9 @@ POD = \
 	perlport.pod	\
 	perlpragma.pod	\
 	perlre.pod	\
+	perlreapi.pod	\
 	perlref.pod	\
 	perlreftut.pod	\
-	perlreapi.pod	\
 	perlreguts.pod	\
 	perlrequick.pod	\
 	perlreref.pod	\
@@ -218,9 +218,9 @@ MAN = \
 	perlport.man	\
 	perlpragma.man	\
 	perlre.man	\
+	perlreapi.man	\
 	perlref.man	\
 	perlreftut.man	\
-	perlreapi.man	\
 	perlreguts.man	\
 	perlrequick.man	\
 	perlreref.man	\
@@ -334,9 +334,9 @@ HTML = \
 	perlport.html	\
 	perlpragma.html	\
 	perlre.html	\
+	perlreapi.html	\
 	perlref.html	\
 	perlreftut.html	\
-	perlreapi.html	\
 	perlreguts.html	\
 	perlrequick.html	\
 	perlreref.html	\
@@ -450,9 +450,9 @@ TEX = \
 	perlport.tex	\
 	perlpragma.tex	\
 	perlre.tex	\
+	perlreapi.tex	\
 	perlref.tex	\
 	perlreftut.tex	\
-	perlreapi.tex	\
 	perlreguts.tex	\
 	perlrequick.tex	\
 	perlreref.tex	\
