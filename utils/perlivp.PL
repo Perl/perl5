@@ -211,6 +211,9 @@ if (defined($Config{'extensions'})) {
 	# that's a distribution name, not a module name
 	next if $_ eq 'IO/Compress/Zlib';
         next if $_ eq 'Devel/DProf'; 
+	# test modules
+	next if $_ eq 'XS/APItest';
+	next if $_ eq 'XS/Typemap';
            # VMS$ perl  -e "eval ""require \""Devel/DProf.pm\"";"" print $@"
            # \NT> perl  -e "eval \"require 'Devel/DProf.pm'\"; print $@"
            # DProf: run perl with -d to use DProf.

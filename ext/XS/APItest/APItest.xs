@@ -35,7 +35,7 @@ my_cxt_setsv_p(SV* sv _pMY_CXT)
 
 
 /* from exception.c */
-int exception(int);
+int apitest_exception(int);
 
 /* from core_or_not.inc */
 bool sv_setsv_cow_hashkey_core(void);
@@ -463,7 +463,7 @@ require_pv(pv)
 	require_pv(pv);
 
 int
-exception(throw_e)
+apitest_exception(throw_e)
     int throw_e
     OUTPUT:
         RETVAL
