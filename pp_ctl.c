@@ -2911,7 +2911,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     SAVEI32(PL_error_count);
 
 #ifdef PERL_MAD
-    SAVEI32(PL_madskills);
+    SAVEBOOL(PL_madskills);
     PL_madskills = 0;
 #endif
 
