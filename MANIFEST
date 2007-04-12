@@ -3204,6 +3204,7 @@ pod/perlpod.pod			Perl plain old documentation
 pod/perlpodspec.pod		Perl plain old documentation format specification
 pod/perlport.pod		Perl portability guide
 pod/perlpragma.pod		Perl modules: writing a user pragma
+pod/perlreapi.pod		Perl regexp plugin interface
 pod/perlref.pod			Perl references, the rest of the story
 pod/perlreftut.pod		Perl references short introduction
 pod/perlreguts.pod		Perl regular expression engine internals
