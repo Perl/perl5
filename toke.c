@@ -3948,12 +3948,12 @@ Perl_yylex(pTHX)
 				t++;
 			    } while (isSPACE(*t));
 			    if (isIDFIRST_lazy_if(t,UTF)) {
-				STRLEN dummylen;
+				STRLEN len;
 				t = scan_word(t, tmpbuf, sizeof tmpbuf, TRUE,
-					      &dummylen);
+					      &len);
 				while (isSPACE(*t))
 				    t++;
-				if (*t == ';' && get_cv(tmpbuf, FALSE))
+				if (*t == ';' && get_cvn_flags(tmpbuf, len, 0))
 				    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 						"You need to quote \"%s\"",
 						tmpbuf);
@@ -9503,7 +9503,8 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
 	    }
 	    if (PL_lex_state == LEX_NORMAL) {
 		if (ckWARN(WARN_AMBIGUOUS) &&
-		    (keyword(dest, d - dest) || get_cv(dest, FALSE)))
+		    (keyword(dest, d - dest)
+		     || get_cvn_flags(dest, d - dest, 0)))
 		{
 		    if (funny == '#')
 			funny = '@';

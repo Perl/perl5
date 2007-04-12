@@ -8,7 +8,7 @@ BEGIN {
 require 'test.pl';
 use strict qw(refs subs);
 
-plan(127);
+plan(129);
 
 # Test glob operations.
 
@@ -482,6 +482,13 @@ TODO: {
     my $glob2 = *{$name2};
 
     is ($glob1, undef, "We get different typeglobs. In fact, undef");
+
+    *{$name1} = sub {"One"};
+    *{$name2} = sub {"Two"};
+
+    # In 5.8.x land these two are the same.
+    is (&{$name1}, "Two");
+    is (&{$name2}, "Two");
 }
 
 # test dereferencing errors
