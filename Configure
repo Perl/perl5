@@ -6614,7 +6614,7 @@ EOM
 	voidflags="$ans"
 	;;
 esac
-$rm -f try.* .out
+$rm -f try try.* .out
 
 : check for length of pointer
 echo " "
@@ -9812,7 +9812,7 @@ else
 fi;
 set $varname;
 eval $setvar;
-$rm -f try.c try.o'
+$rm -f try try.c try.o'
 
 : see if we should include time.h, sys/time.h, or both
 echo " "
@@ -10790,7 +10790,7 @@ case "$castflags" in
 esac
 set d_castneg
 eval $setvar
-$rm -f try.*
+$rm -f try try.*
 
 : see if vprintf exists
 echo " "
@@ -10872,7 +10872,7 @@ else
 fi;
 set $varname;
 eval $setvar;
-$rm -f try.c try.o'
+$rm -f try try.c try.o'
 
 socketlib=''
 sockethdr=''
@@ -11324,7 +11324,7 @@ else
 	. ./myread
 	direntrytype="$ans"
 fi
-$rm -f try.c
+$rm -f try try.c
 
 
 : see if the directory entry stores field length
@@ -11339,7 +11339,7 @@ else
 fi
 set d_dirnamlen
 eval $setvar
-$rm -f try.c
+$rm -f try try.c
 
 : Look for DIR.dd_fd
 case "$i_dirent" in
@@ -15086,7 +15086,7 @@ else
 fi
 set d_volatile
 eval $setvar
-$rm -f try.*
+$rm -f try try.*
 
 
 echo " "
@@ -17410,7 +17410,7 @@ else
 fi
 set d_strctcpy
 eval $setvar
-$rm -f try.*
+$rm -f try try.*
 
 : see if strerror and/or sys_errlist[] exist
 echo " "
@@ -18452,7 +18452,7 @@ EOCP
 			;;
 		esac
 	fi
-	$rm -f try.*
+	$rm -f try try.*
 	;;
 esac
 
@@ -18495,7 +18495,7 @@ EOCP
 		echo "Help:  I can't seem to compile the db test program." >&4
 		echo "Something's wrong, but I'll assume you use $db_hashtype." >&4
 	fi
-	$rm -f try.*
+	$rm -f try try.*
 	echo "Your version of Berkeley DB uses $db_hashtype for hash."
 	;;
 *)	db_hashtype=u_int32_t
@@ -18540,7 +18540,7 @@ EOCP
 		echo "Help:  I can't seem to compile the db test program." >&4
 		echo "Something's wrong, but I'll assume you use $db_prefixtype." >&4
 	fi
-	$rm -f try.*
+	$rm -f try try.*
 	echo "Your version of Berkeley DB uses $db_prefixtype for prefix."
 	;;
 *)	db_prefixtype='size_t'
