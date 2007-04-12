@@ -2566,8 +2566,12 @@ PP(pp_i_divide)
     }
 }
 
+#if defined(__GLIBC__) && IVSIZE == 8
 STATIC
 PP(pp_i_modulo_0)
+#else
+PP(pp_i_modulo)
+#endif
 {
      /* This is the vanilla old i_modulo. */
      dVAR; dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
@@ -2587,6 +2591,7 @@ PP(pp_i_modulo_0)
 #if defined(__GLIBC__) && IVSIZE == 8
 STATIC
 PP(pp_i_modulo_1)
+
 {
      /* This is the i_modulo with the workaround for the _moddi3 bug
       * in (at least) glibc 2.2.5 (the PERL_ABS() the workaround).
@@ -2604,7 +2609,6 @@ PP(pp_i_modulo_1)
 	  RETURN;
      }
 }
-#endif
 
 PP(pp_i_modulo)
 {
@@ -2624,7 +2628,6 @@ PP(pp_i_modulo)
 	   * opcode dispatch table if that is the case, remembering to
 	   * also apply the workaround so that this first round works
 	   * right, too.  See [perl #9402] for more information. */
-#if defined(__GLIBC__) && IVSIZE == 8
 	  {
 	       IV l =   3;
 	       IV r = -10;
@@ -2640,7 +2643,6 @@ PP(pp_i_modulo)
 		    right = PERL_ABS(right);
 	       }
 	  }
-#endif
 	  /* avoid FPE_INTOVF on some platforms when left is IV_MIN */
 	  if (right == -1)
 	      SETi( 0 );
@@ -2649,6 +2651,7 @@ PP(pp_i_modulo)
 	  RETURN;
      }
 }
+#endif
 
 PP(pp_i_add)
 {
