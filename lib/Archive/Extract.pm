@@ -27,7 +27,7 @@ use constant TBZ            => 'tbz';
 
 use vars qw[$VERSION $PREFER_BIN $PROGRAMS $WARN $DEBUG];
 
-$VERSION        = '0.16';
+$VERSION        = '0.18';
 $PREFER_BIN     = 0;
 $WARN           = 1;
 $DEBUG          = 0;
@@ -192,7 +192,7 @@ Returns a C<Archive::Extract> object on success, or false on failure.
         ### figure out the type, if it wasn't already specified ###
         unless ( $parsed->{type} ) {
             $parsed->{type} =
-                $ar =~ /.+?\.(?:tar\.gz)|tgz$/i     ? TGZ   :
+                $ar =~ /.+?\.(?:tar\.gz|tgz)$/i     ? TGZ   :
                 $ar =~ /.+?\.gz$/i                  ? GZ    :
                 $ar =~ /.+?\.tar$/i                 ? TAR   :
                 $ar =~ /.+?\.(zip|jar|par)$/i       ? ZIP   :
@@ -448,7 +448,7 @@ sub _untar {
 
     ### bzip2 support in A::T via IO::Uncompress::Bzip2
     my   @methods = qw[_untar_at _untar_bin];
-         @methods = reverse @methods unless $PREFER_BIN;
+         @methods = reverse @methods if $PREFER_BIN;
 
     for my $method (@methods) {
         $self->_extractor($method) && return 1 if $self->$method();
@@ -1119,20 +1119,18 @@ Defaults to C<false>.
 Maybe this module should use something like C<File::Type> to determine
 the type, rather than blindly trust the suffix.
 
-=head1 AUTHORS
+=head1 BUG REPORTS
 
-This module by
-Jos Boumans E<lt>kane@cpan.orgE<gt>.
+Please report bugs or other issues to E<lt>bug-archive-extract@rt.cpan.org<gt>.
+
+=head1 AUTHOR
+
+This module by Jos Boumans E<lt>kane@cpan.orgE<gt>.
 
 =head1 COPYRIGHT
 
-This module is
-copyright (c) 2004-2007 Jos Boumans E<lt>kane@cpan.orgE<gt>.
-All rights reserved.
-
-This library is free software;
-you may redistribute and/or modify it under the same
-terms as Perl itself.
+This library is free software; you may redistribute and/or modify it 
+under the same terms as Perl itself.
 
 =cut
 

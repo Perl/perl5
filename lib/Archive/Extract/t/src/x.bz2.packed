@@ -4,13 +4,13 @@ is included in the Perl distribution.
 
 To unpack this file use the following command:
 
-     uupacktool.pl -u /Users/kane/sources/perl-dev/perl-current-archive-extract.7657/lib/Archive/Extract/t/src/x.bz2.packed /Users/kane/sources/perl-dev/perl-current-archive-extract.7657/lib/Archive/Extract/t/src/x.bz2
+     uupacktool.pl -u lib/Archive/Extract/t/src/x.bz2.packed lib/Archive/Extract/t/src/x.bz2
 
 To recreate it use the following command:
 
-     uupacktool.pl -p /Users/kane/sources/perl-dev/perl-current-archive-extract.7657/lib/Archive/Extract/t/src/x.bz2 /Users/kane/sources/perl-dev/perl-current-archive-extract.7657/lib/Archive/Extract/t/src/x.bz2.packed
+     uupacktool.pl -p lib/Archive/Extract/t/src/x.bz2 lib/Archive/Extract/t/src/x.bz2.packed
 
-Created at Fri Jan 26 14:27:58 2007
+Created at Wed Apr 11 21:33:15 2007
 #########################################################################
 __UU__
 .0EIH.1=R13A0D```````
