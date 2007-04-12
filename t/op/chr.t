@@ -37,7 +37,7 @@ SKIP: {
 
 sub hexes {
     no warnings 'utf8'; # avoid surrogate and beyond Unicode warnings
-    join(" ",map{sprintf"%02x",$_}unpack("C*",chr($_[0])));
+    join(" ",unpack "U0 (H2)*", chr $_[0]);
 }
 
 # The following code points are some interesting steps in UTF-8.

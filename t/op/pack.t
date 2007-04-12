@@ -12,7 +12,7 @@ my $no_endianness = $] > 5.009 ? '' :
 my $no_signedness = $] > 5.009 ? '' :
   "Signed/unsigned pack modifiers not available on this perl";
 
-plan tests => 14697;
+plan tests => 14696;
 
 use strict;
 use warnings qw(FATAL all);
@@ -918,7 +918,7 @@ SKIP: {
 isnt(v1.20.300.4000, sprintf "%vd", pack("C0U*",1,20,300,4000));
 
 my $rslt = $Is_EBCDIC ? "156 67" : "199 162";
-is(join(" ", unpack("C*", chr(0x1e2))), $rslt);
+is(join(" ", unpack("U0 C*", chr(0x1e2))), $rslt);
 
 # does pack U create Unicode?
 is(ord(pack('U', 300)), 300);
@@ -935,9 +935,6 @@ is("@{[unpack('U*', pack('U*', 100, 200))]}", "100 200");
 
 SKIP: {
     skip "Not for EBCDIC", 4 if $Is_EBCDIC;
-
-    # does unpack C unravel pack U?
-    is("@{[unpack('C*', pack('U*', 100, 200))]}", "100 195 136");
 
     # does pack U0C create Unicode?
     is("@{[pack('U0C*', 100, 195, 136)]}", v100.v200);
@@ -1648,7 +1645,7 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
 }
 
 {
-    # C is *not* neutral
+    # C *is* neutral
     my $down = "\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff\x05\x06";
     my $up   = $down;
     utf8::upgrade($up);
@@ -1658,7 +1655,7 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
     is(pack("C*", @down), $down, "byte join");
 
     my @up   = unpack("C*", $up);
-    my @expect_up = (0xc3, 0xb8, 0xc3, 0xb9, 0xc3, 0xba, 0xc3, 0xbb, 0xc3, 0xbc, 0xc3, 0xbd, 0xc3, 0xbe, 0xc3, 0xbf, 0x05, 0x06);
+    my @expect_up = (0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff, 0x05, 0x06);
     is("@up", "@expect_up", "UTF-8 expand");
     is(pack("U0C0C*", @up), $up, "UTF-8 join");
 }

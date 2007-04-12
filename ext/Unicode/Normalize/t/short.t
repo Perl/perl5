@@ -35,7 +35,7 @@ print "ok 1\n";
 no warnings qw(utf8);
 
 # U+3042 is 3-byte length (in UTF-8/UTF-EBCDIC)
-our $a = pack 'U0C', unpack 'C', "\x{3042}";
+our $a = pack 'U0C', unpack 'U0C', "\x{3042}";
 
 print NFD($a) eq "\0"
    ? "ok" : "not ok", " 2\n";

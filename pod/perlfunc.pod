@@ -3505,8 +3505,7 @@ of values, as follows:
     H	A hex string (high nybble first).
 
     c	A signed char (8-bit) value.
-    C	An unsigned C char (octet) even under Unicode. Should normally not
-        be used. See U and W instead.
+    C	An unsigned char (octet) value.
     W   An unsigned char value (can be greater than 255).
 
     s	A signed short (16-bit) value.
@@ -3547,8 +3546,8 @@ of values, as follows:
     P	A pointer to a structure (fixed-length string).
 
     u	A uuencoded string.
-    U	A Unicode character number.  Encodes to UTF-8 internally
-	(or UTF-EBCDIC in EBCDIC platforms).
+    U	A Unicode character number.  Encodes to a character in character mode
+        and UTF-8 (or UTF-EBCDIC in EBCDIC platforms) in byte mode.
 
     w	A BER compressed integer (not an ASN.1 BER, see perlpacktut for
 	details).  Its bytes represent an unsigned integer in base 128,

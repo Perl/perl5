@@ -23,10 +23,7 @@ plan(tests => 3*10 + 3*8 + 2*16 + 2);
 my $arg = $ENV{PATH}; # a tainted value
 use constant UTF8 => "\x{1234}";
 
-sub is_utf8 {
-    my $s = shift;
-    return 0xB6 != unpack('C', chr(0xB6).$s);
-}
+*is_utf8 = \&utf8::is_utf8;
 
 for my $ary ([ascii => 'perl'], [latin1 => "\xB6"], [utf8 => "\x{100}"]) {
     my $encode = $ary->[0];

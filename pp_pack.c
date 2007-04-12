@@ -26,7 +26,6 @@
  * other pp*.c files for the rest of the pp_ functions.
  */
 
-
 #include "EXTERN.h"
 #define PERL_IN_PP_PACK_C
 #include "perl.h"
@@ -381,7 +380,7 @@ STATIC const packprops_t packprops[512] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0,
-    /* C */ sizeof(unsigned char) | PACK_SIZE_UNPREDICTABLE,
+    /* C */ sizeof(unsigned char),
 #if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
     /* D */ LONG_DOUBLESIZE,
 #else
@@ -532,7 +531,7 @@ STATIC const packprops_t packprops[512] = {
     /* w */ sizeof(char) | PACK_SIZE_UNPREDICTABLE | PACK_SIZE_CANNOT_CSUM,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    /* C */ sizeof(unsigned char) | PACK_SIZE_UNPREDICTABLE,
+    /* C */ sizeof(unsigned char),
 #if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
     /* D */ LONG_DOUBLESIZE,
 #else
@@ -1562,10 +1561,29 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    XPUSHs(sv);
 	    break;
 	}
+	case 'C':
+            if (len == 0) {
+                if (explicit_length)
+		    /* Switch to "character" mode */
+		    utf8 = (symptr->flags & FLAG_DO_UTF8) ? 1 : 0;
+		break;
+	    }
+	    /* FALL THROUGH */
 	case 'c':
-	    while (len-- > 0) {
-		int aint = SHIFT_BYTE(utf8, s, strend, datumtype);
-		if (aint >= 128)	/* fake up signed chars */
+	    while (len-- > 0 && s < strend) {
+		int aint;
+		if (utf8)
+		  {
+		    STRLEN retlen;
+		    aint = utf8n_to_uvchr((U8 *) s, strend-s, &retlen,
+				 ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
+		    if (retlen == (STRLEN) -1 || retlen == 0)
+			Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
+		    s += retlen;
+		  }
+		else
+		  aint = *(U8 *)(s)++;
+		if (aint >= 128 && datumtype != 'C')	/* fake up signed chars */
 		    aint -= 256;
 		if (!checksum)
 		    PUSHs(sv_2mortal(newSViv((IV)aint)));
@@ -1575,18 +1593,9 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		    cuv += aint;
 	    }
 	    break;
-	case 'C':
 	case 'W':
 	  W_checksum:
-            if (len == 0) {
-                if (explicit_length && datumtype == 'C')
-		    /* Switch to "character" mode */
-		    utf8 = (symptr->flags & FLAG_DO_UTF8) ? 1 : 0;
-		break;
-	    }
-	    if (datumtype == 'C' ?
-		 (symptr->flags & FLAG_DO_UTF8) &&
-		!(symptr->flags & FLAG_WAS_UTF8) : utf8) {
+	    if (utf8) {
 		while (len-- > 0 && s < strend) {
 		    STRLEN retlen;
 		    const UV val = utf8n_to_uvchr((U8 *) s, strend-s, &retlen,
@@ -2930,7 +2939,6 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		utf8 = (symptr->flags & FLAG_DO_UTF8) ? 1 : 0;
 		break;
 	    }
-	    GROWING(0, cat, start, cur, len);
 	    while (len-- > 0) {
 		IV aiv;
 		fromstr = NEXTFROM;
@@ -2939,7 +2947,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    ckWARN(WARN_PACK))
 		    Perl_warner(aTHX_ packWARN(WARN_PACK),
 				"Character in 'C' format wrapped in pack");
-		*cur++ = (char)(aiv & 0xff);
+		PUSH_BYTE(utf8, cur, (U8)(aiv & 0xff));
 	    }
 	    break;
 	case 'W': {
