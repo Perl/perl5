@@ -186,7 +186,6 @@ Perl_pending_Slabs_to_ro(pTHX) {
        read only. Also, do it ahead of the loop in case the warn triggers,
        and a warn handler has an eval */
 
-    free(PL_slabs);
     PL_slabs = NULL;
     PL_slab_count = 0;
 
@@ -194,13 +193,15 @@ Perl_pending_Slabs_to_ro(pTHX) {
     PL_OpSpace = 0;
 
     while (count--) {
-	const void *start = slabs[count];
+	void *const start = slabs[count];
 	const size_t size = PERL_SLAB_SIZE* sizeof(I32*);
 	if(mprotect(start, size, PROT_READ)) {
 	    Perl_warn(aTHX_ "mprotect for %p %lu failed with %d",
 		      start, (unsigned long) size, errno);
 	}
     }
+
+    free(slabs);
 }
 
 STATIC void

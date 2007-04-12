@@ -10932,6 +10932,10 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	HINTS_REFCNT_UNLOCK;
     }
     PL_curcop		= (COP*)any_dup(proto_perl->Tcurcop, proto_perl);
+#ifdef PERL_DEBUG_READONLY_OPS
+    PL_slabs = NULL;
+    PL_slab_count = 0;
+#endif
 
     /* pseudo environmental stuff */
     PL_origargc		= proto_perl->Iorigargc;
