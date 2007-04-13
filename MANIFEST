@@ -2774,6 +2774,7 @@ lib/Text/TabsWrap/t/tabs.t	See if Text::Tabs works
 lib/Text/TabsWrap/t/wrap.t	See if Text::Wrap::wrap works
 lib/Text/Wrap.pm		Paragraph formatter
 lib/Thread.pm			Thread extensions frontend
+lib/Thread.t			Thread extensions frontend tests
 lib/Thread/Queue.pm		Threadsafe queue
 lib/Thread/Queue.t		See if threadsafe queue works
 lib/Thread/Semaphore.pm		Threadsafe semaphore
