@@ -1,81 +1,77 @@
 package Thread;
 
 use strict;
+use warnings;
 
-our($VERSION, $ithreads, $othreads);
+our $VERSION = '3.01';
+$VERSION = eval $VERSION;
 
 BEGIN {
-    $VERSION = '2.01';
     use Config;
-    $ithreads = $Config{useithreads};
-    $othreads = $Config{use5005threads};
+    if (! $Config{useithreads}) {
+        die("This Perl not built to support threads\n");
+    }
 }
+
+use threads 'yield';
+use threads::shared;
 
 require Exporter;
-use XSLoader ();
-our(@ISA, @EXPORT, @EXPORT_OK);
+our @ISA = qw(Exporter threads);
+our @EXPORT = qw(cond_wait cond_broadcast cond_signal);
+our @EXPORT_OK = qw(async yield);
 
-@ISA = qw(Exporter);
+sub async (&) { return Thread->new(shift); }
 
-BEGIN {
-    if ($ithreads) {
-	@EXPORT = qw(cond_wait cond_broadcast cond_signal)
-    } elsif ($othreads) {
-	@EXPORT_OK = qw(cond_signal cond_broadcast cond_wait);
-    }
-    push @EXPORT_OK, qw(async yield);
-}
+sub done { return ! shift->is_running(); }
+
+sub eval  { die("'eval' not implemented with 'ithreads'\n"); };
+sub flags { die("'flags' not implemented with 'ithreads'\n"); };
+
+1;
+
+__END__
 
 =head1 NAME
 
-Thread - manipulate threads in Perl (for old code only)
+Thread - Manipulate threads in Perl (for old code only)
 
-=head1 CAVEAT
+=head1 DEPRECATED
 
-Perl has two thread models.
+The C<Thread> module served as the frontend to the old-style thread model,
+called I<5005threads>, that was introduced in release 5.005.  That model was
+deprecated, and has been removed in version 5.10.
 
-In Perl 5.005 the thread model was that all data is implicitly shared
-and shared access to data has to be explicitly synchronized.
-This model is called "5005threads".
+For old code and interim backwards compatibility, the C<Thread> module has
+been reworked to function as a frontend for the new interpreter threads
+(I<ithreads>) model.  However, some previous functionality is not available.
+Further, the data sharing models between the two thread models are completely
+different, and anything to do with data sharing has to be thought differently.
+With I<ithreads>, you must explicitly C<share()> variables between the
+threads.
 
-In Perl 5.6 a new model was introduced in which all is was thread
-local and shared access to data has to be explicitly declared.
-This model is called "ithreads", for "interpreter threads".
+You are strongly encouraged to migrate any existing threaded code to the new
+model (i.e., use the C<threads> and C<threads::shared> modules) as soon as
+possible.
 
-In Perl 5.6 the ithreads model was not available as a public API,
-only as an internal API that was available for extension writers,
-and to implement fork() emulation on Win32 platforms.
+=head1 HISTORY
 
-In Perl 5.8 the ithreads model became available through the C<threads>
-module.
+In Perl 5.005, the thread model was that all data is implicitly shared, and
+shared access to data has to be explicitly synchronized.  This model is called
+I<5005threads>.
 
-In Perl 5.10, the 5005threads model will be removed from the Perl interpreter.
+In Perl 5.6, a new model was introduced in which all is was thread local and
+shared access to data has to be explicitly declared.  This model is called
+I<ithreads>, for "interpreter threads".
 
-Neither model is configured by default into Perl (except, as mentioned
-above, in Win32 ithreads are always available.)  You can see your
-Perl's threading configuration by running C<perl -V> and looking for
-the I<use...threads> variables, or inside script by C<use Config;>
-and testing for C<$Config{use5005threads}> and C<$Config{useithreads}>.
+In Perl 5.6, the I<ithreads> model was not available as a public API; only as
+an internal API that was available for extension writers, and to implement
+fork() emulation on Win32 platforms.
 
-For old code and interim backwards compatibility, the Thread module
-has been reworked to function as a frontend for both 5005threads and
-ithreads.
+In Perl 5.8, the I<ithreads> model became available through the C<threads>
+module, and the I<5005threads> model was deprecated.
 
-Note that the compatibility is not complete: because the data sharing
-models are directly opposed, anything to do with data sharing has to
-be thought differently.  With the ithreads you must explicitly share()
-variables between the threads.
-
-For new code the use of the C<Thread> module is discouraged and
-the direct use of the C<threads> and C<threads::shared> modules
-is encouraged instead.
-
-Finally, note that there are many known serious problems with the
-5005threads, one of the least of which is that regular expression
-match variables like $1 are not threadsafe, that is, they easily get
-corrupted by competing threads.  Other problems include more insidious
-data corruption and mysterious crashes.  You are seriously urged to
-use ithreads instead.
+In Perl 5.10, the I<5005threads> model was removed from the Perl interpreter.
 
 =head1 SYNOPSIS
 
@@ -84,7 +80,6 @@ use ithreads instead.
     my $t = Thread->new(\&start_sub, @start_args);
 
     $result = $t->join;
-    $result = $t->eval;         # not available with ithreads
     $t->detach;
 
     if ($t->done) {
@@ -103,15 +98,11 @@ use ithreads instead.
     lock(@array);
     lock(%hash);
 
-    lock(\&sub);                # not available with ithreads
-
-    $flags = $t->flags;         # not available with ithreads
-
     my @list = Thread->list;
 
 =head1 DESCRIPTION
 
-The C<Thread> module provides multithreading support for perl.
+The C<Thread> module provides multithreading support for Perl.
 
 =head1 FUNCTIONS
 
@@ -148,15 +139,6 @@ If a container object, such as a hash or array, is locked, all the
 elements of that container are not locked. For example, if a thread
 does a C<lock @a>, any other thread doing a C<lock($a[12])> won't
 block.
-
-With 5005threads you may also C<lock> a sub, using C<lock &sub>.
-Any calls to that sub from another thread will block until the lock
-is released.  This behaviour is not equivalent to declaring the sub
-with the C<:locked> attribute (5005threads only).  The C<:locked>
-attribute serializes
-access to a subroutine, but allows different threads non-simultaneous
-access. C<lock &sub>, on the other hand, will not allow I<any> other
-thread access for the duration of the lock.
 
 Finally, C<lock> will traverse up references exactly I<one> level.
 C<lock(\$a)> is equivalent to C<lock($a)>, while C<lock(\\$a)> is not.
@@ -228,12 +210,6 @@ be returned at this time. If you don't want the thread performing
 the C<join> to die as well, you should either wrap the C<join> in
 an C<eval> or use the C<eval> thread method instead of C<join>.
 
-=item eval
-
-The C<eval> method wraps an C<eval> around a C<join>, and so waits for
-a thread to exit, passing along any values the thread might have returned.
-Errors, of course, get placed into C<$@>.  (Not available with ithreads.)
-
 =item detach
 
 C<detach> tells a thread that it is never going to be joined i.e.
@@ -253,13 +229,6 @@ a monotonically increasing integer assigned when a thread is
 created. The main thread of a program will have a tid of zero,
 while subsequent threads will have tids assigned starting with one.
 
-=item flags
-
-The C<flags> method returns the flags for the thread. This is the
-integer value corresponding to the internal flags for the thread,
-and the value may not be all that meaningful to you.
-(Not available with ithreads.)
-
 =item done
 
 The C<done> method returns true if the thread you're checking has
@@ -267,75 +236,37 @@ finished, and false otherwise.
 
 =back
 
-=head1 LIMITATIONS
+=head1 DEFUNCT
 
-The sequence number used to assign tids is a simple integer, and no
-checking is done to make sure the tid isn't currently in use.  If a
-program creates more than 2**32 - 1 threads in a single run, threads
-may be assigned duplicate tids.  This limitation may be lifted in
-a future version of Perl.
+The following were implemented with I<5005threads>, but are no longer
+available with I<ithreads>.
+
+=over 8
+
+=item lock(\&sub)
+
+With 5005threads, you could also C<lock> a sub such that any calls to that sub
+from another thread would block until the lock was released.
+
+Also, subroutines could be declared with the C<:locked> attribute which would
+serialize access to the subroutine, but allowed different threads
+non-simultaneous access.
+
+=item eval
+
+The C<eval> method wrapped an C<eval> around a C<join>, and so waited for a
+thread to exit, passing along any values the thread might have returned and
+placing any errors into C<$@>.
+
+=item flags
+
+The C<flags> method returned the flags for the thread - an integer value
+corresponding to the internal flags for the thread.
+
+=back
 
 =head1 SEE ALSO
 
-L<threads::shared> (not available with 5005threads)
-
-L<attributes>, L<Thread::Queue>, L<Thread::Semaphore>,
-L<Thread::Specific> (not available with ithreads)
+L<threads>, L<threads::shared>, L<Thread::Queue>, L<Thread::Semaphore>
 
 =cut
-
-#
-# Methods
-#
-
-#
-# Exported functions
-#
-
-sub async (&) {
-    return Thread->new(shift);
-}
-
-sub eval {
-    return eval { shift->join; };
-}
-
-sub unimplemented {
-    print $_[0], " unimplemented with ",
-          $Config{useithreads} ? "ithreads" : "5005threads", "\n";
-}
-
-sub unimplement {
-    no strict 'refs';
-    no warnings 'redefine';
-    for my $m (@_) {
-	*{"Thread::$m"} = sub { unimplemented $m };
-    }
-}
-
-BEGIN {
-    if ($ithreads) {
-	if ($othreads) {
-	    require Carp;
-	    Carp::croak("This Perl has both ithreads and 5005threads (serious malconfiguration)");
-	}
-	no strict 'refs';
-	require threads;
-	for my $m (qw(new join detach yield self tid equal list)) {
-	    *{"Thread::$m"} = \&{"threads::$m"};
-	}
-	require threads::shared;
-	for my $m (qw(cond_signal cond_broadcast cond_wait)) {
-	    *{"Thread::$m"} = \&{"threads::shared::$m"};
-	}
-	*Thread::done = sub { return ! shift->threads::is_running(); };
-	unimplement(qw(eval flags));
-    } elsif ($othreads) {
-	XSLoader::load 'Thread';
-    } else {
-	require Carp;
-	Carp::croak("This Perl has neither ithreads nor 5005threads");
-    }
-}
-
-1;
