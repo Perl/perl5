@@ -50,8 +50,7 @@ sub read_file {
 sub config_h_SH_reader {
     my $cfg = shift;
     return sub {
-	return if 1../^echo \"Extracting \$CONFIG_H/;
-	while (/[^\\]\$(\w+)/g) {
+	while (/[^\\]\$([a-z]\w+)/g) {
 	    my $v = $1;
 	    next if $v =~ /^(CONFIG_H|CONFIG_SH)$/;
 	    $cfg->{$v}++;

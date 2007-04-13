@@ -2,7 +2,9 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#include "ppport.h"
+#ifdef USE_PPPORT_H
+#  include "ppport.h"
+#endif
 
 #if PERL_VERSION < 6
 #  define DD_USE_OLD_ID_FORMAT

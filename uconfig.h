@@ -3721,7 +3721,7 @@
  *	This symbol is the type of pointer returned by malloc and realloc.
  */
 #define Malloc_t void *			/**/
-#define Free_t int			/**/
+#define Free_t void			/**/
 
 /* PERL_MALLOC_WRAP:
  *	This symbol, if defined, indicates that we'd like malloc wrap checks.

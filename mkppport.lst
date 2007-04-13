@@ -6,7 +6,6 @@
 #
 
 ext/Cwd
-ext/Data/Dumper
 ext/Sys/Syslog
 ext/Time/HiRes
 ext/Win32API/File
