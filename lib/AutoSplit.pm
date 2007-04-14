@@ -11,7 +11,7 @@ use strict;
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, $Verbose, $Keep, $Maxlen,
     $CheckForAutoloader, $CheckModTime);
 
-$VERSION = "1.04";
+$VERSION = "1.05";
 @ISA = qw(Exporter);
 @EXPORT = qw(&autosplit &autosplit_lib_modules);
 @EXPORT_OK = qw($Verbose $Keep $Maxlen $CheckForAutoloader $CheckModTime);
@@ -172,27 +172,28 @@ sub autosplit{
 # This function is used during perl building/installation
 # ./miniperl -e 'use AutoSplit; autosplit_lib_modules(@ARGV)' ...
 
-sub autosplit_lib_modules{
+sub autosplit_lib_modules {
     my(@modules) = @_; # list of Module names
 
-    while(defined($_ = shift @modules)){
-    	while (m#(.*?[^:])::([^:].*)#) { # in case specified as ABC::XYZ
-	    $_ = catfile($1, $2);
+    while (defined(my $m = shift @modules)) {
+	while ($m =~ m#([^:]+)::([^:].*)#) { # in case specified as ABC::XYZ
+	    $m = catfile($1, $2);
 	}
-	s|\\|/|g;		# bug in ksh OS/2
-	s#^lib/##s; # incase specified as lib/*.pm
+	$m =~ s|\\|/|g;		# bug in ksh OS/2
+	$m =~ s#^lib/##s; # incase specified as lib/*.pm
 	my($lib) = catfile(curdir(), "lib");
 	if ($Is_VMS) { # may need to convert VMS-style filespecs
 	    $lib =~ s#^\[\]#.\/#;
 	}
-	s#^$lib\W+##s; # incase specified as ./lib/*.pm
-	if ($Is_VMS && /[:>\]]/) { # may need to convert VMS-style filespecs
-	    my ($dir,$name) = (/(.*])(.*)/s);
+	$m =~ s#^$lib\W+##s; # incase specified as ./lib/*.pm
+	if ($Is_VMS && $m =~ /[:>\]]/) {
+	    # may need to convert VMS-style filespecs
+	    my ($dir,$name) = $m =~ (/(.*])(.*)/s);
 	    $dir =~ s/.*lib[\.\]]//s;
 	    $dir =~ s#[\.\]]#/#g;
-	    $_ = $dir . $name;
+	    $m = $dir . $name;
 	}
-	autosplit_file(catfile($lib, $_), catfile($lib, "auto"),
+	autosplit_file(catfile($lib, $m), catfile($lib, "auto"),
 		       $Keep, $CheckForAutoloader, $CheckModTime);
     }
     0;
