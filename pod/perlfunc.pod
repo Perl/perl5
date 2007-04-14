@@ -4726,7 +4726,7 @@ X<say>
 =item say
 
 Just like C<print>, but implicitly appends a newline.
-C<say LIST> is simply an abbreviation for C<{ local $/ = "\n"; print
+C<say LIST> is simply an abbreviation for C<{ local $\ = "\n"; print
 LIST }>.
 
 This keyword is only available when the "say" feature is
