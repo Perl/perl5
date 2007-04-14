@@ -422,7 +422,7 @@ XS(XS_UNIVERSAL_DOES)
     PERL_UNUSED_ARG(cv);
 
     if (items != 2)
-	Perl_croak(aTHX_ "Usage: invocant->does(kind)");
+	Perl_croak(aTHX_ "Usage: invocant->DOES(kind)");
     else {
 	SV * const sv = ST(0);
 	const char *name;
