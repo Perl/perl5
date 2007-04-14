@@ -174,20 +174,29 @@ if ($use_mymalloc) {
   $fcns{'Perl_mfree'}++;
 }
 
-$preprocess_list = "${dir}perl.h + ${dir}perlapi.h + ${dir}regcomp.h";
-if ($use_perlio) {
-  $preprocess_list .= " + ${dir}perliol.h";
-}
-
 $used_expectation_enum = $used_opcode_enum = 0; # avoid warnings
 if ($docc) {
+  1 while unlink 'perlincludes.tmp';
+  END { 1 while unlink 'perlincludes.tmp'; }  # and clean up after
+
+  open(PERLINC, '>perlincludes.tmp') or die "Couldn't open 'perlincludes.tmp' $!";
+
+  print PERLINC qq/#include "${dir}perl.h"\n/;
+  print PERLINC qq/#include "${dir}perlapi.h"\n/; 
+  print PERLINC qq/#include "${dir}perliol.h"\n/ if $use_perlio;
+  print PERLINC qq/#include "${dir}regcomp.h"\n/;
+
+  close PERLINC;
+  $preprocess_list = 'perlincludes.tmp';
+
   open(CPP,"${cc_cmd}/NoObj/PreProc=Sys\$Output $preprocess_list|")
     or die "$0: Can't preprocess $preprocess_list: $!\n";
 }
 else {
   open(CPP,"$cpp_file") or die "$0: Can't read preprocessed file $cpp_file: $!\n";
 }
-%checkh = map { $_,1 } qw( thread bytecode byterun proto perlapi perlio perlvars intrpvar regcomp thrdvar );
+%checkh = map { $_,1 } qw( bytecode byterun intrpvar perlapi perlio perliol 
+                           perlvars proto regcomp thrdvar thread );
 $ckfunc = 0;
 LINE: while (<CPP>) {
   while (/^#.*vmsish\.h/i .. /^#.*perl\.h/i) {
@@ -213,7 +222,6 @@ LINE: while (<CPP>) {
     # Pull name from library module or header filespec
     $spec =~ /^(\w+)$/ or $spec =~ /(\w+)\.h/i;
     my $name = lc $1;
-    $name = 'perlio' if $name eq 'perliol';
     $ckfunc = exists $checkh{$name} ? 1 : 0;
     $scanname = $name if $ckfunc;
     print "Header file transition: ckfunc = $ckfunc for $name.h\n" if $debug > 1;
