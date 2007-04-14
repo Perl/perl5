@@ -502,10 +502,6 @@ do_clean_all(pTHX_ SV *sv)
     dVAR;
     DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops: SV at 0x%"UVxf"\n", PTR2UV(sv)) ));
     SvFLAGS(sv) |= SVf_BREAK;
-    if (PL_comppad == (AV*)sv) {
-	PL_comppad = NULL;
-	PL_curpad = NULL;
-    }
     SvREFCNT_dec(sv);
 }
 
@@ -5124,6 +5120,10 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	hv_undef((HV*)sv);
 	break;
     case SVt_PVAV:
+	if (PL_comppad == (AV*)sv) {
+	    PL_comppad = NULL;
+	    PL_curpad = NULL;
+	}
 	av_undef((AV*)sv);
 	break;
     case SVt_PVLV:
