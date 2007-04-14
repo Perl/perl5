@@ -24,10 +24,7 @@ is(f(pos($x)), 4);
 $x = "test string?"; $x =~ s/\w/pos($x)/eg;
 is($x, "0123 5678910?");
 
-TODO: {
-    $x = "123 56"; $x =~ / /g;
-    is(pos($x), 4);
-    { local $x }
-    local $TODO = "RT #1716: search position reset after 'local' save/restore";
-    is(pos($x), 4);
-}
+$x = "123 56"; $x =~ / /g;
+is(pos($x), 4);
+{ local $x }
+is(pos($x), 4);
