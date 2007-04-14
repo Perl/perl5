@@ -3,7 +3,7 @@ use strict;
 require Exporter;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION = 1.07;
+$VERSION = 1.08;
 @ISA = qw(Exporter);
 @EXPORT = qw(pod2html htmlify);
 @EXPORT_OK = qw(anchorify);
@@ -230,7 +230,6 @@ L<perlpod>
 This program is distributed under the Artistic License.
 
 =cut
-
 
 my($Cachedir);
 my($Dircache, $Itemcache);
@@ -498,13 +497,25 @@ END_OF_HEAD
     # still generate an index, but surround it with an html comment.
     # that way some other program can extract it if desired.
     $index =~ s/--+/-/g;
-    print HTML "<p><a name=\"__index__\"></a></p>\n";
-    print HTML "<!-- INDEX BEGIN -->\n";
-    print HTML "<!--\n" unless $Doindex;
-    print HTML $index;
-    print HTML "-->\n" unless $Doindex;
-    print HTML "<!-- INDEX END -->\n\n";
-    print HTML "<hr />\n" if $Doindex and $index;
+
+    my $hr = ($Doindex and $index) ? qq(<hr name="index" />) : "";
+
+    unless ($Doindex)
+    {
+        $index = qq(<!--\n$index\n-->\n);
+    }
+
+    print HTML << "END_OF_INDEX";
+
+<!-- INDEX BEGIN -->
+<div name="index">
+<p><a name=\"__index__\"></a></p>
+$index
+$hr
+</div>
+<!-- INDEX END -->
+
+END_OF_INDEX
 
     # now convert this file
     my $after_item;             # set to true after an =item
@@ -1118,8 +1129,9 @@ my $EmittedItem;
 
 sub emit_item_tag($$$){
     my( $otext, $text, $compact ) = @_;
-    my $item = fragment_id( $text );
-
+    my $item = fragment_id( depod($text) , -generate);
+    Carp::confess("Undefined fragment '$text' (".depod($text).") from fragment_id() in emit_item_tag() in $Podfile")
+        if !defined $item;
     $EmittedItem = $item;
     ### print STDERR "emit_item_tag=$item ($text)\n";
 
@@ -1127,9 +1139,9 @@ sub emit_item_tag($$$){
     if ($Items_Named{$item}++) {
 	print HTML process_text( \$otext );
     } else {
-        my $name = 'item_' . $item;
+        my $name = $item;
         $name = anchorify($name);
-	print HTML qq{<a name="$name">}, process_text( \$otext ), '</a>';
+	print HTML qq{<a name="$name" class="item">}, process_text( \$otext ), '</a>';
     }
     print HTML "</strong>\n";
     undef( $EmittedItem );
@@ -1175,7 +1187,7 @@ sub process_item {
     # all the list variants:
     if( $text =~ /\A\*/ ){ # bullet
         $emitted = emit_li( 'ul' );
-        if ($text =~ /\A\*\s+(.+)\Z/s ) { # with additional text
+        if ($text =~ /\A\*\s+(\S.*)\Z/s ) { # with additional text
             my $tag = $1;
             $otext =~ s/\A\*\s+//;
             emit_item_tag( $otext, $tag, 1 );
@@ -1183,7 +1195,7 @@ sub process_item {
 
     } elsif( $text =~ /\A\d+/ ){ # numbered list
         $emitted = emit_li( 'ol' );
-        if ($text =~ /\A(?>\d+\.?)\s*(.+)\Z/s ) { # with additional text
+        if ($text =~ /\A(?>\d+\.?)\s*(\S.*)\Z/s ) { # with additional text
             my $tag = $1;
             $otext =~ s/\A\d+\.?\s*//;
             emit_item_tag( $otext, $tag, 1 );
@@ -1289,8 +1301,8 @@ sub process_begin {
 sub process_end {
     my($whom, $text) = @_;
     $whom = lc($whom);
-    if ($Begin_Stack[-1] ne $whom ) {
-	die "Unmatched begin/end at chunk $Paragraph\n"
+    if (!defined $Begin_Stack[-1] or $Begin_Stack[-1] ne $whom ) {
+	Carp::confess("Unmatched begin/end at chunk $Paragraph in pod $Podfile\n")
     }
     pop( @Begin_Stack );
 }
@@ -1436,20 +1448,36 @@ sub process_puretext {
     foreach my $word (@words) {
 	# skip space runs
  	next if $word =~ /^\s*$/;
-	# see if we can infer a link
-	if( $notinIS && $word =~ /^(\w+)\((.*)\)$/ ) {
+	# see if we can infer a link or a function call
+	#
+	# NOTE: This is a word based search, it won't automatically
+	# mark "substr($var, 1, 2)" because the 1st word would be "substr($var"
+	# User has to enclose those with proper C<>
+
+	if( $notinIS && $word =~
+	    m/
+		^([a-z_]{2,})                 # The function name
+		\(
+		    ([0-9][a-z]*              # Manual page(1) or page(1M)
+		    |[^)]*[\$\@\%][^)]+       # ($foo), (1, @foo), (%hash)
+		    |                         # ()
+		    )
+		\)
+		([.,;]?)$                     # a possible punctuation follows
+	    /xi
+	) {
 	    # has parenthesis so should have been a C<> ref
             ## try for a pagename (perlXXX(1))?
-            my( $func, $args ) = ( $1, $2 );
+            my( $func, $args, $rest ) = ( $1, $2, $3 || '' );
             if( $args =~ /^\d+$/ ){
                 my $url = page_sect( $word, '' );
                 if( defined $url ){
-                    $word = "<a href=\"$url\">the $word manpage</a>";
+                    $word = qq(<a href="$url" class="man">the $word manpage</a>$rest);
                     next;
                 }
             }
             ## try function name for a link, append tt'ed argument list
-            $word = emit_C( $func, '', "($args)");
+            $word = emit_C( $func, '', "($args)") . $rest;
 
 #### disabled. either all (including $\W, $\w+{.*} etc.) or nothing.
 ##      } elsif( $notinIS && $word =~ /^[\$\@%&*]+\w+$/) {
@@ -1483,8 +1511,8 @@ sub process_puretext {
 #
 
 sub process_text1($$;$$);
-sub pattern ($) { $_[0] ? '[^\S\n]+'.('>' x ($_[0] + 1)) : '>' }
-sub closing ($) { local($_) = shift; (defined && s/\s+$//) ? length : 0 }
+sub pattern ($) { $_[0] ? '\s+'.('>' x ($_[0] + 1)) : '>' }
+sub closing ($) { local($_) = shift; (defined && s/\s+\z//) ? length : 0 }
 
 sub process_text {
     return if $Ignore;
@@ -1492,6 +1520,22 @@ sub process_text {
     my $res = process_text1( 0, $tref );
     $res =~ s/\s+$//s;
     $$tref = $res;
+}
+
+sub process_text_rfc_links {
+    my $text = shift;
+
+    # For every "RFCnnnn" or "RFC nnn", link it to the authoritative
+    # ource. Do not use the /i modifier here. Require "RFC" to be written in
+    #  in capital letters.
+
+    $text =~ s{
+	(?<=[^<>[:alpha:]])           # Make sure this is not an URL already
+	(RFC\s*([0-9]{1,5}))(?![0-9]) # max 5 digits
+    }
+    {<a href="http://www.ietf.org/rfc/rfc$2.txt" class="rfc">$1</a>}gx;
+
+    $text;
 }
 
 sub process_text1($$;$$){
@@ -1528,11 +1572,11 @@ sub process_text1($$;$$){
 	$res = "&$escape;";
 
     } elsif( $func eq 'F' ){
-	# F<filename> - italizice
-	$res = '<em>' . process_text1( $lev, $rstr ) . '</em>';
+	# F<filename> - italicize
+	$res = '<em class="file">' . process_text1( $lev, $rstr ) . '</em>';
 
     } elsif( $func eq 'I' ){
-	# I<text> - italizice
+	# I<text> - italicize
 	$res = '<em>' . process_text1( $lev, $rstr ) . '</em>';
 
     } elsif( $func eq 'L' ){
@@ -1569,7 +1613,11 @@ sub process_text1($$;$$){
 	# check for link patterns
 	if( $par =~ m{^([^/]+?)/(?!")(.*?)$} ){     # name/ident
             # we've got a name/ident (no quotes)
-            ( $page, $ident ) = ( $1, $2 );
+            if (length $2) {
+                ( $page, $ident ) = ( $1, $2 );
+            } else {
+                ( $page, $section ) = ( $1, $2 );
+            }
             ### print STDERR "--> L<$par> to page $page, ident $ident\n";
 
 	} elsif( $par =~ m{^(.*?)/"?(.*?)"?$} ){ # [name]/"section"
@@ -1657,11 +1705,11 @@ sub process_text1($$;$$){
 
     } elsif( $func eq 'X' ){
 	# X<> - ignore
-	$$rstr =~ s/^[^>]*>//;
-
+	warn "$0: $Podfile: invalid X<> in paragraph $Paragraph.\n"
+	    unless $$rstr =~ s/^[^>]*>// or $Quiet;
     } elsif( $func eq 'Z' ){
 	# Z<> - empty
-	warn "$0: $Podfile: invalid X<> in paragraph $Paragraph.\n"
+	warn "$0: $Podfile: invalid Z<> in paragraph $Paragraph.\n"
 	    unless $$rstr =~ s/^>// or $Quiet;
 
     } else {
@@ -1679,9 +1727,12 @@ sub process_text1($$;$$){
 	}
 	if( $lev == 1 ){
 	    $res .= pure_text( $$rstr );
-	} else {
-	    warn "$0: $Podfile: undelimited $func<> in paragraph $Paragraph.\n" unless $Quiet;
+	} elsif( ! $Quiet ) {
+            my $snippet = substr($$rstr,0,60);
+            warn "$0: $Podfile: undelimited $func<> in paragraph $Paragraph: '$snippet'.\n" 
+                
 	}
+	$res = process_text_rfc_links($res);
     }
     return $res;
 }
@@ -1694,7 +1745,7 @@ sub go_ahead($$$){
     my $res = '';
     my @closing = ($closing);
     while( $$rstr =~
-      s/\A(.*?)(([BCEFILSXZ])<(<+[^\S\n]+)?|@{[pattern $closing[0]]})//s ){
+      s/\A(.*?)(([BCEFILSXZ])<(<+\s+)?|@{[pattern $closing[0]]})//s ){
 	$res .= $1;
 	unless( $3 ){
 	    shift @closing;
@@ -1704,7 +1755,10 @@ sub go_ahead($$$){
 	}
 	$res .= $2;
     }
-    warn "$0: $Podfile: undelimited $func<> in paragraph $Paragraph.\n" unless $Quiet;
+    unless ($Quiet) {
+        my $snippet = substr($$rstr,0,60);
+        warn "$0: $Podfile: undelimited $func<> in paragraph $Paragraph (go_ahead): '$snippet'.\n" 
+    }	        
     return $res;
 }
 
@@ -1900,10 +1954,13 @@ sub coderef($$){
     my( $url );
 
     my $fid = fragment_id( $item );
+    
     if( defined( $page ) && $page ne "" ){
 	# we have been given a $page...
 	$page =~ s{::}{/}g;
 
+        Carp::confess("Undefined fragment '$item' from fragment_id() in coderef() in $Podfile")
+            if !defined $fid;    
 	# Do we take it? Item could be a section!
 	my $base = $Items{$fid} || "";
 	$base =~ s{[^/]*/}{};
@@ -1985,7 +2042,8 @@ sub htmlify {
     $heading =~ s/\s+\Z//;
     $heading =~ s/\A\s+//;
     # The hyphen is a disgrace to the English language.
-    $heading =~ s/[-"?]//g;
+    # $heading =~ s/[-"?]//g;
+    $heading =~ s/["?]//g;
     $heading = lc( $heading );
     return $heading;
 }
@@ -2061,14 +2119,69 @@ sub depod1($;$$){
   return $res;
 }
 
+{
+    my %seen;   # static fragment record hash
+
+sub fragment_id_readable {
+    my $text     = shift;
+    my $generate = shift;   # optional flag
+
+    my $orig = $text;
+
+    # leave the words for the fragment identifier,
+    # change everything else to underbars.
+    $text =~ s/[^A-Za-z0-9_]+/_/g; # do not use \W to avoid locale dependency.
+    $text =~ s/_{2,}/_/g;
+    $text =~ s/\A_//;
+    $text =~ s/_\Z//;
+
+    unless ($text)
+    {
+        # Nothing left after removing punctuation, so leave it as is
+        # E.g. if option is named: "=item -#"
+
+        $text = $orig;
+    }
+
+    if ($generate) {
+        if ( exists $seen{$text} ) {
+            # This already exists, make it unique
+            $seen{$text}++;
+            $text = $text . $seen{$text};
+        } else {
+            $seen{$text} = 1;  # first time seen this fragment
+        }
+    }
+
+    $text;
+}}
+
+my @HC;
+sub fragment_id_obfuscated {  # This was the old "_2d_2d__"
+    my $text     = shift;
+    my $generate = shift;   # optional flag
+
+    # text? Normalize by obfuscating the fragment id to make it unique
+    $text =~ s/\s+/_/sg;
+
+    $text =~ s{(\W)}{
+        defined( $HC[ord($1)] ) ? $HC[ord($1)]
+        : ( $HC[ord($1)] = sprintf( "%%%02X", ord($1) ) ) }gxe;
+    $text = substr( $text, 0, 50 );
+
+    $text;
+}
+
 #
 # fragment_id - construct a fragment identifier from:
 #   a) =item text
 #   b) contents of C<...>
 #
-my @HC;
+
 sub fragment_id {
-    my $text = shift();
+    my $text     = shift;
+    my $generate = shift;   # optional flag
+
     $text =~ s/\s+\Z//s;
     if( $text ){
 	# a method or function?
@@ -2089,14 +2202,9 @@ sub fragment_id {
 	return $1 if $text =~ m{^([a-z\d_]+)(\s+[A-Z,/& ][A-Z\d,/& ]*)?$};
 	return $1 if $text =~ m{^([a-z\d]+)\s+Module(\s+[A-Z\d,/& ]+)?$};
 
-	# text? normalize!
-	$text =~ s/\s+/_/sg;
-	$text =~ s{(\W)}{
-         defined( $HC[ord($1)] ) ? $HC[ord($1)]
-                 : ( $HC[ord($1)] = sprintf( "%%%02X", ord($1) ) ) }gxe;
-        $text = substr( $text, 0, 50 );
+	return fragment_id_readable($text, $generate);
     } else {
-	return undef();
+	return;
     }
 }
 

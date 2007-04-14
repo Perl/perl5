@@ -24,8 +24,10 @@ __DATA__
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 
 <ul>
 
@@ -40,9 +42,11 @@ __DATA__
 	</ul>
 
 </ul>
+
+<hr name="index" />
+</div>
 <!-- INDEX END -->
 
-<hr />
 <p>
 </p>
 <h1><a name="name">NAME</a></h1>
@@ -104,19 +108,19 @@ __DATA__
 <h2><a name="section_three">section three</a></h2>
 <p>This is section three.</p>
 <dl>
-<dt><strong><a name="item_item1">item1</a></strong>
+<dt><strong><a name="item1" class="item">item1</a></strong>
 
 <dd>
 <p>This is item one.</p>
 </dd>
 </li>
-<dt><strong><a name="item_item_2">item 2</a></strong>
+<dt><strong><a name="item_2" class="item">item 2</a></strong>
 
 <dd>
 <p>This is item two.</p>
 </dd>
 </li>
-<dt><strong><a name="item_item_three">item three</a></strong>
+<dt><strong><a name="item_three" class="item">item three</a></strong>
 
 <dd>
 <p>This is item three.</p>
