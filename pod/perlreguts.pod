@@ -694,8 +694,8 @@ Unicode. For instance, in ASCII, it is safe to assume that
 C<sizeof(char1) == sizeof(char2)>, but in UTF-8 it isn't. Unicode case folding is
 vastly more complex than the simple rules of ASCII, and even when not
 using Unicode but only localised single byte encodings, things can get
-tricky (for example, GERMAN-SHARP-ESS should match 'SS' in localised
-case-insensitive matching).
+tricky (for example, B<LATIN SMALL LETTER SHARP S> (U+00DF, E<szlig>)
+should match 'SS' in localised case-insensitive matching).
 
 Making things worse is that UTF-8 support was a later addition to the
 regex engine (as it was to perl) and this necessarily  made things a lot
