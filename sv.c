@@ -11462,8 +11462,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_maxscream	= -1;			/* reinits on demand */
     PL_lastscream	= NULL;
 
-    PL_watchaddr	= NULL;
-    PL_watchok		= NULL;
 
     PL_regdummy		= proto_perl->Tregdummy;
     PL_colorset		= 0;		/* reinits PL_colors[] */
@@ -11475,6 +11473,16 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_peepp		= proto_perl->Tpeepp;
 
     PL_stashcache       = newHV();
+
+    PL_watchaddr	= (char **) ptr_table_fetch(PL_ptr_table,
+					    proto_perl->Twatchaddr);
+    PL_watchok		= PL_watchaddr ? * PL_watchaddr : NULL;
+    if (PL_debug && PL_watchaddr) {
+	PerlIO_printf(Perl_debug_log,
+	  "WATCHING: %"UVxf" cloned as %"UVxf" with value %"UVxf"\n",
+	  PTR2UV(proto_perl->Twatchaddr), PTR2UV(PL_watchaddr),
+	  PTR2UV(PL_watchok));
+    }
 
     if (!(flags & CLONEf_KEEP_PTR_TABLE)) {
         ptr_table_free(PL_ptr_table);
