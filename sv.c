@@ -5266,6 +5266,10 @@ Perl_sv_free(pTHX_ SV *sv)
                         pTHX__FORMAT, PTR2UV(sv) pTHX__VALUE);
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 	    Perl_dump_sv_child(aTHX_ sv);
+#else
+  #ifdef DEBUG_LEAKING_SCALARS
+	sv_dump(sv);
+  #endif
 #endif
 	}
 	return;
