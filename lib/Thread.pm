@@ -2,8 +2,9 @@ package Thread;
 
 use strict;
 use warnings;
+no warnings 'redefine';
 
-our $VERSION = '3.01';
+our $VERSION = '3.02';
 $VERSION = eval $VERSION;
 
 BEGIN {
@@ -21,7 +22,7 @@ our @ISA = qw(Exporter threads);
 our @EXPORT = qw(cond_wait cond_broadcast cond_signal);
 our @EXPORT_OK = qw(async yield);
 
-sub async (&) { return Thread->new(shift); }
+sub async (&;@) { return Thread->new(shift); }
 
 sub done { return ! shift->is_running(); }
 
