@@ -484,6 +484,8 @@ clear_pmop:
 		    pmop = pmop->op_pmnext;
 		}
 	    }
+	    if (PL_curpm == cPMOPo) 
+		PL_curpm = NULL;
 	    PmopSTASH_free(cPMOPo);
 	}
 	cPMOPo->op_pmreplroot = NULL;

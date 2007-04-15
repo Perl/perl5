@@ -4624,6 +4624,10 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	hv_undef((HV*)sv);
 	break;
     case SVt_PVAV:
+	if (PL_comppad == (AV*)sv) {
+	    PL_comppad = NULL;
+	    PL_curpad = NULL;
+	}
 	av_undef((AV*)sv);
 	break;
     case SVt_PVLV:
@@ -4643,6 +4647,11 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	   of stash until current sv is completely gone.
 	   -- JohnPC, 27 Mar 1998 */
 	stash = GvSTASH(sv);
+	/* FIXME. There are probably more unreferenced pointers to SVs in the
+	   interpreter struct that we should check and tidy in a similar
+	   fashion to this:  */
+	if ((GV*)sv == PL_last_in_gv)
+	    PL_last_in_gv = NULL;
     case SVt_PVMG:
     case SVt_PVNV:
     case SVt_PVIV:
