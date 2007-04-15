@@ -2846,6 +2846,7 @@ lib/Time/Local.t		See if Time::Local works
 lib/Time/localtime.pm		By-name interface to Perl's builtin localtime
 lib/Time/localtime.t		Test for Time::localtime
 lib/Time/tm.pm			Internal object for Time::{gm,local}time
+lib/Unicode/Collate/allkeys.txt	Unicode::Collate
 lib/Unicode/Collate/Changes	Unicode::Collate
 lib/Unicode/Collate/keys.txt	Unicode::Collate
 lib/Unicode/Collate.pm		Unicode::Collate
