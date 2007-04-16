@@ -1218,7 +1218,7 @@ kill_process_tree_toolhelp(DWORD pid, int sig)
     int killed = 0;
 
     process_handle = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
-    if (process_handle == INVALID_HANDLE_VALUE)
+    if (process_handle == NULL)
         return 0;
 
     killed += terminate_process(pid, process_handle, sig);
@@ -1253,7 +1253,7 @@ kill_process_tree_sysinfo(SYSTEM_PROCESSES *process_info, DWORD pid, int sig)
     int killed = 0;
 
     process_handle = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
-    if (process_handle == INVALID_HANDLE_VALUE)
+    if (process_handle == NULL)
         return 0;
 
     killed += terminate_process(pid, process_handle, sig);
@@ -1308,7 +1308,8 @@ my_kill(int pid, int sig)
         return killpg(pid, -sig);
 
     process_handle = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
-    if (process_handle != INVALID_HANDLE_VALUE) {
+    /* OpenProcess() returns NULL on error, *not* INVALID_HANDLE_VALUE */
+    if (process_handle != NULL) {
         retval = terminate_process(pid, process_handle, sig);
         CloseHandle(process_handle);
     }
