@@ -686,8 +686,8 @@ Perl_get_arena(pTHX_ size_t arena_size, U32 misc)
     Newx(adesc->arena, arena_size, char);
     adesc->size = arena_size;
     adesc->misc = misc;
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "arena %d added: %p size %d\n", 
-			  curr, (void*)adesc->arena, arena_size));
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "arena %d added: %p size %"UVuf"\n", 
+			  curr, (void*)adesc->arena, (UV)arena_size));
 
     return adesc->arena;
 }
