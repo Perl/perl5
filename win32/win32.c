@@ -4910,6 +4910,16 @@ Perl_sys_intern_init(pTHX)
 	/* Force C runtime signal stuff to set its console handler */
 	signal(SIGINT,win32_csighandler);
 	signal(SIGBREAK,win32_csighandler);
+
+        /* We spawn asynchronous processes with the CREATE_NEW_PROCESS_GROUP
+         * flag.  This has the side-effect of disabling Ctrl-C events in all
+         * processes in this group.  At least on Windows NT and later we
+         * can re-enable Ctrl-C handling by calling SetConsoleCtrlHandler()
+         * with a NULL handler.  This is not valid on Windows 9X.
+         */
+        if (IsWinNT())
+            SetConsoleCtrlHandler(NULL,FALSE);
+
 	/* Push our handler on top */
 	SetConsoleCtrlHandler(win32_ctrlhandler,TRUE);
     }
