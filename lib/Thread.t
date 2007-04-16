@@ -72,9 +72,15 @@ COND_:
         return Thread->self->tid;
     }
 
-    my $thr = Thread->new(\&thr_wait);
-    isa_ok($thr, 'Thread');
-    ok(! $thr->done(), 'Thread running');
+    my $thr;
+    {
+        lock($lock);
+        $thr = Thread->new(\&thr_wait);
+        isa_ok($thr, 'Thread');
+        ok(! $thr->done(), 'Thread running');
+    }
+    yield();
+    sleep(1);
 
     {
         lock($lock);
