@@ -1390,19 +1390,6 @@ Perl_gv_check(pTHX_ const HV *stash)
 		if (SvTYPE(gv) != SVt_PVGV || GvMULTI(gv))
 		    continue;
 		file = GvFILE(gv);
-		/* performance hack: if filename is absolute and it's a standard
-		 * module, don't bother warning */
-#ifdef MACOS_TRADITIONAL
-#   define LIB_COMPONENT ":lib:"
-#else
-#   define LIB_COMPONENT "/lib/"
-#endif
-		if (file
-		    && PERL_FILE_IS_ABSOLUTE(file)
-		    && (instr(file, LIB_COMPONENT) || instr(file, ".pm")))
-		{
-		    continue;
-		}
 		CopLINE_set(PL_curcop, GvLINE(gv));
 #ifdef USE_ITHREADS
 		CopFILE(PL_curcop) = (char *)file;	/* set for warning */
