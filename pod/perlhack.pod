@@ -602,8 +602,10 @@ the 5.8 pumpking decides which of those patches is to be backported to the
 maint branch.  Only patches that survive the heat of the development
 branch get applied to maintenance versions.
 
-Your patch should also update the documentation and test suite.  See
-L<Writing a test>.
+Your patch should update the documentation and test suite.  See
+L<Writing a test>.  If you have added or removed files in the distribution,
+edit the MANIFEST file accordingly, sort the MANIFEST file using
+C<make manisort>, and include those changes as part of your patch.
 
 Patching documentation also follows the same order: if accepted, a patch
 is first applied to B<development>, and if relevant then it's backported
