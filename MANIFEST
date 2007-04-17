@@ -2252,6 +2252,7 @@ lib/Module/Pluggable/t/lib/No/Middle.pm	Module::Pluggable tests
 lib/Module/Pluggable/t/lib/OddTest/Plugin/-Dodgy.pm	Module::Pluggable tests
 lib/Module/Pluggable/t/lib/OddTest/Plugin/Foo.pm	Module::Pluggable tests
 lib/Module/Pluggable/t/lib/TA/C/A/I.pm	Module::Pluggable tests
+lib/mro.pm			mro extension
 lib/Net/Changes.libnet		libnet
 lib/Net/Cmd.pm			libnet
 lib/Net/Config.eg		libnet
@@ -2955,6 +2956,7 @@ mpeix/mpeixish.h		MPE/iX port
 mpeix/mpeix_setjmp.c		MPE/iX port
 mpeix/nm			MPE/iX port
 mpeix/relink			MPE/iX port
+mro.c				Method Resolution Order code
 myconfig.SH			Prints summary of the current configuration
 NetWare/bat/Buildtype.bat	NetWare port
 NetWare/bat/SetCodeWar.bat	NetWare port
@@ -3621,6 +3623,36 @@ t/lib/warnings/toke		Tests for toke.c for warnings.t
 t/lib/warnings/universal	Tests for universal.c for warnings.t
 t/lib/warnings/utf8		Tests for utf8.c for warnings.t
 t/lib/warnings/util		Tests for util.c for warnings.t
+t/mro/basic_01_c3.t		mro tests
+t/mro/basic_01_dfs.t		mro tests
+t/mro/basic_02_c3.t		mro tests
+t/mro/basic_02_dfs.t		mro tests
+t/mro/basic_03_c3.t		mro tests
+t/mro/basic_03_dfs.t		mro tests
+t/mro/basic_04_c3.t		mro tests
+t/mro/basic_04_dfs.t		mro tests
+t/mro/basic_05_c3.t		mro tests
+t/mro/basic_05_dfs.t		mro tests
+t/mro/basic.t			mro tests
+t/mro/c3_with_overload.t	mro tests
+t/mro/complex_c3.t		mro tests
+t/mro/complex_dfs.t		mro tests
+t/mro/dbic_c3.t			mro tests
+t/mro/dbic_dfs.t		mro tests
+t/mro/inconsistent_c3.t		mro tests
+t/mro/method_caching.t		mro tests
+t/mro/next_method_edge_cases.t	mro tests
+t/mro/next_method_in_anon.t	mro tests
+t/mro/next_method_in_eval.t	mro tests
+t/mro/next_method_skip.t	mro tests
+t/mro/next_method.t		mro tests
+t/mro/next_method_used_with_NEXT.t	mro tests
+t/mro/overload_c3.t		mro tests
+t/mro/overload_dfs.t		mro tests
+t/mro/recursion_c3.t		mro tests
+t/mro/recursion_dfs.t		mro tests
+t/mro/vulcan_c3.t		mro tests
+t/mro/vulcan_dfs.t		mro tests
 Todo.micro			The Wishlist for microperl
 toke.c				The tokener
 t/op/64bitint.t			See if 64 bit integers work

@@ -104,7 +104,7 @@ sub _populate_hash {
 }
 
 unless (@ARGV) {
-    foreach my $dir (qw(base comp cmd run io op uni)) {
+    foreach my $dir (qw(base comp cmd run io op uni mro)) {
 	_find_tests($dir);
     }
     _find_tests("lib") unless $::core;

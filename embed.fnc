@@ -282,6 +282,16 @@ Ap	|void	|gv_efullname4	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix|boo
 Ap	|GV*	|gv_fetchfile	|NN const char* name
 Ap	|GV*	|gv_fetchfile_flags|NN const char *const name|const STRLEN len\
 				|const U32 flags
+ApM	|struct mro_meta*	|mro_meta_init	|NN HV* stash
+#if defined(USE_ITHREADS)
+ApM	|struct mro_meta*	|mro_meta_dup	|NN struct mro_meta* smeta|NN CLONE_PARAMS* param
+#endif
+ApM	|AV*	|mro_get_linear_isa|NN HV* stash
+ApM	|AV*	|mro_get_linear_isa_c3|NN HV* stash|I32 level
+ApM	|AV*	|mro_get_linear_isa_dfs|NN HV* stash|I32 level
+ApM	|void   |mro_isa_changed_in|NN HV* stash
+ApM	|void	|mro_method_changed_in	|NN HV* stash
+ApM	|void   |boot_core_mro
 Apd	|GV*	|gv_fetchmeth	|NULLOK HV* stash|NN const char* name|STRLEN len|I32 level
 Apd	|GV*	|gv_fetchmeth_autoload	|NULLOK HV* stash|NN const char* name|STRLEN len|I32 level
 Apdmb	|GV*	|gv_fetchmethod	|NULLOK HV* stash|NN const char* name

@@ -1531,7 +1531,7 @@ Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
 	return;
     val = HeVAL(entry);
     if (val && isGV(val) && GvCVu(val) && HvNAME_get(hv))
-	PL_sub_generation++;	/* may be deletion of method from stash */
+        mro_method_changed_in(hv);	/* deletion of method from stash */
     SvREFCNT_dec(val);
     if (HeKLEN(entry) == HEf_SVKEY) {
 	SvREFCNT_dec(HeKEY_sv(entry));
@@ -1726,6 +1726,7 @@ S_hfreeentries(pTHX_ HV *hv)
 
 	if (SvOOK(hv)) {
 	    HE *entry;
+            struct mro_meta *meta;
 	    struct xpvhv_aux *iter = HvAUX(hv);
 	    /* If there are weak references to this HV, we need to avoid
 	       freeing them up here.  In particular we need to keep the AV
@@ -1756,6 +1757,15 @@ S_hfreeentries(pTHX_ HV *hv)
 	    }
 	    iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
 	    iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
+
+            if((meta = iter->xhv_mro_meta)) {
+                if(meta->mro_linear_dfs) SvREFCNT_dec(meta->mro_linear_dfs);
+                if(meta->mro_linear_c3)  SvREFCNT_dec(meta->mro_linear_c3);
+                if(meta->mro_isarev)     SvREFCNT_dec(meta->mro_isarev);
+                if(meta->mro_nextmethod) SvREFCNT_dec(meta->mro_nextmethod);
+                Safefree(meta);
+                iter->xhv_mro_meta = NULL;
+            }
 
 	    /* There are now no allocated pointers in the aux structure.  */
 
@@ -1878,6 +1888,7 @@ S_hv_auxinit(HV *hv) {
     iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
     iter->xhv_name = 0;
     iter->xhv_backreferences = 0;
+    iter->xhv_mro_meta = NULL;
     return iter;
 }
 

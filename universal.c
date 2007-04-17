@@ -36,12 +36,12 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, const HV* const name_stash,
              int len, int level)
 {
     dVAR;
-    AV* av;
-    GV* gv;
-    GV** gvp;
-    HV* hv = NULL;
-    SV* subgen = NULL;
+    AV* stash_linear_isa;
+    SV** svp;
     const char *hvname;
+    I32 items;
+    PERL_UNUSED_ARG(len);
+    PERL_UNUSED_ARG(level);
 
     /* A stash/class can go by many names (ie. User == main::User), so 
        we compare the stash itself just in case */
@@ -56,75 +56,23 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, const HV* const name_stash,
     if (strEQ(name, "UNIVERSAL"))
 	return TRUE;
 
-    if (level > 100)
-	Perl_croak(aTHX_ "Recursive inheritance detected in package '%s'",
-		   hvname);
-
-    gvp = (GV**)hv_fetchs(stash, "::ISA::CACHE::", FALSE);
-
-    if (gvp && (gv = *gvp) && isGV_with_GP(gv) && (subgen = GvSV(gv))
-	&& (hv = GvHV(gv)))
-    {
-	if (SvIV(subgen) == (IV)PL_sub_generation) {
-	    SV** const svp = (SV**)hv_fetch(hv, name, len, FALSE);
-	    if (svp) {
-		SV * const sv = *svp;
-#ifdef DEBUGGING
-		if (sv != &PL_sv_undef)
-		    DEBUG_o( Perl_deb(aTHX_ "Using cached ISA %s for package %s\n",
-				    name, hvname) );
-#endif
-		return (sv == &PL_sv_yes);
-	    }
+    stash_linear_isa = mro_get_linear_isa(stash);
+    svp = AvARRAY(stash_linear_isa) + 1;
+    items = AvFILLp(stash_linear_isa);
+    while (items--) {
+	SV* const basename_sv = *svp++;
+        HV* basestash = gv_stashsv(basename_sv, 0);
+	if (!basestash) {
+	    if (ckWARN(WARN_MISC))
+		Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+			    "Can't locate package %"SVf" for the parents of %s",
+			    SVfARG(basename_sv), hvname);
+	    continue;
 	}
-	else {
-	    DEBUG_o( Perl_deb(aTHX_ "ISA Cache in package %s is stale\n",
-			      hvname) );
-	    hv_clear(hv);
-	    sv_setiv(subgen, PL_sub_generation);
-	}
+        if(name_stash == basestash || strEQ(name, SvPVX(basename_sv)))
+	    return TRUE;
     }
 
-    gvp = (GV**)hv_fetchs(stash, "ISA", FALSE);
-
-    if (gvp && (gv = *gvp) && isGV_with_GP(gv) && (av = GvAV(gv))) {
-	if (!hv || !subgen) {
-	    gvp = (GV**)hv_fetchs(stash, "::ISA::CACHE::", TRUE);
-
-	    gv = *gvp;
-
-	    if (SvTYPE(gv) != SVt_PVGV)
-		gv_init(gv, stash, "::ISA::CACHE::", 14, TRUE);
-
-	    if (!hv)
-		hv = GvHVn(gv);
-	    if (!subgen) {
-		subgen = newSViv(PL_sub_generation);
-		GvSV(gv) = subgen;
-	    }
-	}
-	if (hv) {
-	    SV** svp = AvARRAY(av);
-	    /* NOTE: No support for tied ISA */
-	    I32 items = AvFILLp(av) + 1;
-	    while (items--) {
-		SV* const sv = *svp++;
-		HV* const basestash = gv_stashsv(sv, 0);
-		if (!basestash) {
-		    if (ckWARN(WARN_MISC))
-			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-				    "Can't locate package %"SVf" for @%s::ISA",
-				    SVfARG(sv), hvname);
-		    continue;
-		}
-		if (isa_lookup(basestash, name, name_stash, len, level + 1)) {
-		    (void)hv_store(hv,name,len,&PL_sv_yes,0);
-		    return TRUE;
-		}
-	    }
-	    (void)hv_store(hv,name,len,&PL_sv_no,0);
-	}
-    }
     return FALSE;
 }
 

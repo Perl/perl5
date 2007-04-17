@@ -1,6 +1,6 @@
 package overload;
 
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 
 sub nil {}
 
@@ -95,12 +95,13 @@ sub AddrRef {
 
 sub mycan {				# Real can would leave stubs.
   my ($package, $meth) = @_;
-  return \*{$package . "::$meth"} if defined &{$package . "::$meth"};
-  my $p;
-  foreach $p (@{$package . "::ISA"}) {
-    my $out = mycan($p, $meth);
-    return $out if $out;
+
+  my $mro = mro::get_linear_isa($package);
+  foreach my $p (@$mro) {
+    my $fqmeth = $p . q{::} . $meth;
+    return \*{$fqmeth} if defined &{$fqmeth};
   }
+
   return undef;
 }
 

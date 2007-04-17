@@ -256,7 +256,7 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
 	GP *gp = Perl_newGP(aTHX_ gv);
 
 	if (GvCVu(gv))
-	    PL_sub_generation++;	/* taking a method out of circulation */
+            mro_method_changed_in(GvSTASH(gv)); /* taking a method out of circulation ("local")*/
 	if (GvIOp(gv) && (IoFLAGS(GvIOp(gv)) & IOf_ARGV)) {
 	    gp->gp_io = newIO();
 	    IoFLAGS(gp->gp_io) |= IOf_ARGV|IOf_START;
@@ -740,7 +740,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    gp_free(gv);
 	    GvGP(gv) = (GP*)ptr;
 	    if (GvCVu(gv))
-		PL_sub_generation++;  /* putting a method back into circulation */
+                mro_method_changed_in(GvSTASH(gv)); /* putting a method back into circulation ("local")*/
 	    SvREFCNT_dec(gv);
 	    break;
 	case SAVEt_FREESV:

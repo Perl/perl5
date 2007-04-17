@@ -1530,8 +1530,18 @@ Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
     PERL_UNUSED_ARG(sv);
-    PERL_UNUSED_ARG(mg);
-    PL_sub_generation++;
+
+    /* The first case occurs via setisa,
+       the second via setisa_elem, which
+       calls this same magic */
+    mro_isa_changed_in(
+        GvSTASH(
+            SvTYPE(mg->mg_obj) == SVt_PVGV
+                ? (GV*)mg->mg_obj
+                : (GV*)SvMAGIC(mg->mg_obj)->mg_obj
+        )
+    );
+
     return 0;
 }
 
@@ -1541,7 +1551,6 @@ Perl_magic_setamagic(pTHX_ SV *sv, MAGIC *mg)
     dVAR;
     PERL_UNUSED_ARG(sv);
     PERL_UNUSED_ARG(mg);
-    /* HV_badAMAGIC_on(Sv_STASH(sv)); */
     PL_amagic_generation++;
 
     return 0;

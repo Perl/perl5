@@ -10,7 +10,7 @@ PERL = perl
 all:	microperl
 
 O = uav$(_O) udeb$(_O) udoio$(_O) udoop$(_O) udump$(_O) \
-	uglobals$(_O) ugv$(_O) uhv$(_O) \
+	uglobals$(_O) ugv$(_O) uhv$(_O) umro$(_O)\
 	umg$(_O) uperlmain$(_O) uop$(_O) ureentr$(_O) \
 	upad$(_O) uperl$(_O) uperlio$(_O) uperly$(_O) upp$(_O) \
 	upp_ctl$(_O) upp_hot$(_O) upp_sys$(_O) upp_pack$(_O) upp_sort$(_O) \
@@ -75,6 +75,9 @@ uglobals$(_O):	$(H) globals.c INTERN.h perlapi.h
 
 ugv$(_O):	$(HE) gv.c
 	$(CC) -c -o $@ $(CFLAGS) gv.c
+
+umro$(_O):	$(HE) mro.c
+	$(CC) -c -o $@ $(CFLAGS) mro.c
 
 uhv$(_O):	$(HE) hv.c
 	$(CC) -c -o $@ $(CFLAGS) hv.c

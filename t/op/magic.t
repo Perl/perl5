@@ -440,7 +440,10 @@ ok "@+" eq "10 1 6 10";
 if (!$Is_VMS) {
     local @ISA;
     local %ENV;
-    eval { push @ISA, __PACKAGE__ };
+    # This used to be __PACKAGE__, but that causes recursive
+    #  inheritance, which is detected earlier now and broke
+    #  this test
+    eval { push @ISA, __FILE__ };
     ok( $@ eq '', 'Push a constant on a magic array');
     $@ and print "# $@";
     eval { %ENV = (PATH => __PACKAGE__) };

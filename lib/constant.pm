@@ -5,7 +5,7 @@ use 5.006_00;
 use warnings::register;
 
 our($VERSION, %declared);
-$VERSION = '1.09';
+$VERSION = '1.10';
 
 #=======================================================================
 
@@ -109,7 +109,7 @@ sub import {
 		    # constants from cv_const_sv are read only. So we have to:
 		    Internals::SvREADONLY($scalar, 1);
 		    $symtab->{$name} = \$scalar;
-		    &Internals::inc_sub_generation;
+		    mro::method_changed_in($pkg);
 		} else {
 		    *$full_name = sub () { $scalar };
 		}

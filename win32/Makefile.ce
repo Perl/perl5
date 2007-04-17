@@ -571,6 +571,7 @@ MICROCORE_SRC	=		\
 		..\dump.c	\
 		..\globals.c	\
 		..\gv.c		\
+		..\mro.c	\
 		..\hv.c		\
 		..\mg.c		\
 		..\op.c		\
@@ -790,6 +791,7 @@ $(DLLDIR)\doop.obj \
 $(DLLDIR)\dump.obj \
 $(DLLDIR)\globals.obj \
 $(DLLDIR)\gv.obj \
+$(DLLDIR)\mro.obj \
 $(DLLDIR)\hv.obj \
 $(DLLDIR)\locale.obj \
 $(DLLDIR)\mathoms.obj \

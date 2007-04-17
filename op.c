@@ -3649,6 +3649,11 @@ Perl_package(pTHX_ OP *o)
     save_item(PL_curstname);
 
     PL_curstash = gv_stashsv(sv, GV_ADD);
+
+    /* In case mg.c:Perl_magic_setisa faked
+       this package earlier, we clear the fake flag */
+    HvMROMETA(PL_curstash)->fake = 0;
+
     sv_setsv(PL_curstname, sv);
 
     PL_hints |= HINT_BLOCK_SCOPE;
@@ -5291,9 +5296,9 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    sv_setpvn((SV*)gv, ps, ps_len);
 	else
 	    sv_setiv((SV*)gv, -1);
+
 	SvREFCNT_dec(PL_compcv);
 	cv = PL_compcv = NULL;
-	PL_sub_generation++;
 	goto done;
     }
 
@@ -5387,7 +5392,13 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    GvCV(gv) = NULL;
 	    cv = newCONSTSUB(NULL, name, const_sv);
 	}
-	PL_sub_generation++;
+        mro_method_changed_in( /* sub Foo::Bar () { 123 } */
+            (CvGV(cv) && GvSTASH(CvGV(cv)))
+                ? GvSTASH(CvGV(cv))
+                : CvSTASH(cv)
+                    ? CvSTASH(cv)
+                    : PL_curstash
+        );
 	if (PL_madskills)
 	    goto install_block;
 	op_free(block);
@@ -5470,7 +5481,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		}
 	    }
 	    GvCVGEN(gv) = 0;
-	    PL_sub_generation++;
+            mro_method_changed_in(GvSTASH(gv)); /* sub Foo::bar { (shift)+1 } */
 	}
     }
     CvGV(cv) = gv;
@@ -5802,7 +5813,7 @@ Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
 	if (name) {
 	    GvCV(gv) = cv;
 	    GvCVGEN(gv) = 0;
-	    PL_sub_generation++;
+            mro_method_changed_in(GvSTASH(gv)); /* newXS */
 	}
     }
     CvGV(cv) = gv;

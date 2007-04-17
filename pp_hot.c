@@ -192,7 +192,7 @@ PP(pp_sassign)
 
 	if (strEQ(GvNAME(right),"isa")) {
 	    GvCVGEN(right) = 0;
-	    ++PL_sub_generation;
+	    ++PL_sub_generation; /* I don't get this at all --blblack */
 	}
     }
     SvSetMagicSV(right, left);
@@ -3060,7 +3060,8 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	if (he) {
 	    gv = (GV*)HeVAL(he);
 	    if (isGV(gv) && GvCV(gv) &&
-		(!GvCVGEN(gv) || GvCVGEN(gv) == PL_sub_generation))
+		(!GvCVGEN(gv) || GvCVGEN(gv)
+                  == (PL_sub_generation + HvMROMETA(stash)->sub_generation)))
 		return (SV*)GvCV(gv);
 	}
     }

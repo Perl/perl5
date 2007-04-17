@@ -3241,7 +3241,7 @@ S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr) {
 		    SvREFCNT_dec(GvCV(dstr));
 		    GvCV(dstr) = NULL;
 		    GvCVGEN(dstr) = 0; /* Switch off cacheness. */
-		    PL_sub_generation++;
+		    mro_method_changed_in(GvSTASH(dstr));
 		}
 	    }
 	    SAVEGENERICSV(*location);
@@ -3287,7 +3287,7 @@ S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr) {
 	    }
 	    GvCVGEN(dstr) = 0; /* Switch off cacheness. */
 	    GvASSUMECV_on(dstr);
-	    PL_sub_generation++;
+	    mro_method_changed_in(GvSTASH(dstr)); /* sub foo { 1 } sub bar { 2 } *bar = \&foo */
 	}
 	*location = sref;
 	if (import_flag && !(GvFLAGS(dstr) & import_flag)
@@ -10157,6 +10157,11 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 				? (AV*) SvREFCNT_inc(
 					sv_dup((SV*)saux->xhv_backreferences, param))
 				: 0;
+
+                        daux->xhv_mro_meta = saux->xhv_mro_meta
+                            ? mro_meta_dup(saux->xhv_mro_meta, param)
+                            : 0;
+
 			/* Record stashes for possible cloning in Perl_clone(). */
 			if (hvname)
 			    av_push(param->stashes, dstr);

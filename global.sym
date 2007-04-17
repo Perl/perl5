@@ -135,6 +135,14 @@ Perl_gv_efullname3
 Perl_gv_efullname4
 Perl_gv_fetchfile
 Perl_gv_fetchfile_flags
+Perl_mro_meta_init
+Perl_mro_meta_dup
+Perl_mro_get_linear_isa
+Perl_mro_get_linear_isa_c3
+Perl_mro_get_linear_isa_dfs
+Perl_mro_isa_changed_in
+Perl_mro_method_changed_in
+Perl_boot_core_mro
 Perl_gv_fetchmeth
 Perl_gv_fetchmeth_autoload
 Perl_gv_fetchmethod

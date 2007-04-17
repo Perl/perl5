@@ -169,7 +169,7 @@ is(B::opnumber("chop"), 38, "Testing opnumber with opname (chop)");
 {
     no warnings 'once';
     my $sg = B::sub_generation();
-    *Whatever::hand_waving = sub { };
+    *UNIVERSAL::hand_waving = sub { };
     ok( $sg < B::sub_generation, "sub_generation increments" );
 }
 

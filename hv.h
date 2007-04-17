@@ -38,12 +38,38 @@ struct shared_he {
 
 /* Subject to change.
    Don't access this directly.
+   Use the funcs in mro.c
 */
+
+typedef enum {
+    MRO_DFS, /* 0 */
+    MRO_C3   /* 1 */
+} mro_alg;
+
+struct mro_meta {
+    AV          *mro_linear_dfs; /* cached dfs @ISA linearization */
+    AV          *mro_linear_c3; /* cached c3 @ISA linearization */
+    HV		*mro_isarev;    /* reverse @ISA dependencies (who depends on us?) */
+    HV		*mro_nextmethod; /* next::method caching */
+    mro_alg     mro_which;      /* which mro alg is in use? */
+    U32         sub_generation; /* Like PL_sub_generation, but stash-local */
+    I32         is_universal;   /* We are UNIVERSAL or a potentially indirect
+                                   member of @UNIVERSAL::ISA */
+    I32         fake;           /* setisa made this fake package,
+                                   gv_fetchmeth pays attention to this,
+                                   and "package" sets it back to zero */
+};
+
+/* Subject to change.
+   Don't access this directly.
+*/
+
 struct xpvhv_aux {
     HEK		*xhv_name;	/* name, if a symbol table */
     AV		*xhv_backreferences; /* back references for weak references */
     HE		*xhv_eiter;	/* current entry of iterator */
     I32		xhv_riter;	/* current root of iterator */
+    struct mro_meta *xhv_mro_meta;
 };
 
 /* hash structure: */
@@ -240,6 +266,7 @@ C<SV*>.
 #define HvRITER_get(hv)	(SvOOK(hv) ? HvAUX(hv)->xhv_riter : -1)
 #define HvEITER_get(hv)	(SvOOK(hv) ? HvAUX(hv)->xhv_eiter : 0)
 #define HvNAME(hv)	HvNAME_get(hv)
+#define HvMROMETA(hv)	(HvAUX(hv)->xhv_mro_meta ? HvAUX(hv)->xhv_mro_meta : mro_meta_init(hv))
 /* FIXME - all of these should use a UTF8 aware API, which should also involve
    getting the length. */
 /* This macro may go away without notice.  */
