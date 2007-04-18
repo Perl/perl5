@@ -128,6 +128,9 @@
 
 #ifdef USE_ITHREADS
 
+/* Magic signature(s) for mg_private to make PERL_MAGIC_ext magic safer */
+#define UL_MAGIC_SIG 0x554C  /* UL = user lock */
+
 /*
  * The shared things need an intepreter to live in ...
  */
@@ -338,7 +341,16 @@ S_get_userlock(pTHX_ SV* ssv, bool create)
     /* XXX Redesign the storage of user locks so we don't need a global
      * lock to access them ???? DAPM */
     ENTER_LOCK;
-    mg = mg_find(ssv, PERL_MAGIC_ext);
+
+    /* Version of mg_find that also checks the private signature */
+    for (mg = SvMAGIC(ssv); mg; mg = mg->mg_moremagic) {
+        if ((mg->mg_type == PERL_MAGIC_ext) &&
+            (mg->mg_private == UL_MAGIC_SIG))
+        {
+            break;
+        }
+    }
+
     if (mg) {
         ul = (user_lock*)(mg->mg_ptr);
     } else if (create) {
@@ -347,8 +359,9 @@ S_get_userlock(pTHX_ SV* ssv, bool create)
         ul = (user_lock *) PerlMemShared_malloc(sizeof(user_lock));
         Zero(ul, 1, user_lock);
         /* Attach to shared SV using ext magic */
-        sv_magicext(ssv, NULL, PERL_MAGIC_ext, &sharedsv_userlock_vtbl,
-               (char *)ul, 0);
+        mg = sv_magicext(ssv, NULL, PERL_MAGIC_ext, &sharedsv_userlock_vtbl,
+                            (char *)ul, 0);
+        mg->mg_private = UL_MAGIC_SIG;  /* Set private signature */
         recursive_lock_init(aTHX_ &ul->lock);
         COND_INIT(&ul->user_cond);
         CALLER_CONTEXT;
