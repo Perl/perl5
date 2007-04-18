@@ -681,6 +681,13 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'Sys::Syslog' =>
+		{
+		'MAINTAINER'	=> 'saper',
+		'FILES'		=> q[ext/Sys/Syslog],
+		'CPAN'		=> 1,
+		},
+
 	'TabsWrap' =>
 		{
 		'MAINTAINER'	=> 'muir',
