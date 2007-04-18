@@ -1,3 +1,8 @@
+# THIS IS A GENERATED FILE
+# DO NOT HAND-EDIT
+#
+# See Porting/config_h.pl
+
 case "$CONFIG_SH" in
 '') CONFIG_SH=config.sh ;;
 esac
@@ -23,8 +28,8 @@ esac
 case "$CONFIG_H" in
 already-done) echo "Not re-extracting config.h" ;;
 *)
-    echo "Extracting $CONFIG_H (with variable substitutions)"
-    sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-def!#undef!'
+echo "Extracting $CONFIG_H (with variable substitutions)"
+sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-def!#undef!'
 /*
  * This file was produced by running the config_h.SH script, which
  * gets its values from $CONFIG_SH, which is generally produced by
@@ -528,13 +533,6 @@ already-done) echo "Not re-extracting config.h" ;;
  */
 #$d_strcoll HAS_STRCOLL	/**/
 
-/* USE_STRUCT_COPY:
- *	This symbol, if defined, indicates that this C compiler knows how
- *	to copy structures.  If undefined, you'll need to use a block copy
- *	routine of some sort instead.
- */
-#$d_strctcpy	USE_STRUCT_COPY	/**/
-
 /* HAS_STRTOD:
  *	This symbol, if defined, indicates that the strtod routine is
  *	available to provide better numeric string conversion than atof().
@@ -613,15 +611,6 @@ already-done) echo "Not re-extracting config.h" ;;
  */
 #$d_usleep HAS_USLEEP		/**/
 
-/* HASVOLATILE:
- *	This symbol, if defined, indicates that this C compiler knows about
- *	the volatile declaration.
- */
-#$d_volatile	HASVOLATILE	/**/
-#ifndef HASVOLATILE
-#define volatile
-#endif
-
 /* HAS_WAIT4:
  *	This symbol, if defined, indicates that wait4() exists.
  */
@@ -661,26 +650,6 @@ already-done) echo "Not re-extracting config.h" ;;
  */
 #$i_dbm I_DBM	/**/
 #$i_rpcsvcdbm I_RPCSVC_DBM	/**/
-
-/* I_DIRENT:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <dirent.h>. Using this symbol also triggers the definition
- *	of the Direntry_t define which ends up being 'struct dirent' or
- *	'struct direct' depending on the availability of <dirent.h>.
- */
-/* DIRNAMLEN:
- *	This symbol, if defined, indicates to the C program that the length
- *	of directory entry names is provided by a d_namlen field.  Otherwise
- *	you need to do strlen() on the d_name field.
- */
-/* Direntry_t:
- *	This symbol is set to 'struct direct' or 'struct dirent' depending on
- *	whether dirent is available or not. You should use this pseudo type to
- *	portably declare your directory entries.
- */
-#$i_dirent I_DIRENT		/**/
-#$d_dirnamlen DIRNAMLEN	/**/
-#define Direntry_t $direntrytype
 
 /* I_DLFCN:
  *	This symbol, if defined, indicates that <dlfcn.h> exists and should
@@ -2217,6 +2186,13 @@ already-done) echo "Not re-extracting config.h" ;;
 #$d_statblks USE_STAT_BLOCKS 	/**/
 #endif
 
+/* USE_STRUCT_COPY:
+ *	This symbol, if defined, indicates that this C compiler knows how
+ *	to copy structures.  If undefined, you'll need to use a block copy
+ *	routine of some sort instead.
+ */
+#$d_strctcpy	USE_STRUCT_COPY	/**/
+
 /* HAS_STRERROR:
  *	This symbol, if defined, indicates that the strerror routine is
  *	available to translate error numbers to strings. See the writeup
@@ -2340,6 +2316,15 @@ already-done) echo "Not re-extracting config.h" ;;
  */
 #define Signal_t $signal_t	/* Signal handler's return type */
 
+/* HASVOLATILE:
+ *	This symbol, if defined, indicates that this C compiler knows about
+ *	the volatile declaration.
+ */
+#$d_volatile	HASVOLATILE	/**/
+#ifndef HASVOLATILE
+#define volatile
+#endif
+
 /* Fpos_t:
  *	This symbol holds the type used to declare file positions in libc.
  *	It can be fpos_t, long, uint, etc... It may be necessary to include
@@ -2384,6 +2369,26 @@ already-done) echo "Not re-extracting config.h" ;;
 #if defined(HAS_GETGROUPS) || defined(HAS_SETGROUPS)
 #define Groups_t $groupstype	/* Type for 2nd arg to [sg]etgroups() */
 #endif
+
+/* I_DIRENT:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <dirent.h>. Using this symbol also triggers the definition
+ *	of the Direntry_t define which ends up being 'struct dirent' or
+ *	'struct direct' depending on the availability of <dirent.h>.
+ */
+/* DIRNAMLEN:
+ *	This symbol, if defined, indicates to the C program that the length
+ *	of directory entry names is provided by a d_namlen field.  Otherwise
+ *	you need to do strlen() on the d_name field.
+ */
+/* Direntry_t:
+ *	This symbol is set to 'struct direct' or 'struct dirent' depending on
+ *	whether dirent is available or not. You should use this pseudo type to
+ *	portably declare your directory entries.
+ */
+#$i_dirent I_DIRENT		/**/
+#$d_dirnamlen DIRNAMLEN	/**/
+#define Direntry_t $direntrytype
 
 /* I_GRP:
  *	This symbol, if defined, indicates to the C program that it should
@@ -4488,5 +4493,5 @@ already-done) echo "Not re-extracting config.h" ;;
 
 #endif
 !GROK!THIS!
-    ;;
+;;
 esac

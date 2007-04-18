@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Mar  9 20:00:14 CET 2007 [metaconfig 3.0 PL70]
+# Generated on Wed Apr 18 21:01:29 CEST 2007 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -7568,6 +7568,33 @@ $rm -f libnames libpath
 set dld.h i_dld
 eval $inhdr
 
+
+echo " "
+echo "Checking for C++..." >&4
+cat >try.c <<'EOCP'
+#include <stdio.h>
+int main(void)
+{
+#ifdef __cplusplus
+    printf("define\n");
+#else
+    printf("undef\n");
+#endif
+    return 0;
+}
+EOCP
+set try
+if eval $compile_ok && $run ./try >cplusplus$$; then
+	val=`$cat cplusplus$$`
+	echo "You are using a C++ compiler."
+else
+	val="$undef"
+	echo "You are not using a C++ compiler."
+fi
+$rm -f try try.* cplusplus$$
+set d_cplusplus
+eval $setvar
+
 : is a C symbol defined?
 csym='tlook=$1;
 case "$3" in
@@ -7582,10 +7609,10 @@ true-*) tx=no; eval "tval=\$$4"; case "$tval" in "") tx=yes;; esac;;
 esac;
 case "$tx" in
 yes)
+	tval=false;
 	case "$d_cplusplus" in
 		$define) extern_C=\"C\";;
 	esac;
-	tval=false;
 	if $test "$runnm" = true; then
 		if $contains $tlook $tf >/dev/null 2>&1; then
 			tval=true;
@@ -7636,33 +7663,6 @@ yes)
 	*) echo "$sym() NOT found." >&4;;
 	esac;;
 esac'
-
-
-echo " "
-echo "Checking for C++..." >&4
-cat >try.c <<'EOCP'
-#include <stdio.h>
-int main(void)
-{
-#ifdef __cplusplus
-    printf("define\n");
-#else
-    printf("undef\n");
-#endif
-    return 0;
-}
-EOCP
-set try
-if eval $compile_ok && $run ./try >cplusplus$$; then
-	val=`$cat cplusplus$$`
-	echo "You are using a C++ compiler."
-else
-	val="$undef"
-	echo "You are not using a C++ compiler."
-fi
-$rm -f try try.* cplusplus$$
-set d_cplusplus
-eval $setvar
 
 : see if dlopen exists
 xxx_runnm="$runnm"
@@ -12968,11 +12968,11 @@ if eval $compile; then
 	0)  echo "Yes, it does" >&4
 	    d_futimes="$define"
 	    ;;
-	*)  echo "No, it has futimes, but it isn't working ($rc) (probably harmless)\n" >&4
+	*)  echo "No, it has futimes, but it isn't working ($rc) (probably harmless)" >&4
 	    ;;
     esac
 else
-    echo "No, it does not (probably harmless)\n" >&4
+    echo "No, it does not (probably harmless)" >&4
 fi
 $rm -f try.* try core core.try.*
 
@@ -14694,7 +14694,7 @@ int main()
 EOCP
 	set try
 	if eval $compile; then
-	    if ./try; then
+	    if $run ./try; then
 		d_localtime_r_needs_tzset=undef;
 	    else
 		d_localtime_r_needs_tzset=define;
@@ -15976,7 +15976,7 @@ exit(0);
 EOCP
 		set try
 		if eval $compile_ok; then
-			if ./try 2>/dev/null; then
+			if $run ./try 2>/dev/null; then
 				echo "Yes, it can."
 				val="$define"
 			else
@@ -16052,7 +16052,7 @@ exit(0);
 EOCP
 		set try
 		if eval $compile_ok; then
-			if ./try 2>/dev/null; then
+			if $run ./try 2>/dev/null; then
 				echo "Yes, it can."
 				val="$define"
 			else
@@ -18021,7 +18021,7 @@ int main()
 EOCP
 		xxx_prompt=y
 		set try
-		if eval $compile && ./try > /dev/null; then
+		if eval $compile && $run ./try > /dev/null; then
 			dflt=`$run ./try`
 			case "$dflt" in
 			[1-4][1-4][1-4][1-4]|12345678|87654321)
