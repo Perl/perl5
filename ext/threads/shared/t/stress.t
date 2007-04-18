@@ -15,26 +15,9 @@ BEGIN {
 
 use ExtUtils::testlib;
 
-my $Base = 0;
-sub ok {
-    my ($id, $ok, $why) = @_;
-    $id += $Base;
-
-    # You have to do it this way or VMS will get confused.
-    if ($ok) {
-        print("ok $id\n");
-    } else {
-        print ("not ok $id\n");
-        printf("# Failed test at line %d\n", (caller)[2]);
-        print ("#   Reason: $why\n");
-    }
-
-    return ($ok);
-}
-
 BEGIN {
     $| = 1;
-    print("1..50\n");   ### Number of tests that will be run ###
+    print("1..1\n");   ### Number of tests that will be run ###
 };
 
 use threads;
@@ -46,10 +29,6 @@ use threads::shared;
 #
 # Launches a bunch of threads which are then
 # restricted to finishing in numerical order
-#
-# Frequently fails under MSWin32 due to deadlocking bug in Windows
-#   http://rt.perl.org/rt3/Public/Bug/Display.html?id=41574
-#   http://support.microsoft.com/kb/175332
 #
 #####
 {
@@ -94,12 +73,44 @@ use threads::shared;
     }
 
     # Gather thread results
+    my ($okay, $failures, $timeouts, $unknown) = (0, 0, 0, 0);
     for (1..$cnt) {
-        my $rc = $threads[$_]->join() || 'Thread failed';
-        ok($_, ($rc eq 'okay'), $rc);
+        my $rc = $threads[$_]->join();
+        if (! $rc) {
+            $failures++;
+        } elsif ($rc =~ /^timed out/) {
+            $timeouts++;
+        } elsif ($rc eq 'okay') {
+            $okay++;
+        } else {
+            $unknown++;
+            print("# Unknown error: $rc\n");
+        }
     }
 
-    $Base += $cnt;
+    if ($failures || $unknown || (($okay + $timeouts) != $cnt)) {
+        print('not ok 1');
+        my $too_few = $cnt - ($okay + $failures + $timeouts + $unknown);
+        print(" - $too_few too few threads reported") if $too_few;
+        print(" - $failures threads failed")          if $failures;
+        print(" - $unknown unknown errors")           if $unknown;
+        print(" - $timeouts threads timed out")       if $timeouts;
+        print("\n");
+
+    } elsif ($timeouts) {
+        # Frequently fails under MSWin32 due to deadlocking bug in Windows
+        # hence test is TODO under MSWin32
+        #   http://rt.perl.org/rt3/Public/Bug/Display.html?id=41574
+        #   http://support.microsoft.com/kb/175332
+        print('not ok 1');
+        print(' # TODO - not reliable under MSWin32') if ($^O eq 'MSWin32');
+        print(" - $timeouts threads timed out\n");
+
+    } else {
+        print('ok 1');
+        print(' # TODO - not reliable under MSWin32') if ($^O eq 'MSWin32');
+        print("\n");
+    }
 }
 
 # EOF

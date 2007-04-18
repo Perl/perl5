@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.09';
+our $VERSION = '1.09_01';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -85,7 +85,7 @@ This document describes threads::shared version 1.09
   $var = $shared_ref_value;
   $var = share($simple_unshared_ref_value);
 
-  my($scalar, @array, %hash);
+  my ($scalar, @array, %hash);
   share($scalar);
   share(@array);
   share(%hash);
