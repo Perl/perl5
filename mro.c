@@ -26,14 +26,14 @@ These functions are related to the method resolution order of perl classes
 struct mro_meta*
 Perl_mro_meta_init(pTHX_ HV* stash)
 {
-    void* newmeta;
+    struct mro_meta* newmeta;
 
     assert(stash);
     assert(HvAUX(stash));
     assert(!(HvAUX(stash)->xhv_mro_meta));
-    Newxz(newmeta, sizeof(struct mro_meta), char);
-    HvAUX(stash)->xhv_mro_meta = (struct mro_meta*)newmeta;
-    ((struct mro_meta*)newmeta)->sub_generation = 1;
+    Newxc(newmeta, sizeof(struct mro_meta), char, struct mro_meta);
+    HvAUX(stash)->xhv_mro_meta = newmeta;
+    newmeta->sub_generation = 1;
 
     /* Manually flag UNIVERSAL as being universal.
        This happens early in perl booting (when universal.c
@@ -54,13 +54,11 @@ Perl_mro_meta_init(pTHX_ HV* stash)
 struct mro_meta*
 Perl_mro_meta_dup(pTHX_ struct mro_meta* smeta, CLONE_PARAMS* param)
 {
-    void* newmeta_void;
     struct mro_meta* newmeta;
 
     assert(smeta);
 
-    Newx(newmeta_void, sizeof(struct mro_meta), char);
-    newmeta = (struct mro_meta*)newmeta_void;
+    Newxc(newmeta, sizeof(struct mro_meta), char, struct mro_meta);
 
     newmeta->mro_which       = smeta->mro_which;
     newmeta->sub_generation  = smeta->sub_generation;
