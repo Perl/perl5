@@ -8,6 +8,11 @@
  */
 
 /*
+ * "Which order shall we go in?" said Frodo. "Eldest first, or quickest first?
+ *  You'll be last either way, Master Peregrin."
+ */
+
+/*
 =head1 MRO Functions
 
 These functions are related to the method resolution order of perl classes
