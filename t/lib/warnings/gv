@@ -22,14 +22,14 @@
     
 __END__
 # gv.c
-use warnings 'misc' ;
+use warnings 'syntax' ;
 @ISA = qw(Fred); joe()
 EXPECT
 Can't locate package Fred for @main::ISA at - line 3.
 Undefined subroutine &main::joe called at - line 3.
 ########
 # gv.c
-no warnings 'misc' ;
+no warnings 'syntax' ;
 @ISA = qw(Fred); joe()
 EXPECT
 Undefined subroutine &main::joe called at - line 3.
