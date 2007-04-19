@@ -864,9 +864,10 @@ XS(XS_mro_is_universal)
     class_stash = gv_stashsv(classname, 0);
     if(!class_stash) Perl_croak(aTHX_ "No such class: '%"SVf"'!", SVfARG(classname));
 
-    HvMROMETA(class_stash)->is_universal
-        ? XSRETURN_YES
-        : XSRETURN_NO;
+    if (HvMROMETA(class_stash)->is_universal)
+        XSRETURN_YES;
+    else
+        XSRETURN_NO;
 }
 
 XS(XS_mro_get_global_sub_generation)
