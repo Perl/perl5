@@ -334,7 +334,7 @@ Perl_mro_get_linear_isa(pTHX_ HV *stash)
     } else if(meta->mro_which == MRO_C3) {
         return mro_get_linear_isa_c3(stash, 0);
     } else {
-        Perl_croak(aTHX_ "Internal error: invalid MRO!");
+        Perl_croak(aTHX_ "panic: invalid MRO!");
     }
 }
 
