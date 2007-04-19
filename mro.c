@@ -651,8 +651,8 @@ __nextcan(pTHX_ SV* self, I32 throw_nomethod)
             curstash = gv_stashsv(linear_sv, FALSE);
 
             if (!curstash || (HvMROMETA(curstash)->fake && !HvFILL(curstash))) {
-                if (ckWARN(WARN_MISC))
-                    Perl_warner(aTHX_ packWARN(WARN_MISC), "Can't locate package %"SVf" for @%s::ISA",
+                if (ckWARN(WARN_SYNTAX))
+                    Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Can't locate package %"SVf" for @%s::ISA",
                         (void*)linear_sv, hvname);
                 continue;
             }

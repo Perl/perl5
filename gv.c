@@ -416,8 +416,8 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
            yet we still need to issue this warning when appropriate.
         */
         if (!cstash || (HvMROMETA(cstash)->fake && !HvFILL(cstash))) {
-            if (ckWARN(WARN_MISC))
-                Perl_warner(aTHX_ packWARN(WARN_MISC), "Can't locate package %"SVf" for @%s::ISA",
+            if (ckWARN(WARN_SYNTAX))
+                Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Can't locate package %"SVf" for @%s::ISA",
                     SVfARG(linear_sv), hvname);
             continue;
         }
