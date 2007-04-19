@@ -31,7 +31,7 @@ Perl_mro_meta_init(pTHX_ HV* stash)
     assert(stash);
     assert(HvAUX(stash));
     assert(!(HvAUX(stash)->xhv_mro_meta));
-    Newxc(newmeta, sizeof(struct mro_meta), char, struct mro_meta);
+    Newxz(newmeta, 1, struct mro_meta);
     HvAUX(stash)->xhv_mro_meta = newmeta;
     newmeta->sub_generation = 1;
 
@@ -58,7 +58,7 @@ Perl_mro_meta_dup(pTHX_ struct mro_meta* smeta, CLONE_PARAMS* param)
 
     assert(smeta);
 
-    Newxc(newmeta, sizeof(struct mro_meta), char, struct mro_meta);
+    Newxz(newmeta, 1, struct mro_meta);
 
     newmeta->mro_which       = smeta->mro_which;
     newmeta->sub_generation  = smeta->sub_generation;
