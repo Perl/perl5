@@ -700,7 +700,6 @@ struct token {
  * l       last index of array ($#foo)
  * L       label
  * m       modifier on regex
- * M       my assignment slurped into some other operator's target
  * n       sub or format name
  * o       current operator/declarator name
  * o       else/continue

@@ -598,7 +598,6 @@ sub ast {
 
     my @retval;
     my @newkids;
-    push @retval, $self->madness('M ox');
     for my $kid (@{$$self{Kids}}) {
 	push @newkids, $kid->ast($self, @_);
     }
@@ -615,7 +614,7 @@ package PLXML::baseop_unop;
 
 sub ast {
     my $self = shift;
-    my @newkids = $self->madness('d M ox o (');
+    my @newkids = $self->madness('d o (');
 
     if (exists $$self{Kids}) {
 	my $arg = $$self{Kids}[0];
@@ -631,8 +630,6 @@ package PLXML::binop;
 sub ast {
     my $self = shift;
     my @newkids;
-
-    push @newkids, $self->madness('M ox');
 
     my $left = $$self{Kids}[0];
     push @newkids, $left->ast($self, @_);
@@ -675,13 +672,9 @@ sub ast {
     my $self = shift;
 
     my @retval;
-    my @before;
     my @after;
-    if (@before = $self->madness('M')) {
-	push @before, $self->madness('ox');	# o is the function name
-    }
     if (@retval = $self->madness('X')) {
-	push @before, $self->madness('o x');
+	my @before, $self->madness('o x');
 	return P5AST::listop->new(Kids => [@before,@retval]);
     }
 
@@ -703,7 +696,7 @@ sub ast {
     push @retval, @newkids;
 
     push @retval, $self->madness('} ] )');
-    return $self->newtype->new(Kids => [@before,@retval,@after]);
+    return $self->newtype->new(Kids => [@retval,@after]);
 }
 
 package PLXML::logop;
@@ -1858,10 +1851,6 @@ sub astnull {
     my $self = shift;
     my @newkids;
 
-    my @before;
-    if (@before = $self->madness('M')) {
-	push @before, $self->madness('ox');	# o is the .
-    }
     my @after;
     my $left = $$self{Kids}[0];
     push @newkids, $left->ast($self, @_);
@@ -1878,10 +1867,6 @@ sub ast {
     my $parent = $_[0];
     my @newkids;
 
-    my @before;
-    if (@before = $self->madness('M')) {
-	push @before, $self->madness('ox');	# o is the .
-    }
     my @after;
     my $left = $$self{Kids}[0];
     push @newkids, $left->ast($self, @_);
@@ -1891,7 +1876,7 @@ sub ast {
     my $right = $$self{Kids}[1];
     push @newkids, $right->ast($self, @_);
 
-    return $self->newtype->new(Kids => [@before, @newkids, @after]);
+    return $self->newtype->new(Kids => [@newkids, @after]);
 }
 
 package PLXML::op_stringify;
