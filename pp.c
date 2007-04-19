@@ -1306,7 +1306,11 @@ PP(pp_divide)
 #endif /* PERL_TRY_UV_DIVIDE */
     {
 	dPOPPOPnnrl;
+#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+	if (! Perl_isnan(right) && right == 0.0)
+#else
 	if (right == 0.0)
+#endif
 	    DIE(aTHX_ "Illegal division by zero");
 	PUSHn( left / right );
 	RETURN;
