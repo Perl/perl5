@@ -830,6 +830,11 @@ usually double the curlies to get the same effect though, because the
 inner curlies will be considered a block that loops once.  See
 L<perlfunc/last>.
 
+=item Can't linearize anonymous symbol table
+
+(F) Perl tried to calculate the method resolution order (MRO) of a
+package, but failed because the package stash has no name.
+
 =item Can't load '%s' for module %s
 
 (F) The module you tried to load failed to load a dynamic extension. This
@@ -887,6 +892,13 @@ method, nor does any of its base classes.  See L<perlobj>.
 
 (W syntax) The @ISA array contained the name of another package that
 doesn't seem to exist.
+
+=item Can't locate package %s for the parents of %s
+
+(W syntax) You did not define (or require/use) the first package,
+which is named as a (possibly indirect) parent of the second by
+C<@ISA> inheritance.  Perl will treat this as if the undefined
+package had an empty C<@ISA>.
 
 =item Can't locate PerlIO%s
 
@@ -1966,6 +1978,12 @@ would otherwise result in the same message being repeated.
 Failure of user callbacks dispatched using the C<G_KEEPERR> flag could
 also result in this warning.  See L<perlcall/G_KEEPERR>.
 
+=item Inconsistent hierarchy during C3 merge of class '%s': merging failed on parent '%s'
+
+(F) The method resolution order (MRO) of the given class is not
+C3-consistent, and you have enabled the C3 MRO for this class.  See the C3
+documentation in L<mro> for more information.
+
 =item In EBCDIC the v-string components cannot exceed 2147483647
 
 (F) An error peculiar to EBCDIC.  Internally, v-strings are stored as
@@ -2084,6 +2102,12 @@ from the encoding specified by the encoding pragma.
 The escape was replaced with REPLACEMENT CHARACTER (U+FFFD) instead.
 The <-- HERE shows in the regular expression about where the
 escape was discovered.
+
+=item Invalid mro name: '%s'
+
+(F) You tried to C<mro::set_mro("classname", "foo")>
+or C<use mro 'foo'>, where C<foo> is not a valid method resolution order (MRO).
+(Currently, the only valid ones are C<dfs> and C<c3>). See L<mro>.
 
 =item Invalid [] range "%s" in regex; marked by <-- HERE in m/%s/
 
@@ -2516,6 +2540,12 @@ C<??> appear to be nested quantifiers, but aren't.  See L<perlre>.
 (S internal) The symbol in question was declared but somehow went out of
 scope before it could possibly have been used.
 
+=item next::method/next::can/maybe::next::method cannot find enclosing method
+
+(F) C<next::method> needs to be called within the context of a
+real method in a real package, and it could not find such a context.
+See L<mro>.
+
 =item No %s allowed while running setuid
 
 (F) Certain operations are deemed to be too insecure for a setuid or
@@ -2591,6 +2621,13 @@ name of the file from which to read data for stdin.
 
 (F) The setuid emulator requires that scripts have a well-formed #! line
 even on machines that don't support the #! construct.
+
+=item No next::method '%s' found for %s
+
+(F) C<next::method> found no further instances of this method name
+in the remaining packages of the MRO of this class.  If you don't want
+it throwing an exception, use C<maybe::next::method>
+or C<next::can>. See L<mro>.
 
 =item "no" not allowed in expression
 
@@ -3487,8 +3524,9 @@ which is why it's currently left out of your copy.
 
 =item Recursive inheritance detected in package '%s'
 
-(F) More than 100 levels of inheritance were used.  Probably indicates
-an unintended loop in your inheritance hierarchy.
+(F) While calculating the method resolution order (MRO) of a package, Perl
+believes it found an infinite loop in the C<@ISA> hierarchy.  This is a
+crude check that bails out after 100 levels of C<@ISA> depth.
 
 =item Recursive inheritance detected while looking for method %s
 
