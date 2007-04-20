@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 7;
+require q(./test.pl); plan(tests => 7);
 
 {
     package BaseTest;

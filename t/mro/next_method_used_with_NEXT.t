@@ -2,14 +2,10 @@
 
 use strict;
 use warnings;
+use NEXT;
 
-use Test::More;
-
-BEGIN {
-    eval "use NEXT";
-    plan skip_all => "NEXT required for this test" if $@;
-    plan tests => 4;
-}
+require './test.pl';
+plan(tests => 4);
 
 {
     package Foo;
@@ -38,7 +34,6 @@ BEGIN {
     package Baz;
     use strict;
     use warnings;    
-    require NEXT; # load this as late as possible so we can catch the test skip
 
     use base 'Bar', 'Fuz';
     

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 11;
+require q(./test.pl); plan(tests => 11);
 
 {
 
@@ -41,7 +41,7 @@ use Test::More tests => 11;
     # test it working with with Sub::Name
     SKIP: {    
         eval 'use Sub::Name';
-        skip "Sub::Name is required for this test", 3 if $@;
+        skip("Sub::Name is required for this test", 3) if $@;
     
         my $m = sub { (shift)->next::method() };
         Sub::Name::subname('Bar::bar', $m);

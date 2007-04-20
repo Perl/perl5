@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 1;
+require q(./test.pl); plan(tests => 1);
 
 =pod
 

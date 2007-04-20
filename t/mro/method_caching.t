@@ -12,7 +12,7 @@ BEGIN {
     }
 }
 
-use Test::More;
+require './test.pl';
 
 {
     package MCTest::Base;
@@ -40,7 +40,7 @@ my @testsubs = (
     sub { *XYZ = sub { $_[1]+8 }; ${MCTest::Base::}{foo} = \&XYZ; is(MCTest::Derived->foo(0), 8); },
 );
 
-plan tests => scalar(@testsubs) + 1;
+plan(tests => scalar(@testsubs) + 1);
 
 is(MCTest::Derived->foo(0), 1);
 $_->() for (@testsubs);
