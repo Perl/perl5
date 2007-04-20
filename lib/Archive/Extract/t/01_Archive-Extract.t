@@ -33,7 +33,7 @@ use Module::Load::Conditional   qw[check_install];
 #         Archive::Extract::extract('Archive::Extract=HASH(0x966eac)','to','/Users/kane/sources/p4/other/archive-extract/t/out') called at t/01_Archive-Extract.t line 180
 #BEGIN { $SIG{__WARN__} = sub { require Carp; Carp::cluck(@_) } };
 
-if( IS_WIN32 or IS_CYGWIN ) {
+if ((IS_WIN32 or IS_CYGWIN) && ! $ENV{PERL_CORE}) {
     diag( "Older versions of Archive::Zip may cause File::Spec warnings" );
     diag( "See bug #19713 in rt.cpan.org. It is safe to ignore them" );
 }

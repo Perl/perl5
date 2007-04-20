@@ -65,8 +65,11 @@ my $TOO_LONG    =   ($^O eq 'MSWin32' or $^O eq 'cygwin' or $^O eq 'VMS')
                     && length( cwd(). $LONG_FILE ) > 247;
 
 ### warn if we are going to skip long file names
-$TOO_LONG ? diag("No long filename support - long filename extraction disabled")
-          : ( push @EXPECT_NORMAL, [ [], $LONG_FILE, qr/^hello\s*$/] ) ;
+if ($TOO_LONG) {
+    diag("No long filename support - long filename extraction disabled") if ! $ENV{PERL_CORE};
+} else {
+    push @EXPECT_NORMAL, [ [], $LONG_FILE, qr/^hello\s*$/];
+}
 
 my @ROOT        = grep { length }   'src', $TOO_LONG ? 'short' : 'long';
 
