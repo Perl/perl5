@@ -2,7 +2,7 @@ package CPAN::HandleConfig;
 use strict;
 use vars qw(%can %keys $VERSION);
 
-$VERSION = sprintf "%.6f", substr(q$Rev: 1566 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 1744 $,4)/1000000 + 5.4;
 
 %can = (
         commit   => "Commit changes to disk",
@@ -298,8 +298,8 @@ EOF
     $fh->print(qq[$msg\$CPAN::Config = \{\n]);
     foreach (sort keys %$CPAN::Config) {
         unless (exists $keys{$_}) {
-            $CPAN::Frontend->mywarn("Dropping unknown config variable '$_'\n");
-            delete $CPAN::Config->{$_};
+            # do not drop them: forward compatibility!
+            $CPAN::Frontend->mywarn("Unknown config variable '$_'\n");
             next;
         }
 	$fh->print(
@@ -685,7 +685,7 @@ sub prefs_lookup {
 
     use strict;
     use vars qw($AUTOLOAD $VERSION);
-    $VERSION = sprintf "%.2f", substr(q$Rev: 1566 $,4)/100;
+    $VERSION = sprintf "%.2f", substr(q$Rev: 1744 $,4)/100;
 
     # formerly CPAN::HandleConfig was known as CPAN::Config
     sub AUTOLOAD {

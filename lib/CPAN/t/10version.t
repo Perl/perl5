@@ -21,6 +21,7 @@ print "1..$N\n";
 
 my $has_sort_versions = eval { require Sort::Versions; 1 };
 my $has_versionpm = eval { require version; 1 };
+my $has_perl_versionpm = eval { require Perl::Version; 1 };
 while (@$D) {
   my($l,$r,$exp) = @{shift @$D};
   my $res = CPAN::Version->vcmp($l,$r);
@@ -42,6 +43,16 @@ while (@$D) {
       push @other, "v.pm: $@";
     } elsif ($vres != $res) {
       push @other, sprintf "v.pm: %d", $vres;
+    }
+  }
+  if ($has_perl_versionpm) {
+    local $^W;
+    my $vpack = "Perl::Version"; # hide the name from 5.004
+    my $vres = eval { $vpack->new($l) cmp $vpack->new($r); };
+    if ($@) {
+      push @other, "PV: $@";
+    } elsif ($vres != $res) {
+      push @other, sprintf "PV: %d", $vres;
     }
   }
   my $other = @other ? " (".join("; ", @other).")" : "";
