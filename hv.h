@@ -51,13 +51,13 @@ struct mro_meta {
     AV          *mro_linear_c3; /* cached c3 @ISA linearization */
     HV		*mro_isarev;    /* reverse @ISA dependencies (who depends on us?) */
     HV		*mro_nextmethod; /* next::method caching */
-    mro_alg     mro_which;      /* which mro alg is in use? */
-    U32         sub_generation; /* Like PL_sub_generation, but stash-local */
-    I32         is_universal;   /* We are UNIVERSAL or a potentially indirect
-                                   member of @UNIVERSAL::ISA */
-    I32         fake;           /* setisa made this fake package,
-                                   gv_fetchmeth pays attention to this,
-                                   and "package" sets it back to zero */
+    U32		sub_generation; /* Like PL_sub_generation, but stash-local */
+    mro_alg	mro_which;      /* which mro alg is in use? */
+    unsigned int is_universal : 1;  /* We are UNIVERSAL or a potentially
+				       indirect member of @UNIVERSAL::ISA */
+    unsigned int fake : 1;          /* setisa made this fake package,
+				       gv_fetchmeth pays attention to this,
+				       and "package" sets it back to zero */
 };
 
 /* Subject to change.
