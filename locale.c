@@ -588,11 +588,11 @@ Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
     *(U32*)xbuf = PL_collation_ix;
     xout = sizeof(PL_collation_ix);
     for (xin = 0; xin < len; ) {
-	SSize_t xused;
+	Size_t xused;
 
 	for (;;) {
 	    xused = strxfrm(xbuf + xout, s + xin, xAlloc - xout);
-	    if (xused == -1)
+	    if (xused >= PERL_INT_MAX)
 		goto bad;
 	    if ((STRLEN)xused < xAlloc - xout)
 		break;
