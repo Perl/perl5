@@ -58,24 +58,21 @@ Perl_mro_meta_dup(pTHX_ struct mro_meta* smeta, CLONE_PARAMS* param)
 
     assert(smeta);
 
-    Newxz(newmeta, 1, struct mro_meta);
+    Newx(newmeta, 1, struct mro_meta);
+    Copy(smeta, newmeta, 1, struct mro_meta);
 
-    newmeta->mro_which       = smeta->mro_which;
-    newmeta->sub_generation  = smeta->sub_generation;
-    newmeta->is_universal    = smeta->is_universal;
-    newmeta->fake            = smeta->fake;
-    newmeta->mro_linear_dfs  = smeta->mro_linear_dfs
-        ? (AV*) SvREFCNT_inc(sv_dup((SV*)smeta->mro_linear_dfs, param))
-        : 0;
-    newmeta->mro_linear_c3   = smeta->mro_linear_c3
-        ? (AV*) SvREFCNT_inc(sv_dup((SV*)smeta->mro_linear_c3, param))
-        : 0;
-    newmeta->mro_isarev      = smeta->mro_isarev
-        ? (HV*) SvREFCNT_inc(sv_dup((SV*)smeta->mro_isarev, param))
-        : 0;
-    newmeta->mro_nextmethod  = smeta->mro_nextmethod
-        ? (HV*) SvREFCNT_inc(sv_dup((SV*)smeta->mro_nextmethod, param))
-        : 0;
+    if (newmeta->mro_linear_dfs)
+	newmeta->mro_linear_dfs
+	    = (AV*) SvREFCNT_inc(sv_dup((SV*)newmeta->mro_linear_dfs, param));
+    if (newmeta->mro_linear_c3)
+	newmeta->mro_linear_c3
+	    = (AV*) SvREFCNT_inc(sv_dup((SV*)newmeta->mro_linear_c3, param));
+    if (newmeta->mro_isarev)
+	newmeta->mro_isarev
+	    = (HV*) SvREFCNT_inc(sv_dup((SV*)newmeta->mro_isarev, param));
+    if (newmeta->mro_nextmethod)
+	newmeta->mro_nextmethod
+	    = (HV*) SvREFCNT_inc(sv_dup((SV*)newmeta->mro_nextmethod, param));
 
     return newmeta;
 }
