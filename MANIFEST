@@ -3641,12 +3641,12 @@ t/mro/dbic_c3.t			mro tests
 t/mro/dbic_dfs.t		mro tests
 t/mro/inconsistent_c3.t		mro tests
 t/mro/method_caching.t		mro tests
-t/mro/next_method_edge_cases.t	mro tests
-t/mro/next_method_in_anon.t	mro tests
-t/mro/next_method_in_eval.t	mro tests
-t/mro/next_method_skip.t	mro tests
+t/mro/next_edgecases.t		mro tests
+t/mro/next_inanon.t		mro tests
+t/mro/next_ineval.t		mro tests
+t/mro/next_skip.t		mro tests
 t/mro/next_method.t		mro tests
-t/mro/next_method_used_with_NEXT.t	mro tests
+t/mro/next_NEXT.t		mro tests
 t/mro/overload_c3.t		mro tests
 t/mro/overload_dfs.t		mro tests
 t/mro/recursion_c3.t		mro tests
