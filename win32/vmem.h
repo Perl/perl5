@@ -164,6 +164,10 @@ void* VMem::Malloc(size_t size)
 #ifdef _USE_LINKED_LIST
     GetLock();
     PMEMORY_BLOCK_HEADER ptr = (PMEMORY_BLOCK_HEADER)m_pmalloc(size+sizeof(MEMORY_BLOCK_HEADER));
+    if (!ptr) {
+	FreeLock();
+	return NULL;
+    }
     LinkBlock(ptr);
     FreeLock();
     return (ptr+1);
@@ -187,6 +191,10 @@ void* VMem::Realloc(void* pMem, size_t size)
     PMEMORY_BLOCK_HEADER ptr = (PMEMORY_BLOCK_HEADER)(((char*)pMem)-sizeof(MEMORY_BLOCK_HEADER));
     UnlinkBlock(ptr);
     ptr = (PMEMORY_BLOCK_HEADER)m_prealloc(ptr, size+sizeof(MEMORY_BLOCK_HEADER));
+    if (!ptr) {
+	FreeLock();
+	return NULL;
+    }
     LinkBlock(ptr);
     FreeLock();
 
