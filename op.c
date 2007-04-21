@@ -3436,8 +3436,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	}
         if (DO_UTF8(pat))
 	    pm_flags |= RXf_UTF8;
-	/* FIXME - can we make this function take const char * args?  */
-	PM_SETRE(pm, CALLREGCOMP((char*)p, (char*)p + plen, pm_flags));
+	PM_SETRE(pm, CALLREGCOMP(pat, pm_flags));
 
 #ifdef PERL_MAD
 	op_getmad(expr,(OP*)pm,'e');

@@ -4076,8 +4076,8 @@ extern const struct regexp_engine my_reg_engine;
 #endif
 
 #ifndef PERL_IN_XSUB_RE 
-regexp *
-Perl_pregcomp(pTHX_ char *exp, char *xend, U32 pm_flags)
+REGEXP *
+Perl_pregcomp(pTHX_ const SV * const pattern, const U32 flags)
 {
     dVAR;
     HV * const table = GvHV(PL_hintgv);
@@ -4092,19 +4092,22 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, U32 pm_flags)
                 PerlIO_printf(Perl_debug_log, "Using engine %"UVxf"\n",
                     SvIV(*ptr));
             });            
-            return CALLREGCOMP_ENG(eng, exp, xend, pm_flags);
+            return CALLREGCOMP_ENG(eng, pattern, flags);
         } 
     }
-    return Perl_re_compile(aTHX_ exp, xend, pm_flags);
+    return Perl_re_compile(aTHX_ pattern, flags);
 }
 #endif
 
-regexp *
-Perl_re_compile(pTHX_ char *exp, char *xend, U32 pm_flags)
+REGEXP *
+Perl_re_compile(pTHX_ const SV * const pattern, const U32 pm_flags)
 {
     dVAR;
-    register regexp *r;
+    register REGEXP *r;
     register regexp_internal *ri;
+    STRLEN plen;
+    char*  exp = SvPV((SV*)pattern, plen);
+    char* xend = exp + plen;
     regnode *scan;
     regnode *first;
     I32 flags;
@@ -4120,16 +4123,13 @@ Perl_re_compile(pTHX_ char *exp, char *xend, U32 pm_flags)
 #endif    
     GET_RE_DEBUG_FLAGS_DECL;
     DEBUG_r(if (!PL_colorset) reginitcolors());
-        
-    if (exp == NULL)
-	FAIL("NULL regexp argument");
 
     RExC_utf8 = RExC_orig_utf8 = pm_flags & RXf_UTF8;
 
     DEBUG_COMPILE_r({
         SV *dsv= sv_newmortal();
         RE_PV_QUOTED_DECL(s, RExC_utf8,
-            dsv, exp, (xend - exp), 60);
+            dsv, exp, plen, 60);
         PerlIO_printf(Perl_debug_log, "%sCompiling REx%s %s\n",
 		       PL_colors[4],PL_colors[5],s);
     });
@@ -4184,7 +4184,7 @@ redo_first_pass:
         thing.
         XXX: somehow figure out how to make this less expensive...
         -- dmq */
-        STRLEN len = xend-exp;
+        STRLEN len = plen;
         DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
 	    "UTF8 mismatch! Converting to utf8 for resizing and compile\n"));
         exp = (char*)Perl_bytes_to_utf8(aTHX_ (U8*)exp, &len);
@@ -4230,7 +4230,7 @@ redo_first_pass:
     RXi_SET( r, ri );
     r->engine= RE_ENGINE_PTR;
     r->refcnt = 1;
-    r->prelen = xend - exp;
+    r->prelen = plen;
     r->extflags = pm_flags;
     {
         bool has_k     = ((r->extflags & RXf_PMf_KEEPCOPY) == RXf_PMf_KEEPCOPY);

@@ -3698,13 +3698,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			re = reg_temp_copy((regexp *)mg->mg_obj); /*XXX:dmq*/
 		    }
 		    else {
-			STRLEN len;
-			const char * const t = SvPV_const(ret, len);
 			U32 pm_flags = 0;
 			const I32 osize = PL_regsize;
 
 			if (DO_UTF8(ret)) pm_flags |= RXf_UTF8;
-			re = CALLREGCOMP((char*)t, (char*)t + len, pm_flags);
+			re = CALLREGCOMP(ret, pm_flags);
 			if (!(SvFLAGS(ret)
 			      & (SVs_TEMP | SVs_PADTMP | SVf_READONLY
 				| SVs_GMG)))

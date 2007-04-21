@@ -9,7 +9,7 @@ the default one.  Each engine is supposed to provide access to a constant
 structure of the following format:
 
     typedef struct regexp_engine {
-        regexp* (*comp) (pTHX_ char* exp, char* xend, U32 pm_flags);
+        REGEXP* (*comp) (pTHX_ const SV * const pattern, const U32 flags);
         I32	    (*exec) (pTHX_ regexp* prog, char* stringarg, char* strend,
     			    char* strbeg, I32 minend, SV* screamer,
     			    void* data, U32 flags);
@@ -45,12 +45,28 @@ The routines are as follows:
 
 =head2 comp
 
-    regexp* comp(char *exp, char *xend, U32 flags);
+    REGEXP* comp(pTHX_ const SV * const pattern, const U32 flags);
 
-Compile the pattern between exp and xend using the given flags and return a
-pointer to a prepared regexp structure that can perform the match. See L</The
-REGEXP structure> below for an explanation of the individual fields in the
-REGEXP struct.
+Compile the pattern stored in C<pattern> using the given C<flags> and
+return a pointer to a prepared C<REGEXP> structure that can perform
+the match. See L</The REGEXP structure> below for an explanation of
+the individual fields in the REGEXP struct.
+
+The C<pattern> parameter is the scalar that was used as the
+pattern. previous versions of perl would pass two C<char*> indicating
+the start and end of the stringifed pattern, the following snippet can
+be used to get the old parameters:
+
+    STRLEN plen;
+    char*  exp = SvPV(pattern, plen);
+    char* xend = exp + plen;
+
+Since any scalar can be passed as a pattern it's possible to implement
+an engine that does something with an array (C<< "ook" =~ [ qw/ eek
+hlagh / ] >>) or with the non-stringified form of a compiled regular
+expression (C<< "ook" =~ qr/eek/ >>). perl's own engine will always
+stringify everything using the snippet above but that doesn't mean
+other engines have to.
 
 The C<flags> paramater is a bitfield which indicates which of the
 C<msixk> flags the regex was compiled with. In addition it contains
@@ -63,7 +79,8 @@ in F<pp.c> to find out whether your engine should be setting these.
 
 The C<eogc> flags are stripped out before being passed to the comp
 routine. The regex engine does not need to know whether any of these
-are set.
+are set as those flags should only affect what perl does with the
+pattern and its match variables, not how it gets compiled & executed.
 
 =over 4
 

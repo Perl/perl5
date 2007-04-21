@@ -196,10 +196,10 @@
 
 #define CALLRUNOPS  CALL_FPTR(PL_runops)
 
-#define CALLREGCOMP(exp, xend, pm) Perl_pregcomp(aTHX_ (exp),(xend),(pm))
+#define CALLREGCOMP(sv, flags) Perl_pregcomp(aTHX_ (sv),(flags))
 
-#define CALLREGCOMP_ENG(prog, exp, xend, pm) \
-    CALL_FPTR(((prog)->comp))(aTHX_ exp, xend, pm)
+#define CALLREGCOMP_ENG(prog, sv, flags) \
+    CALL_FPTR(((prog)->comp))(aTHX_ sv, flags)
 #define CALLREGEXEC(prog,stringarg,strend,strbeg,minend,screamer,data,flags) \
     CALL_FPTR((prog)->engine->exec)(aTHX_ (prog),(stringarg),(strend), \
         (strbeg),(minend),(screamer),(data),(flags))

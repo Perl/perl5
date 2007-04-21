@@ -112,7 +112,7 @@ typedef struct re_scream_pos_data_s
  * Any regex engine implementation must be able to build one of these.
  */
 typedef struct regexp_engine {
-    regexp* (*comp) (pTHX_ char* exp, char* xend, U32 pm_flags);
+    REGEXP* (*comp) (pTHX_ const SV * const pattern, const U32 flags);
     I32	    (*exec) (pTHX_ regexp* prog, char* stringarg, char* strend,
 			    char* strbeg, I32 minend, SV* screamer,
 			    void* data, U32 flags);

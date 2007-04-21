@@ -16,7 +16,7 @@ sub handle_file {
     my $mode    = (stat($file))[2] & 07777;
 
     open my $fh, "<", $file
-        or die "Could not open input file $file: $!";
+        or do { warn "Could not open input file $file: $!"; exit 0 };
     binmode $fh;
     my $str = do { local $/; <$fh> };
 
@@ -62,7 +62,7 @@ EOFBLURB
     } else {
         print "Writing $file into $outfile\n" if $opts->{'v'};
         open my $outfh, ">", $outfile
-            or die "Could not open $outfile for writing: $!";
+            or do { warn "Could not open $outfile for writing: $!"; exit 0 };
         binmode $outfh;
         ### $outstr might be empty, if the file was empty
         print $outfh $outstr if $outstr;
