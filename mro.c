@@ -102,11 +102,6 @@ Perl_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
     GV** gvp;
     GV* gv;
     AV* av;
-    SV** svp;
-    I32 items;
-    AV* subrv;
-    SV** subrv_p;
-    I32 subrv_items;
     const char* stashname;
     struct mro_meta* meta;
 
@@ -146,35 +141,37 @@ Perl_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
            the MRO as we go. */
 
         HV* stored = (HV*)sv_2mortal((SV*)newHV());
-        svp = AvARRAY(av);
-        items = AvFILLp(av) + 1;
+        SV **svp = AvARRAY(av);
+        I32 items = AvFILLp(av) + 1;
 
         /* foreach(@ISA) */
         while (items--) {
             SV* const sv = *svp++;
             HV* const basestash = gv_stashsv(sv, 0);
+	    SV *const *subrv_p;
+	    I32 subrv_items;
 
             if (!basestash) {
                 /* if no stash exists for this @ISA member,
                    simply add it to the MRO and move on */
-                if(!hv_exists_ent(stored, sv, 0)) {
-                    av_push(retval, newSVsv(sv));
-                    hv_store_ent(stored, sv, &PL_sv_undef, 0);
-                }
+		subrv_p = &sv;
+		subrv_items = 1;
             }
             else {
                 /* otherwise, recurse into ourselves for the MRO
                    of this @ISA member, and append their MRO to ours */
-                subrv = mro_get_linear_isa_dfs(basestash, level + 1);
-                subrv_p = AvARRAY(subrv);
-                subrv_items = AvFILLp(subrv) + 1;
-                while(subrv_items--) {
-                    SV* subsv = *subrv_p++;
-                    if(!hv_exists_ent(stored, subsv, 0)) {
-                        av_push(retval, newSVsv(subsv));
-                        hv_store_ent(stored, subsv, &PL_sv_undef, 0);
-                    }
-                }
+		const AV *const subrv
+		    = mro_get_linear_isa_dfs(basestash, level + 1);
+
+		subrv_p = AvARRAY(subrv);
+		subrv_items = AvFILLp(subrv) + 1;
+	    }
+	    while(subrv_items--) {
+		SV *const subsv = *subrv_p++;
+		if(!hv_exists_ent(stored, subsv, 0)) {
+		    av_push(retval, newSVsv(subsv));
+		    hv_store_ent(stored, subsv, &PL_sv_undef, 0);
+		}
             }
         }
     }
