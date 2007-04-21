@@ -449,15 +449,15 @@ XS(XS_UNIVERSAL_VERSION)
 	    } else {
 		Perl_croak(aTHX_ "%s version %"SVf" required--"
 		       "this is only version %"SVf"", HvNAME_get(pkg),
-		       SVfARG(vnumify(req)),
-		       SVfARG(vnumify(sv)));
+		       SVfARG(vstringify(req)),
+		       SVfARG(vstringify(sv)));
 	    }
 	}
 
     }
 
     if ( SvOK(sv) && sv_derived_from(sv, "version") ) {
-	ST(0) = vnumify(sv);
+	ST(0) = vstringify(sv);
     } else {
 	ST(0) = sv;
     }

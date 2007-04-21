@@ -147,8 +147,8 @@ $VERSION = version->new('0.61.' . (qw$Revision: 129 $)[1]);
 ---
   $dist->regen;
   my $provides = new_build()->prepare_metadata()->{provides};
-  is $provides->{'Simple'}{version}, 'v0.60.128', "Check version";
-  is $provides->{'Simple::Simon'}{version}, 'v0.61.129', "Check version";
+  is $provides->{'Simple'}{version}, '0.60.128', "Check version";
+  is $provides->{'Simple::Simon'}{version}, '0.61.129', "Check version";
   is ref($provides->{'Simple'}{version}), '', "Versions from prepare_metadata() aren't refs";
   is ref($provides->{'Simple::Simon'}{version}), '', "Versions from prepare_metadata() aren't refs";
 }

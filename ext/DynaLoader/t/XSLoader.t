@@ -64,7 +64,7 @@ for my $module (sort keys %modules) {
         skip "$module not available", 3 if $extensions !~ /\b$module\b/;
 
         eval qq{ package $module; XSLoader::load('$module', "qunckkk"); };
-        like( $@, "/^$module object version \\S+ does not match bootstrap parameter (?:qunckkk|0\\.000)/",  
+        like( $@, "/^$module object version \\S+ does not match bootstrap parameter (?:qunckkk|0)/",  
                 "calling XSLoader::load() with a XS module and an incorrect version" );
 
         eval qq{ package $module; XSLoader::load('$module'); };

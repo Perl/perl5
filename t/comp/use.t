@@ -145,7 +145,7 @@ if ($^O eq 'MacOS') {
     is ($@, '');
 
     eval "use lib 100.105";
-    like ($@, qr/lib version 100.105 required--this is only version 35.360/);
+    like ($@, qr/lib version 100.105 required--this is only version 35.36/);
 
     local $lib::VERSION = '35.36';
     eval "use lib v33.55";
@@ -158,7 +158,7 @@ if ($^O eq 'MacOS') {
     is ($@, '');
 
     eval "use lib 100.105";
-    like ($@, qr/lib version 100.105 required--this is only version 35.360/);
+    like ($@, qr/lib version 100.105 required--this is only version 35.36/);
 
     local $lib::VERSION = v35.36;
     eval "use lib v33.55";
@@ -171,7 +171,7 @@ if ($^O eq 'MacOS') {
     is ($@, '');
 
     eval "use lib 100.105";
-    like ($@, qr/lib version 100.105 required--this is only version 35.036000/);
+    like ($@, qr/lib version 100.105 required--this is only version v35.36/);
 }
 
 

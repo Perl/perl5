@@ -419,10 +419,10 @@ $VERSION = version->new('0.61.' . (qw$Revision: 129 $)[1]);
 
   $pm_info = Module::Build::ModuleInfo->new_from_file('lib/Simple.pm');
   is( $pm_info->name, 'Simple', 'found default package' );
-  is( $pm_info->version, 'v0.60.128', 'version for default package' );
+  is( $pm_info->version, '0.60.128', 'version for default package' );
   my @packages = $pm_info->packages_inside;
   is_deeply([sort @packages], ['Simple', 'Simple::Simon']);
-  is( $pm_info->version('Simple::Simon'), 'v0.61.129', 'version for embedded package' );
+  is( $pm_info->version('Simple::Simon'), '0.61.129', 'version for embedded package' );
 }
 
 

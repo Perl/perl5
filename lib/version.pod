@@ -161,7 +161,8 @@ if required:
   $v2 = version->new("1.2.3");   # v1.2.3
 
 In specific, version numbers initialized as L<Numeric Versions> will
-stringify in Numeric form.  Version numbers initialized as L<Extended Versions>
+stringify as they were originally created (i.e. the same string that was
+passed to C<new()>.  Version numbers initialized as L<Extended Versions>
 will be stringified as L<Normal Form>.
 
 =head2 Numeric Versions
@@ -177,11 +178,11 @@ will have trailing zeros added to make up the difference, but only for
 purposes of comparison with other version objects.  For example:
 
                                    # Prints     Equivalent to  
-  $v = version->new(      1.2);    # 1.200      v1.200.0
-  $v = version->new(     1.02);    # 1.020      v1.20.0
+  $v = version->new(      1.2);    # 1.2        v1.200.0
+  $v = version->new(     1.02);    # 1.02       v1.20.0
   $v = version->new(    1.002);    # 1.002      v1.2.0
-  $v = version->new(   1.0023);    # 1.002300   v1.2.300
-  $v = version->new(  1.00203);    # 1.002030   v1.2.30
+  $v = version->new(   1.0023);    # 1.0023     v1.2.300
+  $v = version->new(  1.00203);    # 1.00203    v1.2.30
   $v = version->new( 1.002003);    # 1.002003   v1.2.3
 
 All of the preceding examples are true whether or not the input value is 
@@ -233,16 +234,15 @@ is quoted.  For example Module::Example was released to CPAN with the
 following sequence of $VERSION's:
 
   # $VERSION    Stringified
-  0.01          0.010
-  0.02          0.020
-  0.02_01       0.02_0100
-  0.02_02       0.02_0200
-  0.03          0.030
+  0.01          0.01
+  0.02          0.02
+  0.02_01       0.02_01
+  0.02_02       0.02_02
+  0.03          0.03
   etc.
 
-As you can see, the version object created from the values in the first
-column may contain a trailing 0, but will otherwise be both mathematically
-equivalent and sorts alpha-numerically as would be expected.
+The stringified form of numeric versions will always be the same string
+that was used to initialize the version object.
 
 =head2 Object Methods
 
@@ -387,25 +387,25 @@ trailing zeros to preserve the correct version value.
 
 =item * Stringification
 
-In order to mirror as much as possible the existing behavior of ordinary
-$VERSION scalars, the stringification operation will display differently,
-depending on whether the version was initialized as a L<Numeric Version>
-or L<Extended Version>.
+The default stringification for version objects returns exactly the same
+string as was used to create it, whether you used C<new()> or C<qv()>,
+with one exception.  The sole exception is if the object was created using
+C<qv()> and the initializer did not have two decimal places or a leading
+'v' (both optional), then the stringified form will have a leading 'v'
+prepended, in order to support round-trip processing.
 
-What this means in practice is that if the normal CPAN and Camel rules are
-followed ($VERSION is a floating point number with no more than 3 decimal
-points), the stringified output will be exactly the same as the numified
-output.  There will be no visible difference, although the internal 
-representation will be different, and the L<Comparison operators> will 
-function using the internal coding.
+For example:
 
-If a version object is initialized using a L<Extended Version> form, then
-the stringified form will be the L<Normal Form>.  The $obj->normal
-operation can always be used to produce the L<Normal Form>, even if the
-version was originally a L<Numeric Version>.
+  Initialized as          Stringifies to
+  ==============          ==============
+  version->new("1.2")       1.2
+  version->new("v1.2")     v1.2
+  qv("1.2.3")               1.2.3
+  qv("v1.3.5")             v1.3.5
+  qv("1.2")                v1.2   ### exceptional case 
 
-  print $ver->stringify;    # prints v1.2.3.4
-  print $nver->stringify;   # prints 1.002
+See also L<UNIVERSAL::VERSION>, as this also returns the stringified form
+when used as a class method.
 
 =back
 
@@ -538,6 +538,10 @@ version, e.g. 1.2.3 or v1.2.3 in order for this heuristic to be successful.
 core to be magical, which means that the version.pm code can automatically
 determine whether the v-string encoding was used.
 
+3) In all cases, a version created using v-strings will have a stringified
+form that has a leading 'v' character, for the simple reason that sometimes
+it is impossible to tell whether one was present initially.
+
 =head2 Types of Versions Objects
 
 There are two types of Version Objects:
@@ -573,14 +577,9 @@ obeys the relationship
   12.03 < $alphaver < 12.04
 
 Alpha versions with a single decimal point will be treated exactly as if
-they were L<Numeric Versions>, for parsing purposes.  The stringification for
-alpha versions with a single decimal point may seem surprising, since any
-trailing zeros will visible.  For example, the above $alphaver will print as
-
-  12.03_0100
-
-which is mathematically equivalent and ASCII sorts exactly the same as
-without the trailing zeros.
+they were L<Numeric Versions>, for parsing and output purposes.  The
+underscore will be output when an alpha version is stringified, in the same
+place as it was when input.
 
 Alpha versions with more than a single decimal point will be treated 
 exactly as if they were L<Extended Versions>, and will display without any
@@ -595,9 +594,9 @@ trailing (or leading) zeros, in the L<Version Normal> form.  For example,
 
 In addition to the version objects, this modules also replaces the core
 UNIVERSAL::VERSION function with one that uses version objects for its
-comparisons.  The return from this operator is always the numified form,
-and the warning message generated includes both the numified and normal
-forms (for clarity).
+comparisons.  The return from this operator is always the stringified form,
+but the warning message generated includes either the stringified form or
+the normal form, depending on how it was called.
 
 For example:
 
@@ -614,20 +613,29 @@ For example:
 
   print $Bar::VERSION; # prints 1.003005
 
-  eval "use CGI 10"; # some far future release
-  print $@; # prints "CGI version 10 (10.0.0) required..."
+  eval "use foo 10";
+  print $@; # prints "foo version 10 required..."
+  eval "use foo 1.3.5; # work in Perl 5.6.1 or better
+  print $@; # prints "foo version 1.3.5 required..."
+
+  eval "use bar 1.3.6";
+  print $@; # prints "bar version 1.3.6 required..."
+  eval "use bar 1.004"; # note numeric version
+  print $@; # prints "bar version 1.004 required..."
+
 
 IMPORTANT NOTE: This may mean that code which searches for a specific
 string (to determine whether a given module is available) may need to be
-changed.
+changed.  It is always better to use the built-in comparison implicit in
+C<use> or C<require>, rather than manually poking at C<class->VERSION>
+and then doing a comparison yourself.
 
 The replacement UNIVERSAL::VERSION, when used as a function, like this:
 
   print $module->VERSION;
 
-will also exclusively return the numified form.  Technically, the 
-$module->VERSION function returns a string (PV) that can be converted to a 
-number following the normal Perl rules, when used in a numeric context.
+will also exclusively return the stringified form.  See L<Stringification>
+for more details.
 
 =head1 SUBCLASSING
 

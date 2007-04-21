@@ -4134,12 +4134,14 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
     while (isSPACE(*s)) /* leading whitespace is OK */
 	s++;
 
+    start = last = s;
+
     if (*s == 'v') {
 	s++;  /* get past 'v' */
 	qv = 1; /* force quoted version processing */
     }
 
-    start = last = pos = s;
+    pos = s;
 
     /* pre-scan the input string to check for decimals/underbars */
     while ( *pos == '.' || *pos == '_' || isDIGIT(*pos) )
@@ -4260,16 +4262,28 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
 	    av_push(av, newSViv(0));
     }
 
-    if ( av_len(av) == -1 ) /* oops, someone forgot to pass a value */
+    /* need to save off the current version string for later */
+    if ( s > start ) {
+	SV * orig = newSVpvn(start,s-start);
+	if ( qv && saw_period == 1 && *start != 'v' ) {
+	    /* need to insert a v to be consistent */
+	    sv_insert(orig, 0, 0, "v", 1);
+	}
+	hv_store((HV *)hv, "original", 8, orig, 0);
+    }
+    else {
+	hv_store((HV *)hv, "original", 8, newSVpvn("0",1), 0);
 	av_push(av, newSViv(0));
+    }
+
+    /* And finally, store the AV in the hash */
+    hv_store((HV *)hv, "version", 7, newRV_noinc((SV *)av), 0);
 
     /* fix RT#19517 - special case 'undef' as string */
     if ( *s == 'u' && strEQ(s,"undef") ) {
 	s += 5;
     }
 
-    /* And finally, store the AV in the hash */
-    hv_store((HV *)hv, "version", 7, newRV_noinc((SV *)av), 0);
     return s;
 }
 
@@ -4319,6 +4333,12 @@ Perl_new_version(pTHX_ SV *ver)
 	    hv_store((HV *)hv, "width", 5, newSViv(width), 0);
 	}
 
+	if ( hv_exists((HV*)ver, "original", 8 ) )
+	{
+	    SV * pv = *hv_fetchs((HV*)ver, "original", FALSE);
+	    hv_store((HV *)hv, "original", 8, newSVsv(pv), 0);
+	}
+
 	sav = (AV *)SvRV(*hv_fetchs((HV*)ver, "version", FALSE));
 	/* This will get reblessed later if a derived class*/
 	for ( key = 0; key <= av_len(sav); key++ )
@@ -4337,6 +4357,9 @@ Perl_new_version(pTHX_ SV *ver)
 	    const STRLEN len = mg->mg_len;
 	    char * const version = savepvn( (const char*)mg->mg_ptr, len);
 	    sv_setpvn(rv,version,len);
+	    /* this is for consistency with the pure Perl class */
+	    if ( *version != 'v' ) 
+		sv_insert(rv, 0, 0, "v", 1);
 	    Safefree(version);
 	}
 	else {
@@ -4382,6 +4405,7 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 	setlocale(LC_NUMERIC, loc);
 #endif
 	while (tbuf[len-1] == '0' && len > 0) len--;
+	if ( tbuf[len-1] == '.' ) len--; /* eat the trailing decimal */
 	version = savepvn(tbuf, len);
     }
 #ifdef SvVOK
@@ -4403,10 +4427,11 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 	    const char *nver;
 	    const char *pos;
 	    int saw_period = 0;
-	    sv_setpvf(nsv,"%vd",ver);
+	    sv_setpvf(nsv,"v%vd",ver);
 	    pos = nver = savepv(SvPV_nolen(nsv));
 
 	    /* scan the resulting formatted string */
+	    pos++; /* skip the leading 'v' */
 	    while ( *pos == '.' || isDIGIT(*pos) ) {
 		if ( *pos == '.' )
 		    saw_period++ ;
@@ -4627,16 +4652,18 @@ the original version contained 1 or more dots, respectively
 SV *
 Perl_vstringify(pTHX_ SV *vs)
 {
+    SV *pv;
     if ( SvROK(vs) )
 	vs = SvRV(vs);
     
     if ( !vverify(vs) )
 	Perl_croak(aTHX_ "Invalid version object");
 
-    if ( hv_exists((HV *)vs, "qv", 2) )
-	return vnormal(vs);
+    pv = *hv_fetchs((HV*)vs, "original", FALSE);
+    if ( SvPOK(pv) ) 
+	return newSVsv(pv);
     else
-	return vnumify(vs);
+	return &PL_sv_undef;
 }
 
 /*

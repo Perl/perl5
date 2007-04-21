@@ -366,7 +366,7 @@ perl_construct(pTHXx)
 
     PL_stashcache = newHV();
 
-    PL_patchlevel = Perl_newSVpvf(aTHX_ "%d.%d.%d", (int)PERL_REVISION,
+    PL_patchlevel = Perl_newSVpvf(aTHX_ "v%d.%d.%d", (int)PERL_REVISION,
 				  (int)PERL_VERSION, (int)PERL_SUBVERSION);
 
 #ifdef HAS_MMAP
