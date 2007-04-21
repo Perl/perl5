@@ -51,7 +51,6 @@ The C variable which corresponds to Perl's $^W warning variable.
 */
 
 PERLVAR(Idowarn,	U8)
-PERLVAR(Iwidesyscalls,	bool)		/* unused since 5.8.1 */
 PERLVAR(Idoextract,	bool)
 PERLVAR(Isawampersand,	bool)		/* must save all match strings */
 PERLVAR(Iunsafe,	bool)
@@ -341,8 +340,6 @@ PERLVARI(Inumeric_standard,	bool,	TRUE)
 PERLVARI(Inumeric_local,	bool,	TRUE)
 					/* Assume local numerics */
 
-PERLVAR(Inumeric_compat1,		char)
-					/* Used to be numeric_radix */
 #endif /* !USE_LOCALE_NUMERIC */
 
 /* utf8 character classes */
