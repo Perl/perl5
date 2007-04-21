@@ -119,8 +119,8 @@ PERLVAR(Tcurstash,	HV *)		/* symbol table for current package */
 
 PERLVAR(Trestartop,	OP *)		/* propagating an error from croak? */
 PERLVARI(Tcurcop,	COP * VOL,	&PL_compiling)
-PERLVAR(Tlocalizing,	int)		/* are we processing a local() list? */
-PERLVAR(Tcolorset,	int)		/* from regcomp.c */
+PERLVAR(Tlocalizing,	U8)		/* are we processing a local() list? */
+PERLVAR(Tcolorset,	bool)		/* from regcomp.c */
 
 PERLVAR(Tcurstack,	AV *)		/* THE STACK */
 PERLVAR(Tcurstackinfo,	PERL_SI *)	/* current stack + context */
@@ -137,7 +137,7 @@ PERLVAR(Thv_fetch_ent_mh, HE*)		/* owned by hv_fetch_ent() */
 
 
 PERLVAR(Tlastgotoprobe,	OP*)		/* from pp_ctl.c */
-PERLVARI(Tdumpindent,	I32, 4)		/* # of blanks per dump indentation level */
+PERLVARI(Tdumpindent,	U16, 4)		/* # of blanks per dump indentation level */
 
 /* sort stuff */
 PERLVAR(Tsortcop,	OP *)		/* user defined sort routine */
@@ -163,7 +163,7 @@ PERLVARI(Tpeepp,	peep_t, MEMBER_TO_FPTR(Perl_peep))
 					/* Pointer to peephole optimizer */
 
 PERLVARI(Tmaxscream,	I32,	-1)
-PERLVARI(Treginterp_cnt,int,	    0)	/* Whether "Regexp" was interpolated. */
+PERLVARI(Treginterp_cnt,I32,	    0)	/* Whether "Regexp" was interpolated. */
 PERLVARI(Twatchaddr,	char **,    0)
 PERLVAR(Twatchok,	char *)
 

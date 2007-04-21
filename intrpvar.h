@@ -65,7 +65,7 @@ PERLVAR(Iperldb,	U32)
 
 /* This value may be set when embedding for full cleanup  */
 /* 0=none, 1=full, 2=full with checks */
-PERLVARI(Iperl_destruct_level,	int,	0)
+PERLVARI(Iperl_destruct_level,	U8,	0)
 
 /* magical thingies */
 PERLVAR(Ibasetime,	Time_t)		/* $^T */
@@ -180,7 +180,7 @@ PERLVAR(IArgv,		char **)	/* stuff to free from do_aexec, vfork safe */
 PERLVAR(ICmd,		char *)		/* stuff to free from do_aexec, vfork safe */
 PERLVAR(Ipreambleav,	AV *)
 PERLVARI(Ilaststatval,	int,	-1)
-PERLVARI(Ilaststype,	I32,	OP_STAT)
+PERLVARI(Ilaststype,	U16,	OP_STAT)
 PERLVAR(Imess_sv,	SV *)
 
 /* XXX shouldn't these be per-thread? --GSAR */
@@ -306,7 +306,7 @@ PERLVARI(Iexpect, U8,	XSTATE)		/* how to interpret ambiguous tokens */
 
 PERLVAR(Imulti_end,	I32)		/* last line of multi-line string */
 
-PERLVAR(Ierror_count,	I32)		/* how many errors so far, max 10 */
+PERLVAR(Ierror_count,	U8)		/* how many errors so far, max 10 */
 PERLVAR(Isubline,	I32)		/* line this subroutine began on */
 PERLVAR(Isubname,	SV *)		/* name of current subroutine */
 
@@ -319,7 +319,7 @@ PERLVAR(Ipad_reset_pending,	I32)	/* reset pad on next attempted alloc */
 PERLVAR(Ilast_uni,	char *)		/* position of last named-unary op */
 PERLVAR(Ilast_lop,	char *)		/* position of last list operator */
 PERLVAR(Ilast_lop_op,	OPCODE)		/* last list operator */
-PERLVAR(Iin_my,		I32)		/* we're compiling a "my" (or "our") declaration */
+PERLVAR(Iin_my,		U16)		/* we're compiling a "my" (or "our") declaration */
 PERLVAR(Iin_my_stash,	HV *)		/* declared class of this "my" declaration */
 #ifdef FCRYPT
 PERLVARI(Icryptseen,	bool,	FALSE)	/* has fast crypt() been initialized? */
@@ -379,7 +379,7 @@ PERLVAR(Ilast_swash_hv,	HV *)
 PERLVAR(Ilast_swash_tmps,	U8 *)
 PERLVAR(Ilast_swash_slen,	STRLEN)
 PERLVARI(Iglob_index,	int,	0)
-PERLVAR(Ilast_swash_klen,	U32)
+PERLVAR(Ilast_swash_klen,	U8)	/* Only needs to store 0-10  */
 PERLVARA(Ilast_swash_key,10,	U8)
 
 PERLVAR(Iparser,	yy_parser *)	/* current parser state */
@@ -451,7 +451,7 @@ PERLVAR(Iutf8locale,	bool)		/* utf8 locale detected */
 PERLVARI(Ihash_seed_set, bool, FALSE)		/* Hash initialized? */
 PERLVARI(Irehash_seed_set, bool, FALSE)	/* 582 hash initialized? */
 
-PERLVARI(Icv_has_eval, I32, 0) /* PL_compcv includes an entereval or similar */
+PERLVARI(Icv_has_eval, bool, FALSE) /* PL_compcv includes an entereval or similar */
 
 #ifdef PL_OP_SLAB_ALLOC
 PERLVAR(IOpPtr,I32 **)

@@ -168,7 +168,7 @@ Perl_pad_new(pTHX_ int flags)
 	    SAVEI32(PL_comppad_name_fill);
 	    SAVEI32(PL_min_intro_pending);
 	    SAVEI32(PL_max_intro_pending);
-	    SAVEI32(PL_cv_has_eval);
+	    SAVEBOOL(PL_cv_has_eval);
 	    if (flags & padnew_SAVESUB) {
 		SAVEI32(PL_pad_reset_pending);
 	    }
