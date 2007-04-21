@@ -138,7 +138,7 @@ Perl_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
     gvp = (GV**)hv_fetchs(stash, "ISA", FALSE);
     av = (gvp && (gv = *gvp) && isGV_with_GP(gv)) ? GvAV(gv) : NULL;
 
-    if(av) {
+    if(av && AvFILLp(av) >= 0) {
 
         /* "stored" is used to keep track of all of the classnames
            we have added to the MRO so far, so we can do a quick
@@ -673,7 +673,7 @@ __nextcan(pTHX_ SV* self, I32 throw_nomethod)
     }
 
     /* Use the cached coderef if it exists */
-    if((cache_entry = hv_fetch_ent(nmcache, sv, 0, 0))) {
+    else if((cache_entry = hv_fetch_ent(nmcache, sv, 0, 0))) {
         SV* val = HeVAL(cache_entry);
         if(val == &PL_sv_undef) {
             if(throw_nomethod)
