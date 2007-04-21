@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 10;
+require q(./test.pl); plan(tests => 10);
 
 =pod
 
@@ -56,10 +56,10 @@ This tests the classic diamond inheritence pattern.
 
 }
 
-is_deeply(
+ok(eq_array(
     mro::get_linear_isa('Diamond_D'),
-    [ qw(Diamond_D Diamond_B Diamond_C Diamond_A) ],
-    '... got the right MRO for Diamond_D');
+    [ qw(Diamond_D Diamond_B Diamond_C Diamond_A) ]
+), '... got the right MRO for Diamond_D');
 
 is(Diamond_D->foo, 'Diamond_D::foo => Diamond_C::foo', '... skipped B and went to C correctly');
 is(Diamond_D->bar, 'Diamond_D::bar => Diamond_A::bar', '... skipped B & C and went to A correctly');

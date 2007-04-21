@@ -2,14 +2,8 @@
 
 use strict;
 use warnings;
-BEGIN {
-    unless (-d 'blib') {
-        chdir 't' if -d 't';
-        @INC = '../lib';
-    }
-}
 
-use Test::More tests => 11;
+require q(./test.pl); plan(tests => 11);
 
 =pod
 
@@ -87,57 +81,57 @@ KJIHGFEDABC
     use base qw/Test::J Test::I/;
 }
 
-is_deeply(
+ok(eq_array(
     mro::get_linear_isa('Test::A'),
-    [ qw(Test::A) ],
-    '... got the right DFS merge order for Test::A');
+    [ qw(Test::A) ]
+), '... got the right DFS merge order for Test::A');
 
-is_deeply(
+ok(eq_array(
     mro::get_linear_isa('Test::B'),
-    [ qw(Test::B) ],
-    '... got the right DFS merge order for Test::B');
+    [ qw(Test::B) ]
+), '... got the right DFS merge order for Test::B');
 
-is_deeply(
+ok(eq_array(
     mro::get_linear_isa('Test::C'),
-    [ qw(Test::C) ],
-    '... got the right DFS merge order for Test::C');
+    [ qw(Test::C) ]
+), '... got the right DFS merge order for Test::C');
 
-is_deeply(
+ok(eq_array(
     mro::get_linear_isa('Test::D'),
-    [ qw(Test::D Test::A Test::B Test::C) ],
-    '... got the right DFS merge order for Test::D');
+    [ qw(Test::D Test::A Test::B Test::C) ]
+), '... got the right DFS merge order for Test::D');
 
-is_deeply(
+ok(eq_array(
     mro::get_linear_isa('Test::E'),
-    [ qw(Test::E Test::D Test::A Test::B Test::C) ],
-    '... got the right DFS merge order for Test::E');
+    [ qw(Test::E Test::D Test::A Test::B Test::C) ]
+), '... got the right DFS merge order for Test::E');
 
-is_deeply(
+ok(eq_array(
     mro::get_linear_isa('Test::F'),
-    [ qw(Test::F Test::E Test::D Test::A Test::B Test::C) ],
-    '... got the right DFS merge order for Test::F');
+    [ qw(Test::F Test::E Test::D Test::A Test::B Test::C) ]
+), '... got the right DFS merge order for Test::F');
 
-is_deeply(
+ok(eq_array(
     mro::get_linear_isa('Test::G'),
-    [ qw(Test::G Test::D Test::A Test::B Test::C) ],
-    '... got the right DFS merge order for Test::G');
+    [ qw(Test::G Test::D Test::A Test::B Test::C) ]
+), '... got the right DFS merge order for Test::G');
 
-is_deeply(
+ok(eq_array(
     mro::get_linear_isa('Test::H'),
-    [ qw(Test::H Test::G Test::D Test::A Test::B Test::C) ],
-    '... got the right DFS merge order for Test::H');
+    [ qw(Test::H Test::G Test::D Test::A Test::B Test::C) ]
+), '... got the right DFS merge order for Test::H');
 
-is_deeply(
+ok(eq_array(
     mro::get_linear_isa('Test::I'),
-    [ qw(Test::I Test::H Test::G Test::D Test::A Test::B Test::C Test::F Test::E) ],
-    '... got the right DFS merge order for Test::I');
+    [ qw(Test::I Test::H Test::G Test::D Test::A Test::B Test::C Test::F Test::E) ]
+), '... got the right DFS merge order for Test::I');
 
-is_deeply(
+ok(eq_array(
     mro::get_linear_isa('Test::J'),
-    [ qw(Test::J Test::F Test::E Test::D Test::A Test::B Test::C) ],
-    '... got the right DFS merge order for Test::J');
+    [ qw(Test::J Test::F Test::E Test::D Test::A Test::B Test::C) ]
+), '... got the right DFS merge order for Test::J');
 
-is_deeply(
+ok(eq_array(
     mro::get_linear_isa('Test::K'),
-    [ qw(Test::K Test::J Test::F Test::E Test::D Test::A Test::B Test::C Test::I Test::H Test::G) ],
-    '... got the right DFS merge order for Test::K');
+    [ qw(Test::K Test::J Test::F Test::E Test::D Test::A Test::B Test::C Test::I Test::H Test::G) ]
+), '... got the right DFS merge order for Test::K');

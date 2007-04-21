@@ -2,14 +2,8 @@
 
 use strict;
 use warnings;
-BEGIN {
-    unless (-d 'blib') {
-        chdir 't' if -d 't';
-        @INC = '../lib';
-    }
-}
 
-use Test::More tests => 1;
+require q(./test.pl); plan(tests => 1);
 
 =pod
 
@@ -96,7 +90,7 @@ The xx:: prefixes are just to be sure these bogus declarations never stomp on re
     package xx::DBIx::Class::Relationship::CascadeActions; our @ISA = (); use mro 'dfs';
 }
 
-is_deeply(
+ok(eq_array(
     mro::get_linear_isa('xx::DBIx::Class::Core'),
     [qw/
         xx::DBIx::Class::Core
@@ -121,5 +115,5 @@ is_deeply(
         xx::DBIx::Class::ResultSourceProxy::Table
         xx::DBIx::Class::AccessorGroup
         xx::DBIx::Class::ResultSourceProxy
-    /],
-    '... got the right DFS merge order for xx::DBIx::Class::Core');
+    /]
+), '... got the right DFS merge order for xx::DBIx::Class::Core');

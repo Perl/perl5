@@ -2,15 +2,8 @@
 
 use strict;
 use warnings;
-BEGIN {
-    unless (-d 'blib') {
-        chdir 't' if -d 't';
-        @INC = '../lib';
-    }
-}
 
-use Test::More tests => 1;
-use mro;
+require q(./test.pl); plan(tests => 1);
 
 =pod
 
@@ -67,7 +60,7 @@ example taken from: L<http://gauss.gwydiondylan.org/books/drm/drm_50.html>
     use base ('Intelligent', 'Humanoid');
 }
 
-is_deeply(
+ok(eq_array(
     mro::get_linear_isa('Vulcan'),
-    [ qw(Vulcan Intelligent Sentient Humanoid BiPedal LifeForm Object) ],
-    '... got the right MRO for the Vulcan Dylan Example');  
+    [ qw(Vulcan Intelligent Sentient Humanoid BiPedal LifeForm Object) ]
+), '... got the right MRO for the Vulcan Dylan Example');  

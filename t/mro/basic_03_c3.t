@@ -2,14 +2,8 @@
 
 use strict;
 use warnings;
-BEGIN {
-    unless (-d 'blib') {
-        chdir 't' if -d 't';
-        @INC = '../lib';
-    }
-}
 
-use Test::More tests => 4;
+require q(./test.pl); plan(tests => 4);
 
 =pod
 
@@ -92,10 +86,10 @@ Level 0                0 | A |
     use mro 'c3';
 }
 
-is_deeply(
+ok(eq_array(
     mro::get_linear_isa('Test::A'),
-    [ qw(Test::A Test::B Test::E Test::C Test::D Test::F Test::O) ],
-    '... got the right MRO for Test::A');      
+    [ qw(Test::A Test::B Test::E Test::C Test::D Test::F Test::O) ]
+), '... got the right MRO for Test::A');      
     
 is(Test::A->O_or_D, 'Test::D', '... got the right method dispatch');    
 is(Test::A->O_or_F, 'Test::F', '... got the right method dispatch');   

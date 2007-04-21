@@ -2,14 +2,8 @@
 
 use strict;
 use warnings;
-BEGIN {
-    unless (-d 'blib') {
-        chdir 't' if -d 't';
-        @INC = '../lib';
-    }
-}
 
-use Test::More tests => 2;
+require q(./test.pl); plan(tests => 2);
 
 =pod
 
@@ -51,10 +45,10 @@ while building DBIx::Class. Thanks Matt!!!!
     sub foo { 'Diamond_D::foo => ' . (shift)->SUPER::foo }    
 }
 
-is_deeply(
+ok(eq_array(
     mro::get_linear_isa('Diamond_D'),
-    [ qw(Diamond_D Diamond_C Diamond_B Diamond_A) ],
-    '... got the right MRO for Diamond_D');
+    [ qw(Diamond_D Diamond_C Diamond_B Diamond_A) ]
+), '... got the right MRO for Diamond_D');
 
 is(Diamond_D->foo, 
    'Diamond_D::foo => Diamond_B::foo => Diamond_A::foo', 
