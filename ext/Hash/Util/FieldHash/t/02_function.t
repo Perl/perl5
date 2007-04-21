@@ -190,6 +190,23 @@ BEGIN { $n_tests += 6 }
     is( keys %$ob_reg, @obs, "all obs unregistered");
 }
 
+
+# direct hash assignment
+BEGIN { $n_tests += 4 }
+{
+    fieldhashes \ my( %f, %g, %h);
+    my $size = 6;
+    my @obs = map [], 1 .. $size;
+    @f{ @obs} = ( 1) x $size;
+    $g{ $_} = $f{ $_} for keys %f; # single assignment
+    %h = %f;                       # wholesale assignment
+    @obs = ();
+    is keys %$ob_reg, 0, "all keys collected";
+    is keys %f, 0, "orig garbage-collected";
+    is keys %g, 0, "single-copy garbage-dollected";
+    is keys %h, 0, "wholesale-copy garbage-dollected";
+}
+
 {
 
     BEGIN { $n_tests += 1 }

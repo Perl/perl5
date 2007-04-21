@@ -5,3 +5,8 @@ Revision history for Perl extension Hash::Util::FieldHash.
 		-A -g --skip-ppport -nHash::Util::FieldHash
       Fri Jun 23 22:31:59 CEST 2006
         - accepted as v5.9.4 DEVEL28420
+
+
+0.02  Fri Apr 20 22:22:57 CEST 2007
+        - Bugfix: string keys are now checked whether they represent
+        an object, so %fieldhash_clone = %fieldhash_orig works.

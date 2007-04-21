@@ -193,6 +193,11 @@ I32 HUF_watch_key(pTHX_ IV action, SV* field) {
     SV* keysv;
     if (mg) {
         keysv = mg->mg_obj;
+        if (keysv && !SvROK(keysv)) { /* is string an object-id? */
+            SV* obj = HUF_ask_trigger(keysv);
+            if (obj)
+                keysv = obj; /* use the object instead, so registry happens */
+        }
         if (keysv && SvROK(keysv)) {
             SV* ob_id = HUF_obj_id(keysv);
             mg->mg_obj = ob_id; /* key replacement */
