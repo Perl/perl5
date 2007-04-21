@@ -203,8 +203,8 @@ BEGIN { $n_tests += 4 }
     @obs = ();
     is keys %$ob_reg, 0, "all keys collected";
     is keys %f, 0, "orig garbage-collected";
-    is keys %g, 0, "single-copy garbage-dollected";
-    is keys %h, 0, "wholesale-copy garbage-dollected";
+    is keys %g, 0, "single-copy garbage-collected";
+    is keys %h, 0, "wholesale-copy garbage-collected";
 }
 
 {
