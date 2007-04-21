@@ -1664,7 +1664,7 @@ S_sublex_push(pTHX)
     SAVEI32(PL_lex_starts);
     SAVEI8(PL_lex_state);
     SAVEVPTR(PL_lex_inpat);
-    SAVEI8(PL_lex_inwhat);
+    SAVEI16(PL_lex_inwhat);
     SAVECOPLINE(PL_curcop);
     SAVEPPTR(PL_bufptr);
     SAVEPPTR(PL_bufend);
