@@ -42,19 +42,19 @@ typedef struct yy_parser {
     I32		lex_casemods;	/* casemod count */
     char	*lex_brackstack;/* what kind of brackets to pop */
     char	*lex_casestack;	/* what kind of case mods in effect */
-    U32		lex_defer;	/* state after determined token */
-    I32		lex_dojoin;	/* doing an array interpolation */
-    int		lex_expect;	/* expect after determined token */
+    U8		lex_defer;	/* state after determined token */
+    bool	lex_dojoin;	/* doing an array interpolation */
+    U8		lex_expect;	/* expect after determined token */
     I32		lex_formbrack;	/* bracket count at outer format level */
     OP		*lex_inpat;	/* in pattern $) and $| are special */
     OP		*lex_op;	/* extra info to pass back on op */
     SV		*lex_repl;	/* runtime replacement from s/// */
-    I32		lex_inwhat;	/* what kind of quoting are we in */
+    U16		lex_inwhat;	/* what kind of quoting are we in */
     I32		lex_starts;	/* how many interps done on level */
     SV		*lex_stuff;	/* runtime pattern from m// or s/// */
     I32		multi_start;	/* 1st line of multi-line string */
-    I32		multi_open;	/* delimiter of said string */
-    I32		multi_close;	/* delimiter of said string */
+    char	multi_open;	/* delimiter of said string */
+    char	multi_close;	/* delimiter of said string */
     char	pending_ident;	/* pending identifier lookup */
     bool	preambled;
     SUBLEXINFO	sublex_info;

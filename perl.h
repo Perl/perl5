@@ -3278,8 +3278,8 @@ struct nexttoken {
 
 typedef struct _sublex_info SUBLEXINFO;
 struct _sublex_info {
-    I32 super_state;	/* lexer state to save */
-    I32 sub_inwhat;	/* "lex_inwhat" to use */
+    U8 super_state;	/* lexer state to save */
+    U16 sub_inwhat;	/* "lex_inwhat" to use */
     OP *sub_op;		/* "lex_op" to use */
     char *super_bufptr;	/* PL_bufptr that was */
     char *super_bufend;	/* PL_bufend that was */

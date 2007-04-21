@@ -645,7 +645,7 @@ Perl_lex_start(pTHX_ SV *line)
 
     /* initialise lexer state */
 
-    SAVEI32(PL_lex_state);
+    SAVEI8(PL_lex_state);
 #ifdef PERL_MAD
     if (PL_lex_state == LEX_KNOWNEXT) {
 	I32 toke = parser->old_parser->lasttoke;
@@ -678,7 +678,7 @@ Perl_lex_start(pTHX_ SV *line)
     SAVEPPTR(PL_linestart);
     SAVESPTR(PL_linestr);
     SAVEDESTRUCTOR_X(restore_rsfp, PL_rsfp);
-    SAVEINT(PL_expect);
+    SAVEI8(PL_expect);
 
     PL_copline = NOLINE;
     PL_lex_state = LEX_NORMAL;
@@ -1658,13 +1658,13 @@ S_sublex_push(pTHX)
     ENTER;
 
     PL_lex_state = PL_sublex_info.super_state;
-    SAVEI32(PL_lex_dojoin);
+    SAVEBOOL(PL_lex_dojoin);
     SAVEI32(PL_lex_brackets);
     SAVEI32(PL_lex_casemods);
     SAVEI32(PL_lex_starts);
-    SAVEI32(PL_lex_state);
+    SAVEI8(PL_lex_state);
     SAVEVPTR(PL_lex_inpat);
-    SAVEI32(PL_lex_inwhat);
+    SAVEI8(PL_lex_inwhat);
     SAVECOPLINE(PL_curcop);
     SAVEPPTR(PL_bufptr);
     SAVEPPTR(PL_bufend);

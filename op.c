@@ -1817,7 +1817,7 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my)
 
     /* fake up C<use attributes $pkg,$rv,@attrs> */
     ENTER;		/* need to protect against side-effects of 'use' */
-    SAVEINT(PL_expect);
+    SAVEI8(PL_expect);
     stashsv = stash ? newSVhek(HvNAME_HEK(stash)) : &PL_sv_no;
 
 #define ATTRSMODULE "attributes"
@@ -3864,7 +3864,7 @@ Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
     {
 	const line_t ocopline = PL_copline;
 	COP * const ocurcop = PL_curcop;
-	const int oexpect = PL_expect;
+	const U8 oexpect = PL_expect;
 
 	utilize(!(flags & PERL_LOADMOD_DENY), start_subparse(FALSE, 0),
 		veop, modname, imop);

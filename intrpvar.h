@@ -285,7 +285,7 @@ PERLVARI(Icshname,	const char *,	CSH)
 PERLVARI(Icshlen,	I32,	0)
 #endif
 
-PERLVAR(Ilex_state,	U32)		/* next token is determined */
+PERLVAR(Ilex_state,	U8)		/* next token is determined */
 
 /* What we know when we're in LEX_KNOWNEXT state. */
 #ifdef PERL_MAD
@@ -302,7 +302,7 @@ PERLVAR(Ibufptr,	char *)
 PERLVAR(Ioldbufptr,	char *)
 PERLVAR(Ioldoldbufptr,	char *)
 PERLVAR(Ibufend,	char *)
-PERLVARI(Iexpect,int,	XSTATE)		/* how to interpret ambiguous tokens */
+PERLVARI(Iexpect, U8,	XSTATE)		/* how to interpret ambiguous tokens */
 
 PERLVAR(Imulti_end,	I32)		/* last line of multi-line string */
 
