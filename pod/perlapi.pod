@@ -3968,7 +3968,8 @@ Found in file sv.h
 X<SvIVx>
 
 Coerces the given SV to an integer and returns it. Guarantees to evaluate
-sv only once. Use the more efficient C<SvIV> otherwise.
+C<sv> only once. Only use this if C<sv> is an expression with side effects,
+otherwise use the more efficient C<SvIV>.
 
 	IV	SvIVx(SV* sv)
 
@@ -4138,7 +4139,8 @@ Found in file sv.h
 X<SvNVx>
 
 Coerces the given SV to a double and returns it. Guarantees to evaluate
-sv only once. Use the more efficient C<SvNV> otherwise.
+C<sv> only once. Only use this if C<sv> is an expression with side effects,
+otherwise use the more efficient C<SvNV>.
 
 	NV	SvNVx(SV* sv)
 
@@ -4378,7 +4380,9 @@ Found in file sv.h
 =item SvPVx
 X<SvPVx>
 
-A version of C<SvPV> which guarantees to evaluate sv only once.
+A version of C<SvPV> which guarantees to evaluate C<sv> only once.
+Only use this if C<sv> is an expression with side effects, otherwise use the
+more efficient C<SvPVX>.
 
 	char*	SvPVx(SV* sv, STRLEN len)
 
@@ -4489,9 +4493,8 @@ Found in file sv.h
 =item SvREFCNT_inc_simple
 X<SvREFCNT_inc_simple>
 
-Same as SvREFCNT_inc, but can only be used with simple variables, not
-expressions or pointer dereferences.  Since we don't have to store a
-temporary value, it's faster.
+Same as SvREFCNT_inc, but can only be used with expressions without side
+effects.  Since we don't have to store a temporary value, it's faster.
 
 	SV*	SvREFCNT_inc_simple(SV* sv)
 
@@ -4775,7 +4778,8 @@ Found in file sv.h
 X<SvUVx>
 
 Coerces the given SV to an unsigned integer and returns it. Guarantees to
-evaluate sv only once. Use the more efficient C<SvUV> otherwise.
+C<sv> only once. Only use this if C<sv> is an expression with side effects,
+otherwise use the more efficient C<SvUV>.
 
 	UV	SvUVx(SV* sv)
 

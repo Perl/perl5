@@ -8578,7 +8578,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 			has_precis = TRUE;
 		    }
 		    argsv = (SV*)va_arg(*args, void*);
-		    eptr = SvPVx_const(argsv, elen);
+		    eptr = SvPV_const(argsv, elen);
 		    if (DO_UTF8(argsv))
 			is_utf8 = TRUE;
 		    goto string;
@@ -8837,7 +8837,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	case 'c':
 	    if (vectorize)
 		goto unknown;
-	    uv = (args) ? va_arg(*args, int) : SvIVx(argsv);
+	    uv = (args) ? va_arg(*args, int) : SvIV(argsv);
 	    if ((uv > 255 ||
 		 (!UNI_IS_INVARIANT(uv) && SvUTF8(sv)))
 		&& !IN_BYTES) {
@@ -8871,7 +8871,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		}
 	    }
 	    else {
-		eptr = SvPVx_const(argsv, elen);
+		eptr = SvPV_const(argsv, elen);
 		if (DO_UTF8(argsv)) {
 		    I32 old_precis = precis;
 		    if (has_precis && precis < elen) {
@@ -8943,7 +8943,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		}
 	    }
 	    else {
-		IV tiv = SvIVx(argsv); /* work around GCC bug #13488 */
+		IV tiv = SvIV(argsv); /* work around GCC bug #13488 */
 		switch (intsize) {
 		case 'h':	iv = (short)tiv; break;
 		case 'l':	iv = (long)tiv; break;
@@ -9028,7 +9028,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		}
 	    }
 	    else {
-		UV tuv = SvUVx(argsv); /* work around GCC bug #13488 */
+		UV tuv = SvUV(argsv); /* work around GCC bug #13488 */
 		switch (intsize) {
 		case 'h':	uv = (unsigned short)tuv; break;
 		case 'l':	uv = (unsigned long)tuv; break;
@@ -9150,7 +9150,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 #else
 		    va_arg(*args, double)
 #endif
-		: SvNVx(argsv);
+		: SvNV(argsv);
 
 	    need = 0;
 	    if (c != 'e' && c != 'E') {

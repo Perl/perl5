@@ -1475,7 +1475,7 @@ PP(pp_repeat)
 	      count = (IV)nv;
     }
     else
-	 count = SvIVx(sv);
+	 count = SvIV(sv);
     if (GIMME == G_ARRAY && PL_op->op_private & OPpREPEAT_DOLIST) {
 	dMARK;
 	static const char oom_list_extend[] = "Out of memory during list extend";
@@ -3863,7 +3863,7 @@ PP(pp_aslice)
 	    register SV **svp;
 	    I32 max = -1;
 	    for (svp = MARK + 1; svp <= SP; svp++) {
-		const I32 elem = SvIVx(*svp);
+		const I32 elem = SvIV(*svp);
 		if (elem > max)
 		    max = elem;
 	    }
@@ -3872,7 +3872,7 @@ PP(pp_aslice)
 	}
 	while (++MARK <= SP) {
 	    register SV **svp;
-	    I32 elem = SvIVx(*MARK);
+	    I32 elem = SvIV(*MARK);
 
 	    if (elem > 0)
 		elem -= arybase;
@@ -4118,7 +4118,7 @@ PP(pp_lslice)
     register SV **lelem;
 
     if (GIMME != G_ARRAY) {
-	I32 ix = SvIVx(*lastlelem);
+	I32 ix = SvIV(*lastlelem);
 	if (ix < 0)
 	    ix += max;
 	else
@@ -4137,7 +4137,7 @@ PP(pp_lslice)
     }
 
     for (lelem = firstlelem; lelem <= lastlelem; lelem++) {
-	I32 ix = SvIVx(*lelem);
+	I32 ix = SvIV(*lelem);
 	if (ix < 0)
 	    ix += max;
 	else
@@ -4216,7 +4216,7 @@ PP(pp_splice)
     SP++;
 
     if (++MARK < SP) {
-	offset = i = SvIVx(*MARK);
+	offset = i = SvIV(*MARK);
 	if (offset < 0)
 	    offset += AvFILLp(ary) + 1;
 	else

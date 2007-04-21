@@ -4812,7 +4812,7 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 	    o = newOP(type, OPf_SPECIAL);
 	else {
 	    o = newPVOP(type, 0, savesharedpv(label->op_type == OP_CONST
-					? SvPVx_nolen_const(((SVOP*)label)->op_sv)
+					? SvPV_nolen_const(((SVOP*)label)->op_sv)
 					: ""));
 	}
 #ifdef PERL_MAD
@@ -5249,11 +5249,11 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	= (block || attrs || (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS)
 	   || PL_madskills)
 	? GV_ADDMULTI : GV_ADDMULTI | GV_NOINIT;
-    const char * const name = o ? SvPVx_nolen_const(cSVOPo->op_sv) : NULL;
+    const char * const name = o ? SvPV_nolen_const(cSVOPo->op_sv) : NULL;
 
     if (proto) {
 	assert(proto->op_type == OP_CONST);
-	ps = SvPVx_const(((SVOP*)proto)->op_sv, ps_len);
+	ps = SvPV_const(((SVOP*)proto)->op_sv, ps_len);
     }
     else
 	ps = NULL;
