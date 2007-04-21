@@ -87,6 +87,12 @@ the given stash.  The return value is a read-only AV*.
 C<level> should be 0 (it is used internally in this
 function's recursion).
 
+You are responsible for C<SvREFCNT_inc()> on the
+return value if you plan to store it anywhere
+semi-permanently (otherwise it might be deleted
+out from under you the next time the cache is
+invalidated).
+
 =cut
 */
 AV*
@@ -117,33 +123,48 @@ Perl_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
               stashname);
 
     meta = HvMROMETA(stash);
+
+    /* return cache if valid */
     if((retval = meta->mro_linear_dfs)) {
-        /* return cache if valid */
         return retval;
     }
 
     /* not in cache, make a new one */
+
     retval = newAV();
     av_push(retval, newSVpv(stashname, 0)); /* add ourselves at the top */
 
+    /* fetch our @ISA */
     gvp = (GV**)hv_fetchs(stash, "ISA", FALSE);
     av = (gvp && (gv = *gvp) && isGV_with_GP(gv)) ? GvAV(gv) : NULL;
 
     if(av) {
+
+        /* "stored" is used to keep track of all of the classnames
+           we have added to the MRO so far, so we can do a quick
+           exists check and avoid adding duplicate classnames to
+           the MRO as we go. */
+
         HV* stored = (HV*)sv_2mortal((SV*)newHV());
         svp = AvARRAY(av);
         items = AvFILLp(av) + 1;
+
+        /* foreach(@ISA) */
         while (items--) {
             SV* const sv = *svp++;
             HV* const basestash = gv_stashsv(sv, 0);
 
             if (!basestash) {
+                /* if no stash exists for this @ISA member,
+                   simply add it to the MRO and move on */
                 if(!hv_exists_ent(stored, sv, 0)) {
                     av_push(retval, newSVsv(sv));
                     hv_store_ent(stored, sv, &PL_sv_undef, 0);
                 }
             }
             else {
+                /* otherwise, recurse into ourselves for the MRO
+                   of this @ISA member, and append their MRO to ours */
                 subrv = mro_get_linear_isa_dfs(basestash, level + 1);
                 subrv_p = AvARRAY(subrv);
                 subrv_items = AvFILLp(subrv) + 1;
@@ -158,7 +179,10 @@ Perl_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
         }
     }
 
+    /* we don't want anyone modifying the cache entry but us,
+       and we do so by replacing it completely */
     SvREADONLY_on(retval);
+
     meta->mro_linear_dfs = retval;
     return retval;
 }
@@ -170,6 +194,12 @@ Returns the C3 linearization of @ISA
 the given stash.  The return value is a read-only AV*.
 C<level> should be 0 (it is used internally in this
 function's recursion).
+
+You are responsible for C<SvREFCNT_inc()> on the
+return value if you plan to store it anywhere
+semi-permanently (otherwise it might be deleted
+out from under you the next time the cache is
+invalidated).
 
 =cut
 */
@@ -199,8 +229,9 @@ Perl_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
               stashname);
 
     meta = HvMROMETA(stash);
+
+    /* return cache if valid */
     if((retval = meta->mro_linear_c3)) {
-        /* return cache if valid */
         return retval;
     }
 
@@ -212,6 +243,11 @@ Perl_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
     gvp = (GV**)hv_fetchs(stash, "ISA", FALSE);
     isa = (gvp && (gv = *gvp) && isGV_with_GP(gv)) ? GvAV(gv) : NULL;
 
+    /* For a better idea how the rest of this works, see the much clearer
+       pure perl version in Algorithm::C3 0.01:
+       http://search.cpan.org/src/STEVAN/Algorithm-C3-0.01/lib/Algorithm/C3.pm
+       (later versions go about it differently than this code for speed reasons)
+    */
     if(isa && AvFILLp(isa) >= 0) {
         SV** seqs_ptr;
         I32 seqs_items;
@@ -305,7 +341,10 @@ Perl_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
         }
     }
 
+    /* we don't want anyone modifying the cache entry but us,
+       and we do so by replacing it completely */
     SvREADONLY_on(retval);
+
     meta->mro_linear_c3 = retval;
     return retval;
 }
@@ -318,6 +357,12 @@ C<mro_get_linear_isa_dfs> for the given stash,
 dependant upon which MRO is in effect
 for that stash.  The return value is a
 read-only AV*.
+
+You are responsible for C<SvREFCNT_inc()> on the
+return value if you plan to store it anywhere
+semi-permanently (otherwise it might be deleted
+out from under you the next time the cache is
+invalidated).
 
 =cut
 */
@@ -341,7 +386,7 @@ Perl_mro_get_linear_isa(pTHX_ HV *stash)
 /*
 =for apidoc mro_isa_changed_in
 
-Takes the neccesary steps (cache invalidations, mostly)
+Takes the necessary steps (cache invalidations, mostly)
 when the @ISA of the given package has changed.  Invoked
 by the C<setisa> magic, should not need to invoke directly.
 
@@ -399,10 +444,17 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
         }
     }
 
-    /* we're starting at the 2nd element, skipping ourselves here */
+    /* Now iterate our MRO (parents), and do a few things:
+         1) instantiate with the "fake" flag if they don't exist
+         2) flag them as universal if we are universal
+         3) Add everything from our isarev to their isarev
+    */
+
+    /* We're starting at the 2nd element, skipping ourselves here */
     linear_mro = mro_get_linear_isa(stash);
     svp = AvARRAY(linear_mro) + 1;
     items = AvFILLp(linear_mro);
+
     while (items--) {
         SV* const sv = *svp++;
         struct mro_meta* mrometa;
@@ -613,11 +665,14 @@ __nextcan(pTHX_ SV* self, I32 throw_nomethod)
 
     /* If we made it to here, we found our context */
 
+    /* Initialize the next::method cache for this stash
+       if necessary */
     selfmeta = HvMROMETA(selfstash);
     if(!(nmcache = selfmeta->mro_nextmethod)) {
         nmcache = selfmeta->mro_nextmethod = newHV();
     }
 
+    /* Use the cached coderef if it exists */
     if((cache_entry = hv_fetch_ent(nmcache, sv, 0, 0))) {
         SV* val = HeVAL(cache_entry);
         if(val == &PL_sv_undef) {
@@ -637,6 +692,8 @@ __nextcan(pTHX_ SV* self, I32 throw_nomethod)
     linear_svp = AvARRAY(linear_av);
     items = AvFILLp(linear_av) + 1;
 
+    /* Walk down our MRO, skipping everything up
+       to the contextually enclosing class */
     while (items--) {
         linear_sv = *linear_svp++;
         assert(linear_sv);
@@ -644,6 +701,9 @@ __nextcan(pTHX_ SV* self, I32 throw_nomethod)
             break;
     }
 
+    /* Now search the remainder of the MRO for the
+       same method name as the contextually enclosing
+       method */
     if(items > 0) {
         while (items--) {
             linear_sv = *linear_svp++;
@@ -667,6 +727,10 @@ __nextcan(pTHX_ SV* self, I32 throw_nomethod)
 
             if (SvTYPE(candidate) != SVt_PVGV)
                 gv_init(candidate, curstash, subname, subname_len, TRUE);
+
+            /* Notably, we only look for real entries, not method cache
+               entries, because in C3 the method cache of a parent is not
+               valid for the child */
             if (SvTYPE(candidate) == SVt_PVGV && (cand_cv = GvCV(candidate)) && !GvCVGEN(candidate)) {
                 SvREFCNT_inc_simple_void_NN((SV*)cand_cv);
                 hv_store_ent(nmcache, newSVsv(sv), (SV*)cand_cv, 0);
