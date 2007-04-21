@@ -169,8 +169,8 @@ Perl_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
 	    while(subrv_items--) {
 		SV *const subsv = *subrv_p++;
 		if(!hv_exists_ent(stored, subsv, 0)) {
-		    av_push(retval, newSVsv(subsv));
 		    hv_store_ent(stored, subsv, &PL_sv_undef, 0);
+		    av_push(retval, newSVsv(subsv));
 		}
             }
         }
@@ -307,7 +307,7 @@ Perl_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
                     cand = seqhead;
                     if((tail_entry = hv_fetch_ent(tails, cand, 0, 0))
                        && (val = HeVAL(tail_entry))
-                       && (SvIVx(val) > 0))
+                       && (SvIVX(val) > 0))
                            continue;
                     winner = newSVsv(cand);
                     av_push(retval, winner);
@@ -480,15 +480,18 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
         if(!mroisarev)
             mroisarev = mrometa->mro_isarev = newHV();
 
-        if(!hv_exists(mroisarev, stashname, strlen(stashname)))
-            hv_store(mroisarev, stashname, strlen(stashname), &PL_sv_yes, 0);
+	/* This hash only ever contains PL_sv_yes. Storing it over itself is
+	   almost as cheap as calling hv_exists, so on aggregate we expect to
+	   save time by not making two calls to the common HV code for the
+	   case where it doesn't exist.  */
+	   
+	hv_store(mroisarev, stashname, strlen(stashname), &PL_sv_yes, 0);
 
         if(isarev) {
             hv_iterinit(isarev);
             while((iter = hv_iternext(isarev))) {
                 SV* revkey = hv_iterkeysv(iter);
-                if(!hv_exists_ent(mroisarev, revkey, 0))
-                    hv_store_ent(mroisarev, revkey, &PL_sv_yes, 0);
+		hv_store_ent(mroisarev, revkey, &PL_sv_yes, 0);
             }
         }
     }
