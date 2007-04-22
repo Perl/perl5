@@ -163,6 +163,7 @@ unless (@ARGV) {
 	warn "$0: cannot open $mani: $!\n";
     }
     unless ($::core) {
+	_find_tests('Module_Pluggable');
 	_find_tests('pod');
 	_find_tests('x2p');
 	_find_tests('japh') if $::torture;

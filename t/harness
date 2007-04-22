@@ -117,6 +117,7 @@ if (@ARGV) {
 	} else {
 	    warn "$0: cannot open $mani: $!\n";
 	}
+	push @tests, <Module_Pluggable/*.t>;
 	push @tests, <pod/*.t>;
 	push @tests, <x2p/*.t>;
     }
