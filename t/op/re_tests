@@ -1283,3 +1283,44 @@ X(\w+)(?=\s)|X(\w+)	Xab	y	[$1-$2]	[-ab]
 (?(DEFINE)(?<A>(?&B)+)(?<B>a))(?&A)	a	y	$&	a
 (?(DEFINE)(?<A>(?&B)+)(?<B>a))(?&A)	aa	y	$&	aa
 \x{100}?(??{""})xxx	xxx	y	$&	xxx
+
+foo(\R)bar	foo\r\nbar	y	$1	\r\n
+foo(\R)bar	foo\nbar	y	$1	\n
+foo(\R)bar	foo\rbar	y	$1	\r
+
+foo(\R+)bar	foo\r\n\x{85}\r\n\nbar	y	$1	\r\n\x{85}\r\n\n
+(\V+)(\R)	foo\r\n\x{85}\r\n\nbar	y	$1-$2	foo-\r\n
+(\R+)(\V)	foo\r\n\x{85}\r\n\nbar	y	$1-$2	\r\n\x{85}\r\n\n-b
+foo(\R)bar	foo\x{85}bar	y	$1	\x{85}
+(\V)(\R)	foo\x{85}bar	y	$1-$2	o-\x{85}
+(\R)(\V)	foo\x{85}bar	y	$1-$2	\x{85}-b
+foo(\R)bar	foo\r\nbar	y	$1	\r\n
+(\V)(\R)	foo\r\nbar	y	$1-$2	o-\r\n
+(\R)(\V)	foo\r\nbar	y	$1-$2	\r\n-b
+foo(\R)bar	foo\r\nbar	y	$1	\r\n
+(\V)(\R)	foo\r\nbar	y	$1-$2	o-\r\n
+(\R)(\V)	foo\r\nbar	y	$1-$2	\r\n-b
+foo(\R)bar	foo\rbar	y	$1	\r
+(\V)(\R)	foo\rbar	y	$1-$2	o-\r
+(\R)(\V)	foo\rbar	y	$1-$2	\r-b
+
+foo(\v+)bar	foo\r\n\x{85}\r\n\nbar	y	$1	\r\n\x{85}\r\n\n
+(\V+)(\v)	foo\r\n\x{85}\r\n\nbar	y	$1-$2	foo-\r
+(\v+)(\V)	foo\r\n\x{85}\r\n\nbar	y	$1-$2	\r\n\x{85}\r\n\n-b
+foo(\v)bar	foo\x{85}bar	y	$1	\x{85}
+(\V)(\v)	foo\x{85}bar	y	$1-$2	o-\x{85}
+(\v)(\V)	foo\x{85}bar	y	$1-$2	\x{85}-b
+foo(\v)bar	foo\rbar	y	$1	\r
+(\V)(\v)	foo\rbar	y	$1-$2	o-\r
+(\v)(\V)	foo\rbar	y	$1-$2	\r-b
+
+
+foo(\h+)bar	foo\t\x{A0}bar	y	$1	\t\x{A0}
+(\H+)(\h)	foo\t\x{A0}bar	y	$1-$2	foo-\t
+(\h+)(\H)	foo\t\x{A0}bar	y	$1-$2	\t\x{A0}-b
+foo(\h)bar	foo\x{A0}bar	y	$1	\x{A0}
+(\H)(\h)	foo\x{A0}bar	y	$1-$2	o-\x{A0}
+(\h)(\H)	foo\x{A0}bar	y	$1-$2	\x{A0}-b
+foo(\h)bar	foo\tbar	y	$1	\t
+(\H)(\h)	foo\tbar	y	$1-$2	o-\t
+(\h)(\H)	foo\tbar	y	$1-$2	\t-b

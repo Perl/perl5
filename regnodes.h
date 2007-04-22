@@ -6,8 +6,8 @@
 
 /* Regops and State definitions */
 
-#define REGNODE_MAX           	84
-#define REGMATCH_STATE_MAX    	124
+#define REGNODE_MAX           	89
+#define REGMATCH_STATE_MAX    	129
 
 #define	END                   	0	/* 0000 End of program. */
 #define	SUCCEED               	1	/* 0x01 Return from a subroutine, basically. */
@@ -92,8 +92,13 @@
 #define	COMMIT                	80	/* 0x50 Pattern fails outright if backtracking through this */
 #define	CUTGROUP              	81	/* 0x51 On failure go to the next alternation in the group */
 #define	KEEPS                 	82	/* 0x52 $& begins here. */
-#define	OPTIMIZED             	83	/* 0x53 Placeholder for dump. */
-#define	PSEUDO                	84	/* 0x54 Pseudo opcode for internal use. */
+#define	LNBREAK               	83	/* 0x53 generic newline pattern */
+#define	VERTWS                	84	/* 0x54 vertical whitespace         (Perl 6) */
+#define	NVERTWS               	85	/* 0x55 not vertical whitespace     (Perl 6) */
+#define	HORIZWS               	86	/* 0x56 horizontal whitespace       (Perl 6) */
+#define	NHORIZWS              	87	/* 0x57 not horizontal whitespace   (Perl 6) */
+#define	OPTIMIZED             	88	/* 0x58 Placeholder for dump. */
+#define	PSEUDO                	89	/* 0x59 Pseudo opcode for internal use. */
 	/* ------------ States ------------- */
 #define	TRIE_next             	(REGNODE_MAX + 1)	/* state for TRIE */
 #define	TRIE_next_fail        	(REGNODE_MAX + 2)	/* state for TRIE */
@@ -225,6 +230,11 @@ EXTCONST U8 PL_regkind[] = {
 	VERB,     	/* COMMIT                 */
 	VERB,     	/* CUTGROUP               */
 	KEEPS,    	/* KEEPS                  */
+	LNBREAK,  	/* LNBREAK                */
+	VERTWS,   	/* VERTWS                 */
+	NVERTWS,  	/* NVERTWS                */
+	HORIZWS,  	/* HORIZWS                */
+	NHORIZWS, 	/* NHORIZWS               */
 	NOTHING,  	/* OPTIMIZED              */
 	PSEUDO,   	/* PSEUDO                 */
 	/* ------------ States ------------- */
@@ -358,6 +368,11 @@ static const U8 regarglen[] = {
 	EXTRA_SIZE(struct regnode_1),        	/* COMMIT       */
 	EXTRA_SIZE(struct regnode_1),        	/* CUTGROUP     */
 	0,                                   	/* KEEPS        */
+	0,                                   	/* LNBREAK      */
+	0,                                   	/* VERTWS       */
+	0,                                   	/* NVERTWS      */
+	0,                                   	/* HORIZWS      */
+	0,                                   	/* NHORIZWS     */
 	0,                                   	/* OPTIMIZED    */
 	0,                                   	/* PSEUDO       */
 };
@@ -448,6 +463,11 @@ static const char reg_off_by_arg[] = {
 	0,	/* COMMIT       */
 	0,	/* CUTGROUP     */
 	0,	/* KEEPS        */
+	0,	/* LNBREAK      */
+	0,	/* VERTWS       */
+	0,	/* NVERTWS      */
+	0,	/* HORIZWS      */
+	0,	/* NHORIZWS     */
 	0,	/* OPTIMIZED    */
 	0,	/* PSEUDO       */
 };
@@ -543,8 +563,13 @@ EXTCONST char * const PL_reg_name[] = {
 	"COMMIT",                	/* 0x50 */
 	"CUTGROUP",              	/* 0x51 */
 	"KEEPS",                 	/* 0x52 */
-	"OPTIMIZED",             	/* 0x53 */
-	"PSEUDO",                	/* 0x54 */
+	"LNBREAK",               	/* 0x53 */
+	"VERTWS",                	/* 0x54 */
+	"NVERTWS",               	/* 0x55 */
+	"HORIZWS",               	/* 0x56 */
+	"NHORIZWS",              	/* 0x57 */
+	"OPTIMIZED",             	/* 0x58 */
+	"PSEUDO",                	/* 0x59 */
 	/* ------------ States ------------- */
 	"TRIE_next",             	/* REGNODE_MAX +0x01 */
 	"TRIE_next_fail",        	/* REGNODE_MAX +0x02 */

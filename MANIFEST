@@ -3297,6 +3297,7 @@ regcomp.c			Regular expression compiler
 regcomp.h			Private declarations for above
 regcomp.pl			Builder of regnodes.h
 regcomp.sym			Data for regnodes.h
+regcharclass.h			Match various character classes efficiently
 regen_lib.pl			Common file routines for generator scripts
 regen_perly.pl			generate perly.{act,h,tab} from perly.y
 regen.pl			Run all scripts that (re)generate files

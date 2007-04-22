@@ -829,7 +829,10 @@ sub UnicodeData_Txt()
 	Table->New(Is => 'Word',   Desc => "[[:Word:]]",   Fuzzy => 0);
     $Cat{SpacePerl} =
 	Table->New(Is => 'SpacePerl', Desc => '\s', Fuzzy => 0);
-
+    $Cat{VertSpace} =
+	Table->New(Is => 'VertSpace', Desc => '\v', Fuzzy => 0);
+    $Cat{HorizSpace} =
+	Table->New(Is => 'HorizSpace', Desc => '\h', Fuzzy => 0);
     my %To;
     $To{Upper} = Table->New();
     $To{Lower} = Table->New();
@@ -885,6 +888,15 @@ sub UnicodeData_Txt()
 
         $Cat{SpacePerl}->$op($code) if $isspace
 	                               && $code != 0x000B; # Backward compat.
+
+        $Cat{VertSpace}->$op($code) if grep {$code == $_} 
+            ( 0x0A..0x0D,0x85,0x2028,0x2029 );
+
+        $Cat{HorizSpace}->$op($code) if grep {$code == $_} (
+            0x09,   0x20,   0xa0,   0x1680, 0x180e, 0x2000, 0x2001, 0x2002,
+            0x2003, 0x2004, 0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200a,
+            0x202f, 0x205f, 0x3000
+        ); 
 
         $Cat{Blank}->$op($code) if $isspace
                                 && !($code == 0x000A ||

@@ -127,6 +127,9 @@ EOFCODE
                 \$got = "$repl";
 EOFCODE
         }
+        #$code.=qq[\n\$expect="$expect";\n];
+        #use Devel::Peek;
+        #die Dump($code) if $pat=~/\\h/ and $subject=~/\x{A0}/;
 	{
 	    # Probably we should annotate specific tests with which warnings
 	    # categories they're known to trigger, and hence should be

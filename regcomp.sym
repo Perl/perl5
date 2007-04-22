@@ -185,7 +185,14 @@ CUTGROUP	VERB,      no-sv 1	On failure go to the next alternation in the group
 #*Control what to keep in $&.
 KEEPS		KEEPS,  no	$& begins here.
 
-# NEW STUFF ABOVE THIS LINE -- Please update counts below. 
+#*New charclass like patterns
+LNBREAK		LNBREAK,   none		generic newline pattern
+VERTWS		VERTWS,    none		vertical whitespace         (Perl 6)
+NVERTWS		NVERTWS,   none		not vertical whitespace     (Perl 6)
+HORIZWS		HORIZWS,   none		horizontal whitespace       (Perl 6)
+NHORIZWS	NHORIZWS,  none		not horizontal whitespace   (Perl 6)
+
+# NEW STUFF ABOVE THIS LINE  
 
 ################################################################################
 

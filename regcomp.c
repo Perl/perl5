@@ -2400,6 +2400,34 @@ typedef struct scan_frame {
 
 #define SCAN_COMMIT(s, data, m) scan_commit(s, data, m, is_inf)
 
+#define CASE_SYNST_FNC(nAmE)                                       \
+case nAmE:                                                         \
+    if (flags & SCF_DO_STCLASS_AND) {                              \
+	    for (value = 0; value < 256; value++)                  \
+		if (!is_ ## nAmE ## _cp(value))                       \
+		    ANYOF_BITMAP_CLEAR(data->start_class, value);  \
+    }                                                              \
+    else {                                                         \
+	    for (value = 0; value < 256; value++)                  \
+		if (is_ ## nAmE ## _cp(value))                        \
+		    ANYOF_BITMAP_SET(data->start_class, value);	   \
+    }                                                              \
+    break;                                                         \
+case N ## nAmE:                                                    \
+    if (flags & SCF_DO_STCLASS_AND) {                              \
+	    for (value = 0; value < 256; value++)                   \
+		if (is_ ## nAmE ## _cp(value))                         \
+		    ANYOF_BITMAP_CLEAR(data->start_class, value);   \
+    }                                                               \
+    else {                                                          \
+	    for (value = 0; value < 256; value++)                   \
+		if (!is_ ## nAmE ## _cp(value))                        \
+		    ANYOF_BITMAP_SET(data->start_class, value);	    \
+    }                                                               \
+    break
+
+
+
 STATIC I32
 S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         I32 *minlenp, I32 *deltap,
@@ -3330,6 +3358,34 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		break;
 	    }
 	}
+	else if (OP(scan) == LNBREAK) {
+	    if (flags & SCF_DO_STCLASS) {
+		int value = 0;
+		data->start_class->flags &= ~ANYOF_EOS;	/* No match on empty */
+    	        if (flags & SCF_DO_STCLASS_AND) {
+                    for (value = 0; value < 256; value++)
+                        if (!is_LNBREAK_cp(value))                   
+                            ANYOF_BITMAP_CLEAR(data->start_class, value);  
+                }                                                              
+                else {                                                         
+                    for (value = 0; value < 256; value++)
+                        if (is_LNBREAK_cp(value))                    
+                            ANYOF_BITMAP_SET(data->start_class, value);	   
+                }                                                              
+                if (flags & SCF_DO_STCLASS_OR)
+		    cl_and(data->start_class, and_withp);
+		flags &= ~SCF_DO_STCLASS;
+            }
+	    min += 1;
+	    delta += 2;
+            if (flags & SCF_DO_SUBSTR) {
+    	        SCAN_COMMIT(pRExC_state,data,minlenp);	/* Cannot expect anything... */
+    	        data->pos_min += 1;
+    	        data->pos_delta += 2;
+		data->longest = &(data->longest_float);
+    	    }
+    	    
+	}
 	else if (strchr((const char*)PL_simple,OP(scan))) {
 	    int value = 0;
 
@@ -3524,6 +3580,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			}
 		    }
 		    break;
+		CASE_SYNST_FNC(VERTWS);
+		CASE_SYNST_FNC(HORIZWS);
+		
 		}
 		if (flags & SCF_DO_STCLASS_OR)
 		    cl_and(data->start_class, and_withp);
@@ -3894,6 +3953,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	}
 #endif /* old or new */
 #endif /* TRIE_STUDY_OPT */	
+
 	/* Else: zero-length, ignore. */
 	scan = regnext(scan);
     }
@@ -6585,15 +6645,25 @@ tryagain:
 	    ret = reg_node(pRExC_state, NDIGIT);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
+	case 'R':
+	    ret = reg_node(pRExC_state, LNBREAK);
+	    *flagp |= HASWIDTH|SIMPLE;
+	    goto finish_meta_pat;
+	case 'h':
+	    ret = reg_node(pRExC_state, HORIZWS);
+	    *flagp |= HASWIDTH|SIMPLE;
+	    goto finish_meta_pat;
+	case 'H':
+	    ret = reg_node(pRExC_state, NHORIZWS);
+	    *flagp |= HASWIDTH|SIMPLE;
+	    goto finish_meta_pat;
 	case 'v':
-	    ret = reganode(pRExC_state, PRUNE, 0);
-	    ret->flags = 1;
-	    *flagp |= SIMPLE;
+	    ret = reg_node(pRExC_state, VERTWS);
+	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'V':
-	    ret = reganode(pRExC_state, SKIP, 0);
-	    ret->flags = 1;
-	    *flagp |= SIMPLE;
+	    ret = reg_node(pRExC_state, NVERTWS);
+	    *flagp |= HASWIDTH|SIMPLE;
          finish_meta_pat:	    
 	    nextchar(pRExC_state);
             Set_Node_Length(ret, 2); /* MJD */
@@ -6815,11 +6885,13 @@ tryagain:
 		    case 'C':             /* Single char !DANGEROUS! */
 		    case 'd': case 'D':   /* digit class */
 		    case 'g': case 'G':   /* generic-backref, pos assertion */
+		    case 'h': case 'H':   /* HORIZWS */
 		    case 'k': case 'K':   /* named backref, keep marker */
 		    case 'N':             /* named char sequence */
 		    case 'p': case 'P':   /* unicode property */
+		              case 'R':   /* LNBREAK */
 		    case 's': case 'S':   /* space class */
-		    case 'v': case 'V':   /* (*PRUNE) and (*SKIP) */
+		    case 'v': case 'V':   /* VERTWS */
 		    case 'w': case 'W':   /* word class */
 		    case 'X':             /* eXtended Unicode "combining character sequence" */
 		    case 'z': case 'Z':   /* End of line/string assertion */
@@ -7242,6 +7314,21 @@ case ANYOF_N##NAME:                                     \
     what = WORD;                                        \
     break
 
+#define _C_C_T_NOLOC_(NAME,TEST,WORD)                   \
+ANYOF_##NAME:                                           \
+	for (value = 0; value < 256; value++)           \
+	    if (TEST)                                   \
+		ANYOF_BITMAP_SET(ret, value);           \
+    yesno = '+';                                        \
+    what = WORD;                                        \
+    break;                                              \
+case ANYOF_N##NAME:                                     \
+	for (value = 0; value < 256; value++)           \
+	    if (!TEST)                                  \
+		ANYOF_BITMAP_SET(ret, value);           \
+    yesno = '!';                                        \
+    what = WORD;                                        \
+    break
 
 /*
    parse a class specification and produce either an ANYOF node that
@@ -7254,10 +7341,10 @@ STATIC regnode *
 S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
 {
     dVAR;
-    register UV value = 0;
     register UV nextvalue;
     register IV prevvalue = OOB_UNICODE;
     register IV range = 0;
+    UV value = 0; /* XXX:dmq: needs to be referenceable (unfortunately) */
     register regnode *ret;
     STRLEN numlen;
     IV namedclass;
@@ -7360,6 +7447,10 @@ parseit:
 	    case 'S':	namedclass = ANYOF_NSPACE;	break;
 	    case 'd':	namedclass = ANYOF_DIGIT;	break;
 	    case 'D':	namedclass = ANYOF_NDIGIT;	break;
+	    case 'v':	namedclass = ANYOF_VERTWS;	break;
+	    case 'V':	namedclass = ANYOF_NVERTWS;	break;
+	    case 'h':	namedclass = ANYOF_HORIZWS;	break;
+	    case 'H':	namedclass = ANYOF_NHORIZWS;	break;
             case 'N':  /* Handle \N{NAME} in class */
                 {
                     /* We only pay attention to the first char of 
@@ -7538,6 +7629,8 @@ parseit:
 		case _C_C_T_(SPACE, isSPACE(value), "SpacePerl");
 		case _C_C_T_(UPPER, isUPPER(value), "Upper");
 		case _C_C_T_(XDIGIT, isXDIGIT(value), "XDigit");
+		case _C_C_T_NOLOC_(VERTWS, is_VERTWS_latin1(&value), "VertSpace");
+		case _C_C_T_NOLOC_(HORIZWS, is_HORIZWS_latin1(&value), "HorizSpace");
 		case ANYOF_ASCII:
 		    if (LOC)
 			ANYOF_CLASS_SET(ret, ANYOF_ASCII);

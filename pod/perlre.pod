@@ -233,7 +233,7 @@ An unescaped C<$> or C<@> interpolates the corresponding variable,
 while escaping will cause the literal string C<\$> to be matched.
 You'll need to write something like C<m/\Quser\E\@\Qhost/>.
 
-=head3 Character classes
+=head3 Character Classes and other Special Escapes
 
 In addition, Perl defines the following:
 X<\w> X<\W> X<\s> X<\S> X<\d> X<\D> X<\X> X<\p> X<\P> X<\C>
@@ -265,8 +265,11 @@ X<word> X<whitespace> X<character class> X<backreference>
     \x12     Hexadecimal escape sequence
     \x{1234} Long hexadecimal escape sequence
     \K       Keep the stuff left of the \K, don't include it in $&
-    \v       Shortcut for (*PRUNE)
-    \V       Shortcut for (*SKIP)
+    \v       Vertical whitespace
+    \V       Not vertical whitespace
+    \h       Horizontal whitespace
+    \H       Not horizontal whitespace
+    \R       Linebreak (matches like \v inside of a charclass)
 
 A C<\w> matches a single alphanumeric character (an alphabetic
 character, or a decimal digit) or C<_>, not a whole word.  Use C<\w+>
@@ -282,6 +285,15 @@ details about C<\pP>, C<\PP>, C<\X> and the possibility of defining
 your own C<\p> and C<\P> properties, and L<perluniintro> about Unicode
 in general.
 X<\w> X<\W> X<word>
+
+C<\R> will atomically match a linebreak, including the network line-ending
+"\x0D\x0A".  Specifically, X<\R> is exactly equivelent to
+
+  (?>\x0D\x0A?|[\x0A-\x0C\x85\x{2028}\x{2029}])
+
+B<Note:> C<\R> has no special meaning inside of a character class;
+use C<\v> instead (vertical whitespace).
+X<\R>
 
 The POSIX character class syntax
 X<character class>
