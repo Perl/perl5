@@ -2908,7 +2908,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     SAVESPTR(PL_unitcheckav);
     PL_unitcheckav = newAV();
     SAVEFREESV(PL_unitcheckav);
-    SAVEI32(PL_error_count);
+    SAVEI8(PL_error_count);
 
 #ifdef PERL_MAD
     SAVEBOOL(PL_madskills);

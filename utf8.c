@@ -1596,7 +1596,7 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
     PUTBACK;
     if (IN_PERL_COMPILETIME) {
 	/* XXX ought to be handled by lex_start */
-	SAVEI32(PL_in_my);
+	SAVEI16(PL_in_my);
 	PL_in_my = 0;
 	sv_setpv(tokenbufsv, PL_tokenbuf);
     }
