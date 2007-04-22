@@ -4,7 +4,7 @@ use strict;
 
 use CPANPLUS::Error;
 use CPANPLUS::Configure;
-
+use CPANPLUS::Internals::Constants;
 
 use Module::Load                qw[load];
 use Params::Check               qw[check];
@@ -14,7 +14,7 @@ $Params::Check::VERBOSE = 1;
 
 use vars qw[@ISA $SHELL $DEFAULT];
 
-$DEFAULT    = 'CPANPLUS::Shell::Default';
+$DEFAULT    = SHELL_DEFAULT;
 
 =pod
 

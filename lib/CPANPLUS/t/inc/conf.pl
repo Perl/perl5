@@ -66,6 +66,7 @@ use constant TEST_CONF_PREREQ           => 'Cwd';
 use constant TEST_CONF_MODULE           => 'Foo::Bar::EU::NOXS';
 use constant TEST_CONF_INST_MODULE      => 'Foo::Bar';
 use constant TEST_CONF_INVALID_MODULE   => 'fnurk';
+use constant TEST_CONF_MIRROR_DIR       => 'dummy-localmirror';
 
 ### we might need this Some Day when we're installing into
 ### our own sandbox. see t/20.t for details
@@ -114,6 +115,7 @@ sub gimme_conf {
 
     _clean_test_dir( [
         $conf->get_conf('base'),     
+        TEST_CONF_MIRROR_DIR,
 #         TEST_INSTALL_DIR_LIB,
 #         TEST_INSTALL_DIR_BIN,
 #         TEST_INSTALL_DIR_MAN1, 
@@ -123,19 +125,40 @@ sub gimme_conf {
     return $conf;
 };
 
-my $fh;
-my $file = ".".basename($0).".output";
-sub output_handle {
-    return $fh if $fh;
+{
+    my $fh;
+    my $file = ".".basename($0).".output";
+    sub output_handle {
+        return $fh if $fh;
+        
+        $fh = FileHandle->new(">$file")
+                    or warn "Could not open output file '$file': $!";
+       
+        $fh->autoflush(1);
+        return $fh;
+    }
     
-    $fh = FileHandle->new(">$file")
-                or warn "Could not open output file '$file': $!";
-   
-    $fh->autoflush(1);
-    return $fh;
+    sub output_file { return $file }
 }
 
-sub output_file { return $file }
+
+### clean these files if we're under perl core
+END { 
+    if ( $ENV{PERL_CORE} ) {
+        close output_handle(); 1 while unlink output_file();
+
+        _clean_test_dir( [
+            gimme_conf->get_conf('base'),   
+            TEST_CONF_MIRROR_DIR,
+    #         TEST_INSTALL_DIR_LIB,
+    #         TEST_INSTALL_DIR_BIN,
+    #         TEST_INSTALL_DIR_MAN1, 
+    #         TEST_INSTALL_DIR_MAN3,
+        ], 1 );
+    }
+}
+
+
 
 ### whenever we start a new script, we want to clean out our
 ### old files from the test '.cpanplus' dir..

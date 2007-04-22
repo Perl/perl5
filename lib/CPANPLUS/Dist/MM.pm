@@ -217,8 +217,7 @@ sub prepare {
         error( loc( "No dir found to operate on!" ) );
         return;
     }
- 
-$DB::single = 1; 
+    
     my $args;
     my( $force, $verbose, $perl, $mmflags );
     {   local $Params::Check::ALLOW_UNKNOWN = 1;

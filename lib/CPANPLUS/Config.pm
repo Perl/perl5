@@ -114,80 +114,90 @@ my $Conf = {
                             : can_run('sudo')
                         ),
         ### perlwrapper that allows us to turn on autoflushing                        
-        'perlwrapper'   => (    ### parallel to your cpanp/cpanp-boxed
-                                do { my $f = File::Spec->rel2abs(
-                                        File::Spec->catdir( 
-                                            dirname($0), 'cpanp-run-perl' 
-                                        )
-                                     );
-                                    -e $f ? $f : undef
-                                } ||
+        'perlwrapper'   => sub{ 
+            my $name = 'cpanp-run-perl';
+
+            my @bins = do{
+                require Config;
+                my $ver  = $Config::Config{version};
+                
+                ### if we are running with 'versiononly' enabled,
+                ### all binaries will have the perlversion appended
+                ### ie, cpanp will become cpanp5.9.5
+                ### so prefer the versioned binary in that case
+                $Config::Config{versiononly}
+                        ? ($name.$ver, $name)
+                        : ($name, $name.$ver);
+            };
                                 
-                                ### parallel to your CPANPLUS.pm:
-                                ### $INC{cpanplus}/../bin/cpanp-run-perl
-                                do { my $f = File::Spec->rel2abs(
-                                        File::Spec->catdir( 
-                                            dirname( $INC{'CPANPLUS.pm'} ),
-                                            '..',   # lib dir
-                                            'bin',  # bin dir
-                                            'cpanp-run-perl' 
-                                        )
-                                     );
-                                    -e $f ? $f : undef
-                                } ||
-                                ### you installed CPANPLUS in a custom prefix,
-                                ### so go paralel to /that/. PREFIX=/tmp/cp
-                                ### would put cpanp-run-perl in /tmp/cp/bin and
-                                ### CPANPLUS.pm in
-                                ### /tmp/cp/lib/perl5/site_perl/5.8.8
-                                do { my $f = File::Spec->rel2abs(
-                                        File::Spec->catdir( 
-                                            dirname( $INC{'CPANPLUS.pm'} ),
-                                            '..', '..', '..', '..', # 4x updir
-                                            'bin',                  # bin dir
-                                            'cpanp-run-perl' 
-                                        )
-                                     );
-                                    -e $f ? $f : undef
-                                } ||
+            my $path;
+            BIN: for my $bin (@bins) {
+                
+                ### parallel to your cpanp/cpanp-boxed
+                my $maybe = File::Spec->rel2abs(
+                                File::Spec->catdir( dirname($0), $bin )
+                            );        
+                $path = $maybe and last BIN if -f $maybe;
+        
+                ### parallel to your CPANPLUS.pm:
+                ### $INC{cpanplus}/../bin/cpanp-run-perl
+                $maybe = File::Spec->rel2abs(
+                            File::Spec->catdir( 
+                                dirname($INC{'CPANPLUS.pm'}),
+                                '..',   # lib dir
+                                'bin',  # bin dir
+                                $bin,   # script
+                            )
+                         );
+                $path = $maybe and last BIN if -f $maybe;
+                         
+                ### you installed CPANPLUS in a custom prefix,
+                ### so go paralel to /that/. PREFIX=/tmp/cp
+                ### would put cpanp-run-perl in /tmp/cp/bin and
+                ### CPANPLUS.pm in
+                ### /tmp/cp/lib/perl5/site_perl/5.8.8
+                $maybe = File::Spec->rel2abs(
+                            File::Spec->catdir( 
+                                dirname( $INC{'CPANPLUS.pm'} ),
+                                '..', '..', '..', '..', # 4x updir
+                                'bin',                  # bin dir
+                                $bin,                   # script
+                            )
+                         );
+                $path = $maybe and last BIN if -f $maybe;
 
-                                ### in your path -- take this one last, the
-                                ### previous two assume extracted tarballs
-                                ### or user installs
-                                ### note that we don't use 'can_run' as it's
-                                ### not an executable, just a wrapper...
-                                do { my $rv;
-                                     for (split(/\Q$Config::Config{path_sep}\E/, 
-                                                $ENV{PATH}), File::Spec->curdir
-                                     ) {           
-                                        my $path = File::Spec->catfile(
-                                                    $_, 'cpanp-run-perl' );
-                                        if( -e $path ) {
-                                            $rv = $path;
-                                            last;
-                                        }     
-                                    }
-                                    
-                                    $rv || undef;
-                                } ||       
-
-                                ### XXX try to be a no-op instead then.. 
-                                ### cross your fingers...
-                                ### pass '-P' to perl: "run program through C 
-                                ### preprocessor before compilation"
-                                do { 
-                                    error(loc(
-                                        "Could not find the '%1' in your path".
-                                        "--this may be a problem.\n".
-                                        "Please locate this program and set ".
-                                        "your '%1' config entry to its path.\n".                
-                                        "Attempting to provide a reasonable ".
-                                        "fallback...",
-                                        'cpanp-run-perl', 'perlwrapper'
-                                     ));                                        
-                                    '-P'
-                                },   
-                        ),         
+                ### in your path -- take this one last, the
+                ### previous two assume extracted tarballs
+                ### or user installs
+                ### note that we don't use 'can_run' as it's
+                ### not an executable, just a wrapper...
+                for my $dir (split(/\Q$Config::Config{path_sep}\E/, $ENV{PATH}),
+                             File::Spec->curdir
+                ) {             
+                    $maybe = File::Spec->catfile( $dir, $bin );
+                    $path = $maybe and last BIN if -f $maybe;
+                }
+            }          
+                
+            ### we should have a $path by now ideally, if so return it
+            return $path if defined $path;
+            
+            ### if not, warn about it and give sensible default.
+            ### XXX try to be a no-op instead then.. 
+            ### cross your fingers...
+            ### pass '-P' to perl: "run program through C 
+            ### preprocessor before compilation"
+            error(loc(
+                "Could not find the '%1' in your path".
+                "--this may be a problem.\n".
+                "Please locate this program and set ".
+                "your '%1' config entry to its path.\n".                
+                "Attempting to provide a reasonable ".
+                "fallback...",
+                $name, 'perlwrapper'
+             ));                                        
+             return '-P'
+        }->(),         
     },
 
     ### _source, _build and _mirror are supposed to be static

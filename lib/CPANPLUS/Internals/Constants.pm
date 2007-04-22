@@ -27,6 +27,9 @@ use constant INSTALLER_SAMPLE
                             => 'CPANPLUS::Dist::Sample';
 use constant INSTALLER_BASE => 'CPANPLUS::Dist::Base';                            
 
+use constant SHELL_DEFAULT  => 'CPANPLUS::Shell::Default';
+use constant SHELL_CLASSIC  => 'CPANPLUS::Shell::Classic';
+
 use constant CONFIG         => 'CPANPLUS::Config';
 use constant CONFIG_USER    => 'CPANPLUS::Config::User';
 use constant CONFIG_SYSTEM  => 'CPANPLUS::Config::System';

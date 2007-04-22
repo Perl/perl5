@@ -119,6 +119,13 @@ CPANPLUS::Selfupdate
                 sub { 
                     my $cb      = shift;
                     my $dist    = $cb->configure_object->get_conf('shell');
+                    
+                    ### we bundle these shells, so don't bother having a dep
+                    ### on them... If we don't do this, CPAN.pm actually detects
+                    ### a recursive dependency and breaks (see #26077).
+                    ### This is not an issue for CPANPLUS itself, it handles
+                    ### it smartly.
+                    return if $dist eq SHELL_DEFAULT or $dist eq SHELL_CLASSIC;
                     return { $dist => '0.0' } if $dist;
                     return;
                 },            

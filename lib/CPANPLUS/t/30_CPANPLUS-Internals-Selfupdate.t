@@ -7,6 +7,7 @@ BEGIN {
 use strict;
 
 use CPANPLUS::Backend;
+use CPANPLUS::Internals::Constants;
 use Test::More 'no_plan';
 use Data::Dumper;
 
@@ -32,6 +33,36 @@ my $Prereq      = { $Dep => 0 };
     ok( $su,                    "Selfupdate object retrieved" );
     isa_ok( $su,                $Class );
 }
+
+
+### check specifically if our bundled shells dont trigger a 
+### dependency (see #26077).
+### do this _before_ changing the built in conf!
+{   my $meth = 'modules_for_feature';
+    my $type = 'shell';
+    my $cobj = $CB->configure_object;
+    my $cur  = $cobj->get_conf( $type );
+
+    for my $shell ( SHELL_DEFAULT, SHELL_CLASSIC ) {
+        ok( $cobj->set_conf( $type => $shell ),         
+                            "Testing dependencies for '$shell'" );
+
+        my $rv = $CB->$Acc->$meth( $type => 1);
+        ok( !$rv,           "   No dependencies for '$shell' -- bundled" );
+    }            
+    
+    for my $shell ( 'CPANPLUS::Test::Shell' ) {
+        ok( $cobj->set_conf( $type => $shell ),         
+                            "Testing dependencies for '$shell'" );
+
+        my $rv = $CB->$Acc->$meth( $type => 1 );
+        ok( $rv,            "   Got prereq hash" );
+        isa_ok( $rv,        'HASH',
+                            "   Return value" );
+        is_deeply( $rv, { $shell => '0.0' },
+                            "   With the proper entries" );
+    }
+}        
 
 ### test the feature list
 {   ### start with defining our OWN type of config, as not all mentioned
@@ -111,7 +142,7 @@ my $Prereq      = { $Dep => 0 };
         ### declare twice because warnings are hateful
         ### declare in a block to quelch 'sub redefined' warnings.
         { local *CPANPLUS::Selfupdate::Module::install = sub { 1 }; }
-        local *CPANPLUS::Selfupdate::Module::install = sub { 1 };
+          local *CPANPLUS::Selfupdate::Module::install = sub { 1 };
         
         my $meth = 'selfupdate';
         can_ok( $Class,         $meth );
