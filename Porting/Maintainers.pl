@@ -512,11 +512,13 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	# NB. tests are located in t/Module_Pluggable to avoid directory
+	# depth issues on VMS
 	'Module::Pluggable' =>
 		{
 		'MAINTAINER'	=> 'simonw',
 		'FILES'		=> q[lib/Module/Pluggable lib/Module/Pluggable.pm
-				     lib/Devel/InnerPackage.pm],
+				     lib/Devel/InnerPackage.pm t/Module_Pluggable],
 		'CPAN'		=> 1,
 		},
 
