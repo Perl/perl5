@@ -120,7 +120,7 @@ sub gimme_conf {
 #         TEST_INSTALL_DIR_BIN,
 #         TEST_INSTALL_DIR_MAN1, 
 #         TEST_INSTALL_DIR_MAN3,
-    ], 1 );
+    ], (  $ENV{PERL_CORE} ? 0 : 1 ) );
         
     return $conf;
 };
@@ -154,7 +154,7 @@ END {
     #         TEST_INSTALL_DIR_BIN,
     #         TEST_INSTALL_DIR_MAN1, 
     #         TEST_INSTALL_DIR_MAN3,
-        ], 1 );
+        ], 0 ); # DO NOT be verbose under perl core -- makes tests fail
     }
 }
 
@@ -168,6 +168,9 @@ sub _clean_test_dir {
 
     for my $dir ( @$dirs ) {
 
+        ### no point if it doesn't exist;
+        next unless -d $dir;
+
         my $dh;
         opendir $dh, $dir or die "Could not open basedir '$dir': $!";
         while( my $file = readdir $dh ) { 
@@ -177,7 +180,7 @@ sub _clean_test_dir {
             
             ### directory, rmtree it
             if( -d $path ) {
-                print "Deleting directory '$path'\n" if $verbose;
+                print "# Deleting directory '$path'\n" if $verbose;
                 eval { rmtree( $path ) };
                 warn "Could not delete '$path' while cleaning up '$dir'" if $@;
            
