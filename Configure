@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Apr 23 19:34:04 CEST 2007 [metaconfig 3.0 PL70]
+# Generated on Mon Apr 23 22:54:24 CEST 2007 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -9728,7 +9728,7 @@ optimize="$optimize"
 ccflags="$ccflags"
 prototype="$prototype"
 define="$define"
-rm_try=$rm_try
+rm_try="$rm_try"
 usethreads=$usethreads
 i_pthread=$i_pthread
 pthread_h_first=$pthread_h_first
