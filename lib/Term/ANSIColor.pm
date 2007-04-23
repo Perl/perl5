@@ -1,5 +1,5 @@
 # Term::ANSIColor -- Color screen output using ANSI escape sequences.
-# $Id: ANSIColor.pm 58 2006-07-12 22:30:55Z eagle $
+# $Id: ANSIColor.pm 64 2007-03-23 17:58:18Z eagle $
 #
 # Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2005, 2006
 #   by Russ Allbery <rra@stanford.edu> and Zenin
@@ -32,7 +32,7 @@ use Exporter ();
                                  ON_CYAN ON_WHITE)]);
 Exporter::export_ok_tags ('constants');
 
-$VERSION = '1.11_01';
+$VERSION = '1.12';
 
 ##############################################################################
 # Internal data structures
@@ -239,13 +239,13 @@ do anything else with it that you might care to).
 uncolor() performs the opposite translation, turning escape sequences
 into a list of strings.
 
-The recognized attributes (all of which should be fairly intuitive) are
-clear, reset, dark, bold, underline, underscore, blink, reverse, concealed,
-black, red, green, yellow, blue, magenta, on_black, on_red, on_green,
+The recognized attributes (all of which should be fairly intuitive) are clear,
+reset, dark, bold, underline, underscore, blink, reverse, concealed, black,
+red, green, yellow, blue, magenta, cyan, white, on_black, on_red, on_green,
 on_yellow, on_blue, on_magenta, on_cyan, and on_white.  Case is not
-significant.  Underline and underscore are equivalent, as are clear and
-reset, so use whichever is the most intuitive to you.  The color alone sets
-the foreground color, and on_color sets the background color.
+significant.  Underline and underscore are equivalent, as are clear and reset,
+so use whichever is the most intuitive to you.  The color alone sets the
+foreground color, and on_color sets the background color.
 
 Note that not all attributes are supported by all terminal types, and some
 terminals may not support any of these sequences.  Dark, blink, and
