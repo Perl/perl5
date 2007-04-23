@@ -3502,7 +3502,7 @@
 #endif
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
-#define find_beginning()	S_find_beginning(aTHX)
+#define find_beginning(a)	S_find_beginning(aTHX_ a)
 #define forbid_setid(a,b)	S_forbid_setid(aTHX_ a,b)
 #define incpush(a,b,c,d,e)	S_incpush(aTHX_ a,b,c,d,e)
 #define init_interp()		S_init_interp(aTHX)
@@ -3515,7 +3515,7 @@
 #define nuke_stacks()		S_nuke_stacks(aTHX)
 #define open_script(a,b,c,d)	S_open_script(aTHX_ a,b,c,d)
 #define usage(a)		S_usage(aTHX_ a)
-#define validate_suid(a,b,c,d)	S_validate_suid(aTHX_ a,b,c,d)
+#define validate_suid(a,b,c,d,e)	S_validate_suid(aTHX_ a,b,c,d,e)
 #endif
 #  if defined(IAMSUID)
 #ifdef PERL_CORE

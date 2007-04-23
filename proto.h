@@ -3373,7 +3373,9 @@ STATIC void	S_Slab_to_rw(pTHX_ void *op)
 #endif
 
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
-STATIC void	S_find_beginning(pTHX);
+STATIC void	S_find_beginning(pTHX_ SV* linestr_sv)
+			__attribute__nonnull__(pTHX_1);
+
 STATIC void	S_forbid_setid(pTHX_ const char flag, const int suidscript);
 STATIC void	S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep, bool canrelocate);
 STATIC void	S_init_interp(pTHX);
@@ -3396,9 +3398,10 @@ STATIC int	S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv, in
 STATIC void	S_usage(pTHX_ const char *name)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC void	S_validate_suid(pTHX_ const char *validarg, const char *scriptname, int fdscript, int suidscript)
+STATIC void	S_validate_suid(pTHX_ const char *validarg, const char *scriptname, int fdscript, int suidscript, SV* linestr_sv)
 			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_5);
 
 #  if defined(IAMSUID)
 STATIC int	S_fd_on_nosuid_fs(pTHX_ int fd);
