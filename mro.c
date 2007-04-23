@@ -245,11 +245,18 @@ Perl_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
        http://search.cpan.org/src/STEVAN/Algorithm-C3-0.01/lib/Algorithm/C3.pm
        (later versions go about it differently than this code for speed reasons)
     */
+
     if(isa && AvFILLp(isa) >= 0) {
         SV** seqs_ptr;
         I32 seqs_items;
         HV* tails = (HV*)sv_2mortal((SV*)newHV());
         AV* seqs = (AV*)sv_2mortal((SV*)newAV());
+        I32* heads;
+
+        /* This builds @seqs, which is an array of arrays.
+           The members of @seqs are the MROs of
+           the members of @ISA, followed by @ISA itself.
+        */
         I32 items = AvFILLp(isa) + 1;
         SV** isa_ptr = AvARRAY(isa);
         while(items--) {
@@ -257,16 +264,28 @@ Perl_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
             SV* isa_item = *isa_ptr++;
             HV* isa_item_stash = gv_stashsv(isa_item, 0);
             if(!isa_item_stash) {
-                isa_lin = newAV();
+                /* if no stash, make a temporary fake MRO
+                   containing just itself */
+                isa_lin = (AV*)sv_2mortal((SV*)newAV());
                 av_push(isa_lin, newSVsv(isa_item));
             }
             else {
                 isa_lin = mro_get_linear_isa_c3(isa_item_stash, level + 1); /* recursion */
             }
-            av_push(seqs, (SV*)av_make(AvFILLp(isa_lin)+1, AvARRAY(isa_lin)));
+            av_push(seqs, (SV*)isa_lin);
         }
-        av_push(seqs, (SV*)av_make(AvFILLp(isa)+1, AvARRAY(isa)));
+        av_push(seqs, (SV*)isa);
 
+        /* This builds "heads", which as an array of integer array
+           indices, one per seq, which point at the virtual "head"
+           of the seq (initially zero) */
+        Newxz(heads, AvFILLp(seqs)+1, I32);
+
+        /* This builds %tails, which has one key for every class
+           mentioned in the tail of any sequence in @seqs (tail meaning
+           everything after the first class, the "head").  The value
+           is how many times this key appears in the tails of @seqs.
+        */
         seqs_ptr = AvARRAY(seqs);
         seqs_items = AvFILLp(seqs) + 1;
         while(seqs_items--) {
@@ -288,6 +307,8 @@ Perl_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
             }
         }
 
+        /* This loop won't terminate until we either finish building
+           the MRO, or get an exception. */
         while(1) {
             SV* seqhead = NULL;
             SV* cand = NULL;
@@ -295,15 +316,22 @@ Perl_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
             SV* val;
             HE* tail_entry;
             AV* seq;
+            int s;
+
+            /* "foreach $seq (@seqs)" */
             SV** avptr = AvARRAY(seqs);
-            items = AvFILLp(seqs)+1;
-            while(items--) {
+            for(s = 0; s <= AvFILLp(seqs); s++) {
                 SV** svp;
-                seq = (AV*)*avptr++;
-                if(AvFILLp(seq) < 0) continue;
-                svp = av_fetch(seq, 0, 0);
-                seqhead = *svp;
+                seq = (AV*)(avptr[s]);
+                if(!seq) continue; /* skip empty seqs */
+                svp = av_fetch(seq, heads[s], 0);
+                seqhead = *svp; /* seqhead = head of this seq */
                 if(!winner) {
+                    /* if we haven't found a winner for this round yet,
+                       and this seqhead is not in tails (or the count
+                       for it in tails has dropped to zero), then this
+                       seqhead is our new winner, and is added to the
+                       final MRO immediately */
                     cand = seqhead;
                     if((tail_entry = hv_fetch_ent(tails, cand, 0, 0))
                        && (val = HeVAL(tail_entry))
@@ -311,27 +339,52 @@ Perl_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
                            continue;
                     winner = newSVsv(cand);
                     av_push(retval, winner);
+                    /* note however that even when we find a winner,
+                       we continue looping over @seqs to do housekeeping */
                 }
                 if(!sv_cmp(seqhead, winner)) {
+                    /* Once we have a winner (including the iteration
+                       where we first found him), inc the head ptr
+                       for any seq which had the winner as a head,
+                       NULL out any seq which is now empty,
+                       and adjust tails for consistency */
 
-                    /* this is basically shift(@seq) in void context */
-                    SvREFCNT_dec(*AvARRAY(seq));
-                    *AvARRAY(seq) = &PL_sv_undef;
-                    AvARRAY(seq) = AvARRAY(seq) + 1;
-                    AvMAX(seq)--;
-                    AvFILLp(seq)--;
-
-                    if(AvFILLp(seq) < 0) continue;
-                    svp = av_fetch(seq, 0, 0);
-                    seqhead = *svp;
-                    tail_entry = hv_fetch_ent(tails, seqhead, 0, 0);
-                    val = HeVAL(tail_entry);
-                    sv_dec(val);
+                    int new_head = ++heads[s];
+                    if(new_head > AvFILLp(seq)) {
+                        avptr[s] = NULL;
+                    }
+                    else {
+                        /* Because we know this new seqhead used to be
+                           a tail, we can assume it is in tails and has
+                           a positive value, which we need to dec */
+                        svp = av_fetch(seq, new_head, 0);
+                        seqhead = *svp;
+                        tail_entry = hv_fetch_ent(tails, seqhead, 0, 0);
+                        val = HeVAL(tail_entry);
+                        sv_dec(val);
+                    }
                 }
             }
-            if(!cand) break;
+
+            /* if we found no candidates, we are done building the MRO.
+               !cand means no seqs have any entries left to check */
+            if(!cand) {
+                Safefree(heads);
+                break;
+            }
+
+            /* If we had candidates, but nobody won, then the @ISA
+               hierarchy is not C3-incompatible */
             if(!winner) {
+                /* we have to do some cleanup before we croak */
+                SV** svp = AvARRAY(seqs);
+                items = AvFILLp(seqs) + 1;
+                while (items--)
+                    *svp++ = NULL;
+
                 SvREFCNT_dec(retval);
+                Safefree(heads);
+
                 Perl_croak(aTHX_ "Inconsistent hierarchy during C3 merge of class '%s': "
                     "merging failed on parent '%"SVf"'", stashname, SVfARG(cand));
             }
