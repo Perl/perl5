@@ -1182,16 +1182,6 @@ Perl_save_long(pTHX_ long int *longp)
 }
 
 void
-Perl_save_I16(pTHX_ I16 *intp)
-{
-    dVAR;
-    SSCHECK(3);
-    SSPUSHINT(*intp);
-    SSPUSHPTR(intp);
-    SSPUSHINT(SAVEt_I16);
-}
-
-void
 Perl_save_iv(pTHX_ IV *ivp)
 {
     dVAR;
