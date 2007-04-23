@@ -2,6 +2,7 @@ Revision history for Perl extension threads::shared.
 
 -
 	- Modify stress test to be TODO under MSWin32
+	- Store user locks safely
 
 1.09 Mon Apr  9 16:49:30 EDT 2007
 	- Modify stress test to not hang under MSWin32
