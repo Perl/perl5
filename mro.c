@@ -752,8 +752,8 @@ XS(XS_mro_set_mro);
 XS(XS_mro_get_mro);
 XS(XS_mro_get_isarev);
 XS(XS_mro_is_universal);
-XS(XS_mro_get_global_sub_generation);
-XS(XS_mro_invalidate_all_method_caches);
+XS(XS_mro_get_global_sub_gen);
+XS(XS_mro_invalidate_method_caches);
 XS(XS_mro_get_sub_generation);
 XS(XS_mro_method_changed_in);
 XS(XS_next_can);
@@ -771,8 +771,8 @@ Perl_boot_core_mro(pTHX)
     newXSproto("mro::get_mro", XS_mro_get_mro, file, "$");
     newXSproto("mro::get_isarev", XS_mro_get_isarev, file, "$");
     newXSproto("mro::is_universal", XS_mro_is_universal, file, "$");
-    newXSproto("mro::get_global_sub_generation", XS_mro_get_global_sub_generation, file, "");
-    newXSproto("mro::invalidate_all_method_caches", XS_mro_invalidate_all_method_caches, file, "");
+    newXSproto("mro::get_global_sub_generation", XS_mro_get_global_sub_gen, file, "");
+    newXSproto("mro::invalidate_all_method_caches", XS_mro_invalidate_method_caches, file, "");
     newXSproto("mro::get_sub_generation", XS_mro_get_sub_generation, file, "$");
     newXSproto("mro::method_changed_in", XS_mro_method_changed_in, file, "$");
     newXS("next::can", XS_next_can, file);
@@ -934,7 +934,7 @@ XS(XS_mro_is_universal)
         XSRETURN_NO;
 }
 
-XS(XS_mro_get_global_sub_generation)
+XS(XS_mro_get_global_sub_gen)
 {
     dVAR;
     dXSARGS;
@@ -948,7 +948,7 @@ XS(XS_mro_get_global_sub_generation)
     XSRETURN(1);
 }
 
-XS(XS_mro_invalidate_all_method_caches)
+XS(XS_mro_invalidate_method_caches)
 {
     dVAR;
     dXSARGS;
