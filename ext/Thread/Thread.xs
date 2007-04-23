@@ -3,9 +3,6 @@
 #include "perl.h"
 #include "XSUB.h"
 
-/* Magic signature for Thread's mg_private is "Th" */ 
-#define Thread_MAGIC_SIGNATURE 0x5468
-
 #ifdef __cplusplus
 #ifdef I_UNISTD
 #include <unistd.h>
