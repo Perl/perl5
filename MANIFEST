@@ -1647,19 +1647,6 @@ lib/CPANPLUS/t/dummy-CPAN/authors/id/M/MB/MBXS/Foo-Bar-0.01.readme	CPANPLUS test
 lib/CPANPLUS/t/dummy-CPAN/authors/id/M/MB/MBXS/Foo-Bar-0.01.tar.gz.packed	CPANPLUS tests
 lib/CPANPLUS/t/dummy-CPAN/modules/02packages.details.txt.gz.packed	CPANPLUS tests
 lib/CPANPLUS/t/dummy-CPAN/modules/03modlist.data.gz.packed	CPANPLUS tests
-lib/CPANPLUS/t/dummy-localmirror/01mailrc.txt.gz.packed	CPANPLUS tests
-lib/CPANPLUS/t/dummy-localmirror/02packages.details.txt.gz.packed	CPANPLUS tests
-lib/CPANPLUS/t/dummy-localmirror/03modlist.data.gz.packed	CPANPLUS tests
-lib/CPANPLUS/t/dummy-localmirror/authors/id/E/EU/EUNOXS/Bundle-Foo-Bar-0.01.tar.gz.packed	CPANPLUS tests
-lib/CPANPLUS/t/dummy-localmirror/authors/id/E/EU/EUNOXS/CHECKSUMS	CPANPLUS tests
-lib/CPANPLUS/t/dummy-localmirror/authors/id/E/EU/EUNOXS/Foo-Bar-0.01.tar.gz.packed	CPANPLUS tests
-lib/CPANPLUS/t/dummy-localmirror/authors/id/E/EU/EUNOXS/perl5.005_03.tar.gz.packed	CPANPLUS tests
-lib/CPANPLUS/t/dummy-localmirror/authors/id/E/EU/EUXS/CHECKSUMS	CPANPLUS tests
-lib/CPANPLUS/t/dummy-localmirror/authors/id/E/EU/EUXS/Foo-Bar-0.01.tar.gz.packed	CPANPLUS tests
-lib/CPANPLUS/t/dummy-localmirror/authors/id/M/MB/MBNOXS/CHECKSUMS	CPANPLUS tests
-lib/CPANPLUS/t/dummy-localmirror/authors/id/M/MB/MBNOXS/Foo-Bar-0.01.tar.gz.packed	CPANPLUS tests
-lib/CPANPLUS/t/dummy-localmirror/authors/id/M/MB/MBXS/CHECKSUMS	CPANPLUS tests
-lib/CPANPLUS/t/dummy-localmirror/authors/id/M/MB/MBXS/Foo-Bar-0.01.tar.gz.packed	CPANPLUS tests
 lib/CPANPLUS/t/inc/conf.pl	CPANPLUS tests
 lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
 lib/CPAN/Queue.pm		queueing system for CPAN.pm
