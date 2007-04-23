@@ -2740,6 +2740,99 @@ Found in file util.c
 
 =back
 
+=head1 MRO Functions
+
+=over 8
+
+=item mro_get_linear_isa
+X<mro_get_linear_isa>
+
+Returns either C<mro_get_linear_isa_c3> or
+C<mro_get_linear_isa_dfs> for the given stash,
+dependant upon which MRO is in effect
+for that stash.  The return value is a
+read-only AV*.
+
+You are responsible for C<SvREFCNT_inc()> on the
+return value if you plan to store it anywhere
+semi-permanently (otherwise it might be deleted
+out from under you the next time the cache is
+invalidated).
+
+	AV*	mro_get_linear_isa(HV* stash)
+
+=for hackers
+Found in file mro.c
+
+=item mro_get_linear_isa_c3
+X<mro_get_linear_isa_c3>
+
+Returns the C3 linearization of @ISA
+the given stash.  The return value is a read-only AV*.
+C<level> should be 0 (it is used internally in this
+function's recursion).
+
+You are responsible for C<SvREFCNT_inc()> on the
+return value if you plan to store it anywhere
+semi-permanently (otherwise it might be deleted
+out from under you the next time the cache is
+invalidated).
+
+	AV*	mro_get_linear_isa_c3(HV* stash, I32 level)
+
+=for hackers
+Found in file mro.c
+
+=item mro_get_linear_isa_dfs
+X<mro_get_linear_isa_dfs>
+
+Returns the Depth-First Search linearization of @ISA
+the given stash.  The return value is a read-only AV*.
+C<level> should be 0 (it is used internally in this
+function's recursion).
+
+You are responsible for C<SvREFCNT_inc()> on the
+return value if you plan to store it anywhere
+semi-permanently (otherwise it might be deleted
+out from under you the next time the cache is
+invalidated).
+
+	AV*	mro_get_linear_isa_dfs(HV* stash, I32 level)
+
+=for hackers
+Found in file mro.c
+
+=item mro_method_changed_in
+X<mro_method_changed_in>
+
+Invalidates method caching on any child classes
+of the given stash, so that they might notice
+the changes in this one.
+
+Ideally, all instances of C<PL_sub_generation++> in
+the perl source outside of C<mro.c> should be
+replaced by calls to this.  This conversion is
+nearly complete.
+
+Perl has always had problems with method caches
+getting out of sync when one directly manipulates
+stashes via things like C<%{Foo::} = %{Bar::}> or 
+C<${Foo::}{bar} = ...> or the equivalent.  If
+you do this in core or XS code, call this afterwards
+on the destination stash to get things back in sync.
+
+If you're doing such a thing from pure perl, use
+C<mro::method_changed_in(classname)>, which
+just calls this.
+
+	void	mro_method_changed_in(HV* stash)
+
+=for hackers
+Found in file mro.c
+
+
+=back
+
 =head1 Multicall Functions
 
 =over 8

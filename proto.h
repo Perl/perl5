@@ -635,31 +635,6 @@ PERL_CALLCONV GV*	Perl_gv_fetchfile(pTHX_ const char* name)
 PERL_CALLCONV GV*	Perl_gv_fetchfile_flags(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV struct mro_meta*	Perl_mro_meta_init(pTHX_ HV* stash)
-			__attribute__nonnull__(pTHX_1);
-
-#if defined(USE_ITHREADS)
-PERL_CALLCONV struct mro_meta*	Perl_mro_meta_dup(pTHX_ struct mro_meta* smeta, CLONE_PARAMS* param)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-
-#endif
-PERL_CALLCONV AV*	Perl_mro_get_linear_isa(pTHX_ HV* stash)
-			__attribute__nonnull__(pTHX_1);
-
-PERL_CALLCONV AV*	Perl_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
-			__attribute__nonnull__(pTHX_1);
-
-PERL_CALLCONV AV*	Perl_mro_get_linear_isa_dfs(pTHX_ HV* stash, I32 level)
-			__attribute__nonnull__(pTHX_1);
-
-PERL_CALLCONV void	Perl_mro_isa_changed_in(pTHX_ HV* stash)
-			__attribute__nonnull__(pTHX_1);
-
-PERL_CALLCONV void	Perl_mro_method_changed_in(pTHX_ HV* stash)
-			__attribute__nonnull__(pTHX_1);
-
-PERL_CALLCONV void	Perl_boot_core_mro(pTHX);
 PERL_CALLCONV GV*	Perl_gv_fetchmeth(pTHX_ HV* stash, const char* name, STRLEN len, I32 level)
 			__attribute__nonnull__(pTHX_2);
 
@@ -4669,6 +4644,32 @@ PERL_CALLCONV void	Perl_emulate_cop_io(pTHX_ const COP *const c, SV *const sv)
 			__attribute__nonnull__(pTHX_2);
 
 PERL_CALLCONV regexp *	Perl_get_re_arg(pTHX_ SV *sv, U32 flags, MAGIC **mgp);
+
+PERL_CALLCONV struct mro_meta*	Perl_mro_meta_init(pTHX_ HV* stash)
+			__attribute__nonnull__(pTHX_1);
+
+#if defined(USE_ITHREADS)
+PERL_CALLCONV struct mro_meta*	Perl_mro_meta_dup(pTHX_ struct mro_meta* smeta, CLONE_PARAMS* param)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+#endif
+PERL_CALLCONV AV*	Perl_mro_get_linear_isa(pTHX_ HV* stash)
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV AV*	Perl_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV AV*	Perl_mro_get_linear_isa_dfs(pTHX_ HV* stash, I32 level)
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV void	Perl_mro_isa_changed_in(pTHX_ HV* stash)
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV void	Perl_mro_method_changed_in(pTHX_ HV* stash)
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV void	Perl_boot_core_mro(pTHX);
 
 END_EXTERN_C
 /*

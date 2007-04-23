@@ -267,16 +267,6 @@
 #define gv_efullname4		Perl_gv_efullname4
 #define gv_fetchfile		Perl_gv_fetchfile
 #define gv_fetchfile_flags	Perl_gv_fetchfile_flags
-#define mro_meta_init		Perl_mro_meta_init
-#if defined(USE_ITHREADS)
-#define mro_meta_dup		Perl_mro_meta_dup
-#endif
-#define mro_get_linear_isa	Perl_mro_get_linear_isa
-#define mro_get_linear_isa_c3	Perl_mro_get_linear_isa_c3
-#define mro_get_linear_isa_dfs	Perl_mro_get_linear_isa_dfs
-#define mro_isa_changed_in	Perl_mro_isa_changed_in
-#define mro_method_changed_in	Perl_mro_method_changed_in
-#define boot_core_mro		Perl_boot_core_mro
 #define gv_fetchmeth		Perl_gv_fetchmeth
 #define gv_fetchmeth_autoload	Perl_gv_fetchmeth_autoload
 #define gv_fetchmethod_autoload	Perl_gv_fetchmethod_autoload
@@ -1894,6 +1884,24 @@
 #endif
 #if !defined(HAS_SIGNBIT)
 #endif
+#ifdef PERL_CORE
+#define mro_meta_init		Perl_mro_meta_init
+#endif
+#if defined(USE_ITHREADS)
+#ifdef PERL_CORE
+#define mro_meta_dup		Perl_mro_meta_dup
+#endif
+#endif
+#define mro_get_linear_isa	Perl_mro_get_linear_isa
+#define mro_get_linear_isa_c3	Perl_mro_get_linear_isa_c3
+#define mro_get_linear_isa_dfs	Perl_mro_get_linear_isa_dfs
+#ifdef PERL_CORE
+#define mro_isa_changed_in	Perl_mro_isa_changed_in
+#endif
+#define mro_method_changed_in	Perl_mro_method_changed_in
+#ifdef PERL_CORE
+#define boot_core_mro		Perl_boot_core_mro
+#endif
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_chdir		Perl_ck_chdir
@@ -2520,16 +2528,6 @@
 #define gv_efullname4(a,b,c,d)	Perl_gv_efullname4(aTHX_ a,b,c,d)
 #define gv_fetchfile(a)		Perl_gv_fetchfile(aTHX_ a)
 #define gv_fetchfile_flags(a,b,c)	Perl_gv_fetchfile_flags(aTHX_ a,b,c)
-#define mro_meta_init(a)	Perl_mro_meta_init(aTHX_ a)
-#if defined(USE_ITHREADS)
-#define mro_meta_dup(a,b)	Perl_mro_meta_dup(aTHX_ a,b)
-#endif
-#define mro_get_linear_isa(a)	Perl_mro_get_linear_isa(aTHX_ a)
-#define mro_get_linear_isa_c3(a,b)	Perl_mro_get_linear_isa_c3(aTHX_ a,b)
-#define mro_get_linear_isa_dfs(a,b)	Perl_mro_get_linear_isa_dfs(aTHX_ a,b)
-#define mro_isa_changed_in(a)	Perl_mro_isa_changed_in(aTHX_ a)
-#define mro_method_changed_in(a)	Perl_mro_method_changed_in(aTHX_ a)
-#define boot_core_mro()		Perl_boot_core_mro(aTHX)
 #define gv_fetchmeth(a,b,c,d)	Perl_gv_fetchmeth(aTHX_ a,b,c,d)
 #define gv_fetchmeth_autoload(a,b,c,d)	Perl_gv_fetchmeth_autoload(aTHX_ a,b,c,d)
 #define gv_fetchmethod_autoload(a,b,c)	Perl_gv_fetchmethod_autoload(aTHX_ a,b,c)
@@ -4162,6 +4160,24 @@
 #if !defined(HAS_SIGNBIT)
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
+#endif
+#ifdef PERL_CORE
+#define mro_meta_init(a)	Perl_mro_meta_init(aTHX_ a)
+#endif
+#if defined(USE_ITHREADS)
+#ifdef PERL_CORE
+#define mro_meta_dup(a,b)	Perl_mro_meta_dup(aTHX_ a,b)
+#endif
+#endif
+#define mro_get_linear_isa(a)	Perl_mro_get_linear_isa(aTHX_ a)
+#define mro_get_linear_isa_c3(a,b)	Perl_mro_get_linear_isa_c3(aTHX_ a,b)
+#define mro_get_linear_isa_dfs(a,b)	Perl_mro_get_linear_isa_dfs(aTHX_ a,b)
+#ifdef PERL_CORE
+#define mro_isa_changed_in(a)	Perl_mro_isa_changed_in(aTHX_ a)
+#endif
+#define mro_method_changed_in(a)	Perl_mro_method_changed_in(aTHX_ a)
+#ifdef PERL_CORE
+#define boot_core_mro()		Perl_boot_core_mro(aTHX)
 #endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)

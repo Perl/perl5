@@ -554,14 +554,14 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 /*
 =for apidoc mro_method_changed_in
 
-Like C<mro_isa_changed_in>, but invalidates method
-caching on any child classes of the given stash, so
-that they might notice the changes in this one.
+Invalidates method caching on any child classes
+of the given stash, so that they might notice
+the changes in this one.
 
 Ideally, all instances of C<PL_sub_generation++> in
-the perl source should be replaced by calls to this.
-Some already are, but some are more difficult to
-replace.
+the perl source outside of C<mro.c> should be
+replaced by calls to this.  This conversion is
+nearly complete.
 
 Perl has always had problems with method caches
 getting out of sync when one directly manipulates

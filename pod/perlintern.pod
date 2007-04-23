@@ -568,6 +568,25 @@ Found in file mg.c
 
 =back
 
+=head1 MRO Functions
+
+=over 8
+
+=item mro_isa_changed_in
+X<mro_isa_changed_in>
+
+Takes the necessary steps (cache invalidations, mostly)
+when the @ISA of the given package has changed.  Invoked
+by the C<setisa> magic, should not need to invoke directly.
+
+	void	mro_isa_changed_in(HV* stash)
+
+=for hackers
+Found in file mro.c
+
+
+=back
+
 =head1 Pad Data Structures
 
 =over 8
