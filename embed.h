@@ -1249,7 +1249,6 @@
 #define incpush			S_incpush
 #define init_interp		S_init_interp
 #define init_ids		S_init_ids
-#define init_lexer		S_init_lexer
 #define init_main_stash		S_init_main_stash
 #define init_perllib		S_init_perllib
 #define init_postdump_symbols	S_init_postdump_symbols
@@ -3508,7 +3507,6 @@
 #define incpush(a,b,c,d,e)	S_incpush(aTHX_ a,b,c,d,e)
 #define init_interp()		S_init_interp(aTHX)
 #define init_ids()		S_init_ids(aTHX)
-#define init_lexer()		S_init_lexer(aTHX)
 #define init_main_stash()	S_init_main_stash(aTHX)
 #define init_perllib()		S_init_perllib(aTHX)
 #define init_postdump_symbols(a,b,c)	S_init_postdump_symbols(aTHX_ a,b,c)

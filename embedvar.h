@@ -273,7 +273,6 @@
 #define PL_nice_chunk		(vTHX->Inice_chunk)
 #define PL_nice_chunk_size	(vTHX->Inice_chunk_size)
 #define PL_nomemok		(vTHX->Inomemok)
-#define PL_numeric_compat1	(vTHX->Inumeric_compat1)
 #define PL_numeric_local	(vTHX->Inumeric_local)
 #define PL_numeric_name		(vTHX->Inumeric_name)
 #define PL_numeric_radix_sv	(vTHX->Inumeric_radix_sv)
@@ -381,7 +380,6 @@
 #define PL_utf8locale		(vTHX->Iutf8locale)
 #define PL_uudmap		(vTHX->Iuudmap)
 #define PL_warnhook		(vTHX->Iwarnhook)
-#define PL_widesyscalls		(vTHX->Iwidesyscalls)
 #define PL_xmlfp		(vTHX->Ixmlfp)
 
 #else	/* !MULTIPLICITY */
@@ -541,7 +539,6 @@
 #define PL_Inice_chunk		PL_nice_chunk
 #define PL_Inice_chunk_size	PL_nice_chunk_size
 #define PL_Inomemok		PL_nomemok
-#define PL_Inumeric_compat1	PL_numeric_compat1
 #define PL_Inumeric_local	PL_numeric_local
 #define PL_Inumeric_name	PL_numeric_name
 #define PL_Inumeric_radix_sv	PL_numeric_radix_sv
@@ -649,7 +646,6 @@
 #define PL_Iutf8locale		PL_utf8locale
 #define PL_Iuudmap		PL_uudmap
 #define PL_Iwarnhook		PL_warnhook
-#define PL_Iwidesyscalls	PL_widesyscalls
 #define PL_Ixmlfp		PL_xmlfp
 
 #define PL_TSv			PL_Sv

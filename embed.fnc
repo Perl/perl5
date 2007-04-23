@@ -1255,7 +1255,6 @@ s	|void	|forbid_setid	|const char flag|const int suidscript
 s	|void	|incpush	|NULLOK const char *dir|bool addsubdirs|bool addoldvers|bool usesep|bool canrelocate
 s	|void	|init_interp
 s	|void	|init_ids
-s	|void	|init_lexer
 s	|void	|init_main_stash
 s	|void	|init_perllib
 s	|void	|init_postdump_symbols|int argc|NN char **argv|NULLOK char **env

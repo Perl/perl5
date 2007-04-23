@@ -424,8 +424,6 @@ END_EXTERN_C
 #define PL_nice_chunk_size	(*Perl_Inice_chunk_size_ptr(aTHX))
 #undef  PL_nomemok
 #define PL_nomemok		(*Perl_Inomemok_ptr(aTHX))
-#undef  PL_numeric_compat1
-#define PL_numeric_compat1	(*Perl_Inumeric_compat1_ptr(aTHX))
 #undef  PL_numeric_local
 #define PL_numeric_local	(*Perl_Inumeric_local_ptr(aTHX))
 #undef  PL_numeric_name
@@ -640,8 +638,6 @@ END_EXTERN_C
 #define PL_uudmap		(*Perl_Iuudmap_ptr(aTHX))
 #undef  PL_warnhook
 #define PL_warnhook		(*Perl_Iwarnhook_ptr(aTHX))
-#undef  PL_widesyscalls
-#define PL_widesyscalls		(*Perl_Iwidesyscalls_ptr(aTHX))
 #undef  PL_xmlfp
 #define PL_xmlfp		(*Perl_Ixmlfp_ptr(aTHX))
 #undef  PL_Sv

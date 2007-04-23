@@ -3378,7 +3378,6 @@ STATIC void	S_forbid_setid(pTHX_ const char flag, const int suidscript);
 STATIC void	S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep, bool canrelocate);
 STATIC void	S_init_interp(pTHX);
 STATIC void	S_init_ids(pTHX);
-STATIC void	S_init_lexer(pTHX);
 STATIC void	S_init_main_stash(pTHX);
 STATIC void	S_init_perllib(pTHX);
 STATIC void	S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)

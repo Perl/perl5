@@ -1658,6 +1658,7 @@ STATIC void *
 S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 {
     dVAR;
+    PerlIO *tmpfp;
     int argc = PL_origargc;
     char **argv = PL_origargv;
     const char *scriptname = NULL;
@@ -2257,7 +2258,11 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     }
 #endif
 
-    init_lexer();
+    tmpfp = PL_rsfp;
+    PL_rsfp = NULL;
+    lex_start(PL_linestr);
+    PL_rsfp = tmpfp;
+    PL_subname = newSVpvs("main");
 
     /* now parse the script */
 
@@ -4564,17 +4569,6 @@ S_nuke_stacks(pTHX)
     Safefree(PL_savestack);
 }
 
-STATIC void
-S_init_lexer(pTHX)
-{
-    dVAR;
-    PerlIO *tmpfp;
-    tmpfp = PL_rsfp;
-    PL_rsfp = NULL;
-    lex_start(PL_linestr);
-    PL_rsfp = tmpfp;
-    PL_subname = newSVpvs("main");
-}
 
 STATIC void
 S_init_predump_symbols(pTHX)
