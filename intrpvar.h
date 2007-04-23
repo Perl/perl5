@@ -16,7 +16,19 @@
  *
  * When building without MULTIPLICITY, these variables will be truly global. */
 
+
+/* For historical reasons this file follows thrdvar.h into the interpeter
+   struct, and that file currently ends with 7 bytes of variables, so putting
+   one last byte here is good for alignment.  */
+
+/* This value may be set when embedding for full cleanup  */
+/* 0=none, 1=full, 2=full with checks */
+PERLVARI(Iperl_destruct_level,	U8,	0)
+
+PERLVAR(Iperldb,	U32)
+
 /* pseudo environmental stuff */
+PERLVAR(Iorigargc,	int)
 PERLVAR(Iorigargv,	char **)
 PERLVAR(Ienvgv,		GV *)
 PERLVAR(Iincgv,		GV *)
@@ -61,11 +73,6 @@ PERLVAR(Isrand_called,	bool)
 PERLVAR(Itainting,	bool)		/* doing taint checks */
 PERLVAR(Iinplace,	char *)
 PERLVAR(Ie_script,	SV *)
-PERLVAR(Iperldb,	U32)
-
-/* This value may be set when embedding for full cleanup  */
-/* 0=none, 1=full, 2=full with checks */
-PERLVARI(Iperl_destruct_level,	U8,	0)
 
 /* magical thingies */
 PERLVAR(Ibasetime,	Time_t)		/* $^T */
@@ -81,8 +88,10 @@ PERLVAR(Istatusvalue_vms,U32)
 PERLVAR(Istatusvalue_posix,I32)
 #endif
 
-/* Moved here to give an even number of adjacent I32s/U32s/ints */
-PERLVAR(Iorigargc,	int)
+#ifdef CSH
+PERLVARI(Icshlen,	I32,	0)
+PERLVARI(Icshname,	const char *,	CSH)
+#endif
 
 /* shortcuts to various I/O objects */
 PERLVAR(Istdingv,	GV *)
@@ -179,17 +188,18 @@ PERLVAR(Ioldname,	char *)		/* what to preserve mode on */
 PERLVAR(IArgv,		char **)	/* stuff to free from do_aexec, vfork safe */
 PERLVAR(ICmd,		char *)		/* stuff to free from do_aexec, vfork safe */
 PERLVAR(Ipreambleav,	AV *)
-PERLVARI(Ilaststatval,	int,	-1)
-PERLVARI(Ilaststype,	U16,	OP_STAT)
 PERLVAR(Imess_sv,	SV *)
-
-/* XXX shouldn't these be per-thread? --GSAR */
 PERLVAR(Iors_sv,	SV *)		/* output record separator $\ */
+     /* Space for one more U16 here without increasing the structure size */
+PERLVAR(Ilast_lop_op,	OPCODE)		/* last list operator */
+PERLVAR(Iin_my,		U16)		/* we're compiling a "my" (or "our") declaration */
+PERLVARI(Ilaststype,	U16,	OP_STAT)
+PERLVARI(Ilaststatval,	int,	-1)
 
 /* interpreter atexit processing */
+PERLVARI(Iexitlistlen,	I32, 0)		/* length of same */
 PERLVARI(Iexitlist,	PerlExitListEntry *, NULL)
 					/* list of exit functions */
-PERLVARI(Iexitlistlen,	I32, 0)		/* length of same */
 
 /*
 =for apidoc Amn|HV*|PL_modglobal
@@ -280,13 +290,6 @@ PERLVAR(Isv_undef,	SV)
 PERLVAR(Isv_no,		SV)
 PERLVAR(Isv_yes,	SV)
 
-#ifdef CSH
-PERLVARI(Icshname,	const char *,	CSH)
-PERLVARI(Icshlen,	I32,	0)
-#endif
-
-PERLVAR(Ilex_state,	U8)		/* next token is determined */
-
 /* What we know when we're in LEX_KNOWNEXT state. */
 #ifdef PERL_MAD
 PERLVARA(Inexttoke,5,	NEXTTOKE)	/* value of next token, if any */
@@ -302,28 +305,27 @@ PERLVAR(Ibufptr,	char *)
 PERLVAR(Ioldbufptr,	char *)
 PERLVAR(Ioldoldbufptr,	char *)
 PERLVAR(Ibufend,	char *)
-PERLVARI(Iexpect, U8,	XSTATE)		/* how to interpret ambiguous tokens */
 
+PERLVARI(Iexpect, U8,	XSTATE)		/* how to interpret ambiguous tokens */
+PERLVAR(Ilex_state,	U8)		/* next token is determined */
+PERLVAR(Ierror_count,	U8)		/* how many errors so far, max 10 */
+PERLVARI(Icv_has_eval, bool, FALSE) /* PL_compcv includes an entereval or similar */
 PERLVAR(Imulti_end,	I32)		/* last line of multi-line string */
 
-PERLVAR(Ierror_count,	U8)		/* how many errors so far, max 10 */
-PERLVAR(Isubline,	I32)		/* line this subroutine began on */
 PERLVAR(Isubname,	SV *)		/* name of current subroutine */
 
+PERLVAR(Isubline,	I32)		/* line this subroutine began on */
 PERLVAR(Imin_intro_pending,	I32)	/* start of vars to introduce */
+
 PERLVAR(Imax_intro_pending,	I32)	/* end of vars to introduce */
 PERLVAR(Ipadix,		I32)		/* max used index in current "register" pad */
+
 PERLVAR(Ipadix_floor,	I32)		/* how low may inner block reset padix */
 PERLVAR(Ipad_reset_pending,	I32)	/* reset pad on next attempted alloc */
 
 PERLVAR(Ilast_uni,	char *)		/* position of last named-unary op */
 PERLVAR(Ilast_lop,	char *)		/* position of last list operator */
-PERLVAR(Ilast_lop_op,	OPCODE)		/* last list operator */
-PERLVAR(Iin_my,		U16)		/* we're compiling a "my" (or "our") declaration */
 PERLVAR(Iin_my_stash,	HV *)		/* declared class of this "my" declaration */
-#ifdef FCRYPT
-PERLVARI(Icryptseen,	bool,	FALSE)	/* has fast crypt() been initialized? */
-#endif
 
 PERLVAR(Ihints,		U32)		/* pragma-tic compile-time flags */
 
@@ -378,9 +380,15 @@ PERLVAR(Iutf8_tofold,	SV *)
 PERLVAR(Ilast_swash_hv,	HV *)
 PERLVAR(Ilast_swash_tmps,	U8 *)
 PERLVAR(Ilast_swash_slen,	STRLEN)
-PERLVARI(Iglob_index,	int,	0)
-PERLVAR(Ilast_swash_klen,	U8)	/* Only needs to store 0-10  */
 PERLVARA(Ilast_swash_key,10,	U8)
+PERLVAR(Ilast_swash_klen,	U8)	/* Only needs to store 0-10  */
+
+#ifdef FCRYPT
+PERLVARI(Icryptseen,	bool,	FALSE)	/* has fast crypt() been initialized? */
+#endif
+
+PERLVARI(Iglob_index,	int,	0)
+
 
 PERLVAR(Iparser,	yy_parser *)	/* current parser state */
 
@@ -409,6 +417,12 @@ PERLVAR(Ibody_arenas, void*) /* pointer to list of body-arenas */
 
 PERLVAR(Ipsig_pend, int *)		/* per-signal "count" of pending */
 PERLVARI(Isig_pending, int,0)           /* Number if highest signal pending */
+
+
+PERLVAR(Itaint_warn,	bool)      /* taint warns instead of dying */
+PERLVAR(Iutf8locale,	bool)		/* utf8 locale detected */
+PERLVARI(Ihash_seed_set, bool, FALSE)		/* Hash initialized? */
+PERLVARI(Irehash_seed_set, bool, FALSE)	/* 582 hash initialized? */
 
 #ifdef USE_LOCALE_NUMERIC
 
@@ -445,13 +459,6 @@ PERLVARI(Idef_layerlist, PerlIO_list_t *,NULL)
 PERLVARI(Iencoding,	SV*, NULL)		/* character encoding */
 
 PERLVAR(Idebug_pad,	struct perl_debug_pad)	/* always needed because of the re extension */
-
-PERLVAR(Itaint_warn,	bool)      /* taint warns instead of dying */
-PERLVAR(Iutf8locale,	bool)		/* utf8 locale detected */
-PERLVARI(Ihash_seed_set, bool, FALSE)		/* Hash initialized? */
-PERLVARI(Irehash_seed_set, bool, FALSE)	/* 582 hash initialized? */
-
-PERLVARI(Icv_has_eval, bool, FALSE) /* PL_compcv includes an entereval or similar */
 
 #ifdef PL_OP_SLAB_ALLOC
 PERLVAR(IOpPtr,I32 **)
@@ -530,8 +537,12 @@ PERLVARI(Islabs, I32**, NULL)	/* Array of slabs that have been allocated */
 PERLVARI(Islab_count, U32, 0)	/* Size of the array */
 #endif
 
-/* New variables must be added to the very end, before this comment,
- * for binary compatibility (the offsets of the old members must not change).
+/* If you are adding a U16, see the comment above on where there are 2 bytes
+   of gap which currently will be structure padding.  */
+
+/* Within a stable branch, new variables must be added to the very end, before
+ * this comment, for binary compatibility (the offsets of the old members must
+ *  not change).
  * (Don't forget to add your variable also to perl_clone()!)
  * XSUB.h provides wrapper functions via perlapi.h that make this
  * irrelevant, but not all code may be expected to #include XSUB.h.

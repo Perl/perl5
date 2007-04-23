@@ -332,37 +332,6 @@ such that it's trivial for the Pumpking to flag "this is an official release"
 when making a tarball, yet leave the default source saying "I'm not the
 official release".
 
-=head2 Ordering of "global" variables.
-
-F<thrdvar.h> and F<intrpvarh> define the "global" variables that need to be
-per-thread under ithreads, where the variables are actually elements in a
-structure. As C dictates, the variables must be laid out in order of
-declaration. There is a comment
-C</* Important ones in the first cache line (if alignment is done right) */>
-which implies that at some point in the past the ordering was carefully chosen
-(at least in part). However, it's clear that the ordering is less than perfect,
-as currently there are things such as 7 C<bool>s in a row, then something
-typically requiring 4 byte alignment, and then an odd C<bool> later on.
-(C<bool>s are typically defined as C<char>s). So it would be good for someone
-to review the ordering of the variables, to see how much alignment padding can
-be removed.
-
-It's also worth checking that all variables are actually used. Perl 5.8.0
-shipped with C<PL_nrs> still defined in F<thrdvar.h>, despite it being unused
-since a change over a year earlier. Had this been spotted before release, it
-could have been removed, but now it has to remain in the 5.8.x releases to
-keep the structure the same size, to retain binary compatibility.
-
-It's probably worth checking if all need to be the types they are. For example
-
-    PERLVAR(Ierror_count, I32)	/* how many errors so far, max 10 */
-
-might work as well if stored in a signed (or unsigned) 8 bit value, if the
-comment is accurate. C<PL_multi_open> and C<PL_multi_close> can probably
-become C<char>s. Finding variables to downsize coupled with rearrangement
-could shrink the interpreter structure; a size saving which is multiplied by
-the number of threads running.
-
 =head2 Profile Perl - am I hot or not?
 
 The Perl source code is stable enough that it makes sense to profile it,

@@ -1,6 +1,6 @@
 /*    thdrvar.h
  *
- *    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+ *    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
  *    by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
@@ -119,9 +119,6 @@ PERLVAR(Tcurstash,	HV *)		/* symbol table for current package */
 
 PERLVAR(Trestartop,	OP *)		/* propagating an error from croak? */
 PERLVARI(Tcurcop,	COP * VOL,	&PL_compiling)
-PERLVAR(Tlocalizing,	U8)		/* are we processing a local() list? */
-PERLVAR(Tcolorset,	bool)		/* from regcomp.c */
-
 PERLVAR(Tcurstack,	AV *)		/* THE STACK */
 PERLVAR(Tcurstackinfo,	PERL_SI *)	/* current stack + context */
 PERLVAR(Tmainstack,	AV *)		/* the stack when nothing funny is happening */
@@ -137,7 +134,6 @@ PERLVAR(Thv_fetch_ent_mh, HE*)		/* owned by hv_fetch_ent() */
 
 
 PERLVAR(Tlastgotoprobe,	OP*)		/* from pp_ctl.c */
-PERLVARI(Tdumpindent,	U16, 4)		/* # of blanks per dump indentation level */
 
 /* sort stuff */
 PERLVAR(Tsortcop,	OP *)		/* user defined sort routine */
@@ -176,7 +172,17 @@ PERLVAR(Twatchok,	char *)
 PERLVARI(Tregmatch_slab,	regmatch_slab *, NULL)
 PERLVAR(Tregmatch_state,	regmatch_state *)
 
+PERLVARI(Tdumpindent,	U16, 4)		/* # of blanks per dump indentation level */
+
+/* Put anything new that is pointer aligned here. */
+
 PERLVAR(Tdelaymagic,	U16)		/* ($<,$>) = ... */
+PERLVAR(Tlocalizing,	U8)		/* are we processing a local() list? */
+PERLVAR(Tcolorset,	bool)		/* from regcomp.c */
 PERLVARI(Tdirty,	bool, FALSE)	/* in the middle of tearing things down? */
 PERLVAR(Tin_eval,	VOL U8)	/* trap "fatal" errors? */
 PERLVAR(Ttainted,	bool)		/* using variables controlled by $< */
+
+/* For historical reasons this file is followed by intrpvar.h in the interpeter
+   struct. As this file currently ends with 7 bytes of variables, intrpvar.h
+   starts with one single U8, to avoid structure padding space wastage.  */
