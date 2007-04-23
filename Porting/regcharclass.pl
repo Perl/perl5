@@ -5,6 +5,8 @@ use Text::Wrap qw(wrap);
 use Encode;
 use Data::Dumper;
 
+our $hex_fmt="0x%02X";
+
 # Author: Yves Orton (demerphq) 2007.
 
 =pod
@@ -222,9 +224,9 @@ sub _cond {
         # map the ranges into conditions
         @r= map {
             # singleton
-            $_->[0] == $_->[1] ? "$alu==$_->[0]" :
+            $_->[0] == $_->[1] ? sprintf("$alu == $hex_fmt",$_->[0]) :
             # range
-            "($_->[0]<=$alu && $alu<=$_->[1])"
+            sprintf("($hex_fmt <= $alu && $alu <= $hex_fmt)",@$_)
         } @r;
         # return the joined results.
         return '( ' . join( " || ", @r ) . ' )';
@@ -242,8 +244,8 @@ sub combine {
     my $alu=shift;
     local $_ = shift;
     my $txt= $_->[0] == $_->[1]
-           ? "$alu==$_->[0]"
-           : "($_->[0]<=$alu && $alu<=$_->[1])";
+           ? sprintf("$alu == $hex_fmt",$_->[0])
+           : sprintf("($hex_fmt <= $alu && $alu <= $hex_fmt)",@$_);
     return $txt unless @_;
     return "( $txt || ( $alu > $_->[1] && \n".combine($alu,@_)." ) )";
 }
@@ -362,7 +364,9 @@ sub _optree_to_ternary {
 sub _macro($) {
     my $str= shift;
     my @lines= split /[^\S\n]*\n/, $str;
-    return join( "\\\n", map { sprintf "%-76s", $_ } @lines ) . "\n\n";
+    my $macro = join( "\\\n", map { sprintf "%-76s", $_ } @lines );
+    $macro =~ s/  *$//;
+    return $macro . "\n\n";
 }
 
 # default type extensions. 'uln' dont have one because normally
