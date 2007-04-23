@@ -258,43 +258,38 @@ perl_construct(pTHXx)
    if (PL_perl_destruct_level > 0)
        init_interp();
 #endif
-   /* Init the real globals (and main thread)? */
-    if (!PL_linestr) {
-	PL_curcop = &PL_compiling;	/* needed by ckWARN, right away */
+    PL_curcop = &PL_compiling;	/* needed by ckWARN, right away */
 
-	PL_linestr = newSV_type(SVt_PVIV);
-	SvGROW(PL_linestr, 80);
+    PL_linestr = newSV_type(SVt_PVIV);
+    SvGROW(PL_linestr, 80);
 
-	if (!SvREADONLY(&PL_sv_undef)) {
-	    /* set read-only and try to insure than we wont see REFCNT==0
-	       very often */
+    /* set read-only and try to insure than we wont see REFCNT==0
+       very often */
 
-	    SvREADONLY_on(&PL_sv_undef);
-	    SvREFCNT(&PL_sv_undef) = (~(U32)0)/2;
+    SvREADONLY_on(&PL_sv_undef);
+    SvREFCNT(&PL_sv_undef) = (~(U32)0)/2;
 
-	    sv_setpv(&PL_sv_no,PL_No);
-	    /* value lookup in void context - happens to have the side effect
-	       of caching the numeric forms.  */
-	    SvIV(&PL_sv_no);
-	    SvNV(&PL_sv_no);
-	    SvREADONLY_on(&PL_sv_no);
-	    SvREFCNT(&PL_sv_no) = (~(U32)0)/2;
+    sv_setpv(&PL_sv_no,PL_No);
+    /* value lookup in void context - happens to have the side effect
+       of caching the numeric forms.  */
+    SvIV(&PL_sv_no);
+    SvNV(&PL_sv_no);
+    SvREADONLY_on(&PL_sv_no);
+    SvREFCNT(&PL_sv_no) = (~(U32)0)/2;
 
-	    sv_setpv(&PL_sv_yes,PL_Yes);
-	    SvIV(&PL_sv_yes);
-	    SvNV(&PL_sv_yes);
-	    SvREADONLY_on(&PL_sv_yes);
-	    SvREFCNT(&PL_sv_yes) = (~(U32)0)/2;
+    sv_setpv(&PL_sv_yes,PL_Yes);
+    SvIV(&PL_sv_yes);
+    SvNV(&PL_sv_yes);
+    SvREADONLY_on(&PL_sv_yes);
+    SvREFCNT(&PL_sv_yes) = (~(U32)0)/2;
 
-	    SvREADONLY_on(&PL_sv_placeholder);
-	    SvREFCNT(&PL_sv_placeholder) = (~(U32)0)/2;
-	}
+    SvREADONLY_on(&PL_sv_placeholder);
+    SvREFCNT(&PL_sv_placeholder) = (~(U32)0)/2;
 
-	PL_sighandlerp = (Sighandler_t) Perl_sighandler;
+    PL_sighandlerp = (Sighandler_t) Perl_sighandler;
 #ifdef PERL_USES_PL_PIDSTATUS
-	PL_pidstatus = newHV();
+    PL_pidstatus = newHV();
 #endif
-    }
 
     PL_rs = newSVpvs("\n");
 
