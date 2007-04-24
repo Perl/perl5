@@ -177,14 +177,7 @@ void HUF_mark_field(SV* trigger, SV* field) {
     hv_store_ent(field_tab, field_id, field_ref, 0);
 }
 
-/* These constants are not in the API.  If they ever change in hv.c this code
- * must be updated */
-#define HV_FETCH_ISSTORE   0x01
-#define HV_FETCH_ISEXISTS  0x02
-#define HV_FETCH_LVALUE    0x04
-#define HV_FETCH_JUST_SV   0x08
-
-#define HUF_WOULD_CREATE_KEY(x) ((x) != -1 && ((x) & (HV_FETCH_ISSTORE | HV_FETCH_LVALUE)))
+#define HUF_WOULD_CREATE_KEY(x) ((x) != HV_DELETE && ((x) & (HV_FETCH_ISSTORE | HV_FETCH_LVALUE)))
 
 /* The key exchange function.  It communicates with S_hv_magic_uvar_xkey
  * in hv.c */
