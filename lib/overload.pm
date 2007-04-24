@@ -1,6 +1,6 @@
 package overload;
 
-our $VERSION = '1.05';
+our $VERSION = '1.06';
 
 sub nil {}
 
@@ -72,7 +72,11 @@ sub OverloadedStringify {
 
 sub Method {
   my $package = shift;
-  $package = ref $package if ref $package;
+  if(ref $package) {
+    require Scalar::Util;
+    $package = Scalar::Util::blessed($package);
+    return undef if !defined $package;
+  }
   #my $meth = $package->can('(' . shift);
   ov_method mycan($package, '(' . shift), $package;
   #return $meth if $meth ne \&nil;
