@@ -1300,7 +1300,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	    Perl_croak(aTHX_ "That use of $[ is unsupported");
 	break;
     case OP_STUB:
-	if (o->op_flags & OPf_PARENS || PL_madskills)
+	if ((o->op_flags & OPf_PARENS) || PL_madskills)
 	    break;
 	goto nomod;
     case OP_ENTERSUB:
