@@ -4346,7 +4346,38 @@ sub kt
         }
     }
 }
+{
+    # test that \xDF matches properly. this is pretty hacky stuff,
+    # but its actually needed. the malarky with '-' is to prevent
+    # compilation caching from playing any role in the test.
+    my @df= (chr(0xDF),'-',chr(0xDF));
+    utf8::upgrade($df[2]);
+    my @strs= ('ss','sS','Ss','SS',chr(0xDF));
+    my @ss= map { ("$_", "$_") } @strs;
+    utf8::upgrade($ss[$_*2+1]) for 0..$#strs;
 
+    for my $ssi (0..$#ss) {
+        for my $dfi (0..$#df) {
+            my $pat= $df[$dfi];
+            my $str= $ss[$ssi];
+            my $utf_df= ($dfi > 1) ? 'utf8' : '';
+            my $utf_ss= ($ssi % 2) ? 'utf8' : '';
+            (my $sstr=$str)=~s/\xDF/\\xDF/;
+
+            if ($utf_df || $utf_ss || length($ss[$ssi])==1) {
+                my $ret= $str=~/$pat/i;
+                next if $pat eq '-';
+                ok($ret, 
+                    "\"$sstr\"=~/\\xDF/i (str is @{[$utf_ss||'latin']}, pat is @{[$utf_df||'latin']})");
+            } else {
+                my $ret= $str !~ /$pat/i;
+                next if $pat eq '-';
+                ok($ret, 
+                    "\"$sstr\"!~/\\xDF/i (str is @{[$utf_ss||'latin']}, pat is @{[$utf_df||'latin']})");
+            }
+        }
+    }
+}
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
 # Keep the following tests last -- they may crash perl
@@ -4428,7 +4459,7 @@ ok($@=~/\QSequence \k... not terminated in regex;\E/);
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 1928;
+    $::TestCount = 1948;
     print "1..$::TestCount\n";
 }
 

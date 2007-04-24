@@ -247,7 +247,8 @@ sub combine {
            ? sprintf("$alu == $hex_fmt",$_->[0])
            : sprintf("($hex_fmt <= $alu && $alu <= $hex_fmt)",@$_);
     return $txt unless @_;
-    return "( $txt || ( $alu > $_->[1] && \n".combine($alu,@_)." ) )";
+    return sprintf "( %s ||( %s > 0x%02X &&\n%s ) )",
+        $txt,$alu,$_->[1],combine($alu,@_);
 }
 
 # recursively convert a trie to an optree represented by
@@ -302,11 +303,15 @@ sub make_optree {
     $size=1 if $type eq 'c';
     if ( !$type ) {
         my ( $u, $l );
-        for ( my $sz= $size ; !$u && $sz > 0 ; $sz-- ) {
-            $u= _trie_to_optree( $self->{trie}{u}{$sz}, 0, 0, $fmt );
+        if ($self->{trie}{u}) {
+            for ( my $sz= $size ; !$u && $sz > 0 ; $sz-- ) {
+                $u= _trie_to_optree( $self->{trie}{u}{$sz}, 0, 0, $fmt );
+            }
         }
-        for ( my $sz= $size ; !$l && $sz > 0 ; $sz-- ) {
-            $l= _trie_to_optree( $self->{trie}{l}{$sz}, 0, 0, $fmt );
+        if ($self->{trie}{l}) {
+            for ( my $sz= $size ; !$l && $sz > 0 ; $sz-- ) {
+                $l= _trie_to_optree( $self->{trie}{l}{$sz}, 0, 0, $fmt );
+            }
         }
         if ( $u ) {
             $else= [ '(is_utf8)', $u, $l || 0 ];
@@ -314,9 +319,13 @@ sub make_optree {
             $else= [ '(!is_utf8)', $l, 0 ];
         }
         $type= 'n';
-        $size-- while !$self->{trie}{n}{$size};
     }
-    return _trie_to_optree( $self->{trie}{$type}{$size}, 0, $else, $fmt );
+    if (!$self->{trie}{$type}) {
+        return $else;
+    } else {
+        $size-- while $size>0 && !$self->{trie}{$type}{$size};
+        return _trie_to_optree( $self->{trie}{$type}{$size}, 0, $else, $fmt );
+    }
 }
 
 # construct the optree for a type with length checks to prevent buffer
@@ -427,18 +436,23 @@ sub ternary {
     return "/*** GENERATED CODE ***/\n"
           . _macro "#define is_$self->{op}$ext($args)\n$code";
 }
-
+$|++;
 my $path=shift @ARGV;
+
 if (!$path) {
     $path= "regcharclass.h";
     if (!-e $path) { $path="../$path" }
     if (!-e $path) { die "Can't find regcharclass.h to update!\n" };
 }
-
-rename $path,"$path.bak";
-open my $out_fh,">",$path
-    or die "Can't write to '$path':$!";
-binmode $out_fh; # want unix line endings even when run on win32.
+my $out_fh;
+if ($path eq '-') {
+    $out_fh= \*STDOUT;
+} else {
+    rename $path,"$path.bak";
+    open $out_fh,">",$path
+        or die "Can't write to '$path':$!";
+    binmode $out_fh; # want unix line endings even when run on win32.
+}
 my ($zero) = $0=~/([^\\\/]+)$/;
 print $out_fh <<"HEADER";
 /*  -*- buffer-read-only: t -*-
@@ -458,17 +472,22 @@ print $out_fh <<"HEADER";
 
 HEADER
 
-my ($op,$title,@strs,@txt);
+my ($op,$title,@strs,@txt,$type);
 my $doit= sub {
     return unless $op;
     my $o= __PACKAGE__->new($title,$op,@strs);
     print $out_fh "/*\n\t$o->{op}: $o->{title}\n\n";
     print $out_fh join "\n",@txt,"*/","";
-    for ('', 'U', 'L') {
-        print $out_fh $o->ternary( $_ );
-        print $out_fh $o->ternary( $_,'_safe' );
+    $type||="U L c _safe";
+    my @ext=("");
+    my @types=("",map{ if (length $_>1) { push @ext,$_; () } else { $_ } }
+              split /\s+/,$type);
+    for my $type (@types) {
+        for my $ext (@ext) {
+            next if $type eq 'c' and $ext eq '_safe';
+            print $out_fh $o->ternary( $type,$ext );
+        }
     }
-    print $out_fh $o->ternary( 'c' );
 };
 while (<DATA>) {
     next unless /\S/;
@@ -477,6 +496,9 @@ while (<DATA>) {
         $doit->();
         ($op,$title)=split /\s*:\s*/,$_,2;
         @txt=@strs=();
+        $type="";
+    } elsif (/^=(.*)/) {
+        $type.=$1;
     } else {
         push @txt, "\t$_";
         s/#.*$//;
@@ -489,7 +511,6 @@ while (<DATA>) {
 }
 $doit->();
 print $out_fh "/* ex: set ro: */\n";
-print "$path has been updated\n";
 
 __DATA__
 LNBREAK: Line Break: \R
@@ -532,3 +553,7 @@ VERTWS: Vertical Whitespace: \v \V
 0x2028          # LINE SEPARATOR
 0x2029          # PARAGRAPH SEPARATOR
 
+TRICKYFOLD: Problematic fold case letters.
+0x00DF	# LATIN SMALL LETTER SHARP S
+0x0390	# GREEK SMALL LETTER IOTA WITH DIALYTIKA AND TONOS
+0x03B0	# GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND TONOS

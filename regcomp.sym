@@ -192,6 +192,8 @@ NVERTWS		NVERTWS,   none		not vertical whitespace     (Perl 6)
 HORIZWS		HORIZWS,   none		horizontal whitespace       (Perl 6)
 NHORIZWS	NHORIZWS,  none		not horizontal whitespace   (Perl 6)
 
+FOLDCHAR	FOLDCHAR,  codepoint 1	codepoint with tricky case folding properties.
+
 # NEW STUFF ABOVE THIS LINE  
 
 ################################################################################
