@@ -25,6 +25,7 @@ BEGIN {
 
 %modules = (
    # ModuleName  => q| code to check that it was loaded |,
+    'List::Util' => q| ::is( ref List::Util->can('first'), 'CODE' ) |,  # 5.7.2
     'Cwd'        => q| ::is( ref Cwd->can('fastcwd'),'CODE' ) |,         # 5.7 ?
     'File::Glob' => q| ::is( ref File::Glob->can('doglob'),'CODE' ) |,   # 5.6
     $db_file     => q| ::is( ref $db_file->can('TIEHASH'), 'CODE' ) |,  # 5.0
@@ -32,7 +33,7 @@ BEGIN {
     'Time::HiRes'=> q| ::is( ref Time::HiRes->can('usleep'),'CODE' ) |,  # 5.7.3
 );
 
-plan tests => 27 + keys(%modules) * 2;
+plan tests => 22 + keys(%modules) * 3;
 
 
 # Try to load the module

@@ -1,6 +1,6 @@
 package overload;
 
-our $VERSION = '1.04';
+our $VERSION = '1.06';
 
 $overload::hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
@@ -74,7 +74,13 @@ sub OverloadedStringify {
 
 sub Method {
   my $package = shift;
-  $package = ref $package if ref $package;
+  if(ref $package) {
+    local $@;
+    local $!;
+    require Scalar::Util;
+    $package = Scalar::Util::blessed($package);
+    return undef if !defined $package;
+  }
   #my $meth = $package->can('(' . shift);
   ov_method mycan($package, '(' . shift), $package;
   #return $meth if $meth ne \&nil;
@@ -85,12 +91,14 @@ sub AddrRef {
   my $package = ref $_[0];
   return "$_[0]" unless $package;
 
-	require Scalar::Util;
-	my $class = Scalar::Util::blessed($_[0]);
-	my $class_prefix = defined($class) ? "$class=" : "";
-	my $type = Scalar::Util::reftype($_[0]);
-	my $addr = Scalar::Util::refaddr($_[0]);
-	return sprintf("$class_prefix$type(0x%x)", $addr);
+  local $@;
+  local $!;
+  require Scalar::Util;
+  my $class = Scalar::Util::blessed($_[0]);
+  my $class_prefix = defined($class) ? "$class=" : "";
+  my $type = Scalar::Util::reftype($_[0]);
+  my $addr = Scalar::Util::refaddr($_[0]);
+  return sprintf("$class_prefix$type(0x%x)", $addr);
 }
 
 *StrVal = *AddrRef;
