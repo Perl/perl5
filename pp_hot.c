@@ -431,12 +431,13 @@ PP(pp_defined)
 		--SP;
             RETURNOP(cLOGOP->op_other);
         }
-    } else if (op_type == OP_DEFINED) {
+    }
+    else {
+	/* OP_DEFINED */
         sv = POPs;
         if (!sv || !SvANY(sv))
             RETPUSHNO;
-    } else
-        DIE(aTHX_ "panic:  Invalid op (%s) in pp_defined()", OP_NAME(PL_op));
+    }
 
     defined = FALSE;
     switch (SvTYPE(sv)) {
