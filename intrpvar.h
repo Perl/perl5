@@ -300,7 +300,6 @@ PERLVARA(Inexttype,5,	I32)		/* type of next token */
 PERLVAR(Inexttoke,	I32)
 #endif
 
-PERLVAR(Ilinestr,	SV *)
 PERLVAR(Ibufptr,	char *)
 PERLVAR(Ioldbufptr,	char *)
 PERLVAR(Ioldoldbufptr,	char *)

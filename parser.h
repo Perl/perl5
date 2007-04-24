@@ -58,6 +58,7 @@ typedef struct yy_parser {
     char	pending_ident;	/* pending identifier lookup */
     bool	preambled;
     SUBLEXINFO	sublex_info;
+    SV		*linestr;	/* current chunk of src text */
 
 #ifdef PERL_MAD
     SV		*endwhite;

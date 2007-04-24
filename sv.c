@@ -9543,6 +9543,7 @@ Perl_parser_dup(pTHX_ const yy_parser *proto, CLONE_PARAMS* param)
     parser->pending_ident = proto->pending_ident;
     parser->preambled	= proto->preambled;
     parser->sublex_info	= proto->sublex_info; /* XXX not quite right */
+    parser->linestr	= sv_dup_inc(proto->linestr, param);
 
 #ifdef PERL_MAD
     parser->endwhite	= proto->endwhite;
@@ -11206,16 +11207,21 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_nexttoke		= proto_perl->Inexttoke;
 #endif
 
-    PL_linestr		= sv_dup_inc(proto_perl->Ilinestr, param);
-    i = proto_perl->Ibufptr - SvPVX_const(proto_perl->Ilinestr);
-    PL_bufptr		= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
-    i = proto_perl->Ioldbufptr - SvPVX_const(proto_perl->Ilinestr);
-    PL_oldbufptr	= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
-    i = proto_perl->Ioldoldbufptr - SvPVX_const(proto_perl->Ilinestr);
-    PL_oldoldbufptr	= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
-    i = proto_perl->Ilinestart - SvPVX_const(proto_perl->Ilinestr);
-    PL_linestart	= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
-    PL_bufend		= SvPVX(PL_linestr) + SvCUR(PL_linestr);
+    if (proto_perl->Iparser) {
+	i = proto_perl->Ibufptr - SvPVX_const(proto_perl->Iparser->linestr);
+	PL_bufptr		= SvPVX(PL_parser->linestr) + (i < 0 ? 0 : i);
+	i = proto_perl->Ioldbufptr - SvPVX_const(proto_perl->Iparser->linestr);
+	PL_oldbufptr	= SvPVX(PL_parser->linestr) + (i < 0 ? 0 : i);
+	i = proto_perl->Ioldoldbufptr - SvPVX_const(proto_perl->Iparser->linestr);
+	PL_oldoldbufptr	= SvPVX(PL_parser->linestr) + (i < 0 ? 0 : i);
+	i = proto_perl->Ilinestart - SvPVX_const(proto_perl->Iparser->linestr);
+	PL_linestart	= SvPVX(PL_parser->linestr) + (i < 0 ? 0 : i);
+	PL_bufend		= SvPVX(PL_parser->linestr) + SvCUR(PL_parser->linestr);
+	i = proto_perl->Ilast_uni - SvPVX_const(proto_perl->Iparser->linestr);
+	PL_last_uni		= SvPVX(PL_parser->linestr) + (i < 0 ? 0 : i);
+	i = proto_perl->Ilast_lop - SvPVX_const(proto_perl->Iparser->linestr);
+	PL_last_lop		= SvPVX(PL_parser->linestr) + (i < 0 ? 0 : i);
+    }
 
     PL_expect		= proto_perl->Iexpect;
 
@@ -11225,10 +11231,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_subline		= proto_perl->Isubline;
     PL_subname		= sv_dup_inc(proto_perl->Isubname, param);
 
-    i = proto_perl->Ilast_uni - SvPVX_const(proto_perl->Ilinestr);
-    PL_last_uni		= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
-    i = proto_perl->Ilast_lop - SvPVX_const(proto_perl->Ilinestr);
-    PL_last_lop		= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
     PL_last_lop_op	= proto_perl->Ilast_lop_op;
     PL_in_my		= proto_perl->Iin_my;
     PL_in_my_stash	= hv_dup(proto_perl->Iin_my_stash, param);

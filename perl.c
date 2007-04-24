@@ -260,9 +260,6 @@ perl_construct(pTHXx)
 #endif
     PL_curcop = &PL_compiling;	/* needed by ckWARN, right away */
 
-    PL_linestr = newSV_type(SVt_PVIV);
-    SvGROW(PL_linestr, 80);
-
     /* set read-only and try to insure than we wont see REFCNT==0
        very often */
 
@@ -992,8 +989,6 @@ perl_destruct(pTHXx)
     PL_preambleav = NULL;
     SvREFCNT_dec(PL_subname);
     PL_subname = NULL;
-    SvREFCNT_dec(PL_linestr);
-    PL_linestr = NULL;
 #ifdef PERL_USES_PL_PIDSTATUS
     SvREFCNT_dec(PL_pidstatus);
     PL_pidstatus = NULL;

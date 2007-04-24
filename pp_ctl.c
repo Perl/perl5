@@ -3504,7 +3504,7 @@ PP(pp_entereval)
     /* prepare to compile string */
 
     if (PERLDB_LINE && PL_curstash != PL_debstash)
-	save_lines(CopFILEAV(&PL_compiling), PL_linestr);
+	save_lines(CopFILEAV(&PL_compiling), PL_parser->linestr);
     PUTBACK;
     ret = doeval(gimme, NULL, runcv, seq);
     if (PERLDB_INTER && was != (I32)PL_sub_generation /* Some subs defined here. */

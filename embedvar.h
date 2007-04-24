@@ -242,7 +242,6 @@
 #define PL_lex_state		(vTHX->Ilex_state)
 #define PL_lineary		(vTHX->Ilineary)
 #define PL_linestart		(vTHX->Ilinestart)
-#define PL_linestr		(vTHX->Ilinestr)
 #define PL_localpatches		(vTHX->Ilocalpatches)
 #define PL_lockhook		(vTHX->Ilockhook)
 #define PL_madskills		(vTHX->Imadskills)
@@ -508,7 +507,6 @@
 #define PL_Ilex_state		PL_lex_state
 #define PL_Ilineary		PL_lineary
 #define PL_Ilinestart		PL_linestart
-#define PL_Ilinestr		PL_linestr
 #define PL_Ilocalpatches	PL_localpatches
 #define PL_Ilockhook		PL_lockhook
 #define PL_Imadskills		PL_madskills
