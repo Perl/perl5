@@ -121,7 +121,7 @@ use Test::More tests => ( # per-pkg tests (function ct + require_ok)
 			  + 595 + 190	# POSIX, IO::Socket
 			  + 323 * ($] > 5.009)
 			  + 17 * ($] >= 5.009003)
-			  - 343);	# fudge
+			  - 344);	# fudge
 
 require_ok("B::Concise");
 
