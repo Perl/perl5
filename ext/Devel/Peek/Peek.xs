@@ -348,7 +348,7 @@ PPCODE:
     PL_dumpindent = 2;
     do_sv_dump(0, Perl_debug_log, sv, 0, lim,
 	       (bool)(dumpop && SvTRUE(dumpop)), pv_lim);
-    PL_dumpindent = save_dumpindent;
+    PL_dumpindent = (U16)save_dumpindent;
 }
 
 void
@@ -368,7 +368,7 @@ PPCODE:
 	do_sv_dump(0, Perl_debug_log, ST(i), 0, lim,
 		   (bool)(dumpop && SvTRUE(dumpop)), pv_lim);
     }
-    PL_dumpindent = save_dumpindent;
+    PL_dumpindent = (U16)save_dumpindent;
 }
 
 void

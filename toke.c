@@ -1629,7 +1629,7 @@ S_sublex_start(pTHX)
     }
 
     PL_sublex_info.super_state = PL_lex_state;
-    PL_sublex_info.sub_inwhat = op_type;
+    PL_sublex_info.sub_inwhat = (U16)op_type;
     PL_sublex_info.sub_op = PL_lex_op;
     PL_lex_state = LEX_INTERPPUSH;
 
@@ -6185,7 +6185,7 @@ Perl_yylex(pTHX)
 	case KEY_our:
 	case KEY_my:
 	case KEY_state:
-	    PL_in_my = tmp;
+	    PL_in_my = (U16)tmp;
 	    s = SKIPSPACE1(s);
 	    if (isIDFIRST_lazy_if(s,UTF)) {
 #ifdef PERL_MAD
