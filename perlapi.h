@@ -632,8 +632,6 @@ END_EXTERN_C
 #define PL_utf8cache		(*Perl_Iutf8cache_ptr(aTHX))
 #undef  PL_utf8locale
 #define PL_utf8locale		(*Perl_Iutf8locale_ptr(aTHX))
-#undef  PL_uudmap
-#define PL_uudmap		(*Perl_Iuudmap_ptr(aTHX))
 #undef  PL_warnhook
 #define PL_warnhook		(*Perl_Iwarnhook_ptr(aTHX))
 #undef  PL_xmlfp

@@ -1266,6 +1266,23 @@ $(X2P) : $(MINIPERL) $(X2P_OBJ)
 	$(EMBED_EXE_MANI)
 .ENDIF
 
+globals$(o) : uudmap.h
+
+uudmap.h: generate_uudmap.exe
+	generate_uudmap >uudmap.h
+
+generate_uudmap.exe : generate_uudmap$(o)
+.IF "$(CCTYPE)" == "BORLAND"
+	$(LINK32) -Tpe -ap $(BLINK_FLAGS) \
+	    @$(mktmp c0x32$(o) generate_uudmap$(o),$(@:s,\,$B,),,$(LIBFILES),)
+.ELIF "$(CCTYPE)" == "GCC"
+	$(LINK32) -v -o $@ $(BLINK_FLAGS) \
+	    $(mktmp $(LKPRE) generate_uudmap$(o) $(LIBFILES) $(LKPOST))
+.ELSE
+	$(LINK32) -subsystem:console -out:$@ $(BLINK_FLAGS) \
+	    @$(mktmp $(LIBFILES) generate_uudmap$(o))
+.ENDIF
+
 perlmain.c : runperl.c
 	copy runperl.c perlmain.c
 
@@ -1605,6 +1622,7 @@ _clean :
 	-@erase $(PERLSTATICLIB)
 	-@erase $(PERLDLL)
 	-@erase $(CORE_OBJ)
+	-@erase generate_uudmap.exe generate_uudmap$(o) uudmap.h
 	-if exist $(MINIDIR) rmdir /s /q $(MINIDIR)
 	-if exist $(UNIDATADIR1) rmdir /s /q $(UNIDATADIR1)
 	-if exist $(UNIDATADIR2) rmdir /s /q $(UNIDATADIR2)

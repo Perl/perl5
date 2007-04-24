@@ -4058,11 +4058,14 @@ EXTCONST char PL_memory_wrap[]
 EXTCONST char PL_uuemap[65]
   INIT("`!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_");
 
-
 #ifdef DOINIT
+EXTCONST char PL_uudmap[256] =
+#include "uudmap.h"
+;
 EXTCONST char* const PL_sig_name[] = { SIG_NAME };
 EXTCONST int         PL_sig_num[]  = { SIG_NUM };
 #else
+EXTCONST char PL_uudmap[256];
 EXTCONST char* const PL_sig_name[];
 EXTCONST int         PL_sig_num[];
 #endif

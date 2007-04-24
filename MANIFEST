@@ -1270,6 +1270,7 @@ ext/XS/Typemap/Typemap.xs	XS::Typemap extension
 fakesdio.h			stdio in terms of PerlIO
 fakethr.h			Fake threads header
 form.h				Public declarations for formats
+generate_uudmap.c		Generate uudmap.h, the uuencode decoding map
 genpacksizetables.pl		Generate the size tables for pack/unpack
 globals.c			File to declare global symbols (for shared library)
 global.sym			Symbols that need hiding when embedded

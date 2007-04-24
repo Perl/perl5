@@ -391,7 +391,6 @@ PERLVARI(Iglob_index,	int,	0)
 
 PERLVAR(Iparser,	yy_parser *)	/* current parser state */
 
-PERLVARA(Iuudmap,256,	char)
 PERLVAR(Ibitcount,	char *)
 
 PERLVAR(Ipsig_ptr, SV**)

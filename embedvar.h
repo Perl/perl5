@@ -377,7 +377,6 @@
 #define PL_utf8_xdigit		(vTHX->Iutf8_xdigit)
 #define PL_utf8cache		(vTHX->Iutf8cache)
 #define PL_utf8locale		(vTHX->Iutf8locale)
-#define PL_uudmap		(vTHX->Iuudmap)
 #define PL_warnhook		(vTHX->Iwarnhook)
 #define PL_xmlfp		(vTHX->Ixmlfp)
 
@@ -642,7 +641,6 @@
 #define PL_Iutf8_xdigit		PL_utf8_xdigit
 #define PL_Iutf8cache		PL_utf8cache
 #define PL_Iutf8locale		PL_utf8locale
-#define PL_Iuudmap		PL_uudmap
 #define PL_Iwarnhook		PL_warnhook
 #define PL_Ixmlfp		PL_xmlfp
 
