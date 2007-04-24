@@ -1649,6 +1649,7 @@ S_scalar_mod_type(const OP *o, I32 type)
     case OP_RECV:
     case OP_ANDASSIGN:
     case OP_ORASSIGN:
+    case OP_DORASSIGN:
 	return TRUE;
     default:
 	return FALSE;
