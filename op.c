@@ -4064,44 +4064,6 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		o->op_private |= OPpASSIGN_COMMON;
 	}
 
-	if ( ((left->op_private & OPpLVAL_INTRO) || ckWARN(WARN_MISC))
-		&& (left->op_type == OP_LIST
-		    || (left->op_type == OP_NULL && left->op_targ == OP_LIST)))
-	{
-	    OP* lop = ((LISTOP*)left)->op_first;
-	    while (lop) {
-		if (lop->op_type == OP_PADSV ||
-		    lop->op_type == OP_PADAV ||
-		    lop->op_type == OP_PADHV ||
-		    lop->op_type == OP_PADANY)
-		{
-		    if (lop->op_private & OPpPAD_STATE) {
-			if (left->op_private & OPpLVAL_INTRO) {
-			    o->op_private |= OPpASSIGN_STATE;
-			    /* hijacking PADSTALE for uninitialized state variables */
-			    SvPADSTALE_on(PAD_SVl(lop->op_targ));
-			}
-			else { /* we already checked for WARN_MISC before */
-			    Perl_warner(aTHX_ packWARN(WARN_MISC), "State variable %s will be reinitialized",
-				    PAD_COMPNAME_PV(lop->op_targ));
-			}
-		    }
-		}
-		lop = lop->op_sibling;
-	    }
-	}
-	else if (((left->op_private & (OPpLVAL_INTRO | OPpPAD_STATE))
-		    == (OPpLVAL_INTRO | OPpPAD_STATE))
-		&& (   left->op_type == OP_PADSV
-		    || left->op_type == OP_PADAV
-		    || left->op_type == OP_PADHV
-		    || left->op_type == OP_PADANY))
-	{
-	    o->op_private |= OPpASSIGN_STATE;
-	    /* hijacking PADSTALE for uninitialized state variables */
-	    SvPADSTALE_on(PAD_SVl(left->op_targ));
-	}
-
 	if (right && right->op_type == OP_SPLIT) {
 	    OP* tmpop = ((LISTOP*)right)->op_first;
 	    if (tmpop && (tmpop->op_type == OP_PUSHRE)) {
@@ -7023,16 +6985,6 @@ Perl_ck_sassign(pTHX_ OP *o)
 #endif
 	    kid->op_private |= OPpTARGET_MY;	/* Used for context settings */
 	    return kid;
-	}
-    }
-    if (kid->op_sibling) {
-	OP *kkid = kid->op_sibling;
-	if (kkid->op_type == OP_PADSV
-		&& (kkid->op_private & OPpLVAL_INTRO)
-		&& SvPAD_STATE(*av_fetch(PL_comppad_name, kkid->op_targ, FALSE))) {
-	    o->op_private |= OPpASSIGN_STATE;
-	    /* hijacking PADSTALE for uninitialized state variables */
-	    SvPADSTALE_on(PAD_SVl(kkid->op_targ));
 	}
     }
     return o;

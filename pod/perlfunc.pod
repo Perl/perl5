@@ -6011,7 +6011,7 @@ X<state>
 =item state TYPE EXPR : ATTRS
 
 C<state> declares a lexically scoped variable, just like C<my> does.
-However, those variables will be initialized only once, contrary to
+However, those variables will never be reinitialized, contrary to
 lexical variables that are reinitialized each time their enclosing block
 is entered.
 

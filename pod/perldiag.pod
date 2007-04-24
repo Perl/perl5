@@ -3902,16 +3902,6 @@ L<perlfunc/splice>.
 iterate more times than there are characters of input, which is what
 happened.) See L<perlfunc/split>.
 
-=item State variable %s will be reinitialized
-
-(W misc) You're declaring a C<state> variable inside a list. The list
-assignment will be treated by perl as a regular assignment, which means
-that the C<state> variable will be reinitialized each time the statement
-is run. The solution to have it initialized only once is to write the
-assignment on its own line, as in:
-
-    state $var = 42;
-
 =item Statement unlikely to be reached
 
 (W exec) You did an exec() with some statement after it other than a

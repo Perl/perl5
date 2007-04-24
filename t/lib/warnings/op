@@ -1081,23 +1081,3 @@ Deprecated use of my() in false conditional at - line 6.
 Deprecated use of my() in false conditional at - line 7.
 Deprecated use of my() in false conditional at - line 8.
 Deprecated use of my() in false conditional at - line 9.
-########
-# op.c
-use feature 'state';
-use warnings 'misc';
-state($x) = 1;
-(state $y) = 2;
-(state $z, my $t) = (3, 4);
-(state $foo, state $bar) = (5, 6);
-(undef, my $v, state $w) = (7 .. 9);
-no warnings 'misc';
-state($x) = 1;
-(state $y) = 2;
-(state $z, my $t) = (3, 4);
-(state $foo, state $bar) = (5, 6);
-(undef, my $v, state $w) = (7 .. 9);
-EXPECT
-State variable $z will be reinitialized at - line 6.
-State variable $foo will be reinitialized at - line 7.
-State variable $bar will be reinitialized at - line 7.
-State variable $w will be reinitialized at - line 8.
