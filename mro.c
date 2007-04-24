@@ -431,6 +431,7 @@ Perl_mro_get_linear_isa(pTHX_ HV *stash)
     } else {
         Perl_croak(aTHX_ "panic: invalid MRO!");
     }
+    return NULL; /* NOT REACHED */
 }
 
 /*
