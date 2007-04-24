@@ -216,8 +216,6 @@ Perl_boot_core_UNIVERSAL(pTHX)
     newXSproto("Internals::hash_seed",XS_Internals_hash_seed, (char *)file, "");
     newXSproto("Internals::rehash_seed",XS_Internals_rehash_seed, (char *)file, "");
     newXSproto("Internals::HvREHASH", XS_Internals_HvREHASH, (char *)file, "\\%");
-    newXSproto("Internals::inc_sub_generation",XS_Internals_inc_sub_generation,
-	       file, "");
 }
 
 
@@ -722,17 +720,6 @@ XS(XS_Internals_HvREHASH)	/* Subject to change  */
 	}
     }
     Perl_croak(aTHX_ "Internals::HvREHASH $hashref");
-}
-
-XS(XS_Internals_inc_sub_generation)
-{
-    /* Using dXSARGS would also have dITEM and dSP,
-     * which define 2 unused local variables.  */
-    dAXMARK;
-    PERL_UNUSED_ARG(cv);
-    PERL_UNUSED_VAR(mark);
-    ++PL_sub_generation;
-    XSRETURN_EMPTY;
 }
 
 /*

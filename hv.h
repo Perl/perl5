@@ -340,6 +340,15 @@ C<SV*>.
 #define HINTS_REFCNT_INIT            NOOP
 #define HINTS_REFCNT_TERM            NOOP
 
+/* Hash actions
+ * Passed in PERL_MAGIC_uvar calls
+ */
+#define HV_DELETE          -1
+#define HV_FETCH_ISSTORE   0x01
+#define HV_FETCH_ISEXISTS  0x02
+#define HV_FETCH_LVALUE    0x04
+#define HV_FETCH_JUST_SV   0x08
+
 /*
  * Local variables:
  * c-indentation-style: bsd
