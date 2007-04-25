@@ -1,7 +1,7 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.91';
+$CPAN::VERSION = '1.9101';
 $CPAN::VERSION = eval $CPAN::VERSION if $CPAN::VERSION =~ /_/;
 
 use CPAN::HandleConfig;
@@ -2838,6 +2838,7 @@ sub format_result {
         if ($CPAN::META->has_inst("File::Temp")) {
             $installation_report_fh
                 = File::Temp->new(
+                                  dir      => File::Spec->tmpdir,
                                   template => 'cpan_install_XXXX',
                                   suffix   => '.txt',
                                   unlink   => 0,
@@ -4636,7 +4637,10 @@ sub reanimate_build_dir {
             # $DB::single = 1;
             if ($do->{make_test}
                 && $do->{build_dir}
-                && !$do->{make_test}->failed
+                && !(UNIVERSAL::can($do->{make_test},"failed") ?
+                     $do->{make_test}->failed :
+                     $do->{make_test} =~ /^YES/
+                    )
                 && (
                     !$do->{install}
                     ||
@@ -8588,6 +8592,7 @@ Could not fork '$html_converter $saved_file': $!});
             my($fh,$filename);
             if ($CPAN::META->has_inst("File::Temp")) {
                 $fh = File::Temp->new(
+                                      dir      => File::Spec->tmpdir,
                                       template => 'cpan_htmlconvert_XXXX',
                                       suffix => '.txt',
                                       unlink => 0,
@@ -8647,6 +8652,7 @@ sub _getsave_url {
     my($fh,$filename);
     if ($CPAN::META->has_inst("File::Temp")) {
         $fh = File::Temp->new(
+                              dir      => File::Spec->tmpdir,
                               template => "cpan_getsave_url_XXXX",
                               suffix => ".html",
                               unlink => 0,
@@ -8754,6 +8760,7 @@ sub reports {
     my $yaml = $resp->content;
     # was fuer ein Umweg!
     my $fh = File::Temp->new(
+                             dir      => File::Spec->tmpdir,
                              template => 'cpan_reports_XXXX',
                              suffix => '.yaml',
                              unlink => 0,
