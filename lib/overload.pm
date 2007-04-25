@@ -2,6 +2,8 @@ package overload;
 
 our $VERSION = '1.06';
 
+require Scalar::Util;
+
 sub nil {}
 
 sub OVERLOAD {
@@ -73,7 +75,6 @@ sub OverloadedStringify {
 sub Method {
   my $package = shift;
   if(ref $package) {
-    require Scalar::Util;
     $package = Scalar::Util::blessed($package);
     return undef if !defined $package;
   }
