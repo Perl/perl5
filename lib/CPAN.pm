@@ -1,7 +1,7 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.90';
+$CPAN::VERSION = '1.91';
 $CPAN::VERSION = eval $CPAN::VERSION if $CPAN::VERSION =~ /_/;
 
 use CPAN::HandleConfig;
@@ -520,6 +520,7 @@ use strict;
                                     recompile
                                     reload
                                     report
+                                    reports
                                     scripts
                                     test
                                     upgrade
@@ -1455,17 +1456,16 @@ sub tidyup {
   my($self) = @_;
   return unless $CPAN::META->{LOCK};
   return unless -d $self->{ID};
-  while ($self->{DU} > $self->{'MAX'} ) {
-    my($toremove) = shift @{$self->{FIFO}};
-    unless ($toremove =~ /\.yml$/) {
-        $CPAN::Frontend->myprint(sprintf(
-                                         "DEL(%.1f>%.1fMB): %s \n",
-                                         $self->{DU},
-                                         $self->{MAX},
-                                         $toremove,
-                                        )
-                                );
-    }
+  my @toremove = grep { $self->{SIZE}{$_}==0 } @{$self->{FIFO}};
+  for my $current (0..$#toremove) {
+    my $toremove = $toremove[$current];
+    $CPAN::Frontend->myprint(sprintf(
+                                     "DEL(%d/%d): %s \n",
+                                     $current+1,
+                                     scalar @toremove,
+                                     $toremove,
+                                    )
+                            );
     return if $CPAN::Signal;
     $self->_clean_cache($toremove);
     return if $CPAN::Signal;
@@ -1499,12 +1499,12 @@ sub entries {
 	}
     }
     chdir $cwd or Carp::croak("Can't chdir to $cwd: $!");
-    sort { -M $b <=> -M $a} @entries;
+    sort { -M $a <=> -M $b} @entries;
 }
 
 #-> sub CPAN::CacheMgr::disk_usage ;
 sub disk_usage {
-    my($self,$dir) = @_;
+    my($self,$dir,$fast) = @_;
     return if exists $self->{SIZE}{$dir};
     return if $CPAN::Signal;
     my($Du) = 0;
@@ -1526,8 +1526,11 @@ sub disk_usage {
         $CPAN::Frontend->mywarn("File or directory '$dir' has gone, ignoring\n");
         return;
     }
-    find(
-         sub {
+    if ($fast) {
+        $Du = 0; # placeholder
+    } else {
+        find(
+             sub {
            $File::Find::prune++ if $CPAN::Signal;
            return if -l $_;
            if ($^O eq 'MacOS') {
@@ -1552,10 +1555,11 @@ sub disk_usage {
            }
          },
          $dir
-        );
+            );
+    }
     return if $CPAN::Signal;
     $self->{SIZE}{$dir} = $Du/1024/1024;
-    push @{$self->{FIFO}}, $dir;
+    unshift @{$self->{FIFO}}, $dir;
     $self->debug("measured $dir is $Du") if $CPAN::DEBUG;
     $self->{DU} += $Du/1024/1024;
     $self->{DU};
@@ -1638,15 +1642,20 @@ sub scan_cache {
 			     sprintf("Scanning cache %s for sizes\n",
 				     $self->{ID}));
     my $e;
-    my @entries = grep { !/^\.\.?$/ } $self->entries($self->{ID});
+    my @entries = $self->entries($self->{ID});
     my $i = 0;
     my $painted = 0;
     for $e (@entries) {
-	# next if $e eq ".." || $e eq ".";
-	$self->disk_usage($e);
+        my $symbol = ".";
+        if ($self->{DU} > $self->{MAX}) {
+            $symbol = "-";
+            $self->disk_usage($e,1);
+        } else {
+            $self->disk_usage($e);
+        }
         $i++;
         while (($painted/76) < ($i/@entries)) {
-            $CPAN::Frontend->myprint(".");
+            $CPAN::Frontend->myprint($symbol);
             $painted++;
         }
 	return if $CPAN::Signal;
@@ -2931,9 +2940,9 @@ sub mywarn {
 #-> sub CPAN::Shell::mydie ;
 sub mydie {
     my($self,$what) = @_;
-    $self->print_ornamented($what, $CPAN::Config->{colorize_warn}||'bold red on_white');
+    $self->mywarn($what);
 
-    # If it is the shell, we want that the following die to be silent,
+    # If it is the shell, we want the following die to be silent,
     # but if it is not the shell, we would need a 'die $what'. We need
     # to take care that only shell commands use mydie. Is this
     # possible?
@@ -2984,8 +2993,11 @@ sub unrecoverable_error {
 #-> sub CPAN::Shell::mysleep ;
 sub mysleep {
     my($self, $sleep) = @_;
-    use Time::HiRes qw(sleep);
-    sleep $sleep;
+    if (CPAN->has_inst("Time::HiRes")) {
+        Time::HiRes::sleep($sleep);
+    } else {
+        sleep($sleep < 1 ? 1 : int($sleep + 0.5));
+    }
 }
 
 #-> sub CPAN::Shell::setup_output ;
@@ -3077,7 +3089,7 @@ sub rematein {
             push @qcopy, $obj;
 	} elsif ($CPAN::META->exists('CPAN::Author',uc($s))) {
 	    $obj = $CPAN::META->instance('CPAN::Author',uc($s));
-            if ($meth =~ /^(dump|ls)$/) {
+            if ($meth =~ /^(dump|ls|reports)$/) {
                 $obj->$meth();
             } else {
                 $CPAN::Frontend->mywarn(
@@ -3231,6 +3243,7 @@ sub recent {
                         notest
                         perldoc
                         readme
+                        reports
                         test
                        )) {
         *$command = sub { shift->rematein($command, @_); };
@@ -3664,20 +3677,6 @@ sub localize {
                     if $var = $CPAN::Config->{ftp_proxy} || $ENV{ftp_proxy};
                 $Ua->proxy('http', $var)
                     if $var = $CPAN::Config->{http_proxy} || $ENV{http_proxy};
-
-
-# >>>>> On Wed, 13 Dec 2000 09:21:34 -0500, "Robison, Jonathon (J.M.)" <jrobiso2@visteon.com> said:
-# 
-#  > I note that although CPAN.pm can use proxies, it doesn't seem equipped to
-#  > use ones that require basic autorization.
-#  
-#  > Example of when I use it manually in my own stuff:
-#  
-#  > $ua->proxy(['http','ftp'], http://my.proxy.server:83');
-#  > $req->proxy_authorization_basic("username","password");
-#  > $res = $ua->request($req);
-# 
-
                 $Ua->no_proxy($var)
                     if $var = $CPAN::Config->{no_proxy} || $ENV{no_proxy};
             }
@@ -5467,6 +5466,12 @@ sub dir_listing {
     @result;
 }
 
+#-> sub CPAN::Author::reports
+sub reports {
+    $CPAN::Frontend->mywarn("reports on authors not implemented.
+Please file a bugreport if you need this.\n");
+}
+
 package CPAN::Distribution;
 use strict;
 
@@ -5477,14 +5482,24 @@ sub cpan_comment {
     $ro->{CPAN_COMMENT}
 }
 
-# CPAN::Distribution::undelay
+#-> CPAN::Distribution::undelay
 sub undelay {
     my $self = shift;
     delete $self->{later};
 }
 
+#-> CPAN::Distribution::is_dot_dist
+sub is_dot_dist {
+    my($self) = @_;
+    return (
+            substr($self->id,-1,1) eq "."
+            ||
+            $self->author->id eq "LOCAL"
+           );
+}
+
 # add the A/AN/ stuff
-# CPAN::Distribution::normalize
+#-> CPAN::Distribution::normalize
 sub normalize {
     my($self,$s) = @_;
     $s = $self->id unless defined $s;
@@ -5729,7 +5744,9 @@ sub get {
             # note: not intended to be persistent but at least visible
             # during this session
         } else {
-            if (exists $self->{build_dir} && -d $self->{build_dir}) {
+            if (exists $self->{build_dir} && -d $self->{build_dir}
+                && ($self->{modulebuild}||$self->{writemakefile})
+               ) {
                 # this deserves print, not warn:
                 $CPAN::Frontend->myprint("  Has already been unwrapped into directory ".
                                          "$self->{build_dir}\n"
@@ -5752,10 +5769,25 @@ sub get {
     }
     my $sub_wd = CPAN::anycwd(); # for cleaning up as good as possible
 
-    #
-    # Get the file on local disk
-    #
+    $self->get_file_onto_local_disk;
+    return if $CPAN::Signal;
+    $self->check_integrity;
+    return if $CPAN::Signal;
+    my($packagedir,$local_file) = $self->run_preps_on_packagedir;
+    $packagedir ||= $self->{build_dir};
 
+    if ($CPAN::Signal){
+        $self->safe_chdir($sub_wd);
+        return;
+    }
+    return $self->run_MM_or_MB($local_file,$packagedir);
+}
+
+#-> CPAN::Distribution::get_file_onto_local_disk
+sub get_file_onto_local_disk {
+    my($self) = @_;
+
+    return if $self->is_dot_dist;
     my($local_file);
     my($local_wanted) =
         File::Spec->catfile(
@@ -5779,22 +5811,27 @@ sub get {
 
     $self->debug("local_wanted[$local_wanted]local_file[$local_file]") if $CPAN::DEBUG;
     $self->{localfile} = $local_file;
-    return if $CPAN::Signal;
+}
 
-    #
-    # Check integrity
-    #
+
+#-> CPAN::Distribution::check_integrity
+sub check_integrity {
+    my($self) = @_;
+
+    return if $self->is_dot_dist;
     if ($CPAN::META->has_inst("Digest::SHA")) {
 	$self->debug("Digest::SHA is installed, verifying");
 	$self->verifyCHECKSUM;
     } else {
 	$self->debug("Digest::SHA is NOT installed");
     }
-    return if $CPAN::Signal;
+}
 
-    #
-    # Create a clean room and go there
-    #
+#-> CPAN::Distribution::run_preps_on_packagedir
+sub run_preps_on_packagedir {
+    my($self) = @_;
+    return if $self->is_dot_dist;
+
     $CPAN::META->{cachemgr} ||= CPAN::CacheMgr->new(); # unsafe meta access, ok
     my $builddir = $CPAN::META->{cachemgr}->dir; # unsafe meta access, ok
     $self->safe_chdir($builddir);
@@ -5812,7 +5849,6 @@ and fix the problem, then retry.
 EOF
     }
     if ($CPAN::Signal){
-        $self->safe_chdir($sub_wd);
         return;
     }
     $self->safe_chdir("tmp-$$");
@@ -5820,6 +5856,7 @@ EOF
     #
     # Unpack the goods
     #
+    my $local_file = $self->{localfile};
     my $ct = eval{CPAN::Tarzip->new($local_file)};
     unless ($ct) {
         $self->{unwrapped} = CPAN::Distrostatus->new("NO");
@@ -5926,11 +5963,6 @@ EOF
             }
         }
     }
-    if ($CPAN::Signal){
-        $self->safe_chdir($sub_wd);
-        return;
-    }
-
     $self->{build_dir} = $packagedir;
     $self->safe_chdir($builddir);
     File::Path::rmtree("tmp-$$");
@@ -5938,9 +5970,13 @@ EOF
     $self->safe_chdir($packagedir);
     $self->_signature_business();
     $self->safe_chdir($builddir);
-    return if $CPAN::Signal;
 
+    return($packagedir,$local_file);
+}
 
+#-> sub CPAN::Distribution::run_MM_or_MB
+sub run_MM_or_MB {
+    my($self,$local_file,$packagedir) = @_;
     my($mpl) = File::Spec->catfile($packagedir,"Makefile.PL");
     my($mpl_exists) = -f $mpl;
     unless ($mpl_exists) {
@@ -5981,7 +6017,6 @@ EOF
        ) {
         $self->store_persistent_state;
     }
-
     return $self;
 }
 
@@ -6169,7 +6204,7 @@ We\'ll try to build it with that Makefile then.
             my $fh = FileHandle->new;
             my $script_file = File::Spec->catfile($packagedir,$local_file);
             $fh->open($script_file)
-                or Carp::croak("Could not open $script_file: $!");
+                or Carp::croak("Could not open script '$script_file': $!");
             local $/ = "\n";
             # name parsen und prereq
             my($state) = "poddir";
@@ -8073,11 +8108,7 @@ sub test {
     }
     my $ready_to_report = $want_report;
     if ($ready_to_report
-        && (
-            substr($self->id,-1,1) eq "."
-            ||
-            $self->author->id eq "LOCAL"
-           )
+        && $self->is_dot_dist
        ) {
         $CPAN::Frontend->mywarn("Reporting via CPAN::Reporter is disabled ".
                                 "for local directories\n");
@@ -8681,6 +8712,90 @@ sub _build_command {
     return "./Build";
 }
 
+#-> sub CPAN::Distribution::reports
+sub reports {
+    my($self) = @_;
+    my $pathname = $self->id;
+    $CPAN::Frontend->myprint("Distribution: $pathname\n");
+
+    unless ($CPAN::META->has_inst("CPAN::DistnameInfo")) {
+        $CPAN::Frontend->mydie("CPAN::DistnameInfo not installed; cannot continue");
+    }
+    unless ($CPAN::META->has_usable("LWP")) {
+        $CPAN::Frontend->mydie("LWP not installed; cannot continue");
+    }
+    unless ($CPAN::META->has_inst("File::Temp")) {
+        $CPAN::Frontend->mydie("File::Temp not installed; cannot continue");
+    }
+
+    my $d = CPAN::DistnameInfo->new($pathname);
+
+    my $dist      = $d->dist;      # "CPAN-DistnameInfo"
+    my $version   = $d->version;   # "0.02"
+    my $maturity  = $d->maturity;  # "released"
+    my $filename  = $d->filename;  # "CPAN-DistnameInfo-0.02.tar.gz"
+    my $cpanid    = $d->cpanid;    # "GBARR"
+    my $distvname = $d->distvname; # "CPAN-DistnameInfo-0.02"
+
+    my $url = sprintf "http://cpantesters.perl.org/show/%s.yaml", $dist;
+
+    CPAN::LWP::UserAgent->config;
+    my $Ua;
+    eval { $Ua = CPAN::LWP::UserAgent->new; };
+    if ($@) {
+        $CPAN::Frontend->mydie("CPAN::LWP::UserAgent->new dies with $@\n");
+    }
+    $CPAN::Frontend->myprint("Fetching '$url'...");
+    my $resp = $Ua->get($url);
+    unless ($resp->is_success) {
+        $CPAN::Frontend->mydie(sprintf "Could not download '%s': %s\n", $url, $resp->code);
+    }
+    $CPAN::Frontend->myprint("DONE\n\n");
+    my $yaml = $resp->content;
+    # was fuer ein Umweg!
+    my $fh = File::Temp->new(
+                             template => 'cpan_reports_XXXX',
+                             suffix => '.yaml',
+                             unlink => 0,
+                            );
+    my $tfilename = $fh->filename;
+    print $fh $yaml;
+    close $fh or $CPAN::Frontend->mydie("Could not close '$tfilename': $!");
+    my $unserialized = CPAN->_yaml_loadfile($tfilename)->[0];
+    unlink $tfilename or $CPAN::Frontend->mydie("Could not unlink '$tfilename': $!");
+    my %other_versions;
+    my $this_version_seen;
+    for my $rep (@$unserialized) {
+        my $rversion = $rep->{version};
+        if ($rversion eq $version){
+            unless ($this_version_seen++) {
+                $CPAN::Frontend->myprint ("$rep->{version}:\n");
+            }
+            $CPAN::Frontend->myprint
+                (sprintf("%1s%1s%-4s %s on %s %s (%s)\n",
+                         $rep->{archname} eq $Config::Config{archname}?"*":"",
+                         $rep->{action}eq"PASS"?"+":$rep->{action}eq"FAIL"?"-":"",
+                         $rep->{action},
+                         $rep->{perl},
+                         ucfirst $rep->{osname},
+                         $rep->{osvers},
+                         $rep->{archname},
+                        ));
+        } else {
+            $other_versions{$rep->{version}}++;
+        }
+    }
+    unless ($this_version_seen) {
+        $CPAN::Frontend->myprint("No reports found for version '$version'
+Reports for other versions:\n");
+        for my $v (sort keys %other_versions) {
+            $CPAN::Frontend->myprint(" $v\: $other_versions{$v}\n");
+        }
+    }
+    $url =~ s/\.yaml/.html/;
+    $CPAN::Frontend->myprint("See $url for details\n");
+}
+
 package CPAN::Bundle;
 use strict;
 
@@ -8959,26 +9074,27 @@ package CPAN::Module;
 use strict;
 
 # Accessors
-# sub CPAN::Module::userid
+#-> sub CPAN::Module::userid
 sub userid {
     my $self = shift;
     my $ro = $self->ro;
     return unless $ro;
     return $ro->{userid} || $ro->{CPAN_USERID};
 }
-# sub CPAN::Module::description
+#-> sub CPAN::Module::description
 sub description {
     my $self = shift;
     my $ro = $self->ro or return "";
     $ro->{description}
 }
 
+#-> sub CPAN::Module::distribution
 sub distribution {
     my($self) = @_;
     CPAN::Shell->expand("Distribution",$self->cpan_file);
 }
 
-# sub CPAN::Module::undelay
+#-> sub CPAN::Module::undelay
 sub undelay {
     my $self = shift;
     delete $self->{later};
@@ -9243,6 +9359,7 @@ sub as_string {
     join "", @m, "\n";
 }
 
+#-> sub CPAN::Module::manpage_headline
 sub manpage_headline {
   my($self,$local_file) = @_;
   my(@local_file) = $local_file;
@@ -9556,6 +9673,12 @@ sub parse_version {
 
     $have =~ s/\s*//g; # stringify to float around floating point issues
     $have; # no stringify needed, \s* above matches always
+}
+
+#-> sub CPAN::Module::reports
+sub reports {
+    my($self) = @_;
+    $self->distribution->reports;
 }
 
 package CPAN;
@@ -10906,6 +11029,11 @@ undef otherwise.
 Downloads the README file associated with a distribution and runs it
 through the pager specified in C<$CPAN::Config->{pager}>.
 
+=item CPAN::Distribution::reports()
+
+Downloads report data for this distribution from cpantesters.perl.org
+and displays a subset of them.
+
 =item CPAN::Distribution::read_yaml()
 
 Returns the content of the META.yml of this distro as a hashref. Note:
@@ -11097,6 +11225,10 @@ Runs a C<perldoc> on this module.
 =item CPAN::Module::readme()
 
 Runs a C<readme> on the distribution associated with this module.
+
+=item CPAN::Module::reports()
+
+Calls the reports() method on the associated distribution object.
 
 =item CPAN::Module::test()
 

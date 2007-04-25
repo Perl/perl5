@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION @ISA $BUGHUNTING);
 use CPAN::Debug;
 use File::Basename ();
-$VERSION = sprintf "%.6f", substr(q$Rev: 1525 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 1717 $,4)/1000000 + 5.4;
 # module is internal to CPAN.pm
 
 @ISA = qw(CPAN::Debug);
@@ -13,7 +13,7 @@ $BUGHUNTING ||= 0; # released code must have turned off
 # it's ok if file doesn't exist, it just matters if it is .gz or .bz2
 sub new {
   my($class,$file) = @_;
-  $CPAN::Frontend->mydie("new called without arg") unless defined $file;
+  $CPAN::Frontend->mydie("CPAN::Tarzip->new called without arg") unless defined $file;
   if (0) {
     # nonono, we get e.g. 01mailrc.txt uncompressed if only wget is available
     $CPAN::Frontend->mydie("file[$file] doesn't match /\\.(bz2|gz|zip|tgz)\$/")
