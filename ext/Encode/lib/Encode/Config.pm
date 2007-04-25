@@ -2,7 +2,7 @@
 # Demand-load module list
 #
 package Encode::Config;
-our $VERSION = do { my @r = ( q$Revision: 2.3 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.4 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 use strict;
 use warnings;
@@ -75,7 +75,8 @@ our %ExtModule = (
     'MacUkrainian'          => 'Encode::Byte',
     'nextstep'              => 'Encode::Byte',
     'hp-roman8'             => 'Encode::Byte',
-    'gsm0338'               => 'Encode::Byte',
+    #'gsm0338'               => 'Encode::Byte',
+    'gsm0338'               => 'Encode::GSM0338',
 
     # Encode::EBCDIC
     'cp37'     => 'Encode::EBCDIC',

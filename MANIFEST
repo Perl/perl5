@@ -478,6 +478,7 @@ ext/Encode/lib/Encode/CN/HZ.pm		Encode extension
 ext/Encode/lib/Encode/Config.pm	Encode configuration module
 ext/Encode/lib/Encode/Encoder.pm	OO Encoder
 ext/Encode/lib/Encode/Encoding.pm	Encode extension
+ext/Encode/lib/Encode/GSM0338.pm	Encode extension
 ext/Encode/lib/Encode/Guess.pm	Encode Extension
 ext/Encode/lib/Encode/JP/H2Z.pm	Encode extension
 ext/Encode/lib/Encode/JP/JIS7.pm	Encode extension

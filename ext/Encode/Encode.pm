@@ -1,10 +1,10 @@
 #
-# $Id: Encode.pm,v 2.19 2007/04/06 12:53:41 dankogai Exp dankogai $
+# $Id: Encode.pm,v 2.20 2007/04/22 14:56:12 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.19 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.20 $ =~ /(\d+)/g;
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -405,11 +405,11 @@ iso-8859-1 (also known as Latin1),
 
   $octets = encode("iso-8859-1", $string);
 
-B<CAVEAT>: When you run C<$octets = encode("utf8", $string)>, then $octets
-B<may not be equal to> $string.  Though they both contain the same data, the UTF8 flag
-for $octets is B<always> off.  When you encode anything, UTF8 flag of
-the result is always off, even when it contains completely valid utf8
-string. See L</"The UTF8 flag"> below.
+B<CAVEAT>: When you run C<$octets = encode("utf8", $string)>, then
+$octets B<may not be equal to> $string.  Though they both contain the
+same data, the UTF8 flag for $octets is B<always> off.  When you
+encode anything, UTF8 flag of the result is always off, even when it
+contains completely valid utf8 string. See L</"The UTF8 flag"> below.
 
 If the $string is C<undef> then C<undef> is returned.
 
@@ -432,6 +432,41 @@ ASCII data (or EBCDIC on EBCDIC machines).  See L</"The UTF8 flag">
 below.
 
 If the $string is C<undef> then C<undef> is returned.
+
+=item [$obj =] find_encoding(ENCODING)
+
+Returns the I<encoding object> corresponding to ENCODING.  Returns
+undef if no matching ENCODING is find.
+
+This object is what actually does the actual (en|de)coding.
+
+  $utf8 = decode($name, $bytes);
+
+is in fact
+
+  $utf8 = do{
+    $obj = find_encoding($name);
+    croak qq(encoding "$name" not found) unless ref $obj;
+    $obj->decode($bytes)
+  };
+
+with more error checking.
+
+Therefore you can save time by reusing this object as follows;
+
+  my $enc = find_encoding("iso-8859-1");
+  while(<>){
+     my $utf8 = $enc->decode($_);
+     # and do someting with $utf8;
+  }
+
+Besides C<< ->decode >> and C<< ->encode >>, other methods are
+available as well.  For instance, C<< -> name >> returns the canonical
+name of the encoding object.
+
+  find_encoding("latin1")->name; # iso-8859-1
+
+See L<Encode::Encoding> for details.
 
 =item [$length =] from_to($octets, FROM_ENC, TO_ENC [, CHECK])
 
@@ -532,9 +567,9 @@ See L<Encode::Alias> for details.
 
 =head1 Encoding via PerlIO
 
-If your perl supports I<PerlIO> (which is the default), you can use a PerlIO layer to decode
-and encode directly via a filehandle.  The following two examples
-are totally identical in their functionality.
+If your perl supports I<PerlIO> (which is the default), you can use a
+PerlIO layer to decode and encode directly via a filehandle.  The
+following two examples are totally identical in their functionality.
 
   # via PerlIO
   open my $in,  "<:encoding(shiftjis)", $infile  or die;
@@ -659,13 +694,17 @@ constants via C<use Encode qw(:fallback_all)>.
 
 =back
 
+=over 2
+
 =item Encode::LEAVE_SRC
 
 If the C<Encode::LEAVE_SRC> bit is not set, but I<CHECK> is, then the second
 argument to C<encode()> or C<decode()> may be assigned to by the functions. If
 you're not interested in this, then bitwise-or the bitmask with it.
 
-=head2 coderef for CHECK
+=back
+
+=Head2 coderef for CHECK
 
 As of Encode 2.12 CHECK can also be a code reference which takes the
 ord value of unmapped caharacter as an argument and returns a string
