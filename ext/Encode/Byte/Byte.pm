@@ -2,7 +2,7 @@ package Encode::Byte;
 use strict;
 use warnings;
 use Encode;
-our $VERSION = do { my @r = ( q$Revision: 2.2 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.3 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -107,7 +107,6 @@ supported are as follows.
   # More vendor encodings
   AdobeStandardEncoding
   nextstep
-  gsm0338	# used in GSM handsets
   hp-roman8
 
 =head1 DESCRIPTION

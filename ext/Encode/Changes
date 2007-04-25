@@ -1,8 +1,23 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.19 2007/04/06 12:53:41 dankogai Exp dankogai $
+# $Id: Changes,v 2.20 2007/04/22 14:56:12 dankogai Exp dankogai $
 #
-$Revision: 2.19 $ $Date: 2007/04/06 12:53:41 $
+$Revision: 2.20 $ $Date: 2007/04/22 14:56:12 $
+! Encode.pm
+  Pod fixes.  Now find_encoding() is explained more in details.
++ lib/Encode/GSM0338.pm
+- ucm/gsm0338.ucm 
+! lib/Encode/Supported.pod lib/Encode/Config.pm Bytes/Makefile.PL t/gsm0338.t
+  ESTI GSM 03.38 support is relocated from Encode::Byte to Encode::GSM0338.
+  This encoding is so kaputt it is unfit for Encode::XS!
+  Though it was okay for general cases and escape sequences,
+  '\0' => '@' IFF '\0\0' => '\0' had gliches.
+  So kaputt even t/gsm0338 wrongly interpreted that.
+  ref. http://www.csoft.co.uk/sms/character_sets/gsm.htm
+! encoding.pm t/Aliases.t
+  Imported from bleedperl #31015
+
+2.19 2007/04/06 12:53:41
 ! lib/Encode/JP/JIS7.pm
 + t/jis7-fallback.t
   encode('iso-2022-jp') fallback support added by MIYAGAWA++
