@@ -287,6 +287,12 @@ for (@modules) {
     $version = undef;
     @missing = ();
     @missing = $installed -> validate($_);
+
+    # .bs files are optional
+    @missing = grep { ! /\.bs$/ } @missing;
+    # man files are often compressed
+    @missing = grep { ! ( -s "$_.gz" || -s "$_.bz2" ) } @missing;
+
     if ($#missing >= 0) {
         print "# file",+($#missing == 0) ? '' : 's'," missing from installation:\n";
         print '# ',join(' ',@missing),"\n";
