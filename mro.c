@@ -483,7 +483,10 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
         while((iter = hv_iternext(isarev))) {
             SV* revkey = hv_iterkeysv(iter);
             HV* revstash = gv_stashsv(revkey, 0);
-            struct mro_meta* revmeta = HvMROMETA(revstash);
+            struct mro_meta* revmeta;
+
+            if(!revstash) continue;
+            revmeta = HvMROMETA(revstash);
             SvREFCNT_dec((SV*)revmeta->mro_linear_dfs);
             SvREFCNT_dec((SV*)revmeta->mro_linear_c3);
             revmeta->mro_linear_dfs = NULL;
@@ -597,7 +600,10 @@ Perl_mro_method_changed_in(pTHX_ HV *stash)
         while((iter = hv_iternext(isarev))) {
             SV* revkey = hv_iterkeysv(iter);
             HV* revstash = gv_stashsv(revkey, 0);
-            struct mro_meta* mrometa = HvMROMETA(revstash);
+            struct mro_meta* mrometa;
+
+            if(!revstash) continue;
+            mrometa = HvMROMETA(revstash);
             mrometa->sub_generation++;
             if(mrometa->mro_nextmethod)
                 hv_clear(mrometa->mro_nextmethod);
