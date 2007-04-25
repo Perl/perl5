@@ -901,9 +901,9 @@ linked list of C<struct magic>'s, typedef'ed to C<MAGIC>.
         U16         mg_private;
         char        mg_type;
         U8          mg_flags;
+        I32         mg_len;
         SV*         mg_obj;
         char*       mg_ptr;
-        I32         mg_len;
     };
 
 Note this is current as of patchlevel 0, and could change at any time.
