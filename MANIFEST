@@ -649,6 +649,7 @@ ext/Fcntl/Fcntl.pm	Fcntl extension Perl module
 ext/Fcntl/Fcntl.xs	Fcntl extension external subroutines
 ext/Fcntl/Makefile.PL	Fcntl extension makefile writer
 ext/Fcntl/t/fcntl.t	See if Fcntl works
+ext/Fcntl/t/mode.t	See if S_ISREG() and S_ISDIR() work
 ext/Fcntl/t/syslfs.t	See if large files work for sysio
 ext/File/Glob/bsd_glob.c	File::Glob extension run time code
 ext/File/Glob/bsd_glob.h	File::Glob extension header file
