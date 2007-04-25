@@ -464,12 +464,13 @@ $(DBG)perl$(E) : perlmain$(O), $(DBG)perlshr$(E), $(MINIPERL_EXE)
 $(DBG)perlshr$(E) : $(DBG)libperl$(OLB) $(extobj) $(DBG)perlshr_xtras.ts
 	Link $(LINKFLAGS)/Share=$(MMS$TARGET) $(extobj) []$(DBG)perlshr_bld.opt/Option, perlshr_attr.opt/Option
 
-globals$(O): uudmap.h
+globals$(O) : uudmap.h
 
-uudmap.h: generate_uudmap.exe
-	MCR generate_uudmap.exe >uudmap.h
+uudmap.h : generate_uudmap$(E)
+	DEFINE/USER_MODE SYS$OUTPUT uudmap.h
+	MCR SYS$DISK:[]generate_uudmap$(E)
 
-generate_uudmap.exe: generate_uudmap$(O)
+generate_uudmap$(E) : generate_uudmap$(O) $(CRTL)
 	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoFull/NoCross/Exe=$(MMS$TARGET) generate_uudmap$(O) $(CRTLOPTS)
 
 # The following files are built in one go by gen_shrfls.pl:
@@ -1757,8 +1758,6 @@ tidy : cleanlis
 	- If F$Search("vms.c;-1")   .nes."" Then Purge/NoConfirm/Log vms.c
 	- If F$Search("perlmain.c;-1")   .nes."" Then Purge/NoConfirm/Log perlmain.c
 	- If F$Search("uudmap.h;-1")   .nes."" Then Purge/NoConfirm/Log uudmap.h
-	- If F$Search("generate_uudmap.exe;-1")   .nes."" Then Purge/NoConfirm/Log generate_uudmap.exe
-	- If F$Search("generate_uudmap$(O);-1")   .nes."" Then Purge/NoConfirm/Log generate_uudmap$(O)
 	- If F$Search("Perlshr_Gbl*.Mar;-1")   .nes."" Then Purge/NoConfirm/Log Perlshr_Gbl*.Mar
 	- If F$Search("[.ext.DynaLoader]dl_vms$(O);-1").nes."" Then Purge/NoConfirm/Log [.ext.DynaLoader]dl_vms$(O)
 	- If F$Search("[.ext.DynaLoader]dl_vms.c;-1").nes."" Then Purge/NoConfirm/Log [.ext.DynaLoader]dl_vms.c
@@ -1793,6 +1792,7 @@ clean : tidy cleantest
 	- If F$Search("vmsish.h").nes."" Then Delete/NoConfirm/Log vmsish.h;*
 	- If F$Search("vms.c")   .nes."" Then Delete/NoConfirm/Log vms.c;*
 	- If F$Search("perlmain.c")   .nes."" Then Delete/NoConfirm/Log perlmain.c;*
+	- If F$Search("uudmap.h")   .nes."" Then Delete/NoConfirm/Log uudmap.h;*
 	- If F$Search("Perlshr_Gbl*.Mar")   .nes."" Then Delete/NoConfirm/Log Perlshr_Gbl*.Mar;*
 	- If F$Search("*.TS").nes."" Then Delete/NoConfirm/Log *.TS;*
 	- If F$Search("[.ext.DynaLoader]dl_vms$(O)").nes."" Then Delete/NoConfirm/Log [.ext.DynaLoader]dl_vms$(O);*
