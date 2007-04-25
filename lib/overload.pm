@@ -2,8 +2,6 @@ package overload;
 
 our $VERSION = '1.06';
 
-require Scalar::Util;
-
 sub nil {}
 
 sub OVERLOAD {
@@ -75,6 +73,9 @@ sub OverloadedStringify {
 sub Method {
   my $package = shift;
   if(ref $package) {
+    local $@;
+    local $!;
+    require Scalar::Util;
     $package = Scalar::Util::blessed($package);
     return undef if !defined $package;
   }
@@ -88,6 +89,9 @@ sub AddrRef {
   my $package = ref $_[0];
   return "$_[0]" unless $package;
 
+  local $@;
+  local $!;
+  require Scalar::Util;
   my $class = Scalar::Util::blessed($_[0]);
   my $class_prefix = defined($class) ? "$class=" : "";
   my $type = Scalar::Util::reftype($_[0]);
