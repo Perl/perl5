@@ -344,11 +344,11 @@ PPCODE:
     SV *pv_lim_sv = perl_get_sv("Devel::Peek::pv_limit", FALSE);
     const STRLEN pv_lim = pv_lim_sv ? SvIV(pv_lim_sv) : 0;
     SV *dumpop = perl_get_sv("Devel::Peek::dump_ops", FALSE);
-    const I32 save_dumpindent = PL_dumpindent;
+    const U16 save_dumpindent = PL_dumpindent;
     PL_dumpindent = 2;
     do_sv_dump(0, Perl_debug_log, sv, 0, lim,
 	       (bool)(dumpop && SvTRUE(dumpop)), pv_lim);
-    PL_dumpindent = (U16)save_dumpindent;
+    PL_dumpindent = save_dumpindent;
 }
 
 void
@@ -360,7 +360,7 @@ PPCODE:
     SV *pv_lim_sv = perl_get_sv("Devel::Peek::pv_limit", FALSE);
     const STRLEN pv_lim = pv_lim_sv ? SvIV(pv_lim_sv) : 0;
     SV *dumpop = perl_get_sv("Devel::Peek::dump_ops", FALSE);
-    const I32 save_dumpindent = PL_dumpindent;
+    const U16 save_dumpindent = PL_dumpindent;
     PL_dumpindent = 2;
 
     for (i=1; i<items; i++) {
@@ -368,7 +368,7 @@ PPCODE:
 	do_sv_dump(0, Perl_debug_log, ST(i), 0, lim,
 		   (bool)(dumpop && SvTRUE(dumpop)), pv_lim);
     }
-    PL_dumpindent = (U16)save_dumpindent;
+    PL_dumpindent = save_dumpindent;
 }
 
 void
