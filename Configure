@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Apr 23 22:54:24 CEST 2007 [metaconfig 3.0 PL70]
+# Generated on Wed Apr 25 10:10:54 CEST 2007 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -9610,7 +9610,7 @@ esac
 
 for xxx_convert in $xxx_list; do
 	echo "Trying $xxx_convert..."
-	$rm_try
+	$rm -f try try$_o core
 	set try -DTRY_$xxx_convert
 	if eval $compile; then
 		echo "$xxx_convert() found." >&4
@@ -9647,6 +9647,7 @@ qgcvt) d_Gconvert='qgcvt((x),(n),(b))' ;;
 esac
 
 fi
+$rm_try
 
 : see if _fwalk exists
 set fwalk d__fwalk
@@ -16199,7 +16200,7 @@ eval $setvar
 case "$d_sem" in
 $define)
     echo " "
-    $cat > try.h <<END
+    $cat > tryh.h <<END
 #ifndef S_IRUSR
 #   ifdef S_IREAD
 #	define S_IRUSR S_IREAD
@@ -16234,7 +16235,7 @@ END
 #include <sys/stat.h>
 #include <stdio.h>
 #include <errno.h>
-#include "try.h"
+#include "tryh.h"
 #ifndef errno
 extern int errno;
 #endif
@@ -16304,7 +16305,7 @@ END
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <sys/stat.h>
-#include "try.h"
+#include "tryh.h"
 #include <stdio.h>
 #include <errno.h>
 #ifndef errno
@@ -16354,7 +16355,6 @@ END
     *)  echo "You cannot use struct semid_ds* for semctl IPC_STAT." >&4
         ;;
     esac
-    $rm_try
     ;;
 *)  val="$undef"
 
@@ -16368,6 +16368,7 @@ END
     eval $setvar
     ;;
 esac
+$rm_try tryh.h
 
 : see if sendmsg exists
 set sendmsg d_sendmsg
