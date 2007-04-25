@@ -88,12 +88,11 @@ sub AddrRef {
   my $package = ref $_[0];
   return "$_[0]" unless $package;
 
-	require Scalar::Util;
-	my $class = Scalar::Util::blessed($_[0]);
-	my $class_prefix = defined($class) ? "$class=" : "";
-	my $type = Scalar::Util::reftype($_[0]);
-	my $addr = Scalar::Util::refaddr($_[0]);
-	return sprintf("$class_prefix$type(0x%x)", $addr);
+  my $class = Scalar::Util::blessed($_[0]);
+  my $class_prefix = defined($class) ? "$class=" : "";
+  my $type = Scalar::Util::reftype($_[0]);
+  my $addr = Scalar::Util::refaddr($_[0]);
+  return sprintf("$class_prefix$type(0x%x)", $addr);
 }
 
 *StrVal = *AddrRef;
