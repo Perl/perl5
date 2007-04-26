@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Apr 25 10:10:54 CEST 2007 [metaconfig 3.0 PL70]
+# Generated on Fri Apr 27 08:02:41 CEST 2007 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -21053,8 +21053,6 @@ known_extensions="$known_extensions threads/shared"
 set X $known_extensions
 shift
 known_extensions="$*"
-#  Ditto for IO/Compress/Base and IO/Compress/Zlib
-nonxs_extensions="$nonxs_extensions IO/Compress/Base IO/Compress/Zlib"
 set X $nonxs_extensions
 shift
 nonxs_extensions="$*"
