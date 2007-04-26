@@ -3237,18 +3237,18 @@ S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr) {
     common:
 	if (intro) {
 	    if (stype == SVt_PVCV) {
-		if (GvCVGEN(dstr) && GvCV(dstr) != (CV*)sref) {
+		/*if (GvCVGEN(dstr) && (GvCV(dstr) != (CV*)sref || GvCVGEN(dstr))) {*/
+		if (GvCVGEN(dstr)) {
 		    SvREFCNT_dec(GvCV(dstr));
 		    GvCV(dstr) = NULL;
 		    GvCVGEN(dstr) = 0; /* Switch off cacheness. */
-		    mro_method_changed_in(GvSTASH(dstr));
 		}
 	    }
 	    SAVEGENERICSV(*location);
 	}
 	else
 	    dref = *location;
-	if (stype == SVt_PVCV && *location != sref) {
+	if (stype == SVt_PVCV && (*location != sref || GvCVGEN(dstr))) {
 	    CV* const cv = (CV*)*location;
 	    if (cv) {
 		if (!GvCVGEN((GV*)dstr) &&

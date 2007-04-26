@@ -38,6 +38,7 @@ my @testsubs = (
     sub { undef *MCTest::Base::foo; eval { MCTest::Derived->foo(0) }; like($@, qr/locate object method/); },
     sub { sub MCTest::Base::foo($); *MCTest::Base::foo = \&ASDF::asdf; is(MCTest::Derived->foo(0), 7); },
     sub { *XYZ = sub { $_[1]+8 }; ${MCTest::Base::}{foo} = \&XYZ; is(MCTest::Derived->foo(0), 8); },
+    sub { *MCTest::Derived::foo = \&MCTest::Base::foo; eval { MCTest::Derived::foo(0,0) }; ok(!$@); undef *MCTest::Derived::foo },
 );
 
 plan(tests => scalar(@testsubs) + 1);

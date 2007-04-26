@@ -180,11 +180,6 @@ PP(pp_sassign)
 	    SvREFCNT_dec(cv);
 	    LEAVE;
 	}
-
-	if (strEQ(GvNAME(right),"isa")) {
-	    GvCVGEN(right) = 0;
-	    ++PL_sub_generation; /* I don't get this at all --blblack */
-	}
     }
     SvSetMagicSV(right, left);
     SETs(right);
