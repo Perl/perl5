@@ -695,6 +695,7 @@ GLOBEXE		= ..\perlglob.exe
 CONFIGPM	= ..\lib\Config.pm ..\lib\Config_heavy.pl
 MINIMOD		= ..\lib\ExtUtils\Miniperl.pm
 X2P		= ..\x2p\a2p.exe
+GENUUDMAP	= ..\generate_uudmap.exe
 .IF "$(BUILD_STATIC)" == "define"
 PERLSTATIC	= static
 .ELSE
@@ -921,6 +922,8 @@ CORE_NOCFG_H	=		\
 
 CORE_H		= $(CORE_NOCFG_H) .\config.h
 
+UUDMAP_H	= ..\uudmap.h
+
 MICROCORE_OBJ	= $(MICROCORE_SRC:db:+$(o))
 CORE_OBJ	= $(MICROCORE_OBJ) $(EXTRACORE_SRC:db:+$(o))
 WIN32_OBJ	= $(WIN32_SRC:db:+$(o))
@@ -929,6 +932,7 @@ MINIWIN32_OBJ	= $(MINIDIR)\{$(WIN32_OBJ:f)}
 MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
 DLL_OBJ		= $(DLL_SRC:db:+$(o))
 X2P_OBJ		= $(X2P_SRC:db:+$(o))
+GENUUDMAP_OBJ	= $(GENUUDMAP:db:+$(o))
 
 PERLDLL_OBJ	= $(CORE_OBJ)
 PERLEXE_OBJ	= perlmain$(o)
@@ -1266,21 +1270,22 @@ $(X2P) : $(MINIPERL) $(X2P_OBJ)
 	$(EMBED_EXE_MANI)
 .ENDIF
 
-globals$(o) : uudmap.h
+$(MINIDIR)\globals$(o) : $(UUDMAP_H)
 
-uudmap.h: generate_uudmap.exe
-	generate_uudmap >uudmap.h
+$(UUDMAP_H) : $(GENUUDMAP)
+	$(GENUUDMAP) >$(UUDMAP_H)
 
-generate_uudmap.exe : generate_uudmap$(o)
+$(GENUUDMAP) : $(GENUUDMAP_OBJ)
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpe -ap $(BLINK_FLAGS) \
-	    @$(mktmp c0x32$(o) generate_uudmap$(o),$(@:s,\,$B,),,$(LIBFILES),)
+	    @$(mktmp c0x32$(o) $(GENUUDMAP_OBJ:s,\,$B,),$(@:s,\,$B,),,$(LIBFILES),)
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -v -o $@ $(BLINK_FLAGS) \
-	    $(mktmp $(LKPRE) generate_uudmap$(o) $(LIBFILES) $(LKPOST))
+	    $(mktmp $(LKPRE) $(GENUUDMAP_OBJ:s,\,$B,) $(LIBFILES) $(LKPOST))
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ $(BLINK_FLAGS) \
-	    @$(mktmp $(LIBFILES) generate_uudmap$(o))
+	    @$(mktmp $(LIBFILES) $(GENUUDMAP_OBJ:s,\,$B,))
+	$(EMBED_EXE_MANI)
 .ENDIF
 
 perlmain.c : runperl.c
@@ -1622,7 +1627,7 @@ _clean :
 	-@erase $(PERLSTATICLIB)
 	-@erase $(PERLDLL)
 	-@erase $(CORE_OBJ)
-	-@erase generate_uudmap.exe generate_uudmap$(o) uudmap.h
+	-@erase $(GENUUDMAP) $(GENUUDMAP_OBJ) $(UUDMAP_H)
 	-if exist $(MINIDIR) rmdir /s /q $(MINIDIR)
 	-if exist $(UNIDATADIR1) rmdir /s /q $(UNIDATADIR1)
 	-if exist $(UNIDATADIR2) rmdir /s /q $(UNIDATADIR2)
