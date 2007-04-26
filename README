@@ -60,8 +60,8 @@ using the 'perlbug' tool. For more information about perlbug, either type
 'perldoc perlbug' or just 'perlbug' on a line by itself.
 
 While it was current when we made it available, Perl is constantly evolving
-and there may be a more recent version that bugs you've run into or adds
-new features that you might find useful.
+and there may be a more recent version that fixes bugs you've run into or
+adds new features that you might find useful.
 
 You can always find the latest version of perl on a CPAN (Comprehensive Perl
 Archive Network) site near you at http://www.cpan.org/src/
