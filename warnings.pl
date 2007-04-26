@@ -437,7 +437,14 @@ __END__
 
 package warnings;
 
-our $VERSION = '1.05';
+our $VERSION = '1.06';
+
+# Verify that we're called correctly so that warnings will work.
+# see also strict.pm.
+unless ( __FILE__ =~ /(^|[\/\\])\Q@{[__PACKAGE__]}\E\.pm$/ ) {
+    my (undef, $f, $l) = caller;
+    die("Incorrect use of pragma '@{[__PACKAGE__,]}' at $f line $l.\n");
+}
 
 =head1 NAME
 
