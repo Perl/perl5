@@ -3377,14 +3377,26 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		flags &= ~SCF_DO_STCLASS;
             }
 	    min += 1;
-	    delta += 2;
+	    delta += 1;
             if (flags & SCF_DO_SUBSTR) {
     	        SCAN_COMMIT(pRExC_state,data,minlenp);	/* Cannot expect anything... */
     	        data->pos_min += 1;
-    	        data->pos_delta += 2;
+	        data->pos_delta += 1;
 		data->longest = &(data->longest_float);
     	    }
     	    
+	}
+	else if (OP(scan) == FOLDCHAR) {
+	    int d = ARG(scan)==0xDF ? 1 : 2;
+	    flags &= ~SCF_DO_STCLASS;
+            min += 1;
+            delta += d;
+            if (flags & SCF_DO_SUBSTR) {
+	        SCAN_COMMIT(pRExC_state,data,minlenp);	/* Cannot expect anything... */
+	        data->pos_min += 1;
+	        data->pos_delta += d;
+		data->longest = &(data->longest_float);
+	    }
 	}
 	else if (strchr((const char*)PL_simple,OP(scan))) {
 	    int value = 0;
@@ -6476,7 +6488,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
 
 tryagain:
-    switch (*RExC_parse) {
+    switch ((U8)*RExC_parse) {
     case '^':
 	RExC_seen_zerolen++;
 	nextchar(pRExC_state);
@@ -6560,6 +6572,19 @@ tryagain:
 	RExC_parse++;
 	vFAIL("Quantifier follows nothing");
 	break;
+    case 0xDF:
+    case 0xC3:
+    case 0xCE:
+        if (FOLD && is_TRICKYFOLD(RExC_parse,UTF)) {
+            U32 len = UTF ? 0 : 1;
+            U32 cp = UTF ? utf8_to_uvchr((U8*)RExC_parse, &len) : (U32)((U8*)RExC_parse)[0];
+            *flagp |= HASWIDTH; /* could be SIMPLE too, but needs a handler in regexec.regrepeat */
+            RExC_parse+=len;
+            ret = reganode(pRExC_state, FOLDCHAR, cp);
+            Set_Node_Length(ret, 1); /* MJD */
+        } else
+            goto outer_default;
+        break;
     case '\\':
 	/* Special Escapes
 
@@ -6830,7 +6855,8 @@ tryagain:
 	}
 	/* FALL THROUGH */
 
-    default: {
+    default:
+        outer_default:{
 	    register STRLEN len;
 	    register UV ender;
 	    register char *p;
@@ -6855,7 +6881,12 @@ tryagain:
 
 		if (RExC_flags & RXf_PMf_EXTENDED)
 		    p = regwhite( pRExC_state, p );
-		switch (*p) {
+		switch ((U8)*p) {
+		case 0xDF:
+		case 0xC3:
+		case 0xCE:
+		           if (!FOLD || !is_TRICKYFOLD(p,UTF))
+		                goto normal_default;
 		case '^':
 		case '$':
 		case '.':
@@ -8565,6 +8596,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
                 SVfARG((SV*)progi->data->data[ ARG( o ) ]));
     } else if (k == LOGICAL)
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);	/* 2: embedded, otherwise 1 */
+    else if (k == FOLDCHAR)
+	Perl_sv_catpvf(aTHX_ sv, "[0x%"UVXf"]",ARG(o) );	
     else if (k == ANYOF) {
 	int i, rangestart = -1;
 	const U8 flags = ANYOF_FLAGS(o);
