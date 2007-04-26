@@ -1165,7 +1165,6 @@ ext/Thread/sync.tx		Test thread synchronisation
 ext/Thread/Thread/Signal.pm	Start a thread to run signal handlers
 ext/Thread/Thread/Specific.pm	Thread specific data access
 ext/Thread/Thread.xs		Thread extension external subroutines
-ext/Thread/typemap		Thread extension interface types
 ext/Thread/unsync2.tx		Test thread implicit synchronisation
 ext/Thread/unsync3.tx		Test thread implicit synchronisation
 ext/Thread/unsync4.tx		Test thread implicit synchronisation
