@@ -4295,6 +4295,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #endif /* DOSUID */
     PERL_UNUSED_ARG(validarg);
     PERL_UNUSED_ARG(scriptname);
+    PERL_UNUSED_ARG(linestr_sv);
 }
 
 STATIC void
