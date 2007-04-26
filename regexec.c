@@ -5022,8 +5022,9 @@ NULL
                     U8 tmpbuf2[UTF8_MAXBYTES_CASE+1];
                     STRLEN tmplen2;
                     to_uni_fold(n, tmpbuf1, &tmplen1);
-                    to_utf8_fold(locinput, tmpbuf2, &tmplen2);    
-                    if (tmplen1!=tmplen2 || !strnEQ(tmpbuf1,tmpbuf2,tmplen1))
+                    to_utf8_fold((U8*)locinput, tmpbuf2, &tmplen2);    
+                    if (tmplen1!=tmplen2
+			|| !strnEQ((char *)tmpbuf1,(char *)tmpbuf2,tmplen1))
                         sayNO;
                     else 
                         locinput += UTF8SKIP(locinput);

@@ -6576,7 +6576,7 @@ tryagain:
     case 0xC3:
     case 0xCE:
         if (FOLD && is_TRICKYFOLD(RExC_parse,UTF)) {
-            U32 len = UTF ? 0 : 1;
+            STRLEN len = UTF ? 0 : 1;
             U32 cp = UTF ? utf8_to_uvchr((U8*)RExC_parse, &len) : (U32)((U8*)RExC_parse)[0];
             *flagp |= HASWIDTH; /* could be SIMPLE too, but needs a handler in regexec.regrepeat */
             RExC_parse+=len;
