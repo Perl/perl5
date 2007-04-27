@@ -1159,7 +1159,7 @@ PP(pp_qr)
     dVAR; dSP;
     register PMOP * const pm = cPMOP;
     REGEXP * rx = PM_GETRE(pm);
-    SV * const pkg = CALLREG_QRPKG(rx);
+    SV * const pkg = CALLREG_PACKAGE(rx);
     SV * const rv = sv_newmortal();
     SV * const sv = newSVrv(rv, SvPV_nolen(pkg));
     if (rx->extflags & RXf_TAINTED)

@@ -471,7 +471,7 @@ EXTCONST regexp_engine PL_core_reg_engine = {
         Perl_regfree_internal, 
         Perl_reg_numbered_buff_get,
         Perl_reg_named_buff_get,
-        Perl_reg_qr_pkg,
+        Perl_reg_qr_package,
 #if defined(USE_ITHREADS)        
         Perl_regdupe_internal
 #endif        

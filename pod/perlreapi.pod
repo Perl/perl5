@@ -10,19 +10,21 @@ structure of the following format:
 
     typedef struct regexp_engine {
         REGEXP* (*comp) (pTHX_ const SV * const pattern, const U32 flags);
-        I32	    (*exec) (pTHX_ regexp* prog, char* stringarg, char* strend,
-    			    char* strbeg, I32 minend, SV* screamer,
-    			    void* data, U32 flags);
-        char*   (*intuit) (pTHX_ regexp *prog, SV *sv, char *strpos,
-    			    char *strend, U32 flags,
-    			    struct re_scream_pos_data_s *data);
-        SV*	    (*checkstr) (pTHX_ regexp *prog);
-        void    (*free) (pTHX_ struct regexp* r);
-        SV*     (*numbered_buff_get) (pTHX_ const REGEXP * const rx, I32 paren, SV* usesv);
-        SV*     (*named_buff_get)(pTHX_ const REGEXP * const rx, SV* namesv, U32 flags);
-        SV*     (*qr_pkg)(pTHX_ const REGEXP * const rx);
+        I32     (*exec) (pTHX_ REGEXP * const rx, char* stringarg, char* strend,
+                    char* strbeg, I32 minend, SV* screamer,
+                    void* data, U32 flags);
+        char*   (*intuit) (pTHX_ REGEXP * const rx, SV *sv, char *strpos,
+                    char *strend, U32 flags,
+                    struct re_scream_pos_data_s *data);
+        SV*     (*checkstr) (pTHX_ REGEXP * const rx);
+        void    (*free) (pTHX_ REGEXP * const rx);
+        void    (*numbered_buff_get) (pTHX_ REGEXP * const rx,
+                    const I32 paren, SV * const usesv);
+        SV*     (*named_buff_get)(pTHX_ REGEXP * const rx, SV * const namesv,
+                    const U32 flags);
+        SV*     (*qr_package)(pTHX_ REGEXP * const rx);
     #ifdef USE_ITHREADS
-        void* (*dupe) (pTHX_ const regexp *r, CLONE_PARAMS *param);
+        void*   (*dupe) (pTHX_ REGEXP * const rx, CLONE_PARAMS *param);
     #endif
     } regexp_engine;
 
@@ -129,7 +131,7 @@ by the tokenizer regardless of the engine currently in use.
 
 =item RXf_PMf_KEEPCOPY
 
-The C</k> flag.
+The C</p> flag.
 
 =item RXf_UTF8
 
@@ -146,7 +148,7 @@ preserved verbatim in regex->extflags.
 
 =head2 exec
 
-    I32 exec(regexp* prog,
+    I32 exec(pTHX_ REGEXP * const rx,
              char *stringarg, char* strend, char* strbeg,
              I32 minend, SV* screamer,
              void* data, U32 flags);
@@ -155,9 +157,9 @@ Execute a regexp.
 
 =head2 intuit
 
-    char* intuit( regexp *prog,
+    char* intuit(pTHX_ REGEXP * const rx,
                   SV *sv, char *strpos, char *strend,
-                  U32 flags, struct re_scream_pos_data_s *data);
+                  const U32 flags, struct re_scream_pos_data_s *data);
 
 Find the start position where a regex match should be attempted,
 or possibly whether the regex engine should not be run because the
@@ -167,14 +169,14 @@ structure.
 
 =head2 checkstr
 
-    SV*	checkstr(regexp *prog);
+    SV*	checkstr(pTHX_ REGEXP * const rx);
 
 Return a SV containing a string that must appear in the pattern. Used
 by C<split> for optimising matches.
 
 =head2 free
 
-    void free(regexp *prog);
+    void free(pTHX_ REGEXP * const rx);
 
 Called by perl when it is freeing a regexp pattern so that the engine
 can release any resources pointed to by the C<pprivate> member of the
@@ -183,26 +185,49 @@ perl will handle releasing anything else contained in the regexp structure.
 
 =head2 numbered_buff_get
 
-    SV* numbered_buff_get(pTHX_ const REGEXP * const rx, I32 paren, SV* usesv);
+    void numbered_buff_get(pTHX_ REGEXP * const rx, const I32 paren,
+                           SV * const usesv);
 
-TODO: document
+Called to get the value of C<$`>, C<$'>, C<$&> (and their named
+equivalents, see L<perlvar>) and the numbered capture buffers (C<$1>,
+C<$2>, ...).
+
+The C<paren> paramater will be C<-2> for C<$`>, C<-1> for C<$'>, C<0>
+for C<$&>, C<1> for C<$1> and so forth.
+
+C<usesv> should be set to the scalar to return, the scalar is passed
+as an argument rather than being returned from the function because
+when it's called perl already has a scalar to store the value,
+creating another one would be redundant. The scalar can be set with
+C<sv_setsv>, C<sv_setpvn> and friends, see L<perlapi>.
+
+This callback is where perl untaints its own capture variables under
+taint mode (see L<perlsec>). See the C<Perl_reg_numbered_buff_get>
+function in F<regcomp.c> for how to untaint capture variables if
+that's something you'd like your engine to do as well.
 
 =head2 named_buff_get
 
-    SV* named_buff_get(pTHX_ const REGEXP * const rx, SV* namesv, U32 flags);
+    SV* named_buff_get(pTHX_ REGEXP * const rx, SV * const namesv,
+                       const U32 flags);
 
-TODO: document
+Called to get the value of key in the C<%+> and C<%-> hashes,
+C<namesv> is the hash key being requested and if C<flags & 1> is true
+C<%-> is being requested (and C<%+> if it's not).
 
-=head2 qr_pkg
+=head2 qr_package
 
-    SV* qr_pkg(pTHX_ const REGEXP * const rx);
+    SV* qr_package(pTHX_ REGEXP * const rx);
 
 The package the qr// magic object is blessed into (as seen by C<ref
-qr//>). It is recommended that engines change this to its package
-name, for instance:
+qr//>). It is recommended that engines change this to their package
+name for identification regardless of whether they implement methods
+on the object.
+
+A callback implementation might be:
 
     SV*
-    Example_reg_qr_pkg(pTHX_ const REGEXP * const rx)
+    Example_reg_qr_package(pTHX_ REGEXP * const rx)
     {
     	PERL_UNUSED_ARG(rx);
     	return newSVpvs("re::engine::Example");
@@ -241,7 +266,7 @@ Or use the (CURRENTLY UNDOCUMENETED!) C<Perl_get_re_arg> function:
 
 =head2 dupe
 
-    void* dupe(const regexp *r, CLONE_PARAMS *param);
+    void* dupe(pTHX_ REGEXP * const rx, CLONE_PARAMS *param);
 
 On threaded builds a regexp may need to be duplicated so that the pattern
 can be used by mutiple threads. This routine is expected to handle the
@@ -437,13 +462,6 @@ offset from the start of the pattern, and the longest string that must
 occur at a floating offset from the start of the pattern. Used to do
 Fast-Boyer-Moore searches on the string to find out if its worth using
 the regex engine at all, and if so where in the string to search.
-
-=item C<startp>, C<endp>
-
-These fields store arrays that are used to hold the offsets of the begining
-and end of each capture group that has matched. -1 is used to indicate no match.
-
-These are the source for @- and @+.
 
 =item C<subbeg> C<sublen> C<saved_copy>
 

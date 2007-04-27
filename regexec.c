@@ -308,7 +308,7 @@ S_regcppop(pTHX_ const regexp *rex)
  - pregexec - match a regexp against a string
  */
 I32
-Perl_pregexec(pTHX_ register regexp *prog, char *stringarg, register char *strend,
+Perl_pregexec(pTHX_ REGEXP * const prog, char* stringarg, register char *strend,
 	 char *strbeg, I32 minend, SV *screamer, U32 nosave)
 /* strend: pointer to null at end of string */
 /* strbeg: real beginning of string */
@@ -372,7 +372,7 @@ Perl_pregexec(pTHX_ register regexp *prog, char *stringarg, register char *stren
    deleted from the finite automaton. */
 
 char *
-Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
+Perl_re_intuit_start(pTHX_ REGEXP * const prog, SV *sv, char *strpos,
 		     char *strend, U32 flags, re_scream_pos_data *data)
 {
     dVAR;
@@ -1705,7 +1705,7 @@ S_swap_match_buff (pTHX_ regexp *prog) {
  - regexec_flags - match a regexp against a string
  */
 I32
-Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *strend,
+Perl_regexec_flags(pTHX_ REGEXP * const prog, char *stringarg, register char *strend,
 	      char *strbeg, I32 minend, SV *sv, void *data, U32 flags)
 /* strend: pointer to null at end of string */
 /* strbeg: real beginning of string */

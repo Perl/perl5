@@ -113,19 +113,21 @@ typedef struct re_scream_pos_data_s
  */
 typedef struct regexp_engine {
     REGEXP* (*comp) (pTHX_ const SV * const pattern, const U32 flags);
-    I32	    (*exec) (pTHX_ regexp* prog, char* stringarg, char* strend,
-			    char* strbeg, I32 minend, SV* screamer,
-			    void* data, U32 flags);
-    char*   (*intuit) (pTHX_ regexp *prog, SV *sv, char *strpos,
-			    char *strend, U32 flags,
-			    struct re_scream_pos_data_s *data);
-    SV*	    (*checkstr) (pTHX_ regexp *prog);
-    void    (*free) (pTHX_ struct regexp* r);
-    SV*     (*numbered_buff_get) (pTHX_ const REGEXP * const rx, I32 paren, SV* usesv);
-    SV*     (*named_buff_get)(pTHX_ const REGEXP * const rx, SV* namesv, U32 flags);
-    SV*     (*qr_pkg)(pTHX_ const REGEXP * const rx);
+    I32     (*exec) (pTHX_ REGEXP * const rx, char* stringarg, char* strend,
+                     char* strbeg, I32 minend, SV* screamer,
+                     void* data, U32 flags);
+    char*   (*intuit) (pTHX_ REGEXP * const rx, SV *sv, char *strpos,
+                       char *strend, U32 flags,
+                       struct re_scream_pos_data_s *data);
+    SV*     (*checkstr) (pTHX_ REGEXP * const rx);
+    void    (*free) (pTHX_ REGEXP * const rx);
+    void    (*numbered_buff_get) (pTHX_ REGEXP * const rx,
+                const I32 paren, SV * const usesv);
+    SV*     (*named_buff_get)(pTHX_ REGEXP * const rx, SV * const namesv,
+                const U32 flags);
+    SV*     (*qr_package)(pTHX_ REGEXP * const rx);
 #ifdef USE_ITHREADS
-    void* (*dupe) (pTHX_ const regexp *r, CLONE_PARAMS *param);
+    void*   (*dupe) (pTHX_ REGEXP * const rx, CLONE_PARAMS *param);
 #endif    
 } regexp_engine;
 

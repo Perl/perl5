@@ -1846,7 +1846,7 @@ PERL_CALLCONV void	Perl_regdump(pTHX_ const regexp* r)
 PERL_CALLCONV SV*	Perl_regclass_swash(pTHX_ const regexp *prog, const struct regnode *n, bool doinit, SV **listsvp, SV **altsvp)
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV I32	Perl_pregexec(pTHX_ regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, U32 nosave)
+PERL_CALLCONV I32	Perl_pregexec(pTHX_ REGEXP * const prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, U32 nosave)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)
@@ -1862,7 +1862,7 @@ PERL_CALLCONV char *	Perl_reg_stringify(pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags,
 			__attribute__nonnull__(pTHX_1);
 
 #if defined(USE_ITHREADS)
-PERL_CALLCONV void*	Perl_regdupe_internal(pTHX_ const regexp* r, CLONE_PARAMS* param)
+PERL_CALLCONV void*	Perl_regdupe_internal(pTHX_ REGEXP * const r, CLONE_PARAMS* param)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
@@ -1873,15 +1873,15 @@ PERL_CALLCONV REGEXP*	Perl_pregcomp(pTHX_ const SV * const pattern, const U32 fl
 PERL_CALLCONV REGEXP*	Perl_re_compile(pTHX_ const SV * const pattern, const U32 flags)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV char*	Perl_re_intuit_start(pTHX_ regexp* prog, SV* sv, char* strpos, char* strend, U32 flags, struct re_scream_pos_data_s *data)
+PERL_CALLCONV char*	Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV* sv, char* strpos, char* strend, const U32 flags, struct re_scream_pos_data_s *data)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3)
 			__attribute__nonnull__(pTHX_4);
 
-PERL_CALLCONV SV*	Perl_re_intuit_string(pTHX_ regexp* prog)
+PERL_CALLCONV SV*	Perl_re_intuit_string(pTHX_ REGEXP * const rx)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV I32	Perl_regexec_flags(pTHX_ regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, void* data, U32 flags)
+PERL_CALLCONV I32	Perl_regexec_flags(pTHX_ REGEXP * const rx, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, void* data, U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)
@@ -1893,14 +1893,14 @@ PERL_CALLCONV regnode*	Perl_regnext(pTHX_ regnode* p)
 			__attribute__nonnull__(pTHX_1);
 
 
-PERL_CALLCONV SV*	Perl_reg_named_buff_get(pTHX_ const REGEXP * const rx, SV* namesv, U32 flags)
+PERL_CALLCONV SV*	Perl_reg_named_buff_get(pTHX_ REGEXP * const rx, SV * const namesv, const U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV SV*	Perl_reg_numbered_buff_get(pTHX_ const REGEXP * const rx, I32 paren, SV* usesv)
+PERL_CALLCONV void	Perl_reg_numbered_buff_get(pTHX_ REGEXP * const rx, const I32 paren, SV * const usesv)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV SV*	Perl_reg_qr_pkg(pTHX_ const REGEXP * const rx)
+PERL_CALLCONV SV*	Perl_reg_qr_package(pTHX_ REGEXP * const rx)
 			__attribute__nonnull__(pTHX_1);
 
 

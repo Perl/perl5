@@ -706,7 +706,7 @@
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define reg_named_buff_get	Perl_reg_named_buff_get
 #define reg_numbered_buff_get	Perl_reg_numbered_buff_get
-#define reg_qr_pkg		Perl_reg_qr_pkg
+#define reg_qr_package		Perl_reg_qr_package
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define regprop			Perl_regprop
@@ -2973,7 +2973,7 @@
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define reg_named_buff_get(a,b,c)	Perl_reg_named_buff_get(aTHX_ a,b,c)
 #define reg_numbered_buff_get(a,b,c)	Perl_reg_numbered_buff_get(aTHX_ a,b,c)
-#define reg_qr_pkg(a)		Perl_reg_qr_pkg(aTHX_ a)
+#define reg_qr_package(a)	Perl_reg_qr_package(aTHX_ a)
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define regprop(a,b,c)		Perl_regprop(aTHX_ a,b,c)
