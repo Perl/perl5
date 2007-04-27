@@ -1,93 +1,55 @@
-package UTF8::Matcher;
+package CharClass::Matcher;
 use strict;
 use warnings;
+use warnings FATAL => 'all';
 use Text::Wrap qw(wrap);
 use Encode;
 use Data::Dumper;
+$Data::Dumper::Useqq= 1;
+our $hex_fmt= "0x%02X";
 
-our $hex_fmt="0x%02X";
+=head1 TITLE
 
-# Author: Yves Orton (demerphq) 2007.
+CharClass::Matcher -- Generate C macros that match character classes efficiently
 
-=pod
+=head1 SYNOPSIS
+
+  ~/perl$ perl Porting\regcharclass.pl
+
+=head1 DESCRIPTION
 
 Dynamically generates macros for detecting special charclasses
-in both latin-1, utf8, and codepoint forms.
+in latin-1, utf8, and codepoint forms. Macros can be set to return
+the length (in bytes) of the matched codepoint, or the codepoint itself.
 
 To regenerate regcharclass.h, run this script from perl-root. No arguments
 are necessary.
 
-Each charclass handler is constructed as follows:
-Each string the charclass must match  is rendered as unicode (codepoints>255),
-and if possible  as latin1 (codepoints>127), and if possible as "neutral"
-(all codepoints<128).
-
-The rendered strings are then inserted into digit-tries by type and length.
-With shorter strings being added to tries that are allowed to contain longer
-strings, but not vice versa.  Thus the "longest" trie contains all strings
-for that charclass.
-
-The following types of trie are generated:
-
-  n - Neutral only. All strings in this type have codepoints<128
-  l - Latin1 only. All strings in this type have a codepoint>127 in them
-  u - UTF8 only.   All strings in this type have a codepoint>255 in them
-  L - Latin1. All strings in 'n' and 'l'
-  U - UTF8.   All string in 'n' and 'u'
-  c - Codepoint. All strings in U but in codepoint and not utf8 form.
-
-The ternary() routine is responsible for converting the trie data into a
-ternary conditional that matches the required set of strings. The generated
-macro normally takes at least the argument 's' which is expected to be a
-pointer of type C<char *> or C<U8 *>. The condition generated will be
-optimised to match the string as efficiently as possible, with range lookups
-being used where possible, and in some situations relying on "true" to be 1.
-
-ternary() takes two optional arguments, $type which is one of the above
-characters and $ext which is used to add an extra extension to the macro name.
-
-If $type is omitted or false then the generated macro will take an additional
-argument, 'is_utf8'.
-
-If $ext has the string 'safe' in it then the generated macro will take an extra
-argument 'e' for the end of the string, and all lookups will be length checked
-to prevent lookups past e. If 'safe' is not used then the lookup is assumed to
-be guaranteed safe, and no 'e' argument is provided  and no length checks are
-made during execution.
-
-The 'c' type is different as compared to the rest. Instead of producing
-a condition that does octet comparisons of a string array, the 'c' type
-produces a macro that takes a single codepoint as an argument (instead of a
-char* or U8*) and does the lookup based on only that char, thus it cannot be
-used to match multi-codepoint sequences like "\r\n" in the LNBREAK charclass.
-This is primarily used for populating charclass bitmaps for codepoints 0..255
-but will also match codepoints in the unicode range if necessary.
-
-Using LNBREAK as an example the following macros will be produced:
+Using WHATEVER as an example the following macros will be produced:
 
 =over 4
 
-=item is_LNBREAK(s,is_utf8)
+=item is_WHATEVER(s,is_utf8)
 
-=item is_LNBREAK_safe(s,e,is_utf8)
+=item is_WHATEVER_safe(s,e,is_utf8)
 
-Do a lookup as apporpriate based on the is_utf8 flag. When possible
+Do a lookup as appropriate based on the is_utf8 flag. When possible
 comparisons involving octect<128 are done before checking the is_utf8
 flag, hopefully saving time.
 
-=item is_LNBREAK_utf8(s)
+=item is_WHATEVER_utf8(s)
 
-=item is_LNBREAK_utf8_safe(s,e)
+=item is_WHATEVER_utf8_safe(s,e)
 
 Do a lookup assuming the string is encoded in (normalized) UTF8.
 
-=item is_LNBREAK_latin1(s)
+=item is_WHATEVER_latin1(s)
 
-=item is_LNBREAK_latin1_safe(s,e)
+=item is_WHATEVER_latin1_safe(s,e)
 
 Do a lookup assuming the string is encoded in latin-1 (aka plan octets).
 
-=item is_LNBREAK_cp(cp)
+=item is_WHATEVER_cp(cp)
 
 Check to see if the string matches a given codepoint (hypotethically a
 U32). The condition is constructed as as to "break out" as early as
@@ -102,359 +64,572 @@ matching lookups slower, but non-matching faster.
 
 =back
 
+Additionally it is possible to generate C<what_> variants that return
+the codepoint read instead of the number of octets read, this can be
+done by suffixing '-cp' to the type description.
+
+=head2 CODE FORMAT
+
+perltidy  -st -bt=1 -bbt=0 -pt=0 -sbt=1 -ce -nwls== "%f"
+
+
+=head1 AUTHOR
+
+Author: Yves Orton (demerphq) 2007
+
+=head1 BUGS
+
+No tests directly here (although the regex engine will fail tests
+if this code is broken). Insufficient documentation and no Getopts
+handler for using the module as a script.
+
+=head1 LICENSE
+
+You may distribute under the terms of either the GNU General Public
+License or the Artistic License, as specified in the README file.
+
 =cut
 
-# store a list of numbers into a hash based trie.
-sub _trie_store {
-    my $root= shift;
-    foreach my $b ( @_ ) {
-        $root->{$b} ||= {};
-        $root= $root->{$b};
-    }
-    $root->{''}++;
-}
+# Sub naming convention:
+# __func : private subroutine, can not be called as a method
+# _func  : private method, not meant for external use
+# func   : public method.
 
-# Convert a string into its neutral, latin1, utf8 forms, where
-# the form is undefined unless the string can be completely represented
-# in that form. The string is then decomposed into the octects representing
-# it. A list is returned for each. Additional a list of codepoints making
-# up the string.
-# returns (\@n,\@u,\@l,\@cp)
+# private subs
+#-------------------------------------------------------------------------------
 #
-sub _uni_latin1 {
+# ($cp,$n,$l,$u)=__uni_latin($str);
+#
+# Return a list of arrays, each of which when interepreted correctly
+# represent the string in some given encoding with specific conditions.
+#
+# $cp - list of codepoints that make up the string.
+# $n  - list of octets that make up the string if all codepoints < 128
+# $l  - list of octets that make up the string in latin1 encoding if all
+#       codepoints < 256, and at least one codepoint is >127.
+# $u  - list of octets that make up the string in utf8 if any codepoint >127
+#
+#   High CP | Defined
+#-----------+----------
+#   0 - 127 : $n
+# 128 - 255 : $l, $u
+# 256 - ... : $u
+#
+
+sub __uni_latin1 {
     my $str= shift;
-    my $u= eval { Encode::encode( "utf8",       "$str", Encode::FB_CROAK ) };
-    my $l= eval { Encode::encode( "iso-8859-1", "$str", Encode::FB_CROAK ) };
-    my $n= $l;
-    undef $n if defined( $n ) && $str =~ /[^\x00-\x7F]/;
-    return ((map { $_ ? [ unpack "U0C*", $_ ] : $_ } ( $n, $u, $l )),
-            [map { ord $_ } split //,$str]);
-}
-
-# store an array ref of char data into the appropriate
-# type bins, tracking sizes as we go.
-sub _store {
-    my ( $self, $r, @k )= @_;
-    for my $z ( @k ) {
-        $self->{size}{$z}{ 0 + @$r }++;
-        push @{ $self->{data}{$z} }, $r;
+    my $max= 0;
+    my @cp;
+    for my $ch ( split //, $str ) {
+        my $cp= ord $ch;
+        push @cp, $cp;
+        $max= $cp if $max < $cp;
     }
+    my ( $n, $l, $u );
+    if ( $max < 128 ) {
+        $n= [@cp];
+    } else {
+        $l= [@cp] if $max && $max < 256;
+
+        my $copy= $str;    # must copy string, FB_CROAK makes encode destructive
+        $u= eval { Encode::encode( "utf8", $copy, Encode::FB_CROAK ) };
+        $u= [ unpack "U0C*", $u ] if $u;
+    }
+    return ( \@cp, $n, $l, $u );
 }
 
-# construct a new charclass constructor object.
-# $title ends up in the code a as a comment.
-# $opcode is the name of the operation the charclass implements.
-# the rest of the arguments are strings that the charclass
-# can match.
+#
+# $clean= __clean($expr);
+#
+# Cleanup a ternary expression, removing unnecessary parens and apply some
+# simplifications using regexes.
+#
+
+sub __clean {
+    my ( $expr )= @_;
+    our $parens;
+    $parens= qr/ (?> \( (?> (?: (?> [^()]+ ) | (??{ $parens }) )* ) \) ) /x;
+
+    #print "$parens\n$expr\n";
+    1 while $expr =~ s/ \( \s* ( $parens ) \s* \) /$1/gx;
+    1 while $expr =~ s/ \( \s* ($parens) \s* \? \s*
+        \( \s* ($parens) \s* \? \s* ($parens|[^:]+?) \s* : \s* ($parens|[^)]+?) \s* \)
+        \s* : \s* \4 \s* \)/( ( $1 && $2 ) ? $3 : 0 )/gx;
+    return $expr;
+}
+
+#
+# $text= __macro(@args);
+# Join args together by newlines, and then neatly add backslashes to the end
+# of every  line as expected by the C pre-processor for #define's.
+#
+
+sub __macro {
+    my $str= join "\n", @_;
+    $str =~ s/\s*$//;
+    my @lines= map { s/\s+$//; s/\t/        /g; $_ } split /\n/, $str;
+    my $last= pop @lines;
+    $str= join "\n", ( map { sprintf "%-76s\\", $_ } @lines ), $last;
+    1 while $str =~ s/^(\t*) {8}/$1\t/gm;
+    return $str . "\n";
+}
+
+#
+# my $op=__incrdepth($op);
+#
+# take an 'op' hashref and add one to it and all its childrens depths.
+#
+
+sub __incrdepth {
+    my $op= shift;
+    return unless ref $op;
+    $op->{depth} += 1;
+    __incrdepth( $op->{yes} );
+    __incrdepth( $op->{no} );
+    return $op;
+}
+
+# join two branches of an opcode together with a condition, incrementing
+# the depth on the yes branch when we do so.
+# returns the new root opcode of the tree.
+sub __cond_join {
+    my ( $cond, $yes, $no )= @_;
+    return {
+        test  => $cond,
+        yes   => __incrdepth( $yes ),
+        no    => $no,
+        depth => 0,
+    };
+}
+
+# Methods
+
+# constructor
+#
+# my $obj=CLASS->new(op=>'SOMENAME',title=>'blah',txt=>[..]);
+#
+# Create a new CharClass::Matcher object by parsing the text in
+# the txt array. Currently applies the following rules:
+#
+# Element starts with C<0x>, line is evaled the result treated as
+# a number which is passed to chr().
+#
+# Element starts with C<">, line is evaled and the result treated
+# as a string.
+#
+# Each string is then stored in the 'strs' subhash as a hash record
+# made up of the results of __uni_latin1, using the keynames
+# 'low','latin1','utf8', as well as the synthesized 'LATIN1' and
+# 'UTF8' which hold a merge of 'low' and their lowercase equivelents.
+#
+# Size data is tracked per type in the 'size' subhash.
+#
+# Return an object
+#
 sub new {
     my $class= shift;
-    my $title= shift;
-    my $opcode= shift;
-    my $self= bless { op => $opcode, title => $title }, $class;
-    my %seen;
-    # convert the strings to the numeric equivelents and store
-    # them for later insertion while tracking their sizes.
-    foreach my $seq ( @_ ) {
-        next if $seen{$seq}++;
-        push @{$self->{seq}},$seq;
-        my ( $n, $u, $l,$cp )= _uni_latin1( $seq );
-        if ( $n ) {
-            _store( $self, $n, qw(n U L) );
-        } else {
-            if ( $l ) {
-                _store( $self, $l, qw(l L) );
-            }
-            _store( $self, $u, qw(u U) );
-        }
-        _store($self,$cp,'c');
+    my %opt= @_;
+    for ( qw(op txt) ) {
+        die "in " . __PACKAGE__ . " constructor '$_;' is a mandatory field"
+          if !exists $opt{$_};
     }
-    #
-    # now construct the tries. For each type of data we insert
-    # the data into all the tries of length $size and smaller.
-    #
 
-    my %allsize;
-    foreach my $k ( keys %{ $self->{data} } ) {
-        my @size= sort { $b <=> $a } keys %{ $self->{size}{$k} };
-        $self->{size}{$k}=\@size;
-        undef @allsize{@size};
-        foreach my $d ( @{ $self->{data}{$k} } ) {
-            foreach my $sz ( @size ) {
-                last if $sz < @$d;
-                $self->{trie}{$k}{$sz} ||= {};
-                _trie_store( $self->{trie}{$k}{$sz}, @$d );
-            }
+    my $self= bless {
+        op    => $opt{op},
+        title => $opt{title} || '',
+    }, $class;
+    foreach my $txt ( @{ $opt{txt} } ) {
+        my $str= $txt;
+        if ( $str =~ /^[""]/ ) {
+            $str= eval $str;
+        } elsif ( $str =~ /^0x/ ) {
+            $str= chr eval $str;
+        } elsif ( /\S/ ) {
+            die "Unparseable line: $txt\n";
+        } else {
+            next;
         }
-        #delete $self->{data}{$k};
+        my ( $cp, $low, $latin1, $utf8 )= __uni_latin1( $str );
+        my $UTF8= $low   || $utf8;
+        my $LATIN1= $low || $latin1;
+
+        @{ $self->{strs}{$str} }{qw( str txt low utf8 latin1 cp UTF8 LATIN1 )}=
+          ( $str, $txt, $low, $utf8, $latin1, $cp, $UTF8, $LATIN1 );
+        my $rec= $self->{strs}{$str};
+        foreach my $key ( qw(low utf8 latin1 cp UTF8 LATIN1) ) {
+            $self->{size}{$key}{ 0 + @{ $self->{strs}{$str}{$key} } }++
+              if $self->{strs}{$str}{$key};
+        }
+        $self->{has_multi} ||= @$cp > 1;
+        $self->{has_ascii} ||= $latin1 && @$latin1;
+        $self->{has_low}   ||= $low && @$low;
+        $self->{has_high}  ||= !$low && !$latin1;
     }
-    my @size= sort { $b <=> $a } keys %allsize;
-    $self->{size}{''}= \@size;
+    $self->{val_fmt}= $hex_fmt;
+    $self->{count}= 0 + keys %{ $self->{strs} };
     return $self;
 }
 
+# my $trie = make_trie($type,$maxlen);
 #
-# _cond([$v1,$v2,$v2...],$ofs)
+# using the data stored in the object build a trie of a specifc type,
+# and with specific maximum depth. The trie is made up the elements of
+# the given types array for each string in the object (assuming it is
+# not too long.)
 #
-# converts an array of codepoints into a conditional expression
-# consequtive codepoints are merged into a range test
-# returns a string containing the conditional expression in the form
-# '( li[x]==v || li[x]==y )' When possible we also use range lookups.
+# returns the trie, or undef if there was no relevent data in the object.
+#
 
-sub _cond {
-    my ( $c, $ofs,$fmt )= @_;
-    $fmt||='((U8*)s)[%d]';
-    # cheapo rangification routine.
-    # Convert the first element into a singleton represented
-    # as [$x,$x] and then merge the rest in as we go.
-    my @v= sort { $a <=> $b } @$c;
-    my @r= ( [ ( shift @v ) x 2 ] );
-    for my $n ( @v ) {
-        if ( $n == $r[-1][1] + 1 ) {
-            $r[-1][1]++;
-        } else {
-            push @r, [ $n, $n ];
+sub make_trie {
+    my ( $self, $type, $maxlen )= @_;
+
+    my $strs= $self->{strs};
+    my %trie;
+    foreach my $rec ( values %$strs ) {
+        die "panic: unknown type '$type'"
+          if !exists $rec->{$type};
+        my $dat= $rec->{$type};
+        next unless $dat;
+        next if $maxlen && @$dat > $maxlen;
+        my $node= \%trie;
+        foreach my $elem ( @$dat ) {
+            $node->{$elem} ||= {};
+            $node= $node->{$elem};
         }
+        $node->{''}= $rec->{str};
     }
-    @r = map { $_->[0]==$_->[1]-1 ? ([$_->[0],$_->[0]],[$_->[1],$_->[1]]) : $_} @r;
-    # sort the ranges by size and order.
-    @r= sort { $a->[0] <=> $b->[0] }  @r;
-    my $alu= sprintf $fmt,$ofs;    # C array look up
-
-    if ($fmt=~/%d/) {
-        # map the ranges into conditions
-        @r= map {
-            # singleton
-            $_->[0] == $_->[1] ? sprintf("$alu == $hex_fmt",$_->[0]) :
-            # range
-            sprintf("($hex_fmt <= $alu && $alu <= $hex_fmt)",@$_)
-        } @r;
-        # return the joined results.
-        return '( ' . join( " || ", @r ) . ' )';
-    } else {
-        return combine($alu,@r);
-    }
+    return 0 + keys( %trie ) ? \%trie : undef;
 }
 
+# my $optree= _optree()
 #
-# Do the condition in such a way that we break out early if the value
-# we are looking at is in between two elements in the list.
-# Currently used only for codepoint macros (depth 1)
+# recursively convert a trie to an optree where every node represents
+# an if else branch.
 #
-sub combine {
-    my $alu=shift;
-    local $_ = shift;
-    my $txt= $_->[0] == $_->[1]
-           ? sprintf("$alu == $hex_fmt",$_->[0])
-           : sprintf("($hex_fmt <= $alu && $alu <= $hex_fmt)",@$_);
-    return $txt unless @_;
-    return sprintf "( %s ||( %s > 0x%02X &&\n%s ) )",
-        $txt,$alu,$_->[1],combine($alu,@_);
-}
+#
 
-# recursively convert a trie to an optree represented by
-# [condition,yes,no] where  yes and no can be a ref to another optree
-# or a scalar representing code.
-# called by make_optree
-
-sub _trie_to_optree {
-    my ( $node, $ofs, $else, $fmt )= @_;
-    return $else unless $node;
-    $ofs ||= 0;
-    if ( $node->{''} ) {
-        $else= $ofs;
-    } else {
-        $else ||= 0;
+sub _optree {
+    my ( $self, $trie, $test_type, $ret_type, $else, $depth )= @_;
+    return unless defined $trie;
+    if ( $self->{has_multi} and $ret_type =~ /cp|both/ ) {
+        die "Can't do 'cp' optree from multi-codepoint strings";
     }
-    my @k= sort { $b->[1] cmp $a->[1] || $a->[0] <=> $b->[0] }
-      map { [ $_, Dumper( $node->{$_} ), $node->{$_} ] }
-      grep length, keys %$node;
+    $ret_type ||= 'len';
+    $else= 0  unless defined $else;
+    $depth= 0 unless defined $depth;
 
-    return $ofs if !@k;
-
-    my ( $root, $expr );
-    while ( @k ) {
-        my @cond= ( $k[0][0] );
-        my $d= $k[0][1];
-        my $r= $k[0][2];
-        shift @k;
-        while ( @k && $k[0][1] eq $d ) {
-            push @cond, $k[0][0];
-            shift @k;
+    my @conds= sort { $a <=> $b } grep { length $_ } keys %$trie;
+    if ( $trie->{''} ) {
+        if ( $ret_type eq 'cp' ) {
+            $else= $self->{strs}{ $trie->{''} }{cp}[0];
+            $else= sprintf "$self->{val_fmt}", $else if $else > 9;
+        } elsif ( $ret_type eq 'len' ) {
+            $else= $depth;
+        } elsif ( $ret_type eq 'both') {
+            $else= $self->{strs}{ $trie->{''} }{cp}[0];
+            $else= sprintf "$self->{val_fmt}", $else if $else > 9;
+            $else= "len=$depth, $else";
         }
-        my $op=
-          [ _cond( \@cond, $ofs, $fmt ), _trie_to_optree( $r, $ofs + 1, $else, $fmt ) ];
-        if ( !$root ) {
-            $root= $expr= $op;
+    }
+    return $else if !@conds;
+    my $node= {};
+    my $root= $node;
+    my ( $yes_res, $as_code, @cond );
+    my $test= $test_type eq 'cp' ? "cp" : "((U8*)s)[$depth]";
+    my $Update= sub {
+        $node->{vals}= [@cond];
+        $node->{test}= $test;
+        $node->{yes}= $yes_res;
+        $node->{depth}= $depth;
+        $node->{no}= shift;
+    };
+    while ( @conds ) {
+        my $cond= shift @conds;
+        my $res=
+          $self->_optree( $trie->{$cond}, $test_type, $ret_type, $else,
+            $depth + 1 );
+        my $res_code= Dumper( $res );
+        if ( !$yes_res || $res_code ne $as_code ) {
+            if ( $yes_res ) {
+                $Update->( {} );
+                $node= $node->{no};
+            }
+            ( $yes_res, $as_code )= ( $res, $res_code );
+            @cond= ( $cond );
         } else {
-            push @$expr, $op;
-            $expr= $op;
+            push @cond, $cond;
         }
     }
-    push @$expr, $else;
+    $Update->( $else );
     return $root;
 }
 
-# construct the optree for a type.
-# handles the special logic of type ''.
-sub make_optree {
-    my ( $self, $type, $size, $fmt )= @_;
-    my $else= 0;
-    $size||=$self->{size}{$type}[0];
-    $size=1 if $type eq 'c';
-    if ( !$type ) {
-        my ( $u, $l );
-        if ($self->{trie}{u}) {
-            for ( my $sz= $size ; !$u && $sz > 0 ; $sz-- ) {
-                $u= _trie_to_optree( $self->{trie}{u}{$sz}, 0, 0, $fmt );
-            }
-        }
-        if ($self->{trie}{l}) {
-            for ( my $sz= $size ; !$l && $sz > 0 ; $sz-- ) {
-                $l= _trie_to_optree( $self->{trie}{l}{$sz}, 0, 0, $fmt );
-            }
-        }
-        if ( $u ) {
-            $else= [ '(is_utf8)', $u, $l || 0 ];
-        } elsif ( $l ) {
-            $else= [ '(!is_utf8)', $l, 0 ];
-        }
-        $type= 'n';
-    }
-    if (!$self->{trie}{$type}) {
-        return $else;
-    } else {
-        $size-- while $size>0 && !$self->{trie}{$type}{$size};
-        return _trie_to_optree( $self->{trie}{$type}{$size}, 0, $else, $fmt );
-    }
+# my $optree= optree(%opts);
+#
+# Convert a trie to an optree, wrapper for _optree
+
+sub optree {
+    my $self= shift;
+    my %opt= @_;
+    my $trie= $self->make_trie( $opt{type}, $opt{max_depth} );
+    $opt{ret_type} ||= 'len';
+    my $test_type= $opt{type} eq 'cp' ? 'cp' : 'depth';
+    return $self->_optree( $trie, $test_type, $opt{ret_type}, $opt{else}, 0 );
 }
 
-# construct the optree for a type with length checks to prevent buffer
-# overruns. Only one length check is performed per lookup trading code
-# size for speed.
+# my $optree= generic_optree(%opts);
+#
+# build a "generic" optree out of the three 'low', 'latin1', 'utf8'
+# sets of strings, including a branch for handling the string type check.
+#
+
+sub generic_optree {
+    my $self= shift;
+    my %opt= @_;
+
+    $opt{ret_type} ||= 'len';
+    my $test_type= 'depth';
+    my $else= $opt{else} || 0;
+
+    my $latin1= $self->make_trie( 'latin1', $opt{max_depth} );
+    my $utf8= $self->make_trie( 'utf8',     $opt{max_depth} );
+
+    $_= $self->_optree( $_, $test_type, $opt{ret_type}, $else, 0 )
+      for $latin1, $utf8;
+
+    if ( $utf8 ) {
+        $else= __cond_join( "( is_utf8 )", $utf8, $latin1 || $else );
+    } elsif ( $latin1 ) {
+        $else= __cond_join( "!( is_utf8 )", $latin1, $else );
+    }
+    my $low= $self->make_trie( 'low', $opt{max_depth} );
+    if ( $low ) {
+        $else= $self->_optree( $low, $test_type, $opt{ret_type}, $else, 0 );
+    }
+
+    return $else;
+}
+
+# length_optree()
+#
+# create a string length guarded optree.
+#
+
 sub length_optree {
-    my ( $self, $type,$fmt )= @_;
-    $type ||= '';
-    return $self->{len_op}{$type} if $self->{len_op}{$type};
-    my @size = @{$self->{size}{$type}};
+    my $self= shift;
+    my %opt= @_;
+    my $type= $opt{type};
 
-    my ( $root, $expr );
-    foreach my $size ( @size ) {
-        my $op= [
-            "( (e) - (s) > " . ( $size - 1 ) . " )",
-            $self->make_optree( $type, $size ),
-        ];
-        if ( !$root ) {
-            $root= $expr= $op;
+    die "Can't do a length_optree on type 'cp', makes no sense."
+      if $type eq 'cp';
+
+    my ( @size, $method );
+
+    if ( $type eq 'generic' ) {
+        $method= 'generic_optree';
+        my %sizes= (
+            %{ $self->{size}{low}    || {} },
+            %{ $self->{size}{latin1} || {} },
+            %{ $self->{size}{utf8}   || {} }
+        );
+        @size= sort { $a <=> $b } keys %sizes;
+    } else {
+        $method= 'optree';
+        @size= sort { $a <=> $b } keys %{ $self->{size}{$type} };
+    }
+
+    my $else= ( $opt{else} ||= 0 );
+    for my $size ( @size ) {
+        my $optree= $self->$method( %opt, type => $type, max_depth => $size );
+        my $cond= "((e)-(s) > " . ( $size - 1 ).")";
+        $else= __cond_join( $cond, $optree, $else );
+    }
+    return $else;
+}
+
+# _cond_as_str
+# turn a list of conditions into a text expression
+# - merges ranges of conditions, and joins the result with ||
+sub _cond_as_str {
+    my ( $self, $op, $combine )= @_;
+    my $cond= $op->{vals};
+    my $test= $op->{test};
+    return "( $test )" if !defined $cond;
+
+    # rangify the list
+    my @ranges;
+    my $Update= sub {
+        if ( @ranges ) {
+            if ( $ranges[-1][0] == $ranges[-1][1] ) {
+                $ranges[-1]= $ranges[-1][0];
+            } elsif ( $ranges[-1][0] + 1 == $ranges[-1][1] ) {
+                $ranges[-1]= $ranges[-1][0];
+                push @ranges, $ranges[-1] + 1;
+            }
+        }
+    };
+    for my $cond ( @$cond ) {
+        if ( !@ranges || $cond != $ranges[-1][1] + 1 ) {
+            $Update->();
+            push @ranges, [ $cond, $cond ];
         } else {
-            push @$expr, $op;
-            $expr= $op;
+            $ranges[-1][1]++;
         }
     }
-    push @$expr, 0;
-    return $self->{len_op}{$type}= $root ? $root : $expr->[0];
+    $Update->();
+    return $self->_combine( $test, @ranges )
+      if $combine;
+    @ranges= map {
+        ref $_
+          ? sprintf(
+            "( $self->{val_fmt} <= $test && $test <= $self->{val_fmt} )",
+            @$_ )
+          : sprintf( "$self->{val_fmt} == $test", $_ );
+    } @ranges;
+    return "( " . join( " || ", @ranges ) . " )";
 }
 
-#
-# recursively walk an optree and covert it to a huge nested ternary expression.
-#
-sub _optree_to_ternary {
-    my ( $node )= @_;
-    return $node
-      if !ref $node;
-    my $depth = 0;
-    if ( $node->[0] =~ /\[(\d+)\]/ ) {
-        $depth= $1 + 1;
-    }
-    return sprintf "\n%s( %s ? %s : %s )", "  " x $depth, $node->[0],
-      _optree_to_ternary( $node->[1] ), _optree_to_ternary( $node->[2] );
-}
-
-# add \\ to the end of strings in a reasonable neat way.
-sub _macro($) {
-    my $str= shift;
-    my @lines= split /[^\S\n]*\n/, $str;
-    my $macro = join( "\\\n", map { sprintf "%-76s", $_ } @lines );
-    $macro =~ s/  *$//;
-    return $macro . "\n\n";
-}
-
-# default type extensions. 'uln' dont have one because normally
-# they are used only as part of type '' which doesnt get an extension
-my %ext= (
-    U => '_utf8',
-    L => '_latin1',
-    c => '_cp',
-
-);
-
-# produce the ternary, handling arguments and putting on the macro headers
-# and boiler plate
-sub ternary {
-    my ( $self, $type, $ext )= @_;
-    $type ||= '';
-    $ext = ($ext{$type} || '') . ($ext||"");
-    my ($root,$fmt,$arg);
-    if ($type eq 'c') {
-        $arg= $fmt= 'cp';
+# _combine
+# recursively turn a list of conditions into a fast break-out condition
+# used by _cond_as_str() for 'cp' type macros.
+sub _combine {
+    my ( $self, $test, @cond )= @_;
+    return if !@cond;
+    my $item= shift @cond;
+    my ( $cstr, $gtv );
+    if ( ref $item ) {
+        $cstr=
+          sprintf( "( $self->{val_fmt} <= $test && $test <= $self->{val_fmt} )",
+            @$item );
+        $gtv= sprintf "$self->{val_fmt}", $item->[1];
     } else {
-        $arg= 's';
+        $cstr= sprintf( "$self->{val_fmt} == $test", $item );
+        $gtv= sprintf "$self->{val_fmt}", $item;
     }
-    if ( $type eq 'c' || $ext !~ /safe/) {
-        $root= $self->make_optree( $type, 0, $fmt );
+    if ( @cond ) {
+        return "( $cstr || ( $gtv < $test &&\n"
+          . $self->_combine( $test, @cond ) . " ) )";
     } else {
-        $root= $self->length_optree( $type, $fmt );
+        return $cstr;
+    }
+}
+
+# _render()
+# recursively convert an optree to text with reasonably neat formatting
+sub _render {
+    my ( $self, $op, $combine, $brace )= @_;
+    if ( !ref $op ) {
+        return $op;
+    }
+    my $cond= $self->_cond_as_str( $op, $combine );
+    my $yes= $self->_render( $op->{yes}, $combine, 1 );
+    my $no= $self->_render( $op->{no},   $combine, 0 );
+    return "( $cond )" if $yes eq '1' and $no eq '0';
+    my ( $lb, $rb )= $brace ? ( "( ", " )" ) : ( "", "" );
+    return "$lb$cond ? $yes : $no$rb"
+      if !ref( $op->{yes} ) && !ref( $op->{no} );
+    my $ind1= " " x 4;
+    my $ind= "\n" . ( $ind1 x $op->{depth} );
+
+    if ( ref $op->{yes} ) {
+        $yes= $ind . $ind1 . $yes;
+    } else {
+        $yes= " " . $yes;
     }
 
-    our $parens;
-    $parens= qr/ \( (?: (?> [^()]+? ) | (??{$parens}) )+? \) /x;
-    my $expr= qr/
-        \( \s*
-        ($parens)
-        \s* \? \s*
-        \( \s*
-        ($parens)
-        \s* \? \s*
-        (\d+|$parens)
-        \s* : \s*
-        (\d+|$parens)
-        \s* \)
-        \s* : \s*
-        \4
-        \s* \)
-    /x;
-    my $code= _optree_to_ternary( $root );
-    for ( $code ) {
-        s/^\s*//;
-        1 while s/\(\s*($parens)\s*\?\s*1\s*:\s*0\s*\)/$1/g
-          || s<$expr><(($1 && $2) ? $3 : $4)>g
-          || s<\(\s*($parens)\s*\)><$1>g;
+    return "$lb$cond ?$yes$ind: $no$rb";
+}
+
+# $expr=render($op,$combine)
+#
+# convert an optree to text with reasonably neat formatting. If $combine
+# is true then the condition is created using "fast breakouts" which
+# produce uglier expressions that are more efficient for common case,
+# longer lists such as that resulting from type 'cp' output.
+# Currently only used for type 'cp' macros.
+sub render {
+    my ( $self, $op, $combine )= @_;
+    my $str= "( " . $self->_render( $op, $combine ) . " )";
+    return __clean( $str );
+}
+
+# make_macro
+# make a macro of a given type.
+# calls into make_trie and (generic_|length_)optree as needed
+# Opts are:
+# type     : 'cp','generic','low','latin1','utf8','LATIN1','UTF8'
+# ret_type : 'cp' or 'len'
+# safe     : add length guards to macro
+#
+# type defaults to 'generic', and ret_type to 'len' unless type is 'cp'
+# in which case it defaults to 'cp' as well.
+#
+# it is illegal to do a type 'cp' macro on a pattern with multi-codepoint
+# sequences in it, as the generated macro will accept only a single codepoint
+# as an argument.
+#
+# returns the macro.
+
+
+sub make_macro {
+    my $self= shift;
+    my %opts= @_;
+    my $type= $opts{type} || 'generic';
+    die "Can't do a 'cp' on multi-codepoint character class '$self->{op}'"
+      if $type eq 'cp'
+      and $self->{has_multi};
+    my $ret_type= $opts{ret_type} || ( $opts{type} eq 'cp' ? 'cp' : 'len' );
+    my $method;
+    if ( $opts{safe} ) {
+        $method= 'length_optree';
+    } elsif ( $type eq 'generic' ) {
+        $method= 'generic_optree';
+    } else {
+        $method= 'optree';
     }
-    my @args=($arg);
-    push @args,'e' if $ext=~/safe/;
-    push @args,'is_utf8' if !$type;
-    my $args=join ",",@args;
+    my $optree= $self->$method( %opts, type => $type, ret_type => $ret_type );
+    my $text= $self->render( $optree, $type eq 'cp' );
+    my @args= $type eq 'cp' ? 'cp' : 's';
+    push @args, "e" if $opts{safe};
+    push @args, "is_utf8" if $type eq 'generic';
+    push @args, "len" if $ret_type eq 'both';
+    my $pfx= $ret_type eq 'both'    ? 'what_len_' : 
+             $ret_type eq 'cp'      ? 'what_'     : 'is_';
+    my $ext= $type     eq 'generic' ? ''          : '_' . lc( $type );
+    $ext .= "_safe" if $opts{safe};
+    my $argstr= join ",", @args;
     return "/*** GENERATED CODE ***/\n"
-          . _macro "#define is_$self->{op}$ext($args)\n$code";
+      . __macro( "#define $pfx$self->{op}$ext($argstr)\n$text" );
 }
-$|++;
-my $path=shift @ARGV;
 
-if (!$path) {
-    $path= "regcharclass.h";
-    if (!-e $path) { $path="../$path" }
-    if (!-e $path) { die "Can't find regcharclass.h to update!\n" };
-}
-my $out_fh;
-if ($path eq '-') {
-    $out_fh= \*STDOUT;
-} else {
-    rename $path,"$path.bak";
-    open $out_fh,">",$path
-        or die "Can't write to '$path':$!";
-    binmode $out_fh; # want unix line endings even when run on win32.
-}
-my ($zero) = $0=~/([^\\\/]+)$/;
-print $out_fh <<"HEADER";
+# if we arent being used as a module (highly likely) then process
+# the __DATA__ below and produce macros in regcharclass.h
+# if an argument is provided to the script then it is assumed to
+# be the path of the file to output to, if the arg is '-' outputs
+# to STDOUT.
+if ( !caller ) {
+
+
+
+    $|++;
+    my $path= shift @ARGV;
+
+    if ( !$path ) {
+        $path= "regcharclass.h";
+        if ( !-e $path ) { $path= "../$path" }
+        if ( !-e $path ) { die "Can't find '$path' to update!\n" }
+    }
+    my $out_fh;
+    if ( $path eq '-' ) {
+        $out_fh= \*STDOUT;
+    } else {
+        rename $path, "$path.bak";
+        open $out_fh, ">", $path
+          or die "Can't write to '$path':$!";
+        binmode $out_fh;    # want unix line endings even when run on win32.
+    }
+    my ( $zero )= $0 =~ /([^\\\/]+)$/;
+    print $out_fh <<"HEADER";
 /*  -*- buffer-read-only: t -*-
  *
  *    regcharclass.h
@@ -472,48 +647,63 @@ print $out_fh <<"HEADER";
 
 HEADER
 
-my ($op,$title,@strs,@txt,$type);
-my $doit= sub {
-    return unless $op;
-    my $o= __PACKAGE__->new($title,$op,@strs);
-    print $out_fh "/*\n\t$o->{op}: $o->{title}\n\n";
-    print $out_fh join "\n",@txt,"*/","";
-    $type||="U L c _safe";
-    my @ext=("");
-    my @types=("",map{ if (length $_>1) { push @ext,$_; () } else { $_ } }
-              split /\s+/,$type);
-    for my $type (@types) {
-        for my $ext (@ext) {
-            next if $type eq 'c' and $ext eq '_safe';
-            print $out_fh $o->ternary( $type,$ext );
+    my ( $op, $title, @txt, @types, @mods );
+    my $doit= sub {
+        return unless $op;
+        print $out_fh "/*\n\t$op: $title\n\n";
+        print $out_fh join "\n", ( map { "\t$_" } @txt ), "*/", "";
+        my $obj= __PACKAGE__->new( op => $op, title => $title, txt => \@txt );
+
+        #die Dumper(\@types,\@mods);
+
+        foreach my $type_spec ( @types ) {
+            my ( $type, $ret )= split /-/, $type_spec;
+            $ret ||= 'len';
+            foreach my $mod ( @mods ) {
+                next if $mod eq 'safe' and $type eq 'cp';
+                my $macro= $obj->make_macro(
+                    type     => $type,
+                    ret_type => $ret,
+                    safe     => $mod eq 'safe'
+                );
+                print $out_fh $macro, "\n";
+            }
+        }
+    };
+
+    while ( <DATA> ) {
+        s/^\s*#//;
+        next unless /\S/;
+        chomp;
+        if ( /^([A-Z]+)/ ) {
+            $doit->();
+            ( $op, $title )= split /\s*:\s*/, $_, 2;
+            @txt= ();
+        } elsif ( s/^=>// ) {
+            my ( $type, $modifier )= split /:/, $_;
+            @types= split ' ', $type;
+            @mods= split ' ',  $modifier;
+        } else {
+            push @txt, "$_";
         }
     }
-};
-while (<DATA>) {
-    next unless /\S/;
-    chomp;
-    if (/^([A-Z]+)/) {
-        $doit->();
-        ($op,$title)=split /\s*:\s*/,$_,2;
-        @txt=@strs=();
-        $type="";
-    } elsif (/^=(.*)/) {
-        $type.=$1;
-    } else {
-        push @txt, "\t$_";
-        s/#.*$//;
-        if (/^0x/) {
-            push @strs,map { chr $_ } eval $_;
-        } elsif (/^[""'']/) {
-            push @strs,eval $_;
-        }
-    }
+    $doit->();
+    print $out_fh "/* ex: set ro: */\n";
+    print "updated $path\n" if $path ne '-';
 }
-$doit->();
-print $out_fh "/* ex: set ro: */\n";
+
+#
+# Valid types: generic, LATIN1, UTF8, low, latin1, utf8
+# default return value is octects read.
+# append -cp to make it codepoint matched.
+# modifiers come after the colon, valid possibilities
+# being 'fast' and 'safe'.
+#
+1; # in the unlikely case we are being used as a module
 
 __DATA__
 LNBREAK: Line Break: \R
+=> generic UTF8 LATIN1 :fast safe
 "\x0D\x0A"      # CRLF - Network (Windows) line ending
 0x0A            # LF  | LINE FEED
 0x0B            # VT  | VERTICAL TAB
@@ -524,6 +714,7 @@ LNBREAK: Line Break: \R
 0x2029          # PARAGRAPH SEPARATOR
 
 HORIZWS: Horizontal Whitespace: \h \H
+=> generic UTF8 LATIN1 cp :fast safe
 0x09            # HT
 0x20            # SPACE
 0xa0            # NBSP
@@ -545,6 +736,7 @@ HORIZWS: Horizontal Whitespace: \h \H
 0x3000          # IDEOGRAPHIC SPACE
 
 VERTWS: Vertical Whitespace: \v \V
+=> generic UTF8 LATIN1 cp :fast safe
 0x0A            # LF
 0x0B            # VT
 0x0C            # FF
@@ -553,7 +745,11 @@ VERTWS: Vertical Whitespace: \v \V
 0x2028          # LINE SEPARATOR
 0x2029          # PARAGRAPH SEPARATOR
 
+
 TRICKYFOLD: Problematic fold case letters.
-0x00DF	# LATIN SMALL LETTER SHARP S
+=> generic cp generic-cp generic-both :fast safe
+0x00DF	# LATIN1 SMALL LETTER SHARP S
 0x0390	# GREEK SMALL LETTER IOTA WITH DIALYTIKA AND TONOS
 0x03B0	# GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND TONOS
+
+

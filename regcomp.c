@@ -3364,12 +3364,12 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		data->start_class->flags &= ~ANYOF_EOS;	/* No match on empty */
     	        if (flags & SCF_DO_STCLASS_AND) {
                     for (value = 0; value < 256; value++)
-                        if (!is_LNBREAK_cp(value))                   
+                        if (!is_VERTWS_cp(value))
                             ANYOF_BITMAP_CLEAR(data->start_class, value);  
                 }                                                              
                 else {                                                         
                     for (value = 0; value < 256; value++)
-                        if (is_LNBREAK_cp(value))                    
+                        if (is_VERTWS_cp(value))
                             ANYOF_BITMAP_SET(data->start_class, value);	   
                 }                                                              
                 if (flags & SCF_DO_STCLASS_OR)
@@ -6575,16 +6575,18 @@ tryagain:
     case 0xDF:
     case 0xC3:
     case 0xCE:
-        if (FOLD && is_TRICKYFOLD(RExC_parse,UTF)) {
-            STRLEN len = UTF ? 0 : 1;
-            U32 cp = UTF ? utf8_to_uvchr((U8*)RExC_parse, &len) : (U32)((U8*)RExC_parse)[0];
-            *flagp |= HASWIDTH; /* could be SIMPLE too, but needs a handler in regexec.regrepeat */
-            RExC_parse+=len;
-            ret = reganode(pRExC_state, FOLDCHAR, cp);
-            Set_Node_Length(ret, 1); /* MJD */
-        } else
-            goto outer_default;
-        break;
+        if (FOLD) {
+            U32 len,cp;
+            if (cp = what_len_TRICKYFOLD_safe(RExC_parse,RExC_end,UTF,len)) {
+                *flagp |= HASWIDTH; /* could be SIMPLE too, but needs a handler in regexec.regrepeat */
+                RExC_parse+=len-1; /* we get one from nextchar() as well. :-( */
+                ret = reganode(pRExC_state, FOLDCHAR, cp);
+                Set_Node_Length(ret, 1); /* MJD */
+                nextchar(pRExC_state); /* kill whitespace under /x */
+                return ret;
+            }
+        }
+        goto outer_default;
     case '\\':
 	/* Special Escapes
 
@@ -6885,7 +6887,7 @@ tryagain:
 		case 0xDF:
 		case 0xC3:
 		case 0xCE:
-		           if (!FOLD || !is_TRICKYFOLD(p,UTF))
+		           if (!FOLD || !is_TRICKYFOLD_safe(p,RExC_end,UTF))
 		                goto normal_default;
 		case '^':
 		case '$':

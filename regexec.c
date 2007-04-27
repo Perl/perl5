@@ -5006,29 +5006,22 @@ NULL
 #undef ST
         case FOLDCHAR:
             n = ARG(scan);
-	    if (nextchr == (I32)n) {
-                locinput += UTF8SKIP(locinput);
-            } else {
-                /* This malarky is to handle LATIN SMALL LETTER SHARP S 
-                   properly. Sigh */
-                if (0xDF==n && (UTF||do_utf8) &&  
-                    toLOWER(locinput[0])=='s' && toLOWER(locinput[1])=='s') 
-                {
-                    locinput += 2;
-                } else if (do_utf8) {
-                    U8 tmpbuf1[UTF8_MAXBYTES_CASE+1];
-                    STRLEN tmplen1;
-                    U8 tmpbuf2[UTF8_MAXBYTES_CASE+1];
-                    STRLEN tmplen2;
-                    to_uni_fold(n, tmpbuf1, &tmplen1);
-                    to_utf8_fold((U8*)locinput, tmpbuf2, &tmplen2);    
-                    if (tmplen1!=tmplen2
-			|| !strnEQ((char *)tmpbuf1,(char *)tmpbuf2,tmplen1))
+            if ( n == what_len_TRICKYFOLD(locinput,do_utf8,ln) ) {
+                locinput += ln;
+            } else if ( 0xDF == n && !do_utf8 && !UTF ) {
+                sayNO;
+            } else  {
+                U8 folded[UTF8_MAXBYTES_CASE+1];
+                STRLEN foldlen;
+                const char * const l = locinput;
+                char *e = PL_regeol;
+                to_uni_fold(n, folded, &foldlen);
+
+                if (ibcmp_utf8(folded, 0,  foldlen, 1,
+                	       l, &e, 0,  do_utf8)) {
                         sayNO;
-                    else 
-                        locinput += UTF8SKIP(locinput);
-                } else 
-                    sayNO;
+                }
+                locinput = e;
             } 
             nextchr = UCHARAT(locinput);  
             break;

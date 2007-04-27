@@ -823,8 +823,17 @@ all : .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE) \
 	cd ..
 	regcomp.pl
 	cd win32
+	
+..\regcharclass.h : ..\Porting\regcharclass.pl
+	cd ..
+	Porting\regcharclass.pl
+	cd win32
 
 regnodes : ..\regnodes.h
+
+..\regcomp$(o) : ..\regnodes.h ..\regcharclass.h	
+
+..\regexec$(o) : ..\regnodes.h ..\regcharclass.h
 
 reonly : regnodes .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) \
 	$(PERLEXE) $(X2P) Extensions_reonly

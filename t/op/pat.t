@@ -4314,6 +4314,7 @@ sub kt
     iseq("$1$2","foobar");
 }
 {
+    local $Message = "HORIZWS";
     local $_="\t \r\n \n \t".chr(11)."\n";
     s/\H/H/g;
     s/\h/h/g;
@@ -4325,6 +4326,7 @@ sub kt
     iseq($_,"hhHHhHhhHH");
 }    
 {
+    local $Message = "Various whitespace special patterns";
     my @h=map { chr( $_ ) } (
         0x09,   0x20,   0xa0,   0x1680, 0x180e, 0x2000, 0x2001, 0x2002,
         0x2003, 0x2004, 0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200a,
@@ -4337,16 +4339,17 @@ sub kt
         my $ary=shift @$t;
         foreach my $pat (@$t) {
             foreach my $str (@$ary) {
-                ok($str=~/($pat)/);
-                iseq($1,$str);
+                ok($str=~/($pat)/,$pat);
+                iseq($1,$str,$pat);
                 utf8::upgrade($str);
-                ok($str=~/($pat)/);
-                iseq($1,$str);
+                ok($str=~/($pat)/,"Upgraded string - $pat");
+                iseq($1,$str,"Upgraded string - $pat");
             }
         }
     }
 }
 {
+    local $Message = "Check that \\xDF match properly in its various forms";
     # test that \xDF matches properly. this is pretty hacky stuff,
     # but its actually needed. the malarky with '-' is to prevent
     # compilation caching from playing any role in the test.
