@@ -100,16 +100,9 @@ sub find_ext
 # Special case:  Add in threads/shared since it is not picked up by the
 # recursive find above (and adding in general recursive finding breaks
 # SDBM_File/sdbm).  A.D.  10/25/2001.
-# Ditto for IO/Compress/Base and IO/Compress/Zlib
 
     if (!$_[0] && -d "threads/shared") {
         $ext{"threads/shared"} = 'dynamic';
-    }
-    if (!$_[0] && -d "IO/Compress/Base") {
-        $ext{"IO/Compress/Base"} = 'nonxs';
-    }
-    if (!$_[0] && -d "IO/Compress/Zlib") {
-        $ext{"IO/Compress/Zlib"} = 'nonxs';
     }
 }
 
