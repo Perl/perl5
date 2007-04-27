@@ -364,17 +364,25 @@ change the appropriate metaconfig units instead, and regenerate Configure.
 
 will regenerate Configure and config_h.SH.  Much more information
 on obtaining and running metaconfig is in the F<U/README> file
-that comes with Perl's metaconfig units.  Perl's metaconfig units
-should be available on CPAN.  A set of units that will work with
-perl5.005 is in the file F<mc_units-5.005_00-01.tar.gz> under
-http://www.cpan.org/authors/id/ANDYD/ .  The mc_units tar file
-should be unpacked in your main perl source directory.  Note: those
-units were for use with 5.005.  There may have been changes since then.
-Check for later versions or contact perl5-porters@perl.org to obtain a
+that comes with Perl's metaconfig units.
+
+Since metaconfig is hard to change, running correction scripts after
+this generation is sometimes needed. Configure gained complexity over
+time, and the order in which config_h.SH is generated can cause havoc
+when compiling perl. Therefor, you need to run Porting/config_h.pl
+after that generation. All that and more is described in the README
+files that come with the metaunits.
+
+Perl's metaconfig units should be available on CPAN.  A set of units
+that will work with perl5.9.x is in a file with a name similar to
+F<mc_units-20070423.tgz> under http://www.cpan.org/authors/id/H/HM/HMBRAND/ .
+The mc_units tar file should be unpacked in your main perl source directory.
+Note: those units were for use with 5.9.x.  There may have been changes since
+then.  Check for later versions or contact perl5-porters@perl.org to obtain a
 pointer to the current version.
 
-Alternatively, do consider if the F<*ish.h> files might be a better
-place for your changes.
+Alternatively, do consider if the F<*ish.h> files or the hint files might be
+a better place for your changes.
 
 =head2 MANIFEST
 
@@ -1547,4 +1555,5 @@ All opinions expressed herein are those of the authorZ<>(s).
 
 =head1 LAST MODIFIED
 
+27-04-2007 H.Merijn Brand
 $Id: pumpkin.pod,v 1.23 2000/01/13 19:45:13 doughera Released $
