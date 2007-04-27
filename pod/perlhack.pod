@@ -528,18 +528,18 @@ Bourne shell script functions that can make your life easier:
     function edit {
 	if [ -L $1 ]; then
 	    mv $1 $1.orig
-		cp $1.orig $1
-		vi $1
+	    cp $1.orig $1
+	    vi $1
 	else
-	    /bin/vi $1
-		fi
+	    vi $1
+	fi
     }
 
     function unedit {
 	if [ -L $1.orig ]; then
 	    rm $1
-		mv $1.orig $1
-		fi
+	    mv $1.orig $1
+	fi
     }
 
 Replace "vi" with your favorite flavor of editor.
@@ -549,15 +549,15 @@ files which have been edited in your symlink tree:
 
     mkpatchorig() {
 	local diffopts
-	    for f in `find . -name '*.orig' | sed s,^\./,,`
-		do
-		    case `echo $f | sed 's,.orig$,,;s,.*\.,,'` in
-			c)   diffopts=-p ;;
+	for f in `find . -name '*.orig' | sed s,^\./,,`
+	do
+	    case `echo $f | sed 's,.orig$,,;s,.*\.,,'` in
+		c)   diffopts=-p ;;
 		pod) diffopts='-F^=' ;;
 		*)   diffopts= ;;
-		esac
-		    diff -du $diffopts $f `echo $f | sed 's,.orig$,,'`
-		    done
+	    esac
+	    diff -du $diffopts $f `echo $f | sed 's,.orig$,,'`
+	done
     }
 
 This function produces patches which include enough context to make
