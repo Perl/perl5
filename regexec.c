@@ -5006,9 +5006,8 @@ NULL
 #undef ST
         case FOLDCHAR:
             n = ARG(scan);
-            if (nextchr==n) {
+	    if (nextchr == (I32)n) {
                 locinput += UTF8SKIP(locinput);
-
             } else {
                 /* This malarky is to handle LATIN SMALL LETTER SHARP S 
                    properly. Sigh */
