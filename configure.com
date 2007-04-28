@@ -907,7 +907,7 @@ $   config_symbols0 ="|archlib|archlibexp|bin|binexp|builddir|cf_email|config_sh
 $   config_symbols1 ="|installprivlib|installscript|installsitearch|installsitelib|most|oldarchlib|oldarchlibexp|osname|pager|perl_symbol|perl_verb|"
 $   config_symbols2 ="|prefix|privlib|privlibexp|scriptdir|sitearch|sitearchexp|sitebin|sitelib|sitelib_stem|sitelibexp|try_cxx|use64bitall|use64bitint|"
 $   config_symbols3 ="|usecasesensitive|usedefaulttypes|usedevel|useieee|useithreads|uselongdouble|usemultiplicity|usemymalloc|usedebugging_perl|"
-$   config_symbols4 ="|useperlio|usesecurelog||usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|uselargefiles|usesitecustomize|"
+$   config_symbols4 ="|useperlio|usesecurelog|usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|uselargefiles|usesitecustomize|"
 $   config_symbols5 ="|buildmake|builder|usethreadupcalls|usekernelthreads|usedecterm"
 $!  
 $   open/read CONFIG 'config_sh'
@@ -2773,7 +2773,8 @@ $ IF .NOT. Has_socketshr .AND. .NOT. Has_Dec_C_Sockets
 $ THEN
 $   dflt = dflt - "Socket"            ! optional on VMS
 $ ENDIF
-$ IF .NOT. use_threads  THEN dflt = dflt - "Thread"
+$ ! Build this one only for threads without ithreads
+$ IF useithreads .OR. useithreads .EQS. "define" .OR. .NOT. use_threads THEN dflt = dflt - "Thread"
 $ dflt = dflt - "Win32API/File" - "Win32CORE" - "Win32"  ! need Dave Cutler's other project
 $ dflt = F$EDIT(dflt,"TRIM,COMPRESS")
 $!
