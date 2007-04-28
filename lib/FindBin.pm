@@ -104,7 +104,7 @@ use File::Spec;
 %EXPORT_TAGS = (ALL => [qw($Bin $Script $RealBin $RealScript $Dir $RealDir)]);
 @ISA = qw(Exporter);
 
-$VERSION = "1.48";
+$VERSION = "1.49";
 
 
 # needed for VMS-specific filename translation
@@ -139,7 +139,7 @@ sub init
 
    if ($^O eq 'VMS')
     {
-     ($Bin,$Script) = VMS::Filespec::rmsexpand($0) =~ /(.*[\]>]+)(.*)/s;
+     ($Bin,$Script) = VMS::Filespec::rmsexpand($0) =~ /(.*[\]>\/]+)(.*)/s;
      # C<use disk:[dev]/lib> isn't going to work, so unixify first
      ($Bin = VMS::Filespec::unixify($Bin)) =~ s/\/\z//;
      ($RealBin,$RealScript) = ($Bin,$Script);
