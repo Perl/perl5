@@ -238,10 +238,10 @@ not a simple single value, because on rare occasions, it makes sense
 to have more than one parent class searched for the missing methods.
 
 If C<Animal> also had an C<@ISA>, then we'd check there too.  The
-search is recursive, depth-first, left-to-right in each C<@ISA>.
-Typically, each C<@ISA> has only one element (multiple elements means
-multiple inheritance and multiple headaches), so we get a nice tree of
-inheritance.
+search is recursive, depth-first, left-to-right in each C<@ISA> by
+default (see L<mro> for alternatives).  Typically, each C<@ISA> has
+only one element (multiple elements means multiple inheritance and
+multiple headaches), so we get a nice tree of inheritance.
 
 When we turn on C<use strict>, we'll get complaints on C<@ISA>, since
 it's not a variable containing an explicit package name, nor is it a

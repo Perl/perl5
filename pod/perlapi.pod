@@ -2810,20 +2810,25 @@ of the given stash, so that they might notice
 the changes in this one.
 
 Ideally, all instances of C<PL_sub_generation++> in
-the perl source outside of C<mro.c> should be
-replaced by calls to this.  This conversion is
-nearly complete.
+perl source outside of C<mro.c> should be
+replaced by calls to this.
 
-Perl has always had problems with method caches
-getting out of sync when one directly manipulates
-stashes via things like C<%{Foo::} = %{Bar::}> or 
-C<${Foo::}{bar} = ...> or the equivalent.  If
-you do this in core or XS code, call this afterwards
-on the destination stash to get things back in sync.
+Perl automatically handles most of the common
+ways a method might be redefined.  However, there
+are a few ways you could change a method in a stash
+without the cache code noticing, in which case you
+need to call this method afterwards:
 
-If you're doing such a thing from pure perl, use
-C<mro::method_changed_in(classname)>, which
-just calls this.
+1) Directly manipulating the stash HV entries from
+XS code.
+
+2) Assigning a reference to a readonly scalar
+constant into a stash entry in order to create
+a constant subroutine (like constant.pm
+does).
+
+This same method is available from pure perl
+via, C<mro::method_changed_in(classname)>.
 
 	void	mro_method_changed_in(HV* stash)
 

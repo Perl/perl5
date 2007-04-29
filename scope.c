@@ -749,8 +749,9 @@ Perl_leave_scope(pTHX_ I32 base)
 	    gv = (GV*)SSPOPPTR;
 	    gp_free(gv);
 	    GvGP(gv) = (GP*)ptr;
-	    if (GvCVu(gv))
-                mro_method_changed_in(GvSTASH(gv)); /* putting a method back into circulation ("local")*/
+            /* putting a method back into circulation ("local")*/
+	    if (GvCVu(gv) && (hv=GvSTASH(gv)) && HvNAME_get(hv))
+                mro_method_changed_in(hv);
 	    SvREFCNT_dec(gv);
 	    break;
 	case SAVEt_FREESV:

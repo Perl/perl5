@@ -3041,7 +3041,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	    gv = (GV*)HeVAL(he);
 	    if (isGV(gv) && GvCV(gv) &&
 		(!GvCVGEN(gv) || GvCVGEN(gv)
-                  == (PL_sub_generation + HvMROMETA(stash)->sub_generation)))
+                  == (PL_sub_generation + HvMROMETA(stash)->cache_gen)))
 		return (SV*)GvCV(gv);
 	}
     }

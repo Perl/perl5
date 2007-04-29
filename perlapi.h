@@ -332,6 +332,8 @@ END_EXTERN_C
 #define PL_initav		(*Perl_Iinitav_ptr(aTHX))
 #undef  PL_inplace
 #define PL_inplace		(*Perl_Iinplace_ptr(aTHX))
+#undef  PL_isarev
+#define PL_isarev		(*Perl_Iisarev_ptr(aTHX))
 #undef  PL_known_layers
 #define PL_known_layers		(*Perl_Iknown_layers_ptr(aTHX))
 #undef  PL_last_lop

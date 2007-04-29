@@ -360,7 +360,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 
     DEBUG_o( Perl_deb(aTHX_ "Looking for method %s in package %s\n",name,hvname) );
 
-    topgen_cmp = HvMROMETA(stash)->sub_generation + PL_sub_generation;
+    topgen_cmp = HvMROMETA(stash)->cache_gen + PL_sub_generation;
 
     /* check locally for a real method or a cache entry */
     gvp = (GV**)hv_fetch(stash, name, len, create);
@@ -405,17 +405,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
         assert(linear_sv);
         cstash = gv_stashsv(linear_sv, 0);
 
-        /* mg.c:Perl_magic_setisa sets the fake flag on packages it had
-           to create that the user did not.  The "package" statement
-           clears it.  We also check if there's anything in the symbol
-           table at all, which would indicate a previously "fake" package
-           where someone adding things via $Foo::Bar = 1 without ever
-           using a "package" statement.
-           This was all neccesary because magic_setisa needs a place to
-           keep isarev information on packages that aren't yet defined,
-           yet we still need to issue this warning when appropriate.
-        */
-        if (!cstash || (HvMROMETA(cstash)->fake && !HvFILL(cstash))) {
+        if (!cstash) {
             if (ckWARN(WARN_SYNTAX))
                 Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Can't locate package %"SVf" for @%s::ISA",
                     SVfARG(linear_sv), hvname);
@@ -1445,15 +1435,6 @@ Perl_gp_ref(pTHX_ GP *gp)
 	    gp->gp_cv = NULL;
 	    gp->gp_cvgen = 0;
 	}
-        /* XXX if anyone finds a method cache regression with
-           the "mro" stuff, turning this else block back on
-           is probably the first place to look --blblack
-        */
-        /*
-        else {
-            PL_sub_generation++;
-        }
-        */
     }
     return gp;
 }
@@ -1472,10 +1453,6 @@ Perl_gp_free(pTHX_ GV *gv)
 			"Attempt to free unreferenced glob pointers"
                         pTHX__FORMAT pTHX__VALUE);
         return;
-    }
-    if (gp->gp_cv) {
-	/* Deleting the name of a subroutine invalidates method cache */
-	PL_sub_generation++;
     }
     if (--gp->gp_refcnt > 0) {
 	if (gp->gp_egv == gv)
@@ -1534,7 +1511,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
   AMT amt;
   U32 newgen;
 
-  newgen = PL_sub_generation + HvMROMETA(stash)->sub_generation;
+  newgen = PL_sub_generation + HvMROMETA(stash)->cache_gen;
   if (mg) {
       const AMT * const amtp = (AMT*)mg->mg_ptr;
       if (amtp->was_ok_am == PL_amagic_generation
@@ -1665,7 +1642,7 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
     if (!stash || !HvNAME_get(stash))
         return NULL;
 
-    newgen = PL_sub_generation + HvMROMETA(stash)->sub_generation;
+    newgen = PL_sub_generation + HvMROMETA(stash)->cache_gen;
 
     mg = mg_find((SV*)stash, PERL_MAGIC_overload_table);
     if (!mg) {

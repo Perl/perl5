@@ -33,17 +33,7 @@ Perl_mro_meta_init(pTHX_ HV* stash)
     assert(!(HvAUX(stash)->xhv_mro_meta));
     Newxz(newmeta, 1, struct mro_meta);
     HvAUX(stash)->xhv_mro_meta = newmeta;
-    newmeta->sub_generation = 1;
-
-    /* Manually flag UNIVERSAL as being universal.
-       This happens early in perl booting (when universal.c
-       does the newXS calls for UNIVERSAL::*), and infects
-       other packages as they are added to UNIVERSAL's MRO
-    */
-    if(HvNAMELEN_get(stash) == 9
-       && strEQ(HEK_KEY(HvAUX(stash)->xhv_name), "UNIVERSAL")) {
-            HvMROMETA(stash)->is_universal = 1;
-    }
+    newmeta->cache_gen = 1;
 
     return newmeta;
 }
@@ -67,9 +57,6 @@ Perl_mro_meta_dup(pTHX_ struct mro_meta* smeta, CLONE_PARAMS* param)
     if (newmeta->mro_linear_c3)
 	newmeta->mro_linear_c3
 	    = (AV*) SvREFCNT_inc(sv_dup((SV*)newmeta->mro_linear_c3, param));
-    if (newmeta->mro_isarev)
-	newmeta->mro_isarev
-	    = (HV*) SvREFCNT_inc(sv_dup((SV*)newmeta->mro_isarev, param));
     if (newmeta->mro_nextmethod)
 	newmeta->mro_nextmethod
 	    = (HV*) SvREFCNT_inc(sv_dup((SV*)newmeta->mro_nextmethod, param));
@@ -454,8 +441,11 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
     I32 items;
     struct mro_meta* meta;
     char* stashname;
+    STRLEN stashname_len;
+    bool is_universal = FALSE;
 
     stashname = HvNAME_get(stash);
+    stashname_len = HvNAMELEN_get(stash);
 
     /* wipe out the cached linearizations for this stash */
     meta = HvMROMETA(stash);
@@ -466,19 +456,26 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 
     /* Wipe the global method cache if this package
        is UNIVERSAL or one of its parents */
-    if(meta->is_universal)
+
+    svp = hv_fetch(PL_isarev, stashname, stashname_len, 0);
+    isarev = svp ? (HV*)*svp : NULL;
+
+    if((stashname_len == 9 && strEQ(stashname, "UNIVERSAL"))
+        || (isarev && hv_exists(isarev, "UNIVERSAL", 9))) {
         PL_sub_generation++;
+        is_universal = TRUE;
+    }
 
     /* Wipe the local method cache otherwise */
     else
-        meta->sub_generation++;
+        meta->cache_gen++;
 
     /* wipe next::method cache too */
     if(meta->mro_nextmethod) hv_clear(meta->mro_nextmethod);
     
     /* Iterate the isarev (classes that are our children),
        wiping out their linearization and method caches */
-    if((isarev = meta->mro_isarev)) {
+    if(isarev) {
         hv_iterinit(isarev);
         while((iter = hv_iternext(isarev))) {
             SV* revkey = hv_iterkeysv(iter);
@@ -491,8 +488,8 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
             SvREFCNT_dec((SV*)revmeta->mro_linear_c3);
             revmeta->mro_linear_dfs = NULL;
             revmeta->mro_linear_c3 = NULL;
-            if(!meta->is_universal)
-                revmeta->sub_generation++;
+            if(!is_universal)
+                revmeta->cache_gen++;
             if(revmeta->mro_nextmethod)
                 hv_clear(revmeta->mro_nextmethod);
         }
@@ -510,45 +507,29 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
     items = AvFILLp(linear_mro);
 
     while (items--) {
+        HE* he;
         SV* const sv = *svp++;
-        struct mro_meta* mrometa;
         HV* mroisarev;
 
-        HV* mrostash = gv_stashsv(sv, 0);
-        if(!mrostash) {
-            mrostash = gv_stashsv(sv, GV_ADD);
-            /*
-               We created the package on the fly, so
-               that we could store isarev information.
-               This flag lets gv_fetchmeth know about it,
-               so that it can still generate the very useful
-               "Can't locate package Foo for @Bar::ISA" warning.
-            */
-            HvMROMETA(mrostash)->fake = 1;
+        he = hv_fetch_ent(PL_isarev, sv, 0, 0);
+        if(!he) {
+            he = hv_store_ent(PL_isarev, sv, (SV*)newHV(), 0);
         }
-
-        mrometa = HvMROMETA(mrostash);
-        mroisarev = mrometa->mro_isarev;
-
-        /* is_universal is viral */
-        if(meta->is_universal)
-            mrometa->is_universal = 1;
-
-        if(!mroisarev)
-            mroisarev = mrometa->mro_isarev = newHV();
+        mroisarev = (HV*)HeVAL(he);
 
 	/* This hash only ever contains PL_sv_yes. Storing it over itself is
 	   almost as cheap as calling hv_exists, so on aggregate we expect to
 	   save time by not making two calls to the common HV code for the
 	   case where it doesn't exist.  */
 	   
-	hv_store(mroisarev, stashname, strlen(stashname), &PL_sv_yes, 0);
+	hv_store(mroisarev, stashname, stashname_len, &PL_sv_yes, 0);
 
         if(isarev) {
             hv_iterinit(isarev);
             while((iter = hv_iternext(isarev))) {
-                SV* revkey = hv_iterkeysv(iter);
-		hv_store_ent(mroisarev, revkey, &PL_sv_yes, 0);
+                I32 revkeylen;
+                char* revkey = hv_iterkey(iter, &revkeylen);
+		hv_store(mroisarev, revkey, revkeylen, &PL_sv_yes, 0);
             }
         }
     }
@@ -562,40 +543,54 @@ of the given stash, so that they might notice
 the changes in this one.
 
 Ideally, all instances of C<PL_sub_generation++> in
-the perl source outside of C<mro.c> should be
-replaced by calls to this.  This conversion is
-nearly complete.
+perl source outside of C<mro.c> should be
+replaced by calls to this.
 
-Perl has always had problems with method caches
-getting out of sync when one directly manipulates
-stashes via things like C<%{Foo::} = %{Bar::}> or 
-C<${Foo::}{bar} = ...> or the equivalent.  If
-you do this in core or XS code, call this afterwards
-on the destination stash to get things back in sync.
+Perl automatically handles most of the common
+ways a method might be redefined.  However, there
+are a few ways you could change a method in a stash
+without the cache code noticing, in which case you
+need to call this method afterwards:
 
-If you're doing such a thing from pure perl, use
-C<mro::method_changed_in(classname)>, which
-just calls this.
+1) Directly manipulating the stash HV entries from
+XS code.
+
+2) Assigning a reference to a readonly scalar
+constant into a stash entry in order to create
+a constant subroutine (like constant.pm
+does).
+
+This same method is available from pure perl
+via, C<mro::method_changed_in(classname)>.
 
 =cut
 */
 void
 Perl_mro_method_changed_in(pTHX_ HV *stash)
 {
-    struct mro_meta* meta = HvMROMETA(stash);
+    SV** svp;
     HV* isarev;
     HE* iter;
+    char* stashname;
+    STRLEN stashname_len;
+
+    stashname = HvNAME_get(stash);
+    stashname_len = HvNAMELEN_get(stash);
+
+    svp = hv_fetch(PL_isarev, stashname, stashname_len, 0);
+    isarev = svp ? (HV*)*svp : NULL;
 
     /* If stash is UNIVERSAL, or one of UNIVERSAL's parents,
        invalidate all method caches globally */
-    if(meta->is_universal) {
+    if((stashname_len == 9 && strEQ(stashname, "UNIVERSAL"))
+        || (isarev && hv_exists(isarev, "UNIVERSAL", 9))) {
         PL_sub_generation++;
         return;
     }
 
     /* else, invalidate the method caches of all child classes,
        but not itself */
-    if((isarev = meta->mro_isarev)) {
+    if(isarev) {
         hv_iterinit(isarev);
         while((iter = hv_iternext(isarev))) {
             SV* revkey = hv_iterkeysv(iter);
@@ -604,7 +599,7 @@ Perl_mro_method_changed_in(pTHX_ HV *stash)
 
             if(!revstash) continue;
             mrometa = HvMROMETA(revstash);
-            mrometa->sub_generation++;
+            mrometa->cache_gen++;
             if(mrometa->mro_nextmethod)
                 hv_clear(mrometa->mro_nextmethod);
         }
@@ -770,7 +765,7 @@ __nextcan(pTHX_ SV* self, I32 throw_nomethod)
             assert(linear_sv);
             curstash = gv_stashsv(linear_sv, FALSE);
 
-            if (!curstash || (HvMROMETA(curstash)->fake && !HvFILL(curstash))) {
+            if (!curstash) {
                 if (ckWARN(WARN_SYNTAX))
                     Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Can't locate package %"SVf" for @%s::ISA",
                         (void*)linear_sv, hvname);
@@ -812,9 +807,7 @@ XS(XS_mro_set_mro);
 XS(XS_mro_get_mro);
 XS(XS_mro_get_isarev);
 XS(XS_mro_is_universal);
-XS(XS_mro_get_global_sub_gen);
 XS(XS_mro_invalidate_method_caches);
-XS(XS_mro_get_sub_generation);
 XS(XS_mro_method_changed_in);
 XS(XS_next_can);
 XS(XS_next_method);
@@ -831,9 +824,7 @@ Perl_boot_core_mro(pTHX)
     newXSproto("mro::get_mro", XS_mro_get_mro, file, "$");
     newXSproto("mro::get_isarev", XS_mro_get_isarev, file, "$");
     newXSproto("mro::is_universal", XS_mro_is_universal, file, "$");
-    newXSproto("mro::get_global_sub_generation", XS_mro_get_global_sub_gen, file, "");
     newXSproto("mro::invalidate_all_method_caches", XS_mro_invalidate_method_caches, file, "");
-    newXSproto("mro::get_sub_generation", XS_mro_get_sub_generation, file, "$");
     newXSproto("mro::method_changed_in", XS_mro_method_changed_in, file, "$");
     newXS("next::can", XS_next_can, file);
     newXS("next::method", XS_next_method, file);
@@ -906,7 +897,7 @@ XS(XS_mro_set_mro)
         meta->mro_which = which;
         /* Only affects local method cache, not
            even child classes */
-        meta->sub_generation++;
+        meta->cache_gen++;
         if(meta->mro_nextmethod)
             hv_clear(meta->mro_nextmethod);
     }
@@ -947,7 +938,10 @@ XS(XS_mro_get_isarev)
     dXSARGS;
     SV* classname;
     HV* class_stash;
+    SV** svp;
     HV* isarev;
+    char* stashname;
+    STRLEN stashname_len;
 
     PERL_UNUSED_ARG(cv);
 
@@ -960,8 +954,12 @@ XS(XS_mro_get_isarev)
     if(!class_stash) Perl_croak(aTHX_ "No such class: '%"SVf"'!", SVfARG(classname));
 
     SP -= items;
-   
-    if((isarev = HvMROMETA(class_stash)->mro_isarev)) {
+
+    stashname = HvNAME_get(class_stash);
+    stashname_len = HvNAMELEN_get(class_stash);
+    svp = hv_fetch(PL_isarev, stashname, stashname_len, 0);
+    isarev = svp ? (HV*)*svp : NULL;
+    if(isarev) {
         HE* iter;
         hv_iterinit(isarev);
         while((iter = hv_iternext(isarev)))
@@ -978,34 +976,31 @@ XS(XS_mro_is_universal)
     dXSARGS;
     SV* classname;
     HV* class_stash;
+    HV* isarev;
+    char* stashname;
+    STRLEN stashname_len;
+    SV** svp;
 
     PERL_UNUSED_ARG(cv);
 
     if (items != 1)
-       Perl_croak(aTHX_ "Usage: mro::get_mro(classname)");
+       Perl_croak(aTHX_ "Usage: mro::is_universal(classname)");
 
     classname = ST(0);
     class_stash = gv_stashsv(classname, 0);
     if(!class_stash) Perl_croak(aTHX_ "No such class: '%"SVf"'!", SVfARG(classname));
 
-    if (HvMROMETA(class_stash)->is_universal)
+    stashname = HvNAME_get(class_stash);
+    stashname_len = HvNAMELEN_get(class_stash);
+
+    svp = hv_fetch(PL_isarev, stashname, stashname_len, 0);
+    isarev = svp ? (HV*)*svp : NULL;
+
+    if((stashname_len == 9 && strEQ(stashname, "UNIVERSAL"))
+        || (isarev && hv_exists(isarev, "UNIVERSAL", 9)))
         XSRETURN_YES;
     else
         XSRETURN_NO;
-}
-
-XS(XS_mro_get_global_sub_gen)
-{
-    dVAR;
-    dXSARGS;
-
-    PERL_UNUSED_ARG(cv);
-
-    if (items != 0)
-        Perl_croak(aTHX_ "Usage: mro::get_global_sub_generation()");
-
-    ST(0) = sv_2mortal(newSViv(PL_sub_generation));
-    XSRETURN(1);
 }
 
 XS(XS_mro_invalidate_method_caches)
@@ -1021,26 +1016,6 @@ XS(XS_mro_invalidate_method_caches)
     PL_sub_generation++;
 
     XSRETURN_EMPTY;
-}
-
-XS(XS_mro_get_sub_generation)
-{
-    dVAR;
-    dXSARGS;
-    SV* classname;
-    HV* class_stash;
-
-    PERL_UNUSED_ARG(cv);
-
-    if(items != 1)
-        Perl_croak(aTHX_ "Usage: mro::get_sub_generation(classname)");
-
-    classname = ST(0);
-    class_stash = gv_stashsv(classname, 0);
-    if(!class_stash) Perl_croak(aTHX_ "No such class: '%"SVf"'!", SVfARG(classname));
-
-    ST(0) = sv_2mortal(newSViv(HvMROMETA(class_stash)->sub_generation));
-    XSRETURN(1);
 }
 
 XS(XS_mro_method_changed_in)

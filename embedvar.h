@@ -227,6 +227,7 @@
 #define PL_incgv		(vTHX->Iincgv)
 #define PL_initav		(vTHX->Iinitav)
 #define PL_inplace		(vTHX->Iinplace)
+#define PL_isarev		(vTHX->Iisarev)
 #define PL_known_layers		(vTHX->Iknown_layers)
 #define PL_last_lop		(vTHX->Ilast_lop)
 #define PL_last_lop_op		(vTHX->Ilast_lop_op)
@@ -491,6 +492,7 @@
 #define PL_Iincgv		PL_incgv
 #define PL_Iinitav		PL_initav
 #define PL_Iinplace		PL_inplace
+#define PL_Iisarev		PL_isarev
 #define PL_Iknown_layers	PL_known_layers
 #define PL_Ilast_lop		PL_last_lop
 #define PL_Ilast_lop_op		PL_last_lop_op

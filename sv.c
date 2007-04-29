@@ -3145,6 +3145,8 @@ copy-ish functions and macros use this underneath.
 static void
 S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
 {
+    I32 method_changed = 0;
+
     if (dtype != SVt_PVGV) {
 	const char * const name = GvNAME(sstr);
 	const STRLEN len = GvNAMELEN(sstr);
@@ -3174,6 +3176,25 @@ S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
     }
 #endif
 
+    if(GvGP((GV*)sstr)) {
+        /* If source has method cache entry, clear it */
+        if(GvCVGEN(sstr)) {
+            SvREFCNT_dec(GvCV(sstr));
+            GvCV(sstr) = NULL;
+            GvCVGEN(sstr) = 0;
+        }
+        /* If source has a real method, then a method is
+           going to change */
+        else if(GvCV((GV*)sstr)) {
+            method_changed = 1;
+        }
+    }
+
+    /* If dest already had a real method, that's a change as well */
+    if(!method_changed && GvGP((GV*)dstr) && GvCVu((GV*)dstr)) {
+        method_changed = 1;
+    }
+
     gp_free((GV*)dstr);
     isGV_with_GP_off(dstr);
     (void)SvOK_off(dstr);
@@ -3188,6 +3209,7 @@ S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
 	    GvIMPORTED_on(dstr);
 	}
     GvMULTI_on(dstr);
+    if(method_changed) mro_method_changed_in(GvSTASH(dstr));
     return;
 }
 
@@ -3287,7 +3309,7 @@ S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr) {
 	    }
 	    GvCVGEN(dstr) = 0; /* Switch off cacheness. */
 	    GvASSUMECV_on(dstr);
-	    mro_method_changed_in(GvSTASH(dstr)); /* sub foo { 1 } sub bar { 2 } *bar = \&foo */
+	    if(GvSTASH(dstr)) mro_method_changed_in(GvSTASH(dstr)); /* sub foo { 1 } sub bar { 2 } *bar = \&foo */
 	}
 	*location = sref;
 	if (import_flag && !(GvFLAGS(dstr) & import_flag)
@@ -5025,6 +5047,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
     const U32 type = SvTYPE(sv);
     const struct body_details *const sv_type_details
 	= bodies_by_type + type;
+    HV *stash;
 
     assert(sv);
     assert(SvREFCNT(sv) == 0);
@@ -5136,13 +5159,15 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	    SvREFCNT_dec(LvTARG(sv));
     case SVt_PVGV:
 	if (isGV_with_GP(sv)) {
+            if(GvCVu((GV*)sv) && (stash = GvSTASH((GV*)sv)) && HvNAME_get(stash))
+                mro_method_changed_in(stash);
 	    gp_free((GV*)sv);
 	    if (GvNAME_HEK(sv))
 		unshare_hek(GvNAME_HEK(sv));
-	/* If we're in a stash, we don't own a reference to it. However it does
-	   have a back reference to us, which needs to be cleared.  */
-	if (!SvVALID(sv) && GvSTASH(sv))
-		sv_del_backref((SV*)GvSTASH(sv), sv);
+	    /* If we're in a stash, we don't own a reference to it. However it does
+	       have a back reference to us, which needs to be cleared.  */
+	    if (!SvVALID(sv) && (stash = GvSTASH(sv)))
+		    sv_del_backref((SV*)stash, sv);
 	}
 	/* FIXME. There are probably more unreferenced pointers to SVs in the
 	   interpreter struct that we should check and tidy in a similar
@@ -7949,6 +7974,7 @@ S_sv_unglob(pTHX_ SV *sv)
 {
     dVAR;
     void *xpvmg;
+    HV *stash;
     SV * const temp = sv_newmortal();
 
     assert(SvTYPE(sv) == SVt_PVGV);
@@ -7956,6 +7982,8 @@ S_sv_unglob(pTHX_ SV *sv)
     gv_efullname3(temp, (GV *) sv, "*");
 
     if (GvGP(sv)) {
+        if(GvCVu((GV*)sv) && (stash = GvSTASH((GV*)sv)) && HvNAME_get(stash))
+            mro_method_changed_in(stash);
 	gp_free((GV*)sv);
     }
     if (GvSTASH(sv)) {
@@ -11081,6 +11109,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_initav		= av_dup_inc(proto_perl->Iinitav, param);
 
     PL_sub_generation	= proto_perl->Isub_generation;
+    PL_isarev		= hv_dup_inc(proto_perl->Iisarev, param);
 
     /* funky return mechanisms */
     PL_forkprocess	= proto_perl->Iforkprocess;

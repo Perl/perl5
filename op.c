@@ -3650,10 +3650,6 @@ Perl_package(pTHX_ OP *o)
 
     PL_curstash = gv_stashsv(sv, GV_ADD);
 
-    /* In case mg.c:Perl_magic_setisa faked
-       this package earlier, we clear the fake flag */
-    HvMROMETA(PL_curstash)->fake = 0;
-
     sv_setsv(PL_curstname, sv);
 
     PL_hints |= HINT_BLOCK_SCOPE;

@@ -1608,6 +1608,8 @@ Perl_hv_clear(pTHX_ HV *hv)
     HvREHASH_off(hv);
     reset:
     if (SvOOK(hv)) {
+        if(HvNAME_get(hv))
+            mro_isa_changed_in(hv);
 	HvEITER_set(hv, NULL);
     }
 }
@@ -1756,7 +1758,6 @@ S_hfreeentries(pTHX_ HV *hv)
             if((meta = iter->xhv_mro_meta)) {
                 if(meta->mro_linear_dfs) SvREFCNT_dec(meta->mro_linear_dfs);
                 if(meta->mro_linear_c3)  SvREFCNT_dec(meta->mro_linear_c3);
-                if(meta->mro_isarev)     SvREFCNT_dec(meta->mro_isarev);
                 if(meta->mro_nextmethod) SvREFCNT_dec(meta->mro_nextmethod);
                 Safefree(meta);
                 iter->xhv_mro_meta = NULL;
@@ -1845,8 +1846,12 @@ Perl_hv_undef(pTHX_ HV *hv)
 	return;
     DEBUG_A(Perl_hv_assert(aTHX_ hv));
     xhv = (XPVHV*)SvANY(hv);
+
+    if ((name = HvNAME_get(hv)) && !PL_dirty)
+        mro_isa_changed_in(hv);
+
     hfreeentries(hv);
-    if ((name = HvNAME_get(hv))) {
+    if (name) {
         if(PL_stashcache)
 	    hv_delete(PL_stashcache, name, HvNAMELEN_get(hv), G_DISCARD);
 	hv_name_set(hv, NULL, 0, 0);

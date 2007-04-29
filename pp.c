@@ -828,6 +828,15 @@ PP(pp_undef)
 	    SvSetMagicSV(sv, &PL_sv_undef);
 	else {
 	    GP *gp;
+            HV *stash;
+
+            /* undef *Foo:: */
+            if((stash = GvHV((GV*)sv)) && HvNAME_get(stash))
+                mro_isa_changed_in(stash);
+            /* undef *Pkg::meth_name ... */
+            else if(GvCVu((GV*)sv) && (stash = GvSTASH((GV*)sv)) && HvNAME_get(stash))
+                mro_method_changed_in(stash);
+
 	    gp_free((GV*)sv);
 	    Newxz(gp, 1, GP);
 	    GvGP(sv) = gp_ref(gp);

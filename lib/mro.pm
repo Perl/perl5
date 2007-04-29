@@ -141,24 +141,10 @@ For similar reasons to C<isarev> above, this flag is
 permanent.  Once it is set, it does not go away, even
 if the class in question really isn't universal anymore.
 
-=head2 mro::get_global_sub_generation()
-
-Returns the current value of the internal perl variable
-C<PL_sub_generation>.
-
 =head2 mro::invalidate_all_method_caches()
 
 Increments C<PL_sub_generation>, which invalidates method
 caching in all packages.
-
-=head2 mro::get_sub_generation($classname)
-
-Returns the current value of a given package's C<sub_generation>.
-This is only incremented when necessary for that package.
-
-If one is trying to determine whether significant (method/cache-affecting)
-changes have occured for a given stash since you last checked, you should
-check both this and the global one above.
 
 =head2 mro::method_changed_in($classname)
 

@@ -535,6 +535,8 @@ PERLVARI(Islabs, I32**, NULL)	/* Array of slabs that have been allocated */
 PERLVARI(Islab_count, U32, 0)	/* Size of the array */
 #endif
 
+PERLVARI(Iisarev, HV*, NULL) /* Reverse map of @ISA dependencies */
+
 /* If you are adding a U16, see the comment above on where there are 2 bytes
    of gap which currently will be structure padding.  */
 

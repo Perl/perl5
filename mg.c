@@ -1925,6 +1925,8 @@ Perl_magic_setglob(pTHX_ SV *sv, MAGIC *mg)
     GV* gv;
     PERL_UNUSED_ARG(mg);
 
+    Perl_croak(aTHX_ "Perl_magic_setglob is dead code?");
+
     if (!SvOK(sv))
 	return 0;
     if (isGV_with_GP(sv)) {
