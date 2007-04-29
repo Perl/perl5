@@ -1120,6 +1120,27 @@ higher available.   This is not the same as loading in that exact version
 number.  No mechanism currently exists for concurrent installation of
 multiple versions of a module.  Lamentably.
 
+=head2 Deeper UNIVERSAL details
+
+It is also valid (though perhaps unwise in most cases) to put other
+packages' names in @UNIVERSAL::ISA.  These packages will also be
+implicitly inherited by all classes, just as UNIVERSAL itself is.
+However, neither UNIVERSAL nor any of its parents from the @ISA tree
+are explicit base classes of all objects.  To clarify, given the
+following:
+
+    @UNIVERSAL::ISA = ('REALLYUNIVERSAL');
+
+    package REALLYUNIVERSAL;
+    sub special_method { return "123" }
+
+    package Foo;
+    sub normal_method { return "321" }
+
+Calling Foo->special_method() will return "123", but calling
+Foo->isa('REALLYUNIVERSAL') or Foo->isa('UNIVERSAL') will return
+false.
+
 =head1 Alternate Object Representations
 
 Nothing requires objects to be implemented as hash references.  An object
