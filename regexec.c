@@ -5017,7 +5017,7 @@ NULL
                 char *e = PL_regeol;
                 to_uni_fold(n, folded, &foldlen);
 
-                if (ibcmp_utf8(folded, 0,  foldlen, 1,
+		if (ibcmp_utf8((const char*) folded, 0,  foldlen, 1,
                 	       l, &e, 0,  do_utf8)) {
                         sayNO;
                 }
