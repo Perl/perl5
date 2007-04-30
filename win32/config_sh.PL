@@ -46,12 +46,10 @@ FindExt::scan_ext("../ext");
 FindExt::scan_ext("ext") if -d 'ext';  # also look in win32/ext/ if it exists
 FindExt::set_static_extensions(split ' ', $opt{'static_ext'});
 
-my @dynamic_ext = grep(!/Thread/,FindExt::dynamic_ext());
-my @extensions  = grep(!/Thread/,FindExt::extensions());
 $opt{'nonxs_ext'}        = join(' ',FindExt::nonxs_ext()) || ' ';
 $opt{'static_ext'}       = join(' ',FindExt::static_ext()) || ' ';
-$opt{'dynamic_ext'}      = join(' ',@dynamic_ext) || ' ';
-$opt{'extensions'}       = join(' ',@extensions) || ' ';
+$opt{'dynamic_ext'}      = join(' ',FindExt::dynamic_ext()) || ' ';
+$opt{'extensions'}       = join(' ',FindExt::extensions()) || ' ';
 $opt{'known_extensions'} = join(' ',FindExt::known_extensions()) || ' ';
 
 my $pl_h = '../patchlevel.h';

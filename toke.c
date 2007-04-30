@@ -5200,8 +5200,7 @@ Perl_yylex(pTHX)
 	    }
 	    else if (gv && !gvp
 		     && -tmp==KEY_lock	/* XXX generalizable kludge */
-		     && GvCVu(gv)
-		     && !hv_fetchs(GvHVn(PL_incgv), "Thread.pm", FALSE))
+		     && GvCVu(gv))
 	    {
 		tmp = 0;		/* any sub overrides "weak" keyword */
 	    }

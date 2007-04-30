@@ -1146,7 +1146,6 @@ distclean: realclean
 	-del /f $(LIBDIR)\PerlIO\scalar.pm
 	-del /f $(LIBDIR)\PerlIO\via.pm
 	-del /f $(LIBDIR)\Sys\Hostname.pm
-	-del /f $(LIBDIR)\Thread\Signal.pm $(LIBDIR)\Thread\Specific.pm
 	-del /f $(LIBDIR)\threads\shared.pm
 	-del /f $(LIBDIR)\Time\HiRes.pm
 	-del /f $(LIBDIR)\Unicode\Normalize.pm

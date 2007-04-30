@@ -4500,8 +4500,6 @@ struct interpreter {
 };
 #endif /* MULTIPLICITY */
 
-typedef void *Thread;
-
 /* Done with PERLVAR macros for now ... */
 #undef PERLVAR
 #undef PERLVARA

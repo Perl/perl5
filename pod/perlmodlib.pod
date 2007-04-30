@@ -1709,14 +1709,6 @@ Thread-safe queues
 
 Thread-safe semaphores
 
-=item Thread::Signal
-
-Start a thread which runs signal handlers reliably (for old code)
-
-=item Thread::Specific
-
-Thread-specific keys
-
 =item Tie::Array
 
 Base class for tied arrays

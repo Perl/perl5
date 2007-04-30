@@ -192,8 +192,8 @@ sub ret_backtrace {
   $i++;
 
   my $tid_msg = '';
-  if (defined &Thread::tid) {
-    my $tid = Thread->self->tid;
+  if (defined &threads::tid) {
+    my $tid = threads->tid;
     $tid_msg = " thread $tid" if $tid;
   }
 
@@ -213,8 +213,8 @@ sub ret_summary {
   $i++;
 
   my $tid_msg = '';
-  if (defined &Thread::tid) {
-    my $tid = Thread->self->tid;
+  if (defined &threads::tid) {
+    my $tid = threads->tid;
     $tid_msg = " thread $tid" if $tid;
   }
 

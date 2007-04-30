@@ -6,8 +6,8 @@ perlothrtut - old tutorial on threads in Perl
 
 B<WARNING>:
 This tutorial describes the old-style thread model that was introduced in
-release 5.005. This model is now deprecated, and will be removed, probably
-in version 5.10. The interfaces described here were considered
+release 5.005. This model is deprecated, and has been removed
+for version 5.10. The interfaces described here were considered
 experimental, and are likely to be buggy.
 
 For information about the new interpreter threads ("ithreads") model, see

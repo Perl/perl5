@@ -4206,29 +4206,19 @@ EOM
 else
 : perl-5.9.x and later
 
-    use5005threads="$undef"
-    case "$usethreads" in
-    $define)
-	: Default to ithreads unless overridden on command line or with
-	: old config.sh
-	dflt='y'
-	case "$useithreads" in
-		$undef|false|[nN]*) dflt='n';;
-	esac
-	rp='Use the newer interpreter-based ithreads?'
-	. ./myread
-	case "$ans" in
-	y|Y)    val="$define" ;;
-	*)      val="$undef" ;;
-	esac
-	set useithreads
-	eval $setvar
-	;;
-    *)
-	useithreads="$undef"
-	;;
-    esac
+    if test X"$usethreads" = "X$define"; then
+        case "$use5005threads" in
+            $define|true|[yY]*)
+                $cat >&4 <<EOM
 
+5.005 threads has been removed for 5.10.  Perl will be built using ithreads.
+
+EOM
+            ;;
+        esac
+    fi
+    use5005threads="$undef"
+    useithreads="$usethreads"
 fi
 
 if test X"$usethreads" = "X$define" -a "X$useperlio" = "Xundef"; then
@@ -21134,8 +21124,8 @@ for xxx in $known_extensions ; do
 	Thread|thread)
                 case "$usethreads" in
                 true|$define|y)
-                        case "$useithreads" in
-                        $undef|false|[nN]*) avail_ext="$avail_ext $xxx" ;;
+                        case "$use5005threads" in
+                            $define|true|[yY]*) avail_ext="$avail_ext $xxx" ;;
                         esac
 		esac
 		;;

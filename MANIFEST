@@ -1096,26 +1096,10 @@ ext/Text/Soundex/README		README for Text::Soundex
 ext/Text/Soundex/Soundex.pm	Text::Soundex extension Perl module
 ext/Text/Soundex/Soundex.xs	Text::Soundex extension external subroutines
 ext/Text/Soundex/t/Soundex.t	test for Text::Soundex
-ext/Thread/create.tx		Test thread creation
-ext/Thread/die2.tx		Test thread die() differently
-ext/Thread/die.tx		Test thread die()
-ext/Thread/io.tx		Test threads doing simple I/O
-ext/Thread/join2.tx		Test thread joining differently
-ext/Thread/join.tx		Test thread joining
-ext/Thread/list.tx		Test getting list of all threads
-ext/Thread/lock.tx		Test lock primitive
-ext/Thread/Makefile.PL		Thread extension makefile writer
-ext/Thread/Notes		Thread notes
-ext/Thread/Queue.pmx		Threadsafe queue
-ext/Thread/queue.tx		Test Thread::Queue module
-ext/Thread/README		Thread README
-ext/Thread/README.threads		Notes about multithreading
 ext/threads/Changes		ithreads
-ext/Thread/Semaphore.pmx	Threadsafe semaphore
 ext/threads/hints/hpux.pl	Hint file for HPUX
 ext/threads/hints/linux.pl	Hint file for Linux
 ext/threads/Makefile.PL		ithreads
-ext/Thread/specific.tx		Test thread-specific user data
 ext/threads/README		ithreads
 ext/threads/shared/Changes	Changes for threads::shared
 ext/threads/shared/hints/linux.pl	thread shared variables
@@ -1160,15 +1144,6 @@ ext/threads/t/stress_cv.t	Test with multiple threads, coderef cv argument.
 ext/threads/t/stress_re.t	Test with multiple threads, string cv argument and regexes.
 ext/threads/t/stress_string.t	Test with multiple threads, string cv argument.
 ext/threads/t/thread.t		General ithread tests from thr5005
-ext/Thread/sync2.tx		Test thread synchronisation
-ext/Thread/sync.tx		Test thread synchronisation
-ext/Thread/Thread/Signal.pm	Start a thread to run signal handlers
-ext/Thread/Thread/Specific.pm	Thread specific data access
-ext/Thread/Thread.xs		Thread extension external subroutines
-ext/Thread/unsync2.tx		Test thread implicit synchronisation
-ext/Thread/unsync3.tx		Test thread implicit synchronisation
-ext/Thread/unsync4.tx		Test thread implicit synchronisation
-ext/Thread/unsync.tx		Test thread implicit synchronisation
 ext/Time/HiRes/Changes		Time::HiRes extension
 ext/Time/HiRes/fallback/const-c.inc	Time::HiRes extension
 ext/Time/HiRes/fallback/const-xs.inc	Time::HiRes extension

@@ -359,21 +359,15 @@ line so that the hint files can make appropriate adjustments.
 
 The default is to compile without thread support.
 
-Perl has two different internal threads implementations.  The current
-model (available internally since 5.6, and as a user-level module since
-5.8) is called interpreter-based implementation (ithreads), with one
-interpreter per thread, and explicit sharing of data.  The 5.005
-version (5005threads) is considered obsolete, buggy, and unmaintained.
-
-By default, Configure selects ithreads if -Dusethreads is specified.
-
-However, if you insist, you can select the unsupported old 5005threads behavior
-
-	sh Configure -Dusethreads -Duse5005threads
+Perl used to have two different internal threads implementations.  The current
+model (available internally since 5.6, and as a user-level module since 5.8) is
+called interpreter-based implementation (ithreads), with one interpreter per
+thread, and explicit sharing of data.  The (deprecated) 5.005 version
+(5005threads) has been removed for release 5.10.
 
 The 'threads' module is for use with the ithreads implementation.  The
-'Thread' module offers an interface to either 5005threads or ithreads
-(whichever has been configured).
+'Thread' module emulates the old 5005threads interface on top of the current
+ithreads model.
 
 When using threads, perl uses a dynamically-sized buffer for some of
 the thread-safe library calls, such as those in the getpw*() family.

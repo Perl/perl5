@@ -657,7 +657,7 @@ CORE_NOCFG_H	=		\
 		.\include\sys\socket.h	\
 		.\win32.h
 
-DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
+DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
 		Sys/Hostname
 

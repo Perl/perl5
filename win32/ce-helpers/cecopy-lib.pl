@@ -78,7 +78,6 @@ sub BEGIN {
     Switch.pm
     Symbol.pm
     Test.pm
-    Thread.pm
     UNIVERSAL.pm
     utf8.pm
     vars.pm

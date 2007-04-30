@@ -10,9 +10,9 @@ model, each thread runs in its own Perl interpreter, and any data sharing
 between threads must be explicit.  The user-level interface for I<ithreads>
 uses the L<threads> class.
 
-B<NOTE>: There is another older Perl threading flavor called the 5.005 model
-that used the L<Threads> class.  This old model is known to have problems, is
-deprecated, and support for it will be removed in release 5.10.  You are
+B<NOTE>: There was another older Perl threading flavor called the 5.005 model
+that used the L<Threads> class.  This old model was known to have problems, is
+deprecated, and was removed for release 5.10.  You are
 strongly encouraged to migrate any existing 5.005 threads code to the new
 model as soon as possible.
 

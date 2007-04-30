@@ -313,7 +313,6 @@ OPCODE_NLM	= $(AUTODIR)\Opcode\Opcode.NLM
 SDBM_FILE_NLM = $(AUTODIR)\SDBM_File\SDBM_File.NLM
 POSIX_NLM	= $(AUTODIR)\POSIX\POSIX.NLM
 ATTRS_NLM	= $(AUTODIR)\attrs\attrs.NLM
-THREAD_NLM	= $(AUTODIR)\Thread\Thread.NLM
 B_NLM		= $(AUTODIR)\B\B.NLM
 DUMPER_NLM	= $(AUTODIR)\Data\Dumper\Dumper.NLM
 PEEK_NLM	= $(AUTODIR)\Devel\Peek\Peek.NLM
@@ -340,7 +339,6 @@ EXTENSION_NLM	= 		\
 		$(ATTRS_NLM)	\
 		$(SDBM_FILE_NLM)	\
 		$(POSIX_NLM)	\
-		$(THREAD_NLM)	\
 		$(DUMPER_NLM)	\
 		$(GLOB_NLM)		\
 		$(PEEK_NLM)		\
@@ -792,7 +790,7 @@ CORE_H		= $(CORE_NOCFG_H) .\config.h
 DLL_OBJ		= $(DLL_SRC:.c=.obj)
 X2P_OBJ		= $(X2P_SRC:.c=.obj)
 
-DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
+DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
 		Storable/Storable List/Util MIME/Base64/Base64 XS/APItest/APItest \
 		XS/Typemap/Typemap Unicode/Normalize/Normalize Sys/Hostname
@@ -808,7 +806,6 @@ SDBM_FILE	= $(EXTDIR)\SDBM_File\SDBM_File
 IO			= $(EXTDIR)\IO\IO
 POSIX		= $(EXTDIR)\POSIX\POSIX
 ATTRS		= $(EXTDIR)\attrs\attrs
-THREAD		= $(EXTDIR)\Thread\Thread
 B			= $(EXTDIR)\B\B
 RE			= $(EXTDIR)\re\re
 DUMPER		= $(EXTDIR)\Data\Dumper\Dumper
@@ -836,7 +833,6 @@ EXTENSION_C	= 		\
 		$(IO).c		\
 		$(POSIX).c	\
 		$(ATTRS).c	\
-		$(THREAD).c	\
 		$(RE).c		\
 		$(DUMPER).c	\
 		$(PEEK).c	\
@@ -1232,12 +1228,6 @@ $(POSIX_NLM):
 	$(MAKE)
 	cd ..\..\netware
 
-$(THREAD_NLM):
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\netware
-
 $(ATTRS_NLM):
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
@@ -1420,7 +1410,6 @@ distclean: clean nwclean
 	-del /f /q $(LIBDIR)\File\Glob.pm
 	-del /f /q $(LIBDIR)\Unicode\Normalize.pm
 	-rmdir /s /q $(LIBDIR)\IO
-	-rmdir /s /q $(LIBDIR)\Thread
 	-rmdir /s /q $(LIBDIR)\B
 	-rmdir /s /q $(LIBDIR)\Data
 	-del /f /q $(PODDIR)\*.html
