@@ -10,7 +10,6 @@ BEGIN {
 }
 
 require './test.pl';
-use mro;
 
 plan(skip_all => "Your system has no SIGALRM") if !exists $SIG{ALRM};
 plan(tests => 8);

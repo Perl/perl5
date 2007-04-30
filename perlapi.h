@@ -668,6 +668,8 @@ END_EXTERN_C
 #define PL_defoutgv		(*Perl_Tdefoutgv_ptr(aTHX))
 #undef  PL_defstash
 #define PL_defstash		(*Perl_Tdefstash_ptr(aTHX))
+#undef  PL_delayedisa
+#define PL_delayedisa		(*Perl_Tdelayedisa_ptr(aTHX))
 #undef  PL_delaymagic
 #define PL_delaymagic		(*Perl_Tdelaymagic_ptr(aTHX))
 #undef  PL_dirty

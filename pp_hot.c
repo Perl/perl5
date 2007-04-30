@@ -1151,6 +1151,15 @@ PP(pp_aassign)
 	while (relem <= SP)
 	    *relem++ = (lelem <= lastlelem) ? *lelem++ : &PL_sv_undef;
     }
+
+    /* This is done at the bottom and in this order because
+       mro_isa_changed_in() can throw exceptions */
+    if(PL_delayedisa) {
+        HV* stash = PL_delayedisa;
+        PL_delayedisa = NULL;
+        mro_isa_changed_in(stash);
+    }
+
     RETURN;
 }
 

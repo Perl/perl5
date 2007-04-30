@@ -246,6 +246,39 @@ In simple cases, it is equivalent to:
 But there are some cases where only this solution
 works (like C<goto &maybe::next::method>);
 
+=head1 PERFORMANCE CONSIDERATIONS
+
+Specifying the mro type of a class before setting C<@ISA> will
+be faster than the other way around.  Also, making all of your
+C<@ISA> manipulations in a single assignment statement will be
+faster that doing them one by one via C<push> (which is what
+C<use base> does currently).
+
+Examples:
+
+  # The slowest way
+  package Foo;
+  use base qw/A B C/;
+  use mro 'c3';
+
+  # The fastest way
+  # (not exactly equivalent to above,
+  #   as base.pm can do other magic)
+  use mro 'c3';
+  use A ();
+  use B ();
+  use C ();
+  our @ISA = qw/A B C/;
+
+Generally speaking, every time C<@ISA> is modified, the MRO
+of that class will be recalculated, because of the way array
+magic works.  Pushing multiple items onto C<@ISA> in one push
+statement still counts as multiple modifications.  However,
+assigning a list to C<@ISA> only counts as a single
+modification.  Thus if you really need to do C<push> as
+opposed to assignment, C<@ISA = (@ISA, qw/A B C/);>
+will still be faster than C<push(@ISA, qw/A B C/);>
+
 =head1 SEE ALSO
 
 =head2 The original Dylan paper

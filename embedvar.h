@@ -55,6 +55,7 @@
 #define PL_curstash		(vTHX->Tcurstash)
 #define PL_defoutgv		(vTHX->Tdefoutgv)
 #define PL_defstash		(vTHX->Tdefstash)
+#define PL_delayedisa		(vTHX->Tdelayedisa)
 #define PL_delaymagic		(vTHX->Tdelaymagic)
 #define PL_dirty		(vTHX->Tdirty)
 #define PL_dumpindent		(vTHX->Tdumpindent)
@@ -661,6 +662,7 @@
 #define PL_Tcurstash		PL_curstash
 #define PL_Tdefoutgv		PL_defoutgv
 #define PL_Tdefstash		PL_defstash
+#define PL_Tdelayedisa		PL_delayedisa
 #define PL_Tdelaymagic		PL_delaymagic
 #define PL_Tdirty		PL_dirty
 #define PL_Tdumpindent		PL_dumpindent

@@ -1529,18 +1529,25 @@ int
 Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
+    HV* stash;
     PERL_UNUSED_ARG(sv);
+
+    /* Bail out if destruction is going on */
+    if(PL_dirty) return 0;
 
     /* The first case occurs via setisa,
        the second via setisa_elem, which
        calls this same magic */
-    mro_isa_changed_in(
-        GvSTASH(
-            SvTYPE(mg->mg_obj) == SVt_PVGV
-                ? (GV*)mg->mg_obj
-                : (GV*)SvMAGIC(mg->mg_obj)->mg_obj
-        )
+    stash = GvSTASH(
+        SvTYPE(mg->mg_obj) == SVt_PVGV
+            ? (GV*)mg->mg_obj
+            : (GV*)SvMAGIC(mg->mg_obj)->mg_obj
     );
+
+    if(PL_delaymagic)
+        PL_delayedisa = stash;
+    else
+        mro_isa_changed_in(stash);
 
     return 0;
 }
