@@ -117,8 +117,8 @@ typedef struct regexp_engine {
                      char* strbeg, I32 minend, SV* screamer,
                      void* data, U32 flags);
     char*   (*intuit) (pTHX_ REGEXP * const rx, SV *sv, char *strpos,
-                       char *strend, U32 flags,
-                       struct re_scream_pos_data_s *data);
+                       char *strend, const U32 flags,
+                       re_scream_pos_data *data);
     SV*     (*checkstr) (pTHX_ REGEXP * const rx);
     void    (*free) (pTHX_ REGEXP * const rx);
     void    (*numbered_buff_get) (pTHX_ REGEXP * const rx,

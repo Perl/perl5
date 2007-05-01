@@ -687,7 +687,7 @@ Ap	|REGEXP*|pregcomp	|NN const SV * const pattern|const U32 flags
 Ap	|REGEXP*|re_compile	|NN const SV * const pattern|const U32 flags
 Ap	|char*	|re_intuit_start|NN REGEXP * const rx|NULLOK SV* sv|NN char* strpos \
 				|NN char* strend|const U32 flags \
-				|NULLOK struct re_scream_pos_data_s *data
+				|NULLOK re_scream_pos_data *data
 Ap	|SV*	|re_intuit_string|NN REGEXP * const rx
 Ap	|I32	|regexec_flags	|NN REGEXP * const rx|NN char* stringarg \
 				|NN char* strend|NN char* strbeg|I32 minend \

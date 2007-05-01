@@ -373,7 +373,7 @@ Perl_pregexec(pTHX_ REGEXP * const prog, char* stringarg, register char *strend,
 
 char *
 Perl_re_intuit_start(pTHX_ REGEXP * const prog, SV *sv, char *strpos,
-		     char *strend, U32 flags, re_scream_pos_data *data)
+		     char *strend, const U32 flags, re_scream_pos_data *data)
 {
     dVAR;
     register I32 start_shift = 0;
