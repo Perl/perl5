@@ -797,6 +797,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     const I32 add = flags & ~GV_NOADD_MASK;
     const char *const name_end = nambeg + full_len;
     const char *const name_em1 = name_end - 1;
+    U32 faking_it;
 
     if (flags & GV_NOTQUAL) {
 	/* Caller promised that there is no stash, so we can skip the check. */
@@ -983,12 +984,19 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	return gv;
     }
 
-    /* Adding a new symbol */
+    /* Adding a new symbol.
+       Unless of course there was already something non-GV here, in which case
+       we want to behave as if there was always a GV here, containing some sort
+       of subroutine.
+       Otherwise we run the risk of creating things like GvIO, which can cause
+       subtle bugs. eg the one that tripped up SQL::Translator  */
+
+    faking_it = SvOK(gv);
 
     if (add & GV_ADDWARN && ckWARN_d(WARN_INTERNAL))
 	Perl_warner(aTHX_ packWARN(WARN_INTERNAL), "Had to create %s unexpectedly", nambeg);
     gv_init(gv, stash, name, len, add & GV_ADDMULTI);
-    gv_init_sv(gv, sv_type);
+    gv_init_sv(gv, faking_it ? SVt_PVCV : sv_type);
 
     if (isALPHA(name[0]) && ! (isLEXWARN_on ? ckWARN(WARN_ONCE)
 			                    : (PL_dowarn & G_WARN_ON ) ) )
