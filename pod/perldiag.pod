@@ -1690,6 +1690,11 @@ you which section of the Perl source code is distressed.
 (F) Your machine apparently doesn't implement fcntl().  What is this, a
 PDP-11 or something?
 
+=item FETCHSIZE returned a negative value
+
+(F) A tied array claimed to have a negative number of elements, which
+is not possible.
+
 =item Field too wide in 'u' format in pack
 
 (W pack) Each line in an uuencoded string start with a length indicator

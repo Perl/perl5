@@ -1667,19 +1667,21 @@ U32
 Perl_magic_sizepack(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR; dSP;
-    U32 retval = 0;
+    I32 retval = 0;
 
     ENTER;
     SAVETMPS;
     PUSHSTACKi(PERLSI_MAGIC);
     if (magic_methcall(sv, mg, "FETCHSIZE", G_SCALAR, 2, NULL)) {
 	sv = *PL_stack_sp--;
-	retval = (U32) SvIV(sv)-1;
+	retval = SvIV(sv)-1;
+	if (retval < -1)
+	    Perl_croak(aTHX_ "FETCHSIZE returned a negative value");
     }
     POPSTACK;
     FREETMPS;
     LEAVE;
-    return retval;
+    return (U32) retval;
 }
 
 int
