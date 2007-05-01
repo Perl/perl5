@@ -582,45 +582,53 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
     dVAR;
     register I32 paren;
     register I32 i;
-    register const REGEXP *rx;
-    I32 s1, t1;
+    register const REGEXP * rx;
+    const char * const remaining = mg->mg_ptr + 1;
 
     switch (*mg->mg_ptr) {
+    case '\020':		
+      if (*remaining == '\0') { /* ^P */
+          break;
+      } else if (strEQ(remaining, "REMATCH")) { /* $^PREMATCH */
+          goto do_prematch;
+      } else if (strEQ(remaining, "OSTMATCH")) { /* $^POSTMATCH */
+          goto do_postmatch;
+      }
+      break;
+    case '\015': /* $^MATCH */
+	if (strEQ(remaining, "ATCH")) {
+        goto do_match;
+    } else {
+        break;
+    }
+    case '`':
+      do_prematch:
+      paren = -2;
+      goto maybegetparen;
+    case '\'':
+      do_postmatch:
+      paren = -1;
+      goto maybegetparen;
+    case '&':
+      do_match:
+      paren = 0;
+      goto maybegetparen;
     case '1': case '2': case '3': case '4':
-    case '5': case '6': case '7': case '8': case '9': case '&':
+    case '5': case '6': case '7': case '8': case '9':
+      paren = atoi(mg->mg_ptr);
+    maybegetparen:
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
+      getparen:
+        i = CALLREG_NUMBUF_LENGTH((REGEXP * const)rx, sv, paren);
 
-	    paren = atoi(mg->mg_ptr); /* $& is in [0] */
-	  getparen:
-	    if (paren <= (I32)rx->nparens &&
-		(s1 = rx->offs[paren].start) != -1 &&
-		(t1 = rx->offs[paren].end) != -1)
-	    {
-		i = t1 - s1;
-	      getlen:
-		if (i > 0 && RX_MATCH_UTF8(rx)) {
-		    const char * const s = rx->subbeg + s1;
-		    const U8 *ep;
-		    STRLEN el;
-
-                    i = t1 - s1;
-		    if (is_utf8_string_loclen((U8*)s, i, &ep, &el))
-			i = el;
-		}
 		if (i < 0)
 		    Perl_croak(aTHX_ "panic: magic_len: %"IVdf, (IV)i);
 		return i;
-	    }
-	    else {
+	} else {
 		if (ckWARN(WARN_UNINITIALIZED))
 		    report_uninit(sv);
-	    }
+		return 0;
 	}
-	else {
-	    if (ckWARN(WARN_UNINITIALIZED))
-		report_uninit(sv);
-	}
-	return 0;
     case '+':
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	    paren = rx->lastparen;
@@ -633,30 +641,6 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 	    paren = rx->lastcloseparen;
 	    if (paren)
 		goto getparen;
-	}
-	return 0;
-    case '`':
-	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	    if (rx->offs[0].start != -1) {
-		i = rx->offs[0].start;
-		if (i > 0) {
-		    s1 = 0;
-		    t1 = i;
-		    goto getlen;
-		}
-	    }
-	}
-	return 0;
-    case '\'':
-	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	    if (rx->offs[0].end != -1) {
-		i = rx->sublen - rx->offs[0].end;
-		if (i > 0) {
-		    s1 = rx->offs[0].end;
-		    t1 = rx->sublen;
-		    goto getlen;
-		}
-	    }
 	}
 	return 0;
     }
@@ -896,7 +880,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		 * XXX Does the new way break anything?
 		 */
 		paren = atoi(mg->mg_ptr); /* $& is in [0] */
-		CALLREG_NUMBUF(rx,paren,sv);
+		CALLREG_NUMBUF_FETCH(rx,paren,sv);
 		break;
 	    }
 	    sv_setsv(sv,&PL_sv_undef);
@@ -905,7 +889,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '+':
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	    if (rx->lastparen) {
-	        CALLREG_NUMBUF(rx,rx->lastparen,sv);
+	        CALLREG_NUMBUF_FETCH(rx,rx->lastparen,sv);
 	        break;
 	    }
 	}
@@ -914,7 +898,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '\016':		/* ^N */
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	    if (rx->lastcloseparen) {
-	        CALLREG_NUMBUF(rx,rx->lastcloseparen,sv);
+	        CALLREG_NUMBUF_FETCH(rx,rx->lastcloseparen,sv);
 	        break;
 	    }
 
@@ -924,7 +908,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '`':
       do_prematch_fetch:
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	    CALLREG_NUMBUF(rx,-2,sv);
+	    CALLREG_NUMBUF_FETCH(rx,-2,sv);
 	    break;
 	}
 	sv_setsv(sv,&PL_sv_undef);
@@ -932,7 +916,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '\'':
       do_postmatch_fetch:
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	    CALLREG_NUMBUF(rx,-1,sv);
+	    CALLREG_NUMBUF_FETCH(rx,-1,sv);
 	    break;
 	}
 	sv_setsv(sv,&PL_sv_undef);
@@ -2234,9 +2218,42 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
     register const char *s;
+    register I32 paren;
+    register const REGEXP * rx;
+    const char * const remaining = mg->mg_ptr + 1;
     I32 i;
     STRLEN len;
+
     switch (*mg->mg_ptr) {
+    case '\015': /* $^MATCH */
+      if (strEQ(remaining, "ATCH"))
+          goto do_match;
+    case '`': /* ${^PREMATCH} caught below */
+      do_prematch:
+      paren = -2;
+      goto setparen;
+    case '\'': /* ${^POSTMATCH} caught below */
+      do_postmatch:
+      paren = -1;
+      goto setparen;
+    case '&':
+      do_match:
+      paren = 0;
+      goto setparen;
+    case '1': case '2': case '3': case '4':
+    case '5': case '6': case '7': case '8': case '9':
+      setparen:
+	    if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
+            CALLREG_NUMBUF_STORE((REGEXP * const)rx,paren,sv);
+            break;
+	    } else {
+            /* Croak with a READONLY error when a numbered match var is
+             * set without a previous pattern match. Unless it's C<local $1>
+             */
+            if (!PL_localizing) {
+                Perl_croak(aTHX_ PL_no_modify);
+            }
+        }
     case '\001':	/* ^A */
 	sv_setsv(PL_bodytarget, sv);
 	break;
@@ -2335,10 +2352,16 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
     case '\020':	/* ^P */
-	PL_perldb = SvIV(sv);
-	if (PL_perldb && !PL_DBsingle)
-	    init_debugger();
-	break;
+      if (*remaining == '\0') { /* ^P */
+          PL_perldb = SvIV(sv);
+          if (PL_perldb && !PL_DBsingle)
+              init_debugger();
+          break;
+      } else if (strEQ(remaining, "REMATCH")) { /* $^PREMATCH */
+          goto do_prematch;
+      } else if (strEQ(remaining, "OSTMATCH")) { /* $^POSTMATCH */
+          goto do_postmatch;
+      }
     case '\024':	/* ^T */
 #ifdef BIG_TIME
 	PL_basetime = (Time_t)(SvNOK(sv) ? SvNVX(sv) : sv_2nv(sv));

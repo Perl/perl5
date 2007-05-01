@@ -694,8 +694,12 @@ Ap	|I32	|regexec_flags	|NN REGEXP * const rx|NN char* stringarg \
 				|NN SV* screamer|NULLOK void* data|U32 flags
 ApR	|regnode*|regnext	|NN regnode* p
 
-EXp	|SV*|reg_named_buff_get	|NN REGEXP * const rx|NN SV * const namesv|const U32 flags
-EXp	|void|reg_numbered_buff_get|NN REGEXP * const rx|const I32 paren|NULLOK SV * const usesv
+EXp	|SV*|reg_named_buff_fetch	|NN REGEXP * const rx|NN SV * const key|const U32 flags
+
+EXp	|void|reg_numbered_buff_fetch|NN REGEXP * const rx|const I32 paren|NULLOK SV * const sv
+EXp	|void|reg_numbered_buff_store|NN REGEXP * const rx|const I32 paren|NULLOK SV const * const value
+EXp	|I32|reg_numbered_buff_length|NN REGEXP * const rx|NN const SV * const sv|const I32 paren
+
 EXp	|SV*|reg_qr_package|NN REGEXP * const rx
 
 Ep	|void	|regprop	|NULLOK const regexp *prog|NN SV* sv|NN const regnode* o

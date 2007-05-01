@@ -405,8 +405,10 @@ Perl_re_intuit_start
 Perl_re_intuit_string
 Perl_regexec_flags
 Perl_regnext
-Perl_reg_named_buff_get
-Perl_reg_numbered_buff_get
+Perl_reg_named_buff_fetch
+Perl_reg_numbered_buff_fetch
+Perl_reg_numbered_buff_store
+Perl_reg_numbered_buff_length
 Perl_reg_qr_package
 Perl_repeatcpy
 Perl_rninstr

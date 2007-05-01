@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 118;
+plan tests => 117;
 
 my $Is_EBCDIC = (ord('i') == 0x89 & ord('J') == 0xd1);
 
@@ -162,10 +162,6 @@ is($_, '...d.f...j.l...p');
 eval "tr/m-d/ /";
 like($@, qr/^Invalid range "m-d" in transliteration operator/,
               'reversed range check');
-
-eval '$1 =~ tr/x/y/';
-like($@, qr/^Modification of a read-only value attempted/,
-              'cannot update read-only var');
 
 'abcdef' =~ /(bcd)/;
 is(eval '$1 =~ tr/abcd//', 3,  'explicit read-only count');

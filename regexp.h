@@ -121,14 +121,18 @@ typedef struct regexp_engine {
                        re_scream_pos_data *data);
     SV*     (*checkstr) (pTHX_ REGEXP * const rx);
     void    (*free) (pTHX_ REGEXP * const rx);
-    void    (*numbered_buff_get) (pTHX_ REGEXP * const rx,
-                const I32 paren, SV * const usesv);
-    SV*     (*named_buff_get)(pTHX_ REGEXP * const rx, SV * const namesv,
-                const U32 flags);
+    void    (*numbered_buff_FETCH) (pTHX_ REGEXP * const rx, const I32 paren,
+                             SV * const sv);
+    void    (*numbered_buff_STORE) (pTHX_ REGEXP * const rx, const I32 paren,
+                                   SV const * const value);
+    I32     (*numbered_buff_LENGTH) (pTHX_ REGEXP * const rx, const SV * const sv,
+                                    const I32 paren);
+    SV*     (*named_buff_FETCH) (pTHX_ REGEXP * const rx, SV * const key,
+                                 const U32 flags);
     SV*     (*qr_package)(pTHX_ REGEXP * const rx);
 #ifdef USE_ITHREADS
     void*   (*dupe) (pTHX_ REGEXP * const rx, CLONE_PARAMS *param);
-#endif    
+#endif
 } regexp_engine;
 
 /* Flags stored in regexp->extflags 

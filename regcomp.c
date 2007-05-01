@@ -4796,7 +4796,7 @@ reStudy:
 
 
 SV*
-Perl_reg_named_buff_get(pTHX_ REGEXP * const rx, SV * const namesv, const U32 flags)
+Perl_reg_named_buff_fetch(pTHX_ REGEXP * const rx, SV * const namesv, const U32 flags)
 {
     AV *retarray = NULL;
     SV *ret;
@@ -4815,7 +4815,7 @@ Perl_reg_named_buff_get(pTHX_ REGEXP * const rx, SV * const namesv, const U32 fl
 			&& rx->offs[nums[i]].end != -1)
                 {
                     ret = newSVpvs("");
-                    CALLREG_NUMBUF(rx,nums[i],ret);
+                    CALLREG_NUMBUF_FETCH(rx,nums[i],ret);
                     if (!retarray)
                         return ret;
                 } else {
@@ -4834,7 +4834,7 @@ Perl_reg_named_buff_get(pTHX_ REGEXP * const rx, SV * const namesv, const U32 fl
 }
 
 void
-Perl_reg_numbered_buff_get(pTHX_ REGEXP * const rx, const I32 paren, SV * const sv)
+Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const rx, const I32 paren, SV * const sv)
 {
     char *s = NULL;
     I32 i = 0;
@@ -4906,6 +4906,73 @@ Perl_reg_numbered_buff_get(pTHX_ REGEXP * const rx, const I32 paren, SV * const 
         sv_setsv(sv,&PL_sv_undef);
         return;
     }
+}
+
+void
+Perl_reg_numbered_buff_store(pTHX_ REGEXP * const rx, const I32 paren,
+							 SV const * const value)
+{
+    PERL_UNUSED_ARG(rx);
+    PERL_UNUSED_ARG(paren);
+    PERL_UNUSED_ARG(value);
+
+    if (!PL_localizing)
+        Perl_croak(aTHX_ PL_no_modify);
+}
+
+I32
+Perl_reg_numbered_buff_length(pTHX_ REGEXP * const rx, const SV * const sv,
+                              const I32 paren)
+{
+    I32 i;
+    I32 s1, t1;
+
+    /* Some of this code was originally in C<Perl_magic_len> in F<mg.c> */
+	switch (paren) {
+      case -2: /* $` */
+        if (rx->offs[0].start != -1) {
+			i = rx->offs[0].start;
+			if (i > 0) {
+				s1 = 0;
+				t1 = i;
+				goto getlen;
+			}
+	    }
+        return 0;
+      case -1: /* $' */
+	    if (rx->offs[0].end != -1) {
+			i = rx->sublen - rx->offs[0].end;
+			if (i > 0) {
+				s1 = rx->offs[0].end;
+				t1 = rx->sublen;
+				goto getlen;
+			}
+	    }
+        return 0;
+      default: /* $&, $1, $2, ... */
+	    if (paren <= (I32)rx->nparens &&
+            (s1 = rx->offs[paren].start) != -1 &&
+            (t1 = rx->offs[paren].end) != -1)
+	    {
+            i = t1 - s1;
+            goto getlen;
+        } else {
+            if (ckWARN(WARN_UNINITIALIZED))
+                report_uninit((SV*)sv);
+            return 0;
+        }
+    }
+  getlen:
+    if (i > 0 && RX_MATCH_UTF8(rx)) {
+        const char * const s = rx->subbeg + s1;
+        const U8 *ep;
+        STRLEN el;
+
+        i = t1 - s1;
+        if (is_utf8_string_loclen((U8*)s, i, &ep, &el))
+			i = el;
+    }
+    return i;
 }
 
 SV*

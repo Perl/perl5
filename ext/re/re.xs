@@ -22,10 +22,16 @@ extern char*	my_re_intuit_start (pTHX_ REGEXP * const prog, SV *sv, char *strpos
 extern SV*	my_re_intuit_string (pTHX_ REGEXP * const prog);
 
 extern void	my_regfree (pTHX_ REGEXP * const r);
-extern void my_reg_numbered_buff_get(pTHX_ REGEXP * const rx, const I32 paren,
+
+extern void my_reg_numbered_buff_fetch(pTHX_ REGEXP * const rx, const I32 paren,
                                      SV * const usesv);
-extern SV*      my_reg_named_buff_get(pTHX_ REGEXP * const rx, SV * const namesv,
+extern void my_reg_numbered_buff_store(pTHX_ REGEXP * const rx, const I32 paren,
+                                       SV const * const value);
+extern I32 my_reg_numbered_buff_length(pTHX_ REGEXP * const rx, const I32 paren);
+
+extern SV* my_reg_named_buff_fetch(pTHX_ REGEXP * const rx, SV * const key,
                                       const U32 flags);
+
 extern SV*      my_reg_qr_package(pTHX_ REGEXP * const rx);
 #if defined(USE_ITHREADS)
 extern void*	my_regdupe (pTHX_ REGEXP * const r, CLONE_PARAMS *param);
@@ -41,8 +47,10 @@ const struct regexp_engine my_reg_engine = {
         my_re_intuit_start, 
         my_re_intuit_string, 
         my_regfree, 
-        my_reg_numbered_buff_get,
-        my_reg_named_buff_get,
+        my_reg_numbered_buff_fetch,
+        my_reg_numbered_buff_store,
+        my_reg_numbered_buff_length,
+        my_reg_named_buff_fetch,
         my_reg_qr_package,
 #if defined(USE_ITHREADS)
         my_regdupe 

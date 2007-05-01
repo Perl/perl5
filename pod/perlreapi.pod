@@ -11,22 +11,25 @@ structure of the following format:
     typedef struct regexp_engine {
         REGEXP* (*comp) (pTHX_ const SV * const pattern, const U32 flags);
         I32     (*exec) (pTHX_ REGEXP * const rx, char* stringarg, char* strend,
-                    char* strbeg, I32 minend, SV* screamer,
-                    void* data, U32 flags);
+                         char* strbeg, I32 minend, SV* screamer,
+                         void* data, U32 flags);
         char*   (*intuit) (pTHX_ REGEXP * const rx, SV *sv, char *strpos,
-                    char *strend, U32 flags,
-                    struct re_scream_pos_data_s *data);
+                           char *strend, U32 flags,
+                           struct re_scream_pos_data_s *data);
         SV*     (*checkstr) (pTHX_ REGEXP * const rx);
         void    (*free) (pTHX_ REGEXP * const rx);
-        void    (*numbered_buff_get) (pTHX_ REGEXP * const rx,
-                    const I32 paren, SV * const usesv);
-        SV*     (*named_buff_get)(pTHX_ REGEXP * const rx, SV * const namesv,
-                    const U32 flags);
+        void    (*numbered_buff_FETCH) (pTHX_ REGEXP * const rx, const I32 paren,
+                                 SV * const sv);
+        void    (*numbered_buff_STORE) (pTHX_ REGEXP * const rx, const I32 paren,
+                                       SV const * const value);
+        I32     (*numbered_buff_LENGTH) (pTHX_ REGEXP * const rx, const SV * const sv,
+                                        const I32 paren);
+        SV*     (*named_buff_FETCH) (pTHX_ REGEXP * const rx, SV * const sv,
+                                     const U32 flags);
         SV*     (*qr_package)(pTHX_ REGEXP * const rx);
     #ifdef USE_ITHREADS
         void*   (*dupe) (pTHX_ REGEXP * const rx, CLONE_PARAMS *param);
     #endif
-    } regexp_engine;
 
 When a regexp is compiled, its C<engine> field is then set to point at
 the appropriate structure so that when it needs to be used Perl can find
@@ -183,10 +186,10 @@ can release any resources pointed to by the C<pprivate> member of the
 regexp structure. This is only responsible for freeing private data;
 perl will handle releasing anything else contained in the regexp structure.
 
-=head2 numbered_buff_get
+=head2 numbered_buff_FETCH
 
-    void numbered_buff_get(pTHX_ REGEXP * const rx, const I32 paren,
-                           SV * const usesv);
+    void numbered_buff_FETCH(pTHX_ REGEXP * const rx, const I32 paren,
+                             SV * const sv);
 
 Called to get the value of C<$`>, C<$'>, C<$&> (and their named
 equivalents, see L<perlvar>) and the numbered capture buffers (C<$1>,
@@ -195,10 +198,10 @@ C<$2>, ...).
 The C<paren> paramater will be C<-2> for C<$`>, C<-1> for C<$'>, C<0>
 for C<$&>, C<1> for C<$1> and so forth.
 
-C<usesv> should be set to the scalar to return, the scalar is passed
-as an argument rather than being returned from the function because
-when it's called perl already has a scalar to store the value,
-creating another one would be redundant. The scalar can be set with
+C<sv> should be set to the scalar to return, the scalar is passed as
+an argument rather than being returned from the function because when
+it's called perl already has a scalar to store the value, creating
+another one would be redundant. The scalar can be set with
 C<sv_setsv>, C<sv_setpvn> and friends, see L<perlapi>.
 
 This callback is where perl untaints its own capture variables under
@@ -206,14 +209,89 @@ taint mode (see L<perlsec>). See the C<Perl_reg_numbered_buff_get>
 function in F<regcomp.c> for how to untaint capture variables if
 that's something you'd like your engine to do as well.
 
-=head2 named_buff_get
+=head2 numbered_buff_STORE
 
-    SV* named_buff_get(pTHX_ REGEXP * const rx, SV * const namesv,
-                       const U32 flags);
+    void    (*numbered_buff_STORE) (pTHX_ REGEXP * const rx, const I32 paren,
+                                    SV const * const value);
 
-Called to get the value of key in the C<%+> and C<%-> hashes,
-C<namesv> is the hash key being requested and if C<flags & 1> is true
-C<%-> is being requested (and C<%+> if it's not).
+Called to set the value of a numbered capture variable. C<paren> is
+the paren number (see the L<mapping|/numbered_buff_FETCH> above) and
+C<value> is the scalar that is to be used as the new value. It's up to
+the engine to make sure this is used as the new value (or reject it).
+
+Example:
+
+    if ("ook" =~ /(o*)/) {
+        # `paren' will be `1' and `value' will be `ee'
+        $1 =~ tr/o/e/;
+    }
+
+Perl's own engine will croak on any attempt to modify the capture
+variables, to do this in another engine use the following callack
+(copied from C<Perl_reg_numbered_buff_store>):
+
+    void
+    Example_reg_numbered_buff_store(pTHX_ REGEXP * const rx, const I32 paren,
+    							    SV const * const value)
+    {
+        PERL_UNUSED_ARG(rx);
+        PERL_UNUSED_ARG(paren);
+        PERL_UNUSED_ARG(value);
+
+        if (!PL_localizing)
+            Perl_croak(aTHX_ PL_no_modify);
+    }
+
+Actually perl 5.10 will not I<always> croak in a statement that looks
+like it would modify a numbered capture variable. This is because the
+STORE callback will not be called if perl can determine that it
+doesn't have to modify the value. This is exactly how tied variables
+behave in the same situation:
+
+    package CaptureVar;
+    use base 'Tie::Scalar';
+
+    sub TIESCALAR { bless [] }
+    sub FETCH { undef }
+    sub STORE { die "This doesn't get called" }
+
+    package main;
+
+    tie my $sv => "CatptureVar";
+    $sv =~ y/a/b/;
+
+Because C<$sv> is C<undef> when the C<y///> operator is applied to it
+the transliteration won't actually execute and the program won't
+C<die>. This is different to how 5.8 behaved since the capture
+variables were READONLY variables then, now they'll just die on
+assignment in the default engine.
+
+=head2 numbered_buff_LENGTH
+
+    I32 numbered_buff_LENGTH (pTHX_ REGEXP * const rx, const SV * const sv,
+                              const I32 paren);
+
+Get the C<length> of a capture variable. There's a special callback
+for this so that perl doesn't have to do a FETCH and run C<length> on
+the result, since the length is (in perl's case) known from a memory
+offset this is much more efficient:
+
+    I32 s1  = rx->offs[paren].start;
+    I32 s2  = rx->offs[paren].end;
+    I32 len = t1 - s1;
+
+This is a little bit more complex in the case of UTF-8, see what
+C<Perl_reg_numbered_buff_length> does with
+L<is_utf8_string_loclen|perlapi/is_utf8_string_loclen>.
+
+=head2 named_buff_FETCH
+
+    SV* named_buff_FETCH(pTHX_ REGEXP * const rx, SV * const key,
+                          const U32 flags);
+
+Called to get the value of key in the C<%+> and C<%-> hashes, C<key>
+is the hash key being requested and if C<flags & 1> is true C<%-> is
+being requested (and C<%+> if it's not).
 
 =head2 qr_package
 

@@ -1127,14 +1127,14 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		break;
             case '\015':        /* $^MATCH */
                 if (strEQ(name2, "ATCH"))
-		    goto ro_magicalize;
+		    goto magicalize;
 	    case '\017':	/* $^OPEN */
 		if (strEQ(name2, "PEN"))
 		    goto magicalize;
 		break;
 	    case '\020':        /* $^PREMATCH  $^POSTMATCH */
 	        if (strEQ(name2, "REMATCH") || strEQ(name2, "OSTMATCH"))
-		    goto ro_magicalize;  
+		    goto magicalize;  
 	    case '\024':	/* ${^TAINT} */
 		if (strEQ(name2, "AINT"))
 		    goto ro_magicalize;
@@ -1161,14 +1161,14 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    case '8':
 	    case '9':
 	    {
-		/* ensures variable is only digits */
-		/* ${"1foo"} fails this test (and is thus writeable) */
-		/* added by japhy, but borrowed from is_gv_magical */
+		/* Ensures that we have an all-digit variable, ${"1foo"} fails
+		   this test  */
+		/* This snippet is taken from is_gv_magical */
 		const char *end = name + len;
 		while (--end > name) {
-		    if (!isDIGIT(*end)) return gv;
+		    if (!isDIGIT(*end))	return gv;
 		}
-		goto ro_magicalize;
+		goto magicalize;
 	    }
 	    }
 	}
@@ -1187,7 +1187,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		sv_type == SVt_PVIO
 		) { break; }
 	    PL_sawampersand = TRUE;
-	    goto ro_magicalize;
+	    goto magicalize;
 
 	case ':':
 	    sv_setpv(GvSVn(gv),PL_chopset);
@@ -1245,6 +1245,9 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    }
 	    goto magicalize;
 	case '\023':	/* $^S */
+	ro_magicalize:
+	    SvREADONLY_on(GvSVn(gv));
+	    /* FALL THROUGH */
 	case '1':
 	case '2':
 	case '3':
@@ -1254,9 +1257,6 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	case '7':
 	case '8':
 	case '9':
-	ro_magicalize:
-	    SvREADONLY_on(GvSVn(gv));
-	    /* FALL THROUGH */
 	case '[':
 	case '^':
 	case '~':

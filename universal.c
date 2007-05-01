@@ -1101,7 +1101,7 @@ XS(XS_re_regname)
 	}
         {
             if (SvPOK(sv) && re && re->paren_names) {
-                bufs = CALLREG_NAMEDBUF(re,sv,all && SvTRUE(all));
+                bufs = CALLREG_NAMEDBUF_FETCH(re,sv,all && SvTRUE(all));
                 if (bufs) {
                     if (all && SvTRUE(all))
                         XPUSHs(newRV(bufs));

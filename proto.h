@@ -1893,12 +1893,21 @@ PERL_CALLCONV regnode*	Perl_regnext(pTHX_ regnode* p)
 			__attribute__nonnull__(pTHX_1);
 
 
-PERL_CALLCONV SV*	Perl_reg_named_buff_get(pTHX_ REGEXP * const rx, SV * const namesv, const U32 flags)
+PERL_CALLCONV SV*	Perl_reg_named_buff_fetch(pTHX_ REGEXP * const rx, SV * const namesv, const U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV void	Perl_reg_numbered_buff_get(pTHX_ REGEXP * const rx, const I32 paren, SV * const usesv)
+
+PERL_CALLCONV void	Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const rx, const I32 paren, SV * const sv)
 			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV void	Perl_reg_numbered_buff_store(pTHX_ REGEXP * const rx, const I32 paren, SV const * const value)
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV I32	Perl_reg_numbered_buff_length(pTHX_ REGEXP * const rx, const SV * const sv, const I32 paren)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
 
 PERL_CALLCONV SV*	Perl_reg_qr_package(pTHX_ REGEXP * const rx)
 			__attribute__nonnull__(pTHX_1);

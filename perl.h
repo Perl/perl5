@@ -219,11 +219,17 @@
 #define CALLREGFREE_PVT(prog) \
     if(prog) CALL_FPTR((prog)->engine->free)(aTHX_ (prog))
 
-#define CALLREG_NUMBUF(rx,paren,usesv) \
-    CALL_FPTR((rx)->engine->numbered_buff_get)(aTHX_ (rx),(paren),(usesv))
+#define CALLREG_NUMBUF_FETCH(rx,paren,usesv)                                \
+    CALL_FPTR((rx)->engine->numbered_buff_FETCH)(aTHX_ (rx),(paren),(usesv))
 
-#define CALLREG_NAMEDBUF(rx,name,flags) \
-    CALL_FPTR((rx)->engine->named_buff_get)(aTHX_ (rx),(name),(flags))
+#define CALLREG_NUMBUF_STORE(rx,paren,value) \
+    CALL_FPTR((rx)->engine->numbered_buff_STORE)(aTHX_ (rx),(paren),(value))
+
+#define CALLREG_NUMBUF_LENGTH(rx,sv,paren)                              \
+    CALL_FPTR((rx)->engine->numbered_buff_LENGTH)(aTHX_ (rx),(sv),(paren))
+
+#define CALLREG_NAMEDBUF_FETCH(rx,name,flags) \
+    CALL_FPTR((rx)->engine->named_buff_FETCH)(aTHX_ (rx),(name),(flags))
 
 #define CALLREG_PACKAGE(rx) \
     CALL_FPTR((rx)->engine->qr_package)(aTHX_ (rx))
