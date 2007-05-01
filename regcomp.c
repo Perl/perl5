@@ -6575,9 +6575,9 @@ tryagain:
     case 0xDF:
     case 0xC3:
     case 0xCE:
-        if (FOLD) {
+        if (!LOC && FOLD) {
             U32 len,cp;
-            if (cp = what_len_TRICKYFOLD_safe(RExC_parse,RExC_end,UTF,len)) {
+            if ((cp = what_len_TRICKYFOLD_safe(RExC_parse,RExC_end,UTF,len))) {
                 *flagp |= HASWIDTH; /* could be SIMPLE too, but needs a handler in regexec.regrepeat */
                 RExC_parse+=len-1; /* we get one from nextchar() as well. :-( */
                 ret = reganode(pRExC_state, FOLDCHAR, cp);
@@ -6887,7 +6887,7 @@ tryagain:
 		case 0xDF:
 		case 0xC3:
 		case 0xCE:
-		           if (!FOLD || !is_TRICKYFOLD_safe(p,RExC_end,UTF))
+		           if (LOC || !FOLD || !is_TRICKYFOLD_safe(p,RExC_end,UTF))
 		                goto normal_default;
 		case '^':
 		case '$':
