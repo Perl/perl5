@@ -187,11 +187,12 @@ sub SWASHNEW {
 	    ## (exception: user-defined properties and mappings), so we
 	    ## have a filename, so now we load it if we haven't already.
 	    ## If we have, return the cached results. The cache key is the
-	    ## file to load.
+	    ## class and file to load.
 	    ##
-	    if ($Cache{$file} and ref($Cache{$file}) eq $class) {
+	    my $found = $Cache{$class, $file};
+	    if ($found and ref($found) eq $class) {
 		print STDERR "Returning cached '$file' for \\p{$type}\n" if DEBUG;
-		return $Cache{$class, $file};
+		return $found;
 	    }
 
 	    $list = do $file; die $@ if $@;

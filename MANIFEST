@@ -3849,6 +3849,7 @@ t/run/switchx.t			Test the -x switch
 t/TEST				The regression tester
 t/TestInit.pm			Preamble library for core tests
 t/test.pl			Simple testing library
+t/uni/cache.t			See if Unicode swash caching works
 t/uni/case.pl			See if Unicode casing works
 t/uni/chomp.t			See if Unicode chomp works
 t/uni/chr.t			See if Unicode chr works
