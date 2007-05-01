@@ -47,7 +47,7 @@ $Cwd = abs_path;
 
 SKIP: {
     skip("no fchdir", 16) unless $has_fchdir;
-    my $has_dirfd = ($Config{d_dirfd} || "") eq "define";
+    my $has_dirfd = ($Config{d_dirfd} || $Config{d_dir_dd_fd} || "") eq "define";
     ok(opendir(my $dh, "."), "opendir .");
     ok(open(my $fh, "<", "op"), "open op");
     ok(chdir($fh), "fchdir op");
@@ -83,7 +83,7 @@ SKIP: {
 	ok(opendir(H, "op"), "opendir op") or diag $!;
 	ok(open(H, "<", "base"), "open base") or diag $!;
     }
-    if (($Config{d_dirfd} || "") eq "define") {
+    if ($has_dirfd) {
 	ok(chdir(H), "fchdir to op");
 	ok(-f "chdir.t", "verify that we are in 'op'");
 	chdir ".." or die $!;
