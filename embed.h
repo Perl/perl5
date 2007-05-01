@@ -1582,6 +1582,7 @@
 #define sv_copypv		Perl_sv_copypv
 #define my_atof2		Perl_my_atof2
 #define my_socketpair		Perl_my_socketpair
+#define my_dirfd		Perl_my_dirfd
 #ifdef PERL_OLD_COPY_ON_WRITE
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define sv_setsv_cow		Perl_sv_setsv_cow
@@ -3853,6 +3854,7 @@
 #define sv_copypv(a,b)		Perl_sv_copypv(aTHX_ a,b)
 #define my_atof2(a,b)		Perl_my_atof2(aTHX_ a,b)
 #define my_socketpair		Perl_my_socketpair
+#define my_dirfd		Perl_my_dirfd
 #ifdef PERL_OLD_COPY_ON_WRITE
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define sv_setsv_cow(a,b)	Perl_sv_setsv_cow(aTHX_ a,b)

@@ -694,6 +694,7 @@ Perl_sv_pvn_force_flags
 Perl_sv_copypv
 Perl_my_atof2
 Perl_my_socketpair
+Perl_my_dirfd
 Perl_sv_setsv_cow
 Perl_PerlIO_context_layers
 Perl_PerlIO_close

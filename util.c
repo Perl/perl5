@@ -5807,6 +5807,23 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
     }
 }
 
+int
+Perl_my_dirfd(DIR * dir) {
+
+    /* Most dirfd implementations have problems when passed NULL. */
+    if(!dir)
+        return -1;
+#ifdef HAS_DIRFD
+    return dirfd(dir);
+#elif defined(HAS_DIR_DD_FD)
+    return dir->dd_fd;
+#else
+    Perl_die(aTHX_ PL_no_func, "dirfd");
+   /* NOT REACHED */
+    return 0;
+#endif 
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd

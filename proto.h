@@ -4197,6 +4197,7 @@ PERL_CALLCONV char*	Perl_my_atof2(pTHX_ const char *s, NV* value)
 			__attribute__nonnull__(pTHX_2);
 
 PERL_CALLCONV int	Perl_my_socketpair(int family, int type, int protocol, int fd[2]);
+PERL_CALLCONV int	Perl_my_dirfd(DIR* dir);
 #ifdef PERL_OLD_COPY_ON_WRITE
 PERL_CALLCONV SV*	Perl_sv_setsv_cow(pTHX_ SV* dsv, SV* ssv)
 			__attribute__nonnull__(pTHX_1)

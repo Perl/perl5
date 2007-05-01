@@ -1274,17 +1274,7 @@ Perl_my_stat(pTHX)
 	    if (IoIFP(io)) {
 	        return (PL_laststatval = PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &PL_statcache));
             } else if (IoDIRP(io)) {
-#ifdef HAS_DIRFD
-                return (PL_laststatval = PerlLIO_fstat(dirfd(IoDIRP(io)), &PL_statcache));
-#else
-                Perl_die(aTHX_ PL_no_func, "dirfd");
-		/* NOT REACHED */
-		return 0;
-		/* Can't use NORETURN_FUNCTION_END because Perl_die is not
-		 *     __attribute__noreturn__
-		 * Can't use DIE because that does not return an integer
-		 */
-#endif
+                return (PL_laststatval = PerlLIO_fstat(my_dirfd(IoDIRP(io)), &PL_statcache));
             } else {
                 if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
                     report_evil_fh(gv, io, PL_op->op_type);

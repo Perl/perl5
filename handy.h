@@ -175,7 +175,7 @@ typedef U64TYPE U64;
 #endif
 
 /* HMB H.Merijn Brand - a placeholder for preparing Configure patches */
-#if defined(HAS_MALLOC_SIZE) && defined(LOCALTIME_R_NEEDS_TZSET) && defined(HAS_DIR_DD_FD) && defined(HAS_PSEUDOFORK)
+#if defined(HAS_MALLOC_SIZE) && defined(LOCALTIME_R_NEEDS_TZSET) && defined(HAS_PSEUDOFORK)
 /* Not (yet) used at top level, but mention them for metaconfig */
 #endif
 
