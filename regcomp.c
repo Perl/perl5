@@ -8866,10 +8866,7 @@ Perl_reg_temp_copy (pTHX_ struct regexp *r) {
     }
     RX_MATCH_COPIED_off(ret);
 #ifdef PERL_OLD_COPY_ON_WRITE
-    /* this is broken. */
-    assert(0); 
-    if (ret->saved_copy)
-        ret->saved_copy=NULL;
+    ret->saved_copy = NULL;
 #endif
     ret->mother_re = r; 
     ret->swap = NULL;
