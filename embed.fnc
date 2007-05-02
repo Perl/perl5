@@ -1585,7 +1585,7 @@ Apd	|char*	|sv_pvn_force_flags|NN SV* sv|NULLOK STRLEN* lp|I32 flags
 Apd	|void	|sv_copypv	|NN SV* dsv|NN SV* ssv
 Ap	|char*	|my_atof2	|NN const char *s|NN NV* value
 Apn	|int	|my_socketpair	|int family|int type|int protocol|int fd[2]
-Apn	|int	|my_dirfd	|NULLOK DIR* dir
+Ap	|int	|my_dirfd	|NULLOK DIR* dir
 #ifdef PERL_OLD_COPY_ON_WRITE
 pMXE	|SV*	|sv_setsv_cow	|NN SV* dsv|NN SV* ssv
 #endif

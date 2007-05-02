@@ -5808,7 +5808,7 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
 }
 
 int
-Perl_my_dirfd(DIR * dir) {
+Perl_my_dirfd(pTHX_ DIR * dir) {
 
     /* Most dirfd implementations have problems when passed NULL. */
     if(!dir)
