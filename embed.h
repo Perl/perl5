@@ -679,6 +679,8 @@
 #define pop_scope		Perl_pop_scope
 #ifdef PERL_CORE
 #define prepend_elem		Perl_prepend_elem
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define push_return		Perl_push_return
 #endif
 #define push_scope		Perl_push_scope
@@ -2797,6 +2799,8 @@
 #define pop_scope()		Perl_pop_scope(aTHX)
 #ifdef PERL_CORE
 #define prepend_elem(a,b,c)	Perl_prepend_elem(aTHX_ a,b,c)
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define push_return(a)		Perl_push_return(aTHX_ a)
 #endif
 #define push_scope()		Perl_push_scope(aTHX)

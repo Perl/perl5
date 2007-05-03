@@ -652,7 +652,7 @@ p	|OP*	|pmtrans	|NN OP* o|NN OP* expr|NN OP* repl
 p	|OP*	|pop_return
 Ap	|void	|pop_scope
 p	|OP*	|prepend_elem	|I32 optype|NULLOK OP* head|NULLOK OP* tail
-p	|void	|push_return	|NULLOK OP* o
+EXp	|void	|push_return	|NULLOK OP* o
 Ap	|void	|push_scope
 p	|OP*	|ref		|NULLOK OP* o|I32 type
 p	|OP*	|refkids	|NULLOK OP* o|I32 type
