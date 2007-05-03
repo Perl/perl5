@@ -318,8 +318,11 @@ sub _update_source {
 
         ### `touch` the file, so windoze knows it's new -jmb
         ### works on *nix too, good fix -Kane
-        utime ( $now, $now, File::Spec->catfile($path, $file) ) or
+        ### make sure it is writable first, otherwise the `touch` will fail
+        unless (chmod ( 0644, File::Spec->catfile($path, $file) ) &&
+                utime ( $now, $now, File::Spec->catfile($path, $file) )) {
             error( loc("Couldn't touch %1", $file) );
+        }
 
     }
     return 1;
