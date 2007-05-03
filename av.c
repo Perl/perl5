@@ -656,10 +656,9 @@ Perl_av_unshift(pTHX_ register AV *av, register I32 num)
     }
     if (num) {
 	register SV **ary;
-	I32 slide;
-	i = AvFILLp(av);
+	const I32 i = AvFILLp(av);
 	/* Create extra elements */
-	slide = i > 0 ? i : 0;
+	const I32 slide = i > 0 ? i : 0;
 	num += slide;
 	av_extend(av, i + num);
 	AvFILLp(av) += num;

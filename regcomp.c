@@ -6434,8 +6434,7 @@ S_reg_recode(pTHX_ const char value, SV **encp)
 {
     STRLEN numlen = 1;
     SV * const sv = sv_2mortal(newSVpvn(&value, numlen));
-    const char * const s = encp && *encp ? sv_recode_to_utf8(sv, *encp)
-					 : SvPVX(sv);
+    const char * const s = *encp ? sv_recode_to_utf8(sv, *encp) : SvPVX(sv);
     const STRLEN newlen = SvCUR(sv);
     UV uv = UNICODE_REPLACEMENT;
 
@@ -6446,8 +6445,7 @@ S_reg_recode(pTHX_ const char value, SV **encp)
 
     if (!newlen || numlen != newlen) {
 	uv = UNICODE_REPLACEMENT;
-	if (encp)
-	    *encp = NULL;
+	*encp = NULL;
     }
     return uv;
 }

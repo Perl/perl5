@@ -3650,7 +3650,9 @@ STATIC I32	S_regcurly(const char *)
 STATIC regnode*	S_reg_node(pTHX_ struct RExC_state_t *state, U8 op)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC UV	S_reg_recode(pTHX_ const char value, SV **encp);
+STATIC UV	S_reg_recode(pTHX_ const char value, SV **encp)
+			__attribute__nonnull__(pTHX_2);
+
 STATIC regnode*	S_regpiece(pTHX_ struct RExC_state_t *state, I32 *flagp, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);

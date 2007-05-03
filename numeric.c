@@ -953,10 +953,9 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 	else if (!seen_dp && GROK_NUMERIC_RADIX(&s, send)) {
 	    seen_dp = 1;
 	    if (sig_digits > MAX_SIG_DIGITS) {
-		++s;
-		while (isDIGIT(*s)) {
+		do {
 		    ++s;
-		}
+		} while (isDIGIT(*s));
 		break;
 	    }
 	}
