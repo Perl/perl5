@@ -174,6 +174,8 @@ PERLVAR(Tregmatch_state,	regmatch_state *)
 
 PERLVARI(Tdumpindent,	U16, 4)		/* # of blanks per dump indentation level */
 
+PERLVARI(Tdelayedisa,	HV*, NULL)      /* stash for PL_delaymagic for magic_setisa */
+
 /* Put anything new that is pointer aligned here. */
 
 PERLVAR(Tdelaymagic,	U16)		/* ($<,$>) = ... */
@@ -182,8 +184,10 @@ PERLVAR(Tcolorset,	bool)		/* from regcomp.c */
 PERLVARI(Tdirty,	bool, FALSE)	/* in the middle of tearing things down? */
 PERLVAR(Tin_eval,	VOL U8)	/* trap "fatal" errors? */
 PERLVAR(Ttainted,	bool)		/* using variables controlled by $< */
-PERLVARI(Tdelayedisa,	HV*, NULL)      /* stash for PL_delaymagic for magic_setisa */
 
-/* For historical reasons this file is followed by intrpvar.h in the interpeter
-   struct. As this file currently ends with 7 bytes of variables, intrpvar.h
-   starts with one single U8, to avoid structure padding space wastage.  */
+/* Put new things UP THERE ^^^  */
+
+/* For historical reasons this file is followed by intrpvar.h in the
+   interpreter struct. As this file currently ends with 7 bytes of variables,
+   intrpvar.h starts with one single U8, to avoid structure padding space
+   wastage.  */
