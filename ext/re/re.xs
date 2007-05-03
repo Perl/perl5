@@ -23,14 +23,15 @@ extern SV*	my_re_intuit_string (pTHX_ REGEXP * const prog);
 
 extern void	my_regfree (pTHX_ REGEXP * const r);
 
-extern void my_reg_numbered_buff_fetch(pTHX_ REGEXP * const rx, const I32 paren,
-                                     SV * const usesv);
-extern void my_reg_numbered_buff_store(pTHX_ REGEXP * const rx, const I32 paren,
-                                       SV const * const value);
-extern I32 my_reg_numbered_buff_length(pTHX_ REGEXP * const rx, const I32 paren);
+extern void	my_reg_numbered_buff_fetch(pTHX_ REGEXP * const rx, const I32 paren,
+					   SV * const usesv);
+extern void	my_reg_numbered_buff_store(pTHX_ REGEXP * const rx, const I32 paren,
+					   SV const * const value);
+extern I32	my_reg_numbered_buff_length(pTHX_ REGEXP * const rx,
+					    const SV * const sv, const I32 paren);
 
-extern SV* my_reg_named_buff_fetch(pTHX_ REGEXP * const rx, SV * const key,
-                                      const U32 flags);
+extern SV*	my_reg_named_buff_fetch(pTHX_ REGEXP * const rx, SV * const key,
+					const U32 flags);
 
 extern SV*      my_reg_qr_package(pTHX_ REGEXP * const rx);
 #if defined(USE_ITHREADS)

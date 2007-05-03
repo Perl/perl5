@@ -1893,7 +1893,7 @@ PERL_CALLCONV regnode*	Perl_regnext(pTHX_ regnode* p)
 			__attribute__nonnull__(pTHX_1);
 
 
-PERL_CALLCONV SV*	Perl_reg_named_buff_fetch(pTHX_ REGEXP * const rx, SV * const namesv, const U32 flags)
+PERL_CALLCONV SV*	Perl_reg_named_buff_fetch(pTHX_ REGEXP * const rx, SV * const key, const U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 

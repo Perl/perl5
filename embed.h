@@ -986,6 +986,8 @@
 #ifdef PERL_CORE
 #define get_hash_seed		Perl_get_hash_seed
 #define report_evil_fh		Perl_report_evil_fh
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define report_uninit		Perl_report_uninit
 #endif
 #define warn			Perl_warn
@@ -3256,6 +3258,8 @@
 #ifdef PERL_CORE
 #define get_hash_seed()		Perl_get_hash_seed(aTHX)
 #define report_evil_fh(a,b,c)	Perl_report_evil_fh(aTHX_ a,b,c)
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define report_uninit(a)	Perl_report_uninit(aTHX_ a)
 #endif
 #define vwarn(a,b)		Perl_vwarn(aTHX_ a,b)

@@ -963,7 +963,7 @@ p	|U32	|parse_unicode_opts|NN const char **popt
 Ap	|U32	|seed
 pR	|UV	|get_hash_seed
 p	|void	|report_evil_fh	|NULLOK const GV *gv|NULLOK const IO *io|I32 op
-pd	|void	|report_uninit	|NULLOK SV* uninit_sv
+XEpd	|void	|report_uninit	|NULLOK SV* uninit_sv
 Afpd	|void	|warn		|NN const char* pat|...
 Ap	|void	|vwarn		|NN const char* pat|NULLOK va_list* args
 Afp	|void	|warner		|U32 err|NN const char* pat|...
