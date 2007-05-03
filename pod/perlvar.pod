@@ -926,7 +926,9 @@ the same as the first number.
 
 However, a value assigned to C<$(> must be a single number used to
 set the real gid.  So the value given by C<$(> should I<not> be assigned
-back to C<$(> without being forced numeric, such as by adding zero.
+back to C<$(> without being forced numeric, such as by adding zero. Note
+that this is different to the effective gid (C<$)>) which does take a
+list.
 
 You can change both the real gid and the effective gid at the same
 time by using POSIX::setgid().  Changes to $( require a check to $!
