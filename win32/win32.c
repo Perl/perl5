@@ -1348,6 +1348,7 @@ win32_kill(int pid, int sig)
                     /* Yield and wait for the other thread to send us its message_hwnd */
                     Sleep(0);
                     win32_async_check(aTHX);
+		    hwnd = w32_pseudo_child_message_hwnds[child];
                     ++count;
                 }
                 if (hwnd != INVALID_HANDLE_VALUE) {
