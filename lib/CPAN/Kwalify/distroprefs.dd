@@ -1,5 +1,16 @@
 $VAR1 = {
   "mapping" => {
+    "comment" => {
+      "type" => "text"
+    },
+    "cpanconfig" => {
+      "mapping" => {
+        "=" => {
+          "type" => "text"
+        }
+      },
+      "type" => "map"
+    },
     "disabled" => {
       "enum" => [
         0,
@@ -7,10 +18,31 @@ $VAR1 = {
       ],
       "type" => "int"
     },
-    "test" => {
+    "goto" => {
+      "type" => "text"
+    },
+    "install" => {
       "mapping" => {
+        "args" => {
+          "sequence" => [
+            {
+              "type" => "text"
+            }
+          ],
+          "type" => "seq"
+        },
+        "commandline" => {
+          "type" => "text"
+        },
         "eexpect" => {
           "mapping" => {
+            "mode" => {
+              "enum" => [
+                "deterministic",
+                "anyorder"
+              ],
+              "type" => "text"
+            },
             "talk" => {
               "sequence" => [
                 {
@@ -21,13 +53,6 @@ $VAR1 = {
             },
             "timeout" => {
               "type" => "number"
-            },
-            "mode" => {
-              "enum" => [
-                "deterministic",
-                "anyorder"
-              ],
-              "type" => "text"
             }
           },
           "type" => "map"
@@ -40,14 +65,6 @@ $VAR1 = {
           },
           "type" => "map"
         },
-        "args" => {
-          "sequence" => [
-            {
-              "type" => "text"
-            }
-          ],
-          "type" => "seq"
-        },
         "expect" => {
           "sequence" => [
             {
@@ -55,17 +72,22 @@ $VAR1 = {
             }
           ],
           "type" => "seq"
-        },
-        "commandline" => {
-          "type" => "text"
         }
       },
       "type" => "map"
     },
     "make" => {},
-    "install" => {},
     "match" => {
       "mapping" => {
+        "distribution" => {
+          "type" => "text"
+        },
+        "module" => {
+          "type" => "text"
+        },
+        "perl" => {
+          "type" => "text"
+        },
         "perlconfig" => {
           "mapping" => {
             "=" => {
@@ -73,33 +95,9 @@ $VAR1 = {
             }
           },
           "type" => "map"
-        },
-        "perl" => {
-          "type" => "text"
-        },
-        "module" => {
-          "type" => "text"
-        },
-        "distribution" => {
-          "type" => "text"
         }
       },
       "type" => "map"
-    },
-    "pl" => {},
-    "comment" => {
-      "type" => "text"
-    },
-    "cpanconfig" => {
-      "mapping" => {
-        "=" => {
-          "type" => "text"
-        }
-      },
-      "type" => "map"
-    },
-    "goto" => {
-      "type" => "text"
     },
     "patches" => {
       "sequence" => [
@@ -108,10 +106,12 @@ $VAR1 = {
         }
       ],
       "type" => "seq"
-    }
+    },
+    "pl" => {},
+    "test" => {}
   },
   "type" => "map"
 };
-$VAR1->{"mapping"}{"make"} = $VAR1->{"mapping"}{"test"};
-$VAR1->{"mapping"}{"install"} = $VAR1->{"mapping"}{"test"};
-$VAR1->{"mapping"}{"pl"} = $VAR1->{"mapping"}{"test"};
+$VAR1->{"mapping"}{"make"} = $VAR1->{"mapping"}{"install"};
+$VAR1->{"mapping"}{"pl"} = $VAR1->{"mapping"}{"install"};
+$VAR1->{"mapping"}{"test"} = $VAR1->{"mapping"}{"install"};
