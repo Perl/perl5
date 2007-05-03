@@ -8953,7 +8953,7 @@ Perl_reg_temp_copy (pTHX_ struct regexp *r) {
  */
  
 void
-Perl_regfree_internal(pTHX_ struct regexp *r)
+Perl_regfree_internal(pTHX_ REGEXP * const r)
 {
     dVAR;
     RXi_GET_DECL(r,ri);

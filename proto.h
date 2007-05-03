@@ -1857,7 +1857,7 @@ PERL_CALLCONV void	Perl_pregfree(pTHX_ struct regexp* r);
 PERL_CALLCONV struct regexp*	Perl_reg_temp_copy(pTHX_ struct regexp* r)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV void	Perl_regfree_internal(pTHX_ struct regexp* r);
+PERL_CALLCONV void	Perl_regfree_internal(pTHX_ REGEXP * const r);
 PERL_CALLCONV char *	Perl_reg_stringify(pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags, I32 *haseval)
 			__attribute__nonnull__(pTHX_1);
 

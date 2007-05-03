@@ -678,7 +678,7 @@ Ap	|I32	|pregexec	|NN REGEXP * const prog|NN char* stringarg \
 				|NN SV* screamer|U32 nosave
 Ap	|void	|pregfree	|NULLOK struct regexp* r
 EXp	|struct regexp*	|reg_temp_copy	|NN struct regexp* r
-Ap	|void	|regfree_internal|NULLOK struct regexp* r
+Ap	|void	|regfree_internal|NULLOK REGEXP * const r
 Ap	|char *	|reg_stringify  |NN MAGIC *mg|NULLOK STRLEN *lp|NULLOK U32 *flags|NULLOK I32 *haseval
 #if defined(USE_ITHREADS)
 Ap	|void*	|regdupe_internal|NN REGEXP * const r|NN CLONE_PARAMS* param
