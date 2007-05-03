@@ -11,10 +11,12 @@ package Maintainers;
 %Maintainers =
 	(
 	'abergman'	=> 'Arthur Bergman <abergman@cpan.org>',
+	'abigail'	=> 'Abigail <abigail@abigail.be>',
 	'ams'		=> 'Abhijit Menon-Sen <ams@cpan.org>',
 	'andk'		=> 'Andreas J. Koenig <andk@cpan.org>',
 	'arandal'       => 'Allison Randal <allison@perl.org>',
 	'audreyt'	=> 'Audrey Tang <cpan@audreyt.org>',
+	'avar'		=> 'Ævar Arnfjörð Bjarmason <avar@cpan.org>',
 	'bbb'		=> 'Rob Brown <bbb@cpan.org>',
 	'craig'		=> 'Craig Berry <craigberry@mac.com>',
 	'dankogai'	=> 'Dan Kogai <dankogai@cpan.org>',
@@ -31,6 +33,7 @@ package Maintainers;
 	'jand'		=> 'Jan Dubois <jand@activestate.com>',
 	'jdhedden'	=> 'Jerry D. Hedden <jdhedden@cpan.org>',
 	'jhi'		=> 'Jarkko Hietaniemi <jhi@cpan.org>',
+	'jpeacock'	=> 'John Peacock <jpeacock@rowman.com>',
 	'jstowe'	=> 'Jonathan Stowe <jstowe@cpan.org>',
 	'jv'		=> 'Johan Vromans <jv@cpan.org>',
 	'kane'		=> 'Jos Boumans <kane@cpan.org>',
@@ -491,11 +494,13 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	# NB. tests are located in t/Module_Pluggable to avoid directory
+	# depth issues on VMS
 	'Module::Pluggable' =>
 		{
 		'MAINTAINER'	=> 'simonw',
 		'FILES'		=> q[lib/Module/Pluggable lib/Module/Pluggable.pm
-				     lib/Devel/InnerPackage.pm],
+				     lib/Devel/InnerPackage.pm t/Module_Pluggable],
 		'CPAN'		=> 1,
 		},
 
@@ -554,6 +559,22 @@ package Maintainers;
 		'FILES'		=> q[lib/PerlIO/via/QuotedPrint.pm
 				     lib/PerlIO/via/t/QuotedPrint.t],
 		'CPAN'		=> 1,
+		},
+
+	'perlre' =>
+		{
+		'MAINTAINER'	=> 'abigail',
+		'FILES'		=> q[pod/perlrecharclass.pod
+				     pod/perlrebackslash.pod],
+		'CPAN'		=> 0,
+		},
+
+
+	'perlreapi' =>
+		{
+		MAINTAINER	=> 'avar',
+		FILES		=> 'pod/perlreapi.pod',
+		CPAN		=> 0,
 		},
 
 	'perlreftut' =>
@@ -657,6 +678,13 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'rgarcia',
 		'FILES'		=> q[lib/Switch.pm lib/Switch],
+		'CPAN'		=> 1,
+		},
+
+	'Sys::Syslog' =>
+		{
+		'MAINTAINER'	=> 'saper',
+		'FILES'		=> q[ext/Sys/Syslog],
 		'CPAN'		=> 1,
 		},
 
@@ -805,6 +833,13 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'version' =>
+		{
+		'MAINTAINER'	=> 'jpeacock',
+		'FILES'		=> q[lib/version.pm lib/version.pod lib/version.t],
+		'CPAN'		=> 1,
+		},
+
 	'vms' =>
 		{
 		'MAINTAINER'	=> 'craig',
@@ -847,7 +882,6 @@ package Maintainers;
 		'FILES'		=> q[x2p/s2p.PL],
 		'CPAN'		=> 0,
 		},
-
 	);
 
 1;
