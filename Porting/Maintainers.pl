@@ -170,6 +170,34 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'CPANPLUS' =>
+		{
+		'MAINTAINER'	=> 'kane',
+		'FILES'		=> q[lib/CPANPLUS.pm
+				     lib/CPANPLUS/Backend lib/CPANPLUS/Backend.pm
+				     lib/CPANPLUS/bin
+				     lib/CPANPLUS/Config.pm
+				     lib/CPANPLUS/Configure lib/CPANPLUS/Configure.pm
+				     lib/CPANPLUS/Error.pm
+				     lib/CPANPLUS/FAQ.pod
+				     lib/CPANPLUS/Hacking.pod
+				     lib/CPANPLUS/inc.pm
+				     lib/CPANPLUS/Internals lib/CPANPLUS/Internals.pm
+				     lib/CPANPLUS/Module lib/CPANPLUS/Module.pm
+				     lib/CPANPLUS/Selfupdate.pm
+				     lib/CPANPLUS/Shell lib/CPANPLUS/Shell.pm
+				     lib/CPANPLUS/t
+				    ],
+		'CPAN'		=> 1,
+		},
+
+	'CPANPLUS::Dist::Build' =>
+		{
+		'MAINTAINER'	=> 'kane',
+		'FILES'		=> q[lib/CPANPLUS/Dist/Build.pm lib/CPANPLUS/Dist/Build],
+		'CPAN'		=> 1,
+		},
+
 	'Cwd' =>
 		{
 		'MAINTAINER'	=> 'kwilliams',
