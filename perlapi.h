@@ -218,8 +218,6 @@ END_EXTERN_C
 #define PL_comppad_name_floor	(*Perl_Icomppad_name_floor_ptr(aTHX))
 #undef  PL_cop_seqmax
 #define PL_cop_seqmax		(*Perl_Icop_seqmax_ptr(aTHX))
-#undef  PL_copline
-#define PL_copline		(*Perl_Icopline_ptr(aTHX))
 #undef  PL_cryptseen
 #define PL_cryptseen		(*Perl_Icryptseen_ptr(aTHX))
 #undef  PL_cshlen
@@ -288,8 +286,6 @@ END_EXTERN_C
 #define PL_exitlist		(*Perl_Iexitlist_ptr(aTHX))
 #undef  PL_exitlistlen
 #define PL_exitlistlen		(*Perl_Iexitlistlen_ptr(aTHX))
-#undef  PL_expect
-#define PL_expect		(*Perl_Iexpect_ptr(aTHX))
 #undef  PL_fdpid
 #define PL_fdpid		(*Perl_Ifdpid_ptr(aTHX))
 #undef  PL_filemode

@@ -246,8 +246,8 @@ S_new_SV(pTHX)
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = 0;
     sv->sv_debug_optype = PL_op ? PL_op->op_type : 0;
-    sv->sv_debug_line = (U16) ((PL_copline == NOLINE) ?
-        (PL_curcop ? CopLINE(PL_curcop) : 0) : PL_copline);
+    sv->sv_debug_line = (U16) ((PL_parser && PL_parser->copline == NOLINE) ?
+        (PL_curcop ? CopLINE(PL_curcop) : 0) : PL_parser->copline);
     sv->sv_debug_inpad = 0;
     sv->sv_debug_cloned = 0;
     sv->sv_debug_file = PL_curcop ? savepv(CopFILE(PL_curcop)): NULL;
@@ -9572,6 +9572,9 @@ Perl_parser_dup(pTHX_ const yy_parser *proto, CLONE_PARAMS* param)
     parser->preambled	= proto->preambled;
     parser->sublex_info	= proto->sublex_info; /* XXX not quite right */
     parser->linestr	= sv_dup_inc(proto->linestr, param);
+    parser->expect	= proto->expect;
+    parser->copline	= proto->copline;
+
 
 #ifdef PERL_MAD
     parser->endwhite	= proto->endwhite;
@@ -11137,7 +11140,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* runtime control stuff */
     PL_curcopdb		= (COP*)any_dup(proto_perl->Icurcopdb, proto_perl);
-    PL_copline		= proto_perl->Icopline;
 
     PL_filemode		= proto_perl->Ifilemode;
     PL_lastfd		= proto_perl->Ilastfd;
@@ -11252,8 +11254,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	i = proto_perl->Ilast_lop - SvPVX_const(proto_perl->Iparser->linestr);
 	PL_last_lop		= SvPVX(PL_parser->linestr) + (i < 0 ? 0 : i);
     }
-
-    PL_expect		= proto_perl->Iexpect;
 
     PL_multi_end	= proto_perl->Imulti_end;
 

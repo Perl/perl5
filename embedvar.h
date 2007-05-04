@@ -171,7 +171,6 @@
 #define PL_comppad_name_fill	(vTHX->Icomppad_name_fill)
 #define PL_comppad_name_floor	(vTHX->Icomppad_name_floor)
 #define PL_cop_seqmax		(vTHX->Icop_seqmax)
-#define PL_copline		(vTHX->Icopline)
 #define PL_cryptseen		(vTHX->Icryptseen)
 #define PL_cshlen		(vTHX->Icshlen)
 #define PL_cshname		(vTHX->Icshname)
@@ -206,7 +205,6 @@
 #define PL_exit_flags		(vTHX->Iexit_flags)
 #define PL_exitlist		(vTHX->Iexitlist)
 #define PL_exitlistlen		(vTHX->Iexitlistlen)
-#define PL_expect		(vTHX->Iexpect)
 #define PL_fdpid		(vTHX->Ifdpid)
 #define PL_filemode		(vTHX->Ifilemode)
 #define PL_forkprocess		(vTHX->Iforkprocess)
@@ -436,7 +434,6 @@
 #define PL_Icomppad_name_fill	PL_comppad_name_fill
 #define PL_Icomppad_name_floor	PL_comppad_name_floor
 #define PL_Icop_seqmax		PL_cop_seqmax
-#define PL_Icopline		PL_copline
 #define PL_Icryptseen		PL_cryptseen
 #define PL_Icshlen		PL_cshlen
 #define PL_Icshname		PL_cshname
@@ -471,7 +468,6 @@
 #define PL_Iexit_flags		PL_exit_flags
 #define PL_Iexitlist		PL_exitlist
 #define PL_Iexitlistlen		PL_exitlistlen
-#define PL_Iexpect		PL_expect
 #define PL_Ifdpid		PL_fdpid
 #define PL_Ifilemode		PL_filemode
 #define PL_Iforkprocess		PL_forkprocess

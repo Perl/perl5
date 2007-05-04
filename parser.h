@@ -45,6 +45,7 @@ typedef struct yy_parser {
     U8		lex_defer;	/* state after determined token */
     bool	lex_dojoin;	/* doing an array interpolation */
     U8		lex_expect;	/* expect after determined token */
+    U8		expect;		/* how to interpret ambiguous tokens */
     I32		lex_formbrack;	/* bracket count at outer format level */
     OP		*lex_inpat;	/* in pattern $) and $| are special */
     OP		*lex_op;	/* extra info to pass back on op */
@@ -59,6 +60,7 @@ typedef struct yy_parser {
     bool	preambled;
     SUBLEXINFO	sublex_info;
     SV		*linestr;	/* current chunk of src text */
+    line_t	copline;	/* current line number */
 
 #ifdef PERL_MAD
     SV		*endwhite;

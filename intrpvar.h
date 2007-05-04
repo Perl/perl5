@@ -178,7 +178,6 @@ PERLVAR(Ieval_start,	OP *)
 
 /* runtime control stuff */
 PERLVARI(Icurcopdb,	COP *,	NULL)
-PERLVARI(Icopline,	line_t,	NOLINE)
 
 /* statics moved here for shared library purposes */
 PERLVARI(Igensym,	I32,	0)	/* next symbol for getsym() to define */
@@ -305,10 +304,11 @@ PERLVAR(Ioldbufptr,	char *)
 PERLVAR(Ioldoldbufptr,	char *)
 PERLVAR(Ibufend,	char *)
 
-PERLVARI(Iexpect, U8,	XSTATE)		/* how to interpret ambiguous tokens */
 PERLVAR(Ilex_state,	U8)		/* next token is determined */
 PERLVAR(Ierror_count,	U8)		/* how many errors so far, max 10 */
 PERLVARI(Icv_has_eval, bool, FALSE) /* PL_compcv includes an entereval or similar */
+/* Space for one more U8 here without increasing the structure size */
+
 PERLVAR(Imulti_end,	I32)		/* last line of multi-line string */
 
 PERLVAR(Isubname,	SV *)		/* name of current subroutine */
@@ -537,8 +537,8 @@ PERLVARI(Islab_count, U32, 0)	/* Size of the array */
 
 PERLVARI(Iisarev, HV*, NULL) /* Reverse map of @ISA dependencies */
 
-/* If you are adding a U16, see the comment above on where there are 2 bytes
-   of gap which currently will be structure padding.  */
+/* If you are adding a U8 or U16, see the 'Space' comments above on where
+ * there are gaps which currently will be structure padding.  */
 
 /* Within a stable branch, new variables must be added to the very end, before
  * this comment, for binary compatibility (the offsets of the old members must

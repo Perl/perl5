@@ -5,8 +5,8 @@ case 2:
 
   case 3:
 #line 142 "perly.y"
-    { if (PL_copline > (line_t)IVAL((ps[(1) - (4)].val.i_tkval)))
-			      PL_copline = (line_t)IVAL((ps[(1) - (4)].val.i_tkval));
+    { if (PL_parser->copline > (line_t)IVAL((ps[(1) - (4)].val.i_tkval)))
+			      PL_parser->copline = (line_t)IVAL((ps[(1) - (4)].val.i_tkval));
 			  (yyval.opval) = block_end((ps[(2) - (4)].val.ival), (ps[(3) - (4)].val.opval));
 			  TOKEN_GETMAD((ps[(1) - (4)].val.i_tkval),(yyval.opval),'{');
 			  TOKEN_GETMAD((ps[(4) - (4)].val.i_tkval),(yyval.opval),'}');
@@ -26,14 +26,14 @@ case 2:
   case 6:
 #line 159 "perly.y"
     {
-		    PL_expect = XSTATE; (yyval.ival) = block_start(TRUE);
+		    PL_parser->expect = XSTATE; (yyval.ival) = block_start(TRUE);
 		;}
     break;
 
   case 7:
 #line 166 "perly.y"
-    { if (PL_copline > (line_t)IVAL((ps[(1) - (4)].val.i_tkval)))
-			      PL_copline = (line_t)IVAL((ps[(1) - (4)].val.i_tkval));
+    { if (PL_parser->copline > (line_t)IVAL((ps[(1) - (4)].val.i_tkval)))
+			      PL_parser->copline = (line_t)IVAL((ps[(1) - (4)].val.i_tkval));
 			  (yyval.opval) = block_end((ps[(2) - (4)].val.ival), (ps[(3) - (4)].val.opval));
 			  TOKEN_GETMAD((ps[(1) - (4)].val.i_tkval),(yyval.opval),'{');
 			  TOKEN_GETMAD((ps[(4) - (4)].val.i_tkval),(yyval.opval),'}');
@@ -102,11 +102,11 @@ case 2:
 			      (yyval.opval) = IF_MAD(
 					newOP(OP_NULL, 0),
 					Nullop);
-                              PL_copline = NOLINE;
+                              PL_parser->copline = NOLINE;
 			      TOKEN_FREE((ps[(1) - (2)].val.p_tkval));
 			      TOKEN_GETMAD((ps[(2) - (2)].val.i_tkval),(yyval.opval),';');
 			  }
-			  PL_expect = XSTATE;
+			  PL_parser->expect = XSTATE;
 			;}
     break;
 
@@ -114,7 +114,7 @@ case 2:
 #line 226 "perly.y"
     {
 			  (yyval.opval) = newSTATEOP(0, PVAL((ps[(1) - (3)].val.p_tkval)), (ps[(2) - (3)].val.opval));
-			  PL_expect = XSTATE;
+			  PL_parser->expect = XSTATE;
 			  DO_MAD(
 			      /* sideff might already have a nexstate */
 			      OP* op = ((LISTOP*)(yyval.opval))->op_first;
@@ -189,7 +189,7 @@ case 2:
 
   case 28:
 #line 279 "perly.y"
-    { PL_copline = (line_t)IVAL((ps[(1) - (6)].val.i_tkval));
+    { PL_parser->copline = (line_t)IVAL((ps[(1) - (6)].val.i_tkval));
 			    (yyval.opval) = newCONDOP(0, (ps[(3) - (6)].val.opval), scope((ps[(5) - (6)].val.opval)), (ps[(6) - (6)].val.opval));
 			    PL_hints |= HINT_BLOCK_SCOPE;
 			  TOKEN_GETMAD((ps[(1) - (6)].val.i_tkval),(yyval.opval),'I');
@@ -200,7 +200,7 @@ case 2:
 
   case 29:
 #line 290 "perly.y"
-    { PL_copline = (line_t)IVAL((ps[(1) - (7)].val.i_tkval));
+    { PL_parser->copline = (line_t)IVAL((ps[(1) - (7)].val.i_tkval));
 			    (yyval.opval) = block_end((ps[(3) - (7)].val.ival),
 				   newCONDOP(0, (ps[(4) - (7)].val.opval), scope((ps[(6) - (7)].val.opval)), (ps[(7) - (7)].val.opval)));
 			  TOKEN_GETMAD((ps[(1) - (7)].val.i_tkval),(yyval.opval),'I');
@@ -211,7 +211,7 @@ case 2:
 
   case 30:
 #line 298 "perly.y"
-    { PL_copline = (line_t)IVAL((ps[(1) - (7)].val.i_tkval));
+    { PL_parser->copline = (line_t)IVAL((ps[(1) - (7)].val.i_tkval));
 			    (yyval.opval) = block_end((ps[(3) - (7)].val.ival),
 				   newCONDOP(0, (ps[(4) - (7)].val.opval), scope((ps[(6) - (7)].val.opval)), (ps[(7) - (7)].val.opval)));
 			  TOKEN_GETMAD((ps[(1) - (7)].val.i_tkval),(yyval.opval),'I');
@@ -246,7 +246,7 @@ case 2:
   case 35:
 #line 326 "perly.y"
     { OP *innerop;
-			  PL_copline = (line_t)(ps[(2) - (9)].val.i_tkval);
+			  PL_parser->copline = (line_t)(ps[(2) - (9)].val.i_tkval);
 			    (yyval.opval) = block_end((ps[(4) - (9)].val.ival),
 				   newSTATEOP(0, PVAL((ps[(1) - (9)].val.p_tkval)),
 				     innerop = newWHILEOP(0, 1, (LOOP*)Nullop,
@@ -261,7 +261,7 @@ case 2:
   case 36:
 #line 339 "perly.y"
     { OP *innerop;
-			  PL_copline = (line_t)(ps[(2) - (9)].val.i_tkval);
+			  PL_parser->copline = (line_t)(ps[(2) - (9)].val.i_tkval);
 			    (yyval.opval) = block_end((ps[(4) - (9)].val.ival),
 				   newSTATEOP(0, PVAL((ps[(1) - (9)].val.p_tkval)),
 				     innerop = newWHILEOP(0, 1, (LOOP*)Nullop,
@@ -316,7 +316,7 @@ case 2:
   case 40:
 #line 384 "perly.y"
     { OP *forop;
-			  PL_copline = (line_t)IVAL((ps[(2) - (12)].val.i_tkval));
+			  PL_parser->copline = (line_t)IVAL((ps[(2) - (12)].val.i_tkval));
 			  forop = newSTATEOP(0, PVAL((ps[(1) - (12)].val.p_tkval)),
 					    newWHILEOP(0, 1, (LOOP*)Nullop,
 						IVAL((ps[(2) - (12)].val.i_tkval)), scalar((ps[(7) - (12)].val.opval)),
@@ -356,7 +356,7 @@ case 2:
 
   case 42:
 #line 422 "perly.y"
-    { PL_copline = (line_t) (ps[(2) - (8)].val.i_tkval);
+    { PL_parser->copline = (line_t) (ps[(2) - (8)].val.i_tkval);
 			    (yyval.opval) = block_end((ps[(4) - (8)].val.ival),
 				newSTATEOP(0, PVAL((ps[(1) - (8)].val.p_tkval)),
 				    newGIVENOP((ps[(6) - (8)].val.opval), scope((ps[(8) - (8)].val.opval)),
@@ -594,7 +594,7 @@ case 2:
 				    newOP(OP_NULL,0),
 				    Nullop
 				);
-			  PL_expect = XSTATE;
+			  PL_parser->expect = XSTATE;
 			  TOKEN_GETMAD((ps[(1) - (1)].val.i_tkval),(yyval.opval),';');
 			;}
     break;
@@ -772,7 +772,7 @@ case 2:
   case 101:
 #line 769 "perly.y"
     { (yyval.opval) = newBINOP(OP_GELEM, 0, (ps[(1) - (5)].val.opval), scalar((ps[(3) - (5)].val.opval)));
-			    PL_expect = XOPERATOR;
+			    PL_parser->expect = XOPERATOR;
 			  TOKEN_GETMAD((ps[(2) - (5)].val.i_tkval),(yyval.opval),'{');
 			  TOKEN_GETMAD((ps[(4) - (5)].val.i_tkval),(yyval.opval),';');
 			  TOKEN_GETMAD((ps[(5) - (5)].val.i_tkval),(yyval.opval),'}');
@@ -811,7 +811,7 @@ case 2:
   case 105:
 #line 796 "perly.y"
     { (yyval.opval) = newBINOP(OP_HELEM, 0, oopsHV((ps[(1) - (5)].val.opval)), jmaybe((ps[(3) - (5)].val.opval)));
-			    PL_expect = XOPERATOR;
+			    PL_parser->expect = XOPERATOR;
 			  TOKEN_GETMAD((ps[(2) - (5)].val.i_tkval),(yyval.opval),'{');
 			  TOKEN_GETMAD((ps[(4) - (5)].val.i_tkval),(yyval.opval),';');
 			  TOKEN_GETMAD((ps[(5) - (5)].val.i_tkval),(yyval.opval),'}');
@@ -823,7 +823,7 @@ case 2:
     { (yyval.opval) = newBINOP(OP_HELEM, 0,
 					ref(newHVREF((ps[(1) - (6)].val.opval)),OP_RV2HV),
 					jmaybe((ps[(4) - (6)].val.opval)));
-			    PL_expect = XOPERATOR;
+			    PL_parser->expect = XOPERATOR;
 			  TOKEN_GETMAD((ps[(2) - (6)].val.i_tkval),(yyval.opval),'a');
 			  TOKEN_GETMAD((ps[(3) - (6)].val.i_tkval),(yyval.opval),'{');
 			  TOKEN_GETMAD((ps[(5) - (6)].val.i_tkval),(yyval.opval),';');
@@ -836,7 +836,7 @@ case 2:
     { (yyval.opval) = newBINOP(OP_HELEM, 0,
 					ref(newHVREF((ps[(1) - (5)].val.opval)),OP_RV2HV),
 					jmaybe((ps[(3) - (5)].val.opval)));
-			    PL_expect = XOPERATOR;
+			    PL_parser->expect = XOPERATOR;
 			  TOKEN_GETMAD((ps[(2) - (5)].val.i_tkval),(yyval.opval),'{');
 			  TOKEN_GETMAD((ps[(4) - (5)].val.i_tkval),(yyval.opval),';');
 			  TOKEN_GETMAD((ps[(5) - (5)].val.i_tkval),(yyval.opval),'}');
@@ -1281,7 +1281,7 @@ case 2:
 				    newLISTOP(OP_HSLICE, 0,
 					list((ps[(3) - (5)].val.opval)),
 					ref(oopsHV((ps[(1) - (5)].val.opval)), OP_HSLICE)));
-			    PL_expect = XOPERATOR;
+			    PL_parser->expect = XOPERATOR;
 			  TOKEN_GETMAD((ps[(2) - (5)].val.i_tkval),(yyval.opval),'{');
 			  TOKEN_GETMAD((ps[(4) - (5)].val.i_tkval),(yyval.opval),';');
 			  TOKEN_GETMAD((ps[(5) - (5)].val.i_tkval),(yyval.opval),'}');
