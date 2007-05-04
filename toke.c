@@ -50,6 +50,8 @@
 #define PL_preambled		(PL_parser->preambled)
 #define PL_sublex_info		(PL_parser->sublex_info)
 #define PL_linestr		(PL_parser->linestr)
+#define PL_expect		(PL_parser->expect)
+#define PL_copline		(PL_parser->copline)
 
 
 #ifdef PERL_MAD
@@ -679,11 +681,10 @@ Perl_lex_start(pTHX_ SV *line)
     SAVEPPTR(PL_last_uni);
     SAVEPPTR(PL_linestart);
     SAVEDESTRUCTOR_X(restore_rsfp, PL_rsfp);
-    SAVEI8(PL_expect);
 
-    PL_copline = NOLINE;
+    parser->copline = NOLINE;
     PL_lex_state = LEX_NORMAL;
-    PL_expect = XSTATE;
+    parser->expect = XSTATE;
     Newx(parser->lex_brackstack, 120, char);
     Newx(parser->lex_casestack, 12, char);
     *parser->lex_casestack = '\0';
