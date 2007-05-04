@@ -11,10 +11,12 @@ package Maintainers;
 %Maintainers =
 	(
 	'abergman'	=> 'Arthur Bergman <abergman@cpan.org>',
+	'abigail'	=> 'Abigail <abigail@abigail.be>',
 	'ams'		=> 'Abhijit Menon-Sen <ams@cpan.org>',
 	'andk'		=> 'Andreas J. Koenig <andk@cpan.org>',
 	'arandal'       => 'Allison Randal <allison@perl.org>',
 	'audreyt'	=> 'Audrey Tang <cpan@audreyt.org>',
+	'avar'		=> 'Ævar Arnfjörð Bjarmason <avar@cpan.org>',
 	'bbb'		=> 'Rob Brown <bbb@cpan.org>',
 	'craig'		=> 'Craig Berry <craigberry@mac.com>',
 	'dankogai'	=> 'Dan Kogai <dankogai@cpan.org>',
@@ -606,6 +608,22 @@ package Maintainers;
 		'FILES'		=> q[lib/PerlIO/via/QuotedPrint.pm
 				     lib/PerlIO/via/t/QuotedPrint.t],
 		'CPAN'		=> 1,
+		},
+
+	'perlre' =>
+		{
+		'MAINTAINER'	=> 'abigail',
+		'FILES'		=> q[pod/perlrecharclass.pod
+				     pod/perlrebackslash.pod],
+		'CPAN'		=> 0,
+		},
+
+
+	'perlreapi' =>
+		{
+		MAINTAINER	=> 'avar',
+		FILES		=> 'pod/perlreapi.pod',
+		CPAN		=> 0,
 		},
 
 	'perlreftut' =>
