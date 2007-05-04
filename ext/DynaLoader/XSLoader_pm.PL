@@ -15,7 +15,7 @@ print OUT <<'EOT';
 
 package XSLoader;
 
-$VERSION = "0.07";
+$VERSION = "0.08";
 
 #use strict;
 
@@ -68,7 +68,7 @@ print OUT <<'EOT' if $^O eq 'os2';
     die 'Dynaloaded Perl modules are not available in this build of Perl' if $OS2::is_static;
 
 EOT
- 
+
 print OUT <<'EOT';
     my $modpname = join('/',@modparts);
     my $modlibname = (caller())[1];
@@ -162,7 +162,7 @@ XSLoader - Dynamically load C libraries into Perl code
 
 =head1 VERSION
 
-Version 0.07
+Version 0.08
 
 =head1 SYNOPSIS
 

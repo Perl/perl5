@@ -233,7 +233,8 @@ inet_aton(host)
 	struct hostent * phe;
 	int ok = (*host != '\0') && inet_aton(host, &ip_address);
 
-	if (!ok && (phe = gethostbyname(host))) {
+	if (!ok && (phe = gethostbyname(host)) &&
+			phe->h_addrtype == AF_INET && phe->h_length == 4) {
 		Copy( phe->h_addr, &ip_address, phe->h_length, char );
 		ok = 1;
 	}

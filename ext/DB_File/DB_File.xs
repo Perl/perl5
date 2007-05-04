@@ -1192,7 +1192,7 @@ SV *   sv ;
             Flags |= DB_TRUNCATE ;
 #endif
 
-        status = db_open(name, RETVAL->type, Flags, mode, NULL, openinfo, &RETVAL->dbp) ; 
+        status = db_open(name, RETVAL->type, Flags, mode, NULL, (DB_INFO*) openinfo, &RETVAL->dbp) ; 
         if (status == 0)
 #if DB_VERSION_MAJOR == 2 && DB_VERSION_MINOR < 6
             status = (RETVAL->dbp->cursor)(RETVAL->dbp, NULL, &RETVAL->cursor) ;
