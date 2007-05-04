@@ -3287,8 +3287,8 @@ struct _sublex_info {
     U8 super_state;	/* lexer state to save */
     U16 sub_inwhat;	/* "lex_inwhat" to use */
     OP *sub_op;		/* "lex_op" to use */
-    char *super_bufptr;	/* PL_bufptr that was */
-    char *super_bufend;	/* PL_bufend that was */
+    char *super_bufptr;	/* PL_parser->bufptr that was */
+    char *super_bufend;	/* PL_parser->bufend that was */
 };
 
 #include "parser.h"

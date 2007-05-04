@@ -52,7 +52,14 @@
 #define PL_linestr		(PL_parser->linestr)
 #define PL_expect		(PL_parser->expect)
 #define PL_copline		(PL_parser->copline)
-
+#define PL_bufptr		(PL_parser->bufptr)
+#define PL_oldbufptr		(PL_parser->oldbufptr)
+#define PL_oldoldbufptr		(PL_parser->oldoldbufptr)
+#define PL_linestart		(PL_parser->linestart)
+#define PL_bufend		(PL_parser->bufend)
+#define PL_last_uni		(PL_parser->last_uni)
+#define PL_last_lop		(PL_parser->last_lop)
+#define PL_last_lop_op		(PL_parser->last_lop_op)
 
 #ifdef PERL_MAD
 #  define PL_endwhite		(PL_parser->endwhite)
@@ -673,13 +680,6 @@ Perl_lex_start(pTHX_ SV *line)
     }
 #endif
     SAVECOPLINE(PL_curcop);
-    SAVEPPTR(PL_bufptr);
-    SAVEPPTR(PL_bufend);
-    SAVEPPTR(PL_oldbufptr);
-    SAVEPPTR(PL_oldoldbufptr);
-    SAVEPPTR(PL_last_lop);
-    SAVEPPTR(PL_last_uni);
-    SAVEPPTR(PL_linestart);
     SAVEDESTRUCTOR_X(restore_rsfp, PL_rsfp);
 
     parser->copline = NOLINE;
@@ -709,9 +709,12 @@ Perl_lex_start(pTHX_ SV *line)
 	SvREFCNT_inc_simple_void_NN(line);
 	parser->linestr = line;
     }
-    PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = SvPVX(parser->linestr);
-    PL_bufend = PL_bufptr + SvCUR(parser->linestr);
-    PL_last_lop = PL_last_uni = NULL;
+    parser->oldoldbufptr =
+	parser->oldbufptr =
+	parser->bufptr =
+	parser->linestart = SvPVX(parser->linestr);
+    parser->bufend = parser->bufptr + SvCUR(parser->linestr);
+    parser->last_lop = parser->last_uni = NULL;
     PL_rsfp = 0;
 }
 

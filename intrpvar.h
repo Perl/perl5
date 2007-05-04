@@ -189,8 +189,6 @@ PERLVAR(ICmd,		char *)		/* stuff to free from do_aexec, vfork safe */
 PERLVAR(Ipreambleav,	AV *)
 PERLVAR(Imess_sv,	SV *)
 PERLVAR(Iors_sv,	SV *)		/* output record separator $\ */
-     /* Space for one more U16 here without increasing the structure size */
-PERLVAR(Ilast_lop_op,	OPCODE)		/* last list operator */
 PERLVAR(Iin_my,		U16)		/* we're compiling a "my" (or "our") declaration */
 PERLVARI(Ilaststype,	U16,	OP_STAT)
 PERLVARI(Ilaststatval,	int,	-1)
@@ -240,8 +238,6 @@ PERLVARI(Iin_clean_objs,bool,    FALSE)	/* from sv.c */
 PERLVARI(Iin_clean_all,	bool,    FALSE)	/* from sv.c */
 PERLVAR(Inomemok,	bool)		/* let malloc context handle nomem */
 PERLVARI(Isavebegin,     bool,	FALSE)	/* save BEGINs for compiler	*/
-
-PERLVAR(Ilinestart,	char *)		/* beg. of most recently read line */
 
 PERLVAR(Iuid,		Uid_t)		/* current real user id */
 PERLVAR(Ieuid,		Uid_t)		/* current effective user id */
@@ -299,11 +295,6 @@ PERLVARA(Inexttype,5,	I32)		/* type of next token */
 PERLVAR(Inexttoke,	I32)
 #endif
 
-PERLVAR(Ibufptr,	char *)
-PERLVAR(Ioldbufptr,	char *)
-PERLVAR(Ioldoldbufptr,	char *)
-PERLVAR(Ibufend,	char *)
-
 PERLVAR(Ilex_state,	U8)		/* next token is determined */
 PERLVAR(Ierror_count,	U8)		/* how many errors so far, max 10 */
 PERLVARI(Icv_has_eval, bool, FALSE) /* PL_compcv includes an entereval or similar */
@@ -322,8 +313,6 @@ PERLVAR(Ipadix,		I32)		/* max used index in current "register" pad */
 PERLVAR(Ipadix_floor,	I32)		/* how low may inner block reset padix */
 PERLVAR(Ipad_reset_pending,	I32)	/* reset pad on next attempted alloc */
 
-PERLVAR(Ilast_uni,	char *)		/* position of last named-unary op */
-PERLVAR(Ilast_lop,	char *)		/* position of last list operator */
 PERLVAR(Iin_my_stash,	HV *)		/* declared class of this "my" declaration */
 
 PERLVAR(Ihints,		U32)		/* pragma-tic compile-time flags */

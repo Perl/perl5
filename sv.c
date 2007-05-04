@@ -9574,7 +9574,29 @@ Perl_parser_dup(pTHX_ const yy_parser *proto, CLONE_PARAMS* param)
     parser->linestr	= sv_dup_inc(proto->linestr, param);
     parser->expect	= proto->expect;
     parser->copline	= proto->copline;
+    parser->last_lop_op	= proto->last_lop_op;
 
+    parser->linestr	= sv_dup_inc(proto->linestr, param);
+
+    {
+	char *ols = SvPVX(proto->linestr);
+	char *ls  = SvPVX(parser->linestr);
+
+	parser->bufptr	    = ls + (proto->bufptr >= ols ?
+				    proto->bufptr -  ols : 0);
+	parser->oldbufptr   = ls + (proto->oldbufptr >= ols ?
+				    proto->oldbufptr -  ols : 0);
+	parser->oldoldbufptr= ls + (proto->oldoldbufptr >= ols ?
+				    proto->oldoldbufptr -  ols : 0);
+	parser->linestart   = ls + (proto->linestart >= ols ?
+				    proto->linestart -  ols : 0);
+	parser->last_uni    = ls + (proto->last_uni >= ols ?
+				    proto->last_uni -  ols : 0);
+	parser->last_lop    = ls + (proto->last_lop >= ols ?
+				    proto->last_lop -  ols : 0);
+
+	parser->bufend	    = ls + SvCUR(parser->linestr);
+    }
 
 #ifdef PERL_MAD
     parser->endwhite	= proto->endwhite;
@@ -11239,29 +11261,12 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_nexttoke		= proto_perl->Inexttoke;
 #endif
 
-    if (proto_perl->Iparser) {
-	i = proto_perl->Ibufptr - SvPVX_const(proto_perl->Iparser->linestr);
-	PL_bufptr		= SvPVX(PL_parser->linestr) + (i < 0 ? 0 : i);
-	i = proto_perl->Ioldbufptr - SvPVX_const(proto_perl->Iparser->linestr);
-	PL_oldbufptr	= SvPVX(PL_parser->linestr) + (i < 0 ? 0 : i);
-	i = proto_perl->Ioldoldbufptr - SvPVX_const(proto_perl->Iparser->linestr);
-	PL_oldoldbufptr	= SvPVX(PL_parser->linestr) + (i < 0 ? 0 : i);
-	i = proto_perl->Ilinestart - SvPVX_const(proto_perl->Iparser->linestr);
-	PL_linestart	= SvPVX(PL_parser->linestr) + (i < 0 ? 0 : i);
-	PL_bufend		= SvPVX(PL_parser->linestr) + SvCUR(PL_parser->linestr);
-	i = proto_perl->Ilast_uni - SvPVX_const(proto_perl->Iparser->linestr);
-	PL_last_uni		= SvPVX(PL_parser->linestr) + (i < 0 ? 0 : i);
-	i = proto_perl->Ilast_lop - SvPVX_const(proto_perl->Iparser->linestr);
-	PL_last_lop		= SvPVX(PL_parser->linestr) + (i < 0 ? 0 : i);
-    }
-
     PL_multi_end	= proto_perl->Imulti_end;
 
     PL_error_count	= proto_perl->Ierror_count;
     PL_subline		= proto_perl->Isubline;
     PL_subname		= sv_dup_inc(proto_perl->Isubname, param);
 
-    PL_last_lop_op	= proto_perl->Ilast_lop_op;
     PL_in_my		= proto_perl->Iin_my;
     PL_in_my_stash	= hv_dup(proto_perl->Iin_my_stash, param);
 #ifdef FCRYPT

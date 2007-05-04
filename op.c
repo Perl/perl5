@@ -2260,10 +2260,11 @@ Perl_localize(pTHX_ OP *o, I32 lex)
 	NOOP;
 #endif
     else {
-	if ( PL_bufptr > PL_oldbufptr && PL_bufptr[-1] == ','
+	if ( PL_parser->bufptr > PL_parser->oldbufptr
+	    && PL_parser->bufptr[-1] == ','
 	    && ckWARN(WARN_PARENTHESIS))
 	{
-	    char *s = PL_bufptr;
+	    char *s = PL_parser->bufptr;
 	    bool sigil = FALSE;
 
 	    /* some heuristics to detect a potential error */
