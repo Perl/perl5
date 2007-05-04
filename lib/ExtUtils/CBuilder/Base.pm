@@ -7,7 +7,7 @@ use Config;
 use Text::ParseWords;
 
 use vars qw($VERSION);
-$VERSION = '0.12';
+$VERSION = '0.12_01';
 
 sub new {
   my $class = shift;
@@ -244,7 +244,7 @@ sub perl_src {
   my $dir   = File::Spec->curdir;
 
   # Try up to 5 levels upwards
-  for (0..5) {
+  for (0..10) {
     if (
 	-f File::Spec->catfile($dir,"config_h.SH")
 	&&
