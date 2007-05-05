@@ -293,7 +293,6 @@ perl_construct(pTHXx)
     init_stacks();
 
     init_ids();
-    PL_lex_state = LEX_NOTPARSING;
 
     JMPENV_BOOTSTRAP;
     STATUS_ALL_SUCCESS;

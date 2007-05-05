@@ -342,8 +342,6 @@ END_EXTERN_C
 #define PL_laststatval		(*Perl_Ilaststatval_ptr(aTHX))
 #undef  PL_laststype
 #define PL_laststype		(*Perl_Ilaststype_ptr(aTHX))
-#undef  PL_lex_state
-#define PL_lex_state		(*Perl_Ilex_state_ptr(aTHX))
 #undef  PL_lineary
 #define PL_lineary		(*Perl_Ilineary_ptr(aTHX))
 #undef  PL_localpatches

@@ -60,6 +60,7 @@
 #define PL_last_uni		(PL_parser->last_uni)
 #define PL_last_lop		(PL_parser->last_lop)
 #define PL_last_lop_op		(PL_parser->last_lop_op)
+#define PL_lex_state		(PL_parser->lex_state)
 
 #ifdef PERL_MAD
 #  define PL_endwhite		(PL_parser->endwhite)
@@ -663,7 +664,6 @@ Perl_lex_start(pTHX_ SV *line)
 
     /* initialise lexer state */
 
-    SAVEI8(PL_lex_state);
     SAVECOPLINE(PL_curcop);
     SAVEDESTRUCTOR_X(restore_rsfp, PL_rsfp);
 

@@ -233,7 +233,6 @@
 #define PL_lastfd		(vTHX->Ilastfd)
 #define PL_laststatval		(vTHX->Ilaststatval)
 #define PL_laststype		(vTHX->Ilaststype)
-#define PL_lex_state		(vTHX->Ilex_state)
 #define PL_lineary		(vTHX->Ilineary)
 #define PL_localpatches		(vTHX->Ilocalpatches)
 #define PL_lockhook		(vTHX->Ilockhook)
@@ -484,7 +483,6 @@
 #define PL_Ilastfd		PL_lastfd
 #define PL_Ilaststatval		PL_laststatval
 #define PL_Ilaststype		PL_laststype
-#define PL_Ilex_state		PL_lex_state
 #define PL_Ilineary		PL_lineary
 #define PL_Ilocalpatches	PL_localpatches
 #define PL_Ilockhook		PL_lockhook

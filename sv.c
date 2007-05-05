@@ -9575,6 +9575,8 @@ Perl_parser_dup(pTHX_ const yy_parser *proto, CLONE_PARAMS* param)
     parser->expect	= proto->expect;
     parser->copline	= proto->copline;
     parser->last_lop_op	= proto->last_lop_op;
+    parser->lex_state	= proto->lex_state;
+
 
     parser->linestr	= sv_dup_inc(proto->linestr, param);
 
@@ -11256,8 +11258,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #endif
 
     PL_parser		= parser_dup(proto_perl->Iparser, param);
-
-    PL_lex_state	= proto_perl->Ilex_state;
 
     PL_multi_end	= proto_perl->Imulti_end;
 

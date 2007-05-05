@@ -285,10 +285,9 @@ PERLVAR(Isv_undef,	SV)
 PERLVAR(Isv_no,		SV)
 PERLVAR(Isv_yes,	SV)
 
-PERLVAR(Ilex_state,	U8)		/* next token is determined */
 PERLVAR(Ierror_count,	U8)		/* how many errors so far, max 10 */
 PERLVARI(Icv_has_eval, bool, FALSE) /* PL_compcv includes an entereval or similar */
-/* Space for one more U8 here without increasing the structure size */
+/* Space for two more U8 here without increasing the structure size */
 
 PERLVAR(Imulti_end,	I32)		/* last line of multi-line string */
 

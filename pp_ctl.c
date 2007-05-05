@@ -3009,7 +3009,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     CvDEPTH(PL_compcv) = 1;
     SP = PL_stack_base + POPMARK;		/* pop original mark */
     PL_op = saveop;			/* The caller may need it. */
-    PL_lex_state = LEX_NOTPARSING;	/* $^S needs this. */
+    PL_parser->lex_state = LEX_NOTPARSING;	/* $^S needs this. */
 
     RETURNOP(PL_eval_start);
 }

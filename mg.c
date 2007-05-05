@@ -807,7 +807,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '\023':		/* ^S */
 	if (nextchar == '\0') {
-	    if (PL_lex_state != LEX_NOTPARSING)
+	    if (PL_parser && PL_parser->lex_state != LEX_NOTPARSING)
 		SvOK_off(sv);
 	    else if (PL_in_eval)
  		sv_setiv(sv, PL_in_eval & ~(EVAL_INREQUIRE));
