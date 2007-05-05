@@ -179,8 +179,6 @@ PERLVAR(Ieval_start,	OP *)
 /* runtime control stuff */
 PERLVARI(Icurcopdb,	COP *,	NULL)
 
-/* statics moved here for shared library purposes */
-PERLVARI(Igensym,	I32,	0)	/* next symbol for getsym() to define */
 PERLVAR(Ifilemode,	int)		/* so nextargv() can preserve mode */
 PERLVAR(Ilastfd,	int)		/* what to preserve mode on */
 PERLVAR(Ioldname,	char *)		/* what to preserve mode on */
@@ -189,6 +187,8 @@ PERLVAR(ICmd,		char *)		/* stuff to free from do_aexec, vfork safe */
 PERLVAR(Ipreambleav,	AV *)
 PERLVAR(Imess_sv,	SV *)
 PERLVAR(Iors_sv,	SV *)		/* output record separator $\ */
+/* statics moved here for shared library purposes */
+PERLVARI(Igensym,	I32,	0)	/* next symbol for getsym() to define */
 PERLVAR(Iin_my,		U16)		/* we're compiling a "my" (or "our") declaration */
 PERLVARI(Ilaststype,	U16,	OP_STAT)
 PERLVARI(Ilaststatval,	int,	-1)
