@@ -13,6 +13,7 @@ use lib qw[../lib];
 
 use constant IS_WIN32   => $^O eq 'MSWin32' ? 1 : 0;
 use constant IS_CYGWIN  => $^O eq 'cygwin'  ? 1 : 0;
+use constant IS_VMS     => $^O eq 'VMS'     ? 1 : 0;
 
 use Cwd                         qw[cwd];
 use Test::More                  qw[no_plan];
@@ -185,9 +186,9 @@ if( $Debug ) {
 
 ### XXX whitebox test
 ### test __get_extract_dir 
-{   my $meth = '__get_extract_dir';
+SKIP: {   my $meth = '__get_extract_dir';
 
-    ### get the right seperator -- File::Spec does clean ups for
+    ### get the right separator -- File::Spec does clean ups for
     ### paths, so we need to join ourselves.
     my $sep  = [ split '', File::Spec->catfile( 'a', 'b' ) ]->[1];
     
@@ -196,6 +197,9 @@ if( $Debug ) {
     ### to be unpacked in '.' rather than in 'dir'. here we test
     ### for this.
     for my $prefix ( '', '.' ) {
+        skip "Prepending ./ to a valid path doesn't give you another valid path on VMS", 2
+            if IS_VMS && length($prefix);
+
         my $dir = basename( $SrcDir );
 
         ### build a list like [dir, dir/file] and [./dir ./dir/file]
