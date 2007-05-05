@@ -377,8 +377,8 @@ Perl_require_pv
 Perl_pack_cat
 Perl_packlist
 Perl_pmflag
+Perl_pop_return
 Perl_pop_scope
-Perl_push_return
 Perl_push_scope
 Perl_regdump
 Perl_regclass_swash

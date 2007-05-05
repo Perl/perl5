@@ -674,13 +674,13 @@
 #ifdef PERL_CORE
 #define pmruntime		Perl_pmruntime
 #define pmtrans			Perl_pmtrans
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define pop_return		Perl_pop_return
 #endif
 #define pop_scope		Perl_pop_scope
 #ifdef PERL_CORE
 #define prepend_elem		Perl_prepend_elem
-#endif
-#if defined(PERL_CORE) || defined(PERL_EXT)
 #define push_return		Perl_push_return
 #endif
 #define push_scope		Perl_push_scope
@@ -2794,13 +2794,13 @@
 #ifdef PERL_CORE
 #define pmruntime(a,b,c)	Perl_pmruntime(aTHX_ a,b,c)
 #define pmtrans(a,b,c)		Perl_pmtrans(aTHX_ a,b,c)
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define pop_return()		Perl_pop_return(aTHX)
 #endif
 #define pop_scope()		Perl_pop_scope(aTHX)
 #ifdef PERL_CORE
 #define prepend_elem(a,b,c)	Perl_prepend_elem(aTHX_ a,b,c)
-#endif
-#if defined(PERL_CORE) || defined(PERL_EXT)
 #define push_return(a)		Perl_push_return(aTHX_ a)
 #endif
 #define push_scope()		Perl_push_scope(aTHX)
