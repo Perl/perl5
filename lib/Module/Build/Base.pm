@@ -447,10 +447,7 @@ sub find_perl_interpreter {
   my $exe = $c->get('exe_ext');
   foreach my $thisperl ( @potential_perls ) {
 
-    if ($proto->os_type eq 'VMS') {
-      # VMS might have a file version at the end
-      $thisperl .= $exe unless $thisperl =~ m/$exe(;\d+)?$/i;
-    } elsif (defined $exe) {
+    if (defined $exe and $proto->os_type ne 'VMS') {
       $thisperl .= $exe unless $thisperl =~ m/$exe$/i;
     }
 

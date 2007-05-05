@@ -197,11 +197,29 @@ sub _infer_xs_spec {
   # Need to create with the same name as DynaLoader will load with.
   if (defined &DynaLoader::mod2fname) {
     my $file = DynaLoader::mod2fname([$$spec{base_name}]);
-    $$spec{lib_file} = File::Spec->catfile($$spec{archdir}, "$file.$self->{config}->{dlext}");
+    $file .= '.' . $self->{config}->get('dlext');
+    $$spec{lib_file} = File::Spec->catfile($$spec{archdir}, $file);
   }
 
   return $spec;
 }
+
+=item rscan_dir
+
+Inherit the standard version but remove dots at end of name.  This may not be 
+necessary if File::Find has been fixed or DECC$FILENAME_UNIX_REPORT is in effect.
+
+=cut
+
+sub rscan_dir {
+  my ($self, $dir, $pattern) = @_;
+
+  my $result = $self->SUPER::rscan_dir( $dir, $pattern );
+
+  for my $file (@$result) { $file =~ s/\.$//; }
+  return $result;
+}
+
 
 =back
 
