@@ -89,6 +89,7 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 void *
 Perl_Slab_Alloc(pTHX_ int m, size_t sz)
 {
+    PERL_UNUSED_ARG(m);
     /*
      * To make incrementing use count easy PL_OpSlab is an I32 *
      * To make inserting the link to slab PL_OpPtr is I32 **
@@ -97,11 +98,11 @@ Perl_Slab_Alloc(pTHX_ int m, size_t sz)
      */
     sz = (sz + 2*sizeof(I32 *) -1)/sizeof(I32 *);
     if ((PL_OpSpace -= sz) < 0) {
-        PL_OpPtr = (I32 **) PerlMemShared_malloc(PERL_SLAB_SIZE*sizeof(I32*)); 
+
+        PL_OpPtr = (I32 **) PerlMemShared_calloc(PERL_SLAB_SIZE,sizeof(I32*)); 
     	if (!PL_OpPtr) {
 	    return NULL;
 	}
-	Zero(PL_OpPtr,PERL_SLAB_SIZE,I32 **);
 	/* We reserve the 0'th I32 sized chunk as a use count */
 	PL_OpSlab = (I32 *) PL_OpPtr;
 	/* Reduce size by the use count word, and by the size we need.
@@ -4152,7 +4153,7 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 	    o = newOP(type, OPf_SPECIAL);
 	else {
 	    o = newPVOP(type, 0, savepv(label->op_type == OP_CONST
-					? SvPVx_nolen_const(((SVOP*)label)->op_sv)
+					? SvPV_nolen_const(((SVOP*)label)->op_sv)
 					: ""));
 	}
 	op_free(label);
@@ -4385,11 +4386,11 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     const I32 gv_fetch_flags
 	= (block || attrs || (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS))
 	? GV_ADDMULTI : GV_ADDMULTI | GV_NOINIT;
-    const char * const name = o ? SvPVx_nolen_const(cSVOPo->op_sv) : NULL;
+    const char * const name = o ? SvPV_nolen_const(cSVOPo->op_sv) : NULL;
 
     if (proto) {
 	assert(proto->op_type == OP_CONST);
-	ps = SvPVx_const(((SVOP*)proto)->op_sv, ps_len);
+	ps = SvPV_const(((SVOP*)proto)->op_sv, ps_len);
     }
     else
 	ps = NULL;
@@ -6726,12 +6727,6 @@ Perl_peep(pTHX_ register OP *o)
 	  ignore_optimization:
 	    o->op_seq = PL_op_seqmax++;
 	    break;
-	case OP_STUB:
-	    if ((o->op_flags & OPf_WANT) != OPf_WANT_LIST) {
-		o->op_seq = PL_op_seqmax++;
-		break; /* Scalar stub must produce undef.  List stub is noop */
-	    }
-	    goto nothin;
 	case OP_NULL:
 	    if (o->op_targ == OP_NEXTSTATE
 		|| o->op_targ == OP_DBSTATE
@@ -6748,10 +6743,15 @@ Perl_peep(pTHX_ register OP *o)
 		continue;
 	    }
 	    break;
+	case OP_STUB:
+	    if ((o->op_flags & OPf_WANT) != OPf_WANT_LIST) {
+		o->op_seq = PL_op_seqmax++;
+		break; /* Scalar stub must produce undef.  List stub is noop */
+	    }
+	    /* FALL THROUGH */
 	case OP_SCALAR:
 	case OP_LINESEQ:
 	case OP_SCOPE:
-	  nothin:
 	    if (oldop && o->op_next) {
 		oldop->op_next = o->op_next;
 		continue;

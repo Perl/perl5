@@ -1488,7 +1488,7 @@ PP(pp_repeat)
 	      count = (IV)nv;
     }
     else
-	 count = SvIVx(sv);
+	 count = SvIV(sv);
     if (GIMME == G_ARRAY && PL_op->op_private & OPpREPEAT_DOLIST) {
 	dMARK;
 	static const char oom_list_extend[] = "Out of memory during list extend";
@@ -2583,8 +2583,12 @@ PP(pp_i_divide)
     }
 }
 
+#if defined(__GLIBC__) && IVSIZE == 8
 STATIC
 PP(pp_i_modulo_0)
+#else
+PP(pp_i_modulo)
+#endif
 {
      /* This is the vanilla old i_modulo. */
      dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
@@ -2604,6 +2608,7 @@ PP(pp_i_modulo_0)
 #if defined(__GLIBC__) && IVSIZE == 8
 STATIC
 PP(pp_i_modulo_1)
+
 {
      /* This is the i_modulo with the workaround for the _moddi3 bug
       * in (at least) glibc 2.2.5 (the PERL_ABS() the workaround).
@@ -2621,7 +2626,6 @@ PP(pp_i_modulo_1)
 	  RETURN;
      }
 }
-#endif
 
 PP(pp_i_modulo)
 {
@@ -2641,7 +2645,6 @@ PP(pp_i_modulo)
 	   * opcode dispatch table if that is the case, remembering to
 	   * also apply the workaround so that this first round works
 	   * right, too.  See [perl #9402] for more information. */
-#if defined(__GLIBC__) && IVSIZE == 8
 	  {
 	       IV l =   3;
 	       IV r = -10;
@@ -2657,7 +2660,6 @@ PP(pp_i_modulo)
 		    right = PERL_ABS(right);
 	       }
 	  }
-#endif
 	  /* avoid FPE_INTOVF on some platforms when left is IV_MIN */
 	  if (right == -1)
 	      SETi( 0 );
@@ -2666,6 +2668,7 @@ PP(pp_i_modulo)
 	  RETURN;
      }
 }
+#endif
 
 PP(pp_i_add)
 {
@@ -3367,7 +3370,7 @@ PP(pp_ord)
 
     XPUSHu(DO_UTF8(argsv) ?
 	   utf8n_to_uvchr((U8 *)s, UTF8_MAXBYTES, 0, UTF8_ALLOW_ANYUV) :
-	   (*s & 0xff));
+	   (UV)(*s & 0xff));
 
     RETURN;
 }
@@ -3853,7 +3856,7 @@ PP(pp_aslice)
 	    register SV **svp;
 	    I32 max = -1;
 	    for (svp = MARK + 1; svp <= SP; svp++) {
-		const I32 elem = SvIVx(*svp);
+		const I32 elem = SvIV(*svp);
 		if (elem > max)
 		    max = elem;
 	    }
@@ -3862,7 +3865,7 @@ PP(pp_aslice)
 	}
 	while (++MARK <= SP) {
 	    register SV **svp;
-	    I32 elem = SvIVx(*MARK);
+	    I32 elem = SvIV(*MARK);
 
 	    if (elem > 0)
 		elem -= arybase;
@@ -4125,7 +4128,7 @@ PP(pp_lslice)
     register SV **lelem;
 
     if (GIMME != G_ARRAY) {
-	I32 ix = SvIVx(*lastlelem);
+	I32 ix = SvIV(*lastlelem);
 	if (ix < 0)
 	    ix += max;
 	else
@@ -4144,7 +4147,7 @@ PP(pp_lslice)
     }
 
     for (lelem = firstlelem; lelem <= lastlelem; lelem++) {
-	I32 ix = SvIVx(*lelem);
+	I32 ix = SvIV(*lelem);
 	if (ix < 0)
 	    ix += max;
 	else
@@ -4223,7 +4226,7 @@ PP(pp_splice)
     SP++;
 
     if (++MARK < SP) {
-	offset = i = SvIVx(*MARK);
+	offset = i = SvIV(*MARK);
 	if (offset < 0)
 	    offset += AvFILLp(ary) + 1;
 	else

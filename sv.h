@@ -142,9 +142,8 @@ to return a meaningful value, or check for NULLness, so it's smaller
 and faster.
 
 =for apidoc Am|SV*|SvREFCNT_inc_simple|SV* sv
-Same as SvREFCNT_inc, but can only be used with simple variables, not
-expressions or pointer dereferences.  Since we don't have to store a
-temporary value, it's faster.
+Same as SvREFCNT_inc, but can only be used with expressions without side
+effects.  Since we don't have to store a temporary value, it's faster.
 
 =for apidoc Am|SV*|SvREFCNT_inc_simple_NN|SV* sv
 Same as SvREFCNT_inc_simple, but can only be used if you know I<sv>
@@ -1124,7 +1123,9 @@ stringified version becoming C<SvPOK>.  Handles 'get' magic. See also
 C<SvPVx> for a version which guarantees to evaluate sv only once.
 
 =for apidoc Am|char*|SvPVx|SV* sv|STRLEN len
-A version of C<SvPV> which guarantees to evaluate sv only once.
+A version of C<SvPV> which guarantees to evaluate C<sv> only once.
+Only use this if C<sv> is an expression with side effects, otherwise use the
+more efficient C<SvPVX>.
 
 =for apidoc Am|char*|SvPV_nomg|SV* sv|STRLEN len
 Like C<SvPV> but doesn't process magic.
@@ -1143,7 +1144,8 @@ Like C<SvIV> but doesn't process magic.
 
 =for apidoc Am|IV|SvIVx|SV* sv
 Coerces the given SV to an integer and returns it. Guarantees to evaluate
-sv only once. Use the more efficient C<SvIV> otherwise.
+C<sv> only once. Only use this if C<sv> is an expression with side effects,
+otherwise use the more efficient C<SvIV>.
 
 =for apidoc Am|NV|SvNV|SV* sv
 Coerce the given SV to a double and return it. See C<SvNVx> for a version
@@ -1151,7 +1153,8 @@ which guarantees to evaluate sv only once.
 
 =for apidoc Am|NV|SvNVx|SV* sv
 Coerces the given SV to a double and returns it. Guarantees to evaluate
-sv only once. Use the more efficient C<SvNV> otherwise.
+C<sv> only once. Only use this if C<sv> is an expression with side effects,
+otherwise use the more efficient C<SvNV>.
 
 =for apidoc Am|UV|SvUV|SV* sv
 Coerces the given SV to an unsigned integer and returns it.  See C<SvUVx>
@@ -1162,7 +1165,8 @@ Like C<SvUV> but doesn't process magic.
 
 =for apidoc Am|UV|SvUVx|SV* sv
 Coerces the given SV to an unsigned integer and returns it. Guarantees to
-evaluate sv only once. Use the more efficient C<SvUV> otherwise.
+C<sv> only once. Only use this if C<sv> is an expression with side effects,
+otherwise use the more efficient C<SvUV>.
 
 =for apidoc Am|bool|SvTRUE|SV* sv
 Returns a boolean indicating whether Perl would evaluate the SV as true or

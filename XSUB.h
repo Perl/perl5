@@ -110,13 +110,13 @@ is a lexical $_ in scope. (Lexical $_ is available in perl 5.9.2 and later)
 #  endif
 #endif
 
-#define dAX const I32 ax = MARK - PL_stack_base + 1
+#define dAX const I32 ax = (I32)(MARK - PL_stack_base + 1)
 
 #define dAXMARK				\
 	I32 ax = POPMARK;	\
 	register SV **mark = PL_stack_base + ax++
 
-#define dITEMS I32 items = SP - MARK
+#define dITEMS I32 items = (I32)(SP - MARK)
 
 #if defined(lint) && defined(S_SPLINT_S) /* www.splint.org */
 #  define dXSARGS \

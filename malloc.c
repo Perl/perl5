@@ -1291,7 +1291,8 @@ write2(char *mess)
 
 #ifdef DEBUGGING
 #undef ASSERT
-#define	ASSERT(p,diag)   if (!(p)) botch(diag,STRINGIFY(p),__FILE__,__LINE__);  else
+#define	ASSERT(p,diag)   if (!(p)) botch(diag,STRINGIFY(p),__FILE__,__LINE__);
+
 static void
 botch(char *diag, char *s, char *file, int line)
 {
