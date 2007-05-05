@@ -222,8 +222,6 @@ END_EXTERN_C
 #define PL_cshname		(*Perl_Icshname_ptr(aTHX))
 #undef  PL_curcopdb
 #define PL_curcopdb		(*Perl_Icurcopdb_ptr(aTHX))
-#undef  PL_curforce
-#define PL_curforce		(*Perl_Icurforce_ptr(aTHX))
 #undef  PL_curstname
 #define PL_curstname		(*Perl_Icurstname_ptr(aTHX))
 #undef  PL_custom_op_descs
@@ -396,12 +394,6 @@ END_EXTERN_C
 #define PL_my_cxt_list		(*Perl_Imy_cxt_list_ptr(aTHX))
 #undef  PL_my_cxt_size
 #define PL_my_cxt_size		(*Perl_Imy_cxt_size_ptr(aTHX))
-#undef  PL_nexttoke
-#define PL_nexttoke		(*Perl_Inexttoke_ptr(aTHX))
-#undef  PL_nexttype
-#define PL_nexttype		(*Perl_Inexttype_ptr(aTHX))
-#undef  PL_nextval
-#define PL_nextval		(*Perl_Inextval_ptr(aTHX))
 #undef  PL_nice_chunk
 #define PL_nice_chunk		(*Perl_Inice_chunk_ptr(aTHX))
 #undef  PL_nice_chunk_size

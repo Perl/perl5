@@ -285,16 +285,6 @@ PERLVAR(Isv_undef,	SV)
 PERLVAR(Isv_no,		SV)
 PERLVAR(Isv_yes,	SV)
 
-/* What we know when we're in LEX_KNOWNEXT state. */
-#ifdef PERL_MAD
-PERLVARA(Inexttoke,5,	NEXTTOKE)	/* value of next token, if any */
-PERLVAR(Icurforce,	I32)
-#else
-PERLVARA(Inextval,5,	YYSTYPE)	/* value of next token, if any */
-PERLVARA(Inexttype,5,	I32)		/* type of next token */
-PERLVAR(Inexttoke,	I32)
-#endif
-
 PERLVAR(Ilex_state,	U8)		/* next token is determined */
 PERLVAR(Ierror_count,	U8)		/* how many errors so far, max 10 */
 PERLVARI(Icv_has_eval, bool, FALSE) /* PL_compcv includes an entereval or similar */

@@ -173,7 +173,6 @@
 #define PL_cshlen		(vTHX->Icshlen)
 #define PL_cshname		(vTHX->Icshname)
 #define PL_curcopdb		(vTHX->Icurcopdb)
-#define PL_curforce		(vTHX->Icurforce)
 #define PL_curstname		(vTHX->Icurstname)
 #define PL_custom_op_descs	(vTHX->Icustom_op_descs)
 #define PL_custom_op_names	(vTHX->Icustom_op_names)
@@ -260,9 +259,6 @@
 #define PL_my_cxt_keys		(vTHX->Imy_cxt_keys)
 #define PL_my_cxt_list		(vTHX->Imy_cxt_list)
 #define PL_my_cxt_size		(vTHX->Imy_cxt_size)
-#define PL_nexttoke		(vTHX->Inexttoke)
-#define PL_nexttype		(vTHX->Inexttype)
-#define PL_nextval		(vTHX->Inextval)
 #define PL_nice_chunk		(vTHX->Inice_chunk)
 #define PL_nice_chunk_size	(vTHX->Inice_chunk_size)
 #define PL_nomemok		(vTHX->Inomemok)
@@ -428,7 +424,6 @@
 #define PL_Icshlen		PL_cshlen
 #define PL_Icshname		PL_cshname
 #define PL_Icurcopdb		PL_curcopdb
-#define PL_Icurforce		PL_curforce
 #define PL_Icurstname		PL_curstname
 #define PL_Icustom_op_descs	PL_custom_op_descs
 #define PL_Icustom_op_names	PL_custom_op_names
@@ -515,9 +510,6 @@
 #define PL_Imy_cxt_keys		PL_my_cxt_keys
 #define PL_Imy_cxt_list		PL_my_cxt_list
 #define PL_Imy_cxt_size		PL_my_cxt_size
-#define PL_Inexttoke		PL_nexttoke
-#define PL_Inexttype		PL_nexttype
-#define PL_Inextval		PL_nextval
 #define PL_Inice_chunk		PL_nice_chunk
 #define PL_Inice_chunk_size	PL_nice_chunk_size
 #define PL_Inomemok		PL_nomemok

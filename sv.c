@@ -9611,6 +9611,13 @@ Perl_parser_dup(pTHX_ const yy_parser *proto, CLONE_PARAMS* param)
     parser->thisstuff	= proto->thisstuff;
     parser->thistoken	= proto->thistoken;
     parser->thiswhite	= proto->thiswhite;
+
+    Copy(proto->nexttoke, parser->nexttoke, 5, NEXTTOKE);
+    parser->curforce	= proto->curforce;
+#else
+    Copy(proto->nextval, parser->nextval, 5, YYSTYPE);
+    Copy(proto->nexttype, parser->nexttype, 5,	I32);
+    parser->nexttoke	= proto->nexttoke;
 #endif
     return parser;
 }
@@ -11251,15 +11258,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_parser		= parser_dup(proto_perl->Iparser, param);
 
     PL_lex_state	= proto_perl->Ilex_state;
-
-#ifdef PERL_MAD
-    Copy(proto_perl->Inexttoke, PL_nexttoke, 5, NEXTTOKE);
-    PL_curforce		= proto_perl->Icurforce;
-#else
-    Copy(proto_perl->Inextval, PL_nextval, 5, YYSTYPE);
-    Copy(proto_perl->Inexttype, PL_nexttype, 5,	I32);
-    PL_nexttoke		= proto_perl->Inexttoke;
-#endif
 
     PL_multi_end	= proto_perl->Imulti_end;
 

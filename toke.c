@@ -74,6 +74,13 @@
 #  define PL_thisstuff		(PL_parser->thisstuff)
 #  define PL_thistoken		(PL_parser->thistoken)
 #  define PL_thiswhite		(PL_parser->thiswhite)
+#  define PL_thiswhite		(PL_parser->thiswhite)
+#  define PL_nexttoke		(PL_parser->nexttoke)
+#  define PL_curforce		(PL_parser->curforce)
+#else
+#  define PL_nexttoke		(PL_parser->nexttoke)
+#  define PL_nexttype		(PL_parser->nexttype)
+#  define PL_nextval		(PL_parser->nextval)
 #endif
 
 static int
@@ -657,40 +664,20 @@ Perl_lex_start(pTHX_ SV *line)
     /* initialise lexer state */
 
     SAVEI8(PL_lex_state);
-#ifdef PERL_MAD
-    if (PL_lex_state == LEX_KNOWNEXT) {
-	I32 toke = parser->old_parser->lasttoke;
- 	while (--toke >= 0) {
-	    SAVEI32(PL_nexttoke[toke].next_type);
-	    SAVEVPTR(PL_nexttoke[toke].next_val);
-	    if (PL_madskills)
-		SAVEVPTR(PL_nexttoke[toke].next_mad);
-	}
-    }
-    SAVEI32(PL_curforce);
-    PL_curforce = -1;
-#else
-    if (PL_lex_state == LEX_KNOWNEXT) {
-	I32 toke = PL_nexttoke;
-	while (--toke >= 0) {
-	    SAVEI32(PL_nexttype[toke]);
-	    SAVEVPTR(PL_nextval[toke]);
-	}
-	SAVEI32(PL_nexttoke);
-    }
-#endif
     SAVECOPLINE(PL_curcop);
     SAVEDESTRUCTOR_X(restore_rsfp, PL_rsfp);
 
+#ifdef PERL_MAD
+    parser->curforce = -1;
+#else
+    parser->nexttoke = 0;
+#endif
     parser->copline = NOLINE;
     PL_lex_state = LEX_NORMAL;
     parser->expect = XSTATE;
     Newx(parser->lex_brackstack, 120, char);
     Newx(parser->lex_casestack, 12, char);
     *parser->lex_casestack = '\0';
-#ifndef PERL_MAD
-    PL_nexttoke = 0;
-#endif
 
     if (line) {
 	s = SvPV_const(line, len);
