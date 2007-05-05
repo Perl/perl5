@@ -990,6 +990,8 @@ LISTOP_children(o)
 #  define PMOP_pmreplstart(o)	o->op_pmstashstartu.op_pmreplstart
 #else
 #  define PMOP_pmreplstart(o)	o->op_pmreplstart
+#  define PMOP_pmpermflags(o)	o->op_pmpermflags
+#  define PMOP_pmdynflags(o)      o->op_pmdynflags
 #endif
 #define PMOP_pmnext(o)		o->op_pmnext
 #define PMOP_pmregexp(o)	PM_GETRE(o)
@@ -1085,6 +1087,18 @@ U32
 PMOP_pmflags(o)
 	B::PMOP		o
 
+#if PERL_VERSION < 9
+
+U32
+PMOP_pmpermflags(o)
+	B::PMOP		o
+
+U8
+PMOP_pmdynflags(o)
+        B::PMOP         o
+
+#endif
+
 void
 PMOP_precomp(o)
 	B::PMOP		o
@@ -1095,6 +1109,8 @@ PMOP_precomp(o)
 	if (rx)
 	    sv_setpvn(ST(0), rx->precomp, rx->prelen);
 
+#if PERL_VERSION >= 9
+
 void
 PMOP_reflags(o)
 	B::PMOP		o
@@ -1104,6 +1120,8 @@ PMOP_reflags(o)
 	rx = PM_GETRE(o);
 	if (rx)
 	    sv_setuv(ST(0), rx->extflags);
+
+#endif
 
 #define SVOP_sv(o)     cSVOPo->op_sv
 #define SVOP_gv(o)     ((GV*)cSVOPo->op_sv)

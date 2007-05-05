@@ -119,9 +119,9 @@ use Test::More tests => ( # per-pkg tests (function ct + require_ok)
 			  40 + 16	# Data::Dumper, Digest::MD5
 			  + 517 + 262	# B::Deparse, B
 			  + 595 + 190	# POSIX, IO::Socket
-			  + 323 * ($] > 5.009)
+			  + 345 * ($] > 5.009)
 			  + 17 * ($] >= 5.009003)
-			  - 344);	# fudge
+			  - 366);	# fudge
 
 require_ok("B::Concise");
 
@@ -176,10 +176,10 @@ my $testpkgs = {
 		     OPpSORT_REVERSE OPpTARGET_MY OPpTRANS_COMPLEMENT
 		     OPpTRANS_DELETE OPpTRANS_SQUASH PMf_CONTINUE
 		     PMf_EVAL PMf_EXTENDED PMf_FOLD PMf_GLOBAL PMf_KEEP
-		     PMf_MULTILINE PMf_ONCE PMf_SINGLELINE RXf_SKIPWHITE
+		     PMf_MULTILINE PMf_ONCE PMf_SINGLELINE
 		     POSTFIX SVf_FAKE SVf_IOK SVf_NOK SVf_POK SVf_ROK
 		     SVpad_OUR SVs_RMG SVs_SMG SWAP_CHILDREN OPpPAD_STATE
-		     /],
+		     /, $] > 5.009 ? ('RXf_SKIPWHITE') : ('PMf_SKIPWHITE')],
 		 },
 
     POSIX => { dflt => 'constant',			# all but 252/589
