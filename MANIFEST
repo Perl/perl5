@@ -7,7 +7,6 @@ av.h			Array value header
 beos/beos.c		BeOS port
 beos/beosish.h		BeOS port
 beos/nm.c		BeOS port
-bytecode.pl		Produces ext/B/Asmdata.pm
 cc_runtime.h		Macros need by runtime of compiler-generated code
 cflags.SH		A script that emits C compilation flags per file
 Changes			Differences from previous version
@@ -69,7 +68,6 @@ ext/attrs/attrs.pm		attrs extension Perl module
 ext/attrs/attrs.xs		attrs extension external subroutines
 ext/attrs/Makefile.PL		attrs extension makefile writer
 ext/attrs/t/attrs.t		See if attrs works with C<sub : attrs>
-ext/B/B/Asmdata.pm	Compiler backend data for assembler
 ext/B/B/Concise.pm	Compiler Concise backend
 ext/B/B/Debug.pm	Compiler Debug backend
 ext/B/B/Deparse.pm	Compiler Deparse backend

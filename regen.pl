@@ -18,7 +18,6 @@ safer_unlink ("warnings.h", "lib/warnings.pm");
 
 my %gen = (
 	   'autodoc.pl'  => [qw[pod/perlapi.pod pod/perlintern.pod]],
-	   'bytecode.pl' => [qw[ext/B/B/Asmdata.pm]],
 	   'embed.pl'    => [qw[proto.h embed.h embedvar.h global.sym
 				perlapi.h perlapi.c]],
 	   'keywords.pl' => [qw[keywords.h]],
@@ -45,7 +44,7 @@ sub do_cksum {
     return %cksum;
 }
 
-foreach my $pl (qw (keywords.pl opcode.pl embed.pl bytecode.pl
+foreach my $pl (qw (keywords.pl opcode.pl embed.pl
 		    regcomp.pl warnings.pl autodoc.pl reentr.pl)) {
   print "$^X $pl\n";
   my %cksum0;
