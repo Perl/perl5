@@ -9581,8 +9581,8 @@ Perl_parser_dup(pTHX_ const yy_parser *proto, CLONE_PARAMS* param)
     parser->linestr	= sv_dup_inc(proto->linestr, param);
 
     {
-	char *ols = SvPVX(proto->linestr);
-	char *ls  = SvPVX(parser->linestr);
+	char * const ols = SvPVX(proto->linestr);
+	char * const ls  = SvPVX(parser->linestr);
 
 	parser->bufptr	    = ls + (proto->bufptr >= ols ?
 				    proto->bufptr -  ols : 0);

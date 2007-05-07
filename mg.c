@@ -2243,10 +2243,10 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
       setparen:
-	    if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
+	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
             CALLREG_NUMBUF_STORE((REGEXP * const)rx,paren,sv);
             break;
-	    } else {
+	} else {
             /* Croak with a READONLY error when a numbered match var is
              * set without a previous pattern match. Unless it's C<local $1>
              */
