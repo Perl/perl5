@@ -8,7 +8,7 @@
 # But it is better to test the numerical functionality, instead of not testing
 # it at all.
 
-use Test;
+use Test::More;
 use strict;
 
 BEGIN
@@ -62,10 +62,8 @@ sub test_broot
   my ($x,$n,$y,$scale,$result) = @_;
 
   my $s = $scale || 'undef';
-  print "# Try: $cl $x->bpow($n)->broot($y,$s) == $result:\n"; 
-   ok ($cl->new($x)->bpow($n)->broot($y,$scale),$result);
+  is ($cl->new($x)->bpow($n)->broot($y,$scale),$result, "Try: $cl $x->bpow($n)->broot($y,$s) == $result");
   $result =~ s/\..*//;
-  print "# Try: $c $x->bpow($n)->broot($y,$s) == $result:\n"; 
-   ok ($c->new($x)->bpow($n)->broot($y,$scale),$result);
+  is ($c->new($x)->bpow($n)->broot($y,$scale),$result, "Try: $c $x->bpow($n)->broot($y,$s) == $result");
   }
 

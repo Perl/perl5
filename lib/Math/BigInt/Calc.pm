@@ -4,9 +4,7 @@ use 5.006002;
 use strict;
 # use warnings;	# dont use warnings for older Perls
 
-use vars qw/$VERSION/;
-
-$VERSION = '0.48';
+our $VERSION = '0.50';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -33,7 +31,7 @@ $VERSION = '0.48';
 # global constants, flags and accessory
 
 # announce that we are compatible with MBI v1.70 and up
-sub api_version () { 1; }
+sub api_version () { 2; }
  
 # constants for easier life
 my ($BASE,$BASE_LEN,$MBASE,$RBASE,$MAX_VAL,$BASE_LEN_SMALL);
@@ -42,8 +40,9 @@ my ($AND_MASK,$XOR_MASK,$OR_MASK);
 
 sub _base_len 
   {
-  # set/get the BASE_LEN and assorted other, connected values
-  # used only be the testsuite, set is used only by the BEGIN block below
+  # Set/get the BASE_LEN and assorted other, connected values.
+  # Used only by the testsuite, the set variant is used only by the BEGIN
+  # block below:
   shift;
 
   my $b = shift;
@@ -76,10 +75,8 @@ sub _base_len
     undef &_mul;
     undef &_div;
 
-    # $caught & 1 != 0 => cannot use MUL
-    # $caught & 2 != 0 => cannot use DIV
-    # The parens around ($caught & 1) were important, indeed, if we would use
-    # & here.
+    # ($caught & 1) != 0 => cannot use MUL
+    # ($caught & 2) != 0 => cannot use DIV
     if ($caught == 2)				# 2
       {
       # must USE_MUL since we cannot use DIV
@@ -172,6 +169,9 @@ BEGIN
   $AND_MASK = __PACKAGE__->_new( ( 2 ** $AND_BITS ));
   $XOR_MASK = __PACKAGE__->_new( ( 2 ** $XOR_BITS ));
   $OR_MASK = __PACKAGE__->_new( ( 2 ** $OR_BITS ));
+
+  # We can compute the approximate lenght no faster than the real length:
+  *_alen = \&_len;
   }
 
 ###############################################################################
@@ -198,6 +198,16 @@ sub _ten
   {
   # create a 10 (used internally for shifting)
   [ 10 ];
+  }
+
+sub _1ex
+  {
+  # create a 1Ex
+  my $rem = $_[1] % $BASE_LEN;		# remainder
+  my $parts = $_[1] / $BASE_LEN;	# parts
+
+  # 000000, 000000, 100 
+  [ (0) x $parts, '1' . ('0' x $rem) ];
   }
 
 sub _copy
@@ -425,7 +435,8 @@ sub _mul_use_mul
     $xi = shift @prod || 0;	# || 0 makes v5.005_3 happy
     }
   push @$xv, @prod;
-  __strip_zeros($xv);
+  # can't have leading zeros
+#  __strip_zeros($xv);
   $xv;
   }                                                                             
 
@@ -435,7 +446,7 @@ sub _mul_use_div
   # multiply two numbers in internal representation
   # modifies first arg, second need not be different from first
   my ($c,$xv,$yv) = @_;
- 
+
   if (@$yv == 1)
     {
     # shortcut for two small numbers, also handles $x == 0
@@ -460,7 +471,9 @@ sub _mul_use_div
     my $y = $yv->[0]; my $car = 0;
     foreach my $i (@$xv)
       {
+      # old, slower code (before use integer;)
       $i = $i * $y + $car; $car = int($i / $MBASE); $i -= $car * $MBASE;
+      #$i = $i * $y + $car; $i -= ($car = $i / $MBASE) * $MBASE;
       }
     push @$xv, $car if $car != 0;
     return $xv;
@@ -480,14 +493,14 @@ sub _mul_use_div
     for $yi (@$yv)
       {
       $prod = $xi * $yi + ($prod[$cty] || 0) + $car;
-      $prod[$cty++] =
-       $prod - ($car = int($prod / $MBASE)) * $MBASE;
+      $prod[$cty++] = $prod - ($car = int($prod / $MBASE)) * $MBASE;
       }
     $prod[$cty] += $car if $car; # need really to check for 0?
     $xi = shift @prod || 0;	# || 0 makes v5.005_3 happy
     }
   push @$xv, @prod;
-  __strip_zeros($xv);
+  # can't have leading zeros
+#  __strip_zeros($xv);
   $xv;
   }                                                                             
 
@@ -907,7 +920,7 @@ sub _acmp
 
 sub _len
   {
-  # compute number of digits
+  # compute number of digits in base 10
 
   # int() because add/sub sometimes leaves strings (like '00005') instead of
   # '5' in this place, thus causing length() to report wrong length
@@ -1242,17 +1255,132 @@ sub _pow
   $cx;
   }
 
+sub _nok
+  {
+  # n over k
+  # ref to array, return ref to array
+  my ($c,$n,$k) = @_;
+
+  # ( 7 )    7!          7*6*5 * 4*3*2*1   7 * 6 * 5
+  # ( - ) = --------- =  --------------- = ---------
+  # ( 3 )   3! (7-3)!    3*2*1 * 4*3*2*1   3 * 2 * 1 
+
+  # compute n - k + 2 (so we start with 5 in the example above)
+  my $x = _copy($c,$n);
+
+  _sub($c,$n,$k);
+  if (!_is_one($c,$n))
+    {
+    _inc($c,$n);
+    my $f = _copy($c,$n); _inc($c,$f);		# n = 5, f = 6, d = 2
+    my $d = _two($c);
+    while (_acmp($c,$f,$x) <= 0)		# f < n ?
+      {
+      # n = (n * f / d) == 5 * 6 / 2 => n == 3
+      $n = _mul($c,$n,$f); $n = _div($c,$n,$d);
+      # f = 7, d = 3
+      _inc($c,$f); _inc($c,$d);
+      }
+    }
+  else 
+    {
+    # keep ref to $n and set it to 1
+    splice (@$n,1); $n->[0] = 1;
+    }
+  $n;
+  }
+
+my @factorials = (
+  1,
+  1,
+  2,
+  2*3,
+  2*3*4,
+  2*3*4*5,
+  2*3*4*5*6,
+  2*3*4*5*6*7,
+);
+
 sub _fac
   {
   # factorial of $x
   # ref to array, return ref to array
   my ($c,$cx) = @_;
 
-  if ((@$cx == 1) && ($cx->[0] <= 2))
+  if ((@$cx == 1) && ($cx->[0] <= 7))
     {
-    $cx->[0] ||= 1;		# 0 => 1, 1 => 1, 2 => 2
+    $cx->[0] = $factorials[$cx->[0]];		# 0 => 1, 1 => 1, 2 => 2 etc.
     return $cx;
     }
+
+  if ((@$cx == 1) && 		# we do this only if $x >= 12 and $x <= 7000
+      ($cx->[0] >= 12 && $cx->[0] < 7000))
+    {
+
+  # Calculate (k-j) * (k-j+1) ... k .. (k+j-1) * (k + j)
+  # See http://blogten.blogspot.com/2007/01/calculating-n.html
+  # The above series can be expressed as factors:
+  #   k * k - (j - i) * 2
+  # We cache k*k, and calculate (j * j) as the sum of the first j odd integers
+
+  # This will not work when N exceeds the storage of a Perl scalar, however,
+  # in this case the algorithm would be way to slow to terminate, anyway.
+
+  # As soon as the last element of $cx is 0, we split it up and remember
+  # how many zeors we got so far. The reason is that n! will accumulate
+  # zeros at the end rather fast.
+  my $zero_elements = 0;
+
+  # If n is even, set n = n -1
+  my $k = _num($c,$cx); my $even = 1;
+  if (($k & 1) == 0)
+    {
+    $even = $k; $k --;
+    }
+  # set k to the center point
+  $k = ($k + 1) / 2;
+#  print "k $k even: $even\n";
+  # now calculate k * k
+  my $k2 = $k * $k;
+  my $odd = 1; my $sum = 1;
+  my $i = $k - 1;
+  # keep reference to x
+  my $new_x = _new($c, $k * $even);
+  @$cx = @$new_x;
+  if ($cx->[0] == 0)
+    {
+    $zero_elements ++; shift @$cx;
+    }
+#  print STDERR "x = ", _str($c,$cx),"\n";
+  my $BASE2 = int(sqrt($BASE))-1;
+  my $j = 1; 
+  while ($j <= $i)
+    {
+    my $m = ($k2 - $sum); $odd += 2; $sum += $odd; $j++;
+    while ($j <= $i && ($m < $BASE2) && (($k2 - $sum) < $BASE2))
+      {
+      $m *= ($k2 - $sum);
+      $odd += 2; $sum += $odd; $j++;
+#      print STDERR "\n k2 $k2 m $m sum $sum odd $odd\n"; sleep(1);
+      }
+    if ($m < $BASE)
+      {
+      _mul($c,$cx,[$m]);
+      }
+    else
+      {
+      _mul($c,$cx,$c->_new($m));
+      }
+    if ($cx->[0] == 0)
+      {
+      $zero_elements ++; shift @$cx;
+      }
+#    print STDERR "Calculate $k2 - $sum = $m (x = ", _str($c,$cx),")\n";
+    }
+  # multiply in the zeros again
+  unshift @$cx, (0) x $zero_elements; 
+  return $cx;
+  }
 
   # go forward until $base is exceeded
   # limit is either $x steps (steps == 100 means a result always too high) or
@@ -1281,19 +1409,32 @@ sub _fac
     $n = _copy($c,$cx);
     }
 
-  $cx->[0] = $last; splice (@$cx,1);		# keep ref to $x
+  # Set $cx to the last result below $BASE (but keep ref to $x)
+  $cx->[0] = $last; splice (@$cx,1);
+  # As soon as the last element of $cx is 0, we split it up and remember
+  # how many zeors we got so far. The reason is that n! will accumulate
+  # zeros at the end rather fast.
   my $zero_elements = 0;
 
   # do left-over steps fit into a scalar?
   if (ref $n eq 'ARRAY')
     {
     # No, so use slower inc() & cmp()
-    $step = [$step];
-    while (_acmp($step,$n) <= 0)
+    # ($n is at least $BASE here)
+    my $base_2 = int(sqrt($BASE)) - 1;
+    #print STDERR "base_2: $base_2\n"; 
+    while ($step < $base_2)
       {
-      # as soon as the last element of $cx is 0, we split it up and remember
-      # how many zeors we got so far. The reason is that n! will accumulate
-      # zeros at the end rather fast.
+      if ($cx->[0] == 0)
+        {
+        $zero_elements ++; shift @$cx;
+        }
+      my $b = $step * ($step + 1); $step += 2;
+      _mul($c,$cx,[$b]);
+      }
+    $step = [$step];
+    while (_acmp($c,$step,$n) <= 0)
+      {
       if ($cx->[0] == 0)
         {
         $zero_elements ++; shift @$cx;
@@ -1304,23 +1445,45 @@ sub _fac
   else
     {
     # Yes, so we can speed it up slightly
-    while ($step <= $n)
+  
+#    print "# left over steps $n\n";
+
+    my $base_4 = int(sqrt(sqrt($BASE))) - 2;
+    #print STDERR "base_4: $base_4\n";
+    my $n4 = $n - 4; 
+    while ($step < $n4 && $step < $base_4)
       {
-      # When the last element of $cx is 0, we split it up and remember
-      # how many we got so far. The reason is that n! will accumulate
-      # zeros at the end rather fast.
       if ($cx->[0] == 0)
         {
         $zero_elements ++; shift @$cx;
         }
+      my $b = $step * ($step + 1); $step += 2; $b *= $step * ($step + 1); $step += 2;
+      _mul($c,$cx,[$b]);
+      }
+    my $base_2 = int(sqrt($BASE)) - 1;
+    my $n2 = $n - 2; 
+    #print STDERR "base_2: $base_2\n"; 
+    while ($step < $n2 && $step < $base_2)
+      {
+      if ($cx->[0] == 0)
+        {
+        $zero_elements ++; shift @$cx;
+        }
+      my $b = $step * ($step + 1); $step += 2;
+      _mul($c,$cx,[$b]);
+      }
+    # do what's left over
+    while ($step <= $n)
+      {
       _mul($c,$cx,[$step]); $step++;
+      if ($cx->[0] == 0)
+        {
+        $zero_elements ++; shift @$cx;
+        }
       }
     }
   # multiply in the zeros again
-  while ($zero_elements-- > 0)
-    {
-    unshift @$cx, 0; 
-    }
+  unshift @$cx, (0) x $zero_elements;
   $cx;			# return result
   }
 
@@ -1430,7 +1593,7 @@ sub _sqrt
 
   if (scalar @$x == 1)
     {
-    # fit's into one Perl scalar, so result can be computed directly
+    # fits into one Perl scalar, so result can be computed directly
     $x->[0] = int(sqrt($x->[0]));
     return $x;
     } 
@@ -1513,7 +1676,7 @@ sub _root
       }
     else
       {
-      # fit's into one Perl scalar, so result can be computed directly
+      # fits into one Perl scalar, so result can be computed directly
       # cannot use int() here, because it rounds wrongly (try 
       # (81 ** 3) ** (1/3) to see what I mean)
       #$x->[0] = int( $x->[0] ** (1 / $n->[0]) );
@@ -1722,7 +1885,7 @@ sub _as_hex
   # convert a decimal number to hex (ref to array, return ref to string)
   my ($c,$x) = @_;
 
-  # fit's into one element (handle also 0x0 case)
+  # fits into one element (handle also 0x0 case)
   return sprintf("0x%x",$x->[0]) if @$x == 1;
 
   my $x1 = _copy($c,$x);
@@ -1752,7 +1915,7 @@ sub _as_bin
   # convert a decimal number to bin (ref to array, return ref to string)
   my ($c,$x) = @_;
 
-  # fit's into one element (and Perl recent enough), handle also 0b0 case
+  # fits into one element (and Perl recent enough), handle also 0b0 case
   # handle zero case for older Perls
   if ($] <= 5.005 && @$x == 1 && $x->[0] == 0)
     {
@@ -1790,7 +1953,7 @@ sub _as_oct
   # convert a decimal number to octal (ref to array, return ref to string)
   my ($c,$x) = @_;
 
-  # fit's into one element (handle also 0 case)
+  # fits into one element (handle also 0 case)
   return sprintf("0%o",$x->[0]) if @$x == 1;
 
   my $x1 = _copy($c,$x);
@@ -1810,7 +1973,7 @@ sub _as_oct
 
 sub _from_oct
   {
-  # convert a octal number to decimal (ref to string, return ref to array)
+  # convert a octal number to decimal (string, return ref to array)
   my ($c,$os) = @_;
 
   # for older Perls, play safe
@@ -1836,7 +1999,7 @@ sub _from_oct
 
 sub _from_hex
   {
-  # convert a hex number to decimal (ref to string, return ref to array)
+  # convert a hex number to decimal (string, return ref to array)
   my ($c,$hs) = @_;
 
   my $m = _new($c, 0x10000000);			# 28 bit at a time (<32 bit!)
@@ -1874,7 +2037,7 @@ sub _from_hex
 
 sub _from_bin
   {
-  # convert a hex number to decimal (ref to string, return ref to array)
+  # convert a hex number to decimal (string, return ref to array)
   my ($c,$bs) = @_;
 
   # instead of converting X (8) bit at a time, it is faster to "convert" the
@@ -2007,7 +2170,7 @@ version like 'Pari'.
 The following functions MUST be defined in order to support the use by
 Math::BigInt v1.70 or later:
 
-	api_version()	return API version, minimum 1 for v1.70
+	api_version()	return API version, 1 for v1.70, 2 for v1.83
 	_new(string)	return ref to new object from ref to decimal string
 	_zero()		return a new object with value 0
 	_one()		return a new object with value 1
@@ -2054,9 +2217,9 @@ Math::BigInt v1.70 or later:
 	_check(obj)	check whether internal representation is still intact
 			return 0 for ok, otherwise error message as string
 
-	_from_hex(str)	return ref to new object from ref to hexadecimal string
-	_from_bin(str)	return ref to new object from ref to binary string
-	_from_oct(str)	return ref to new object from ref to octal string
+	_from_hex(str)	return new object from a hexadecimal string
+	_from_bin(str)	return new object from a binary string
+	_from_oct(str)	return new object from an octal string
 	
 	_as_hex(str)	return string containing the value as
 			unsigned hex string, with the '0x' prepended.
@@ -2073,11 +2236,11 @@ Math::BigInt v1.70 or later:
 	_and(obj1,obj2)	AND (bit-wise) object 1 with object 2
 	_or(obj1,obj2)	OR (bit-wise) object 1 with object 2
 
-	_mod(obj,obj)	Return remainder of div of the 1st by the 2nd object
+	_mod(obj1,obj2)	Return remainder of div of the 1st by the 2nd object
 	_sqrt(obj)	return the square root of object (truncated to int)
 	_root(obj)	return the n'th (n >= 3) root of obj (truncated to int)
 	_fac(obj)	return factorial of object 1 (1*2*3*4..)
-	_pow(obj,obj)	return object 1 to the power of object 2
+	_pow(obj1,obj2)	return object 1 to the power of object 2
 			return undef for NaN
 	_zeros(obj)	return number of trailing decimal zeros
 	_modinv		return inverse modulus
@@ -2090,6 +2253,14 @@ Math::BigInt v1.70 or later:
 			 undef : unknown whether result is exactly RESULT
         _gcd(obj,obj)	return Greatest Common Divisor of two objects
 
+The following functions are REQUIRED for an api_version of 2 or greater:
+
+	_1ex($x)	create the number 1Ex where x >= 0
+	_alen(obj)	returns approximate count of the decimal digits of the
+			object. This estimate MUST always be greater or equal
+			to what _len() returns.
+        _nok(n,k)	calculate n over k (binomial coefficient)
+
 The following functions are optional, and can be defined if the underlying lib
 has a fast way to do them. If undefined, Math::BigInt will use pure Perl (hence
 slow) fallback routines to emulate these:
@@ -2097,7 +2268,6 @@ slow) fallback routines to emulate these:
 	_signed_or
 	_signed_and
 	_signed_xor
-
 
 Input strings come in as unsigned but with prefix (i.e. as '123', '0xabc'
 or '0b1101').
@@ -2109,7 +2279,7 @@ cases.
 
 The first parameter can be modified, that includes the possibility that you
 return a reference to a completely different object instead. Although keeping
-the reference and just changing it's contents is preferred over creating and
+the reference and just changing its contents is preferred over creating and
 returning a different reference.
 
 Return values are always references to objects, strings, or true/false for
@@ -2145,7 +2315,7 @@ Fixed, speed-up, streamlined and enhanced by Tels 2001 - 2007.
 
 =head1 SEE ALSO
 
-L<Math::BigInt>, L<Math::BigFloat>, L<Math::BigInt::BitVect>,
+L<Math::BigInt>, L<Math::BigFloat>,
 L<Math::BigInt::GMP>, L<Math::BigInt::FastCalc> and L<Math::BigInt::Pari>.
 
 =cut

@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.54';
+$VERSION = '1.57';
 require 5.006002;
 
 require Exporter;
@@ -599,6 +599,8 @@ sub badd
     {
     ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
     }
+ 
+  return $x if $x->modify('badd');
 
   # inf and NaN handling
   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/))
@@ -676,6 +678,8 @@ sub binc
   # increment arg by one
   my ($self,$x,@r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
 
+  return $x if $x->modify('binc');
+
   if ($x->{_es} eq '-')
     {
     return $x->badd($self->bone(),@r);	#  digits after dot
@@ -710,6 +714,8 @@ sub bdec
   {
   # decrement arg by one
   my ($self,$x,@r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
+
+  return $x if $x->modify('bdec');
 
   if ($x->{_es} eq '-')
     {
@@ -748,6 +754,8 @@ sub blog
   {
   my ($self,$x,$base,$a,$p,$r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
 
+  return $x if $x->modify('blog');
+
   # $base > 0, $base != 1; if $base == undef default to $base == e
   # $x >= 0
 
@@ -777,7 +785,7 @@ sub blog
     }
 
   return $x->bzero(@params) if $x->is_one();
-  # base not defined => base == Euler's constant e
+  # base not defined => base == Euler's number e
   if (defined $base)
     {
     # make object, since we don't feed it through objectify() to still get the
@@ -878,10 +886,69 @@ sub blog
   $x;
   }
 
+sub _len_to_steps
+  {
+  # Given D (digits in decimal), compute N so that N! (N factorial) is
+  # at least D digits long. D should be at least 50.
+  my $d = shift;
+
+  # two constants for the Ramanujan estimate of ln(N!)
+  my $lg2 = log(2 * 3.14159265) / 2;
+  my $lg10 = log(10);
+
+  # D = 50 => N => 42, so L = 40 and R = 50
+  my $l = 40; my $r = $d;
+
+  # Otherwise this does not work under -Mbignum and we do not yet have "no bignum;" :(
+  $l = $l->numify if ref($l);
+  $r = $r->numify if ref($r);
+  $lg2 = $lg2->numify if ref($lg2);
+  $lg10 = $lg10->numify if ref($lg10);
+
+  # binary search for the right value (could this be written as the reverse of lg(n!)?)
+  while ($r - $l > 1)
+    {
+    my $n = int(($r - $l) / 2) + $l;
+    my $ramanujan = 
+      int(($n * log($n) - $n + log( $n * (1 + 4*$n*(1+2*$n)) ) / 6 + $lg2) / $lg10);
+    $ramanujan > $d ? $r = $n : $l = $n;
+    }
+  $l;
+  }
+
+sub bnok
+  {
+  # Calculate n over k (binomial coefficient or "choose" function) as integer.
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,@r) = objectify(2,@_);
+    }
+
+  return $x if $x->modify('bnok');
+
+  return $x->bnan() if $x->is_nan() || $y->is_nan();
+  return $x->binf() if $x->is_inf();
+
+  my $u = $x->as_int();
+  $u->bnok($y->as_int());
+
+  $x->{_m} = $u->{value};
+  $x->{_e} = $MBI->_zero();
+  $x->{_es} = '+';
+  $x->{sign} = '+';
+  $x->bnorm(@r);
+  }
+
 sub bexp
   {
-  # Calculate e ** X (Euler's constant to the power of X)
+  # Calculate e ** X (Euler's number to the power of X)
   my ($self,$x,$a,$p,$r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
+
+  return $x if $x->modify('bexp');
 
   return $x->binf() if $x->{sign} eq '+inf';
   return $x->bzero() if $x->{sign} eq '-inf';
@@ -931,7 +998,6 @@ sub bexp
   local $Math::BigFloat::downgrade = undef;
 
   my $x_org = $x->copy();
-  delete $x_org->{_a}; delete $x_org->{_p};
 
   # We use the following Taylor series:
 
@@ -977,42 +1043,70 @@ sub bexp
   # -- + -- + -- + -- + -- + --- + --- + ---- = -----
   # 1     1    2    6   24   120   720   5040   5040
 
-  # Note that we cannot simple reduce 13700/5040 to 685/252.
+  # Note that we cannot simple reduce 13700/5040 to 685/252, but must keep A and B!
 
-  # So we start with A / B = 13490 / 5040 and F = 8
-  my $A = $MBI->_new(13700);
-  my $B = $MBI->_new(5040);
-  my $F = $MBI->_new(8);
-
-  # Code based on big rational math:
-  my $limit = $MBI->_new('1' . '0' x ($scale - 2));	# scale=5 => 100000
-
-  # while $B is not yet too big (making 1/$B too small)
-  while ($MBI->_acmp($B,$limit) < 0)
+  if ($scale <= 75)
     {
-    # calculate $a * $f + 1
-    $A = $MBI->_mul($A, $F);
-    $A = $MBI->_inc($A);
-    # calculate $b * $f
-    $B = $MBI->_mul($B, $F);
-    # increment f
-    $F = $MBI->_inc($F);
-    }
-
-  $x = $self->new($MBI->_str($A))->bdiv($MBI->_str($B), $scale);
-
-  delete $x->{_a}; delete $x->{_p};
-  # raise $x to the wanted power
-  $x->bpow($x_org, $scale) unless $x_org->is_one();
-
-  # shortcut to not run through _find_round_parameters again
-  if (defined $params[0])
-    {
-    $x->bround($params[0],$params[2]);		# then round accordingly
+    # set $x directly from a cached string form
+    $x->{_m} = $MBI->_new(
+    "27182818284590452353602874713526624977572470936999595749669676277240766303535476");
+    $x->{sign} = '+';
+    $x->{_es} = '-';
+    $x->{_e} = $MBI->_new(79);
     }
   else
     {
-    $x->bfround($params[1],$params[2]);		# then round accordingly
+    # compute A and B so that e = A / B.
+ 
+    # After some terms we end up with this, so we use it as a starting point:
+    my $A = $MBI->_new("90933395208605785401971970164779391644753259799242");
+    my $F = $MBI->_new(42); my $step = 42;
+
+    # Compute how many steps we need to take to get $A and $B sufficiently big
+    my $steps = _len_to_steps($scale - 4);
+#    print STDERR "# Doing $steps steps for ", $scale-4, " digits\n";
+    while ($step++ <= $steps)
+      {
+      # calculate $a * $f + 1
+      $A = $MBI->_mul($A, $F);
+      $A = $MBI->_inc($A);
+      # increment f
+      $F = $MBI->_inc($F);
+      }
+    # compute $B as factorial of $steps (this is faster than doing it manually)
+    my $B = $MBI->_fac($MBI->_new($steps));
+    
+#  print "A ", $MBI->_str($A), "\nB ", $MBI->_str($B), "\n";
+
+    # compute A/B with $scale digits in the result (truncate, not round)
+    $A = $MBI->_lsft( $A, $MBI->_new($scale), 10);
+    $A = $MBI->_div( $A, $B );
+
+    $x->{_m} = $A;
+    $x->{sign} = '+';
+    $x->{_es} = '-';
+    $x->{_e} = $MBI->_new($scale);
+    }
+
+  # $x contains now an estimate of e, with some surplus digits, so we can round
+  if (!$x_org->is_one())
+    {
+    # raise $x to the wanted power and round it in one step:
+    $x->bpow($x_org, @params);
+    }
+  else
+    {
+    # else just round the already computed result
+    delete $x->{_a}; delete $x->{_p};
+    # shortcut to not run through _find_round_parameters again
+    if (defined $params[0])
+      {
+      $x->bround($params[0],$params[2]);		# then round accordingly
+      }
+    else
+      {
+      $x->bfround($params[1],$params[2]);		# then round accordingly
+      }
     }
   if ($fallback)
     {
@@ -1466,6 +1560,8 @@ sub bmul
     ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
     }
 
+  return $x if $x->modify('bmul');
+
   return $x->bnan() if (($x->{sign} eq $nan) || ($y->{sign} eq $nan));
 
   # inf handling
@@ -1506,6 +1602,8 @@ sub bdiv
     {
     ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
     }
+
+  return $x if $x->modify('bdiv');
 
   return $self->_div_inf($x,$y)
    if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/) || $y->is_zero());
@@ -1642,6 +1740,8 @@ sub bmod
     ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
     }
 
+  return $x if $x->modify('bmod');
+
   # handle NaN, inf, -inf
   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/))
     {
@@ -1736,6 +1836,8 @@ sub broot
     {
     ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
     }
+
+  return $x if $x->modify('broot');
 
   # NaN handling: $x ** 1/0, x or y NaN, or y inf/-inf or y == 0
   return $x->bnan() if $x->{sign} !~ /^\+/ || $y->is_zero() ||
@@ -1860,6 +1962,8 @@ sub bsqrt
   { 
   # calculate square root
   my ($self,$x,$a,$p,$r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
+
+  return $x if $x->modify('bsqrt');
 
   return $x->bnan() if $x->{sign} !~ /^[+]/;	# NaN, -inf or < 0
   return $x if $x->{sign} eq '+inf';		# sqrt(inf) == inf
@@ -2030,7 +2134,9 @@ sub bfac
   # objectify is costly, so avoid it
   ($self,$x,@r) = objectify(1,@_) if !ref($x);
 
- return $x if $x->{sign} eq '+inf';	# inf => inf
+  # inf => inf
+  return $x if $x->modify('bfac') || $x->{sign} eq '+inf';	
+
   return $x->bnan() 
     if (($x->{sign} ne '+') ||		# inf, NaN, <0 etc => NaN
      ($x->{_es} ne '+'));		# digits after dot?
@@ -2160,6 +2266,8 @@ sub bpow
     {
     ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
     }
+
+  return $x if $x->modify('bpow');
 
   return $x->bnan() if $x->{sign} eq $nan || $y->{sign} eq $nan;
   return $x if $x->{sign} =~ /^[+-]inf$/;
@@ -2539,6 +2647,7 @@ sub import
   my $self = shift;
   my $l = scalar @_;
   my $lib = ''; my @a;
+  my $lib_kind = 'try';
   $IMPORT=1;
   for ( my $i = 0; $i < $l ; $i++)
     {
@@ -2560,10 +2669,11 @@ sub import
       $downgrade = $_[$i+1];		# or undef to disable
       $i++;
       }
-    elsif ($_[$i] eq 'lib')
+    elsif ($_[$i] =~ /^(lib|try|only)\z/)
       {
       # alternative library
       $lib = $_[$i+1] || '';		# default Calc
+      $lib_kind = $1;			# lib, try or only
       $i++;
       }
     elsif ($_[$i] eq 'with')
@@ -2585,7 +2695,7 @@ sub import
   if ((defined $mbilib) && ($MBI eq 'Math::BigInt::Calc'))
     {
     # MBI already loaded
-    Math::BigInt->import('try',"$lib,$mbilib", 'objectify');
+    Math::BigInt->import( $lib_kind, "$lib,$mbilib", 'objectify');
     }
   else
     {
@@ -2598,7 +2708,7 @@ sub import
     # Perl < 5.6.0 dies with "out of memory!" when eval() and ':constant' is
     # used in the same script, or eval inside import(). So we require MBI:
     require Math::BigInt;
-    Math::BigInt->import( try => $lib, 'objectify' );
+    Math::BigInt->import( $lib_kind => $lib, 'objectify' );
     }
   if ($@)
     {
@@ -2721,6 +2831,8 @@ sub as_number
   {
   # return copy as a bigint representation of this BigFloat number
   my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
+
+  return $x if $x->modify('as_number');
 
   my $z = $MBI->_copy($x->{_m});
   if ($x->{_es} eq '-')			# < 0

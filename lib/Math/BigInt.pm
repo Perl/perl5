@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 use 5.006002;
 
-$VERSION = '1.82';
+$VERSION = '1.86';
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(objectify bgcd blcm); 
@@ -1265,6 +1265,57 @@ sub blog
   $x->round(@r);
   }
 
+sub bnok
+  {
+  # Calculate n over k (binomial coefficient or "choose" function) as integer.
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,@r) = objectify(2,@_);
+    }
+
+  return $x if $x->modify('bnok');
+  return $x->bnan() if $x->{sign} eq 'NaN' || $y->{sign} eq 'NaN';
+  return $x->binf() if $x->{sign} eq '+inf';
+
+  # k > n or k < 0 => 0
+  my $cmp = $x->bacmp($y);
+  return $x->bzero() if $cmp < 0 || $y->{sign} =~ /^-/;
+  # k == n => 1
+  return $x->bone(@r) if $cmp == 0;
+
+  if ($CALC->can('_nok'))
+    {
+    $x->{value} = $CALC->_nok($x->{value},$y->{value});
+    }
+  else
+    {
+    # ( 7 )    7!          7*6*5 * 4*3*2*1   7 * 6 * 5
+    # ( - ) = --------- =  --------------- = ---------
+    # ( 3 )   3! (7-3)!    3*2*1 * 4*3*2*1   3 * 2 * 1 
+
+    # compute n - k + 2 (so we start with 5 in the example above)
+    my $z = $x - $y;
+    if (!$z->is_one())
+      {
+      $z->binc();
+      my $r = $z->copy(); $z->binc();
+      my $d = $self->new(2);
+      while ($z->bacmp($x) <= 0)		# f < x ?
+        {
+        $r->bmul($z); $r->bdiv($d);
+        $z->binc(); $d->binc();
+        }
+      $x->{value} = $r->{value}; $x->{sign} = '+';
+      }
+    else { $x->bone(); }
+    }
+  $x->round(@r);
+  }
+
 sub bexp
   {
   # Calculate e ** $x (Euler's number to the power of X), truncated to
@@ -1281,6 +1332,7 @@ sub bexp
   my $u;
   {
     # run through Math::BigFloat unless told otherwise
+    require Math::BigFloat unless defined $upgrade;
     local $upgrade = 'Math::BigFloat' unless defined $upgrade;
     # calculate result, truncate it to integer
     $u = $upgrade->bexp($upgrade->new($x),@r);
@@ -2880,6 +2932,8 @@ Math::BigInt - Arbitrary size integer/float math package
   $x->broot($y);	   # $y'th root of $x (e.g. $y == 3 => cubic root)
   $x->bfac();		   # factorial of $x (1*2*3*4*..$x)
 
+  $x->bnok($y);		   # x over y (binomial coefficient n over k)
+
   $x->blog();		   # logarithm of $x to base e (Euler's number)
   $x->blog($base);	   # logarithm of $x to base $base (f.i. 2)
   $x->bexp();		   # calculate e ** $x where e is Euler's number
@@ -3417,6 +3471,19 @@ Calculates the expression C<e ** $x> where C<e> is Euler's number.
 This method was added in v1.82 of Math::BigInt (April 2007).
 
 See also L<blog()>.
+
+=head2 bnok()
+
+	$x->bnok($y);		   # x over y (binomial coefficient n over k)
+
+Calculates the binomial coefficient n over k, also called the "choose"
+function. The result is equivalent to:
+
+	( n )      n!
+	| - |  = -------
+	( k )    k!(n-k)!
+
+This method was added in v1.84 of Math::BigInt (April 2007).
 
 =head2 blsft()
 
