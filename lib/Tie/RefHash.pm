@@ -2,7 +2,9 @@ package Tie::RefHash;
 
 use vars qw/$VERSION/;
 
-$VERSION = "1.35_01";
+$VERSION = "1.37";
+
+use 5.005;
 
 =head1 NAME
 
@@ -92,22 +94,21 @@ use strict;
 use Carp qw/croak/;
 
 BEGIN {
+  local $@;
   # determine whether we need to take care of threads
   use Config ();
   my $usethreads = $Config::Config{usethreads}; # && exists $INC{"threads.pm"}
   *_HAS_THREADS = $usethreads ? sub () { 1 } : sub () { 0 };
-  if ($usethreads) {
-    # The magic of taint tunneling means that we can't do this require in the
-    # same statement as the boolean check on $usethreads, as $usethreads is
-    # tainted.
-    require Scalar::Util;
-  }
+  *_HAS_SCALAR_UTIL = eval { require Scalar::Util; 1 } ? sub () { 1 } : sub () { 0 };
+  *_HAS_WEAKEN = defined(&Scalar::Util::weaken) ? sub () { 1 } : sub () { 0 };
 }
 
 BEGIN {
   # create a refaddr function
 
-  if ( eval { require Scalar::Util; 1 } ) {
+  local $@;
+
+  if ( _HAS_SCALAR_UTIL ) {
     Scalar::Util->import("refaddr");
   } else {
     require overload;
@@ -132,16 +133,21 @@ sub TIEHASH {
     $s->STORE(shift, shift);
   }
 
-  if (_HAS_THREADS) {
-    # remember the object so that we can rekey it on CLONE
-    push @thread_object_registry, $s;
-    # but make this a weak reference, so that there are no leaks
-    Scalar::Util::weaken( $thread_object_registry[-1] );
+  if (_HAS_THREADS ) {
 
-    if ( ++$count > 1000 ) {
-      # this ensures we don't fill up with a huge array dead weakrefs
-      @thread_object_registry = grep { defined } @thread_object_registry;
-      $count = 0;
+    if ( _HAS_WEAKEN ) {
+      # remember the object so that we can rekey it on CLONE
+      push @thread_object_registry, $s;
+      # but make this a weak reference, so that there are no leaks
+      Scalar::Util::weaken( $thread_object_registry[-1] );
+
+      if ( ++$count > 1000 ) {
+        # this ensures we don't fill up with a huge array dead weakrefs
+        @thread_object_registry = grep { defined } @thread_object_registry;
+        $count = 0;
+      }
+    } else {
+      $count++; # used in the warning
     }
   }
 
@@ -167,6 +173,11 @@ sub STORABLE_thaw {
 
 sub CLONE {
   my $pkg = shift;
+
+  if ( $count and not _HAS_WEAKEN ) {
+    warn "Tie::RefHash is not threadsafe without Scalar::Util::weaken";
+  }
+
   # when the thread has been cloned all the objects need to be updated.
   # dead weakrefs are undefined, so we filter them out
   @thread_object_registry = grep { defined && do { $_->_reindex_keys; 1 } } @thread_object_registry;

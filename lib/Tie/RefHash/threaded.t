@@ -9,14 +9,16 @@ BEGIN {
 
 use strict;
 
+
 BEGIN {
     # this is sucky because threads.pm has to be loaded before Test::Builder
   use Config;
-  if ( $Config{usethreads} and !$Config{use5005threads} ) {
+  eval { require Scalar::Util };
+  if ( $Config{usethreads} and !$Config{use5005threads} and defined(&Scalar::Util::weaken) ) {
     require threads; "threads"->import;
     print "1..14\n";
   } else {
-    print "1..0 # Skip -- threads aren't enabled in your perl\n";
+    print "1..0 # Skip -- threads aren't enabled in your perl, or Scalar::Util::weaken is missing\n";
     exit 0;
   }
 }
@@ -29,7 +31,7 @@ sub ok ($$) {
 }
 
 sub is ($$$) {
-  print ( ( ( $_[0] eq $_[1] ) ? "" : "not "), "ok - $_[2]" );
+  print ( ( ( ($_[0]||'') eq ($_[1]||'') ) ? "" : "not "), "ok - $_[2]" );
 }
 
 tie my %hash, "Tie::RefHash";
