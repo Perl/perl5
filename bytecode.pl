@@ -10,13 +10,6 @@ my %alias_to = (
     U8  => [qw(char)],
 );
 
-my @optype= qw(OP UNOP BINOP LOGOP LISTOP PMOP SVOP PADOP PVOP LOOP COP);
-
-# Nullsv *must* come first in the following so that the condition
-# ($$sv == 0) can continue to be used to test (sv == Nullsv).
-my @specialsv = qw(Nullsv &PL_sv_undef &PL_sv_yes &PL_sv_no
-		   (SV*)pWARN_ALL (SV*)pWARN_NONE (SV*)pWARN_STD);
-
 my (%alias_from, $from, $tos);
 while (($from, $tos) = each %alias_to) {
     map { $alias_from{$_} = $from } @$tos;
@@ -49,24 +42,21 @@ binmode ASMDATA_PM;
 print ASMDATA_PM $perl_header, <<'EOT';
 package B::Asmdata;
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 use Exporter;
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(%insn_data @insn_name @optype @specialsv_name);
-our(%insn_data, @insn_name, @optype, @specialsv_name);
+our(%insn_data, @insn_name);
 
+use B qw(@optype @specialsv_name);
 EOT
 print ASMDATA_PM <<"EOT";
-\@optype = qw(@optype);
-\@specialsv_name = qw(@specialsv);
 
 # XXX insn_data is initialised this way because with a large
 # %insn_data = (foo => [...], bar => [...], ...) initialiser
 # I get a hard-to-track-down stack underflow and segfault.
 EOT
-
-my $size = @specialsv;
 
 my (@insn_name, $insn_num, $insn, $lvalue, $argtype, $flags, $fundtype);
 

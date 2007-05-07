@@ -1,11 +1,10 @@
 package B::Debug;
 
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 
 use strict;
 use B qw(peekop class walkoptree walkoptree_exec
-         main_start main_root cstring sv_undef);
-use B::Asmdata qw(@specialsv_name);
+         main_start main_root cstring sv_undef @specialsv_name);
 
 my %done_gv;
 
