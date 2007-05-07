@@ -67,13 +67,15 @@ if ($] >= 5.009) {
     doconst(AVf_REAL);
 }  
 
-foreach my $file (qw(op.h cop.h))
+foreach my $tuple (['op.h'],['cop.h'],['regexp.h','RXf_'])
  {
+  my $file = $tuple->[0];
+  my $pfx = $tuple->[1] || '';
   my $path = $^O eq 'MacOS' ? ":::$file" : "../../$file";
   open(OPH,"$path") || die "Cannot open $path:$!";
   while (<OPH>)
    {  
-    doconst($1) if (/#define\s+(\w+)\s+([\(\)\|\dx]+)\s*(?:$|\/\*)/);
+    doconst($1) if (/#define\s+($pfx\w+)\s+([\(\)\|\dx]+)\s*(?:$|\/\*)/);
    }  
   close(OPH);
  }

@@ -169,7 +169,7 @@ is(B::opnumber("localtime"), 294, "Testing opnumber with opname (localtime)");
 {
     no warnings 'once';
     my $sg = B::sub_generation();
-    *Whatever::hand_waving = sub { };
+    *UNIVERSAL::hand_waving = sub { };
     ok( $sg < B::sub_generation, "sub_generation increments" );
 }
 
