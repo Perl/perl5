@@ -26,7 +26,7 @@ local $Data::Dumper::Indent     = 1; # for dumpering from !
 BEGIN {
     use vars        qw[ $VERSION @ISA ];
     @ISA        =   qw[ CPANPLUS::Shell::_Base::ReadLine ];
-    $VERSION = "0.79_01";
+    $VERSION = "0.79_02";
 }
 
 load CPANPLUS::Shell;
@@ -1152,7 +1152,10 @@ sub _set_conf {
         unless( $valid{$key} ) {
             print loc( "To update your current CPANPLUS installation, ".
                         "choose one of the these options:\n%1",
-                        (join $/, map {"\ts selfupdate $_"} sort keys %valid) );          
+                        ( join $/, map { 
+                             sprintf "\ts selfupdate %-17s [--latest=0]", $_ 
+                          } sort keys %valid ) 
+                    );          
         } else {
             print loc( "Updating your CPANPLUS installation\n" );
             $cb->selfupdate_object->selfupdate( 

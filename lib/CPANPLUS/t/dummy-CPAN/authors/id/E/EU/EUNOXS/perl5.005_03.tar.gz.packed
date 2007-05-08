@@ -10,7 +10,7 @@ To recreate it use the following command:
 
      uupacktool.pl -p lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUNOXS/perl5.005_03.tar.gz lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUNOXS/perl5.005_03.tar.gz.packed
 
-Created at Sun Apr 22 10:12:09 2007
+Created at Tue May  8 13:53:41 2007
 #########################################################################
 __UU__
 M'XL(`'3DO44``^W/,0J`,`Q`T1RE)Y"T-O4XXN"DB%2]OR(*NNC4[;_E#\F0

@@ -191,12 +191,10 @@ my $Conf = {
                 "Could not find the '%1' in your path".
                 "--this may be a problem.\n".
                 "Please locate this program and set ".
-                "your '%1' config entry to its path.\n".                
-                "Attempting to provide a reasonable ".
-                "fallback...",
+                "your '%2' config entry to its path.\n",                
                 $name, 'perlwrapper'
              ));                                        
-             return '-P'
+             return '';
         }->(),         
     },
 

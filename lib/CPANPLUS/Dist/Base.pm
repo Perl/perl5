@@ -165,15 +165,16 @@ sub create {
     $dist           = $self->status->dist   if      $self->status->dist;
     $self->status->dist( $dist )            unless  $self->status->dist;
 
-    my $cb   = $self->parent;
-    my $conf = $cb->configure_object;
+    my $cb      = $self->parent;
+    my $conf    = $cb->configure_object;
+    my $format  = ref $dist;
 
     ### make sure to set this variable, if the caller hasn't yet
     ### just so we have some clue where the dist left off.
     $dist->status->dist( $dist_cpan->status->distdir )
         unless defined $dist->status->dist;
 
-    $dist->status->created( $dist_cpan->create( @_ ) );
+    $dist->status->created( $dist_cpan->create(prereq_format => $format, @_) );
 }
 
 =head2 $bool = $dist->install
