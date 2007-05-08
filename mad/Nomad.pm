@@ -440,6 +440,7 @@ sub newtype {
 sub madness {
     my $self = shift;
     my @keys = split(' ', shift);
+    @keys = map { $_ eq 'd' ? ('k', 'd') : $_ } @keys;
     my @vals = ();
     for my $key (@keys) {
 	my $madprop = $self->{mp}{$key};

@@ -1083,7 +1083,7 @@ term	:	termbinop
 			{ $$ = $1; }
 	|	LOCAL term	%prec UNIOP
 			{ $$ = localize($2,IVAL($1));
-			  TOKEN_GETMAD($1,$$,'d');
+			  TOKEN_GETMAD($1,$$,'k');
 			}
 	|	'(' expr ')'
 			{ $$ = sawparens(IF_MAD(newUNOP(OP_NULL,0,$2), $2));

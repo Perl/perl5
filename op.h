@@ -696,6 +696,7 @@ struct token {
  * g       op was forced to be a word
  * i       if/unless modifier
  * I       if/elsif/unless statement
+ * k       local declarator
  * K       retired kid op
  * l       last index of array ($#foo)
  * L       label
