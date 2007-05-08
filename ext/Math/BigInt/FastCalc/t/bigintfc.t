@@ -9,7 +9,7 @@ BEGIN
   chdir 't' if -d 't';
   unshift @INC, '../lib';		# for running manually
   unshift @INC, '../blib/arch';		# for running manually
-  plan tests => 308;
+  plan tests => 359;
   }
 
 use Math::BigInt::FastCalc;
@@ -93,31 +93,44 @@ ok ($C->_is_odd($C->_one()),1); ok ($C->_is_odd($C->_zero())||0,0);
 ok ($C->_is_even($C->_one()) || 0,0); ok ($C->_is_even($C->_zero()),1);
 
 # _len
-$x = $C->_new("1"); ok ($C->_len($x),1);
-$x = $C->_new("12"); ok ($C->_len($x),2);
-$x = $C->_new("123"); ok ($C->_len($x),3);
-$x = $C->_new("1234"); ok ($C->_len($x),4);
-$x = $C->_new("12345"); ok ($C->_len($x),5);
-$x = $C->_new("123456"); ok ($C->_len($x),6);
-$x = $C->_new("1234567"); ok ($C->_len($x),7);
-$x = $C->_new("12345678"); ok ($C->_len($x),8);
-$x = $C->_new("123456789"); ok ($C->_len($x),9);
-
-$x = $C->_new("8"); ok ($C->_len($x),1);
-$x = $C->_new("21"); ok ($C->_len($x),2);
-$x = $C->_new("321"); ok ($C->_len($x),3);
-$x = $C->_new("4321"); ok ($C->_len($x),4);
-$x = $C->_new("54321"); ok ($C->_len($x),5);
-$x = $C->_new("654321"); ok ($C->_len($x),6);
-$x = $C->_new("7654321"); ok ($C->_len($x),7);
-$x = $C->_new("87654321"); ok ($C->_len($x),8);
-$x = $C->_new("987654321"); ok ($C->_len($x),9);
-
-for (my $i = 1; $i < 9; $i++)
+for my $method (qw/_alen _len/)
   {
-  my $a = "$i" . '0' x ($i-1);
-  $x = $C->_new($a); 
-  print "# Tried len '$a'\n" unless ok ($C->_len($x),$i);
+  $x = $C->_new("1"); ok ($C->$method($x),1);
+  $x = $C->_new("12"); ok ($C->$method($x),2);
+  $x = $C->_new("123"); ok ($C->$method($x),3);
+  $x = $C->_new("1234"); ok ($C->$method($x),4);
+  $x = $C->_new("12345"); ok ($C->$method($x),5);
+  $x = $C->_new("123456"); ok ($C->$method($x),6);
+  $x = $C->_new("1234567"); ok ($C->$method($x),7);
+  $x = $C->_new("12345678"); ok ($C->$method($x),8);
+  $x = $C->_new("123456789"); ok ($C->$method($x),9);
+
+  $x = $C->_new("8"); ok ($C->$method($x),1);
+  $x = $C->_new("21"); ok ($C->$method($x),2);
+  $x = $C->_new("321"); ok ($C->$method($x),3);
+  $x = $C->_new("4321"); ok ($C->$method($x),4);
+  $x = $C->_new("54321"); ok ($C->$method($x),5);
+  $x = $C->_new("654321"); ok ($C->$method($x),6);
+  $x = $C->_new("7654321"); ok ($C->$method($x),7);
+  $x = $C->_new("87654321"); ok ($C->$method($x),8);
+  $x = $C->_new("987654321"); ok ($C->$method($x),9);
+
+  $x = $C->_new("0"); ok ($C->$method($x),1);
+  $x = $C->_new("20"); ok ($C->$method($x),2);
+  $x = $C->_new("320"); ok ($C->$method($x),3);
+  $x = $C->_new("4320"); ok ($C->$method($x),4);
+  $x = $C->_new("54320"); ok ($C->$method($x),5);
+  $x = $C->_new("654320"); ok ($C->$method($x),6);
+  $x = $C->_new("7654320"); ok ($C->$method($x),7);
+  $x = $C->_new("87654320"); ok ($C->$method($x),8);
+  $x = $C->_new("987654320"); ok ($C->$method($x),9);
+
+  for (my $i = 1; $i < 9; $i++)
+    {
+    my $a = "$i" . '0' x ($i-1);
+    $x = $C->_new($a);
+    print "# Tried len '$a'\n" unless ok ($C->_len($x),$i);
+    }
   }
 
 # _digit
@@ -360,19 +373,29 @@ ok ($C->_str(scalar $C->_or($x,$y)),7);
 $x = $C->_new("5"); $y = $C->_new("3");
 ok ($C->_str(scalar $C->_and($x,$y)),1);
 
-# _from_hex, _from_bin
+# _from_hex, _from_bin, _from_oct
 ok ($C->_str( $C->_from_hex("0xFf")),255);
 ok ($C->_str( $C->_from_bin("0b10101011")),160+11);
+ok ($C->_str( $C->_from_oct("0100")), 8*8);
+ok ($C->_str( $C->_from_oct("01000")), 8*8*8);
+ok ($C->_str( $C->_from_oct("010001")), 8*8*8*8+1);
+ok ($C->_str( $C->_from_oct("010007")), 8*8*8*8+7);
 
-# _as_hex, _as_bin
+# _as_hex, _as_bin, as_oct
 ok ($C->_str( $C->_from_hex( $C->_as_hex( $C->_new("128")))), 128);
 ok ($C->_str( $C->_from_bin( $C->_as_bin( $C->_new("128")))), 128);
-ok ($C->_str( $C->_from_hex( $C->_as_hex( $C->_new("0")))), 0);
-ok ($C->_str( $C->_from_bin( $C->_as_bin( $C->_new("0")))), 0);
-ok ($C->_as_hex( $C->_new("0")), '0x0');
-ok ($C->_as_bin( $C->_new("0")), '0b0');
-ok ($C->_as_hex( $C->_new("12")), '0xc');
-ok ($C->_as_bin( $C->_new("12")), '0b1100');
+ok ($C->_str( $C->_from_oct( $C->_as_oct( $C->_new("128")))), 128);
+
+ok ($C->_str( $C->_from_oct( $C->_as_oct( $C->_new("123456")))), 123456);
+ok ($C->_str( $C->_from_oct( $C->_as_oct( $C->_new("123456789")))), "123456789");
+ok ($C->_str( $C->_from_oct( $C->_as_oct( $C->_new("1234567890123")))), "1234567890123");
+
+# _1ex
+ok ($C->_str($C->_1ex(0)), "1");
+ok ($C->_str($C->_1ex(1)), "10");
+ok ($C->_str($C->_1ex(2)), "100");
+ok ($C->_str($C->_1ex(12)), "1000000000000");
+ok ($C->_str($C->_1ex(16)), "10000000000000000");
 
 # _check
 $x = $C->_new("123456789");

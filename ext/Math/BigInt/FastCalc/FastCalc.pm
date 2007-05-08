@@ -11,7 +11,7 @@ use vars qw/@ISA $VERSION $BASE $BASE_LEN/;
 
 @ISA = qw(DynaLoader);
 
-$VERSION = '0.13';
+$VERSION = '0.14';
 
 bootstrap Math::BigInt::FastCalc $VERSION;
 
@@ -36,6 +36,7 @@ BEGIN
     from_hex from_bin from_oct as_hex as_bin as_oct
     zeros length base_len
     xor or and
+    alen 1ex
     /)
     {
     no strict 'refs';
@@ -117,7 +118,7 @@ Further streamlining (api_version 1 etc.) by Tels 2004-2007.
 
 =head1 SEE ALSO
 
-L<Math::BigInt>, L<Math::BigFloat>, L<Math::BigInt::BitVect>,
+L<Math::BigInt>, L<Math::BigFloat>,
 L<Math::BigInt::GMP>, L<Math::BigInt::FastCalc> and L<Math::BigInt::Pari>.
 
 =cut
