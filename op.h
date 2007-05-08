@@ -712,7 +712,6 @@ struct token {
  * Q       optimized qw//
  * r       expression producing R
  * R       tr/E/R/ s/E/R/
- * R       assign slurped by split
  * s       sub signature
  * S       use import stub (no import)
  * S       retired sort block

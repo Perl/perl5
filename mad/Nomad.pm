@@ -2199,16 +2199,6 @@ sub ast {
 package PLXML::op_unpack;
 package PLXML::op_pack;
 package PLXML::op_split;
-
-sub ast {
-    my $self = shift;
-    my $results = $self->SUPER::ast(@_);
-    if (my @dest = $self->madness('R')) {
-	return PLXML::op_aassign->newtype->new(Kids => [@dest, $self->madness('ox'), $results]);
-    }
-    return $results;
-}
-
 package PLXML::op_join;
 package PLXML::op_list;
 
