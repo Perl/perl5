@@ -4240,7 +4240,8 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
     /* optimize "!a && b" to "a || b", and "!a || b" to "a && b" */
     if (first->op_type == OP_NOT
 	&& (first->op_flags & OPf_SPECIAL)
-	&& (first->op_flags & OPf_KIDS)) {
+	&& (first->op_flags & OPf_KIDS)
+	&& !PL_madskills) {
 	if (type == OP_AND || type == OP_OR) {
 	    if (type == OP_AND)
 		type = OP_OR;
@@ -4251,11 +4252,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	    if (o->op_next)
 		first->op_next = o->op_next;
 	    cUNOPo->op_first = NULL;
-#ifdef PERL_MAD
-	    op_getmad(o,first,'O');
-#else
 	    op_free(o);
-#endif
 	}
     }
     if (first->op_type == OP_CONST) {
