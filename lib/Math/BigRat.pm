@@ -23,7 +23,7 @@ use vars qw($VERSION @ISA $upgrade $downgrade
 
 @ISA = qw(Math::BigFloat);
 
-$VERSION = '0.18';
+$VERSION = '0.19';
 
 use overload;			# inherit overload from Math::BigFloat
 
@@ -209,8 +209,7 @@ sub new
       $self->{_d} = $MBI->_copy( $f->{_m} );
 
       # calculate the difference between nE and dE
-      # XXX TODO: check that exponent() makes a copy to avoid copy()
-      my $diff_e = $nf->exponent()->copy()->bsub( $f->exponent);
+      my $diff_e = $nf->exponent()->bsub( $f->exponent);
       if ($diff_e->is_negative())
 	{
         # < 0: mul d with it
@@ -385,14 +384,13 @@ sub bnorm
   my ($self,$x) = ref($_[0]) ? (undef,$_[0]) : objectify(1,@_);
 
   # Both parts must be objects of whatever we are using today.
-  # Second check because Calc.pm has ARRAY res as unblessed objects.
-  if (ref($x->{_n}) ne $MBI && ref($x->{_n}) ne 'ARRAY')
+  if ( my $c = $MBI->_check($x->{_n}) )
     {
-    require Carp; Carp::croak ("n is not $MBI but (".ref($x->{_n}).') in bnorm()');
+    require Carp; Carp::croak ("n did not pass the self-check ($c) in bnorm()");
     }
-  if (ref($x->{_d}) ne $MBI && ref($x->{_d}) ne 'ARRAY')
+  if ( my $c = $MBI->_check($x->{_d}) )
     {
-    require Carp; Carp::croak ("d is not $MBI but (".ref($x->{_d}).') in bnorm()');
+    require Carp; Carp::croak ("d did not pass the self-check ($c) in bnorm()");
     }
 
   # no normalize for NaN, inf etc.

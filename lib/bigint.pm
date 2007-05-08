@@ -1,7 +1,7 @@
 package bigint;
 use 5.006002;
 
-$VERSION = '0.09';
+$VERSION = '0.10';
 use Exporter;
 @ISA		= qw( Exporter );
 @EXPORT_OK	= qw( ); 
@@ -115,7 +115,7 @@ sub import
   my $self = shift;
 
   # some defaults
-  my $lib = '';
+  my $lib = ''; my $lib_kind = 'try';
 
   my @import = ( ':constant' );				# drive it w/ constant
   my @a = @_; my $l = scalar @_; my $j = 0;
@@ -123,9 +123,10 @@ sub import
   my ($a,$p);						# accuracy, precision
   for ( my $i = 0; $i < $l ; $i++,$j++ )
     {
-    if ($_[$i] =~ /^(l|lib)$/)
+    if ($_[$i] =~ /^(l|lib|try|only)$/)
       {
       # this causes a different low lib to take care...
+      $lib_kind = $1; $lib_kind = 'lib' if $lib_kind eq 'l';
       $lib = $_[$i+1] || '';
       my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existant..."
       splice @a, $j, $s; $j -= $s; $i++;
@@ -176,7 +177,7 @@ sub import
     require Math::BigInt if $_lite == 0;	# not already loaded?
     $class = 'Math::BigInt';			# regardless of MBIL or not
     }
-  push @import, 'try' => $lib if $lib ne '';
+  push @import, $lib_kind => $lib if $lib ne '';
   # Math::BigInt::Trace or plain Math::BigInt
   $class->import(@import);
 
@@ -264,11 +265,13 @@ Note that setting precision and accurary at the same time is not possible.
 This enables a trace mode and is primarily for debugging bigint or
 Math::BigInt.
 
-=item l or lib
+=item l, lib, try or only
 
-Load a different math lib, see L<MATH LIBRARY>.
+Load a different math lib, see L<Math Library>.
 
-	perl -Mbigint=l,GMP -e 'print 2 ** 512'
+	perl -Mbigint=lib,GMP -e 'print 2 ** 512'
+	perl -Mbigint=try,GMP -e 'print 2 ** 512'
+	perl -Mbigint=only,GMP -e 'print 2 ** 512'
 
 Currently there is no way to specify more than one library on the command
 line. This means the following does not work:
@@ -294,12 +297,22 @@ Math::BigInt::Calc. This is equivalent to saying:
 
 You can change this by using:
 
-	use bigint lib => 'BitVect';
+	use bignum lib => 'GMP';
 
 The following would first try to find Math::BigInt::Foo, then
 Math::BigInt::Bar, and when this also fails, revert to Math::BigInt::Calc:
 
 	use bigint lib => 'Foo,Math::BigInt::Bar';
+
+Using C<lib> warns if none of the specified libraries can be found and
+L<Math::BigInt> did fall back to one of the default libraries.
+To supress this warning, use C<try> instead:
+
+        use bignum try => 'GMP';
+
+If you want the code to die instead of falling back, use C<only> instead:
+
+        use bignum only => 'GMP';
 
 Please see respective module documentation for further details.
 

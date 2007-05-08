@@ -1,7 +1,7 @@
 package bignum;
 use 5.006002;
 
-$VERSION = '0.20';
+$VERSION = '0.21';
 use Exporter;
 @EXPORT_OK 	= qw( ); 
 @EXPORT 	= qw( inf NaN ); 
@@ -77,7 +77,7 @@ sub import
   my $self = shift;
 
   # some defaults
-  my $lib = '';
+  my $lib = ''; my $lib_kind = 'try';
   my $upgrade = 'Math::BigFloat';
   my $downgrade = 'Math::BigInt';
 
@@ -101,9 +101,10 @@ sub import
       my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existant..."
       splice @a, $j, $s; $j -= $s; $i++;
       }
-    elsif ($_[$i] =~ /^(l|lib)$/)
+    elsif ($_[$i] =~ /^(l|lib|try|only)$/)
       {
       # this causes a different low lib to take care...
+      $lib_kind = $1; $lib_kind = 'lib' if $lib_kind eq 'l';
       $lib = $_[$i+1] || '';
       my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existant..."
       splice @a, $j, $s; $j -= $s; $i++;
@@ -155,7 +156,7 @@ sub import
     require Math::BigInt if $_lite == 0;	# not already loaded?
     $class = 'Math::BigInt';			# regardless of MBIL or not
     }
-  push @import, 'try' => $lib if $lib ne ''; 
+  push @import, $lib_kind => $lib if $lib ne ''; 
   # Math::BigInt::Trace or plain Math::BigInt
   $class->import(@import, upgrade => $upgrade);
 
@@ -430,7 +431,7 @@ C<$Math::BigInt::upgrade>.
 
 =back
 
-=head2 MATH LIBRARY
+=head2 Math Library
 
 Math with the numbers is done (by default) by a module called
 Math::BigInt::Calc. This is equivalent to saying:
@@ -439,7 +440,7 @@ Math::BigInt::Calc. This is equivalent to saying:
 
 You can change this by using:
 
-	use bignum lib => 'BitVect';
+	use bignum lib => 'GMP';
 
 The following would first try to find Math::BigInt::Foo, then
 Math::BigInt::Bar, and when this also fails, revert to Math::BigInt::Calc:
@@ -447,6 +448,16 @@ Math::BigInt::Bar, and when this also fails, revert to Math::BigInt::Calc:
 	use bignum lib => 'Foo,Math::BigInt::Bar';
 
 Please see respective module documentation for further details.
+
+Using C<lib> warns if none of the specified libraries can be found and
+L<Math::BigInt> did fall back to one of the default libraries.
+To supress this warning, use C<try> instead:
+
+	use bignum try => 'GMP';
+
+If you want the code to die instead of falling back, use C<only> instead:
+
+	use bignum only => 'GMP';
 
 =head2 INTERNAL FORMAT
 
