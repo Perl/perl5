@@ -26,26 +26,37 @@ into an infinite loop
 # initial setup, everything sane
 {
     package K;
+    use mro 'c3';
     our @ISA = qw/J I/;
     package J;
+    use mro 'c3';
     our @ISA = qw/F/;
     package I;
+    use mro 'c3';
     our @ISA = qw/H F/;
     package H;
+    use mro 'c3';
     our @ISA = qw/G/;
     package G;
+    use mro 'c3';
     our @ISA = qw/D/;
     package F;
+    use mro 'c3';
     our @ISA = qw/E/;
     package E;
+    use mro 'c3';
     our @ISA = qw/D/;
     package D;
+    use mro 'c3';
     our @ISA = qw/A B C/;
     package C;
+    use mro 'c3';
     our @ISA = qw//;
     package B;
+    use mro 'c3';
     our @ISA = qw//;
     package A;
+    use mro 'c3';
     our @ISA = qw//;
 }
 

@@ -219,9 +219,6 @@ Perl_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
 
     /* not in cache, make a new one */
 
-    retval = newAV();
-    av_push(retval, newSVpvn(stashname, stashname_len)); /* us first */
-
     gvp = (GV**)hv_fetchs(stash, "ISA", FALSE);
     isa = (gvp && (gv = *gvp) && isGV_with_GP(gv)) ? GvAV(gv) : NULL;
 
@@ -257,9 +254,9 @@ Perl_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
             else {
                 isa_lin = mro_get_linear_isa_c3(isa_item_stash, level + 1); /* recursion */
             }
-            av_push(seqs, (SV*)isa_lin);
+            av_push(seqs, SvREFCNT_inc_simple_NN((SV*)isa_lin));
         }
-        av_push(seqs, (SV*)isa);
+        av_push(seqs, SvREFCNT_inc_simple_NN((SV*)isa));
 
         /* This builds "heads", which as an array of integer array
            indices, one per seq, which point at the virtual "head"
@@ -291,6 +288,10 @@ Perl_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
                 }
             }
         }
+
+        /* Initialize retval to build the return value in */
+        retval = newAV();
+        av_push(retval, newSVpvn(stashname, stashname_len)); /* us first */
 
         /* This loop won't terminate until we either finish building
            the MRO, or get an exception. */
@@ -335,6 +336,7 @@ Perl_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
 
                     const int new_head = ++heads[s];
                     if(new_head > AvFILLp(seq)) {
+                        SvREFCNT_dec(avptr[s]);
                         avptr[s] = NULL;
                     }
                     else {
@@ -363,10 +365,6 @@ Perl_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
                hierarchy is not C3-incompatible */
             if(!winner) {
                 /* we have to do some cleanup before we croak */
-                SV** svp = AvARRAY(seqs);
-                items = AvFILLp(seqs) + 1;
-                while (items--)
-                    *svp++ = NULL;
 
                 SvREFCNT_dec(retval);
                 Safefree(heads);
@@ -375,6 +373,11 @@ Perl_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
                     "merging failed on parent '%"SVf"'", stashname, SVfARG(cand));
             }
         }
+    }
+    else { /* @ISA was undefined or empty */
+        /* build a retval containing only ourselves */
+        retval = newAV();
+        av_push(retval, newSVpvn(stashname, stashname_len));
     }
 
     /* we don't want anyone modifying the cache entry but us,
