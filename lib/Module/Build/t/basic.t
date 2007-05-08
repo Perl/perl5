@@ -2,7 +2,7 @@
 
 use strict;
 use lib $ENV{PERL_CORE} ? '../lib/Module/Build/t/lib' : 't/lib';
-use MBTest tests => 49;
+use MBTest tests => 52;
 
 use Cwd ();
 my $cwd = Cwd::cwd;
@@ -203,6 +203,14 @@ my \$build = Module::Build->new(
     extra_compiler_flags => '-I/foo -I/bar',
     extra_linker_flags => '-L/foo -L/bar',
   );
+  ok $mb;
+  is_deeply $mb->extra_compiler_flags, ['-I/foo', '-I/bar'], "Should split shell string into list";
+  is_deeply $mb->extra_linker_flags,   ['-L/foo', '-L/bar'], "Should split shell string into list";
+
+  # Try again with command-line args
+  eval {Module::Build->run_perl_script('Build.PL', [], ['--extra_compiler_flags', '-I/foo -I/bar',
+							'--extra_linker_flags', '-L/foo -L/bar'])};
+  $mb = Module::Build->resume;
   ok $mb;
   is_deeply $mb->extra_compiler_flags, ['-I/foo', '-I/bar'], "Should split shell string into list";
   is_deeply $mb->extra_linker_flags,   ['-L/foo', '-L/bar'], "Should split shell string into list";

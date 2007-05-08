@@ -15,7 +15,7 @@ use Module::Build::Base;
 
 use vars qw($VERSION @ISA);
 @ISA = qw(Module::Build::Base);
-$VERSION = '0.2807';
+$VERSION = '0.2808';
 $VERSION = eval $VERSION;
 
 # Okay, this is the brute-force method of finding out what kind of
@@ -94,6 +94,10 @@ if (grep {-e File::Spec->catfile($_, qw(Module Build Platform), $^O) . '.pm'} @I
 }
 
 sub os_type { $OSTYPES{$^O} }
+
+sub is_vmsish { return ((os_type() || '') eq 'VMS') }
+sub is_windowsish { return ((os_type() || '') eq 'Windows') }
+sub is_unixish { return ((os_type() || '') eq 'Unix') }
 
 1;
 

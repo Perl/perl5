@@ -1295,6 +1295,18 @@ whatever is appropriate.  If you're running on an unknown platform, it
 will return C<undef> - there shouldn't be many unknown platforms
 though.
 
+=item is_vmsish()
+
+=item is_windowsish()
+
+=item is_unixish()
+
+Convenience functions that return a boolean value indicating whether
+this platform behaves respectively like VMS, Windows, or Unix.  For
+arbitrary reasons other platforms don't get their own such functions,
+at least not yet.
+
+
 =item prefix_relpaths()
 
 =item prefix_relpaths($installdirs)

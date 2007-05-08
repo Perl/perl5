@@ -2125,6 +2125,7 @@ lib/Module/Build/t/destinations.t	Module::Build
 lib/Module/Build/t/extend.t	Module::Build
 lib/Module/Build/t/ext.t	Module::Build
 lib/Module/Build/t/files.t	Module::Build
+lib/Module/Build/t/help.t	Module::Build
 lib/Module/Build/t/install.t	Module::Build
 lib/Module/Build/t/lib/DistGen.pm	Module::Build
 lib/Module/Build/t/lib/MBTest.pm	Module::Build
@@ -2136,6 +2137,7 @@ lib/Module/Build/t/moduleinfo.t	Module::Build
 lib/Module/Build/t/new_from_context.t	Module::Build
 lib/Module/Build/t/notes.t	Module::Build
 lib/Module/Build/t/parents.t	Module::Build
+lib/Module/Build/t/par.t	Module::Build
 lib/Module/Build/t/pod_parser.t	Module::Build
 lib/Module/Build/t/ppm.t	Module::Build
 lib/Module/Build/t/runthrough.t	Module::Build

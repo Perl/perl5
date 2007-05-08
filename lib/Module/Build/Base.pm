@@ -1630,6 +1630,10 @@ sub read_args {
   }
   $args{ARGV} = \@argv;
 
+  for ('extra_compiler_flags', 'extra_linker_flags') {
+    $args{$_} = [ $self->split_like_shell($args{$_}) ] if exists $args{$_};
+  }
+
   # Hashify these parameters
   for ($self->hash_properties, 'config') {
     next unless exists $args{$_};
@@ -1674,6 +1678,8 @@ sub read_args {
 }
 
 
+# (bash shell won't expand tildes mid-word: "--foo=~/thing")
+# TODO: handle ~user/foo
 sub _detildefy {
     my $arg = shift;
 
@@ -1862,6 +1868,7 @@ sub get_action_docs {
   my ($files_found, @docs) = (0);
   foreach my $class ($self->super_classes) {
     (my $file = $class) =~ s{::}{/}g;
+    # NOTE: silently skipping relative paths if any chdir() happened
     $file = $INC{$file . '.pm'} or next;
     my $fh = IO::File->new("< $file") or next;
     $files_found++;
@@ -1874,20 +1881,41 @@ sub get_action_docs {
       last if /^=head1 ACTIONS\s/;
     }
 
-    # Look for our action
-    my ($found, $inlist) = (0, 0);
+    # Look for our action and determine the style
+    my $style;
     while (<$fh>) {
-      if (/^=item\s+\Q$action\E\b/)  {
-        $found = 1;
-      } elsif (/^=(item|back)/) {
-        last if $found > 1 and not $inlist;
+      last if /^=head1 /;
+
+      # only item and head2 are allowed (3&4 are not in 5.005)
+      if(/^=(item|head2)\s+\Q$action\E\b/) {
+        $style = $1;
+        push @docs, $_;
+        last;
       }
-      next unless $found;
-      push @docs, $_;
-      ++$inlist if /^=over/;
-      --$inlist if /^=back/;
-      ++$found  if /^\w/; # Found descriptive text
     }
+    $style or next; # not here
+
+    # and the content
+    if($style eq 'item') {
+      my ($found, $inlist) = (0, 0);
+      while (<$fh>) {
+        if (/^=(item|back)/) {
+          last unless $inlist;
+        }
+        push @docs, $_;
+        ++$inlist if /^=over/;
+        --$inlist if /^=back/;
+      }
+    }
+    else { # head2 style
+      # stop at anything equal or greater than the found level
+      while (<$fh>) {
+        last if(/^=(?:head[12]|cut)/);
+        push @docs, $_;
+      }
+    }
+    # TODO maybe disallow overriding just pod for an action
+    # TODO and possibly: @docs and last;
   }
 
   unless ($files_found) {
@@ -2261,7 +2289,7 @@ sub process_script_files {
   
   foreach my $file (keys %$files) {
     my $result = $self->copy_if_modified($file, $script_dir, 'flatten') or next;
-    $self->fix_shebang_line($result) unless $self->os_type eq 'VMS';
+    $self->fix_shebang_line($result) unless $self->is_vmsish;
     $self->make_executable($result);
   }
 }
@@ -2348,7 +2376,7 @@ sub _find_file_by_type {
 
 sub localize_file_path {
   my ($self, $path) = @_;
-  $path =~ s/\.\z// if $self->os_type eq 'VMS';
+  $path =~ s/\.\z// if $self->is_vmsish;
   return File::Spec->catfile( split m{/}, $path );
 }
 
@@ -2381,7 +2409,7 @@ sub fix_shebang_line { # Adapted from fixin() in ExtUtils::MM_Unix 1.35
     $shb .= qq{
 eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
     if 0; # not running under some shell
-} unless $self->os_type eq 'Windows'; # this won't work on win32, so don't
+} unless $self->is_windowsish; # this won't work on win32, so don't
     
     my $FIXOUT = IO::File->new(">$file.new")
       or die "Can't create new $file: $!\n";
@@ -2432,6 +2460,18 @@ sub ACTION_testpodcoverage {
   eval q{use Test::Pod::Coverage 1.00; 1}
     or die "The 'testpodcoverage' action requires ",
            "Test::Pod::Coverage version 1.00";
+
+  # TODO this needs test coverage!
+
+  # XXX work-around a bug in Test::Pod::Coverage previous to v1.09
+  # Make sure we test the module in blib/
+  local @INC = @INC;
+  my $p = $self->{properties};
+  unshift(@INC,
+    # XXX any reason to include arch?
+    File::Spec->catdir($p->{base_dir}, $self->blib, 'lib'),
+    #File::Spec->catdir($p->{base_dir}, $self->blib, 'arch')
+  );
 
   all_pod_coverage_ok();
 }

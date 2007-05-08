@@ -6,8 +6,6 @@ use strict;
 use Data::Dumper;
 use IO::File;
 
-use Carp; BEGIN{ $SIG{__DIE__} = \&carp::confess }
-
 sub new {
   my ($class, %args) = @_;
   my $file = delete $args{file} or die "Missing required parameter 'file' to new()";

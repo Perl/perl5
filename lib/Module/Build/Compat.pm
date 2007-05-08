@@ -206,11 +206,11 @@ sub fake_makefile {
     warn "Unknown 'build_class', defaulting to 'Module::Build'\n";
     $args{build_class} = 'Module::Build';
   }
+  my $class = $args{build_class};
 
-  my $perl = $args{build_class}->find_perl_interpreter;
-  my $os_type = $args{build_class}->os_type;
-  my $noop = ($os_type eq 'Windows' ? 'rem>nul' :
-	      $os_type eq 'VMS'     ? 'Continue' :
+  my $perl = $class->find_perl_interpreter;
+  my $noop = ($class->is_windowsish ? 'rem>nul'  :
+	      $class->is_vmsish     ? 'Continue' :
 	      'true');
   my $Build = 'Build --makefile_env_macros 1';
 
@@ -226,7 +226,7 @@ force_do_it :
 	@ $noop
 EOF
 
-  foreach my $action ($args{build_class}->known_actions) {
+  foreach my $action ($class->known_actions) {
     next if $action =~ /^(all|realclean|force_do_it)$/;  # Don't double-define
     $maketext .= <<"EOF";
 $action : force_do_it
