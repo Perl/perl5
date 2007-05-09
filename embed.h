@@ -3831,7 +3831,7 @@
 #endif
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
-#define isa_lookup(a,b,c,d,e)	S_isa_lookup(aTHX_ a,b,c,d,e)
+#define isa_lookup(a,b,c)	S_isa_lookup(aTHX_ a,b,c)
 #endif
 #endif
 #if defined(PERL_IN_LOCALE_C) || defined(PERL_DECL_PROT)
