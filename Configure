@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed May  9 18:33:46 CEST 2007 [metaconfig 3.0 PL70]
+# Generated on Wed May  9 18:53:25 CEST 2007 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1673,9 +1673,9 @@ Usage: $me [-dehrsEKOSV] [-f config.sh] [-D symbol] [-D symbol=value]
          -D symbol=value   symbol gets the value 'value'
        common used examples (see INSTALL for more info):
          -Duse64bitint            use 64bit integers
-         -Duse64bitall            use 64bit inttegers and pointers
+         -Duse64bitall            use 64bit integers and pointers
          -Dusethreads             use thread support
-         -Dinc_version_list=none  do not include older perl treess in @INC
+         -Dinc_version_list=none  do not include older perl trees in @INC
          -DEBUGGING=none          DEBUGGING options
          -Dcc=gcc                 choose your compiler
          -Dprefix=/opt/perl5      choose your destination
