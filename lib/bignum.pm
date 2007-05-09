@@ -1,7 +1,7 @@
 package bignum;
 use 5.006002;
 
-$VERSION = '0.21';
+$VERSION = '0.21_01';
 use Exporter;
 @EXPORT_OK 	= qw( ); 
 @EXPORT 	= qw( inf NaN ); 
@@ -156,7 +156,7 @@ sub import
     require Math::BigInt if $_lite == 0;	# not already loaded?
     $class = 'Math::BigInt';			# regardless of MBIL or not
     }
-  push @import, $lib_kind => $lib if $lib ne ''; 
+  push @import, 'try' => $lib if $lib ne ''; 
   # Math::BigInt::Trace or plain Math::BigInt
   $class->import(@import, upgrade => $upgrade);
 
