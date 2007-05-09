@@ -65,6 +65,10 @@ In module filtering context, it can be used as Perl version filter.
 
 =back
 
+As a special case, if you specify the module name C<Unicode>, you'll get
+the version number of the Unicode Character Database bundled with the
+requested perl versions.
+
 =cut
 
 use Module::CoreList;
@@ -249,10 +253,9 @@ sub numify_version {
 
 =head1 COPYRIGHT
 
-Copyright (c) 2002-2006 by D.H. aka PodMaster
+Copyright (c) 2002-2007 by D.H. aka PodMaster
 
-Current maintainer : Rafael Garcia-Suarez E<lt>rgarciasuarez at gmail dot
-comE<gt>
+Currently maintained by the perl 5 porters E<lt>perl5-porters@perl.orgE<gt>.
 
 This program is distributed under the same terms as perl itself.
 See http://perl.org/ or http://cpan.org/ for more info on that.

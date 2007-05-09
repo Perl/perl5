@@ -1,7 +1,7 @@
 package Module::CoreList;
 use strict;
 use vars qw/$VERSION %released %patchlevel %version %families/;
-$VERSION = '2.09_02';
+$VERSION = '2.10';
 
 =head1 NAME
 
@@ -30,7 +30,7 @@ Module::CoreList - what modules shipped with versions of perl
 =head1 DESCRIPTION
 
 Module::CoreList contains the hash of hashes
-%Module::CoreList::version, this is keyed on perl version as indicated
+%Module::CoreList::version, that is keyed on perl version as indicated
 in $].  The second level hash is module => version pairs.
 
 Note, it is possible for the version of a module to be unspecified,
@@ -46,6 +46,9 @@ clusters known perl releases by their major versions.
 In 2.01 %Module::CoreList::patchlevel contains the branch and patchlevel
 corresponding to the specified perl version in the Perforce repository where
 the perl sources are kept.
+
+The special module name C<Unicode> refers to the version of the Unicode
+Character Database bundled with Perl.
 
 =head1 CAVEATS
 
@@ -66,14 +69,14 @@ Currently maintained by the perl 5 porters E<lt>perl5-porters@perl.orgE<gt>.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002-2006 Richard Clamp.  All Rights Reserved.
+Copyright (C) 2002-2007 Richard Clamp.  All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Module::Info>, L<perl>
+L<corelist>, L<Module::Info>, L<perl>
 
 =cut
 
