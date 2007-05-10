@@ -7,7 +7,7 @@ require Exporter;
 @EXPORT_OK = qw(rearrange make_attributes unescape escape 
 		expires ebcdic2ascii ascii2ebcdic);
 
-$VERSION = '1.5';
+$VERSION = '1.5_01';
 
 $EBCDIC = "\t" ne "\011";
 # (ord('^') == 95) for codepage 1047 as on os390, vmesa
@@ -200,8 +200,8 @@ sub escape {
   shift() if @_ > 1 and ( ref($_[0]) || (defined $_[1] && $_[0] eq $CGI::DefaultClass));
   my $toencode = shift;
   return undef unless defined($toencode);
-  # we enforce UTF-8 encoding for URLs for no good reason except UTF-8 being the future
-  utf8::encode $toencode;
+  # force bytes while preserving backward compatibility -- dankogai
+  $toencode = pack("C*", unpack("U0C*", $toencode));
     if ($EBCDIC) {
       $toencode=~s/([^a-zA-Z0-9_.~-])/uc sprintf("%%%02x",$E2A[ord($1)])/eg;
     } else {
