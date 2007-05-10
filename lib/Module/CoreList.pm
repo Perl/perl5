@@ -1,7 +1,7 @@
 package Module::CoreList;
 use strict;
 use vars qw/$VERSION %released %patchlevel %version %families/;
-$VERSION = '2.10';
+$VERSION = '2.11';
 
 =head1 NAME
 
@@ -13,8 +13,9 @@ Module::CoreList - what modules shipped with versions of perl
 
  print $Module::CoreList::version{5.00503}{CPAN}; # prints 1.48
 
- print Module::CoreList->first_release('File::Spec');       # prints 5.00503
- print Module::CoreList->first_release('File::Spec', 0.82); # prints 5.006001
+ print Module::CoreList->first_release('File::Spec');         # prints 5.00405
+ print Module::CoreList->first_release_by_date('File::Spec'); # prints 5.005
+ print Module::CoreList->first_release('File::Spec', 0.82);   # prints 5.006001
 
  print join ', ', Module::CoreList->find_modules(qr/Data/);
     # prints 'Data::Dumper'
@@ -47,8 +48,12 @@ In 2.01 %Module::CoreList::patchlevel contains the branch and patchlevel
 corresponding to the specified perl version in the Perforce repository where
 the perl sources are kept.
 
-The special module name C<Unicode> refers to the version of the Unicode
-Character Database bundled with Perl.
+Starting with 2.10, the special module name C<Unicode> refers to the version of
+the Unicode Character Database bundled with Perl.
+
+Since 2.11, Module::CoreList::first_release() returns the first release
+in the order of perl version numbers. If you want to get the earliest
+perl release instead, use Module::CoreList::first_release_by_date().
 
 =head1 CAVEATS
 
@@ -95,7 +100,7 @@ END {
 }
 
 
-sub first_release {
+sub first_release_raw {
     my ($discard, $module, $version) = @_;
 
     my @perls = $version
@@ -103,8 +108,19 @@ sub first_release {
                         $version{$_}{ $module } ge $version } keys %version
         : grep { exists $version{$_}{ $module }             } keys %version;
 
+    return @perls;
+}
+
+sub first_release_by_date {
+    my @perls = &first_release_raw;
     return unless @perls;
     return (sort { $released{$a} cmp $released{$b} } @perls)[0];
+}
+
+sub first_release {
+    my @perls = &first_release_raw;
+    return unless @perls;
+    return (sort { $a cmp $b } @perls)[0];
 }
 
 sub find_modules {

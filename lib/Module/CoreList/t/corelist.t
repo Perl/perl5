@@ -1,7 +1,7 @@
 #!perl -w
 use strict;
 use Module::CoreList;
-use Test::More tests => 12;
+use Test::More tests => 13;
 
 BEGIN { require_ok('Module::CoreList'); }
 
@@ -20,8 +20,11 @@ ok($Module::CoreList::version{5.007003},    "5.007003");
 ok(exists $Module::CoreList::version{5.007003}{'Attribute::Handlers'},
    "Attribute::Handlers were bundled with 5.7.3");
 
-is(Module::CoreList->first_release('File::Spec'), 5.005,
+is(Module::CoreList->first_release_by_date('File::Spec'), 5.005,
    "File::Spec was first bundled in 5.005");
+
+is(Module::CoreList->first_release('File::Spec'), 5.00405,
+   "File::Spec was released in perl with lowest version number 5.00405");
 
 is(Module::CoreList->first_release('File::Spec', 0.82), 5.006_001,
    "File::Spec reached 0.82 with 5.006_001");
