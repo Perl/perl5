@@ -2242,6 +2242,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
       goto setparen;
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
+      paren = atoi(mg->mg_ptr);
       setparen:
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
             CALLREG_NUMBUF_STORE((REGEXP * const)rx,paren,sv);
