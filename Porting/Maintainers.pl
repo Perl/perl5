@@ -144,10 +144,17 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'Compress::Raw::Zlib' =>
+		{
+		'MAINTAINER'	=> 'pmqs',
+		'FILES'		=> q[ext/Compress/Raw],
+		'CPAN'		=> 1,
+		},
+
 	'Compress::Zlib' =>
 		{
 		'MAINTAINER'	=> 'pmqs',
-		'FILES'		=> q[ext/Compress/Zlib t/lib/ZlibTestUtils.pm],
+		'FILES'		=> q[ext/Compress/Zlib],
 		'CPAN'		=> 1,
 		},
 
@@ -390,6 +397,20 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'gbarr',
 		'FILES'		=> q[ext/IO],
+		'CPAN'		=> 1,
+		},
+
+	'IO::Compress::Base' =>
+		{
+		'MAINTAINER'	=> 'pmqs',
+		'FILES'		=> q[ext/IO_Compress_Base],
+		'CPAN'		=> 1,
+		},
+
+	'IO::Compress::Zlib' =>
+		{
+		'MAINTAINER'	=> 'pmqs',
+		'FILES'		=> q[ext/IO_Compress_Zlib],
 		'CPAN'		=> 1,
 		},
 
