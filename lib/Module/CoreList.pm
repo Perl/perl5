@@ -255,6 +255,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         'strict'                => undef,  # lib/strict.pm
         'subs'                  => undef,  # lib/subs.pm
     },
+
     5.001 => {
         'AnyDBM_File'           => undef,  # lib/AnyDBM_File.pm
         'AutoLoader'            => undef,  # lib/AutoLoader.pm
@@ -313,6 +314,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         'strict'                => undef,  # lib/strict.pm
         'subs'                  => undef,  # lib/subs.pm
     },
+
     5.002 => {
         'AnyDBM_File'           => undef,  # lib/AnyDBM_File.pm
         'AutoLoader'            => undef,  # lib/AutoLoader.pm
@@ -392,6 +394,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         'subs'                  => undef,  # lib/subs.pm
         'vars'                  => undef,  # lib/vars.pm
     },
+
     5.00307 => {
         'AnyDBM_File'           => undef, #./lib/AnyDBM_File.pm
         'AutoLoader'            => undef, #./lib/AutoLoader.pm
@@ -492,6 +495,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         'VMS::Filespec'         => undef, #./vms/ext/Filespec.pm
         'VMS::Stdio'            => '2.0', #./vms/ext/Stdio/Stdio.pm
     },
+
     5.004   => {
         'AnyDBM_File'           => undef, #./lib/AnyDBM_File.pm
         'AutoLoader'            => undef, #./lib/AutoLoader.pm
@@ -625,6 +629,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         'VMS::Stdio'            => '2.02', #./vms/ext/Stdio/Stdio.pm
         'vmsish'                => undef, #./vms/ext/vmsish.pm
     },
+
     5.005   => {
         'AnyDBM_File'           => undef, #./lib/AnyDBM_File.pm
         'attrs'                 => '1.0', #./ext/attrs/attrs.pm
@@ -800,6 +805,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         'VMS::Stdio'            => '2.1', #./vms/ext/Stdio/Stdio.pm
         'vmsish'                => undef, #./vms/ext/vmsish.pm
     },
+
     5.00503   => {
         'AnyDBM_File'           => undef,
         'attrs'                 => '1.0',
@@ -976,6 +982,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         'VMS::Stdio'            => 2.1,
         'vmsish'                => undef,
     },
+
     5.00405   => {
         'AnyDBM_File'           => undef, #./lib/AnyDBM_File.pm
         'attrs'                 => '0.1', #./lib/attrs.pm
@@ -1123,7 +1130,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         'vmsish'                => undef, #./vms/ext/vmsish.pm
     },
 
-        5.00504 => {
+    5.00504 => {
         'AnyDBM_File'           => undef,  #lib/AnyDBM_File.pm
         'attrs'                 => '1.0',  #lib/attrs.pm
         'AutoLoader'            => undef,  #lib/AutoLoader.pm
@@ -1301,7 +1308,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         'VMS::Filespec'         => undef,  #vms/ext/Filespec.pm
         'VMS::Stdio'            => '2.1',  #vms/ext/Stdio/Stdio.pm
         'vmsish'                => undef,  #vms/ext/vmsish.pm
-        },
+    },
 
     5.006   => {
         'AnyDBM_File'           => undef, #./lib/AnyDBM_File.pm
@@ -1520,6 +1527,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         'warnings'              => undef, #./lib/warnings.pm
         'warnings::register'    => undef, #./lib/warnings/register.pm
     },
+
     5.006001   => {
         'AnyDBM_File'           => undef,
         'attributes'            => 0.03,
@@ -1743,6 +1751,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         'warnings::register'    => undef,
         'XSLoader'              => '0.01',
     },
+
     5.006002 => {
         'AnyDBM_File'           => undef,  #lib/AnyDBM_File.pm
         'attributes'            => '0.03',  #lib/attributes.pm
@@ -3360,7 +3369,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         'XSLoader' => 0.02,     #XSLoader.pm
     },
 
-        5.008003 => {
+    5.008003 => {
         'AnyDBM_File'           => '1.00',  #lib/AnyDBM_File.pm
         'Attribute::Handlers'   => '0.78',  #lib/Attribute/Handlers.pm
         'attributes'            => '0.06',  #lib/attributes.pm
@@ -3716,7 +3725,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         'XS::APItest'           => '0.03',  #lib/XS/APItest.pm
         'XSLoader'              => '0.02',  #lib/XSLoader.pm
         'XS::Typemap'           => '0.01',  #lib/XS/Typemap.pm
-        },
+    },
 
     5.009 => {
         'AnyDBM_File'           => '1.00',  #lib/AnyDBM_File.pm
@@ -4076,7 +4085,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         'XS::APItest'           => '0.02',  #lib/XS/APItest.pm
         'XS::Typemap'           => '0.01',  #lib/XS/Typemap.pm
         'XSLoader'              => '0.03',  #lib/XSLoader.pm
-       },
+    },
 
     5.009001 => {
         'AnyDBM_File'           => '1.00',  #lib/AnyDBM_File.pm
@@ -4498,6 +4507,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         'Symbol'                => '1.05',  #lib/Symbol.pm
         'Test'                  => '1.24',  #lib/Test.pm
         'Thread'                => '2.00',  #lib/Thread.pm
+        'Unicode'               => '4.0.1', # lib/unicore/version
         'UNIVERSAL'             => '1.01',  #lib/UNIVERSAL.pm
         'utf8'                  => '1.03',  #lib/utf8.pm
         'vars'                  => '1.01',  #lib/vars.pm
@@ -4806,8 +4816,8 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         'VMS::Filespec'         => '1.11',  #vms/ext/Filespec.pm
         'VMS::Stdio'            => '2.3',  #vms/ext/Stdio/Stdio.pm
     },
-    5.008005 => {
 
+    5.008005 => {
         'AnyDBM_File'           => '1.00',  #lib/AnyDBM_File.pm
         'attributes'            => '0.06',  #lib/attributes.pm
         'AutoLoader'            => '5.60',  #lib/AutoLoader.pm
@@ -5171,6 +5181,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         'VMS::Filespec'         => '1.11',  #vms/ext/Filespec.pm
         'VMS::Stdio'            => '2.3',  #vms/ext/Stdio/Stdio.pm
     },
+
     5.008006 => {
         'AnyDBM_File'           => '1.00',  #lib/AnyDBM_File.pm
         'Attribute::Handlers'   => '0.78_01',  #lib/Attribute/Handlers.pm
@@ -5520,6 +5531,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         'Unicode::Normalize'    => '0.30',  #lib/Unicode/Normalize.pm
         'Unicode::UCD'          => '0.22',  #lib/Unicode/UCD.pm
         'UNIVERSAL'             => '1.01',  #lib/UNIVERSAL.pm
+        'Unicode'               => '4.0.1', # lib/unicore/version
         'User::grent'           => '1.00',  #lib/User/grent.pm
         'User::pwent'           => '1.00',  #lib/User/pwent.pm
         'utf8'                  => '1.04',  #lib/utf8.pm
