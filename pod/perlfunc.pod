@@ -296,8 +296,7 @@ and tests the associated file to see if something is true about it.  If the
 argument is omitted, tests C<$_>, except for C<-t>, which tests STDIN.
 Unless otherwise documented, it returns C<1> for true and C<''> for false, or
 the undefined value if the file doesn't exist.  Despite the funny
-names, precedence is the same as any other named unary operator, and
-the argument may be parenthesized like any other unary operator.  The
+names, precedence is the same as any other named unary operator.  The
 operator may be any of:
 
     -r	File is readable by effective uid/gid.
