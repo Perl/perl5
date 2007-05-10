@@ -216,7 +216,7 @@ sub _pack_U {
 
 sub _U_stringify {
     sprintf '"%s"', join '',
-	map sprintf("\\x%02x", $_), unpack 'C*', _pack_U(@_);
+	map sprintf("\\x%02x", $_), unpack 'U0C*', _pack_U(@_);
 }
 
 foreach my $hash (\%Canon, \%Compat) {
