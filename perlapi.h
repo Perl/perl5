@@ -472,8 +472,6 @@ END_EXTERN_C
 #define PL_rehash_seed_set	(*Perl_Irehash_seed_set_ptr(aTHX))
 #undef  PL_replgv
 #define PL_replgv		(*Perl_Ireplgv_ptr(aTHX))
-#undef  PL_rsfp
-#define PL_rsfp			(*Perl_Irsfp_ptr(aTHX))
 #undef  PL_rsfp_filters
 #define PL_rsfp_filters		(*Perl_Irsfp_filters_ptr(aTHX))
 #undef  PL_runops

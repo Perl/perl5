@@ -70,6 +70,7 @@ typedef struct yy_parser {
     char	*last_uni;	/* position of last named-unary op */
     char	*last_lop;	/* position of last list operator */
     U8		lex_state;	/* next token is determined */
+    PerlIO	*rsfp;		/* current source file pointer */
 
 #ifdef PERL_MAD
     SV		*endwhite;

@@ -214,7 +214,6 @@ PERLVAR(Imodglobal,	HV *)		/* per-interp module data */
 
 /* these used to be in global before 5.004_68 */
 PERLVARI(Iprofiledata,	U32 *,	NULL)	/* table of ops, counts */
-PERLVARI(Irsfp,	PerlIO * VOL,	NULL)	/* current source file pointer */
 PERLVARI(Irsfp_filters,	AV *,	NULL)	/* keeps active source filters */
 
 PERLVAR(Icompiling,	COP)		/* compiling/done executing marker */

@@ -2661,7 +2661,7 @@
 #define lex_end()		Perl_lex_end(aTHX)
 #endif
 #ifdef PERL_CORE
-#define lex_start(a)		Perl_lex_start(aTHX_ a)
+#define lex_start(a,b)		Perl_lex_start(aTHX_ a,b)
 #endif
 #define op_null(a)		Perl_op_null(aTHX_ a)
 #if defined(PERL_CORE) || defined(PERL_EXT)
@@ -3517,7 +3517,7 @@
 #endif
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
-#define find_beginning(a)	S_find_beginning(aTHX_ a)
+#define find_beginning(a,b)	S_find_beginning(aTHX_ a,b)
 #define forbid_setid(a,b)	S_forbid_setid(aTHX_ a,b)
 #define incpush(a,b,c,d,e)	S_incpush(aTHX_ a,b,c,d,e)
 #define init_interp()		S_init_interp(aTHX)
@@ -3528,9 +3528,9 @@
 #define init_predump_symbols()	S_init_predump_symbols(aTHX)
 #define my_exit_jump()		S_my_exit_jump(aTHX)
 #define nuke_stacks()		S_nuke_stacks(aTHX)
-#define open_script(a,b,c,d)	S_open_script(aTHX_ a,b,c,d)
+#define open_script(a,b,c,d,e)	S_open_script(aTHX_ a,b,c,d,e)
 #define usage(a)		S_usage(aTHX_ a)
-#define validate_suid(a,b,c,d,e)	S_validate_suid(aTHX_ a,b,c,d,e)
+#define validate_suid(a,b,c,d,e,f)	S_validate_suid(aTHX_ a,b,c,d,e,f)
 #endif
 #  if defined(IAMSUID)
 #ifdef PERL_CORE

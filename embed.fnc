@@ -403,7 +403,7 @@ p	|OP*	|jmaybe		|NN OP* arg
 pP	|I32	|keyword	|NN const char* d|I32 len|bool all_keywords
 Ap	|void	|leave_scope	|I32 base
 EXp	|void	|lex_end
-p	|void	|lex_start	|NULLOK SV* line
+p	|void	|lex_start	|NULLOK SV* line|NULLOK PerlIO *rsfp
 Ap	|void	|op_null	|NN OP* o
 EXp	|void	|op_clear	|NN OP* o
 Ap	|void	|op_refcnt_lock
@@ -1244,7 +1244,7 @@ s	|void	|Slab_to_rw	|NN void *op
 #endif
 
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
-s	|void	|find_beginning	|NN SV* linestr_sv
+s	|void	|find_beginning	|NN SV* linestr_sv|NN PerlIO *rsfp
 s	|void	|forbid_setid	|const char flag|const int suidscript
 s	|void	|incpush	|NULLOK const char *dir|bool addsubdirs|bool addoldvers|bool usesep|bool canrelocate
 s	|void	|init_interp
@@ -1256,11 +1256,13 @@ s	|void	|init_predump_symbols
 rs	|void	|my_exit_jump
 s	|void	|nuke_stacks
 s	|int	|open_script	|NN const char *scriptname|bool dosearch \
-				|NN SV *sv|NN int *suidscript
+				|NN SV *sv|NN int *suidscript|NN PerlIO **rsfpp
 s	|void	|usage		|NN const char *name
 s	|void	|validate_suid	|NN const char *validarg \
 				|NN const char *scriptname|int fdscript \
-				|int suidscript|NN SV* linestr_sv
+				|int suidscript|NN SV* linestr_sv \
+				|NN PerlIO *rsfp
+
 #  if defined(IAMSUID)
 s	|int	|fd_on_nosuid_fs|int fd
 #  endif

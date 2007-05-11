@@ -61,6 +61,7 @@
 #define PL_last_lop		(PL_parser->last_lop)
 #define PL_last_lop_op		(PL_parser->last_lop_op)
 #define PL_lex_state		(PL_parser->lex_state)
+#define PL_rsfp			(PL_parser->rsfp)
 
 #ifdef PERL_MAD
 #  define PL_endwhite		(PL_parser->endwhite)
@@ -638,7 +639,7 @@ S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen)
  */
 
 void
-Perl_lex_start(pTHX_ SV *line)
+Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp)
 {
     dVAR;
     const char *s = NULL;
@@ -665,7 +666,6 @@ Perl_lex_start(pTHX_ SV *line)
     /* initialise lexer state */
 
     SAVECOPLINE(PL_curcop);
-    SAVEDESTRUCTOR_X(restore_rsfp, PL_rsfp);
 
 #ifdef PERL_MAD
     parser->curforce = -1;
@@ -675,6 +675,8 @@ Perl_lex_start(pTHX_ SV *line)
     parser->copline = NOLINE;
     PL_lex_state = LEX_NORMAL;
     parser->expect = XSTATE;
+    parser->rsfp = rsfp;
+
     Newx(parser->lex_brackstack, 120, char);
     Newx(parser->lex_casestack, 12, char);
     *parser->lex_casestack = '\0';
@@ -702,7 +704,6 @@ Perl_lex_start(pTHX_ SV *line)
 	parser->linestart = SvPVX(parser->linestr);
     parser->bufend = parser->bufptr + SvCUR(parser->linestr);
     parser->last_lop = parser->last_uni = NULL;
-    PL_rsfp = 0;
 }
 
 
@@ -712,6 +713,12 @@ void
 Perl_parser_free(pTHX_  const yy_parser *parser)
 {
     SvREFCNT_dec(parser->linestr);
+
+    if (parser->rsfp == PerlIO_stdin())
+	PerlIO_clearerr(parser->rsfp);
+    else if (parser->rsfp && parser->old_parser
+			  && parser->rsfp != parser->old_parser->rsfp)
+	PerlIO_close(parser->rsfp);
 
     Safefree(parser->stack);
     Safefree(parser->lex_brackstack);
@@ -12659,23 +12666,6 @@ S_swallow_bom(pTHX_ U8 *s)
     return (char*)s;
 }
 
-/*
- * restore_rsfp
- * Restore a source filter.
- */
-
-static void
-restore_rsfp(pTHX_ void *f)
-{
-    dVAR;
-    PerlIO * const fp = (PerlIO*)f;
-
-    if (PL_rsfp == PerlIO_stdin())
-	PerlIO_clearerr(PL_rsfp);
-    else if (PL_rsfp && (PL_rsfp != fp))
-	PerlIO_close(PL_rsfp);
-    PL_rsfp = fp;
-}
 
 #ifndef PERL_NO_UTF16_FILTER
 static I32

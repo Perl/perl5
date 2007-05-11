@@ -1025,7 +1025,7 @@ PERL_CALLCONV I32	Perl_keyword(pTHX_ const char* d, I32 len, bool all_keywords)
 
 PERL_CALLCONV void	Perl_leave_scope(pTHX_ I32 base);
 PERL_CALLCONV void	Perl_lex_end(pTHX);
-PERL_CALLCONV void	Perl_lex_start(pTHX_ SV* line);
+PERL_CALLCONV void	Perl_lex_start(pTHX_ SV* line, PerlIO *rsfp);
 PERL_CALLCONV void	Perl_op_null(pTHX_ OP* o)
 			__attribute__nonnull__(pTHX_1);
 
@@ -3357,8 +3357,9 @@ STATIC void	S_Slab_to_rw(pTHX_ void *op)
 #endif
 
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
-STATIC void	S_find_beginning(pTHX_ SV* linestr_sv)
-			__attribute__nonnull__(pTHX_1);
+STATIC void	S_find_beginning(pTHX_ SV* linestr_sv, PerlIO *rsfp)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
 
 STATIC void	S_forbid_setid(pTHX_ const char flag, const int suidscript);
 STATIC void	S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep, bool canrelocate);
@@ -3374,18 +3375,21 @@ STATIC void	S_my_exit_jump(pTHX)
 			__attribute__noreturn__;
 
 STATIC void	S_nuke_stacks(pTHX);
-STATIC int	S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv, int *suidscript)
+STATIC int	S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv, int *suidscript, PerlIO **rsfpp)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3)
-			__attribute__nonnull__(pTHX_4);
+			__attribute__nonnull__(pTHX_4)
+			__attribute__nonnull__(pTHX_5);
 
 STATIC void	S_usage(pTHX_ const char *name)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC void	S_validate_suid(pTHX_ const char *validarg, const char *scriptname, int fdscript, int suidscript, SV* linestr_sv)
+STATIC void	S_validate_suid(pTHX_ const char *validarg, const char *scriptname, int fdscript, int suidscript, SV* linestr_sv, PerlIO *rsfp)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_5);
+			__attribute__nonnull__(pTHX_5)
+			__attribute__nonnull__(pTHX_6);
+
 
 #  if defined(IAMSUID)
 STATIC int	S_fd_on_nosuid_fs(pTHX_ int fd);

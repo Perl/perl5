@@ -9576,6 +9576,7 @@ Perl_parser_dup(pTHX_ const yy_parser *proto, CLONE_PARAMS* param)
     parser->copline	= proto->copline;
     parser->last_lop_op	= proto->last_lop_op;
     parser->lex_state	= proto->lex_state;
+    parser->rsfp	= fp_dup(proto->rsfp, '<', param);
 
 
     parser->linestr	= sv_dup_inc(proto->linestr, param);
@@ -9599,6 +9600,7 @@ Perl_parser_dup(pTHX_ const yy_parser *proto, CLONE_PARAMS* param)
 
 	parser->bufend	    = ls + SvCUR(parser->linestr);
     }
+
 
 #ifdef PERL_MAD
     parser->endwhite	= proto->endwhite;
@@ -11214,7 +11216,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_custom_op_descs  = hv_dup_inc(proto_perl->Icustom_op_descs,param);
 
     PL_profiledata	= NULL;
-    PL_rsfp		= fp_dup(proto_perl->Irsfp, '<', param);
     /* PL_rsfp_filters entries have fake IoDIRP() */
     PL_rsfp_filters	= av_dup_inc(proto_perl->Irsfp_filters, param);
 

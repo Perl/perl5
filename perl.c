@@ -868,9 +868,10 @@ perl_destruct(pTHXx)
 
     /* loosen bonds of global variables */
 
-    if(PL_rsfp) {
-	(void)PerlIO_close(PL_rsfp);
-	PL_rsfp = NULL;
+    /* XXX can PL_parser still be non-null here? */
+    if(PL_parser && PL_parser->rsfp) {
+	(void)PerlIO_close(PL_parser->rsfp);
+	PL_parser->rsfp = NULL;
     }
 
     /* Filters for program text */
@@ -1654,7 +1655,7 @@ STATIC void *
 S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 {
     dVAR;
-    PerlIO *tmpfp;
+    PerlIO *rsfp;
     int argc = PL_origargc;
     char **argv = PL_origargv;
     const char *scriptname = NULL;
@@ -2112,9 +2113,10 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     {
 	int suidscript;
 	const int fdscript
-	    = open_script(scriptname, dosearch, sv, &suidscript);
+	    = open_script(scriptname, dosearch, sv, &suidscript, &rsfp);
 
-	validate_suid(validarg, scriptname, fdscript, suidscript, linestr_sv);
+	validate_suid(validarg, scriptname, fdscript, suidscript,
+		linestr_sv, rsfp);
 
 #ifndef PERL_MICRO
 #  if defined(SIGCHLD) || defined(SIGCLD)
@@ -2144,7 +2146,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    forbid_setid('x', suidscript);
 	    /* Hence you can't get here if suidscript >= 0  */
 
-	    find_beginning(linestr_sv);
+	    find_beginning(linestr_sv, rsfp);
 	    if (cddir && PerlDir_chdir( (char *)cddir ) < 0)
 		Perl_croak(aTHX_ "Can't chdir to %s",cddir);
 	}
@@ -2259,10 +2261,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     }
 #endif
 
-    tmpfp = PL_rsfp;
-    PL_rsfp = NULL;
-    lex_start(linestr_sv);
-    PL_rsfp = tmpfp;
+    lex_start(linestr_sv, rsfp);
     PL_subname = newSVpvs("main");
 
     /* now parse the script */
@@ -3584,7 +3583,7 @@ S_init_main_stash(pTHX)
 
 STATIC int
 S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv,
-	      int *suidscript)
+	      int *suidscript, PerlIO **rsfpp)
 {
 #ifndef IAMSUID
     const char *quote;
@@ -3642,11 +3641,11 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv,
     if (*PL_origfilename == '-' && PL_origfilename[1] == '\0')
 	scriptname = (char *)"";
     if (fdscript >= 0) {
-	PL_rsfp = PerlIO_fdopen(fdscript,PERL_SCRIPT_MODE);
+	*rsfpp = PerlIO_fdopen(fdscript,PERL_SCRIPT_MODE);
 #       if defined(HAS_FCNTL) && defined(F_SETFD)
-	    if (PL_rsfp)
+	    if (*rsfpp)
                 /* ensure close-on-exec */
-	        fcntl(PerlIO_fileno(PL_rsfp),F_SETFD,1);
+	        fcntl(PerlIO_fileno(*rsfpp),F_SETFD,1);
 #       endif
     }
 #ifdef IAMSUID
@@ -3728,24 +3727,24 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv,
                               "PL_preprocess: cmd=\"%s\"\n",
                               SvPVX_const(cmd)));
 
-	PL_rsfp = PerlProc_popen((char *)SvPVX_const(cmd), (char *)"r");
+	*rsfpp = PerlProc_popen((char *)SvPVX_const(cmd), (char *)"r");
 	SvREFCNT_dec(cmd);
 	SvREFCNT_dec(cpp);
     }
     else if (!*scriptname) {
 	forbid_setid(0, *suidscript);
-	PL_rsfp = PerlIO_stdin();
+	*rsfpp = PerlIO_stdin();
     }
     else {
-	PL_rsfp = PerlIO_open(scriptname,PERL_SCRIPT_MODE);
+	*rsfpp = PerlIO_open(scriptname,PERL_SCRIPT_MODE);
 #       if defined(HAS_FCNTL) && defined(F_SETFD)
-	    if (PL_rsfp)
+	    if (*rsfpp)
                 /* ensure close-on-exec */
-	        fcntl(PerlIO_fileno(PL_rsfp),F_SETFD,1);
+	        fcntl(PerlIO_fileno(*rsfpp),F_SETFD,1);
 #       endif
     }
 #endif /* IAMSUID */
-    if (!PL_rsfp) {
+    if (!*rsfpp) {
 	/* PSz 16 Sep 03  Keep neat error message */
 	if (PL_e_script)
 	    Perl_croak(aTHX_ "Can't open "BIT_BUCKET": %s\n", Strerror(errno));
@@ -3892,7 +3891,7 @@ S_fd_on_nosuid_fs(pTHX_ int fd)
 
 STATIC void
 S_validate_suid(pTHX_ const char *validarg, const char *scriptname,
-		int fdscript, int suidscript, SV *linestr_sv)
+		int fdscript, int suidscript, SV *linestr_sv, PerlIO *rsfp)
 {
     dVAR;
 #ifdef IAMSUID
@@ -3929,7 +3928,7 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname,
 #ifdef DOSUID
     const char *s, *s2;
 
-    if (PerlLIO_fstat(PerlIO_fileno(PL_rsfp),&PL_statbuf) < 0)	/* normal stat is insecure */
+    if (PerlLIO_fstat(PerlIO_fileno(rsfp),&PL_statbuf) < 0)	/* normal stat is insecure */
 	Perl_croak(aTHX_ "Can't stat script \"%s\"",PL_origfilename);
     if (PL_statbuf.st_mode & (S_ISUID|S_ISGID)) {
 	I32 len;
@@ -4018,7 +4017,7 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname,
 	 * Seems safe enough to do as root.
 	 */
 #if !defined(NO_NOSUID_CHECK)
-	if (fd_on_nosuid_fs(PerlIO_fileno(PL_rsfp))) {
+	if (fd_on_nosuid_fs(PerlIO_fileno(rsfp))) {
 	    Perl_croak(aTHX_ "Setuid script on nosuid or noexec filesystem\n");
 	}
 #endif
@@ -4032,7 +4031,7 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname,
 	PL_doswitches = FALSE;		/* -s is insecure in suid */
 	/* PSz 13 Nov 03  But -s was caught elsewhere ... so unsetting it here is useless(?!) */
 	CopLINE_inc(PL_curcop);
-	if (sv_gets(linestr_sv, PL_rsfp, 0) == NULL)
+	if (sv_gets(linestr_sv, rsfp, 0) == NULL)
 	    Perl_croak(aTHX_ "No #! line");
 	linestr = SvPV_nolen_const(linestr_sv);
 	/* required even on Sys V */
@@ -4120,8 +4119,8 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 	     * in fact will use that to distinguish this from "normal"
 	     * usage, see comments above.
 	     */
-	    PerlIO_rewind(PL_rsfp);
-	    PerlLIO_lseek(PerlIO_fileno(PL_rsfp),(Off_t)0,0);  /* just in case rewind didn't */
+	    PerlIO_rewind(rsfp);
+	    PerlLIO_lseek(PerlIO_fileno(rsfp),(Off_t)0,0);  /* just in case rewind didn't */
 	    /* PSz 27 Feb 04  Sanity checks on scriptname */
 	    if ((!scriptname) || (!*scriptname) ) {
 		Perl_croak(aTHX_ "No setuid script name\n");
@@ -4138,9 +4137,9 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 		Perl_croak(aTHX_ "Can't change argv to have fd script\n");
 	    }
 	    PL_origargv[which] = savepv(Perl_form(aTHX_ "/dev/fd/%d/%s",
-					  PerlIO_fileno(PL_rsfp), PL_origargv[which]));
+					  PerlIO_fileno(rsfp), PL_origargv[which]));
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-	    fcntl(PerlIO_fileno(PL_rsfp),F_SETFD,0);	/* ensure no close-on-exec */
+	    fcntl(PerlIO_fileno(rsfp),F_SETFD,0);	/* ensure no close-on-exec */
 #endif
 	    PERL_FPU_PRE_EXEC
 	    PerlProc_execv(Perl_form(aTHX_ "%s/sperl"PERL_FS_VER_FMT, BIN_EXP,
@@ -4257,8 +4256,8 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
      * #endif
      * into the perly bits.
      */
-    PerlIO_rewind(PL_rsfp);
-    PerlLIO_lseek(PerlIO_fileno(PL_rsfp),(Off_t)0,0);  /* just in case rewind didn't */
+    PerlIO_rewind(rsfp);
+    PerlLIO_lseek(PerlIO_fileno(rsfp),(Off_t)0,0);  /* just in case rewind didn't */
     /* PSz 11 Nov 03
      * Keep original arguments: suidperl already has fd script.
      */
@@ -4268,9 +4267,9 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 /*	Perl_croak(aTHX_ "Permission denied\n");			*/
 /*  }									*/
 /*  PL_origargv[which] = savepv(Perl_form(aTHX_ "/dev/fd/%d/%s",	*/
-/*				  PerlIO_fileno(PL_rsfp), PL_origargv[which]));	*/
+/*				  PerlIO_fileno(rsfp), PL_origargv[which]));	*/
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-    fcntl(PerlIO_fileno(PL_rsfp),F_SETFD,0);	/* ensure no close-on-exec */
+    fcntl(PerlIO_fileno(rsfp),F_SETFD,0);	/* ensure no close-on-exec */
 #endif
     PERL_FPU_PRE_EXEC
     PerlProc_execv(Perl_form(aTHX_ "%s/perl"PERL_FS_VER_FMT, BIN_EXP,
@@ -4284,7 +4283,7 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
     PERL_UNUSED_ARG(suidscript);
     if (PL_euid != PL_uid || PL_egid != PL_gid) {	/* (suidperl doesn't exist, in fact) */
 #ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
-	PerlLIO_fstat(PerlIO_fileno(PL_rsfp),&PL_statbuf);	/* may be either wrapped or real suid */
+	PerlLIO_fstat(PerlIO_fileno(rsfp),&PL_statbuf);	/* may be either wrapped or real suid */
 	if ((PL_euid != PL_uid && PL_euid == PL_statbuf.st_uid && PL_statbuf.st_mode & S_ISUID)
 	    ||
 	    (PL_egid != PL_gid && PL_egid == PL_statbuf.st_gid && PL_statbuf.st_mode & S_ISGID)
@@ -4302,7 +4301,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 }
 
 STATIC void
-S_find_beginning(pTHX_ SV* linestr_sv)
+S_find_beginning(pTHX_ SV* linestr_sv, PerlIO *rsfp)
 {
     dVAR;
     register char *s;
@@ -4317,7 +4316,7 @@ S_find_beginning(pTHX_ SV* linestr_sv)
     /* Since the Mac OS does not honor #! arguments for us, we do it ourselves */
 
     while (PL_doextract || gMacPerl_AlwaysExtract) {
-	if ((s = sv_gets(linestr_sv, PL_rsfp, 0)) == NULL) {
+	if ((s = sv_gets(linestr_sv, rsfp, 0)) == NULL) {
 	    if (!gMacPerl_AlwaysExtract)
 		Perl_croak(aTHX_ "No Perl script found in input\n");
 
@@ -4328,18 +4327,18 @@ S_find_beginning(pTHX_ SV* linestr_sv)
 		    PL_doextract = FALSE;
 
 	    /* Pater peccavi, file does not have #! */
-	    PerlIO_rewind(PL_rsfp);
+	    PerlIO_rewind(rsfp);
 
 	    break;
 	}
 #else
     while (PL_doextract) {
-	if ((s = sv_gets(linestr_sv, PL_rsfp, 0)) == NULL)
+	if ((s = sv_gets(linestr_sv, rsfp, 0)) == NULL)
 	    Perl_croak(aTHX_ "No Perl script found in input\n");
 #endif
 	s2 = s;
 	if (*s == '#' && s[1] == '!' && ((s = instr(s,"perl")) || (s = instr(s2,"PERL")))) {
-	    PerlIO_ungetc(PL_rsfp, '\n');		/* to keep line count right */
+	    PerlIO_ungetc(rsfp, '\n');		/* to keep line count right */
 	    PL_doextract = FALSE;
 	    while (*s && !(isSPACE (*s) || *s == '#')) s++;
 	    s2 = s;
@@ -4357,7 +4356,7 @@ S_find_beginning(pTHX_ SV* linestr_sv)
 	     * by counting lines we already skipped over
 	     */
 	    for (; maclines > 0 ; maclines--)
-		PerlIO_ungetc(PL_rsfp, '\n');
+		PerlIO_ungetc(rsfp, '\n');
 
 	    break;
 

@@ -97,6 +97,7 @@ __NEED_VAR__ U32 PL_signals = D_PPP_PERL_SIGNALS_INIT;
 #  define PL_PARSER_EXISTS
 #  define PL_expect   (PL_parser ? PL_parser->expect : 0)
 #  define PL_copline  (PL_parser ? PL_parser->copline : 0)
+#  define PL_rsfp     (PL_parser ? PL_parser->rsfp : 0)
 #endif
 
 =xsinit
@@ -227,7 +228,11 @@ other_variables()
 		ppp_TESTVAR(PL_perl_destruct_level);
 		ppp_TESTVAR(PL_perldb);
 		ppp_TESTVAR(PL_rsfp_filters);
+#ifdef PL_PARSER_EXISTS
+		ppp_TESTVAR(PL_parser); /* just any var that isn't PL_expect */
+#else
 		ppp_TESTVAR(PL_rsfp);
+#endif
 		ppp_TESTVAR(PL_stack_base);
 		ppp_TESTVAR(PL_stack_sp);
 		ppp_TESTVAR(PL_statcache);
