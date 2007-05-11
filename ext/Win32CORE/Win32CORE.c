@@ -15,7 +15,9 @@ static void
 forward(pTHX_ const char *function)
 {
     dXSARGS;
+    DWORD err = GetLastError();
     Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpvn("Win32",5), newSVnv(0.27));
+    SetLastError(err);
     SPAGAIN;
     PUSHMARK(SP-items);
     call_pv(function, GIMME_V);
