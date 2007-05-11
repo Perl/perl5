@@ -19,7 +19,7 @@
 #  define HWND_MESSAGE     ((HWND)-3)
 #endif
 #ifndef WC_NO_BEST_FIT_CHARS
-#  define WC_NO_BEST_FIT_CHARS 0x00000400
+#  define WC_NO_BEST_FIT_CHARS 0x00000400 /* requires Windows 2000 or later */
 #endif
 #include <winnt.h>
 #include <tlhelp32.h>
@@ -206,6 +206,12 @@ IsWinNT(void)
     return (g_osver.dwPlatformId == VER_PLATFORM_WIN32_NT);
 }
 
+int
+IsWin2000(void)
+{
+    return (g_osver.dwMajorVersion > 4);
+}
+
 EXTERN_C void
 set_w32_module_name(void)
 {
@@ -219,7 +225,7 @@ set_w32_module_name(void)
     osver.dwOSVersionInfoSize = sizeof(osver);
     GetVersionEx(&osver);
 
-    if (osver.dwPlatformId == VER_PLATFORM_WIN32_NT) {
+    if (osver.dwMajorVersion > 4) {
         WCHAR modulename[MAX_PATH];
         WCHAR fullname[MAX_PATH];
         char *ansi;
@@ -858,7 +864,7 @@ win32_opendir(const char *filename)
     scanname[len] = '\0';
 
     /* do the FindFirstFile call */
-    if (IsWinNT()) {
+    if (IsWin2000()) {
         WCHAR wscanname[sizeof(scanname)];
         MultiByteToWideChar(CP_ACP, 0, scanname, -1, wscanname, sizeof(wscanname)/sizeof(WCHAR));
 	dirp->handle = FindFirstFileW(PerlDir_mapW(wscanname), &wFindData);
@@ -949,7 +955,7 @@ win32_readdir(DIR *dirp)
 	    /* finding the next file that matches the wildcard
 	     * (which should be all of them in this directory!).
 	     */
-	    if (IsWinNT()) {
+	    if (IsWin2000()) {
                 WIN32_FIND_DATAW wFindData;
 		res = FindNextFileW(dirp->handle, &wFindData);
 		if (res) {
@@ -4677,8 +4683,8 @@ ansify_path(void)
     WCHAR *wide_path;
     WCHAR *wide_dir;
 
-    /* there is no Unicode environment on Windows 9X */
-    if (IsWin95())
+    /* win32_ansipath() requires Windows 2000 or later */
+    if (!IsWin2000())
         return;
 
     /* fetch Unicode version of PATH */
@@ -4869,7 +4875,7 @@ win32_create_message_window()
      * "right" place with DispatchMessage() anymore, as there is no WindowProc
      * if there is no window handle.
      */
-    if (g_osver.dwMajorVersion < 5)
+    if (!IsWin2000())
         return NULL;
 
     return CreateWindow("Static", "", 0, 0, 0, 0, 0, HWND_MESSAGE, 0, 0, NULL);

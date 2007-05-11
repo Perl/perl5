@@ -153,7 +153,7 @@ void VDir::Init(VDir* pDir, VMem *p)
         GetVersionEx(&osver);
 
 	bManageDirectory = 0;
-        if (osver.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS) {
+        if (osver.dwMajorVersion < 5) {
             char szBuffer[MAX_PATH*driveCount];
             if (GetLogicalDriveStringsA(sizeof(szBuffer), szBuffer)) {
                 char* pEnv = (char*)GetEnvironmentStringsA();
@@ -168,7 +168,7 @@ void VDir::Init(VDir* pDir, VMem *p)
             }
             SetDefaultA(".");
         }
-        else { /* Windows NT or later */
+        else { /* Windows 2000 or later */
             WCHAR szBuffer[MAX_PATH*driveCount];
             if (GetLogicalDriveStringsW(sizeof(szBuffer), szBuffer)) {
                 WCHAR* pEnv = GetEnvironmentStringsW();
