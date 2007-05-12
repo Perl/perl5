@@ -671,10 +671,9 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, bool new_filter)
 
     /* on scope exit, free this parser and restore any outer one */
     SAVEPARSER(parser);
+    parser->saved_curcop = PL_curcop;
 
     /* initialise lexer state */
-
-    SAVECOPLINE(PL_curcop);
 
 #ifdef PERL_MAD
     parser->curforce = -1;
@@ -723,6 +722,7 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, bool new_filter)
 void
 Perl_parser_free(pTHX_  const yy_parser *parser)
 {
+    PL_curcop = parser->saved_curcop;
     SvREFCNT_dec(parser->linestr);
 
     if (parser->rsfp == PerlIO_stdin())

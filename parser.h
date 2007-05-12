@@ -96,6 +96,8 @@ typedef struct yy_parser {
     I32		nexttoke;
 #endif
 
+    COP		*saved_curcop;	/* the previous PL_curcop */
+
 } yy_parser;
     
 
