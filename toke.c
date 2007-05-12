@@ -681,7 +681,7 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, bool new_filter)
     parser->nexttoke = 0;
 #endif
     parser->copline = NOLINE;
-    PL_lex_state = LEX_NORMAL;
+    parser->lex_state = LEX_NORMAL;
     parser->expect = XSTATE;
     parser->rsfp = rsfp;
     parser->rsfp_filters = (new_filter || !oparser) ? NULL
