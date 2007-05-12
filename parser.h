@@ -71,6 +71,7 @@ typedef struct yy_parser {
     char	*last_lop;	/* position of last list operator */
     U8		lex_state;	/* next token is determined */
     PerlIO	*rsfp;		/* current source file pointer */
+    AV		*rsfp_filters;	/* holds chain of active source filters */
 
 #ifdef PERL_MAD
     SV		*endwhite;

@@ -2745,7 +2745,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
     STRLEN len;
 
     ENTER;
-    lex_start(sv, NULL);
+    lex_start(sv, NULL, FALSE);
     SAVETMPS;
     /* switch to eval mode */
 
@@ -3377,9 +3377,7 @@ PP(pp_require)
 
     ENTER;
     SAVETMPS;
-    lex_start(NULL, tryrsfp);
-    SAVEGENERICSV(PL_rsfp_filters);
-    PL_rsfp_filters = NULL;
+    lex_start(NULL, tryrsfp, TRUE);
 
     SAVEHINTS();
     PL_hints = 0;
@@ -3448,7 +3446,7 @@ PP(pp_entereval)
     TAINT_PROPER("eval");
 
     ENTER;
-    lex_start(sv, NULL);
+    lex_start(sv, NULL, FALSE);
     SAVETMPS;
 
     /* switch to eval mode */

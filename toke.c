@@ -62,6 +62,7 @@
 #define PL_last_lop_op		(PL_parser->last_lop_op)
 #define PL_lex_state		(PL_parser->lex_state)
 #define PL_rsfp			(PL_parser->rsfp)
+#define PL_rsfp_filters		(PL_parser->rsfp_filters)
 
 #ifdef PERL_MAD
 #  define PL_endwhite		(PL_parser->endwhite)
@@ -91,7 +92,6 @@ S_pending_ident(pTHX);
 static const char ident_too_long[] = "Identifier too long";
 static const char commaless_variable_list[] = "comma-less variable list";
 
-static void restore_rsfp(pTHX_ void *f);
 #ifndef PERL_NO_UTF16_FILTER
 static I32 utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 static I32 utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen);
@@ -635,21 +635,30 @@ S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 
 /*
  * Perl_lex_start
+ *
  * Create a parser object and initialise its parser and lexer fields
+ *
+ * rsfp       is the opened file handle to read from (if any),
+ *
+ * line       holds any initial content already read from the file (or in
+ *            the case of no file, such as an eval, the whole contents);
+ *
+ * new_filter indicates that this is a new file and it shouldn't inherit
+ *            the filters from the current parser (ie require).
  */
 
 void
-Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp)
+Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, bool new_filter)
 {
     dVAR;
     const char *s = NULL;
     STRLEN len;
-    yy_parser *parser;
+    yy_parser *parser, *oparser;
 
     /* create and initialise a parser */
 
     Newxz(parser, 1, yy_parser);
-    parser->old_parser = PL_parser;
+    parser->old_parser = oparser = PL_parser;
     PL_parser = parser;
 
     Newx(parser->stack, YYINITDEPTH, yy_stack_frame);
@@ -676,6 +685,8 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp)
     PL_lex_state = LEX_NORMAL;
     parser->expect = XSTATE;
     parser->rsfp = rsfp;
+    parser->rsfp_filters = (new_filter || !oparser) ? NULL
+		: (AV*)SvREFCNT_inc(oparser->rsfp_filters);
 
     Newx(parser->lex_brackstack, 120, char);
     Newx(parser->lex_casestack, 12, char);
@@ -719,6 +730,7 @@ Perl_parser_free(pTHX_  const yy_parser *parser)
     else if (parser->rsfp && parser->old_parser
 			  && parser->rsfp != parser->old_parser->rsfp)
 	PerlIO_close(parser->rsfp);
+    SvREFCNT_dec(parser->rsfp_filters);
 
     Safefree(parser->stack);
     Safefree(parser->lex_brackstack);
@@ -2764,6 +2776,9 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
     if (!funcp)
 	return NULL;
 
+    if (!PL_parser)
+	return NULL;
+
     if (!PL_rsfp_filters)
 	PL_rsfp_filters = newAV();
     if (!datasv)
@@ -2791,7 +2806,7 @@ Perl_filter_del(pTHX_ filter_t funcp)
     DEBUG_P(PerlIO_printf(Perl_debug_log, "filter_del func %p",
 			  FPTR2DPTR(void*, funcp)));
 #endif
-    if (!PL_rsfp_filters || AvFILLp(PL_rsfp_filters)<0)
+    if (!PL_parser || !PL_rsfp_filters || AvFILLp(PL_rsfp_filters)<0)
 	return;
     /* if filter is on top of stack (usual case) just pop it off */
     datasv = FILTER_DATA(AvFILLp(PL_rsfp_filters));
@@ -2827,7 +2842,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 #endif
 	: maxlen;
 
-    if (!PL_rsfp_filters)
+    if (!PL_parser || !PL_rsfp_filters)
 	return -1;
     if (idx > AvFILLp(PL_rsfp_filters)) {       /* Any more filters?	*/
 	/* Provide a default input filter to make life easy.	*/

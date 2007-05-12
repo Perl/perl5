@@ -647,7 +647,8 @@ use	:	USE startsub
 			  $$ = utilize(IVAL($1), $2, $4, $5, $6);
 			  token_getmad($1,$$,'o');
 			  token_getmad($7,$$,';');
-			  if (PL_rsfp_filters && AvFILLp(PL_rsfp_filters) >= 0)
+			  if (PL_parser->rsfp_filters &&
+				      AvFILLp(PL_parser->rsfp_filters) >= 0)
 			      append_madprops(newMADPROP('!', MAD_PV, "", 0), $$, 0);
 #else
 			  utilize(IVAL($1), $2, $4, $5, $6);

@@ -874,10 +874,6 @@ perl_destruct(pTHXx)
 	PL_parser->rsfp = NULL;
     }
 
-    /* Filters for program text */
-    SvREFCNT_dec(PL_rsfp_filters);
-    PL_rsfp_filters = NULL;
-
     if (PL_minus_F) {
 	Safefree(PL_splitstr);
 	PL_splitstr = NULL;
@@ -1668,6 +1664,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     bool minus_f = FALSE;
 #endif
     SV *linestr_sv = newSV_type(SVt_PVIV);
+    bool add_read_e_script = FALSE;
 
     SvGROW(linestr_sv, 80);
     sv_setpvn(linestr_sv,"",0);
@@ -1751,7 +1748,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    forbid_setid('e', -1);
 	    if (!PL_e_script) {
 		PL_e_script = newSVpvs("");
-		filter_add(read_e_script, NULL);
+		add_read_e_script = TRUE;
 	    }
 	    if (*++s)
 		sv_catpv(PL_e_script, s);
@@ -2261,8 +2258,11 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     }
 #endif
 
-    lex_start(linestr_sv, rsfp);
+    lex_start(linestr_sv, rsfp, TRUE);
     PL_subname = newSVpvs("main");
+
+    if (add_read_e_script)
+	filter_add(read_e_script, NULL);
 
     /* now parse the script */
 

@@ -1025,7 +1025,7 @@ PERL_CALLCONV I32	Perl_keyword(pTHX_ const char* d, I32 len, bool all_keywords)
 
 PERL_CALLCONV void	Perl_leave_scope(pTHX_ I32 base);
 PERL_CALLCONV void	Perl_lex_end(pTHX);
-PERL_CALLCONV void	Perl_lex_start(pTHX_ SV* line, PerlIO *rsfp);
+PERL_CALLCONV void	Perl_lex_start(pTHX_ SV* line, PerlIO *rsfp, bool new_filter);
 PERL_CALLCONV void	Perl_op_null(pTHX_ OP* o)
 			__attribute__nonnull__(pTHX_1);
 

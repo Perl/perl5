@@ -2661,7 +2661,7 @@
 #define lex_end()		Perl_lex_end(aTHX)
 #endif
 #ifdef PERL_CORE
-#define lex_start(a,b)		Perl_lex_start(aTHX_ a,b)
+#define lex_start(a,b,c)	Perl_lex_start(aTHX_ a,b,c)
 #endif
 #define op_null(a)		Perl_op_null(aTHX_ a)
 #if defined(PERL_CORE) || defined(PERL_EXT)

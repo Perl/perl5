@@ -298,7 +298,6 @@
 #define PL_rehash_seed		(vTHX->Irehash_seed)
 #define PL_rehash_seed_set	(vTHX->Irehash_seed_set)
 #define PL_replgv		(vTHX->Ireplgv)
-#define PL_rsfp_filters		(vTHX->Irsfp_filters)
 #define PL_runops		(vTHX->Irunops)
 #define PL_runops_dbg		(vTHX->Irunops_dbg)
 #define PL_runops_std		(vTHX->Irunops_std)
@@ -547,7 +546,6 @@
 #define PL_Irehash_seed		PL_rehash_seed
 #define PL_Irehash_seed_set	PL_rehash_seed_set
 #define PL_Ireplgv		PL_replgv
-#define PL_Irsfp_filters	PL_rsfp_filters
 #define PL_Irunops		PL_runops
 #define PL_Irunops_dbg		PL_runops_dbg
 #define PL_Irunops_std		PL_runops_std
