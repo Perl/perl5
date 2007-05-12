@@ -63,6 +63,8 @@
 #define PL_lex_state		(PL_parser->lex_state)
 #define PL_rsfp			(PL_parser->rsfp)
 #define PL_rsfp_filters		(PL_parser->rsfp_filters)
+#define PL_in_my		(PL_parser->in_my)
+#define PL_in_my_stash		(PL_parser->in_my_stash)
 
 #ifdef PERL_MAD
 #  define PL_endwhite		(PL_parser->endwhite)

@@ -352,7 +352,7 @@ Perl_allocmy(pTHX_ const char *const name)
 {
     dVAR;
     PADOFFSET off;
-    const bool is_our = (PL_in_my == KEY_our);
+    const bool is_our = (PL_parser->in_my == KEY_our);
 
     /* complain about "my $<special_var>" etc etc */
     if (*name &&
@@ -373,24 +373,25 @@ Perl_allocmy(pTHX_ const char *const name)
     /* check for duplicate declaration */
     pad_check_dup(name, is_our, (PL_curstash ? PL_curstash : PL_defstash));
 
-    if (PL_in_my_stash && *name != '$') {
+    if (PL_parser->in_my_stash && *name != '$') {
 	yyerror(Perl_form(aTHX_
 		    "Can't declare class for non-scalar %s in \"%s\"",
  		     name,
- 		     is_our ? "our" : PL_in_my == KEY_state ? "state" : "my"));
+ 		     is_our ? "our"
+			    : PL_parser->in_my == KEY_state ? "state" : "my"));
     }
 
     /* allocate a spare slot and store the name in that slot */
 
     off = pad_add_name(name,
-		    PL_in_my_stash,
+		    PL_parser->in_my_stash,
 		    (is_our
 		        /* $_ is always in main::, even with our */
 			? (PL_curstash && !strEQ(name,"$_") ? PL_curstash : PL_defstash)
 			: NULL
 		    ),
 		    0, /*  not fake */
-		    PL_in_my == KEY_state
+		    PL_parser->in_my == KEY_state
     );
     return off;
 }
@@ -1969,11 +1970,13 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 	if (cUNOPo->op_first->op_type != OP_GV) { /* MJD 20011224 */
 	    yyerror(Perl_form(aTHX_ "Can't declare %s in \"%s\"",
 			OP_DESC(o),
-			PL_in_my == KEY_our ? "our" : PL_in_my == KEY_state ? "state" : "my"));
+			PL_parser->in_my == KEY_our
+			    ? "our"
+			    : PL_parser->in_my == KEY_state ? "state" : "my"));
 	} else if (attrs) {
 	    GV * const gv = cGVOPx_gv(cUNOPo->op_first);
-	    PL_in_my = FALSE;
-	    PL_in_my_stash = NULL;
+	    PL_parser->in_my = FALSE;
+	    PL_parser->in_my_stash = NULL;
 	    apply_attrs(GvSTASH(gv),
 			(type == OP_RV2SV ? GvSV(gv) :
 			 type == OP_RV2AV ? (SV*)GvAV(gv) :
@@ -1990,14 +1993,16 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
     {
 	yyerror(Perl_form(aTHX_ "Can't declare %s in \"%s\"",
 			  OP_DESC(o),
-			  PL_in_my == KEY_our ? "our" : PL_in_my == KEY_state ? "state" : "my"));
+			  PL_parser->in_my == KEY_our
+			    ? "our"
+			    : PL_parser->in_my == KEY_state ? "state" : "my"));
 	return o;
     }
     else if (attrs && type != OP_PUSHMARK) {
 	HV *stash;
 
-	PL_in_my = FALSE;
-	PL_in_my_stash = NULL;
+	PL_parser->in_my = FALSE;
+	PL_parser->in_my_stash = NULL;
 
 	/* check for C<my Dog $spot> when deciding package */
 	stash = PAD_COMPNAME_TYPE(o->op_targ);
@@ -2007,7 +2012,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
     }
     o->op_flags |= OPf_MOD;
     o->op_private |= OPpLVAL_INTRO;
-    if (PL_in_my == KEY_state)
+    if (PL_parser->in_my == KEY_state)
 	o->op_private |= OPpPAD_STATE;
     return o;
 }
@@ -2041,8 +2046,8 @@ Perl_my_attrs(pTHX_ OP *o, OP *attrs)
 	else
 	    o = append_list(OP_LIST, (LISTOP*)o, (LISTOP*)rops);
     }
-    PL_in_my = FALSE;
-    PL_in_my_stash = NULL;
+    PL_parser->in_my = FALSE;
+    PL_parser->in_my_stash = NULL;
     return o;
 }
 
@@ -2287,8 +2292,13 @@ Perl_localize(pTHX_ OP *o, I32 lex)
 	    if (sigil && (*s == ';' || *s == '=')) {
 		Perl_warner(aTHX_ packWARN(WARN_PARENTHESIS),
 				"Parentheses missing around \"%s\" list",
-				lex ? (PL_in_my == KEY_our ? "our" : PL_in_my == KEY_state ? "state" : "my")
-				: "local");
+				lex
+				    ? (PL_parser->in_my == KEY_our
+					? "our"
+					: PL_parser->in_my == KEY_state
+					    ? "state"
+					    : "my")
+				    : "local");
 	    }
 	}
     }
@@ -2296,8 +2306,8 @@ Perl_localize(pTHX_ OP *o, I32 lex)
 	o = my(o);
     else
 	o = mod(o, OP_NULL);		/* a bit kludgey */
-    PL_in_my = FALSE;
-    PL_in_my_stash = NULL;
+    PL_parser->in_my = FALSE;
+    PL_parser->in_my_stash = NULL;
     return o;
 }
 

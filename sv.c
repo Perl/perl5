@@ -9579,6 +9579,8 @@ Perl_parser_dup(pTHX_ const yy_parser *proto, CLONE_PARAMS* param)
     parser->rsfp	= fp_dup(proto->rsfp, '<', param);
     /* rsfp_filters entries have fake IoDIRP() */
     parser->rsfp_filters= av_dup_inc(proto->rsfp_filters, param);
+    parser->in_my	= proto->in_my;
+    parser->in_my_stash	= hv_dup(proto->in_my_stash, param);
 
 
     parser->linestr	= sv_dup_inc(proto->linestr, param);
@@ -11266,8 +11268,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_subline		= proto_perl->Isubline;
     PL_subname		= sv_dup_inc(proto_perl->Isubname, param);
 
-    PL_in_my		= proto_perl->Iin_my;
-    PL_in_my_stash	= hv_dup(proto_perl->Iin_my_stash, param);
 #ifdef FCRYPT
     PL_cryptseen	= proto_perl->Icryptseen;
 #endif

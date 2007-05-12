@@ -550,7 +550,7 @@ Perl_pad_check_dup(pTHX_ const char *name, bool is_our, const HV *ourstash)
 		break; /* "our" masking "our" */
 	    Perl_warner(aTHX_ packWARN(WARN_MISC),
 		"\"%s\" variable %s masks earlier declaration in same %s",
-		(is_our ? "our" : PL_in_my == KEY_my ? "my" : "state"),
+		(is_our ? "our" : PL_parser->in_my == KEY_my ? "my" : "state"),
 		name,
 		(COP_SEQ_RANGE_HIGH(sv) == PAD_MAX ? "scope" : "statement"));
 	    --off;

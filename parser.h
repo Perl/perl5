@@ -61,7 +61,6 @@ typedef struct yy_parser {
     bool	preambled;
     SUBLEXINFO	sublex_info;
     SV		*linestr;	/* current chunk of src text */
-    line_t	copline;	/* current line number */
     char	*bufptr;	
     char	*oldbufptr;	
     char	*oldoldbufptr;	
@@ -69,7 +68,11 @@ typedef struct yy_parser {
     char	*linestart;	/* beginning of most recently read line */
     char	*last_uni;	/* position of last named-unary op */
     char	*last_lop;	/* position of last list operator */
+    line_t	copline;	/* current line number */
+    U16		in_my;		/* we're compiling a "my"/"our" declaration */
     U8		lex_state;	/* next token is determined */
+    /* space for a U8 here */
+    HV		*in_my_stash;	/* declared class of this "my" declaration */
     PerlIO	*rsfp;		/* current source file pointer */
     AV		*rsfp_filters;	/* holds chain of active source filters */
 

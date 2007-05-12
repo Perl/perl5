@@ -1535,7 +1535,7 @@ case 2:
 
   case 200:
 #line 1293 "perly.y"
-    { PL_in_my = 0; (yyval.opval) = my((ps[(1) - (1)].val.opval)); ;}
+    { PL_parser->in_my = 0; (yyval.opval) = my((ps[(1) - (1)].val.opval)); ;}
     break;
 
   case 201:
