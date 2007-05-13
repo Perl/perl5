@@ -1279,7 +1279,7 @@ S_curmad(pTHX_ char slot, SV *sv)
     /* keep a slot open for the head of the list? */
     if (slot != '_' && *where && (*where)->mad_key == '^') {
 	(*where)->mad_key = slot;
-	sv_free((*where)->mad_val);
+	sv_free((SV*)((*where)->mad_val));
 	(*where)->mad_val = (void*)sv;
     }
     else
