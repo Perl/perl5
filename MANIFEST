@@ -483,6 +483,7 @@ ext/Encode/lib/Encode/JP/JIS7.pm	Encode extension
 ext/Encode/lib/Encode/KR/2022_KR.pm	 Encode extension
 ext/Encode/lib/Encode/MIME/Header/ISO_2022_JP.pm	Encode extension
 ext/Encode/lib/Encode/MIME/Header.pm	Encode extension
+ext/Encode/lib/Encode/MIME/Name.pm	Encode extension
 ext/Encode/lib/Encode/PerlIO.pod	Documents for Encode & PerlIO
 ext/Encode/lib/Encode/Supported.pod	Documents for supported encodings
 ext/Encode/lib/Encode/Unicode/UTF7.pm	Encode extension
@@ -524,6 +525,7 @@ ext/Encode/t/ksc5601.enc	test data
 ext/Encode/t/ksc5601.utf	test data
 ext/Encode/t/mime_header_iso2022jp.t	test script
 ext/Encode/t/mime-header.t	test script
+ext/Encode/t/mime-name.t	test script
 ext/Encode/t/Mod_EUCJP.pm	module that t/enc_module.enc uses
 ext/Encode/t/perlio.t		test script
 ext/Encode/t/rt.pl		test script

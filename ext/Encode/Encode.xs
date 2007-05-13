@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.11 2007/04/06 12:53:41 dankogai Exp $
+ $Id: Encode.xs,v 2.12 2007/05/12 06:42:19 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -646,6 +646,35 @@ CODE:
     ST(0) = &PL_sv_no;
     }else{
     ST(0) = &PL_sv_yes;
+    }
+    XSRETURN(1);
+}
+
+void
+Method_mime_name(obj)
+SV *	obj
+CODE:
+{
+    encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj)));
+    SV *retval;
+    eval_pv("require Encode::MIME::Name", 0);
+
+    if (SvTRUE(get_sv("@", 0))) {
+	ST(0) = &PL_sv_undef;
+    }else{
+	ENTER;
+	SAVETMPS;
+	PUSHMARK(sp);
+	XPUSHs(sv_2mortal(newSVpvn(enc->name[0], strlen(enc->name[0]))));
+	PUTBACK;
+	call_pv("Encode::MIME::Name::get_mime_name", G_SCALAR);
+	SPAGAIN;
+	retval = newSVsv(POPs);
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+	/* enc->name[0] */
+	ST(0) = retval;
     }
     XSRETURN(1);
 }

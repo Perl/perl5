@@ -1,10 +1,10 @@
 #
-# $Id: Encode.pm,v 2.20 2007/04/22 14:56:12 dankogai Exp dankogai $
+# $Id: Encode.pm,v 2.21 2007/05/12 06:42:19 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.20 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.21 $ =~ /(\d+)/g;
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -564,6 +564,22 @@ resolve_alias() does not need C<use Encode::Alias>; it can be
 exported via C<use Encode qw(resolve_alias)>.
 
 See L<Encode::Alias> for details.
+
+=head2 Finding IANA Character Set Registry names
+
+The canonical name of a given encoding does not necessarily agree with
+IANA IANA Character Set Registry, commonly seen as C<< Content-Type:
+text/plain; charset=I<whatever> >>.  For most cases canonical names
+work but sometimes it does not (notably 'utf-8-strict').
+
+Therefore as of Encode version 2.21, a new method C<mime_name()> is added.
+
+  use Encode;
+  my $enc = find_encoding('UTF-8');
+  warn $enc->name;      # utf-8-strict
+  warn $enc->mime_name; # UTF-8
+
+See also:  L<Encode::Encoding>
 
 =head1 Encoding via PerlIO
 

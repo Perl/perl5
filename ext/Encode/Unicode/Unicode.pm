@@ -4,7 +4,7 @@ use strict;
 use warnings;
 no warnings 'redefine';
 
-our $VERSION = do { my @r = ( q$Revision: 2.3 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.4 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -158,7 +158,7 @@ and as of this writing Encode suite just leave it as is (\x{FeFF}).
               16         32 bits/char
   -------------------------
   BE      0xFeFF 0x0000FeFF
-  LE      0xFFeF 0xFFFe0000
+  LE      0xFFFe 0xFFFe0000
   -------------------------
 
 =back

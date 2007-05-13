@@ -3,7 +3,7 @@ package Encode::Encoding;
 # Base class for classes which implement encodings
 use strict;
 use warnings;
-our $VERSION = do { my @r = ( q$Revision: 2.4 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.5 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 require Encode;
 
@@ -19,6 +19,11 @@ sub Define {
 }
 
 sub name { return shift->{'Name'} }
+
+sub mime_name{
+    require Encode::MIME::Name;
+    return Encode::MIME::Name::get_mime_name(shift->name);
+}
 
 # sub renew { return $_[0] }
 
@@ -177,6 +182,17 @@ Predefined As:
   sub name  { return shift->{'Name'} }
 
 MUST return the string representing the canonical name of the encoding.
+
+=item -E<gt>mime_name
+
+Predefined As:
+
+  sub mime_name{
+    require Encode::MIME::Name;
+    return Encode::MIME::Name::get_mime_name(shift->name);
+  }
+
+MUST return the string representing the IANA charset name of the encoding.
 
 =item -E<gt>renew
 
