@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.57';
+$VERSION = '1.58';
 require 5.006002;
 
 require Exporter;
@@ -332,6 +332,12 @@ sub config
   {
   # return (later set?) configuration data as hash ref
   my $class = shift || 'Math::BigFloat';
+
+  if (@_ == 1 && ref($_[0]) ne 'HASH')
+    {
+    my $cfg = $class->SUPER::config();
+    return $cfg->{$_[0]};
+    }
 
   my $cfg = $class->SUPER::config(@_);
 

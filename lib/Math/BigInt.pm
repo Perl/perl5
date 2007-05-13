@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 use 5.006002;
 
-$VERSION = '1.86';
+$VERSION = '1.87';
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(objectify bgcd blcm); 
@@ -375,7 +375,7 @@ sub config
   my $class = shift || 'Math::BigInt';
 
   no strict 'refs';
-  if (@_ > 0)
+  if (@_ > 1 || (@_ == 1 && (ref($_[0]) eq 'HASH')))
     {
     # try to set given options as arguments from hash
 
@@ -428,6 +428,11 @@ sub config
     {
     $cfg->{$key} = ${"${class}::$key"};
     };
+  if (@_ == 1 && (ref($_[0]) ne 'HASH'))
+    {
+    # calls of the style config('lib') return just this value
+    return $cfg->{$_[0]};
+    }
   $cfg;
   }
 
@@ -1239,6 +1244,8 @@ sub blog
     }
 
   return $x if $x->modify('blog');
+
+  $base = $self->new($base) if defined $base && !ref $base;
 
   # inf, -inf, NaN, <0 => NaN
   return $x->bnan()

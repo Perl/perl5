@@ -277,7 +277,7 @@ ok ($C->_str($C->_root($x,$n)),'80');
 $x = $C->_new("523347633027360537213511522");
 ok ($C->_str($C->_root($x,$n)),'81');
 
-my $res = [ qw/ 9 31 99 316 999 3162 9999/ ];
+my $res = [ qw/9 31 99 316 999 3162 9999 31622 99999/ ];
 
 # 99 ** 2 = 9801, 999 ** 2 = 998001 etc
 for my $i (2 .. 9)
@@ -299,7 +299,7 @@ for my $i (2 .. 9)
 
     $x = '9' x $i; $x = $C->_new($x);
     $n = $C->_new("2");
-    print "# _root( ", '9' x $i, ", ", 9 x $i, ") \n" unless
+    print "# BASE_LEN $BASE_LEN _root( ", '9' x $i, ", ", 9 x $i, ") \n" unless
      ok ($C->_str($C->_root($x,$n)), $res->[$i-2]);
     }
   else
