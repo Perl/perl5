@@ -679,7 +679,7 @@ $(o).dll:
 
 .rc.res:
 .IF "$(CCTYPE)" == "GCC"
-	$(RSC) --use-temp-file -I . -I .. -O COFF -i $< -o $@
+	$(RSC) --use-temp-file --include-dir=. --include-dir=.. -O COFF -i $< -o $@
 .ELSE
 	$(RSC) -i.. $<
 .ENDIF
