@@ -10,6 +10,11 @@ BEGIN {
 	}
     }
 
-    plan tests => 1;
+    plan tests => 2;
 };
 use_ok( "Win32CORE" );
+
+# [perl #42925] - Loading Win32::GetLastError() via the forwarder function
+# should not affect the last error being retrieved
+$^E = 42;
+is(Win32::GetLastError(), 42, 'GetLastError() works on the first call');
