@@ -189,6 +189,8 @@ PERLVAR(Imess_sv,	SV *)
 PERLVAR(Iors_sv,	SV *)		/* output record separator $\ */
 /* statics moved here for shared library purposes */
 PERLVARI(Igensym,	I32,	0)	/* next symbol for getsym() to define */
+PERLVAR(Ierror_count,	U8)		/* how many errors so far, max 10 */
+PERLVARI(Icv_has_eval, bool, FALSE) /* PL_compcv includes an entereval or similar */
 PERLVARI(Ilaststype,	U16,	OP_STAT)
 PERLVARI(Ilaststatval,	int,	-1)
 
@@ -281,12 +283,6 @@ C<&PL_sv_yes>.
 PERLVAR(Isv_undef,	SV)
 PERLVAR(Isv_no,		SV)
 PERLVAR(Isv_yes,	SV)
-
-PERLVAR(Ierror_count,	U8)		/* how many errors so far, max 10 */
-PERLVARI(Icv_has_eval, bool, FALSE) /* PL_compcv includes an entereval or similar */
-/* Space for two more U8 here without increasing the structure size */
-
-PERLVAR(Imulti_end,	I32)		/* last line of multi-line string */
 
 PERLVAR(Isubname,	SV *)		/* name of current subroutine */
 
@@ -489,6 +485,8 @@ PERLVARI(Irehash_seed, UV, 0)		/* 582 hash initializer */
 /* File descriptor to talk to the child which dumps scalars.  */
 PERLVARI(Idumper_fd, int, -1)
 #endif
+
+PERLVAR(Imulti_end,	I32)		/* last line of multi-line string */
 
 #ifdef PERL_IMPLICIT_CONTEXT
 PERLVARI(Imy_cxt_size, int, 0)		/* size of PL_my_cxt_list */

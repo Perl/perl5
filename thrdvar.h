@@ -152,7 +152,12 @@ PERLVAR(Tscreamnext,	I32 *)
 PERLVAR(Tlastscream,	SV *)
 
 PERLVAR(Treg_state,	struct re_save_state)
+
 PERLVAR(Tregdummy,	regnode)	/* from regcomp.c */
+
+PERLVARI(Tdumpindent,	U16, 4)		/* # of blanks per dump indentation level */
+/* Space for U16 here without increasing the structure size */
+
 PERLVARA(Tcolors,6,	char *)		/* from regcomp.c */
 
 PERLVARI(Tpeepp,	peep_t, MEMBER_TO_FPTR(Perl_peep))
@@ -171,8 +176,6 @@ PERLVAR(Twatchok,	char *)
 
 PERLVARI(Tregmatch_slab,	regmatch_slab *, NULL)
 PERLVAR(Tregmatch_state,	regmatch_state *)
-
-PERLVARI(Tdumpindent,	U16, 4)		/* # of blanks per dump indentation level */
 
 PERLVARI(Tdelayedisa,	HV*, NULL)      /* stash for PL_delaymagic for magic_setisa */
 
