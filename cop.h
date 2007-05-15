@@ -135,6 +135,9 @@ typedef struct jmpenv JMPENV;
 
 struct cop {
     BASEOP
+    /* On LP64 putting this here takes advantage of the fact that BASEOP isn't
+       an exact multiple of 8 bytes to save structure padding.  */
+    line_t      cop_line;       /* line # of this command */
     char *	cop_label;	/* label for this construct */
 #ifdef USE_ITHREADS
     char *	cop_stashpv;	/* package line was compiled in */
@@ -145,7 +148,6 @@ struct cop {
 #endif
     U32		cop_hints;	/* hints bits from pragmata */
     U32		cop_seq;	/* parse sequence number */
-    line_t      cop_line;       /* line # of this command */
     /* Beware. mg.c and warnings.pl assume the type of this is STRLEN *:  */
     STRLEN *	cop_warnings;	/* lexical warnings bitmask */
     /* compile time state of %^H.  See the comment in op.c for how this is
