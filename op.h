@@ -315,7 +315,6 @@ struct pmop {
     BASEOP
     /* On LP64 putting this here takes advantage of the fact that BASEOP isn't
        an exact multiple of 8 bytes to save structure padding.  */
-    U32		op_pmflags;
     OP *	op_first;
     OP *	op_last;
 #ifdef USE_ITHREADS
@@ -323,6 +322,7 @@ struct pmop {
 #else
     REGEXP *    op_pmregexp;            /* compiled expression */
 #endif
+    U32         op_pmflags;
     union {
 	OP *	op_pmreplroot;		/* For OP_SUBST */
 #ifdef USE_ITHREADS
