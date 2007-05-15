@@ -686,7 +686,7 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, bool new_filter)
     parser->lex_state = LEX_NORMAL;
     parser->expect = XSTATE;
     parser->rsfp = rsfp;
-    parser->rsfp_filters = (new_filter || !oparser) ? NULL
+    parser->rsfp_filters = (new_filter || !oparser) ? newAV()
 		: (AV*)SvREFCNT_inc(oparser->rsfp_filters);
 
     Newx(parser->lex_brackstack, 120, char);
