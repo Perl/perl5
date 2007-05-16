@@ -11,6 +11,10 @@ BEGIN {
         print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
         exit(0);
     }
+    if ($^O eq 'hpux' && $Config{osvers} <= 10.20) {
+        print("1..0 # Skip: Broken under HP-UX 10.20\n");
+        exit(0);
+    }
 }
 
 use ExtUtils::testlib;

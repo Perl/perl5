@@ -99,28 +99,28 @@ ok(23, ref($$hobj{'array'}) eq 'yang', "blessed array in hash");
 ok(24, ref($$hobj{'scalar'}) eq 'baz', "blessed scalar in hash");
 ok(25, ${$$hobj{'scalar'}} eq '3', "blessed scalar in hash contents");
 
-threads->new(sub {
-                # Rebless objects
-                bless $hobj, 'oof';
-                bless $aobj, 'rab';
-                bless $sobj, 'zab';
+threads->create(sub {
+                    # Rebless objects
+                    bless $hobj, 'oof';
+                    bless $aobj, 'rab';
+                    bless $sobj, 'zab';
 
-                my $data = $$aobj[0];
-                bless $data, 'niy';
-                $$aobj[0] = $data;
-                $data = $$aobj[1];
-                bless $data, 'gnay';
-                $$aobj[1] = $data;
+                    my $data = $$aobj[0];
+                    bless $data, 'niy';
+                    $$aobj[0] = $data;
+                    $data = $$aobj[1];
+                    bless $data, 'gnay';
+                    $$aobj[1] = $data;
 
-                $data = $$hobj{'hash'};
-                bless $data, 'niy';
-                $$hobj{'hash'} = $data;
-                $data = $$hobj{'array'};
-                bless $data, 'gnay';
-                $$hobj{'array'} = $data;
+                    $data = $$hobj{'hash'};
+                    bless $data, 'niy';
+                    $$hobj{'hash'} = $data;
+                    $data = $$hobj{'array'};
+                    bless $data, 'gnay';
+                    $$hobj{'array'} = $data;
 
-                $$sobj = 'test';
-             })->join;
+                    $$sobj = 'test';
+                })->join();
 
 # Test reblessing
 ok(26, ref($hobj) eq 'oof', "hash reblessing does work");

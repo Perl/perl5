@@ -5,28 +5,24 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.61';
+our $VERSION = '1.67';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
+# Verify this Perl supports threads
+require Config;
+if (! $Config::Config{useithreads}) {
+    die("This Perl not built to support threads\n");
+}
 
-BEGIN {
-    # Verify this Perl supports threads
-    use Config;
-    if (! $Config{useithreads}) {
-        die("This Perl not built to support threads\n");
-    }
-
-    # Complain if 'threads' is loaded after 'threads::shared'
-    if ($threads::shared::threads_shared) {
-        warn <<'_MSG_';
+# Complain if 'threads' is loaded after 'threads::shared'
+if ($threads::shared::threads_shared) {
+    warn <<'_MSG_';
 Warning, threads::shared has already been loaded.  To
 enable shared variables, 'use threads' must be called
 before threads::shared or any module that uses it.
 _MSG_
-   }
 }
-
 
 # Declare that we have been loaded
 $threads::threads = 1;
@@ -62,7 +58,7 @@ sub import
         } elsif ($sym =~ /^str/i) {
             import overload ('""' => \&tid);
 
-        } elsif ($sym =~ /^(?:all|yield)$/) {
+        } elsif ($sym =~ /^(?::all|yield)$/) {
             push(@EXPORT, qw(yield));
 
         } else {
@@ -138,7 +134,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.61
+This document describes threads version 1.67
 
 =head1 SYNOPSIS
 
@@ -863,10 +859,16 @@ problem.
 
 =over
 
-=item Using non-threadsafe modules
+=item Thread-safe modules
 
-Unfortunately, you may encounter Perl modules that are not I<threadsafe>.  For
-example, they may crash the Perl interpreter during execution, or may dump
+See L<perlmod/"Making your module threadsafe"> when creating modules that may
+be used in threaded applications, especially if those modules use non-Perl
+data, or XS code.
+
+=item Using non-thread-safe modules
+
+Unfortunately, you may encounter Perl modules that are not I<thread-safe>.
+For example, they may crash the Perl interpreter during execution, or may dump
 core on termination.  Depending on the module and the requirements of your
 application, it may be possible to work around such difficulties.
 
@@ -877,18 +879,42 @@ C<import> if needed):
     sub thr_func
     {
         require Unsafe::Module
-        # import Unsafe::Module ...;
+        # Unsafe::Module->import(...);
 
         ....
     }
 
 If the module is needed inside the I<main> thread, try modifying your
 application so that the module is loaded (again using C<require> and
-C<import>) after any threads are started, and in such a way that no other
-threads are started afterwards.
+C<-E<gt>import()>) after any threads are started, and in such a way that no
+other threads are started afterwards.
 
 If the above does not work, or is not adequate for your application, then file
 a bug report on L<http://rt.cpan.org/Public/> against the problematic module.
+
+=item Current working directory
+
+On all platforms except MSWin32, the setting for the current working directory
+is shared among all threads such that changing it in one thread (e.g., using
+C<chdir()>) will affect all the threads in the application.
+
+On MSWin32, each thread maintains its own the current working directory
+setting.
+
+=item Environment variables
+
+Currently, on all platforms except MSWin32, all I<system> calls (e.g., using
+C<system()> or back-ticks) made from threads use the environment variable
+settings from the I<main> thread.  In other words, changes made to C<%ENV> in
+a thread will not be visible in I<system> calls made by that thread.
+
+To work around this, set environment variables as part of the I<system> call.
+For example:
+
+    my $msg = 'hello';
+    system("FOO=$msg; echo \$FOO");   # Outputs 'hello' to STDOUT
+
+On MSWin32, each thread maintains its own set of environment variables.
 
 =item Parent-child threads
 
@@ -942,10 +968,15 @@ reconstituting it in the joining thread.
 =item Perl Bugs and the CPAN Version of L<threads>
 
 Support for threads extends beyond the code in this module (i.e.,
-F<threads.pm> and F<threads.xs>), and into the Perl iterpreter itself.  Older
+F<threads.pm> and F<threads.xs>), and into the Perl interpreter itself.  Older
 versions of Perl contain bugs that may manifest themselves despite using the
 latest version of L<threads> from CPAN.  There is no workaround for this other
-than upgrading to the lastest version of Perl.
+than upgrading to the latest version of Perl.
+
+Even with the latest version of Perl, it is known that certain constructs
+with threads may result in warning messages concerning leaked scalars or
+unreferenced scalars.  However, such warnings are harmless, and may safely be
+ignored.
 
 =back
 
@@ -959,7 +990,10 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.61/threads.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.67/threads.pm>
+
+Source repository:
+L<http://code.google.com/p/threads-shared/>
 
 L<threads::shared>, L<perlthrtut>
 

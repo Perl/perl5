@@ -15,14 +15,16 @@ BEGIN {
 
 use ExtUtils::testlib;
 
+my $test = 0;
 sub ok {
-    my ($id, $ok, $name) = @_;
+    my ($ok, $name) = @_;
+    $test++;
 
     # You have to do it this way or VMS will get confused.
     if ($ok) {
-        print("ok $id - $name\n");
+        print("ok $test - $name\n");
     } else {
-        print("not ok $id - $name\n");
+        print("not ok $test - $name\n");
         printf("# Failed test at line %d\n", (caller)[2]);
     }
 
@@ -31,11 +33,11 @@ sub ok {
 
 BEGIN {
     $| = 1;
-    print("1..31\n");   ### Number of tests that will be run ###
+    print("1..61\n");   ### Number of tests that will be run ###
 };
 
 use threads;
-ok(1, 1, 'Loaded');
+ok(1, 'Loaded');
 
 ### Start of Testing ###
 
@@ -50,12 +52,16 @@ sub stress_re {
 
 my @threads;
 for (1..$cnt) {
-    push(@threads, threads->create('stress_re', $_));
+    my $thr = threads->create('stress_re', $_);
+    ok($thr, "Thread created - iter $_");
+    push(@threads, $thr);
 }
 
 for (1..$cnt) {
-    my $result = $threads[$_-1]->join;
-    ok($_+1, defined($result) && ($result eq 'ok'), "stress re - iter $_");
+    my ($result, $thr);
+    $thr = $threads[$_-1];
+    $result = $thr->join if $thr;
+    ok($thr && defined($result) && ($result eq 'ok'), "Thread joined - iter $_");
 }
 
 # EOF

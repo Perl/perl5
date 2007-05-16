@@ -12,7 +12,7 @@
 #ifdef HAS_PPPORT_H
 #  define NEED_PL_signals
 #  define NEED_newRV_noinc
-#  define NEED_sv_2pv_nolen
+#  define NEED_sv_2pv_flags
 #  include "ppport.h"
 #  include "threads.h"
 #endif
@@ -452,7 +452,7 @@ S_ithread_run(void * arg)
         SPAGAIN;
         for (ii=len-1; ii >= 0; ii--) {
             SV *sv = POPs;
-            if (jmp_rc == 0) {
+            if (jmp_rc == 0 && (! (thread->gimme & G_VOID))) {
                 av_store(params, ii, SvREFCNT_inc(sv));
             }
         }
@@ -688,10 +688,8 @@ S_ithread_create(
             thread->init_function = newSV(0);
             sv_copypv(thread->init_function, init_function);
         } else {
-            thread->init_function = sv_dup(init_function, &clone_param);
-            if (SvREFCNT(thread->init_function) == 0) {
-                SvREFCNT_inc_void(thread->init_function);
-            }
+            thread->init_function =
+		SvREFCNT_inc(sv_dup(init_function, &clone_param));
         }
 
         thread->params = sv_dup(params, &clone_param);
@@ -848,7 +846,7 @@ ithread_create(...)
     CODE:
         if ((items >= 2) && SvROK(ST(1)) && SvTYPE(SvRV(ST(1)))==SVt_PVHV) {
             if (--items < 2) {
-                Perl_croak(aTHX_ "Usage: threads->create(\\%specs, function, ...)");
+                Perl_croak(aTHX_ "Usage: threads->create(\\%%specs, function, ...)");
             }
             specs = (HV*)SvRV(ST(1));
             idx = 1;

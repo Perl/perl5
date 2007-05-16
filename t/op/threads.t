@@ -1,25 +1,26 @@
-#!./perl
+#!perl
+
 BEGIN {
      chdir 't' if -d 't';
      @INC = '../lib';
-     require './test.pl';	# for which_perl() etc
+     require './test.pl';
      $| = 1;
-}
 
-use strict;
-use Config;
-
-BEGIN {
-     if (!$Config{useithreads}) {
-	print "1..0 # Skip: no ithreads\n";
-	exit 0;
+     require Config;
+     if (!$Config::Config{useithreads}) {
+        print "1..0 # Skip: no ithreads\n";
+        exit 0;
      }
      if ($ENV{PERL_CORE_MINITEST}) {
        print "1..0 # Skip: no dynamic loading on miniperl, no threads\n";
        exit 0;
      }
-     plan(6);
+
+     plan(9);
 }
+
+use strict;
+use warnings;
 use threads;
 
 # test that we don't get:
@@ -113,3 +114,33 @@ fresh_perl_is(<<'EOI', 'ok', { }, 'Ensure PL_linestr can be cloned');
 use threads;
 print do 'op/threads_create.pl' || die $@;
 EOI
+
+
+TODO: {
+    no strict 'vars';   # Accessing $TODO from test.pl
+    local $TODO = 'refcount issues with threads';
+
+# Scalars leaked: 1
+foreach my $BLOCK (qw(CHECK INIT)) {
+    fresh_perl_is(<<EOI, 'ok', { }, "threads in $BLOCK block");
+        use threads;
+        $BLOCK { threads->create(sub {})->join; }
+        print 'ok';
+EOI
+}
+
+# Scalars leaked: 1
+fresh_perl_is(<<'EOI', 'ok', { }, 'Bug #41138');
+    use threads;
+    leak($x);
+    sub leak
+    {
+        local $x;
+        threads->create(sub {})->join();
+    }
+    print 'ok';
+EOI
+
+} # TODO
+
+# EOF

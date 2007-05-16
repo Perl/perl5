@@ -160,7 +160,7 @@ ok(31, ! defined($thrx), 'No object');
 $thrx = threads->object(0);
 ok(32, ! defined($thrx), 'No object');
 
-import threads 'stringify';
+threads->import('stringify');
 $thr1 = threads->create(sub {});
 ok(33, "$thr1" eq $thr1->tid(), 'Stringify');
 $thr1->join();
