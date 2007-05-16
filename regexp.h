@@ -55,8 +55,17 @@ typedef struct regexp_paren_pair {
     I32 end;
 } regexp_paren_pair;
 
-/* this is ordered such that the most commonly used 
-   fields are at the start of the struct */
+/*
+  The regexp/REGEXP struct, see L<perlreapi> for further documentation
+  on the individual fields. The struct is ordered so that the most
+  commonly used fields are placed at the start.
+
+  Any patch that adds items to this struct will need to include
+  changes to F<sv.c> (C<Perl_re_dup()>) and F<regcomp.c>
+  (C<pregfree()>). This involves freeing or cloning items in the
+  regexp's data array based on the data item's type.
+*/
+
 typedef struct regexp {
         /* what engine created this regexp? */
 	const struct regexp_engine* engine; 

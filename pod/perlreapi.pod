@@ -46,7 +46,7 @@ to provide an extra argument to the routine holding a pointer back to
 the interpreter that is executing the regexp. So under threading all
 routines get an extra argument.
 
-The routines are as follows:
+=head1 Callbacks
 
 =head2 comp
 
@@ -142,12 +142,12 @@ Set if the pattern is L<SvUTF8()|perlapi/SvUTF8>, set by Perl_pmruntime.
 
 =back
 
-In general these flags should be preserved in regex->extflags after
-compilation, although it is possible the regex includes constructs
-that changes them. The perl engine for instance may upgrade non-utf8
-strings to utf8 if the pattern includes constructs such as C<\x{...}>
-that can only match unicode values. RXf_SKIPWHITE should always be
-preserved verbatim in regex->extflags.
+In general these flags should be preserved in C<< rx->extflags >>
+after compilation, although it is possible the regex includes
+constructs that changes them. The perl engine for instance may upgrade
+non-utf8 strings to utf8 if the pattern includes constructs such as
+C<\x{...}> that can only match unicode values. RXf_SKIPWHITE should
+always be preserved verbatim in C<< regex->extflags >>.
 
 =head2 exec
 
@@ -373,11 +373,12 @@ execute patterns in various contexts such as is the pattern anchored in
 some way, or what flags were used during the compile, or whether the
 program contains special constructs that perl needs to be aware of.
 
-In addition it contains two fields that are intended for the private use
-of the regex engine that compiled the pattern. These are the C<intflags>
-and pprivate members. The C<pprivate> is a void pointer to an arbitrary
-structure whose use and management is the responsibility of the compiling
-engine. perl will never modify either of these values.
+In addition it contains two fields that are intended for the private
+use of the regex engine that compiled the pattern. These are the
+C<intflags> and C<pprivate> members. C<pprivate> is a void pointer to
+an arbitrary structure whose use and management is the responsibility
+of the compiling engine. perl will never modify either of these
+values.
 
     typedef struct regexp {
         /* what engine created this regexp? */
@@ -430,9 +431,7 @@ engine. perl will never modify either of these values.
 
 The fields are discussed in more detail below:
 
-=over 4
-
-=item C<engine>
+=head2 C<engine>
 
 This field points at a regexp_engine structure which contains pointers
 to the subroutines that are to be used for performing a match. It
@@ -443,16 +442,16 @@ Internally this is set to C<NULL> unless a custom engine is specified in
 C<$^H{regcomp}>, perl's own set of callbacks can be accessed in the struct
 pointed to by C<RE_ENGINE_PTR>.
 
-=item C<mother_re>
+=head2 C<mother_re>
 
 TODO, see L<http://www.mail-archive.com/perl5-changes@perl.org/msg17328.html>
 
-=item C<extflags>
+=head2 C<extflags>
 
 This will be used by perl to see what flags the regexp was compiled with, this
 will normally be set to the value of the flags parameter on L</comp>.
 
-=item C<minlen> C<minlenret>
+=head2 C<minlen> C<minlenret>
 
 The minimum string length required for the pattern to match.  This is used to
 prune the search space by not bothering to match any closer to the end of a
@@ -474,36 +473,36 @@ distinction is particularly important as the substitution logic uses the
 C<minlenret> to tell whether it can do in-place substition which can result in
 considerable speedup.
 
-=item C<gofs>
+=head2 C<gofs>
 
 Left offset from pos() to start match at.
 
-=item C<substrs>
+=head2 C<substrs>
 
 TODO: document
 
-=item C<nparens>, C<lasparen>, and C<lastcloseparen>
+=head2 C<nparens>, C<lasparen>, and C<lastcloseparen>
 
 These fields are used to keep track of how many paren groups could be matched
 in the pattern, which was the last open paren to be entered, and which was
 the last close paren to be entered.
 
-=item C<intflags>
+=head2 C<intflags>
 
 The engine's private copy of the flags the pattern was compiled with. Usually
 this is the same as C<extflags> unless the engine chose to modify one of them
 
-=item C<pprivate>
+=head2 C<pprivate>
 
 A void* pointing to an engine-defined data structure. The perl engine uses the
 C<regexp_internal> structure (see L<perlreguts/Base Structures>) but a custom
 engine should use something else.
 
-=item C<swap>
+=head2 C<swap>
 
 TODO: document
 
-=item C<offs>
+=head2 C<offs>
 
 A C<regexp_paren_pair> structure which defines offsets into the string being
 matched which correspond to the C<$&> and C<$1>, C<$2> etc. captures, the
@@ -519,12 +518,12 @@ capture buffer did not match. C<< ->offs[0].start/end >> represents C<$&> (or
 C<${^MATCH> under C<//p>) and C<< ->offs[paren].end >> matches C<$$paren> where
 C<$paren >= 1>.
 
-=item C<precomp> C<prelen>
+=head2 C<precomp> C<prelen>
 
 Used for debugging purposes. C<precomp> holds a copy of the pattern
 that was compiled and C<prelen> its length.
 
-=item C<paren_names>
+=head2 C<paren_names>
 
 This is a hash used internally to track named capture buffers and their
 offsets. The keys are the names of the buffers the values are dualvars,
@@ -533,7 +532,7 @@ pv being an embedded array of I32.  The values may also be contained
 independently in the data array in cases where named backreferences are
 used.
 
-=item C<reg_substr_data>
+=head2 C<reg_substr_data>
 
 Holds information on the longest string that must occur at a fixed
 offset from the start of the pattern, and the longest string that must
@@ -541,7 +540,7 @@ occur at a floating offset from the start of the pattern. Used to do
 Fast-Boyer-Moore searches on the string to find out if its worth using
 the regex engine at all, and if so where in the string to search.
 
-=item C<subbeg> C<sublen> C<saved_copy>
+=head2 C<subbeg> C<sublen> C<saved_copy>
 
     #define SAVEPVN(p,n) ((p) ? savepvn(p,n) : NULL)
     if (RX_MATCH_COPIED(ret))
@@ -554,7 +553,7 @@ C<PL_sawampersand || rx->extflags & RXf_PMf_KEEPCOPY>
 These are used during execution phase for managing search and replace
 patterns.
 
-=item C<wrapped> C<wraplen>
+=head2 C<wrapped> C<wraplen>
 
 Stores the string C<qr//> stringifies to, for example C<(?-xism:eek)>
 in the case of C<qr/eek/>.
@@ -572,25 +571,16 @@ understand some for of inline modifiers.
 
 The C<Perl_reg_stringify> in F<regcomp.c> does the stringification work.
 
-=item C<seen_evals>
+=head2 C<seen_evals>
 
 This stores the number of eval groups in the pattern. This is used for security
 purposes when embedding compiled regexes into larger patterns with C<qr//>.
 
-=item C<refcnt>
+=head2 C<refcnt>
 
 The number of times the structure is referenced. When this falls to 0 the
 regexp is automatically freed by a call to pregfree. This should be set to 1 in
 each engine's L</comp> routine.
-
-=back
-
-=head2 De-allocation and Cloning
-
-Any patch that adds data items to the REGEXP struct will need to include
-changes to F<sv.c> (C<Perl_re_dup()>) and F<regcomp.c> (C<pregfree()>). This
-involves freeing or cloning items in the regexp's data array based on the data
-item's type.
 
 =head1 HISTORY
 
