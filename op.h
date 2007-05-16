@@ -313,8 +313,6 @@ struct listop {
 
 struct pmop {
     BASEOP
-    /* On LP64 putting this here takes advantage of the fact that BASEOP isn't
-       an exact multiple of 8 bytes to save structure padding.  */
     OP *	op_first;
     OP *	op_last;
 #ifdef USE_ITHREADS
