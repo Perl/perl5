@@ -159,13 +159,6 @@ esac
 : Prepare dependency lists for Makefile.
 dynamic_list=' '
 extra_dep=''
-case "$d_cplusplus" in
-define)
-  : delete as a function name will not work.
-  dynamic_ext=`echo $dynamic_ext | sed 's/ODBM_File//'`
-  static_ext=`echo $static_ext | sed 's/ODBM_File//'`
-  ;;
-esac
 for f in $dynamic_ext; do
     : the dependency named here will never exist
       base=`echo "$f" | sed 's/.*\///'`
