@@ -534,6 +534,34 @@ sub os_flavor {
 }
 
 
+=item cflags
+
+Defines the PERLDLL symbol if we are configured for static building since all
+code destined for the perl5xx.dll must be compiled with the PERLDLL symbol
+defined.
+
+=cut
+
+sub cflags {
+    my($self,$libperl)=@_;
+    return $self->{CFLAGS} if $self->{CFLAGS};
+    return '' unless $self->needs_linking();
+
+    my $base = $self->SUPER::cflags($libperl);
+    foreach (split /\n/, $base) {
+        /^(\S*)\s*=\s*(\S*)$/ and $self->{$1} = $2;
+    };
+    $self->{CCFLAGS} .= " -DPERLDLL" if ($self->{LINKTYPE} eq 'static');
+
+    return $self->{CFLAGS} = qq{
+CCFLAGS = $self->{CCFLAGS}
+OPTIMIZE = $self->{OPTIMIZE}
+PERLTYPE = $self->{PERLTYPE}
+};
+
+}
+
+
 1;
 __END__
 
