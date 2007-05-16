@@ -1,9 +1,12 @@
-
 use strict;
 use warnings;
 use Carp;
 
-use lib '.';
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = qw(. ../lib);
+}
+
 our $db ;
 
 {
