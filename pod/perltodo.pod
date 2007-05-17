@@ -38,7 +38,7 @@ Write portable self destruct code for tests to stop them burning CPU in
 infinite loops. This needs to avoid using alarm, as some of the tests are
 testing alarm/sleep or timers.
 
-=head2 POD -> HTML conversion in the core still sucks
+=head2 POD -E<gt> HTML conversion in the core still sucks
 
 Which is crazy given just how simple POD purports to be, and how simple HTML
 can be. It's not actually I<as> simple as it sounds, particularly with the
@@ -303,7 +303,14 @@ C<perl> executable.
 This could be done little differently. Namely C<miniperl> should be built for
 HOST and then full C<perl> with extensions should be compiled for TARGET.
 This, however, might require extra trickery for %Config: we have one config
-first for HOST and then another for TARGET.
+first for HOST and then another for TARGET.  Tools like MakeMaker will be
+mightily confused.  Having around two different types of executables and
+libraries (HOST and TARGET) makes life interesting for Makefiles and
+shell (and Perl) scripts.  There is $Config{run}, normally empty, which
+can be used as an execution wrapper.  Also note that in some
+cross-compilation/execution environments the HOST and the TARGET do
+not see the same filesystem(s), the $Config{run} may need to do some
+file/directory copying back and forth.
 
 =head1 Tasks that need a little C knowledge
 
@@ -422,14 +429,18 @@ filesystem.
 temporarily retired in 5.8.1, and the -C has been repurposed, see
 L<perlrun>.)
 
+Most probably the right way to do this would be this:
+L</"Virtualize operating system access">.
+
 =head2 Unicode in %ENV
 
 Currently the %ENV entries are always byte strings.
+See L</"Virtualize operating system access">.
 
 =head2 Unicode and glob()
 
 Currently glob patterns and filenames returned from File::Glob::glob()
-are always byte strings.
+are always byte strings.  See L</"Virtualize operating system access">.
 
 =head2 use less 'memory'
 
@@ -619,10 +630,36 @@ if it is ever executed. Variant ??? calls warn, and !!! calls die.>
 
 Those would be nice to add to Perl 5. That could be done without new ops.
 
+=head2 Virtualize operating system access
+
+Implement a set of "vtables" that virtualizes operating system access
+(open(), mkdir(), unlink(), readdir(), getenv(), etc.)  At the very
+least these interfaces should take SVs as "name" arguments instead of
+bare char pointers; probably the most flexible and extensible way
+would be for the interfaces to accept HVs.  The system needs to be
+per-operating-system and per-file-system hookable/filterable
+(L<perlport/"Files and Filesystems"> is good reading at this point,
+in fact, all of L<perlport> is.)
+
+A less ambitious form of this has actually already been implemented
+(but only for Win32), take a look at F<iperlsys.h>.  While Win32
+systems go through a set of "vtables" for operating system access,
+non-Win32 systems go straight for the POSIX/UNIX-style system/library
+call.  Similar system should be implemented for all platforms.
+The existing Win32 implementation probably does not need to survive
+alongside this proposed new implementation, they could be merged.
+
+What would this give us?  One often-asked-for feature this would
+enable is using Unicode for filenames (and other "names" like %ENV,
+usernames, hostnames, and so forth.)  But this would also allow for
+things like virtual filesystems and "sandboxes" (though as long as
+dynamic loading of random object code  is allowed, not very safe
+sandboxes since external code of course know not of Perl's vtables).
+
 =head1 Big projects
 
 Tasks that will get your name mentioned in the description of the "Highlights
-of 5.10"
+of 5.12"
 
 =head2 make ithreads more robust
 
