@@ -848,7 +848,7 @@ ithread_create(...)
     CODE:
         if ((items >= 2) && SvROK(ST(1)) && SvTYPE(SvRV(ST(1)))==SVt_PVHV) {
             if (--items < 2) {
-                Perl_croak(aTHX_ "Usage: threads->create(\\%specs, function, ...)");
+                Perl_croak(aTHX_ "Usage: threads->create(\\%%specs, function, ...)");
             }
             specs = (HV*)SvRV(ST(1));
             idx = 1;

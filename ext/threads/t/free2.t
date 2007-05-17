@@ -32,37 +32,38 @@ BEGIN {
         exit(0);
     }
 
+    require Thread::Queue;
+
     $| = 1;
     print("1..78\n");   ### Number of tests that will be run ###
-};
-
-my $TEST;
-BEGIN {
-    share($TEST);
-    $TEST = 1;
 }
 
-ok(1, 'Loaded');
 
-sub ok {
-    my ($ok, $name) = @_;
+my $q = Thread::Queue->new();
+my $TEST = 1;
 
-    lock($TEST);
-    my $id = $TEST++;
+sub ok
+{
+    $q->enqueue(@_) if @_;
 
-    # You have to do it this way or VMS will get confused.
-    if ($ok) {
-        print("ok $id - $name\n");
-    } else {
-        print("not ok $id - $name\n");
-        printf("# Failed test at line %d\n", (caller)[2]);
+    while ($q->pending()) {
+        my $ok   = $q->dequeue();
+        my $name = $q->dequeue();
+        my $id   = $TEST++;
+
+        if ($ok) {
+            print("ok $id - $name\n");
+        } else {
+            print("not ok $id - $name\n");
+            printf("# Failed test at line %d\n", (caller)[2]);
+        }
     }
-
-    return ($ok);
 }
+
 
 
 ### Start of Testing ###
+ok(1, 'Loaded');
 
 # Tests freeing the Perl interperter for each thread
 # See http://www.nntp.perl.org/group/perl.perl5.porters/110772 for details
@@ -73,9 +74,11 @@ my %READY;
 share(%READY);
 
 # Init a thread
-sub th_start {
+sub th_start
+{
+    my $q = shift;
     my $tid = threads->tid();
-    ok($tid, "Thread $tid started");
+    $q->enqueue($tid, "Thread $tid started");
 
     threads->yield();
 
@@ -86,10 +89,10 @@ sub th_start {
         # Create next thread
         if ($tid < 17) {
             my $next = 'th' . ($tid+1);
-            my $th = threads->create($next);
+            my $th = threads->create($next, $q);
         } else {
             # Last thread signals first
-            th_signal(1);
+            th_signal($q, 1);
         }
 
         # Wait until signalled by another thread
@@ -98,28 +101,31 @@ sub th_start {
         }
         $other = delete($READY{$tid});
     }
-    ok($tid, "Thread $tid received signal from $other");
+    $q->enqueue($tid, "Thread $tid received signal from $other");
     threads->yield();
 }
 
 # Thread terminating
-sub th_done {
+sub th_done
+{
+    my $q = shift;
     my $tid = threads->tid();
 
     lock($COUNT);
     $COUNT++;
     cond_signal($COUNT);
 
-    ok($tid, "Thread $tid done");
+    $q->enqueue($tid, "Thread $tid done");
 }
 
 # Signal another thread to go
 sub th_signal
 {
+    my $q = shift;
     my $other = shift;
     my $tid = threads->tid();
 
-    ok($tid, "Thread $tid signalling $other");
+    $q->enqueue($tid, "Thread $tid signalling $other");
 
     lock(%READY);
     $READY{$other} = $tid;
@@ -128,155 +134,189 @@ sub th_signal
 
 #####
 
-sub th1 {
-    th_start();
+sub th1
+{
+    my $q = shift;
+    th_start($q);
 
     threads->detach();
 
-    th_signal(2);
-    th_signal(6);
-    th_signal(10);
-    th_signal(14);
+    th_signal($q, 2);
+    th_signal($q, 6);
+    th_signal($q, 10);
+    th_signal($q, 14);
 
-    th_done();
+    th_done($q);
 }
 
-sub th2 {
-    th_start();
+sub th2
+{
+    my $q = shift;
+    th_start($q);
     threads->detach();
-    th_signal(4);
-    th_done();
+    th_signal($q, 4);
+    th_done($q);
 }
 
-sub th6 {
-    th_start();
+sub th6
+{
+    my $q = shift;
+    th_start($q);
     threads->detach();
-    th_signal(8);
-    th_done();
+    th_signal($q, 8);
+    th_done($q);
 }
 
-sub th10 {
-    th_start();
+sub th10
+{
+    my $q = shift;
+    th_start($q);
     threads->detach();
-    th_signal(12);
-    th_done();
+    th_signal($q, 12);
+    th_done($q);
 }
 
-sub th14 {
-    th_start();
+sub th14
+{
+    my $q = shift;
+    th_start($q);
     threads->detach();
-    th_signal(16);
-    th_done();
+    th_signal($q, 16);
+    th_done($q);
 }
 
-sub th4 {
-    th_start();
+sub th4
+{
+    my $q = shift;
+    th_start($q);
     threads->detach();
-    th_signal(3);
-    th_done();
+    th_signal($q, 3);
+    th_done($q);
 }
 
-sub th8 {
-    th_start();
+sub th8
+{
+    my $q = shift;
+    th_start($q);
     threads->detach();
-    th_signal(7);
-    th_done();
+    th_signal($q, 7);
+    th_done($q);
 }
 
-sub th12 {
-    th_start();
+sub th12
+{
+    my $q = shift;
+    th_start($q);
     threads->detach();
-    th_signal(13);
-    th_done();
+    th_signal($q, 13);
+    th_done($q);
 }
 
-sub th16 {
-    th_start();
+sub th16
+{
+    my $q = shift;
+    th_start($q);
     threads->detach();
-    th_signal(17);
-    th_done();
+    th_signal($q, 17);
+    th_done($q);
 }
 
-sub th3 {
+sub th3
+{
+    my $q = shift;
     my $tid = threads->tid();
     my $other = 5;
 
-    th_start();
+    th_start($q);
     threads->detach();
-    th_signal($other);
+    th_signal($q, $other);
     sleep(1);
-    ok(1, "Thread $tid getting return from thread $other");
+    $q->enqueue(1, "Thread $tid getting return from thread $other");
     my $ret = threads->object($other)->join();
-    ok($ret == $other, "Thread $tid saw that thread $other returned $ret");
-    th_done();
+    $q->enqueue($ret == $other, "Thread $tid saw that thread $other returned $ret");
+    th_done($q);
 }
 
-sub th5 {
-    th_start();
-    th_done();
+sub th5
+{
+    my $q = shift;
+    th_start($q);
+    th_done($q);
     return (threads->tid());
 }
 
 
-sub th7 {
+sub th7
+{
+    my $q = shift;
     my $tid = threads->tid();
     my $other = 9;
 
-    th_start();
+    th_start($q);
     threads->detach();
-    th_signal($other);
-    ok(1, "Thread $tid getting return from thread $other");
+    th_signal($q, $other);
+    $q->enqueue(1, "Thread $tid getting return from thread $other");
     my $ret = threads->object($other)->join();
-    ok($ret == $other, "Thread $tid saw that thread $other returned $ret");
-    th_done();
+    $q->enqueue($ret == $other, "Thread $tid saw that thread $other returned $ret");
+    th_done($q);
 }
 
-sub th9 {
-    th_start();
+sub th9
+{
+    my $q = shift;
+    th_start($q);
     sleep(1);
-    th_done();
+    th_done($q);
     return (threads->tid());
 }
 
 
-sub th13 {
+sub th13
+{
+    my $q = shift;
     my $tid = threads->tid();
     my $other = 11;
 
-    th_start();
+    th_start($q);
     threads->detach();
-    th_signal($other);
+    th_signal($q, $other);
     sleep(1);
-    ok(1, "Thread $tid getting return from thread $other");
+    $q->enqueue(1, "Thread $tid getting return from thread $other");
     my $ret = threads->object($other)->join();
-    ok($ret == $other, "Thread $tid saw that thread $other returned $ret");
-    th_done();
+    $q->enqueue($ret == $other, "Thread $tid saw that thread $other returned $ret");
+    th_done($q);
 }
 
-sub th11 {
-    th_start();
-    th_done();
+sub th11
+{
+    my $q = shift;
+    th_start($q);
+    th_done($q);
     return (threads->tid());
 }
 
 
-sub th17 {
+sub th17
+{
+    my $q = shift;
     my $tid = threads->tid();
     my $other = 15;
 
-    th_start();
+    th_start($q);
     threads->detach();
-    th_signal($other);
-    ok(1, "Thread $tid getting return from thread $other");
+    th_signal($q, $other);
+    $q->enqueue(1, "Thread $tid getting return from thread $other");
     my $ret = threads->object($other)->join();
-    ok($ret == $other, "Thread $tid saw that thread $other returned $ret");
-    th_done();
+    $q->enqueue($ret == $other, "Thread $tid saw that thread $other returned $ret");
+    th_done($q);
 }
 
-sub th15 {
-    th_start();
+sub th15
+{
+    my $q = shift;
+    th_start($q);
     sleep(1);
-    th_done();
+    th_done($q);
     return (threads->tid());
 }
 
@@ -284,11 +324,12 @@ sub th15 {
 TEST_STARTS_HERE:
 {
     $COUNT = 0;
-    threads->create('th1');
+    threads->create('th1', $q);
     {
         lock($COUNT);
         while ($COUNT < 17) {
             cond_wait($COUNT);
+            ok();   # Prints out any intermediate results
         }
     }
     sleep(1);

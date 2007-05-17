@@ -27,37 +27,37 @@ BEGIN {
         exit(0);
     }
 
+    require Thread::Queue;
+
     $| = 1;
     print("1..29\n");   ### Number of tests that will be run ###
-};
-
-my $TEST;
-BEGIN {
-    share($TEST);
-    $TEST = 1;
 }
 
-ok(1, 'Loaded');
 
-sub ok {
-    my ($ok, $name) = @_;
+my $q = Thread::Queue->new();
+my $TEST = 1;
 
-    lock($TEST);
-    my $id = $TEST++;
+sub ok
+{
+    $q->enqueue(@_);
 
-    # You have to do it this way or VMS will get confused.
-    if ($ok) {
-        print("ok $id - $name\n");
-    } else {
-        print("not ok $id - $name\n");
-        printf("# Failed test at line %d\n", (caller)[2]);
+    while ($q->pending()) {
+        my $ok   = $q->dequeue();
+        my $name = $q->dequeue();
+        my $id   = $TEST++;
+
+        if ($ok) {
+            print("ok $id - $name\n");
+        } else {
+            print("not ok $id - $name\n");
+            printf("# Failed test at line %d\n", (caller)[2]);
+        }
     }
-
-    return ($ok);
 }
 
 
 ### Start of Testing ###
+ok(1, 'Loaded');
 
 # Tests freeing the Perl interperter for each thread
 # See http://www.nntp.perl.org/group/perl.perl5.porters/110772 for details
@@ -65,8 +65,10 @@ sub ok {
 my ($COUNT, $STARTED) :shared;
 
 sub threading_1 {
+    my $q = shift;
+
     my $tid = threads->tid();
-    ok($tid, "Thread $tid started");
+    $q->enqueue($tid, "Thread $tid started");
 
     my $id;
     {
@@ -76,7 +78,7 @@ sub threading_1 {
     }
     if ($STARTED < 5) {
         sleep(1);
-        threads->create('threading_1')->detach();
+        threads->create('threading_1', $q)->detach();
     }
 
     if ($id == 1) {
@@ -94,13 +96,13 @@ sub threading_1 {
     lock($COUNT);
     $COUNT++;
     cond_signal($COUNT);
-    ok($tid, "Thread $tid done");
+    $q->enqueue($tid, "Thread $tid done");
 }
 
 {
     $STARTED = 0;
     $COUNT = 0;
-    threads->create('threading_1')->detach();
+    threads->create('threading_1', $q)->detach();
     {
         my $cnt = 0;
         while ($cnt < 5) {
@@ -120,15 +122,17 @@ ok($COUNT == 5, "Done - $COUNT threads");
 
 
 sub threading_2 {
+    my $q = shift;
+
     my $tid = threads->tid();
-    ok($tid, "Thread $tid started");
+    $q->enqueue($tid, "Thread $tid started");
 
     {
         lock($STARTED);
         $STARTED++;
     }
     if ($STARTED < 5) {
-        threads->create('threading_2')->detach();
+        threads->create('threading_2', $q)->detach();
     }
     threads->yield();
 
@@ -136,13 +140,13 @@ sub threading_2 {
     $COUNT++;
     cond_signal($COUNT);
 
-    ok($tid, "Thread $tid done");
+    $q->enqueue($tid, "Thread $tid done");
 }
 
 {
     $STARTED = 0;
     $COUNT = 0;
-    threads->create('threading_2')->detach();
+    threads->create('threading_2', $q)->detach();
     threads->create(sub {
         threads->create(sub { })->join();
     })->join();
@@ -164,13 +168,17 @@ ok(1, 'Join');
 
 
 sub threading_3 {
+    my $q = shift;
+
     my $tid = threads->tid();
-    ok($tid, "Thread $tid started");
+    $q->enqueue($tid, "Thread $tid started");
 
     {
         threads->create(sub {
+            my $q = shift;
+
             my $tid = threads->tid();
-            ok($tid, "Thread $tid started");
+            $q->enqueue($tid, "Thread $tid started");
 
             sleep(1);
 
@@ -178,21 +186,21 @@ sub threading_3 {
             $COUNT++;
             cond_signal($COUNT);
 
-            ok($tid, "Thread $tid done");
-        })->detach();
+            $q->enqueue($tid, "Thread $tid done");
+        }, $q)->detach();
     }
 
     lock($COUNT);
     $COUNT++;
     cond_signal($COUNT);
 
-    ok($tid, "Thread $tid done");
+    $q->enqueue($tid, "Thread $tid done");
 }
 
 {
     $COUNT = 0;
     threads->create(sub {
-        threads->create('threading_3')->detach();
+        threads->create('threading_3', $q)->detach();
         {
             lock($COUNT);
             while ($COUNT < 2) {

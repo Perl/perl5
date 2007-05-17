@@ -35,63 +35,39 @@ BEGIN {
         print("1..0 # Skip: Not using safe signals\n");
         exit(0);
     }
-}
 
-{
-    package Thread::Semaphore;
-    use threads::shared;
+    require Thread::Queue;
+    require Thread::Semaphore;
 
-    sub new {
-        my $class = shift;
-        my $val : shared = @_ ? shift : 1;
-        bless \$val, $class;
-    }
-
-    sub down {
-        my $s = shift;
-        lock($$s);
-        my $inc = @_ ? shift : 1;
-        cond_wait $$s until $$s >= $inc;
-        $$s -= $inc;
-    }
-
-    sub up {
-        my $s = shift;
-        lock($$s);
-        my $inc = @_ ? shift : 1;
-        ($$s += $inc) > 0 and cond_broadcast $$s;
-    }
-}
-
-BEGIN {
     $| = 1;
-    print("1..19\n");   ### Number of tests that will be run ###
+    print("1..18\n");   ### Number of tests that will be run ###
 };
 
+
+my $q = Thread::Queue->new();
 my $TEST = 1;
-share($TEST);
 
-ok(1, 'Loaded');
+sub ok
+{
+    $q->enqueue(@_);
 
-sub ok {
-    my ($ok, $name) = @_;
+    while ($q->pending()) {
+        my $ok   = $q->dequeue();
+        my $name = $q->dequeue();
+        my $id   = $TEST++;
 
-    lock($TEST);
-    my $id = $TEST++;
-
-    # You have to do it this way or VMS will get confused.
-    if ($ok) {
-        print("ok $id - $name\n");
-    } else {
-        print("not ok $id - $name\n");
-        printf("# Failed test at line %d\n", (caller)[2]);
+        if ($ok) {
+            print("ok $id - $name\n");
+        } else {
+            print("not ok $id - $name\n");
+            printf("# Failed test at line %d\n", (caller)[2]);
+        }
     }
-
-    return ($ok);
 }
 
 
 ### Start of Testing ###
+ok(1, 'Loaded');
 
 ### Thread cancel ###
 
@@ -99,43 +75,32 @@ sub ok {
 my @errs :shared;
 $SIG{__WARN__} = sub { push(@errs, @_); };
 
-
 sub thr_func {
+    my $q = shift;
+
     # Thread 'cancellation' signal handler
     $SIG{'KILL'} = sub {
-        ok(1, 'Thread received signal');
+        $q->enqueue(1, 'Thread received signal');
         die("Thread killed\n");
     };
 
     # Thread sleeps until signalled
-    ok(1, 'Thread sleeping');
-    {
-        local $SIG{'INT'} = sub {};
-        sleep(5);
-    }
+    $q->enqueue(1, 'Thread sleeping');
+    sleep(1) for (1..10);
     # Should not go past here
-    ok(0, 'Thread terminated normally');
+    $q->enqueue(0, 'Thread terminated normally');
     return ('ERROR');
 }
 
-
 # Create thread
-my $thr = threads->create('thr_func');
+my $thr = threads->create('thr_func', $q);
 ok($thr && $thr->tid() == 2, 'Created thread');
 threads->yield();
 sleep(1);
 
 # Signal thread
-ok($thr->kill('KILL'), 'Signalled thread');
+ok($thr->kill('KILL') == $thr, 'Signalled thread');
 threads->yield();
-
-# Interrupt thread's sleep call
-{
-    # We can't be sure whether the signal itself will get delivered to this
-    # thread or the sleeping thread
-    local $SIG{'INT'} = sub {};
-    ok(kill('INT', $$) || $^O eq 'MSWin32', q/Interrupt thread's sleep call/);
-}
 
 # Cleanup
 my $rc = $thr->join();
@@ -149,21 +114,23 @@ ok(@errs && $errs[0] =~ /Thread killed/, 'Thread termination warning');
 
 sub thr_func2
 {
+    my $q = shift;
+
     my $sema = shift;
-    ok($sema, 'Thread received semaphore');
+    $q->enqueue($sema, 'Thread received semaphore');
 
     # Set up the signal handler for suspension/resumption
     $SIG{'STOP'} = sub {
-        ok(1, 'Thread suspending');
+        $q->enqueue(1, 'Thread suspending');
         $sema->down();
-        ok(1, 'Thread resuming');
+        $q->enqueue(1, 'Thread resuming');
         $sema->up();
     };
 
     # Set up the signal handler for graceful termination
     my $term = 0;
     $SIG{'TERM'} = sub {
-        ok(1, 'Thread caught termination signal');
+        $q->enqueue(1, 'Thread caught termination signal');
         $term = 1;
     };
 
@@ -172,7 +139,7 @@ sub thr_func2
         sleep(1);
     }
 
-    ok(1, 'Thread done');
+    $q->enqueue(1, 'Thread done');
     return ('OKAY');
 }
 
@@ -182,14 +149,14 @@ my $sema = Thread::Semaphore->new();
 ok($sema, 'Semaphore created');
 
 # Create a thread and send it the semaphore
-$thr = threads->create('thr_func2', $sema);
+$thr = threads->create('thr_func2', $q, $sema);
 ok($thr && $thr->tid() == 3, 'Created thread');
 threads->yield();
 sleep(1);
 
 # Suspend the thread
 $sema->down();
-ok($thr->kill('STOP'), 'Suspended thread');
+ok($thr->kill('STOP') == $thr, 'Suspended thread');
 
 threads->yield();
 sleep(1);
@@ -206,6 +173,6 @@ ok($thr->kill('TERM') == $thr, 'Signalled thread to terminate');
 $rc = $thr->join();
 ok($rc eq 'OKAY', 'Thread return value');
 
-ok($thr->kill('TERM'), 'Ignore signal to terminated thread');
+ok($thr->kill('TERM') == $thr, 'Ignore signal to terminated thread');
 
 # EOF

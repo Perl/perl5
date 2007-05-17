@@ -1,5 +1,10 @@
 Revision history for Perl extension threads.
 
+1.62 Thu May 17 16:10:49 2007
+	- Fixed :all import option
+	- Fixed problems in test suite
+	- Subversion repository on Google
+
 1.61 Wed Mar 21 16:09:15 EDT 2007
 	- Fix 'list/array' context - both keywords are supported
 	- Upgraded ppport.h to Devel::PPPort 3.11
