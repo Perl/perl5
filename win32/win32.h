@@ -363,10 +363,6 @@ typedef  char *		caddr_t;	/* In malloc.c (core address). */
 /* #define PERL_SBRK_VIA_MALLOC	/**/
 #endif
 
-#if defined(PERLDLL) && !defined(PERL_CORE)
-#define PERL_CORE
-#endif
-
 #ifdef PERL_TEXTMODE_SCRIPTS
 #  define PERL_SCRIPT_MODE		"r"
 #else
