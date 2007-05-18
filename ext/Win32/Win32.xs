@@ -1,20 +1,105 @@
+#include <wctype.h>
 #include <windows.h>
+#include <shlobj.h>
 
+#define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
 
+#ifndef countof
+#  define countof(array) (sizeof (array) / sizeof (*(array)))
+#endif
+
 #define SE_SHUTDOWN_NAMEA   "SeShutdownPrivilege"
 
-typedef BOOL (WINAPI *PFNSHGetSpecialFolderPath)(HWND, char*, int, BOOL);
-typedef HRESULT (WINAPI *PFNSHGetFolderPath)(HWND, int, HANDLE, DWORD, LPTSTR);
+#ifndef WC_NO_BEST_FIT_CHARS
+#  define WC_NO_BEST_FIT_CHARS 0x00000400
+#endif
+
+#define GETPROC(fn) pfn##fn = (PFN##fn)GetProcAddress(module, #fn)
+
+typedef BOOL (WINAPI *PFNSHGetSpecialFolderPathA)(HWND, char*, int, BOOL);
+typedef BOOL (WINAPI *PFNSHGetSpecialFolderPathW)(HWND, WCHAR*, int, BOOL);
+typedef HRESULT (WINAPI *PFNSHGetFolderPathA)(HWND, int, HANDLE, DWORD, LPTSTR);
+typedef HRESULT (WINAPI *PFNSHGetFolderPathW)(HWND, int, HANDLE, DWORD, LPWSTR);
+typedef BOOL (WINAPI *PFNCreateEnvironmentBlock)(void**, HANDLE, BOOL);
+typedef BOOL (WINAPI *PFNDestroyEnvironmentBlock)(void*);
 typedef int (__stdcall *PFNDllRegisterServer)(void);
 typedef int (__stdcall *PFNDllUnregisterServer)(void);
+typedef DWORD (__stdcall *PFNNetApiBufferFree)(void*);
+typedef DWORD (__stdcall *PFNNetWkstaGetInfo)(LPWSTR, DWORD, void*);
+
+typedef BOOL (__stdcall *PFNOpenProcessToken)(HANDLE, DWORD, HANDLE*);
+typedef BOOL (__stdcall *PFNOpenThreadToken)(HANDLE, DWORD, BOOL, HANDLE*);
+typedef BOOL (__stdcall *PFNGetTokenInformation)(HANDLE, TOKEN_INFORMATION_CLASS, void*, DWORD, DWORD*);
+typedef BOOL (__stdcall *PFNAllocateAndInitializeSid)(PSID_IDENTIFIER_AUTHORITY, BYTE, DWORD, DWORD,
+                                                      DWORD, DWORD, DWORD, DWORD, DWORD, DWORD, PSID*);
+typedef BOOL (__stdcall *PFNEqualSid)(PSID, PSID);
+typedef void* (__stdcall *PFNFreeSid)(PSID);
+typedef BOOL (__stdcall *PFNIsUserAnAdmin)();
+
 #ifndef CSIDL_FLAG_CREATE
 #   define CSIDL_FLAG_CREATE               0x8000
 #endif
 
-static OSVERSIONINFO g_osver = {0, 0, 0, 0, 0, ""};
+#ifndef CSIDL_ADMINTOOLS
+#   define CSIDL_ADMINTOOLS           0x0030
+#   define CSIDL_COMMON_ADMINTOOLS    0x002F
+#   define CSIDL_COMMON_APPDATA       0x0023
+#   define CSIDL_COMMON_DOCUMENTS     0x002E
+#   define CSIDL_COMMON_TEMPLATES     0x002D
+#   define CSIDL_LOCAL_APPDATA        0x001C
+#   define CSIDL_MYPICTURES           0x0027
+#   define CSIDL_PROFILE              0x0028
+#   define CSIDL_PROGRAM_FILES        0x0026
+#   define CSIDL_PROGRAM_FILES_COMMON 0x002B
+#   define CSIDL_WINDOWS              0x0024
+#endif
+
+#ifndef CSIDL_CDBURN_AREA
+#   define CSIDL_CDBURN_AREA          0x003B
+#endif
+
+#ifndef CSIDL_COMMON_MUSIC
+#   define CSIDL_COMMON_MUSIC         0x0035
+#endif
+
+#ifndef CSIDL_COMMON_PICTURES
+#   define CSIDL_COMMON_PICTURES      0x0036
+#endif
+
+#ifndef CSIDL_COMMON_VIDEO
+#   define CSIDL_COMMON_VIDEO         0x0037
+#endif
+
+#ifndef CSIDL_MYMUSIC
+#   define CSIDL_MYMUSIC              0x000D
+#endif
+
+#ifndef CSIDL_MYVIDEO
+#   define CSIDL_MYVIDEO              0x000E
+#endif
+
+/* Use explicit struct definition because wSuiteMask and
+ * wProductType are not defined in the VC++ 6.0 headers.
+ * WORD type has been replaced by unsigned short because
+ * WORD is already used by Perl itself.
+ */
+struct {
+    DWORD dwOSVersionInfoSize;
+    DWORD dwMajorVersion;
+    DWORD dwMinorVersion;
+    DWORD dwBuildNumber;
+    DWORD dwPlatformId;
+    CHAR  szCSDVersion[128];
+    unsigned short wServicePackMajor;
+    unsigned short wServicePackMinor;
+    unsigned short wSuiteMask;
+    BYTE  wProductType;
+    BYTE  wReserved;
+}   g_osver = {0, 0, 0, 0, 0, "", 0, 0, 0, 0, 0};
+BOOL g_osver_ex = TRUE;
 
 #define ONE_K_BUFSIZE	1024
 
@@ -30,125 +115,226 @@ IsWinNT(void)
     return (g_osver.dwPlatformId == VER_PLATFORM_WIN32_NT);
 }
 
-#ifdef __CYGWIN__
-
-#define isSLASH(c) ((c) == '/' || (c) == '\\')
-#define SKIP_SLASHES(s) \
-    STMT_START {				\
-	while (*(s) && isSLASH(*(s)))		\
-	    ++(s);				\
-    } STMT_END
-#define COPY_NONSLASHES(d,s) \
-    STMT_START {				\
-	while (*(s) && !isSLASH(*(s)))		\
-	    *(d)++ = *(s)++;			\
-    } STMT_END
-
-/* Find the longname of a given path.  path is destructively modified.
- * It should have space for at least MAX_PATH characters. */
-char *
-win32_longpath(char *path)
+int
+IsWin2000(void)
 {
-    WIN32_FIND_DATA fdata;
-    HANDLE fhand;
-    char tmpbuf[MAX_PATH+1];
-    char *tmpstart = tmpbuf;
-    char *start = path;
-    char sep;
-    if (!path)
-	return Nullch;
-
-    /* drive prefix */
-    if (isALPHA(path[0]) && path[1] == ':') {
-	start = path + 2;
-	*tmpstart++ = path[0];
-	*tmpstart++ = ':';
-    }
-    /* UNC prefix */
-    else if (isSLASH(path[0]) && isSLASH(path[1])) {
-	start = path + 2;
-	*tmpstart++ = path[0];
-	*tmpstart++ = path[1];
-	SKIP_SLASHES(start);
-	COPY_NONSLASHES(tmpstart,start);	/* copy machine name */
-	if (*start) {
-	    *tmpstart++ = *start++;
-	    SKIP_SLASHES(start);
-	    COPY_NONSLASHES(tmpstart,start);	/* copy share name */
-	}
-    }
-    *tmpstart = '\0';
-    while (*start) {
-	/* copy initial slash, if any */
-	if (isSLASH(*start)) {
-	    *tmpstart++ = *start++;
-	    *tmpstart = '\0';
-	    SKIP_SLASHES(start);
-	}
-
-	/* FindFirstFile() expands "." and "..", so we need to pass
-	 * those through unmolested */
-	if (*start == '.'
-	    && (!start[1] || isSLASH(start[1])
-		|| (start[1] == '.' && (!start[2] || isSLASH(start[2])))))
-	{
-	    COPY_NONSLASHES(tmpstart,start);	/* copy "." or ".." */
-	    *tmpstart = '\0';
-	    continue;
-	}
-
-	/* if this is the end, bust outta here */
-	if (!*start)
-	    break;
-
-	/* now we're at a non-slash; walk up to next slash */
-	while (*start && !isSLASH(*start))
-	    ++start;
-
-	/* stop and find full name of component */
-	sep = *start;
-	*start = '\0';
-	fhand = FindFirstFile(path,&fdata);
-	*start = sep;
-	if (fhand != INVALID_HANDLE_VALUE) {
-	    STRLEN len = strlen(fdata.cFileName);
-	    if ((STRLEN)(tmpbuf + sizeof(tmpbuf) - tmpstart) > len) {
-		strcpy(tmpstart, fdata.cFileName);
-		tmpstart += len;
-		FindClose(fhand);
-	    }
-	    else {
-		FindClose(fhand);
-		errno = ERANGE;
-		return Nullch;
-	    }
-	}
-	else {
-	    /* failed a step, just return without side effects */
-	    /*PerlIO_printf(Perl_debug_log, "Failed to find %s\n", path);*/
-	    errno = EINVAL;
-	    return Nullch;
-	}
-    }
-    strcpy(path,tmpbuf);
-    return path;
+    return (g_osver.dwMajorVersion > 4);
 }
+
+/* Convert SV to wide character string.  The return value must be
+ * freed using Safefree().
+ */
+WCHAR*
+sv_to_wstr(pTHX_ SV *sv)
+{
+    DWORD wlen;
+    WCHAR *wstr;
+    STRLEN len;
+    char *str = SvPV(sv, len);
+    UINT cp = SvUTF8(sv) ? CP_UTF8 : CP_ACP;
+
+    wlen = MultiByteToWideChar(cp, 0, str, len+1, NULL, 0);
+    New(0, wstr, wlen, WCHAR);
+    MultiByteToWideChar(cp, 0, str, len+1, wstr, wlen);
+
+    return wstr;
+}
+
+/* Convert wide character string to mortal SV.  Use UTF8 encoding
+ * if the string cannot be represented in the system codepage.
+ */
+SV *
+wstr_to_sv(pTHX_ WCHAR *wstr)
+{
+    size_t wlen = wcslen(wstr)+1;
+    BOOL use_default = FALSE;
+    int len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, wstr, wlen, NULL, 0, NULL, NULL);
+    SV *sv = sv_2mortal(newSV(len));
+
+    len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, wstr, wlen, SvPVX(sv), len, NULL, &use_default);
+    if (use_default) {
+        len = WideCharToMultiByte(CP_UTF8, 0, wstr, wlen, NULL, 0, NULL, NULL);
+        sv_grow(sv, len);
+        len = WideCharToMultiByte(CP_UTF8, 0, wstr, wlen, SvPVX(sv), len, NULL, NULL);
+        SvUTF8_on(sv);
+    }
+    /* Shouldn't really ever fail since we ask for the required length first, but who knows... */
+    if (len) {
+        SvPOK_on(sv);
+        SvCUR_set(sv, len-1);
+    }
+    return sv;
+}
+
+/* Retrieve a variable from the Unicode environment in a mortal SV.
+ *
+ * Recreates the Unicode environment because a bug in earlier Perl versions
+ * overwrites it with the ANSI version, which contains replacement
+ * characters for the characters not in the ANSI codepage.
+ */
+SV*
+get_unicode_env(pTHX_ WCHAR *name)
+{
+    SV *sv = NULL;
+    void *env;
+    HANDLE token;
+    HMODULE module;
+    PFNOpenProcessToken pfnOpenProcessToken;
+
+    /* Get security token for the current process owner */
+    module = LoadLibrary("advapi32.dll");
+    if (!module)
+        return NULL;
+
+    GETPROC(OpenProcessToken);
+
+    if (pfnOpenProcessToken == NULL ||
+        !pfnOpenProcessToken(GetCurrentProcess(), TOKEN_QUERY | TOKEN_DUPLICATE, &token))
+    {
+        FreeLibrary(module);
+        return NULL;
+    }
+    FreeLibrary(module);
+
+    /* Create a Unicode environment block for this process */
+    module = LoadLibrary("userenv.dll");
+    if (module) {
+        PFNCreateEnvironmentBlock pfnCreateEnvironmentBlock;
+        PFNDestroyEnvironmentBlock pfnDestroyEnvironmentBlock;
+
+        GETPROC(CreateEnvironmentBlock);
+        GETPROC(DestroyEnvironmentBlock);
+
+        if (pfnCreateEnvironmentBlock && pfnDestroyEnvironmentBlock &&
+            pfnCreateEnvironmentBlock(&env, token, FALSE))
+        {
+            size_t name_len = wcslen(name);
+            WCHAR *entry = env;
+            while (*entry) {
+                size_t i;
+                size_t entry_len = wcslen(entry);
+                BOOL equal = (entry_len > name_len) && (entry[name_len] == '=');
+
+                for (i=0; equal && i < name_len; ++i)
+                    equal = (towupper(entry[i]) == towupper(name[i]));
+
+                if (equal) {
+                    sv = wstr_to_sv(aTHX_ entry+name_len+1);
+                    break;
+                }
+                entry += entry_len+1;
+            }
+            pfnDestroyEnvironmentBlock(env);
+        }
+        FreeLibrary(module);
+    }
+    CloseHandle(token);
+    return sv;
+}
+
+/* Define both an ANSI and a Wide version of win32_longpath */
+
+#define CHAR_T            char
+#define WIN32_FIND_DATA_T WIN32_FIND_DATAA
+#define FN_FINDFIRSTFILE  FindFirstFileA
+#define FN_STRLEN         strlen
+#define FN_STRCPY         strcpy
+#define LONGPATH          my_longpathA
+#include "longpath.inc"
+
+#define CHAR_T            WCHAR
+#define WIN32_FIND_DATA_T WIN32_FIND_DATAW
+#define FN_FINDFIRSTFILE  FindFirstFileW
+#define FN_STRLEN         wcslen
+#define FN_STRCPY         wcscpy
+#define LONGPATH          my_longpathW
+#include "longpath.inc"
+
+/* The my_ansipath() function takes a Unicode filename and converts it
+ * into the current Windows codepage. If some characters cannot be mapped,
+ * then it will convert the short name instead.
+ *
+ * The buffer to the ansi pathname must be freed with Safefree() when it
+ * it no longer needed.
+ *
+ * The argument to my_ansipath() must exist before this function is
+ * called; otherwise there is no way to determine the short path name.
+ *
+ * Ideas for future refinement:
+ * - Only convert those segments of the path that are not in the current
+ *   codepage, but leave the other segments in their long form.
+ * - If the resulting name is longer than MAX_PATH, start converting
+ *   additional path segments into short names until the full name
+ *   is shorter than MAX_PATH.  Shorten the filename part last!
+ */
+
+/* This is a modified version of core Perl win32/win32.c(win32_ansipath).
+ * It uses New() etc. instead of win32_malloc().
+ */
+
+char *
+my_ansipath(const WCHAR *widename)
+{
+    char *name;
+    BOOL use_default = FALSE;
+    size_t widelen = wcslen(widename)+1;
+    int len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, widename, widelen,
+                                  NULL, 0, NULL, NULL);
+    New(0, name, len, char);
+    WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, widename, widelen,
+                        name, len, NULL, &use_default);
+    if (use_default) {
+        DWORD shortlen = GetShortPathNameW(widename, NULL, 0);
+        if (shortlen) {
+            WCHAR *shortname;
+            New(0, shortname, shortlen, WCHAR);
+            shortlen = GetShortPathNameW(widename, shortname, shortlen)+1;
+
+            len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, shortname, shortlen,
+                                      NULL, 0, NULL, NULL);
+            Renew(name, len, char);
+            WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, shortname, shortlen,
+                                name, len, NULL, NULL);
+            Safefree(shortname);
+        }
+    }
+    return name;
+}
+
+/* Convert wide character path to ANSI path and return as mortal SV. */
+SV*
+wstr_to_ansipath(pTHX_ WCHAR *wstr)
+{
+    char *ansi = my_ansipath(wstr);
+    SV *sv = sv_2mortal(newSVpvn(ansi, strlen(ansi)));
+    Safefree(ansi);
+    return sv;
+}
+
+#ifdef __CYGWIN__
 
 char*
 get_childdir(void)
 {
     dTHX;
     char* ptr;
-    char szfilename[MAX_PATH+1];
 
-    GetCurrentDirectoryA(MAX_PATH+1, szfilename);
-    New(0, ptr, strlen(szfilename)+1, char);
-    strcpy(ptr, szfilename);
+    if (IsWin2000()) {
+        WCHAR filename[MAX_PATH+1];
+        GetCurrentDirectoryW(MAX_PATH+1, filename);
+        ptr = my_ansipath(filename);
+    }
+    else {
+        char filename[MAX_PATH+1];
+        GetCurrentDirectoryA(MAX_PATH+1, filename);
+        New(0, ptr, strlen(filename)+1, char);
+        strcpy(ptr, filename);
+    }
     return ptr;
 }
 
 void
-free_childdir(char* d)
+free_childdir(char *d)
 {
     dTHX;
     Safefree(d);
@@ -161,7 +347,7 @@ get_childenv(void)
 }
 
 void
-free_childenv(void* d)
+free_childenv(void *d)
 {
 }
 
@@ -172,36 +358,36 @@ free_childenv(void* d)
 XS(w32_ExpandEnvironmentStrings)
 {
     dXSARGS;
-    BYTE buffer[4096];
 
     if (items != 1)
 	croak("usage: Win32::ExpandEnvironmentStrings($String);\n");
 
-    ExpandEnvironmentStringsA(SvPV_nolen(ST(0)), (char*)buffer, sizeof(buffer));
-    XSRETURN_PV((char*)buffer);
+    if (IsWin2000()) {
+        WCHAR value[31*1024];
+        WCHAR *source = sv_to_wstr(aTHX_ ST(0));
+        ExpandEnvironmentStringsW(source, value, countof(value)-1);
+        ST(0) = wstr_to_sv(aTHX_ value);
+        Safefree(source);
+        XSRETURN(1);
+    }
+    else {
+        char value[31*1024];
+        ExpandEnvironmentStringsA(SvPV_nolen(ST(0)), value, countof(value)-2);
+        XSRETURN_PV(value);
+    }
 }
 
 XS(w32_IsAdminUser)
 {
     dXSARGS;
-    HINSTANCE                   hAdvApi32;
-    BOOL (__stdcall *pfnOpenThreadToken)(HANDLE hThr, DWORD dwDesiredAccess,
-                                BOOL bOpenAsSelf, PHANDLE phTok);
-    BOOL (__stdcall *pfnOpenProcessToken)(HANDLE hProc, DWORD dwDesiredAccess,
-                                PHANDLE phTok);
-    BOOL (__stdcall *pfnGetTokenInformation)(HANDLE hTok,
-                                TOKEN_INFORMATION_CLASS TokenInformationClass,
-                                LPVOID lpTokInfo, DWORD dwTokInfoLen,
-                                PDWORD pdwRetLen);
-    BOOL (__stdcall *pfnAllocateAndInitializeSid)(
-                                PSID_IDENTIFIER_AUTHORITY pIdAuth,
-                                BYTE nSubAuthCount, DWORD dwSubAuth0,
-                                DWORD dwSubAuth1, DWORD dwSubAuth2,
-                                DWORD dwSubAuth3, DWORD dwSubAuth4,
-                                DWORD dwSubAuth5, DWORD dwSubAuth6,
-                                DWORD dwSubAuth7, PSID pSid);
-    BOOL (__stdcall *pfnEqualSid)(PSID pSid1, PSID pSid2);
-    PVOID (__stdcall *pfnFreeSid)(PSID pSid);
+    HMODULE                     module;
+    PFNIsUserAnAdmin            pfnIsUserAnAdmin;
+    PFNOpenThreadToken          pfnOpenThreadToken;
+    PFNOpenProcessToken         pfnOpenProcessToken;
+    PFNGetTokenInformation      pfnGetTokenInformation;
+    PFNAllocateAndInitializeSid pfnAllocateAndInitializeSid;
+    PFNEqualSid                 pfnEqualSid;
+    PFNFreeSid                  pfnFreeSid;
     HANDLE                      hTok;
     DWORD                       dwTokInfoLen;
     TOKEN_GROUPS                *lpTokInfo;
@@ -209,54 +395,57 @@ XS(w32_IsAdminUser)
     PSID                        pAdminSid;
     int                         iRetVal;
     unsigned int                i;
-    OSVERSIONINFO               osver;
 
     if (items)
         croak("usage: Win32::IsAdminUser()");
 
     /* There is no concept of "Administrator" user accounts on Win9x systems,
        so just return true. */
-    memset(&osver, 0, sizeof(OSVERSIONINFO));
-    osver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-    GetVersionEx(&osver);
-    if (osver.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
+    if (IsWin95())
         XSRETURN_YES;
 
-    hAdvApi32 = LoadLibrary("advapi32.dll");
-    if (!hAdvApi32) {
+    /* Use IsUserAnAdmin() when available.  On Vista this will only return TRUE
+     * if the process is running with elevated privileges and not just when the
+     * process owner is a member of the "Administrators" group.
+     */
+    module = LoadLibrary("shell32.dll");
+    if (module) {
+        GETPROC(IsUserAnAdmin);
+        if (pfnIsUserAnAdmin) {
+            EXTEND(SP, 1);
+            ST(0) = sv_2mortal(newSViv(pfnIsUserAnAdmin() ? 1 : 0));
+            FreeLibrary(module);
+            XSRETURN(1);
+        }
+        FreeLibrary(module);
+    }
+
+    module = LoadLibrary("advapi32.dll");
+    if (!module) {
         warn("Cannot load advapi32.dll library");
         XSRETURN_UNDEF;
     }
 
-    pfnOpenThreadToken = (BOOL (__stdcall *)(HANDLE, DWORD, BOOL, PHANDLE))
-        GetProcAddress(hAdvApi32, "OpenThreadToken");
-    pfnOpenProcessToken = (BOOL (__stdcall *)(HANDLE, DWORD, PHANDLE))
-        GetProcAddress(hAdvApi32, "OpenProcessToken");
-    pfnGetTokenInformation = (BOOL (__stdcall *)(HANDLE,
-        TOKEN_INFORMATION_CLASS, LPVOID, DWORD, PDWORD))
-        GetProcAddress(hAdvApi32, "GetTokenInformation");
-    pfnAllocateAndInitializeSid = (BOOL (__stdcall *)(
-        PSID_IDENTIFIER_AUTHORITY, BYTE, DWORD, DWORD, DWORD, DWORD, DWORD,
-        DWORD, DWORD, DWORD, PSID))
-        GetProcAddress(hAdvApi32, "AllocateAndInitializeSid");
-    pfnEqualSid = (BOOL (__stdcall *)(PSID, PSID))
-        GetProcAddress(hAdvApi32, "EqualSid");
-    pfnFreeSid = (PVOID (__stdcall *)(PSID))
-        GetProcAddress(hAdvApi32, "FreeSid");
+    GETPROC(OpenThreadToken);
+    GETPROC(OpenProcessToken);
+    GETPROC(GetTokenInformation);
+    GETPROC(AllocateAndInitializeSid);
+    GETPROC(EqualSid);
+    GETPROC(FreeSid);
 
     if (!(pfnOpenThreadToken && pfnOpenProcessToken &&
           pfnGetTokenInformation && pfnAllocateAndInitializeSid &&
           pfnEqualSid && pfnFreeSid))
     {
         warn("Cannot load functions from advapi32.dll library");
-        FreeLibrary(hAdvApi32);
+        FreeLibrary(module);
         XSRETURN_UNDEF;
     }
 
     if (!pfnOpenThreadToken(GetCurrentThread(), TOKEN_QUERY, FALSE, &hTok)) {
         if (!pfnOpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hTok)) {
             warn("Cannot open thread token or process token");
-            FreeLibrary(hAdvApi32);
+            FreeLibrary(module);
             XSRETURN_UNDEF;
         }
     }
@@ -265,7 +454,7 @@ XS(w32_IsAdminUser)
     if (!New(1, lpTokInfo, dwTokInfoLen, TOKEN_GROUPS)) {
         warn("Cannot allocate token information structure");
         CloseHandle(hTok);
-        FreeLibrary(hAdvApi32);
+        FreeLibrary(module);
         XSRETURN_UNDEF;
     }
 
@@ -275,7 +464,7 @@ XS(w32_IsAdminUser)
         warn("Cannot get token information");
         Safefree(lpTokInfo);
         CloseHandle(hTok);
-        FreeLibrary(hAdvApi32);
+        FreeLibrary(module);
         XSRETURN_UNDEF;
     }
 
@@ -285,7 +474,7 @@ XS(w32_IsAdminUser)
         warn("Cannot allocate administrators' SID");
         Safefree(lpTokInfo);
         CloseHandle(hTok);
-        FreeLibrary(hAdvApi32);
+        FreeLibrary(module);
         XSRETURN_UNDEF;
     }
 
@@ -300,7 +489,7 @@ XS(w32_IsAdminUser)
     pfnFreeSid(pAdminSid);
     Safefree(lpTokInfo);
     CloseHandle(hTok);
-    FreeLibrary(hAdvApi32);
+    FreeLibrary(module);
 
     EXTEND(SP, 1);
     ST(0) = sv_2mortal(newSViv(iRetVal));
@@ -459,21 +648,32 @@ XS(w32_AbortSystemShutdown)
 XS(w32_MsgBox)
 {
     dXSARGS;
-    char *msg;
-    char *title = "Perl";
     DWORD flags = MB_ICONEXCLAMATION;
     I32 result;
 
     if (items < 1 || items > 3)
 	croak("usage: Win32::MsgBox($message [, $flags [, $title]]);\n");
 
-    msg = SvPV_nolen(ST(0));
-    if (items > 1) {
-	flags = SvIV(ST(1));
-	if (items > 2)
-	    title = SvPV_nolen(ST(2));
+    if (items > 1)
+        flags = SvIV(ST(1));
+
+    if (IsWin2000()) {
+        WCHAR *title = NULL;
+        WCHAR *msg = sv_to_wstr(aTHX_ ST(0));
+        if (items > 2)
+            title = sv_to_wstr(aTHX_ ST(2));
+        result = MessageBoxW(GetActiveWindow(), msg, title ? title : L"Perl", flags);
+        Safefree(msg);
+        if (title)
+            Safefree(title);
     }
-    result = MessageBoxA(GetActiveWindow(), msg, title, flags);
+    else {
+        char *title = "Perl";
+        char *msg = SvPV_nolen(ST(0));
+        if (items > 2)
+            title = SvPV_nolen(ST(2));
+        result = MessageBoxA(GetActiveWindow(), msg, title, flags);
+    }
     XSRETURN_IV(result);
 }
 
@@ -513,18 +713,18 @@ XS(w32_RegisterServer)
 {
     dXSARGS;
     BOOL result = FALSE;
-    HINSTANCE hnd;
+    HMODULE module;
 
     if (items != 1)
 	croak("usage: Win32::RegisterServer($libname)\n");
 
-    hnd = LoadLibraryA(SvPV_nolen(ST(0)));
-    if (hnd) {
-	PFNDllRegisterServer func;
-	func = (PFNDllRegisterServer)GetProcAddress(hnd, "DllRegisterServer");
-	if (func && func() == 0)
+    module = LoadLibraryA(SvPV_nolen(ST(0)));
+    if (module) {
+	PFNDllRegisterServer pfnDllRegisterServer;
+        GETPROC(DllRegisterServer);
+	if (pfnDllRegisterServer && pfnDllRegisterServer() == 0)
 	    result = TRUE;
-	FreeLibrary(hnd);
+	FreeLibrary(module);
     }
     ST(0) = boolSV(result);
     XSRETURN(1);
@@ -534,18 +734,18 @@ XS(w32_UnregisterServer)
 {
     dXSARGS;
     BOOL result = FALSE;
-    HINSTANCE hnd;
+    HINSTANCE module;
 
     if (items != 1)
 	croak("usage: Win32::UnregisterServer($libname)\n");
 
-    hnd = LoadLibraryA(SvPV_nolen(ST(0)));
-    if (hnd) {
-	PFNDllUnregisterServer func;
-	func = (PFNDllUnregisterServer)GetProcAddress(hnd, "DllUnregisterServer");
-	if (func && func() == 0)
+    module = LoadLibraryA(SvPV_nolen(ST(0)));
+    if (module) {
+	PFNDllUnregisterServer pfnDllUnregisterServer;
+        GETPROC(DllUnregisterServer);
+	if (pfnDllUnregisterServer && pfnDllUnregisterServer() == 0)
 	    result = TRUE;
-	FreeLibrary(hnd);
+	FreeLibrary(module);
     }
     ST(0) = boolSV(result);
     XSRETURN(1);
@@ -592,6 +792,7 @@ XS(w32_GetFolderPath)
 {
     dXSARGS;
     char path[MAX_PATH+1];
+    WCHAR wpath[MAX_PATH+1];
     int folder;
     int create = 0;
     HMODULE module;
@@ -605,9 +806,18 @@ XS(w32_GetFolderPath)
 
     module = LoadLibrary("shfolder.dll");
     if (module) {
-        PFNSHGetFolderPath pfn;
-        pfn = (PFNSHGetFolderPath)GetProcAddress(module, "SHGetFolderPathA");
-        if (pfn && SUCCEEDED(pfn(NULL, folder|create, NULL, 0, path))) {
+        PFNSHGetFolderPathA pfna;
+        if (IsWin2000()) {
+            PFNSHGetFolderPathW pfnw;
+            pfnw = (PFNSHGetFolderPathW)GetProcAddress(module, "SHGetFolderPathW");
+            if (pfnw && SUCCEEDED(pfnw(NULL, folder|create, NULL, 0, wpath))) {
+                FreeLibrary(module);
+                ST(0) = wstr_to_ansipath(aTHX_ wpath);
+                XSRETURN(1);
+            }
+        }
+        pfna = (PFNSHGetFolderPathA)GetProcAddress(module, "SHGetFolderPathA");
+        if (pfna && SUCCEEDED(pfna(NULL, folder|create, NULL, 0, path))) {
             FreeLibrary(module);
             XSRETURN_PV(path);
         }
@@ -616,15 +826,121 @@ XS(w32_GetFolderPath)
 
     module = LoadLibrary("shell32.dll");
     if (module) {
-        PFNSHGetSpecialFolderPath pfn;
-        pfn = (PFNSHGetSpecialFolderPath)
-            GetProcAddress(module, "SHGetSpecialFolderPathA");
-        if (pfn && pfn(NULL, path, folder, !!create)) {
+        PFNSHGetSpecialFolderPathA pfna;
+        if (IsWin2000()) {
+            PFNSHGetSpecialFolderPathW pfnw;
+            pfnw = (PFNSHGetSpecialFolderPathW)GetProcAddress(module, "SHGetSpecialFolderPathW");
+            if (pfnw && pfnw(NULL, wpath, folder, !!create)) {
+                FreeLibrary(module);
+                ST(0) = wstr_to_ansipath(aTHX_ wpath);
+                XSRETURN(1);
+            }
+        }
+        pfna = (PFNSHGetSpecialFolderPathA)GetProcAddress(module, "SHGetSpecialFolderPathA");
+        if (pfna && pfna(NULL, path, folder, !!create)) {
             FreeLibrary(module);
             XSRETURN_PV(path);
         }
         FreeLibrary(module);
     }
+
+    /* SHGetFolderPathW() and SHGetSpecialFolderPathW() may fail on older
+     * Perl versions that have replaced the Unicode environment with an
+     * ANSI version.  Let's go spelunking in the registry now...
+     */
+    if (IsWin2000()) {
+        SV *sv;
+        HKEY hkey;
+        HKEY root = HKEY_CURRENT_USER;
+        WCHAR *name = NULL;
+
+        switch (folder) {
+        case CSIDL_ADMINTOOLS:                  name = L"Administrative Tools";        break;
+        case CSIDL_APPDATA:                     name = L"AppData";                     break;
+        case CSIDL_CDBURN_AREA:                 name = L"CD Burning";                  break;
+        case CSIDL_COOKIES:                     name = L"Cookies";                     break;
+        case CSIDL_DESKTOP:
+        case CSIDL_DESKTOPDIRECTORY:            name = L"Desktop";                     break;
+        case CSIDL_FAVORITES:                   name = L"Favorites";                   break;
+        case CSIDL_FONTS:                       name = L"Fonts";                       break;
+        case CSIDL_HISTORY:                     name = L"History";                     break;
+        case CSIDL_INTERNET_CACHE:              name = L"Cache";                       break;
+        case CSIDL_LOCAL_APPDATA:               name = L"Local AppData";               break;
+        case CSIDL_MYMUSIC:                     name = L"My Music";                    break;
+        case CSIDL_MYPICTURES:                  name = L"My Pictures";                 break;
+        case CSIDL_MYVIDEO:                     name = L"My Video";                    break;
+        case CSIDL_NETHOOD:                     name = L"NetHood";                     break;
+        case CSIDL_PERSONAL:                    name = L"Personal";                    break;
+        case CSIDL_PRINTHOOD:                   name = L"PrintHood";                   break;
+        case CSIDL_PROGRAMS:                    name = L"Programs";                    break;
+        case CSIDL_RECENT:                      name = L"Recent";                      break;
+        case CSIDL_SENDTO:                      name = L"SendTo";                      break;
+        case CSIDL_STARTMENU:                   name = L"Start Menu";                  break;
+        case CSIDL_STARTUP:                     name = L"Startup";                     break;
+        case CSIDL_TEMPLATES:                   name = L"Templates";                   break;
+            /* XXX L"Local Settings" */
+        }
+
+        if (!name) {
+            root = HKEY_LOCAL_MACHINE;
+            switch (folder) {
+            case CSIDL_COMMON_ADMINTOOLS:       name = L"Common Administrative Tools"; break;
+            case CSIDL_COMMON_APPDATA:          name = L"Common AppData";              break;
+            case CSIDL_COMMON_DESKTOPDIRECTORY: name = L"Common Desktop";              break;
+            case CSIDL_COMMON_DOCUMENTS:        name = L"Common Documents";            break;
+            case CSIDL_COMMON_FAVORITES:        name = L"Common Favorites";            break;
+            case CSIDL_COMMON_PROGRAMS:         name = L"Common Programs";             break;
+            case CSIDL_COMMON_STARTMENU:        name = L"Common Start Menu";           break;
+            case CSIDL_COMMON_STARTUP:          name = L"Common Startup";              break;
+            case CSIDL_COMMON_TEMPLATES:        name = L"Common Templates";            break;
+            case CSIDL_COMMON_MUSIC:            name = L"CommonMusic";                 break;
+            case CSIDL_COMMON_PICTURES:         name = L"CommonPictures";              break;
+            case CSIDL_COMMON_VIDEO:            name = L"CommonVideo";                 break;
+            }
+        }
+        /* XXX todo
+         * case CSIDL_SYSTEM               # GetSystemDirectory()
+         * case CSIDL_RESOURCES            # %windir%\Resources\, For theme and other windows resources.
+         * case CSIDL_RESOURCES_LOCALIZED  # %windir%\Resources\<LangID>, for theme and other windows specific resources.
+         */
+
+#define SHELL_FOLDERS "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders"
+
+        if (name && RegOpenKeyEx(root, SHELL_FOLDERS, 0, KEY_QUERY_VALUE, &hkey) == ERROR_SUCCESS) {
+            WCHAR data[MAX_PATH+1];
+            DWORD cb = sizeof(data)-sizeof(WCHAR);
+            DWORD type = REG_NONE;
+            long rc = RegQueryValueExW(hkey, name, NULL, &type, (BYTE*)&data, &cb);
+            RegCloseKey(hkey);
+            if (rc == ERROR_SUCCESS && type == REG_SZ && cb > sizeof(WCHAR) && data[0]) {
+                /* Make sure the string is properly terminated */
+                data[cb/sizeof(WCHAR)] = '\0';
+                ST(0) = wstr_to_ansipath(aTHX_ data);
+                XSRETURN(1);
+            }
+        }
+
+#undef SHELL_FOLDERS
+
+        /* Unders some circumstances the registry entries seem to have a null string
+         * as their value even when the directory already exists.  The environment
+         * variables do get set though, so try re-create a Unicode environment and
+         * check if they are there.
+         */
+        sv = NULL;
+        switch (folder) {
+        case CSIDL_APPDATA:              sv = get_unicode_env(aTHX_ L"APPDATA");            break;
+        case CSIDL_PROFILE:              sv = get_unicode_env(aTHX_ L"USERPROFILE");        break;
+        case CSIDL_PROGRAM_FILES:        sv = get_unicode_env(aTHX_ L"ProgramFiles");       break;
+        case CSIDL_PROGRAM_FILES_COMMON: sv = get_unicode_env(aTHX_ L"CommonProgramFiles"); break;
+        case CSIDL_WINDOWS:              sv = get_unicode_env(aTHX_ L"SystemRoot");         break;
+        }
+        if (sv) {
+            ST(0) = sv;
+            XSRETURN(1);
+        }
+    }
+
     XSRETURN_UNDEF;
 }
 
@@ -713,7 +1029,6 @@ XS(w32_GetCwd)
 #endif
 
 	EXTEND(SP,1);
-	SvPOK_on(sv);
 	ST(0) = sv;
 	XSRETURN(1);
     }
@@ -724,9 +1039,21 @@ XS(w32_SetCwd)
 {
     dXSARGS;
     if (items != 1)
-	Perl_croak(aTHX_ "usage: Win32::SetCurrentDirectory($cwd)");
-    if (!PerlDir_chdir(SvPV_nolen(ST(0))))
-	XSRETURN_YES;
+	Perl_croak(aTHX_ "usage: Win32::SetCwd($cwd)");
+
+    if (IsWin2000() && SvUTF8(ST(0))) {
+        WCHAR *wide = sv_to_wstr(aTHX_ ST(0));
+        char *ansi = my_ansipath(wide);
+        int rc = PerlDir_chdir(ansi);
+        Safefree(wide);
+        Safefree(ansi);
+        if (!rc)
+            XSRETURN_YES;
+    }
+    else {
+        if (!PerlDir_chdir(SvPV_nolen(ST(0))))
+            XSRETURN_YES;
+    }
 
     XSRETURN_NO;
 }
@@ -767,13 +1094,23 @@ XS(w32_SetLastError)
 XS(w32_LoginName)
 {
     dXSARGS;
-    char name[128];
-    DWORD size = sizeof(name);
     EXTEND(SP,1);
-    if (GetUserName(name,&size)) {
-	/* size includes NULL */
-	ST(0) = sv_2mortal(newSVpvn(name,size-1));
-	XSRETURN(1);
+    if (IsWin2000()) {
+        WCHAR name[128];
+        DWORD size = countof(name);
+        if (GetUserNameW(name, &size)) {
+            ST(0) = wstr_to_sv(aTHX_ name);
+            XSRETURN(1);
+        }
+    }
+    else {
+        char name[128];
+        DWORD size = countof(name);
+        if (GetUserNameA(name, &size)) {
+            /* size includes NULL */
+            ST(0) = sv_2mortal(newSVpvn(name, size-1));
+            XSRETURN(1);
+        }
     }
     XSRETURN_UNDEF;
 }
@@ -796,19 +1133,16 @@ XS(w32_NodeName)
 XS(w32_DomainName)
 {
     dXSARGS;
-    HINSTANCE hNetApi32 = LoadLibrary("netapi32.dll");
-    DWORD (__stdcall *pfnNetApiBufferFree)(LPVOID Buffer);
-    DWORD (__stdcall *pfnNetWkstaGetInfo)(LPWSTR servername, DWORD level,
-					  void *bufptr);
+    HMODULE module = LoadLibrary("netapi32.dll");
+    PFNNetApiBufferFree pfnNetApiBufferFree;
+    PFNNetWkstaGetInfo pfnNetWkstaGetInfo;
 
-    if (hNetApi32) {
-	pfnNetApiBufferFree = (DWORD (__stdcall *)(void *))
-	    GetProcAddress(hNetApi32, "NetApiBufferFree");
-	pfnNetWkstaGetInfo = (DWORD (__stdcall *)(LPWSTR, DWORD, void *))
-	    GetProcAddress(hNetApi32, "NetWkstaGetInfo");
+    if (module) {
+        GETPROC(NetApiBufferFree);
+        GETPROC(NetWkstaGetInfo);
     }
     EXTEND(SP,1);
-    if (hNetApi32 && pfnNetWkstaGetInfo && pfnNetApiBufferFree) {
+    if (module && pfnNetWkstaGetInfo && pfnNetApiBufferFree) {
 	/* this way is more reliable, in case user has a local account. */
 	char dname[256];
 	DWORD dnamelen = sizeof(dname);
@@ -830,17 +1164,17 @@ XS(w32_DomainName)
 				    -1, (LPSTR)dname, dnamelen, NULL, NULL);
 	    }
 	    pfnNetApiBufferFree(pwi);
-	    FreeLibrary(hNetApi32);
+	    FreeLibrary(module);
 	    XSRETURN_PV(dname);
 	}
-	FreeLibrary(hNetApi32);
+	FreeLibrary(module);
     }
     else {
 	/* Win95 doesn't have NetWksta*(), so do it the old way */
 	char name[256];
 	DWORD size = sizeof(name);
-	if (hNetApi32)
-	    FreeLibrary(hNetApi32);
+	if (module)
+	    FreeLibrary(module);
 	if (GetUserName(name,&size)) {
 	    char sid[ONE_K_BUFSIZE];
 	    DWORD sidlen = sizeof(sid);
@@ -879,48 +1213,21 @@ XS(w32_FsType)
 XS(w32_GetOSVersion)
 {
     dXSARGS;
-    /* Use explicit struct definition because wSuiteMask and
-     * wProductType are not defined in the VC++ 6.0 headers.
-     * WORD type has been replaced by unsigned short because
-     * WORD is already used by Perl itself.
-     */
-    struct {
-        DWORD dwOSVersionInfoSize;
-        DWORD dwMajorVersion;
-        DWORD dwMinorVersion;
-        DWORD dwBuildNumber;
-        DWORD dwPlatformId;
-        CHAR  szCSDVersion[128];
-        unsigned short wServicePackMajor;
-        unsigned short wServicePackMinor;
-        unsigned short wSuiteMask;
-        BYTE  wProductType;
-        BYTE  wReserved;
-    }   osver;
-    BOOL bEx = TRUE;
 
-    osver.dwOSVersionInfoSize = sizeof(osver);
-    if (!GetVersionExA((OSVERSIONINFOA*)&osver)) {
-        bEx = FALSE;
-        osver.dwOSVersionInfoSize = sizeof(OSVERSIONINFOA);
-        if (!GetVersionExA((OSVERSIONINFOA*)&osver)) {
-            XSRETURN_EMPTY;
-        }
-    }
     if (GIMME_V == G_SCALAR) {
-        XSRETURN_IV(osver.dwPlatformId);
+        XSRETURN_IV(g_osver.dwPlatformId);
     }
-    XPUSHs(newSVpvn(osver.szCSDVersion, strlen(osver.szCSDVersion)));
+    XPUSHs(newSVpvn(g_osver.szCSDVersion, strlen(g_osver.szCSDVersion)));
 
-    XPUSHs(newSViv(osver.dwMajorVersion));
-    XPUSHs(newSViv(osver.dwMinorVersion));
-    XPUSHs(newSViv(osver.dwBuildNumber));
-    XPUSHs(newSViv(osver.dwPlatformId));
-    if (bEx) {
-        XPUSHs(newSViv(osver.wServicePackMajor));
-        XPUSHs(newSViv(osver.wServicePackMinor));
-        XPUSHs(newSViv(osver.wSuiteMask));
-        XPUSHs(newSViv(osver.wProductType));
+    XPUSHs(newSViv(g_osver.dwMajorVersion));
+    XPUSHs(newSViv(g_osver.dwMinorVersion));
+    XPUSHs(newSViv(g_osver.dwBuildNumber));
+    XPUSHs(newSViv(g_osver.dwPlatformId));
+    if (g_osver_ex) {
+        XPUSHs(newSViv(g_osver.wServicePackMajor));
+        XPUSHs(newSViv(g_osver.wServicePackMinor));
+        XPUSHs(newSViv(g_osver.wSuiteMask));
+        XPUSHs(newSViv(g_osver.wProductType));
     }
     PUTBACK;
 }
@@ -1025,6 +1332,18 @@ XS(w32_GetShortPathName)
     if (items != 1)
 	Perl_croak(aTHX_ "usage: Win32::GetShortPathName($longPathName)");
 
+    if (IsWin2000()) {
+        WCHAR wshort[MAX_PATH+1];
+        WCHAR *wlong = sv_to_wstr(aTHX_ ST(0));
+        len = GetShortPathNameW(wlong, wshort, countof(wshort));
+        Safefree(wlong);
+        if (len < sizeof(wshort)) {
+            ST(0) = wstr_to_sv(aTHX_ wshort);
+            XSRETURN(1);
+        }
+        XSRETURN_UNDEF;
+    }
+
     shortpath = sv_mortalcopy(ST(0));
     SvUPGRADE(shortpath, SVt_PV);
     if (!SvPVX(shortpath) || !SvLEN(shortpath))
@@ -1048,68 +1367,154 @@ XS(w32_GetShortPathName)
 XS(w32_GetFullPathName)
 {
     dXSARGS;
-    SV *filename;
-    SV *fullpath;
-    char *filepart;
-    DWORD len;
-    STRLEN filename_len;
-    char *filename_p;
+    char *fullname;
+    char *ansi = NULL;
+
+/* The code below relies on the fact that PerlDir_mapX() returns an
+ * absolute path, which is only true under PERL_IMPLICIT_SYS when
+ * we use the virtualization code from win32/vdir.h.
+ * Without it PerlDir_mapX() is a no-op and we need to use the same
+ * code as we use for Cygwin.
+ */
+#if __CYGWIN__ || !defined(PERL_IMPLICIT_SYS)
+    char buffer[2*MAX_PATH];
+#endif
 
     if (items != 1)
 	Perl_croak(aTHX_ "usage: Win32::GetFullPathName($filename)");
 
-    filename = ST(0);
-    filename_p = SvPV(filename, filename_len);
-    fullpath = sv_2mortal(newSVpvn(filename_p, filename_len));
-    if (!SvPVX(fullpath) || !SvLEN(fullpath))
-        XSRETURN_UNDEF;
-
-    do {
-	len = GetFullPathName(SvPVX(filename),
-			      SvLEN(fullpath),
-			      SvPVX(fullpath),
-			      &filepart);
-    } while (len >= SvLEN(fullpath) && sv_grow(fullpath,len+1));
-    if (len) {
-	if (GIMME_V == G_ARRAY) {
-	    EXTEND(SP,1);
-	    if (filepart) {
-		XST_mPV(1,filepart);
-		len = filepart - SvPVX(fullpath);
-	    }
-	    else {
-		XST_mPVN(1,"",0);
-	    }
-	    items = 2;
-	}
-	SvCUR_set(fullpath,len);
-	*SvEND(fullpath) = '\0';
-	ST(0) = fullpath;
-	XSRETURN(items);
+#if __CYGWIN__ || !defined(PERL_IMPLICIT_SYS)
+    if (IsWin2000()) {
+        WCHAR *filename = sv_to_wstr(aTHX_ ST(0));
+        WCHAR full[2*MAX_PATH];
+        DWORD len = GetFullPathNameW(filename, countof(full), full, NULL);
+        Safefree(filename);
+        if (len == 0 || len >= countof(full))
+            XSRETURN_EMPTY;
+        ansi = fullname = my_ansipath(full);
     }
-    XSRETURN_EMPTY;
+    else {
+        DWORD len = GetFullPathNameA(SvPV_nolen(ST(0)), countof(buffer), buffer, NULL);
+        if (len == 0 || len >= countof(buffer))
+            XSRETURN_EMPTY;
+        fullname = buffer;
+    }
+#else
+    /* Don't use my_ansipath() unless the $filename argument is in Unicode.
+     * If the relative path doesn't exist, GetShortPathName() will fail and
+     * my_ansipath() will use the long name with replacement characters.
+     * In that case we will be better off using PerlDir_mapA(), which
+     * already uses the ANSI name of the current directory.
+     *
+     * XXX The one missing case is where we could downgrade $filename
+     * XXX from UTF8 into the current codepage.
+     */
+    if (IsWin2000() && SvUTF8(ST(0))) {
+        WCHAR *filename = sv_to_wstr(aTHX_ ST(0));
+        WCHAR *mappedname = PerlDir_mapW(filename);
+        Safefree(filename);
+        ansi = fullname = my_ansipath(mappedname);
+    }
+    else {
+        fullname = PerlDir_mapA(SvPV_nolen(ST(0)));
+    }
+#  if PERL_VERSION < 8
+    {
+        /* PerlDir_mapX() in Perl 5.6 used to return forward slashes */
+        char *str = fullname;
+        while (*str) {
+            if (*str == '/')
+                *str = '\\';
+            ++str;
+        }
+    }
+#  endif
+#endif
+
+    /* GetFullPathName() on Windows NT drops trailing backslash */
+    if (g_osver.dwMajorVersion == 4 && *fullname) {
+        STRLEN len;
+        char *pv = SvPV(ST(0), len);
+        char *lastchar = fullname + strlen(fullname) - 1;
+        /* If ST(0) ends with a slash, but fullname doesn't ... */
+        if (len && (pv[len-1] == '/' || pv[len-1] == '\\') && *lastchar != '\\') {
+            /* fullname is the MAX_PATH+1 sized buffer returned from PerlDir_mapA()
+             * or the 2*MAX_PATH sized local buffer in the __CYGWIN__ case.
+             */
+            strcpy(lastchar+1, "\\");
+        }
+    }
+
+    if (GIMME_V == G_ARRAY) {
+        char *filepart = strrchr(fullname, '\\');
+
+        EXTEND(SP,1);
+        if (filepart) {
+            XST_mPV(1, ++filepart);
+            *filepart = '\0';
+        }
+        else {
+            XST_mPVN(1, "", 0);
+        }
+        items = 2;
+    }
+    XST_mPV(0, fullname);
+
+    if (ansi)
+        Safefree(ansi);
+    XSRETURN(items);
 }
 
 XS(w32_GetLongPathName)
 {
     dXSARGS;
-    SV *path;
-    char tmpbuf[MAX_PATH+1];
-    char *pathstr;
-    STRLEN len;
 
     if (items != 1)
 	Perl_croak(aTHX_ "usage: Win32::GetLongPathName($pathname)");
 
-    path = ST(0);
-    pathstr = SvPV(path,len);
-    strcpy(tmpbuf, pathstr);
-    pathstr = win32_longpath(tmpbuf);
-    if (pathstr) {
-	ST(0) = sv_2mortal(newSVpvn(pathstr, strlen(pathstr)));
-	XSRETURN(1);
+    if (IsWin2000()) {
+        WCHAR *wstr = sv_to_wstr(aTHX_ ST(0));
+        WCHAR wide_path[MAX_PATH+1];
+        WCHAR *long_path;
+
+        wcscpy(wide_path, wstr);
+        Safefree(wstr);
+        long_path = my_longpathW(wide_path);
+        if (long_path) {
+            ST(0) = wstr_to_sv(aTHX_ long_path);
+            XSRETURN(1);
+        }
+    }
+    else {
+        SV *path;
+        char tmpbuf[MAX_PATH+1];
+        char *pathstr;
+        STRLEN len;
+
+        path = ST(0);
+        pathstr = SvPV(path,len);
+        strcpy(tmpbuf, pathstr);
+        pathstr = my_longpathA(tmpbuf);
+        if (pathstr) {
+            ST(0) = sv_2mortal(newSVpvn(pathstr, strlen(pathstr)));
+            XSRETURN(1);
+        }
     }
     XSRETURN_EMPTY;
+}
+
+XS(w32_GetANSIPathName)
+{
+    dXSARGS;
+    WCHAR *wide_path;
+
+    if (items != 1)
+	Perl_croak(aTHX_ "usage: Win32::GetANSIPathName($pathname)");
+
+    wide_path = sv_to_wstr(aTHX_ ST(0));
+    ST(0) = wstr_to_ansipath(aTHX_ wide_path);
+    Safefree(wide_path);
+    XSRETURN(1);
 }
 
 XS(w32_Sleep)
@@ -1136,14 +1541,92 @@ XS(w32_CopyFile)
     XSRETURN_NO;
 }
 
-XS(boot_Win32)
+XS(w32_OutputDebugString)
 {
     dXSARGS;
+    if (items != 1)
+	Perl_croak(aTHX_ "usage: Win32::OutputDebugString($string)");
+
+    if (SvUTF8(ST(0))) {
+        WCHAR *str = sv_to_wstr(aTHX_ ST(0));
+        OutputDebugStringW(str);
+        Safefree(str);
+    }
+    else
+        OutputDebugStringA(SvPV_nolen(ST(0)));
+
+    XSRETURN_EMPTY;
+}
+
+XS(w32_GetCurrentThreadId)
+{
+    dXSARGS;
+    EXTEND(SP,1);
+    XSRETURN_IV(GetCurrentThreadId());
+}
+
+XS(w32_CreateDirectory)
+{
+    dXSARGS;
+    BOOL result;
+
+    if (items != 1)
+	Perl_croak(aTHX_ "usage: Win32::CreateDirectory($dir)");
+
+    if (IsWin2000() && SvUTF8(ST(0))) {
+        WCHAR *dir = sv_to_wstr(aTHX_ ST(0));
+        result = CreateDirectoryW(dir, NULL);
+        Safefree(dir);
+    }
+    else {
+        result = CreateDirectoryA(SvPV_nolen(ST(0)), NULL);
+    }
+
+    ST(0) = boolSV(result);
+    XSRETURN(1);
+}
+
+XS(w32_CreateFile)
+{
+    dXSARGS;
+    HANDLE handle;
+
+    if (items != 1)
+	Perl_croak(aTHX_ "usage: Win32::CreateFile($file)");
+
+    if (IsWin2000() && SvUTF8(ST(0))) {
+        WCHAR *file = sv_to_wstr(aTHX_ ST(0));
+        handle = CreateFileW(file, GENERIC_WRITE, FILE_SHARE_WRITE,
+                             NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+        Safefree(file);
+    }
+    else {
+        handle = CreateFileA(SvPV_nolen(ST(0)), GENERIC_WRITE, FILE_SHARE_WRITE,
+                             NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+    }
+
+    if (handle != INVALID_HANDLE_VALUE)
+        CloseHandle(handle);
+
+    ST(0) = boolSV(handle != INVALID_HANDLE_VALUE);
+    XSRETURN(1);
+}
+
+MODULE = Win32            PACKAGE = Win32
+
+PROTOTYPES: DISABLE
+
+BOOT:
+{
     char *file = __FILE__;
 
     if (g_osver.dwOSVersionInfoSize == 0) {
         g_osver.dwOSVersionInfoSize = sizeof(g_osver);
-        GetVersionEx(&g_osver);
+        if (!GetVersionExA((OSVERSIONINFOA*)&g_osver)) {
+            g_osver_ex = FALSE;
+            g_osver.dwOSVersionInfoSize = sizeof(OSVERSIONINFOA);
+            GetVersionExA((OSVERSIONINFOA*)&g_osver);
+        }
     }
 
     newXS("Win32::LookupAccountName", w32_LookupAccountName, file);
@@ -1182,11 +1665,15 @@ XS(boot_Win32)
     newXS("Win32::GetShortPathName", w32_GetShortPathName, file);
     newXS("Win32::GetFullPathName", w32_GetFullPathName, file);
     newXS("Win32::GetLongPathName", w32_GetLongPathName, file);
+    newXS("Win32::GetANSIPathName", w32_GetANSIPathName, file);
     newXS("Win32::CopyFile", w32_CopyFile, file);
     newXS("Win32::Sleep", w32_Sleep, file);
+    newXS("Win32::OutputDebugString", w32_OutputDebugString, file);
+    newXS("Win32::GetCurrentThreadId", w32_GetCurrentThreadId, file);
+    newXS("Win32::CreateDirectory", w32_CreateDirectory, file);
+    newXS("Win32::CreateFile", w32_CreateFile, file);
 #ifdef __CYGWIN__
     newXS("Win32::SetChildShowWindow", w32_SetChildShowWindow, file);
 #endif
-
     XSRETURN_YES;
 }

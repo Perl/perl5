@@ -13,4 +13,4 @@ my @version = Win32::GetFileVersion($^X);
 my $version = $version[0] + $version[1] / 1000 + $version[2] / 1000000;
 
 ok($version, $]);
-ok($version[3], Win32::BuildNumber());
+ok($version[3], int(Win32::BuildNumber()));

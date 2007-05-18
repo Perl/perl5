@@ -2,13 +2,15 @@ package Win32;
 
 BEGIN {
     use strict;
-    use vars qw|$VERSION @ISA @EXPORT @EXPORT_OK|;
+    use vars qw|$VERSION $XS_VERSION @ISA @EXPORT @EXPORT_OK|;
 
     require Exporter;
     require DynaLoader;
 
     @ISA = qw|Exporter DynaLoader|;
-    $VERSION = '0.27';
+    $VERSION = '0.29';
+    $XS_VERSION = $VERSION;
+    $VERSION = eval $VERSION;
 
     @EXPORT = qw(
 	NULL
@@ -78,20 +80,6 @@ BEGIN {
         CSIDL_CDBURN_AREA
     );
 }
-
-# Routines available in core:
-# Win32::GetLastError
-# Win32::LoginName
-# Win32::NodeName
-# Win32::DomainName
-# Win32::FsType
-# Win32::GetCwd
-# Win32::GetOSVersion
-# Win32::FormatMessage ERRORCODE
-# Win32::Spawn COMMAND, ARGS, PID
-# Win32::GetTickCount
-# Win32::IsWinNT
-# Win32::IsWin95
 
 # We won't bother with the constant stuff, too much of a hassle.  Just hard
 # code it here.
@@ -251,6 +239,8 @@ sub GetOSName {
     return wantarray ? ($found_os, $found_desc) : $found_os;
 }
 
+# "no warnings 'redefine';" doesn't work for 5.8.7 and earlier
+local $^W = 0;
 bootstrap Win32;
 
 1;
@@ -270,6 +260,12 @@ The Win32 module contains functions to access Win32 APIs.
 It is recommended to C<use Win32;> before any of these functions;
 however, for backwards compatibility, those marked as [CORE] will
 automatically do this for you.
+
+In the function descriptions below the term I<Unicode string> is used
+to indicate that the string may contain characters outside the system
+codepage.  The caveat I<If supported by the core Perl version>
+generally means Perl 5.8.9 and later, though some Unicode pathname
+functionality may work on earlier versions.
 
 =over
 
@@ -293,6 +289,25 @@ overwritten when the OVERWRITE parameter is true.  But even this will
 not overwrite a read-only file; you have to unlink() it first
 yourself.
 
+=item Win32::CreateDirectory(DIRECTORY)
+
+Creates the DIRECTORY and returns a true value on success.  Check $^E
+on failure for extended error information.
+
+DIRECTORY may contain Unicode characters outside the system codepage.
+Once the directory has been created you can use
+Win32::GetANSIPathName() to get a name that can be passed to system
+calls and external programs.
+
+=item Win32::CreateFile(FILE)
+
+Creates the FILE and returns a true value on success.  Check $^E on
+failure for extended error information.
+
+FILE may contain Unicode characters outside the system codepage.  Once
+the file has been created you can use Win32::GetANSIPathName() to get
+a name that can be passed to system calls and external programs.
+
 =item Win32::DomainName()
 
 [CORE] Returns the name of the Microsoft Network domain that the
@@ -309,6 +324,10 @@ original C<%VariableName%> text is retained.  Has the same effect
 as the following:
 
 	$string =~ s/%([^%]*)%/$ENV{$1} || "%$1%"/eg
+
+However, this function may return a Unicode string if the environment
+variable being expanded hasn't been assigned to via %ENV.  Access
+to %ENV is currently always using byte semantics.
 
 =item Win32::FormatMessage(ERRORCODE)
 
@@ -349,6 +368,20 @@ Unloads a previously loaded dynamic-link library.  The HANDLE is
 no longer valid after this call.  See L<LoadLibrary|Win32::LoadLibrary(LIBNAME)>
 for information on dynamically loading a library.
 
+=item Win32::GetANSIPathName(FILENAME)
+
+Returns an ANSI version of FILENAME.  This may be the short name
+if the long name cannot be represented in the system codepage.
+
+While not currently implemented, it is possible that in the future
+this function will convert only parts of the path to FILENAME to a
+short form.
+
+If FILENAME doesn't exist on the filesystem, or if the filesystem
+doesn't support short ANSI filenames, then this function will
+translate the Unicode name into the system codepage using replacement
+characters.
+
 =item Win32::GetArchName()
 
 Use of this function is deprecated.  It is equivalent with
@@ -364,6 +397,19 @@ Returns the processor type: 386, 486 or 586 for Intel processors,
 [CORE] Returns the current active drive and directory.  This function
 does not return a UNC path, since the functionality required for such
 a feature is not available under Windows 95.
+
+If supported by the core Perl version, this function will return an
+ANSI path name for the current directory if the long pathname cannot
+be represented in the system codepage.
+
+=item Win32::GetCurrentThreadId()
+
+Returns the thread identifier of the calling thread.  Until the thread
+terminates, the thread identifier uniquely identifies the thread
+throughout the system.
+
+Note: the current process identifier is available via the predefined
+$$ variable.
 
 =item Win32::GetFileVersion(FILENAME)
 
@@ -429,6 +475,11 @@ currently available at:
 
 http://msdn.microsoft.com/library/default.asp?url=/library/en-us/shellcc/platform/shell/reference/enums/csidl.asp
 
+This function will return an ANSI folder path if the long name cannot
+be represented in the system codepage.  Use Win32::GetLongPathName()
+on the result of Win32::GetFolderPath() if you want the Unicode
+version of the folder name.
+
 =item Win32::GetFullPathName(FILENAME)
 
 [CORE] GetFullPathName combines the FILENAME with the current drive
@@ -437,8 +488,12 @@ path name.  In list context it returns two elements: (PATH, FILE) where
 PATH is the complete pathname component (including trailing backslash)
 and FILE is just the filename part.  Note that no attempt is made to
 convert 8.3 components in the supplied FILENAME to longnames or
-vice-versa.  Compare with Win32::GetShortPathName and
-Win32::GetLongPathName.
+vice-versa.  Compare with Win32::GetShortPathName() and
+Win32::GetLongPathName().
+
+If supported by the core Perl version, this function will return an
+ANSI path name if the full pathname cannot be represented in the
+system codepage.
 
 =item Win32::GetLastError()
 
@@ -451,8 +506,12 @@ same value.
 [CORE] Returns a representation of PATHNAME composed of longname
 components (if any).  The result may not necessarily be longer
 than PATHNAME.  No attempt is made to convert PATHNAME to the
-absolute path.  Compare with Win32::GetShortPathName and
-Win32::GetFullPathName.
+absolute path.  Compare with Win32::GetShortPathName() and
+Win32::GetFullPathName().
+
+This function may return the pathname in Unicode if it cannot be
+represented in the system codepage.  Use Win32::GetANSIPathName()
+before passing the path to a system call or another program.
 
 =item Win32::GetNextAvailDrive()
 
@@ -546,8 +605,8 @@ different major/minor version number than Windows XP.
 (8.3) path components where available.  For path components where the
 file system has not generated the short form the returned path will
 use the long form, so this function might still for instance return a
-path containing spaces.  Compare with Win32::GetFullPathName and
-Win32::GetLongPathName.
+path containing spaces.  Compare with Win32::GetFullPathName() and
+Win32::GetLongPathName().
 
 =item Win32::GetProcAddress(INSTANCE, PROCNAME)
 
@@ -590,8 +649,10 @@ only on WinNT.
 Returns non zero if the account in whose security context the
 current process/thread is running belongs to the local group of
 Administrators in the built-in system domain; returns 0 if not.
-Returns the undefined value and prints a warning if an error occurred.
-This function always returns 1 on Win9X.
+On Windows Vista it will only return non-zero if the process is
+actually running with elevated privileges.  Returns the undefined
+value and prints a warning if an error occurred.  This function always
+returns 1 on Win9X.
 
 =item Win32::IsWinNT()
 
@@ -604,13 +665,14 @@ This function always returns 1 on Win9X.
 =item Win32::LoadLibrary(LIBNAME)
 
 Loads a dynamic link library into memory and returns its module
-handle.  This handle can be used with Win32::GetProcAddress and
-Win32::FreeLibrary.  This function is deprecated.  Use the Win32::API
+handle.  This handle can be used with Win32::GetProcAddress() and
+Win32::FreeLibrary().  This function is deprecated.  Use the Win32::API
 module instead.
 
 =item Win32::LoginName()
 
 [CORE] Returns the username of the owner of the current perl process.
+The return value may be a Unicode string.
 
 =item Win32::LookupAccountName(SYSTEM, ACCOUNT, DOMAIN, SID, SIDTYPE)
 
@@ -657,6 +719,16 @@ The function returns the menu id of the selected push button:
 
 [CORE] Returns the Microsoft Network node-name of the current machine.
 
+=item Win32::OutputDebugString(STRING)
+
+Sends a string to the application or system debugger for display.
+The function does nothing if there is no active debugger.
+
+Alternatively one can use the I<Debug Viewer> application to
+watch the OutputDebugString() output:
+
+http://www.microsoft.com/technet/sysinternals/utilities/debugview.mspx
+
 =item Win32::RegisterServer(LIBRARYNAME)
 
 Loads the DLL LIBRARYNAME and calls the function DllRegisterServer.
@@ -669,8 +741,7 @@ processes if Perl itself is not running from a console.  Calling
 SetChildShowWindow(0) will make these new console windows invisible.
 Calling SetChildShowWindow() without arguments reverts system() to the
 default behavior.  The return value of SetChildShowWindow() is the
-previous setting or C<undef>.  This function is only available in
-MSWin32 builds of perl.
+previous setting or C<undef>.
 
 The following symbolic constants for SHOWWINDOW are available
 (but not exported) from the Win32 module: SW_HIDE, SW_SHOWNORMAL,
