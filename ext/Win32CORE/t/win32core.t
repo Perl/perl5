@@ -10,7 +10,11 @@ BEGIN {
 	}
     }
 
-    plan tests => 4;
+    if ($^O eq 'cygwin') {
+        plan skip_all => '$^E not functional under Cygwin';
+    } else {
+        plan tests => 4;
+    }
 };
 use_ok( "Win32CORE" );
 
