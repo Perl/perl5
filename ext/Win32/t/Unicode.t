@@ -5,6 +5,10 @@ use Win32;
 use Cwd qw(cwd);
 
 BEGIN {
+    if ($^O eq 'cygwin') {
+	print "1..0 # Skip: Cygwin doesn't support Unicode filenames\n";
+	exit 0;
+    }
     unless (defined &Win32::BuildNumber && Win32::BuildNumber() >= 820 or $] >= 5.008009) {
 	print "1..0 # Skip: Needs ActivePerl 820 or Perl 5.8.9 or later\n";
 	exit 0;
