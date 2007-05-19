@@ -1519,6 +1519,11 @@ Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)
     /* Bail out if destruction is going on */
     if(PL_dirty) return 0;
 
+    /* XXX Once it's possible, we need to
+       detect that our @ISA is aliased in
+       other stashes, and act on the stashes
+       of all of the aliases */
+
     /* The first case occurs via setisa,
        the second via setisa_elem, which
        calls this same magic */

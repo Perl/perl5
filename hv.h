@@ -51,6 +51,7 @@ struct mro_meta {
     AV      *mro_linear_c3;  /* cached c3 @ISA linearization */
     HV      *mro_nextmethod; /* next::method caching */
     U32     cache_gen;       /* Bumping this invalidates our method cache */
+    U32     pkg_gen;         /* Bumps when local methods/@ISA change */
     mro_alg mro_which;       /* which mro alg is in use? */
 };
 

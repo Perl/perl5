@@ -35,6 +35,10 @@ mro - Method Resolution Order
 The "mro" namespace provides several utilities for dealing
 with method resolution order and method caching in general.
 
+These interfaces are only available in Perl 5.9.5 and higher.
+See L<MRO::Compat> on CPAN for a mostly forwards compatible
+implementation for older Perls.
+
 =head1 OVERVIEW
 
 It's possible to change the MRO of a given class either by using C<use
@@ -89,6 +93,13 @@ Returns an arrayref which is the linearized MRO of the given class.
 Uses whichever MRO is currently in effect for that class by default,
 or the given MRO (either C<c3> or C<dfs> if specified as C<$type>).
 
+The linearized MRO of a class is an ordered array of all of the
+classes one would search when resolving a method on that class,
+starting with the class itself.
+
+If the requested class doesn't yet exist, this function will still
+succeed, and return C<[ $classname ]>
+
 Note that C<UNIVERSAL> (and any members of C<UNIVERSAL>'s MRO) are not
 part of the MRO of a class, even though all classes implicitly inherit
 methods from C<UNIVERSAL> and its parents.
@@ -105,7 +116,7 @@ Returns the MRO of the given class (either C<c3> or C<dfs>).
 =head2 mro::get_isarev($classname)
 
 Gets the C<mro_isarev> for this class, returned as an
-array of class names.  These are every class that "isa"
+arrayref of class names.  These are every class that "isa"
 the given class name, even if the isa relationship is
 indirect.  This is used internally by the MRO code to
 keep track of method/MRO cache invalidations.
@@ -149,7 +160,41 @@ caching in all packages.
 =head2 mro::method_changed_in($classname)
 
 Invalidates the method cache of any classes dependent on the
-given class.
+given class.  This is not normally necessary.  The only
+known case where pure perl code can confuse the method
+cache is when you manually install a new constant
+subroutine by using a readonly scalar value, like the
+internals of L<constant> do.  If you find another case,
+please report it so we can either fix it or document
+the exception here.
+
+=head2 mro::get_pkg_gen($classname)
+
+Returns an integer which is incremented every time a
+real local method in the package C<$classname> changes,
+or the local C<@ISA> of C<$classname> is modified.
+
+This is intended for authors of modules which do lots
+of class introspection, as it allows them to very quickly
+check if anything important about the local properties
+of a given class have changed since the last time they
+looked.  It does not increment on method/C<@ISA>
+changes in superclasses.
+
+It's still up to you to seek out the actual changes,
+and there might not actually be any.  Perhaps all
+of the changes since you last checked cancelled each
+other out and left the package in the state it was in
+before.
+
+This integer normally starts off at a value of C<1>
+when a package stash is instantiated.  Calling it
+on packages whose stashes do not exist at all will
+return C<0>.  If a package stash is completely
+deleted (not a normal occurence, but it can happen
+if someone does something like C<undef %PkgName::>),
+the number will be reset to either C<0> or C<1>,
+depending on how completely package was wiped out.
 
 =head2 next::method
 

@@ -3631,6 +3631,7 @@ t/mro/next_NEXT.t		mro tests
 t/mro/next_skip.t		mro tests
 t/mro/overload_c3.t		mro tests
 t/mro/overload_dfs.t		mro tests
+t/mro/pkg_gen.t		mro tests
 t/mro/recursion_c3.t		mro tests
 t/mro/recursion_dfs.t		mro tests
 t/mro/vulcan_c3.t		mro tests

@@ -3145,7 +3145,7 @@ copy-ish functions and macros use this underneath.
 static void
 S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
 {
-    I32 method_changed = 0;
+    I32 mro_changes = 0; /* 1 = method, 2 = isa */
 
     if (dtype != SVt_PVGV) {
 	const char * const name = GvNAME(sstr);
@@ -3186,14 +3186,17 @@ S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
         /* If source has a real method, then a method is
            going to change */
         else if(GvCV((GV*)sstr)) {
-            method_changed = 1;
+            mro_changes = 1;
         }
     }
 
     /* If dest already had a real method, that's a change as well */
-    if(!method_changed && GvGP((GV*)dstr) && GvCVu((GV*)dstr)) {
-        method_changed = 1;
+    if(!mro_changes && GvGP((GV*)dstr) && GvCVu((GV*)dstr)) {
+        mro_changes = 1;
     }
+
+    if(strEQ(GvNAME((GV*)dstr),"ISA"))
+        mro_changes = 2;
 
     gp_free((GV*)dstr);
     isGV_with_GP_off(dstr);
@@ -3209,7 +3212,8 @@ S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
 	    GvIMPORTED_on(dstr);
 	}
     GvMULTI_on(dstr);
-    if(method_changed) mro_method_changed_in(GvSTASH(dstr));
+    if(mro_changes == 2) mro_isa_changed_in(GvSTASH(dstr));
+    else if(mro_changes) mro_method_changed_in(GvSTASH(dstr));
     return;
 }
 

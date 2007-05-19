@@ -34,6 +34,7 @@ Perl_mro_meta_init(pTHX_ HV* stash)
     Newxz(newmeta, 1, struct mro_meta);
     HvAUX(stash)->xhv_mro_meta = newmeta;
     newmeta->cache_gen = 1;
+    newmeta->pkg_gen = 1;
 
     return newmeta;
 }
@@ -242,19 +243,20 @@ Perl_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
         I32 items = AvFILLp(isa) + 1;
         SV** isa_ptr = AvARRAY(isa);
         while(items--) {
-            AV* isa_lin;
             SV* const isa_item = *isa_ptr++;
             HV* const isa_item_stash = gv_stashsv(isa_item, 0);
             if(!isa_item_stash) {
                 /* if no stash, make a temporary fake MRO
                    containing just itself */
-                isa_lin = (AV*)sv_2mortal((SV*)newAV());
+                AV* const isa_lin = newAV();
                 av_push(isa_lin, newSVsv(isa_item));
+                av_push(seqs, (SV*)isa_lin);
             }
             else {
-                isa_lin = mro_get_linear_isa_c3(isa_item_stash, level + 1); /* recursion */
+                /* recursion */
+                AV* const isa_lin = mro_get_linear_isa_c3(isa_item_stash, level + 1);
+                av_push(seqs, SvREFCNT_inc_simple_NN((SV*)isa_lin));
             }
-            av_push(seqs, SvREFCNT_inc_simple_NN((SV*)isa_lin));
         }
         av_push(seqs, SvREFCNT_inc_simple_NN((SV*)isa));
 
@@ -453,6 +455,9 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
     meta->mro_linear_dfs = NULL;
     meta->mro_linear_c3 = NULL;
 
+    /* Inc the package generation, since our @ISA changed */
+    meta->pkg_gen++;
+
     /* Wipe the global method cache if this package
        is UNIVERSAL or one of its parents */
 
@@ -571,6 +576,9 @@ Perl_mro_method_changed_in(pTHX_ HV *stash)
 
     SV ** const svp = hv_fetch(PL_isarev, stashname, stashname_len, 0);
     HV * const isarev = svp ? (HV*)*svp : NULL;
+
+    /* Inc the package generation, since a local method changed */
+    HvMROMETA(stash)->pkg_gen++;
 
     /* If stash is UNIVERSAL, or one of UNIVERSAL's parents,
        invalidate all method caches globally */
@@ -804,6 +812,7 @@ XS(XS_mro_get_isarev);
 XS(XS_mro_is_universal);
 XS(XS_mro_invalidate_method_caches);
 XS(XS_mro_method_changed_in);
+XS(XS_mro_get_pkg_gen);
 XS(XS_next_can);
 XS(XS_next_method);
 XS(XS_maybe_next_method);
@@ -821,6 +830,7 @@ Perl_boot_core_mro(pTHX)
     newXSproto("mro::is_universal", XS_mro_is_universal, file, "$");
     newXSproto("mro::invalidate_all_method_caches", XS_mro_invalidate_method_caches, file, "");
     newXSproto("mro::method_changed_in", XS_mro_method_changed_in, file, "$");
+    newXSproto("mro::get_pkg_gen", XS_mro_get_pkg_gen, file, "$");
     newXS("next::can", XS_next_can, file);
     newXS("next::method", XS_next_method, file);
     newXS("maybe::next::method", XS_maybe_next_method, file);
@@ -840,9 +850,15 @@ XS(XS_mro_get_linear_isa) {
 
     classname = ST(0);
     class_stash = gv_stashsv(classname, 0);
-    if(!class_stash) Perl_croak(aTHX_ "No such class: '%"SVf"'!", SVfARG(classname));
 
-    if(items > 1) {
+    if(!class_stash) {
+        /* No stash exists yet, give them just the classname */
+        AV* isalin = newAV();
+        av_push(isalin, newSVsv(classname));
+        ST(0) = sv_2mortal(newRV_noinc((SV*)isalin));
+        XSRETURN(1);
+    }
+    else if(items > 1) {
         const char* const which = SvPV_nolen(ST(1));
         if(strEQ(which, "dfs"))
             RETVAL = mro_get_linear_isa_dfs(class_stash, 0);
@@ -907,7 +923,6 @@ XS(XS_mro_get_mro)
     dXSARGS;
     SV* classname;
     HV* class_stash;
-    struct mro_meta* meta;
 
     PERL_UNUSED_ARG(cv);
 
@@ -916,10 +931,8 @@ XS(XS_mro_get_mro)
 
     classname = ST(0);
     class_stash = gv_stashsv(classname, 0);
-    if(!class_stash) Perl_croak(aTHX_ "No such class: '%"SVf"'!", SVfARG(classname));
-    meta = HvMROMETA(class_stash);
 
-    if(meta->mro_which == MRO_DFS)
+    if(!class_stash || HvMROMETA(class_stash)->mro_which == MRO_DFS)
         ST(0) = sv_2mortal(newSVpvn("dfs", 3));
     else
         ST(0) = sv_2mortal(newSVpvn("c3", 2));
@@ -932,11 +945,11 @@ XS(XS_mro_get_isarev)
     dVAR;
     dXSARGS;
     SV* classname;
-    HV* class_stash;
     SV** svp;
     HV* isarev;
-    char* stashname;
-    STRLEN stashname_len;
+    char* classname_pv;
+    STRLEN classname_len;
+    AV* ret_array;
 
     PERL_UNUSED_ARG(cv);
 
@@ -945,22 +958,22 @@ XS(XS_mro_get_isarev)
 
     classname = ST(0);
 
-    class_stash = gv_stashsv(classname, 0);
-    if(!class_stash)
-	Perl_croak(aTHX_ "No such class: '%"SVf"'!", SVfARG(classname));
-
     SP -= items;
 
-    stashname = HvNAME_get(class_stash);
-    stashname_len = HvNAMELEN_get(class_stash);
-    svp = hv_fetch(PL_isarev, stashname, stashname_len, 0);
+    
+    classname_pv = SvPV_nolen(classname);
+    classname_len = strlen(classname_pv);
+    svp = hv_fetch(PL_isarev, classname_pv, classname_len, 0);
     isarev = svp ? (HV*)*svp : NULL;
+
+    ret_array = newAV();
     if(isarev) {
         HE* iter;
         hv_iterinit(isarev);
         while((iter = hv_iternext(isarev)))
-            XPUSHs(hv_iterkeysv(iter));
+            av_push(ret_array, newSVsv(hv_iterkeysv(iter)));
     }
+    XPUSHs(sv_2mortal(newRV_noinc((SV*)ret_array)));
 
     PUTBACK;
     return;
@@ -971,10 +984,9 @@ XS(XS_mro_is_universal)
     dVAR;
     dXSARGS;
     SV* classname;
-    HV* class_stash;
     HV* isarev;
-    char* stashname;
-    STRLEN stashname_len;
+    char* classname_pv;
+    STRLEN classname_len;
     SV** svp;
 
     PERL_UNUSED_ARG(cv);
@@ -983,16 +995,14 @@ XS(XS_mro_is_universal)
        Perl_croak(aTHX_ "Usage: mro::is_universal(classname)");
 
     classname = ST(0);
-    class_stash = gv_stashsv(classname, 0);
-    if(!class_stash) Perl_croak(aTHX_ "No such class: '%"SVf"'!", SVfARG(classname));
 
-    stashname = HvNAME_get(class_stash);
-    stashname_len = HvNAMELEN_get(class_stash);
+    classname_pv = SvPV_nolen(classname);
+    classname_len = strlen(classname_pv);
 
-    svp = hv_fetch(PL_isarev, stashname, stashname_len, 0);
+    svp = hv_fetch(PL_isarev, classname_pv, classname_len, 0);
     isarev = svp ? (HV*)*svp : NULL;
 
-    if((stashname_len == 9 && strEQ(stashname, "UNIVERSAL"))
+    if((classname_len == 9 && strEQ(classname_pv, "UNIVERSAL"))
         || (isarev && hv_exists(isarev, "UNIVERSAL", 9)))
         XSRETURN_YES;
     else
@@ -1034,6 +1044,32 @@ XS(XS_mro_method_changed_in)
     mro_method_changed_in(class_stash);
 
     XSRETURN_EMPTY;
+}
+
+XS(XS_mro_get_pkg_gen)
+{
+    dVAR;
+    dXSARGS;
+    SV* classname;
+    HV* class_stash;
+
+    PERL_UNUSED_ARG(cv);
+
+    if(items != 1)
+        Perl_croak(aTHX_ "Usage: mro::get_pkg_gen(classname)");
+    
+    classname = ST(0);
+
+    class_stash = gv_stashsv(classname, 0);
+
+    SP -= items;
+
+    XPUSHs(sv_2mortal(newSViv(
+        class_stash ? HvMROMETA(class_stash)->pkg_gen : 0
+    )));
+    
+    PUTBACK;
+    return;
 }
 
 XS(XS_next_can)
