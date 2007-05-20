@@ -135,10 +135,7 @@ PERLVAR(Istart_env,	JMPENV)		/* empty startup sigjmp environment */
 PERLVARI(Ierrors,	SV *,	NULL)	/* outstanding queued errors */
 
 /* statics "owned" by various functions */
-PERLVAR(Iav_fetch_sv,	SV *)		/* unused as of change #19268 */
-PERLVAR(Ihv_fetch_sv,	SV *)		/* unused as of change #19268 */
 PERLVAR(Ihv_fetch_ent_mh, HE*)		/* owned by hv_fetch_ent() */
-
 
 PERLVAR(Ilastgotoprobe,	OP*)		/* from pp_ctl.c */
 
@@ -483,10 +480,13 @@ PERLVARI(Icollation_standard, bool,	TRUE)
 
 
 #ifdef PERL_UTF8_CACHE_ASSERT
-PERLVARI(Iutf8cache, I8, -1)	/* Is the utf8 caching code enabled? */
+#  define PERL___I -1
 #else
-PERLVARI(Iutf8cache, I8, 1)	/* Is the utf8 caching code enabled? */
+#  define PERL___I -1
 #endif
+PERLVARI(Iutf8cache, I8, PERL___I)	/* Is the utf8 caching code enabled? */
+#undef PERL___I
+
 
 #ifdef USE_LOCALE_NUMERIC
 

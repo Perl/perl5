@@ -69,7 +69,6 @@
 #define PL_argvgv		(vTHX->Iargvgv)
 #define PL_argvout_stack	(vTHX->Iargvout_stack)
 #define PL_argvoutgv		(vTHX->Iargvoutgv)
-#define PL_av_fetch_sv		(vTHX->Iav_fetch_sv)
 #define PL_basetime		(vTHX->Ibasetime)
 #define PL_beginav		(vTHX->Ibeginav)
 #define PL_beginav_save		(vTHX->Ibeginav_save)
@@ -159,7 +158,6 @@
 #define PL_hintgv		(vTHX->Ihintgv)
 #define PL_hints		(vTHX->Ihints)
 #define PL_hv_fetch_ent_mh	(vTHX->Ihv_fetch_ent_mh)
-#define PL_hv_fetch_sv		(vTHX->Ihv_fetch_sv)
 #define PL_in_clean_all		(vTHX->Iin_clean_all)
 #define PL_in_clean_objs	(vTHX->Iin_clean_objs)
 #define PL_in_eval		(vTHX->Iin_eval)
@@ -393,7 +391,6 @@
 #define PL_Iargvgv		PL_argvgv
 #define PL_Iargvout_stack	PL_argvout_stack
 #define PL_Iargvoutgv		PL_argvoutgv
-#define PL_Iav_fetch_sv		PL_av_fetch_sv
 #define PL_Ibasetime		PL_basetime
 #define PL_Ibeginav		PL_beginav
 #define PL_Ibeginav_save	PL_beginav_save
@@ -483,7 +480,6 @@
 #define PL_Ihintgv		PL_hintgv
 #define PL_Ihints		PL_hints
 #define PL_Ihv_fetch_ent_mh	PL_hv_fetch_ent_mh
-#define PL_Ihv_fetch_sv		PL_hv_fetch_sv
 #define PL_Iin_clean_all	PL_in_clean_all
 #define PL_Iin_clean_objs	PL_in_clean_objs
 #define PL_Iin_eval		PL_in_eval

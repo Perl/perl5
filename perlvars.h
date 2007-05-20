@@ -54,12 +54,15 @@ PERLVAR(Gop_mutex,	perl_mutex)	/* Mutex for op refcounting */
 PERLVAR(Gdollarzero_mutex, perl_mutex)	/* Modifying $0 */
 #endif
 
+
 /* This is constant on most architectures, a global on OS/2 */
 #ifdef OS2
-PERLVARI(Gsh_path,	      char *,	SH_PATH)/* full path of shell */
+#  define PERL___C
 #else
-PERLVARI(Gsh_path,	const char *,	SH_PATH)/* full path of shell */
+#  define PERL___C const
 #endif
+PERLVARI(Gsh_path,	PERL___C char *, SH_PATH) /* full path of shell */
+#undef PERL___C
 
 #ifndef PERL_MICRO
 /* If Perl has to ignore SIGPFE, this is its saved state.

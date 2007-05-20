@@ -174,8 +174,6 @@ END_EXTERN_C
 #define PL_argvout_stack	(*Perl_Iargvout_stack_ptr(aTHX))
 #undef  PL_argvoutgv
 #define PL_argvoutgv		(*Perl_Iargvoutgv_ptr(aTHX))
-#undef  PL_av_fetch_sv
-#define PL_av_fetch_sv		(*Perl_Iav_fetch_sv_ptr(aTHX))
 #undef  PL_basetime
 #define PL_basetime		(*Perl_Ibasetime_ptr(aTHX))
 #undef  PL_beginav
@@ -354,8 +352,6 @@ END_EXTERN_C
 #define PL_hints		(*Perl_Ihints_ptr(aTHX))
 #undef  PL_hv_fetch_ent_mh
 #define PL_hv_fetch_ent_mh	(*Perl_Ihv_fetch_ent_mh_ptr(aTHX))
-#undef  PL_hv_fetch_sv
-#define PL_hv_fetch_sv		(*Perl_Ihv_fetch_sv_ptr(aTHX))
 #undef  PL_in_clean_all
 #define PL_in_clean_all		(*Perl_Iin_clean_all_ptr(aTHX))
 #undef  PL_in_clean_objs
