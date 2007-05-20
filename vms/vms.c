@@ -11968,6 +11968,8 @@ Perl_vms_start_glob
 	if (!stat_sts && S_ISDIR(st.st_mode)) {
 	    wilddsc.dsc$a_pointer = tovmspath_utf8(SvPVX(tmpglob),vmsspec,NULL);
 	    ok = (wilddsc.dsc$a_pointer != NULL);
+	    /* maybe passed 'foo' rather than '[.foo]', thus not detected above */
+	    hasdir = 1; 
 	}
 	else {
 	    wilddsc.dsc$a_pointer = tovmsspec_utf8(SvPVX(tmpglob),vmsspec,NULL);
