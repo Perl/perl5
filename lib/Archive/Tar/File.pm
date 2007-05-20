@@ -237,7 +237,7 @@ sub _new_from_file {
     my $type        = __PACKAGE__->_filetype($path);
     my $data        = '';
 
-    unless ($type == DIR) {
+    unless ($type == DIR || $type == SYMLINK) {
         my $fh = IO::File->new;
         $fh->open($path) or return;
 

@@ -14,7 +14,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG              = 0;
 $WARN               = 1;
 $FOLLOW_SYMLINK     = 0;
-$VERSION            = "1.30_01";
+$VERSION            = "1.31";
 $CHOWN              = 1;
 $CHMOD              = 1;
 $DO_NOT_USE_PREFIX  = 0;
@@ -303,7 +303,7 @@ sub _read_tar {
 
             if ( $entry->is_file && !$entry->validate ) {
                 ### sometimes the chunk is rather fux0r3d and a whole 512
-                ### bytes ends p in the ->name area.
+                ### bytes ends up in the ->name area.
                 ### clean it up, if need be
                 my $name = $entry->name;
                 $name = substr($name, 0, 100) if length $name > 100;
@@ -408,6 +408,9 @@ sub contains_file {
     my $self = shift;
     my $full = shift or return;
 
+    ### don't warn if the entry isn't there.. that's what this function
+    ### is for after all.
+    local $WARN = 0;
     return 1 if $self->_find_entry($full);
     return;
 }
@@ -565,6 +568,17 @@ sub _extract_file {
             $self->_error( qq[Could not create directory '$dir': $@] );
             return;
         }
+        
+        ### XXX chown here? that might not be the same as in the archive
+        ### as we're only chown'ing to the owner of the file we're extracting
+        ### not to the owner of the directory itself, which may or may not
+        ### be another entry in the archive
+        ### Answer: no, gnu tar doesn't do it either, it'd be the wrong
+        ### way to go.
+        #if( $CHOWN && CAN_CHOWN ) {
+        #    chown $entry->uid, $entry->gid, $dir or
+        #        $self->_error( qq[Could not set uid/gid on '$dir'] );
+        #}
     }
 
     ### we're done if we just needed to create a dir ###
@@ -1116,7 +1130,7 @@ sub add_files {
 
     my @rv;
     for my $file ( @files ) {
-        unless( -e $file ) {
+        unless( -e $file || -l $file ) {
             $self->_error( qq[No such file: '$file'] );
             next;
         }
@@ -1595,6 +1609,10 @@ Header> functionality. To facilitate those clients, you can set the
 C<$Archive::Tar::DO_NOT_USE_PREFIX> variable to C<true>. See the 
 C<GLOBAL VARIABLES> section for details on this variable.
 
+Note that GNU tar earlier than version 1.14 does not cope well with
+the C<POSIX header prefix>. If you use such a version, consider setting
+the C<$Archive::Tar::DO_NOT_USE_PREFIX> variable to C<true>.
+
 =item How do I extract only files that have property X from an archive?
 
 Sometimes, you might not wish to extract a complete archive, just
@@ -1704,8 +1722,9 @@ Lists known issues and incompatibilities; C<http://gd.tuwien.ac.at/utils/archive
 
 =head1 AUTHOR
 
-This module by
-Jos Boumans E<lt>kane@cpan.orgE<gt>.
+This module by Jos Boumans E<lt>kane@cpan.orgE<gt>.
+
+Please reports bugs to E<lt>bug-archive-tar@rt.cpan.orgE<gt>.
 
 =head1 ACKNOWLEDGEMENTS
 
@@ -1714,12 +1733,10 @@ especially Andrew Savige for their help and suggestions.
 
 =head1 COPYRIGHT
 
-This module is
-copyright (c) 2002 Jos Boumans E<lt>kane@cpan.orgE<gt>.
-All rights reserved.
+This module is copyright (c) 2002 - 2007 Jos Boumans 
+E<lt>kane@cpan.orgE<gt>. All rights reserved.
 
-This library is free software;
-you may redistribute and/or modify it under the same
-terms as Perl itself.
+This library is free software; you may redistribute and/or modify 
+it under the same terms as Perl itself.
 
 =cut

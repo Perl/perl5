@@ -134,6 +134,18 @@ chmod 0644, $COMPRESS_FILE;
     ### check if ->error eq $error
     is( $tar->error, $Archive::Tar::error,
                                     '$error matches error() method' );
+                     
+    ### check that 'contains_file' doesn't warn about missing files.                     
+    {   ### turn on warnings in general!
+        local $Archive::Tar::WARN  = 1;
+
+        my $warnings = '';
+        local $SIG{__WARN__} = sub { $warnings .= "@_" };
+        
+        my $rv = $tar->contains_file( $$ );
+        ok( !$rv,                   "Does not contain file '$$'" );
+        is( $warnings, '',          "   No warnings issued during lookup" );
+    }        
 }
 
 ### read tests ###
