@@ -24,7 +24,7 @@ use warnings;
 use strict;
 use Config;
 
-print "1..43\n";
+print "1..47\n";
 
 use B::Deparse;
 my $deparse = B::Deparse->new() or print "not ";
@@ -334,3 +334,15 @@ do { my $x = 1; $x };
 my $f = sub {
     +{[]};
 } ;
+####
+# 38 (bug #43010)
+'!@$%'->();
+####
+# 39 (ibid.)
+::();
+####
+# 40 (ibid.)
+'::::'->();
+####
+# 41 (ibid.)
+&::::;

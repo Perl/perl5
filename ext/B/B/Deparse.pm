@@ -350,7 +350,7 @@ sub next_todo {
 		$name = "$self->{'curstash'}::$name" unless $name =~ /::/;
 		$self->{'curstash'} = $stash;
 	    }
-	    $name =~ s/^\Q$stash\E:://;
+	    $name =~ s/^\Q$stash\E::(?!\z|.*::)//;
 	}
         return "${p}${l}sub $name " . $self->deparse_sub($cv);
     }
@@ -469,7 +469,6 @@ sub stash_subs {
     }
     my %stash = svref_2object($stash)->ARRAY;
     while (my ($key, $val) = each %stash) {
-	next if $key eq 'main::';	# avoid infinite recursion
 	my $class = class($val);
 	if ($class eq "PV") {
 	    # Just a prototype. As an ugly but fairly effective way
@@ -503,7 +502,9 @@ sub stash_subs {
 		$self->todo($cv, 1);
 	    }
 	    if (class($val->HV) ne "SPECIAL" && $key =~ /::$/) {
-		$self->stash_subs($pack . $key);
+		$self->stash_subs($pack . $key)
+		    unless $pack eq '' && $key eq 'main::';
+		    # avoid infinite recursion
 	    }
 	}
     }
@@ -1236,8 +1237,12 @@ sub gv_name {
 Carp::confess() unless ref($gv) eq "B::GV";
     my $stash = $gv->STASH->NAME;
     my $name = $gv->SAFENAME;
-    if (($stash eq 'main' && $globalnames{$name})
-	or ($stash eq $self->{'curstash'} && !$globalnames{$name})
+    if ($stash eq 'main' && $name =~ /^::/) {
+	$stash = '::';
+    }
+    elsif (($stash eq 'main' && $globalnames{$name})
+	or ($stash eq $self->{'curstash'} && !$globalnames{$name}
+	    && ($stash eq 'main' || $name !~ /::/))
 	or $name =~ /^[^A-Za-z_:]/)
     {
 	$stash = "";
@@ -3241,6 +3246,13 @@ sub pp_entersub {
 	}
 	$simple = 1; # only calls of named functions can be prototyped
 	$kid = $self->deparse($kid, 24);
+	if (!$amper) {
+	    if ($kid eq 'main::') {
+		$kid = '::';
+	    } elsif ($kid !~ /^(?:\w|::)(?:[\w\d]|::(?!\z))*\z/) {
+		$kid = single_delim("q", "'", $kid) . '->';
+	    }
+	}
     } elsif (is_scalar ($kid->first) && $kid->first->name ne 'rv2cv') {
 	$amper = "&";
 	$kid = $self->deparse($kid, 24);
