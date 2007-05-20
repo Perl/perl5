@@ -6,7 +6,7 @@
 # and by AIX for creating libperl.a when -Dusershrplib is in effect,
 # and by MacOS Classic.
 #
-# reads global.sym, pp.sym, perlvars.h, intrpvar.h, thrdvar.h, config.h
+# reads global.sym, pp.sym, perlvars.h, intrpvar.h, config.h
 # On OS/2 reads miniperl.map and the previous version of perl5.def as well
 
 BEGIN { unshift @INC, "lib" }
@@ -72,7 +72,6 @@ my $exportperlmalloc = $PLATFORM eq 'os2';
 
 my $config_sh   = "config.sh";
 my $config_h    = "config.h";
-my $thrdvar_h   = "thrdvar.h";
 my $intrpvar_h  = "intrpvar.h";
 my $perlvars_h  = "perlvars.h";
 my $global_sym  = "global.sym";
@@ -86,13 +85,13 @@ if ($PLATFORM eq 'aix') {
 }
 elsif ($PLATFORM =~ /^win(?:32|ce)$/ || $PLATFORM eq 'netware') {
     $CCTYPE = "MSVC" unless defined $CCTYPE;
-    foreach ($thrdvar_h, $intrpvar_h, $perlvars_h, $global_sym,
+    foreach ($intrpvar_h, $perlvars_h, $global_sym,
 	     $pp_sym, $globvar_sym, $perlio_sym) {
 	s!^!..\\!;
     }
 }
 elsif ($PLATFORM eq 'MacOS') {
-    foreach ($thrdvar_h, $intrpvar_h, $perlvars_h, $global_sym,
+    foreach ($intrpvar_h, $perlvars_h, $global_sym,
 	     $pp_sym, $globvar_sym, $perlio_sym) {
 	s!^!::!;
     }
@@ -1158,7 +1157,7 @@ for my $syms (@syms) {
 # variables
 
 if ($define{'MULTIPLICITY'}) {
-    for my $f ($perlvars_h, $intrpvar_h, $thrdvar_h) {
+    for my $f ($perlvars_h, $intrpvar_h) {
 	my $glob = readvar($f, sub { "Perl_" . $_[1] . $_[2] . "_ptr" });
 	emit_symbols $glob;
     }
@@ -1175,10 +1174,6 @@ else {
     }
     unless ($define{'MULTIPLICITY'}) {
 	my $glob = readvar($intrpvar_h);
-	emit_symbols $glob;
-    }
-    unless ($define{'MULTIPLICITY'}) {
-	my $glob = readvar($thrdvar_h);
 	emit_symbols $glob;
     }
 }

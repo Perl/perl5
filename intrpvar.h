@@ -1,8 +1,22 @@
-/***********************************************/
-/* Global only to current interpreter instance */
-/***********************************************/
+/*   intrpvar.h 
+ *
+ *    Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+ *    2006, 2007
+ *    by Larry Wall and others
+ *
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
+ *
+ */
 
-/* Don't forget to re-run embed.pl to propagate changes! */
+/*
+=head1 Per-Interpreter Variables
+*/
+
+/* These variables are per-interpreter in threaded/multiplicity builds,
+ * global otherwise.
+
+ * Don't forget to re-run embed.pl to propagate changes! */
 
 /* New variables must be added to the very end for binary compatibility.
  * XSUB.h provides wrapper functions via perlapi.h that make this
@@ -14,12 +28,172 @@
  * generated when built with or without MULTIPLICITY.  It is also used
  * to generate the appropriate export list for win32.
  *
- * When building without MULTIPLICITY, these variables will be truly global. */
+ * When building without MULTIPLICITY, these variables will be truly global.
+ *
+ * Important ones in the first cache line (if alignment is done right) */
+
+PERLVAR(Istack_sp,	SV **)		/* top of the stack */
+#ifdef OP_IN_REGISTER
+PERLVAR(Iopsave,	OP *)
+#else
+PERLVAR(Iop,		OP *)		/* currently executing op */
+#endif
+PERLVAR(Icurpad,	SV **)		/* active pad (lexicals+tmps) */
+
+PERLVAR(Istack_base,	SV **)
+PERLVAR(Istack_max,	SV **)
+
+PERLVAR(Iscopestack,	I32 *)		/* scopes we've ENTERed */
+PERLVAR(Iscopestack_ix,	I32)
+PERLVAR(Iscopestack_max,I32)
+
+PERLVAR(Isavestack,	ANY *)		/* items that need to be restored when
+					   LEAVEing scopes we've ENTERed */
+PERLVAR(Isavestack_ix,	I32)
+PERLVAR(Isavestack_max,	I32)
+
+PERLVAR(Itmps_stack,	SV **)		/* mortals we've made */
+PERLVARI(Itmps_ix,	I32,	-1)
+PERLVARI(Itmps_floor,	I32,	-1)
+PERLVAR(Itmps_max,	I32)
+PERLVAR(Imodcount,	I32)		/* how much mod()ification in
+					   assignment? */
+
+PERLVAR(Imarkstack,	I32 *)		/* stack_sp locations we're
+					   remembering */
+PERLVAR(Imarkstack_ptr,	I32 *)
+PERLVAR(Imarkstack_max,	I32 *)
+
+PERLVAR(ISv,		SV *)		/* used to hold temporary values */
+PERLVAR(IXpv,		XPV *)		/* used to hold temporary values */
+
+/*
+=for apidoc Amn|STRLEN|PL_na
+
+A convenience variable which is typically used with C<SvPV> when one
+doesn't care about the length of the string.  It is usually more efficient
+to either declare a local variable and use that instead or to use the
+C<SvPV_nolen> macro.
+
+=cut
+*/
+
+PERLVAR(Ina,		STRLEN)		/* for use in SvPV when length is
+					   Not Applicable */
+
+/* stat stuff */
+PERLVAR(Istatbuf,	Stat_t)
+PERLVAR(Istatcache,	Stat_t)		/* _ */
+PERLVAR(Istatgv,	GV *)
+PERLVARI(Istatname,	SV *,	NULL)
+
+#ifdef HAS_TIMES
+PERLVAR(Itimesbuf,	struct tms)
+#endif
+
+/* Fields used by magic variables such as $@, $/ and so on */
+PERLVAR(Icurpm,		PMOP *)		/* what to do \ interps in REs from */
+
+/*
+=for apidoc mn|SV*|PL_rs
+
+The input record separator - C<$/> in Perl space.
+
+=for apidoc mn|GV*|PL_last_in_gv
+
+The GV which was last used for a filehandle input operation. (C<< <FH> >>)
+
+=for apidoc mn|SV*|PL_ofs_sv
+
+The output field separator - C<$,> in Perl space.
+
+=cut
+*/
+
+PERLVAR(Irs,		SV *)		/* input record separator $/ */
+PERLVAR(Ilast_in_gv,	GV *)		/* GV used in last <FH> */
+PERLVAR(Iofs_sv,	SV *)		/* output field separator $, */
+PERLVAR(Idefoutgv,	GV *)		/* default FH for output */
+PERLVARI(Ichopset,	const char *, " \n-")	/* $: */
+PERLVAR(Iformtarget,	SV *)
+PERLVAR(Ibodytarget,	SV *)
+PERLVAR(Itoptarget,	SV *)
+
+/* Stashes */
+PERLVAR(Idefstash,	HV *)		/* main symbol table */
+PERLVAR(Icurstash,	HV *)		/* symbol table for current package */
+
+PERLVAR(Irestartop,	OP *)		/* propagating an error from croak? */
+PERLVAR(Icurcop,	COP * VOL)
+PERLVAR(Icurstack,	AV *)		/* THE STACK */
+PERLVAR(Icurstackinfo,	PERL_SI *)	/* current stack + context */
+PERLVAR(Imainstack,	AV *)		/* the stack when nothing funny is
+					   happening */
+
+PERLVAR(Itop_env,	JMPENV *)	/* ptr to current sigjmp environment */
+PERLVAR(Istart_env,	JMPENV)		/* empty startup sigjmp environment */
+PERLVARI(Ierrors,	SV *,	NULL)	/* outstanding queued errors */
+
+/* statics "owned" by various functions */
+PERLVAR(Iav_fetch_sv,	SV *)		/* unused as of change #19268 */
+PERLVAR(Ihv_fetch_sv,	SV *)		/* unused as of change #19268 */
+PERLVAR(Ihv_fetch_ent_mh, HE*)		/* owned by hv_fetch_ent() */
 
 
-/* For historical reasons this file follows thrdvar.h into the interpeter
-   struct, and that file currently ends with 7 bytes of variables, so putting
-   one last byte here is good for alignment.  */
+PERLVAR(Ilastgotoprobe,	OP*)		/* from pp_ctl.c */
+
+/* sort stuff */
+PERLVAR(Isortcop,	OP *)		/* user defined sort routine */
+PERLVAR(Isortstash,	HV *)		/* which is in some package or other */
+PERLVAR(Ifirstgv,	GV *)		/* $a */
+PERLVAR(Isecondgv,	GV *)		/* $b */
+
+/* float buffer */
+PERLVAR(Iefloatbuf,	char *)
+PERLVAR(Iefloatsize,	STRLEN)
+
+/* regex stuff */
+
+PERLVAR(Iscreamfirst,	I32 *)
+PERLVAR(Iscreamnext,	I32 *)
+PERLVAR(Ilastscream,	SV *)
+
+PERLVAR(Ireg_state,	struct re_save_state)
+
+PERLVAR(Iregdummy,	regnode)	/* from regcomp.c */
+
+PERLVARI(Idumpindent,	U16,	4)	/* number of blanks per dump
+					   indentation level */
+
+/* Space for U16 here without increasing the structure size */
+
+PERLVARA(Icolors,6,	char *)		/* from regcomp.c */
+
+PERLVARI(Ipeepp,	peep_t, MEMBER_TO_FPTR(Perl_peep))
+					/* Pointer to peephole optimizer */
+
+PERLVARI(Imaxscream,	I32,	-1)
+PERLVARI(Ireginterp_cnt,I32,	 0)	/* Whether "Regexp" was interpolated. */
+PERLVARI(Iwatchaddr,	char **, 0)
+PERLVAR(Iwatchok,	char *)
+
+/* the currently active slab in a chain of slabs of regmatch states,
+ * and the currently active state within that slab */
+
+PERLVARI(Iregmatch_slab, regmatch_slab *,	NULL)
+PERLVAR(Iregmatch_state, regmatch_state *)
+
+PERLVARI(Idelayedisa,	HV*,	NULL)   /* stash for PL_delaymagic for magic_setisa */
+
+/* Put anything new that is pointer aligned here. */
+
+PERLVAR(Idelaymagic,	U16)		/* ($<,$>) = ... */
+PERLVAR(Ilocalizing,	U8)		/* are we processing a local() list? */
+PERLVAR(Icolorset,	bool)		/* from regcomp.c */
+PERLVARI(Idirty,	bool, FALSE)	/* in the middle of tearing things
+					   down? */
+PERLVAR(Iin_eval,	VOL U8)		/* trap "fatal" errors? */
+PERLVAR(Itainted,	bool)		/* using variables controlled by $< */
 
 /* This value may be set when embedding for full cleanup  */
 /* 0=none, 1=full, 2=full with checks */
@@ -54,7 +228,6 @@ PERLVAR(Idoswitches,	bool)
 PERLVAR(Iminus_E,	bool)
 
 /*
-=head1 Global Variables
 
 =for apidoc mn|bool|PL_dowarn
 
@@ -102,8 +275,6 @@ PERLVAR(Iargvoutgv,	GV *)
 PERLVAR(Iargvout_stack,	AV *)
 
 /* shortcuts to regexp stuff */
-/* this one needs to be moved to thrdvar.h and accessed via
- * find_threadsv() when USE_5005THREADS */
 PERLVAR(Ireplgv,	GV *)
 
 /* shortcuts to misc objects */

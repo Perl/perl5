@@ -10455,9 +10455,9 @@ ANY *
 Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 {
     dVAR;
-    ANY * const ss	= proto_perl->Tsavestack;
-    const I32 max	= proto_perl->Tsavestack_max;
-    I32 ix		= proto_perl->Tsavestack_ix;
+    ANY * const ss	= proto_perl->Isavestack;
+    const I32 max	= proto_perl->Isavestack_max;
+    I32 ix		= proto_perl->Isavestack_ix;
     ANY *nss;
     SV *sv;
     GV *gv;
@@ -11013,7 +11013,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	PL_compiling.cop_hints_hash->refcounted_he_refcnt++;
 	HINTS_REFCNT_UNLOCK;
     }
-    PL_curcop		= (COP*)any_dup(proto_perl->Tcurcop, proto_perl);
+    PL_curcop		= (COP*)any_dup(proto_perl->Icurcop, proto_perl);
 #ifdef PERL_DEBUG_READONLY_OPS
     PL_slabs = NULL;
     PL_slab_count = 0;
@@ -11137,8 +11137,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_dbargs		= av_dup(proto_perl->Idbargs, param);
 
     /* symbol tables */
-    PL_defstash		= hv_dup_inc(proto_perl->Tdefstash, param);
-    PL_curstash		= hv_dup(proto_perl->Tcurstash, param);
+    PL_defstash		= hv_dup_inc(proto_perl->Idefstash, param);
+    PL_curstash		= hv_dup(proto_perl->Icurstash, param);
     PL_debstash		= hv_dup(proto_perl->Idebstash, param);
     PL_globalstash	= hv_dup(proto_perl->Iglobalstash, param);
     PL_curstname	= sv_dup_inc(proto_perl->Icurstname, param);
@@ -11154,7 +11154,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_sub_generation	= proto_perl->Isub_generation;
     PL_isarev		= hv_dup_inc(proto_perl->Iisarev, param);
-    PL_delayedisa	= hv_dup_inc(proto_perl->Tdelayedisa, param);
+    PL_delayedisa	= hv_dup_inc(proto_perl->Idelayedisa, param);
 
     /* funky return mechanisms */
     PL_forkprocess	= proto_perl->Iforkprocess;
@@ -11382,54 +11382,54 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	PL_psig_name	= (SV**)NULL;
     }
 
-    /* thrdvar.h stuff */
+    /* intrpvar.h stuff */
 
     if (flags & CLONEf_COPY_STACKS) {
 	/* next allocation will be PL_tmps_stack[PL_tmps_ix+1] */
-	PL_tmps_ix		= proto_perl->Ttmps_ix;
-	PL_tmps_max		= proto_perl->Ttmps_max;
-	PL_tmps_floor		= proto_perl->Ttmps_floor;
+	PL_tmps_ix		= proto_perl->Itmps_ix;
+	PL_tmps_max		= proto_perl->Itmps_max;
+	PL_tmps_floor		= proto_perl->Itmps_floor;
 	Newxz(PL_tmps_stack, PL_tmps_max, SV*);
 	i = 0;
 	while (i <= PL_tmps_ix) {
-	    PL_tmps_stack[i]	= sv_dup_inc(proto_perl->Ttmps_stack[i], param);
+	    PL_tmps_stack[i]	= sv_dup_inc(proto_perl->Itmps_stack[i], param);
 	    ++i;
 	}
 
 	/* next PUSHMARK() sets *(PL_markstack_ptr+1) */
-	i = proto_perl->Tmarkstack_max - proto_perl->Tmarkstack;
+	i = proto_perl->Imarkstack_max - proto_perl->Imarkstack;
 	Newxz(PL_markstack, i, I32);
-	PL_markstack_max	= PL_markstack + (proto_perl->Tmarkstack_max
-						  - proto_perl->Tmarkstack);
-	PL_markstack_ptr	= PL_markstack + (proto_perl->Tmarkstack_ptr
-						  - proto_perl->Tmarkstack);
-	Copy(proto_perl->Tmarkstack, PL_markstack,
+	PL_markstack_max	= PL_markstack + (proto_perl->Imarkstack_max
+						  - proto_perl->Imarkstack);
+	PL_markstack_ptr	= PL_markstack + (proto_perl->Imarkstack_ptr
+						  - proto_perl->Imarkstack);
+	Copy(proto_perl->Imarkstack, PL_markstack,
 	     PL_markstack_ptr - PL_markstack + 1, I32);
 
 	/* next push_scope()/ENTER sets PL_scopestack[PL_scopestack_ix]
 	 * NOTE: unlike the others! */
-	PL_scopestack_ix	= proto_perl->Tscopestack_ix;
-	PL_scopestack_max	= proto_perl->Tscopestack_max;
+	PL_scopestack_ix	= proto_perl->Iscopestack_ix;
+	PL_scopestack_max	= proto_perl->Iscopestack_max;
 	Newxz(PL_scopestack, PL_scopestack_max, I32);
-	Copy(proto_perl->Tscopestack, PL_scopestack, PL_scopestack_ix, I32);
+	Copy(proto_perl->Iscopestack, PL_scopestack, PL_scopestack_ix, I32);
 
 	/* NOTE: si_dup() looks at PL_markstack */
-	PL_curstackinfo		= si_dup(proto_perl->Tcurstackinfo, param);
+	PL_curstackinfo		= si_dup(proto_perl->Icurstackinfo, param);
 
 	/* PL_curstack		= PL_curstackinfo->si_stack; */
-	PL_curstack		= av_dup(proto_perl->Tcurstack, param);
-	PL_mainstack		= av_dup(proto_perl->Tmainstack, param);
+	PL_curstack		= av_dup(proto_perl->Icurstack, param);
+	PL_mainstack		= av_dup(proto_perl->Imainstack, param);
 
 	/* next PUSHs() etc. set *(PL_stack_sp+1) */
 	PL_stack_base		= AvARRAY(PL_curstack);
-	PL_stack_sp		= PL_stack_base + (proto_perl->Tstack_sp
-						   - proto_perl->Tstack_base);
+	PL_stack_sp		= PL_stack_base + (proto_perl->Istack_sp
+						   - proto_perl->Istack_base);
 	PL_stack_max		= PL_stack_base + AvMAX(PL_curstack);
 
 	/* next SSPUSHFOO() sets PL_savestack[PL_savestack_ix]
 	 * NOTE: unlike the others! */
-	PL_savestack_ix		= proto_perl->Tsavestack_ix;
-	PL_savestack_max	= proto_perl->Tsavestack_max;
+	PL_savestack_ix		= proto_perl->Isavestack_ix;
+	PL_savestack_max	= proto_perl->Isavestack_max;
 	/*Newxz(PL_savestack, PL_savestack_max, ANY);*/
 	PL_savestack		= ss_dup(proto_perl, param);
     }
@@ -11442,9 +11442,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	 * non-refcount means (eg a temp in @_); otherwise they will be
 	 * orphaned
 	 */
-	for (i = 0; i<= proto_perl->Ttmps_ix; i++) {
+	for (i = 0; i<= proto_perl->Itmps_ix; i++) {
 	    SV * const nsv = (SV*)ptr_table_fetch(PL_ptr_table,
-		    proto_perl->Ttmps_stack[i]);
+		    proto_perl->Itmps_stack[i]);
 	    if (nsv && !SvREFCNT(nsv)) {
 		EXTEND_MORTAL(1);
 		PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc_simple(nsv);
@@ -11452,50 +11452,50 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	}
     }
 
-    PL_start_env	= proto_perl->Tstart_env;	/* XXXXXX */
+    PL_start_env	= proto_perl->Istart_env;	/* XXXXXX */
     PL_top_env		= &PL_start_env;
 
-    PL_op		= proto_perl->Top;
+    PL_op		= proto_perl->Iop;
 
     PL_Sv		= NULL;
     PL_Xpv		= (XPV*)NULL;
-    PL_na		= proto_perl->Tna;
+    PL_na		= proto_perl->Ina;
 
-    PL_statbuf		= proto_perl->Tstatbuf;
-    PL_statcache	= proto_perl->Tstatcache;
-    PL_statgv		= gv_dup(proto_perl->Tstatgv, param);
-    PL_statname		= sv_dup_inc(proto_perl->Tstatname, param);
+    PL_statbuf		= proto_perl->Istatbuf;
+    PL_statcache	= proto_perl->Istatcache;
+    PL_statgv		= gv_dup(proto_perl->Istatgv, param);
+    PL_statname		= sv_dup_inc(proto_perl->Istatname, param);
 #ifdef HAS_TIMES
-    PL_timesbuf		= proto_perl->Ttimesbuf;
+    PL_timesbuf		= proto_perl->Itimesbuf;
 #endif
 
-    PL_tainted		= proto_perl->Ttainted;
-    PL_curpm		= proto_perl->Tcurpm;	/* XXX No PMOP ref count */
-    PL_rs		= sv_dup_inc(proto_perl->Trs, param);
-    PL_last_in_gv	= gv_dup(proto_perl->Tlast_in_gv, param);
-    PL_ofs_sv		= sv_dup_inc(proto_perl->Tofs_sv, param);
-    PL_defoutgv		= gv_dup_inc(proto_perl->Tdefoutgv, param);
-    PL_chopset		= proto_perl->Tchopset;	/* XXX never deallocated */
-    PL_toptarget	= sv_dup_inc(proto_perl->Ttoptarget, param);
-    PL_bodytarget	= sv_dup_inc(proto_perl->Tbodytarget, param);
-    PL_formtarget	= sv_dup(proto_perl->Tformtarget, param);
+    PL_tainted		= proto_perl->Itainted;
+    PL_curpm		= proto_perl->Icurpm;	/* XXX No PMOP ref count */
+    PL_rs		= sv_dup_inc(proto_perl->Irs, param);
+    PL_last_in_gv	= gv_dup(proto_perl->Ilast_in_gv, param);
+    PL_ofs_sv		= sv_dup_inc(proto_perl->Iofs_sv, param);
+    PL_defoutgv		= gv_dup_inc(proto_perl->Idefoutgv, param);
+    PL_chopset		= proto_perl->Ichopset;	/* XXX never deallocated */
+    PL_toptarget	= sv_dup_inc(proto_perl->Itoptarget, param);
+    PL_bodytarget	= sv_dup_inc(proto_perl->Ibodytarget, param);
+    PL_formtarget	= sv_dup(proto_perl->Iformtarget, param);
 
-    PL_restartop	= proto_perl->Trestartop;
-    PL_in_eval		= proto_perl->Tin_eval;
-    PL_delaymagic	= proto_perl->Tdelaymagic;
-    PL_dirty		= proto_perl->Tdirty;
-    PL_localizing	= proto_perl->Tlocalizing;
+    PL_restartop	= proto_perl->Irestartop;
+    PL_in_eval		= proto_perl->Iin_eval;
+    PL_delaymagic	= proto_perl->Idelaymagic;
+    PL_dirty		= proto_perl->Idirty;
+    PL_localizing	= proto_perl->Ilocalizing;
 
-    PL_errors		= sv_dup_inc(proto_perl->Terrors, param);
+    PL_errors		= sv_dup_inc(proto_perl->Ierrors, param);
     PL_hv_fetch_ent_mh	= NULL;
-    PL_modcount		= proto_perl->Tmodcount;
+    PL_modcount		= proto_perl->Imodcount;
     PL_lastgotoprobe	= NULL;
-    PL_dumpindent	= proto_perl->Tdumpindent;
+    PL_dumpindent	= proto_perl->Idumpindent;
 
-    PL_sortcop		= (OP*)any_dup(proto_perl->Tsortcop, proto_perl);
-    PL_sortstash	= hv_dup(proto_perl->Tsortstash, param);
-    PL_firstgv		= gv_dup(proto_perl->Tfirstgv, param);
-    PL_secondgv		= gv_dup(proto_perl->Tsecondgv, param);
+    PL_sortcop		= (OP*)any_dup(proto_perl->Isortcop, proto_perl);
+    PL_sortstash	= hv_dup(proto_perl->Isortstash, param);
+    PL_firstgv		= gv_dup(proto_perl->Ifirstgv, param);
+    PL_secondgv		= gv_dup(proto_perl->Isecondgv, param);
     PL_efloatbuf	= NULL;		/* reinits on demand */
     PL_efloatsize	= 0;			/* reinits on demand */
 
@@ -11507,24 +11507,24 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_lastscream	= NULL;
 
 
-    PL_regdummy		= proto_perl->Tregdummy;
+    PL_regdummy		= proto_perl->Iregdummy;
     PL_colorset		= 0;		/* reinits PL_colors[] */
     /*PL_colors[6]	= {0,0,0,0,0,0};*/
 
 
 
     /* Pluggable optimizer */
-    PL_peepp		= proto_perl->Tpeepp;
+    PL_peepp		= proto_perl->Ipeepp;
 
     PL_stashcache       = newHV();
 
     PL_watchaddr	= (char **) ptr_table_fetch(PL_ptr_table,
-					    proto_perl->Twatchaddr);
+					    proto_perl->Iwatchaddr);
     PL_watchok		= PL_watchaddr ? * PL_watchaddr : NULL;
     if (PL_debug && PL_watchaddr) {
 	PerlIO_printf(Perl_debug_log,
 	  "WATCHING: %"UVxf" cloned as %"UVxf" with value %"UVxf"\n",
-	  PTR2UV(proto_perl->Twatchaddr), PTR2UV(PL_watchaddr),
+	  PTR2UV(proto_perl->Iwatchaddr), PTR2UV(PL_watchaddr),
 	  PTR2UV(PL_watchok));
     }
 

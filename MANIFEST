@@ -3382,7 +3382,6 @@ t/comp/uproto.t			See if the _ prototype works
 t/comp/use.t			See if pragmata work
 t/comp/utf.t			See if UTFs work
 t/harness			Finer diagnostics from test suite
-thrdvar.h			Per-thread variables
 thread.h			Threading header
 t/io/argv.t			See if ARGV stuff works
 t/io/binmode.t			See if binmode() works

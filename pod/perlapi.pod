@@ -1223,72 +1223,6 @@ Found in file pp_pack.c
 
 =back
 
-=head1 Global Variables
-
-=over 8
-
-=item PL_modglobal
-X<PL_modglobal>
-
-C<PL_modglobal> is a general purpose, interpreter global HV for use by
-extensions that need to keep information on a per-interpreter basis.
-In a pinch, it can also be used as a symbol table for extensions
-to share data among each other.  It is a good idea to use keys
-prefixed by the package name of the extension that owns the data.
-
-	HV*	PL_modglobal
-
-=for hackers
-Found in file intrpvar.h
-
-=item PL_na
-X<PL_na>
-
-A convenience variable which is typically used with C<SvPV> when one
-doesn't care about the length of the string.  It is usually more efficient
-to either declare a local variable and use that instead or to use the
-C<SvPV_nolen> macro.
-
-	STRLEN	PL_na
-
-=for hackers
-Found in file thrdvar.h
-
-=item PL_sv_no
-X<PL_sv_no>
-
-This is the C<false> SV.  See C<PL_sv_yes>.  Always refer to this as
-C<&PL_sv_no>.
-
-	SV	PL_sv_no
-
-=for hackers
-Found in file intrpvar.h
-
-=item PL_sv_undef
-X<PL_sv_undef>
-
-This is the C<undef> SV.  Always refer to this as C<&PL_sv_undef>.
-
-	SV	PL_sv_undef
-
-=for hackers
-Found in file intrpvar.h
-
-=item PL_sv_yes
-X<PL_sv_yes>
-
-This is the C<true> SV.  See C<PL_sv_no>.  Always refer to this as
-C<&PL_sv_yes>.
-
-	SV	PL_sv_yes
-
-=for hackers
-Found in file intrpvar.h
-
-
-=back
-
 =head1 GV Functions
 
 =over 8
@@ -3131,6 +3065,72 @@ Use macro PAD_SV instead of calling this function directly.
 
 =for hackers
 Found in file pad.c
+
+
+=back
+
+=head1 Per-Interpreter Variables
+
+=over 8
+
+=item PL_modglobal
+X<PL_modglobal>
+
+C<PL_modglobal> is a general purpose, interpreter global HV for use by
+extensions that need to keep information on a per-interpreter basis.
+In a pinch, it can also be used as a symbol table for extensions
+to share data among each other.  It is a good idea to use keys
+prefixed by the package name of the extension that owns the data.
+
+	HV*	PL_modglobal
+
+=for hackers
+Found in file intrpvar.h
+
+=item PL_na
+X<PL_na>
+
+A convenience variable which is typically used with C<SvPV> when one
+doesn't care about the length of the string.  It is usually more efficient
+to either declare a local variable and use that instead or to use the
+C<SvPV_nolen> macro.
+
+	STRLEN	PL_na
+
+=for hackers
+Found in file intrpvar.h
+
+=item PL_sv_no
+X<PL_sv_no>
+
+This is the C<false> SV.  See C<PL_sv_yes>.  Always refer to this as
+C<&PL_sv_no>.
+
+	SV	PL_sv_no
+
+=for hackers
+Found in file intrpvar.h
+
+=item PL_sv_undef
+X<PL_sv_undef>
+
+This is the C<undef> SV.  Always refer to this as C<&PL_sv_undef>.
+
+	SV	PL_sv_undef
+
+=for hackers
+Found in file intrpvar.h
+
+=item PL_sv_yes
+X<PL_sv_yes>
+
+This is the C<true> SV.  See C<PL_sv_no>.  Always refer to this as
+C<&PL_sv_yes>.
+
+	SV	PL_sv_yes
+
+=for hackers
+Found in file intrpvar.h
 
 
 =back

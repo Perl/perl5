@@ -3509,7 +3509,6 @@ S_init_interp(pTHX)
 #    define PERLVARIC(var,type,init)	PERL_GET_INTERP->var = init;
 #  endif
 #  include "intrpvar.h"
-#  include "thrdvar.h"
 #  undef PERLVAR
 #  undef PERLVARA
 #  undef PERLVARI
@@ -3520,7 +3519,6 @@ S_init_interp(pTHX)
 #  define PERLVARI(var,type,init)	PL_##var = init;
 #  define PERLVARIC(var,type,init)	PL_##var = init;
 #  include "intrpvar.h"
-#  include "thrdvar.h"
 #  undef PERLVAR
 #  undef PERLVARA
 #  undef PERLVARI

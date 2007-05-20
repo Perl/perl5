@@ -4502,7 +4502,6 @@ struct perl_vars *PL_VarsPtr;
 */
 
 struct interpreter {
-#  include "thrdvar.h"
 #  include "intrpvar.h"
 };
 
@@ -4567,7 +4566,6 @@ struct tempsym; /* defined in pp_pack.c */
 #if !defined(MULTIPLICITY)
 START_EXTERN_C
 #  include "intrpvar.h"
-#  include "thrdvar.h"
 END_EXTERN_C
 #endif
 

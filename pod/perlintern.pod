@@ -353,92 +353,6 @@ Found in file pp_ctl.c
 
 =back
 
-=head1 Global Variables
-
-=over 8
-
-=item PL_DBsingle
-X<PL_DBsingle>
-
-When Perl is run in debugging mode, with the B<-d> switch, this SV is a
-boolean which indicates whether subs are being single-stepped.
-Single-stepping is automatically turned on after every step.  This is the C
-variable which corresponds to Perl's $DB::single variable.  See
-C<PL_DBsub>.
-
-	SV *	PL_DBsingle
-
-=for hackers
-Found in file intrpvar.h
-
-=item PL_DBsub
-X<PL_DBsub>
-
-When Perl is run in debugging mode, with the B<-d> switch, this GV contains
-the SV which holds the name of the sub being debugged.  This is the C
-variable which corresponds to Perl's $DB::sub variable.  See
-C<PL_DBsingle>.
-
-	GV *	PL_DBsub
-
-=for hackers
-Found in file intrpvar.h
-
-=item PL_DBtrace
-X<PL_DBtrace>
-
-Trace variable used when Perl is run in debugging mode, with the B<-d>
-switch.  This is the C variable which corresponds to Perl's $DB::trace
-variable.  See C<PL_DBsingle>.
-
-	SV *	PL_DBtrace
-
-=for hackers
-Found in file intrpvar.h
-
-=item PL_dowarn
-X<PL_dowarn>
-
-The C variable which corresponds to Perl's $^W warning variable.
-
-	bool	PL_dowarn
-
-=for hackers
-Found in file intrpvar.h
-
-=item PL_last_in_gv
-X<PL_last_in_gv>
-
-The GV which was last used for a filehandle input operation. (C<< <FH> >>)
-
-	GV*	PL_last_in_gv
-
-=for hackers
-Found in file thrdvar.h
-
-=item PL_ofs_sv
-X<PL_ofs_sv>
-
-The output field separator - C<$,> in Perl space.
-
-	SV*	PL_ofs_sv
-
-=for hackers
-Found in file thrdvar.h
-
-=item PL_rs
-X<PL_rs>
-
-The input record separator - C<$/> in Perl space.
-
-	SV*	PL_rs
-
-=for hackers
-Found in file thrdvar.h
-
-
-=back
-
 =head1 GV Functions
 
 =over 8
@@ -939,6 +853,92 @@ taken)
 
 =for hackers
 Found in file pad.c
+
+
+=back
+
+=head1 Per-Interpreter Variables
+
+=over 8
+
+=item PL_DBsingle
+X<PL_DBsingle>
+
+When Perl is run in debugging mode, with the B<-d> switch, this SV is a
+boolean which indicates whether subs are being single-stepped.
+Single-stepping is automatically turned on after every step.  This is the C
+variable which corresponds to Perl's $DB::single variable.  See
+C<PL_DBsub>.
+
+	SV *	PL_DBsingle
+
+=for hackers
+Found in file intrpvar.h
+
+=item PL_DBsub
+X<PL_DBsub>
+
+When Perl is run in debugging mode, with the B<-d> switch, this GV contains
+the SV which holds the name of the sub being debugged.  This is the C
+variable which corresponds to Perl's $DB::sub variable.  See
+C<PL_DBsingle>.
+
+	GV *	PL_DBsub
+
+=for hackers
+Found in file intrpvar.h
+
+=item PL_DBtrace
+X<PL_DBtrace>
+
+Trace variable used when Perl is run in debugging mode, with the B<-d>
+switch.  This is the C variable which corresponds to Perl's $DB::trace
+variable.  See C<PL_DBsingle>.
+
+	SV *	PL_DBtrace
+
+=for hackers
+Found in file intrpvar.h
+
+=item PL_dowarn
+X<PL_dowarn>
+
+The C variable which corresponds to Perl's $^W warning variable.
+
+	bool	PL_dowarn
+
+=for hackers
+Found in file intrpvar.h
+
+=item PL_last_in_gv
+X<PL_last_in_gv>
+
+The GV which was last used for a filehandle input operation. (C<< <FH> >>)
+
+	GV*	PL_last_in_gv
+
+=for hackers
+Found in file intrpvar.h
+
+=item PL_ofs_sv
+X<PL_ofs_sv>
+
+The output field separator - C<$,> in Perl space.
+
+	SV*	PL_ofs_sv
+
+=for hackers
+Found in file intrpvar.h
+
+=item PL_rs
+X<PL_rs>
+
+The input record separator - C<$/> in Perl space.
+
+	SV*	PL_rs
+
+=for hackers
+Found in file intrpvar.h
 
 
 =back

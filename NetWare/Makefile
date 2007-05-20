@@ -782,8 +782,7 @@ CORE_NOCFG_H	=		\
 		..\XSUB.h	\
 		..\EXTERN.h	\
 		..\perlvars.h	\
-		..\intrpvar.h	\
-		..\thrdvar.h	
+		..\intrpvar.h
 		
 CORE_H		= $(CORE_NOCFG_H) .\config.h
 

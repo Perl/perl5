@@ -1279,7 +1279,7 @@ $(OBJECT) : $(PERL_INC)perlsdio.h, $(PERL_INC)perlvars.h
 $(OBJECT) : $(PERL_INC)perly.h, $(PERL_INC)pp.h, $(PERL_INC)pp_proto.h
 $(OBJECT) : $(PERL_INC)proto.h, $(PERL_INC)regcomp.h, $(PERL_INC)regexp.h
 $(OBJECT) : $(PERL_INC)regnodes.h, $(PERL_INC)scope.h, $(PERL_INC)sv.h
-$(OBJECT) : $(PERL_INC)thrdvar.h, $(PERL_INC)thread.h
+$(OBJECT) : $(PERL_INC)thread.h
 $(OBJECT) : $(PERL_INC)util.h, $(PERL_INC)vmsish.h
 
 ' if $self->{OBJECT}; 

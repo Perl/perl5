@@ -948,7 +948,7 @@ perly.h: perly.y
 # No interp.sym since 5.005_03.
 SYM  = global.sym globvar.sym perlio.sym pp.sym
 
-SYMH = perlvars.h intrpvar.h thrdvar.h
+SYMH = perlvars.h intrpvar.h
 
 CHMOD_W = chmod +w
 
