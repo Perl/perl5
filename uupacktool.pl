@@ -4,6 +4,14 @@ use strict;
 use warnings;
 use Getopt::Long;
 use File::Basename;
+use File::Spec;
+
+BEGIN {
+    if ($^O eq 'VMS') {
+        require VMS::Filespec;
+        import VMS::Filespec;
+    }
+}
 
 Getopt::Long::Configure('no_ignore_case');
 
@@ -13,6 +21,7 @@ sub handle_file {
     my $opts    = shift;
     my $file    = shift or die "Need file\n". usage();
     my $outfile = shift || '';
+    $file = vms_check_name($file) if $^O eq 'VMS';
     my $mode    = (stat($file))[2] & 07777;
 
     open my $fh, "<", $file
@@ -25,7 +34,7 @@ sub handle_file {
     if( $opts->{u} ) {
         if( !$outfile ) {
             $outfile = $file;
-            $outfile =~ s/\.packed//;
+            $outfile =~ s/\.packed\z//;
         }
         my ($head, $body) = split /__UU__\n/, $str;
         die "Can't unpack malformed data in '$file'\n"
@@ -60,6 +69,7 @@ EOFBLURB
     if( $opts->{'s'} ) {
         print STDOUT $outstr;
     } else {
+        $outfile = VMS::Filespec::vmsify($outfile) if $^O eq 'VMS';
         print "Writing $file into $outfile\n" if $opts->{'v'};
         open my $outfh, ">", $outfile
             or do { warn "Could not open $outfile for writing: $!"; exit 0 };
@@ -99,7 +109,8 @@ sub bulk_process {
         $count++;
 
         my $out = $file;
-        $out =~ s/\.packed//;
+        $out =~ s/\.packed\z//;
+        $out = vms_check_name($out) if $^O eq 'VMS';
 
         ### unpack
         if( !$opts->{'c'} ) {
@@ -156,6 +167,33 @@ Options:
     -v  Run verbosely
     -h  Display this help message
 ];
+}
+
+sub vms_check_name {
+
+# Packed files tend to have multiple dots, which the CRTL may or may not handle
+# properly, so convert to native format.  And depending on how the archive was
+# unpacked, foo.bar.baz may be foo_bar.baz or foo.bar_baz.  N.B. This checks for
+# existence, so is not suitable as-is to generate ODS-2-safe names in preparation
+# for file creation.
+
+    my $file = shift;
+
+    $file = VMS::Filespec::vmsify($file);
+    return $file if -e $file;
+
+    my ($vol,$dirs,$base) = File::Spec->splitpath($file);
+    my $tmp = $base;
+    1 while $tmp =~ s/([^\.]+)\.(.+\..+)/$1_$2/;
+    my $try = File::Spec->catpath($vol, $dirs, $tmp);
+    return $try if -e $try;
+
+    $tmp = $base;
+    1 while $tmp =~ s/(.+\..+)\.([^\.]+)/$1_$2/;
+    $try = File::Spec->catpath($vol, $dirs, $tmp);
+    return $try if -e $try;
+
+    return $file;
 }
 
 my $opts = {};
