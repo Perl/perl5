@@ -2267,9 +2267,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     /* now parse the script */
 
     SETERRNO(0,SS_NORMAL);
-    PL_error_count = 0;
 #ifdef MACOS_TRADITIONAL
-    if (gMacPerl_SyntaxError = (yyparse() || PL_error_count)) {
+    if (gMacPerl_SyntaxError = (yyparse() || PL_parser->error_count)) {
 	if (PL_minus_c)
 	    Perl_croak(aTHX_ "%s had compilation errors.\n", MacPerl_MPWFileName(PL_origfilename));
 	else {
@@ -2278,7 +2277,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	}
     }
 #else
-    if (yyparse() || PL_error_count) {
+    if (yyparse() || PL_parser->error_count) {
 	if (PL_minus_c)
 	    Perl_croak(aTHX_ "%s had compilation errors.\n", PL_origfilename);
 	else {

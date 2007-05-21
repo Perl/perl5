@@ -77,6 +77,7 @@ typedef struct yy_parser {
     HV		*in_my_stash;	/* declared class of this "my" declaration */
     PerlIO	*rsfp;		/* current source file pointer */
     AV		*rsfp_filters;	/* holds chain of active source filters */
+    U8		error_count;	/* how many compile errors so far, max 10 */
 
 #ifdef PERL_MAD
     SV		*endwhite;

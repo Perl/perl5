@@ -1459,7 +1459,8 @@ Perl_qerror(pTHX_ SV *err)
 	sv_catsv(PL_errors, err);
     else
 	Perl_warn(aTHX_ "%"SVf, SVfARG(err));
-    ++PL_error_count;
+    if (PL_parser)
+	++PL_parser->error_count;
 }
 
 OP *
@@ -2908,7 +2909,6 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     SAVESPTR(PL_unitcheckav);
     PL_unitcheckav = newAV();
     SAVEFREESV(PL_unitcheckav);
-    SAVEI8(PL_error_count);
 
 #ifdef PERL_MAD
     SAVEBOOL(PL_madskills);
@@ -2918,14 +2918,13 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     /* try to compile it */
 
     PL_eval_root = NULL;
-    PL_error_count = 0;
     PL_curcop = &PL_compiling;
     CopARYBASE_set(PL_curcop, 0);
     if (saveop && (saveop->op_type != OP_REQUIRE) && (saveop->op_flags & OPf_SPECIAL))
 	PL_in_eval |= EVAL_KEEPERR;
     else
 	sv_setpvn(ERRSV,"",0);
-    if (yyparse() || PL_error_count || !PL_eval_root) {
+    if (yyparse() || PL_parser->error_count || !PL_eval_root) {
 	SV **newsp;			/* Used by POPBLOCK. */
 	PERL_CONTEXT *cx = &cxstack[cxstack_ix];
 	I32 optype = 0;			/* Might be reset by POPEVAL. */
@@ -4516,7 +4515,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 
     /* I was having segfault trouble under Linux 2.2.5 after a
        parse error occured.  (Had to hack around it with a test
-       for PL_error_count == 0.)  Solaris doesn't segfault --
+       for PL_parser->error_count == 0.)  Solaris doesn't segfault --
        not sure where the trouble is yet.  XXX */
 
     if (IoFMT_GV(datasv)) {
