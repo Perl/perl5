@@ -45,14 +45,14 @@ sub _base_len
   # block below:
   shift;
 
-  my $b = shift;
+  my ($b, $int) = @_;
   if (defined $b)
     {
     # avoid redefinitions
     undef &_mul;
     undef &_div;
 
-    if ($] > 5.008 && $b > 7)
+    if ($] > 5.008 && $int && $b > 7)
       {
       $BASE_LEN = $b;
       *_mul = \&_mul_use_div_64;
@@ -134,8 +134,25 @@ BEGIN
 #  $e = 5 if $] < 5.006;		# cap, for older Perls
 #  $e = 7 if $e > 7;		# cap, for VMS, OS/390 and other 64 bit systems
 #				# 8 fails inside random testsuite, so take 7
-
-  __PACKAGE__->_base_len($e);	# set and store
+  my $int = 0;
+  if ($e > 7)
+    {
+    use integer;
+    my $e1 = 7;
+    $num = 7;
+    do 
+      {
+      $num = ('9' x ++$e1) + 0;
+      $num *= $num + 1;
+      } while ("$num" =~ /9{$e1}0{$e1}/);	# must be a certain pattern
+    $e1--; 					# last test failed, so retract one step
+    if ($e1 > 7)
+      { 
+      $int = 1; $e = $e1; 
+      }
+    }
+ 
+  __PACKAGE__->_base_len($e,$int);	# set and store
 
   use integer;
   # find out how many bits _and, _or and _xor can take (old default = 16)
