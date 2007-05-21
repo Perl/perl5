@@ -1556,7 +1556,6 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
 {
     dVAR;
     SV* retval;
-    SV* const tokenbufsv = sv_newmortal();
     dSP;
     const size_t pkg_len = strlen(pkg);
     const size_t name_len = strlen(name);
@@ -1594,9 +1593,6 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
     PUSHs(sv_2mortal(newSViv(minbits)));
     PUSHs(sv_2mortal(newSViv(none)));
     PUTBACK;
-    if (IN_PERL_COMPILETIME) {
-	sv_setpv(tokenbufsv, PL_tokenbuf);
-    }
     errsv_save = newSVsv(ERRSV);
     if (call_method("SWASHNEW", G_SCALAR))
 	retval = newSVsv(*PL_stack_sp--);
@@ -1608,10 +1604,6 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
     LEAVE;
     POPSTACK;
     if (IN_PERL_COMPILETIME) {
-	STRLEN len;
-	const char* const pv = SvPV_const(tokenbufsv, len);
-
-	Copy(pv, PL_tokenbuf, len+1, char);
 	CopHINTS_set(PL_curcop, PL_hints);
     }
     if (!SvROK(retval) || SvTYPE(SvRV(retval)) != SVt_PVHV) {

@@ -9609,6 +9609,8 @@ Perl_parser_dup(pTHX_ const yy_parser *proto, CLONE_PARAMS* param)
 	parser->bufend	    = ls + SvCUR(parser->linestr);
     }
 
+    Copy(proto->tokenbuf, parser->tokenbuf, 256, char);
+
 
 #ifdef PERL_MAD
     parser->endwhite	= proto->endwhite;
@@ -11256,8 +11258,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_sighandlerp	= proto_perl->Isighandlerp;
 
     PL_runops		= proto_perl->Irunops;
-
-    Copy(proto_perl->Itokenbuf, PL_tokenbuf, 256, char);
 
 #ifdef CSH
     PL_cshlen		= proto_perl->Icshlen;

@@ -431,8 +431,6 @@ PERLVARI(Imaxo,	int,	MAXO)		/* maximum number of ops */
 
 PERLVARI(Irunops,	runops_proc_t,	MEMBER_TO_FPTR(RUNOPS_DEFAULT))
 
-PERLVARA(Itokenbuf,256,	char)
-
 /*
 =for apidoc Amn|SV|PL_sv_undef
 This is the C<undef> SV.  Always refer to this as C<&PL_sv_undef>.

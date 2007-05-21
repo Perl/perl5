@@ -100,6 +100,7 @@ typedef struct yy_parser {
 #endif
 
     COP		*saved_curcop;	/* the previous PL_curcop */
+    char	tokenbuf[256];
 
 } yy_parser;
     

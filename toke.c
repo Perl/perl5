@@ -65,6 +65,7 @@
 #define PL_rsfp_filters		(PL_parser->rsfp_filters)
 #define PL_in_my		(PL_parser->in_my)
 #define PL_in_my_stash		(PL_parser->in_my_stash)
+#define PL_tokenbuf		(PL_parser->tokenbuf)
 
 #ifdef PERL_MAD
 #  define PL_endwhite		(PL_parser->endwhite)

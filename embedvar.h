@@ -322,7 +322,6 @@
 #define PL_tmps_ix		(vTHX->Itmps_ix)
 #define PL_tmps_max		(vTHX->Itmps_max)
 #define PL_tmps_stack		(vTHX->Itmps_stack)
-#define PL_tokenbuf		(vTHX->Itokenbuf)
 #define PL_top_env		(vTHX->Itop_env)
 #define PL_toptarget		(vTHX->Itoptarget)
 #define PL_uid			(vTHX->Iuid)
@@ -644,7 +643,6 @@
 #define PL_Itmps_ix		PL_tmps_ix
 #define PL_Itmps_max		PL_tmps_max
 #define PL_Itmps_stack		PL_tmps_stack
-#define PL_Itokenbuf		PL_tokenbuf
 #define PL_Itop_env		PL_top_env
 #define PL_Itoptarget		PL_toptarget
 #define PL_Iuid			PL_uid

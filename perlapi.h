@@ -680,8 +680,6 @@ END_EXTERN_C
 #define PL_tmps_max		(*Perl_Itmps_max_ptr(aTHX))
 #undef  PL_tmps_stack
 #define PL_tmps_stack		(*Perl_Itmps_stack_ptr(aTHX))
-#undef  PL_tokenbuf
-#define PL_tokenbuf		(*Perl_Itokenbuf_ptr(aTHX))
 #undef  PL_top_env
 #define PL_top_env		(*Perl_Itop_env_ptr(aTHX))
 #undef  PL_toptarget
