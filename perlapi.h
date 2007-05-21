@@ -448,8 +448,6 @@ END_EXTERN_C
 #define PL_modcount		(*Perl_Imodcount_ptr(aTHX))
 #undef  PL_modglobal
 #define PL_modglobal		(*Perl_Imodglobal_ptr(aTHX))
-#undef  PL_multi_end
-#define PL_multi_end		(*Perl_Imulti_end_ptr(aTHX))
 #undef  PL_my_cxt_keys
 #define PL_my_cxt_keys		(*Perl_Imy_cxt_keys_ptr(aTHX))
 #undef  PL_my_cxt_list

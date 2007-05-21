@@ -9572,6 +9572,7 @@ Perl_parser_dup(pTHX_ const yy_parser *proto, CLONE_PARAMS* param)
     parser->multi_close	= proto->multi_close;
     parser->multi_open	= proto->multi_open;
     parser->multi_start	= proto->multi_start;
+    parser->multi_end	= proto->multi_end;
     parser->pending_ident = proto->pending_ident;
     parser->preambled	= proto->preambled;
     parser->sublex_info	= proto->sublex_info; /* XXX not quite right */
@@ -11265,8 +11266,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #endif
 
     PL_parser		= parser_dup(proto_perl->Iparser, param);
-
-    PL_multi_end	= proto_perl->Imulti_end;
 
     PL_error_count	= proto_perl->Ierror_count;
     PL_subline		= proto_perl->Isubline;

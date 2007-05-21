@@ -55,10 +55,12 @@ typedef struct yy_parser {
     I32		lex_starts;	/* how many interps done on level */
     SV		*lex_stuff;	/* runtime pattern from m// or s/// */
     I32		multi_start;	/* 1st line of multi-line string */
+    I32		multi_end;	/* last line of multi-line string */
     char	multi_open;	/* delimiter of said string */
     char	multi_close;	/* delimiter of said string */
     char	pending_ident;	/* pending identifier lookup */
     bool	preambled;
+    /* XXX I32 space */
     SUBLEXINFO	sublex_info;
     SV		*linestr;	/* current chunk of src text */
     char	*bufptr;	

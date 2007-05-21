@@ -655,8 +655,6 @@ PERLVARI(Irehash_seed, UV, 0)		/* 582 hash initializer */
 PERLVARI(Idumper_fd, int, -1)
 #endif
 
-PERLVAR(Imulti_end,	I32)		/* last line of multi-line string */
-
 #ifdef PERL_IMPLICIT_CONTEXT
 PERLVARI(Imy_cxt_size, int, 0)		/* size of PL_my_cxt_list */
 PERLVARI(Imy_cxt_list, void **, NULL) /* per-module array of MY_CXT pointers */

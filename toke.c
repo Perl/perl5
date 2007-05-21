@@ -66,6 +66,7 @@
 #define PL_in_my		(PL_parser->in_my)
 #define PL_in_my_stash		(PL_parser->in_my_stash)
 #define PL_tokenbuf		(PL_parser->tokenbuf)
+#define PL_multi_end		(PL_parser->multi_end)
 
 #ifdef PERL_MAD
 #  define PL_endwhite		(PL_parser->endwhite)
