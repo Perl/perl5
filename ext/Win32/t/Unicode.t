@@ -1,14 +1,10 @@
 use strict;
 use Test;
-use Win32;
 
 use Cwd qw(cwd);
+use Win32;
 
 BEGIN {
-    if ($^O eq 'cygwin') {
-	print "1..0 # Skip: Cygwin doesn't support Unicode filenames\n";
-	exit 0;
-    }
     unless (defined &Win32::BuildNumber && Win32::BuildNumber() >= 820 or $] >= 5.008009) {
 	print "1..0 # Skip: Needs ActivePerl 820 or Perl 5.8.9 or later\n";
 	exit 0;
@@ -24,6 +20,7 @@ BEGIN {
 }
 
 my $home = Win32::GetCwd();
+my $cwd  = cwd(); # may be a Cygwin path
 my $dir  = "Foo \x{394}\x{419} Bar \x{5E7}\x{645} Baz";
 my $file = "$dir\\xyzzy \x{394}\x{419} plugh \x{5E7}\x{645}";
 
@@ -67,12 +64,21 @@ ok(Win32::SetCwd($dir));
 ok(Win32::GetLongPathName(Win32::GetCwd()), $long);
 
 # cwd() also returns a usable ANSI directory name
-(my $cwd = cwd) =~ s,/,\\,g;
-ok(Win32::GetLongPathName($cwd), $long);
+my $subdir = cwd();
 
-# change back to home directory
+# change back to home directory to make sure relative paths
+# in @INC continue to work
 ok(chdir($home));
 ok(Win32::GetCwd(), $home);
+
+# cwd() on Cygwin returns a mapped path that we need to translate
+# back to a Windows path. Invoking `cygpath` on $subdir doesn't work.
+if ($^O eq "cygwin") {
+    chomp(my $cygpath = `cygpath -w "$cwd"`);
+    $subdir =~ s,\Q$cwd\E,$cygpath,;
+}
+$subdir =~ s,/,\\,g;
+ok(Win32::GetLongPathName($subdir), $long);
 
 # We can chdir() into the Unicode directory if we use the ANSI name
 ok(chdir(Win32::GetANSIPathName($dir)));
