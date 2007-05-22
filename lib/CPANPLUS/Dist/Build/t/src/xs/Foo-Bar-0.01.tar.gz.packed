@@ -10,7 +10,7 @@ To recreate it use the following command:
 
      uupacktool.pl -p lib/CPANPLUS/Dist/Build/t/src/xs/Foo-Bar-0.01.tar.gz lib/CPANPLUS/Dist/Build/t/src/xs/Foo-Bar-0.01.tar.gz.packed
 
-Created at Fri May  4 14:00:54 2007
+Created at Tue May 22 13:44:00 2007
 #########################################################################
 __UU__
 M'XL("-\X34(``T9O;RU"87(M,"XP,2YT87(`[5K_3QI)%/=7YZ]XU39H(BN[

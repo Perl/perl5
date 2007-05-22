@@ -62,6 +62,55 @@ use File::Basename  qw[basename];
     $Locale::Maketext::Lexicon::VERSION = 0;
 }
 
+### clean up files for PERLCORE mostly -- make clean isn't invoked
+### there... otoh, we should clean up after ourselves anyway.
+END {
+    ### chdir to our own test dir, so we know all files are relative 
+    ### to this point, no matter whether run from perlcore tests or
+    ### regular CPAN installs
+    chdir "$FindBin::Bin" if -d "$FindBin::Bin";
+
+    ### XXX hardcoded
+    _clean_test_dir( [qw|dummy-perl dummy-cpanplus| ] );
+}
+
+### whenever we start a new script, we want to clean out our
+### old files from the test '.cpanplus' dir..
+sub _clean_test_dir {
+    my $dirs    = shift || [];
+    my $verbose = shift || 0;
+
+    for my $dir ( @$dirs ) {
+
+        ### if it's not there, don't bother
+        next unless -d $dir;
+
+        my $dh;
+        opendir $dh, $dir or die "Could not open basedir '$dir': $!";
+        while( my $file = readdir $dh ) { 
+            next if $file =~ /^\./;  # skip dot files
+            
+            my $path = File::Spec->catfile( $dir, $file );
+            
+            ### directory, rmtree it
+            if( -d $path ) {
+                print "Deleting directory '$path'\n" if $verbose;
+                eval { rmtree( $path ) };
+                warn "Could not delete '$path' while cleaning up '$dir'" if $@;
+           
+            ### regular file
+            } else {
+                print "Deleting file '$path'\n" if $verbose;
+                1 while unlink $path;
+            }            
+        }       
+    
+        close $dh;
+    }
+    
+    return 1;
+}
+
 1;
 
 __END__

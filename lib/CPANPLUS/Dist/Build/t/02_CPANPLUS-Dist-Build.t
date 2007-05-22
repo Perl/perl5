@@ -194,7 +194,12 @@ while( my($path,$need_cc) = each %Map ) {
     ### since we're die'ing in the Build.PL, do a local *STDERR,
     ### so we dont spam the result through the test -- this is expected
     ### behaviour after all.
-    my $rv = do { local *STDERR; $clone->prepare( force => 1 ) };
+    ### also quell the warning for print() on unopened fh...
+    my $rv = do { 
+                local $^W;
+                local *STDERR; 
+                $clone->prepare( force => 1 ) 
+            };
     ok( !$rv,                   '   $mod->prepare failed' );
 
     my $re = quotemeta( $build_pl );
@@ -209,7 +214,8 @@ while( my($path,$need_cc) = each %Map ) {
 sub find_module {
   my $module = shift;
 
-  # Don't add the .pm yet, in case it's a packlist or something like ExtUtils::xsubpp.
+  ### Don't add the .pm yet, in case it's a packlist or something 
+  ### like ExtUtils::xsubpp.
   my $file = File::Spec->catfile( split m/::/, $module );
   my $candidate;
   foreach (@INC) {

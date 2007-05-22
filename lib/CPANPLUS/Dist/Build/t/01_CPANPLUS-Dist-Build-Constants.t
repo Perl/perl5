@@ -1,3 +1,11 @@
+### make sure we can find our conf.pl file
+BEGIN { 
+    use FindBin; 
+    require "$FindBin::Bin/inc/conf.pl";
+}
+
+
+
 BEGIN { chdir 't' if -d 't' };
 
 ### this is to make devel::cover happy ###
