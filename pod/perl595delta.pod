@@ -30,6 +30,11 @@ C<defined @$foo> and C<defined %$bar> are now subject to C<strict 'refs'>
 (However, C<defined(@foo)> and C<defined(%bar)> are discouraged constructs
 anyway.)
 
+=head2 C<(?p{})> has been removed
+
+The regular expression construct C<(?p{})>, which was deprecated in perl
+5.8, has been removed. Use C<(??{})> instead. (Rafael)
+
 =head2 Removal of the bytecode compiler and of perlcc
 
 C<perlcc>, the byteloader and the supporting modules (B::C, B::CC,
@@ -186,7 +191,12 @@ for more information. (Alex Gough)
 =head2 readpipe() is now overridable
 
 The built-in function readpipe() is now overridable. Overriding it permits
-also to override its operator counterpart, C<qx//> (a.k.a. C<``>). (Rafael)
+also to override its operator counterpart, C<qx//> (a.k.a. C<``>).
+Moreover, it now defaults to C<$_> if no argument is provided. (Rafael)
+
+=head2 default argument for readline()
+
+readline() now defaults to C<*ARGV> if no argument is provided. (Rafael)
 
 =head2 UCD 5.0.0
 
@@ -198,7 +208,22 @@ been updated to version 5.0.0.
 The smart match operator (C<~~>) is now available by default (you don't
 need to enable it with C<use feature> any longer). (Michael G Schwern)
 
+=head2 Implicit loading of C<feature>
+
+The C<feature> pragma is now implicitly loaded when you require a minimal
+perl version (with the C<use VERSION> construct) greater than, or equal
+to, 5.9.5.
+
 =head1 Modules and Pragmas
+
+=head2 New Pragma, C<mro>
+
+A new pragma, C<mro> (for Method Resolution Order) has been added. It
+permits to switch, on a per-class basis, the algorithm that perl uses to
+find inherited methods in case of a mutiple inheritance hierachy. The
+default MRO hasn't changed (DFS, for Depth First Search). Another MRO is
+available: the C3 algorithm. See L<mro> for more information.
+(Brandon Black)
 
 =head2 New Core Modules
 
@@ -253,6 +278,11 @@ C<File::Fetch> provide a simple generic file fetching mechanism.
 C<Archive::Extract> is a generic archive extraction mechanism
 for F<.tar> (plain, gziped or bzipped) or F<.zip> files.
 
+=item *
+
+C<CPANPLUS> provides an API and a command-line tool to access the CPAN
+mirrors.
+
 =back
 
 =head2 Module changes
@@ -263,6 +293,11 @@ for F<.tar> (plain, gziped or bzipped) or F<.zip> files.
 
 The C<base> pragma now warns if a class tries to inherit from itself.
 (Curtis "Ovid" Poe)
+
+=item C<strict> and C<warnings>
+
+C<strict> and C<warnings> will now complain loudly if they are loaded via
+incorrect casing (as in C<use Strict;>). (Johan Vromans)
 
 =item C<warnings>
 
@@ -306,7 +341,23 @@ ben Jore)
 
 =head1 Utility Changes
 
+=head2 C<cpanp>
+
+C<cpanp>, the CPANPLUS shell, has been added. (C<cpanp-run-perl>, an
+helper for CPANPLUS operation, has been added too, but isn't intended for
+direct use).
+
+=head2 C<pod2html>
+
+The output of C<pod2html> has been enhanced to be more customizable via
+CSS. Some formatting problems were also corrected. (Jari Aalto)
+
 =head1 Documentation
+
+=head2 New manpage, perlunifaq
+
+A new manual page, L<perlunifaq> (the Perl Unicode FAQ), has been added
+(Juerd Waalboer).
 
 =head1 Performance Enhancements
 
@@ -349,7 +400,17 @@ accordingly to the contents of that %INC entry. (Rafael)
 The C<-w> and C<-t> switches can now be used together without messing
 up what categories of warnings are activated or not. (Rafael)
 
+Duping a filehandle which has the C<:utf8> PerlIO layer set will now
+properly carry that layer on the duped filehandle. (Rafael)
+
 =head1 New or Changed Diagnostics
+
+=head2 Deprecations
+
+Two deprecation warnings have been added: (Rafael)
+
+    Opening dirhandle %s also as a file
+    Opening filehandle %s also as a directory
 
 =head1 Changed Internals
 
