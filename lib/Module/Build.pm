@@ -34,6 +34,7 @@ my %OSTYPES = qw(
 		 irix      Unix
 		 darwin    Unix
 		 machten   Unix
+		 midnightbsd Unix
 		 next      Unix
 		 openbsd   Unix
 		 netbsd    Unix
