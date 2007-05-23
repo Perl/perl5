@@ -33,7 +33,7 @@ sub ok {
 
 BEGIN {
     $| = 1;
-    print("1..103\n");   ### Number of tests that will be run ###
+    print("1..91\n");   ### Number of tests that will be run ###
 };
 
 use threads;
@@ -55,6 +55,7 @@ $Base++;
 # RedHat users should see https://rhn.redhat.com/errata/RHBA-2003-136.html
 # and consider upgrading their glibc.
 
+
 sub forko (&$$); # To prevent deadlock from underlying pthread_* bugs (as in
                  # stock RH9 glibc/NPTL) or from our own errors, we run tests
                  # in separately forked and alarmed processes.
@@ -68,14 +69,11 @@ sub forko (&$$); # To prevent deadlock from underlying pthread_* bugs (as in
 
   my $bump = $expected;
 
-  $patience ||= 60;
-
   unless (defined($pid = open(CHLD, "-|"))) {
     die "fork: $!\n";
   }
   if (! $pid) {   # Child -- run the test
-    $patience ||= 60;
-    alarm $patience;
+    alarm($patience || 60);
     &$code;
     exit;
   }
@@ -89,13 +87,12 @@ sub forko (&$$); # To prevent deadlock from underlying pthread_* bugs (as in
   close(CHLD);
 
   while ($expected--) {
-    $test_num++;
-    print "not ok $test_num - child status $?\n";
+    ok(++$test_num, 0, "missing test result: child status $?");
   }
 
   $Base += $bump;
-
 };
+
 
 # - TEST basics
 
@@ -140,29 +137,24 @@ SYNC_SHARED: {
     foreach (@wait_how) {
       $test = "cond_wait [$_]";
       threads->create(\&cw)->join;
-      $Base += 6;
+      $Base += 5;
     }
-  }, 6*@wait_how, 90);
+  }, 5*@wait_how, 90);
 
   sub cw {
-    my $thr;
-
-    { # -- begin lock scope; which lock to obtain?
+      # which lock to obtain?
       $test =~ /twain/ ? lock($lock) : lock($cond);
       ok(1,1, "$test: obtained initial lock");
 
-      $thr = threads->create(\&signaller);
+      my $thr = threads->create(\&signaller);
       for ($test) {
         cond_wait($cond), last        if    /simple/;
         cond_wait($cond, $cond), last if    /repeat/;
         cond_wait($cond, $lock), last if    /twain/;
-        die "$test: unknown test\n"; 
+        die "$test: unknown test\n";
       }
+      $thr->join;
       ok(5,1, "$test: condition obtained");
-    } # -- end lock scope
-
-    $thr->join;
-    ok(6,1, "$test: join completed");
   }
 
   # - TEST cond_timedwait success
@@ -171,31 +163,27 @@ SYNC_SHARED: {
     foreach (@wait_how) {
       $test = "cond_timedwait [$_]";
       threads->create(\&ctw, 5)->join;
-      $Base += 6;
+      $Base += 5;
     }
-  }, 6*@wait_how, 90);
+  }, 5*@wait_how, 90);
 
   sub ctw($) {
-    my $to = shift;
-    my $thr;
+      my $to = shift;
 
-    { # -- begin lock scope;  which lock to obtain?
+      # which lock to obtain?
       $test =~ /twain/ ? lock($lock) : lock($cond);
       ok(1,1, "$test: obtained initial lock");
 
-      $thr = threads->create(\&signaller);
+      my $thr = threads->create(\&signaller);
       my $ok = 0;
       for ($test) {
         $ok=cond_timedwait($cond, time() + $to), last        if    /simple/;
         $ok=cond_timedwait($cond, time() + $to, $cond), last if    /repeat/;
         $ok=cond_timedwait($cond, time() + $to, $lock), last if    /twain/;
-        die "$test: unknown test\n"; 
+        die "$test: unknown test\n";
       }
+      $thr->join;
       ok(5,$ok, "$test: condition obtained");
-    } # -- end lock scope
-
-    $thr->join;
-    ok(6,1, "$test: join completed");
   }
 
   # - TEST cond_timedwait timeout
@@ -231,7 +219,7 @@ SYNC_SHARED: {
         $ok=cond_timedwait($cond, time() + $to), last        if    /simple/;
         $ok=cond_timedwait($cond, time() + $to, $cond), last if    /repeat/;
         $ok=cond_timedwait($cond, time() + $to, $lock), last if    /twain/;
-        die "$test: unknown test\n"; 
+        die "$test: unknown test\n";
       }
       ok(2,!defined($ok), "$test: timeout");
     }
@@ -244,7 +232,7 @@ SYNC_SHARED: {
 
 SYNCH_REFS: {
   my $test : shared;  # simple|repeat|twain
-  
+
   my $true_cond; share($true_cond);
   my $true_lock; share($true_lock);
 
@@ -272,29 +260,24 @@ SYNCH_REFS: {
     foreach (@wait_how) {
       $test = "cond_wait [$_]";
       threads->create(\&cw2)->join;
-      $Base += 6;
+      $Base += 5;
     }
-  }, 6*@wait_how, 90);
+  }, 5*@wait_how, 90);
 
   sub cw2 {
-    my $thr;
-
-    { # -- begin lock scope; which lock to obtain?
+      # which lock to obtain?
       $test =~ /twain/ ? lock($lock) : lock($cond);
       ok(1,1, "$test: obtained initial lock");
 
-      $thr = threads->create(\&signaller2);
+      my $thr = threads->create(\&signaller2);
       for ($test) {
         cond_wait($cond), last        if    /simple/;
         cond_wait($cond, $cond), last if    /repeat/;
         cond_wait($cond, $lock), last if    /twain/;
-        die "$test: unknown test\n"; 
+        die "$test: unknown test\n";
       }
+      $thr->join;
       ok(5,1, "$test: condition obtained");
-    } # -- end lock scope
-
-    $thr->join;
-    ok(6,1, "$test: join completed");
   }
 
   # - TEST cond_timedwait success
@@ -303,31 +286,27 @@ SYNCH_REFS: {
     foreach (@wait_how) {
       $test = "cond_timedwait [$_]";
       threads->create(\&ctw2, 5)->join;
-      $Base += 6;
+      $Base += 5;
     }
-  }, 6*@wait_how, 90);
+  }, 5*@wait_how, 90);
 
   sub ctw2($) {
-    my $to = shift;
-    my $thr;
+      my $to = shift;
 
-    { # -- begin lock scope;  which lock to obtain?
+      # which lock to obtain?
       $test =~ /twain/ ? lock($lock) : lock($cond);
       ok(1,1, "$test: obtained initial lock");
 
-      $thr = threads->create(\&signaller2);
+      my $thr = threads->create(\&signaller2);
       my $ok = 0;
       for ($test) {
         $ok=cond_timedwait($cond, time() + $to), last        if    /simple/;
         $ok=cond_timedwait($cond, time() + $to, $cond), last if    /repeat/;
         $ok=cond_timedwait($cond, time() + $to, $lock), last if    /twain/;
-        die "$test: unknown test\n"; 
+        die "$test: unknown test\n";
       }
+      $thr->join;
       ok(5,$ok, "$test: condition obtained");
-    } # -- end lock scope
-
-    $thr->join;
-    ok(6,1, "$test: join completed");
   }
 
   # - TEST cond_timedwait timeout
@@ -363,7 +342,7 @@ SYNCH_REFS: {
         $ok=cond_timedwait($cond, time() + $to), last        if    /simple/;
         $ok=cond_timedwait($cond, time() + $to, $cond), last if    /repeat/;
         $ok=cond_timedwait($cond, time() + $to, $lock), last if    /twain/;
-        die "$test: unknown test\n"; 
+        die "$test: unknown test\n";
       }
       ok(2,!$ok, "$test: timeout");
     }
