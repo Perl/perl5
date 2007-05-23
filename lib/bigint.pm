@@ -1,7 +1,7 @@
 package bigint;
 use 5.006002;
 
-$VERSION = '0.10';
+$VERSION = '0.22';
 use Exporter;
 @ISA		= qw( Exporter );
 @EXPORT_OK	= qw( ); 
@@ -48,12 +48,6 @@ sub AUTOLOAD
 
 sub upgrade
   {
-  my $self = shift;
-  no strict 'refs';
-#  if (defined $_[0])
-#    {
-#    $Math::BigInt::upgrade = $_[0];
-#    }
   $Math::BigInt::upgrade;
   }
 
@@ -110,9 +104,24 @@ sub _float_constant
   $sign.$$miv.$mfv; 				# 123.45e+1 => 1234
   }
 
+sub unimport
+  {
+  $^H{bigint} = undef;					# no longer in effect
+  overload::remove_constant('binary','','float','','integer');
+  }
+
+sub in_effect
+  {
+  my $level = shift || 0;
+  my $hinthash = (caller($level))[10];
+  $hinthash->{bigint};
+  }
+
 sub import 
   {
   my $self = shift;
+
+  $^H{bigint} = 1;					# we are in effect
 
   # some defaults
   my $lib = ''; my $lib_kind = 'try';
@@ -198,7 +207,14 @@ sub import
   # Take care of octal/hexadecimal constants
   overload::constant binary => sub { _binary_constant(shift) };
 
-  $self->export_to_level(1,$self,@a);           # export inf and NaN
+  # if another big* was already loaded:
+  my ($package) = caller();
+
+  no strict 'refs';
+  if (!defined *{"${package}::inf"})
+    {
+    $self->export_to_level(1,$self,@a);           # export inf and NaN
+    }
   }
 
 sub inf () { Math::BigInt->binf(); }
@@ -220,6 +236,11 @@ bigint - Transparent BigInteger support for Perl
   print 2 ** 512,"\n";			# really is what you think it is
   print inf + 42,"\n";			# inf
   print NaN * 7,"\n";			# NaN
+
+  {
+    no bigint;
+    print 2 ** 256,"\n";		# a normal Perl scalar now
+  }
 
 =head1 DESCRIPTION
 
@@ -360,6 +381,20 @@ handle bareword C<NaN> properly.
 
 Return the class that numbers are upgraded to, is in fact returning
 C<$Math::BigInt::upgrade>.
+
+=item in_effect()
+
+	use bigint;
+
+	print "in effect\n" if bigint::in_effect;	# true
+	{
+	  no bigint;
+	  print "in effect\n" if bigint::in_effect;	# false
+	}
+
+Returns true or false if C<bigint> is in effect in the current scope.
+
+This method only works on Perl v5.9.4 or later.
 
 =back
 

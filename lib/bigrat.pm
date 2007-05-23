@@ -1,7 +1,7 @@
 package bigrat;
 use 5.006002;
 
-$VERSION = '0.10';
+$VERSION = '0.22';
 require Exporter;
 @ISA		= qw( Exporter );
 @EXPORT_OK	= qw( ); 
@@ -50,13 +50,6 @@ sub AUTOLOAD
 
 sub upgrade
   {
-  my $self = shift;
-  no strict 'refs';
-#  if (defined $_[0])
-#    {
-#    $Math::BigInt::upgrade = $_[0];
-#    $Math::BigFloat::upgrade = $_[0];
-#    }
   $Math::BigInt::upgrade;
   }
 
@@ -73,11 +66,26 @@ sub _binary_constant
   Math::BigInt->from_oct($string);
   }
 
+sub unimport
+  {
+  $^H{bigrat} = undef;					# no longer in effect
+  overload::remove_constant('binary','','float','','integer');
+  }
+
+sub in_effect
+  {
+  my $level = shift || 0;
+  my $hinthash = (caller($level))[10];
+  $hinthash->{bigrat};
+  }
+
 sub import 
   {
   my $self = shift;
 
   # see also bignum->import() for additional comments
+
+  $^H{bigrat} = 1;					# we are in effect
 
   # some defaults
   my $lib = ''; my $lib_kind = 'try'; my $upgrade = 'Math::BigFloat';
@@ -178,7 +186,14 @@ sub import
   # Take care of octal/hexadecimal constants
   overload::constant binary => sub { _binary_constant(shift) };
 
-  $self->export_to_level(1,$self,@a);           # export inf and NaN
+  # if another big* was already loaded:
+  my ($package) = caller();
+
+  no strict 'refs';
+  if (!defined *{"${package}::inf"})
+    {
+    $self->export_to_level(1,$self,@a);           # export inf and NaN
+    }
   }
 
 sub inf () { Math::BigInt->binf(); }
@@ -196,8 +211,13 @@ bigrat - Transparent BigNumber/BigRational support for Perl
 
   use bigrat;
 
-  $x = 2 + 4.5,"\n";			# BigFloat 6.5
+  print 2 + 4.5,"\n";			# BigFloat 6.5
   print 1/3 + 1/4,"\n";			# produces 7/12
+
+  {
+    no bigrat;
+    print 1/3,"\n";			# 0.33333...
+  }
 
 =head1 DESCRIPTION
 
@@ -281,6 +301,20 @@ handle bareword C<NaN> properly.
 
 Return the class that numbers are upgraded to, is in fact returning
 C<$Math::BigInt::upgrade>.
+
+=item in_effect()
+
+	use bigrat;
+
+	print "in effect\n" if bigrat::in_effect;	# true
+	{
+	  no bigrat;
+	  print "in effect\n" if bigrat::in_effect;	# false
+	}
+
+Returns true or false if C<bigrat> is in effect in the current scope.
+
+This method only works on Perl v5.9.4 or later.
 
 =back
 

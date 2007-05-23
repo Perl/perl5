@@ -1456,7 +1456,7 @@ lib/bigfloat.pl			An arbitrary precision floating point package
 lib/bigfloatpl.t		See if bigfloat.pl works
 lib/bigint.pl			An arbitrary precision integer arithmetic package
 lib/bigintpl.t			See if bigint.pl works
-lib/bigint.pm			bignum
+lib/bigint.pm			bigint
 lib/bignum.pm			bignum
 lib/bignum/t/bigexp.t		See if bignum works
 lib/bignum/t/bigint.t		See if bigint works
@@ -1467,13 +1467,17 @@ lib/bignum/t/bninfnan.t		See if bignum works
 lib/bignum/t/bn_lite.t		See if bignum with Math::BigInt::Lite works
 lib/bignum/t/brinfnan.t		See if bignum works
 lib/bignum/t/br_lite.t		See if bigrat with Math::BigInt::Lite works
-lib/bignum/t/infnan.inc		See if bignum works
+lib/bignum/t/infnan.inc		See if bignum with inf/NaN works
+lib/bignum/t/in_effect.t	See if in_effect() works
 lib/bignum/t/option_a.t		See if bignum a => X works
 lib/bignum/t/option_l.t		See if bignum l => X works
 lib/bignum/t/option_p.t		See if bignum p => X works
 lib/bignum/t/ratopt_a.t		See if bigrat a => X works
+lib/bignum/t/scope_i.t		See if no bigint works
+lib/bignum/t/scope_f.t		See if no bignum works
+lib/bignum/t/scope_r.t		See if no bigrat works
 lib/bigrat.pl			An arbitrary precision rational arithmetic package
-lib/bigrat.pm			bignum
+lib/bigrat.pm			bigrat
 lib/blib.pm			For "use blib"
 lib/blib.t			blib.pm test
 lib/bytes_heavy.pl		Support routines for byte pragma
