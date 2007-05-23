@@ -52,6 +52,15 @@ B::Concise).
 
 The JPL (Java-Perl Linguo) has been removed from the perl sources tarball.
 
+=head2 Recursive inheritance detected earlier
+
+Perl will now immediately throw an exception if you modify any package's
+C<@ISA> in such a way that it would cause recursive inheritance.
+
+Previously, the exception would not occur until Perl attempted to make
+use of the recursive inheritance while resolving a method or doing a
+C<$foo-E<gt>isa($bar)> lookup.
+
 =head1 Core Enhancements
 
 =head2 Regular expressions
