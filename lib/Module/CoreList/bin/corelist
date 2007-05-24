@@ -25,7 +25,7 @@ used a module regexp) in the perls Module::CoreList knows about.
 
     corelist -a utf8
 
-    utf8  was first released with perl 5.006
+    utf8 was first released with perl 5.006
       5.006      undef
       5.006001   undef
       5.006002   undef
@@ -154,10 +154,9 @@ sub module_version {
             $Module::CoreList::version{$Opts{v}}{$mod} || 'undef';
     }
 
-    $ver = "" unless defined $ver;
-
     my $ret = Module::CoreList->first_release(@_);
-    my $msg = "$mod $ver";
+    my $msg = $mod;
+    $msg .= " $ver" if $ver;
 
     if( defined $ret ) {
         $msg .= " was ";
@@ -199,7 +198,7 @@ sub numify_version {
 
     $ corelist File::Spec
 
-    File::Spec  was first released with perl 5.005
+    File::Spec was first released with perl 5.005
 
     $ corelist File::Spec 0.83
 
@@ -215,13 +214,13 @@ sub numify_version {
 
     $ corelist /IPC::Open/
 
-    IPC::Open2  was first released with perl 5
+    IPC::Open2 was first released with perl 5
 
-    IPC::Open3  was first released with perl 5
+    IPC::Open3 was first released with perl 5
 
     $ corelist /MANIFEST/i
 
-    ExtUtils::Manifest  was first released with perl 5.001
+    ExtUtils::Manifest was first released with perl 5.001
 
     $ corelist /Template/
 
