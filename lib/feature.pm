@@ -151,7 +151,8 @@ sub import {
     }
     while (@_) {
 	my $name = shift(@_);
-	if (substr($name, 0, 1) eq ":" and (my $v = substr($name, 1))) {
+	if (substr($name, 0, 1) eq ":") {
+	    my $v = substr($name, 1);
 	    if (!exists $feature_bundle{$v}) {
 		unknown_feature_bundle($v);
 	    }
@@ -176,7 +177,8 @@ sub unimport {
 
     while (@_) {
 	my $name = shift;
-	if (substr($name, 0, 1) eq ":" and (my $v = substr($name, 1))) {
+	if (substr($name, 0, 1) eq ":") {
+	    my $v = substr($name, 1);
 	    if (!exists $feature_bundle{$v}) {
 		unknown_feature_bundle($v);
 	    }
