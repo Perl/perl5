@@ -746,7 +746,7 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
     UV retnum = 0;
 
     if (offset < 0)
-	return retnum;
+	return 0;
     if (size < 1 || (size & (size-1))) /* size < 1 or not a power of two */
 	Perl_croak(aTHX_ "Illegal number of bits in vec");
 
