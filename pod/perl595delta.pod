@@ -346,6 +346,12 @@ ben Jore)
 
 =for p5p XXX document this in B.pm too
 
+=item C<Thread>
+
+As the old 5005thread threading model has been removed, in favor of the
+ithreads scheme, the C<Thread> module is now a compatibility wrapper, to
+be used in old code only.
+
 =back
 
 =head1 Utility Changes
@@ -378,11 +384,21 @@ Efforts have been made to make perl and the core XS modules compilable
 with various C++ compilers (although the situation is not perfect with
 some of the compilers on some of the platforms tested.)
 
+=head2 Visual C++
+
+Perl now can be compiled with Microsoft Visual C++ 2005.
+
 =head2 Static build on Win32
 
 It's now possible to build a C<perl-static.exe> that doesn't depend
 on C<perl59.dll> on Win32. See the Win32 makefiles for details.
 (Vadim Konovalov)
+
+=head2 C<d_pseudofork>
+
+A new configuration variable, available as C<$Config{d_pseudofork}> in
+the L<Config> module, has been added, to distinguish real fork() support
+from fake pseudofork used on Windows platforms.
 
 =head2 Ports
 
