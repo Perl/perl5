@@ -362,6 +362,11 @@ C<cpanp>, the CPANPLUS shell, has been added. (C<cpanp-run-perl>, an
 helper for CPANPLUS operation, has been added too, but isn't intended for
 direct use).
 
+=head2 C<cpan2dist>
+
+C<cpan2dist> is a new utility, that comes with CPANPLUS. It's a tool to
+create distributions (or packages) from CPAN modules.
+
 =head2 C<pod2html>
 
 The output of C<pod2html> has been enhanced to be more customizable via

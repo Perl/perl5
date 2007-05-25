@@ -267,6 +267,18 @@ a lot more.  It is similar to the command line mode of the L<CPAN> module,
 
     perl -MCPAN -e shell
 
+=item L<cpanp>
+
+F<cpanp> is, like F<cpan>, a command-line interface to the CPAN, using
+the C<CPANPLUS> module as a back-end. It can be used interactively or
+imperatively.
+
+=item L<cpan2dist>
+
+F<cpan2dist> is a tool to create distributions (or packages) from CPAN
+modules, then suitable for your package manager of choice. Support for
+specific formats are available from CPAN as C<CPANPLUS::Dist::*> modules.
+
 =item L<instmodsh>
 
 A little interface to ExtUtils::Installed to examine installed modules,
@@ -282,7 +294,7 @@ L<podchecker|podchecker>, L<splain|splain>, L<perldiag>,
 L<roffitall|roffitall>, L<a2p|a2p>, L<s2p|s2p>, L<find2perl|find2perl>,
 L<File::Find|File::Find>, L<pl2pm|pl2pm>, L<perlbug|perlbug>,
 L<h2ph|h2ph>, L<c2ph|c2ph>, L<h2xs|h2xs>, L<dprofpp|dprofpp>,
-L<Devel::DProf>, L<enc2xs>, L<xsubpp>, L<cpan>,
+L<Devel::DProf>, L<enc2xs>, L<xsubpp>, L<cpan>, L<cpanp>, L<cpan2dist>,
 L<instmodsh>, L<piconv>, L<prove>, L<corelist>, L<ptar>, L<ptardiff>,
 L<shasum>
 
