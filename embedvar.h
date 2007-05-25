@@ -153,7 +153,6 @@
 #define PL_glob_index		(vTHX->Iglob_index)
 #define PL_globalstash		(vTHX->Iglobalstash)
 #define PL_hash_seed		(vTHX->Ihash_seed)
-#define PL_hash_seed_set	(vTHX->Ihash_seed_set)
 #define PL_hintgv		(vTHX->Ihintgv)
 #define PL_hints		(vTHX->Ihints)
 #define PL_hv_fetch_ent_mh	(vTHX->Ihv_fetch_ent_mh)
@@ -177,7 +176,6 @@
 #define PL_lastscream		(vTHX->Ilastscream)
 #define PL_laststatval		(vTHX->Ilaststatval)
 #define PL_laststype		(vTHX->Ilaststype)
-#define PL_lineary		(vTHX->Ilineary)
 #define PL_localizing		(vTHX->Ilocalizing)
 #define PL_localpatches		(vTHX->Ilocalpatches)
 #define PL_lockhook		(vTHX->Ilockhook)
@@ -261,8 +259,6 @@
 #define PL_restartop		(vTHX->Irestartop)
 #define PL_rs			(vTHX->Irs)
 #define PL_runops		(vTHX->Irunops)
-#define PL_runops_dbg		(vTHX->Irunops_dbg)
-#define PL_runops_std		(vTHX->Irunops_std)
 #define PL_savebegin		(vTHX->Isavebegin)
 #define PL_savestack		(vTHX->Isavestack)
 #define PL_savestack_ix		(vTHX->Isavestack_ix)
@@ -472,7 +468,6 @@
 #define PL_Iglob_index		PL_glob_index
 #define PL_Iglobalstash		PL_globalstash
 #define PL_Ihash_seed		PL_hash_seed
-#define PL_Ihash_seed_set	PL_hash_seed_set
 #define PL_Ihintgv		PL_hintgv
 #define PL_Ihints		PL_hints
 #define PL_Ihv_fetch_ent_mh	PL_hv_fetch_ent_mh
@@ -496,7 +491,6 @@
 #define PL_Ilastscream		PL_lastscream
 #define PL_Ilaststatval		PL_laststatval
 #define PL_Ilaststype		PL_laststype
-#define PL_Ilineary		PL_lineary
 #define PL_Ilocalizing		PL_localizing
 #define PL_Ilocalpatches	PL_localpatches
 #define PL_Ilockhook		PL_lockhook
@@ -580,8 +574,6 @@
 #define PL_Irestartop		PL_restartop
 #define PL_Irs			PL_rs
 #define PL_Irunops		PL_runops
-#define PL_Irunops_dbg		PL_runops_dbg
-#define PL_Irunops_std		PL_runops_std
 #define PL_Isavebegin		PL_savebegin
 #define PL_Isavestack		PL_savestack
 #define PL_Isavestack_ix	PL_savestack_ix
@@ -727,6 +719,10 @@
 #define PL_Gperlio_mutex	(my_vars->Gperlio_mutex)
 #define PL_ppaddr		(my_vars->Gppaddr)
 #define PL_Gppaddr		(my_vars->Gppaddr)
+#define PL_runops_dbg		(my_vars->Grunops_dbg)
+#define PL_Grunops_dbg		(my_vars->Grunops_dbg)
+#define PL_runops_std		(my_vars->Grunops_std)
+#define PL_Grunops_std		(my_vars->Grunops_std)
 #define PL_sh_path		(my_vars->Gsh_path)
 #define PL_Gsh_path		(my_vars->Gsh_path)
 #define PL_sig_defaulting	(my_vars->Gsig_defaulting)
@@ -780,6 +776,8 @@
 #define PL_Gperlio_fd_refcnt_size	PL_perlio_fd_refcnt_size
 #define PL_Gperlio_mutex	PL_perlio_mutex
 #define PL_Gppaddr		PL_ppaddr
+#define PL_Grunops_dbg		PL_runops_dbg
+#define PL_Grunops_std		PL_runops_std
 #define PL_Gsh_path		PL_sh_path
 #define PL_Gsig_defaulting	PL_sig_defaulting
 #define PL_Gsig_handlers_initted	PL_sig_handlers_initted

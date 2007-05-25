@@ -342,8 +342,6 @@ END_EXTERN_C
 #define PL_globalstash		(*Perl_Iglobalstash_ptr(aTHX))
 #undef  PL_hash_seed
 #define PL_hash_seed		(*Perl_Ihash_seed_ptr(aTHX))
-#undef  PL_hash_seed_set
-#define PL_hash_seed_set	(*Perl_Ihash_seed_set_ptr(aTHX))
 #undef  PL_hintgv
 #define PL_hintgv		(*Perl_Ihintgv_ptr(aTHX))
 #undef  PL_hints
@@ -390,8 +388,6 @@ END_EXTERN_C
 #define PL_laststatval		(*Perl_Ilaststatval_ptr(aTHX))
 #undef  PL_laststype
 #define PL_laststype		(*Perl_Ilaststype_ptr(aTHX))
-#undef  PL_lineary
-#define PL_lineary		(*Perl_Ilineary_ptr(aTHX))
 #undef  PL_localizing
 #define PL_localizing		(*Perl_Ilocalizing_ptr(aTHX))
 #undef  PL_localpatches
@@ -558,10 +554,6 @@ END_EXTERN_C
 #define PL_rs			(*Perl_Irs_ptr(aTHX))
 #undef  PL_runops
 #define PL_runops		(*Perl_Irunops_ptr(aTHX))
-#undef  PL_runops_dbg
-#define PL_runops_dbg		(*Perl_Irunops_dbg_ptr(aTHX))
-#undef  PL_runops_std
-#define PL_runops_std		(*Perl_Irunops_std_ptr(aTHX))
 #undef  PL_savebegin
 #define PL_savebegin		(*Perl_Isavebegin_ptr(aTHX))
 #undef  PL_savestack
@@ -792,6 +784,10 @@ END_EXTERN_C
 #define PL_perlio_mutex		(*Perl_Gperlio_mutex_ptr(NULL))
 #undef  PL_ppaddr
 #define PL_ppaddr		(*Perl_Gppaddr_ptr(NULL))
+#undef  PL_runops_dbg
+#define PL_runops_dbg		(*Perl_Grunops_dbg_ptr(NULL))
+#undef  PL_runops_std
+#define PL_runops_std		(*Perl_Grunops_std_ptr(NULL))
 #undef  PL_sh_path
 #define PL_sh_path		(*Perl_Gsh_path_ptr(NULL))
 #undef  PL_sig_defaulting

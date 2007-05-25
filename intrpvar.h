@@ -307,7 +307,6 @@ PERLVAR(IDBsub,		GV *)
 PERLVAR(IDBsingle,	SV *)
 PERLVAR(IDBtrace,	SV *)
 PERLVAR(IDBsignal,	SV *)
-PERLVAR(Ilineary,	AV *)		/* lines of script for debugger */
 PERLVAR(Idbargs,	AV *)		/* args to call listed by caller function */
 
 /* symbol tables */
@@ -556,7 +555,6 @@ PERLVARI(Isig_pending, int,0)           /* Number if highest signal pending */
 
 PERLVAR(Itaint_warn,	bool)      /* taint warns instead of dying */
 PERLVAR(Iutf8locale,	bool)		/* utf8 locale detected */
-PERLVARI(Ihash_seed_set, bool, FALSE)		/* Hash initialized? */
 PERLVARI(Irehash_seed_set, bool, FALSE)	/* 582 hash initialized? */
 
 #ifdef USE_LOCALE_NUMERIC
@@ -633,10 +631,6 @@ PERLVARI(Ilockhook,	share_proc_t,	MEMBER_TO_FPTR(Perl_sv_nosharing))
 PERLVARI(Iunlockhook,	share_proc_t,	MEMBER_TO_FPTR(PERL_UNLOCK_HOOK))
 
 PERLVARI(Ithreadhook,	thrhook_proc_t,	MEMBER_TO_FPTR(Perl_nothreadhook))
-
-/* Force inclusion of both runops options */
-PERLVARI(Irunops_std,	runops_proc_t,	MEMBER_TO_FPTR(Perl_runops_standard))
-PERLVARI(Irunops_dbg,	runops_proc_t,	MEMBER_TO_FPTR(Perl_runops_debug))
 
 /* Stores the PPID */
 #ifdef THREADS_HAVE_PIDS

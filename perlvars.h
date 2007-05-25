@@ -154,3 +154,9 @@ PERLVAR(Gperlio_mutex, perl_mutex)    /* Mutex for perlio fd refcounts */
  * can be set atomically (ie not a bit field) */
 PERLVARI(Gveto_cleanup,	int, FALSE)	/* exit without cleanup */
 
+/* dummy variables that hold pointers to both runops functions, thus forcing
+ * them *both* to get linked in (useful for Peek.xs, debugging etc) */
+
+PERLVARI(Grunops_std,	runops_proc_t,	MEMBER_TO_FPTR(Perl_runops_standard))
+PERLVARI(Grunops_dbg,	runops_proc_t,	MEMBER_TO_FPTR(Perl_runops_debug))
+
