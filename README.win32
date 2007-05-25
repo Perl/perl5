@@ -410,11 +410,6 @@ spaces.  So don't do that.
 If you are running the tests from a emacs shell window, you may see
 failures in op/stat.t.  Run "dmake test-notty" in that case.
 
-If you're using the Microsoft Visual C++ 2005 compiler (VC++ 8) then you'll
-find that F<ext/IO/t/io_sock.t> currently produces some warnings and then
-hangs.  You will need to kill the hung perl.exe process to allow the
-remainder of the test suite to complete.
-
 If you're using the Borland compiler, you may see a failure in op/taint.t
 arising from the inability to find the Borland Runtime DLLs on the system
 default path.  You will need to copy the DLLs reported by the messages
@@ -960,6 +955,6 @@ Win9x support was added in 5.6 (Benjamin Stuhl).
 
 Support for 64-bit Windows added in 5.8 (ActiveState Corp).
 
-Last updated: 28 November 2006
+Last updated: 25 May 2007
 
 =cut
