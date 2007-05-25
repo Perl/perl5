@@ -11778,8 +11778,7 @@ S_varname(pTHX_ GV *gv, const char gvtype, PADOFFSET targ,
 	}
     }
     else {
-	U32 unused;
-	CV * const cv = find_runcv(&unused);
+	CV * const cv = find_runcv(NULL);
 	SV *sv;
 	AV *av;
 
