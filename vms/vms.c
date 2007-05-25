@@ -7717,20 +7717,20 @@ char *Perl_tounixpath_utf8_ts(pTHX_ const char *path, char *buf, int * utf8_fl)
   { return do_tounixpath(path,buf,1,utf8_fl); }
 
 /*
- * @(#)argproc.c 2.2 94/08/16	Mark Pizzolato (mark@infocomm.com)
+ * @(#)argproc.c 2.2 94/08/16	Mark Pizzolato (mark AT infocomm DOT com)
  *
  *****************************************************************************
  *                                                                           *
- *  Copyright (C) 1989-1994 by                                               *
+ *  Copyright (C) 1989-1994, 2007 by                                         *
  *  Mark Pizzolato - INFO COMM, Danville, California  (510) 837-5600         *
  *                                                                           *
- *  Permission is hereby  granted for the reproduction of this software,     *
- *  on condition that this copyright notice is included in the reproduction, *
- *  and that such reproduction is not for purposes of profit or material     *
- *  gain.                                                                    *
+ *  Permission is hereby granted for the reproduction of this software       *
+ *  on condition that this copyright notice is included in source            *
+ *  distributions of the software.  The code may be modified and             *
+ *  distributed under the same terms as Perl itself.                         *
  *                                                                           *
  *  27-Aug-1994 Modified for inclusion in perl5                              *
- *              by Charles Bailey  bailey@newman.upenn.edu                   *
+ *              by Charles Bailey  (bailey AT newman DOT upenn DOT edu)      *
  *****************************************************************************
  */
 
@@ -7746,7 +7746,7 @@ char *Perl_tounixpath_utf8_ts(pTHX_ const char *path, char *buf, int * utf8_fl)
  * of program.  With suitable modification, it may useful for other
  * portability problems as well.
  *
- * Author:  Mark Pizzolato	mark@infocomm.com
+ * Author:  Mark Pizzolato	(mark AT infocomm DOT com)
  */
 struct list_item
     {
