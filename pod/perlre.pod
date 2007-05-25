@@ -269,7 +269,7 @@ X<word> X<whitespace> X<character class> X<backreference>
     \V       Not vertical whitespace
     \h       Horizontal whitespace
     \H       Not horizontal whitespace
-    \R       Linebreak (matches like \v inside of a charclass)
+    \R       Linebreak
 
 A C<\w> matches a single alphanumeric character (an alphabetic
 character, or a decimal digit) or C<_>, not a whole word.  Use C<\w+>
