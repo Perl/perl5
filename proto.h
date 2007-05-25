@@ -3878,7 +3878,7 @@ STATIC void	S_debug_start_match(pTHX_ const regexp *prog, const bool do_utf8, co
 #endif
 
 #if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
-STATIC CV*	S_deb_curcv(pTHX_ I32 ix);
+STATIC CV*	S_deb_curcv(pTHX_ const I32 ix);
 STATIC void	S_debprof(pTHX_ const OP *o)
 			__attribute__nonnull__(pTHX_1);
 

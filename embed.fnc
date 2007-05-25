@@ -1437,7 +1437,7 @@ Es	|void	|debug_start_match|NN const regexp *prog|const bool do_utf8|NN const ch
 #endif
 
 #if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
-s	|CV*	|deb_curcv	|I32 ix
+s	|CV*	|deb_curcv	|const I32 ix
 s	|void	|debprof	|NN const OP *o
 s	|void	|sequence	|NULLOK const OP *o
 s	|void	|sequence_tail	|NULLOK const OP *o
