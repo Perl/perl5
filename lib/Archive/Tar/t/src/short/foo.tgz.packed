@@ -10,7 +10,7 @@ To recreate it use the following command:
 
      uupacktool.pl -p lib/Archive/Tar/t/src/short/foo.tgz lib/Archive/Tar/t/src/short/foo.tgz.packed
 
-Created at Fri May 18 13:05:16 2007
+Created at Thu May 24 15:38:19 2007
 #########################################################################
 __UU__
 M'XL(`````````^W300K",!"%X5GW%#G"3-JFYREJ080NJKU_A^A"$.RJ(\+_

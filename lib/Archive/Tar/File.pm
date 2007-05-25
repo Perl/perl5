@@ -237,14 +237,26 @@ sub _new_from_file {
     my $type        = __PACKAGE__->_filetype($path);
     my $data        = '';
 
-    unless ($type == DIR || $type == SYMLINK) {
-        my $fh = IO::File->new;
-        $fh->open($path) or return;
+    READ: { 
+        unless ($type == DIR ) {
+            my $fh = IO::File->new;
+        
+            unless( $fh->open($path) ) {
+                ### dangling symlinks are fine, stop reading but continue
+                ### creating the object
+                last READ if $type == SYMLINK;
+                
+                ### otherwise, return from this function --
+                ### anything that's *not* a symlink should be
+                ### resolvable
+                return;
+            }
 
-        ### binmode needed to read files properly on win32 ###
-        binmode $fh;
-        $data = do { local $/; <$fh> };
-        close $fh;
+            ### binmode needed to read files properly on win32 ###
+            binmode $fh;
+            $data = do { local $/; <$fh> };
+            close $fh;
+        }
     }
 
     my @items       = qw[mode uid gid size mtime];

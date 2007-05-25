@@ -43,8 +43,8 @@ use constant MODE_READ      => sub { $_[0] =~ /^r/ ? 1 : 0 };
 # Pointless assignment to make -w shut up
 my $getpwuid; $getpwuid = 'unknown' unless eval { my $f = getpwuid (0); };
 my $getgrgid; $getgrgid = 'unknown' unless eval { my $f = getgrgid (0); };
-use constant UNAME          => sub { $getpwuid || scalar getpwuid( shift() ) };
-use constant GNAME          => sub { $getgrgid || scalar getgrgid( shift() ) };
+use constant UNAME          => sub { $getpwuid || scalar getpwuid( shift() ) || '' };
+use constant GNAME          => sub { $getgrgid || scalar getgrgid( shift() ) || '' };
 use constant UID            => $>;
 use constant GID            => (split ' ', $) )[0];
 
