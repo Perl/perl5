@@ -243,7 +243,9 @@ F<ptar> is a tar-like program, written in pure Perl.
 =item L<ptardiff>
 
 F<ptardiff> is a small utility that produces a diff between an extracted
-archive and an unextracted one.
+archive and an unextracted one. (Note that this utility requires the
+C<Text::Diff> module to function properly; this module isn't distributed
+with perl, but is available from the CPAN.)
 
 =item L<shasum>
 
