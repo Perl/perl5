@@ -178,7 +178,7 @@ Regular expressions now recognize the C<\v> and C<\h> escapes, that match
 vertical and horizontal whitespace, respectively. C<\V> and C<\H>
 logically match their complements.
 
-C<\R> matches a generic linebreak, that is, horizontal whitespace, plus
+C<\R> matches a generic linebreak, that is, vertical whitespace, plus
 the multi-character sequence C<"\x0D\x0A">.
 
 =back
