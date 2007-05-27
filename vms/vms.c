@@ -11187,6 +11187,16 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
      *
      * If we are in Posix filespec mode, accept the filename as is.
      */
+
+
+#if __CRTL_VER >= 70300000 && !defined(__VAX)
+  /* The CRTL stat() falls down hard on multi-dot filenames in unix format unless
+   * DECC$EFS_CHARSET is in effect, so temporarily enable it if it isn't already.
+   */
+  if (!decc_efs_charset)
+    decc$feature_set_value(decc$feature_get_index("DECC$EFS_CHARSET"),1,1); 
+#endif
+
 #if __CRTL_VER >= 80200000 && !defined(__VAX)
   if (decc_posix_compliant_pathnames == 0) {
 #endif
@@ -11213,6 +11223,13 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
       save_spec = temp_fspec;
   }
 #endif
+
+#if __CRTL_VER >= 70300000 && !defined(__VAX)
+  /* As you were... */
+  if (!decc_efs_charset)
+    decc$feature_set_value(decc$feature_get_index("DECC$EFS_CHARSET"),1,0); 
+#endif
+
     if (!retval) {
     char * cptr;
       cptr = do_rmsexpand
