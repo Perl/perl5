@@ -565,10 +565,9 @@ int scnt;
 	inspec++;
 	switch (*inspec) {
 	case '.':
-	    /* Non trailing dots should just be passed through */
+	    /* Non trailing dots should just be passed through, but eat the escape */
 	    *outspec = *inspec;
 	    count++;
-	    (*output_cnt)++;
 	    break;
 	case '_': /* space */
 	    *outspec = ' ';
@@ -8746,12 +8745,9 @@ Perl_opendir(pTHX_ const char *name)
     DIR *dd;
     char *dir;
     Stat_t sb;
-    int unix_flag;
+    int unix_flag = 0;
 
-    unix_flag = 0;
-    if (decc_efs_charset) {
-        unix_flag = is_unix_filespec(name);
-    }
+    unix_flag = is_unix_filespec(name);
 
     Newx(dir, VMS_MAXRSS, char);
     if (do_tovmspath(name,dir,0,NULL) == NULL) {
@@ -8987,21 +8983,21 @@ Perl_readdir(pTHX_ DIR *dd)
 	if (strchr(dd->entry.d_name, '^') != NULL) {
 	    char new_name[256];
 	    char * q;
-	    int cnt;
 	    p = dd->entry.d_name;
 	    q = new_name;
 	    while (*p != 0) {
-		int x, y;
-		x = copy_expand_vms_filename_escape(q, p, &y);
-		p += x;
-		q += y;
+		int inchars_read, outchars_added;
+		inchars_read = copy_expand_vms_filename_escape(q, p, &outchars_added);
+		p += inchars_read;
+		q += outchars_added;
 		/* fix-me */
-		/* if y > 1, then this is a wide file specification */
+		/* if outchars_added > 1, then this is a wide file specification */
 		/* Wide file specifications need to be passed in Perl */
 		/* counted strings apparently with a unicode flag */
 	    }
 	    *q = 0;
 	    strcpy(dd->entry.d_name, new_name);
+	    dd->entry.d_namlen = strlen(dd->entry.d_name);
 	}
     }
 
