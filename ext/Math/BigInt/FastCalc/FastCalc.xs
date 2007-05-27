@@ -20,6 +20,8 @@ MODULE = Math::BigInt::FastCalc		PACKAGE = Math::BigInt::FastCalc
  #  * added _is_two(), _is_ten(), _ten()
  # 2007-04-02 0.08 Tels
  #  * plug leaks by creating mortals
+ # 2007-05-27 0.09 Tels
+ #  * add _new()
 
 #define RETURN_MORTAL_INT(value)		\
       ST(0) = sv_2mortal(newSViv(value));	\
@@ -41,6 +43,58 @@ _set_XS_BASE(BASE, BASE_LEN)
   CODE:
     XS_BASE = SvNV(BASE); 
     XS_BASE_LEN = SvIV(BASE_LEN); 
+
+##############################################################################
+# _new
+
+AV *
+_new(class, x)
+  SV*	x
+  INIT:
+    STRLEN len;
+    char* cur;
+    int part_len;
+
+  CODE:
+    /* create the array */
+    RETVAL = newAV();
+    sv_2mortal((SV*)RETVAL);
+    /*  cur = SvPV(x, len); printf ("input '%s'\n", cur); */ 
+    if (SvIOK(x) && SvIV(x) < XS_BASE)
+      {
+      /* shortcut for integer arguments */
+      av_push (RETVAL, newSViv( SvIV(x) ));
+      }
+    else
+      {
+      /* split the input (as string) into XS_BASE_LEN long parts */
+      /* in perl:
+		[ reverse(unpack("a" . ($il % $BASE_LEN+1)
+		. ("a$BASE_LEN" x ($il / $BASE_LEN)), $_[1])) ];
+      */
+      cur = SvPV(x, len);			/* convert to string & store length */
+      cur += len;				/* doing "cur = SvEND(x)" does not work! */
+      # process the string from the back
+      while (len > 0)
+        {
+        /* use either BASE_LEN or the amount of remaining digits */
+        part_len = XS_BASE_LEN;
+        if (part_len > len)
+          {
+          part_len = len;
+          }
+        /* processed so many digits */
+        cur -= part_len;
+        len -= part_len;
+        /* printf ("part '%s' (part_len: %i, len: %i, BASE_LEN: %i)\n", cur, part_len, len, XS_BASE_LEN); */
+        if (part_len > 0)
+	  {
+	  av_push (RETVAL, newSVpvn(cur, part_len) );
+	  }
+        }
+      }
+  OUTPUT:
+    RETVAL
 
 ##############################################################################
 # _copy

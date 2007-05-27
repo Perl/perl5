@@ -11,7 +11,7 @@ use vars qw/@ISA $VERSION $BASE $BASE_LEN/;
 
 @ISA = qw(DynaLoader);
 
-$VERSION = '0.14';
+$VERSION = '0.15';
 
 bootstrap Math::BigInt::FastCalc $VERSION;
 
@@ -26,12 +26,12 @@ BEGIN
   # use Calc to override the methods that we do not provide in XS
 
   for my $method (qw/
-    new str
+    str
     add sub mul div
     rsft lsft
     mod modpow modinv
     gcd
-    pow root sqrt log_int fac
+    pow root sqrt log_int fac nok
     digit check
     from_hex from_bin from_oct as_hex as_bin as_oct
     zeros length base_len

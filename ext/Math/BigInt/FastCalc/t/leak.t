@@ -13,8 +13,10 @@ BEGIN
   $| = 1;
   chdir 't' if -d 't';
   unshift @INC, ('../lib', '../blib/arch');	# for running manually
-  plan tests => 20;
+  plan tests => 22;
   }
+
+use Math::BigInt::FastCalc;
 
 #############################################################################
 package Math::BigInt::FastCalc::LeakCheck;
@@ -52,6 +54,9 @@ my $num_2 = Math::BigInt::FastCalc->_two();
 
 my $num_long   = Math::BigInt::FastCalc->_new("1234567890");
 my $num_long_2 = Math::BigInt::FastCalc->_new("12345678900987654321");
+
+is (Math::BigInt::FastCalc->_str($num_long), "1234567890");
+is (Math::BigInt::FastCalc->_str($num_long_2), "12345678900987654321");
 
 # to hit all possible code branches
 _test_acmp($num, $num);

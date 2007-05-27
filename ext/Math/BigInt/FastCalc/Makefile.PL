@@ -6,7 +6,7 @@ WriteMakefile(
     'NAME'		=> 'Math::BigInt::FastCalc',
     'VERSION_FROM'	=> 'FastCalc.pm',
     'PREREQ_PM'		=> {
-	'Math::BigInt' => 1.83,
+	'Math::BigInt' => 1.86,
     },
     INSTALLDIRS		=> 'perl',
     PREREQ_FATAL	=> 1,
