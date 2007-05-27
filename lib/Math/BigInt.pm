@@ -865,6 +865,10 @@ sub _find_round_parameters
   my $c = ref($self);				# find out class of argument(s)
   no strict 'refs';
 
+  # convert to normal scalar for speed and correctness in inner parts
+  $a = $a->numify() if defined $a && ref($a);
+  $p = $p->numify() if defined $a && ref($p);
+
   # now pick $a or $p, but only if we have got "arguments"
   if (!defined $a)
     {
@@ -3380,7 +3384,7 @@ and '-inf', respectively. Does nothing for NaN or zero.
 
 	$x->babs();
 
-Set the number to it's absolute value, e.g. change the sign from '-' to '+'
+Set the number to its absolute value, e.g. change the sign from '-' to '+'
 and from '-inf' to '+inf', respectively. Does nothing for NaN or positive
 numbers.
 
@@ -3392,7 +3396,7 @@ numbers.
 
 	$x->bnot();			
 
-Two's complement (bit wise not). This is equivalent to
+Two's complement (bitwise not). This is equivalent to
 
 	$x->binc()->bneg();
 
@@ -3870,7 +3874,7 @@ This is how it works now:
 
 =item Creating numbers
 
-  * When you create a number, you can give it's desired A or P via:
+  * When you create a number, you can give the desired A or P via:
     $x = Math::BigInt->new($number,$A,$P);
   * Only one of A or P can be defined, otherwise the result is NaN
   * If no A or P is give ($x = Math::BigInt->new($number) form), then the
@@ -3879,7 +3883,7 @@ This is how it works now:
     $x will be what was in effect when $x was created)
   * If given undef for A and P, B<no> rounding will occur, and the globals will
     B<not> be used. This is used by subclasses to create numbers without
-    suffering rounding in the parent. Thus a subclass is able to have it's own
+    suffering rounding in the parent. Thus a subclass is able to have its own
     globals enforced upon creation of a number by using
     C<< $x = Math::BigInt->new($number,undef,undef) >>:
 
@@ -4305,7 +4309,7 @@ needs to merely change the output only needs to overload C<bstr()>.
 All other object methods and overloaded functions can be directly inherited
 from the parent class.
 
-At the very minimum, any subclass will need to provide it's own C<new()> and can
+At the very minimum, any subclass will need to provide its own C<new()> and can
 store additional hash keys in the object. There are also some package globals
 that must be defined, e.g.:
 
@@ -4418,7 +4422,7 @@ Both C<bstr()> and C<bsstr()> as well as automated stringify via overload now
 drop the leading '+'. The old code would return '+3', the new returns '3'.
 This is to be consistent with Perl and to make C<cmp> (especially with
 overloading) to work as you expect. It also solves problems with C<Test.pm>,
-because it's C<ok()> uses 'eq' internally. 
+because its C<ok()> uses 'eq' internally. 
 
 Mark Biggar said, when asked about to drop the '+' altogether, or make only
 C<cmp> work:

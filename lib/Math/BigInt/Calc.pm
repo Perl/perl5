@@ -1790,13 +1790,11 @@ sub _log_int
     return ($x,undef);
     }
 
-  # this trial multiplication is very fast, even for large counts (like for
-  # 2 ** 1024, since this still requires only 1024 very fast steps
-  # (multiplication of a large number by a very small number is very fast))
   my $x_org = _copy($c,$x);		# preserve x
   splice(@$x,1); $x->[0] = 1;		# keep ref to $x
 
-  # compute int ( length_in_base_10(X) / ( log(base) / log(10) ) )
+  # Compute a guess for the result based on:
+  # $guess = int ( length_in_base_10(X) / ( log(base) / log(10) ) )
   my $len = _len($c,$x_org);
   my $log = log($base->[-1]) / log(10);
 

@@ -16,7 +16,7 @@ $VERSION = '1.58';
 require 5.006002;
 
 require Exporter;
-@ISA =       qw(Exporter Math::BigInt);
+@ISA =       qw(Math::BigInt);
 
 use strict;
 # $_trap_inf/$_trap_nan are internal and should never be accessed from outside
@@ -3160,7 +3160,7 @@ These are effectively no-ops.
 =back
 
 All rounding functions take as a second parameter a rounding mode from one of
-the following: 'even', 'odd', '+inf', '-inf', 'zero' or 'trunc'.
+the following: 'even', 'odd', '+inf', '-inf', 'zero', 'trunc' or 'common'.
 
 The default rounding mode is 'even'. By using
 C<< Math::BigFloat->round_mode($round_mode); >> you can get and set the default
@@ -3182,6 +3182,11 @@ C<as_number()>:
 	$y = $x->as_number('odd');	# $y = 3
 
 =head1 METHODS
+
+Math::BigFloat supports all methods that Math::BigInt supports, except it
+calculates non-integer results when possible. Please see L<Math::BigInt>
+for a full description of each method. Below are just the most important
+differences:
 
 =head2 accuracy
 
@@ -3224,6 +3229,27 @@ Note: You probably want to use L<accuracy()> instead. With L<accuracy> you
 set the number of digits each result should have, with L<precision> you
 set the place where to round!
 
+=head2 bexp()
+
+	$x->bexp($accuracy);		# calculate e ** X
+
+Calculates the expression C<e ** $x> where C<e> is Euler's number.
+
+This method was added in v1.82 of Math::BigInt (April 2007).
+
+=head2 bnok()
+
+	$x->bnok($y);		   # x over y (binomial coefficient n over k)
+
+Calculates the binomial coefficient n over k, also called the "choose"
+function. The result is equivalent to:
+
+	( n )      n!
+	| - |  = -------
+	( k )    k!(n-k)!
+
+This method was added in v1.84 of Math::BigInt (April 2007).
+
 =head1 Autocreating constants
 
 After C<use Math::BigFloat ':constant'> all the floating point constants
@@ -3251,19 +3277,14 @@ Math::BigInt::Calc. This is equivalent to saying:
 
 You can change this by using:
 
-	use Math::BigFloat lib => 'BitVect';
+	use Math::BigFloat lib => 'GMP';
 
 The following would first try to find Math::BigInt::Foo, then
 Math::BigInt::Bar, and when this also fails, revert to Math::BigInt::Calc:
 
 	use Math::BigFloat lib => 'Foo,Math::BigInt::Bar';
 
-Calc.pm uses as internal format an array of elements of some decimal base
-(usually 1e7, but this might be different for some systems) with the least
-significant digit first, while BitVect.pm uses a bit vector of base 2, most
-significant bit first. Other modules might use even different means of
-representing the numbers. See the respective module documentation for further
-details.
+See the respective low-level library documentation for further details.
 
 Please note that Math::BigFloat does B<not> use the denoted library itself,
 but it merely passes the lib argument to Math::BigInt. So, instead of the need
@@ -3283,108 +3304,37 @@ It is also possible to just require Math::BigFloat:
 This will load the necessary things (like BigInt) when they are needed, and
 automatically.
 
-Use the lib, Luke! And see L<Using Math::BigInt::Lite> for more details than
-you ever wanted to know about loading a different library.
+See L<Math::BigInt> for more details than you ever wanted to know about using
+a different low-level library.
 
 =head2 Using Math::BigInt::Lite
 
-It is possible to use L<Math::BigInt::Lite> with Math::BigFloat:
+For backwards compatibility reasons it is still possible to
+request a different storage class for use with Math::BigFloat:
 
-        # 1
         use Math::BigFloat with => 'Math::BigInt::Lite';
 
-There is no need to "use Math::BigInt" or "use Math::BigInt::Lite", but you
-can combine these if you want. For instance, you may want to use
-Math::BigInt objects in your main script, too.
-
-        # 2
-        use Math::BigInt;
-        use Math::BigFloat with => 'Math::BigInt::Lite';
-
-Of course, you can combine this with the C<lib> parameter.
-
-        # 3
-        use Math::BigFloat with => 'Math::BigInt::Lite', lib => 'GMP,Pari';
-
-There is no need for a "use Math::BigInt;" statement, even if you want to
-use Math::BigInt's, since Math::BigFloat will needs Math::BigInt and thus
-always loads it. But if you add it, add it B<before>:
-
-        # 4
-        use Math::BigInt;
-        use Math::BigFloat with => 'Math::BigInt::Lite', lib => 'GMP,Pari';
-
-Notice that the module with the last C<lib> will "win" and thus
-it's lib will be used if the lib is available:
-
-        # 5
-        use Math::BigInt lib => 'Bar,Baz';
-        use Math::BigFloat with => 'Math::BigInt::Lite', lib => 'Foo';
-
-That would try to load Foo, Bar, Baz and Calc (in that order). Or in other
-words, Math::BigFloat will try to retain previously loaded libs when you
-don't specify it onem but if you specify one, it will try to load them.
-
-Actually, the lib loading order would be "Bar,Baz,Calc", and then
-"Foo,Bar,Baz,Calc", but independent of which lib exists, the result is the
-same as trying the latter load alone, except for the fact that one of Bar or
-Baz might be loaded needlessly in an intermidiate step (and thus hang around
-and waste memory). If neither Bar nor Baz exist (or don't work/compile), they
-will still be tried to be loaded, but this is not as time/memory consuming as
-actually loading one of them. Still, this type of usage is not recommended due
-to these issues.
-
-The old way (loading the lib only in BigInt) still works though:
-
-        # 6
-        use Math::BigInt lib => 'Bar,Baz';
-        use Math::BigFloat;
-
-You can even load Math::BigInt afterwards:
-
-        # 7
-        use Math::BigFloat;
-        use Math::BigInt lib => 'Bar,Baz';
-
-But this has the same problems like #5, it will first load Calc
-(Math::BigFloat needs Math::BigInt and thus loads it) and then later Bar or
-Baz, depending on which of them works and is usable/loadable. Since this
-loads Calc unnec., it is not recommended.
-
-Since it also possible to just require Math::BigFloat, this poses the question
-about what libary this will use:
-
-	require Math::BigFloat;
-	my $x = Math::BigFloat->new(123); $x += 123;
-
-It will use Calc. Please note that the call to import() is still done, but
-only when you use for the first time some Math::BigFloat math (it is triggered
-via any constructor, so the first time you create a Math::BigFloat, the load
-will happen in the background). This means:
-
-	require Math::BigFloat;
-	Math::BigFloat->import ( lib => 'Foo,Bar' );
-
-would be the same as:
-
-	use Math::BigFloat lib => 'Foo, Bar';
-
-But don't try to be clever to insert some operations in between:
-
-	require Math::BigFloat;
-	my $x = Math::BigFloat->bone() + 4;		# load BigInt and Calc
-	Math::BigFloat->import( lib => 'Pari' );	# load Pari, too
-	$x = Math::BigFloat->bone()+4;			# now use Pari
-
-While this works, it loads Calc needlessly. But maybe you just wanted that?
-
-B<Examples #3 is highly recommended> for daily usage.
+However, this request is ignored, as the current code now uses the low-level
+math libary for directly storing the number parts.
 
 =head1 BUGS
 
 Please see the file BUGS in the CPAN distribution Math::BigInt for known bugs.
 
 =head1 CAVEATS
+
+Do not try to be clever to insert some operations in between switching
+libraries:
+
+	require Math::BigFloat;
+	my $matter = Math::BigFloat->bone() + 4;	# load BigInt and Calc
+	Math::BigFloat->import( lib => 'Pari' );	# load Pari, too
+	my $anti-matter = Math::BigFloat->bone()+4;	# now use Pari
+
+This will create objects with numbers stored in two different backend libraries,
+and B<VERY BAD THINGS> will happen when you use these together:
+
+	my $flash_and_bang = $matter + $anti_matter;	# Don't do this!
 
 =over 1
 
