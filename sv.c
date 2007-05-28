@@ -2734,15 +2734,16 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	const U32 isUIOK = SvIsUV(sv);
 	char buf[TYPE_CHARS(UV)];
 	char *ebuf, *ptr;
+	STRLEN len;
 
 	if (SvTYPE(sv) < SVt_PVIV)
 	    sv_upgrade(sv, SVt_PVIV);
  	ptr = uiv_2buf(buf, SvIVX(sv), SvUVX(sv), isUIOK, &ebuf);
+	len = ebuf - ptr;
 	/* inlined from sv_setpvn */
-	SvGROW_mutable(sv, (STRLEN)(ebuf - ptr + 1));
-	Move(ptr,SvPVX_mutable(sv),ebuf - ptr,char);
-	SvCUR_set(sv, ebuf - ptr);
-	s = SvEND(sv);
+	s = SvGROW_mutable(sv, len + 1);
+	Move(ptr, s, len, char);
+	s += len;
 	*s = '\0';
     }
     else if (SvNOKp(sv)) {
@@ -3998,7 +3999,7 @@ Perl_sv_usepvn_flags(pTHX_ SV *sv, char *ptr, STRLEN len, U32 flags)
     SvCUR_set(sv, len);
     SvLEN_set(sv, allocate);
     if (!(flags & SV_HAS_TRAILING_NUL)) {
-	*SvEND(sv) = '\0';
+	ptr[len] = '\0';
     }
     (void)SvPOK_only_UTF8(sv);		/* validate pointer */
     SvTAINT(sv);
@@ -7612,7 +7613,7 @@ Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
 	    SvGROW(sv, len + 1);
 	    Move(s,SvPVX(sv),len,char);
 	    SvCUR_set(sv, len);
-	    *SvEND(sv) = '\0';
+	    SvPVX(sv)[len] = '\0';
 	}
 	if (!SvPOK(sv)) {
 	    SvPOK_on(sv);		/* validate pointer */
