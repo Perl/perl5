@@ -29,6 +29,303 @@ Version v5.9.X		Development release working toward v5.10
 --------------
 
 ____________________________________________________________________________
+[ 31289] By: rgs                                   on 2007/05/28  12:44:29
+        Log: Update outdated example
+     Branch: perl
+	   ! pod/perlpod.pod
+____________________________________________________________________________
+[ 31288] By: rgs                                   on 2007/05/28  12:33:05
+        Log: Update to Archive::Extract 0.20, and re-apply patch #31158
+     Branch: perl
+	   + lib/Archive/Extract/t/src/x.Z.packed
+	   ! MANIFEST lib/Archive/Extract.pm
+	   ! lib/Archive/Extract/t/01_Archive-Extract.t
+	   ! lib/Archive/Extract/t/src/double_dir.zip.packed
+	   ! lib/Archive/Extract/t/src/x.bz2.packed
+	   ! lib/Archive/Extract/t/src/x.gz.packed
+	   ! lib/Archive/Extract/t/src/x.jar.packed
+	   ! lib/Archive/Extract/t/src/x.par.packed
+	   ! lib/Archive/Extract/t/src/x.tar.gz.packed
+	   ! lib/Archive/Extract/t/src/x.tar.packed
+	   ! lib/Archive/Extract/t/src/x.tgz.packed
+	   ! lib/Archive/Extract/t/src/x.zip.packed
+	   ! lib/Archive/Extract/t/src/y.jar.packed
+	   ! lib/Archive/Extract/t/src/y.par.packed
+	   ! lib/Archive/Extract/t/src/y.tar.bz2.packed
+	   ! lib/Archive/Extract/t/src/y.tar.gz.packed
+	   ! lib/Archive/Extract/t/src/y.tar.packed
+	   ! lib/Archive/Extract/t/src/y.tbz.packed
+	   ! lib/Archive/Extract/t/src/y.tgz.packed
+	   ! lib/Archive/Extract/t/src/y.zip.packed
+____________________________________________________________________________
+[ 31287] By: rgs                                   on 2007/05/28  12:03:25
+        Log: Subject: linux arm cross-compilation
+             From: Vadim <vadim@vkonovalov.ru>
+             Date: Mon, 28 May 2007 01:23:46 +0400
+             Message-ID: <4659F6E2.3090805@vkonovalov.ru>
+             
+             with adjustments to the MANIFEST
+     Branch: perl
+	   + Cross/Makefile-cross.SH Cross/build-arm-n770.sh
+	   + Cross/cflags-cross-arm Cross/config.sh-arm-linux-n770
+	   + ext/util/make_ext_cross
+	   ! MANIFEST configpm
+____________________________________________________________________________
+[ 31286] By: rgs                                   on 2007/05/28  11:14:32
+        Log: Bump version number
+             
+             Subject: [PATCH] Update log::message::simple to 0.02
+             From: "Jos I. Boumans" <jib@ripe.net>
+             Date: Mon, 28 May 2007 12:04:02 +0200
+             Message-Id: <EB397A0C-713C-4E42-92DB-DD8B808AE34C@ripe.net>
+     Branch: perl
+	   ! lib/Log/Message/Simple.pm
+____________________________________________________________________________
+[ 31285] By: rgs                                   on 2007/05/28  10:17:22
+        Log: Subject: Re: [PATCH] Math::BigInt v1.87 take 5
+             From: Tels <nospam-abuse@bloodgate.com>
+             Date: Sun, 27 May 2007 15:54:29 +0000
+             Message-Id: <200705271554.32054@bloodgate.com>
+     Branch: perl
+	   ! lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	   ! lib/Math/BigInt/Calc.pm lib/Math/BigInt/t/bigfltpm.t
+____________________________________________________________________________
+[ 31284] By: rgs                                   on 2007/05/28  09:45:39
+        Log: Subject: [PATCH] Math::BigInt::FastCalc v0.15
+             From: Tels <nospam-abuse@bloodgate.com>
+             Date: Sun, 27 May 2007 14:43:15 +0000
+             Message-Id: <200705271443.16138@bloodgate.com>
+     Branch: perl
+	   ! ext/Math/BigInt/FastCalc/FastCalc.pm
+	   ! ext/Math/BigInt/FastCalc/FastCalc.xs
+	   ! ext/Math/BigInt/FastCalc/Makefile.PL
+	   ! ext/Math/BigInt/FastCalc/t/leak.t
+____________________________________________________________________________
+[ 31283] By: craigb                                on 2007/05/27  01:54:45
+        Log: In the stat() wrapper for VMS, always allow extended characters
+             (such as multiple dots) in the filename regardless of environment
+             setting.
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 31282] By: craigb                                on 2007/05/27  01:50:46
+        Log: In the homegrown readdir() for VMS, always treat unix-style paths
+             appropriately regardless of environment setting, and also remove
+             the escape characters from escaped dots.
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 31281] By: rgs                                   on 2007/05/26  06:54:40
+        Log: Bad orientation in doc, noticed by Jan Dubois.
+     Branch: perl
+	   ! pod/perl595delta.pod
+____________________________________________________________________________
+[ 31280] By: davem                                 on 2007/05/25  23:26:33
+        Log: delete PL_hash_seed_set, PL_lineary; move PL_runops_std/dbg
+             the first two aren't used, and the last two are just place holders
+             to ensure that both runops functions get linked in; so make them
+             global rather than per-interpeter
+     Branch: perl
+	   ! embedvar.h intrpvar.h perlapi.h perlvars.h sv.c
+____________________________________________________________________________
+[ 31279] By: craigb                                on 2007/05/25  22:19:40
+        Log: Subject: Re: argproc.c license Re: [perl #43037] Bad license in perl distribution
+             From: Mark Pizzolato <mark@infocomm.com>
+             Date: Fri, 25 May 2007 13:31:17 -0700 (PDT)
+             Message-ID: <288163.41670.qm@web83606.mail.sp1.yahoo.com>
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 31278] By: davem                                 on 2007/05/25  19:16:50
+        Log: fix coredump in S_varname (tickled by Devel::Profile)
+             a 'Use of uninitialized value' warning within a DB sub
+             attempted to use the pad of the caller to locate the offending
+             lexical
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 31277] By: rgs                                   on 2007/05/25  13:29:34
+        Log: \R can't be used in a char class
+     Branch: perl
+	   ! pod/perlre.pod
+____________________________________________________________________________
+[ 31276] By: rgs                                   on 2007/05/25  13:28:39
+        Log: Document new escapes in perldelta
+     Branch: perl
+	   ! pod/perl595delta.pod
+____________________________________________________________________________
+[ 31275] By: steveh                                on 2007/05/25  10:15:54
+        Log: Change #31270 should have updated proto.h to match
+     Branch: perl
+	   ! embed.fnc proto.h
+____________________________________________________________________________
+[ 31274] By: rgs                                   on 2007/05/25  09:57:33
+        Log: Upgrade to Archive::Tar 1.32.
+     Branch: perl
+	   ! lib/Archive/Tar.pm lib/Archive/Tar/Constant.pm
+	   ! lib/Archive/Tar/File.pm
+	   ! lib/Archive/Tar/t/src/long/bar.tar.packed
+	   ! lib/Archive/Tar/t/src/long/foo.tgz.packed
+	   ! lib/Archive/Tar/t/src/short/bar.tar.packed
+	   ! lib/Archive/Tar/t/src/short/foo.tgz.packed
+____________________________________________________________________________
+[ 31273] By: rgs                                   on 2007/05/25  09:29:12
+        Log: Document that ptardiff needs Text::Diff
+     Branch: perl
+	   ! pod/perlutil.pod
+____________________________________________________________________________
+[ 31272] By: rgs                                   on 2007/05/25  09:20:45
+        Log: Document cpanp and cpan2dist
+     Branch: perl
+	   ! pod/perl595delta.pod pod/perlutil.pod
+____________________________________________________________________________
+[ 31271] By: steveh                                on 2007/05/25  09:18:45
+        Log: Fix the ext/IO/t/io_sock.t failure when built with VC++ 2005
+             
+             Unknown to me win32/win32.h was defining USE_FIXED_OSFHANDLE, which
+             arranged for a black magic fix to MSVCRT.DLL's _open_osfhandle() to
+             be used. It seems that this is inappropriate for VC++ versions later
+             than 6.x, since they don't use that DLL: simply not defining that
+             symbol makes the io_sock.t failure go away.
+             
+             (Compare change #29233, which similarly disabled the fix to
+             MSVCRT.DLL's read() for VC++ versions later than 6.x.)
+     Branch: perl
+	   ! README.win32 win32/win32.h
+____________________________________________________________________________
+[ 31270] By: rgs                                   on 2007/05/25  07:46:08
+        Log: Subject: [PATCH] Consting dump.c
+             From: Andy Lester <andy@petdance.com>
+             Date: Thu, 24 May 2007 13:25:43 -0500
+             Message-Id: <B46A083E-A133-4D38-9BE8-BE1EB0AAA326@petdance.com>
+     Branch: perl
+	   ! XSUB.h doop.c dump.c
+____________________________________________________________________________
+[ 31269] By: rgs                                   on 2007/05/24  17:18:24
+        Log: Subject: Re: perl pragma [PATCH]
+             From: Tels <nospam-abuse@bloodgate.com>
+             Date: Wed, 23 May 2007 21:35:58 +0000
+             Message-Id: <200705232135.59546@bloodgate.com>
+     Branch: perl
+	   + lib/bignum/t/in_effect.t lib/bignum/t/scope_f.t
+	   + lib/bignum/t/scope_i.t lib/bignum/t/scope_r.t
+	   ! MANIFEST lib/bigint.pm lib/bignum.pm lib/bigrat.pm
+____________________________________________________________________________
+[ 31268] By: rgs                                   on 2007/05/24  16:12:58
+        Log: Subject: [perl #43010] [PATCH] Deparse, ''->(), ::(), sub :: {}, etc. 
+             From: Father Chrysostomos (via RT) <perlbug-followup@perl.org>
+             Date: Sun, 20 May 2007 21:44:42 -0700
+             Message-ID: <rt-3.6.HEAD-4015-1179722682-636.43010-75-0@perl.org>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm ext/B/t/deparse.t
+____________________________________________________________________________
+[ 31267] By: rgs                                   on 2007/05/24  15:37:40
+        Log: Adjustment to the test for importing feature bundles,
+             found by Hugo
+     Branch: perl
+	   ! lib/feature.pm
+____________________________________________________________________________
+[ 31266] By: rgs                                   on 2007/05/24  15:12:41
+        Log: Subject: [PATCH] update CPANPLUS::Dist::Build to 0.06_01
+             From: "Jos I. Boumans" <kane@dwim.org>
+             Date: Tue, 22 May 2007 14:45:19 +0200
+             Message-Id: <208F4537-CCF8-401B-9F97-EF1902EA2FB6@dwim.org>
+     Branch: perl
+	   ! lib/CPANPLUS/Dist/Build.pm
+	   ! lib/CPANPLUS/Dist/Build/t/01_CPANPLUS-Dist-Build-Constants.t
+	   ! lib/CPANPLUS/Dist/Build/t/02_CPANPLUS-Dist-Build.t
+	   ! lib/CPANPLUS/Dist/Build/t/inc/conf.pl
+	   ! lib/CPANPLUS/Dist/Build/t/src/noxs/Foo-Bar-0.01.tar.gz.packed
+	   ! lib/CPANPLUS/Dist/Build/t/src/xs/Foo-Bar-0.01.tar.gz.packed
+____________________________________________________________________________
+[ 31265] By: rgs                                   on 2007/05/24  13:29:01
+        Log: It suddendly annoyed me that corelist returned sometimes two
+             spaces in a row.
+     Branch: perl
+	   ! lib/Module/CoreList/bin/corelist
+____________________________________________________________________________
+[ 31264] By: rgs                                   on 2007/05/24  11:17:31
+        Log: Doc nits by Steven Schubiger
+     Branch: perl
+	   ! pod/perlintro.pod
+____________________________________________________________________________
+[ 31263] By: rgs                                   on 2007/05/24  08:25:52
+        Log: perldelta additions suggested by Steve Hay
+     Branch: perl
+	   ! pod/perl595delta.pod
+____________________________________________________________________________
+[ 31262] By: rgs                                   on 2007/05/24  08:18:31
+        Log: Subject: [PATCH revised] threads::shared 1.12
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Wed, 23 May 2007 09:28:28 -0400
+             Message-ID: <1ff86f510705230628n73c16e2gc67a3ec05d57c5f3@mail.gmail.com>
+     Branch: perl
+	   ! ext/threads/shared/Changes ext/threads/shared/README
+	   ! ext/threads/shared/shared.pm ext/threads/shared/t/wait.t
+	   ! ext/threads/shared/t/waithires.t
+____________________________________________________________________________
+[ 31260] By: rgs                                   on 2007/05/23  10:20:29
+        Log: Perldelta nit by Brandon Black
+     Branch: perl
+	   ! pod/perl595delta.pod
+____________________________________________________________________________
+[ 31259] By: steveh                                on 2007/05/23  08:12:14
+        Log: Subject: RE: [PATCH] Skip ext/Win32/t/Unicode.t under Cygwin
+             From: "Jan Dubois" <jand@activestate.com>
+             Date: Tue, 22 May 2007 16:35:27 -0700
+             Message-ID: <06dd01c79cc9$e101ce60$a3056b20$@com>
+             
+             Reinstates the test under Cygwin and fixes it.
+     Branch: perl
+	   ! ext/Win32/t/Unicode.t
+____________________________________________________________________________
+[ 31258] By: stevep                                on 2007/05/23  01:58:07
+        Log: Subject: [PATCH] Forgotten Cygwin patch
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Tue, 22 May 2007 20:58:04 -0400
+             Message-ID: <1ff86f510705221758p71418517ncb89fac289d74c35@mail.gmail.com>
+     Branch: perl
+	   ! cygwin/perlld.in
+____________________________________________________________________________
+[ 31257] By: rgs                                   on 2007/05/22  14:12:18
+        Log: Add MidnightBSD to the list of Unix-like OSes
+     Branch: perl
+	   ! lib/Module/Build.pm
+____________________________________________________________________________
+[ 31256] By: rgs                                   on 2007/05/22  10:07:09
+        Log: Update perldelta
+     Branch: perl
+	   ! pod/perl595delta.pod
+____________________________________________________________________________
+[ 31255] By: davem                                 on 2007/05/21  22:35:15
+        Log: move PL_error_count into the PL_parser struct
+     Branch: perl
+	   ! embedvar.h intrpvar.h op.c parser.h perl.c perlapi.h pp_ctl.c
+	   ! sv.c toke.c
+____________________________________________________________________________
+[ 31254] By: davem                                 on 2007/05/21  21:02:50
+        Log: move PL_multi_end into the PL_parser struct
+     Branch: perl
+	   ! embedvar.h intrpvar.h op.c parser.h perlapi.h sv.c toke.c
+____________________________________________________________________________
+[ 31253] By: stevep                                on 2007/05/21  20:52:10
+        Log: Subject: Re: Smoke failures with blead@31225 (Linux) [PATCH]
+             From: Tels <nospam-abuse@bloodgate.com>
+             Date: Mon, 21 May 2007 20:17:20 +0000
+             Message-Id: <200705212017.23224@bloodgate.com>
+     Branch: perl
+	   ! lib/Math/BigInt/Calc.pm
+____________________________________________________________________________
+[ 31252] By: davem                                 on 2007/05/21  19:57:24
+        Log: move PL_tokenbuf into the PL_parser struct
+     Branch: perl
+	   ! embedvar.h intrpvar.h parser.h perlapi.h sv.c toke.c utf8.c
+____________________________________________________________________________
+[ 31251] By: rgs                                   on 2007/05/21  16:46:04
+        Log: Update Changes
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [ 31250] By: rgs                                   on 2007/05/21  14:29:02
         Log: Subject: [PATCH] Skip ext/Win32/t/Unicode.t under Cygwin
              From: "Jerry D. Hedden" <jdhedden@cpan.org>
