@@ -4,13 +4,13 @@ is included in the Perl distribution.
 
 To unpack this file use the following command:
 
-     uupacktool.pl -u lib/Archive/Extract/t/src/x.gz.packed lib/Archive/Extract/t/src/x.gz
+     uupacktool.pl -u lib/Archive/Extract/t/src/x.Z.packed lib/Archive/Extract/t/src/x.Z
 
 To recreate it use the following command:
 
-     uupacktool.pl -p lib/Archive/Extract/t/src/x.gz lib/Archive/Extract/t/src/x.gz.packed
+     uupacktool.pl -p lib/Archive/Extract/t/src/x.Z lib/Archive/Extract/t/src/x.Z.packed
 
-Created at Mon May 28 12:45:26 2007
+Created at Mon May 28 12:45:27 2007
 #########################################################################
 __UU__
-6'XL("+F;6D8``W@``P``````````````
+''YV0>`(J````

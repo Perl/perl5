@@ -24,14 +24,15 @@ use constant GZ             => 'gz';
 use constant ZIP            => 'zip';
 use constant BZ2            => 'bz2';
 use constant TBZ            => 'tbz';
+use constant Z              => 'Z';
 
 use vars qw[$VERSION $PREFER_BIN $PROGRAMS $WARN $DEBUG];
 
-$VERSION        = '0.18';
+$VERSION        = '0.20';
 $PREFER_BIN     = 0;
 $WARN           = 1;
 $DEBUG          = 0;
-my @Types       = ( TGZ, TAR, GZ, ZIP, BZ2, TBZ ); # same as all constants
+my @Types       = ( TGZ, TAR, GZ, ZIP, BZ2, TBZ, Z ); # same as all constants
 
 local $Params::Check::VERBOSE = $Params::Check::VERBOSE = 1;
 
@@ -86,9 +87,9 @@ Archive::Extract - A generic archive extracting mechanism
 Archive::Extract is a generic archive extraction mechanism.
 
 It allows you to extract any archive file of the type .tar, .tar.gz,
-.gz, tar.bz2, .tbz, .bz2 or .zip without having to worry how it does 
-so, or use different interfaces for each type by using either perl 
-modules, or commandline tools on your system.
+.gz, .Z, tar.bz2, .tbz, .bz2 or .zip without having to worry how it 
+does so, or use different interfaces for each type by using either 
+perl modules, or commandline tools on your system.
 
 See the C<HOW IT WORKS> section further down for details.
 
@@ -97,7 +98,7 @@ See the C<HOW IT WORKS> section further down for details.
 
 ### see what /bin/programs are available ###
 $PROGRAMS = {};
-for my $pgm (qw[tar unzip gzip bunzip2]) {
+for my $pgm (qw[tar unzip gzip bunzip2 uncompress]) {
     $PROGRAMS->{$pgm} = can_run($pgm);
 }
 
@@ -109,6 +110,7 @@ my $Mapping = {
     is_zip  => '_unzip',
     is_tbz  => '_untar',
     is_bz2  => '_bunzip2',
+    is_Z    => '_uncompress',
 };
 
 {
@@ -158,6 +160,11 @@ Corresponds to a C<.tgz> or C<.tar.gz> suffix.
 Gzip compressed file, as produced by, for example C</bin/gzip>.
 Corresponds to a C<.gz> suffix.
 
+=item Z
+
+Lempel-Ziv compressed file, as produced by, for example C</bin/compress>.
+Corresponds to a C<.Z> suffix.
+
 =item zip
 
 Zip compressed file, as produced by, for example C</bin/zip>.
@@ -198,6 +205,7 @@ Returns a C<Archive::Extract> object on success, or false on failure.
                 $ar =~ /.+?\.(zip|jar|par)$/i       ? ZIP   :
                 $ar =~ /.+?\.(?:tbz|tar\.bz2?)$/i   ? TBZ   :
                 $ar =~ /.+?\.bz2$/i                 ? BZ2   :
+                $ar =~ /.+?\.Z$/                    ? Z     :
                 '';
 
         }
@@ -272,9 +280,9 @@ sub extract {
     ### to.
     my $dir;
     {   ### a foo.gz file
-        if( $self->is_gz or $self->is_bz2 ) {
+        if( $self->is_gz or $self->is_bz2 or $self->is_Z) {
     
-            my $cp = $self->archive; $cp =~ s/\.(?:gz|bz2)$//i;
+            my $cp = $self->archive; $cp =~ s/\.(?:gz|bz2|Z)$//i;
         
             ### to is a dir?
             if ( -d $to ) {
@@ -397,6 +405,11 @@ See the C<new()> method for details.
 Returns true if the file is of type C<.gz>.
 See the C<new()> method for details.
 
+=head2 $ae->is_Z
+
+Returns true if the file is of type C<.Z>.
+See the C<new()> method for details.
+
 =head2 $ae->is_zip
 
 Returns true if the file is of type C<.zip>.
@@ -411,6 +424,7 @@ sub is_gz   { return $_[0]->type eq GZ  }
 sub is_zip  { return $_[0]->type eq ZIP }
 sub is_tbz  { return $_[0]->type eq TBZ }
 sub is_bz2  { return $_[0]->type eq BZ2 }
+sub is_Z    { return $_[0]->type eq Z   }
 
 =pod
 
@@ -429,10 +443,12 @@ Returns the full path to your unzip binary, if found
 =cut
 
 ### paths to commandline tools ###
-sub bin_gzip    { return $PROGRAMS->{'gzip'}    if $PROGRAMS->{'gzip'}  }
-sub bin_unzip   { return $PROGRAMS->{'unzip'}   if $PROGRAMS->{'unzip'} }
-sub bin_tar     { return $PROGRAMS->{'tar'}     if $PROGRAMS->{'tar'}   }
-sub bin_bunzip2 { return $PROGRAMS->{'bunzip2'} if $PROGRAMS->{'bunzip2'} }
+sub bin_gzip        { return $PROGRAMS->{'gzip'}    if $PROGRAMS->{'gzip'}  }
+sub bin_unzip       { return $PROGRAMS->{'unzip'}   if $PROGRAMS->{'unzip'} }
+sub bin_tar         { return $PROGRAMS->{'tar'}     if $PROGRAMS->{'tar'}   }
+sub bin_bunzip2     { return $PROGRAMS->{'bunzip2'} if $PROGRAMS->{'bunzip2'} }
+sub bin_uncompress  { return $PROGRAMS->{'uncompress'} 
+                                                 if $PROGRAMS->{'uncompress'} }
 
 #################################
 #
@@ -742,6 +758,68 @@ sub _gunzip_cz {
 
     return 1;
 }
+
+#################################
+#
+# Uncompress code
+#
+#################################
+
+
+### untar wrapper... goes to either Archive::Tar or /bin/tar
+### depending on $PREFER_BIN
+sub _uncompress {
+    my $self = shift;
+
+    my   @methods = qw[_gunzip_cz _uncompress_bin];
+         @methods = reverse @methods if $PREFER_BIN;
+
+    for my $method (@methods) {
+        $self->_extractor($method) && return 1 if $self->$method();
+    }
+
+    return $self->_error(loc("Unable to untar file '%1'", $self->archive));
+}
+
+sub _uncompress_bin {
+    my $self = shift;
+
+    ### check for /bin/gzip -- we need it ###
+    return $self->_error(loc("No '%1' program found", '/bin/uncompress'))
+        unless $self->bin_uncompress;
+
+
+    my $fh = FileHandle->new('>'. $self->_gunzip_to) or
+        return $self->_error(loc("Could not open '%1' for writing: %2",
+                            $self->_gunzip_to, $! ));
+
+    my $cmd = [ $self->bin_uncompress, '-c', $self->archive ];
+
+    my $buffer;
+    unless( scalar run( command => $cmd,
+                        verbose => $DEBUG,
+                        buffer  => \$buffer )
+    ) {
+        return $self->_error(loc("Unable to uncompress '%1': %2",
+                                    $self->archive, $buffer));
+    }
+
+    ### no buffers available?
+    if( !IPC::Cmd->can_capture_buffer and !$buffer ) {
+        $self->_error( $self->_no_buffer_content( $self->archive ) );
+    }
+
+    print $fh $buffer if defined $buffer;
+
+    close $fh;
+
+    ### set what files where extract, and where they went ###
+    $self->files( [$self->_gunzip_to] );
+    $self->extract_path( File::Spec->rel2abs(cwd()) );
+
+    return 1;
+}
+
 
 #################################
 #
@@ -1118,6 +1196,8 @@ Defaults to C<false>.
 
 Maybe this module should use something like C<File::Type> to determine
 the type, rather than blindly trust the suffix.
+
+=back
 
 =head1 BUG REPORTS
 

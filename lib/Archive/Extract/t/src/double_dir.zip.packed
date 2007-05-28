@@ -10,7 +10,7 @@ To recreate it use the following command:
 
      uupacktool.pl -p lib/Archive/Extract/t/src/double_dir.zip lib/Archive/Extract/t/src/double_dir.zip.packed
 
-Created at Wed Apr 11 21:33:15 2007
+Created at Mon May 28 12:45:26 2007
 #########################################################################
 __UU__
 M4$L#!`H``````&QH,S0````````````````%`!4`>"]Y+WI55`D``PR`ST,,

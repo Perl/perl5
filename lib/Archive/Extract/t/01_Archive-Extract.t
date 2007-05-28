@@ -77,9 +77,14 @@ my $tmpl = {
                     method      => 'is_tar',
                     outfile     => 'a',
                 },
-    'x.gz' => {     programs    => [qw[gzip]],
+    'x.gz'  => {    programs    => [qw[gzip]],
                     modules     => [qw[Compress::Zlib]],
                     method      => 'is_gz',
+                    outfile     => 'a',
+                },
+    'x.Z'   => {    programs    => [qw[uncompress]],
+                    modules     => [qw[Compress::Zlib]],
+                    method      => 'is_Z',
                     outfile     => 'a',
                 },
     'x.zip' => {    programs    => [qw[unzip]],
@@ -272,7 +277,9 @@ for my $switch (0,1) {
         ### where to extract to -- try both dir and file for gz files
         ### XXX test me!
         #my @outs = $ae->is_gz ? ($abs_path, $OutDir) : ($OutDir);
-        my @outs = $ae->is_gz || $ae->is_bz2 ? ($abs_path) : ($OutDir);
+        my @outs = $ae->is_gz || $ae->is_bz2 || $ae->is_Z 
+                        ? ($abs_path) 
+                        : ($OutDir);
 
         skip "No binaries or modules to extract ".$archive, 
             (10 * scalar @outs) if $mod_fail && $pgm_fail;
@@ -302,7 +309,7 @@ for my $switch (0,1) {
 
                 diag("Extracting to: $to")                  if $Debug;
                 diag("Buffers enabled: ".!$turn_off)        if $Debug;
-    
+  
                 my $rv = $ae->extract( to => $to );
     
                 ok( $rv, "extract() for '$archive' reports success");
@@ -351,6 +358,14 @@ for my $switch (0,1) {
                     SKIP: {
                         skip "No extract path captured, can't remove paths", 2
                             unless $ae->extract_path;
+        
+                        ### if something went wrong with determining the out
+                        ### path, don't go deleting stuff.. might be Really Bad
+                        my $out_re = quotemeta( $OutDir );
+                        if( $ae->extract_path !~ /^$out_re/ ) {   
+                            ok( 0, "Extractpath WRONG (".$ae->extract_path.")"); 
+                            skip(  "Unsafe operation -- skip cleanup!!!" ), 1;
+                        }                    
         
                         eval { rmtree( $ae->extract_path ) }; 
                         ok( !$@,        "   rmtree gave no error" );
