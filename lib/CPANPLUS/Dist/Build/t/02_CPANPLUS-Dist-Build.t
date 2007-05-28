@@ -13,7 +13,7 @@ use CPANPLUS::Module::Author::Fake;
 
 use Config;
 use Test::More      'no_plan';
-use File::Basename  ();
+use File::Basename  qw[basename];
 use Data::Dumper;
 use Config;
 use IPC::Cmd        'can_run';
@@ -52,6 +52,19 @@ $Conf->set_conf( verbose    => $Verbose );
 $Conf->set_conf( signature  => 0 );
 ### running tests will mess with the test output so skip 'm
 $Conf->set_conf( skiptest   => 1 );
+
+### dmq tells us that we should run with /nologo
+### if using nmake, as it's very noise otherwise.
+### XXX copied from CPANPLUS' test include file!
+{   my $make = $Conf->get_program('make');
+    if( $make and basename($make) =~ /^nmake/i and
+        $make !~ m|/nologo|
+    ) {
+        $make .= ' /nologo';
+        $Conf->set_program( make => $make );
+    }
+}
+    
 
                 # path, cc needed?
 my %Map     = ( noxs    => 0,
