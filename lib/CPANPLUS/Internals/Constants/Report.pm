@@ -297,17 +297,19 @@ managed to load:
                                 
 .
                                 $str .= join '', 
-                                        map { my $want = $prq->{$_->name};
-                                              
-                                              sprintf "\t%s %-30s %8s %8s\n", 
-                                              do { $_->is_uptodate( 
+                                        map { sprintf "\t%s %-30s %8s %8s\n", 
+                                              @$_
+                                        
+                                        } [' ', 'Module Name', 'Have', 'Want'],
+                                          map { my $want = $prq->{$_->name};
+                                              [ do { $_->is_uptodate( 
                                                     version => $want
                                                    ) ? ' ' : '!' 
-                                              },
-                                              $_->name,
-                                              $_->installed_version,
-                                              $want
-                                              
+                                                },
+                                                $_->name,
+                                                $_->installed_version,
+                                                $want
+                                              ],
                                         ### might be empty entries in there
                                         } grep { defined $_ } @prq;   
                                 

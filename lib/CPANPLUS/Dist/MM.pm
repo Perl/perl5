@@ -653,7 +653,9 @@ sub create {
                 ### send success on force...
                 $test_fail++;
                 
-                unless( $force ) {
+                if( !$force and !$cb->_callbacks->proceed_on_test_failure->(
+                                      $self, $captured ) 
+                ) {
                     $fail++; last RUN;     
                 }
             }

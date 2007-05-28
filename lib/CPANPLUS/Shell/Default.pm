@@ -26,7 +26,7 @@ local $Data::Dumper::Indent     = 1; # for dumpering from !
 BEGIN {
     use vars        qw[ $VERSION @ISA ];
     @ISA        =   qw[ CPANPLUS::Shell::_Base::ReadLine ];
-    $VERSION = "0.79_02";
+    $VERSION = "0.79_03";
 }
 
 load CPANPLUS::Shell;
@@ -200,6 +200,11 @@ sub new {
     $cb->_register_callback(
             name    => 'send_test_report',
             code    => \&__ask_about_send_test_report,
+    );
+
+    $cb->_register_callback(
+            name    => 'proceed_on_test_failure',
+            code    => \&__ask_about_test_failure,
     );
 
 
@@ -844,7 +849,7 @@ sub _install {
     my $status = {};
     ### first loop over the mods to install them ###
     for my $mod (@$mods) {
-        print $prompt, $mod->module, "\n";
+        print $prompt, $mod->module, " (".$mod->version.")", "\n";
 
         my $log_length = length CPANPLUS::Error->stack_as_string;
     
@@ -971,6 +976,23 @@ sub __ask_about_edit_test_report {
     return $bool;
 }
 
+sub __ask_about_test_failure {
+    my $mod         = shift;
+    my $captured    = shift || '';
+    my $term        = $Shell->term;
+
+    print "\n";
+    print loc(  "The tests for '%1' failed. Would you like me to proceed ".
+                "anyway or should we abort?", $mod->module );
+    print "\n\n";
+    
+    my $bool =  $term->ask_yn(
+                    prompt  => loc("Proceed anyway?"),
+                    default => 'n',
+                );
+
+    return $bool;
+}
 
 
 sub _details {
@@ -1070,7 +1092,15 @@ sub _set_conf {
 
     ### possible options
     ### XXX hard coded, not optimal :(
-    my @types   = qw[reconfigure save edit program conf mirrors selfupdate];
+    my %types   = (
+        reconfigure => '', 
+        save        => q([user | system | boxed]),
+        edit        => '',
+        program     => q([key => val]),
+        conf        => q([key => val]),
+        mirrors     => '',
+        selfupdate  => '',  # XXX add all opts here?
+    );
 
 
     my $args; my $opts; my $input;
@@ -1099,12 +1129,28 @@ sub _set_conf {
         my $where = {
             user    => CONFIG_USER,
             system  => CONFIG_SYSTEM,
+            boxed   => CONFIG_BOXED,
         }->{ $key } || CONFIG_USER;      
         
-        my $rv = $cb->configure_object->save( $where );
+        ### boxed is special, so let's get it's value from %INC
+        ### so we can tell it where to save
+        ### XXX perhaps this logic should be generic for all
+        ### types, and put in the ->save() routine
+        my $dir;
+        if( $where eq CONFIG_BOXED ) {
+            my $file    = join( '/', split( '::', CONFIG_BOXED ) ) . '.pm';
+            my $file_re = quotemeta($file);
+            
+            my $path    = $INC{$file} || '';
+            $path       =~ s/$file_re$//;        
+            $dir        = $path;
+        }     
+        
+        my $rv = $cb->configure_object->save( $where => $dir );
 
         print $rv
-                ? loc("Configuration successfully saved to %1\n", $where)
+                ? loc("Configuration successfully saved to %1\n    (%2)\n",
+                       $where, $rv)
                 : loc("Failed to save configuration\n" );
         return $rv;
 
@@ -1147,22 +1193,51 @@ sub _set_conf {
 
     } elsif ( $type eq 'selfupdate' ) {
         my %valid = map { $_ => $_ } 
-                        qw|core dependencies enabled_features features all|;
+                        $cb->selfupdate_object->list_categories;    
 
         unless( $valid{$key} ) {
             print loc( "To update your current CPANPLUS installation, ".
                         "choose one of the these options:\n%1",
                         ( join $/, map { 
-                             sprintf "\ts selfupdate %-17s [--latest=0]", $_ 
+                             sprintf "\ts selfupdate %-17s " .
+                                     "[--latest=0] [--dryrun]", $_ 
                           } sort keys %valid ) 
                     );          
         } else {
-            print loc( "Updating your CPANPLUS installation\n" );
-            $cb->selfupdate_object->selfupdate( 
-                                    update  => $key, 
-                                    latest  => 1,
-                                    %$opts 
-                                );
+            my %update_args = (
+                update  => $key,
+                latest  => 1,
+                %$opts
+            );
+
+
+            my %list = $cb->selfupdate_object
+                            ->list_modules_to_update( %update_args );
+
+            print loc( "The following updates will take place:" ), $/.$/;
+            
+            for my $feature ( sort keys %list ) {
+                my $aref = $list{$feature};
+                
+                ### is it a 'feature' or a built in?
+                print $valid{$feature} 
+                    ? "  " . ucfirst($feature) . ":\n"
+                    : "  Modules for '$feature' support:\n";
+                    
+                ### show what modules would be installed    
+                print scalar @$aref
+                    ? map { sprintf "    %-42s %-6s -> %-6s \n", 
+                            $_->name, $_->installed_version, $_->version
+                      } @$aref      
+                    : "    No upgrades required\n";                                                  
+                print $/;
+            }
+            
+        
+            unless( $opts->{'dryrun'} ) { 
+                print loc( "Updating your CPANPLUS installation\n" );
+                $cb->selfupdate_object->selfupdate( %update_args );
+            }
         }
         
     } else {
@@ -1204,7 +1279,9 @@ sub _set_conf {
             print loc("Unknown type '%1'",$type || 'EMPTY' );
             print $/;
             print loc("Try one of the following:");
-            print $/, join $/, map { "\t'$_'" } sort @types;
+            print $/, join $/, 
+                      map { sprintf "\t%-11s %s", $_, $types{$_} } 
+                      sort keys %types;
         }
     }
     print "\n";
@@ -1641,7 +1718,7 @@ sub _read_configuration_from_rc {
         loc( "You can turn off these tips using '%1'", 
              's conf show_startup_tip 0' ),
         loc( "You can use wildcards like '%1' and '%2' on search results",
-             '*', '..' ),
+             '*', '2..5' ) ,
         loc( "You can use plugins. Type '%1' to list available plugins",
              '/plugins' ),
         loc( "You can show all your out of date modules using '%1'", 'o' ),  
@@ -1650,6 +1727,7 @@ sub _read_configuration_from_rc {
         loc( "The documentation in %1 and %2 is very useful",
              "CPANPLUS::Module", "CPANPLUS::Backend" ),
         loc( "You can type '%1' for help and '%2' to exit", 'h', 'q' ),
+        loc( "You can run an interactive setup using '%1'", 's reconfigure' ),          
     );
     
     sub _show_random_tip {

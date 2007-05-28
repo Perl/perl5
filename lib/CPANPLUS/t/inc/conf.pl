@@ -113,6 +113,17 @@ sub gimme_conf {
     $conf->set_conf( dist_type  => '' );
     $conf->set_conf( signature  => 0 );
 
+    ### dmq tells us that we should run with /nologo
+    ### if using nmake, as it's very noise otherwise.
+    {   my $make = $conf->get_program('make');
+        if( $make and basename($make) =~ /^nmake/i and
+            $make !~ m|/nologo|
+        ) {
+            $make .= ' /nologo';
+            $conf->set_program( make => $make );
+        }
+    }
+    
     _clean_test_dir( [
         $conf->get_conf('base'),     
         TEST_CONF_MIRROR_DIR,

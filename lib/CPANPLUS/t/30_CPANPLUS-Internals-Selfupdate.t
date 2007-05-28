@@ -77,6 +77,9 @@ my $Prereq      = { $Dep => 0 };
     is_deeply( $Conf, $Class->_get_config,
                                 "Config updated succesfully" );
 
+    my @cat  = $CB->$Acc->list_categories;
+    ok( scalar(@cat),           "Category list returned" );
+
     my @feat = $CB->$Acc->list_features;
     ok( scalar(@feat),          "Features list returned" );
 
@@ -103,8 +106,32 @@ my $Prereq      = { $Dep => 0 };
             is_deeply( $href, $Prereq,
                                 "   With the proper entries" );
 
-        }
+        }        
+    }
+
+    ### see if we can get a list of modules to be updated
+    {   my $cat  = 'core';
+        my $meth = 'list_modules_to_update';
+
+        ### XXX just test the mechanics, make sure is_uptodate
+        ### returns false
+        ### declare twice because warnings are hateful
+        ### declare in a block to quelch 'sub redefined' warnings.
+        { local *CPANPLUS::Selfupdate::Module::is_uptodate = sub { return }; }
+          local *CPANPLUS::Selfupdate::Module::is_uptodate = sub { return };
+
+        my %list = $CB->$Acc->$meth( update => $cat, latest => 1 );
+
+        cmp_ok( scalar(keys(%list)), '==', 1,
+                                "Got modules for '$cat' from '$meth'" );
         
+        my $aref = $list{$cat};
+        ok( $aref,              "   Got module list" );
+        cmp_ok( scalar(@$aref), '==', 1,
+                                "   With right amount of modules" );
+        isa_ok( $aref->[0],     $ModClass );
+        is( $aref->[0]->name, $Dep,
+                                "   With the right name ($Dep)" );
     }
 
     ### find enabled features
@@ -136,6 +163,7 @@ my $Prereq      = { $Dep => 0 };
                                 "   With the proper entries" );
         }
     }
+    
 
     ### now selfupdate ourselves
     {   ### XXX just test the mechanics, make sure install returns true

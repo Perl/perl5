@@ -9,6 +9,8 @@ use File::Spec;
 use File::Basename;
 use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
+local $Data::Dumper::Indent = 1;
+
 use constant PREREQ_SKIP_CLASS  => 'CPANPLUS::To::Dist::PREREQ_SKIP';
 use constant ALARM_CLASS        => 'CPANPLUS::To::Dist::ALARM';
 
@@ -23,17 +25,17 @@ my %formats = map { $_ => $_ } CPANPLUS::Dist->dist_types;
 
 my $opts    = {};
 GetOptions( $opts,
-            'format=s',     'archive',
-            'verbose!',     'force!',
-            'skiptest!',    'keepsource!',
-            'makefile!',    'buildprereq!',
-            'help',         'flushcache',
-            'ban=s@',       'banlist=s@',
-            'ignore=s@',    'ignorelist=s@',
-            'defaults',     'modulelist=s@',
-            'logfile=s',    'timeout=s',
-            'dist-opts=s%',
-            'default-banlist!',
+            'format=s',             'archive',
+            'verbose!',             'force!',
+            'skiptest!',            'keepsource!',
+            'makefile!',            'buildprereq!',
+            'help',                 'flushcache',
+            'ban=s@',               'banlist=s@',
+            'ignore=s@',            'ignorelist=s@',
+            'defaults',             'modulelist=s@',
+            'logfile=s',            'timeout=s',
+            'dist-opts=s%',         'set-config=s%',
+            'default-banlist!',     'set-program=s%',
             'default-ignorelist!',
         );
         
@@ -61,18 +63,38 @@ my $format;
     die loc("Invalid format: " . ($format || "[NONE]") ) . usage() 
         unless $formats{$format};
 
-    my %map = ( verbose     => 'verbose',
-                force       => 'force',
-                skiptest    => 'skiptest',
-                makefile    => 'prefer_makefile'
-            );
-            
-    ### set config options from arguments        
-    while (my($key,$val) = each %map) {
-        my $bool = exists $opts->{$key} ? $opts->{$key} : $conf->get_conf($val);
-        $conf->set_conf( $val => $bool );
-    }    
+    ### any options to fix config entries
+    {   my $set_conf = $opts->{'set-config'} || {};
+        while( my($key,$val) = each %$set_conf ) {
+            $conf->set_conf( $key => $val );
+        }
+    }        
+
+    ### any options to fix program entries
+    {   my $set_prog = $opts->{'set-program'} || {};
+        while( my($key,$val) = each %$set_prog ) {
+            $conf->set_program( $key => $val );
+        }
+    }        
+
+    ### any other options passed
+    {   my %map = ( verbose     => 'verbose',
+                    force       => 'force',
+                    skiptest    => 'skiptest',
+                    makefile    => 'prefer_makefile'
+                );
+                
+        ### set config options from arguments        
+        while (my($key,$val) = each %map) {
+            my $bool = exists $opts->{$key} 
+                            ? $opts->{$key} 
+                            : $conf->get_conf($val);
+            $conf->set_conf( $val => $bool );
+        }    
+    }        
 }
+
+die Dumper $conf;
 
 my @modules = @ARGV;
 if( exists $opts->{'modulelist'} ) {
@@ -136,10 +158,10 @@ $cb->reload_indices() if $opts->{'flushcache'};
         ### the die came from this location, and that it's an
         ### 'acceptable' death
         my $pat = ban_me( $prereq );
-        die bless \(loc("Module '%1' requires '%2' to be installed " .
-                    "but found in your ban list (%3) -- skipping",
-                    $mod->module, $prereq->module, $pat )),
-                    PREREQ_SKIP_CLASS if $pat;
+        die bless sub { loc("Module '%1' requires '%2' to be installed " .
+                        "but found in your ban list (%3) -- skipping",
+                        $mod->module, $prereq->module, $pat ) 
+                  }, PREREQ_SKIP_CLASS if $pat;
         return 1;
     }    
     
@@ -148,7 +170,7 @@ $cb->reload_indices() if $opts->{'flushcache'};
         my $mod = shift;
         
         for my $pat ( @ban ) {
-            return $pat if $mod->module =~ /$pat/;
+            return $pat if $mod->module =~ /$pat/i;
         }
         return;
     }
@@ -202,8 +224,8 @@ $cb->reload_indices() if $opts->{'flushcache'};
         my $mod = shift;
         
         for my $pat ( @ignore ) {
-            return $pat if $mod->module =~ /$pat/;
-            return $pat if $mod->package_name =~ /$pat/;
+            return $pat if $mod->module =~ /$pat/i;
+            return $pat if $mod->package_name =~ /$pat/i;
         }
         return;
     }   
@@ -298,7 +320,7 @@ for my $name (@modules) {
     ### install failed due to a 'die' in our prereq skipper?
     if( $@ and ref $@ and $@->isa( PREREQ_SKIP_CLASS ) ) {
         warn loc("Dist creation of '%1' skipped: '%2'", 
-                    $obj->module, ${$@} );
+                    $obj->module, $@->() );
         next;
 
     } elsif ( $@ and ref $@ and $@->isa( ALARM_CLASS ) ) {
@@ -413,8 +435,9 @@ Options:
 
     ### take argument:
     --format      Installer format to use (defaults to config setting)
-    --ban         Patterns of module names to skip during installation 
-                  (affects prerequisites too) May be given multiple times
+    --ban         Patterns of module names to skip during installation,
+                  case-insensitive (affects prerequisites too)
+                  May be given multiple times
     --banlist     File containing patterns that could be given to --ban
                   Are appended to the ban list built up by --ban
                   May be given multiple times.
@@ -422,9 +445,9 @@ Options:
                   for when a prereq listed by a CPAN module is resolved 
                   in another way than from its corresponding CPAN package
                   (Match is done on both module name, and package name of
-                  the package the module is in)
+                  the package the module is in, case-insensitive)
     --ignorelist  File containing patterns that may be given to --ignore.
-                  Are appended to the ban list build up by --ignore.
+                  Are appended to the ban list built up by --ignore.
                   May be given multiple times.
     --modulelist  File containing a list of modules that should be built.
                   Are appended to the list of command line modules.
@@ -436,8 +459,16 @@ Options:
                   hang or happen to be interactive despite being told not 
                   to be. Defaults to 300 seconds. To turn off, you can 
                   set it to 0.
+    --set-config  Change any options as specified in your config for this
+                  invocation only. See CPANPLUS::Config for a list of 
+                  supported options.
+    --set-program Change any programs as specified in your config for this
+                  invocation only. See CPANPLUS::Config for a list of 
+                  supported programs.
     --dist-opts   Arbitrary options passed along to the chosen installer
-                  format's prepare()/create() routine.
+                  format's prepare()/create() routine. Please see the
+                  documentation of the installer of your choice for 
+                  options it accepts.
 
     ### builtin lists
     --default-banlist    Use our builtin banlist. Works just like --ban
@@ -453,7 +484,7 @@ Examples:
     ### don't bother running tests
     cpan2dist --format CPANPLUS::Dist::Deb --buildprereq --skiptest DBI
     
-    ### Build a package, whose format is determined by your config of 
+    ### Build a package, whose format is determined by your config, of 
     ### the local tarball, reloading cpanplus' indices first and using
     ### the tarballs Makefile.PL if it has one.
     cpan2dist --makefile --flushcache --archive /path/to/Cwd-1.0.tgz

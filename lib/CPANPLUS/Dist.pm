@@ -89,6 +89,8 @@ works. This will be set upon a successful create.
 
 =cut
 
+=back
+
 =head2 $dist = CPANPLUS::Dist->new( module => MODOBJ, [format => DIST_TYPE] );
 
 Create a new C<CPANPLUS::Dist> object based on the provided C<MODOBJ>.

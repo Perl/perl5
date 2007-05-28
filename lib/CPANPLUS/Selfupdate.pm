@@ -180,8 +180,99 @@ sub new {
 }    
 
 
+{   ### cache to find the relevant modules
+    my $cache = {
+        core 
+            => sub { my $self = shift;
+                     core => [ $self->list_core_modules ]   },
+ 
+        dependencies        
+            => sub { my $self = shift;
+                     dependencies => [ $self->list_core_dependencies ] },
 
-=head2 $bool = $self->selfupdate( update => "core|dependencies|enabled_features|features|all", latest => BOOL )
+        enabled_features    
+            => sub { my $self = shift;
+                     map { $_ => [ $self->modules_for_feature( $_ ) ] }
+                        $self->list_enabled_features 
+                   },
+        features
+            => sub { my $self = shift;
+                     map { $_ => [ $self->modules_for_feature( $_ ) ] }
+                        $self->list_features   
+                   },
+            ### make sure to do 'core' first, in case
+            ### we are out of date ourselves
+        all => [ qw|core dependencies enabled_features| ],
+    };
+    
+    
+=head2 @cat = $self->list_categories
+
+Returns a list of categories that the C<selfupdate> method accepts.
+
+See C<selfupdate> for details.
+
+=cut
+
+    sub list_categories { return sort keys %$cache }
+
+=head2 %list = $self->list_modules_to_update( update => "core|dependencies|enabled_features|features|all", [latest => BOOL] )
+    
+List which modules C<selfupdate> would upgrade. You can update either 
+the core (CPANPLUS itself), the core dependencies, all features you have
+currently turned on, or all features available, or everything.
+
+The C<latest> option determines whether it should update to the latest
+version on CPAN, or if the minimal required version for CPANPLUS is
+good enough.
+    
+Returns a hash of feature names and lists of module objects to be
+upgraded based on the category you provided. For example:
+
+    %list = $self->list_modules_to_update( update => 'core' );
+    
+Would return:
+
+    ( core => [ $module_object_for_cpanplus ] );
+    
+=cut    
+    
+    sub list_modules_to_update {
+        my $self = shift;
+        my $cb   = $self->();
+        my $conf = $cb->configure_object;
+        my %hash = @_;
+        
+        my($type, $latest);
+        my $tmpl = {
+            update => { required => 1, store => \$type,
+                         allow   => [ keys %$cache ], },
+            latest => { default  => 0, store => \$latest, allow => BOOLEANS },                     
+        };    
+    
+        {   local $Params::Check::ALLOW_UNKNOWN = 1;
+            check( $tmpl, \%hash ) or return;
+        }
+    
+        my $ref     = $cache->{$type};
+
+        ### a list of ( feature1 => \@mods, feature2 => \@mods, etc )        
+        my %list    = UNIVERSAL::isa( $ref, 'ARRAY' )
+                            ? map { $cache->{$_}->( $self ) } @$ref
+                            : $ref->( $self );
+
+        ### filter based on whether we need the latest ones or not
+        for my $aref ( values %list ) {              
+              $aref = [ $latest 
+                        ? grep { !$_->is_uptodate } @$aref
+                        : grep { !$_->is_installed_version_sufficient } @$aref
+                      ];
+        }
+        
+        return %list;
+    }
+    
+=head2 $bool = $self->selfupdate( update => "core|dependencies|enabled_features|features|all", [latest => BOOL, force => BOOL] )
 
 Selfupdate CPANPLUS. You can update either the core (CPANPLUS itself),
 the core dependencies, all features you have currently turned on, or
@@ -195,58 +286,39 @@ Returns true on success, false on error.
 
 =cut
 
-sub selfupdate {
-    my $self = shift;
-    my $cb   = $self->();
-    my $conf = $cb->configure_object;
-    my %hash = @_;
-
-    ### cache to find the relevant modules
-    my $cache = {
-        core                => sub { $self->list_core_modules               },
-        dependencies        => sub { $self->list_core_dependencies          },
-        enabled_features    => sub { map { $self->modules_for_feature( $_ ) }
-                                        $self->list_enabled_features   
-                                },
-        features            => sub { map { $self->modules_for_feature( $_ ) }
-                                     $self->list_features   
-                                },
-                                ### make sure to do 'core' first, in case
-                                ### we are out of date ourselves
-        all                 => [ qw|core dependencies enabled_features| ],
-    };
+    sub selfupdate {
+        my $self = shift;
+        my $cb   = $self->();
+        my $conf = $cb->configure_object;
+        my %hash = @_;
     
-    my($type, $latest, $force);
-    my $tmpl = {
-        update  => { required => 1, store => \$type,
-                     allow    => [ keys %$cache ],  },
-        latest  => { default  => 0, store => \$latest,    allow => BOOLEANS },                     
-        force   => { default => $conf->get_conf('force'), store => \$force },
-    };
-        
-    check( $tmpl, \%hash ) or return;
+        my $force;
+        my $tmpl = {
+            force  => { default => $conf->get_conf('force'), store => \$force },
+        };    
     
-    my $ref     = $cache->{$type};
-    my @mods    = UNIVERSAL::isa( $ref, 'ARRAY' )
-                    ? map { $cache->{$_}->() } @$ref
-                    : $ref->();
-    
-    ### do we need the latest versions?
-    @mods       = $latest 
-                    ? @mods 
-                    : grep { !$_->is_installed_version_sufficient } @mods;
-    
-    my $flag;
-    for my $mod ( @mods ) {
-        unless( $mod->install( force => $force ) ) {
-            $flag++;
-            error(loc("Failed to update module '%1'", $mod->name));
+        {   local $Params::Check::ALLOW_UNKNOWN = 1;
+            check( $tmpl, \%hash ) or return;
         }
-    }
     
-    return if $flag;
-    return 1;
-}    
+        my %list = $self->list_modules_to_update( %hash ) or return;
+
+        ### just the modules please
+        my @mods = map { @$_ } values %list;
+        
+        my $flag;
+        for my $mod ( @mods ) {
+            unless( $mod->install( force => $force ) ) {
+                $flag++;
+                error(loc("Failed to update module '%1'", $mod->name));
+            }
+        }
+        
+        return if $flag;
+        return 1;
+    }    
+
+}
 
 =head2 @features = $self->list_features
 

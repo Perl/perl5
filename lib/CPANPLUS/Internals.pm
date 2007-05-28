@@ -40,7 +40,7 @@ use vars qw[@ISA $VERSION];
             CPANPLUS::Internals::Report
         ];
 
-$VERSION = "0.79_02";
+$VERSION = "0.79_03";
 
 =pod
 
@@ -99,6 +99,8 @@ for my $key ( qw[_conf _id _lib _perl5lib _modules _hosts _methods _status
 
 =pod
 
+=back
+
 =head1 METHODS
 
 =head2 $internals = CPANPLUS::Internals->_init( _conf => CONFIG_OBJ )
@@ -114,7 +116,7 @@ Returns the object on success, or dies on failure.
     ### if extra callbacks are added, don't forget to update the
     ### 02-internals.t test script with them!
     my $callback_map = {
-        ### name            default value    
+        ### name                default value    
         install_prerequisite    => 1,   # install prereqs when 'ask' is set?
         edit_test_report        => 0,   # edit the prepared test report?
         send_test_report        => 1,   # send the test report?
@@ -122,6 +124,8 @@ Returns the object on success, or dies on failure.
         munge_test_report       => sub { return $_[1] },
                                         # filter out unwanted prereqs
         filter_prereqs          => sub { return $_[1] },
+                                        # continue if 'make test' fails?
+        proceed_on_test_failure => sub { return 0 },
     };
     
     my $status = Object::Accessor->new;
@@ -315,6 +319,12 @@ Is called when the user should be prompted to edit test reports
 about to be sent out by Test::Reporter. Should return a boolean 
 indicating true to edit the test report in an editor and false 
 to skip it.
+
+=item proceed_on_test_failure
+
+Is called when 'make test' or 'Build test' fails. Should return
+a boolean indicating whether the install should continue even if
+the test failed.
 
 =back
 

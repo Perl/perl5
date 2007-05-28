@@ -421,6 +421,9 @@ sub options {
 Accessors that start with a C<_> are marked private -- regular users
 should never need to use these.
 
+See the C<CPANPLUS::Config> documentation for what items can be
+set and retrieved.
+
 =head2 get_SOMETHING( ITEM, [ITEM, ITEM, ... ] );
 
 The C<get_*> style accessors merely retrieves one or more desired
@@ -588,7 +591,7 @@ under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<CPANPLUS::Backend>, L<CPANPLUS::Configure::Setup>
+L<CPANPLUS::Backend>, L<CPANPLUS::Configure::Setup>, L<CPANPLUS::Config>
 
 =cut
 

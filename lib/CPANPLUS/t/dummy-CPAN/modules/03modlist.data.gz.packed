@@ -10,7 +10,7 @@ To recreate it use the following command:
 
      uupacktool.pl -p lib/CPANPLUS/t/dummy-CPAN/modules/03modlist.data.gz lib/CPANPLUS/t/dummy-CPAN/modules/03modlist.data.gz.packed
 
-Created at Tue May  8 13:53:41 2007
+Created at Mon May 28 14:32:04 2007
 #########################################################################
 __UU__
 M'XL("#'FO$4``S`S;6]D;&ES="YD871A`%U3_6O;,!#].?HKCBXC"20A=<@&

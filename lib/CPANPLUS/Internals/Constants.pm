@@ -33,6 +33,7 @@ use constant SHELL_CLASSIC  => 'CPANPLUS::Shell::Classic';
 use constant CONFIG         => 'CPANPLUS::Config';
 use constant CONFIG_USER    => 'CPANPLUS::Config::User';
 use constant CONFIG_SYSTEM  => 'CPANPLUS::Config::System';
+use constant CONFIG_BOXED   => 'CPANPLUS::Config::Boxed';
 
 use constant TARGET_CREATE  => 'create';
 use constant TARGET_PREPARE => 'prepare';

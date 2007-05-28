@@ -75,12 +75,13 @@ is($cb->_id, $cb->_last_id, "Comparing ID's");
 
 ### callback registering tests ###
 {    my $callback_map = {
-        ### name            default value    
+        ### name                default value    
         install_prerequisite    => 1,   # install prereqs when 'ask' is set?
         edit_test_report        => 0,   # edit the prepared test report?
         send_test_report        => 1,   # send the test report?
         munge_test_report       => $$,  # munge the test report
         filter_prereqs          => $$,  # limit prereqs
+        proceed_on_test_failure => 0,   # continue on failed 'make test'?
     };
 
     for my $callback ( keys %$callback_map ) {
