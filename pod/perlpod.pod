@@ -424,8 +424,7 @@ C<LE<lt>Perl Error Messages|perldiagE<gt>>
 C<LE<lt>text|name/"sec"E<gt>> or C<LE<lt>text|name/secE<gt>>
 
 Link this text to that section in that manual page.  E.g.,
-C<LE<lt>SWITCH statements|perlsyn/"Basic BLOCKs and Switch
-Statements"E<gt>>
+C<LE<lt>postfix "if"|perlsyn/"Statement Modifiers"E<gt>>
 
 =item *
 
