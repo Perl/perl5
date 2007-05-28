@@ -137,6 +137,8 @@ Like ParseAndRun() but works for Symbian filenames (UTF-16LE).
 The UTF-8 version of aFileName is always argv[argc-1], and argv[0]
 is always "perl".
 
+=back
+
 =head2 Macros
 
 =over 4

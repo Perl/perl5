@@ -1579,6 +1579,7 @@ subroutine rendering is more representative, insofar as a single main
 program will have many subs.
 
 
+=back
 
 =head1 Using B::Concise outside of the O framework
 
