@@ -243,6 +243,11 @@ default MRO hasn't changed (DFS, for Depth First Search). Another MRO is
 available: the C3 algorithm. See L<mro> for more information.
 (Brandon Black)
 
+=head2 bignum, bigint, bigrat
+
+The three numeric pragmas C<bignum>, C<bigint> and C<bigrat> are now
+lexically scoped. (Tels)
+
 =head2 New Core Modules
 
 =over 4
