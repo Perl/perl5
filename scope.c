@@ -545,7 +545,7 @@ Perl_save_helem(pTHX_ HV *hv, SV *key, SV **sptr)
     SvGETMAGIC(*sptr);
     SSCHECK(4);
     SSPUSHPTR(SvREFCNT_inc_simple(hv));
-    SSPUSHPTR(SvREFCNT_inc_simple(key));
+    SSPUSHPTR(newSVsv(key));
     SSPUSHPTR(SvREFCNT_inc(*sptr));
     SSPUSHINT(SAVEt_HELEM);
     save_scalar_at(sptr);
