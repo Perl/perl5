@@ -28,12 +28,12 @@ Copying			The GNU General Public License
 Cross/config		Cross-compilation
 Cross/config.sh-arm-linux	Cross-compilation
 Cross/config.sh-arm-linux-n770	Cross-compilation
-Cross/build-arm-n770.sh	Cross-compilation
+Cross/build-arm-n770-sh	Cross-compilation
 Cross/generate_config_sh	Cross-compilation
 Cross/installperl.patch		Cross-compilation
 Cross/Makefile		Cross-compilation
 Cross/Makefile.SH.patch	Cross-compilation
-Cross/Makefile-cross.SH	Cross-compilation
+Cross/Makefile-cross-SH	Cross-compilation
 Cross/cflags-cross-arm	Cross-compilation
 Cross/README		Cross-compilation
 Cross/TODO		Cross-compilation
