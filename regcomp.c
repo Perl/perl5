@@ -4121,7 +4121,6 @@ Perl_re_compile(pTHX_ const SV * const pattern, const U32 pm_flags)
     char*  exp = SvPV((SV*)pattern, plen);
     char* xend = exp + plen;
     regnode *scan;
-    regnode *first;
     I32 flags;
     I32 minlen = 0;
     I32 sawplus = 0;
@@ -4381,18 +4380,20 @@ reStudy:
 	struct regnode_charclass_class ch_class; /* pointed to by data */
 	int stclass_flag;
 	I32 last_close = 0; /* pointed to by data */
-
-	first = scan;
+        regnode *first= scan;
+        regnode *first_next= regnext(first);
+	
 	/* Skip introductions and multiplicators >= 1. */
 	while ((OP(first) == OPEN && (sawopen = 1)) ||
 	       /* An OR of *one* alternative - should not happen now. */
-	    (OP(first) == BRANCH && OP(regnext(first)) != BRANCH) ||
+	    (OP(first) == BRANCH && OP(first_next) != BRANCH) ||
 	    /* for now we can't handle lookbehind IFMATCH*/
 	    (OP(first) == IFMATCH && !first->flags) || 
 	    (OP(first) == PLUS) ||
 	    (OP(first) == MINMOD) ||
 	       /* An {n,m} with n>0 */
-	    (PL_regkind[OP(first)] == CURLY && ARG1(first) > 0) ) 
+	    (PL_regkind[OP(first)] == CURLY && ARG1(first) > 0) ||
+	    (OP(first) == NOTHING && PL_regkind[OP(first_next)] != END ))
 	{
 	        
 		if (OP(first) == PLUS)
@@ -4404,6 +4405,7 @@ reStudy:
 		    first += EXTRA_STEP_2ARGS;
 		} else  /* XXX possible optimisation for /(?=)/  */
 		    first = NEXTOPER(first);
+		first_next= regnext(first);
 	}
 
 	/* Starting-point info. */

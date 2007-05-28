@@ -1845,7 +1845,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const prog, char *stringarg, register char *st
 		    if (regtry(&reginfo, &s))
 			goto got_it;
 		  after_try:
-		    if (s >= end)
+		    if (s > end)
 			goto phooey;
 		    if (prog->extflags & RXf_USE_INTUIT) {
 			s = re_intuit_start(prog, sv, s + 1, strend, flags, NULL);

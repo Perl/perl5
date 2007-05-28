@@ -1324,3 +1324,5 @@ foo(\h)bar	foo\x{A0}bar	y	$1	\x{A0}
 foo(\h)bar	foo\tbar	y	$1	\t
 (\H)(\h)	foo\tbar	y	$1-$2	o-\t
 (\h)(\H)	foo\tbar	y	$1-$2	\t-b
+
+.*\z	foo\n	y	-	-
