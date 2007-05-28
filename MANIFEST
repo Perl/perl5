@@ -27,10 +27,14 @@ cop.h			Control operator header
 Copying			The GNU General Public License
 Cross/config		Cross-compilation
 Cross/config.sh-arm-linux	Cross-compilation
+Cross/config.sh-arm-linux-n770	Cross-compilation
+Cross/build-arm-n770.sh	Cross-compilation
 Cross/generate_config_sh	Cross-compilation
 Cross/installperl.patch		Cross-compilation
 Cross/Makefile		Cross-compilation
 Cross/Makefile.SH.patch	Cross-compilation
+Cross/Makefile-cross.SH	Cross-compilation
+Cross/cflags-cross-arm	Cross-compilation
 Cross/README		Cross-compilation
 Cross/TODO		Cross-compilation
 Cross/warp		Cross-compilation
@@ -1190,6 +1194,7 @@ ext/Unicode/Normalize/t/split.t	Unicode::Normalize
 ext/Unicode/Normalize/t/test.t	Unicode::Normalize
 ext/Unicode/Normalize/t/tie.t	Unicode::Normalize
 ext/util/make_ext		Used by Makefile to execute extension Makefiles
+ext/util/make_ext_cross		Cross-compilation
 ext/Win32API/File/buffers.h	Win32API::File extension
 ext/Win32API/File/cFile.h	Win32API::File extension
 ext/Win32API/File/cFile.pc	Win32API::File extension

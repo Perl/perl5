@@ -2,8 +2,8 @@
 #
 # configpm
 #
-# Copyright (C) 1994, 1995, 1996 1997, 1998, 1999, 2000, 2001,
-# 2002, 2003, 2004, 2005, 2006 Larry Wall and others.
+# Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+# 2002, 2003, 2004, 2005, 2006, 2007 Larry Wall and others.
 #
 #
 # Regenerate the files
@@ -13,6 +13,7 @@
 #    lib/Config.pod
 #    lib/Cross.pm (optionally)
 #
+#
 # from the contents of the static files
 #
 #    Porting/Glossary
@@ -21,6 +22,8 @@
 # and from the contents of the Configure-generated file
 #
 #    config.sh
+#
+# Note that output directory is xlib/[cross-name]/ for cross-compiling
 #
 # It will only update Config.pm and Config_heavy.pl if the contents of
 # either file would be different. Note that *both* files are updated in
@@ -86,7 +89,7 @@ sub opts {
 
 my %Opts = opts();
 
-my ($Config_PM, $Config_heavy);
+my ($Config_SH, $Config_PM, $Config_heavy, $Config_POD);
 my $Glossary = $ARGV[1] || 'Porting/Glossary';
 
 if ($Opts{cross}) {
@@ -94,9 +97,13 @@ if ($Opts{cross}) {
   mkdir "xlib";
   mkdir "xlib/$Opts{cross}";
   $Config_PM = $ARGV[0] || "xlib/$Opts{cross}/Config.pm";
+  $Config_POD = "xlib/$Opts{cross}/Config.pod";
+  $Config_SH = "Cross/config-$Opts{cross}.sh";
 }
 else {
   $Config_PM = $ARGV[0] || 'lib/Config.pm';
+  $Config_POD = "lib/Config.pod";
+  $Config_SH = "config.sh";
 }
 if ($Opts{heavy}) {
   $Config_heavy = $Opts{heavy};
@@ -184,7 +191,7 @@ my %Data     = ();
 my %seen_quotes;
 {
   my ($name, $val);
-  open(CONFIG_SH, 'config.sh') || die "Can't open config.sh: $!";
+  open(CONFIG_SH, $Config_SH) || die "Can't open $Config_SH: $!";
   while (<CONFIG_SH>) {
     next if m:^#!/bin/sh:;
 
@@ -717,7 +724,7 @@ tie %%Config, 'Config', {
 ENDOFTIE
 
 
-open(CONFIG_POD, ">lib/Config.pod") or die "Can't open lib/Config.pod: $!";
+open(CONFIG_POD, ">$Config_POD") or die "Can't open $Config_POD: $!";
 print CONFIG_POD <<'ENDOFTAIL';
 =head1 NAME
 
@@ -917,7 +924,7 @@ ENDOFTAIL
 
 close(GLOS) if $Opts{glossary};
 close(CONFIG_POD);
-print "written lib/Config.pod\n";
+print "written $Config_POD\n";
 
 my $orig_config_txt = "";
 my $orig_heavy_txt = "";
