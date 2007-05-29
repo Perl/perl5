@@ -87,6 +87,7 @@ do_fallback_cb(pTHX_ UV ch)
     LEAVE;
     retval = newSVpv("",0);
     sv_catsv(retval, temp);
+    SvREFCNT_dec(temp);
     return retval;
 }
 
