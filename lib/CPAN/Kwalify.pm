@@ -48,7 +48,7 @@ See L<http://www.perl.com/perl/misc/Artistic.html>
 use strict;
 
 package CPAN::Kwalify;
-use vars qw($VERSION);
+use vars qw($VERSION $VAR1);
 $VERSION = sprintf "%.6f", substr(q$Rev: 1418 $,4)/1000000 + 5.4;
 
 use File::Spec ();
@@ -83,7 +83,7 @@ sub _validate {
                     local $/;
                     <FH>;
                 };
-                our $VAR1 = undef;
+                $VAR1 = undef;
                 eval $content;
                 die "parsing of '$schema_name.dd' failed: $@" if $@;
                 $schema_loaded->{$schema_name} = $VAR1;

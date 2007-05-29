@@ -1,7 +1,7 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.9101';
+$CPAN::VERSION = '1.9102';
 $CPAN::VERSION = eval $CPAN::VERSION if $CPAN::VERSION =~ /_/;
 
 use CPAN::HandleConfig;
@@ -5495,11 +5495,7 @@ sub undelay {
 #-> CPAN::Distribution::is_dot_dist
 sub is_dot_dist {
     my($self) = @_;
-    return (
-            substr($self->id,-1,1) eq "."
-            ||
-            $self->author->id eq "LOCAL"
-           );
+    return substr($self->id,-1,1) eq ".";
 }
 
 # add the A/AN/ stuff
@@ -5736,6 +5732,7 @@ sub get {
 
   EXCUSE: {
 	my @e;
+        my $goodbye_message;
         $self->debug("checking disabled id[$self->{ID}]") if $CPAN::DEBUG;
         if ($self->prefs->{disabled}) {
             my $why = sprintf(
@@ -5744,7 +5741,8 @@ sub get {
                               $self->{prefs_file_doc},
                              );
             push @e, $why;
-            $self->{unwrapped} = CPAN::Distrostatus->new("NO -- $why");
+            $self->{unwrapped} = CPAN::Distrostatus->new("NO $why");
+            $goodbye_message = "[disabled] -- NA $why";
             # note: not intended to be persistent but at least visible
             # during this session
         } else {
@@ -5768,8 +5766,13 @@ sub get {
                                           )
                 and push @e, "Unwrapping had some problem, won't try again without force";
         }
-
-	$CPAN::Frontend->mywarn(join "", map {"$_\n"} @e) and return if @e;
+        if (@e) {
+            $CPAN::Frontend->mywarn(join "", map {"$_\n"} @e);
+            if ($goodbye_message) {
+                 $self->goodbye($goodbye_message);
+            }
+            return;
+        }
     }
     my $sub_wd = CPAN::anycwd(); # for cleaning up as good as possible
 
@@ -6067,81 +6070,99 @@ sub try_download {
                                $local_wanted);
 }
 
-#-> CPAN::Distribution::patch
-sub patch {
-    my($self) = @_;
-    $self->debug("checking patches id[$self->{ID}]") if $CPAN::DEBUG;
-    my $patches = $self->prefs->{patches};
-    $patches ||= "";
-    $self->debug("patches[$patches]") if $CPAN::DEBUG;
-    if ($patches) {
-        return unless @$patches;
-        $self->safe_chdir($self->{build_dir});
-        CPAN->debug("patches[$patches]") if $CPAN::DEBUG;
-        my $patchbin = $CPAN::Config->{patch};
-        unless ($patchbin && length $patchbin) {
-            $CPAN::Frontend->mydie("No external patch command configured\n\n".
-                                   "Please run 'o conf init /patch/'\n\n");
-        }
-        unless (MM->maybe_command($patchbin)) {
-            $CPAN::Frontend->mydie("No external patch command available\n\n".
-                                   "Please run 'o conf init /patch/'\n\n");
-        }
-        $patchbin = CPAN::HandleConfig->safe_quote($patchbin);
-        local $ENV{PATCH_GET} = 0; # shall replace -g0 which is not
-                                   # supported everywhere (and then,
-                                   # not ever necessary there)
-        my $stdpatchargs = "-N --fuzz=3";
-        my $countedpatches = @$patches == 1 ? "1 patch" : (scalar @$patches . " patches");
-        $CPAN::Frontend->myprint("Going to apply $countedpatches:\n");
-        for my $patch (@$patches) {
-            unless (-f $patch) {
-                if (my $trydl = $self->try_download($patch)) {
-                    $patch = $trydl;
+{
+    my $stdpatchargs = "";
+    #-> CPAN::Distribution::patch
+    sub patch {
+        my($self) = @_;
+        $self->debug("checking patches id[$self->{ID}]") if $CPAN::DEBUG;
+        my $patches = $self->prefs->{patches};
+        $patches ||= "";
+        $self->debug("patches[$patches]") if $CPAN::DEBUG;
+        if ($patches) {
+            return unless @$patches;
+            $self->safe_chdir($self->{build_dir});
+            CPAN->debug("patches[$patches]") if $CPAN::DEBUG;
+            my $patchbin = $CPAN::Config->{patch};
+            unless ($patchbin && length $patchbin) {
+                $CPAN::Frontend->mydie("No external patch command configured\n\n".
+                                       "Please run 'o conf init /patch/'\n\n");
+            }
+            unless (MM->maybe_command($patchbin)) {
+                $CPAN::Frontend->mydie("No external patch command available\n\n".
+                                       "Please run 'o conf init /patch/'\n\n");
+            }
+            $patchbin = CPAN::HandleConfig->safe_quote($patchbin);
+            local $ENV{PATCH_GET} = 0; # formerly known as -g0
+            unless ($stdpatchargs) {
+                my $system = "$patchbin --version |";
+                local *FH;
+                open FH, $system or die "Could not fork '$system': $!";
+                local $/ = "\n";
+                my $pversion;
+              PARSEVERSION: while (<FH>) {
+                    if (/^patch\s+([\d\.]+)/) {
+                        $pversion = $1;
+                        last PARSEVERSION;
+                    }
+                }
+                if ($pversion) {
+                    $stdpatchargs = "-N --fuzz=3";
                 } else {
-                    my $fail = "Could not find patch '$patch'";
+                    $stdpatchargs = "-N";
+                }
+            }
+            my $countedpatches = @$patches == 1 ? "1 patch" : (scalar @$patches . " patches");
+            $CPAN::Frontend->myprint("Going to apply $countedpatches:\n");
+            for my $patch (@$patches) {
+                unless (-f $patch) {
+                    if (my $trydl = $self->try_download($patch)) {
+                        $patch = $trydl;
+                    } else {
+                        my $fail = "Could not find patch '$patch'";
+                        $CPAN::Frontend->mywarn("$fail; cannot continue\n");
+                        $self->{unwrapped} = CPAN::Distrostatus->new("NO -- $fail");
+                        delete $self->{build_dir};
+                        return;
+                    }
+                }
+                $CPAN::Frontend->myprint("  $patch\n");
+                my $readfh = CPAN::Tarzip->TIEHANDLE($patch);
+
+                my $pcommand;
+                my $ppp = $self->_patch_p_parameter($readfh);
+                if ($ppp eq "applypatch") {
+                    $pcommand = "$CPAN::Config->{applypatch} -verbose";
+                } else {
+                    my $thispatchargs = join " ", $stdpatchargs, $ppp;
+                    $pcommand = "$patchbin $thispatchargs";
+                }
+
+                $readfh = CPAN::Tarzip->TIEHANDLE($patch); # open again
+                my $writefh = FileHandle->new;
+                $CPAN::Frontend->myprint("  $pcommand\n");
+                unless (open $writefh, "|$pcommand") {
+                    my $fail = "Could not fork '$pcommand'";
+                    $CPAN::Frontend->mywarn("$fail; cannot continue\n");
+                    $self->{unwrapped} = CPAN::Distrostatus->new("NO -- $fail");
+                    delete $self->{build_dir};
+                    return;
+                }
+                while (my $x = $readfh->READLINE) {
+                    print $writefh $x;
+                }
+                unless (close $writefh) {
+                    my $fail = "Could not apply patch '$patch'";
                     $CPAN::Frontend->mywarn("$fail; cannot continue\n");
                     $self->{unwrapped} = CPAN::Distrostatus->new("NO -- $fail");
                     delete $self->{build_dir};
                     return;
                 }
             }
-            $CPAN::Frontend->myprint("  $patch\n");
-            my $readfh = CPAN::Tarzip->TIEHANDLE($patch);
-
-            my $pcommand;
-            my $ppp = $self->_patch_p_parameter($readfh);
-            if ($ppp eq "applypatch") {
-                $pcommand = "$CPAN::Config->{applypatch} -verbose";
-            } else {
-                my $thispatchargs = join " ", $stdpatchargs, $ppp;
-                $pcommand = "$patchbin $thispatchargs";
-            }
-
-            $readfh = CPAN::Tarzip->TIEHANDLE($patch); # open again
-            my $writefh = FileHandle->new;
-            $CPAN::Frontend->myprint("  $pcommand\n");
-            unless (open $writefh, "|$pcommand") {
-                my $fail = "Could not fork '$pcommand'";
-                $CPAN::Frontend->mywarn("$fail; cannot continue\n");
-                $self->{unwrapped} = CPAN::Distrostatus->new("NO -- $fail");
-                delete $self->{build_dir};
-                return;
-            }
-            while (my $x = $readfh->READLINE) {
-                print $writefh $x;
-            }
-            unless (close $writefh) {
-                my $fail = "Could not apply patch '$patch'";
-                $CPAN::Frontend->mywarn("$fail; cannot continue\n");
-                $self->{unwrapped} = CPAN::Distrostatus->new("NO -- $fail");
-                delete $self->{build_dir};
-                return;
-            }
+            $self->{patched}++;
         }
-        $self->{patched}++;
+        return 1;
     }
-    return 1;
 }
 
 sub _patch_p_parameter {
@@ -6964,7 +6985,9 @@ is part of the perl-%s distribution. To install that, you need to run
         }
 
 	if (defined $self->{make}) {
-            if ($self->{make}->failed) {
+            if (UNIVERSAL::can($self->{make},"failed") ?
+                $self->{make}->failed :
+                $self->{make} =~ /^NO/) {
                 if ($self->{force_update}) {
                     # Trying an already failed 'make' (unless somebody else blocks)
                 } else {
@@ -7111,7 +7134,7 @@ is part of the perl-%s distribution. To install that, you need to run
                     ->new("NO '$system' returned status $ret");
                 $CPAN::Frontend->mywarn("Warning: No success on command[$system]\n");
                 $self->store_persistent_state;
-                return;
+                return $self->goodbye("$system -- NOT OK\n");
             }
 	}
 	if (-f "Makefile" || -f "Build") {
@@ -7133,7 +7156,7 @@ is part of the perl-%s distribution. To install that, you need to run
             $CPAN::Frontend->mywarn("$id $need; you have only $]; giving up\n");
             $self->{make} = CPAN::Distrostatus->new("NO $need");
             $self->store_persistent_state;
-            return;
+            return $self->goodbye("[prereq] -- NOT OK\n");
         } else {
             my $follow = eval { $self->follow_prereqs(@prereq); };
             if (0) {
@@ -7142,7 +7165,7 @@ is part of the perl-%s distribution. To install that, you need to run
                 return 1;
             } elsif ($@ && ref $@ && $@->isa("CPAN::Exception::RecursiveDependency")) {
                 $CPAN::Frontend->mywarn($@);
-                return;
+                return $self->goodbye("[depend] -- NOT OK\n");
             }
         }
     }
@@ -7158,7 +7181,7 @@ is part of the perl-%s distribution. To install that, you need to run
             unless (-f "Build") {
                 my $cwd = CPAN::anycwd();
                 $CPAN::Frontend->mywarn("Alert: no Build file available for 'make $self->{id}'".
-                                        " in cwd[$cwd]. Danger, Will Robinson!");
+                                        " in cwd[$cwd]. Danger, Will Robinson!\n");
                 $CPAN::Frontend->mysleep(5);
             }
             $system = join " ", $self->_build_command(), $CPAN::Config->{mbuild_arg};
@@ -7209,7 +7232,15 @@ is part of the perl-%s distribution. To install that, you need to run
     $self->store_persistent_state;
 }
 
-# CPAN::Distribution::_run_via_expect
+# CPAN::Distribution::goodbye ;
+sub goodbye {
+    my($self,$goodbye) = @_;
+    my $id = $self->pretty_id;
+    $CPAN::Frontend->mywarn("  $id\n  $goodbye");
+    return;
+}
+
+# CPAN::Distribution::_run_via_expect ;
 sub _run_via_expect {
     my($self,$system,$expect_model) = @_;
     CPAN->debug("system[$system]expect_model[$expect_model]") if $CPAN::DEBUG;
@@ -8182,7 +8213,7 @@ sub test {
                 $CPAN::Frontend->mywarn("Tests succeeded but $but\n");
                 $self->{make_test} = CPAN::Distrostatus->new("NO $but");
                 $self->store_persistent_state;
-                return;
+                return $self->goodbye("[dependencies] -- NA");
             }
         }
 
@@ -8312,7 +8343,7 @@ sub goto {
     # and run where we left off
 
     my($method) = (caller(1))[3];
-    CPAN->instance("CPAN::Distribution",$goto)->$method;
+    CPAN->instance("CPAN::Distribution",$goto)->$method();
     CPAN::Queue->delete_first($goto);
 }
 
