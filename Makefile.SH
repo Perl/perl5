@@ -80,9 +80,6 @@ true)
 		linklibperl="-L. -lperl"
 		shrpldflags="$shrpldflags -Wl,--image-base,0x57000000"
 		;;
-	linux*)
-		shrpldflags="$shrpldflags $ldflags $perllibs $cryptlib"
-		;;
 	aix*)
 		shrpldflags="-H512 -T512 -bhalt:4 -bM:SRE -bE:perl.exp"
 		case "$osvers" in
