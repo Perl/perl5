@@ -3,7 +3,7 @@ use 5.00503;
 use strict;
 
 use vars qw(@ISA @EXPORT $VERSION $MUST_REBOOT %Config);
-$VERSION = '1.41';
+$VERSION = '1.41_01';
 $VERSION = eval $VERSION;
 
 use AutoSplit;
@@ -395,7 +395,7 @@ Abstract a -w check that tries to use POSIX::access() if possible.
     sub _have_write_access {
         my $dir=shift;
         if (!defined $has_posix) {
-            $has_posix=eval "require POSIX; 1" || 0;
+            $has_posix=eval "local $^W; require POSIX; 1" || 0;
         }
         if ($has_posix) {
             return POSIX::access($dir, POSIX::W_OK());
