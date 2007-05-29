@@ -1,8 +1,35 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.20 2007/04/22 14:56:12 dankogai Exp dankogai $
+# $Id: Changes,v 2.22 2007/05/29 07:35:27 dankogai Exp dankogai $
 #
-$Revision: 2.20 $ $Date: 2007/04/22 14:56:12 $
+$Revision: 2.22 $ $Date: 2007/05/29 07:35:27 $
+! Encode.pm
+  from_to() does not honor the check while decoding.  That's a feature.
+  To make sure it is a feature it is mentioned in the POD.
+  http://rt.cpan.org/NoAuth/Bug.html?id=#27277
+! Makefile.pl
+  Encode used to suppress man page generation.  Now it does.
+  http://rt.cpan.org/NoAuth/Bug.html?id=#27200
+! Encode.pm Encode.xs t/fallback.t
+  Addressed: (de|en)code("ascii", "\x{3000}", sub{ $_[0] }) segfaults
+  Reported by MIYAGAWA
+
+2.21 2007/05/12 06:42:19
++ lib/Encode/MIME/Name.pm t/mime-name.t
+! Encode.pm Encode.xs lib/Encode/Encoding.pm
+  new method: mime_name()
+  inspired by: MIYAGAWA
+! t/encoding.t
+  Subject: Re: Compress::Zlib, pack "C" and utf-8 [PATCH]
+  From: Marc Lehmann <schmorp@schmorp.de>
+  Date: Thu, 12 Apr 2007 08:41:53 +0200
+  Message-ID: <20070412064153.GA22475@schmorp.de>
+  http://public.activestate.com/cgi-bin/perlbrowse/p/31194
+! Unicode/Unicode.pm
+  POD fix.
+  Message-Id: <20070417220547.GA11999@zetta.zet>
+
+2.20  2007/04/22 14:56:12
 ! Encode.pm
   Pod fixes.  Now find_encoding() is explained more in details.
 + lib/Encode/GSM0338.pm

@@ -1,10 +1,10 @@
 #
-# $Id: Encode.pm,v 2.21 2007/05/12 06:42:19 dankogai Exp dankogai $
+# $Id: Encode.pm,v 2.22 2007/05/29 07:35:27 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.21 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.22 $ =~ /(\d+)/g;
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -144,7 +144,7 @@ sub encode($$;$) {
         Carp::croak("Unknown encoding '$name'");
     }
     my $octets = $enc->encode( $string, $check );
-    $_[1] = $string if $check and !( $check & LEAVE_SRC() );
+    $_[1] = $string if $check and !ref $check and !( $check & LEAVE_SRC() );
     return $octets;
 }
 *str2bytes = \&encode;
@@ -160,7 +160,7 @@ sub decode($$;$) {
         Carp::croak("Unknown encoding '$name'");
     }
     my $string = $enc->decode( $octets, $check );
-    $_[1] = $octets if $check and !( $check & LEAVE_SRC() );
+    $_[1] = $octets if $check and !ref $check and !( $check & LEAVE_SRC() );
     return $string;
 }
 *bytes2str = \&decode;
@@ -498,6 +498,20 @@ but only #2 turns UTF8 flag on.  #1 is equivalent to
   $data = encode("utf8", decode("iso-8859-1", $data));
 
 See L</"The UTF8 flag"> below.
+
+Also note that
+
+  from_to($octets, $from, $to, $check);
+
+is equivalent to
+
+  $octets = encode($to, decode($from, $octets), $check);
+
+Yes, it does not respect the $check during decoding.  It is
+deliberately done that way.  If you need minute control, C<decode>
+then C<encode> as follows;
+
+  $octets = encode($to, decode($from, $octets, $check_from), $check_to);
 
 =item $octets = encode_utf8($string);
 

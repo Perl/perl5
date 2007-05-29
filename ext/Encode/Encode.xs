@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.12 2007/05/12 06:42:19 dankogai Exp dankogai $
+ $Id: Encode.xs,v 2.13 2007/05/29 07:35:27 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -70,7 +70,7 @@ do_fallback_cb(pTHX_ UV ch)
 {
     dSP;
     int argc;
-    SV* retval;
+    SV *temp, *retval;
     ENTER;
     SAVETMPS;
     PUSHMARK(sp);
@@ -81,10 +81,12 @@ do_fallback_cb(pTHX_ UV ch)
     if (argc != 1){
     croak("fallback sub must return scalar!");
     }
-    retval = newSVsv(POPs);
+    temp = newSVsv(POPs);
     PUTBACK;
     FREETMPS;
     LEAVE;
+    retval = newSVpv("",0);
+    sv_catsv(retval, temp);
     return retval;
 }
 
