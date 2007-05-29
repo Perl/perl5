@@ -411,8 +411,10 @@ AV*
 Perl_mro_get_linear_isa(pTHX_ HV *stash)
 {
     struct mro_meta* meta;
+
     assert(stash);
-    assert(HvAUX(stash));
+    if(!SvOOK(stash))
+        Perl_croak(aTHX_ "Can't linearize anonymous symbol table");
 
     meta = HvMROMETA(stash);
     if(meta->mro_which == MRO_DFS) {
@@ -444,12 +446,16 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
     SV** svp;
     I32 items;
     bool is_universal;
+    struct mro_meta * meta;
 
     const char * const stashname = HvNAME_get(stash);
     const STRLEN stashname_len = HvNAMELEN_get(stash);
 
+    if(!stashname)
+        Perl_croak(aTHX_ "Can't call mro_isa_changed_in() on anonymous symbol table");
+
     /* wipe out the cached linearizations for this stash */
-    struct mro_meta * const meta = HvMROMETA(stash);
+    meta = HvMROMETA(stash);
     SvREFCNT_dec((SV*)meta->mro_linear_dfs);
     SvREFCNT_dec((SV*)meta->mro_linear_c3);
     meta->mro_linear_dfs = NULL;
@@ -576,6 +582,9 @@ Perl_mro_method_changed_in(pTHX_ HV *stash)
 
     SV ** const svp = hv_fetch(PL_isarev, stashname, stashname_len, 0);
     HV * const isarev = svp ? (HV*)*svp : NULL;
+
+    if(!stashname)
+        Perl_croak(aTHX_ "Can't call mro_method_changed_in() on anonymous symbol table");
 
     /* Inc the package generation, since a local method changed */
     HvMROMETA(stash)->pkg_gen++;

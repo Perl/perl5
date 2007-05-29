@@ -261,9 +261,13 @@ C<SV*>.
 #define HvRITER_get(hv)	(SvOOK(hv) ? HvAUX(hv)->xhv_riter : -1)
 #define HvEITER_get(hv)	(SvOOK(hv) ? HvAUX(hv)->xhv_eiter : 0)
 #define HvNAME(hv)	HvNAME_get(hv)
-#define HvMROMETA(hv)	(SvOOK(hv) \
-			? (HvAUX(hv)->xhv_mro_meta ? HvAUX(hv)->xhv_mro_meta : mro_meta_init(hv)) \
-			: NULL)
+
+/* Checking that hv is a valid package stash is the
+   caller's responsibility */
+#define HvMROMETA(hv) (HvAUX(hv)->xhv_mro_meta \
+                       ? HvAUX(hv)->xhv_mro_meta \
+                       : mro_meta_init(hv))
+
 /* FIXME - all of these should use a UTF8 aware API, which should also involve
    getting the length. */
 /* This macro may go away without notice.  */
