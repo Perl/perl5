@@ -447,6 +447,9 @@ up what categories of warnings are activated or not. (Rafael)
 Duping a filehandle which has the C<:utf8> PerlIO layer set will now
 properly carry that layer on the duped filehandle. (Rafael)
 
+Localizing an hash element whose key was given as a variable didn't work
+correctly (as in C<local $h{$x}>). (Bo Lindbergh)
+
 =head1 New or Changed Diagnostics
 
 =head2 Deprecations
