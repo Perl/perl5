@@ -94,8 +94,6 @@ my $format;
     }        
 }
 
-die Dumper $conf;
-
 my @modules = @ARGV;
 if( exists $opts->{'modulelist'} ) {
     push @modules, map { parse_file( $_ ) } @{ $opts->{'modulelist'} }; 
