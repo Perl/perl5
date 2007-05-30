@@ -5,7 +5,7 @@ use Log::Message private => 0;;
 
 BEGIN { 
     use vars qw[$VERSION]; 
-    $VERSION = 0.02; 
+    $VERSION = 0.02_01; 
 }
         
 
@@ -139,31 +139,31 @@ Exported by default, or using the C<:STD> tag.
 
 =head2 carp();
 
-Provides functionality equal to C<Carp::carp()>, whilst still logging
+Provides functionality equal to C<Carp::carp()> while still logging
 to the stack.
 
-Exported by by using the C<:CARP> tag.
+Exported by using the C<:CARP> tag.
 
 =head2 croak();
 
-Provides functionality equal to C<Carp::croak()>, whilst still logging
+Provides functionality equal to C<Carp::croak()> while still logging
 to the stack.
 
-Exported by by using the C<:CARP> tag.
+Exported by using the C<:CARP> tag.
 
 =head2 confess();
 
-Provides functionality equal to C<Carp::confess()>, whilst still logging
+Provides functionality equal to C<Carp::confess()> while still logging
 to the stack.
 
-Exported by by using the C<:CARP> tag.
+Exported by using the C<:CARP> tag.
 
 =head2 cluck();
 
-Provides functionality equal to C<Carp::cluck()>, whilst still logging
+Provides functionality equal to C<Carp::cluck()> while still logging
 to the stack.
 
-Exported by by using the C<:CARP> tag.
+Exported by using the C<:CARP> tag.
 
 =head1 CLASS METHODS
 
