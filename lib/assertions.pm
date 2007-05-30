@@ -73,9 +73,9 @@ sub _calc_expr {
 		    $t=($^H{assertions} & $hint) ? 1 : 0;
 		}
 		elsif ($t ne '0' and $t ne '1') {
-		    $t = ( grep { ref $_ eq 'Regexp'
+		    $t = ( grep { re::is_regexp($_)
 				      ? $t=~$_
-				      : $_->check($t)
+				      : $_->($t)
 				} @{^ASSERTING} ) ? 1 : 0;
 		}
 

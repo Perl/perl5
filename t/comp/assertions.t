@@ -41,7 +41,7 @@ my @expr=( '1' => 1,
 
 my $supported = assertions::compat::supported();
 
-my $n=@expr/2 + ($supported ? 10 : 0);
+my $n=@expr/2 + ($supported ? 12 : 0);
 my $i=1;
 print "1..$n\n";
 
@@ -164,6 +164,29 @@ if ($supported) {
 	callme(my $b=46);
 	if (defined $b) {
 	    print STDERR "lexical declaration in assertion arg ignored (b=$b\n";
+	    print "not ";
+	}
+    }
+    print "ok ", $i++, "\n";
+
+    # 11
+    {
+        use assertions::activate sub { return 1 if $_[0] eq 'via_sub' };
+	use assertions 'via_sub';
+	callme(my $b=47);
+	unless ($b == 47) {
+	    print STDERR "this shouldn't fail ever (b=$b)\n";
+	    print "not ";
+	}
+    }
+    print "ok ", $i++, "\n";
+
+    # 12
+    {
+	use assertions 'not_asserted';
+	callme(my $b=48);
+	if ($b == 48) {
+	    print STDERR "this shouldn't fail ever (b=$b)\n";
 	    print "not ";
 	}
     }

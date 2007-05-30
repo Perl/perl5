@@ -5,7 +5,7 @@ our $VERSION = '0.02';
 sub import {
     shift;
     @_ = '.*' unless @_;
-    push @{^ASSERTING}, map { ref $_ eq 'Regexp' ? $_ : qr/^(?:$_)\z/ } @_;
+    push @{^ASSERTING}, map { ref $_ ? $_ : qr/^(?:$_)\z/ } @_;
 }
 
 1;
@@ -33,7 +33,7 @@ Though it can also be explicetly used:
 
 The import parameters are a list of strings or of regular expressions. The
 assertion tags that match those regexps are enabled. If no parameter is
-given, all assertions are activated.
+given, all assertions are activated.  References are activated as-is.
 
 =head1 SEE ALSO
 
