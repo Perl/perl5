@@ -1,10 +1,10 @@
 #
-# $Id: Encode.pm,v 2.22 2007/05/29 07:35:27 dankogai Exp dankogai $
+# $Id: Encode.pm,v 2.23 2007/05/29 18:15:32 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.22 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.23 $ =~ /(\d+)/g;
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -922,7 +922,7 @@ L<Encode::PerlIO>,
 L<encoding>,
 L<perlebcdic>,
 L<perlfunc/open>,
-L<perlunicode>,
+L<perlunicode>, L<perluniintro>, L<perlunifaq>, L<perlunitut>
 L<utf8>,
 the Perl Unicode Mailing List E<lt>perl-unicode@perl.orgE<gt>
 

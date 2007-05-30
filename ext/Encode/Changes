@@ -1,15 +1,32 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.22 2007/05/29 07:35:27 dankogai Exp dankogai $
+# $Id: Changes,v 2.23 2007/05/29 18:15:32 dankogai Exp dankogai $
 #
-$Revision: 2.22 $ $Date: 2007/05/29 07:35:27 $
+$Revision: 2.23 $ $Date: 2007/05/29 18:15:32 $
+! Encode.xs
+  got rid of global fallback_cb; encode_method() now takes one more
+  argument which is a coderef to fallback.  This should make
+  encode_method() thread-safe.
+! Encode.pm
+  Added perluniintro, perlunifaq, and perlunitut to POD
+! Encode.xs
+  Plug a memory leak in Encode -- by rgs
+  Message-Id: <b77c1dce0705290858v2be239c3o2d726e3d59091493@mail.gmail.com>
+! Unicode/Unicode.pm
+  POD fixes on UTF-16LE
+  http://aspn.activestate.com/ASPN/Mail/Message/perl5-porters/3486118
+! Makefile.PL
+  man page generation is now conditional; yes by default but no if $PERL_CORE
+  Message-Id: <b77c1dce0705290237h5c4667cdlf79a48b839170add@mail.gmail.com>
+
+2.22 2007/05/29 07:35:27
 ! Encode.pm
   from_to() does not honor the check while decoding.  That's a feature.
   To make sure it is a feature it is mentioned in the POD.
-  http://rt.cpan.org/NoAuth/Bug.html?id=#27277
+  http://rt.cpan.org/NoAuth/Bug.html?id=27277
 ! Makefile.pl
   Encode used to suppress man page generation.  Now it does.
-  http://rt.cpan.org/NoAuth/Bug.html?id=#27200
+  http://rt.cpan.org/NoAuth/Bug.html?id=27200
 ! Encode.pm Encode.xs t/fallback.t
   Addressed: (de|en)code("ascii", "\x{3000}", sub{ $_[0] }) segfaults
   Reported by MIYAGAWA
@@ -53,19 +70,19 @@ $Revision: 2.22 $ $Date: 2007/05/29 07:35:27 $
   Message-Id: <693254b90704060526s6d850320h71cdda50dfbf7eba@mail.gmail.com>
 ! Encode.pm
   #25216 ([PATCH] Encode.pm: postpone the load of Encode::Encoding)
-  http://rt.cpan.org/NoAuth/Bug.html?id=#25216
+  http://rt.cpan.org/NoAuth/Bug.html?id=25216
 ! lib/Encode/MIME/Header.pm t/mime-header.t
   #24418 (Encode::MIME::Header: wrong encoding with latin1 characters)
-  http://rt.cpan.org/NoAuth/Bug.html?id=#24418
+  http://rt.cpan.org/NoAuth/Bug.html?id=24418
 ! Encode.pm
   #23876 (Add documentation for LEAVE_SRC)
-  http://rt.cpan.org/NoAuth/Bug.html?id=#23876
+  http://rt.cpan.org/NoAuth/Bug.html?id=23876
 ! lib/Encode/Alias.pm t/Aliases.t
   #20781: Thai encoding needs alias for tis-620
-  http://rt.cpan.org/NoAuth/Bug.html?id=#20781
+  http://rt.cpan.org/NoAuth/Bug.html?id=20781
 ! bin/piconv AUTHORS
   #20344: piconv: wrong conversion of utf-16le encoded files (with PATCH)
-  http://rt.cpan.org/NoAuth/Bug.html?id=#20344
+  http://rt.cpan.org/NoAuth/Bug.html?id=20344
 ! Encode.pm Encode.xs bin/enc2xs encoding.pm t/Aliases.t t/utf8strict.t
   Imported from bleedperl's 2.18_01
 
@@ -97,7 +114,7 @@ $Revision: 2.22 $ $Date: 2007/05/29 07:35:27 $
   --xmlcref and --htmlcref added.
 ! Encode.pm
   Copyright Notice Added.
-  http://rt.cpan.org/NoAuth/Bug.html?id=#19056  
+  http://rt.cpan.org/NoAuth/Bug.html?id=19056  
 ! *
   Replaced remaining ^\t with q( ) x 4. -- Perl Best Practice pp. 20
   And all .pm's are now perltidy-ed.
@@ -105,11 +122,11 @@ $Revision: 2.22 $ $Date: 2007/05/29 07:35:27 $
 2.15 2006/04/06 15:44:11
 ! Unicode/Unicode.xs
   Addressed: UTF-16, UTF-32, UCS, UTF-7 decoders mishandle illegal characters
-  http://rt.cpan.org/NoAuth/Bug.html?id=#18556
+  http://rt.cpan.org/NoAuth/Bug.html?id=18556
 ! Encode.pm
   added str2bytes() as an alias to encode() and  bytes2str() as an alias 
   to decode()
-  http://rt.cpan.org/NoAuth/Bug.html?id=#17103
+  http://rt.cpan.org/NoAuth/Bug.html?id=17103
 ! Encode.xs
   Change 26922: Avoid warning with MS Visual C compiler.
   Message-Id: <200601231245.k0NCj2dw009484@smtp3.ActiveState.com>

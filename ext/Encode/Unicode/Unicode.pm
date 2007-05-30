@@ -4,7 +4,7 @@ use strict;
 use warnings;
 no warnings 'redefine';
 
-our $VERSION = do { my @r = ( q$Revision: 2.4 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.5 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -97,14 +97,14 @@ Encode::Unicode::UTF7.  For details see L<Encode::Unicode::UTF7>.
                 Decodes from ord(N)           Encodes chr(N) to...
        octet/char BOM S.P d800-dfff  ord > 0xffff     \x{1abcd} ==
   ---------------+-----------------+------------------------------
-  UCS-2BE	2   N   N  is bogus                  Not Available
+  UCS-2BE       2   N   N  is bogus                  Not Available
   UCS-2LE       2   N   N     bogus                  Not Available
   UTF-16      2/4   Y   Y  is   S.P           S.P            BE/LE
   UTF-16BE    2/4   N   Y       S.P           S.P    0xd82a,0xdfcd
-  UTF-16LE	2   N   Y       S.P           S.P    0x2ad8,0xcddf
-  UTF-32	4   Y   -  is bogus         As is            BE/LE
-  UTF-32BE	4   N   -     bogus         As is       0x0001abcd
-  UTF-32LE	4   N   -     bogus         As is       0xcdab0100
+  UTF-16LE    2/4   N   Y       S.P           S.P    0x2ad8,0xcddf
+  UTF-32        4   Y   -  is bogus         As is            BE/LE
+  UTF-32BE      4   N   -     bogus         As is       0x0001abcd
+  UTF-32LE      4   N   -     bogus         As is       0xcdab0100
   UTF-8       1-4   -   -     bogus   >= 4 octets   \xf0\x9a\af\8d
   ---------------+-----------------+------------------------------
 
