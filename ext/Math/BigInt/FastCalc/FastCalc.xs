@@ -53,7 +53,7 @@ _new(class, x)
   INIT:
     STRLEN len;
     char* cur;
-    int part_len;
+    STRLEN part_len;
 
   CODE:
     /* create the array */
@@ -78,7 +78,7 @@ _new(class, x)
       while (len > 0)
         {
         /* use either BASE_LEN or the amount of remaining digits */
-        part_len = XS_BASE_LEN;
+        part_len = (STRLEN) XS_BASE_LEN;
         if (part_len > len)
           {
           part_len = len;
