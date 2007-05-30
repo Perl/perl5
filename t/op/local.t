@@ -5,7 +5,7 @@ BEGIN {
     @INC = qw(. ../lib);
     require './test.pl';
 }
-plan tests => 117;
+plan tests => 120;
 
 my $list_assignment_supported = 1;
 
@@ -442,4 +442,14 @@ sub f { ok(0 == $[); }
     ok(! exists($h{'k2'}));
     is($h{'k1'},111);
 }
-
+{
+    my %h=('k1' => 111);
+    our $k = 'k1';  # try dynamic too
+    {
+	local $h{$k}=222;
+	is($h{'k1'},222);
+	$k='k2';
+    }
+    ok(! exists($h{'k2'}));
+    is($h{'k1'},111);
+}
