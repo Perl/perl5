@@ -842,7 +842,7 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'jdhedden',
 		'FILES'		=> q[ext/threads/hints ext/threads/t
-				     ext/threads/threads.{pm,xs} ext/threads/typemap],
+				     ext/threads/threads.{pm,xs}],
 		'CPAN'		=> 1,
 		},
 
