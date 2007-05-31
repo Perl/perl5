@@ -10938,6 +10938,7 @@ Perl_cando_by_name_int
   struct itmlst_3 usrprolst[2] = {{sizeof curprv, CHP$_PRIV, &curprv, &retlen},
          {0,0,0,0}};
   struct dsc$descriptor_s usrprodsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
+  static int profile_context = -1;
 
   if (!fname || !*fname) return FALSE;
   /* Make sure we expand logical names, since sys$check_access doesn't */
@@ -11010,16 +11011,16 @@ Perl_cando_by_name_int
 
   /* find out the space required for the profile */
   _ckvmssts(sys$create_user_profile(&usrdsc,&usrprolst,0,0,
-                                    &usrprodsc.dsc$w_length,0));
+                                    &usrprodsc.dsc$w_length,&profile_context));
 
   /* allocate space for the profile and get it filled in */
   usrprodsc.dsc$a_pointer = PerlMem_malloc(usrprodsc.dsc$w_length);
   if (usrprodsc.dsc$a_pointer == NULL) _ckvmssts(SS$_INSFMEM);
   _ckvmssts(sys$create_user_profile(&usrdsc,&usrprolst,0,usrprodsc.dsc$a_pointer,
-                                    &usrprodsc.dsc$w_length,0));
+                                    &usrprodsc.dsc$w_length,&profile_context));
 
   /* use the profile to check access to the file; free profile & analyze results */
-  retsts = sys$check_access(&objtyp,&namdsc,0,armlst,0,0,0,&usrprodsc);
+  retsts = sys$check_access(&objtyp,&namdsc,0,armlst,&profile_context,0,0,&usrprodsc);
   PerlMem_free(usrprodsc.dsc$a_pointer);
   if (retsts == SS$_NOCALLPRIV) retsts = SS$_NOPRIV; /* not really 3rd party */
 
