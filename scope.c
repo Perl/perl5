@@ -261,6 +261,14 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
 	    gp->gp_io = newIO();
 	    IoFLAGS(gp->gp_io) |= IOf_ARGV|IOf_START;
 	}
+#ifdef PERL_DONT_CREATE_GVSV
+	if (gv == PL_errgv) {
+	    /* We could scatter this logic everywhere by changing the
+	       definition of ERRSV from GvSV() to GvSVn(), but it seems more
+	       efficient to do this check once here.  */
+	    gp->gp_sv = newSV(0);
+	}
+#endif
 	GvGP(gv) = gp;
     }
     else {

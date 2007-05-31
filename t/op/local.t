@@ -5,7 +5,7 @@ BEGIN {
     @INC = qw(. ../lib);
     require './test.pl';
 }
-plan tests => 120;
+plan tests => 122;
 
 my $list_assignment_supported = 1;
 
@@ -453,3 +453,12 @@ sub f { ok(0 == $[); }
     ok(! exists($h{'k2'}));
     is($h{'k1'},111);
 }
+
+# Keep this test last, as it can SEGV
+{
+    local *@;
+    pass("Localised *@");
+    eval {1};
+    pass("Can eval with *@ localised");
+}
+
