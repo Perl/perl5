@@ -473,7 +473,7 @@ package Maintainers;
 
 	'Log::Message::Simple' =>
                 {
-                'MAINTAINER'    => 'tels',
+                'MAINTAINER'    => 'kane',
                 'FILES'         => q[lib/Log/Message/Simple.pm lib/Log/Message/Simple],
                 'CPAN'          => 1,
                 },
