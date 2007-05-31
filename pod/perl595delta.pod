@@ -448,7 +448,8 @@ Duping a filehandle which has the C<:utf8> PerlIO layer set will now
 properly carry that layer on the duped filehandle. (Rafael)
 
 Localizing an hash element whose key was given as a variable didn't work
-correctly (as in C<local $h{$x}>). (Bo Lindbergh)
+correctly if the variable was changed while the local() was in effect (as
+in C<local $h{$x}; ++$x>). (Bo Lindbergh)
 
 =head1 New or Changed Diagnostics
 
