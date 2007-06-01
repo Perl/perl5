@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed May 16 19:31:47 CEST 2007 [metaconfig 3.0 PL70]
+# Generated on Fri Jun  1 08:37:13 CEST 2007 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -12160,6 +12160,14 @@ esac
 set i_fcntl
 eval $setvar
 
+: see if fork exists
+set fork d_fork
+eval $inlibc
+
+: see if pipe exists
+set pipe d_pipe
+eval $inlibc
+
 : check for non-blocking I/O stuff
 case "$h_sysfile" in
 true) echo "#include <sys/file.h>" > head.c;;
@@ -12220,6 +12228,8 @@ echo " "
 echo "Let's see what value errno gets from read() on a $o_nonblock file..." >&4
 case "$eagain" in
 '')
+	case "$d_fork:$d_pipe" in
+	define:define)
 	$cat head.c > try.c
 	$cat >>try.c <<EOCP
 #include <errno.h>
@@ -12352,6 +12362,12 @@ EOCP
 		echo "I can't compile the test program--assuming errno EAGAIN will do."
 		eagain=EAGAIN
 	fi
+	;;
+	*)	echo "Can't figure out how to test this--assuming errno EAGAIN will do."
+		eagain=EAGAIN
+		val="$define"
+		;;
+	esac
 	set d_eofnblk
 	eval $setvar
 	;;
@@ -12835,10 +12851,6 @@ eval $inlibc
 echo " "
 set d_flockproto flock $i_sysfile sys/file.h
 eval $hasproto
-
-: see if fork exists
-set fork d_fork
-eval $inlibc
 
 : see if fp_class exists
 set fp_class d_fp_class
@@ -14605,7 +14617,7 @@ EOCP
 	    echo "Yes, it does ($foo)" >&4
 	    d_libm_lib_version="$define"
 	else
-	    echo "No, it does not (probably harmless)\n" >&4
+	    echo "No, it does not (probably harmless)" >&4
 	    fi
 	$rm_try
 	;;
@@ -15537,10 +15549,6 @@ fi
 
 : see if pause exists
 set pause d_pause
-eval $inlibc
-
-: see if pipe exists
-set pipe d_pipe
 eval $inlibc
 
 : see if poll exists
