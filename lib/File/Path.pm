@@ -580,7 +580,7 @@ sub _rmtree {
             else {
                 my $updir  = File::Spec->updir();
                 my $curdir = File::Spec->curdir();
-                @files = map(File::Spec->catdir($root,$_),
+                @files = map(File::Spec->catfile($root,$_),
                     grep {$_ ne $updir and $_ ne $curdir}
                     @files
                 );
