@@ -241,27 +241,30 @@ sub new
 
 sub copy
   {
-  my ($c,$x);
+  # if two arguments, the first one is the class to "swallow" subclasses
   if (@_ > 1)
     {
-    # if two arguments, the first one is the class to "swallow" subclasses
-    ($c,$x) = @_;
-    }
-  else
-    {
-    $x = shift;
-    $c = ref($x);
-    }
-  return unless ref($x); # only for objects
+    my  $self = bless {
+	sign => $_[1]->{sign}, 
+	_es => $_[1]->{_es}, 
+	_m => $MBI->_copy($_[1]->{_m}),
+	_e => $MBI->_copy($_[1]->{_e}),
+    }, $_[0] if @_ > 1;
 
-  my $self = {}; bless $self,$c;
+    $self->{_a} = $_[1]->{_a} if defined $_[1]->{_a};
+    $self->{_p} = $_[1]->{_p} if defined $_[1]->{_p};
+    return $self;
+    }
 
-  $self->{sign} = $x->{sign};
-  $self->{_es} = $x->{_es};
-  $self->{_m} = $MBI->_copy($x->{_m});
-  $self->{_e} = $MBI->_copy($x->{_e});
-  $self->{_a} = $x->{_a} if defined $x->{_a};
-  $self->{_p} = $x->{_p} if defined $x->{_p};
+  my $self = bless {
+	sign => $_[0]->{sign}, 
+	_es => $_[0]->{_es}, 
+	_m => $MBI->_copy($_[0]->{_m}),
+	_e => $MBI->_copy($_[0]->{_e}),
+	}, ref($_[0]);
+
+  $self->{_a} = $_[0]->{_a} if defined $_[0]->{_a};
+  $self->{_p} = $_[0]->{_p} if defined $_[0]->{_p};
   $self;
   }
 
@@ -3279,6 +3282,15 @@ You can change this by using:
 
 	use Math::BigFloat lib => 'GMP';
 
+Note: The keyword 'lib' will warn when the requested library could not be
+loaded. To suppress the warning use 'try' instead:
+
+	use Math::BigFloat try => 'GMP';
+
+To turn the warning into a die(), use 'only' instead:
+
+	use Math::BigFloat only => 'GMP';
+
 The following would first try to find Math::BigInt::Foo, then
 Math::BigInt::Bar, and when this also fails, revert to Math::BigInt::Calc:
 
@@ -3329,7 +3341,7 @@ libraries:
 	require Math::BigFloat;
 	my $matter = Math::BigFloat->bone() + 4;	# load BigInt and Calc
 	Math::BigFloat->import( lib => 'Pari' );	# load Pari, too
-	my $anti-matter = Math::BigFloat->bone()+4;	# now use Pari
+	my $anti_matter = Math::BigFloat->bone()+4;	# now use Pari
 
 This will create objects with numbers stored in two different backend libraries,
 and B<VERY BAD THINGS> will happen when you use these together:

@@ -475,25 +475,26 @@ sub _scale_p
 
 sub copy
   {
-  my ($c,$x);
+  # if two arguments, the first one is the class to "swallow" subclasses
   if (@_ > 1)
     {
-    # if two arguments, the first one is the class to "swallow" subclasses
-    ($c,$x) = @_;
-    }
-  else
-    {
-    $x = shift;
-    $c = ref($x);
-    }
-  return unless ref($x); # only for objects
+    my  $self = bless {
+	sign => $_[1]->{sign}, 
+	value => $CALC->_copy($_[1]->{value}),
+    }, $_[0] if @_ > 1;
 
-  my $self = bless {}, $c;
+    $self->{_a} = $_[1]->{_a} if defined $_[1]->{_a};
+    $self->{_p} = $_[1]->{_p} if defined $_[1]->{_p};
+    return $self;
+    }
 
-  $self->{sign} = $x->{sign};
-  $self->{value} = $CALC->_copy($x->{value});
-  $self->{_a} = $x->{_a} if defined $x->{_a};
-  $self->{_p} = $x->{_p} if defined $x->{_p};
+  my $self = bless {
+	sign => $_[0]->{sign}, 
+	value => $CALC->_copy($_[0]->{value}),
+	}, ref($_[0]);
+
+  $self->{_a} = $_[0]->{_a} if defined $_[0]->{_a};
+  $self->{_p} = $_[0]->{_p} if defined $_[0]->{_p};
   $self;
   }
 
@@ -866,8 +867,8 @@ sub _find_round_parameters
   no strict 'refs';
 
   # convert to normal scalar for speed and correctness in inner parts
-  $a = $a->numify() if defined $a && ref($a);
-  $p = $p->numify() if defined $a && ref($p);
+  $a = $a->can('numify') ? $a->numify() : "$a" if defined $a && ref($a);
+  $p = $p->can('numify') ? $p->numify() : "$p" if defined $p && ref($p);
 
   # now pick $a or $p, but only if we have got "arguments"
   if (!defined $a)
