@@ -64,7 +64,8 @@ SKIP: {
     # IOW: File::Spec->catdir( qw(foo bar), File::Spec->updir ) eq 'foo'
     # rather than foo/bar/..    
     skip "updir() canonicalises path on this platform", 2
-        if $dir2 eq $tmp_base;
+        if $dir2 eq $tmp_base
+            or $^O eq 'cygwin';
         
     @created = mkpath($dir2, {mask => 0700});
     is(scalar(@created), 1, "make directory with trailing parent segment");

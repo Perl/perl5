@@ -18,7 +18,7 @@ This document describes version 2.00 of File::Path, released
 
     rmtree(
         'foo/bar/baz', '/zug/zwang',
-        { verbose => 1, errors  => \my $err_list }
+        { verbose => 1, error  => \my $err_list }
     );
 
     # traditional
@@ -362,10 +362,7 @@ use strict;
 use File::Basename ();
 use File::Spec     ();
 BEGIN {
-    if ($] >= 5.006) {
-        eval "use warnings";
-    }
-    else {
+    if ($] < 5.006) {
         # can't say 'opendir my $dh, $dirname'
         # need to initialise $dh
         eval "use Symbol";
