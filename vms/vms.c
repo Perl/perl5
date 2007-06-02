@@ -5182,7 +5182,7 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
 	(!decc_posix_compliant_pathnames && decc_disable_posix_root)) {
       strcpy(trndir,*dir == '/' ? dir + 1: dir);
       trnlnm_iter_count = 0;
-      while (!strpbrk(trndir,"/]>:>") && my_trnlnm(trndir,trndir,0)) {
+      while (!strpbrk(trndir,"/]>:") && my_trnlnm(trndir,trndir,0)) {
         trnlnm_iter_count++; 
         if (trnlnm_iter_count >= PERL_LNM_MAX_ITER) break;
       }
@@ -10920,11 +10920,10 @@ static I32
 Perl_cando_by_name_int
    (pTHX_ I32 bit, bool effective, const char *fname, int opts)
 {
-  static char usrname[L_cuserid];
-  static struct dsc$descriptor_s usrdsc =
+  char usrname[L_cuserid];
+  struct dsc$descriptor_s usrdsc =
          {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, usrname};
-  char vmsname[NAM$C_MAXRSS+1];
-  char *fileified;
+  char *vmsname = NULL, *fileified = NULL;
   unsigned long int objtyp = ACL$C_FILE, access, retsts, privused, iosb[2], flags;
   unsigned short int retlen, trnlnm_iter_count;
   struct dsc$descriptor_s namdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
@@ -10941,37 +10940,51 @@ Perl_cando_by_name_int
   static int profile_context = -1;
 
   if (!fname || !*fname) return FALSE;
-  /* Make sure we expand logical names, since sys$check_access doesn't */
 
-  fileified = NULL;
-  if ((opts & PERL_RMSEXPAND_M_VMS_IN) != 0) {
-    fileified = PerlMem_malloc(VMS_MAXRSS);
-    if (!strpbrk(fname,"/]>:")) {
+  /* Make sure we expand logical names, since sys$check_access doesn't */
+  fileified = PerlMem_malloc(VMS_MAXRSS);
+  if (fileified == NULL) _ckvmssts(SS$_INSFMEM);
+  if (!strpbrk(fname,"/]>:")) {
       strcpy(fileified,fname);
       trnlnm_iter_count = 0;
-      while (!strpbrk(fileified,"/]>:>") && my_trnlnm(fileified,fileified,0)) {
+      while (!strpbrk(fileified,"/]>:") && my_trnlnm(fileified,fileified,0)) {
         trnlnm_iter_count++; 
         if (trnlnm_iter_count >= PERL_LNM_MAX_ITER) break;
       }
       fname = fileified;
-    }
+  }
+
+  vmsname = PerlMem_malloc(VMS_MAXRSS);
+  if (vmsname == NULL) _ckvmssts(SS$_INSFMEM);
+  if ( !(opts & PERL_RMSEXPAND_M_VMS_IN) ) {
+    /* Don't know if already in VMS format, so make sure */
     if (!do_rmsexpand(fname, vmsname, 0, NULL, PERL_RMSEXPAND_M_VMS, NULL, NULL)) {
       PerlMem_free(fileified);
+      PerlMem_free(vmsname);
       return FALSE;
-    }
-    retlen = namdsc.dsc$w_length = strlen(vmsname);
-    namdsc.dsc$a_pointer = vmsname;
-    if (vmsname[retlen-1] == ']' || vmsname[retlen-1] == '>' ||
-      vmsname[retlen-1] == ':') {
-      if (!do_fileify_dirspec(vmsname,fileified,1,NULL)) return FALSE;
-      namdsc.dsc$w_length = strlen(fileified);
-      namdsc.dsc$a_pointer = fileified;
     }
   }
   else {
-    retlen = namdsc.dsc$w_length = strlen(fname);
-    namdsc.dsc$a_pointer = (char *)fname; /* cast ok */
+    strcpy(vmsname,fname);
   }
+
+  /* sys$check_access needs a file spec, not a directory spec */
+
+  retlen = namdsc.dsc$w_length = strlen(vmsname);
+  if (vmsname[retlen-1] == ']' 
+      || vmsname[retlen-1] == '>' 
+      || vmsname[retlen-1] == ':') {
+
+      if (!do_fileify_dirspec(vmsname,fileified,1,NULL)) {
+        PerlMem_free(fileified);
+        PerlMem_free(vmsname);
+        return FALSE;
+      }
+      fname = fileified;
+  }
+
+  retlen = namdsc.dsc$w_length = strlen(fname);
+  namdsc.dsc$a_pointer = (char *)fname;
 
   switch (bit) {
     case S_IXUSR: case S_IXGRP: case S_IXOTH:
@@ -10993,6 +11006,8 @@ Perl_cando_by_name_int
     default:
       if (fileified != NULL)
 	PerlMem_free(fileified);
+      if (vmsname != NULL)
+	PerlMem_free(vmsname);
       return FALSE;
   }
 
@@ -11039,17 +11054,23 @@ Perl_cando_by_name_int
     else set_errno(ENOENT);
     if (fileified != NULL)
       PerlMem_free(fileified);
+    if (vmsname != NULL)
+      PerlMem_free(vmsname);
     return FALSE;
   }
   if (retsts == SS$_NORMAL || retsts == SS$_ACCONFLICT) {
     if (fileified != NULL)
       PerlMem_free(fileified);
+    if (vmsname != NULL)
+      PerlMem_free(vmsname);
     return TRUE;
   }
   _ckvmssts(retsts);
 
   if (fileified != NULL)
     PerlMem_free(fileified);
+  if (vmsname != NULL)
+    PerlMem_free(vmsname);
   return FALSE;  /* Should never get here */
 
 }
