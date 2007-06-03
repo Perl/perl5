@@ -10937,6 +10937,7 @@ Perl_cando_by_name_int
   struct itmlst_3 usrprolst[2] = {{sizeof curprv, CHP$_PRIV, &curprv, &retlen},
          {0,0,0,0}};
   struct dsc$descriptor_s usrprodsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
+  Stat_t st;
   static int profile_context = -1;
 
   if (!fname || !*fname) return FALSE;
@@ -10968,12 +10969,16 @@ Perl_cando_by_name_int
     strcpy(vmsname,fname);
   }
 
-  /* sys$check_access needs a file spec, not a directory spec */
+  /* sys$check_access needs a file spec, not a directory spec.
+   * Don't use flex_stat here, as that depends on thread context
+   * having been initialized, and we may get here during startup.
+   */
 
   retlen = namdsc.dsc$w_length = strlen(vmsname);
   if (vmsname[retlen-1] == ']' 
       || vmsname[retlen-1] == '>' 
-      || vmsname[retlen-1] == ':') {
+      || vmsname[retlen-1] == ':'
+      || (!stat(vmsname, (stat_t *)&st) && S_ISDIR(st.st_mode))) {
 
       if (!do_fileify_dirspec(vmsname,fileified,1,NULL)) {
         PerlMem_free(fileified);
@@ -10981,6 +10986,9 @@ Perl_cando_by_name_int
         return FALSE;
       }
       fname = fileified;
+  }
+  else {
+      fname = vmsname;
   }
 
   retlen = namdsc.dsc$w_length = strlen(fname);
