@@ -4381,6 +4381,18 @@ sub kt
         }
     }
 }
+{
+    local $Message = "BBC(Bleadperl Breaks CPAN) Today: String::Multibyte";
+    my $re  = qr/(?:[\x00-\xFF]{4})/;
+    my $hyp = "\0\0\0-";
+    my $esc = "\0\0\0\\";
+
+    my $str = "$esc$hyp$hyp$esc$esc";
+    my @a = ($str =~ /\G(?:\Q$esc$esc\E|\Q$esc$hyp\E|$re)/g);
+
+    iseq(0+@a,3);
+    iseq(join('=', @a),"$esc$hyp=$hyp=$esc$esc");
+}
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
 # Keep the following tests last -- they may crash perl
@@ -4462,7 +4474,7 @@ ok($@=~/\QSequence \k... not terminated in regex;\E/);
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 1948;
+    $::TestCount = 1950;
     print "1..$::TestCount\n";
 }
 

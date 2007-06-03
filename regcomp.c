@@ -1966,7 +1966,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                 }
                 if ( count == 1 ) {
                     SV **tmp = av_fetch( revcharmap, idx, 0);
-                    char *ch = SvPV_nolen( *tmp );
+                    STRLEN len;
+                    char *ch = SvPV( *tmp, len );
                     DEBUG_OPTIMISE_r({
                         SV *sv=sv_newmortal();
                         PerlIO_printf( Perl_debug_log,
@@ -1985,11 +1986,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                         str=STRING(convert);
                         STR_LEN(convert)=0;
                     }
-                    while (*ch) {
+                    STR_LEN(convert) += len;
+                    while (len--)
                         *str++ = *ch++;
-                        STR_LEN(convert)++;
-                    }
-                    
 		} else {
 #ifdef DEBUGGING	    
 		    if (state>1)
