@@ -131,18 +131,55 @@ typedef struct regexp_engine {
     SV*     (*checkstr) (pTHX_ REGEXP * const rx);
     void    (*free) (pTHX_ REGEXP * const rx);
     void    (*numbered_buff_FETCH) (pTHX_ REGEXP * const rx, const I32 paren,
-                             SV * const sv);
+                                    SV * const sv);
     void    (*numbered_buff_STORE) (pTHX_ REGEXP * const rx, const I32 paren,
                                    SV const * const value);
     I32     (*numbered_buff_LENGTH) (pTHX_ REGEXP * const rx, const SV * const sv,
                                     const I32 paren);
-    SV*     (*named_buff_FETCH) (pTHX_ REGEXP * const rx, SV * const key,
-                                 const U32 flags);
+    SV*     (*named_buff) (pTHX_ REGEXP * const rx, SV * const key,
+                           SV * const value, const U32 flags);
+    SV*     (*named_buff_iter) (pTHX_ REGEXP * const rx, const SV * const lastkey,
+                                const U32 flags);
     SV*     (*qr_package)(pTHX_ REGEXP * const rx);
 #ifdef USE_ITHREADS
     void*   (*dupe) (pTHX_ REGEXP * const rx, CLONE_PARAMS *param);
 #endif
 } regexp_engine;
+
+/*
+  These are passed to the numbered capture variable callbacks as the
+  paren name. >= 1 is reserved for actual numbered captures, i.e. $1,
+  $2 etc.
+*/
+#define RXf_PREMATCH  -2 /* $` / ${^PREMATCH}  */
+#define RXf_POSTMATCH -1 /* $' / ${^POSTMATCH} */
+#define RXf_MATCH      0 /* $& / ${^MATCH}     */
+
+/*
+  Flags that are passed to the named_buff and named_buff_iter
+  callbacks above. Those routines are called from universal.c via the
+  Tie::Hash::NamedCapture interface for %+ and %- and the re::
+  functions in the same file.
+*/
+
+/* The Tie::Hash::NamedCapture operation this is part of, if any */
+#define RXf_HASH_FETCH     0x0001
+#define RXf_HASH_STORE     0x0002
+#define RXf_HASH_DELETE    0x0004
+#define RXf_HASH_CLEAR     0x0008
+#define RXf_HASH_EXISTS    0x0010
+#define RXf_HASH_SCALAR    0x0020
+#define RXf_HASH_FIRSTKEY  0x0040
+#define RXf_HASH_NEXTKEY   0x0080
+
+/* Whether %+ or %- is being operated on */
+#define RXf_HASH_ONE       0x0100 /* %+ */
+#define RXf_HASH_ALL       0x0200 /* %- */
+
+/* Whether this is being called from a re:: function */
+#define RXf_HASH_REGNAME         0x0400
+#define RXf_HASH_REGNAMES        0x0800
+#define RXf_HASH_REGNAMES_COUNT  0x1000 
 
 /* Flags stored in regexp->extflags 
  * These are used by code external to the regexp engine

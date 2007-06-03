@@ -990,6 +990,7 @@ ext/re/re_top.h			re extension symbol hiding header
 ext/re/re.xs			re extension external subroutines
 ext/re/t/lexical_debug.pl	generate debug output for lexical re 'debug'
 ext/re/t/lexical_debug.t	test that lexical re 'debug' works
+ext/re/t/qr.t			test that qr// is a Regexp
 ext/re/t/re_funcs.t		see if exportable funcs from re.pm work
 ext/re/t/regop.pl		generate debug output for various patterns
 ext/re/t/regop.t		test RE optimizations by scraping debug output
@@ -3753,6 +3754,7 @@ t/op/recurse.t			See if deep recursion works
 t/op/ref.t			See if refs and objects work
 t/op/regexp_email.t		See if regex recursion works by parsing email addresses
 t/op/regexp_namedcapture.t	Make sure glob assignment doesn't break named capture
+t/op/regexp_nc_tie.t	        Test the tied methods of Tie::Hash::NamedCapture
 t/op/regexp_noamp.t		See if regular expressions work with optimizations
 t/op/regexp_notrie.t		See if regular expressions work without trie optimisation
 t/op/regexp_pmod.t		See if regexp /p modifier works as expected

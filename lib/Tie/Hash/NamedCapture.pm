@@ -1,52 +1,17 @@
 package Tie::Hash::NamedCapture;
 
-use strict;
-use warnings;
+our $VERSION = "0.06";
 
-our $VERSION = "0.05";
+# The real meat implemented in XS in universal.c in the core, but this
+# method was left behind because gv.c expects a Purl-Perl method in
+# this package when it loads the tie magic for %+ and %-
+
+my ($one, $all) = Tie::Hash::NamedCapture::flags();
 
 sub TIEHASH {
-    my $classname = shift;
-    my %opts = @_;
-
-    my $self = bless { all => $opts{all} }, $classname;
-    return $self;
-}
-
-sub FETCH {
-    return re::regname($_[1],$_[0]->{all});
-}
-
-sub STORE {
-    require Carp;
-    Carp::croak("STORE forbidden: hashes tied to ",__PACKAGE__," are read-only.");
-}
-
-sub FIRSTKEY {
-    re::regnames_iterinit();
-    return $_[0]->NEXTKEY;
-}
-
-sub NEXTKEY {
-    return re::regnames_iternext($_[0]->{all});
-}
-
-sub EXISTS {
-    return defined re::regname( $_[1], $_[0]->{all});
-}
-
-sub DELETE {
-    require Carp;
-    Carp::croak("DELETE forbidden: hashes tied to ",__PACKAGE__," are read-only");
-}
-
-sub CLEAR {
-    require Carp;
-    Carp::croak("CLEAR forbidden: hashes tied to ",__PACKAGE__," are read-only");
-}
-
-sub SCALAR {
-    return scalar re::regnames($_[0]->{all});
+    my ($pkg, %arg) = @_;
+    my $flag = $arg{all} ? $all : $one;
+    bless \$flag => $pkg;
 }
 
 tie %+, __PACKAGE__;
@@ -91,6 +56,7 @@ buffers that have captured (and that are thus associated to defined values).
 
 =head1 SEE ALSO
 
-L<re>, L<perlmodlib/Pragmatic Modules>, L<perlvar/"%+">, L<perlvar/"%-">.
+L<perlreapi>, L<re>, L<perlmodlib/Pragmatic Modules>, L<perlvar/"%+">,
+L<perlvar/"%-">.
 
 =cut

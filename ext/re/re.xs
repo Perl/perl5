@@ -30,8 +30,10 @@ extern void	my_reg_numbered_buff_store(pTHX_ REGEXP * const rx, const I32 paren,
 extern I32	my_reg_numbered_buff_length(pTHX_ REGEXP * const rx,
 					    const SV * const sv, const I32 paren);
 
-extern SV*	my_reg_named_buff_fetch(pTHX_ REGEXP * const rx, SV * const key,
-					const U32 flags);
+extern SV*	my_reg_named_buff(pTHX_ REGEXP * const, SV * const, SV * const,
+                              const U32);
+extern SV*	my_reg_named_buff_iter(pTHX_ REGEXP * const rx,
+                                   const SV * const lastkey, const U32 flags);
 
 extern SV*      my_reg_qr_package(pTHX_ REGEXP * const rx);
 #if defined(USE_ITHREADS)
@@ -51,7 +53,8 @@ const struct regexp_engine my_reg_engine = {
         my_reg_numbered_buff_fetch,
         my_reg_numbered_buff_store,
         my_reg_numbered_buff_length,
-        my_reg_named_buff_fetch,
+        my_reg_named_buff,
+        my_reg_named_buff_iter,
         my_reg_qr_package,
 #if defined(USE_ITHREADS)
         my_regdupe 

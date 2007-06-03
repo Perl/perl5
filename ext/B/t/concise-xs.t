@@ -117,9 +117,9 @@ use Getopt::Std;
 use Carp;
 use Test::More tests => ( # per-pkg tests (function ct + require_ok)
 			  40 + 16	# Data::Dumper, Digest::MD5
-			  + 517 + 262	# B::Deparse, B
+			  + 517 + 276	# B::Deparse, B
 			  + 595 + 190	# POSIX, IO::Socket
-			  - 6);		# fudge
+			  - 20);		# fudge
 
 require_ok("B::Concise");
 

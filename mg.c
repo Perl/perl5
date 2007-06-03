@@ -603,15 +603,15 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
     }
     case '`':
       do_prematch:
-      paren = -2;
+      paren = RXf_PREMATCH;
       goto maybegetparen;
     case '\'':
       do_postmatch:
-      paren = -1;
+      paren = RXf_POSTMATCH;
       goto maybegetparen;
     case '&':
       do_match:
-      paren = 0;
+      paren = RXf_MATCH;
       goto maybegetparen;
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
@@ -2235,15 +2235,15 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
           goto do_match;
     case '`': /* ${^PREMATCH} caught below */
       do_prematch:
-      paren = -2;
+      paren = RXf_PREMATCH;
       goto setparen;
     case '\'': /* ${^POSTMATCH} caught below */
       do_postmatch:
-      paren = -1;
+      paren = RXf_POSTMATCH;
       goto setparen;
     case '&':
       do_match:
-      paren = 0;
+      paren = RXf_MATCH;
       goto setparen;
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':

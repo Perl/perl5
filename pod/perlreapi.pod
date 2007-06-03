@@ -24,8 +24,10 @@ structure of the following format:
                                        SV const * const value);
         I32     (*numbered_buff_LENGTH) (pTHX_ REGEXP * const rx, const SV * const sv,
                                         const I32 paren);
-        SV*     (*named_buff_FETCH) (pTHX_ REGEXP * const rx, SV * const sv,
-                                     const U32 flags);
+        SV*     (*named_buff) (pTHX_ REGEXP * const rx, SV * const key,
+                               SV * const value, U32 flags);
+        SV*     (*named_buff_iter) (pTHX_ REGEXP * const rx, const SV * const lastkey,
+                                    const U32 flags);
         SV*     (*qr_package)(pTHX_ REGEXP * const rx);
     #ifdef USE_ITHREADS
         void*   (*dupe) (pTHX_ REGEXP * const rx, CLONE_PARAMS *param);
@@ -186,38 +188,45 @@ can release any resources pointed to by the C<pprivate> member of the
 regexp structure. This is only responsible for freeing private data;
 perl will handle releasing anything else contained in the regexp structure.
 
-=head2 numbered_buff_FETCH
+=head2 Numbered capture callbacks
 
-    void numbered_buff_FETCH(pTHX_ REGEXP * const rx, const I32 paren,
-                             SV * const sv);
-
-Called to get the value of C<$`>, C<$'>, C<$&> (and their named
-equivalents, see L<perlvar>) and the numbered capture buffers (C<$1>,
-C<$2>, ...).
+Called to get/set the value of C<$`>, C<$'>, C<$&> and their named
+equivalents, ${^PREMATCH}, ${^POSTMATCH} and $^{MATCH}, as well as the
+numbered capture buffers (C<$1>, C<$2>, ...).
 
 The C<paren> paramater will be C<-2> for C<$`>, C<-1> for C<$'>, C<0>
 for C<$&>, C<1> for C<$1> and so forth.
 
-C<sv> should be set to the scalar to return, the scalar is passed as
-an argument rather than being returned from the function because when
-it's called perl already has a scalar to store the value, creating
-another one would be redundant. The scalar can be set with
-C<sv_setsv>, C<sv_setpvn> and friends, see L<perlapi>.
+The names have been chosen by analogy with L<Tie::Scalar> methods
+names with an additional B<LENGTH> callback for efficiency. However
+named capture variables are currently not tied internally but
+implemented via magic.
+
+=head3 numbered_buff_FETCH
+
+    void numbered_buff_FETCH(pTHX_ REGEXP * const rx, const I32 paren,
+                             SV * const sv);
+
+Fetch a specified numbered capture. C<sv> should be set to the scalar
+to return, the scalar is passed as an argument rather than being
+returned from the function because when it's called perl already has a
+scalar to store the value, creating another one would be
+redundant. The scalar can be set with C<sv_setsv>, C<sv_setpvn> and
+friends, see L<perlapi>.
 
 This callback is where perl untaints its own capture variables under
 taint mode (see L<perlsec>). See the C<Perl_reg_numbered_buff_get>
 function in F<regcomp.c> for how to untaint capture variables if
 that's something you'd like your engine to do as well.
 
-=head2 numbered_buff_STORE
+=head3 numbered_buff_STORE
 
     void    (*numbered_buff_STORE) (pTHX_ REGEXP * const rx, const I32 paren,
                                     SV const * const value);
 
-Called to set the value of a numbered capture variable. C<paren> is
-the paren number (see the L<mapping|/numbered_buff_FETCH> above) and
-C<value> is the scalar that is to be used as the new value. It's up to
-the engine to make sure this is used as the new value (or reject it).
+Set the value of a numbered capture variable. C<value> is the scalar
+that is to be used as the new value. It's up to the engine to make
+sure this is used as the new value (or reject it).
 
 Example:
 
@@ -262,19 +271,19 @@ behave in the same situation:
 
 Because C<$sv> is C<undef> when the C<y///> operator is applied to it
 the transliteration won't actually execute and the program won't
-C<die>. This is different to how 5.8 behaved since the capture
-variables were READONLY variables then, now they'll just die on
-assignment in the default engine.
+C<die>. This is different to how 5.8 and earlier versions behaved
+since the capture variables were READONLY variables then, now they'll
+just die when assigned to in the default engine.
 
-=head2 numbered_buff_LENGTH
+=head3 numbered_buff_LENGTH
 
     I32 numbered_buff_LENGTH (pTHX_ REGEXP * const rx, const SV * const sv,
                               const I32 paren);
 
 Get the C<length> of a capture variable. There's a special callback
 for this so that perl doesn't have to do a FETCH and run C<length> on
-the result, since the length is (in perl's case) known from a memory
-offset this is much more efficient:
+the result, since the length is (in perl's case) known from an offset
+stored in C<<rx->offs> this is much more efficient:
 
     I32 s1  = rx->offs[paren].start;
     I32 s2  = rx->offs[paren].end;
@@ -284,14 +293,61 @@ This is a little bit more complex in the case of UTF-8, see what
 C<Perl_reg_numbered_buff_length> does with
 L<is_utf8_string_loclen|perlapi/is_utf8_string_loclen>.
 
-=head2 named_buff_FETCH
+=head2 Named capture callbacks
 
-    SV* named_buff_FETCH(pTHX_ REGEXP * const rx, SV * const key,
-                          const U32 flags);
+Called to get/set the value of C<%+> and C<%-> as well as by some
+utility functions in L<re>.
 
-Called to get the value of key in the C<%+> and C<%-> hashes, C<key>
-is the hash key being requested and if C<flags & 1> is true C<%-> is
-being requested (and C<%+> if it's not).
+There are two callbacks, C<named_buff> is called in all the cases the
+FETCH, STORE, DELETE, CLEAR, EXISTS and SCALAR L<Tie::Hash> callbacks
+would be on changes to C<%+> and C<%-> and C<named_buff_iter> in the
+same cases as FIRSTKEY and NEXTKEY.
+
+The C<flags> parameter can be used to determine which of these
+operations the callbacks should respond to, the following flags are
+currently defined:
+
+Which L<Tie::Hash> operation is being performed from the Perl level on
+C<%+> or C<%+>, if any:
+
+    RXf_HASH_FETCH
+    RXf_HASH_STORE
+    RXf_HASH_DELETE
+    RXf_HASH_CLEAR
+    RXf_HASH_EXISTS
+    RXf_HASH_SCALAR
+    RXf_HASH_FIRSTKEY
+    RXf_HASH_NEXTKEY
+
+Whether C<%+> or C<%-> is being operated on, if any.
+
+    RXf_HASH_ONE /* %+ */
+    RXf_HASH_ALL /* %- */
+
+Whether this is being called as C<re::regname>, C<re::regnames> or
+C<C<re::regnames_count>, if any. The first two will be combined with
+C<RXf_HASH_ONE> or C<RXf_HASH_ALL>.
+
+    RXf_HASH_REGNAME
+    RXf_HASH_REGNAMES
+    RXf_HASH_REGNAMES_COUNT
+
+Internally C<%+> and C<%-> are implemented with a real tied interface
+via L<Tie::Hash::NamedCapture>. The methods in that package will call
+back into these functions. However the usage of
+L<Tie::Hash::NamedCapture> for this purpose might change in future
+releases. For instance this might be implemented by magic instead
+(would need an extension to mgvtbl).
+
+=head3 named_buff
+
+    SV*     (*named_buff) (pTHX_ REGEXP * const rx, SV * const key,
+                           SV * const value, U32 flags);
+
+=head3 named_buff_iter
+
+    SV*     (*named_buff_iter) (pTHX_ REGEXP * const rx, const SV * const lastkey,
+                                const U32 flags);
 
 =head2 qr_package
 
@@ -302,10 +358,14 @@ qr//>). It is recommended that engines change this to their package
 name for identification regardless of whether they implement methods
 on the object.
 
-A callback implementation might be:
+The package this method returns should also have the internal
+C<Regexp> package in its C<@ISA>. C<qr//->isa("Regexp")> should always
+be true regardless of what engine is being used.
+
+Example implementation might be:
 
     SV*
-    Example_reg_qr_package(pTHX_ REGEXP * const rx)
+    Example_qr_package(pTHX_ REGEXP * const rx)
     {
     	PERL_UNUSED_ARG(rx);
     	return newSVpvs("re::engine::Example");
@@ -333,14 +393,8 @@ following snippet:
             SvTYPE(sv) == SVt_PVMG &&
             (mg = mg_find(sv, PERL_MAGIC_qr))) /* assignment deliberate */
         {
-            re = (REGEXP *)mg->mg_obj; 
+            re = (REGEXP *)mg->mg_obj;
         }
-
-Or use the (CURRENTLY UNDOCUMENETED!) C<Perl_get_re_arg> function:
-
-    void meth(SV * rv)
-    PPCODE:
-        const REGEXP * const re = (REGEXP *)Perl_get_re_arg( aTHX_ rv, 0, NULL );
 
 =head2 dupe
 
@@ -448,8 +502,9 @@ TODO, see L<http://www.mail-archive.com/perl5-changes@perl.org/msg17328.html>
 
 =head2 C<extflags>
 
-This will be used by perl to see what flags the regexp was compiled with, this
-will normally be set to the value of the flags parameter on L</comp>.
+This will be used by perl to see what flags the regexp was compiled
+with, this will normally be set to the value of the flags parameter by
+the L<comp|/comp> callback.
 
 =head2 C<minlen> C<minlenret>
 
@@ -479,7 +534,9 @@ Left offset from pos() to start match at.
 
 =head2 C<substrs>
 
-TODO: document
+Substring data about strings that must appear in the final match. This
+is currently only used internally by perl's engine for but might be
+used in the future for all engines for optimisations like C<minlen>.
 
 =head2 C<nparens>, C<lasparen>, and C<lastcloseparen>
 
@@ -490,7 +547,7 @@ the last close paren to be entered.
 =head2 C<intflags>
 
 The engine's private copy of the flags the pattern was compiled with. Usually
-this is the same as C<extflags> unless the engine chose to modify one of them
+this is the same as C<extflags> unless the engine chose to modify one of them.
 
 =head2 C<pprivate>
 
@@ -520,8 +577,18 @@ C<$paren >= 1>.
 
 =head2 C<precomp> C<prelen>
 
-Used for debugging purposes. C<precomp> holds a copy of the pattern
-that was compiled and C<prelen> its length.
+Used for optimisations. C<precomp> holds a copy of the pattern that
+was compiled and C<prelen> its length. When a new pattern is to be
+compiled (such as inside a loop) the internal C<regcomp> operator
+checks whether the last compiled C<REGEXP>'s C<precomp> and C<prelen>
+are equivalent to the new one, and if so uses the old pattern instead
+of compiling a new one.
+
+The relevant snippet from C<Perl_pp_regcomp>:
+
+	if (!re || !re->precomp || re->prelen != (I32)len ||
+	    memNE(re->precomp, t, len))
+        /* Compile a new pattern */
 
 =head2 C<paren_names>
 
@@ -563,11 +630,11 @@ inline modifiers it's best to have C<qr//> stringify to the supplied pattern,
 note that this will create invalid patterns in cases such as:
 
     my $x = qr/a|b/;  # "a|b"
-    my $y = qr/c/;    # "c"
+    my $y = qr/c/i;   # "c"
     my $z = qr/$x$y/; # "a|bc"
 
-There's no solution for such problems other than making the custom engine
-understand some for of inline modifiers.
+There's no solution for this problem other than making the custom
+engine understand a construct like C<(?:)>.
 
 The C<Perl_reg_stringify> in F<regcomp.c> does the stringification work.
 

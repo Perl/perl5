@@ -1893,9 +1893,31 @@ PERL_CALLCONV regnode*	Perl_regnext(pTHX_ regnode* p)
 			__attribute__nonnull__(pTHX_1);
 
 
-PERL_CALLCONV SV*	Perl_reg_named_buff_fetch(pTHX_ REGEXP * const rx, SV * const key, const U32 flags)
+PERL_CALLCONV SV*	Perl_reg_named_buff(pTHX_ REGEXP * const rx, SV * const key, SV * const value, const U32 flags)
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV SV*	Perl_reg_named_buff_iter(pTHX_ REGEXP * const rx, const SV * const lastkey, const U32 flags)
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV SV*	Perl_reg_named_buff_fetch(pTHX_ REGEXP * const rx, SV * const namesv, const U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
+
+PERL_CALLCONV bool	Perl_reg_named_buff_exists(pTHX_ REGEXP * const rx, SV * const key, const U32 flags)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+PERL_CALLCONV SV*	Perl_reg_named_buff_firstkey(pTHX_ REGEXP * const rx, const U32 flags)
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV SV*	Perl_reg_named_buff_nextkey(pTHX_ REGEXP * const rx, const U32 flags)
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV SV*	Perl_reg_named_buff_scalar(pTHX_ REGEXP * const rx, const U32 flags)
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV SV*	Perl_reg_named_buff_all(pTHX_ REGEXP * const rx, const U32 flags)
+			__attribute__nonnull__(pTHX_1);
 
 
 PERL_CALLCONV void	Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const rx, const I32 paren, SV * const sv)

@@ -405,7 +405,14 @@ Perl_re_intuit_start
 Perl_re_intuit_string
 Perl_regexec_flags
 Perl_regnext
+Perl_reg_named_buff
+Perl_reg_named_buff_iter
 Perl_reg_named_buff_fetch
+Perl_reg_named_buff_exists
+Perl_reg_named_buff_firstkey
+Perl_reg_named_buff_nextkey
+Perl_reg_named_buff_scalar
+Perl_reg_named_buff_all
 Perl_reg_numbered_buff_fetch
 Perl_reg_numbered_buff_store
 Perl_reg_numbered_buff_length

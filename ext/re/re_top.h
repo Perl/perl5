@@ -19,7 +19,8 @@
 #define Perl_reg_numbered_buff_fetch  my_reg_numbered_buff_fetch
 #define Perl_reg_numbered_buff_store  my_reg_numbered_buff_store
 #define Perl_reg_numbered_buff_length  my_reg_numbered_buff_length
-#define Perl_reg_named_buff_fetch  my_reg_named_buff_fetch
+#define Perl_reg_named_buff      my_reg_named_buff
+#define Perl_reg_named_buff_iter my_reg_named_buff_iter
 #define Perl_reg_qr_package        my_reg_qr_package
 
 #define PERL_NO_GET_CONTEXT

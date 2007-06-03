@@ -704,8 +704,15 @@
 #define regexec_flags		Perl_regexec_flags
 #define regnext			Perl_regnext
 #if defined(PERL_CORE) || defined(PERL_EXT)
-#define reg_named_buff_fetch	Perl_reg_named_buff_fetch
+#define reg_named_buff		Perl_reg_named_buff
+#define reg_named_buff_iter	Perl_reg_named_buff_iter
 #endif
+#define reg_named_buff_fetch	Perl_reg_named_buff_fetch
+#define reg_named_buff_exists	Perl_reg_named_buff_exists
+#define reg_named_buff_firstkey	Perl_reg_named_buff_firstkey
+#define reg_named_buff_nextkey	Perl_reg_named_buff_nextkey
+#define reg_named_buff_scalar	Perl_reg_named_buff_scalar
+#define reg_named_buff_all	Perl_reg_named_buff_all
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define reg_numbered_buff_fetch	Perl_reg_numbered_buff_fetch
 #define reg_numbered_buff_store	Perl_reg_numbered_buff_store
@@ -2980,8 +2987,15 @@
 #define regexec_flags(a,b,c,d,e,f,g,h)	Perl_regexec_flags(aTHX_ a,b,c,d,e,f,g,h)
 #define regnext(a)		Perl_regnext(aTHX_ a)
 #if defined(PERL_CORE) || defined(PERL_EXT)
-#define reg_named_buff_fetch(a,b,c)	Perl_reg_named_buff_fetch(aTHX_ a,b,c)
+#define reg_named_buff(a,b,c,d)	Perl_reg_named_buff(aTHX_ a,b,c,d)
+#define reg_named_buff_iter(a,b,c)	Perl_reg_named_buff_iter(aTHX_ a,b,c)
 #endif
+#define reg_named_buff_fetch(a,b,c)	Perl_reg_named_buff_fetch(aTHX_ a,b,c)
+#define reg_named_buff_exists(a,b,c)	Perl_reg_named_buff_exists(aTHX_ a,b,c)
+#define reg_named_buff_firstkey(a,b)	Perl_reg_named_buff_firstkey(aTHX_ a,b)
+#define reg_named_buff_nextkey(a,b)	Perl_reg_named_buff_nextkey(aTHX_ a,b)
+#define reg_named_buff_scalar(a,b)	Perl_reg_named_buff_scalar(aTHX_ a,b)
+#define reg_named_buff_all(a,b)	Perl_reg_named_buff_all(aTHX_ a,b)
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define reg_numbered_buff_fetch(a,b,c)	Perl_reg_numbered_buff_fetch(aTHX_ a,b,c)
 #define reg_numbered_buff_store(a,b,c)	Perl_reg_numbered_buff_store(aTHX_ a,b,c)

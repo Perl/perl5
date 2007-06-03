@@ -7,8 +7,7 @@ use warnings;
 our $VERSION     = "0.08";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = qw(is_regexp regexp_pattern regmust 
-                      regname regnames 
-                      regnames_count regnames_iterinit regnames_iternext);
+                      regname regnames regnames_count);
 our %EXPORT_OK = map { $_ => 1 } @EXPORT_OK;
 
 # *** WARNING *** WARNING *** WARNING *** WARNING *** WARNING ***
@@ -484,18 +483,6 @@ otherwise returns the first defined buffer.
 Returns a list of all of the named buffers defined in the last successful
 match. If $all is true, then it returns all names defined, if not it returns
 only names which were involved in the match.
-
-=item regnames_iterinit()
-
-Initializes the internal hash iterator associated to the last successful
-matches named capture buffers.
-
-=item regnames_iternext($all)
-
-Gets the next key from the named capture buffer hash associated with the
-last successful match. If $all is true returns the keys of all of the
-distinct named buffers in the pattern, if not returns only those names
-used in the last successful match.
 
 =item regnames_count()
 

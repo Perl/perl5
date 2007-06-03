@@ -228,8 +228,35 @@
 #define CALLREG_NUMBUF_LENGTH(rx,sv,paren)                              \
     CALL_FPTR((rx)->engine->numbered_buff_LENGTH)(aTHX_ (rx),(sv),(paren))
 
-#define CALLREG_NAMEDBUF_FETCH(rx,name,flags) \
-    CALL_FPTR((rx)->engine->named_buff_FETCH)(aTHX_ (rx),(name),(flags))
+#define CALLREG_NAMED_BUFF_FETCH(rx, key, flags) \
+    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), (key), NULL, ((flags) | RXf_HASH_FETCH))
+
+#define CALLREG_NAMED_BUFF_STORE(rx, key, value, flags) \
+    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), (key), (value), ((flags) | RXf_HASH_STORE))
+
+#define CALLREG_NAMED_BUFF_DELETE(rx, key, flags) \
+    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx),(key), NULL, ((flags) | RXf_HASH_DELETE))
+
+#define CALLREG_NAMED_BUFF_CLEAR(rx, flags) \
+    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), NULL, NULL, ((flags) | RXf_HASH_CLEAR))
+
+#define CALLREG_NAMED_BUFF_EXISTS(rx, key, flags) \
+    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), (key), NULL, ((flags) | RXf_HASH_EXISTS))
+
+#define CALLREG_NAMED_BUFF_FIRSTKEY(rx, flags) \
+    CALL_FPTR((rx)->engine->named_buff_iter)(aTHX_ (rx), NULL, ((flags) | RXf_HASH_FIRSTKEY))
+
+#define CALLREG_NAMED_BUFF_NEXTKEY(rx, lastkey, flags) \
+    CALL_FPTR((rx)->engine->named_buff_iter)(aTHX_ (rx), (lastkey), ((flags) | RXf_HASH_NEXTKEY))
+
+#define CALLREG_NAMED_BUFF_SCALAR(rx, flags) \
+    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), NULL, NULL, ((flags) | RXf_HASH_SCALAR))
+
+#define CALLREG_NAMED_BUFF_COUNT(rx) \
+    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), NULL, NULL, RXf_HASH_REGNAMES_COUNT)
+
+#define CALLREG_NAMED_BUFF_ALL(rx, flags) \
+    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), NULL, NULL, flags)
 
 #define CALLREG_PACKAGE(rx) \
     CALL_FPTR((rx)->engine->qr_package)(aTHX_ (rx))

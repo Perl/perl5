@@ -1014,7 +1014,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	        if (*name == '!')
 		    require_tie_mod(gv, "!", newSVpvs("Errno"), "TIEHASH", 1);
 		else if (*name == '-' || *name == '+')
-		    require_tie_mod(gv, name, newSVpvs("Tie::Hash::NamedCapture"), "FETCH", 0);
+		    require_tie_mod(gv, name, newSVpvs("Tie::Hash::NamedCapture"), "TIEHASH", 0);
 	    }
 	}
 	return gv;
@@ -1224,7 +1224,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
             SvREADONLY_on(av);
 
             if (sv_type == SVt_PVHV || sv_type == SVt_PVGV)
-                require_tie_mod(gv, name, newSVpvs("Tie::Hash::NamedCapture"), "FETCH", 0);
+                require_tie_mod(gv, name, newSVpvs("Tie::Hash::NamedCapture"), "TIEHASH", 0);
 
             break;
 	}

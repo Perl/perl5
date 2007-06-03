@@ -4797,11 +4797,52 @@ reStudy:
 
 
 SV*
+Perl_reg_named_buff(pTHX_ REGEXP * const rx, SV * const key, SV * const value,
+                    const U32 flags)
+{
+    PERL_UNUSED_ARG(value);
+
+    if (flags & RXf_HASH_FETCH) {
+        return reg_named_buff_fetch(rx, key, flags);
+    } else if (flags & (RXf_HASH_STORE | RXf_HASH_DELETE | RXf_HASH_CLEAR)) {
+        Perl_croak(aTHX_ PL_no_modify);
+        return NULL;
+    } else if (flags & RXf_HASH_EXISTS) {
+        return reg_named_buff_exists(rx, key, flags)
+            ? &PL_sv_yes
+            : &PL_sv_no;
+    } else if (flags & RXf_HASH_REGNAMES) {
+        return reg_named_buff_all(rx, flags);
+    } else if (flags & (RXf_HASH_SCALAR | RXf_HASH_REGNAMES_COUNT)) {
+        return reg_named_buff_scalar(rx, flags);
+    } else {
+        Perl_croak(aTHX_ "panic: Unknown flags %d in named_buff", (int)flags);
+        return NULL;
+    }
+}
+
+SV*
+Perl_reg_named_buff_iter(pTHX_ REGEXP * const rx, const SV * const lastkey,
+                         const U32 flags)
+{
+    PERL_UNUSED_ARG(lastkey);
+
+    if (flags & RXf_HASH_FIRSTKEY)
+        return reg_named_buff_firstkey(rx, flags);
+    else if (flags & RXf_HASH_NEXTKEY)
+        return reg_named_buff_nextkey(rx, flags);
+    else {
+        Perl_croak(aTHX_ "panic: Unknown flags %d in named_buff_iter", (int)flags);
+        return NULL;
+    }
+}
+
+SV*
 Perl_reg_named_buff_fetch(pTHX_ REGEXP * const rx, SV * const namesv, const U32 flags)
 {
     AV *retarray = NULL;
     SV *ret;
-    if (flags & 1) 
+    if (flags & RXf_HASH_ALL)
         retarray=newAV();
 
     if (rx && rx->paren_names) {
@@ -4811,9 +4852,9 @@ Perl_reg_named_buff_fetch(pTHX_ REGEXP * const rx, SV * const namesv, const U32 
             SV* sv_dat=HeVAL(he_str);
             I32 *nums=(I32*)SvPVX(sv_dat);
             for ( i=0; i<SvIVX(sv_dat); i++ ) {
-		if ((I32)(rx->nparens) >= nums[i]
-			&& rx->offs[nums[i]].start != -1
-			&& rx->offs[nums[i]].end != -1)
+                if ((I32)(rx->nparens) >= nums[i]
+                    && rx->offs[nums[i]].start != -1
+                    && rx->offs[nums[i]].end != -1)
                 {
                     ret = newSVpvs("");
                     CALLREG_NUMBUF_FETCH(rx,nums[i],ret);
@@ -4828,10 +4869,124 @@ Perl_reg_named_buff_fetch(pTHX_ REGEXP * const rx, SV * const namesv, const U32 
                 }
             }
             if (retarray)
-                return (SV*)retarray;
+                return newRV((SV*)retarray);
         }
     }
     return NULL;
+}
+
+bool
+Perl_reg_named_buff_exists(pTHX_ REGEXP * const rx, SV * const key,
+                           const U32 flags)
+{
+    if (rx && rx->paren_names) {
+        if (flags & RXf_HASH_ALL) {
+            return hv_exists_ent(rx->paren_names, key, 0);
+        } else {
+            if (CALLREG_NAMED_BUFF_FETCH(rx, key, flags)) {
+                return TRUE;
+            } else {
+                return FALSE;
+            }
+        }
+    } else {
+        return FALSE;
+    }
+}
+
+SV*
+Perl_reg_named_buff_firstkey(pTHX_ REGEXP * const rx, const U32 flags)
+{
+    (void)hv_iterinit(rx->paren_names);
+
+    return CALLREG_NAMED_BUFF_NEXTKEY(rx, NULL, flags & ~RXf_HASH_FIRSTKEY);
+}
+
+SV*
+Perl_reg_named_buff_nextkey(pTHX_ REGEXP * const rx, const U32 flags)
+{
+    if (rx && rx->paren_names) {
+        HV *hv = rx->paren_names;
+        HE *temphe;
+        while ( (temphe = hv_iternext_flags(hv,0)) ) {
+            IV i;
+            IV parno = 0;
+            SV* sv_dat = HeVAL(temphe);
+            I32 *nums = (I32*)SvPVX(sv_dat);
+            for ( i = 0; i < SvIVX(sv_dat); i++ ) {
+                if ((I32)(rx->lastcloseparen) >= nums[i] &&
+                    rx->offs[nums[i]].start != -1 &&
+                    rx->offs[nums[i]].end != -1)
+                {
+                    parno = nums[i];
+                    break;
+                }
+            }
+            if (parno || flags & RXf_HASH_ALL) {
+                STRLEN len;
+                char *pv = HePV(temphe, len);
+                return newSVpvn(pv,len);
+            }
+        }
+    }
+    return NULL;
+}
+
+SV*
+Perl_reg_named_buff_scalar(pTHX_ REGEXP * const rx, const U32 flags)
+{
+    SV *ret;
+    AV *av;
+    I32 length;
+
+    if (rx && rx->paren_names) {
+        if (flags & (RXf_HASH_ALL | RXf_HASH_REGNAMES_COUNT)) {
+            return newSViv(HvTOTALKEYS(rx->paren_names));
+        } else if (flags & RXf_HASH_ONE) {
+            ret = CALLREG_NAMED_BUFF_ALL(rx, (flags | RXf_HASH_REGNAMES));
+            av = (AV*)SvRV(ret);
+            length = av_len(av);
+            return newSViv(length + 1);
+        } else {
+            Perl_croak(aTHX_ "panic: Unknown flags %d in named_buff_scalar", (int)flags);
+            return NULL;
+        }
+    }
+    return &PL_sv_undef;
+}
+
+SV*
+Perl_reg_named_buff_all(pTHX_ REGEXP * const rx, const U32 flags)
+{
+    AV *av = newAV();
+
+    if (rx && rx->paren_names) {
+        HV *hv= rx->paren_names;
+        HE *temphe;
+        (void)hv_iterinit(hv);
+        while ( (temphe = hv_iternext_flags(hv,0)) ) {
+            IV i;
+            IV parno = 0;
+            SV* sv_dat = HeVAL(temphe);
+            I32 *nums = (I32*)SvPVX(sv_dat);
+            for ( i = 0; i < SvIVX(sv_dat); i++ ) {
+                if ((I32)(rx->lastcloseparen) >= nums[i] &&
+                    rx->offs[nums[i]].start != -1 &&
+                    rx->offs[nums[i]].end != -1)
+                {
+                    parno = nums[i];
+                    break;
+                }
+            }
+            if (parno || flags & RXf_HASH_ALL) {
+                STRLEN len;
+                char *pv = HePV(temphe, len);
+                av_push(av, newSVpvn(pv,len));
+            }
+        }
+    }
+
+    return newRV((SV*)av);
 }
 
 void
@@ -4846,13 +5001,13 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const rx, const I32 paren, SV * cons
         return;
     } 
     else               
-    if (paren == -2 && rx->offs[0].start != -1) {
+    if (paren == RXf_PREMATCH && rx->offs[0].start != -1) {
         /* $` */
 	i = rx->offs[0].start;
 	s = rx->subbeg;
     }
     else 
-    if (paren == -1 && rx->offs[0].end != -1) {
+    if (paren == RXf_POSTMATCH && rx->offs[0].end != -1) {
         /* $' */
 	s = rx->subbeg + rx->offs[0].end;
 	i = rx->sublen - rx->offs[0].end;
@@ -4930,7 +5085,8 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const rx, const SV * const sv,
 
     /* Some of this code was originally in C<Perl_magic_len> in F<mg.c> */
 	switch (paren) {
-      case -2: /* $` */
+      /* $` / ${^PREMATCH} */
+      case RXf_PREMATCH:
         if (rx->offs[0].start != -1) {
 			i = rx->offs[0].start;
 			if (i > 0) {
@@ -4940,7 +5096,8 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const rx, const SV * const sv,
 			}
 	    }
         return 0;
-      case -1: /* $' */
+      /* $' / ${^POSTMATCH} */
+      case RXf_POSTMATCH:
 	    if (rx->offs[0].end != -1) {
 			i = rx->sublen - rx->offs[0].end;
 			if (i > 0) {
@@ -4950,7 +5107,8 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const rx, const SV * const sv,
 			}
 	    }
         return 0;
-      default: /* $&, $1, $2, ... */
+      /* $& / ${^MATCH}, $1, $2, ... */
+      default:
 	    if (paren <= (I32)rx->nparens &&
             (s1 = rx->offs[paren].start) != -1 &&
             (t1 = rx->offs[paren].end) != -1)
