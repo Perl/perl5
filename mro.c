@@ -631,187 +631,6 @@ __dopoptosub_at(const PERL_CONTEXT *cxstk, I32 startingblock) {
     return i;
 }
 
-STATIC SV*
-__nextcan(pTHX_ SV* self, I32 throw_nomethod)
-{
-    register I32 cxix;
-    register const PERL_CONTEXT *ccstack = cxstack;
-    const PERL_SI *top_si = PL_curstackinfo;
-    HV* selfstash;
-    SV *stashname;
-    const char *fq_subname;
-    const char *subname;
-    STRLEN stashname_len;
-    STRLEN subname_len;
-    SV* sv;
-    GV** gvp;
-    AV* linear_av;
-    SV** linear_svp;
-    const char *hvname;
-    I32 items;
-    struct mro_meta* selfmeta;
-    HV* nmcache;
-
-    if(sv_isobject(self))
-        selfstash = SvSTASH(SvRV(self));
-    else
-        selfstash = gv_stashsv(self, 0);
-
-    assert(selfstash);
-
-    hvname = HvNAME_get(selfstash);
-    if (!hvname)
-        Perl_croak(aTHX_ "Can't use anonymous symbol table for method lookup");
-
-    cxix = __dopoptosub_at(cxstack, cxstack_ix);
-
-    /* This block finds the contextually-enclosing fully-qualified subname,
-       much like looking at (caller($i))[3] until you find a real sub that
-       isn't ANON, etc */
-    for (;;) {
-	GV* cvgv;
-	STRLEN fq_subname_len;
-
-        /* we may be in a higher stacklevel, so dig down deeper */
-        while (cxix < 0) {
-            if(top_si->si_type == PERLSI_MAIN)
-                Perl_croak(aTHX_ "next::method/next::can/maybe::next::method must be used in method context");
-            top_si = top_si->si_prev;
-            ccstack = top_si->si_cxstack;
-            cxix = __dopoptosub_at(ccstack, top_si->si_cxix);
-        }
-
-        if(CxTYPE((PERL_CONTEXT*)(&ccstack[cxix])) != CXt_SUB
-          || (PL_DBsub && GvCV(PL_DBsub) && ccstack[cxix].blk_sub.cv == GvCV(PL_DBsub))) {
-            cxix = __dopoptosub_at(ccstack, cxix - 1);
-            continue;
-        }
-
-        {
-            const I32 dbcxix = __dopoptosub_at(ccstack, cxix - 1);
-            if (PL_DBsub && GvCV(PL_DBsub) && dbcxix >= 0 && ccstack[dbcxix].blk_sub.cv == GvCV(PL_DBsub)) {
-                if(CxTYPE((PERL_CONTEXT*)(&ccstack[dbcxix])) != CXt_SUB) {
-                    cxix = dbcxix;
-                    continue;
-                }
-            }
-        }
-
-        cvgv = CvGV(ccstack[cxix].blk_sub.cv);
-
-        if(!isGV(cvgv)) {
-            cxix = __dopoptosub_at(ccstack, cxix - 1);
-            continue;
-        }
-
-        /* we found a real sub here */
-        sv = sv_2mortal(newSV(0));
-
-        gv_efullname3(sv, cvgv, NULL);
-
-        fq_subname = SvPVX(sv);
-        fq_subname_len = SvCUR(sv);
-
-        subname = strrchr(fq_subname, ':');
-        if(!subname)
-            Perl_croak(aTHX_ "next::method/next::can/maybe::next::method cannot find enclosing method");
-
-        subname++;
-        subname_len = fq_subname_len - (subname - fq_subname);
-        if(subname_len == 8 && strEQ(subname, "__ANON__")) {
-            cxix = __dopoptosub_at(ccstack, cxix - 1);
-            continue;
-        }
-        break;
-    }
-
-    /* If we made it to here, we found our context */
-
-    /* Initialize the next::method cache for this stash
-       if necessary */
-    selfmeta = HvMROMETA(selfstash);
-    if(!(nmcache = selfmeta->mro_nextmethod)) {
-        nmcache = selfmeta->mro_nextmethod = newHV();
-    }
-    else { /* Use the cached coderef if it exists */
-	HE* cache_entry = hv_fetch_ent(nmcache, sv, 0, 0);
-	if (cache_entry) {
-	    SV* const val = HeVAL(cache_entry);
-	    if(val == &PL_sv_undef) {
-		if(throw_nomethod)
-		    Perl_croak(aTHX_ "No next::method '%s' found for %s", subname, hvname);
-	    }
-	    return val;
-	}
-    }
-
-    /* beyond here is just for cache misses, so perf isn't as critical */
-
-    stashname_len = subname - fq_subname - 2;
-    stashname = sv_2mortal(newSVpvn(fq_subname, stashname_len));
-
-    linear_av = mro_get_linear_isa_c3(selfstash, 0); /* has ourselves at the top of the list */
-
-    linear_svp = AvARRAY(linear_av);
-    items = AvFILLp(linear_av) + 1;
-
-    /* Walk down our MRO, skipping everything up
-       to the contextually enclosing class */
-    while (items--) {
-        SV * const linear_sv = *linear_svp++;
-        assert(linear_sv);
-        if(sv_eq(linear_sv, stashname))
-            break;
-    }
-
-    /* Now search the remainder of the MRO for the
-       same method name as the contextually enclosing
-       method */
-    if(items > 0) {
-        while (items--) {
-            SV * const linear_sv = *linear_svp++;
-	    HV* curstash;
-	    GV* candidate;
-	    CV* cand_cv;
-
-            assert(linear_sv);
-            curstash = gv_stashsv(linear_sv, FALSE);
-
-            if (!curstash) {
-                if (ckWARN(WARN_SYNTAX))
-                    Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Can't locate package %"SVf" for @%s::ISA",
-                        (void*)linear_sv, hvname);
-                continue;
-            }
-
-            assert(curstash);
-
-            gvp = (GV**)hv_fetch(curstash, subname, subname_len, 0);
-            if (!gvp) continue;
-
-            candidate = *gvp;
-            assert(candidate);
-
-            if (SvTYPE(candidate) != SVt_PVGV)
-                gv_init(candidate, curstash, subname, subname_len, TRUE);
-
-            /* Notably, we only look for real entries, not method cache
-               entries, because in C3 the method cache of a parent is not
-               valid for the child */
-            if (SvTYPE(candidate) == SVt_PVGV && (cand_cv = GvCV(candidate)) && !GvCVGEN(candidate)) {
-                SvREFCNT_inc_simple_void_NN((SV*)cand_cv);
-                hv_store_ent(nmcache, newSVsv(sv), (SV*)cand_cv, 0);
-                return (SV*)cand_cv;
-            }
-        }
-    }
-
-    hv_store_ent(nmcache, newSVsv(sv), &PL_sv_undef, 0);
-    if(throw_nomethod)
-        Perl_croak(aTHX_ "No next::method '%s' found for %s", subname, hvname);
-    return &PL_sv_undef;
-}
-
 #include "XSUB.h"
 
 XS(XS_mro_get_linear_isa);
@@ -822,9 +641,7 @@ XS(XS_mro_is_universal);
 XS(XS_mro_invalidate_method_caches);
 XS(XS_mro_method_changed_in);
 XS(XS_mro_get_pkg_gen);
-XS(XS_next_can);
-XS(XS_next_method);
-XS(XS_maybe_next_method);
+XS(XS_mro_nextcan);
 
 void
 Perl_boot_core_mro(pTHX)
@@ -840,9 +657,7 @@ Perl_boot_core_mro(pTHX)
     newXSproto("mro::invalidate_all_method_caches", XS_mro_invalidate_method_caches, file, "");
     newXSproto("mro::method_changed_in", XS_mro_method_changed_in, file, "$");
     newXSproto("mro::get_pkg_gen", XS_mro_get_pkg_gen, file, "$");
-    newXS("next::can", XS_next_can, file);
-    newXS("next::method", XS_next_method, file);
-    newXS("maybe::next::method", XS_maybe_next_method, file);
+    newXS("mro::_nextcan", XS_mro_nextcan, file);
 }
 
 XS(XS_mro_get_linear_isa) {
@@ -1081,55 +896,194 @@ XS(XS_mro_get_pkg_gen)
     return;
 }
 
-XS(XS_next_can)
+XS(XS_mro_nextcan)
 {
     dVAR;
     dXSARGS;
-    SV* const self = ST(0);
-    SV* const methcv = __nextcan(aTHX_ self, 0);
+    SV* self = ST(0);
+    const I32 throw_nomethod = SvIVX(ST(1));
+    register I32 cxix;
+    register const PERL_CONTEXT *ccstack = cxstack;
+    const PERL_SI *top_si = PL_curstackinfo;
+    HV* selfstash;
+    SV *stashname;
+    const char *fq_subname;
+    const char *subname;
+    STRLEN stashname_len;
+    STRLEN subname_len;
+    SV* sv;
+    GV** gvp;
+    AV* linear_av;
+    SV** linear_svp;
+    const char *hvname;
+    I32 entries;
+    struct mro_meta* selfmeta;
+    HV* nmcache;
 
-    PERL_UNUSED_ARG(cv);
-    PERL_UNUSED_VAR(items);
+    SP -= items;
 
-    if(methcv == &PL_sv_undef) {
-        ST(0) = &PL_sv_undef;
+    if(sv_isobject(self))
+        selfstash = SvSTASH(SvRV(self));
+    else
+        selfstash = gv_stashsv(self, 0);
+
+    assert(selfstash);
+
+    hvname = HvNAME_get(selfstash);
+    if (!hvname)
+        Perl_croak(aTHX_ "Can't use anonymous symbol table for method lookup");
+
+    cxix = __dopoptosub_at(cxstack, cxstack_ix);
+    cxix = __dopoptosub_at(ccstack, cxix - 1); /* skip next::method, etc */
+
+    /* This block finds the contextually-enclosing fully-qualified subname,
+       much like looking at (caller($i))[3] until you find a real sub that
+       isn't ANON, etc */
+    for (;;) {
+	GV* cvgv;
+	STRLEN fq_subname_len;
+
+        /* we may be in a higher stacklevel, so dig down deeper */
+        while (cxix < 0) {
+            if(top_si->si_type == PERLSI_MAIN)
+                Perl_croak(aTHX_ "next::method/next::can/maybe::next::method must be used in method context");
+            top_si = top_si->si_prev;
+            ccstack = top_si->si_cxstack;
+            cxix = __dopoptosub_at(ccstack, top_si->si_cxix);
+        }
+
+        if(CxTYPE((PERL_CONTEXT*)(&ccstack[cxix])) != CXt_SUB
+          || (PL_DBsub && GvCV(PL_DBsub) && ccstack[cxix].blk_sub.cv == GvCV(PL_DBsub))) {
+            cxix = __dopoptosub_at(ccstack, cxix - 1);
+            continue;
+        }
+
+        {
+            const I32 dbcxix = __dopoptosub_at(ccstack, cxix - 1);
+            if (PL_DBsub && GvCV(PL_DBsub) && dbcxix >= 0 && ccstack[dbcxix].blk_sub.cv == GvCV(PL_DBsub)) {
+                if(CxTYPE((PERL_CONTEXT*)(&ccstack[dbcxix])) != CXt_SUB) {
+                    cxix = dbcxix;
+                    continue;
+                }
+            }
+        }
+
+        cvgv = CvGV(ccstack[cxix].blk_sub.cv);
+
+        if(!isGV(cvgv)) {
+            cxix = __dopoptosub_at(ccstack, cxix - 1);
+            continue;
+        }
+
+        /* we found a real sub here */
+        sv = sv_2mortal(newSV(0));
+
+        gv_efullname3(sv, cvgv, NULL);
+
+        fq_subname = SvPVX(sv);
+        fq_subname_len = SvCUR(sv);
+
+        subname = strrchr(fq_subname, ':');
+        if(!subname)
+            Perl_croak(aTHX_ "next::method/next::can/maybe::next::method cannot find enclosing method");
+
+        subname++;
+        subname_len = fq_subname_len - (subname - fq_subname);
+        if(subname_len == 8 && strEQ(subname, "__ANON__")) {
+            cxix = __dopoptosub_at(ccstack, cxix - 1);
+            continue;
+        }
+        break;
     }
-    else {
-        ST(0) = sv_2mortal(newRV_inc(methcv));
+
+    /* If we made it to here, we found our context */
+
+    /* Initialize the next::method cache for this stash
+       if necessary */
+    selfmeta = HvMROMETA(selfstash);
+    if(!(nmcache = selfmeta->mro_nextmethod)) {
+        nmcache = selfmeta->mro_nextmethod = newHV();
+    }
+    else { /* Use the cached coderef if it exists */
+	HE* cache_entry = hv_fetch_ent(nmcache, sv, 0, 0);
+	if (cache_entry) {
+	    SV* const val = HeVAL(cache_entry);
+	    if(val == &PL_sv_undef) {
+		if(throw_nomethod)
+		    Perl_croak(aTHX_ "No next::method '%s' found for %s", subname, hvname);
+                XSRETURN_EMPTY;
+	    }
+	    XPUSHs(sv_2mortal(newRV_inc(val)));
+            XSRETURN(1);
+	}
     }
 
-    XSRETURN(1);
-}
+    /* beyond here is just for cache misses, so perf isn't as critical */
 
-XS(XS_next_method)
-{
-    dMARK;
-    dAX;
-    SV* const self = ST(0);
-    SV* const methcv = __nextcan(aTHX_ self, 1);
+    stashname_len = subname - fq_subname - 2;
+    stashname = sv_2mortal(newSVpvn(fq_subname, stashname_len));
 
-    PERL_UNUSED_ARG(cv);
+    linear_av = mro_get_linear_isa_c3(selfstash, 0); /* has ourselves at the top of the list */
 
-    PL_markstack_ptr++;
-    call_sv(methcv, GIMME_V);
-}
+    linear_svp = AvARRAY(linear_av);
+    entries = AvFILLp(linear_av) + 1;
 
-XS(XS_maybe_next_method)
-{
-    dMARK;
-    dAX;
-    SV* const self = ST(0);
-    SV* const methcv = __nextcan(aTHX_ self, 0);
-
-    PERL_UNUSED_ARG(cv);
-
-    if(methcv == &PL_sv_undef) {
-        ST(0) = &PL_sv_undef;
-        XSRETURN(1);
+    /* Walk down our MRO, skipping everything up
+       to the contextually enclosing class */
+    while (entries--) {
+        SV * const linear_sv = *linear_svp++;
+        assert(linear_sv);
+        if(sv_eq(linear_sv, stashname))
+            break;
     }
 
-    PL_markstack_ptr++;
-    call_sv(methcv, GIMME_V);
+    /* Now search the remainder of the MRO for the
+       same method name as the contextually enclosing
+       method */
+    if(entries > 0) {
+        while (entries--) {
+            SV * const linear_sv = *linear_svp++;
+	    HV* curstash;
+	    GV* candidate;
+	    CV* cand_cv;
+
+            assert(linear_sv);
+            curstash = gv_stashsv(linear_sv, FALSE);
+
+            if (!curstash) {
+                if (ckWARN(WARN_SYNTAX))
+                    Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Can't locate package %"SVf" for @%s::ISA",
+                        (void*)linear_sv, hvname);
+                continue;
+            }
+
+            assert(curstash);
+
+            gvp = (GV**)hv_fetch(curstash, subname, subname_len, 0);
+            if (!gvp) continue;
+
+            candidate = *gvp;
+            assert(candidate);
+
+            if (SvTYPE(candidate) != SVt_PVGV)
+                gv_init(candidate, curstash, subname, subname_len, TRUE);
+
+            /* Notably, we only look for real entries, not method cache
+               entries, because in C3 the method cache of a parent is not
+               valid for the child */
+            if (SvTYPE(candidate) == SVt_PVGV && (cand_cv = GvCV(candidate)) && !GvCVGEN(candidate)) {
+                SvREFCNT_inc_simple_void_NN((SV*)cand_cv);
+                hv_store_ent(nmcache, newSVsv(sv), (SV*)cand_cv, 0);
+                XPUSHs(sv_2mortal(newRV_inc((SV*)cand_cv)));
+                XSRETURN(1);
+            }
+        }
+    }
+
+    hv_store_ent(nmcache, newSVsv(sv), &PL_sv_undef, 0);
+    if(throw_nomethod)
+        Perl_croak(aTHX_ "No next::method '%s' found for %s", subname, hvname);
+    XSRETURN_EMPTY;
 }
 
 /*

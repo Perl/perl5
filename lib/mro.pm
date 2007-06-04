@@ -9,12 +9,31 @@ package mro;
 use strict;
 use warnings;
 
-# mro.pm versions < 1.00 reserved for possible CPAN mro dist
-#  (for partial back-compat to 5.[68].x)
+# mro.pm versions < 1.00 reserved for MRO::Compat
+#  for partial back-compat to 5.[68].x
 our $VERSION = '1.00';
 
 sub import {
     mro::set_mro(scalar(caller), $_[1]) if $_[1];
+}
+
+package # hide me from PAUSE
+    next;
+
+sub can { mro::_nextcan($_[0], 0) }
+
+sub method {
+    my $method = mro::_nextcan($_[0], 1);
+    goto &$method;
+}
+
+package # hide me from PAUSE
+    maybe::next;
+
+sub method {
+    my $method = mro::_nextcan($_[0], 0);
+    goto &$method if defined $method;
+    return;
 }
 
 1;
@@ -26,6 +45,8 @@ __END__
 mro - Method Resolution Order
 
 =head1 SYNOPSIS
+
+  use mro; # enables next::method and friends globally
 
   use mro 'dfs'; # enable DFS MRO for this class (Perl default)
   use mro 'c3'; # enable C3 MRO for this class
@@ -43,9 +64,12 @@ implementation for older Perls.
 
 It's possible to change the MRO of a given class either by using C<use
 mro> as shown in the synopsis, or by using the L</mro::set_mro> function
-below.  The functions do not require loading the C<mro> module, as they
-are actually provided by the core perl interpreter.  The C<use mro> syntax
-is just syntactic sugar for setting the current package's MRO.
+below.  The functions in the mro namespace do not require loading the
+C<mro> module, as they are actually provided by the core perl interpreter.
+
+The special methods C<next::method>, C<next::can>, and
+C<maybe::next::method> are not available until this C<mro> module
+has been loaded via C<use> or C<require>.
 
 =head1 The C3 MRO
 
