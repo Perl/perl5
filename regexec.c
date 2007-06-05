@@ -5006,7 +5006,7 @@ NULL
 #undef ST
         case FOLDCHAR:
             n = ARG(scan);
-            if ( n == what_len_TRICKYFOLD(locinput,do_utf8,ln) ) {
+            if ( n == (U32)what_len_TRICKYFOLD(locinput,do_utf8,ln) ) {
                 locinput += ln;
             } else if ( 0xDF == n && !do_utf8 && !UTF ) {
                 sayNO;
