@@ -603,15 +603,6 @@ instated.
 
 The old perltodo notes "Look at the "reification" code in C<av.c>".
 
-=head2 What hooks would assertions need?
-
-Assertions are in the core, and work. However, assertions needed to be added
-as a core patch, rather than an XS module in ext, or a CPAN module, because
-the core has no hooks in the necessary places. It would be useful to
-investigate what hooks would need to be added to make it possible to provide
-the full assertion support from a CPAN module, so that we aren't constraining
-the imagination of future CPAN authors.
-
 =head2 Properly Unicode safe tokeniser and pads.
 
 The tokeniser isn't actually very UTF-8 clean. C<use utf8;> is a hack -

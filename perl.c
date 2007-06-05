@@ -971,7 +971,6 @@ perl_destruct(pTHXx)
     PL_DBsingle = NULL;
     PL_DBtrace = NULL;
     PL_DBsignal = NULL;
-    PL_DBassertion = NULL;
     PL_DBcv = NULL;
     PL_dbargs = NULL;
     PL_debstash = NULL;
@@ -1716,7 +1715,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	case 'W':
 	case 'X':
 	case 'w':
-	case 'A':
 	    if ((s = moreswitches(s)))
 		goto reswitch;
 	    break;
@@ -2908,7 +2906,6 @@ S_usage(pTHX_ const char *name)		/* XXX move this out into a module ? */
 
     static const char * const usage_msg[] = {
 "-0[octal]         specify record separator (\\0, if no argument)",
-"-A[mod][=pattern] activate all/given assertions",
 "-a                autosplit mode with -n or -p (splits $_ into @F)",
 "-C[number/list]   enables the listed Unicode features",
 "-c                check syntax only (runs BEGIN and CHECK blocks)",
@@ -3206,27 +3203,6 @@ Perl_moreswitches(pTHX_ char *s)
 	    }
 	}
 	return s;
-    case 'A':
-	forbid_setid('A', -1);
-	s++;
-	{
-	    char * const start = s;
-	    SV * const sv = newSVpvs("use assertions::activate");
-	    while(isALNUM(*s) || *s == ':') ++s;
-	    if (s != start) {
-		sv_catpvs(sv, "::");
-		sv_catpvn(sv, start, s-start);
-	    }
-	    if (*s == '=') {
-		Perl_sv_catpvf(aTHX_ sv, " split(/,/,q%c%s%c)", 0, ++s, 0);
-		s+=strlen(s);
-	    }
-	    else if (*s != '\0') {
-		Perl_croak(aTHX_ "Can't use '%c' after -A%.*s", *s, (int)(s-start), start);
-	    }
-	    Perl_av_create_and_push(aTHX_ &PL_preambleav, sv);
-	    return s;
-	}
     case 'M':
 	forbid_setid('M', -1);	/* XXX ? */
 	/* FALL THROUGH */
@@ -4500,8 +4476,6 @@ Perl_init_debugger(pTHX)
     sv_setiv(PL_DBtrace, 0);
     PL_DBsignal = GvSV((gv_fetchpvs("DB::signal", GV_ADDMULTI, SVt_PV)));
     sv_setiv(PL_DBsignal, 0);
-    PL_DBassertion = GvSV((gv_fetchpvs("DB::assertion", GV_ADDMULTI, SVt_PV)));
-    sv_setiv(PL_DBassertion, 0);
     PL_curstash = ostash;
 }
 

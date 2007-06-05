@@ -967,15 +967,6 @@ BEGIN {
     $^W       = 0;
 }    # Switch compilation warnings off until another BEGIN.
 
-# test if assertions are supported and actived:
-BEGIN {
-    $ini_assertion = eval "sub asserting_test : assertion {1}; 1";
-
-    # $ini_assertion = undef => assertions unsupported,
-    #        "       = 1     => assertions supported
-    # print "\$ini_assertion=$ini_assertion\n";
-}
-
 local ($^W) = 0;    # Switch run-time warnings off during init.
 
 =head2 THREADS SUPPORT
@@ -1102,10 +1093,10 @@ are to be accepted.
   signalLevel  warnLevel     dieLevel
   inhibit_exit ImmediateStop bareStringify
   CreateTTY    RemotePort    windowSize
-  DollarCaretP OnlyAssertions WarnAssertions
+  DollarCaretP
 );
 
-@RememberOnROptions = qw(DollarCaretP OnlyAssertions);
+@RememberOnROptions = qw(DollarCaretP);
 
 =pod
 
@@ -1134,7 +1125,6 @@ state.
     ImmediateStop => \$ImmediateStop,
     RemotePort    => \$remoteport,
     windowSize    => \$window,
-    WarnAssertions => \$warnassertions,
     HistFile      => \$histfile,
     HistSize      => \$histsize,
 );
@@ -1165,7 +1155,6 @@ option.
     ornaments     => \&ornaments,
     RemotePort    => \&RemotePort,
     DollarCaretP  => \&DollarCaretP,
-    OnlyAssertions=> \&OnlyAssertions,
 );
 
 =pod
@@ -3697,17 +3686,7 @@ sub sub {
         # Called in array context. call sub and capture output.
         # DB::DB will recursively get control again if appropriate; we'll come
         # back here when the sub is finished.
-        if ($assertion) {
-            $assertion = 0;
-            eval { @ret = &$sub; };
-            if ($@) {
-                print $OUT $@;
-                $signal = 1 unless $warnassertions;
-            }
-        }
-        else {
-            @ret = &$sub;
-        }
+	@ret = &$sub;
 
         # Pop the single-step value back off the stack.
         $single |= $stack[ $stack_depth-- ];
@@ -3748,32 +3727,17 @@ sub sub {
 
     # Scalar context.
     else {
-        if ($assertion) {
-            $assertion = 0;
-            eval {
+	if ( defined wantarray ) {
 
-                # Save the value if it's wanted at all.
-                $ret = &$sub;
-            };
-            if ($@) {
-                print $OUT $@;
-                $signal = 1 unless $warnassertions;
-            }
-            $ret = undef unless defined wantarray;
-        }
-        else {
-            if ( defined wantarray ) {
+	    # Save the value if it's wanted at all.
+	    $ret = &$sub;
+	}
+	else {
 
-                # Save the value if it's wanted at all.
-                $ret = &$sub;
-            }
-            else {
-
-                # Void return, explicitly.
-                &$sub;
-                undef $ret;
-            }
-        }    # if assertion
+	    # Void return, explicitly.
+	    &$sub;
+	    undef $ret;
+	}
 
         # Pop the single-step value off the stack.
         $single |= $stack[ $stack_depth-- ];
@@ -5342,38 +5306,6 @@ sub cmd_W {
 
 These are general support routines that are used in a number of places
 throughout the debugger.
-
-=over 4
-
-=item cmd_P
-
-Something to do with assertions
-
-=back
-
-=cut
-
-sub cmd_P {
-    unless ($ini_assertion) {
-        print $OUT "Assertions not supported in this Perl interpreter\n";
-    } else {
-        if ( $cmd =~ /^.\b\s*([+-]?)\s*(~?)\s*(\w+(\s*\|\s*\w+)*)\s*$/ ) {
-            my ( $how, $neg, $flags ) = ( $1, $2, $3 );
-            my $acu = parse_DollarCaretP_flags($flags);
-            if ( defined $acu ) {
-                $acu = ~$acu if $neg;
-                if ( $how eq '+' ) { $^P |= $acu }
-                elsif ( $how eq '-' ) { $^P &= ~$acu }
-                else { $^P = $acu }
-            }
-
-            # else { print $OUT "undefined acu\n" }
-        }
-        my $expanded = expand_DollarCaretP_flags($^P);
-        print $OUT "Internal Perl debugger flags:\n\$^P=$expanded\n";
-        $expanded;
-    }
-}
 
 =head2 save
 
@@ -6946,33 +6878,6 @@ sub DollarCaretP {
     expand_DollarCaretP_flags($^P);
 }
 
-sub OnlyAssertions {
-    if ($term) {
-        &warn("Too late to set up OnlyAssertions mode, enabled on next 'R'!\n")
-          if @_;
-    }
-    if (@_) {
-        unless ( defined $ini_assertion ) {
-            if ($term) {
-                &warn("Current Perl interpreter doesn't support assertions");
-            }
-            return 0;
-        }
-        if (shift) {
-            unless ($ini_assertion) {
-                print "Assertions will be active on next 'R'!\n";
-                $ini_assertion = 1;
-            }
-            $^P &= ~$DollarCaretP_flags{PERLDBf_SUB};
-            $^P |= $DollarCaretP_flags{PERLDBf_ASSERTION};
-        }
-        else {
-            $^P |= $DollarCaretP_flags{PERLDBf_SUB};
-        }
-    }
-    !( $^P & $DollarCaretP_flags{PERLDBf_SUB} ) || 0;
-}
-
 =head2 C<pager>
 
 Set up the C<$pager> variable. Adds a pipe to the front unless there's one
@@ -7235,7 +7140,6 @@ B<i> I<class>       Prints nested parents of given class.
 B<e>         Display current thread id.
 B<E>         Display all thread ids the current one will be identified: <n>.
 B<y> [I<n> [I<Vars>]]   List lexicals in higher scope <n>.  Vars same as B<V>.
-B<P> Something to do with assertions...
 
 B<<> ?            List Perl commands to run before each prompt.
 B<<> I<expr>        Define Perl command to run before each prompt.
@@ -8762,8 +8666,7 @@ BEGIN {
         PERLDBf_GOTO      => 0x80,     # Report goto: call DB::goto
         PERLDBf_NAMEEVAL  => 0x100,    # Informative names for evals
         PERLDBf_NAMEANON  => 0x200,    # Informative names for anon subs
-        PERLDBf_ASSERTION => 0x400,    # Debug assertion subs enter/exit
-        PERLDB_ALL        => 0x33f,    # No _NONAME, _GOTO, _ASSERTION
+        PERLDB_ALL        => 0x33f,    # No _NONAME, _GOTO
     );
 
     %DollarCaretP_flags_r = reverse %DollarCaretP_flags;
@@ -8869,11 +8772,6 @@ sub restart {
 
     # If warn was on before, turn it on again.
     push @flags, '-w' if $ini_warn;
-    if ( $ini_assertion and @{^ASSERTING} ) {
-        push @flags,
-          ( map { /\:\^\(\?\:(.*)\)\$\)/ ? "-A$1" : "-A$_" }
-              @{^ASSERTING} );
-    }
 
     # Rebuild the -I flags that were on the initial
     # command line.

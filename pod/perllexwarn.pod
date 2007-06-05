@@ -212,8 +212,6 @@ The current hierarchy is:
 
   all -+
        |
-       +- assertions
-       |
        +- closure
        |
        +- deprecated

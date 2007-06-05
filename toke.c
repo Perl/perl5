@@ -4296,10 +4296,6 @@ Perl_yylex(pTHX)
 			sv_free(sv);
 			CvMETHOD_on(PL_compcv);
 		    }
-		    else if (!PL_in_my && len == 9 && strnEQ(SvPVX(sv), "assertion", len)) {
-			sv_free(sv);
-		        CvASSERTION_on(PL_compcv);
-		    }
 		    /* After we've set the flags, it could be argued that
 		       we don't need to do the attributes.pm-based setting
 		       process, and shouldn't bother appending recognized

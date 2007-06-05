@@ -2710,9 +2710,6 @@ try_autoload:
 
     gimme = GIMME_V;
     if ((PL_op->op_private & OPpENTERSUB_DB) && GvCV(PL_DBsub) && !CvNODEBUG(cv)) {
-        if (CvASSERTION(cv) && PL_DBassertion)
-	    sv_setiv(PL_DBassertion, 1);
-	
 	 Perl_get_db_sub(aTHX_ &sv, cv);
 	 if (CvISXSUB(cv))
 	     PL_curcopdb = PL_curcop;

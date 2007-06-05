@@ -634,8 +634,8 @@ our %hints; # used to display each COP's op_hints values
 @hints{4096,8192,16384,32768,65536} = ('I', 'F', 'B', 'S', 'R');
 # taint and eval
 @hints{1048576,2097152} = ('T', 'E');
-# filetest access, UTF-8, assertions, assertions seen
-@hints{4194304,8388608,16777216,33554432} = ('X', 'U', 'A', 'a');
+# filetest access, UTF-8
+@hints{4194304,8388608} = ('X', 'U');
 
 sub _flags {
     my($hash, $x) = @_;

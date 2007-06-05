@@ -4395,10 +4395,6 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_FILETEST_ACCESS	0x00400000 /* filetest pragma */
 #define HINT_UTF8		0x00800000 /* utf8 pragma */
 
-/* assertions pragma, stored in $^H{assertions} */
-#define HINT_ASSERTING          0x00000001
-#define HINT_ASSERTIONSSEEN     0x00000002
-
 /* The following are stored in $^H{sort}, not in PL_hints */
 #define HINT_SORT_SORT_BITS	0x000000FF /* allow 256 different ones */
 #define HINT_SORT_QUICKSORT	0x00000001
@@ -5099,7 +5095,6 @@ typedef struct am_table_short AMTS;
 #define PERLDBf_GOTO		0x80	/* Report goto: call DB::goto */
 #define PERLDBf_NAMEEVAL	0x100	/* Informative names for evals */
 #define PERLDBf_NAMEANON	0x200	/* Informative names for anon subs */
-#define PERLDBf_ASSERTION       0x400   /* Debug assertion subs enter/exit */
 
 #define PERLDB_SUB	(PL_perldb && (PL_perldb & PERLDBf_SUB))
 #define PERLDB_LINE	(PL_perldb && (PL_perldb & PERLDBf_LINE))

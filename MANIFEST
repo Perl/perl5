@@ -1421,9 +1421,6 @@ lib/Archive/Tar/t/src/long/foo.tgz.packed	Archive::Tar tests
 lib/Archive/Tar/t/src/short/b	Archive::Tar tests
 lib/Archive/Tar/t/src/short/bar.tar.packed	Archive::Tar tests
 lib/Archive/Tar/t/src/short/foo.tgz.packed	Archive::Tar tests
-lib/assertions/activate.pm	assertions activate/deactivate
-lib/assertions/compat.pm	assertions compatibility for earlier perls
-lib/assertions.pm		module support for -A flag
 lib/assert.pl			assertion and panic with stack trace
 lib/Attribute/Handlers/Changes	Attribute::Handlers
 lib/Attribute/Handlers/demo/demo2.pl	Attribute::Handlers demo
@@ -3368,8 +3365,6 @@ t/cmd/mod.t			See if statement modifiers work
 t/cmd/subval.t			See if subroutine values work
 t/cmd/switch.t			See if switch optimizations work
 t/cmd/while.t			See if while loops work
-t/comp/assertions.t		See if assertions work
-t/comp/asstcompat.t		See if assertions::compat work
 t/comp/bproto.t			See if builtins conform to their prototypes
 t/comp/cmdopt.t			See if command optimization works
 t/comp/colon.t			See if colons are parsed correctly
@@ -3861,7 +3856,6 @@ t/run/noswitch.t		Test aliasing ARGV for other switch tests
 t/run/runenv.t			Test if perl honors its environment variables.
 t/run/switch0.t			Test the -0 switch
 t/run/switcha.t			Test the -a switch
-t/run/switch_A.t		Test the -A switch
 t/run/switchC.t			Test the -C switch
 t/run/switchd.t			Test the -d switch
 t/run/switches.t		Tests for the other switches (-0, -l, -c, -s, -M, -m, -V, -v, -h, -z, -i)

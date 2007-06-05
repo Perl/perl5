@@ -11137,7 +11137,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_DBsingle		= sv_dup(proto_perl->IDBsingle, param);
     PL_DBtrace		= sv_dup(proto_perl->IDBtrace, param);
     PL_DBsignal		= sv_dup(proto_perl->IDBsignal, param);
-    PL_DBassertion      = sv_dup(proto_perl->IDBassertion, param);
     PL_dbargs		= av_dup(proto_perl->Idbargs, param);
 
     /* symbol tables */

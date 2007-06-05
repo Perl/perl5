@@ -1967,11 +1967,6 @@ name or CLI symbol definition when preparing to iterate over %ENV, and
 didn't see the expected delimiter between key and value, so the line was
 ignored.
 
-=item Impossible to activate assertion call
-
-(W assertions) You're calling an assertion function in a block that is
-not under the control of the C<assertions> pragma.
-
 =item (in cleanup) %s
 
 (W misc) This prefix usually indicates that a DESTROY() method raised

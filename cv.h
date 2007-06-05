@@ -139,7 +139,6 @@ Returns the stash of the CV.
 #define CVf_METHOD	0x0001	/* CV is explicitly marked as a method */
 #define CVf_LOCKED	0x0002	/* CV locks itself or first arg on entry */
 #define CVf_LVALUE	0x0004  /* CV return value can be used as lvalue */
-#define CVf_ASSERTION   0x0008  /* CV called only when asserting */
 
 #define CVf_WEAKOUTSIDE	0x0010  /* CvOUTSIDE isn't ref counted */
 #define CVf_CLONE	0x0020	/* anon CV uses external lexicals */
@@ -153,7 +152,7 @@ Returns the stash of the CV.
 #define CVf_ISXSUB	0x0800	/* CV is an XSUB, not pure perl.  */
 
 /* This symbol for optimised communication between toke.c and op.c: */
-#define CVf_BUILTIN_ATTRS	(CVf_METHOD|CVf_LOCKED|CVf_LVALUE|CVf_ASSERTION)
+#define CVf_BUILTIN_ATTRS	(CVf_METHOD|CVf_LOCKED|CVf_LVALUE)
 
 #define CvCLONE(cv)		(CvFLAGS(cv) & CVf_CLONE)
 #define CvCLONE_on(cv)		(CvFLAGS(cv) |= CVf_CLONE)
@@ -186,10 +185,6 @@ Returns the stash of the CV.
 #define CvLVALUE(cv)		(CvFLAGS(cv) & CVf_LVALUE)
 #define CvLVALUE_on(cv)		(CvFLAGS(cv) |= CVf_LVALUE)
 #define CvLVALUE_off(cv)	(CvFLAGS(cv) &= ~CVf_LVALUE)
-
-#define CvASSERTION(cv)		(CvFLAGS(cv) & CVf_ASSERTION)
-#define CvASSERTION_on(cv)	(CvFLAGS(cv) |= CVf_ASSERTION)
-#define CvASSERTION_off(cv)	(CvFLAGS(cv) &= ~CVf_ASSERTION)
 
 #define CvEVAL(cv)		(CvUNIQUE(cv) && !SvFAKE(cv))
 #define CvEVAL_on(cv)		(CvUNIQUE_on(cv),SvFAKE_off(cv))
