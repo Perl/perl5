@@ -252,7 +252,7 @@ and can't restore permissions to \d+
     $dir2 = catdir($base,'B');
 
     stderr_like(
-        \&rmtree,
+        sub { rmtree( [], 1 ) },
         qr/\ANo root path\(s\) specified\b/,
         "rmtree of nothing carps sensibly"
     );

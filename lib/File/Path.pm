@@ -502,7 +502,7 @@ sub rmtree {
             push @{${$arg->{error}}}, {'' => "No root path(s) specified"};
     }
     else {
-            _carp ("No root path(s) specified\n");
+            $arg->{verbose} and _carp ("No root path(s) specified\n");
         }
       return 0;
     }
