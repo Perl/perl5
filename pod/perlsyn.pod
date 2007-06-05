@@ -555,10 +555,8 @@ is exactly equivalent to
 
 	when($_ ~~ $foo)
 
-(though you need to enable the "~~" feature before you
-can use the C<~~> operator directly). In fact C<when(EXPR)>
-is treated as an implicit smart match most of the time. The
-exceptions are that when EXPR is:
+In fact C<when(EXPR)> is treated as an implicit smart match most of the
+time. The exceptions are that when EXPR is:
 
 =over 4
 
