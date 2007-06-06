@@ -1,5 +1,5 @@
 package encoding::warnings;
-$encoding::warnings::VERSION = '0.10';
+$encoding::warnings::VERSION = '0.11';
 
 use strict;
 use 5.007;
@@ -10,8 +10,8 @@ encoding::warnings - Warn on implicit encoding conversions
 
 =head1 VERSION
 
-This document describes version 0.10 of encoding::warnings, released
-July 7, 2006.
+This document describes version 0.11 of encoding::warnings, released
+June 5, 2007.
 
 =head1 SYNOPSIS
 
@@ -177,6 +177,7 @@ sub import {
 sub unimport {
     my $class = shift;
     $^H{$class} = undef;
+    undef ${^ENCODING};
 }
 
 # Don't worry about source code literals.
@@ -228,7 +229,7 @@ Audrey Tang
 
 =head1 COPYRIGHT
 
-Copyright 2004, 2005, 2006 by Audrey Tang E<lt>cpan@audreyt.orgE<gt>.
+Copyright 2004, 2005, 2006, 2007 by Audrey Tang E<lt>cpan@audreyt.orgE<gt>.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
