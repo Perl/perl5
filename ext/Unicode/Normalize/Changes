@@ -1,5 +1,10 @@
 Revision history for Perl extension Unicode::Normalize.
 
+1.02  Tue Jun  5 22:46:45 2007
+    - XSUB: mkheader, _U_stringify() - avoid unpack('C*') on unicode.
+    - test: short.t removed - pure perl is not inapprotiate for test of
+            unicode edge cases.
+
 1.01  Tue Jun 13 22:01:53 2006
     - XSUB: sv_setpvn() needs cast to (char*).
     - XSUB: avoid double FETCH for tied scalar variables.

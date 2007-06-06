@@ -416,7 +416,7 @@ U8* pv_utf8_compose(U8* s, STRLEN slen, U8* d, STRLEN dlen, bool iscontig)
 			else {
 			    Renew(seq_ext, seq_max, UV);
 			}
-			seq_ptr = seq_ext; /* till now use seq_ext */
+			seq_ptr = seq_ext; /* use seq_ext from now */
 		    }
 		    seq_ptr[cc_pos] = uv;
 		    ++cc_pos;
@@ -593,7 +593,7 @@ NFC(src)
   OUTPUT:
     RETVAL
 
-void
+SV*
 checkNFD(src)
     SV * src
   PROTOTYPE: $
@@ -602,6 +602,7 @@ checkNFD(src)
   PREINIT:
     STRLEN srclen, retlen;
     U8 *s, *e, *p, curCC, preCC;
+    bool result = TRUE;
   CODE:
     s = (U8*)sv_2pvunicode(src,&srclen);
     e = s + srclen;
@@ -613,17 +614,22 @@ checkNFD(src)
 	    croak(ErrRetlenIsZero, "checkNFD or -NFKD");
 
 	curCC = getCombinClass(uv);
-	if (preCC > curCC && curCC != 0) /* canonical ordering violated */
-	    XSRETURN_NO;
-	if (Hangul_IsS(uv) || (ix ? dec_compat(uv) : dec_canonical(uv)))
-	    XSRETURN_NO;
+	if (preCC > curCC && curCC != 0) { /* canonical ordering violated */
+	    result = FALSE;
+	    break;
+	}
+	if (Hangul_IsS(uv) || (ix ? dec_compat(uv) : dec_canonical(uv))) {
+	    result = FALSE;
+	    break;
+	}
 	preCC = curCC;
     }
-    XSRETURN_YES;
+    RETVAL = boolSV(result);
+  OUTPUT:
+    RETVAL
 
 
-
-void
+SV*
 checkNFC(src)
     SV * src
   PROTOTYPE: $
@@ -632,27 +638,31 @@ checkNFC(src)
   PREINIT:
     STRLEN srclen, retlen;
     U8 *s, *e, *p, curCC, preCC;
-    bool isMAYBE;
+    bool result = TRUE;
+    bool isMAYBE = FALSE;
   CODE:
     s = (U8*)sv_2pvunicode(src,&srclen);
     e = s + srclen;
 
     preCC = 0;
-    isMAYBE = FALSE;
     for (p = s; p < e; p += retlen) {
 	UV uv = utf8n_to_uvuni(p, e - p, &retlen, AllowAnyUTF);
 	if (!retlen)
 	    croak(ErrRetlenIsZero, "checkNFC or -NFKC");
 
 	curCC = getCombinClass(uv);
-	if (preCC > curCC && curCC != 0) /* canonical ordering violated */
-	    XSRETURN_NO;
+	if (preCC > curCC && curCC != 0) { /* canonical ordering violated */
+	    result = FALSE;
+	    break;
+	}
 
 	/* get NFC/NFKC property */
 	if (Hangul_IsS(uv)) /* Hangul syllables are canonical composites */
 	    ; /* YES */
-	else if (isExclusion(uv) || isSingleton(uv) || isNonStDecomp(uv))
-	    XSRETURN_NO;
+	else if (isExclusion(uv) || isSingleton(uv) || isNonStDecomp(uv)) {
+	    result = FALSE;
+	    break;
+	}
 	else if (isComp2nd(uv))
 	    isMAYBE = TRUE;
 	else if (ix) {
@@ -660,20 +670,22 @@ checkNFC(src)
 	  /* NFKC_NO when having compatibility mapping. */
 	    canon  = (char *) dec_canonical(uv);
 	    compat = (char *) dec_compat(uv);
-	    if (compat && !(canon && strEQ(canon, compat)))
-		XSRETURN_NO;
+	    if (compat && !(canon && strEQ(canon, compat))) {
+		result = FALSE;
+		break;
+	    }
 	} /* end of get NFC/NFKC property */
 
 	preCC = curCC;
     }
-    if (isMAYBE)
+    if (isMAYBE && result) /* NO precedes MAYBE */
 	XSRETURN_UNDEF;
-    else
-	XSRETURN_YES;
+    RETVAL = boolSV(result);
+  OUTPUT:
+    RETVAL
 
 
-
-void
+SV*
 checkFCD(src)
     SV * src
   PROTOTYPE: $
@@ -682,12 +694,12 @@ checkFCD(src)
   PREINIT:
     STRLEN srclen, retlen;
     U8 *s, *e, *p, curCC, preCC;
-    bool isMAYBE;
+    bool result = TRUE;
+    bool isMAYBE = FALSE;
   CODE:
     s = (U8*)sv_2pvunicode(src,&srclen);
     e = s + srclen;
     preCC = 0;
-    isMAYBE = FALSE;
     for (p = s; p < e; p += retlen) {
 	U8 *sCan;
 	UV uvLead;
@@ -711,12 +723,16 @@ checkFCD(src)
 
 	curCC = getCombinClass(uvLead);
 
-	if (curCC != 0 && curCC < preCC) /* canonical ordering violated */
-	    XSRETURN_NO;
+	if (curCC != 0 && curCC < preCC) { /* canonical ordering violated */
+	    result = FALSE;
+	    break;
+	}
 
 	if (ix) {
-	    if (isExclusion(uv) || isSingleton(uv) || isNonStDecomp(uv))
-		XSRETURN_NO;
+	    if (isExclusion(uv) || isSingleton(uv) || isNonStDecomp(uv)) {
+		result = FALSE;
+		break;
+	    }
 	    else if (isComp2nd(uv))
 		isMAYBE = TRUE;
 	}
@@ -737,11 +753,11 @@ checkFCD(src)
 	    preCC = curCC;
 	}
     }
-    if (isMAYBE)
+    if (isMAYBE && result) /* NO precedes MAYBE */
 	XSRETURN_UNDEF;
-    else
-	XSRETURN_YES;
-
+    RETVAL = boolSV(result);
+  OUTPUT:
+    RETVAL
 
 
 U8
@@ -774,43 +790,44 @@ isComp2nd(uv)
 
 
 
-void
+SV*
 isNFD_NO(uv)
     UV uv
   PROTOTYPE: $
   ALIAS:
     isNFKD_NO = 1
+  PREINIT:
+    bool result = FALSE;
   CODE:
     if (Hangul_IsS(uv) || (ix ? dec_compat(uv) : dec_canonical(uv)))
-	XSRETURN_YES; /* NFD_NO or NFKD_NO */
-    else
-	XSRETURN_NO;
+	result = TRUE; /* NFD_NO or NFKD_NO */
+    RETVAL = boolSV(result);
+  OUTPUT:
+    RETVAL
 
 
-
-void
+SV*
 isComp_Ex(uv)
     UV uv
   PROTOTYPE: $
   ALIAS:
     isNFC_NO  = 0
     isNFKC_NO = 1
+  PREINIT:
+    bool result = FALSE;
   CODE:
     if (isExclusion(uv) || isSingleton(uv) || isNonStDecomp(uv))
-	XSRETURN_YES; /* NFC_NO or NFKC_NO */
+	result = TRUE; /* NFC_NO or NFKC_NO */
     else if (ix) {
 	char *canon, *compat;
 	canon  = (char *) dec_canonical(uv);
 	compat = (char *) dec_compat(uv);
 	if (compat && (!canon || strNE(canon, compat)))
-	    XSRETURN_YES; /* NFC_NO or NFKC_NO */
-	else
-	    XSRETURN_NO;
+	    result = TRUE; /* NFC_NO or NFKC_NO */
     }
-    else
-	XSRETURN_NO;
-
-
+    RETVAL = boolSV(result);
+  OUTPUT:
+    RETVAL
 
 SV*
 getComposite(uv, uv2)

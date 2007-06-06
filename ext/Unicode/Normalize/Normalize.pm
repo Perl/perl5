@@ -13,7 +13,7 @@ use Carp;
 
 no warnings 'utf8';
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 our $PACKAGE = __PACKAGE__;
 
 require Exporter;
@@ -470,7 +470,7 @@ In Unicode 4.1.0, the definition D2 of canonical composition (which
 affects NFC and NFKC) has been changed (see Public Review Issue #29
 and recent UAX #15). This module has used the newer definition
 since the version 0.07 (Oct 31, 2001).
-This module does not support normalization according to the older
+This module will not support the normalization according to the older
 definition, even if the Unicode version implemented by perl is
 lower than 4.1.0.
 
@@ -480,7 +480,7 @@ lower than 4.1.0.
 
 SADAHIRO Tomoyuki <SADAHIRO@cpan.org>
 
-Copyright(C) 2001-2006, SADAHIRO Tomoyuki. Japan. All rights reserved.
+Copyright(C) 2001-2007, SADAHIRO Tomoyuki. Japan. All rights reserved.
 
 This module is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.

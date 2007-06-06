@@ -1,4 +1,4 @@
-Unicode/Normalize version 1.01
+Unicode/Normalize version 1.02
 ===================================
 
 Unicode::Normalize - Unicode Normalization Forms
@@ -64,7 +64,7 @@ which are included in recent perl core distributions.
 - unicore/Decomposition.pl (or unicode/Decomposition.pl)
 - unicore/CompositionExclusions.txt (or unicode/CompExcl.txt)
 
-CAVEATS
+NOTES
 
 (1) After these unicore/*.* files are updated:
 
@@ -76,14 +76,14 @@ In the case of pure perl:
     Rebuilding is not necessary,
     as the data will be read on requirement.
 
-(2) Normalize.pmN (pure perl module) may work without any other file
-    in this distribution (it must be renamed Normalize.pm, though)
+(2) Normalize.pmN (a pure perl module) may work without any other file
+    in this distribution.  It must be renamed Normalize.pm, though.
 
 COPYRIGHT AND LICENSE
 
 SADAHIRO Tomoyuki <SADAHIRO@cpan.org>
 
-Copyright(C) 2001-2006, SADAHIRO Tomoyuki. Japan. All rights reserved.
+Copyright(C) 2001-2007, SADAHIRO Tomoyuki. Japan. All rights reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

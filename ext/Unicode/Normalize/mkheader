@@ -80,8 +80,7 @@ sub decomposeHangul {
        VBase + $VIndex,
       $TIndex ? (TBase + $TIndex) : (),
     );
-    wantarray ? @ret : pack('U*', @ret);
-     # any element in @ret greater than 0xFF, so no need of u2n conversion.
+    return @ret;
 }
 
 ########## getting full decomposion ##########
@@ -214,9 +213,20 @@ sub _pack_U {
     return pack('U*', @_);
 }
 
+sub split_into_char {
+    use bytes;
+    my $uni = shift;
+    my $len = length($uni);
+    my @ary;
+    for(my $i = 0; $i < $len; ++$i) {
+	push @ary, ord(substr($uni,$i,1));
+    }
+    return @ary;
+}
+
 sub _U_stringify {
     sprintf '"%s"', join '',
-	map sprintf("\\x%02x", $_), unpack 'U0C*', _pack_U(@_);
+	map sprintf("\\x%02x", $_), split_into_char(_pack_U(@_));
 }
 
 foreach my $hash (\%Canon, \%Compat) {
