@@ -161,7 +161,11 @@ print STDERR "Defines: (" . join(' ', sort keys %define) . ")\n";
 if ($PLATFORM =~ /^win(?:32|ce)$/) {
     (my $dll = ($define{PERL_DLL} || "perl59")) =~ s/\.dll$//i;
     print "LIBRARY $dll\n";
-    print "DESCRIPTION 'Perl interpreter'\n";
+    # The DESCRIPTION module definition file statement is not supported
+    # by VC7 onwards.
+    if ($CCTYPE !~ /^MSVC7/ && $CCTYPE !~ /^MSVC8/) {
+	print "DESCRIPTION 'Perl interpreter'\n";
+    }
     print "EXPORTS\n";
     if ($define{PERL_IMPLICIT_SYS}) {
 	output_symbol("perl_get_host_info");
