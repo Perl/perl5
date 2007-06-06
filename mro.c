@@ -920,6 +920,8 @@ XS(XS_mro_nextcan)
     struct mro_meta* selfmeta;
     HV* nmcache;
 
+    PERL_UNUSED_ARG(cv);
+
     SP -= items;
 
     if(sv_isobject(self))

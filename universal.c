@@ -1100,6 +1100,7 @@ XS(XS_re_regnames_count)
     SV * ret;
     dVAR; 
     dXSARGS;
+    PERL_UNUSED_ARG(cv);
 
     if (items != 0)
        Perl_croak(aTHX_ "Usage: %s(%s)", "re::regnames_count", "");
@@ -1129,6 +1130,7 @@ XS(XS_re_regname)
     REGEXP * rx;
     U32 flags;
     SV * ret;
+    PERL_UNUSED_ARG(cv);
 
     if (items < 1 || items > 2)
         Perl_croak(aTHX_ "Usage: %s(%s)", "re::regname", "name[, all ]");
@@ -1169,6 +1171,7 @@ XS(XS_re_regnames)
     I32 length;
     I32 i;
     SV **entry;
+    PERL_UNUSED_ARG(cv);
 
     if (items > 1)
         Perl_croak(aTHX_ "Usage: %s(%s)", "re::regnames", "[all]");
@@ -1217,6 +1220,7 @@ XS(XS_Tie_Hash_NamedCapture_FETCH)
     REGEXP * rx;
     U32 flags;
     SV * ret;
+    PERL_UNUSED_ARG(cv);
 
     if (items != 2)
         Perl_croak(aTHX_ "Usage: Tie::Hash::NamedCapture::STORE($key, $flags)");
@@ -1250,6 +1254,7 @@ XS(XS_Tie_Hash_NamedCapture_STORE)
     dXSARGS;
     REGEXP * rx;
     U32 flags;
+    PERL_UNUSED_ARG(cv);
 
     if (items != 3)
         Perl_croak(aTHX_ "Usage: Tie::Hash::NamedCapture::STORE($key, $value, $flags)");
@@ -1275,6 +1280,7 @@ XS(XS_Tie_Hash_NamedCapture_DELETE)
     dXSARGS;
     REGEXP * rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
     U32 flags;
+    PERL_UNUSED_ARG(cv);
 
     if (items != 2)
         Perl_croak(aTHX_ "Usage: Tie::Hash::NamedCapture::DELETE($key, $flags)");
@@ -1294,6 +1300,7 @@ XS(XS_Tie_Hash_NamedCapture_CLEAR)
     dXSARGS;
     REGEXP * rx;
     U32 flags;
+    PERL_UNUSED_ARG(cv);
 
     if (items != 1)
         Perl_croak(aTHX_ "Usage: Tie::Hash::NamedCapture::CLEAR($flags)");
@@ -1316,6 +1323,7 @@ XS(XS_Tie_Hash_NamedCapture_EXISTS)
     REGEXP * rx;
     U32 flags;
     SV * ret;
+    PERL_UNUSED_ARG(cv);
 
     if (items != 2)
         Perl_croak(aTHX_ "Usage: Tie::Hash::NamedCapture::EXISTS($key, $flags)");
@@ -1344,6 +1352,7 @@ XS(XS_Tie_Hash_NamedCapture_FIRSTKEY)
     REGEXP * rx;
     U32 flags;
     SV * ret;
+    PERL_UNUSED_ARG(cv);
 
     if (items != 1)
         Perl_croak(aTHX_ "Usage: Tie::Hash::NamedCapture::FIRSTKEY()");
@@ -1376,6 +1385,7 @@ XS(XS_Tie_Hash_NamedCapture_NEXTKEY)
     REGEXP * rx;
     U32 flags;
     SV * ret;
+    PERL_UNUSED_ARG(cv);
 
     if (items != 2)
         Perl_croak(aTHX_ "Usage: Tie::Hash::NamedCapture::NEXTKEY($lastkey)");
@@ -1407,6 +1417,7 @@ XS(XS_Tie_Hash_NamedCapture_SCALAR)
     REGEXP * rx;
     U32 flags;
     SV * ret;
+    PERL_UNUSED_ARG(cv);
 
     if (items != 1)
         Perl_croak(aTHX_ "Usage: Tie::Hash::NamedCapture::SCALAR()");
@@ -1436,6 +1447,7 @@ XS(XS_Tie_Hash_NamedCapture_flags)
 {
     dVAR;
     dXSARGS;
+    PERL_UNUSED_ARG(cv);
 
     if (items != 0)
         Perl_croak(aTHX_ "Usage: Tie::Hash::NamedCapture::flags()");
