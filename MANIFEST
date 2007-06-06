@@ -1189,7 +1189,6 @@ ext/Unicode/Normalize/t/illegal.t	Unicode::Normalize
 ext/Unicode/Normalize/t/norm.t	Unicode::Normalize
 ext/Unicode/Normalize/t/null.t	Unicode::Normalize
 ext/Unicode/Normalize/t/proto.t	Unicode::Normalize
-ext/Unicode/Normalize/t/short.t	Unicode::Normalize
 ext/Unicode/Normalize/t/split.t	Unicode::Normalize
 ext/Unicode/Normalize/t/test.t	Unicode::Normalize
 ext/Unicode/Normalize/t/tie.t	Unicode::Normalize
