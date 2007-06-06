@@ -6,7 +6,7 @@ File::Path - Create or remove directory trees
 
 =head1 VERSION
 
-This document describes version 2.00 of File::Path, released
+This document describes version 2.00_01 of File::Path, released
 2007-xx-xx.
 
 =head1 SYNOPSIS
@@ -292,7 +292,7 @@ moved while C<rmtree> is running, and in particular on any directory
 trees with any path components or subdirectories potentially writable
 by untrusted users.
 
-Additionally, if the C<skip_others> parareter is not set (or the
+Additionally, if the C<skip_others> parameter is not set (or the
 third parameter in the traditional inferface is not TRUE) and
 C<rmtree> is interrupted, it may leave files and directories with
 permissions altered to allow deletion.
@@ -371,7 +371,7 @@ BEGIN {
 
 use Exporter ();
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '2.00';
+$VERSION = '2.00_01';
 @ISA     = qw(Exporter);
 @EXPORT  = qw(mkpath rmtree);
 
