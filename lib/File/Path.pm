@@ -6,8 +6,8 @@ File::Path - Create or remove directory trees
 
 =head1 VERSION
 
-This document describes version 2.00_01 of File::Path, released
-2007-xx-xx.
+This document describes version 2.00_02 of File::Path, released
+2007-06-06.
 
 =head1 SYNOPSIS
 
@@ -371,7 +371,7 @@ BEGIN {
 
 use Exporter ();
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '2.00_01';
+$VERSION = '2.00_02';
 @ISA     = qw(Exporter);
 @EXPORT  = qw(mkpath rmtree);
 
@@ -395,7 +395,7 @@ sub _croak {
 
 sub mkpath {
     my $new_style = (
-        ref($_[0]) eq 'ARRAY'
+        UNIVERSAL::isa($_[0],'ARRAY')
         or (@_ == 2 and $_[1] =~ /\A\d+\z/)
         or (@_ == 3 and $_[1] =~ /\A\d+\z/ and $_[2] =~ /\A\d+\z/)
     ) ? 0 : 1;
@@ -404,7 +404,7 @@ sub mkpath {
     my $paths;
 
     if ($new_style) {
-        if (ref $_[-1] eq 'HASH') {
+        if (@_ > 0 and UNIVERSAL::isa($_[-1], 'HASH')) {
             $arg = pop @_;
             exists $arg->{mask} and $arg->{mode} = delete $arg->{mask};
             $arg->{mode} = 0777 unless exists $arg->{mode};
@@ -418,7 +418,7 @@ sub mkpath {
     else {
         my ($verbose, $mode);
         ($paths, $verbose, $mode) = @_;
-        $paths = [$paths] unless ref($paths) eq 'ARRAY';
+        $paths = [$paths] unless UNIVERSAL::isa($paths,'ARRAY');
         $arg->{verbose} = defined $verbose ? $verbose : 0;
         $arg->{mode}    = defined $mode    ? $mode    : 0777;
     }
@@ -469,7 +469,7 @@ sub _mkpath {
 
 sub rmtree {
     my $new_style = (
-        ref($_[0]) eq 'ARRAY'
+        UNIVERSAL::isa($_[0],'ARRAY')
         or (@_ == 2 and $_[1] =~ /\A\d+\z/)
         or (@_ == 3 and $_[1] =~ /\A\d+\z/ and $_[2] =~ /\A\d+\z/)
     ) ? 0 : 1;
@@ -478,7 +478,7 @@ sub rmtree {
     my $paths;
 
     if ($new_style) {
-        if (ref $_[-1] eq 'HASH') {
+        if (@_ > 0 and UNIVERSAL::isa($_[-1],'HASH')) {
             $arg = pop @_;
             ${$arg->{error}}  = [] if exists $arg->{error};
             ${$arg->{result}} = [] if exists $arg->{result};
@@ -492,19 +492,21 @@ sub rmtree {
     else {
         my ($verbose, $safe);
         ($paths, $verbose, $safe) = @_;
-        $paths = [$paths] unless ref($paths) eq 'ARRAY';
         $arg->{verbose} = defined $verbose ? $verbose : 0;
         $arg->{safe}    = defined $safe    ? $safe    : 0;
-    }
 
-    if (@$paths < 1) {
+        if (defined($paths) and length($paths)) {
+            $paths = [$paths] unless UNIVERSAL::isa($paths,'ARRAY');
+        }
+        else {
         if ($arg->{error}) {
             push @{${$arg->{error}}}, {'' => "No root path(s) specified"};
     }
     else {
-            $arg->{verbose} and _carp ("No root path(s) specified\n");
+                _carp ("No root path(s) specified\n");
         }
       return 0;
+    }
     }
     return _rmtree($arg, $paths);
 }

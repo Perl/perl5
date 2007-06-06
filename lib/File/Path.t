@@ -2,7 +2,7 @@
 
 use strict;
 
-use Test::More tests => 72;
+use Test::More tests => 71;
 
 BEGIN {
     use_ok('File::Path');
@@ -74,11 +74,7 @@ SKIP: {
 
 my $count = rmtree({error => \$error});
 is( $count, 0, 'rmtree of nothing, count of zero' );
-is( scalar(@$error), 1, 'one diagnostic captureed' );
-eval { ($file, $message) = each %{$error->[0]} }; # too early to die, just in case
-is( $@, '', 'decoded diagnostic' );
-is( $file, '', 'general diagnostic' );
-is( $message, 'No root path(s) specified', 'expected diagnostic received' );
+is( scalar(@$error), 0, 'no diagnostic captured' );
 
 @created = mkpath($tmp_base, 0);
 is(scalar(@created), 0, "skipped making existing directories (old style 1)")
@@ -220,9 +216,20 @@ SKIP: {
     is( $file, $dir, 'symlink reported in error' );
 }
 
+{
+    $dir = catdir($tmp_base, 'Z');
+    @created = mkpath($dir);
+    is(scalar(@created), 1, "create a Z directory");
+
+    local @ARGV = ($dir);
+    rmtree( [grep -e $_, @ARGV], 0, 0 );
+    ok(!-e $dir, "blow it away via \@ARGV");
+}
+
 SKIP: {
     skip 'Test::Output not available', 10
         unless $has_Test_Output;
+
 
     SKIP: {
         $dir = catdir('EXTRA', '3');
@@ -252,7 +259,7 @@ and can't restore permissions to \d+
     $dir2 = catdir($base,'B');
 
     stderr_like(
-        sub { rmtree( [], 1 ) },
+        sub { rmtree( undef, 1 ) },
         qr/\ANo root path\(s\) specified\b/,
         "rmtree of nothing carps sensibly"
     );
