@@ -6,8 +6,8 @@ File::Path - Create or remove directory trees
 
 =head1 VERSION
 
-This document describes version 2.00_02 of File::Path, released
-2007-06-06.
+This document describes version 2.00_03 of File::Path, released
+2007-06-07.
 
 =head1 SYNOPSIS
 
@@ -371,7 +371,7 @@ BEGIN {
 
 use Exporter ();
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '2.00_02';
+$VERSION = '2.00_03';
 @ISA     = qw(Exporter);
 @EXPORT  = qw(mkpath rmtree);
 
@@ -396,8 +396,11 @@ sub _croak {
 sub mkpath {
     my $new_style = (
         UNIVERSAL::isa($_[0],'ARRAY')
-        or (@_ == 2 and $_[1] =~ /\A\d+\z/)
-        or (@_ == 3 and $_[1] =~ /\A\d+\z/ and $_[2] =~ /\A\d+\z/)
+        or (@_ == 2 and (defined $_[1] ? $_[1] =~ /\A\d+\z/ : 1))
+        or (@_ == 3
+            and (defined $_[1] ? $_[1] =~ /\A\d+\z/ : 1)
+            and (defined $_[2] ? $_[2] =~ /\A\d+\z/ : 1)
+        )
     ) ? 0 : 1;
 
     my $arg;
@@ -470,8 +473,11 @@ sub _mkpath {
 sub rmtree {
     my $new_style = (
         UNIVERSAL::isa($_[0],'ARRAY')
-        or (@_ == 2 and $_[1] =~ /\A\d+\z/)
-        or (@_ == 3 and $_[1] =~ /\A\d+\z/ and $_[2] =~ /\A\d+\z/)
+        or (@_ == 2 and (defined $_[1] ? $_[1] =~ /\A\d+\z/ : 1))
+        or (@_ == 3
+            and (defined $_[1] ? $_[1] =~ /\A\d+\z/ : 1)
+            and (defined $_[2] ? $_[2] =~ /\A\d+\z/ : 1)
+        )
     ) ? 0 : 1;
 
     my $arg;
