@@ -4883,7 +4883,9 @@ Perl_reg_named_buff_exists(pTHX_ REGEXP * const rx, SV * const key,
         if (flags & RXf_HASH_ALL) {
             return hv_exists_ent(rx->paren_names, key, 0);
         } else {
-            if (CALLREG_NAMED_BUFF_FETCH(rx, key, flags)) {
+	    SV *sv = CALLREG_NAMED_BUFF_FETCH(rx, key, flags);
+            if (sv) {
+		SvREFCNT_dec(sv);
                 return TRUE;
             } else {
                 return FALSE;
