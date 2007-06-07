@@ -60,13 +60,6 @@ typedef struct {
 #include "EXTERN.h"
 #include "perl.h"
 
-/* GCC-2.95.2/Mingw32-1.1 forgot the WINAPI on CommandLineToArgvW() */
-#if defined(__MINGW32__) && (__MINGW32_MAJOR_VERSION==1)
-#  include <shellapi.h>
-#else
-EXTERN_C LPWSTR* WINAPI CommandLineToArgvW(LPCWSTR lpCommandLine, int * pNumArgs);
-#endif
-
 #define NO_XSLOCKS
 #define PERL_NO_GET_CONTEXT
 #include "XSUB.h"
@@ -4985,23 +4978,4 @@ win32_free_argvw(pTHX_ void *ptr)
 	Safefree(*argv);
 	*argv++ = Nullch;
     }
-}
-
-void
-win32_argv2utf8(int argc, char** argv)
-{
-    dTHX;
-    char* psz;
-    int length, wargc;
-    LPWSTR* lpwStr = CommandLineToArgvW(GetCommandLineW(), &wargc);
-    if (lpwStr && argc) {
-	while (argc--) {
-	    length = WideCharToMultiByte(CP_UTF8, 0, lpwStr[--wargc], -1, NULL, 0, NULL, NULL);
-	    Newxz(psz, length, char);
-	    WideCharToMultiByte(CP_UTF8, 0, lpwStr[wargc], -1, psz, length, NULL, NULL);
-	    argv[argc] = psz;
-	}
-	call_atexit(win32_free_argvw, argv);
-    }
-    GlobalFree((HGLOBAL)lpwStr);
 }

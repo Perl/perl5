@@ -364,7 +364,7 @@ ARCHNAME	= $(ARCHNAME)-thread
 # version of 8.x can.)
 !IF "$(CCTYPE)" == "MSVC60" || "$(CCTYPE)" == "MSVC70" || \
     "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE"
-DELAYLOAD	= -DELAYLOAD:ws2_32.dll -DELAYLOAD:shell32.dll delayimp.lib
+DELAYLOAD	= -DELAYLOAD:ws2_32.dll delayimp.lib
 !ENDIF
 
 # Visual C++ 2005 (VC++ 8.x) creates manifest files for EXEs and DLLs. These

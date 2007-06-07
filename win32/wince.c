@@ -2844,14 +2844,6 @@ win32_free_argvw(pTHX_ void *ptr)
     }
 }
 
-void
-win32_argv2utf8(int argc, char** argv)
-{
-  /* do nothing, since we're not aware of command line arguments
-   * currently ...
-   */
-}
-
 #if 0
 void
 Perl_sys_intern_clear(pTHX)
