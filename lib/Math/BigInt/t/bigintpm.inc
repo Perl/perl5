@@ -91,6 +91,8 @@ while (<DATA>)
     $try .= '"$m,$e";';
    }elsif ($f eq "bexp"){
     $try .= "\$x->bexp();";
+   } elsif ($f eq "bpi"){
+    $try .= "$class\->bpi(\$x);";
    } else {
     # binary ops
     $try .= "\$y = $class->new('$args[1]');";
@@ -2232,6 +2234,10 @@ NaN:NaN
 inf:inf
 1:2
 2:7
+&bpi
+77:3
++0:3
+11:3
 # see t/bignok.t for more tests
 &bnok
 +inf:10:inf

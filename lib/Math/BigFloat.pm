@@ -16,7 +16,8 @@ $VERSION = '1.58';
 require 5.006002;
 
 require Exporter;
-@ISA =       qw(Math::BigInt);
+@ISA		= qw/Math::BigInt/;
+@EXPORT_OK	= qw/bpi/;
 
 use strict;
 # $_trap_inf/$_trap_nan are internal and should never be accessed from outside
@@ -2324,6 +2325,137 @@ sub bpow
   }
 
 ###############################################################################
+# trigonometric functions
+
+# helper function for bpi()
+
+sub _signed_sub
+  {
+  my ($a, $s, $b) = @_;
+ 
+  if ($s == 0)
+    {
+    # $a and $b are negativ: -> add 
+    $MBI->_add($a, $b);
+    }
+  else
+    {
+    my $c = $MBI->_acmp($a,$b);
+    # $a positiv, $b negativ
+    if ($c >= 0)
+      {
+      $MBI->_sub($a,$b);
+      }
+    else
+      {
+      # make negativ
+      $a = $MBI->_sub( $MBI->_copy($b), $a);
+      $s = 0;
+      }
+    }
+
+  ($a,$s);
+  }
+
+sub _signed_add
+  {
+  my ($a, $s, $b) = @_;
+ 
+  if ($s == 1)
+    {
+    # $a and $b are positiv: -> add 
+    $MBI->_add($a, $b);
+    }
+  else
+    {
+    my $c = $MBI->_acmp($a,$b);
+    # $a positiv, $b negativ
+    if ($c >= 0)
+      {
+      $MBI->_sub($a,$b);
+      }
+    else
+      {
+      # make positiv
+      $a = $MBI->_sub( $MBI->_copy($b), $a);
+      $s = 1;
+      }
+    }
+
+  ($a,$s);
+  }
+
+sub bpi
+  {
+  # Calculate PI to N digits (including the 3 before the dot).
+
+  # The basic algorithm is the one implemented in:
+
+  # The Computer Language Shootout
+  #   http://shootout.alioth.debian.org/
+  #
+  #   contributed by Robert Bradshaw
+  #      modified by Ruud H.G.van Tol
+  #      modified by Emanuele Zeppieri
+ 
+  # We re-implement it here by using the low-level library directly. Also,
+  # the functions consume() and extract_digit() were inlined and some
+  # rendundand operations ( like *= 1 ) were removed.
+
+  my ($self,$n) = @_;
+  if (@_ == 1)
+    {
+    # called like Math::BigFloat::bpi(10);
+    $n = $self; $self = $class;
+    }
+  $self = ref($self) if ref($self);
+  $n = 40 if !defined $n || $n < 1;
+
+  my $z0 = $MBI->_one();
+  my $z1 = $MBI->_zero();
+  my $z2 = $MBI->_one();
+  my $ten = $MBI->_ten();
+  my $three = $MBI->_new(3);
+  my ($s, $d, $e, $r); my $k = 0; my $z1_sign = 0;
+
+  # main loop
+  for (1..$n)
+    {
+    while ( 1 < 3 )
+      {
+      if ($MBI->_acmp($z0,$z2) != 1)
+        {
+        # my $o = $z0 * 3 + $z1;
+        my $o = $MBI->_mul( $MBI->_copy($z0), $three);
+        $z1_sign == 0 ? $MBI->_sub( $o, $z1) : $MBI->_add( $o, $z1);
+        ($d,$r) = $MBI->_div( $MBI->_copy($o), $z2 );
+        $d = $MBI->_num($d);
+        $e = $MBI->_num( scalar $MBI->_div( $MBI->_add($o, $z0), $z2 ) );
+        last if $d == $e;
+        }
+      $k++;
+      my $k2 = $MBI->_new( 2*$k+1 );
+      # mul works regardless of the sign of $z1 since $k is always positive
+      $MBI->_mul( $z1, $k2 );
+      ($z1, $z1_sign) = _signed_add($z1, $z1_sign, $MBI->_mul( $MBI->_new(4*$k+2), $z0 ) );
+      $MBI->_mul( $z0, $MBI->_new($k) );
+      $MBI->_mul( $z2, $k2 );
+      }
+    $MBI->_mul( $z1, $ten );
+    ($z1, $z1_sign) = _signed_sub($z1, $z1_sign, $MBI->_mul( $MBI->_new(10*$d), $z2 ) );
+    $MBI->_mul( $z0, $ten );
+    $s .= $d;
+    }
+
+  my $x = $self->new(0);
+  $x->{_es} = '-';
+  $x->{_e} = $MBI->_new(length($s)-1);
+  $x->{_m} = $MBI->_new($s);
+
+  $x;
+  }
+
+###############################################################################
 # rounding functions
 
 sub bfround
@@ -2728,11 +2860,8 @@ sub import
 
   # register us with MBI to get notified of future lib changes
   Math::BigInt::_register_callback( $self, sub { $MBI = $_[0]; } );
-   
-  # any non :constant stuff is handled by our parent, Exporter
-  # even if @_ is empty, to give it a chance
-  $self->SUPER::import(@a);      	# for subclasses
-  $self->export_to_level(1,$self,@a);	# need this, too
+
+  $self->export_to_level(1,$self,@a);		# export wanted functions
   }
 
 sub bnorm
@@ -2887,13 +3016,16 @@ Math::BigFloat - Arbitrary size floating point math package
   use Math::BigFloat;
 
   # Number creation
-  $x = Math::BigFloat->new($str);	# defaults to 0
-  $nan  = Math::BigFloat->bnan();	# create a NotANumber
-  $zero = Math::BigFloat->bzero();	# create a +0
-  $inf = Math::BigFloat->binf();	# create a +inf
-  $inf = Math::BigFloat->binf('-');	# create a -inf
-  $one = Math::BigFloat->bone();	# create a +1
-  $one = Math::BigFloat->bone('-');	# create a -1
+  my $x = Math::BigFloat->new($str);	# defaults to 0
+  my $y = $x->copy();			# make a true copy
+  my $nan  = Math::BigFloat->bnan();	# create a NotANumber
+  my $zero = Math::BigFloat->bzero();	# create a +0
+  my $inf = Math::BigFloat->binf();	# create a +inf
+  my $inf = Math::BigFloat->binf('-');	# create a -inf
+  my $one = Math::BigFloat->bone();	# create a +1
+  my $mone = Math::BigFloat->bone('-');	# create a -1
+
+  my $pi = Math::BigFloat->bpi(100);	# PI to 100 digits
 
   # Testing
   $x->is_zero();		# true if arg is +0
@@ -3253,6 +3385,14 @@ function. The result is equivalent to:
 
 This method was added in v1.84 of Math::BigInt (April 2007).
 
+=head2 bpi()
+
+	print Math::BigFloat->bpi(100), "\n";
+
+Calculate PI to N digits (including the 3 before the dot).
+
+This method was added in v1.87 of Math::BigInt (June 2007).
+
 =head1 Autocreating constants
 
 After C<use Math::BigFloat ':constant'> all the floating point constants
@@ -3328,6 +3468,14 @@ request a different storage class for use with Math::BigFloat:
 
 However, this request is ignored, as the current code now uses the low-level
 math libary for directly storing the number parts.
+
+=head1 EXPORTS
+
+C<Math::BigFloat> exports nothing by default, but can export the C<bpi()> method:
+
+	use Math::BigFloat qw/bpi/;
+
+	print bpi(10), "\n";
 
 =head1 BUGS
 
