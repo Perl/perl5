@@ -2834,16 +2834,6 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
 #  endif /* USE_ITHREADS */
 #endif /* HAVE_INTERP_INTERN */
 
-static void
-win32_free_argvw(pTHX_ void *ptr)
-{
-    char** argv = (char**)ptr;
-    while(*argv) {
-	Safefree(*argv);
-	*argv++ = Nullch;
-    }
-}
-
 // added to remove undefied symbol error in CodeWarrior compilation
 int
 Perl_Ireentrant_buffer_ptr(aTHX)
