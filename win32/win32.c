@@ -4844,19 +4844,6 @@ win32_signal(int sig, Sighandler_t subcode)
     }
 }
 
-
-#ifdef HAVE_INTERP_INTERN
-
-static void
-win32_csighandler(int sig)
-{
-#if 0
-    dTHXa(PERL_GET_SIG_CONTEXT);
-    Perl_warn(aTHX_ "Got signal %d",sig);
-#endif
-    /* Does nothing */
-}
-
 HWND
 win32_create_message_window()
 {
@@ -4872,6 +4859,18 @@ win32_create_message_window()
         return NULL;
 
     return CreateWindow("Static", "", 0, 0, 0, 0, 0, HWND_MESSAGE, 0, 0, NULL);
+}
+
+#ifdef HAVE_INTERP_INTERN
+
+static void
+win32_csighandler(int sig)
+{
+#if 0
+    dTHXa(PERL_GET_SIG_CONTEXT);
+    Perl_warn(aTHX_ "Got signal %d",sig);
+#endif
+    /* Does nothing */
 }
 
 #if defined(__MINGW32__) && defined(__cplusplus)
