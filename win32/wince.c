@@ -2844,20 +2844,6 @@ win32_free_argvw(pTHX_ void *ptr)
     }
 }
 
-#if 0
-void
-Perl_sys_intern_clear(pTHX)
-{
-    Safefree(w32_perlshell_tokens);
-    Safefree(w32_perlshell_vec);
-    /* NOTE: w32_fdpid is freed by sv_clean_all() */
-    Safefree(w32_children);
-#  ifdef USE_ITHREADS
-    Safefree(w32_pseudo_children);
-#  endif
-}
-
-#endif
 // added to remove undefied symbol error in CodeWarrior compilation
 int
 Perl_Ireentrant_buffer_ptr(aTHX)
