@@ -21,6 +21,12 @@
 #define Perl_reg_numbered_buff_length  my_reg_numbered_buff_length
 #define Perl_reg_named_buff      my_reg_named_buff
 #define Perl_reg_named_buff_iter my_reg_named_buff_iter
+#define Perl_reg_named_buff_fetch    my_reg_named_buff_fetch    
+#define Perl_reg_named_buff_exists   my_reg_named_buff_exists  
+#define Perl_reg_named_buff_firstkey my_reg_named_buff_firstkey
+#define Perl_reg_named_buff_nextkey  my_reg_named_buff_nextkey 
+#define Perl_reg_named_buff_scalar   my_reg_named_buff_scalar  
+#define Perl_reg_named_buff_all      my_reg_named_buff_all     
 #define Perl_reg_qr_package        my_reg_qr_package
 
 #define PERL_NO_GET_CONTEXT
