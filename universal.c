@@ -239,8 +239,8 @@ XS(XS_Tie_Hash_NamedCapture_STORE);
 XS(XS_Tie_Hash_NamedCapture_DELETE);
 XS(XS_Tie_Hash_NamedCapture_CLEAR);
 XS(XS_Tie_Hash_NamedCapture_EXISTS);
-XS(XS_Tie_Hash_NamedCapture_FIRSTKEY);
-XS(XS_Tie_Hash_NamedCapture_NEXTKEY);
+XS(XS_Tie_Hash_NamedCapture_FIRSTK);
+XS(XS_Tie_Hash_NamedCapture_NEXTK);
 XS(XS_Tie_Hash_NamedCapture_SCALAR);
 XS(XS_Tie_Hash_NamedCapture_flags);
 
@@ -302,8 +302,8 @@ Perl_boot_core_UNIVERSAL(pTHX)
     newXS("Tie::Hash::NamedCapture::DELETE", XS_Tie_Hash_NamedCapture_DELETE, file);
     newXS("Tie::Hash::NamedCapture::CLEAR", XS_Tie_Hash_NamedCapture_CLEAR, file);
     newXS("Tie::Hash::NamedCapture::EXISTS", XS_Tie_Hash_NamedCapture_EXISTS, file);
-    newXS("Tie::Hash::NamedCapture::FIRSTKEY", XS_Tie_Hash_NamedCapture_FIRSTKEY, file);
-    newXS("Tie::Hash::NamedCapture::NEXTKEY", XS_Tie_Hash_NamedCapture_NEXTKEY, file);
+    newXS("Tie::Hash::NamedCapture::FIRSTKEY", XS_Tie_Hash_NamedCapture_FIRSTK, file);
+    newXS("Tie::Hash::NamedCapture::NEXTKEY", XS_Tie_Hash_NamedCapture_NEXTK, file);
     newXS("Tie::Hash::NamedCapture::SCALAR", XS_Tie_Hash_NamedCapture_SCALAR, file);
     newXS("Tie::Hash::NamedCapture::flags", XS_Tie_Hash_NamedCapture_flags, file);
 }
@@ -1345,7 +1345,7 @@ XS(XS_Tie_Hash_NamedCapture_EXISTS)
 	return;
 }
 
-XS(XS_Tie_Hash_NamedCapture_FIRSTKEY)
+XS(XS_Tie_Hash_NamedCapture_FIRSTK)
 {
     dVAR;
     dXSARGS;
@@ -1378,7 +1378,7 @@ XS(XS_Tie_Hash_NamedCapture_FIRSTKEY)
 
 }
 
-XS(XS_Tie_Hash_NamedCapture_NEXTKEY)
+XS(XS_Tie_Hash_NamedCapture_NEXTK)
 {
     dVAR;
     dXSARGS;
