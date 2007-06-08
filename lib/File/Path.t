@@ -217,9 +217,9 @@ SKIP: {
 }
 
 {
-    $dir = catdir($tmp_base, 'Z');
+    $dir = catdir($tmp_base, 'ZZ');
     @created = mkpath($dir);
-    is(scalar(@created), 1, "create a Z directory");
+    is(scalar(@created), 1, "create a ZZ directory");
 
     local @ARGV = ($dir);
     rmtree( [grep -e $_, @ARGV], 0, 0 );
