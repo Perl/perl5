@@ -764,8 +764,7 @@ X<$^ENCODING>
 The I<object reference> to the Encode object that is used to convert
 the source code to Unicode.  Thanks to this variable your perl script
 does not have to be written in UTF-8.  Default is I<undef>.  The direct
-manipulation of this variable is highly discouraged.  See L<encoding>
-for more details.
+manipulation of this variable is highly discouraged.
 
 =item $OS_ERROR
 
