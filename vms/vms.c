@@ -2823,14 +2823,20 @@ pipe_exit_routine(pTHX)
     unsigned long int retsts = SS$_NORMAL, abort = SS$_TIMEOUT;
     int sts, did_stuff, need_eof, j;
 
-    /* 
-        flush any pending i/o
+   /* 
+    * Flush any pending i/o, but since we are in process run-down, be
+    * careful about referencing PerlIO structures that may already have
+    * been deallocated.  We may not even have an interpreter anymore.
     */
     info = open_pipes;
     while (info) {
         if (info->fp) {
-           if (!info->useFILE) 
-               PerlIO_flush(info->fp);   /* first, flush data */
+           if (!info->useFILE
+#if defined(USE_ITHREADS)
+             && my_perl
+#endif
+             && PL_perlio_fd_refcnt) 
+               PerlIO_flush(info->fp);
            else 
                fflush((FILE *)info->fp);
         }
@@ -4377,8 +4383,12 @@ I32 Perl_my_pclose(pTHX_ PerlIO *fp)
      *  the first EOF closing the pipe (and DASSGN'ing the channel)...
      */
      if (info->fp) {
-        if (!info->useFILE) 
-            PerlIO_flush(info->fp);   /* first, flush data */
+        if (!info->useFILE
+#if defined(USE_ITHREADS)
+          && my_perl
+#endif
+          && PL_perlio_fd_refcnt) 
+            PerlIO_flush(info->fp);
         else 
             fflush((FILE *)info->fp);
     }
@@ -4400,7 +4410,11 @@ I32 Perl_my_pclose(pTHX_ PerlIO *fp)
                            0, 0, 0, 0, 0, 0));
     _ckvmssts(sys$setast(1));
     if (info->fp) {
-     if (!info->useFILE) 
+     if (!info->useFILE
+#if defined(USE_ITHREADS)
+         && my_perl
+#endif
+         && PL_perlio_fd_refcnt) 
         PerlIO_close(info->fp);
      else 
         fclose((FILE *)info->fp);
