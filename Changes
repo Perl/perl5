@@ -83,7 +83,7 @@ ____________________________________________________________________________
 [      ] By: acme                                  on 2007/06/09  07:27:22
         Log: Skip the test if DB_File is not being built
      Branch: maint-5.005/perl
-           ! t/lib/db0hash
+           ! t/lib/db-btree.t
 ____________________________________________________________________________
 [      ] By: acme                                  on 2007/06/02  15:36:02
         Log: Update for new releases

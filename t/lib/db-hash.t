@@ -18,9 +18,9 @@ BEGIN {
             exit 0;
         }
     }
-    use DB_File; 
 }
 
+use DB_File; 
 use Fcntl;
 
 print "1..143\n";

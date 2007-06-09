@@ -18,7 +18,6 @@ BEGIN {
             exit 0;
         }
     }
-    use DB_File;
     if ($^O eq 'darwin' && ($DB_File::db_version < 2)) {
 	warn <<EOM;
 #
@@ -29,6 +28,7 @@ EOM
     }
 }
 
+use DB_File;
 use Fcntl;
 
 print "1..177\n";
