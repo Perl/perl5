@@ -1513,7 +1513,7 @@ sub is_int
 
 sub bmul 
   { 
-  # multiply two numbers -- stolen from Knuth Vol 2 pg 233
+  # multiply the first number by the second numbers
   # (BINT or num_str, BINT or num_str) return BINT
 
   # set up parameters
@@ -1550,6 +1550,82 @@ sub bmul
   $x->{value} = $CALC->_mul($x->{value},$y->{value});	# do actual math
   $x->{sign} = '+' if $CALC->_is_zero($x->{value}); 	# no -0
 
+  $x->round(@r);
+  }
+
+sub bmuladd
+  { 
+  # multiply two numbers and then add the third to the result
+  # (BINT or num_str, BINT or num_str, BINT or num_str) return BINT
+
+  # set up parameters
+  my ($self,$x,$y,$z,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,$z,@r) = objectify(3,@_);
+    }
+
+  return $x if $x->modify('bmuladd');
+
+  return $x->bnan() if  ($x->{sign} eq $nan) ||
+			($y->{sign} eq $nan) ||
+			($z->{sign} eq $nan);
+
+  # inf handling of x and y
+  if (($x->{sign} =~ /^[+-]inf$/) || ($y->{sign} =~ /^[+-]inf$/))
+    {
+    return $x->bnan() if $x->is_zero() || $y->is_zero();
+    # result will always be +-inf:
+    # +inf * +/+inf => +inf, -inf * -/-inf => +inf
+    # +inf * -/-inf => -inf, -inf * +/+inf => -inf
+    return $x->binf() if ($x->{sign} =~ /^\+/ && $y->{sign} =~ /^\+/); 
+    return $x->binf() if ($x->{sign} =~ /^-/ && $y->{sign} =~ /^-/); 
+    return $x->binf('-');
+    }
+  # inf handling x*y and z
+  if (($z->{sign} =~ /^[+-]inf$/))
+    {
+    # something +-inf => +-inf
+    $x->{sign} = $z->{sign}, return $x if $z->{sign} =~ /^[+-]inf$/;
+    }
+
+  return $upgrade->bmuladd($x,$upgrade->new($y),$upgrade->new($z),@r)
+   if defined $upgrade && (!$y->isa($self) || !$z->isa($self) || !$x->isa($self));
+ 
+  # TODO: what it $y and $z have A or P set?
+  $r[3] = $z;				# no push here
+
+  $x->{sign} = $x->{sign} eq $y->{sign} ? '+' : '-'; # +1 * +1 or -1 * -1 => +
+
+  $x->{value} = $CALC->_mul($x->{value},$y->{value});	# do actual math
+  $x->{sign} = '+' if $CALC->_is_zero($x->{value}); 	# no -0
+
+  my ($sx, $sz) = ( $x->{sign}, $z->{sign} ); 		# get signs
+
+  if ($sx eq $sz)  
+    {
+    $x->{value} = $CALC->_add($x->{value},$z->{value});	# same sign, abs add
+    }
+  else 
+    {
+    my $a = $CALC->_acmp ($z->{value},$x->{value});	# absolute compare
+    if ($a > 0)                           
+      {
+      $x->{value} = $CALC->_sub($z->{value},$x->{value},1); # abs sub w/ swap
+      $x->{sign} = $sz;
+      } 
+    elsif ($a == 0)
+      {
+      # speedup, if equal, set result to 0
+      $x->{value} = $CALC->_zero();
+      $x->{sign} = '+';
+      }
+    else # a < 0
+      {
+      $x->{value} = $CALC->_sub($x->{value}, $z->{value}); # abs sub
+      }
+    }
   $x->round(@r);
   }
 
@@ -1731,7 +1807,7 @@ sub bmodinv
 sub bmodpow
   {
   # takes a very large number to a very large exponent in a given very
-  # large modulus, quickly, thanks to binary exponentation.  supports
+  # large modulus, quickly, thanks to binary exponentation. Supports
   # negative exponents.
   my ($self,$num,$exp,$mod,@r) = objectify(3,@_);
 
@@ -2947,6 +3023,8 @@ Math::BigInt - Arbitrary size integer/float math package
   $x->bdiv($y);		# divide, set $x to quotient
 			# return (quo,rem) or quo if scalar
 
+  $x->bmuladd($y,$z);	# $x = $x * $y + $z
+
   $x->bmod($y);		   # modulus (x % y)
   $x->bmodpow($exp,$mod);  # modular exponentation (($num**$exp) % $mod))
   $x->bmodinv($mod);	   # the inverse of $x in the given modulus $mod
@@ -3446,6 +3524,14 @@ but faster.
 =head2 bmul()
 
 	$x->bmul($y);			# multiplication (multiply $x by $y)
+
+=head2 bmuladd()
+
+	$x->bmuladd($y,$z);
+
+Multiply $x by $y, and then add $z to the result,
+
+This method was added in v1.87 of Math::BigInt (June 2007).
 
 =head2 bdiv()
 
