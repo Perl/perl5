@@ -3,6 +3,8 @@
 # this approach is like Perl-CE cross-compiling, and allows
 # for full TARGET perl (as opposed to renamed miniperl)
 
+# to skip Configure/build for HOST miniperl, pass "noconf" argument to this script
+
 # some trick is different, however - the file extension for objects files
 # are choosen to be .${CROSS_NAME}, .armo in our case
 
@@ -31,8 +33,7 @@ cp config.sh-arm-linux-n770 config-${CROSS_NAME}.sh
 # following should be done better:
 cd ..
 
-if false
-then
+if [[ "x$1" != xnoconf* ]] ; then
 # do miniperl on HOST
 ./Configure -des -D prefix=./dummy -Dusedevel
 make miniperl
@@ -57,10 +58,8 @@ PERL_CONFIG_SH=Cross/config-${CROSS_NAME}.sh
 rm cflags-cross-$CROSS_NAME
 cp Cross/cflags-cross-$CROSS_NAME .
 rm Makefile-cross-$CROSS_NAME
-sh Cross/Makefile-cross.SH
+sh Cross/Makefile-cross-SH
 cp Cross/Makefile-cross-$CROSS_NAME .
-# makefile hack-patching TODO generation from Makefile.SH
-#./miniperl -pi.bak -w0777ne "s{^(CCCMD.*?)cflags}{\$1cflags-cross-$CROSS_NAME}gm" Makefile-cross-$CROSS_NAME
 
 mkdir xlib
 mkdir xlib/$CROSS_NAME

@@ -710,7 +710,7 @@ all: hostminiperl $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE) MakePPPort E
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c xconfig.h $(EXTDIR)\DynaLoader\dlutils.c
 
-$(CONFIGPM) : $(HPERL) ..\config.sh config_h.PL ..\minimod.pl
+$(CONFIGPM) : $(HPERL) ..\config.sh .\xconfig.h config_h.PL ..\minimod.pl
 	cd .. && $(HPERL) configpm --cross=$(CROSS_NAME) --no-glossary
 	-mkdir $(XCOREDIR)
 	$(XCOPY) ..\*.h $(XCOREDIR)\*.*
@@ -718,12 +718,12 @@ $(CONFIGPM) : $(HPERL) ..\config.sh config_h.PL ..\minimod.pl
 	$(XCOPY) *.h $(XCOREDIR)\*.*
 	$(XCOPY) ..\ext\re\re.pm $(LIBDIR)\*.*
 	$(RCOPY) include $(XCOREDIR)\*.*
-	-$(HPERL) -I..\lib -MCross=$(CROSS_NAME) config_h.PL "INST_VER=$(INST_VER)" "CORE_DIR=$(XCOREDIR)" "CONFIG_H=xconfig.h"
-	$(XCOPY) xconfig.h $(XCOREDIR)\config.h
 
 .\xconfig.h:
 	-del /f xconfig.h
-	copy config_H.ce xconfig.h
+	-mkdir $(XCOREDIR)
+	-$(HPERL) -I..\lib -MCross=$(CROSS_NAME) config_h.PL "INST_VER=$(INST_VER)" "CORE_DIR=$(XCOREDIR)" "CONFIG_H=xconfig.h"
+	$(XCOPY) xconfig.h $(XCOREDIR)\config.h
 
 ..\config.sh: config.ce config_sh.PL
 	$(HPERL) -I..\lib -I. config_sh.PL $(CFG_VARS) config.ce > ..\config.sh

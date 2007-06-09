@@ -327,9 +327,7 @@ CCCMDSRC = \`sh \$(shellflags) cflags-cross-${CROSS_NAME} "optimize='\$(OPTIMIZE
 ## In the following dollars and backticks do not need the extra backslash.
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
-XCOREDIR	= ./xlib/$(CROSS_NAME)/CORE
-
-CONFIGPM = xlib/$(CROSS_NAME)/Config.pm xlib/$(CROSS_NAME)/Config_heavy.pl
+CONFIGPM = xlib/$(CROSS_NAME)/Config.pm
 
 private = preplibrary $(CONFIGPM) $(CROSS_LIB)/Config.pod
 
@@ -766,17 +764,11 @@ makeppport: miniperl$(EXE_EXT) $(CONFIGPM)
 	$(LDLIBPTH) ./miniperl$(EXE_EXT) -Ilib mkppport
 
 $(CROSS_LIB)/Config.pod: config.sh miniperl configpm Porting/Glossary
-	$(LDLIBPTH) ./miniperl -Ilib configpm --cross=$(CROSS_NAME) --heavy=$(CROSS_LIB)/Config_heavy.pl
-	#TODO $(XCOPY) ..\*.h $(XCOREDIR)\*.*
-	#TODO $(XCOPY) ..\*.inc $(XCOREDIR)\*.*
-	#TODO $(XCOPY) *.h $(XCOREDIR)\*.*
-	#TODO $(XCOPY) ..\ext\re\re.pm $(LIBDIR)\*.*
-	#TODO $(RCOPY) include $(XCOREDIR)\*.*
-	#TODO $(LDLIBPTH) ./miniperl -Ilib -MCross=$(CROSS_NAME) config_h.PL "INST_VER=$(INST_VER)" "CORE_DIR=$(XCOREDIR)" "CONFIG_H=xconfig.h"
-	#TODO cp xconfig.h $(CROSS_LIB)/config.h
-	#TODO cp xconfig.h $(CROSS_LIB)/xconfig.h
+	$(LDLIBPTH) ./miniperl -Ilib configpm --cross=$(CROSS_NAME)
+	cp *.h $(CROSS_LIB)/
+	cp ext/re/re.pm $(LIBDIR)/
 
-$(CONFIGPM): $(CROSS_LIB)/Config.pod
+$(CONFIGPM): $(CROSS_LIB)/Config.pod xconfig.h
 
 lib/re.pm: ext/re/re.pm
 	@-rm -f $@
@@ -1103,7 +1095,9 @@ config.h: config_h.SH config.sh
 
 xconfig.h: config_h.SH Cross/config-$(CROSS_NAME).sh
 	CONFIG_SH=Cross/config-$(CROSS_NAME).sh CONFIG_H=xconfig.h $(SHELL) config_h.SH
+	#TODO $(LDLIBPTH) ./miniperl -Ilib -MCross=$(CROSS_NAME) config_h.PL "INST_VER=$(INST_VER)" "CORE_DIR=$(CROSS_LIB)" "CONFIG_H=xconfig.h"
 	cp xconfig.h $(CROSS_LIB)/
+	cp xconfig.h $(CROSS_LIB)/config.h
 
 # When done, touch perlmain.c so that it doesn't get remade each time.
 .PHONY: depend

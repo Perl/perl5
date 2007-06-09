@@ -39,7 +39,7 @@ File C<Cross.pm> is dead simple: for given cross-architecture places in @INC
 a path where perl modules are, and right C<Config.pm> in that place.
 
 That said, C<miniperl -Ilib -MConfig -we 1> should report an error, because
-it can not find C<Config.pm>. If it does not gives an error -- wrong C<Config.pm>
+it can not find C<Config.pm>. If it does not give an error -- wrong C<Config.pm>
 is substituted, and resulting binaries will be a mess.
 
 C<miniperl -MCross -MConfig -we 1> should run okay, and it will provide right

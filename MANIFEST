@@ -36,6 +36,7 @@ Cross/Makefile.SH.patch	Cross-compilation
 Cross/Makefile-cross-SH	Cross-compilation
 Cross/cflags-cross-arm	Cross-compilation
 Cross/README		Cross-compilation
+Cross/README.new	Cross-compilation
 Cross/TODO		Cross-compilation
 Cross/warp		Cross-compilation
 cv.h			Code value header
