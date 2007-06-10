@@ -716,7 +716,7 @@ still only provides DOS semantics (read "warts") for globbing.
 =back
 
 Please send detailed descriptions of any problems and solutions that 
-you may find to <F<perlbug@perl.com>>, along with the output produced
+you may find to <F<perlbug@perl.org>>, along with the output produced
 by C<perl -V>.
 
 =head1 AUTHORS

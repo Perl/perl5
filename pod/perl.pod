@@ -311,7 +311,7 @@ affected by wraparound).
 
 You may mail your bug reports (be sure to include full configuration
 information as output by the myconfig program in the perl source tree,
-or by C<perl -V>) to <F<perlbug@perl.com>>.
+or by C<perl -V>) to <F<perlbug@perl.org>>.
 If you've succeeded in compiling perl, the perlbug script in the utils/
 subdirectory can be used to help mail in a bug report.
 

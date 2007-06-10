@@ -1021,7 +1021,7 @@ If you can't compile successfully, try some of the following ideas.
 If none of them help, and careful reading of the error message and
 the relevant manual pages on your system doesn't help, you can
 send a message to either the comp.lang.perl.misc newsgroup or to
-perlbug@perl.com with an accurate description of your problem.
+perlbug@perl.org with an accurate description of your problem.
 See L<"Reporting Problems"> below.
 
 =over 4
@@ -1626,7 +1626,7 @@ available in TeX format.  Type
 If you have difficulty building perl, and none of the advice in this file
 helps, and careful reading of the error message and the relevant manual
 pages on your system doesn't help either, then you should send a message
-to either the comp.lang.perl.misc newsgroup or to perlbug@perl.com with
+to either the comp.lang.perl.misc newsgroup or to perlbug@perl.org with
 an accurate description of your problem.
 
 Please include the output of the ./myconfig shell script that comes with
