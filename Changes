@@ -80,6 +80,12 @@ Version 5.005_04        Fourth maintenance release of 5.005
 
 
 ____________________________________________________________________________
+[      ] By: acme                                  on 2007/06/10  16:14:49
+        Log: Fix line endings on Windows files
+     Branch: maint-5.005/perl
+           ! README.dos README.win32 djgpp/configure.bat win32/Makefile
+           ! win32/makefile.mk
+____________________________________________________________________________
 [      ] By: acme                                  on 2007/06/10  16:10:19
         Log: Update compare test from blead (hopefully is more portable)
      Branch: maint-5.005/perl
@@ -95,8 +101,8 @@ ____________________________________________________________________________
         Log: Update perlbug email address to perlbug@perl.org
      Branch: maint-5.005/perl
            ! utils/perlbug.PL pod/perllocale.pod pod/perlfaq2.pod 
-             pod/perl.pod hints/README.hints configure.com README.win32
-             README.vms README INSTALL Configure
+           ! pod/perl.pod hints/README.hints configure.com README.win32
+           ! README.vms README INSTALL Configure
 ____________________________________________________________________________
 [      ] By: acme                                  on 2007/06/10  12:52:18
         Log: Tests in t/lib/db-recno.t fail on both of these machines.
