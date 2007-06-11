@@ -822,7 +822,7 @@ makeppport: miniperl$(EXE_EXT) $(CONFIGPM)
 	$(LDLIBPTH) ./miniperl$(EXE_EXT) -Ilib mkppport
 
 lib/Config.pod: config.sh miniperl$(EXE_EXT) configpm Porting/Glossary
-	$(LDLIBPTH) ./miniperl -Ilib configpm --heavy=lib/Config_heavy.pl lib/Config.pm
+	$(LDLIBPTH) ./miniperl -Ilib configpm
 
 $(CONFIGPM): lib/Config.pod
 

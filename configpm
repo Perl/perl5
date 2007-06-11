@@ -31,12 +31,9 @@
 # on Config.pm should trigger even if only Config_heavy.pl has changed.
 
 sub usage { die <<EOF }
-usage: $0  [ options ] [ Config_file ] [ Glossary_file ]
+usage: $0  [ options ]
     --cross=PLATFORM    cross-compile for a different platform
     --no-glossary       don't include Porting/Glossary in lib/Config.pod
-    --heavy=FILE        alternative name for lib/Config_heavy.pl
-    Config_file         alternative name for lib/Config.pm
-    Glossary_file       alternative name for Porting/Glossary
 EOF
 
 use strict;
@@ -63,7 +60,6 @@ my %Allowed_Opts = (
     'cross'    => '', # --cross=PLATFORM - crosscompiling for PLATFORM
     'glossary' => 1,  # --no-glossary  - no glossary file inclusion,
                       #                  for compactness
-    'heavy' => '',   # pathname of the Config_heavy.pl file
 );
 
 sub opts {
@@ -90,29 +86,24 @@ sub opts {
 my %Opts = opts();
 
 my ($Config_SH, $Config_PM, $Config_heavy, $Config_POD);
-my $Glossary = $ARGV[1] || 'Porting/Glossary';
+my $Glossary = 'Porting/Glossary';
 
 if ($Opts{cross}) {
   # creating cross-platform config file
   mkdir "xlib";
   mkdir "xlib/$Opts{cross}";
-  $Config_PM = $ARGV[0] || "xlib/$Opts{cross}/Config.pm";
+  $Config_PM = "xlib/$Opts{cross}/Config.pm";
   $Config_POD = "xlib/$Opts{cross}/Config.pod";
   $Config_SH = "Cross/config-$Opts{cross}.sh";
 }
 else {
-  $Config_PM = $ARGV[0] || 'lib/Config.pm';
+  $Config_PM = "lib/Config.pm";
   $Config_POD = "lib/Config.pod";
   $Config_SH = "config.sh";
 }
-if ($Opts{heavy}) {
-  $Config_heavy = $Opts{heavy};
-}
-else {
-  ($Config_heavy = $Config_PM) =~ s!\.pm$!_heavy.pl!;
-  die "Can't automatically determine name for Config_heavy.pl from '$Config_PM'"
-    if $Config_heavy eq $Config_PM;
-}
+($Config_heavy = $Config_PM) =~ s/\.pm$/_heavy.pl/;
+die "Can't automatically determine name for Config_heavy.pl from '$Config_PM'"
+  if $Config_heavy eq $Config_PM;
 
 my $config_txt;
 my $heavy_txt;
