@@ -247,8 +247,44 @@ bigint - Transparent BigInteger support for Perl
 All operators (including basic math operations) are overloaded. Integer
 constants are created as proper BigInts.
 
-Floating point constants are truncated to integer. All results are also
-truncated.
+Floating point constants are truncated to integer. All parts and results of
+expressions are also truncated.
+
+Unlike L<integer>, this pragma creates integer constants that are only
+limited in their size by the available memory and CPU time.
+
+=head2 use integer vs. use bigint
+
+There is one small difference between C<use integer> and C<use bigint>: the
+former will not affect assignments to variables and the return value of
+some functions. C<bigint> truncates these results to integer too:
+
+	# perl -Minteger -wle 'print 3.2'
+	3.2
+	# perl -Minteger -wle 'print 3.2 + 0'
+	3
+	# perl -Mbigint -wle 'print 3.2'
+	3
+	# perl -Mbigint -wle 'print 3.2 + 0'
+	3
+
+	# perl -Mbigint -wle 'print exp(1) + 0'
+	2
+	# perl -Mbigint -wle 'print exp(1)'
+	2
+	# perl -Mbigint -wle 'print exp(1)'
+	2.71828182845905
+	# perl -Mbigint -wle 'print exp(1) + 0'
+	2
+
+In practice this makes seldom a difference as B<parts and results> of
+expressions will be truncated anyway, but this can, for instance, affect the
+return value of subroutines:
+
+	sub three_integer { use integer; return 3.2; } 
+	sub three_bigint { use bigint; return 3.2; }
+ 
+	print three_integer(), " ", three_bigint(),"\n";	# prints "3.2 3"
 
 =head2 Options
 
