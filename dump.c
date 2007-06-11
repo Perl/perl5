@@ -2141,11 +2141,11 @@ Perl_sv_catxmlsv(pTHX_ SV *dsv, SV *ssv)
 }
 
 char *
-Perl_sv_catxmlpvn(pTHX_ SV *dsv, char* pv, STRLEN len, int utf8)
+Perl_sv_catxmlpvn(pTHX_ SV *dsv, const char *pv, STRLEN len, int utf8)
 {
     unsigned int c;
     const char * const e = pv + len;
-    char *start = pv;
+    const char * const start = pv;
     STRLEN dsvcur;
     STRLEN cl;
 
@@ -2818,7 +2818,7 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
     if (PL_madskills && o->op_madprop) {
 	char prevkey = '\0';
 	SV * const tmpsv = newSVpvn("", 0);
-	const MADPROP* const mp = o->op_madprop;
+	const MADPROP* mp = o->op_madprop;
 
 	sv_utf8_upgrade(tmpsv);
 	if (!contents) {

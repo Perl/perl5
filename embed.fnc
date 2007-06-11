@@ -1834,7 +1834,7 @@ Mp	|void	|xmldump_sub	|NN const GV* gv
 Mp	|void	|xmldump_form	|NN const GV* gv
 Mp	|void	|xmldump_eval
 Mp	|char*	|sv_catxmlsv	|NN SV *dsv|NN SV *ssv
-Mp	|char*	|sv_catxmlpvn	|NN SV *dsv|NN char *pv|STRLEN len|int utf8
+Mp	|char*	|sv_catxmlpvn	|NN SV *dsv|NN const char *pv|STRLEN len|int utf8
 Mp	|char*	|sv_xmlpeek	|NN SV* sv
 Mp	|void	|do_pmop_xmldump|I32 level|NN PerlIO *file \
 				|NULLOK const PMOP *pm

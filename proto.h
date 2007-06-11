@@ -4619,7 +4619,7 @@ PERL_CALLCONV char*	Perl_sv_catxmlsv(pTHX_ SV *dsv, SV *ssv)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV char*	Perl_sv_catxmlpvn(pTHX_ SV *dsv, char *pv, STRLEN len, int utf8)
+PERL_CALLCONV char*	Perl_sv_catxmlpvn(pTHX_ SV *dsv, const char *pv, STRLEN len, int utf8)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
