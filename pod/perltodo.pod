@@ -511,6 +511,8 @@ PerlIO doesn't do directories or symlinks, either: mkdir(), rmdir(),
 opendir(), closedir(), seekdir(), rewinddir(), glob(); symlink(),
 readlink().
 
+See also L</"Virtualize operating system access">.
+
 =head2 -C on the #! line
 
 It should be possible to make -C work correctly if found on the #! line,
@@ -643,14 +645,18 @@ probably does not need to survive alongside this proposed new
 implementation, the approaches could be merged.
 
 What would this give us?  One often-asked-for feature this would
-enable is using Unicode for filenames (and other "names" like %ENV,
-usernames, hostnames, and so forth.)  But this would also allow for
-things like virtual filesystems, virtual networks, and "sandboxes"
-(though as long as dynamic loading of random object code is allowed,
-not very safe sandboxes since external code of course know not of
-Perl's vtables).  An example of a smaller "sandbox" is that this
-feature can be used to implement per-thread working directories:
-Win32 already does this.
+enable is using Unicode for filenames, and other "names" like %ENV,
+usernames, hostnames, and so forth.
+(See L<perlunicode/"When Unicode Does Not Happen">.)
+
+But this kind of virtualization would also allow for things like
+virtual filesystems, virtual networks, and "sandboxes" (though as long
+as dynamic loading of random object code is allowed, not very safe
+sandboxes since external code of course know not of Perl's vtables).
+An example of a smaller "sandbox" is that this feature can be used to
+implement per-thread working directories: Win32 already does this.
+
+See also L</"Extend PerlIO and PerlIO::Scalar">.
 
 =head1 Big projects
 
