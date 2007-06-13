@@ -622,9 +622,30 @@ sub _clean_up_paths {
     ### clean up paths if we are on win32
     if( $^O eq 'MSWin32' ) {
         for my $pgm ( $self->program->ls_accessors ) {
-            $self->program->$pgm(
-                Win32::GetShortPathName( $self->program->$pgm )
-            ) if $self->program->$pgm and $self->program->$pgm =~ /\s+/;      
+            my $path = $self->program->$pgm;
+
+            ### paths with whitespace needs to be shortened
+            ### for shell outs.
+            if ($path and $path =~ /\s+/) {
+                my($prog, $args);
+
+                ### patch from Steve Hay, 13nd of June 2007
+                ### msg-id: <467012A4.6060705@uk.radan.com>
+                ### windows directories are not allowed to end with 
+                ### a space, so any occurrence of '\w\s+/\w+' means
+                ### we're dealing with arguments, not directory
+                ### names.
+                if ($path =~ /^(.*?)(\s+\/.*$)/) {
+                    ($prog, $args) = ($1, $2);
+                
+                ### otherwise, there are no arguments
+                } else {
+                    ($prog, $args) = ($path, '');
+                }
+                
+                $prog = Win32::GetShortPathName( $prog );
+                $self->program->$pgm( $prog . $args );
+            }
         }
     }
 
