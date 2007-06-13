@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Jun  1 08:37:13 CEST 2007 [metaconfig 3.0 PL70]
+# Generated on Wed Jun 13 22:10:15 CEST 2007 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -7576,21 +7576,20 @@ eval $inhdr
 
 echo " "
 echo "Checking for C++..." >&4
-cat >try.c <<'EOCP'
+$cat >try.c <<'EOCP'
 #include <stdio.h>
 int main(void)
 {
 #ifdef __cplusplus
-    printf("define\n");
-#else
-    printf("undef\n");
-#endif
     return 0;
+#else
+    return 1;
+#endif
 }
 EOCP
 set try
-if eval $compile_ok && $run ./try >cplusplus$$; then
-	val=`$cat cplusplus$$`
+if eval $compile_ok && $run ./try; then
+	val="$define"
 	echo "You are using a C++ compiler."
 else
 	val="$undef"
