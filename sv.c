@@ -246,8 +246,13 @@ S_new_SV(pTHX)
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = 0;
     sv->sv_debug_optype = PL_op ? PL_op->op_type : 0;
-    sv->sv_debug_line = (U16) ((PL_parser && PL_parser->copline == NOLINE) ?
-        (PL_curcop ? CopLINE(PL_curcop) : 0) : PL_parser->copline);
+    sv->sv_debug_line = (U16) (PL_parser
+	    ?  PL_parser->copline == NOLINE
+		?  PL_curcop
+		    ? CopLINE(PL_curcop)
+		    : 0
+		: PL_parser->copline
+	    : 0);
     sv->sv_debug_inpad = 0;
     sv->sv_debug_cloned = 0;
     sv->sv_debug_file = PL_curcop ? savepv(CopFILE(PL_curcop)): NULL;
