@@ -29,6 +29,721 @@ Version v5.9.X		Development release working toward v5.10
 --------------
 
 ____________________________________________________________________________
+[ 31382] By: rgs                                   on 2007/06/14  14:12:35
+        Log: Upgrade to PathTools 3.25
+     Branch: perl
+	   ! ext/Cwd/Changes ext/Cwd/Cwd.xs ext/Cwd/Makefile.PL lib/Cwd.pm
+	   ! lib/File/Spec.pm lib/File/Spec/OS2.pm lib/File/Spec/t/tmpdir.t
+____________________________________________________________________________
+[ 31381] By: rgs                                   on 2007/06/14  13:12:56
+        Log: Upgrade to ExtUtils::CBuilder 0.19
+     Branch: perl
+	   ! lib/ExtUtils/CBuilder.pm lib/ExtUtils/CBuilder/Base.pm
+	   ! lib/ExtUtils/CBuilder/Changes
+	   ! lib/ExtUtils/CBuilder/Platform/Windows.pm
+	   ! lib/ExtUtils/CBuilder/Platform/os2.pm
+____________________________________________________________________________
+[ 31380] By: rgs                                   on 2007/06/14  13:06:13
+        Log: Sync Archive::Extract with CPAN
+     Branch: perl
+	   ! lib/Archive/Extract.pm
+____________________________________________________________________________
+[ 31379] By: rgs                                   on 2007/06/14  12:38:16
+        Log: Subject: [PATCH] Less sed'ing in Cygwin Makefile.SHs
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Thu, 14 Jun 2007 08:13:29 -0400
+             Message-ID: <1ff86f510706140513v5d3bb0e0l89dff31da83abfb9@mail.gmail.com>
+     Branch: perl
+	   ! cygwin/Makefile.SHs
+____________________________________________________________________________
+[ 31378] By: rgs                                   on 2007/06/14  12:27:41
+        Log: assertions has been removed
+     Branch: perl
+	   ! Porting/Maintainers.pl
+____________________________________________________________________________
+[ 31377] By: rgs                                   on 2007/06/14  11:06:02
+        Log: Fix [perl #43207] lc() or uc() inside sort affect the return value.
+     Branch: perl
+	   ! pp.c t/op/lc.t
+____________________________________________________________________________
+[ 31376] By: davem                                 on 2007/06/13  22:41:33
+        Log: change #31134 broke DEBUG_LEAKING_SCALARS builds
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 31375] By: merijn                                on 2007/06/13  20:15:28
+        Log: Subject: Re: vsprintf
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Wed, 13 Jun 2007 14:41:44 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.64.0706131434120.18715@fractal.phys.lafayette.edu>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 31373] By: merijn                                on 2007/06/13  20:11:10
+        Log: Subject: [PATCH] Configure: Erroneous C++ message
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Wed, 13 Jun 2007 14:33:54 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.64.0706131428510.18715@fractal.phys.lafayette.edu>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 31371] By: steveh                                on 2007/06/13  17:12:21
+        Log: Fix random failures in CPANPLUS tests on Win32
+             
+             The failures were a result of calling Win32::GetShortPathName with
+             the program argument " /nologo" appended to the path. Program
+             arguments should not be passed to Win32::GetShortPathName.
+             
+             (The randomness occurred because random garbage was being produced
+             due to a separate bug in that Win32 function, for which a fix is
+             forthcoming...).
+     Branch: perl
+	   ! lib/CPANPLUS/Config.pm
+____________________________________________________________________________
+[ 31370] By: rgs                                   on 2007/06/13  13:24:09
+        Log: Subject: yet another mro.c patch
+             From: "Brandon Black" <blblack@gmail.com>
+             Date: Wed, 13 Jun 2007 08:19:11 -0500
+             Message-ID: <84621a60706130619g17c9d2fbi111cca567da3d500@mail.gmail.com>
+     Branch: perl
+	   ! mro.c
+____________________________________________________________________________
+[ 31369] By: rgs                                   on 2007/06/12  08:43:55
+        Log: Subject: mad-const patch
+             From: Jim Cromie <jim.cromie@gmail.com>
+             Date: Mon, 11 Jun 2007 13:49:06 -0600
+             Message-ID: <466DA732.3010608@gmail.com>
+     Branch: perl
+	   ! dump.c embed.fnc proto.h
+____________________________________________________________________________
+[ 31368] By: rgs                                   on 2007/06/12  08:39:00
+        Log: Subject: Re: integer vs. bigint [PATCH]
+             From: Tels <nospam-abuse@bloodgate.com>
+             Date: Mon, 11 Jun 2007 19:31:16 +0200
+             Message-Id: <200706111931.17616@bloodgate.com>
+     Branch: perl
+	   ! lib/bigint.pm
+____________________________________________________________________________
+[ 31367] By: rgs                                   on 2007/06/12  08:33:40
+        Log: Subject: [PATCH] perltodo: more vtable musings
+             From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Date: Tue, 12 Jun 2007 03:15:26 +0300 (EEST)
+             Message-Id: <200706120015.l5C0FQH7512295@kosh.hut.fi>
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 31366] By: rgs                                   on 2007/06/12  08:32:26
+        Log: Subject: Re: [PATCH-at-31365] (was - configpm frustrations)
+             From: Vadim <vadim@vkonovalov.ru>
+             Date: Mon, 11 Jun 2007 19:19:31 +0400
+             Message-ID: <466D6803.1020808@vkonovalov.ru>
+     Branch: perl
+	   ! Makefile.SH configpm
+____________________________________________________________________________
+[ 31365] By: rgs                                   on 2007/06/11  15:20:38
+        Log: Subject: Math::BigInt v1.87 take 8
+             From: Tels <nospam-abuse@bloodgate.com>
+             Date: Sat, 9 Jun 2007 14:07:34 +0200
+             Message-Id: <200706091407.36659@bloodgate.com>
+     Branch: perl
+	   ! lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	   ! lib/Math/BigInt/t/bare_mbf.t lib/Math/BigInt/t/bare_mbi.t
+	   ! lib/Math/BigInt/t/bigfltpm.inc lib/Math/BigInt/t/bigfltpm.t
+	   ! lib/Math/BigInt/t/bigintpm.inc lib/Math/BigInt/t/bigintpm.t
+	   ! lib/Math/BigInt/t/sub_mbf.t lib/Math/BigInt/t/sub_mbi.t
+	   ! lib/Math/BigInt/t/with_sub.t
+____________________________________________________________________________
+[ 31364] By: rgs                                   on 2007/06/11  15:18:27
+        Log: Subject: pidigits benchmark and bpi() method in Math::BigFloat/Math::BigInt, take 7 [PATCH]
+             From: Tels <nospam-abuse@bloodgate.com>
+             Date: Fri, 8 Jun 2007 19:29:41 +0200
+             Message-Id: <200706081929.44888@bloodgate.com>
+     Branch: perl
+	   ! lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	   ! lib/Math/BigInt/t/bare_mbf.t lib/Math/BigInt/t/bare_mbi.t
+	   ! lib/Math/BigInt/t/bigfltpm.inc lib/Math/BigInt/t/bigfltpm.t
+	   ! lib/Math/BigInt/t/bigintpm.inc lib/Math/BigInt/t/bigintpm.t
+	   ! lib/Math/BigInt/t/sub_mbf.t lib/Math/BigInt/t/sub_mbi.t
+	   ! lib/Math/BigInt/t/with_sub.t
+____________________________________________________________________________
+[ 31363] By: rgs                                   on 2007/06/11  14:27:40
+        Log: Doc adjustments for the number localization and setlocale().
+             See debian bug #379463.
+     Branch: perl
+	   ! pod/perllocale.pod
+____________________________________________________________________________
+[ 31362] By: rgs                                   on 2007/06/11  08:28:57
+        Log: Subject: [PATCH] cross-compilation for linux
+             From: "Konovalov, Vadim Vladimirovich \(Vadim\)** CTR **" <vkonovalov@alcatel-lucent.com>
+             Date: Sat, 9 Jun 2007 19:41:44 +0200
+             Message-ID: <D16F05D0CAAA234BA2B753B80DE6100D278EBC@DEEXC1U02.de.lucent.com>
+     Branch: perl
+	   + Cross/README.new
+	   ! Cross/Makefile-cross-SH Cross/README Cross/build-arm-n770-sh
+	   ! MANIFEST README.ce win32/Makefile.ce
+____________________________________________________________________________
+[ 31361] By: craigb                                on 2007/06/08  18:43:10
+        Log: A couple of File::Path tests require unix syntax on VMS.
+     Branch: perl
+	   ! lib/File/Path.t
+____________________________________________________________________________
+[ 31360] By: craigb                                on 2007/06/08  15:28:29
+        Log: Make pipe shutdown on VMS care about whether PerlIO has already
+             shut down.
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 31359] By: craigb                                on 2007/06/08  15:25:22
+        Log: Avoid multiply defined symbols in re extension following #31341.
+     Branch: perl
+	   ! ext/re/re_top.h
+____________________________________________________________________________
+[ 31358] By: craigb                                on 2007/06/08  15:21:24
+        Log: Make symbols short enough for VMS after #31341.
+     Branch: perl
+	   ! universal.c
+____________________________________________________________________________
+[ 31357] By: steveh                                on 2007/06/08  10:35:34
+        Log: Fix lib/File/Path.t failure on Win32
+             (Create a 'ZZ' directory instead of 'Z' because we already have a 'z'
+             which is the same as 'Z' on Win32's case-insensitive filesystem)
+     Branch: perl
+	   ! lib/File/Path.pm lib/File/Path.t
+____________________________________________________________________________
+[ 31356] By: steveh                                on 2007/06/08  09:07:46
+        Log: Change 31347 should also have removed win32_free_argvw()
+             because it now isn't used anywhere.
+     Branch: perl
+	   ! win32/win32.c win32/wince.c
+____________________________________________________________________________
+[ 31355] By: steveh                                on 2007/06/08  08:50:09
+        Log: Remove dead Perl_sys_intern_clear() from wince.c
+     Branch: perl
+	   ! win32/wince.c
+____________________________________________________________________________
+[ 31354] By: steveh                                on 2007/06/08  08:36:05
+        Log: Move win32_create_message_window() out of #ifdef HAVE_INTERP_INTERN
+             section, where it didn't belong. (That section should (currently)
+             only contain sys_intern_init(), sys_intern_clear() and
+             sys_intern_dup() and related functionality such as
+             win32_csighandler().)
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[ 31353] By: rgs                                   on 2007/06/08  08:30:25
+        Log: encoding.pm doesn't give any details about ${^ENCODING},
+             so don't mention it in perlvar
+     Branch: perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[ 31352] By: rgs                                   on 2007/06/07  16:09:54
+        Log: Plug a memory leak (noticed by Yves)
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 31351] By: rgs                                   on 2007/06/07  14:05:11
+        Log: Subject: Re: [perl #43082] "$_[0]->method" interpolation 
+             From: Father Chrysostomos <sprout@cpan.org>
+             Date: Tue, 5 Jun 2007 13:25:39 -0700
+             Message-Id: <064E3238-D26D-446D-9B7E-0DB8CEFDE0AD@cpan.org>
+     Branch: perl
+	   ! t/comp/parser.t toke.c
+____________________________________________________________________________
+[ 31350] By: steveh                                on 2007/06/07  13:49:04
+        Log: Stop VC++ from warning "'getenv' : inconsistent dll linkage.
+             dllexport assumed." when building with -DDEBUGGING by declaring
+             getenv() with the same __declspec as in Microsoft's <stdlib.h>.
+             MinGW/GCC is happy with that too, but Borland doesn't understand
+             _CRTIMP so don't bother for Borland since it doesn't warn anyway.
+     Branch: perl
+	   ! x2p/a2p.c
+____________________________________________________________________________
+[ 31349] By: rgs                                   on 2007/06/07  13:23:07
+        Log: Subject: Re: [PATCH] Update File-Path to 2.00
+             From: David Landgren <david@landgren.net>
+             Date: Thu, 07 Jun 2007 14:02:36 +0200
+             Message-ID: <4667F3DC.9070203@landgren.net>
+     Branch: perl
+	   ! lib/File/Path.pm
+____________________________________________________________________________
+[ 31348] By: rgs                                   on 2007/06/07  12:12:39
+        Log: Subject: [PATCHES] Silence compiler warnings
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Wed, 6 Jun 2007 14:45:06 -0400
+             Message-ID: <1ff86f510706061145r540c7f02kba96c04bc9dcf8b0@mail.gmail.com>
+     Branch: perl
+	   ! mro.c pp_sys.c universal.c
+____________________________________________________________________________
+[ 31347] By: steveh                                on 2007/06/07  11:48:47
+        Log: Stop VC++ from warning "all references to 'SHELL32.dll' discarded
+             by /OPT:REF" by removing the only reference to a SHELL32.dll function
+             (namely, CommandLineToArgvW(), called from win32_argv2utf8(), which
+             isn't actually used anywhere so delete it).
+             
+             That then caused the warning "/DELAYLOAD:shell32.dll ignored; no
+             imports found from shell32.dll", so remove that /DELAYLOAD option too.
+     Branch: perl
+	   ! win32/Makefile win32/makefile.mk win32/win32.c win32/win32.h
+	   ! win32/wince.c
+____________________________________________________________________________
+[ 31346] By: rgs                                   on 2007/06/07  08:51:15
+        Log: Subject: [patch] fix small errors in sv.c commentary
+             From: Jim Cromie <jim.cromie@gmail.com>
+             Date: Wed, 06 Jun 2007 23:38:53 -0600
+             Message-ID: <466799ED.3090705@gmail.com>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 31345] By: rgs                                   on 2007/06/07  08:01:18
+        Log: Subject: Re: [PATCH] Update File-Path to 2.00
+             From: David Landgren <david@landgren.net>
+             Date: Wed, 06 Jun 2007 23:57:34 +0200
+             Message-ID: <46672DCE.2080508@landgren.net>
+     Branch: perl
+	   ! lib/File/Path.pm lib/File/Path.t
+____________________________________________________________________________
+[ 31344] By: steveh                                on 2007/06/06  16:48:46
+        Log: Stop VC7 and VC8 warning about overriding /DPERLDLL with /UPERLDLL
+             when compiling perlmain.c, and don't supply /DPERLDLL twice when
+             compiling perlmainst.c
+     Branch: perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 31343] By: steveh                                on 2007/06/06  16:33:42
+        Log: Stop VC7 and VC8 complaining about the DESCRIPTION statement
+             in perldll.def (it isn't supported any more).
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[ 31342] By: rgs                                   on 2007/06/06  14:58:27
+        Log: Adjust test count (it shouldn't have changed with last patch)
+     Branch: perl
+	   ! ext/B/t/concise-xs.t
+____________________________________________________________________________
+[ 31341] By: rgs                                   on 2007/06/06  14:42:01
+        Log: Subject: Re: [PATCH] Callbacks for named captures (%+ and %-)
+             From: "=?UTF-8?Q?=C3=86var_Arnfj=C3=B6r=C3=B0_Bjarmason?=" <avarab@gmail.com>
+             Date: Sun, 3 Jun 2007 20:24:59 +0000
+             Message-ID: <51dd1af80706031324y5618d519p460da27a2e7fe712@mail.gmail.com>
+     Branch: perl
+	   + ext/re/t/qr.t t/op/regexp_nc_tie.t
+	   ! MANIFEST embed.fnc embed.h ext/B/t/concise-xs.t ext/re/re.pm
+	   ! ext/re/re.xs ext/re/re_top.h ext/re/t/re_funcs.t global.sym
+	   ! gv.c lib/Tie/Hash/NamedCapture.pm mg.c perl.h
+	   ! pod/perlreapi.pod proto.h regcomp.c regcomp.h regexp.h
+	   ! t/op/pat.t t/op/readdir.t universal.c
+____________________________________________________________________________
+[ 31340] By: rgs                                   on 2007/06/06  12:27:36
+        Log: Upgrade to encoding::warnings 0.11
+     Branch: perl
+	   ! lib/encoding/warnings.pm
+____________________________________________________________________________
+[ 31339] By: rgs                                   on 2007/06/06  12:07:13
+        Log: A test file was removed from the latest Unicode::Normalize
+     Branch: perl
+	   - ext/Unicode/Normalize/t/short.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 31338] By: rgs                                   on 2007/06/06  12:03:00
+        Log: Upgrade to Unicode::Normalize 1.02
+     Branch: perl
+	   ! ext/Unicode/Normalize/Changes
+	   ! ext/Unicode/Normalize/Normalize.pm
+	   ! ext/Unicode/Normalize/Normalize.xs
+	   ! ext/Unicode/Normalize/README ext/Unicode/Normalize/mkheader
+	   ! ext/Unicode/Normalize/t/fcdc.t ext/Unicode/Normalize/t/func.t
+	   ! ext/Unicode/Normalize/t/test.t
+____________________________________________________________________________
+[ 31337] By: steveh                                on 2007/06/06  08:20:32
+        Log: Subject: Re: [PATCH] Update File-Path to 2.00
+             From: Joshua Juran <jjuran@gmail.com>
+             Date: Wed, 6 Jun 2007 01:14:31 -0700
+             Message-Id: <5F26D98D-8B6D-4F4A-B2E9-168F71B963DD@gmail.com>
+             
+             Fixes typo in the POD.
+     Branch: perl
+	   ! lib/File/Path.pm
+____________________________________________________________________________
+[ 31336] By: steveh                                on 2007/06/06  08:16:44
+        Log: Subject: Re: [PATCH] Update File-Path to 2.00
+             From: David Landgren <david@landgren.net>
+             Date: Tue, 05 Jun 2007 23:21:40 +0200
+             Message-ID: <4665D3E4.2030809@landgren.net>
+             
+             Silences some unnecessary carping (e.g. from ExtUtils::Command line 109
+             when building perl).
+     Branch: perl
+	   ! lib/File/Path.pm lib/File/Path.t
+____________________________________________________________________________
+[ 31335] By: steveh                                on 2007/06/05  12:51:07
+        Log: Silence another VC++ compiler warning (signed/unsigned mismatch in ==)
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 31334] By: rgs                                   on 2007/06/05  10:23:24
+        Log: There is no more a ~~ feature, noticed by Moritz Lenz
+     Branch: perl
+	   ! pod/perlsyn.pod
+____________________________________________________________________________
+[ 31333] By: rgs                                   on 2007/06/05  10:10:33
+        Log: Remove support for assertions and -A
+     Branch: perl
+	   - lib/assertions.pm lib/assertions/activate.pm
+	   - lib/assertions/compat.pm t/comp/assertions.t
+	   - t/comp/asstcompat.t t/run/switch_A.t
+	   ! MANIFEST cv.h dump.c ext/B/B.xs ext/B/B/Concise.pm
+	   ! ext/B/B/Deparse.pm ext/B/defsubs_h.PL ext/B/t/concise-xs.t
+	   ! lib/perl5db.pl op.c perl.c perl.h pod/perl.pod
+	   ! pod/perldiag.pod pod/perllexwarn.pod pod/perlrun.pod
+	   ! pod/perltodo.pod pp_hot.c sv.c t/op/attrs.t toke.c warnings.pl
+	   ! xsutils.c
+____________________________________________________________________________
+[ 31332] By: rgs                                   on 2007/06/04  08:04:13
+        Log: Subject: another mro patch
+             From: "Brandon Black" <blblack@gmail.com>
+             Date: Mon, 4 Jun 2007 00:55:15 -0500
+             Message-ID: <84621a60706032255g6702cd81ube1f582a1e07cf8a@mail.gmail.com>
+     Branch: perl
+	   + t/mro/next_goto.t
+	   ! MANIFEST lib/mro.pm mro.c
+____________________________________________________________________________
+[ 31331] By: craigb                                on 2007/06/03  22:26:20
+        Log: cando_by_name again: work harder to identify directories 
+             for fileification, plus a nit missed in #31326.
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 31330] By: rgs                                   on 2007/06/03  16:23:03
+        Log: Subject: [PATCH] Math::BigInt v1.87 take 6
+             From: Tels <nospam-abuse@bloodgate.com>
+             Date: Sat, 2 Jun 2007 13:40:45 +0000
+             Message-Id: <200706021340.46806@bloodgate.com>
+     Branch: perl
+	   ! lib/Math/BigFloat.pm lib/Math/BigInt.pm
+____________________________________________________________________________
+[ 31329] By: rgs                                   on 2007/06/03  16:19:37
+        Log: Subject: Re: [PATCH] Update File-Path to 2.00
+             From: David Landgren <david@landgren.net>
+             Date: Sat, 02 Jun 2007 20:58:16 +0200
+             Message-ID: <4661BDC8.6040102@landgren.net>
+     Branch: perl
+	   ! lib/File/Path.pm lib/File/Path.t
+____________________________________________________________________________
+[ 31328] By: rgs                                   on 2007/06/03  15:36:25
+        Log: Subject: [PATCH] Re: BBC(Bleadperl Breaks CPAN) Today: String::Multibyte
+             From: demerphq <demerphq@gmail.com>
+             Date: Sun, 3 Jun 2007 17:21:55 +0200
+             Message-ID: <9b18b3110706030821u39460f96ic342dda8ba9fcdf7@mail.gmail.com>
+     Branch: perl
+	   ! regcomp.c t/op/pat.t
+____________________________________________________________________________
+[ 31327] By: craigb                                on 2007/06/02  17:47:37
+        Log: In File::Path::_rmtree, we want a list of files, not directories (some of them 
+             may be directory files, which is ok).
+     Branch: perl
+	   ! lib/File/Path.pm
+____________________________________________________________________________
+[ 31326] By: craigb                                on 2007/06/02  16:02:03
+        Log: Assorted fixes for VMS version of cando_by_name:
+             -- Restore pre-5.9.x behavior of expanding logical names and fileifying
+             directory specs regardless of whether input spec is in VMS syntax.
+             -- VMSify input spec unless explicitly told we don't need to (this was
+             backwards since introduced in #27733).
+             -- Various memory handling robustifications.
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 31325] By: rgs                                   on 2007/06/01  09:14:24
+        Log: Subject: [perl #43094] Doc patch to perlre: modifiers => quantifiers 
+             From: Brad Baxter (via RT) <perlbug-followup@perl.org>
+             Date: Thu, 31 May 2007 15:04:55 -0700
+             Message-ID: <rt-3.6.HEAD-1668-1180649095-1834.43094-75-0@perl.org>
+     Branch: perl
+	   ! pod/perlre.pod
+____________________________________________________________________________
+[ 31324] By: steveh                                on 2007/06/01  07:32:52
+        Log: Subject: [PATCH] Fix DynaLoader::dl_findfile() to locate .so files again
+             From: "Jan Dubois" <jand@activestate.com>
+             Date: Thu, 31 May 2007 13:17:22 -0700
+             Message-ID: <00a501c7a3c0$b2d880d0$18898270$@com>
+     Branch: perl
+	   ! ext/DynaLoader/DynaLoader_pm.PL
+____________________________________________________________________________
+[ 31323] By: merijn                                on 2007/06/01  06:39:32
+        Log: Subject: [PATCH] Configure: O_NONBLOCK test uses fork() and pipe()
+             From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Date: Fri, 1 Jun 2007 04:31:03 +0300 (EEST)
+             Message-Id: <200706010131.l511V3kv417484@kosh.hut.fi>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 31321] By: merijn                                on 2007/06/01  06:32:38
+        Log: Subject: Updated email address for AUTHORS.txt
+             From: perl@cadop.com
+             Date: Thu, 31 May 2007 19:33:08 -0600 (MDT)
+             Message-Id: <20070601013308.3B6A314ECA82@noop.cadop.com>
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 31320] By: craigb                                on 2007/05/31  22:17:17
+        Log: Maintain UAF context across calls to sys$check_access in cando_by_name.
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 31319] By: rgs                                   on 2007/05/31  16:13:07
+        Log: Dave remarks that I have been too terse here.
+     Branch: perl
+	   ! pod/perl595delta.pod
+____________________________________________________________________________
+[ 31318] By: rgs                                   on 2007/05/31  16:09:22
+        Log: Subject: [PATCH] Remove threads/typemap from Porting/Maintainers.pl
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Thu, 31 May 2007 11:59:31 -0400
+             Message-ID: <1ff86f510705310859y6c101c15t6d823d00ef25309b@mail.gmail.com>
+     Branch: perl
+	   ! Porting/Maintainers.pl
+____________________________________________________________________________
+[ 31317] By: rgs                                   on 2007/05/31  15:52:28
+        Log: Actually, Log::Message::Simple comes from Jos, not Tels.
+     Branch: perl
+	   ! Porting/Maintainers.pl
+____________________________________________________________________________
+[ 31316] By: rgs                                   on 2007/05/31  12:11:40
+        Log: Subject: [PATCH] minor assertions improvements
+             From: Ricardo SIGNES <rjbs-perl-p5p@lists.manxome.org>
+             Date: Wed, 30 May 2007 21:47:15 -0400
+             Message-ID: <20070531014715.GA26562@knight.manxome.org>
+     Branch: perl
+	   ! lib/assertions.pm lib/assertions/activate.pm
+	   ! t/comp/assertions.t
+____________________________________________________________________________
+[ 31315] By: rgs                                   on 2007/05/31  09:42:05
+        Log: Subject: [PATCH] Update File-Path to 2.00
+             From: David Landgren <david@landgren.net>
+             Date: Wed, 30 May 2007 19:50:38 +0200
+             Message-ID: <465DB96E.1020106@landgren.net>
+     Branch: perl
+	   ! lib/File/Path.pm lib/File/Path.t
+____________________________________________________________________________
+[ 31314] By: rgs                                   on 2007/05/31  08:28:02
+        Log: Subject: [PATCH] Gooder English
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Wed, 30 May 2007 17:12:32 -0400
+             Message-ID: <1ff86f510705301412v75fc5810vf28f5b62c0077585@mail.gmail.com>
+     Branch: perl
+	   ! lib/Log/Message/Simple.pm
+____________________________________________________________________________
+[ 31313] By: nicholas                              on 2007/05/31  08:25:57
+        Log: blead segfaults on local *@; eval {1} because ERRSV assumes that
+             GvSV(PL_errgv) is always non-NULL. That stopped being the case with
+             change 25009 (ish) - when we stopped automatically creating a(n unused)
+             SV at GV creation time.
+     Branch: perl
+	   ! scope.c t/op/local.t
+____________________________________________________________________________
+[ 31312] By: rgs                                   on 2007/05/30  15:21:10
+        Log: Subject: Re: HvMROMETA
+             From: "Brandon Black" <blblack@gmail.com>
+             Date: Tue, 29 May 2007 19:08:13 -0500
+             Message-ID: <84621a60705291708m3f106d74r473f3d91c780163d@mail.gmail.com>
+     Branch: perl
+	   ! hv.h mro.c
+____________________________________________________________________________
+[ 31311] By: rgs                                   on 2007/05/30  13:59:17
+        Log: Subject: Re: localising hash element by variable 
+             From: hv@crypt.org
+             Date: Wed, 30 May 2007 13:21:15 +0100
+             Message-Id: <200705301221.l4UCLFwf010411@zen.crypt.org>
+     Branch: perl
+	   ! t/op/local.t
+____________________________________________________________________________
+[ 31310] By: rgs                                   on 2007/05/30  10:45:08
+        Log: Upgrade to Encode 2.23
+     Branch: perl
+	   ! ext/Encode/Changes ext/Encode/Encode.pm ext/Encode/Encode.xs
+	   ! ext/Encode/Makefile.PL ext/Encode/Unicode/Unicode.pm
+____________________________________________________________________________
+[ 31309] By: steveh                                on 2007/05/30  07:38:30
+        Log: Silence a couple of VC++ compiler warnings
+     Branch: perl
+	   ! ext/Math/BigInt/FastCalc/FastCalc.pm
+	   ! ext/Math/BigInt/FastCalc/FastCalc.xs
+____________________________________________________________________________
+[ 31308] By: nicholas                              on 2007/05/29  19:57:34
+        Log: DBL_EPSILON DBL_MIN FLT_EPSILON FLT_MIN are not C constant expressions
+             on z/OS, so move them to the list of non const constants.
+     Branch: perl
+	   ! ext/POSIX/Makefile.PL
+____________________________________________________________________________
+[ 31307] By: rgs                                   on 2007/05/29  15:48:27
+        Log: Plug a memory leak in Encode
+     Branch: perl
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[ 31306] By: stevep                                on 2007/05/29  14:42:24
+        Log: Upgrade to CPAN-1.9102
+     Branch: perl
+	   ! lib/CPAN.pm lib/CPAN/Kwalify.pm lib/CPAN/t/10version.t
+____________________________________________________________________________
+[ 31305] By: rgs                                   on 2007/05/29  09:33:52
+        Log: Upgrade to Encode 2.22
+     Branch: perl
+	   ! ext/Encode/Changes ext/Encode/Encode.pm ext/Encode/Encode.xs
+	   ! ext/Encode/t/fallback.t ext/Encode/t/mime-name.t
+____________________________________________________________________________
+[ 31304] By: rgs                                   on 2007/05/29  08:59:05
+        Log: Revert change #30530, following Jan's advice
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 31303] By: rgs                                   on 2007/05/29  08:49:06
+        Log: Subject: Re: [perl #43015] regex /.*\z/ doesn't matches strings ending with \n
+             From: demerphq <demerphq@gmail.com>
+             Date: Mon, 28 May 2007 19:46:04 +0200
+             Message-ID: <9b18b3110705281046ib37acb4i7960fe415325270f@mail.gmail.com>
+     Branch: perl
+	   ! regcomp.c regexec.c t/op/re_tests
+____________________________________________________________________________
+[ 31302] By: rgs                                   on 2007/05/29  08:43:29
+        Log: Mention that last bugfix in perldelta
+     Branch: perl
+	   ! pod/perl595delta.pod
+____________________________________________________________________________
+[ 31301] By: rgs                                   on 2007/05/29  08:41:09
+        Log: Subject: Re: localising hash element by variable
+             From: Bo Lindbergh <blgl@hagernas.com>
+             Date: Mon, 28 May 2007 20:26:00 +0200
+             Message-Id: <BC2C451F-B286-4D38-923E-E3B473F7B5E1@hagernas.com>
+     Branch: perl
+	   ! scope.c t/op/local.t
+____________________________________________________________________________
+[ 31300] By: steveh                                on 2007/05/29  08:09:38
+        Log: win32/makefile.mk doesn't support GSAR's old dmake (because of
+             the use of || and && in conditional expressions, which that old
+             dmake doesn't understand), so stop with a helpful error message
+             if such a dmake is being used.
+             
+             There is now no need to have all the clutter of trying to support
+             different backslash and newline semantics, so ditch that too.
+     Branch: perl
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[ 31299] By: rgs                                   on 2007/05/29  07:57:33
+        Log: Subject: Re: [PATCH] Update CPANPLUS to 0.79_03
+             From: "Jos I. Boumans" <jos@dwim.org>
+             Date: Tue, 29 May 2007 09:00:53 +0200
+             Message-Id: <551932A2-91F8-4E7C-8939-4B71216976BA@dwim.org>
+             
+             Removed a fatal debug statement from cpan2dist.
+     Branch: perl
+	   ! lib/CPANPLUS.pm lib/CPANPLUS/Internals.pm
+	   ! lib/CPANPLUS/Shell/Default.pm lib/CPANPLUS/bin/cpan2dist
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/01mailrc.txt.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUNOXS/Bundle-Foo-Ba
+	   ! r-0.01.tar.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUNOXS/Foo-Bar-0.01.
+	   ! tar.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUNOXS/perl5.005_03.
+	   ! tar.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUXS/Foo-Bar-0.01.ta
+	   ! r.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/M/MB/MBNOXS/Foo-Bar-0.01.
+	   ! tar.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/M/MB/MBXS/Foo-Bar-0.01.ta
+	   ! r.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/modules/02packages.details.txt.gz.pa
+	   ! cked
+	   ! lib/CPANPLUS/t/dummy-CPAN/modules/03modlist.data.gz.packed
+____________________________________________________________________________
+[ 31298] By: steveh                                on 2007/05/29  07:25:22
+        Log: Silence the warning "Can't locate auto/POSIX/autosplit.ix in @INC"
+             when building the POSIX extension
+     Branch: perl
+	   ! lib/ExtUtils/Install.pm
+____________________________________________________________________________
+[ 31297] By: merijn                                on 2007/05/29  06:12:06
+        Log: Subject: [PATCH] perltodo tweak on virtualizing OS/FS access
+             From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Date: Tue, 29 May 2007 06:50:57 +0300 (EEST)
+             Message-Id: <200705290350.l4T3ovWG275103@kosh.hut.fi>
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 31296] By: nicholas                              on 2007/05/28  21:35:45
+        Log: Subject: Re: Cross patch 31287 broke blead
+             From: Vadim <vadim@vkonovalov.ru>
+             Message-ID: <465B11AB.8000608@vkonovalov.ru>
+             Date: Mon, 28 May 2007 21:30:19 +0400
+     Branch: perl
+	  +> Cross/Makefile-cross-SH Cross/build-arm-n770-sh
+	   - Cross/Makefile-cross.SH Cross/build-arm-n770.sh
+	   ! MANIFEST
+____________________________________________________________________________
+[ 31295] By: nicholas                              on 2007/05/28  18:50:23
+        Log: Avoid calling SvEND() when SvPOKp() is not true.
+             Remove an unneeded dupliate SvCUR_set() in Perl_sv_2pv_flags().
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 31294] By: rgs                                   on 2007/05/28  13:36:43
+        Log: Several POD fixes by Jonathan Stowe
+     Branch: perl
+	   ! ext/B/B/Concise.pm ext/B/B/Lint.pm pod/perldebguts.pod
+	   ! symbian/PerlBase.pod
+____________________________________________________________________________
+[ 31293] By: rgs                                   on 2007/05/28  13:21:23
+        Log: Subject: [PATCH] Add /nologo to nmake in CPANPLUS::Dist::Build too
+             From: "Jos I. Boumans" <kane@xs4all.nl>
+             Date: Mon, 28 May 2007 15:06:52 +0200
+             Message-Id: <90E1CAA6-8529-4DD1-9D42-A377538E9320@xs4all.nl>
+     Branch: perl
+	   ! lib/CPANPLUS/Dist/Build/t/02_CPANPLUS-Dist-Build.t
+	   ! lib/CPANPLUS/Dist/Build/t/src/noxs/Foo-Bar-0.01.tar.gz.packed
+	   ! lib/CPANPLUS/Dist/Build/t/src/xs/Foo-Bar-0.01.tar.gz.packed
+____________________________________________________________________________
+[ 31292] By: rgs                                   on 2007/05/28  13:17:54
+        Log: Subject: [PATCH] Update CPANPLUS to 0.79_03
+             From: "Jos I. Boumans" <jos@dwim.org>
+             Date: Mon, 28 May 2007 14:59:11 +0200
+             Message-Id: <DDD60952-6B63-4AA5-9862-FAE3456AB7CA@dwim.org>
+     Branch: perl
+	   ! lib/CPANPLUS.pm lib/CPANPLUS/Config.pm
+	   ! lib/CPANPLUS/Configure.pm lib/CPANPLUS/Dist.pm
+	   ! lib/CPANPLUS/Dist/MM.pm lib/CPANPLUS/Internals.pm
+	   ! lib/CPANPLUS/Internals/Constants.pm
+	   ! lib/CPANPLUS/Internals/Constants/Report.pm
+	   ! lib/CPANPLUS/Selfupdate.pm lib/CPANPLUS/Shell/Default.pm
+	   ! lib/CPANPLUS/bin/cpan2dist
+	   ! lib/CPANPLUS/t/02_CPANPLUS-Internals.t
+	   ! lib/CPANPLUS/t/30_CPANPLUS-Internals-Selfupdate.t
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/01mailrc.txt.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUNOXS/Bundle-Foo-Ba
+	   ! r-0.01.tar.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUNOXS/Foo-Bar-0.01.
+	   ! tar.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUNOXS/perl5.005_03.
+	   ! tar.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUXS/Foo-Bar-0.01.ta
+	   ! r.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/M/MB/MBNOXS/Foo-Bar-0.01.
+	   ! tar.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/M/MB/MBXS/Foo-Bar-0.01.ta
+	   ! r.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/modules/02packages.details.txt.gz.pa
+	   ! cked
+	   ! lib/CPANPLUS/t/dummy-CPAN/modules/03modlist.data.gz.packed
+	   ! lib/CPANPLUS/t/inc/conf.pl
+____________________________________________________________________________
+[ 31291] By: rgs                                   on 2007/05/28  12:52:08
+        Log: Mention new lexical pragmas big* in perldelta
+     Branch: perl
+	   ! pod/perl595delta.pod
+____________________________________________________________________________
+[ 31290] By: rgs                                   on 2007/05/28  12:47:32
+        Log: Update Changes
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [ 31289] By: rgs                                   on 2007/05/28  12:44:29
         Log: Update outdated example
      Branch: perl

@@ -312,6 +312,13 @@ mirrors.
 
 =over 4
 
+=item C<assertions>
+
+The C<assertions> pragma, its submodules C<assertions::activate> and
+C<assertions::compat> and the B<-A> command-line switch have been removed.
+The interface was not judged mature enough for inclusion in a stable
+release.
+
 =item C<base>
 
 The C<base> pragma now warns if a class tries to inherit from itself.
