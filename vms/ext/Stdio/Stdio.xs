@@ -1,8 +1,8 @@
 /* VMS::Stdio - VMS extensions to stdio routines 
  *
- * Version:  2.2
+ * Version:  2.3
  * Author:   Charles Bailey  bailey@newman.upenn.edu
- * Revised:  18-Jul-1998
+ * Revised:  14-Jun-2007
  *
  */
 
@@ -199,6 +199,7 @@ getname(fp)
 	    char fname[NAM$C_MAXRSS+1];
 	    ST(0) = sv_newmortal();
             if (fgetname(stdio,fname) != NULL) sv_setpv(ST(0),fname);
+            PerlIO_releaseFILE(fp,stdio);
 
 void
 rewind(fp)
