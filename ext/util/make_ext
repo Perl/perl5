@@ -82,6 +82,13 @@ if test ! -d "ext/$pname"; then
 fi
 
 
+case "$osname" in
+catamount) # Snowball's chance to build extensions.
+  echo "This is $osname, not building $mname, sorry."
+  exit 0
+  ;;
+esac
+
 echo "	Making $mname ($target)"
 
 cd ext/$pname

@@ -3951,7 +3951,7 @@ PP(pp_fork)
 
 PP(pp_wait)
 {
-#if (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(MACOS_TRADITIONAL)
+#if (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(MACOS_TRADITIONAL) && !defined(__LIBCATAMOUNT__)
     dSP; dTARGET;
     Pid_t childpid;
     int argflags;
@@ -3979,7 +3979,7 @@ PP(pp_wait)
 
 PP(pp_waitpid)
 {
-#if (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(MACOS_TRADITIONAL)
+#if (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(MACOS_TRADITIONAL) && !defined(__LIBCATAMOUNT__)
     dSP; dTARGET;
     const int optype = POPi;
     const Pid_t pid = TOPi;
@@ -4010,6 +4010,11 @@ PP(pp_waitpid)
 PP(pp_system)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
+#if defined(__LIBCATAMOUNT__)
+    PL_statusvalue = -1;
+    SP = ORIGMARK;
+    XPUSHi(-1);
+#else
     I32 value;
     int result;
 
@@ -4133,7 +4138,8 @@ PP(pp_system)
     do_execfree();
     SP = ORIGMARK;
     XPUSHi(result ? value : STATUS_CURRENT);
-#endif /* !FORK or VMS */
+#endif /* !FORK or VMS or OS/2 */
+#endif
     RETURN;
 }
 
