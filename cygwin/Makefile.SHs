@@ -56,12 +56,9 @@ $spitshell >>Makefile <<!GROK!THIS!
 # perlld parameters
 #
 # these ones are mandatory
-DLLWRAP = 'dllwrap'
 VERSION = '$version'
 
 # following are optional.
-WRAPDRIVER = gcc
-DLLTOOL = dlltool
 EXPORT_ALL = 1
 
 # if some of extensions are empty,
@@ -72,9 +69,7 @@ EXP_EXT = .exp
 
 perlld: $& Makefile ${src}/cygwin/perlld.in
 	@echo "extracting perlld (with variable substitutions)"
-	@$sed -e s,@CC@,\${CC}, -e s,@DLLWRAP@,\${DLLWRAP},g \\
-	-e s,@WRAPDRIVER@,\${WRAPDRIVER},g -e s,@DLLTOOL@,\${DLLTOOL},g \\
-	-e s,@AS@,\${AS},g -e s,@EXPORT_ALL@,\${EXPORT_ALL},g \\
+	@$sed -e s,@CC@,\${CC}, -e s,@EXPORT_ALL@,\${EXPORT_ALL},g \\
 	-e s,@DEF_EXT@,\${DEF_EXT},g -e s,@EXP_EXT@,\${EXP_EXT},g \\
 	-e s,@LIB_EXT@,\${LIB_EXT},g -e s,@VERSION@,\${VERSION},g \\
 	${src}/cygwin/perlld.in >perlld
