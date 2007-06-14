@@ -1,7 +1,7 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#ifdef USE_PPPORT_H
+#ifndef NO_PPPORT_H
 #   define NEED_sv_2pv_nolen
 #   include "ppport.h"
 #endif

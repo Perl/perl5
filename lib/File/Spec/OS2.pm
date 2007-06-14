@@ -37,9 +37,8 @@ sub _cwd {
 my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
-    $tmpdir = $_[0]->_tmpdir( @ENV{qw(TMPDIR TEMP TMP)},
-			      '/tmp',
-			      '/'  );
+    my @d = @ENV{qw(TMPDIR TEMP TMP)};	# function call could autovivivy
+    $tmpdir = $_[0]->_tmpdir( @d, '/tmp', '/'  );
 }
 
 sub catdir {
