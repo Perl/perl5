@@ -28,7 +28,7 @@ use constant Z              => 'Z';
 
 use vars qw[$VERSION $PREFER_BIN $PROGRAMS $WARN $DEBUG];
 
-$VERSION        = '0.20';
+$VERSION        = '0.22';
 $PREFER_BIN     = 0;
 $WARN           = 1;
 $DEBUG          = 0;
