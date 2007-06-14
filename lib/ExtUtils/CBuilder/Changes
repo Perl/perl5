@@ -1,5 +1,31 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
+ - When building as part of the perl core (so this is irrelevant for
+   people downloading from CPAN) we now try a little harder to find
+   the perl sources. [Jos Boumans]
+
+ - Fixed a part of the manifest thingy that got broken on 64-bit
+   Windows platforms in version 0.18. [Steve Hay, Jan Dubois]
+
+0.18 - Mon Mar 26 21:29:09 2007
+
+ - Various OS/2 fixes:
+   + Put .LIB file near .DEF file
+   + Got library-file building working better
+   + Handled libperl_overrides better
+   [Ilya Zakharevich]
+
+ - On Windows: embed manifest files in DLLs built with Module-Build
+   when using VC8. [Steve Hay]
+
+ - Added a workaround for a config error on dec_osf: the linker is
+   $Config{cc}, not $Config{ld}. [Jarkko Hietaniemi]
+
+ - Borland's compiler "response files" will not pass through macro
+   definitions that contain quotes. The quotes get stripped and there
+   seems to be no way to escape them. So we leave macros on the
+   command line. [Randy W. Sims]
+
 0.18  Sat Mar 25 13:35:47 CST 2006
 
  - Yet more fixes for arg_defines() on VMS. [Craig A. Berry and John

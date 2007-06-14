@@ -7,7 +7,7 @@ use Config;
 use Text::ParseWords;
 
 use vars qw($VERSION);
-$VERSION = '0.12_01';
+$VERSION = '0.12';
 
 sub new {
   my $class = shift;
@@ -167,9 +167,9 @@ sub prelink {
     DL_FUNCS => $args{dl_funcs}     || {},
     FUNCLIST => $args{dl_func_list} || [],
     IMPORTS  => $args{dl_imports}   || {},
-    NAME     => $args{dl_name},
-    DLBASE   => $args{dl_base},
-    FILE     => $args{dl_file},
+    NAME     => $args{dl_name},		# Name of the Perl module
+    DLBASE   => $args{dl_base},		# Basename of DLL file
+    FILE     => $args{dl_file},		# Dir + Basename of symlist file
     VERSION  => (defined $args{dl_version} ? $args{dl_version} : '0.0'),
   );
   
