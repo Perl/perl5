@@ -101,13 +101,6 @@ package Maintainers;
 		'CPAN'		=> 1,
 	},
 
-	'assertions' =>
-		{
-		'MAINTAINER'	=> 'salva',
-		'FILES'		=> q[lib/assertions.pm lib/assertions t/comp/assertions.t t/comp/asstcompat.t],
-		'CPAN'		=> 1,
-		},
-
 	'Attribute::Handlers' =>
 		{
 		'MAINTAINER'	=> 'abergman',
