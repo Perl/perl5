@@ -1909,7 +1909,10 @@ Perl_my_htonl(pTHX_ long l)
 	char c[sizeof(long)];
     } u;
 
-#if BYTEORDER == 0x1234
+#if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
+#if BYTEORDER == 0x12345678
+    u.result = 0; 
+#endif 
     u.c[0] = (l >> 24) & 255;
     u.c[1] = (l >> 16) & 255;
     u.c[2] = (l >> 8) & 255;
@@ -2508,7 +2511,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 #if defined(atarist) || defined(EPOC)
 FILE *popen();
 PerlIO *
-Perl_my_popen((pTHX_ const char *cmd, const char *mode)
+Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 {
     PERL_FLUSHALL_FOR_CHILD;
     /* Call system's popen() to get a FILE *, then import it.
@@ -2521,7 +2524,7 @@ Perl_my_popen((pTHX_ const char *cmd, const char *mode)
 #if defined(DJGPP)
 FILE *djgpp_popen();
 PerlIO *
-Perl_my_popen((pTHX_ const char *cmd, const char *mode)
+Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 {
     PERL_FLUSHALL_FOR_CHILD;
     /* Call system's popen() to get a FILE *, then import it.

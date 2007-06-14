@@ -2957,11 +2957,11 @@ PERL_CALLCONV void	Perl_sys_intern_clear(pTHX);
 PERL_CALLCONV void	Perl_sys_intern_init(pTHX);
 #endif
 
-PERL_CALLCONV char *	Perl_custom_op_name(pTHX_ const OP* op)
+PERL_CALLCONV const char *	Perl_custom_op_name(pTHX_ const OP* op)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV char *	Perl_custom_op_desc(pTHX_ const OP* op)
+PERL_CALLCONV const char *	Perl_custom_op_desc(pTHX_ const OP* op)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 

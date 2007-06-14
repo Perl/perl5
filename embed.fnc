@@ -1101,8 +1101,8 @@ Ap	|void	|sys_intern_clear
 Ap	|void	|sys_intern_init
 #endif
 
-ApR	|char *	|custom_op_name	|NN const OP* op
-ApR	|char *	|custom_op_desc	|NN const OP* op
+ApR	|const char *	|custom_op_name	|NN const OP* op
+ApR	|const char *	|custom_op_desc	|NN const OP* op
 
 Adp	|void	|sv_nosharing	|NULLOK SV *sv
 Adpbm	|void	|sv_nolocking	|NULLOK SV *sv

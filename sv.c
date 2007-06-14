@@ -467,7 +467,7 @@ do_clean_named_objs(pTHX_ SV *sv)
 	     SvOBJECT(GvSV(sv))) ||
 	     (GvAV(sv) && SvOBJECT(GvAV(sv))) ||
 	     (GvHV(sv) && SvOBJECT(GvHV(sv))) ||
-	     (GvIO(sv) && SvOBJECT(GvIO(sv))) ||
+	     (GvIO(sv) && GvIOp(sv) && SvOBJECT(GvIO(sv))) ||  /* In certain rare cases GvIOP(sv) can be NULL, which would make SvOBJECT(GvIO(sv)) dereference NULL. */
 	     (GvCV(sv) && SvOBJECT(GvCV(sv))) )
 	{
 	    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning named glob object:\n "), sv_dump(sv)));

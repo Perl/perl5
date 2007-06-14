@@ -259,7 +259,7 @@ C<SV*>.
 #define HvRITER_set(hv,r)	Perl_hv_riter_set(aTHX_ (HV*)(hv), r)
 #define HvEITER_set(hv,e)	Perl_hv_eiter_set(aTHX_ (HV*)(hv), e)
 #define HvRITER_get(hv)	(SvOOK(hv) ? HvAUX(hv)->xhv_riter : -1)
-#define HvEITER_get(hv)	(SvOOK(hv) ? HvAUX(hv)->xhv_eiter : 0)
+#define HvEITER_get(hv)	(SvOOK(hv) ? HvAUX(hv)->xhv_eiter : NULL)
 #define HvNAME(hv)	HvNAME_get(hv)
 
 /* Checking that hv is a valid package stash is the
@@ -271,9 +271,9 @@ C<SV*>.
 /* FIXME - all of these should use a UTF8 aware API, which should also involve
    getting the length. */
 /* This macro may go away without notice.  */
-#define HvNAME_HEK(hv) (SvOOK(hv) ? HvAUX(hv)->xhv_name : 0)
+#define HvNAME_HEK(hv) (SvOOK(hv) ? HvAUX(hv)->xhv_name : NULL)
 #define HvNAME_get(hv)	((SvOOK(hv) && (HvAUX(hv)->xhv_name)) \
-			 ? HEK_KEY(HvAUX(hv)->xhv_name) : 0)
+			 ? HEK_KEY(HvAUX(hv)->xhv_name) : NULL)
 #define HvNAMELEN_get(hv)	((SvOOK(hv) && (HvAUX(hv)->xhv_name)) \
 				 ? HEK_LEN(HvAUX(hv)->xhv_name) : 0)
 
