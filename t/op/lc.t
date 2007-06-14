@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 87;
+plan tests => 88;
 
 $a = "HELLO.* world";
 $b = "hello.* WORLD";
@@ -204,4 +204,11 @@ for (1, 4, 9, 16, 25) {
        'uc U+03B0 grows threefold');
 
     is(lc "\x{0130}" x $_, "i\x{307}" x $_, 'lc U+0130 grows');
+}
+
+# bug #43207
+my $temp = "Hello";
+for ("$temp") {
+    lc $_;
+    is($_, "Hello");
 }
