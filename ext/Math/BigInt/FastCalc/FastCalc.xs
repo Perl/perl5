@@ -59,11 +59,10 @@ _new(class, x)
     /* create the array */
     RETVAL = newAV();
     sv_2mortal((SV*)RETVAL);
-    /*  cur = SvPV(x, len); printf ("input '%s'\n", cur); */ 
-    if (SvIOK(x) && SvIV(x) < XS_BASE)
+    if (SvIOK(x) && SvUV(x) < XS_BASE)
       {
       /* shortcut for integer arguments */
-      av_push (RETVAL, newSViv( SvIV(x) ));
+      av_push (RETVAL, newSVuv( SvUV(x) ));
       }
     else
       {

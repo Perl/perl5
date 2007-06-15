@@ -9,7 +9,7 @@ BEGIN
   chdir 't' if -d 't';
   unshift @INC, '../lib';		# for running manually
   unshift @INC, '../blib/arch';		# for running manually
-  plan tests => 359;
+  plan tests => 361;
   }
 
 use Math::BigInt::FastCalc;
@@ -30,6 +30,14 @@ my $C = 'Math::BigInt::FastCalc';		# pass classname to sub's
 # _new and _str
 my $x = $C->_new("123"); my $y = $C->_new("321");
 ok (ref($x),'ARRAY'); ok ($C->_str($x),123); ok ($C->_str($y),321);
+
+###############################################################################
+# _new(0xffffffff) (the test is important for 32 bit Perls)
+
+my $ff = $C->_new(0xffffffff);
+
+ok ($C->_str($ff),"4294967295");		# must not be -1
+ok (scalar @{ $ff }, 2);			# must be two parts
 
 ###############################################################################
 # _add, _sub, _mul, _div
