@@ -8759,9 +8759,6 @@ Perl_opendir(pTHX_ const char *name)
     DIR *dd;
     char *dir;
     Stat_t sb;
-    int unix_flag = 0;
-
-    unix_flag = is_unix_filespec(name);
 
     Newx(dir, VMS_MAXRSS, char);
     if (do_tovmspath(name,dir,0,NULL) == NULL) {
@@ -8792,8 +8789,12 @@ Perl_opendir(pTHX_ const char *name)
     dd->context = 0;
     dd->count = 0;
     dd->flags = 0;
-    if (unix_flag)
-	dd->flags = PERL_VMSDIR_M_UNIXSPECS;
+    /* By saying we always want the result of readdir() in unix format, we 
+     * are really saying we want all the escapes removed.  Otherwise the caller,
+     * having no way to know whether it's already in VMS format, might send it
+     * through tovmsspec again, thus double escaping.
+     */
+    dd->flags = PERL_VMSDIR_M_UNIXSPECS;
     dd->pat.dsc$a_pointer = dd->pattern;
     dd->pat.dsc$w_length = strlen(dd->pattern);
     dd->pat.dsc$b_dtype = DSC$K_DTYPE_T;
