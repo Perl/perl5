@@ -116,7 +116,6 @@ my %map = reverse (
 		   => "paul_greenvos\100vos.stratus.com",
 		   "alian\100cpan.org" => "alian\100alianwebserver.com",
 		   "david.dyck\100fluke.com" => "dcd\100tc.fluke.com",
-		   "jdhedden\100" . "1979.usna.com" => "jdhedden\100cpan.org",
 		   # Maybe we should special case this to get real names out?
 		   "perlbug\100perl.org" => "perlbug-followup\100perl.org",
 		  );
@@ -160,7 +159,7 @@ $map{"richard.foley\100ubs.com"} = "richard.foley\100ubsw.com";
 $map{"jerry\100hedden.us"} = $map{"jdhedden\100" . "1979.usna.com"} =
 $map{"jdhedden\100gmail.com"} = $map{"jdhedden\100yahoo.com"}
   = "jdhedden\100cpan.org";
-# I assume that Ton Hopsel's lack of e-mail address in AUTHORS is deliberate
+# I assume that Ton Hospel's lack of e-mail address in AUTHORS is deliberate
 $map{"me-02\100ton.iguana.be"} = $map{"perl-5.8.0\100ton.iguana.be"}
   = $map{"perl5-porters\100ton.iguana.be"} = "!";
 # No real name for these address
