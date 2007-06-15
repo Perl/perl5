@@ -116,6 +116,7 @@ my %map = reverse (
 		   => "paul_greenvos\100vos.stratus.com",
 		   "alian\100cpan.org" => "alian\100alianwebserver.com",
 		   "david.dyck\100fluke.com" => "dcd\100tc.fluke.com",
+		   "jdhedden\100" . "1979.usna.com" => "jdhedden\100cpan.org",
 		   # Maybe we should special case this to get real names out?
 		   "perlbug\100perl.org" => "perlbug-followup\100perl.org",
 		  );
@@ -161,7 +162,7 @@ $map{"me-02\100ton.iguana.be"} = $map{"perl-5.8.0\100ton.iguana.be"}
   = $map{"perl5-porters\100ton.iguana.be"} = "!";
 # No real name for these address
 $map{$_} = "?" foreach ("grommel\100sears.com", "pxm\100nubz.org",
-			"padre\100elte.hu", "jdhedden\100" . "1979.usna.com",
+			"padre\100elte.hu",
 			"nothingmuch\100woobling.org", "bob\100starlabs.net",
 			"bbucklan\100jpl-devvax.jpl.nasa.gov",
 			"bilbo\100ua.fm", "mats\100sm5sxl.net",
