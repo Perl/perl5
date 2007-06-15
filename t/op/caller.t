@@ -65,27 +65,47 @@ ok( $c[4], "hasargs true with unknown sub" );
 
 # See if caller() returns the correct warning mask
 
+sub show_bits
+{
+    my $in = shift;
+    my $out = '';
+    foreach (unpack('W*', $in)) {
+        $out .= sprintf('\x%02x', $_);
+    }
+    return $out;
+}
+
+sub check_bits
+{
+    my ($got, $exp, $desc) = @_;
+    if (! ok($got eq $exp, $desc)) {
+        diag('     got: ' . show_bits($got));
+        diag('expected: ' . show_bits($exp));
+    }
+}
+
 sub testwarn {
     my $w = shift;
-    is( (caller(0))[9], $w, "warnings match caller");
+    my $id = shift;
+    check_bits( (caller(0))[9], $w, "warnings match caller ($id)");
 }
 
 # NB : extend the warning mask values below when new warnings are added
 {
     no warnings;
-    BEGIN { is( ${^WARNING_BITS}, "\0" x 12, 'all bits off via "no warnings"' ) }
-    testwarn("\0" x 12);
+    BEGIN { check_bits( ${^WARNING_BITS}, "\0" x 12, 'all bits off via "no warnings"' ) }
+    testwarn("\0" x 12, 'no bits');
 
     use warnings;
-    BEGIN { is( ${^WARNING_BITS}, "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\005", 'default bits on via "use warnings"' ); }
-    BEGIN { testwarn("\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\005", "#1"); }
+    BEGIN { check_bits( ${^WARNING_BITS}, "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x05", 'default bits on via "use warnings"' ); }
+    BEGIN { testwarn("\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x05", 'all'); }
     # run-time :
     # the warning mask has been extended by warnings::register
-    testwarn("\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x15");
+    testwarn("\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x15", 'ahead of w::r');
 
     use warnings::register;
-    BEGIN { is( ${^WARNING_BITS}, "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x15", 'warning bits on via "use warnings::register"' ) }
-    testwarn("\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x15","#3");
+    BEGIN { check_bits( ${^WARNING_BITS}, "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x15", 'warning bits on via "use warnings::register"' ) }
+    testwarn("\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x15", 'following w::r');
 }
 
 
