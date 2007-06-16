@@ -2011,7 +2011,7 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 	iter = hv_auxinit(hv);
     }
     PERL_HASH(hash, name, len);
-    iter->xhv_name = name ? share_hek(name, len, hash) : 0;
+    iter->xhv_name = name ? share_hek(name, len, hash) : NULL;
 }
 
 AV **
