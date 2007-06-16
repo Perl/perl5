@@ -983,6 +983,7 @@ DIAGNOSTIC
 
 # I'm not ready to publish this.  It doesn't deal with array return
 # values from the code or context.
+
 =begin private
 
 =item B<_try>
