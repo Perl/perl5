@@ -171,19 +171,19 @@ BEGIN
   my ($x,$y,$z);
   do {
     $AND_BITS++;
-    $x = oct('0b' . '1' x $AND_BITS); $y = $x & $x;
+    $x = CORE::oct('0b' . '1' x $AND_BITS); $y = $x & $x;
     $z = (2 ** $AND_BITS) - 1;
     } while ($AND_BITS < $max && $x == $z && $y == $x);
   $AND_BITS --;						# retreat one step
   do {
     $XOR_BITS++;
-    $x = oct('0b' . '1' x $XOR_BITS); $y = $x ^ 0;
+    $x = CORE::oct('0b' . '1' x $XOR_BITS); $y = $x ^ 0;
     $z = (2 ** $XOR_BITS) - 1;
     } while ($XOR_BITS < $max && $x == $z && $y == $x);
   $XOR_BITS --;						# retreat one step
   do {
     $OR_BITS++;
-    $x = oct('0b' . '1' x $OR_BITS); $y = $x | $x;
+    $x = CORE::oct('0b' . '1' x $OR_BITS); $y = $x | $x;
     $z = (2 ** $OR_BITS) - 1;
     } while ($OR_BITS < $max && $x == $z && $y == $x);
   $OR_BITS --;						# retreat one step
@@ -2282,7 +2282,7 @@ sub _from_oct
   while ($len >= 0)
     {
     $val = substr($os,$i,$d);			# get oct digits
-    $val = oct($val);
+    $val = CORE::oct($val);
     $i -= $d; $len --;
     my $adder = [ $val ];
     _add ($c, $x, _mul ($c, $adder, $mul ) ) if $val != 0;
@@ -2314,7 +2314,7 @@ sub _from_hex
     {
     $val = substr($hs,$i,$d);			# get hex digits
     $val =~ s/^0x// if $len == 0;		# for last part only because
-    $val = hex($val);				# hex does not like wrong chars
+    $val = CORE::hex($val);			# hex does not like wrong chars
     $i -= $d; $len --;
     my $adder = [ $val ];
     # if the resulting number was to big to fit into one element, create a
