@@ -23,7 +23,7 @@ can_ok ('bignum', qw/in_effect/);
 can_ok ('bigrat', qw/in_effect/);
 
 SKIP: {
-  skip ('Need at least Perl v5.9.4', 3) unless $] > 5.009004;
+  skip ('Need at least Perl v5.9.4', 3) if $] < "5.009005";
 
   is (bigint::in_effect(), 1, 'bigint in effect');
   is (bignum::in_effect(), 1, 'bignum in effect');

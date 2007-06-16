@@ -3,14 +3,21 @@ use 5.006002;
 
 $VERSION = '0.22';
 use Exporter;
+@ISA 		= qw( bigint );
 @EXPORT_OK 	= qw( ); 
 @EXPORT 	= qw( inf NaN ); 
-@ISA 		= qw( Exporter );
 
 use strict;
 use overload;
+require bigint;		# no "use" to avoid import being called
 
 ############################################################################## 
+
+BEGIN 
+  {
+  *inf = \&bigint::inf;
+  *NaN = \&bigint::NaN;
+  }
 
 # These are all alike, and thus faked by AUTOLOAD
 
@@ -47,24 +54,6 @@ sub AUTOLOAD
   Carp::croak ("Can't call bignum\-\>$name, not a valid method");
   }
 
-sub upgrade
-  {
-  $Math::BigInt::upgrade;
-  }
-
-sub _binary_constant
-  {
-  # this takes a binary/hexadecimal/octal constant string and returns it
-  # as string suitable for new. Basically it converts octal to decimal, and
-  # passes every thing else unmodified back.
-  my $string = shift;
-
-  return Math::BigInt->new($string) if $string =~ /^0[bx]/;
-
-  # so it must be an octal constant
-  Math::BigInt->from_oct($string);
-  }
-
 sub unimport
   {
   $^H{bignum} = undef;					# no longer in effect
@@ -78,11 +67,38 @@ sub in_effect
   $hinthash->{bignum};
   }
 
+#############################################################################
+# the following two routines are for Perl 5.9.4 or later and are lexical
+
+sub _hex
+  {
+  return CORE::hex($_[0]) unless in_effect(1);
+  my $i = $_[0];
+  $i = '0x'.$i unless $i =~ /^0x/;
+  Math::BigInt->new($i);
+  }
+
+sub _oct
+  {
+  return CORE::oct($_[0]) unless in_effect(1);
+  my $i = $_[0];
+  return Math::BigInt->from_oct($i) if $i =~ /^0[0-7]/;
+  Math::BigInt->new($i);
+  }
+
 sub import 
   {
   my $self = shift;
 
   $^H{bignum} = 1;					# we are in effect
+
+  # for newer Perls override hex() and oct() with a lexical version:
+  if ($] > 5.009003)
+    {
+    no warnings 'redefine';
+    *CORE::GLOBAL::oct = \&_oct;
+    *CORE::GLOBAL::hex = \&_hex;
+    }
 
   # some defaults
   my $lib = ''; my $lib_kind = 'try';
@@ -139,6 +155,20 @@ sub import
       $trace = 1;
       splice @a, $j, 1; $j --;
       }
+    elsif ($_[$i] eq 'hex')
+      {
+      splice @a, $j, 1; $j --;
+      no warnings 'redefine';
+      # override with a global version
+      *CORE::GLOBAL::hex = \&bigint::_hex_global;
+      }
+    elsif ($_[$i] eq 'oct')
+      {
+      splice @a, $j, 1; $j --;
+      no warnings 'redefine';
+      # override with a global version
+      *CORE::GLOBAL::oct = \&bigint::_oct_global;
+      }
     else { die "unknown option $_[$i]"; }
     }
   my $class;
@@ -193,7 +223,7 @@ sub import
     }
 
   # Take care of octal/hexadecimal constants
-  overload::constant binary => sub { _binary_constant(shift) };
+  overload::constant binary => sub { bigint::_binary_constant(shift) };
 
   # if another big* was already loaded:
   my ($package) = caller();
@@ -204,9 +234,6 @@ sub import
     $self->export_to_level(1,$self,@a);           # export inf and NaN
     }
   }
-
-sub inf () { Math::BigInt->binf(); }
-sub NaN () { Math::BigInt->bnan(); }
 
 1;
 
@@ -229,6 +256,11 @@ bignum - Transparent BigNumber support for Perl
     no bignum;
     print 2 ** 256,"\n";		# a normal Perl scalar now
   }
+
+  # for older Perls, note that this will be global:
+  use bignum qw/hex oct/;
+  print hex("0x1234567890123490"),"\n";
+  print oct("01234567890123490"),"\n";
 
 =head1 DESCRIPTION
 
@@ -274,16 +306,16 @@ Since numbers are actually objects, you can call all the usual methods from
 BigInt/BigFloat on them. This even works to some extent on expressions:
 
         perl -Mbignum -le '$x = 1234; print $x->bdec()'
-        perl -Mbignum -le 'print 1234->binc();'
-        perl -Mbignum -le 'print 1234->binc->badd(6);'
-        perl -Mbignum -le 'print +(1234)->binc()'
+        perl -Mbignum -le 'print 1234->copy()->binc();'
+        perl -Mbignum -le 'print 1234->copy()->binc->badd(6);'
+        perl -Mbignum -le 'print +(1234)->copy()->binc()'
 
 (Note that print doesn't do what you expect if the expression starts with
 '(' hence the C<+>)
 
 You can even chain the operations together as usual:
 
-        perl -Mbignum -le 'print 1234->binc->badd(6);'
+        perl -Mbignum -le 'print 1234->copy()->binc->badd(6);'
         1241
 
 Under bignum (or bigint or bigrat), Perl will "upgrade" the numbers
@@ -308,9 +340,7 @@ There is also C<use bigrat;> which gives you big rationals:
         12381/10
 
 The entire upgrading/downgrading is still experimental and might not work
-as you expect or may even have bugs.
-
-You might get errors like this:
+as you expect or may even have bugs. You might get errors like this:
 
         Can't use an undefined value as an ARRAY reference at
         /usr/local/lib/perl5/5.8.0/Math/BigInt/Calc.pm line 864
@@ -377,6 +407,18 @@ line. This means the following does not work:
 
 This will be hopefully fixed soon ;)
 
+=item hex
+
+Override the build-in hex() method with a version that can handle big
+integers. Note that under Perl older than v5.9.4, this will be global
+and cannot be disabled with "no bigint;".
+
+=item oct
+
+Override the build-in oct() method with a version that can handle big
+integers. Note that under Perl older than v5.9.4, this will be global
+and cannot be disabled with "no bigint;".
+
 =item v or version
 
 This prints out the name and version of all modules used and then exits.
@@ -424,7 +466,7 @@ B<both> the original and the copy being destroyed:
         $x = 9; $y = $x;
         print $x->bmul(2), " ", $y,"\n";        # prints 18 18
 
-Using methods that do not modify, but testthe contents works:
+Using methods that do not modify, but test the contents works:
 
         $x = 9; $y = $x;
         $z = 9 if $x->is_zero();                # works fine
@@ -514,6 +556,41 @@ A sign of 'NaN' is used to represent the result when input arguments are not
 numbers or as a result of 0/0. '+inf' and '-inf' represent plus respectively
 minus infinity. You will get '+inf' when dividing a positive number by 0, and
 '-inf' when dividing any negative number by 0.
+
+=head1 CAVAETS
+
+=over 2
+
+=item in_effect()
+
+This method only works on Perl v5.9.4 or later.
+
+=item hex()/oct()
+
+C<bigint> overrides these routines with versions that can also handle
+big integer values. Under Perl prior to version v5.9.4, however, this
+will not happen unless you specifically ask for it with the two
+import tags "hex" and "oct" - and then it will be global and cannot be
+disabled inside a scope with "no bigint":
+
+	use bigint qw/hex oct/;
+
+	print hex("0x1234567890123456");
+	{
+		no bigint;
+		print hex("0x1234567890123456");
+	}
+
+The second call to hex() will warn about a non-portable constant.
+
+Compare this to:
+
+	use bigint;
+
+	# will warn only under older than v5.9.4
+	print hex("0x1234567890123456");
+
+=back
 
 =head1 MODULES USED
 
