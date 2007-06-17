@@ -4,9 +4,9 @@ perlreapi - perl regular expression plugin interface
 
 =head1 DESCRIPTION
 
-As of Perl 5.9.5 there is a new interface for using other regexp engines than
-the default one.  Each engine is supposed to provide access to a constant
-structure of the following format:
+As of Perl 5.9.5 there is a new interface for using other regexp
+engines than the default one.  Each engine is supposed to provide
+access to a constant structure of the following format:
 
     typedef struct regexp_engine {
         REGEXP* (*comp) (pTHX_ const SV * const pattern, const U32 flags);
@@ -76,80 +76,115 @@ stringify everything using the snippet above but that doesn't mean
 other engines have to.
 
 The C<flags> paramater is a bitfield which indicates which of the
-C<msixk> flags the regex was compiled with. In addition it contains
-info about whether C<use locale> is in effect and optimization info
-for C<split>. A regex engine might want to use the same split
-optimizations with a different syntax, for instance a Perl6 engine
-would treat C<split /^^/> equivalently to perl's C<split /^/>, see
-L<split documentation|perlfunc> and the relevant code in C<pp_split>
-in F<pp.c> to find out whether your engine should be setting these.
+C<msixp> flags the regex was compiled with. It also contains
+additional info such as whether C<use locale> is in effect.
 
 The C<eogc> flags are stripped out before being passed to the comp
 routine. The regex engine does not need to know whether any of these
 are set as those flags should only affect what perl does with the
-pattern and its match variables, not how it gets compiled & executed.
+pattern and its match variables, not how it gets compiled and
+executed.
+
+By the time the comp callback is called, some of these flags have
+already had effect (noted below where applicable). However most of
+their effect occurs after the comp callback has run in routines that
+read the C<< rx->extflags >> field which it populates.
+
+In general the flags should be preserved in C<< rx->extflags >> after
+compilation, although the regex engine might want to add or delete
+some of them to invoke or disable some special behavior in perl. The
+flags along with any special behavior they cause are documented below:
+
+The pattern modifiers:
+
+=over 4
+
+=item C</m> - RXf_PMf_MULTILINE
+
+If this is in C<< rx->extflags >> it will be passed to
+C<Perl_fbm_instr> by C<pp_split> which will treat the subject string
+as a multi-line string.
+
+=item C</s> - RXf_PMf_SINGLELINE
+
+=item C</i> - RXf_PMf_FOLD
+
+=item C</x> - RXf_PMf_EXTENDED
+
+If present on a regex C<#> comments will be handled differently by the
+tokenizer in some cases.
+
+TODO: Document those cases.
+
+=item C</p> - RXf_PMf_KEEPCOPY
+
+=back
+
+Additional flags:
 
 =over 4
 
 =item RXf_SKIPWHITE
 
-C<split ' '> or C<split> with no arguments (which really means
-C<split(' ', $_> see L<split|perlfunc>).
+If C<split> is invoked as C<split ' '> or with no arguments (which
+really means C<split(' ', $_>, see L<split|perlfunc/split>), perl will set
+this flag and change the pattern from C<" "> to C<"\s+"> before it's
+passed to the comp routine.
 
-=item RXf_START_ONLY
+If the flag is present in C<< rx->extflags >> C<split> to delete
+whitespace from the start of the subject string before it's operated
+on. What is considered whitespace depends on whether the subject is a
+UTF-8 string and whether the C<RXf_PMf_LOCALE> flag is set.
 
-Set if the pattern is C</^/> (C<<r->prelen == 1 && r->precomp[0] ==
-'^'>>). Will be used by the C<split> operator to split the given
-string on C<\n> (even under C</^/s>, see L<split|perlfunc>).
-
-=item RXf_WHITE
-
-Set if the pattern is exactly C</\s+/> and used by C<split>, the
-definition of whitespace varies depending on whether RXf_UTF8 or
-RXf_PMf_LOCALE is set.
+This probably always be preserved verbatim in C<< rx->extflags >>.
 
 =item RXf_PMf_LOCALE
 
-Makes C<split> use the locale dependant definition of whitespace under C<use
-locale> when RXf_SKIPWHITE or RXf_WHITE is in effect. Under ASCII whitespace is
-defined as per L<isSPACE|perlapi/ISSPACE>, and by the internal macros
-C<is_utf8_space> under UTF-8 and C<isSPACE_LC> under C<use locale>.
-
-=item RXf_PMf_MULTILINE
-
-The C</m> flag, this ends up being passed to C<Perl_fbm_instr> by
-C<pp_split> regardless of the engine.
-
-=item RXf_PMf_SINGLELINE
-
-The C</s> flag. Guaranteed not to be used outside the regex engine.
-
-=item RXf_PMf_FOLD
-
-The C</i> flag. Guaranteed not to be used outside the regex engine.
-
-=item RXf_PMf_EXTENDED
-
-The C</x> flag. Guaranteed not to be used outside the regex
-engine. However if present on a regex C<#> comments will be stripped
-by the tokenizer regardless of the engine currently in use.
-
-=item RXf_PMf_KEEPCOPY
-
-The C</p> flag.
+Set if C<use locale> is in effect. If present in C<< rx->extflags >>
+C<split> will use the locale dependant definition of whitespace under
+when RXf_SKIPWHITE or RXf_WHITE are in effect. Under ASCII whitespace
+is defined as per L<isSPACE|perlapi/ISSPACE>, and by the internal
+macros C<is_utf8_space> under UTF-8 and C<isSPACE_LC> under C<use
+locale>.
 
 =item RXf_UTF8
 
 Set if the pattern is L<SvUTF8()|perlapi/SvUTF8>, set by Perl_pmruntime.
 
+A regex engine may want to set or disable this flag during
+compilation. The perl engine for instance may upgrade non-UTF-8
+strings to UTF-8 if the pattern includes constructs such as C<\x{...}>
+that can only match Unicode values.
+
 =back
 
-In general these flags should be preserved in C<< rx->extflags >>
-after compilation, although it is possible the regex includes
-constructs that changes them. The perl engine for instance may upgrade
-non-utf8 strings to utf8 if the pattern includes constructs such as
-C<\x{...}> that can only match unicode values. RXf_SKIPWHITE should
-always be preserved verbatim in C<< regex->extflags >>.
+These flags can be set during compilation to enable optimizations in
+the C<split> operator.
+
+=over 4
+
+=item RXf_START_ONLY
+
+Tells the split operator to split the target string on newlines
+(C<\n>) without invoking the regex engine.
+
+Perl's engine sets this if the pattern is C</^/> (C<plen == 1 && *exp
+== '^'>), even under C</^/s>, see L<split|perlfunc>. Of course a
+different regex engine might want to use the same optimizations
+with a different syntax.
+
+=item RXf_WHITE
+
+Tells the split operator to split the target string on whitespace
+without invoking the regex engine. The definition of whitespace varies
+depending on whether the target string is a UTF-8 string and on
+whether RXf_PMf_LOCALE is set.
+
+Perl's engine sets this flag if the pattern is C<\s+>, which it will be if
+the pattern actually was C<\s+> or if it was originally C<" "> (see
+C<RXf_SKIPWHITE> above).
+
+=back
 
 =head2 exec
 
@@ -215,7 +250,7 @@ redundant. The scalar can be set with C<sv_setsv>, C<sv_setpvn> and
 friends, see L<perlapi>.
 
 This callback is where perl untaints its own capture variables under
-taint mode (see L<perlsec>). See the C<Perl_reg_numbered_buff_get>
+taint mode (see L<perlsec>). See the C<Perl_reg_numbered_buff_fetch>
 function in F<regcomp.c> for how to untaint capture variables if
 that's something you'd like your engine to do as well.
 
@@ -325,7 +360,7 @@ Whether C<%+> or C<%-> is being operated on, if any.
     RXf_HASH_ALL /* %- */
 
 Whether this is being called as C<re::regname>, C<re::regnames> or
-C<C<re::regnames_count>, if any. The first two will be combined with
+C<re::regnames_count>, if any. The first two will be combined with
 C<RXf_HASH_ONE> or C<RXf_HASH_ALL>.
 
     RXf_HASH_REGNAME
@@ -462,7 +497,6 @@ values.
         I32 prelen;           /* length of precomp */
         const char *precomp;  /* pre-compilation regular expression */
 
-        /* wrapped can't be const char*, as it is returned by sv_2pv_flags */
         char *wrapped;  /* wrapped version of the pattern */
         I32 wraplen;    /* length of wrapped */
 
@@ -494,7 +528,8 @@ TODO, see L<http://www.mail-archive.com/perl5-changes@perl.org/msg17328.html>
 
 This will be used by perl to see what flags the regexp was compiled
 with, this will normally be set to the value of the flags parameter by
-the L<comp|/comp> callback.
+the L<comp|/comp> callback. See the L<comp|/comp> documentation for
+valid flags.
 
 =head2 C<minlen> C<minlenret>
 
@@ -526,7 +561,7 @@ Left offset from pos() to start match at.
 
 Substring data about strings that must appear in the final match. This
 is currently only used internally by perl's engine for but might be
-used in the future for all engines for optimisations like C<minlen>.
+used in the future for all engines for optimisations.
 
 =head2 C<nparens>, C<lasparen>, and C<lastcloseparen>
 
@@ -589,7 +624,7 @@ pv being an embedded array of I32.  The values may also be contained
 independently in the data array in cases where named backreferences are
 used.
 
-=head2 C<reg_substr_data>
+=head2 C<substrs>
 
 Holds information on the longest string that must occur at a fixed
 offset from the start of the pattern, and the longest string that must
@@ -599,25 +634,17 @@ the regex engine at all, and if so where in the string to search.
 
 =head2 C<subbeg> C<sublen> C<saved_copy>
 
-    #define SAVEPVN(p,n) ((p) ? savepvn(p,n) : NULL)
-    if (RX_MATCH_COPIED(ret))
-        ret->subbeg = SAVEPVN(ret->subbeg, ret->sublen);
-    else
-        ret->subbeg = NULL;
-
-C<PL_sawampersand || rx->extflags & RXf_PMf_KEEPCOPY>
-
-These are used during execution phase for managing search and replace
-patterns.
+Used during execution phase for managing search and replace patterns.
 
 =head2 C<wrapped> C<wraplen>
 
-Stores the string C<qr//> stringifies to, for example C<(?-xism:eek)>
-in the case of C<qr/eek/>.
+Stores the string C<qr//> stringifies to. The perl engine for example
+stores C<(?-xism:eek)> in the case of C<qr/eek/>.
 
-When using a custom engine that doesn't support the C<(?:)> construct for
-inline modifiers it's best to have C<qr//> stringify to the supplied pattern,
-note that this will create invalid patterns in cases such as:
+When using a custom engine that doesn't support the C<(?:)> construct
+for inline modifiers, it's probably best to have C<qr//> stringify to
+the supplied pattern, note that this will create undesired patterns in
+cases such as:
 
     my $x = qr/a|b/;  # "a|b"
     my $y = qr/c/i;   # "c"
@@ -625,8 +652,6 @@ note that this will create invalid patterns in cases such as:
 
 There's no solution for this problem other than making the custom
 engine understand a construct like C<(?:)>.
-
-The C<Perl_reg_stringify> in F<regcomp.c> does the stringification work.
 
 =head2 C<seen_evals>
 
