@@ -57,7 +57,7 @@ __END__
 
 Hash::Util::FieldHash - Support for Inside-Out Classes
 
-=head1 Synopsis
+=head1 SYNOPSIS
 
   ### Create fieldhashes
   use Hash::Util qw(fieldhash fieldhashes);
@@ -78,7 +78,7 @@ Hash::Util::FieldHash - Support for Inside-Out Classes
   register( $obj, \ %name);
   # the following entry wil be deleted when $obj goes out of scope
   $name{ $obj} = 'John Doe';
-  
+
   ### Register an ordinary hash for garbage collection
   use Hash::Util::FieldHash qw( id register);
   my %name;
@@ -87,12 +87,11 @@ Hash::Util::FieldHash - Support for Inside-Out Classes
   register $obj, \ %name;
   # the following entry wil be deleted when $obj goes out of scope
   $name{id $obj} = 'John Doe';
-  
 
-=head1 Functions
+=head1 FUNCTIONS
 
 C<Hash::Util::FieldHash> offers a number of functions in support of
-L<the inside-out technique> of class construction.
+L<The Inside-out Technique> of class construction.
 
 =over
 
@@ -186,7 +185,7 @@ context.
 
 =back
 
-=head1 Description
+=head1 DESCRIPTION
 
 A word on terminology:  I shall use the term I<field> for a scalar
 piece of data that a class associates with an object.  Other terms that
@@ -284,7 +283,7 @@ existing C<Scalar::Util::refaddr()>.  Besides its short name
 it can be a little faster under some circumstances (and a
 bit slower under others).  Benchmark if it matters.  The
 working of C<id()> also allows the use of the class name
-as a I<generic object> as described L<further down|Generic Object>.
+as a I<generic object> as described L<further down|/"The Generic Object">.
 
 The C<id()> function is incorporated in I<id hashes> in the sense
 that it is called automatically on every key that is used with
@@ -442,7 +441,7 @@ with an identical key from a string or integer, that will be collected
 instead.  Thus, mixed use of references and plain scalars as field hash
 keys is not entirely supported.
 
-=head1 Examples
+=head1 EXAMPLES
 
 The examples show a very simple class that implements a I<name>, consisting
 of a first and last name (no middle initial).  The name class has four
@@ -688,7 +687,7 @@ to a file F<Example.pm>.
 
     1;
 
-To exercise the various implementations the script L<below|Example 2> can
+To exercise the various implementations the script L<below|/"Example 2"> can
 be used.
 
 It sets up a class C<Name> that is a mirror of one of the implementation
@@ -752,7 +751,7 @@ incompatibility of object bodies.
 
 
 
-=head1 Guts
+=head1 GUTS
 
 To make C<Hash::Util::FieldHash> work, there were two changes to
 F<perl> itself.  C<PERL_MAGIC_uvar> was made avaliable for hashes,
@@ -852,7 +851,7 @@ Anno Siegel, E<lt>anno4000@zrz.tu-berlin.deE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2006 by (Anno Siegel)
+Copyright (C) 2006-2007 by (Anno Siegel)
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.7 or,
