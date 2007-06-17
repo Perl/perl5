@@ -86,9 +86,7 @@ is($cb->_id, $cb->_last_id, "Comparing ID's");
 
     for my $callback ( keys %$callback_map ) {
         
-        {   local $CPANPLUS::Error::ERROR_FH = output_handle() unless @ARGV;
-
-            my $rv = $callback_map->{$callback};
+        {   my $rv = $callback_map->{$callback};
 
             is( $rv, $cb->_callbacks->$callback->( $0, $$ ),
                                 "Default callback '$callback' called" );

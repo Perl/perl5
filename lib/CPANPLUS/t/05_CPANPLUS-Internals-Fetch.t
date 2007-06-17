@@ -17,10 +17,6 @@ use CPANPLUS::Internals::Constants;
 
 my $conf = gimme_conf();
 
-### Redirect errors to file ###
-local $CPANPLUS::Error::ERROR_FH = output_handle() unless @ARGV;
-local $CPANPLUS::Error::MSG_FH   = output_handle() unless @ARGV;
-
 my $cb = CPANPLUS::Backend->new( $conf );
 isa_ok($cb, "CPANPLUS::Internals" );
 

@@ -26,9 +26,9 @@ BEGIN {
                                    _prepare_args _install_args _create_args]);
                               return $Init };
     sub format_available    { return $Available }
-    sub prepare             { return shift->status->prepared($Prepare) }
-    sub create              { return shift->status->created($Create) }
-    sub install             { return shift->status->installed($Install) }
+    sub prepare             { return shift->status->prepared(  $Prepare ) }
+    sub create              { return shift->status->created(   $Create  ) }
+    sub install             { return shift->status->installed( $Install ) }
 }
 
 use strict;
@@ -46,10 +46,6 @@ use Module::Load::Conditional qw[check_install];
 
 my $conf = gimme_conf();
 my $cb   = CPANPLUS::Backend->new( $conf );
-
-### Redirect errors to file ###
-local $CPANPLUS::Error::ERROR_FH = output_handle() unless @ARGV;
-local $CPANPLUS::Error::MSG_FH   = output_handle() unless @ARGV;
 
 ### obsolete
 #my $Format = '_test';

@@ -34,8 +34,9 @@ my $map = {
 
 ### global variables test ###
 {   my $file = output_file();
-    unlink $file;   # just in case
 
+    ### this *has* to be set, as we're testing the contents of the file
+    ### to see if it matches what's stored in the buffer.
     local $CPANPLUS::Error::MSG_FH   = output_handle();    
     local $CPANPLUS::Error::ERROR_FH = output_handle();
     

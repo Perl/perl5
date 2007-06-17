@@ -34,10 +34,7 @@ ok( not grep { $_ eq INSTALLER_BUILD } CPANPLUS::Dist->dist_types,
 }
     
 ### extract it, silence warnings/messages    
-{   local $CPANPLUS::Error::MSG_FH   = output_handle();    
-    local $CPANPLUS::Error::ERROR_FH = output_handle();
-
-    my $where = $Mod->extract;
+{   my $where = $Mod->extract;
     ok( -e $where,          "   Tarball extracted to '$where'" );
 }
 

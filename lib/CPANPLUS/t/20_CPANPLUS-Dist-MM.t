@@ -40,8 +40,6 @@ $cb->_callbacks->send_test_report( sub { 0 } );
 $conf->set_conf( cpantest => 0 );
 
 ### Redirect errors to file ###
-local $CPANPLUS::Error::ERROR_FH = output_handle() unless $Verbose;
-local $CPANPLUS::Error::MSG_FH   = output_handle() unless $Verbose;
 *STDERR                          = output_handle() unless $Verbose;
 
 ### dont uncomment this, it screws up where STDOUT goes and makes

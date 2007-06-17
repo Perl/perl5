@@ -51,6 +51,7 @@ BEGIN {
 
 use strict;
 use CPANPLUS::Configure;
+use CPANPLUS::Error ();
 
 use File::Path      qw[rmtree];
 use FileHandle;
@@ -150,6 +151,24 @@ sub gimme_conf {
     }
     
     sub output_file { return $file }
+    
+    
+    my $env = 'PERL5_CPANPLUS_TEST_VERBOSE';
+    ### redirect output from msg() and error() output to file
+    unless( $ENV{$env} ) {
+    
+        print "# To run tests in verbose mode, set ".
+              "\$ENV{PERL5_CPANPLUS_TEST_VERBOSE} = 1\n" unless $ENV{PERL_CORE};
+    
+        unlink $file;   # just in case
+    
+        $CPANPLUS::Error::ERROR_FH  =
+        $CPANPLUS::Error::ERROR_FH  = output_handle();
+        
+        $CPANPLUS::Error::MSG_FH    =
+        $CPANPLUS::Error::MSG_FH    = output_handle();
+        
+    }        
 }
 
 
@@ -197,7 +216,7 @@ sub _clean_test_dir {
            
             ### regular file
             } else {
-                print "Deleting file '$path'\n" if $verbose;
+                print "# Deleting file '$path'\n" if $verbose;
                 1 while unlink $path;
             }            
         }       

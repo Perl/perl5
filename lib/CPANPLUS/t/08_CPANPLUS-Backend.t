@@ -14,9 +14,6 @@ use CPANPLUS::Internals::Constants;
 
 my $conf = gimme_conf();
 
-### purposely avert messages and errors to a file? ###
-my $Trap_Output = @ARGV ? 0 : 1;
-
 my $Class = 'CPANPLUS::Backend';
 ### D::C has troubles with the 'use_ok' -- it finds the wrong paths.
 ### for now, do a 'use' instead
@@ -133,10 +130,7 @@ ok( IS_CONFOBJ->(conf => $conf_obj),    "Configure object found" );
 
 
     ### test for things that look like real modules, but aren't ###
-    {   local $CPANPLUS::Error::MSG_FH    = output_handle() if $Trap_Output;
-        local $CPANPLUS::Error::ERROR_FH  = output_handle() if $Trap_Output;
-        
-        my @map = (
+    {   my @map = (
             [  $Name . $$ => [
                 [qr/does not contain an author/,"Missing author part detected"],
                 [qr/Cannot find .+? in the module tree/,"Unable to find module"]

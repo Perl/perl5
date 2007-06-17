@@ -25,16 +25,16 @@ configure.com		Configure-equivalent for VMS
 configure.gnu		Crude emulation of GNU configure
 cop.h			Control operator header
 Copying			The GNU General Public License
+Cross/build-arm-n770-sh	Cross-compilation
+Cross/cflags-cross-arm	Cross-compilation
 Cross/config		Cross-compilation
 Cross/config.sh-arm-linux	Cross-compilation
 Cross/config.sh-arm-linux-n770	Cross-compilation
-Cross/build-arm-n770-sh	Cross-compilation
 Cross/generate_config_sh	Cross-compilation
 Cross/installperl.patch		Cross-compilation
 Cross/Makefile		Cross-compilation
-Cross/Makefile.SH.patch	Cross-compilation
 Cross/Makefile-cross-SH	Cross-compilation
-Cross/cflags-cross-arm	Cross-compilation
+Cross/Makefile.SH.patch	Cross-compilation
 Cross/README		Cross-compilation
 Cross/README.new	Cross-compilation
 Cross/TODO		Cross-compilation

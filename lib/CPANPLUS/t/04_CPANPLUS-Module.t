@@ -16,9 +16,6 @@ use Test::More 'no_plan';
 use Data::Dumper;
 use File::Path ();
 
-### silence errors, unless you tell us not to ###
-local $CPANPLUS::Error::ERROR_FH = output_handle() unless @ARGV;
-
 my $Conf    = gimme_conf();
 my $CB      = CPANPLUS::Backend->new( $Conf );
 

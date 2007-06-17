@@ -9,8 +9,6 @@ use Data::Dumper;
 use strict;
 use CPANPLUS::Internals::Constants;
 
-### purposely avert messages and errors to a file? ###
-my $Trap_Output = @ARGV ? 0 : 1;
 my $Config_pm   = 'CPANPLUS/Config.pm';
 
 ### DO NOT FLUSH TILL THE END!!! we depend on all warnings being logged..
@@ -106,9 +104,7 @@ for my $cat ( $r->ls_accessors ) {
     
 }
 
-{   local $CPANPLUS::Error::ERROR_FH  = output_handle() if $Trap_Output;
- 
-    my $env             = ENV_CPANPLUS_CONFIG;
+{   my $env             = ENV_CPANPLUS_CONFIG;
     local $ENV{$env}    = $$;
     my $ok              = $c->init;
     my $stack           = CPANPLUS::Error->stack_as_string;
@@ -119,9 +115,7 @@ for my $cat ( $r->ls_accessors ) {
 }
 
 
-{   local $CPANPLUS::Error::ERROR_FH  = output_handle() if $Trap_Output;
-    
-    CPANPLUS::Error->flush;
+{   CPANPLUS::Error->flush;
     
     {   ### try a bogus method call 
         my $x   = $c->flubber('foo');
