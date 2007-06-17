@@ -11,11 +11,16 @@ our %EXPORT_TAGS = (
     'all' => [ qw(
         fieldhash
         fieldhashes
+        idhash
+        idhashes
+        id
+        id_2obj
+        register
     )],
 );
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
-our $VERSION = '0.02';
+our $VERSION = '1.01';
 
 {
     require XSLoader;
@@ -28,22 +33,33 @@ sub fieldhash (\%) {
     for ( shift ) {
         return unless ref() && reftype( $_) eq 'HASH';
         return $_ if Hash::Util::FieldHash::_fieldhash( $_, 0);
-        return $_ if Hash::Util::FieldHash::_fieldhash( $_, 1);
+        return $_ if Hash::Util::FieldHash::_fieldhash( $_, 2) == 2;
+        return;
+    }
+}
+
+sub idhash (\%) {
+    for ( shift ) {
+        return unless ref() && reftype( $_) eq 'HASH';
+        return $_ if Hash::Util::FieldHash::_fieldhash( $_, 0);
+        return $_ if Hash::Util::FieldHash::_fieldhash( $_, 1) == 1;
         return;
     }
 }
 
 sub fieldhashes { map &fieldhash( $_), @_ }
+sub idhashes { map &idhash( $_), @_ }
 
 1;
 __END__
 
 =head1 NAME
 
-Hash::Util::FieldHash - Associate references with data
+Hash::Util::FieldHash - Support for Inside-Out Classes
 
-=head1 SYNOPSIS
+=head1 Synopsis
 
+  ### Create fieldhashes
   use Hash::Util qw(fieldhash fieldhashes);
 
   # Create a single field hash
@@ -54,18 +70,111 @@ Hash::Util::FieldHash - Associate references with data
   # ...or any number
   fieldhashes @hashrefs;
 
+  ### Create an idhash and register it for garbage collection
+  use Hash::Util::FieldHash qw( idhash register);
+  idhash my %name;
+  my $obj = \ do { my $o };
+  # register the idhash for garbage collection with $object
+  register( $obj, \ %name);
+  # the following entry wil be deleted when $obj goes out of scope
+  $name{ $obj} = 'John Doe';
+  
+  ### Register an ordinary hash for garbage collection
+  use Hash::Util::FieldHash qw( id register);
+  my %name;
+  my $obj = \ do { my $o };
+  # register the hash %name for garbage collection of $obj's id
+  register $obj, \ %name;
+  # the following entry wil be deleted when $obj goes out of scope
+  $name{id $obj} = 'John Doe';
+  
+
 =head1 Functions
 
-Two functions generate field hashes:
+C<Hash::Util::FieldHash> offers a number of functions in support of
+L<the inside-out technique> of class construction.
 
 =over
+
+=item id
+
+    id($obj)
+
+Returns the reference address of a reference $obj.  If $obj is
+not a reference, returns $obj.
+
+This function is a stand-in replacement for
+L<Scalar::Util::refaddr|Scalar::Util/refaddr>, that is, it returns
+the reference address of its argument as a numeric value.  The only
+difference is that C<refaddr()> returns C<undef> when given a
+non-reference while C<id()> returns its argument unchanged.
+
+C<id()> also uses a caching technique that makes it faster when
+the id of an object is requested often, but slower if it is needed
+only once or twice.
+
+=item id_2obj
+
+    $obj = id_2obj($id)
+
+If C<$id> is the id of a registered object (see L</register>), returns
+the object, otherwise an undefined value.  For registered objects this
+is the inverse function of C<id()>.
+
+=item register
+
+    register($obj)
+    register($obj, @hashrefs)
+
+In the first form, registers an object to work with for the function
+C<id_2obj()>.  In the second form, it additionally marks the given
+hashrefs down for garbage collection.  This means that when the object
+goes out of scope, any entries in the given hashes under the key of
+C<id($obj)> will be deleted from the hashes.
+
+It is a fatal error to register a non-reference $obj.  Any non-hashrefs
+among the following arguments are silently ignored.
+
+It is I<not> an error to register the same object multiple times with
+varying sets of hashrefs.  Any hashrefs that are not registered yet
+will be added, others ignored.
+
+Registry also implies thread support.  When a new thread is created,
+all references are replaced with new ones, including all objects.
+If a hash uses the reference address of an object as a key, that
+connection would be broken.  With a registered object, its id will
+be updated in all hashes registered with it.
+
+=item idhash
+
+    idhash my %hash
+
+Makes an idhash from the argument, which must be a hash.
+
+An I<idhash> works like a normal hash, except that it stringifies a
+I<reference used as a key> differently.  A reference is stringified
+as if the C<id()> function had been invoked on it, that is, its
+reference address in decimal is used as the key.
+
+=item idhashes
+
+    idhashes \ my( %hash, %gnash, %trash)
+    idhashes \ @hashrefs
+
+Creates many idhashes from its hashref arguments.  Returns those
+arguments that could be converted or their number in scalar context.
 
 =item fieldhash
 
     fieldhash %hash;
 
-Creates a single field hash.  The argument must be a hash.  Returns
+Creates a single fieldhash.  The argument must be a hash.  Returns
 a reference to the given hash if successful, otherwise nothing.
+
+A I<fieldhash> is, in short, an idhash with auto-registry.  When an
+object (or, indeed, any reference) is used as a fieldhash key, the
+fieldhash is automatically registered for garbage collection with
+the object, as if C<register $obj, \ %fieldhash> had been called.
 
 =item fieldhashes
 
@@ -79,98 +188,181 @@ context.
 
 =head1 Description
 
-=head2 Features
+A word on terminology:  I shall use the term I<field> for a scalar
+piece of data that a class associates with an object.  Other terms that
+have been used for this concept are "object variable", "(object) property",
+"(object) attribute" and more.  Especally "attribute" has some currency
+among Perl programmer, but that clashes with the C<attributes> pragma.  The
+term "field" also has some currency in this sense and doesn't seem
+to conflict with other Perl terminology.
 
-Field hashes have three basic features:
+In Perl, an object is a blessed reference.  The standard way of associating
+data with an object ist to store the data inside the object's body, that is,
+the piece of data pointed to by the reference.
 
-=over
+In consequence, if two or more classes want to access an object they
+I<must> agree on the type of refrerence and also on the organization of
+data within the object body.  Failure to agree on the type results in
+immediate death when the wrong method tries to access an object.  Failure
+to agree on data organization may lead to one class trampling over the
+data of another.
 
-=item Key exchange
+This object model leads to a tight coupling between subclasses.
+If one class wants to inherit from another (and both classes access
+object data), the classes must agree about implementation details.
+Inheritance can only be used among classes that are maintained together,
+in a single source or not.
 
-If a I<reference> is used as a field hash key, it is replaced by
-the integer value of the reference address.
+In particular, it is not possible to write general-purpose classes
+in this technique, classes that can advertise themselves as "Put me
+on your @ISA list and use my methods".  If the other class has different
+ideas about how the object body is used, there is trouble.
 
-=item Thread support
+For reference L<Name_hash> in L<Example 1> shows the standard implementation of
+a simple class C<Name> in the well-known hash based way.  It also demonstrates
+the predictable failure to construct a common subclass C<NamedFile>
+of C<Name> and the class C<IO::File> (whose objects I<must> be globrefs).
 
-In a new I<thread> a field hash is updated so that its keys reflect
-the new reference addresses of the original objects.
+Thus, techniques are of interest that store object data I<not> in
+the object body but some other place.
 
-=item Garbage collection
+=head2 The Inside-out Technique
 
-When a reference goes I<stale> after having been used as a field hash key,
-the hash entry will be deleted.
+With I<inside-out> classes, each class declares a (typically lexical)
+hash for each field it wants to use.  The reference address of an
+object is used as the hash key.  By definition, the reference address
+is unique to each object so this guarantees a place for each field that
+is private to the class and unique to each object.  See L<Name_id> in
+L<Example 1> for a simple example.
 
-=back
+In comparison to the standard implementation where the object is a
+hash and the fields correspond to hash keys, here the fields correspond
+to hashes, and the object determines the hash key.  Thus the hashes
+appear to be turned I<inside out>.
 
-Field hashes are designed to maintain an association of a reference
-with a value. The association is independent of the bless status of
-the key, it is thread safe and garbage-collected.  These properties
-are desirable in the construction of inside-out classes.
+The body of an object is never examined by an inside-out class, only
+its reference address is used.  This allows for the body of an actual
+object to be I<anything at all> while the object methods of the class
+still work as designed.  This is a key feature of inside-out classes.
 
-When used with keys that are plain scalars (not references), field
-hashes behave like normal hashes.
+=head2 Problems of Inside-out
 
-=head2 Rationale
+Inside-out classes give us freedom of inheritance, but as usual there
+is a price.
 
-The association of a reference (namely an object) with a value is
-central to the concept of inside-out classes.  These classes don't
-store the values of object variables (fields) inside the object itself,
-but outside, as it were, in private hashes keyed by the object.
+Most obviously, there is the necessity of retrieving the reference
+address of an object for each data access.  It's a minor inconvenience,
+but it does clutter the code.
 
-Normal hashes can be used for the purpose, but turn out to have
-some disadvantages:
+More important (and less obvious) is the necessity of garbage
+collection.  When a normal object dies, anything stored in the
+object body is garbage-collected by perl.  With inside-out objects,
+Perl knows nothing about the data stored in field hashes by a class,
+but these must be deleted when the object goes out of scope.  Thus
+the class must provide a C<DESTROY> method to take care of that.
 
-=over
+In the presence of multiple classes it can be non-trivial
+to make sure that every relevant destructor is called for
+every object.  Perl calls the first one it finds on the
+inheritance tree (if any) and that's it.
 
-=item Stringification
+A related issue is thread-safety.  When a new thread is created,
+the Perl interpreter is cloned, which implies that all reference
+addresses in use will be replaced with new ones.  Thus, if a class
+tries to access a field of a cloned object its (cloned) data will
+still be stored under the now invalid reference address of the
+original in the parent thread.  A general C<CLONE> method must
+be provided to re-establish the association.
 
-The stringification of references depends on the bless status of the
-reference.  A plain hash reference C<$ref> may stringify as C<HASH(0x1801018)>,
-but after being blessed into class C<foo> the same reference will look like
-as C<foo=HASH(0x1801018)>, unless class C<foo> overloads stringification,
-in which case it may show up as C<wurzelzwerg>.  In a normal hash, the
-stringified reference wouldn't be found again after the blessing.
+=head2 Solutions
 
-Bypassing stringification by use of C<Scalar::Util::refaddr> has been
-used to correct this.  Field hashes automatically stringify their
-keys to the reference address in decimal.
+C<Hash::Util::FieldHash> addresses these issues on several
+levels.
 
-=item Thread Dependency
+The C<id()> function is provided in addition to the
+existing C<Scalar::Util::refaddr()>.  Besides its short name
+it can be a little faster under some circumstances (and a
+bit slower under others).  Benchmark if it matters.  The
+working of C<id()> also allows the use of the class name
+as a I<generic object> as described L<further down|Generic Object>.
 
-When a new thread is created, the Perl interpreter is cloned, which
-implies that all variables change their reference address.  Thus,
-in a daughter thread, the "same" reference C<$ref> contains a different
-address, but the cloned hash still holds the key based on the original
-address.  Again, the association is broken.
+The C<id()> function is incorporated in I<id hashes> in the sense
+that it is called automatically on every key that is used with
+the hash.  No explicit call is necessary.
 
-A C<CLONE> method is required to update the hash on thread creation.
-Field hashes come with an appropriate C<CLONE>.
+The problems of garbage collection and thread safety are both
+addressed by the function C<register()>.  It registers an object
+together with any number of hashes.  Registry means that when the
+object dies, an entry in any of the hashes under the reference
+address of this object will be deleted.  This guarantees garbage
+collection in these hashes.  It also means that on thread
+cloning the object's entries in registered hashes will be
+replaced with updated entries whose key is the cloned object's
+reference address.  Thus the object-data association becomes
+thread-safe.
 
-=item Garbage Collection
+Object registry is best done when the object is initialized
+for use with a class.  That way, garbage collection and thread
+safety are established for every object and every field that is
+initialized.
 
-When a reference (an object) is used as a hash key, the entry stays
-in the hash when the object eventually goes out of scope.  That can result
-in a memory leak because the data associated with the object is not
-freed.  Worse than that, it can lead to a false association if the
-reference address of the original object is later re-used.  This
-is not a remote possibility, address re-use happens all the time and
-is a certainty under many conditions.
+Finally, I<field hashes> incorporate all these functions in one
+package.  Besides automatically calling the C<id()> function
+on every object used as a key, the object is registered with
+the field hash on first use.  Classes based on field hashes
+are fully garbage-collected and thread safe without further
+measures.
 
-If the references in question are indeed objects, a C<DESTROY> method
-I<must> clean up hashes that the object uses for storage.  Special
-methods are needed when unblessed references can occur.
+=head2 More Problems
 
-Field hashes have garbage collection built in.  If a reference
-(blessed or unblessed) goes out of scope, corresponding entries
-will be deleted from all field hashes.
+Another problem that occurs with inside-out classes is serialization.
+Since the object data is not in its usual place, standard routines
+like C<Storable::freeze()>, C<Storable::thaw()> and 
+C<Data::Dumper::Dumper()> can't deal with it on their own.  Both
+C<Data::Dumper> and C<Storable> provide the necessary hooks to
+make things work, but the functions or methods used by the hooks
+must be provided by each inside-out class.
 
-=back
+A general solution to the serialization problem would require another
+level of registry, one that that associates I<classes> and fields.
+So far, he functions of C<Hash::Util::Fieldhash> are unaware of
+any classes, which I consider a feature.  Therefore C<Hash::Util::FieldHash>
+doesn't address the serialization problems.
 
-Thus, an inside-out class based on field hashes doesn't need a C<DESTROY>
-method, nor a C<CLONE> method for thread support.  That facilitates the
-construction considerably.
+=head2 The Generic Object
 
-=head2 How to use
+Classes based on the C<id()> function (and hence classes based on
+C<idhash()> and C<fieldhash()>) show a peculiar behavior in that
+the class name can be used like an object.  Specifically, methods
+that set or read data associated with an object continue to work as
+class methods, just as if the class name were an object, distinct from
+all other objects, with its own data.  This object may be called
+the I<generic object> of the class.
+
+This works because field hashes respond to keys that are not refrences
+like a normal hash would and use the string offered as the hash key.
+Thus, if a method is called as a class method, the field hash is presented
+with the class name instead of an object and blithely uses it as a key.
+Since the keys of real objects are decimal numbers, there is no
+conflict and the slot in the field hash can be used like any other.
+The C<id()> function behaves correspondingly with respect to non-reference
+arguments.
+
+Two possible uses (besides ignoring the property) come to mind.
+A singleton class could be implemented this using the generic object.
+If necessary, an C<init()> method could die or ignore calls with
+actual objects (references), so only the generic object will ever exist.
+
+Another use of the generic object would be as a template.  It is
+a convenient place to store class-specific defaults for various
+fields to be used in actual object initialization.
+
+Usually, the feature can be entirely ignored.  Calling I<object
+methods> as I<class methods> normally leads to an error and isn't used
+routinely anywhere.  It may be a problem that this error isn't
+indicated by a class with a generic object.
+
+=head2 How to use Field Hashes
 
 Traditionally, the definition of an inside-out class contains a bare
 block inside which a number of lexical hashes are declared and the
@@ -214,7 +406,7 @@ early and call the functions qualified:
     Hash::Util::FieldHash::fieldhash my %foo;
 
 Otherwise, import the functions into a convenient package like
-C<HUF> or, more generic, C<Aux>
+C<HUF> or, more general, C<Aux>
 
     {
         package Aux;
@@ -226,90 +418,6 @@ and call
     Aux::fieldhash my %foo;
 
 as needed.
-
-=head2 Examples
-
-Well... really only one example, and a rather trivial one at that.
-There isn't much to exemplify.
-
-=head3 A simple class...
-
-The following example shows an utterly simple inside-out class
-C<TimeStamp>, created using field hashes.  It has a single field,
-incorporated as the field hash C<%time>.  Besides C<new> it has only
-two methods: an initializer called C<stamp> that sets the field to
-the current time, and a read-only accessor C<when> that returns the
-time in C<localtime> format.
-
-    # The class TimeStamp
-
-    use Hash::Util::FieldHash;
-    {
-        package TimeStamp;
-
-        Hash::Util::FieldHash::fieldhash my %time;
-
-        sub stamp { $time{ $_[ 0]} = time; shift }       # initializer
-        sub when { scalar localtime $time{ shift()} }    # read accessor
-        sub new { bless( do { \ my $x }, shift)->stamp } # creator
-    }
-
-    # See if it works
-    my $ts = TimeStamp->new;
-    print $ts->when, "\n";
-
-Remarkable about this class definition is what isn't there: there
-is no C<DESTROY> method, inherited or local, and no C<CLONE> method
-is needed to make it thread-safe.  Not to mention no need to call
-C<refaddr> or something similar in the accessors.
-
-=head3 ...in action
-
-The outstanding property of inside-out classes is their "inheritability".
-Like all inside-out classes, C<TimeStamp> is a I<universal base class>.
-We can put it on the C<@ISA> list of arbitrary classes and its methods
-will just work, no matter how the host class is constructed.  No traditional
-Perl class allows that.  The following program demonstrates the feat:
-
-    # Make a sample of objects to add time stamps to.
-
-    use Math::Complex;
-    use IO::Handle;
-
-    my @objects = (
-        Math::Complex->new( 12, 13),
-        IO::Handle->new(),
-        qr/abc/,                         # in class Regexp
-        bless( [], 'Boing'),             # made up on the spot
-        # add more
-    );
-
-    # Prepare for use with TimeStamp
-
-    for ( @objects ) {
-        no strict 'refs';
-        push @{ ref() . '::ISA' }, 'TimeStamp';
-    }
-
-    # Now apply TimeStamp methods to all objects and show the result
-
-    for my $obj ( @objects ) {
-        $obj->stamp;
-        report( $obj, $obj->when);
-    }
-
-    # print a description of the object and the result of ->when
-
-    use Scalar::Util qw( reftype);
-    sub report {
-        my ( $obj, $when) = @_;
-        my $msg = sprintf "This is a %s object(a %s), its time is %s",
-            ref $obj,
-            reftype $obj,
-            $when;
-        $msg =~ s/\ba(?= [aeiouAEIOU])/an/g; # grammar matters :)
-        print "$msg\n";
-    }
 
 =head2 Garbage-Collected Hashes
 
@@ -333,6 +441,316 @@ the reference goes out of scope.  If you happen to create an entry
 with an identical key from a string or integer, that will be collected
 instead.  Thus, mixed use of references and plain scalars as field hash
 keys is not entirely supported.
+
+=head1 Examples
+
+The examples show a very simple class that implements a I<name>, consisting
+of a first and last name (no middle initial).  The name class has four
+methods:
+
+=over
+
+=item * C<init()>
+
+An object method that initializes the first and last name to its
+two arguments. If called as a class method, C<init()> creates an
+object in the given class and initializes that.
+
+=item * C<first()>
+
+Retrieve the first name
+
+=item * C<last()>
+
+Retrieve the last name
+
+=item * C<name()>
+
+Retrieve the full name, the first and last name joined by a blank.
+
+=back
+
+The examples show this class implemented with different levels of
+support by C<Hash::Util::FieldHash>.  All supported combinations
+are shown.  The difference between implementations is often quite
+small.  The implementations are:
+
+=over
+
+=item * C<Name_hash>
+
+A conventional (not inside-out) implementation where an object is
+a hash that stores the field values, without support by
+C<Hash::Util::FieldHash>.  This implementation doesn't allow
+arbitrary inheritance.
+
+=item * C<Name_id>
+
+Inside-out implementation based on the C<id()> function.  It needs
+a C<DESTROY> method.  For thread support a C<CLONE> method (not shown)
+would also be needed.  Instead of C<Hash::Util::FieldHash::id()> the
+function C<Scalar::Util::refaddr> could be used with very little
+functional difference.  This is the basic pattern of an inside-out
+class.
+
+=item * C<Name_idhash>
+
+Idhash-based inside-out implementation.  Like L<Name_id> it needs
+a C<DESTROY> method and would need C<CLONE> for thread support.
+
+=item * C<Name_id_reg>
+
+Inside-out implementation based on the C<id()> function with explicit
+object registry.  No destructor is needed and objects are thread safe.
+
+=item * C<Name_idhash_reg>
+
+Idhash-based inside-out implementation with explicit object registry.
+No destructor is needed and objects are thread safe.
+
+=item * C<Name_fieldhash>
+
+Fieldhash-based inside-out implementation.  Object registry happens
+automatically.  No destructor is needed and objects are thread safe.
+
+=back
+
+These examples are realized in the code below, which could be copied
+to a file F<Example.pm>.
+
+=head2 Example 1
+
+    use strict; use warnings;
+
+    {
+        package Name_hash; # standard implementation: the object is a hash
+
+        sub init {
+            my $obj = shift;
+            my ( $first, $last) = @_;
+            # create an object if called as class method
+            $obj = bless {}, $obj unless ref $obj;
+            $obj->{ first} = $first;
+            $obj->{ last} = $last;
+            $obj;
+        }
+
+        sub first { shift()->{ first} }
+        sub last { shift()->{ last} }
+
+        sub name {
+            my $n = shift;
+            join ' ' => $n->first, $n->last;
+        }
+
+    }
+
+    {
+        package Name_id;
+        use Hash::Util::FieldHash qw( id);
+
+        my ( %first, %last);
+
+        sub init {
+            my $obj = shift;
+            my ( $first, $last) = @_;
+            # create an object if called as class method
+            $obj = bless \ my $o, $obj unless ref $obj;
+            $first{ id $obj} = $first;
+            $last{ id $obj} = $last;
+            $obj;
+        }
+
+        sub first { $first{ id shift()} }
+        sub last { $last{ id shift()} }
+
+        sub name {
+            my $n = shift;
+            join ' ' => $n->first, $n->last;
+        }
+
+        sub DESTROY {
+            my $id = id shift;
+            delete $first{ $id};
+            delete $last{ $id};
+        }
+
+    }
+
+    {
+        package Name_idhash;
+        use Hash::Util::FieldHash;
+
+        Hash::Util::FieldHash::idhashes( \ my ( %first, %last));
+
+        sub init {
+            my $obj = shift;
+            my ( $first, $last) = @_;
+            # create an object if called as class method
+            $obj = bless \ my $o, $obj unless ref $obj;
+            $first{ $obj} = $first;
+            $last{ $obj} = $last;
+            $obj;
+        }
+
+        sub first { $first{ shift()} }
+        sub last { $last{ shift()} }
+
+        sub name {
+            my $n = shift;
+            join ' ' => $n->first, $n->last;
+        }
+
+        sub DESTROY {
+            my $n = shift;
+            delete $first{ $n};
+            delete $last{ $n};
+        }
+
+    }
+
+    {
+        package Name_id_reg;
+        use Hash::Util::FieldHash qw( id register);
+
+        my ( %first, %last);
+
+        sub init {
+            my $obj = shift;
+            my ( $first, $last) = @_;
+            # create an object if called as class method
+            $obj = bless \ my $o, $obj unless ref $obj;
+            register( $obj, \ ( %first, %last));
+            $first{ id $obj} = $first;
+            $last{ id $obj} = $last;
+            $obj;
+        }
+
+        sub first { $first{ id shift()} }
+        sub last { $last{ id shift()} }
+
+        sub name {
+            my $n = shift;
+            join ' ' => $n->first, $n->last;
+        }
+    }
+
+    {
+        package Name_idhash_reg;
+        use Hash::Util::FieldHash qw( register);
+
+        Hash::Util::FieldHash::idhashes \ my ( %first, %last);
+
+        sub init {
+            my $obj = shift;
+            my ( $first, $last) = @_;
+            # create an object if called as class method
+            $obj = bless \ my $o, $obj unless ref $obj;
+            register( $obj, \ ( %first, %last));
+            $first{ $obj} = $first;
+            $last{ $obj} = $last;
+            $obj;
+        }
+
+        sub first { $first{ shift()} }
+        sub last { $last{ shift()} }
+
+        sub name {
+            my $n = shift;
+            join ' ' => $n->first, $n->last;
+        }
+    }
+
+    {
+        package Name_fieldhash;
+        use Hash::Util::FieldHash;
+
+        Hash::Util::FieldHash::fieldhashes \ my ( %first, %last);
+
+        sub init {
+            my $obj = shift;
+            my ( $first, $last) = @_;
+            # create an object if called as class method
+            $obj = bless \ my $o, $obj unless ref $obj;
+            $first{ $obj} = $first;
+            $last{ $obj} = $last;
+            $obj;
+        }
+
+        sub first { $first{ shift()} }
+        sub last { $last{ shift()} }
+
+        sub name {
+            my $n = shift;
+            join ' ' => $n->first, $n->last;
+        }
+    }
+
+    1;
+
+To exercise the various implementations the script L<below|Example 2> can
+be used.
+
+It sets up a class C<Name> that is a mirror of one of the implementation
+classes C<Name_hash>, C<Name_id>, ..., C<Name_fieldhash>.  That determines
+which implementation is run.
+
+The script first verifies the function of the C<Name> class.
+
+In the second step, the free inheritablility of the implementation
+(or lack thereof) is demonstrated.  For this purpose it constructs
+a class called C<NamedFile> which is a common subclass of C<Name> and
+the standard class C<IO::File>.  This puts inheritability to the test
+because objects of C<IO::File> I<must> be globrefs.  Objects of C<NamedFile>
+should behave like a file opened for reading and also support the C<name()>
+method.  This class juncture works with exception of the C<Name_hash>
+implementation, where object initialization fails because of the
+incompatibility of object bodies.
+
+=head2 Example 2
+
+    use strict; use warnings; $| = 1;
+
+    use Example;
+
+    {
+        package Name;
+        use base 'Name_id';      # define here which implementation to run
+    }
+
+
+    # Verify that the base package works
+    my $n = Name->init( qw( Albert Einstein));
+    print $n->name, "\n";
+    print "\n";
+
+    # Create a named file handle (See definition below)
+    my $nf = NamedFile->init( qw( /tmp/x Filomena File));
+    # use as a file handle...
+    for ( 1 .. 3 ) {
+        my $l = <$nf>;
+        print "line $_: $l";
+    }
+    # ...and as a Name object
+    print "...brought to you by ", $nf->name, "\n";
+    exit;
+
+
+    # Definition of NamedFile
+    package NamedFile;
+    use base 'Name';
+    use base 'IO::File';
+
+    sub init {
+        my $obj = shift;
+        my ( $file, $first, $last) = @_;
+        $obj = $obj->IO::File::new() unless ref $obj;
+        $obj->open( $file) or die "Can't read '$file': $!";
+        $obj->Name::init( $first, $last);
+    }
+    __END__
+
+
 
 =head1 Guts
 

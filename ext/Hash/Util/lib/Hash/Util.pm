@@ -50,18 +50,6 @@ Hash::Util - A selection of general-utility hash subroutines
 
 =head1 SYNOPSIS
 
-  # Field hashes
-
-  use Hash::Util qw(fieldhash fieldhashes);
-
-  # Create a single field hash
-  fieldhash my %foo;
-
-  # Create three at once...
-  fieldhashes \ my(%foo, %bar, %baz);
-  # ...or any number
-  fieldhashes @hashrefs;
-
   # Restricted hashes
 
   use Hash::Util qw(
@@ -100,23 +88,16 @@ Hash::Util - A selection of general-utility hash subroutines
 
 =head1 DESCRIPTION
 
-C<Hash::Util> contains special functions for manipulating hashes that
-don't really warrant a keyword.
+C<Hash::Util> and C<Hash::Util::FieldHash> contain special functions
+for manipulating hashes that don't really warrant a keyword.
+
+C<Hash::Util> contains as set of functions that support
+L<restricted hashes|Restricted hashes>. These are described in
+this document.  C<Hash::Util::FieldHash> contains an (unrelated)
+set of functions that support the use of hashes in
+I<inside-out classes>, described in L<Hash::Util::FieldHash>.
 
 By default C<Hash::Util> does not export anything.
-
-=head2 Field hashes
-
-Field hashes are designed to maintain an association of a reference
-with a value. The association is independent of the bless status of
-the key, it is thread safe and garbage-collected.  These properties
-are desirable in the construction of inside-out classes.
-
-When used with keys that are plain scalars (not references), field
-hashes behave like normal hashes.
-
-Field hashes are defined in a separate module for which C<Hash::Util>
-is a front end.  For a detailed description see L<Hash::Util::FieldHash>.
 
 =head2 Restricted hashes
 
@@ -530,8 +511,9 @@ Additional code by Yves Orton.
 
 =head1 SEE ALSO
 
-L<Scalar::Util>, L<List::Util>, L<Hash::Util>,
-and L<perlsec/"Algorithmic Complexity Attacks">.
+L<Scalar::Util>, L<List::Util> and L<perlsec/"Algorithmic Complexity Attacks">.
+
+L<Hash::Util::FieldHash>.
 
 =cut
 

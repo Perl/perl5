@@ -9,6 +9,8 @@
 /* Magic cookies to recognize object id's.  Hi, Eva, David */
 #define HUF_COOKIE 2805.1980
 #define HUF_REFADDR_COOKIE 1811.1976
+/* Identifier for PERL_MAGIC_ext magic */
+#define HUF_IDCACHE 0x4944
 
 /* For global cache of object registry */
 #define MY_CXT_KEY "Hash::Util::FieldHash::_guts" XS_VERSION
@@ -58,29 +60,34 @@ void HUF_global(I32 how) {
     }
 }
 
-/* the id as an SV, optionally marked in the nv (unused feature) */
-SV* HUF_id(SV* ref, NV cookie) {
-    SV* id = sv_newmortal();
-    if (cookie == 0 ) {
-        SvUPGRADE(id, SVt_PVIV);
-    } else {
-        SvUPGRADE(id, SVt_PVNV);
-        SvNV_set(id, cookie);
-        SvNOK_on(id);
-    }
-    SvIV_set(id, PTR2UV(SvRV(ref)));
-    SvIOK_on(id);
-    return id;
-}
+/* Object id */
 
-/* plain id, only used for field hash entries in field lists */
-SV* HUF_field_id(SV* obj) {
-    return HUF_id(obj, 0.0);
-}
+/* definition of id transformation */
+#define HUF_OBJ_ID(x) newSVuv(PTR2UV(x))
 
-/* object id (same as plain, may be different in future) */
 SV* HUF_obj_id(SV* obj) {
-    return HUF_id(obj, 0.0);
+    SV *item = SvRV(obj);
+    MAGIC *mg;
+    SV *id;
+
+    /* Get cached object ID, if it exists */
+    if (SvTYPE(item) >= SVt_PVMG) {
+        for ( mg = SvMAGIC(item); mg; mg = mg->mg_moremagic ) {
+            if ((mg->mg_type == PERL_MAGIC_ext) &&
+                (mg->mg_private == HUF_IDCACHE)
+            ) {
+                return mg->mg_obj;
+            }
+        }
+    }
+
+    /* Create an object ID, cache it */
+    id = HUF_OBJ_ID(item);
+    mg = sv_magicext(item, id, PERL_MAGIC_ext, NULL, NULL, 0);
+    mg->mg_private = HUF_IDCACHE;
+
+    /* Return the object ID */
+    return id;
 }
 
 /* set up uvar magic for any sv */
@@ -127,17 +134,19 @@ I32 HUF_destroy_obj(pTHX_ IV index, SV* trigger) {
         }
         /* make it safe in case we must run in global clenaup, after all */
         if (PL_in_clean_all)
-            HUF_global(HUF_RESET);
+            HUF_global(HUF_RESET); /* shoudn't be needed */
         hv_delete_ent(MY_CXT.ob_reg, ob_id, G_DISCARD, 0);
     }
     return 0;
 }
 
-/* Create a trigger for an object.  The trigger is a magical weak ref
- * that fires when the weak ref expires.  it holds the original id of
- * the object, and a list of field hashes from which the object may
- * have to be deleted.  The trigger is stored in the object registry
- * and also deleted when the object expires.
+/* Create a trigger for an object.  The trigger is a magical SV
+ * that holds a weak ref to the object.  The magic fires when the object
+ * expires and takes care of garbage collection in registred hashes.
+ * For that purpose, the magic structure holds the original id of
+ * the object, and a list (a hash, really) of hashes from which the
+ * object may * have to be deleted.  The trigger is stored in the
+ * object registry and is also deleted when the object expires.
  */
 SV* HUF_new_trigger(SV* obj, SV* ob_id) {
     dMY_CXT;
@@ -161,46 +170,68 @@ SV* HUF_ask_trigger(SV* ob_id) {
 }
 
 /* get the trigger for an object, creating it if necessary */
-SV* HUF_get_trigger(SV* obj, SV* ob_id) {
+SV* HUF_get_trigger0(SV* obj, SV* ob_id) {
     SV* trigger;
     if (!(trigger = HUF_ask_trigger(ob_id)))
         trigger = HUF_new_trigger(obj, ob_id);
     return trigger;
 }
 
-/* mark an object (trigger) as having been used with a field */
+SV* HUF_get_trigger(SV* obj, SV* ob_id) {
+    SV* trigger = HUF_ask_trigger(ob_id);
+    if (!trigger)
+        trigger = HUF_new_trigger(obj, ob_id);
+    return( trigger);
+}
+
+/* mark an object (trigger) as having been used with a field
+   (a clenup-liability)
+*/
 void HUF_mark_field(SV* trigger, SV* field) {
     AV* cont = HUF_get_trigger_content(trigger);
     HV* field_tab = (HV*) *av_fetch(cont, 1, 0);
     SV* field_ref = newRV_inc(field);
-    SV* field_id = HUF_field_id(field_ref);
-    hv_store_ent(field_tab, field_id, field_ref, 0);
+    UV field_addr = PTR2UV(field);
+    hv_store(field_tab, (char *)&field_addr, sizeof(field_addr), field_ref, 0);
 }
 
+/* Determine, from the value of action, whether this call may create a new
+ * hash key */
 #define HUF_WOULD_CREATE_KEY(x) ((x) != HV_DELETE && ((x) & (HV_FETCH_ISSTORE | HV_FETCH_LVALUE)))
 
-/* The key exchange function.  It communicates with S_hv_magic_uvar_xkey
+/* The key exchange functions.  They communicate with S_hv_magic_uvar_xkey
  * in hv.c */
-I32 HUF_watch_key(pTHX_ IV action, SV* field) {
+I32 HUF_watch_key_safe(pTHX_ IV action, SV* field) {
     MAGIC* mg = mg_find(field, PERL_MAGIC_uvar);
     SV* keysv;
-    if (mg) {
-        keysv = mg->mg_obj;
-        if (keysv && !SvROK(keysv)) { /* is string an object-id? */
-            SV* obj = HUF_ask_trigger(keysv);
-            if (obj)
-                keysv = obj; /* use the object instead, so registry happens */
-        }
-        if (keysv && SvROK(keysv)) {
+    if (mg && (keysv = mg->mg_obj)) {
+        if (SvROK(keysv)) { /* ref key */
             SV* ob_id = HUF_obj_id(keysv);
             mg->mg_obj = ob_id; /* key replacement */
             if (HUF_WOULD_CREATE_KEY(action)) {
                 SV* trigger = HUF_get_trigger(keysv, ob_id);
                 HUF_mark_field(trigger, field);
             }
+        } else if (HUF_WOULD_CREATE_KEY(action)) { /* string key */
+            /* registered as object id? */
+            SV* trigger;
+            if ( trigger = HUF_ask_trigger(keysv))
+                HUF_mark_field( trigger, field);
         }
     } else {
-        Perl_die(aTHX_ "Rogue call of 'HUF_watch_key'");
+        Perl_die(aTHX_ "Rogue call of 'HUF_watch_key_safe'");
+    }
+    return 0;
+}
+
+I32 HUF_watch_key_id(pTHX_ IV action, SV* field) {
+    MAGIC* mg = mg_find(field, PERL_MAGIC_uvar);
+    SV* keysv;
+    if (mg && (keysv = mg->mg_obj)) {
+        if (SvROK(keysv)) /* ref key */
+            mg->mg_obj = HUF_obj_id(keysv); /* key replacement */
+    } else {
+        Perl_die(aTHX_ "Rogue call of 'HUF_watch_key_id'");
     }
     return 0;
 }
@@ -211,12 +242,36 @@ int HUF_get_status(HV* hash) {
     if (hash && (SvTYPE(hash) == SVt_PVHV)) {
         MAGIC* mg;
         struct ufuncs* uf;
-        ans = (mg = mg_find((SV*)hash, PERL_MAGIC_uvar)) &&
+        if ((mg = mg_find((SV*)hash, PERL_MAGIC_uvar)) &&
             (uf = (struct ufuncs *)mg->mg_ptr) &&
-            (uf->uf_val == &HUF_watch_key) &&
-            (uf->uf_set == NULL);
+            (uf->uf_set == NULL)
+        ) {
+            ans = HUF_func_2mode(uf->uf_val);
+        }
     }
     return ans;
+}
+
+int HUF_func_2mode( I32(* val)(pTHX_ IV, SV*)) {
+    int ans = 0;
+    if (val == &HUF_watch_key_id)
+        ans = 1;
+    if (val == &HUF_watch_key_safe)
+        ans = 2;
+    return(ans);
+}
+
+I32(* HUF_mode_2func( int mode))(pTHX_ IV, SV*) {
+    I32(* ans)(pTHX_ IV, SV*) = NULL;
+    switch (mode) {
+        case 1:
+            ans = &HUF_watch_key_id;
+            break;
+        case 2:
+            ans = &HUF_watch_key_safe;
+            break;
+    }
+    return(ans);
 }
 
 /* Thread support.  These routines are called by CLONE (and nothing else) */
@@ -231,11 +286,11 @@ void HUF_fix_trigger(SV* trigger, SV* new_id) {
     hv_iterinit(field_tab);
     while (ent = hv_iternext(field_tab)) {
         SV* field_ref = HeVAL(ent);
-        SV* field_id = HUF_field_id(field_ref);
         HV* field = (HV*)SvRV(field_ref);
+        UV field_addr = PTR2UV(field);
         SV* val;
         /* recreate field tab entry */
-        hv_store_ent(new_tab, field_id, SvREFCNT_inc(field_ref), 0);
+        hv_store(new_tab, (char *)&field_addr, sizeof(field_addr), SvREFCNT_inc(field_ref), 0);
         /* recreate field entry, if any */
         if (val = hv_delete_ent(field, old_id, 0, 0))
             hv_store_ent(field, new_id, SvREFCNT_inc(val), 0);
@@ -260,7 +315,20 @@ void HUF_fix_objects(void) {
     for (i = 0; i <= len; ++i) {
         SV* old_id = *av_fetch(oblist, i, 0);
         SV* trigger = hv_delete_ent(MY_CXT.ob_reg, old_id, 0, 0);
-        SV* new_id = HUF_obj_id(trigger);
+        SV* obj = SvRV(trigger);
+        MAGIC *mg;
+
+        SV* new_id = HUF_OBJ_ID(obj);
+
+        /* Replace cached object ID with this new one */
+        for (mg = SvMAGIC(obj); mg; mg = mg->mg_moremagic) {
+            if ((mg->mg_type == PERL_MAGIC_ext) &&
+                    (mg->mg_private == HUF_IDCACHE)
+                ) {
+                mg->mg_obj = new_id;
+            }
+        }
+
         HUF_fix_trigger(trigger, new_id);
         hv_store_ent(MY_CXT.ob_reg, new_id, SvREFCNT_inc(trigger), 0);
     }
@@ -292,14 +360,59 @@ CODE:
         (field = (HV*)SvRV(href)) &&
         SvTYPE(field) == SVt_PVHV
     ) {
+        
         HUF_add_uvar_magic(
             SvRV(href),
-            &HUF_watch_key,
+            HUF_mode_2func( mode),
             NULL,
             0,
             NULL
         );
         RETVAL = HUF_get_status(field);
+    }
+OUTPUT:
+    RETVAL
+
+void
+id(SV* ref)
+PPCODE:
+    if (SvROK(ref)) {
+        XPUSHs(HUF_obj_id(ref));
+    } else {
+        XPUSHs(ref);
+    }
+
+SV*
+id_2obj(SV* id)
+PROTOTYPE: $
+CODE:
+    SV* obj = HUF_ask_trigger(id);
+    if (obj) {
+        RETVAL = newRV_inc(SvRV(obj));
+    } else {
+        RETVAL = &PL_sv_undef;
+    }
+OUTPUT:
+    RETVAL
+
+SV*
+register(SV* obj, ...)
+PROTOTYPE: $@
+CODE:
+    SV* trigger;
+    int i;
+    RETVAL = NULL;
+    if (!SvROK(obj)) {
+        Perl_die(aTHX_ "Attempt to register a non-ref");
+    } else {
+        RETVAL = newRV_inc(SvRV(obj));
+    }
+    trigger = HUF_get_trigger(obj, HUF_obj_id(obj));
+    for (i = 1; i < items; ++ i) {
+        SV* field_ref = POPs;
+        if (SvROK(field_ref) && (SvTYPE(SvRV(field_ref)) == SVt_PVHV)) {
+            HUF_mark_field(trigger, SvRV(field_ref));
+        }
     }
 OUTPUT:
     RETVAL

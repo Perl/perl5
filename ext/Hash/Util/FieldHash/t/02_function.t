@@ -16,6 +16,8 @@ my $ob_reg = Hash::Util::FieldHash::_ob_reg;
 
 #########################
 
+my $fieldhash_mode = 2;
+
 # define ref types to use with some tests
 my @test_types;
 BEGIN {
@@ -23,15 +25,66 @@ BEGIN {
     @test_types = qw( SCALAR ARRAY HASH GLOB);
 }
 
-### Object registry
+### The id() function
+{
+    BEGIN { $n_tests += 4 }
+    my $ref = [];
+    is id( $ref), refaddr( $ref), "id is refaddr";
+    my %h;
+    Hash::Util::FieldHash::_fieldhash \ %h, $fieldhash_mode;
+    $h{ $ref} = ();
+    my ( $key) = keys %h;
+    is id( $ref), $key, "id is FieldHash key";
+    my $scalar = 'string';
+    is id( $scalar), $scalar, "string passes unchanged";
+    $scalar = 1234;
+    is id( $scalar), $scalar, "number passes unchanged";
+}
+
+### idhash functionality
+{
+    BEGIN { $n_tests += 3 }
+    Hash::Util::FieldHash::idhash my %h;
+    my $ref = sub {};
+    my $val = 123;
+    $h{ $ref} = $val;
+    my ( $key) = keys %h;
+    is $key, id( $ref), "idhash key correct";
+    is $h{ $ref}, $val, "value retrieved through ref";
+    is scalar keys %$ob_reg, 0, "no auto-registry in idhash";
+}
+
+### the register() and id_2obj functions
+{
+    BEGIN { $n_tests += 9 }
+    my $obj = {};
+    my $id = id( $obj);
+    is id_2obj( $id), undef, "unregistered object not retrieved";
+    is scalar keys %$ob_reg, 0, "object registry empty";
+    is register( $obj), $obj, "object returned by register";
+    is scalar keys %$ob_reg, 1, "object registry nonempty";
+    is id_2obj( $id), $obj, "registered object retrieved";
+    my %hash;
+    register( $obj, \ %hash);
+    $hash{ $id} = 123;
+    is scalar keys %hash, 1, "key present in registered hash";
+    undef $obj;
+    is scalar keys %hash, 0, "key collected from registered hash";
+    is scalar keys %$ob_reg, 0, "object registry empty again";
+    eval { register( 1234) };
+    like $@, qr/^Attempt to register/, "registering non-ref is fatal";
+    
+}
+
+### Object auto-registry
 
 BEGIN { $n_tests += 3 }
 {
     {
         my $obj = {};
         {
-            my $h;
-            fieldhash %$h;
+            my $h = {};
+            Hash::Util::FieldHash::_fieldhash $h, $fieldhash_mode;
             $h->{ $obj} = 123;
             is( keys %$ob_reg, 1, "one object registered");
         }
@@ -46,7 +99,7 @@ BEGIN { $n_tests += 6 }
 {
     no warnings 'misc';
     my $val = 123;
-    fieldhash my %h;
+    Hash::Util::FieldHash::_fieldhash \ my( %h), $fieldhash_mode;
     for ( [ str => 'abc'], [ ref => {}] ) {
         my ( $keytype, $key) = @$_;
         $h{ $key} = $val;
@@ -58,15 +111,19 @@ BEGIN { $n_tests += 6 }
 }
 
 ### id-action (stringification independent of bless)
-BEGIN { $n_tests += 4 }
+BEGIN { $n_tests += 5 }
+# use Scalar::Util qw( refaddr);
 {
     my( %f, %g, %h, %i);
-    fieldhash %f;
-    fieldhash %g;
+    Hash::Util::FieldHash::_fieldhash \ %f, $fieldhash_mode;
+    Hash::Util::FieldHash::_fieldhash \ %g, $fieldhash_mode;
     my $val = 123;
     my $key = [];
     $f{ $key} = $val;
     is( $f{ $key}, $val, "plain key set in field");
+    my ( $id) = keys %f;
+    my $refaddr = hex +($key =~ /\(0x([[:xdigit:]]+)\)$/)[ 0];
+    is $id, $refaddr, "key is refaddr";
     bless $key;
     is( $f{ $key}, $val, "access through blessed");
     $key = [];
@@ -77,17 +134,19 @@ BEGIN { $n_tests += 4 }
 }
     
 # Garbage collection
-BEGIN { $n_tests += 1 + 2*( 3*@test_types + 5) + 1 }
+BEGIN { $n_tests += 1 + 2*( 3*@test_types + 5) + 1 + 2 }
 
 {
-    fieldhash my %h;
+    my %h;
+    Hash::Util::FieldHash::_fieldhash \ %h, $fieldhash_mode;
     $h{ []} = 123;
     is( keys %h, 0, "blip");
 }
 
 for my $preload ( [], [ map {}, 1 .. 3] ) {
     my $pre = @$preload ? ' (preloaded)' : '';
-    fieldhash my %f;
+    my %f;
+    Hash::Util::FieldHash::_fieldhash \ %f, $fieldhash_mode;
     my @preval = map "$_", @$preload;
     @f{ @$preload} = @preval;
     # Garbage collection separately
@@ -127,11 +186,23 @@ for my $preload ( [], [ map {}, 1 .. 3] ) {
 }
 is( keys %$ob_reg, 0, "preload gone after loop");
 
+# autovivified key
+{
+    my %h;
+    Hash::Util::FieldHash::_fieldhash \ %h, $fieldhash_mode;
+    my $ref = {};
+    my $x = $h{ $ref}->[ 0];
+    is keys %h, 1, "autovivified key present";
+    undef $ref;
+    is keys %h, 0, "autovivified key collected";
+}
+    
 # big key sets
 BEGIN { $n_tests += 8 }
 {
     my $size = 10_000;
-    fieldhash( my %f);
+    my %f;
+    Hash::Util::FieldHash::_fieldhash \ %f, $fieldhash_mode;
     {
         my @refs = map [], 1 .. $size;
         $f{ $_} = 1 for @refs;
@@ -171,7 +242,8 @@ BEGIN { $n_tests += 8 }
 BEGIN { $n_tests += 6 }
 {
     my $n_fields = 1000;
-    my @fields = map &fieldhash( {}), 1 .. $n_fields;
+    my @fields = map {}, $n_fields;
+    Hash::Util::FieldHash::_fieldhash( $_, $fieldhash_mode) for @fields;
     my @obs = map gen_ref( $_), @test_types;
     my $n_obs = @obs;
     for my $field ( @fields ) {
@@ -194,7 +266,7 @@ BEGIN { $n_tests += 6 }
 # direct hash assignment
 BEGIN { $n_tests += 4 }
 {
-    fieldhashes \ my( %f, %g, %h);
+    Hash::Util::FieldHash::_fieldhash( $_, $fieldhash_mode) for \ my( %f, %g, %h);
     my $size = 6;
     my @obs = map [], 1 .. $size;
     @f{ @obs} = ( 1) x $size;
@@ -208,9 +280,8 @@ BEGIN { $n_tests += 4 }
 }
 
 {
-
     BEGIN { $n_tests += 1 }
-    fieldhash my %h;
+    Hash::Util::FieldHash::_fieldhash \ my( %h), $fieldhash_mode;
     bless \ %h, 'abc'; # this bus-errors with a certain bug
     ok( 1, "no bus error on bless")
 }
@@ -219,11 +290,16 @@ BEGIN { plan tests => $n_tests }
 
 #######################################################################
 
+sub refaddr {
+    my $ref = shift;
+    hex +($ref =~ /\(0x([[:xdigit:]]+)\)$/)[ 0];
+}
+
 use Symbol qw( gensym);
 
 BEGIN {
     my %gen = (
-        SCALAR => sub { \ my $x },
+        SCALAR => sub { \ my $o },
         ARRAY  => sub { [] },
         HASH   => sub { {} },
         GLOB   => sub { gensym },
