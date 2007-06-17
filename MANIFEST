@@ -1289,6 +1289,7 @@ hints/aux_3.sh			Hints for named architecture
 hints/beos.sh			Hints for named architecture
 hints/broken-db.msg		Warning message for systems with broken DB library
 hints/bsdos.sh			Hints for named architecture
+hints/catamount.sh		Hints for named architecture
 hints/convexos.sh		Hints for named architecture
 hints/cxux.sh			Hints for named architecture
 hints/cygwin.sh			Hints for named architecture

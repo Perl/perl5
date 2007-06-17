@@ -675,6 +675,11 @@ EXTERN_C int syscall(int, ...);
 EXTERN_C int usleep(unsigned int);
 #endif
 
+/* Funky places that do not have socket stuff. */
+#if defined(__LIBCATAMOUNT__)
+#  define MYSWAP
+#endif
+
 #ifdef PERL_MICRO /* Last chance to export Perl_my_swap */
 #  define MYSWAP
 #endif
@@ -3268,6 +3273,12 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 
 #if !defined(OS2) && !defined(MACOS_TRADITIONAL)
 #  include "iperlsys.h"
+#endif
+
+#ifdef __LIBCATAMOUNT__
+#undef HAS_PASSWD  /* unixish.h but not unixish enough. */ 
+#undef HAS_GROUP
+#define FAKE_BIT_BUCKET
 #endif
 
 /* [perl #22371] Algorimic Complexity Attack on Perl 5.6.1, 5.8.0.

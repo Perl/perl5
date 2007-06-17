@@ -18,7 +18,7 @@ use vars qw($VERSION @ISA
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.52_03';
+$VERSION = '1.52_04';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -1028,6 +1028,10 @@ WARNING
             print "Executing $abs\n" if ($trace >= 2);
 
             my $version_check = qq{$abs -le "require $ver; print qq{VER_OK}"};
+
+            if (defined $Config{run}) {
+               $version_check = "$Config{run} $version_check";
+            }
             # To avoid using the unportable 2>&1 to suppress STDERR,
             # we close it before running the command.
             # However, thanks to a thread library bug in many BSDs

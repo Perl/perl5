@@ -32,7 +32,15 @@ d_suidsafe='undef'
 #   libgdbmg1-dev (development version of GNU libc 2-linked GDBM library)
 # So make sure that for any libraries you wish to link Perl with under
 # Debian or Red Hat you have the -dev packages installed.
-#
+
+# SuSE Linux can be used as cross-compilation host for Cray XT4 Catamount/Qk.
+if test -d /opt/xt-pe
+then
+  case "`cc -V 2>&1`" in
+  *catamount*) . hints/catamount.sh; return ;;
+  esac
+fi
+
 # Some operating systems (e.g., Solaris 2.6) will link to a versioned shared
 # library implicitly.  For example, on Solaris, `ld foo.o -lgdbm' will find an
 # appropriate version of libgdbm, if one is available; Linux, however, doesn't

@@ -479,7 +479,7 @@ opmini\$(OBJ_EXT): opmini.c
 globals\$(OBJ_EXT): uudmap.h
 
 uudmap.h: generate_uudmap\$(EXE_EXT)
-	./generate_uudmap\$(EXE_EXT) >uudmap.h
+	\$(RUN) ./generate_uudmap\$(EXE_EXT) >uudmap.h
 
 generate_uudmap\$(EXE_EXT): generate_uudmap\$(OBJ_EXT)
 	\$(CC) -o generate_uudmap \$(LDFLAGS) generate_uudmap\$(OBJ_EXT) \$(libs)

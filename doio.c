@@ -1380,7 +1380,7 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 	       int fd, int do_report)
 {
     dVAR;
-#if defined(MACOS_TRADITIONAL) || defined(__SYMBIAN32__)
+#if defined(MACOS_TRADITIONAL) || defined(__SYMBIAN32__) || defined(__LIBCATAMOUNT__)
     Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
 #else
     if (sp > mark) {

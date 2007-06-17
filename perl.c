@@ -3709,7 +3709,47 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv,
 	*rsfpp = PerlIO_stdin();
     }
     else {
+#ifdef FAKE_BIT_BUCKET
+	/* This hack allows one not to have /dev/null (or BIT_BUCKET as it
+	 * is called) and still have the "-e" work.  (Believe it or not,
+	 * a /dev/null is required for the "-e" to work because source
+	 * filter magic is used to implement it. ) This is *not* a general
+	 * replacement for a /dev/null.  What we do here is create a temp
+	 * file (an empty file), open up that as the script, and then
+	 * immediately close and unlink it.  Close enough for jazz. */ 
+#define FAKE_BIT_BUCKET_PREFIX "/tmp/perlnull-"
+#define FAKE_BIT_BUCKET_SUFFIX "XXXXXXXX"
+#define FAKE_BIT_BUCKET_TEMPLATE FAKE_BIT_BUCKET_PREFIX FAKE_BIT_BUCKET_SUFFIX
+	char tmpname[sizeof(FAKE_BIT_BUCKET_TEMPLATE)] = {
+	    FAKE_BIT_BUCKET_TEMPLATE
+	};
+	const char * const err = "Failed to create a fake bit bucket";
+	if (strEQ(scriptname, BIT_BUCKET)) {
+#ifdef HAS_MKSTEMP /* Hopefully mkstemp() is safe here. */
+	    int tmpfd = mkstemp(tmpname);
+	    if (tmpfd > -1) {
+		scriptname = tmpname;
+		close(tmpfd);
+	    } else
+		Perl_croak(aTHX_ err);
+#else
+#  ifdef HAS_MKTEMP
+	    scriptname = mktemp(tmpname);
+	    if (!scriptname)
+		Perl_croak(aTHX_ err);
+#  endif
+#endif
+	}
+#endif
 	*rsfpp = PerlIO_open(scriptname,PERL_SCRIPT_MODE);
+#ifdef FAKE_BIT_BUCKET
+	if (memEQ(scriptname, FAKE_BIT_BUCKET_PREFIX,
+		  sizeof(FAKE_BIT_BUCKET_PREFIX) - 1)
+	    && strlen(scriptname) == sizeof(tmpname) - 1) {
+	    unlink(scriptname);
+	}
+	scriptname = BIT_BUCKET;
+#endif
 #       if defined(HAS_FCNTL) && defined(F_SETFD)
 	    if (*rsfpp)
                 /* ensure close-on-exec */
