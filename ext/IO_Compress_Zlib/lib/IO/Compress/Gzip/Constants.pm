@@ -92,8 +92,19 @@ use constant GZIP_FEXTRA_SUBFIELD_HEADER_SIZE => GZIP_FEXTRA_SUBFIELD_ID_SIZE +
 use constant GZIP_FEXTRA_SUBFIELD_MAX_SIZE    => GZIP_FEXTRA_MAX_SIZE - 
                                                  GZIP_FEXTRA_SUBFIELD_HEADER_SIZE ;
 
-            $GZIP_FNAME_INVALID_CHAR_RE       =  '[\x00-\x1F\x7F-\x9F]';
-            $GZIP_FCOMMENT_INVALID_CHAR_RE    =  '[\x00-\x09\x11-\x1F\x7F-\x9F]';
+
+if (ord('A') == 193)
+{
+    # EBCDIC 
+    $GZIP_FNAME_INVALID_CHAR_RE = '[\x00-\x03\x37\x2d-\x2f\x16\x05\x15\x0b-\x13\x3c\x3d\x32\x26\x18\x19\x3f\x27\x1c-\x1f\x07\x20-\x25\x06\x17\x28-\x2c\x09\x0a\x1b\x30\x31\x1a\x33-\x36\x08\x38-\x3b\x04\x14\x3e\xff]';
+    $GZIP_FCOMMENT_INVALID_CHAR_RE = '[\x00-\x03\x37\x2d-\x2f\x16\x05\x15\x0b-\x0f\x11-\x13\x3c\x3d\x32\x26\x18\x19\x3f\x27\x1c-\x1f\x07\x20-\x25\x06\x17\x28-\x2c\x09\x0a\x1b\x30\x31\x1a\x33-\x36\x08\x38-\x3b\x04\x14\x3e\xff]'; 
+    
+}
+else
+{
+    $GZIP_FNAME_INVALID_CHAR_RE       =  '[\x00-\x1F\x7F-\x9F]';
+    $GZIP_FCOMMENT_INVALID_CHAR_RE    =  '[\x00-\x09\x11-\x1F\x7F-\x9F]';
+}            
 
 use constant GZIP_FHCRC_SIZE        => 2 ; # aka CONTINUATION in gzip
 

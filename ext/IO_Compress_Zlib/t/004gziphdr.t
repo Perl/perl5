@@ -165,7 +165,7 @@ for my $value ( "0D", "0A", "0A0D", "0D0A", "0A0A", "0D0D")
 {
     title "Comment with $value" ;
 
-    my $v = pack "H*", $value;
+    my $v = pack "h*", $value;
     my $comment = "my${v}comment$v";
     my $hdr = readHeaderInfo $name, 
                     Time => 0,
