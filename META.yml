@@ -1,11 +1,12 @@
 name: perl
-version: 5.009004
+version: 5.009005
 abstract: Practical Extraction and Reporting Language
 author: perl5-porters@perl.org
 license: perl
 distribution_type: core
 private:
   directory:
+    - ext/Compress/Raw
     - ext/Compress/Zlib
     - ext/Cwd
     - ext/Data/Dumper
@@ -16,54 +17,78 @@ private:
     - ext/Encode
     - ext/Filter/Util/Call
     - ext/IO
+    - ext/IO_Compress_Base
+    - ext/IO_Compress_Zlib
     - ext/List/Util
     - ext/Math/BigInt/FastCalc
     - ext/MIME/Base64
     - ext/Safe
     - ext/Storable
+    - ext/Sys/Syslog
+    - ext/Text/Soundex
     - ext/threads/hints
     - ext/threads/shared
     - ext/threads/t
     - ext/Time/HiRes
+    - ext/Time/Piece
     - ext/Unicode/Normalize
+    - ext/Win32API/File
+    - lib/Archive/Extract
     - lib/Archive/Tar
-    - lib/assertions
     - lib/Attribute/Handlers
     - lib/base
     - lib/bignum
     - lib/CGI
     - lib/Class/ISA
     - lib/CPAN
+    - lib/CPANPLUS/Backend
+    - lib/CPANPLUS/bin
+    - lib/CPANPLUS/Configure
+    - lib/CPANPLUS/Dist/Build
+    - lib/CPANPLUS/Internals
+    - lib/CPANPLUS/Module
+    - lib/CPANPLUS/Shell
+    - lib/CPANPLUS/t
     - lib/Digest
     - lib/encoding/warnings
     - lib/ExtUtils/CBuilder
     - lib/ExtUtils/ParseXS
     - lib/ExtUtils/t
+    - lib/File/Fetch
     - lib/File/Spec
     - lib/File/Temp
     - lib/Filter/Simple
     - lib/Getopt/Long
     - lib/I18N/LangTags
     - lib/IO/Zlib
-    - lib/Locale/Maketext
+    - lib/IPC/Cmd
+    - lib/Locale/Maketext/Simple
+    - lib/Locale/Maketext/t
+    - lib/Log/Message/Simple
+    - lib/Log/Message/t
     - lib/Math/BigFloat
     - lib/Math/BigInt
     - lib/Math/BigRat
     - lib/Memoize
     - lib/Module/Build
     - lib/Module/CoreList
-    - lib/Module/Load
+    - lib/Module/Load/Conditional
+    - lib/Module/Load/t
     - lib/Module/Loaded
+    - lib/Module/Pluggable
     - lib/Net/FTP
     - lib/Net/Ping
     - lib/Net/t
     - lib/NEXT
+    - lib/Object/Accessor
     - lib/Package/Constants
+    - lib/Params/Check
     - lib/Pod/Escapes
     - lib/Pod/Perldoc
     - lib/Pod/Simple
     - lib/Switch
     - lib/Term/ANSIColor
+    - lib/Term/UI
     - lib/Test/Harness
     - lib/Test/Simple
     - lib/Test/t
@@ -77,7 +102,7 @@ private:
     - t/lib/Math
     - t/lib/sample-tests
     - t/lib/Test/Simple
-    - win32/ext/Win32API/File
+    - t/Module_Pluggable
 
   file:
     - ext/DynaLoader/t/XSLoader.t
@@ -85,10 +110,11 @@ private:
     - ext/Filter/t/call.t
     - ext/threads/threads.pm
     - ext/threads/threads.xs
-    - ext/threads/typemap
+    - lib/Archive/Extract.pm
     - lib/Archive/Tar.pm
-    - lib/assertions.pm
     - lib/Attribute/Handlers.pm
+    - lib/AutoLoader.pm
+    - lib/AutoLoader.t
     - lib/base.pm
     - lib/bigint.pm
     - lib/bignum.pm
@@ -96,9 +122,26 @@ private:
     - lib/CGI.pm
     - lib/Class/ISA.pm
     - lib/CPAN.pm
+    - lib/CPANPLUS.pm
+    - lib/CPANPLUS/Backend.pm
+    - lib/CPANPLUS/Config.pm
+    - lib/CPANPLUS/Configure.pm
+    - lib/CPANPLUS/Dist/Build.pm
+    - lib/CPANPLUS/Error.pm
+    - lib/CPANPLUS/FAQ.pod
+    - lib/CPANPLUS/Hacking.pod
+    - lib/CPANPLUS/inc.pm
+    - lib/CPANPLUS/Internals.pm
+    - lib/CPANPLUS/Module.pm
+    - lib/CPANPLUS/Selfupdate.pm
+    - lib/CPANPLUS/Shell.pm
     - lib/Cwd.pm
+    - lib/Devel/InnerPackage.pm
     - lib/Digest.pm
     - lib/encoding/warnings.pm
+    - lib/Exporter.pm
+    - lib/Exporter.t
+    - lib/Exporter/Heavy.pm
     - lib/ExtUtils/CBuilder.pm
     - lib/ExtUtils/Command
     - lib/ExtUtils/Command.pm
@@ -133,6 +176,7 @@ private:
     - lib/ExtUtils/ParseXS.pm
     - lib/ExtUtils/testlib.pm
     - lib/fields.pm
+    - lib/File/Fetch.pm
     - lib/File/Spec.pm
     - lib/File/Temp.pm
     - lib/Filter/Simple.pm
@@ -141,6 +185,7 @@ private:
     - lib/if.pm
     - lib/if.t
     - lib/IO/Zlib.pm
+    - lib/IPC/Cmd.pm
     - lib/Locale/Codes
     - lib/Locale/Constants.pm
     - lib/Locale/Constants.pod
@@ -151,8 +196,20 @@ private:
     - lib/Locale/Language.pm
     - lib/Locale/Language.pod
     - lib/Locale/Maketext.pm
+    - lib/Locale/Maketext.pod
+    - lib/Locale/Maketext/ChangeLog
+    - lib/Locale/Maketext/Guts.pm
+    - lib/Locale/Maketext/GutsLoader.pm
+    - lib/Locale/Maketext/README
+    - lib/Locale/Maketext/Simple.pm
+    - lib/Locale/Maketext/TPJ13.pod
     - lib/Locale/Script.pm
     - lib/Locale/Script.pod
+    - lib/Log/Message.pm
+    - lib/Log/Message/Config.pm
+    - lib/Log/Message/Handlers.pm
+    - lib/Log/Message/Item.pm
+    - lib/Log/Message/Simple.pm
     - lib/Math/BigFloat.pm
     - lib/Math/BigInt.pm
     - lib/Math/BigRat.pm
@@ -162,7 +219,9 @@ private:
     - lib/Module/Build.pm
     - lib/Module/CoreList.pm
     - lib/Module/Load.pm
+    - lib/Module/Load/Conditional.pm
     - lib/Module/Loaded.pm
+    - lib/Module/Pluggable.pm
     - lib/Net/ChangeLog.libnet
     - lib/Net/Cmd.pm
     - lib/Net/Config.eg
@@ -179,7 +238,9 @@ private:
     - lib/Net/SMTP.pm
     - lib/Net/Time.pm
     - lib/NEXT.pm
+    - lib/Object/Accessor.pm
     - lib/Package/Constants.pm
+    - lib/Params/Check.pm
     - lib/PerlIO/via/QuotedPrint.pm
     - lib/PerlIO/via/t/QuotedPrint.t
     - lib/Pod/Checker.pm
@@ -213,10 +274,13 @@ private:
     - lib/Pod/Text/Overstrike.pm
     - lib/Pod/Text/Termcap.pm
     - lib/Pod/Usage.pm
+    - lib/Shell.pm
+    - lib/Shell.t
     - lib/Switch.pm
     - lib/Term/ANSIColor.pm
     - lib/Term/Cap.pm
     - lib/Term/Cap.t
+    - lib/Term/UI.pm
     - lib/Test.pm
     - lib/Test/Builder.pm
     - lib/Test/Harness.pm
@@ -230,17 +294,17 @@ private:
     - lib/Time/Local.pm
     - lib/Time/Local.t
     - lib/Unicode/Collate.pm
+    - lib/version.pm
+    - lib/version.pod
+    - lib/version.t
     - pod/pod2man.PL
     - pod/pod2text.PL
     - pod/pod2usage.PL
     - pod/podchecker.PL
     - pod/podselect.PL
-    - t/comp/assertions.t
-    - t/comp/asstcompat.t
     - t/lib/filter-util.pl
     - t/lib/TieIn.pm
     - t/lib/TieOut.pm
-    - t/lib/ZlibTestUtils.pm
     - t/pod/emptycmd.t
     - t/pod/emptycmd.xr
     - t/pod/find.t

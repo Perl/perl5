@@ -40,6 +40,7 @@ package Maintainers;
 	'kwilliams'	=> 'Ken Williams <kwilliams@cpan.org>',
 	'laun'		=> 'Wolfgang Laun <Wolfgang.Laun@alcatel.at>',
 	'lstein'	=> 'Lincoln D. Stein <lds@cpan.org>',
+	'lwall'		=> 'Larry Wall <lwall@cpan.org>',
 	'marekr'	=> 'Marek Rouchal <marekr@cpan.org>',
 	'markm'		=> 'Mark Mielke <markm@cpan.org>',
 	'mhx'		=> 'Marcus Holland-Moritz <mhx@cpan.org>',
@@ -470,6 +471,13 @@ package Maintainers;
                 'FILES'         => q[lib/Log/Message/Simple.pm lib/Log/Message/Simple],
                 'CPAN'          => 1,
                 },
+
+	'mad' =>
+		{
+		'MAINTAINER'	=> 'lwall',
+		'FILES'		=> q[mad],
+		'CPAN'		=> 0,
+		},
 
 	'Math::BigFloat' =>
 		{
