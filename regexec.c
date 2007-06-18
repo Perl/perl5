@@ -4219,12 +4219,6 @@ NULL
 
 	case BRANCH:	    /*  /(...|A|...)/ */
 	    scan = NEXTOPER(scan); /* scan now points to inner node */
-	    if ((!next || (OP(next) != BRANCH && OP(next) != BRANCHJ)) 
-	        && !has_cutgroup)
-	    {
-	    	/* last branch; skip state push and jump direct to node */
-		continue;
-            }
 	    ST.lastparen = *PL_reglastparen;
 	    ST.next_branch = next;
 	    REGCP_SET(ST.cp);

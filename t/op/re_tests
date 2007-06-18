@@ -1327,3 +1327,4 @@ foo(\h)bar	foo\tbar	y	$1	\t
 
 .*\z	foo\n	y	-	-
 ^(?:(\d)x)?\d$	1	y	${\(defined($1)?1:0)}	0	
+.*?(?:(\w)|(\w))x	abx	y	$1-$2	b-
