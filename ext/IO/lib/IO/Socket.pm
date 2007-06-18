@@ -145,6 +145,11 @@ sub connect {
     $err ? undef : $sock;
 }
 
+# Enable/disable blocking IO on sockets.
+# Without args return the current status of blocking,
+# with args change the mode as appropriate, returning the
+# old setting, or in case of error during the mode change
+# undef.
 
 sub blocking {
     my $sock = shift;
@@ -154,22 +159,32 @@ sub blocking {
 
     # Windows handles blocking differently
     #
-    # http://groups.google.co.uk/group/perl.perl5.porters/browse_thread/
-    #   thread/b4e2b1d88280ddff/630b667a66e3509f?#630b667a66e3509f
-    # http://msdn.microsoft.com/library/default.asp?url=/library/en-us/
-    #   winsock/winsock/ioctlsocket_2.asp
+    # http://groups.google.co.uk/group/perl.perl5.porters/browse_thread/thread/b4e2b1d88280ddff/630b667a66e3509f?#630b667a66e3509f
+    # http://msdn.microsoft.com/library/default.asp?url=/library/en-us/winsock/winsock/ioctlsocket_2.asp
     #
     # 0x8004667e is FIONBIO
-    # By default all sockets are blocking
+    #
+    # which is used to set blocking behaviour.
 
-    return !${*$sock}{io_sock_nonblocking}
-        unless @_;
+    # NOTE: 
+    # This is a little confusing, the perl keyword for this is
+    # 'blocking' but the OS level behaviour is 'non-blocking', probably
+    # because sockets are blocking by default.
+    # Therefore internally we have to reverse the semantics.
+
+    my $orig= !${*$sock}{io_sock_nonblocking};
+        
+    return $orig unless @_;
 
     my $block = shift;
-
-    ${*$sock}{io_sock_nonblocking} = $block ? "0" : "1";
-
-    return ioctl($sock, 0x8004667e, \${*$sock}{io_sock_nonblocking});
+    
+    if ( !$block != !$orig ) {
+        ${*$sock}{io_sock_nonblocking} = $block ? 0 : 1;
+        ioctl($sock, 0x8004667e, pack("L!",${*$sock}{io_sock_nonblocking}))
+            or return undef;
+    }
+    
+    return $orig;        
 }
 
 
