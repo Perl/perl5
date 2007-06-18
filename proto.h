@@ -3640,6 +3640,8 @@ STATIC OP*	S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 
+#  if !defined(PERL_EFF_ACCESS) && defined(HAS_ACCESS) && (defined(HAS_SETREUID) || defined(HAS_SETRESUID) || defined(HAS_SETREGID) || defined(HAS_SETRESGID))
+#  endif
 STATIC int	S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 			__attribute__nonnull__(pTHX_1);
 
