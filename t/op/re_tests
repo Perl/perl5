@@ -1326,3 +1326,4 @@ foo(\h)bar	foo\tbar	y	$1	\t
 (\h)(\H)	foo\tbar	y	$1-$2	\t-b
 
 .*\z	foo\n	y	-	-
+^(?:(\d)x)?\d$	1	y	${\(defined($1)?1:0)}	0	

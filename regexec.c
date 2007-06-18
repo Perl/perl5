@@ -285,9 +285,8 @@ S_regcppop(pTHX_ const regexp *rex)
      * requiring null fields (pat.t#187 and split.t#{13,14}
      * (as of patchlevel 7877)  will fail.  Then again,
      * this code seems to be necessary or otherwise
-     * building DynaLoader will fail:
-     * "Error: '*' not in typemap in DynaLoader.xs, line 164"
-     * --jhi */
+     * this erroneously leaves $1 defined: "1" =~ /^(?:(\d)x)?\d$/
+     * --jhi updated by dapm */
     for (i = *PL_reglastparen + 1; i <= rex->nparens; i++) {
 	if (i > PL_regsize)
 	    PL_regoffs[i].start = -1;
@@ -2267,13 +2266,12 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
     /* Tests pat.t#187 and split.t#{13,14} seem to depend on this code.
      * Actually, the code in regcppop() (which Ilya may be meaning by
      * PL_reglastparen), is not needed at all by the test suite
-     * (op/regexp, op/pat, op/split), but that code is needed, oddly
-     * enough, for building DynaLoader, or otherwise this
-     * "Error: '*' not in typemap in DynaLoader.xs, line 164"
-     * will happen.  Meanwhile, this code *is* needed for the
+     * (op/regexp, op/pat, op/split), but that code is needed otherwise
+     * this erroneously leaves $1 defined: "1" =~ /^(?:(\d)x)?\d$/
+     * Meanwhile, this code *is* needed for the
      * above-mentioned test suite tests to succeed.  The common theme
      * on those tests seems to be returning null fields from matches.
-     * --jhi */
+     * --jhi updated by dapm */
 #if 1
     if (prog->nparens) {
 	regexp_paren_pair *pp = PL_regoffs;
