@@ -511,6 +511,8 @@ X<record> X<structure> X<struct>
 
 =item UNIVERSAL: The Root of All Objects
 
+=item Deeper UNIVERSAL details
+
 =back
 
 =item Alternate Object Representations
@@ -2588,14 +2590,14 @@ X<perl, location of interpreter>
 =item Command Switches
 X<perl, command switches> X<command switches>
 
-B<-0>[I<octal/hexadecimal>] X<-0> X<$/>, B<-A[I<module>][=I<assertions>]>
-X<-A>, B<-a> X<-a> X<autosplit>, B<-C [I<number/list>]> X<-C>, B<-c> X<-c>,
-B<-d> X<-d> X<-dt>, B<-dt>, B<-d:>I<foo[=bar,baz]> X<-d> X<-dt>,
-B<-dt:>I<foo[=bar,baz]>, B<-D>I<letters> X<-D> X<DEBUGGING> X<-DDEBUGGING>,
-B<-D>I<number>, B<-e> I<commandline> X<-e>, B<-E> I<commandline> X<-E>,
-B<-f> X<-f>, B<-F>I<pattern> X<-F>, B<-h> X<-h>, B<-i>[I<extension>] X<-i>
-X<in-place>, B<-I>I<directory> X<-I> X<@INC>, B<-l>[I<octnum>] X<-l> X<$/>
-X<$\>, B<-m>[B<->]I<module> X<-m> X<-M>, B<-M>[B<->]I<module>,
+B<-0>[I<octal/hexadecimal>] X<-0> X<$/>, B<-a> X<-a> X<autosplit>, B<-C
+[I<number/list>]> X<-C>, B<-c> X<-c>, B<-d> X<-d> X<-dt>, B<-dt>,
+B<-d:>I<foo[=bar,baz]> X<-d> X<-dt>, B<-dt:>I<foo[=bar,baz]>,
+B<-D>I<letters> X<-D> X<DEBUGGING> X<-DDEBUGGING>, B<-D>I<number>, B<-e>
+I<commandline> X<-e>, B<-E> I<commandline> X<-E>, B<-f> X<-f>,
+B<-F>I<pattern> X<-F>, B<-h> X<-h>, B<-i>[I<extension>] X<-i> X<in-place>,
+B<-I>I<directory> X<-I> X<@INC>, B<-l>[I<octnum>] X<-l> X<$/> X<$\>,
+B<-m>[B<->]I<module> X<-m> X<-M>, B<-M>[B<->]I<module>,
 B<-M>[B<->]I<'module ...'>, B<-[mM]>[B<->]I<module=arg[,arg]...>, B<-n>
 X<-n>, B<-p> X<-p>, B<-P> X<-P>, B<-s> X<-s>, B<-S> X<-S>, B<-t> X<-t>,
 B<-T> X<-T>, B<-u> X<-u>, B<-U> X<-U>, B<-v> X<-v>, B<-V> X<-V>,
@@ -2926,6 +2928,67 @@ C<< (?PE<lt>NAMEE<gt>pattern) >>, C<< (?P=NAME) >>, C<< (?P>NAME) >>
 =item BUGS
 
 =item SEE ALSO
+
+=back
+
+=head2 perlrebackslash - Perl Regular Expression Backslash Sequences and
+Escapes
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item The backslash
+
+[1]
+
+=item All the sequences and escapes
+
+=item Character Escapes
+
+[1], [2]
+
+=item Modifiers
+
+=item Character classes
+
+=item Referencing
+
+=item Assertions
+
+\A, \z, \Z, \G, \b, \B
+
+=item Misc
+
+\C, \K, \R, \X
+
+=back
+
+=back
+
+=head2 perlrecharclass - Perl Regular Expression Character Classes
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item The dot
+
+=item Backslashed sequences
+
+[1]
+
+=item Bracketed Character Classes
+
+cntrl, graph, print, punct
+
+=item Locale, Unicode and UTF-8
+
+=back
 
 =back
 
@@ -4187,49 +4250,49 @@ X<CLONE> X<CLONE_SKIP> X<thread> X<threads> X<ithread>
 
 =item Pragmatic Modules
 
-assertions, assertions::activate, assertions::compat, attributes, attrs,
-autouse, base, bigint, bignum, bigrat, blib, bytes, charnames, constant,
-diagnostics, encoding, encoding::warnings, feature, fields, filetest, if,
-integer, less, lib, locale, open, ops, overload, re, sigtrap, sort, strict,
-subs, threads, threads::shared, utf8, vars, version, vmsish, warnings,
-warnings::register
+attributes, attrs, autouse, base, bigint, bignum, bigrat, blib, bytes,
+charnames, constant, diagnostics, encoding, encoding::warnings, feature,
+fields, filetest, if, integer, less, lib, locale, mro, open, ops, overload,
+re, sigtrap, sort, strict, subs, threads, threads::shared, utf8, vars,
+version, vmsish, warnings, warnings::register
 
 =item Standard Modules
 
-AnyDBM_File, Archive::Tar, Archive::Tar::File, Attribute::Handlers,
-AutoLoader, AutoSplit, B, B::Asmdata, B::Assembler, B::Bblock, B::Bytecode,
-B::C, B::CC, B::Concise, B::Debug, B::Deparse, B::Disassembler, B::Lint,
-B::Showlex, B::Stackobj, B::Stash, B::Terse, B::Xref, Benchmark,
-ByteLoader, CGI, CGI::Apache, CGI::Carp, CGI::Cookie, CGI::Fast,
-CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util, CPAN, CPAN::FirstTime,
-CPAN::Nox, CPAN::Version, Carp, Carp::Heavy, Class::ISA, Class::Struct,
-Compress::Raw::Zlib, Compress::Zlib, Config, Cwd, DB, DBM_Filter,
-DBM_Filter::compress, DBM_Filter::encode, DBM_Filter::int32,
-DBM_Filter::null, DBM_Filter::utf8, DB_File, Data::Dumper, Devel::DProf,
-Devel::Peek, Devel::SelfStubber, Digest, Digest::MD5, Digest::SHA,
-Digest::base, Digest::file, DirHandle, Dumpvalue, DynaLoader, Encode,
-Encode::Alias, Encode::Byte, Encode::CJKConstants, Encode::CN,
-Encode::CN::HZ, Encode::Config, Encode::EBCDIC, Encode::Encoder,
-Encode::Encoding, Encode::Guess, Encode::JP, Encode::JP::H2Z,
+AnyDBM_File, Archive::Extract, Archive::Tar, Archive::Tar::File,
+Attribute::Handlers, AutoLoader, AutoSplit, B, B::Concise, B::Debug,
+B::Deparse, B::Lint, B::Showlex, B::Terse, B::Xref, Benchmark, CGI,
+CGI::Apache, CGI::Carp, CGI::Cookie, CGI::Fast, CGI::Pretty, CGI::Push,
+CGI::Switch, CGI::Util, CPAN, CPAN::FirstTime, CPAN::Kwalify, CPAN::Nox,
+CPAN::Version, CPANPLUS, CPANPLUS::Dist::Base, CPANPLUS::Dist::Sample,
+CPANPLUS::Shell::Classic, CPANPLUS::Shell::Default::Plugins::HOWTO, Carp,
+Carp::Heavy, Class::ISA, Class::Struct, Compress::Raw::Zlib,
+Compress::Zlib, Config, Cwd, DB, DBM_Filter, DBM_Filter::compress,
+DBM_Filter::encode, DBM_Filter::int32, DBM_Filter::null, DBM_Filter::utf8,
+DB_File, Data::Dumper, Devel::DProf, Devel::InnerPackage, Devel::Peek,
+Devel::SelfStubber, Digest, Digest::MD5, Digest::SHA, Digest::base,
+Digest::file, DirHandle, Dumpvalue, DynaLoader, Encode, Encode::Alias,
+Encode::Byte, Encode::CJKConstants, Encode::CN, Encode::CN::HZ,
+Encode::Config, Encode::EBCDIC, Encode::Encoder, Encode::Encoding,
+Encode::GSM0338, Encode::Guess, Encode::JP, Encode::JP::H2Z,
 Encode::JP::JIS7, Encode::KR, Encode::KR::2022_KR, Encode::MIME::Header,
-Encode::PerlIO, Encode::Supported, Encode::Symbol, Encode::TW,
-Encode::Unicode, Encode::Unicode::UTF7, English, Env, Errno, Exporter,
-Exporter::Heavy, ExtUtils::CBuilder, ExtUtils::CBuilder::Platform::Windows,
-ExtUtils::Command, ExtUtils::Command::MM, ExtUtils::Constant,
-ExtUtils::Constant::Base, ExtUtils::Constant::Utils,
-ExtUtils::Constant::XS, ExtUtils::Embed, ExtUtils::Install,
-ExtUtils::Installed, ExtUtils::Liblist, ExtUtils::MM, ExtUtils::MM_AIX,
-ExtUtils::MM_Any, ExtUtils::MM_BeOS, ExtUtils::MM_Cygwin, ExtUtils::MM_DOS,
-ExtUtils::MM_MacOS, ExtUtils::MM_NW5, ExtUtils::MM_OS2, ExtUtils::MM_QNX,
-ExtUtils::MM_UWIN, ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_VOS,
-ExtUtils::MM_Win32, ExtUtils::MM_Win95, ExtUtils::MY, ExtUtils::MakeMaker,
-ExtUtils::MakeMaker::Config, ExtUtils::MakeMaker::FAQ,
+Encode::MIME::Name, Encode::PerlIO, Encode::Supported, Encode::Symbol,
+Encode::TW, Encode::Unicode, Encode::Unicode::UTF7, English, Env, Errno,
+Exporter, Exporter::Heavy, ExtUtils::CBuilder,
+ExtUtils::CBuilder::Platform::Windows, ExtUtils::Command,
+ExtUtils::Command::MM, ExtUtils::Constant, ExtUtils::Constant::Base,
+ExtUtils::Constant::Utils, ExtUtils::Constant::XS, ExtUtils::Embed,
+ExtUtils::Install, ExtUtils::Installed, ExtUtils::Liblist, ExtUtils::MM,
+ExtUtils::MM_AIX, ExtUtils::MM_Any, ExtUtils::MM_BeOS, ExtUtils::MM_Cygwin,
+ExtUtils::MM_DOS, ExtUtils::MM_MacOS, ExtUtils::MM_NW5, ExtUtils::MM_OS2,
+ExtUtils::MM_QNX, ExtUtils::MM_UWIN, ExtUtils::MM_Unix, ExtUtils::MM_VMS,
+ExtUtils::MM_VOS, ExtUtils::MM_Win32, ExtUtils::MM_Win95, ExtUtils::MY,
+ExtUtils::MakeMaker, ExtUtils::MakeMaker::Config, ExtUtils::MakeMaker::FAQ,
 ExtUtils::MakeMaker::Tutorial, ExtUtils::MakeMaker::bytes,
 ExtUtils::MakeMaker::vmsish, ExtUtils::Manifest, ExtUtils::Mkbootstrap,
 ExtUtils::Mksymlists, ExtUtils::Packlist, ExtUtils::ParseXS,
 ExtUtils::testlib, Fatal, Fcntl, File::Basename, File::CheckTree,
-File::Compare, File::Copy, File::DosGlob, File::Find, File::Glob,
-File::GlobMapper, File::Path, File::Spec, File::Spec::Cygwin,
+File::Compare, File::Copy, File::DosGlob, File::Fetch, File::Find,
+File::Glob, File::GlobMapper, File::Path, File::Spec, File::Spec::Cygwin,
 File::Spec::Epoc, File::Spec::Functions, File::Spec::Mac, File::Spec::OS2,
 File::Spec::Unix, File::Spec::VMS, File::Spec::Win32, File::Temp,
 File::stat, FileCache, FileHandle, Filter::Simple, Filter::Util::Call,
@@ -4242,11 +4305,13 @@ IO::Pipe, IO::Poll, IO::Seekable, IO::Select, IO::Socket, IO::Socket::INET,
 IO::Socket::UNIX, IO::Uncompress::AnyInflate,
 IO::Uncompress::AnyUncompress, IO::Uncompress::Base,
 IO::Uncompress::Gunzip, IO::Uncompress::Inflate,
-IO::Uncompress::RawInflate, IO::Uncompress::Unzip, IO::Zlib, IPC::Open2,
-IPC::Open3, IPC::SysV, IPC::SysV::Msg, IPC::SysV::Semaphore, List::Util,
-Locale::Constants, Locale::Country, Locale::Currency, Locale::Language,
-Locale::Maketext, Locale::Maketext::TPJ13, Locale::Script, MIME::Base64,
-MIME::Base64::QuotedPrint, Math::BigFloat, Math::BigInt,
+IO::Uncompress::RawInflate, IO::Uncompress::Unzip, IO::Zlib, IPC::Cmd,
+IPC::Open2, IPC::Open3, IPC::SysV, IPC::SysV::Msg, IPC::SysV::Semaphore,
+List::Util, Locale::Constants, Locale::Country, Locale::Currency,
+Locale::Language, Locale::Maketext, Locale::Maketext::Simple,
+Locale::Maketext::TPJ13, Locale::Script, Log::Message,
+Log::Message::Config, Log::Message::Handlers, Log::Message::Item,
+MIME::Base64, MIME::Base64::QuotedPrint, Math::BigFloat, Math::BigInt,
 Math::BigInt::Calc, Math::BigInt::CalcEmu, Math::BigInt::FastCalc,
 Math::BigRat, Math::Complex, Math::Trig, Memoize, Memoize::AnyDBM_File,
 Memoize::Expire, Memoize::ExpireFile, Memoize::ExpireTest,
@@ -4261,11 +4326,13 @@ Module::Build::Platform::Unix, Module::Build::Platform::VMS,
 Module::Build::Platform::VOS, Module::Build::Platform::Windows,
 Module::Build::Platform::aix, Module::Build::Platform::cygwin,
 Module::Build::Platform::darwin, Module::Build::Platform::os2,
-Module::Build::YAML, Module::CoreList, Module::Load, Module::Loaded,
-NDBM_File, NEXT, Net::Cmd, Net::Config, Net::Domain, Net::FTP, Net::NNTP,
-Net::Netrc, Net::POP3, Net::Ping, Net::SMTP, Net::Time, Net::hostent,
-Net::libnetFAQ, Net::netent, Net::protoent, Net::servent, O, ODBM_File,
-Opcode, POSIX, Package::Constants, PerlIO, PerlIO::encoding,
+Module::Build::YAML, Module::CoreList, Module::Load,
+Module::Load::Conditional, Module::Loaded, Module::Pluggable,
+Module::Pluggable::Object, NDBM_File, NEXT, Net::Cmd, Net::Config,
+Net::Domain, Net::FTP, Net::NNTP, Net::Netrc, Net::POP3, Net::Ping,
+Net::SMTP, Net::Time, Net::hostent, Net::libnetFAQ, Net::netent,
+Net::protoent, Net::servent, O, ODBM_File, Opcode, POSIX,
+Package::Constants, Params::Check, PerlIO, PerlIO::encoding,
 PerlIO::scalar, PerlIO::via, PerlIO::via::QuotedPrint, Pod::Checker,
 Pod::Escapes, Pod::Find, Pod::Functions, Pod::Html, Pod::InputObjects,
 Pod::LaTeX, Pod::Man, Pod::ParseLink, Pod::ParseUtils, Pod::Parser,
@@ -4283,18 +4350,19 @@ Pod::Simple::TextContent, Pod::Simple::XMLOutStream, Pod::Text,
 Pod::Text::Color, Pod::Text::Overstrike, Pod::Text::Termcap, Pod::Usage,
 SDBM_File, Safe, Scalar::Util, Search::Dict, SelectSaver, SelfLoader,
 Shell, Socket, Storable, Switch, Symbol, Sys::Hostname, Sys::Syslog,
-Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine, Test,
+Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine, Term::UI, Test,
 Test::Builder, Test::Builder::Module, Test::Builder::Tester,
 Test::Builder::Tester::Color, Test::Harness, Test::Harness::Assert,
-Test::Harness::Iterator, Test::Harness::Point, Test::Harness::Straps,
-Test::Harness::TAP, Test::Harness::Util, Test::More, Test::Simple,
-Test::Tutorial, Text::Abbrev, Text::Balanced, Text::ParseWords,
-Text::Soundex, Text::Tabs, Text::Wrap, Thread, Thread::Queue,
-Thread::Semaphore, Thread::Signal, Thread::Specific, Tie::Array, Tie::File,
-Tie::Handle, Tie::Hash, Tie::Memoize, Tie::RefHash, Tie::Scalar,
-Tie::SubstrHash, Time::HiRes, Time::Local, Time::gmtime, Time::localtime,
-Time::tm, UNIVERSAL, Unicode::Collate, Unicode::Normalize, Unicode::UCD,
-User::grent, User::pwent, XS::APItest, XS::Typemap, XSLoader
+Test::Harness::Iterator, Test::Harness::Point, Test::Harness::Results,
+Test::Harness::Straps, Test::Harness::TAP, Test::Harness::Util, Test::More,
+Test::Simple, Test::Tutorial, Text::Abbrev, Text::Balanced,
+Text::ParseWords, Text::Soundex, Text::Tabs, Text::Wrap, Thread,
+Thread::Queue, Thread::Semaphore, Tie::Array, Tie::File, Tie::Handle,
+Tie::Hash, Tie::Hash::NamedCapture, Tie::Memoize, Tie::RefHash,
+Tie::Scalar, Tie::SubstrHash, Time::HiRes, Time::Local, Time::Piece,
+Time::Piece::Seconds, Time::gmtime, Time::localtime, Time::tm, UNIVERSAL,
+Unicode::Collate, Unicode::Normalize, Unicode::UCD, User::grent,
+User::pwent, Win32, Win32API::File, XS::APItest, XS::Typemap, XSLoader
 
 =item Extension Modules
 
@@ -4575,7 +4643,7 @@ L<piconv>, L<ptar>, L<ptardiff>, L<shasum>
 
 =item Installation
 
-L<cpan>, L<instmodsh>
+L<cpan>, L<cpanp>, L<cpan2dist>, L<instmodsh>
 
 =back
 
@@ -5445,13 +5513,15 @@ callback
 
 =item DESCRIPTION
 
+=item Callbacks
+
 =over 4
 
 =item comp
 
-RXf_SKIPWHITE, RXf_START_ONLY, RXf_WHITE, RXf_PMf_LOCALE,
-RXf_PMf_MULTILINE, RXf_PMf_SINGLELINE, RXf_PMf_FOLD, RXf_PMf_EXTENDED,
-RXf_PMf_KEEPCOPY, RXf_UTF8
+C</m> - RXf_PMf_MULTILINE, C</s> - RXf_PMf_SINGLELINE, C</i> -
+RXf_PMf_FOLD, C</x> - RXf_PMf_EXTENDED, C</p> - RXf_PMf_KEEPCOPY,
+RXf_SKIPWHITE, RXf_PMf_LOCALE, RXf_UTF8, RXf_START_ONLY, RXf_WHITE
 
 =item exec
 
@@ -5461,11 +5531,11 @@ RXf_PMf_KEEPCOPY, RXf_UTF8
 
 =item free
 
-=item numbered_buff_get
+=item Numbered capture callbacks
 
-=item named_buff_get
+=item Named capture callbacks
 
-=item qr_pkg
+=item qr_package
 
 =item dupe
 
@@ -5473,15 +5543,43 @@ RXf_PMf_KEEPCOPY, RXf_UTF8
 
 =item The REGEXP structure
 
-C<engine>, C<mother_re>, C<extflags>, C<minlen> C<minlenret>, C<gofs>,
-C<substrs>, C<nparens>, C<lasparen>, and C<lastcloseparen>, C<intflags>,
-C<pprivate>, C<swap>, C<offs>, C<precomp> C<prelen>, C<paren_names>,
-C<reg_substr_data>, C<startp>, C<endp>, C<subbeg> C<sublen> C<saved_copy>,
-C<wrapped> C<wraplen>, C<seen_evals>, C<refcnt>
-
 =over 4
 
-=item De-allocation and Cloning
+=item C<engine>
+
+=item C<mother_re>
+
+=item C<extflags>
+
+=item C<minlen> C<minlenret>
+
+=item C<gofs>
+
+=item C<substrs>
+
+=item C<nparens>, C<lasparen>, and C<lastcloseparen>
+
+=item C<intflags>
+
+=item C<pprivate>
+
+=item C<swap>
+
+=item C<offs>
+
+=item C<precomp> C<prelen>
+
+=item C<paren_names>
+
+=item C<substrs>
+
+=item C<subbeg> C<sublen> C<saved_copy>
+
+=item C<wrapped> C<wraplen>
+
+=item C<seen_evals>
+
+=item C<refcnt>
 
 =back
 
@@ -5624,11 +5722,6 @@ X<sv_usepvn_mg>, sv_uv X<sv_uv>, unpack_str X<unpack_str>
 
 packlist X<packlist>, unpackstring X<unpackstring>
 
-=item Global Variables
-
-PL_modglobal X<PL_modglobal>, PL_na X<PL_na>, PL_sv_no X<PL_sv_no>,
-PL_sv_undef X<PL_sv_undef>, PL_sv_yes X<PL_sv_yes>
-
 =item GV Functions
 
 GvSV X<GvSV>, gv_const_sv X<gv_const_sv>, gv_fetchmeth X<gv_fetchmeth>,
@@ -5688,6 +5781,12 @@ X<strnNE>, sv_nosharing X<sv_nosharing>, upg_version X<upg_version>, vcmp
 X<vcmp>, vnormal X<vnormal>, vnumify X<vnumify>, vstringify X<vstringify>,
 vverify X<vverify>
 
+=item MRO Functions
+
+mro_get_linear_isa X<mro_get_linear_isa>, mro_get_linear_isa_c3
+X<mro_get_linear_isa_c3>, mro_get_linear_isa_dfs X<mro_get_linear_isa_dfs>,
+mro_method_changed_in X<mro_method_changed_in>
+
 =item Multicall Functions
 
 dMULTICALL X<dMULTICALL>, MULTICALL X<MULTICALL>, POP_MULTICALL
@@ -5707,6 +5806,15 @@ cv_const_sv X<cv_const_sv>, newCONSTSUB X<newCONSTSUB>, newXS X<newXS>
 =item Pad Data Structures
 
 pad_sv X<pad_sv>
+
+=item Per-Interpreter Variables
+
+PL_modglobal X<PL_modglobal>, PL_na X<PL_na>, PL_sv_no X<PL_sv_no>,
+PL_sv_undef X<PL_sv_undef>, PL_sv_yes X<PL_sv_yes>
+
+=item REGEXP Functions
+
+SvRX X<SvRX>, SvRXOK X<SvRXOK>
 
 =item Simple Exception Handling Macros
 
@@ -5889,12 +5997,6 @@ SAVECOMPPAD X<SAVECOMPPAD>, SAVEPADSV X<SAVEPADSV>
 
 find_runcv X<find_runcv>
 
-=item Global Variables
-
-PL_DBsingle X<PL_DBsingle>, PL_DBsub X<PL_DBsub>, PL_DBtrace X<PL_DBtrace>,
-PL_dowarn X<PL_dowarn>, PL_last_in_gv X<PL_last_in_gv>, PL_ofs_sv
-X<PL_ofs_sv>, PL_rs X<PL_rs>
-
 =item GV Functions
 
 is_gv_magical X<is_gv_magical>, is_gv_magical_sv X<is_gv_magical_sv>
@@ -5912,6 +6014,10 @@ start_glob X<start_glob>
 
 magic_sethint X<magic_sethint>, mg_localize X<mg_localize>
 
+=item MRO Functions
+
+mro_isa_changed_in X<mro_isa_changed_in>
+
 =item Pad Data Structures
 
 CvPADLIST X<CvPADLIST>, cv_clone X<cv_clone>, cv_dump X<cv_dump>,
@@ -5923,6 +6029,12 @@ X<pad_fixup_inner_anons>, pad_free X<pad_free>, pad_leavemy X<pad_leavemy>,
 pad_new X<pad_new>, pad_push X<pad_push>, pad_reset X<pad_reset>, pad_setsv
 X<pad_setsv>, pad_swipe X<pad_swipe>, pad_tidy X<pad_tidy>, pad_undef
 X<pad_undef>
+
+=item Per-Interpreter Variables
+
+PL_DBsingle X<PL_DBsingle>, PL_DBsub X<PL_DBsub>, PL_DBtrace X<PL_DBtrace>,
+PL_dowarn X<PL_dowarn>, PL_last_in_gv X<PL_last_in_gv>, PL_ofs_sv
+X<PL_ofs_sv>, PL_rs X<PL_rs>
 
 =item Stack Manipulation Macros
 
@@ -6244,7 +6356,7 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item common test code for timed bail out
 
-=item POD -> HTML conversion in the core still sucks
+=item POD -E<gt> HTML conversion in the core still sucks
 
 =item Parallel testing
 
@@ -6293,8 +6405,6 @@ I<The Road goes ever on and on, down from the door where it began.>
 =over 4
 
 =item Make it clear from -v if this is the exact official release
-
-=item Ordering of "global" variables.
 
 =item Profile Perl - am I hot or not?
 
@@ -6366,11 +6476,11 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Optimize away @_
 
-=item What hooks would assertions need?
-
 =item Properly Unicode safe tokeniser and pads.
 
 =item The yada yada yada operators
+
+=item Virtualize operating system access
 
 =back
 
@@ -6463,9 +6573,13 @@ B<-V>
 
 =item strictures and array/hash dereferencing in defined()
 
+=item C<(?p{})> has been removed
+
 =item Removal of the bytecode compiler and of perlcc
 
 =item Removal of the JPL
+
+=item Recursive inheritance detected earlier
 
 =back
 
@@ -6476,7 +6590,8 @@ B<-V>
 =item Regular expressions
 
 Recursive Patterns, Named Capture Buffers, Possessive Quantifiers,
-Backtracking control verbs, Relative backreferences, C<\K> escape
+Backtracking control verbs, Relative backreferences, C<\K> escape, Vertical
+and horizontal whitespace, and linebreak
 
 =item The C<_> prototype
 
@@ -6484,9 +6599,13 @@ Backtracking control verbs, Relative backreferences, C<\K> escape
 
 =item readpipe() is now overridable
 
+=item default argument for readline()
+
 =item UCD 5.0.0
 
 =item Smart match
+
+=item Implicit loading of C<feature>
 
 =back
 
@@ -6494,17 +6613,38 @@ Backtracking control verbs, Relative backreferences, C<\K> escape
 
 =over 4
 
+=item New Pragma, C<mro>
+
+=item bignum, bigint, bigrat
+
 =item New Core Modules
 
 =item Module changes
 
-C<base>, C<warnings>, C<less>, C<Attribute::Handlers>, C<B::Lint>, C<B>
+C<assertions>, C<base>, C<strict> and C<warnings>, C<warnings>, C<less>,
+C<Attribute::Handlers>, C<B::Lint>, C<B>, C<Thread>
 
 =back
 
 =item Utility Changes
 
+=over 4
+
+=item C<cpanp>
+
+=item C<cpan2dist>
+
+=item C<pod2html>
+
+=back
+
 =item Documentation
+
+=over 4
+
+=item New manpage, perlunifaq
+
+=back
 
 =item Performance Enhancements
 
@@ -6514,7 +6654,11 @@ C<base>, C<warnings>, C<less>, C<Attribute::Handlers>, C<B::Lint>, C<B>
 
 =item C++ compatibility
 
+=item Visual C++
+
 =item Static build on Win32
+
+=item C<d_pseudofork>
 
 =item Ports
 
@@ -6523,6 +6667,12 @@ C<base>, C<warnings>, C<less>, C<Attribute::Handlers>, C<B::Lint>, C<B>
 =item Selected Bug Fixes
 
 =item New or Changed Diagnostics
+
+=over 4
+
+=item Deprecations
+
+=back
 
 =item Changed Internals
 
@@ -6556,9 +6706,13 @@ C<base>, C<warnings>, C<less>, C<Attribute::Handlers>, C<B::Lint>, C<B>
 
 =item strictures and array/hash dereferencing in defined()
 
+=item C<(?p{})> has been removed
+
 =item Removal of the bytecode compiler and of perlcc
 
 =item Removal of the JPL
+
+=item Recursive inheritance detected earlier
 
 =back
 
@@ -6569,7 +6723,8 @@ C<base>, C<warnings>, C<less>, C<Attribute::Handlers>, C<B::Lint>, C<B>
 =item Regular expressions
 
 Recursive Patterns, Named Capture Buffers, Possessive Quantifiers,
-Backtracking control verbs, Relative backreferences, C<\K> escape
+Backtracking control verbs, Relative backreferences, C<\K> escape, Vertical
+and horizontal whitespace, and linebreak
 
 =item The C<_> prototype
 
@@ -6577,9 +6732,13 @@ Backtracking control verbs, Relative backreferences, C<\K> escape
 
 =item readpipe() is now overridable
 
+=item default argument for readline()
+
 =item UCD 5.0.0
 
 =item Smart match
+
+=item Implicit loading of C<feature>
 
 =back
 
@@ -6587,17 +6746,38 @@ Backtracking control verbs, Relative backreferences, C<\K> escape
 
 =over 4
 
+=item New Pragma, C<mro>
+
+=item bignum, bigint, bigrat
+
 =item New Core Modules
 
 =item Module changes
 
-C<base>, C<warnings>, C<less>, C<Attribute::Handlers>, C<B::Lint>, C<B>
+C<assertions>, C<base>, C<strict> and C<warnings>, C<warnings>, C<less>,
+C<Attribute::Handlers>, C<B::Lint>, C<B>, C<Thread>
 
 =back
 
 =item Utility Changes
 
+=over 4
+
+=item C<cpanp>
+
+=item C<cpan2dist>
+
+=item C<pod2html>
+
+=back
+
 =item Documentation
+
+=over 4
+
+=item New manpage, perlunifaq
+
+=back
 
 =item Performance Enhancements
 
@@ -6607,7 +6787,11 @@ C<base>, C<warnings>, C<less>, C<Attribute::Handlers>, C<B::Lint>, C<B>
 
 =item C++ compatibility
 
+=item Visual C++
+
 =item Static build on Win32
+
+=item C<d_pseudofork>
 
 =item Ports
 
@@ -6616,6 +6800,12 @@ C<base>, C<warnings>, C<less>, C<Attribute::Handlers>, C<B::Lint>, C<B>
 =item Selected Bug Fixes
 
 =item New or Changed Diagnostics
+
+=over 4
+
+=item Deprecations
+
+=back
 
 =item Changed Internals
 
@@ -11137,8 +11327,7 @@ useful flags, ALL, All, MORE, More
 =item Exportable Functions
 
 is_regexp($ref), regexp_pattern($ref), regmust($ref), regname($name,$all),
-regnames($all), regnames_iterinit(), regnames_iternext($all),
-regnames_count()
+regnames($all), regnames_count()
 
 =back
 
@@ -11264,74 +11453,6 @@ L<threads>
 
 =back
 
-=head2 assertions - select assertions in blocks of code
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Selecting assertions
-
-=item Handling assertions your own way
-
-enabled($on), enabled(), seen($on), seen()
-
-=back
-
-=item COMPATIBILITY
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
-=head2 assertions::activate - activate assertions
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
-=head2 assertions::compat - assertions for pre-5.9 versions of perl
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item The C<assertion> attribute handler
-
-=item Assertion execution status as a constant
-
-=back
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
 =head2 attributes - get/set subroutine or variable attributes
 
 =over 4
@@ -11422,9 +11543,12 @@ Base class package "%s" is empty
 
 =over 4
 
+=item use integer vs. use bigint
+
 =item Options
 
-a or accuracy, p or precision, t or trace, l or lib, v or version
+a or accuracy, p or precision, t or trace, hex, oct, l, lib, try or only, v
+or version
 
 =item Math Library
 
@@ -11434,13 +11558,17 @@ a or accuracy, p or precision, t or trace, l or lib, v or version
 
 =item Methods
 
-inf(), NaN(), upgrade()
+inf(), NaN(), upgrade(), in_effect()
 
 =item MATH LIBRARY
 
 =item Caveat
 
 =back
+
+=item CAVAETS
+
+in_effect(), hex()/oct()
 
 =item MODULES USED
 
@@ -11466,21 +11594,25 @@ inf(), NaN(), upgrade()
 
 =item Options
 
-a or accuracy, p or precision, t or trace, l or lib, v or version
+a or accuracy, p or precision, t or trace, l or lib, hex, oct, v or version
 
 =item Methods
 
-=item Caveat
+=item Caveats
 
-inf(), NaN(), upgrade()
+inf(), NaN(), upgrade(), in_effect()
 
-=item MATH LIBRARY
+=item Math Library
 
 =item INTERNAL FORMAT
 
 =item SIGN
 
 =back
+
+=item CAVAETS
+
+in_effect(), hex()/oct()
 
 =item MODULES USED
 
@@ -11512,7 +11644,7 @@ inf(), NaN(), upgrade()
 
 =item Methods
 
-inf(), NaN(), upgrade()
+inf(), NaN(), upgrade(), in_effect()
 
 =item MATH LIBRARY
 
@@ -11520,9 +11652,13 @@ inf(), NaN(), upgrade()
 
 =item Options
 
-a or accuracy, p or precision, t or trace, l or lib, v or version
+a or accuracy, p or precision, t or trace, l or lib, hex, oct, v or version
 
 =back
+
+=item CAVAETS
+
+in_effect(), hex()/oct()
 
 =item EXAMPLES
 
@@ -11676,6 +11812,8 @@ escapes
 =item PerlIO layers for C<STD(IN|OUT)>
 
 =item Implicit upgrading for byte strings
+
+=item Side effects
 
 =item Side effects
 
@@ -11916,6 +12054,92 @@ operations
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=back
+
+=head2 mro - Method Resolution Order
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item OVERVIEW
+
+=item The C3 MRO
+
+=over 4
+
+=item What is C3?
+
+=item How does C3 work
+
+=back
+
+=item Functions
+
+=over 4
+
+=item mro::get_linear_isa($classname[, $type])
+
+=item mro::set_mro($classname, $type)
+
+=item mro::get_mro($classname)
+
+=item mro::get_isarev($classname)
+
+=item mro::is_universal($classname)
+
+=item mro::invalidate_all_method_caches()
+
+=item mro::method_changed_in($classname)
+
+=item mro::get_pkg_gen($classname)
+
+=item next::method
+
+=item next::can
+
+=item maybe::next::method
+
+=back
+
+=item PERFORMANCE CONSIDERATIONS
+
+=item SEE ALSO
+
+=over 4
+
+=item The original Dylan paper
+
+L<http://www.webcom.com/haahr/dylan/linearization-oopsla96.html>
+
+=item The prototype Perl 6 Object Model uses C3
+
+L<http://svn.openfoundry.org/pugs/perl5/Perl6-MetaModel/>
+
+=item Parrot now uses C3
+
+L<http://aspn.activestate.com/ASPN/Mail/Message/perl6-internals/2746631>,
+L<http://use.perl.org/~autrijus/journal/25768>
+
+=item Python 2.3 MRO related links
+
+L<http://www.python.org/2.3/mro.html>,
+L<http://www.python.org/2.2.2/descrintro.html#mro>
+
+=item C3 for TinyCLOS
+
+L<http://www.call-with-current-continuation.org/eggs/c3.html>
+
+=item Class::C3
+
+L<Class::C3>
+
+=back
+
+=item AUTHOR
 
 =back
 
@@ -12317,7 +12541,7 @@ warnings::warnif($object, $message)
 =item $ae = Archive::Extract->new(archive => '/path/to/archive',[type =>
 TYPE])
 
-tar, tgz, gz, zip, bz2, tbz
+tar, tgz, gz, Z, zip, bz2, tbz
 
 =back
 
@@ -12360,6 +12584,8 @@ $ae->extract_path, $ae->files
 =item $ae->is_tar
 
 =item $ae->is_gz
+
+=item $ae->is_Z
 
 =item $ae->is_zip
 
@@ -12841,6 +13067,10 @@ main_root, main_start, walkoptree(OP, METHOD), walkoptree_debug(DEBUG)
 ppname(OPNUM), hash(STR), cast_I32(I), minus_c, cstring(STR),
 perlstring(STR), class(OBJ), threadsv_names
 
+=item Exported utility variabiles
+
+@optype, @specialsv_name
+
 =back
 
 =item OVERVIEW OF CLASSES
@@ -12957,20 +13187,6 @@ redoop, nextop, lastop
 label, stash, stashpv, file, cop_seq, arybase, line, warnings, io, hints
 
 =back
-
-=item AUTHOR
-
-=back
-
-=head2 B::Asmdata - Autogenerated data about Perl ops
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-%insn_data, @insn_name, @optype, @specialsv_name
 
 =item AUTHOR
 
@@ -13849,21 +14065,21 @@ CPAN::Distribution::install_tested(), CPAN::Distribution::isa_perl(),
 CPAN::Distribution::is_tested(), CPAN::Distribution::look(),
 CPAN::Distribution::make(), CPAN::Distribution::perldoc(),
 CPAN::Distribution::prefs(), CPAN::Distribution::prereq_pm(),
-CPAN::Distribution::readme(), CPAN::Distribution::read_yaml(),
-CPAN::Distribution::test(), CPAN::Distribution::uptodate(),
-CPAN::Index::force_reload(), CPAN::Index::reload(), CPAN::InfoObj::dump(),
-CPAN::Module::as_glimpse(), CPAN::Module::as_string(),
-CPAN::Module::clean(), CPAN::Module::cpan_file(),
-CPAN::Module::cpan_version(), CPAN::Module::cvs_import(),
-CPAN::Module::description(), CPAN::Module::distribution(),
-CPAN::Module::dslip_status(), CPAN::Module::force($method,@args),
-CPAN::Module::get(), CPAN::Module::inst_file(),
-CPAN::Module::available_file(), CPAN::Module::inst_version(),
-CPAN::Module::available_version(), CPAN::Module::install(),
-CPAN::Module::look(), CPAN::Module::make(),
+CPAN::Distribution::readme(), CPAN::Distribution::reports(),
+CPAN::Distribution::read_yaml(), CPAN::Distribution::test(),
+CPAN::Distribution::uptodate(), CPAN::Index::force_reload(),
+CPAN::Index::reload(), CPAN::InfoObj::dump(), CPAN::Module::as_glimpse(),
+CPAN::Module::as_string(), CPAN::Module::clean(),
+CPAN::Module::cpan_file(), CPAN::Module::cpan_version(),
+CPAN::Module::cvs_import(), CPAN::Module::description(),
+CPAN::Module::distribution(), CPAN::Module::dslip_status(),
+CPAN::Module::force($method,@args), CPAN::Module::get(),
+CPAN::Module::inst_file(), CPAN::Module::available_file(),
+CPAN::Module::inst_version(), CPAN::Module::available_version(),
+CPAN::Module::install(), CPAN::Module::look(), CPAN::Module::make(),
 CPAN::Module::manpage_headline(), CPAN::Module::perldoc(),
-CPAN::Module::readme(), CPAN::Module::test(), CPAN::Module::uptodate(),
-CPAN::Module::userid()
+CPAN::Module::readme(), CPAN::Module::reports(), CPAN::Module::test(),
+CPAN::Module::uptodate(), CPAN::Module::userid()
 
 =item Cache Manager
 
@@ -14201,6 +14417,104 @@ ok, args, rv, function
 
 =back
 
+=head2 CPANPLUS::Config
+
+=over 4
+
+=item DESCRIPTION
+
+=item CONFIGURATION
+
+=back
+
+=over 4
+
+=item Section 'conf'
+
+hosts
+
+=back
+
+base
+
+buildflags
+
+cpantest
+
+cpantest_mx
+
+debug
+
+dist_type
+
+email
+
+extractdir
+
+fetchdir
+
+flush
+
+force
+
+lib
+
+makeflags
+
+makemakerflags
+
+md5
+
+no_update
+
+passive
+
+prefer_bin
+
+prefer_makefile
+
+prereqs
+
+shell
+
+show_startup_tip
+
+signature
+
+skiptest
+
+storable
+
+timeout
+
+verbose
+
+write_install_log
+
+editor
+
+make
+
+pager
+
+shell
+
+sudo
+
+perlwrapper
+
+=over 4
+
+=item BUG REPORTS
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=item SEE ALSO
+
+=back
+
 =head2 CPANPLUS::Configure
 
 =over 4
@@ -14364,6 +14678,77 @@ created(), installed(), uninstalled(), dist()
 =over 4
 
 =item $bool = $dist->uninstall
+
+=back
+
+=head2 CPANPLUS::Dist::Build
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item ACCESSORS
+
+parent(), status()
+
+=item STATUS ACCESSORS
+
+build_pl (), build (), test (), prepared (), distdir (), created (),
+installed (), uninstalled (), _create_args (), _install_args (), _mb_object
+()
+
+=back
+
+=over 4
+
+=item METHODS
+
+=over 4
+
+=item $bool = CPANPLUS::Dist::Build->format_available();
+
+=back
+
+=back
+
+=over 4
+
+=item $bool = $dist->init();
+
+=back
+
+=over 4
+
+=item $bool = $dist->prepare([perl => '/path/to/perl', buildflags =>
+'EXTRA=FLAGS', force => BOOL, verbose => BOOL])
+
+=back
+
+=over 4
+
+=item $dist->create([perl => '/path/to/perl', buildflags => 'EXTRA=FLAGS',
+prereq_target => TARGET, force => BOOL, verbose => BOOL, skiptest => BOOL])
+
+=back
+
+=over 4
+
+=item $dist->install([verbose => BOOL, perl => /path/to/perl])
+
+=back
+
+=over 4
+
+=item KNOWN ISSUES
+
+Module::Build can not be upgraded using its own API (#13169), Module::Build
+does not provide access to install history (#9793)
+
+=item AUTHOR
+
+=item COPYRIGHT
 
 =back
 
@@ -14559,7 +14944,8 @@ _conf, _id, _lib, _perl5lib
 =item $bool = $internals->_register_callback( name => CALLBACK_NAME, code
 => CODEREF );
 
-install_prerequisite, send_test_report, munge_test_report, edit_test_report
+install_prerequisite, send_test_report, munge_test_report,
+edit_test_report, proceed_on_test_failure
 
 =back
 
@@ -15310,8 +15696,12 @@ Non-directories in @INC
 
 =over 4
 
-=item $bool = $self->selfupdate( update =>
-"core|dependencies|enabled_features|features|all", latest => BOOL )
+=item %list = $self->list_modules_to_update( update =>
+"core|dependencies|enabled_features|features|all", [latest => BOOL] )
+
+List which modules C<selfupdate> would upgrade. You can update either 
+the core (CPANPLUS itself), the core dependencies, all features you have
+currently turned on, or all features available, or everything.
 
 =back
 
@@ -17201,15 +17591,17 @@ C<XSLoader::load('Your::Module', $Your::Module::VERSION)>
 =item PERL ENCODING API
 
 $octets  = encode(ENCODING, $string [, CHECK]), $string = decode(ENCODING,
-$octets [, CHECK]), [$length =] from_to($octets, FROM_ENC, TO_ENC [,
-CHECK]), $octets = encode_utf8($string);, $string = decode_utf8($octets [,
-CHECK]);
+$octets [, CHECK]), [$obj =] find_encoding(ENCODING), [$length =]
+from_to($octets, FROM_ENC, TO_ENC [, CHECK]), $octets =
+encode_utf8($string);, $string = decode_utf8($octets [, CHECK]);
 
 =over 4
 
 =item Listing available encodings
 
 =item Defining Aliases
+
+=item Finding IANA Character Set Registry names
 
 =back
 
@@ -17223,12 +17615,6 @@ Encode::FB_QUIET, I<CHECK> = Encode::FB_WARN, perlqq mode (I<CHECK> =
 Encode::FB_PERLQQ), HTML charref mode (I<CHECK> = Encode::FB_HTMLCREF), XML
 charref mode (I<CHECK> = Encode::FB_XMLCREF), The bitmask,
 Encode::LEAVE_SRC
-
-=over 4
-
-=item coderef for CHECK
-
-=back
 
 =item Defining Encodings
 
@@ -17342,7 +17728,7 @@ reference, e.g.:
 
 =item Other methods defined in Encode::Encodings
 
--E<gt>name, -E<gt>renew, -E<gt>renewed, -E<gt>perlio_ok(),
+-E<gt>name, -E<gt>mime_name, -E<gt>renew, -E<gt>renewed, -E<gt>perlio_ok(),
 -E<gt>needs_lines()
 
 =item Example: Encode::ROT13
@@ -17360,6 +17746,22 @@ reference, e.g.:
 =item SEE ALSO
 
 Scheme 1, Scheme 2, Other Schemes
+
+=back
+
+=head2 Encode::GSM0338 -- ESTI GSM 03.38 Encoding
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item NOTES
+
+=item BUGS
+
+=item SEE ALSO
 
 =back
 
@@ -17439,6 +17841,14 @@ guess_encoding($data, [, I<list of suspects>])
 
 =back
 
+=head2 Encode::MIME::Name, Encode::MIME::NAME -- internally used by Encode
+
+=over 4
+
+=item SEE ALSO
+
+=back
+
 =head2 Encode::PerlIO -- a detailed document on Encode and PerlIO
 
 =over 4
@@ -17482,7 +17892,11 @@ guess_encoding($data, [, I<list of suspects>])
 =item Encode::Byte -- Extended ASCII
 
 ISO-8859 and corresponding vendor mappings, KOI8 - De Facto Standard for
-the Cyrillic world, gsm0338 - Hentai Latin 1
+the Cyrillic world
+
+=item gsm0338 - Hentai Latin 1
+
+gsm0338 support before 2.19
 
 =item CJK: Chinese, Japanese, Korean (Multibyte)
 
@@ -17666,7 +18080,7 @@ Implementation Base Class
 
 =item Other methods defined in Encode::Encodings
 
--E<gt>name, -E<gt>renew, -E<gt>renewed, -E<gt>perlio_ok(),
+-E<gt>name, -E<gt>mime_name, -E<gt>renew, -E<gt>renewed, -E<gt>perlio_ok(),
 -E<gt>needs_lines()
 
 =item Example: Encode::ROT13
@@ -17684,6 +18098,23 @@ Implementation Base Class
 =item SEE ALSO
 
 Scheme 1, Scheme 2, Other Schemes
+
+=back
+
+=head2 Encode::lib::Encode::GSM0338, Encode::GSM0338 -- ESTI GSM 03.38
+Encoding
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item NOTES
+
+=item BUGS
+
+=item SEE ALSO
 
 =back
 
@@ -17736,6 +18167,15 @@ and 'Q' header encoding
 
 =back
 
+=head2 Encode::lib::Encode::MIME::Name, Encode::MIME::NAME -- internally
+used by Encode
+
+=over 4
+
+=item SEE ALSO
+
+=back
+
 =head2 Encode::lib::Encode::PerlIO, Encode::PerlIO -- a detailed document
 on Encode and PerlIO
 
@@ -17781,7 +18221,11 @@ supported by Encode
 =item Encode::Byte -- Extended ASCII
 
 ISO-8859 and corresponding vendor mappings, KOI8 - De Facto Standard for
-the Cyrillic world, gsm0338 - Hentai Latin 1
+the Cyrillic world
+
+=item gsm0338 - Hentai Latin 1
+
+gsm0338 support before 2.19
 
 =item CJK: Chinese, Japanese, Korean (Multibyte)
 
@@ -17901,6 +18345,8 @@ non-ascii or non-utf8
 =item PerlIO layers for C<STD(IN|OUT)>
 
 =item Implicit upgrading for byte strings
+
+=item Side effects
 
 =item Side effects
 
@@ -19107,6 +19553,8 @@ max_exec_len
 
 os_flavor
 
+cflags
+
 =head2 ExtUtils::MM_Win95 - method to customize MakeMaker for Win9X
 
 =over 4
@@ -19834,17 +20282,41 @@ B<~>, B<~user>, B<.>, B<*>, B<?>, B<\>,  B<[]>,  B<{,}>,  B<()>
 
 =back
 
-=head2 File::Path - create or remove directory trees
+=head2 File::Path - Create or remove directory trees
 
 =over 4
+
+=item VERSION
 
 =item SYNOPSIS
 
 =item DESCRIPTION
 
+=over 4
+
+=item FUNCTIONS
+
+mode, verbose, error, verbose, skip_others, keep_root, result, error
+
+=item TRADITIONAL INTERFACE
+
+=item ERROR HANDLING
+
+=item NOTES
+
+=back
+
 =item DIAGNOSTICS
 
+=item SEE ALSO
+
+=item BUGS
+
 =item AUTHORS
+
+=item COPYRIGHT
+
+=item LICENSE
 
 =back
 
@@ -20575,8 +21047,6 @@ with switch clustering
 
 =over 4
 
-=item Field hashes
-
 =item Restricted hashes
 
 B<lock_keys>, B<unlock_keys>
@@ -20621,37 +21091,50 @@ unlock_hashref_recurse, hash_ref_unlocked, legal_ref_keys, hidden_ref_keys
 
 =back
 
-=head2 Hash::Util::FieldHash - Associate references with data
+=head2 Hash::Util::FieldHash - Support for Inside-Out Classes
 
 =over 4
 
 =item SYNOPSIS
 
-=item Functions
+=item FUNCTIONS
 
-fieldhash, fieldhashes
+id, id_2obj, register, idhash, idhashes, fieldhash, fieldhashes
 
-=item Description
+=item DESCRIPTION
 
 =over 4
 
-=item Features
+=item The Inside-out Technique
 
-Key exchange, Thread support, Garbage collection
+=item Problems of Inside-out
 
-=item Rationale
+=item Solutions
 
-Stringification, Thread Dependency, Garbage Collection
+=item More Problems
 
-=item How to use
+=item The Generic Object
 
-=item Examples
+=item How to use Field Hashes
 
 =item Garbage-Collected Hashes
 
 =back
 
-=item Guts
+=item EXAMPLES
+
+C<init()>, C<first()>, C<last()>, C<name()>, C<Name_hash>, C<Name_id>,
+C<Name_idhash>, C<Name_id_reg>, C<Name_idhash_reg>, C<Name_fieldhash>
+
+=over 4
+
+=item Example 1
+
+=item Example 2
+
+=back
+
+=item GUTS
 
 =over 4
 
@@ -20672,37 +21155,50 @@ Stringification, Thread Dependency, Garbage Collection
 =back
 
 =head2 Hash::Util::FieldHash::lib::Hash::Util::FieldHash,
-Hash::Util::FieldHash - Associate references with data
+Hash::Util::FieldHash - Support for Inside-Out Classes
 
 =over 4
 
 =item SYNOPSIS
 
-=item Functions
+=item FUNCTIONS
 
-fieldhash, fieldhashes
+id, id_2obj, register, idhash, idhashes, fieldhash, fieldhashes
 
-=item Description
+=item DESCRIPTION
 
 =over 4
 
-=item Features
+=item The Inside-out Technique
 
-Key exchange, Thread support, Garbage collection
+=item Problems of Inside-out
 
-=item Rationale
+=item Solutions
 
-Stringification, Thread Dependency, Garbage Collection
+=item More Problems
 
-=item How to use
+=item The Generic Object
 
-=item Examples
+=item How to use Field Hashes
 
 =item Garbage-Collected Hashes
 
 =back
 
-=item Guts
+=item EXAMPLES
+
+C<init()>, C<first()>, C<last()>, C<name()>, C<Name_hash>, C<Name_id>,
+C<Name_idhash>, C<Name_id_reg>, C<Name_idhash_reg>, C<Name_fieldhash>
+
+=over 4
+
+=item Example 1
+
+=item Example 2
+
+=back
+
+=item GUTS
 
 =over 4
 
@@ -20732,8 +21228,6 @@ general-utility hash subroutines
 =item DESCRIPTION
 
 =over 4
-
-=item Field hashes
 
 =item Restricted hashes
 
@@ -21041,201 +21535,6 @@ Sichuan Yi, {yi} : Yiddish, {yo} : Yoruba, [{ypk} : Yupik languages], {znd}
 =back
 
 =head2 IO::Compress::Base - Base Class for IO::Compress modules 
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item MODIFICATION HISTORY
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
-=head2 IO::Compress::Base::lib::File::GlobMapper, File::GlobMapper - Extend
-File Glob to Allow Input and Output Files
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-This code is a work in progress, There are known bugs, The interface
-defined here is tentative, There are portability issues, Do not use in
-production code, Consider yourself warned!
-
-=over 4
-
-=item Behind The Scenes
-
-=item Limitations
-
-=item Input File Glob
-
-B<~>, B<~user>, B<.>, B<*>, B<?>, B<\>,  B<[]>,  B<{,}>,  B<()>
-
-=item Output File Glob
-
-"*", #1
-
-=item Returned Data
-
-=back
-
-=item EXAMPLES
-
-=over 4
-
-=item A Rename script
-
-=item A few example globmaps
-
-=back
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
-=head2 IO::Compress::Base::lib::IO::Compress::Base, IO::Compress::Base -
-Base Class for IO::Compress modules 
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item MODIFICATION HISTORY
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
-=head2 IO::Compress::Base::lib::IO::Uncompress::AnyUncompress,
-IO::Uncompress::AnyUncompress - Uncompress gzip, zip, bzip2 or lzop
-file/buffer
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-RFC 1950, RFC 1951 (optionally), gzip (RFC 1952), zip, bzip2, lzop, lzf
-
-=item Functional Interface
-
-=over 4
-
-=item anyuncompress $input => $output [, OPTS]
-
-A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, An Array
-Reference, An Output FileGlob
-
-=item Notes
-
-=item Optional Parameters
-
-C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
-C<< MultiStream => 0|1 >>, C<< TrailingData => $scalar >>
-
-=item Examples
-
-=back
-
-=item OO Interface
-
-=over 4
-
-=item Constructor
-
-A filename, A filehandle, A scalar reference
-
-=item Constructor Options
-
-C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
->>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
-$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>, C<< RawInflate => 0|1
->>
-
-=item Examples
-
-=back
-
-=item Methods 
-
-=over 4
-
-=item read
-
-=item read
-
-=item getline
-
-=item getc
-
-=item ungetc
-
-=item getHeaderInfo
-
-=item tell
-
-=item eof
-
-=item seek
-
-=item binmode
-
-=item opened
-
-=item autoflush
-
-=item input_line_number
-
-=item fileno
-
-=item close
-
-=item nextStream
-
-=item trailingData
-
-=back
-
-=item Importing 
-
-:all
-
-=item EXAMPLES
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item MODIFICATION HISTORY
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
-=head2 IO::Compress::Base::lib::IO::Uncompress::Base, IO::Uncompress::Base
-- Base Class for IO::Uncompress modules 
 
 =over 4
 
@@ -21646,956 +21945,6 @@ Minimal => 1|0 >>, C<< BlockSize100K => number >>, C<< WorkFactor => number
 =item Importing 
 
 :all, :constants, :flush, :level, :strategy, :zip_method
-
-=item EXAMPLES
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item MODIFICATION HISTORY
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
-=head2 IO::Compress::Zlib::IO::Compress::Deflate, IO::Compress::Deflate -
-Write RFC 1950 files/buffers
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item Functional Interface
-
-=over 4
-
-=item deflate $input => $output [, OPTS]
-
-A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, An Array
-Reference, An Output FileGlob
-
-=item Notes
-
-=item Optional Parameters
-
-C<< AutoClose => 0|1 >>, C<< BinModeIn => 0|1 >>, C<< Append => 0|1 >>
-
-=item Examples
-
-=back
-
-=item OO Interface
-
-=over 4
-
-=item Constructor
-
-A filename, A filehandle, A scalar reference
-
-=item Constructor Options
-
-C<< AutoClose => 0|1 >>, C<< Append => 0|1 >>, A Buffer, A Filename, A
-Filehandle, C<< Merge => 0|1 >>, -Level, -Strategy, C<< Strict => 0|1 >>
-
-=item Examples
-
-=back
-
-=item Methods 
-
-=over 4
-
-=item print
-
-=item printf
-
-=item syswrite
-
-=item write
-
-=item flush
-
-=item tell
-
-=item eof
-
-=item seek
-
-=item binmode
-
-=item opened
-
-=item autoflush
-
-=item input_line_number
-
-=item fileno
-
-=item close
-
-=item newStream([OPTS])
-
-=item deflateParams
-
-=back
-
-=item Importing 
-
-:all, :constants, :flush, :level, :strategy
-
-=item EXAMPLES
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item MODIFICATION HISTORY
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
-=head2 IO::Compress::Zlib::IO::Compress::Gzip, IO::Compress::Gzip - Write
-RFC 1952 files/buffers
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item Functional Interface
-
-=over 4
-
-=item gzip $input => $output [, OPTS]
-
-A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, An Array
-Reference, An Output FileGlob
-
-=item Notes
-
-=item Optional Parameters
-
-C<< AutoClose => 0|1 >>, C<< BinModeIn => 0|1 >>, C<< Append => 0|1 >>
-
-=item Examples
-
-=back
-
-=item OO Interface
-
-=over 4
-
-=item Constructor
-
-A filename, A filehandle, A scalar reference
-
-=item Constructor Options
-
-C<< AutoClose => 0|1 >>, C<< Append => 0|1 >>, A Buffer, A Filename, A
-Filehandle, C<< Merge => 0|1 >>, -Level, -Strategy, C<< Minimal => 0|1 >>,
-C<< Comment => $comment >>, C<< Name => $string >>, C<< Time => $number >>,
-C<< TextFlag => 0|1 >>, C<< HeaderCRC => 0|1 >>, C<< OS_Code => $value >>,
-C<< ExtraField => $data >>, C<< ExtraFlags => $value >>, C<< Strict => 0|1
->>
-
-=item Examples
-
-=back
-
-=item Methods 
-
-=over 4
-
-=item print
-
-=item printf
-
-=item syswrite
-
-=item write
-
-=item flush
-
-=item tell
-
-=item eof
-
-=item seek
-
-=item binmode
-
-=item opened
-
-=item autoflush
-
-=item input_line_number
-
-=item fileno
-
-=item close
-
-=item newStream([OPTS])
-
-=item deflateParams
-
-=back
-
-=item Importing 
-
-:all, :constants, :flush, :level, :strategy
-
-=item EXAMPLES
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item MODIFICATION HISTORY
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
-=head2 IO::Compress::Zlib::IO::Compress::RawDeflate,
-IO::Compress::RawDeflate - Write RFC 1951 files/buffers
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item Functional Interface
-
-=over 4
-
-=item rawdeflate $input => $output [, OPTS]
-
-A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, An Array
-Reference, An Output FileGlob
-
-=item Notes
-
-=item Optional Parameters
-
-C<< AutoClose => 0|1 >>, C<< BinModeIn => 0|1 >>, C<< Append => 0|1 >>
-
-=item Examples
-
-=back
-
-=item OO Interface
-
-=over 4
-
-=item Constructor
-
-A filename, A filehandle, A scalar reference
-
-=item Constructor Options
-
-C<< AutoClose => 0|1 >>, C<< Append => 0|1 >>, A Buffer, A Filename, A
-Filehandle, C<< Merge => 0|1 >>, -Level, -Strategy, C<< Strict => 0|1 >>
-
-=item Examples
-
-=back
-
-=item Methods 
-
-=over 4
-
-=item print
-
-=item printf
-
-=item syswrite
-
-=item write
-
-=item flush
-
-=item tell
-
-=item eof
-
-=item seek
-
-=item binmode
-
-=item opened
-
-=item autoflush
-
-=item input_line_number
-
-=item fileno
-
-=item close
-
-=item newStream([OPTS])
-
-=item deflateParams
-
-=back
-
-=item Importing 
-
-:all, :constants, :flush, :level, :strategy
-
-=item EXAMPLES
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item MODIFICATION HISTORY
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
-=head2 IO::Compress::Zlib::IO::Compress::Zip, IO::Compress::Zip - Write zip
-files/buffers
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item Functional Interface
-
-=over 4
-
-=item zip $input => $output [, OPTS]
-
-A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, An Array
-Reference, An Output FileGlob
-
-=item Notes
-
-=item Optional Parameters
-
-C<< AutoClose => 0|1 >>, C<< BinModeIn => 0|1 >>, C<< Append => 0|1 >>
-
-=item Examples
-
-=back
-
-=item OO Interface
-
-=over 4
-
-=item Constructor
-
-A filename, A filehandle, A scalar reference
-
-=item Constructor Options
-
-C<< AutoClose => 0|1 >>, C<< Append => 0|1 >>, A Buffer, A Filename, A
-Filehandle, C<< Name => $string >>, C<< Time => $number >>, C<< ExtAttr =>
-$attr >>, C<< exTime => [$atime, $mtime, $ctime] >>, C<< Comment =>
-$comment >>, C<< ZipComment => $comment >>, C<< Method => $method >>, C<<
-Stream => 0|1 >>, C<< Zip64 => 0|1 >>, C<< TextFlag => 0|1 >>, C<<
-ExtraFieldLocal => $data >> =item C<< ExtraFieldCentral => $data >>, C<<
-Minimal => 1|0 >>, C<< BlockSize100K => number >>, C<< WorkFactor => number
->>, -Level, -Strategy, C<< Strict => 0|1 >>
-
-=item Examples
-
-=back
-
-=item Methods 
-
-=over 4
-
-=item print
-
-=item printf
-
-=item syswrite
-
-=item write
-
-=item flush
-
-=item tell
-
-=item eof
-
-=item seek
-
-=item binmode
-
-=item opened
-
-=item autoflush
-
-=item input_line_number
-
-=item fileno
-
-=item close
-
-=item newStream([OPTS])
-
-=item deflateParams
-
-=back
-
-=item Importing 
-
-:all, :constants, :flush, :level, :strategy, :zip_method
-
-=item EXAMPLES
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item MODIFICATION HISTORY
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
-=head2 IO::Compress::Zlib::IO::Uncompress::AnyInflate,
-IO::Uncompress::AnyInflate - Uncompress zlib-based (zip, gzip) file/buffer
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-RFC 1950, RFC 1951 (optionally), gzip (RFC 1952), zip
-
-=item Functional Interface
-
-=over 4
-
-=item anyinflate $input => $output [, OPTS]
-
-A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, An Array
-Reference, An Output FileGlob
-
-=item Notes
-
-=item Optional Parameters
-
-C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
-C<< MultiStream => 0|1 >>, C<< TrailingData => $scalar >>
-
-=item Examples
-
-=back
-
-=item OO Interface
-
-=over 4
-
-=item Constructor
-
-A filename, A filehandle, A scalar reference
-
-=item Constructor Options
-
-C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
->>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
-$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>, C<< RawInflate => 0|1
->>, C<< ParseExtra => 0|1 >> If the gzip FEXTRA header field is present and
-this option is set, it will force the module to check that it conforms to
-the sub-field structure as defined in RFC 1952
-
-=item Examples
-
-=back
-
-=item Methods 
-
-=over 4
-
-=item read
-
-=item read
-
-=item getline
-
-=item getc
-
-=item ungetc
-
-=item inflateSync
-
-=item getHeaderInfo
-
-=item tell
-
-=item eof
-
-=item seek
-
-=item binmode
-
-=item opened
-
-=item autoflush
-
-=item input_line_number
-
-=item fileno
-
-=item close
-
-=item nextStream
-
-=item trailingData
-
-=back
-
-=item Importing 
-
-:all
-
-=item EXAMPLES
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item MODIFICATION HISTORY
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
-=head2 IO::Compress::Zlib::IO::Uncompress::Gunzip, IO::Uncompress::Gunzip -
-Read RFC 1952 files/buffers
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item Functional Interface
-
-=over 4
-
-=item gunzip $input => $output [, OPTS]
-
-A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, An Array
-Reference, An Output FileGlob
-
-=item Notes
-
-=item Optional Parameters
-
-C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
-C<< MultiStream => 0|1 >>, C<< TrailingData => $scalar >>
-
-=item Examples
-
-=back
-
-=item OO Interface
-
-=over 4
-
-=item Constructor
-
-A filename, A filehandle, A scalar reference
-
-=item Constructor Options
-
-C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
->>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
-$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>, C<< ParseExtra => 0|1
->> If the gzip FEXTRA header field is present and this option is set, it
-will force the module to check that it conforms to the sub-field structure
-as defined in RFC 1952
-
-=item Examples
-
-=back
-
-=item Methods 
-
-=over 4
-
-=item read
-
-=item read
-
-=item getline
-
-=item getc
-
-=item ungetc
-
-=item inflateSync
-
-=item getHeaderInfo
-
-Name, Comment
-
-=item tell
-
-=item eof
-
-=item seek
-
-=item binmode
-
-=item opened
-
-=item autoflush
-
-=item input_line_number
-
-=item fileno
-
-=item close
-
-=item nextStream
-
-=item trailingData
-
-=back
-
-=item Importing 
-
-:all
-
-=item EXAMPLES
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item MODIFICATION HISTORY
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
-=head2 IO::Compress::Zlib::IO::Uncompress::Inflate, IO::Uncompress::Inflate
-- Read RFC 1950 files/buffers
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item Functional Interface
-
-=over 4
-
-=item inflate $input => $output [, OPTS]
-
-A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, An Array
-Reference, An Output FileGlob
-
-=item Notes
-
-=item Optional Parameters
-
-C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
-C<< MultiStream => 0|1 >>, C<< TrailingData => $scalar >>
-
-=item Examples
-
-=back
-
-=item OO Interface
-
-=over 4
-
-=item Constructor
-
-A filename, A filehandle, A scalar reference
-
-=item Constructor Options
-
-C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
->>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
-$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>
-
-=item Examples
-
-=back
-
-=item Methods 
-
-=over 4
-
-=item read
-
-=item read
-
-=item getline
-
-=item getc
-
-=item ungetc
-
-=item inflateSync
-
-=item getHeaderInfo
-
-=item tell
-
-=item eof
-
-=item seek
-
-=item binmode
-
-=item opened
-
-=item autoflush
-
-=item input_line_number
-
-=item fileno
-
-=item close
-
-=item nextStream
-
-=item trailingData
-
-=back
-
-=item Importing 
-
-:all
-
-=item EXAMPLES
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item MODIFICATION HISTORY
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
-=head2 IO::Compress::Zlib::IO::Uncompress::RawInflate,
-IO::Uncompress::RawInflate - Read RFC 1951 files/buffers
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item Functional Interface
-
-=over 4
-
-=item rawinflate $input => $output [, OPTS]
-
-A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, An Array
-Reference, An Output FileGlob
-
-=item Notes
-
-=item Optional Parameters
-
-C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
-C<< MultiStream => 0|1 >>, C<< TrailingData => $scalar >>
-
-=item Examples
-
-=back
-
-=item OO Interface
-
-=over 4
-
-=item Constructor
-
-A filename, A filehandle, A scalar reference
-
-=item Constructor Options
-
-C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
->>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
-$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>
-
-=item Examples
-
-=back
-
-=item Methods 
-
-=over 4
-
-=item read
-
-=item read
-
-=item getline
-
-=item getc
-
-=item ungetc
-
-=item inflateSync
-
-=item getHeaderInfo
-
-=item tell
-
-=item eof
-
-=item seek
-
-=item binmode
-
-=item opened
-
-=item autoflush
-
-=item input_line_number
-
-=item fileno
-
-=item close
-
-=item nextStream
-
-=item trailingData
-
-=back
-
-=item Importing 
-
-:all
-
-=item EXAMPLES
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item MODIFICATION HISTORY
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
-=head2 IO::Compress::Zlib::IO::Uncompress::Unzip, IO::Uncompress::Unzip -
-Read zip files/buffers
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item Functional Interface
-
-=over 4
-
-=item unzip $input => $output [, OPTS]
-
-A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, An Array
-Reference, An Output FileGlob
-
-=item Notes
-
-=item Optional Parameters
-
-C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
-C<< MultiStream => 0|1 >>, C<< TrailingData => $scalar >>
-
-=item Examples
-
-=back
-
-=item OO Interface
-
-=over 4
-
-=item Constructor
-
-A filename, A filehandle, A scalar reference
-
-=item Constructor Options
-
-C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
->>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
-$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>
-
-=item Examples
-
-=back
-
-=item Methods 
-
-=over 4
-
-=item read
-
-=item read
-
-=item getline
-
-=item getc
-
-=item ungetc
-
-=item inflateSync
-
-=item getHeaderInfo
-
-=item tell
-
-=item eof
-
-=item seek
-
-=item binmode
-
-=item opened
-
-=item autoflush
-
-=item input_line_number
-
-=item fileno
-
-=item close
-
-=item nextStream
-
-=item trailingData
-
-=back
-
-=item Importing 
-
-:all
 
 =item EXAMPLES
 
@@ -23802,6 +23151,1151 @@ hostpath(), peerpath()
 
 =back
 
+=head2 IO_Compress_Base::lib::File::GlobMapper, File::GlobMapper - Extend
+File Glob to Allow Input and Output Files
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+This code is a work in progress, There are known bugs, The interface
+defined here is tentative, There are portability issues, Do not use in
+production code, Consider yourself warned!
+
+=over 4
+
+=item Behind The Scenes
+
+=item Limitations
+
+=item Input File Glob
+
+B<~>, B<~user>, B<.>, B<*>, B<?>, B<\>,  B<[]>,  B<{,}>,  B<()>
+
+=item Output File Glob
+
+"*", #1
+
+=item Returned Data
+
+=back
+
+=item EXAMPLES
+
+=over 4
+
+=item A Rename script
+
+=item A few example globmaps
+
+=back
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 IO_Compress_Base::lib::IO::Compress::Base, IO::Compress::Base - Base
+Class for IO::Compress modules 
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 IO_Compress_Base::lib::IO::Uncompress::AnyUncompress,
+IO::Uncompress::AnyUncompress - Uncompress gzip, zip, bzip2 or lzop
+file/buffer
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+RFC 1950, RFC 1951 (optionally), gzip (RFC 1952), zip, bzip2, lzop, lzf
+
+=item Functional Interface
+
+=over 4
+
+=item anyuncompress $input => $output [, OPTS]
+
+A filename, A filehandle, A scalar reference, An array reference, An Input
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
+
+=item Notes
+
+=item Optional Parameters
+
+C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
+C<< MultiStream => 0|1 >>, C<< TrailingData => $scalar >>
+
+=item Examples
+
+=back
+
+=item OO Interface
+
+=over 4
+
+=item Constructor
+
+A filename, A filehandle, A scalar reference
+
+=item Constructor Options
+
+C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
+>>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
+$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>, C<< RawInflate => 0|1
+>>
+
+=item Examples
+
+=back
+
+=item Methods 
+
+=over 4
+
+=item read
+
+=item read
+
+=item getline
+
+=item getc
+
+=item ungetc
+
+=item getHeaderInfo
+
+=item tell
+
+=item eof
+
+=item seek
+
+=item binmode
+
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
+=item fileno
+
+=item close
+
+=item nextStream
+
+=item trailingData
+
+=back
+
+=item Importing 
+
+:all
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 IO_Compress_Base::lib::IO::Uncompress::Base, IO::Uncompress::Base -
+Base Class for IO::Uncompress modules 
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 IO_Compress_Zlib::IO::Compress::Deflate, IO::Compress::Deflate -
+Write RFC 1950 files/buffers
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item Functional Interface
+
+=over 4
+
+=item deflate $input => $output [, OPTS]
+
+A filename, A filehandle, A scalar reference, An array reference, An Input
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
+
+=item Notes
+
+=item Optional Parameters
+
+C<< AutoClose => 0|1 >>, C<< BinModeIn => 0|1 >>, C<< Append => 0|1 >>
+
+=item Examples
+
+=back
+
+=item OO Interface
+
+=over 4
+
+=item Constructor
+
+A filename, A filehandle, A scalar reference
+
+=item Constructor Options
+
+C<< AutoClose => 0|1 >>, C<< Append => 0|1 >>, A Buffer, A Filename, A
+Filehandle, C<< Merge => 0|1 >>, -Level, -Strategy, C<< Strict => 0|1 >>
+
+=item Examples
+
+=back
+
+=item Methods 
+
+=over 4
+
+=item print
+
+=item printf
+
+=item syswrite
+
+=item write
+
+=item flush
+
+=item tell
+
+=item eof
+
+=item seek
+
+=item binmode
+
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
+=item fileno
+
+=item close
+
+=item newStream([OPTS])
+
+=item deflateParams
+
+=back
+
+=item Importing 
+
+:all, :constants, :flush, :level, :strategy
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 IO_Compress_Zlib::IO::Compress::Gzip, IO::Compress::Gzip - Write RFC
+1952 files/buffers
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item Functional Interface
+
+=over 4
+
+=item gzip $input => $output [, OPTS]
+
+A filename, A filehandle, A scalar reference, An array reference, An Input
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
+
+=item Notes
+
+=item Optional Parameters
+
+C<< AutoClose => 0|1 >>, C<< BinModeIn => 0|1 >>, C<< Append => 0|1 >>
+
+=item Examples
+
+=back
+
+=item OO Interface
+
+=over 4
+
+=item Constructor
+
+A filename, A filehandle, A scalar reference
+
+=item Constructor Options
+
+C<< AutoClose => 0|1 >>, C<< Append => 0|1 >>, A Buffer, A Filename, A
+Filehandle, C<< Merge => 0|1 >>, -Level, -Strategy, C<< Minimal => 0|1 >>,
+C<< Comment => $comment >>, C<< Name => $string >>, C<< Time => $number >>,
+C<< TextFlag => 0|1 >>, C<< HeaderCRC => 0|1 >>, C<< OS_Code => $value >>,
+C<< ExtraField => $data >>, C<< ExtraFlags => $value >>, C<< Strict => 0|1
+>>
+
+=item Examples
+
+=back
+
+=item Methods 
+
+=over 4
+
+=item print
+
+=item printf
+
+=item syswrite
+
+=item write
+
+=item flush
+
+=item tell
+
+=item eof
+
+=item seek
+
+=item binmode
+
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
+=item fileno
+
+=item close
+
+=item newStream([OPTS])
+
+=item deflateParams
+
+=back
+
+=item Importing 
+
+:all, :constants, :flush, :level, :strategy
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 IO_Compress_Zlib::IO::Compress::RawDeflate, IO::Compress::RawDeflate
+- Write RFC 1951 files/buffers
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item Functional Interface
+
+=over 4
+
+=item rawdeflate $input => $output [, OPTS]
+
+A filename, A filehandle, A scalar reference, An array reference, An Input
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
+
+=item Notes
+
+=item Optional Parameters
+
+C<< AutoClose => 0|1 >>, C<< BinModeIn => 0|1 >>, C<< Append => 0|1 >>
+
+=item Examples
+
+=back
+
+=item OO Interface
+
+=over 4
+
+=item Constructor
+
+A filename, A filehandle, A scalar reference
+
+=item Constructor Options
+
+C<< AutoClose => 0|1 >>, C<< Append => 0|1 >>, A Buffer, A Filename, A
+Filehandle, C<< Merge => 0|1 >>, -Level, -Strategy, C<< Strict => 0|1 >>
+
+=item Examples
+
+=back
+
+=item Methods 
+
+=over 4
+
+=item print
+
+=item printf
+
+=item syswrite
+
+=item write
+
+=item flush
+
+=item tell
+
+=item eof
+
+=item seek
+
+=item binmode
+
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
+=item fileno
+
+=item close
+
+=item newStream([OPTS])
+
+=item deflateParams
+
+=back
+
+=item Importing 
+
+:all, :constants, :flush, :level, :strategy
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 IO_Compress_Zlib::IO::Compress::Zip, IO::Compress::Zip - Write zip
+files/buffers
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item Functional Interface
+
+=over 4
+
+=item zip $input => $output [, OPTS]
+
+A filename, A filehandle, A scalar reference, An array reference, An Input
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
+
+=item Notes
+
+=item Optional Parameters
+
+C<< AutoClose => 0|1 >>, C<< BinModeIn => 0|1 >>, C<< Append => 0|1 >>
+
+=item Examples
+
+=back
+
+=item OO Interface
+
+=over 4
+
+=item Constructor
+
+A filename, A filehandle, A scalar reference
+
+=item Constructor Options
+
+C<< AutoClose => 0|1 >>, C<< Append => 0|1 >>, A Buffer, A Filename, A
+Filehandle, C<< Name => $string >>, C<< Time => $number >>, C<< ExtAttr =>
+$attr >>, C<< exTime => [$atime, $mtime, $ctime] >>, C<< Comment =>
+$comment >>, C<< ZipComment => $comment >>, C<< Method => $method >>, C<<
+Stream => 0|1 >>, C<< Zip64 => 0|1 >>, C<< TextFlag => 0|1 >>, C<<
+ExtraFieldLocal => $data >> =item C<< ExtraFieldCentral => $data >>, C<<
+Minimal => 1|0 >>, C<< BlockSize100K => number >>, C<< WorkFactor => number
+>>, -Level, -Strategy, C<< Strict => 0|1 >>
+
+=item Examples
+
+=back
+
+=item Methods 
+
+=over 4
+
+=item print
+
+=item printf
+
+=item syswrite
+
+=item write
+
+=item flush
+
+=item tell
+
+=item eof
+
+=item seek
+
+=item binmode
+
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
+=item fileno
+
+=item close
+
+=item newStream([OPTS])
+
+=item deflateParams
+
+=back
+
+=item Importing 
+
+:all, :constants, :flush, :level, :strategy, :zip_method
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 IO_Compress_Zlib::IO::Uncompress::AnyInflate,
+IO::Uncompress::AnyInflate - Uncompress zlib-based (zip, gzip) file/buffer
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+RFC 1950, RFC 1951 (optionally), gzip (RFC 1952), zip
+
+=item Functional Interface
+
+=over 4
+
+=item anyinflate $input => $output [, OPTS]
+
+A filename, A filehandle, A scalar reference, An array reference, An Input
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
+
+=item Notes
+
+=item Optional Parameters
+
+C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
+C<< MultiStream => 0|1 >>, C<< TrailingData => $scalar >>
+
+=item Examples
+
+=back
+
+=item OO Interface
+
+=over 4
+
+=item Constructor
+
+A filename, A filehandle, A scalar reference
+
+=item Constructor Options
+
+C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
+>>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
+$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>, C<< RawInflate => 0|1
+>>, C<< ParseExtra => 0|1 >> If the gzip FEXTRA header field is present and
+this option is set, it will force the module to check that it conforms to
+the sub-field structure as defined in RFC 1952
+
+=item Examples
+
+=back
+
+=item Methods 
+
+=over 4
+
+=item read
+
+=item read
+
+=item getline
+
+=item getc
+
+=item ungetc
+
+=item inflateSync
+
+=item getHeaderInfo
+
+=item tell
+
+=item eof
+
+=item seek
+
+=item binmode
+
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
+=item fileno
+
+=item close
+
+=item nextStream
+
+=item trailingData
+
+=back
+
+=item Importing 
+
+:all
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 IO_Compress_Zlib::IO::Uncompress::Gunzip, IO::Uncompress::Gunzip -
+Read RFC 1952 files/buffers
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item Functional Interface
+
+=over 4
+
+=item gunzip $input => $output [, OPTS]
+
+A filename, A filehandle, A scalar reference, An array reference, An Input
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
+
+=item Notes
+
+=item Optional Parameters
+
+C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
+C<< MultiStream => 0|1 >>, C<< TrailingData => $scalar >>
+
+=item Examples
+
+=back
+
+=item OO Interface
+
+=over 4
+
+=item Constructor
+
+A filename, A filehandle, A scalar reference
+
+=item Constructor Options
+
+C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
+>>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
+$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>, C<< ParseExtra => 0|1
+>> If the gzip FEXTRA header field is present and this option is set, it
+will force the module to check that it conforms to the sub-field structure
+as defined in RFC 1952
+
+=item Examples
+
+=back
+
+=item Methods 
+
+=over 4
+
+=item read
+
+=item read
+
+=item getline
+
+=item getc
+
+=item ungetc
+
+=item inflateSync
+
+=item getHeaderInfo
+
+Name, Comment
+
+=item tell
+
+=item eof
+
+=item seek
+
+=item binmode
+
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
+=item fileno
+
+=item close
+
+=item nextStream
+
+=item trailingData
+
+=back
+
+=item Importing 
+
+:all
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 IO_Compress_Zlib::IO::Uncompress::Inflate, IO::Uncompress::Inflate -
+Read RFC 1950 files/buffers
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item Functional Interface
+
+=over 4
+
+=item inflate $input => $output [, OPTS]
+
+A filename, A filehandle, A scalar reference, An array reference, An Input
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
+
+=item Notes
+
+=item Optional Parameters
+
+C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
+C<< MultiStream => 0|1 >>, C<< TrailingData => $scalar >>
+
+=item Examples
+
+=back
+
+=item OO Interface
+
+=over 4
+
+=item Constructor
+
+A filename, A filehandle, A scalar reference
+
+=item Constructor Options
+
+C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
+>>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
+$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>
+
+=item Examples
+
+=back
+
+=item Methods 
+
+=over 4
+
+=item read
+
+=item read
+
+=item getline
+
+=item getc
+
+=item ungetc
+
+=item inflateSync
+
+=item getHeaderInfo
+
+=item tell
+
+=item eof
+
+=item seek
+
+=item binmode
+
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
+=item fileno
+
+=item close
+
+=item nextStream
+
+=item trailingData
+
+=back
+
+=item Importing 
+
+:all
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 IO_Compress_Zlib::IO::Uncompress::RawInflate,
+IO::Uncompress::RawInflate - Read RFC 1951 files/buffers
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item Functional Interface
+
+=over 4
+
+=item rawinflate $input => $output [, OPTS]
+
+A filename, A filehandle, A scalar reference, An array reference, An Input
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
+
+=item Notes
+
+=item Optional Parameters
+
+C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
+C<< MultiStream => 0|1 >>, C<< TrailingData => $scalar >>
+
+=item Examples
+
+=back
+
+=item OO Interface
+
+=over 4
+
+=item Constructor
+
+A filename, A filehandle, A scalar reference
+
+=item Constructor Options
+
+C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
+>>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
+$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>
+
+=item Examples
+
+=back
+
+=item Methods 
+
+=over 4
+
+=item read
+
+=item read
+
+=item getline
+
+=item getc
+
+=item ungetc
+
+=item inflateSync
+
+=item getHeaderInfo
+
+=item tell
+
+=item eof
+
+=item seek
+
+=item binmode
+
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
+=item fileno
+
+=item close
+
+=item nextStream
+
+=item trailingData
+
+=back
+
+=item Importing 
+
+:all
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 IO_Compress_Zlib::IO::Uncompress::Unzip, IO::Uncompress::Unzip -
+Read zip files/buffers
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item Functional Interface
+
+=over 4
+
+=item unzip $input => $output [, OPTS]
+
+A filename, A filehandle, A scalar reference, An array reference, An Input
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
+
+=item Notes
+
+=item Optional Parameters
+
+C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
+C<< MultiStream => 0|1 >>, C<< TrailingData => $scalar >>
+
+=item Examples
+
+=back
+
+=item OO Interface
+
+=over 4
+
+=item Constructor
+
+A filename, A filehandle, A scalar reference
+
+=item Constructor Options
+
+C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
+>>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
+$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>
+
+=item Examples
+
+=back
+
+=item Methods 
+
+=over 4
+
+=item read
+
+=item read
+
+=item getline
+
+=item getc
+
+=item ungetc
+
+=item inflateSync
+
+=item getHeaderInfo
+
+=item tell
+
+=item eof
+
+=item seek
+
+=item binmode
+
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
+=item fileno
+
+=item close
+
+=item nextStream
+
+=item trailingData
+
+=back
+
+=item Importing 
+
+:all
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
 =head2 IPC::Msg - SysV Msg IPC object class
 
 =over 4
@@ -24767,6 +25261,14 @@ ffround ( +$scale ), ffround ( -$scale ), ffround ( 0 ), fround  ( +$scale
 
 =item precision()
 
+=item bexp()
+
+=item bnok()
+
+=item bpi()
+
+=item bmuladd()
+
 =back
 
 =item Autocreating constants
@@ -24778,6 +25280,8 @@ ffround ( +$scale ), ffround ( -$scale ), ffround ( 0 ), fround  ( +$scale
 =item Using Math::BigInt::Lite
 
 =back
+
+=item EXPORTS
 
 =item BUGS
 
@@ -24867,6 +25371,8 @@ Input, Output
 
 =item bmul()
 
+=item bmuladd()
+
 =item bdiv()
 
 =item bmod()
@@ -24880,6 +25386,10 @@ Input, Output
 =item blog()
 
 =item bexp()
+
+=item bnok()
+
+=item bpi()
 
 =item blsft()
 
@@ -25003,6 +25513,8 @@ oct()/hex(), log(-inf), exp(), cos(), sin(), atan2()
 bsqrt(), div(), blog(), bexp()
 
 =back
+
+=item EXPORTS
 
 =item BUGS
 
@@ -25545,14 +26057,14 @@ install_base_relpaths(), install_base_relpaths($type),
 install_base_relpaths($type => $path), install_destination($type),
 install_path(), install_path($type), install_path($type => $path),
 install_types(), invoked_action(), notes(), notes($key), notes($key =>
-$value), orig_dir(), os_type(), prefix_relpaths(),
-prefix_relpaths($installdirs), prefix_relpaths($installdirs, $type),
-prefix_relpaths($installdirs, $type => $path), prepare_metadata(),
-prereq_failures(), prereq_report(), prompt($message, $default),
-recommends(), requires(), rscan_dir($dir, $pattern), runtime_params(),
-runtime_params($key), script_files(), up_to_date($source_file,
-$derived_file), up_to_date(\@source_files, \@derived_files), y_n($message,
-$default)
+$value), orig_dir(), os_type(), is_vmsish(), is_windowsish(), is_unixish(),
+prefix_relpaths(), prefix_relpaths($installdirs),
+prefix_relpaths($installdirs, $type), prefix_relpaths($installdirs, $type
+=> $path), prepare_metadata(), prereq_failures(), prereq_report(),
+prompt($message, $default), recommends(), requires(), rscan_dir($dir,
+$pattern), runtime_params(), runtime_params($key), script_files(),
+up_to_date($source_file, $derived_file), up_to_date(\@source_files,
+\@derived_files), y_n($message, $default)
 
 =item Autogenerated Accessors
 
@@ -25909,6 +26421,8 @@ _backticks
 do_system
 
 _infer_xs_spec
+
+rscan_dir
 
 =over 4
 
@@ -30841,11 +31355,13 @@ unexpand(1)
 
 =back
 
-=head2 Thread - manipulate threads in Perl (for old code only)
+=head2 Thread - Manipulate threads in Perl (for old code only)
 
 =over 4
 
-=item CAVEAT
+=item DEPRECATED
+
+=item HISTORY
 
 =item SYNOPSIS
 
@@ -30854,14 +31370,16 @@ unexpand(1)
 =item FUNCTIONS
 
 $thread = Thread->new(\&start_sub), $thread = Thread->new(\&start_sub,
-LIST), lock VARIABLE, async BLOCK;, Thread->self, cond_wait VARIABLE,
-cond_signal VARIABLE, cond_broadcast VARIABLE, yield
+LIST), lock VARIABLE, async BLOCK;, Thread->self, Thread->list, cond_wait
+VARIABLE, cond_signal VARIABLE, cond_broadcast VARIABLE, yield
 
 =item METHODS
 
-join, eval, detach, equal, tid, flags, done
+join, detach, equal, tid, done
 
-=item LIMITATIONS
+=item DEFUNCT
+
+lock(\&sub), eval, flags
 
 =item SEE ALSO
 
@@ -30894,31 +31412,6 @@ new, enqueue LIST, dequeue, dequeue_nb, pending
 =item FUNCTIONS AND METHODS
 
 new, new NUMBER, down, down NUMBER, up, up NUMBER
-
-=back
-
-=head2 Thread::Signal - Start a thread which runs signal handlers reliably
-(for old code)
-
-=over 4
-
-=item CAVEAT
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item BUGS
-
-=back
-
-=head2 Thread::Specific - thread-specific keys
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
 
 =back
 
@@ -31527,6 +32020,18 @@ http://www.unicode.org/review/pr-29.html, http://www.unicode.org/notes/tn5/
 
 =over 4
 
+=item general_categories
+
+=back
+
+=over 4
+
+=item bidi_types
+
+=back
+
+=over 4
+
 =item compexcl
 
 =back
@@ -31620,23 +32125,26 @@ March 18th, 2000
 =item Alphabetical Listing of Win32 Functions
 
 Win32::AbortSystemShutdown(MACHINE), Win32::BuildNumber(),
-Win32::CopyFile(FROM, TO, OVERWRITE), Win32::DomainName(),
+Win32::CopyFile(FROM, TO, OVERWRITE), Win32::CreateDirectory(DIRECTORY),
+Win32::CreateFile(FILE), Win32::DomainName(),
 Win32::ExpandEnvironmentStrings(STRING), Win32::FormatMessage(ERRORCODE),
-Win32::FsType(), Win32::FreeLibrary(HANDLE), Win32::GetArchName(),
-Win32::GetChipName(), Win32::GetCwd(), Win32::GetFileVersion(FILENAME),
-Win32::GetFolderPath(FOLDER [, CREATE]), Win32::GetFullPathName(FILENAME),
-Win32::GetLastError(), Win32::GetLongPathName(PATHNAME),
-Win32::GetNextAvailDrive(), Win32::GetOSVersion(), Win32::GetOSName(),
+Win32::FsType(), Win32::FreeLibrary(HANDLE),
+Win32::GetANSIPathName(FILENAME), Win32::GetArchName(),
+Win32::GetChipName(), Win32::GetCwd(), Win32::GetCurrentThreadId(),
+Win32::GetFileVersion(FILENAME), Win32::GetFolderPath(FOLDER [, CREATE]),
+Win32::GetFullPathName(FILENAME), Win32::GetLastError(),
+Win32::GetLongPathName(PATHNAME), Win32::GetNextAvailDrive(),
+Win32::GetOSVersion(), Win32::GetOSName(),
 Win32::GetShortPathName(PATHNAME), Win32::GetProcAddress(INSTANCE,
 PROCNAME), Win32::GetTickCount(), Win32::GuidGen(), Win32::IsAdminUser(),
 Win32::IsWinNT(), Win32::IsWin95(), Win32::LoadLibrary(LIBNAME),
 Win32::LoginName(), Win32::LookupAccountName(SYSTEM, ACCOUNT, DOMAIN, SID,
 SIDTYPE), Win32::LookupAccountSID(SYSTEM, SID, ACCOUNT, DOMAIN, SIDTYPE),
 Win32::MsgBox(MESSAGE [, FLAGS [, TITLE]]), Win32::NodeName(),
-Win32::RegisterServer(LIBRARYNAME), Win32::SetChildShowWindow(SHOWWINDOW),
-Win32::SetCwd(NEWDIRECTORY), Win32::SetLastError(ERROR),
-Win32::Sleep(TIME), Win32::Spawn(COMMAND, ARGS, PID),
-Win32::UnregisterServer(LIBRARYNAME)
+Win32::OutputDebugString(STRING), Win32::RegisterServer(LIBRARYNAME),
+Win32::SetChildShowWindow(SHOWWINDOW), Win32::SetCwd(NEWDIRECTORY),
+Win32::SetLastError(ERROR), Win32::Sleep(TIME), Win32::Spawn(COMMAND, ARGS,
+PID), Win32::UnregisterServer(LIBRARYNAME)
 
 =back
 
