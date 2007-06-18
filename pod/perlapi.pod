@@ -3135,6 +3135,50 @@ Found in file intrpvar.h
 
 =back
 
+=head1 REGEXP Functions
+
+=over 8
+
+=item SvRX
+X<SvRX>
+
+Convenience macro to get the REGEXP from a SV. This is approximately
+equivalent to the following snippet:
+
+    if (SvMAGICAL(sv))
+        mg_get(sv);
+    if (SvROK(sv) &&
+        (tmpsv = (SV*)SvRV(sv)) &&
+        SvTYPE(tmpsv) == SVt_PVMG &&
+        (tmpmg = mg_find(tmpsv, PERL_MAGIC_qr)))
+    {
+        return (REGEXP *)tmpmg->mg_obj;
+    }
+
+NULL will be returned if a REGEXP* is not found.
+
+	REGEXP *	SvRX(SV *sv)
+
+=for hackers
+Found in file regexp.h
+
+=item SvRXOK
+X<SvRXOK>
+
+Returns a boolean indicating whether the SV contains qr magic
+(PERL_MAGIC_qr).
+
+If you want to do something with the REGEXP* later use SvRX instead
+and check for NULL.
+
+	bool	SvRXOK(SV* sv)
+
+=for hackers
+Found in file regexp.h
+
+
+=back
+
 =head1 Simple Exception Handling Macros
 
 =over 8

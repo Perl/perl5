@@ -176,26 +176,6 @@ Perl_sv_does(pTHX_ SV *sv, const char *name)
     return does_it;
 }
 
-regexp *
-Perl_get_re_arg( pTHX_ SV *sv, U32 flags, MAGIC **mgp) {
-    MAGIC *mg;
-    if (sv) {
-        if (SvMAGICAL(sv))
-            mg_get(sv);
-        if (SvROK(sv) &&
-            (sv = (SV*)SvRV(sv)) &&     /* assign deliberate */
-            SvTYPE(sv) == SVt_PVMG &&
-            (mg = mg_find(sv, PERL_MAGIC_qr))) /* assign deliberate */
-        {        
-            if (mgp) *mgp = mg;
-            return (regexp *)mg->mg_obj;       
-        }
-    }    
-    if (mgp) *mgp = NULL;
-    return ((flags && PL_curpm) ? PM_GETRE(PL_curpm) : NULL);
-}
-
-
 PERL_XS_EXPORT_C void XS_UNIVERSAL_isa(pTHX_ CV *cv);
 PERL_XS_EXPORT_C void XS_UNIVERSAL_can(pTHX_ CV *cv);
 PERL_XS_EXPORT_C void XS_UNIVERSAL_DOES(pTHX_ CV *cv);
@@ -1075,22 +1055,17 @@ XS(XS_re_is_regexp)
 {
     dVAR; 
     dXSARGS;
+    PERL_UNUSED_VAR(cv);
+
     if (items != 1)
        Perl_croak(aTHX_ "Usage: %s(%s)", "re::is_regexp", "sv");
-    PERL_UNUSED_VAR(cv); /* -W */
-    PERL_UNUSED_VAR(ax); /* -Wall */
+
     SP -= items;
-    {
-	SV *	sv = ST(0);
-        if ( Perl_get_re_arg( aTHX_ sv, 0, NULL ) ) 
-        {
-            XSRETURN_YES;
-        } else {
-            XSRETURN_NO;
-        }
-        /* NOTREACHED */        
-	PUTBACK;
-	return;
+
+    if (SvRXOK(ST(0))) {
+        XSRETURN_YES;
+    } else {
+        XSRETURN_NO;
     }
 }
 

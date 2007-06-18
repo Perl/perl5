@@ -378,23 +378,13 @@ package as a normal object.
     my $re = qr//;
     $re->meth; # dispatched to re::engine::Example::meth()
 
-To retrieve the C<REGEXP> object from the scalar in an XS function use the
-following snippet:
+To retrieve the C<REGEXP> object from the scalar in an XS function use
+the C<SvRX> macro, see L<"REGEXP Functions" in perlapi|perlapi/REGEXP
+Functions>.
 
     void meth(SV * rv)
     PPCODE:
-        MAGIC  * mg;
-        REGEXP * re;
-
-        if (SvMAGICAL(sv))
-            mg_get(sv);
-        if (SvROK(sv) &&
-            (sv = (SV*)SvRV(sv)) &&            /* assignment deliberate */
-            SvTYPE(sv) == SVt_PVMG &&
-            (mg = mg_find(sv, PERL_MAGIC_qr))) /* assignment deliberate */
-        {
-            re = (REGEXP *)mg->mg_obj;
-        }
+        REGEXP * re = SvRX(sv);
 
 =head2 dupe
 

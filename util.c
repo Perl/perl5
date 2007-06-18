@@ -5871,6 +5871,26 @@ Perl_my_dirfd(pTHX_ DIR * dir) {
 #endif 
 }
 
+REGEXP *
+Perl_get_re_arg(pTHX_ SV *sv) {
+    SV    *tmpsv;
+    MAGIC *mg;
+
+    if (sv) {
+        if (SvMAGICAL(sv))
+            mg_get(sv);
+        if (SvROK(sv) &&
+            (tmpsv = (SV*)SvRV(sv)) &&            /* assign deliberate */
+            SvTYPE(tmpsv) == SVt_PVMG &&
+            (mg = mg_find(tmpsv, PERL_MAGIC_qr))) /* assign deliberate */
+        {
+            return (REGEXP *)mg->mg_obj;
+        }
+    }
+ 
+    return NULL;
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd

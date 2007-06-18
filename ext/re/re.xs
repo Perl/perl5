@@ -61,25 +61,6 @@ const struct regexp_engine my_reg_engine = {
 #endif
 };
 
-REGEXP *
-get_re_arg( pTHX_ SV *sv, U32 flags, MAGIC **mgp) {
-    MAGIC *mg;
-    if (sv) {
-        if (SvMAGICAL(sv))
-            mg_get(sv);
-        if (SvROK(sv) &&
-            (sv = (SV*)SvRV(sv)) &&     /* assign deliberate */
-            SvTYPE(sv) == SVt_PVMG &&
-            (mg = mg_find(sv, PERL_MAGIC_qr))) /* assign deliberate */
-        {        
-            if (mgp) *mgp = mg;
-            return (REGEXP *)mg->mg_obj;       
-        }
-    }    
-    if (mgp) *mgp = NULL;
-    return ((flags && PL_curpm) ? PM_GETRE(PL_curpm) : NULL);
-}
-
 MODULE = re	PACKAGE = re
 
 void
@@ -95,7 +76,6 @@ regexp_pattern(sv)
     SV * sv
 PROTOTYPE: $
 PREINIT:
-    MAGIC *mg;
     REGEXP *re;
 PPCODE:
 {
@@ -110,7 +90,7 @@ PPCODE:
        on the object. 
     */
 
-    if ( re = get_re_arg( aTHX_ sv, 0, &mg) ) /* assign deliberate */
+    if ((re = SvRX(sv))) /* assign deliberate */
     {
         /* Housten, we have a regex! */
         SV *pattern;
@@ -184,7 +164,7 @@ PREINIT:
     REGEXP *re;
 PPCODE:
 {
-    if ( re = get_re_arg( aTHX_ sv, 0, 0) ) /* assign deliberate */
+    if ((re = SvRX(sv))) /* assign deliberate */
     {
         SV *an = &PL_sv_no;
         SV *fl = &PL_sv_no;

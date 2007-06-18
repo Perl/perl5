@@ -1871,7 +1871,7 @@ AMdnoP	|int	|Perl_signbit	|NV f
 #endif
 
 XEMop	|void	|emulate_cop_io	|NN const COP *const c|NN SV *const sv
-XEMop	|regexp *|get_re_arg|NULLOK SV *sv|U32 flags|NULLOK MAGIC **mgp
+XEMop	|REGEXP *|get_re_arg|NULLOK SV *sv
 
 p	|struct mro_meta*	|mro_meta_init	|NN HV* stash
 #if defined(USE_ITHREADS)

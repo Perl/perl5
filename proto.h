@@ -4681,7 +4681,7 @@ PERL_CALLCONV void	Perl_emulate_cop_io(pTHX_ const COP *const c, SV *const sv)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV regexp *	Perl_get_re_arg(pTHX_ SV *sv, U32 flags, MAGIC **mgp);
+PERL_CALLCONV REGEXP *	Perl_get_re_arg(pTHX_ SV *sv);
 
 PERL_CALLCONV struct mro_meta*	Perl_mro_meta_init(pTHX_ HV* stash)
 			__attribute__nonnull__(pTHX_1);

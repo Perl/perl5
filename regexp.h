@@ -181,6 +181,41 @@ typedef struct regexp_engine {
 #define RXf_HASH_REGNAMES        0x0800
 #define RXf_HASH_REGNAMES_COUNT  0x1000 
 
+/*
+=head1 REGEXP Functions
+
+=for apidoc Am|REGEXP *|SvRX|SV *sv
+
+Convenience macro to get the REGEXP from a SV. This is approximately
+equivalent to the following snippet:
+
+    if (SvMAGICAL(sv))
+        mg_get(sv);
+    if (SvROK(sv) &&
+        (tmpsv = (SV*)SvRV(sv)) &&
+        SvTYPE(tmpsv) == SVt_PVMG &&
+        (tmpmg = mg_find(tmpsv, PERL_MAGIC_qr)))
+    {
+        return (REGEXP *)tmpmg->mg_obj;
+    }
+
+NULL will be returned if a REGEXP* is not found.
+
+=for apidoc Am|bool|SvRXOK|SV* sv
+
+Returns a boolean indicating whether the SV contains qr magic
+(PERL_MAGIC_qr).
+
+If you want to do something with the REGEXP* later use SvRX instead
+and check for NULL.
+
+=cut
+*/
+
+#define SvRX(sv)   (Perl_get_re_arg(aTHX_ sv))
+#define SvRXOK(sv) (Perl_get_re_arg(aTHX_ sv) ? TRUE : FALSE)
+
+
 /* Flags stored in regexp->extflags 
  * These are used by code external to the regexp engine
  *
