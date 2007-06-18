@@ -3729,7 +3729,6 @@ Gid_t getegid (void);
 #define PERL_MAGIC_nkeys	  'k' /* scalar(keys()) lvalue */
 #define PERL_MAGIC_dbfile	  'L' /* Debugger %_<filename */
 #define PERL_MAGIC_dbline	  'l' /* Debugger %_<filename element */
-#define PERL_MAGIC_mutex	  'm' /* for lock op */
 #define PERL_MAGIC_shared	  'N' /* Shared between threads */
 #define PERL_MAGIC_shared_scalar  'n' /* Shared between threads */
 #define PERL_MAGIC_collxfrm	  'o' /* Locale transformation */

@@ -1045,7 +1045,6 @@ The current kinds of Magic Virtual Tables are:
     k  PERL_MAGIC_nkeys          vtbl_nkeys      scalar(keys()) lvalue
     L  PERL_MAGIC_dbfile         (none)          Debugger %_<filename
     l  PERL_MAGIC_dbline         vtbl_dbline     Debugger %_<filename element
-    m  PERL_MAGIC_mutex          vtbl_mutex      ???
     o  PERL_MAGIC_collxfrm       vtbl_collxfrm   Locale collate transformation
     P  PERL_MAGIC_tied           vtbl_pack       Tied array or hash
     p  PERL_MAGIC_tiedelem       vtbl_packelem   Tied array or hash element

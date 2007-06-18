@@ -1170,7 +1170,6 @@ static const struct { const char type; const char *name; } magic_names[] = {
 	{ PERL_MAGIC_isaelem,        "isaelem(i)" },
 	{ PERL_MAGIC_nkeys,          "nkeys(k)" },
 	{ PERL_MAGIC_dbline,         "dbline(l)" },
-	{ PERL_MAGIC_mutex,          "mutex(m)" },
 	{ PERL_MAGIC_shared_scalar,  "shared_scalar(n)" },
 	{ PERL_MAGIC_collxfrm,       "collxfrm(o)" },
 	{ PERL_MAGIC_tiedelem,       "tiedelem(p)" },
