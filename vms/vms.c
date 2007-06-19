@@ -521,6 +521,16 @@ int utf8_flag;
     case ']':
     case '%':
     case '^':
+        /* Don't escape again if following character is 
+         * already something we escape.
+         */
+        if (strchr(".~!#&\'`()+@{},;[]%^=_", *(inspec+1))) {
+	    *outspec = *inspec;
+	    *output_cnt = 1;
+	    return 1;
+	    break;
+        }
+        /* But otherwise fall through and escape it. */
     case '=':
 	/* Assume that this is to be escaped */
 	outspec[0] = '^';
@@ -564,16 +574,25 @@ int scnt;
     if (*inspec == '^') {
 	inspec++;
 	switch (*inspec) {
+        /* Spaces and non-trailing dots should just be passed through, 
+         * but eat the escape character.
+         */
 	case '.':
-	    /* Non trailing dots should just be passed through, but eat the escape */
 	    *outspec = *inspec;
-	    count++;
+	    count += 2;
+	    (*output_cnt)++;
 	    break;
 	case '_': /* space */
 	    *outspec = ' ';
-	    inspec++;
-	    count++;
+	    count += 2;
 	    (*output_cnt)++;
+	    break;
+	case '^':
+            /* Hmm.  Better leave the escape escaped. */
+            outspec[0] = '^';
+            outspec[1] = '^';
+	    count += 2;
+	    (*output_cnt) += 2;
 	    break;
 	case 'U': /* Unicode - FIX-ME this is wrong. */
 	    inspec++;
@@ -7559,6 +7578,14 @@ static char *mp_do_tovmsspec
     case '#':
     case '%':
     case '^':
+        /* Don't escape again if following character is 
+         * already something we escape.
+         */
+        if (strchr("\"~`!#%^&()=+\'@[]{}:\\|<>_.", *(cp2+1))) {
+	    *(cp1++) = *(cp2++);
+	    break;
+        }
+        /* But otherwise fall through and escape it. */
     case '&':
     case '(':
     case ')':
