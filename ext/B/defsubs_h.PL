@@ -1,7 +1,9 @@
 # Do not remove the following line; MakeMaker relies on it to identify
 # this file as a template for defsubs.h
 # Extracting defsubs.h (with variable substitutions)
-#!perl
+#!perl -w
+use File::Spec;
+my (undef, $headerpath) = @ARGV;
 my ($out) = __FILE__ =~ /(^.*)\.PL/i;
 $out =~ s/_h$/.h/;
 unlink $out if -l $out;
@@ -70,7 +72,7 @@ foreach my $tuple (['op.h'],['cop.h'],['regexp.h','RXf_'])
  {
   my $file = $tuple->[0];
   my $pfx = $tuple->[1] || '';
-  my $path = $^O eq 'MacOS' ? ":::$file" : "../../$file";
+  my $path = File::Spec->catfile($headerpath, $file);
   open(OPH,"$path") || die "Cannot open $path:$!";
   while (<OPH>)
    {  
