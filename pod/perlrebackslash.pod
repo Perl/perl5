@@ -92,7 +92,7 @@ quoted constructs>.
  \s                Character class for white space.
  \S                Character class for non white space.
  \t                Tab character.
- \u                Uppercase next character.
+ \u                Titlecase next character.
  \U                Uppercase till \E.
  \v                Character class for vertical white space.
  \V                Character class for non vertical white space.
@@ -255,8 +255,9 @@ Mnemonic: heI<x>adecimal.
 
 A number of backslash sequences have to do with changing the character,
 or characters following them. C<\l> will lowercase the character following
-it, while C<\u> will uppercase the character following it. (They perform
-similar functionality as the functions C<lcfirst> and C<ucfirst>).
+it, while C<\u> will uppercase (or, more accurately, titlecase) the
+character following it. (They perform similar functionality as the
+functions C<lcfirst> and C<ucfirst>).
 
 To uppercase or lowercase several characters, one might want to use
 C<\L> or C<\U>, which will lowercase/uppercase all characters following
@@ -492,7 +493,7 @@ a newline by Unicode. This includes all characters matched by C<\v>
 (vertical white space), and the multi character sequence C<"\x0D\x0A">
 (carriage return followed by a line feed, aka the network newline, or
 the newline used in Windows text files). C<\R> is equivalent with
-C<(?>\x0D\x0A)|\v)>. Since C<\R> can match a more than one character,
+C<< (?>\x0D\x0A)|\v) >>. Since C<\R> can match a more than one character,
 it cannot be put inside a bracketed character class; C</[\R]/> is an error.
 C<\R> is introduced in perl 5.10.
 
