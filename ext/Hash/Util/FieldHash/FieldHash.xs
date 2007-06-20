@@ -236,22 +236,6 @@ I32 HUF_watch_key_id(pTHX_ IV action, SV* field) {
     return 0;
 }
 
-/* see if something is a field hash */
-int HUF_get_status(HV* hash) {
-    int ans = 0;
-    if (hash && (SvTYPE(hash) == SVt_PVHV)) {
-        MAGIC* mg;
-        struct ufuncs* uf;
-        if ((mg = mg_find((SV*)hash, PERL_MAGIC_uvar)) &&
-            (uf = (struct ufuncs *)mg->mg_ptr) &&
-            (uf->uf_set == NULL)
-        ) {
-            ans = HUF_func_2mode(uf->uf_val);
-        }
-    }
-    return ans;
-}
-
 int HUF_func_2mode( I32(* val)(pTHX_ IV, SV*)) {
     int ans = 0;
     if (val == &HUF_watch_key_id)
@@ -272,6 +256,22 @@ I32(* HUF_mode_2func( int mode))(pTHX_ IV, SV*) {
             break;
     }
     return(ans);
+}
+
+/* see if something is a field hash */
+int HUF_get_status(HV* hash) {
+    int ans = 0;
+    if (hash && (SvTYPE(hash) == SVt_PVHV)) {
+        MAGIC* mg;
+        struct ufuncs* uf;
+        if ((mg = mg_find((SV*)hash, PERL_MAGIC_uvar)) &&
+            (uf = (struct ufuncs *)mg->mg_ptr) &&
+            (uf->uf_set == NULL)
+        ) {
+            ans = HUF_func_2mode(uf->uf_val);
+        }
+    }
+    return ans;
 }
 
 /* Thread support.  These routines are called by CLONE (and nothing else) */
