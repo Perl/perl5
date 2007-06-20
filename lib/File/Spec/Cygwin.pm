@@ -4,7 +4,7 @@ use strict;
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '1.1';
+$VERSION = '1.1_01';
 
 @ISA = qw(File::Spec::Unix);
 
@@ -96,6 +96,15 @@ sub tmpdir {
     return $tmpdir if defined $tmpdir;
     $tmpdir = $_[0]->_tmpdir( $ENV{TMPDIR}, "/tmp", 'C:/temp' );
 }
+
+=item case_tolerant
+
+Override Unix. Cygwin is always case-tolerant, indicating that it is not
+significant when comparing file specifications.
+
+=cut
+
+sub case_tolerant () { 1 }
 
 =back
 

@@ -619,7 +619,7 @@ if ($^O eq 'MacOS') {
 #[ "Epoc->canonpath('/a/.')",                                  '/a'        ],
 #[ "Epoc->canonpath('/.')",                                    '/'         ],
 
-[ "Cygwin->case_tolerant()",         '0'  ],
+[ "Cygwin->case_tolerant()",         '1'  ],
 [ "Cygwin->catdir('/','d2/d3')",     '/d2/d3'  ],
 
 ) ;
