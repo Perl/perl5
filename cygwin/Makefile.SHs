@@ -198,7 +198,7 @@ DIST_DIRECTORY = .dist
 
 distdir: miniperl
 	-mkdir $(DIST_DIRECTORY)
-	./miniperl '-MExtUtils::Manifest' \
+	./miniperl -Ilib '-MExtUtils::Manifest' \
 	-e "ExtUtils::Manifest::manicopy(ExtUtils::Manifest::maniread(),'$(DIST_DIRECTORY)')"
 
 cygwin1.dll: /bin/cygwin1.dll
