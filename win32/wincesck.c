@@ -343,15 +343,19 @@ int
 win32_ioctl(int i, unsigned int u, char *data)
 {
     dTHX;
-    u_long argp = (u_long)data;
+    u_long u_long_arg; 
     int retval;
-
+    
     if (!wsock_started) {
 	Perl_croak_nocontext("ioctl implemented only on sockets");
 	/* NOTREACHED */
     }
 
-    retval = ioctlsocket(TO_SOCKET(i), (long)u, &argp);
+    /* mauke says using memcpy avoids alignment issues */
+    memcpy(&u_long_arg, data, sizeof u_long_arg); 
+    retval = ioctlsocket(TO_SOCKET(i), (long)u, &u_long_arg);
+    memcpy(data, &u_long_arg, sizeof u_long_arg);
+    
     if (retval == SOCKET_ERROR) {
 	if (WSAGetLastError() == WSAENOTSOCK) {
 	    Perl_croak_nocontext("ioctl implemented only on sockets");
