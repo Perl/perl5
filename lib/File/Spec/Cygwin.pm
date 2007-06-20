@@ -53,7 +53,7 @@ sub catdir {
     my $self = shift;
 
     # Don't create something that looks like a //network/path
-    if ($_[0] eq '/' or $_[0] eq '\\') {
+    if ($_[0] and ($_[0] eq '/' or $_[0] eq '\\')) {
         shift;
         return $self->SUPER::catdir('', @_);
     }
