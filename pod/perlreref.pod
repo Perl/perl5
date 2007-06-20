@@ -10,47 +10,50 @@ as the L</"SEE ALSO"> section in this document.
 
 =head2 OPERATORS
 
-  =~ determines to which variable the regex is applied.
-     In its absence, $_ is used.
+C<=~> determines to which variable the regex is applied.
+In its absence, $_ is used.
 
-        $var =~ /foo/;
+    $var =~ /foo/;
 
-  !~ determines to which variable the regex is applied,
-     and negates the result of the match; it returns
-     false if the match succeeds, and true if it fails.
+C<!~> determines to which variable the regex is applied,
+and negates the result of the match; it returns
+false if the match succeeds, and true if it fails.
 
-       $var !~ /foo/;
+    $var !~ /foo/;
 
-  m/pattern/igmsoxc searches a string for a pattern match,
-     applying the given options.
+C<m/pattern/msixpogc> searches a string for a pattern match,
+applying the given options.
 
-        i  case-Insensitive
-        g  Global - all occurrences
-        m  Multiline mode - ^ and $ match internal lines
-        s  match as a Single line - . matches \n
-        o  compile pattern Once
-        x  eXtended legibility - free whitespace and comments
-        c  don't reset pos on failed matches when using /g
+    m  Multiline mode - ^ and $ match internal lines
+    s  match as a Single line - . matches \n
+    i  case-Insensitive
+    x  eXtended legibility - free whitespace and comments
+    p  Preserve a copy of the matched string -
+       ${^PREMATCH}, ${^MATCH}, ${^POSTMATCH} will be defined.
+    o  compile pattern Once
+    g  Global - all occurrences
+    c  don't reset pos on failed matches when using /g
 
-     If 'pattern' is an empty string, the last I<successfully> matched
-     regex is used. Delimiters other than '/' may be used for both this
-     operator and the following ones.
+If 'pattern' is an empty string, the last I<successfully> matched
+regex is used. Delimiters other than '/' may be used for both this
+operator and the following ones. The leading C<m> can be ommitted
+if the delimiter is '/'.
 
-  qr/pattern/imsox lets you store a regex in a variable,
-     or pass one around. Modifiers as for m// and are stored
-     within the regex.
+C<qr/pattern/msixpo> lets you store a regex in a variable,
+or pass one around. Modifiers as for C<m//>, and are stored
+within the regex.
 
-  s/pattern/replacement/igmsoxe substitutes matches of
-     'pattern' with 'replacement'. Modifiers as for m//
-     with one addition:
+C<s/pattern/replacement/msixpogce> substitutes matches of
+'pattern' with 'replacement'. Modifiers as for C<m//>,
+with one addition:
 
-        e  Evaluate replacement as an expression
+    e  Evaluate 'replacement' as an expression
 
-     'e' may be specified multiple times. 'replacement' is interpreted
-     as a double quoted string unless a single-quote (') is the delimiter.
+'e' may be specified multiple times. 'replacement' is interpreted
+as a double quoted string unless a single-quote (C<'>) is the delimiter.
 
-  ?pattern? is like m/pattern/ but matches only once. No alternate
-      delimiters can be used.  Must be reset with reset().
+C<?pattern?> is like C<m/pattern/> but matches only once. No alternate
+delimiters can be used.  Must be reset with reset().
 
 =head2 SYNTAX
 
@@ -66,7 +69,7 @@ as the L</"SEE ALSO"> section in this document.
    (...)   Groups subexpressions for capturing to $1, $2...
    (?:...) Groups subexpressions without capturing (cluster)
    |       Matches either the subexpression preceding or following it
-   \1, \2 ...  The text from the Nth group
+   \1, \2 ...  Matches the text from the Nth group
 
 =head2 ESCAPE SEQUENCES
 
@@ -89,7 +92,7 @@ These work as in normal strings.
    \L  Lowercase until \E
    \U  Uppercase until \E
    \Q  Disable pattern metacharacters until \E
-   \E  End case modification
+   \E  End modification
 
 For Titlecase, see L</Titlecase>.
 
@@ -105,23 +108,27 @@ This one works differently from normal strings:
    [^f-j]   Caret indicates "match any character _except_ these"
 
 The following sequences work within or without a character class.
-The first six are locale aware, all are Unicode aware.  The default
-character class equivalent are given.  See L<perllocale> and
-L<perlunicode> for details.
+The first six are locale aware, all are Unicode aware. See L<perllocale>
+and L<perlunicode> for details.
 
-   \d      A digit                     [0-9]
-   \D      A nondigit                  [^0-9]
-   \w      A word character            [a-zA-Z0-9_]
-   \W      A non-word character        [^a-zA-Z0-9_]
-   \s      A whitespace character      [ \t\n\r\f]
-   \S      A non-whitespace character  [^ \t\n\r\f]
+   \d      A digit
+   \D      A nondigit
+   \w      A word character
+   \W      A non-word character
+   \s      A whitespace character
+   \S      A non-whitespace character
+   \h      An horizontal white space
+   \H      A non horizontal white space
+   \v      A vertical white space
+   \V      A non vertical white space
+   \R      A generic newline           (?>\v|\x0D\x0A)
 
    \C      Match a byte (with Unicode, '.' matches a character)
    \pP     Match P-named (Unicode) property
    \p{...} Match Unicode property with long name
    \PP     Match non-P
    \P{...} Match lack of Unicode property with long name
-   \X      Match extended unicode sequence
+   \X      Match extended Unicode combining character sequence
 
 POSIX character classes and their Unicode and Perl equivalents:
 
@@ -192,16 +199,22 @@ There is no quantifier {,n} -- that gets understood as a literal string.
 =head2 VARIABLES
 
    $_    Default variable for operators to use
-   $*    Enable multiline matching (deprecated; not in 5.9.0 or later)
 
-   $&    Entire matched string
    $`    Everything prior to matched string
+   $&    Entire matched string
    $'    Everything after to matched string
 
-The use of those last three will slow down B<all> regex use
+   ${^PREMATCH}   Everything prior to matched string
+   ${^MATCH}      Entire matched string
+   ${^POSTMATCH}  Everything after to matched string
+
+The use of C<$`>, C<$&> or C<$'> will slow down B<all> regex use
 within your program. Consult L<perlvar> for C<@LAST_MATCH_START>
 to see equivalent expressions that won't cause slow down.
-See also L<Devel::SawAmpersand>.
+See also L<Devel::SawAmpersand>. Starting with Perl 5.10, you
+can also use the equivalent variables C<${^PREMATCH}>, C<${^MATCH}>
+and C<${^POSTMATCH}>, but for them to be defined, you have to
+specify the C</p> (preserve) modifier on your regular expression.
 
    $1, $2 ...  hold the Xth captured expr
    $+    Last parenthesized pattern match
@@ -209,6 +222,8 @@ See also L<Devel::SawAmpersand>.
    $^R   Holds the result of the last (?{...}) expr
    @-    Offsets of starts of groups. $-[0] holds start of whole match
    @+    Offsets of ends of groups. $+[0] holds end of whole match
+   %+    Named capture buffers
+   %-    Named capture buffers, as array refs
 
 Captured groups are numbered according to their I<opening> paren.
 
@@ -224,7 +239,7 @@ Captured groups are numbered according to their I<opening> paren.
    reset       Reset ?pattern? status
    study       Analyze string for optimizing matching
 
-   split       Use regex to split a string into parts
+   split       Use a regex to split a string into parts
 
 The first four of these are like the escape sequences C<\L>, C<\l>,
 C<\U>, and C<\u>.  For Titlecase, see L</Titlecase>.
@@ -285,7 +300,7 @@ L<perldebug/"Debugging regular expressions">
 
 =item *
 
-L<perluniintro>, L<perlunicode>, L<charnames> and L<locale>
+L<perluniintro>, L<perlunicode>, L<charnames> and L<perllocale>
 for details on regexes and internationalisation.
 
 =item *
