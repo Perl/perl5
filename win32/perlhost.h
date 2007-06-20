@@ -989,7 +989,14 @@ PerlLIOFileStat(struct IPerlLIO* piPerl, int handle, Stat_t *buffer)
 int
 PerlLIOIOCtl(struct IPerlLIO* piPerl, int i, unsigned int u, char *data)
 {
-    return win32_ioctlsocket((SOCKET)i, (long)u, (u_long*)data);
+    u_long u_long_arg;
+    int retval;
+
+    /* mauke says using memcpy avoids alignment issues */
+    memcpy(&u_long_arg, data, sizeof u_long_arg); 
+    retval = win32_ioctlsocket((SOCKET)i, (long)u, &u_long_arg);
+    memcpy(data, &u_long_arg, sizeof u_long_arg);
+    return retval;
 }
 
 int
