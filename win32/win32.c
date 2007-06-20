@@ -4937,16 +4937,6 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
 #  endif /* USE_ITHREADS */
 #endif /* HAVE_INTERP_INTERN */
 
-static void
-win32_free_argvw(pTHX_ void *ptr)
-{
-    char** argv = (char**)ptr;
-    while(*argv) {
-	Safefree(*argv);
-	*argv++ = Nullch;
-    }
-}
-
 void
 win32_argv2utf8(int argc, char** argv)
 {

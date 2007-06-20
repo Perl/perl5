@@ -116,6 +116,10 @@ USE_LARGE_FILES	*= define
 #CCTYPE		*= MSVC80FREE
 # Visual C++ 2005 (aka Visual C++ 8.x) (full version)
 #CCTYPE		*= MSVC80
+# Visual C++ 2008 Express Edition (aka Visual C++ 9.x) (free version)
+#CCTYPE		*= MSVC90FREE
+# Visual C++ 2008 (aka Visual C++ 9.x) (full version)
+#CCTYPE		*= MSVC90
 # Borland 5.02 or later
 #CCTYPE		*= BORLAND
 # MinGW with gcc-2.95.2 or later
@@ -376,20 +380,23 @@ ARCHNAME	= MSWin32-$(ARCHITECTURE)
 ARCHNAME	!:= $(ARCHNAME)-thread
 .ENDIF
 
-# Visual C++ 98, .NET 2003 and 2005 specific.
-# VC++ 6.x, 7.x and 8.x can load DLL's on demand.  Makes the test suite run in
-# about 10% less time.  (The free version of 7.x can't do this, but the free
-# version of 8.x can.)
-.IF "$(CCTYPE)" == "MSVC60" || "$(CCTYPE)" == "MSVC70" \
-    "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE"
+# Visual C++ 98, .NET 2003, 2005 and 2008 specific.
+# VC++ 6.x, 7.x, 8.x and 9.x can load DLL's on demand.  Makes the test suite run
+# in about 10% less time.  (The free version of 7.x can't do this, but the free
+# versions of 8.x and 9.x can.)
+.IF "$(CCTYPE)" == "MSVC60" || "$(CCTYPE)" == "MSVC70"     || \
+    "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE" ||
+    "$(CCTYPE)" == "MSVC90" || "$(CCTYPE)" == "MSVC90FREE"
 DELAYLOAD	*= -DELAYLOAD:ws2_32.dll -DELAYLOAD:shell32.dll delayimp.lib
 .ENDIF
 
-# Visual C++ 2005 (VC++ 8.x) creates manifest files for EXEs and DLLs. These
-# either need copying everywhere with the binaries, or else need embedding in
-# them otherwise MSVCR80.dll won't be found. Embed them for simplicity, and
-# delete them afterwards so that they don't get installed too.
-.IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE"
+# Visual C++ 2005 and 2008 (VC++ 8.x and 9.x) create manifest files for EXEs and
+# DLLs. These either need copying everywhere with the binaries, or else need
+# embedding in them otherwise MSVCR80.dll or MSVCR90.dll won't be found. Embed
+# them for simplicity, and delete them afterwards so that they don't get
+# installed too.
+.IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE" || \
+    "$(CCTYPE)" == "MSVC90" || "$(CCTYPE)" == "MSVC90FREE"
 EMBED_EXE_MANI	= mt -nologo -manifest $@.manifest -outputresource:$@;1 && \
 		  del $@.manifest
 EMBED_DLL_MANI	= mt -nologo -manifest $@.manifest -outputresource:$@;2 && \
@@ -462,7 +469,7 @@ LINK_DBG	=
 EXTRACFLAGS	=
 CFLAGS		= -w -g0 -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
-LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(CCLIBDIR)" \
+LINK_FLAGS	= $(LINK_DBG) -x -L"$(INST_COREDIR)" -L"$(CCLIBDIR)" \
 		-L"$(CCLIBDIR)\PSDK"
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -e
@@ -584,10 +591,11 @@ DEFINES		+= -DWIN64 -DCONSERVATIVE
 OPTIMIZE	+= -Wp64 -fp:precise
 .ENDIF
 
-# For now, silence VC++ 8.x's warnings about "unsafe" CRT functions and POSIX
-# CRT function names being deprecated.
-.IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE"
-DEFINES		+= -D_CRT_SECURE_NO_DEPRECATE -wd4996
+# For now, silence VC++ 8.x's and 9.x's warnings about "unsafe" CRT functions
+# and POSIX CRT function names being deprecated.
+.IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE" || \
+    "$(CCTYPE)" == "MSVC90" || "$(CCTYPE)" == "MSVC90FREE"
+DEFINES		+= -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
 .ENDIF
 
 # Use the MSVCRT read() fix if the PerlCRT was not chosen, but only when using
@@ -1498,11 +1506,7 @@ distclean: realclean
 	-del /f bin\*.bat
 	-del /f perllibst.h
 	-del /f $(PERLEXE_ICO) perl.base
-	ren ..\lib\Net\Changes.libnet Changes.tenbil
-	ren ..\lib\Net\README.libnet  README.tenbil	
 	-cd .. && del /s *$(a) *.map *.pdb *.ilk *.tds *.bs *$(o) .exists pm_to_blib
-	ren ..\lib\Net\Changes.tenbil Changes.libnet
-	ren ..\lib\Net\README.tenbil  README.libnet	
 	-cd $(EXTDIR) && del /s *.def Makefile Makefile.old
 	-if exist $(AUTODIR) rmdir /s /q $(AUTODIR)
 	-if exist $(COREDIR) rmdir /s /q $(COREDIR)
@@ -1611,11 +1615,7 @@ _clean :
 	-@erase $(WIN32_OBJ)
 	-@erase $(DLL_OBJ)
 	-@erase $(X2P_OBJ)
-	ren ..\lib\Net\Changes.libnet Changes.tenbil
-	ren ..\lib\Net\README.libnet  README.tenbil	
 	-@erase ..\*$(o) ..\*$(a) ..\*.exp *$(o) *$(a) *.exp *.res
-	ren ..\lib\Net\Changes.tenbil Changes.libnet
-	ren ..\lib\Net\README.tenbil  README.libnet	
 	-@erase ..\t\*.exe ..\t\*.dll ..\t\*.bat
 	-@erase ..\x2p\*.exe ..\x2p\*.bat
 	-@erase *.ilk
