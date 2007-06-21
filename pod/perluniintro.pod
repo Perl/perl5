@@ -656,10 +656,11 @@ Use the C<Encode> package to try converting it.
 For example,
 
     use Encode 'decode_utf8';
-    if (decode_utf8($string_of_bytes_that_I_think_is_utf8)) {
-        # valid
+    eval { decode_utf8($string, Encode::FB_CROAK) };
+    if ($@) {
+        # $string is valid utf8
     } else {
-        # invalid
+        # $string is not valid utf8
     }
 
 Or use C<unpack> to try decoding it:
@@ -667,9 +668,8 @@ Or use C<unpack> to try decoding it:
     use warnings;
     @chars = unpack("C0U*", $string_of_bytes_that_I_think_is_utf8);
 
-If invalid, a C<Malformed UTF-8 character (byte 0x##) in unpack>
-warning is produced. The "C0" means 
-"process the string character per character".  Without that the 
+If invalid, a C<Malformed UTF-8 character> warning is produced. The "C0" means 
+"process the string character per character".  Without that, the 
 C<unpack("U*", ...)> would work in C<U0> mode (the default if the format 
 string starts with C<U>) and it would return the bytes making up the UTF-8 
 encoding of the target string, something that will always work.
