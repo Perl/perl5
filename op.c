@@ -423,7 +423,7 @@ Perl_op_free(pTHX_ OP *o)
     dVAR;
     OPCODE type;
 
-    if (!o || o->op_static)
+    if (!o)
 	return;
     if (o->op_latefreed) {
 	if (o->op_latefree)

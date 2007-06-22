@@ -845,7 +845,6 @@ threadsv_names()
 #define OP_type(o)	o->op_type
 #if PERL_VERSION >= 9
 #  define OP_opt(o)	o->op_opt
-#  define OP_static(o)	o->op_static
 #else
 #  define OP_seq(o)	o->op_seq
 #endif
@@ -910,10 +909,6 @@ OP_type(o)
 
 U8
 OP_opt(o)
-	B::OP		o
-
-U8
-OP_static(o)
 	B::OP		o
 
 #else

@@ -7,7 +7,7 @@
 #
 package B;
 
-our $VERSION = '1.15';
+our $VERSION = '1.16';
 
 use XSLoader ();
 require Exporter;
@@ -1016,8 +1016,6 @@ This returns the op description from the global C PL_op_desc array
 =item type
 
 =item opt
-
-=item static
 
 =item flags
 

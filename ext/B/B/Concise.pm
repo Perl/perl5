@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.71";
+our $VERSION   = "0.72";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -817,7 +817,6 @@ sub concise_op {
     $h{seq} = "" if $h{seq} eq "-";
     if ($] > 5.009) {
 	$h{opt} = $op->opt;
-	$h{static} = $op->static;
 	$h{label} = $labels{$$op};
     } else {
 	$h{seqnum} = $op->seq;
@@ -1499,13 +1498,6 @@ your program is).
 =item B<#opt>
 
 Whether or not the op has been optimised by the peephole optimiser.
-
-Only available in 5.9 and later.
-
-=item B<#static>
-
-Whether or not the op is statically defined.  This flag is used by the
-B::C compiler backend and indicates that the op should not be freed.
 
 Only available in 5.9 and later.
 
