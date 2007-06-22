@@ -1501,8 +1501,8 @@ Perl_cv_clone(pTHX_ CV *proto)
 			    "Variable \"%s\" is not available", SvPVX_const(namesv));
 		    sv = NULL;
 		}
-		else {
-		    assert(!SvPADSTALE(sv));
+		/* 'my $x if $y' can leave $x stale even in an active sub */
+		else if (!SvPADSTALE(sv)) {
 		    SvREFCNT_inc_simple_void_NN(sv);
 		}
 	    }
