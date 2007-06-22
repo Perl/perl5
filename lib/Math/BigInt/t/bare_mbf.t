@@ -27,7 +27,7 @@ BEGIN
     }
   print "# INC = @INC\n";
 
-  plan tests => 2200;
+  plan tests => 2226;
   }
 
 use Math::BigFloat lib => 'BareCalc';

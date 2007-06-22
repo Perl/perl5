@@ -28,7 +28,7 @@ BEGIN
     }
   print "# INC = @INC\n";
 
-  plan tests => 9;
+  plan tests => 7;
   }
 
 # The tests below test that cos(BigInt) = cos(Scalar) which is DWIM, but not
@@ -41,18 +41,14 @@ use Math::BigFloat;
 
 my $bi = Math::BigInt->new(1);
 
-ok (cos($bi), cos(1));
-ok (sin($bi), sin(1));
+ok (cos($bi), int(cos(1)));
+ok (sin($bi), int(sin(1)));
 ok (atan2($bi,$bi), atan2(1,1));
 
 my $bf = Math::BigInt->new(0);
 
-ok (cos($bf), cos(0));
-ok (sin($bf), sin(0));
+ok (cos($bf), int(cos(0)));
+ok (sin($bf), int(sin(0)));
 ok (atan2($bi,$bf), atan2(1,0));
 ok (atan2($bf,$bi), atan2(0,1));
-
-my $bone = Math::BigInt->new(1);
-ok (cos($bone), cos(1));
-ok (sin($bone), sin(1));
 
