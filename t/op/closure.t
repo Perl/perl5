@@ -14,7 +14,7 @@ BEGIN {
 use Config;
 require './test.pl'; # for runperl()
 
-print "1..188\n";
+print "1..187\n";
 
 my $test = 1;
 sub test (&) {
@@ -686,24 +686,6 @@ __EOF__
 	$x = bless {}, 'X';
     }
     test { $flag == 1 };
-}
-
-# although the 'my $x if ...' form is deprecated, it must still work.
-# Ensure that cloning a stale var gives a new undef value rather than
-# sharing the old value
-
-{ 
-    sub f {
-	my $a = 1 if $_[0];
-	return sub { \$a };
-    }
-    my $c1 = f(1);
-    my $c2 = f(0);
-    my $r1 = $c1->();
-    my $r2 = $c2->();
-    warn "r1=$r1 r2=$r2\n";
-    test { !defined $$r2 };
-    test { $r1 ne $r2 };
 }
 
 
