@@ -213,7 +213,7 @@ sub SWASHNEW {
 	$list = join '',
 	    map  { $_->[1] }
 	    sort { $a->[0] <=> $b->[0] }
-	    map  { /^([0-9a-fA-F]+)/; [ hex($1), $_ ] }
+	    map  { /^([0-9a-fA-F]+)/; [ CORE::hex($1), $_ ] }
 	    grep { /^([0-9a-fA-F]+)/ and not $seen{$1}++ } @tmp; # XXX doesn't do ranges right
     }
 
@@ -225,9 +225,9 @@ sub SWASHNEW {
     if ($minbits != 1 && $minbits < 32) { # not binary property
 	my $top = 0;
 	while ($list =~ /^([0-9a-fA-F]+)(?:[\t]([0-9a-fA-F]+)?)(?:[ \t]([0-9a-fA-F]+))?/mg) {
-	    my $min = hex $1;
-	    my $max = defined $2 ? hex $2 : $min;
-	    my $val = defined $3 ? hex $3 : 0;
+	    my $min = CORE::hex $1;
+	    my $max = defined $2 ? CORE::hex $2 : $min;
+	    my $val = defined $3 ? CORE::hex $3 : 0;
 	    $val += $max - $min if defined $3;
 	    $top = $val if $val > $top;
 	}

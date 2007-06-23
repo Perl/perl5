@@ -95,12 +95,12 @@ sub import
 
   $^H{bigrat} = 1;					# we are in effect
 
+  my ($hex,$oct);
   # for newer Perls always override hex() and oct() with a lexical version:
   if ($] > 5.009004)
     {
-    no warnings 'redefine';
-    *CORE::GLOBAL::oct = \&_oct;
-    *CORE::GLOBAL::hex = \&_hex;
+    $oct = \&_oct;
+    $hex = \&_hex;
     }
   # some defaults
   my $lib = ''; my $lib_kind = 'try'; my $upgrade = 'Math::BigFloat';
@@ -151,14 +151,12 @@ sub import
     elsif ($_[$i] eq 'hex')
       {
       splice @a, $j, 1; $j --;
-      no warnings 'redefine';
-      *CORE::GLOBAL::hex = \&bigint::_hex_global;
+      $hex = \&bigint::_hex_global;
       }
     elsif ($_[$i] eq 'oct')
       {
       splice @a, $j, 1; $j --;
-      no warnings 'redefine';
-      *CORE::GLOBAL::oct = \&bigint::_oct_global;
+      $oct = \&bigint::_oct_global;
       }
     else
       {
@@ -221,6 +219,11 @@ sub import
     {
     $self->export_to_level(1,$self,@a);           # export inf and NaN
     }
+  {
+    no warnings 'redefine';
+    *CORE::GLOBAL::oct = $oct if $oct;
+    *CORE::GLOBAL::hex = $hex if $hex;
+  }
   }
 
 1;
