@@ -3750,17 +3750,17 @@ t/op/readline.t			See if <> / readline / rcatline work
 t/op/read.t			See if read() works
 t/op/recurse.t			See if deep recursion works
 t/op/ref.t			See if refs and objects work
-t/op/regexp_email.t		See if regex recursion works by parsing email addresses
-t/op/regexp_namedcapture.t	Make sure glob assignment doesn't break named capture
-t/op/regexp_nc_tie.t	        Test the tied methods of Tie::Hash::NamedCapture
 t/op/regexp_noamp.t		See if regular expressions work with optimizations
 t/op/regexp_notrie.t		See if regular expressions work without trie optimisation
-t/op/regexp_pmod.t		See if regexp /p modifier works as expected
 t/op/regexp_qr_embed.t		See if regular expressions work with embedded qr//
 t/op/regexp_qr.t		See if regular expressions work as qr//
 t/op/regexp.t			See if regular expressions work
 t/op/regexp_trielist.t		See if regular expressions work with trie optimisation
-t/op/regmesg.t			See if one can get regular expression errors
+t/op/reg_email.t		See if regex recursion works by parsing email addresses
+t/op/reg_mesg.t			See if one can get regular expression errors
+t/op/reg_namedcapture.t		Make sure glob assignment doesn't break named capture
+t/op/reg_nc_tie.t	        Test the tied methods of Tie::Hash::NamedCapture
+t/op/reg_pmod.t			See if regexp /p modifier works as expected
 t/op/reg_unsafe.t		Check for unsafe match vars
 t/op/repeat.t			See if x operator works
 t/op/reset.t			See if reset operator works
