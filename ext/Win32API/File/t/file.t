@@ -2,6 +2,8 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
 
+# These test will only work on an english or german Windows!
+
 ######################### We start with some black magic to print on failure.
 
 BEGIN {
@@ -23,7 +25,9 @@ END {print "not ok 1\n" unless $loaded;}
 # Win32API::File does an implicit "require Win32", but
 # the ../lib directory in @INC will no longer work once
 # we chdir() into the TEMP directory.
+
 use Win32;
+use File::Spec;
 use Carp;
 use Carp::Heavy;
 
@@ -37,19 +41,16 @@ $test= 1;
 
 use strict qw(subs);
 
-$temp= $ENV{"TMP"};
-$temp= $ENV{"TEMP"}	unless -d $temp;
-$temp= "C:/Temp"	unless -d $temp;
-$temp= "."		unless -d $temp;
+$temp= File::Spec->tmpdir();
 $dir= "W32ApiF.tmp";
 
 $ENV{WINDIR} = $ENV{SYSTEMROOT} if not exists $ENV{WINDIR};
 
 chdir( $temp )
   or  die "# Can't cd to temp directory, $temp: $!\n";
-
+$tempdir = File::Spec->catdir($temp,$dir);
 if(  -d $dir  ) {
-    print "# deleting $temp\\$dir\\*\n" if glob "$dir/*";
+    print "# deleting ",File::Spec->catdir($temp,$dir,'*'),"\n" if glob "$dir/*";
 
     for (glob "$dir/*") {
 	chmod 0777, $_;
@@ -58,13 +59,12 @@ if(  -d $dir  ) {
     rmdir $dir or die "Could not rmdir $dir: $!";
 }
 mkdir( $dir, 0777 )
-  or  die "# Can't create temp dir, $temp/$dir: $!\n";
-print "# chdir $temp\\$dir\n";
+  or  die "# Can't create temp dir, $tempdir: $!\n";
+print "# chdir $tempdir\n";
 chdir( $dir )
-  or  die "# Can't cd to my dir, $temp/$dir: $!\n";
-
+  or  die "# Can't cd to my dir, $tempdir: $!\n";
 $h1= createFile( "ReadOnly.txt", "r", { Attributes=>"r" } );
-$ok=  ! $h1  &&  fileLastError() =~ /not find the file?/i;
+$ok=  ! $h1  &&  Win32API::File::_fileLastError() == 2; # could not find the file
 $ok or print "# ","".fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 2
 if(  ! $ok  ) {   CloseHandle($h1);   unlink("ReadOnly.txt");   }
@@ -78,13 +78,13 @@ $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 4
 
 $h2= createFile( "ReadOnly.txt", "rcn" );
-$ok= ! $h2  &&  fileLastError() =~ /file exists?/i;
+$ok= ! $h2  &&  Win32API::File::_fileLastError() == 80; # file exists
 $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 5
 if(  ! $ok  ) {   CloseHandle($h2);   }
 
 $h2= createFile( "ReadOnly.txt", "rwke" );
-$ok= ! $h2  &&  fileLastError() =~ /access is denied?/i;
+$ok= ! $h2  &&  Win32API::File::_fileLastError() == 5; # access is denied
 $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 6
 if(  ! $ok  ) {   CloseHandle($h2);   }
@@ -121,7 +121,7 @@ $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 12
 
 $ok= ! ReadFile( $h2, $text, 80, $len, [] )
- &&  fileLastError() =~ /handle is invalid?/i;
+ &&  Win32API::File::_fileLastError() == 6; # handle is invalid
 $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 13
 
@@ -174,7 +174,7 @@ if ($^O eq 'cygwin') {
 }
 else {
     unlink("CanWrite.txt");
-    $ok= -e "CanWrite.txt" &&  $! =~ /permission denied/i;
+    $ok = -e "CanWrite.txt" &&  $! =~ /permission denied/i;
     $ok or print "# $!\n";
 }
 print $ok ? "" : "not ", "ok ", ++$test, "$skip\n"; # ok 22
@@ -184,37 +184,37 @@ close(APP);		# Also does C<CloseHandle($h2)>
 CloseHandle( $h1 );
 
 $ok= ! DeleteFile( "ReadOnly.txt" )
- &&  fileLastError() =~ /access is denied?/i;
+ &&  Win32API::File::_fileLastError() == 5; # access is denied
 $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 23
 
 $ok= ! CopyFile( "ReadOnly.txt", "CanWrite.txt", 1 )
- &&  fileLastError() =~ /file exists?/i;
+ &&  Win32API::File::_fileLastError() == 80; # file exists
 $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 24
 
 $ok= ! CopyFile( "CanWrite.txt", "ReadOnly.txt", 0 )
- &&  fileLastError() =~ /access is denied?/i;
+ &&  Win32API::File::_fileLastError() == 5; # access is denied
 $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 25
 
 $ok= ! MoveFile( "NoSuchFile", "NoSuchDest" )
- &&  fileLastError() =~ /not find the file/i;
+ &&  Win32API::File::_fileLastError() == 2; # not find the file
 $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 26
 
 $ok= ! MoveFileEx( "NoSuchFile", "NoSuchDest", 0 )
- &&  fileLastError() =~ /not find the file/i;
+ &&  Win32API::File::_fileLastError() == 2; # not find the file
 $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 27
 
 $ok= ! MoveFile( "ReadOnly.txt", "CanWrite.txt" )
- &&  fileLastError() =~ /file already exists?/i;
+ &&  Win32API::File::_fileLastError() == 183; # file already exists
 $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 28
 
 $ok= ! MoveFileEx( "ReadOnly.txt", "CanWrite.txt", 0 )
- &&  fileLastError() =~ /file already exists?/i;
+ &&  Win32API::File::_fileLastError() == 183; # file already exists
 $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 29
 
@@ -224,7 +224,7 @@ $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 30
 
 $ok= ! MoveFileEx( "CanWrite.txt", "ReadOnly.cp", MOVEFILE_REPLACE_EXISTING )
- &&  fileLastError() =~ /access is denied?|cannot create/i;
+ &&  Win32API::File::_fileLastError() == 5; # access is denied
 $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 31
 
@@ -244,7 +244,7 @@ $ok or print "# $!\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 34
 
 $ok= ! DeleteFile( "Moved.cp" )
- &&  fileLastError() =~ /access is denied?/i;
+ &&  Win32API::File::_fileLastError() == 5; # access is denied
 $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 35
 
