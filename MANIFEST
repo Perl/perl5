@@ -3761,6 +3761,7 @@ t/op/regexp_qr.t		See if regular expressions work as qr//
 t/op/regexp.t			See if regular expressions work
 t/op/regexp_trielist.t		See if regular expressions work with trie optimisation
 t/op/regmesg.t			See if one can get regular expression errors
+t/op/reg_unsafe.t		Check for unsafe match vars
 t/op/repeat.t			See if x operator works
 t/op/reset.t			See if reset operator works
 t/op/re_tests			Regular expressions for regexp.t

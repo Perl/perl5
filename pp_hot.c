@@ -1266,9 +1266,12 @@ PP(pp_match)
 	    }
 	}
     }
-    /* remove comment to get faster /g but possibly unsafe $1 vars after a
-       match. Test for the unsafe vars will fail as well*/
-    if (( /* !global &&  */ rx->nparens) 
+    /* XXX: comment out !global get safe $1 vars after a
+       match, BUT be aware that this leads to drammatic slowdowns on
+       /g matches against large strings.  So far a solution to this problem
+       appears to be quite tricky.
+       Test for the unsafe vars are TODO for now. */
+    if ((  !global &&  rx->nparens) 
 	    || SvTEMP(TARG) || PL_sawampersand ||
 	    (rx->extflags & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY)))
 	r_flags |= REXEC_COPY_STR;

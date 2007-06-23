@@ -4453,7 +4453,12 @@ sub kt
         if 'foo'=~/(?<x>foo)|bar/;
     iseq($ok,1,'$+{x} exists after "foo"=~/(?<x>foo)|bar/');
 }
-
+{
+    local $_;
+    ($_ = 'abc')=~/(abc)/g;
+    $_ = '123'; 
+    iseq("$1",'abc',"/g leads to unsafe match vars: $1");
+}
 
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
@@ -4504,6 +4509,6 @@ ok($@=~/\QSequence \k... not terminated in regex;\E/);
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 1960;
+    $::TestCount = 1961;
     print "1..$::TestCount\n";
 }
