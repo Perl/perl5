@@ -378,7 +378,7 @@ Perl_is_utf8_string_loclen(pTHX_ const U8 *s, STRLEN len, const U8 **ep, STRLEN 
 =for apidoc A|UV|utf8n_to_uvuni|const U8 *s|STRLEN curlen|STRLEN *retlen|U32 flags
 
 Bottom level UTF-8 decode routine.
-Returns the unicode code point value of the first character in the string C<s>
+Returns the Unicode code point value of the first character in the string C<s>
 which is assumed to be in UTF-8 encoding and no longer than C<curlen>;
 C<retlen> will be set to the length, in bytes, of that character.
 

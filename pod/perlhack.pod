@@ -1925,7 +1925,7 @@ we can write the more sensible (see L<Test::More> for a full
 explanation of is() and other testing functions).
 
  is( "1.20.300.4000", sprintf "%vd", pack("U*",1,20,300,4000), 
-                                       "U* produces unicode" );
+                                       "U* produces Unicode" );
 
 Now we'll test that we got that space-at-the-beginning business right:
 
@@ -1936,7 +1936,7 @@ And finally we'll test that we don't make Unicode strings if C<U> is B<not>
 the first active format:
 
  isnt( v1.20.300.4000, sprintf "%vd", pack("C0U*",1,20,300,4000),
-                                       "U* not first isn't unicode" );
+                                       "U* not first isn't Unicode" );
 
 Mustn't forget to change the number of tests which appears at the top,
 or else the automated tester will get confused.  This will either look

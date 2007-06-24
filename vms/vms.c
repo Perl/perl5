@@ -419,7 +419,7 @@ int utf8_flag;
 	    }
 	}
 
-	/* High bit set, but not a unicode character! */
+	/* High bit set, but not a Unicode character! */
 
 	/* Non printing DECMCS or ISO Latin-1 character? */
 	if (*inspec <= 0x9F) {
@@ -6110,7 +6110,7 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts, int * u
     }
     if ((*cp2 == '^')) {
 	/* EFS file escape, pass the next character as is */
-	/* Fix me: HEX encoding for UNICODE not implemented */
+	/* Fix me: HEX encoding for Unicode not implemented */
 	cp2++;
     }
     else if ( *cp2 == '.') {
@@ -6125,7 +6125,7 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts, int * u
   for (; cp2 <= dirend; cp2++) {
     if ((*cp2 == '^')) {
 	/* EFS file escape, pass the next character as is */
-	/* Fix me: HEX encoding for UNICODE not implemented */
+	/* Fix me: HEX encoding for Unicode not implemented */
 	*(cp1++) = *(++cp2);
         /* An escaped dot stays as is -- don't convert to slash */
         if (*cp2 == '.') cp2++;
@@ -9021,7 +9021,7 @@ Perl_readdir(pTHX_ DIR *dd)
     if (dd->flags & PERL_VMSDIR_M_UNIXSPECS) {
 
 	/* Translate the encoded characters. */
-	/* Fixme: unicode handling could result in embedded 0 characters */
+	/* Fixme: Unicode handling could result in embedded 0 characters */
 	if (strchr(dd->entry.d_name, '^') != NULL) {
 	    char new_name[256];
 	    char * q;
@@ -9035,7 +9035,7 @@ Perl_readdir(pTHX_ DIR *dd)
 		/* fix-me */
 		/* if outchars_added > 1, then this is a wide file specification */
 		/* Wide file specifications need to be passed in Perl */
-		/* counted strings apparently with a unicode flag */
+		/* counted strings apparently with a Unicode flag */
 	    }
 	    *q = 0;
 	    strcpy(dd->entry.d_name, new_name);
@@ -12408,7 +12408,7 @@ static int set_features
 	 vms_debug_on_exception = 0;
     }
 
-    /* Create VTF-7 filenames from UNICODE instead of UTF-8 */
+    /* Create VTF-7 filenames from Unicode instead of UTF-8 */
     vms_vtf7_filenames = 0;
     status = sys_trnlnm("PERL_VMS_VTF7_FILENAMES", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {

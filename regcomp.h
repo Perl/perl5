@@ -492,7 +492,7 @@ END_EXTERN_C
  *   n - Root of op tree for (?{EVAL}) item
  *   o - Start op for (?{EVAL}) item
  *   p - Pad for (?{EVAL}) item
- *   s - swash for unicode-style character class, and the multicharacter
+ *   s - swash for Unicode-style character class, and the multicharacter
  *       strings resulting from casefolding the single-character entries
  *       in the character class
  *   t - trie struct

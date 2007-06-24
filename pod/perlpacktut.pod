@@ -660,7 +660,7 @@ Usually you'll want to pack or unpack UTF-8 strings:
 
 Please note: in the general case, you're better off using
 Encode::decode_utf8 to decode a UTF-8 encoded byte string to a Perl
-unicode string, and Encode::encode_utf8 to encode a Perl unicode string
+Unicode string, and Encode::encode_utf8 to encode a Perl Unicode string
 to UTF-8 bytes. These functions provide means of handling invalid byte
 sequences and generally have a friendlier interface.
 

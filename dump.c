@@ -175,9 +175,9 @@ will also be escaped.
 Normally the SV will be cleared before the escaped string is prepared,
 but when PERL_PV_ESCAPE_NOCLEAR is set this will not occur.
 
-If PERL_PV_ESCAPE_UNI is set then the input string is treated as unicode,
+If PERL_PV_ESCAPE_UNI is set then the input string is treated as Unicode,
 if PERL_PV_ESCAPE_UNI_DETECT is set then the input string is scanned
-using C<is_utf8_string()> to determine if it is unicode.
+using C<is_utf8_string()> to determine if it is Unicode.
 
 If PERL_PV_ESCAPE_ALL is set then all input chars will be output
 using C<\x01F1> style escapes, otherwise only chars above 255 will be
@@ -214,7 +214,7 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
     STRLEN wrote = 0;    /* chars written so far */
     STRLEN chsize = 0;   /* size of data to be written */
     STRLEN readsize = 1; /* size of data just read */
-    bool isuni= flags & PERL_PV_ESCAPE_UNI ? 1 : 0; /* is this unicode */
+    bool isuni= flags & PERL_PV_ESCAPE_UNI ? 1 : 0; /* is this Unicode */
     const char *pv  = str;
     const char * const end = pv + count; /* end of string */
     octbuf[0] = esc;

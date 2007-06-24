@@ -53,7 +53,7 @@ ISO 8859-1 or other eight-bit encodings.)
 
 =item C<use encoding> needed to upgrade non-Latin-1 byte strings
 
-By default, there is a fundamental asymmetry in Perl's unicode model:
+By default, there is a fundamental asymmetry in Perl's Unicode model:
 implicit upgrading from byte strings to Unicode strings assumes that
 they were encoded in I<ISO 8859-1 (Latin-1)>, but Unicode strings are
 downgraded with UTF-8 encoding.  This happens because the first 256

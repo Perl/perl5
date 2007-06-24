@@ -1481,8 +1481,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		U8 **points; /* map of where we were in the input string
 		                when reading a given char. For ASCII this
 		                is unnecessary overhead as the relationship
-		                is always 1:1, but for unicode, especially
-		                case folded unicode this is not true. */
+		                is always 1:1, but for Unicode, especially
+		                case folded Unicode this is not true. */
 		U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
 		U8 *bitmap=NULL;
 
