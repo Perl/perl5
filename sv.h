@@ -1839,13 +1839,15 @@ Like C<sv_catsv> but doesn't process magic.
 #define SV_SMAGIC		128
 #define SV_HAS_TRAILING_NUL	256
 #define SV_COW_SHARED_HASH_KEYS	512
+/* This one is only enabled for PERL_OLD_COPY_ON_WRITE */
+#define SV_COW_OTHER_PVS	1024
 
 /* The core is safe for this COW optimisation. XS code on CPAN may not be.
    So only default to doing the COW setup if we're in the core.
  */
 #ifdef PERL_CORE
 #  ifndef SV_DO_COW_SVSETSV
-#    define SV_DO_COW_SVSETSV	SV_COW_SHARED_HASH_KEYS
+#    define SV_DO_COW_SVSETSV	SV_COW_SHARED_HASH_KEYS|SV_COW_OTHER_PVS
 #  endif
 #endif
 

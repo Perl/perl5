@@ -3623,9 +3623,11 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    			/* and won't be needed again, potentially */
 	      !(PL_op && PL_op->op_type == OP_AASSIGN))
 #ifdef PERL_OLD_COPY_ON_WRITE
-            && !((sflags & CAN_COW_MASK) == CAN_COW_FLAGS
-		 && (SvFLAGS(dstr) & CAN_COW_MASK) == CAN_COW_FLAGS
-                 && SvTYPE(sstr) >= SVt_PVIV)
+            && ((flags & SV_COW_SHARED_HASH_KEYS)
+		? (!((sflags & CAN_COW_MASK) == CAN_COW_FLAGS
+		     && (SvFLAGS(dstr) & CAN_COW_MASK) == CAN_COW_FLAGS
+		     && SvTYPE(sstr) >= SVt_PVIV))
+		: 1)
 #endif
             ) {
             /* Failed the swipe test, and it's not a shared hash key either.
