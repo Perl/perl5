@@ -2191,7 +2191,7 @@ lib/Module/Load/t/to_load/ToBeLoaded	Module::Load tests
 lib/Module/Pluggable/Object.pm	Module::Pluggable
 lib/Module/Pluggable.pm	Module::Pluggable
 lib/mro.pm			mro extension
-lib/Net/Changes.libnet		libnet
+lib/Net/Changes			libnet
 lib/Net/Cmd.pm			libnet
 lib/Net/Config.eg		libnet
 lib/Net/Config.pm		libnet
@@ -2237,7 +2237,7 @@ lib/Net/Ping/t/510_ping_udp.t	Ping Net::Ping
 lib/Net/POP3.pm			libnet
 lib/Net/protoent.pm		By-name interface to Perl's builtin getproto*
 lib/Net/protoent.t		See if Net::protoent works
-lib/Net/README.libnet		libnet
+lib/Net/README			libnet
 lib/Net/servent.pm		By-name interface to Perl's builtin getserv*
 lib/Net/servent.t		See if Net::servtent works
 lib/Net/SMTP.pm			libnet
