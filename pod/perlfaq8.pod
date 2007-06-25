@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq8 - System Interaction ($Revision: 8539 $)
+perlfaq8 - System Interaction ($Revision: 9667 $)
 
 =head1 DESCRIPTION
 
@@ -334,12 +334,11 @@ You spend lots and lots of money on dedicated hardware, but this is
 bound to get you talked about.
 
 Seriously, you can't if they are Unix password files--the Unix
-password system employs one-way encryption.  It's more like hashing than
-encryption.  The best you can check is whether something else hashes to
-the same string.  You can't turn a hash back into the original string.
-Programs like Crack
-can forcibly (and intelligently) try to guess passwords, but don't
-(can't) guarantee quick success.
+password system employs one-way encryption.  It's more like hashing
+than encryption.  The best you can do is check whether something else
+hashes to the same string.  You can't turn a hash back into the
+original string. Programs like Crack can forcibly (and intelligently)
+try to guess passwords, but don't (can't) guarantee quick success.
 
 If you're worried about users selecting bad passwords, you should
 proactively check when they try to change their password (by modifying
@@ -818,8 +817,8 @@ like this:
 
 	@ok = `grep @opts '$search_string' @filenames`;
 
-As of Perl 5.8.0, you can use open() with multiple arguments.
-Just like the list forms of system() and exec(), no shell
+As of Perl 5.8.0, you can use C<open()> with multiple arguments.
+Just like the list forms of C<system()> and C<exec()>, no shell
 escapes happen.
 
 	open( GREP, "-|", 'grep', @opts, $search_string, @filenames );
@@ -833,18 +832,19 @@ You can also:
 		while (<GREP>) {
 			chomp;
 			push(@ok, $_);
-	    }
-	    close GREP;
+		}
+		close GREP;
 	} else {
 		exec 'grep', @opts, $search_string, @filenames;
 	}
 
-Just as with system(), no shell escapes happen when you exec() a list.
-Further examples of this can be found in L<perlipc/"Safe Pipe Opens">.
+Just as with C<system()>, no shell escapes happen when you C<exec()> a
+list. Further examples of this can be found in L<perlipc/"Safe Pipe
+Opens">.
 
-Note that if you're use Microsoft, no solution to this vexing issue
-is even possible.  Even if Perl were to emulate fork(), you'd still
-be stuck, because Microsoft does not have a argc/argv-style API.
+Note that if you're using Windows, no solution to this vexing issue is
+even possible.  Even if Perl were to emulate C<fork()>, you'd still be
+stuck, because Windows does not have an argc/argv-style API.
 
 =head2 Why can't my script read from STDIN after I gave it EOF (^D on Unix, ^Z on MS-DOS)?
 
@@ -1073,7 +1073,7 @@ sysopen():
 
 =head2 How do I tell the difference between errors from the shell and perl?
 
-(answer contributed by brian d foy, C<< <bdfoy@cpan.org> >>
+(answer contributed by brian d foy)
 
 When you run a Perl script, something else is running the script for you,
 and that something else may output error messages.  The script might
@@ -1211,42 +1211,101 @@ In general, you usually want C<use> and a proper Perl module.
 
 =head2 How do I keep my own module/library directory?
 
-When you build modules, use the PREFIX and LIB options when generating
-Makefiles:
+When you build modules, tell Perl where to install the modules.
+
+For C<Makefile.PL>-based distributions, use the PREFIX and LIB options
+when generating Makefiles:
 
 	perl Makefile.PL PREFIX=/mydir/perl LIB=/mydir/perl/lib
 
-then either set the PERL5LIB environment variable before you run
-scripts that use the modules/libraries (see L<perlrun>) or say
+You can set this in your CPAN.pm configuration so modules automatically install
+in your private library directory when you use the CPAN.pm shell:
 
-	use lib '/mydir/perl/lib';
+	% cpan
+	cpan> o conf makepl_arg PREFIX=/mydir/perl,LIB=/mydir/perl/lib
+	cpan> o conf commit
 
-This is almost the same as
+For C<Build.PL>-based distributions, use the --install_base option:
 
-	BEGIN {
-	unshift(@INC, '/mydir/perl/lib');
-	}
+	perl Build.PL --install_base /mydir/perl 
 
-except that the lib module checks for machine-dependent subdirectories.
-See Perl's L<lib> for more information.
+You can configure CPAN.pm to automatically use this option too:
+
+	% cpan
+	cpan> o conf mbuild_arg --install_base /mydir/perl
+	cpan> o conf commit
 
 =head2 How do I add the directory my program lives in to the module/library search path?
 
+(contributed by brian d foy)
+
+If you know the directory already, you can add it to C<@INC> as you would
+for any other directory. You might <use lib> if you know the directory
+at compile time:
+
+	use lib $directory;
+	
+The trick in this task is to find the directory. Before your script does
+anything else (such as a C<chdir>), you can get the current working
+directory with the C<Cwd> module, which comes with Perl:
+
+	BEGIN {
+		use Cwd;
+		our $directory = cwd;
+		}
+	
+	use lib $directory;
+	
+You can do a similar thing with the value of C<$0>, which holds the
+script name. That might hold a relative path, but C<rel2abs> can turn
+it into an absolute path. Once you have the 
+
+	BEGIN {	
+		use File::Spec::Functions qw(rel2abs);
+		use File::Basename qw(dirname);
+		
+		my $path   = rel2abs( $0 );
+		our $directory = dirname( $path );
+		}
+		
+	use lib $directory;
+
+The C<FindBin> module, which comes with Perl, might work. It searches
+through C<$ENV{PATH}> (so your script has to be in one of those
+directories). You can then use that directory (in C<$FindBin::Bin>)
+to locate nearby directories you want to add:
+
 	use FindBin;
-	use lib "$FindBin::Bin";
-	use your_own_modules;
+	use lib "$FindBin::Bin/../lib";
 
 =head2 How do I add a directory to my include path (@INC) at runtime?
 
-Here are the suggested ways of modifying your include path:
+Here are the suggested ways of modifying your include path, including
+environment variables, run-time switches, and in-code statements:
 
-	the PERLLIB environment variable
-	the PERL5LIB environment variable
-	the perl -Idir command line flag
-	the use lib pragma, as in
-		use lib "$ENV{HOME}/myown_perllib";
+=over 4
 
-The latter is particularly useful because it knows about machine
+=item the PERLLIB environment variable
+
+	$ export PERLLIB=/path/to/my/dir
+	$ perl program.pl
+
+=item the PERL5LIB environment variable
+
+	$ export PERL5LIB=/path/to/my/dir
+	$ perl program.pl
+
+=item the perl -Idir command line flag
+
+	$ perl -I/path/to/my/dir program.pl
+
+=item the use lib pragma:
+
+	use lib "$ENV{HOME}/myown_perllib";
+
+=back
+
+The last is particularly useful because it knows about machine
 dependent architectures.  The lib.pm pragmatic module was first
 included with the 5.002 release of Perl.
 
@@ -1258,9 +1317,9 @@ but other times it is not.  Modern programs C<use Socket;> instead.
 
 =head1 REVISION
 
-Revision: $Revision: 8539 $
+Revision: $Revision: 9667 $
 
-Date: $Date: 2007-01-11 00:07:14 +0100 (Thu, 11 Jan 2007) $
+Date: $Date: 2007-06-20 06:13:55 +0200 (Wed, 20 Jun 2007) $
 
 See L<perlfaq> for source control details and availability.
 

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 8539 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 9462 $)
 
 =head1 DESCRIPTION
 
@@ -407,7 +407,8 @@ Recommended books on (or mostly on) Perl follow.
 
 I<The Perl Review> ( http://www.theperlreview.com ) focuses on Perl
 almost completely (although it sometimes sneaks in an article about
-another language).
+another language). There's also I<$foo Magazin>, a german magazine
+dedicated to Perl, at ( http://www.foo-magazin.de ).
 
 Magazines that frequently carry quality articles on Perl include I<The
 Perl Review> ( http://www.theperlreview.com ), I<Unix Review> (
@@ -520,9 +521,9 @@ the I<What is CPAN?> question earlier in this document.
 
 =head1 REVISION
 
-Revision: $Revision: 8539 $
+Revision: $Revision: 9462 $
 
-Date: $Date: 2007-01-11 00:07:14 +0100 (Thu, 11 Jan 2007) $
+Date: $Date: 2007-04-27 08:24:33 +0200 (Fri, 27 Apr 2007) $
 
 See L<perlfaq> for source control details and availability.
 

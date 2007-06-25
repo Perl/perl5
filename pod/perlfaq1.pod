@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq1 - General Questions About Perl ($Revision: 8539 $)
+perlfaq1 - General Questions About Perl ($Revision: 9671 $)
 
 =head1 DESCRIPTION
 
@@ -325,7 +325,7 @@ to sign email and usenet messages starting in the late 1980s. He
 previously used the phrase with many subjects ("Just another x hacker,"),
 so to distinguish his JAPH, he started to write them as Perl programs:
 
-	print "Just another Perl hacker,";
+	print "Just another Perl hacker, ";
 
 Note the trailing comma and space, which allows the addition of other
 JAxH clauses for his many other interests.
@@ -390,9 +390,9 @@ You might find these links useful:
 
 =head1 REVISION
 
-Revision: $Revision: 8539 $
+Revision: $Revision: 9671 $
 
-Date: $Date: 2007-01-11 00:07:14 +0100 (Thu, 11 Jan 2007) $
+Date: $Date: 2007-06-23 18:38:20 +0200 (Sat, 23 Jun 2007) $
 
 See L<perlfaq> for source control details and availability.
 

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 8539 $)
+perlfaq4 - Data Manipulation ($Revision: 9491 $)
 
 =head1 DESCRIPTION
 
@@ -1433,7 +1433,7 @@ that satisfies the condition.
 In general, you usually don't need a linked list in Perl, since with
 regular arrays, you can push and pop or shift and unshift at either
 end, or you can use splice to add and/or remove arbitrary number of
-elements at arbitrary points.  Both pop and shift are both O(1)
+elements at arbitrary points.  Both pop and shift are O(1)
 operations on Perl's dynamic arrays.  In the absence of shifts and
 pops, push in general needs to reallocate on the order every log(N)
 times, and unshift will need to copy pointers each time.
@@ -1615,7 +1615,7 @@ unpublished) of Knuth's I<The Art of Computer Programming>
 and will work on any list:
 
 	#!/usr/bin/perl -n
-	# Fischer-Kause ordered permutation generator
+	# Fischer-Krause ordered permutation generator
 
 	sub permute (&@) {
 		my $code = shift;
@@ -2260,9 +2260,9 @@ the C<PDL> module from CPAN instead--it makes number-crunching easy.
 
 =head1 REVISION
 
-Revision: $Revision: 8539 $
+Revision: $Revision: 9491 $
 
-Date: $Date: 2007-01-11 00:07:14 +0100 (Thu, 11 Jan 2007) $
+Date: $Date: 2007-05-02 13:14:13 +0200 (Wed, 02 May 2007) $
 
 See L<perlfaq> for source control details and availability.
 
