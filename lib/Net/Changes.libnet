@@ -1,3 +1,16 @@
+libnet 1.21  -- Sat May 19 08:53:09 CDT 2007
+
+Bug Fixes
+  * Fix bug causing utf8 encoding of 8bit strings in Net::Cmd
+  * Fix precedence issue in Net::NNTP. Patch from Brendan O'Dea
+  * Fixed bug causing removal of last character on the line when
+    doing ASCII FTP transfers
+
+Enhancements
+  * Add support for ENVID and AUTH to Net::SMTP. Patch by Mark Martinec
+  * Changed default for FTP transfers to be passive
+  * Added support for FTP FEAT command
+
 libnet 1.20  -- Fri Feb  2 19:42:51 CST 2007
 
 Bug Fixes

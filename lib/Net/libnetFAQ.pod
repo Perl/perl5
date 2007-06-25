@@ -301,7 +301,3 @@ being sent or response being received.
 Copyright (c) 1997 Graham Barr.
 All rights reserved.
 
-=for html <hr>
-
-I<$Id: //depot/libnet/Net/libnetFAQ.pod#6 $>
-
