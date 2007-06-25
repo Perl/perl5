@@ -222,7 +222,8 @@ $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 30
 
 $ok= ! MoveFileEx( "CanWrite.txt", "ReadOnly.cp", MOVEFILE_REPLACE_EXISTING )
- &&  Win32API::File::_fileLastError() == 5; # access is denied
+ &&  (Win32API::File::_fileLastError() == 5     # access is denied
+ ||   Win32API::File::_fileLastError() == 183); # already exists
 $ok or print "# ",fileLastError(),"\n";
 print $ok ? "" : "not ", "ok ", ++$test, "\n";	# ok 31
 
