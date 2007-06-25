@@ -59,10 +59,8 @@ XCE_EXPORT struct protoent *xcegetprotobynumber(int number);
 
 #define StartSockets() \
     STMT_START {					\
-	if (!wsock_started) {				\
+	if (!wsock_started)				\
 	    start_sockets();				\
-	    set_socktype();				\
-	}						\
     } STMT_END
 
 #define SOCKET_TEST(x, y) \
@@ -107,11 +105,6 @@ start_sockets(void)
 
     /* atexit((void (*)(void)) EndSockets); */
     wsock_started = 1;
-}
-
-void
-set_socktype(void)
-{
 }
 
 u_long

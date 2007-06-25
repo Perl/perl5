@@ -37,22 +37,11 @@
 #	define TO_SOCKET(x)	(x)
 #endif	/* USE_SOCKETS_AS_HANDLES */
 
-#if defined(USE_ITHREADS)
 #define StartSockets() \
     STMT_START {					\
 	if (!wsock_started)				\
 	    start_sockets();				\
-	set_socktype();                                 \
     } STMT_END
-#else
-#define StartSockets() \
-    STMT_START {					\
-	if (!wsock_started) {				\
-	    start_sockets();				\
-	    set_socktype();				\
-	}						\
-    } STMT_END
-#endif
 
 #define SOCKET_TEST(x, y) \
     STMT_START {					\
@@ -97,12 +86,6 @@ start_sockets(void)
     /* atexit((void (*)(void)) EndSockets); */
     wsock_started = 1;
 }
-
-void
-set_socktype(void)
-{
-}
-
 
 #ifndef USE_SOCKETS_AS_HANDLES
 #undef fdopen
