@@ -9,6 +9,7 @@ WriteMakefile(
     VERSION_FROM  => 'Win32.pm',
     LIBS          => \@libs,
     INSTALLDIRS   => ($] >= 5.008004 ? 'perl' : 'site'),
+    NO_META       => 1,
 
     AUTHOR        => 'Jan Dubois <jand@activestate.com>',
     ABSTRACT_FROM => 'Win32.pm',

@@ -8,7 +8,7 @@ BEGIN {
     require DynaLoader;
 
     @ISA = qw|Exporter DynaLoader|;
-    $VERSION = '0.29';
+    $VERSION = '0.30';
     $XS_VERSION = $VERSION;
     $VERSION = eval $VERSION;
 
@@ -605,7 +605,8 @@ different major/minor version number than Windows XP.
 (8.3) path components where available.  For path components where the
 file system has not generated the short form the returned path will
 use the long form, so this function might still for instance return a
-path containing spaces.  Compare with Win32::GetFullPathName() and
+path containing spaces.  Returns C<undef> when the PATHNAME does not
+exist. Compare with Win32::GetFullPathName() and
 Win32::GetLongPathName().
 
 =item Win32::GetProcAddress(INSTANCE, PROCNAME)
@@ -650,8 +651,8 @@ Returns non zero if the account in whose security context the
 current process/thread is running belongs to the local group of
 Administrators in the built-in system domain; returns 0 if not.
 On Windows Vista it will only return non-zero if the process is
-actually running with elevated privileges.  Returns the undefined
-value and prints a warning if an error occurred.  This function always
+actually running with elevated privileges.  Returns C<undef>
+and prints a warning if an error occurred.  This function always
 returns 1 on Win9X.
 
 =item Win32::IsWinNT()

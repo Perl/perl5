@@ -1337,7 +1337,7 @@ XS(w32_GetShortPathName)
         WCHAR *wlong = sv_to_wstr(aTHX_ ST(0));
         len = GetShortPathNameW(wlong, wshort, countof(wshort));
         Safefree(wlong);
-        if (len < sizeof(wshort)) {
+        if (len && len < sizeof(wshort)) {
             ST(0) = wstr_to_sv(aTHX_ wshort);
             XSRETURN(1);
         }
