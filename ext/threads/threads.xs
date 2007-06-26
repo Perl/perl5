@@ -688,10 +688,8 @@ S_ithread_create(
             thread->init_function = newSV(0);
             sv_copypv(thread->init_function, init_function);
         } else {
-            thread->init_function = sv_dup(init_function, &clone_param);
-            if (SvREFCNT(thread->init_function) == 0) {
-                SvREFCNT_inc_void(thread->init_function);
-            }
+            thread->init_function =
+		SvREFCNT_inc(sv_dup(init_function, &clone_param));
         }
 
         thread->params = sv_dup(params, &clone_param);

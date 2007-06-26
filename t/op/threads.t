@@ -114,11 +114,6 @@ use threads;
 print do 'op/threads_create.pl' || die $@;
 EOI
 
-
-TODO: {
-    no strict 'vars';   # Accessing $TODO from test.pl
-    local $TODO = 'refcount issues with threads';
-
 # Attempt to free unreferenced scalar...
 fresh_perl_is(<<'EOI', 'ok', { }, 'thread sub via scalar');
     use threads;
@@ -134,6 +129,12 @@ fresh_perl_is(<<'EOI', 'ok', { }, 'thread sub via $_[0]');
     thr(sub { })->join;
     print 'ok';
 EOI
+
+TODO: {
+    no strict 'vars';   # Accessing $TODO from test.pl
+    local $TODO = 'refcount issues with threads';
+
+
 
 # Scalars leaked: 1
 foreach my $BLOCK (qw(CHECK INIT)) {
