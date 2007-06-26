@@ -1509,9 +1509,10 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
   dVAR;
   MAGIC* const mg = mg_find((SV*)stash, PERL_MAGIC_overload_table);
   AMT amt;
+  const struct mro_meta* stash_meta = HvMROMETA(stash);
   U32 newgen;
 
-  newgen = PL_sub_generation + HvMROMETA(stash)->cache_gen;
+  newgen = PL_sub_generation + stash_meta->pkg_gen + stash_meta->cache_gen;
   if (mg) {
       const AMT * const amtp = (AMT*)mg->mg_ptr;
       if (amtp->was_ok_am == PL_amagic_generation
@@ -1638,11 +1639,13 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
     MAGIC *mg;
     AMT *amtp;
     U32 newgen;
+    struct mro_meta* stash_meta;
 
     if (!stash || !HvNAME_get(stash))
         return NULL;
 
-    newgen = PL_sub_generation + HvMROMETA(stash)->cache_gen;
+    stash_meta = HvMROMETA(stash);
+    newgen = PL_sub_generation + stash_meta->pkg_gen + stash_meta->cache_gen;
 
     mg = mg_find((SV*)stash, PERL_MAGIC_overload_table);
     if (!mg) {
