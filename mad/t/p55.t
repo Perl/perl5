@@ -62,8 +62,6 @@ use File::Find;
 use Test::Differences;
 
 our %failing = map { $_, 1 } qw|
-../t/op/subst.t
-
 ../t/comp/require.t
 
 ../t/io/layers.t
@@ -83,6 +81,9 @@ our %failing = map { $_, 1 } qw|
 ../t/op/symbolcache.t
 
 ../t/op/threads.t
+
+../t/op/exec.t
+../t/io/say.t
 |;
 
 my @files;
@@ -139,13 +140,13 @@ for (my $i=0; $i<3; $i++) { }
 ########
 for (; $a<3; $a++) { }
 ########
-# TODO
+#
 s//$#foo/ge;
 ########
-# TODO
+#
 s//m#.#/ge;
 ########
-# TODO
+#
 eval { require 5.005 }
 ########
 # TODO Reduced test case from t/io/layers.t

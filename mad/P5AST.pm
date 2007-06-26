@@ -75,6 +75,9 @@ sub p5text {
 	    }
 	    $text .= $newtext;
 	}
+        elsif ($type eq "chomp") {
+            $text =~ s/\n$//g;
+        }
 	elsif ($type) {
 	    $text .= $kid->p5text(@_);
 	}

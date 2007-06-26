@@ -1683,7 +1683,10 @@ sub ast {
     if ($rfirst[-1]->uni ne $llast[-1]->uni) {
 	push @newkids, @rfirst;
     }
-
+    # remove the fake '\n' if /e and '#' in replacement.
+    if (@mods and $mods[0] =~ m/e/ and ($self->madness('R'))[0]->uni =~ m/#/) {
+        unshift @rlast, bless {}, 'chomp'; # hack to remove '\n'
+    }
     push @newkids, $bits->{repl}, @rlast, @mods;
 
     my $retval = $self->newtype->new(Kids => [@newkids]);
