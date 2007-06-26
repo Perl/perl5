@@ -2,7 +2,7 @@
 BEGIN {
      chdir 't' if -d 't';
      @INC = '../lib';
-     require './test.pl';	# for which_perl() etc
+     require './test.pl';
      $| = 1;
 }
 
@@ -18,7 +18,7 @@ BEGIN {
        print "1..0 # Skip: no dynamic loading on miniperl, no threads\n";
        exit 0;
      }
-     plan(6);
+     plan(11);
 }
 use threads;
 
@@ -113,3 +113,49 @@ fresh_perl_is(<<'EOI', 'ok', { }, 'Ensure PL_linestr can be cloned');
 use threads;
 print do 'op/threads_create.pl' || die $@;
 EOI
+
+
+TODO: {
+    no strict 'vars';   # Accessing $TODO from test.pl
+    local $TODO = 'refcount issues with threads';
+
+# Attempt to free unreferenced scalar...
+fresh_perl_is(<<'EOI', 'ok', { }, 'thread sub via scalar');
+    use threads;
+    my $test = sub {};
+    threads->create($test)->join();
+    print 'ok';
+EOI
+
+# Attempt to free unreferenced scalar...
+fresh_perl_is(<<'EOI', 'ok', { }, 'thread sub via $_[0]');
+    use threads;
+    sub thr { threads->new($_[0]); }
+    thr(sub { })->join;
+    print 'ok';
+EOI
+
+# Scalars leaked: 1
+foreach my $BLOCK (qw(CHECK INIT)) {
+    fresh_perl_is(<<EOI, 'ok', { }, "threads in $BLOCK block");
+        use threads;
+        $BLOCK { threads->create(sub {})->join; }
+        print 'ok';
+EOI
+}
+
+# Scalars leaked: 1
+fresh_perl_is(<<'EOI', 'ok', { }, 'Bug #41138');
+    use threads;
+    leak($x);
+    sub leak
+    {
+        local $x;
+        threads->create(sub {})->join();
+    }
+    print 'ok';
+EOI
+
+} # TODO
+
+# EOF
