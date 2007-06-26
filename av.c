@@ -469,17 +469,20 @@ Perl_av_undef(pTHX_ register AV *av)
 
     /* Give any tie a chance to cleanup first */
     if (SvTIED_mg((SV*)av, PERL_MAGIC_tied)) 
-	av_fill(av, -1);   /* mg_clear() ? */
+	av_fill(av, -1);
 
     if (AvREAL(av)) {
 	register I32 key = AvFILLp(av) + 1;
 	while (key)
 	    SvREFCNT_dec(AvARRAY(av)[--key]);
     }
+
     Safefree(AvALLOC(av));
     AvALLOC(av) = NULL;
     AvARRAY(av) = NULL;
     AvMAX(av) = AvFILLp(av) = -1;
+
+    if(SvRMAGICAL(av)) mg_clear((SV*)av);
 }
 
 /*

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-require q(./test.pl); plan(tests => 18);
+require q(./test.pl); plan(tests => 21);
 
 {
     package MRO_A;
@@ -124,4 +124,23 @@ is(eval { MRO_N->testfunc() }, 123);
     $obj = DESTROY_MRO_Dynamic_Child->new();
     undef $obj;
     is($x, 2);
+}
+
+# clearing @ISA in different ways
+{
+    no warnings 'uninitialized';
+    {
+        package ISACLEAR;
+        our @ISA = qw/XX YY ZZ/;
+    }
+    # baseline
+    ok(eq_array(mro::get_linear_isa('ISACLEAR'),[qw/ISACLEAR XX YY ZZ/]));
+
+    # this looks dumb, but it preserves existing behavior for compatibility
+    #  (undefined @ISA elements treated as "main")
+    $ISACLEAR::ISA[1] = undef;
+    ok(eq_array(mro::get_linear_isa('ISACLEAR'),[qw/ISACLEAR XX main ZZ/]));
+
+    undef @ISACLEAR::ISA;
+    ok(eq_array(mro::get_linear_isa('ISACLEAR'),[qw/ISACLEAR/]));
 }
