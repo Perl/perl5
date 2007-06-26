@@ -1,5 +1,12 @@
 Revision history for Perl extension threads.
 
+1.63 Tue Jun 26 21:15:27 EDT 2007
+	- Avoid double-free of the thread function
+	- Added reference in POD to perlmod section on thread safety
+	- Mention leaked and unreferenced scalar warnings in POD
+	- Removed BEGIN in threads.pm
+	- Only need to require Config
+
 1.62 Thu May 17 16:10:49 2007
 	- Fixed :all import option
 	- Fixed problems in test suite
@@ -10,7 +17,7 @@ Revision history for Perl extension threads.
 	- Upgraded ppport.h to Devel::PPPort 3.11
 	- Removed embed.t - unreliable
 
-1.59 - Mon Feb  5 16:05:44 EST 2007
+1.59 Mon Feb  5 16:05:44 EST 2007
 	- POD tweaks per Wolfgang Laun
 
 1.58 Wed Jan 24 13:15:34 EST 2007
@@ -21,10 +28,10 @@ Revision history for Perl extension threads.
 
 1.57 Wed Dec 20 13:10:26 EST 2006
 	- Fixes courtesy of Michael J. Pomraning
-	    Eliminates self joins.
-	    Eliminates multiple, simultaneous joins on a thread.
-	    Protects thread->state variable with mutexes.
-	    Checks that OS join call is successful.
+	    Eliminates self joins
+	    Eliminates multiple, simultaneous joins on a thread
+	    Protects thread->state variable with mutexes
+	    Checks that OS join call is successful
 
 1.56 Fri Dec 15 12:18:47 EST 2006
 	- More fixes to test suite

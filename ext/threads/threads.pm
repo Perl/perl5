@@ -5,28 +5,24 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.62';
+our $VERSION = '1.63';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
+# Verify this Perl supports threads
+require Config;
+if (! $Config::Config{useithreads}) {
+    die("This Perl not built to support threads\n");
+}
 
-BEGIN {
-    # Verify this Perl supports threads
-    use Config;
-    if (! $Config{useithreads}) {
-        die("This Perl not built to support threads\n");
-    }
-
-    # Complain if 'threads' is loaded after 'threads::shared'
-    if ($threads::shared::threads_shared) {
-        warn <<'_MSG_';
+# Complain if 'threads' is loaded after 'threads::shared'
+if ($threads::shared::threads_shared) {
+    warn <<'_MSG_';
 Warning, threads::shared has already been loaded.  To
 enable shared variables, 'use threads' must be called
 before threads::shared or any module that uses it.
 _MSG_
-   }
 }
-
 
 # Declare that we have been loaded
 $threads::threads = 1;
@@ -138,7 +134,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.62
+This document describes threads version 1.63
 
 =head1 SYNOPSIS
 
@@ -863,6 +859,12 @@ problem.
 
 =over
 
+=item Threadsafe modules
+
+See L<perlmod/"Making your module threadsafe"> when creating modules that may
+be used in threaded applications, especially if those modules use non-Perl
+data, or XS code.
+
 =item Using non-threadsafe modules
 
 Unfortunately, you may encounter Perl modules that are not I<threadsafe>.  For
@@ -947,6 +949,11 @@ versions of Perl contain bugs that may manifest themselves despite using the
 latest version of L<threads> from CPAN.  There is no workaround for this other
 than upgrading to the lastest version of Perl.
 
+Even with the lastest version of Perl, it is known that certain constructs
+with threads may result in warning messages concerning leaked scalars or
+unreferenced scalars.  However, such warnings are harmless, and may safely be
+ignored.
+
 =back
 
 =head1 REQUIREMENTS
@@ -959,7 +966,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.62/threads.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.63/threads.pm>
 
 Source repository:
 L<http://code.google.com/p/threads-shared/>
