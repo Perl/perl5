@@ -4,7 +4,7 @@ use 5.006002;
 $VERSION = '0.22';
 require Exporter;
 @ISA		= qw( bigint );
-@EXPORT_OK	= qw( ); 
+@EXPORT_OK 	= qw( PI e ); 
 @EXPORT		= qw( inf NaN ); 
 
 use strict;
@@ -158,7 +158,7 @@ sub import
       splice @a, $j, 1; $j --;
       $oct = \&bigint::_oct_global;
       }
-    else
+    elsif ($_[$i] !~ /^(PI|e)\z/)
       {
       die ("unknown option $_[$i]");
       }
@@ -225,6 +225,9 @@ sub import
     *CORE::GLOBAL::hex = $hex if $hex;
   }
   }
+
+sub PI { local $Math::BigFloat::upgrade = undef; Math::BigFloat::bpi(@_); }
+sub e  { local $Math::BigFloat::upgrade = undef; Math::BigFloat->bone()->bexp(@_); }
 
 1;
 
@@ -328,6 +331,14 @@ handle bareword C<inf> properly.
 
 A shortcut to return Math::BigInt->bnan(). Useful because Perl does not always
 handle bareword C<NaN> properly.
+
+=item e()
+
+Returns Euler's number C<e>, aka exp(1), to the given number of digits.
+
+=item PI()
+
+Returns PI to the given number of digits.
 
 =item upgrade()
 

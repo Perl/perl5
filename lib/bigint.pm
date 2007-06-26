@@ -4,7 +4,7 @@ use 5.006002;
 $VERSION = '0.22';
 use Exporter;
 @ISA		= qw( Exporter );
-@EXPORT_OK	= qw( ); 
+@EXPORT_OK	= qw( PI e ); 
 @EXPORT		= qw( inf NaN ); 
 
 use strict;
@@ -215,7 +215,10 @@ sub import
       splice @a, $j, 1; $j --;
       $oct = \&_oct_global;
       }
-    else { die "unknown option $_[$i]"; }
+    elsif ($_[$i] !~ /^(PI|e)\z/)
+      {
+      die ("unknown option $_[$i]");
+      }
     }
   my $class;
   $_lite = 0;					# using M::BI::L ?
@@ -266,7 +269,7 @@ sub import
   no strict 'refs';
   if (!defined *{"${package}::inf"})
     {
-    $self->export_to_level(1,$self,@a);           # export inf and NaN
+    $self->export_to_level(1,$self,@a);           # export inf and NaN, e and PI
     }
   {
     no warnings 'redefine';
@@ -275,8 +278,10 @@ sub import
   }
   }
 
-sub inf () { Math::BigInt->binf(); }
-sub NaN () { Math::BigInt->bnan(); }
+sub inf () { Math::BigInt::binf(); }
+sub NaN () { Math::BigInt::bnan(); }
+sub PI { Math::BigInt->new(3); }
+sub e { Math::BigInt->new(2); }
 
 1;
 
@@ -488,6 +493,14 @@ handle bareword C<inf> properly.
 
 A shortcut to return Math::BigInt->bnan(). Useful because Perl does not always
 handle bareword C<NaN> properly.
+
+=item e()
+
+Returns Euler's number C<e>, aka exp(1), to the given number of digits.
+
+=item PI()
+
+Returns PI to the given number of digits.
 
 =item upgrade()
 

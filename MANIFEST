@@ -1467,6 +1467,9 @@ lib/bignum/t/bigexp.t		See if bignum works
 lib/bignum/t/bigint.t		See if bigint works
 lib/bignum/t/bignum.t		See if bignum works
 lib/bignum/t/bigrat.t		See if bigrat works
+lib/bignum/t/bii_e_pi.t		See if bigint exports e() and PI()
+lib/bignum/t/bir_e_pi.t		See if bigrat exports e() and PI()
+lib/bignum/t/big_e_pi.t		See if bignum exports e() and PI()
 lib/bignum/t/biinfnan.t		See if bignum works
 lib/bignum/t/bninfnan.t		See if bignum works
 lib/bignum/t/bn_lite.t		See if bignum with Math::BigInt::Lite works
