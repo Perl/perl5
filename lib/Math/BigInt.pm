@@ -2970,33 +2970,30 @@ sub bsin
 
 sub batan2
   { 
-  # calculate arcus tangens of ($x/$y)
+  # calculate arcus tangens of ($y/$x)
  
   # set up parameters
-  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+  my ($self,$y,$x,@r) = (ref($_[0]),@_);
   # objectify is costly, so avoid it
   if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
     {
-    ($self,$x,$y,@r) = objectify(2,@_);
+    ($self,$y,$x,@r) = objectify(2,@_);
     }
 
-  return $x if $x->modify('batan2');
+  return $y if $y->modify('batan2');
 
-  return $x->bnan() if (($x->{sign} eq $nan) ||
-			($y->{sign} eq $nan) ||
-			($x->is_zero() && $y->is_zero()));
+  return $y->bnan() if ($y->{sign} eq $nan) || ($x->{sign} eq $nan);
+
+  return $y->bzero() if	$y->is_zero() && $x->{sign} eq '+';		# x >= 0
 
   # inf handling
-  if (($x->{sign} =~ /^[+-]inf$/) || ($y->{sign} =~ /^[+-]inf$/))
-    {
-    # XXX TODO:
-    return $x->bnan();
-    }
+  # +-inf => --PI/2 => +-1
+  return $y->bone( substr($y->{sign},0,1) ) if $y->{sign} =~ /^[+-]inf$/;
 
-  return $upgrade->new($x)->batan2($upgrade->new($y),@r) if defined $upgrade;
+  return $upgrade->new($y)->batan2($upgrade->new($x),@r) if defined $upgrade;
 
   require Math::BigFloat;
-  my $r = Math::BigFloat->new($x)->batan2(Math::BigFloat->new($y),@r)->as_int();
+  my $r = Math::BigFloat->new($y)->batan2(Math::BigFloat->new($x),@r)->as_int();
 
   $x->{value} = $r->{value};
   $x->{sign} = $r->{sign};
@@ -3744,24 +3741,25 @@ integer.
 
 This method was added in v1.87 of Math::BigInt (June 2007).
 
-=head2 batan()
+=head2 batan2()
 
 	my $x = Math::BigInt->new(1);
-	print $x->batan(100), "\n";
+	my $y = Math::BigInt->new(1);
+	print $y->batan2($x), "\n";
 
-Calculate the arcus tanges of $x, modifying $x in place.
+Calculate the arcus tangens of C<$y> divided by C<$x>, modifying $y in place.
 
 In BigInt, unless upgrading is in effect, the result is truncated to an
 integer.
 
 This method was added in v1.87 of Math::BigInt (June 2007).
 
-=head2 batan2()
+=head2 batan()
 
-	my $x = Math::BigInt->new(1);
-	print $x->batan2(5), "\n";
+	my $x = Math::BigFloat->new(0.5);
+	print $x->batan(100), "\n";
 
-Calculate the arcus tanges of $x / $y, modifying $x in place.
+Calculate the arcus tangens of $x, modifying $x in place.
 
 In BigInt, unless upgrading is in effect, the result is truncated to an
 integer.

@@ -2488,11 +2488,11 @@ sub _atan_inv
   #        sign = 1 - sign
 
   my $a = $MBI->_one();
-  my $b = $MBI->_new($x);
+  my $b = $MBI->_copy($x);
  
-  my $x2  = $MBI->_mul( $MBI->_new($x), $b);		# x2 = x * x
+  my $x2  = $MBI->_mul( $MBI->_copy($x), $b);		# x2 = x * x
   my $d   = $MBI->_new( 3 );				# d = 3
-  my $c   = $MBI->_mul( $MBI->_new($x), $x2);		# c = x ^ 3
+  my $c   = $MBI->_mul( $MBI->_copy($x), $x2);		# c = x ^ 3
   my $two = $MBI->_new( 2 );
 
   # run the first step unconditionally
@@ -2567,7 +2567,7 @@ sub _atan_inv
 
     }
 
-#  print "Took $step steps for $x\n";
+#  print "Took $step steps for ", $MBI->_str($x),"\n";
 #  print "a=",$MBI->_str($a),"\n"; print "b=",$MBI->_str($b),"\n";
   # return a/b so that a/b approximates atan(1/x)
   ($a,$b);
@@ -2597,12 +2597,12 @@ sub bpi
   # a few more to prevent rounding errors
   $n += 4;
 
-  my ($a,$b) = $self->_atan_inv(239,$n);
-  my ($c,$d) = $self->_atan_inv(1023,$n);
-  my ($e,$f) = $self->_atan_inv(5832,$n);
-  my ($g,$h) = $self->_atan_inv(110443,$n);
-  my ($i,$j) = $self->_atan_inv(4841182,$n);
-  my ($k,$l) = $self->_atan_inv(6826318,$n);
+  my ($a,$b) = $self->_atan_inv( $MBI->_new(239),$n);
+  my ($c,$d) = $self->_atan_inv( $MBI->_new(1023),$n);
+  my ($e,$f) = $self->_atan_inv( $MBI->_new(5832),$n);
+  my ($g,$h) = $self->_atan_inv( $MBI->_new(110443),$n);
+  my ($i,$j) = $self->_atan_inv( $MBI->_new(4841182),$n);
+  my ($k,$l) = $self->_atan_inv( $MBI->_new(6826318),$n);
 
   $MBI->_mul($a, $MBI->_new(732));
   $MBI->_mul($c, $MBI->_new(128));
@@ -2830,68 +2830,65 @@ sub bsin
 
 sub batan2
   { 
-  # calculate arcus tangens of ($x/$y)
+  # calculate arcus tangens of ($y/$x)
   
   # set up parameters
-  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+  my ($self,$y,$x,@r) = (ref($_[0]),@_);
   # objectify is costly, so avoid it
   if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
     {
-    ($self,$x,$y,@r) = objectify(2,@_);
+    ($self,$y,$x,@r) = objectify(2,@_);
     }
 
-  return $x if $x->modify('batan2');
+  return $y if $y->modify('batan2');
 
-  return $x->bnan() if (($x->{sign} eq $nan) ||
-			($y->{sign} eq $nan) ||
-			($x->is_zero() && $y->is_zero()));
+  return $y->bnan() if ($y->{sign} eq $nan) || ($x->{sign} eq $nan);
 
-  # inf handling
-  if (($x->{sign} =~ /^[+-]inf$/) || ($y->{sign} =~ /^[+-]inf$/))
+  return $upgrade->new($y)->batan2($upgrade->new($x),@r) if defined $upgrade;
+
+  # Y X
+  # 0 0 result is 0
+  # 0 +x result is 0
+  return $y->bzero(@r) if $y->is_zero() && $x->{sign} eq '+';
+
+  # Y X
+  # 0 -x result is PI
+  if ($y->is_zero())
     {
-    # XXX TODO:
-    return $x->bnan();
+    # calculate PI
+    my $pi = $self->bpi(@r);
+    # modify $x in place
+    $y->{_m} = $pi->{_m};
+    $y->{_e} = $pi->{_e};
+    $y->{_es} = $pi->{_es};
+    $y->{sign} = '+';
+    return $y;
     }
 
-  return $upgrade->new($x)->batan2($upgrade->new($y),@r) if defined $upgrade;
-
-  # divide $x by $y
-  $x->bdiv($y)->batan(@r);
-
-  # set the sign of $x depending on $y
-  $x->{sign} = '-' if $y->{sign} eq '-';
-
-  $x;
-  }
-
-sub batan
-  {
-  # Calculate a arcus tangens of x.
-  my ($x,@r) = @_;
-  my $self = ref($x);
-
-  # taylor:       x^3   x^5   x^7   x^9
-  #    atan = x - --- + --- - --- + --- ...
-  #                3     5     7     9 
-
-  # XXX TODO:
-  # This series is only valid if -1 < x < 1, so for other x we need to
-  # find a different way.
-
-  if ($x < -1 || $x > 1)
+  # Y X
+  # +y 0 result is PI/2
+  # -y 0 result is -PI/2
+  if ($y->is_inf() || $x->is_zero())
     {
-    die("$x is out of range for batan()!");
+    # calculate PI/2
+    my $pi = $self->bpi(@r);
+    # modify $x in place
+    $y->{_m} = $pi->{_m};
+    $y->{_e} = $pi->{_e};
+    $y->{_es} = $pi->{_es};
+    # -y => -PI/2, +y => PI/2
+    $y->{sign} = substr($y->{sign},0,1);		# +inf => +
+    $MBI->_div($y->{_m}, $MBI->_new(2));
+    return $y;
     }
-
-  return $x->bzero(@r) if $x->is_zero();
 
   # we need to limit the accuracy to protect against overflow
   my $fallback = 0;
   my ($scale,@params);
-  ($x,@params) = $x->_find_round_parameters(@r);
+  ($y,@params) = $y->_find_round_parameters(@r);
     
-  #         constant object       or error in _find_round_parameters?
-  return $x if $x->modify('batan') || $x->is_nan();
+  # error in _find_round_parameters?
+  return $y if $y->is_nan();
 
   # no rounding at all, so must use fallback
   if (scalar @params == 0)
@@ -2908,6 +2905,146 @@ sub batan
     # the 4 below is empirical, and there might be cases where it is not
     # enough...
     $scale = abs($params[0] || $params[1]) + 4; # take whatever is defined
+    }
+
+  # inlined is_one() && is_one('-')
+  if ($MBI->_is_one($y->{_m}) && $MBI->_is_zero($y->{_e}))
+    {
+    # shortcut: 1 1 result is PI/4
+    # inlined is_one() && is_one('-')
+    if ($MBI->_is_one($x->{_m}) && $MBI->_is_zero($x->{_e}))
+      {
+      # 1,1 => PI/4
+      my $pi_4 = $self->bpi( $scale - 3);
+      # modify $x in place
+      $y->{_m} = $pi_4->{_m};
+      $y->{_e} = $pi_4->{_e};
+      $y->{_es} = $pi_4->{_es};
+      # 1 1 => +
+      # -1 1 => -
+      # 1 -1 => -
+      # -1 -1 => +
+      $y->{sign} = $x->{sign} eq $y->{sign} ? '+' : '-';
+      $MBI->_div($y->{_m}, $MBI->_new(4));
+      return $y;
+      }
+    # shortcut: 1 int(X) result is _atan_inv(X)
+
+    # is integer
+    if ($x->{_es} eq '+')
+      {
+      my $x1 = $MBI->_copy($x->{_m});
+      $MBI->_lsft($x1, $x->{_e},10) unless $MBI->_is_zero($x->{_e});
+
+      my ($a,$b) = $self->_atan_inv($x1, $scale);
+      my $y_sign = $y->{sign};
+      # calculate A/B
+      $y->bone(); $y->{_m} = $a; my $y_d = $self->bone(); $y_d->{_m} = $b;
+      $y->bdiv($y_d, @r);
+      $y->{sign} = $y_sign;
+      return $y;
+      }
+    }
+
+  # handle all other cases
+  #  X  Y
+  # +x +y 0 to PI/2
+  # -x +y PI/2 to PI
+  # +x -y 0 to -PI/2
+  # -x -y -PI/2 to -PI 
+
+  my $y_sign = $y->{sign};
+
+  # divide $x by $y
+  $y->bdiv($x, $scale) unless $x->is_one();
+  $y->batan(@r);
+
+  # restore sign
+  $y->{sign} = $y_sign;
+
+  $y;
+  }
+
+sub batan
+  {
+  # Calculate a arcus tangens of x.
+  my ($x,@r) = @_;
+  my $self = ref($x);
+
+  # taylor:       x^3   x^5   x^7   x^9
+  #    atan = x - --- + --- - --- + --- ...
+  #                3     5     7     9 
+
+  # we need to limit the accuracy to protect against overflow
+  my $fallback = 0;
+  my ($scale,@params);
+  ($x,@params) = $x->_find_round_parameters(@r);
+    
+  #         constant object       or error in _find_round_parameters?
+  return $x if $x->modify('batan') || $x->is_nan();
+
+  if ($x->{sign} =~ /^[+-]inf\z/)
+    {
+    # +inf result is PI/2
+    # -inf result is -PI/2
+    # calculate PI/2
+    my $pi = $self->bpi(@r);
+    # modify $x in place
+    $x->{_m} = $pi->{_m};
+    $x->{_e} = $pi->{_e};
+    $x->{_es} = $pi->{_es};
+    # -y => -PI/2, +y => PI/2
+    $x->{sign} = substr($x->{sign},0,1);		# +inf => +
+    $MBI->_div($x->{_m}, $MBI->_new(2));
+    return $x;
+    }
+
+  return $x->bzero(@r) if $x->is_zero();
+
+  # no rounding at all, so must use fallback
+  if (scalar @params == 0)
+    {
+    # simulate old behaviour
+    $params[0] = $self->div_scale();	# and round to it as accuracy
+    $params[1] = undef;			# disable P
+    $scale = $params[0]+4; 		# at least four more for proper round
+    $params[2] = $r[2];			# round mode by caller or undef
+    $fallback = 1;			# to clear a/p afterwards
+    }
+  else
+    {
+    # the 4 below is empirical, and there might be cases where it is not
+    # enough...
+    $scale = abs($params[0] || $params[1]) + 4; # take whatever is defined
+    }
+
+  # 1 or -1 => PI/4
+  # inlined is_one() && is_one('-')
+  if ($MBI->_is_one($x->{_m}) && $MBI->_is_zero($x->{_e}))
+    {
+    my $pi = $self->bpi($scale - 3);
+    # modify $x in place
+    $x->{_m} = $pi->{_m};
+    $x->{_e} = $pi->{_e};
+    $x->{_es} = $pi->{_es};
+    # leave the sign of $x alone (+1 => +PI/4, -1 => -PI/4)
+    $MBI->_div($x->{_m}, $MBI->_new(4));
+    return $x;
+    }
+  
+  # This series is only valid if -1 < x < 1, so for other x we need to
+  # to calculate PI/ - atan(1/x):
+  my $one = $MBI->_new(1);
+  my $pi = undef;
+  if ($x->{_es} eq '+' && ($MBI->_acmp($x->{_m},$one) >= 0))
+    {
+    # calculate PI/2
+    $pi = $self->bpi($scale - 3);
+    $MBI->_div($pi->{_m}, $MBI->_new(2));
+    # calculate 1/$x:
+    my $x_copy = $x->copy();
+    # modify $x in place
+    $x->bone(); $x->bdiv($x_copy,$scale);
     }
 
   # when user set globals, they would interfere with our calculation, so
@@ -2952,6 +3089,17 @@ sub batan
     # calculate things for the next term
     $over->bmul($x2);					# $x*$x
     $below->badd($two);					# n += 2
+    }
+
+  if (defined $pi)
+    {
+    my $x_copy = $x->copy();
+    # modify $x in place
+    $x->{_m} = $pi->{_m};
+    $x->{_e} = $pi->{_e};
+    $x->{_es} = $pi->{_es};
+    # PI/2 - $x
+    $x->bsub($x_copy);
     }
 
   # shortcut to not run through _find_round_parameters again
@@ -3549,6 +3697,10 @@ Math::BigFloat - Arbitrary size floating point math package
   my $sin  = Math::BigFloat->new(1)->bsin(100);		# sinus(1)
   my $atan = Math::BigFloat->new(1)->batan(100);	# arcus tangens(1)
 
+  my $atan2 = Math::BigFloat->new(  1 )->batan2( 1 ,100); # batan(1)
+  my $atan2 = Math::BigFloat->new(  1 )->batan2( 8 ,100); # batan(1/8)
+  my $atan2 = Math::BigFloat->new( -2 )->batan2( 1 ,100); # batan(-2)
+
   # Testing
   $x->is_zero();		# true if arg is +0
   $x->is_nan();			# true if arg is NaN
@@ -3935,21 +4087,23 @@ Calculate the sinus of $x, modifying $x in place.
 
 This method was added in v1.87 of Math::BigInt (June 2007).
 
+=head2 batan2()
+
+	my $y = Math::BigFloat->new(2);
+	my $x = Math::BigFloat->new(3);
+	print $y->batan2($x), "\n";
+
+Calculate the arcus tanges of C<$y> divided by C<$x>, modifying $y in place.
+See also L<batan()>.
+
+This method was added in v1.87 of Math::BigInt (June 2007).
+
 =head2 batan()
 
 	my $x = Math::BigFloat->new(1);
 	print $x->batan(100), "\n";
 
-Calculate the arcus tanges of $x, modifying $x in place.
-
-This method was added in v1.87 of Math::BigInt (June 2007).
-
-=head2 batan2()
-
-	my $x = Math::BigFloat->new(0.5);
-	print $x->batan2(0.5), "\n";
-
-Calculate the arcus tanges of $x / $y, modifying $x in place.
+Calculate the arcus tanges of $x, modifying $x in place. See also L<batan2()>.
 
 This method was added in v1.87 of Math::BigInt (June 2007).
 

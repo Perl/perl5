@@ -176,6 +176,8 @@ while (<DATA>)
        $try .= "\$x->bmodinv(\$y);";
       }elsif ($f eq "digit"){
         $try .= "\$x->digit(\$y);";
+      }elsif ($f eq "batan2"){
+        $try .= "\$x->batan2(\$y);";
       } else {
        # Functions with three arguments
        $try .= "\$z = $class->new(\"$args[2]\");";
@@ -2296,6 +2298,27 @@ NaN:NaN
 inf:inf
 1:2
 2:7
+&batan2
+NaN:1:10:NaN
+NaN:NaN:10:NaN
+1:NaN:10:NaN
+inf:1:14:1
+-inf:1:14:-1
+1:5:13:0
+1:5:14:0
+0:0:10:0
+0:1:14:0
+0:2:14:0
+1:0:14:1
+5:0:14:1
+-1:0:11:-1
+-2:0:77:-1
+2:0:77:1
+-1:5:14:0
+1:5:14:0
+-1:8:14:0
+1:8:14:0
+-1:1:14:0
 &bpi
 77:3
 +0:3
