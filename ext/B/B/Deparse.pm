@@ -21,7 +21,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED),
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : 'RXf_SKIPWHITE');
-$VERSION = 0.81;
+$VERSION = 0.82;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -1107,32 +1107,10 @@ sub lineseq {
 	if defined($self->{'limit_seq'})
 	&& (!defined($limit_seq) || $self->{'limit_seq'} < $limit_seq);
     local $self->{'limit_seq'} = $limit_seq;
-    for (my $i = 0; $i < @ops; $i++) {
-	$expr = "";
-	if (is_state $ops[$i]) {
-	    $expr = $self->deparse($ops[$i], 0);
-	    $i++;
-	    if ($i > $#ops) {
-		push @exprs, $expr;
-		last;
-	    }
-	}
-	if (!is_state $ops[$i] and (my $ls = $ops[$i+1]) and
-	    !null($ops[$i+1]) and $ops[$i+1]->name eq "lineseq")
-	{
-	    if ($ls->first && !null($ls->first) && is_state($ls->first)
-		&& (my $sib = $ls->first->sibling)) {
-		if (!null($sib) && $sib->name eq "leaveloop") {
-		    push @exprs, $expr . $self->for_loop($ops[$i], 0);
-		    $i++;
-		    next;
-		}
-	    }
-	}
-	$expr .= $self->deparse($ops[$i], (@ops != 1)/2);
-	$expr =~ s/;\n?\z//;
-	push @exprs, $expr;
-    }
+
+    $self->walk_lineseq($root, \@ops,
+		       sub { push @exprs, $_[0]} );
+
     my $body = join(";\n", grep {length} @exprs);
     my $subs = "";
     if (defined $root && defined $limit_seq && !$self->{'in_format'}) {
@@ -1197,28 +1175,31 @@ sub deparse_root {
     for (my $kid = $op->first->sibling; !null($kid); $kid = $kid->sibling) {
 	push @kids, $kid;
     }
+    $self->walk_lineseq($op, \@kids,
+			sub { print $self->indent($_[0].';');
+			      print "\n" unless $_[1] == $#kids;
+			  });
+}
+
+sub walk_lineseq {
+    my ($self, $op, $kids, $callback) = @_;
+    my @kids = @$kids;
     for (my $i = 0; $i < @kids; $i++) {
 	my $expr = "";
 	if (is_state $kids[$i]) {
-	    $expr = $self->deparse($kids[$i], 0);
-	    $i++;
+	    $expr = $self->deparse($kids[$i++], 0);
 	    if ($i > $#kids) {
-		print $self->indent($expr);
+		$callback->($expr, $i);
 		last;
 	    }
 	}
 	if (is_for_loop($kids[$i])) {
-	    $expr .= $self->for_loop($kids[$i], 0);
-	    $expr .= ";\n" unless $i == $#kids;
-	    print $self->indent($expr);
-	    $i++;
+	    $callback->($expr . $self->for_loop($kids[$i], 0), $i++);
 	    next;
 	}
 	$expr .= $self->deparse($kids[$i], (@kids != 1)/2);
 	$expr =~ s/;\n?\z//;
-	$expr .= ";";
-	print $self->indent($expr);
-	print "\n" unless $i == $#kids;
+	$callback->($expr, $i);
     }
 }
 
@@ -1803,8 +1784,7 @@ sub pp_refgen {
 	    return $self->anon_hash_or_list($op, $cx);
 	} elsif (!null($kid->sibling) and
 		 $kid->sibling->name eq "anoncode") {
-	    return "sub " .
-		$self->deparse_sub($self->padval($kid->sibling->targ));
+            return $self->e_anoncode({ code => $self->padval($kid->sibling->targ) });
 	} elsif ($kid->name eq "pushmark") {
             my $sib_name = $kid->sibling->name;
             if ($sib_name =~ /^(pad|rv2)[ah]v$/
@@ -1823,6 +1803,12 @@ sub pp_refgen {
         }
     }
     $self->pfixop($op, $cx, "\\", 20);
+}
+
+sub e_anoncode {
+    my ($self, $info) = @_;
+    my $text = $self->deparse_sub($info->{code});
+    return "sub " . $text;
 }
 
 sub pp_srefgen { pp_refgen(@_) }
@@ -2679,7 +2665,7 @@ sub loop_common {
     return $head . "{\n\t" . $body . "\b}" . $cont;
 }
 
-sub pp_leaveloop { loop_common(@_, "") }
+sub pp_leaveloop { shift->loop_common(@_, "") }
 
 sub for_loop {
     my $self = shift;
@@ -3080,7 +3066,7 @@ sub want_list {
     return ($op->flags & OPf_WANT) == OPf_WANT_LIST;
 }
 
-sub method {
+sub _method {
     my $self = shift;
     my($op, $cx) = @_;
     my $kid = $op->first->sibling; # skip pushmark
@@ -3102,18 +3088,18 @@ sub method {
 	$obj = $kid;
 	$kid = $kid->sibling;
 	for (; not null $kid; $kid = $kid->sibling) {
-	    push @exprs, $self->deparse($kid, 6);
+	    push @exprs, $kid;
 	}
     } else {
 	$obj = $kid;
 	$kid = $kid->sibling;
 	for (; !null ($kid->sibling) && $kid->name ne "method_named";
 	      $kid = $kid->sibling) {
-	    push @exprs, $self->deparse($kid, 6);
+	    push @exprs, $kid
 	}
 	$meth = $kid;
     }
-    $obj = $self->deparse($obj, 24);
+
     if ($meth->name eq "method_named") {
 	$meth = $self->const_sv($meth)->PV;
     } else {
@@ -3122,12 +3108,28 @@ sub method {
 	    # As of 5.005_58, this case is probably obsoleted by the
 	    # method_named case above
 	    $meth = $self->const_sv($meth)->PV; # needs to be bare
-	} else {
-	    $meth = $self->deparse($meth, 1);
 	}
     }
-    my $args = join(", ", @exprs);	
-    $kid = $obj . "->" . $meth;
+
+    return { method => $meth, variable_method => ref($meth),
+             object => $obj, args => \@exprs  };
+}
+
+# compat function only
+sub method {
+    my $self = shift;
+    my $info = $self->_method(@_);
+    return $self->e_method( $self->_method(@_) );
+}
+
+sub e_method {
+    my ($self, $info) = @_;
+    my $obj = $self->deparse($info->{object}, 24);
+
+    my $meth = $info->{method};
+    $meth = $self->deparse($meth, 1) if $info->{variable_method};
+    my $args = join(", ", map { $self->deparse($_, 6) } @{$info->{args}} );
+    my $kid = $obj . "->" . $meth;
     if (length $args) {
 	return $kid . "(" . $args . ")"; # parens mandatory
     } else {
@@ -3217,7 +3219,8 @@ sub check_proto {
 sub pp_entersub {
     my $self = shift;
     my($op, $cx) = @_;
-    return $self->method($op, $cx) unless null $op->first->sibling;
+    return $self->e_method($self->_method($op, $cx))
+        unless null $op->first->sibling;
     my $prefix = "";
     my $amper = "";
     my($kid, @exprs);
