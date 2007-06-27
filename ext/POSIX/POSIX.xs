@@ -1108,9 +1108,14 @@ char *
 setlocale(category, locale = 0)
 	int		category
 	char *		locale
+    PREINIT:
+	char *		retval;
     CODE:
-	RETVAL = setlocale(category, locale);
-	if (RETVAL) {
+	retval = setlocale(category, locale);
+	if (retval) {
+	    /* Save retval since subsequent setlocale() calls
+	     * may overwrite it. */
+	    RETVAL = savepv(retval);
 #ifdef USE_LOCALE_CTYPE
 	    if (category == LC_CTYPE
 #ifdef LC_ALL
@@ -1163,9 +1168,13 @@ setlocale(category, locale = 0)
 	    }
 #endif /* USE_LOCALE_NUMERIC */
 	}
+	else
+	    RETVAL = NULL;
     OUTPUT:
 	RETVAL
-
+    CLEANUP:
+        if (RETVAL)
+	    Safefree(RETVAL);
 
 NV
 acos(x)
