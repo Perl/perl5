@@ -226,8 +226,8 @@ sub import
   }
   }
 
-sub PI { local $Math::BigFloat::upgrade = undef; Math::BigFloat::bpi(@_); }
-sub e  { local $Math::BigFloat::upgrade = undef; Math::BigFloat->bone()->bexp(@_); }
+sub PI () { local $Math::BigFloat::upgrade = undef; Math::BigFloat::bpi(@_); }
+sub e  () { local $Math::BigFloat::upgrade = undef; Math::BigFloat->bone()->bexp(@_); }
 
 1;
 

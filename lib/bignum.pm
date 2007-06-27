@@ -240,8 +240,8 @@ sub import
   }
   }
 
-sub PI { Math::BigFloat::bpi(@_); }
-sub e  { Math::BigFloat->bone->bexp(@_); }
+sub PI () { Math::BigFloat::bpi(@_); }
+sub e  () { Math::BigFloat->bone->bexp(@_); }
 
 1;
 

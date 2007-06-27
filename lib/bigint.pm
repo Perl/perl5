@@ -280,8 +280,8 @@ sub import
 
 sub inf () { Math::BigInt::binf(); }
 sub NaN () { Math::BigInt::bnan(); }
-sub PI { Math::BigInt->new(3); }
-sub e { Math::BigInt->new(2); }
+sub PI  () { Math::BigInt->new(3); }
+sub e   () { Math::BigInt->new(2); }
 
 1;
 
