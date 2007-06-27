@@ -2588,6 +2588,7 @@ sub bpi
     $n = undef if $n eq 'Math::BigFloat';
     }
   $self = ref($self) if ref($self);
+  my $fallback = defined $n ? 0 : 1;
   $n = 40 if !defined $n || $n < 1;
 
   # after 黃見利 (Hwang Chien-Lih) (1997)
@@ -2624,11 +2625,13 @@ sub bpi
   $v->bdiv($v_d, $n);
   $w->bdiv($w_d, $n);
 
-  delete $x->{a}; delete $y->{a}; delete $z->{a};
-  delete $u->{a}; delete $v->{a}; delete $w->{a};
+  delete $x->{_a}; delete $y->{_a}; delete $z->{_a};
+  delete $u->{_a}; delete $v->{_a}; delete $w->{_a};
   $x->badd($y)->bsub($z)->badd($u)->bsub($v)->bsub($w);
 
-  $x->round($n-4);
+  $x->bround($n-4);
+  delete $x->{_a} if $fallback == 1;
+  $x;
   }
 
 sub bcos
@@ -2683,7 +2686,7 @@ sub bcos
   my $x2 = $over->copy();               # X ^ 2; difference between terms
   my $sign = 1;                         # start with -=
   my $below = $self->new(2); my $factorial = $self->new(3);
-  $x->bone(); delete $x->{a}; delete $x->{p};
+  $x->bone(); delete $x->{_a}; delete $x->{_p};
 
   my $limit = $self->new("1E-". ($scale-1));
   #my $steps = 0;
@@ -2782,7 +2785,7 @@ sub bsin
   $over->bmul($x);			# X ^ 3 as starting value
   my $sign = 1;				# start with -=
   my $below = $self->new(6); my $factorial = $self->new(4);
-  delete $x->{a}; delete $x->{p};
+  delete $x->{_a}; delete $x->{_p};
 
   my $limit = $self->new("1E-". ($scale-1));
   #my $steps = 0;
@@ -3065,7 +3068,7 @@ sub batan
   my $sign = 1;				# start with -=
   my $below = $self->new(3);
   my $two = $self->new(2);
-  delete $x->{a}; delete $x->{p};
+  delete $x->{_a}; delete $x->{_p};
 
   my $limit = $self->new("1E-". ($scale-1));
   #my $steps = 0;
