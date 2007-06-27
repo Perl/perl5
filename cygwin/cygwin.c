@@ -11,6 +11,7 @@
 #include <process.h>
 #include <sys/cygwin.h>
 #include <alloca.h>
+#include <dlfcn.h>
 
 /*
  * pp_system() implemented via spawn()
@@ -196,17 +197,21 @@ XS(XS_Cygwin_winpid_to_pid)
 void
 init_os_extras(void)
 {
-    char *file = __FILE__;
-    CV *cv;
     dTHX;
+    char *file = __FILE__;
+    void *handle;
 
     newXS("Cwd::cwd", Cygwin_cwd, file);
     newXS("Cygwin::winpid_to_pid", XS_Cygwin_winpid_to_pid, file);
     newXS("Cygwin::pid_to_winpid", XS_Cygwin_pid_to_winpid, file);
 
-    if ((cv = get_cv("Win32CORE::bootstrap", 0))) {
-	dSP;
-	PUSHMARK(SP);
-	(void)call_sv((SV *)cv, G_EVAL|G_DISCARD|G_VOID);
+    /* Initialize Win32CORE if it has been statically linked. */
+    handle = dlopen(NULL, RTLD_LAZY);
+    if (handle) {
+        void (*pfn_init)(pTHX);
+        pfn_init = (void (*)(pTHX))dlsym(handle, "init_Win32CORE");
+        if (pfn_init)
+            pfn_init(aTHX);
+        dlclose(handle);
     }
 }

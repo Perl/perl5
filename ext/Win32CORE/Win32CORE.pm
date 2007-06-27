@@ -1,17 +1,14 @@
 package Win32CORE;
 
-$VERSION = '0.01';
+$VERSION = '0.02';
 
-use strict;
-use warnings;
-use vars qw($VERSION @ISA);
-use base qw(Exporter DynaLoader);
-no warnings "redefine";
-
-bootstrap Win32CORE $VERSION;
+# There is no reason to load this module explicitly.  It will be
+# initialized using xs_init() when the interpreter is constructed.
 
 1;
+
 __END__
+
 =head1 NAME
 
 Win32CORE - Win32 CORE function stubs

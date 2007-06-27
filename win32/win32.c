@@ -4582,15 +4582,17 @@ Perl_init_os_extras(void)
 {
     dTHX;
     char *file = __FILE__;
-    CV *cv;
-    dXSUB_SYS;
 
-    /* load Win32 CORE stubs, assuming Win32CORE was statically linked */
-    if ((cv = get_cv("Win32CORE::bootstrap", 0))) {
-	dSP;
-	PUSHMARK(SP);
-	(void)call_sv((SV *)cv, G_EVAL|G_DISCARD|G_VOID);
-    }
+    /* Initialize Win32CORE if it has been statically linked. */
+    void (*pfn_init)(pTHX);
+#if defined(__BORLANDC__)
+    /* makedef.pl seems to have given up on fixing this issue in the .def file */
+    pfn_init = (void (*)(pTHX))GetProcAddress((HMODULE)w32_perldll_handle, "_init_Win32CORE");
+#else
+    pfn_init = (void (*)(pTHX))GetProcAddress((HMODULE)w32_perldll_handle, "init_Win32CORE");
+#endif
+    if (pfn_init)
+        pfn_init(aTHX);
 
     newXS("Win32::SetChildShowWindow", w32_SetChildShowWindow, file);
 }
