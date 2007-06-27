@@ -30,7 +30,7 @@ BEGIN {
     }
 
     $| = 1;
-    print("1..31\n");   ### Number of tests that will be run ###
+    print("1..33\n");   ### Number of tests that will be run ###
 };
 
 print("ok 1 - Loaded\n");
@@ -178,6 +178,22 @@ run_perl(prog => 'use threads 1.63;' .
          switches => ($ENV{PERL_CORE}) ? [] : [ '-Mblib' ]);
 is($?, 0, 'coredump in global destruction');
 
+# Attempt to free unreferenced scalar...
+fresh_perl_is(<<'EOI', 'ok', { }, 'thread sub via scalar');
+    use threads;
+    my $test = sub {};
+    threads->create($test)->join();
+    print 'ok';
+EOI
+
+# Attempt to free unreferenced scalar...
+fresh_perl_is(<<'EOI', 'ok', { }, 'thread sub via $_[0]');
+    use threads;
+    sub thr { threads->new($_[0]); }
+    thr(sub { })->join;
+    print 'ok';
+EOI
+
 # test CLONE_SKIP() functionality
 if ($] >= 5.008007) {
     my %c : shared;
@@ -288,11 +304,11 @@ if ($] >= 5.008007) {
         "counts of calls to DESTROY");
 
 } else {
-    print("ok 27 # Skip objs clone skip at depth 0\n");
-    print("ok 28 # Skip objs clone skip at depth 1\n");
-    print("ok 29 # Skip objs clone skip at depth 2\n");
-    print("ok 30 # Skip counts of calls to CLONE_SKIP\n");
-    print("ok 31 # Skip counts of calls to DESTROY\n");
+    print("ok 29 # Skip objs clone skip at depth 0\n");
+    print("ok 30 # Skip objs clone skip at depth 1\n");
+    print("ok 31 # Skip objs clone skip at depth 2\n");
+    print("ok 32 # Skip counts of calls to CLONE_SKIP\n");
+    print("ok 33 # Skip counts of calls to DESTROY\n");
 }
 
 # EOF

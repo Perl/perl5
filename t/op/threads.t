@@ -1,25 +1,26 @@
-#!./perl
+#!perl
+
 BEGIN {
      chdir 't' if -d 't';
      @INC = '../lib';
      require './test.pl';
      $| = 1;
-}
 
-use strict;
-use Config;
-
-BEGIN {
-     if (!$Config{useithreads}) {
-	print "1..0 # Skip: no ithreads\n";
-	exit 0;
+     require Config;
+     if (!$Config::Config{useithreads}) {
+        print "1..0 # Skip: no ithreads\n";
+        exit 0;
      }
      if ($ENV{PERL_CORE_MINITEST}) {
        print "1..0 # Skip: no dynamic loading on miniperl, no threads\n";
        exit 0;
      }
-     plan(11);
+
+     plan(9);
 }
+
+use strict;
+use warnings;
 use threads;
 
 # test that we don't get:
@@ -114,27 +115,10 @@ use threads;
 print do 'op/threads_create.pl' || die $@;
 EOI
 
-# Attempt to free unreferenced scalar...
-fresh_perl_is(<<'EOI', 'ok', { }, 'thread sub via scalar');
-    use threads;
-    my $test = sub {};
-    threads->create($test)->join();
-    print 'ok';
-EOI
-
-# Attempt to free unreferenced scalar...
-fresh_perl_is(<<'EOI', 'ok', { }, 'thread sub via $_[0]');
-    use threads;
-    sub thr { threads->new($_[0]); }
-    thr(sub { })->join;
-    print 'ok';
-EOI
 
 TODO: {
     no strict 'vars';   # Accessing $TODO from test.pl
     local $TODO = 'refcount issues with threads';
-
-
 
 # Scalars leaked: 1
 foreach my $BLOCK (qw(CHECK INIT)) {
