@@ -6,8 +6,8 @@ File::Path - Create or remove directory trees
 
 =head1 VERSION
 
-This document describes version 2.00_04 of File::Path, released
-2007-06-07.
+This document describes version 2.01 of File::Path, released
+2007-06-27.
 
 =head1 SYNOPSIS
 
@@ -371,7 +371,7 @@ BEGIN {
 
 use Exporter ();
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '2.00_04';
+$VERSION = '2.01';
 @ISA     = qw(Exporter);
 @EXPORT  = qw(mkpath rmtree);
 
@@ -394,19 +394,26 @@ sub _croak {
 }
 
 sub mkpath {
-    my $new_style = (
+    my $old_style = (
         UNIVERSAL::isa($_[0],'ARRAY')
         or (@_ == 2 and (defined $_[1] ? $_[1] =~ /\A\d+\z/ : 1))
         or (@_ == 3
             and (defined $_[1] ? $_[1] =~ /\A\d+\z/ : 1)
             and (defined $_[2] ? $_[2] =~ /\A\d+\z/ : 1)
         )
-    ) ? 0 : 1;
+    ) ? 1 : 0;
 
     my $arg;
     my $paths;
 
-    if ($new_style) {
+    if ($old_style) {
+        my ($verbose, $mode);
+        ($paths, $verbose, $mode) = @_;
+        $paths = [$paths] unless UNIVERSAL::isa($paths,'ARRAY');
+        $arg->{verbose} = defined $verbose ? $verbose : 0;
+        $arg->{mode}    = defined $mode    ? $mode    : 0777;
+    }
+    else {
         if (@_ > 0 and UNIVERSAL::isa($_[-1], 'HASH')) {
             $arg = pop @_;
             exists $arg->{mask} and $arg->{mode} = delete $arg->{mask};
@@ -417,13 +424,6 @@ sub mkpath {
             @{$arg}{qw(verbose mode)} = (0, 0777);
         }
         $paths = [@_];
-    }
-    else {
-        my ($verbose, $mode);
-        ($paths, $verbose, $mode) = @_;
-        $paths = [$paths] unless UNIVERSAL::isa($paths,'ARRAY');
-        $arg->{verbose} = defined $verbose ? $verbose : 0;
-        $arg->{mode}    = defined $mode    ? $mode    : 0777;
     }
     return _mkpath($arg, $paths);
 }
@@ -471,31 +471,19 @@ sub _mkpath {
 }
 
 sub rmtree {
-    my $new_style = (
+    my $old_style = (
         UNIVERSAL::isa($_[0],'ARRAY')
         or (@_ == 2 and (defined $_[1] ? $_[1] =~ /\A\d+\z/ : 1))
         or (@_ == 3
             and (defined $_[1] ? $_[1] =~ /\A\d+\z/ : 1)
             and (defined $_[2] ? $_[2] =~ /\A\d+\z/ : 1)
         )
-    ) ? 0 : 1;
+    ) ? 1 : 0;
 
     my $arg;
     my $paths;
 
-    if ($new_style) {
-        if (@_ > 0 and UNIVERSAL::isa($_[-1],'HASH')) {
-            $arg = pop @_;
-            ${$arg->{error}}  = [] if exists $arg->{error};
-            ${$arg->{result}} = [] if exists $arg->{result};
-        }
-        else {
-            @{$arg}{qw(verbose safe)} = (0, 0);
-        }
-        $arg->{depth} = 0;
-        $paths = [@_];
-    }
-    else {
+    if ($old_style) {
         my ($verbose, $safe);
         ($paths, $verbose, $safe) = @_;
         $arg->{verbose} = defined $verbose ? $verbose : 0;
@@ -505,14 +493,21 @@ sub rmtree {
             $paths = [$paths] unless UNIVERSAL::isa($paths,'ARRAY');
         }
         else {
-        if ($arg->{error}) {
-            push @{${$arg->{error}}}, {'' => "No root path(s) specified"};
+            _carp ("No root path(s) specified\n");
+            return 0;
+        }
     }
     else {
-                _carp ("No root path(s) specified\n");
+        if (@_ > 0 and UNIVERSAL::isa($_[-1],'HASH')) {
+            $arg = pop @_;
+            ${$arg->{error}}  = [] if exists $arg->{error};
+            ${$arg->{result}} = [] if exists $arg->{result};
         }
-      return 0;
+        else {
+            @{$arg}{qw(verbose safe)} = (0, 0);
     }
+        $arg->{depth} = 0;
+        $paths = [@_];
     }
     return _rmtree($arg, $paths);
 }
@@ -522,7 +517,7 @@ sub _rmtree {
     my $paths = shift;
     my($count) = 0;
     my (@files, $root);
-    foreach $root (@{$paths}) {
+    foreach $root (@$paths) {
     	if ($Is_MacOS) {
 	    $root = ":$root" if $root !~ /:/;
             $root =~ s/([^:])\z/$1:/;

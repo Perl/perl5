@@ -2,7 +2,7 @@
 
 use strict;
 
-use Test::More tests => 71;
+use Test::More tests => 84;
 
 BEGIN {
     use_ok('File::Path');
@@ -135,6 +135,23 @@ is(scalar(@$list),  4, "list contains 4 elements")
 ok(-d $dir,  "dir a still exists");
 ok(-d $dir2, "dir z still exists");
 
+$dir = catdir($tmp_base,'F');
+
+@created = mkpath($dir, undef, 0770);
+is(scalar(@created), 1, "created directory (old style 2 verbose undef)");
+is($created[0], $dir, "created directory (old style 2 verbose undef) cross-check");
+is(rmtree($dir, undef, 0), 1, "removed directory 2 verbose undef");
+
+@created = mkpath($dir, undef);
+is(scalar(@created), 1, "created directory (old style 2a verbose undef)");
+is($created[0], $dir, "created directory (old style 2a verbose undef) cross-check");
+is(rmtree($dir, undef), 1, "removed directory 2a verbose undef");
+
+@created = mkpath($dir, 0, undef);
+is(scalar(@created), 1, "created directory (old style 3 mode undef)");
+is($created[0], $dir, "created directory (old style 3 mode undef) cross-check");
+is(rmtree($dir, 0, undef), 1, "removed directory 3 verbose undef");
+
 # borderline new-style heuristics
 if (chdir $tmp_base) {
     pass("chdir to temp dir");
@@ -212,6 +229,9 @@ SKIP: {
     rmtree($dir, {error => \$error});
     is( scalar(@$error), 2, 'two errors for an unreadable dir' );
 
+    $dir = catdir('EXTRA', '3', 'T');
+    rmtree($dir, {error => \$error});
+
     $dir = catdir( 'EXTRA', '4' );
     rmtree($dir,  {result => \$list, error => \$err} );
     is( @$list, 0, q{don't follow a symlinked dir} );
@@ -231,15 +251,22 @@ SKIP: {
 }
 
 SKIP: {
-    skip 'Test::Output not available', 10
+    skip 'Test::Output not available', 14
         unless $has_Test_Output;
-
 
     SKIP: {
         $dir = catdir('EXTRA', '3');
         skip "extra scenarios not set up, see eg/setup-extra-tests", 2
             unless -e $dir;
 
+        $dir = catdir('EXTRA', '3', 'U');
+        stderr_like( 
+            sub {rmtree($dir, {verbose => 0})},
+            qr{\bCan't read \Q$dir\E: },
+            q(rmtree can't read root dir)
+        );
+
+        $dir = catdir('EXTRA', '3');
         stderr_like( 
             sub {rmtree($dir, {})},
             qr{\ACan't remove directory \S+: .*? at \S+ line \d+\n},
@@ -267,6 +294,15 @@ and can't restore permissions to \d+
         qr/\ANo root path\(s\) specified\b/,
         "rmtree of nothing carps sensibly"
     );
+
+    stderr_like(
+        sub { rmtree( '', 1 ) },
+        qr/\ANo root path\(s\) specified\b/,
+        "rmtree of empty dir carps sensibly"
+    );
+
+    stderr_is( sub { mkpath() }, '', "mkpath no args does not carp" );
+    stderr_is( sub { rmtree() }, '', "rmtree no args does not carp" );
 
     stdout_is(
         sub {@created = mkpath($dir, 1)},
