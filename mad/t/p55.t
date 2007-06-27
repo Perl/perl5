@@ -72,8 +72,6 @@ our %failing = map { $_, 1 } qw|
 
 ../t/comp/parser.t
 
-../t/op/getppid.t
-
 ../t/op/switch.t
 
 ../t/op/attrhand.t
@@ -159,7 +157,7 @@ $[ = 1
 # TODO from t/comp/parser.t
 $x = 1 for ($[) = 0;
 ########
-# TODO from t/op/getppid.t
+# from t/op/getppid.t
 pipe my ($r, $w)
 ########
 # TODO switch

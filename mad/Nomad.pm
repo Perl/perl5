@@ -674,7 +674,7 @@ sub ast {
 	return P5AST::listop->new(Kids => [@before,@retval]);
     }
 
-    push @retval, $self->madness('o ( [ {');
+    push @retval, $self->madness('o d ( [ {');
 
     my @newkids;
     for my $kid (@{$$self{Kids}}) {
