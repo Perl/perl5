@@ -8,7 +8,7 @@ BEGIN {
 	print "1..0 # Skip: Needs ActivePerl 820 or Perl 5.8.9 or later\n";
 	exit 0;
     }
-    unless ((Win32::FsType())[1] & 4) {
+    if ((((Win32::FsType())[1] & 4) == 0) || (Win32::FsType() =~ /^FAT/)) {
 	print "1..0 # Skip: Filesystem doesn't support Unicode\n";
 	exit 0;
     }
