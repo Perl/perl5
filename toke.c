@@ -5430,18 +5430,7 @@ Perl_yylex(pTHX)
 			    d++;
 			if (*d == ')' && (sv = gv_const_sv(gv))) {
 			    s = d + 1;
-#ifdef PERL_MAD
-			    if (PL_madskills) {
-				char *par = SvPVX(PL_linestr) + PL_realtokenstart; 
-				sv_catpvn(PL_thistoken, par, s - par);
-				if (PL_nextwhite) {
-				    sv_free(PL_nextwhite);
-				    PL_nextwhite = 0;
-				}
-			    }
-			    else
-#endif
-				goto its_constant;
+			    goto its_constant;
 			}
 		    }
 #ifdef PERL_MAD
@@ -5488,7 +5477,7 @@ Perl_yylex(pTHX)
 				"Ambiguous use of -%s resolved as -&%s()",
 				PL_tokenbuf, PL_tokenbuf);
 		    /* Check for a constant sub */
-		    if ((sv = gv_const_sv(gv)) && !PL_madskills) {
+		    if ((sv = gv_const_sv(gv))) {
 		  its_constant:
 			SvREFCNT_dec(((SVOP*)yylval.opval)->op_sv);
 			((SVOP*)yylval.opval)->op_sv = SvREFCNT_inc_simple(sv);

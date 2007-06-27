@@ -64,8 +64,6 @@ use Test::Differences;
 our %failing = map { $_, 1 } qw|
 ../t/comp/require.t
 
-../t/io/layers.t
-
 ../t/op/array.t
 ../t/op/local.t
 ../t/op/substr.t
@@ -147,7 +145,7 @@ s//m#.#/ge;
 #
 eval { require 5.005 }
 ########
-# TODO Reduced test case from t/io/layers.t
+# Reduced test case from t/io/layers.t
 sub PerlIO::F_UTF8 () { 0x00008000 } # from perliol.h
 BEGIN { PerlIO::Layer->find("encoding",1);}
 ########

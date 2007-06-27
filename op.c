@@ -5095,6 +5095,9 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
     dVAR;
     SV *sv = NULL;
 
+    if (PL_madskills)
+	return NULL;
+
     if (!o)
 	return NULL;
 
