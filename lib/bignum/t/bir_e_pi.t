@@ -14,10 +14,12 @@ BEGIN
   plan tests => 4;
   }
 
-use bigrat qw/e PI/;
+use bigrat qw/e PI bexp bpi/;
 
 is (e, "2.718281828459045235360287471352662497757", 'e');
 is (PI, "3.141592653589793238462643383279502884197", 'PI');
 
-is (e(10), "2.718281828", 'e');
-is (PI(10), "3.141592654", 'PI');
+# these tests should actually produce big rationals, but this is not yet
+# implemented:
+is (bexp(1,10), "2.718281828", 'e');
+is (bpi(10), "3.141592654", 'PI');

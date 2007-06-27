@@ -4,8 +4,8 @@ use 5.006002;
 $VERSION = '0.22';
 use Exporter;
 @ISA		= qw( Exporter );
-@EXPORT_OK	= qw( PI e ); 
-@EXPORT		= qw( inf NaN ); 
+@EXPORT_OK	= qw( PI e bpi bexp );
+@EXPORT		= qw( inf NaN );
 
 use strict;
 use overload;
@@ -215,7 +215,7 @@ sub import
       splice @a, $j, 1; $j --;
       $oct = \&_oct_global;
       }
-    elsif ($_[$i] !~ /^(PI|e)\z/)
+    elsif ($_[$i] !~ /^(PI|e|bpi|bexp)\z/)
       {
       die ("unknown option $_[$i]");
       }
@@ -280,8 +280,11 @@ sub import
 
 sub inf () { Math::BigInt::binf(); }
 sub NaN () { Math::BigInt::bnan(); }
-sub PI { Math::BigInt->new(3); }
-sub e  { Math::BigInt->new(2); }
+
+sub PI () { Math::BigInt->new(3); }
+sub e () { Math::BigInt->new(2); }
+sub bpi ($) { Math::BigInt->new(3); }
+sub bexp ($$) { my $x = Math::BigInt->new($_[0]); $x->bexp($_[1]); }
 
 1;
 
@@ -494,13 +497,43 @@ handle bareword C<inf> properly.
 A shortcut to return Math::BigInt->bnan(). Useful because Perl does not always
 handle bareword C<NaN> properly.
 
-=item e()
+=item e
 
-Returns Euler's number C<e>, aka exp(1), to the given number of digits.
+	# perl -Mbigint=e -wle 'print e'
 
-=item PI()
+Returns Euler's number C<e>, aka exp(1). Note that under bigint, this is
+truncated to an integer, and hence simple '2'.
 
-Returns PI to the given number of digits.
+=item PI
+
+	# perl -Mbigint=PI -wle 'print PI'
+
+Returns PI. Note that under bigint, this is truncated to an integer, and hence
+simple '3'.
+
+=item bexp()
+
+	bexp($power,$accuracy);
+
+Returns Euler's number C<e> raised to the appropriate power, to
+the wanted accuracy.
+
+Note that under bigint, the result is truncated to an integer.
+
+Example:
+
+	# perl -Mbigint=bexp -wle 'print bexp(1,80)'
+
+=item bpi()
+
+	bpi($accuracy);
+
+Returns PI to the wanted accuracy. Note that under bigint, this is truncated
+to an integer, and hence simple '3'.
+
+Example:
+
+	# perl -Mbigint=bpi -wle 'print bpi(80)'
 
 =item upgrade()
 

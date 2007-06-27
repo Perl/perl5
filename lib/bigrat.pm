@@ -4,8 +4,8 @@ use 5.006002;
 $VERSION = '0.22';
 require Exporter;
 @ISA		= qw( bigint );
-@EXPORT_OK 	= qw( PI e ); 
-@EXPORT		= qw( inf NaN ); 
+@EXPORT_OK 	= qw( PI e bpi bexp );
+@EXPORT		= qw( inf NaN );
 
 use strict;
 use overload;
@@ -158,7 +158,7 @@ sub import
       splice @a, $j, 1; $j --;
       $oct = \&bigint::_oct_global;
       }
-    elsif ($_[$i] !~ /^(PI|e)\z/)
+    elsif ($_[$i] !~ /^(PI|e|bpi|bexp)\z/)
       {
       die ("unknown option $_[$i]");
       }
@@ -226,8 +226,16 @@ sub import
   }
   }
 
-sub PI { local $Math::BigFloat::upgrade = undef; Math::BigFloat::bpi(@_); }
-sub e  { local $Math::BigFloat::upgrade = undef; Math::BigFloat->bone()->bexp(@_); }
+sub PI () { Math::BigFloat->new('3.141592653589793238462643383279502884197'); }
+sub e () { Math::BigFloat->new('2.718281828459045235360287471352662497757'); }
+
+sub bpi ($) { local $Math::BigFloat::upgrade; Math::BigFloat::bpi(@_); }
+
+sub bexp ($$)
+  {
+  local $Math::BigFloat::upgrade;
+  my $x = Math::BigFloat->new($_[0]); $x->bexp($_[1]);
+  }
 
 1;
 
@@ -332,13 +340,39 @@ handle bareword C<inf> properly.
 A shortcut to return Math::BigInt->bnan(). Useful because Perl does not always
 handle bareword C<NaN> properly.
 
-=item e()
+=item e
 
-Returns Euler's number C<e>, aka exp(1), to the given number of digits.
+	# perl -Mbigrat=e -wle 'print e'
 
-=item PI()
+Returns Euler's number C<e>, aka exp(1).
 
-Returns PI to the given number of digits.
+=item PI
+
+	# perl -Mbigrat=PI -wle 'print PI'
+
+Returns PI.
+
+=item bexp()
+
+	bexp($power,$accuracy);
+
+
+Returns Euler's number C<e> raised to the appropriate power, to
+the wanted accuracy.
+
+Example:
+
+	# perl -Mbigrat=bexp -wle 'print bexp(1,80)'
+
+=item bpi()
+
+	bpi($accuracy);
+
+Returns PI to the wanted accuracy.
+
+Example:
+
+	# perl -Mbigrat=bpi -wle 'print bpi(80)'
 
 =item upgrade()
 
