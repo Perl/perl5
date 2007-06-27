@@ -1518,12 +1518,19 @@ Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
 {
     dVAR;
     SV *val;
+    I32 isa_changing = 0;
 
     if (!entry)
 	return;
     val = HeVAL(entry);
-    if (val && isGV(val) && GvCVu(val) && HvNAME_get(hv))
-        mro_method_changed_in(hv);	/* deletion of method from stash */
+
+    if(HvNAME_get(hv) && val && isGV(val)) {
+        if(GvCVu((GV*)val))
+            mro_method_changed_in(hv);	/* deletion of method from stash */
+        else if(GvAV((GV*)val) && strEQ(GvNAME((GV*)val), "ISA"))
+            isa_changing = 1;
+    }
+
     SvREFCNT_dec(val);
     if (HeKLEN(entry) == HEf_SVKEY) {
 	SvREFCNT_dec(HeKEY_sv(entry));
@@ -1534,6 +1541,8 @@ Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
     else
 	Safefree(HeKEY_hek(entry));
     del_HE(entry);
+
+    if(isa_changing) mro_isa_changed_in(hv);	/* deletion of @ISA from stash */
 }
 
 void
@@ -1844,8 +1853,21 @@ Perl_hv_undef(pTHX_ HV *hv)
     DEBUG_A(Perl_hv_assert(aTHX_ hv));
     xhv = (XPVHV*)SvANY(hv);
 
-    if ((name = HvNAME_get(hv)) && !PL_dirty)
+    /* If it's a stash, undef the @ISA and call
+       mro_isa_changed_in before proceeding with
+       the rest of the destruction */
+    if ((name = HvNAME_get(hv)) && !PL_dirty) {
+        GV** gvp;
+        GV* gv;
+        AV* isa;
+
+        gvp = (GV**)hv_fetchs(hv, "ISA", FALSE);
+        gv = gvp ? *gvp : NULL;
+        isa = (gv && isGV_with_GP(gv)) ? GvAV(gv) : NULL;
+    
+        if(isa) av_undef(isa);
         mro_isa_changed_in(hv);
+    }
 
     hfreeentries(hv);
     if (name) {

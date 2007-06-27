@@ -1217,6 +1217,10 @@ PERL_CALLCONV int	Perl_magic_setisa(pTHX_ SV* sv, MAGIC* mg)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
+PERL_CALLCONV int	Perl_magic_freeisa(pTHX_ SV* sv, MAGIC* mg)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
 PERL_CALLCONV int	Perl_magic_setglob(pTHX_ SV* sv, MAGIC* mg)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
