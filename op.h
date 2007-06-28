@@ -120,7 +120,7 @@ Deprecated.  Use C<GIMME_V> instead.
 				/*  On OP_EXISTS, treat av as av, not avhv.  */
 				/*  On OP_(ENTER|LEAVE)EVAL, don't clear $@ */
 				/*  On OP_ENTERITER, loop var is per-thread */
-				/*  On pushre, re is /\s+/ imp. by split " " */
+				/*  On pushre, rx is used as part of split, e.g. split " " */
 				/*  On regcomp, "use re 'eval'" was in scope */
 				/*  On OP_READLINE, was <$filehandle> */
 				/*  On RV2[ACGHS]V, don't create GV--in

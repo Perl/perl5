@@ -307,7 +307,14 @@ and check for NULL.
 #define RXf_USE_INTUIT_NOML	0x01000000
 #define RXf_USE_INTUIT_ML	0x02000000
 #define RXf_INTUIT_TAIL 	0x04000000
-/* one bit here */
+
+/*
+  Set in Perl_pmruntime if op_flags & OPf_SPECIAL, i.e. split. Will
+  be used by regex engines to check whether they should set
+  RXf_SKIPWHITE
+*/
+#define RXf_SPLIT           0x08000000
+
 #define RXf_USE_INTUIT		(RXf_USE_INTUIT_NOML|RXf_USE_INTUIT_ML)
 
 /* Copy and tainted info */

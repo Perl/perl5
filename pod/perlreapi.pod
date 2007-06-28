@@ -124,20 +124,6 @@ Additional flags:
 
 =over 4
 
-=item RXf_SKIPWHITE
-
-If C<split> is invoked as C<split ' '> or with no arguments (which
-really means C<split(' ', $_>, see L<split|perlfunc/split>), perl will set
-this flag and change the pattern from C<" "> to C<"\s+"> before it's
-passed to the comp routine.
-
-If the flag is present in C<< rx->extflags >> C<split> to delete
-whitespace from the start of the subject string before it's operated
-on. What is considered whitespace depends on whether the subject is a
-UTF-8 string and whether the C<RXf_PMf_LOCALE> flag is set.
-
-This probably always be preserved verbatim in C<< rx->extflags >>.
-
 =item RXf_PMf_LOCALE
 
 Set if C<use locale> is in effect. If present in C<< rx->extflags >>
@@ -156,12 +142,32 @@ compilation. The perl engine for instance may upgrade non-UTF-8
 strings to UTF-8 if the pattern includes constructs such as C<\x{...}>
 that can only match Unicode values.
 
+=item RXf_SPLIT
+
+If C<split> is invoked as C<split ' '> or with no arguments (which
+really means C<split(' ', $_>, see L<split|perlfunc/split>), perl will
+set this flag. The regex engine can then check for it and set the
+SKIPWHITE and WHITE extflags. To do this the perl engine does:
+
+    if (flags & RXf_SPLIT && r->prelen == 1 && r->precomp[0] == ' ')
+        r->extflags |= (RXf_SKIPWHITE|RXf_WHITE);
+
 =back
 
 These flags can be set during compilation to enable optimizations in
 the C<split> operator.
 
 =over 4
+
+=item RXf_SKIPWHITE
+
+If the flag is present in C<< rx->extflags >> C<split> will delete
+whitespace from the start of the subject string before it's operated
+on. What is considered whitespace depends on whether the subject is a
+UTF-8 string and whether the C<RXf_PMf_LOCALE> flag is set.
+
+If RXf_WHITE is set in addition to this flag C<split> will behave like
+C<split " "> under the perl engine.
 
 =item RXf_START_ONLY
 
@@ -180,9 +186,7 @@ without invoking the regex engine. The definition of whitespace varies
 depending on whether the target string is a UTF-8 string and on
 whether RXf_PMf_LOCALE is set.
 
-Perl's engine sets this flag if the pattern is C<\s+>, which it will be if
-the pattern actually was C<\s+> or if it was originally C<" "> (see
-C<RXf_SKIPWHITE> above).
+Perl's engine sets this flag if the pattern is C<\s+>.
 
 =back
 

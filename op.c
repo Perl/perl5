@@ -3424,32 +3424,15 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
     pm = (PMOP*)o;
 
     if (expr->op_type == OP_CONST) {
-	STRLEN plen;
 	SV * const pat = ((SVOP*)expr)->op_sv;
-	const char *p = SvPV_const(pat, plen);
 	U32 pm_flags = pm->op_pmflags & PMf_COMPILETIME;
-	if ((o->op_flags & OPf_SPECIAL) && (plen == 1 && *p == ' ')) {
-	    U32 was_readonly = SvREADONLY(pat);
 
-	    if (was_readonly) {
-		if (SvFAKE(pat)) {
-		    sv_force_normal_flags(pat, 0);
-		    assert(!SvREADONLY(pat));
-		    was_readonly = 0;
-		} else {
-		    SvREADONLY_off(pat);
-		}
-	    }   
+	if (o->op_flags & OPf_SPECIAL)
+	    pm_flags |= RXf_SPLIT;
 
-	    sv_setpvn(pat, "\\s+", 3);
-
-	    SvFLAGS(pat) |= was_readonly;
-
-	    p = SvPV_const(pat, plen);
-	    pm_flags |= RXf_SKIPWHITE;
-	}
-        if (DO_UTF8(pat))
+	if (DO_UTF8(pat))
 	    pm_flags |= RXf_UTF8;
+
 	PM_SETRE(pm, CALLREGCOMP(pat, pm_flags));
 
 #ifdef PERL_MAD
