@@ -151,9 +151,9 @@ typedef struct regexp_engine {
   paren name. >= 1 is reserved for actual numbered captures, i.e. $1,
   $2 etc.
 */
-#define RXf_PREMATCH  -2 /* $` / ${^PREMATCH}  */
-#define RXf_POSTMATCH -1 /* $' / ${^POSTMATCH} */
-#define RXf_MATCH      0 /* $& / ${^MATCH}     */
+#define RX_BUFF_IDX_PREMATCH  -2 /* $` / ${^PREMATCH}  */
+#define RX_BUFF_IDX_POSTMATCH -1 /* $' / ${^POSTMATCH} */
+#define RX_BUFF_IDX_FULLMATCH      0 /* $& / ${^MATCH}     */
 
 /*
   Flags that are passed to the named_buff and named_buff_iter
@@ -163,23 +163,23 @@ typedef struct regexp_engine {
 */
 
 /* The Tie::Hash::NamedCapture operation this is part of, if any */
-#define RXf_HASH_FETCH     0x0001
-#define RXf_HASH_STORE     0x0002
-#define RXf_HASH_DELETE    0x0004
-#define RXf_HASH_CLEAR     0x0008
-#define RXf_HASH_EXISTS    0x0010
-#define RXf_HASH_SCALAR    0x0020
-#define RXf_HASH_FIRSTKEY  0x0040
-#define RXf_HASH_NEXTKEY   0x0080
+#define RXapif_FETCH     0x0001
+#define RXapif_STORE     0x0002
+#define RXapif_DELETE    0x0004
+#define RXapif_CLEAR     0x0008
+#define RXapif_EXISTS    0x0010
+#define RXapif_SCALAR    0x0020
+#define RXapif_FIRSTKEY  0x0040
+#define RXapif_NEXTKEY   0x0080
 
 /* Whether %+ or %- is being operated on */
-#define RXf_HASH_ONE       0x0100 /* %+ */
-#define RXf_HASH_ALL       0x0200 /* %- */
+#define RXapif_ONE       0x0100 /* %+ */
+#define RXapif_ALL       0x0200 /* %- */
 
 /* Whether this is being called from a re:: function */
-#define RXf_HASH_REGNAME         0x0400
-#define RXf_HASH_REGNAMES        0x0800
-#define RXf_HASH_REGNAMES_COUNT  0x1000 
+#define RXapif_REGNAME         0x0400
+#define RXapif_REGNAMES        0x0800
+#define RXapif_REGNAMES_COUNT  0x1000 
 
 /*
 =head1 REGEXP Functions
@@ -301,7 +301,7 @@ and check for NULL.
 
 /* UTF8 related */
 #define RXf_UTF8        	0x00400000
-#define RXf_MATCH_UTF8  	0x00800000
+#define RX_BUFF_IDX_FULLMATCH_UTF8  	0x00800000
 
 /* Intuit related */
 #define RXf_USE_INTUIT_NOML	0x01000000
@@ -359,9 +359,9 @@ and check for NULL.
 	}} STMT_END
 #endif
 
-#define RX_MATCH_UTF8(prog)		((prog)->extflags & RXf_MATCH_UTF8)
-#define RX_MATCH_UTF8_on(prog)		((prog)->extflags |= RXf_MATCH_UTF8)
-#define RX_MATCH_UTF8_off(prog)		((prog)->extflags &= ~RXf_MATCH_UTF8)
+#define RX_MATCH_UTF8(prog)		((prog)->extflags & RX_BUFF_IDX_FULLMATCH_UTF8)
+#define RX_MATCH_UTF8_on(prog)		((prog)->extflags |= RX_BUFF_IDX_FULLMATCH_UTF8)
+#define RX_MATCH_UTF8_off(prog)		((prog)->extflags &= ~RX_BUFF_IDX_FULLMATCH_UTF8)
 #define RX_MATCH_UTF8_set(prog, t)	((t) \
 			? (RX_MATCH_UTF8_on(prog), (PL_reg_match_utf8 = 1)) \
 			: (RX_MATCH_UTF8_off(prog), (PL_reg_match_utf8 = 0)))

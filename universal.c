@@ -1118,11 +1118,11 @@ XS(XS_re_regname)
         XSRETURN_UNDEF;
 
     if (items == 2 && SvTRUE(ST(1))) {
-        flags = RXf_HASH_ALL;
+        flags = RXapif_ALL;
     } else {
-        flags = RXf_HASH_ONE;
+        flags = RXapif_ONE;
     }
-    ret = CALLREG_NAMED_BUFF_FETCH(rx, ST(0), (flags | RXf_HASH_REGNAME));
+    ret = CALLREG_NAMED_BUFF_FETCH(rx, ST(0), (flags | RXapif_REGNAME));
 
     if (ret) {
         if (SvROK(ret))
@@ -1157,14 +1157,14 @@ XS(XS_re_regnames)
         XSRETURN_UNDEF;
 
     if (items == 1 && SvTRUE(ST(0))) {
-        flags = RXf_HASH_ALL;
+        flags = RXapif_ALL;
     } else {
-        flags = RXf_HASH_ONE;
+        flags = RXapif_ONE;
     }
 
     SP -= items;
 
-    ret = CALLREG_NAMED_BUFF_ALL(rx, (flags | RXf_HASH_REGNAMES));
+    ret = CALLREG_NAMED_BUFF_ALL(rx, (flags | RXapif_REGNAMES));
 
     SPAGAIN;
 
@@ -1427,8 +1427,8 @@ XS(XS_Tie_Hash_NamedCapture_flags)
     if (items != 0)
         Perl_croak(aTHX_ "Usage: Tie::Hash::NamedCapture::flags()");
 
-	XPUSHs(sv_2mortal(newSVuv(RXf_HASH_ONE)));
-	XPUSHs(sv_2mortal(newSVuv(RXf_HASH_ALL)));
+	XPUSHs(sv_2mortal(newSVuv(RXapif_ONE)));
+	XPUSHs(sv_2mortal(newSVuv(RXapif_ALL)));
 	PUTBACK;
 	return;
 }

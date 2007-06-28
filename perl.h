@@ -229,31 +229,31 @@
     CALL_FPTR((rx)->engine->numbered_buff_LENGTH)(aTHX_ (rx),(sv),(paren))
 
 #define CALLREG_NAMED_BUFF_FETCH(rx, key, flags) \
-    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), (key), NULL, ((flags) | RXf_HASH_FETCH))
+    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), (key), NULL, ((flags) | RXapif_FETCH))
 
 #define CALLREG_NAMED_BUFF_STORE(rx, key, value, flags) \
-    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), (key), (value), ((flags) | RXf_HASH_STORE))
+    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), (key), (value), ((flags) | RXapif_STORE))
 
 #define CALLREG_NAMED_BUFF_DELETE(rx, key, flags) \
-    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx),(key), NULL, ((flags) | RXf_HASH_DELETE))
+    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx),(key), NULL, ((flags) | RXapif_DELETE))
 
 #define CALLREG_NAMED_BUFF_CLEAR(rx, flags) \
-    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), NULL, NULL, ((flags) | RXf_HASH_CLEAR))
+    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), NULL, NULL, ((flags) | RXapif_CLEAR))
 
 #define CALLREG_NAMED_BUFF_EXISTS(rx, key, flags) \
-    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), (key), NULL, ((flags) | RXf_HASH_EXISTS))
+    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), (key), NULL, ((flags) | RXapif_EXISTS))
 
 #define CALLREG_NAMED_BUFF_FIRSTKEY(rx, flags) \
-    CALL_FPTR((rx)->engine->named_buff_iter)(aTHX_ (rx), NULL, ((flags) | RXf_HASH_FIRSTKEY))
+    CALL_FPTR((rx)->engine->named_buff_iter)(aTHX_ (rx), NULL, ((flags) | RXapif_FIRSTKEY))
 
 #define CALLREG_NAMED_BUFF_NEXTKEY(rx, lastkey, flags) \
-    CALL_FPTR((rx)->engine->named_buff_iter)(aTHX_ (rx), (lastkey), ((flags) | RXf_HASH_NEXTKEY))
+    CALL_FPTR((rx)->engine->named_buff_iter)(aTHX_ (rx), (lastkey), ((flags) | RXapif_NEXTKEY))
 
 #define CALLREG_NAMED_BUFF_SCALAR(rx, flags) \
-    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), NULL, NULL, ((flags) | RXf_HASH_SCALAR))
+    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), NULL, NULL, ((flags) | RXapif_SCALAR))
 
 #define CALLREG_NAMED_BUFF_COUNT(rx) \
-    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), NULL, NULL, RXf_HASH_REGNAMES_COUNT)
+    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), NULL, NULL, RXapif_REGNAMES_COUNT)
 
 #define CALLREG_NAMED_BUFF_ALL(rx, flags) \
     CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), NULL, NULL, flags)

@@ -349,27 +349,27 @@ currently defined:
 Which L<Tie::Hash> operation is being performed from the Perl level on
 C<%+> or C<%+>, if any:
 
-    RXf_HASH_FETCH
-    RXf_HASH_STORE
-    RXf_HASH_DELETE
-    RXf_HASH_CLEAR
-    RXf_HASH_EXISTS
-    RXf_HASH_SCALAR
-    RXf_HASH_FIRSTKEY
-    RXf_HASH_NEXTKEY
+    RXapif_FETCH
+    RXapif_STORE
+    RXapif_DELETE
+    RXapif_CLEAR
+    RXapif_EXISTS
+    RXapif_SCALAR
+    RXapif_FIRSTKEY
+    RXapif_NEXTKEY
 
 Whether C<%+> or C<%-> is being operated on, if any.
 
-    RXf_HASH_ONE /* %+ */
-    RXf_HASH_ALL /* %- */
+    RXapif_ONE /* %+ */
+    RXapif_ALL /* %- */
 
 Whether this is being called as C<re::regname>, C<re::regnames> or
 C<re::regnames_count>, if any. The first two will be combined with
-C<RXf_HASH_ONE> or C<RXf_HASH_ALL>.
+C<RXapif_ONE> or C<RXapif_ALL>.
 
-    RXf_HASH_REGNAME
-    RXf_HASH_REGNAMES
-    RXf_HASH_REGNAMES_COUNT
+    RXapif_REGNAME
+    RXapif_REGNAMES
+    RXapif_REGNAMES_COUNT
 
 Internally C<%+> and C<%-> are implemented with a real tied interface
 via L<Tie::Hash::NamedCapture>. The methods in that package will call
