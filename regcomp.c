@@ -4321,9 +4321,10 @@ redo_first_pass:
     /* Store the count of eval-groups for security checks: */
     RExC_rx->seen_evals = RExC_seen_evals;
     REGC((U8)REG_MAGIC, (char*) RExC_emit++);
-    if (reg(pRExC_state, 0, &flags,1) == NULL)
+    if (reg(pRExC_state, 0, &flags,1) == NULL) {
+	ReREFCNT_dec(r);   
 	return(NULL);
-
+    }
     /* XXXX To minimize changes to RE engine we always allocate
        3-units-long substrs field. */
     Newx(r->substrs, 1, struct reg_substr_data);
