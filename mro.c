@@ -87,6 +87,7 @@ AV*
 Perl_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
 {
     AV* retval;
+    AV* tmp_retval; /* mortal to avoid leaks */
     GV** gvp;
     GV* gv;
     AV* av;
@@ -113,8 +114,8 @@ Perl_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
 
     /* not in cache, make a new one */
 
-    retval = newAV();
-    av_push(retval, newSVpv(stashname, 0)); /* add ourselves at the top */
+    tmp_retval = (AV*)sv_2mortal((SV*)newAV());
+    av_push(tmp_retval, newSVpv(stashname, 0)); /* add ourselves at the top */
 
     /* fetch our @ISA */
     gvp = (GV**)hv_fetchs(stash, "ISA", FALSE);
@@ -146,7 +147,9 @@ Perl_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
             }
             else {
                 /* otherwise, recurse into ourselves for the MRO
-                   of this @ISA member, and append their MRO to ours */
+                   of this @ISA member, and append their MRO to ours.
+                   The recursive call could throw an exception, which
+                   has memory management implications here (tmp_retval) */
 		const AV *const subrv
 		    = mro_get_linear_isa_dfs(basestash, level + 1);
 
@@ -157,11 +160,15 @@ Perl_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
 		SV *const subsv = *subrv_p++;
 		if(!hv_exists_ent(stored, subsv, 0)) {
 		    hv_store_ent(stored, subsv, &PL_sv_undef, 0);
-		    av_push(retval, newSVsv(subsv));
+		    av_push(tmp_retval, newSVsv(subsv));
 		}
             }
         }
     }
+
+    /* make the real retval out of tmp_retval, now that we're
+       past the exception dangers */
+    retval = av_make(AvFILLp(tmp_retval)+1, AvARRAY(tmp_retval));
 
     /* we don't want anyone modifying the cache entry but us,
        and we do so by replacing it completely */
