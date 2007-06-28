@@ -4752,6 +4752,7 @@ reStudy:
     else
         r->paren_names = NULL;
 
+#ifdef STUPID_PATTERN_CHECKS            
     if (r->extflags & RXf_SPLIT && r->prelen == 1 && r->precomp[0] == ' ')
         /* XXX: this should happen BEFORE we compile */
         r->extflags |= (RXf_SKIPWHITE|RXf_WHITE); 
@@ -4759,6 +4760,20 @@ reStudy:
         r->extflags |= RXf_WHITE;
     else if (r->prelen == 1 && r->precomp[0] == '^')
         r->extflags |= RXf_START_ONLY;
+#endif
+    if (r->extflags & RXf_SPLIT && r->prelen == 1 && r->precomp[0] == ' ')
+            /* XXX: this should happen BEFORE we compile */
+            r->extflags |= (RXf_SKIPWHITE|RXf_WHITE); 
+    else {
+        regnode *first = ri->program + 1;
+        char fop = OP(first);
+        char nop = OP(NEXTOPER(first));
+        
+         if (PL_regkind[fop] == BOL && nop == END) 
+            r->extflags |= RXf_START_ONLY;
+        else if (fop == PLUS && nop ==SPACE && OP(regnext(first))==END)
+            r->extflags |= RXf_WHITE;    
+    }
 
 #ifdef DEBUGGING
     if (RExC_paren_names) {
