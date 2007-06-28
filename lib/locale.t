@@ -43,7 +43,12 @@ eval {
 
 # Visual C's CRT goes silly on strings of the form "en_US.ISO8859-1"
 # and mingw32 uses said silly CRT
-$have_setlocale = 0 if (($^O eq 'MSWin32' || $^O eq 'NetWare') && $Config{cc} =~ /^(cl|gcc)/i);
+# This doesn't seem to be an issue any more, at least on Windows XP,
+# so re-enable the tests for Windows XP onwards.
+my $winxp = ($^O eq 'MSWin32' && defined &Win32::GetOSVersion &&
+		join('.', (Win32::GetOSVersion())[1..2]) >= 5.1);
+$have_setlocale = 0 if ((($^O eq 'MSWin32' && !$winxp) || $^O eq 'NetWare') &&
+		$Config{cc} =~ /^(cl|gcc)/i);
 
 # UWIN seems to loop after test 98, just skip for now
 $have_setlocale = 0 if ($^O =~ /^uwin/);
