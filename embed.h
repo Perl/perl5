@@ -686,6 +686,7 @@
 #define refkids			Perl_refkids
 #endif
 #define regdump			Perl_regdump
+#define regdump			Perl_regdump
 #define regclass_swash		Perl_regclass_swash
 #define pregexec		Perl_pregexec
 #define pregfree		Perl_pregfree
@@ -1404,6 +1405,7 @@
 #endif
 #  ifdef DEBUGGING
 #if defined(PERL_CORE) || defined(PERL_EXT)
+#define regdump_extflags	S_regdump_extflags
 #define dumpuntil		S_dumpuntil
 #define put_byte		S_put_byte
 #define dump_trie		S_dump_trie
@@ -2973,6 +2975,7 @@
 #define refkids(a,b)		Perl_refkids(aTHX_ a,b)
 #endif
 #define regdump(a)		Perl_regdump(aTHX_ a)
+#define regdump(a)		Perl_regdump(aTHX_ a)
 #define regclass_swash(a,b,c,d,e)	Perl_regclass_swash(aTHX_ a,b,c,d,e)
 #define pregexec(a,b,c,d,e,f,g)	Perl_pregexec(aTHX_ a,b,c,d,e,f,g)
 #define pregfree(a)		Perl_pregfree(aTHX_ a)
@@ -3691,6 +3694,7 @@
 #endif
 #  ifdef DEBUGGING
 #if defined(PERL_CORE) || defined(PERL_EXT)
+#define regdump_extflags(a,b)	S_regdump_extflags(aTHX_ a,b)
 #define dumpuntil(a,b,c,d,e,f,g,h)	S_dumpuntil(aTHX_ a,b,c,d,e,f,g,h)
 #define put_byte(a,b)		S_put_byte(aTHX_ a,b)
 #define dump_trie(a,b,c,d)	S_dump_trie(aTHX_ a,b,c,d)

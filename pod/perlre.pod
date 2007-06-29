@@ -237,7 +237,7 @@ You'll need to write something like C<m/\Quser\E\@\Qhost/>.
 
 In addition, Perl defines the following:
 X<\w> X<\W> X<\s> X<\S> X<\d> X<\D> X<\X> X<\p> X<\P> X<\C>
-X<\g> X<\k> X<\N> X<\K> X<\v> X<\V>
+X<\g> X<\k> X<\N> X<\K> X<\v> X<\V> X<\h> X<\H>
 X<word> X<whitespace> X<character class> X<backreference>
 
     \w	     Match a "word" character (alphanumeric plus "_")
@@ -670,7 +670,7 @@ whitespace formatting, a simple C<#> will suffice.  Note that Perl closes
 the comment as soon as it sees a C<)>, so there is no way to put a literal
 C<)> in the comment.
 
-=item C<(?kimsx-imsx)>
+=item C<(?pimsx-imsx)>
 X<(?)>
 
 One or more embedded pattern-match modifiers, to be turned on (or
@@ -1346,7 +1346,7 @@ argument, then C<$REGERROR> and C<$REGMARK> are not touched at all.
 =over 4
 
 =item C<(*PRUNE)> C<(*PRUNE:NAME)>
-X<(*PRUNE)> X<(*PRUNE:NAME)> X<\v>
+X<(*PRUNE)> X<(*PRUNE:NAME)>
 
 This zero-width pattern prunes the backtracking tree at the current point
 when backtracked into on failure. Consider the pattern C<A (*PRUNE) B>,
@@ -1355,8 +1355,6 @@ A may backtrack as necessary to match. Once it is reached, matching
 continues in B, which may also backtrack as necessary; however, should B
 not match, then no further backtracking will take place, and the pattern
 will fail outright at the current starting position.
-
-As a shortcut, C<\v> is exactly equivalent to C<(*PRUNE)>.
 
 The following example counts all the possible matching strings in a
 pattern (without actually matching any of them).
@@ -1408,8 +1406,6 @@ to the C<(*SKIP)> pattern being executed cannot be part of I<any> match
 of this pattern. This effectively means that the regex engine "skips" forward
 to this position on failure and tries to match again, (assuming that
 there is sufficient room to match).
-
-As a shortcut C<\V> is exactly equivalent to C<(*SKIP)>.
 
 The name of the C<(*SKIP:NAME)> pattern has special significance. If a
 C<(*MARK:NAME)> was encountered while matching, then it is that position

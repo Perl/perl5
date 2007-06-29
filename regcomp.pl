@@ -187,9 +187,38 @@ print OUT <<EOP;
 };
 #endif /* DOINIT */
 
-/* ex: set ro: */
+/* PL_reg_extflags_name[] - Opcode/state names in string form, for debugging */
+
+#ifndef DOINIT
+EXTCONST char * PL_reg_extflags_name[];
+#else
+EXTCONST char * const PL_reg_extflags_name[] = {
 EOP
 
+open my $fh,"<","regexp.h" or die "Can't read regexp.h: $!";
+my %rxfv;
+my $val;
+while (<$fh>) {
+    if (/#define\s+(RXf_\w+)\s+(0x[A-F\d]+)/i) {
+        $rxfv{$1}= eval $2;
+        $val|=$rxfv{$1};
+    }
+}    
+my %vrxf=reverse %rxfv;
+printf OUT "\t/* Bits in extflags defined: %032b */\n",$val;
+for (0..31) {
+    my $n=$vrxf{2**$_}||"UNUSED_BIT_$_";
+    $n=~s/^RXf_(PMf_)?//;
+    printf OUT qq(\t%-20s/* 0x%08x */\n), 
+        qq("$n",),2**$_;
+}  
+ 
+print OUT <<EOP;
+};
+#endif /* DOINIT */
+
+/* ex: set ro: */
+EOP
 close OUT or die "close $tmp_h: $!";
 
 safer_rename $tmp_h, 'regnodes.h';

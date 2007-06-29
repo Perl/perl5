@@ -818,7 +818,7 @@ all : .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE) \
 	$(X2P) MakePPPort Extensions $(PERLSTATIC)
 	@echo	Everything is up to date. '$(MAKE_BARE) test' to run test suite.
 
-..\regnodes.h : ..\regcomp.sym
+..\regnodes.h : ..\regcomp.sym ..\regcomp.pl ..\regexp.h
 	cd ..
 	regcomp.pl
 	cd win32

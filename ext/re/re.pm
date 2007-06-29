@@ -53,6 +53,7 @@ my %flags = (
     OPTIMISE        => 0x000002,
     TRIEC           => 0x000004,
     DUMP            => 0x000008,
+    FLAGS           => 0x000010,
 
     EXECUTE         => 0x00FF00,
     INTUIT          => 0x000100,

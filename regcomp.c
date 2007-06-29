@@ -4243,21 +4243,21 @@ redo_first_pass:
     r->prelen = plen;
     r->extflags = pm_flags;
     {
-        bool has_k     = ((r->extflags & RXf_PMf_KEEPCOPY) == RXf_PMf_KEEPCOPY);
+        bool has_p     = ((r->extflags & RXf_PMf_KEEPCOPY) == RXf_PMf_KEEPCOPY);
 	bool has_minus = ((r->extflags & RXf_PMf_STD_PMMOD) != RXf_PMf_STD_PMMOD);
 	bool has_runon = ((RExC_seen & REG_SEEN_RUN_ON_COMMENT)==REG_SEEN_RUN_ON_COMMENT);
 	U16 reganch = (U16)((r->extflags & RXf_PMf_STD_PMMOD) >> 12);
 	const char *fptr = STD_PAT_MODS;        /*"msix"*/
 	char *p;
-        r->wraplen = r->prelen + has_minus + has_k + has_runon
+        r->wraplen = r->prelen + has_minus + has_p + has_runon
             + (sizeof(STD_PAT_MODS) - 1)
             + (sizeof("(?:)") - 1);
 
         Newx(r->wrapped, r->wraplen + 1, char );
         p = r->wrapped;
         *p++='('; *p++='?';
-        if (has_k)
-            *p++ = KEEPCOPY_PAT_MOD; /*'k'*/
+        if (has_p)
+            *p++ = KEEPCOPY_PAT_MOD; /*'p'*/
         {
             char *r = p + (sizeof(STD_PAT_MODS) - 1) + has_minus - 1;
             char *colon = r + 1;
@@ -4362,7 +4362,7 @@ reStudy:
 #endif    
 
     /* Dig out information for optimizations. */
-    r->extflags = pm_flags; /* Again? */
+    r->extflags = RExC_flags; /* was pm_op */
     /*dmq: removed as part of de-PMOP: pm->op_pmflags = RExC_flags; */
  
     if (UTF)
@@ -5291,7 +5291,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     register regnode *ender = NULL;
     register I32 parno = 0;
     I32 flags;
-    const I32 oregflags = RExC_flags;
+    U32 oregflags = RExC_flags;
     bool have_branch = 0;
     bool is_open = 0;
     I32 freeze_paren = 0;
@@ -5890,8 +5890,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		       and must be globally applied -- japhy */
                     switch (*RExC_parse) {
 	            CASE_STD_PMMOD_FLAGS_PARSE_SET(flagsp);
-                    case 'o':
-                    case 'g':
+                    case ONCE_PAT_MOD: /* 'o' */
+                    case GLOBAL_PAT_MOD: /* 'g' */
 			if (SIZE_ONLY && ckWARN(WARN_REGEXP)) {
 			    const I32 wflagbit = *RExC_parse == 'o' ? WASTED_O : WASTED_G;
 			    if (! (wastedflags & wflagbit) ) {
@@ -5908,7 +5908,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			}
 			break;
 		        
-		    case 'c':
+		    case CONTINUE_PAT_MOD: /* 'c' */
 			if (SIZE_ONLY && ckWARN(WARN_REGEXP)) {
 			    if (! (wastedflags & WASTED_C) ) {
 				wastedflags |= WASTED_GC;
@@ -5921,10 +5921,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			    }
 			}
 			break;
-	            case 'k':
+	            case KEEPCOPY_PAT_MOD: /* 'p' */
                         if (flagsp == &negflags) {
                             if (SIZE_ONLY && ckWARN(WARN_REGEXP))
-                                vWARN(RExC_parse + 1,"Useless use of (?-k)");
+                                vWARN(RExC_parse + 1,"Useless use of (?-p)");
                         } else {
                             *flagsp |= RXf_PMf_KEEPCOPY;
                         }
@@ -5944,6 +5944,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     case ')':
                         RExC_flags |= posflags;
                         RExC_flags &= ~negflags;
+                        if (paren != ':') {
+                            oregflags |= posflags;
+                            oregflags &= ~negflags;
+                        }
                         nextchar(pRExC_state);
 		        if (paren != ':') {
 		            *flagp = TRYAGAIN;
@@ -8633,6 +8637,27 @@ S_regcurly(register const char *s)
 /*
  - regdump - dump a regexp onto Perl_debug_log in vaguely comprehensible form
  */
+#ifdef DEBUGGING
+void 
+S_regdump_extflags(pTHX_ const char *lead, const U32 flags) {
+    int bit;
+    int set=0;
+    for (bit=0; bit<32; bit++) {
+        if (flags & (1<<bit)) {
+            if (!set++ && lead) 
+                PerlIO_printf(Perl_debug_log, "%s",lead);
+            PerlIO_printf(Perl_debug_log, "%s ",PL_reg_extflags_name[bit]);
+        }	        
+    }	   
+    if (lead)  {
+        if (set) 
+            PerlIO_printf(Perl_debug_log, "\n");
+        else 
+            PerlIO_printf(Perl_debug_log, "%s[none-set]\n",lead);
+    }            
+}   
+#endif
+
 void
 Perl_regdump(pTHX_ const regexp *r)
 {
@@ -8641,6 +8666,7 @@ Perl_regdump(pTHX_ const regexp *r)
     SV * const sv = sv_newmortal();
     SV *dsv= sv_newmortal();
     RXi_GET_DECL(r,ri);
+    GET_RE_DEBUG_FLAGS_DECL;
 
     (void)dumpuntil(r, ri->program, ri->program + 1, NULL, NULL, sv, 0, 0);
 
@@ -8714,6 +8740,7 @@ Perl_regdump(pTHX_ const regexp *r)
     if (r->extflags & RXf_EVAL_SEEN)
 	PerlIO_printf(Perl_debug_log, "with eval ");
     PerlIO_printf(Perl_debug_log, "\n");
+    DEBUG_FLAGS_r(regdump_extflags("r->extflags: ",r->extflags));            
 #else
     PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(r);

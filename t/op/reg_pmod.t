@@ -10,10 +10,11 @@ use strict;
 use warnings;
 
 our @tests = (
-    # /p     Pattern   PRE     MATCH   POST
-    [ 'p',   "456",    "123-", "456",  "-789"],
-    [ '',    "(456)",  "123-", "456",  "-789"],
-    [ '',    "456",    undef,  undef,  undef ],
+    # /p      Pattern   PRE     MATCH   POST
+    [ '/p',   "456",    "123-", "456",  "-789"],
+    [ '(?p)', "456",    "123-", "456",  "-789"],
+    [ '',     "(456)",  "123-", "456",  "-789"],
+    [ '',     "456",    undef,  undef,  undef ],
 );
 
 plan tests => 4 * @tests + 2;
@@ -25,8 +26,17 @@ sub _u($$) { "$_[0] is ".(defined $_[1] ? "'$_[1]'" : "undef") }
 $_ = '123-456-789';
 foreach my $test (@tests) {
     my ($p, $pat,$l,$m,$r) = @$test;
-    my $test_name = "/$pat/$p";
-    my $ok = ok($p ? /$pat/p : /$pat/, $test_name);
+    my $test_name = $p eq '/p'   ? "/$pat/p"
+                  : $p eq '(?p)' ? "/(?p)$pat/"
+                  :                "/$pat/";
+
+    #
+    # Cannot use if/else due to the scope invalidating ${^MATCH} and friends.
+    #
+    my $ok = ok $p eq '/p'   ? /$pat/p
+              : $p eq '(?p)' ? /(?p)$pat/
+              :                /$pat/
+              => $test_name;
     SKIP: {
         skip "/$pat/$p failed to match", 3
             unless $ok;

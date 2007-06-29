@@ -247,7 +247,7 @@ and check for NULL.
 #define RXf_PMf_SINGLELINE	0x00002000 /* /s         */
 #define RXf_PMf_FOLD    	0x00004000 /* /i         */
 #define RXf_PMf_EXTENDED	0x00008000 /* /x         */
-#define RXf_PMf_KEEPCOPY	0x00010000 /* /k         */
+#define RXf_PMf_KEEPCOPY	0x00010000 /* /p         */
 /* these flags are transfered from the PMOP->op_pmflags member during compilation */
 #define RXf_PMf_STD_PMMOD	(RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED)
 #define RXf_PMf_COMPILETIME	(RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_LOCALE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_KEEPCOPY)

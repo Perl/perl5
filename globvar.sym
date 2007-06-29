@@ -29,6 +29,7 @@ opargs
 ppaddr
 regkind
 reg_name
+reg_extflags_name
 sig_name
 sig_num
 simple

@@ -691,6 +691,7 @@ re.pm, especially to the documentation.
 #define RE_DEBUG_COMPILE_OPTIMISE  0x000002
 #define RE_DEBUG_COMPILE_TRIE      0x000004
 #define RE_DEBUG_COMPILE_DUMP      0x000008
+#define RE_DEBUG_COMPILE_FLAGS     0x000010
 
 /* Execute */
 #define RE_DEBUG_EXECUTE_MASK      0x00FF00
@@ -723,7 +724,8 @@ re.pm, especially to the documentation.
     if (re_debug_flags & RE_DEBUG_COMPILE_DUMP) x  )
 #define DEBUG_TRIE_COMPILE_r(x) DEBUG_r( \
     if (re_debug_flags & RE_DEBUG_COMPILE_TRIE) x )
-
+#define DEBUG_FLAGS_r(x) DEBUG_r( \
+    if (re_debug_flags & RE_DEBUG_COMPILE_FLAGS) x )
 /* Execute */
 #define DEBUG_EXECUTE_r(x) DEBUG_r( \
     if (re_debug_flags & RE_DEBUG_EXECUTE_MASK) x  )
