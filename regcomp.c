@@ -8035,12 +8035,16 @@ parseit:
 		{
 		    if (isLOWER(prevvalue)) {
 			for (i = prevvalue; i <= ceilvalue; i++)
-			    if (isLOWER(i))
+			    if (isLOWER(i) && !ANYOF_BITMAP_TEST(ret,i)) {
+				stored++;
 				ANYOF_BITMAP_SET(ret, i);
+			    }
 		    } else {
 			for (i = prevvalue; i <= ceilvalue; i++)
-			    if (isUPPER(i))
+			    if (isUPPER(i) && !ANYOF_BITMAP_TEST(ret,i)) {
+				stored++;
 				ANYOF_BITMAP_SET(ret, i);
+			    }
 		    }
 		}
 		else
