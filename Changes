@@ -29,6 +29,949 @@ Version v5.9.X		Development release working toward v5.10
 --------------
 
 ____________________________________________________________________________
+[ 31502] By: rgs                                   on 2007/06/29  09:00:32
+        Log: Revert change #31489.
+             That change was adding a hook to cope with the case when one was
+             undef'ining *ISA globs, in order to clean up correctly. However, this
+             broke the case where one was assiging an array ref to @ISA, which
+             is likely to be more common.
+             Conclusion: don't undef *ISA. (or more generally don't undef globs
+             that contain magical variables)
+     Branch: perl
+	   ! embed.fnc embed.h hv.c mg.c mro.c perl.h proto.h sv.c
+	   ! t/mro/basic.t
+____________________________________________________________________________
+[ 31501] By: rgs                                   on 2007/06/29  08:29:09
+        Log: Subject: Re: valgrind findings
+             From: "Brandon Black" <blblack@gmail.com>
+             Date: Thu, 28 Jun 2007 15:58:32 -0500
+             Message-ID: <84621a60706281358o3b379b20k2c1e53566587d79b@mail.gmail.com>
+     Branch: perl
+	   ! mro.c
+____________________________________________________________________________
+[ 31500] By: rgs                                   on 2007/06/29  07:58:19
+        Log: Being tired of adjusting the test count of concise-xs.t
+             all the time. Use no_plan instead.
+     Branch: perl
+	   ! ext/B/t/concise-xs.t
+____________________________________________________________________________
+[ 31499] By: rgs                                   on 2007/06/29  06:28:07
+        Log: Small pod fix
+     Branch: perl
+	   ! pod/perlreapi.pod
+____________________________________________________________________________
+[ 31498] By: demerphq                              on 2007/06/29  00:05:57
+        Log: fix overzealous search and replace
+     Branch: perl
+	   ! regexp.h
+____________________________________________________________________________
+[ 31497] By: demerphq                              on 2007/06/28  23:14:39
+        Log: Rename various regex defined so that they have distinct prefixes based on their usage.
+             
+             RXf_ => flags used in pm_flags argument to regcomp 
+             and stored in the regex via rx->extflags
+             PREGf_ => flags stored in rx->intflags
+             RXapif_ => argument flags for regex named capture api
+             RX_BUFF_IDX_ => special indexes to represent $` $' $&
+             used in the numeric capture buffer api
+             
+             PREGf is untouched by this change, but RXf_ is split into RXapif and RX_BUFF_IDX_.
+     Branch: perl
+	   ! mg.c perl.h pod/perlreapi.pod regcomp.c regexp.h universal.c
+____________________________________________________________________________
+[ 31496] By: demerphq                              on 2007/06/28  22:14:14
+        Log: Replace pattern parsing logic with optree "parsing" logic.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 31495] By: demerphq                              on 2007/06/28  22:09:07
+        Log: Subject: [PATCH] Move the RXf_WHITE logic for split " " into the regex engine
+             From: "=?UTF-8?Q?=C3=86var_Arnfj=C3=B6r=C3=B0_Bjarmason?=" 
+             Date: Thu, 28 Jun 2007 20:06:50 +0000
+             <avarab@gmail.com>
+             Message-ID: <51dd1af80706281306i4dbba39em3eeb8da1d67ea27c@mail.gmail.com>
+             
+             (with tweaks)
+     Branch: perl
+	   ! ext/B/t/concise-xs.t op.c op.h pod/perlreapi.pod regcomp.c
+	   ! regexp.h
+____________________________________________________________________________
+[ 31494] By: stevep                                on 2007/06/28  20:33:32
+        Log: Add a TODO test cases RT# 43403.
+     Branch: perl
+	   ! t/op/goto.t
+____________________________________________________________________________
+[ 31493] By: rgs                                   on 2007/06/28  15:05:42
+        Log: Fix tests so they actually test $@. like() demands a qr//.
+     Branch: perl
+	   ! t/op/vec.t
+____________________________________________________________________________
+[ 31492] By: rgs                                   on 2007/06/28  10:55:04
+        Log: New valgrind suppressions.
+     Branch: perl
+	   ! t/perl.supp
+____________________________________________________________________________
+[ 31491] By: steveh                                on 2007/06/28  10:46:39
+        Log: Re-enable the setlocale() tests for Windows XP onwards
+             since they seem to work OK. Not sure about older flavours
+             of Windows, so leave them alone.
+     Branch: perl
+	   ! lib/locale.t
+____________________________________________________________________________
+[ 31490] By: steveh                                on 2007/06/28  10:11:15
+        Log: Subject: RE: Problem in Win32CORE when building PAR-Packer-0.975 with bleadperl on Win32
+             From: "Jan Dubois" <jand@activestate.com>
+             Date: Wed, 27 Jun 2007 15:34:12 -0700
+             Message-ID: <02bd01c7b90b$49863720$dc92a560$@com>
+             
+             Rearranges the initialization of Win32CORE. The Perl interpreter isn't
+             fully initialized when Perl_init_os_extras() in win32/win32.c is called,
+             so it is not safe to use the Perl calling mechanism yet. Fixes a problem
+             building PAR-Packer on Win32.
+     Branch: perl
+	   ! cygwin/cygwin.c ext/Win32CORE/Win32CORE.c
+	   ! ext/Win32CORE/Win32CORE.pm makedef.pl win32/win32.c
+____________________________________________________________________________
+[ 31489] By: rgs                                   on 2007/06/28  06:32:01
+        Log: Subject: Re: [perl #43357] *DESTROY = sub {} at runtime
+             From: "Brandon Black" <blblack@gmail.com>
+             Date: Wed, 27 Jun 2007 10:07:54 -0500
+             Message-ID: <84621a60706270807r7af65546x8d959b131ffa28e6@mail.gmail.com>
+     Branch: perl
+	   ! embed.fnc embed.h hv.c mg.c mro.c perl.h proto.h sv.c
+	   ! t/mro/basic.t
+____________________________________________________________________________
+[ 31488] By: rgs                                   on 2007/06/28  06:17:04
+        Log: Subject: [PATCH-revised] Move tests under 'threads' module
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Wed, 27 Jun 2007 14:15:16 -0400
+             Message-ID: <1ff86f510706271115n6c816334nbde6774792743a54@mail.gmail.com>
+     Branch: perl
+	   ! ext/threads/t/thread.t t/op/threads.t
+____________________________________________________________________________
+[ 31487] By: rgs                                   on 2007/06/28  06:13:31
+        Log: Subject: Re: [PATCH-revised] ext/Win32/t/Unicode.t failures on FAT32 under Cygwin
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Wed, 27 Jun 2007 20:46:39 -0400
+             Message-ID: <1ff86f510706271746r62f921f4s3770df0b92cdf201@mail.gmail.com>
+     Branch: perl
+	   ! ext/Win32/t/Unicode.t
+____________________________________________________________________________
+[ 31486] By: rgs                                   on 2007/06/28  06:10:45
+        Log: Subject: Math::BigFloat - fix bpi() and A [PATCH]
+             From: Tels <nospam-abuse@bloodgate.com>
+             Date: Wed, 27 Jun 2007 18:34:14 +0200
+             Message-Id: <200706271834.14904@bloodgate.com>
+     Branch: perl
+	   + lib/Math/BigInt/t/big_pi_e.t
+	   ! MANIFEST lib/Math/BigFloat.pm
+____________________________________________________________________________
+[ 31485] By: rgs                                   on 2007/06/28  06:03:32
+        Log: Subject: Re: Broken bignum tests [PATCH]
+             From: Tels <nospam-abuse@bloodgate.com>
+             Date: Wed, 27 Jun 2007 19:15:45 +0200
+             Message-Id: <200706271915.46068@bloodgate.com>
+     Branch: perl
+	   ! lib/bigint.pm lib/bignum.pm lib/bignum/t/big_e_pi.t
+	   ! lib/bignum/t/bii_e_pi.t lib/bignum/t/bir_e_pi.t lib/bigrat.pm
+____________________________________________________________________________
+[ 31484] By: rgs                                   on 2007/06/28  05:42:49
+        Log: Subject: [PATCH] bring File-Path up to 2.01
+             From: David Landgren <david@landgren.net>
+             Date: Wed, 27 Jun 2007 21:46:39 +0200
+             Message-ID: <4682BE9F.6080502@landgren.net>
+     Branch: perl
+	   ! lib/File/Path.pm lib/File/Path.t
+____________________________________________________________________________
+[ 31483] By: demerphq                              on 2007/06/28  00:01:54
+        Log: Free memory in case of error/failure to compile.
+             
+             Hopefully valgrind will notice and like. :-)
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 31482] By: steveh                                on 2007/06/27  17:08:01
+        Log: Fix POSIX::setlocale(): the CRT function returns a pointer to a
+             buffer that may be overwritten by subsequent calls to the CRT
+             function, so we must make a safe copy of that buffer for our own
+             use. This fixes lib/locale.t on Win32 with the Borland compiler,
+             but presumably could affect other compilers too.
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[ 31481] By: rgs                                   on 2007/06/27  16:40:10
+        Log: Revert change #31480. The PI and e functions can accept an argument.
+     Branch: perl
+	   ! lib/bigint.pm lib/bignum.pm lib/bigrat.pm
+____________________________________________________________________________
+[ 31480] By: rgs                                   on 2007/06/27  13:02:02
+        Log: Add an empty prototype to functions PI and e
+     Branch: perl
+	   ! lib/bigint.pm lib/bignum.pm lib/bigrat.pm
+____________________________________________________________________________
+[ 31479] By: rgs                                   on 2007/06/27  12:57:52
+        Log: Subject: Re: RFC: bigint et. al exporting PI method? [PATCH]
+             From: Tels <nospam-abuse@bloodgate.com>
+             Date: Tue, 26 Jun 2007 20:56:45 +0200
+             Message-Id: <200706262056.47311@bloodgate.com>
+     Branch: perl
+	   + lib/bignum/t/big_e_pi.t lib/bignum/t/bii_e_pi.t
+	   + lib/bignum/t/bir_e_pi.t
+	   ! MANIFEST lib/bigint.pm lib/bignum.pm lib/bigrat.pm
+____________________________________________________________________________
+[ 31478] By: rgs                                   on 2007/06/27  12:51:22
+        Log: Subject: Math::BigInt take 12 [PATCH]
+             From: Tels <nospam-abuse@bloodgate.com>
+             Date: Tue, 26 Jun 2007 21:00:53 +0200
+             Message-Id: <200706262100.54138@bloodgate.com>
+     Branch: perl
+	   ! lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	   ! lib/Math/BigInt/t/bare_mbf.t lib/Math/BigInt/t/bare_mbi.t
+	   ! lib/Math/BigInt/t/bigfltpm.inc lib/Math/BigInt/t/bigfltpm.t
+	   ! lib/Math/BigInt/t/bigintpm.inc lib/Math/BigInt/t/bigintpm.t
+	   ! lib/Math/BigInt/t/sub_mbf.t lib/Math/BigInt/t/sub_mbi.t
+	   ! lib/Math/BigInt/t/with_sub.t
+____________________________________________________________________________
+[ 31477] By: rgs                                   on 2007/06/27  09:59:11
+        Log: Subject: [PATCH-revised] threads 1.63
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Tue, 26 Jun 2007 21:17:52 -0400
+             Message-ID: <1ff86f510706261817o52ad2e23kbd4efb16b5bed98b@mail.gmail.com>
+     Branch: perl
+	   ! ext/threads/Changes ext/threads/README ext/threads/t/exit.t
+	   ! ext/threads/t/thread.t ext/threads/threads.pm
+____________________________________________________________________________
+[ 31476] By: rgs                                   on 2007/06/27  08:53:02
+        Log: Subject: [PATCH] B::Deparse cleanups
+             From: Chia-liang Kao <clkao@bestpractical.com>
+             Date: Wed, 27 Jun 2007 00:06:56 +0100
+             Message-Id: <1182899216.22414.32.camel@localhost>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm ext/B/t/concise-xs.t ext/B/t/deparse.t
+____________________________________________________________________________
+[ 31475] By: davem                                 on 2007/06/26  21:25:15
+        Log: avoid double-free of the thread function
+     Branch: perl
+	   ! ext/threads/threads.xs t/op/threads.t
+____________________________________________________________________________
+[ 31474] By: davem                                 on 2007/06/26  21:07:02
+        Log: make sure PL_Parser is NULL during early stage of thread clone
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 31473] By: rgs                                   on 2007/06/26  16:12:27
+        Log: Second patch from:
+             Subject: Re: [perl #43357] *DESTROY = sub {} at runtime
+             From: "Brandon Black" <blblack@gmail.com>
+             Date: Tue, 26 Jun 2007 11:05:31 -0500
+             Message-ID: <84621a60706260905x2da6eaf1x4bd7d5223951e52@mail.gmail.com>
+             
+             Fix MRO behaviour when one undefs @ISA
+     Branch: perl
+	   ! av.c t/mro/basic.t
+____________________________________________________________________________
+[ 31472] By: rgs                                   on 2007/06/26  16:10:11
+        Log: First patch from:
+             Subject: Re: [perl #43357] *DESTROY = sub {} at runtime
+             From: "Brandon Black" <blblack@gmail.com>
+             Date: Tue, 26 Jun 2007 11:05:31 -0500
+             Message-ID: <84621a60706260905x2da6eaf1x4bd7d5223951e52@mail.gmail.com>
+             
+             Fix problem recently introduced with loosing a DESTROY when redefined
+             at runtime.
+     Branch: perl
+	   ! gv.c t/mro/basic.t
+____________________________________________________________________________
+[ 31471] By: rgs                                   on 2007/06/26  15:48:51
+        Log: Subject: [PATCH] Add TODO tests for refcount issues related to threads
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Tue, 26 Jun 2007 11:26:25 -0400
+             Message-ID: <1ff86f510706260826h79124373y51d899e53c96b50e@mail.gmail.com>
+     Branch: perl
+	   ! t/op/threads.t
+____________________________________________________________________________
+[ 31470] By: steveh                                on 2007/06/26  09:10:24
+        Log: Upgrade to Win32-0.30
+     Branch: perl
+	   + ext/Win32/t/GetShortPathName.t
+	   ! MANIFEST ext/Win32/Makefile.PL ext/Win32/Win32.pm
+	   ! ext/Win32/Win32.xs ext/Win32/t/Unicode.t
+____________________________________________________________________________
+[ 31469] By: steveh                                on 2007/06/26  07:38:05
+        Log: Subject: [PATCH] Remove dead code from win32/win32sck.c
+             From: "Jan Dubois" <jand@activestate.com>
+             Date: Mon, 25 Jun 2007 17:13:04 -0700
+             Message-ID: <02bb01c7b786$c42099c0$4c61cd40$@com>
+             
+             Subject: RE: [PATCH] Remove dead code from win32/win32sck.c
+             From: "Jan Dubois" <jand@activestate.com>
+             Date: Mon, 25 Jun 2007 17:26:15 -0700
+             Message-ID: <02c801c7b788$9bf7ebe0$d3e7c3a0$@com>
+     Branch: perl
+	   ! win32/win32sck.c win32/wincesck.c
+____________________________________________________________________________
+[ 31468] By: steveh                                on 2007/06/26  07:31:13
+        Log: Subject: [PATCH] Win32 is dual-lived on CPAN
+             From: "Jan Dubois" <jand@activestate.com>
+             Date: Mon, 25 Jun 2007 17:02:24 -0700
+             Message-ID: <02a501c7b785$4774f890$d65ee9b0$@com>
+     Branch: perl
+	   ! Porting/Maintainers.pl
+____________________________________________________________________________
+[ 31467] By: rgs                                   on 2007/06/26  07:22:36
+        Log: Subject: [PATCH] Porting/corecpan.pl -f option doesn't work
+             From: "Jan Dubois" <jand@activestate.com>
+             Date: Mon, 25 Jun 2007 16:55:01 -0700
+             Message-ID: <02a101c7b784$3f79c720$be6d5560$@com>
+     Branch: perl
+	   ! Porting/corecpan.pl
+____________________________________________________________________________
+[ 31466] By: steveh                                on 2007/06/25  15:10:34
+        Log: Revert #30197 and #30219, which #31464 has just made redundant
+     Branch: perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 31465] By: rgs                                   on 2007/06/25  14:26:37
+        Log: Subject: [PATCH] Accept file exists error in ext/Win32API/File/t/file.t
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Mon, 25 Jun 2007 10:23:15 -0400
+             Message-ID: <1ff86f510706250723r4d6c5f5dg203b3f61cdeaa14d@mail.gmail.com>
+     Branch: perl
+	   ! ext/Win32API/File/t/file.t
+____________________________________________________________________________
+[ 31464] By: rgs                                   on 2007/06/25  14:20:04
+        Log: Rename README and Changes for more readability
+     Branch: perl
+	  +> lib/Net/Changes lib/Net/README
+	   - lib/Net/Changes.libnet lib/Net/README.libnet
+	   ! MANIFEST Porting/Maintainers.pl
+____________________________________________________________________________
+[ 31463] By: rgs                                   on 2007/06/25  14:16:28
+        Log: Upgrade to libnet 1.21
+     Branch: perl
+	   + lib/Net/Hostname.pm.eg
+	   - lib/Net/Hostname.eg
+	   ! MANIFEST lib/Net/Changes.libnet lib/Net/Cmd.pm
+	   ! lib/Net/Config.pm lib/Net/Domain.pm lib/Net/FTP.pm
+	   ! lib/Net/FTP/A.pm lib/Net/FTP/I.pm lib/Net/FTP/dataconn.pm
+	   ! lib/Net/NNTP.pm lib/Net/Netrc.pm lib/Net/POP3.pm
+	   ! lib/Net/README.libnet lib/Net/SMTP.pm lib/Net/Time.pm
+	   ! lib/Net/libnetFAQ.pod
+____________________________________________________________________________
+[ 31462] By: rgs                                   on 2007/06/25  12:10:10
+        Log: Apply doc suggestion from:
+             Subject: [perl #43287] perluniintro inaccurate answer to testing encoding validity 
+             From: Danny Rathjens (via RT) <perlbug-followup@perl.org>
+             Date: Thu, 21 Jun 2007 17:35:26 -0700
+             Message-ID: <rt-3.6.HEAD-1276-1182472526-1129.43287-75-0@perl.org>
+     Branch: perl
+	   ! pod/perluniintro.pod
+____________________________________________________________________________
+[ 31461] By: rgs                                   on 2007/06/25  11:41:35
+        Log: Subject: [PATCH] remove op_static
+             From: Paul Johnson <paul@pjcj.net>
+             Date: Fri, 22 Jun 2007 02:13:20 +0200
+             Message-ID: <20070622001320.GD20560@pjcj.net>
+             
+             Plus version bumps
+     Branch: perl
+	   ! ext/B/B.pm ext/B/B.xs ext/B/B/Concise.pm ext/B/B/Debug.pm op.c
+	   ! op.h
+____________________________________________________________________________
+[ 31460] By: rgs                                   on 2007/06/25  10:23:47
+        Log: That test too should be skipped in the core on EBCDIC platforms
+             (because it requires Convert::EBCDIC)
+     Branch: perl
+	   ! lib/Net/t/datasend.t
+____________________________________________________________________________
+[ 31459] By: rgs                                   on 2007/06/25  09:45:21
+        Log: Subject: [Caffeine-Patch] Math::BigInt 1.87 take 11 (add batan2, fix batan, speedup bpi()
+             From: Tels <nospam-abuse@bloodgate.com>
+             Date: Sat, 23 Jun 2007 15:30:49 +0200
+             Message-Id: <200706231530.49865@bloodgate.com>
+     Branch: perl
+	   - lib/Math/BigInt/t/fallback.t
+	   ! MANIFEST lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	   ! lib/Math/BigInt/t/bare_mbf.t lib/Math/BigInt/t/bigfltpm.inc
+	   ! lib/Math/BigInt/t/bigfltpm.t lib/Math/BigInt/t/sub_mbf.t
+	   ! lib/Math/BigInt/t/with_sub.t t/lib/Math/BigInt/BareCalc.pm
+____________________________________________________________________________
+[ 31458] By: rgs                                   on 2007/06/25  09:08:53
+        Log: Remove now-irrelevant comment
+     Branch: perl
+	   ! ext/Win32API/File/t/file.t
+____________________________________________________________________________
+[ 31457] By: rgs                                   on 2007/06/25  09:08:04
+        Log: Subject: [perl #43285] Win32API::File tests language specific 
+             From: "Reini Urban via RT" <perlbug-followup@perl.org>
+             Date: Sat, 23 Jun 2007 11:15:07 -0700
+             Message-ID: <rt-3.6.HEAD-1276-1182622506-790.43285-15-0@perl.org>
+     Branch: perl
+	   ! ext/Win32API/File/t/file.t
+____________________________________________________________________________
+[ 31456] By: rgs                                   on 2007/06/25  09:02:18
+        Log: PerlFAQ sync.
+     Branch: perl
+	   ! pod/perlfaq1.pod pod/perlfaq2.pod pod/perlfaq4.pod
+	   ! pod/perlfaq5.pod pod/perlfaq7.pod pod/perlfaq8.pod
+____________________________________________________________________________
+[ 31455] By: nicholas                              on 2007/06/24  15:46:40
+        Log: s/\bunicode\b/Unicode/; # For everything not dual life
+     Branch: perl
+	   ! dump.c ext/Data/Dumper/Dumper.pm pod/perlapi.pod
+	   ! pod/perldiag.pod pod/perlhack.pod pod/perlpacktut.pod
+	   ! pod/perlre.pod pod/perlretut.pod pod/perlunicode.pod regcomp.c
+	   ! regcomp.h regexec.c utf8.c vms/vms.c
+____________________________________________________________________________
+[ 31454] By: nicholas                              on 2007/06/24  13:32:42
+        Log: Also get copy on write working with ithreads. It hadn't been working
+             since change 26684 (which uses sv_setsv_flags to copy a value from an
+             SV in one interpreter context to an SV in another), despite what
+             change 31120 thought. ext/Compress/Raw/Zlib/t/07bufsize.t still fails.
+     Branch: perl
+	   ! sv.c sv.h
+____________________________________________________________________________
+[ 31453] By: demerphq                              on 2007/06/23  19:53:53
+        Log: Rename test files starting with regexp_ that do not
+             wrap regexp.t (and thus use re_tests) to reg_ to make
+             it clear they are standalone.
+     Branch: perl
+	  +> t/op/reg_email.t t/op/reg_mesg.t t/op/reg_namedcapture.t
+	  +> t/op/reg_nc_tie.t t/op/reg_pmod.t
+	   - t/op/regexp_email.t t/op/regexp_namedcapture.t
+	   - t/op/regexp_nc_tie.t t/op/regexp_pmod.t t/op/regmesg.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 31451] By: demerphq                              on 2007/06/23  19:04:04
+        Log: Resolve 
+             http://www.nntp.perl.org/group/perl.perl5.porters/2007/06/msg125667.html
+             by reverting part of change #29354. 
+             
+             Unfortunately match vars after a /g match in scalar context will be
+             unsafe (again) after this, but such matches on long strings won't be
+             as diabolically slow.
+             
+             Question: why does the new test in t/op/pat.t pass, but the same test
+             in t/op/reg_unsafe.t fail? (Latter is TODO for now)
+     Branch: perl
+	   + t/op/reg_unsafe.t
+	   ! MANIFEST pp_hot.c t/op/pat.t
+____________________________________________________________________________
+[ 31450] By: rgs                                   on 2007/06/23  10:14:43
+        Log: Tels' patch to defer overloading of hex and oct,
+             to avoid magic leaking and smoke failures under
+             utf-8 locales
+     Branch: perl
+	   ! lib/bigint.pm lib/bignum.pm lib/bigrat.pm lib/charnames.pm
+	   ! lib/utf8.pm lib/utf8_heavy.pl
+____________________________________________________________________________
+[ 31449] By: rgs                                   on 2007/06/23  09:19:03
+        Log: Subject: [PATCH] Math::BigInt v1.87 take 10
+             From: Tels <nospam-abuse@bloodgate.com>
+             Date: Fri, 22 Jun 2007 19:02:22 +0200
+             Message-Id: <200706221902.22487@bloodgate.com>
+     Branch: perl
+	   ! lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	   ! lib/Math/BigInt/t/bare_mbf.t lib/Math/BigInt/t/bigfltpm.inc
+	   ! lib/Math/BigInt/t/bigfltpm.t lib/Math/BigInt/t/fallback.t
+	   ! lib/Math/BigInt/t/sub_mbf.t lib/Math/BigInt/t/with_sub.t
+____________________________________________________________________________
+[ 31448] By: davem                                 on 2007/06/23  00:08:44
+        Log: remove the test added by change #31447
+             (I couldn't get a test that worked, and accidentally included my
+             failed attempt in the patch).
+     Branch: perl
+	   ! t/op/closure.t
+____________________________________________________________________________
+[ 31447] By: davem                                 on 2007/06/22  23:46:36
+        Log: safely handle cloning a stale lexical var
+             This code:
+             my $x if ...; sub { $x}
+             could attempt to clone $x even if $x is stale.
+     Branch: perl
+	   ! pad.c t/op/closure.t
+____________________________________________________________________________
+[ 31446] By: rgs                                   on 2007/06/22  15:17:23
+        Log: Subject: [PATCH] Remove orphaned (and unused) Test::Simple test
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Thu, 21 Jun 2007 14:28:12 -0400
+             Message-ID: <1ff86f510706211128h58cd5e98s49ec897bbdcce2a2@mail.gmail.com>
+     Branch: perl
+	   - lib/Test/Simple/t/strays.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 31445] By: merijn                                on 2007/06/22  14:55:47
+        Log: Subject: [perl #43291] perl-5.8.8 - AIX 5.3 64bit build issues 
+             From: Niklas Edmundsson (via RT) <perlbug-followup@perl.org>
+             Date: Fri, 22 Jun 2007 00:30:36 -0700
+             Message-ID: <rt-3.6.HEAD-1276-1182497436-1446.43291-75-0@perl.org>
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 31444] By: merijn                                on 2007/06/22  10:21:12
+        Log: Subject: [PATCH] perlopentut
+             From: "Dintelmann, Peter" <Peter.Dintelmann@Dresdner-Bank.com>
+             Date: Fri, 22 Jun 2007 10:30:50 +0200
+             Message-ID: <3852726AFA94DE4F87E616F13F416A5FB66C78@naimucu1.ffz00k.rootdom.net>
+     Branch: perl
+	   ! pod/perlopentut.pod
+____________________________________________________________________________
+[ 31443] By: demerphq                              on 2007/06/21  22:57:20
+        Log: Add avar to the authors file... Apparently the 'ae' ligature sorts after z in Icelandic so he goes at the bottom of the file.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 31442] By: demerphq                              on 2007/06/21  22:23:20
+        Log: Correct my email address. (My very first commit!)
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 31441] By: rgs                                   on 2007/06/21  14:54:32
+        Log: Subject: [PATCH] Remove unused Module::Build tests
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Thu, 21 Jun 2007 10:24:01 -0400
+             Message-ID: <1ff86f510706210724v5ccd24d0md024fd5a941ee769@mail.gmail.com>
+     Branch: perl
+	   - lib/Module/Build/t/par.t lib/Module/Build/t/signature.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 31440] By: rgs                                   on 2007/06/21  08:34:35
+        Log: Subject: [PATCH] File::Spec::Cygwin more tests and silence warning
+             From: Reini Urban <rurban@x-ray.at>
+             Date: Wed, 20 Jun 2007 21:10:05 +0200
+             Message-ID: <46797B8D.8040002@x-ray.at>
+     Branch: perl
+	   ! lib/File/Spec/Cygwin.pm lib/File/Spec/t/Spec.t
+____________________________________________________________________________
+[ 31439] By: rgs                                   on 2007/06/21  08:28:13
+        Log: Subject: [perl #43265] cygwin/Makefile.SHs: miniperl -Ilib for a clean @INC 
+             From: cygwin@cygwin.com (via RT) <perlbug-followup@perl.org>
+             Date: Wed, 20 Jun 2007 09:39:31 -0700
+             Message-ID: <rt-3.6.HEAD-1276-1182357570-46.43265-75-0@perl.org>
+     Branch: perl
+	   ! cygwin/Makefile.SHs
+____________________________________________________________________________
+[ 31438] By: rgs                                   on 2007/06/21  08:26:18
+        Log: Subject: [PATCH] cloexec.t works under Cygwin
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Wed, 20 Jun 2007 09:39:20 -0400
+             Message-ID: <1ff86f510706200639t13f58ecbi286015713765c403@mail.gmail.com>
+     Branch: perl
+	   ! t/run/cloexec.t
+____________________________________________________________________________
+[ 31437] By: rgs                                   on 2007/06/21  08:24:26
+        Log: Subject: [PATCH] Remove Archive::Test POD check
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Wed, 20 Jun 2007 09:43:27 -0400
+             Message-ID: <1ff86f510706200643s50cb5028ted455f52497f6af5@mail.gmail.com>
+     Branch: perl
+	   - lib/Archive/Tar/t/99_pod.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 31436] By: rgs                                   on 2007/06/21  08:18:54
+        Log: Subject: [perl #40103] File::Spec->case_tolerant() should return true on Cygwin 
+             From: "Reini Urban via RT" <perlbug-followup@perl.org>
+             Date: Wed, 20 Jun 2007 11:50:21 -0700
+             Message-ID: <rt-3.6.HEAD-1276-1182365420-145.40103-15-0@perl.org>
+     Branch: perl
+	   ! lib/File/Spec/Cygwin.pm lib/File/Spec/t/Spec.t
+____________________________________________________________________________
+[ 31435] By: rgs                                   on 2007/06/21  08:15:24
+        Log: Subject: [perl #43273] Enable lib/User/*.t on cygwin 
+             From: Reini Urban (via RT) <perlbug-followup@perl.org>
+             Date: Wed, 20 Jun 2007 16:22:48 -0700
+             Message-ID: <rt-3.6.HEAD-1276-1182381767-470.43273-75-0@perl.org>
+     Branch: perl
+	   ! lib/User/grent.t lib/User/pwent.t
+____________________________________________________________________________
+[ 31434] By: rgs                                   on 2007/06/21  08:13:37
+        Log: Subject: [PATH] AUTHORS rurban
+             From: Reini Urban <rurban@x-ray.at>
+             Date: Wed, 20 Jun 2007 23:35:03 +0200
+             Message-ID: <46799D87.50906@x-ray.at>
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 31433] By: rgs                                   on 2007/06/21  08:12:09
+        Log: Subject: [PATCH] pod/perlhack.pod where to go for information about smoke testing
+             From: "Gabor Szabo" <szabgab@gmail.com>
+             Date: Thu, 21 Jun 2007 08:19:33 +0300
+             Message-ID: <d8a74af10706202219n4f4659eenef064752bd0a6954@mail.gmail.com>
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[ 31432] By: craigb                                on 2007/06/21  03:24:02
+        Log: Skip a test that causes list assignment to %ENV errors on VMS.
+     Branch: perl
+	   ! lib/File/Spec/t/tmpdir.t
+____________________________________________________________________________
+[ 31431] By: craigb                                on 2007/06/21  03:15:59
+        Log: Make File::Spec::VMS->splitdir stop returning an empty first directory
+             when passed a relative path.  Also, don't split on escaped directory 
+             delimiters.
+     Branch: perl
+	   ! lib/File/Spec/VMS.pm lib/File/Spec/t/Spec.t
+____________________________________________________________________________
+[ 31430] By: steveh                                on 2007/06/20  16:26:01
+        Log: Silence "signed/unsigned mismatch" warning from VC++ when building
+             with -DPERL_DEBUGGING_MSTATS
+     Branch: perl
+	   ! ext/Devel/Peek/Peek.xs
+____________________________________________________________________________
+[ 31429] By: steveh                                on 2007/06/20  16:07:06
+        Log: Stop the VC++ warning "'HUF_func_2mode' undefined; assuming extern
+             returning int" by shuffling the functions around so that that
+             function is defined before it is called (since there are no forward
+             declarations of functions in this file)
+     Branch: perl
+	   ! ext/Hash/Util/FieldHash/FieldHash.xs
+____________________________________________________________________________
+[ 31428] By: steveh                                on 2007/06/20  16:03:10
+        Log: Change #31426 should also be applied to the PERL_IMPLICIT_SYS
+             version of ioctl()
+     Branch: perl
+	   ! win32/perlhost.h
+____________________________________________________________________________
+[ 31427] By: rgs                                   on 2007/06/20  14:36:19
+        Log: Change #31426 should also be applied to the windows CE version
+     Branch: perl
+	   ! win32/wincesck.c
+____________________________________________________________________________
+[ 31426] By: rgs                                   on 2007/06/20  13:30:14
+        Log: Subject: Re: Net::SMTP can't send large messages with bleadperl
+             From: demerphq <demerphq@gmail.com>
+             Date: Wed, 20 Jun 2007 15:22:31 +0200
+             Message-ID: <9b18b3110706200622o344c417apbd50468c6e5eb533@mail.gmail.com>
+     Branch: perl
+	   ! win32/win32sck.c
+____________________________________________________________________________
+[ 31425] By: rgs                                   on 2007/06/20  07:45:43
+        Log: A first stab at making perlreref.pod up to date
+     Branch: perl
+	   ! pod/perlreref.pod
+____________________________________________________________________________
+[ 31424] By: rgs                                   on 2007/06/20  07:41:15
+        Log: Fix docs for \u ; plus a POD formatting nit
+     Branch: perl
+	   ! pod/perlrebackslash.pod
+____________________________________________________________________________
+[ 31423] By: nicholas                              on 2007/06/19  20:38:36
+        Log: Subject: Re: Net::SMTP can't send large messages with bleadperl
+             Message-ID: <9b18b3110706180943y22c0eaa7yf34565d87689dd9e@mail.gmail.com>
+             From: demerphq <demerphq@gmail.com>
+             Date: Mon, 18 Jun 2007 18:43:17 +0200
+     Branch: perl
+	   ! ext/IO/lib/IO/Socket.pm
+____________________________________________________________________________
+[ 31422] By: nicholas                              on 2007/06/19  18:32:59
+        Log: Work on getting B compiling outside of the perl source tree.
+     Branch: perl
+	   ! ext/B/Makefile.PL ext/B/defsubs_h.PL
+____________________________________________________________________________
+[ 31421] By: craigb                                on 2007/06/19  12:29:32
+        Log: Better handling of escapes in filenames when converting between VMS
+             and Unix syntax.
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 31420] By: rgs                                   on 2007/06/19  12:13:20
+        Log: Subject: [perl #43242] "use base" breaks code containing peculiarly named constant 
+             From: Martin Becker (via RT) <perlbug-followup@perl.org>
+             Date: Mon, 18 Jun 2007 09:48:54 -0700
+             Message-ID: <rt-3.6.HEAD-7948-1182185333-640.43242-75-0@perl.org>
+             
+             plus a test case
+     Branch: perl
+	   ! lib/base.pm lib/base/t/base.t
+____________________________________________________________________________
+[ 31419] By: rgs                                   on 2007/06/19  09:43:21
+        Log: Update list of files that need crlf line endings
+     Branch: perl
+	   ! Porting/curliff.pl
+____________________________________________________________________________
+[ 31418] By: davem                                 on 2007/06/18  22:48:25
+        Log: fix S_emulate_eaccess compiler warning
+     Branch: perl
+	   ! embed.fnc embed.h proto.h
+____________________________________________________________________________
+[ 31417] By: davem                                 on 2007/06/18  15:10:32
+        Log: 5.9.4 regexp capturing wrongly
+             change #28398 accidently made the last branch of an alternation
+             not restore the paren state after failure backtrack. Fix this by
+             removing the last-branch-skips-pushing-a-state optimisation.
+     Branch: perl
+	   ! regexec.c t/op/re_tests
+____________________________________________________________________________
+[ 31416] By: rgs                                   on 2007/06/18  13:20:50
+        Log: R stands for Report, not Reporting.
+     Branch: perl
+	   ! META.yml Porting/makemeta
+____________________________________________________________________________
+[ 31415] By: rgs                                   on 2007/06/18  13:19:23
+        Log: Regenerate META.yml.
+             Put MAD in Maintainers.pl.
+     Branch: perl
+	   ! META.yml Porting/Maintainers.pl
+____________________________________________________________________________
+[ 31414] By: rgs                                   on 2007/06/18  11:39:04
+        Log: Regen pods
+     Branch: perl
+	   ! pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 31413] By: steveh                                on 2007/06/18  08:49:30
+        Log: Subject: Re: Math::BigInt 1.87 problems? Re: FAIL DBI-1.56 i686-linux 2.4.27-3-686 [PATCH]
+             From: Tels <nospam-abuse@bloodgate.com>
+             Date: Fri, 15 Jun 2007 19:56:10 +0200
+             Message-Id: <200706151956.11861@bloodgate.com>
+     Branch: perl
+	   ! ext/Math/BigInt/FastCalc/FastCalc.xs
+	   ! ext/Math/BigInt/FastCalc/t/bigintfc.t
+____________________________________________________________________________
+[ 31412] By: rgs                                   on 2007/06/18  08:27:59
+        Log: Remove PERL_MAGIC_mutex
+     Branch: perl
+	   ! dump.c perl.h pod/perlguts.pod
+____________________________________________________________________________
+[ 31411] By: rgs                                   on 2007/06/18  07:53:05
+        Log: Subject: [PATCH] perlreapi.pod documentation for flags & cleanup
+             From: "=?UTF-8?Q?=C3=86var_Arnfj=C3=B6r=C3=B0_Bjarmason?=" <avarab@gmail.com>
+             Date: Sun, 17 Jun 2007 18:09:25 +0000
+             Message-ID: <51dd1af80706171109r37c294c4h78a51083c3b851ba@mail.gmail.com>
+     Branch: perl
+	   ! pod/perlreapi.pod
+____________________________________________________________________________
+[ 31410] By: rgs                                   on 2007/06/18  07:48:56
+        Log: Subject: [PATCH] POD Alignment for the magic table in perlapi.pod
+             From: "=?UTF-8?Q?=C3=86var_Arnfj=C3=B6r=C3=B0_Bjarmason?=" <avarab@gmail.com>
+             Date: Sun, 17 Jun 2007 18:41:29 +0000
+             Message-ID: <51dd1af80706171141w48cb717fr71ce7f214daebe36@mail.gmail.com>
+     Branch: perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[ 31409] By: rgs                                   on 2007/06/18  07:39:35
+        Log: Subject: [PATCH] SvRX() and SvRXOK() macros
+             From: "=?UTF-8?Q?=C3=86var_Arnfj=C3=B6r=C3=B0_Bjarmason?=" <avarab@gmail.com>
+             Date: Mon, 18 Jun 2007 03:33:34 +0000
+             Message-ID: <51dd1af80706172033h1908aa0ge15698204e0b79ed@mail.gmail.com>
+     Branch: perl
+	   ! embed.fnc ext/re/re.xs pod/perlapi.pod pod/perlreapi.pod
+	   ! proto.h regexp.h universal.c util.c
+____________________________________________________________________________
+[ 31408] By: davem                                 on 2007/06/18  00:00:30
+        Log: add test for, and update comments for, old defined($1) oddity.
+             
+             Some code in regexec.c had a comment to the effect that without
+             this code, Dynaloader failed (this is back at 5.6.0). Replace the
+             comments with something more specific, and add a test for it
+             (basically without the code $1 is '' rather than undefined
+             sometimes).
+     Branch: perl
+	   ! regexec.c t/op/re_tests
+____________________________________________________________________________
+[ 31407] By: rgs                                   on 2007/06/17  17:14:12
+        Log: POD fixes in Hash::Util and Hash::Util::FieldHash
+     Branch: perl
+	   ! ext/Hash/Util/FieldHash/lib/Hash/Util/FieldHash.pm
+	   ! ext/Hash/Util/lib/Hash/Util.pm
+____________________________________________________________________________
+[ 31406] By: rgs                                   on 2007/06/17  16:58:55
+        Log: Subject: [patch] Hash::Util::FieldHash v1.01
+             From: Anno Siegel <anno4000@mailbox.tu-berlin.de>
+             Date: Sun, 17 Jun 2007 17:13:06 +0200
+             Message-Id: <1750E68D-4F6E-48B9-A255-BCC0DA5C886E@mailbox.tu-berlin.de>
+     Branch: perl
+	   ! ext/Hash/Util/FieldHash/Changes
+	   ! ext/Hash/Util/FieldHash/FieldHash.xs
+	   ! ext/Hash/Util/FieldHash/lib/Hash/Util/FieldHash.pm
+	   ! ext/Hash/Util/FieldHash/t/02_function.t
+	   ! ext/Hash/Util/lib/Hash/Util.pm
+____________________________________________________________________________
+[ 31404] By: rgs                                   on 2007/06/17  14:48:11
+        Log: Patches to compile perl on Cray XT4 Catamount/Qk, by Jarkko
+     Branch: perl
+	   + hints/catamount.sh
+	   ! Configure MANIFEST Makefile.SH doio.c ext/util/make_ext
+	   ! hints/linux.sh lib/ExtUtils/MM_Unix.pm perl.c perl.h pp_sys.c
+	   ! sv.c util.c
+____________________________________________________________________________
+[ 31403] By: rgs                                   on 2007/06/17  13:28:00
+        Log: Subject: bignum 0.22 take 4 (hex()/oct() overloading)
+             From: Tels <nospam-abuse@bloodgate.com>
+             Date: Sat, 16 Jun 2007 14:33:47 +0200
+             Message-Id: <200706161433.47489@bloodgate.com>
+     Branch: perl
+	   ! lib/bigint.pm lib/bignum.pm lib/bignum/t/bigint.t
+	   ! lib/bignum/t/bignum.t lib/bignum/t/bigrat.t
+	   ! lib/bignum/t/in_effect.t lib/bignum/t/scope_f.t
+	   ! lib/bignum/t/scope_i.t lib/bignum/t/scope_r.t lib/bigrat.pm
+____________________________________________________________________________
+[ 31402] By: rgs                                   on 2007/06/17  12:54:12
+        Log: Subject: [PATCH] EBCDIC fixes for gzip
+             From: "Paul Marquess" <Paul.Marquess@ntlworld.com>
+             Date: Sun, 17 Jun 2007 01:43:11 +0100
+             Message-ID: <004001c7b078$7cc2e520$6701a8c0@myopwv.com>
+     Branch: perl
+	   ! ext/IO_Compress_Zlib/lib/IO/Compress/Gzip/Constants.pm
+	   ! ext/IO_Compress_Zlib/t/004gziphdr.t
+____________________________________________________________________________
+[ 31401] By: rgs                                   on 2007/06/17  12:51:30
+        Log: Subject: [PATCH] CPANPLUS 0.80
+             From: "Jos I. Boumans" <kane@dwim.org>
+             Date: Sun, 17 Jun 2007 14:39:29 +0200
+             Message-Id: <45B1EC67-D34B-404D-9801-449FAC1D75BA@dwim.org>
+     Branch: perl
+	   ! MANIFEST lib/CPANPLUS.pm lib/CPANPLUS/Internals.pm
+	   ! lib/CPANPLUS/Shell/Default.pm
+	   ! lib/CPANPLUS/t/01_CPANPLUS-Configure.t
+	   ! lib/CPANPLUS/t/02_CPANPLUS-Internals.t
+	   ! lib/CPANPLUS/t/04_CPANPLUS-Module.t
+	   ! lib/CPANPLUS/t/05_CPANPLUS-Internals-Fetch.t
+	   ! lib/CPANPLUS/t/08_CPANPLUS-Backend.t
+	   ! lib/CPANPLUS/t/10_CPANPLUS-Error.t
+	   ! lib/CPANPLUS/t/19_CPANPLUS-Dist.t
+	   ! lib/CPANPLUS/t/20_CPANPLUS-Dist-MM.t
+	   ! lib/CPANPLUS/t/21_CPANPLUS-Dist-No-Build.t
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/01mailrc.txt.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUNOXS/Bundle-Foo-Ba
+	   ! r-0.01.tar.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUNOXS/Foo-Bar-0.01.
+	   ! tar.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUNOXS/perl5.005_03.
+	   ! tar.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUXS/Foo-Bar-0.01.ta
+	   ! r.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/M/MB/MBNOXS/Foo-Bar-0.01.
+	   ! tar.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/M/MB/MBXS/Foo-Bar-0.01.ta
+	   ! r.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/modules/02packages.details.txt.gz.pa
+	   ! cked
+	   ! lib/CPANPLUS/t/dummy-CPAN/modules/03modlist.data.gz.packed
+	   ! lib/CPANPLUS/t/inc/conf.pl
+____________________________________________________________________________
+[ 31400] By: rgs                                   on 2007/06/17  08:46:13
+        Log: Subject: Math::BigInt take 9 (CORE::hex() vs. hex() in Calc.pm)
+             From: Tels <nospam-abuse@bloodgate.com>
+             Date: Sat, 16 Jun 2007 13:43:45 +0200
+             Message-Id: <200706161343.47110@bloodgate.com>
+     Branch: perl
+	   ! lib/Math/BigInt/Calc.pm
+____________________________________________________________________________
+[ 31399] By: rgs                                   on 2007/06/17  08:10:59
+        Log: Subject: [DOC PATCH] Pod nits in doc/perlpodspec.pod
+             From: "Adriano Ferreira" <a.r.ferreira@gmail.com>
+             Date: Sat, 16 Jun 2007 14:30:16 -0300
+             Message-ID: <73ddeb6c0706161030nb489b0cx746daddc55b95987@mail.gmail.com>
+     Branch: perl
+	   ! pod/perlpodspec.pod
+____________________________________________________________________________
+[ 31398] By: rgs                                   on 2007/06/17  08:08:45
+        Log: Subject: [PATCH] Test::Builder tickles Pod::Html parsing stupidity bug
+             From: demerphq <demerphq@gmail.com>
+             Date: Sat, 16 Jun 2007 18:47:22 +0200
+             Message-ID: <9b18b3110706160947x5d3521b3kca1edf2d9ba65f37@mail.gmail.com>
+     Branch: perl
+	   ! lib/Test/Builder.pm
+____________________________________________________________________________
+[ 31397] By: rgs                                   on 2007/06/17  08:06:08
+        Log: Subject: [DOC PATCH] MANIFEST: t/op/exec.t tests exec, system AND qx
+             From: "Adriano Ferreira" <a.r.ferreira@gmail.com>
+             Date: Sat, 16 Jun 2007 15:03:41 -0300
+             Message-ID: <73ddeb6c0706161103oe4afe43i941223debc00543@mail.gmail.com>
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 31396] By: rgs                                   on 2007/06/16  06:10:19
+        Log: More portability nits by Jarkko
+     Branch: perl
+	   ! ext/util/make_ext gv.h hv.c
+____________________________________________________________________________
+[ 31395] By: merijn                                on 2007/06/16  05:56:15
+        Log: Subject: [PATCH] Re: [perl #43216] Perl 5.8.8 does not compile on Solaris 8 with-Dusethreads
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Fri, 15 Jun 2007 12:05:36 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.64.0706151203200.14068@fractal.phys.lafayette.edu>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 31393] By: craigb                                on 2007/06/15  21:21:25
+        Log: Subject: [PATCH] Show warning bits on failure in t/op/caller.t
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Fri, 15 Jun 2007 16:05:36 -0400
+             Message-ID: <1ff86f510706151305j1ce8c46eib165ee9fad10b538@mail.gmail.com>
+     Branch: perl
+	   ! t/op/caller.t
+____________________________________________________________________________
+[ 31392] By: rgs                                   on 2007/06/15  15:29:53
+        Log: Subject: [PATCH] checkAUTHORS.pl once more
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Fri, 15 Jun 2007 10:54:28 -0400
+             Message-ID: <1ff86f510706150754g59703eabs7072fb750e160a31@mail.gmail.com>
+     Branch: perl
+	   ! Porting/checkAUTHORS.pl
+____________________________________________________________________________
+[ 31391] By: rgs                                   on 2007/06/15  14:29:28
+        Log: Subject: [PATCH] checkAUTHORS.pl again
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Fri, 15 Jun 2007 10:16:38 -0400
+             Message-ID: <1ff86f510706150716r5aef08fw12c9ea5d401f5f9a@mail.gmail.com>
+     Branch: perl
+	   ! Porting/checkAUTHORS.pl
+____________________________________________________________________________
+[ 31390] By: rgs                                   on 2007/06/15  13:59:55
+        Log: Subject: [PATCH] I have a name
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Fri, 15 Jun 2007 09:54:57 -0400
+             Message-ID: <1ff86f510706150654t24817135t67803e81f444305b@mail.gmail.com>
+     Branch: perl
+	   ! Porting/checkAUTHORS.pl
+____________________________________________________________________________
+[ 31389] By: rgs                                   on 2007/06/15  13:52:34
+        Log: Subject: [PATCH] Warning bit fixes to t/op/caller.t
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Fri, 15 Jun 2007 09:49:47 -0400
+             Message-ID: <1ff86f510706150649l320d629cl8820bfbf938c9f4d@mail.gmail.com>
+     Branch: perl
+	   ! t/op/caller.t
+____________________________________________________________________________
+[ 31388] By: rgs                                   on 2007/06/15  11:17:50
+        Log: Subject: [PATCH] miscellanea
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Thu, 14 Jun 2007 22:32:49 -0400
+             Message-ID: <4671FA51.4070001@iki.fi>
+     Branch: perl
+	   ! Makefile.SH embed.fnc hv.h op.c proto.h sv.c util.c
+____________________________________________________________________________
+[ 31387] By: rgs                                   on 2007/06/15  09:52:07
+        Log: Subject: [PATCH] Re: vsprintf
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Thu, 14 Jun 2007 13:12:57 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.64.0706141312510.31762@fractal.phys.lafayette.edu>
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 31386] By: rgs                                   on 2007/06/15  08:55:38
+        Log: Forgot to regen warnings
+     Branch: perl
+	   ! lib/warnings.pm warnings.h
+____________________________________________________________________________
+[ 31385] By: craigb                                on 2007/06/15  03:19:46
+        Log: Don't let the home-grown readdir() on VMS return results with
+             ODS-5 escapes (i.e., report foo.tar.gz, not foo^.tar.gz).
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 31384] By: craigb                                on 2007/06/14  18:23:18
+        Log: Fix missing PerlIO_releaseFILE in VMS::Stdio::getname().
+     Branch: perl
+	   ! vms/ext/Stdio/Stdio.xs
+____________________________________________________________________________
+[ 31383] By: rgs                                   on 2007/06/14  15:36:16
+        Log: Update Changes.
+             Mention the removal of -A and assertions.pm in perldelta.
+     Branch: perl
+	   ! Changes pod/perl595delta.pod
+____________________________________________________________________________
 [ 31382] By: rgs                                   on 2007/06/14  14:12:35
         Log: Upgrade to PathTools 3.25
      Branch: perl
