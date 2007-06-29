@@ -301,7 +301,7 @@ and check for NULL.
 
 /* UTF8 related */
 #define RXf_UTF8        	0x00400000
-#define RX_BUFF_IDX_FULLMATCH_UTF8  	0x00800000
+#define RXf_MATCH_UTF8  	0x00800000
 
 /* Intuit related */
 #define RXf_USE_INTUIT_NOML	0x01000000
@@ -359,9 +359,9 @@ and check for NULL.
 	}} STMT_END
 #endif
 
-#define RX_MATCH_UTF8(prog)		((prog)->extflags & RX_BUFF_IDX_FULLMATCH_UTF8)
-#define RX_MATCH_UTF8_on(prog)		((prog)->extflags |= RX_BUFF_IDX_FULLMATCH_UTF8)
-#define RX_MATCH_UTF8_off(prog)		((prog)->extflags &= ~RX_BUFF_IDX_FULLMATCH_UTF8)
+#define RX_MATCH_UTF8(prog)		((prog)->extflags & RXf_MATCH_UTF8)
+#define RX_MATCH_UTF8_on(prog)		((prog)->extflags |= RXf_MATCH_UTF8)
+#define RX_MATCH_UTF8_off(prog)		((prog)->extflags &= ~RXf_MATCH_UTF8)
 #define RX_MATCH_UTF8_set(prog, t)	((t) \
 			? (RX_MATCH_UTF8_on(prog), (PL_reg_match_utf8 = 1)) \
 			: (RX_MATCH_UTF8_off(prog), (PL_reg_match_utf8 = 0)))
