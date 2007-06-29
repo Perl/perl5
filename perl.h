@@ -4768,7 +4768,7 @@ MGVTBL_SET(
     MEMBER_TO_FPTR(Perl_magic_setisa),
     0,
     MEMBER_TO_FPTR(Perl_magic_setisa),
-    MEMBER_TO_FPTR(Perl_magic_freeisa),
+    0,
     0,
     0,
     0

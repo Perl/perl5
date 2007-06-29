@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-require q(./test.pl); plan(tests => 27);
+require q(./test.pl); plan(tests => 21);
 
 {
     package MRO_A;
@@ -146,45 +146,4 @@ is(eval { MRO_N->testfunc() }, 123);
     # undef the array itself
     undef @ISACLEAR::ISA;
     ok(eq_array(mro::get_linear_isa('ISACLEAR'),[qw/ISACLEAR/]));
-}
-
-{
-    {
-        package ISACLEAR2;
-        our @ISA = qw/XX YY ZZ/;
-    }
-
-    # baseline
-    ok(eq_array(mro::get_linear_isa('ISACLEAR2'),[qw/ISACLEAR2 XX YY ZZ/]));
-
-    # delete @ISA
-    delete $ISACLEAR2::{ISA};
-    ok(eq_array(mro::get_linear_isa('ISACLEAR2'),[qw/ISACLEAR2/]));
-}
-
-# another destructive test, undef the ISA glob
-{
-    {
-        package ISACLEAR3;
-        our @ISA = qw/XX YY ZZ/;
-    }
-    # baseline
-    ok(eq_array(mro::get_linear_isa('ISACLEAR3'),[qw/ISACLEAR3 XX YY ZZ/]));
-
-    undef *ISACLEAR3::ISA;
-    ok(eq_array(mro::get_linear_isa('ISACLEAR3'),[qw/ISACLEAR3/]));
-}
-
-# This is how Class::Inner does it
-{
-    {
-        package ISACLEAR4;
-        our @ISA = qw/XX YY ZZ/;
-    }
-    # baseline
-    ok(eq_array(mro::get_linear_isa('ISACLEAR4'),[qw/ISACLEAR4 XX YY ZZ/]));
-
-    delete $ISACLEAR4::{ISA};
-    delete $::{ISACLEAR4::};
-    ok(eq_array(mro::get_linear_isa('ISACLEAR4'),[qw/ISACLEAR4/]));
 }

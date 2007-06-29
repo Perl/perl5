@@ -4397,7 +4397,6 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, const MGVTBL *vtable,
     */
     if (!obj || obj == sv ||
 	how == PERL_MAGIC_arylen ||
-	how == PERL_MAGIC_isaelem ||
 	how == PERL_MAGIC_qr ||
 	how == PERL_MAGIC_symtab ||
 	(SvTYPE(obj) == SVt_PVGV &&

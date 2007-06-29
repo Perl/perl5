@@ -455,10 +455,8 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
     bool is_universal;
     struct mro_meta * meta;
 
-    const char * const stashname = stash ? HvNAME_get(stash) : NULL;
-    const STRLEN stashname_len = stash ? HvNAMELEN_get(stash) : 0;
-
-    if(!stash) return;
+    const char * const stashname = HvNAME_get(stash);
+    const STRLEN stashname_len = HvNAMELEN_get(stash);
 
     if(!stashname)
         Perl_croak(aTHX_ "Can't call mro_isa_changed_in() on anonymous symbol table");

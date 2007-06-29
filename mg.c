@@ -1541,26 +1541,6 @@ Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
-int Perl_magic_freeisa(pTHX_ SV *sv, MAGIC *mg)
-{
-    dVAR;
-    GV** gvp;
-    GV* gv;
-    AV* isa;
-
-    PERL_UNUSED_ARG(sv);
-
-    if(PL_dirty) return 0;
-
-    gvp = (GV**)hv_fetchs(GvSTASH((GV*)mg->mg_obj), "ISA", FALSE);
-    gv = gvp ? *gvp : NULL;
-    isa = (gv && isGV_with_GP(gv)) ? GvAV(gv) : NULL;
-
-    if(isa) av_undef(isa);
-
-    return 0;
-}
-
 int
 Perl_magic_setamagic(pTHX_ SV *sv, MAGIC *mg)
 {
