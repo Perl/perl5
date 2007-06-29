@@ -145,7 +145,7 @@ that can only match Unicode values.
 =item RXf_SPLIT
 
 If C<split> is invoked as C<split ' '> or with no arguments (which
-really means C<split(' ', $_>, see L<split|perlfunc/split>), perl will
+really means C<split(' ', $_)>, see L<split|perlfunc/split>), perl will
 set this flag. The regex engine can then check for it and set the
 SKIPWHITE and WHITE extflags. To do this the perl engine does:
 
