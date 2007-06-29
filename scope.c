@@ -680,15 +680,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    av = (AV*)SSPOPPTR;
 	    gv = (GV*)SSPOPPTR;
 	    if (GvAV(gv)) {
-		AV * const goner = GvAV(gv);
-		/* FIXME - this is a temporary hack until we work out what
-		   the correct behaviour for magic should be.  */
-		sv_unmagic((SV*)goner, PERL_MAGIC_arylen_p);
-		SvMAGIC_set(av, SvMAGIC(goner));
-		SvFLAGS((SV*)av) |= SvMAGICAL(goner);
-		SvMAGICAL_off(goner);
-		SvMAGIC_set(goner, NULL);
-		SvREFCNT_dec(goner);
+		SvREFCNT_dec(GvAV(gv));
 	    }
 	    GvAV(gv) = av;
 	    if (SvMAGICAL(av)) {
@@ -701,12 +693,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    hv = (HV*)SSPOPPTR;
 	    gv = (GV*)SSPOPPTR;
 	    if (GvHV(gv)) {
-		HV * const goner = GvHV(gv);
-		SvMAGIC_set(hv, SvMAGIC(goner));
-		SvFLAGS(hv) |= SvMAGICAL(goner);
-		SvMAGICAL_off(goner);
-		SvMAGIC_set(goner, NULL);
-		SvREFCNT_dec(goner);
+		SvREFCNT_dec(GvHV(gv));
 	    }
 	    GvHV(gv) = hv;
 	    if (SvMAGICAL(hv)) {
