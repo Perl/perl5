@@ -449,8 +449,7 @@ like($@, qr/Can't goto subroutine from an eval-block/, 'eval block');
 }
 
 TODO: {
-    local $TODO = "[perl #43403] goto() from an if to an else doesn't undo local
-() changes";
+    local $TODO = "[perl #43403] goto() from an if to an else doesn't undo local () changes";
     our $global = "unmodified";
     if ($global) { # true but not constant-folded
          local $global = "modified";
