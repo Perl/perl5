@@ -1512,7 +1512,7 @@ sub is_int
 
 sub bmul 
   { 
-  # multiply the first number by the second numbers
+  # multiply the first number by the second number
   # (BINT or num_str, BINT or num_str) return BINT
 
   # set up parameters
@@ -1592,7 +1592,7 @@ sub bmuladd
   return $upgrade->bmuladd($x,$upgrade->new($y),$upgrade->new($z),@r)
    if defined $upgrade && (!$y->isa($self) || !$z->isa($self) || !$x->isa($self));
  
-  # TODO: what it $y and $z have A or P set?
+  # TODO: what if $y and $z have A or P set?
   $r[3] = $z;				# no push here
 
   $x->{sign} = $x->{sign} eq $y->{sign} ? '+' : '-'; # +1 * +1 or -1 * -1 => +

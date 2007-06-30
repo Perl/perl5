@@ -2381,7 +2381,6 @@ sub bpow
     }
   if ($x_is_zero)
     {
-    #return $x->bone() if $y_is_zero;
     return $x if $y->{sign} eq '+'; 	# 0**y => 0 (if not y <= 0)
     # 0 ** -y => 1 / (0 ** y) => 1 / 0! (1 / 0 => +inf)
     return $x->binf();
@@ -3036,7 +3035,7 @@ sub batan
     }
   
   # This series is only valid if -1 < x < 1, so for other x we need to
-  # to calculate PI/ - atan(1/x):
+  # to calculate PI/2 - atan(1/x):
   my $one = $MBI->_new(1);
   my $pi = undef;
   if ($x->{_es} eq '+' && ($MBI->_acmp($x->{_m},$one) >= 0))
