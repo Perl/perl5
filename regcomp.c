@@ -4766,8 +4766,8 @@ reStudy:
             r->extflags |= (RXf_SKIPWHITE|RXf_WHITE); 
     else {
         regnode *first = ri->program + 1;
-        char fop = OP(first);
-        char nop = OP(NEXTOPER(first));
+        U8 fop = OP(first);
+        U8 nop = OP(NEXTOPER(first));
         
          if (PL_regkind[fop] == BOL && nop == END) 
             r->extflags |= RXf_START_ONLY;
