@@ -1,6 +1,19 @@
 CHANGES
 -------
 
+  2.005 18 June 2007
+
+      * IO::Compress::Gzip & IO::Uncompress::Gunzip
+
+        - RFC1952 says that the FNAME & FCOMMENT header fields must be ISO
+          8859-1 (LATIN-1) characters. The code can optionally police this.
+          Added a fix for this logic when running on EBCDIC.
+
+      * Makefile.PL
+
+        - Check if IO::Compress::Bzip2 is already installed. If it is, add
+          to the PREREQ_PM list.
+
   2.004 3 March 2007
 
       * IO::Compress::Zip 

@@ -1,6 +1,20 @@
 CHANGES
 -------
 
+  2.005 18 June 2007
+
+      * Stephen Turner reported a problem when using IO::Uncompress::Gunzip
+        with XML::Parser. Turns out there were two issues.  
+
+        Firstly an IO::Uncompress object isn't an IO::Handle. It is now.
+
+        Secondly the implementation of "read" wasn't honouring this 
+
+            SCALAR will be grown or shrunk to the length actually read.
+
+        In particular it didn't do the right thing on EOF.
+        This has been fixed.
+
   2.004 3 March 2007
 
       * Made seek less wasteful of memory.

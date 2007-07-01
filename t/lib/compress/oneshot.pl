@@ -51,7 +51,7 @@ sub run
         like $@, mkErr("^$TopType: unknown key value\\(s\\) Fred"), '  Illegal Parameters';
 
         eval { $a = $Func->() ;} ;
-        like $@, mkErr("^$TopType: expected at least 1 parameters"), '  No Parameters';
+        like $@, "/^$TopType: expected at least 1 parameters/", '  No Parameters';
 
         eval { $a = $Func->(\$x, \1) ;} ;
         like $$Error, "/^$TopType: output buffer is read-only/", '  Output is read-only' ;

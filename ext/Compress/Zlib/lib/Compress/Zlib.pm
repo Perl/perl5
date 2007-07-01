@@ -8,17 +8,17 @@ use Carp ;
 use IO::Handle ;
 use Scalar::Util qw(dualvar);
 
-use IO::Compress::Base::Common 2.004 ;
-use Compress::Raw::Zlib 2.004 ;
-use IO::Compress::Gzip 2.004 ;
-use IO::Uncompress::Gunzip 2.004 ;
+use IO::Compress::Base::Common 2.005 ;
+use Compress::Raw::Zlib 2.005 ;
+use IO::Compress::Gzip 2.005 ;
+use IO::Uncompress::Gunzip 2.005 ;
 
 use strict ;
 use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.004';
+$VERSION = '2.005';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -193,6 +193,9 @@ sub Compress::Zlib::gzFile::gzwrite
     return _set_gzerr(Z_STREAM_ERROR())
         if $self->[1] ne 'deflate';
 
+    $] >= 5.008 and (utf8::downgrade($_[0], 1) 
+        or croak "Wide character in gzwrite");
+
     my $status = $gz->write($_[0]) ;
     _save_gzerr($gz);
     return $status ;
@@ -301,6 +304,9 @@ sub compress($;$)
         $in = \$_[0] ;
     }
 
+    $] >= 5.008 and (utf8::downgrade($$in, 1) 
+        or croak "Wide character in compress");
+
     my $level = (@_ == 2 ? $_[1] : Z_DEFAULT_COMPRESSION() );
 
     $x = new Compress::Raw::Zlib::Deflate -AppendOutput => 1, -Level => $level
@@ -327,6 +333,9 @@ sub uncompress($)
     else {
         $in = \$_[0] ;
     }
+
+    $] >= 5.008 and (utf8::downgrade($$in, 1) 
+        or croak "Wide character in uncompress");
 
     $x = new Compress::Raw::Zlib::Inflate -ConsumeInput => 0 or return undef ;
  
@@ -438,7 +447,7 @@ sub inflate
 
 package Compress::Zlib ;
 
-use IO::Compress::Gzip::Constants 2.004 ;
+use IO::Compress::Gzip::Constants 2.005 ;
 
 sub memGzip($)
 {
@@ -446,6 +455,9 @@ sub memGzip($)
 
   # if the deflation buffer isn't a reference, make it one
   my $string = (ref $_[0] ? $_[0] : \$_[0]) ;
+
+  $] >= 5.008 and (utf8::downgrade($$string, 1) 
+      or croak "Wide character in memGzip");
 
   IO::Compress::Gzip::gzip($string, \$out, Minimal => 1)
       or return undef ;
@@ -518,6 +530,9 @@ sub memGunzip($)
     # if the buffer isn't a reference, make it one
     my $string = (ref $_[0] ? $_[0] : \$_[0]);
  
+    $] >= 5.008 and (utf8::downgrade($$string, 1) 
+        or croak "Wide character in memGunzip");
+
     _removeGzipHeader($string) == Z_OK() 
         or return undef;
      
@@ -1440,6 +1455,7 @@ Copyright (c) 1995-2007 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
+
 
 
 

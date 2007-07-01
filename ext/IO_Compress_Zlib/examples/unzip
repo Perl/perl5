@@ -2,10 +2,13 @@
 use strict;
 use warnings;
 
+use File::Path;
+use File::Basename;
 use IO::File;
-use IO::Uncompress::RawInflate qw(rawinflate $RawInflateError);
+use IO::Uncompress::RawInflate qw(:all);
 
-die "Usage: zipcat file" 
+
+die "Usage: zipcat file\n" 
     if @ARGV != 1 ;
 
 my $file = $ARGV[0] ;
@@ -53,9 +56,10 @@ while ()
 
     warn "Writing file '$filename' $compressedMethod\n";
 
-    mkpath basename $filename;
+    #mkpath dirname $filename;
 
-    rawinflate $fh  => $filename,
+    #rawinflate $fh  => $filename,
+    rawinflate $fh  => '-',
         Transparent => 1,
         InputLength => $compressedLength
       or die "Error uncompressing $file [$filename]: $RawInflateError\n"  ;

@@ -1,6 +1,11 @@
 CHANGES
 -------
 
+  2.005 18 June 2007
+
+      * Added info about removing Compress::Zlib version 1, before
+        installing version 2. 
+
   2.004 3 March 2007
 
       * rewrote memGzip using IO::Compress::Gzip::gzip

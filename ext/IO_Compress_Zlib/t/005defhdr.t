@@ -42,7 +42,7 @@ sub ReadHeaderInfo
     ok $def->close ;
     #print "ReadHeaderInfo\n"; hexDump(\$buffer);
 
-    ok my $inf = new IO::Uncompress::Inflate \$buffer  ;
+    ok my $inf = new IO::Uncompress::Inflate \$buffer, Append => 1  ;
     my $uncomp ;
     #ok $inf->read($uncomp) ;
     my $actual = 0 ;
@@ -72,7 +72,7 @@ sub ReadHeaderInfoZlib
     cmp_ok $def->flush($buffer), '==', Z_OK;
     #print "ReadHeaderInfoZlib\n"; hexDump(\$buffer);
     
-    ok my $inf = new IO::Uncompress::Inflate \$buffer  ;
+    ok my $inf = new IO::Uncompress::Inflate \$buffer, Append => 1  ;
     my $uncomp ;
     #ok $inf->read($uncomp) ;
     my $actual = 0 ;

@@ -18,7 +18,7 @@ BEGIN
     $extra = 1
         if $st ;
 
-    plan(tests => 641 + $extra) ;
+    plan(tests => 670 + $extra) ;
 }
 
 sub myGZreadFile
@@ -781,7 +781,9 @@ EOT
                 eval { $io->read(1) } ;
                 like $@, mkErr("buffer parameter is read-only");
 
+                $buf = "abcd";
                 is $io->read($buf, 0), 0, "Requested 0 bytes" ;
+                is $buf, "", "Buffer empty";
 
                 is $io->read($buf, 3), 3 ;
                 is $buf, "Thi";
@@ -791,6 +793,30 @@ EOT
                     or print "# [$buf]\n" ;;
                 ok ! $io->eof;
             
+                $buf = "ab" ;
+                is $io->read($buf, 3, 4), 3 ;
+                is $buf, "ab" . "\x00" x 2 . "s a"
+                    or print "# [$buf]\n" ;;
+                ok ! $io->eof;
+            
+                # read the rest of the file
+                $buf = '';
+                my $remain = length($str) - 9;
+                is $io->read($buf, $remain+1), $remain ;
+                is $buf, substr($str, 9);
+                ok $io->eof;
+
+                $buf = "hello";
+                is $io->read($buf, 10), 0 ;
+                is $buf, "", "Buffer empty";
+                ok $io->eof;
+
+                ok $io->close();
+                $buf = "hello";
+                is $io->read($buf, 10), 0 ;
+                is $buf, "hello", "Buffer not empty";
+                ok $io->eof;
+
         #        $io->seek(-4, 2);
         #    
         #        ok ! $io->eof;
@@ -930,11 +956,15 @@ EOT
             }
             
             
-            # Test read
+            # Test Read
             
             {
                 my $io = $UncompressClass->new($name);
             
+                $buf = "abcd";
+                is $io->read($buf, 0), 0, "Requested 0 bytes" ;
+                is $buf, "", "Buffer empty";
+
                 ok $io->read($buf, 3) == 3 ;
                 ok $buf eq "Thi";
             
@@ -942,6 +972,30 @@ EOT
                 ok $buf eq "Ths i";
                 ok ! $io->eof;
             
+                $buf = "ab" ;
+                is $io->read($buf, 3, 4), 3 ;
+                is $buf, "ab" . "\x00" x 2 . "s a"
+                    or print "# [$buf]\n" ;;
+                ok ! $io->eof;
+            
+                # read the rest of the file
+                $buf = '';
+                my $remain = length($str) - 9;
+                is $io->read($buf, $remain), $remain ;
+                is $buf, substr($str, 9);
+                ok $io->eof;
+
+                $buf = "hello";
+                is $io->read($buf, 10), 0 ;
+                is $buf, "", "Buffer empty";
+                ok $io->eof;
+
+                ok $io->close();
+                $buf = "hello";
+                is $io->read($buf, 10), 0 ;
+                is $buf, "hello", "Buffer not empty";
+                ok $io->eof;
+
         #        $io->seek(-4, 2);
         #    
         #        ok ! $io->eof;

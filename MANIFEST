@@ -795,6 +795,10 @@ ext/IO_Compress_Zlib/t/109merge-deflate.t	IO::Compress::Zlib
 ext/IO_Compress_Zlib/t/109merge-gzip.t	IO::Compress::Zlib
 ext/IO_Compress_Zlib/t/109merge-rawdeflate.t	IO::Compress::Zlib
 ext/IO_Compress_Zlib/t/109merge-zip.t	IO::Compress::Zlib
+ext/IO_Compress_Zlib/t/110encode-deflate.t	IO::Compress::Zlib
+ext/IO_Compress_Zlib/t/110encode-gzip.t	IO::Compress::Zlib
+ext/IO_Compress_Zlib/t/110encode-rawdeflate.t	IO::Compress::Zlib
+ext/IO_Compress_Zlib/t/110encode-zip.t	IO::Compress::Zlib
 ext/IO/hints/sco.pl		Hint for IO for named architecture
 ext/IO/IO.pm			Top-level interface to IO::* classes
 ext/IO/IO.xs			IO extension external subroutines
@@ -3425,6 +3429,7 @@ t/lib/compress/any.pl		Compress::Zlib
 t/lib/compress/anyunc.pl	Compress::Zlib
 t/lib/compress/CompTestUtils.pm	Compress::Zlib
 t/lib/compress/destroy.pl	Compress::Zlib
+t/lib/compress/encode.pl	Compress::Zlib
 t/lib/compress/generic.pl	Compress::Zlib
 t/lib/compress/merge.pl		Compress::Zlib
 t/lib/compress/multi.pl		Compress::Zlib

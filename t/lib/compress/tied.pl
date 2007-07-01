@@ -199,10 +199,10 @@ EOT
             {
                 my $io = new $UncompressClass $name ;
             
-                ok ! $io->eof;
-                is $io->tell(), 0 ;
+                ok ! $io->eof, "  Not EOF";
+                is $io->tell(), 0, "  Tell is 0" ;
                 my @lines = <$io>;
-                is @lines, 6
+                is @lines, 6, "  Line is 6"
                     or print "# Got " . scalar(@lines) . " lines, expected 6\n" ;
                 is $lines[1], "of a paragraph\n" ;
                 is join('', @lines), $str ;

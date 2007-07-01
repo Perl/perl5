@@ -3,13 +3,25 @@
 use strict ;
 require 5.004 ;
 
-$::VERSION = '2.004' ;
+$::VERSION = '2.005' ;
 
 use private::MakeUtil;
 use ExtUtils::MakeMaker 5.16 ;
 
 UpDowngrade(getPerlFiles('MANIFEST')) 
     unless $ENV{PERL_CORE};
+
+my @MainPREREQ = qw(Compress::Raw::Zlib
+                    IO::Compress::Base
+                    IO::Uncompress::Base
+                   );
+
+# Bzip2 is an option prereq.                   
+push @MainPREREQ, qw(IO::Compress::Bzip2 IO::Uncompress::Bunzip2)
+    if eval { require IO::Compress::Bzip2; };
+
+my %MainPREREQ = map { $_ => $::VERSION } @MainPREREQ; 
+
 
 WriteMakefile( 
     NAME         => 'IO::Compress::Zlib',
@@ -23,9 +35,7 @@ WriteMakefile(
     (
       $ENV{SKIP_FOR_CORE}
         ? (MAN3PODS    => {})
-	    : (PREREQ_PM   => { 'Compress::Raw::Zlib'  => $::VERSION,
-		                    'IO::Compress::Base'   => $::VERSION,
-		                    'IO::Uncompress::Base' => $::VERSION,
+	    : (PREREQ_PM   => { %MainPREREQ, 
 		                    $] >= 5.005 && $] < 5.006   
                                 ? ('File::BSDGlob' => 0) 
                                 : () }

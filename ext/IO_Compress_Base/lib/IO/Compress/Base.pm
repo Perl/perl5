@@ -6,7 +6,7 @@ require 5.004 ;
 use strict ;
 use warnings;
 
-use IO::Compress::Base::Common 2.004 ;
+use IO::Compress::Base::Common 2.005 ;
 
 use IO::File ;
 use Scalar::Util qw(blessed readonly);
@@ -18,9 +18,9 @@ use Symbol;
 use bytes;
 
 our (@ISA, $VERSION);
-#@ISA    = qw(Exporter IO::File);
+@ISA    = qw(Exporter IO::File);
 
-$VERSION = '2.004';
+$VERSION = '2.005';
 
 #Can't locate object method "SWASHNEW" via package "utf8" (perhaps you forgot to load "utf8"?) at .../ext/Compress-Zlib/Gzip/blib/lib/Compress/Zlib/Common.pm line 16.
 
@@ -574,6 +574,9 @@ sub syswrite
         $buffer = \$_[0] ;
     }
 
+    $] >= 5.008 and ( utf8::downgrade($$buffer, 1) 
+        or croak "Wide character in " .  *$self->{ClassName} . "::write:");
+
 
     if (@_ > 1) {
         my $slen = defined $$buffer ? length($$buffer) : 0;
@@ -983,5 +986,6 @@ Copyright (c) 2005-2007 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
+
 
 

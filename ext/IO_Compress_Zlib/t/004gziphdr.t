@@ -189,7 +189,6 @@ for my $value ( "0D", "0A", "0A0D", "0D0A", "0A0A", "0D0D")
     ok   $hdr->{TextFlag} ;
     ok ! defined $hdr->{HeaderCRC} ;
     is $hdr->{OsID}, $ThisOS_code ;
-
 }
 
 {
@@ -823,6 +822,7 @@ EOM
 
     writeFile($name, $good) ;
     ok my $gunz = new IO::Uncompress::Gunzip $name, 
+                                       -Append   => 1,
                                        -Strict   => 1;
     my $uncomp ;
     1 while  $gunz->read($uncomp) > 0 ;

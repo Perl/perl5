@@ -1,6 +1,11 @@
 CHANGES
 -------
 
+  2.005 18 June 2007
+
+      * Only include ppport.h when not being built with perl.
+        [core patch #30655]
+
   2.004 3 March 2007
 
       * Fixed lvalue substr issue
