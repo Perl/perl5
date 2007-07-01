@@ -146,7 +146,10 @@ Perl_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
             }
             else {
                 /* otherwise, recurse into ourselves for the MRO
-                   of this @ISA member, and append their MRO to ours */
+                   of this @ISA member, and append their MRO to ours.
+		   The recursive call could throw an exception, which
+		   has memory management implications here, hence the use of
+		   the mortal.  */
 		const AV *const subrv
 		    = mro_get_linear_isa_dfs(basestash, level + 1);
 
