@@ -622,3 +622,19 @@ foreach my $var ($VAR) {
 }
 EXPECT
 yes
+########
+sub TIEARRAY { bless [], 'main' }
+{
+    local @a;
+    tie @a, 'main';
+}
+print "tied\n" if tied @a;
+EXPECT
+########
+sub TIEHASH { bless [], 'main' }
+{
+    local %h;
+    tie %h, 'main';
+}
+print "tied\n" if tied %h;
+EXPECT
