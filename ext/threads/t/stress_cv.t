@@ -15,14 +15,16 @@ BEGIN {
 
 use ExtUtils::testlib;
 
+my $test = 0;
 sub ok {
-    my ($id, $ok, $name) = @_;
+    my ($ok, $name) = @_;
+    $test++;
 
     # You have to do it this way or VMS will get confused.
     if ($ok) {
-        print("ok $id - $name\n");
+        print("ok $test - $name\n");
     } else {
-        print("not ok $id - $name\n");
+        print("not ok $test - $name\n");
         printf("# Failed test at line %d\n", (caller)[2]);
     }
 
@@ -31,27 +33,29 @@ sub ok {
 
 BEGIN {
     $| = 1;
-    print("1..63\n");   ### Number of tests that will be run ###
+    print("1..61\n");   ### Number of tests that will be run ###
 };
 
 use threads;
-ok(1, 1, 'Loaded');
+ok(1, 'Loaded');
 
 ### Start of Testing ###
 
+my $cnt = 30;
+
 my @threads;
-for (2..32) {
-    ok($_, 1, "Multiple thread test");
-    push(@threads , threads->create(sub {
-                                        my $i = shift;
-                                        for (1..500000) { $i++ }
-                                    }, $_));
+for (1..$cnt) {
+    my $thr = threads->create(sub { my $ii = shift;
+                                    for (1..500000) { $ii++ } }, $_);
+    ok($thr, "Thread created - iter $_");
+    push(@threads, $thr);
 }
 
-my $i = 33;
-for (@threads) {
-    $_->join;
-    ok($i++, 1 ,"Thread joined");
+for (1..$cnt) {
+    my ($result, $thr);
+    $thr = $threads[$_-1];
+    $result = $thr->join if $thr;
+    ok($thr, "Thread joined - iter $_");
 }
 
 # EOF

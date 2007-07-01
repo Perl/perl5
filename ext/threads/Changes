@@ -1,5 +1,8 @@
 Revision history for Perl extension threads.
 
+-
+	- Sundry test suite fixes
+
 1.63 Tue Jun 26 21:15:27 EDT 2007
 	- Avoid double-free of the thread function
 	- Added reference in POD to perlmod section on thread safety
