@@ -344,14 +344,19 @@ perform the upgrade if necessary.  See C<svtype>.
 #define PRIVSHIFT 4	/* (SVp_?OK >> PRIVSHIFT) == SVf_?OK */
 
 #define SVf_AMAGIC	0x10000000  /* has magical overloaded methods */
+
+/* Ensure this value does not clash with the GV_ADD* flags in gv.h: */
 #define SVf_UTF8        0x20000000  /* SvPV is UTF-8 encoded
 				       This is also set on RVs whose overloaded
 				       stringification is UTF-8. This might
 				       only happen as a side effect of SvPV() */
 					   
-/* Ensure this value does not clash with the GV_ADD* flags in gv.h */
 
 /* Some private flags. */
+
+/* PVAV could probably use 0x2000000 without conflict. I assume that PVFM can
+   be UTF-8 encoded, and PVCVs could well have UTF-8 prototypes. PVIOs haven't
+   been restructured, so sometimes get used as string buffers.  */
 
 /* PVHV */
 #define SVphv_SHAREKEYS 0x20000000  /* PVHV keys live on shared string table */
