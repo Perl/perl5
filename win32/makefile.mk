@@ -1005,10 +1005,17 @@ all : CHECKDMAKE .\config.h $(GLOBEXE) $(MINIPERL) $(MK2)		\
 	$(RIGHTMAKE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE)	\
 	$(X2P) MakePPPort Extensions $(PERLSTATIC)
 
-..\regnodes.h : ..\regcomp.sym
+..\regnodes.h : ..\regcomp.sym ..\regcomp.pl ..\regexp.h
 	cd .. && regcomp.pl && cd win32
 
+..\regcharclass.h : ..\Porting\regcharclass.pl
+	cd .. && Porting\regcharclass.pl && cd win32
+
 regnodes : ..\regnodes.h
+
+..\regcomp$(o) : ..\regnodes.h ..\regcharclass.h	
+
+..\regexec$(o) : ..\regnodes.h ..\regcharclass.h
 
 reonly : regnodes .\config.h $(GLOBEXE) $(MINIPERL) $(MK2)		\
 	$(RIGHTMAKE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE)	\
