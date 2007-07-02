@@ -1,4 +1,4 @@
-# $Id: /local/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker.pm 27436 2007-02-21T15:59:55.429725Z schwern  $
+# $Id: /mirror/svn.schwern.org/CPAN/ExtUtils-MakeMaker/trunk/lib/ExtUtils/MakeMaker.pm 32220 2007-07-02T03:54:00.548844Z schwern  $
 package ExtUtils::MakeMaker;
 
 BEGIN {require 5.005_03;}
@@ -21,8 +21,8 @@ use vars qw(
 use vars qw($Revision);
 use strict;
 
-$VERSION = '6.32_01';
-($Revision) = q$Revision: 27436 $ =~ /Revision:\s+(\S+)/;
+$VERSION = '6.35';
+($Revision) = q$Revision: 32220 $ =~ /Revision:\s+(\S+)/;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&WriteMakefile &writeMakefile $Verbose &prompt);
@@ -68,41 +68,42 @@ sub WriteMakefile {
 # scalar.
 my %Att_Sigs;
 my %Special_Sigs = (
- C                  => 'array',
- CONFIG             => 'array',
- CONFIGURE          => 'code',
- DIR                => 'array',
- DL_FUNCS           => 'hash',
- DL_VARS            => 'array',
- EXCLUDE_EXT        => 'array',
- EXE_FILES          => 'array',
- FUNCLIST           => 'array',
- H                  => 'array',
- IMPORTS            => 'hash',
- INCLUDE_EXT        => 'array',
- LIBS               => ['array',''],
- MAN1PODS           => 'hash',
- MAN3PODS           => 'hash',
- PL_FILES           => 'hash',
- PM                 => 'hash',
- PMLIBDIRS          => 'array',
- PMLIBPARENTDIRS    => 'array',
- PREREQ_PM          => 'hash',
- SKIP               => 'array',
- TYPEMAPS           => 'array',
- XS                 => 'hash',
+ C                  => 'ARRAY',
+ CONFIG             => 'ARRAY',
+ CONFIGURE          => 'CODE',
+ DIR                => 'ARRAY',
+ DL_FUNCS           => 'HASH',
+ DL_VARS            => 'ARRAY',
+ EXCLUDE_EXT        => 'ARRAY',
+ EXE_FILES          => 'ARRAY',
+ FUNCLIST           => 'ARRAY',
+ H                  => 'ARRAY',
+ IMPORTS            => 'HASH',
+ INCLUDE_EXT        => 'ARRAY',
+ LIBS               => ['ARRAY',''],
+ MAN1PODS           => 'HASH',
+ MAN3PODS           => 'HASH',
+ PL_FILES           => 'HASH',
+ PM                 => 'HASH',
+ PMLIBDIRS          => 'ARRAY',
+ PMLIBPARENTDIRS    => 'ARRAY',
+ PREREQ_PM          => 'HASH',
+ SKIP               => 'ARRAY',
+ TYPEMAPS           => 'ARRAY',
+ XS                 => 'HASH',
+ VERSION            => ['version',''],
  _KEEP_AFTER_FLUSH  => '',
 
- clean      => 'hash',
- depend     => 'hash',
- dist       => 'hash',
- dynamic_lib=> 'hash',
- linkext    => 'hash',
- macro      => 'hash',
- postamble  => 'hash',
- realclean  => 'hash',
- test       => 'hash',
- tool_autosplit => 'hash',
+ clean      => 'HASH',
+ depend     => 'HASH',
+ dist       => 'HASH',
+ dynamic_lib=> 'HASH',
+ linkext    => 'HASH',
+ macro      => 'HASH',
+ postamble  => 'HASH',
+ realclean  => 'HASH',
+ test       => 'HASH',
+ tool_autosplit => 'HASH',
 );
 
 @Att_Sigs{keys %Recognized_Att_Keys} = ('') x keys %Recognized_Att_Keys;
@@ -120,18 +121,27 @@ sub _verify_att {
         }
 
         my @sigs   = ref $sig ? @$sig : $sig;
-        my $given = lc ref $val;
-        unless( grep $given eq $_, @sigs ) {
-            my $takes = join " or ", map { $_ ne '' ? "$_ reference"
-                                                    : "string/number"
-                                         } @sigs;
-            my $has   = $given ne '' ? "$given reference"
-                                     : "string/number";
+        my $given  = ref $val;
+        unless( grep { $given eq $_ || ($_ && eval{$val->isa($_)}) } @sigs ) {
+            my $takes = join " or ", map { _format_att($_) } @sigs;
+
+            my $has = _format_att($given);
             warn "WARNING: $key takes a $takes not a $has.\n".
                  "         Please inform the author.\n";
         }
     }
 }
+
+
+sub _format_att {
+    my $given = shift;
+    
+    return $given eq ''        ? "string/number"
+         : uc $given eq $given ? "$given reference"
+         :                       "$given object"
+         ;
+}
+
 
 sub prompt ($;$) {
     my($mess, $def) = @_;
@@ -415,13 +425,6 @@ sub new {
               $self->{PREREQ_PM}->{$prereq} : 'unknown version' ;
         }
     }
-    if (%unsatisfied && $self->{PREREQ_FATAL}){
-        my $failedprereqs = join ', ', map {"$_ $unsatisfied{$_}"} 
-                            keys %unsatisfied;
-        die qq{MakeMaker FATAL: prerequisites not found ($failedprereqs)\n
-               Please install these modules first and rerun 'perl Makefile.PL'.\n};
-    }
-
     if (defined $self->{CONFIGURE}) {
         if (ref $self->{CONFIGURE} eq 'CODE') {
             %configure_att = %{&{$self->{CONFIGURE}}};
@@ -491,6 +494,17 @@ sub new {
     } else {
         parse_args($self,split(' ', $ENV{PERL_MM_OPT} || ''),@ARGV);
     }
+    if (%unsatisfied && $self->{PREREQ_FATAL}){
+        my $failedprereqs = join "\n", map {"    $_ $unsatisfied{$_}"} 
+                            sort { $a cmp $b } keys %unsatisfied;
+        die <<"END";
+MakeMaker FATAL: prerequisites not found.
+$failedprereqs
+
+Please install these modules first and rerun 'perl Makefile.PL'.
+END
+    }
+
 
     $self->{NAME} ||= $self->guess_name;
 
@@ -635,10 +649,11 @@ sub WriteEmptyMakefile {
 
     my %att = @_;
     my $self = MM->new(\%att);
-    my $new = $self->{FIRST_MAKEFILE};
+    
+    my $new = $self->{MAKEFILE};
     my $old = $self->{MAKEFILE_OLD};
     if (-f $old) {
-      _unlink($old) or warn "unlink $old: $!";
+        _unlink($old) or warn "unlink $old: $!";
     }
     if ( -f $new ) {
         _rename($new, $old) or warn "rename $new => $old: $!"
@@ -881,7 +896,8 @@ sub flush {
     my $self = shift;
     my($chunk);
     local *FH;
-    my($finalname) = $self->{FIRST_MAKEFILE};
+
+    my $finalname = $self->{MAKEFILE};
     print STDOUT "Writing $finalname for $self->{NAME}\n";
 
     unlink($finalname, "MakeMaker.tmp", $Is_VMS ? 'Descrip.MMS' : ());
@@ -2059,16 +2075,23 @@ by the PREFIX.
 =item PREREQ_FATAL
 
 Bool. If this parameter is true, failing to have the required modules
-(or the right versions thereof) will be fatal. perl Makefile.PL will die
-with the proper message.
+(or the right versions thereof) will be fatal. C<perl Makefile.PL>
+will C<die> instead of simply informing the user of the missing dependencies.
 
-Note: see L<Test::Harness> for a shortcut for stopping tests early if
-you are missing dependencies.
+It is I<extremely> rare to have to use C<PREREQ_FATAL>. Its use by module
+authors is I<strongly discouraged> and should never be used lightly.
+Module installation tools have ways of resolving umet dependencies but
+to do that they need a F<Makefile>.  Using C<PREREQ_FATAL> breaks this.
+That's bad.
 
-Do I<not> use this parameter for simple requirements, which could be resolved
-at a later time, e.g. after an unsuccessful B<make test> of your module.
+The only situation where it is appropriate is when you have
+dependencies that are indispensible to actually I<write> a
+F<Makefile>. For example, MakeMaker's F<Makefile.PL> needs L<File::Spec>.
+If its not available it cannot write the F<Makefile>.
 
-It is I<extremely> rare to have to use C<PREREQ_FATAL> at all!
+Note: see L<Test::Harness> for a shortcut for stopping tests early
+if you are missing dependencies and are afraid that users might
+use your module with an incomplete environment.
 
 =item PREREQ_PM
 
@@ -2165,16 +2188,27 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    $VERSION = (q$Revision: 27436 $) =~ /(\d+)/g;
+    ($VERSION) = q$Revision: 32220 $ =~ /(\d+)/g;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
-    our $VERSION = 1.2.3;       # new for perl5.6.0 
+    our $VERSION = 1.2.3;       # new for perl5.6.0
 
 but these will fail:
 
     my $VERSION = '1.01';
     local $VERSION = '1.02';
     local $FOO::VERSION = '1.30';
+
+L<version> will be loaded, if available, so this will work.
+
+    our $VERSION = qv(1.2.3);   # version.pm will be loaded if available
+
+Its up to you to declare a dependency on C<version>.  Also note that this
+feature was introduced in MakeMaker 6.35.  Earlier versions of MakeMaker
+require this:
+
+    # All on one line
+    use version; our $VERSION = qv(1.2.3);
 
 (Putting C<my> or C<local> on the preceding line will work o.k.)
 
@@ -2411,7 +2445,7 @@ directory with the name C<$(DISTNAME)-$(VERSION)>. If that directory
 exists, it will be removed first.
 
 Additionally, it will create a META.yml module meta-data file in the
-distdir and add this to the distdir's MANFIEST.  You can shut this
+distdir and add this to the distdir's MANIFEST.  You can shut this
 behavior off with the NO_META flag.
 
 =item   make disttest
@@ -2422,7 +2456,7 @@ a make test in that directory.
 =item    make tardist
 
 First does a distdir. Then a command $(PREOP) which defaults to a null
-command, followed by $(TOUNIX), which defaults to a null command under
+command, followed by $(TO_UNIX), which defaults to a null command under
 UNIX, and will convert files in distribution directory to UNIX format
 otherwise. Next it runs C<tar> on that directory into a tarfile and
 deletes the directory. Finishes with a command $(POSTOP) which
