@@ -29,7 +29,7 @@ use vars qw(@ISA $VERSION);
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
-$VERSION = '1.14_01';
+$VERSION = '1.15';
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 
@@ -341,10 +341,12 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)$(DFSEP).
       push(@m,
        q{	$(LD) -out:$@ $(LDDLFLAGS) }.$ldfrom.q{ $(OTHERLDFLAGS) }
       .q{$(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) -def:$(EXPORT_LIST)});
+
       # VS2005 (aka VC 8) or higher, but not for 64-bit compiler from Platform SDK
-      if ($Config{ivsize} == 4 && $Config{cc} eq 'cl' and $Config{ccversion} =~ /^(\d+)/ and $1 >= 14) {
+      if ($Config{ivsize} == 4 && $Config{cc} eq 'cl' and $Config{ccversion} =~ /^(\d+)/ and $1 >= 14) 
+    {
         push(@m,
-          q{	
+          q{
 	mt -nologo -manifest $@.manifest -outputresource:$@;2 && del $@.manifest});
       }
     }
@@ -485,8 +487,7 @@ wants:
     another_command
     cd ..
 
-B<NOTE> This cd can only go one level down.  So far this sufficient for
-what MakeMaker needs.
+NOTE: This only works with simple relative directories.  Throw it an absolute dir or something with .. in it and things will go wrong.
 
 =cut
 
@@ -497,11 +498,13 @@ sub cd {
 
     my $cmd = join "\n\t", map "$_", @cmds;
 
+    my $updirs = $self->catdir(map { $self->updir } $self->splitdir($dir));
+
     # No leading tab and no trailing newline makes for easier embedding.
-    my $make_frag = sprintf <<'MAKE_FRAG', $dir, $cmd;
+    my $make_frag = sprintf <<'MAKE_FRAG', $dir, $cmd, $updirs;
 cd %s
 	%s
-	cd ..
+	cd %s
 MAKE_FRAG
 
     chomp $make_frag;
@@ -560,7 +563,6 @@ PERLTYPE = $self->{PERLTYPE}
 };
 
 }
-
 
 1;
 __END__

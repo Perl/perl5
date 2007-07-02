@@ -18,7 +18,7 @@ use vars qw($VERSION @ISA
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.52_04';
+$VERSION = '1.54';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -632,7 +632,7 @@ manifest :
 	$(PERLRUN) "-MExtUtils::Manifest=mkmanifest" -e mkmanifest
 
 veryclean : realclean
-	$(RM_F) *~ *.orig */*~ */*.orig
+	$(RM_F) *~ */*~ *.orig */*.orig *.bak */*.bak *.old */*.old 
 
 MAKE_FRAG
 
@@ -1028,10 +1028,9 @@ WARNING
             print "Executing $abs\n" if ($trace >= 2);
 
             my $version_check = qq{$abs -le "require $ver; print qq{VER_OK}"};
+            $version_check = "$Config{run} $version_check"
+                if defined $Config{run} and length $Config{run};
 
-            if (defined $Config{run}) {
-               $version_check = "$Config{run} $version_check";
-            }
             # To avoid using the unportable 2>&1 to suppress STDERR,
             # we close it before running the command.
             # However, thanks to a thread library bug in many BSDs
@@ -1046,7 +1045,7 @@ WARNING
                 open STDERR, '>&STDERR_COPY' if $stderr_duped;
             }
 
-            if ($val =~ /^VER_OK/) {
+            if ($val =~ /^VER_OK/m) {
                 print "Using PERL=$abs\n" if $trace;
                 return $abs;
             } elsif ($trace >= 2) {
@@ -1067,95 +1066,104 @@ Inserts the sharpbang or equivalent magic number to a set of @files.
 
 =cut
 
-sub fixin { # stolen from the pink Camel book, more or less
-    my($self, @files) = @_;
+sub fixin {    # stolen from the pink Camel book, more or less
+    my ( $self, @files ) = @_;
 
-    my($does_shbang) = $Config{'sharpbang'} =~ /^\s*\#\!/;
+    my ($does_shbang) = $Config{'sharpbang'} =~ /^\s*\#\!/;
     for my $file (@files) {
         my $file_new = "$file.new";
         my $file_bak = "$file.bak";
 
-	local(*FIXIN);
-	local(*FIXOUT);
-	open(FIXIN, $file) or croak "Can't process '$file': $!";
-	local $/ = "\n";
-	chomp(my $line = <FIXIN>);
-	next unless $line =~ s/^\s*\#!\s*//;     # Not a shbang file.
-	# Now figure out the interpreter name.
-	my($cmd,$arg) = split ' ', $line, 2;
-	$cmd =~ s!^.*/!!;
+        local (*FIXIN);
+        local (*FIXOUT);
+        open( FIXIN, $file ) or croak "Can't process '$file': $!";
+        local $/ = "\n";
+        chomp( my $line = <FIXIN> );
+        next unless $line =~ s/^\s*\#!\s*//;    # Not a shbang file.
+        # Now figure out the interpreter name.
+        my ( $cmd, $arg ) = split ' ', $line, 2;
+        $cmd =~ s!^.*/!!;
 
-	# Now look (in reverse) for interpreter in absolute PATH (unless perl).
+        # Now look (in reverse) for interpreter in absolute PATH (unless perl).
         my $interpreter;
-	if ($cmd eq "perl") {
-            if ($Config{startperl} =~ m,^\#!.*/perl,) {
+        if ( $cmd eq "perl" ) {
+            if ( $Config{startperl} =~ m,^\#!.*/perl, ) {
                 $interpreter = $Config{startperl};
                 $interpreter =~ s,^\#!,,;
-            } else {
+            }
+            else {
                 $interpreter = $Config{perlpath};
             }
-	} else {
-	    my(@absdirs) = reverse grep {$self->file_name_is_absolute} $self->path;
-	    $interpreter = '';
-	    my($dir);
-	    foreach $dir (@absdirs) {
-		if ($self->maybe_command($cmd)) {
-		    warn "Ignoring $interpreter in $file\n" if $Verbose && $interpreter;
-		    $interpreter = $self->catfile($dir,$cmd);
-		}
-	    }
-	}
-	# Figure out how to invoke interpreter on this machine.
+        }
+        else {
+            my (@absdirs)
+                = reverse grep { $self->file_name_is_absolute } $self->path;
+            $interpreter = '';
+            my ($dir);
+            foreach $dir (@absdirs) {
+                if ( $self->maybe_command($cmd) ) {
+                    warn "Ignoring $interpreter in $file\n"
+                        if $Verbose && $interpreter;
+                    $interpreter = $self->catfile( $dir, $cmd );
+                }
+            }
+        }
 
-	my($shb) = "";
-	if ($interpreter) {
-	    print STDOUT "Changing sharpbang in $file to $interpreter" if $Verbose;
-	    # this is probably value-free on DOSISH platforms
-	    if ($does_shbang) {
-		$shb .= "$Config{'sharpbang'}$interpreter";
-		$shb .= ' ' . $arg if defined $arg;
-		$shb .= "\n";
-	    }
-	    $shb .= qq{
+        # Figure out how to invoke interpreter on this machine.
+
+        my ($shb) = "";
+        if ($interpreter) {
+            print STDOUT "Changing sharpbang in $file to $interpreter"
+                if $Verbose;
+
+            # this is probably value-free on DOSISH platforms
+            if ($does_shbang) {
+                $shb .= "$Config{'sharpbang'}$interpreter";
+                $shb .= ' ' . $arg if defined $arg;
+                $shb .= "\n";
+            }
+            $shb .= qq{
 eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
     if 0; # not running under some shell
-} unless $Is_Win32; # this won't work on win32, so don't
-	} else {
-	    warn "Can't find $cmd in PATH, $file unchanged"
-		if $Verbose;
-	    next;
-	}
+} unless $Is_Win32;    # this won't work on win32, so don't
+        }
+        else {
+            warn "Can't find $cmd in PATH, $file unchanged"
+                if $Verbose;
+            next;
+        }
 
-	unless ( open(FIXOUT,">$file_new") ) {
-	    warn "Can't create new $file: $!\n";
-	    next;
-	}
-	
-	# Print out the new #! line (or equivalent).
-	local $\;
-	local $/;
-	print FIXOUT $shb, <FIXIN>;
-	close FIXIN;
-	close FIXOUT;
+        unless ( open( FIXOUT, ">$file_new" ) ) {
+            warn "Can't create new $file: $!\n";
+            next;
+        }
+
+        # Print out the new #! line (or equivalent).
+        local $\;
+        local $/;
+        print FIXOUT $shb, <FIXIN>;
+        close FIXIN;
+        close FIXOUT;
 
         chmod 0666, $file_bak;
         unlink $file_bak;
-	unless ( _rename($file, $file_bak) ) {	
-	    warn "Can't rename $file to $file_bak: $!";
-	    next;
-	}
-	unless ( _rename($file_new, $file) ) {	
-	    warn "Can't rename $file_new to $file: $!";
-	    unless ( _rename($file_bak, $file) ) {
-	        warn "Can't rename $file_bak back to $file either: $!";
-		warn "Leaving $file renamed as $file_bak\n";
-	    }
-	    next;
-	}
-	unlink $file_bak;
-    } continue {
-	close(FIXIN) if fileno(FIXIN);
-	system("$Config{'eunicefix'} $file") if $Config{'eunicefix'} ne ':';;
+        unless ( _rename( $file, $file_bak ) ) {
+            warn "Can't rename $file to $file_bak: $!";
+            next;
+        }
+        unless ( _rename( $file_new, $file ) ) {
+            warn "Can't rename $file_new to $file: $!";
+            unless ( _rename( $file_bak, $file ) ) {
+                warn "Can't rename $file_bak back to $file either: $!";
+                warn "Leaving $file renamed as $file_bak\n";
+            }
+            next;
+        }
+        unlink $file_bak;
+    }
+    continue {
+        close(FIXIN) if fileno(FIXIN);
+        system("$Config{'eunicefix'} $file") if $Config{'eunicefix'} ne ':';
     }
 }
 
@@ -1577,21 +1585,17 @@ sub init_main {
     my $inc_carp_dir   = dirname($INC{'Carp.pm'});
 
     unless ($self->{PERL_SRC}){
-	my($dir);
-	foreach my $dir_count (1..8) # 8 is the VMS limit for nesting
-        {
-            $dir = $self->catdir(($Updir) x $dir_count);
-	    if (
-		-f $self->catfile($dir,"config_h.SH")
-		&&
-		-f $self->catfile($dir,"perl.h")
-		&&
-		-f $self->catfile($dir,"lib","Exporter.pm")
-	       ) {
-		$self->{PERL_SRC}=$dir ;
-		last;
-	    }
-	}
+        foreach my $dir_count (1..8) { # 8 is the VMS limit for nesting
+            my $dir = $self->catdir(($Updir) x $dir_count);
+
+            if (-f $self->catfile($dir,"config_h.SH")   &&
+                -f $self->catfile($dir,"perl.h")        &&
+                -f $self->catfile($dir,"lib","Exporter.pm")
+            ) {
+                $self->{PERL_SRC}=$dir ;
+                last;
+            }
+        }
     }
 
     warn "PERL_CORE is set but I can't find your PERL_SRC!\n" if
@@ -2539,7 +2543,7 @@ doc_inst_perl:
 		MAP_LIBPERL "$(MAP_LIBPERL)" \
 		>> }.$self->catfile('$(DESTINSTALLARCHLIB)','perllocal.pod').q{
 
-} if -f 'Makefile.PL';
+};
 
     push @m, q{
 inst_perl: pure_inst_perl doc_inst_perl
@@ -2682,10 +2686,16 @@ sub parse_abstract {
 
 =item parse_version
 
-parse a file and return what you think is $VERSION in this file set to.
+    my $version = MM->parse_version($file);
+
+Parse a $file and return what $VERSION is set to by the first assignment.
 It will return the string "undef" if it can't figure out what $VERSION
-is. $VERSION should be for all to see, so our $VERSION or plain $VERSION
-are okay, but my $VERSION is not.
+is. $VERSION should be for all to see, so C<our $VERSION> or plain $VERSION
+are okay, but C<my $VERSION> is not.
+
+parse_version() will try to C<use version> before checking for C<$VERSION> so the following will work.
+
+    $VERSION = qv(1.2.3);
 
 =cut
 
@@ -2705,6 +2715,10 @@ sub parse_version {
 	my $eval = qq{
 	    package ExtUtils::MakeMaker::_version;
 	    no strict;
+	    BEGIN { eval {
+	        require version;
+	        "version"->import;
+	    } }
 
 	    local $1$2;
 	    \$$2=undef; do {
@@ -3415,7 +3429,6 @@ sub test {
     }
     # note: 'test.pl' name is also hardcoded in init_dirscan()
     my(@m);
-    my $subdirs_test = ($self->{DIR} && @{$self->{DIR}} ? 'subdirs-test' : '');
     push(@m,"
 TEST_VERBOSE=0
 TEST_TYPE=test_\$(LINKTYPE)
@@ -3425,17 +3438,21 @@ TESTDB_SW = -d
 
 testdb :: testdb_\$(LINKTYPE)
 
-test :: \$(TEST_TYPE) $subdirs_test
+test :: \$(TEST_TYPE) subdirs-test
+
+subdirs-test ::
+	\$(NOECHO) \$(NOOP)
+
 ");
 
     foreach my $dir (@{ $self->{DIR} }) {
-        my $test = $self->oneliner(sprintf <<'CODE', $dir);
-chdir '%s';  
-system '$(MAKE) $(USEMAKEFILE) $(FIRST_MAKEFILE) test $(PASTHRU)' 
-    if -f '$(FIRST_MAKEFILE)';
-CODE
+        my $test = $self->cd($dir, '$(MAKE) test $(PASTHRU)');
 
-        push(@m, "\nsubdirs-test ::\n\t\$(NOECHO) $test\n");
+        push @m, <<END
+subdirs-test ::
+	\$(NOECHO) $test
+
+END
     }
 
     push(@m, "\t\$(NOECHO) \$(ECHO) 'No tests defined for \$(NAME) extension.'\n")

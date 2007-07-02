@@ -1782,6 +1782,7 @@ lib/ExtUtils/t/backwards.t	Check MakeMaker's backwards compatibility
 lib/ExtUtils/t/basic.t		See if MakeMaker can build a module
 lib/ExtUtils/t/build_man.t	Set if MakeMaker builds manpages
 lib/ExtUtils/t/bytes.t		Test ExtUtils::MakeMaker::bytes
+lib/ExtUtils/t/cd.t		Test to see cd works
 lib/ExtUtils/t/config.t		Test ExtUtils::MakeMaker::Config
 lib/ExtUtils/t/Constant.t	See if ExtUtils::Constant works
 lib/ExtUtils/t/dir_target.t	Verify if dir_target() is supported
@@ -1789,6 +1790,7 @@ lib/ExtUtils/t/Embed.t		See if ExtUtils::Embed and embedding works
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
 lib/ExtUtils/t/eu_command.t	See if ExtUtils::Command works
 lib/ExtUtils/t/FIRST_MAKEFILE.t		See if FIRST_MAKEFILE works
+lib/ExtUtils/t/fixin.t		See if ExtUtils::MakeMaker works
 lib/ExtUtils/t/hints.t		See if hint files are honored.
 lib/ExtUtils/t/INSTALL_BASE.t	Test INSTALL_BASE in MakeMaker
 lib/ExtUtils/t/Installed.t	See if ExtUtils::Installed works
@@ -1815,6 +1817,7 @@ lib/ExtUtils/t/PL_FILES.t	Test PL_FILES in MakeMaker
 lib/ExtUtils/t/pm.t		See if Makemaker can handle PM
 lib/ExtUtils/t/postamble.t	See if postamble works
 lib/ExtUtils/t/prefixify.t	See if MakeMaker can apply a PREFIX
+lib/ExtUtils/t/prereq.t		See if MakeMaker works
 lib/ExtUtils/t/prereq_print.t	See if PREREQ_PRINT works
 lib/ExtUtils/t/problems.t	How MakeMaker reacts to build problems
 lib/ExtUtils/t/prompt.t		See if E::MM::prompt() works
@@ -1824,6 +1827,7 @@ lib/ExtUtils/t/split_command.t	See if MM's xargs-like function works
 lib/ExtUtils/t/testlib.t	See if ExtUtils::testlib works
 lib/ExtUtils/t/VERSION_FROM.t	See if MakeMaker's VERSION_FROM works
 lib/ExtUtils/t/vmsish.t	Test ExtUtils::MakeMaker::vmsish
+lib/ExtUtils/t/WriteEmptyMakefile.t	See if WriteEmptyMakefile works
 lib/ExtUtils/t/writemakefile_args.t	See if WriteMakefile works
 lib/ExtUtils/t/xs.t		Part of MakeMaker's test suite
 lib/ExtUtils/typemap		Extension interface types

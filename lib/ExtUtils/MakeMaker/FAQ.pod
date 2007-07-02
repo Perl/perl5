@@ -1,7 +1,7 @@
 package ExtUtils::MakeMaker::FAQ;
 
 use vars qw($VERSION);
-$VERSION = '1.11_04';
+$VERSION = '1.12';
 
 1;
 __END__
@@ -104,6 +104,20 @@ And then set PERL5LIB to F<~/tmp/lib/perl5>.  This works well when you
 have multiple modules to work with.  It also ensures that the module
 goes through its full installation process which may modify it.
 
+=item PREFIX vs INSTALL_BASE from Module::Build::Cookbook
+
+The behavior of PREFIX is complicated and depends closely on how your
+Perl is configured. The resulting installation locations will vary from
+machine to machine and even different installations of Perl on the same machine.
+Because of this, its difficult to document where prefix will place your modules.
+
+In contrast, INSTALL_BASE has predictable, easy to explain installation locations.
+Now that Module::Build and MakeMaker both have INSTALL_BASE there is little reason
+to use PREFIX other than to preserve your existing installation locations. If you
+are starting a fresh Perl installation we encourage you to use INSTALL_BASE. If
+you have an existing installation installed via PREFIX, consider moving it to an
+installation structure matching INSTALL_BASE and using that instead.
+
 =back
 
 
@@ -175,7 +189,7 @@ in the $Revision$ will be updated, updating your $VERSION.
 SVN uses a simple integer for $Revision$ so you can adapt it for your
 $VERSION like so:
 
-    $VERSION = (q$Revision$) =~ /(\d+)/g;
+    ($VERSION) = q$Revision$ =~ /(\d+)/;
 
 In CVS and RCS version 1.9 is followed by 1.10.  Since CPAN compares
 version numbers numerically we use a sprintf() to convert 1.9 to 1.009
