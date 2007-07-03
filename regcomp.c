@@ -7052,6 +7052,8 @@ tryagain:
 		        goto parse_named_seq;
 		}   }
 		num = atoi(RExC_parse);
+		if (isg && num == 0)
+		    vFAIL("Reference to invalid group 0");
                 if (isrel) {
                     num = RExC_npar - num;
                     if (num < 1)

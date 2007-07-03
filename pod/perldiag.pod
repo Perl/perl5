@@ -3556,6 +3556,13 @@ Doing so has no effect.
 (W internal) The internal sv_replace() function was handed a new SV with
 a reference count of other than 1.
 
+=item Reference to invalid group 0
+
+(F) You used C<\g0> or similar in a regular expression. You may refer to
+capturing parentheses only with strictly positive integers (normal
+backreferences) or with stricly negative integers (relative
+backreferences), but using 0 does not make sense.
+
 =item Reference to nonexistent group in regex; marked by <-- HERE in m/%s/
 
 (F) You used something like C<\7> in your regular expression, but there are
