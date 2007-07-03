@@ -253,6 +253,14 @@ a[-]?c	ac	y	$&	ac
 ([a-c]*)\1	abcabc	y	$1	abc
 \1	-	c	-	Reference to nonexistent group
 \2	-	c	-	Reference to nonexistent group
+\g1	-	c	-	Reference to nonexistent group
+\g-1	-	c	-	Reference to nonexistent or unclosed group
+\g{1}	-	c	-	Reference to nonexistent group
+\g{-1}	-	c	-	Reference to nonexistent or unclosed group
+\g0	-	c	-	Reference to invalid group 0
+\g-0	-	c	-	Reference to invalid group 0
+\g{0}	-	c	-	Reference to invalid group 0
+\g{-0}	-	c	-	Reference to invalid group 0
 (a)|\1	a	y	-	-
 (a)|\1	x	n	-	-
 (a)|\2	-	c	-	Reference to nonexistent group
