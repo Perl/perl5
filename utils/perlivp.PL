@@ -209,7 +209,7 @@ if (defined($Config{'extensions'})) {
             next if ($_ eq 'threads/shared');
         }
 	# that's a distribution name, not a module name
-	next if $_ eq 'IO/Compress/Zlib';
+	next if /^IO_Compress_(?:Zlib|Base)$/;
         next if $_ eq 'Devel/DProf'; 
 	# test modules
 	next if $_ eq 'XS/APItest';
