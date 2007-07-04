@@ -7267,7 +7267,8 @@ This function should have been named wantlist() instead.
 X<warn> X<warning> X<STDERR>
 
 Prints the value of LIST to STDERR.  If the last element of LIST does
-not end in a newline, appends the same text as C<die> does.
+not end in a newline, it appends the same file/line number text as C<die>
+does.
 
 If LIST is empty and C<$@> already contains a value (typically from a
 previous eval) that value is used after appending C<"\t...caught">
