@@ -61,7 +61,7 @@ Postpone load of modules until a function is used
 
 =item base
 
-Establish IS-A relationship with base classes at compile time
+Establish an ISA relationship with base classes at compile time
 
 =item bigint
 
@@ -1460,6 +1460,10 @@ By-name interface to Perl's built-in getgr*() functions
 =item User::pwent
 
 By-name interface to Perl's built-in getpw*() functions
+
+=item Win32CORE
+
+Win32 CORE function stubs
 
 =item XS::APItest
 

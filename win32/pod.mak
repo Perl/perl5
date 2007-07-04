@@ -43,6 +43,7 @@ POD = \
 	perlcall.pod	\
 	perlcheat.pod	\
 	perlclib.pod	\
+	perlcommunity.pod	\
 	perlcompile.pod	\
 	perldata.pod	\
 	perldbmfilter.pod	\
@@ -152,6 +153,7 @@ MAN = \
 	perlcall.man	\
 	perlcheat.man	\
 	perlclib.man	\
+	perlcommunity.man	\
 	perlcompile.man	\
 	perldata.man	\
 	perldbmfilter.man	\
@@ -261,6 +263,7 @@ HTML = \
 	perlcall.html	\
 	perlcheat.html	\
 	perlclib.html	\
+	perlcommunity.html	\
 	perlcompile.html	\
 	perldata.html	\
 	perldbmfilter.html	\
@@ -370,6 +373,7 @@ TEX = \
 	perlcall.tex	\
 	perlcheat.tex	\
 	perlclib.tex	\
+	perlcommunity.tex	\
 	perlcompile.tex	\
 	perldata.tex	\
 	perldbmfilter.tex	\

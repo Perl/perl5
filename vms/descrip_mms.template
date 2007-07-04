@@ -388,16 +388,16 @@ pod2 = [.lib.pods]perl582delta.pod [.lib.pods]perl583delta.pod [.lib.pods]perl58
 pod3 = [.lib.pods]perl587delta.pod [.lib.pods]perl588delta.pod [.lib.pods]perl589delta.pod [.lib.pods]perl58delta.pod [.lib.pods]perlaix.pod
 pod4 = [.lib.pods]perlamiga.pod [.lib.pods]perlapi.pod [.lib.pods]perlapio.pod [.lib.pods]perlapollo.pod [.lib.pods]perlartistic.pod [.lib.pods]perlbeos.pod
 pod5 = [.lib.pods]perlbook.pod [.lib.pods]perlboot.pod [.lib.pods]perlbot.pod [.lib.pods]perlbs2000.pod [.lib.pods]perlcall.pod [.lib.pods]perlce.pod
-pod6 = [.lib.pods]perlcheat.pod [.lib.pods]perlclib.pod [.lib.pods]perlcn.pod [.lib.pods]perlcompile.pod [.lib.pods]perlcygwin.pod [.lib.pods]perldata.pod
-pod7 = [.lib.pods]perldbmfilter.pod [.lib.pods]perldebguts.pod [.lib.pods]perldebtut.pod [.lib.pods]perldebug.pod [.lib.pods]perldelta.pod
-pod8 = [.lib.pods]perldgux.pod [.lib.pods]perldiag.pod [.lib.pods]perldoc.pod [.lib.pods]perldos.pod [.lib.pods]perldsc.pod [.lib.pods]perlebcdic.pod
-pod9 = [.lib.pods]perlembed.pod [.lib.pods]perlepoc.pod [.lib.pods]perlfaq.pod [.lib.pods]perlfaq1.pod [.lib.pods]perlfaq2.pod [.lib.pods]perlfaq3.pod
-pod10 = [.lib.pods]perlfaq4.pod [.lib.pods]perlfaq5.pod [.lib.pods]perlfaq6.pod [.lib.pods]perlfaq7.pod [.lib.pods]perlfaq8.pod [.lib.pods]perlfaq9.pod
-pod11 = [.lib.pods]perlfilter.pod [.lib.pods]perlfork.pod [.lib.pods]perlform.pod [.lib.pods]perlfreebsd.pod [.lib.pods]perlfunc.pod
-pod12 = [.lib.pods]perlglossary.pod [.lib.pods]perlgpl.pod [.lib.pods]perlguts.pod [.lib.pods]perlhack.pod [.lib.pods]perlhist.pod [.lib.pods]perlhpux.pod
-pod13 = [.lib.pods]perlhurd.pod [.lib.pods]perlintern.pod [.lib.pods]perlintro.pod [.lib.pods]perliol.pod [.lib.pods]perlipc.pod [.lib.pods]perlirix.pod
-pod14 = [.lib.pods]perljp.pod [.lib.pods]perlko.pod [.lib.pods]perllexwarn.pod [.lib.pods]perllinux.pod [.lib.pods]perllocale.pod [.lib.pods]perllol.pod
-pod15 = [.lib.pods]perlmachten.pod [.lib.pods]perlmacos.pod [.lib.pods]perlmacosx.pod [.lib.pods]perlmint.pod [.lib.pods]perlmod.pod
+pod6 = [.lib.pods]perlcheat.pod [.lib.pods]perlclib.pod [.lib.pods]perlcn.pod [.lib.pods]perlcommunity.pod [.lib.pods]perlcompile.pod
+pod7 = [.lib.pods]perlcygwin.pod [.lib.pods]perldata.pod [.lib.pods]perldbmfilter.pod [.lib.pods]perldebguts.pod [.lib.pods]perldebtut.pod
+pod8 = [.lib.pods]perldebug.pod [.lib.pods]perldelta.pod [.lib.pods]perldgux.pod [.lib.pods]perldiag.pod [.lib.pods]perldoc.pod [.lib.pods]perldos.pod
+pod9 = [.lib.pods]perldsc.pod [.lib.pods]perlebcdic.pod [.lib.pods]perlembed.pod [.lib.pods]perlepoc.pod [.lib.pods]perlfaq.pod [.lib.pods]perlfaq1.pod
+pod10 = [.lib.pods]perlfaq2.pod [.lib.pods]perlfaq3.pod [.lib.pods]perlfaq4.pod [.lib.pods]perlfaq5.pod [.lib.pods]perlfaq6.pod [.lib.pods]perlfaq7.pod
+pod11 = [.lib.pods]perlfaq8.pod [.lib.pods]perlfaq9.pod [.lib.pods]perlfilter.pod [.lib.pods]perlfork.pod [.lib.pods]perlform.pod [.lib.pods]perlfreebsd.pod
+pod12 = [.lib.pods]perlfunc.pod [.lib.pods]perlglossary.pod [.lib.pods]perlgpl.pod [.lib.pods]perlguts.pod [.lib.pods]perlhack.pod [.lib.pods]perlhist.pod
+pod13 = [.lib.pods]perlhpux.pod [.lib.pods]perlhurd.pod [.lib.pods]perlintern.pod [.lib.pods]perlintro.pod [.lib.pods]perliol.pod [.lib.pods]perlipc.pod
+pod14 = [.lib.pods]perlirix.pod [.lib.pods]perljp.pod [.lib.pods]perlko.pod [.lib.pods]perllexwarn.pod [.lib.pods]perllinux.pod [.lib.pods]perllocale.pod
+pod15 = [.lib.pods]perllol.pod [.lib.pods]perlmachten.pod [.lib.pods]perlmacos.pod [.lib.pods]perlmacosx.pod [.lib.pods]perlmint.pod [.lib.pods]perlmod.pod
 pod16 = [.lib.pods]perlmodinstall.pod [.lib.pods]perlmodlib.pod [.lib.pods]perlmodstyle.pod [.lib.pods]perlmpeix.pod [.lib.pods]perlnetware.pod
 pod17 = [.lib.pods]perlnewmod.pod [.lib.pods]perlnumber.pod [.lib.pods]perlobj.pod [.lib.pods]perlop.pod [.lib.pods]perlopenbsd.pod
 pod18 = [.lib.pods]perlopentut.pod [.lib.pods]perlos2.pod [.lib.pods]perlos390.pod [.lib.pods]perlos400.pod [.lib.pods]perlothrtut.pod
@@ -814,6 +814,10 @@ makeppport : $(MINIPERL_EXE) $(ARCHDIR)Config.pm
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pods]
 
 [.lib.pods]perlcn.pod : [.pod]perlcn.pod
+	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
+	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pods]
+
+[.lib.pods]perlcommunity.pod : [.pod]perlcommunity.pod
 	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pods]
 

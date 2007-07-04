@@ -4217,7 +4217,8 @@ Thread, Thread::Queue, Thread::Semaphore, Thread::Signal, Thread::Specific,
 Tie::Array, Tie::File, Tie::Handle, Tie::Hash, Tie::Memoize, Tie::RefHash,
 Tie::Scalar, Tie::SubstrHash, Time::HiRes, Time::Local, Time::gmtime,
 Time::localtime, Time::tm, UNIVERSAL, Unicode::Collate, Unicode::Normalize,
-Unicode::UCD, User::grent, User::pwent, XS::APItest, XS::Typemap, XSLoader
+Unicode::UCD, User::grent, User::pwent, Win32CORE, XS::APItest,
+XS::Typemap, XSLoader
 
 =item Extension Modules
 
@@ -6073,6 +6074,40 @@ I<The Road goes ever on and on, down from the door where it began.>
 =over 4
 
 =item DESCRIPTION
+
+=back
+
+=head2 perlcommunity - a brief overview of the Perl community
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Where to find the community
+
+=item Mailing lists and Newsgroups
+
+=item IRC
+
+=item Websites
+
+L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
+
+=item User Groups
+
+=item Workshops
+
+=item Hackathons
+
+=item Conventions
+
+=item Calendar of Perl Events
+
+=back
+
+=item AUTHOR
 
 =back
 
