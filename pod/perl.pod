@@ -139,6 +139,7 @@ For ease of access, the Perl manual has been split up into several sections.
 =head2 Miscellaneous
 
     perlbook		Perl book information
+    perlcommunity	Perl community information
     perltodo		Perl things to do
 
     perldoc		Look up Perl documentation in Pod format

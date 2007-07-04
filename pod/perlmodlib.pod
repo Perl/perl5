@@ -61,7 +61,7 @@ Postpone load of modules until a function is used
 
 =item base
 
-Establish IS-A relationship with base classes at compile time
+Establish an ISA relationship with base classes at compile time
 
 =item bigint
 
@@ -1848,6 +1848,10 @@ Interfaces to some Win32 API Functions
 =item Win32API::File
 
 Low-level access to Win32 system API calls for files/dirs.
+
+=item Win32CORE
+
+Win32 CORE function stubs
 
 =item XS::APItest
 

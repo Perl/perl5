@@ -885,7 +885,7 @@ Interaction, perlfaq9 - Networking
 
 =back
 
-=head2 perlfaq1 - General Questions About Perl ($Revision: 8539 $)
+=head2 perlfaq1 - General Questions About Perl ($Revision: 9671 $)
 
 =over 4
 
@@ -937,7 +937,7 @@ http://www.perl.org/advocacy/whyperl.html
 
 =back
 
-=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 8539 $)
+=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 9462 $)
 
 =over 4
 
@@ -1077,7 +1077,7 @@ program; what am I doing wrong?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 8539 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 9491 $)
 
 =over 4
 
@@ -1296,7 +1296,7 @@ array of hashes or arrays?
 
 =back
 
-=head2 perlfaq5 - Files and Formats ($Revision: 8579 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 9576 $)
 
 =over 4
 
@@ -1527,7 +1527,7 @@ X<\E, regex>, X<qr//>
 
 =back
 
-=head2 perlfaq7 - General Perl Language Issues ($Revision: 9309 $)
+=head2 perlfaq7 - General Perl Language Issues ($Revision: 9620 $)
 
 =over 4
 
@@ -1610,7 +1610,7 @@ methods?
 
 =back
 
-=head2 perlfaq8 - System Interaction ($Revision: 8539 $)
+=head2 perlfaq8 - System Interaction ($Revision: 9667 $)
 
 =over 4
 
@@ -1730,6 +1730,9 @@ complete?
 search path?
 
 =item How do I add a directory to my include path (@INC) at runtime?
+
+the PERLLIB environment variable, the PERL5LIB environment variable, the
+perl -Idir command line flag, the use lib pragma:
 
 =item What is socket.ph and where do I get it?
 
@@ -2871,7 +2874,7 @@ X<punct>, xdigit X<xdigit>
 
 =item Extended Patterns
 
-C<(?#text)> X<(?#)>, C<(?kimsx-imsx)> X<(?)>, C<(?:pattern)> X<(?:)>,
+C<(?#text)> X<(?#)>, C<(?pimsx-imsx)> X<(?)>, C<(?:pattern)> X<(?:)>,
 C<(?imsx-imsx:pattern)>, C<(?|pattern)> X<(?|)> X<Branch reset>,
 Look-Around Assertions X<look-around assertion> X<lookaround assertion>
 X<look-around> X<lookaround>, C<(?=pattern)> X<(?=)> X<look-ahead,
@@ -2895,10 +2898,10 @@ X<backtracking> X<atomic> X<possessive>
 =item Special Backtracking Control Verbs
 
 Verbs that take an argument, C<(*PRUNE)> C<(*PRUNE:NAME)> X<(*PRUNE)>
-X<(*PRUNE:NAME)> X<\v>, C<(*SKIP)> C<(*SKIP:NAME)> X<(*SKIP)>,
-C<(*MARK:NAME)> C<(*:NAME)> X<(*MARK)> C<(*MARK:NAME)> C<(*:NAME)>,
-C<(*THEN)> C<(*THEN:NAME)>, C<(*COMMIT)> X<(*COMMIT)>, Verbs without an
-argument, C<(*FAIL)> C<(*F)> X<(*FAIL)> X<(*F)>, C<(*ACCEPT)> X<(*ACCEPT)>
+X<(*PRUNE:NAME)>, C<(*SKIP)> C<(*SKIP:NAME)> X<(*SKIP)>, C<(*MARK:NAME)>
+C<(*:NAME)> X<(*MARK)> C<(*MARK:NAME)> C<(*:NAME)>, C<(*THEN)>
+C<(*THEN:NAME)>, C<(*COMMIT)> X<(*COMMIT)>, Verbs without an argument,
+C<(*FAIL)> C<(*F)> X<(*FAIL)> X<(*F)>, C<(*ACCEPT)> X<(*ACCEPT)>
 
 =item Backtracking
 X<backtrack> X<backtracking>
@@ -4362,7 +4365,8 @@ Tie::Hash, Tie::Hash::NamedCapture, Tie::Memoize, Tie::RefHash,
 Tie::Scalar, Tie::SubstrHash, Time::HiRes, Time::Local, Time::Piece,
 Time::Piece::Seconds, Time::gmtime, Time::localtime, Time::tm, UNIVERSAL,
 Unicode::Collate, Unicode::Normalize, Unicode::UCD, User::grent,
-User::pwent, Win32, Win32API::File, XS::APItest, XS::Typemap, XSLoader
+User::pwent, Win32, Win32API::File, Win32CORE, XS::APItest, XS::Typemap,
+XSLoader
 
 =item Extension Modules
 
@@ -5521,7 +5525,8 @@ callback
 
 C</m> - RXf_PMf_MULTILINE, C</s> - RXf_PMf_SINGLELINE, C</i> -
 RXf_PMf_FOLD, C</x> - RXf_PMf_EXTENDED, C</p> - RXf_PMf_KEEPCOPY,
-RXf_SKIPWHITE, RXf_PMf_LOCALE, RXf_UTF8, RXf_START_ONLY, RXf_WHITE
+RXf_PMf_LOCALE, RXf_UTF8, RXf_SPLIT, RXf_SKIPWHITE, RXf_START_ONLY,
+RXf_WHITE
 
 =item exec
 
@@ -5717,6 +5722,10 @@ X<sv_pv>, sv_pvbyte X<sv_pvbyte>, sv_pvbyten X<sv_pvbyten>, sv_pvn
 X<sv_pvn>, sv_pvutf8 X<sv_pvutf8>, sv_pvutf8n X<sv_pvutf8n>, sv_taint
 X<sv_taint>, sv_unref X<sv_unref>, sv_usepvn X<sv_usepvn>, sv_usepvn_mg
 X<sv_usepvn_mg>, sv_uv X<sv_uv>, unpack_str X<unpack_str>
+
+=item Functions in file pp_ctl.c
+
+find_runcv X<find_runcv>
 
 =item Functions in file pp_pack.c
 
@@ -5992,10 +6001,6 @@ PAD_SAVE_SETNULLPAD X<PAD_SAVE_SETNULLPAD>, PAD_SETSV X<PAD_SETSV>,
 PAD_SET_CUR X<PAD_SET_CUR>, PAD_SET_CUR_NOSAVE X<PAD_SET_CUR_NOSAVE>,
 PAD_SV X<PAD_SV>, PAD_SVl X<PAD_SVl>, SAVECLEARSV X<SAVECLEARSV>,
 SAVECOMPPAD X<SAVECOMPPAD>, SAVEPADSV X<SAVEPADSV>
-
-=item Functions in file pp_ctl.c
-
-find_runcv X<find_runcv>
 
 =item GV Functions
 
@@ -6336,19 +6341,45 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =back
 
-=head2 perltodo - Perl TO-DO List
+=head2 perlcommunity - a brief overview of the Perl community
 
 =over 4
 
 =item DESCRIPTION
 
-=item The roadmap to 5.10
+=over 4
+
+=item Where to find the community
+
+=item Mailing lists and Newsgroups
+
+=item IRC
+
+=item Websites
+
+L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
+
+=item User Groups
+
+=item Workshops
+
+=item Hackathons
+
+=item Conventions
+
+=item Calendar of Perl Events
+
+=back
+
+=item AUTHOR
+
+=back
+
+=head2 perltodo - Perl TO-DO List
 
 =over 4
 
-=item Needed for the final 5.10.0 release
-
-=back
+=item DESCRIPTION
 
 =item Tasks that only need Perl knowledge
 
@@ -11435,9 +11466,9 @@ signal name: ..
 
 =item BUGS AND LIMITATIONS
 
-Using non-threadsafe modules, Parent-child threads, Creating threads inside
-special blocks, Unsafe signals, Perl has been built with
-C<PERL_OLD_SIGNALS> (see C<perl -V>), The environment variable
+Threadsafe modules, Using non-threadsafe modules, Parent-child threads,
+Creating threads inside special blocks, Unsafe signals, Perl has been built
+with C<PERL_OLD_SIGNALS> (see C<perl -V>), The environment variable
 C<PERL_SIGNALS> is set to C<unsafe> (see L<perlrun/"PERL_SIGNALS">), The
 module L<Perl::Unsafe::Signals> is used, Returning closures from threads,
 Returning objects from threads, Perl Bugs and the CPAN Version of
@@ -11513,7 +11544,8 @@ FETCH_I<type>_ATTRIBUTES, MODIFY_I<type>_ATTRIBUTES
 
 =back
 
-=head2 base - Establish IS-A relationship with base classes at compile time
+=head2 base - Establish an ISA relationship with base classes at compile
+time
 
 =over 4
 
@@ -11523,7 +11555,7 @@ FETCH_I<type>_ATTRIBUTES, MODIFY_I<type>_ATTRIBUTES
 
 =item DIAGNOSTICS
 
-Base class package "%s" is empty
+Base class package "%s" is empty, Class 'Foo' tried to inherit from itself
 
 =item HISTORY
 
@@ -11558,7 +11590,7 @@ or version
 
 =item Methods
 
-inf(), NaN(), upgrade(), in_effect()
+inf(), NaN(), e, PI, bexp(), bpi(), upgrade(), in_effect()
 
 =item MATH LIBRARY
 
@@ -11600,7 +11632,7 @@ a or accuracy, p or precision, t or trace, l or lib, hex, oct, v or version
 
 =item Caveats
 
-inf(), NaN(), upgrade(), in_effect()
+inf(), NaN(), e, PI(), bexp(), bpi(), upgrade(), in_effect()
 
 =item Math Library
 
@@ -11644,7 +11676,7 @@ in_effect(), hex()/oct()
 
 =item Methods
 
-inf(), NaN(), upgrade(), in_effect()
+inf(), NaN(), e, PI, bexp(), bpi(), upgrade(), in_effect()
 
 =item MATH LIBRARY
 
@@ -12611,8 +12643,6 @@ $ae->extract_path, $ae->files
 
 =item File Extensions
 
-=item Bzip2 Support
-
 =back
 
 =item GLOBAL VARIABLES
@@ -13142,8 +13172,7 @@ FILL, MAX, KEYS, RITER, NAME, ARRAY, PMROOT
 
 =item B::OP Methods
 
-next, sibling, name, ppaddr, desc, targ, type, opt, static, flags, private,
-spare
+next, sibling, name, ppaddr, desc, targ, type, opt, flags, private, spare
 
 =item B::UNOP METHOD
 
@@ -13256,9 +13285,9 @@ B<#>I<var>, B<#>I<var>I<N>, B<#>I<Var>, B<#addr>, B<#arg>, B<#class>,
 B<#classsym>, B<#coplabel>, B<#exname>, B<#extarg>, B<#firstaddr>,
 B<#flags>, B<#flagval>, B<#hints>, B<#hintsval>, B<#hyphseq>, B<#label>,
 B<#lastaddr>, B<#name>, B<#NAME>, B<#next>, B<#nextaddr>, B<#noise>,
-B<#private>, B<#privval>, B<#seq>, B<#seqnum>, B<#opt>, B<#static>,
-B<#sibaddr>, B<#svaddr>, B<#svclass>, B<#svval>, B<#targ>, B<#targarg>,
-B<#targarglife>, B<#typenum>
+B<#private>, B<#privval>, B<#seq>, B<#seqnum>, B<#opt>, B<#sibaddr>,
+B<#svaddr>, B<#svclass>, B<#svval>, B<#targ>, B<#targarg>, B<#targarglife>,
+B<#typenum>
 
 =back
 
@@ -19715,7 +19744,8 @@ MakeMaker
 
 How do I install a module into my home directory?, How do I get MakeMaker
 and Module::Build to install to the same place?, How do I keep from
-installing man pages?, How do I use a module without installing it?
+installing man pages?, How do I use a module without installing it?, PREFIX
+vs INSTALL_BASE from Module::Build::Cookbook
 
 =item Philosophy and History
 
@@ -20360,6 +20390,8 @@ canonpath
 file_name_is_absolute
 
 tmpdir (override)
+
+case_tolerant
 
 =over 4
 
@@ -25267,6 +25299,14 @@ ffround ( +$scale ), ffround ( -$scale ), ffround ( 0 ), fround  ( +$scale
 
 =item bpi()
 
+=item bcos()
+
+=item bsin()
+
+=item batan2()
+
+=item batan()
+
 =item bmuladd()
 
 =back
@@ -25390,6 +25430,14 @@ Input, Output
 =item bnok()
 
 =item bpi()
+
+=item bcos()
+
+=item bsin()
+
+=item batan2()
+
+=item batan()
 
 =item blsft()
 
@@ -26875,11 +26923,11 @@ RECURSE ]), mkdir ( DIR [, RECURSE ]), alloc ( SIZE [, RECORD_SIZE] ), ls (
 put ( LOCAL_FILE [, REMOTE_FILE ] ), put_unique ( LOCAL_FILE [, REMOTE_FILE
 ] ), append ( LOCAL_FILE [, REMOTE_FILE ] ), unique_name (), mdtm ( FILE ),
 size ( FILE ), supported ( CMD ), hash ( [FILEHANDLE_GLOB_REF],[
-BYTES_PER_HASH_MARK] ), nlst ( [ DIR ] ), list ( [ DIR ] ), retr ( FILE ),
-stor ( FILE ), stou ( FILE ), appe ( FILE ), port ( [ PORT ] ), pasv (),
-pasv_xfer ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ), pasv_xfer_unique (
-SRC_FILE, DEST_SERVER [, DEST_FILE ] ), pasv_wait ( NON_PASV_SERVER ),
-abort (), quit ()
+BYTES_PER_HASH_MARK] ), feature ( NAME ), nlst ( [ DIR ] ), list ( [ DIR ]
+), retr ( FILE ), stor ( FILE ), stou ( FILE ), appe ( FILE ), port ( [
+PORT ] ), pasv (), pasv_xfer ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ),
+pasv_xfer_unique ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ), pasv_wait (
+NON_PASV_SERVER ), abort (), quit ()
 
 =over 4
 
@@ -32285,6 +32333,8 @@ C<":SEM_">, C<":PARTITION_">, C<":ALL">
 =item SEE ALSO
 
 =back
+
+=head2 Win32CORE - Win32 CORE function stubs
 
 =over 4
 
