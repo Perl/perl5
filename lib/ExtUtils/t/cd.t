@@ -60,7 +60,7 @@ SKIP: {
     use ExtUtils::MM_VMS;
     is +ExtUtils::MM_VMS->cd(@cd_args),
 q{startdir = F$Environment("Default")
-	Set Default some/dir
+	Set Default [.some.dir]
 	command1
 	command2
 	Set Default 'startdir'};
