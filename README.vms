@@ -268,10 +268,6 @@ inappropriate changes to configure.com or config_h.SH can render perl
 unbuildable; odds are that there's nothing in there you'll need to
 change.
 
-The one exception is the various *DIR install locations. Changing those
-requires changes in genconfig.pl as well.  Be really careful if you need to
-change these, as they can cause some fairly subtle problems.
-
 =head2 Socket Support (optional) for Perl on VMS
 
 Perl includes a number of functions for IP sockets, which are available if

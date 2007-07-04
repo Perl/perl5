@@ -870,7 +870,7 @@ $!
 $!: Try to determine whether config.sh was made on this system
 $!: Get old answers from old config file if Configure was run on the
 $!: same system, otherwise use the hints.
-$ config_sh_es = "''config_sh'/[-]config.sh/[-.vms]config.vms/"
+$ config_sh_es = "''config_sh'/[-]config.sh/"
 $ i = 0
 $ max = 3
 $Config_sh_look:
@@ -882,7 +882,6 @@ $   configshfound = F$SEARCH(config_sh)
 $   IF (configshfound.NES."") THEN GOTO Config_sh_found
 $ ENDIF
 $ IF (i.LT.max) THEN GOTO Config_sh_look
-$! genconfig.pl has "osname='VMS'"
 $ osname = F$EDIT(F$GETSYI("NODE_SWTYPE"),"COLLAPSE")
 $ IF (configshfound.EQS."")
 $ THEN
@@ -1128,7 +1127,6 @@ $ tz = f$fao("UTC!AS!UL:!2ZL",signothetime,tzhour,tzminrem)
 $ cf_time = "''wkday' ''mon' ''mday' ''hour':''min':''sec' ''tz' ''year'"
 $!
 $!: determine the architecture name  
-$! genconfig.pl has either archname='VMS_AXP' or 'VMS_VAX'
 $! Note that DCL in VMS V5.4 does not have F$GETSYI("ARCH_NAME")
 $! but does have F$GETSYI("HW_MODEL").
 $! Please try to use either archname .EQS. "VMS_VAX" or archname .EQS. 
@@ -2928,8 +2926,6 @@ $ IF F$TYPE(pager) .EQS. "STRING" THEN dflt = pager
 $ rp="What pager is used on your system? [''dflt'] "
 $ GOSUB myread
 $ pager = ans
-$!
-$! update [.vms]config.vms here
 $!
 $! update makefile here
 $! echo4 "Updating makefile..."
