@@ -698,9 +698,9 @@ will match C<blah> in any case, some spaces, and an exact (I<including the case>
 repetition of the previous word, assuming the C</x> modifier, and no C</i>
 modifier outside this group.
 
-Note that the C<k> modifier is special in that it can only be enabled,
+Note that the C<p> modifier is special in that it can only be enabled,
 not disabled, and that its presence anywhere in a pattern has a global
-effect. Thus C<(?-k)> and C<(?-k:...)> are meaningless and will warn
+effect. Thus C<(?-p)> and C<(?-p:...)> are meaningless and will warn
 when executed under C<use warnings>.
 
 =item C<(?:pattern)>
