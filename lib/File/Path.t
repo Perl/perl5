@@ -136,6 +136,8 @@ ok(-d $dir,  "dir a still exists");
 ok(-d $dir2, "dir z still exists");
 
 $dir = catdir($tmp_base,'F');
+# mkpath returns unix syntax filespecs on VMS
+$dir = VMS::Filespec::unixify($dir) if $^O eq 'VMS';
 
 @created = mkpath($dir, undef, 0770);
 is(scalar(@created), 1, "created directory (old style 2 verbose undef)");
