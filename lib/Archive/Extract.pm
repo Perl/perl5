@@ -28,7 +28,7 @@ use constant Z              => 'Z';
 
 use vars qw[$VERSION $PREFER_BIN $PROGRAMS $WARN $DEBUG];
 
-$VERSION        = '0.22';
+$VERSION        = '0.22_01';
 $PREFER_BIN     = 0;
 $WARN           = 1;
 $DEBUG          = 0;
@@ -1148,12 +1148,6 @@ what type it is, and what extractor methods therefore can be used. If
 your archives do not have any of the extensions as described in the
 C<new()> method, you will have to specify the type explicitly, or
 C<Archive::Extract> will not be able to extract the archive for you.
-
-=head2 Bzip2 Support
-
-There's currently no very reliable pure perl Bzip2 implementation
-available, so C<Archive::Extract> can only extract C<bzip2> 
-compressed archives if you have a C</bin/bunzip2> program.
 
 =head1 GLOBAL VARIABLES
 
