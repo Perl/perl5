@@ -401,7 +401,7 @@ B<-D14> is equivalent to B<-Dtls>):
       512  r  Regular expression parsing and execution
      1024  x  Syntax tree dump
      2048  u  Tainting checks
-     4096     (Obsolete, previously used for LEAKTEST)
+     4096  U  Unofficial, User hacking (reserved for private, unreleased use)
      8192  H  Hash dump -- usurps values()
     16384  X  Scratchpad allocation
     32768  D  Cleaning up
