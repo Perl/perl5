@@ -162,16 +162,19 @@ like $@,
     qr/^No such $Field "notthere" in variable \$obj3 of type D3/,
     "Compile failure of undeclared fields (helem)";
 
-# Slices
-# We should get compile time failures field name typos
-eval q(return; my D3 $obj3 = $obj2; my $k; @$obj3{$k,'notthere'} = ());
-like $@, 
-    qr/^No such $Field "notthere" in variable \$obj3 of type D3/,
-    "Compile failure of undeclared fields (hslice)";
-eval q(return; my D3 $obj3 = $obj2; my $k; @{$obj3}{$k,'notthere'} = ());
-like 
-    $@, qr/^No such $Field "notthere" in variable \$obj3 of type D3/,
-    "Compile failure of undeclared fields (hslice (block form))";
+SKIP: {
+    # Slices
+    # We should get compile time failures field name typos
+    skip "Doesn't work before 5.9", 2 if $] < 5.009;
+    eval q(return; my D3 $obj3 = $obj2; my $k; @$obj3{$k,'notthere'} = ());
+    like $@, 
+	qr/^No such $Field "notthere" in variable \$obj3 of type D3/,
+	"Compile failure of undeclared fields (hslice)";
+    eval q(return; my D3 $obj3 = $obj2; my $k; @{$obj3}{$k,'notthere'} = ());
+    like 
+	$@, qr/^No such $Field "notthere" in variable \$obj3 of type D3/,
+	"Compile failure of undeclared fields (hslice (block form))";
+}
 
 @$obj1{"_b1", "b1"} = (17, 29);
 is( $obj1->{_b1}, 17 );
