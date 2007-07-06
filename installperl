@@ -845,6 +845,13 @@ sub installlib {
     return if $name =~ m{^(?:TODO|BUGS|CREDITS)$}i;
     return if $name =~ m{^change(?:s|log)(?:\.libnet)?$}i;
 
+    # if using a shared perl library then ignore:
+    # - static library files [of statically linked extensions];
+    # - import library files and export library files (only present on Win32
+    #   anyway?) and empty bootstrap files [of dynamically linked extensions].
+    return if $Config{useshrplib} eq 'true' and
+             ($name =~ /$Config{_a}$/ or $name =~ /\.exp$/ or ($name =~ /\.bs$/ and -z $name));
+
     $name = "$dir/$name" if $dir ne '';
 
     my $installlib = $installprivlib;
