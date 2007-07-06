@@ -178,7 +178,7 @@ sub write_protos {
 	}
 	else {
 	    $retval = "PERL_CALLCONV $splint_flags$retval";
-	    if ($flags =~ /p/) {
+	    if ($flags =~ /[bp]/) {
 		$func = "Perl_$func";
 	    }
 	}
