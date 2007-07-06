@@ -1456,9 +1456,13 @@ lib/AutoSplit.t			See if AutoSplit works
 lib/autouse.pm			Load and call a function only when it's used
 lib/autouse.t			See if autouse works
 lib/base.pm			Establish IS-A relationship at compile time
+lib/base/Changes		base.pm changelog
 lib/base/t/base.t		See if base works
 lib/base/t/fields-base.t	See if fields work
 lib/base/t/fields.t		See if fields work
+lib/base/t/sigdie.t		See if base works with SIGDIE
+lib/base/t/version.t		See if base works with versions
+lib/base/t/warnings.t		See if base works with warnings
 lib/Benchmark.pm		Measure execution time
 lib/Benchmark.t			See if Benchmark works
 lib/bigfloat.pl			An arbitrary precision floating point package
@@ -3443,6 +3447,7 @@ t/lib/contains_pod.xr		Pod-Parser test file
 t/lib/cygwin.t			Builtin cygwin function tests
 t/lib/Devel/switchd.pm		Module for t/run/switchd.t
 t/lib/Dev/Null.pm		Module for testing Test::Harness
+t/lib/Dummy.pm			Module for testing base.pm
 t/lib/dprof/test1_t		Perl code profiler tests
 t/lib/dprof/test1_v		Perl code profiler tests
 t/lib/dprof/test2_t		Perl code profiler tests
@@ -3470,6 +3475,7 @@ t/lib/Filter/Simple/FilterOnlyTest.pm	Helper file for Filter::Simple tests
 t/lib/Filter/Simple/FilterTest.pm	Helper file for Filter::Simple tests
 t/lib/Filter/Simple/ImportTest.pm	Helper file for Filter::Simple tests
 t/lib/filter-util.pl		See if Filter::Util::Call works
+t/lib/HasSigDie.pm		Module for testing base.pm
 t/lib/h2ph.h			Test header file for h2ph
 t/lib/h2ph.pht			Generated output from h2ph.h by h2ph, for comparison
 t/lib/locale/latin1		Part of locale.t in Latin 1
