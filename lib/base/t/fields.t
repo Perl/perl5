@@ -1,5 +1,12 @@
 #!/usr/bin/perl -w
 
+BEGIN {
+   if( $ENV{PERL_CORE} ) {
+        chdir 't' if -d 't';
+        @INC = qw(../lib);
+    }
+}
+
 my $Has_PH;
 BEGIN {
     $Has_PH = $] < 5.009;
