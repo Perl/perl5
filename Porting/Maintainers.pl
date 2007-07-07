@@ -21,6 +21,7 @@ package Maintainers;
 	'craig'		=> 'Craig Berry <craigberry@mac.com>',
 	'dankogai'	=> 'Dan Kogai <dankogai@cpan.org>',
 	'dconway'	=> 'Damian Conway <dconway@cpan.org>',
+	'dland'		=> 'David Landgren <dland@cpan.org>',
 	'dmanura'	=> 'David Manura <dmanura@cpan.org>',
 	'drolsky'	=> 'Dave Rolsky <drolsky@cpan.org>',
 	'elizabeth'	=> 'Elizabeth Mattijsen <liz@dijkmat.nl>',
@@ -50,6 +51,7 @@ package Maintainers;
 	'muir'		=> 'David Muir Sharnoff <muir@cpan.org>',
 	'neilb'		=> 'Neil Bowers <neilb@cpan.org>',
 	'nuffin'	=> 'Yuval Kogman <nothingmuch@woobling.org>',
+	'nwclark'	=> 'Nicholas Clark <nwclark@cpan.org>',
 	'osfameron'	=> 'Hakim Cassimally <osfameron@perl.org>',
 	'p5p'		=> 'perl5-porters <perl5-porters@perl.org>',
 	'perlfaq'	=> 'perlfaq-workers <perlfaq-workers@perl.org>',
@@ -300,6 +302,13 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'ExtUtils::Constant' =>
+		{
+		'MAINTAINER'	=> 'nwclark',
+		'FILES'		=> q[lib/ExtUtils/Constant.pm lib/ExtUtils/Constant],
+		'CPAN'		=> 1,
+		},
+
         'ExtUtils::Install' =>
 
 		{
@@ -341,6 +350,13 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/File/Fetch.pm lib/File/Fetch],
+		'CPAN'		=> 1,
+		},
+
+	'File::Path' =>
+		{
+		'MAINTAINER'	=> 'dland',
+		'FILES'		=> q[lib/File/Path.pm lib/File/Path.t],
 		'CPAN'		=> 1,
 		},
 
