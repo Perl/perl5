@@ -32,6 +32,7 @@ private:
     - ext/Time/HiRes
     - ext/Time/Piece
     - ext/Unicode/Normalize
+    - ext/Win32
     - ext/Win32API/File
     - lib/Archive/Extract
     - lib/Archive/Tar
@@ -222,19 +223,19 @@ private:
     - lib/Module/Load/Conditional.pm
     - lib/Module/Loaded.pm
     - lib/Module/Pluggable.pm
-    - lib/Net/ChangeLog.libnet
+    - lib/Net/ChangeLog
     - lib/Net/Cmd.pm
     - lib/Net/Config.eg
     - lib/Net/Config.pm
     - lib/Net/Domain.pm
     - lib/Net/FTP.pm
-    - lib/Net/Hostname.eg
+    - lib/Net/Hostname.pm.eg
     - lib/Net/libnetFAQ.pod
     - lib/Net/Netrc.pm
     - lib/Net/NNTP.pm
     - lib/Net/Ping.pm
     - lib/Net/POP3.pm
-    - lib/Net/README.libnet
+    - lib/Net/README
     - lib/Net/SMTP.pm
     - lib/Net/Time.pm
     - lib/NEXT.pm

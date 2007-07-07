@@ -308,6 +308,11 @@ C<File::Fetch> provide a simple generic file fetching mechanism.
 
 =item *
 
+C<Log::Message> and C<Log::Message::Simple> are used by the log facility
+of C<CPANPLUS>.
+
+=item *
+
 C<Archive::Extract> is a generic archive extraction mechanism
 for F<.tar> (plain, gziped or bzipped) or F<.zip> files.
 
