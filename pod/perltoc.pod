@@ -885,7 +885,7 @@ Interaction, perlfaq9 - Networking
 
 =back
 
-=head2 perlfaq1 - General Questions About Perl ($Revision: 9671 $)
+=head2 perlfaq1 - General Questions About Perl ($Revision: 9681 $)
 
 =over 4
 
@@ -899,11 +899,11 @@ Interaction, perlfaq9 - Networking
 
 =item Which version of Perl should I use?
 
-=item What are perl4, perl5, or perl6?
+=item What are Perl 4, Perl 5, or Perl 6?
 
 =item What was Ponie?
 
-=item What is perl6?
+=item What is Perl 6?
 
 =item How stable is Perl?
 
@@ -1077,7 +1077,7 @@ program; what am I doing wrong?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 9491 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 9681 $)
 
 =over 4
 
@@ -1610,7 +1610,7 @@ methods?
 
 =back
 
-=head2 perlfaq8 - System Interaction ($Revision: 9667 $)
+=head2 perlfaq8 - System Interaction ($Revision: 9681 $)
 
 =over 4
 
@@ -6606,6 +6606,8 @@ B<-V>
 
 =item C<(?p{})> has been removed
 
+=item Pseudo-hashes have been removed
+
 =item Removal of the bytecode compiler and of perlcc
 
 =item Removal of the JPL
@@ -6738,6 +6740,8 @@ C<Attribute::Handlers>, C<B::Lint>, C<B>, C<Thread>
 =item strictures and array/hash dereferencing in defined()
 
 =item C<(?p{})> has been removed
+
+=item Pseudo-hashes have been removed
 
 =item Removal of the bytecode compiler and of perlcc
 
@@ -14974,7 +14978,7 @@ _conf, _id, _lib, _perl5lib
 => CODEREF );
 
 install_prerequisite, send_test_report, munge_test_report,
-edit_test_report, proceed_on_test_failure
+edit_test_report, proceed_on_test_failure, munge_dist_metafile
 
 =back
 
