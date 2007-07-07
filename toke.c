@@ -12540,8 +12540,10 @@ Perl_yyerror(pTHX_ const char *s)
                 (int)PL_multi_open,(int)PL_multi_close,(IV)PL_multi_start);
         PL_multi_end = 0;
     }
-    if (PL_in_eval & EVAL_WARNONLY && ckWARN_d(WARN_SYNTAX))
-	Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "%"SVf, SVfARG(msg));
+    if (PL_in_eval & EVAL_WARNONLY) {
+	if (ckWARN_d(WARN_SYNTAX))
+	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "%"SVf, SVfARG(msg));
+    }
     else
 	qerror(msg);
     if (PL_error_count >= 10) {
