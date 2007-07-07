@@ -194,6 +194,14 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'CPANPLUS::Dist' =>
+		{
+		'MAINTAINER'	=> 'kane',
+		'FILES'		=> q[lib/CPANPLUS/Dist.pm lib/CPANPLUS/Dist/Base.pm
+				     lib/CPANPLUS/Dist/MM.pm lib/CPANPLUS/Dist/Sample.pm],
+		'CPAN'		=> 1,
+		},
+
 	'CPANPLUS::Dist::Build' =>
 		{
 		'MAINTAINER'	=> 'kane',
