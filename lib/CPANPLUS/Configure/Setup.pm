@@ -475,13 +475,12 @@ Note that the paths you provide should not contain spaces, which is
 needed to make a distinction between program name and options to that
 program. For Win32 machines, you can use the short name for a path,
 like '%1'.
-
-    ", 'c:\Progra~1\prog.exe' );
+", 'c:\Progra~1\prog.exe' );
 
     for my $prog ( sort $conf->options( type => 'program') ) {
         PROGRAM: {
-            print loc("Where can I find your '%1' utility? ".
-                      "(Enter a single space to disable)", $prog );
+            print "\n", loc("Where can I find your '%1' utility? ".
+                      "(Enter a single space to disable)", $prog ), "\n";
             
             my $loc = $term->get_reply(
                             prompt  => "Path to your '$prog'",
@@ -518,9 +517,9 @@ like '%1'.
 
             $conf->set_program( $prog => $cmd );
             print $cmd
-                ? loc(  "Your '%1' utility has been set to '%2'", 
+                ? loc(  "Your '%1' utility has been set to '%2'.", 
                         $prog, $cmd )
-                : loc(  "Your '%1' has been disabled", $prog );           
+                : loc(  "Your '%1' has been disabled.", $prog );           
             print "\n";
         }
     }

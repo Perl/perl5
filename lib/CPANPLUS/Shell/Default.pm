@@ -26,7 +26,7 @@ local $Data::Dumper::Indent     = 1; # for dumpering from !
 BEGIN {
     use vars        qw[ $VERSION @ISA ];
     @ISA        =   qw[ CPANPLUS::Shell::_Base::ReadLine ];
-    $VERSION = "0.80";
+    $VERSION = "0.81_01";
 }
 
 load CPANPLUS::Shell;
@@ -238,7 +238,7 @@ sub _input_loop {
             $SIG{$sig} = $entry->{handler} if exists($entry->{handler});
         }
 
-	print "\n";
+        print "\n";
         last if $self->dispatch_on_input( input => $input );
 
         ### flush the lib cache ###
@@ -493,22 +493,22 @@ sub _quit {
 
 ### print out the help message ###
 ### perhaps, '?' should be a slightly different version ###
-my @Help;
-sub _help {
-    my $self = shift;
-    my %hash    = @_;
-
-    my $input;
-    {   local $Params::Check::ALLOW_UNKNOWN = 1;
-
-        my $tmpl = {
-            input   => { required => 0, store => \$input }
-        };
-
-        my $args = check( $tmpl, \%hash ) or return;
-    }
-
-    @Help = (
+{   my @help;
+    sub _help {
+        my $self = shift;
+        my %hash    = @_;
+    
+        my $input;
+        {   local $Params::Check::ALLOW_UNKNOWN = 1;
+    
+            my $tmpl = {
+                input   => { required => 0, store => \$input }
+            };
+    
+            my $args = check( $tmpl, \%hash ) or return;
+        }
+    
+        @help = (
 loc('[General]'                                                                     ),
 loc('    h | ?                  # display help'                                     ),
 loc('    q                      # exit'                                             ),
@@ -541,20 +541,25 @@ loc('    s edit [user|system]   # open configuration file in editor and reload' 
 loc('    ! EXPR                 # evaluate a perl statement'                        ),
 loc('    p [FILE]               # print the error stack (optionally to a file)'     ),
 loc('    x                      # reload CPAN indices (purges cache)'                              ),
-loc('    x --update_source      # reload CPAN indices, get fresh source files'                              ),
+loc('    x --update_source      # reload CPAN indices, get fresh source files' ),
+loc('[Common Options]'                                  ),
+loc('   i ... --skiptest        # skip tests'           ),
+loc('   i ... --force           # force all operations' ),
+loc('   i ... --verbose         # run in verbose mode'  ),
 loc('[Plugins]'                                                             ),
 loc('   /plugins                # list available plugins'                   ),
 loc('   /? [PLUGIN NAME]        # show usage for (a particular) plugin(s)'  ),
 
-    ) unless @Help;
-
-    $self->_pager_open if (@Help >= $self->_term_rowcount);
-    ### XXX: functional placeholder for actual 'detailed' help.
-    print "Detailed help for the command '$input' is not available.\n\n"
-      if length $input;
-    print map {"$_\n"} @Help;
-    print $/;
-    $self->_pager_close;
+        ) unless @help;
+    
+        $self->_pager_open if (@help >= $self->_term_rowcount);
+        ### XXX: functional placeholder for actual 'detailed' help.
+        print "Detailed help for the command '$input' is not available.\n\n"
+          if length $input;
+        print map {"$_\n"} @help;
+        print $/;
+        $self->_pager_close;
+    }
 }
 
 ### eval some code ###
@@ -1722,8 +1727,8 @@ sub _read_configuration_from_rc {
         loc( "You can use plugins. Type '%1' to list available plugins",
              '/plugins' ),
         loc( "You can show all your out of date modules using '%1'", 'o' ),  
-        loc( "Many operations take options, like '%1' or '%2'",
-             '--verbose', '--skiptest' ),
+        loc( "Many operations take options, like '%1', '%2' or '%3'",
+             '--verbose', '--force', '--skiptest' ),
         loc( "The documentation in %1 and %2 is very useful",
              "CPANPLUS::Module", "CPANPLUS::Backend" ),
         loc( "You can type '%1' for help and '%2' to exit", 'h', 'q' ),

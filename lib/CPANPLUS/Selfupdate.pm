@@ -134,14 +134,20 @@ CPANPLUS::Selfupdate
             signature => [
                 sub {
                     my $cb      = shift;
-                    return if can_run('gpg');
-                        ### leave this out -- Crypt::OpenPGP is fairly
-                        ### painful to install, and broken on some platforms
-                        ### so we'll just always fall back to gpg. It may
-                        ### issue a warning or 2, but that's about it.
-                        ### this change due to this ticket: #26914
-                        # and $cb->configure_object->get_conf('prefer_bin');
-                    return { 'Crypt::OpenPGP' => '0.0' };
+                    return {
+                        'Module::Signature' => '0.06',
+                    } if can_run('gpg');
+                    ### leave this out -- Crypt::OpenPGP is fairly
+                    ### painful to install, and broken on some platforms
+                    ### so we'll just always fall back to gpg. It may
+                    ### issue a warning or 2, but that's about it.
+                    ### this change due to this ticket: #26914
+                    # and $cb->configure_object->get_conf('prefer_bin');
+
+                    return { 
+                        'Crypt::OpenPGP'    => '0.0', 
+                        'Module::Signature' => '0.06',
+                    };
                 },            
                 sub {
                     my $cb = shift;

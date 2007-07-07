@@ -40,7 +40,7 @@ use vars qw[@ISA $VERSION];
             CPANPLUS::Internals::Report
         ];
 
-$VERSION = "0.80";
+$VERSION = "0.81_01";
 
 =pod
 
@@ -126,6 +126,7 @@ Returns the object on success, or dies on failure.
         filter_prereqs          => sub { return $_[1] },
                                         # continue if 'make test' fails?
         proceed_on_test_failure => sub { return 0 },
+        munge_dist_metafile     => sub { return $_[1] },
     };
     
     my $status = Object::Accessor->new;
@@ -325,6 +326,13 @@ to skip it.
 Is called when 'make test' or 'Build test' fails. Should return
 a boolean indicating whether the install should continue even if
 the test failed.
+
+=item munge_dist_metafile
+
+Is called when the C<CPANPLUS::Dist::*> metafile is created, like
+C<control> for C<CPANPLUS::Dist::Deb>, giving the user a chance to
+programatically alter it. Should return the (munged) text to be
+written to the metafile.
 
 =back
 

@@ -82,6 +82,7 @@ is($cb->_id, $cb->_last_id, "Comparing ID's");
         munge_test_report       => $$,  # munge the test report
         filter_prereqs          => $$,  # limit prereqs
         proceed_on_test_failure => 0,   # continue on failed 'make test'?
+        munge_dist_metafile     => $$,  # munge the metailfe
     };
 
     for my $callback ( keys %$callback_map ) {

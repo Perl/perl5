@@ -6,6 +6,7 @@ use CPANPLUS::Internals::Constants;
 use Data::Dumper;
 use Getopt::Long;
 use File::Spec;
+use File::Temp                  qw|tempfile|;
 use File::Basename;
 use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
@@ -36,7 +37,7 @@ GetOptions( $opts,
             'logfile=s',            'timeout=s',
             'dist-opts=s%',         'set-config=s%',
             'default-banlist!',     'set-program=s%',
-            'default-ignorelist!',
+            'default-ignorelist!',  'edit-metafile!'
         );
         
 die usage() if exists $opts->{'help'};
@@ -101,6 +102,41 @@ if( exists $opts->{'modulelist'} ) {
 
 die usage() unless @modules;
 
+### set up munge callback if requested
+{   if( $opts->{'edit-metafile'} ) {
+        my $editor = $conf->get_program('editor');
+        
+        if( $editor ) {
+    
+            ### register install callback ###
+            $cb->_register_callback(
+                name    => 'munge_dist_metafile',
+                code    => sub {
+                                my $self = shift;
+                                my $text = shift or return;
+                            
+                                my($fh,$file) = tempfile( UNLINK => 1 );
+                                
+                                unless( print $fh $text ) {
+                                    warn "Could not print metafile information: $!";
+                                    return;
+                                }
+                                
+                                close $fh;
+                                
+                                system( $editor => $file );
+                                
+                                my $cont = $cb->_get_file_contents( file => $file );
+                                
+                                return $cont;
+                            },
+            );
+            
+        } else {
+            warn "No editor configured. Can not edit metafiles!\n";
+        }
+    }
+}
 
 my $fh;
 LOGFILE: {
@@ -413,23 +449,25 @@ $formats
 Options:
 
     ### take no argument:
-    --help        Show this help message
-    --skiptest    Skip tests. Can be negated using --noskiptest
-    --force       Force operation. Can be negated using --noforce
-    --verbose     Be verbose. Can be negated using --noverbose
-    --keepsource  Keep sources after building distribution. Can be
-                  negated by --nokeepsource. May not be supported 
-                  by all formats
-    --makefile    Prefer Makefile.PL over Build.PL. Can be negated
-                  using --nomakefile. Defaults to your config setting
-    --buildprereq Build packages of any prerequisites, even if they are
-                  already uptodate on the local system. Can be negated
-                  using --nobuildprereq. Defaults to false.
-    --archive     Indicate that all modules listed are actually archives
-    --flushcache  Update CPANPLUS' cache before commencing any operation
-    --defaults    Instruct ExtUtils::MakeMaker and Module::Build to use
-                  default answers during 'perl Makefile.PL' or 'perl
-                  Build.PL' calls where possible
+    --help          Show this help message
+    --skiptest      Skip tests. Can be negated using --noskiptest
+    --force         Force operation. Can be negated using --noforce
+    --verbose       Be verbose. Can be negated using --noverbose
+    --keepsource    Keep sources after building distribution. Can be
+                    negated by --nokeepsource. May not be supported 
+                    by all formats
+    --makefile      Prefer Makefile.PL over Build.PL. Can be negated
+                    using --nomakefile. Defaults to your config setting
+    --buildprereq   Build packages of any prerequisites, even if they are
+                    already uptodate on the local system. Can be negated
+                    using --nobuildprereq. Defaults to false.
+    --archive       Indicate that all modules listed are actually archives
+    --flushcache    Update CPANPLUS' cache before commencing any operation
+    --defaults      Instruct ExtUtils::MakeMaker and Module::Build to use
+                    default answers during 'perl Makefile.PL' or 'perl
+                    Build.PL' calls where possible
+    --edit-metafile Edit the distributions metafile(s) before the distribution
+                    is built. Requires a configured editor.
 
     ### take argument:
     --format      Installer format to use (defaults to config setting)

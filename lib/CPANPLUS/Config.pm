@@ -358,7 +358,11 @@ installed, 'false' otherwise.
 =cut
 
         $Conf->{'conf'}->{'signature'} = do {
-          (can_run('gpg') || check_install(module => 'Crypt::OpenPGP')) ?1:0 };
+            check_install( module => 'Module::Signature', version => '0.06' )
+            and ( can_run('gpg') || 
+                  check_install(module => 'Crypt::OpenPGP')
+            );
+        } ? 1 : 0;
 
 =item skiptest
 
@@ -517,7 +521,12 @@ with CPANPLUS, which is used to enable autoflushing in spawned processes.
                         ? ($name.$ver, $name)
                         : ($name, $name.$ver);
             };
-                                
+
+            ### patch from Steve Hay Fri 29 Jun 2007 14:26:02 GMT+02:00
+            ### Msg-Id: <4684FA5A.7030506@uk.radan.com>
+            ### look for files with a ".bat" extension as well on Win32
+            @bins = map { $_, "$_.bat" } @bins if $^O eq 'MSWin32';
+
             my $path;
             BIN: for my $bin (@bins) {
                 
@@ -576,11 +585,16 @@ with CPANPLUS, which is used to enable autoflushing in spawned processes.
             ### pass '-P' to perl: "run program through C 
             ### preprocessor before compilation"
             error(loc(
-                "Could not find the '%1' in your path".
+                "Could not find the '%1' binary in your path".
                 "--this may be a problem.\n".
                 "Please locate this program and set ".
-                "your '%2' config entry to its path.\n",                
-                $name, 'perlwrapper'
+                "your '%2' config entry to its path.\n".
+                "From the default shell, you can do this by typing:\n\n".
+                "  %3\n".
+                "  %4\n",
+                $name, 'perlwrapper', 
+                's program perlwrapper FULL_PATH_TO_CPANP_RUN_PERL',
+                's save'
              ));                                        
              return '';
         }->();
