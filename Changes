@@ -29,6 +29,419 @@ Version v5.9.X		Development release working toward v5.10
 --------------
 
 ____________________________________________________________________________
+[ 31554] By: rgs                                   on 2007/07/07  08:07:58
+        Log: Subject: [PATCH] MAD: disable constant subs when PL_madskills
+             From: Gerard Goossen <gerard@tty.nl>
+             Date: Wed, 27 Jun 2007 13:04:00 +0200
+             Message-ID: <20070627110400.GC11336@ostwald>
+     Branch: perl
+	   ! mad/t/p55.t op.c toke.c
+____________________________________________________________________________
+[ 31553] By: rgs                                   on 2007/07/07  08:05:24
+        Log: Subject: [PATCH] p55: add 'declarator' to listop. Fixes 'pipe my ($r, $w)'
+             From: Gerard Goossen <gerard@tty.nl>
+             Date: Wed, 27 Jun 2007 11:58:28 +0200
+             Message-ID: <20070627095828.GB11336@ostwald>
+     Branch: perl
+	   ! mad/Nomad.pm mad/t/p55.t
+____________________________________________________________________________
+[ 31552] By: rgs                                   on 2007/07/07  08:03:49
+        Log: Subject: [PATCH] p55: correctly translate things like s//$#foo/ge
+             From: Gerard Goossen <gerard@tty.nl>
+             Date: Tue, 26 Jun 2007 20:33:50 +0200
+             Message-ID: <20070626183350.GA11336@ostwald>
+     Branch: perl
+	   ! mad/Nomad.pm mad/P5AST.pm mad/t/p55.t
+____________________________________________________________________________
+[ 31551] By: rgs                                   on 2007/07/07  07:46:58
+        Log: Subject: Re: [PATCH] Final Draft - pod/perlcommunity.pod - (was [PATCH] Draft - pod/perlcommunity.pod - Patches welcome)
+             From: "Edgar Bering" <trizor@gmail.com>
+             Date: Wed, 4 Jul 2007 11:51:53 +0200
+             Message-ID: <e54ba1c30707040251o6814c0e4r64929702dc3b0eb7@mail.gmail.com>
+     Branch: perl
+	   + pod/perlcommunity.pod
+	   ! MANIFEST pod.lst pod/perl.pod pod/perlmodlib.pod
+	   ! pod/perltoc.pod vms/descrip_mms.template win32/pod.mak
+____________________________________________________________________________
+[ 31550] By: rgs                                   on 2007/07/07  07:29:08
+        Log: Add a note in perldelta about undefining *ISA
+     Branch: perl
+	   ! pod/perl595delta.pod
+____________________________________________________________________________
+[ 31549] By: rgs                                   on 2007/07/07  07:12:01
+        Log: Subject: [patch]  add verbose mode to -DU debugging option
+             From: Jim Cromie <jim.cromie@gmail.com>
+             Date: Thu, 05 Jul 2007 10:17:24 -0600
+             Message-ID: <468D1994.1090909@gmail.com>
+     Branch: perl
+	   ! perl.h pod/perlrun.pod
+____________________________________________________________________________
+[ 31548] By: rgs                                   on 2007/07/07  07:02:21
+        Log: Make Perl_find_runcv a member of the public API
+             (so Sub::Current works on Windows)
+     Branch: perl
+	   ! embed.fnc embed.h global.sym pod/perlapi.pod
+	   ! pod/perlintern.pod
+____________________________________________________________________________
+[ 31547] By: rgs                                   on 2007/07/07  06:56:48
+        Log: Remove 5.10.0 section from perltodo
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 31546] By: rgs                                   on 2007/07/07  06:52:39
+        Log: Subject: [PATCH] Fix commented out function names in proto.h
+             From: "Jan Dubois" <jand@activestate.com>
+             Date: Fri, 6 Jul 2007 17:59:38 -0700
+             Message-ID: <058b01c7c032$18a6a260$49f3e720$@com>
+     Branch: perl
+	   ! embed.h embed.pl proto.h
+____________________________________________________________________________
+[ 31545] By: rgs                                   on 2007/07/07  05:05:50
+        Log: base.pm is belong to me
+     Branch: perl
+	   ! Porting/Maintainers.pl
+____________________________________________________________________________
+[ 31544] By: craigb                                on 2007/07/06  20:39:46
+        Log: Fix the case of $Config{perl_patchlevel} on VMS.
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 31543] By: steveh                                on 2007/07/06  16:24:07
+        Log: Subject: Re: Beyond 5.10
+             From: Abigail <abigail@abigail.be>
+             Date: Thu, 5 Jul 2007 21:55:20 +0200
+             Message-ID: <20070705195520.GB1314@abigail.nl>
+             
+             Cleans up Porting/checkAUTHORS.pl and adds missing alias mappings
+             to it, and adds missing entries to AUTHORS.
+     Branch: perl
+	   ! AUTHORS Porting/checkAUTHORS.pl
+____________________________________________________________________________
+[ 31542] By: rgs                                   on 2007/07/06  16:00:57
+        Log: Add test preambles
+     Branch: perl
+	   ! lib/base/t/base.t lib/base/t/fields-base.t lib/base/t/fields.t
+	   ! lib/base/t/warnings.t
+____________________________________________________________________________
+[ 31541] By: rgs                                   on 2007/07/06  15:52:40
+        Log: Make this new test be skipped with 5.8.x
+     Branch: perl
+	   ! lib/base/t/fields-base.t
+____________________________________________________________________________
+[ 31540] By: rgs                                   on 2007/07/06  13:58:58
+        Log: Upgrade to base and fields 2.12, mostly by Michael G Schwern
+     Branch: perl
+	   + lib/base/Changes lib/base/t/sigdie.t lib/base/t/version.t
+	   + lib/base/t/warnings.t t/lib/Dummy.pm t/lib/HasSigDie.pm
+	   ! MANIFEST lib/base.pm lib/base/t/base.t
+	   ! lib/base/t/fields-base.t lib/base/t/fields.t lib/fields.pm
+____________________________________________________________________________
+[ 31539] By: steveh                                on 2007/07/06  11:08:37
+        Log: Add Borland linker option to not generate .map files
+             (They are not generated by default by VC++ or MinGW, and there
+             doesn't seem to be any need for them.)
+     Branch: perl
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[ 31538] By: rgs                                   on 2007/07/06  08:09:12
+        Log: Subject: [PATCH] Archive::Extract - small pod update
+             From: "Paul Marquess" <paul_marquess@yahoo.co.uk>
+             Date: Thu, 5 Jul 2007 16:01:02 +0100
+             Message-ID: <00ee01c7bf15$57bdbf60$3a3c140a@myopwv.com>
+     Branch: perl
+	   ! lib/Archive/Extract.pm
+____________________________________________________________________________
+[ 31537] By: davem                                 on 2007/07/04  23:09:02
+        Log: clarify what text 'warn' appends to a newline-less string
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 31536] By: davem                                 on 2007/07/04  22:39:08
+        Log: really fix S_emulate_eaccess compiler warning (#31418 didn't)
+     Branch: perl
+	   ! embed.fnc
+____________________________________________________________________________
+[ 31535] By: craigb                                on 2007/07/04  16:27:16
+        Log: New File::Path tests require unix syntax on VMS.
+     Branch: perl
+	   ! lib/File/Path.t
+____________________________________________________________________________
+[ 31534] By: craigb                                on 2007/07/04  16:07:33
+        Log: VMS syntax nit in new MakeMaker test.
+     Branch: perl
+	   ! lib/ExtUtils/t/cd.t
+____________________________________________________________________________
+[ 31533] By: craigb                                on 2007/07/04  15:35:56
+        Log: Replace C<shrplib='define'> with C<useshrplib='true'> on VMS.
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 31532] By: craigb                                on 2007/07/04  15:18:06
+        Log: Remove vms/genconfig.pl and references to it; it was made obsolete way back
+             in change #1084.  Remove references to vms/config.vms, which was removed in
+             change #1084.
+     Branch: perl
+	   - vms/genconfig.pl
+	   ! MANIFEST README.vms configure.com vms/myconfig.com
+____________________________________________________________________________
+[ 31531] By: rgs                                   on 2007/07/04  14:13:55
+        Log: Adapt perlivp to the ext/ reorganisation for Compress modules
+     Branch: perl
+	   ! utils/perlivp.PL
+____________________________________________________________________________
+[ 31530] By: rgs                                   on 2007/07/04  13:38:42
+        Log: Subject: [perl #3589] [BUG#3589 bleadperl] 
+             From: "Reini Urban via RT" <perlbug-followup@perl.org>
+             Date: Mon, 02 Jul 2007 14:59:08 -0700
+             Message-ID: <rt-3.6.HEAD-20473-1183413546-187.3589-15-0@perl.org>
+     Branch: perl
+	   ! t/op/re_tests
+____________________________________________________________________________
+[ 31529] By: rgs                                   on 2007/07/04  13:32:06
+        Log: Subject: RE: [PATCH] lib/Net/Ping/t/500_ping_icmp.t requires admin
+             From: "Jan Dubois" <jand@activestate.com>
+             Date: Mon, 2 Jul 2007 14:21:06 -0700
+             Message-ID: <007901c7bcee$e7b5d400$b7217c00$@com>
+     Branch: perl
+	   ! lib/Net/Ping/t/500_ping_icmp.t
+____________________________________________________________________________
+[ 31528] By: rgs                                   on 2007/07/04  08:20:47
+        Log: Don't require to have at least DB_File or *DBM_File
+     Branch: perl
+	   ! t/lib/commonsense.t
+____________________________________________________________________________
+[ 31527] By: rgs                                   on 2007/07/04  08:11:36
+        Log: regexp flags =~ s/k/p/
+     Branch: perl
+	   ! pod/perlre.pod
+____________________________________________________________________________
+[ 31526] By: steveh                                on 2007/07/03  16:13:58
+        Log: Correct a couple more cases of $Config{useshrplib}
+     Branch: perl
+	   ! hints/uts.sh lib/ExtUtils/MM_Unix.pm vms/genconfig.pl
+____________________________________________________________________________
+[ 31525] By: rgs                                   on 2007/07/03  14:34:05
+        Log: More tests for \g errors in regular expressions
+     Branch: perl
+	   ! t/op/re_tests
+____________________________________________________________________________
+[ 31524] By: rgs                                   on 2007/07/03  14:26:13
+        Log: Forbid \g0. (tests coming later)
+     Branch: perl
+	   ! pod/perldiag.pod regcomp.c
+____________________________________________________________________________
+[ 31523] By: steveh                                on 2007/07/03  14:16:23
+        Log: $Config{useshrplib} should be 'true' rather than 'yes' when using
+             a shared perl library
+     Branch: perl
+	   ! NetWare/config.wc win32/config.bc win32/config.ce
+	   ! win32/config.gc win32/config.vc win32/config.vc64
+____________________________________________________________________________
+[ 31522] By: stevep                                on 2007/07/03  13:51:08
+        Log: Upgrade to ExtUtils-MakeMaker-6.36
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm lib/ExtUtils/t/prereq.t
+____________________________________________________________________________
+[ 31521] By: stevep                                on 2007/07/02  18:23:50
+        Log: Include file missed from change #31519.
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[ 31520] By: stevep                                on 2007/07/02  16:52:30
+        Log: Subject: [PATCH] compression modules update to version 2.005
+             From: "Paul Marquess" <Paul.Marquess@ntlworld.com>
+             Date: Sun, 1 Jul 2007 00:50:01 +0100
+             Message-ID: <000c01c7bb71$6189ae20$6601a8c0@myopwv.com>
+     Branch: perl
+	   + ext/IO_Compress_Zlib/t/110encode-deflate.t
+	   + ext/IO_Compress_Zlib/t/110encode-gzip.t
+	   + ext/IO_Compress_Zlib/t/110encode-rawdeflate.t
+	   + ext/IO_Compress_Zlib/t/110encode-zip.t
+	   + t/lib/compress/encode.pl
+	   ! MANIFEST ext/Compress/Raw/Zlib/Changes
+	   ! ext/Compress/Raw/Zlib/Makefile.PL ext/Compress/Raw/Zlib/README
+	   ! ext/Compress/Raw/Zlib/lib/Compress/Raw/Zlib.pm
+	   ! ext/Compress/Zlib/Changes ext/Compress/Zlib/Makefile.PL
+	   ! ext/Compress/Zlib/README
+	   ! ext/Compress/Zlib/lib/Compress/Zlib.pm
+	   ! ext/Compress/Zlib/t/08encoding.t ext/IO_Compress_Base/Changes
+	   ! ext/IO_Compress_Base/README
+	   ! ext/IO_Compress_Base/lib/IO/Compress/Base.pm
+	   ! ext/IO_Compress_Base/lib/IO/Compress/Base/Common.pm
+	   ! ext/IO_Compress_Base/lib/IO/Uncompress/AnyUncompress.pm
+	   ! ext/IO_Compress_Base/lib/IO/Uncompress/Base.pm
+	   ! ext/IO_Compress_Zlib/Changes ext/IO_Compress_Zlib/Makefile.PL
+	   ! ext/IO_Compress_Zlib/README
+	   ! ext/IO_Compress_Zlib/examples/unzip
+	   ! ext/IO_Compress_Zlib/lib/IO/Compress/Adapter/Deflate.pm
+	   ! ext/IO_Compress_Zlib/lib/IO/Compress/Adapter/Identity.pm
+	   ! ext/IO_Compress_Zlib/lib/IO/Compress/Deflate.pm
+	   ! ext/IO_Compress_Zlib/lib/IO/Compress/Gzip.pm
+	   ! ext/IO_Compress_Zlib/lib/IO/Compress/Gzip/Constants.pm
+	   ! ext/IO_Compress_Zlib/lib/IO/Compress/RawDeflate.pm
+	   ! ext/IO_Compress_Zlib/lib/IO/Compress/Zip.pm
+	   ! ext/IO_Compress_Zlib/lib/IO/Compress/Zip/Constants.pm
+	   ! ext/IO_Compress_Zlib/lib/IO/Compress/Zlib/Constants.pm
+	   ! ext/IO_Compress_Zlib/lib/IO/Compress/Zlib/Extra.pm
+	   ! ext/IO_Compress_Zlib/lib/IO/Uncompress/Adapter/Identity.pm
+	   ! ext/IO_Compress_Zlib/lib/IO/Uncompress/Adapter/Inflate.pm
+	   ! ext/IO_Compress_Zlib/lib/IO/Uncompress/AnyInflate.pm
+	   ! ext/IO_Compress_Zlib/lib/IO/Uncompress/Gunzip.pm
+	   ! ext/IO_Compress_Zlib/lib/IO/Uncompress/Inflate.pm
+	   ! ext/IO_Compress_Zlib/lib/IO/Uncompress/RawInflate.pm
+	   ! ext/IO_Compress_Zlib/lib/IO/Uncompress/Unzip.pm
+	   ! ext/IO_Compress_Zlib/t/004gziphdr.t
+	   ! ext/IO_Compress_Zlib/t/005defhdr.t t/lib/compress/generic.pl
+	   ! t/lib/compress/oneshot.pl t/lib/compress/tied.pl
+____________________________________________________________________________
+[ 31519] By: stevep                                on 2007/07/02  15:39:52
+        Log: Upgrade to ExtUtils-MakeMaker-6.35
+     Branch: perl
+	   + lib/ExtUtils/t/WriteEmptyMakefile.t lib/ExtUtils/t/cd.t
+	   + lib/ExtUtils/t/fixin.t lib/ExtUtils/t/prereq.t
+	   ! MANIFEST lib/ExtUtils/Liblist/Kid.pm lib/ExtUtils/MM_Unix.pm
+	   ! lib/ExtUtils/MM_VMS.pm lib/ExtUtils/MM_Win32.pm
+	   ! lib/ExtUtils/MakeMaker/FAQ.pod lib/ExtUtils/t/basic.t
+	   ! lib/ExtUtils/t/parse_version.t lib/ExtUtils/t/recurs.t
+	   ! lib/ExtUtils/t/writemakefile_args.t
+	   ! t/lib/MakeMaker/Test/Setup/Recurs.pm
+	   ! t/lib/MakeMaker/Test/Utils.pm
+____________________________________________________________________________
+[ 31518] By: rgs                                   on 2007/07/02  13:35:06
+        Log: Subject: [PATCH] Add add-package.pl to the core (was Re: Why no (XML|DBI|WWW|Template) modules in the core?)
+             From: "Jos I. Boumans" <kane@dwim.org>
+             Date: Mon, 2 Jul 2007 15:20:37 +0200
+             Message-Id: <A819F8C7-19C9-4ECE-8CF5-80FAAF54F890@dwim.org>
+     Branch: perl
+	   + Porting/add-package.pl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 31517] By: rgs                                   on 2007/07/02  13:28:50
+        Log: Subject: [PATCH-revised] Address 250_ping_hires.t failure
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Sun, 1 Jul 2007 15:23:37 -0400
+             Message-ID: <1ff86f510707011223u7557fc53m9df980815479892a@mail.gmail.com>
+     Branch: perl
+	   ! lib/Net/Ping/t/250_ping_hires.t
+____________________________________________________________________________
+[ 31516] By: rgs                                   on 2007/07/02  13:17:26
+        Log: Subject: [PATCH] Fixes to threads tests
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Sun, 1 Jul 2007 15:03:41 -0400
+             Message-ID: <1ff86f510707011203qc90c31he6f6b86d08d34e39@mail.gmail.com>
+     Branch: perl
+	   ! ext/threads/Changes ext/threads/t/stack.t
+	   ! ext/threads/t/stack_env.t ext/threads/t/stress_cv.t
+	   ! ext/threads/t/stress_re.t ext/threads/t/stress_string.t
+____________________________________________________________________________
+[ 31515] By: steveh                                on 2007/07/02  12:25:46
+        Log: Apply win32/Makefile changes from #31102 and #31506 to win32/makefile.mk
+     Branch: perl
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[ 31514] By: nicholas                              on 2007/07/01  14:45:47
+        Log: Restore a comment from 30501 unintentionally deleted with change 31513.
+     Branch: perl
+	   ! mro.c
+____________________________________________________________________________
+[ 31513] By: nicholas                              on 2007/07/01  14:23:45
+        Log: Avoid copying the AV in Perl_mro_get_linear_isa_dfs()
+     Branch: perl
+	   ! mro.c
+____________________________________________________________________________
+[ 31512] By: nicholas                              on 2007/07/01  12:33:39
+        Log: Add some information to the comments describing SV flag bits.
+     Branch: perl
+	   ! sv.h
+____________________________________________________________________________
+[ 31511] By: davem                                 on 2007/07/01  12:30:50
+        Log: test that localised tieing of a hash or array remains local
+             (tests for change #31505)
+     Branch: perl
+	   ! t/op/tie.t
+____________________________________________________________________________
+[ 31510] By: demerphq                              on 2007/07/01  12:03:35
+        Log: char is not a good type to use for array indexes;
+             should have been U8 in the first place. 
+             
+             Originally noticed by Jerry Hedden in 
+             Subject: [PATCH] Compiler warning in regcomp.c
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Sat, 30 Jun 2007 16:34:06 -0400
+             Message-ID: <1ff86f510706301334t337903a0k46abc6d2d25c68a5@mail.gmail.com>
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 31509] By: demerphq                              on 2007/06/30  16:44:16
+        Log: Subject: FYI: Math::BigInt v1.87 released [PATCH]
+             From: Tels <nospam-abuse@bloodgate.com>
+             Date: Sat, 30 Jun 2007 13:14:05 +0200
+             Message-Id: <200706301314.07075@bloodgate.com>
+     Branch: perl
+	   ! lib/Math/BigFloat.pm lib/Math/BigInt.pm
+____________________________________________________________________________
+[ 31508] By: demerphq                              on 2007/06/30  16:19:33
+        Log: Subject: [PATCH pp_hot.c]  Comment typo fix
+             From: Abigail <abigail@abigail.be>
+             Date: Fri, 29 Jun 2007 22:49:35 +0200
+             Message-ID: <20070629204935.GA13919@abigail.nl>
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[ 31507] By: demerphq                              on 2007/06/30  15:48:55
+        Log: Subject: [PATCH regcomp.c] regclass on EBCDIC platforms
+             From: Benjamin Carter <q.eibcartereio.=~m-b.{6}-cgimosx@gumdrop.flyinganvil.org>
+             Date: Fri, 29 Jun 2007 23:42:59 -0500
+             Message-ID: <20070630044259.GB22566@egg>
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 31506] By: demerphq                              on 2007/06/30  15:37:41
+        Log: Subject: /p vs (?p)
+             From: Abigail <abigail@abigail.be>
+             Date: Fri, 29 Jun 2007 23:38:07 +0200
+             Message-ID: <20070629213807.GA14454@abigail.nl>
+             
+             Subject: [PATCH pod/perlre.pod] Keeping up with the changes.
+             From: Abigail <abigail@abigail.be>
+             Date: Sat, 30 Jun 2007 01:24:36 +0200
+             Message-ID: <20070629232436.GA15326@abigail.nl>
+             
+             Plus tweaks, and debug enahancements.
+     Branch: perl
+	   ! embed.fnc embed.h ext/re/re.pm globvar.sym pod/perlre.pod
+	   ! proto.h regcomp.c regcomp.h regcomp.pl regexp.h regnodes.h
+	   ! t/op/reg_pmod.t win32/Makefile
+____________________________________________________________________________
+[ 31505] By: rgs                                   on 2007/06/29  16:28:34
+        Log: Removes the code that is supposed to restore magic on leaving the
+             localization of an array or a hash. This fixes some memory leaks.
+             Basically we were overwriting the magic of the outer value (value
+             from the outer scope) by the magic of the inner value (therefore making
+             that outer magic leaking in memory). But that inner magic was created
+             by mg_localize() by copying *some* of the outer magic. Consequently the
+             outer value already has that magic. So just keep it and don't bother.
+             
+             That change might introduce obscure bugs. On the other hand, it might
+             also cure obscure bugs, related to the inner value acquiring container
+             magic during its lifetime, or to the outer value loosing non-container
+             magic. No test in the test suite seems to test that.
+     Branch: perl
+	   ! scope.c
+____________________________________________________________________________
+[ 31504] By: stevep                                on 2007/06/29  16:10:13
+        Log: Subject: [PATCH] Fix up change 31494
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Date: Fri, 29 Jun 2007 12:02:17 -0400
+             Message-ID: <1ff86f510706290902k57b540a5n446fad22c1afdab0@mail.gmail.com>
+     Branch: perl
+	   ! t/op/goto.t
+____________________________________________________________________________
+[ 31503] By: rgs                                   on 2007/06/29  09:09:39
+        Log: Update Changes
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [ 31502] By: rgs                                   on 2007/06/29  09:00:32
         Log: Revert change #31489.
              That change was adding a hook to cope with the case when one was
