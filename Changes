@@ -29,6 +29,74 @@ Version v5.9.X		Development release working toward v5.10
 --------------
 
 ____________________________________________________________________________
+[ 31562] By: rgs                                   on 2007/07/07  10:59:10
+        Log: Fix corelist.pl after the reorganisation of the
+             Compress modules in ext/. Re-update Module::CoreList.
+     Branch: perl
+	   ! Porting/corelist.pl lib/Module/CoreList.pm
+____________________________________________________________________________
+[ 31561] By: rgs                                   on 2007/07/07  10:51:08
+        Log: Update Module::CoreList, regenerate META.yml,
+             mention Log::Message::* in perldelta and
+             update perlhist with 5.9.5
+     Branch: perl
+	   ! META.yml lib/Module/CoreList.pm pod/perl595delta.pod
+	   ! pod/perlhist.pod
+____________________________________________________________________________
+[ 31560] By: rgs                                   on 2007/07/07  10:38:56
+        Log: Regenerate table of contents
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 31559] By: rgs                                   on 2007/07/07  10:19:07
+        Log: FAQ sync
+     Branch: perl
+	   ! pod/perlfaq.pod pod/perlfaq1.pod pod/perlfaq4.pod
+	   ! pod/perlfaq8.pod
+____________________________________________________________________________
+[ 31558] By: rgs                                   on 2007/07/07  09:44:34
+        Log: Subject: [PATCH] Update CPANPLUS to 0.81_01
+             From: "Jos I. Boumans" <kane@dwim.org>
+             Date: Sat, 7 Jul 2007 11:39:12 +0200
+             Message-Id: <87949855-9BDE-4823-9C28-BD639844CA41@dwim.org>
+     Branch: perl
+	   ! lib/CPANPLUS.pm lib/CPANPLUS/Config.pm
+	   ! lib/CPANPLUS/Configure/Setup.pm lib/CPANPLUS/Internals.pm
+	   ! lib/CPANPLUS/Selfupdate.pm lib/CPANPLUS/Shell/Default.pm
+	   ! lib/CPANPLUS/bin/cpan2dist
+	   ! lib/CPANPLUS/t/02_CPANPLUS-Internals.t
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/01mailrc.txt.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUNOXS/Bundle-Foo-Ba
+	   ! r-0.01.tar.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUNOXS/Foo-Bar-0.01.
+	   ! tar.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUNOXS/perl5.005_03.
+	   ! tar.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/E/EU/EUXS/Foo-Bar-0.01.ta
+	   ! r.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/M/MB/MBNOXS/Foo-Bar-0.01.
+	   ! tar.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/authors/id/M/MB/MBXS/Foo-Bar-0.01.ta
+	   ! r.gz.packed
+	   ! lib/CPANPLUS/t/dummy-CPAN/modules/02packages.details.txt.gz.pa
+	   ! cked
+	   ! lib/CPANPLUS/t/dummy-CPAN/modules/03modlist.data.gz.packed
+____________________________________________________________________________
+[ 31557] By: rgs                                   on 2007/07/07  09:32:30
+        Log: Desactive the "DEVEL" local patch tag for release.
+     Branch: perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 31556] By: rgs                                   on 2007/07/07  09:03:41
+        Log: Mention that pseudo-hashes are no longer supported
+     Branch: perl
+	   ! pod/perl595delta.pod
+____________________________________________________________________________
+[ 31555] By: rgs                                   on 2007/07/07  08:22:46
+        Log: Update Changes
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [ 31554] By: rgs                                   on 2007/07/07  08:07:58
         Log: Subject: [PATCH] MAD: disable constant subs when PL_madskills
              From: Gerard Goossen <gerard@tty.nl>
