@@ -126,7 +126,7 @@ package Maintainers;
 
 	'base' =>
 		{
-		'MAINTAINER'	=> 'mschwern',
+		'MAINTAINER'	=> 'rgarcia',
 		'FILES'		=> q[lib/base.pm lib/fields.pm lib/base],
 		'CPAN'		=> 1,
 		},
