@@ -9,7 +9,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 4;
+use Test::More tests => 8;
 
 is(Cygwin::winpid_to_pid(Cygwin::pid_to_winpid($$)), $$,
    "perl pid translates to itself");
@@ -29,3 +29,15 @@ close($ps);
 is(Cygwin::winpid_to_pid($catwinpid), $catpid, "winpid to pid");
 is(Cygwin::pid_to_winpid($catpid), $catwinpid, "pid to winpid");
 close($cat);
+
+is(Cygwin::win_to_posix_path("t\\lib"), "t/lib", "win to posix path: t/lib");
+is(Cygwin::posix_to_win_path("t/lib"), "t\\lib", "posix to win path: t\\lib");
+
+use Win32;
+use Cwd;
+$pwd = getcwd();
+chdir("/");
+$winpath = Win32::GetCwd();
+is(Cygwin::posix_to_win_path("/", 1), $winpath, "posix to absolute win path");
+chdir($pwd);
+is(Cygwin::win_to_posix_path($winpath, 1), "/", "win to absolute posix path");

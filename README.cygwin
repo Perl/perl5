@@ -27,11 +27,11 @@ platforms.  They run thanks to the Cygwin library which provides the UNIX
 system calls and environment these programs expect.  More information
 about this project can be found at:
 
-  http://www.cygwin.com/
+  F<http://www.cygwin.com/>
 
 A recent net or commercial release of Cygwin is required.
 
-At the time this document was last updated, Cygwin 1.5.2 was current.
+At the time this document was last updated, Cygwin 1.5.24 was current.
 
 
 =head2 Cygwin Configuration
@@ -143,9 +143,10 @@ NOTE: The GDBM library only works on NTFS partitions.
 
 BerkeleyDB is available for Cygwin.
 
-NOTE: The BerkeleyDB library only completely works on NTFS partitions.
+NOTE: The BerkeleyDB library only completely works on NTFS partitions 
+and db-4.3 is flawed.
 
-=item * C<-lcygipc> (C<use IPC::SysV>)
+=item * C<cygserver> (C<use IPC::SysV>)
 
 A port of SysV IPC is available for Cygwin.
 
@@ -292,7 +293,7 @@ directory (where you said to put public executables).  It does not
 wait until the C<make install> process to install the I<ld2> script,
 this is because the remainder of the C<make> refers to I<ld2> without
 fully specifying its path and does this from multiple subdirectories.
-The assumption is that $installbin is in your current C<PATH>.  If this
+The assumption is that I<$installbin> is in your current C<PATH>. If this
 is not the case C<make> will fail at some point.  If this happens,
 just manually copy I<ld2> from the source directory to somewhere in
 your C<PATH>.
@@ -303,7 +304,7 @@ There are two steps to running the test suite:
 
   make test 2>&1 | tee log.make-test
 
-  cd t;./perl harness 2>&1 | tee ../log.harness
+  cd t; ./perl harness 2>&1 | tee ../log.harness
 
 The same tests are run both times, but more information is provided when
 running as C<./perl harness>.
@@ -323,8 +324,8 @@ user write bit (files are always readable, files are executable if they
 have a F<.{com,bat,exe}> extension or begin with C<#!>, directories are
 always readable and executable).  On WinNT with the I<ntea> C<CYGWIN>
 setting, the additional mode bits are stored as extended file attributes.
-On WinNT with the I<ntsec> C<CYGWIN> setting, permissions use the standard
-WinNT security descriptors and access control lists.  Without one of
+On WinNT with the default I<ntsec> C<CYGWIN> setting, permissions use the 
+standard WinNT security descriptors and access control lists. Without one of
 these options, these tests will fail (listing not updated yet):
 
   Failed Test           List of failed
@@ -356,7 +357,7 @@ If you intend to run only on FAT (or if using AnyDBM_File on FAT),
 run Configure with the -Ui_ndbm and -Ui_dbm options to prevent
 NDBM_File and ODBM_File being built.
 
-With NTFS (and CYGWIN=ntsec), there should be no problems even if
+With NTFS (and no CYGWIN=nontsec), there should be no problems even if
 perl was built on FAT.
 
 =head2 C<fork()> failures in io_* tests
@@ -395,12 +396,21 @@ File names are case insensitive, but case preserving.  A pathname that
 contains a backslash or drive letter is a Win32 pathname (and not subject
 to the translations applied to POSIX style pathnames).
 
+For conversion we have C<Cygwin::win_to_posix_path()> and 
+C<Cygwin::posix_to_win_path()>.
+
+Pathnames may not contain Unicode characters. C<Cygwin> still uses the
+ANSI API calls and no Unicode calls because of newlib deficiencies.
+There's an unofficial unicode patch for cygwin at 
+F<http://www.okisoft.co.jp/esc/utf8-cygwin/>
+
 =item * Text/Binary
 
 When a file is opened it is in either text or binary mode.  In text mode
 a file is subject to CR/LF/Ctrl-Z translations.  With Cygwin, the default
 mode for an C<open()> is determined by the mode of the mount that underlies
-the file.  Perl provides a C<binmode()> function to set binary mode on files
+the file. See C<Cygwin::is_binmount()> and C<Cygwin::is_textmount()>.
+Perl provides a C<binmode()> function to set binary mode on files
 that otherwise would be treated as text.  C<sysopen()> with the C<O_TEXT>
 flag sets text mode on files that otherwise would be treated as binary:
 
@@ -487,7 +497,7 @@ F<http://www.cygwin.com/setup.exe> to install it and run rebaseall.
 
 =item C<Cwd::cwd>
 
-Returns current working directory.
+Returns the current working directory.
 
 =item C<Cygwin::pid_to_winpid>
 
@@ -497,6 +507,28 @@ may not be the same).
 =item C<Cygwin::winpid_to_pid>
 
 Translates a Windows pid to the corresponding cygwin pid (if any).
+
+=item C<Cygwin::win_to_posix_path>
+
+Translates a Windows path to the corresponding cygwin path respecting
+the current mount points. With a second non-null argument returns an
+absolute path. Double-byte characters will not be translated.
+
+=item C<Cygwin::posix_to_win_path>
+
+Translates a cygwin path to the corresponding cygwin path respecting
+the current mount points. With a second non-null argument returns an
+absolute path. Double-byte characters will not be translated.
+
+=item C<Cygwin::is_binmount>
+
+Returns true if the given cygwin path is binary mounted, false if the
+path is mounted in textmode.
+
+=item C<Cygwin::is_textmount>
+
+Returns true if the given cygwin path is mounted in textmode (C<"\r\n"> C<lt>=C<gt> C<"\n">), 
+false if the path is mounted binary. The result is complementary to C<Cygwin::is_binmount()>.
 
 =back
 

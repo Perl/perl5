@@ -193,6 +193,99 @@ XS(XS_Cygwin_winpid_to_pid)
     XSRETURN_UNDEF;
 }
 
+XS(XS_Cygwin_win_to_posix_path)
+{
+    dXSARGS;
+    int absolute_flag = 0;
+    STRLEN len;
+    int err;
+    char *pathname, *buf;
+
+    if (items < 1 || items > 2)
+        Perl_croak(aTHX_ "Usage: Cygwin::win_to_posix_path(pathname, [absolute])");
+
+    pathname = SvPV(ST(0), len);
+    if (items == 2)
+	absolute_flag = SvTRUE(ST(1));
+
+    if (!len)
+	Perl_croak(aTHX_ "can't convert empty path");
+    buf = (char *) safemalloc (len + 260 + 1001);
+
+    if (absolute_flag)
+	err = cygwin_conv_to_full_posix_path(pathname, buf);
+    else
+	err = cygwin_conv_to_posix_path(pathname, buf);
+    if (!err) {
+	ST(0) = sv_2mortal(newSVpv(buf, 0));
+	safefree(buf);
+       XSRETURN(1);
+    } else {
+	safefree(buf);
+	XSRETURN_UNDEF;
+    }
+}
+
+XS(XS_Cygwin_posix_to_win_path)
+{
+    dXSARGS;
+    int absolute_flag = 0;
+    STRLEN len;
+    int err;
+    char *pathname, *buf;
+
+    if (items < 1 || items > 2)
+        Perl_croak(aTHX_ "Usage: Cygwin::posix_to_win_path(pathname, [absolute])");
+
+    pathname = SvPV(ST(0), len);
+    if (items == 2)
+	absolute_flag = SvTRUE(ST(1));
+
+    if (!len)
+	Perl_croak(aTHX_ "can't convert empty path");
+    buf = (char *) safemalloc(len + 260 + 1001);
+
+    if (absolute_flag)
+	err = cygwin_conv_to_full_win32_path(pathname, buf);
+    else
+	err = cygwin_conv_to_win32_path(pathname, buf);
+    if (!err) {
+	ST(0) = sv_2mortal(newSVpv(buf, 0));
+	safefree(buf);
+       XSRETURN(1);
+    } else {
+	safefree(buf);
+	XSRETURN_UNDEF;
+    }
+}
+
+XS(XS_Cygwin_is_binmount)
+{
+    dXSARGS;
+    char *pathname;
+
+    if (items != 1)
+        Perl_croak(aTHX_ "Usage: Cygwin::is_binmount(pathname)");
+
+    pathname = SvPV_nolen(ST(0));
+
+    ST(0) = boolSV(cygwin_internal(CW_GET_BINMODE, pathname));
+    XSRETURN(1);
+}
+
+XS(XS_Cygwin_is_textmount)
+{
+    dXSARGS;
+    char *pathname;
+
+    if (items != 1)
+        Perl_croak(aTHX_ "Usage: Cygwin::is_textmount(pathname)");
+
+    pathname = SvPV_nolen(ST(0));
+
+    ST(0) = boolSV(!cygwin_internal(CW_GET_BINMODE, pathname));
+    XSRETURN(1);
+}
 
 void
 init_os_extras(void)
@@ -202,8 +295,12 @@ init_os_extras(void)
     void *handle;
 
     newXS("Cwd::cwd", Cygwin_cwd, file);
-    newXS("Cygwin::winpid_to_pid", XS_Cygwin_winpid_to_pid, file);
-    newXS("Cygwin::pid_to_winpid", XS_Cygwin_pid_to_winpid, file);
+    newXSproto("Cygwin::winpid_to_pid", XS_Cygwin_winpid_to_pid, file, "$");
+    newXSproto("Cygwin::pid_to_winpid", XS_Cygwin_pid_to_winpid, file, "$");
+    newXSproto("Cygwin::win_to_posix_path", XS_Cygwin_win_to_posix_path, file, "$;$");
+    newXSproto("Cygwin::posix_to_win_path", XS_Cygwin_posix_to_win_path, file, "$;$");
+    newXSproto("Cygwin::is_binmount", XS_Cygwin_is_binmount, file, "$");
+    newXSproto("Cygwin::is_textmount", XS_Cygwin_is_textmount, file, "$");
 
     /* Initialize Win32CORE if it has been statically linked. */
     handle = dlopen(NULL, RTLD_LAZY);
