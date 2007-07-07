@@ -20,16 +20,6 @@ not, but if your patch is incorporated, then we'll add your name to the
 F<AUTHORS> file, which ships in the official distribution. How many other
 programming languages offer you 1 line of immortality?
 
-=head1 The roadmap to 5.10
-
-The roadmap to 5.10 envisages feature based releases, as various items in this
-TODO are completed.
-
-=head2 Needed for the final 5.10.0 release
-
-Review perlguts. Significant changes have occured since 5.8, and we can't
-release a new version without making sure these are covered.
-
 =head1 Tasks that only need Perl knowledge
 
 =head2 common test code for timed bail out
