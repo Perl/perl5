@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq1 - General Questions About Perl ($Revision: 9671 $)
+perlfaq1 - General Questions About Perl ($Revision: 9681 $)
 
 =head1 DESCRIPTION
 
@@ -101,13 +101,13 @@ for a while, although not at the same level as the current releases.
 
 =item *
 
-No one is actively supporting perl4.x.  Five years ago it was a dead
+No one is actively supporting Perl 4.  Five years ago it was a dead
 camel carcass (according to this document).  Now it's barely a skeleton
 as its whitewashed bones have fractured or eroded.
 
 =item *
 
-There is no perl6.x for the next couple of years.  Stay tuned, but don't
+There is no Perl 6 for the next couple of years.  Stay tuned, but don't
 worry that you'll have to change major versions of Perl soon (i.e. before
 2008).
 
@@ -123,29 +123,29 @@ minor release (i.e. perl5.9.x, where 9 is the minor release).
 =back
 
 
-=head2 What are perl4, perl5, or perl6?
+=head2 What are Perl 4, Perl 5, or Perl 6?
 
 (contributed by brian d foy)
 
-In short, perl4 is the past, perl5 is the present, and perl6 is the
+In short, Pelr 4 is the past, Perl 5 is the present, and Perl 6 is the
 future.
 
-The number after perl (i.e. the 5 after perl5) is the major release
+The number after perl (i.e. the 5 after Perl 5) is the major release
 of the perl interpreter as well as the version of the language.  Each
 major version has significant differences that earlier versions cannot
 support.
 
-The current major release of Perl is perl5, and was released in 1994.
+The current major release of Perl is Perl 5, and was released in 1994.
 It can run scripts from the previous major release, perl4 (March 1991),
 but has significant differences. It introduced the concept of references,
-complex data structures, and modules.  The perl5 interpreter was a
+complex data structures, and modules.  The Perl 5 interpreter was a
 complete re-write of the previous perl sources.
 
-Perl6 is the next major version of Perl, but it's still in development
+Perl 6 is the next major version of Perl, but it's still in development
 in both its syntax and design.  The work started in 2002 and is still
 ongoing.  Many of the most interesting features have shown up in the
-latest versions of perl5, and some perl5 modules allow you to use some
-perl6 syntax in your programs.  You can learn more about perl6 at
+latest versions of Perl 5, and some Perl 5 modules allow you to use some
+Perl 6 syntax in your programs.  You can learn more about Perl 6 at
 http://dev.perl.org/perl6/ .
 
 See L<perlhist> for a history of Perl revisions.
@@ -165,20 +165,20 @@ new one that would provide a translation path from Perl 5 to Perl 6
 able  to just keep using Perl 5 with Parrot, the virtual machine which
 will compile and run Perl 6 bytecode.
 
-=head2 What is perl6?
+=head2 What is Perl 6?
 
 At The Second O'Reilly Open Source Software Convention, Larry Wall
-announced Perl6 development would begin in earnest. Perl6 was an oft
+announced Perl 6 development would begin in earnest. Perl 6 was an oft
 used term for Chip Salzenberg's project to rewrite Perl in C++ named
 Topaz. However, Topaz provided valuable insights to the next version
 of Perl and its implementation, but was ultimately abandoned.
 
-If you want to learn more about Perl6, or have a desire to help in
-the crusade to make Perl a better place then peruse the Perl6 developers
+If you want to learn more about Perl 6, or have a desire to help in
+the crusade to make Perl a better place then peruse the Perl 6 developers
 page at http://dev.perl.org/perl6/ and get involved.
 
-Perl6 is not scheduled for release yet, and Perl5 will still be supported
-for quite awhile after its release. Do not wait for Perl6 to do whatever
+Perl 6 is not scheduled for release yet, and Perl 5 will still be supported
+for quite awhile after its release. Do not wait for Perl 6 to do whatever
 you need to do.
 
 "We're really serious about reinventing everything that needs reinventing."
@@ -192,8 +192,8 @@ averaged only about one production release per year.
 
 Larry and the Perl development team occasionally make changes to the
 internal core of the language, but all possible efforts are made toward
-backward compatibility.  While not quite all perl4 scripts run flawlessly
-under perl5, an update to perl should nearly never invalidate a program
+backward compatibility.  While not quite all Perl 4 scripts run flawlessly
+under Perl 5, an update to perl should nearly never invalidate a program
 written for an earlier version of perl (barring accidental bug fixes
 and the rare new keyword).
 
@@ -390,9 +390,9 @@ You might find these links useful:
 
 =head1 REVISION
 
-Revision: $Revision: 9671 $
+Revision: $Revision: 9681 $
 
-Date: $Date: 2007-06-23 18:38:20 +0200 (Sat, 23 Jun 2007) $
+Date: $Date: 2007-06-26 01:36:56 +0200 (Tue, 26 Jun 2007) $
 
 See L<perlfaq> for source control details and availability.
 

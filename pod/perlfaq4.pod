@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 9491 $)
+perlfaq4 - Data Manipulation ($Revision: 9681 $)
 
 =head1 DESCRIPTION
 
@@ -1980,7 +1980,7 @@ And these conditions hold
 	$hash{'d'}                       is false
 	defined $hash{'d'}               is true
 	defined $hash{'a'}               is true
-	exists $hash{'a'}                is true (Perl5 only)
+	exists $hash{'a'}                is true (Perl 5 only)
 	grep ($_ eq 'a', keys %hash)     is true
 
 If you now say
@@ -2004,7 +2004,7 @@ and these conditions now hold; changes in caps:
 	$hash{'d'}                       is false
 	defined $hash{'d'}               is true
 	defined $hash{'a'}               is FALSE
-	exists $hash{'a'}                is true (Perl5 only)
+	exists $hash{'a'}                is true (Perl 5 only)
 	grep ($_ eq 'a', keys %hash)     is true
 
 Notice the last two: you have an undef value, but a defined key!
@@ -2028,7 +2028,7 @@ and these conditions now hold; changes in caps:
 	$hash{'d'}                       is false
 	defined $hash{'d'}               is true
 	defined $hash{'a'}               is false
-	exists $hash{'a'}                is FALSE (Perl5 only)
+	exists $hash{'a'}                is FALSE (Perl 5 only)
 	grep ($_ eq 'a', keys %hash)     is FALSE
 
 See, the whole entry is gone!
@@ -2260,9 +2260,9 @@ the C<PDL> module from CPAN instead--it makes number-crunching easy.
 
 =head1 REVISION
 
-Revision: $Revision: 9491 $
+Revision: $Revision: 9681 $
 
-Date: $Date: 2007-05-02 13:14:13 +0200 (Wed, 02 May 2007) $
+Date: $Date: 2007-06-26 01:36:56 +0200 (Tue, 26 Jun 2007) $
 
 See L<perlfaq> for source control details and availability.
 

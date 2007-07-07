@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq8 - System Interaction ($Revision: 9667 $)
+perlfaq8 - System Interaction ($Revision: 9681 $)
 
 =head1 DESCRIPTION
 
@@ -1311,15 +1311,15 @@ included with the 5.002 release of Perl.
 
 =head2 What is socket.ph and where do I get it?
 
-It's a perl4-style file defining values for system networking
+It's a Perl 4 style file defining values for system networking
 constants.  Sometimes it is built using h2ph when Perl is installed,
 but other times it is not.  Modern programs C<use Socket;> instead.
 
 =head1 REVISION
 
-Revision: $Revision: 9667 $
+Revision: $Revision: 9681 $
 
-Date: $Date: 2007-06-20 06:13:55 +0200 (Wed, 20 Jun 2007) $
+Date: $Date: 2007-06-26 01:36:56 +0200 (Tue, 26 Jun 2007) $
 
 See L<perlfaq> for source control details and availability.
 

@@ -123,7 +123,7 @@ Which version of Perl should I use?
 
 =item *
 
-What are perl4, perl5, or perl6?
+What are Perl 4, Perl 5, or Perl 6?
 
 =item *
 
@@ -131,7 +131,7 @@ What was Ponie?
 
 =item *
 
-What is perl6?
+What is Perl 6?
 
 =item *
 
