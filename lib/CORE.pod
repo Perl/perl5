@@ -1,0 +1,51 @@
+=head1 NAME
+
+CORE - Virtual namespace for Perl's core routines
+
+=head1 SYNOPSIS
+
+	BEGIN
+		{
+		*CORE::GLOBAL::hex = sub { 1; };
+		}
+
+	print hex("0x50"),"\n";			# prints 1
+	print CORE::hex("0x50"),"\n";		# prints 80
+
+=head1 DESCRIPTION
+
+The C<CORE> namespace gives access to the original build-in functions from
+Perl. There is no C<CORE>-package, and therefore you do not need to use or
+require the CORE-module prior to accessing routines in this namespace.
+
+A list of the build-in functions in Perl can be found in L<perlfunc>.
+
+=head1 OVERRIDING CORE FUNCTIONS
+
+The C<CORE::GLOBAL> namespace allows you to override the Perl build-in
+routines with your own version:
+
+	*CORE::GLOBAL::hex = sub 
+		{
+		# ... your code here
+		};
+
+The new routine will be called whenever a build-in function is called
+without a qualifying package:
+
+	print hex("0x50"),"\n";			# prints 1
+
+If you want access to the original, unaltered routine, use the C<CORE::>
+prefix:
+
+	print CORE::hex("0x50"),"\n";		# prints 80
+
+=head1 AUTHOR
+
+Tels <nospam-abuse@bloodgate.com> 2007.
+
+=head1 SEE ALSO
+
+L<perl>, L<perlfunc>.
+
+=cut

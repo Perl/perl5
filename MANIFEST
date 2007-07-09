@@ -1567,6 +1567,7 @@ lib/Config/Extensions.t		See if Config::Extensions works
 lib/Config.t			See if Config works
 lib/constant.pm			For "use constant"
 lib/constant.t			See if compile-time constants work
+lib/CORE.pod			document the CORE namespace
 lib/CPAN/bin/cpan		easily interact with CPAN from the command line
 lib/CPAN/Debug.pm		helper package for CPAN.pm
 lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
