@@ -3,7 +3,7 @@ use strict;
 my $MODULE;
 
 BEGIN {
-	$MODULE = (-e "SHA.pm") ? "Digest::SHA" : "Digest::SHA::PurePerl";
+	$MODULE = ($ENV{PERL_CORE} || -e "SHA.pm") ? "Digest::SHA" : "Digest::SHA::PurePerl";
 	eval "require $MODULE" || die $@;
 	$MODULE->import(qw(sha1_base64 sha224_base64 sha256_base64
 		sha384_base64 sha512_base64));
