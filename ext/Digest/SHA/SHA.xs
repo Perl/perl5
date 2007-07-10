@@ -15,6 +15,10 @@ PROTOTYPES: ENABLE
 #include <src/sha.h>
 #include <src/hmac.h>
 
+#ifndef INT2PTR
+#define INT2PTR(p, i) (p) (i)
+#endif
+
 int
 shaclose(s)
 	SHA *	s

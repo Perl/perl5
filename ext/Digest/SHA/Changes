@@ -1,5 +1,12 @@
 Revision history for Perl extension Digest::SHA.
 
+5.45  Tue Jun 26 02:36:00 MST 2007
+	- extended portability to earlier Perls
+		-- works on Perl 5.003 and later
+		-- thanks to Jim Doble for testing on legacy platforms
+	- updated META.yml to conform to current META spec (1.3)
+	- minor documentation fixes
+
 5.44  Sat Oct 14 00:42:44 MST 2006
 	- removed SIGNATURE file from distribution
 		-- spurious errors from CPANPLUS can break build

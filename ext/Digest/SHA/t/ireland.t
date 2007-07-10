@@ -1,8 +1,13 @@
-use Test;
 use strict;
-use File::Basename qw(dirname);
-use File::Spec;
-use Digest::SHA;
+use FileHandle;
+
+my $MODULE;
+
+BEGIN {
+	$MODULE = (-e "SHA.pm") ? "Digest::SHA" : "Digest::SHA::PurePerl";
+	eval "require $MODULE" || die $@;
+	$MODULE->import(qw());
+}
 
 BEGIN {
 	if ($ENV{PERL_CORE}) {
@@ -16,25 +21,23 @@ BEGIN {
 # Adapted from Julius Duque's original script (t/24-ireland.tmp)
 #	- modified to use state cache via dump()/load() methods
 
-BEGIN { plan tests => 1 }
+print "1..1\n";
 
-my $file = File::Spec->catfile(dirname($0), "ireland.tmp");
-open(my $fh, q{>}, $file); while (<DATA>) { print $fh $_ }  close($fh);
+my $tempfile = "ireland.tmp";
+END { 1 while unlink $tempfile }
 
-my $data = "a" x 1000000;
-my $vec = "b9045a713caed5dff3d3b783e98d1ce5778d8bc331ee4119d707072312af06a7";
+my $fh = FileHandle->new($tempfile, "w");
+while (<DATA>) { print $fh $_ }  close($fh);
 
-my $ctx;
-unless ($ctx = Digest::SHA->load($file)) {
-	$ctx = Digest::SHA->new(256);
-	for (1 .. 536) { $ctx->add($data) }
-	$ctx->add(substr($data, 0, 870910));
-	$ctx->dump($file);
+my $rsp = "b9045a713caed5dff3d3b783e98d1ce5778d8bc331ee4119d707072312af06a7";
+
+my $sha;
+if ($sha = $MODULE->load($tempfile)) {
+	$sha->add("aa");
+	print "not " unless $sha->hexdigest eq $rsp;
+	print "ok 1\n";
 }
-$ctx->add("aa");
-ok($ctx->hexdigest, $vec);
-
-unlink($file);
+else { print "not ok 1\n" }
 
 __DATA__
 alg:256

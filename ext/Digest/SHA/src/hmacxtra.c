@@ -19,11 +19,11 @@ unsigned int keylen;
 	hmacwrite(bitstr, bitcnt, h);
 	hmacfinish(h);
 	if (fmt == SHA_FMT_RAW)
-		memcpy(digest, hmacdigest(h), h->osha->digestlen); 
+		memcpy(digest, hmacdigest(h), h->osha->digestlen);
 	else if (fmt == SHA_FMT_HEX)
-		strcpy((char *) digest, hmachex(h)); 
+		strcpy((char *) digest, hmachex(h));
 	else if (fmt == SHA_FMT_BASE64)
-		strcpy((char *) digest, hmacbase64(h)); 
+		strcpy((char *) digest, hmacbase64(h));
 	else
 		ret = NULL;
 	hmacclose(h);

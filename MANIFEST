@@ -384,41 +384,26 @@ ext/Digest/SHA/src/sha64bit.h	Digest::SHA extension
 ext/Digest/SHA/src/sha.c	Digest::SHA extension
 ext/Digest/SHA/src/sha.h	Digest::SHA extension
 ext/Digest/SHA/src/shaxtra.c	Digest::SHA extension
-ext/Digest/SHA/t/1-exist.t	See if Digest::SHA works
-ext/Digest/SHA/t/1-hello-world.t	See if Digest::SHA works
-ext/Digest/SHA/t/2-nist-sha-1.t	See if Digest::SHA works
-ext/Digest/SHA/t/2-nist-sha-224.t	See if Digest::SHA works
-ext/Digest/SHA/t/2-nist-sha-256.t	See if Digest::SHA works
-ext/Digest/SHA/t/2-nist-sha-384.t	See if Digest::SHA works
-ext/Digest/SHA/t/2-nist-sha-512.t	See if Digest::SHA works
-ext/Digest/SHA/t/2-nist-sha-base64.t	See if Digest::SHA works
-ext/Digest/SHA/t/2-nist-sha-oo.t	See if Digest::SHA works
-ext/Digest/SHA/t/2-nist-vectors-bit.t	See if Digest::SHA works
-ext/Digest/SHA/t/2-nist-vectors-byte.t	See if Digest::SHA works
-ext/Digest/SHA/t/3-gillogly-easy.t	See if Digest::SHA works
-ext/Digest/SHA/t/3-gillogly-hard.t	See if Digest::SHA works
-ext/Digest/SHA/t/4-bitstr-increasing.t	See if Digest::SHA works
-ext/Digest/SHA/t/4-bitstr-large.t	See if Digest::SHA works
-ext/Digest/SHA/t/4-bitstr-random.t	See if Digest::SHA works
-ext/Digest/SHA/t/5-hmac-fips198.t	See if Digest::SHA works
-ext/Digest/SHA/t/5-hmac-rfc2202.t	See if Digest::SHA works
-ext/Digest/SHA/t/5-hmac-sha-256.t	See if Digest::SHA works
-ext/Digest/SHA/t/5-hmac-woodbury.t	See if Digest::SHA works
-ext/Digest/SHA/t/6-dump-load.t	See if Digest::SHA works
-ext/Digest/SHA/t/7-ireland.t	See if Digest::SHA works
-ext/Digest/SHA/t/gillogly/state.011	See if Digest::SHA works
-ext/Digest/SHA/t/gillogly/state.110	See if Digest::SHA works
-ext/Digest/SHA/t/nist/bit-hashes.sha1	See if Digest::SHA works
-ext/Digest/SHA/t/nist/bit-messages.sha1	See if Digest::SHA works
-ext/Digest/SHA/t/nist/byte-hashes.sha1	See if Digest::SHA works
-ext/Digest/SHA/t/nist/byte-messages.sha1	See if Digest::SHA works
-ext/Digest/SHA/t/nist/COPYRIGHT	See if Digest::SHA works
-ext/Digest/SHA/t/nist/Readme.txt	See if Digest::SHA works
-ext/Digest/SHA/t/state/state.1	See if Digest::SHA works
-ext/Digest/SHA/t/state/state.256	See if Digest::SHA works
-ext/Digest/SHA/t/state/state.384	See if Digest::SHA works
-ext/Digest/SHA/t/state/state.512	See if Digest::SHA works
-ext/Digest/SHA/typemap		See if Digest::SHA works
+ext/Digest/SHA/t/allfcns.t	See if Digest::SHA works
+ext/Digest/SHA/t/base64.t	See if Digest::SHA works
+ext/Digest/SHA/t/bitbuf.t	See if Digest::SHA works
+ext/Digest/SHA/t/dumpload.t	See if Digest::SHA works
+ext/Digest/SHA/t/fips198.t	See if Digest::SHA works
+ext/Digest/SHA/t/gg.t		See if Digest::SHA works
+ext/Digest/SHA/t/gglong.t	See if Digest::SHA works
+ext/Digest/SHA/t/hmacsha.t	See if Digest::SHA works
+ext/Digest/SHA/t/ireland.t	See if Digest::SHA works
+ext/Digest/SHA/t/methods.t	See if Digest::SHA works
+ext/Digest/SHA/t/nistbit.t	See if Digest::SHA works
+ext/Digest/SHA/t/nistbyte.t	See if Digest::SHA works
+ext/Digest/SHA/t/rfc2202.t	See if Digest::SHA works
+ext/Digest/SHA/t/sha1.t		See if Digest::SHA works
+ext/Digest/SHA/t/sha224.t	See if Digest::SHA works
+ext/Digest/SHA/t/sha256.t	See if Digest::SHA works
+ext/Digest/SHA/t/sha384.t	See if Digest::SHA works
+ext/Digest/SHA/t/sha512.t	See if Digest::SHA works
+ext/Digest/SHA/t/woodbury.t	See if Digest::SHA works
+ext/Digest/SHA/typemap		Typemap for Digest::SHA
 ext/DynaLoader/dl_aix.xs	AIX implementation
 ext/DynaLoader/dl_beos.xs	BeOS implementation
 ext/DynaLoader/dl_dld.xs	GNU dld style implementation

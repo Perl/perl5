@@ -3,10 +3,10 @@
  *
  * Ref: NIST FIPS PUB 180-2 Secure Hash Standard
  *
- * Copyright (C) 2003-2006 Mark Shelor, All Rights Reserved
+ * Copyright (C) 2003-2007 Mark Shelor, All Rights Reserved
  *
- * Version: 5.44
- * Sat Oct 14 00:42:44 MST 2006
+ * Version: 5.45
+ * Tue Jun 26 02:36:00 MST 2007
  *
  */
 
@@ -425,7 +425,7 @@ char *shahex(SHA *s)
 }
 
 /* map: translation map for Base 64 encoding */
-static char map[] =		
+static char map[] =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /* encbase64: encodes input (0 to 3 bytes) into Base 64 */
