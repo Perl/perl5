@@ -258,7 +258,7 @@ SKIP: {
 
     SKIP: {
         $dir = catdir('EXTRA', '3');
-        skip "extra scenarios not set up, see eg/setup-extra-tests", 2
+        skip "extra scenarios not set up, see eg/setup-extra-tests", 3
             unless -e $dir;
 
         $dir = catdir('EXTRA', '3', 'U');
