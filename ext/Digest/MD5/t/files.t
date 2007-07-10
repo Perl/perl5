@@ -23,7 +23,7 @@ if (ord "A" == 193) { # EBCDIC
 c7b68bb806b2d42f4a11511132e94ae8  Changes
 11e8028ee426273db6b6db270a8bb38c  README
 c5e839f675f682215f913ea73788bc2c  MD5.pm
-3a9289ff503d676c67c72bfad90285a1  MD5.xs
+d4b61fd6f875dcd3e3066a3d6750010e  MD5.xs
 276da0aa4e9a08b7fe09430c9c5690aa  rfc1321.txt
 EOT
 } elsif ("\n" eq "\015") { # MacOS
