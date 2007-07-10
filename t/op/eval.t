@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..93\n";
+print "1..94\n";
 
 eval 'print "ok 1\n";';
 
@@ -457,4 +457,25 @@ print "ok $test - eval and last\n"; $test++;
     print "not " unless $@ eq "";
     print "ok $test # eval unef \n"; $test++;
 }
+
+
+# a syntax error in an eval called magically 9eg vie tie or overload)
+# resulted in an assertion failure in S_docatch, since doeval had already
+# poppedthe EVAL context due to the failure, but S_docatch expected the
+# context to still be there.
+
+{
+    my $ok  = 0;
+    package Eval1;
+    sub STORE { eval '('; $ok = 1 }
+    sub TIESCALAR { bless [] }
+
+    my $x;
+    tie $x, bless [];
+    $x = 1;
+    print "not " unless $ok;
+    print "ok $test # eval docatch \n"; $test++;
+}
+
+
 
