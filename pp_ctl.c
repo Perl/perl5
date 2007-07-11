@@ -2950,8 +2950,8 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	    const SV * const nsv = cx->blk_eval.old_namesv;
 	    (void)hv_store(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv),
                           &PL_sv_undef, 0);
-	    DIE(aTHX_ "%sCompilation failed in require",
-		*msg ? msg : "Unknown error\n");
+	    Perl_croak(aTHX_ "%sCompilation failed in require",
+		       *msg ? msg : "Unknown error\n");
 	}
 	else if (startop) {
 	    POPBLOCK(cx,PL_curpm);
