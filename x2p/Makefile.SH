@@ -47,7 +47,7 @@ SHELL = $sh
 
 # These variables may need to be manually set for non-Unix systems.
 AR = $ar
-EXE_EXT = $_ext
+EXE_EXT = $_exe
 LIB_EXT = $_a
 OBJ_EXT = $_o
 PATH_SEP = $p_
