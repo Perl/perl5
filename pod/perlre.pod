@@ -65,6 +65,15 @@ X</p> X<regex, preserve> X<regexp, preserve>
 Preserve the string matched such that ${^PREMATCH}, {$^MATCH}, and
 ${^POSTMATCH} are available for use after matching.
 
+=item g and c
+X</g> X</c>
+
+Global matching, and keep the Current position after failed matching.
+Unlike i, m, s and x, these two flags affect the way the regex is used
+rather than the regex itself. See
+L<perlretut/"Using regular expressions in Perl"> for further explanation
+of the g and c modifiers.
+
 =back
 
 These are usually written as "the C</x> modifier", even though the delimiter
