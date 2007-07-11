@@ -14,7 +14,7 @@ BEGIN { require "./test.pl"; }
 
 use Devel::Peek;
 
-plan(24);
+plan(48);
 
 our $DEBUG = 0;
 open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
@@ -24,6 +24,8 @@ sub do_test {
     if (open(OUT,">peek$$")) {
 	open(STDERR, ">&OUT") or die "Can't dup OUT: $!";
 	Dump($_[1]);
+        print STDERR "*****\n";
+        Dump($_[1]); # second dump to compare with the first to make sure nothing changed.
 	open(STDERR, ">&SAVERR") or die "Can't restore STDERR: $!";
 	close(OUT);
 	if (open(IN, "peek$$")) {
@@ -44,10 +46,15 @@ sub do_test {
 	    /mge;
 
 	    print $pattern, "\n" if $DEBUG;
-	    my $dump = <IN>;
+	    my ($dump, $dump2) = split m/\*\*\*\*\*\n/, scalar <IN>;
 	    print $dump, "\n"    if $DEBUG;
 	    like( $dump, qr/\A$pattern\Z/ms );
+
+            local $TODO = $dump2 =~ /OOK/ ? "The hash iterator used in dump.c sets the OOK flag" : undef;
+            is($dump2, $dump);
+
 	    close(IN);
+
             return $1;
 	} else {
 	    die "$0: failed to open peek$$: !\n";
@@ -264,6 +271,7 @@ do_test(14,
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$pattern"
       \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG" flags=0x0 index=0
       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$dump"
+      \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$dump2"
     OUTSIDE = $ADDR \\(MAIN\\)');
 
 do_test(15,

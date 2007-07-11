@@ -491,7 +491,7 @@ Perl_sv_peek(pTHX_ SV *sv)
 	    Perl_sv_catpvf(aTHX_ t, "%s)", pv_display(tmp, SvPVX_const(sv), SvCUR(sv), SvLEN(sv), 127));
 	    if (SvUTF8(sv))
 		Perl_sv_catpvf(aTHX_ t, " [UTF8 \"%s\"]",
-			       sv_uni_display(tmp, sv, 8 * sv_len_utf8(sv),
+			       sv_uni_display(tmp, sv, 6 * SvCUR(sv),
 					      UNI_DISPLAY_QQ));
 	    SvREFCNT_dec(tmp);
 	}
@@ -1570,8 +1570,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    if (SvOOK(sv))
 		PerlIO_printf(file, "( %s . ) ", pv_display(d, SvPVX_const(sv)-SvIVX(sv), SvIVX(sv), 0, pvlim));
 	    PerlIO_printf(file, "%s", pv_display(d, SvPVX_const(sv), SvCUR(sv), SvLEN(sv), pvlim));
-	    if (SvUTF8(sv)) /* the 8?  \x{....} */
-	        PerlIO_printf(file, " [UTF8 \"%s\"]", sv_uni_display(d, sv, 8 * sv_len_utf8(sv), UNI_DISPLAY_QQ));
+	    if (SvUTF8(sv)) /* the 6?  \x{....} */
+	        PerlIO_printf(file, " [UTF8 \"%s\"]", sv_uni_display(d, sv, 6 * SvCUR(sv), UNI_DISPLAY_QQ));
 	    PerlIO_printf(file, "\n");
 	    Perl_dump_indent(aTHX_ level, file, "  CUR = %"IVdf"\n", (IV)SvCUR(sv));
 	    Perl_dump_indent(aTHX_ level, file, "  LEN = %"IVdf"\n", (IV)SvLEN(sv));
@@ -1716,7 +1716,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 
 		Perl_dump_indent(aTHX_ level+1, file, "Elt %s ", pv_display(d, keypv, len, 0, pvlim));
 		if (SvUTF8(keysv))
-		    PerlIO_printf(file, "[UTF8 \"%s\"] ", sv_uni_display(d, keysv, 8 * sv_len_utf8(keysv), UNI_DISPLAY_QQ));
+		    PerlIO_printf(file, "[UTF8 \"%s\"] ", sv_uni_display(d, keysv, 6 * SvCUR(keysv), UNI_DISPLAY_QQ));
 		if (HeKREHASH(he))
 		    PerlIO_printf(file, "[REHASH] ");
 		PerlIO_printf(file, "HASH = 0x%"UVxf"\n", (UV)hash);
