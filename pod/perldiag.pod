@@ -27,7 +27,7 @@ and B<-W> switches. Warnings may be captured by setting C<$SIG{__WARN__}>
 to a reference to a routine that will be called on each warning instead
 of printing it.  See L<perlvar>.
 
-Default warnings are always enabled unless they are explicitly disabled
+Severe warnings are always enabled, unless they are explicitly disabled
 with the C<warnings> pragma or the B<-X> switch.
 
 Trappable errors may be trapped using the eval operator.  See
