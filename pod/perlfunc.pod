@@ -4056,9 +4056,7 @@ X<pop> X<stack>
 =item pop
 
 Pops and returns the last value of the array, shortening the array by
-one element.  Has an effect similar to
-
-    $ARRAY[$#ARRAY--]
+one element.
 
 If there are no elements in the array, returns the undefined value
 (although this may happen at other times as well).  If ARRAY is
