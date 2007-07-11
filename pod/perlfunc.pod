@@ -6814,7 +6814,7 @@ Imports some semantics into the current package from the named module,
 generally by aliasing certain subroutine or variable names into your
 package.  It is exactly equivalent to
 
-    BEGIN { require Module; import Module LIST; }
+    BEGIN { require Module; Module->import( LIST ); }
 
 except that Module I<must> be a bareword.
 
