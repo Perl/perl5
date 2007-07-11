@@ -2177,13 +2177,13 @@ neither as a system call or an ioctl call (SIOCATMARK).
 
 =item $* is no longer supported
 
-(D deprecated) The special variable C<$*>, deprecated in older perls, has
+(S deprecated, syntax) The special variable C<$*>, deprecated in older perls, has
 been removed as of 5.9.0 and is no longer supported. You should use the
 C<//m> and C<//s> regexp modifiers instead.
 
 =item $# is no longer supported
 
-(D deprecated) The special variable C<$#>, deprecated in older perls, has
+(S deprecated, syntax) The special variable C<$#>, deprecated in older perls, has
 been removed as of 5.9.3 and is no longer supported. You should use the
 printf/sprintf functions instead.
 

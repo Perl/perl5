@@ -43,12 +43,11 @@ EXPECT
 Use of inherited AUTOLOAD for non-method main::fred() is deprecated at - line 5.
 ########
 # gv.c
-use warnings 'deprecated' ;
 $a = ${"#"};
 $a = ${"*"};
 no warnings 'deprecated' ;
 $a = ${"#"};
 $a = ${"*"};
 EXPECT
-$# is no longer supported at - line 3.
-$* is no longer supported at - line 4.
+$# is no longer supported at - line 2.
+$* is no longer supported at - line 3.
