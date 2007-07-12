@@ -332,7 +332,7 @@ eval { for("a") { for $x (1,2) { local $_="b"; s/(.*)/+$1/ } } };
 is($@, "");
 
 # Special local() behavior for $[
-# (see RT #38207 - Useless localization of constant ($[) in getopts.pl}
+# (see RT #43425, which contains a potential fix)
 {
     local $[ = 1;
     local $TODO = "local() not currently working correctly with \$[";
