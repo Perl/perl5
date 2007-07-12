@@ -1351,7 +1351,7 @@ s	|void	|qsortsvu	|NN SV** array|size_t num_elts|NN SVCOMPARE_t compare
 
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 s	|OP*	|doform		|NN CV *cv|NN GV *gv|NN OP *retop
-#  if !defined(PERL_EFF_ACCESS) && defined(HAS_ACCESS) && (defined(HAS_SETREUID) || defined(HAS_SETRESUID) || defined(HAS_SETREGID) || defined(HAS_SETRESGID))
+#  if !defined(PERL_EFF_ACCESS)
 s	|int	|emulate_eaccess|NN const char* path|Mode_t mode
 #  endif
 #  if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
