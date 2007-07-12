@@ -1372,6 +1372,20 @@ $     perl_patchlevel = F$ELEMENT(1,"""",line)
 $     perl_patchlevel = perl_patchlevel - "DEVEL"
 $     got_perl_patchlevel = "true"
 $   ENDIF
+$   IF ((F$LOCATE("""SMOKE",line).NE.F$LENGTH(line)).AND.(.NOT.got_perl_patchlevel))
+$   THEN
+$     line = F$EDIT(line,"COMPRESS, TRIM")
+$     perl_patchlevel = F$ELEMENT(1,"""",line)
+$     perl_patchlevel = perl_patchlevel - "SMOKE"
+$     got_perl_patchlevel = "true"
+$   ENDIF
+$   IF ((F$LOCATE("""MAINT",line).NE.F$LENGTH(line)).AND.(.NOT.got_perl_patchlevel))
+$   THEN
+$     line = F$EDIT(line,"COMPRESS, TRIM")
+$     perl_patchlevel = F$ELEMENT(1,"""",line)
+$     perl_patchlevel = perl_patchlevel - "MAINT"
+$     got_perl_patchlevel = "true"
+$   ENDIF
 $   IF (.NOT. got_patch) .OR. -
        (.NOT. got_sub) .OR. - 
        (.NOT. got_api_revision) .OR. -
@@ -5702,6 +5716,7 @@ $ WC "PERL_SUBVERSION='" + subversion + "'"
 $ WC "PERL_API_REVISION='" + api_revision + "'"
 $ WC "PERL_API_VERSION='" + api_version + "'" 
 $ WC "PERL_API_SUBVERSION='" + api_subversion + "'"
+$ WC "PERL_PATCHLEVEL='" + perl_patchlevel + "'"
 $ WC "perl_patchlevel='" + perl_patchlevel + "'"
 $ WC "PERL_CONFIG_SH='true'"
 $ WC "_a='" + lib_ext + "'"
