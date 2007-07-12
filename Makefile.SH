@@ -1045,7 +1045,7 @@ clobber:	cleanup_unpacked_files _realcleaner _mopup _clobber
 distclean:	clobber
 
 # Like distclean but also removes emacs backups and *.orig.
-veryclean:	_verycleaner _mopup _clobber
+veryclean:	cleanup_unpacked_files _verycleaner _mopup _clobber
 	-@rm -f Obsolete Wanted
 
 # Do not 'make _mopup' directly.
@@ -1098,7 +1098,7 @@ _cleaner2:
 	rm -f lib/.exists lib/*/.exists lib/*/*/.exists
 	rm -f h2ph.man pstruct
 	rm -rf .config
-	rm -f preload
+	rm -f preload lib/re.pm
 	rm -rf lib/Encode lib/Compress lib/Hash lib/re
 	rm -rf lib/IO/Compress lib/IO/Uncompress
 	rm -f lib/ExtUtils/ParseXS/t/XSTest.c
