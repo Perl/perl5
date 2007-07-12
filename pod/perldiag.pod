@@ -9,7 +9,7 @@ desperation):
 
     (W) A warning (optional).
     (D) A deprecation (optional).
-    (S) A severe warning (default).
+    (S) A severe warning (enabled by default).
     (F) A fatal error (trappable).
     (P) An internal error you should never see (trappable).
     (X) A very fatal error (nontrappable).
@@ -5023,5 +5023,9 @@ not get any randomness out of your system.  This usually indicates
 Something Very Wrong.
 
 =back
+
+=head1 SEE ALSO
+
+L<warnings>, L<perllexwarn>.
 
 =cut
