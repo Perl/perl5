@@ -108,6 +108,9 @@ distribution needs to be dual lifed. Anything else can be too. Figure out what
 changes would be needed to package that module and its tests up for CPAN, and
 do so. Test it with older perl releases, and fix the problems you find.
 
+To make a minimal perl distribution, it's useful to look at
+F<t/lib/commonsense.t>.
+
 =head2 Improving C<threads::shared>
 
 Investigate whether C<threads::shared> could share aggregates properly with
@@ -521,6 +524,18 @@ or a willingness to learn.
 
 It would be nice to extend the syntax of the C<~~> operator to also
 understand numeric (and maybe alphanumeric) ranges.
+
+=head2 A does() built-in
+
+Like ref(), only useful. It would call the C<DOES> method on objects; it
+would also tell whether something can be dereferenced as an
+array/hash/etc., or used as a regexp, etc.
+L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-03/msg00481.html>
+
+=head2 Tied filehandles and write() don't mix
+
+There is no method on tied filehandles to allow them to be called back by
+formats.
 
 =head2 Attach/detach debugger from running program
 
