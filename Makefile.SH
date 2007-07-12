@@ -1100,33 +1100,14 @@ _cleaner2:
 	rm -rf .config
 	rm -f preload
 	rm -rf lib/Encode lib/Compress lib/Hash lib/re
-	rm -f lib/re.pm
-	rm -f lib/Archive/Extract/t/src/*.zip lib/Archive/Extract/t/src/*.gz
-	rm -f lib/Archive/Extract/t/src/*.tar lib/Archive/Extract/t/src/*.tgz
-	rm -f lib/Archive/Extract/t/src/*.bz2 lib/Archive/Extract/t/src/*.tbz
-	rm -f lib/Archive/Extract/t/src/*.jar lib/Archive/Extract/t/src/*.par
-	rm -f lib/Archive/Extract/t/src/*.Z
-	rm -f lib/Archive/Tar/t/src/*/*.tar lib/Archive/Tar/t/src/*/*.tgz
-	rm -f lib/CPANPLUS/Dist/Build/t/src/*/Foo-Bar-0.01.tar.gz
-	rm -f lib/CPANPLUS/t/dummy-CPAN/authors/01mailrc.txt.gz
-	rm -f lib/CPANPLUS/t/dummy-CPAN/authors/id/*/*/*/*.gz
-	rm -f lib/CPANPLUS/t/dummy-CPAN/modules/*.gz
 	rm -rf lib/IO/Compress lib/IO/Uncompress
 	rm -f lib/ExtUtils/ParseXS/t/XSTest.c
 	rm -f lib/ExtUtils/ParseXS/t/XSTest$(OBJ_EXT)
 	rm -f lib/ExtUtils/ParseXS/t/XSTest$(DLSUFFIX)
-	rm -f lib/Pod/Simple/t/corpus/2202jp.txt
-	rm -f lib/Pod/Simple/t/corpus/2202jpx.txt
-	rm -f lib/Pod/Simple/t/corpus/2202jpy.txt
-	rm -f lib/Pod/Simple/t/corpus2/polish_utf16be_bom.txt
-	rm -f lib/Pod/Simple/t/corpus2/polish_utf16le_bom.txt
 	-rmdir lib/B lib/Data
 	-rmdir lib/Filter/Util lib/IO/Socket
 	-rmdir lib/List lib/MIME lib/Scalar lib/Sys
 	-rmdir lib/threads lib/XS
-	-rmdir lib/CPANPLUS/Dist/Build/t/dummy-*
-	-rmdir lib/CPANPLUS/t/dummy-*
-	-rm -fr lib/Win32API
 	-rm -f cygcrypt-0.dll cygwin1.dll
 	-rm -f lib/ExtUtils/CBuilder/t/libcompilet.dll.a
 	-rm -f lib/ExtUtils/ParseXS/t/libXSTest.dll.a
