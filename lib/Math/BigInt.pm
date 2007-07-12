@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 use 5.006002;
 
-$VERSION = '1.87';
+$VERSION = '1.88';
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(objectify bgcd blcm); 
@@ -2741,7 +2741,7 @@ sub from_hex
   # create a bigint from a hexadecimal string
   my ($self, $hs) = @_;
 
-  my $rc = $self->__from_hex($hs);
+  my $rc = __from_hex($hs);
 
   return $self->bnan() unless defined $rc;
 
@@ -2753,7 +2753,7 @@ sub from_bin
   # create a bigint from a hexadecimal string
   my ($self, $bs) = @_;
 
-  my $rc = $self->__from_bin($bs);
+  my $rc = __from_bin($bs);
 
   return $self->bnan() unless defined $rc;
 
@@ -2768,10 +2768,10 @@ sub from_oct
   my $x = $self->bzero();
   
   # strip underscores
-  $os =~ s/([0-9a-fA-F])_([0-9a-fA-F])/$1$2/g;	
-  $os =~ s/([0-9a-fA-F])_([0-9a-fA-F])/$1$2/g;	
+  $os =~ s/([0-7])_([0-7])/$1$2/g;	
+  $os =~ s/([0-7])_([0-7])/$1$2/g;	
   
-  return $x->bnan() if $os !~ /^[\-\+]?0[0-9]+$/;
+  return $x->bnan() if $os !~ /^[\-\+]?0[0-7]+\z/;
 
   my $sign = '+'; $sign = '-' if $os =~ /^-/;
 
@@ -3443,15 +3443,15 @@ See L<Input> for more info on accepted input formats.
 
 =head2 from_oct()
 
-	$x = Math::BigIn->from_oct("0775");	# input is octal
+	$x = Math::BigInt->from_oct("0775");	# input is octal
 
 =head2 from_hex()
 
-	$x = Math::BigIn->from_hex("0xcafe");	# input is hexadecimal
+	$x = Math::BigInt->from_hex("0xcafe");	# input is hexadecimal
 
 =head2 from_bin()
 
-	$x = Math::BigIn->from_oct("0x10011");	# input is binary
+	$x = Math::BigInt->from_oct("0x10011");	# input is binary
 
 =head2 bnan()
 
