@@ -96,9 +96,11 @@ BEGIN {
     # use secure tempfiles wherever possible
     eval "require File::Temp;";
     $::HaveTemp = ($@ eq "");
+    eval { require Module::CoreList; };
+    $::HaveCoreList = ($@ eq "");
 };
 
-my $Version = "1.35";
+my $Version = "1.36";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -138,6 +140,7 @@ my $Version = "1.35";
 # Changed in 1.33 Don't require -t STDOUT for -ok.
 # Changed in 1.34 Added Message-Id RFOLEY 18-06-2002 
 # Changed in 1.35 Use File::Temp (patch from Solar Designer) NWCLARK 28-02-2004
+# Changed in 1.36 Initial Module::CoreList support Alexandr Ciornii 11-07-2007
 
 # TODO: - Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is
@@ -500,6 +503,29 @@ EOF
 	    $usefile = 1;
 	} elsif ($entry ne "") {
 	    $ed = $entry;
+	}
+    }
+    my $report_about_module = '';
+    if ($::HaveCoreList) {
+	paraprint <<EOF;
+Is your report about a Perl module? If yes, enter its name. If not, skip.
+EOF
+	print "Module []: ";
+	my $entry = scalar <>;
+	$entry =~ s/^\s+//s;
+	$entry =~ s/\s+$//s;
+	if ($entry ne q{}) {
+	    $category ||= 'library';
+	    $report_about_module = $entry;
+	    my $first_release = Module::CoreList->first_release($entry);
+	    unless ($first_release) {
+		paraprint <<EOF;
+Module $entry is not a core module. Please check that
+you entered its name correctly. If it is correct,
+abort this program, try searching for $entry on
+search.cpan.org, and report it there.
+EOF
+	    }
 	}
     }
 
