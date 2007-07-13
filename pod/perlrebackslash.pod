@@ -319,9 +319,10 @@ Mnemonic: I<p>roperty.
 
 If capturing parenthesis are used in a regular expression, we can refer
 to the part of the source string that was matched, and match exactly the
-same thing. (Full details are discussed in L<perlrecapture>). There are
-three ways of referring to such I<backreference>: absolutely, relatively,
-and by name.
+same thing. There are three ways of referring to such I<backreference>:
+absolutely, relatively, and by name.
+
+=for later add link to perlrecapture
 
 =head3 Absolute referencing
 
@@ -426,7 +427,9 @@ remember where in the source string the last match ended, and the next time,
 it will start the match from where it ended the previous time.
 
 C<\G> matches the point where the previous match ended, or the beginning
-of the string if there was no previous match. See also L<perlremodifiers>.
+of the string if there was no previous match.
+
+=for later add link to perlremodifiers
 
 Mnemonic: I<G>lobal.
 
