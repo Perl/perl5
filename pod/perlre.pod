@@ -1475,7 +1475,7 @@ As a shortcut C<(*MARK:NAME)> can be written C<(*:NAME)>.
 
 =item C<(*THEN)> C<(*THEN:NAME)>
 
-This is similar to the "cut group" operator C<::> from Perl6. Like
+This is similar to the "cut group" operator C<::> from Perl 6. Like
 C<(*PRUNE)>, this verb always matches, and when backtracked into on
 failure, it causes the regex engine to try the next alternation in the
 innermost enclosing group (capturing or otherwise).
@@ -1509,7 +1509,7 @@ backtrack and try C; but the C<(*PRUNE)> verb will simply fail.
 =item C<(*COMMIT)>
 X<(*COMMIT)>
 
-This is the Perl6 "commit pattern" C<< <commit> >> or C<:::>. It's a
+This is the Perl 6 "commit pattern" C<< <commit> >> or C<:::>. It's a
 zero-width pattern similar to C<(*SKIP)>, except that when backtracked
 into on failure it causes the match to fail outright. No further attempts
 to find a valid match by advancing the start pointer will occur again.
