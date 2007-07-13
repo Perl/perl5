@@ -304,7 +304,7 @@ compilation to fail with an error. The code will not be executed.
 The default operator mask for a newly created compartment is
 the ':default' optag.
 
-It is important that you read the Opcode(3) module documentation
+It is important that you read the L<Opcode> module documentation
 for more information, especially for detailed definitions of opnames,
 optags and opsets.
 
