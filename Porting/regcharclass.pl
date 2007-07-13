@@ -8,13 +8,13 @@ use Data::Dumper;
 $Data::Dumper::Useqq= 1;
 our $hex_fmt= "0x%02X";
 
-=head1 TITLE
+=head1 NAME
 
 CharClass::Matcher -- Generate C macros that match character classes efficiently
 
 =head1 SYNOPSIS
 
-  ~/perl$ perl Porting\regcharclass.pl
+    perl Porting/regcharclass.pl
 
 =head1 DESCRIPTION
 
