@@ -1,12 +1,17 @@
 You're reading ./Cross/README.new, describing Perl cross-compilation process.
-NOTE: this file will replace ./Cross/README, after cross-compilation scheme
-will stabilize;
+NOTE: this file will replace ./Cross/README, after the cross-compilation scheme
+is stabilized.
 
-=head1 Cross-compilation for linux
+=head1 NAME
 
-This is second approach to linux cross-compiling, which should allow building
-full perl and entensions for target platform. Cross-compiling for linux
-uses similar approach and share same files as cross-compiling for WINCE.
+README.new - Cross-compilation for linux
+
+=head1 DESCRIPTION
+
+This is second approach to linux cross-compilation, which should allow
+building full perl and entensions for target platform. Cross-compilation
+for linux uses similar approach and shares the same files as
+cross-compilation for WinCE.
 
 We refer to HOST as the platform where the build is performed, and to
 TARGET as where final executables will run.
@@ -15,7 +20,7 @@ TARGET as where final executables will run.
 
 =head3 common
 
-Unlike WINCE, output files from GCC cross-compiler are produced in the same
+Unlike WinCE, output files from GCC cross-compiler are produced in the same
 directory where C files are. All TARGET binaries have different extensions
 so to distinguish HOST and TARGET binaries. Namely, object files for C<arm>
 cross-compilation will have extension C<.armo>, executable files will have
@@ -47,30 +52,31 @@ an indication of a mistake somewhere in the middle.
   # following command should cluck, and it is bad if it does not:
   ./miniperl -Ilib -MConfig -e 1
 
-After C<miniperl> is built, C<configpm> is invoked to create right C<Config.pm>
-in right place and its corresponding Cross.pm.
+After C<miniperl> is built, C<configpm> is invoked to create an
+appropriate C<Config.pm> in the right place and its corresponding
+C<Cross.pm>.
 
 File C<Cross.pm> is dead simple: for given cross-architecture places in @INC
 a path where perl modules are, and right C<Config.pm> in that place.
 
 That said, C<miniperl -Ilib -MConfig -we 1> should report an error, because
-it can not find C<Config.pm>. If it does not give an error -- wrong C<Config.pm>
+it cannot find C<Config.pm>. If it does not give an error, a wrong C<Config.pm>
 is substituted, and resulting binaries will be a mess.
 
-C<miniperl -MCross -MConfig -we 1> should run okay, and it will provide right
-C<Config.pm> for further compilations.
+C<miniperl -MCross -MConfig -we 1> should run okay, and it will provide a
+correct C<Config.pm> for further compilations.
 
 During extensions build phase, the script C<./ext/util/make_ext_cross> is
 invoked.
 
-All invokes of C<Makefile.PL> are provided with C<-MCross> so to enable cross-
-compile.
+All invocations of C<Makefile.PL> are provided with C<-MCross> so to enable
+cross-compilation.
 
 =head2 BUILD
 
 =head3 Tools & SDK
 
-For compiling, you need following:
+To compile, you need the following:
 
 =over 4
 
@@ -82,7 +88,7 @@ For compiling, you need following:
 
 =over 4
 
-=item * better distinguishing of config.h/xconfig.h, dependancies
+=item * better distinguishing of config.h/xconfig.h, dependencies
 
 =item * object files created in ./xlib/cross-name/ ?
 
