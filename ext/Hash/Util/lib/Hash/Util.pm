@@ -67,20 +67,20 @@ Hash::Util - A selection of general-utility hash subroutines
   lock_keys(%hash, @keyset);
   lock_keys_plus(%hash, @additional_keys);
 
-  #Ways to inspect the properties of a restricted hash
-  my @legal=legal_keys(%hash);
-  my @hidden=hidden_keys(%hash);
-  my $ref=all_keys(%hash,@keys,@hidden);
-  my $is_locked=hash_locked(%hash);
+  # Ways to inspect the properties of a restricted hash
+  my @legal = legal_keys(%hash);
+  my @hidden = hidden_keys(%hash);
+  my $ref = all_keys(%hash,@keys,@hidden);
+  my $is_locked = hash_locked(%hash);
 
-  #Remove restrictions on the hash
+  # Remove restrictions on the hash
   unlock_keys(%hash);
 
-  #Lock individual values in a hash
+  # Lock individual values in a hash
   lock_value  (%hash, 'foo');
   unlock_value(%hash, 'foo');
 
-  #Ways to change the restrictions on both keys and values
+  # Ways to change the restrictions on both keys and values
   lock_hash  (%hash);
   unlock_hash(%hash);
 
@@ -251,7 +251,7 @@ sub unlock_value (\%$) { unlock_ref_value(@_) }
 
     lock_hash(%hash);
 
-lock_hash() locks an entire hash, making all keys and values readonly.
+lock_hash() locks an entire hash, making all keys and values read-only.
 No value can be changed, no keys can be added or deleted.
 
     unlock_hash(%hash);
@@ -298,7 +298,7 @@ sub unlock_hash (\%) { unlock_hashref(@_) }
     lock_hash_recurse(%hash);
 
 lock_hash() locks an entire hash and any hashes it references recursively,
-making all keys and values readonly. No value can be changed, no keys can
+making all keys and values read-only. No value can be changed, no keys can
 be added or deleted.
 
 B<Only> recurses into hashes that are referenced by another hash. Thus a
@@ -372,17 +372,17 @@ sub hidden_keys(\%){ hidden_ref_keys(@_) }
 
 =item b<legal_keys>
 
-  my @keys=legal_keys(%hash);
+  my @keys = legal_keys(%hash);
 
-Returns a list of the keys that are legal in a restricted hash.
+Returns the list of the keys that are legal in a restricted hash.
 In the case of an unrestricted hash this is identical to calling
 keys(%hash).
 
 =item B<hidden_keys>
 
-  my @keys=hidden_keys(%hash);
+  my @keys = hidden_keys(%hash);
 
-Returns a list of the keys that are legal in a restricted hash but
+Returns the list of the keys that are legal in a restricted hash but
 do not have a value associated to them. Thus if 'foo' is a
 "hidden" key of the %hash it will return false for both C<defined>
 and C<exists> tests.
@@ -391,7 +391,7 @@ In the case of an unrestricted hash this will return an empty list.
 
 B<NOTE> this is an experimental feature that is heavily dependent
 on the current implementation of restricted hashes. Should the
-implementation change this routine may become meaningless in which
+implementation change, this routine may become meaningless, in which
 case it will return an empty list.
 
 =item B<all_keys>
@@ -404,19 +404,19 @@ keys that have not been utilized.
 
 Returns a reference to the hash.
 
-In the case of an unrestricted hash this will be equivelent to
+In the case of an unrestricted hash this will be equivalent to
 
-  $ref=do{
-            @keys  =keys %hash;
-            @hidden=();
-            \%hash
-         };
+  $ref = do {
+      @keys = keys %hash;
+      @hidden = ();
+      \%hash
+  };
 
 B<NOTE> this is an experimental feature that is heavily dependent
 on the current implementation of restricted hashes. Should the
 implementation change this routine may become meaningless in which
 case it will behave identically to how it would behave on an
-unrestrcited hash.
+unrestricted hash.
 
 =item B<hash_seed>
 
@@ -440,9 +440,9 @@ sub hash_seed () {
 
 =item B<hv_store>
 
-  my $sv=0;
+  my $sv = 0;
   hv_store(%hash,$key,$sv) or die "Failed to alias!";
-  $hash{$key}=1;
+  $hash{$key} = 1;
   print $sv; # prints 1
 
 Stores an alias to a variable in a hash instead of copying the value.
@@ -451,7 +451,7 @@ Stores an alias to a variable in a hash instead of copying the value.
 
 =head2 Operating on references to hashes.
 
-Most subroutines documented in this module have equivelent versions
+Most subroutines documented in this module have equivalent versions
 that operate on references to hashes instead of native hashes.
 The following is a list of these subs. They are identical except
 in name and in that instead of taking a %hash they take a $hashref,
@@ -497,7 +497,7 @@ leaves the C<%hash> empty rather than with its original contents.
 =head1 BUGS
 
 The interface exposed by this module is very close to the current
-imlementation of restricted hashes. Over time it is expected that
+implementation of restricted hashes. Over time it is expected that
 this behavior will be extended and the interface abstracted further.
 
 =head1 AUTHOR
