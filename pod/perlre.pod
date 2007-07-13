@@ -296,7 +296,7 @@ in general.
 X<\w> X<\W> X<word>
 
 C<\R> will atomically match a linebreak, including the network line-ending
-"\x0D\x0A".  Specifically, X<\R> is exactly equivelent to
+"\x0D\x0A".  Specifically, X<\R> is exactly equivalent to
 
   (?>\x0D\x0A?|[\x0A-\x0C\x85\x{2028}\x{2029}])
 

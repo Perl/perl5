@@ -37,7 +37,7 @@ future version of Perl may assign a special meaning to it. However, if you
 have warnings turned on, Perl will issue a warning if you use such a sequence.
 [1].
 
-It is however garanteed that backslash or escape sequences never have a
+It is however guaranteed that backslash or escape sequences never have a
 punctuation character following the backslash, not now, and not in a future
 version of Perl 5. So it is safe to put a backslash in front of a non-word
 character.
@@ -107,7 +107,7 @@ quoted constructs>.
 
 =head3  Fixed characters
 
-A handful of characters have a dedidated I<character escape>. The following
+A handful of characters have a dedicated I<character escape>. The following
 table shows them, along with their code points (in decimal and hex), their
 ASCII name, the control escape (see below) and a short description.
 
@@ -261,7 +261,7 @@ functions C<lcfirst> and C<ucfirst>).
 
 To uppercase or lowercase several characters, one might want to use
 C<\L> or C<\U>, which will lowercase/uppercase all characters following
-them, until either the end of the pattern, or the next occurance of
+them, until either the end of the pattern, or the next occurrence of
 C<\E>, whatever comes first. They perform similar functionality as the
 functions C<lc> and C<uc> do.
 
@@ -320,7 +320,7 @@ Mnemonic: I<p>roperty.
 If capturing parenthesis are used in a regular expression, we can refer
 to the part of the source string that was matched, and match exactly the
 same thing. (Full details are discussed in L<perlrecapture>). There are
-three ways of refering to such I<backreference>: absolutely, relatively,
+three ways of referring to such I<backreference>: absolutely, relatively,
 and by name.
 
 =head3 Absolute referencing
@@ -339,12 +339,12 @@ as well.
 
 =head3 Relative referencing
 
-New in perl 5.10 is different way of refering to capture buffers: C<\g>.
+New in perl 5.10 is different way of referring to capture buffers: C<\g>.
 C<\g> takes a number as argument, with the number in curly braces (the
 braces are optional). If the number (N) does not have a sign, it's a reference
 to the Nth capture group (so C<\g{2}> is equivalent to C<\2> - except that
 C<\g> always refers to a capture group and will never be seen as an octal
-escape). If the number is negative, the reference is relative, refering to
+escape). If the number is negative, the reference is relative, referring to
 the Nth group before the C<\g{-N}>.
 
 The big advantage of C<\g{-N}> is that it makes it much easier to write
