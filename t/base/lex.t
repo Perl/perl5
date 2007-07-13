@@ -7,7 +7,7 @@ $x = 'x';
 print "#1	:$x: eq :x:\n";
 if ($x eq 'x') {print "ok 1\n";} else {print "not ok 1\n";}
 
-$x = $#;	# this is the register $#
+$x = $#[0];
 
 if ($x eq '') {print "ok 2\n";} else {print "not ok 2\n";}
 
