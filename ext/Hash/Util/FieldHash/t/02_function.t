@@ -280,6 +280,29 @@ BEGIN { $n_tests += 4 }
 }
 
 {
+    # prototypes in place?
+    my %proto_tab = (
+        fieldhash   => '\\%',
+        fieldhashes => '',
+        idhash      => '\\%',
+        idhashes    => '',
+        id          => '$',
+        id_2obj     => '$',
+        register    => '$@',
+    );
+
+
+    my @notfound = grep !exists $proto_tab{ $_} =>
+        @Hash::Util::FieldHash::EXPORT_OK;
+    ok @notfound == 0, "All exports in table";
+    is prototype( "Hash::Util::FieldHash::$_") || '', $proto_tab{ $_},
+        "$_ has prototype ($proto_tab{ $_})" for
+            @Hash::Util::FieldHash::EXPORT_OK;
+
+    BEGIN { $n_tests += 1 + @Hash::Util::FieldHash::EXPORT_OK }
+}
+
+{
     BEGIN { $n_tests += 1 }
     Hash::Util::FieldHash::_fieldhash \ my( %h), $fieldhash_mode;
     bless \ %h, 'abc'; # this bus-errors with a certain bug

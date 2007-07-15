@@ -6,9 +6,6 @@
 
 /* A Perl sub that returns a hashref to the object registry */
 #define HUF_OB_REG "Hash::Util::FieldHash::_ob_reg"
-/* Magic cookies to recognize object id's.  Hi, Eva, David */
-#define HUF_COOKIE 2805.1980
-#define HUF_REFADDR_COOKIE 1811.1976
 /* Identifier for PERL_MAGIC_ext magic */
 #define HUF_IDCACHE 0x4944
 
@@ -236,6 +233,22 @@ I32 HUF_watch_key_id(pTHX_ IV action, SV* field) {
     return 0;
 }
 
+/* see if something is a field hash */
+int HUF_get_status(HV* hash) {
+    int ans = 0;
+    if (hash && (SvTYPE(hash) == SVt_PVHV)) {
+        MAGIC* mg;
+        struct ufuncs* uf;
+        if ((mg = mg_find((SV*)hash, PERL_MAGIC_uvar)) &&
+            (uf = (struct ufuncs *)mg->mg_ptr) &&
+            (uf->uf_set == NULL)
+        ) {
+            ans = HUF_func_2mode(uf->uf_val);
+        }
+    }
+    return ans;
+}
+
 int HUF_func_2mode( I32(* val)(pTHX_ IV, SV*)) {
     int ans = 0;
     if (val == &HUF_watch_key_id)
@@ -256,22 +269,6 @@ I32(* HUF_mode_2func( int mode))(pTHX_ IV, SV*) {
             break;
     }
     return(ans);
-}
-
-/* see if something is a field hash */
-int HUF_get_status(HV* hash) {
-    int ans = 0;
-    if (hash && (SvTYPE(hash) == SVt_PVHV)) {
-        MAGIC* mg;
-        struct ufuncs* uf;
-        if ((mg = mg_find((SV*)hash, PERL_MAGIC_uvar)) &&
-            (uf = (struct ufuncs *)mg->mg_ptr) &&
-            (uf->uf_set == NULL)
-        ) {
-            ans = HUF_func_2mode(uf->uf_val);
-        }
-    }
-    return ans;
 }
 
 /* Thread support.  These routines are called by CLONE (and nothing else) */
@@ -375,6 +372,7 @@ OUTPUT:
 
 void
 id(SV* ref)
+PROTOTYPE: $
 PPCODE:
     if (SvROK(ref)) {
         XPUSHs(HUF_obj_id(ref));

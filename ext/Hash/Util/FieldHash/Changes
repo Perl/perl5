@@ -16,8 +16,14 @@ Revision history for Perl extension Hash::Util::FieldHash.
         - Added functions id, id_2obj, register, idhash, idhashes
 
       Sun Jun 17 15:10:45 CEST 2007
-        In preparation for release
         - added tests for new functions
         - pod partially re-written to describe the multi-level
           interface
         - updated pod part of lib/Hash/Util.pm
+        - release accepted by p5p
+
+1.02 Sat Jul 14 22:38:33 CEST 2007
+        - prototype set to ($) for id()
+        - tests added for prototypes
+        - some cleanup in xs code
+        - small pod fixes
