@@ -331,13 +331,10 @@ like($@, qr/Modification of a read-only value attempted/);
 eval { for("a") { for $x (1,2) { local $_="b"; s/(.*)/+$1/ } } };
 is($@, "");
 
-# Special local() behavior for $[
-# (see RT #43425, which contains a potential fix)
+# RT #4342 Special local() behavior for $[
 {
     local $[ = 1;
-    local $TODO = "local() not currently working correctly with \$[";
-    ok(1 == $[);
-    undef $TODO;
+    ok(1 == $[, 'lexcical scope of local $[');
     f();
 }
 

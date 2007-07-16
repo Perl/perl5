@@ -272,6 +272,7 @@ S_clear_yystack(pTHX_  const yy_parser *parser)
     /* clear any reducing ops (1st pass) */
 
     for (i=0; i< parser->yylen; i++) {
+	LEAVE_SCOPE(ps[-i].savestack_ix);
 	if (yy_type_tab[yystos[ps[-i].state]] == toketype_opval
 	    && ps[-i].val.opval) {
 	    if ( ! (ps[-i].val.opval->op_attached
@@ -289,6 +290,7 @@ S_clear_yystack(pTHX_  const yy_parser *parser)
     /* now free whole the stack, including the just-reduced ops */
 
     while (ps > parser->stack) {
+	LEAVE_SCOPE(ps->savestack_ix);
 	if (yy_type_tab[yystos[ps->state]] == toketype_opval
 	    && ps->val.opval)
 	{
@@ -450,6 +452,7 @@ Perl_yyparse (pTHX)
     ps->state   = yyn;
     ps->val     = parser->yylval;
     ps->comppad = PL_comppad;
+    ps->savestack_ix = PL_savestack_ix;
 #ifdef DEBUGGING
     ps->name    = (const char *)(yytname[yytoken]);
 #endif
@@ -547,6 +550,7 @@ Perl_yyparse (pTHX)
 
     ps->val     = yyval;
     ps->comppad = PL_comppad;
+    ps->savestack_ix = PL_savestack_ix;
 #ifdef DEBUGGING
     ps->name    = (const char *)(yytname [yyr1[yyn]]);
 #endif
@@ -584,6 +588,7 @@ Perl_yyparse (pTHX)
 	    /* Pop the rest of the stack.  */
 	    while (ps > parser->stack) {
 		YYDSYMPRINTF ("Error: popping", yystos[ps->state], &ps->val);
+		LEAVE_SCOPE(ps->savestack_ix);
 		if (yy_type_tab[yystos[ps->state]] == toketype_opval
 			&& ps->val.opval)
 		{
@@ -631,6 +636,7 @@ Perl_yyparse (pTHX)
 	    YYABORT;
 
 	YYDSYMPRINTF ("Error: popping", yystos[ps->state], &ps->val);
+	LEAVE_SCOPE(ps->savestack_ix);
 	if (yy_type_tab[yystos[ps->state]] == toketype_opval && ps->val.opval) {
 	    YYDPRINTF ((Perl_debug_log, "(freeing op)\n"));
 	    if (ps->comppad != PL_comppad) {
@@ -654,6 +660,7 @@ Perl_yyparse (pTHX)
     ps->state   = yyn;
     ps->val     = parser->yylval;
     ps->comppad = PL_comppad;
+    ps->savestack_ix = PL_savestack_ix;
 #ifdef DEBUGGING
     ps->name    ="<err>";
 #endif

@@ -4969,6 +4969,12 @@ void
 Perl_cv_undef(pTHX_ CV *cv)
 {
     dVAR;
+
+    DEBUG_X(PerlIO_printf(Perl_debug_log,
+	  "CV undef: cv=0x%"UVxf" comppad=0x%"UVxf"\n",
+	    PTR2UV(cv), PTR2UV(PL_comppad))
+    );
+
 #ifdef USE_ITHREADS
     if (CvFILE(cv) && !CvISXSUB(cv)) {
 	/* for XSUBs CvFILE point directly to static memory; __FILE__ */

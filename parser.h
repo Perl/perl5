@@ -17,6 +17,7 @@ typedef struct {
     AV	    *comppad; /* value of PL_comppad when this value was created */
 #ifdef DEBUGGING
     const char  *name; /* token/rule name for -Dpv */
+    I32     savestack_ix;	/* size of savestack at this state */
 #endif
 } yy_stack_frame;
 

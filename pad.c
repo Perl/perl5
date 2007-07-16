@@ -255,8 +255,8 @@ Perl_pad_undef(pTHX_ CV* cv)
 	return;
 
     DEBUG_X(PerlIO_printf(Perl_debug_log,
-	  "Pad undef: cv=0x%"UVxf" padlist=0x%"UVxf"\n",
-	    PTR2UV(cv), PTR2UV(padlist))
+	  "Pad undef: cv=0x%"UVxf" padlist=0x%"UVxf" comppad=0x%"UVxf"\n",
+	    PTR2UV(cv), PTR2UV(padlist), PTR2UV(PL_comppad))
     );
 
     /* detach any '&' anon children in the pad; if afterwards they
