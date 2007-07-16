@@ -298,9 +298,7 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
     return res;
 }
 #   define PERL_EFF_ACCESS(p,f) (emulate_eaccess((p), (f)))
-#endif
-
-#if !defined(PERL_EFF_ACCESS)
+#else
 /* With it or without it: anyway you get a warning: either that
    it is unused, or it is declared static and never defined.
  */
