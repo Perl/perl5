@@ -98,7 +98,7 @@ If you have problems, corrections, or questions, please see
 L<"Reporting Problems"> above.
 
 For information on what's new in this release, see the
-pod/perldelta.pod file.  For more detailed information about specific
+pod/perl5100delta.pod file.  For more detailed information about specific
 changes, see the Changes file.
 
 =head1 DESCRIPTION
@@ -132,13 +132,12 @@ directory.
 
 =head2 Changes and Incompatibilities
 
-Please see pod/perldelta.pod for a description of the changes and
+Please see pod/perl5100delta.pod for a description of the changes and
 potential incompatibilities introduced with this release.  A few of
 the most important issues are listed below, but you should refer
-to pod/perldelta.pod for more detailed information.
+to pod/perl5100delta.pod for more detailed information.
 
-=head3 WARNING:  This version is not binary compatible with releases of
-Perl prior to 5.9.0.
+B<WARNING:> This version is not binary compatible with prior releases of Perl.
 
 If you have built extensions (i.e. modules that include C code)
 using an earlier version of Perl, you will need to rebuild and reinstall
@@ -153,18 +152,10 @@ The standard extensions supplied with Perl will be handled automatically.
 
 On a related issue, old modules may possibly be affected by the changes
 in the Perl language in the current release.  Please see
-pod/perldelta.pod for a description of what's changed.  See your
+pod/perl5100delta.pod for a description of what's changed.  See your
 installed copy of the perllocal.pod file for a (possibly incomplete)
 list of locally installed modules.  Also see CPAN::autobundle for one
 way to make a "bundle" of your currently installed modules.
-
-=head2 Space Requirements
-
-The complete perl5 source tree takes up about 60 MB of disk space.
-After completing make, it takes up roughly 100 MB, though the actual
-total is likely to be quite system-dependent.  The installation
-directories need something on the order of 50 MB, though again that
-value is quite system-dependent.
 
 =head1 Start with a Fresh Distribution
 
@@ -441,30 +432,6 @@ this support (if it is available).
 
 You can "Configure -Dusemorebits" to turn on both the 64-bit support
 and the long double support.
-
-=head3 Selecting File IO mechanisms
-
-Executive summary: as of Perl 5.8, you should use the default "PerlIO"
-as the IO mechanism unless you have a good reason not to.
-
-In more detail: previous versions of perl used the standard IO
-mechanisms as defined in stdio.h.  Versions 5.003_02 and later of perl
-introduced alternate IO mechanisms via a "PerlIO" abstraction, but up
-until and including Perl 5.6, the stdio mechanism was still the default
-and the only supported mechanism.
-
-Starting from Perl 5.8, the default mechanism is to use the PerlIO
-abstraction, because it allows better control of I/O mechanisms,
-instead of having to work with (often, work around) vendors' I/O
-implementations.
-
-This PerlIO abstraction can be (but again, unless you know what you
-are doing, should not be) disabled either on the Configure command
-line with
-
-	sh Configure -Uuseperlio
-
-or interactively at the appropriate Configure prompt.
 
 =head3 Algorithmic Complexity Attacks on Hashes
 
@@ -2289,7 +2256,7 @@ approach.
 
 =head1 Coexistence with earlier versions of perl5
 
-Perl 5.9 is not binary compatible with earlier versions of Perl.
+Perl 5.10 is not binary compatible with earlier versions of Perl.
 In other words, you will have to recompile your XS modules.
 
 In general, you can usually safely upgrade from one version of Perl (e.g.
@@ -2408,21 +2375,6 @@ above.)
 See your installed copy of the perllocal.pod file for a (possibly
 incomplete) list of locally installed modules.  Note that you want
 perllocal.pod, not perllocale.pod, for installed module information.
-
-=head1 Coexistence with perl4
-
-You can safely install perl5 even if you want to keep perl4 around.
-
-By default, the perl5 libraries go into /usr/local/lib/perl5/, so
-they don't override the perl4 libraries in /usr/local/lib/perl/.
-
-In your /usr/local/bin directory, you should have a binary named
-perl4.036.  That will not be touched by the perl5 installation
-process.  Most perl4 scripts should run just fine under perl5.
-However, if you have any scripts that require perl4, you can replace
-the #! line at the top of them by #!/usr/local/bin/perl4.036 (or
-whatever the appropriate pathname is).  See L<perltrap> for
-possible problems running perl4 scripts under perl5.
 
 =head1 cd /usr/include; h2ph *.h sys/*.h
 
