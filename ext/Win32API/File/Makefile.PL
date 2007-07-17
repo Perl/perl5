@@ -104,7 +104,10 @@ ${_final}_to_blib: $final
         -e "pm_to_blib({ ',neatvalue($final),',',
 	neatvalue($self->catfile('$(INST_ARCHLIB)',@path,$final)), ' },',
 	neatvalue($self->catfile(qw[$(INST_LIB) auto])), ')"
-	@$(TOUCH) ', $_final, "_to_blib\n";
+	@$(TOUCH) ', $_final, "_to_blib
+
+realclean ::
+	$self->{RM_RF} ", $self->catfile('$(INST_ARCHLIB)', $path[0]), "\n";
 
 	    push( @clean, $outfile, $bin, $obj, $_final . "_to_blib" );
 	    push( @realclean, $final )   unless  $noreb;
