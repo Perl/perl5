@@ -196,8 +196,9 @@ sub _infer_xs_spec {
 
   # Need to create with the same name as DynaLoader will load with.
   if (defined &DynaLoader::mod2fname) {
-    my $file = DynaLoader::mod2fname([$$spec{base_name}]);
-    $file .= '.' . $self->{config}->get('dlext');
+    my $file = $$spec{module_name} . '.' . $self->{config}->get('dlext');
+    $file =~ tr/:/_/;
+    $file = DynaLoader::mod2fname([$file]);
     $$spec{lib_file} = File::Spec->catfile($$spec{archdir}, $file);
   }
 
@@ -220,12 +221,55 @@ sub rscan_dir {
   return $result;
 }
 
+=item dist_dir
+
+Inherit the standard version but replace embedded dots with underscores because 
+a dot is the directory delimiter on VMS.
+
+=cut
+
+sub dist_dir {
+  my $self = shift;
+
+  my $dist_dir = $self->SUPER::dist_dir;
+  $dist_dir =~ s/\./_/g;
+  return $dist_dir;
+}
+
+=item man3page_name
+
+Inherit the standard version but chop the extra manpage delimiter off the front if 
+there is one.  The VMS version of splitdir('[.foo]') returns '', 'foo'.
+
+=cut
+
+sub man3page_name {
+  my $self = shift;
+
+  my $mpname = $self->SUPER::man3page_name( shift );
+  $mpname =~ s/^$self->manpage_separator//;
+  return $mpname;
+}
+
+=item eliminate_macros
+
+Since make-style macros containing directory names can't just be pasted together 
+without expansion on VMS, we traditionally expand those macros much earlier than
+on other platforms.  Even though Module::Build isn't using make (or MMS or MMK),
+we depend on some bits that still refer to this as if it's a method that belongs 
+to $self, so we just put in a noop version here.
+
+sub eliminate_macros {
+  return(@_);
+}
 
 =back
 
 =head1 AUTHOR
 
-Michael G Schwern <schwern@pobox.com>, Ken Williams <kwilliams@cpan.org>
+Michael G Schwern <schwern@pobox.com>
+Ken Williams <kwilliams@cpan.org>
+Craig A. Berry <craigberry@mac.com>
 
 =head1 SEE ALSO
 

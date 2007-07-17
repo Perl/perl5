@@ -2860,7 +2860,7 @@ sub ACTION_ppmdist {
 	File::Spec->abs2rel( File::Spec->rel2abs( $file ),
 			     File::Spec->rel2abs( $dir  ) );
       my $to_file  =
-	File::Spec->catdir( $ppm, 'blib',
+	File::Spec->catfile( $ppm, 'blib',
 			    exists( $types{$type} ) ? $types{$type} : $type,
 			    $rel_file );
       $self->copy_if_modified( from => $file, to => $to_file );

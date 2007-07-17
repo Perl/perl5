@@ -16,7 +16,7 @@ chdir( $dist->dirname ) or die "Can't chdir to '@{[$dist->dirname]}': $!";
 
 
 use Config;
-use File::Spec::Functions qw( catdir splitdir );
+use File::Spec::Functions qw( catdir splitdir splitpath );
 
 #########################
 
@@ -300,10 +300,12 @@ sub have_same_ending {
   my ($dir1, $dir2, $message) = @_;
 
   $dir1 =~ s{/$}{} if $^O eq 'cygwin'; # remove any trailing slash
-  my @dir1 = splitdir $dir1;
+  my (undef, $dirs1, undef) = splitpath $dir1;
+  my @dir1 = splitdir $dirs1;
 
   $dir2 =~ s{/$}{} if $^O eq 'cygwin'; # remove any trailing slash
-  my @dir2 = splitdir $dir2;
+  my (undef, $dirs2, undef) = splitpath $dir2;
+  my @dir2 = splitdir $dirs2;
 
   is $dir1[-1], $dir2[-1], $message;
 }
