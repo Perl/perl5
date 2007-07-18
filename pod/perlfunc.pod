@@ -2230,6 +2230,18 @@ The Socket library makes this slightly easier:
     # or going the other way
     $straddr = inet_ntoa($iaddr);
 
+In the opposite way, to resolve a hostname to the IP address
+you can write this:
+
+    use Socket;
+    $packed_ip = gethostbyname("www.perl.org");
+    if (defined $packed_ip) {
+        $ip_address = inet_ntoa($packed_ip);
+    }
+
+Make sure <gethostbyname()> is called in SCALAR context and that
+its return value is checked for definedness.
+
 If you get tired of remembering which element of the return list
 contains which return value, by-name interfaces are provided
 in standard modules: C<File::stat>, C<Net::hostent>, C<Net::netent>,
