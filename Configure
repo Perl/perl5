@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Jul 18 17:42:05 CEST 2007 [metaconfig 3.0 PL70]
+# Generated on Thu Jul 19 15:56:52 CEST 2007 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -181,6 +181,7 @@ true)
 	esac
 	;;
 esac
+test -x "${newsh}" || unset newsh
 
 : if needed set CDPATH to a harmless value that is not chatty
 : avoid bash 2.02 problems with empty CDPATH.
