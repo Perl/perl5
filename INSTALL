@@ -59,7 +59,7 @@ http://www.chiark.greenend.org.uk/~sgtatham/bugs.html
 First, make sure you have an up-to-date version of Perl.   If you
 didn't get your Perl source from CPAN, check the latest version at
 http://www.cpan.org/src/.  Perl uses a version scheme where even-numbered
-subreleases (like 5.6.x and 5.8.x) are stable maintenance releases and
+subreleases (like 5.8.x and 5.10.x) are stable maintenance releases and
 odd-numbered subreleases (like 5.7.x and 5.9.x) are unstable
 development releases.  Development releases should not be used in
 production environments.  Fixes and new features are first carefully
@@ -90,7 +90,7 @@ If that's not okay with you, can run Configure interactively and use
 	# You may also wish to add these:
 	(cd /usr/include && h2ph *.h sys/*.h)
 	(installhtml --help)
-	(cd pod && make tex  && <process the latex files>)
+	(cd pod && make tex && <process the latex files>)
 
 or you can use some of the Configure options described below.
 
@@ -231,13 +231,14 @@ Configure variables you can set and their definitions.
 
 =over 4
 
-=item gcc
+=item C compiler
 
-To compile with gcc you should run
+To compile with gcc, if it's not the default compiler on your
+system, you should run
 
 	sh Configure -Dcc=gcc
 
-This is the preferred way to specify gcc (or another alternative
+This is the preferred way to specify gcc (or any another alternative
 compiler) so that the hints files can set appropriate defaults.
 
 =item Installation prefix
@@ -320,7 +321,7 @@ after the platform hints have been run by using Configure's -A switch.
 For example, here's how to add a couple of extra flags to C compiler
 invocations:
 
-	sh Configure -Accflags="-DPERL_EXTERNAL_GLOB -DPERL_POLLUTE_MALLOC"
+	sh Configure -Accflags="-DPERL_EXTERNAL_GLOB -DNO_HASH_SEED"
 
 To clarify, those ccflags values are not Configure options; if passed to
 Configure directly, they won't do anything useful (that will define a config.sh
@@ -366,9 +367,9 @@ This buffer starts small, but it will keep growing until the result
 fits.  To get a fixed upper limit, you should compile Perl with
 PERL_REENTRANT_MAXSIZE defined to be the number of bytes you want.  One
 way to do this is to run Configure with
-C<-Accflags=-DPERL_REENTRANT_MAXSIZE=65536>
+C<-Accflags=-DPERL_REENTRANT_MAXSIZE=65536>.
 
-=head3 Large file support.
+=head3 Large file support
 
 Since Perl 5.6.0, Perl has supported large files (files larger than
 2 gigabytes), and in many common platforms like Linux or Solaris this
@@ -379,18 +380,17 @@ seek(), stat(), and -s them.  It is bad in that if you are interfacing Perl
 using some extension, the components you are connecting to must also
 be large file aware: if Perl thinks files can be large but the other
 parts of the software puzzle do not understand the concept, bad things
-will happen.  One popular extension suffering from this ailment is the
-Apache extension mod_perl.
+will happen.
 
 There's also one known limitation with the current large files
 implementation: unless you also have 64-bit integers (see the next
 section), you cannot use the printf/sprintf non-decimal integer formats
 like C<%x> to print filesizes.  You can use C<%d>, though.
 
-=head3 64 bit support.
+=head3 64 bit support
 
-If your platform does not have run natively at 64 bits, but can
-simulate them with compiler flags and/or C<long long> or C<int64_t>,
+If your platform does not run natively at 64 bits, but can simulate
+them with compiler flags and/or C<long long> or C<int64_t>,
 you can build a perl that uses 64 bits.
 
 There are actually two modes of 64-bitness: the first one is achieved
@@ -413,13 +413,7 @@ resulting executable may not run at all in a 32-bit box, or you may
 have to reboot/reconfigure/rebuild your operating system to be 64-bit
 aware.
 
-Natively 64-bit systems like Alpha and Cray need neither -Duse64bitint
-nor -Duse64bitall.
-
-    NOTE: 64-bit support is still experimental on most platforms.
-    Existing support only covers the LP64 data model.  In particular, the
-    LLP64 data model is not yet supported.  64-bit libraries and system
-    APIs on many platforms have not stabilized--your mileage may vary.
+Natively 64-bit systems need neither -Duse64bitint nor -Duse64bitall.
 
 =head3 Long doubles
 
@@ -471,10 +465,9 @@ the compilation flags to completely disable the randomisation feature.
 B<Perl has never guaranteed any ordering of the hash keys>, and the
 ordering has already changed several times during the lifetime of Perl
 5.  Also, the ordering of hash keys has always been, and continues to
-be, affected by the insertion order.  It is likely that Perl 5.10 and
-Perl 6 will randomise all hashes.  Note that because of this
+be, affected by the insertion order.  Note that because of this
 randomisation for example the Data::Dumper results will be different
-between different runs of Perl since Data::Dumper by default dumps
+between different runs of Perl, since Data::Dumper by default dumps
 hashes "unordered".  The use of the Data::Dumper C<Sortkeys> option is
 recommended.
 
@@ -498,7 +491,7 @@ Currently, for most systems, the main perl executable is built by
 linking the "perl library" libperl.a with perlmain.o, your static
 extensions, and various extra libraries, such as -lm.
 
-On some systems that support dynamic loading, it may be possible to
+On systems that support dynamic loading, it may be possible to
 replace libperl.a with a shared libperl.so.  If you anticipate building
 several different perl binaries (e.g. by embedding libperl into
 different programs, or by using the optional compiler extension), then
@@ -516,14 +509,11 @@ Your system and typical applications may well give quite different
 results.
 
 The default name for the shared library is typically something like
-libperl.so.6.2 (for Perl 5.6.2), or libperl.so.602, or simply
+libperl.so.5.8.8 (for Perl 5.8.8), or libperl.so.588, or simply
 libperl.so.  Configure tries to guess a sensible naming convention
 based on your C library name.  Since the library gets installed in a
 version-specific architecture-dependent directory, the exact name
 isn't very important anyway, as long as your linker is happy.
-
-For some systems (mostly SVR4), building a shared libperl is required
-for dynamic loading to work, and hence is already the default.
 
 You can elect to build a shared libperl by
 
@@ -545,8 +535,10 @@ shared library path might be required.  For example, if you want to run
 something like the following with the newly-built but not-yet-installed
 ./perl:
 
-        cd t; ./perl misc/failing_test.t
+        cd t; ./perl -MTestInit misc/failing_test.t
+
 or
+
         ./perl -Ilib ~/my_mission_critical_test
 
 then you need to set up the shared library path explicitly.
@@ -565,13 +557,14 @@ again, it may be something other than LD_LIBRARY_PATH for you, see above.)
 You can often recognize failures to build/use a shared libperl from error
 messages complaining about a missing libperl.so (or libperl.sl in HP-UX),
 for example:
-18126:./miniperl: /sbin/loader: Fatal Error: cannot map libperl.so
+
+    18126:./miniperl: /sbin/loader: Fatal Error: cannot map libperl.so
 
 There is also an potential problem with the shared perl library if you
 want to have more than one "flavor" of the same version of perl (e.g.
 with and without -DDEBUGGING).  For example, suppose you build and
-install a standard Perl 5.8.0 with a shared library.  Then, suppose you
-try to build Perl 5.8.0 with -DDEBUGGING enabled, but everything else
+install a standard Perl 5.10.0 with a shared library.  Then, suppose you
+try to build Perl 5.10.0 with -DDEBUGGING enabled, but everything else
 the same, including all the installation directories.  How can you
 ensure that your newly built perl will link with your newly built
 libperl.so.8 rather with the installed libperl.so.8?  The answer is
@@ -630,9 +623,9 @@ The directories set up by Configure fall into three broad categories.
 
 =item Directories for the perl distribution
 
-By default, Configure will use the following directories for 5.9.0.
+By default, Configure will use the following directories for 5.10.0.
 $version is the full perl version number, including subversion, e.g.
-5.9.0 or 5.9.1, and $archname is a string like sun4-sunos,
+5.10.0 or 5.9.5, and $archname is a string like sun4-sunos,
 determined by Configure.  The full definitions of all Configure
 variables are in the file Porting/Glossary.
 
@@ -943,6 +936,10 @@ you probably want to have support for perl internal debugging code
 (activated by adding -DDEBUGGING to ccflags), and/or support for the
 system debugger by adding -g to optimize.
 
+	sh Configure -DDEBUGGING
+
+or
+
 	sh Configure -DDEBUGGING=<mode>
 
 For a more eye appealing call, -DEBUGGING is defined to be an alias
@@ -971,8 +968,6 @@ L<"Propagating your changes to config.sh"> below.)
 
 You can actually specify -g and -DDEBUGGING independently, but usually
 it's convenient to have both.
-
-=over 4
 
 =item -DDEBUGGING
 
@@ -1488,8 +1483,9 @@ Because of the buggy history of suidperl, and the difficulty
 of properly security auditing as large and complex piece of
 software as Perl, we cannot recommend using suidperl and the feature
 should be considered deprecated.
+
 Instead, use a tool specifically designed to handle changes in
-privileges, such as B<sudo>, http://www.courtesan.com/sudo/ .
+privileges, such as B<sudo>.
 
 =head1 make depend
 
@@ -1545,7 +1541,7 @@ If you have any locale-related environment variables set, try unsetting
 them.  I have some reports that some versions of IRIX hang while
 running B<./miniperl configpm> with locales other than the C locale.
 See the discussion under L<"make test"> below about locales and the
-whole L<"Locale problems"> section in the file pod/perllocale.pod.
+whole L<perllocale/"LOCALE PROBLEMS"> section in the file pod/perllocale.pod.
 The latter is especially useful if you see something like this
 
 	perl: warning: Setting locale failed.
