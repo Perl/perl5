@@ -23,7 +23,7 @@ use vars qw($VERSION @ISA $upgrade $downgrade
 
 @ISA = qw(Math::BigFloat);
 
-$VERSION = '0.19';
+$VERSION = '0.20';
 
 use overload;			# inherit overload from Math::BigFloat
 
@@ -337,6 +337,12 @@ sub config
   {
   # return (later set?) configuration data as hash ref
   my $class = shift || 'Math::BigRat';
+
+  if (@_ == 1 && ref($_[0]) ne 'HASH')
+    {
+    my $cfg = $class->SUPER::config();
+    return $cfg->{$_[0]};
+    }
 
   my $cfg = $class->SUPER::config(@_);
 
@@ -1011,6 +1017,130 @@ sub blog
   $x->_new_from_float( $x->_as_float()->blog(Math::BigFloat->new("$y"),@r) );
   }
 
+sub bexp
+  {
+  # set up parameters
+  my ($self,$x,$y,$a,$p,$r) = (ref($_[0]),@_);
+
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,$a,$p,$r) = objectify(2,$class,@_);
+    }
+
+  return $x->binf() if $x->{sign} eq '+inf';
+  return $x->bzero() if $x->{sign} eq '-inf';
+
+  # we need to limit the accuracy to protect against overflow
+  my $fallback = 0;
+  my ($scale,@params);
+  ($x,@params) = $x->_find_round_parameters($a,$p,$r);
+
+  # also takes care of the "error in _find_round_parameters?" case
+  return $x if $x->{sign} eq 'NaN';
+
+  # no rounding at all, so must use fallback
+  if (scalar @params == 0)
+    {
+    # simulate old behaviour
+    $params[0] = $self->div_scale();    # and round to it as accuracy
+    $params[1] = undef;                 # P = undef
+    $scale = $params[0]+4;              # at least four more for proper round
+    $params[2] = $r;                    # round mode by caller or undef
+    $fallback = 1;                      # to clear a/p afterwards
+    }
+  else
+    {
+    # the 4 below is empirical, and there might be cases where it's not enough...
+    $scale = abs($params[0] || $params[1]) + 4; # take whatever is defined
+    }
+
+  return $x->bone(@params) if $x->is_zero();
+
+  # See the comments in Math::BigFloat on how this algorithm works.
+  # Basically we calculate A and B (where B is faculty(N)) so that A/B = e
+
+  my $x_org = $x->copy();
+  if ($scale <= 75)
+    {
+    # set $x directly from a cached string form
+    $x->{_n} = $MBI->_new("90933395208605785401971970164779391644753259799242");
+    $x->{_d} = $MBI->_new("33452526613163807108170062053440751665152000000000");
+    $x->{sign} = '+';
+    }
+  else
+    {
+    # compute A and B so that e = A / B.
+
+    # After some terms we end up with this, so we use it as a starting point:
+    my $A = $MBI->_new("90933395208605785401971970164779391644753259799242");
+    my $F = $MBI->_new(42); my $step = 42;
+
+    # Compute how many steps we need to take to get $A and $B sufficiently big
+    my $steps = Math::BigFloat::_len_to_steps($scale - 4);
+#    print STDERR "# Doing $steps steps for ", $scale-4, " digits\n";
+    while ($step++ <= $steps)
+      {
+      # calculate $a * $f + 1
+      $A = $MBI->_mul($A, $F);
+      $A = $MBI->_inc($A);
+      # increment f
+      $F = $MBI->_inc($F);
+      }
+    # compute $B as factorial of $steps (this is faster than doing it manually)
+    my $B = $MBI->_fac($MBI->_new($steps));
+
+#  print "A ", $MBI->_str($A), "\nB ", $MBI->_str($B), "\n";
+
+    $x->{_n} = $A;
+    $x->{_d} = $B;
+    $x->{sign} = '+';
+    }
+
+  # $x contains now an estimate of e, with some surplus digits, so we can round
+  if (!$x_org->is_one())
+    {
+    # raise $x to the wanted power and round it in one step:
+    $x->bpow($x_org, @params);
+    }
+  else
+    {
+    # else just round the already computed result
+    delete $x->{_a}; delete $x->{_p};
+    # shortcut to not run through _find_round_parameters again
+    if (defined $params[0])
+      {
+      $x->bround($params[0],$params[2]);                # then round accordingly
+      }
+    else
+      {
+      $x->bfround($params[1],$params[2]);               # then round accordingly
+      }
+    }
+  if ($fallback)
+    {
+    # clear a/p after round, since user did not request it
+    delete $x->{_a}; delete $x->{_p};
+    }
+
+  $x;
+  }
+
+sub bnok
+  {
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,@r) = objectify(2,$class,@_);
+    }
+
+  # do it with floats
+  $x->_new_from_float( $x->_as_float()->bnok(Math::BigFloat->new("$y"),@r) );
+  }
+
 sub _float_from_part
   {
   my $x = shift;
@@ -1602,10 +1732,6 @@ Calculates the factorial of $x. For instance:
 
 Works currently only for integers.
 
-=head2 blog()
-
-Is not yet implemented.
-
 =head2 bround()/round()/bfround()
 
 Are not yet implemented.
@@ -1738,6 +1864,30 @@ Please see the documentation in L<Math::BigInt> for further details.
 Compute $x ** $y.
 
 Please see the documentation in L<Math::BigInt> for further details.
+
+=head2 bexp()
+
+	$x->bexp($accuracy);		# calculate e ** X
+
+Calculates two integers A and B so that A/B is equal to C<e ** $x>, where C<e> is
+Euler's number.
+
+This method was added in v0.20 of Math::BigRat (May 2007).
+
+See also L<blog()>.
+
+=head2 bnok()
+
+	$x->bnok($y);		   # x over y (binomial coefficient n over k)
+
+Calculates the binomial coefficient n over k, also called the "choose"
+function. The result is equivalent to:
+
+	( n )      n!
+	| - |  = -------
+	( k )    k!(n-k)!
+
+This method was added in v0.20 of Math::BigRat (May 2007).
 
 =head2 config()
 

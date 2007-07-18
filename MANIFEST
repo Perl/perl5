@@ -2072,10 +2072,12 @@ lib/Math/BigRat.pm		Math::BigRat
 lib/Math/BigRat/t/big_ap.t		Math::BigRat test
 lib/Math/BigRat/t/bigfltpm.inc		Math::BigRat test
 lib/Math/BigRat/t/bigfltrt.t		Math::BigRat test
+lib/Math/BigRat/t/biglog.t		Math::BigRat test
 lib/Math/BigRat/t/bigratpm.inc		Math::BigRat test
 lib/Math/BigRat/t/bigratpm.t		Math::BigRat test
 lib/Math/BigRat/t/bigrat.t		Math::BigRat test
 lib/Math/BigRat/t/bigratup.t	test under $Math::BigInt::upgrade
+lib/Math/BigRat/t/bigroot.t		Math::BigRat test
 lib/Math/BigRat/t/requirer.t	see if require works properly
 lib/Math/BigRat/t/trap.t	see if trap_nan and trap_inf work
 lib/Math/Complex.pm		A Complex package
