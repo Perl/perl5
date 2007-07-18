@@ -90,7 +90,12 @@ $map {$_} = "?" for
 # 
 
 $map {$_} = '!' for
-     # Iain Truskett has passed away.
+     # Nick Ing-Simmons has passed away (2006-09-25).
+     "nick\100ing-simmons.net",
+     "nik\100tiuk.ti.com",
+     "nick.ing-simmons\100elixent.com",
+
+     # Iain Truskett has passed away (2003-12-29).
      "perl\100dellah.anu.edu.au",
      "spoon\100dellah.org",
      "spoon\100cpan.org",
@@ -293,9 +298,6 @@ nicholas                                nick\100unfortu.net
 +                                       nick\100plum.flirble.org
 +                                       nick\100babyhippo.co.uk
 +                                       nick\100bagpuss.unfortu.net
-nick                                    nick\100ing-simmons.net
-+                                       nik\100tiuk.ti.com
-+                                       nick.ing-simmons\100elixent.com
 pudge                                   pudge\100pobox.com
 rgs                                     rgarciasuarez\100free.fr
 +                                       rgarciasuarez\100mandrakesoft.com
