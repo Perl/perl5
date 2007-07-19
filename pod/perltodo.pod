@@ -435,6 +435,12 @@ See L</"Virtualize operating system access">.
 Currently glob patterns and filenames returned from File::Glob::glob()
 are always byte strings.  See L</"Virtualize operating system access">.
 
+=head2 Unicode and lc/uc operators
+
+Some built-in operators (C<lc>, C<uc>, etc.) behave differently, based on
+what the internal encoding of their argument is. That should not be the
+case. Maybe add a pragma to switch behaviour.
+
 =head2 use less 'memory'
 
 Investigate trade offs to switch out perl's choices on memory usage.
