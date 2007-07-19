@@ -4295,7 +4295,9 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
     PERL_UNUSED_ARG(fdscript);
     PERL_UNUSED_ARG(suidscript);
     if (PL_euid != PL_uid || PL_egid != PL_gid) {	/* (suidperl doesn't exist, in fact) */
-#ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
+#ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
+    PERL_UNUSED_ARG(rsfp);
+#else
 	PerlLIO_fstat(PerlIO_fileno(rsfp),&PL_statbuf);	/* may be either wrapped or real suid */
 	if ((PL_euid != PL_uid && PL_euid == PL_statbuf.st_uid && PL_statbuf.st_mode & S_ISUID)
 	    ||
