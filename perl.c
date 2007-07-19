@@ -3948,7 +3948,7 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname,
 	const char *linestr;
 	const char *s_end;
 
-#ifdef IAMSUID
+#  ifdef IAMSUID
 	if (fdscript < 0 || suidscript != 1)
 	    Perl_croak(aTHX_ "Need (suid) fdscript in suidperl\n");	/* We already checked this */
 	/* PSz 11 Nov 03
@@ -3959,16 +3959,16 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname,
 	/* PSz 27 Feb 04
 	 * Do checks even for systems with no HAS_SETREUID.
 	 * We used to swap, then re-swap UIDs with
-#ifdef HAS_SETREUID
+#    ifdef HAS_SETREUID
 	    if (setreuid(PL_euid,PL_uid) < 0
 		|| PerlProc_getuid() != PL_euid || PerlProc_geteuid() != PL_uid)
 		Perl_croak(aTHX_ "Can't swap uid and euid");
-#endif
-#ifdef HAS_SETREUID
+#    endif
+#    ifdef HAS_SETREUID
 	    if (setreuid(PL_uid,PL_euid) < 0
 		|| PerlProc_getuid() != PL_uid || PerlProc_geteuid() != PL_euid)
 		Perl_croak(aTHX_ "Can't reswap uid and euid");
-#endif
+#    endif
 	 */
 
 	/* On this access check to make sure the directories are readable,
@@ -4029,12 +4029,12 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname,
 	 * operating systems do not have such mount options anyway...)
 	 * Seems safe enough to do as root.
 	 */
-#if !defined(NO_NOSUID_CHECK)
+#    if !defined(NO_NOSUID_CHECK)
 	if (fd_on_nosuid_fs(PerlIO_fileno(rsfp))) {
 	    Perl_croak(aTHX_ "Setuid script on nosuid or noexec filesystem\n");
 	}
-#endif
-#endif /* IAMSUID */
+#    endif
+#  endif /* IAMSUID */
 
 	if (!S_ISREG(PL_statbuf.st_mode)) {
 	    Perl_croak(aTHX_ "Setuid script not plain file\n");
@@ -4098,14 +4098,14 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname,
 	      || ((s_end - s) == len+2 && isSPACE(s[len+1]))))
 	    Perl_croak(aTHX_ "Args must match #! line");
 
-#ifndef IAMSUID
+#  ifndef IAMSUID
 	if (fdscript < 0 &&
 	    PL_euid != PL_uid && (PL_statbuf.st_mode & S_ISUID) &&
 	    PL_euid == PL_statbuf.st_uid)
 	    if (!PL_do_undump)
 		Perl_croak(aTHX_ "YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!\n\
 FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
-#endif /* IAMSUID */
+#  endif /* IAMSUID */
 
 	if (fdscript < 0 &&
 	    PL_euid) {	/* oops, we're not the setuid root perl */
@@ -4123,7 +4123,7 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 	     * fdscript to avoid loops), and do the execs
 	     * even for root.
 	     */
-#ifndef IAMSUID
+#  ifndef IAMSUID
 	    int which;
 	    /* PSz 11 Nov 03
 	     * Pass fd script to suidperl.
@@ -4151,15 +4151,15 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 	    }
 	    PL_origargv[which] = savepv(Perl_form(aTHX_ "/dev/fd/%d/%s",
 					  PerlIO_fileno(rsfp), PL_origargv[which]));
-#if defined(HAS_FCNTL) && defined(F_SETFD)
+#    if defined(HAS_FCNTL) && defined(F_SETFD)
 	    fcntl(PerlIO_fileno(rsfp),F_SETFD,0);	/* ensure no close-on-exec */
-#endif
+#    endif
 	    PERL_FPU_PRE_EXEC
 	    PerlProc_execv(Perl_form(aTHX_ "%s/sperl"PERL_FS_VER_FMT, BIN_EXP,
 				     (int)PERL_REVISION, (int)PERL_VERSION,
 				     (int)PERL_SUBVERSION), PL_origargv);
 	    PERL_FPU_POST_EXEC
-#endif /* IAMSUID */
+#  endif /* IAMSUID */
 	    Perl_croak(aTHX_ "Can't do setuid (cannot exec sperl)\n");
 	}
 
@@ -4170,54 +4170,54 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
  * in the sense that we only want to set EGID; but are there any machines
  * with either of the latter, but not the former? Same with UID, later.
  */
-#ifdef HAS_SETEGID
+#  ifdef HAS_SETEGID
 	    (void)setegid(PL_statbuf.st_gid);
-#else
-#ifdef HAS_SETREGID
+#  else
+#    ifdef HAS_SETREGID
            (void)setregid((Gid_t)-1,PL_statbuf.st_gid);
-#else
-#ifdef HAS_SETRESGID
+#    else
+#      ifdef HAS_SETRESGID
            (void)setresgid((Gid_t)-1,PL_statbuf.st_gid,(Gid_t)-1);
-#else
+#      else
 	    PerlProc_setgid(PL_statbuf.st_gid);
-#endif
-#endif
-#endif
+#      endif
+#    endif
+#  endif
 	    if (PerlProc_getegid() != PL_statbuf.st_gid)
 		Perl_croak(aTHX_ "Can't do setegid!\n");
 	}
 	if (PL_statbuf.st_mode & S_ISUID) {
 	    if (PL_statbuf.st_uid != PL_euid)
-#ifdef HAS_SETEUID
+#  ifdef HAS_SETEUID
 		(void)seteuid(PL_statbuf.st_uid);	/* all that for this */
-#else
-#ifdef HAS_SETREUID
+#  else
+#    ifdef HAS_SETREUID
                 (void)setreuid((Uid_t)-1,PL_statbuf.st_uid);
-#else
-#ifdef HAS_SETRESUID
+#    else
+#      ifdef HAS_SETRESUID
                 (void)setresuid((Uid_t)-1,PL_statbuf.st_uid,(Uid_t)-1);
-#else
+#      else
 		PerlProc_setuid(PL_statbuf.st_uid);
-#endif
-#endif
-#endif
+#      endif
+#    endif
+#  endif
 	    if (PerlProc_geteuid() != PL_statbuf.st_uid)
 		Perl_croak(aTHX_ "Can't do seteuid!\n");
 	}
 	else if (PL_uid) {			/* oops, mustn't run as root */
-#ifdef HAS_SETEUID
+#  ifdef HAS_SETEUID
           (void)seteuid((Uid_t)PL_uid);
-#else
-#ifdef HAS_SETREUID
+#  else
+#    ifdef HAS_SETREUID
           (void)setreuid((Uid_t)-1,(Uid_t)PL_uid);
-#else
-#ifdef HAS_SETRESUID
+#    else
+#      ifdef HAS_SETRESUID
           (void)setresuid((Uid_t)-1,(Uid_t)PL_uid,(Uid_t)-1);
-#else
+#      else
           PerlProc_setuid((Uid_t)PL_uid);
-#endif
-#endif
-#endif
+#      endif
+#    endif
+#  endif
 	    if (PerlProc_geteuid() != PL_uid)
 		Perl_croak(aTHX_ "Can't do seteuid!\n");
 	}
@@ -4225,7 +4225,7 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 	if (!cando(S_IXUSR,TRUE,&PL_statbuf))
 	    Perl_croak(aTHX_ "Effective UID cannot exec script\n");	/* they can't do this */
     }
-#ifdef IAMSUID
+#  ifdef IAMSUID
     else if (PL_preprocess)	/* PSz 13 Nov 03  Caught elsewhere, useless(?!) here */
 	Perl_croak(aTHX_ "-P not allowed for setuid/setgid script\n");
     else if (fdscript < 0 || suidscript != 1)
@@ -4281,23 +4281,23 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 /*  }									*/
 /*  PL_origargv[which] = savepv(Perl_form(aTHX_ "/dev/fd/%d/%s",	*/
 /*				  PerlIO_fileno(rsfp), PL_origargv[which]));	*/
-#if defined(HAS_FCNTL) && defined(F_SETFD)
+#  if defined(HAS_FCNTL) && defined(F_SETFD)
     fcntl(PerlIO_fileno(rsfp),F_SETFD,0);	/* ensure no close-on-exec */
-#endif
+#  endif
     PERL_FPU_PRE_EXEC
     PerlProc_execv(Perl_form(aTHX_ "%s/perl"PERL_FS_VER_FMT, BIN_EXP,
 			     (int)PERL_REVISION, (int)PERL_VERSION,
 			     (int)PERL_SUBVERSION), PL_origargv);/* try again */
     PERL_FPU_POST_EXEC
     Perl_croak(aTHX_ "Can't do setuid (suidperl cannot exec perl)\n");
-#endif /* IAMSUID */
+#  endif /* IAMSUID */
 #else /* !DOSUID */
     PERL_UNUSED_ARG(fdscript);
     PERL_UNUSED_ARG(suidscript);
     if (PL_euid != PL_uid || PL_egid != PL_gid) {	/* (suidperl doesn't exist, in fact) */
-#ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
+#  ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
     PERL_UNUSED_ARG(rsfp);
-#else
+#  else
 	PerlLIO_fstat(PerlIO_fileno(rsfp),&PL_statbuf);	/* may be either wrapped or real suid */
 	if ((PL_euid != PL_uid && PL_euid == PL_statbuf.st_uid && PL_statbuf.st_mode & S_ISUID)
 	    ||
@@ -4306,7 +4306,7 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 	    if (!PL_do_undump)
 		Perl_croak(aTHX_ "YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!\n\
 FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
-#endif /* SETUID_SCRIPTS_ARE_SECURE_NOW */
+#  endif /* SETUID_SCRIPTS_ARE_SECURE_NOW */
 	/* not set-id, must be wrapped */
     }
 #endif /* DOSUID */
