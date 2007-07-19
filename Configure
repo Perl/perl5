@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Jul  9 16:19:23 CEST 2007 [metaconfig 3.0 PL70]
+# Generated on Wed Jul 18 17:42:05 CEST 2007 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1688,16 +1688,17 @@ Usage: $me [-dehrsEKOSV] [-f config.sh] [-D symbol] [-D symbol=value]
          -U symbol=   symbol gets completely empty
        e.g.:  -Uversiononly
   -A : manipulate symbol after the platform specific hints have been applied:
-	 -A symbol=value		append " "value to symbol
-	 -A append:symbol=value		append value to symbol
-	 -A define:symbol=value		define symbol to have value
-         -A clear:symbol		define symbol to be ''
-	 -A define:symbol		define symbol to be 'define'
-	 -A eval:symbol=value		define symbol to be eval of value
-	 -A prepend:symbol=value	prepend value to symbol
-	 -A undef:symbol		define symbol to be 'undef'
-	 -A undef:symbol=		define symbol to be ''
+         -A append:symbol=value   append value to symbol
+         -A symbol=value          like append:, but with a separating space
+         -A define:symbol=value   define symbol to have value
+         -A clear:symbol          define symbol to be ''
+         -A define:symbol         define symbol to be 'define'
+         -A eval:symbol=value     define symbol to be eval of value
+         -A prepend:symbol=value  prepend value to symbol
+         -A undef:symbol          define symbol to be 'undef'
+         -A undef:symbol=         define symbol to be ''
        e.g.:  -A prepend:libswanted='cl pthread '
+              -A ccflags=-DSOME_MACRO
   -V : print version number and exit (with a zero status).
 EOM
 	exit 1
