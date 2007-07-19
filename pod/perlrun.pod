@@ -1258,11 +1258,11 @@ PERL_ENCODING environment variable is consulted for an encoding name.
 =item PERL_HASH_SEED
 X<PERL_HASH_SEED>
 
-(Since Perl 5.8.1.)  Used to randomise Perl's internal hash function.
+(Since Perl 5.8.1.)  Used to randomise perl's internal hash function.
 To emulate the pre-5.8.1 behaviour, set to an integer (zero means
 exactly the same order as 5.8.0).  "Pre-5.8.1" means, among other
-things, that hash keys not always be ordered the same between different
-runs of Perl.
+things, that hash keys will always have the same ordering between
+different runs of perl.
 
 Most hashes return elements in the same order as Perl 5.8.0 by default.
 On a hash by hash basis, if pathological data is detected during a hash
@@ -1270,10 +1270,10 @@ key insertion, then that hash will switch to an alternative random hash
 seed.
 
 The default behaviour is to randomise unless the PERL_HASH_SEED is set.
-If Perl has been compiled with C<-DUSE_HASH_SEED_EXPLICIT>, the default
+If perl has been compiled with C<-DUSE_HASH_SEED_EXPLICIT>, the default
 behaviour is B<not> to randomise unless the PERL_HASH_SEED is set.
 
-If PERL_HASH_SEED is unset or set to a non-numeric string, Perl uses
+If PERL_HASH_SEED is unset or set to a non-numeric string, perl uses
 the pseudorandom seed supplied by the operating system and libraries.
 
 B<Please note that the hash seed is sensitive information>. Hashes are
