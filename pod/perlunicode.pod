@@ -1474,7 +1474,7 @@ derived class with such a C<param> method:
     sub param {
       my($self,$name,$value) = @_;
       utf8::upgrade($name);     # make sure it is UTF-8 encoded
-      if (defined $value)
+      if (defined $value) {
         utf8::upgrade($value);  # make sure it is UTF-8 encoded
         return $self->SUPER::param($name,$value);
       } else {
