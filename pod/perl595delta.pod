@@ -386,7 +386,8 @@ ben Jore)
 
 As the old 5005thread threading model has been removed, in favor of the
 ithreads scheme, the C<Thread> module is now a compatibility wrapper, to
-be used in old code only.
+be used in old code only. It has been removed from the default list of
+dynamic extensions.
 
 =back
 
@@ -435,15 +436,37 @@ It's now possible to build a C<perl-static.exe> that doesn't depend
 on C<perl59.dll> on Win32. See the Win32 makefiles for details.
 (Vadim Konovalov)
 
-=head2 C<d_pseudofork>
+=head2 win32 builds
+
+All win32 builds (MS-Win, WinCE) have been merged and cleaned up.
+
+=head2 C<d_pseudofork> and C<d_printf_format_null>
 
 A new configuration variable, available as C<$Config{d_pseudofork}> in
 the L<Config> module, has been added, to distinguish real fork() support
 from fake pseudofork used on Windows platforms.
 
+A new configuration variable, C<d_printf_format_null>, has been added, 
+to see if printf-like formats are allowed to be NULL.
+
+=head2 Help
+
+C<Configure -h> has been extended with the most used option.
+
+Much less 'Whoa there' messages.
+
+=head2 64bit systems
+
+Better detection of 64bit(only) systems, and setting all the (library)
+paths accordingly.
+
 =head2 Ports
 
 Perl has been reported to work on MidnightBSD.
+
+Support for Cray XT4 Catamount/Qk has been added.
+
+Vendor patches have been merged for RedHat and GenToo.
 
 =head1 Selected Bug Fixes
 
