@@ -3,7 +3,7 @@ use 5.00503;
 use strict;
 
 use vars qw(@ISA @EXPORT $VERSION $MUST_REBOOT %Config);
-$VERSION = '1.41_01';
+$VERSION = '1.43';
 $VERSION = eval $VERSION;
 
 use AutoSplit;
@@ -259,7 +259,7 @@ sub _unlink_or_rename { #XXX OS-SPECIFIC
         # not the end of the world. The other cases are more serious
         # and need to be fatal.
         _move_file_at_boot( $tmp, [], $installing );
-	return $file;
+        return $file;
     } elsif ( $installing ) {
         _warnonce("Rename failed: $!. Scheduling '$tmp'\nfor".
              " installation as '$file' at reboot.\n");
@@ -431,11 +431,12 @@ sub _can_write_dir {
     return
         unless defined $dir and length $dir;
 
-    my @dirs=File::Spec->splitdir(File::Spec->rel2abs($dir));
+    my ($vol, $dirs, $file) = File::Spec->splitpath(File::Spec->rel2abs($dir),1);
+    my @dirs = File::Spec->splitdir($dirs);
     my $path='';
     my @make;
     while (@dirs) {
-        $dir=File::Spec->catdir(@dirs);
+        $dir = File::Spec->catdir($vol,@dirs);
         next if ( $dir eq $path );
         if ( ! -e $dir ) {
             unshift @make,$dir;
@@ -559,61 +560,53 @@ sub install { #XXX OS-SPECIFIC
 
     local(*DIR);
     for (qw/read write/) {
-	$pack{$_}=$from_to{$_};
-	delete $from_to{$_};
-    }
-    my($source_dir_or_file);
-    my (%fs_type);
-    foreach $source_dir_or_file (sort keys %from_to) {
-	#Check if there are files, and if yes, look if the corresponding
-	#target directory is writable for us
-	opendir DIR, $source_dir_or_file or next;
-	for (readdir DIR) {
-	    next if $_ eq $Curdir || $_ eq $Updir || $_ eq ".exists";
-            my $targetdir = install_rooted_dir($from_to{$source_dir_or_file});
-            _mkpath( $targetdir, 0, 0755, $verbose, $nonono );
-	}
-	closedir DIR;
+        $pack{$_}=$from_to{$_};
+        delete $from_to{$_};
     }
     my $tmpfile = install_rooted_file($pack{"read"});
     $packlist->read($tmpfile) if (-f $tmpfile);
     my $cwd = cwd();
-
+    my @found_files;
+    my %check_dirs;
+    
     MOD_INSTALL: foreach my $source (sort keys %from_to) {
-	#copy the tree to the target directory without altering
-	#timestamp and permission and remember for the .packlist
-	#file. The packlist file contains the absolute paths of the
-	#install locations. AFS users may call this a bug. We'll have
-	#to reconsider how to add the means to satisfy AFS users also.
+        #copy the tree to the target directory without altering
+        #timestamp and permission and remember for the .packlist
+        #file. The packlist file contains the absolute paths of the
+        #install locations. AFS users may call this a bug. We'll have
+        #to reconsider how to add the means to satisfy AFS users also.
 
-	#October 1997: we want to install .pm files into archlib if
-	#there are any files in arch. So we depend on having ./blib/arch
-	#hardcoded here.
+        #October 1997: we want to install .pm files into archlib if
+        #there are any files in arch. So we depend on having ./blib/arch
+        #hardcoded here.
 
-	my $targetroot = install_rooted_dir($from_to{$source});
+        my $targetroot = install_rooted_dir($from_to{$source});
 
         my $blib_lib  = File::Spec->catdir('blib', 'lib');
         my $blib_arch = File::Spec->catdir('blib', 'arch');
-	if ($source eq $blib_lib and
-	    exists $from_to{$blib_arch} and
-	    directory_not_empty($blib_arch)
-	){
-	    $targetroot = install_rooted_dir($from_to{$blib_arch});
+        if ($source eq $blib_lib and
+            exists $from_to{$blib_arch} and
+            directory_not_empty($blib_arch)
+        ){
+            $targetroot = install_rooted_dir($from_to{$blib_arch});
             print "Files found in $blib_arch: installing files in $blib_lib into architecture dependent library tree\n";
-	}
+        }
 
         next unless -d $source;
         _chdir($source);
+        # 5.5.3's File::Find missing no_chdir option
+        # XXX OS-SPECIFIC
+        # File::Find seems to always be Unixy except on MacPerl :(
+        my $current_directory= $Is_MacPerl ? $Curdir : '.';
+        find(sub {
+            my ($mode,$size,$atime,$mtime) = (stat)[2,7,8,9];
 
-	find(sub {
-	    my ($mode,$size,$atime,$mtime) = (stat)[2,7,8,9];
-
-	    return if !-f _;
+            return if !-f _;
             my $origfile = $_;
 
-	    return if $origfile eq ".exists";
-	    my $targetdir  = File::Spec->catdir($targetroot, $File::Find::dir);
-	    my $targetfile = File::Spec->catfile($targetdir, $origfile);
+            return if $origfile eq ".exists";
+            my $targetdir  = File::Spec->catdir($targetroot, $File::Find::dir);
+            my $targetfile = File::Spec->catfile($targetdir, $origfile);
             my $sourcedir  = File::Spec->catdir($source, $File::Find::dir);
             my $sourcefile = File::Spec->catfile($sourcedir, $origfile);
 
@@ -621,69 +614,81 @@ sub install { #XXX OS-SPECIFIC
                 if ( $sourcefile=~/$pat/ ) {
                     print "Skipping $targetfile (filtered)\n"
                         if $verbose>1;
-	            return;
-	        }
-	    }
+                    return;
+                }
+            }
+            # we have to do this for back compat with old File::Finds
+            # and because the target is relative
+            my $save_cwd = _chdir($cwd); 
+            my $diff = 0;
+            if ( -f $targetfile && -s _ == $size) {
+                # We have a good chance, we can skip this one
+                $diff = compare($sourcefile, $targetfile);
+            } else {
+                $diff++;
+            }
+            $check_dirs{$targetdir}++ 
+                unless -w $targetfile;
+            
+            push @found_files,
+                [ $diff, $File::Find::dir, $origfile,
+                  $mode, $size, $atime, $mtime,
+                  $targetdir, $targetfile, $sourcedir, $sourcefile,
+                  
+                ];  
+            #restore the original directory we were in when File::Find
+            #called us so that it doesnt get horribly confused.
+            _chdir($save_cwd);                
+        }, $current_directory ); 
+        _chdir($cwd);
+    }   
+    
+    foreach my $targetdir (sort keys %check_dirs) {
+        _mkpath( $targetdir, 0, 0755, $verbose, $nonono );
+    }
+    foreach my $found (@found_files) {
+        my ($diff, $ffd, $origfile, $mode, $size, $atime, $mtime,
+            $targetdir, $targetfile, $sourcedir, $sourcefile)= @$found;
+        
+        my $realtarget= $targetfile;
+        if ($diff) {
+            if (-f $targetfile) {
+                print "_unlink_or_rename($targetfile)\n" if $verbose>1;
+                $targetfile= _unlink_or_rename( $targetfile, 'tryhard', 'install' )
+                    unless $nonono;
+            } elsif ( ! -d $targetdir ) {
+                _mkpath( $targetdir, 0, 0755, $verbose, $nonono );
+            }
+            print "Installing $targetfile\n";
+            _copy( $sourcefile, $targetfile, $verbose, $nonono, );
+            #XXX OS-SPECIFIC
+            print "utime($atime,$mtime,$targetfile)\n" if $verbose>1;
+            utime($atime,$mtime + $Is_VMS,$targetfile) unless $nonono>1;
 
-            # 5.5.3's File::Find missing no_chdir option.
-            my $save_cwd = _chdir($cwd); # in case the target is relative
 
-	    my $diff = 0;
-	    if ( -f $targetfile && -s _ == $size) {
-		# We have a good chance, we can skip this one
-		$diff = compare($sourcefile, $targetfile);
-	    } else {
-		$diff++;
-	    }
-            print "$sourcefile differs\n" if $diff && $verbose>1;
-            my $realtarget= $targetfile;
-	    if ($diff) {
-	        if (-f $targetfile) {
-	            print "_unlink_or_rename($targetfile)\n" if $verbose>1;
-		    $targetfile= _unlink_or_rename( $targetfile, 'tryhard', 'install' )
-		        unless $nonono;
-		} elsif ( ! -d $targetdir ) {
-		    _mkpath( $targetdir, 0, 0755, $verbose, $nonono );
-		}
-		print "Installing $targetfile\n";
-		_copy( $sourcefile, $targetfile, $verbose, $nonono, );
-		#XXX OS-SPECIFIC
-		print "utime($atime,$mtime,$targetfile)\n" if $verbose>1;
-		utime($atime,$mtime + $Is_VMS,$targetfile) unless $nonono>1;
+            $mode = 0444 | ( $mode & 0111 ? 0111 : 0 );
+            $mode = $mode | 0222
+                if $realtarget ne $targetfile;
+            _chmod( $mode, $targetfile, $verbose );
+        } else {
+            print "Skipping $targetfile (unchanged)\n" if $verbose;
+        }
 
+        if ( defined $inc_uninstall ) {
+            inc_uninstall($sourcefile,$ffd, $verbose,
+                          $nonono,
+                          $realtarget ne $targetfile ? $realtarget : "");
+        }
 
-                $mode = 0444 | ( $mode & 0111 ? 0111 : 0 );
-                $mode = $mode | 0222
-                    if $realtarget ne $targetfile;
-                _chmod( $mode, $targetfile, $verbose );
-
-
-	    } else {
-		print "Skipping $targetfile (unchanged)\n" if $verbose;
-	    }
-
-	    if ( defined $inc_uninstall ) {
-		inc_uninstall($sourcefile,$File::Find::dir,$verbose,
-                              $inc_uninstall ? 0 : 1,
-                              $realtarget ne $targetfile ? $realtarget : "");
-	    }
-
-	    # Record the full pathname.
-	    $packlist->{$targetfile}++;
-
-            # File::Find can get confused if you chdir in here.
-            _chdir($save_cwd);
-
-        # File::Find seems to always be Unixy except on MacPerl :(
-	}, $Is_MacPerl ? $Curdir : '.' ); #END SUB -- XXX OS-SPECIFIC
-	_chdir($cwd);
+        # Record the full pathname.
+        $packlist->{$targetfile}++;
     }
 
     if ($pack{'write'}) {
-	$dir = install_rooted_dir(dirname($pack{'write'}));
-	_mkpath( $dir, 0, 0755, $verbose, $nonono );
-	print "Writing $pack{'write'}\n";
-	$packlist->write(install_rooted_file($pack{'write'})) unless $nonono;
+        $dir = install_rooted_dir(dirname($pack{'write'}));
+        _mkpath( $dir, 0, 0755, $verbose, $nonono );
+        print "Writing $pack{'write'}\n";
+        $packlist->write(install_rooted_file($pack{'write'})) unless $nonono;
     }
 
     _do_cleanup($verbose);
@@ -731,18 +736,18 @@ is defined.
 
 sub install_rooted_file {
     if (defined $INSTALL_ROOT) {
-	File::Spec->catfile($INSTALL_ROOT, $_[0]);
+        File::Spec->catfile($INSTALL_ROOT, $_[0]);
     } else {
-	$_[0];
+        $_[0];
     }
 }
 
 
 sub install_rooted_dir {
     if (defined $INSTALL_ROOT) {
-	File::Spec->catdir($INSTALL_ROOT, $_[0]);
+        File::Spec->catdir($INSTALL_ROOT, $_[0]);
     } else {
-	$_[0];
+        $_[0];
     }
 }
 
@@ -780,11 +785,11 @@ sub directory_not_empty ($) {
   my($dir) = @_;
   my $files = 0;
   find(sub {
-	   return if $_ eq ".exists";
-	   if (-f) {
-	     $File::Find::prune++;
-	     $files = 1;
-	   }
+           return if $_ eq ".exists";
+           if (-f) {
+             $File::Find::prune++;
+             $files = 1;
+           }
        }, $dir);
   return $files;
 }
@@ -822,17 +827,17 @@ sub install_default {
   my $INST_MAN1DIR = File::Spec->catdir($Curdir,'blib','man1');
   my $INST_MAN3DIR = File::Spec->catdir($Curdir,'blib','man3');
   install({
-	   read => "$Config{sitearchexp}/auto/$FULLEXT/.packlist",
-	   write => "$Config{installsitearch}/auto/$FULLEXT/.packlist",
-	   $INST_LIB => (directory_not_empty($INST_ARCHLIB)) ?
-			 $Config{installsitearch} :
-			 $Config{installsitelib},
-	   $INST_ARCHLIB => $Config{installsitearch},
-	   $INST_BIN => $Config{installbin} ,
-	   $INST_SCRIPT => $Config{installscript},
-	   $INST_MAN1DIR => $Config{installman1dir},
-	   $INST_MAN3DIR => $Config{installman3dir},
-	  },1,0,0);
+           read => "$Config{sitearchexp}/auto/$FULLEXT/.packlist",
+           write => "$Config{installsitearch}/auto/$FULLEXT/.packlist",
+           $INST_LIB => (directory_not_empty($INST_ARCHLIB)) ?
+                         $Config{installsitearch} :
+                         $Config{installsitelib},
+           $INST_ARCHLIB => $Config{installsitearch},
+           $INST_BIN => $Config{installbin} ,
+           $INST_SCRIPT => $Config{installscript},
+           $INST_MAN1DIR => $Config{installman1dir},
+           $INST_MAN3DIR => $Config{installman3dir},
+          },1,0,0);
 }
 
 
@@ -862,9 +867,9 @@ sub uninstall {
     # require $my_req; # Hairy, but for the first
     my ($packlist) = ExtUtils::Packlist->new($fil);
     foreach (sort(keys(%$packlist))) {
-	chomp;
-	print "unlink $_\n" if $verbose;
-	forceunlink($_,'tryhard') unless $nonono;
+        chomp;
+        print "unlink $_\n" if $verbose;
+        forceunlink($_,'tryhard') unless $nonono;
     }
     print "unlink $fil\n" if $verbose;
     forceunlink($fil, 'tryhard') unless $nonono;
@@ -894,42 +899,42 @@ sub inc_uninstall {
       ? $ENV{'PERL5LIB'} : $ENV{'PERLLIB'} || '';
 
     foreach $dir (@INC, @PERL_ENV_LIB, @Config{qw(archlibexp
-						  privlibexp
-						  sitearchexp
-						  sitelibexp)}) {
-	my $canonpath = File::Spec->canonpath($dir);
-	next if $canonpath eq $Curdir;
-	next if $seen_dir{$canonpath}++;
-	my $targetfile = File::Spec->catfile($canonpath,$libdir,$file);
-	next unless -f $targetfile;
+                                                  privlibexp
+                                                  sitearchexp
+                                                  sitelibexp)}) {
+        my $canonpath = File::Spec->canonpath($dir);
+        next if $canonpath eq $Curdir;
+        next if $seen_dir{$canonpath}++;
+        my $targetfile = File::Spec->catfile($canonpath,$libdir,$file);
+        next unless -f $targetfile;
 
-	# The reason why we compare file's contents is, that we cannot
-	# know, which is the file we just installed (AFS). So we leave
-	# an identical file in place
-	my $diff = 0;
-	if ( -f $targetfile && -s _ == -s $filepath) {
-	    # We have a good chance, we can skip this one
-	    $diff = compare($filepath,$targetfile);
-	} else {
-	    $diff++;
-	}
+        # The reason why we compare file's contents is, that we cannot
+        # know, which is the file we just installed (AFS). So we leave
+        # an identical file in place
+        my $diff = 0;
+        if ( -f $targetfile && -s _ == -s $filepath) {
+            # We have a good chance, we can skip this one
+            $diff = compare($filepath,$targetfile);
+        } else {
+            $diff++;
+        }
         print "#$file and $targetfile differ\n" if $diff && $verbose > 1;
 
-	next if !$diff or $targetfile eq $ignore;
-	if ($nonono) {
-	    if ($verbose) {
-		$Inc_uninstall_warn_handler ||= ExtUtils::Install::Warn->new();
-		$libdir =~ s|^\./||s ; # That's just cosmetics, no need to port. It looks prettier.
-		$Inc_uninstall_warn_handler->add(
+        next if !$diff or $targetfile eq $ignore;
+        if ($nonono) {
+            if ($verbose) {
+                $Inc_uninstall_warn_handler ||= ExtUtils::Install::Warn->new();
+                $libdir =~ s|^\./||s ; # That's just cosmetics, no need to port. It looks prettier.
+                $Inc_uninstall_warn_handler->add(
                                      File::Spec->catfile($libdir, $file),
                                      $targetfile
                                     );
-	    }
-	    # if not verbose, we just say nothing
-	} else {
-	    print "Unlinking $targetfile (shadowing?)\n";
-	    forceunlink($targetfile,'tryhard');
-	}
+            }
+            # if not verbose, we just say nothing
+        } else {
+            print "Unlinking $targetfile (shadowing?)\n" if $verbose;
+            forceunlink($targetfile,'tryhard');
+        }
     }
 }
 
@@ -951,7 +956,7 @@ sub run_filter {
     my $buf;
     my $sz = 1024;
     while (my $len = sysread(SRC, $buf, $sz)) {
-	syswrite(CMD, $buf, $len);
+        syswrite(CMD, $buf, $len);
     }
     close SRC;
     close CMD or die "Filter command '$cmd' failed for $src";
@@ -981,41 +986,41 @@ sub pm_to_blib {
 
     _mkpath($autodir,0,0755);
     while(my($from, $to) = each %$fromto) {
-	if( -f $to && -s $from == -s $to && -M $to < -M $from ) {
+        if( -f $to && -s $from == -s $to && -M $to < -M $from ) {
             print "Skip $to (unchanged)\n";
             next;
         }
 
-	# When a pm_filter is defined, we need to pre-process the source first
-	# to determine whether it has changed or not.  Therefore, only perform
-	# the comparison check when there's no filter to be ran.
-	#    -- RAM, 03/01/2001
+        # When a pm_filter is defined, we need to pre-process the source first
+        # to determine whether it has changed or not.  Therefore, only perform
+        # the comparison check when there's no filter to be ran.
+        #    -- RAM, 03/01/2001
 
-	my $need_filtering = defined $pm_filter && length $pm_filter &&
+        my $need_filtering = defined $pm_filter && length $pm_filter &&
                              $from =~ /\.pm$/;
 
-	if (!$need_filtering && 0 == compare($from,$to)) {
-	    print "Skip $to (unchanged)\n";
-	    next;
-	}
-	if (-f $to){
-	    # we wont try hard here. its too likely to mess things up.
-	    forceunlink($to);
-	} else {
-	    _mkpath(dirname($to),0,0755);
-	}
-	if ($need_filtering) {
-	    run_filter($pm_filter, $from, $to);
-	    print "$pm_filter <$from >$to\n";
-	} else {
-	    _copy( $from, $to );
-	    print "cp $from $to\n";
-	}
-	my($mode,$atime,$mtime) = (stat $from)[2,8,9];
-	utime($atime,$mtime+$Is_VMS,$to);
-	_chmod(0444 | ( $mode & 0111 ? 0111 : 0 ),$to);
-	next unless $from =~ /\.pm$/;
-	_autosplit($to,$autodir);
+        if (!$need_filtering && 0 == compare($from,$to)) {
+            print "Skip $to (unchanged)\n";
+            next;
+        }
+        if (-f $to){
+            # we wont try hard here. its too likely to mess things up.
+            forceunlink($to);
+        } else {
+            _mkpath(dirname($to),0,0755);
+        }
+        if ($need_filtering) {
+            run_filter($pm_filter, $from, $to);
+            print "$pm_filter <$from >$to\n";
+        } else {
+            _copy( $from, $to );
+            print "cp $from $to\n";
+        }
+        my($mode,$atime,$mtime) = (stat $from)[2,8,9];
+        utime($atime,$mtime+$Is_VMS,$to);
+        _chmod(0444 | ( $mode & 0111 ? 0111 : 0 ),$to);
+        next unless $from =~ /\.pm$/;
+        _autosplit($to,$autodir);
     }
 }
 
