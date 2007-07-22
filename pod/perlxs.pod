@@ -1391,7 +1391,7 @@ C<fp[]> with offsets being C<multiply_off>, C<divide_off>, C<add_off>,
 C<subtract_off>.  Then one can use 
 
     #define XSINTERFACE_FUNC_BYOFFSET(ret,cv,f) \
-	((XSINTERFACE_CVT(ret,))fp[CvXSUBANY(cv).any_i32])
+	((XSINTERFACE_CVT_ANON(ret))fp[CvXSUBANY(cv).any_i32])
     #define XSINTERFACE_FUNC_BYOFFSET_set(cv,f) \
 	CvXSUBANY(cv).any_i32 = CAT2( f, _off )
 
