@@ -144,11 +144,13 @@ is a lexical $_ in scope.
 
 #ifdef __cplusplus
 #  define XSINTERFACE_CVT(ret,name) ret (*name)(...)
+#  define XSINTERFACE_CVT_ANON(ret) ret (*)(...)
 #else
 #  define XSINTERFACE_CVT(ret,name) ret (*name)()
+#  define XSINTERFACE_CVT_ANON(ret) ret (*)()
 #endif
 #define dXSFUNCTION(ret)		XSINTERFACE_CVT(ret,XSFUNCTION)
-#define XSINTERFACE_FUNC(ret,cv,f)     ((XSINTERFACE_CVT(ret,))(f))
+#define XSINTERFACE_FUNC(ret,cv,f)     ((XSINTERFACE_CVT_ANON(ret))(f))
 #define XSINTERFACE_FUNC_SET(cv,f)	\
 		CvXSUBANY(cv).any_dxptr = (void (*) (pTHX_ void*))(f)
 
