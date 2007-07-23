@@ -7140,10 +7140,16 @@ $ ELSE    !leave in but commented out (in case setting was from perl :-)
 $ WRITE CONFIG "$! define SYS$TIMEZONE_DIFFERENTIAL ''tzd'"
 $ ENDIF
 $ WRITE CONFIG "$!"
-$ WRITE CONFIG "$! Symbols for commonly used programs:"
+$ WRITE CONFIG "$! Symbols for Perl-based utility programs:"
 $ WRITE CONFIG "$!"
 $ WRITE CONFIG "$ c2ph       == """ + perl_setup_perl + " ''vms_prefix':[utils]c2ph.com"""
+$ WRITE CONFIG "$ config_data== """ + perl_setup_perl + " ''vms_prefix':[utils]config_data.com"""
+$ WRITE CONFIG "$ corelist   == """ + perl_setup_perl + " ''vms_prefix':[utils]corelist.com"""
 $ WRITE CONFIG "$ cpan       == """ + perl_setup_perl + " ''vms_prefix':[utils]cpan.com"""
+$ WRITE CONFIG "$ cpan2dist  == """ + perl_setup_perl + " ''vms_prefix':[utils]cpan2dist.com"""
+$! FIXME: "-" is an operator and illegal in a symbol name -- cpanp-run-perl can't work
+$!$ WRITE CONFIG "$ cpanp-run-perl == """ + perl_setup_perl + " ''vms_prefix':[utils]cpanp-run-perl.com"""
+$ WRITE CONFIG "$ cpanp      == """ + perl_setup_perl + " ''vms_prefix':[utils]cpanp.com"""
 $ IF F$LOCATE("Devel::DProf",extensions) .LT. F$LENGTH(extensions)
 $ THEN
 $ WRITE CONFIG "$ dprofpp    == """ + perl_setup_perl + " ''vms_prefix':[utils]dprofpp.com"""
@@ -7170,6 +7176,9 @@ $ WRITE CONFIG "$ prove      == """ + perl_setup_perl + " ''vms_prefix':[utils]p
 $ WRITE CONFIG "$ psed       == """ + perl_setup_perl + " ''vms_prefix':[utils]psed.com"""
 $ WRITE CONFIG "$ pstruct    == """ + perl_setup_perl + " ''vms_prefix':[utils]pstruct.com"""
 $ WRITE CONFIG "$ s2p        == """ + perl_setup_perl + " ''vms_prefix':[utils]s2p.com"""
+$ WRITE CONFIG "$ ptar       == """ + perl_setup_perl + " ''vms_prefix':[utils]ptar.com"""
+$ WRITE CONFIG "$ ptardiff   == """ + perl_setup_perl + " ''vms_prefix':[utils]ptardiff.com"""
+$ WRITE CONFIG "$ shasum     == """ + perl_setup_perl + " ''vms_prefix':[utils]shasum.com"""
 $ WRITE CONFIG "$ splain     == """ + perl_setup_perl + " ''vms_prefix':[utils]splain.com"""
 $ WRITE CONFIG "$ xsubpp     == """ + perl_setup_perl + " ''vms_prefix':[utils]xsubpp.com"""
 $ CLOSE CONFIG
