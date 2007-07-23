@@ -1,10 +1,12 @@
 
 use Test::More;
 
-if( ord("A") == 193 ) {
-    plan skip_all => 'No Encode::MIME::Header::ISO_2022_JP on EBCDIC Platforms';
-} else {
-    plan tests => 14;
+BEGIN {
+    if( ord("A") == 193 ) {
+	plan skip_all => 'No Encode::MIME::Header::ISO_2022_JP on EBCDIC Platforms';
+    } else {
+	plan tests => 14;
+    }
 }
 
 use strict;
