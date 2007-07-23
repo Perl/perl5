@@ -131,11 +131,11 @@ SKIP: {
 	  [ qw(stdio crlf) ],
 	  "open :crlf");
 
-    binmode(F, ":encoding(sjis)"); # "sjis" will be canonized to "shiftjis"
+    binmode(F, ":encoding(cp1047)"); 
 
     check([ PerlIO::get_layers(F) ],
-	  [ qw[stdio crlf encoding(shiftjis) utf8] ],
-	  ":encoding(sjis)");
+	  [ qw[stdio crlf encoding(cp1047) utf8] ],
+	  ":encoding(cp1047)");
     
     binmode(F, ":pop");
 
