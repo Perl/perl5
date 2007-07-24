@@ -780,12 +780,32 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	}
 
 	if (realpack) {  /* free blessed allocs */
+	    I32 plen;
+	    I32 pticks;
+
 	    if (indent >= 2) {
 		SvREFCNT_dec(apad);
 		apad = blesspad;
 	    }
 	    sv_catpvn(retval, ", '", 3);
-	    sv_catpvn(retval, realpack, strlen(realpack));
+
+	    plen = strlen(realpack);
+	    pticks = num_q(realpack, plen);
+	    if (pticks) { // needs escaping
+	        char *npack;
+	        char *npack_buffer = NULL;
+
+	        New(0, npack_buffer, plen+pticks+1, char);
+	        npack = npack_buffer;
+	        plen += esc_q(npack, realpack, plen);
+	        npack[plen] = '\0';
+
+	        sv_catpvn(retval, npack, plen);
+	        Safefree(npack_buffer);
+	    }
+	    else {
+	        sv_catpvn(retval, realpack, strlen(realpack));
+	    }
 	    sv_catpvn(retval, "' )", 3);
 	    if (toaster && SvPOK(toaster) && SvCUR(toaster)) {
 		sv_catpvn(retval, "->", 2);
