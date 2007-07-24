@@ -12160,7 +12160,8 @@ Perl_vms_start_glob
 
 #ifdef HAS_SYMLINK
 static char *
-mp_do_vms_realpath(pTHX_ const char *filespec, char * rslt_spec, const int *utf8_fl);
+mp_do_vms_realpath(pTHX_ const char *filespec, char * rslt_spec,
+		   const int *utf8_fl);
 
 void
 vms_realpath_fromperl(pTHX_ CV *cv)
@@ -12273,7 +12274,8 @@ char *realpath(const char *file_name, char * resolved_name, ...);
  * on OpenVMS.
  */
 static char *
-mp_do_vms_realpath(pTHX_ const char *filespec, char *outbuf, int *utf8_fl)
+mp_do_vms_realpath(pTHX_ const char *filespec, char *outbuf,
+		   const int *utf8_fl)
 {
     return realpath(filespec, outbuf);
 }
