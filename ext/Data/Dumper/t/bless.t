@@ -14,7 +14,7 @@ BEGIN { use_ok('Data::Dumper') };
 # test under XS and pure Perl version
 foreach $Data::Dumper::Useperl (0, 1) {
 
-diag("\$Data::Dumper::Useperl = $Data::Dumper::Useperl");
+#diag("\$Data::Dumper::Useperl = $Data::Dumper::Useperl");
 
 {
 my $t = bless( {}, q{a'b} );
