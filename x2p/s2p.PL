@@ -747,7 +747,7 @@ sub Comment($$$$$$){
 # part of s///, trailing spaces have to be kept as the initial
 # part of the replacement string.
 #
-sub stripRegex($$$){
+sub stripRegex($$;$){
     my( $del, $sref, $sub ) = @_;
     my $regex = $del;
     print "stripRegex:$del:$$sref:\n" if $useDEBUG;
