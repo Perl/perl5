@@ -91,6 +91,17 @@ int sys$getdviw
 	void * nullarg);
 #endif
 
+#ifdef lib$find_image_symbol
+#undef lib$find_image_symbol
+int lib$find_image_symbol
+       (const struct dsc$descriptor_s * imgname,
+	const struct dsc$descriptor_s * symname,
+	void * symval,
+	const struct dsc$descriptor_s * defspec,
+	unsigned long flag);
+
+#endif
+
 #if __CRTL_VER >= 70300000 && !defined(__VAX)
 
 static int set_feature_default(const char *name, int value)
@@ -144,12 +155,10 @@ return 0;
 #  define RTL_USES_UTC 1
 #endif
 
-#ifdef USE_VMS_DECTERM
-
 /* Routine to create a decterm for use with the Perl debugger */
 /* No headers, this information was found in the Programming Concepts Manual */
 
-int decw$term_port
+static int (*decw_term_port)
    (const struct dsc$descriptor_s * display,
     const struct dsc$descriptor_s * setup_file,
     const struct dsc$descriptor_s * customization,
@@ -157,8 +166,7 @@ int decw$term_port
     unsigned short * result_device_name_length,
     void * controller,
     void * char_buffer,
-    void * char_change_buffer);
-#endif
+    void * char_change_buffer) = 0;
 
 /* gcc's header files don't #define direct access macros
  * corresponding to VAXC's variant structs */
@@ -3769,8 +3777,6 @@ vmspipe_tempfile(pTHX)
 }
 
 
-#ifdef USE_VMS_DECTERM
-
 static int vms_is_syscommand_xterm(void)
 {
     const static struct dsc$descriptor_s syscommand_dsc = 
@@ -3861,6 +3867,12 @@ static PerlIO * create_forked_xterm(pTHX_ const char *cmd, const char *mode)
     struct dsc$descriptor_s d_mbx1 = {sizeof mbx1, DSC$K_DTYPE_T,
                                           DSC$K_CLASS_S, mbx1};
 
+     /* LIB$FIND_IMAGE_SIGNAL needs a handler */
+    /*---------------------------------------*/
+    VAXC$ESTABLISH((__vms_handler)LIB$SIG_TO_RET);
+
+
+    /* Make sure that this is from the Perl debugger */
     ret_char = strstr(cmd," xterm ");
     if (ret_char == NULL)
 	return NULL;
@@ -3870,6 +3882,37 @@ static PerlIO * create_forked_xterm(pTHX_ const char *cmd, const char *mode)
 	return NULL;
     ret_char = strstr(cmd,"sleep");
     if (ret_char == NULL)
+	return NULL;
+
+    if (decw_term_port == 0) {
+	$DESCRIPTOR(filename1_dsc, "DECW$TERMINALSHR12");
+	$DESCRIPTOR(filename2_dsc, "DECW$TERMINALSHR");
+	$DESCRIPTOR(decw_term_port_dsc, "DECW$TERM_PORT");
+
+	status = LIB$FIND_IMAGE_SYMBOL
+			       (&filename1_dsc,
+				&decw_term_port_dsc,
+				(void *)&decw_term_port,
+				NULL,
+				0);
+
+	/* Try again with the other image name */
+	if (!$VMS_STATUS_SUCCESS(status)) {
+
+	    status = LIB$FIND_IMAGE_SYMBOL
+			       (&filename2_dsc,
+				&decw_term_port_dsc,
+				(void *)&decw_term_port,
+				NULL,
+				0);
+
+	}
+
+    }
+
+
+    /* No decw$term_port, give it up */
+    if (!$VMS_STATUS_SUCCESS(status))
 	return NULL;
 
     /* Are we on a workstation? */
@@ -3917,7 +3960,7 @@ static PerlIO * create_forked_xterm(pTHX_ const char *cmd, const char *mode)
     device_name_len = 0;
 
     /* Try to create the window */
-     status = decw$term_port
+     status = (*decw_term_port)
        (NULL,
 	NULL,
 	&customization_dsc,
@@ -3996,7 +4039,6 @@ static PerlIO * create_forked_xterm(pTHX_ const char *cmd, const char *mode)
     /* All done */
     return info->fp;
 }
-#endif
 
 static PerlIO *
 safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
@@ -4026,7 +4068,6 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
     $DESCRIPTOR(d_sym_out,"PERL_POPEN_OUT");
     $DESCRIPTOR(d_sym_err,"PERL_POPEN_ERR");
 
-#ifdef USE_VMS_DECTERM
     /* Check here for Xterm create request.  This means looking for
      * "3>&1 xterm\b" and "\btty 1>&3\b$" in the command, and that it
      *  is possible to create an xterm.
@@ -4038,7 +4079,6 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
 	if (xterm_fd != Nullfp)
 	    return xterm_fd;
     }
-#endif
 
     if (!head_PLOC) store_pipelocs(aTHX);   /* at least TRY to use a static vmspipe file */
 
