@@ -51,7 +51,6 @@ $ use64bitall = "n"
 $ use64bitint = "n"
 $ uselongdouble = "n"
 $ uselargefiles = "n"
-$ usedecterm = "n"
 $ usesitecustomize = "n"
 $ C_Compiler_Replace = "CC="
 $ thread_upcalls = "MTU="
@@ -853,7 +852,6 @@ $   ENDIF
 $ ENDIF  !(needman .EQS. "true")
 $!
 $!: see if sh knows # comments             !sfn
-$ sharpbang = "$ "
 $!: figure out how to guarantee sh startup !sfn
 $!: find out where common programs are     !sfn
 $!loclist="awk/cat/comm/cp/echo/expr/find/grep/ln/ls/mkdir/rm/sed/sort/touch/tr/uniq"
@@ -906,7 +904,7 @@ $   config_symbols1 ="|installprivlib|installscript|installsitearch|installsitel
 $   config_symbols2 ="|prefix|privlib|privlibexp|scriptdir|sitearch|sitearchexp|sitebin|sitelib|sitelib_stem|sitelibexp|try_cxx|use64bitall|use64bitint|"
 $   config_symbols3 ="|usecasesensitive|usedefaulttypes|usedevel|useieee|useithreads|uselongdouble|usemultiplicity|usemymalloc|usedebugging_perl|"
 $   config_symbols4 ="|useperlio|usesecurelog|usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|uselargefiles|usesitecustomize|"
-$   config_symbols5 ="|buildmake|builder|usethreadupcalls|usekernelthreads|usedecterm"
+$   config_symbols5 ="|buildmake|builder|usethreadupcalls|usekernelthread"
 $!  
 $   open/read CONFIG 'config_sh'
 $   rd_conf_loop:
@@ -2585,44 +2583,6 @@ $ ELSE
 $     d_unlink_all_versions = "undef"
 $ ENDIF
 $!
-$! To avoid 'SYSTEM-F-PROTINSTALL, protected images must be installed'
-$! at run time, we must check that the DECterm image is both present
-$! and installed as a known image.
-$!
-$ decterm_capable = "FALSE"
-$ dflt = "SYS$SHARE:DECW$TERMINALSHR12.EXE"
-$ IF F$SEARCH(dflt) .NES. "" 
-$ THEN 
-$    decterm_capable = F$FILE_ATTRIBUTES(dflt, "KNOWN")
-$ ELSE
-$     dflt = "SYS$SHARE:DECW$TERMINALSHR.EXE"
-$     IF F$SEARCH(dflt) .NES. "" THEN decterm_capable = F$FILE_ATTRIBUTES(dflt, "KNOWN")
-$ ENDIF
-$!
-$ IF F$TYPE(usedecterm) .NES. ""
-$ THEN
-$       if usedecterm .or. usedecterm .eqs. "define"
-$       then
-$         bool_dflt="y"
-$       else
-$         bool_dflt="n"
-$       endif
-$ ELSE
-$       bool_dflt="n"
-$ ENDIF
-$ IF .NOT. use_debugging_perl THEN bool_dflt = "n"
-$ echo ""
-$ echo "Perl can be built to support DECterms from the Perl debugger"
-$ echo ""
-$ echo "If this does not make any sense to you, just accept the default '" + bool_dflt + "'."
-$ rp = "Build with DECterm Perl debugger support, if available? [''bool_dflt'] "
-$ GOSUB myread
-$ usedecterm=ans
-$ IF (usedecterm .OR. usedecterm .EQS. "define") .AND. .NOT. decterm_capable
-$ THEN
-$     echo4 "No installed DECterm image found, disabling..."
-$     usedecterm = "n"
-$ ENDIF
 $! CC Flags
 $ echo ""
 $ echo "Your compiler may want other flags.  For this question you should include"
@@ -6416,6 +6376,7 @@ $ WC "seedfunc='" + seedfunc + "'"
 $ WC "selectminbits='32'"
 $ WC "selecttype='" + selecttype + "'"
 $ WC "sh='MCR'"
+$ WC "sharpbang='#!'"
 $ WC "shmattype='" + " '"
 $ WC "shortsize='" + shortsize + "'"
 $ IF (f$length(sig_name) .GE. 244)
@@ -6747,7 +6708,6 @@ $! Alas this does not help to build Fcntl
 $!   WC "#define PERL_IGNORE_FPUSIG SIGFPE"
 $ ENDIF
 $ IF kill_by_sigprc .EQS. "define" then WC "#define KILL_BY_SIGPRC"
-$ IF usedecterm .OR. usedecterm .EQS. "define" then WC "#define USE_VMS_DECTERM"
 $ IF unlink_all_versions .OR. unlink_all_versions .EQS. "define" THEN -
     WC "#define UNLINK_ALL_VERSIONS"
 $ CLOSE CONFIG
@@ -6823,17 +6783,6 @@ $!   ENDIF
 $ ELSE
 $   LARGEFILE_REPLACE = "LARGEFILE="
 $ ENDIF
-$ IF usedecterm .OR. usedecterm .EQS. "define"
-$ THEN
-$   IF F$SEARCH("SYS$SHARE:DECW$TERMINALSHR12.EXE") .nes. ""
-$   THEN
-$      DECTERM_REPLACE = "DECTERMLIB=DECTERMLIB=DECW$TERMINALSHR12/SHARE"
-$   ELSE
-$      DECTERM_REPLACE = "DECTERMLIB=DECTERMLIB=DECW$TERMINALSHR/SHARE"
-$   ENDIF
-$ ELSE
-$   DECTERM_REPLACE = "DECTERMLIB=DECTERMLIB="
-$ ENDIF
 $!
 $! In order not to stress the tiny command buffer on pre-7.3-2 systems,
 $! we put the following substitutions in a file and pass the file to
@@ -6854,7 +6803,6 @@ $ WC "''THREAD_KERNEL'"
 $ WC "PV=''version'"
 $ WC "FLAGS=FLAGS=''extra_flags'"
 $ WC "''LARGEFILE_REPLACE'"
-$ WC "''DECTERM_REPLACE'"
 $ close CONFIG
 $!
 $ echo4 "Extracting ''defmakefile' (with variable substitutions)"
