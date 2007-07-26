@@ -34,6 +34,7 @@ private:
     - ext/Unicode/Normalize
     - ext/Win32
     - ext/Win32API/File
+    - ext/Win32CORE
     - lib/Archive/Extract
     - lib/Archive/Tar
     - lib/Attribute/Handlers
