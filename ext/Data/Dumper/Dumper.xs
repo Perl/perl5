@@ -791,7 +791,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 
 	    plen = strlen(realpack);
 	    pticks = num_q(realpack, plen);
-	    if (pticks) { // needs escaping
+	    if (pticks) { /* needs escaping */
 	        char *npack;
 	        char *npack_buffer = NULL;
 
