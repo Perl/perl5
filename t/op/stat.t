@@ -50,9 +50,10 @@ open(FOO, ">$tmpfile") || DIE("Can't open temp test file: $!");
 
 my($nlink, $mtime, $ctime) = (stat(FOO))[$NLINK, $MTIME, $CTIME];
 
-#VMS Fix-me: nlink should work on VMS if applicable link support configured.
+#nlink should if link support configured in Perl.
 SKIP: {
-    skip "No link count", 1 if $Is_VMS;
+    skip "No link count - Hard link support not built in.", 1
+	unless $Config{d_link};
 
     is($nlink, 1, 'nlink on regular file');
 }
