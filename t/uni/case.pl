@@ -9,7 +9,7 @@ sub unidump {
 sub casetest {
     my ($base, $spec, @funcs) = @_;
     # For each provided function run it, and run a version with some extra
-    # characters afterwards. Use a recylcing symbol, as it doesn't change case.
+    # characters afterwards. Use a recycling symbol, as it doesn't change case.
     my $ballast = chr (0x2672) x 3;
     @funcs = map {my $f = $_;
 		  ($f,
@@ -79,7 +79,7 @@ sub casetest {
     for my $i (sort keys %$spec) {
 	my $w = unidump($spec->{$i});
 	if (ord('A') == 193 && $i eq "\x8A\x73") {
-	    $w = '0178'; # It's a latin small Y with diaresis and not a latin small letter sharp 's'.
+	    $w = '0178'; # It's a Latin small Y with diaeresis and not a Latin small letter sharp 's'.
 	}
 	my $u = unpack "C0U", $i;
 	my $h = sprintf "%04X", $u;
