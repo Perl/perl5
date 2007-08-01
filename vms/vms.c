@@ -5077,7 +5077,7 @@ mp_do_rmsexpand
 
   if (!rms_nam_rsll(mynam)) {
     if (isunix) {
-      if (do_tounixspec(esa,outbuf,0,fs_utf8) == NULL) {
+      if (do_tounixspec(tbuf, outbuf ,0 , fs_utf8) == NULL) {
 	if (out) Safefree(out);
 	if (esal != NULL)
 	    PerlMem_free(esal);
@@ -5087,7 +5087,7 @@ mp_do_rmsexpand
 	return NULL;
       }
     }
-    else strcpy(outbuf,esa);
+    else strcpy(outbuf, tbuf);
   }
   else if (isunix) {
     tmpfspec = PerlMem_malloc(VMS_MAXRSS);
