@@ -841,7 +841,8 @@ sub installlib {
 
     # ignore READMEs, MANIFESTs, INSTALL docs, META.ymls and change logs.
     # Changes.e2x and README.e2x are needed by enc2xs.
-    return if $name =~ m{^(?:README(?:\.\w+)?|MANIFEST|META\.yml|INSTALL)$} && $name ne 'README.e2x';
+    return if $name =~ m{^(?:README(?:\.\w+)?)$} && $name ne 'README.e2x';
+    return if $name =~ m{^(?:MANIFEST(?:\.SKIP)?|META\.yml|INSTALL)$};
     return if $name =~ m{^(?:TODO|BUGS|CREDITS)$}i;
     return if $name =~ m{^change(?:s|log)(?:\.libnet)?$}i;
 
