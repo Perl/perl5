@@ -1924,7 +1924,7 @@ Perl_do_rmdir(pTHX_ const char *name)
 	PerlMem_free(dirfile);
 	return -1;
     }
-    if (flex_lstat(dirfile, &st) || !S_ISDIR(st.st_mode)) {
+    if (Perl_flex_lstat(aTHX_ dirfile, &st) || !S_ISDIR(st.st_mode)) {
 	errno = ENOTDIR;
 	retval = -1;
     }
@@ -1959,7 +1959,7 @@ Perl_kill_file(pTHX_ const char *name)
     * This needs special handling to work with the ACL hacks.
      */
    if (flex_stat(name, &st) && S_ISDIR(st.st_mode)) {
-	rmsts = Perl_do_rmdir(name);
+	rmsts = Perl_do_rmdir(aTHX_ name);
 	return rmsts;
     }
 
