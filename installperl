@@ -845,6 +845,7 @@ sub installlib {
     return if $name =~ m{^(?:MANIFEST|META\.yml|INSTALL)$};
     return if $name =~ m{^(?:TODO|BUGS|CREDITS)$}i;
     return if $name =~ m{^change(?:s|log)(?:\.libnet)?$}i;
+    return if $name =~ m{^(?:SIGNATURE|PAUSE200\d\.pub)$};  # CPAN files
 
     # if using a shared perl library then ignore:
     # - static library files [of statically linked extensions];
