@@ -445,12 +445,12 @@ previous timer, and an argument of C<0> may be supplied to cancel the
 previous timer without starting a new one.  The returned value is the
 amount of time remaining on the previous timer.
 
-For delays of finer granularity than one second, you may use Perl's
-four-argument version of select() leaving the first three arguments
-undefined, or you might be able to use the C<syscall> interface to
-access setitimer(2) if your system supports it.  The Time::HiRes
-module (from CPAN, and starting from Perl 5.8 part of the standard
-distribution) may also prove useful.
+For delays of finer granularity than one second, the Time::HiRes module
+(from CPAN, and starting from Perl 5.8 part of the standard
+distribution) provides ualarm().  You may also use Perl's four-argument
+version of select() leaving the first three arguments undefined, or you
+might be able to use the C<syscall> interface to access setitimer(2) if
+your system supports it. See L<perlfaq8> for details.
 
 It is usually a mistake to intermix C<alarm> and C<sleep> calls.
 (C<sleep> may be internally implemented in your system with C<alarm>)
@@ -5108,11 +5108,12 @@ always sleep the full amount.  They may appear to sleep longer than that,
 however, because your process might not be scheduled right away in a
 busy multitasking system.
 
-For delays of finer granularity than one second, you may use Perl's
-C<syscall> interface to access setitimer(2) if your system supports
-it, or else see L</select> above.  The Time::HiRes module (from CPAN,
-and starting from Perl 5.8 part of the standard distribution) may also
-help.
+For delays of finer granularity than one second, the Time::HiRes module
+(from CPAN, and starting from Perl 5.8 part of the standard
+distribution) provides usleep().  You may also use Perl's four-argument
+version of select() leaving the first three arguments undefined, or you
+might be able to use the C<syscall> interface to access setitimer(2) if
+your system supports it. See L<perlfaq8> for details.
 
 See also the POSIX module's C<pause> function.
 
