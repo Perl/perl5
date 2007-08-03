@@ -258,6 +258,54 @@ array and should not have been done in the first place.
 The three numeric pragmas C<bignum>, C<bigint> and C<bigrat> are now
 lexically scoped. (Tels)
 
+=head2 Math::BigInt/Math::BigFloat
+
+Many bugs have been fixed; noteworthy are comparisons with NaN, which
+no longer warn about undef values.
+
+The following things are new:
+
+=over 4
+
+=item config()
+
+The config() method now also supports the calling-style
+C<< config('lib') >> in addition to C<< config()->{'lib'} >>.
+
+=item import()
+
+Upon import, using C<< lib => 'Foo' >> now warns if the low-level library
+cannot be found. To suppress the warning, you can use C<< try => 'Foo' >>
+instead. To convert the warning into a die, use C<< only => 'Foo' >>
+instead.
+
+=item roundmode common
+
+A rounding mode of C<common> is now supported.
+
+=back
+
+Also, support for the following methods has been added:
+
+=over 4
+
+=item bpi(), bcos(), bsin(), batan(), batan2()
+
+=item bmuladd()
+
+=item bexp(), bnok()
+
+=item from_hex(), from_oct(), and from_bin()
+
+=item as_oct()
+
+=back
+
+In addition, the default math-backend (Calc (Perl) and FastCalc (XS)) now
+support storing numbers in parts with 9 digits instead of 7 on Perls with
+either 64bit integer or long double support. This means math operations
+scale better and are thus faster for really big numbers.
+
 =head2 New Core Modules
 
 =over 4
