@@ -837,15 +837,16 @@ sub installlib {
     return if $dir =~ m{\bXS/(?:APItest|Typemap)\b};
     return if $name =~ m{\b(?:APItest|Typemap)\.pm$};
     # ignore the demo files
-    return if $dir =~ /\bdemos?\b/;
+    return if $dir =~ /\b(?:demos?|eg)\b/;
 
     # ignore READMEs, MANIFESTs, INSTALL docs, META.ymls and change logs.
     # Changes.e2x and README.e2x are needed by enc2xs.
     return if $name =~ m{^(?:README(?:\.\w+)?)$} && $name ne 'README.e2x';
-    return if $name =~ m{^(?:MANIFEST|META\.yml|INSTALL)$};
-    return if $name =~ m{^(?:TODO|BUGS|CREDITS)$}i;
+    return if $name =~ m{^(?:MANIFEST|META\.yml)$};
+    return if $name =~ m{^(?:INSTALL|TODO|BUGS|CREDITS)$}i;
     return if $name =~ m{^change(?:s|log)(?:\.libnet)?$}i;
-    return if $name =~ m{^(?:SIGNATURE|PAUSE200\d\.pub)$};  # CPAN files
+    return if $name =~ m{^(?:SIGNATURE|PAUSE200\d\.pub)$}; # CPAN files
+    return if $name =~ m{^(?:NOTES|PATCHING)$}; # ExtUtils files
 
     # if using a shared perl library then ignore:
     # - static library files [of statically linked extensions];
