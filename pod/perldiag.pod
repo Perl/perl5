@@ -4410,11 +4410,11 @@ reserved word.  It's best to put such a word in quotes, or capitalize it
 somehow, or insert an underbar into it.  You might also declare it as a
 subroutine.
 
-=item Unrecognized character %s
+=item Unrecognized character %s in column %d
 
 (F) The Perl parser has no idea what to do with the specified character
-in your Perl script (or eval).  Perhaps you tried to run a compressed
-script, a binary program, or a directory as a Perl program.
+in your Perl script (or eval) at the specified column.  Perhaps you tried 
+to run a compressed script, a binary program, or a directory as a Perl program.
 
 =item Unrecognized escape \\%c in character class passed through in regex; marked by <-- HERE in m/%s/
 
