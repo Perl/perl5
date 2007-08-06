@@ -22,7 +22,7 @@ use threads;
 BEGIN {
     eval {
         require threads::shared;
-        import threads::shared;
+        threads::shared->import();
     };
     if ($@ || ! $threads::shared::threads_shared) {
         print("1..0 # Skip: threads::shared not available\n");
@@ -171,7 +171,7 @@ package main;
 
 # bugid #24165
 
-run_perl(prog => 'use threads 1.63;' .
+run_perl(prog => 'use threads 1.64;' .
                  'sub a{threads->create(shift)} $t = a sub{};' .
                  '$t->tid; $t->join; $t->tid',
          nolib => ($ENV{PERL_CORE}) ? 0 : 1,

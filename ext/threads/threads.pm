@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.63';
+our $VERSION = '1.64';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -134,7 +134,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.63
+This document describes threads version 1.64
 
 =head1 SYNOPSIS
 
@@ -879,18 +879,42 @@ C<import> if needed):
     sub thr_func
     {
         require Unsafe::Module
-        # import Unsafe::Module ...;
+        # Unsafe::Module->import(...);
 
         ....
     }
 
 If the module is needed inside the I<main> thread, try modifying your
 application so that the module is loaded (again using C<require> and
-C<import>) after any threads are started, and in such a way that no other
-threads are started afterwards.
+C<-E<gt>import()>) after any threads are started, and in such a way that no
+other threads are started afterwards.
 
 If the above does not work, or is not adequate for your application, then file
 a bug report on L<http://rt.cpan.org/Public/> against the problematic module.
+
+=item Current working directory
+
+On all platforms except MSWin32, the setting for the current working directory
+is shared among all threads such that changing it in one thread (e.g., using
+C<chdir()>) will affect all the threads in the application.
+
+On MSWin32, each thread maintains its own the current working directory
+setting.
+
+=item Environment variables
+
+Currently, on all platforms except MSWin32, all I<system> calls (e.g., using
+C<system()> or back-ticks) made from threads use the environment variable
+settings from the I<main> thread.  In other words, changes made to C<%ENV> in
+a thread will not be visible in I<system> calls made by that thread.
+
+To work around this, set environment variables as part of the I<system> call.
+For example:
+
+    my $msg = 'hello';
+    system("FOO=$msg; echo \$FOO");   # Outputs 'hello' to STDOUT
+
+On MSWin32, each thread maintains its own set of environment variables.
 
 =item Parent-child threads
 
@@ -966,7 +990,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.63/threads.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.64/threads.pm>
 
 Source repository:
 L<http://code.google.com/p/threads-shared/>

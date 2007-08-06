@@ -1092,15 +1092,11 @@ ext/Text/Soundex/README		README for Text::Soundex
 ext/Text/Soundex/Soundex.pm	Text::Soundex extension Perl module
 ext/Text/Soundex/Soundex.xs	Text::Soundex extension external subroutines
 ext/Text/Soundex/t/Soundex.t	test for Text::Soundex
-ext/threads/Changes		ithreads
 ext/threads/hints/hpux.pl	Hint file for HPUX
 ext/threads/hints/linux.pl	Hint file for Linux
 ext/threads/Makefile.PL		ithreads
-ext/threads/README		ithreads
-ext/threads/shared/Changes	Changes for threads::shared
 ext/threads/shared/hints/linux.pl	thread shared variables
 ext/threads/shared/Makefile.PL	thread shared variables
-ext/threads/shared/README	thread shared variables
 ext/threads/shared/shared.pm	thread shared variables
 ext/threads/shared/shared.xs	thread shared variables
 ext/threads/shared/t/0nothread.t	Tests for basic shared array functionality.
