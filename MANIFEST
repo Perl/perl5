@@ -2765,6 +2765,7 @@ lib/Tie/File/t/41_heap.t	Unit tests for Tie::File::Heap
 lib/Tie/File/t/42_offset.t	Unit tests for the offset method
 lib/Tie/Handle.pm		Base class for tied handles
 lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
+lib/Tie/Handle/stdhandle_from_handle.t	Test for Tie::StdHandle/Handle backwards compat
 lib/Tie/Hash/NamedCapture.pm	Implements %- and %+ behaviour
 lib/Tie/Hash.pm			Base class for tied hashes
 lib/Tie/Memoize.pm		Base class for memoized tied hashes
@@ -2776,6 +2777,7 @@ lib/Tie/RefHash/storable.t	Test for Tie::RefHash with storable
 lib/Tie/RefHash/threaded.t	Test for Tie::RefHash with threads
 lib/Tie/Scalar.pm		Base class for tied scalars
 lib/Tie/Scalar.t		See if Tie::Scalar works
+lib/Tie/StdHandle.pm		Tie::StdHandle
 lib/Tie/SubstrHash.pm		Compact hash for known key, value and table size
 lib/Tie/SubstrHash.t		Test for Tie::SubstrHash
 lib/Time/gmtime.pm		By-name interface to Perl's builtin gmtime
