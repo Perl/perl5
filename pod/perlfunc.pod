@@ -4152,10 +4152,10 @@ the function whose prototype you want to retrieve.
 
 If FUNCTION is a string starting with C<CORE::>, the rest is taken as a
 name for Perl builtin.  If the builtin is not I<overridable> (such as
-C<qw//>) or its arguments cannot be expressed by a prototype (such as
-C<system>) returns C<undef> because the builtin does not really behave
-like a Perl function.  Otherwise, the string describing the equivalent
-prototype is returned.
+C<qw//>) or if its arguments cannot be adequately expressed by a prototype
+(such as C<system>), prototype() returns C<undef>, because the builtin
+does not really behave like a Perl function.  Otherwise, the string
+describing the equivalent prototype is returned.
 
 =item push ARRAY,LIST
 X<push> X<stack>
