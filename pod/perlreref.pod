@@ -36,7 +36,7 @@ applying the given options.
 
 If 'pattern' is an empty string, the last I<successfully> matched
 regex is used. Delimiters other than '/' may be used for both this
-operator and the following ones. The leading C<m> can be ommitted
+operator and the following ones. The leading C<m> can be omitted
 if the delimiter is '/'.
 
 C<qr/pattern/msixpo> lets you store a regex in a variable,
@@ -69,7 +69,13 @@ delimiters can be used.  Must be reset with reset().
    (...)   Groups subexpressions for capturing to $1, $2...
    (?:...) Groups subexpressions without capturing (cluster)
    |       Matches either the subexpression preceding or following it
-   \1, \2 ...  Matches the text from the Nth group
+   \1, \2, \3 ...           Matches the text from the Nth group
+   \g1 or \g{1}, \g2 ...    Matches the text from the Nth group
+   \g-1 or \g{-1}, \g-2 ... Matches the text from the Nth previous group
+   \g{name}     Named backreference
+   \k<name>     Named backreference
+   \k'name'     Named backreference
+   (?P=name)    Named backreference (python syntax)
 
 =head2 ESCAPE SEQUENCES
 
@@ -167,34 +173,59 @@ All are zero-width assertions.
    \z Match absolute string end
    \G Match where previous m//g left off
 
+   \K Keep the stuff left of the \K, don't include it in $&
+
 =head2 QUANTIFIERS
 
 Quantifiers are greedy by default -- match the B<longest> leftmost.
 
-   Maximal Minimal Allowed range
-   ------- ------- -------------
-   {n,m}   {n,m}?  Must occur at least n times but no more than m times
-   {n,}    {n,}?   Must occur at least n times
-   {n}     {n}?    Must occur exactly n times
-   *       *?      0 or more times (same as {0,})
-   +       +?      1 or more times (same as {1,})
-   ?       ??      0 or 1 time (same as {0,1})
+   Maximal Minimal Possessive Allowed range
+   ------- ------- ---------- -------------
+   {n,m}   {n,m}?  {n,m}+     Must occur at least n times
+                              but no more than m times
+   {n,}    {n,}?   {n,}+      Must occur at least n times
+   {n}     {n}?    {n}+       Must occur exactly n times
+   *       *?      *+         0 or more times (same as {0,})
+   +       +?      ++         1 or more times (same as {1,})
+   ?       ??      ?+         0 or 1 time (same as {0,1})
+
+The possessive forms (new in Perl 5.10) prevent backtracking: what gets
+matched by a pattern with a possessive quantifier will not be backtracked
+into, even if that causes the whole match to fail.
 
 There is no quantifier {,n} -- that gets understood as a literal string.
 
 =head2 EXTENDED CONSTRUCTS
 
-   (?#text)         A comment
-   (?imxs-imsx:...) Enable/disable option (as per m// modifiers)
-   (?=...)          Zero-width positive lookahead assertion
-   (?!...)          Zero-width negative lookahead assertion
-   (?<=...)         Zero-width positive lookbehind assertion
-   (?<!...)         Zero-width negative lookbehind assertion
-   (?>...)          Grab what we can, prohibit backtracking
-   (?{ code })      Embedded code, return value becomes $^R
-   (??{ code })     Dynamic regex, return value used as regex
-   (?(cond)yes|no)  cond being integer corresponding to capturing parens
-   (?(cond)yes)        or a lookaround/eval zero-width assertion
+   (?#text)          A comment
+   (?:...)           Groups subexpressions without capturing (cluster)
+   (?pimsx-imsx:...) Enable/disable option (as per m// modifiers)
+   (?=...)           Zero-width positive lookahead assertion
+   (?!...)           Zero-width negative lookahead assertion
+   (?<=...)          Zero-width positive lookbehind assertion
+   (?<!...)          Zero-width negative lookbehind assertion
+   (?>...)           Grab what we can, prohibit backtracking
+   (?|...)           Branch reset
+   (?<name>...)      Named capture
+   (?'name'...)      Named capture
+   (?P<name>...)     Named capture (python syntax)
+   (?{ code })       Embedded code, return value becomes $^R
+   (??{ code })      Dynamic regex, return value used as regex
+   (?N)              Recurse into subpattern number N
+   (?-N), (?+N)      Recurse into Nth previous/next subpattern
+   (?R), (?0)        Recurse at the beginning of the whole pattern
+   (?&name)          Recurse into a named subpattern
+   (?P>name)         Recurse into a named subpattern (python syntax)
+   (?(cond)yes|no)
+   (?(cond)yes)      Conditional expression, where "cond" can be:
+                     (N)       subpattern N has matched something
+                     (<name>)  named subpattern has matched something
+                     ('name')  named subpattern has matched something
+                     (?{code}) code condition
+                     (R)       true if recursing
+                     (RN)      true if recursing into Nth subpattern
+                     (R&name)  true if recursing into named subpattern
+                     (DEFINE)  always false, no no-pattern allowed
 
 =head2 VARIABLES
 
@@ -209,7 +240,7 @@ There is no quantifier {,n} -- that gets understood as a literal string.
    ${^POSTMATCH}  Everything after to matched string
 
 The use of C<$`>, C<$&> or C<$'> will slow down B<all> regex use
-within your program. Consult L<perlvar> for C<@LAST_MATCH_START>
+within your program. Consult L<perlvar> for C<@->
 to see equivalent expressions that won't cause slow down.
 See also L<Devel::SawAmpersand>. Starting with Perl 5.10, you
 can also use the equivalent variables C<${^PREMATCH}>, C<${^MATCH}>
@@ -253,7 +284,7 @@ certain characters like the German "sharp s" there is a difference.
 
 =head1 AUTHOR
 
-Iain Truskett.
+Iain Truskett. Updated by the Perl 5 Porters.
 
 This document may be distributed under the same terms as Perl itself.
 
@@ -288,6 +319,14 @@ L<perlfunc> for details on the functions.
 =item *
 
 L<perlfaq6> for FAQs on regular expressions.
+
+=item *
+
+L<perlrebackslash> for a reference on backslash sequences.
+
+=item *
+
+L<perlrecharclass> for a reference on character classes.
 
 =item *
 

@@ -558,7 +558,7 @@ and C<< \k<name> >> refer to the leftmost defined group. (Thus it's possible
 to do things with named capture buffers that would otherwise require C<(??{})>
 code to accomplish.)
 X<named capture buffer> X<regular expression, named capture buffer>
-X<%+> X<$+{name}> X<\k{name}>
+X<%+> X<$+{name}> X<< \k<name> >>
 
 Examples:
 
@@ -865,10 +865,9 @@ its Unicode extension (see L<utf8>),
 though it isn't extended by the locale (see L<perllocale>).
 
 B<NOTE:> In order to make things easier for programmers with experience
-with the Python or PCRE regex engines, the pattern C<< (?PE<lt>NAMEE<gt>pattern) >>
+with the Python or PCRE regex engines, the pattern C<< (?P<NAME>pattern) >>
 may be used instead of C<< (?<NAME>pattern) >>; however this form does not
-support the use of single quotes as a delimiter for the name. This is
-only available in Perl 5.10 or later.
+support the use of single quotes as a delimiter for the name.
 
 =item C<< \k<NAME> >>
 
@@ -886,7 +885,7 @@ Both forms are equivalent.
 
 B<NOTE:> In order to make things easier for programmers with experience
 with the Python or PCRE regex engines, the pattern C<< (?P=NAME) >>
-may be used instead of C<< \k<NAME> >> in Perl 5.10 or later.
+may be used instead of C<< \k<NAME> >>.
 
 =item C<(?{ code })>
 X<(?{})> X<regex, code in> X<regexp, code in> X<regular expression, code in>
@@ -1111,7 +1110,7 @@ pattern.
 
 B<NOTE:> In order to make things easier for programmers with experience
 with the Python or PCRE regex engines the pattern C<< (?P>NAME) >>
-may be used instead of C<< (?&NAME) >> in Perl 5.10 or later.
+may be used instead of C<< (?&NAME) >>.
 
 =item C<(?(condition)yes-pattern|no-pattern)>
 X<(?()>
@@ -2115,7 +2114,7 @@ Perl specific syntax, the following are legal in Perl 5.10:
 
 =over 4
 
-=item C<< (?PE<lt>NAMEE<gt>pattern) >>
+=item C<< (?P<NAME>pattern) >>
 
 Define a named capture buffer. Equivalent to C<< (?<NAME>pattern) >>.
 

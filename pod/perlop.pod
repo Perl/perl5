@@ -1056,9 +1056,9 @@ This operator quotes (and possibly compiles) its I<STRING> as a regular
 expression.  I<STRING> is interpolated the same way as I<PATTERN>
 in C<m/PATTERN/>.  If "'" is used as the delimiter, no interpolation
 is done.  Returns a Perl value which may be used instead of the
-corresponding C</STRING/imosx> expression. The returned value is a
+corresponding C</STRING/msixpo> expression. The returned value is a
 normalized version of the original pattern. It magically differs from
-a string containing the same characters: ref(qr/x/) returns "Regexp",
+a string containing the same characters: C<ref(qr/x/)> returns "Regexp",
 even though dereferencing the result returns undef.
 
 For example,
