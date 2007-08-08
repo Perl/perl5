@@ -1997,13 +1997,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	case 'x':
 	    PL_doextract = TRUE;
 	    s++;
-	    if (*s) {
+	    if (*s)
 		cddir = s;
-	    }
-	    else if ((s=argv[1]) && *s != '-') {
-		argc--,argv++;
-		cddir = s;
-	    }
 	    break;
 	case 0:
 	    break;
