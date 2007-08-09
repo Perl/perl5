@@ -3876,6 +3876,7 @@ t/run/switchPx.aux		Data for switchPx.t
 t/run/switchPx.t		Test the -Px combination
 t/run/switcht.t			Test the -t switch
 t/run/switchx.aux		Data for switchx.t
+t/run/switchx2.aux		Data for switchx.t
 t/run/switchx.t			Test the -x switch
 t/TEST				The regression tester
 t/TestInit.pm			Preamble library for core tests
