@@ -4711,6 +4711,43 @@ PP(pp_split)
 	    s = m;
 	}
     }
+    else if (rx->extflags & RXf_NULL && !(s >= strend)) {
+        /*
+          Pre-extend the stack, either the number of bytes or
+          characters in the string or a limited amount, triggered by:
+
+          my ($x, $y) = split //, $str;
+            or
+          split //, $str, $i;
+        */
+        const U32 items = limit - 1; 
+        if (items < slen)
+            EXTEND(SP, items);
+        else
+            EXTEND(SP, slen);
+
+        while (--limit) {
+            m = s;
+            
+            if (do_utf8)
+                s += UTF8SKIP(s);
+            else
+                ++s;
+
+            dstr = newSVpvn(m, s-m);
+
+            if (make_mortal)
+                sv_2mortal(dstr);
+            if (do_utf8)
+                (void)SvUTF8_on(dstr);
+
+            PUSHs(dstr);
+
+            /* are we there yet? */
+            if (s >= strend)
+                break;
+        }
+    }
     else if (do_utf8 == ((rx->extflags & RXf_UTF8) != 0) &&
 	     (rx->extflags & RXf_USE_INTUIT) && !rx->nparens
 	     && (rx->extflags & RXf_CHECK_ALL)

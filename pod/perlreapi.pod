@@ -188,6 +188,16 @@ whether RXf_PMf_LOCALE is set.
 
 Perl's engine sets this flag if the pattern is C<\s+>.
 
+=item RXf_NULL
+
+Tells the split operatior to split the target string on
+characters. The definition of character varies depending on whether
+the target string is a UTF-8 string.
+
+Perl's engine sets this flag on empty patterns, this optimization
+makes C<split //> much faster than it would otherwise be, it's even
+faster than C<unpack>.
+
 =back
 
 =head2 exec

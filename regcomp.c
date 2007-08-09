@@ -4753,6 +4753,8 @@ reStudy:
         r->paren_names = NULL;
 
 #ifdef STUPID_PATTERN_CHECKS            
+    if (r->prelen == 0)
+        r->extflags |= RXf_NULL;
     if (r->extflags & RXf_SPLIT && r->prelen == 1 && r->precomp[0] == ' ')
         /* XXX: this should happen BEFORE we compile */
         r->extflags |= (RXf_SKIPWHITE|RXf_WHITE); 
@@ -4769,7 +4771,9 @@ reStudy:
         U8 fop = OP(first);
         U8 nop = OP(NEXTOPER(first));
         
-         if (PL_regkind[fop] == BOL && nop == END) 
+        if (PL_regkind[fop] == NOTHING && nop == END)
+            r->extflags |= RXf_NULL;
+        else if (PL_regkind[fop] == BOL && nop == END)
             r->extflags |= RXf_START_ONLY;
         else if (fop == PLUS && nop ==SPACE && OP(regnext(first))==END)
             r->extflags |= RXf_WHITE;    
