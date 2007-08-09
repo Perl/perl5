@@ -4,9 +4,11 @@ perlreapi - perl regular expression plugin interface
 
 =head1 DESCRIPTION
 
-As of Perl 5.9.5 there is a new interface for using other regexp
-engines than the default one.  Each engine is supposed to provide
-access to a constant structure of the following format:
+As of Perl 5.9.5 there is a new interface for plugging and using other
+regular expression engines than the default one.
+
+Each engine is supposed to provide access to a constant structure of the
+following format:
 
     typedef struct regexp_engine {
         REGEXP* (*comp) (pTHX_ const SV * const pattern, const U32 flags);
@@ -34,7 +36,7 @@ access to a constant structure of the following format:
     #endif
 
 When a regexp is compiled, its C<engine> field is then set to point at
-the appropriate structure so that when it needs to be used Perl can find
+the appropriate structure, so that when it needs to be used Perl can find
 the right routines to do so.
 
 In order to install a new regexp handler, C<$^H{regcomp}> is set
@@ -61,7 +63,7 @@ the individual fields in the REGEXP struct.
 
 The C<pattern> parameter is the scalar that was used as the
 pattern. previous versions of perl would pass two C<char*> indicating
-the start and end of the stringifed pattern, the following snippet can
+the start and end of the stringified pattern, the following snippet can
 be used to get the old parameters:
 
     STRLEN plen;
@@ -75,7 +77,7 @@ expression (C<< "ook" =~ qr/eek/ >>). perl's own engine will always
 stringify everything using the snippet above but that doesn't mean
 other engines have to.
 
-The C<flags> paramater is a bitfield which indicates which of the
+The C<flags> parameter is a bitfield which indicates which of the
 C<msixp> flags the regex was compiled with. It also contains
 additional info such as whether C<use locale> is in effect.
 
@@ -127,7 +129,7 @@ Additional flags:
 =item RXf_PMf_LOCALE
 
 Set if C<use locale> is in effect. If present in C<< rx->extflags >>
-C<split> will use the locale dependant definition of whitespace under
+C<split> will use the locale dependent definition of whitespace under
 when RXf_SKIPWHITE or RXf_WHITE are in effect. Under ASCII whitespace
 is defined as per L<isSPACE|perlapi/ISSPACE>, and by the internal
 macros C<is_utf8_space> under UTF-8 and C<isSPACE_LC> under C<use
@@ -190,12 +192,12 @@ Perl's engine sets this flag if the pattern is C<\s+>.
 
 =item RXf_NULL
 
-Tells the split operatior to split the target string on
+Tells the split operator to split the target string on
 characters. The definition of character varies depending on whether
 the target string is a UTF-8 string.
 
 Perl's engine sets this flag on empty patterns, this optimization
-makes C<split //> much faster than it would otherwise be, it's even
+makes C<split //> much faster than it would otherwise be. It's even
 faster than C<unpack>.
 
 =back
@@ -243,7 +245,7 @@ Called to get/set the value of C<$`>, C<$'>, C<$&> and their named
 equivalents, ${^PREMATCH}, ${^POSTMATCH} and $^{MATCH}, as well as the
 numbered capture buffers (C<$1>, C<$2>, ...).
 
-The C<paren> paramater will be C<-2> for C<$`>, C<-1> for C<$'>, C<0>
+The C<paren> parameter will be C<-2> for C<$`>, C<-1> for C<$'>, C<0>
 for C<$&>, C<1> for C<$1> and so forth.
 
 The names have been chosen by analogy with L<Tie::Scalar> methods
@@ -285,7 +287,7 @@ Example:
     }
 
 Perl's own engine will croak on any attempt to modify the capture
-variables, to do this in another engine use the following callack
+variables, to do this in another engine use the following callback
 (copied from C<Perl_reg_numbered_buff_store>):
 
     void
@@ -440,11 +442,11 @@ Functions>.
     void* dupe(pTHX_ REGEXP * const rx, CLONE_PARAMS *param);
 
 On threaded builds a regexp may need to be duplicated so that the pattern
-can be used by mutiple threads. This routine is expected to handle the
+can be used by multiple threads. This routine is expected to handle the
 duplication of any private data pointed to by the C<pprivate> member of
 the regexp structure.  It will be called with the preconstructed new
 regexp structure as an argument, the C<pprivate> member will point at
-the B<old> private structue, and it is this routine's responsibility to
+the B<old> private structure, and it is this routine's responsibility to
 construct a copy and return a pointer to it (which perl will then use to
 overwrite the field as passed to this routine.)
 
@@ -564,7 +566,7 @@ following pattern:
 where the C<minlen> would be 3 but C<minlenret> would only be 2 as the \d is
 required to match but is not actually included in the matched content. This
 distinction is particularly important as the substitution logic uses the
-C<minlenret> to tell whether it can do in-place substition which can result in
+C<minlenret> to tell whether it can do in-place substitution which can result in
 considerable speedup.
 
 =head2 C<gofs>
