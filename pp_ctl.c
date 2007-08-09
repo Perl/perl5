@@ -2915,7 +2915,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 }
 
 STATIC PerlIO *
-S_check_type_and_open(pTHX_ const char *name, const char *mode)
+S_check_type_and_open(pTHX_ const char *name)
 {
     Stat_t st;
     const int st_rc = PerlLIO_stat(name, &st);
@@ -2924,44 +2924,48 @@ S_check_type_and_open(pTHX_ const char *name, const char *mode)
 	return NULL;
     }
 
-    return PerlIO_open(name, mode);
+    return PerlIO_open(name, PERL_SCRIPT_MODE);
 }
 
-STATIC PerlIO *
-S_doopen_pm(pTHX_ const char *name, const char *mode)
-{
 #ifndef PERL_DISABLE_PMC
-    const STRLEN namelen = strlen(name);
+STATIC PerlIO *
+S_doopen_pm(pTHX_ const char *name, const STRLEN namelen)
+{
     PerlIO *fp;
 
-    if (namelen > 3 && strEQ(name + namelen - 3, ".pm")) {
-	SV * const pmcsv = Perl_newSVpvf(aTHX_ "%s%c", name, 'c');
-	const char * const pmc = SvPV_nolen_const(pmcsv);
+    if (namelen > 3 && memEQs(name + namelen - 3, 3, ".pm")) {
+	SV *const pmcsv = newSV(namelen + 2);
+	char *const pmc = SvPVX(pmcsv);
 	Stat_t pmcstat;
+
+	memcpy(pmc, name, namelen);
+	pmc[namelen] = 'c';
+	pmc[namelen + 1] = '\0';
+
 	if (PerlLIO_stat(pmc, &pmcstat) < 0) {
-	    fp = check_type_and_open(name, mode);
+	    fp = check_type_and_open(name);
 	}
 	else {
 	    Stat_t pmstat;
 	    if (PerlLIO_stat(name, &pmstat) < 0 ||
 	        pmstat.st_mtime < pmcstat.st_mtime)
 	    {
-		fp = check_type_and_open(pmc, mode);
+		fp = check_type_and_open(pmc);
 	    }
 	    else {
-		fp = check_type_and_open(name, mode);
+		fp = check_type_and_open(name);
 	    }
 	}
 	SvREFCNT_dec(pmcsv);
     }
     else {
-	fp = check_type_and_open(name, mode);
+	fp = check_type_and_open(name);
     }
     return fp;
-#else
-    return check_type_and_open(name, mode);
-#endif /* !PERL_DISABLE_PMC */
 }
+#else
+#  define doopen_pm(name, namelen) check_type_and_open(name)
+#endif /* !PERL_DISABLE_PMC */
 
 PP(pp_require)
 {
@@ -3087,7 +3091,7 @@ PP(pp_require)
 
     if (path_is_absolute(name)) {
 	tryname = name;
-	tryrsfp = doopen_pm(name,PERL_SCRIPT_MODE);
+	tryrsfp = doopen_pm(name, len);
     }
 #ifdef MACOS_TRADITIONAL
     if (!tryrsfp) {
@@ -3096,7 +3100,7 @@ PP(pp_require)
 	MacPerl_CanonDir(name, newname, 1);
 	if (path_is_absolute(newname)) {
 	    tryname = newname;
-	    tryrsfp = doopen_pm(newname,PERL_SCRIPT_MODE);
+	    tryrsfp = doopen_pm(newname, strlen(newname));
 	}
     }
 #endif
@@ -3109,6 +3113,7 @@ PP(pp_require)
 #endif
 	{
 	    namesv = newSV(0);
+	    sv_upgrade(namesv, SVt_PV);
 	    for (i = 0; i <= AvFILL(ar); i++) {
 		SV * const dirsv = *av_fetch(ar, i, TRUE);
 
@@ -3238,7 +3243,16 @@ PP(pp_require)
 			|| (*name == ':' && name[1] != ':' && strchr(name+2, ':'))
 #endif
 		  ) {
-		    const char *dir = SvPV_nolen_const(dirsv);
+		    const char *dir;
+		    STRLEN dirlen;
+
+		    if (SvOK(dirsv)) {
+			dir = SvPV_const(dirsv, dirlen);
+		    } else {
+			dir = "";
+			dirlen = 0;
+		    }
+
 #ifdef MACOS_TRADITIONAL
 		    char buf1[256];
 		    char buf2[256];
@@ -3266,13 +3280,32 @@ PP(pp_require)
 				       "%s\\%s",
 				       dir, name);
 #    else
-		    Perl_sv_setpvf(aTHX_ namesv, "%s/%s", dir, name);
+		    /* The equivalent of		    
+		       Perl_sv_setpvf(aTHX_ namesv, "%s/%s", dir, name);
+		       but without the need to parse the format string, or
+		       call strlen on either pointer, and with the correct
+		       allocation up front.  */
+		    {
+			char *tmp = SvGROW(namesv, dirlen + len + 2);
+
+			memcpy(tmp, dir, dirlen);
+			tmp +=dirlen;
+			*tmp++ = '/';
+			/* name came from an SV, so it will have a '\0' at the
+			   end that we can copy as part of this memcpy().  */
+			memcpy(tmp, name, len + 1);
+
+			SvCUR_set(namesv, dirlen + len + 1);
+
+			/* Don't even actually have to turn SvPOK_on() as we
+			   access it directly with SvPVX() below.  */
+		    }
 #    endif
 #  endif
 #endif
 		    TAINT_PROPER("require");
 		    tryname = SvPVX_const(namesv);
-		    tryrsfp = doopen_pm(tryname, PERL_SCRIPT_MODE);
+		    tryrsfp = doopen_pm(tryname, SvCUR(namesv));
 		    if (tryrsfp) {
 			if (tryname[0] == '.' && tryname[1] == '/')
 			    tryname += 2;
