@@ -3307,7 +3307,7 @@ PP(pp_require)
 			|| (*name == ':' && name[1] != ':' && strchr(name+2, ':'))
 #endif
 		  ) {
-		    const char *dir = SvPV_nolen_const(dirsv);
+		    const char *dir = SvOK(dirsv) ? SvPV_nolen_const(dirsv) : "";
 #ifdef MACOS_TRADITIONAL
 		    char buf1[256];
 		    char buf2[256];
