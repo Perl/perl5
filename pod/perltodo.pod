@@ -550,6 +550,12 @@ program if you pass the process ID. It would be good to do this with the Perl
 debugger on a running Perl program, although I'm not sure how it would be
 done." ssh and screen do this with named pipes in /tmp. Maybe we can too.
 
+=head2 Optimize away empty destructors
+
+Defining an empty DESTROY method might be useful (notably in
+AUTOLOAD-enabled classes), but it's still a bit expensive to call. That
+could probably be optimized.
+
 =head2 LVALUE functions for lists
 
 The old perltodo notes that lvalue functions don't work for list or hash
