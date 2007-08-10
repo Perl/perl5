@@ -96,21 +96,33 @@ is a lexical $_ in scope.
 
 #define ST(off) PL_stack_base[ax + (off)]
 
+/* XSPROTO() is also used by SWIG like this:
+ *
+ *     typedef XSPROTO(SwigPerlWrapper);
+ *     typedef SwigPerlWrapper *SwigPerlWrapperPtr;
+ *
+ * This code needs to be compilable under both C and C++.
+ *
+ * Don't forget to change the __attribute__unused__ version of XS()
+ * below too if you change XSPROTO() here.
+ */
+#define XSPROTO(name) void name(pTHX_ CV* cv)
+
 #undef XS
 #if defined(__CYGWIN__) && defined(USE_DYNAMIC_LOADING)
-#  define XS(name) __declspec(dllexport) void name(pTHX_ CV* cv)
+#  define XS(name) __declspec(dllexport) XSPROTO(name)
 #endif
 #if defined(__SYMBIAN32__)
-#  define XS(name) EXPORT_C void name(pTHX_ CV* cv)
+#  define XS(name) EXPORT_C XSPROTO(name)
 #endif
 #ifndef XS
 #  if defined(HASATTRIBUTE_UNUSED) && !defined(__cplusplus)
 #    define XS(name) void name(pTHX_ CV* cv __attribute__unused__)
 #  else
 #    ifdef __cplusplus
-#      define XS(name) extern "C" void name(pTHX_ CV* cv)
+#      define XS(name) extern "C" XSPROTO(name)
 #    else
-#      define XS(name) void name(pTHX_ CV* cv)
+#      define XS(name) XSPROTO(name)
 #    endif
 #  endif
 #endif
