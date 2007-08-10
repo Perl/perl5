@@ -954,7 +954,7 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'jand',
 		'FILES'		=> q[win32 README.win32 t/win32 ext/Win32CORE],
-		'CPAN'		=> 0,
+		'CPAN'		=> 1,
 		},
 
 	'Win32' =>
