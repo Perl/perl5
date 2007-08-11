@@ -4726,26 +4726,36 @@ PP(pp_split)
         else
             EXTEND(SP, slen);
 
-        while (--limit) {
-            m = s;
-            
-            if (do_utf8)
+        if (do_utf8) {
+            while (--limit) {
+                /* keep track of how many bytes we skip over */
+                m = s;
                 s += UTF8SKIP(s);
-            else
-                ++s;
+                dstr = newSVpvn(m, s-m);
 
-            dstr = newSVpvn(m, s-m);
+                if (make_mortal)
+                    sv_2mortal(dstr);
 
-            if (make_mortal)
-                sv_2mortal(dstr);
-            if (do_utf8)
                 (void)SvUTF8_on(dstr);
+                PUSHs(dstr);
 
-            PUSHs(dstr);
+                if (s >= strend)
+                    break;
+            }
+        } else {
+            while (--limit) {
+                dstr = newSVpvn(s, 1);
 
-            /* are we there yet? */
-            if (s >= strend)
-                break;
+                s++;
+
+                if (make_mortal)
+                    sv_2mortal(dstr);
+
+                PUSHs(dstr);
+
+                if (s >= strend)
+                    break;
+            }
         }
     }
     else if (do_utf8 == ((rx->extflags & RXf_UTF8) != 0) &&
