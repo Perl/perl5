@@ -1,3 +1,49 @@
+3.11_02 - 2007-08-13
+
+    * fix cpan #25372: special case sv_magic(sv, obj, how, name, 0)
+    * fix cpan #27906: [PATCH] add UTF8_MAXBYTES
+      (thanks to Steve Peters for providing a patch)
+    * added support for the following API
+        sv_2pv_flags
+        sv_2pvbyte_nolen
+        SV_CONST_RETURN
+        SV_COW_DROP_PV
+        SV_COW_SHARED_HASH_KEYS
+        SV_GMAGIC
+        SV_HAS_TRAILING_NUL
+        SV_IMMEDIATE_UNREF
+        sv_magic_portable
+        SV_MUTABLE_RETURN
+        SV_NOSTEAL
+        sv_pvn_force_flags
+        SV_SMAGIC
+        SV_UTF8_NO_ENCODING
+        SvPV_const
+        SvPV_flags
+        SvPV_flags_const
+        SvPV_flags_const_nolen
+        SvPV_flags_mutable
+        SvPV_force
+        SvPV_force_flags
+        SvPV_force_flags_mutable
+        SvPV_force_flags_nolen
+        SvPV_force_mutable
+        SvPV_force_nolen
+        SvPV_force_nomg_nolen
+        SvPV_mutable
+        SvPV_nolen_const
+        SvPV_nomg_const
+        SvPV_nomg_const_nolen
+        SvUOK
+        UTF8_MAXBYTES
+    * provide compatibility macros for vanished variables
+      PL_expect, PL_copline, PL_rsfp, PL_rsfp_filters
+    * add warnings support to ppport.h
+    * update ppport.h file searching logic
+    * add -c.inc and -xs.inc to the list of supported extensions
+    * document that --copy doesn't include the dot
+    * improve soak script and devel/buildperl.pl
+
 3.11_01 - 2007-03-23
 
     * added support for the following API

@@ -1,5 +1,33 @@
 TODO:
 
+* > 3. In several cases, "perl ppport.h --copy=.new" output a new file in
+  > which the only change was the addition of "#include "ppport.h"". In each
+  > case, that actually wasn't necessary because the source file in question
+  > already #included another source file which #included ppport.h itself.
+  > Would it be possible for the analyzer to follow #include directives to
+  > spot cases like this?
+
+  Uh, well, I guess it would be possible. But I have some concerns:
+
+  1. ppport.h is already too big. :-)
+
+  2. There is code in ppport.h to actually remove an
+
+       #include "ppport.h"
+
+     if it appears not to be needed. If it's not needed in your
+     included file, it might be dropped from there and moved to
+     the other file that included the first one. This would make
+     the logic much more complicated.
+
+  3. As ppport.h is configurable, it's not (always) a good idea
+     to put it into a file that's included from another file.
+
+  I guess I'll have to think about this a little more. Maybe I can
+  come up with a fancy solution that doesn't increase the code size
+  too much.
+
+
 * On 14/12/06, Nicholas Clark <nick@ccl4.org> wrote:
   > On Thu, Dec 14, 2006 at 05:03:24AM +0100, Andreas J. Koenig wrote:
   >  
@@ -13,6 +41,8 @@ TODO:
   1. your redefinition of SVt_PBVM is probably what most XS modules want
   2. anyway, if we remove it from the core, it might appear in Devel::PPPort :)
 
+
+* maybe backport bytes_from_utf8() for 5.6.0 (or even before)?
 
 * check which of the following we need to support:
 

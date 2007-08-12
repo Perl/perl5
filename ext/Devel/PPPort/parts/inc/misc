@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 38 $
+##  $Revision: 39 $
 ##  $Author: mhx $
-##  $Date: 2007/01/02 12:32:34 +0100 $
+##  $Date: 2007/07/18 13:09:15 +0200 $
 ##
 ################################################################################
 ##
@@ -37,6 +37,7 @@ END_EXTERN_C
 EXTERN_C
 STMT_START
 STMT_END
+UTF8_MAXBYTES
 XSRETURN
 
 =implementation
@@ -212,6 +213,8 @@ __UNDEFINED__  PERL_ABS(x)     ((x) < 0 ? -(x) : (x))
 __UNDEFINED__  dVAR            dNOOP
 
 __UNDEFINED__  SVf             "_"
+
+__UNDEFINED__ UTF8_MAXBYTES    UTF8_MAXLEN
 
 =xsmisc
 

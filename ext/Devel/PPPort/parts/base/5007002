@@ -47,7 +47,6 @@ PERL_MAGIC_ext                 # added by devel/scanprov
 PERL_MAGIC_fm                  # added by devel/scanprov
 PERL_MAGIC_isa                 # added by devel/scanprov
 PERL_MAGIC_isaelem             # added by devel/scanprov
-PERL_MAGIC_mutex               # added by devel/scanprov
 PERL_MAGIC_nkeys               # added by devel/scanprov
 PERL_MAGIC_overload            # added by devel/scanprov
 PERL_MAGIC_overload_elem       # added by devel/scanprov
@@ -69,3 +68,6 @@ PERL_MAGIC_uvar                # added by devel/scanprov
 PERL_MAGIC_vec                 # added by devel/scanprov
 PERL_UNUSED_DECL               # added by devel/scanprov
 PERL_UNUSED_VAR                # added by devel/scanprov
+SV_GMAGIC                      # added by devel/scanprov
+SvPV_flags                     # added by devel/scanprov
+SvPV_force_flags               # added by devel/scanprov

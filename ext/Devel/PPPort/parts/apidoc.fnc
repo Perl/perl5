@@ -16,23 +16,13 @@ Am|bool|strNE|char* s1|char* s2
 Am|bool|strnEQ|char* s1|char* s2|STRLEN len
 Am|bool|strnNE|char* s1|char* s2|STRLEN len
 Am|bool|SvIOK_notUV|SV* sv
-Am|bool|SvIOKp|SV* sv
-Am|bool|SvIOK|SV* sv
 Am|bool|SvIOK_UV|SV* sv
 Am|bool|SvIsCOW_shared_hash|SV* sv
 Am|bool|SvIsCOW|SV* sv
-Am|bool|SvNIOKp|SV* sv
-Am|bool|SvNIOK|SV* sv
-Am|bool|SvNOKp|SV* sv
-Am|bool|SvNOK|SV* sv
-Am|bool|SvOK|SV* sv
-Am|bool|SvOOK|SV* sv
-Am|bool|SvPOKp|SV* sv
-Am|bool|SvPOK|SV* sv
-Am|bool|SvROK|SV* sv
+Am|bool|SvRXOK|SV* sv
 Am|bool|SvTAINTED|SV* sv
 Am|bool|SvTRUE|SV* sv
-Am|bool|SvUTF8|SV* sv
+Am|bool|SvUOK|SV* sv
 Am|bool|SvVOK|SV* sv
 Am|char*|HePV|HE* he|STRLEN len
 Am|char*|HvNAME|HV* stash
@@ -89,6 +79,7 @@ Am|NV|SvNVx|SV* sv
 Am|NV|SvNVX|SV* sv
 Amn|(whatever)|RETVAL
 Amn|(whatever)|THIS
+Am|REGEXP *|SvRX|SV *sv
 Ams||dAX
 Ams||dAXMARK
 Ams||dITEMS
@@ -134,7 +125,19 @@ Ams||XSRETURN_UNDEF
 Ams||XSRETURN_YES
 Ams||XS_VERSION_BOOTCHECK
 Am|U32|HeHASH|HE* he
+Am|U32|SvIOKp|SV* sv
+Am|U32|SvIOK|SV* sv
+Am|U32|SvNIOKp|SV* sv
+Am|U32|SvNIOK|SV* sv
+Am|U32|SvNOKp|SV* sv
+Am|U32|SvNOK|SV* sv
+Am|U32|SvOK|SV* sv
+Am|U32|SvOOK|SV* sv
+Am|U32|SvPOKp|SV* sv
+Am|U32|SvPOK|SV* sv
 Am|U32|SvREFCNT|SV* sv
+Am|U32|SvROK|SV* sv
+Am|U32|SvUTF8|SV* sv
 AmU||G_ARRAY
 AmU||G_DISCARD
 AmU||G_EVAL
@@ -245,7 +248,6 @@ Am|void|SvTAINTED_off|SV* sv
 Am|void|SvTAINTED_on|SV* sv
 Am|void|SvTAINT|SV* sv
 Am|void|SvUNLOCK|SV* sv
-Am|void|SvUOK|SV* sv
 Am|void|SvUPGRADE|SV* sv|svtype type
 Am|void|SvUTF8_off|SV *sv
 Am|void|SvUTF8_on|SV *sv

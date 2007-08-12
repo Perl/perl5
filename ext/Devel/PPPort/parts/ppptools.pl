@@ -107,7 +107,7 @@ sub parse_partspec
   }
 
   unless (exists $data{provides}) {
-    $data{provides} = ($file =~ /(\w+)\.?$/)[0];
+    $data{provides} = ($file =~ /(\w+)$/)[0];
   }
   $data{provides} = [$data{provides} =~ /(\S+)/g];
 

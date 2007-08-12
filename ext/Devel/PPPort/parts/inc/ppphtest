@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 34 $
+##  $Revision: 38 $
 ##  $Author: mhx $
-##  $Date: 2007/01/02 12:32:32 +0100 $
+##  $Date: 2007/08/12 23:58:29 +0200 $
 ##
 ################################################################################
 ##
@@ -15,11 +15,11 @@
 ##
 ################################################################################
 
-=tests plan => 203
+=tests plan => 221
 
 BEGIN {
   if ($ENV{'SKIP_SLOW_TESTS'}) {
-    for (1 .. 203) {
+    for (1 .. 221) {
       skip("skip: SKIP_SLOW_TESTS", 0);
     }
     exit 0;
@@ -270,9 +270,9 @@ ok($o =~ /^Scanning.*file1\.xs/mi);
 ok($o =~ /Analyzing.*file1\.xs/mi);
 ok($o !~ /^Scanning.*file2\.xs/mi);
 ok($o =~ /^Uses newCONSTSUB/m);
-ok($o =~ /^Uses SvPV_nolen.*depends.*sv_2pv_nolen/m);
+ok($o =~ /^Uses SvPV_nolen.*depends.*sv_2pv_flags/m);
+ok($o =~ /WARNING: PL_expect/m);
 ok($o =~ /hint for newCONSTSUB/m);
-ok($o !~ /hint for sv_2pv_nolen/m);
 ok($o =~ /^Looks good/m);
 
 $o = ppport(qw(--nochanges --nohints file1.xs));
@@ -280,9 +280,9 @@ ok($o =~ /^Scanning.*file1\.xs/mi);
 ok($o =~ /Analyzing.*file1\.xs/mi);
 ok($o !~ /^Scanning.*file2\.xs/mi);
 ok($o =~ /^Uses newCONSTSUB/m);
-ok($o =~ /^Uses SvPV_nolen.*depends.*sv_2pv_nolen/m);
+ok($o =~ /^Uses SvPV_nolen.*depends.*sv_2pv_flags/m);
+ok($o =~ /WARNING: PL_expect/m);
 ok($o !~ /hint for newCONSTSUB/m);
-ok($o !~ /hint for sv_2pv_nolen/m);
 ok($o =~ /^Looks good/m);
 
 $o = ppport(qw(--nochanges --nohints --nodiag file1.xs));
@@ -291,8 +291,8 @@ ok($o =~ /Analyzing.*file1\.xs/mi);
 ok($o !~ /^Scanning.*file2\.xs/mi);
 ok($o !~ /^Uses newCONSTSUB/m);
 ok($o !~ /^Uses SvPV_nolen/m);
+ok($o =~ /WARNING: PL_expect/m);
 ok($o !~ /hint for newCONSTSUB/m);
-ok($o !~ /hint for sv_2pv_nolen/m);
 ok($o =~ /^Looks good/m);
 
 $o = ppport(qw(--nochanges --quiet file1.xs));
@@ -331,11 +331,12 @@ ok($o =~ /^\s*$/);
 ---------------------------- file1.xs -----------------------------------------
 
 #define NEED_newCONSTSUB
-#define NEED_sv_2pv_nolen
+#define NEED_sv_2pv_flags
 #include "ppport.h"
 
 newCONSTSUB();
 SvPV_nolen();
+PL_expect = 0;
 
 ---------------------------- file2.xs -----------------------------------------
 
@@ -673,12 +674,14 @@ ok(not ref $p{call_sv});
 
 ok(exists $p{grok_bin});
 ok(ref $p{grok_bin}, 'HASH');
-ok(scalar keys %{$p{grok_bin}}, 1);
+ok(scalar keys %{$p{grok_bin}}, 2);
 ok($p{grok_bin}{explicit});
+ok($p{grok_bin}{depend});
 
 ok(exists $p{gv_stashpvn});
 ok(ref $p{gv_stashpvn}, 'HASH');
-ok(scalar keys %{$p{gv_stashpvn}}, 1);
+ok(scalar keys %{$p{gv_stashpvn}}, 2);
+ok($p{gv_stashpvn}{depend});
 ok($p{gv_stashpvn}{hint});
 
 ok(exists $p{sv_catpvf_mg});
@@ -686,6 +689,11 @@ ok(ref $p{sv_catpvf_mg}, 'HASH');
 ok(scalar keys %{$p{sv_catpvf_mg}}, 2);
 ok($p{sv_catpvf_mg}{explicit});
 ok($p{sv_catpvf_mg}{depend});
+
+ok(exists $p{PL_signals});
+ok(ref $p{PL_signals}, 'HASH');
+ok(scalar keys %{$p{PL_signals}}, 1);
+ok($p{PL_signals}{explicit});
 
 ===============================================================================
 
@@ -774,4 +782,27 @@ if (PL_signals == 42)
 PL_signals = 123;
 if (PL_signals == 42)
   foo();
+
+===============================================================================
+
+my $o = ppport(qw(--nochanges file.xs));
+ok($o =~ /^Uses PL_copline/m);
+ok($o =~ /WARNING: PL_copline/m);
+ok($o =~ /^Uses SvUOK/m);
+ok($o =~ /WARNING: Uses SvUOK, which may not be portable/m);
+ok($o =~ /^Analysis completed \(2 warnings\)/m);
+ok($o =~ /^Looks good/m);
+
+$o = ppport(qw(--nochanges --compat-version=5.8.0 file.xs));
+ok($o =~ /^Uses PL_copline/m);
+ok($o =~ /WARNING: PL_copline/m);
+ok($o !~ /WARNING: Uses SvUOK, which may not be portable/m);
+ok($o =~ /^Analysis completed \(1 warning\)/m);
+ok($o =~ /^Looks good/m);
+
+---------------------------- file.xs -----------------------------------------
+
+#include "ppport.h"
+SvUOK
+PL_copline
 

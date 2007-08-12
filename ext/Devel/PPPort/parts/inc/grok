@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 11 $
+##  $Revision: 13 $
 ##  $Author: mhx $
-##  $Date: 2007/01/02 12:32:34 +0100 $
+##  $Date: 2007/08/12 23:57:10 +0200 $
 ##
 ################################################################################
 ##
@@ -38,7 +38,6 @@ __UNDEFINED__  IS_NUMBER_NEG                   0x08
 __UNDEFINED__  IS_NUMBER_INFINITY              0x10
 __UNDEFINED__  IS_NUMBER_NAN                   0x20
 
-/* GROK_NUMERIC_RADIX depends on grok_numeric_radix */
 __UNDEFINED__  GROK_NUMERIC_RADIX(sp, send) grok_numeric_radix(sp, send)
 
 __UNDEFINED__  PERL_SCAN_GREATER_THAN_UV_MAX   0x02
@@ -88,8 +87,6 @@ grok_numeric_radix(pTHX_ const char **sp, const char *send)
 }
 #endif
 #endif
-
-/* grok_number depends on grok_numeric_radix */
 
 #ifndef grok_number
 #if { NEED grok_number }

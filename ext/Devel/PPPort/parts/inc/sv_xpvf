@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 5 $
+##  $Revision: 7 $
 ##  $Author: mhx $
-##  $Date: 2007/01/02 12:32:32 +0100 $
+##  $Date: 2007/08/12 23:57:10 +0200 $
 ##
 ################################################################################
 ##
@@ -45,17 +45,14 @@ vnewSVpvf(pTHX_ const char *pat, va_list *args)
 #endif
 #endif
 
-/* sv_vcatpvf depends on sv_vcatpvfn */
 #if { VERSION >= 5.004 } && !defined(sv_vcatpvf)
 #  define sv_vcatpvf(sv, pat, args)  sv_vcatpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*))
 #endif
 
-/* sv_vsetpvf depends on sv_vsetpvfn */
 #if { VERSION >= 5.004 } && !defined(sv_vsetpvf)
 #  define sv_vsetpvf(sv, pat, args)  sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*))
 #endif
 
-/* sv_catpvf_mg depends on sv_vcatpvfn, sv_catpvf_mg_nocontext */
 #if { VERSION >= 5.004 } && !defined(sv_catpvf_mg)
 #if { NEED sv_catpvf_mg }
 
@@ -72,7 +69,6 @@ sv_catpvf_mg(pTHX_ SV *sv, const char *pat, ...)
 #endif
 #endif
 
-/* sv_catpvf_mg_nocontext depends on sv_vcatpvfn */
 #ifdef PERL_IMPLICIT_CONTEXT
 #if { VERSION >= 5.004 } && !defined(sv_catpvf_mg_nocontext)
 #if { NEED sv_catpvf_mg_nocontext }
@@ -92,6 +88,7 @@ sv_catpvf_mg_nocontext(SV *sv, const char *pat, ...)
 #endif
 #endif
 
+/* sv_catpvf_mg depends on sv_catpvf_mg_nocontext */
 #ifndef sv_catpvf_mg
 #  ifdef PERL_IMPLICIT_CONTEXT
 #    define sv_catpvf_mg   Perl_sv_catpvf_mg_nocontext
@@ -100,7 +97,6 @@ sv_catpvf_mg_nocontext(SV *sv, const char *pat, ...)
 #  endif
 #endif
 
-/* sv_vcatpvf_mg depends on sv_vcatpvfn */
 #if { VERSION >= 5.004 } && !defined(sv_vcatpvf_mg)
 #  define sv_vcatpvf_mg(sv, pat, args)                                     \
    STMT_START {                                                            \
@@ -109,7 +105,6 @@ sv_catpvf_mg_nocontext(SV *sv, const char *pat, ...)
    } STMT_END
 #endif
 
-/* sv_setpvf_mg depends on sv_vsetpvfn, sv_setpvf_mg_nocontext */
 #if { VERSION >= 5.004 } && !defined(sv_setpvf_mg)
 #if { NEED sv_setpvf_mg }
 
@@ -126,7 +121,6 @@ sv_setpvf_mg(pTHX_ SV *sv, const char *pat, ...)
 #endif
 #endif
 
-/* sv_setpvf_mg_nocontext depends on sv_vsetpvfn */
 #ifdef PERL_IMPLICIT_CONTEXT
 #if { VERSION >= 5.004 } && !defined(sv_setpvf_mg_nocontext)
 #if { NEED sv_setpvf_mg_nocontext }
@@ -146,6 +140,7 @@ sv_setpvf_mg_nocontext(SV *sv, const char *pat, ...)
 #endif
 #endif
 
+/* sv_setpvf_mg depends on sv_setpvf_mg_nocontext */
 #ifndef sv_setpvf_mg
 #  ifdef PERL_IMPLICIT_CONTEXT
 #    define sv_setpvf_mg   Perl_sv_setpvf_mg_nocontext
@@ -154,7 +149,6 @@ sv_setpvf_mg_nocontext(SV *sv, const char *pat, ...)
 #  endif
 #endif
 
-/* sv_vsetpvf_mg depends on sv_vsetpvfn */
 #if { VERSION >= 5.004 } && !defined(sv_vsetpvf_mg)
 #  define sv_vsetpvf_mg(sv, pat, args)                                     \
    STMT_START {                                                            \

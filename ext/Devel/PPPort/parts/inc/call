@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 12 $
+##  $Revision: 14 $
 ##  $Author: mhx $
-##  $Date: 2007/03/23 17:57:58 +0100 $
+##  $Date: 2007/08/12 23:57:09 +0200 $
 ##
 ################################################################################
 ##
@@ -43,7 +43,6 @@ __UNDEFINED__ PERL_LOADMOD_IMPORT_OPS	0x4
 /* Replace: 0 */
 
 /* Replace perl_eval_pv with eval_pv */
-/* eval_pv depends on eval_sv */
 
 #ifndef eval_pv
 #if { NEED eval_pv }
@@ -129,8 +128,6 @@ vload_module(U32 flags, SV *name, SV *ver, va_list *args)
 
 #endif
 #endif
-
-/* load_module depends on vload_module */
 
 #ifndef load_module
 #if { NEED load_module }
@@ -276,9 +273,8 @@ load_module(flags, name, version, ...)
 	CODE:
 		/* Both SV parameters are donated to the ops built inside
 		   load_module, so we need to bump the refcounts.  */
-		SvREFCNT_inc(name);
-		SvREFCNT_inc(version);
-		Perl_load_module(aTHX_ flags, name, version, NULL);
+		Perl_load_module(aTHX_ flags, SvREFCNT_inc_simple(name),
+		                 SvREFCNT_inc_simple(version), NULL);
 
 =tests plan => 46
 

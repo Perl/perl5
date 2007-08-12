@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 52 $
+#  $Revision: 54 $
 #  $Author: mhx $
-#  $Date: 2007/03/23 16:27:19 +0100 $
+#  $Date: 2007/08/13 00:03:11 +0200 $
 #
 ################################################################################
 #
@@ -27,7 +27,7 @@ my $INCLUDE = 'parts/inc';
 my $DPPP = 'DPPP_';
 
 my %embed = map { ( $_->{name} => $_ ) }
-            parse_embed(qw(parts/embed.fnc parts/apidoc.fnc));
+            parse_embed(qw(parts/embed.fnc parts/apidoc.fnc parts/ppport.fnc));
 
 my(%provides, %prototypes, %explicit);
 
@@ -125,7 +125,7 @@ $data =~ s{^__UNSUPPORTED_API__(\s*?)^}
           {join "\n", @todo}gem;
 
 $data =~ s{__MIN_PERL__}{5.003}g;
-$data =~ s{__MAX_PERL__}{5.9.4}g;
+$data =~ s{__MAX_PERL__}{5.9.5}g;
 
 open FH, ">PPPort.pm" or die "PPPort.pm: $!\n";
 print FH $data;
@@ -344,9 +344,9 @@ __DATA__
 #
 ################################################################################
 #
-#  $Revision: 52 $
+#  $Revision: 54 $
 #  $Author: mhx $
-#  $Date: 2007/03/23 16:27:19 +0100 $
+#  $Date: 2007/08/13 00:03:11 +0200 $
 #
 ################################################################################
 #
@@ -507,7 +507,7 @@ package Devel::PPPort;
 use strict;
 use vars qw($VERSION $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.11_01 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.11_02 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 sub _init_data
 {

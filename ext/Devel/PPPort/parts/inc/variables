@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 8 $
+##  $Revision: 11 $
 ##  $Author: mhx $
-##  $Date: 2007/03/23 16:24:34 +0100 $
+##  $Date: 2007/08/13 00:31:48 +0200 $
 ##
 ################################################################################
 ##
@@ -17,7 +17,43 @@
 
 =provides
 
-/PL_\w+/
+PL_ppaddr
+PL_no_modify
+PL_DBsignal
+PL_DBsingle
+PL_DBsub
+PL_DBtrace
+PL_Sv
+PL_compiling
+PL_copline
+PL_curcop
+PL_curstash
+PL_debstash
+PL_defgv
+PL_diehook
+PL_dirty
+PL_dowarn
+PL_errgv
+PL_expect
+PL_hexdigit
+PL_hints
+PL_laststatval
+PL_na
+PL_perl_destruct_level
+PL_perldb
+PL_rsfp_filters
+PL_rsfp
+PL_stack_base
+PL_stack_sp
+PL_statcache
+PL_stdingv
+PL_sv_arenaroot
+PL_sv_no
+PL_sv_undef
+PL_sv_yes
+PL_tainted
+PL_tainting
+PL_signals
 PERL_SIGNALS_UNSAFE_FLAG
 
 =dontwarn
@@ -93,12 +129,18 @@ __NEED_VAR__ U32 PL_signals = D_PPP_PERL_SIGNALS_INIT;
 /* Replace: 0 */
 #endif
 
+/* Warning: PL_expect, PL_copline, PL_rsfp, PL_rsfp_filters
+ * Do not use this variable. It is internal to the perl parser
+ * and may change or even be removed in the future. Note that
+ * as of perl 5.9.5 you cannot assign to this variable anymore.
+ */
+
+/* TODO: cannot assign to these vars; is it worth fixing? */
 #if { VERSION >= 5.9.5 }
-#  define PL_PARSER_EXISTS
-#  define PL_expect   (PL_parser ? PL_parser->expect : 0)
-#  define PL_copline  (PL_parser ? PL_parser->copline : 0)
-#  define PL_rsfp     (PL_parser ? PL_parser->rsfp : 0)
-#  define PL_rsfp_filters (PL_parser ? PL_parser->rsfp_filters : 0)
+#  define PL_expect         (PL_parser ? PL_parser->expect : 0)
+#  define PL_copline        (PL_parser ? PL_parser->copline : 0)
+#  define PL_rsfp           (PL_parser ? PL_parser->rsfp : (PerlIO *) 0)
+#  define PL_rsfp_filters   (PL_parser ? PL_parser->rsfp_filters : (AV *) 0)
 #endif
 
 =xsinit
@@ -175,6 +217,27 @@ PL_copline()
 		RETVAL
 
 SV *
+PL_expect()
+	CODE:
+		RETVAL = newSViv((IV) PL_expect);
+	OUTPUT:
+		RETVAL
+
+SV *
+PL_rsfp()
+	CODE:
+		RETVAL = newSViv(PL_rsfp != 0);
+	OUTPUT:
+		RETVAL
+
+SV *
+PL_rsfp_filters()
+	CODE:
+		RETVAL = newSViv(PL_rsfp_filters != 0);
+	OUTPUT:
+		RETVAL
+
+SV *
 PL_hexdigit()
 	CODE:
 		RETVAL = newSVpv(PL_hexdigit, 0);
@@ -219,22 +282,10 @@ other_variables()
 		ppp_TESTVAR(PL_dirty);
 		ppp_TESTVAR(PL_dowarn);
 		ppp_TESTVAR(PL_errgv);
-#ifdef PL_PARSER_EXISTS
-		ppp_TESTVAR(PL_parser); /* just any var that isn't PL_expect */
-#else
-		ppp_TESTVAR(PL_expect);
-#endif
 		ppp_TESTVAR(PL_laststatval);
 		ppp_TESTVAR(PL_no_modify);
 		ppp_TESTVAR(PL_perl_destruct_level);
 		ppp_TESTVAR(PL_perldb);
-#ifdef PL_PARSER_EXISTS
-		ppp_TESTVAR(PL_parser); /* just any var that isn't PL_expect */
-		ppp_TESTVAR(PL_parser);
-#else
-		ppp_TESTVAR(PL_rsfp);
-		ppp_TESTVAR(PL_rsfp_filters);
-#endif
 		ppp_TESTVAR(PL_stack_base);
 		ppp_TESTVAR(PL_stack_sp);
 		ppp_TESTVAR(PL_statcache);
@@ -254,6 +305,9 @@ ok(!&Devel::PPPort::PL_sv_no());
 ok(&Devel::PPPort::PL_na("abcd"), 4);
 ok(&Devel::PPPort::PL_Sv(), "mhx");
 ok(defined &Devel::PPPort::PL_copline());
+ok(defined &Devel::PPPort::PL_expect());
+ok(defined &Devel::PPPort::PL_rsfp());
+ok(defined &Devel::PPPort::PL_rsfp_filters());
 ok(&Devel::PPPort::PL_hexdigit() =~ /^[0-9a-zA-Z]+$/);
 ok(defined &Devel::PPPort::PL_hints());
 ok(&Devel::PPPort::PL_ppaddr("mhx"), "MHX");

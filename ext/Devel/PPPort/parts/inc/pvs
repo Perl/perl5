@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 4 $
+##  $Revision: 5 $
 ##  $Author: mhx $
-##  $Date: 2007/01/02 12:32:29 +0100 $
+##  $Date: 2007/07/18 14:19:44 +0200 $
 ##
 ################################################################################
 ##
@@ -69,7 +69,7 @@ hv_stores(hv, sv)
 	SV *hv
 	SV *sv
 	PPCODE:
-		hv_stores((HV *) SvRV(hv), "hv_stores", SvREFCNT_inc(sv));
+		hv_stores((HV *) SvRV(hv), "hv_stores", SvREFCNT_inc_simple(sv));
 
 =tests plan => 7
 

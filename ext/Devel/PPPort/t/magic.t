@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (13) {
+  if (15) {
     load();
-    plan(tests => 13);
+    plan(tests => 15);
   }
 }
 
@@ -88,4 +88,8 @@ my $ver = eval qq[qv("v1.2.0")];
 ok($[ < 5.009 || $@ eq '');
 ok($@ || Devel::PPPort::SvVSTRING_mg($ver));
 ok(!Devel::PPPort::SvVSTRING_mg(4711));
+
+my $foo = 'bar';
+ok(Devel::PPPort::sv_magic_portable($foo));
+ok($foo eq 'bar');
 

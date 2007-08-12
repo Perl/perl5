@@ -5,9 +5,9 @@
 #
 ################################################################################
 #
-#  $Revision: 22 $
+#  $Revision: 25 $
 #  $Author: mhx $
-#  $Date: 2007/01/02 12:32:28 +0100 $
+#  $Date: 2007/08/12 23:23:40 +0200 $
 #
 ################################################################################
 #
@@ -31,7 +31,7 @@ else {
   *OUT = \*STDOUT;
 }
 
-my @f = parse_embed(qw( parts/embed.fnc parts/apidoc.fnc ));
+my @f = parse_embed(qw( parts/embed.fnc parts/apidoc.fnc parts/ppport.fnc ));
 
 my %todo = %{&parse_todo};
 
@@ -141,23 +141,27 @@ print OUT <<HEAD;
 
 #else
 
+#define NEED_PL_signals
 #define NEED_eval_pv
 #define NEED_grok_bin
 #define NEED_grok_hex
 #define NEED_grok_number
 #define NEED_grok_numeric_radix
 #define NEED_grok_oct
+#define NEED_load_module
 #define NEED_my_snprintf
 #define NEED_my_strlcat
 #define NEED_my_strlcpy
 #define NEED_newCONSTSUB
 #define NEED_newRV_noinc
-#define NEED_sv_2pv_nolen
+#define NEED_sv_2pv_flags
+#define NEED_sv_pvn_force_flags
 #define NEED_sv_2pvbyte
 #define NEED_sv_catpvf_mg
 #define NEED_sv_catpvf_mg_nocontext
 #define NEED_sv_setpvf_mg
 #define NEED_sv_setpvf_mg_nocontext
+#define NEED_vload_module
 #define NEED_vnewSVpvf
 #define NEED_warner
 

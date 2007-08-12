@@ -7,9 +7,9 @@
 #
 ################################################################################
 #
-#  $Revision: 15 $
+#  $Revision: 16 $
 #  $Author: mhx $
-#  $Date: 2007/01/02 12:32:28 +0100 $
+#  $Date: 2007/08/12 23:25:33 +0200 $
 #
 ################################################################################
 #
@@ -33,7 +33,7 @@ use File::Find;
 use List::Util qw(max);
 use Config;
 
-my $VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.11_01 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+my $VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.11_02 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 $| = 1;
 my %OPT = (
@@ -207,7 +207,7 @@ sub perl_version
 {
   my $perl = shift;
   my $ver = `$perl -e 'print \$]' 2>&1`;
-  return $? == 0 && $ver >= 5 ? $ver : 0;
+  return $? == 0 && $ver =~ /^\d+\.\d+/ && $ver >= 5 ? $ver : 0;
 }
 
 sub parse_version

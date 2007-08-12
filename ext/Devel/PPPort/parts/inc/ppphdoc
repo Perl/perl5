@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 28 $
+##  $Revision: 30 $
 ##  $Author: mhx $
-##  $Date: 2007/01/02 12:32:32 +0100 $
+##  $Date: 2007/05/22 21:26:46 +0200 $
 ##
 ################################################################################
 ##
@@ -88,7 +88,10 @@ to be installed on your system.
 
 If this option is given, a copy of each file will be saved with
 the given suffix that contains the suggested changes. This does
-not require any external programs.
+not require any external programs. Note that this does not
+automagially add a dot between the original filename and the
+suffix. If you want the dot, you have to include it in the option
+argument.
 
 If neither C<--patch> or C<--copy> are given, the default is to
 simply print the diffs for each file. This requires either
@@ -127,7 +130,7 @@ alerts will be printed.
 =head2 --nohints
 
 Don't output any hints. Hints often contain useful portability
-notes.
+notes. Warnings will still be displayed.
 
 =head2 --nochanges
 
@@ -154,7 +157,7 @@ module is installed.
 
 Lists the API elements for which compatibility is provided by
 F<ppport.h>. Also lists if it must be explicitly requested,
-if it has dependencies, and if there are hints for it.
+if it has dependencies, and if there are hints or warnings for it.
 
 =head2 --list-unsupported
 
@@ -270,6 +273,10 @@ the C<--diff> option:
     perl ppport.h --diff='diff -C 10'
 
 This would output context diffs with 10 lines of context.
+
+If you want to create patched copies of your files instead, use:
+
+    perl ppport.h --copy=.new
 
 To display portability information for the C<newSVpvn> function,
 use:

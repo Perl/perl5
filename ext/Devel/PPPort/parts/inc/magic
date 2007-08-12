@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 11 $
+##  $Revision: 13 $
 ##  $Author: mhx $
-##  $Date: 2007/01/02 12:32:34 +0100 $
+##  $Date: 2007/08/12 23:24:34 +0200 $
 ##
 ################################################################################
 ##
@@ -19,6 +19,7 @@
 
 __UNDEFINED__
 /sv_\w+_mg/
+sv_magic_portable
 
 =implementation
 
@@ -65,8 +66,6 @@ __UNDEFINED__  PERL_MAGIC_backref         '<'
 __UNDEFINED__  PERL_MAGIC_ext             '~'
 
 /* That's the best we can do... */
-__UNDEFINED__  SvPV_force_nomg    SvPV_force
-__UNDEFINED__  SvPV_nomg          SvPV
 __UNDEFINED__  sv_catpvn_nomg     sv_catpvn
 __UNDEFINED__  sv_catsv_nomg      sv_catsv
 __UNDEFINED__  sv_setsv_nomg      sv_setsv
@@ -166,6 +165,44 @@ __UNDEFINED__  SvUV_nomg          SvUV
 
 __UNDEFINED__  SvVSTRING_mg(sv)  (SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_vstring) : NULL)
 
+/* Hint: sv_magic_portable
+ * This is a compatibility function that is only available with
+ * Devel::PPPort. It is NOT in the perl core.
+ * Its purpose is to mimic the 5.8.0 behaviour of sv_magic() when
+ * it is being passed a name pointer with namlen == 0. In that
+ * case, perl 5.8.0 and later store the pointer, not a copy of it.
+ * The compatibility can be provided back to perl 5.004. With
+ * earlier versions, the code will not compile.
+ */
+
+#if { VERSION < 5.004 }
+
+  /* code that uses sv_magic_portable will not compile */
+
+#elif { VERSION < 5.8.0 }
+
+#  define sv_magic_portable(sv, obj, how, name, namlen)         \
+   STMT_START {                                                 \
+     if (name && namlen == 0)                                   \
+     {                                                          \
+       MAGIC *mg;                                               \
+       sv_magic(sv, obj, how, 0, 0);                            \
+       mg = SvMAGIC(sv);                                        \
+       mg->mg_len = -42; /* XXX: this is the tricky part */     \
+       mg->mg_ptr = name;                                       \
+     }                                                          \
+     else                                                       \
+     {                                                          \
+       sv_magic(sv, obj, how, name, namlen);                    \
+     }                                                          \
+   } STMT_END
+
+#else
+
+#  define sv_magic_portable(a, b, c, d, e)  sv_magic(a, b, c, d, e)
+
+#endif
+
 =xsubs
 
 void
@@ -260,7 +297,27 @@ SvVSTRING_mg(sv)
 	OUTPUT:
 		RETVAL
 
-=tests plan => 13
+int
+sv_magic_portable(sv)
+	SV *sv
+	PREINIT:
+		MAGIC *mg;
+		const char *foo = "foo";
+	CODE:
+#if { VERSION >= 5.004 }
+		sv_magic_portable(sv, 0, '~', foo, 0);
+		mg = mg_find(sv, '~');
+		RETVAL = mg->mg_ptr == foo;
+#else
+		sv_magic(sv, 0, '~', foo, strlen(foo));
+		mg = mg_find(sv, '~');
+		RETVAL = strEQ(mg->mg_ptr, foo);
+#endif
+		sv_unmagic(sv, '~');
+	OUTPUT:
+		RETVAL
+
+=tests plan => 15
 
 use Tie::Hash;
 my %h;
@@ -302,4 +359,8 @@ my $ver = eval qq[qv("v1.2.0")];
 ok($[ < 5.009 || $@ eq '');
 ok($@ || Devel::PPPort::SvVSTRING_mg($ver));
 ok(!Devel::PPPort::SvVSTRING_mg(4711));
+
+my $foo = 'bar';
+ok(Devel::PPPort::sv_magic_portable($foo));
+ok($foo eq 'bar');
 
