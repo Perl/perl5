@@ -8882,7 +8882,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
     } else if (k == LOGICAL)
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);	/* 2: embedded, otherwise 1 */
     else if (k == FOLDCHAR)
-	Perl_sv_catpvf(aTHX_ sv, "[0x%"UVXf"]",ARG(o) );	
+	Perl_sv_catpvf(aTHX_ sv, "[0x%"UVXf"]", PTR2UV(ARG(o)) );
     else if (k == ANYOF) {
 	int i, rangestart = -1;
 	const U8 flags = ANYOF_FLAGS(o);
