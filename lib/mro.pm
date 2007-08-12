@@ -319,8 +319,8 @@ works (like C<goto &maybe::next::method>);
 
 Specifying the mro type of a class before setting C<@ISA> will
 be faster than the other way around.  Also, making all of your
-C<@ISA> manipulations in a single assignment statement will be
-faster that doing them one by one via C<push> (which is what
+C<@ISA> manipulations in a single assignment or push statement
+will be faster that doing them one by one (which is what
 C<use base> does currently).
 
 Examples:
@@ -330,23 +330,29 @@ Examples:
   use base qw/A B C/;
   use mro 'c3';
 
+  # Equivalently slow
+  package Foo;
+  our @ISA;
+  require A; push(@ISA, 'A');
+  require B; push(@ISA, 'B');
+  require C; push(@ISA, 'C');
+  use mro 'c3';
+
   # The fastest way
   # (not exactly equivalent to above,
   #   as base.pm can do other magic)
+  package Foo;
   use mro 'c3';
-  use A ();
-  use B ();
-  use C ();
+  require A;
+  require B;
+  require C;
   our @ISA = qw/A B C/;
 
 Generally speaking, every time C<@ISA> is modified, the MRO
-of that class will be recalculated, because of the way array
-magic works.  Pushing multiple items onto C<@ISA> in one push
-statement still counts as multiple modifications.  However,
-assigning a list to C<@ISA> only counts as a single
-modification.  Thus if you really need to do C<push> as
-opposed to assignment, C<@ISA = (@ISA, qw/A B C/);>
-will still be faster than C<push(@ISA, qw/A B C/);>
+of that class will be recalculated because of the way array
+magic works.  Cutting down on unecessary recalculations is
+a win, especially with complex class hierarchies and/or
+the c3 mro.
 
 =head1 SEE ALSO
 

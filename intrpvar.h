@@ -180,8 +180,6 @@ PERLVAR(Iwatchok,	char *)
 PERLVARI(Iregmatch_slab, regmatch_slab *,	NULL)
 PERLVAR(Iregmatch_state, regmatch_state *)
 
-PERLVARI(Idelayedisa,	HV*,	NULL)   /* stash for PL_delaymagic for magic_setisa */
-
 /* Put anything new that is pointer aligned here. */
 
 PERLVAR(Idelaymagic,	U16)		/* ($<,$>) = ... */

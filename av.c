@@ -342,11 +342,14 @@ Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
 	SvREFCNT_dec(ary[key]);
     ary[key] = val;
     if (SvSMAGICAL(av)) {
+	const MAGIC* const mg = SvMAGIC(av);
 	if (val != &PL_sv_undef) {
-	    const MAGIC* const mg = SvMAGIC(av);
 	    sv_magic(val, (SV*)av, toLOWER(mg->mg_type), 0, key);
 	}
-	mg_set((SV*)av);
+	if (PL_delaymagic && mg->mg_type == PERL_MAGIC_isa)
+	    PL_delaymagic |= DM_ARRAY;
+	else
+	   mg_set((SV*)av);
     }
     return &ary[key];
 }
@@ -428,8 +431,13 @@ Perl_av_clear(pTHX_ register AV *av)
 	Perl_croak(aTHX_ PL_no_modify);
 
     /* Give any tie a chance to cleanup first */
-    if (SvRMAGICAL(av))
-	mg_clear((SV*)av); 
+    if (SvRMAGICAL(av)) {
+	const MAGIC* const mg = SvMAGIC(av);
+	if (PL_delaymagic && mg->mg_type == PERL_MAGIC_isa)
+	    PL_delaymagic |= DM_ARRAY;
+        else
+	    mg_clear((SV*)av); 
+    }
 
     if (AvMAX(av) < 0)
 	return;

@@ -181,6 +181,7 @@ Return the SV from the GV.
 #define DM_UID   0x003
 #define DM_RUID   0x001
 #define DM_EUID   0x002
+#define DM_ARRAY 0x004
 #define DM_GID   0x030
 #define DM_RGID   0x010
 #define DM_EGID   0x020

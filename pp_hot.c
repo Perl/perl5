@@ -1122,6 +1122,9 @@ PP(pp_aassign)
 	    PL_egid = PerlProc_getegid();
 	}
 	PL_tainting |= (PL_uid && (PL_euid != PL_uid || PL_egid != PL_gid));
+
+	if (PL_delaymagic & DM_ARRAY && SvMAGICAL((SV*)ary))
+	    mg_set((SV*)ary);
     }
     PL_delaymagic = 0;
 
@@ -1150,14 +1153,6 @@ PP(pp_aassign)
 	lelem = firstlelem + (relem - firstrelem);
 	while (relem <= SP)
 	    *relem++ = (lelem <= lastlelem) ? *lelem++ : &PL_sv_undef;
-    }
-
-    /* This is done at the bottom and in this order because
-       mro_isa_changed_in() can throw exceptions */
-    if(PL_delayedisa) {
-        HV* stash = PL_delayedisa;
-        PL_delayedisa = NULL;
-        mro_isa_changed_in(stash);
     }
 
     RETURN;

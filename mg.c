@@ -1528,6 +1528,10 @@ Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)
     /* Bail out if destruction is going on */
     if(PL_dirty) return 0;
 
+    /* Skip _isaelem because _isa will handle it shortly */
+    if (PL_delaymagic & DM_ARRAY && mg->mg_type == PERL_MAGIC_isaelem)
+	return 0;
+
     /* XXX Once it's possible, we need to
        detect that our @ISA is aliased in
        other stashes, and act on the stashes
@@ -1542,10 +1546,7 @@ Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)
             : (GV*)SvMAGIC(mg->mg_obj)->mg_obj
     );
 
-    if(PL_delaymagic)
-        PL_delayedisa = stash;
-    else
-        mro_isa_changed_in(stash);
+    mro_isa_changed_in(stash);
 
     return 0;
 }
