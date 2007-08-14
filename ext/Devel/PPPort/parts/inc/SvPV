@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 15 $
+##  $Revision: 17 $
 ##  $Author: mhx $
-##  $Date: 2007/08/12 23:57:47 +0200 $
+##  $Date: 2007/08/13 22:59:33 +0200 $
 ##
 ################################################################################
 ##
@@ -26,6 +26,7 @@ sv_pvn_force_flags
 =dontwarn
 
 NEED_sv_2pv_flags
+NEED_sv_2pv_flags_GLOBAL
 
 =implementation
 
@@ -87,12 +88,10 @@ __UNDEFINED__  sv_2pvbyte_nolen(sv)  sv_2pv_nolen(sv)
 /* Hint: sv_pvn
  * Always use the SvPV() macro instead of sv_pvn().
  */
-__UNDEFINED__  sv_pvn(sv, len)         SvPV(sv, len)
 
 /* Hint: sv_pvn_force
  * Always use the SvPV_force() macro instead of sv_pvn_force().
  */
-__UNDEFINED__  sv_pvn_force(sv, len)   SvPV_force(sv, len)
 
 /* If these are undefined, they're not handled by the core anyway */
 __UNDEFINED__  SV_IMMEDIATE_UNREF	0

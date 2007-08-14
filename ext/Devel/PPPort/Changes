@@ -1,3 +1,12 @@
+3.11_03 - 2007-08-14
+
+    * fix an infinite recursion in ppport.h that could be
+      triggered by circular dependencies
+    * fix PERL_BCDREVISION, which wasn't BCD but simply
+      shifted decimal (just in time for 5.10)
+    * fix detection of macros that are not listed in the
+      implementation/dontwarn sections
+
 3.11_02 - 2007-08-13
 
     * fix cpan #25372: special case sv_magic(sv, obj, how, name, 0)

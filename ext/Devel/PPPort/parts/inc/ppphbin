@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 40 $
+##  $Revision: 41 $
 ##  $Author: mhx $
-##  $Date: 2007/08/12 23:58:21 +0200 $
+##  $Date: 2007/08/13 21:08:26 +0200 $
 ##
 ################################################################################
 ##
@@ -106,6 +106,18 @@ my(%replace, %need, %hints, %warnings, %depends);
 my $replace = 0;
 my($hint, $define, $function);
 
+sub find_api
+{
+  my $code = shift;
+  $code =~ s{
+    ([^"'/]+)
+  | / (?: \*[^*]*\*+(?:[^$ccs][^*]*\*+)* / | /[^\r\n]*)
+  | (?:"[^"\\]*(?:\\.[^"\\]*)*" [^"'/]*)+
+  | (?:'[^'\\]*(?:\\.[^'\\]*)*' [^"'/]*)+
+  }{ defined $1 ? $1 : '' }egsx;
+  grep { exists $API{$_} } $code =~ /(\w+)/mg;
+}
+
 while (<DATA>) {
   if ($hint) {
     my $h = $hint->[0] eq 'Hint' ? \%hints : \%warnings;
@@ -128,7 +140,7 @@ while (<DATA>) {
     }
     else {
       if (exists $API{$define->[0]} && $define->[1] !~ /^DPPP_\(/) {
-        my @n = grep { exists $API{$_} } $define->[1] =~ /(\w+)/mg;
+        my @n = find_api($define->[1]);
         push @{$depends{$define->[0]}}, @n if @n
       }
       undef $define;
@@ -140,7 +152,7 @@ while (<DATA>) {
   if ($function) {
     if (/^}/) {
       if (exists $API{$function->[0]}) {
-        my @n = grep { exists $API{$_} } $function->[1] =~ /(\w+)/mg;
+        my @n = find_api($function->[1]);
         push @{$depends{$function->[0]}}, @n if @n
       }
       undef $define;
@@ -291,23 +303,13 @@ for $filename (@files) {
   # temporarily remove C comments from the code
   my @ccom;
   $c =~ s{
-    (
-        [^"'/]+
-      |
-        (?:"[^"\\]*(?:\\.[^"\\]*)*" [^"'/]*)+
-      |
-        (?:'[^'\\]*(?:\\.[^'\\]*)*' [^"'/]*)+
-    )
-  |
-    (/ (?:
-        \*[^*]*\*+(?:[^$ccs][^*]*\*+)* /
-        |
-        /[^\r\n]*
-      ))
-  }{
-    defined $2 and push @ccom, $2;
-    defined $1 ? $1 : "$ccs$#ccom$cce";
-  }egsx;
+    ( [^"'/]+
+    | (?:"[^"\\]*(?:\\.[^"\\]*)*" [^"'/]*)+
+    | (?:'[^'\\]*(?:\\.[^'\\]*)*' [^"'/]*)+ )
+  | (/ (?: \*[^*]*\*+(?:[^$ccs][^*]*\*+)* /
+         | /[^\r\n]* ) )
+  }{ defined $2 and push @ccom, $2;
+     defined $1 ? $1 : "$ccs$#ccom$cce" }egsx;
 
   $file{ccom} = \@ccom;
   $file{code} = $c;
@@ -665,10 +667,12 @@ sub can_use
 
 sub rec_depend
 {
-  my $func = shift;
-  my %seen;
+  my($func, $seen) = @_;
   return () unless exists $depends{$func};
-  grep !$seen{$_}++, map { ($_, rec_depend($_)) } @{$depends{$func}};
+  $seen = {%{$seen||{}}};
+  return () if $seen->{$func}++;
+  my %s;
+  grep !$s{$_}++, map { ($_, rec_depend($_, $seen)) } @{$depends{$func}};
 }
 
 sub parse_version

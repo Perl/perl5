@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 18 $
+#  $Revision: 19 $
 #  $Author: mhx $
-#  $Date: 2007/01/02 12:32:28 +0100 $
+#  $Date: 2007/08/13 22:59:58 +0200 $
 #
 ################################################################################
 #
@@ -189,7 +189,7 @@ sub parse_partspec
                              (defined $nop && exists $dontwarn{$nop}) ||
                              $h{$_}++;
                        }
-                       $data{implementation} =~ /^\s*#\s*define\s+(\w+)/g };
+                       $data{implementation} =~ /^\s*#\s*define\s+(\w+)/gm };
 
   if (@maybeprov) {
     warn "$file seems to provide these macros, but doesn't list them:\n  "
