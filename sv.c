@@ -7059,11 +7059,11 @@ Perl_newSVhek(pTHX_ const HEK *hek)
 
 Creates a new SV with its SvPVX_const pointing to a shared string in the string
 table. If the string does not already exist in the table, it is created
-first.  Turns on READONLY and FAKE.  The string's hash is stored in the UV
-slot of the SV; if the C<hash> parameter is non-zero, that value is used;
-otherwise the hash is computed.  The idea here is that as the string table
-is used for shared hash keys these strings will have SvPVX_const == HeKEY and
-hash lookup will avoid string compare.
+first.  Turns on READONLY and FAKE. If the C<hash> parameter is non-zero, that
+value is used; otherwise the hash is computed. The string's hash can be later
+be retrieved from the SV with the C<SvSHARED_HASH()> macro. The idea here is
+that as the string table is used for shared hash keys these strings will have
+SvPVX_const == HeKEY and hash lookup will avoid string compare.
 
 =cut
 */
