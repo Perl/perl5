@@ -304,6 +304,7 @@ case "$cc" in
   done
   ;;
 esac
+cppflags=`echo $cppflags|sed 's/-Wdeclaration-after-statement/ /'`
 
 case "$cc" in
 *g++*)
