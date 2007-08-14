@@ -285,37 +285,6 @@ if (($Is_W32 and ! $Is_NetWare) or $Is_Cygwin) {
 	my $v_e_r_s = $ver; $v_e_r_s =~ tr/./_/;
 	$perldll =~ s/(\..*)?$/$v_e_r_s.$dlext/;
 	$perldll =~ s/^lib/cyg/;
-	if ($Config{useshrplib} eq 'true') {
-	    # install ld2 and perlld as well
-	    foreach ('ld2', 'perlld') {
-		safe_unlink("$installbin/$_");
-		copy("$_", "$installbin/$_");
-		chmod(0755, "$installbin/$_");
-		$packlist->{"$installbin/$_"} = { type => 'file' };
-	    };
-	    open (LD2, ">$installbin/ld2");
-	    print LD2 <<SHELL;
-#!/bin/sh
-#
-# ld wrapper, passes all args to perlld;
-#
-for trythis in $installbin/perl
-do
-  if [ -x \$trythis ]
-  then
-    \$trythis $installbin/perlld "\$\@"
-    exit \$?
-  fi
-done
-# hard luck!
-echo I see no perl executable around there
-echo perl is required to build dynamic libraries
-echo look if the path to perl in /bin/ld2 is correct
-exit 1
-SHELL
-	    close LD2;
-	    chmod(0755, "$installbin/ld2");
-	};
     } else {
 	$perldll = 'perl59.' . $dlext;
     }
