@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <process.h>
 #include <sys/cygwin.h>
+#include <mntent.h>
 #include <alloca.h>
 #include <dlfcn.h>
 
@@ -259,6 +260,76 @@ XS(XS_Cygwin_posix_to_win_path)
     }
 }
 
+XS(XS_Cygwin_mount_table)
+{
+    dXSARGS;
+    struct mntent *mnt;
+
+    if (items != 0)
+        Perl_croak(aTHX_ "Usage: Cygwin::mount_table");
+    /* => array of [mnt_dir mnt_fsname mnt_type mnt_opts] */
+
+    setmntent (0, 0);
+    while ((mnt = getmntent (0))) {
+	AV* av = newAV();
+	av_push(av, newSVpvn(mnt->mnt_dir, strlen(mnt->mnt_dir)));
+	av_push(av, newSVpvn(mnt->mnt_fsname, strlen(mnt->mnt_fsname)));
+	av_push(av, newSVpvn(mnt->mnt_type, strlen(mnt->mnt_type)));
+	av_push(av, newSVpvn(mnt->mnt_opts, strlen(mnt->mnt_opts)));
+	XPUSHs(sv_2mortal(newRV_noinc((SV*)av)));
+    }
+    endmntent (0);
+    PUTBACK;
+}
+
+XS(XS_Cygwin_mount_flags)
+{
+    dXSARGS;
+    char *pathname;
+    char flags[260];
+
+    if (items != 1)
+        Perl_croak(aTHX_ "Usage: Cygwin::mount_flags(mnt_dir)");
+
+    pathname = SvPV_nolen(ST(0));
+    
+    /* TODO: check for cygdrive registry setting. use CW_GET_CYGDRIVE_INFO then
+     */
+    if (!strcmp(pathname, "/cygdrive")) {
+	char user[260];
+	char system[260];
+	char user_flags[260];
+	char system_flags[260];
+	cygwin_internal (CW_GET_CYGDRIVE_INFO, user, system, user_flags,
+			 system_flags);
+	if (strlen(system) > 0)
+	    strcpy (flags, system_flags);
+	if (strlen(user) > 0)
+	    strcpy(flags, user_flags);
+	if (strlen(flags) > 0)
+	    strcat(flags, ",");
+	strcat(flags, "cygdrive");
+	ST(0) = sv_2mortal(newSVpv(flags, 0));
+	XSRETURN(1);
+    } else {
+	struct mntent *mnt;
+	setmntent (0, 0);
+	while ((mnt = getmntent (0))) {
+	    if (!strcmp(pathname, mnt->mnt_dir)) {
+		strcpy(flags, mnt->mnt_type);
+		if (strlen(mnt->mnt_opts) > 0) {
+		    strcat(flags, ",");
+		    strcat(flags, mnt->mnt_opts);
+		}
+		break;
+	    }
+	}
+	endmntent (0);
+	ST(0) = sv_2mortal(newSVpv(flags, 0));
+	XSRETURN(1);
+    }
+}
+
 XS(XS_Cygwin_is_binmount)
 {
     dXSARGS;
@@ -299,6 +370,8 @@ init_os_extras(void)
     newXSproto("Cygwin::pid_to_winpid", XS_Cygwin_pid_to_winpid, file, "$");
     newXSproto("Cygwin::win_to_posix_path", XS_Cygwin_win_to_posix_path, file, "$;$");
     newXSproto("Cygwin::posix_to_win_path", XS_Cygwin_posix_to_win_path, file, "$;$");
+    newXSproto("Cygwin::mount_table", XS_Cygwin_mount_table, file, "");
+    newXSproto("Cygwin::mount_flags", XS_Cygwin_mount_flags, file, "$");
     newXSproto("Cygwin::is_binmount", XS_Cygwin_is_binmount, file, "$");
     newXSproto("Cygwin::is_textmount", XS_Cygwin_is_textmount, file, "$");
 

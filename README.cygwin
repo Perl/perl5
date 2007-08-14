@@ -520,6 +520,38 @@ Translates a cygwin path to the corresponding cygwin path respecting
 the current mount points. With a second non-null argument returns an
 absolute path. Double-byte characters will not be translated.
 
+=item C<Cygwin::mount_table()>
+
+Returns an array of [mnt_dir, mnt_fsname, mnt_type, mnt_opts].
+
+  perl -e 'for $i (Cygwin::mount_table) {print join(" ",@$i),"\n";}'
+  /bin c:\cygwin\bin system binmode,cygexec
+  /usr/bin c:\cygwin\bin system binmode
+  /usr/lib c:\cygwin\lib system binmode
+  / c:\cygwin system binmode
+  /cygdrive/c c: system binmode,noumount
+  /cygdrive/d d: system binmode,noumount
+  /cygdrive/e e: system binmode,noumount 
+
+=item C<Cygwin::mount_flags>
+
+Returns the mount type and flags for a specified mount point.
+A comma-seperated string of mntent->mnt_type (always
+"system" or "user"), then the mntent->mnt_opts, where
+the first is always "binmode" or "textmode".
+
+  system|user,binmode|textmode,exec,cygexec,cygdrive,mixed,
+  notexec,managed,nosuid,devfs,proc,noumount
+
+If the argument is "/cygdrive", just the volume mount settings are returned. 
+
+User mounts override system mounts.
+
+  $ perl -e 'print Cygwin::mount_flags "/usr/bin"'
+  system,binmode,cygexec
+  $ perl -e 'print Cygwin::mount_flags "/cygdrive"'
+  binmode,cygdrive 
+
 =item C<Cygwin::is_binmount>
 
 Returns true if the given cygwin path is binary mounted, false if the
@@ -596,8 +628,7 @@ be kept as clean as possible (listing not updated yet).
 
   EXTERN.h              - __declspec(dllimport)
   XSUB.h                - __declspec(dllexport)
-  cygwin/cygwin.c       - os_extras (getcwd, spawn, Cygwin::winpid_to_pid, 
-                          Cygwin::pid_to_winpid)
+  cygwin/cygwin.c       - os_extras (getcwd, spawn, and several Cygwin:: functions)
   perl.c                - os_extras
   perl.h                - binmode
   doio.c                - win9x can not rename a file when it is open
@@ -620,6 +651,7 @@ be kept as clean as possible (listing not updated yet).
   lib/ExtUtils/MM_Cygwin.pm
                         - canonpath, cflags, manifypods, perl_archive
   lib/File/Find.pm      - on remote drives stat() always sets st_nlink to 1
+  lib/File/Spec/Cygwin.pm - case_tolerant
   lib/File/Spec/Unix.pm - preserve //unc
   lib/File/Temp.pm      - no directory sticky bit
   lib/perl5db.pl        - use stdin not /dev/tty
@@ -642,8 +674,10 @@ alexander smishlajev <als@turnhere.com>,
 Steven Morlock <newspost@morlock.net>,
 Sebastien Barre <Sebastien.Barre@utc.fr>,
 Teun Burgers <burgers@ecn.nl>,
-Gerrit P. Haase <gp@familiehaase.de>.
+Gerrit P. Haase <gp@familiehaase.de>,
+Reini Urban <rurban@cpan.org>,
+Jan Dubois <jand@activestate.com>.
 
 =head1 HISTORY
 
-Last updated: 2005-02-11
+Last updated: 2007-08-12
