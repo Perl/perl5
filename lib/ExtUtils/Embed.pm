@@ -133,7 +133,9 @@ sub xsi_body {
 
 sub static_ext {
     unless (scalar @Extensions) {
-	@Extensions = sort split /\s+/, $Config{static_ext};
+      my $static_ext = $Config{static_ext};
+      $static_ext =~ s/^\s+//;
+      @Extensions = sort split /\s+/, $static_ext;
 	unshift @Extensions, qw(DynaLoader);
     }
     @Extensions;
