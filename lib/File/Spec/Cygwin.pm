@@ -109,7 +109,8 @@ Default: 1
 =cut
 
 sub case_tolerant () {
-  my $drive = shift || "C:";
+  if ($^O ne 'cygwin') return 1;
+  my $drive = shift || "/cygdrive/c";
   my $mntopts = Cygwin::mount_flags($drive);
   if ($mntopts and ($mntopts =~ /,managed/)) {
     return 0;
