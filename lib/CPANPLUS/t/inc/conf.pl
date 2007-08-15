@@ -104,7 +104,11 @@ use constant TEST_CONF_MIRROR_DIR       => 'dummy-localmirror';
 
 
 sub gimme_conf { 
-    my $conf = CPANPLUS::Configure->new();
+
+    ### don't load any other configs than the heuristic one
+    ### during tests. They might hold broken/incorrect data
+    ### for our test suite. Bug [perl #43629] showed this.
+    my $conf = CPANPLUS::Configure->new( load_configs => 0 );
     $conf->set_conf( hosts  => [ { 
                         path        => 'dummy-CPAN',
                         scheme      => 'file',

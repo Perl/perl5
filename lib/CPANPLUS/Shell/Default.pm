@@ -26,7 +26,7 @@ local $Data::Dumper::Indent     = 1; # for dumpering from !
 BEGIN {
     use vars        qw[ $VERSION @ISA ];
     @ISA        =   qw[ CPANPLUS::Shell::_Base::ReadLine ];
-    $VERSION = "0.81_01";
+    $VERSION = "0.82";
 }
 
 load CPANPLUS::Shell;
@@ -330,8 +330,10 @@ sub dispatch_on_input {
             if( $key eq 'z' or
                 ($key eq 's' and $input =~ /^\s*edit/)
             ) {
-                print "\n", loc("Command not supported over remote connection"),
-                        "\n\n";
+                print "\n", 
+                      loc(  "Command '%1' not supported over remote connection",
+                            join ' ', $key, $input 
+                      ), "\n\n";
 
             } else {
                 my($status,$buff) = $self->__send_remote_command($org_input);

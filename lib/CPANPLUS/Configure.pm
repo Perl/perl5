@@ -463,17 +463,9 @@ Locations and names of source files locally.
 
 Locations and names of source files remotely.
 
-=item _set|_get_dist
-
-Mapping of distribution format names to modules.
-
 =item _set|_get_fetch
 
 Special settings pertaining to the fetching of files.
-
-=item _set|_get_daemon
-
-Settings for C<cpanpd>, the CPANPLUS daemon.
 
 =back
 

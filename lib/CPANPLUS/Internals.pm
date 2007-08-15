@@ -40,7 +40,7 @@ use vars qw[@ISA $VERSION];
             CPANPLUS::Internals::Report
         ];
 
-$VERSION = "0.81_01";
+$VERSION = "0.82";
 
 =pod
 
@@ -160,7 +160,7 @@ Returns the object on success, or dies on failure.
         if( my $id = $class->_last_id ) {
             # make it a singleton.
             warn loc(q[%1 currently only supports one %2 object per ] .
-                     q[running program], 'CPANPLUS', $class);
+                     qq[running program\n], 'CPANPLUS', $class);
 
             return $class->_retrieve_id( $id );
         }

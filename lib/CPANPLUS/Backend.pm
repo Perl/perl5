@@ -380,7 +380,7 @@ for my $func (qw[fetch extract install readme files distributions]) {
 
 =pod
 
-=head2 $mod_obj = $cb->parse_module( module => $modname|$distname|$modobj )
+=head2 $mod_obj = $cb->parse_module( module => $modname|$distname|$modobj|URI )
 
 C<parse_module> tries to find a C<CPANPLUS::Module> object that
 matches your query. Here's a list of examples you could give to

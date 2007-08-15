@@ -568,8 +568,10 @@ with CPANPLUS, which is used to enable autoflushing in spawned processes.
                 ### or user installs
                 ### note that we don't use 'can_run' as it's
                 ### not an executable, just a wrapper...
-                for my $dir (split(/\Q$Config::Config{path_sep}\E/, $ENV{PATH}),
-                             File::Spec->curdir
+                ### prefer anything that's found in the path paralel to your $^X
+                for my $dir (File::Spec->rel2abs( dirname($^X) ),
+                             split(/\Q$Config::Config{path_sep}\E/, $ENV{PATH}),
+                             File::Spec->curdir, 
                 ) {             
                     $maybe = File::Spec->catfile( $dir, $bin );
                     $path = $maybe and last BIN if -f $maybe;
@@ -584,6 +586,8 @@ with CPANPLUS, which is used to enable autoflushing in spawned processes.
             ### cross your fingers...
             ### pass '-P' to perl: "run program through C 
             ### preprocessor before compilation"
+            ### XXX using -P actually changes the way some Makefile.PLs
+            ### are executed, so don't do that... --kane
             error(loc(
                 "Could not find the '%1' binary in your path".
                 "--this may be a problem.\n".

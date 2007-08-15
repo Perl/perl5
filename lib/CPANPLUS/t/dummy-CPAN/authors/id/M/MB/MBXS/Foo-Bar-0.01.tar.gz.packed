@@ -10,7 +10,7 @@ To recreate it use the following command:
 
      uupacktool.pl -p lib/CPANPLUS/t/dummy-CPAN/authors/id/M/MB/MBXS/Foo-Bar-0.01.tar.gz lib/CPANPLUS/t/dummy-CPAN/authors/id/M/MB/MBXS/Foo-Bar-0.01.tar.gz.packed
 
-Created at Sat Jul  7 11:15:17 2007
+Created at Wed Aug 15 16:13:41 2007
 #########################################################################
 __UU__
 M'XL("-\X34(``T9O;RU"87(M,"XP,2YT87(`[5K_3QI)%/=7YZ]XU39H(BN[

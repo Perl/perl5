@@ -64,10 +64,8 @@ sub connect {
     {   local $Params::Check::ALLOW_UNKNOWN = 1;
 
         my $tmpl = {
-            user => { default => $conf->_get_daemon('username'),
-                        store => \$user },
-            pass => { default => $conf->_get_daemon('password'),
-                        store => \$pass },
+            user => { default   => 'cpanpd',    store => \$user },
+            pass => { required  => 1,           store => \$pass },
         };
 
          check( $tmpl, $opts ) or return;
@@ -75,7 +73,7 @@ sub connect {
 
     my @parts = split /\s+/, $input;
     my $host = shift @parts || 'localhost';
-    my $port = shift @parts || $conf->_get_daemon('port');
+    my $port = shift @parts || '1337';
 
     load IO::Socket;
 
@@ -114,7 +112,7 @@ sub connect {
         ### save the original prompt
         $Saved_Prompt = $shell->prompt;
 
-        $shell->prompt( $shell->brand .'@'. $host .'> ' );
+        $shell->prompt( $shell->brand .'@'. $host .':'. $port .'> ' );
 
     } else {
         print "\n$buffer\n\n";
