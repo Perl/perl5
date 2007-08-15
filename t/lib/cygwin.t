@@ -9,7 +9,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 14;
+use Test::More tests => 15;
 
 is(Cygwin::winpid_to_pid(Cygwin::pid_to_winpid($$)), $$,
    "perl pid translates to itself");
@@ -59,3 +59,5 @@ for $i (@mnttbl) {
     is($i->[2].",".$i->[3], $rootmnt, "same root mount flags");
   }
 }
+
+ok(Cwd->cwd(), "bug#38628 legacy");
