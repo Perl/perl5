@@ -173,7 +173,7 @@ ok( &POSIX::acos(1.0) == 0.0,   'dynamic loading' );
 # didn't detect it.  If this fails, try adding
 # -DSTRUCT_TM_HASZONE to your cflags when compiling ext/POSIX/POSIX.c.
 # See ext/POSIX/hints/sunos_4.pl and ext/POSIX/hints/linux.pl 
-print POSIX::strftime("ok 21 # %H:%M, on %D\n", localtime());
+print POSIX::strftime("ok 21 # %H:%M, on %m/%d/%y\n", localtime());
 next_test();
 
 # If that worked, validate the mini_mktime() routine's normalisation of
@@ -187,8 +187,10 @@ sub try_strftime {
 $lc = &POSIX::setlocale(&POSIX::LC_TIME, 'C') if $Config{d_setlocale};
 try_strftime("Wed Feb 28 00:00:00 1996 059", 0,0,0, 28,1,96);
 SKIP: {
-    skip("VC++ 8 regards 60 seconds as an invalid parameter", 1)
-	if $Config{cc} eq 'cl' and $Config{ccversion} =~ /^(\d+)/ and $1 >= 14;
+    skip("VC++ 8 and Vista's CRTs regard 60 seconds as an invalid parameter", 1)
+	if ($Is_W32 and ($Config{cc} eq 'cl' and
+	                 $Config{ccversion} =~ /^(\d+)/ and $1 >= 14) or
+	                ((Win32::GetOSVersion())[1] >= 6));
 
     try_strftime("Thu Feb 29 00:00:60 1996 060", 60,0,-24, 30,1,96);
 }
