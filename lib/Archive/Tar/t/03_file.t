@@ -20,6 +20,10 @@ my @test_files = (
     [    'x/bIn1',        $all_chars                                      ],
     [    'bIn2',          $all_chars x 2                                  ],
     [    'bIn0',          ''                                              ],
+
+    ### we didnt handle 'false' filenames very well across A::T as of version
+    ### 1.32, as reported in #28687. Test for the handling of such files here.
+    [    0,               '',                                             ],
     
     ### keep this one as the last entry
     [    'x/yy/z',        '',               { type  => DIR,

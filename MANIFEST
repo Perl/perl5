@@ -389,8 +389,8 @@ ext/Digest/SHA/t/base64.t	See if Digest::SHA works
 ext/Digest/SHA/t/bitbuf.t	See if Digest::SHA works
 ext/Digest/SHA/t/dumpload.t	See if Digest::SHA works
 ext/Digest/SHA/t/fips198.t	See if Digest::SHA works
-ext/Digest/SHA/t/gg.t		See if Digest::SHA works
 ext/Digest/SHA/t/gglong.t	See if Digest::SHA works
+ext/Digest/SHA/t/gg.t		See if Digest::SHA works
 ext/Digest/SHA/t/hmacsha.t	See if Digest::SHA works
 ext/Digest/SHA/t/ireland.t	See if Digest::SHA works
 ext/Digest/SHA/t/methods.t	See if Digest::SHA works
@@ -2763,8 +2763,8 @@ lib/Tie/File/t/40_abs_cache.t	Unit tests for Tie::File::Cache
 lib/Tie/File/t/41_heap.t	Unit tests for Tie::File::Heap
 lib/Tie/File/t/42_offset.t	Unit tests for the offset method
 lib/Tie/Handle.pm		Base class for tied handles
-lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
 lib/Tie/Handle/stdhandle_from_handle.t	Test for Tie::StdHandle/Handle backwards compat
+lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
 lib/Tie/Hash/NamedCapture.pm	Implements %- and %+ behaviour
 lib/Tie/Hash.pm			Base class for tied hashes
 lib/Tie/Memoize.pm		Base class for memoized tied hashes
@@ -3874,8 +3874,8 @@ t/run/switchp.t			Test the -p switch
 t/run/switchPx.aux		Data for switchPx.t
 t/run/switchPx.t		Test the -Px combination
 t/run/switcht.t			Test the -t switch
-t/run/switchx.aux		Data for switchx.t
 t/run/switchx2.aux		Data for switchx.t
+t/run/switchx.aux		Data for switchx.t
 t/run/switchx.t			Test the -x switch
 t/TEST				The regression tester
 t/TestInit.pm			Preamble library for core tests

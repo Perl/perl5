@@ -14,7 +14,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG              = 0;
 $WARN               = 1;
 $FOLLOW_SYMLINK     = 0;
-$VERSION            = "1.32";
+$VERSION            = "1.34";
 $CHOWN              = 1;
 $CHMOD              = 1;
 $DO_NOT_USE_PREFIX  = 0;
@@ -406,7 +406,9 @@ underlying file.
 
 sub contains_file {
     my $self = shift;
-    my $full = shift or return;
+    my $full = shift;
+    
+    return unless defined $full;
 
     ### don't warn if the entry isn't there.. that's what this function
     ### is for after all.
@@ -509,7 +511,7 @@ Returns true on success, false on failure.
 
 sub extract_file {
     my $self = shift;
-    my $file = shift or return;
+    my $file = shift;   return unless defined $file;
     my $alt  = shift;
 
     my $entry = $self->_find_entry( $file )
@@ -1669,6 +1671,56 @@ write a C<.tar.Z> file
     $tar->write($fh);
     $fh->close ;
 
+=item How do I handle Unicode strings?
+
+C<Archive::Tar> uses byte semantics for any files it reads from or writes
+to disk. This is not a problem if you only deal with files and never
+look at their content or work solely with byte strings. But if you use
+Unicode strings with character semantics, some additional steps need
+to be taken.
+
+For example, if you add a Unicode string like
+
+    # Problem
+    $tar->add_data('file.txt', "Euro: \x{20AC}");
+
+then there will be a problem later when the tarfile gets written out
+to disk via C<$tar->write()>:
+
+    Wide character in print at .../Archive/Tar.pm line 1014.
+
+The data was added as a Unicode string and when writing it out to disk,
+the C<:utf8> line discipline wasn't set by C<Archive::Tar>, so Perl
+tried to convert the string to ISO-8859 and failed. The written file
+now contains garbage.
+
+For this reason, Unicode strings need to be converted to UTF-8-encoded
+bytestrings before they are handed off to C<add_data()>:
+
+    use Encode;
+    my $data = "Accented character: \x{20AC}";
+    $data = encode('utf8', $data);
+
+    $tar->add_data('file.txt', $data);
+
+A opposite problem occurs if you extract a UTF8-encoded file from a 
+tarball. Using C<get_content()> on the C<Archive::Tar::File> object
+will return its content as a bytestring, not as a Unicode string.
+
+If you want it to be a Unicode string (because you want character
+semantics with operations like regular expression matching), you need
+to decode the UTF8-encoded content and have Perl convert it into 
+a Unicode string:
+
+    use Encode;
+    my $data = $tar->get_content();
+    
+    # Make it a Unicode string
+    $data = decode('utf8', $data);
+
+There is no easy way to provide this functionality in C<Archive::Tar>, 
+because a tarball can contain many files, and each of which could be
+encoded in a different way.
 
 =back
 
