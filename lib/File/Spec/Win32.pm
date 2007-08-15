@@ -5,7 +5,7 @@ use strict;
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '1.6';
+$VERSION = '1.6_01';
 
 @ISA = qw(File::Spec::Unix);
 
@@ -89,7 +89,7 @@ Default: 1
 
 sub case_tolerant () {
   eval { require Win32API::File; } or return 1;
-  my $drive = shift or "C:";
+  my $drive = shift || "C:";
   my $osFsType = "\0"x256;
   my $osVolName = "\0"x256;
   my $ouFsFlags = 0;
