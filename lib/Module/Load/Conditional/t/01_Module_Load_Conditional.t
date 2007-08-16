@@ -43,8 +43,24 @@ use_ok( 'Module::Load::Conditional' );
     ok( $rv->{version} == $Module::Load::Conditional::VERSION,  
                             q[  Found proper version] );
 
+    # This test is expecting the file to in UNIX format, so force
+    $rv->{file} = VMS::Filespec::unixify($rv->{file}) if $^O eq 'VMS';
+
+    # break up the specification
+    my @rv_path;
+    if ($^O eq 'VMS') {
+	# Use the UNIX specific method, as the VMS one currently
+	# converts the file spec back to VMS format.
+	@rv_path = File::Spec::Unix->splitpath($rv->{file});
+    } else {
+	@rv_path = File::Spec->splitpath($rv->{file});
+    }
+
+    # First element could be blank for some system types like VMS
+    shift @rv_path if $rv_path[0] eq '';
+
     ok( $INC{'Module/Load/Conditional.pm'} eq
-        File::Spec::Unix->catfile(File::Spec->splitdir($rv->{file}) ),
+        File::Spec::Unix->catfile(@rv_path),
                             q[  Found proper file]
     );
 
@@ -152,6 +168,7 @@ SKIP:{
     {   package A::B::C::D; 
         $A::B::C::D::VERSION = $$; 
         $INC{'A/B/C/D.pm'}   = $$.$$;
+	$INC{'[.A.B.C]D.pm'} = $$.$$ if $^O eq 'VMS';
     }
     
     my $href = check_install( module => 'A::B::C::D', version => 0 );
@@ -163,5 +180,4 @@ SKIP:{
     ok( can_load( modules => { 'A::B::C::D' => 0 } ),
                                 '   can_load successful' );
 }
-
 
