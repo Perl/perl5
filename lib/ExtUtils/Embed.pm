@@ -18,7 +18,7 @@ use vars qw(@ISA @EXPORT $VERSION
 	    );
 use strict;
 
-$VERSION = 1.26;
+$VERSION = '1.26_01';
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&xsinit &ldopts 
