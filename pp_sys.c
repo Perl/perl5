@@ -5227,7 +5227,7 @@ PP(pp_gpwent)
 #   ifdef PWGECOS
 	PUSHs(sv = sv_2mortal(newSVpv(pwent->pw_gecos, 0)));
 #   else
-	PUSHs(sv_mortalcopy(&PL_sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #   endif
 #   ifndef INCOMPLETE_TAINTS
 	/* pw_gecos is tainted because user himself can diddle with it. */
