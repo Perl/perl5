@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.72";
+our $VERSION   = "0.73";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -74,6 +74,7 @@ my $big_endian = 1;	# more <sequence#> display
 my $tree_style = 0;	# tree-order details
 my $banner = 1;		# print banner before optree is traversed
 my $do_main = 0;	# force printing of main routine
+my $show_src;		# show source code
 
 # another factor: can affect all styles!
 our @callbacks;		# allow external management
@@ -244,7 +245,6 @@ my @tree_decorations =
    [" ", map("$start_sym$_$end_sym", "q", "w", "t", "x", "m"), "", 0],
   );
 
-
 sub compileOpts {
     # set rendering state from options and args
     my (@options,@args);
@@ -288,6 +288,9 @@ sub compileOpts {
 	    $do_main = 1;
 	} elsif ($o eq "-nomain") {
 	    $do_main = 0;
+	} elsif ($o eq "-src") {
+	    $show_src = 1;
+	    $^P |= 831;
 	}
 	# line-style options
 	elsif (exists $style{substr($o, 1)}) {
@@ -553,6 +556,9 @@ sub fmt_line {    # generate text-line for op.
 
     $text =~ s/\#([a-zA-Z]+)/$hr->{$1}/eg;	# populate #var's
     $text =~ s/[ \t]*~+[ \t]*/ /g;		# squeeze tildes
+
+    $text = "# $hr->{src}\n$text" if $show_src and $hr->{src};
+
     chomp $text;
     return "$text\n" if $text ne "";
     return $text; # suppress empty lines
@@ -702,6 +708,20 @@ sub concise_sv {
     }
 }
 
+my %srclines;
+
+sub fill_srclines {
+    my $file = shift;
+    warn "-e not yet supported\n" and return if $file eq '-e';
+    open (my $fh, $file)
+	or warn "# $file: $!, (chdirs not supported by this feature yet)\n"
+	and return;
+    my @l = <$fh>;
+    chomp @l;
+    unshift @l, $file; # like @{_<$filename} in debug, array starts at 1
+    $srclines{$file} = \@l;
+}
+
 sub concise_op {
     my ($op, $level, $format) = @_;
     my %h;
@@ -793,6 +813,12 @@ sub concise_op {
 	my $arybase = $op->arybase;
 	$arybase = $arybase ? ' $[=' . $arybase : "";
 	$h{arg} = "($label$stash $cseq $loc$arybase)";
+	if ($show_src) {
+	    my ($file,$ln) = split /:/, $loc;
+	    fill_srclines($file) unless exists $srclines{$file};
+	    $h{src} = "$ln: " . $srclines{$file}[$ln];
+	    # print "$file:$ln $h{src}\n";
+	}
     } elsif ($h{class} eq "LOOP") {
 	$h{arg} = "(next->" . seq($op->nextop) . " last->" . seq($op->lastop)
 	  . " redo->" . seq($op->redoop) . ")";
@@ -1194,7 +1220,36 @@ obviously mutually exclusive with bigendian.
 
 =head2 Other options
 
-These are pairwise exclusive.
+=over 4
+
+=item B<-src>
+
+With this option, the rendering will print the 1st line of source code
+that generates the following sequence of opcodes that comprise the
+statement.  For example:
+
+    1  <0> enter
+    # 1: my $i;
+    2  <;> nextstate(main 1 junk.pl:1) v:{
+    3  <0> padsv[$i:1,10] vM/LVINTRO
+    # 3: for $i (0..9) {
+    4  <;> nextstate(main 3 junk.pl:3) v:{
+    5  <0> pushmark s
+    6  <$> const[IV 0] s
+    7  <$> const[IV 9] s
+    8  <{> enteriter(next->j last->m redo->9)[$i:1,10] lKS
+    k  <0> iter s
+    l  <|> and(other->9) vK/1
+    # 4:     print "line ";
+    9      <;> nextstate(main 2 junk.pl:4) v
+    a      <0> pushmark s
+    b      <$> const[PV "line "] s
+    c      <@> print vK
+    # 5:     print "$i\n";
+
+=back
+
+The following options are pairwise exclusive.
 
 =over 4
 
