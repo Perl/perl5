@@ -198,6 +198,14 @@ sub link {
                                             $spec{basename}  . $cf->{lib_ext} );
   $spec{explib}    ||= File::Spec->catfile( $spec{builddir},
                                             $spec{basename}  . '.exp'  );
+  if ($cf->{cc} eq 'cl') {
+    $spec{dbg_file}  ||= File::Spec->catfile( $spec{builddir},
+                                            $spec{basename}  . '.pdb'  );
+  }
+  elsif ($cf->{cc} eq 'bcc32') {
+    $spec{dbg_file}  ||= File::Spec->catfile( $spec{builddir},
+                                            $spec{basename}  . '.tds'  );
+  }
   $spec{def_file}  ||= File::Spec->catfile( $spec{srcdir}  ,
                                             $spec{basename}  . '.def'  );
   $spec{base_file} ||= File::Spec->catfile( $spec{srcdir}  ,
@@ -205,10 +213,10 @@ sub link {
 
   $self->add_to_cleanup(
     grep defined,
-    @{[ @spec{qw(manifest implib explib def_file base_file map_file)} ]}
+    @{[ @spec{qw(manifest implib explib dbg_file def_file base_file map_file)} ]}
   );
 
-  foreach my $opt ( qw(output manifest implib explib def_file map_file base_file) ) {
+  foreach my $opt ( qw(output manifest implib explib dbg_file def_file map_file base_file) ) {
     $self->normalize_filespecs( \$spec{$opt} );
   }
 
@@ -229,7 +237,7 @@ sub link {
 
   $spec{output} =~ tr/'"//d;
   return wantarray
-    ? grep defined, @spec{qw[output manifest implib explib def_file map_file base_file]}
+    ? grep defined, @spec{qw[output manifest implib explib dbg_file def_file map_file base_file]}
     : $spec{output};
 }
 
