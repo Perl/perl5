@@ -150,7 +150,16 @@ my $TEST = catfile(curdir(), 'TEST');
 	    };
 	}
     }
-
+    if ($Is_Cygwin and (! -f 'cygwin1.dll' or ! -f 'cygcrypt-0.dll')) {
+      require File::Copy;
+      -f 'cygwin1.dll' or File::Copy::copy("/usr/bin/cygwin1.dll", '.') or
+	  die "$0: failed to copy cygwin1.dll: $!\n";
+      -f 'cygcyrypt-0.dll' or File::Copy::copy("/usr/bin/cygcrypt-0.dll", '.') or
+	  die "$0: failed to copy cygcrypt-0.dll: $!\n";
+      eval q{
+		END { unlink "cygwin1.dll"; unlink "cygcrypt-0.dll"; }
+	    };
+    }
     $ENV{PATH} = '';
     delete @ENV{@MoreEnv};
     $ENV{TERM} = 'dumb';
