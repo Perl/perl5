@@ -55,6 +55,7 @@ use_ok( 'Module::Load::Conditional' );
     } else {
 	@rv_path = File::Spec->splitpath($rv->{file});
     }
+    @rv_path = ($rv_path[0], File::Spec->splitdir($rv_path[1]), $rv_path[2]);
 
     # First element could be blank for some system types like VMS
     shift @rv_path if $rv_path[0] eq '';
