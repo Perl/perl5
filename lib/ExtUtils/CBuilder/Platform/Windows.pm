@@ -9,7 +9,7 @@ use File::Spec;
 use ExtUtils::CBuilder::Base;
 
 use vars qw($VERSION @ISA);
-$VERSION = '0.13';
+$VERSION = '0.13_01';
 @ISA = qw(ExtUtils::CBuilder::Base);
 
 sub new {
