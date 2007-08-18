@@ -222,6 +222,10 @@ and check for NULL.
  * Note that flags starting with RXf_PMf_ have exact equivalents
  * stored in op_pmflags and which are defined in op.h, they are defined
  * numerically here only for clarity.
+ *
+ * NOTE: if you modify any RXf flags you should run regen.pl or regcomp.pl
+ * so that regnodes.h is updated with the changes. 
+ *
  */
 
 /* Anchor and GPOS related stuff */
@@ -290,6 +294,11 @@ and check for NULL.
 #define M_PAT_MODS      QR_PAT_MODS     LOOP_PAT_MODS
 #define S_PAT_MODS      M_PAT_MODS      EXEC_PAT_MODS
 
+/*
+ * NOTE: if you modify any RXf flags you should run regen.pl or regcomp.pl
+ * so that regnodes.h is updated with the changes. 
+ *
+ */
 
 /* What we have seen */
 #define RXf_LOOKBEHIND_SEEN	0x00020000
@@ -323,6 +332,11 @@ and check for NULL.
 #define RXf_TAINTED_SEEN	0x20000000
 #define RXf_TAINTED             0x80000000 /* this pattern is tainted */
 
+/*
+ * NOTE: if you modify any RXf flags you should run regen.pl or regcomp.pl
+ * so that regnodes.h is updated with the changes. 
+ *
+ */
 
 #define RX_HAS_CUTGROUP(prog) ((prog)->intflags & PREGf_CUTGROUP_SEEN)
 #define RX_MATCH_TAINTED(prog)	((prog)->extflags & RXf_TAINTED_SEEN)
