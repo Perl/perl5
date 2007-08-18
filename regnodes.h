@@ -625,7 +625,7 @@ EXTCONST char * const PL_reg_name[] = {
 EXTCONST char * PL_reg_extflags_name[];
 #else
 EXTCONST char * const PL_reg_extflags_name[] = {
-	/* Bits in extflags defined: 10111111111111111111111100111111 */
+	/* Bits in extflags defined: 11111111111111111111111100111111 */
 	"ANCH_BOL",         /* 0x00000001 */
 	"ANCH_MBOL",        /* 0x00000002 */
 	"ANCH_SBOL",        /* 0x00000004 */
@@ -656,7 +656,7 @@ EXTCONST char * const PL_reg_extflags_name[] = {
 	"SPLIT",            /* 0x08000000 */
 	"COPY_DONE",        /* 0x10000000 */
 	"TAINTED_SEEN",     /* 0x20000000 */
-	"UNUSED_BIT_30",    /* 0x40000000 */
+	"NULL",             /* 0x40000000 */
 	"TAINTED",          /* 0x80000000 */
 };
 #endif /* DOINIT */

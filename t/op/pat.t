@@ -4459,6 +4459,25 @@ sub kt
     $_ = '123'; 
     iseq("$1",'abc',"/g leads to unsafe match vars: $1");
 }
+{
+    local $Message="Message-ID: <20070818091501.7eff4831@r2d2>";
+    my $str= "";
+    for(0..5){
+        my @x;
+        $str .= "@x"; # this should ALWAYS be the empty string
+        'a'=~/(a|)/;
+        push @x,1;
+    }
+    iseq(length($str),"0","Trie scope error, string should be empty");
+    $str="";
+    my @foo = ('a')x5;
+    for (@foo) {
+        my @bar;
+        $str .= "@bar";
+        s/a|/push @bar, 1/e;
+    }
+    iseq(length($str),"0","Trie scope error, string should be empty");
+}
 
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
@@ -4509,6 +4528,6 @@ ok($@=~/\QSequence \k... not terminated in regex;\E/);
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 1961;
+    $::TestCount = 1963;
     print "1..$::TestCount\n";
 }

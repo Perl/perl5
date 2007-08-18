@@ -2937,7 +2937,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    if ( got_wordnum ) {
 			if ( ! ST.accepted ) {
 			    ENTER;
-			    SAVETMPS;
+			    /* SAVETMPS; */ /* XXX is this necessary? dmq */
 			    bufflen = TRIE_INITAL_ACCEPT_BUFFLEN;
 			    sv_accept_buff=newSV(bufflen *
 					    sizeof(reg_trie_accepted) - 1);
@@ -3148,18 +3148,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		PL_reginput = (char *)ST.accept_buff[ best ].endpos;
 		if ( !ST.jump || !ST.jump[ST.accept_buff[best].wordnum]) {
 		    scan = ST.B;
-		    /* NOTREACHED */
 		} else {
 		    scan = ST.me + ST.jump[ST.accept_buff[best].wordnum];
-		    /* NOTREACHED */
                 }
-                if (has_cutgroup) {
-                    PUSH_YES_STATE_GOTO(TRIE_next, scan);    
-                    /* NOTREACHED */
-                } else {
-                    PUSH_STATE_GOTO(TRIE_next, scan);
-                    /* NOTREACHED */
-                }
+                PUSH_YES_STATE_GOTO(TRIE_next, scan);    
                 /* NOTREACHED */
 	    }
 	    /* NOTREACHED */
