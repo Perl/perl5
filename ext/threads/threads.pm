@@ -859,16 +859,16 @@ problem.
 
 =over
 
-=item Threadsafe modules
+=item Thread-safe modules
 
 See L<perlmod/"Making your module threadsafe"> when creating modules that may
 be used in threaded applications, especially if those modules use non-Perl
 data, or XS code.
 
-=item Using non-threadsafe modules
+=item Using non-thread-safe modules
 
-Unfortunately, you may encounter Perl modules that are not I<threadsafe>.  For
-example, they may crash the Perl interpreter during execution, or may dump
+Unfortunately, you may encounter Perl modules that are not I<thread-safe>.
+For example, they may crash the Perl interpreter during execution, or may dump
 core on termination.  Depending on the module and the requirements of your
 application, it may be possible to work around such difficulties.
 
@@ -968,12 +968,12 @@ reconstituting it in the joining thread.
 =item Perl Bugs and the CPAN Version of L<threads>
 
 Support for threads extends beyond the code in this module (i.e.,
-F<threads.pm> and F<threads.xs>), and into the Perl iterpreter itself.  Older
+F<threads.pm> and F<threads.xs>), and into the Perl interpreter itself.  Older
 versions of Perl contain bugs that may manifest themselves despite using the
 latest version of L<threads> from CPAN.  There is no workaround for this other
-than upgrading to the lastest version of Perl.
+than upgrading to the latest version of Perl.
 
-Even with the lastest version of Perl, it is known that certain constructs
+Even with the latest version of Perl, it is known that certain constructs
 with threads may result in warning messages concerning leaked scalars or
 unreferenced scalars.  However, such warnings are harmless, and may safely be
 ignored.
