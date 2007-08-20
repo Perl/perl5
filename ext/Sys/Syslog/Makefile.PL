@@ -64,9 +64,9 @@ if(eval {require ExtUtils::Constant; 1}) {
 
             # others macros
             qw(
-                LOG_FACMASK LOG_NFACILITIES LOG_PRIMASK 
+                LOG_FACMASK LOG_NFACILITIES
             ), 
-
+           { name => "LOG_PRIMASK", type => "IV", default => [ "IV", 7] },
            { name => "_PATH_LOG", type => "PV", default => [ "PV", qq("$_PATH_LOG") ] },
     );
 
