@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 14 $
+##  $Revision: 15 $
 ##  $Author: mhx $
-##  $Date: 2007/08/12 23:57:09 +0200 $
+##  $Date: 2007/08/18 20:16:11 +0200 $
 ##
 ################################################################################
 ##
@@ -331,5 +331,5 @@ ok(&Devel::PPPort::eval_pv('f()', 0), 'y');
 ok(&Devel::PPPort::eval_pv('f(qw(a b c))', 0), 'y');
 
 ok(!defined $::{'less::'}, 1, "Hadn't loaded less yet");
-Devel::PPPort::load_module(0, "less", undef);  
+Devel::PPPort::load_module(0, "less", undef);
 ok(defined $::{'less::'}, 1, "Have now loaded less");

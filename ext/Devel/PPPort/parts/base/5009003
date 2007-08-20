@@ -58,3 +58,4 @@ SvPV_mutable                   # added by devel/scanprov
 SvPV_nolen_const               # added by devel/scanprov
 SvPV_nomg_const                # added by devel/scanprov
 SvPV_nomg_const_nolen          # added by devel/scanprov
+SvSHARED_HASH                  # added by devel/scanprov

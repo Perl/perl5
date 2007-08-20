@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 39 $
+##  $Revision: 41 $
 ##  $Author: mhx $
-##  $Date: 2007/07/18 13:09:15 +0200 $
+##  $Date: 2007/08/20 18:33:10 +0200 $
 ##
 ################################################################################
 ##
@@ -28,6 +28,7 @@ NVTYPE
 INT2PTR
 PTRV
 NUM2PTR
+PERL_HASH
 PTR2IV
 PTR2UV
 PTR2NV
@@ -214,7 +215,17 @@ __UNDEFINED__  dVAR            dNOOP
 
 __UNDEFINED__  SVf             "_"
 
-__UNDEFINED__ UTF8_MAXBYTES    UTF8_MAXLEN
+__UNDEFINED__  UTF8_MAXBYTES   UTF8_MAXLEN
+
+__UNDEFINED__  PERL_HASH(hash,str,len) \
+     STMT_START	{ \
+	const char *s_PeRlHaSh = str; \
+	I32 i_PeRlHaSh = len; \
+	U32 hash_PeRlHaSh = 0; \
+	while (i_PeRlHaSh--) \
+	    hash_PeRlHaSh = hash_PeRlHaSh * 33 + *s_PeRlHaSh++; \
+	(hash) = hash_PeRlHaSh; \
+    } STMT_END
 
 =xsmisc
 

@@ -5,9 +5,9 @@
 #
 ################################################################################
 #
-#  $Revision: 25 $
+#  $Revision: 27 $
 #  $Author: mhx $
-#  $Date: 2007/08/12 23:23:40 +0200 $
+#  $Date: 2007/08/19 19:41:03 +0200 $
 #
 ################################################################################
 #
@@ -154,11 +154,12 @@ print OUT <<HEAD;
 #define NEED_my_strlcpy
 #define NEED_newCONSTSUB
 #define NEED_newRV_noinc
+#define NEED_newSVpvn_share
 #define NEED_sv_2pv_flags
-#define NEED_sv_pvn_force_flags
 #define NEED_sv_2pvbyte
 #define NEED_sv_catpvf_mg
 #define NEED_sv_catpvf_mg_nocontext
+#define NEED_sv_pvn_force_flags
 #define NEED_sv_setpvf_mg
 #define NEED_sv_setpvf_mg_nocontext
 #define NEED_vload_module

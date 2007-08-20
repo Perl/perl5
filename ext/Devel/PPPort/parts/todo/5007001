@@ -6,7 +6,6 @@ do_openn                       # U
 gv_handler                     # U
 is_lvalue_sub                  # U
 my_popen_list                  # U
-newSVpvn_share                 # U
 save_mortalizesv               # U
 save_padsv                     # U
 scan_num                       # E (Perl_scan_num)

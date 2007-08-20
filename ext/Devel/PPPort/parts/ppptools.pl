@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 19 $
+#  $Revision: 22 $
 #  $Author: mhx $
-#  $Date: 2007/08/13 22:59:58 +0200 $
+#  $Date: 2007/08/19 01:18:23 +0200 $
 #
 ################################################################################
 #
@@ -68,10 +68,8 @@ sub expand_version
   my($op, $ver) = @_;
   my($r, $v, $s) = parse_version($ver);
   $r == 5 or die "only Perl revision 5 is supported\n";
-  $op eq '=='     and return "((PERL_VERSION == $v) && (PERL_SUBVERSION == $s))";
-  $op eq '!='     and return "((PERL_VERSION != $v) || (PERL_SUBVERSION != $s))";
-  $op =~ /([<>])/ and return "((PERL_VERSION $1 $v) || ((PERL_VERSION == $v) && (PERL_SUBVERSION $op $s)))";
-  die "cannot expand version expression ($op $ver)\n";
+  my $bcdver = sprintf "0x%d%03d%03d", $r, $v, $s;
+  return "(PERL_BCDVERSION $op $bcdver)";
 }
 
 sub parse_partspec
@@ -85,13 +83,18 @@ sub parse_partspec
 
   open F, $file or die "$file: $!\n";
   while (<F>) {
+    /[ \t]+$/ and warn "$file:$.: warning: trailing whitespace\n";
+    if ($section eq 'implementation') {
+      m!//! && !m!(?:=~|s/).*//! && !m!(?:ht|f)tp://!
+          and warn "$file:$.: warning: potential C++ comment\n";
+    }
     /^##/ and next;
     if (/^=($vsec)(?:\s+(.*))?/) {
       $section = $1;
       if (defined $2) {
         my $opt = $2;
         $options{$section} = eval "{ $opt }";
-        $@ and die "Invalid options ($opt) in section $section of $file: $@\n";
+        $@ and die "$file:$.: invalid options ($opt) in section $section: $@\n";
       }
       next;
     }

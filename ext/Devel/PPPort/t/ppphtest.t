@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (221) {
+  if (225) {
     load();
-    plan(tests => 221);
+    plan(tests => 225);
   }
 }
 
@@ -50,7 +50,7 @@ package main;
 
 BEGIN {
   if ($ENV{'SKIP_SLOW_TESTS'}) {
-    for (1 .. 221) {
+    for (1 .. 225) {
       skip("skip: SKIP_SLOW_TESTS", 0);
     }
     exit 0;
@@ -163,6 +163,7 @@ for (split /\s*={70,}\s*/, do { local $/; <DATA> }) {
 
 my $t;
 for $t (@tests) {
+  print "#\n", ('# ', '-'x70, "\n")x3, "#\n";
   my $f;
   for $f (keys %{$t->{files}}) {
     my @f = split /\//, $f;
@@ -179,6 +180,11 @@ for $t (@tests) {
     $txt =~ s/^/# | /mg;
     print "# *** writing $f ***\n$txt\n";
   }
+
+  my $code = $t->{code};
+  $code =~ s/^/# | /mg;
+
+  print "# *** evaluating test code ***\n$code\n";
 
   eval $t->{code};
   if ($@) {
@@ -836,4 +842,42 @@ ok($o =~ /^Looks good/m);
 #include "ppport.h"
 SvUOK
 PL_copline
+
+===============================================================================
+
+my $o = ppport(qw(--copy=f));
+
+for (qw(file.xs)) {
+  ok($o =~ /^Writing copy of.*\Q$_\E.*with changes/mi);
+  ok(-e "${_}f");
+  ok(eq_files("${_}f", "${_}r"));
+  unlink "${_}f";
+}
+
+---------------------------- file.xs -----------------------------------------
+
+a_string = "sv_undef"
+a_char = 'sv_yes'
+#define SOMETHING defgv
+/* C-comment: sv_tainted */
+#
+# This is just a big XS comment using sv_no
+#
+/* The following, is NOT an XS comment! */
+#  define SOMETHING_ELSE defgv + \
+                         sv_undef
+
+---------------------------- file.xsr -----------------------------------------
+
+#include "ppport.h"
+a_string = "sv_undef"
+a_char = 'sv_yes'
+#define SOMETHING PL_defgv
+/* C-comment: sv_tainted */
+#
+# This is just a big XS comment using sv_no
+#
+/* The following, is NOT an XS comment! */
+#  define SOMETHING_ELSE PL_defgv + \
+                         PL_sv_undef
 

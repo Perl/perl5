@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 13 $
+##  $Revision: 14 $
 ##  $Author: mhx $
-##  $Date: 2007/08/12 23:24:34 +0200 $
+##  $Date: 2007/08/20 19:19:24 +0200 $
 ##
 ################################################################################
 ##
@@ -181,20 +181,23 @@ __UNDEFINED__  SvVSTRING_mg(sv)  (SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_vstring
 
 #elif { VERSION < 5.8.0 }
 
-#  define sv_magic_portable(sv, obj, how, name, namlen)         \
-   STMT_START {                                                 \
-     if (name && namlen == 0)                                   \
-     {                                                          \
-       MAGIC *mg;                                               \
-       sv_magic(sv, obj, how, 0, 0);                            \
-       mg = SvMAGIC(sv);                                        \
-       mg->mg_len = -42; /* XXX: this is the tricky part */     \
-       mg->mg_ptr = name;                                       \
-     }                                                          \
-     else                                                       \
-     {                                                          \
-       sv_magic(sv, obj, how, name, namlen);                    \
-     }                                                          \
+#  define sv_magic_portable(sv, obj, how, name, namlen)     \
+   STMT_START {                                             \
+     SV *SvMp_sv = (sv);                                    \
+     char *SvMp_name = (char *) (name);                     \
+     I32 SvMp_namlen = (namlen);                            \
+     if (SvMp_name && SvMp_namlen == 0)                     \
+     {                                                      \
+       MAGIC *mg;                                           \
+       sv_magic(SvMp_sv, obj, how, 0, 0);                   \
+       mg = SvMAGIC(SvMp_sv);                               \
+       mg->mg_len = -42; /* XXX: this is the tricky part */ \
+       mg->mg_ptr = SvMp_name;                              \
+     }                                                      \
+     else                                                   \
+     {                                                      \
+       sv_magic(SvMp_sv, obj, how, SvMp_name, SvMp_namlen); \
+     }                                                      \
    } STMT_END
 
 #else

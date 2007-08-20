@@ -85,3 +85,4 @@ SvUVXx                         # added by devel/scanprov
 boolSV                         # added by devel/scanprov
 memEQ                          # added by devel/scanprov
 memNE                          # added by devel/scanprov
+PERL_HASH                      # added by devel/scanprov

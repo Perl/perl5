@@ -101,6 +101,6 @@ ok(&Devel::PPPort::eval_pv('f()', 0), 'y');
 ok(&Devel::PPPort::eval_pv('f(qw(a b c))', 0), 'y');
 
 ok(!defined $::{'less::'}, 1, "Hadn't loaded less yet");
-Devel::PPPort::load_module(0, "less", undef);  
+Devel::PPPort::load_module(0, "less", undef);
 ok(defined $::{'less::'}, 1, "Have now loaded less");
 

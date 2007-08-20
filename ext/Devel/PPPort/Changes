@@ -1,3 +1,32 @@
+3.11_05 - 2007-08-20
+
+    * fix: PERL_HASH() was emitting a warning when passed in a
+      const char pointer
+    * fix: sv_magic_portable() was emitting a warning when
+      passed in a const char pointer
+    * fix: make sure arguments to sv_magic_portable() are only
+      evaluated once
+
+3.11_04 - 2007-08-20
+
+    * fix: ignore strings and XS comments when scanning and
+      patching files
+    * added support for the following API
+        newSVpvn_share
+        PERL_HASH
+        SvSHARED_HASH
+    * use PERL_BCDREVISION for version checking to save some
+      bytes in ppport.h
+    * improve the --strip option
+      - strip all C comments
+      - strip most superfluous whitespace
+      with these changes, the stripped ppport.h is now almost
+      30% smaller:
+                       3.11_03   3.11_04     delta
+        ------------------------------------------
+        uncompressed     87988     62573    -28.9%
+        gzip'd           17985     12725    -29.2%
+
 3.11_03 - 2007-08-14
 
     * fix an infinite recursion in ppport.h that could be

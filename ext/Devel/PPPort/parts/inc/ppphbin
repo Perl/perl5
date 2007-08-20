@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 41 $
+##  $Revision: 44 $
 ##  $Author: mhx $
-##  $Date: 2007/08/13 21:08:26 +0200 $
+##  $Date: 2007/08/20 18:21:09 +0200 $
 ##
 ################################################################################
 ##
@@ -21,6 +21,9 @@
 
 use strict;
 
+# Disable broken TRIE-optimization
+BEGIN { eval '${^RE_TRIE_MAXBUF} = -1' if $] >= 5.009004 && $] <= 5.009005 }
+
 my $VERSION = __VERSION__;
 
 my %opt = (
@@ -37,6 +40,12 @@ my %opt = (
 my($ppport) = $0 =~ /([\w.]+)$/;
 my $LF = '(?:\r\n|[\r\n])';   # line feed
 my $HS = "[ \t]";             # horizontal whitespace
+
+# Never use C comments in this file!
+my $ccs  = '/'.'*';
+my $cce  = '*'.'/';
+my $rccs = quotemeta $ccs;
+my $rcce = quotemeta $cce;
 
 eval {
   require Getopt::Long;
@@ -73,12 +82,6 @@ else {
   $opt{'compat-version'} = 5;
 }
 
-# Never use C comments in this file!!!!!
-my $ccs  = '/'.'*';
-my $cce  = '*'.'/';
-my $rccs = quotemeta $ccs;
-my $rcce = quotemeta $cce;
-
 my %API = map { /^(\w+)\|([^|]*)\|([^|]*)\|(\w*)$/
                 ? ( $1 => {
                       ($2                  ? ( base     => $2 ) : ()),
@@ -110,11 +113,9 @@ sub find_api
 {
   my $code = shift;
   $code =~ s{
-    ([^"'/]+)
-  | / (?: \*[^*]*\*+(?:[^$ccs][^*]*\*+)* / | /[^\r\n]*)
-  | (?:"[^"\\]*(?:\\.[^"\\]*)*" [^"'/]*)+
-  | (?:'[^'\\]*(?:\\.[^'\\]*)*' [^"'/]*)+
-  }{ defined $1 ? $1 : '' }egsx;
+    / (?: \*[^*]*\*+(?:[^$ccs][^*]*\*+)* / | /[^\r\n]*)
+  | "[^"\\]*(?:\\.[^"\\]*)*"
+  | '[^'\\]*(?:\\.[^'\\]*)*' }{}egsx;
   grep { exists $API{$_} } $code =~ /(\w+)/mg;
 }
 
@@ -127,12 +128,11 @@ while (<DATA>) {
         $h->{$_} .= "$1\n";
       }
     }
-    else {
-      undef $hint;
-    }
+    else { undef $hint }
   }
 
-  $hint = [$1, [split /,?\s+/, $2]] if m{^\s*$rccs\s+(Hint|Warning):\s+(\w+(?:,?\s+\w+)*)\s*$};
+  $hint = [$1, [split /,?\s+/, $2]]
+      if m{^\s*$rccs\s+(Hint|Warning):\s+(\w+(?:,?\s+\w+)*)\s*$};
 
   if ($define) {
     if ($define->[1] =~ /\\$/) {
@@ -203,17 +203,11 @@ if (exists $opt{'api-info'}) {
       print "\nWARNING:\n$warnings{$f}" if exists $warnings{$f};
       $info++;
     }
-    unless ($info) {
-      print "No portability information available.\n";
-    }
+    print "No portability information available.\n" unless $info;
     $count++;
   }
-  if ($count > 0) {
-    print "\n";
-  }
-  else {
-    print "Found no API matching '$opt{'api-info'}'.\n";
-  }
+  $count or print "Found no API matching '$opt{'api-info'}'.";
+  print "\n";
   exit 0;
 }
 
@@ -278,9 +272,7 @@ if (!@ARGV || $opt{filter}) {
   @files = @in;
 }
 
-unless (@files) {
-  die "No input files given!\n";
-}
+die "No input files given!\n" unless @files;
 
 my(%files, %global, %revreplace);
 %revreplace = reverse %replace;
@@ -300,20 +292,22 @@ for $filename (@files) {
 
   my %file = (orig => $c, changes => 0);
 
-  # temporarily remove C comments from the code
+  # Temporarily remove C/XS comments and strings from the code
   my @ccom;
+
   $c =~ s{
-    ( [^"'/]+
-    | (?:"[^"\\]*(?:\\.[^"\\]*)*" [^"'/]*)+
-    | (?:'[^'\\]*(?:\\.[^'\\]*)*' [^"'/]*)+ )
-  | (/ (?: \*[^*]*\*+(?:[^$ccs][^*]*\*+)* /
-         | /[^\r\n]* ) )
+    ( ^$HS*\#$HS*include\b[^\r\n]+\b(?:\Q$ppport\E|XSUB\.h)\b[^\r\n]*
+    | ^$HS*\#$HS*(?:define|elif|if(?:def)?)\b[^\r\n]* )
+  | ( ^$HS*\#[^\r\n]*
+    | "[^"\\]*(?:\\.[^"\\]*)*"
+    | '[^'\\]*(?:\\.[^'\\]*)*'
+    | / (?: \*[^*]*\*+(?:[^$ccs][^*]*\*+)* / | /[^\r\n]* ) )
   }{ defined $2 and push @ccom, $2;
-     defined $1 ? $1 : "$ccs$#ccom$cce" }egsx;
+     defined $1 ? $1 : "$ccs$#ccom$cce" }mgsex;
 
   $file{ccom} = \@ccom;
   $file{code} = $c;
-  $file{has_inc_ppport} = ($c =~ /#.*include.*\Q$ppport\E/);
+  $file{has_inc_ppport} = $c =~ /^$HS*#$HS*include[^\r\n]+\b\Q$ppport\E\b/m;
 
   my $func;
 
@@ -335,9 +329,7 @@ for $filename (@files) {
             }
           }
           for ($func, @deps) {
-            if (exists $need{$_}) {
-              $file{needs}{$_} = 'static';
-            }
+            $file{needs}{$_} = 'static' if exists $need{$_};
           }
         }
       }
@@ -353,9 +345,7 @@ for $filename (@files) {
     if (exists $need{$2}) {
       $file{defined $3 ? 'needed_global' : 'needed_static'}{$2}++;
     }
-    else {
-      warning("Possibly wrong #define $1 in $filename");
-    }
+    else { warning("Possibly wrong #define $1 in $filename") }
   }
 
   for (qw(uses needs uses_todo needed_global needed_static)) {
@@ -590,6 +580,8 @@ exit 0;
 
 #######################################################################
 
+sub try_use { eval "use @_;"; return $@ eq '' }
+
 sub mydiff
 {
   local *F = shift;
@@ -600,7 +592,7 @@ sub mydiff
     $diff = run_diff($opt{diff}, $file, $str);
   }
 
-  if (!defined $diff and can_use('Text::Diff')) {
+  if (!defined $diff and try_use('Text::Diff')) {
     $diff = Text::Diff::diff($file, \$str, { STYLE => 'Unified' });
     $diff = <<HEADER . $diff;
 --- $file
@@ -622,7 +614,6 @@ HEADER
   }
 
   print F $diff;
-
 }
 
 sub run_diff
@@ -657,12 +648,6 @@ sub run_diff
   }
 
   return undef;
-}
-
-sub can_use
-{
-  eval "use @_;";
-  return $@ eq '';
 }
 
 sub rec_depend
@@ -819,9 +804,19 @@ please try to regenerate this file using:
 
 END
 /ms;
+  my($pl, $c) = $self =~ /(.*^__DATA__)(.*)/ms;
+  $c =~ s{
+    / (?: \*[^*]*\*+(?:[^$ccs][^*]*\*+)* / | /[^\r\n]*)
+  | ( "[^"\\]*(?:\\.[^"\\]*)*"
+    | '[^'\\]*(?:\\.[^'\\]*)*' )
+  | ($HS+) }{ defined $2 ? ' ' : ($1 || '') }gsex;
+  $c =~ s!\s+$!!mg;
+  $c =~ s!^$LF!!mg;
+  $c =~ s!^\s*#\s*!#!mg;
+  $c =~ s!^\s+!!mg;
 
   open OUT, ">$0" or die "cannot strip $0: $!\n";
-  print OUT $self;
+  print OUT "$pl$c\n";
 
   exit 0;
 }
