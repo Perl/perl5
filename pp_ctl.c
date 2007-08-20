@@ -3066,6 +3066,9 @@ PP(pp_require)
     SV *sv;
     const char *name;
     STRLEN len;
+    char * unixname;
+    STRLEN unixlen;
+    int vms_unixname = 0;
     const char *tryname = NULL;
     SV *namesv = NULL;
     const I32 gimme = GIMME_V;
@@ -3115,8 +3118,31 @@ PP(pp_require)
     if (!(name && len > 0 && *name))
 	DIE(aTHX_ "Null filename used");
     TAINT_PROPER("require");
+
+
+#ifdef VMS
+    /* The key in the %ENV hash is in the syntax of file passed as the argument
+     * usually this is in UNIX format, but sometimes in VMS format, which
+     * can result in a module being pulled in more than once.
+     * To prevent this, the key must be stored in UNIX format if the VMS
+     * name can be translated to UNIX.
+     */
+    if ((unixname = tounixspec(name, NULL)) != NULL) {
+	unixlen = strlen(unixname);
+	vms_unixname = 1;
+    }
+    else
+#endif
+    {
+        /* if not VMS or VMS name can not be translated to UNIX, pass it
+	 * through.
+	 */
+	unixname = (char *) name;
+	unixlen = len;
+    }
     if (PL_op->op_type == OP_REQUIRE) {
-	SV * const * const svp = hv_fetch(GvHVn(PL_incgv), name, len, 0);
+	SV * const * const svp = hv_fetch(GvHVn(PL_incgv),
+					  unixname, unixlen, 0);
 	if ( svp ) {
 	    if (*svp != &PL_sv_undef)
 		RETPUSHYES;
@@ -3146,8 +3172,7 @@ PP(pp_require)
 	AV * const ar = GvAVn(PL_incgv);
 	I32 i;
 #ifdef VMS
-	char *unixname;
-	if ((unixname = tounixspec(name, NULL)) != NULL)
+	if (vms_unixname)
 #endif
 	{
 	    namesv = newSV(0);
@@ -3372,11 +3397,13 @@ PP(pp_require)
     /* name is never assigned to again, so len is still strlen(name)  */
     /* Check whether a hook in @INC has already filled %INC */
     if (!hook_sv) {
-	(void)hv_store(GvHVn(PL_incgv), name, len, newSVpv(CopFILE(&PL_compiling),0),0);
+	(void)hv_store(GvHVn(PL_incgv),
+		       unixname, unixlen, newSVpv(CopFILE(&PL_compiling),0),0);
     } else {
-	SV** const svp = hv_fetch(GvHVn(PL_incgv), name, len, 0);
+	SV** const svp = hv_fetch(GvHVn(PL_incgv), unixname, unixlen, 0);
 	if (!svp)
-	    (void)hv_store(GvHVn(PL_incgv), name, len, SvREFCNT_inc_simple(hook_sv), 0 );
+	    (void)hv_store(GvHVn(PL_incgv),
+			   unixname, unixlen, SvREFCNT_inc_simple(hook_sv), 0 );
     }
 
     ENTER;

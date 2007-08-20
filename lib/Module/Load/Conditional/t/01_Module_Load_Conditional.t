@@ -54,8 +54,9 @@ use_ok( 'Module::Load::Conditional' );
 	@rv_path = File::Spec::Unix->splitpath($rv->{file});
     } else {
 	@rv_path = File::Spec->splitpath($rv->{file});
+ 	@rv_path = ($rv_path[0],
+		    File::Spec->splitdir($rv_path[1]), $rv_path[2]);
     }
-    @rv_path = ($rv_path[0], File::Spec->splitdir($rv_path[1]), $rv_path[2]);
 
     # First element could be blank for some system types like VMS
     shift @rv_path if $rv_path[0] eq '';
@@ -169,7 +170,6 @@ SKIP:{
     {   package A::B::C::D; 
         $A::B::C::D::VERSION = $$; 
         $INC{'A/B/C/D.pm'}   = $$.$$;
-	$INC{'[.A.B.C]D.pm'} = $$.$$ if $^O eq 'VMS';
     }
     
     my $href = check_install( module => 'A::B::C::D', version => 0 );
