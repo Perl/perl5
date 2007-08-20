@@ -362,6 +362,10 @@ for my $switch (0,1) {
                         ### if something went wrong with determining the out
                         ### path, don't go deleting stuff.. might be Really Bad
                         my $out_re = quotemeta( $OutDir );
+
+		        # Remove the directory terminator from regex
+			my $out_re = s/\\\]// if IS_VMS;
+
                         if( $ae->extract_path !~ /^$out_re/ ) {   
                             ok( 0, "Extractpath WRONG (".$ae->extract_path.")"); 
                             skip(  "Unsafe operation -- skip cleanup!!!" ), 1;

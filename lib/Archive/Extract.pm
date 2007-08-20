@@ -17,6 +17,9 @@ use Locale::Maketext::Simple    Style => 'gettext';
 use constant ON_SOLARIS     => $^O eq 'solaris' ? 1 : 0;
 use constant FILE_EXISTS    => sub { -e $_[0] ? 1 : 0 };
 
+### VMS may require quoting upper case command options
+use constant ON_VMS         => $^O eq 'VMS' ? 1 : 0;
+
 ### If these are changed, update @TYPES and the new() POD
 use constant TGZ            => 'tgz';
 use constant TAR            => 'tar';
@@ -851,7 +854,12 @@ sub _unzip_bin {
 
 
     ### first, get the files.. it must be 2 different commands with 'unzip' :(
-    {   my $cmd = [ $self->bin_unzip, '-Z', '-1', $self->archive ];
+    {   my $cmd;
+	if (ON_VMS) {
+	    $cmd = [ $self->bin_unzip, '"-Z"', '-1', $self->archive ];
+	} else {
+	    $cmd = [ $self->bin_unzip, '-Z', '-1', $self->archive ];
+	}
 
         my $buffer = '';
         unless( scalar run( command => $cmd,
