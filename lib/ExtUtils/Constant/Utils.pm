@@ -55,7 +55,7 @@ sub C_stringify {
   s/\f/\\f/g;
   s/\a/\\a/g;
   if (ord('A') == 193) { # EBCDIC has no ^\0-\177 workalike.
-      s/([[:^print:]])/sprintf "\\x{%X}", ord $1/ge;
+      s/([[:^print:]])/sprintf "\\%03o", ord $1/ge;
   } else {
       s/([^\0-\177])/sprintf "\\%03o", ord $1/ge;
   }
