@@ -261,47 +261,54 @@ unless (   defined &Time::HiRes::gettimeofday
     sleep (0.5);
     print "# sleep...", Time::HiRes::tv_interval($r), "\nok 16\n";
 
-    $r = [Time::HiRes::gettimeofday()];
-    $i = 5;
     my $oldaction;
-    if ($use_sigaction) {
-	$oldaction = new POSIX::SigAction;
-	printf "# sigaction tick, ALRM = %d\n", &POSIX::SIGALRM;
-	# Perl's deferred signals may be too wimpy to break through
-	# a restartable select(), so use POSIX::sigaction if available.
-	POSIX::sigaction(&POSIX::SIGALRM, POSIX::SigAction->new("tick"),
-			 $oldaction)
-	    or die "Error setting SIGALRM handler with sigaction: $!\n";
-    } else {
-	print "# SIG tick\n";
-	$SIG{ALRM} = "tick";
-    }
 
-    while ($i > 0)
-    {
-	alarm(0.3);
-	select (undef, undef, undef, 3);
-	my $ival = Time::HiRes::tv_interval ($r);
-	print "# Select returned! $i $ival\n";
-	print "# ", abs($ival/3 - 1), "\n";
-	# Whether select() gets restarted after signals is
-	# implementation dependent.  If it is restarted, we
-	# will get about 3.3 seconds: 3 from the select, 0.3
-	# from the alarm.  If this happens, let's just skip
-	# this particular test.  --jhi
-	if (abs($ival/3.3 - 1) < $limit) {
-	    $ok = "Skip: your select() may get restarted by your SIGALRM (or just retry test)";
-	    undef $not;
-	    last;
+    # on VMS timers can not interrupt select.
+    if ($^O ne 'VMS') {
+	$r = [Time::HiRes::gettimeofday()];
+	$i = 5;
+	if ($use_sigaction) {
+	    $oldaction = new POSIX::SigAction;
+	    printf "# sigaction tick, ALRM = %d\n", &POSIX::SIGALRM;
+	    # Perl's deferred signals may be too wimpy to break through
+	    # a restartable select(), so use POSIX::sigaction if available.
+	    POSIX::sigaction(&POSIX::SIGALRM, POSIX::SigAction->new("tick"),
+			     $oldaction)
+		or die "Error setting SIGALRM handler with sigaction: $!\n";
+	} else {
+	    print "# SIG tick\n";
+	    $SIG{ALRM} = "tick";
 	}
-	my $exp = 0.3 * (5 - $i);
-	# This test is more sensitive, so impose a softer limit.
-	if (abs($ival/$exp - 1) > 3*$limit) {
-	    my $ratio = abs($ival/$exp);
-	    $not = "while: $exp sleep took $ival ratio $ratio";
-	    last;
+
+	while ($i > 0)
+	{
+	    alarm(0.3);
+	    select (undef, undef, undef, 3);
+	    my $ival = Time::HiRes::tv_interval ($r);
+	    print "# Select returned! $i $ival\n";
+	    print "# ", abs($ival/3 - 1), "\n";
+	    # Whether select() gets restarted after signals is
+	    # implementation dependent.  If it is restarted, we
+	    # will get about 3.3 seconds: 3 from the select, 0.3
+	    # from the alarm.  If this happens, let's just skip
+	    # this particular test.  --jhi
+	    if (abs($ival/3.3 - 1) < $limit) {
+		$ok = 
+ "Skip: your select() may get restarted by your SIGALRM (or just retry test)";
+		undef $not;
+		last;
+		}
+	    my $exp = 0.3 * (5 - $i);
+	    # This test is more sensitive, so impose a softer limit.
+	    if (abs($ival/$exp - 1) > 3*$limit) {
+		my $ratio = abs($ival/$exp);
+		$not = "while: $exp sleep took $ival ratio $ratio";
+		last;
+	    }
+	    $ok = $i;
 	}
-	$ok = $i;
+    } else {
+	$ok = "Skip: VMS select() does not get interrupted.";
     }
 
     sub tick
@@ -318,10 +325,13 @@ unless (   defined &Time::HiRes::gettimeofday
 	}
     }
 
-    if ($use_sigaction) {
-	POSIX::sigaction(&POSIX::SIGALRM, $oldaction);
-    } else {
-	alarm(0); # can't cancel usig %SIG
+
+    if ($^O ne 'VMS') {
+	if ($use_sigaction) {
+	    POSIX::sigaction(&POSIX::SIGALRM, $oldaction);
+	} else {
+	    alarm(0); # can't cancel usig %SIG
+	}
     }
 
     print $not ? "not ok 17 # $not\n" : "ok 17 # $ok\n";

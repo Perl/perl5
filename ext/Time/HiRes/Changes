@@ -1,5 +1,23 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9708	[2007-10-05]
+	- [rt.cpan.org #29747]: Build failure with perl 5.005_05
+	  Fixed by regenerating the ppport.h using Devel::PPPort 3.13.
+
+1.9707	[2007-02-27]
+	- t/HiRes.t failed in Perl 5.6.2,
+	  "action is not of type POSIX::SigAction at t/HiRes.t line 318",
+	  reported and fixed by Anton Berezin, the reason was faulty
+	  use of sigaction() when restoring the old action.
+
+1.9706	[2007-02-25]
+	- with bleadperl in VMS the HiRes.t overrun the maximum number
+	  of deferred signals because the libc SIGALRM was not strong
+	  enough to interrupt select(), and select() got restarted every
+	  time, solution is to use POSIX::SigAction if available.
+	  A fix from Craig Berry (not 100% there, but helps).
+	- allow for more measuring noise for ualarm() tests 35..37
+
 1.9705	[2007-02-06]
 	- nanosleep() and clock_nanosleep() detection and use were
 	  quite broken; in Linux -lrt needed; fixes from Zefram
