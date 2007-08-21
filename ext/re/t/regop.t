@@ -15,6 +15,8 @@ BEGIN { require "./test.pl"; }
 our $NUM_SECTS;
 chomp(my @strs= grep { !/^\s*\#/ } <DATA>);
 my $out = runperl(progfile => "../ext/re/t/regop.pl", stderr => 1 );
+# VMS currently embeds linefeeds in the output.
+$out =~ s/\cJ//g if $^O = 'VMS';
 my @tests = grep { /\S/ } split /(?=Compiling REx)/, $out;
 # on debug builds we get an EXECUTING... message in there at the top
 shift @tests
