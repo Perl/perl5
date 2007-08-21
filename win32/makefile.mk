@@ -568,7 +568,7 @@ OPTIMIZE	+= -Wp64 -fp:precise
 # For now, silence VC++ 8.x's warnings about "unsafe" CRT functions and POSIX
 # CRT function names being deprecated.
 .IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE"
-DEFINES		+= -D_CRT_SECURE_NO_DEPRECATE -wd4996
+DEFINES		+= -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
 .ENDIF
 
 # Use the MSVCRT read() fix if the PerlCRT was not chosen, but only when using

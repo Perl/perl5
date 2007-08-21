@@ -383,7 +383,7 @@ warning suppressant and actually make use of the new secure CRT functions.
 
 There is also a similar issue with POSIX CRT function names like fileno having
 been deprecated in favour of ISO C++ conformant names like _fileno. These
-warnings are also currently suppressed with the compiler option /wd4996. It
+warnings are also currently suppressed by adding -D_CRT_NONSTDC_NO_DEPRECATE. It
 might be nice to do as Microsoft suggest here too, although, unlike the secure
 functions issue, there is presumably little or no benefit in this case.
 
