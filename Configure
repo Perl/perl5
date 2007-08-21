@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Jul 19 15:56:52 CEST 2007 [metaconfig 3.0 PL70]
+# Generated on Tue Aug 21 15:53:52 CEST 2007 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -347,7 +347,6 @@ optimize=''
 cf_email=''
 cf_by=''
 cf_time=''
-charsize=''
 contains=''
 cpp_stuff=''
 cpplast=''
@@ -15090,40 +15089,6 @@ eval $inhdr
 set nl_langinfo d_nl_langinfo
 eval $inlibc
 
-: check for length of character
-echo " "
-case "$charsize" in
-'')
-	echo "Checking to see how big your characters are (hey, you never know)..." >&4
-	$cat >try.c <<EOCP
-#include <stdio.h>
-#$i_stdlib I_STDLIB
-#ifdef I_STDLIB
-#include <stdlib.h>
-#endif
-int main()
-{
-    printf("%d\n", (int)sizeof(char));
-    exit(0);
-}
-EOCP
-	set try
-	if eval $compile_ok; then
-		dflt=`$run ./try`
-	else
-		dflt='1'
-		echo "(I can't seem to compile the test program.  Guessing...)"
-	fi
-	;;
-*)
-	dflt="$charsize"
-	;;
-esac
-rp="What is the size of a character (in bytes)?"
-. ./myread
-charsize="$ans"
-$rm_try
-
 : check for volatile keyword
 echo " "
 echo 'Checking to see if your C compiler knows about "volatile"...' >&4
@@ -15212,38 +15177,10 @@ int main() {
 }
 EOCP
 
-case "$i8type" in
-'')	case "$charsize" in
-	1)	i8type=char
-		u8type="unsigned char"
-		i8size=$charsize
-		u8size=$charsize
-		;;
-	esac
-	;;
-esac
-case "$i8type" in
-'')	set try -DINT8
-	if eval $compile; then
-		case "`$run ./try`" in
-		int8_t)	i8type=int8_t
-			u8type=uint8_t
-			i8size=1
-			u8size=1
-			;;
-		esac
-	fi
-	;;
-esac
-case "$i8type" in
-'')	if $test $charsize -ge 1; then
-		i8type=char
-		u8type="unsigned char"
-		i8size=$charsize
-		u8size=$charsize
-	fi
-	;;
-esac
+i8type=char
+u8type="unsigned char"
+i8size=1
+u8size=1
 
 case "$i16type" in
 '')	case "$shortsize" in
@@ -21596,7 +21533,6 @@ ccversion='$ccversion'
 cf_by='$cf_by'
 cf_email='$cf_email'
 cf_time='$cf_time'
-charsize='$charsize'
 chgrp='$chgrp'
 chmod='$chmod'
 chown='$chown'

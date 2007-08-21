@@ -244,10 +244,6 @@ cf_time (cf_who.U):
 	Holds the output of the "date" command when the configuration file was
 	produced. This is used to tag both config.sh and config_h.SH.
 
-charsize (charsize.U):
-	This variable contains the value of the CHARSIZE symbol, which
-	indicates to the C program how many bytes there are in a character.
-
 chgrp (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
@@ -4105,6 +4101,10 @@ rm (Loc.U):
 	This variable is used internally by Configure to determine the
 	full pathname (if any) of the rm program.  After Configure runs,
 	the value is reset to a plain "rm" and is not useful.
+
+rm_try (Unix.U):
+	This is a cleanup variable for try test programs.
+	Internal Configure use only.
 
 rmail (Loc.U):
 	This variable is defined but not used by Configure.
