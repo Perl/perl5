@@ -3068,7 +3068,9 @@ PP(pp_require)
     STRLEN len;
     char * unixname;
     STRLEN unixlen;
+#ifdef VMS
     int vms_unixname = 0;
+#endif
     const char *tryname = NULL;
     SV *namesv = NULL;
     const I32 gimme = GIMME_V;
