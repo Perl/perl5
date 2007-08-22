@@ -21,9 +21,63 @@
 #  define utf8n_to_uvchr utf8_to_uv
 #endif
 
-static char *soundex_table =
-  /*ABCDEFGHIJKLMNOPQRSTUVWXYZ*/
-   "01230120022455012623010202";
+static char sv_soundex_table[0x100];
+static void sv_soundex_initialize (void)
+{
+  memset(&sv_soundex_table[0], '\0', sizeof(sv_soundex_table));
+  sv_soundex_table['A'] = '0';
+  sv_soundex_table['a'] = '0';
+  sv_soundex_table['E'] = '0';
+  sv_soundex_table['e'] = '0';
+  sv_soundex_table['H'] = '0';
+  sv_soundex_table['h'] = '0';
+  sv_soundex_table['I'] = '0';
+  sv_soundex_table['i'] = '0';
+  sv_soundex_table['O'] = '0';
+  sv_soundex_table['o'] = '0';
+  sv_soundex_table['U'] = '0';
+  sv_soundex_table['u'] = '0';
+  sv_soundex_table['W'] = '0';
+  sv_soundex_table['w'] = '0';
+  sv_soundex_table['Y'] = '0';
+  sv_soundex_table['y'] = '0';
+  sv_soundex_table['B'] = '1';
+  sv_soundex_table['b'] = '1';
+  sv_soundex_table['F'] = '1';
+  sv_soundex_table['f'] = '1';
+  sv_soundex_table['P'] = '1';
+  sv_soundex_table['p'] = '1';
+  sv_soundex_table['V'] = '1';
+  sv_soundex_table['v'] = '1';
+  sv_soundex_table['C'] = '2';
+  sv_soundex_table['c'] = '2';
+  sv_soundex_table['G'] = '2';
+  sv_soundex_table['g'] = '2';
+  sv_soundex_table['J'] = '2';
+  sv_soundex_table['j'] = '2';
+  sv_soundex_table['K'] = '2';
+  sv_soundex_table['k'] = '2';
+  sv_soundex_table['Q'] = '2';
+  sv_soundex_table['q'] = '2';
+  sv_soundex_table['S'] = '2';
+  sv_soundex_table['s'] = '2';
+  sv_soundex_table['X'] = '2';
+  sv_soundex_table['x'] = '2';
+  sv_soundex_table['Z'] = '2';
+  sv_soundex_table['z'] = '2';
+  sv_soundex_table['D'] = '3';
+  sv_soundex_table['d'] = '3';
+  sv_soundex_table['T'] = '3';
+  sv_soundex_table['t'] = '3';
+  sv_soundex_table['L'] = '4';
+  sv_soundex_table['l'] = '4';
+  sv_soundex_table['M'] = '5';
+  sv_soundex_table['m'] = '5';
+  sv_soundex_table['N'] = '5';
+  sv_soundex_table['n'] = '5';
+  sv_soundex_table['R'] = '6';
+  sv_soundex_table['r'] = '6';
+}
 
 static SV *sv_soundex (SV *source)
 {
@@ -38,28 +92,27 @@ static SV *sv_soundex (SV *source)
 
   while (source_p != source_end)
     {
-      if ((*source_p & ~((UV) 0x7F)) == 0 && isalpha(*source_p))
+      char codepart_last = sv_soundex_table[(unsigned char) *source_p];
+
+      if (codepart_last != '\0')
         {
           SV   *code     = newSV(SOUNDEX_ACCURACY);
           char *code_p   = SvPVX(code);
           char *code_end = &code_p[SOUNDEX_ACCURACY];
-          char  code_last;
 
           SvCUR_set(code, SOUNDEX_ACCURACY);
           SvPOK_only(code);
 
-          code_last = soundex_table[(*code_p++ = toupper(*source_p++)) - 'A'];
+          *code_p++ = toupper(*source_p++);
 
           while (source_p != source_end && code_p != code_end)
             {
               char c = *source_p++;
+              char codepart = sv_soundex_table[(unsigned char) c];
 
-              if ((c & ~((UV) 0x7F)) == 0 && isalpha(c))
-                {
-                  *code_p = soundex_table[toupper(c) - 'A'];
-                  if (*code_p != code_last && (code_last = *code_p) != '0')
-                    code_p++;
-                }
+              if (codepart != '\0')
+                if (codepart != codepart_last && (codepart_last = codepart) != '0')
+                  *code_p++ = codepart;
             }
 
           while (code_p != code_end)
@@ -91,31 +144,30 @@ static SV *sv_soundex_utf8 (SV* source)
     {
       STRLEN offset;
       UV c = utf8n_to_uvchr(source_p, source_end-source_p, &offset, 0);
+      char codepart_last = (c <= 0xFF) ? sv_soundex_table[c] : '\0';
       source_p = (offset >= 1) ? &source_p[offset] : source_end;
 
-      if ((c & ~((UV) 0x7F)) == 0 && isalpha(c))
+      if (codepart_last != '\0')
         {
           SV   *code     = newSV(SOUNDEX_ACCURACY);
           char *code_p   = SvPVX(code);
           char *code_end = &code_p[SOUNDEX_ACCURACY];
-          char  code_last;
 
           SvCUR_set(code, SOUNDEX_ACCURACY);
           SvPOK_only(code);
 
-          code_last = soundex_table[(*code_p++ = toupper(c)) - 'A'];
+          *code_p++ = toupper(c);
 
           while (source_p != source_end && code_p != code_end)
             {
+              char codepart;
               c = utf8n_to_uvchr(source_p, source_end-source_p, &offset, 0);
+              codepart = (c <= 0xFF) ? sv_soundex_table[c] : '\0';
               source_p = (offset >= 1) ? &source_p[offset] : source_end;
 
-              if ((c & ~((UV) 0x7F)) == 0 && isalpha(c))
-                {
-                  *code_p = soundex_table[toupper(c) - 'A'];
-                  if (*code_p != code_last && (code_last = *code_p) != '0')
-                    code_p++;
-                }
+              if (codepart != '\0')
+                if (codepart != codepart_last && (codepart_last = codepart) != '0')
+                  *code_p++ = codepart;
             }
 
           while (code_p != code_end)
@@ -138,6 +190,10 @@ PROTOTYPES: DISABLE
 
 void
 soundex_xs (...)
+INIT:
+{
+  sv_soundex_initialize();
+}
 PPCODE:
 {
   int i;
