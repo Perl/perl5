@@ -1,5 +1,28 @@
 Revision history for Sys-Syslog
 
+0.19 -- 2007.08.xx -- Sebastien Aperghis-Tramoni (SAPER)
+        [BUGFIX] CPAN-RT#20635: Fix tests to avoid problems related to the 
+        "stream" mechanism which occured on Debian and Cygwin.
+        [BUGFIX] CPAN-RT#20780: Facility could not be temporarily changed.
+        Also fixes the syslog() before openlog() bug.
+        [BUGFIX] CPAN-RT#21333: Makefile.PL now creates a typemap for Perl 5.6.1
+        [BUGFIX] CPAN-RT#21516: disconnect_log() now correctly calls closelog_xs().
+        [BUGFIX] CPAN-RT#21866: Silence warnings in openlog().
+        [BUGFIX] CPAN-RT#25488: Silence warnings in disconnect_log().
+        via syslog().
+        [BUGFIX] Rewrote the constants generation code in order to provide 
+        fallback value for non-standard macros.
+        [FEATURE] Added Win32 event log support thanks to Yves Orton.
+        [FEATURE] Added new macros from modern BSD and IRIX.
+        [FEATURE] Each non-standard macro now fall backs to a standard macro.
+        [CODE] Merged changes from Jerry D. Hedden to use ppport.h only when not
+        built from core distribution (blead@30657).
+        [TESTS] t/syslog.t now generates a more detailled TAP output.
+        [TESTS] Merged change blead@29176: suppress taint mode from t/constants.t
+        [TESTS] Added regression tests for CPAN-RT#21866 and #25488.
+        [EG] Added example script eg/syslog.pl
+        [DOC] Added the Sys::Syslog Rules.
+
 0.18 -- 2006.08.28 -- Sebastien Aperghis-Tramoni (SAPER)
         [BUGFIX] Rewrote the way the default identifiant is constructed.
         [TESTS] CPAN-RT#20946: Removed the console mechanism from the main 
@@ -12,7 +35,7 @@ Revision history for Sys-Syslog
         some dead code. 
         [CODE] Actually added the macros from Mac OS X that were announced in 
         the 0.14 version.
-        [DOC] CPAN-RT#20545: Rewrote the documentation about setlogksock().
+        [DOC] CPAN-RT#20545: Rewrote the documentation about setlogsock().
 
 0.16 -- 2006.06.20 -- Sebastien Aperghis-Tramoni (SAPER)
         [BUGFIX] Perl-RT#20557: Save errno before trying to connect.
@@ -23,7 +46,6 @@ Revision history for Sys-Syslog
         later.
         [DOC] Added documentation about the "native" mechanism.
         [DOC] Now indicates whether tickets are from CPAN or Perl RT.
-
 
 0.15 -- 2006.06.10 -- Sebastien Aperghis-Tramoni (SAPER)
         [FEATURE] CPAN-RT#17316: Added a "nofatal" option to openlog().

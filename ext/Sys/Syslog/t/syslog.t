@@ -1,7 +1,7 @@
-#!/usr/bin/perl -T
+#!perl -T
 
 BEGIN {
-    if( $ENV{PERL_CORE} ) {
+    if ($ENV{PERL_CORE}) {
         chdir 't';
         @INC = '../lib';
     }
@@ -19,18 +19,26 @@ use warnings qw(closure deprecated exiting glob io misc numeric once overflow
                 pack portable recursion redefine regexp severe signal substr
                 syntax taint uninitialized unpack untie utf8 void);
 
-# check that the module is at least available
-plan skip_all => "Sys::Syslog was not build" 
-  unless $Config{'extensions'} =~ /\bSyslog\b/;
+my $is_Win32  = $^O =~ /win32/i;
+my $is_Cygwin = $^O =~ /cygwin/i;
+
+# if testing in core, check that the module is at least available
+if ($ENV{PERL_CORE}) {
+    plan skip_all => "Sys::Syslog was not build" 
+        unless $Config{'extensions'} =~ /\bSyslog\b/;
+}
 
 # we also need Socket
 plan skip_all => "Socket was not build" 
-  unless $Config{'extensions'} =~ /\bSocket\b/;
+    unless $Config{'extensions'} =~ /\bSocket\b/;
 
 my $tests;
 plan tests => $tests;
 
-BEGIN { $tests = 1 }
+# any remaining warning should be severly punished
+BEGIN { eval "use Test::NoWarnings"; $tests = $@ ? 0 : 1; }
+
+BEGIN { $tests += 1 }
 # ok, now loads them
 eval 'use Socket';
 use_ok('Sys::Syslog', ':standard', ':extended', ':macros');
@@ -103,110 +111,124 @@ SKIP: {
 }
 
 
-BEGIN { $tests += 20 * 6 }
+BEGIN { $tests += 20 * 7 }
 # try to open a syslog using all the available connection methods
-for my $sock_type (qw(native stream unix inet tcp udp)) {
+my @passed = ();
+for my $sock_type (qw(native eventlog unix stream inet tcp udp)) {
     SKIP: {
+        skip "the 'unix' mechanism works, so the tests will likely fail with the 'stream' mechanism", 20 
+            if $sock_type eq 'stream' and grep {/unix/} @passed;
+
         # setlogsock() called with an arrayref
         $r = eval { setlogsock([$sock_type]) } || 0;
         skip "can't use '$sock_type' socket", 20 unless $r;
-        is( $@, '', "setlogsock() called with ['$sock_type']" );
-        ok( $r, "setlogsock() should return true: '$r'" );
+        is( $@, '', "[$sock_type] setlogsock() called with ['$sock_type']" );
+        ok( $r, "[$sock_type] setlogsock() should return true: '$r'" );
 
         # setlogsock() called with a single argument
         $r = eval { setlogsock($sock_type) } || 0;
         skip "can't use '$sock_type' socket", 18 unless $r;
-        is( $@, '', "setlogsock() called with '$sock_type'" );
-        ok( $r, "setlogsock() should return true: '$r'" );
+        is( $@, '', "[$sock_type] setlogsock() called with '$sock_type'" );
+        ok( $r, "[$sock_type] setlogsock() should return true: '$r'" );
 
         # openlog() without option NDELAY
         $r = eval { openlog('perl', '', 'local0') } || 0;
         skip "can't connect to syslog", 16 if $@ =~ /^no connection to syslog available/;
-        is( $@, '', "openlog() called with facility 'local0' and without option 'ndelay'" );
-        ok( $r, "openlog() should return true: '$r'" );
+        is( $@, '', "[$sock_type] openlog() called with facility 'local0' and without option 'ndelay'" );
+        ok( $r, "[$sock_type] openlog() should return true: '$r'" );
 
         # openlog() with the option NDELAY
         $r = eval { openlog('perl', 'ndelay', 'local0') } || 0;
         skip "can't connect to syslog", 14 if $@ =~ /^no connection to syslog available/;
-        is( $@, '', "openlog() called with facility 'local0' with option 'ndelay'" );
-        ok( $r, "openlog() should return true: '$r'" );
+        is( $@, '', "[$sock_type] openlog() called with facility 'local0' with option 'ndelay'" );
+        ok( $r, "[$sock_type] openlog() should return true: '$r'" );
 
         # syslog() with negative level, should fail
         $r = eval { syslog(-1, "$test_string by connecting to a $sock_type socket") } || 0;
-        like( $@, '/^syslog: invalid level\/facility: /', "syslog() called with level -1" );
-        ok( !$r, "syslog() should return false: '$r'" );
+        like( $@, '/^syslog: invalid level\/facility: /', "[$sock_type] syslog() called with level -1" );
+        ok( !$r, "[$sock_type] syslog() should return false: '$r'" );
 
         # syslog() with levels "info" and "notice" (as a strings), should fail
         $r = eval { syslog('info,notice', "$test_string by connecting to a $sock_type socket") } || 0;
-        like( $@, '/^syslog: too many levels given: notice/', "syslog() called with level 'info,notice'" );
-        ok( !$r, "syslog() should return false: '$r'" );
+        like( $@, '/^syslog: too many levels given: notice/', "[$sock_type] syslog() called with level 'info,notice'" );
+        ok( !$r, "[$sock_type] syslog() should return false: '$r'" );
 
         # syslog() with facilities "local0" and "local1" (as a strings), should fail
         $r = eval { syslog('local0,local1', "$test_string by connecting to a $sock_type socket") } || 0;
-        like( $@, '/^syslog: too many facilities given: local1/', "syslog() called with level 'info,notice'" );
-        ok( !$r, "syslog() should return false: '$r'" );
+        like( $@, '/^syslog: too many facilities given: local1/', "[$sock_type] syslog() called with level 'info,notice'" );
+        ok( !$r, "[$sock_type] syslog() should return false: '$r'" );
 
         # syslog() with level "info" (as a string), should pass
-        $r = eval { syslog('info', "$test_string by connecting to a $sock_type socket (errno=%m)") } || 0;
-        is( $@, '', "syslog() called with level 'info' (string)" );
-        ok( $r, "syslog() should return true: '$r'" );
+        $r = eval { syslog('info', "$test_string by connecting to a $sock_type socket") } || 0;
+        is( $@, '', "[$sock_type] syslog() called with level 'info' (string)" );
+        ok( $r, "[$sock_type] syslog() should return true: '$r'" );
 
         # syslog() with level "info" (as a macro), should pass
-        $r = eval { syslog(LOG_INFO(), "$test_string by connecting to a $sock_type socket (errno=%m)") } || 0;
-        is( $@, '', "syslog() called with level 'info' (macro)" );
-        ok( $r, "syslog() should return true: '$r'" );
+        { local $! = 1;
+          $r = eval { syslog(LOG_INFO(), "$test_string by connecting to a $sock_type socket, setting a fake errno: %m") } || 0;
+        }
+        is( $@, '', "[$sock_type] syslog() called with level 'info' (macro)" );
+        ok( $r, "[$sock_type] syslog() should return true: '$r'" );
 
-        # syslog() with facility "kern" (as a string), should fail
-        #$r = eval { syslog('kern', "$test_string by connecting to a $sock_type socket") } || 0;
-        #like( $@, '/^syslog: invalid level/facility: kern/', "syslog() called with facility 'kern'" );
-        #ok( !$r, "syslog() should return false: '$r'" );
-
-        # syslog() with facility "kern" (as a macro), should fail
-        #$r = eval { syslog(LOG_KERN, "$test_string by connecting to a $sock_type socket") } || 0;
-        #like( $@, '/^syslog: invalid level/facility: 0/', "syslog() called with facility 'kern'" );
-        #ok( !$r, "syslog() should return false: '$r'" );
+        push @passed, $sock_type;
 
         SKIP: {
             skip "skipping closelog() tests for 'console'", 2 if $sock_type eq 'console';
             # closelog()
             $r = eval { closelog() } || 0;
-            is( $@, '', "closelog()" );
-            ok( $r, "closelog() should return true: '$r'" );
+            is( $@, '', "[$sock_type] closelog()" );
+            ok( $r, "[$sock_type] closelog() should return true: '$r'" );
         }
     }
 }
 
 
 BEGIN { $tests += 10 }
-# setlogsock() with "stream" and an undef path
-$r = eval { setlogsock("stream", undef ) } || '';
-is( $@, '', "setlogsock() called, with 'stream' and an undef path" );
-ok( $r, "setlogsock() should return true: '$r'" );
-
-# setlogsock() with "stream" and an empty path
-$r = eval { setlogsock("stream", '' ) } || '';
-is( $@, '', "setlogsock() called, with 'stream' and an empty path" );
-ok( !$r, "setlogsock() should return false: '$r'" );
-
-# setlogsock() with "stream" and /dev/null
-$r = eval { setlogsock("stream", '/dev/null' ) } || '';
-is( $@, '', "setlogsock() called, with 'stream' and '/dev/null'" );
-ok( $r, "setlogsock() should return true: '$r'" );
-
-# setlogsock() with "stream" and a non-existing file
-$r = eval { setlogsock("stream", 'test.log' ) } || '';
-is( $@, '', "setlogsock() called, with 'stream' and 'test.log' (file does not exist)" );
-ok( !$r, "setlogsock() should return false: '$r'" );
-
-# setlogsock() with "stream" and a local file
 SKIP: {
-    my $logfile = "test.log";
-    open(LOG, ">$logfile") or skip "can't create file '$logfile': $!", 2;
-    close(LOG);
-    $r = eval { setlogsock("stream", $logfile ) } || '';
-    is( $@, '', "setlogsock() called, with 'stream' and '$logfile' (file exists)" );
+    skip "not testing setlogsock('stream') on Win32", 10 if $is_Win32;
+    skip "the 'unix' mechanism works, so the tests will likely fail with the 'stream' mechanism", 10 
+        if grep {/unix/} @passed;
+
+    # setlogsock() with "stream" and an undef path
+    $r = eval { setlogsock("stream", undef ) } || '';
+    is( $@, '', "setlogsock() called, with 'stream' and an undef path" );
+    if ($is_Cygwin) {
+        if (-x "/usr/sbin/syslog-ng") {
+            ok( $r, "setlogsock() on Cygwin with syslog-ng should return true: '$r'" );
+        }
+        else {
+            ok( !$r, "setlogsock() on Cygwin without syslog-ng should return false: '$r'" );
+        }
+    }
+    else  {
+        ok( $r, "setlogsock() should return true: '$r'" );
+    }
+
+    # setlogsock() with "stream" and an empty path
+    $r = eval { setlogsock("stream", '' ) } || '';
+    is( $@, '', "setlogsock() called, with 'stream' and an empty path" );
+    ok( !$r, "setlogsock() should return false: '$r'" );
+
+    # setlogsock() with "stream" and /dev/null
+    $r = eval { setlogsock("stream", '/dev/null' ) } || '';
+    is( $@, '', "setlogsock() called, with 'stream' and '/dev/null'" );
     ok( $r, "setlogsock() should return true: '$r'" );
-    unlink($logfile);
+
+    # setlogsock() with "stream" and a non-existing file
+    $r = eval { setlogsock("stream", 'test.log' ) } || '';
+    is( $@, '', "setlogsock() called, with 'stream' and 'test.log' (file does not exist)" );
+    ok( !$r, "setlogsock() should return false: '$r'" );
+
+    # setlogsock() with "stream" and a local file
+    SKIP: {
+        my $logfile = "test.log";
+        open(LOG, ">$logfile") or skip "can't create file '$logfile': $!", 2;
+        close(LOG);
+        $r = eval { setlogsock("stream", $logfile ) } || '';
+        is( $@, '', "setlogsock() called, with 'stream' and '$logfile' (file exists)" );
+        ok( $r, "setlogsock() should return true: '$r'" );
+        unlink($logfile);
+    }
 }
 
 

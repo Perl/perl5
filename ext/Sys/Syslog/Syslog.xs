@@ -5,8 +5,17 @@
 #  include "ppport.h"
 #endif
 
+#ifndef HAVE_SYSLOG
+#define HAVE_SYSLOG 1
+#endif
+
 #ifdef I_SYSLOG
 #include <syslog.h>
+#endif
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#undef HAVE_SYSLOG
+#include "fallback/syslog.h"
 #endif
 
 static SV *ident_svptr;
@@ -88,6 +97,7 @@ LOG_UPTO(pri)
     OUTPUT:
 	RETVAL
 
+#ifdef HAVE_SYSLOG
 
 void
 openlog_xs(ident, option, facility)
@@ -125,3 +135,4 @@ closelog_xs()
         if (SvREFCNT(ident_svptr))
             SvREFCNT_dec(ident_svptr);
 
+#endif /* HAVE_SYSLOG */
