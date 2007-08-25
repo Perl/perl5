@@ -1,7 +1,7 @@
 #!./perl -w
 
 # Tests for the command-line switches:
-# -0, -c, -l, -s, -m, -M, -V, -v, -h, -z, -i, -E
+# -0, -c, -l, -s, -m, -M, -V, -v, -h, -i, -E and all unknown
 # Some switches have their own tests, see MANIFEST.
 
 BEGIN {
@@ -11,7 +11,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan(tests => 31);
+plan(tests => 62);
 
 use Config;
 
@@ -253,14 +253,16 @@ SWTESTPM
 
 }
 
-# Tests for -z (which does not exist)
+# Tests for switches which do not exist
 
+foreach my $switch (split //, "ABbGgHJjKkLNOoQqRrYyZz123456789_")
 {
     local $TODO = '';   # these ones should work on VMS
 
-    like( runperl( switches => ['-z'], stderr => 1 ),
-	  qr/\QUnrecognized switch: -z  (-h will show valid options)./,
-          '-z correctly unknown' );
+    like( runperl( switches => ["-$switch"], stderr => 1,
+		   prog => 'die "oops"' ),
+	  qr/\QUnrecognized switch: -$switch  (-h will show valid options)./,
+          "-$switch correctly unknown" );
 
 }
 
