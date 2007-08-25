@@ -869,10 +869,6 @@ execute a portion of your program before dumping, use the dump()
 operator instead.  Note: availability of B<undump> is platform
 specific and may not be available for a specific port of Perl.
 
-This switch has been superseded in favor of the new Perl code
-generator backends to the compiler.  See L<B> and L<B::Bytecode>
-for details.
-
 =item B<-U>
 X<-U>
 
