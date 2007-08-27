@@ -23,7 +23,7 @@ sub mv;
 # package has not yet been updated to work with Perl 5.004, and so it
 # would be a Bad Thing for the CPAN module to grab it and replace this
 # module.  Therefore, we set this module's version higher than 2.0.
-$VERSION = '2.10';
+$VERSION = '2.11';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -221,7 +221,8 @@ sub move {
     # is on a remote NFS file system, and NFS lost the server's ack?
     return 1 if defined($fromsz) && !-e $from &&           # $from disappeared
                 (($tosz2,$tomt2) = (stat($to))[7,9]) &&    # $to's there
-                ($tosz1 != $tosz2 or $tomt1 != $tomt2) &&  #   and changed
+                  ((!defined $tosz1) ||			   #  not before or
+		   ($tosz1 != $tosz2 or $tomt1 != $tomt2)) &&  #   was changed
                 $tosz2 == $fromsz;                         # it's all there
 
     ($tosz1,$tomt1) = (stat($to))[7,9];  # just in case rename did something
