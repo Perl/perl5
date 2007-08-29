@@ -1317,6 +1317,9 @@ Perl_csighandler(int sig)
 #else
     dTHX;
 #endif
+#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+   va_list args;
+#endif
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
     (void) rsignal(sig, PL_csighandlerp);
     if (PL_sig_ignoring[sig]) return;
@@ -1328,6 +1331,9 @@ Perl_csighandler(int sig)
 #else
             exit(1);
 #endif
+#endif
+#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+   va_start(args, sig);
 #endif
    if (
 #ifdef SIGILL
@@ -1345,6 +1351,9 @@ Perl_csighandler(int sig)
 	(*PL_sighandlerp)(sig);
    else
 	S_raise_signal(aTHX_ sig);
+#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+   va_end(args);
+#endif
 }
 
 #if defined(FAKE_PERSISTENT_SIGNAL_HANDLERS) || defined(FAKE_DEFAULT_SIGNAL_HANDLERS)

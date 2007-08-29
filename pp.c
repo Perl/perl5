@@ -4066,7 +4066,7 @@ PP(pp_hslice)
         }
 
         he = hv_fetch_ent(hv, keysv, lval, 0);
-        svp = he ? &HeVAL(he) : 0;
+        svp = he ? &HeVAL(he) : NULL;
 
         if (lval) {
             if (!svp || *svp == &PL_sv_undef) {

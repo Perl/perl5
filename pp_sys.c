@@ -476,7 +476,7 @@ PP(pp_die)
     }
     else {
 	tmpsv = TOPs;
-        tmps = SvROK(tmpsv) ? NULL : SvPV_const(tmpsv, len);
+        tmps = SvROK(tmpsv) ? (const char *)NULL : SvPV_const(tmpsv, len);
     }
     if (!tmps || !len) {
 	SV * const error = ERRSV;

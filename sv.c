@@ -5397,7 +5397,7 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
 
 	if (PL_utf8cache) {
 	    STRLEN ulen;
-	    MAGIC *mg = SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : 0;
+	    MAGIC *mg = SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : NULL;
 
 	    if (mg && mg->mg_len != -1) {
 		ulen = mg->mg_len;

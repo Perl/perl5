@@ -856,6 +856,8 @@ Perl_reentrant_retry(const char *f, ...)
 {
     dTHX;
     void *retptr = NULL;
+    va_list ap;
+    va_start(ap, f);
 #ifdef USE_REENTRANT_API
 #  if defined(USE_HOSTENT_BUFFER) || defined(USE_GRENT_BUFFER) || defined(USE_NETENT_BUFFER) || defined(USE_PWENT_BUFFER) || defined(USE_PROTOENT_BUFFER) || defined(USE_SERVENT_BUFFER)
     void *p0;
@@ -869,9 +871,6 @@ Perl_reentrant_retry(const char *f, ...)
 #  if defined(USE_HOSTENT_BUFFER) || defined(USE_NETENT_BUFFER) || defined(USE_PROTOENT_BUFFER) || defined(USE_SERVENT_BUFFER)
     int anint;
 #  endif
-    va_list ap;
-
-    va_start(ap, f);
 
     switch (PL_op->op_type) {
 #ifdef USE_HOSTENT_BUFFER
@@ -1074,11 +1073,10 @@ Perl_reentrant_retry(const char *f, ...)
 	/* Not known how to retry, so just fail. */
 	break;
     }
-
-    va_end(ap);
 #else
     PERL_UNUSED_ARG(f);
 #endif
+    va_end(ap);
     return retptr;
 }
 

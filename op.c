@@ -3971,7 +3971,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	PL_modcount = 0;
 	/* Grandfathering $[ assignment here.  Bletch.*/
 	/* Only simple assignments like C<< ($[) = 1 >> are allowed */
-	PL_eval_start = (left->op_type == OP_CONST) ? right : 0;
+	PL_eval_start = (left->op_type == OP_CONST) ? right : NULL;
 	left = mod(left, OP_AASSIGN);
 	if (PL_eval_start)
 	    PL_eval_start = 0;
