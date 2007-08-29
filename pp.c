@@ -4100,7 +4100,7 @@ PP(pp_hslice)
 
 	    if (realhv) {
 		HE *he = hv_fetch_ent(hv, keysv, lval, 0);
-		svp = he ? &HeVAL(he) : 0;
+		svp = he ? &HeVAL(he) : NULL;
 	    }
 	    else {
 		svp = avhv_fetch_ent((AV*)hv, keysv, lval, 0);

@@ -2585,6 +2585,7 @@ typedef struct clone_params CLONE_PARAMS;
  * have HASATTRIBUTE_FORMAT).
  */
 
+#ifndef PERL_MICRO
 #if defined __GNUC__ && !defined(__INTEL_COMPILER)
 #  if __GNUC__ >= 3 /* 3.0 -> */ /* XXX Verify this version */
 #    define HASATTRIBUTE_FORMAT
@@ -2614,6 +2615,7 @@ typedef struct clone_params CLONE_PARAMS;
 #    define HASATTRIBUTE_WARN_UNUSED_RESULT
 #  endif
 #endif
+#endif /* #ifndef PERL_MICRO */ 
 
 /*
  * USE_5005THREADS needs to be after unixish.h as <pthread.h> includes

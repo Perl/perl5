@@ -22,24 +22,22 @@
 #
 # To build:
 #
-#   sh Configure -des -Dusedevel
+#   sh Configure -des
 #   make perl
 #
-# The -Dusedevel is required for Perl 5.9, it is not required for the Perl
-# 5.10 sources, once they come out.  "make install" won't work since it
-# assumes file globbing (see above).  You can try the following manually:
+# "make install" won't work since it assumes file globbing (see above).
+# You can try the following manual way:
 #
 # mkdir -p /opt/perl-catamount
 # mkdir -p /opt/perl-catamount/include
 # mkdir -p /opt/perl-catamount/lib
-# mkdir -p /opt/perl-catamount/lib/perl5/5.9.5
+# mkdir -p /opt/perl-catamount/lib/perl5/5.10.0
 # mkdir -p /opt/perl-catamount/bin
 # cp *.h /opt/perl-catamount/include
 # cp libperl.a /opt/perl-catamount/lib
-# cp -pr lib/* /opt/perl-catamount/lib/perl5/5.9.5
+# cp -pr lib/* /opt/perl-catamount/lib/perl5/5.10.0
 # cp miniperl perl run.sh cc.sh /opt/perl-catamount/lib
 #
-# (For Perl 5.10.0 do the obvious renaming above.)
 # With the headers and the libperl.a you can embed Perl to your Catamount
 # application, see pod/perlembed.pod.  You can do for example:
 #
@@ -136,9 +134,12 @@ cat > $cc <<__EOF3a__
 # $0
 #
 # This is essentially a frontend driver for the Catamount cc.
-# We arrange for (1) the main(), exit(), _exit() being wrapped (cpp-defined)
-# catamain(), cataexit(), and _cataexit() (2) the actual main() etc. are in
-# cata.c, and cata*.o are linked in when needed (3) signals being caught
+# We arrange for
+# (1) the main(), exit(), _exit() being wrapped (cpp-defined)
+#     catamain(), cataexit(), and _cataexit()
+# (2) the actual main() etc. are in cata.c, and cata*.o are
+#     linked in when needed
+# (3) signals being caught
 # All this mostly for being able to catch the exit status (or crash cause).
 #
 argv=''
@@ -147,7 +148,7 @@ srct=''
 exe=''
 defs='-Dmain=catamain -Dexit=cataexit -D_exit=_cataexit'
 argv=''
-BUILD=/wrk/jhi/perl-5.9.x@31393+cata
+BUILD=$BUILD
 __EOF3a__
 cat >> $cc <<'__EOF3b__'
 case "$1" in

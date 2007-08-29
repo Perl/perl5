@@ -41,15 +41,14 @@ Perl_deb_nocontext(const char *pat, ...)
 void
 Perl_deb(pTHX_ const char *pat, ...)
 {
-#ifdef DEBUGGING
     va_list args;
     va_start(args, pat);
+#ifdef DEBUGGING
     vdeb(pat, &args);
-    va_end(args);
 #else
     PERL_UNUSED_CONTEXT;
-    PERL_UNUSED_ARG(pat);
 #endif /* DEBUGGING */
+    va_end(args);
 }
 
 void

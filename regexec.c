@@ -4040,8 +4040,8 @@ Perl_regclass_swash(pTHX_ register regnode* node, bool doinit, SV** listsvp, SV 
 	     * documentation of these array elements. */
 
 	    si = *ary;
-	    a  = SvROK(ary[1]) ? &ary[1] : 0;
-	    b  = SvTYPE(ary[2]) == SVt_PVAV ? &ary[2] : 0;
+	    a  = SvROK(ary[1]) ? &ary[1] : NULL;
+	    b  = SvTYPE(ary[2]) == SVt_PVAV ? &ary[2] : NULL;
 
 	    if (a)
 		sw = *a;
