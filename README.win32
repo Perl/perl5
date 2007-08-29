@@ -52,9 +52,9 @@ The Borland C++ and Microsoft Visual C++ compilers are also now being given
 away free.  The Borland compiler is available as "Borland C++ Compiler Free
 Command Line Tools" and is the same compiler that ships with the full
 "Borland C++ Builder" product.  The Microsoft compiler is available as
-"Visual C++ Toolkit 2003" or "Visual C++ 2005 Express Edition" (and also as
-part of the ".NET Framework SDK") and is the same compiler that ships with
-"Visual C++ .NET 2003 Professional" or "Visual C++ 2005 Professional"
+"Visual C++ Toolkit 2003" or "Visual C++ 2005/2008 Express Edition" (and also
+as part of the ".NET Framework SDK") and is the same compiler that ships with
+"Visual C++ .NET 2003 Professional" or "Visual C++ 2005/2008 Professional"
 respectively.
 
 This port can also be built on the Intel IA64 using:
@@ -134,6 +134,35 @@ under which the Visual C dmake configuration lives) in your environment
 and edit win32/config.vc to change "make=nmake" into "make=dmake".  The
 latter step is only essential if you want to use dmake as your default
 make for building extensions using MakeMaker.
+
+=item Microsoft Visual C++ 2008 Express Edition Beta 2
+
+This free version of Visual C++ 2008 Professional contains the same compiler
+and linker that ship with the full version, and also contains everything
+necessary to build Perl, rather than requiring a separate download of the
+Platform SDK like previous versions did.
+
+The Beta 2 package is currently available from 
+
+http://msdn2.microsoft.com/en-us/express/future/default.aspx
+http://msdn2.microsoft.com/en-gb/express/future/default.aspx
+
+The final release version will probably be found by searching in the Download
+Center at http://www.microsoft.com/downloads/search.aspx?displaylang=en in due
+course.
+
+Install Visual C++ 2008, then setup your environment using
+
+	C:\Program Files\Microsoft Visual Studio 9.0\Common7\Tools\vsvars32.bat
+
+(assuming the default installation location was chosen).
+
+Perl should now build using the win32/Makefile.  You will need to edit that
+file to set
+
+	CCTYPE = MSVC90FREE
+
+first.
 
 =item Microsoft Visual C++ 2005 Express Edition
 
@@ -969,6 +998,6 @@ Win9x support was added in 5.6 (Benjamin Stuhl).
 
 Support for 64-bit Windows added in 5.8 (ActiveState Corp).
 
-Last updated: 25 May 2007
+Last updated: 29 August 2007
 
 =cut

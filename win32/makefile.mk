@@ -106,6 +106,10 @@ USE_LARGE_FILES	*= define
 #CCTYPE		*= MSVC80FREE
 # Visual C++ 2005 (aka Visual C++ 8.x) (full version)
 #CCTYPE		*= MSVC80
+# Visual C++ 2008 Express Edition (aka Visual C++ 9.x) (free version)
+#CCTYPE		*= MSVC90FREE
+# Visual C++ 2008 (aka Visual C++ 9.x) (full version)
+#CCTYPE		*= MSVC90
 # Borland 5.02 or later
 #CCTYPE		*= BORLAND
 # MinGW with gcc-2.95.2 or later
@@ -357,20 +361,23 @@ ARCHNAME	= MSWin32-$(ARCHITECTURE)
 ARCHNAME	!:= $(ARCHNAME)-thread
 .ENDIF
 
-# Visual C++ 98, .NET 2003 and 2005 specific.
-# VC++ 6.x, 7.x and 8.x can load DLL's on demand.  Makes the test suite run in
-# about 10% less time.  (The free version of 7.x can't do this, but the free
-# version of 8.x can.)
-.IF "$(CCTYPE)" == "MSVC60" || "$(CCTYPE)" == "MSVC70" \
-    "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE"
+# Visual C++ 98, .NET 2003, 2005 and 2008 specific.
+# VC++ 6.x, 7.x, 8.x and 9.x can load DLL's on demand.  Makes the test suite run
+# in about 10% less time.  (The free version of 7.x can't do this, but the free
+# versions of 8.x and 9.x can.)
+.IF "$(CCTYPE)" == "MSVC60" || "$(CCTYPE)" == "MSVC70"     || \
+    "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE" ||
+    "$(CCTYPE)" == "MSVC90" || "$(CCTYPE)" == "MSVC90FREE"
 DELAYLOAD	*= -DELAYLOAD:ws2_32.dll delayimp.lib
 .ENDIF
 
-# Visual C++ 2005 (VC++ 8.x) creates manifest files for EXEs and DLLs. These
-# either need copying everywhere with the binaries, or else need embedding in
-# them otherwise MSVCR80.dll won't be found. Embed them for simplicity, and
-# delete them afterwards so that they don't get installed too.
-.IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE"
+# Visual C++ 2005 and 2008 (VC++ 8.x and 9.x) create manifest files for EXEs and
+# DLLs. These either need copying everywhere with the binaries, or else need
+# embedding in them otherwise MSVCR80.dll or MSVCR90.dll won't be found. Embed
+# them for simplicity, and delete them afterwards so that they don't get
+# installed too.
+.IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE" || \
+    "$(CCTYPE)" == "MSVC90" || "$(CCTYPE)" == "MSVC90FREE"
 EMBED_EXE_MANI	= mt -nologo -manifest $@.manifest -outputresource:$@;1 && \
 		  del $@.manifest
 EMBED_DLL_MANI	= mt -nologo -manifest $@.manifest -outputresource:$@;2 && \
@@ -565,9 +572,10 @@ DEFINES		+= -DWIN64 -DCONSERVATIVE
 OPTIMIZE	+= -Wp64 -fp:precise
 .ENDIF
 
-# For now, silence VC++ 8.x's warnings about "unsafe" CRT functions and POSIX
-# CRT function names being deprecated.
-.IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE"
+# For now, silence VC++ 8.x's and 9.x's warnings about "unsafe" CRT functions
+# and POSIX CRT function names being deprecated.
+.IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE" || \
+    "$(CCTYPE)" == "MSVC90" || "$(CCTYPE)" == "MSVC90FREE"
 DEFINES		+= -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
 .ENDIF
 
