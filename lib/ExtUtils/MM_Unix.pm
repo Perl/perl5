@@ -18,7 +18,7 @@ use vars qw($VERSION @ISA
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.54_01';
+$VERSION = '6.42';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -35,8 +35,9 @@ BEGIN {
     $Is_SunOS4  = $^O eq 'sunos';
     $Is_Solaris = $^O eq 'solaris';
     $Is_SunOS   = $Is_SunOS4 || $Is_Solaris;
-    $Is_BSD     = $^O =~ /^(?:free|net|open)bsd$/ or
-                  $^O eq 'bsdos' or $^O eq 'interix';
+    $Is_BSD     = ($^O =~ /^(?:free|net|open)bsd$/ or
+                   grep( $^O eq $_, qw(bsdos interix dragonfly) )
+                  );
 }
 
 BEGIN {
@@ -129,37 +130,42 @@ sub c_o {
     my($self) = shift;
     return '' unless $self->needs_linking();
     my(@m);
+    
+    my $command = '$(CCCMD)';
+    my $flags   = '$(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE)';
+    
     if (my $cpp = $Config{cpprun}) {
         my $cpp_cmd = $self->const_cccmd;
         $cpp_cmd =~ s/^CCCMD\s*=\s*\$\(CC\)/$cpp/;
-        push @m, '
+        push @m, qq{
 .c.i:
-	'. $cpp_cmd . ' $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.c > $*.i
-';
+	$cpp_cmd $flags \$*.c > \$*.i
+};
     }
-    push @m, '
+
+    push @m, qq{
 .c.s:
-	$(CCCMD) -S $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.c
-';
-    push @m, '
-.c$(OBJ_EXT):
-	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.c
-';
-    push @m, '
-.C$(OBJ_EXT):
-	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.C
-' if !$Is_OS2 and !$Is_Win32 and !$Is_Dos; #Case-specific
-    push @m, '
-.cpp$(OBJ_EXT):
-	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.cpp
+	$command -S $flags \$*.c
 
-.cxx$(OBJ_EXT):
-	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.cxx
+.c\$(OBJ_EXT):
+	$command $flags \$*.c
 
-.cc$(OBJ_EXT):
-	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.cc
-';
-    join "", @m;
+.cpp\$(OBJ_EXT):
+	$command $flags \$*.cpp
+
+.cxx\$(OBJ_EXT):
+	$command $flags \$*.cxx
+
+.cc\$(OBJ_EXT):
+	$command $flags \$*.cc
+};
+
+    push @m, qq{
+.C\$(OBJ_EXT):
+	$command \$*.C
+} if !$Is_OS2 and !$Is_Win32 and !$Is_Dos; #Case-specific
+
+    return join "", @m;
 }
 
 =item cflags (o)
@@ -1192,7 +1198,7 @@ Writes an empty FORCE: target.
 sub force {
     my($self) = shift;
     '# Phony target to force checking subdirectories.
-FORCE:
+FORCE :
 	$(NOECHO) $(NOOP)
 ';
 }
@@ -2533,7 +2539,7 @@ $tmp/perlmain.c: $makefilename}, q{
 
 
     push @m, q{
-doc_inst_perl:
+doc_inst_perl :
 	$(NOECHO) $(ECHO) Appending installation info to $(DESTINSTALLARCHLIB)/perllocal.pod
 	-$(NOECHO) $(MKPATH) $(DESTINSTALLARCHLIB)
 	-$(NOECHO) $(DOC_INSTALL) \
@@ -2546,9 +2552,9 @@ doc_inst_perl:
 };
 
     push @m, q{
-inst_perl: pure_inst_perl doc_inst_perl
+inst_perl : pure_inst_perl doc_inst_perl
 
-pure_inst_perl: $(MAP_TARGET)
+pure_inst_perl : $(MAP_TARGET)
 	}.$self->{CP}.q{ $(MAP_TARGET) }.$self->catfile('$(DESTINSTALLBIN)','$(MAP_TARGET)').q{
 
 clean :: map_clean
@@ -2640,22 +2646,6 @@ sub needs_linking {
     return $self->{NEEDS_LINKING} = 0;
 }
 
-=item nicetext
-
-misnamed method (will have to be changed). The MM_Unix method just
-returns the argument without further processing.
-
-On VMS used to insure that colons marking targets are preceded by
-space - most Unix Makes don't need this, but it's necessary under VMS
-to distinguish the target delimiter from a colon appearing as part of
-a filespec.
-
-=cut
-
-sub nicetext {
-    my($self,$text) = @_;
-    $text;
-}
 
 =item parse_abstract
 
@@ -2708,27 +2698,32 @@ sub parse_version {
     open(FH,$parsefile) or die "Could not open '$parsefile': $!";
     my $inpod = 0;
     while (<FH>) {
-	$inpod = /^=(?!cut)/ ? 1 : /^=cut/ ? 0 : $inpod;
-	next if $inpod || /^\s*#/;
-	chop;
-	next unless /(?<!\\)([\$*])(([\w\:\']*)\bVERSION)\b.*\=/;
-	my $eval = qq{
-	    package ExtUtils::MakeMaker::_version;
-	    no strict;
-	    BEGIN { eval {
-	        require version;
-	        "version"->import;
-	    } }
+        $inpod = /^=(?!cut)/ ? 1 : /^=cut/ ? 0 : $inpod;
+        next if $inpod || /^\s*#/;
+        chop;
+        next unless /(?<!\\)([\$*])(([\w\:\']*)\bVERSION)\b.*\=/;
+        my $eval = qq{
+            package ExtUtils::MakeMaker::_version;
+            no strict;
+            BEGIN { eval {
+                # Ensure any version() routine which might have leaked
+                # into this package has been deleted.  Interferes with
+                # version->import()
+                undef *version;
+                require version;
+                "version"->import;
+            } }
 
-	    local $1$2;
-	    \$$2=undef; do {
-		$_
-	    }; \$$2
-	};
+            local $1$2;
+            \$$2=undef;
+            do {
+                $_
+            }; \$$2
+        };
         local $^W = 0;
-	$result = eval($eval);
-	warn "Could not eval '$eval' in $parsefile: $@" if $@;
-	last;
+        $result = eval($eval);
+        warn "Could not eval '$eval' in $parsefile: $@" if $@;
+        last;
     }
     close FH;
 
@@ -3027,7 +3022,7 @@ PPD_XML
 
     return sprintf <<'PPD_OUT', join "\n\t", @ppd_cmds;
 # Creates a PPD (Perl Package Description) for a binary distribution.
-ppd:
+ppd :
 	%s
 PPD_OUT
 

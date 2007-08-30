@@ -3,7 +3,7 @@ package ExtUtils::MM_Win95;
 use strict;
 
 use vars qw($VERSION @ISA);
-$VERSION = '0.06';
+$VERSION = '6.42';
 
 require ExtUtils::MM_Win32;
 @ISA = qw(ExtUtils::MM_Win32);

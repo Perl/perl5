@@ -106,7 +106,7 @@ Backwards Compatibility
 
 - MakeMaker must be backwards compatible to 5.5.4 (5.005_04).  Avoid any
   obvious 5.6-isms (threads, warnings.pm, Unicode, our, v1.2.3, attributes
-  open my $fh, lvalue subroutines, any new core modules, etc...).
+  open my $fh, lvalue subroutines, qr//, any new core modules, etc...).
 
 - MakeMaker should avoid having module dependencies.  Avoid using modules
   which didn't come with 5.5.4 and avoid using features from newer 
@@ -126,7 +126,7 @@ Cross-Platform Compatibility
   and MMK to name the most common.  Keep your make code as simple as 
   possible.  
 
-- Avoid special variables (even $@).  
+- Avoid special make variables (even $@).  
 
 - Format targets as "target : dependency", the spacing is important.  
 

@@ -14,7 +14,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More 'no_plan';
+use Test::More tests => 28;
 
 use TieOut;
 use MakeMaker::Test::Utils;
@@ -164,7 +164,7 @@ VERIFY
 
 
     SKIP: {
-        skip("Can't test version objects",2) unless eval { require version };
+        skip("Can't test version objects",6) unless eval { require version };
         version->import;
 
         my $version = version->new("1.2.3");

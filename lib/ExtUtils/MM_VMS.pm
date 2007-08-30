@@ -18,7 +18,7 @@ use File::Basename;
 # $Revision can't be on the same line or SVN/K gets confused
 use vars qw($Revision
             $VERSION @ISA);
-$VERSION = '5.76';
+$VERSION = '6.42';
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
@@ -1571,10 +1571,10 @@ map_clean :
 
     join '', @m;
 }
-  
+
 # --- Output postprocessing section ---
 
-=item nicetext (override)
+=item maketext_filter (override)
 
 Insure that colons marking targets are preceded by space, in order
 to distinguish the target delimiter from a colon appearing as
@@ -1582,11 +1582,11 @@ part of a filespec.
 
 =cut
 
-sub nicetext {
-    my($self,$text) = @_;
-    return $text if $text =~ m/^\w+\s*=/; # leave macro defs alone
-    $text =~ s/([^\s:])(:+\s)/$1 $2/gs;
-    $text;
+sub maketext_filter {
+    my($self, $text) = @_;
+
+    $text =~ s/^([^\s:=]+)(:+\s)/$1 $2/mg;
+    return $text;
 }
 
 =item prefixify (override)

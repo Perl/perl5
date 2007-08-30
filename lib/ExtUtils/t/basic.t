@@ -15,6 +15,7 @@ BEGIN {
 
 use strict;
 use Config;
+use ExtUtils::MakeMaker;
 
 use Test::More tests => 83;
 use MakeMaker::Test::Utils;
@@ -250,9 +251,25 @@ ok( -f $meta_yml,    'META.yml written to dist dir' );
 ok( !-e "META_new.yml", 'temp META.yml file not left around' );
 
 ok open META, $meta_yml or diag $!;
-my @meta = <META>;
-like $meta[-1], '/\n$/', "META.yml ends with a newline";
+my $meta = join '', <META>;
 ok close META;
+
+is $meta, <<"END";
+--- #YAML:1.0
+name:                Big-Dummy
+version:             0.01
+abstract:            Try "our" hot dog's
+license:             ~
+author:              
+    - Michael G Schwern <schwern\@pobox.com>
+generated_by:        ExtUtils::MakeMaker version $ExtUtils::MakeMaker::VERSION
+distribution_type:   module
+requires:     
+    strict:                        0
+meta-spec:
+    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
+    version: 1.3
+END
 
 my $manifest = maniread("$distdir/MANIFEST");
 # VMS is non-case preserving, so we can't know what the MANIFEST will
