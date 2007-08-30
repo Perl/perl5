@@ -720,8 +720,8 @@ sub grand_search_init {
         # prepend extra search directories (including language specific)
         push @searchdirs, @{ $self->{'extra_search_dirs'} };
 
-        # We mush look both in @INC for library modules and in $bindir
-        # for executables, like h2xs or perldoc itself.	
+        # We must look both in @INC for library modules and in $bindir
+        # for executables, like h2xs or perldoc itself.
         push @searchdirs, ($self->{'bindir'}, @INC);
         unless ($self->opt_m) {
             if (IS_VMS) {
