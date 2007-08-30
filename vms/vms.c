@@ -32,6 +32,7 @@
 #include <lib$routines.h>
 #include <lnmdef.h>
 #include <msgdef.h>
+#include <ossdef.h>
 #if __CRTL_VER >= 70301000 && !defined(__VAX)
 #include <ppropdef.h>
 #endif
@@ -91,6 +92,30 @@ int sys$getdviw
 	void * nullarg);
 #endif
 
+#ifdef sys$get_security
+#undef sys$get_security
+int sys$get_security
+       (const struct dsc$descriptor_s * clsnam,
+	const struct dsc$descriptor_s * objnam,
+	const unsigned int *objhan,
+	unsigned int flags,
+	const struct item_list_3 * itmlst,
+	unsigned int * contxt,
+	const unsigned int * acmode);
+#endif
+
+#ifdef sys$set_security
+#undef sys$set_security
+int sys$set_security
+       (const struct dsc$descriptor_s * clsnam,
+	const struct dsc$descriptor_s * objnam,
+	const unsigned int *objhan,
+	unsigned int flags,
+	const struct item_list_3 * itmlst,
+	unsigned int * contxt,
+	const unsigned int * acmode);
+#endif
+
 #ifdef lib$find_image_symbol
 #undef lib$find_image_symbol
 int lib$find_image_symbol
@@ -99,7 +124,33 @@ int lib$find_image_symbol
 	void * symval,
 	const struct dsc$descriptor_s * defspec,
 	unsigned long flag);
+#endif
 
+#ifdef lib$rename_file
+#undef lib$rename_file
+int lib$rename_file
+       (const struct dsc$descriptor_s * old_file_dsc,
+	const struct dsc$descriptor_s * new_file_dsc,
+	const struct dsc$descriptor_s * default_file_dsc,
+	const struct dsc$descriptor_s * related_file_dsc,
+	const unsigned long * flags,
+	void * (success)(const struct dsc$descriptor_s * old_dsc,
+			 const struct dsc$descriptor_s * new_dsc,
+			 const void *),
+	void * (error)(const struct dsc$descriptor_s * old_dsc,
+		       const struct dsc$descriptor_s * new_dsc,
+		       const int * rms_sts,
+		       const int * rms_stv,
+		       const int * error_src,
+		       const void * usr_arg),
+	int (confirm)(const struct dsc$descriptor_s * old_dsc,
+		      const struct dsc$descriptor_s * new_dsc,
+		      const void * old_fab,
+		      const void * usr_arg),
+	void * user_arg,
+	struct dsc$descriptor_s * old_result_name_dsc,
+	struct dsc$descriptor_s * new_result_name_dsc,
+	unsigned long * file_scan_context);
 #endif
 
 #if __CRTL_VER >= 70300000 && !defined(__VAX)
@@ -1956,9 +2007,9 @@ Perl_kill_file(pTHX_ const char *name)
 
    /* Remove() is allowed to delete directories, according to the X/Open
     * specifications.
-    * This needs special handling to work with the ACL hacks.
+    * This may need special handling to work with the ACL hacks.
      */
-   if (flex_stat(name, &st) && S_ISDIR(st.st_mode)) {
+   if ((flex_lstat(name, &st) == 0) && S_ISDIR(st.st_mode)) {
 	rmsts = Perl_do_rmdir(aTHX_ name);
 	return rmsts;
     }
@@ -4704,13 +4755,11 @@ struct NAML * nam;
 	(nam.naml$l_long_name_size + nam.naml$l_long_type_size)
 #endif
 
+
 /* rms_erase
  * The CRTL for 8.3 and later can create symbolic links in any mode,
- * however the unlink/remove/delete routines will only properly handle
+ * however in 8.3 the unlink/remove/delete routines will only properly handle
  * them if one of the PCP modes is active.
- *
- * Future: rename() routine will also need this when the unlink_all_versions
- * option is set.
  */
 static int rms_erase(const char * vmsname)
 {
@@ -4720,7 +4769,7 @@ static int rms_erase(const char * vmsname)
 
   rms_set_fna(myfab, mynam, (char *)vmsname, strlen(vmsname)); /* cast ok */
   rms_bind_fab_nam(myfab, mynam);
-\
+
   /* Are we removing all versions? */
   if (vms_unlink_all_versions == 1) {
     const char * defspec = ";*";
@@ -4735,6 +4784,431 @@ static int rms_erase(const char * vmsname)
 
   return status;
 }
+
+
+static int
+vms_rename_with_acl(pTHX_ const struct dsc$descriptor_s * vms_src_dsc,
+		    const struct dsc$descriptor_s * vms_dst_dsc,
+		    unsigned long flags)
+{
+    /*  VMS and UNIX handle file permissions differently and the
+     * the same ACL trick may be needed for renaming files,
+     * especially if they are directories.
+     */
+
+   /* todo: get kill_file and rename to share common code */
+   /* I can not find online documentation for $change_acl
+    * it appears to be replaced by $set_security some time ago */
+
+const unsigned int access_mode = 0;
+$DESCRIPTOR(obj_file_dsc,"FILE");
+char *vmsname;
+char *rslt;
+unsigned long int jpicode = JPI$_UIC, type = ACL$C_FILE;
+int aclsts, fndsts, rnsts = -1;
+unsigned int ctx = 0;
+struct dsc$descriptor_s fildsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
+struct dsc$descriptor_s * clean_dsc;
+
+struct myacedef {
+    unsigned char myace$b_length;
+    unsigned char myace$b_type;
+    unsigned short int myace$w_flags;
+    unsigned long int myace$l_access;
+    unsigned long int myace$l_ident;
+} newace = { sizeof(struct myacedef), ACE$C_KEYID, 0,
+	     ACE$M_READ | ACE$M_WRITE | ACE$M_DELETE | ACE$M_CONTROL,
+	     0},
+	     oldace = { sizeof(struct myacedef), ACE$C_KEYID, 0, 0, 0};
+
+struct item_list_3
+	findlst[3] = {{sizeof oldace, OSS$_ACL_FIND_ENTRY, &oldace, 0},
+		      {sizeof oldace, OSS$_ACL_READ_ENTRY, &oldace, 0},
+		      {0,0,0,0}},
+	addlst[2] = {{sizeof newace, OSS$_ACL_ADD_ENTRY, &newace, 0},{0,0,0,0}},
+	dellst[2] = {{sizeof newace, OSS$_ACL_DELETE_ENTRY, &newace, 0},
+		     {0,0,0,0}};
+
+
+    /* Expand the input spec using RMS, since we do not want to put
+     * ACLs on the target of a symbolic link */
+    vmsname = PerlMem_malloc(NAM$C_MAXRSS+1);
+    if (vmsname == NULL)
+	return SS$_INSFMEM;
+
+    rslt = do_rmsexpand(vms_src_dsc->dsc$a_pointer,
+			vmsname,
+			0,
+			NULL,
+			PERL_RMSEXPAND_M_VMS | PERL_RMSEXPAND_M_SYMLINK,
+			NULL,
+			NULL);
+    if (rslt == NULL) {
+	PerlMem_free(vmsname);
+	return SS$_INSFMEM;
+    }
+
+    /* So we get our own UIC to use as a rights identifier,
+     * and the insert an ACE at the head of the ACL which allows us
+     * to delete the file.
+     */
+    _ckvmssts(lib$getjpi(&jpicode,0,0,&(oldace.myace$l_ident),0,0));
+
+    fildsc.dsc$w_length = strlen(vmsname);
+    fildsc.dsc$a_pointer = vmsname;
+    ctx = 0;
+    newace.myace$l_ident = oldace.myace$l_ident;
+    rnsts = SS$_ABORT;
+
+    /* Grab any existing ACEs with this identifier in case we fail */
+    clean_dsc = &fildsc;
+    aclsts = fndsts = sys$get_security(&obj_file_dsc,
+			       &fildsc,
+			       NULL,
+			       OSS$M_WLOCK,
+			       findlst,
+			       &ctx,
+			       &access_mode);
+
+    if ($VMS_STATUS_SUCCESS(fndsts)  || (fndsts == SS$_ACLEMPTY)) {
+	/* Add the new ACE . . . */
+
+	/* if the sys$get_security succeeded, then ctx is valid, and the
+	 * object/file descriptors will be ignored.  But otherwise they
+	 * are needed
+	 */
+	aclsts = sys$set_security(&obj_file_dsc, &fildsc, NULL,
+				  OSS$M_RELCTX, addlst, &ctx, &access_mode);
+	if (!$VMS_STATUS_SUCCESS(aclsts) && (aclsts != SS$_NOCLASS)) {
+	    set_errno(EVMSERR);
+	    set_vaxc_errno(aclsts);
+	    PerlMem_free(vmsname);
+	    return aclsts;
+	}
+
+	rnsts = lib$rename_file(vms_src_dsc, vms_dst_dsc,
+				NULL, NULL,
+				&flags,
+				NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+	if ($VMS_STATUS_SUCCESS(rnsts)) {
+	    clean_dsc = (struct dsc$descriptor_s *)vms_dst_dsc;
+	}
+
+	/* Put things back the way they were. */
+	ctx = 0;
+	aclsts = sys$get_security(&obj_file_dsc,
+				  clean_dsc,
+				  NULL,
+				  OSS$M_WLOCK,
+				  findlst,
+				  &ctx,
+				  &access_mode);
+
+	if ($VMS_STATUS_SUCCESS(aclsts)) {
+	int sec_flags;
+
+	    sec_flags = 0;
+	    if (!$VMS_STATUS_SUCCESS(fndsts))
+		sec_flags = OSS$M_RELCTX;
+
+	    /* Get rid of the new ACE */
+	    aclsts = sys$set_security(NULL, NULL, NULL,
+				  sec_flags, dellst, &ctx, &access_mode);
+
+	    /* If there was an old ACE, put it back */
+	    if ($VMS_STATUS_SUCCESS(aclsts) && $VMS_STATUS_SUCCESS(fndsts)) {
+		addlst[0].bufadr = &oldace;
+		aclsts = sys$set_security(NULL, NULL, NULL,
+				      OSS$M_RELCTX, addlst, &ctx, &access_mode);
+		if (!$VMS_STATUS_SUCCESS(aclsts) && (aclsts != SS$_NOCLASS)) {
+		    set_errno(EVMSERR);
+		    set_vaxc_errno(aclsts);
+		    rnsts = aclsts;
+		}
+	    } else {
+	    int aclsts2;
+
+		/* Try to clear the lock on the ACL list */
+		aclsts2 = sys$set_security(NULL, NULL, NULL,
+				      OSS$M_RELCTX, NULL, &ctx, &access_mode);
+
+		/* Rename errors are most important */
+		if (!$VMS_STATUS_SUCCESS(rnsts))
+		    aclsts = rnsts;
+		set_errno(EVMSERR);
+		set_vaxc_errno(aclsts);
+		rnsts = aclsts;
+	    }
+	}
+	else {
+	    if (aclsts != SS$_ACLEMPTY)
+		rnsts = aclsts;
+	}
+    }
+    else
+	rnsts = fndsts;
+
+    PerlMem_free(vmsname);
+    return rnsts;
+}
+
+
+/*{{{int rename(const char *, const char * */
+/* Not exactly what X/Open says to do, but doing it absolutely right
+ * and efficiently would require a lot more work.  This should be close
+ * enough to pass all but the most strict X/Open compliance test.
+ */
+int
+Perl_rename(pTHX_ const char *src, const char * dst)
+{
+int retval;
+int pre_delete = 0;
+int src_sts;
+int dst_sts;
+Stat_t src_st;
+Stat_t dst_st;
+
+    /* Validate the source file */
+    src_sts = flex_lstat(src, &src_st);
+    if (src_sts != 0) {
+
+	/* No source file or other problem */
+	return src_sts;
+    }
+
+    dst_sts = flex_lstat(dst, &dst_st);
+    if (dst_sts == 0) {
+
+	if (dst_st.st_dev != src_st.st_dev) {
+	    /* Must be on the same device */
+	    errno = EXDEV;
+	    return -1;
+	}
+
+	/* VMS_INO_T_COMPARE is true if the inodes are different
+	 * to match the output of memcmp
+	 */
+
+	if (!VMS_INO_T_COMPARE(src_st.st_ino, dst_st.st_ino)) {
+	    /* That was easy, the files are the same! */
+	    return 0;
+	}
+
+	if (S_ISDIR(src_st.st_mode) && !S_ISDIR(dst_st.st_mode)) {
+	    /* If source is a directory, so must be dest */
+		errno = EISDIR;
+		return -1;
+	}
+
+    }
+
+
+    if ((dst_sts == 0) &&
+	(vms_unlink_all_versions || S_ISDIR(dst_st.st_mode))) {
+
+	/* We have issues here if vms_unlink_all_versions is set
+	 * If the destination exists, and is not a directory, then
+	 * we must delete in advance.
+	 *
+	 * If the src is a directory, then we must always pre-delete
+	 * the destination.
+	 *
+	 * If we successfully delete the dst in advance, and the rename fails
+	 * X/Open requires that errno be EIO.
+	 *
+	 */
+
+	if (!S_ISDIR(dst_st.st_mode) || S_ISDIR(src_st.st_mode)) {
+	    int d_sts;
+	    d_sts = mp_do_kill_file(aTHX_ dst, S_ISDIR(dst_st.st_mode));
+	    if (d_sts != 0)
+		return d_sts;
+
+	    /* We killed the destination, so only errno now is EIO */
+	    pre_delete = 1;
+	}
+    }
+
+    /* Originally the idea was to call the CRTL rename() and only
+     * try the lib$rename_file if it failed.
+     * It turns out that there are too many variants in what the
+     * the CRTL rename might do, so only use lib$rename_file
+     */
+    retval = -1;
+
+    {
+	/* Is the source and dest both in VMS format */
+	/* if the source is a directory, then need to fileify */
+	/*  and dest must be a directory or non-existant. */
+
+	char * vms_src;
+	char * vms_dst;
+	int sts;
+	char * ret_str;
+	unsigned long flags;
+	struct dsc$descriptor_s old_file_dsc;
+	struct dsc$descriptor_s new_file_dsc;
+
+	/* We need to modify the src and dst depending
+	 * on if one or more of them are directories.
+	 */
+
+	vms_src = PerlMem_malloc(VMS_MAXRSS);
+	if (vms_src == NULL)
+	    _ckvmssts(SS$_INSFMEM);
+
+	/* Source is always a VMS format file */
+	ret_str = do_tovmsspec(src, vms_src, 0, NULL);
+	if (ret_str == NULL) {
+	    PerlMem_free(vms_src);
+	    errno = EIO;
+	    return -1;
+	}
+
+	vms_dst = PerlMem_malloc(VMS_MAXRSS);
+	if (vms_dst == NULL)
+	    _ckvmssts(SS$_INSFMEM);
+
+	if (S_ISDIR(src_st.st_mode)) {
+	char * ret_str;
+	char * vms_dir_file;
+
+	    vms_dir_file = PerlMem_malloc(VMS_MAXRSS);
+	    if (vms_dir_file == NULL)
+		_ckvmssts(SS$_INSFMEM);
+
+	    /* The source must be a file specification */
+	    ret_str = do_fileify_dirspec(vms_src, vms_dir_file, 0, NULL);
+	    if (ret_str == NULL) {
+		PerlMem_free(vms_src);
+		PerlMem_free(vms_dst);
+		PerlMem_free(vms_dir_file);
+		errno = EIO;
+		return -1;
+	    }
+	    PerlMem_free(vms_src);
+	    vms_src = vms_dir_file;
+
+	    /* If the dest is a directory, we must remove it
+	    if (dst_sts == 0) {
+		int d_sts;
+		d_sts = mp_do_kill_file(aTHX_ dst, 1);
+		if (d_sts != 0) {
+		    PerlMem_free(vms_src);
+		    PerlMem_free(vms_dst);
+		    errno = EIO;
+		    return sts;
+		}
+
+		pre_delete = 1;
+	    }
+
+	   /* The dest must be a VMS file specification */
+	   ret_str = do_tovmsspec(dst, vms_dst, 0, NULL);
+	   if (ret_str == NULL) {
+		PerlMem_free(vms_src);
+		PerlMem_free(vms_dst);
+		errno = EIO;
+		return -1;
+	   }
+
+	    /* The source must be a file specification */
+	    vms_dir_file = PerlMem_malloc(VMS_MAXRSS);
+	    if (vms_dir_file == NULL)
+		_ckvmssts(SS$_INSFMEM);
+
+	    ret_str = do_fileify_dirspec(vms_dst, vms_dir_file, 0, NULL);
+	    if (ret_str == NULL) {
+		PerlMem_free(vms_src);
+		PerlMem_free(vms_dst);
+		PerlMem_free(vms_dir_file);
+		errno = EIO;
+		return -1;
+	    }
+	    PerlMem_free(vms_dst);
+	    vms_dst = vms_dir_file;
+
+	} else {
+	    /* File to file or file to new dir */
+
+	    if ((dst_sts == 0) && S_ISDIR(dst_st.st_mode)) {
+		/* VMS pathify a dir target */
+		ret_str = do_tovmspath(dst, vms_dst, 0, NULL);
+		if (ret_str == NULL) {
+		    PerlMem_free(vms_src);
+		    PerlMem_free(vms_dst);
+		    errno = EIO;
+		    return -1;
+		}
+	    } else {
+
+		/* fileify a target VMS file specification */
+		ret_str = do_tovmsspec(dst, vms_dst, 0, NULL);
+		if (ret_str == NULL) {
+		    PerlMem_free(vms_src);
+		    PerlMem_free(vms_dst);
+		    errno = EIO;
+		    return -1;
+		}
+	    }
+	}
+
+	old_file_dsc.dsc$a_pointer = vms_src;
+	old_file_dsc.dsc$w_length = strlen(vms_src);
+	old_file_dsc.dsc$b_dtype = DSC$K_DTYPE_T;
+	old_file_dsc.dsc$b_class = DSC$K_CLASS_S;
+
+	new_file_dsc.dsc$a_pointer = vms_dst;
+	new_file_dsc.dsc$w_length = strlen(vms_dst);
+	new_file_dsc.dsc$b_dtype = DSC$K_DTYPE_T;
+	new_file_dsc.dsc$b_class = DSC$K_CLASS_S;
+
+	flags = 0;
+#if !defined(__VAX) && defined(NAML$C_MAXRSS)
+	flags |= 2; /* LIB$M_FIL_LONG_NAMES */
+#endif
+
+	sts = lib$rename_file(&old_file_dsc,
+			      &new_file_dsc,
+			      NULL, NULL,
+			      &flags,
+			      NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+	if (!$VMS_STATUS_SUCCESS(sts)) {
+
+	   /* We could have failed because VMS style permissions do not
+	    * permit renames that UNIX will allow.  Just like the hack
+	    * in for kill_file.
+	    */
+	   sts = vms_rename_with_acl(aTHX_ &old_file_dsc, &new_file_dsc, flags);
+	}
+
+	PerlMem_free(vms_src);
+	PerlMem_free(vms_dst);
+	if (!$VMS_STATUS_SUCCESS(sts)) {
+	    errno = EIO;
+	    return -1;
+	}
+	retval = 0;
+    }
+
+    if (vms_unlink_all_versions) {
+	/* Now get rid of any previous versions of the source file that
+	 * might still exist
+	 */
+	int save_errno;
+	save_errno = errno;
+	src_sts = mp_do_kill_file(aTHX_ src, S_ISDIR(src_st.st_mode));
+	errno = save_errno;
+    }
+
+    /* We deleted the destination, so must force the error to be EIO */
+    if ((retval != 0) && (pre_delete != 0))
+	errno = EIO;
+
+    return retval;
+}
+/*}}}*/
 
 
 /*{{{char *do_rmsexpand(char *fspec, char *out, int ts, char *def, unsigned opts)*/

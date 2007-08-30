@@ -165,6 +165,7 @@
 #define pathify_dirspec_utf8_ts	Perl_pathify_dirspec_utf8_ts
 #define trim_unixpath		Perl_trim_unixpath
 #define opendir			Perl_opendir
+#define rename			Perl_rename
 #define rmscopy			Perl_rmscopy
 #define my_mkdir		Perl_my_mkdir
 #define vms_do_aexec		Perl_vms_do_aexec
@@ -228,6 +229,7 @@
 #define rmsexpand_utf8_ts(a,b,c,d,e,f) Perl_rmsexpand_utf8_ts(aTHX_ a,b,c,d,e,f)
 #define trim_unixpath(a,b,c)	Perl_trim_unixpath(aTHX_ a,b,c)
 #define opendir(a)		Perl_opendir(aTHX_ a)
+#define rename(a,b)		Perl_rename(aTHX_ a,b)
 #define rmscopy(a,b,c)		Perl_rmscopy(aTHX_ a,b,c)
 #define my_mkdir(a,b)		Perl_my_mkdir(aTHX_ a,b)
 #define vms_do_aexec(a,b,c)	Perl_vms_do_aexec(aTHX_ a,b,c)
@@ -246,6 +248,7 @@
 #define flex_fstat(a,b)		Perl_flex_fstat(aTHX_ a,b)
 #define cando_by_name(a,b,c)	Perl_cando_by_name(aTHX_ a,b,c)
 #define flex_stat(a,b)		Perl_flex_stat(aTHX_ a,b)
+#define flex_lstat(a,b)		Perl_flex_lstat(aTHX_ a,b)
 #define my_getpwnam(a)		Perl_my_getpwnam(aTHX_ a)
 #define my_getpwuid(a)		Perl_my_getpwuid(aTHX_ a)
 #define my_flush(a)		Perl_my_flush(aTHX_ a)
@@ -859,6 +862,7 @@ char *	Perl_rmsexpand_utf8 (const char *, char *, const char *, unsigned, int *,
 char *	Perl_rmsexpand_utf8_ts (const char *, char *, const char *, unsigned, int *, int *);
 int	Perl_trim_unixpath (char *, const char*, int);
 DIR  * Perl_opendir (const char *);
+int 	Perl_rename(const char *, const char *);
 int	Perl_rmscopy (const char *, const char *, int);
 int	Perl_my_mkdir (const char *, Mode_t);
 bool	Perl_vms_do_aexec (SV *, SV **, SV **);
@@ -896,6 +900,7 @@ char *	Perl_rmsexpand_utf8 (pTHX_ const char *, char *, const char *, unsigned, 
 char *	Perl_rmsexpand_utf8_ts (pTHX_ const char *, char *, const char *, unsigned, int *, int *);
 int	Perl_trim_unixpath (pTHX_ char *, const char*, int);
 DIR * Perl_opendir (pTHX_ const char *);
+int	Perl_rename (pTHX_ const char *, const char *);
 int	Perl_rmscopy (pTHX_ const char *, const char *, int);
 int	Perl_my_mkdir (pTHX_ const char *, Mode_t);
 bool	Perl_vms_do_aexec (pTHX_ SV *, SV **, SV **);
