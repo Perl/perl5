@@ -9,7 +9,7 @@ require ExtUtils::Constant::XS;
 use ExtUtils::Constant::Utils qw(C_stringify);
 use ExtUtils::Constant::XS qw(%XS_TypeSet);
 
-$VERSION = '0.03';
+$VERSION = '0.04';
 @ISA = 'ExtUtils::Constant::XS';
 
 %type_to_struct =
@@ -218,7 +218,7 @@ ${c_subname}_add_symbol($pthx HV *hash, const char *name, I32 namelen, SV *value
 
 EOADD
 
-    print $c_fh $explosives ? <<"EXPLODE" : <<"DONT";
+    print $c_fh $explosives ? <<"EXPLODE" : "\n";
 
 static int
 Im_sorry_Dave(pTHX_ SV *sv, MAGIC *mg)
@@ -242,12 +242,6 @@ static MGVTBL not_defined_vtbl = {
 
 EXPLODE
 
-#ifndef SYMBIAN
-static HV *${c_subname}_missing = NULL;
-#endif
-
-DONT
-
     print $xs_fh <<"EOBOOT";
 BOOT:
   {
@@ -255,6 +249,18 @@ BOOT:
     dTHX;
 #endif
     HV *symbol_table = get_hv("$symbol_table", TRUE);
+#ifndef SYMBIAN
+    /* When we create the 'missing' hash, it generates a 'used only once'
+     * warning.  Therefore, turn off warnings while we do this.
+     */
+    HV *${c_subname}_missing;
+    {
+        const bool warn_tmp = PL_dowarn;
+        PL_dowarn = 0;
+        ${c_subname}_missing = get_hv("${symbol_table}${c_subname}_M!55!NG", TRUE);
+        PL_dowarn = warn_tmp;
+    }
+#endif
 EOBOOT
 
     my %iterator;
@@ -320,11 +326,6 @@ EOBOOT
 					      'symbol_table',
 					      $add_symbol_subname);
     }
-    print $xs_fh $explosives ? "\n" : <<"EOBOOT";
-#ifndef SYMBIAN
-	${c_subname}_missing = newHV();
-#endif
-EOBOOT
 
     print $xs_fh <<"EOBOOT";
 	while (value_for_notfound->name) {
@@ -464,6 +465,7 @@ $xs_subname(sv)
 #ifdef SYMBIAN
 	sv = newSVpvf("%"SVf" is not a valid $package_sprintf_safe macro", sv);
 #else
+	HV *${c_subname}_missing = get_hv("${c_subname}_M!55!NG", FALSE);
 	if (hv_exists(${c_subname}_missing, s, SvUTF8(sv) ? -(I32)len : (I32)len)) {
 	    sv = newSVpvf("Your vendor has not defined $package_sprintf_safe macro %" SVf
 			  ", used", sv);
