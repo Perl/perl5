@@ -9,7 +9,7 @@ require ExtUtils::Constant::XS;
 use ExtUtils::Constant::Utils qw(C_stringify);
 use ExtUtils::Constant::XS qw(%XS_TypeSet);
 
-$VERSION = '0.04';
+$VERSION = '0.05';
 @ISA = 'ExtUtils::Constant::XS';
 
 %type_to_struct =
@@ -250,16 +250,7 @@ BOOT:
 #endif
     HV *symbol_table = get_hv("$symbol_table", TRUE);
 #ifndef SYMBIAN
-    /* When we create the 'missing' hash, it generates a 'used only once'
-     * warning.  Therefore, turn off warnings while we do this.
-     */
     HV *${c_subname}_missing;
-    {
-        const bool warn_tmp = PL_dowarn;
-        PL_dowarn = 0;
-        ${c_subname}_missing = get_hv("${symbol_table}${c_subname}_M!55!NG", TRUE);
-        PL_dowarn = warn_tmp;
-    }
 #endif
 EOBOOT
 
@@ -314,11 +305,22 @@ EOBOOT
 
 	print $xs_fh <<"EOBOOT";
 	const struct $struct_type *$iterator{$type} = $array_name;
-
 EOBOOT
     }
 
     delete $found->{''};
+
+    print $xs_fh <<"EOBOOT";
+#ifndef SYMBIAN
+	/* When we create the 'missing' hash, it generates a 'used only once'
+	 * warning.  Therefore, turn off warnings while we do this.
+	 */
+	const bool warn_tmp = PL_dowarn;
+	PL_dowarn = 0;
+	${c_subname}_missing = get_hv("${symbol_table}${c_subname}_M!55!NG", TRUE);
+	PL_dowarn = warn_tmp;
+#endif
+EOBOOT
 
     my $add_symbol_subname = $c_subname . '_add_symbol';
     foreach my $type (sort keys %$found) {
