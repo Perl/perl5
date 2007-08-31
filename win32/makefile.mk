@@ -187,11 +187,20 @@ CRYPT_SRC	*= fcrypt.c
 #
 # set this to additionally provide a statically linked perl-static.exe.
 # Note that dynamic loading will not work with this perl, so you must
-# include required modules statically using STATIC_EXT variable below.
-# A static library perl59s.lib will also be created.
+# include required modules statically using the STATIC_EXT or ALL_STATIC
+# variables below. A static library perl59s.lib will also be created.
 # Ordinary perl.exe is not affected by this option.
 #
 #BUILD_STATIC	*= define
+
+#
+# in addition to BUILD_STATIC the option ALL_STATIC makes *every*
+# extension get statically built
+# This will result in a very large perl executable, but the main purpose
+# is to have proper linking set so as to be able to create miscellaneous
+# executables with different built-in extensions
+#
+#ALL_STATIC	*= define
 
 #
 # set the install locations of the compiler include/libraries
@@ -940,9 +949,18 @@ PERLDLL_OBJ	+= $(WIN32_OBJ) $(DLL_OBJ)
 SETARGV_OBJ	= setargv$(o)
 .ENDIF
 
-# specify static extensions here
+.IF "$(ALL_STATIC)" == "define"
+# some exclusions, unfortunately, until fixed:
+#  - Win32 extension contains overlapped symbols with win32.c (BUG!)
+#  - MakeMaker isn't capable enough for SDBM_File (smaller bug)
+#  - Encode (encoding search algorithm relies on shared library?)
+#  - Hash/Util (fails various tests when linked statically)
+STATIC_EXT	= * !Win32 !SDBM_File !Encode !Hash/Util
+.ELSE
+# specify static extensions here, for example:
 #STATIC_EXT	= Cwd Compress/Raw/Zlib
 STATIC_EXT	= Win32CORE
+.ENDIF
 
 DYNALOADER	= $(EXTDIR)\DynaLoader\DynaLoader
 
@@ -1010,8 +1028,8 @@ ODBCCP32_DLL = $(windir)\system\odbccp32.dll
 #
 
 all : CHECKDMAKE .\config.h $(GLOBEXE) $(MINIPERL) $(MK2)		\
-	$(RIGHTMAKE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE)	\
-	$(X2P) MakePPPort Extensions $(PERLSTATIC)
+	$(RIGHTMAKE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) MakePPPort	\
+	$(PERLEXE) $(X2P) Extensions $(PERLSTATIC)
 
 ..\regnodes.h : ..\regcomp.sym ..\regcomp.pl ..\regexp.h
 	cd .. && regcomp.pl && cd win32
@@ -1341,7 +1359,7 @@ $(PERLEXESTATIC): $(PERLSTATICLIB) $(CONFIGPM) $(PERLEXEST_OBJ) $(PERLEXE_RES)
 		$(PERLEXE_RES) $(LKPOST))
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ -stack:0x1000000 $(BLINK_FLAGS) \
-	    @Extensions_static $(PERLSTATICLIB) \
+	    @Extensions_static $(PERLSTATICLIB) /PDB:NONE \
 	    $(LIBFILES) $(PERLEXEST_OBJ) $(SETARGV_OBJ) $(PERLEXE_RES)
 	$(EMBED_EXE_MANI)
 .ENDIF

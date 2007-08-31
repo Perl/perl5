@@ -169,11 +169,20 @@ CRYPT_SRC	= fcrypt.c
 #
 # set this to additionally provide a statically linked perl-static.exe.
 # Note that dynamic loading will not work with this perl, so you must
-# include required modules statically using STATIC_EXT variable below.
-# A static library perl59s.lib will also be created.
+# include required modules statically using the STATIC_EXT or ALL_STATIC
+# variables below. A static library perl59s.lib will also be created.
 # Ordinary perl.exe is not affected by this option.
 #
 #BUILD_STATIC	= define
+
+#
+# in addition to BUILD_STATIC the option ALL_STATIC makes *every*
+# extension get statically built
+# This will result in a very large perl executable, but the main purpose
+# is to have proper linking set so as to be able to create miscellaneous
+# executables with different built-in extensions
+#
+#ALL_STATIC	= define
 
 #
 #
@@ -784,9 +793,18 @@ PERLDLL_OBJ	= $(PERLDLL_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
 SETARGV_OBJ	= setargv$(o)
 !ENDIF
 
-# specify static extensions here
+!IF "$(ALL_STATIC)" == "define"
+# some exclusions, unfortunately, until fixed:
+#  - Win32 extension contains overlapped symbols with win32.c (BUG!)
+#  - MakeMaker isn't capable enough for SDBM_File (smaller bug)
+#  - Encode (encoding search algorithm relies on shared library?)
+#  - Hash/Util (fails various tests when linked statically)
+STATIC_EXT	= * !Win32 !SDBM_File !Encode !Hash/Util
+!ELSE
+# specify static extensions here, for example:
 #STATIC_EXT	= Cwd Compress/Raw/Zlib
 STATIC_EXT	= Win32CORE
+!ENDIF
 
 DYNALOADER	= $(EXTDIR)\DynaLoader\DynaLoader
 
@@ -822,8 +840,8 @@ CFG_VARS	=					\
 # Top targets
 #
 
-all : .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE) \
-	$(X2P) MakePPPort Extensions $(PERLSTATIC)
+all : .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) MakePPPort \
+	$(PERLEXE) $(X2P) Extensions $(PERLSTATIC)
 	@echo	Everything is up to date. '$(MAKE_BARE) test' to run test suite.
 
 ..\regnodes.h : ..\regcomp.sym ..\regcomp.pl ..\regexp.h
@@ -1011,7 +1029,7 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 
 $(PERLEXESTATIC): $(PERLSTATICLIB) $(CONFIGPM) $(PERLEXEST_OBJ) $(PERLEXE_RES)
 	$(LINK32) -subsystem:console -out:$@ -stack:0x1000000 $(LINK_FLAGS) \
-	    @Extensions_static $(PERLSTATICLIB) \
+	    @Extensions_static $(PERLSTATICLIB) /PDB:NONE \
 	    $(LIBFILES) $(PERLEXEST_OBJ) $(SETARGV_OBJ) $(PERLEXE_RES)
 	$(EMBED_EXE_MANI)
 
