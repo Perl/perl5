@@ -347,20 +347,6 @@ XS(XS_Cygwin_is_binmount)
     XSRETURN(1);
 }
 
-XS(XS_Cygwin_is_textmount)
-{
-    dXSARGS;
-    char *pathname;
-
-    if (items != 1)
-        Perl_croak(aTHX_ "Usage: Cygwin::is_textmount(pathname)");
-
-    pathname = SvPV_nolen(ST(0));
-
-    ST(0) = boolSV(!cygwin_internal(CW_GET_BINMODE, pathname));
-    XSRETURN(1);
-}
-
 void
 init_os_extras(void)
 {
@@ -376,7 +362,6 @@ init_os_extras(void)
     newXSproto("Cygwin::mount_table", XS_Cygwin_mount_table, file, "");
     newXSproto("Cygwin::mount_flags", XS_Cygwin_mount_flags, file, "$");
     newXSproto("Cygwin::is_binmount", XS_Cygwin_is_binmount, file, "$");
-    newXSproto("Cygwin::is_textmount", XS_Cygwin_is_textmount, file, "$");
 
     /* Initialize Win32CORE if it has been statically linked. */
     handle = dlopen(NULL, RTLD_LAZY);

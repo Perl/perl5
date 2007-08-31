@@ -9,7 +9,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 15;
+use Test::More tests => 14;
 
 is(Cygwin::winpid_to_pid(Cygwin::pid_to_winpid($$)), $$,
    "perl pid translates to itself");
@@ -46,7 +46,6 @@ my $mount = join '', `/usr/bin/mount`;
 $mount =~ m|on /usr/bin type .+ \((\w+mode)\)|m;
 my $binmode = $1 eq 'binmode';
 is(Cygwin::is_binmount("/"),  $binmode ? 1 : '', "check / for binmount");
-is(Cygwin::is_textmount("/"), $binmode ? '' : 1, "check / for textmount");
 
 my $rootmnt = Cygwin::mount_flags("/");
 ok($binmode ? ($rootmnt =~ /,binmode/) : ($rootmnt =~ /,textmode/), "check / mount_flags");
