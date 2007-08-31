@@ -572,8 +572,11 @@ sub _rmtree {
 
 	    # Deleting large numbers of files from VMS Files-11 filesystems
 	    # is faster if done in reverse ASCIIbetical order 
-	    @files = reverse @files if $Is_VMS;
-	    ($root = VMS::Filespec::unixify($root)) =~ s#\.dir\z## if $Is_VMS;
+	    if ($Is_VMS) {
+	        @files = reverse @files;
+	        ($root = VMS::Filespec::unixify($root)) =~ s#\.dir\z##;
+	        @files = map( $_ eq '.' ? '.;' : $_, @files );
+	    }
 	    if ($Is_MacOS) {
 		@files = map("$root$_", @files);
 	    }
