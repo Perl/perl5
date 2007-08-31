@@ -183,7 +183,7 @@ sub _extract {
     #            @{$ae->files};
     
     for my $file ( @{$ae->files} ) { 
-        my $path = File::Spec->rel2abs( File::Spec->catdir($to, $file) );
+        my $path = File::Spec->rel2abs( File::Spec->catfile($to, $file) );
     
         $self->_mode_plus_w( file => $path );
     }
