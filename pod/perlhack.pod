@@ -1718,7 +1718,7 @@ but you have to say
 
 You may find it helpful to have a "macro dictionary", which you can
 produce by saying C<cpp -dM perl.c | sort>. Even then, F<cpp> won't
-recursively apply those macros for you. 
+recursively apply those macros for you.
 
 =head2 gdb macro support
 
@@ -1734,7 +1734,7 @@ One way to get around this macro hell is to use the dumping functions in
 F<dump.c>; these work a little like an internal
 L<Devel::Peek|Devel::Peek>, but they also cover OPs and other structures
 that you can't get at from Perl. Let's take an example. We'll use the
-C<$a = $b + $c> we used before, but give it a bit of context: 
+C<$a = $b + $c> we used before, but give it a bit of context:
 C<$b = "6XXXX"; $c = 2.3;>. Where's a good place to stop and poke around?
 
 What about C<pp_add>, the function we examined earlier to implement the
@@ -1769,7 +1769,7 @@ C<POPn> takes the SV from the top of the stack and obtains its NV either
 directly (if C<SvNOK> is set) or by calling the C<sv_2nv> function.
 C<TOPs> takes the next SV from the top of the stack - yes, C<POPn> uses
 C<TOPs> - but doesn't remove it. We then use C<SvNV> to get the NV from
-C<leftsv> in the same way as before - yes, C<POPn> uses C<SvNV>. 
+C<leftsv> in the same way as before - yes, C<POPn> uses C<SvNV>.
 
 Since we don't have an NV for C<$b>, we'll have to use C<sv_2nv> to
 convert it. If we step again, we'll find ourselves there:
@@ -1822,7 +1822,7 @@ similar output to L<B::Debug|B::Debug>.
 All right, we've now had a look at how to navigate the Perl sources and
 some things you'll need to know when fiddling with them. Let's now get
 on and create a simple patch. Here's something Larry suggested: if a
-C<U> is the first active format during a C<pack>, (for example, 
+C<U> is the first active format during a C<pack>, (for example,
 C<pack "U3C8", @stuff>) then the resulting string should be treated as
 UTF-8 encoded.
 
@@ -1908,7 +1908,7 @@ else along the line.
 The regression tests for each operator live in F<t/op/>, and so we
 make a copy of F<t/op/pack.t> to F<t/op/pack.t~>. Now we can add our
 tests to the end. First, we'll test that the C<U> does indeed create
-Unicode strings.  
+Unicode strings.
 
 t/op/pack.t has a sensible ok() function, but if it didn't we could
 use the one from t/test.pl.
@@ -1924,7 +1924,7 @@ so instead of this:
 we can write the more sensible (see L<Test::More> for a full
 explanation of is() and other testing functions).
 
- is( "1.20.300.4000", sprintf "%vd", pack("U*",1,20,300,4000), 
+ is( "1.20.300.4000", sprintf "%vd", pack("U*",1,20,300,4000),
                                        "U* produces Unicode" );
 
 Now we'll test that we got that space-at-the-beginning business right:
@@ -2150,7 +2150,7 @@ decision of which to use depends on what part of the test suite you're
 working on.  This is a measure to prevent a high-level failure (such
 as Config.pm breaking) from causing basic functionality tests to fail.
 
-=over 4 
+=over 4
 
 =item t/base t/comp
 
@@ -2175,9 +2175,9 @@ also use the full suite of core modules in the tests.
 =back
 
 When you say "make test" Perl uses the F<t/TEST> program to run the
-test suite (except under Win32 where it uses F<t/harness> instead.)  
-All tests are run from the F<t/> directory, B<not> the directory 
-which contains the test.  This causes some problems with the tests 
+test suite (except under Win32 where it uses F<t/harness> instead.)
+All tests are run from the F<t/> directory, B<not> the directory
+which contains the test.  This causes some problems with the tests
 in F<lib/>, so here's some opportunity for some patching.
 
 You must be triply conscious of cross-platform concerns.  This usually
@@ -2302,14 +2302,14 @@ that they must appear if used together.
     harness -v -torture -re LIST OF PATTERNS TO MATCH
 
 If C<LIST OF FILES TO TEST> is omitted the file list is obtained from
-the manifest. The file list may include shell wildcards which will be 
+the manifest. The file list may include shell wildcards which will be
 expanded out.
 
 =over 4
 
 =item -v
 
-Run the tests under verbose mode so you can see what tests were run, 
+Run the tests under verbose mode so you can see what tests were run,
 and debug outbut.
 
 =item -torture
@@ -2324,7 +2324,7 @@ in that it allows the file list to be provided as well.
 
 =item -re LIST OF PATTERNS
 
-Filter the file list so that all the test files run match 
+Filter the file list so that all the test files run match
 /(LIST|OF|PATTERNS)/. Note that with this form the patterns
 are joined by '|' and you cannot supply a list of files, instead
 the test files are obtained from the MANIFEST.
@@ -2338,7 +2338,7 @@ You can run an individual test by a command similar to
 except that the harnesses set up some environment variables that may
 affect the execution of the test :
 
-=over 4 
+=over 4
 
 =item PERL_CORE=1
 
@@ -2993,7 +2993,7 @@ number of bogus leak reports from Purify.
 Once you've compiled a perl suitable for Purify'ing, then you
 can just:
 
-    make pureperl   
+    make pureperl
 
 which creates a binary named 'pureperl' that has been Purify'ed.
 This binary is used in place of the standard 'perl' binary
@@ -3005,7 +3005,7 @@ perl as:
 
     make pureperl
     cd t
-    ../pureperl -I../lib harness 
+    ../pureperl -I../lib harness
 
 which would run Perl on test.pl and report any memory problems.
 
@@ -3044,7 +3044,7 @@ should change to get the most use out of Purify:
 You should add -DPURIFY to the DEFINES line so the DEFINES
 line looks something like:
 
-    DEFINES = -DWIN32 -D_CONSOLE -DNO_STRICT $(CRYPT_FLAG) -DPURIFY=1 
+    DEFINES = -DWIN32 -D_CONSOLE -DNO_STRICT $(CRYPT_FLAG) -DPURIFY=1
 
 to disable Perl's arena memory allocation functions, as
 well as to force use of memory allocation functions derived
@@ -3076,7 +3076,7 @@ standard Perl testset you would create and run Purify as:
     cd win32
     make
     cd ../t
-    purify ../perl -I../lib harness 
+    purify ../perl -I../lib harness
 
 which would instrument Perl in memory, run Perl on test.pl,
 then finally report any memory problems.
@@ -3087,7 +3087,12 @@ The excellent valgrind tool can be used to find out both memory leaks
 and illegal memory accesses.  As of August 2003 it unfortunately works
 only on x86 (ELF) Linux.  The special "test.valgrind" target can be used
 to run the tests under valgrind.  Found errors and memory leaks are
-logged in files named F<test.valgrind>.
+logged in files named F<testfile.valgrind>.
+
+Valgrind also provides a cachegrind tool, invoked on perl as:
+
+    VG_OPTS=' --log-fd=3 --suppressions=perl.supp --tool=cachegrind' \
+        make test.valgrind
 
 As system libraries (most notably glibc) are also triggering errors,
 valgrind allows to suppress such errors using suppression files. The
@@ -3248,6 +3253,13 @@ Display routines that have zero usage.
 For more detailed explanation of the available commands and output
 formats, see your own local documentation of gprof.
 
+quick-hint:
+
+    $ sh Configure -des -Dusedevel -Doptimize='-g' -Accflags='-pg' -Aldflags='-pg' && make
+    $ ./perl someprog # creates gmon.out in current directory
+    $ gprof perl > out
+    $ view out
+
 =head2 GCC gcov Profiling
 
 Starting from GCC 3.0 I<basic block profiling> is officially available
@@ -3283,6 +3295,15 @@ with gcc, see the latest GNU CC manual, as of GCC 3.0 see
 and its section titled "8. gcov: a Test Coverage Program"
 
     http://gcc.gnu.org/onlinedocs/gcc-3.0/gcc_8.html#SEC132
+
+quick hint:
+
+    $ sh Configure -des  -Doptimize='-g' -Accflags='-fprofile-arcs -ftest-coverage' \
+        -Aldflags='-fprofile-arcs -ftest-coverage' && make perl.gcov
+    $ rm -f regexec.c.gcov regexec.gcda
+    $ ./perl.gcov
+    $ gcov regexec.c
+    $ view regexec.c.gcov
 
 =head2 Pixie Profiling
 
@@ -3457,7 +3478,7 @@ test Perl.
 
 I'd now suggest you read over those references again, and then, as soon
 as possible, get your hands dirty. The best way to learn is by doing,
-so: 
+so:
 
 =over 3
 
