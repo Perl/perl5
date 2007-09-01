@@ -846,12 +846,12 @@ all : .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) MakePPPort \
 
 ..\regnodes.h : ..\regcomp.sym ..\regcomp.pl ..\regexp.h
 	cd ..
-	regcomp.pl
+	miniperl regcomp.pl
 	cd win32
 	
 ..\regcharclass.h : ..\Porting\regcharclass.pl
 	cd ..
-	Porting\regcharclass.pl
+	miniperl Porting\regcharclass.pl
 	cd win32
 
 regnodes : ..\regnodes.h
