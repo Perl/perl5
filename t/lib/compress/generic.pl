@@ -612,7 +612,7 @@ EOM
             my $foo = "1234567890";
             
             is $io->syswrite($foo, length($foo)), length($foo), "  syswrite ok" ;
-            if ( $[ < 5.6 )
+            if ( $] < 5.6 )
               { is $io->syswrite($foo, length $foo), length $foo, "  syswrite ok" }
             else
               { is $io->syswrite($foo), length $foo, "  syswrite ok" }

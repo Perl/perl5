@@ -1,6 +1,17 @@
 CHANGES
 -------
 
+  2.006 1 September 2007
+
+      * Makefile.PL
+        Added INSTALLDIRS directive to install as a core module when built
+        on a perl >= 5.9.
+
+      * IO::Uncompress::RawDeflate 
+
+        - Fixed export problem - "$RawDeflateError" and "rawdeflate" were
+          not being exported with ":all".
+
   2.005 18 June 2007
 
       * IO::Compress::Gzip & IO::Uncompress::Gunzip

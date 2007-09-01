@@ -8,17 +8,17 @@ use Carp ;
 use IO::Handle ;
 use Scalar::Util qw(dualvar);
 
-use IO::Compress::Base::Common 2.005 ;
-use Compress::Raw::Zlib 2.005 ;
-use IO::Compress::Gzip 2.005 ;
-use IO::Uncompress::Gunzip 2.005 ;
+use IO::Compress::Base::Common 2.006 ;
+use Compress::Raw::Zlib 2.006 ;
+use IO::Compress::Gzip 2.006 ;
+use IO::Uncompress::Gunzip 2.006 ;
 
 use strict ;
 use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.005';
+$VERSION = '2.006';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -180,7 +180,12 @@ sub Compress::Zlib::gzFile::gzreadline
     my $self = shift ;
 
     my $gz = $self->[0] ;
-    $_[0] = $gz->getline() ; 
+    {
+        # Maintain backward compatibility with 1.x behaviour
+        # It didn't support $/, so this can't either.
+        local $/ = "\n" ;
+        $_[0] = $gz->getline() ; 
+    }
     _save_gzerr($gz, 1);
     return defined $_[0] ? length $_[0] : 0 ;
 }
@@ -447,7 +452,7 @@ sub inflate
 
 package Compress::Zlib ;
 
-use IO::Compress::Gzip::Constants 2.005 ;
+use IO::Compress::Gzip::Constants 2.006 ;
 
 sub memGzip($)
 {
@@ -652,12 +657,17 @@ C<IO::Compress::Gzip> and C<IO::Uncompress::Gunzip> modules for
 reading/writing gzip files, and the C<Compress::Raw::Zlib> module for some
 low-level zlib access. 
 
-The interface provided by version 2 should be 100% backward compatible with
-version 1. If you find a difference in the expected behaviour please
-contact the author (See L</AUTHOR>). See L<GZIP INTERFACE> 
+The interface provided by version 2 of this module should be 100% backward
+compatible with version 1. If you find a difference in the expected
+behaviour please contact the author (See L</AUTHOR>). See L<GZIP INTERFACE> 
 
-If you are writing new code, your first port of call should be to use one
-these new modules.
+With the creation of the C<IO::Compress> and C<IO::Uncompress> modules no
+new features are planned for C<Compress::Zlib> - the new modules do
+everything that C<Compress::Zlib> does and then some. Development on
+C<Compress::Zlib> will be limited to bug fixes only.
+
+If you are writing new code, your first port of call should be one of the
+new C<IO::Compress> or C<IO::Uncompress> modules.
 
 =head1 GZIP INTERFACE
 
@@ -770,11 +780,13 @@ the case of an error, -1.
 
 It is legal to intermix calls to C<gzread> and C<gzreadline>.
 
-In addition, C<gzreadline> fully supports the use of of the variable C<$/>
-(C<$INPUT_RECORD_SEPARATOR> or C<$RS> when C<English> is in use) to
-determine what constitutes an end of line. Both paragraph mode and file
-slurp mode are supported. 
+To maintain backward compatibility with version 1.x of this module
+C<gzreadline> ignores the C<$/> variable - it I<always> uses the string
+C<"\n"> as the line delimiter.  
 
+If you want to read a gzip file a line at a time and have it respect the
+C<$/> variable (or C<$INPUT_RECORD_SEPARATOR>, or C<$RS> when C<English> is
+in use) see L<IO::Uncompress::Gunzip|IO::Uncompress::Gunzip>.
 
 =item B<$byteswritten = $gz-E<gt>gzwrite($buffer) ;>
 
@@ -1455,7 +1467,6 @@ Copyright (c) 1995-2007 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
-
 
 
 

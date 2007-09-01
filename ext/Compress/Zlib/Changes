@@ -1,6 +1,20 @@
 CHANGES
 -------
 
+  2.006 1 September 20007
+
+      * Makefile.PL
+        Added INSTALLDIRS directive to install as a core module when built
+        on a perl >= 5.9.
+
+      * t/03zlib-v1.t
+        Fixed crc32 and adler32 tests in to remove ascii assumption.
+
+      * lib/Compress/Zlib.pm
+        Make gzreadline not support $/, just like in Compress::Zlib 1.x
+        Folk who want $/ with readline support can get it in 
+        IO::Uncompress::Gunzip.
+        [rt.cpan.org #28663] and Debian bug #435656 http://bugs.debian.org/435656
   2.005 18 June 2007
 
       * Added info about removing Compress::Zlib version 1, before

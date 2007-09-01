@@ -868,8 +868,11 @@ if ($] >= 5.005)
 {
     title 'CRC32' ;
 
-    my $data = 'ZgRNtjgSUW'; # CRC32 of this data should have the high bit set
+    # CRC32 of this data should have the high bit set
+    # value in ascii is ZgRNtjgSUW
+    my $data = "\x5a\x67\x52\x4e\x74\x6a\x67\x53\x55\x57"; 
     my $expected_crc = 0xCF707A2B ; # 3480255019 
+
     my $crc = crc32($data) ;
     is $crc, $expected_crc;
 }
@@ -877,7 +880,11 @@ if ($] >= 5.005)
 {
     title 'Adler32' ;
 
-    my $data = 'lpscOVsAJiUfNComkOfWYBcPhHZ[bT'; # adler of this data should have the high bit set
+    # adler of this data should have the high bit set
+    # value in ascii is lpscOVsAJiUfNComkOfWYBcPhHZ[bT
+    my $data = "\x6c\x70\x73\x63\x4f\x56\x73\x41\x4a\x69\x55\x66" .
+               "\x4e\x43\x6f\x6d\x6b\x4f\x66\x57\x59\x42\x63\x50" .
+               "\x68\x48\x5a\x5b\x62\x54";
     my $expected_crc = 0xAAD60AC7 ; # 2866154183 
     my $crc = adler32($data) ;
     is $crc, $expected_crc;

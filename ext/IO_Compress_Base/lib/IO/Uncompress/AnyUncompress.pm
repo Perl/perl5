@@ -4,16 +4,16 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common 2.005 qw(createSelfTiedObject);
+use IO::Compress::Base::Common 2.006 qw(createSelfTiedObject);
 
-use IO::Uncompress::Base 2.005 ;
+use IO::Uncompress::Base 2.006 ;
 
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $AnyUncompressError);
 
-$VERSION = '2.005';
+$VERSION = '2.006';
 $AnyUncompressError = '';
 
 @ISA = qw( Exporter IO::Uncompress::Base );
@@ -27,18 +27,18 @@ Exporter::export_ok_tags('all');
 
 BEGIN
 {
-   eval ' use IO::Uncompress::Adapter::Inflate 2.005 ;';
-   eval ' use IO::Uncompress::Adapter::Bunzip2 2.005 ;';
-   eval ' use IO::Uncompress::Adapter::LZO 2.005 ;';
-   eval ' use IO::Uncompress::Adapter::Lzf 2.005 ;';
+   eval ' use IO::Uncompress::Adapter::Inflate 2.006 ;';
+   eval ' use IO::Uncompress::Adapter::Bunzip2 2.006 ;';
+   eval ' use IO::Uncompress::Adapter::LZO 2.006 ;';
+   eval ' use IO::Uncompress::Adapter::Lzf 2.006 ;';
 
-   eval ' use IO::Uncompress::Bunzip2 2.005 ;';
-   eval ' use IO::Uncompress::UnLzop 2.005 ;';
-   eval ' use IO::Uncompress::Gunzip 2.005 ;';
-   eval ' use IO::Uncompress::Inflate 2.005 ;';
-   eval ' use IO::Uncompress::RawInflate 2.005 ;';
-   eval ' use IO::Uncompress::Unzip 2.005 ;';
-   eval ' use IO::Uncompress::UnLzf 2.005 ;';
+   eval ' use IO::Uncompress::Bunzip2 2.006 ;';
+   eval ' use IO::Uncompress::UnLzop 2.006 ;';
+   eval ' use IO::Uncompress::Gunzip 2.006 ;';
+   eval ' use IO::Uncompress::Inflate 2.006 ;';
+   eval ' use IO::Uncompress::RawInflate 2.006 ;';
+   eval ' use IO::Uncompress::Unzip 2.006 ;';
+   eval ' use IO::Uncompress::UnLzf 2.006 ;';
 }
 
 sub new
@@ -56,7 +56,7 @@ sub anyuncompress
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common 2.005 qw(:Parse);
+    use IO::Compress::Base::Common 2.006 qw(:Parse);
     return ( 'RawInflate' => [1, 1, Parse_boolean,  0] ) ;
 }
 

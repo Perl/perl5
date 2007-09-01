@@ -20,7 +20,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 217 + $extra ;
+    plan tests => 250 + $extra ;
 
     use_ok('Compress::Zlib', 2) ;
     use_ok('IO::Compress::Gzip::Constants') ;
@@ -600,4 +600,28 @@ foreach my $stdio ( ['-', '-'], [*STDIN, *STDOUT])
     is $u->gzread($buf2, 0), 0, "  gzread returns 0";
     ok defined $buf2, "  output buffer defined";
     is $buf2, "", "  output buffer empty string";
+}
+
+{
+    title 'gzreadline does not support $/';
+
+    my $lex = new LexFile my $name ;
+
+    my $a = gzopen($name, "w");
+    my $text = "fred\n";
+    my $len = length $text;
+    $a->gzwrite($text);
+    $a->gzwrite("\n\n");
+    $a->gzclose ;
+
+    for my $delim ( undef, "", 0, 1, "abc", $text, "\n\n", "\n" )
+    {
+        local $/ = $delim;
+        my $u = gzopen($name, "r");
+        my $line;
+        is $u->gzreadline($line), length $text, "  read $len bytes";
+        is $line, $text, "  got expected line";
+        ok ! $u->gzclose, "  closed" ;
+        is $/, $delim, '  $/ unchanged by gzreadline';
+    }
 }

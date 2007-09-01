@@ -228,7 +228,6 @@ typedef di_stream * Compress__Raw__Zlib__inflateScanStream ;
 #define adlerInitial adler32(0L, Z_NULL, 0)
 #define crcInitial crc32(0L, Z_NULL, 0)
 
-
 static const char * const my_z_errmsg[] = {
     "need dictionary",     /* Z_NEED_DICT     2 */
     "stream end",          /* Z_STREAM_END    1 */
@@ -607,8 +606,8 @@ BOOT:
     }
 
 
-#define Zip_zlib_version()	(char*)zlib_version
-char*
+#define Zip_zlib_version()	(const char*)zlib_version
+const char*
 Zip_zlib_version()
 
 unsigned
@@ -650,6 +649,8 @@ Zip_adler32(buf, adler=adlerInitial)
 	  adler = SvUV(ST(1)) ;
 	else
 	  adler = adlerInitial;
+    OUTPUT:
+        RETVAL
  
 #define Zip_crc32(buf, crc) crc32(crc, buf, (uInt)len)
 
@@ -724,9 +725,9 @@ _deflateInit(flags,level, method, windowBits, memLevel, strategy, bufsize, dicti
     int err ;
     deflateStream s ;
 
-    if (trace)
-        warn("in _deflateInit(level=%d, method=%d, windowBits=%d, memLevel=%d, strategy=%d, bufsize=%ld\n",
-	level, method, windowBits, memLevel, strategy, bufsize) ;
+    if (trace) 
+        warn("in _deflateInit(level=%d, method=%d, windowBits=%d, memLevel=%d, strategy=%d, bufsize=%ld dictionary=%p)\n", 
+	level, method, windowBits, memLevel, strategy, bufsize, dictionary) ;
     if ((s = InitStream() )) {
 
         s->Level      = level;
@@ -761,8 +762,11 @@ _deflateInit(flags,level, method, windowBits, memLevel, strategy, bufsize, dicti
     else
         err = Z_MEM_ERROR ;
 
-    XPUSHs(sv_setref_pv(sv_newmortal(), 
-	"Compress::Raw::Zlib::deflateStream", (void*)s));
+    {
+        SV* obj = sv_setref_pv(sv_newmortal(), 
+            "Compress::Raw::Zlib::deflateStream", (void*)s);
+        XPUSHs(obj);
+    }
     if (GIMME == G_ARRAY) {
         SV * sv = sv_2mortal(newSViv(err)) ;
 	setDUALstatus(sv, err);
@@ -814,11 +818,14 @@ _inflateInit(flags, windowBits, bufsize, dictionary)
     else
 	err = Z_MEM_ERROR ;
 
-    XPUSHs(sv_setref_pv(sv_newmortal(), 
+    {
+        SV* obj = sv_setref_pv(sv_newmortal(), 
                    ix == 1 
                    ? "Compress::Raw::Zlib::inflateScanStream" 
                    :  "Compress::Raw::Zlib::inflateStream",
-                   (void*)s));
+                   (void*)s);
+        XPUSHs(obj);
+    }
     if (GIMME == G_ARRAY) {
         SV * sv = sv_2mortal(newSViv(err)) ;
 	setDUALstatus(sv, err);

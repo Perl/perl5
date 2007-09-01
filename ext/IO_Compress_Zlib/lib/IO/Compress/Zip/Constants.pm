@@ -7,7 +7,7 @@ require Exporter;
 
 our ($VERSION, @ISA, @EXPORT, %ZIP_CM_MIN_VERSIONS);
 
-$VERSION = '2.005';
+$VERSION = '2.006';
 
 @ISA = qw(Exporter);
 

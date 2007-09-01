@@ -1,9 +1,9 @@
 
                              Compress::Zlib
 
-                             Version 2.005
+                             Version 2.006
 
-                              18th June 2007
+                            1st September 2007
 
 
        Copyright (c) 1995-2007 Paul Marquess. All rights reserved.
@@ -32,7 +32,7 @@ installed on your system:
 
     * Perl 5.004 or better. 
     * Compress::Raw::Zlib
-    * IO::Compress::Gzip
+    * IO::Compress::Zlib
 
 
 
