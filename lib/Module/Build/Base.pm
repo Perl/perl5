@@ -3796,7 +3796,7 @@ sub install_map {
   if ($self->create_packlist and my $module_name = $self->module_name) {
     my $archdir = $self->install_destination('arch');
     my @ext = split /::/, $module_name;
-    $map{write} = File::Spec->catdir($archdir, 'auto', @ext, '.packlist');
+    $map{write} = File::Spec->catfile($archdir, 'auto', @ext, '.packlist');
   }
 
   # Handle destdir
