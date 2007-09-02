@@ -312,13 +312,10 @@ EOBOOT
 
     print $xs_fh <<"EOBOOT";
 #ifndef SYMBIAN
-	/* When we create the 'missing' hash, it generates a 'used only once'
-	 * warning.  Therefore, turn off warnings while we do this.
-	 */
-	const bool warn_tmp = PL_dowarn;
-	PL_dowarn = 0;
 	${c_subname}_missing = get_hv("${symbol_table}${c_subname}_M!55!NG", TRUE);
-	PL_dowarn = warn_tmp;
+	/* When we create the 'missing' hash, it generates a 'used only once'
+	 * warning.  Avoid this: */
+	${c_subname}_missing = get_hv("${symbol_table}${c_subname}_M!55!NG", TRUE);
 #endif
 EOBOOT
 
