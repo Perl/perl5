@@ -1804,10 +1804,10 @@ L<perlfunc/getsockopt>.
 
 =item Global symbol "%s" requires explicit package name
 
-(F) You've said "use strict vars", which indicates that all variables
-must either be lexically scoped (using "my"), declared beforehand using
-"our", or explicitly qualified to say which package the global variable
-is in (using "::").
+(F) You've said "use strict" or "use strict vars", which indicates 
+that all variables must either be lexically scoped (using "my"), 
+declared beforehand using "our", or explicitly qualified to say 
+which package the global variable is in (using "::").
 
 =item glob failed (%s)
 
