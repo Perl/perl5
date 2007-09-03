@@ -3091,8 +3091,7 @@ logged in files named F<testfile.valgrind>.
 
 Valgrind also provides a cachegrind tool, invoked on perl as:
 
-    VG_OPTS=' --log-fd=3 --suppressions=perl.supp --tool=cachegrind' \
-        make test.valgrind
+    VG_OPTS=--tool=cachegrind make test.valgrind
 
 As system libraries (most notably glibc) are also triggering errors,
 valgrind allows to suppress such errors using suppression files. The
@@ -3253,7 +3252,7 @@ Display routines that have zero usage.
 For more detailed explanation of the available commands and output
 formats, see your own local documentation of gprof.
 
-quick-hint:
+quick hint:
 
     $ sh Configure -des -Dusedevel -Doptimize='-g' -Accflags='-pg' -Aldflags='-pg' && make
     $ ./perl someprog # creates gmon.out in current directory
