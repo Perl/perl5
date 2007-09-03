@@ -14,7 +14,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG              = 0;
 $WARN               = 1;
 $FOLLOW_SYMLINK     = 0;
-$VERSION            = "1.34";
+$VERSION            = "1.34_01";
 $CHOWN              = 1;
 $CHMOD              = 1;
 $DO_NOT_USE_PREFIX  = 0;
@@ -496,7 +496,7 @@ sub extract {
 =head2 $tar->extract_file( $file, [$extract_path] )
 
 Write an entry, whose name is equivalent to the file name provided to
-disk. Optionally takes a second parameter, which is the full (unix)
+disk. Optionally takes a second parameter, which is the full native
 path (including filename) the entry will be written to.
 
 For example:
@@ -547,9 +547,18 @@ sub _extract_file {
     ### it's a relative path ###
     } else {
         my $cwd     = (defined $self->{cwd} ? $self->{cwd} : cwd());
-        my @dirs    = File::Spec::Unix->splitdir( $dirs );
-        my @cwd     = File::Spec->splitdir( $cwd );
-        $dir        = File::Spec->catdir( @cwd, @dirs );
+        my @dirs;
+        if ( defined $alt ) { # It's a local-OS path
+            @dirs   = File::Spec->splitdir( $dirs );
+        } else {              # it's UNIX-style, likely straight from the tarball
+            @dirs   = File::Spec::Unix->splitdir( $dirs );
+        }
+        map tr/\./_/, @dirs if $^O eq 'VMS'; # '.' is the directory delimiter
+        my ($cwd_vol,$cwd_dir,$cwd_file) 
+                    = File::Spec->splitpath( $cwd );
+        my @cwd     = File::Spec->splitdir( $cwd_dir );
+        push @cwd, $cwd_file if length $cwd_file;
+        $dir        = File::Spec->catpath( $cwd_vol, File::Spec->catdir( @cwd, @dirs ) );
 
         # catdir() returns undef if the path is longer than 255 chars on VMS
         unless ( defined $dir ) {
