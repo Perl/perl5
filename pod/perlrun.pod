@@ -699,7 +699,8 @@ the implicit loop, just as in B<awk>.
 X<-P>
 
 B<NOTE: Use of -P is strongly discouraged because of its inherent
-problems, including poor portability.>
+problems, including poor portability. It is deprecated and will be
+removed in a future version of Perl.>
 
 This option causes your program to be run through the C preprocessor before
 compilation by Perl.  Because both comments and B<cpp> directives begin

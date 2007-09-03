@@ -1787,6 +1787,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    forbid_setid('P', -1);
 	    PL_preprocess = TRUE;
 	    s++;
+	    deprecate("-P");
 	    goto reswitch;
 	case 'S':
 	    forbid_setid('S', -1);
