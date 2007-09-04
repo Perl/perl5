@@ -315,6 +315,7 @@ Perl_reentrant_retry(const char *f, ...)
     void *retptr = NULL;
     va_list ap;
     va_start(ap, f);
+    {
 #ifdef USE_REENTRANT_API
 #  if defined(USE_HOSTENT_BUFFER) || defined(USE_GRENT_BUFFER) || defined(USE_NETENT_BUFFER) || defined(USE_PWENT_BUFFER) || defined(USE_PROTOENT_BUFFER) || defined(USE_SERVENT_BUFFER)
     void *p0;
@@ -533,6 +534,7 @@ Perl_reentrant_retry(const char *f, ...)
 #else
     PERL_UNUSED_ARG(f);
 #endif
+    }
     va_end(ap);
     return retptr;
 }
