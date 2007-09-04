@@ -5418,14 +5418,22 @@ the following:
 
 produces the output 'h:i: :t:h:e:r:e'.
 
-Empty leading (or trailing) fields are produced when there are positive
-width matches at the beginning (or end) of the string; a zero-width match
-at the beginning (or end) of the string does not produce an empty field.
-For example:
+Empty leading fields are produced when there are positive-width matches at
+the beginning of the string; a zero-width match at the beginning of
+the string does not produce an empty field. For example:
 
    print join(':', split(/(?=\w)/, 'hi there!'));
 
-produces the output 'h:i :t:h:e:r:e!'.
+produces the output 'h:i :t:h:e:r:e!'. Empty trailing fields, on the other
+hand, are produced when there is a match at the end of the string (and
+when LIMIT is given and is not 0), regardless of the length of the match.
+For example:
+
+   print join(':', split(//,   'hi there!', -1));
+   print join(':', split(/\W/, 'hi there!', -1));
+
+produce the output 'h:i: :t:h:e:r:e:!:' and 'hi:there:', respectively,
+both with an empty trailing field.
 
 The LIMIT parameter can be used to split a line partially
 
