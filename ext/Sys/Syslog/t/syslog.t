@@ -155,7 +155,7 @@ for my $sock_type (qw(native eventlog unix stream inet tcp udp)) {
 
         # syslog() with facilities "local0" and "local1" (as a strings), should fail
         $r = eval { syslog('local0,local1', "$test_string by connecting to a $sock_type socket") } || 0;
-        like( $@, '/^syslog: too many facilities given: local1/', "[$sock_type] syslog() called with level 'info,notice'" );
+        like( $@, '/^syslog: too many facilities given: local1/', "[$sock_type] syslog() called with level 'local0,local1'" );
         ok( !$r, "[$sock_type] syslog() should return false: '$r'" );
 
         # syslog() with level "info" (as a string), should pass

@@ -1,6 +1,9 @@
 Revision history for Sys-Syslog
 
-0.19 -- 2007.08.xx -- Sebastien Aperghis-Tramoni (SAPER)
+0.20 -- 2007.09.05 -- Sebastien Aperghis-Tramoni (SAPER)
+        [DOC] Added README.win32 which was missing in MANIFEST.
+
+0.19 -- 2007.09.05 -- Sebastien Aperghis-Tramoni (SAPER)
         [BUGFIX] CPAN-RT#20635: Fix tests to avoid problems related to the 
         "stream" mechanism which occured on Debian and Cygwin.
         [BUGFIX] CPAN-RT#20780: Facility could not be temporarily changed.

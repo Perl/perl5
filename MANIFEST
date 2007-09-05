@@ -1082,6 +1082,7 @@ ext/Sys/Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file
 ext/Sys/Syslog/fallback/const-xs.inc	Sys::Syslog constants fallback file
 ext/Sys/Syslog/Makefile.PL	Sys::Syslog extension makefile writer
 ext/Sys/Syslog/README		README for Sys::Syslog
+ext/Sys/Syslog/README.win32	README for Sys::Syslog on Windows
 ext/Sys/Syslog/Syslog.pm	Sys::Syslog extension Perl module
 ext/Sys/Syslog/Syslog.xs	Sys::Syslog extension external subroutines
 ext/Sys/Syslog/t/00-load.t	test for Sys::Syslog

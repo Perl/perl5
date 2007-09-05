@@ -100,13 +100,13 @@ if (-c "/dev/conslog" and -w _) {
     # permissions.
     $_PATH_LOG = "/dev/conslog";
 }
-elsif (-S "/dev/log" and -w _) {
-    # Most unixes have a unix domain socket /dev/log.
-    $_PATH_LOG = "/dev/log";
-}
 elsif (-S "/var/run/syslog" and -w _) {
     # Mac OS X puts it at a different path.
     $_PATH_LOG = "/var/run/syslog";
+}
+elsif (-S "/dev/log" and -w _) {
+    # Most unixes have a unix domain socket /dev/log.
+    $_PATH_LOG = "/dev/log";
 }
 else {
     $_PATH_LOG = "";
