@@ -60,8 +60,8 @@ ok($long, Win32::GetLongPathName($home)."\\$dir");
 
 # We can Win32::SetCwd() into the Unicode directory
 ok(Win32::SetCwd($dir));
-ok(Win32::GetLongPathName(Win32::GetCwd()), $long);
 
+my $w32dir = Win32::GetCwd();
 # cwd() also returns a usable ANSI directory name
 my $subdir = cwd();
 
@@ -69,6 +69,8 @@ my $subdir = cwd();
 # in @INC continue to work
 ok(chdir($home));
 ok(Win32::GetCwd(), $home);
+
+ok(Win32::GetLongPathName($w32dir), $long);
 
 # cwd() on Cygwin returns a mapped path that we need to translate
 # back to a Windows path. Invoking `cygpath` on $subdir doesn't work.
