@@ -77,7 +77,7 @@ if ($threads::shared::VERSION && ! exists($ENV{'PERL_CORE'})) {
 array(24, [], 'Thing');
 hash(24, [], 'Thing');
 
-import threads::shared;
+threads::shared->import();
 
 share(\@array);
 array(24, 42, 'Thing');

@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.12';
+our $VERSION = '1.13';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -73,7 +73,7 @@ threads::shared - Perl extension for sharing data structures between threads
 
 =head1 VERSION
 
-This document describes threads::shared version 1.12
+This document describes threads::shared version 1.13
 
 =head1 SYNOPSIS
 
@@ -108,7 +108,7 @@ This document describes threads::shared version 1.12
 
 By default, variables are private to each thread, and each newly created
 thread gets a private copy of each existing variable.  This module allows you
-to share variables across different threads (and pseudoforks on Win32).  It is
+to share variables across different threads (and pseudo-forks on Win32).  It is
 used together with the L<threads> module.
 
 =head1 EXPORT
@@ -205,11 +205,11 @@ the variable, and blocks until another thread does a C<cond_signal> or
 C<cond_broadcast> for that same locked variable.  The variable that
 C<cond_wait> blocked on is relocked after the C<cond_wait> is satisfied.  If
 there are multiple threads C<cond_wait>ing on the same variable, all but one
-will reblock waiting to reacquire the lock on the variable. (So if you're only
+will re-block waiting to reacquire the lock on the variable. (So if you're only
 using C<cond_wait> for synchronisation, give up the lock as soon as possible).
 The two actions of unlocking the variable and entering the blocked wait state
 are atomic, the two actions of exiting from the blocked wait state and
-relocking the variable are not.
+re-locking the variable are not.
 
 In its second form, C<cond_wait> takes a shared, B<unlocked> variable followed
 by a shared, B<locked> variable.  The second variable is unlocked and thread
@@ -368,7 +368,7 @@ L<threads::shared> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads-shared>
 
 Annotated POD for L<threads::shared>:
-L<http://annocpan.org/~JDHEDDEN/threads-shared-1.12/shared.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-shared-1.13/shared.pm>
 
 Source repository:
 L<http://code.google.com/p/threads-shared/>

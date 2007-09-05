@@ -1328,7 +1328,10 @@ _refcnt(SV *ref)
             ref = SvRV(ref);
         ssv = Perl_sharedsv_find(aTHX_ ref);
         if (! ssv) {
-            Perl_warn(aTHX_ "%" SVf " is not shared", ST(0));
+            if (ckWARN(WARN_THREADS)) {
+                Perl_warner(aTHX_ packWARN(WARN_THREADS),
+                                "%" SVf " is not shared", ST(0));
+            }
             XSRETURN_UNDEF;
         }
         ST(0) = sv_2mortal(newSViv(SvREFCNT(ssv)));
