@@ -171,7 +171,7 @@ package main;
 
 # bugid #24165
 
-run_perl(prog => 'use threads 1.64;' .
+run_perl(prog => 'use threads 1.65;' .
                  'sub a{threads->create(shift)} $t = a sub{};' .
                  '$t->tid; $t->join; $t->tid',
          nolib => ($ENV{PERL_CORE}) ? 0 : 1,
