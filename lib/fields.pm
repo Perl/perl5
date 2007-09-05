@@ -11,7 +11,7 @@ unless( eval q{require warnings::register; warnings::register->import; 1} ) {
 }
 use vars qw(%attr $VERSION);
 
-$VERSION = '2.12';
+$VERSION = '2.13';
 
 # constant.pm is slow
 sub PUBLIC     () { 2**0  }
@@ -124,9 +124,17 @@ if ($] < 5.009) {
     my $self = bless {}, $class;
 
     # The lock_keys() prototype won't work since we require Hash::Util :(
-    &Hash::Util::lock_keys(\%$self, keys %{$class.'::FIELDS'});
+    &Hash::Util::lock_keys(\%$self, _accessible_keys($class));
     return $self;
   }
+}
+
+sub _accessible_keys {
+    my ($class) = @_;
+    return (
+        keys %{$class.'::FIELDS'},
+        map(_accessible_keys($_), @{$class.'::ISA'}),
+    );
 }
 
 sub phash {
