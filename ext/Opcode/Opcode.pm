@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.09";
+$VERSION = "1.10";
 
 use Carp;
 use Exporter ();
@@ -394,6 +394,8 @@ These are a hotchpotch of opcodes still waiting to be considered
     gvsv gv gelem
 
     padsv padav padhv padany
+
+    once
 
     rv2gv refgen srefgen ref
 
