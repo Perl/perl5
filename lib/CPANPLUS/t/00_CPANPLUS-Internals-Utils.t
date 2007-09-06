@@ -73,7 +73,7 @@ rmdir $Dir  if -d $Dir;
 ### _perl_version tests ###
 {   my $version = $Class->_perl_version( perl => $^X );
     ok( $version,                       "Perl version found" );
-    like( $version, qr/\d.\d.\d/,       "   Looks like a proper version" );
+    like( $version, qr/\d.\d+.\d+/,     "   Looks like a proper version" );
 }    
         
 ### _version_to_number tests ###
