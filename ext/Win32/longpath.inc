@@ -30,7 +30,7 @@ LONGPATH(CHAR_T *path)
     /* drive prefix */
     if (isALPHA(path[0]) && path[1] == ':') {
 	start = path + 2;
-	*tmpstart++ = path[0];
+	*tmpstart++ = toupper(path[0]);
 	*tmpstart++ = ':';
     }
     /* UNC prefix */
