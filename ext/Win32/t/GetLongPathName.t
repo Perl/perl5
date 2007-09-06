@@ -37,7 +37,10 @@ if ($drive) {
     push @paths, $ENV{SystemRoot} if $ENV{SystemRoot};
 }
 my %expect;
-@expect{@paths} = map { my $x = $_; $x =~ s,(.[/\\])[/\\]+,$1,g; $x } @paths;
+@expect{@paths} = map { my $x = $_;
+                        $x =~ s,(.[/\\])[/\\]+,$1,g;
+                        $x =~ s,^c,C,;
+                        $x } @paths;
 
 plan tests => scalar(@paths);
 
