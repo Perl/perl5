@@ -405,5 +405,6 @@ PERL_PPDEF(Perl_pp_egrent)
 PERL_PPDEF(Perl_pp_getlogin)
 PERL_PPDEF(Perl_pp_syscall)
 PERL_PPDEF(Perl_pp_lock)
+PERL_PPDEF(Perl_pp_once)
 
 /* ex: set ro: */

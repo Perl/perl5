@@ -1047,4 +1047,8 @@ syscall		syscall			ck_fun		imst@	S L
 # For multi-threading
 lock		lock			ck_rfun		s%	R
 
+# For state support
+
+once		once			ck_null		|	
+
 custom		unknown custom operator		ck_null		0

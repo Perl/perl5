@@ -375,11 +375,12 @@ typedef enum opcode {
 	OP_GETLOGIN,	/* 357 */
 	OP_SYSCALL,	/* 358 */
 	OP_LOCK,	/* 359 */
-	OP_CUSTOM,	/* 360 */
+	OP_ONCE,	/* 360 */
+	OP_CUSTOM,	/* 361 */
 	OP_max		
 } opcode;
 
-#define MAXO 361
+#define MAXO 362
 #define OP_phoney_INPUT_ONLY -1
 #define OP_phoney_OUTPUT_ONLY -2
 

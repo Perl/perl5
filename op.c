@@ -6986,6 +6986,29 @@ Perl_ck_sassign(pTHX_ OP *o)
 	    return kid;
 	}
     }
+    if (kid->op_sibling) {
+	OP *kkid = kid->op_sibling;
+	if (kkid->op_type == OP_PADSV
+		&& (kkid->op_private & OPpLVAL_INTRO)
+		&& SvPAD_STATE(*av_fetch(PL_comppad_name, kkid->op_targ, FALSE))) {
+	    const PADOFFSET target = kkid->op_targ;
+	    OP *const other = newOP(OP_PADSV,
+				    kkid->op_flags
+				    | ((kkid->op_private & ~OPpLVAL_INTRO) << 8));
+	    OP *const first = newOP(OP_NULL, 0);
+	    OP *const nullop = newCONDOP(0, first, o, other);
+	    OP *const condop = first->op_next;
+	    /* hijacking PADSTALE for uninitialized state variables */
+	    SvPADSTALE_on(PAD_SVl(target));
+
+	    condop->op_type = OP_ONCE;
+	    condop->op_ppaddr = PL_ppaddr[OP_ONCE];
+	    condop->op_targ = target;
+	    other->op_targ = target;
+
+	    return nullop;
+	}
+    }
     return o;
 }
 
@@ -7984,6 +8007,7 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_DORASSIGN:
 	case OP_COND_EXPR:
 	case OP_RANGE:
+	case OP_ONCE:
 	    while (cLOGOP->op_other->op_type == OP_NULL)
 		cLOGOP->op_other = cLOGOP->op_other->op_next;
 	    peep(cLOGOP->op_other); /* Recursive calls are not replaced by fptr calls */

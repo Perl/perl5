@@ -10,7 +10,7 @@ BEGIN {
 use strict;
 use feature "state";
 
-plan tests => 37;
+plan tests => 38;
 
 ok( ! defined state $uninit, q(state vars are undef by default) );
 
@@ -18,7 +18,7 @@ ok( ! defined state $uninit, q(state vars are undef by default) );
 
 sub stateful {
     state $x;
-    state $y //= 1;
+    state $y = 1;
     my $z = 2;
     state ($t) //= 3;
     return ($x++, $y++, $z++, $t++);
@@ -45,9 +45,9 @@ is( $t, 5, 'incremented state var, list syntax' );
 # in a nested block
 
 sub nesting {
-    state $foo //= 10;
+    state $foo = 10;
     my $t;
-    { state $bar //= 12; $t = ++$bar }
+    { state $bar = 12; $t = ++$bar }
     ++$foo;
     return ($foo, $t);
 }
@@ -83,7 +83,7 @@ is( $f2->(), 2, 'generator 2 once more' );
     sub TIESCALAR {bless {}};
     sub FETCH { ++$fetchcount; 18 };
     tie my $y, "countfetches";
-    sub foo { state $x //= $y; $x++ }
+    sub foo { state $x = $y; $x++ }
     ::is( foo(), 18, "initialisation with tied variable" );
     ::is( foo(), 19, "increments correctly" );
     ::is( foo(), 20, "increments correctly, twice" );
@@ -94,7 +94,7 @@ is( $f2->(), 2, 'generator 2 once more' );
 
 sub gen_cashier {
     my $amount = shift;
-    state $cash_in_store;
+    state $cash_in_store = 0;
     return {
 	add => sub { $cash_in_store += $amount },
 	del => sub { $cash_in_store -= $amount },
@@ -113,7 +113,7 @@ sub stateless {
     ++$reinitme;
 }
 is( stateless(), 43, 'stateless function, first time' );
-is( stateless(), 43, 'stateless function, second time' );
+is( stateless(), 44, 'stateless function, second time' );
 
 # array state vars
 
@@ -157,3 +157,4 @@ noseworth(2);
 sub pugnax { my $x = state $y = 42; $y++; $x; }
 
 is( pugnax(), 42, 'scalar state assignment return value' );
+is( pugnax(), 43, 'scalar state assignment return value' );

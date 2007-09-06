@@ -4932,6 +4932,19 @@ PP(pp_split)
     RETURN;
 }
 
+PP(pp_once)
+{
+    dSP;
+    SV *const sv = PAD_SVl(PL_op->op_targ);
+
+    if (SvPADSTALE(sv)) {
+	/* First time. */
+	SvPADSTALE_off(sv);
+	RETURNOP(cLOGOP->op_other);
+    }
+    RETURNOP(cLOGOP->op_next);
+}
+
 PP(pp_lock)
 {
     dVAR;

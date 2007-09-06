@@ -404,5 +404,6 @@ Perl_pp_egrent
 Perl_pp_getlogin
 Perl_pp_syscall
 Perl_pp_lock
+Perl_pp_once
 
 # ex: set ro:
