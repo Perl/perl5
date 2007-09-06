@@ -658,9 +658,7 @@ if( $opt_b ){
 	    $sub ? sprintf("%d.%03d%02d",$maj,$min,$sub) :
 	           sprintf("%d.%03d",    $maj,$min);
     } else {
-        $compat_version =
-	    $sub ? sprintf("%d.%03d%03d",$maj,$min,$sub) :
-		   sprintf("%d.%03d",    $maj,$min);
+        $compat_version = sprintf("%d.%03d%03d",$maj,$min,$sub);
     }
 } else {
     my ($maj,$min,$sub) = $compat_version =~ /(\d+)\.(\d\d\d)(\d*)/;
