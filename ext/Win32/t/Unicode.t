@@ -75,8 +75,7 @@ ok(Win32::GetLongPathName($w32dir), $long);
 # cwd() on Cygwin returns a mapped path that we need to translate
 # back to a Windows path. Invoking `cygpath` on $subdir doesn't work.
 if ($^O eq "cygwin") {
-    chomp(my $cygpath = `cygpath -w "$cwd"`);
-    $subdir =~ s,\Q$cwd\E,$cygpath,;
+    $subdir = Cygwin::posix_to_win_path($subdir, 1);
 }
 $subdir =~ s,/,\\,g;
 ok(Win32::GetLongPathName($subdir), $long);
