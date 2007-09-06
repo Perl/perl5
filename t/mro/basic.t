@@ -160,10 +160,7 @@ is(eval { MRO_N->testfunc() }, 123);
     ok(eq_array(mro::get_linear_isa('ISACLEAR2'),[qw/ISACLEAR2 YY ZZ/]));
     (@ISACLEAR1::ISA, @ISACLEAR2::ISA) = ();
 
-    {
-        local our $TODO = 1;
-        ok(eq_array(mro::get_linear_isa('ISACLEAR1'),[qw/ISACLEAR1/]));
-    }
+    ok(eq_array(mro::get_linear_isa('ISACLEAR1'),[qw/ISACLEAR1/]));
     ok(eq_array(mro::get_linear_isa('ISACLEAR2'),[qw/ISACLEAR2/]));
 }
 

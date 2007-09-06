@@ -1005,6 +1005,8 @@ PP(pp_aassign)
 		}
 		TAINT_NOT;
 	    }
+	    if (PL_delaymagic & DM_ARRAY)
+		SvSETMAGIC((SV*)ary);
 	    break;
 	case SVt_PVHV: {				/* normal hash */
 		SV *tmpstr;
@@ -1122,9 +1124,6 @@ PP(pp_aassign)
 	    PL_egid = PerlProc_getegid();
 	}
 	PL_tainting |= (PL_uid && (PL_euid != PL_uid || PL_egid != PL_gid));
-
-	if (PL_delaymagic & DM_ARRAY && SvMAGICAL((SV*)ary))
-	    mg_set((SV*)ary);
     }
     PL_delaymagic = 0;
 
