@@ -32,7 +32,7 @@ INST_TOP	= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-#INST_VER	= \5.9.5
+#INST_VER	= \5.10.0
 
 #
 # Comment this out if you DON'T want your perl installation to have

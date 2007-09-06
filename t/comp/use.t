@@ -195,6 +195,11 @@ foreach my $index (-3..+3) {
 	    if ($index < 0) {
 		# Jiggle one of the parts down
 		--$parts[-$index - 1];
+		if ($parts[-$index - 1] < 0) {
+		    # perl's version number ends with '.0'
+		    $parts[-$index - 1] = 0;
+		    $parts[-$index - 2] -= 2;
+		}
 	    } else {
 		# Jiggle one of the parts up
 		++$parts[$index - 1];
