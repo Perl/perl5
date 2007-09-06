@@ -8,9 +8,9 @@ BEGIN {
 }
 
 use strict;
-use feature "state";
+use feature ":5.10";
 
-plan tests => 38;
+plan tests => 108;
 
 ok( ! defined state $uninit, q(state vars are undef by default) );
 
@@ -158,3 +158,176 @@ sub pugnax { my $x = state $y = 42; $y++; $x; }
 
 is( pugnax(), 42, 'scalar state assignment return value' );
 is( pugnax(), 43, 'scalar state assignment return value' );
+
+
+#
+# Test various blocks.
+#
+foreach my $x (1 .. 3) {
+    state $y = $x;
+    is ($y, 1, "foreach $x");
+}
+
+for (my $x = 1; $x < 4; $x ++) {
+    state $y = $x;
+    is ($y, 1, "for $x");
+}
+
+while ($x < 4) {
+    state $y = $x;
+    is ($y, 1, "while $x");
+    $x ++;
+}
+
+$x = 1;
+until ($x >= 4) {
+    state $y = $x;
+    is ($y, 1, "until $x");
+    $x ++;
+}
+
+$x = 0;
+$y = 0;
+{
+    state $z = $x;
+    $z ++;
+    $y ++;
+    is ($z, $y, "bare block $y");
+    redo if $y < 3
+}
+
+
+#
+# Check state $_
+#
+my @stones = qw [fred wilma barny betty];
+my $first  = $stones [0];
+my $First  = ucfirst $first;
+$_ = "bambam";
+foreach my $flint (@stones) {
+    state $_ = $flint;
+    is $_, $first, 'state $_';
+    ok /$first/, '/.../ binds to $_';
+    is ucfirst, $First, '$_ default argument';
+}
+is $_, "bambam", '$_ is still there';
+
+#
+# Goto.
+#
+my @simpsons = qw [Homer Marge Bart Lisa Maggie];
+again:
+    my $next = shift @simpsons;
+    state $simpson = $next;
+    is $simpson, 'Homer', 'goto 1';
+    goto again if @simpsons;
+
+goto Elvis;
+my $vi;
+{
+           state $calvin = ++ $vi;
+    Elvis: state $vile   = ++ $vi;
+    redo unless defined $calvin;
+    is $calvin, 2, "goto 2";
+    is $vile,   1, "goto 3";
+    is $vi,     2, "goto 4";
+}
+my @presidents = qw [Taylor Garfield Ford Arthur Monroe];
+sub president {
+    my $next = shift @presidents;
+    state $president = $next;
+    goto  &president if @presidents;
+    $president;
+}
+my $president_answer = $presidents [0];
+is president, $president_answer, '&goto';
+
+my @flowers = qw [Bluebonnet Goldenrod Hawthorn Peony];
+foreach my $f (@flowers) {
+    goto state $flower = $f;
+    ok 0, 'computed goto 0'; next;
+    Bluebonnet: ok 1, 'computed goto 1'; next;
+    Goldenrod:  ok 0, 'computed goto 2'; next;
+    Hawthorn:   ok 0, 'computed goto 3'; next;
+    Peony:      ok 0, 'computed goto 4'; next;
+    ok 0, 'computed goto 5'; next;
+}
+
+#
+# map/grep
+#
+my @apollo  = qw [Eagle Antares Odyssey Aquarius];
+my @result1 = map  {state $x = $_;}     @apollo;
+my @result2 = grep {state $x = /Eagle/} @apollo;
+{
+    local $" = "";
+    is "@result1", $apollo [0] x @apollo, "map";
+    is "@result2", "@apollo", "grep";
+}
+
+#
+# Reference to state variable.
+#
+sub reference {\state $x}
+my $ref1 = reference;
+my $ref2 = reference;
+is $ref1, $ref2, "Reference to state variable";
+
+#
+# Pre/post increment.
+#
+foreach my $x (1 .. 3) {
+    ++ state $y;
+    state $z ++;
+    is $y, $x, "state pre increment";
+    is $z, $x, "state post increment";
+}
+
+
+#
+# Substr
+#
+my $tintin = "Tin-Tin";
+my @thunderbirds  = qw [Scott Virgel Alan Gordon John];
+my @thunderbirds2 = qw [xcott xxott xxxtt xxxxt xxxxx];
+foreach my $x (0 .. 4) {
+    state $c = \substr $tintin, $x, 1;
+    my $d = \substr ((state $tb = $thunderbirds [$x]), $x, 1);
+    $$c = "x";
+    $$d = "x";
+    is $tintin, "xin-Tin", "substr";
+    is $tb, $thunderbirds2 [$x], "substr";
+}
+
+
+#
+# List context reassigns, but scalar doesn't.
+#
+my @swords = qw [Stormbringer Szczerbiec Grimtooth Corrougue];
+foreach my $sword (@swords) {
+    state ($s1) = state $s2 = $sword;
+    is $s1, $swords [0], 'mixed context';
+    is $s2, $swords [0], 'mixed context';
+}
+
+
+#
+# Use with given.
+#
+my @spam = qw [spam ham bacon beans];
+foreach my $spam (@spam) {
+    given (state $spam = $spam) {
+        when ($spam [0]) {ok 1, "given"}
+        default          {ok 0, "given"}
+    }
+}
+
+#
+# Redefine.
+#
+{
+    state $x = "one";
+    no warnings;
+    state $x = "two";
+    is $x, "two", "masked"
+}
