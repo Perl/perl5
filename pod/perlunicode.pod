@@ -754,6 +754,10 @@ or more newline-separated lines.  Each line must be one of the following:
 
 =item *
 
+A single hexadecimal number denoting a Unicode code point to include.
+
+=item *
+
 Two hexadecimal numbers separated by horizontal whitespace (space or
 tabular characters) denoting a range of Unicode code points to include.
 
@@ -843,10 +847,6 @@ two (or more) classes.
 
 It's important to remember not to use "&" for the first set -- that
 would be intersecting with nothing (resulting in an empty set).
-
-A final note on the user-defined property tests: they will be used
-only if the scalar has been marked as having Unicode characters.
-Old byte-style strings will not be affected.
 
 =head2 User-Defined Case Mappings
 
