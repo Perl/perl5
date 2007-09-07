@@ -46,7 +46,7 @@ my $db1 = tie(%h1, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
 ok $db1, "tied to $db_file";
 
 eval { $db1->Filter_Push('encode' => 'blah') };
-like $@, qr/^Encoding 'blah' is not available/, "push an illigal filter" ;
+like $@, qr/^Encoding 'blah' is not available/, "push an illegal filter" ;
 
 eval { $db1->Filter_Push('encode') };
 is $@, '', "push an 'encode' filter (default to utf-8)" ;
