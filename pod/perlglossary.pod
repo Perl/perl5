@@ -880,8 +880,8 @@ included, which have now fallen out of common use.  It has been suggested
 that these modules should be removed, since the distribution became rather
 large, and the common criterion for new module additions is now limited to
 modules that help to build, test, and extend perl itself.  Furthermore,
-the CPAN (which didn't exist by the time of Perl 5.0) can become a new
-home dropped modules. Dropping modules is currently not an option, but
+the CPAN (which didn't exist at the time of Perl 5.0) can become the new
+home of dropped modules. Dropping modules is currently not an option, but
 further developments may clear the last barriers.
 
 =item dweomer

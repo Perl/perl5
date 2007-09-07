@@ -1224,9 +1224,9 @@ obviously mutually exclusive with bigendian.
 
 =item B<-src>
 
-With this option, the rendering will print the 1st line of source code
-that generates the following sequence of opcodes that comprise the
-statement.  For example:
+With this option, the rendering of each statement (starting with the
+nextstate OP) will be preceded by the 1st line of source code that
+generates it.  For example:
 
     1  <0> enter
     # 1: my $i;
@@ -1246,6 +1246,7 @@ statement.  For example:
     b      <$> const[PV "line "] s
     c      <@> print vK
     # 5:     print "$i\n";
+    ...
 
 =back
 
