@@ -80,7 +80,6 @@ sub _prefixify {
     $self->log_verbose("  prefixify $path from $sprefix to $rprefix\n");
 
     # Translate $(PERLPREFIX) to a real path.
-    $rprefix = $self->eliminate_macros($rprefix);
     $rprefix = VMS::Filespec::vmspath($rprefix) if $rprefix;
     $sprefix = VMS::Filespec::vmspath($sprefix) if $sprefix;
 
@@ -251,16 +250,24 @@ sub man3page_name {
   return $mpname;
 }
 
-=item eliminate_macros
+=item expand_test_dir
 
-Since make-style macros containing directory names can't just be pasted together 
-without expansion on VMS, we traditionally expand those macros much earlier than
-on other platforms.  Even though Module::Build isn't using make (or MMS or MMK),
-we depend on some bits that still refer to this as if it's a method that belongs 
-to $self, so we just put in a noop version here.
+Inherit the standard version but relativize the paths as the native glob() doesn't
+do that for us.
 
-sub eliminate_macros {
-  return(@_);
+=cut
+
+sub expand_test_dir {
+  my ($self, $dir) = @_;
+
+  my @reldirs = $self->SUPER::expand_test_dir( $dir );
+
+  for my $eachdir (@reldirs) {
+    my ($v,$d,$f) = File::Spec->splitpath( $eachdir );
+    my $reldir = File::Spec->abs2rel( File::Spec->catpath( $v, $d, '' ) );
+    $eachdir = File::Spec->catfile( $reldir, $f );
+  }
+  return @reldirs;
 }
 
 =back
