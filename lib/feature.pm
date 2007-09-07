@@ -1,6 +1,6 @@
 package feature;
 
-our $VERSION = '1.10';
+our $VERSION = '1.11';
 
 # (feature name) => (internal name, used in %^H)
 my %feature = (
@@ -13,10 +13,9 @@ my %feature = (
 my %feature_bundle = (
     "5.10.0" => [qw(switch say err state)],
 );
+
 # latest version here
-# keep it harcoded until we actually bump the version number to 5.10
-$feature_bundle{"5.10"} = $feature_bundle{"5.10.0"};
-#$feature_bundle{"5.10"} = $feature_bundle{sprintf("%vd",$^V)};
+$feature_bundle{"5.10"} = $feature_bundle{sprintf("%vd",$^V)};
 
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10.0"};
 
