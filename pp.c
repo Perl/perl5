@@ -416,7 +416,7 @@ PP(pp_prototype)
 		char str[ MAX_ARGS_OP * 2 + 2 ]; /* One ';', one '\0' */
 
 		if (code == -KEY_chop || code == -KEY_chomp
-			|| code == -KEY_exec || code == -KEY_system || code == -KEY_err)
+			|| code == -KEY_exec || code == -KEY_system)
 		    goto set;
 		if (code == -KEY_mkdir) {
 		    ret = sv_2mortal(newSVpvs("_;$"));

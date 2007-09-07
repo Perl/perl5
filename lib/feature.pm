@@ -6,12 +6,11 @@ our $VERSION = '1.11';
 my %feature = (
     switch => 'feature_switch',
     say    => "feature_say",
-    err    => "feature_err",
     state  => "feature_state",
 );
 
 my %feature_bundle = (
-    "5.10.0" => [qw(switch say err state)],
+    "5.10.0" => [qw(switch say state)],
 );
 
 # latest version here
@@ -88,14 +87,6 @@ C<say> function.
 
 See L<perlfunc/say> for details.
 
-=head2 the 'err' feature
-
-C<use feature 'err'> tells the compiler to enable the C<err>
-operator.
-
-C<err> is a low-precedence variant of the C<//> operator:
-see C<perlop> for details.
-
 =head2 the 'state' feature
 
 C<use feature 'state'> tells the compiler to enable C<state>
@@ -109,7 +100,7 @@ It's possible to load a whole slew of features in one go, using
 a I<feature bundle>. The name of a feature bundle is prefixed with
 a colon, to distinguish it from an actual feature. At present, the
 only feature bundles are C<use feature ":5.10"> and C<use feature ":5.10.0">,
-which both are equivalent to C<use feature qw(switch say err state)>.
+which both are equivalent to C<use feature qw(switch say state)>.
 
 In the forthcoming 5.10.X perl releases, C<use feature ":5.10"> will be
 equivalent to the latest C<use feature ":5.10.X">.

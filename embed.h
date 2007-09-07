@@ -2175,6 +2175,7 @@
 #define pp_not			Perl_pp_not
 #define pp_null			Perl_pp_null
 #define pp_oct			Perl_pp_oct
+#define pp_once			Perl_pp_once
 #define pp_open			Perl_pp_open
 #define pp_open_dir		Perl_pp_open_dir
 #define pp_or			Perl_pp_or
@@ -4470,6 +4471,7 @@
 #define pp_not()		Perl_pp_not(aTHX)
 #define pp_null()		Perl_pp_null(aTHX)
 #define pp_oct()		Perl_pp_oct(aTHX)
+#define pp_once()		Perl_pp_once(aTHX)
 #define pp_open()		Perl_pp_open(aTHX)
 #define pp_open_dir()		Perl_pp_open_dir(aTHX)
 #define pp_or()			Perl_pp_or(aTHX)

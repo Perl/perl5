@@ -53,7 +53,7 @@ values only, not array values.
     nonassoc	list operators (rightward)
     right	not
     left	and
-    left	or xor err
+    left	or xor
 
 In the following sections, these operators are covered in precedence order.
 
@@ -522,9 +522,9 @@ for selecting between two aggregates for assignment:
     @a = scalar(@b) || @c;	# really meant this
     @a = @b ? @b : @c;		# this works fine, though
 
-As more readable alternatives to C<&&>, C<//> and C<||> when used for
-control flow, Perl provides C<and>, C<err> and C<or> operators (see below).
-The short-circuit behavior is identical.  The precedence of "and", "err"
+As more readable alternatives to C<&&> and C<||> when used for
+control flow, Perl provides the C<and> and C<or> operators (see below).
+The short-circuit behavior is identical.  The precedence of "and"
 and "or" is much lower, however, so that you can safely use them after a
 list operator without the need for parentheses:
 
@@ -838,9 +838,9 @@ precedence.  This means that it short-circuits: i.e., the right
 expression is evaluated only if the left expression is true.
 
 =head2 Logical or, Defined or, and Exclusive Or
-X<operator, logical, or> X<operator, logical, xor> X<operator, logical, err>
+X<operator, logical, or> X<operator, logical, xor>
 X<operator, logical, defined or> X<operator, logical, exclusive or>
-X<or> X<xor> X<err>
+X<or> X<xor>
 
 Binary "or" returns the logical disjunction of the two surrounding
 expressions.  It's equivalent to || except for the very low precedence.
@@ -864,13 +864,6 @@ takes higher precedence.
     @info = stat($file) or die;     # better, now @info gets its due
 
 Then again, you could always use parentheses.
-
-Binary "err" is equivalent to C<//>--it's just like binary "or", except it
-tests its left argument's definedness instead of its truth.  There are two
-ways to remember "err":  either because many functions return C<undef> on
-an B<err>or, or as a sort of correction:  C<$a = ($b err 'default')>. This
-keyword is only available when the 'err' feature is enabled: see
-L<feature> for more information.
 
 Binary "xor" returns the exclusive-OR of the two surrounding expressions.
 It cannot short circuit, of course.

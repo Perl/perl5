@@ -11,7 +11,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan(tests => 62);
+plan(tests => 61);
 
 use Config;
 
@@ -308,11 +308,6 @@ $r = runperl(
 );
 is( $r, "Hello, world!\n", "-E say" );
 
-
-$r = runperl(
-    switches	=> [ '-E', '"undef err say q(Hello, world!)"']
-);
-is( $r, "Hello, world!\n", "-E err" );
 
 $r = runperl(
     switches	=> [ '-E', '"undef ~~ undef and say q(Hello, world!)"']
