@@ -15,7 +15,7 @@ my @pos = qw(__DATA__ __END__ AUTOLOAD BEGIN CHECK DESTROY default defined
 my @neg = qw(__FILE__ __LINE__ __PACKAGE__ and abs alarm atan2 accept bless
 	    break bind binmode CORE cmp chr cos chop close chdir chomp chmod
 	    chown crypt chroot caller connect closedir continue die dump
-	    dbmopen dbmclose eq eof err exp exit exec each endgrent endpwent
+	    dbmopen dbmclose eq eof exp exit exec each endgrent endpwent
 	    endnetent endhostent endservent endprotoent fork fcntl flock fileno
 	    formline getppid getpgrp getpwent getpwnam getpwuid getpeername
 	    getprotoent getpriority getprotobyname getprotobynumber
@@ -43,8 +43,6 @@ my %feature_kw = (
 	break   => 'switch',
 
 	say     => 'say',
-
-	err	=> 'err',
 
 	state	=> 'state',
 	);
