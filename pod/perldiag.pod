@@ -606,13 +606,13 @@ quotas or other plumbing problems.
 =item Can't declare class for non-scalar %s in "%s"
 
 (F) Currently, only scalar variables can be declared with a specific
-class qualifier in a "my" or "our" declaration.  The semantics may be
+class qualifier in a "my", "our" or "state" declaration.  The semantics may be
 extended for other types of variables in future.
 
 =item Can't declare %s in "%s"
 
-(F) Only scalar, array, and hash variables may be declared as "my" or
-"our" variables.  They must have ordinary identifiers as names.
+(F) Only scalar, array, and hash variables may be declared as "my", "our" or
+"state" variables.  They must have ordinary identifiers as names.
 
 =item Can't do inplace edit: %s is not a regular file
 
@@ -848,7 +848,7 @@ extensions.
 =item Can't localize lexical variable %s
 
 (F) You used local on a variable name that was previously declared as a
-lexical variable using "my".  This is not allowed.  If you want to
+lexical variable using "my" or "state".  This is not allowed.  If you want to
 localize a package variable of the same name, qualify it with the
 package name.
 
@@ -1805,7 +1805,7 @@ L<perlfunc/getsockopt>.
 =item Global symbol "%s" requires explicit package name
 
 (F) You've said "use strict" or "use strict vars", which indicates 
-that all variables must either be lexically scoped (using "my"), 
+that all variables must either be lexically scoped (using "my" or "state"), 
 declared beforehand using "our", or explicitly qualified to say 
 which package the global variable is in (using "::").
 
@@ -2493,7 +2493,7 @@ See L<perlfunc/pack>.
 (F) Lexically scoped subroutines are not yet implemented.  Don't try
 that yet.
 
-=item "my" variable %s can't be in a package
+=item "%s" variable %s can't be in a package
 
 (F) Lexically scoped variables aren't in a package, so it doesn't make
 sense to try to declare one with a package qualifier on the front.  Use
@@ -2680,7 +2680,7 @@ package has restricted the set of allowed keys using the L<fields> pragma.
 
 =item No such class %s
 
-(F) You provided a class qualifier in a "my" or "our" declaration, but
+(F) You provided a class qualifier in a "my", "our" or "state" declaration, but
 this class doesn't exist at this point in your program.
 
 =item No such pipe open
@@ -3206,7 +3206,7 @@ when you meant
 
     my ($foo, $bar) = @_;
 
-Remember that "my", "our", and "local" bind tighter than comma.
+Remember that "my", "our", "local" and "state" bind tighter than comma.
 
 =item C<-p> destination: %s
 
@@ -4869,7 +4869,7 @@ known at compile time.  See L<perlre>.
 
 =item "%s" variable %s masks earlier declaration in same %s
 
-(W misc) A "my" or "our" variable has been redeclared in the current
+(W misc) A "my", "our" or "state" variable has been redeclared in the current
 scope or statement, effectively eliminating all access to the previous
 instance.  This is almost always a typographical error.  Note that the
 earlier variable will still exist until the end of the scope or until
