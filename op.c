@@ -3968,6 +3968,8 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
     }
 
     if (is_list_assignment(left)) {
+	static const char no_list_state[] = "Initialization of state variables"
+	    " in list context currently forbidden";
 	OP *curop;
 
 	PL_modcount = 0;
@@ -4059,6 +4061,54 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	    }
 	    if (curop != o)
 		o->op_private |= OPpASSIGN_COMMON;
+	}
+
+	if ((left->op_type == OP_LIST
+	     || (left->op_type == OP_NULL && left->op_targ == OP_LIST))) {
+	    OP* lop = ((LISTOP*)left)->op_first;
+	    while (lop) {
+		if (lop->op_type == OP_PADSV ||
+		    lop->op_type == OP_PADAV ||
+		    lop->op_type == OP_PADHV ||
+		    lop->op_type == OP_PADANY) {
+		    if (lop->op_private & OPpPAD_STATE) {
+			if (left->op_private & OPpLVAL_INTRO) {
+			    /* Each variable in state($a, $b, $c) = ... */
+			}
+			else {
+			    /* Each state variable in
+			       (state $a, my $b, our $c, $d, undef) = ... */
+			}
+			yyerror(no_list_state);
+		    } else {
+			/* Each my variable in
+			   (state $a, my $b, our $c, $d, undef) = ... */
+		    }
+		} else {
+		    /* Other ops in the list. undef may be interesting in
+		       (state $a, undef, state $c) */
+		}
+		lop = lop->op_sibling;
+	    }
+	}
+	else if (((left->op_private & (OPpLVAL_INTRO | OPpPAD_STATE))
+		    == (OPpLVAL_INTRO | OPpPAD_STATE))
+		&& (   left->op_type == OP_PADSV
+		    || left->op_type == OP_PADAV
+		    || left->op_type == OP_PADHV
+		    || left->op_type == OP_PADANY))
+	{
+	    /* All single variable list context state assignments, hence
+	       state ($a) = ...
+	       (state $a) = ...
+	       state @a = ...
+	       state (@a) = ...
+	       (state @a) = ...
+	       state %a = ...
+	       state (%a) = ...
+	       (state %a) = ...
+	    */
+	    yyerror(no_list_state);
 	}
 
 	if (right && right->op_type == OP_SPLIT && !PL_madskills) {

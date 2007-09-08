@@ -10,7 +10,7 @@ BEGIN {
 use strict;
 use feature ":5.10";
 
-plan tests => 108;
+plan tests => 117;
 
 ok( ! defined state $uninit, q(state vars are undef by default) );
 
@@ -301,17 +301,6 @@ foreach my $x (0 .. 4) {
 
 
 #
-# List context reassigns, but scalar doesn't.
-#
-my @swords = qw [Stormbringer Szczerbiec Grimtooth Corrougue];
-foreach my $sword (@swords) {
-    state ($s1) = state $s2 = $sword;
-    is $s1, $swords [0], 'mixed context';
-    is $s2, $swords [0], 'mixed context';
-}
-
-
-#
 # Use with given.
 #
 my @spam = qw [spam ham bacon beans];
@@ -331,3 +320,28 @@ foreach my $spam (@spam) {
     state $x = "two";
     is $x, "two", "masked"
 }
+
+foreach my $forbidden (<DATA>) {
+    chomp $forbidden;
+    no strict 'vars';
+    eval $forbidden;
+    like $@, qr/Initialization of state variables in list context currently forbidden/, "Currently forbidden: $forbidden";
+}
+__DATA__
+state ($a) = 1;
+(state $a) = 1;
+state @a = 1;
+state (@a) = 1;
+(state @a) = 1;
+state %a = ();
+state (%a) = ();
+(state %a) = ();
+state ($a, $b) = ();
+state ($a, @b) = ();
+(state $a, state $b) = ();
+(state $a, $b) = ();
+(state $a, my $b) = ();
+(state $a, state @b) = ();
+(state $a, local @b) = ();
+(state $a, undef, state $b) = ();
+state ($a, undef, $b) = ();

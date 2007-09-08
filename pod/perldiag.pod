@@ -1999,6 +1999,13 @@ either consume text or fail.
 The <-- HERE shows in the regular expression about where the problem was
 discovered.
 
+=item Initialization of state variables in list context currently forbidden
+
+(F) Currently the implementation of "state" only permits the initialization
+of scalar variables in scalar context. Re-write C<state ($a) = 42> as
+C<state $a = 42> to change from list to scalar context. Constructions such
+as C<state (@a) = foo()> will be supported in a future perl release.
+
 =item Insecure dependency in %s
 
 (F) You tried to do something that the tainting mechanism didn't like.
