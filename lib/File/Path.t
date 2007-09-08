@@ -2,7 +2,7 @@
 
 use strict;
 
-use Test::More tests => 84;
+use Test::More tests => 93;
 
 BEGIN {
     use_ok('File::Path');
@@ -154,6 +154,14 @@ is(scalar(@created), 1, "created directory (old style 3 mode undef)");
 is($created[0], $dir, "created directory (old style 3 mode undef) cross-check");
 is(rmtree($dir, 0, undef), 1, "removed directory 3 verbose undef");
 
+$dir = catdir($tmp_base,'G');
+$dir = VMS::Filespec::unixify($dir) if $^O eq 'VMS';
+
+@created = mkpath($dir, undef, 0200);
+is(scalar(@created), 1, "created write-only dir");
+is($created[0], $dir, "created write-only directory cross-check");
+is(rmtree($dir), 1, "removed write-only dir");
+
 # borderline new-style heuristics
 if (chdir $tmp_base) {
     pass("chdir to temp dir");
@@ -213,7 +221,7 @@ SKIP: {
 my $extra =  catdir(curdir(), qw(EXTRA 1 a));
 
 SKIP: {
-    skip "extra scenarios not set up, see eg/setup-extra-tests", 8
+    skip "extra scenarios not set up, see eg/setup-extra-tests", 9
         unless -e $extra;
 
     my ($list, $err);
@@ -229,15 +237,16 @@ SKIP: {
 
     $dir = catdir('EXTRA', '3', 'S');
     rmtree($dir, {error => \$error});
-    is( scalar(@$error), 2, 'two errors for an unreadable dir' );
+    is( scalar(@$error), 1, 'one error for an unreadable dir' );
 
     $dir = catdir('EXTRA', '3', 'T');
     rmtree($dir, {error => \$error});
+    is( scalar(@$error), 1, 'one error for an unreadable dir' );
 
     $dir = catdir( 'EXTRA', '4' );
     rmtree($dir,  {result => \$list, error => \$err} );
     is( @$list, 0, q{don't follow a symlinked dir} );
-    is( @$err,  1, q{one error when removing a symlink in r/o dir} );
+    is( @$err,  2, q{two errors when removing a symlink in r/o dir} );
     eval { ($file, $message) = each %{$err->[0]} };
     is( $file, $dir, 'symlink reported in error' );
 }
@@ -264,25 +273,33 @@ SKIP: {
         $dir = catdir('EXTRA', '3', 'U');
         stderr_like( 
             sub {rmtree($dir, {verbose => 0})},
-            qr{\bCan't read \Q$dir\E: },
-            q(rmtree can't read root dir)
+            qr{\Acannot make child directory read-write-exec for [^:]+: .* at \S+ line \d+},
+            q(rmtree can't chdir into root dir)
         );
 
         $dir = catdir('EXTRA', '3');
         stderr_like( 
             sub {rmtree($dir, {})},
-            qr{\ACan't remove directory \S+: .*? at \S+ line \d+\n},
+            qr{\Acannot make child directory read-write-exec for [^:]+: .* at (\S+) line (\d+)
+cannot make child directory read-write-exec for [^:]+: .* at \1 line \2
+cannot make child directory read-write-exec for [^:]+: .* at \1 line \2
+cannot remove directory for [^:]+: .* at \1 line \2},
             'rmtree with file owned by root'
         );
 
         stderr_like( 
             sub {rmtree('EXTRA', {})},
-            qr{\ACan't make directory EXTRA read\+writeable: .*? at \S+ line \d+
-(?:Can't remove directory EXTRA/\d: .*? at \S+ line \d+
-)+Can't unlink file [^:]+: .*? at \S+ line \d+
-Can't remove directory EXTRA: .*? at \S+ line \d+
-and can't restore permissions to \d+
- at \S+ line \d+},
+            qr{\Acannot remove directory for [^:]+: .* at (\S+) line (\d+)
+cannot remove directory for [^:]+: .* at \1 line \2
+cannot make child directory read-write-exec for [^:]+: .* at \1 line \2
+cannot make child directory read-write-exec for [^:]+: .* at \1 line \2
+cannot make child directory read-write-exec for [^:]+: .* at \1 line \2
+cannot remove directory for [^:]+: .* at \1 line \2
+cannot unlink file for [^:]+: .* at \1 line \2
+cannot restore permissions to \d+ for [^:]+: .* at \1 line \2
+cannot make child directory read-write-exec for [^:]+: .* at \1 line \2
+cannot remove directory for [^:]+: .* at \1 line \2
+cannot restore permissions to \d+ for [^:]+: .* at \1 line \2},
             'rmtree with insufficient privileges'
         );
     }
@@ -353,23 +370,23 @@ and can't restore permissions to \d+
 }
 
 SKIP: {
-    skip "extra scenarios not set up, see eg/setup-extra-tests", 6
+    skip "extra scenarios not set up, see eg/setup-extra-tests", 11
         unless -d catdir(qw(EXTRA 1));
 
     rmtree 'EXTRA', {safe => 0, error => \$error};
-    is( scalar(@$error), 7, 'seven deadly sins' );
+    is( scalar(@$error), 11, 'seven deadly sins' ); # well there used to be 7
 
     rmtree 'EXTRA', {safe => 1, error => \$error};
-    is( scalar(@$error), 4, 'safe is better' );
+    is( scalar(@$error), 9, 'safe is better' );
     for (@$error) {
         ($file, $message) = each %$_;
         if ($file =~  /[123]\z/) {
-            is(index($message, 'rmdir: '), 0, "failed to remove $file with rmdir")
+            is(index($message, 'cannot remove directory: '), 0, "failed to remove $file with rmdir")
                 or diag($message);
         }
         else {
-            is(index($message, 'unlink: '), 0, "failed to remove $file with unlink")
-                or diag($message);
+            like($message, qr(\Acannot (?:restore permissions to \d+|chdir to child|unlink file): ), "failed to remove $file with unlink")
+                or diag($message)
         }
     }
 }
