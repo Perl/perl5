@@ -363,10 +363,12 @@ Perl_allocmy(pTHX_ const char *const name)
     {
 	/* name[2] is true if strlen(name) > 2  */
 	if (!isPRINT(name[1]) || strchr("\t\n\r\f", name[1])) {
-	    yyerror(Perl_form(aTHX_ "Can't use global %c^%c%s in \"my\"",
-			      name[0], toCTRL(name[1]), name + 2));
+	    yyerror(Perl_form(aTHX_ "Can't use global %c^%c%s in \"%s\"",
+			      name[0], toCTRL(name[1]), name + 2,
+			      PL_parser->in_my == KEY_state ? "state" : "my"));
 	} else {
-	    yyerror(Perl_form(aTHX_ "Can't use global %s in \"my\"",name));
+	    yyerror(Perl_form(aTHX_ "Can't use global %s in \"%s\"",name,
+			      PL_parser->in_my == KEY_state ? "state" : "my"));
 	}
     }
 

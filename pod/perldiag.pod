@@ -1133,7 +1133,7 @@ allowed.  See L<perlfunc/pack>.
 (F) Only a simple scalar variable may be used as a loop variable on a
 foreach.
 
-=item Can't use global %s in "my"
+=item Can't use global %s in "%s"
 
 (F) You tried to declare a magical variable as a lexical variable.  This
 is not allowed, because the magic can be tied to only one location
