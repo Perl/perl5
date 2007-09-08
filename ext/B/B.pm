@@ -7,7 +7,7 @@
 #
 package B;
 
-our $VERSION = '1.16';
+our $VERSION = '1.17';
 
 use XSLoader ();
 require Exporter;
@@ -39,7 +39,8 @@ use strict;
 @B::PVMG::ISA = 'B::PVNV';
 # Change in the inheritance hierarchy post 5.9.0
 @B::PVLV::ISA = $] > 5.009 ? 'B::GV' : 'B::PVMG';
-@B::BM::ISA = 'B::PVMG';
+# BM is eliminated post 5.9.5, but effectively is a specialisation of GV now.
+@B::BM::ISA = $] > 5.009005 ? 'B::GV' : 'B::PVMG';
 @B::AV::ISA = 'B::PVMG';
 @B::GV::ISA = 'B::PVMG';
 @B::HV::ISA = 'B::PVMG';
@@ -570,20 +571,20 @@ give incomprehensible results, or worse.
 
 =head2 SV-RELATED CLASSES
 
-B::IV, B::NV, B::RV, B::PV, B::PVIV, B::PVNV, B::PVMG, B::BM, B::PVLV,
-B::AV, B::HV, B::CV, B::GV, B::FM, B::IO. These classes correspond in
-the obvious way to the underlying C structures of similar names. The
-inheritance hierarchy mimics the underlying C "inheritance". For 5.9.1
+B::IV, B::NV, B::RV, B::PV, B::PVIV, B::PVNV, B::PVMG, B::BM (5.9.5 and
+earlier), B::PVLV, B::AV, B::HV, B::CV, B::GV, B::FM, B::IO. These classes
+correspond in the obvious way to the underlying C structures of similar names.
+The inheritance hierarchy mimics the underlying C "inheritance". For 5.9.5
 and later this is:
 
-                             B::SV
-                               |
-                +--------------+----------+------------+
-                |              |          |            |
-              B::PV          B::IV      B::NV        B::RV
-                   \         /          /
-                    \       /          /
-                     B::PVIV          /
+                           B::SV
+                             |
+                +------------+------------+------------+
+                |            |            |            |
+              B::PV        B::IV        B::NV        B::RV
+                  \         /           /
+                   \       /           /
+                    B::PVIV           /
                          \           /
                           \         /
                            \       /
@@ -592,26 +593,28 @@ and later this is:
                                |
                             B::PVMG
                                |
-                    +-----+----+------+-----+-----+
-                    |     |    |      |     |     |
-                  B::BM B::AV B::GV B::HV B::CV B::IO
-                               |            |
-                            B::PVLV         |
-                                          B::FM
+                   +-----+-----+-----+-----+
+                   |     |     |     |     |
+                 B::AV B::GV B::HV B::CV B::IO
+                         |           |
+                         |           |
+                      B::PVLV      B::FM
 
 
-For 5.9.0 and earlier, PVLV is a direct subclass of PVMG, so the base
-of this diagram is
+For 5.9.0 and earlier, PVLV is a direct subclass of PVMG, and BM is still
+present as a distinct type, so the base of this diagram is
 
-                           |
-                        B::PVMG
-                           |
-         +------+-----+----+------+-----+-----+
-         |      |     |    |      |     |     |
-      B::PVLV B::BM B::AV B::GV B::HV B::CV B::IO
-                                        |
-                                        |
-                                      B::FM
+
+                               |
+                               |
+                            B::PVMG
+                               |
+            +------+-----+-----+-----+-----+-----+
+            |      |     |     |     |     |     |
+         B::PVLV B::BM B::AV B::GV B::HV B::CV B::IO
+                                           |
+                                           |
+                                         B::FM
 
 
 Access methods correspond to the underlying C macros for field access,
