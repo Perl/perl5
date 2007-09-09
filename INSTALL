@@ -19,9 +19,8 @@ tested in development releases and only if they prove themselves to be
 worthy will they be migrated to the maintenance releases.
 
 The basic steps to build and install perl5 on a Unix system with all
-the defaults are:
+the defaults are to run, from a freshly unpacked source tree:
 
-	rm -f config.sh Policy.sh
 	sh Configure -de
 	make
 	make test
@@ -65,9 +64,8 @@ proceeding.
 In addition to this file, check if there is a README file specific to
 your operating system, since it may provide additional or different
 instructions for building Perl.  If there is a hint file for your
-system (in the hints/ directory) you should also read that hint file
-for even more information.  (Unixware users should use the svr4.sh or
-the svr5.sh hint file.)
+system (in the hints/ directory) you might also want to read it
+for even more information.
 
 For additional information about porting Perl, see the section on
 L<"Porting information"> below, and look at the files in the Porting/
@@ -89,9 +87,8 @@ using an earlier version of Perl, you will need to rebuild and reinstall
 those extensions.
 
 Pure perl modules without XS or C code should continue to work fine
-without reinstallation.  See the discussions below on
-L<"Coexistence with earlier versions of perl5"> and
-L<"Upgrading from 5.005 or 5.6 to 5.8.0"> for more details.
+without reinstallation.  See the discussion below on
+L<"Coexistence with earlier versions of perl5"> for more details.
 
 The standard extensions supplied with Perl will be handled automatically.
 
@@ -101,54 +98,6 @@ pod/perl5100delta.pod for a description of what's changed.  See your
 installed copy of the perllocal.pod file for a (possibly incomplete)
 list of locally installed modules.  Also see CPAN::autobundle for one
 way to make a "bundle" of your currently installed modules.
-
-=head1 Start with a Fresh Distribution
-
-If you have built perl before, you should clean out the build directory
-with the command
-
-	make distclean
-
-or
-
-	make realclean
-
-The only difference between the two is that make distclean also removes
-your old config.sh and Policy.sh files.
-
-The results of a Configure run are stored in the config.sh and Policy.sh
-files.  If you are upgrading from a previous version of perl, or if you
-change systems or compilers or make other significant changes, or if
-you are experiencing difficulties building perl, you should probably
-not re-use your old config.sh.  Simply remove it
-
-	rm -f config.sh
-
-If you wish to use your old config.sh, be especially attentive to the
-version and architecture-specific questions and answers.  For example,
-the default directory for architecture-dependent library modules
-includes the version name.  By default, Configure will reuse your old
-name (e.g. /opt/perl/lib/i86pc-solaris/5.003) even if you're running
-Configure for a different version, e.g. 5.004.  Similarly, if you used
-a shared libperl.so (see below) with version numbers, you will probably
-want to adjust them as well.
-
-Also, be careful to check your architecture name.  For example, some
-Linux distributions use i386, but Configure uses the output of the arch
-command, which might be i686 instead.  If you pick up a precompiled
-binary, or compile extensions on different systems, they might not all
-agree on the architecture name.
-
-In short, if you wish to use your old config.sh, I recommend running
-Configure interactively rather than blindly accepting the defaults.
-
-If your reason to reuse your old config.sh is to save your particular
-installation choices, then you can probably achieve the same effect by
-using the Policy.sh file.  See the section on L<"Site-wide Policy
-settings"> below.  If you wish to start with a fresh distribution, you
-also need to remove any old Policy.sh files you may have with
-
-	rm -f Policy.sh
 
 =head1 Run Configure
 
@@ -164,6 +113,9 @@ defaults from then on.
 
 After it runs, Configure will perform variable substitution on all the
 *.SH files and offer to run make depend.
+
+The results of a Configure run are stored in the config.sh and Policy.sh
+files.
 
 =head2 Common Configure options
 
@@ -257,7 +209,7 @@ For example for my Solaris/x86 system, I usually use
 
 	sh Configure -Dprefix=/opt/perl -Doptimize='-xpentium -xO4' -des
 
-=head2 Altering config.sh variables for C compiler switches etc.
+=head2 Altering Configure variables for C compiler switches etc.
 
 For most users, most of the Configure defaults are fine, or can easily
 be set on the Configure command line.  However, if Configure doesn't
@@ -269,9 +221,9 @@ invocations:
 	sh Configure -Accflags="-DPERL_EXTERNAL_GLOB -DNO_HASH_SEED"
 
 To clarify, those ccflags values are not Configure options; if passed to
-Configure directly, they won't do anything useful (that will define a config.sh
-variable, but without taking any action based upon it).  When passed to the
-compiler, those flags will activate #ifdefd code.
+Configure directly, they won't do anything useful (they will define a
+variable in config.sh, but without taking any action based upon it).
+But when passed to the compiler, those flags will activate #ifdefd code.
 
 For more help on Configure switches, run
 
@@ -986,7 +938,7 @@ DB or newer releases of version 2.  Configure will automatically detect
 this for you and refuse to try to build DB_File with earlier
 releases of version 2.
 
-If you re-use your old config.sh but change your system (e.g. by
+If you re-use an old config.sh but change your system (e.g. by
 adding libgdbm) Configure will still offer your old choices of extensions
 for the default answer, but it will also point out the discrepancy to
 you.
@@ -1105,8 +1057,9 @@ using DB 3.1.17:
 
 =head2 Overriding an old config.sh
 
-If you want to use your old config.sh but override some of the items
-with command line options, you need to use B<Configure -O>.
+If you want to use an old config.sh produced by a previous run of
+Configure, but override some of the items with command line options, you
+need to use B<Configure -O>.
 
 =head2 GNU-style configure
 
@@ -1270,11 +1223,7 @@ the list of dynamic extensions to build.)
 
 If you change compilers or make other significant changes, you should
 probably not re-use your old config.sh.  Simply remove it or
-rename it, e.g. mv config.sh config.sh.old.  Then rerun Configure
-with the options you want to use.
-
-This is a common source of problems.  If you change from cc to
-gcc, you should almost always remove your old config.sh.
+rename it, then rerun Configure with the options you want to use.
 
 =item Propagating your changes to config.sh
 
@@ -2351,13 +2300,13 @@ seriously consider using a separate directory, since development
 subversions may not have all the compatibility wrinkles ironed out
 yet.
 
-=head2 Upgrading from 5.005 or 5.6 to 5.8.0
+=head2 Upgrading from 5.8.x or earlier
 
-B<Perl 5.9.0 is binary incompatible with Perl 5.8.x, Perl 5.6.x, 5.005,
-and any earlier Perl release.>  Perl modules having binary parts
+B<Perl 5.10.0 is binary incompatible with Perl 5.8.x and any earlier
+Perl release.>  Perl modules having binary parts
 (meaning that a C compiler is used) will have to be recompiled to be
-used with 5.9.0.  If you find you do need to rebuild an extension with
-5.9.0, you may safely do so without disturbing the older
+used with 5.10.0.  If you find you do need to rebuild an extension with
+5.10.0, you may safely do so without disturbing the older
 installations.  (See L<"Coexistence with earlier versions of perl5">
 above.)
 
@@ -2417,6 +2366,53 @@ Some sites may also wish to make the documentation in the pod/ directory
 available in TeX format.  Type
 
 	(cd pod && make tex && <process the latex files>)
+
+=head1 Starting all over again
+
+If you wish to re-build perl from the same build directory, you should
+clean it out with the command
+
+	make distclean
+
+or
+
+	make realclean
+
+The only difference between the two is that make distclean also removes
+your old config.sh and Policy.sh files.
+
+If you are upgrading from a previous version of perl, or if you
+change systems or compilers or make other significant changes, or if
+you are experiencing difficulties building perl, you should probably
+not re-use your old config.sh.  Simply remove it:
+
+	rm -f config.sh
+
+If you wish to re-use your old config.sh, be especially attentive to the
+version and architecture-specific questions and answers.  For example,
+the default directory for architecture-dependent library modules
+includes the version name.  By default, Configure will reuse your old
+name (e.g. /opt/perl/lib/i86pc-solaris/5.003) even if you're running
+Configure for a different version, e.g. 5.004.  Similarly, if you used
+a shared libperl.so (see below) with version numbers, you will probably
+want to adjust them as well.
+
+Also, be careful to check your architecture name.  For example, some
+Linux distributions use i386, but Configure uses the output of the arch
+command, which might be i686 instead.  If you pick up a precompiled
+binary, or compile extensions on different systems, they might not all
+agree on the architecture name.
+
+In short, if you wish to use your old config.sh, I recommend running
+Configure interactively rather than blindly accepting the defaults.
+
+If your reason to reuse your old config.sh is to save your particular
+installation choices, then you can probably achieve the same effect by
+using the Policy.sh file.  See the section on L<"Site-wide Policy
+settings"> above.  If you wish to start with a fresh distribution, you
+also need to remove any old Policy.sh files you may have with
+
+	rm -f Policy.sh
 
 =head1 Minimizing the Perl installation
 
