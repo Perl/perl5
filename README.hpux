@@ -622,15 +622,24 @@ bug seems to be to create add to the file F</etc/nsswitch.conf>
 Whether you are using NIS does not matter.  Amazingly enough,
 the same bug also affects Solaris.
 
+=head1 Miscellaneous
+
+HP-UX 11 Y2K patch "Y2K-1100 B.11.00.B0125 HP-UX Core OS Year 2000
+Patch Bundle" has been reported to break the io/fs test #18 which
+tests whether utime() can change timestamps.  The Y2K patch seems to
+break utime() so that over NFS the timestamps do not get changed
+(on local filesystems utime() still works). This has probably been
+fixed on your system by now.
+
 =head1 AUTHOR
 
-Jeff Okamoto <okamoto@corp.hp.com>
 H.Merijn Brand <h.m.brand@xs4all.nl>
+Jeff Okamoto <okamoto@corp.hp.com>
 
 With much assistance regarding shared libraries from Marc Sabatella.
 
 =head1 DATE
 
-Version 0.7.9: 2007-03-14
+Version 0.8.0: 2007-09-09
 
 =cut
