@@ -190,7 +190,7 @@ In any case, system administrators are strongly encouraged to put
 into a directory typically found along a user's PATH, or in another
 obvious and convenient place.
 
-=item Building a development release.
+=item Building a development release
 
 For development releases (odd subreleases, like 5.9.x) if you want to
 use Configure -d, you will also need to supply -Dusedevel to Configure,
@@ -204,10 +204,6 @@ If you are willing to accept all the defaults, and you want terse
 output, you can run
 
 	sh Configure -des
-
-For example for my Solaris/x86 system, I usually use
-
-	sh Configure -Dprefix=/opt/perl -Doptimize='-xpentium -xO4' -des
 
 =head2 Altering Configure variables for C compiler switches etc.
 
@@ -242,9 +238,6 @@ On some platforms, perl can be compiled with support for threads.  To
 enable this, run
 
 	sh Configure -Dusethreads
-
-Currently, you need to specify -Dusethreads on the Configure command
-line so that the hint files can make appropriate adjustments.
 
 The default is to compile without thread support.
 
@@ -283,6 +276,10 @@ There's also one known limitation with the current large files
 implementation: unless you also have 64-bit integers (see the next
 section), you cannot use the printf/sprintf non-decimal integer formats
 like C<%x> to print filesizes.  You can use C<%d>, though.
+
+If you want to compile perl without large file support, use
+
+    sh Configure -Uuselargefiles
 
 =head3 64 bit support
 
@@ -373,12 +370,14 @@ recommended.
 Perl can be configured to be 'socksified', that is, to use the SOCKS
 TCP/IP proxy protocol library.  SOCKS is used to give applications
 access to transport layer network proxies.  Perl supports only SOCKS
-Version 5.  You can find more about SOCKS from http://www.socks.nec.com/
+Version 5.  The corresponding Configure option is -Dusesocks.
+You can find more about SOCKS from wikipedia at
+L<http://en.wikipedia.org/wiki/SOCKS>.
 
 =head3 Dynamic Loading
 
-By default, Configure will compile perl to use dynamic loading if
-your system supports it.  If you want to force perl to be compiled
+By default, Configure will compile perl to use dynamic loading.
+If you want to force perl to be compiled completely
 statically, you can either choose this when Configure prompts you or
 you can use the Configure command line option -Uusedl.
 
@@ -1285,21 +1284,6 @@ Porting/config.sh to config.sh and edit your config.sh to reflect your
 system's peculiarities.  See Porting/pumpkin.pod for more information.
 You'll probably also have to extensively modify the extension building
 mechanism.
-
-=item Digital UNIX/Tru64 UNIX and BIN_SH
-
-In Digital UNIX/Tru64 UNIX, Configure might abort with
-
-Build a threading Perl? [n]
-Configure[2437]: Syntax error at line 1 : `config.sh' is not expected.
-
-This indicates that Configure is being run with a broken Korn shell
-(even though you think you are using a Bourne shell by using
-"sh Configure" or "./Configure").  The Korn shell bug has been reported
-to Compaq as of February 1999 but in the meanwhile, the reason ksh is
-being used is that you have the environment variable BIN_SH set to
-'xpg4'.  This causes /bin/sh to delegate its duties to /bin/posix/sh
-(a ksh).  Unset the environment variable and rerun Configure.
 
 =item HP-UX 11, pthreads, and libgdbm
 
