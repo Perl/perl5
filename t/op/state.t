@@ -10,7 +10,7 @@ BEGIN {
 use strict;
 use feature ":5.10";
 
-plan tests => 117;
+plan tests => 119;
 
 ok( ! defined state $uninit, q(state vars are undef by default) );
 
@@ -319,6 +319,18 @@ foreach my $spam (@spam) {
     no warnings;
     state $x = "two";
     is $x, "two", "masked"
+}
+
+# normally closureless anon subs share a CV and pad. If the anon sub has a
+# state var, this would mean that it is shared. Check that this doesn't
+# happen
+
+{
+    my @f;
+    push @f, sub { state $x; ++$x } for 1..2;
+    $f[0]->() for 1..10;
+    is $f[0]->(), 11;
+    is $f[1]->(), 1;
 }
 
 foreach my $forbidden (<DATA>) {

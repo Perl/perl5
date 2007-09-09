@@ -395,6 +395,12 @@ Perl_allocmy(pTHX_ const char *const name)
 		    0, /*  not fake */
 		    PL_parser->in_my == KEY_state
     );
+    /* anon sub prototypes contains state vars should always be cloned,
+     * otherwise the state var would be shared between anon subs */
+
+    if (PL_parser->in_my == KEY_state && CvANON(PL_compcv))
+	CvCLONE_on(PL_compcv);
+
     return off;
 }
 
