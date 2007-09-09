@@ -759,6 +759,22 @@ Use of uninitialized value $m1 in scalar assignment at - line 5.
 ########
 use warnings 'uninitialized';
 my ($m1);
+our ($g1);
+
+$v = pos($m1) + 1;
+$v = pos($g1) + 1;
+$m1 = 0;
+$g1 = "";
+$v = pos($m1) + 1;
+$v = pos($g1) + 1;
+EXPECT
+Use of uninitialized value in addition (+) at - line 5.
+Use of uninitialized value in addition (+) at - line 6.
+Use of uninitialized value in addition (+) at - line 9.
+Use of uninitialized value in addition (+) at - line 10.
+########
+use warnings 'uninitialized';
+my ($m1);
 
 { my $x = "a" x $m1 }		# NB LHS of repeat does not warn
 { my @x = ("a") x $m1 }

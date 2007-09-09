@@ -12077,6 +12077,11 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 	match = 1; /* XS or custom code could trigger random warnings */
 	goto do_op;
 
+    case OP_POS:
+	/* def-ness of rval pos() is independent of the def-ness of its arg */
+	if ( !(obase->op_flags & OPf_MOD))
+	    break;
+
     case OP_SCHOMP:
     case OP_CHOMP:
 	if (SvROK(PL_rs) && uninit_sv == SvRV(PL_rs))
