@@ -6,54 +6,6 @@ designed to be readable as is.
 
 Install - Build and Installation guide for perl5.
 
-=head1 Reporting Problems
-
-Wherever possible please use the perlbug tool supplied with this Perl
-to report problems, as it automatically includes summary configuration
-information about your perl, which may help us track down problems far
-more quickly. But first you should read the advice in this file,
-carefully re-read the error message and check the relevant manual pages
-on your system, as these may help you find an immediate solution.  If
-you are not sure whether what you are seeing is a bug, you can send a
-message describing the problem to the comp.lang.perl.misc newsgroup to
-get advice.
-
-The perlbug tool is installed along with perl, so after you have
-completed C<make install> it should be possible to run it with plain
-C<perlbug>.  If the install fails, or you want to report problems with
-C<make test> without installing perl, then you can use C<make nok> to
-run perlbug to report the problem, or run it by hand from this source
-directory with C<./perl -Ilib utils/perlbug>
-
-If the build fails too early to run perlbug uninstalled, then please
-B<run> the C<./myconfig> shell script, and mail its output along with
-an accurate description of your problem to perlbug@perl.org
-
-If Configure itself fails, and does not generate a config.sh file
-(needed to run C<./myconfig>), then please mail perlbug@perl.org the
-description of how Configure fails along with details of your system
-- for example the output from running C<uname -a>
-
-Please try to make your message brief but clear.  Brief, clear bug
-reports tend to get answered more quickly.  Please don't worry if your
-written English is not great - what matters is how well you describe
-the important technical details of the problem you have encountered,
-not whether your grammar and spelling is flawless.
-
-Trim out unnecessary information.  Do not include large files (such as
-config.sh or a complete Configure or make log) unless absolutely
-necessary.  Do not include a complete transcript of your build
-session.  Just include the failing commands, the relevant error
-messages, and whatever preceding commands are necessary to give the
-appropriate context.  Plain text should usually be sufficient--fancy
-attachments or encodings may actually reduce the number of people who
-read your message.  Your message will get relayed to over 400
-subscribers around the world so please try to keep it brief but clear.
-
-If you are unsure what makes a good bug report please read "How to
-report Bugs Effectively" by Simon Tatham:
-http://www.chiark.greenend.org.uk/~sgtatham/bugs.html
-
 =head1 SYNOPSIS
 
 First, make sure you have an up-to-date version of Perl.   If you
@@ -79,23 +31,16 @@ Each of these is explained in further detail below.
 
 The above commands will install Perl to /usr/local (or some other
 platform-specific directory -- see the appropriate file in hints/.)
-If that's not okay with you, can run Configure interactively and use
+If that's not okay with you, can run Configure interactively, by
+just typing "sh Configure" (without the -de args). You can also specify
+any prefix location by adding "-Dprefix='/some/dir'" to Configure's args.
+To explicitly name the perl binary, use the command
+"make install PERLNAME=myperl".
 
-	rm -f config.sh Policy.sh
-	sh Configure
-	make
-	make test
-	make install
-
-	# You may also wish to add these:
-	(cd /usr/include && h2ph *.h sys/*.h)
-	(installhtml --help)
-	(cd pod && make tex && <process the latex files>)
-
-or you can use some of the Configure options described below.
+These options, and many more, are explained in further detail below.
 
 If you have problems, corrections, or questions, please see
-L<"Reporting Problems"> above.
+L<"Reporting Problems"> below.
 
 For information on what's new in this release, see the
 pod/perl5100delta.pod file.  For more detailed information about specific
@@ -1240,7 +1185,7 @@ to enable this option.
 =head2 What if it doesn't work?
 
 If you run into problems, try some of the following ideas.
-If none of them help, then see L<"Reporting Problems"> above.
+If none of them help, then see L<"Reporting Problems"> below.
 
 =over 4
 
@@ -1517,7 +1462,7 @@ These errors are normal, and can be ignored:
 If you can't compile successfully, try some of the following ideas.
 If none of them help, and careful reading of the error message and
 the relevant manual pages on your system doesn't help,
-then see L<"Reporting Problems"> above.
+then see L<"Reporting Problems"> below.
 
 =over 4
 
@@ -2249,6 +2194,54 @@ you can just manually run
 and skip installman altogether.
 See also L<"Maintaining completely separate versions"> for another
 approach.
+
+=head1 Reporting Problems
+
+Wherever possible please use the perlbug tool supplied with this Perl
+to report problems, as it automatically includes summary configuration
+information about your perl, which may help us track down problems far
+more quickly. But first you should read the advice in this file,
+carefully re-read the error message and check the relevant manual pages
+on your system, as these may help you find an immediate solution.  If
+you are not sure whether what you are seeing is a bug, you can send a
+message describing the problem to the comp.lang.perl.misc newsgroup to
+get advice.
+
+The perlbug tool is installed along with perl, so after you have
+completed C<make install> it should be possible to run it with plain
+C<perlbug>.  If the install fails, or you want to report problems with
+C<make test> without installing perl, then you can use C<make nok> to
+run perlbug to report the problem, or run it by hand from this source
+directory with C<./perl -Ilib utils/perlbug>
+
+If the build fails too early to run perlbug uninstalled, then please
+B<run> the C<./myconfig> shell script, and mail its output along with
+an accurate description of your problem to perlbug@perl.org
+
+If Configure itself fails, and does not generate a config.sh file
+(needed to run C<./myconfig>), then please mail perlbug@perl.org the
+description of how Configure fails along with details of your system
+- for example the output from running C<uname -a>
+
+Please try to make your message brief but clear.  Brief, clear bug
+reports tend to get answered more quickly.  Please don't worry if your
+written English is not great - what matters is how well you describe
+the important technical details of the problem you have encountered,
+not whether your grammar and spelling is flawless.
+
+Trim out unnecessary information.  Do not include large files (such as
+config.sh or a complete Configure or make log) unless absolutely
+necessary.  Do not include a complete transcript of your build
+session.  Just include the failing commands, the relevant error
+messages, and whatever preceding commands are necessary to give the
+appropriate context.  Plain text should usually be sufficient--fancy
+attachments or encodings may actually reduce the number of people who
+read your message.  Your message will get relayed to over 400
+subscribers around the world so please try to keep it brief but clear.
+
+If you are unsure what makes a good bug report please read "How to
+report Bugs Effectively" by Simon Tatham:
+http://www.chiark.greenend.org.uk/~sgtatham/bugs.html
 
 =head1 Coexistence with earlier versions of perl5
 
