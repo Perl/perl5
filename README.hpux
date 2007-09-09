@@ -540,10 +540,18 @@ it is known to fail with 64-bit versions of GCC.
 
 =head2 GDBM and Threads on HP-UX
 
-If you attempt to compile Perl with threads on an 11.X system and also
-link in the GDBM library, then Perl will immediately core dump when it
-starts up.  The only workaround at this point is to relink the GDBM
-library under 11.X, then relink it into Perl.
+If you attempt to compile Perl with (POSIX) threads on an 11.X system
+and also link in the GDBM library, then Perl will immediately core dump
+when it starts up.  The only workaround at this point is to relink the
+GDBM library under 11.X, then relink it into Perl.
+
+the error might show something like:
+
+Pthread internal error: message: __libc_reinit() failed, file: ../pthreads/pthread.c, line: 1096
+Return Pointer is 0xc082bf33
+sh: 5345 Quit(coredump)
+
+and Configure will give up.
 
 =head2 NFS filesystems and utime(2) on HP-UX
 

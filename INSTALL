@@ -1285,20 +1285,6 @@ system's peculiarities.  See Porting/pumpkin.pod for more information.
 You'll probably also have to extensively modify the extension building
 mechanism.
 
-=item HP-UX 11, pthreads, and libgdbm
-
-If you are running Configure with -Dusethreads in HP-UX 11, be warned
-that POSIX threads and libgdbm (the GNU dbm library) compiled before
-HP-UX 11 do not mix.  This will cause a basic test run by Configure to
-fail
-
-Pthread internal error: message: __libc_reinit() failed, file: ../pthreads/pthread.c, line: 1096
-Return Pointer is 0xc082bf33
-sh: 5345 Quit(coredump)
-
-and Configure will give up.  The cure is to recompile and install
-libgdbm under HP-UX 11.
-
 =item Porting information
 
 Specific information for the OS/2, Plan 9, VMS and Win32 ports is in the
