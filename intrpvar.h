@@ -476,7 +476,7 @@ PERLVARI(Icollation_standard, bool,	TRUE)
 #ifdef PERL_UTF8_CACHE_ASSERT
 #  define PERL___I -1
 #else
-#  define PERL___I -1
+#  define PERL___I 1
 #endif
 PERLVARI(Iutf8cache, I8, PERL___I)	/* Is the utf8 caching code enabled? */
 #undef PERL___I
