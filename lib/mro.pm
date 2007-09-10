@@ -315,45 +315,6 @@ In simple cases, it is equivalent to:
 But there are some cases where only this solution
 works (like C<goto &maybe::next::method>);
 
-=head1 PERFORMANCE CONSIDERATIONS
-
-Specifying the mro type of a class before setting C<@ISA> will
-be faster than the other way around.  Also, making all of your
-C<@ISA> manipulations in a single assignment or push statement
-will be faster that doing them one by one (which is what
-C<use base> does currently).
-
-Examples:
-
-  # The slowest way
-  package Foo;
-  use base qw/A B C/;
-  use mro 'c3';
-
-  # Equivalently slow
-  package Foo;
-  our @ISA;
-  require A; push(@ISA, 'A');
-  require B; push(@ISA, 'B');
-  require C; push(@ISA, 'C');
-  use mro 'c3';
-
-  # The fastest way
-  # (not exactly equivalent to above,
-  #   as base.pm can do other magic)
-  package Foo;
-  use mro 'c3';
-  require A;
-  require B;
-  require C;
-  our @ISA = qw/A B C/;
-
-Generally speaking, every time C<@ISA> is modified, the MRO
-of that class will be recalculated because of the way array
-magic works.  Cutting down on unecessary recalculations is
-a win, especially with complex class hierarchies and/or
-the c3 mro.
-
 =head1 SEE ALSO
 
 =head2 The original Dylan paper
