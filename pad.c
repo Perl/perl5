@@ -1517,6 +1517,9 @@ Perl_cv_clone(pTHX_ CV *proto)
 		else
 		    sv = newSV(0);
 		SvPADMY_on(sv);
+		/* reset the 'assign only once' flag on each state var */
+		if (SvPAD_STATE(namesv))
+		    SvPADSTALE_on(sv);
 	    }
 	}
 	else if (IS_PADGV(ppad[ix]) || IS_PADCONST(ppad[ix])) {

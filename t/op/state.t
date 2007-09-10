@@ -10,7 +10,7 @@ BEGIN {
 use strict;
 use feature ":5.10";
 
-plan tests => 119;
+plan tests => 123;
 
 ok( ! defined state $uninit, q(state vars are undef by default) );
 
@@ -332,6 +332,21 @@ foreach my $spam (@spam) {
     is $f[0]->(), 11;
     is $f[1]->(), 1;
 }
+
+# each copy of an anon sub should get its own 'once block'
+
+{
+    my $x; # used to force a closure
+    my @f;
+    push @f, sub { $x; state $s = $_[0]; $s } for 1..2;
+    is $f[0]->(1), 1;
+    is $f[0]->(2), 1;
+    is $f[1]->(3), 3;
+    is $f[1]->(4), 3;
+}
+
+
+
 
 foreach my $forbidden (<DATA>) {
     chomp $forbidden;
