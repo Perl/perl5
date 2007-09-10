@@ -522,7 +522,7 @@ BEGIN {
 
 use Exporter ();
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '2.00_11';
+$VERSION = '2.00_12';
 @ISA     = qw(Exporter);
 @EXPORT  = qw(mkpath rmtree);
 
@@ -708,7 +708,6 @@ sub _rmtree {
         else {
             $root =~ s{/\z}{};
 	}
-        my ($ldev, $lino, $perm) = (lstat $root)[0,1,2] or next;
 
         # since we chdir into each directory, it may not be obvious
         # to figure out where we are if we generate a message about
@@ -717,11 +716,14 @@ sub _rmtree {
         # opposed to being truly canonical, anchored from the root (/).
 
         my $canon = $arg->{prefix}
-            ? File::Spec->catdir($arg->{prefix}, $root)
+            ? File::Spec->catfile($arg->{prefix}, $root)
             : $root
         ;
 
+        my ($ldev, $lino, $perm) = (lstat $root)[0,1,2] or next;
+
 	if ( -d _ ) {
+            $root = VMS::Filespec::pathify($root) if $Is_VMS;
             if (!chdir($root)) {
                 # see if we can escalate privileges to get in
                 # (e.g. funny protection mask such as -w- instead of rwx)
@@ -840,6 +842,10 @@ sub _rmtree {
         }
         else {
             # not a directory
+
+            $root = VMS::Filespec::vmsify("./$root")
+                if $Is_VMS && !File::Spec->file_name_is_absolute($root);
+
             if ($arg->{safe} &&
 		($Is_VMS ? !&VMS::Filespec::candelete($root)
 		         : !(-l $root || -w $root)))
