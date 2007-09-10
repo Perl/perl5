@@ -1,3 +1,6 @@
+2.13
+    - push all classes at once in @ISA
+
 2.12  Fri Jul  6 00:57:15 PDT 2007
     Test Features
     - Test that base.pm preserves $VERSION after real module loading.
