@@ -3,7 +3,7 @@ use 5.00503;
 use strict;
 
 use vars qw(@ISA @EXPORT $VERSION $MUST_REBOOT %Config);
-$VERSION = '1.43';
+$VERSION = '1.44';
 $VERSION = eval $VERSION;
 
 use AutoSplit;
@@ -674,7 +674,7 @@ sub install { #XXX OS-SPECIFIC
             print "Skipping $targetfile (unchanged)\n" if $verbose;
         }
 
-        if ( defined $inc_uninstall ) {
+        if ( $inc_uninstall ) {
             inc_uninstall($sourcefile,$ffd, $verbose,
                           $nonono,
                           $realtarget ne $targetfile ? $realtarget : "");
