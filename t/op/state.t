@@ -338,7 +338,7 @@ foreach my $spam (@spam) {
 {
     my $x; # used to force a closure
     my @f;
-    push @f, sub { $x; state $s = $_[0]; $s } for 1..2;
+    push @f, sub { $x=0; state $s = $_[0]; $s } for 1..2;
     is $f[0]->(1), 1;
     is $f[0]->(2), 1;
     is $f[1]->(3), 3;
