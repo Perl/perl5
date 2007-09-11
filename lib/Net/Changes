@@ -1,3 +1,8 @@
+libnet 1.22  -- Sun Aug 26 07:13:18 CDT 2007
+
+Bug Fixes
+  * Fix a bug in Net::Cmd that is_utf8 does not exist prior to perl 5.8.1
+
 libnet 1.21  -- Sat May 19 08:53:09 CDT 2007
 
 Bug Fixes

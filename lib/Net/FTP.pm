@@ -1468,7 +1468,7 @@ The alloc command allows you to give the ftp server a hint about the size
 of the file about to be transferred using the ALLO ftp command. Some storage
 systems use this to make intelligent decisions about how to store the file.
 The C<SIZE> argument represents the size of the file in bytes. The
-C<RECORD_SIZE> argument indicates a mazimum record or page size for files
+C<RECORD_SIZE> argument indicates a maximum record or page size for files
 sent with a record or page structure.
 
 The size of the file will be determined, and sent to the server
