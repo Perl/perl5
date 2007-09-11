@@ -175,6 +175,7 @@
 #define kill_file		Perl_kill_file
 #define my_utime		Perl_my_utime
 #define my_chdir		Perl_my_chdir
+#define my_chmod		Perl_my_chmod
 #define do_aspawn		Perl_do_aspawn
 #define seekdir			Perl_seekdir
 #define my_gmtime		Perl_my_gmtime
@@ -239,6 +240,7 @@
 #define kill_file(a)		Perl_kill_file(aTHX_ a)
 #define my_utime(a,b)		Perl_my_utime(aTHX_ a,b)
 #define my_chdir(a)		Perl_my_chdir(aTHX_ a)
+#define my_chmod(a,b)		Perl_my_chmod(aTHX_ a,b)
 #define do_aspawn(a,b,c)	Perl_do_aspawn(aTHX_ a,b,c)
 #define seekdir(a,b)		Perl_seekdir(aTHX_ a,b)
 #define my_gmtime(a)		Perl_my_gmtime(aTHX_ a)
@@ -627,12 +629,15 @@ struct utimbuf {
 /* Tweak arg to mkdir & chdir first, so we can tolerate trailing /. */
 #define Mkdir(dir,mode) Perl_my_mkdir(aTHX_ (dir),(mode))
 #define Chdir(dir) my_chdir((dir))
+#ifndef DONT_MASK_RTL_CALLS
+#define chmod(file_spec, mode) my_chmod((file_spec), (mode))
+#endif
 
 /* Use our own stat() clones, which handle Unix-style directory names */
 #define Stat(name,bufptr) flex_stat(name,bufptr)
 #define Fstat(fd,bufptr) Perl_flex_fstat(aTHX_ fd,bufptr)
 #ifndef DONT_MASK_RTL_CALLS
-#define lstat(name, bufptr) Perl_flex_lstat(name, bufptr)
+#define lstat(name, bufptr) flex_lstat(name, bufptr)
 #endif
 
 /* Setup for the dirent routines:
@@ -914,6 +919,7 @@ Pid_t	Perl_my_waitpid (pTHX_ Pid_t, int *, int);
 char *	my_gconvert (double, int, int, char *);
 int	Perl_kill_file (pTHX_ const char *);
 int	Perl_my_chdir (pTHX_ const char *);
+int	Perl_my_chmod(pTHX_ const char *, mode_t);
 FILE *	Perl_my_tmpfile (void);
 #ifndef HOMEGROWN_POSIX_SIGNALS
 int	Perl_my_sigaction (pTHX_ int, const struct sigaction*, struct sigaction*);

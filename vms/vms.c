@@ -2083,6 +2083,61 @@ Perl_my_chdir(pTHX_ const char *dir)
 /*}}}*/
 
 
+/*{{{int my_chmod(char *, mode_t)*/
+int
+Perl_my_chmod(pTHX_ const char *file_spec, mode_t mode)
+{
+  STRLEN speclen = strlen(file_spec);
+
+  /* zero length string sometimes gives ACCVIO */
+  if (speclen == 0) return -1;
+
+  /* some versions of CRTL chmod() doesn't tolerate trailing /, since
+   * that implies null file name/type.  However, it's commonplace under Unix,
+   * so we'll allow it for a gain in portability.
+   *
+   * Tests are showing that chmod() on VMS 8.3 is only accepting directories
+   * in VMS file.dir notation.
+   */
+  if ((speclen > 1) && (file_spec[speclen-1] == '/')) {
+    char *vms_src, *vms_dir, *rslt;
+    int ret = -1;
+    errno = EIO;
+
+    /* First convert this to a VMS format specification */
+    vms_src = PerlMem_malloc(VMS_MAXRSS);
+    if (vms_src == NULL)
+	_ckvmssts(SS$_INSFMEM);
+
+    rslt = do_tovmsspec(file_spec, vms_src, 0, NULL);
+    if (rslt == NULL) {
+	/* If we fail, then not a file specification */
+	PerlMem_free(vms_src);
+	errno = EIO;
+	return -1;
+    }
+
+    /* Now make it a directory spec so chmod is happy */
+    vms_dir = PerlMem_malloc(VMS_MAXRSS + 1);
+    if (vms_dir == NULL)
+	_ckvmssts(SS$_INSFMEM);
+    rslt = do_fileify_dirspec(vms_src, vms_dir, 0, NULL);
+    PerlMem_free(vms_src);
+
+    /* Now do it */
+    if (rslt != NULL) {
+	ret = chmod(vms_dir, mode);
+    } else {
+	errno = EIO;
+    }
+    PerlMem_free(vms_dir);
+    return ret;
+  }
+  else return chmod(file_spec, mode);
+}  /* end of my_chmod */
+/*}}}*/
+
+
 /*{{{FILE *my_tmpfile()*/
 FILE *
 my_tmpfile(void)
@@ -11745,6 +11800,27 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
       else
 	retval = lstat(temp_fspec,(stat_t *) statbufp);
       save_spec = temp_fspec;
+    }
+/*
+ * In debugging, on 8.3 Alpha, I found a case where stat was returning a
+ * file not found error for a directory named foo:[bar.t] or /foo/bar/t
+ * and lstat was working correctly for the same file.
+ * The only syntax that was working for stat was "foo:[bar]t.dir".
+ *
+ * Other directories with the same syntax worked fine.
+ * So work around the problem when it shows up here.
+ */
+    if (retval) {
+        int save_errno = errno;
+	if (do_tovmsspec(fspec, temp_fspec, 0, NULL) != NULL) {
+	    if (do_fileify_dirspec(temp_fspec, fileified, 0, NULL) != NULL) {
+		retval = stat(fileified, (stat_t *) statbufp);
+		save_spec = fileified;
+	    }
+	}
+	/* Restore the errno value if third stat does not succeed */
+	if (retval != 0)
+	    errno = save_errno;
     }
 #if __CRTL_VER >= 80200000 && !defined(__VAX)
   } else {
