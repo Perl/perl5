@@ -16,7 +16,7 @@ use Carp;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = "2.32";
+$VERSION = "2.33";
 
 sub SOL_IP { 0; };
 sub IP_TOS { 1; };
@@ -481,6 +481,7 @@ sub ping_icmp
       $self->{"from_type"} = $from_type;
       $self->{"from_subcode"} = $from_subcode;
       if (($from_pid == $self->{"pid"}) && # Does the packet check out?
+          (! $source_verify || (inet_ntoa($from_ip) eq inet_ntoa($ip))) &&
           ($from_seq == $self->{"seq"})) {
         if ($from_type == ICMP_ECHOREPLY) {
           $ret = 1;
@@ -1369,6 +1370,15 @@ sub close
   }
 }
 
+sub port_number {
+   my $self = shift;
+   if(@_) {
+       $self->{port_num} = shift @_;
+       $self->service_check(1);
+   }
+   return $self->{port_num};
+}
+
 
 1;
 __END__
@@ -1398,7 +1408,7 @@ Net::Ping - check a remote host for reachability
 
     $p = Net::Ping->new("tcp", 2);
     # Try connecting to the www port instead of the echo port
-    $p->{port_num} = getservbyname("http", "tcp");
+    $p->port_number(getservbyname("http", "tcp"));
     while ($stop_time > time())
     {
         print "$host not reachable ", scalar(localtime()), "\n"
@@ -1409,7 +1419,7 @@ Net::Ping - check a remote host for reachability
 
     # Like tcp protocol, but with many hosts
     $p = Net::Ping->new("syn");
-    $p->{port_num} = getservbyname("http", "tcp");
+    $p->port_number(getservbyname("http", "tcp"));
     foreach $host (@host_array) {
       $p->ping($host);
     }
@@ -1630,6 +1640,14 @@ Close the network connection for this ping object.  The network
 connection is also closed by "undef $p".  The network connection is
 automatically closed if the ping object goes out of scope (e.g. $p is
 local to a subroutine and you leave the subroutine).
+
+=item $p->port_number([$port_number])
+
+When called with a port number, the port number used to ping is set to
+$port_number rather than using the echo port.  It also has the effect
+of calling C<$p-E<gt>service_check(1)> causing a ping to return a successful
+response only if that specific port is accessible.  This function returns
+the value of the port that C<ping()> will connect to.
 
 =item pingecho($host [, $timeout]);
 
