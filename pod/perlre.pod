@@ -223,9 +223,9 @@ X<\0> X<\c> X<\N> X<\x>
     \e		escape (think troff)  (ESC)
     \033	octal char            (example: ESC)
     \x1B	hex char              (example: ESC)
-    \x{263a}	wide hex char         (example: Unicode SMILEY)
+    \x{263a}	long hex char         (example: Unicode SMILEY)
     \cK		control char          (example: VT)
-    \N{name}	named char
+    \N{name}	named Unicode character
     \l		lowercase next char (think vi)
     \u		uppercase next char (think vi)
     \L		lowercase till \E (think vi)
@@ -270,9 +270,6 @@ X<word> X<whitespace> X<character class> X<backreference>
              optionally be wrapped in curly brackets for safer parsing.
     \g{name} Named backreference
     \k<name> Named backreference
-    \N{name} Named Unicode character, or Unicode escape
-    \x12     Hexadecimal escape sequence
-    \x{1234} Long hexadecimal escape sequence
     \K       Keep the stuff left of the \K, don't include it in $&
     \v       Vertical whitespace
     \V       Not vertical whitespace
