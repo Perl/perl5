@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 14 $
+##  $Revision: 15 $
 ##  $Author: mhx $
-##  $Date: 2007/08/20 19:19:24 +0200 $
+##  $Date: 2007/09/11 23:20:42 +0200 $
 ##
 ################################################################################
 ##
@@ -312,7 +312,7 @@ sv_magic_portable(sv)
 		mg = mg_find(sv, '~');
 		RETVAL = mg->mg_ptr == foo;
 #else
-		sv_magic(sv, 0, '~', foo, strlen(foo));
+		sv_magic(sv, 0, '~', (char *) foo, strlen(foo));
 		mg = mg_find(sv, '~');
 		RETVAL = strEQ(mg->mg_ptr, foo);
 #endif

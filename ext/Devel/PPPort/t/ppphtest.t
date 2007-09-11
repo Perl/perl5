@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (225) {
+  if (229) {
     load();
-    plan(tests => 225);
+    plan(tests => 229);
   }
 }
 
@@ -50,7 +50,7 @@ package main;
 
 BEGIN {
   if ($ENV{'SKIP_SLOW_TESTS'}) {
-    for (1 .. 225) {
+    for (1 .. 229) {
       skip("skip: SKIP_SLOW_TESTS", 0);
     }
     exit 0;
@@ -880,4 +880,45 @@ a_char = 'sv_yes'
 /* The following, is NOT an XS comment! */
 #  define SOMETHING_ELSE PL_defgv + \
                          PL_sv_undef
+
+===============================================================================
+
+my $o = ppport(qw(--copy=f));
+
+for (qw(file.xs)) {
+  ok($o =~ /^Writing copy of.*\Q$_\E.*with changes/mi);
+  ok(-e "${_}f");
+  ok(eq_files("${_}f", "${_}r"));
+  unlink "${_}f";
+}
+
+---------------------------- file.xs -----------------------------------------
+
+#define NEED_sv_2pv_flags
+#define NEED_vnewSVpvf
+#define NEED_warner
+#include "ppport.h"
+Perl_croak_nocontext("foo");
+Perl_croak("bar");
+croak("foo");
+croak_nocontext("foo");
+Perl_warner_nocontext("foo");
+Perl_warner("foo");
+warner_nocontext("foo");
+warner("foo");
+
+---------------------------- file.xsr -----------------------------------------
+
+#define NEED_sv_2pv_flags
+#define NEED_vnewSVpvf
+#define NEED_warner
+#include "ppport.h"
+Perl_croak_nocontext("foo");
+Perl_croak(aTHX_ "bar");
+croak("foo");
+croak_nocontext("foo");
+Perl_warner_nocontext("foo");
+Perl_warner(aTHX_ "foo");
+warner_nocontext("foo");
+warner("foo");
 

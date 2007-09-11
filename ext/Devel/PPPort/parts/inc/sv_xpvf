@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 7 $
+##  $Revision: 8 $
 ##  $Author: mhx $
-##  $Date: 2007/08/12 23:57:10 +0200 $
+##  $Date: 2007/09/11 23:20:43 +0200 $
 ##
 ################################################################################
 ##
@@ -175,7 +175,7 @@ static SV * test_vnewSVpvf(pTHX_ const char *pat, ...)
 #if { VERSION >= 5.004 }
   sv = vnewSVpvf(pat, &args);
 #else
-  sv = newSVpv(pat, 0);
+  sv = newSVpv((char *) pat, 0);
 #endif
   va_end(args);
   return sv;
@@ -188,7 +188,7 @@ static void test_sv_vcatpvf(pTHX_ SV *sv, const char *pat, ...)
 #if { VERSION >= 5.004 }
   sv_vcatpvf(sv, pat, &args);
 #else
-  sv_catpv(sv, pat);
+  sv_catpv(sv, (char *) pat);
 #endif
   va_end(args);
 }
@@ -200,7 +200,7 @@ static void test_sv_vsetpvf(pTHX_ SV *sv, const char *pat, ...)
 #if { VERSION >= 5.004 }
   sv_vsetpvf(sv, pat, &args);
 #else
-  sv_setpv(sv, pat);
+  sv_setpv(sv, (char *) pat);
 #endif
   va_end(args);
 }

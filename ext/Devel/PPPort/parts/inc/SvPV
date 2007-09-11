@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 17 $
+##  $Revision: 18 $
 ##  $Author: mhx $
-##  $Date: 2007/08/13 22:59:33 +0200 $
+##  $Date: 2007/09/11 23:19:51 +0200 $
 ##
 ################################################################################
 ##
@@ -56,7 +56,7 @@ __UNDEFINED__  sv_2pv_nolen(sv)   SvPV_nolen(sv)
 #if { NEED sv_2pvbyte }
 
 char *
-sv_2pvbyte(pTHX_ register SV *sv, STRLEN *lp)
+sv_2pvbyte(pTHX_ SV *sv, STRLEN *lp)
 {
   sv_utf8_downgrade(sv,0);
   return SvPV(sv,*lp);

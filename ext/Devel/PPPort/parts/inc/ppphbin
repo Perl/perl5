@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 44 $
+##  $Revision: 45 $
 ##  $Author: mhx $
-##  $Date: 2007/08/20 18:21:09 +0200 $
+##  $Date: 2007/09/11 23:18:31 +0200 $
 ##
 ################################################################################
 ##
@@ -386,11 +386,13 @@ for $filename (@files) {
 
   for $func (sort keys %{$file{uses_Perl}}) {
     if ($API{$func}{varargs}) {
-      my $changes = ($c =~ s{\b(Perl_$func\s*\(\s*)(?!aTHX_?)(\)|[^\s)]*\))}
-                            { $1 . ($2 eq ')' ? 'aTHX' : 'aTHX_ ') . $2 }ge);
-      if ($changes) {
-        warning("Doesn't pass interpreter argument aTHX to Perl_$func");
-        $file{changes} += $changes;
+      unless ($API{$func}{nothxarg}) {
+        my $changes = ($c =~ s{\b(Perl_$func\s*\(\s*)(?!aTHX_?)(\)|[^\s)]*\))}
+                              { $1 . ($2 eq ')' ? 'aTHX' : 'aTHX_ ') . $2 }ge);
+        if ($changes) {
+          warning("Doesn't pass interpreter argument aTHX to Perl_$func");
+          $file{changes} += $changes;
+        }
       }
     }
     else {

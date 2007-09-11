@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 11 $
+##  $Revision: 12 $
 ##  $Author: mhx $
-##  $Date: 2007/01/02 12:32:33 +0100 $
+##  $Date: 2007/09/11 23:20:42 +0200 $
 ##
 ################################################################################
 ##
@@ -31,7 +31,7 @@ newCONSTSUB
 #if { NEED newCONSTSUB }
 
 void
-newCONSTSUB(HV *stash, char *name, SV *sv)
+newCONSTSUB(HV *stash, const char *name, SV *sv)
 {
 	U32 oldhints = PL_hints;
 	HV *old_cop_stash = PL_curcop->cop_stash;
@@ -53,7 +53,7 @@ newCONSTSUB(HV *stash, char *name, SV *sv)
      		start_subparse(FALSE, 0),
 #endif
 
-		newSVOP(OP_CONST, 0, newSVpv(name,0)),
+		newSVOP(OP_CONST, 0, newSVpv((char *) name, 0)),
 		newSVOP(OP_CONST, 0, &PL_sv_no),   /* SvPV(&PL_sv_no) == "" -- GMB */
 		newSTATEOP(0, Nullch, newSVOP(OP_CONST, 0, sv))
 	);

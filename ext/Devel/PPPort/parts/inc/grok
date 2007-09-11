@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 13 $
+##  $Revision: 14 $
 ##  $Author: mhx $
-##  $Date: 2007/08/12 23:57:10 +0200 $
+##  $Date: 2007/09/11 23:20:41 +0200 $
 ##
 ################################################################################
 ##
@@ -292,7 +292,7 @@ grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
 #ifndef grok_bin
 #if { NEED grok_bin }
 UV
-grok_bin(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result)
+grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 {
     const char *s = start;
     STRLEN len = *len_p;
@@ -381,7 +381,7 @@ grok_bin(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result)
 #ifndef grok_hex
 #if { NEED grok_hex }
 UV
-grok_hex(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result)
+grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 {
     const char *s = start;
     STRLEN len = *len_p;
@@ -470,7 +470,7 @@ grok_hex(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result)
 #ifndef grok_oct
 #if { NEED grok_oct }
 UV
-grok_oct(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result)
+grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 {
     const char *s = start;
     STRLEN len = *len_p;

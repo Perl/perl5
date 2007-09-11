@@ -1,7 +1,5 @@
 TODO:
 
-* bump __MAX_PERL__ before 5.10
-
 * > 3. In several cases, "perl ppport.h --copy=.new" output a new file in
   > which the only change was the addition of "#include "ppport.h"". In each
   > case, that actually wasn't necessary because the source file in question

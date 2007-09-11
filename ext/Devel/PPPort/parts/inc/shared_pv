@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 1 $
+##  $Revision: 3 $
 ##  $Author: mhx $
-##  $Date: 2007/08/19 19:38:17 +0200 $
+##  $Date: 2007/09/11 23:20:42 +0200 $
 ##
 ################################################################################
 ##
@@ -33,7 +33,7 @@ newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
   if (len < 0)
     len = -len;
   if (!hash)
-    PERL_HASH(hash, src, len);
+    PERL_HASH(hash, (char*) src, len);
   sv = newSVpvn((char *) src, len);
   sv_upgrade(sv, SVt_PVIV);
   SvIVX(sv) = hash;
@@ -65,7 +65,7 @@ newSVpvn_share()
 		RETVAL = 0;
 		s = "mhx";
 		len = 3;
-		PERL_HASH(hash, s, len);
+		PERL_HASH(hash, (char *) s, len);
 		sv = newSVpvn_share(s, len, 0);
 		s = 0;
 		RETVAL += strEQ(SvPV_nolen_const(sv), "mhx");
@@ -74,8 +74,8 @@ newSVpvn_share()
 		SvREFCNT_dec(sv);
 		s = "foobar";
 		len = 6;
-		PERL_HASH(hash, s, len);
-		sv = newSVpvn_share(s, -len, hash);
+		PERL_HASH(hash, (char *) s, len);
+		sv = newSVpvn_share(s, -(I32) len, hash);
 		s = 0;
 		RETVAL += strEQ(SvPV_nolen_const(sv), "foobar");
 		RETVAL += SvCUR(sv) == len;
