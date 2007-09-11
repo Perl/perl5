@@ -9194,7 +9194,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		: SvNV(argsv);
 
 	    need = 0;
-	    if (c != 'e' && c != 'E') {
+	    if (c != 'e' && c != 'E' && nv == nv) {
 		i = PERL_INT_MIN;
 		/* FIXME: if HAS_LONG_DOUBLE but not USE_LONG_DOUBLE this
 		   will cast our (long double) to (double) */
