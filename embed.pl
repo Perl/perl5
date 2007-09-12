@@ -312,7 +312,7 @@ sub readsyms (\%$) {
 	s/[ \t]*#.*//;		# Delete comments.
 	if (/^\s*(\S+)\s*$/) {
 	    my $sym = $1;
-	    warn "duplicate symbol $sym while processing $file\n"
+	    warn "duplicate symbol $sym while processing $file line $.\n"
 		if exists $$syms{$sym};
 	    $$syms{$sym} = 1;
 	}
@@ -333,7 +333,7 @@ sub readvars(\%$$@) {
 	if (/PERLVARA?I?S?C?\($pre(\w+)/) {
 	    my $sym = $1;
 	    $sym = $pre . $sym if $keep_pre;
-	    warn "duplicate symbol $sym while processing $file\n"
+	    warn "duplicate symbol $sym while processing $file line $.\n"
 		if exists $$syms{$sym};
 	    $$syms{$sym} = $pre || 1;
 	}
