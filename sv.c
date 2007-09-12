@@ -9194,12 +9194,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		: SvNV(argsv);
 
 	    need = 0;
-#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
-	    if (c != 'e' && c != 'E' && !Perl_isnan(nv))
-#else
-	    if (c != 'e' && c != 'E' && nv == nv)
-#endif
-	    {
+	    /* nv * 0 will be NaN for NaN, +Inf and -Inf, and 0 for anything
+	       else. frexp() has some unspecified behaviour for those three */
+	    if (c != 'e' && c != 'E' && (nv * 0) == 0) {
 		i = PERL_INT_MIN;
 		/* FIXME: if HAS_LONG_DOUBLE but not USE_LONG_DOUBLE this
 		   will cast our (long double) to (double) */
