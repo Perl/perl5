@@ -7065,6 +7065,11 @@ Perl_ck_sassign(pTHX_ OP *o)
 	    condop->op_targ = target;
 	    other->op_targ = target;
 
+	    /* Because we change the type of the op here, we will skip the
+	       assinment binop->op_last = binop->op_first->op_sibling; at the
+	       end of Perl_newBINOP(). So need to do it here. */
+	    cBINOPo->op_last = cBINOPo->op_first->op_sibling;
+
 	    return nullop;
 	}
     }

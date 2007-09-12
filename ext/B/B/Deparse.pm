@@ -2557,6 +2557,14 @@ sub pp_cond_expr {
     return $head . join($cuddle, "", @elsifs) . $false;
 }
 
+sub pp_once {
+    my ($self, $op, $cx) = @_;
+    my $cond = $op->first;
+    my $true = $cond->sibling;
+
+    return $self->deparse($true, $cx);
+}
+
 sub loop_common {
     my $self = shift;
     my($op, $cx, $init) = @_;
