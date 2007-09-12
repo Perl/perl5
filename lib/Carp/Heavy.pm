@@ -104,14 +104,16 @@ sub format_arg {
   my $arg = shift;
   if (ref($arg)) {
       $arg = defined($overload::VERSION) ? overload::StrVal($arg) : "$arg";
-  }elsif (not defined($arg)) {
-    $arg = 'undef';
   }
-  $arg =~ s/'/\\'/g;
-  $arg = str_len_trim($arg, $MaxArgLen);
+  if (defined($arg)) {
+      $arg =~ s/'/\\'/g;
+      $arg = str_len_trim($arg, $MaxArgLen);
   
-  # Quote it?
-  $arg = "'$arg'" unless $arg =~ /^-?[\d.]+\z/;
+      # Quote it?
+      $arg = "'$arg'" unless $arg =~ /^-?[\d.]+\z/;
+  } else {
+      $arg = 'undef';
+  }
 
   # The following handling of "control chars" is direct from
   # the original code - it is broken on Unicode though.
