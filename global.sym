@@ -761,7 +761,5 @@ Perl_signbit
 Perl_emulate_cop_io
 Perl_get_re_arg
 Perl_mro_get_linear_isa
-Perl_mro_get_linear_isa_c3
-Perl_mro_get_linear_isa_dfs
 Perl_mro_method_changed_in
 # ex: set ro:

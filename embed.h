@@ -1911,8 +1911,12 @@
 #endif
 #endif
 #define mro_get_linear_isa	Perl_mro_get_linear_isa
-#define mro_get_linear_isa_c3	Perl_mro_get_linear_isa_c3
-#define mro_get_linear_isa_dfs	Perl_mro_get_linear_isa_dfs
+#if defined(PERL_IN_MRO_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define mro_get_linear_isa_c3	S_mro_get_linear_isa_c3
+#define mro_get_linear_isa_dfs	S_mro_get_linear_isa_dfs
+#endif
+#endif
 #ifdef PERL_CORE
 #define mro_isa_changed_in	Perl_mro_isa_changed_in
 #endif
@@ -4207,8 +4211,12 @@
 #endif
 #endif
 #define mro_get_linear_isa(a)	Perl_mro_get_linear_isa(aTHX_ a)
-#define mro_get_linear_isa_c3(a,b)	Perl_mro_get_linear_isa_c3(aTHX_ a,b)
-#define mro_get_linear_isa_dfs(a,b)	Perl_mro_get_linear_isa_dfs(aTHX_ a,b)
+#if defined(PERL_IN_MRO_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define mro_get_linear_isa_c3(a,b)	S_mro_get_linear_isa_c3(aTHX_ a,b)
+#define mro_get_linear_isa_dfs(a,b)	S_mro_get_linear_isa_dfs(aTHX_ a,b)
+#endif
+#endif
 #ifdef PERL_CORE
 #define mro_isa_changed_in(a)	Perl_mro_isa_changed_in(aTHX_ a)
 #endif

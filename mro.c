@@ -21,6 +21,7 @@ These functions are related to the method resolution order of perl classes
 */
 
 #include "EXTERN.h"
+#define PERL_IN_MRO_C
 #include "perl.h"
 
 struct mro_meta*
@@ -83,8 +84,8 @@ invalidated).
 
 =cut
 */
-AV*
-Perl_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
+static AV*
+S_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
 {
     AV* retval;
     GV** gvp;
@@ -197,8 +198,8 @@ invalidated).
 =cut
 */
 
-AV*
-Perl_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
+static AV*
+S_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
 {
     AV* retval;
     GV** gvp;
