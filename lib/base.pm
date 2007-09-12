@@ -92,9 +92,11 @@ sub import {
                 die if $@ && $@ !~ /^Can't locate .*? at \(eval /;
                 unless (%{"$base\::"}) {
                     require Carp;
+                    local $" = " ";
                     Carp::croak(<<ERROR);
 Base class package "$base" is empty.
-    (Perhaps you need to 'use' the module which defines that package first.)
+    (Perhaps you need to 'use' the module which defines that package first,
+    or make that module available in \@INC (\@INC contains: @INC).
 ERROR
                 }
                 $sigdie = $SIG{__DIE__};
