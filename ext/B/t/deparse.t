@@ -40,8 +40,8 @@ ok($deparse);
 $/ = "\n####\n";
 while (<DATA>) {
     chomp;
-    s/#(.*)$//mg;
-    my ($num) = $1 =~ m/(\d+)/;
+    s/#\s*(.*)$//mg;
+    my ($num, $testname) = $1 =~ m/(\d+)\s*(.*)/;
     my ($input, $expected);
     if (/(.*)\n>>>>\n(.*)/s) {
 	($input, $expected) = ($1, $2);
@@ -53,7 +53,8 @@ while (<DATA>) {
     my $coderef = eval "sub {$input}";
 
     if ($@) {
-	ok(0, "$num deparsed: $@");
+	diag("$num deparsed: $@");
+	ok(0, $testname);
     }
     else {
 	my $deparsed = $deparse->coderef2text( $coderef );
@@ -61,7 +62,7 @@ while (<DATA>) {
 	$regex =~ s/(\S+)/\Q$1/g;
 	$regex =~ s/\s+/\\s+/g;
 	$regex = '^\{\s*' . $regex . '\s*\}$';
-        like($deparsed, qr/$regex/);
+        like($deparsed, qr/$regex/, $testname);
     }
 }
 
