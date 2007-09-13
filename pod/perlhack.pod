@@ -575,7 +575,7 @@ category, open issues etc. using the B<RT> bugtracker system, maintained
 by Robert Spier.  Become an administrator, and close any bugs you can get
 your sticky mitts on:
 
-	http://rt.perl.org/rt3/
+	http://bugs.perl.org/
 
 To email the bug system administrators:
 
