@@ -87,6 +87,28 @@ tests that are currently missing.
 
 A full test suite for the B module would be nice.
 
+=head2 Deparse inlined constants
+
+Code such as this
+
+    use constant PI => 4;
+    warn PI
+
+will currently deparse as
+
+    use constant ('PI', 4);
+    warn 4;
+
+because the tokenizer inlines the value of the constant subroutine C<PI>.
+This allows various compile time optimisations, such as constant folding
+and dead code elimination. Where these haven't happened (such as the example
+above) it ought be possible to make B::Deparse work out the name of the
+original constant, because just enough information survives in the symbol
+table to do this. Specifically, the same scalar is used for the constant in
+the optree as is used for the constant subroutine, so by iterating over all
+symbol tables and generating a mapping of SV address to constant name, it
+would be possible to provide B::Deparse with this functionality.
+
 =head2 A decent benchmark
 
 C<perlbench> seems impervious to any recent changes made to the perl core. It
@@ -525,6 +547,19 @@ calls during startup, and (by implication) a bit of tweaking of that order.
 
 These tasks would need C knowledge, and knowledge of how the interpreter works,
 or a willingness to learn.
+
+=head2 state variable initialization in list context
+
+Currently this is illegal:
+
+    state ($a, $b) = foo(); 
+
+The current Perl 6 design is that C<state ($a) = foo();> and
+C<(state $a) = foo();> have different semantics, which is tricky to implement
+in Perl 5 as currently the produce the same opcode trees. It would be useful
+to clarify that the Perl 6 design is firm, and then implement the necessary
+code in Perl 5. There are comments in C<Perl_newASSIGNOP()> that show the
+code paths taken by various assignment constructions involving state variables.
 
 =head2 Implement $value ~~ 0 .. $range
 
