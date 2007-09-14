@@ -6,11 +6,11 @@ use Fcntl qw(O_WRONLY);
 use File::Basename;
 use POSIX qw(strftime setlocale LC_TIME);
 use Socket ':all';
-require 5.006;
+require 5.005;
 require Exporter;
 
 {   no strict 'vars';
-    $VERSION = '0.20';
+    $VERSION = '0.21';
     @ISA = qw(Exporter);
 
     %EXPORT_TAGS = (
@@ -98,8 +98,8 @@ my %options = (
 );
 
 # Default is now to first use the native mechanism, so Perl programs 
-# behave like other normal C programs, then try other mechanisms.
-my @connectMethods = qw(native tcp udp unix stream console);
+# behave like other normal Unix programs, then try other mechanisms.
+my @connectMethods = qw(native tcp udp unix pipe stream console);
 if ($^O =~ /^(freebsd|linux)$/) {
     @connectMethods = grep { $_ ne 'udp' } @connectMethods;
 }
@@ -212,6 +212,20 @@ sub setlogsock {
 	    return undef;
         }
 
+    } elsif (lc $setsock eq 'pipe') {
+        for my $path ($syslog_path, &_PATH_LOG, "/dev/log") {
+            next unless defined $path and length $path and -w $path;
+            $syslog_path = $path;
+            last
+        }
+
+        if (not $syslog_path) {
+            warnings::warnif "pipe passed to setlogsock, but path not available";
+            return undef
+        }
+
+        @connectMethods = qw(pipe);
+
     } elsif (lc $setsock eq 'native') {
         @connectMethods = qw(native);
 
@@ -219,7 +233,8 @@ sub setlogsock {
         if (eval "use Win32::EventLog; 1") {
             @connectMethods = qw(eventlog);
         } else {
-            warnings::warnif "eventlog passed to setlogsock, but operating system isn't Win32-compatible"
+            warnings::warnif "eventlog passed to setlogsock, but operating system isn't Win32-compatible";
+            return undef;
         }
 
     } elsif (lc $setsock eq 'tcp') {
@@ -245,7 +260,8 @@ sub setlogsock {
 	@connectMethods = qw(console);
 
     } else {
-        croak "Invalid argument passed to setlogsock; must be 'stream', 'unix', 'native', 'eventlog', 'tcp', 'udp' or 'inet'"
+        croak "Invalid argument passed to setlogsock; must be 'stream', 'pipe', ",
+              "'unix', 'native', 'eventlog', 'tcp', 'udp' or 'inet'"
     }
 
     return 1;
@@ -309,7 +325,10 @@ sub syslog {
     $mask .= "\n" unless $mask =~ /\n$/;
     $message = @_ ? sprintf($mask, @_) : $mask;
 
-    if($current_proto eq 'native') {
+    # See CPAN-RT#24431. Opened on Apple Radar as bug #4944407 on 2007.01.21
+    chomp $message if $^O =~ /darwin/;
+
+    if ($current_proto eq 'native') {
         $buf = $message;
 
     }
@@ -403,6 +422,11 @@ sub _syslog_send_stream {
     # Solaris 8 but not Solaris 7.
     # To be correct, it should use a STREAMS API, but perl doesn't have one.
     return syswrite(SYSLOG, $buf, length($buf));
+}
+
+sub _syslog_send_pipe {
+    my ($buf) = @_;
+    return print SYSLOG $buf;
 }
 
 sub _syslog_send_socket {
@@ -504,7 +528,10 @@ sub connect_tcp {
     }
 
     setsockopt(SYSLOG, SOL_SOCKET, SO_KEEPALIVE, 1);
-    setsockopt(SYSLOG, IPPROTO_TCP, TCP_NODELAY, 1);
+    if (eval { IPPROTO_TCP() }) {
+        # These constants don't exist in 5.005. They were added in 1999
+        setsockopt(SYSLOG, IPPROTO_TCP(), TCP_NODELAY(), 1);
+    }
     if (!connect(SYSLOG, $addr)) {
 	push @$errs, "tcp connect: $!";
 	return 0;
@@ -578,6 +605,26 @@ sub connect_stream {
 	return 0;
     }
     $syslog_send = \&_syslog_send_stream;
+    return 1;
+}
+
+sub connect_pipe {
+    my ($errs) = @_;
+
+    $syslog_path ||= &_PATH_LOG || "/dev/log";
+
+    if (not -w $syslog_path) {
+        push @$errs, "$syslog_path is not writable";
+        return 0;
+    }
+
+    if (not open(SYSLOG, ">$syslog_path")) {
+        push @$errs, "can't write to $syslog_path: $!";
+        return 0;
+    }
+
+    $syslog_send = \&_syslog_send_pipe;
+
     return 1;
 }
 
@@ -705,7 +752,7 @@ Sys::Syslog - Perl interface to the UNIX syslog(3) calls
 
 =head1 VERSION
 
-Version 0.20
+Version 0.21
 
 =head1 SYNOPSIS
 
@@ -907,6 +954,11 @@ C<"native"> - use the native C functions from your C<syslog(3)> library
 
 =item *
 
+C<"eventlog"> - send messages to the Win32 events logger (Win32 only; 
+added in C<Sys::Syslog> 0.19).
+
+=item *
+
 C<"tcp"> - connect to a TCP socket, on the C<syslog/tcp> or C<syslogng/tcp> 
 service. 
 
@@ -934,13 +986,15 @@ For example Solaris and IRIX system may prefer C<"stream"> instead of C<"unix">.
 
 =item *
 
-C<"console"> - send messages directly to the console, as for the C<"cons"> 
-option of C<openlog()>.
+C<"pipe"> - connect to the named pipe indicated by the pathname provided as 
+the optional second parameter, or, if omitted, to the value returned by 
+the C<_PATH_LOG> macro (if your system defines it), or F</dev/log>
+(added in C<Sys::Syslog> 0.21).
 
 =item *
 
-C<"eventlog"> - send messages to the Win32 events logger (Win32 only; 
-added in C<Sys::Syslog> 0.19).
+C<"console"> - send messages directly to the console, as for the C<"cons"> 
+option of C<openlog()>.
 
 =back
 
@@ -949,6 +1003,8 @@ When this calling method is used, the array should contain a list of
 mechanisms which are attempted in order.
 
 The default is to try C<native>, C<tcp>, C<udp>, C<unix>, C<stream>, C<console>.
+Under Win32 systems, C<eventlog> will be added as the first mechanism to try 
+if C<Win32::EventLog> is available.
 
 Giving an invalid value for C<$sock_type> will C<croak>.
 
@@ -1268,7 +1324,7 @@ IRIX 6.4 documentation on syslog,
 L<http://techpubs.sgi.com/library/tpl/cgi-bin/getdoc.cgi?coll=0640&db=man&fname=3c+syslog>
 
 AIX 5L 5.3 documentation on syslog, 
-L<http://publib.boulder.ibm.com/infocenter/pseries/v5r3/index.jsp?topic=/com.ibm.aix.doc/libs/basetrf2/syslog.htm>
+L<http://publib.boulder.ibm.com/infocenter/pseries/v5r3/index.jsp?topic=/com.ibm.aix.basetechref/doc/basetrf2/syslog.htm>
 
 HP-UX 11i documentation on syslog, 
 L<http://docs.hp.com/en/B9106-90010/syslog.3C.html>
@@ -1430,4 +1486,17 @@ of a bug in Sys::Syslog back then?
 
 - L<ftp://ftp.kiae.su/pub/unix/fido/>
 
+
+Links
+-----
+II12021: SYSLOGD HOWTO TCPIPINFO (z/OS, OS/390, MVS)
+- L<http://www-1.ibm.com/support/docview.wss?uid=isg1II12021>
+
+Getting the most out of the Event Viewer
+- L<http://www.codeproject.com/dotnet/evtvwr.asp?print=true>
+
+Log events to the Windows NT Event Log with JNI
+- L<http://www.javaworld.com/javaworld/jw-09-2001/jw-0928-ntmessages.html>
+
 =end comment
+

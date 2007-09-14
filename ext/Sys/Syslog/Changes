@@ -1,5 +1,12 @@
 Revision history for Sys-Syslog
 
+0.21 -- 2007.09.14 -- Sebastien Aperghis-Tramoni (SAPER)
+        [BUGFIX] setlogsock(eventlog) returned true even when it shouldn't have.
+        [BUGFIX] Added workaround for Mac OS X syslogd.
+        [FEATURE] Added "pipe" mechanism in order to support HP-UX named pipe.
+        Thanks to H.Merijn Brand and PROCURA.
+        [CODE] Sys::Syslog works again on Perl 5.005, thanks to Nicholas Clark.
+
 0.20 -- 2007.09.05 -- Sebastien Aperghis-Tramoni (SAPER)
         [DOC] Added README.win32 which was missing in MANIFEST.
 
@@ -24,6 +31,7 @@ Revision history for Sys-Syslog
         [TESTS] Merged change blead@29176: suppress taint mode from t/constants.t
         [TESTS] Added regression tests for CPAN-RT#21866 and #25488.
         [EG] Added example script eg/syslog.pl
+        [DOC] CPAN-RT#26097: man pages were not installed.
         [DOC] Added the Sys::Syslog Rules.
 
 0.18 -- 2006.08.28 -- Sebastien Aperghis-Tramoni (SAPER)

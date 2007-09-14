@@ -111,13 +111,13 @@ SKIP: {
 }
 
 
-BEGIN { $tests += 20 * 7 }
+BEGIN { $tests += 20 * 8 }
 # try to open a syslog using all the available connection methods
 my @passed = ();
-for my $sock_type (qw(native eventlog unix stream inet tcp udp)) {
+for my $sock_type (qw(native eventlog unix pipe stream inet tcp udp)) {
     SKIP: {
-        skip "the 'unix' mechanism works, so the tests will likely fail with the 'stream' mechanism", 20 
-            if $sock_type eq 'stream' and grep {/unix/} @passed;
+        skip "the 'stream' mechanism because a previous mechanism with similar interface succeeded", 20 
+            if $sock_type eq 'stream' and grep {/pipe|unix/} @passed;
 
         # setlogsock() called with an arrayref
         $r = eval { setlogsock([$sock_type]) } || 0;

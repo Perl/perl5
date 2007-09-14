@@ -5,7 +5,7 @@ eval 'use ExtUtils::MakeMaker::Coverage';
 use File::Copy;
 use File::Path;
 use File::Spec;
-require 5.006;
+require 5.005;
 
 
 # create a typemap for Perl 5.6
@@ -16,7 +16,7 @@ if ($] < 5.008) {
 }
 
 # create a lib/ dir in order to avoid warnings in Test::Distribution
-mkdir "lib";
+mkdir "lib", 0755;
 
 # virtual paths given to EU::MM
 my %virtual_path = ( 'Syslog.pm' => '$(INST_LIBDIR)/Syslog.pm' );
@@ -103,6 +103,10 @@ if (-c "/dev/conslog" and -w _) {
 elsif (-S "/var/run/syslog" and -w _) {
     # Mac OS X puts it at a different path.
     $_PATH_LOG = "/var/run/syslog";
+}
+elsif (-p "/dev/log" and -w _) {
+    # On HP-UX, /dev/log isn't a unix domain socket but a named pipe.
+    $_PATH_LOG = "/dev/log";
 }
 elsif (-S "/dev/log" and -w _) {
     # Most unixes have a unix domain socket /dev/log.

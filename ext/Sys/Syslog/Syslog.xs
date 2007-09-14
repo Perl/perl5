@@ -9,7 +9,7 @@
 #define HAVE_SYSLOG 1
 #endif
 
-#ifdef I_SYSLOG
+#if defined(I_SYSLOG) || PATCHLEVEL < 6
 #include <syslog.h>
 #endif
 
