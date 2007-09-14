@@ -452,7 +452,7 @@ S_ithread_run(void * arg)
         SPAGAIN;
         for (ii=len-1; ii >= 0; ii--) {
             SV *sv = POPs;
-            if (jmp_rc == 0) {
+            if (jmp_rc == 0 && (! (thread->gimme & G_VOID))) {
                 av_store(params, ii, SvREFCNT_inc(sv));
             }
         }
