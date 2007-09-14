@@ -12,7 +12,7 @@
 #ifdef HAS_PPPORT_H
 #  define NEED_PL_signals
 #  define NEED_newRV_noinc
-#  define NEED_sv_2pv_nolen
+#  define NEED_sv_2pv_flags
 #  include "ppport.h"
 #  include "threads.h"
 #endif
