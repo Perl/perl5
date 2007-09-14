@@ -473,7 +473,7 @@ PERLVARI(Icollation_standard, bool,	TRUE)
 #endif /* USE_LOCALE_COLLATE */
 
 
-#ifdef PERL_UTF8_CACHE_ASSERT
+#if defined (PERL_UTF8_CACHE_ASSERT) || defined (DEBUGGING)
 #  define PERL___I -1
 #else
 #  define PERL___I 1
