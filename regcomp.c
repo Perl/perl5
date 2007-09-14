@@ -3297,7 +3297,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 					SvUTF8(sv) && SvMAGICAL(sv) ?
 					mg_find(sv, PERL_MAGIC_utf8) : NULL;
 				    if (mg && mg->mg_len >= 0)
-					mg->mg_len += CHR_SVLEN(last_str);
+					mg->mg_len += CHR_SVLEN(last_str) - l;
 				}
 				data->last_end += l * (mincount - 1);
 			    }
