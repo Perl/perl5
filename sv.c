@@ -354,7 +354,7 @@ Perl_sv_add_arena(pTHX_ char *ptr, U32 size, U32 flags)
 #ifdef DEBUGGING
 	SvREFCNT(sv) = 0;
 #endif
-	/* Must always set typemask because it's awlays checked in on cleanup
+	/* Must always set typemask because it's always checked in on cleanup
 	   when the arenas are walked looking for objects.  */
 	SvFLAGS(sv) = SVTYPEMASK;
 	sv++;
