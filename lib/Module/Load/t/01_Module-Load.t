@@ -18,9 +18,6 @@ use Test::More tests => 13;
     my $mod = 'Must::Be::Loaded';
     my $file = Module::Load::_to_file($mod,1);
 
-    # %INC on VMS has all keys in UNIX format
-    $file = VMS::Filespec::unixify($file) if $^O eq 'VMS';
-
     eval { load $mod };
 
     is( $@, '', qq[Loading module '$mod'] );

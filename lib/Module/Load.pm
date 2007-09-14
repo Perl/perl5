@@ -1,6 +1,6 @@
 package Module::Load;
 
-$VERSION = '0.10';
+$VERSION = '0.12';
 
 use strict;
 use File::Spec ();
@@ -56,6 +56,13 @@ sub _to_file{
                     : File::Spec->catfile( @parts );
 
     $file   .= '.pm' if $pm;
+    
+    ### on perl's before 5.10 (5.9.5@31746) if you require
+    ### a file in VMS format, it's stored in %INC in VMS
+    ### format. Therefor, better unixify it first
+    ### Patch in reply to John Malmbergs patch (as mentioned
+    ### above) on p5p Tue 21 Aug 2007 04:55:07
+    $file = VMS::Filespec::unixify($file) if $^O eq 'VMS';
 
     return $file;
 }
@@ -154,20 +161,22 @@ C<Module::Load> cannot do implicit imports, only explicit imports.
 to import from a module, even if the functions are in that modules'
 C<@EXPORT>)
 
+=head1 ACKNOWLEDGEMENTS
+
+Thanks to Jonas B. Nielsen for making explicit imports work.
+
+=head1 BUG REPORTS
+
+Please report bugs or other issues to E<lt>bug-module-load@rt.cpan.org<gt>.
+
 =head1 AUTHOR
 
 This module by Jos Boumans E<lt>kane@cpan.orgE<gt>.
 
-Thanks to Jonas B. Nielsen for making explicit imports work.
-
 =head1 COPYRIGHT
 
-This module is
-copyright (c) 2002 Jos Boumans E<lt>kane@cpan.orgE<gt>.
-All rights reserved.
+This library is free software; you may redistribute and/or modify it 
+under the same terms as Perl itself.
 
-This library is free software;
-you may redistribute and/or modify it under the same
-terms as Perl itself.
 
 =cut                               
