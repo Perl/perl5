@@ -1804,13 +1804,13 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		
 		    opts_prog = newSVpvs("print Config::myconfig(),");
 #ifdef VMS
-		    sv_catpvs(opts_prog,"\"\\nCharacteristics of this PERLSHR image: \\n\",");
+		    sv_catpvs(opts_prog,"\"\\nCharacteristics of this PERLSHR image: \\n");
 #else
-		    sv_catpvs(opts_prog,"\"\\nCharacteristics of this binary (from libperl): \\n\",");
+		    sv_catpvs(opts_prog,"\"\\nCharacteristics of this binary (from libperl): \\n");
 #endif
 		    opts = SvCUR(opts_prog);
 
-		    Perl_sv_catpv(aTHX_ opts_prog,"\"  Compile-time options:"
+		    Perl_sv_catpv(aTHX_ opts_prog,"  Compile-time options:"
 #  ifdef DEBUGGING
 			     " DEBUGGING"
 #  endif
@@ -1961,14 +1961,14 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		    }
 #endif
 		    Perl_sv_catpvf(aTHX_ opts_prog,
-				   "\"  Built under %s\\n\"",OSNAME);
+				   "\"  Built under %s\\n",OSNAME);
 #ifdef __DATE__
 #  ifdef __TIME__
 		    Perl_sv_catpvf(aTHX_ opts_prog,
-				   ",\"  Compiled at %s %s\\n\"",__DATE__,
+				   "  Compiled at %s %s\\n\"",__DATE__,
 				   __TIME__);
 #  else
-		    Perl_sv_catpvf(aTHX_ opts_prog,",\"  Compiled on %s\\n\"",
+		    Perl_sv_catpvf(aTHX_ opts_prog,"  Compiled on %s\\n\"",
 				   __DATE__);
 #  endif
 #endif
