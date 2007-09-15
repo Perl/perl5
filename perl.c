@@ -1800,17 +1800,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 
 		Perl_av_create_and_push(aTHX_ &PL_preambleav, newSVpvs("use Config;"));
 		if (*++s != ':')  {
-		    STRLEN opts;
-		
-		    opts_prog = newSVpvs("print Config::myconfig(),");
-#ifdef VMS
-		    sv_catpvs(opts_prog,"\"\\nCharacteristics of this PERLSHR image: \\n");
-#else
-		    sv_catpvs(opts_prog,"\"\\nCharacteristics of this binary (from libperl): \\n");
-#endif
-		    opts = SvCUR(opts_prog);
-
-		    Perl_sv_catpv(aTHX_ opts_prog,"  Compile-time options:"
+		    /* Can't do newSVpvs() as that would involve pre-processor
+		       condititionals inside a macro expansion.  */
+		    opts_prog = Perl_newSVpv(aTHX_ "$_ = join ' ', sort qw("
 #  ifdef DEBUGGING
 			     " DEBUGGING"
 #  endif
@@ -1925,28 +1917,17 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef USE_SOCKS
 			     " USE_SOCKS"
 #  endif
-			     );
+					     , 0);
 
-		    while (SvCUR(opts_prog) > opts+76) {
-			/* find last space after "options: " and before col 76
-			 */
+		    /* Terminate the qw(, and then wrap at 76 columns.  */
+		    sv_catpvs(opts_prog, "); s/(?=.{53})(.{1,53}) /$1\\n                        /mg;print Config::myconfig(),");
+#ifdef VMS
+		    sv_catpvs(opts_prog,"\"\\nCharacteristics of this PERLSHR image: \\n");
+#else
+		    sv_catpvs(opts_prog,"\"\\nCharacteristics of this binary (from libperl): \\n");
+#endif
 
-			const char *space;
-			char * const pv = SvPV_nolen(opts_prog);
-			const char c = pv[opts+76];
-			pv[opts+76] = '\0';
-			space = strrchr(pv+opts+26, ' ');
-			pv[opts+76] = c;
-			if (!space) break; /* "Can't happen" */
-
-			/* break the line before that space */
-
-			opts = space - pv;
-			Perl_sv_insert(aTHX_ opts_prog, opts, 0,
-				  STR_WITH_LEN("\\n                       "));
-		    }
-
-		    sv_catpvs(opts_prog,"\\n\",");
+		    sv_catpvs(opts_prog,"  Compile-time options: $_\\n\",");
 
 #if defined(LOCAL_PATCH_COUNT)
 		    if (LOCAL_PATCH_COUNT > 0) {
