@@ -380,6 +380,11 @@ custom allocates so it would both use less memory and less CPU to allocate
 the various OP structures from arenas. The SV arena code can probably be
 re-used for this.
 
+Note that Configuring perl with C<-Accflags=-DPL_OP_SLAB_ALLOC> will use
+Perl_Slab_alloc() to pack optrees into a contiguous block, which is
+probably superior to the use of OP arenas, esp. from a cache locality
+standpoint.  See L<Profile Perl - am I hot or not?>.
+
 =head2 Improve win32/wince.c
 
 Currently, numerous functions look virtually, if not completely,
