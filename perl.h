@@ -4337,6 +4337,99 @@ EXTCONST char* PL_block_type[];
 #endif
 #endif
 
+/* These are all the compile time options that affect binary compatibility.
+   Other compile time options that are binary compatible are in perl.c
+   Both are combined for the output of perl -V
+   However, this string will be embedded in any shared perl library, which will
+   allow us add a comparison check in perlmain.c in the near future.  */
+#ifdef DOINIT
+EXTCONST char PL_bincompat_options[] =
+#  ifdef DEBUG_LEAKING_SCALARS
+			     " DEBUG_LEAKING_SCALARS"
+#  endif
+#  ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
+			     " DEBUG_LEAKING_SCALARS_FORK_DUMP"
+#  endif
+#  ifdef FAKE_THREADS
+			     " FAKE_THREADS"
+#  endif
+#  ifdef MULTIPLICITY
+			     " MULTIPLICITY"
+#  endif
+#  ifdef MYMALLOC
+			     " MYMALLOC"
+#  endif
+#  ifdef PERL_DEBUG_READONLY_OPS
+			     " PERL_DEBUG_READONLY_OPS"
+#  endif
+#  ifdef PERL_GLOBAL_STRUCT
+			     " PERL_GLOBAL_STRUCT"
+#  endif
+#  ifdef PERL_IMPLICIT_CONTEXT
+			     " PERL_IMPLICIT_CONTEXT"
+#  endif
+#  ifdef PERL_IMPLICIT_SYS
+			     " PERL_IMPLICIT_SYS"
+#  endif
+#  ifdef PERL_MAD
+			     " PERL_MAD"
+#  endif
+#  ifdef PERL_NEED_APPCTX
+			     " PERL_NEED_APPCTX"
+#  endif
+#  ifdef PERL_NEED_TIMESBASE
+			     " PERL_NEED_TIMESBASE"
+#  endif
+#  ifdef PERL_OLD_COPY_ON_WRITE
+			     " PERL_OLD_COPY_ON_WRITE"
+#  endif
+#  ifdef PERL_POISON
+			     " PERL_POISON"
+#  endif
+#  ifdef PERL_TRACK_MEMPOOL
+			     " PERL_TRACK_MEMPOOL"
+#  endif
+#  ifdef PERL_USES_PL_PIDSTATUS
+			     " PERL_USES_PL_PIDSTATUS"
+#  endif
+#  ifdef PL_OP_SLAB_ALLOC
+			     " PL_OP_SLAB_ALLOC"
+#  endif
+#  ifdef THREADS_HAVE_PIDS
+			     " THREADS_HAVE_PIDS"
+#  endif
+#  ifdef USE_64_BIT_ALL
+			     " USE_64_BIT_ALL"
+#  endif
+#  ifdef USE_64_BIT_INT
+			     " USE_64_BIT_INT"
+#  endif
+#  ifdef USE_ITHREADS
+			     " USE_ITHREADS"
+#  endif
+#  ifdef USE_LARGE_FILES
+			     " USE_LARGE_FILES"
+#  endif
+#  ifdef USE_LONG_DOUBLE
+			     " USE_LONG_DOUBLE"
+#  endif
+#  ifdef USE_PERLIO
+			     " USE_PERLIO"
+#  endif
+#  ifdef USE_REENTRANT_API
+			     " USE_REENTRANT_API"
+#  endif
+#  ifdef USE_SFIO
+			     " USE_SFIO"
+#  endif
+#  ifdef USE_SOCKS
+			     " USE_SOCKS"
+#  endif
+  ;
+#else
+EXTCONST char PL_bincompat_options[];
+#endif
+
 END_EXTERN_C
 
 /*****************************************************************************/
