@@ -62,6 +62,8 @@ OPTIMIZE = $optimize
 
 .SUFFIXES: .c \$(OBJ_EXT)
 
+RUN = $run
+
 !GROK!THIS!
 
 cat >>Makefile <<'!NO!SUBS!'
@@ -169,7 +171,7 @@ shlist:
 # These should be automatically generated
 
 $(plextract):
-	../miniperl -I../lib $@.PL
+	$(RUN) ../miniperl -I../lib $@.PL
 
 find2perl: find2perl.PL
 

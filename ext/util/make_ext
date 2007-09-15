@@ -81,9 +81,8 @@ if test ! -d "ext/$pname"; then
     exit 0 # not an error ?
 fi
 
-
 case "$osname" in
-catamount) # Snowball's chance to build extensions.
+catamount) # Snowball's chance of building extensions.
   echo "This is $osname, not building $mname, sorry."
   exit 0
   ;;

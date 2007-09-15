@@ -1,6 +1,40 @@
+case $PERL_CONFIG_SH in
+'')
+	if test -f config.sh; then TOP=.;
+	elif test -f ../config.sh; then TOP=..;
+	elif test -f ../../config.sh; then TOP=../..;
+	elif test -f ../../../config.sh; then TOP=../../..;
+	elif test -f ../../../../config.sh; then TOP=../../../..;
+	else
+		echo "Can't find config.sh."; exit 1
+	fi
+	. $TOP/config.sh
+	;;
+esac
+: This forces SH files to create target in same directory as SH file.
+: This is so that make depend always knows where to find SH derivatives.
+case "$0" in
+*/Makefile.SH) cd `expr X$0 : 'X\(.*\)/'` ;;
+Makefile.SH) ;;
+*) case `pwd` in
+   */utils) ;;
+   *) if test -d utils; then cd utils
+      else echo "Can't figure out where to write output."; exit 1
+	  fi;;
+   esac;;
+esac
+
+echo "Extracting utils/Makefile (with variable substitutions)"
+rm -f Makefile
+cat >Makefile <<!GROK!THIS!
 
 PERL = ../miniperl
 REALPERL = ../perl
+RUN = $run
+
+!GROK!THIS!
+
+cat >>Makefile <<'!NO!SUBS!'
 
 # Files to be built with variable substitution after miniperl is
 # available.  Dependencies handled manually below (for now).
@@ -12,7 +46,7 @@ plextractexe = ./c2ph ./config_data ./corelist ./cpan ./h2ph ./h2xs ./instmodsh 
 all: $(plextract) 
 
 $(plextract):
-	$(PERL) -I../lib $@.PL
+	$(RUN) $(PERL) -I../lib $@.PL
 
 c2ph:		c2ph.PL ../config.sh
 
@@ -74,3 +108,12 @@ distclean:	clobber
 
 veryclean:	distclean
 	-rm -f *~ *.org
+!NO!SUBS!
+$eunicefix Makefile
+case `pwd` in
+*SH)
+    $rm -f ../Makefile
+    $ln Makefile ../Makefile
+    ;;
+esac
+rm -f $firstmakefile
