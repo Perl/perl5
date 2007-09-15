@@ -349,6 +349,10 @@ PERLVAR(Ilastfd,	int)		/* what to preserve mode on */
 PERLVAR(Ioldname,	char *)		/* what to preserve mode on */
 PERLVAR(IArgv,		char **)	/* stuff to free from do_aexec, vfork safe */
 PERLVAR(ICmd,		char *)		/* stuff to free from do_aexec, vfork safe */
+/* Elements in this array have ';' appended and are injected as a single line
+   into the tokeniser. You can't put any (literal) newlines into any program
+   you stuff in into this array, as the point where it's injected is expecting
+   a single physical line. */
 PERLVAR(Ipreambleav,	AV *)
 PERLVAR(Imess_sv,	SV *)
 PERLVAR(Iors_sv,	SV *)		/* output record separator $\ */
