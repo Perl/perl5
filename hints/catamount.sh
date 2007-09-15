@@ -15,23 +15,53 @@
 # cause weird errors during the Perl build:
 # 1182003549.604836:3-24:(super.c:1516:llu_iop_fcntl()): unsupported fcntl cmd 2
 #
-# As of 2007-Jun (pre-5.9.5) miniperl and libperl.a can be successfully built;
-# building any extensions would be hard since Perl cannot run anything
-# external (which breaks MakeMaker, and confuses ext/util/make_ext).
+# As of 2007-Sep (pre-5.10) miniperl, libperl.a, and perl can be successfully
+# built; no extensions are built.  It would be hard since Perl cannot run
+# anything external (pipes, system(), backticks or fork/exec, or globbing)
+# (which breaks MakeMaker, and confuses ext/util/make_ext).
 #
-# To build libperl.a (which also gets miniperl built):
+# To build:
 #
 #   sh Configure -des -Dusedevel
-#   make libperl.a
+#   make perl
 #
-# The -Dusedevel is required for Perl 5.9, it is not required for Perl 5.10
-# sources, once they come out.  You will need to have the run.sh execution
-# wrapper around (it gets created in the Perl build directory) if you want to
-# run the miniperl in the XT4.  It collects the exit status (note that yod
-# is run with "-sz 1", so only one instance is run), and possible crash status.
-# For example:
+# The -Dusedevel is required for Perl 5.9, it is not required for the Perl
+# 5.10 sources, once they come out.  "make install" won't work since it
+# assumes file globbing (see above).  You can try the following manually:
 #
-#  sh run.sh ./miniperl -le 'print 42'
+# mkdir -p /opt/perl-catamount
+# mkdir -p /opt/perl-catamount/include
+# mkdir -p /opt/perl-catamount/lib
+# mkdir -p /opt/perl-catamount/lib/perl5/5.9.5
+# mkdir -p /opt/perl-catamount/bin
+# cp *.h /opt/perl-catamount/include
+# cp libperl.a /opt/perl-catamount/lib
+# cp -pr lib/* /opt/perl-catamount/lib/perl5/5.9.5
+# cp miniperl perl run.sh cc.sh /opt/perl-catamount/lib
+#
+# (For Perl 5.10.0 do the obvious renaming above.)
+# With the headers and the libperl.a you can embed Perl to your Catamount
+# application, see pod/perlembed.pod.  You can do for example:
+#
+# cc -I/opt/perl-catamount/include -L/opt/perl-catamount/lib -o embed embed.c
+# yod -sz 1 ./embed -le 'print sqrt(2)'
+#
+# You might want to have the run.sh execution wrapper around (it gets created
+# in the Perl build directory) if you want to run the miniperl or perl in
+# the XT4.  It collects the exit status (note that yod is run with "-sz 1",
+# so only one instance is run), and possible crash status (bare yod does
+# not collect the exit status).  For example:
+#
+#   sh /opt/perl-catamount/bin/run.sh /opt/perl-catamount/bin/perl -le 'print 42'
+# 
+# or if you are still in the build directory:
+#
+#   sh run.sh ./perl -le 'print 2*3*7'
+#
+# The cc.sh is a wrapper for the Catamount cc used when building Perl
+# (and before that, when running Configure), it arranges for the main()
+# exit(), _exit() to be wrapped so that the exit/crash status can be
+# collected (by run.sh).
 # 
 
 case "$prefix" in
@@ -46,7 +76,7 @@ cat >&4 <<__EOF1__
 __EOF1__
 
 archname='x86_64-catamount'
-archobjs='cata.o'
+archobjs='catalib.o'
 d_mmap='undef'
 d_setlocale='undef' # There is setlocale() but no locales.
 d_vprintf='define'
@@ -59,10 +89,11 @@ incpth=' '
 installusrbinperl='undef'
 libswanted="m crypt c"
 libpth=' '
-locincpth=''
-onlyextensions='Fcntl' # Not that we can build this, really.
+locincpth=' '
+nonxs_ext=' '
 osname='catamount'
 procselfexe='undef'
+static_ext=' '
 usedl='undef'
 useithreads='undef'
 uselargefiles='define'
@@ -107,7 +138,7 @@ cat > $cc <<__EOF3a__
 # This is essentially a frontend driver for the Catamount cc.
 # We arrange for (1) the main(), exit(), _exit() being wrapped (cpp-defined)
 # catamain(), cataexit(), and _cataexit() (2) the actual main() etc. are in
-# cata.c, and cata.o is linked in when needed (3) signals being caught
+# cata.c, and cata*.o are linked in when needed (3) signals being caught
 # All this mostly for being able to catch the exit status (or crash cause).
 #
 argv=''
@@ -121,17 +152,19 @@ __EOF3a__
 cat >> $cc <<'__EOF3b__'
 case "$1" in
 --cata_o) ;;
-*) if test ! -f cata.o
+*) if test ! -f catalib.o
    then
-     if test ! -f cata.c
+     if test ! -f catalib.c
      then
-       if test -f ../cata.c # If compiling in UU during Configure.
+       if test -f ../catalib.c # If compiling in UU during Configure.
        then
-         cp ../cata.c cata.c
+         cp ../catalib.c catalib.c
+         cp ../catamain.c catamain.c
          cp ../cata.h cata.h
        fi
      fi
-     $0 --cata_o -c cata.c || exit 1
+     $0 --cata_o -c catalib.c || exit 1
+     $0 --cata_o -c catamain.c || exit 1
    fi
    ;;
 esac
@@ -200,8 +233,12 @@ done
 case "$exe" in
 '') ;;
 *) case "$argv" in
-   *cata.o*) ;;
-   *) argv="$argv cata.o" ;;
+   *catalib.o*|*" perlmain.o "*) ;;
+   *) argv="$argv catalib.o" ;;
+   esac
+   case "$argv" in
+   *catamain.o*) ;;
+   *) argv="$argv catamain.o" ;;
    esac
    ;;
 esac
@@ -244,9 +281,14 @@ int main(int argc, char **argv, char **env);
 #endif
 #endif
 #endif
+#ifdef argv0
+#define ARGV0 STRINGIFY(argv0)
+#else
+#define ARGV0 argv0
+#endif
 __EOF6__
 
-cat >cata.c<<__EOF7__
+cat >catalib.c<<__EOF7__
 #include <stdio.h>
 #include <signal.h>
 #undef printf
@@ -254,15 +296,7 @@ cat >cata.c<<__EOF7__
 #undef exit
 #undef _exit
 #include "cata.h"
-#ifndef STRINGIFY
-#define STRINGIFY(a) #a
-#endif
-#ifdef argv0
-#define ARGV0 STRINGIFY(argv0)
-#else
-static char* argv0;
-#define ARGV0 argv0
-#endif
+char* argv0;
 void cataexit(int status) {
   printf("cata: exe %s pid %d exit %d\n", ARGV0, getpid(), status);
   exit(status);
@@ -324,6 +358,16 @@ void catasigsetup() {
   signal(SIGPWR, catasighandle);
   signal(SIGSYS, catasighandle);
 }
+void boot_DynaLoader (void* cv) { }
+__EOF7__
+cat >catamain.c<<__EOF8__
+#include <stdio.h>
+#undef printf
+#undef main
+#undef exit
+#undef _exit
+#include "cata.h"
+extern char* argv0;
 int main(int argc, char *argv[], char *envv[]) {
   int status;
 #ifndef argv0
@@ -343,7 +387,7 @@ int main(int argc, char *argv[], char *envv[]) {
   printf("cata: exe %s pid %d main %d\n", ARGV0, getpid(), status);
   return status;
 }
-__EOF7__
+__EOF8__
 
 echo "Faking DynaLoader"
 touch DynaLoader.o # Oh, the agony.
