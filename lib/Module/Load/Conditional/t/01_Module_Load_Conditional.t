@@ -1,24 +1,28 @@
 ### Module::Load::Conditional test suite ###
-BEGIN { 
-    if( $ENV{PERL_CORE} ) {
-        chdir '../lib/Module/Load/Conditional' 
-            if -d '../lib/Module/Load/Conditional';
-        unshift @INC, '../../../..';
-    
-        ### fix perl location too
-        $^X = '../../../../../t/' . $^X;
-    }
-} 
+### this should no longer be needed
+# BEGIN { 
+#     if( $ENV{PERL_CORE} ) {
+#         chdir '../lib/Module/Load/Conditional' 
+#             if -d '../lib/Module/Load/Conditional';
+#         unshift @INC, '../../../..';
+#     
+#         ### fix perl location too
+#         $^X = '../../../../../t/' . $^X;
+#     }
+# } 
 
+BEGIN { use FindBin }
 BEGIN { chdir 't' if -d 't' }
 
 use strict;
-use lib qw[../lib to_load];
 use File::Spec ();
+use Test::More 'no_plan';
 
-use Test::More tests => 23;
+use constant ON_VMS     => $^O eq 'VMS';
 
-### case 1 ###
+use lib "$FindBin::Bin/../lib";
+use lib "$FindBin::Bin/to_load";
+
 use_ok( 'Module::Load::Conditional' );
 
 ### stupid stupid warnings ###
@@ -40,35 +44,37 @@ use_ok( 'Module::Load::Conditional' );
                 );
 
     ok( $rv->{uptodate},    q[Verify self] );
-    ok( $rv->{version} == $Module::Load::Conditional::VERSION,  
+    is( $rv->{version}, $Module::Load::Conditional::VERSION,  
                             q[  Found proper version] );
 
-    # This test is expecting the file to in UNIX format, so force
-    $rv->{file} = VMS::Filespec::unixify($rv->{file}) if $^O eq 'VMS';
+    ### break up the specification
+    my @rv_path = do {
 
-    # break up the specification
-    my @rv_path;
-    if ($^O eq 'VMS') {
-	# Use the UNIX specific method, as the VMS one currently
-	# converts the file spec back to VMS format.
-	@rv_path = File::Spec::Unix->splitpath($rv->{file});
-    } else {
-	@rv_path = File::Spec->splitpath($rv->{file});
- 	@rv_path = ($rv_path[0],
-		    File::Spec->splitdir($rv_path[1]), $rv_path[2]);
-    }
+        ### Use the UNIX specific method, as the VMS one currently
+        ### converts the file spec back to VMS format.
+        my $class = ON_VMS ? 'File::Spec::Unix' : 'File::Spec';
+        
+        my($vol, $path, $file) = $class->splitpath( $rv->{'file'} );
 
-    # First element could be blank for some system types like VMS
-    shift @rv_path if $rv_path[0] eq '';
+        my @path = ($vol, $class->splitdir( $path ), $file );
 
-    ok( $INC{'Module/Load/Conditional.pm'} eq
-        File::Spec::Unix->catfile(@rv_path),
+        ### First element could be blank for some system types like VMS
+        shift @path if $vol eq '';
+
+        ### and return it    
+        @path;
+    };
+    
+    is( $INC{'Module/Load/Conditional.pm'},            
+            File::Spec::Unix->catfile(@rv_path),
                             q[  Found proper file]
     );
 
 }
 
-{
+### the version may contain an _, which means perl will warn about 'not
+### numeric' -- turn off that warning here.
+{   local $^W;
     my $rv = check_install(
                         module  => 'Module::Load::Conditional',
                         version => $Module::Load::Conditional::VERSION + 1,
@@ -102,6 +108,23 @@ use_ok( 'Module::Load::Conditional' );
     ok( $rv->{version},             "   Version found" );
     is( $rv->{version}, 2,          "   Version is correct" );
 }
+
+### test beta/developer release versions
+{   my $test_ver = $Module::Load::Conditional::VERSION;
+    
+    ### strip beta tags
+    $test_ver =~ s/_\d+//g;
+    $test_ver .= '_99';
+    
+    my $rv = check_install( 
+                    module  => 'Module::Load::Conditional', 
+                    version => $test_ver,
+                );
+
+    ok( $rv,                "Checking beta versions" );
+    ok( !$rv->{'uptodate'}, "   Beta version is higher" );
+    
+}    
 
 ### test $FIND_VERSION
 {   local $Module::Load::Conditional::FIND_VERSION = 0;
@@ -170,6 +193,9 @@ SKIP:{
     {   package A::B::C::D; 
         $A::B::C::D::VERSION = $$; 
         $INC{'A/B/C/D.pm'}   = $$.$$;
+        
+        ### XXX this is no longer needed with M::Load 0.11_01
+        #$INC{'[.A.B.C]D.pm'} = $$.$$ if $^O eq 'VMS';
     }
     
     my $href = check_install( module => 'A::B::C::D', version => 0 );

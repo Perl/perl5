@@ -3,20 +3,22 @@ package Module::Load::Conditional;
 use strict;
 
 use Module::Load;
-use Params::Check qw[check];
-use Locale::Maketext::Simple Style => 'gettext';
+use Params::Check                       qw[check];
+use Locale::Maketext::Simple Style  => 'gettext';
 
 use Carp        ();
 use File::Spec  ();
 use FileHandle  ();
 use version     qw[qv];
 
+use constant ON_VMS  => $^O eq 'VMS';
+
 BEGIN {
     use vars        qw[ $VERSION @ISA $VERBOSE $CACHE @EXPORT_OK 
                         $FIND_VERSION $ERROR $CHECK_INC_HASH];
     use Exporter;
     @ISA            = qw[Exporter];
-    $VERSION        = '0.16';
+    $VERSION        = '0.18';
     $VERBOSE        = 0;
     $FIND_VERSION   = 1;
     $CHECK_INC_HASH = 0;
@@ -224,7 +226,11 @@ sub check_install {
                 }
             }
     
-            $href->{file} = $filename;
+            ### files need to be in unix format under vms,
+            ### or they might be loaded twice
+            $href->{file} = ON_VMS
+                ? VMS::Filespec::unixify( $filename )
+                : $filename;
     
             ### user wants us to find the version from files
             if( $FIND_VERSION ) {
@@ -256,7 +262,7 @@ sub check_install {
     ### if we couldn't find the file, return undef ###
     return unless defined $href->{file};
 
-    ### only complain if we expected fo find a version higher than 0.0 anyway
+    ### only complain if we're expected to find a version higher than 0.0 anyway
     if( $FIND_VERSION and not defined $href->{version} ) {
         {   ### don't warn about the 'not numeric' stuff ###
             local $^W;
@@ -270,7 +276,12 @@ sub check_install {
     } else {
         ### don't warn about the 'not numeric' stuff ###
         local $^W;
-        $href->{uptodate} = $args->{version} <= $href->{version} ? 1 : 0;
+        
+        ### use qv(), as it will deal with developer release number
+        ### ie ones containing _ as well. This addresses bug report
+        ### #29348: Version compare logic doesn't handle alphas?
+        $href->{uptodate} = 
+            qv( $args->{version} ) <= qv( $href->{version} ) ? 1 : 0;
     }
 
     return $href;
@@ -411,9 +422,13 @@ sub can_load {
             ### else, check if the hash key is defined already,
             ### meaning $mod => 0,
             ### indicating UNSUCCESSFUL prior attempt of usage
+
+            ### use qv(), as it will deal with developer release number
+            ### ie ones containing _ as well. This addresses bug report
+            ### #29348: Version compare logic doesn't handle alphas?
             if (    !$args->{nocache}
                     && defined $CACHE->{$mod}->{usable}
-                    && (($CACHE->{$mod}->{version}||0) >= $href->{$mod})
+                    && (qv($CACHE->{$mod}->{version}||0) >= qv($href->{$mod}))
             ) {
                 $error = loc( q[Already tried to use '%1', which was unsuccessful], $mod);
                 last BLOCK;
@@ -468,11 +483,13 @@ sub can_load {
     if( defined $error ) {
         $ERROR = $error;
         Carp::carp( loc(q|%1 [THIS MAY BE A PROBLEM!]|,$error) ) if $args->{verbose};
-        return undef;
+        return;
     } else {
         return 1;
     }
 }
+
+=back
 
 =head2 @list = requires( MODULE );
 
@@ -565,15 +582,17 @@ C<undef>.
 
 C<Module::Load>
 
+=head1 BUG REPORTS
+
+Please report bugs or other issues to E<lt>bug-module-load-conditional@rt.cpan.orgE<gt>.
+
 =head1 AUTHOR
 
-This module by
-Jos Boumans E<lt>kane@cpan.orgE<gt>.
+This module by Jos Boumans E<lt>kane@cpan.orgE<gt>.
 
 =head1 COPYRIGHT
 
-This module is copyright (c) 2002-2007 Jos Boumans 
-E<lt>kane@cpan.orgE<gt>. All rights reserved.
+This library is free software; you may redistribute and/or modify it 
+under the same terms as Perl itself.
 
-This library is free software; you may redistribute and/or modify 
-it under the same terms as Perl itself.
+=cut

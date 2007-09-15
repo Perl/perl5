@@ -72,6 +72,8 @@ sub _succeed {
         ( $VERSION = q($Id: Tidy.pm,v 1.56 2006/07/19 23:13:33 perltidy Exp $) ) =~ s/^.*\s+(\d+)\/(\d+)\/(\d+).*$/$1$2$3/; # all one line for MakeMaker
         ($VERSION) = q $Revision: 2.120 $ =~ /([\d.]+)/;
         ($VERSION) = q$Revision: 1.00 $ =~ /([\d.]+)/;
+        $VERSION = "3.0.8";
+        $VERSION = '1.0.5';
     ];
 }
 
