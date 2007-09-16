@@ -14,7 +14,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG              = 0;
 $WARN               = 1;
 $FOLLOW_SYMLINK     = 0;
-$VERSION            = "1.34_01";
+$VERSION            = "1.36";
 $CHOWN              = 1;
 $CHMOD              = 1;
 $DO_NOT_USE_PREFIX  = 0;
@@ -547,20 +547,39 @@ sub _extract_file {
     ### it's a relative path ###
     } else {
         my $cwd     = (defined $self->{cwd} ? $self->{cwd} : cwd());
-        my @dirs;
-        if ( defined $alt ) { # It's a local-OS path
-            @dirs   = File::Spec->splitdir( $dirs );
-        } else {              # it's UNIX-style, likely straight from the tarball
-            @dirs   = File::Spec::Unix->splitdir( $dirs );
-        }
-        map tr/\./_/, @dirs if $^O eq 'VMS'; # '.' is the directory delimiter
+
+
+
+        my @dirs = defined $alt
+            ? File::Spec->splitdir( $dirs )         # It's a local-OS path
+            : File::Spec::Unix->splitdir( $dirs );  # it's UNIX-style, likely
+                                                    # straight from the tarball
+        
+        ### '.' is the directory delimiter, of which the first one has to
+        ### be escaped/changed.
+        map tr/\./_/, @dirs if ON_VMS;        
+
         my ($cwd_vol,$cwd_dir,$cwd_file) 
                     = File::Spec->splitpath( $cwd );
         my @cwd     = File::Spec->splitdir( $cwd_dir );
         push @cwd, $cwd_file if length $cwd_file;
-        $dir        = File::Spec->catpath( $cwd_vol, File::Spec->catdir( @cwd, @dirs ) );
 
-        # catdir() returns undef if the path is longer than 255 chars on VMS
+        ### We need to pass '' as the last elemant to catpath. Craig Berry
+        ### explains why (msgid <p0624083dc311ae541393@[172.16.52.1]>):
+        ### The root problem is that splitpath on UNIX always returns the 
+        ### final path element as a file even if it is a directory, and of
+        ### course there is no way it can know the difference without checking
+        ### against the filesystem, which it is documented as not doing.  When
+        ### you turn around and call catpath, on VMS you have to know which bits
+        ### are directory bits and which bits are file bits.  In this case we
+        ### know the result should be a directory.  I had thought you could omit
+        ### the file argument to catpath in such a case, but apparently on UNIX
+        ### you can't.
+        $dir        = File::Spec->catpath( 
+                            $cwd_vol, File::Spec->catdir( @cwd, @dirs ), '' 
+                        );
+
+        ### catdir() returns undef if the path is longer than 255 chars on VMS
         unless ( defined $dir ) {
             $^W && $self->_error( qq[Could not compose a path for '$dirs'\n] );
             return;

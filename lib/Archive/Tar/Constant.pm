@@ -10,7 +10,7 @@ BEGIN {
                 BLOCK_SIZE TAR_PAD TAR_END ON_UNIX BLOCK CAN_READLINK MAGIC 
                 TAR_VERSION UNAME GNAME CAN_CHOWN MODE CHECK_SUM UID GID 
                 GZIP_MAGIC_NUM MODE_READ LONGLINK LONGLINK_NAME PREFIX_LENGTH
-                LABEL NAME_LENGTH STRIP_MODE
+                LABEL NAME_LENGTH STRIP_MODE ON_VMS
             ];
 
     require Time::Local if $^O eq "MacOS";
@@ -73,5 +73,6 @@ use constant GZIP_MAGIC_NUM => qr/^(?:\037\213|\037\235)/;
 use constant CAN_CHOWN      => do { ($> == 0 and $^O ne "MacOS" and $^O ne "MSWin32") };
 use constant CAN_READLINK   => ($^O ne 'MSWin32' and $^O !~ /RISC(?:[ _])?OS/i and $^O ne 'VMS');
 use constant ON_UNIX        => ($^O ne 'MSWin32' and $^O ne 'MacOS' and $^O ne 'VMS');
+use constant ON_VMS         => $^O eq 'VMS'; 
 
 1;
