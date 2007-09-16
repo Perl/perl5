@@ -16,7 +16,7 @@ package Math::BigInt;
 # underlying lib might change the reference!
 
 my $class = "Math::BigInt";
-use 5.006002;
+use 5.006;
 
 $VERSION = '1.88';
 
@@ -4660,31 +4660,6 @@ C<Math::BigInt> exports nothing by default, but can export the following methods
 
 	bgcd
 	blcm
-
-=head1 BUGS
-
-=over 2
-
-=item broot() does not work
-
-The broot() function in BigInt may only work for small values. This will be
-fixed in a later version.
-
-=item Out of Memory!
-
-Under Perl prior to 5.6.0 having an C<use Math::BigInt ':constant';> and 
-C<eval()> in your code will crash with "Out of memory". This is probably an
-overload/exporter bug. You can workaround by not having C<eval()> 
-and ':constant' at the same time or upgrade your Perl to a newer version.
-
-=item Fails to load Calc on Perl prior 5.6.0
-
-Since eval(' use ...') can not be used in conjunction with ':constant', BigInt
-will fall back to eval { require ... } when loading the math lib on Perls
-prior to 5.6.0. This simple replaces '::' with '/' and thus might fail on
-filesystems using a different seperator.  
-
-=back
 
 =head1 CAVEATS
 

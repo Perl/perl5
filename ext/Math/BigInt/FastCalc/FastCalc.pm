@@ -1,6 +1,6 @@
 package Math::BigInt::FastCalc;
 
-use 5.006002;
+use 5.006;
 use strict;
 # use warnings;	# dont use warnings for older Perls
 
@@ -11,7 +11,7 @@ use vars qw/@ISA $VERSION $BASE $BASE_LEN/;
 
 @ISA = qw(DynaLoader);
 
-$VERSION = '0.15_01';
+$VERSION = '0.16';
 
 bootstrap Math::BigInt::FastCalc $VERSION;
 
@@ -34,7 +34,7 @@ BEGIN
     pow root sqrt log_int fac nok
     digit check
     from_hex from_bin from_oct as_hex as_bin as_oct
-    zeros length base_len
+    zeros base_len
     xor or and
     alen 1ex
     /)

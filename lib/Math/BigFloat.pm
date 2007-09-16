@@ -12,8 +12,8 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.58';
-require 5.006002;
+$VERSION = '1.59';
+require 5.006;
 
 require Exporter;
 @ISA		= qw/Math::BigInt/;
