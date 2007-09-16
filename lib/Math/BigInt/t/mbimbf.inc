@@ -782,7 +782,7 @@ my ($ans1,$f,$a,$p,$xp,$yp,$xa,$ya,$try,$ans,@args);
 my $CALC = Math::BigInt->config()->{lib};
 while (<DATA>)
   {
-  chomp;
+  $_ =~ s/[\n\r]//g;	# remove newlines
   next if /^\s*(#|$)/;	# skip comments and empty lines
   if (s/^&//)
     {

@@ -3796,6 +3796,12 @@ This method was added in v1.87 of Math::BigInt (June 2007).
 
 	$x->bsqrt();			# calculate square-root
 
+=head2 broot()
+
+	$x->broot($N);
+
+Calculates the N'th root of C<$x>.
+
 =head2 bfac()
 
 	$x->bfac();			# factorial of $x (1*2*3*4*..$x)
