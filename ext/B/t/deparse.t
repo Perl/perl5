@@ -22,7 +22,7 @@ BEGIN {
 use warnings;
 use strict;
 use feature ":5.10";
-use Test::More tests => 52;
+use Test::More tests => 54;
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -337,8 +337,20 @@ my $bar;
 # 44
 'Foo'->bar;
 ####
-# 45 state vars
+# 45 say
+say 'foo';
+####
+# 46 state vars
 state $x = 42;
 ####
-# 46 say
-say 'foo';
+# 47 state var assignment
+{
+    my $y = (state $x = 42);
+}
+####
+# 48 state vars in anoymous subroutines
+$a = sub {
+    state $x;
+    return $x++;
+}
+;
