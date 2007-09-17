@@ -6,8 +6,8 @@ File::Path - Create or remove directory trees
 
 =head1 VERSION
 
-This document describes version 2.00_11 of File::Path, released
-2007-09-08.
+This document describes version 2.00_12 of File::Path, released
+2007-09-17.
 
 =head1 SYNOPSIS
 
@@ -317,7 +317,7 @@ See the following pages for more information:
   http://www.debian.org/security/2005/dsa-696
 
 Additionally, unless the C<skip_others> parameter is set (or the
-third parameter in the traditional inferface is TRUE), should a
+third parameter in the traditional interface is TRUE), should a
 C<rmtree> be interrupted, files that were originally in read-only
 mode may now have their permissions set to a read-write (or "delete
 OK") mode.
@@ -338,7 +338,7 @@ they will be C<carp>ed about. Program execution will not be halted.
 
 =over 4
 
-=item mkdir [ppath]: [errmsg] (SEVERE)
+=item mkdir [path]: [errmsg] (SEVERE)
 
 C<mkpath> was unable to create the path. Probably some sort of
 permissions error at the point of departure, or insufficient resources
@@ -454,7 +454,7 @@ C<rmtree> failed to remove a file. Probably a permissions issue.
 =item cannot restore permissions of [file] to [0nnn]: [errmsg]
 
 After having failed to remove a file, C<rmtree> was also unable
-to restore the permissions on the file to a possibily less permissive
+to restore the permissions on the file to a possibly less permissive
 setting. (Permissions given in octal).
 
 =back
@@ -482,7 +482,7 @@ L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=File-Path>
 
 =head1 ACKNOWLEDGEMENTS
 
-Paul Szabo identified the race condition orignially, and Brendan
+Paul Szabo identified the race condition originally, and Brendan
 O'Dea wrote an implementation for Debian that addressed the problem.
 That code was used as a basis for the current code. Their efforts
 are greatly appreciated.
@@ -522,7 +522,7 @@ BEGIN {
 
 use Exporter ();
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '2.00_12';
+$VERSION = '2.00_11';
 @ISA     = qw(Exporter);
 @EXPORT  = qw(mkpath rmtree);
 
@@ -700,6 +700,7 @@ sub _rmtree {
     my $updir  = File::Spec->updir();
 
     my (@files, $root);
+    ROOT_DIR:
     foreach $root (@$paths) {
     	if ($Is_MacOS) {
             $root  = ":$root" unless $root =~ /:/;
@@ -720,7 +721,7 @@ sub _rmtree {
             : $root
         ;
 
-        my ($ldev, $lino, $perm) = (lstat $root)[0,1,2] or next;
+        my ($ldev, $lino, $perm) = (lstat $root)[0,1,2] or next ROOT_DIR;
 
 	if ( -d _ ) {
             $root = VMS::Filespec::pathify($root) if $Is_VMS;
@@ -731,17 +732,17 @@ sub _rmtree {
                 my $nperm = $perm | 0700;
                 if (!($arg->{safe} or $nperm == $perm or chmod($nperm, $root))) {
                     _error($arg, "cannot make child directory read-write-exec", $canon);
-                    next;
+                    next ROOT_DIR;
                 }
                 elsif (!chdir($root)) {
                     _error($arg, "cannot chdir to child", $canon);
-                    next;
+                    next ROOT_DIR;
                 }
             }
 
             my ($device, $inode, $perm) = (stat $curdir)[0,1,2] or do {
                 _error($arg, "cannot stat current working directory", $canon);
-                return $count;
+                next ROOT_DIR;
             };
 
             ($ldev eq $device and $lino eq $inode)
@@ -819,7 +820,7 @@ sub _rmtree {
                 if ($arg->{safe} &&
 		($Is_VMS ? !&VMS::Filespec::candelete($root) : !-w $root)) {
                     print "skipped $root\n" if $arg->{verbose};
-		next;
+                    next ROOT_DIR;
 	    }
                 if (!chmod $perm | 0700, $root) {
                     if ($Force_Writeable) {
@@ -851,7 +852,7 @@ sub _rmtree {
 		         : !(-l $root || -w $root)))
 	    {
                 print "skipped $root\n" if $arg->{verbose};
-		next;
+                next ROOT_DIR;
 	    }
 
             my $nperm = $perm & 07777 | 0600;

@@ -2,7 +2,7 @@
 
 use strict;
 
-use Test::More tests => 93;
+use Test::More tests => 98;
 
 BEGIN {
     use_ok('File::Path');
@@ -221,7 +221,7 @@ SKIP: {
 my $extra =  catdir(curdir(), qw(EXTRA 1 a));
 
 SKIP: {
-    skip "extra scenarios not set up, see eg/setup-extra-tests", 9
+    skip "extra scenarios not set up, see eg/setup-extra-tests", 14
         unless -e $extra;
 
     my ($list, $err);
@@ -238,17 +238,30 @@ SKIP: {
     $dir = catdir('EXTRA', '3', 'S');
     rmtree($dir, {error => \$error});
     is( scalar(@$error), 1, 'one error for an unreadable dir' );
+    eval { ($file, $message) = each %{$error->[0]}};
+    is( $file, $dir, 'unreadable dir reported in error' )
+        or diag($message);
 
     $dir = catdir('EXTRA', '3', 'T');
     rmtree($dir, {error => \$error});
-    is( scalar(@$error), 1, 'one error for an unreadable dir' );
+    is( scalar(@$error), 1, 'one error for an unreadable dir T' );
+    eval { ($file, $message) = each %{$error->[0]}};
+    is( $file, $dir, 'unreadable dir reported in error T' );
 
     $dir = catdir( 'EXTRA', '4' );
     rmtree($dir,  {result => \$list, error => \$err} );
-    is( @$list, 0, q{don't follow a symlinked dir} );
-    is( @$err,  2, q{two errors when removing a symlink in r/o dir} );
+    is( scalar(@$list), 0, q{don't follow a symlinked dir} );
+    is( scalar(@$err),  2, q{two errors when removing a symlink in r/o dir} );
     eval { ($file, $message) = each %{$err->[0]} };
     is( $file, $dir, 'symlink reported in error' );
+
+    $dir  = catdir('EXTRA', '3', 'U');
+    $dir2 = catdir('EXTRA', '3', 'V');
+    rmtree($dir, $dir2, {verbose => 0, error => \$err, result => \$list});
+    is( scalar(@$list),  1, q{deleted 1 out of 2 directories} );
+    is( scalar(@$error), 1, q{left behind 1 out of 2 directories} );
+    eval { ($file, $message) = each %{$err->[0]} };
+    is( $file, $dir, 'first dir reported in error' );
 }
 
 {
