@@ -533,16 +533,6 @@ Perl_hv_magic(pTHX_ HV *hv, GV *gv, int how)
     sv_magic((SV*)hv, (SV*)gv, how, NULL, 0);
 }
 
-#if 0 /* use the macro from hv.h instead */
-
-char*	
-Perl_sharepvn(pTHX_ const char *sv, I32 len, U32 hash)
-{
-    return HEK_KEY(share_hek(sv, len, hash));
-}
-
-#endif
-
 AV *
 Perl_av_fake(pTHX_ register I32 size, register SV **strp)
 {
@@ -672,16 +662,6 @@ Perl_save_hints(pTHX)
 {
     Perl_croak(aTHX_ "internal error: obsolete function save_hints() called");
 }
-
-#if 0
-OP *
-Perl_ck_retarget(pTHX_ OP *o)
-{
-    Perl_croak(aTHX_ "NOT IMPL LINE %d",__LINE__);
-    /* STUB */
-    return o;
-}
-#endif
 
 OP *
 Perl_oopsCV(pTHX_ OP *o)
