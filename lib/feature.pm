@@ -120,15 +120,21 @@ all available features in the main compilation unit (that is, the one-liner.)
 
 By requiring explicitly a minimal Perl version number for your program, with
 the C<use VERSION> construct, and when the version is higher than or equal to
-5.9.5. That is,
+5.10.0. That is,
 
-    use 5.9.5;
+    use 5.10.0;
 
 will do an implicit
 
-    use feature ':5.9.5';
+    use feature ':5.10.0';
 
 and so on.
+
+But to avoid portability warnings (see L<perlfunc/use>), you may prefer:
+
+    use 5.010;
+
+with the same effect.
 
 =back
 
