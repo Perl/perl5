@@ -650,7 +650,7 @@ struct token {
 #endif
 
 /*
- * Values that can be hold by mad_key :
+ * Values that can be held by mad_key :
  * ^       unfilled head spot
  * ,       literal ,
  * ;       literal ; (blank if implicit ; at end of block)
