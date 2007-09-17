@@ -157,7 +157,7 @@ case `$cc -v 2>&1`"" in
 		done
 	    [ -z "$cc_found" ] && cc_found=`which cc`
 	    what $cc_found >&4
-	    ccversion=`what $cc_found | awk '/Compiler/{print $2}/Itanium/{print $6,$7}/for Integrity/{print $7}'`
+	    ccversion=`what $cc_found | awk '/Compiler/{print $2}/Itanium/{print $6,$7}/for Integrity/{print $6}'`
 	    case "$ccflags" in
                "-Ae "*) ;;
 		*)  ccflags="-Ae $cc_cppflags"
@@ -365,6 +365,7 @@ to at least 0x08000000 (128 Mb) and rebuild your kernel.
 EOM
 regexec_cflags=''
 doop_cflags=''
+op_cflags=''
     fi
 
 case "$ccisgcc" in
@@ -424,7 +425,8 @@ case "$ccisgcc" in
 			# maint (5.8.8+) and blead (5.9.3+)
 			# -O1/+O1 passed all tests (m)'05 [ 10 Jan 2005 ]
 			optimize="$opt"			;;
-		    *)  doop_cflags="optimize=\"$opt\""	;;
+		    *)  doop_cflags="optimize=\"$opt\""
+			op_cflags="optimize=\"$opt\""	;;
 		    esac
 		;;
 	    esac
