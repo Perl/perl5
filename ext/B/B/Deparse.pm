@@ -21,7 +21,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED),
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : 'RXf_SKIPWHITE');
-$VERSION = 0.82;
+$VERSION = 0.83;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -438,7 +438,8 @@ sub begin_is_use {
     # Certain pragmas are dealt with using hint bits,
     # so we ignore them here
     if ($module eq 'strict' || $module eq 'integer'
-	|| $module eq 'bytes' || $module eq 'warnings') {
+	|| $module eq 'bytes' || $module eq 'warnings'
+	|| $module eq 'feature') {
 	return "";
     }
 
@@ -561,6 +562,7 @@ sub new {
     $self->{'ambient_arybase'} = 0;
     $self->{'ambient_warnings'} = undef; # Assume no lexical warnings
     $self->{'ambient_hints'} = 0;
+    $self->{'ambient_hinthash'} = undef;
     $self->init();
 
     while (my $arg = shift @_) {
@@ -609,6 +611,7 @@ sub init {
 				: undef;
     $self->{'hints'}    = $self->{'ambient_hints'};
     $self->{'hints'} &= 0xFF if $] < 5.009;
+    $self->{'hinthash'} = $self->{'ambient_hinthash'};
 
     # also a convenient place to clear out subs_declared
     delete $self->{'subs_declared'};
@@ -686,7 +689,7 @@ sub coderef2text {
 
 sub ambient_pragmas {
     my $self = shift;
-    my ($arybase, $hint_bits, $warning_bits) = (0, 0);
+    my ($arybase, $hint_bits, $warning_bits, $hinthash) = (0, 0);
 
     while (@_ > 1) {
 	my $name = shift();
@@ -775,6 +778,10 @@ sub ambient_pragmas {
 	    $hint_bits = $val;
 	}
 
+	elsif ($name eq '%^H') {
+	    $hinthash = $val;
+	}
+
 	else {
 	    croak "Unknown pragma type: $name";
 	}
@@ -786,6 +793,7 @@ sub ambient_pragmas {
     $self->{'ambient_arybase'} = $arybase;
     $self->{'ambient_warnings'} = $warning_bits;
     $self->{'ambient_hints'} = $hint_bits;
+    $self->{'ambient_hinthash'} = $hinthash;
 }
 
 # This method is the inner loop, so try to keep it simple
@@ -846,8 +854,8 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
 
     local($self->{'curcv'}) = $cv;
     local($self->{'curcvlex'});
-    local(@$self{qw'curstash warnings hints'})
-		= @$self{qw'curstash warnings hints'};
+    local(@$self{qw'curstash warnings hints hinthash'})
+		= @$self{qw'curstash warnings hints hinthash'};
     my $body;
     if (not null $cv->ROOT) {
 	my $lineseq = $cv->ROOT->first;
@@ -886,8 +894,8 @@ sub deparse_format {
     local($self->{'curcv'}) = $form;
     local($self->{'curcvlex'});
     local($self->{'in_format'}) = 1;
-    local(@$self{qw'curstash warnings hints'})
-		= @$self{qw'curstash warnings hints'};
+    local(@$self{qw'curstash warnings hints hinthash'})
+		= @$self{qw'curstash warnings hints hinthash'};
     my $op = $form->ROOT;
     my $kid;
     return "\f." if $op->first->name eq 'stub'
@@ -1124,8 +1132,8 @@ sub scopeop {
     my $kid;
     my @kids;
 
-    local(@$self{qw'curstash warnings hints'})
-		= @$self{qw'curstash warnings hints'} if $real_block;
+    local(@$self{qw'curstash warnings hints hinthash'})
+		= @$self{qw'curstash warnings hints hinthash'} if $real_block;
     if ($real_block) {
 	$kid = $op->first->sibling; # skip enter
 	if (is_miniwhile($kid)) {
@@ -1168,8 +1176,8 @@ sub pp_leave { scopeop(1, @_); }
 sub deparse_root {
     my $self = shift;
     my($op) = @_;
-    local(@$self{qw'curstash warnings hints'})
-      = @$self{qw'curstash warnings hints'};
+    local(@$self{qw'curstash warnings hints hinthash'})
+      = @$self{qw'curstash warnings hints hinthash'};
     my @kids;
     return if null $op->first; # Can happen, e.g., for Bytecode without -k
     for (my $kid = $op->first->sibling; !null($kid); $kid = $kid->sibling) {
@@ -1399,6 +1407,12 @@ sub pp_nextstate {
 	$self->{'hints'} = $op->hints;
     }
 
+    # hack to check that the hint hash hasn't changed
+    if ("@{[sort %{$self->{'hinthash'} || {}}]}" ne "@{[sort %{$op->hints_hash->HASH || {}}]}") {
+	push @text, declare_hinthash($self->{'hinthash'}, $op->hints_hash->HASH, $self->{indent_size});
+	$self->{'hinthash'} = $op->hints_hash->HASH;
+    }
+
     # This should go after of any branches that add statements, to
     # increase the chances that it refers to the same line it did in
     # the original program.
@@ -1433,6 +1447,23 @@ sub declare_hints {
         $decls .= "no $pragma;\n";
     }
     return $decls;
+}
+
+sub declare_hinthash {
+    my ($from, $to, $indent) = @_;
+    my @decls;
+    for my $key (keys %$to) {
+	if (!defined $from->{$key} or $from->{$key} ne $to->{$key}) {
+	    push @decls, qq(\$^H{'$key'} = q($to->{$key}););
+	}
+    }
+    for my $key (keys %$from) {
+	if (!exists $to->{$key}) {
+	    push @decls, qq(delete \$^H{'$key'};);
+	}
+    }
+    @decls or return '';
+    return join("\n" . (" " x $indent), "BEGIN {", @decls) . "\n}\n";
 }
 
 sub hint_pragmas {
@@ -2571,8 +2602,8 @@ sub loop_common {
     my($op, $cx, $init) = @_;
     my $enter = $op->first;
     my $kid = $enter->sibling;
-    local(@$self{qw'curstash warnings hints'})
-		= @$self{qw'curstash warnings hints'};
+    local(@$self{qw'curstash warnings hints hinthash'})
+		= @$self{qw'curstash warnings hints hinthash'};
     my $head = "";
     my $bare = 0;
     my $body;
@@ -4683,6 +4714,11 @@ They exist principally so that you can write code like:
 
 which specifies that the ambient pragmas are exactly those which
 are in scope at the point of calling.
+
+=item %^H
+
+This parameter is used to specify the ambient pragmas which are
+stored in the special hash %^H.
 
 =back
 

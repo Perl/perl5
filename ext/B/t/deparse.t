@@ -21,19 +21,21 @@ BEGIN {
 
 use warnings;
 use strict;
-use Test::More tests => 50;
+use feature ":5.10";
+use Test::More tests => 52;
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
 ok($deparse);
 
 # Tell B::Deparse about our ambient pragmas
-{ my ($hint_bits, $warning_bits);
- BEGIN { ($hint_bits, $warning_bits) = ($^H, ${^WARNING_BITS}); }
+{ my ($hint_bits, $warning_bits, $hinthash);
+ BEGIN { ($hint_bits, $warning_bits, $hinthash) = ($^H, ${^WARNING_BITS}, \%^H); }
  $deparse->ambient_pragmas (
      hint_bits    => $hint_bits,
      warning_bits => $warning_bits,
-     '$['         => 0 + $[
+     '$['         => 0 + $[,
+     '%^H'	  => $hinthash,
  );
 }
 
@@ -334,3 +336,9 @@ my $bar;
 ####
 # 44
 'Foo'->bar;
+####
+# 45 state vars
+state $x = 42;
+####
+# 46 say
+say 'foo';
