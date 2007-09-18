@@ -39,46 +39,71 @@ typedef BOOL (__stdcall *PFNEqualSid)(PSID, PSID);
 typedef void* (__stdcall *PFNFreeSid)(PSID);
 typedef BOOL (__stdcall *PFNIsUserAnAdmin)();
 
-#ifndef CSIDL_FLAG_CREATE
-#   define CSIDL_FLAG_CREATE               0x8000
-#endif
-
-#ifndef CSIDL_ADMINTOOLS
-#   define CSIDL_ADMINTOOLS           0x0030
-#   define CSIDL_COMMON_ADMINTOOLS    0x002F
-#   define CSIDL_COMMON_APPDATA       0x0023
-#   define CSIDL_COMMON_DOCUMENTS     0x002E
-#   define CSIDL_COMMON_TEMPLATES     0x002D
-#   define CSIDL_LOCAL_APPDATA        0x001C
-#   define CSIDL_MYPICTURES           0x0027
-#   define CSIDL_PROFILE              0x0028
-#   define CSIDL_PROGRAM_FILES        0x0026
-#   define CSIDL_PROGRAM_FILES_COMMON 0x002B
-#   define CSIDL_WINDOWS              0x0024
-#endif
-
-#ifndef CSIDL_CDBURN_AREA
-#   define CSIDL_CDBURN_AREA          0x003B
-#endif
-
-#ifndef CSIDL_COMMON_MUSIC
-#   define CSIDL_COMMON_MUSIC         0x0035
-#endif
-
-#ifndef CSIDL_COMMON_PICTURES
-#   define CSIDL_COMMON_PICTURES      0x0036
-#endif
-
-#ifndef CSIDL_COMMON_VIDEO
-#   define CSIDL_COMMON_VIDEO         0x0037
-#endif
-
 #ifndef CSIDL_MYMUSIC
 #   define CSIDL_MYMUSIC              0x000D
 #endif
-
 #ifndef CSIDL_MYVIDEO
 #   define CSIDL_MYVIDEO              0x000E
+#endif
+#ifndef CSIDL_LOCAL_APPDATA
+#   define CSIDL_LOCAL_APPDATA        0x001C
+#endif
+#ifndef CSIDL_COMMON_FAVORITES
+#   define CSIDL_COMMON_FAVORITES     0x001F
+#endif
+#ifndef CSIDL_INTERNET_CACHE
+#   define CSIDL_INTERNET_CACHE       0x0020
+#endif
+#ifndef CSIDL_COOKIES
+#   define CSIDL_COOKIES              0x0021
+#endif
+#ifndef CSIDL_HISTORY
+#   define CSIDL_HISTORY              0x0022
+#endif
+#ifndef CSIDL_COMMON_APPDATA
+#   define CSIDL_COMMON_APPDATA       0x0023
+#endif
+#ifndef CSIDL_WINDOWS
+#   define CSIDL_WINDOWS              0x0024
+#endif
+#ifndef CSIDL_PROGRAM_FILES
+#   define CSIDL_PROGRAM_FILES        0x0026
+#endif
+#ifndef CSIDL_MYPICTURES
+#   define CSIDL_MYPICTURES           0x0027
+#endif
+#ifndef CSIDL_PROFILE
+#   define CSIDL_PROFILE              0x0028
+#endif
+#ifndef CSIDL_PROGRAM_FILES_COMMON
+#   define CSIDL_PROGRAM_FILES_COMMON 0x002B
+#endif
+#ifndef CSIDL_COMMON_TEMPLATES
+#   define CSIDL_COMMON_TEMPLATES     0x002D
+#endif
+#ifndef CSIDL_COMMON_DOCUMENTS
+#   define CSIDL_COMMON_DOCUMENTS     0x002E
+#endif
+#ifndef CSIDL_COMMON_ADMINTOOLS
+#   define CSIDL_COMMON_ADMINTOOLS    0x002F
+#endif
+#ifndef CSIDL_ADMINTOOLS
+#   define CSIDL_ADMINTOOLS           0x0030
+#endif
+#ifndef CSIDL_COMMON_MUSIC
+#   define CSIDL_COMMON_MUSIC         0x0035
+#endif
+#ifndef CSIDL_COMMON_PICTURES
+#   define CSIDL_COMMON_PICTURES      0x0036
+#endif
+#ifndef CSIDL_COMMON_VIDEO
+#   define CSIDL_COMMON_VIDEO         0x0037
+#endif
+#ifndef CSIDL_CDBURN_AREA
+#   define CSIDL_CDBURN_AREA          0x003B
+#endif
+#ifndef CSIDL_FLAG_CREATE
+#   define CSIDL_FLAG_CREATE          0x8000
 #endif
 
 /* Use explicit struct definition because wSuiteMask and
