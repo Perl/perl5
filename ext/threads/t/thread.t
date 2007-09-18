@@ -171,7 +171,7 @@ package main;
 
 # bugid #24165
 
-run_perl(prog => 'use threads 1.66;' .
+run_perl(prog => 'use threads 1.67;' .
                  'sub a{threads->create(shift)} $t = a sub{};' .
                  '$t->tid; $t->join; $t->tid',
          nolib => ($ENV{PERL_CORE}) ? 0 : 1,
@@ -203,7 +203,9 @@ fresh_perl_is(<<'EOI', 'ok', { }, 'void eval return');
 EOI
 
 # test CLONE_SKIP() functionality
-if ($] >= 5.008007) {
+SKIP: {
+    skip('CLONE_SKIP not implemented in Perl < 5.8.7', 5) if ($] < 5.008007);
+
     my %c : shared;
     my %d : shared;
 
@@ -310,13 +312,6 @@ if ($] >= 5.008007) {
             )
         }),
         "counts of calls to DESTROY");
-
-} else {
-    print("ok 29 # Skip objs clone skip at depth 0\n");
-    print("ok 30 # Skip objs clone skip at depth 1\n");
-    print("ok 31 # Skip objs clone skip at depth 2\n");
-    print("ok 32 # Skip counts of calls to CLONE_SKIP\n");
-    print("ok 33 # Skip counts of calls to DESTROY\n");
 }
 
 # EOF
