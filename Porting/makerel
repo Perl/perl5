@@ -135,6 +135,7 @@ my @writables = qw(
     win32/config_H.bc
     win32/config_H.gc
     win32/config_H.vc
+    utils/Makefile
 );
 system("chmod +w @writables") == 0
     or die "system: $!";

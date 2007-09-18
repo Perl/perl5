@@ -3935,6 +3935,7 @@ utils/instmodsh.PL		Give information about installed extensions
 utils/libnetcfg.PL		libnet
 utils.lst			Lists utilities bundled with Perl
 utils/Makefile.SH		Extract the utility scripts
+utils/Makefile			Pregenerated from utils/Makefile.SH
 utils/perlbug.PL		A simple tool to submit a bug report
 utils/perldoc.PL		A simple tool to find & display perl's documentation
 utils/perlivp.PL		installation verification procedure
