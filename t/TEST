@@ -479,6 +479,12 @@ EOT
 	    $failure="FAILED--expected $max tests, saw $next";
 	}
 
+	if( !defined $failure  # don't mask a test failure
+	    and $? )
+	{
+	    $failure = "FAILED--non-zero wait status: $?";
+	}
+
 	if (defined $failure) {
 	    print "${te}$failure\n";
 	    $::bad_files++;
