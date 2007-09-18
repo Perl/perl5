@@ -1453,11 +1453,13 @@ sub declare_hinthash {
     my ($from, $to, $indent) = @_;
     my @decls;
     for my $key (keys %$to) {
+	next if $key =~ /^open[<>]$/;
 	if (!defined $from->{$key} or $from->{$key} ne $to->{$key}) {
 	    push @decls, qq(\$^H{'$key'} = q($to->{$key}););
 	}
     }
     for my $key (keys %$from) {
+	next if $key =~ /^open[<>]$/;
 	if (!exists $to->{$key}) {
 	    push @decls, qq(delete \$^H{'$key'};);
 	}
