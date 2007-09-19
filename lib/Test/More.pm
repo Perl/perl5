@@ -16,7 +16,7 @@ sub _carp {
 
 
 use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS $TODO);
-$VERSION = '0.70';
+$VERSION = '0.71';
 $VERSION = eval $VERSION;    # make the alpha version come out as a number
 
 use Test::Builder::Module;
@@ -53,8 +53,8 @@ Test::More - yet another framework for writing test scripts
   # Various ways to say "ok"
   ok($got eq $expected, $test_name);
 
-  is  ($got, $exptected, $test_name);
-  isnt($got, $expected,  $test_name);
+  is  ($got, $expected, $test_name);
+  isnt($got, $expected, $test_name);
 
   # Rather than print STDERR "# here's what went wrong\n"
   diag("here's what went wrong");
@@ -659,32 +659,37 @@ sub use_ok ($;@) {
 
     my($pack,$filename,$line) = caller;
 
-    local($@,$!,$SIG{__DIE__});   # isolate eval
+    # Work around a glitch in $@ and eval
+    my $eval_error;
+    {
+        local($@,$!,$SIG{__DIE__});   # isolate eval
 
-    if( @imports == 1 and $imports[0] =~ /^\d+(?:\.\d+)?$/ ) {
-        # probably a version check.  Perl needs to see the bare number
-        # for it to work with non-Exporter based modules.
-        eval <<USE;
+        if( @imports == 1 and $imports[0] =~ /^\d+(?:\.\d+)?$/ ) {
+            # probably a version check.  Perl needs to see the bare number
+            # for it to work with non-Exporter based modules.
+            eval <<USE;
 package $pack;
 use $module $imports[0];
 USE
-    }
-    else {
-        eval <<USE;
+        }
+        else {
+            eval <<USE;
 package $pack;
 use $module \@imports;
 USE
+        }
+        $eval_error = $@;
     }
 
-    my $ok = $tb->ok( !$@, "use $module;" );
+    my $ok = $tb->ok( !$eval_error, "use $module;" );
 
     unless( $ok ) {
-        chomp $@;
+        chomp $eval_error;
         $@ =~ s{^BEGIN failed--compilation aborted at .*$}
                 {BEGIN failed--compilation aborted at $filename line $line.}m;
         $tb->diag(<<DIAGNOSTIC);
     Tried to use '$module'.
-    Error:  $@
+    Error:  $eval_error
 DIAGNOSTIC
 
     }
@@ -780,6 +785,12 @@ along these lines.
 
 use vars qw(@Data_Stack %Refs_Seen);
 my $DNE = bless [], 'Does::Not::Exist';
+
+sub _dne {
+    ref $_[0] eq ref $DNE;
+}
+
+
 sub is_deeply {
     my $tb = Test::More->builder;
 
@@ -852,8 +863,8 @@ sub _format_stack {
     foreach my $idx (0..$#vals) {
         my $val = $vals[$idx];
         $vals[$idx] = !defined $val ? 'undef'          :
-                      $val eq $DNE  ? "Does not exist" :
-	              ref $val      ? "$val"           :
+                      _dne($val)    ? "Does not exist" :
+                      ref $val      ? "$val"           :
                                       "'$val'";
     }
 
@@ -1222,7 +1233,7 @@ sub _deep_check {
         if( defined $e1 xor defined $e2 ) {
             $ok = 0;
         }
-        elsif ( $e1 == $DNE xor $e2 == $DNE ) {
+        elsif ( _dne($e1) xor _dne($e2) ) {
             $ok = 0;
         }
         elsif ( $same_ref and ($e1 eq $e2) ) {
