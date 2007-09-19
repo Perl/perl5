@@ -76,7 +76,7 @@ use Scalar::Util qw( weaken);
     is( $counter, 1, "list assign triggers");
 
     $h{ def} = 456;
-    is( $counter, 2, "lvalue assign triggers twice");
+    is( $counter, 2, "lvalue assign triggers");
 
     exists $h{ def};
     is( $counter, 3, "good exists triggers");
@@ -96,9 +96,9 @@ use Scalar::Util qw( weaken);
     $x = $h{ xyz};
     is( $counter, 8, "bad read triggers");
 
-    bless \ %h;
-    is( $counter, 8, "bless triggers(!)"); # XXX, this description seems bogus
 
+    bless \ %h;
+    is( $counter, 8, "bless doesn't trigger");
 
     $x = keys %h;
     is( $counter, 8, "scalar keys doesn't trigger");
