@@ -2720,44 +2720,6 @@ invalidated).
 =for hackers
 Found in file mro.c
 
-=item mro_get_linear_isa_c3
-X<mro_get_linear_isa_c3>
-
-Returns the C3 linearization of @ISA
-the given stash.  The return value is a read-only AV*.
-C<level> should be 0 (it is used internally in this
-function's recursion).
-
-You are responsible for C<SvREFCNT_inc()> on the
-return value if you plan to store it anywhere
-semi-permanently (otherwise it might be deleted
-out from under you the next time the cache is
-invalidated).
-
-	AV*	mro_get_linear_isa_c3(HV* stash, I32 level)
-
-=for hackers
-Found in file mro.c
-
-=item mro_get_linear_isa_dfs
-X<mro_get_linear_isa_dfs>
-
-Returns the Depth-First Search linearization of @ISA
-the given stash.  The return value is a read-only AV*.
-C<level> should be 0 (it is used internally in this
-function's recursion).
-
-You are responsible for C<SvREFCNT_inc()> on the
-return value if you plan to store it anywhere
-semi-permanently (otherwise it might be deleted
-out from under you the next time the cache is
-invalidated).
-
-	AV*	mro_get_linear_isa_dfs(HV* stash, I32 level)
-
-=for hackers
-Found in file mro.c
-
 =item mro_method_changed_in
 X<mro_method_changed_in>
 
