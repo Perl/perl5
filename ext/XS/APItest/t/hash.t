@@ -18,7 +18,7 @@ use utf8;
 use Tie::Hash;
 use Test::More 'no_plan';
 
-use_ok('XS::APItest');
+BEGIN {use_ok('XS::APItest')};
 
 sub preform_test;
 sub test_present;
@@ -95,7 +95,7 @@ foreach my $in ("", "N", "a\0b") {
     is ($got, $in, "test_share_unshare_pvn");
 }
 
-{
+if ($] > 5.009) {
     my %hash;
     XS::APItest::Hash::rot13_hash(\%hash);
     $hash{a}++; @hash{qw(p i e)} = (2, 4, 8);
@@ -105,6 +105,34 @@ foreach my $in ("", "N", "a\0b") {
        "uvar magic called exactly once on store");
 
     is($hash{i}, 4);
+
+    is(delete $hash{a}, 1);
+
+    is(keys %hash, 3);
+    @keys = sort keys %hash;
+    is("@keys", join(' ', sort(rot13(qw(p i e)))));
+
+    is (XS::APItest::Hash::delete_ent (\%hash, 'p',
+				       XS::APItest::HV_DISABLE_UVAR_XKEY),
+	undef, "Deleting a known key with conversion disabled fails (ent)");
+    is(keys %hash, 3);
+
+    is (XS::APItest::Hash::delete_ent (\%hash, 'p', 0),
+	2, "Deleting a known key with conversion enabled works (ent)");
+    is(keys %hash, 2);
+    @keys = sort keys %hash;
+    is("@keys", join(' ', sort(rot13(qw(i e)))));
+
+    is (XS::APItest::Hash::delete (\%hash, 'i',
+				   XS::APItest::HV_DISABLE_UVAR_XKEY),
+	undef, "Deleting a known key with conversion disabled fails");
+    is(keys %hash, 2);
+
+    is (XS::APItest::Hash::delete (\%hash, 'i', 0),
+	4, "Deleting a known key with conversion enabled works");
+    is(keys %hash, 1);
+    @keys = sort keys %hash;
+    is("@keys", join(' ', sort(rot13(qw(e)))));
 }
 
 exit;

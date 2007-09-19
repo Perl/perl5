@@ -3044,10 +3044,9 @@ STATIC HEK*	S_share_hek_flags(pTHX_ const char* sv, I32 len, U32 hash, int flags
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
-STATIC SV*	S_hv_magic_uvar_xkey(pTHX_ HV* hv, SV* keysv, int action)
+STATIC SV*	S_hv_magic_uvar_xkey(pTHX_ HV* hv, SV* keysv, const char *const key, const STRLEN klen, const int k_flags, int action)
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_1);
 
 STATIC void	S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen, const char *msg)
 			__attribute__noreturn__

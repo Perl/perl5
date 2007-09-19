@@ -195,7 +195,11 @@ rot13_key(pTHX_ IV action, SV *field) {
     return 0;
 }
 
+#include "const-c.inc"
+
 MODULE = XS::APItest:Hash		PACKAGE = XS::APItest::Hash
+
+INCLUDE: const-xs.inc
 
 void
 rot13_hash(hash)
@@ -227,17 +231,31 @@ exists(hash, key_sv)
         RETVAL
 
 SV *
-delete(hash, key_sv)
+delete(hash, key_sv, flags = 0)
 	PREINIT:
 	STRLEN len;
 	const char *key;
 	INPUT:
 	HV *hash
 	SV *key_sv
+	I32 flags;
 	CODE:
 	key = SvPV(key_sv, len);
 	/* It's already mortal, so need to increase reference count.  */
-	RETVAL = SvREFCNT_inc(hv_delete(hash, key, UTF8KLEN(key_sv, len), 0));
+	RETVAL
+	    = SvREFCNT_inc(hv_delete(hash, key, UTF8KLEN(key_sv, len), flags));
+        OUTPUT:
+        RETVAL
+
+SV *
+delete_ent(hash, key_sv, flags = 0)
+	INPUT:
+	HV *hash
+	SV *key_sv
+	I32 flags;
+	CODE:
+	/* It's already mortal, so need to increase reference count.  */
+	RETVAL = SvREFCNT_inc(hv_delete_ent(hash, key_sv, flags, 0));
         OUTPUT:
         RETVAL
 
