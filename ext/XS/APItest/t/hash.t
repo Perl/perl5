@@ -96,78 +96,112 @@ foreach my $in ("", "N", "a\0b") {
 }
 
 if ($] > 5.009) {
-    my %hash;
-    XS::APItest::Hash::rot13_hash(\%hash);
-    $hash{a}++; @hash{qw(p i e)} = (2, 4, 8);
+    foreach ([\&XS::APItest::Hash::rot13_hash, \&rot13, "rot 13"],
+	     [\&XS::APItest::Hash::bitflip_hash, \&bitflip, "bitflip"],
+	    ) {
+	my ($setup, $mapping, $name) = @$_;
+	my %hash;
+	my %placebo = (a => 1, p => 2, i => 4, e => 8);
+	$setup->(\%hash);
+	$hash{a}++; @hash{qw(p i e)} = (2, 4, 8);
 
-    my @keys = sort keys %hash;
-    is("@keys", join(' ', sort(rot13(qw(a p i e)))),
-       "uvar magic called exactly once on store");
-
-    is($hash{i}, 4);
-
-    is(delete $hash{a}, 1);
-
-    is(keys %hash, 3);
-    @keys = sort keys %hash;
-    is("@keys", join(' ', sort(rot13(qw(p i e)))));
-
-    is (XS::APItest::Hash::delete_ent (\%hash, 'p',
-				       XS::APItest::HV_DISABLE_UVAR_XKEY),
-	undef, "Deleting a known key with conversion disabled fails (ent)");
-    is(keys %hash, 3);
-
-    is (XS::APItest::Hash::delete_ent (\%hash, 'p', 0),
-	2, "Deleting a known key with conversion enabled works (ent)");
-    is(keys %hash, 2);
-    @keys = sort keys %hash;
-    is("@keys", join(' ', sort(rot13(qw(i e)))));
-
-    is (XS::APItest::Hash::delete (\%hash, 'i',
-				   XS::APItest::HV_DISABLE_UVAR_XKEY),
-	undef, "Deleting a known key with conversion disabled fails");
-    is(keys %hash, 2);
-
-    is (XS::APItest::Hash::delete (\%hash, 'i', 0),
-	4, "Deleting a known key with conversion enabled works");
-    is(keys %hash, 1);
-    @keys = sort keys %hash;
-    is("@keys", join(' ', sort(rot13(qw(e)))));
-
-    $hash{f} = 9;
-    is(keys %hash, 2);
-    @keys = sort keys %hash;
-    is("@keys", join(' ', sort(rot13(qw(e f)))));
-
-    is (XS::APItest::Hash::store_ent(\%hash, 'g', 10), 10, "store_ent");
-    is(keys %hash, 3);
-    @keys = sort keys %hash;
-    is("@keys", join(' ', sort(rot13(qw(e f g)))));
-
-    is (XS::APItest::Hash::store(\%hash, 'h', 11), 11, "store");
-    is(keys %hash, 4);
-    @keys = sort keys %hash;
-    is("@keys", join(' ', sort(rot13(qw(e f g h)))));
-
-    is (XS::APItest::Hash::fetch_ent(\%hash, 'g'), 10, "fetch_ent");
-    is (XS::APItest::Hash::fetch_ent(\%hash, rot13('g')), undef,
-	"fetch_ent (missing)");
-
-    is (XS::APItest::Hash::fetch(\%hash, 'h'), 11, "fetch");
-    is (XS::APItest::Hash::fetch(\%hash, rot13('h')), undef,
-	"fetch (missing)");
-
-    ok (XS::APItest::Hash::exists_ent(\%hash, 'e'), "exists_ent");
-    ok (!XS::APItest::Hash::exists_ent(\%hash, rot13('e')),
-	"exists_ent (missing)");
-
-    ok (XS::APItest::Hash::exists(\%hash, 'f'), "exists");
-    ok (!XS::APItest::Hash::exists(\%hash, rot13('f')), "exists (missing)");
+	test_U_hash(\%hash, \%placebo, [f => 9, g => 10, h => 11], $mapping,
+		    $name);
+    }
 }
 
 exit;
 
 ################################   The End   ################################
+
+sub test_U_hash {
+    my ($hash, $placebo, $new, $mapping, $message) = @_;
+    my @hitlist = keys %$placebo;
+    print "# $message\n";
+
+    my @keys = sort keys %$hash;
+    is ("@keys", join(' ', sort($mapping->(keys %$placebo))),
+	"uvar magic called exactly once on store");
+
+    is (keys %$hash, 4);
+
+    my $victim = shift @hitlist;
+    is (delete $hash->{$victim}, delete $placebo->{$victim});
+
+    is (keys %$hash, 3);
+    @keys = sort keys %$hash;
+    is ("@keys", join(' ', sort($mapping->(keys %$placebo))));
+
+    $victim = shift @hitlist;
+    is (XS::APItest::Hash::delete_ent ($hash, $victim,
+				       XS::APItest::HV_DISABLE_UVAR_XKEY),
+	undef, "Deleting a known key with conversion disabled fails (ent)");
+    is (keys %$hash, 3);
+
+    is (XS::APItest::Hash::delete_ent ($hash, $victim, 0),
+	delete $placebo->{$victim},
+	"Deleting a known key with conversion enabled works (ent)");
+    is (keys %$hash, 2);
+    @keys = sort keys %$hash;
+    is ("@keys", join(' ', sort($mapping->(keys %$placebo))));
+
+    $victim = shift @hitlist;
+    is (XS::APItest::Hash::delete ($hash, $victim,
+				   XS::APItest::HV_DISABLE_UVAR_XKEY),
+	undef, "Deleting a known key with conversion disabled fails");
+    is (keys %$hash, 2);
+
+    is (XS::APItest::Hash::delete ($hash, $victim, 0),
+	delete $placebo->{$victim},
+	"Deleting a known key with conversion enabled works");
+    is(keys %$hash, 1);
+    @keys = sort keys %$hash;
+    is ("@keys", join(' ', sort($mapping->(keys %$placebo))));
+
+    my ($k, $v) = splice @$new, 0, 2;
+    $hash->{$k} = $v;
+    $placebo->{$k} = $v;
+    is(keys %$hash, 2);
+    @keys = sort keys %$hash;
+    is ("@keys", join(' ', sort($mapping->(keys %$placebo))));
+
+    ($k, $v) = splice @$new, 0, 2;
+    is (XS::APItest::Hash::store_ent($hash, $k, $v), $v, "store_ent");
+    $placebo->{$k} = $v;
+    is (keys %$hash, 3);
+    @keys = sort keys %$hash;
+    is ("@keys", join(' ', sort($mapping->(keys %$placebo))));
+
+    ($k, $v) = splice @$new, 0, 2;
+    is (XS::APItest::Hash::store($hash, $k, $v), $v, "store");
+    is (keys %$hash, 4);
+    $placebo->{$k} = $v;
+    @keys = sort keys %$hash;
+    is ("@keys", join(' ', sort($mapping->(keys %$placebo))));
+
+    @hitlist = keys %$placebo;
+    $victim = shift @hitlist;
+    is (XS::APItest::Hash::fetch_ent($hash, $victim), $placebo->{$victim},
+	"fetch_ent");
+    is (XS::APItest::Hash::fetch_ent($hash, $mapping->($victim)), undef,
+	"fetch_ent (missing)");
+
+    $victim = shift @hitlist;
+    is (XS::APItest::Hash::fetch($hash, $victim), $placebo->{$victim},
+	"fetch");
+    is (XS::APItest::Hash::fetch($hash, $mapping->($victim)), undef,
+	"fetch (missing)");
+
+    $victim = shift @hitlist;
+    ok (XS::APItest::Hash::exists_ent($hash, $victim), "exists_ent");
+    ok (!XS::APItest::Hash::exists_ent($hash, $mapping->($victim)),
+	"exists_ent (missing)");
+
+    $victim = shift @hitlist;
+    ok (XS::APItest::Hash::exists($hash, $victim), "exists");
+    ok (!XS::APItest::Hash::exists($hash, $mapping->($victim)),
+	"exists (missing)");
+}
 
 sub main_tests {
   my ($keys, $testkeys, $description) = @_;
@@ -334,5 +368,10 @@ sub brute_force_exists {
 
 sub rot13 {
     my @results = map {my $a = $_; $a =~ tr/A-Za-z/N-ZA-Mn-za-m/; $a} @_;
+    wantarray ? @results : $results[0];
+}
+
+sub bitflip {
+    my @results = map {join '', map {chr(32 ^ ord $_)} split '', $_} @_;
     wantarray ? @results : $results[0];
 }

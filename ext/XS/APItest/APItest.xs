@@ -112,6 +112,41 @@ test_freeent(freeent_function *f) {
 
 
 static I32
+bitflip_key(pTHX_ IV action, SV *field) {
+    MAGIC *mg = mg_find(field, PERL_MAGIC_uvar);
+    SV *keysv;
+    if (mg && (keysv = mg->mg_obj)) {
+	STRLEN len;
+	const char *p = SvPV(keysv, len);
+
+	if (len) {
+	    SV *newkey = newSV(len);
+	    char *new_p = SvPVX(newkey);
+
+	    if (SvUTF8(keysv)) {
+		const char *const end = p + len;
+		while (p < end) {
+		    STRLEN len;
+		    UV chr = utf8_to_uvuni(p, &len);
+		    new_p = uvuni_to_utf8(new_p, chr ^ 32);
+		    p += len;
+		}
+		SvUTF8_on(newkey);
+	    } else {
+		while (len--)
+		    *new_p++ = *p++ ^ 32;
+	    }
+	    *new_p = '\0';
+	    SvCUR_set(newkey, SvCUR(keysv));
+	    SvPOK_on(newkey);
+
+	    mg->mg_obj = newkey;
+	}
+    }
+    return 0;
+}
+
+static I32
 rot13_key(pTHX_ IV action, SV *field) {
     MAGIC *mg = mg_find(field, PERL_MAGIC_uvar);
     SV *keysv;
@@ -208,6 +243,19 @@ rot13_hash(hash)
 	{
 	    struct ufuncs uf;
 	    uf.uf_val = rot13_key;
+	    uf.uf_set = 0;
+	    uf.uf_index = 0;
+
+	    sv_magic((SV*)hash, NULL, PERL_MAGIC_uvar, (char*)&uf, sizeof(uf));
+	}
+
+void
+bitflip_hash(hash)
+	HV *hash
+	CODE:
+	{
+	    struct ufuncs uf;
+	    uf.uf_val = bitflip_key;
 	    uf.uf_set = 0;
 	    uf.uf_index = 0;
 
