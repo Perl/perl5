@@ -716,7 +716,9 @@ L<perlcall>.
 #define G_VOID		128	/* skip this bit when adding flags below */
 
 /* extra flags for Perl_call_* routines */
-#define G_DISCARD	2	/* Call FREETMPS. */
+#define G_DISCARD	2	/* Call FREETMPS.
+				   Don't change this without consulting the
+				   hash actions codes defined in hv.h */
 #define G_EVAL		4	/* Assume eval {} around subroutine call. */
 #define G_NOARGS	8	/* Don't construct a @_ array. */
 #define G_KEEPERR      16	/* Append errors to $@, don't overwrite it */

@@ -424,8 +424,16 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	return NULL;
 
     if (keysv) {
-	if (SvSMAGICAL(hv) && SvGMAGICAL(hv))
+	if (SvSMAGICAL(hv) && SvGMAGICAL(hv)
+	    && !(action & HV_DISABLE_UVAR_XKEY)) {
 	    keysv = hv_magic_uvar_xkey(hv, keysv, action);
+	    /* If a fetch-as-store fails on the fetch, then the action is to
+	       recurse once into "hv_store". If we didn't do this, then that
+	       recursive call would call the key conversion routine again.
+	       However, as we replace the original key with the converted
+	       key, this would result in a double conversion, which would show
+	       up as a bug if the conversion routine is not idempotent.  */
+	}
 	if (flags & HVhek_FREEKEY)
 	    Safefree(key);
 	key = SvPV_const(keysv, klen);
@@ -489,7 +497,8 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 			   key) whereas the store is for key (the original)  */
 			entry = hv_fetch_common(hv, NULL, nkey, klen,
 						HVhek_FREEKEY, /* free nkey */
-						0 /* non-LVAL fetch */,
+						0 /* non-LVAL fetch */
+						| HV_DISABLE_UVAR_XKEY,
 						NULL /* no value */,
 						0 /* compute hash */);
 			if (!entry && (action & HV_FETCH_LVALUE)) {
@@ -497,7 +506,9 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 			       Do it this way to encourage compiler to tail
 			       call optimise.  */
 			    entry = hv_fetch_common(hv, keysv, key, klen,
-						    flags, HV_FETCH_ISSTORE,
+						    flags,
+						    HV_FETCH_ISSTORE
+						    | HV_DISABLE_UVAR_XKEY,
 						    newSV(0), hash);
 			} else {
 			    if (flags & HVhek_FREEKEY)
@@ -747,7 +758,8 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	if (env) {
 	    sv = newSVpvn(env,len);
 	    SvTAINTED_on(sv);
-	    return hv_fetch_common(hv,keysv,key,klen,flags,HV_FETCH_ISSTORE,sv,
+	    return hv_fetch_common(hv, keysv, key, klen, flags,
+				   HV_FETCH_ISSTORE|HV_DISABLE_UVAR_XKEY, sv,
 				   hash);
 	}
     }
@@ -772,7 +784,8 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	       magic check happen.  */
 	    /* gonna assign to this, so it better be there */
 	    return hv_fetch_common(hv, keysv, key, klen, flags,
-				   HV_FETCH_ISSTORE, val, hash);
+				   HV_FETCH_ISSTORE|HV_DISABLE_UVAR_XKEY, val,
+				   hash);
 	    /* XXX Surely that could leak if the fetch-was-store fails?
 	       Just like the hv_fetch.  */
 	}
@@ -954,7 +967,8 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	return NULL;
 
     if (keysv) {
-	if (SvSMAGICAL(hv) && SvGMAGICAL(hv))
+	if (SvSMAGICAL(hv) && SvGMAGICAL(hv)
+	    && !(d_flags & HV_DISABLE_UVAR_XKEY))
 	    keysv = hv_magic_uvar_xkey(hv, keysv, HV_DELETE);
 	if (k_flags & HVhek_FREEKEY)
 	    Safefree(key);
@@ -973,7 +987,8 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	if (needs_copy) {
 	    SV *sv;
 	    entry = hv_fetch_common(hv, keysv, key, klen,
-				    k_flags & ~HVhek_FREEKEY, HV_FETCH_LVALUE,
+				    k_flags & ~HVhek_FREEKEY,
+				    HV_FETCH_LVALUE|HV_DISABLE_UVAR_XKEY,
 				    NULL, hash);
 	    sv = entry ? HeVAL(entry) : NULL;
 	    if (sv) {

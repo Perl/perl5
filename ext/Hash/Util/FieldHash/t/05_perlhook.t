@@ -76,50 +76,50 @@ use Scalar::Util qw( weaken);
     is( $counter, 1, "list assign triggers");
 
     $h{ def} = 456;
-    is( $counter, 3, "lvalue assign triggers twice");
+    is( $counter, 2, "lvalue assign triggers twice");
 
     exists $h{ def};
-    is( $counter, 4, "good exists triggers");
+    is( $counter, 3, "good exists triggers");
 
     exists $h{ xyz};
-    is( $counter, 5, "bad exists triggers");
+    is( $counter, 4, "bad exists triggers");
 
     delete $h{ def};
-    is( $counter, 6, "good delete triggers");
+    is( $counter, 5, "good delete triggers");
 
     delete $h{ xyz};
-    is( $counter, 7, "bad delete triggers");
+    is( $counter, 6, "bad delete triggers");
 
     my $x = $h{ abc};
-    is( $counter, 8, "good read triggers");
+    is( $counter, 7, "good read triggers");
 
     $x = $h{ xyz};
-    is( $counter, 9, "bad read triggers");
+    is( $counter, 8, "bad read triggers");
 
     bless \ %h;
-    is( $counter, 9, "bless triggers(!)");
+    is( $counter, 8, "bless triggers(!)"); # XXX, this description seems bogus
 
 
     $x = keys %h;
-    is( $counter, 9, "scalar keys doesn't trigger");
+    is( $counter, 8, "scalar keys doesn't trigger");
 
     () = keys %h;
-    is( $counter, 9, "list keys doesn't trigger");
+    is( $counter, 8, "list keys doesn't trigger");
 
     $x = values %h;
-    is( $counter, 9, "scalar values doesn't trigger");
+    is( $counter, 8, "scalar values doesn't trigger");
 
     () = values %h;
-    is( $counter, 9, "list values doesn't trigger");
+    is( $counter, 8, "list values doesn't trigger");
 
     $x = each %h;
-    is( $counter, 9, "scalar each doesn't trigger");
+    is( $counter, 8, "scalar each doesn't trigger");
 
     () = each %h;
-    is( $counter, 9, "list each doesn't trigger");
+    is( $counter, 8, "list each doesn't trigger");
 
     bless \ %h, 'xyz';
-    is( $counter, 9, "bless doesn't trigger");
+    is( $counter, 8, "bless doesn't trigger");
 
     # see that normal set magic doesn't trigger (identity condition)
     my %i;

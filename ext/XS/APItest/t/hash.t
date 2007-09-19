@@ -95,6 +95,18 @@ foreach my $in ("", "N", "a\0b") {
     is ($got, $in, "test_share_unshare_pvn");
 }
 
+{
+    my %hash;
+    XS::APItest::Hash::rot13_hash(\%hash);
+    $hash{a}++; @hash{qw(p i e)} = (2, 4, 8);
+
+    my @keys = sort keys %hash;
+    is("@keys", join(' ', sort(rot13(qw(a p i e)))),
+       "uvar magic called exactly once on store");
+
+    is($hash{i}, 4);
+}
+
 exit;
 
 ################################   The End   ################################
@@ -260,4 +272,9 @@ sub brute_force_exists {
     return 1 if $key eq $_;
   }
   return 0;
+}
+
+sub rot13 {
+    my @results = map {my $a = $_; $a =~ tr/A-Za-z/N-ZA-Mn-za-m/; $a} @_;
+    wantarray ? @results : $results[0];
 }

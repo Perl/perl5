@@ -110,7 +110,105 @@ test_freeent(freeent_function *f) {
     SvREFCNT_dec(test_scalar);
 }
 
+
+static I32
+rot13_key(pTHX_ IV action, SV *field) {
+    MAGIC *mg = mg_find(field, PERL_MAGIC_uvar);
+    SV *keysv;
+    if (mg && (keysv = mg->mg_obj)) {
+	STRLEN len;
+	const char *p = SvPV(keysv, len);
+
+	if (len) {
+	    SV *newkey = newSV(len);
+	    char *new_p = SvPVX(newkey);
+
+	    /* There's a deliberate fencepost error here to loop len + 1 times
+	       to copy the trailing \0  */
+	    do {
+		char new_c = *p++;
+		/* Try doing this cleanly and clearly in EBCDIC another way: */
+		switch (new_c) {
+		case 'A': new_c = 'N'; break;
+		case 'B': new_c = 'O'; break;
+		case 'C': new_c = 'P'; break;
+		case 'D': new_c = 'Q'; break;
+		case 'E': new_c = 'R'; break;
+		case 'F': new_c = 'S'; break;
+		case 'G': new_c = 'T'; break;
+		case 'H': new_c = 'U'; break;
+		case 'I': new_c = 'V'; break;
+		case 'J': new_c = 'W'; break;
+		case 'K': new_c = 'X'; break;
+		case 'L': new_c = 'Y'; break;
+		case 'M': new_c = 'Z'; break;
+		case 'N': new_c = 'A'; break;
+		case 'O': new_c = 'B'; break;
+		case 'P': new_c = 'C'; break;
+		case 'Q': new_c = 'D'; break;
+		case 'R': new_c = 'E'; break;
+		case 'S': new_c = 'F'; break;
+		case 'T': new_c = 'G'; break;
+		case 'U': new_c = 'H'; break;
+		case 'V': new_c = 'I'; break;
+		case 'W': new_c = 'J'; break;
+		case 'X': new_c = 'K'; break;
+		case 'Y': new_c = 'L'; break;
+		case 'Z': new_c = 'M'; break;
+		case 'a': new_c = 'n'; break;
+		case 'b': new_c = 'o'; break;
+		case 'c': new_c = 'p'; break;
+		case 'd': new_c = 'q'; break;
+		case 'e': new_c = 'r'; break;
+		case 'f': new_c = 's'; break;
+		case 'g': new_c = 't'; break;
+		case 'h': new_c = 'u'; break;
+		case 'i': new_c = 'v'; break;
+		case 'j': new_c = 'w'; break;
+		case 'k': new_c = 'x'; break;
+		case 'l': new_c = 'y'; break;
+		case 'm': new_c = 'z'; break;
+		case 'n': new_c = 'a'; break;
+		case 'o': new_c = 'b'; break;
+		case 'p': new_c = 'c'; break;
+		case 'q': new_c = 'd'; break;
+		case 'r': new_c = 'e'; break;
+		case 's': new_c = 'f'; break;
+		case 't': new_c = 'g'; break;
+		case 'u': new_c = 'h'; break;
+		case 'v': new_c = 'i'; break;
+		case 'w': new_c = 'j'; break;
+		case 'x': new_c = 'k'; break;
+		case 'y': new_c = 'l'; break;
+		case 'z': new_c = 'm'; break;
+		}
+		*new_p++ = new_c;
+	    } while (len--);
+	    SvCUR_set(newkey, SvCUR(keysv));
+	    SvPOK_on(newkey);
+	    if (SvUTF8(keysv))
+		SvUTF8_on(newkey);
+
+	    mg->mg_obj = newkey;
+	}
+    }
+    return 0;
+}
+
 MODULE = XS::APItest:Hash		PACKAGE = XS::APItest::Hash
+
+void
+rot13_hash(hash)
+	HV *hash
+	CODE:
+	{
+	    struct ufuncs uf;
+	    uf.uf_val = rot13_key;
+	    uf.uf_set = 0;
+	    uf.uf_index = 0;
+
+	    sv_magic((SV*)hash, NULL, PERL_MAGIC_uvar, (char*)&uf, sizeof(uf));
+	}
 
 #define UTF8KLEN(sv, len)   (SvUTF8(sv) ? -(I32)len : (I32)len)
 
