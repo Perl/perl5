@@ -75,8 +75,50 @@ use Scalar::Util qw( weaken);
     %h = ( abc => 123);
     is( $counter, 1, "list assign triggers");
 
+
+    my $x = keys %h;
+    is( $counter, 1, "scalar keys doesn't trigger");
+    is( $x, 1, "there is one key");
+
+    my (@x) = keys %h;
+    is( $counter, 1, "list keys doesn't trigger");
+    is( "@x", "abc", "key is correct");
+
+    $x = values %h;
+    is( $counter, 1, "scalar values doesn't trigger");
+    is( $x, 1, "the value is correct");
+
+    (@x) = values %h;
+    is( $counter, 1, "list values doesn't trigger");
+    is( "@x", "123", "the value is correct");
+
+    $x = each %h;
+    is( $counter, 1, "scalar each doesn't trigger");
+    is( $x, "abc", "the return is correct");
+
+    $x = each %h;
+    is( $counter, 1, "scalar each doesn't trigger");
+    is( $x, undef, "the return is correct");
+
+    (@x) = each %h;
+    is( $counter, 1, "list each doesn't trigger");
+    is( "@x", "abc 123", "the return is correct");
+
+    $x = %h;
+    is( $counter, 1, "hash in scalar context doesn't trigger");
+    like( $x, qr!^\d+/\d+$!, "correct result");
+
+    (@x) = %h;
+    is( $counter, 1, "hash in list context doesn't trigger");
+    is( "@x", "abc 123", "correct result");
+
+
     $h{ def} = 456;
     is( $counter, 2, "lvalue assign triggers");
+
+    (@x) = sort %h;
+    is( $counter, 2, "hash in list context doesn't trigger");
+    is( "@x", "123 456 abc def", "correct result");
 
     exists $h{ def};
     is( $counter, 3, "good exists triggers");
@@ -87,36 +129,30 @@ use Scalar::Util qw( weaken);
     delete $h{ def};
     is( $counter, 5, "good delete triggers");
 
+    (@x) = sort %h;
+    is( $counter, 5, "hash in list context doesn't trigger");
+    is( "@x", "123 abc", "correct result");
+
     delete $h{ xyz};
     is( $counter, 6, "bad delete triggers");
 
-    my $x = $h{ abc};
+    (@x) = sort %h;
+    is( $counter, 6, "hash in list context doesn't trigger");
+    is( "@x", "123 abc", "correct result");
+
+    $x = $h{ abc};
     is( $counter, 7, "good read triggers");
 
     $x = $h{ xyz};
     is( $counter, 8, "bad read triggers");
 
+    (@x) = sort %h;
+    is( $counter, 8, "hash in list context doesn't trigger");
+    is( "@x", "123 abc", "correct result");
+
 
     bless \ %h;
     is( $counter, 8, "bless doesn't trigger");
-
-    $x = keys %h;
-    is( $counter, 8, "scalar keys doesn't trigger");
-
-    () = keys %h;
-    is( $counter, 8, "list keys doesn't trigger");
-
-    $x = values %h;
-    is( $counter, 8, "scalar values doesn't trigger");
-
-    () = values %h;
-    is( $counter, 8, "list values doesn't trigger");
-
-    $x = each %h;
-    is( $counter, 8, "scalar each doesn't trigger");
-
-    () = each %h;
-    is( $counter, 8, "list each doesn't trigger");
 
     bless \ %h, 'xyz';
     is( $counter, 8, "bless doesn't trigger");
@@ -172,7 +208,7 @@ use Scalar::Util qw( weaken);
     bless \ %j, 'abc';
     is( $counter, 1, "...except for bless");
 
-    BEGIN { $n_tests += 23 }
+    BEGIN { $n_tests += 43 }
 }
 
 BEGIN { plan tests => $n_tests }
