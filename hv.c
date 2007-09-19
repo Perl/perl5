@@ -431,6 +431,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	   However, as we replace the original key with the converted
 	   key, this would result in a double conversion, which would show
 	   up as a bug if the conversion routine is not idempotent.  */
+	hash = 0;
     }
     if (keysv) {
 	if (flags & HVhek_FREEKEY)
@@ -966,8 +967,10 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	return NULL;
 
     if (SvSMAGICAL(hv) && SvGMAGICAL(hv)
-	&& !(d_flags & HV_DISABLE_UVAR_XKEY))
+	&& !(d_flags & HV_DISABLE_UVAR_XKEY)) {
 	keysv = hv_magic_uvar_xkey(hv, keysv, key, klen, k_flags, HV_DELETE);
+	hash = 0;
+    }
     if (keysv) {
 	if (k_flags & HVhek_FREEKEY)
 	    Safefree(key);
