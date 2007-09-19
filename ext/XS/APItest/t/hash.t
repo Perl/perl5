@@ -133,6 +133,36 @@ if ($] > 5.009) {
     is(keys %hash, 1);
     @keys = sort keys %hash;
     is("@keys", join(' ', sort(rot13(qw(e)))));
+
+    $hash{f} = 9;
+    is(keys %hash, 2);
+    @keys = sort keys %hash;
+    is("@keys", join(' ', sort(rot13(qw(e f)))));
+
+    is (XS::APItest::Hash::store_ent(\%hash, 'g', 10), 10, "store_ent");
+    is(keys %hash, 3);
+    @keys = sort keys %hash;
+    is("@keys", join(' ', sort(rot13(qw(e f g)))));
+
+    is (XS::APItest::Hash::store(\%hash, 'h', 11), 11, "store");
+    is(keys %hash, 4);
+    @keys = sort keys %hash;
+    is("@keys", join(' ', sort(rot13(qw(e f g h)))));
+
+    is (XS::APItest::Hash::fetch_ent(\%hash, 'g'), 10, "fetch_ent");
+    is (XS::APItest::Hash::fetch_ent(\%hash, rot13('g')), undef,
+	"fetch_ent (missing)");
+
+    is (XS::APItest::Hash::fetch(\%hash, 'h'), 11, "fetch");
+    is (XS::APItest::Hash::fetch(\%hash, rot13('h')), undef,
+	"fetch (missing)");
+
+    ok (XS::APItest::Hash::exists_ent(\%hash, 'e'), "exists_ent");
+    ok (!XS::APItest::Hash::exists_ent(\%hash, rot13('e')),
+	"exists_ent (missing)");
+
+    ok (XS::APItest::Hash::exists(\%hash, 'f'), "exists");
+    ok (!XS::APItest::Hash::exists(\%hash, rot13('f')), "exists (missing)");
 }
 
 exit;

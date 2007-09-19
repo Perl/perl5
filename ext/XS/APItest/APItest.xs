@@ -230,6 +230,17 @@ exists(hash, key_sv)
         OUTPUT:
         RETVAL
 
+bool
+exists_ent(hash, key_sv)
+	PREINIT:
+	INPUT:
+	HV *hash
+	SV *key_sv
+	CODE:
+	RETVAL = hv_exists_ent(hash, key_sv, 0);
+        OUTPUT:
+        RETVAL
+
 SV *
 delete(hash, key_sv, flags = 0)
 	PREINIT:
@@ -282,7 +293,6 @@ store_ent(hash, key, value)
         OUTPUT:
         RETVAL
 
-
 SV *
 store(hash, key_sv, value)
 	PREINIT:
@@ -309,6 +319,22 @@ store(hash, key_sv, value)
         OUTPUT:
         RETVAL
 
+SV *
+fetch_ent(hash, key_sv)
+	PREINIT:
+	HE *result;
+	INPUT:
+	HV *hash
+	SV *key_sv
+	CODE:
+	result = hv_fetch_ent(hash, key_sv, 0, 0);
+	if (!result) {
+	    XSRETURN_EMPTY;
+	}
+	/* Force mg_get  */
+	RETVAL = newSVsv(HeVAL(result));
+        OUTPUT:
+        RETVAL
 
 SV *
 fetch(hash, key_sv)

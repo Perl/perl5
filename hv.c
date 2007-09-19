@@ -423,17 +423,16 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     if (!hv)
 	return NULL;
 
+    if (SvSMAGICAL(hv) && SvGMAGICAL(hv) && !(action & HV_DISABLE_UVAR_XKEY)) {
+	keysv = hv_magic_uvar_xkey(hv, keysv, key, klen, flags, action);
+	/* If a fetch-as-store fails on the fetch, then the action is to
+	   recurse once into "hv_store". If we didn't do this, then that
+	   recursive call would call the key conversion routine again.
+	   However, as we replace the original key with the converted
+	   key, this would result in a double conversion, which would show
+	   up as a bug if the conversion routine is not idempotent.  */
+    }
     if (keysv) {
-	if (SvSMAGICAL(hv) && SvGMAGICAL(hv)
-	    && !(action & HV_DISABLE_UVAR_XKEY)) {
-	    keysv = hv_magic_uvar_xkey(hv, keysv, 0, 0, 0, action);
-	    /* If a fetch-as-store fails on the fetch, then the action is to
-	       recurse once into "hv_store". If we didn't do this, then that
-	       recursive call would call the key conversion routine again.
-	       However, as we replace the original key with the converted
-	       key, this would result in a double conversion, which would show
-	       up as a bug if the conversion routine is not idempotent.  */
-	}
 	if (flags & HVhek_FREEKEY)
 	    Safefree(key);
 	key = SvPV_const(keysv, klen);
