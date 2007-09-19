@@ -1142,7 +1142,6 @@
 #define hv_magic_check		S_hv_magic_check
 #define unshare_hek_or_pvn	S_unshare_hek_or_pvn
 #define share_hek_flags		S_share_hek_flags
-#define hv_magic_uvar_xkey	S_hv_magic_uvar_xkey
 #define hv_notallowed		S_hv_notallowed
 #define hv_auxinit		S_hv_auxinit
 #define hv_delete_common	S_hv_delete_common
@@ -3423,7 +3422,6 @@
 #define hv_magic_check		S_hv_magic_check
 #define unshare_hek_or_pvn(a,b,c,d)	S_unshare_hek_or_pvn(aTHX_ a,b,c,d)
 #define share_hek_flags(a,b,c,d)	S_share_hek_flags(aTHX_ a,b,c,d)
-#define hv_magic_uvar_xkey(a,b,c,d,e,f)	S_hv_magic_uvar_xkey(aTHX_ a,b,c,d,e,f)
 #define hv_notallowed(a,b,c,d)	S_hv_notallowed(aTHX_ a,b,c,d)
 #define hv_auxinit		S_hv_auxinit
 #define hv_delete_common(a,b,c,d,e,f,g)	S_hv_delete_common(aTHX_ a,b,c,d,e,f,g)

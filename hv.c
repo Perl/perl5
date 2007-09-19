@@ -424,14 +424,29 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	return NULL;
 
     if (SvSMAGICAL(hv) && SvGMAGICAL(hv) && !(action & HV_DISABLE_UVAR_XKEY)) {
-	keysv = hv_magic_uvar_xkey(hv, keysv, key, klen, flags, action);
-	/* If a fetch-as-store fails on the fetch, then the action is to
-	   recurse once into "hv_store". If we didn't do this, then that
-	   recursive call would call the key conversion routine again.
-	   However, as we replace the original key with the converted
-	   key, this would result in a double conversion, which would show
-	   up as a bug if the conversion routine is not idempotent.  */
-	hash = 0;
+	MAGIC* mg;
+	if ((mg = mg_find((SV*)hv, PERL_MAGIC_uvar))) {
+	    struct ufuncs * const uf = (struct ufuncs *)mg->mg_ptr;
+	    if (uf->uf_set == NULL) {
+		SV* obj = mg->mg_obj;
+
+		if (!keysv) {
+		    keysv = sv_2mortal(newSVpvn(key, klen));
+		    if (flags & HVhek_UTF8)
+			SvUTF8_on(keysv);
+		}
+		
+		mg->mg_obj = keysv;         /* pass key */
+		uf->uf_index = action;      /* pass action */
+		magic_getuvar((SV*)hv, mg);
+		keysv = mg->mg_obj;         /* may have changed */
+		mg->mg_obj = obj;
+
+		/* If the key may have changed, then we need to invalidate
+		   any passed-in computed hash value.  */
+		hash = 0;
+	    }
+	}
     }
     if (keysv) {
 	if (flags & HVhek_FREEKEY)
@@ -789,6 +804,12 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	       which in turn might do some tied magic. So we need to make that
 	       magic check happen.  */
 	    /* gonna assign to this, so it better be there */
+	    /* If a fetch-as-store fails on the fetch, then the action is to
+	       recurse once into "hv_store". If we didn't do this, then that
+	       recursive call would call the key conversion routine again.
+	       However, as we replace the original key with the converted
+	       key, this would result in a double conversion, which would show
+	       up as a bug if the conversion routine is not idempotent.  */
 	    return hv_fetch_common(hv, keysv, key, klen, flags,
 				   HV_FETCH_ISSTORE|HV_DISABLE_UVAR_XKEY, val,
 				   hash);
@@ -2522,32 +2543,6 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 	Safefree(str);
 
     return HeKEY_hek(entry);
-}
-
-STATIC SV *
-S_hv_magic_uvar_xkey(pTHX_ HV* hv, SV* keysv, const char *const key,
-		     const STRLEN klen, const int k_flags, int action)
-{
-    MAGIC* mg;
-    if ((mg = mg_find((SV*)hv, PERL_MAGIC_uvar))) {
-	struct ufuncs * const uf = (struct ufuncs *)mg->mg_ptr;
-	if (uf->uf_set == NULL) {
-	    SV* obj = mg->mg_obj;
-
-	    if (!keysv) {
-		keysv = sv_2mortal(newSVpvn(key, klen));
-		if (k_flags & HVhek_UTF8)
-		    SvUTF8_on(keysv);
-	    }
-		
-	    mg->mg_obj = keysv;         /* pass key */
-	    uf->uf_index = action;      /* pass action */
-	    magic_getuvar((SV*)hv, mg);
-	    keysv = mg->mg_obj;         /* may have changed */
-	    mg->mg_obj = obj;
-	}
-    }
-    return keysv;
 }
 
 I32 *
