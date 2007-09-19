@@ -45,6 +45,7 @@ while (<DATA>) {
 # Email addresses for we do not have names.
 #
 $map {$_} = "?" for 
+    "agrow\100thegotonerd.com",
     "alexander_bluhm\100genua.de",
     "alexander_gernler\100genua.de",
     "ammon\100rhythm.com",
@@ -424,6 +425,7 @@ richard.foley\100ubsw.com               richard.foley\100t-online.de
 +                                       richard.foley\100rfi.net
 rick\100consumercontact.com             rick\100bort.ca
 +                                       rick.delaney\100rogers.com
+rjbs\100cpan.org                        rjbs-perl-p5p\100lists.manxome.org
 rjk\100linguist.dartmouth.edu           rjk\100linguist.thayer.dartmouth.edu
 +                                       rjk-perl-p5p\100tamias.net
 rmgiroux\100acm.org                     rmgiroux\100hotmail.com
