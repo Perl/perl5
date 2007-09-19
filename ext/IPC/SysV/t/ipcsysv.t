@@ -148,8 +148,11 @@ SKIP: {
 
     use IPC::SysV qw(IPC_CREAT GETALL SETALL);
 
+    # FreeBSD's default limit seems to be 9
+    my $nsem = 5;
+
     my $test_name = 'sem acquire';
-    $sem = semget(IPC_PRIVATE, 10, $perm | IPC_CREAT);
+    $sem = semget(IPC_PRIVATE, $nsem, $perm | IPC_CREAT);
     if ($sem) {
         pass($test_name);
     }
@@ -164,10 +167,8 @@ SKIP: {
 
     my $data;
     ok(semctl($sem,0,IPC_STAT,$data),'sem data call');
-    
-    cmp_ok(length($data),'>',0,'sem data len');
 
-    my $nsem = 10;
+    cmp_ok(length($data),'>',0,'sem data len');
 
     ok(semctl($sem,0,SETALL,pack("s!*",(0) x $nsem)), 'set all sems');
 
