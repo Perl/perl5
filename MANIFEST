@@ -1450,6 +1450,7 @@ lib/base.pm			Establish IS-A relationship at compile time
 lib/base/t/base.t		See if base works
 lib/base/t/fields-base.t	See if fields work
 lib/base/t/fields.t		See if fields work
+lib/base/t/isa.t		See if base's behaviour doesn't change
 lib/base/t/sigdie.t		See if base works with SIGDIE
 lib/base/t/version.t		See if base works with versions
 lib/base/t/warnings.t		See if base works with warnings

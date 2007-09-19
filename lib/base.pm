@@ -71,12 +71,13 @@ sub import {
     my $inheritor = caller(0);
     my @isa_classes;
 
+    my @bases;
     foreach my $base (@_) {
         if ( $inheritor eq $base ) {
             warn "Class '$inheritor' tried to inherit from itself\n";
         }
 
-        next if $inheritor->isa($base);
+        next if grep $_->isa($base), ($inheritor, @bases);
 
         if (has_version($base)) {
             ${$base.'::VERSION'} = '-1, set by base.pm' 
@@ -106,7 +107,7 @@ ERROR
             ${$base.'::VERSION'} = "-1, set by base.pm"
               unless defined ${$base.'::VERSION'};
         }
-        push @isa_classes, $base;
+        push @bases, $base;
 
         if ( has_fields($base) || has_attr($base) ) {
             # No multiple fields inheritance *suck*
@@ -120,6 +121,8 @@ ERROR
     }
     # Save this until the end so it's all or nothing if the above loop croaks.
     push @{"$inheritor\::ISA"}, @isa_classes;
+
+    push @{"$inheritor\::ISA"}, @bases;
 
     if( defined $fields_base ) {
         inherit_fields($inheritor, $fields_base);
