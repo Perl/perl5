@@ -443,6 +443,12 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	is_utf8 = ((flags & HVhek_UTF8) ? TRUE : FALSE);
     }
 
+    if (action & HV_DELETE) {
+	return (HE *) hv_delete_common(hv, keysv, key, klen,
+				       flags | (is_utf8 ? HVhek_UTF8 : 0),
+				       action, hash);
+    }
+
     xhv = (XPVHV*)SvANY(hv);
     if (SvMAGICAL(hv)) {
 	if (SvRMAGICAL(hv) && !(action & (HV_FETCH_ISSTORE|HV_FETCH_ISEXISTS))) {
@@ -930,7 +936,8 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 flags)
 	klen = klen_i32;
 	k_flags = 0;
     }
-    return hv_delete_common(hv, NULL, key, klen, k_flags, flags, 0);
+    return (SV *) hv_fetch_common(hv, NULL, key, klen, k_flags,
+				  flags | HV_DELETE, NULL, 0);
 }
 
 /*
@@ -948,7 +955,8 @@ precomputed hash value, or 0 to ask for it to be computed.
 SV *
 Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 {
-    return hv_delete_common(hv, keysv, NULL, 0, 0, flags, hash);
+    return (SV *) hv_fetch_common(hv, keysv, NULL, 0, 0, flags | HV_DELETE,
+				  NULL, hash);
 }
 
 STATIC SV *
@@ -960,26 +968,8 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     register HE *entry;
     register HE **oentry;
     HE *const *first_entry;
-    bool is_utf8;
+    bool is_utf8 = (k_flags & HVhek_UTF8) ? TRUE : FALSE;
     int masked_flags;
-
-    if (!hv)
-	return NULL;
-
-    if (SvSMAGICAL(hv) && SvGMAGICAL(hv)
-	&& !(d_flags & HV_DISABLE_UVAR_XKEY)) {
-	keysv = hv_magic_uvar_xkey(hv, keysv, key, klen, k_flags, HV_DELETE);
-	hash = 0;
-    }
-    if (keysv) {
-	if (k_flags & HVhek_FREEKEY)
-	    Safefree(key);
-	key = SvPV_const(keysv, klen);
-	k_flags = 0;
-	is_utf8 = (SvUTF8(keysv) != 0);
-    } else {
-	is_utf8 = ((k_flags & HVhek_UTF8) ? TRUE : FALSE);
-    }
 
     if (SvRMAGICAL(hv)) {
 	bool needs_copy;

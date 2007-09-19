@@ -482,7 +482,6 @@ struct refcounted_he {
 /* Hash actions
  * Passed in PERL_MAGIC_uvar calls
  */
-#define HV_DELETE		-1
 #define HV_DISABLE_UVAR_XKEY	0x01
 /* We need to ensure that these don't clash with G_DISCARD, which is 2, as it
    is documented as being passed to hv_delete().  */
@@ -490,6 +489,7 @@ struct refcounted_he {
 #define HV_FETCH_ISEXISTS	0x08
 #define HV_FETCH_LVALUE		0x10
 #define HV_FETCH_JUST_SV	0x20
+#define HV_DELETE		0x40
 
 /*
  * Local variables:
