@@ -7,6 +7,7 @@ BEGIN {
 
 BEGIN { chdir 't' if -d 't' };
 BEGIN { mkdir 'out' unless -d 'out' };
+END { rmtree('out') };
 
 use strict;
 use lib qw[../lib];
