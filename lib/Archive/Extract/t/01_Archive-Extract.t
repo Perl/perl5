@@ -7,7 +7,9 @@ BEGIN {
 
 BEGIN { chdir 't' if -d 't' };
 BEGIN { mkdir 'out' unless -d 'out' };
-END { rmtree('out') };
+
+### left behind, at least on Win32. See core patch #31904
+END   { rmtree('out') };        
 
 use strict;
 use lib qw[../lib];
@@ -164,6 +166,17 @@ my $tmpl = {
                 },
 };
 
+### XXX special case: on older solaris boxes (8),
+### bunzip2 is version 0.9.x. Older versions (pre 1),
+### only extract files that end in .bz2, and nothing
+### else. So remove that test case if we have an older
+### bunzip2 :(
+{   if( $Class->have_old_bunzip2 ) {
+        delete $tmpl->{'y.tbz'};
+        diag "Old bunzip2 detected, skipping .tbz test";
+    }
+}    
+
 ### show us the tools IPC::Cmd will use to run binary programs
 if( $Debug ) {
     diag( "IPC::Run enabled: $IPC::Cmd::USE_IPC_RUN " );
@@ -285,7 +298,6 @@ for my $switch (0,1) {
         skip "No binaries or modules to extract ".$archive, 
             (10 * scalar @outs) if $mod_fail && $pgm_fail;
 
-
         ### we dont warnings spewed about missing modules, that might
         ### be a problem...
         local $IPC::Cmd::WARN = 0;
@@ -363,8 +375,24 @@ for my $switch (0,1) {
                         ### if something went wrong with determining the out
                         ### path, don't go deleting stuff.. might be Really Bad
                         my $out_re = quotemeta( $OutDir );
-                        $out_re =~ s/\\(>|\])\z// if IS_VMS; # zap trailing bracket
-
+                        
+                        ### VMS directory layout is different. Craig Berry
+                        ### explains:
+                        ### the test is trying to determine if C</disk1/foo/bar>
+                        ### is part of C</disk1/foo/bar/baz>.  Except in VMS
+                        ### syntax, that would mean trying to determine whether
+                        ### C<disk1:[foo.bar]> is part of C<disk1:[foo.bar.baz]>
+                        ### Because we have both a directory delimiter
+                        ### (dot) and a directory spec terminator (right 
+                        ### bracket), we have to trim the right bracket from 
+                        ### the first one to make it successfully match the
+                        ### second one.  Since we're asserting the same truth --
+                        ### that one path spec is the leading part of the other
+                        ### -- it seems to me ok to have this in the test only.
+                        ### 
+                        ### so we strip the ']' of the back of the regex
+                        $out_re =~ s/\\\]// if IS_VMS; 
+                        
                         if( $ae->extract_path !~ /^$out_re/ ) {   
                             ok( 0, "Extractpath WRONG (".$ae->extract_path.")"); 
                             skip(  "Unsafe operation -- skip cleanup!!!" ), 1;

@@ -31,7 +31,7 @@ use constant Z              => 'Z';
 
 use vars qw[$VERSION $PREFER_BIN $PROGRAMS $WARN $DEBUG];
 
-$VERSION        = '0.22_01';
+$VERSION        = '0.24';
 $PREFER_BIN     = 0;
 $WARN           = 1;
 $DEBUG          = 0;
@@ -206,7 +206,7 @@ Returns a C<Archive::Extract> object on success, or false on failure.
                 $ar =~ /.+?\.gz$/i                  ? GZ    :
                 $ar =~ /.+?\.tar$/i                 ? TAR   :
                 $ar =~ /.+?\.(zip|jar|par)$/i       ? ZIP   :
-                $ar =~ /.+?\.(?:tbz|tar\.bz2?)$/i   ? TBZ   :
+                $ar =~ /.+?\.(?:tbz2?|tar\.bz2?)$/i ? TBZ   :
                 $ar =~ /.+?\.bz2$/i                 ? BZ2   :
                 $ar =~ /.+?\.Z$/                    ? Z     :
                 '';
@@ -285,7 +285,7 @@ sub extract {
     {   ### a foo.gz file
         if( $self->is_gz or $self->is_bz2 or $self->is_Z) {
     
-            my $cp = $self->archive; $cp =~ s/\.(?:gz|bz2|Z)$//i;
+            my $cp = $self->archive; $cp =~ s/\.(?:gz|bz2?|Z)$//i;
         
             ### to is a dir?
             if ( -d $to ) {
@@ -452,6 +452,46 @@ sub bin_tar         { return $PROGRAMS->{'tar'}     if $PROGRAMS->{'tar'}   }
 sub bin_bunzip2     { return $PROGRAMS->{'bunzip2'} if $PROGRAMS->{'bunzip2'} }
 sub bin_uncompress  { return $PROGRAMS->{'uncompress'} 
                                                  if $PROGRAMS->{'uncompress'} }
+=head2 $bool = $ae->have_old_bunzip2
+
+Older versions of C</bin/bunzip2>, from before the C<bunzip2 1.0> release,
+require all archive names to end in C<.bz2> or it will not extract
+them. This method checks if you have a recent version of C<bunzip2>
+that allows any extension, or an older one that doesn't.
+
+=cut
+
+sub have_old_bunzip2 {
+    my $self = shift;
+
+    ### no bunzip2? no old bunzip2 either :)
+    return unless $self->bin_bunzip2;
+
+    ### if we can't run this, we can't be sure if it's too old or not    
+    ### XXX stupid stupid stupid bunzip2 doesn't understand --version
+    ### is not a request to extract data:
+    ### $ bunzip2 --version
+    ### bzip2, a block-sorting file compressor.  Version 1.0.2, 30-Dec-2001.
+    ### [...]
+    ### bunzip2: I won't read compressed data from a terminal.
+    ### bunzip2: For help, type: `bunzip2 --help'.
+    ### $ echo $?
+    ### 1
+    ### HATEFUL!
+    my $buffer;
+    scalar run( command => [$self->bin_bunzip2, '--version'],
+         verbose => 0,
+         buffer  => \$buffer
+    );
+
+    ### no output
+    return unless $buffer;
+    
+    my ($version) = $buffer =~ /version \s+ (\d+)/ix;
+
+    return 1 if $version < 1;
+    return;
+}
 
 #################################
 #
@@ -506,7 +546,7 @@ sub _untar_bin {
     {    my $cmd = 
             $self->is_tgz ? [$self->bin_gzip, '-cdf', $self->archive, '|',
                              $self->bin_tar, '-tf', '-'] :
-            $self->is_tbz ? [$self->bin_bunzip2, '-c', $self->archive, '|',                             
+            $self->is_tbz ? [$self->bin_bunzip2, '-cd', $self->archive, '|',                             
                              $self->bin_tar, '-tf', '-'] :
             [$self->bin_tar, '-tf', $self->archive];
 
@@ -549,7 +589,7 @@ sub _untar_bin {
     {   my $cmd = 
             $self->is_tgz ? [$self->bin_gzip, '-cdf', $self->archive, '|',
                              $self->bin_tar, '-xf', '-'] :
-            $self->is_tbz ? [$self->bin_bunzip2, '-c', $self->archive, '|',                             
+            $self->is_tbz ? [$self->bin_bunzip2, '-cd', $self->archive, '|',                             
                              $self->bin_tar, '-xf', '-'] :
             [$self->bin_tar, '-xf', $self->archive];
 
@@ -854,13 +894,12 @@ sub _unzip_bin {
 
 
     ### first, get the files.. it must be 2 different commands with 'unzip' :(
-    {   my $cmd;
-	if (ON_VMS) {
-	    $cmd = [ $self->bin_unzip, '"-Z"', '-1', $self->archive ];
-	} else {
-	    $cmd = [ $self->bin_unzip, '-Z', '-1', $self->archive ];
-	}
-
+    {   ### on VMS, capital letter options have to be quoted. This is
+        ### peported by John Malmberg on P5P Tue 21 Aug 2007 05:05:11 
+        ### Subject: [patch@31735]Archive Extract fix on VMS.
+        my $opt = ON_VMS ? '"-Z"' : '-Z';
+        my $cmd = [ $self->bin_unzip, $opt, '-1', $self->archive ];
+	
         my $buffer = '';
         unless( scalar run( command => $cmd,
                             verbose => $DEBUG,
@@ -1009,8 +1048,16 @@ sub _bunzip2_bin {
     my $fh = FileHandle->new('>'. $self->_gunzip_to) or
         return $self->_error(loc("Could not open '%1' for writing: %2",
                             $self->_gunzip_to, $! ));
+    
+    ### guard against broken bunzip2. See ->have_old_bunzip2()
+    ### for details
+    if( $self->have_old_bunzip2 and $self->archive !~ /\.bz2$/i ) {
+        return $self->_error(loc("Your bunzip2 version is too old and ".
+                                 "can only extract files ending in '%1'",
+                                 '.bz2'));
+    }
 
-    my $cmd = [ $self->bin_bunzip2, '-c', $self->archive ];
+    my $cmd = [ $self->bin_bunzip2, '-cd', $self->archive ];
 
     my $buffer;
     unless( scalar run( command => $cmd,
@@ -1156,6 +1203,25 @@ what type it is, and what extractor methods therefore can be used. If
 your archives do not have any of the extensions as described in the
 C<new()> method, you will have to specify the type explicitly, or
 C<Archive::Extract> will not be able to extract the archive for you.
+
+=head2 Supporting Very Large Files
+
+C<Archive::Extract> can use either pure perl modules or command line
+programs under the hood. Some of the pure perl modules (like 
+C<Archive::Tar> take the entire contents of the archive into memory,
+which may not be feasible on your system. Consider setting the global
+variable C<$Archive::Extract::PREFER_BIN> to C<1>, which will prefer
+the use of command line programs and won't consume so much memory.
+
+See the C<GLOBAL VARIABLES> section below for details.
+
+=head2 Bunzip2 support of arbitrary extensions.
+
+Older versions of C</bin/bunzip2> do not support arbitrary file 
+extensions and insist on a C<.bz2> suffix. Although we do our best
+to guard against this, if you experience a bunzip2 error, it may
+be related to this. For details, please see the C<have_old_bunzip2>
+method.
 
 =head1 GLOBAL VARIABLES
 

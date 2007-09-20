@@ -10,7 +10,7 @@ To recreate it use the following command:
 
      uupacktool.pl -p lib/Archive/Extract/t/src/x.gz lib/Archive/Extract/t/src/x.gz.packed
 
-Created at Mon May 28 12:45:26 2007
+Created at Thu Sep 20 15:38:01 2007
 #########################################################################
 __UU__
 6'XL("+F;6D8``W@``P``````````````
