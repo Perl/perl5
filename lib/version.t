@@ -533,6 +533,14 @@ SKIP: {
     unlike($@, qr/^Invalid version format \(alpha with zero width\)/,
     	"Invalid version format 1._1");
 
+    {
+	my $warning;
+	local $SIG{__WARN__} = sub { $warning = $_[0] };
+	eval 'my $v = $CLASS->new(~0);';
+	unlike($@, qr/Integer overflow in version/, "Too large version");
+	like($warning, qr/Integer overflow in version/, "Too large version");
+    }
+
 }
 
 1;

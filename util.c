@@ -4139,6 +4139,7 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
 #endif
 }
 
+#define VERSION_MAX 0x7FFFFFFF
 /*
 =for apidoc scan_version
 
@@ -4170,6 +4171,7 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
     int saw_period = 0;
     int alpha = 0;
     int width = 3;
+    bool vinf = FALSE;
     AV * const av = newAV();
     SV * const hv = newSVrv(rv, "version"); /* create an SV and upgrade the RV */
     (void)sv_upgrade(hv, SVt_PVHV); /* needs to be an HV type */
@@ -4219,6 +4221,7 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
     if ( saw_period > 1 )
 	qv = 1; /* force quoted version processing */
 
+    last = pos;
     pos = s;
 
     if ( qv )
@@ -4239,7 +4242,7 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
   		/* this is atoi() that delimits on underscores */
   		const char *end = pos;
   		I32 mult = 1;
- 		I32 orev;
+		I32 orev;
 
 		/* the following if() will only be true after the decimal
 		 * point of a version originally created with a bare
@@ -4248,11 +4251,18 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
  		if ( !qv && s > start && saw_period == 1 ) {
 		    mult *= 100;
  		    while ( s < end ) {
- 			orev = rev;
+			orev = rev;
  			rev += (*s - '0') * mult;
  			mult /= 10;
- 			if ( PERL_ABS(orev) > PERL_ABS(rev) )
- 			    Perl_croak(aTHX_ "Integer overflow in version");
+			if (   (PERL_ABS(orev) > PERL_ABS(rev)) 
+			    || (PERL_ABS(rev) > VERSION_MAX )) {
+			    if(ckWARN(WARN_OVERFLOW))
+				Perl_warner(aTHX_ packWARN(WARN_OVERFLOW), 
+				"Integer overflow in version %d",VERSION_MAX);
+			    s = end - 1;
+			    rev = VERSION_MAX;
+			    vinf = 1;
+			}
  			s++;
 			if ( *s == '_' )
 			    s++;
@@ -4260,18 +4270,29 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
   		}
  		else {
  		    while (--end >= s) {
- 			orev = rev;
+			orev = rev;
  			rev += (*end - '0') * mult;
  			mult *= 10;
- 			if ( PERL_ABS(orev) > PERL_ABS(rev) )
- 			    Perl_croak(aTHX_ "Integer overflow in version");
+			if (   (PERL_ABS(orev) > PERL_ABS(rev)) 
+			    || (PERL_ABS(rev) > VERSION_MAX )) {
+			    if(ckWARN(WARN_OVERFLOW))
+				Perl_warner(aTHX_ packWARN(WARN_OVERFLOW), 
+				"Integer overflow in version");
+			    end = s - 1;
+			    rev = VERSION_MAX;
+			    vinf = 1;
+			}
  		    }
  		} 
   	    }
 
   	    /* Append revision */
 	    av_push(av, newSViv(rev));
-	    if ( *pos == '.' )
+	    if ( vinf ) {
+		s = last;
+		break;
+	    }
+	    else if ( *pos == '.' )
 		s = ++pos;
 	    else if ( *pos == '_' && isDIGIT(pos[1]) )
 		s = ++pos;
@@ -4310,7 +4331,12 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
     }
 
     /* need to save off the current version string for later */
-    if ( s > start ) {
+    if ( vinf ) {
+	SV * orig = newSVpvn("v.Inf", sizeof("v.Inf")-1);
+	hv_store((HV *)hv, "original", 8, orig, 0);
+	hv_store((HV *)hv, "vinf", 4, newSViv(1), 0);
+    }
+    else if ( s > start ) {
 	SV * orig = newSVpvn(start,s-start);
 	if ( qv && saw_period == 1 && *start != 'v' ) {
 	    /* need to insert a v to be consistent */
