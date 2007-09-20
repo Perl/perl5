@@ -304,7 +304,7 @@ ApdR	|bool	|hv_exists	|NULLOK HV* tb|NN const char* key|I32 klen
 AbmdR	|bool	|hv_exists_ent	|NULLOK HV* tb|NN SV* key|U32 hash
 Apd	|SV**	|hv_fetch	|NULLOK HV* tb|NN const char* key|I32 klen|I32 lval
 Abmd	|HE*	|hv_fetch_ent	|NULLOK HV* tb|NN SV* key|I32 lval|U32 hash
-Ap	|HE*	|hv_common	|NULLOK HV* tb|NULLOK SV* keysv \
+Ap	|void*	|hv_common	|NULLOK HV* tb|NULLOK SV* keysv \
 				|NULLOK const char* key|STRLEN klen|int flags \
 				|int action|NULLOK SV* val|U32 hash
 Ap	|void	|hv_free_ent	|NN HV* hv|NULLOK HE* entryK

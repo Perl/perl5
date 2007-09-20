@@ -413,14 +413,15 @@ C<SV*>.
      hek)
 
 #define hv_store_ent(zlonk, awk, touche, zgruppp)			\
-    hv_common((zlonk), (awk), NULL, 0, 0, HV_FETCH_ISSTORE, (touche), (zgruppp))
+    ((HE *) hv_common((zlonk), (awk), NULL, 0, 0, HV_FETCH_ISSTORE,	\
+		      (touche), (zgruppp)))
 
 #define hv_exists_ent(zlonk, awk, zgruppp)				\
     (hv_common((zlonk), (awk), NULL, 0, 0, HV_FETCH_ISEXISTS, 0, (zgruppp))\
      ? TRUE : FALSE)
 #define hv_fetch_ent(zlonk, awk, touche, zgruppp)			\
-    hv_common((zlonk), (awk), NULL, 0, 0, ((touche) ? HV_FETCH_LVALUE : 0), \
-	      NULL, (zgruppp))
+    ((HE *) hv_common((zlonk), (awk), NULL, 0, 0,			\
+		      ((touche) ? HV_FETCH_LVALUE : 0), NULL, (zgruppp)))
 #define hv_delete_ent(zlonk, awk, touche, zgruppp)			\
     ((SV *) hv_common((zlonk), (awk), NULL, 0, 0, (touche) | HV_DELETE,	\
 		      NULL, (zgruppp)))
