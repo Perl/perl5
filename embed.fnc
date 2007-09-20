@@ -299,11 +299,11 @@ Apd	|void	|hv_clear	|NULLOK HV* tb
 poM	|HV *	|hv_copy_hints_hv|NN HV *const ohv
 Ap	|void	|hv_delayfree_ent|NN HV* hv|NULLOK HE* entry
 Apd	|SV*	|hv_delete	|NULLOK HV* tb|NN const char* key|I32 klen|I32 flags
-Apd	|SV*	|hv_delete_ent	|NULLOK HV* tb|NN SV* key|I32 flags|U32 hash
+Abmd	|SV*	|hv_delete_ent	|NULLOK HV* tb|NN SV* key|I32 flags|U32 hash
 ApdR	|bool	|hv_exists	|NULLOK HV* tb|NN const char* key|I32 klen
-ApdR	|bool	|hv_exists_ent	|NULLOK HV* tb|NN SV* key|U32 hash
+AbmdR	|bool	|hv_exists_ent	|NULLOK HV* tb|NN SV* key|U32 hash
 Apd	|SV**	|hv_fetch	|NULLOK HV* tb|NN const char* key|I32 klen|I32 lval
-Apd	|HE*	|hv_fetch_ent	|NULLOK HV* tb|NN SV* key|I32 lval|U32 hash
+Abmd	|HE*	|hv_fetch_ent	|NULLOK HV* tb|NN SV* key|I32 lval|U32 hash
 Ap	|HE*	|hv_common	|NULLOK HV* tb|NULLOK SV* keysv \
 				|NULLOK const char* key|STRLEN klen|int flags \
 				|int action|NULLOK SV* val|U32 hash
@@ -327,7 +327,7 @@ XEdpoM	|struct refcounted_he *|refcounted_he_new \
 				|NULLOK SV *const key|NULLOK SV *const value
 Apd	|SV**	|hv_store	|NULLOK HV* tb|NULLOK const char* key|I32 klen|NULLOK SV* val \
 				|U32 hash
-Apd	|HE*	|hv_store_ent	|NULLOK HV* tb|NULLOK SV* key|NULLOK SV* val|U32 hash
+Abmd	|HE*	|hv_store_ent	|NULLOK HV* tb|NULLOK SV* key|NULLOK SV* val|U32 hash
 ApM	|SV**	|hv_store_flags	|NULLOK HV* tb|NULLOK const char* key|I32 klen|NULLOK SV* val \
 				|U32 hash|int flags
 Apd	|void	|hv_undef	|NULLOK HV* tb

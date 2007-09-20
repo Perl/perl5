@@ -258,7 +258,7 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen_i32, SV *val, U32 hash)
     return hek ? &HeVAL(hek) : NULL;
 }
 
-/* XXX This looks like an ideal candidate to inline */
+/* Tricky to inlike this because it needs a temporary variable */
 SV**
 Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
                  register U32 hash, int flags)
@@ -296,13 +296,6 @@ information on how to use this function on tied hashes.
 
 =cut
 */
-
-/* XXX This looks like an ideal candidate to inline */
-HE *
-Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, U32 hash)
-{
-  return hv_common(hv, keysv, NULL, 0, 0, HV_FETCH_ISSTORE, val, hash);
-}
 
 /*
 =for apidoc hv_exists
@@ -374,14 +367,6 @@ computed.
 =cut
 */
 
-/* XXX This looks like an ideal candidate to inline */
-bool
-Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
-{
-    return hv_common(hv, keysv, NULL, 0, 0, HV_FETCH_ISEXISTS, 0, hash)
-	? TRUE : FALSE;
-}
-
 /* returns an HE * structure with the all fields set */
 /* note that hent_val will be a mortal sv for MAGICAL hashes */
 /*
@@ -400,13 +385,6 @@ information on how to use this function on tied hashes.
 
 =cut
 */
-
-HE *
-Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
-{
-    return hv_common(hv, keysv, NULL, 0, 0, 
-		     (lval ? HV_FETCH_LVALUE : 0), NULL, hash);
-}
 
 HE *
 Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
@@ -973,14 +951,6 @@ precomputed hash value, or 0 to ask for it to be computed.
 
 =cut
 */
-
-/* XXX This looks like an ideal candidate to inline */
-SV *
-Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
-{
-    return (SV *) hv_common(hv, keysv, NULL, 0, 0, flags | HV_DELETE, NULL,
-			    hash);
-}
 
 STATIC SV *
 S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
