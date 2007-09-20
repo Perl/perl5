@@ -104,7 +104,7 @@ my $map = {
         pre_hook    => sub {
                         my $mod     = shift;
                         my $clone   = $mod->clone;
-                        $clone->status->prereqs( { $ModPrereq => ~0 } );
+                        $clone->status->prereqs( { $ModPrereq => ~0/2 } );
                         return $clone;
                     },
         failed      => 1,
@@ -273,7 +273,7 @@ my $map = {
     }
     
     {   my $clone   = $Mod->clone;
-        my $prereqs = { $ModPrereq => ~0 };
+        my $prereqs = { $ModPrereq => ~0/2 };
     
         $clone->status->prereqs( $prereqs );
 
