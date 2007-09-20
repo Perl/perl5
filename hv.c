@@ -236,10 +236,6 @@ hv_store_ent.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
-=cut
-*/
-
-/*
 =for apidoc hv_store_ent
 
 Stores C<val> in a hash.  The hash key is specified as C<key>.  The C<hash>
@@ -265,19 +261,11 @@ hv_store in preference to hv_store_ent.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
-=cut
-*/
-
-/*
 =for apidoc hv_exists
 
 Returns a boolean indicating whether the specified hash key exists.  The
 C<klen> is the length of the key.
 
-=cut
-*/
-
-/*
 =for apidoc hv_fetch
 
 Returns the SV which corresponds to the specified key in the hash.  The
@@ -288,10 +276,6 @@ dereferencing it to an C<SV*>.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
-=cut
-*/
-
-/*
 =for apidoc hv_exists_ent
 
 Returns a boolean indicating whether the specified hash key exists. C<hash>
@@ -886,10 +870,6 @@ hash and returned to the caller.  The C<klen> is the length of the key.
 The C<flags> value will normally be zero; if set to G_DISCARD then NULL
 will be returned.
 
-=cut
-*/
-
-/*
 =for apidoc hv_delete_ent
 
 Deletes a key/value pair in the hash.  The value SV is removed from the
