@@ -1214,7 +1214,7 @@ Perl_pack_cat(pTHX_ SV *cat, const char *pat, const char *patend, register SV **
 HE *
 Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, U32 hash)
 {
-  return hv_common(hv, keysv, NULL, 0, 0, HV_FETCH_ISSTORE, val, hash);
+  return (HE *)hv_common(hv, keysv, NULL, 0, 0, HV_FETCH_ISSTORE, val, hash);
 }
 
 bool
@@ -1227,7 +1227,7 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 HE *
 Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, U32 hash)
 {
-    return hv_common(hv, keysv, NULL, 0, 0, 
+    return (HE *)hv_common(hv, keysv, NULL, 0, 0, 
 		     (lval ? HV_FETCH_LVALUE : 0), NULL, hash);
 }
 
