@@ -235,9 +235,27 @@ sub test_U_hash {
 	"exists_ent (missing)");
 
     $victim = shift @hitlist;
+    die "Need a victim" unless defined $victim;
     ok (XS::APItest::Hash::exists($hash, $victim), "exists");
     ok (!XS::APItest::Hash::exists($hash, $mapping->($victim)),
 	"exists (missing)");
+
+    is (XS::APItest::Hash::common({hv => $hash, keysv => $victim}),
+	$placebo->{$victim}, "common (fetch)");
+    is (XS::APItest::Hash::common({hv => $hash, keypv => $victim}),
+	$placebo->{$victim}, "common (fetch pv)");
+    is (XS::APItest::Hash::common({hv => $hash, keysv => $victim,
+				   action => XS::APItest::HV_DISABLE_UVAR_XKEY}),
+	undef, "common (fetch) missing");
+    is (XS::APItest::Hash::common({hv => $hash, keypv => $victim,
+				   action => XS::APItest::HV_DISABLE_UVAR_XKEY}),
+	undef, "common (fetch pv) missing");
+    is (XS::APItest::Hash::common({hv => $hash, keysv => $mapping->($victim),
+				   action => XS::APItest::HV_DISABLE_UVAR_XKEY}),
+	$placebo->{$victim}, "common (fetch) missing mapped");
+    is (XS::APItest::Hash::common({hv => $hash, keypv => $mapping->($victim),
+				   action => XS::APItest::HV_DISABLE_UVAR_XKEY}),
+	$placebo->{$victim}, "common (fetch pv) missing mapped");
 }
 
 sub main_tests {

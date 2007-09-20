@@ -404,6 +404,51 @@ fetch(hash, key_sv)
         OUTPUT:
         RETVAL
 
+SV *
+common(params)
+	INPUT:
+	HV *params
+	PREINIT:
+	HE *result;
+	HV *hv = NULL;
+	SV *keysv = NULL;
+	const char *key = NULL;
+	STRLEN klen = 0;
+	int flags = 0;
+	int action = 0;
+	SV *val = NULL;
+	U32 hash = 0;
+	SV **svp;
+	CODE:
+	if ((svp = hv_fetchs(params, "hv", 0))) {
+	    SV *const rv = *svp;
+	    if (!SvROK(rv))
+		croak("common passed a non-reference for parameter hv");
+	    hv = (HV *)SvRV(rv);
+	}
+	if ((svp = hv_fetchs(params, "keysv", 0)))
+	    keysv = *svp;
+	if ((svp = hv_fetchs(params, "keypv", 0))) {
+	    key = SvPV_const(*svp, klen);
+	    if (SvUTF8(*svp))
+		flags = HVhek_UTF8;
+	}
+	if ((svp = hv_fetchs(params, "action", 0)))
+	    action = SvIV(*svp);
+	if ((svp = hv_fetchs(params, "val", 0)))
+	    val = *svp;
+	if ((svp = hv_fetchs(params, "hash", 0)))
+	    action = SvUV(*svp);
+
+	result = hv_common(hv, keysv, key, klen, flags, action, val, hash);
+	if (!result) {
+	    XSRETURN_EMPTY;
+	}
+	/* Force mg_get  */
+	RETVAL = newSVsv(HeVAL(result));
+        OUTPUT:
+        RETVAL
+
 void
 test_hv_free_ent()
 	PPCODE:
