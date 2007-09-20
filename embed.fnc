@@ -304,6 +304,9 @@ ApdR	|bool	|hv_exists	|NULLOK HV* tb|NN const char* key|I32 klen
 ApdR	|bool	|hv_exists_ent	|NULLOK HV* tb|NN SV* key|U32 hash
 Apd	|SV**	|hv_fetch	|NULLOK HV* tb|NN const char* key|I32 klen|I32 lval
 Apd	|HE*	|hv_fetch_ent	|NULLOK HV* tb|NN SV* key|I32 lval|U32 hash
+Ap	|HE*	|hv_common	|NULLOK HV* tb|NULLOK SV* keysv \
+				|NULLOK const char* key|STRLEN klen|int flags \
+				|int action|NULLOK SV* val|U32 hash
 Ap	|void	|hv_free_ent	|NN HV* hv|NULLOK HE* entryK
 Apd	|I32	|hv_iterinit	|NN HV* tb
 ApdR	|char*	|hv_iterkey	|NN HE* entry|NN I32* retlen
@@ -1145,8 +1148,6 @@ rs	|void	|hv_notallowed	|int flags|NN const char *key|I32 klen|NN const char *ms
 sn	|struct xpvhv_aux*|hv_auxinit|NN HV *hv
 sM	|SV*	|hv_delete_common|NULLOK HV* tb|NULLOK SV* keysv|NULLOK const char* key \
 		|STRLEN klen|int k_flags|I32 d_flags|U32 hash
-sM	|HE*	|hv_fetch_common|NULLOK HV* tb|NULLOK SV* keysv|NULLOK const char* key \
-		|STRLEN klen|int flags|int action|NULLOK SV* val|U32 hash
 sM	|void	|clear_placeholders	|NN HV* hb|U32 items
 sM	|SV *	|refcounted_he_value	|NN const struct refcounted_he *he
 #endif

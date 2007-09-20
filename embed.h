@@ -285,6 +285,7 @@
 #define hv_exists_ent		Perl_hv_exists_ent
 #define hv_fetch		Perl_hv_fetch
 #define hv_fetch_ent		Perl_hv_fetch_ent
+#define hv_common		Perl_hv_common
 #define hv_free_ent		Perl_hv_free_ent
 #define hv_iterinit		Perl_hv_iterinit
 #define hv_iterkey		Perl_hv_iterkey
@@ -1145,7 +1146,6 @@
 #define hv_notallowed		S_hv_notallowed
 #define hv_auxinit		S_hv_auxinit
 #define hv_delete_common	S_hv_delete_common
-#define hv_fetch_common		S_hv_fetch_common
 #define clear_placeholders	S_clear_placeholders
 #define refcounted_he_value	S_refcounted_he_value
 #endif
@@ -2570,6 +2570,7 @@
 #define hv_exists_ent(a,b,c)	Perl_hv_exists_ent(aTHX_ a,b,c)
 #define hv_fetch(a,b,c,d)	Perl_hv_fetch(aTHX_ a,b,c,d)
 #define hv_fetch_ent(a,b,c,d)	Perl_hv_fetch_ent(aTHX_ a,b,c,d)
+#define hv_common(a,b,c,d,e,f,g,h)	Perl_hv_common(aTHX_ a,b,c,d,e,f,g,h)
 #define hv_free_ent(a,b)	Perl_hv_free_ent(aTHX_ a,b)
 #define hv_iterinit(a)		Perl_hv_iterinit(aTHX_ a)
 #define hv_iterkey(a,b)		Perl_hv_iterkey(aTHX_ a,b)
@@ -3425,7 +3426,6 @@
 #define hv_notallowed(a,b,c,d)	S_hv_notallowed(aTHX_ a,b,c,d)
 #define hv_auxinit		S_hv_auxinit
 #define hv_delete_common(a,b,c,d,e,f,g)	S_hv_delete_common(aTHX_ a,b,c,d,e,f,g)
-#define hv_fetch_common(a,b,c,d,e,f,g,h)	S_hv_fetch_common(aTHX_ a,b,c,d,e,f,g,h)
 #define clear_placeholders(a,b)	S_clear_placeholders(aTHX_ a,b)
 #define refcounted_he_value(a)	S_refcounted_he_value(aTHX_ a)
 #endif
