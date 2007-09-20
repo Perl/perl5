@@ -290,8 +290,14 @@ and omits the hash parameter.
 #define savepvs(str) Perl_savepvn(aTHX_ STR_WITH_LEN(str))
 #define gv_stashpvs(str, create) Perl_gv_stashpvn(aTHX_ STR_WITH_LEN(str), create)
 #define gv_fetchpvs(namebeg, add, sv_type) Perl_gv_fetchpvn_flags(aTHX_ STR_WITH_LEN(namebeg), add, sv_type)
-#define hv_fetchs(hv,key,lval) Perl_hv_fetch(aTHX_ hv, STR_WITH_LEN(key), lval)
-#define hv_stores(hv,key,val) Perl_hv_store(aTHX_ hv, STR_WITH_LEN(key), val, 0)
+#define hv_fetchs(hv,key,lval)						\
+  ((SV **)Perl_hv_common(aTHX_ (hv), NULL, STR_WITH_LEN(key), 0,	\
+			 (lval) ? (HV_FETCH_JUST_SV | HV_FETCH_LVALUE)	\
+			 : HV_FETCH_JUST_SV, NULL, 0))
+
+#define hv_stores(hv,key,val)						\
+  ((SV **)Perl_hv_common(aTHX_ (hv), NULL, STR_WITH_LEN(key), 0,	\
+			 (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV), (val), 0))
 
 
 /*

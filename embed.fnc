@@ -298,15 +298,20 @@ Apd	|HV*	|gv_stashsv	|NULLOK SV* sv|I32 flags
 Apd	|void	|hv_clear	|NULLOK HV* tb
 poM	|HV *	|hv_copy_hints_hv|NN HV *const ohv
 Ap	|void	|hv_delayfree_ent|NN HV* hv|NULLOK HE* entry
-Apd	|SV*	|hv_delete	|NULLOK HV* tb|NN const char* key|I32 klen|I32 flags
+Abmd	|SV*	|hv_delete	|NULLOK HV* tb|NN const char* key|I32 klen \
+				|I32 flags
 Abmd	|SV*	|hv_delete_ent	|NULLOK HV* tb|NN SV* key|I32 flags|U32 hash
-ApdR	|bool	|hv_exists	|NULLOK HV* tb|NN const char* key|I32 klen
+AbmdR	|bool	|hv_exists	|NULLOK HV* tb|NN const char* key|I32 klen
 AbmdR	|bool	|hv_exists_ent	|NULLOK HV* tb|NN SV* key|U32 hash
-Apd	|SV**	|hv_fetch	|NULLOK HV* tb|NN const char* key|I32 klen|I32 lval
+Abmd	|SV**	|hv_fetch	|NULLOK HV* tb|NN const char* key|I32 klen \
+				|I32 lval
 Abmd	|HE*	|hv_fetch_ent	|NULLOK HV* tb|NN SV* key|I32 lval|U32 hash
 Ap	|void*	|hv_common	|NULLOK HV* tb|NULLOK SV* keysv \
 				|NULLOK const char* key|STRLEN klen|int flags \
 				|int action|NULLOK SV* val|U32 hash
+Ap	|void*	|hv_common_key_len|NULLOK HV *hv|NN const char *key \
+				|I32 klen_i32|const int action|NULLOK SV *val \
+				|const U32 hash
 Ap	|void	|hv_free_ent	|NN HV* hv|NULLOK HE* entryK
 Apd	|I32	|hv_iterinit	|NN HV* tb
 ApdR	|char*	|hv_iterkey	|NN HE* entry|NN I32* retlen
@@ -325,11 +330,11 @@ dpoM	|void	|refcounted_he_free|NULLOK struct refcounted_he *he
 XEdpoM	|struct refcounted_he *|refcounted_he_new \
 				|NULLOK struct refcounted_he *const parent \
 				|NULLOK SV *const key|NULLOK SV *const value
-Apd	|SV**	|hv_store	|NULLOK HV* tb|NULLOK const char* key|I32 klen|NULLOK SV* val \
-				|U32 hash
+Abmd	|SV**	|hv_store	|NULLOK HV* tb|NULLOK const char* key \
+				|I32 klen|NULLOK SV* val|U32 hash
 Abmd	|HE*	|hv_store_ent	|NULLOK HV* tb|NULLOK SV* key|NULLOK SV* val|U32 hash
-ApM	|SV**	|hv_store_flags	|NULLOK HV* tb|NULLOK const char* key|I32 klen|NULLOK SV* val \
-				|U32 hash|int flags
+AbmdM	|SV**	|hv_store_flags	|NULLOK HV* tb|NULLOK const char* key \
+				|I32 klen|NULLOK SV* val|U32 hash|int flags
 Apd	|void	|hv_undef	|NULLOK HV* tb
 ApP	|I32	|ibcmp		|NN const char* a|NN const char* b|I32 len
 ApP	|I32	|ibcmp_locale	|NN const char* a|NN const char* b|I32 len

@@ -426,6 +426,29 @@ C<SV*>.
     ((SV *) hv_common((zlonk), (awk), NULL, 0, 0, (touche) | HV_DELETE,	\
 		      NULL, (zgruppp)))
 
+#define hv_store_flags(urkk, zamm, clunk, thwape, sploosh, eee_yow)	\
+    ((SV**) hv_common((urkk), NULL, (zamm), (clunk), (eee_yow),		\
+		      (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV), (thwape),	\
+		      (sploosh)))
+
+#define hv_store(urkk, zamm, clunk, thwape, sploosh)			\
+    ((SV**) hv_common_key_len((urkk), (zamm), (clunk),			\
+			      (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV),	\
+			      (thwape), (sploosh)))
+
+#define hv_exists(urkk, zamm, clunk)					\
+    (hv_common_key_len((urkk), (zamm), (clunk), HV_FETCH_ISEXISTS, NULL, 0) \
+     ? TRUE : FALSE)
+
+#define hv_fetch(urkk, zamm, clunk, pam)				\
+    ((SV**) hv_common_key_len((urkk), (zamm), (clunk), (pam)		\
+			      ? (HV_FETCH_JUST_SV | HV_FETCH_LVALUE)	\
+			      : HV_FETCH_JUST_SV, NULL, 0))
+
+#define hv_delete(urkk, zamm, clunk, pam)				\
+    ((SV*) hv_common_key_len((urkk), (zamm), (clunk),			\
+			     (pam) | HV_DELETE, NULL, 0))
+
 /* This refcounted he structure is used for storing the hints used for lexical
    pragmas. Without threads, it's basically struct he + refcount.
    With threads, life gets more complex as the structure needs to be shared
