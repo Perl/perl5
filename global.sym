@@ -156,6 +156,7 @@ Perl_hv_exists
 Perl_hv_exists_ent
 Perl_hv_fetch
 Perl_hv_fetch_ent
+Perl_hv_common
 Perl_hv_free_ent
 Perl_hv_iterinit
 Perl_hv_iterkey
