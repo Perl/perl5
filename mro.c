@@ -779,10 +779,8 @@ XS(XS_mro_get_isarev)
     dVAR;
     dXSARGS;
     SV* classname;
-    SV** svp;
+    HE* he;
     HV* isarev;
-    char* classname_pv;
-    STRLEN classname_len;
     AV* ret_array;
 
     PERL_UNUSED_ARG(cv);
@@ -795,10 +793,8 @@ XS(XS_mro_get_isarev)
     SP -= items;
 
     
-    classname_pv = SvPV_nolen(classname);
-    classname_len = strlen(classname_pv);
-    svp = hv_fetch(PL_isarev, classname_pv, classname_len, 0);
-    isarev = svp ? (HV*)*svp : NULL;
+    he = hv_fetch_ent(PL_isarev, classname, 0, 0);
+    isarev = he ? (HV*)HeVAL(he) : NULL;
 
     ret_array = newAV();
     if(isarev) {
@@ -821,7 +817,7 @@ XS(XS_mro_is_universal)
     HV* isarev;
     char* classname_pv;
     STRLEN classname_len;
-    SV** svp;
+    HE* he;
 
     PERL_UNUSED_ARG(cv);
 
@@ -833,8 +829,8 @@ XS(XS_mro_is_universal)
     classname_pv = SvPV_nolen(classname);
     classname_len = strlen(classname_pv);
 
-    svp = hv_fetch(PL_isarev, classname_pv, classname_len, 0);
-    isarev = svp ? (HV*)*svp : NULL;
+    he = hv_fetch_ent(PL_isarev, classname, 0, 0);
+    isarev = he ? (HV*)HeVAL(he) : NULL;
 
     if((classname_len == 9 && strEQ(classname_pv, "UNIVERSAL"))
         || (isarev && hv_exists(isarev, "UNIVERSAL", 9)))
