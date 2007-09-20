@@ -127,8 +127,8 @@ bitflip_key(pTHX_ IV action, SV *field) {
 		const char *const end = p + len;
 		while (p < end) {
 		    STRLEN len;
-		    UV chr = utf8_to_uvuni(p, &len);
-		    new_p = uvuni_to_utf8(new_p, chr ^ 32);
+		    UV chr = utf8_to_uvuni((U8 *)p, &len);
+		    new_p = (char *)uvuni_to_utf8((U8 *)new_p, chr ^ 32);
 		    p += len;
 		}
 		SvUTF8_on(newkey);
@@ -440,7 +440,7 @@ common(params)
 	if ((svp = hv_fetchs(params, "hash", 0)))
 	    action = SvUV(*svp);
 
-	result = hv_common(hv, keysv, key, klen, flags, action, val, hash);
+	result = (HE *)hv_common(hv, keysv, key, klen, flags, action, val, hash);
 	if (!result) {
 	    XSRETURN_EMPTY;
 	}
