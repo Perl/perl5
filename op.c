@@ -2818,7 +2818,7 @@ Perl_newMADsv(pTHX_ char key, SV* sv)
 }
 
 MADPROP *
-Perl_newMADPROP(pTHX_ char key, char type, void* val, I32 vlen)
+Perl_newMADPROP(pTHX_ char key, char type, const void* val, I32 vlen)
 {
     MADPROP *mp;
     Newxz(mp, 1, MADPROP);

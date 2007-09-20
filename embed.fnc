@@ -1858,7 +1858,8 @@ Mp	|void	|append_madprops|NULLOK MADPROP* tm|NULLOK OP* o|char slot
 Mp	|void	|addmad		|NULLOK MADPROP* tm|NULLOK MADPROP** root \
 				|char slot
 Mp	|MADPROP*|newMADsv	|char key|NN SV* sv
-Mp	|MADPROP*|newMADPROP	|char key|char type|NULLOK void* val|I32 vlen
+Mp	|MADPROP*|newMADPROP	|char key|char type|NULLOK const void* val \
+				|I32 vlen
 Mp	|void	|mad_free	|NULLOK MADPROP* mp
 
 #  if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
