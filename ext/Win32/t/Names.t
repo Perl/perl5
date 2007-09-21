@@ -15,8 +15,11 @@ plan tests => $tests;
 # test Win32::DomainName()
 if (Win32::IsWinNT()) {
     my $domain = eval { Win32::DomainName() };
-    is( $@, '', "Win32::DomainName()" );
-    like( $domain, '/^[a-zA-Z0-9!@#$%^&()_\'{}.~-]+$/', "  - checking returned domain" );
+    SKIP: {
+	skip 'The Workstation service has not been started', 2 if $^E == 2138;
+	is( $@, '', "Win32::DomainName()" );
+	like( $domain, '/^[a-zA-Z0-9!@#$%^&()_\'{}.~-]+$/', "  - checking returned domain" );
+    }
 }
 
 # test Win32::GetArchName()
@@ -38,9 +41,9 @@ cmp_ok( length($osname), '>', 3, "  - checking returned OS name" );
 #  - list context
 my ($osname2, $desc) = eval { Win32::GetOSName() };
 is( $@, '', "Win32::GetOSName() in list context" );
-cmp_ok( length($osname), '>', 3, "  - checking returned OS name" );
-cmp_ok( length($desc  ), '>', 3, "  - checking returned description" );
-is( $osname2, $osname, " - checking that OS name is the same in both calls" );
+cmp_ok( length($osname2), '>', 3, "  - checking returned OS name" );
+ok( defined($desc), "  - checking returned description" );
+is( $osname2, $osname, "  - checking that OS name is the same in both calls" );
 
 # test Win32::LoginName()
 my $login = eval { Win32::LoginName() };

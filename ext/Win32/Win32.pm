@@ -8,7 +8,7 @@ BEGIN {
     require DynaLoader;
 
     @ISA = qw|Exporter DynaLoader|;
-    $VERSION = '0.31_01';
+    $VERSION = '0.32';
     $XS_VERSION = $VERSION;
     $VERSION = eval $VERSION;
 
@@ -310,9 +310,10 @@ a name that can be passed to system calls and external programs.
 
 =item Win32::DomainName()
 
-[CORE] Returns the name of the Microsoft Network domain that the
-owner of the current perl process is logged into.  This function does
-B<not> work on Windows 9x.
+[CORE] Returns the name of the Microsoft Network domain or workgroup
+that the owner of the current perl process is logged into.  The
+"Workstation" service must be running to determine this
+information.  This function does B<not> work on Windows 9x.
 
 =item Win32::ExpandEnvironmentStrings(STRING)
 

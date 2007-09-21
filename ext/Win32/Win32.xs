@@ -1178,8 +1178,10 @@ XS(w32_DomainName)
 	    DWORD   wki100_ver_major;
 	    DWORD   wki100_ver_minor;
 	} *pwi;
+	DWORD retval;
+	retval = pfnNetWkstaGetInfo(NULL, 100, &pwi);
 	/* NERR_Success *is* 0*/
-	if (0 == pfnNetWkstaGetInfo(NULL, 100, &pwi)) {
+	if (retval == 0) {
 	    if (pwi->wki100_langroup && *(pwi->wki100_langroup)) {
 		WideCharToMultiByte(CP_ACP, 0, pwi->wki100_langroup,
 				    -1, (LPSTR)dname, dnamelen, NULL, NULL);
@@ -1193,6 +1195,7 @@ XS(w32_DomainName)
 	    XSRETURN_PV(dname);
 	}
 	FreeLibrary(module);
+	SetLastError(retval);
     }
     else {
 	/* Win95 doesn't have NetWksta*(), so do it the old way */
