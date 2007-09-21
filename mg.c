@@ -2866,15 +2866,15 @@ Perl_sighandler(int sig)
 		   SV *rv  = newRV_noinc((SV*)sih);
 		   /* The siginfo fields signo, code, errno, pid, uid,
 		    * addr, status, and band are defined by POSIX/SUSv3. */
-		   (void)hv_store(sih, "signo", 5, newSViv(sip->si_signo), 0);
-		   (void)hv_store(sih, "code",  4, newSViv(sip->si_code),  0);
+		   (void)hv_stores(sih, "signo", newSViv(sip->si_signo));
+		   (void)hv_stores(sih, "code", newSViv(sip->si_code));
 #if 0 /* XXX TODO: Configure scan for the existence of these, but even that does not help if the SA_SIGINFO is not implemented according to the spec. */
-		   hv_store(sih, "errno",   5, newSViv(sip->si_errno),  0);
-		   hv_store(sih, "status",  6, newSViv(sip->si_status), 0);
-		   hv_store(sih, "uid",     3, newSViv(sip->si_uid),    0);
-		   hv_store(sih, "pid",     3, newSViv(sip->si_pid),    0);
-		   hv_store(sih, "addr",    4, newSVuv(PTR2UV(sip->si_addr)),   0);
-		   hv_store(sih, "band",    4, newSViv(sip->si_band),   0);
+		   hv_stores(sih, "errno",      newSViv(sip->si_errno));
+		   hv_stores(sih, "status",     newSViv(sip->si_status));
+		   hv_stores(sih, "uid",        newSViv(sip->si_uid));
+		   hv_stores(sih, "pid",        newSViv(sip->si_pid));
+		   hv_stores(sih, "addr",       newSVuv(PTR2UV(sip->si_addr)));
+		   hv_stores(sih, "band",       newSViv(sip->si_band));
 #endif
 		   EXTEND(SP, 2);
 		   PUSHs((SV*)rv);
