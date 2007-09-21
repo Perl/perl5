@@ -631,7 +631,7 @@ S_sequence(pTHX_ register const OP *o)
 	switch (o->op_type) {
 	case OP_STUB:
 	    if ((o->op_flags & OPf_WANT) != OPf_WANT_LIST) {
-		hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
+		(void)hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
 		break;
 	    }
 	    goto nothin;
@@ -649,7 +649,7 @@ S_sequence(pTHX_ register const OP *o)
 	  nothin:
 	    if (oldop && o->op_next)
 		continue;
-	    hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
+	    (void)hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
 	    break;
 
 	case OP_MAPWHILE:
@@ -662,20 +662,20 @@ S_sequence(pTHX_ register const OP *o)
 	case OP_DORASSIGN:
 	case OP_COND_EXPR:
 	case OP_RANGE:
-	    hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
+	    (void)hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
 	    sequence_tail(cLOGOPo->op_other);
 	    break;
 
 	case OP_ENTERLOOP:
 	case OP_ENTERITER:
-	    hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
+	    (void)hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
 	    sequence_tail(cLOOPo->op_redoop);
 	    sequence_tail(cLOOPo->op_nextop);
 	    sequence_tail(cLOOPo->op_lastop);
 	    break;
 
 	case OP_SUBST:
-	    hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
+	    (void)hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
 	    sequence_tail(cPMOPo->op_pmstashstartu.op_pmreplstart);
 	    break;
 
@@ -685,7 +685,7 @@ S_sequence(pTHX_ register const OP *o)
 	    break;
 
 	default:
-	    hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
+	    (void)hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
 	    break;
 	}
 	oldop = o;

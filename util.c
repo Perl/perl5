@@ -4225,11 +4225,11 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
     pos = s;
 
     if ( qv )
-	hv_store((HV *)hv, "qv", 2, newSViv(qv), 0);
+	(void)hv_store((HV *)hv, "qv", 2, newSViv(qv), 0);
     if ( alpha )
-	hv_store((HV *)hv, "alpha", 5, newSViv(alpha), 0);
+	(void)hv_store((HV *)hv, "alpha", 5, newSViv(alpha), 0);
     if ( !qv && width < 3 )
-	hv_store((HV *)hv, "width", 5, newSViv(width), 0);
+	(void)hv_store((HV *)hv, "width", 5, newSViv(width), 0);
     
     while (isDIGIT(*pos))
 	pos++;
@@ -4333,8 +4333,8 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
     /* need to save off the current version string for later */
     if ( vinf ) {
 	SV * orig = newSVpvn("v.Inf", sizeof("v.Inf")-1);
-	hv_store((HV *)hv, "original", 8, orig, 0);
-	hv_store((HV *)hv, "vinf", 4, newSViv(1), 0);
+	(void)hv_store((HV *)hv, "original", 8, orig, 0);
+	(void)hv_store((HV *)hv, "vinf", 4, newSViv(1), 0);
     }
     else if ( s > start ) {
 	SV * orig = newSVpvn(start,s-start);
@@ -4342,15 +4342,15 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
 	    /* need to insert a v to be consistent */
 	    sv_insert(orig, 0, 0, "v", 1);
 	}
-	hv_store((HV *)hv, "original", 8, orig, 0);
+	(void)hv_store((HV *)hv, "original", 8, orig, 0);
     }
     else {
-	hv_store((HV *)hv, "original", 8, newSVpvn("0",1), 0);
+	(void)hv_store((HV *)hv, "original", 8, newSVpvn("0",1), 0);
 	av_push(av, newSViv(0));
     }
 
     /* And finally, store the AV in the hash */
-    hv_store((HV *)hv, "version", 7, newRV_noinc((SV *)av), 0);
+    (void)hv_store((HV *)hv, "version", 7, newRV_noinc((SV *)av), 0);
 
     /* fix RT#19517 - special case 'undef' as string */
     if ( *s == 'u' && strEQ(s,"undef") ) {
@@ -4395,21 +4395,21 @@ Perl_new_version(pTHX_ SV *ver)
 
 	/* Begin copying all of the elements */
 	if ( hv_exists((HV *)ver, "qv", 2) )
-	    hv_store((HV *)hv, "qv", 2, &PL_sv_yes, 0);
+	    (void)hv_store((HV *)hv, "qv", 2, &PL_sv_yes, 0);
 
 	if ( hv_exists((HV *)ver, "alpha", 5) )
-	    hv_store((HV *)hv, "alpha", 5, &PL_sv_yes, 0);
+	    (void)hv_store((HV *)hv, "alpha", 5, &PL_sv_yes, 0);
 	
 	if ( hv_exists((HV*)ver, "width", 5 ) )
 	{
 	    const I32 width = SvIV(*hv_fetchs((HV*)ver, "width", FALSE));
-	    hv_store((HV *)hv, "width", 5, newSViv(width), 0);
+	    (void)hv_store((HV *)hv, "width", 5, newSViv(width), 0);
 	}
 
 	if ( hv_exists((HV*)ver, "original", 8 ) )
 	{
 	    SV * pv = *hv_fetchs((HV*)ver, "original", FALSE);
-	    hv_store((HV *)hv, "original", 8, newSVsv(pv), 0);
+	    (void)hv_store((HV *)hv, "original", 8, newSVsv(pv), 0);
 	}
 
 	sav = (AV *)SvRV(*hv_fetchs((HV*)ver, "version", FALSE));
@@ -4420,7 +4420,7 @@ Perl_new_version(pTHX_ SV *ver)
 	    av_push(av, newSViv(rev));
 	}
 
-	hv_store((HV *)hv, "version", 7, newRV_noinc((SV *)av), 0);
+	(void)hv_store((HV *)hv, "version", 7, newRV_noinc((SV *)av), 0);
 	return rv;
     }
 #ifdef SvVOK

@@ -4031,12 +4031,12 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 			    RETPUSHNO;
 		    }
 		    else {
-			hv_store_ent(seen_this,
-			    sv_2mortal(newSViv(PTR2IV(*this_elem))),
-			    &PL_sv_undef, 0);
-			hv_store_ent(seen_other,
-			    sv_2mortal(newSViv(PTR2IV(*other_elem))),
-			    &PL_sv_undef, 0);
+			(void)hv_store_ent(seen_this,
+				sv_2mortal(newSViv(PTR2IV(*this_elem))),
+				&PL_sv_undef, 0);
+			(void)hv_store_ent(seen_other,
+				sv_2mortal(newSViv(PTR2IV(*other_elem))),
+				&PL_sv_undef, 0);
 			PUSHs(*this_elem);
 			PUSHs(*other_elem);
 			

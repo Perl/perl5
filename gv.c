@@ -1470,7 +1470,7 @@ Perl_gp_free(pTHX_ GV *gv)
     if (gp->gp_hv && SvTYPE(gp->gp_hv) == SVt_PVHV) {
 	const char *hvname = HvNAME_get(gp->gp_hv);
 	if (PL_stashcache && hvname)
-	    hv_delete(PL_stashcache, hvname, HvNAMELEN_get(gp->gp_hv),
+	    (void)hv_delete(PL_stashcache, hvname, HvNAMELEN_get(gp->gp_hv),
 		      G_DISCARD);
 	SvREFCNT_dec(gp->gp_hv);
     }

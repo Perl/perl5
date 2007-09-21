@@ -1397,9 +1397,9 @@ Perl_newHVhv(pTHX_ HV *ohv)
 
 	hv_iterinit(ohv);
 	while ((entry = hv_iternext_flags(ohv, 0))) {
-	    hv_store_flags(hv, HeKEY(entry), HeKLEN(entry),
-                           newSVsv(HeVAL(entry)), HeHASH(entry),
-                           HeKFLAGS(entry));
+	    (void)hv_store_flags(hv, HeKEY(entry), HeKLEN(entry),
+			         newSVsv(HeVAL(entry)), HeHASH(entry),
+			         HeKFLAGS(entry));
 	}
 	HvRITER_set(ohv, riter);
 	HvEITER_set(ohv, eiter);
@@ -1431,8 +1431,8 @@ Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
 	    SV *const sv = newSVsv(HeVAL(entry));
 	    sv_magic(sv, NULL, PERL_MAGIC_hintselem,
 		     (char *)newSVhek (HeKEY_hek(entry)), HEf_SVKEY);
-	    hv_store_flags(hv, HeKEY(entry), HeKLEN(entry),
-			   sv, HeHASH(entry), HeKFLAGS(entry));
+	    (void)hv_store_flags(hv, HeKEY(entry), HeKLEN(entry),
+				 sv, HeHASH(entry), HeKFLAGS(entry));
 	}
 	HvRITER_set(ohv, riter);
 	HvEITER_set(ohv, eiter);
@@ -1777,8 +1777,8 @@ Perl_hv_undef(pTHX_ HV *hv)
 
     hfreeentries(hv);
     if (name) {
-        if(PL_stashcache)
-	    hv_delete(PL_stashcache, name, HvNAMELEN_get(hv), G_DISCARD);
+        if (PL_stashcache)
+	    (void)hv_delete(PL_stashcache, name, HvNAMELEN_get(hv), G_DISCARD);
 	hv_name_set(hv, NULL, 0, 0);
     }
     SvFLAGS(hv) &= ~SVf_OOK;
