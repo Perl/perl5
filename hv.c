@@ -445,7 +445,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 						 | return_svp,
 						 NULL /* no value */,
 						 0 /* compute hash */);
-			if (!entry && (action & HV_FETCH_LVALUE)) {
+			if (!result && (action & HV_FETCH_LVALUE)) {
 			    /* This call will free key if necessary.
 			       Do it this way to encourage compiler to tail
 			       call optimise.  */
