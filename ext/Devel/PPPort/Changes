@@ -1,3 +1,7 @@
+3.12 - 2007-09-22
+
+    [released without changes]
+
 3.11_06 - 2007-09-11
 
     * fix cpan #29302: Perl_croak_nocontext doesn't need aTHX_
