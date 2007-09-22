@@ -3149,7 +3149,8 @@ PP(pp_require)
 	    if (*svp != &PL_sv_undef)
 		RETPUSHYES;
 	    else
-		DIE(aTHX_ "Compilation failed in require");
+		DIE(aTHX_ "Attempt to reload %s aborted.\n"
+			    "Compilation failed in require", unixname);
 	}
     }
 

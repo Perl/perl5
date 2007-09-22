@@ -282,6 +282,13 @@ invalid anytime, even before the end of the current statement.  Use
 literals or global values as arguments to the "p" pack() template to
 avoid this warning.
 
+=item Attempt to reload %s aborted.
+
+(F) You tried to load a file with C<use> or C<require> that failed to
+compile once already.  Perl will not try to compile this file again
+unless you delete its entry from %INC.  See L<perlfunc/require> and
+L<perlvar/%INC>.
+
 =item Attempt to set length of freed array
 
 (W) You tried to set the length of an array which has been freed.  You
