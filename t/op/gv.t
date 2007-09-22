@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 
 require './test.pl';
-plan( tests => 160 );
+plan( tests => 161 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -484,6 +484,15 @@ foreach my $value ([1,2,3], {1=>2}, *STDOUT{IO}, \&ok, *STDOUT{FORMAT}) {
     $CORE::GLOBAL::{"readpipe"}=[];
     eval "`` if 0";
     is($@, '', "Can't trip up readpipe overloading");
+}
+
+{
+    die if exists $::{BONK};
+    $::{BONK} = \"powie";
+    *{"BONK"} = \&{"BONK"};
+    eval 'is(BONK(), "powie",
+             "Assigment works when glob created midway (bug 45607)"); 1'
+	or die $@;
 }
 __END__
 Perl

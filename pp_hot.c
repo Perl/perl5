@@ -168,18 +168,44 @@ PP(pp_sassign)
 	if (!got_coderef) {
 	    /* We've been returned a constant rather than a full subroutine,
 	       but they expect a subroutine reference to apply.  */
-	    ENTER;
-	    SvREFCNT_inc_void(SvRV(cv));
-	    /* newCONSTSUB takes a reference count on the passed in SV
-	       from us.  We set the name to NULL, otherwise we get into
-	       all sorts of fun as the reference to our new sub is
-	       donated to the GV that we're about to assign to.
-	    */
-	    SvRV_set(left, (SV *)newCONSTSUB(GvSTASH(right), NULL,
+	    if (SvROK(cv)) {
+		ENTER;
+		SvREFCNT_inc_void(SvRV(cv));
+		/* newCONSTSUB takes a reference count on the passed in SV
+		   from us.  We set the name to NULL, otherwise we get into
+		   all sorts of fun as the reference to our new sub is
+		   donated to the GV that we're about to assign to.
+		*/
+		SvRV_set(left, (SV *)newCONSTSUB(GvSTASH(right), NULL,
 						 SvRV(cv)));
-	    SvREFCNT_dec(cv);
-	    LEAVE;
+		SvREFCNT_dec(cv);
+		LEAVE;
+	    } else {
+		/* What can happen for the corner case *{"BONK"} = \&{"BONK"};
+		   is that
+		   First:   ops for \&{"BONK"}; return us the constant in the
+			    symbol table
+		   Second:  ops for *{"BONK"} cause that symbol table entry
+			    (and our reference to it) to be upgraded from RV
+			    to typeblob)
+		   Thirdly: We get here. cv is actually PVGV now, and its
+			    GvCV() is actually the subroutine we're looking for
+
+		   So change the reference so that it points to the subroutine
+		   of that typeglob, as that's what they were after all along.
+		*/
+		GV *const upgraded = (GV *) cv;
+		CV *const source = GvCV(upgraded);
+
+		assert(source);
+		assert(CvFLAGS(source) & CVf_CONST);
+
+		SvREFCNT_inc_void(source);
+		SvREFCNT_dec(upgraded);
+		SvRV_set(left, (SV *)source);
+	    }
 	}
+
     }
     SvSetMagicSV(right, left);
     SETs(right);
