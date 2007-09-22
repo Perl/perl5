@@ -2059,6 +2059,7 @@ lib/Math/BigInt/t/req_mbfi.t	test: require Math::BigFloat; ->binf();
 lib/Math/BigInt/t/req_mbfn.t	test: require Math::BigFloat; ->new();
 lib/Math/BigInt/t/req_mbfw.t	require Math::BigFloat; import ( with => );
 lib/Math/BigInt/t/require.t	Test if require Math::BigInt works
+lib/Math/BigInt/t/round.t	Test rounding with non-integer A and P
 lib/Math/BigInt/t/sub_ali.t	Tests for aliases in BigInt subclasses
 lib/Math/BigInt/t/sub_mbf.t	Empty subclass test of BigFloat
 lib/Math/BigInt/t/sub_mbi.t	Empty subclass test of BigInt

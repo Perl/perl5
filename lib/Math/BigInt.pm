@@ -291,11 +291,12 @@ sub accuracy
       if (!$a || $a <= 0)
         {
         require Carp;
-        Carp::croak ('Argument to accuracy must be greater than zero');
+	Carp::croak ('Argument to accuracy must be greater than zero');
         }
       if (int($a) != $a)
         {
-        require Carp; Carp::croak ('Argument to accuracy must be an integer');
+        require Carp;
+	Carp::croak ('Argument to accuracy must be an integer');
         }
       }
     if (ref($x))
@@ -449,6 +450,12 @@ sub _scale_a
   $scale = ${ $class . '::accuracy' } unless defined $scale;
   $mode = ${ $class . '::round_mode' } unless defined $mode;
 
+  if (defined $scale)
+    {
+    $scale = $scale->can('numify') ? $scale->numify() : "$scale" if ref($scale);
+    $scale = int($scale);
+    }
+
   ($scale,$mode);
   }
 
@@ -465,6 +472,12 @@ sub _scale_p
 
   $scale = ${ $class . '::precision' } unless defined $scale;
   $mode = ${ $class . '::round_mode' } unless defined $mode;
+
+  if (defined $scale)
+    {
+    $scale = $scale->can('numify') ? $scale->numify() : "$scale" if ref($scale);
+    $scale = int($scale);
+    }
 
   ($scale,$mode);
   }
@@ -907,6 +920,9 @@ sub _find_round_parameters
     require Carp; Carp::croak ("Unknown round mode '$r'");
     }
 
+  $a = int($a) if defined $a;
+  $p = int($p) if defined $p;
+
   ($self,$a,$p,$r);
   }
 
@@ -967,11 +983,11 @@ sub round
   # now round, by calling either fround or ffround:
   if (defined $a)
     {
-    $self->bround($a,$r) if !defined $self->{_a} || $self->{_a} >= $a;
+    $self->bround(int($a),$r) if !defined $self->{_a} || $self->{_a} >= $a;
     }
   else # both can't be undefined due to early out
     {
-    $self->bfround($p,$r) if !defined $self->{_p} || $self->{_p} <= $p;
+    $self->bfround(int($p),$r) if !defined $self->{_p} || $self->{_p} <= $p;
     }
   # bround() or bfround() already callled bnorm() if nec.
   $self;
@@ -3147,7 +3163,9 @@ Math::BigInt - Arbitrary size integer/float math package
   
   $x->round($A,$P,$mode);  # round to accuracy or precision using mode $mode
   $x->bround($n);	   # accuracy: preserve $n digits
-  $x->bfround($n);	   # round to $nth digit, no-op for BigInts
+  $x->bfround($n);	   # $n > 0: round $nth digits,
+			   # $n < 0: round to the $nth digit after the
+			   # dot, no-op for BigInts
 
   # The following do not modify their arguments in BigInt (are no-ops),
   # but do so in BigFloat:
@@ -3819,7 +3837,20 @@ C<$round_mode>.
 
 =head2 bfround()
 
-	$x->bfround($N);              # round to $Nth digit, no-op for BigInts
+	$x->bfround($N);
+
+If N is > 0, rounds to the Nth digit from the left. If N < 0, rounds to
+the Nth digit after the dot. Since BigInts are integers, the case N < 0
+is a no-op for them.
+
+Examples:
+
+	Input		N		Result
+	===================================================
+	123456.123456	3		123500
+	123456.123456	2		123450
+	123456.123456	-2		123456.12
+	123456.123456	-3		123456.123
 
 =head2 bfloor()
 
