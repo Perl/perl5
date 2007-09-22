@@ -1405,7 +1405,20 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                     /* store the codepoint in the bitmap, and if its ascii
                        also store its folded equivelent. */
                     TRIE_BITMAP_SET(trie,uvc);
-                    if ( folder ) TRIE_BITMAP_SET(trie,folder[ uvc ]);
+
+		    /* store the folded codepoint */
+		    if ( folder ) TRIE_BITMAP_SET(trie,folder[ uvc ]);
+
+		    if ( !UTF ) {
+			/* store first byte of utf8 representation of
+			   codepoints in the 127 < uvc < 256 range */
+			if (127 < uvc && uvc < 192) {
+			    TRIE_BITMAP_SET(trie,194);
+			} else if (191 < uvc ) {
+			    TRIE_BITMAP_SET(trie,195);
+			/* && uvc < 256 -- we know uvc is < 256 already */
+			}
+		    }
                     set_bit = 0; /* We've done our bit :-) */
                 }
             } else {

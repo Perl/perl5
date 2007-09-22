@@ -4478,6 +4478,14 @@ sub kt
     }
     iseq(length($str),"0","Trie scope error, string should be empty");
 }
+{
+# [perl #45605] Regexp failure with utf8-flagged and byte-flagged string
+
+    my $utf_8 = "\xd6schel";
+    utf8::upgrade($utf_8);
+    $utf_8 =~ m{(\xd6|&Ouml;)schel};
+    iseq($1,"\xd6","#45605");
+}
 
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
@@ -4537,6 +4545,6 @@ ok($@=~/\QSequence \k... not terminated in regex;\E/);
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 1964;
+    $::TestCount = 1965;
     print "1..$::TestCount\n";
 }
