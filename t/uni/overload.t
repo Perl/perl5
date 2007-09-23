@@ -101,7 +101,7 @@ SKIP: {
 	skip "No setlocale", 24;
     } elsif (!setlocale(&POSIX::LC_ALL, "en_GB.ISO8859-1")) {
 	skip "Could not setlocale to en_GB.ISO8859-1", 24;
-    } elsif ($^O eq 'dec_osf' || $^O eq 'VMS') {
+    } elsif ($^O eq 'dec_osf' || $^O eq 'VMS' || $^O eq 'netbsd') {
 	skip "$^O has broken en_GB.ISO8859-1 locale", 24;
     } else {
 	use locale;
