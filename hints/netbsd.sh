@@ -103,15 +103,6 @@ case "$osvers" in
 	;;
 esac
 
-# @20070922: setlocale() doesn't support LC_COLLATE and LC_NUMERIC
-case "$osvers" in
-2.*|3.*|4.*)
-	# next two lines should start at column 0
-locale_cflags='ccflags="$ccflags -DNO_LOCALE_COLLATE -DNO_LOCALE_NUMERIC"'
-sv_cflags='ccflags="$ccflags -DNO_LOCALE_COLLATE"'
-	;;
-esac
-
 # These are obsolete in any netbsd.
 d_setrgid="$undef"
 d_setruid="$undef"
