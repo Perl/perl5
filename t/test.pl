@@ -527,7 +527,7 @@ sub runperl {
 	local $ENV{'DCL$PATH'} = $1 if $is_vms && ($ENV{'DCL$PATH'} =~ /(.*)/s);
 	$ENV{PATH} =~ /(.*)/s;
 	local $ENV{PATH} =
-	    join $sep, grep { $_ ne "" and $_ ne "." and
+	    join $sep, grep { $_ ne "" and $_ ne "." and -d $_ and
 		($is_mswin or $is_vms or !(stat && (stat _)[2]&0022)) }
 		    split quotemeta ($sep), $1;
 
