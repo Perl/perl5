@@ -6684,6 +6684,7 @@ $ ENDIF
 $ IF use64bitall .OR. use64bitall .EQS. "define" THEN -
     WC "#define USE_64_BIT_ALL"
 $ IF be_case_sensitive THEN WC "#define VMS_WE_ARE_CASE_SENSITIVE"
+$ IF use_ieee_math THEN WC "#define USE_IEEE"
 $ IF d_herrno .EQS. "undef" THEN WC "#define NEED_AN_H_ERRNO"
 $ WC "#define HAS_ENVGETENV"
 $ WC "#define PERL_EXTERNAL_GLOB"
