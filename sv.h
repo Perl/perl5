@@ -1219,9 +1219,7 @@ the scalar's value cannot change unless written to.
 	} STMT_END
 
 #ifdef PERL_DEBUG_COW
-#define SvRV(sv) (0 + (sv)->sv_u.svu_rv)
 #else
-#define SvRV(sv) ((sv)->sv_u.svu_rv)
 #endif
 #define SvRVx(sv) SvRV(sv)
 
@@ -1231,6 +1229,7 @@ the scalar's value cannot change unless written to.
 #  define SvIVX(sv) (0 + ((XPVIV*) SvANY(sv))->xiv_iv)
 #  define SvUVX(sv) (0 + ((XPVUV*) SvANY(sv))->xuv_uv)
 #  define SvNVX(sv) (-0.0 + ((XPVNV*) SvANY(sv))->xnv_u.xnv_nv)
+#  define SvRV(sv) (0 + (sv)->sv_u.svu_rv)
 /* Don't test the core XS code yet.  */
 #  if defined (PERL_CORE) && PERL_DEBUG_COW > 1
 #    define SvPVX(sv) (0 + (assert(!SvREADONLY(sv)), (sv)->sv_u.svu_pv))
@@ -1298,6 +1297,16 @@ the scalar's value cannot change unless written to.
 	    assert(!isGV_with_GP(_svi));				\
 	   &(((XPVNV*) SvANY(_svi))->xnv_u.xnv_nv);			\
 	 }))
+#    define SvRV(sv)							\
+	(*({ SV *const _svi = (SV *) (sv);				\
+	    assert(SvTYPE(_svi) >= SVt_RV);				\
+	    assert(SvTYPE(_svi) != SVt_PVAV);				\
+	    assert(SvTYPE(_svi) != SVt_PVHV);				\
+	    assert(SvTYPE(_svi) != SVt_PVCV);				\
+	    assert(SvTYPE(_svi) != SVt_PVFM);				\
+	    assert(!isGV_with_GP(_svi));				\
+	    &((_svi)->sv_u.svu_rv);					\
+	 }))
 #    define SvMAGIC(sv)							\
 	(*({ SV *const _svi = (SV *) (sv);				\
 	    assert(SvTYPE(_svi) >= SVt_PVMG);				\
@@ -1316,6 +1325,7 @@ the scalar's value cannot change unless written to.
 #    define SvIVX(sv) ((XPVIV*) SvANY(sv))->xiv_iv
 #    define SvUVX(sv) ((XPVUV*) SvANY(sv))->xuv_uv
 #    define SvNVX(sv) ((XPVNV*) SvANY(sv))->xnv_u.xnv_nv
+#    define SvRV(sv) ((sv)->sv_u.svu_rv)
 #    define SvMAGIC(sv)	((XPVMG*)  SvANY(sv))->xmg_u.xmg_magic
 #    define SvSTASH(sv)	((XPVMG*)  SvANY(sv))->xmg_stash
 #  endif
@@ -1375,6 +1385,10 @@ the scalar's value cannot change unless written to.
 		(((XPVUV*)SvANY(sv))->xuv_uv = (val)); } STMT_END
 #define SvRV_set(sv, val) \
         STMT_START { assert(SvTYPE(sv) >=  SVt_RV); \
+		assert(SvTYPE(sv) != SVt_PVAV);		\
+		assert(SvTYPE(sv) != SVt_PVHV);		\
+		assert(SvTYPE(sv) != SVt_PVCV);		\
+		assert(SvTYPE(sv) != SVt_PVFM);		\
 		assert(!isGV_with_GP(sv));		\
                 ((sv)->sv_u.svu_rv = (val)); } STMT_END
 #define SvMAGIC_set(sv, val) \
