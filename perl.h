@@ -4428,6 +4428,15 @@ EXTCONST char PL_bincompat_options[] =
 #  ifdef USE_SOCKS
 			     " USE_SOCKS"
 #  endif
+#  ifdef VMS_DO_SOCKETS
+			     " VMS_DO_SOCKETS"
+#    ifdef DECCRTL_SOCKETS
+			     " DECCRTL_SOCKETS"
+#    endif
+#  endif
+#  ifdef VMS_WE_ARE_CASE_SENSITIVE
+			     " VMS_SYMBOL_CASE_AS_IS"
+#  endif
   "";
 #else
 EXTCONST char PL_bincompat_options[];
