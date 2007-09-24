@@ -229,19 +229,6 @@ You may see some messages during Configure that seem suspicious.
 
 =over 4
 
-=item * I<dlsym()>
-
-I<ld2> is needed to build dynamic libraries, but it does not exist
-when C<dlsym()> checking occurs (it is not created until C<make> runs).
-You will see the following message:
-
-  Checking whether your C<dlsym()> needs a leading underscore ...
-  ld2: not found
-  I can't compile and run the test program.
-  I'm guessing that dlsym doesn't need a leading underscore.
-
-Since the guess is correct, this is not a problem.
-
 =item * Win9x and C<d_eofnblk>
 
 Win9x does not correctly report C<EOF> with a non-blocking read on a
@@ -276,27 +263,6 @@ operator".
 Simply run I<make> and wait:
 
   make 2>&1 | tee log.make
-
-=head2 Errors on Cygwin
-
-Errors like these are normal:
-
-  ...
-  make: [extra.pods] Error 1 (ignored)
-  ...
-  make: [extras.make] Error 1 (ignored)
-
-=head2 ld2 on Cygwin
-
-During C<make>, I<ld2> will be created and installed in your $installbin
-directory (where you said to put public executables).  It does not
-wait until the C<make install> process to install the I<ld2> script,
-this is because the remainder of the C<make> refers to I<ld2> without
-fully specifying its path and does this from multiple subdirectories.
-The assumption is that I<$installbin> is in your current C<PATH>. If this
-is not the case C<make> will fail at some point.  If this happens,
-just manually copy I<ld2> from the source directory to somewhere in
-your C<PATH>.
 
 =head1 TEST ON CYGWIN
 
@@ -448,7 +414,7 @@ However, when accessing an executable as a normal file (e.g., I<cp>
 in a makefile) the F<.exe> is not transparent.  The I<install> included
 with Cygwin automatically appends a F<.exe> when necessary.
 
-=item * cygwin vs. windows process ids
+=item * Cygwin vs. Windows process ids
 
 Cygwin processes have their own pid, which is different from the
 underlying windows pid.  Most posix compliant Proc functions expect
@@ -456,6 +422,11 @@ the cygwin pid, but several Win32::Process functions expect the
 winpid. E.g. C<$$> is the cygwin pid of F</usr/bin/perl>, which is not
 the winpid.  Use C<Cygwin::winpid_to_pid()> and C<Cygwin::winpid_to_pid()> 
 to translate between them.
+
+=item * Cygwin vs. Windows errors
+
+Under Cygwin, $^E is the same as $!.  When using L<Win32 API Functions|Win32>,
+use C<Win32::GetLastError()> to get the last Windows error.
 
 =item * C<chown()>
 
