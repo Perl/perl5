@@ -6831,6 +6831,7 @@ tryagain:
     case 0xCE:
         if (!LOC && FOLD) {
             U32 len,cp;
+	    len=0; /* silence a spurious compiler warning */
             if ((cp = what_len_TRICKYFOLD_safe(RExC_parse,RExC_end,UTF,len))) {
                 *flagp |= HASWIDTH; /* could be SIMPLE too, but needs a handler in regexec.regrepeat */
                 RExC_parse+=len-1; /* we get one from nextchar() as well. :-( */
