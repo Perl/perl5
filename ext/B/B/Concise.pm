@@ -143,15 +143,18 @@ sub concise_subref {
 
 sub concise_stashref {
     my($order, $h) = @_;
+    local *s;
+    print "stashref $h\n";
     foreach my $k (sort keys %$h) {
-	local *s = $h->{$k};
+	next unless defined $h->{$k};
+	*s = $h->{$k};
 	my $coderef = *s{CODE} or next;
 	reset_sequence();
 	print "FUNC: ", *s, "\n";
 	my $codeobj = svref_2object($coderef);
 	next unless ref $codeobj eq 'B::CV';
-	eval { concise_cv_obj($order, $codeobj) }
-	or warn "err $@ on $codeobj";
+	eval { concise_cv_obj($order, $codeobj, $k) };
+	warn "err $@ on $codeobj" if $@;
     }
 }
 
@@ -712,9 +715,14 @@ my %srclines;
 
 sub fill_srclines {
     my $file = shift;
+    my $fullnm = $file;
     warn "-e not yet supported\n" and return if $file eq '-e';
-    open (my $fh, $file)
-	or warn "# $file: $!, (chdirs not supported by this feature yet)\n"
+    unless (-f $fullnm) {
+	($fullnm) = grep /$file$/, keys %:: ;
+	$fullnm =~ s/^_<//;
+    }
+    open (my $fh, $fullnm)
+	or warn "# $fullnm: $!, (chdirs not supported by this feature yet)\n"
 	and return;
     my @l = <$fh>;
     chomp @l;
@@ -1626,6 +1634,11 @@ This is B<very> similar to previous, only the first two ops differ.  This
 subroutine rendering is more representative, insofar as a single main
 program will have many subs.
 
+=item perl -MB::Concise -e 'B::Concise::compile("-exec","-src", \%B::Concise::)->()'
+
+This renders all functions in the B::Concise package with the source
+lines.  It eschews the O framework so that the stashref can be passed
+directly to B::Concise::compile().
 
 =back
 
