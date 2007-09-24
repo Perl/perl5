@@ -1,6 +1,13 @@
 CHANGES
 -------
 
+  2.007 22 September 20007
+
+      * lib/Compress/Zlib.pm -- 1.x Backward Compatability issues
+        gzclose - documented return value was wrong, should be 0 for ok.
+        gzflush - return value didn't match 1.x, should return 0 if ok.
+        [rt.cpan.org #29215] and Debian bug #440943 http://bugs.debian.org/440943
+
   2.006 1 September 20007
 
       * Makefile.PL

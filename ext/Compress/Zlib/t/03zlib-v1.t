@@ -23,10 +23,10 @@ BEGIN
 
     my $count = 0 ;
     if ($] < 5.005) {
-        $count = 383 ;
+        $count = 390 ;
     }
     else {
-        $count = 394 ;
+        $count = 401 ;
     }
 
 
@@ -1167,4 +1167,22 @@ sub trickle
 
     is slurp($name), $data1 . $data2 . $trailing, "got expected data from slurp" ;
     is trickle($name), $data1 . $data2 . $trailing, "got expected data from trickle" ;
+}
+
+{
+    title "gzclose & gzflush return codes";
+    # rt.29215
+
+    my $lex = new LexFile my $name ;
+    my $data1 = "the is some text";
+    my $status;
+
+    $fil = gzopen($name, "wb") ;
+    ok $fil, "opened first file"; 
+    is $fil->gzwrite($data1), length $data1, "write data1" ;
+    $status = $fil->gzflush(0xfff);
+    ok   $status, "flush not ok" ;
+    is $status, Z_STREAM_ERROR;
+    ok ! $fil->gzflush(), "flush ok" ;
+    ok ! $fil->gzclose(), "Closed";
 }

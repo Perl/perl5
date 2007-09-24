@@ -95,7 +95,7 @@ is $gzerrno, 0;
 
 is $fil->gzwrite($number), $num_len, "gzwrite returned $num_len" ;
 is $gzerrno, 0, 'gzerrno is 0';
-ok $fil->gzflush(Z_FINISH) ;
+ok ! $fil->gzflush(Z_FINISH) ;
 
 is $gzerrno, 0, 'gzerrno is 0';
 

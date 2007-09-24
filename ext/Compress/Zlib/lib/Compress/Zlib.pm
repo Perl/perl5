@@ -18,7 +18,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.006';
+$VERSION = '2.007';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -242,8 +242,8 @@ sub Compress::Zlib::gzFile::gzflush
 
     my $gz = $self->[0] ;
     my $status = $gz->flush($f) ;
-    _save_gzerr($gz);
-    return $status ;
+    my $err = _save_gzerr($gz);
+    return $status ? 0 : $err;
 }
 
 sub Compress::Zlib::gzFile::gzclose
@@ -252,8 +252,8 @@ sub Compress::Zlib::gzFile::gzclose
     my $gz = $self->[0] ;
 
     my $status = $gz->close() ;
-    _save_gzerr($gz);
-    return ! $status ;
+    my $err = _save_gzerr($gz);
+    return $status ? 0 : $err;
 }
 
 sub Compress::Zlib::gzFile::gzeof
@@ -806,7 +806,7 @@ you fully understand the implications of what it does - overuse of C<flush>
 can seriously degrade the level of compression achieved. See the C<zlib>
 documentation for details.
 
-Returns 1 on success, 0 on failure.
+Returns 0 on success.
 
 
 =item B<$offset = $gz-E<gt>gztell() ;>
@@ -831,7 +831,7 @@ Returns 1 on success, 0 on failure.
 Closes the compressed file. Any pending data is flushed to the file
 before it is closed.
 
-Returns 1 on success, 0 on failure.
+Returns 0 on success.
 
 =item B<$gz-E<gt>gzsetparams($level, $strategy>
 
