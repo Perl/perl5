@@ -11,7 +11,7 @@ BEGIN {
     }
 
     if ($^O eq 'cygwin') {
-        plan skip_all => '$^E not functional under Cygwin';
+        plan skip_all => '$^E is not Win32::GetLastError() under Cygwin';
     } else {
         plan tests => 4;
     }
