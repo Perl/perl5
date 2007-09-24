@@ -3633,9 +3633,6 @@ STATIC OP*	S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 
-STATIC int	S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
-			__attribute__nonnull__(pTHX_1);
-
 #  if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 STATIC int	S_dooneliner(pTHX_ const char *cmd, const char *filename)
 			__attribute__warn_unused_result__

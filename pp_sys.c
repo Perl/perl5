@@ -297,20 +297,7 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 
     return res;
 }
-#   define PERL_EFF_ACCESS(p,f) (emulate_eaccess((p), (f)))
-#else
-/* With it or without it: anyway you get a warning: either that
-   it is unused, or it is declared static and never defined.
- */
-STATIC int
-S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
-{
-    PERL_UNUSED_ARG(path);
-    PERL_UNUSED_ARG(mode);
-    Perl_croak(aTHX_ "switching effective uid is not implemented");
-    /*NOTREACHED*/
-    return -1;
-}
+#   define PERL_EFF_ACCESS(p,f) (emulate_eaccess(aTHX_ (p), (f)))
 #endif
 
 PP(pp_backtick)

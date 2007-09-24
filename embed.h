@@ -1338,7 +1338,6 @@
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define doform			S_doform
-#define emulate_eaccess		S_emulate_eaccess
 #endif
 #  if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 #ifdef PERL_CORE
@@ -3618,7 +3617,6 @@
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define doform(a,b,c)		S_doform(aTHX_ a,b,c)
-#define emulate_eaccess(a,b)	S_emulate_eaccess(aTHX_ a,b)
 #endif
 #  if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 #ifdef PERL_CORE
