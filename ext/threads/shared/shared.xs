@@ -120,6 +120,7 @@
 #include "perl.h"
 #include "XSUB.h"
 #ifdef HAS_PPPORT_H
+#  define NEED_sv_2pv_flags
 #  define NEED_vnewSVpvf
 #  define NEED_warner
 #  include "ppport.h"
@@ -1302,15 +1303,15 @@ MODULE = threads::shared        PACKAGE = threads::shared
 PROTOTYPES: ENABLE
 
 void
-_id(SV *ref)
+_id(SV *myref)
     PROTOTYPE: \[$@%]
     PREINIT:
         SV *ssv;
     CODE:
-        ref = SvRV(ref);
-        if (SvROK(ref))
-            ref = SvRV(ref);
-        ssv = Perl_sharedsv_find(aTHX_ ref);
+        myref = SvRV(myref);
+        if (SvROK(myref))
+            myref = SvRV(myref);
+        ssv = Perl_sharedsv_find(aTHX_ myref);
         if (! ssv)
             XSRETURN_UNDEF;
         ST(0) = sv_2mortal(newSVuv(PTR2UV(ssv)));
@@ -1318,15 +1319,15 @@ _id(SV *ref)
 
 
 void
-_refcnt(SV *ref)
+_refcnt(SV *myref)
     PROTOTYPE: \[$@%]
     PREINIT:
         SV *ssv;
     CODE:
-        ref = SvRV(ref);
-        if (SvROK(ref))
-            ref = SvRV(ref);
-        ssv = Perl_sharedsv_find(aTHX_ ref);
+        myref = SvRV(myref);
+        if (SvROK(myref))
+            myref = SvRV(myref);
+        ssv = Perl_sharedsv_find(aTHX_ myref);
         if (! ssv) {
             if (ckWARN(WARN_THREADS)) {
                 Perl_warner(aTHX_ packWARN(WARN_THREADS),
@@ -1339,16 +1340,16 @@ _refcnt(SV *ref)
 
 
 void
-share(SV *ref)
+share(SV *myref)
     PROTOTYPE: \[$@%]
     CODE:
-        if (! SvROK(ref))
+        if (! SvROK(myref))
             Perl_croak(aTHX_ "Argument to share needs to be passed as ref");
-        ref = SvRV(ref);
-        if (SvROK(ref))
-            ref = SvRV(ref);
-        Perl_sharedsv_share(aTHX_ ref);
-        ST(0) = sv_2mortal(newRV_inc(ref));
+        myref = SvRV(myref);
+        if (SvROK(myref))
+            myref = SvRV(myref);
+        Perl_sharedsv_share(aTHX_ myref);
+        ST(0) = sv_2mortal(newRV_inc(myref));
         /* XSRETURN(1); - implied */
 
 
@@ -1460,18 +1461,18 @@ cond_timedwait(SV *ref_cond, double abs, SV *ref_lock = 0)
 
 
 void
-cond_signal(SV *ref)
+cond_signal(SV *myref)
     PROTOTYPE: \[$@%]
     PREINIT:
         SV *ssv;
         user_lock *ul;
     CODE:
-        if (! SvROK(ref))
+        if (! SvROK(myref))
             Perl_croak(aTHX_ "Argument to cond_signal needs to be passed as ref");
-        ref = SvRV(ref);
-        if (SvROK(ref))
-            ref = SvRV(ref);
-        ssv = Perl_sharedsv_find(aTHX_ ref);
+        myref = SvRV(myref);
+        if (SvROK(myref))
+            myref = SvRV(myref);
+        ssv = Perl_sharedsv_find(aTHX_ myref);
         if (! ssv)
             Perl_croak(aTHX_ "cond_signal can only be used on shared values");
         ul = S_get_userlock(aTHX_ ssv, 1);
@@ -1483,18 +1484,18 @@ cond_signal(SV *ref)
 
 
 void
-cond_broadcast(SV *ref)
+cond_broadcast(SV *myref)
     PROTOTYPE: \[$@%]
     PREINIT:
         SV *ssv;
         user_lock *ul;
     CODE:
-        if (! SvROK(ref))
+        if (! SvROK(myref))
             Perl_croak(aTHX_ "Argument to cond_broadcast needs to be passed as ref");
-        ref = SvRV(ref);
-        if (SvROK(ref))
-            ref = SvRV(ref);
-        ssv = Perl_sharedsv_find(aTHX_ ref);
+        myref = SvRV(myref);
+        if (SvROK(myref))
+            myref = SvRV(myref);
+        ssv = Perl_sharedsv_find(aTHX_ myref);
         if (! ssv)
             Perl_croak(aTHX_ "cond_broadcast can only be used on shared values");
         ul = S_get_userlock(aTHX_ ssv, 1);
@@ -1506,7 +1507,7 @@ cond_broadcast(SV *ref)
 
 
 void
-bless(SV* ref, ...);
+bless(SV* myref, ...);
     PROTOTYPE: $;$
     PREINIT:
         HV* stash;
@@ -1533,10 +1534,10 @@ bless(SV* ref, ...);
             }
             stash = gv_stashpvn(ptr, len, TRUE);
         }
-        SvREFCNT_inc_void(ref);
-        (void)sv_bless(ref, stash);
-        ST(0) = sv_2mortal(ref);
-        ssv = Perl_sharedsv_find(aTHX_ ref);
+        SvREFCNT_inc_void(myref);
+        (void)sv_bless(myref, stash);
+        ST(0) = sv_2mortal(myref);
+        ssv = Perl_sharedsv_find(aTHX_ myref);
         if (ssv) {
             dTHXc;
             ENTER_LOCK;
