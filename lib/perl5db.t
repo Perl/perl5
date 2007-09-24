@@ -53,7 +53,10 @@ rc(
     }\n|,
 );
 
-runperl(switches => [ '-d' ], progfile => $target);
+{
+    local $ENV{PERLDB_OPTS} = "ReadLine=0";
+    runperl(switches => [ '-d' ], progfile => $target);
+}
 
 my $contents;
 {
