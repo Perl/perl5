@@ -16,7 +16,7 @@ plan tests => $tests;
 if (Win32::IsWinNT()) {
     my $domain = eval { Win32::DomainName() };
     SKIP: {
-	skip 'The Workstation service has not been started', 2 if $^E == 2138;
+	skip('The Workstation service has not been started', 2) if (Win32::GetLastError() == 2138);
 	is( $@, '', "Win32::DomainName()" );
 	like( $domain, '/^[a-zA-Z0-9!@#$%^&()_\'{}.~-]+$/', "  - checking returned domain" );
     }
