@@ -204,7 +204,9 @@ Perl_sys_init3(int* argc, char*** argv, char*** env)
 void
 Perl_sys_term(pTHX)
 {
-    PERL_SYS_TERM_BODY();
+    if (!PL_veto_cleanup) {
+	PERL_SYS_TERM_BODY();
+    }
 }
 
 
