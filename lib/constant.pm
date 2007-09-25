@@ -1,11 +1,10 @@
 package constant;
-
+use 5.005;
 use strict;
-use 5.006_00;
 use warnings::register;
 
-our($VERSION, %declared);
-$VERSION = '1.10';
+use vars qw($VERSION %declared);
+$VERSION = '1.11';
 
 #=======================================================================
 
@@ -32,6 +31,7 @@ sub import {
     my $multiple  = ref $_[0];
     my $pkg = caller;
     my $symtab;
+    my $str_end = $] >= 5.006 ? "\\z" : "\\Z";
 
     if ($] > 5.009002) {
 	no strict 'refs';
@@ -55,7 +55,7 @@ sub import {
 	}
 
 	# Normal constant name
-	if ($name =~ /^_?[^\W_0-9]\w*\z/ and !$forbidden{$name}) {
+	if ($name =~ /^_?[^\W_0-9]\w*$str_end/ and !$forbidden{$name}) {
 	    # Everything is okay
 
 	# Name forced into main, but we're not in main. Fatal.
@@ -69,7 +69,7 @@ sub import {
 	    Carp::croak("Constant name '$name' begins with '__'");
 
 	# Maybe the name is tolerable
-	} elsif ($name =~ /^[A-Za-z_]\w*\z/) {
+	} elsif ($name =~ /^[A-Za-z_]\w*$str_end/) {
 	    # Then we'll warn only if you've asked for warnings
 	    if (warnings::enabled()) {
 		if ($keywords{$name}) {
@@ -82,7 +82,7 @@ sub import {
 
 	# Looks like a boolean
 	# use constant FRED == fred;
-	} elsif ($name =~ /^[01]?\z/) {
+	} elsif ($name =~ /^[01]?$str_end/) {
             require Carp;
 	    if (@_) {
 		Carp::croak("Constant name '$name' is invalid");
@@ -158,7 +158,7 @@ constant - Perl pragma to declare constants
 
 =head1 DESCRIPTION
 
-This will declare a symbol to be a constant with the given value.
+This pragma allows you to declare constants at compile-time.
 
 When you declare a constant such as C<PI> using the method shown
 above, each machine your script runs upon can have as many digits
@@ -229,8 +229,8 @@ constant is evaluated in list context.  This may produce surprises:
     use constant TIMESTAMP => scalar localtime;         # right
 
 The first line above defines C<TIMESTAMP> as a 9-element list, as
-returned by localtime() in list context.  To set it to the string
-returned by localtime() in scalar context, an explicit C<scalar>
+returned by C<localtime()> in list context.  To set it to the string
+returned by C<localtime()> in scalar context, an explicit C<scalar>
 keyword is required.
 
 List constants are lists, not arrays.  To index or slice them, they
@@ -305,7 +305,7 @@ used.
         $constant::declared{$full_name};
     }
 
-=head1 BUGS
+=head1 CAVEATS
 
 In the current version of Perl, list constants are not inlined
 and some symbols may be redefined without generating a warning.
@@ -330,7 +330,11 @@ immediately to its left, you have to say C<< CONSTANT() => 'value' >>
 (or simply use a comma in place of the big arrow) instead of
 C<< CONSTANT => 'value' >>.
 
-=head1 AUTHOR
+=head1 BUGS
+
+Please report any bugs or feature requests via the perlbug(1) utility.
+
+=head1 AUTHORS
 
 Tom Phoenix, E<lt>F<rootbeer@redcat.com>E<gt>, with help from
 many other folks.
@@ -340,6 +344,10 @@ E<lt>F<casey@geeknest.com>E<gt>.
 
 Documentation mostly rewritten by Ilmari Karonen,
 E<lt>F<perl@itz.pp.sci.fi>E<gt>.
+
+This program is maintained by the Perl 5 Porters. 
+The CPAN distribution is maintained by SE<eacute>bastien Aperghis-Tramoni
+E<lt>F<sebastien@aperghis.net>E<gt>.
 
 =head1 COPYRIGHT
 
