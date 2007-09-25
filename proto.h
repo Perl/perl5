@@ -4701,6 +4701,17 @@ PERL_CALLCONV void	Perl_mro_method_changed_in(pTHX_ HV* stash)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV void	Perl_boot_core_mro(pTHX);
+PERL_CALLCONV void	Perl_sys_init(int* argc, char*** argv)
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2);
+
+PERL_CALLCONV void	Perl_sys_init3(int* argc, char*** argv, char*** env)
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2)
+			__attribute__nonnull__(3);
+
+PERL_CALLCONV void	Perl_sys_term(pTHX);
+
 
 END_EXTERN_C
 /*

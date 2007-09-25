@@ -2648,9 +2648,13 @@ typedef struct clone_params CLONE_PARAMS;
 #  define PERL_FPU_POST_EXEC  }
 #endif
 
-#ifndef PERL_SYS_INIT3
-#  define PERL_SYS_INIT3(argvp,argcp,envp) PERL_SYS_INIT(argvp,argcp)
+#ifndef PERL_SYS_INIT3_BODY
+#  define PERL_SYS_INIT3_BODY(argvp,argcp,envp) PERL_SYS_INIT_BODY(argvp,argcp)
 #endif
+
+#define PERL_SYS_INIT(argc, argv)	Perl_sys_init(argc, argv)
+#define PERL_SYS_INIT3(argc, argv, env)	Perl_sys_init3(argc, argv, env)
+#define PERL_SYS_TERM()			Perl_sys_term(aTHX)
 
 #ifndef PERL_WRITE_MSG_TO_CONSOLE
 #  define PERL_WRITE_MSG_TO_CONSOLE(io, msg, len) PerlIO_write(io, msg, len)

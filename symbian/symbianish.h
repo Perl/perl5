@@ -119,8 +119,9 @@
 #define Fflush(fp)         fflush(fp)
 #define Mkdir(path,mode)   mkdir((path),(mode))
 
-#ifndef PERL_SYS_TERM
-#define PERL_SYS_TERM()		HINTS_REFCNT_TERM; OP_REFCNT_TERM; PERLIO_TERM; MALLOC_TERM; CloseSTDLIB();
+#ifndef PERL_SYS_TERM_BODY
+#define PERL_SYS_TERM_BODY()	HINTS_REFCNT_TERM; OP_REFCNT_TERM; \
+				PERLIO_TERM; MALLOC_TERM; CloseSTDLIB();
 #endif
 
 #define BIT_BUCKET "NUL:"
@@ -170,7 +171,7 @@ pid_t wait(int *status);
 #define times(b)  symbian_times(b)
 #define usleep(u) symbian_usleep(u)
 
-#define PERL_SYS_INIT(c, v) symbian_sys_init(c, v)
+#define PERL_SYS_INIT_BODY(c, v) symbian_sys_init(c, v)
 
 #ifdef __SERIES60_1X__
 #  error "Unfortunately Perl does not work in S60 1.2 (see FAQ-0929)"

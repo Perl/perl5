@@ -763,4 +763,7 @@ Perl_emulate_cop_io
 Perl_get_re_arg
 Perl_mro_get_linear_isa
 Perl_mro_method_changed_in
+Perl_sys_init
+Perl_sys_init3
+Perl_sys_term
 # ex: set ro:
