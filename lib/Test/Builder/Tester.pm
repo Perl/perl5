@@ -2,7 +2,7 @@ package Test::Builder::Tester;
 
 use strict;
 use vars qw(@EXPORT $VERSION @ISA);
-$VERSION = "1.08";
+$VERSION = "1.09";
 
 use Test::Builder;
 use Symbol;

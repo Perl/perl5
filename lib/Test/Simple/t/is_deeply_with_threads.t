@@ -36,7 +36,7 @@ sub do_one_thread {
                  'hello', 's', 'thisisalongname', '1', '2', '3',
                  'abc', 'xyz', '1234567890', 'm', 'n', 'p' );
     my @list2 = @list;
-    print "# kid $kid before eq_set\n";
+    print "# kid $kid before is_deeply\n";
 
     for my $j (1..100) {
         is_deeply(\@list, \@list2);

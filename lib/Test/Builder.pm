@@ -8,7 +8,7 @@ $^C ||= 0;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.71';
+$VERSION = '0.72';
 $VERSION = eval $VERSION;    # make the alpha version come out as a number
 
 # Make Test::Builder thread-safe for ithreads.

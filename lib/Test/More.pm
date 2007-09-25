@@ -16,7 +16,7 @@ sub _carp {
 
 
 use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS $TODO);
-$VERSION = '0.71';
+$VERSION = '0.72';
 $VERSION = eval $VERSION;    # make the alpha version come out as a number
 
 use Test::Builder::Module;
@@ -659,37 +659,32 @@ sub use_ok ($;@) {
 
     my($pack,$filename,$line) = caller;
 
-    # Work around a glitch in $@ and eval
-    my $eval_error;
-    {
-        local($@,$!,$SIG{__DIE__});   # isolate eval
+    local($@,$!,$SIG{__DIE__});   # isolate eval
 
-        if( @imports == 1 and $imports[0] =~ /^\d+(?:\.\d+)?$/ ) {
-            # probably a version check.  Perl needs to see the bare number
-            # for it to work with non-Exporter based modules.
-            eval <<USE;
+    if( @imports == 1 and $imports[0] =~ /^\d+(?:\.\d+)?$/ ) {
+        # probably a version check.  Perl needs to see the bare number
+        # for it to work with non-Exporter based modules.
+        eval <<USE;
 package $pack;
 use $module $imports[0];
 USE
-        }
-        else {
-            eval <<USE;
+    }
+    else {
+        eval <<USE;
 package $pack;
 use $module \@imports;
 USE
-        }
-        $eval_error = $@;
     }
 
-    my $ok = $tb->ok( !$eval_error, "use $module;" );
+    my $ok = $tb->ok( !$@, "use $module;" );
 
     unless( $ok ) {
-        chomp $eval_error;
+        chomp $@;
         $@ =~ s{^BEGIN failed--compilation aborted at .*$}
                 {BEGIN failed--compilation aborted at $filename line $line.}m;
         $tb->diag(<<DIAGNOSTIC);
     Tried to use '$module'.
-    Error:  $eval_error
+    Error:  $@
 DIAGNOSTIC
 
     }
