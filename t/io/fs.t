@@ -413,7 +413,7 @@ SKIP: {
 # check if rename() can be used to just change case of filename
 SKIP: {
     skip "Works in Cygwin only if check_case is set to relaxed", 1
-      if $^O eq 'cygwin';
+      if ($ENV{'CYGWIN'} && ($ENV{'CYGWIN'} =~ /check_case:(?:adjust|strict)/));
 
     chdir './tmp';
     open(FH,'>x') || die "Can't create x";
