@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.73";
+our $VERSION   = "0.74";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -144,7 +144,6 @@ sub concise_subref {
 sub concise_stashref {
     my($order, $h) = @_;
     local *s;
-    print "stashref $h\n";
     foreach my $k (sort keys %$h) {
 	next unless defined $h->{$k};
 	*s = $h->{$k};
@@ -248,6 +247,8 @@ my @tree_decorations =
    [" ", map("$start_sym$_$end_sym", "q", "w", "t", "x", "m"), "", 0],
   );
 
+my @render_packs; # collect -stash=<packages>
+
 sub compileOpts {
     # set rendering state from options and args
     my (@options,@args);
@@ -282,6 +283,7 @@ sub compileOpts {
 	} elsif ($o eq "-littleendian") {
 	    $big_endian = 0;
 	}
+	# miscellaneous, presentation
 	elsif ($o eq "-nobanner") {
 	    $banner = 0;
 	} elsif ($o eq "-banner") {
@@ -293,7 +295,12 @@ sub compileOpts {
 	    $do_main = 0;
 	} elsif ($o eq "-src") {
 	    $show_src = 1;
-	    $^P |= 831;
+	}
+	elsif ($o =~ /^-stash=(.*)/) {
+	    my $pkg = $1;
+	    no strict 'refs';
+	    eval "require $pkg" unless defined %{$pkg.'::'};
+	    push @render_packs, $pkg;
 	}
 	# line-style options
 	elsif (exists $style{substr($o, 1)}) {
@@ -356,7 +363,12 @@ sub compile {
 		concise_subref($order, $objref, $objname);
 	    }
 	}
-	if (!@args or $do_main) {
+	for my $pkg (@render_packs) {
+	    no strict 'refs';
+	    concise_stashref($order, \%{$pkg.'::'});
+	}
+
+	if (!@args or $do_main or @render_packs) {
 	    print $walkHandle "main program:\n" if $do_main;
 	    concise_main($order);
 	}
@@ -714,20 +726,18 @@ sub concise_sv {
 my %srclines;
 
 sub fill_srclines {
-    my $file = shift;
-    my $fullnm = $file;
-    warn "-e not yet supported\n" and return if $file eq '-e';
-    unless (-f $fullnm) {
-	($fullnm) = grep /$file$/, keys %:: ;
-	$fullnm =~ s/^_<//;
+    my $fullnm = shift;
+    if ($fullnm eq '-e') {
+	$srclines{$fullnm} = [ $fullnm, "-src not supported for -e" ];
+	return;
     }
-    open (my $fh, $fullnm)
+    open (my $fh, '<', $fullnm)
 	or warn "# $fullnm: $!, (chdirs not supported by this feature yet)\n"
 	and return;
     my @l = <$fh>;
     chomp @l;
-    unshift @l, $file; # like @{_<$filename} in debug, array starts at 1
-    $srclines{$file} = \@l;
+    unshift @l, $fullnm; # like @{_<$fullnm} in debug, array starts at 1
+    $srclines{$fullnm} = \@l;
 }
 
 sub concise_op {
@@ -815,17 +825,18 @@ sub concise_op {
 	$h{coplabel} = $label;
 	$label = $label ? "$label: " : "";
 	my $loc = $op->file;
+	my $pathnm = $loc;
 	$loc =~ s[.*/][];
-	$loc .= ":" . $op->line;
+	my $ln = $op->line;
+	$loc .= ":$ln";
 	my($stash, $cseq) = ($op->stash->NAME, $op->cop_seq - $cop_seq_base);
 	my $arybase = $op->arybase;
 	$arybase = $arybase ? ' $[=' . $arybase : "";
 	$h{arg} = "($label$stash $cseq $loc$arybase)";
 	if ($show_src) {
-	    my ($file,$ln) = split /:/, $loc;
-	    fill_srclines($file) unless exists $srclines{$file};
-	    $h{src} = "$ln: " . $srclines{$file}[$ln];
-	    # print "$file:$ln $h{src}\n";
+	    fill_srclines($pathnm) unless exists $srclines{$pathnm};
+	    $h{src} = "$ln: " . ($srclines{$pathnm}[$ln]
+				 // "-src unavailable under -e");
 	}
     } elsif ($h{class} eq "LOOP") {
 	$h{arg} = "(next->" . seq($op->nextop) . " last->" . seq($op->lastop)
@@ -1088,11 +1099,11 @@ on threaded and un-threaded perls.
 =head1 OPTIONS
 
 Arguments that don't start with a hyphen are taken to be the names of
-subroutines to print the OPs of; if no such functions are specified,
-the main body of the program (outside any subroutines, and not
-including use'd or require'd files) is rendered.  Passing C<BEGIN>,
-C<UNITCHECK>, C<CHECK>, C<INIT>, or C<END> will cause all of the
-corresponding special blocks to be printed.
+subroutines to render; if no such functions are specified, the main
+body of the program (outside any subroutines, and not including use'd
+or require'd files) is rendered.  Passing C<BEGIN>, C<UNITCHECK>,
+C<CHECK>, C<INIT>, or C<END> will cause all of the corresponding
+special blocks to be printed.  Arguments must follow options.
 
 Options affect how things are rendered (ie printed).  They're presented
 here by their visual effect, 1st being strongest.  They're grouped
@@ -1255,6 +1266,11 @@ generates it.  For example:
     c      <@> print vK
     # 5:     print "$i\n";
     ...
+
+=item B<-stash="somepackage">
+
+With this, "somepackage" will be required, then the stash is
+inspected, and each function is rendered.
 
 =back
 
@@ -1638,7 +1654,8 @@ program will have many subs.
 
 This renders all functions in the B::Concise package with the source
 lines.  It eschews the O framework so that the stashref can be passed
-directly to B::Concise::compile().
+directly to B::Concise::compile().  See -stash option for a more
+convenient way to render a package.
 
 =back
 
