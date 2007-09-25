@@ -35,8 +35,7 @@ BEGIN {
     $Is_SunOS4  = $^O eq 'sunos';
     $Is_Solaris = $^O eq 'solaris';
     $Is_SunOS   = $Is_SunOS4 || $Is_Solaris;
-    $Is_BSD     = $^O =~ /^(?:free|net|open)bsd$/ or
-                  $^O eq 'bsdos' or $^O eq 'interix' or $^O eq 'dragonfly';
+    $Is_BSD     = $^O =~ /^(?:(?:free|net|open)bsd|bsdos|interix|dragonfly)$/;
 }
 
 BEGIN {
