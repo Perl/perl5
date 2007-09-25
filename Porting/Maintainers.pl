@@ -147,6 +147,13 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'constant' =>
+		{
+		'MAINTAINER'	=> 'saper',
+		'FILES'		=> q[lib/constant.{pm,t}],
+		'CPAN'		=> 1,
+		},
+
 	'Compress::Zlib' =>
 		{
 		'MAINTAINER'	=> 'pmqs',
