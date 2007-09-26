@@ -296,21 +296,21 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
            |const U32 flags
 
 Converts a string into something presentable, handling escaping via
-pv_escape() and supporting quoting and elipses. 
+pv_escape() and supporting quoting and ellipses.
 
 If the PERL_PV_PRETTY_QUOTE flag is set then the result will be 
 double quoted with any double quotes in the string escaped. Otherwise
 if the PERL_PV_PRETTY_LTGT flag is set then the result be wrapped in
 angle brackets. 
            
-If the PERL_PV_PRETTY_ELIPSES flag is set and not all characters in
-string were output then an elipses C<...> will be appended to the 
+If the PERL_PV_PRETTY_ELLIPSES flag is set and not all characters in
+string were output then an ellipsis C<...> will be appended to the
 string. Note that this happens AFTER it has been quoted.
            
 If start_color is non-null then it will be inserted after the opening
 quote (if there is one) but before the escaped text. If end_color
 is non-null then it will be inserted after the escaped text but before
-any quotes or elipses.
+any quotes or ellipses.
 
 Returns a pointer to the prettified text as held by dsv.
            
@@ -345,7 +345,7 @@ Perl_pv_pretty( pTHX_ SV *dsv, char const * const str, const STRLEN count,
     else if ( flags & PERL_PV_PRETTY_LTGT )
         sv_catpvn( dsv, ">", 1);         
     
-    if ( (flags & PERL_PV_PRETTY_ELIPSES) && ( escaped < count ) )
+    if ( (flags & PERL_PV_PRETTY_ELLIPSES) && ( escaped < count ) )
 	    sv_catpvn( dsv, "...", 3 );
  
     return SvPVX(dsv);
@@ -1276,7 +1276,7 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
 		SV * const dsv = sv_newmortal();
                 const char * const s =  pv_pretty(dsv, re->wrapped, re->wraplen, 
                     60, NULL, NULL,
-                    ( PERL_PV_PRETTY_QUOTE | PERL_PV_ESCAPE_RE | PERL_PV_PRETTY_ELIPSES |
+                    ( PERL_PV_PRETTY_QUOTE | PERL_PV_ESCAPE_RE | PERL_PV_PRETTY_ELLIPSES |
                     ((re->extflags & RXf_UTF8) ? PERL_PV_ESCAPE_UNI : 0))
                 );
 		Perl_dump_indent(aTHX_ level+1, file, "    PAT = %s\n", s);

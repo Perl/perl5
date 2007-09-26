@@ -360,7 +360,7 @@ EOF
 	   ." followed by a statement on column one?)")
       if $line[0] =~ /^\s/;
     
-    my ($class, $externC, $static, $elipsis, $wantRETVAL, $RETVAL_no_return);
+    my ($class, $externC, $static, $ellipsis, $wantRETVAL, $RETVAL_no_return);
     my (@fake_INPUT_pre);	# For length(s) generated variables
     my (@fake_INPUT);
     
@@ -513,7 +513,7 @@ EOF
     my $report_args = '';
     foreach my $i (0 .. $#args) {
       if ($args[$i] =~ s/\.\.\.//) {
-	$elipsis = 1;
+	$ellipsis = 1;
 	if ($args[$i] eq '' && $i == $#args) {
 	  $report_args .= ", ...";
 	  pop(@args);
@@ -577,7 +577,7 @@ EOF
     print Q(<<"EOF") if $INTERFACE ;
 #    dXSFUNCTION($ret_type);
 EOF
-    if ($elipsis) {
+    if ($ellipsis) {
       $cond = ($min_args ? qq(items < $min_args) : 0);
     } elsif ($min_args == $num_args) {
       $cond = qq(items != $min_args);
@@ -842,7 +842,7 @@ EOF
 	  $proto_arg[$min_args] .= ";" ;
 	}
 	push @proto_arg, "$s\@"
-	  if $elipsis ;
+	  if $ellipsis ;
 	
 	$proto = join ("", grep defined, @proto_arg);
       }
