@@ -24,6 +24,31 @@ These functions are related to the method resolution order of perl classes
 #define PERL_IN_MRO_C
 #include "perl.h"
 
+struct mro_alg {
+    const char *name;
+    AV *(*resolve)(pTHX_ HV* stash, I32 level);
+};
+
+/* First one is the default */
+static struct mro_alg mros[] = {
+    {"dfs", S_mro_get_linear_isa_dfs},
+    {"c3", S_mro_get_linear_isa_c3}
+};
+
+#define NUMBER_OF_MROS (sizeof(mros)/sizeof(struct mro_alg))
+
+static const struct mro_alg *
+S_get_mro_from_name(pTHX_ const char *const name) {
+    const struct mro_alg *algo = mros;
+    const struct mro_alg *const end = mros + NUMBER_OF_MROS;
+    while (algo < end) {
+	if(strEQ(name, algo->name))
+	    return algo;
+	++algo;
+    }
+    return NULL;
+}
+
 struct mro_meta*
 Perl_mro_meta_init(pTHX_ HV* stash)
 {
@@ -36,6 +61,7 @@ Perl_mro_meta_init(pTHX_ HV* stash)
     HvAUX(stash)->xhv_mro_meta = newmeta;
     newmeta->cache_gen = 1;
     newmeta->pkg_gen = 1;
+    newmeta->mro_which = (void *) mros;
 
     return newmeta;
 }
@@ -427,14 +453,9 @@ Perl_mro_get_linear_isa(pTHX_ HV *stash)
         Perl_croak(aTHX_ "Can't linearize anonymous symbol table");
 
     meta = HvMROMETA(stash);
-    if(meta->mro_which == MRO_DFS) {
-        return mro_get_linear_isa_dfs(stash, 0);
-    } else if(meta->mro_which == MRO_C3) {
-        return mro_get_linear_isa_c3(stash, 0);
-    } else {
+    if (!meta->mro_which)
         Perl_croak(aTHX_ "panic: invalid MRO!");
-    }
-    return NULL; /* NOT REACHED */
+    return meta->mro_which->resolve(aTHX_ stash, 0);
 }
 
 /*
@@ -694,12 +715,10 @@ XS(XS_mro_get_linear_isa) {
     }
     else if(items > 1) {
         const char* const which = SvPV_nolen(ST(1));
-        if(strEQ(which, "dfs"))
-            RETVAL = mro_get_linear_isa_dfs(class_stash, 0);
-        else if(strEQ(which, "c3"))
-            RETVAL = mro_get_linear_isa_c3(class_stash, 0);
-        else
-            Perl_croak(aTHX_ "Invalid mro name: '%s'", which);
+	const struct mro_alg *const algo = S_get_mro_from_name(aTHX_ which);
+	if (!algo)
+	    Perl_croak(aTHX_ "Invalid mro name: '%s'", which);
+	algo->resolve(aTHX_ class_stash, 0);
     }
     else {
         RETVAL = mro_get_linear_isa(class_stash);
@@ -715,8 +734,8 @@ XS(XS_mro_set_mro)
     dVAR;
     dXSARGS;
     SV* classname;
-    char* whichstr;
-    mro_alg which;
+    const char* whichstr;
+    const struct mro_alg *which;
     HV* class_stash;
     struct mro_meta* meta;
 
@@ -731,11 +750,8 @@ XS(XS_mro_set_mro)
     if(!class_stash) Perl_croak(aTHX_ "Cannot create class: '%"SVf"'!", SVfARG(classname));
     meta = HvMROMETA(class_stash);
 
-    if(strEQ(whichstr, "dfs"))
-        which = MRO_DFS;
-    else if(strEQ(whichstr, "c3"))
-        which = MRO_C3;
-    else
+    which = S_get_mro_from_name(aTHX_ whichstr);
+    if (!which)
         Perl_croak(aTHX_ "Invalid mro name: '%s'", whichstr);
 
     if(meta->mro_which != which) {
@@ -766,11 +782,9 @@ XS(XS_mro_get_mro)
     classname = ST(0);
     class_stash = gv_stashsv(classname, 0);
 
-    if(!class_stash || HvMROMETA(class_stash)->mro_which == MRO_DFS)
-        ST(0) = sv_2mortal(newSVpvn("dfs", 3));
-    else
-        ST(0) = sv_2mortal(newSVpvn("c3", 2));
-
+    ST(0) = sv_2mortal(newSVpv(class_stash
+			       ? HvMROMETA(class_stash)->mro_which->name
+			       : "dfs", 0));
     XSRETURN(1);
 }
 
