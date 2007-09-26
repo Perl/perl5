@@ -718,7 +718,7 @@ XS(XS_mro_get_linear_isa) {
 	const struct mro_alg *const algo = S_get_mro_from_name(aTHX_ which);
 	if (!algo)
 	    Perl_croak(aTHX_ "Invalid mro name: '%s'", which);
-	algo->resolve(aTHX_ class_stash, 0);
+	RETVAL = algo->resolve(aTHX_ class_stash, 0);
     }
     else {
         RETVAL = mro_get_linear_isa(class_stash);

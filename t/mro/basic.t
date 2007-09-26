@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-require q(./test.pl); plan(tests => 29);
+require q(./test.pl); plan(tests => 35);
 
 {
     package MRO_A;
@@ -20,17 +20,28 @@ require q(./test.pl); plan(tests => 29);
     our @ISA = qw/MRO_D MRO_E/;
 }
 
+my @MFO_F_DFS = qw/MRO_F MRO_D MRO_A MRO_B MRO_C MRO_E/;
+my @MFO_F_C3 = qw/MRO_F MRO_D MRO_E MRO_A MRO_B MRO_C/;
 is(mro::get_mro('MRO_F'), 'dfs');
 ok(eq_array(
-    mro::get_linear_isa('MRO_F'),
-    [qw/MRO_F MRO_D MRO_A MRO_B MRO_C MRO_E/]
+    mro::get_linear_isa('MRO_F'), \@MFO_F_DFS
 ));
+
+ok(eq_array(mro::get_linear_isa('MRO_F', 'dfs'), \@MFO_F_DFS));
+ok(eq_array(mro::get_linear_isa('MRO_F', 'c3'), \@MFO_F_C3));
+eval{mro::get_linear_isa('MRO_F', 'C3')};
+like($@, qr/^Invalid mro name: 'C3'/);
+
 mro::set_mro('MRO_F', 'c3');
 is(mro::get_mro('MRO_F'), 'c3');
 ok(eq_array(
-    mro::get_linear_isa('MRO_F'),
-    [qw/MRO_F MRO_D MRO_E MRO_A MRO_B MRO_C/]
+    mro::get_linear_isa('MRO_F'), \@MFO_F_C3
 ));
+
+ok(eq_array(mro::get_linear_isa('MRO_F', 'dfs'), \@MFO_F_DFS));
+ok(eq_array(mro::get_linear_isa('MRO_F', 'c3'), \@MFO_F_C3));
+eval{mro::get_linear_isa('MRO_F', 'C3')};
+like($@, qr/^Invalid mro name: 'C3'/);
 
 my @isarev = sort { $a cmp $b } @{mro::get_isarev('MRO_B')};
 ok(eq_array(
