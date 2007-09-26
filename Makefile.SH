@@ -85,7 +85,7 @@ true)
 		case "$osvers" in
 		3*)	shrpldflags="$shrpldflags -e _nostart"
 			;;
-		*)	shrpldflags="$shrpldflags -b noentry"
+		*)	shrpldflags="$shrpldflags -bnoentry"
 			;;
 		esac
 	        shrpldflags="$shrpldflags $ldflags $perllibs $cryptlib"
