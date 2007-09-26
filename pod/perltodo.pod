@@ -332,6 +332,12 @@ file/directory copying back and forth.
 These tasks would need a little C knowledge, but don't need any specific
 background or experience with XS, or how the Perl interpreter works
 
+=head2 Modernize the order of directories in @INC
+
+The way @INC is laid out by default, one cannot upgrade core (dual-life)
+modules without overwriting files. This causes problems for binary
+package builders.
+
 =head2 Make it clear from -v if this is the exact official release
 
 Currently perl from C<p4>/C<rsync> ships with a F<patchlevel.h> file that
