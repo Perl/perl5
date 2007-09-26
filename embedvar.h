@@ -345,6 +345,7 @@
 #define PL_utf8_xdigit		(vTHX->Iutf8_xdigit)
 #define PL_utf8cache		(vTHX->Iutf8cache)
 #define PL_utf8locale		(vTHX->Iutf8locale)
+#define PL_v_string_ok		(vTHX->Iv_string_ok)
 #define PL_warnhook		(vTHX->Iwarnhook)
 #define PL_watchaddr		(vTHX->Iwatchaddr)
 #define PL_watchok		(vTHX->Iwatchok)
@@ -659,6 +660,7 @@
 #define PL_Iutf8_xdigit		PL_utf8_xdigit
 #define PL_Iutf8cache		PL_utf8cache
 #define PL_Iutf8locale		PL_utf8locale
+#define PL_Iv_string_ok		PL_v_string_ok
 #define PL_Iwarnhook		PL_warnhook
 #define PL_Iwatchaddr		PL_watchaddr
 #define PL_Iwatchok		PL_watchok
