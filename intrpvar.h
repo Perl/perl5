@@ -162,7 +162,13 @@ PERLVAR(Iregdummy,	regnode)	/* from regcomp.c */
 PERLVARI(Idumpindent,	U16,	4)	/* number of blanks per dump
 					   indentation level */
 
-/* Space for U16 here without increasing the structure size */
+PERLVARI(Iv_string_ok,	bool, FALSE)	/* use/require v_string OK */
+
+/* This would be space for U8 here without increasing the structure size
+   so name the space, so that the first post 5.10 need for a bool can use this
+   rather than padding at the end.  */
+
+PERLVARI(Ispare_510,	bool, FALSE)	/*  */
 
 PERLVARA(Icolors,6,	char *)		/* from regcomp.c */
 
@@ -669,8 +675,6 @@ PERLVARI(Islab_count, U32, 0)	/* Size of the array */
 #endif
 
 PERLVARI(Iisarev, HV*, NULL)	/* Reverse map of @ISA dependencies */
-
-PERLVARI(Iv_string_ok,	bool, FALSE)	/* use/require v_string OK */
 
 /* If you are adding a U8 or U16, see the 'Space' comments above on where
  * there are gaps which currently will be structure padding.  */
