@@ -163,7 +163,7 @@ checkOptree ( name	=> 'END',
 # END 1:
 # 4  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->4
-# 1        <;> nextstate(main 5 -e:6) v:>,<,%,{ ->2
+# 1        <;> nextstate(main 5 -e:6) v:{ ->2
 # 3        <1> postinc[t3] sK/1 ->4
 # -           <1> ex-rv2sv sKRM/1 ->3
 # 2              <#> gvsv[*end] s ->3
@@ -186,7 +186,7 @@ checkOptree ( name	=> 'CHECK',
 # CHECK 1:
 # 4  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->4
-# 1        <;> nextstate(main 3 -e:4) v:>,<,%,{ ->2
+# 1        <;> nextstate(main 3 -e:4) v:{ ->2
 # 3        <1> postinc[t3] sK/1 ->4
 # -           <1> ex-rv2sv sKRM/1 ->3
 # 2              <#> gvsv[*chk] s ->3
@@ -209,7 +209,7 @@ if ($] >= 5.009) {
 # UNITCHECK 1:
 # 4  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->4
-# 1        <;> nextstate(main 3 -e:4) v:>,<,%,{ ->2
+# 1        <;> nextstate(main 3 -e:4) v:{ ->2
 # 3        <1> postinc[t3] sK/1 ->4
 # -           <1> ex-rv2sv sKRM/1 ->3
 # 2              <#> gvsv[*uc] s ->3
@@ -233,7 +233,7 @@ checkOptree ( name	=> 'INIT',
 # INIT 1:
 # 4  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->4
-# 1        <;> nextstate(main 4 -e:5) v:>,<,%,{ ->2
+# 1        <;> nextstate(main 4 -e:5) v:{ ->2
 # 3        <1> postinc[t3] sK/1 ->4
 # -           <1> ex-rv2sv sKRM/1 ->3
 # 2              <#> gvsv[*init] s ->3
