@@ -1987,7 +1987,7 @@ sub coderef($$){
             if( exists $Pages{$page} and $Pages{$page} =~ /([^:.]*)\.[^:]*:/){
 		$page = $1 . '.html';
 	    }
-	    my $link = "$Htmlroot/$page#item_" . anchorify($fid);
+	    my $link = "$Htmlroot/$page#" . anchorify($fid);
 
 	    # Here, we take advantage of the knowledge that $Htmlfileurl
 	    # ne '' implies $Htmlroot eq ''.
@@ -1998,7 +1998,7 @@ sub coderef($$){
 		$url = $link ;
 	    }
 	} else {
-	    $url = "#item_" . anchorify($fid);
+	    $url = "#" . anchorify($fid);
 	}
 
 	confess "url has space: $url" if $url =~ /"[^"]*\s[^"]*"/;
