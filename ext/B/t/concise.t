@@ -413,12 +413,8 @@ $out = runperl ( switches => ["-MO=Concise,-stash=Data::Dumper,-src,-exec"],
 like($out, qr/FUNC: \*Data::Dumper::format_refaddr/,
      "stash rendering loads package as needed");
 
-my $prog = q{
-    package FOO;
-    sub bar { print "bar" }
-    package main;
-    FOO::bar();
-};
+my $prog = q{package FOO; sub bar { print "bar" } package main; FOO::bar(); };
+
 # this would fail if %INC used for -stash test
 $out = runperl ( switches => ["-MO=Concise,-src,-stash=FOO,-main"],
 		 prog => $prog, stderr => 1 );
