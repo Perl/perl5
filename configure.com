@@ -50,7 +50,7 @@ $ use_vmsdebug_perl = "n"
 $ use64bitall = "n"
 $ use64bitint = "n"
 $ uselongdouble = "n"
-$ uselargefiles = "n"
+$ uselargefiles = "y"
 $ usestdstat = "n"
 $ usesitecustomize = "n"
 $ C_Compiler_Replace = "CC="
@@ -4929,10 +4929,10 @@ $  ENDIF
 $!
 $  IF uselargefiles .OR. uselargefiles .eqs. "define"
 $  THEN
-$    echo4 "Largefile support enabled (plus standard stat support on V8.2 and later)"
-$    usestdstat = "y"
 $    IF (vms_ver .GES. "8.2") .AND. (archname .NES. "VMS_VAX")
 $    THEN
+$      echo4 "Largefile support enabled, so enabling standard stat support too."
+$      usestdstat = "y"
 $      echo4 -
    "Looking for the realpath() function to indicate symbolic link support..."
 $      OS
