@@ -9497,7 +9497,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 All the macros and functions in this section are for the private use of
 the main function, perl_clone().
 
-The foo_dup() functions make an exact copy of an existing foo thinngy.
+The foo_dup() functions make an exact copy of an existing foo thingy.
 During the course of a cloning, a hash table is used to map old addresses
 to new addresses. The table is created and manipulated with the
 ptr_table_* functions.
