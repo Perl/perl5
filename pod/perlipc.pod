@@ -119,7 +119,7 @@ handlers:
 But that will be problematic for the more complicated handlers that need
 to reinstall themselves.  Because Perl's signal mechanism is currently
 based on the signal(3) function from the C library, you may sometimes be so
-misfortunate as to run on systems where that function is "broken", that
+unfortunate as to run on systems where that function is "broken", that
 is, it behaves in the old unreliable SysV way rather than the newer, more
 reasonable BSD and POSIX fashion.  So you'll see defensive people writing
 signal handlers like this:

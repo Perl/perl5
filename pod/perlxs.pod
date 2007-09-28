@@ -554,7 +554,7 @@ exception happens if this C<;> terminates the line, then this C<;>
 is quietly ignored.
 
 The following code demonstrates how to supply initialization code for
-function parameters.  The initialization code is eval'd within double
+function parameters.  The initialization code is eval'ed within double
 quotes by the compiler before it is added to the output so anything
 which should be interpreted literally [mainly C<$>, C<@>, or C<\\>]
 must be protected with backslashes.  The variables $var, $arg,
@@ -1313,7 +1313,7 @@ this:
 
 In this case, the function will overload both of the three way
 comparison operators.  For all overload operations using non-alpha
-characters, you must type the parameter without quoting, seperating
+characters, you must type the parameter without quoting, separating
 multiple overloads with whitespace.  Note that "" (the stringify 
 overload) should be entered as \"\" (i.e. escaped).
 

@@ -173,7 +173,7 @@ information you may find useful.
 
 In a sense, perl (the C program) is a good example of embedding Perl
 (the language), so I'll demonstrate embedding with I<miniperlmain.c>,
-included in the source distribution.  Here's a bastardized, nonportable
+included in the source distribution.  Here's a bastardized, non-portable
 version of I<miniperlmain.c> containing the essentials of embedding:
 
     #include <EXTERN.h>               /* from the Perl distribution     */
@@ -352,7 +352,7 @@ I<SvPV()> to create a string:
    a = Just Another Perl Hacker
 
 In the example above, we've created a global variable to temporarily
-store the computed value of our eval'd expression.  It is also
+store the computed value of our eval'ed expression.  It is also
 possible and in most cases a better strategy to fetch the return value
 from I<eval_pv()> instead.  Example:
 

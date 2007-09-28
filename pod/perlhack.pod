@@ -156,7 +156,7 @@ altogether without further notice.
 =item Is the implementation generic enough to be portable?
 
 The worst patches make use of a system-specific features.  It's highly
-unlikely that nonportable additions to the Perl language will be
+unlikely that non-portable additions to the Perl language will be
 accepted.
 
 =item Is the implementation tested?
@@ -2829,7 +2829,7 @@ not perfect, because the below is a compile-time check):
   #endif
 
 How does the HAS_QUUX become defined where it needs to be?  Well, if
-Foonix happens to be UNIXy enought to be able to run the Configure
+Foonix happens to be UNIXy enough to be able to run the Configure
 script, and Configure has been taught about detecting and testing
 quux(), the HAS_QUUX will be correctly defined.  In other platforms,
 the corresponding configuration step will hopefully do the same.
@@ -2858,7 +2858,7 @@ But in any case, try to keep the features and operating systems separate.
 
 =item *
 
-malloc(0), realloc(0), calloc(0, 0) are nonportable.  To be portable
+malloc(0), realloc(0), calloc(0, 0) are non-portable.  To be portable
 allocate at least one byte.  (In general you should rarely need to
 work at this low level, but instead use the various malloc wrappers.)
 

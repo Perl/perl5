@@ -333,7 +333,7 @@ the .pm or .xs files, you should increment the value of this variable.
 
 =head2 Writing good test scripts
 
-The importance of writing good test scripts cannot be overemphasized.  You
+The importance of writing good test scripts cannot be over-emphasized.  You
 should closely follow the "ok/not ok" style that Perl itself uses, so that
 it is very easy and unambiguous to determine the outcome of each test case.
 When you find and fix a bug, make sure you add a test case for it.

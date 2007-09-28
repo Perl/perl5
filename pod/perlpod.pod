@@ -214,7 +214,7 @@ formatter that can use that format will use the region, otherwise it
 will be completely ignored.
 
 A command "=begin I<formatname>", some paragraphs, and a
-command "=end I<formatname>", mean that the text/data inbetween
+command "=end I<formatname>", mean that the text/data in between
 is meant for formatters that understand the special format
 called I<formatname>.  For example,
 

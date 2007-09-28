@@ -334,7 +334,7 @@ If the C<utf8> pragma is not used but the C<locale> pragma is, the
 classes correlate with the usual isalpha(3) interface (except for
 "word" and "blank").
 
-The assumedly non-obviously named classes are:
+The other named classes are:
 
 =over 4
 

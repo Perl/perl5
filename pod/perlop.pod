@@ -200,7 +200,7 @@ concatenated with the identifier is returned.  Otherwise, if the string
 starts with a plus or minus, a string starting with the opposite sign
 is returned.  One effect of these rules is that -bareword is equivalent
 to the string "-bareword".  If, however, the string begins with a
-non-alphabetic character (exluding "+" or "-"), Perl will attempt to convert
+non-alphabetic character (excluding "+" or "-"), Perl will attempt to convert
 the string to a numeric and the arithmetic negation is performed. If the
 string cannot be cleanly converted to a numeric, Perl will give the warning
 B<Argument "the string" isn't numeric in negation (-) at ...>.
