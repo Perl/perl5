@@ -592,6 +592,8 @@ END_EXTERN_C
 #define PL_sortcop		(*Perl_Isortcop_ptr(aTHX))
 #undef  PL_sortstash
 #define PL_sortstash		(*Perl_Isortstash_ptr(aTHX))
+#undef  PL_spare_510
+#define PL_spare_510		(*Perl_Ispare_510_ptr(aTHX))
 #undef  PL_splitstr
 #define PL_splitstr		(*Perl_Isplitstr_ptr(aTHX))
 #undef  PL_srand_called
