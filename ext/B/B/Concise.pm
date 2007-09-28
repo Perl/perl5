@@ -1513,7 +1513,28 @@ The numeric value of the OP's flags.
 =item B<#hints>
 
 The COP's hint flags, rendered with abbreviated names if possible. An empty
-string if this is not a COP.
+string if this is not a COP. Here are the symbols used:
+
+    $ strict refs
+    & strict subs
+    * strict vars
+    i integers
+    l locale
+    b bytes
+    [ arybase
+    { block scope
+    % localise %^H
+    < open in
+    > open out
+    I overload int
+    F overload float
+    B overload binary
+    S overload string
+    R overload re
+    T taint
+    E eval
+    X filetest access
+    U utf-8
 
 =item B<#hintsval>
 
