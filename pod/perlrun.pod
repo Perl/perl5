@@ -977,7 +977,7 @@ C<__END__> if there is trailing garbage to be ignored (the program
 can process any or all of the trailing garbage via the DATA filehandle
 if desired).
 
-The directory, if specified, must appear immedately following the B<-x>
+The directory, if specified, must appear immediately following the B<-x>
 with no intervening whitespace.
 
 =back

@@ -1667,7 +1667,7 @@ Base class for test modules
 
 =item Test::Builder::Tester
 
-Test testsuites that have been built with
+Test test suites that have been built with
 
 =item Test::Builder::Tester::Color
 

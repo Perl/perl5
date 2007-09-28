@@ -320,7 +320,7 @@ backslash C<\> to represent themselves.  The same is true in a
 character class, but the sets of ordinary and special characters
 inside a character class are different than those outside a character
 class.  The special characters for a character class are C<-]\^$> (and
-the pattern delimiter, whatever it is). 
+the pattern delimiter, whatever it is).
 C<]> is special because it denotes the end of a character class.  C<$> is
 special because it denotes a scalar variable.  C<\> is special because
 it is used in escape sequences, just like above.  Here is how the
@@ -332,7 +332,7 @@ special characters C<]$\> are handled:
    /[\$x]at/;  # matches '$at' or 'xat'
    /[\\$x]at/; # matches '\at', 'bat, 'cat', or 'rat'
 
-The last two are a little tricky.  in C<[\$x]>, the backslash protects
+The last two are a little tricky.  In C<[\$x]>, the backslash protects
 the dollar sign, so the character class has two members C<$> and C<x>.
 In C<[\\$x]>, the backslash is protected, so C<$x> is treated as a
 variable and substituted in double quote fashion.
@@ -681,8 +681,8 @@ possible character positions have been exhausted does Perl give
 up and declare S<C<$string =~ /(abd|abc)(df|d|de)/;>> to be false.
 
 Even with all this work, regexp matching happens remarkably fast.  To
-speed things up, Perl compiles the regexp into a compact sequence of 
-opcodes that can often fit inside a processor cache.  When the code is 
+speed things up, Perl compiles the regexp into a compact sequence of
+opcodes that can often fit inside a processor cache.  When the code is
 executed, these opcodes can then run at full throttle and search very
 quickly.
 
@@ -765,7 +765,7 @@ so may lead to surprising and unsatisfactory results.
 =head2 Relative backreferences
 
 Counting the opening parentheses to get the correct number for a
-backreference is errorprone as soon as there is more than one 
+backreference is errorprone as soon as there is more than one
 capturing group.  A more convenient technique became available
 with Perl 5.10: relative backreferences. To refer to the immediately
 preceding capture group one now may write C<\g{-1}>, the next but
@@ -775,7 +775,7 @@ Another good reason in addition to readability and maintainability
 for using relative backreferences  is illustrated by the following example,
 where a simple pattern for matching peculiar strings is used:
 
-    $a99a = '([a-z])(\d)\2\1';   # matches a11a, g22g, x33x, etc. 
+    $a99a = '([a-z])(\d)\2\1';   # matches a11a, g22g, x33x, etc.
 
 Now that we have this pattern stored as a handy string, we might feel
 tempted to use it as a part of some other pattern:
@@ -807,9 +807,9 @@ same name to more than one group, but then only the leftmost one of the
 eponymous set can be referenced.  Outside of the pattern a named
 capture buffer is accessible through the C<%+> hash.
 
-Assuming that we have to match calendar dates which may be given in one 
+Assuming that we have to match calendar dates which may be given in one
 of the three formats yyyy-mm-dd, mm/dd/yyyy or dd.mm.yyyy, we can write
-three suitable patterns where we use 'd', 'm' and 'y' respectively as the 
+three suitable patterns where we use 'd', 'm' and 'y' respectively as the
 names of the buffers capturing the pertaining components of a date. The
 matching operation combines the three patterns as alternatives:
 
@@ -837,9 +837,9 @@ Consider a pattern for matching a time of the day, civil or military style:
     }
 
 Processing the results requires an additional if statement to determine
-whether C<$1> and C<$2> or C<$3> and C<$4> contain the goodies. It would 
+whether C<$1> and C<$2> or C<$3> and C<$4> contain the goodies. It would
 be easier if we could use buffer numbers 1 and 2 in second alternative as
-well, and this is exactly what the parenthesized construct C<(?|...)>, 
+well, and this is exactly what the parenthesized construct C<(?|...)>,
 set around an alternative achieves. Here is an extended version of the
 previous pattern:
 
@@ -849,8 +849,7 @@ previous pattern:
 
 Within the alternative numbering group, buffer numbers start at the same
 position for each alternative. After the group, numbering continues
-with one higher than the maximum reached across all the alteratives.
-
+with one higher than the maximum reached across all the alternatives.
 
 =head2 Position information
 
@@ -900,11 +899,11 @@ C<@+> instead:
 
 =head2 Non-capturing groupings
 
-A group that is required to bundle a set of alternatives may or may not be 
+A group that is required to bundle a set of alternatives may or may not be
 useful as a capturing group.  If it isn't, it just creates a superfluous
 addition to the set of available capture buffer values, inside as well as
 outside the regexp.  Non-capturing groupings, denoted by C<(?:regexp)>,
-still allow the regexp to be treated as a single unit, but don't establish 
+still allow the regexp to be treated as a single unit, but don't establish
 a capturing buffer at the same time.  Both capturing and non-capturing
 groupings are allowed to co-exist in the same regexp.  Because there is
 no extraction, non-capturing groupings are faster than capturing
@@ -1288,28 +1287,30 @@ the simple pattern
 
 Whenever this is applied to a string which doesn't quite meet the
 pattern's expectations such as S<C<"abc  ">> or S<C<"abc  def ">>,
-the regex engine will backtrack, approximately once for each character 
-in the string.  But we know that there is no way around taking I<all> 
-of the inital word characters to match the first repetition, that I<all> 
+the regex engine will backtrack, approximately once for each character
+in the string.  But we know that there is no way around taking I<all>
+of the initial word characters to match the first repetition, that I<all>
 spaces must be eaten by the middle part, and the same goes for the second
-word.  With the introduction of the I<possessive quantifiers> in 
-Perl 5.10 we have a way of instructing the regexp engine not to backtrack, 
-with the usual quantifiers with a C<+> appended to them.  This makes them 
-greedy as well as stingy; once they succeed they won't give anything back
-to permit another solution. They have the following meanings:
+word.
+
+With the introduction of the I<possessive quantifiers> in Perl 5.10, we
+have a way of instructing the regex engine not to backtrack, with the
+usual quantifiers with a C<+> appended to them.  This makes them greedy as
+well as stingy; once they succeed they won't give anything back to permit
+another solution. They have the following meanings:
 
 =over 4
 
 =item *
 
-C<a{n,m}+> means: match at least C<n> times, not more than C<m> times, 
-as many times as possible, and don't give anything up. C<a?+> is short 
+C<a{n,m}+> means: match at least C<n> times, not more than C<m> times,
+as many times as possible, and don't give anything up. C<a?+> is short
 for C<a{0,1}+>
 
 =item *
 
 C<a{n,}+> means: match at least C<n> times, but as many times as possible,
-and don't give anything up. C<a*+> is short for C<a{0,}+> and C<a++> is 
+and don't give anything up. C<a*+> is short for C<a{0,}+> and C<a++> is
 short for C<a{1,}+>.
 
 =item *
@@ -1319,15 +1320,15 @@ notational consistency.
 
 =back
 
-These possessive quantifiers represent a special case of a more general 
-concept, the I<independent subexpression>, see below. 
+These possessive quantifiers represent a special case of a more general
+concept, the I<independent subexpression>, see below.
 
 As an example where a possessive quantifier is suitable we consider
 matching a quoted string, as it appears in several programming languages.
 The backslash is used as an escape character that indicates that the
 next character is to be taken literally, as another character for the
 string.  Therefore, after the opening quote, we expect a (possibly
-empty) sequence of alternatives: either some character except an 
+empty) sequence of alternatives: either some character except an
 unescaped quote or backslash or an escaped character.
 
     /"(?:[^"\\]++|\\.)*+"/;
@@ -1492,12 +1493,12 @@ C</regexp/> and arbitrary delimiter C<m!regexp!> forms.  We have used
 the binding operator C<=~> and its negation C<!~> to test for string
 matches.  Associated with the matching operator, we have discussed the
 single line C<//s>, multi-line C<//m>, case-insensitive C<//i> and
-extended C<//x> modifiers.  There are a few more things you might 
-want to know about matching operators. 
+extended C<//x> modifiers.  There are a few more things you might
+want to know about matching operators.
 
 =head3 Optimizing pattern evaluation
 
-We pointed out earlier that variables in regexps are substituted 
+We pointed out earlier that variables in regexps are substituted
 before the regexp is evaluated:
 
     $pattern = 'Seuss';
@@ -1531,7 +1532,7 @@ special delimiter C<m''>:
         print if m'@pattern';  # matches literal '@pattern', not 'Seuss'
     }
 
-Similar to strings, C<m''> acts like apostrophes on a regexp; all other 
+Similar to strings, C<m''> acts like apostrophes on a regexp; all other
 C<m> delimiters act like quotes.  If the regexp evaluates to the empty string,
 the regexp in the I<last successful match> is used instead.  So we have
 
@@ -1747,10 +1748,10 @@ matches.
 =head3 The split function
 
 The C<split()> function is another place where a regexp is used.
-C<split /regexp/, string, limit> separates the C<string> operand into 
-a list of substrings and returns that list.  The regexp must be designed 
+C<split /regexp/, string, limit> separates the C<string> operand into
+a list of substrings and returns that list.  The regexp must be designed
 to match whatever constitutes the separators for the desired substrings.
-The C<limit>, if present, constrains splitting into no more than C<limit> 
+The C<limit>, if present, constrains splitting into no more than C<limit>
 number of strings.  For example, to split a string into words, use
 
     $x = "Calvin and Hobbes";
@@ -1806,7 +1807,7 @@ haven't covered yet.
 
 There are several escape sequences that convert characters or strings
 between upper and lower case, and they are also available within
-patterns.  C<\l> and C<\u> convert the next character to lower or 
+patterns.  C<\l> and C<\u> convert the next character to lower or
 upper case, respectively:
 
     $x = "perl";
@@ -1940,7 +1941,7 @@ For the full list see L<perlunicode>.
 The Unicode has also been separated into various sets of characters
 which you can test with C<\p{...}> (in) and C<\P{...}> (not in).
 To test whether a character is (or is not) an element of a script
-you would use the script name, for example C<\p{Latin}>, C<\p{Greek}>, 
+you would use the script name, for example C<\p{Latin}>, C<\p{Greek}>,
 or C<\P{Katakana}>. Other sets are the Unicode blocks, the names
 of which begin with "In". One such block is dedicated to mathematical
 operators, and its pattern formula is <C\p{InMathematicalOperators>}>.
@@ -2048,10 +2049,10 @@ flexibility without sacrificing speed.
 
 Backtracking is more efficient than repeated tries with different regular
 expressions.  If there are several regular expressions and a match with
-any of them is acceptable, then it is possible to combine them into a set 
+any of them is acceptable, then it is possible to combine them into a set
 of alternatives.  If the individual expressions are input data, this
-can be done by programming a join operation.  We'll exploit this idea in 
-an improved version of the C<simple_grep> program: a program that matches 
+can be done by programming a join operation.  We'll exploit this idea in
+an improved version of the C<simple_grep> program: a program that matches
 multiple patterns:
 
     % cat > multi_grep
@@ -2075,9 +2076,9 @@ multiple patterns:
 Sometimes it is advantageous to construct a pattern from the I<input>
 that is to be analyzed and use the permissible values on the left
 hand side of the matching operations.  As an example for this somewhat
-paradoxical situation, let's assume that our input contains a command 
+paradoxical situation, let's assume that our input contains a command
 verb which should match one out of a set of available command verbs,
-with the additional twist that commands may be abbreviated as long as 
+with the additional twist that commands may be abbreviated as long as
 the given string is unique. The program below demonstrates the basic
 algorithm.
 
@@ -2106,12 +2107,11 @@ algorithm.
 
 Rather than trying to match the input against the keywords, we match the
 combined set of keywords against the input.  The pattern matching
-operation S<C<$kwds =~ /\b($command\w*)/g>> does several things at the 
-same time. It makes sure that the given command begins where a keyword 
-begins (C<\b>). It tolerates abbreviations due to the added C<\w*>. It 
-tells us the number of matches (C<scalar @matches>) and all the keywords 
+operation S<C<$kwds =~ /\b($command\w*)/g>> does several things at the
+same time. It makes sure that the given command begins where a keyword
+begins (C<\b>). It tolerates abbreviations due to the added C<\w*>. It
+tells us the number of matches (C<scalar @matches>) and all the keywords
 that were actually matched.  You could hardly ask for more.
- 
 
 =head2 Embedding comments and modifiers in a regular expression
 
@@ -2133,7 +2133,7 @@ example is
 This style of commenting has been largely superseded by the raw,
 freeform commenting that is allowed with the C<//x> modifier.
 
-The modifiers C<//i>, C<//m>, C<//s>, C<//x> and C<//k> (or any 
+The modifiers C<//i>, C<//m>, C<//s>, C<//x> and C<//k> (or any
 combination thereof) can also embedded in
 a regexp using C<(?i)>, C<(?m)>, C<(?s)>, and C<(?x)>.  For instance,
 
@@ -2190,7 +2190,7 @@ characters (advance the character position) if they match.  The examples
 we have seen so far are the anchors.  The anchor C<^> matches the
 beginning of the line, but doesn't eat any characters.  Similarly, the
 word boundary anchor C<\b> matches wherever a character matching C<\w>
-is next to a character that doesn't, but it doesn't eat up any 
+is next to a character that doesn't, but it doesn't eat up any
 characters itself.  Anchors are examples of I<zero-width assertions>.
 Zero-width, because they consume
 no characters, and assertions, because they test some property of the
@@ -2340,7 +2340,7 @@ integer in parentheses C<(integer)>.  It is true if the corresponding
 backreference C<\integer> matched earlier in the regexp.  The same
 thing can be done with a name associated with a capture buffer, written
 as C<< (<name>) >> or C<< ('name') >>.  The second form is a bare
-zero width assertion C<(?...)>, either a lookahead, a lookbehind, or a 
+zero width assertion C<(?...)>, either a lookahead, a lookbehind, or a
 code assertion (discussed in the next section).  The third set of forms
 provides tests that return true if the expression is executed within
 a recursion (C<(R)>) or is being called from some capturing group,
@@ -2391,7 +2391,7 @@ group at the end of the pattern contains their definition.  Notice
 that the decimal fraction pattern is the first place where we can
 reuse the integer pattern.
 
-   /^ (?&osg)\ * ( (?&int)(?&dec)? | (?&dec) ) 
+   /^ (?&osg)\ * ( (?&int)(?&dec)? | (?&dec) )
       (?: [eE](?&osg)(?&int) )?
     $
     (?(DEFINE)
@@ -2406,7 +2406,7 @@ reuse the integer pattern.
 This feature (introduced in Perl 5.10) significantly extends the
 power of Perl's pattern matching.  By referring to some other
 capture group anywhere in the pattern with the construct
-C<(?group-ref)>, the I<pattern> within the referenced group is used 
+C<(?group-ref)>, the I<pattern> within the referenced group is used
 as an independent subpattern in place of the group reference itself.
 Because the group reference may be contained I<within> the group it
 refers to, it is now possible to apply pattern matching to tasks that
@@ -2444,7 +2444,7 @@ arbitrary Perl code to be a part of a regexp.  A code evaluation
 expression is denoted C<(?{code})>, with I<code> a string of Perl
 statements.
 
-Be warned that this feature is considered experimental, and may be 
+Be warned that this feature is considered experimental, and may be
 changed without notice.
 
 Code expressions are zero-width assertions, and the value they return
@@ -2658,7 +2658,7 @@ The regexp without the C<//x> modifier is
     /^1(?:((??{ $z0 }))1(?{ $z0 = $z1; $z1 .= $^N; }))+$/
 
 which shows that spaces are still possible in the code parts. Nevertheless,
-when working with code and conditional expressions, the extended form of 
+when working with code and conditional expressions, the extended form of
 regexps is almost necessary in creating and debugging regexps.
 
 
@@ -2676,9 +2676,9 @@ Below is just one example, illustrating the control verb C<(*FAIL)>,
 which may be abbreviated as C<(*F)>. If this is inserted in a regexp
 it will cause to fail, just like at some mismatch between the pattern
 and the string. Processing of the regexp continues like after any "normal"
-failure, so that, for instance, the next position in the string or another 
-alternative will be tried. As failing to match doesn't preserve capture 
-buffers or produce results, it may be necessary to use this in 
+failure, so that, for instance, the next position in the string or another
+alternative will be tried. As failing to match doesn't preserve capture
+buffers or produce results, it may be necessary to use this in
 combination with embedded code.
 
    %count = ();
@@ -2686,11 +2686,11 @@ combination with embedded code.
        /([aeiou])(?{ $count{$1}++; })(*FAIL)/oi;
    printf "%3d '%s'\n", $count{$_}, $_ for (sort keys %count);
 
-The pattern begins with a class matching a subset of letters.  Whenever 
-this matches, a statement like C<$count{'a'}++;> is executed, incrementing 
-the letter's counter. Then C<(*FAIL)> does what it says, and 
-the regexp  engine proceeds according to the book: as long as the end of 
-the string  hasn't been reached, the position is advanced before looking 
+The pattern begins with a class matching a subset of letters.  Whenever
+this matches, a statement like C<$count{'a'}++;> is executed, incrementing
+the letter's counter. Then C<(*FAIL)> does what it says, and
+the regexp  engine proceeds according to the book: as long as the end of
+the string  hasn't been reached, the position is advanced before looking
 for another vowel. Thus, match or no match makes no difference, and the
 regexp engine proceeds until the the entire string has been inspected.
 (It's remarkable that an alternative solution using something like

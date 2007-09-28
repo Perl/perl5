@@ -3574,7 +3574,7 @@ a reference count of other than 1.
 
 (F) You used C<\g0> or similar in a regular expression. You may refer to
 capturing parentheses only with strictly positive integers (normal
-backreferences) or with stricly negative integers (relative
+backreferences) or with strictly negative integers (relative
 backreferences), but using 0 does not make sense.
 
 =item Reference to nonexistent group in regex; marked by <-- HERE in m/%s/
@@ -4765,7 +4765,7 @@ to be huge numbers, and so usually indicates programmer error.
 If you really do mean it, explicitly numify your reference, like so:
 C<$array[0+$ref]>.  This warning is not given for overloaded objects,
 either, because you can overload the numification and stringification
-operators and then you assumedly know what you are doing.
+operators and then you assumably know what you are doing.
 
 =item Use of reserved word "%s" is deprecated
 

@@ -798,7 +798,7 @@ enclose" (like these parentheses are doing).
 Deprecated modules and features are those which were part of a stable
 release, but later found to be subtly flawed, and which should be avoided.
 They are subject to removal and/or bug-incompatible reimplementation in
-the next major release (but they will be preserved through maintainance
+the next major release (but they will be preserved through maintenance
 releases).  Deprecation warnings are issued under B<-w> or C<use
 diagnostics>, and notices are found in L<perldelta>s, as well as various
 other PODs. Coding practices that misuse features, such as C<my $foo if
@@ -1592,7 +1592,7 @@ hold, not to be confused with an L</NV>.
 
 "Just Another Perl Hacker," a clever but cryptic bit of Perl code that
 when executed, evaluates to that string.  Often used to illustrate a
-particular Perl feature, and something of an ungoing Obfuscated Perl
+particular Perl feature, and something of an ongoing Obfuscated Perl
 Contest seen in Usenix signatures.
 
 =back

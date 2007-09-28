@@ -243,12 +243,12 @@ to, 5.9.5.
 
 A new pragma, C<mro> (for Method Resolution Order) has been added. It
 permits to switch, on a per-class basis, the algorithm that perl uses to
-find inherited methods in case of a mutiple inheritance hierachy. The
+find inherited methods in case of a multiple inheritance hierarchy. The
 default MRO hasn't changed (DFS, for Depth First Search). Another MRO is
 available: the C3 algorithm. See L<mro> for more information.
 (Brandon Black)
 
-Note that, due to changes in the implentation of class hierarchy search,
+Note that, due to changes in the implementation of class hierarchy search,
 code that used to undef the C<*ISA> glob will most probably break. Anyway,
 undef'ing C<*ISA> had the side-effect of removing the magic on the @ISA
 array and should not have been done in the first place.

@@ -188,7 +188,7 @@ X<module>
 
 C<do>, C<import>, C<no>, C<package>, C<require>, C<use>
 
-=item Keywords related to classes and object-orientedness
+=item Keywords related to classes and object-orientation
 X<object> X<class> X<package>
 
 C<bless>, C<dbmclose>, C<dbmopen>, C<package>, C<ref>, C<tie>, C<tied>,

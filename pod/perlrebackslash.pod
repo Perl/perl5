@@ -202,7 +202,7 @@ the following rules:
 
 =item 1
 
-If the backslash is followed by a single digit, it's a backrefence.
+If the backslash is followed by a single digit, it's a backreference.
 
 =item 2
 

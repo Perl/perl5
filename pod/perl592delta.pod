@@ -139,7 +139,7 @@ by perl at startup.
 
 =item *
 
-C<encoding::warnings>, by Autrijus Tang, is a module to emit warnings
+C<encoding::warnings>, by Audrey Tang, is a module to emit warnings
 whenever an ASCII character string containing high-bit bytes is implicitly
 converted into UTF-8.
 

@@ -389,7 +389,7 @@ If the C<utf8> pragma is not used but the C<locale> pragma is, the
 classes correlate with the usual isalpha(3) interface (except for
 "word" and "blank").
 
-The assumedly non-obviously named classes are:
+The other named classes are:
 
 =over 4
 
@@ -1386,7 +1386,7 @@ If we add a C<(*PRUNE)> before the count like the following
     print "Count=$count\n";
 
 we prevent backtracking and find the count of the longest matching
-at each matching startpoint like so:
+at each matching starting point like so:
 
     aaab
     aab
@@ -1432,7 +1432,7 @@ outputs
     Count=2
 
 Once the 'aaab' at the start of the string has matched, and the C<(*SKIP)>
-executed, the next startpoint will be where the cursor was when the
+executed, the next starting point will be where the cursor was when the
 C<(*SKIP)> was executed.
 
 =item C<(*MARK:NAME)> C<(*:NAME)>
