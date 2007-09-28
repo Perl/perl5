@@ -246,7 +246,8 @@ sub man3page_name {
   my $self = shift;
 
   my $mpname = $self->SUPER::man3page_name( shift );
-  $mpname =~ s/^$self->manpage_separator//;
+  my $sep = $self->manpage_separator;
+  $mpname =~ s/^$sep//;
   return $mpname;
 }
 

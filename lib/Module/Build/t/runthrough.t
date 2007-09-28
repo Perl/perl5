@@ -83,7 +83,16 @@ eval {$mb->create_build_script};
 is $@, '';
 ok -e $mb->build_script;
 
-is $mb->dist_dir, 'Simple-0.01';
+my $dist_dir = 'Simple-0.01';
+
+# VMS may or may not need to modify the name, vmsify will do this if
+# the name looks like a UNIX directory.
+if ($^O eq 'VMS') {
+   my @dist_dirs = File::Spec->splitdir(VMS::Filespec::vmsify($dist_dir.'/'));
+   $dist_dir = $dist_dirs[0];
+}
+
+is $mb->dist_dir, $dist_dir;
 
 # The 'cleanup' file doesn't exist yet
 ok grep {$_ eq 'before_script'} $mb->cleanup;
@@ -159,12 +168,15 @@ SKIP: {
   ok $scripts->{script};
   
   # Check that a shebang line is rewritten
-  my $blib_script = File::Spec->catdir( qw( blib script script ) );
+  my $blib_script = File::Spec->catfile( qw( blib script script ) );
   ok -e $blib_script;
   
+  SKIP: {
+    skip("We do not rewrite shebang on VMS", 1) if $^O eq 'VMS';
   my $fh = IO::File->new($blib_script);
   my $first_line = <$fh>;
   isnt $first_line, "#!perl -w\n", "should rewrite the shebang line";
+  }
 }
 
 {

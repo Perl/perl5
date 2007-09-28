@@ -102,6 +102,11 @@ my %distro = (
 
 %distro = map {$mb->localize_file_path($_), $distro{$_}} keys %distro;
 
+my $lib_path = $mb->localize_dir_path('lib');
+
+# Remove trailing directory delimiter on VMS for compares
+$lib_path =~ s/\]// if $^O eq 'VMS';
+
 $mb->dispatch('build');
 
 eval {$mb->dispatch('docs')};
@@ -123,7 +128,8 @@ $mb->dispatch('install');
 
 while (my ($from, $v) = each %distro) {
   next unless $v;
-  my $to = File::Spec->catfile($destdir, 'man', $man{($from =~ /^lib/ ? 'dir3' : 'dir1')}, $v);
+  my $to = File::Spec->catfile
+     ($destdir, 'man', $man{($from =~ /^\Q$lib_path\E/ ? 'dir3' : 'dir1')}, $v);
   ok -e $to, "Created $to manpage";
 }
 
