@@ -21,7 +21,12 @@ BEGIN {
 
 use warnings;
 use strict;
-use feature ":5.10";
+BEGIN {
+    # BEGIN block is acutally a subroutine :-)
+    return unless $] > 5.009;
+    require feature;
+    feature->import(':5.10');
+}
 use Test::More tests => 54;
 
 use B::Deparse;
@@ -42,8 +47,29 @@ ok($deparse);
 $/ = "\n####\n";
 while (<DATA>) {
     chomp;
+    # This code is pinched from the t/lib/common.pl for TODO.
+    # It's not clear how to avoid duplication
+    my ($skip, $skip_reason);
+    s/^#\s*SKIP\s*(.*)\n//m and $skip_reason = $1;
+    # If the SKIP reason starts ? then it's taken as a code snippet to evaluate
+    # This provides the flexibility to have conditional SKIPs
+    if ($skip_reason && $skip_reason =~ s/^\?//) {
+	my $temp = eval $skip_reason;
+	if ($@) {
+	    die "# In SKIP code reason:\n# $skip_reason\n$@";
+	}
+	$skip_reason = $temp;
+    }
+
     s/#\s*(.*)$//mg;
     my ($num, $testname) = $1 =~ m/(\d+)\s*(.*)/;
+
+    if ($skip_reason) {
+	# Like this to avoid needing a label SKIP:
+	Test::More->builder->skip($skip_reason);
+	next;
+    }
+
     my ($input, $expected);
     if (/(.*)\n>>>>\n(.*)/s) {
 	($input, $expected) = ($1, $2);
@@ -337,17 +363,21 @@ my $bar;
 # 44
 'Foo'->bar;
 ####
+# SKIP ?$] < 5.010 && "say not implemented on this Perl version"
 # 45 say
 say 'foo';
 ####
+# SKIP ?$] < 5.010 && "state vars not implemented on this Perl version"
 # 46 state vars
 state $x = 42;
 ####
+# SKIP ?$] < 5.010 && "state vars not implemented on this Perl version"
 # 47 state var assignment
 {
     my $y = (state $x = 42);
 }
 ####
+# SKIP ?$] < 5.010 && "state vars not implemented on this Perl version"
 # 48 state vars in anoymous subroutines
 $a = sub {
     state $x;

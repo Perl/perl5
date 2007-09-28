@@ -835,8 +835,11 @@ sub concise_op {
 	$h{arg} = "($label$stash $cseq $loc$arybase)";
 	if ($show_src) {
 	    fill_srclines($pathnm) unless exists $srclines{$pathnm};
-	    $h{src} = "$ln: " . ($srclines{$pathnm}[$ln]
-				 // "-src unavailable under -e");
+	    # Would love to retain Jim's use of // but this code needs to be
+	    # portable to 5.8.x
+	    my $line = $srclines{$pathnm}[$ln];
+	    $line = "-src unavailable under -e" unless defined $line;
+	    $h{src} = "$ln: $line";
 	}
     } elsif ($h{class} eq "LOOP") {
 	$h{arg} = "(next->" . seq($op->nextop) . " last->" . seq($op->lastop)

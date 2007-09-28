@@ -1408,7 +1408,9 @@ sub pp_nextstate {
     }
 
     # hack to check that the hint hash hasn't changed
-    if ("@{[sort %{$self->{'hinthash'} || {}}]}" ne "@{[sort %{$op->hints_hash->HASH || {}}]}") {
+    if ($] > 5.009 &&
+	"@{[sort %{$self->{'hinthash'} || {}}]}"
+	ne "@{[sort %{$op->hints_hash->HASH || {}}]}") {
 	push @text, declare_hinthash($self->{'hinthash'}, $op->hints_hash->HASH, $self->{indent_size});
 	$self->{'hinthash'} = $op->hints_hash->HASH;
     }
