@@ -61,7 +61,7 @@ Perl_mro_meta_init(pTHX_ HV* stash)
     HvAUX(stash)->xhv_mro_meta = newmeta;
     newmeta->cache_gen = 1;
     newmeta->pkg_gen = 1;
-    newmeta->mro_which = (void *) mros;
+    newmeta->mro_which = mros;
 
     return newmeta;
 }
