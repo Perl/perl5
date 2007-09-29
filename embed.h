@@ -3087,7 +3087,9 @@
 #define share_hek(a,b,c)	Perl_share_hek(aTHX_ a,b,c)
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 #ifdef PERL_CORE
+#define sighandler		Perl_sighandler
 #endif
+#define csighandler		Perl_csighandler
 #else
 #ifdef PERL_CORE
 #define sighandler		Perl_sighandler

@@ -795,8 +795,8 @@ p	|I32	|setenv_getix	|NN const char* nam
 EXp	|void	|setdefout	|NULLOK GV* gv
 Ap	|HEK*	|share_hek	|NN const char* str|I32 len|U32 hash
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-np	|Signal_t |sighandler	|int sig|...
-Anp	|Signal_t |csighandler	|int sig|...
+np	|Signal_t |sighandler	|int sig|NULLOK siginfo_t *info|NULLOK void *uap
+Anp	|Signal_t |csighandler	|int sig|NULLOK siginfo_t *info|NULLOK void *uap
 #else
 np	|Signal_t |sighandler	|int sig
 Anp	|Signal_t |csighandler	|int sig

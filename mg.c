@@ -56,7 +56,7 @@ tie.
 #endif
 
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-Signal_t Perl_csighandler(int sig, ...);
+Signal_t Perl_csighandler(int sig, siginfo_t *, void *);
 #else
 Signal_t Perl_csighandler(int sig);
 #endif
@@ -1307,7 +1307,7 @@ S_raise_signal(pTHX_ int sig)
 
 Signal_t
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-Perl_csighandler(int sig, ...)
+Perl_csighandler(int sig, siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSED_DECL)
 #else
 Perl_csighandler(int sig)
 #endif
@@ -1318,7 +1318,6 @@ Perl_csighandler(int sig)
     dTHX;
 #endif
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-   va_list args;
 #endif
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
     (void) rsignal(sig, PL_csighandlerp);
@@ -1333,7 +1332,6 @@ Perl_csighandler(int sig)
 #endif
 #endif
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-   va_start(args, sig);
 #endif
    if (
 #ifdef SIGILL
@@ -1352,7 +1350,6 @@ Perl_csighandler(int sig)
    else
 	S_raise_signal(aTHX_ sig);
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-   va_end(args);
 #endif
 }
 
@@ -2778,7 +2775,7 @@ Perl_whichsig(pTHX_ const char *sig)
 
 Signal_t
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-Perl_sighandler(int sig, ...)
+Perl_sighandler(int sig, siginfo_t *sip, void *uap PERL_UNUSED_DECL)
 #else
 Perl_sighandler(int sig)
 #endif
@@ -2856,11 +2853,6 @@ Perl_sighandler(int sig)
 	 struct sigaction oact;
 
 	 if (sigaction(sig, 0, &oact) == 0 && oact.sa_flags & SA_SIGINFO) {
-	      siginfo_t *sip;
-	      va_list args;
-
-	      va_start(args, sig);
-	      sip = (siginfo_t*)va_arg(args, siginfo_t*);
 	      if (sip) {
 		   HV *sih = newHV();
 		   SV *rv  = newRV_noinc((SV*)sih);
@@ -2881,7 +2873,6 @@ Perl_sighandler(int sig)
 		   PUSHs(newSVpv((char *)sip, sizeof(*sip)));
 	      }
 
-              va_end(args);
 	 }
     }
 #endif
