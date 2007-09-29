@@ -2247,7 +2247,7 @@ sub process_support_files {
   
   push @{$p->{include_dirs}}, $p->{c_source};
   
-  my $files = $self->rscan_dir($p->{c_source}, qr('\.c(pp)?$'));
+  my $files = $self->rscan_dir($p->{c_source}, file_qr('\.c(pp)?$'));
   foreach my $file (@$files) {
     push @{$p->{objects}}, $self->compile_c($file);
   }
