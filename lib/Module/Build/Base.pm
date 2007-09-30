@@ -1651,7 +1651,7 @@ sub read_args {
   # De-tilde-ify any path parameters
   for my $key (qw(prefix install_base destdir)) {
     next if !defined $args{$key};
-    $args{$key} = _detildefy($args{$key});
+    $args{$key} = $self->_detildefy($args{$key});
   }
 
   for my $key (qw(install_path)) {
@@ -1659,7 +1659,7 @@ sub read_args {
 
     for my $subkey (keys %{$args{$key}}) {
       next if !defined $args{$key}{$subkey};
-      my $subkey_ext = _detildefy($args{$key}{$subkey});
+      my $subkey_ext = $self->_detildefy($args{$key}{$subkey});
       if ( $subkey eq 'html' ) { # translate for compatability
 	$args{$key}{binhtml} = $subkey_ext;
 	$args{$key}{libhtml} = $subkey_ext;
@@ -1681,7 +1681,7 @@ sub read_args {
 # (bash shell won't expand tildes mid-word: "--foo=~/thing")
 # TODO: handle ~user/foo
 sub _detildefy {
-    my $arg = shift;
+    my ($self, $arg) = @_;
 
     return $arg =~ /^~/ ? (glob $arg)[0] : $arg;
 }
