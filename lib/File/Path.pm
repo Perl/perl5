@@ -6,8 +6,8 @@ File::Path - Create or remove directory trees
 
 =head1 VERSION
 
-This document describes version 2.00_12 of File::Path, released
-2007-09-17.
+This document describes version 2.01 of File::Path, released
+2007-09-29.
 
 =head1 SYNOPSIS
 
@@ -93,11 +93,14 @@ in an C<eval> block.
 If present, will cause C<rmtree> to print the name of each file as
 it is unlinked. By default nothing is printed.
 
-=item skip_others
+=item safe
 
 When set to a true value, will cause C<rmtree> to skip the files
 for which the process lacks the required privileges needed to delete
-files, such as delete privileges on VMS.
+files, such as delete privileges on VMS. In other words, the code
+will make no attempt to alter file permissions. Thus, if the process
+is interrupted, no filesystem object will be left in a more
+permissive mode.
 
 =item keep_root
 
@@ -316,7 +319,7 @@ See the following pages for more information:
   http://www.nntp.perl.org/group/perl.perl5.porters/2005/01/msg97623.html
   http://www.debian.org/security/2005/dsa-696
 
-Additionally, unless the C<skip_others> parameter is set (or the
+Additionally, unless the C<safe> parameter is set (or the
 third parameter in the traditional interface is TRUE), should a
 C<rmtree> be interrupted, files that were originally in read-only
 mode may now have their permissions set to a read-write (or "delete
@@ -522,7 +525,7 @@ BEGIN {
 
 use Exporter ();
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '2.00_11';
+$VERSION = '2.01';
 @ISA     = qw(Exporter);
 @EXPORT  = qw(mkpath rmtree);
 
