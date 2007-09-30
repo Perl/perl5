@@ -7346,6 +7346,56 @@ S_reset_amagic(pTHX_ SV *rv, const bool on) {
 	return;
     }
 
+    /* References to objects may be via RVs, or anything else that can hold
+       a reference count (AVs, HVs, GVs, and arbitrary C code)
+       Object-ness can only be accessed via true RVs, including the overloading
+       part of object-ness, so for that part it doesn't matter that the
+       overloading flag (pre 5.10) is on the reference. But the overloading
+       mechanism itself checks the referent, the object itself, hence they
+       can get out of sync.
+
+       We'll assume two common cases - either we got here through a real
+       reference, and the referent is a value in the pad of the current
+       subroutine (hence a reference count of 2 or more), during construction
+       of the reference, or that there is a second (or more) reference to
+       the object (but no arrays, hashes, pads, typeglobs or other things)
+       pointing to it.
+
+       The first case is likely to involve quite a small search.
+       The second case is O(n) on the number of SVs, but we can make it
+       terminate early if we find every reference is accounted for by an RV.
+       [Terminating early is still O(n), but with a smaller constant.]
+    */
+    {
+	/* So before trying the large O(n) linear search of all SVs, start by
+	   seeing if we can find the other references in the current pad.
+	   This avoids the big search for constructions such as
+	   my $string = ...;
+	   my $obj = bless \$string, $class;
+	   which modules like URI use.  */
+
+	U32 how_many_in_pad = how_many;
+	CV *const current_sub = find_runcv(NULL);
+	AV *const padlist = CvPADLIST(current_sub);
+	AV *const curpad = (AV*) AvARRAY(padlist)[CvDEPTH(current_sub)];
+	SV ** const start = AvARRAY(curpad);
+	SV ** end = start + AvFILLp(curpad);
+
+	while (end >= start) {
+	    SV *const sv = *end--;
+	    if (sv == target) {
+		if (--how_many_in_pad == 0) {
+		    /* We have found them all.  */
+		    return;
+		}
+	    }
+	}
+    }
+
+    /* Right, didn't find all the other referneces were lexicals or temporaries
+       in the pad, so need to do an exhaustive search to find all references.
+    */
+
     for (sva = PL_sv_arenaroot; sva; sva = (SV*)SvANY(sva)) {
 	register const SV * const svend = &sva[SvREFCNT(sva)];
 	register SV* sv;
@@ -7366,6 +7416,10 @@ S_reset_amagic(pTHX_ SV *rv, const bool on) {
 	    }
 	}
     }
+
+    /* Can get here if the object happens to be lexical somewhere else, a
+       global, an element in an array or hash, etc. But we will have found all
+       the references.  */
 }
 
 /*
