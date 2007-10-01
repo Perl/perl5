@@ -342,8 +342,6 @@ STARTOBJS  = $(CECONSOLEDIR)/$(MACHINE)/wmain.obj \
 CEDEFS    = -D_WINDOWS -D_WIN32_WCE=$(CEVersion) -DUNDER_CE=$(CEVersion) \
             $(MCFLAGS) -D PERL
 
-#CEDEFS    = $(CEDEFS) -DDEBUGGING_OPS
-
 CECFLAGS  = $(CEDEFS)
 
 !if "$(CFG)" == "DEBUG"
