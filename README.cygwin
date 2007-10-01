@@ -514,14 +514,15 @@ the first is always "binmode" or "textmode".
   system|user,binmode|textmode,exec,cygexec,cygdrive,mixed,
   notexec,managed,nosuid,devfs,proc,noumount
 
-If the argument is "/cygdrive", just the volume mount settings are returned.
+If the argument is "/cygdrive", then just the volume mount settings,
+and the cygdrive mount prefix are returned.
 
 User mounts override system mounts.
 
   $ perl -e 'print Cygwin::mount_flags "/usr/bin"'
   system,binmode,cygexec
   $ perl -e 'print Cygwin::mount_flags "/cygdrive"'
-  binmode,cygdrive
+  binmode,cygdrive,/cygdrive
 
 =item C<Cygwin::is_binmount>
 

@@ -9,7 +9,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 14;
+use Test::More tests => 16;
 
 is(Cygwin::winpid_to_pid(Cygwin::pid_to_winpid($$)), $$,
    "perl pid translates to itself");
@@ -50,6 +50,17 @@ is(Cygwin::is_binmount("/"),  $binmode ? 1 : '', "check / for binmount");
 my $rootmnt = Cygwin::mount_flags("/");
 ok($binmode ? ($rootmnt =~ /,binmode/) : ($rootmnt =~ /,textmode/), "check / mount_flags");
 is(Cygwin::mount_flags("/cygdrive") =~ /,cygdrive/,  1, "check cygdrive mount_flags");
+
+# Cygdrive mount prefix
+my @flags = split(/,/, Cygwin::mount_flags('/cygdrive'));
+my $prefix = pop(@flags);
+ok($prefix, "cygdrive mount prefix = " . (($prefix) ? $prefix : '<none>'));
+chomp(my $prefix2 = `df | grep -i '^c: ' | cut -d% -f2 | xargs`);
+$prefix2 =~ s/\/c$//i;
+if (! $prefix2) {
+    $prefix2 = '/';
+}
+is($prefix, $prefix2, 'cygdrive mount prefix');
 
 my @mnttbl = Cygwin::mount_table();
 ok(@mnttbl > 0, "non empty mount_table");

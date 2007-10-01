@@ -4,7 +4,7 @@ use strict;
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '1.1_02';
+$VERSION = '1.1_03';
 
 @ISA = qw(File::Spec::Unix);
 
@@ -112,7 +112,18 @@ sub case_tolerant () {
   if ($^O ne 'cygwin') {
     return 1;
   }
-  my $drive = shift || "/cygdrive/c";
+  my $drive = shift;
+  if (! $drive) {
+      my @flags = split(/,/, Cygwin::mount_flags('/cygwin'));
+      my $prefix = pop(@flags);
+      if (! $prefix || $prefix eq 'cygdrive') {
+          $drive = '/cygdrive/c';
+      } elsif ($prefix eq '/') {
+          $drive = '/c';
+      } else {
+          $drive = "$prefix/c";
+      }
+  }
   my $mntopts = Cygwin::mount_flags($drive);
   if ($mntopts and ($mntopts =~ /,managed/)) {
     return 0;
