@@ -3637,10 +3637,10 @@ sub sub {
 		print "creating new thread\n"; 
 	}
 
-    # If the last ten characters are C'::AUTOLOAD', note we've traced
+    # If the last ten characters are '::AUTOLOAD', note we've traced
     # into AUTOLOAD for $sub.
     if ( length($sub) > 10 && substr( $sub, -10, 10 ) eq '::AUTOLOAD' ) {
-        $al = " for $$sub";
+        $al = " for $$sub" if defined $$sub;
     }
 
     # We stack the stack pointer and then increment it to protect us
