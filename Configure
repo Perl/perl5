@@ -4203,13 +4203,47 @@ do set $yyy; var=$2; eval "was=\$$2";
 	set $yyy; shift; shift; yyy=$@;
 done'
 
-: see if this is a malloc.h system
-set malloc.h i_malloc
-eval $inhdr
+
+: define a shorthand compile call
+compile='
+mc_file=$1;
+shift;
+$cc $optimize $ccflags $ldflags -o ${mc_file} $* ${mc_file}.c $libs > /dev/null 2>&1;'
+: define a shorthand compile call for compilations that should be ok.
+compile_ok='
+mc_file=$1;
+shift;
+$cc $optimize $ccflags $ldflags -o ${mc_file} $* ${mc_file}.c $libs;'
+
+rm_try="$rm -f try try$_exe a.out .out try.[cho] try.$_o core core.try* try.core*"
 
 : see if stdlib is available
 set stdlib.h i_stdlib
 eval $inhdr
+
+: see if this is a malloc.h system
+: we want a real compile instead of Inhdr because some systems have a
+: malloc.h that just gives a compile error saying to use stdlib.h instead
+echo " "
+$cat >try.c <<EOCP
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#include <malloc.h>
+int main () { return 0; }
+EOCP
+set try
+if eval $compile; then
+    echo "<malloc.h> found." >&4
+    val="$define"
+else
+    echo "<malloc.h> NOT found." >&4
+    val="$undef"
+fi
+$rm_try
+set i_malloc
+eval $setvar
 
 : determine which malloc to compile in
 echo " "
@@ -4267,7 +4301,7 @@ void free();
 END
 case "$malloctype" in
 '')
-	if $cc $ccflags -c -DTRY_MALLOC malloc.c >/dev/null 2>&1; then
+	if $cc $ccflags -c -DTRY_MALLOC malloc.c ; then
 		malloctype='void *'
 	else
 		malloctype='char *'
@@ -4383,16 +4417,6 @@ fi
 set installusrbinperl
 eval $setvar
 
-: define a shorthand compile call
-compile='
-mc_file=$1;
-shift;
-$cc $optimize $ccflags $ldflags -o ${mc_file} $* ${mc_file}.c $libs > /dev/null 2>&1;'
-: define a shorthand compile call for compilations that should be ok.
-compile_ok='
-mc_file=$1;
-shift;
-$cc $optimize $ccflags $ldflags -o ${mc_file} $* ${mc_file}.c $libs;'
 
 echo " "
 echo "Checking for GNU C Library..." >&4

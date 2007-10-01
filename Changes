@@ -80,6 +80,18 @@ Version 5.005_04        Fourth maintenance release of 5.005
 
 
 ____________________________________________________________________________
+[      ] By: acme                                  on 2007/09/01  19:31:20
+        Log: For newer FreeBSDs the return type of malloc() and free()
+             is being guessed wrong because the 5.005 configure doesn't
+             check that if the malloc.h exists that it doesn't simply do 
+             "#error ..." as it does in a number of more recent OS - 
+             I've copied in the test from the blead Configure and
+             jiggled a few things around and all is hunk-dory - with 
+             this everything compiles and tests fine on 
+             FreeBSD 6.2-RELEASE-p4 (Thanks to Jonathan Stowe)
+     Branch: maint-5.005/perl
+           ! Configure
+____________________________________________________________________________
 [      ] By: acme                                  on 2007/06/10  16:14:49
         Log: Fix line endings on Windows files
      Branch: maint-5.005/perl
