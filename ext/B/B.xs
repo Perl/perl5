@@ -1728,9 +1728,13 @@ B::GV
 IoBOTTOM_GV(io)
 	B::IO	io
 
+#if PERL_VERSION <= 8
+
 short
 IoSUBPROCESS(io)
 	B::IO	io
+
+#endif
 
 bool
 IsSTD(io,name)
