@@ -100,7 +100,7 @@ Base class package "$base" is empty.
     or make that module available in \@INC (\@INC contains: @INC).
 ERROR
                 }
-                $sigdie = $SIG{__DIE__};
+                $sigdie = $SIG{__DIE__} || undef;
             }
             # Make sure a global $SIG{__DIE__} makes it out of the localization.
             $SIG{__DIE__} = $sigdie if defined $sigdie;
