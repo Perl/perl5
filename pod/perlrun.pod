@@ -280,7 +280,7 @@ An alternate delimiter may be specified using B<-F>.
 =item B<-C [I<number/list>]>
 X<-C>
 
-The C<-C> flag controls some Unicode of the Perl Unicode features.
+The C<-C> flag controls some of the Perl Unicode features.
 
 As of 5.8.1, the C<-C> can be followed either by a number or a list
 of option letters.  The letters, their numeric values, and effects
