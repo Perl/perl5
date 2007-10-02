@@ -3,6 +3,17 @@ type: map
 mapping:
   comment:
     type: text
+  depends:
+    type: map
+    mapping:
+      configure_requires:
+        &requires_common
+        type: map
+        mapping:
+          =:
+            type: text
+      build_requires: *requires_common
+      requires:       *requires_common
   match:
     type: map
     mapping:
@@ -46,6 +57,8 @@ mapping:
               - anyorder
           timeout:
             type: number
+          reuse:
+            type: int
           talk:
             type: seq
             sequence:

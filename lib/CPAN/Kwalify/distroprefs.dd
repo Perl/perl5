@@ -11,6 +11,21 @@ $VAR1 = {
       },
       "type" => "map"
     },
+    "depends" => {
+      "mapping" => {
+        "build_requires" => {
+          "mapping" => {
+            "=" => {
+              "type" => "text"
+            }
+          },
+          "type" => "map"
+        },
+        "configure_requires" => {},
+        "requires" => {}
+      },
+      "type" => "map"
+    },
     "disabled" => {
       "enum" => [
         0,
@@ -42,6 +57,9 @@ $VAR1 = {
                 "anyorder"
               ],
               "type" => "text"
+            },
+            "reuse" => {
+              "type" => "int"
             },
             "talk" => {
               "sequence" => [
@@ -112,6 +130,8 @@ $VAR1 = {
   },
   "type" => "map"
 };
+$VAR1->{"mapping"}{"depends"}{"mapping"}{"configure_requires"} = $VAR1->{"mapping"}{"depends"}{"mapping"}{"build_requires"};
+$VAR1->{"mapping"}{"depends"}{"mapping"}{"requires"} = $VAR1->{"mapping"}{"depends"}{"mapping"}{"build_requires"};
 $VAR1->{"mapping"}{"make"} = $VAR1->{"mapping"}{"install"};
 $VAR1->{"mapping"}{"pl"} = $VAR1->{"mapping"}{"install"};
 $VAR1->{"mapping"}{"test"} = $VAR1->{"mapping"}{"install"};

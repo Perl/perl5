@@ -1559,8 +1559,10 @@ lib/Config.t			See if Config works
 lib/constant.pm			For "use constant"
 lib/constant.t			See if compile-time constants work
 lib/CORE.pod			document the CORE namespace
+lib/CPAN/API/HOWTO.pm		recipe book for programming with CPAN.pm
 lib/CPAN/bin/cpan		easily interact with CPAN from the command line
 lib/CPAN/Debug.pm		helper package for CPAN.pm
+lib/CPAN/DeferedCode.pm		helper package for CPAN.pm
 lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
 lib/CPAN/HandleConfig.pm	helper package for CPAN.pm
 lib/CPAN/Kwalify/distroprefs.dd		helper file for validating config files
@@ -3940,8 +3942,8 @@ utils/h2xs.PL			Program to make .xs files from C header files
 utils/instmodsh.PL		Give information about installed extensions
 utils/libnetcfg.PL		libnet
 utils.lst			Lists utilities bundled with Perl
-utils/Makefile.SH		Extract the utility scripts
 utils/Makefile			Pregenerated from utils/Makefile.SH
+utils/Makefile.SH		Extract the utility scripts
 utils/perlbug.PL		A simple tool to submit a bug report
 utils/perldoc.PL		A simple tool to find & display perl's documentation
 utils/perlivp.PL		installation verification procedure

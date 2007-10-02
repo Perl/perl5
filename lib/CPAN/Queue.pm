@@ -1,6 +1,26 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
-package CPAN::Queue;
 use strict;
+package CPAN::Queue::Item;
+
+# CPAN::Queue::Item::new ;
+sub new {
+    my($class,@attr) = @_;
+    my $self = bless { @attr }, $class;
+    return $self;
+}
+
+sub as_string {
+    my($self) = @_;
+    $self->{qmod};
+}
+
+# r => requires, b => build_requires, c => commandline
+sub reqtype {
+    my($self) = @_;
+    $self->{reqtype};
+}
+
+package CPAN::Queue;
 
 # One use of the queue is to determine if we should or shouldn't
 # announce the availability of a new CPAN module
@@ -45,49 +65,43 @@ use strict;
 # tell the distribution object that it should ask the user before
 # processing. Where would the question be triggered then? Most probably
 # in CPAN::Distribution::rematein.
-# Hope that makes sense, my head is a bit off:-) -- AK
 
 use vars qw{ @All $VERSION };
-$VERSION = sprintf "%.6f", substr(q$Rev: 1704 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 2212 $,4)/1000000 + 5.4;
 
-# CPAN::Queue::new ;
-sub new {
-  my($class,@attr) = @_;
-  my $self = bless { @attr }, $class;
-  push @All, $self;
-  CPAN->debug(sprintf("in new All[%s]",
-                      join("",map {sprintf " %s\[%s]\n",$_->{qmod},$_->{reqtype}} @All),
-                     )) if $CPAN::DEBUG;
-  return $self;
+# CPAN::Queue::queue_item ;
+sub queue_item {
+    my($class,@attr) = @_;
+    my $item = "$class\::Item"->new(@attr);
+    $class->qpush($item);
+    return 1;
+}
+
+# CPAN::Queue::qpush ;
+sub qpush {
+    my($class,$obj) = @_;
+    push @All, $obj;
+    CPAN->debug(sprintf("in new All[%s]",
+                        join("",map {sprintf " %s\[%s]\n",$_->{qmod},$_->{reqtype}} @All),
+                       )) if $CPAN::DEBUG;
 }
 
 # CPAN::Queue::first ;
 sub first {
-  my $obj = $All[0];
-  $obj;
-}
-
-sub as_string {
-  my($self) = @_;
-  $self->{qmod};
-}
-
-# r => requires, b => build_requires, c => commandline
-sub reqtype {
-  my($self) = @_;
-  $self->{reqtype};
+    my $obj = $All[0];
+    $obj;
 }
 
 # CPAN::Queue::delete_first ;
 sub delete_first {
-  my($class,$what) = @_;
-  my $i;
-  for my $i (0..$#All) {
-    if (  $All[$i]->{qmod} eq $what ) {
-      splice @All, $i, 1;
-      return;
+    my($class,$what) = @_;
+    my $i;
+    for my $i (0..$#All) {
+        if (  $All[$i]->{qmod} eq $what ) {
+            splice @All, $i, 1;
+            return;
+        }
     }
-  }
 }
 
 # CPAN::Queue::jumpqueue ;
@@ -95,17 +109,17 @@ sub jumpqueue {
     my $class = shift;
     my @what = @_;
     CPAN->debug(sprintf("before jumpqueue All[%s] what[%s]",
-                        join("",map {sprintf " %s\[%s]\n",$_->{qmod},$_->{reqtype}} @All),
-                        join("",map {sprintf " %s\[%s]",$_->[0],$_->[1]} @what)
-                       )) if $CPAN::DEBUG;
-    unless (defined $what[0][1]) {
+                        join("",
+                             map {sprintf " %s\[%s]\n",$_->{qmod},$_->{reqtype}} @All, @what
+                            ))) if $CPAN::DEBUG;
+    unless (defined $what[0]{reqtype}) {
         # apparently it was not the Shell that sent us this enquiry,
         # treat it as commandline
-        $what[0][1] = "c";
-     }
-    my $inherit_reqtype = $what[0][1] =~ /^(c|r)$/ ? "r" : "b";
+        $what[0]{reqtype} = "c";
+    }
+    my $inherit_reqtype = $what[0]{reqtype} =~ /^(c|r)$/ ? "r" : "b";
   WHAT: for my $what_tuple (@what) {
-        my($what,$reqtype) = @$what_tuple;
+        my($what,$reqtype) = @$what_tuple{qw(qmod reqtype)};
         if ($reqtype eq "r"
             &&
             $inherit_reqtype eq "b"
@@ -115,24 +129,27 @@ sub jumpqueue {
         my $jumped = 0;
         for (my $i=0; $i<$#All;$i++) { #prevent deep recursion
             # CPAN->debug("i[$i]this[$All[$i]{qmod}]what[$what]") if $CPAN::DEBUG;
-            if ($All[$i]{qmod} eq $what){
+            if ($All[$i]{qmod} eq $what) {
                 $jumped++;
-                if ($jumped > 25) { # one's OK if e.g. just processing
+                if ($jumped >= 50) {
+                    die "PANIC: object[$what] 50 instances on the queue, looks like ".
+                        "some recursiveness has hit";
+                } elsif ($jumped > 25) { # one's OK if e.g. just processing
                                     # now; more are OK if user typed
                                     # it several times
                     my $sleep = sprintf "%.1f", $jumped/10;
                     $CPAN::Frontend->mywarn(
 qq{Warning: Object [$what] queued $jumped times, sleeping $sleep secs!\n}
-				 );
+                    );
                     $CPAN::Frontend->mysleep($sleep);
                     # next WHAT;
                 }
             }
         }
-        my $obj = bless {
-                         qmod => $what,
-                         reqtype => $reqtype
-                        }, $class;
+        my $obj = "$class\::Item"->new(
+                                       qmod => $what,
+                                       reqtype => $reqtype
+                                      );
         unshift @All, $obj;
     }
     CPAN->debug(sprintf("after jumpqueue All[%s]",
@@ -142,26 +159,26 @@ qq{Warning: Object [$what] queued $jumped times, sleeping $sleep secs!\n}
 
 # CPAN::Queue::exists ;
 sub exists {
-  my($self,$what) = @_;
-  my @all = map { $_->{qmod} } @All;
-  my $exists = grep { $_->{qmod} eq $what } @All;
-  # warn "in exists what[$what] all[@all] exists[$exists]";
-  $exists;
+    my($self,$what) = @_;
+    my @all = map { $_->{qmod} } @All;
+    my $exists = grep { $_->{qmod} eq $what } @All;
+    # warn "in exists what[$what] all[@all] exists[$exists]";
+    $exists;
 }
 
 # CPAN::Queue::delete ;
 sub delete {
-  my($self,$mod) = @_;
-  @All = grep { $_->{qmod} ne $mod } @All;
-  CPAN->debug(sprintf("after delete mod[%s] All[%s]",
-                      $mod,
-                      join("",map {sprintf " %s\[%s]\n",$_->{qmod},$_->{reqtype}} @All)
-                     )) if $CPAN::DEBUG;
+    my($self,$mod) = @_;
+    @All = grep { $_->{qmod} ne $mod } @All;
+    CPAN->debug(sprintf("after delete mod[%s] All[%s]",
+                        $mod,
+                        join("",map {sprintf " %s\[%s]\n",$_->{qmod},$_->{reqtype}} @All)
+                       )) if $CPAN::DEBUG;
 }
 
 # CPAN::Queue::nullify_queue ;
 sub nullify_queue {
-  @All = ();
+    @All = ();
 }
 
 1;
