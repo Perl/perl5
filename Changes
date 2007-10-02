@@ -80,6 +80,11 @@ Version 5.005_04        Fourth maintenance release of 5.005
 
 
 ____________________________________________________________________________
+[      ] By: acme                                  on 2007/09/01  21:07:49
+        Log: Fix IPC::SysV test under VC++ 6.0 (Thanks to Steve Hay)
+     Branch: maint-5.005/perl
+           ! t/lib/ipc_sysv.t
+____________________________________________________________________________
 [      ] By: acme                                  on 2007/09/01  19:31:20
         Log: For newer FreeBSDs the return type of malloc() and free()
              is being guessed wrong because the 5.005 configure doesn't

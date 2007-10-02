@@ -7,17 +7,19 @@ BEGIN {
     require 'test.pl';
 }
 
-if ($Config{'extensions'} !~ /\bIPC\/SysV\b/) {
-    skip_all('IPC::SysV was not built');
-}
-elsif ($Config{'d_sem'} ne 'define') {
-    skip_all('$Config{d_sem} undefined');
-}
-elsif ($Config{'d_msg'} ne 'define') {
-    skip_all('$Config{d_msg} undefined');
-}
-else {
-    plan( tests => 17 );
+BEGIN {
+    if ($Config{'extensions'} !~ /\bIPC\/SysV\b/) {
+       skip_all('IPC::SysV was not built');
+    }
+    elsif ($Config{'d_sem'} ne 'define') {
+       skip_all('$Config{d_sem} undefined');
+    }
+    elsif ($Config{'d_msg'} ne 'define') {
+       skip_all('$Config{d_msg} undefined');
+    }
+    else {
+       plan( tests => 17 );
+    }
 }
 
 # These constants are common to all tests.
