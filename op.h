@@ -58,7 +58,7 @@
     OP*		(CPERLscope(*op_ppaddr))(pTHX);		\
     MADPROP_IN_BASEOP			\
     PADOFFSET	op_targ;		\
-    unsigned	op_type:9;		\
+    opcode	op_type:9;		\
     unsigned	op_opt:1;		\
     unsigned	op_latefree:1;		\
     unsigned	op_latefreed:1;		\

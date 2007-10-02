@@ -3105,9 +3105,44 @@ PP(pp_require)
 		    SVfARG(vnormal(sv)), SVfARG(vnormal(PL_patchlevel)));
 	}
 	else {
-	    if ( vcmp(sv,PL_patchlevel) > 0 )
-		DIE(aTHX_ "Perl %"SVf" required--this is only %"SVf", stopped",
-		    SVfARG(vnormal(sv)), SVfARG(vnormal(PL_patchlevel)));
+	    if ( vcmp(sv,PL_patchlevel) > 0 ) {
+		I32 first = 0;
+		AV *lav;
+		SV * const req = SvRV(sv);
+		SV * const pv = *hv_fetchs((HV*)req, "original", FALSE);
+
+		/* get the left hand term */
+		lav = (AV *)SvRV(*hv_fetchs((HV*)req, "version", FALSE));
+
+		first  = SvIV(*av_fetch(lav,0,0));
+		if (   first > (int)PERL_REVISION    /* probably 'use 6.0' */
+		    || hv_exists((HV*)req, "qv", 2 ) /* qv style */
+		    || av_len(lav) > 1               /* FP with > 3 digits */
+		    || strstr(SvPVX(pv),".0")        /* FP with leading 0 */
+		   ) {
+		    DIE(aTHX_ "Perl %"SVf" required--this is only "
+		    	"%"SVf", stopped", SVfARG(vnormal(req)),
+			SVfARG(vnormal(PL_patchlevel)));
+		}
+		else { /* probably 'use 5.10' or 'use 5.8' */
+		    SV * hintsv = newSV(0);
+		    I32 second = 0;
+
+		    if (av_len(lav)>=1) 
+			second = SvIV(*av_fetch(lav,1,0));
+
+		    second /= second >= 600  ? 100 : 10;
+		    hintsv = Perl_newSVpvf(aTHX_ "v%d.%d.%d",
+		    	(int)first, (int)second,0);
+		    upg_version(hintsv, TRUE);
+
+		    DIE(aTHX_ "Perl %"SVf" required (did you mean %"SVf"?)"
+		    	"--this is only %"SVf", stopped",
+			SVfARG(vnormal(req)),
+			SVfARG(vnormal(hintsv)),
+			SVfARG(vnormal(PL_patchlevel)));
+		}
+	    }
 	}
 
 	/* If we request a version >= 5.9.5, load feature.pm with the

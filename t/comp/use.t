@@ -6,7 +6,7 @@ BEGIN {
     $INC{"feature.pm"} = 1; # so we don't attempt to load feature.pm
 }
 
-print "1..59\n";
+print "1..63\n";
 
 # Can't require test.pl, as we're testing the use/require mechanism here.
 
@@ -76,6 +76,18 @@ is ($@, '');
 
 eval "no 5.000;";
 like ($@, qr/Perls since v5\.0\.0 too modern--this is \Q$^V\E, stopped/);
+
+eval "use 5.6;";
+like ($@, qr/Perl v5\.600\.0 required \(did you mean v5\.6\.0\?\)--this is only \Q$^V\E, stopped/);
+
+eval "use 5.8;";
+like ($@, qr/Perl v5\.800\.0 required \(did you mean v5\.8\.0\?\)--this is only \Q$^V\E, stopped/);
+
+eval "use 5.9;";
+like ($@, qr/Perl v5\.900\.0 required \(did you mean v5\.9\.0\?\)--this is only \Q$^V\E, stopped/);
+
+eval "use 5.10;";
+like ($@, qr/Perl v5\.100\.0 required \(did you mean v5\.10\.0\?\)--this is only \Q$^V\E, stopped/);
 
 eval sprintf "use %.6f;", $];
 is ($@, '');
