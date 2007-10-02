@@ -5870,7 +5870,7 @@ than the default seed.  Checksumming the compressed output of one or more
 rapidly changing operating system status programs is the usual method.  For
 example:
 
-    srand (time ^ $$ ^ unpack "%L*", `ps axww | gzip`);
+    srand (time ^ $$ ^ unpack "%L*", `ps axww | gzip -f`);
 
 If you're particularly concerned with this, see the C<Math::TrulyRandom>
 module in CPAN.
