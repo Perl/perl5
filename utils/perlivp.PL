@@ -119,7 +119,7 @@ print "## Checking Perl version via variable `\$]'.\n" if $opt{'p'};
 !NO!SUBS!
 
 print OUT <<"!GROK!THIS!";
-my \$ivp_VERSION = $];
+my \$ivp_VERSION = "$]";
 
 !GROK!THIS!
 print OUT <<'!NO!SUBS!';
