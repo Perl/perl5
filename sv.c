@@ -7368,13 +7368,47 @@ S_reset_amagic(pTHX_ SV *rv, const bool on) {
     */
     {
 	/* So before trying the large O(n) linear search of all SVs, start by
-	   seeing if we can find the other references in the current pad.
+	   seeing if we can find the other references as temporaries on the
+	   stack or in the current pad.
+
 	   This avoids the big search for constructions such as
 	   my $string = ...;
 	   my $obj = bless \$string, $class;
 	   which modules like URI use.  */
 
 	U32 how_many_in_pad = how_many;
+
+	{
+	    /* Search the tmps stack */
+	    I32 ix = PL_tmps_ix;
+
+	    while (ix >= 0) {
+		SV *const sv = PL_tmps_stack[ix];
+
+		if (sv == target) {
+		    if (--how_many_in_pad == 0) {
+			/* We have found them all.  */
+			return;
+		    }
+		} else if (SvTYPE(sv) != SVTYPEMASK
+			   && (sv->sv_flags & SVf_ROK) == SVf_ROK
+			   && SvREFCNT(sv)
+			   && SvRV(sv) == target
+			   && sv != rv) {
+		    if (on)
+			SvAMAGIC_on(sv);
+		    else
+			SvAMAGIC_off(sv);
+		    if (--how_many == 0) {
+			/* We have found them all.  */
+			return;
+		    }
+		}
+		--ix;
+	    }
+	}
+
+	{
 	CV *const current_sub = find_runcv(NULL);
 	AV *const padlist = CvPADLIST(current_sub);
 	AV *const curpad = (AV*) AvARRAY(padlist)[CvDEPTH(current_sub)];
@@ -7389,6 +7423,7 @@ S_reset_amagic(pTHX_ SV *rv, const bool on) {
 		    return;
 		}
 	    }
+	}
 	}
     }
 
