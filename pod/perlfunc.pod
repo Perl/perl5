@@ -6853,15 +6853,9 @@ avoided, because it leads to misleading error messages under earlier
 versions of Perl that do not support this syntax.  The equivalent numeric
 version should be used instead.
 
-Alternatively, you can use a numeric version C<use 5.006> followed by a
-v-string version like C<use v5.10.1>, to avoid the unintuitive C<use
-5.010_001>. (older perl versions fail gracefully at the first C<use>,
-later perl versions understand the v-string syntax in the second).
-
     use v5.6.1;		# compile time version check
     use 5.6.1;		# ditto
     use 5.006_001;	# ditto; preferred for backwards compatibility
-    use 5.006; use 5.6.1;	# ditto, for compatibility and readability
 
 This is often useful if you need to check the current Perl version before
 C<use>ing library modules that have changed in incompatible ways from

@@ -3085,18 +3085,11 @@ PP(pp_require)
 
     sv = POPs;
     if ( (SvNIOKp(sv) || SvVOK(sv)) && PL_op->op_type != OP_DOFILE) {
-	if (!PL_v_string_ok && 
-	    SvVOK(sv) && ckWARN(WARN_PORTABLE) )	/* require v5.6.1 */
+	if ( SvVOK(sv) && ckWARN(WARN_PORTABLE) )	/* require v5.6.1 */
 		Perl_warner(aTHX_ packWARN(WARN_PORTABLE),
                         "v-string in use/require non-portable");
 
 	sv = new_version(sv);
-	if (PL_compcv &&
-	    vcmp(sv, sv_2mortal(upg_version(newSVnv(5.006), FALSE))) >= 0)
-		/* version 5.006 recognises 5.x.y in C<use 5.x.y> so
-                   can portably C<use 5.10.0> following C<use 5.006> */
-		    PL_v_string_ok = TRUE;
-
 	if (!sv_derived_from(PL_patchlevel, "version"))
 	    upg_version(PL_patchlevel, TRUE);
 	if (cUNOP->op_first->op_type == OP_CONST && cUNOP->op_first->op_private & OPpCONST_NOVER) {

@@ -240,8 +240,3 @@ use warnings;
     eval 'print $foo';
 }
 EXPECT
-########
-# pp_ctl.c
-use warnings;
-eval 'use 5.006; use 5.10.0';
-EXPECT

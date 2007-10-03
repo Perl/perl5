@@ -278,7 +278,6 @@
 #define PL_sort_RealCmp		(vTHX->Isort_RealCmp)
 #define PL_sortcop		(vTHX->Isortcop)
 #define PL_sortstash		(vTHX->Isortstash)
-#define PL_spare_510		(vTHX->Ispare_510)
 #define PL_splitstr		(vTHX->Isplitstr)
 #define PL_srand_called		(vTHX->Isrand_called)
 #define PL_stack_base		(vTHX->Istack_base)
@@ -346,7 +345,6 @@
 #define PL_utf8_xdigit		(vTHX->Iutf8_xdigit)
 #define PL_utf8cache		(vTHX->Iutf8cache)
 #define PL_utf8locale		(vTHX->Iutf8locale)
-#define PL_v_string_ok		(vTHX->Iv_string_ok)
 #define PL_warnhook		(vTHX->Iwarnhook)
 #define PL_watchaddr		(vTHX->Iwatchaddr)
 #define PL_watchok		(vTHX->Iwatchok)
@@ -594,7 +592,6 @@
 #define PL_Isort_RealCmp	PL_sort_RealCmp
 #define PL_Isortcop		PL_sortcop
 #define PL_Isortstash		PL_sortstash
-#define PL_Ispare_510		PL_spare_510
 #define PL_Isplitstr		PL_splitstr
 #define PL_Isrand_called	PL_srand_called
 #define PL_Istack_base		PL_stack_base
@@ -662,7 +659,6 @@
 #define PL_Iutf8_xdigit		PL_utf8_xdigit
 #define PL_Iutf8cache		PL_utf8cache
 #define PL_Iutf8locale		PL_utf8locale
-#define PL_Iv_string_ok		PL_v_string_ok
 #define PL_Iwarnhook		PL_warnhook
 #define PL_Iwatchaddr		PL_watchaddr
 #define PL_Iwatchok		PL_watchok

@@ -11534,8 +11534,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	  PTR2UV(PL_watchok));
     }
 
-    PL_v_string_ok	= proto_perl->Iv_string_ok;
-
     if (!(flags & CLONEf_KEEP_PTR_TABLE)) {
         ptr_table_free(PL_ptr_table);
         PL_ptr_table = NULL;
