@@ -527,6 +527,13 @@ S_refto(pTHX_ SV *sv)
     sv_upgrade(rv, SVt_RV);
     SvRV_set(rv, sv);
     SvROK_on(rv);
+    /* As overloading is stored on the reference, not the referant, need to
+       propagate this flag to the new reference we create.  */
+    if (SvOBJECT(sv)) {
+	HV *const stash = SvSTASH(sv);
+	if (Gv_AMG(stash))
+	    SvAMAGIC_on(rv);
+    }
     return rv;
 }
 
