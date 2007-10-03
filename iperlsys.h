@@ -52,7 +52,7 @@
 
 #ifndef Sighandler_t
 #  if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-typedef Signal_t (*Sighandler_t) (int, ...);
+typedef Signal_t (*Sighandler_t) (int, siginfo_t*, void*);
 #  else
 typedef Signal_t (*Sighandler_t) (int);
 #  endif
