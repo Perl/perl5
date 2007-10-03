@@ -47,7 +47,7 @@ sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 package main;
 
 $| = 1;
-use Test::More tests => 522;
+use Test::More tests => 528;
 
 
 $a = new Oscalar "087";
@@ -1332,4 +1332,46 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     is($method, 'cmp');
     like($warning, qr/isn't numeric/, 'cmp should return number');
 
+}
+
+{
+    # Subtle bug pre 5.10, as a side effect of the overloading flag being
+    # stored on the reference rather than the referant. Despite the fact that
+    # objects can only be accessed via references (even internally), the
+    # referant actually knows that it's blessed, not the references. So taking
+    # a new, unrelated, reference to it gives an object. However, the
+    # overloading-or-not flag was on the reference prior to 5.10, and taking
+    # a new reference didn't (use to) copy it.
+
+    package kayo;
+
+    use overload '""' => sub {${$_[0]}};
+
+    sub Pie {
+	return "$_[0], $_[1]";
+    }
+
+    package main;
+
+    my $class = 'kayo';
+    my $string = 'bam';
+    my $crunch_eth = bless \$string, $class;
+
+    is("$crunch_eth", $string);
+    is ($crunch_eth->Pie("Meat"), "$string, Meat");
+
+    my $wham_eth = \$string;
+
+    is("$wham_eth", $string,
+       'This reference did not have overloading in 5.8.8 and earlier');
+    is ($crunch_eth->Pie("Apple"), "$string, Apple");
+
+    my $class = ref $wham_eth;
+    $class =~ s/=.*//;
+
+    # Bless it back into its own class!
+    bless $wham_eth, $class;
+
+    is("$wham_eth", $string);
+    is ($crunch_eth->Pie("Blackbird"), "$string, Blackbird");
 }
