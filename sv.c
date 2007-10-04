@@ -7322,6 +7322,47 @@ Perl_sv_setref_pvn(pTHX_ SV *rv, const char *classname, char *pv, STRLEN n)
     return rv;
 }
 
+/* For this subroutine, for each level of recursion, check the pad for either
+   direct pointers to the target object, or perl references to it.
+   We assume that arrays and hashes (and deeper structures) in lexicals
+   rarely point to objects.  */
+static U32
+S_process_sub(pTHX_ CV *const current_sub, U32 how_many_in_pad,
+	      const SV *const target, SV *const rv, const bool on) {
+    AV *const padlist = CvPADLIST(current_sub);
+    long depth = CvDEPTH(current_sub);
+
+    while (depth > 0) {
+	AV *const curpad = (AV*) AvARRAY(padlist)[depth];
+	SV ** const start = AvARRAY(curpad);
+	SV ** end = start + AvFILLp(curpad);
+
+	while (end >= start) {
+	    SV *const sv = *end--;
+	    if (sv == target) {
+		if (--how_many_in_pad == 0) {
+		    /* We have found them all.  */
+		    return 0;
+		}
+	    } else if ((sv->sv_flags & SVf_ROK) == SVf_ROK
+		       && SvRV(sv) == target
+		       && sv != rv) {
+		if (on)
+		    SvAMAGIC_on(sv);
+		else
+		    SvAMAGIC_off(sv);
+		if (--how_many_in_pad == 0) {
+		    /* We have found them all.  */
+		    return 0;
+		}
+	    }
+	}
+	--depth;
+    };
+    return how_many_in_pad;
+}
+
+
 /* This is a hack to cope with reblessing from class with overloading magic to
    one without (or the other way).  Search for every reference pointing to the
    object.  Can't use S_visit() because we would need to pass a parameter to
@@ -7361,6 +7402,11 @@ S_reset_amagic(pTHX_ SV *rv, const bool on) {
        the object (but no arrays, hashes, pads, typeglobs or other things)
        pointing to it.
 
+       Actually, need to extend that to any pad in the call chain, and any
+       temporaries. Fortunately, we can do this in a way that doesn't involve
+       visiting any location twice, so we don't need to keep track of what
+       we've seen.
+
        The first case is likely to involve quite a small search.
        The second case is O(n) on the number of SVs, but we can make it
        terminate early if we find every reference is accounted for by an RV.
@@ -7369,7 +7415,7 @@ S_reset_amagic(pTHX_ SV *rv, const bool on) {
     {
 	/* So before trying the large O(n) linear search of all SVs, start by
 	   seeing if we can find the other references as temporaries on the
-	   stack or in the current pad.
+	   stack or in the pads of the current subroutine call chain.
 
 	   This avoids the big search for constructions such as
 	   my $string = ...;
@@ -7390,9 +7436,7 @@ S_reset_amagic(pTHX_ SV *rv, const bool on) {
 			/* We have found them all.  */
 			return;
 		    }
-		} else if (SvTYPE(sv) != SVTYPEMASK
-			   && (sv->sv_flags & SVf_ROK) == SVf_ROK
-			   && SvREFCNT(sv)
+		} else if ((sv->sv_flags & SVf_ROK) == SVf_ROK
 			   && SvRV(sv) == target
 			   && sv != rv) {
 		    if (on)
@@ -7409,26 +7453,50 @@ S_reset_amagic(pTHX_ SV *rv, const bool on) {
 	}
 
 	{
-	CV *const current_sub = find_runcv(NULL);
-	AV *const padlist = CvPADLIST(current_sub);
-	AV *const curpad = (AV*) AvARRAY(padlist)[CvDEPTH(current_sub)];
-	SV ** const start = AvARRAY(curpad);
-	SV ** end = start + AvFILLp(curpad);
+	    /* This code is pilfered from Perl_find_runcv  */
+	    PERL_SI	 *si;
 
-	while (end >= start) {
-	    SV *const sv = *end--;
-	    if (sv == target) {
-		if (--how_many_in_pad == 0) {
+	    for (si = PL_curstackinfo; si; si = si->si_prev) {
+		I32 ix;
+		for (ix = si->si_cxix; ix >= 0; ix--) {
+		    const PERL_CONTEXT *cx = &(si->si_cxstack[ix]);
+		    if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
+			CV * const cv = cx->blk_sub.cv;
+			/* Process all levels of recursion the first time we
+			   see a subroutine.  */
+			if (cx->blk_sub.olddepth + 1 == CvDEPTH(cv)) {
+			    how_many_in_pad = process_sub(cv, how_many_in_pad,
+							  target, rv, on);
+			    if (how_many_in_pad == 0) {
+				/* We have found them all.  */
+				return;
+			    }
+			}
+		    }
+		    else if (CxTYPE(cx) == CXt_EVAL && !CxTRYBLOCK(cx)) {
+			how_many_in_pad
+			    = process_sub(PL_compcv, how_many_in_pad, target,
+					  rv, on);
+			if (how_many_in_pad == 0) {
+			    /* We have found them all.  */
+			    return;
+			}
+		    }
+		}
+		how_many_in_pad
+		    = process_sub(PL_main_cv, how_many_in_pad, target, rv, on);
+		if (how_many_in_pad == 0) {
 		    /* We have found them all.  */
 		    return;
 		}
 	    }
 	}
-	}
     }
 
-    /* Right, didn't find all the other referneces were lexicals or temporaries
+    /* Right, didn't find all the other references were lexicals or temporaries
        in the pad, so need to do an exhaustive search to find all references.
+       It doesn't matter if we've already set the AMAGIC flag to the correct
+       value on some of the other references.
     */
 
     for (sva = PL_sv_arenaroot; sva; sva = (SV*)SvANY(sva)) {

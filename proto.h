@@ -1938,6 +1938,7 @@ STATIC void	S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr);
 STATIC PTR_TBL_ENT_t *	S_ptr_table_find(PTR_TBL_t *tbl, const void *sv)
 			__attribute__warn_unused_result__;
 
+STATIC U32	S_process_sub(pTHX_ CV *const current_sub, U32 how_many_in_pad, const SV *const target, SV *const rv, const bool on);
 STATIC void	S_reset_amagic(pTHX_ SV *rv, const bool on);
 #endif
 

@@ -1391,6 +1391,7 @@
 #define glob_assign_glob	S_glob_assign_glob
 #define glob_assign_ref		S_glob_assign_ref
 #define ptr_table_find		S_ptr_table_find
+#define process_sub		S_process_sub
 #define reset_amagic		S_reset_amagic
 #endif
 #endif
@@ -3510,6 +3511,7 @@
 #define glob_assign_glob(a,b,c)	S_glob_assign_glob(aTHX_ a,b,c)
 #define glob_assign_ref(a,b)	S_glob_assign_ref(aTHX_ a,b)
 #define ptr_table_find		S_ptr_table_find
+#define process_sub(a,b,c,d,e)	S_process_sub(aTHX_ a,b,c,d,e)
 #define reset_amagic(a,b)	S_reset_amagic(aTHX_ a,b)
 #endif
 #endif

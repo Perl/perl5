@@ -1361,6 +1361,9 @@ s	|bool	|sv_2iuv_common	|NN SV *sv
 s	|void	|glob_assign_glob|NN SV *dstr|NN SV *sstr|const int dtype
 s	|void	|glob_assign_ref|NN SV *dstr|NN SV *sstr
 sRn	|PTR_TBL_ENT_t *|ptr_table_find|NN PTR_TBL_t *tbl|NN const void *sv
+s	|U32	|process_sub	|NN CV *const current_sub|U32 how_many_in_pad \
+				|NN const SV *const target|NN SV *const rv \
+				|const bool on
 s	|void	|reset_amagic	|NN SV *rv|const bool on
 #endif
 
