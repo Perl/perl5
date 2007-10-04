@@ -343,6 +343,16 @@ sub _detildefy {
 
 }
 
+=item find_perl_interpreter
+
+On VMS, $^X returns the fully qualified absolute path including version number. 
+It's logically impossible to improve on it for getting the perl we're currently
+running, and attempting to manipulate it is usually lossy.
+
+=cut
+
+sub find_perl_interpreter { return $^X; }
+
 =back
 
 =head1 AUTHOR
