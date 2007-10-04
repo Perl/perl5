@@ -407,14 +407,20 @@ my @NewFiles;
 if( $RunDiff ) {
     my $diff = $Repo; $diff =~ s/$$/patch/;
 
-    print "Generating diff..." if $Verbose;
-
     ### weird RV ;(
     my $master = basename( $MasterRepo );
     my $repo   = basename( $Repo );
     my $chdir  = dirname( $MasterRepo );
 
-    system( "cd $chdir; diff -ruN $master $repo > $diff" );
+    ### the .patch file is added by an rsync from the APC
+    ### but isn't actually in the p4 repo, so exclude it
+    my $cmd = "cd $chdir; diff -ruN --exclude=.patch $master $repo > $diff";
+
+    print "Running: '$cmd'\n";
+
+    print "Generating diff..." if $Verbose;
+
+    system( $cmd );
         #and die "Could not write diff to '$diff': $?";
     die "Could not write diff to '$diff'" unless -e $diff && -s _;
 
