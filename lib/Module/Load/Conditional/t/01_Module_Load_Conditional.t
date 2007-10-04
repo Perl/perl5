@@ -154,7 +154,7 @@ use_ok( 'Module::Load::Conditional' );
 }
 
 {
-    my $use_list = { 'Must::Be::Loaded' => 1 };
+    my $use_list = { 'MustBe::Loaded' => 1 };
     my $bool = can_load( modules => $use_list );
 
     ok( !$bool, q[Detect out of date module] );
@@ -162,12 +162,12 @@ use_ok( 'Module::Load::Conditional' );
 
 {
     delete $INC{'LoadIt.pm'};
-    delete $INC{'Must/Be/Loaded.pm'};
+    delete $INC{'MustBe/Loaded.pm'};
 
-    my $use_list = { 'LoadIt' => 1, 'Must::Be::Loaded' => 1 };
+    my $use_list = { 'LoadIt' => 1, 'MustBe::Loaded' => 1 };
     my $bool = can_load( modules => $use_list );
 
-    ok( !$INC{'LoadIt.pm'} && !$INC{'Must/Be/Loaded.pm'},
+    ok( !$INC{'LoadIt.pm'} && !$INC{'MustBe/Loaded.pm'},
         q[Do not load if one prerequisite fails]
     );
 }

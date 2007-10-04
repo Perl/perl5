@@ -2190,7 +2190,7 @@ lib/Module/Load/Conditional/t/to_load/Commented.pm	Module::Conditional tests
 lib/Module/Load/Conditional/t/to_load/InPod.pm	Module::Load::Conditional tests
 lib/Module/Load/Conditional/t/to_load/LoadIt.pm	Module::Conditional tests
 lib/Module/Load/Conditional/t/to_load/LoadMe.pl	Module::Conditional tests
-lib/Module/Load/Conditional/t/to_load/Must/Be/Loaded.pm	Module::Conditional tests
+lib/Module/Load/Conditional/t/to_load/MustBe/Loaded.pm	Module::Load::Conditional tests
 lib/Module/Load/Conditional/t/to_load/ToBeLoaded	Module::Conditional tests
 lib/Module/Loaded.pm	Module::Loaded
 lib/Module/Loaded/t/01_Module-Loaded.t	Module::Loaded tests

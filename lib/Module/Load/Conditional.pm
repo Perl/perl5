@@ -18,7 +18,7 @@ BEGIN {
                         $FIND_VERSION $ERROR $CHECK_INC_HASH];
     use Exporter;
     @ISA            = qw[Exporter];
-    $VERSION        = '0.18';
+    $VERSION        = '0.20';
     $VERBOSE        = 0;
     $FIND_VERSION   = 1;
     $CHECK_INC_HASH = 0;
