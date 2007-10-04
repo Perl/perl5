@@ -1346,15 +1346,13 @@ Perl_csighandler(int sig)
 	   (PL_signals & PERL_SIGNALS_UNSAFE_FLAG))
 	/* Call the perl level handler now--
 	 * with risk we may be in malloc() etc. */
-#ifdef WIN32
-	(*PL_sighandlerp)(sig);
-#else
+#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 	(*PL_sighandlerp)(sig, NULL, NULL);
+#else
+	(*PL_sighandlerp)(sig);
 #endif
    else
 	S_raise_signal(aTHX_ sig);
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-#endif
 }
 
 #if defined(FAKE_PERSISTENT_SIGNAL_HANDLERS) || defined(FAKE_DEFAULT_SIGNAL_HANDLERS)
@@ -1389,10 +1387,10 @@ Perl_despatch_signals(pTHX)
 	    PERL_BLOCKSIG_ADD(set, sig);
  	    PL_psig_pend[sig] = 0;
 	    PERL_BLOCKSIG_BLOCK(set);
-#ifdef WIN32
-	    (*PL_sighandlerp)(sig);
-#else
+#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 	    (*PL_sighandlerp)(sig, NULL, NULL);
+#else
+	    (*PL_sighandlerp)(sig);
 #endif
 	    PERL_BLOCKSIG_UNBLOCK(set);
 	}
