@@ -11,7 +11,7 @@ use strict;
 BEGIN {
     use vars        qw[$VERSION $AUTOREPLY $VERBOSE $INVALID];
     $VERBOSE    =   1;
-    $VERSION    =   '0.14_01';
+    $VERSION    =   '0.16';
     $INVALID    =   loc('Invalid selection, please try again: ');
 }
 
@@ -404,9 +404,9 @@ sub parse_options {
     my $return = {};
 
     ### there's probably a more elegant way to do this... ###
-    while ( $input =~ s/--?([-\w]+=("|').+?\2)(?:\Z|\s+)//  or
-            $input =~ s/--?([-\w]+=\S+)(?:\Z|\s+)//         or
-            $input =~ s/--?([-\w]+)(?:\Z|\s+)//
+    while ( $input =~ s/(?:\s+)--?([-\w]+=("|').+?\2)(?=\Z|\s+)//  or
+            $input =~ s/(?:\s+)--?([-\w]+=\S+)(?=\Z|\s+)//         or
+            $input =~ s/(?:\s+)--?([-\w]+)(?=\Z|\s+)//
     ) {
         my $match = $1;
 
@@ -604,17 +604,17 @@ will warn about this and return C<undef>.
 
 C<Params::Check>, C<Term::ReadLine>, C<Term::UI::History>
 
+=head1 BUG REPORTS
+
+Please report bugs or other issues to E<lt>bug-term-ui@rt.cpan.org<gt>.
+
 =head1 AUTHOR
 
-This module by
-Jos Boumans E<lt>kane@cpan.orgE<gt>.
+This module by Jos Boumans E<lt>kane@cpan.orgE<gt>.
 
 =head1 COPYRIGHT
 
-This module is
-copyright (c) 2002 - 2005 Jos Boumans E<lt>kane@cpan.orgE<gt>.
-All rights reserved.
+This library is free software; you may redistribute and/or modify it 
+under the same terms as Perl itself.
 
-This library is free software;
-you may redistribute and/or modify it under the same
-terms as Perl itself.
+=cut

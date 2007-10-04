@@ -106,9 +106,9 @@ my $tmpl = {
 #### test parse_options   
 {
     my $str =   q[command --no-foo --baz --bar=0 --quux=bleh ] .
-                q[--option="some'thing" -one-dash -single=blah' foo];
+                q[--option="some'thing" -one-dash -single=blah' foo bar-zot];
 
-    my $munged = 'command foo';
+    my $munged = 'command foo bar-zot';
     my $expected = {
             foo         => 0,
             baz         => 1,
@@ -121,6 +121,6 @@ my $tmpl = {
 
     my ($href,$rest) = $term->parse_options( $str );
 
-    is_deeply( $href, $expected, q[Parsing options] );
-    is($rest,$munged, q[Remaining unparsed string] );
+    is_deeply($href, $expected, qq[Parsing options] );
+    is($rest, $munged,          qq[Remaining unparsed string '$munged'] );
 }

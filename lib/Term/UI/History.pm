@@ -8,7 +8,7 @@ use base 'Log::Message::Simple';
 
 =head1 NAME
 
-Log::Message::Simple
+Term::UI::History
 
 =head1 SYNOPSIS
 
