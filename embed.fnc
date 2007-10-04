@@ -1319,7 +1319,6 @@ sR	|I32	|dopoptoeval	|I32 startingblock
 sR	|I32	|dopoptogiven	|I32 startingblock
 sR	|I32	|dopoptolabel	|NN const char *label
 sR	|I32	|dopoptoloop	|I32 startingblock
-sR	|I32	|dopoptosub	|I32 startingblock
 sR	|I32	|dopoptosub_at	|NN const PERL_CONTEXT* cxstk|I32 startingblock
 sR	|I32	|dopoptowhen	|I32 startingblock
 s	|void	|save_lines	|NULLOK AV *array|NN SV *sv

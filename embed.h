@@ -1300,7 +1300,6 @@
 #define dopoptogiven		S_dopoptogiven
 #define dopoptolabel		S_dopoptolabel
 #define dopoptoloop		S_dopoptoloop
-#define dopoptosub		S_dopoptosub
 #define dopoptosub_at		S_dopoptosub_at
 #define dopoptowhen		S_dopoptowhen
 #define save_lines		S_save_lines
@@ -3581,7 +3580,6 @@
 #define dopoptogiven(a)		S_dopoptogiven(aTHX_ a)
 #define dopoptolabel(a)		S_dopoptolabel(aTHX_ a)
 #define dopoptoloop(a)		S_dopoptoloop(aTHX_ a)
-#define dopoptosub(a)		S_dopoptosub(aTHX_ a)
 #define dopoptosub_at(a,b)	S_dopoptosub_at(aTHX_ a,b)
 #define dopoptowhen(a)		S_dopoptowhen(aTHX_ a)
 #define save_lines(a,b)		S_save_lines(aTHX_ a,b)

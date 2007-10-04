@@ -3525,9 +3525,6 @@ STATIC I32	S_dopoptolabel(pTHX_ const char *label)
 STATIC I32	S_dopoptoloop(pTHX_ I32 startingblock)
 			__attribute__warn_unused_result__;
 
-STATIC I32	S_dopoptosub(pTHX_ I32 startingblock)
-			__attribute__warn_unused_result__;
-
 STATIC I32	S_dopoptosub_at(pTHX_ const PERL_CONTEXT* cxstk, I32 startingblock)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
