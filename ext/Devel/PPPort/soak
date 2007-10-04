@@ -33,7 +33,7 @@ use File::Find;
 use List::Util qw(max);
 use Config;
 
-my $VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.12 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+my $VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.13 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 $| = 1;
 my %OPT = (

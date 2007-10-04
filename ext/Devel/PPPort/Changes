@@ -1,3 +1,9 @@
+3.13 - 2007-10-04
+
+    * fix cpan #29748: ppport.h problems with perl5.005_05
+      (spotted by Slaven Rezić)
+    * fix a compiler warning
+
 3.12 - 2007-09-22
 
     [released without changes]

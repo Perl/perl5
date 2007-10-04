@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 12 $
+##  $Revision: 13 $
 ##  $Author: mhx $
-##  $Date: 2007/09/11 23:20:43 +0200 $
+##  $Date: 2007/10/04 10:21:28 +0200 $
 ##
 ################################################################################
 ##
@@ -83,7 +83,7 @@ __NEED_VAR__ U32 PL_signals = D_PPP_PERL_SIGNALS_INIT;
  * automatically be defined as the correct argument.
  */
 
-#if { VERSION <= 5.005_04 }
+#if { VERSION <= 5.005_05 }
 /* Replace: 1 */
 #  define PL_ppaddr                 ppaddr
 #  define PL_no_modify              no_modify
