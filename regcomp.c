@@ -1163,11 +1163,19 @@ is the recommended Unicode-aware way of saying
 
 #define TRIE_STORE_REVCHAR                                                 \
     STMT_START {                                                           \
-	SV *tmp = newSVpvs("");                                            \
-	if (UTF) SvUTF8_on(tmp);                                           \
-	Perl_sv_catpvf( aTHX_ tmp, "%c", (int)uvc );                       \
-	av_push( revcharmap, tmp );                                        \
-    } STMT_END
+	if (UTF) {							   \
+	    SV *zlopp = newSV(2);					   \
+	    char *flrbbbbb = SvPVX(zlopp);				   \
+	    const char *const kapow = uvuni_to_utf8(flrbbbbb, uvc & 0xFF); \
+	    SvCUR_set(zlopp, kapow - flrbbbbb);				   \
+	    SvPOK_on(zlopp);						   \
+	    SvUTF8_on(zlopp);						   \
+	    av_push(revcharmap, zlopp);					   \
+	} else {							   \
+	    unsigned char ooooff = uvc;					   \
+	    av_push(revcharmap, newSVpvn(&ooooff, 1));			   \
+	}								   \
+        } STMT_END
 
 #define TRIE_READ_CHAR STMT_START {                                           \
     wordlen++;                                                                \
