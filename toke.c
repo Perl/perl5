@@ -3381,8 +3381,10 @@ Perl_yylex(pTHX)
 		else
 		    Perl_croak(aTHX_ "panic: yylex");
 		if (PL_madskills) {
-		    SV* const tmpsv = newSVpvs("");
-		    Perl_sv_catpvf(aTHX_ tmpsv, "\\%c", *s);
+		    SV* const tmpsv = newSVpvs("\\ ");
+		    /* replace the space with the character we want to escape
+		     */
+		    SvPVX(tmpsv)[1] = *s;
 		    curmad('_', tmpsv);
 		}
 		PL_bufptr = s + 1;
@@ -10956,8 +10958,12 @@ S_scan_subst(pTHX_ char *start)
 	PL_sublex_info.super_bufend = PL_bufend;
 	PL_multi_end = 0;
 	pm->op_pmflags |= PMf_EVAL;
-	while (es-- > 0)
-	    sv_catpv(repl, (const char *)(es ? "eval " : "do "));
+	while (es-- > 0) {
+	    if (es)
+		sv_catpvs(repl, "eval ");
+	    else
+		sv_catpvs(repl, "do ");
+	}
 	sv_catpvs(repl, "{");
 	sv_catsv(repl, PL_lex_repl);
 	if (strchr(SvPVX(PL_lex_repl), '#'))
