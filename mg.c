@@ -942,7 +942,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    sv_setpv(sv,s);
 	else {
 	    sv_setpv(sv,GvENAME(PL_defoutgv));
-	    sv_catpv(sv,"_TOP");
+	    sv_catpvs(sv,"_TOP");
 	}
 	break;
     case '~':
