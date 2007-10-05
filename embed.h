@@ -1292,7 +1292,6 @@
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define docatch			S_docatch
-#define docatch_body		S_docatch_body
 #define dofindlabel		S_dofindlabel
 #define doparseform		S_doparseform
 #define num_overflow		S_num_overflow
@@ -3572,7 +3571,6 @@
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define docatch(a)		S_docatch(aTHX_ a)
-#define docatch_body()		S_docatch_body(aTHX)
 #define dofindlabel(a,b,c,d)	S_dofindlabel(aTHX_ a,b,c,d)
 #define doparseform(a)		S_doparseform(aTHX_ a)
 #define num_overflow		S_num_overflow

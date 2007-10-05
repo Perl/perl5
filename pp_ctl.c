@@ -2660,14 +2660,6 @@ S_save_lines(pTHX_ AV *array, SV *sv)
     }
 }
 
-STATIC void
-S_docatch_body(pTHX)
-{
-    dVAR;
-    CALLRUNOPS(aTHX);
-    return;
-}
-
 STATIC OP *
 S_docatch(pTHX_ OP *o)
 {
@@ -2688,7 +2680,7 @@ S_docatch(pTHX_ OP *o)
 	assert(CxTYPE(&cxstack[cxstack_ix]) == CXt_EVAL);
 	cxstack[cxstack_ix].blk_eval.cur_top_env = PL_top_env;
  redo_body:
-	docatch_body();
+	CALLRUNOPS(aTHX);
 	break;
     case 3:
 	/* die caught by an inner eval - continue inner loop */
