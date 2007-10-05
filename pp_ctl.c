@@ -3144,8 +3144,11 @@ PP(pp_require)
 	    vcmp(sv, sv_2mortal(upg_version(newSVnv(5.006), FALSE))) >= 0) {
 	  HV * hinthv = GvHV(PL_hintgv);
 	  if( hinthv ) {
-	    (void)hv_stores(hinthv, "v_string", newSViv(1));
-	    PL_hints |= HINT_LOCALIZE_HH;
+	      SV *hint = newSViv(1);
+	      (void)hv_stores(hinthv, "v_string", hint);
+	      /* This will call through to Perl_magic_sethint() which in turn
+		 sets PL_hints correctly.  */
+	      SvSETMAGIC(hint);
 	  }
 	  /* If we request a version >= 5.9.5, load feature.pm with the
 	   * feature bundle that corresponds to the required version. */

@@ -3008,7 +3008,8 @@ int
 Perl_magic_sethint(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
-    assert(mg->mg_len == HEf_SVKEY);
+    SV *key = (mg->mg_len == HEf_SVKEY) ? (SV *)mg->mg_ptr
+	: sv_2mortal(newSVpvn(mg->mg_ptr, mg->mg_len));
 
     /* mg->mg_obj isn't being used.  If needed, it would be possible to store
        an alternative leaf in there, with PL_compiling.cop_hints being used if
@@ -3020,8 +3021,7 @@ Perl_magic_sethint(pTHX_ SV *sv, MAGIC *mg)
        forgetting to do it, and consequent subtle errors.  */
     PL_hints |= HINT_LOCALIZE_HH;
     PL_compiling.cop_hints_hash
-	= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints_hash,
-				 (SV *)mg->mg_ptr, sv);
+	= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints_hash, key, sv);
     return 0;
 }
 
