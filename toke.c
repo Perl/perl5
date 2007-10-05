@@ -2969,9 +2969,6 @@ S_readpipe_override(pTHX)
 		newSVOP(OP_CONST, 0, &PL_sv_undef), /* value will be read later */
 		newCVREF(0, newGVOP(OP_GV, 0, gv_readpipe))));
     }
-    else {
-	set_csh();
-    }
 }
 
 #ifdef PERL_MAD 
@@ -5928,7 +5925,6 @@ Perl_yylex(pTHX)
 	    UNI(OP_EACH);
 
 	case KEY_exec:
-	    set_csh();
 	    LOP(OP_EXEC,XREF);
 
 	case KEY_endhostent:
@@ -6093,7 +6089,6 @@ Perl_yylex(pTHX)
 	    OPERATOR(GIVEN);
 
 	case KEY_glob:
-	    set_csh();
 	    LOP(OP_GLOB,XTERM);
 
 	case KEY_hex:
@@ -6435,11 +6430,9 @@ Perl_yylex(pTHX)
 	    UNI(OP_READDIR);
 
 	case KEY_readline:
-	    set_csh();
 	    UNIDOR(OP_READLINE);
 
 	case KEY_readpipe:
-	    set_csh();
 	    UNIDOR(OP_BACKTICK);
 
 	case KEY_rewinddir:
@@ -6758,7 +6751,6 @@ Perl_yylex(pTHX)
 	    }
 
 	case KEY_system:
-	    set_csh();
 	    LOP(OP_SYSTEM,XREF);
 
 	case KEY_symlink:
@@ -11396,7 +11388,6 @@ S_scan_inputsymbol(pTHX_ char *start)
 
     if (d - PL_tokenbuf != len) {
 	yylval.ival = OP_GLOB;
-	set_csh();
 	s = scan_str(start,!!PL_madskills,FALSE);
 	if (!s)
 	   Perl_croak(aTHX_ "Glob not terminated");
@@ -12396,20 +12387,6 @@ S_scan_formline(pTHX_ register char *s)
     }
 #endif
     return s;
-}
-
-STATIC void
-S_set_csh(pTHX)
-{
-#ifdef CSH
-    dVAR;
-    if (!PL_cshlen)
-	PL_cshlen = strlen(PL_cshname);
-#else
-#if defined(USE_ITHREADS)
-    PERL_UNUSED_CONTEXT;
-#endif
-#endif
 }
 
 I32

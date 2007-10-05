@@ -226,10 +226,6 @@ END_EXTERN_C
 #define PL_cop_seqmax		(*Perl_Icop_seqmax_ptr(aTHX))
 #undef  PL_cryptseen
 #define PL_cryptseen		(*Perl_Icryptseen_ptr(aTHX))
-#undef  PL_cshlen
-#define PL_cshlen		(*Perl_Icshlen_ptr(aTHX))
-#undef  PL_cshname
-#define PL_cshname		(*Perl_Icshname_ptr(aTHX))
 #undef  PL_curcop
 #define PL_curcop		(*Perl_Icurcop_ptr(aTHX))
 #undef  PL_curcopdb

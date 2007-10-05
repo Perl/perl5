@@ -11271,11 +11271,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_runops		= proto_perl->Irunops;
 
-#ifdef CSH
-    PL_cshlen		= proto_perl->Icshlen;
-    PL_cshname		= proto_perl->Icshname; /* XXX never deallocated */
-#endif
-
     PL_parser		= parser_dup(proto_perl->Iparser, param);
 
     PL_subline		= proto_perl->Isubline;

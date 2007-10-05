@@ -4113,6 +4113,12 @@ EXTCONST char PL_no_localize_ref[]
 EXTCONST char PL_memory_wrap[]
   INIT("panic: memory wrap");
 
+#ifdef CSH
+EXTCONST char PL_cshname[]
+  INIT(CSH);
+#  define PL_cshlen	(sizeof(CSH "") - 1)
+#endif
+
 EXTCONST char PL_uuemap[65]
   INIT("`!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_");
 

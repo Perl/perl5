@@ -4103,7 +4103,6 @@ STATIC void	S_missingterm(pTHX_ char *s)
 STATIC void	S_no_op(pTHX_ const char *what, char *s)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC void	S_set_csh(pTHX);
 STATIC I32	S_sublex_done(pTHX)
 			__attribute__warn_unused_result__;
 

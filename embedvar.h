@@ -95,8 +95,6 @@
 #define PL_comppad_name_floor	(vTHX->Icomppad_name_floor)
 #define PL_cop_seqmax		(vTHX->Icop_seqmax)
 #define PL_cryptseen		(vTHX->Icryptseen)
-#define PL_cshlen		(vTHX->Icshlen)
-#define PL_cshname		(vTHX->Icshname)
 #define PL_curcop		(vTHX->Icurcop)
 #define PL_curcopdb		(vTHX->Icurcopdb)
 #define PL_curpad		(vTHX->Icurpad)
@@ -409,8 +407,6 @@
 #define PL_Icomppad_name_floor	PL_comppad_name_floor
 #define PL_Icop_seqmax		PL_cop_seqmax
 #define PL_Icryptseen		PL_cryptseen
-#define PL_Icshlen		PL_cshlen
-#define PL_Icshname		PL_cshname
 #define PL_Icurcop		PL_curcop
 #define PL_Icurcopdb		PL_curcopdb
 #define PL_Icurpad		PL_curpad

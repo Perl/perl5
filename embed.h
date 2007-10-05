@@ -1520,7 +1520,6 @@
 #define lop			S_lop
 #define missingterm		S_missingterm
 #define no_op			S_no_op
-#define set_csh			S_set_csh
 #define sublex_done		S_sublex_done
 #define sublex_push		S_sublex_push
 #define sublex_start		S_sublex_start
@@ -3802,7 +3801,6 @@
 #define lop(a,b,c)		S_lop(aTHX_ a,b,c)
 #define missingterm(a)		S_missingterm(aTHX_ a)
 #define no_op(a,b)		S_no_op(aTHX_ a,b)
-#define set_csh()		S_set_csh(aTHX)
 #define sublex_done()		S_sublex_done(aTHX)
 #define sublex_push()		S_sublex_push(aTHX)
 #define sublex_start()		S_sublex_start(aTHX)

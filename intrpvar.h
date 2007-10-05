@@ -256,11 +256,6 @@ PERLVAR(Istatusvalue_vms,U32)
 PERLVAR(Istatusvalue_posix,I32)
 #endif
 
-#ifdef CSH
-PERLVARI(Icshlen,	I32,	0)
-PERLVARI(Icshname,	const char *,	CSH)
-#endif
-
 /* shortcuts to various I/O objects */
 PERLVAR(Istdingv,	GV *)
 PERLVAR(Istderrgv,	GV *)

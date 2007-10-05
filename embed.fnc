@@ -1541,7 +1541,6 @@ s	|int	|intuit_more	|NN char *s
 s	|I32	|lop		|I32 f|int x|NN char *s
 rs	|void	|missingterm	|NULLOK char *s
 s	|void	|no_op		|NN const char *what|NULLOK char *s
-s	|void	|set_csh
 sR	|I32	|sublex_done
 sR	|I32	|sublex_push
 sR	|I32	|sublex_start
