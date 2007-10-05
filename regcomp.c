@@ -6484,6 +6484,7 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep)
             | PERL_SCAN_DISALLOW_PREFIX
             | (SIZE_ONLY ? PERL_SCAN_SILENT_ILLDIGIT : 0);
         UV cp;
+	unsigned char string;
         len = (STRLEN)(endbrace - name - 2);
         cp = grok_hex(name + 2, &len, &fl, NULL);
         if ( len != (STRLEN)(endbrace - name - 2) ) {
@@ -6495,7 +6496,8 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep)
             *valuep = cp;
             return NULL;
         }
-        sv_str= Perl_newSVpvf_nocontext("%c",(int)cp);
+	string = (unsigned char) cp;
+        sv_str= newSVpvn(&string, 1);
     } else {
         /* fetch the charnames handler for this scope */
         HV * const table = GvHV(PL_hintgv);
@@ -9666,10 +9668,12 @@ S_put_byte(pTHX_ SV *sv, int c)
 {
     if (isCNTRL(c) || c == 255 || !isPRINT(c))
 	Perl_sv_catpvf(aTHX_ sv, "\\%o", c);
-    else if (c == '-' || c == ']' || c == '\\' || c == '^')
-	Perl_sv_catpvf(aTHX_ sv, "\\%c", c);
-    else
-	Perl_sv_catpvf(aTHX_ sv, "%c", c);
+    else {
+	const unsigned char string = (unsigned char) c;
+	if (c == '-' || c == ']' || c == '\\' || c == '^')
+	    sv_catpvs(sv, "\\");
+	sv_catpvn(sv, &string, 1);
+    }
 }
 
 

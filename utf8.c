@@ -2167,12 +2167,14 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim, UV f
 		 default: break;
 		 }
 		 if (ok) {
-		     Perl_sv_catpvf(aTHX_ dsv, "\\%c", ok);
+		     const unsigned char string = (unsigned char) ok;
+		     sv_catpvn(dsv, &string, 1);
 		 }
 	     }
 	     /* isPRINT() is the locale-blind version. */
 	     if (!ok && (flags & UNI_DISPLAY_ISPRINT) && isPRINT(c)) {
-	         Perl_sv_catpvf(aTHX_ dsv, "%c", c);
+		 const unsigned char string = (unsigned char) c;
+		 sv_catpvn(dsv, &string, 1);
 		 ok = 1;
 	     }
 	 }

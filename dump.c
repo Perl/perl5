@@ -279,7 +279,8 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
             sv_catpvn(dsv, octbuf, chsize);
             wrote += chsize;
 	} else {
-            Perl_sv_catpvf( aTHX_ dsv, "%c", c);
+	    const char string = (char) c;
+            sv_catpvn(dsv, &string, 1);
 	    wrote++;
 	}
         if ( flags & PERL_PV_ESCAPE_FIRSTCHAR ) 
@@ -2243,7 +2244,8 @@ Perl_sv_catxmlpvn(pTHX_ SV *dsv, const char *pv, STRLEN len, int utf8)
 		    Perl_sv_catpvf(aTHX_ dsv, "&#x%X;", c);
 		}
 		else {
-		    Perl_sv_catpvf(aTHX_ dsv, "%c", c);
+		    const char string = (char) c;
+		    sv_catpvn(dsv, &string, 1);
 		}
 		break;
 	    }
