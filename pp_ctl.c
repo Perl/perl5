@@ -3080,10 +3080,14 @@ PP(pp_require)
 
     sv = POPs;
     if ( (SvNIOKp(sv) || SvVOK(sv)) && PL_op->op_type != OP_DOFILE) {
-	if ( SvVOK(sv) && ckWARN(WARN_PORTABLE) )	/* require v5.6.1 */
+	if ( SvVOK(sv) && ckWARN(WARN_PORTABLE) ) {	/* require v5.6.1 */
+	    HV * hinthv = GvHV(PL_hintgv);
+	    SV ** ptr = NULL;
+	    if (hinthv) ptr = hv_fetchs(hinthv, "v_string", FALSE);
+	    if ( !(ptr && *ptr && SvIOK(*ptr) && SvIV(*ptr)) )
 		Perl_warner(aTHX_ packWARN(WARN_PORTABLE),
                         "v-string in use/require non-portable");
-
+	}
 	sv = new_version(sv);
 	if (!sv_derived_from(PL_patchlevel, "version"))
 	    upg_version(PL_patchlevel, TRUE);
@@ -3133,15 +3137,25 @@ PP(pp_require)
 	    }
 	}
 
-	/* If we request a version >= 5.9.5, load feature.pm with the
-	 * feature bundle that corresponds to the required version.
-	 * We do this only with use, not require. */
-	if (PL_compcv && vcmp(sv, sv_2mortal(upg_version(newSVnv(5.009005), FALSE))) >= 0) {
+        /* We do this only with use, not require. */
+	if (PL_compcv &&
+	  /* If we request a version >= 5.6.0, then v-string are OK
+	     so set $^H{v_string} to suppress the v-string warning */
+	    vcmp(sv, sv_2mortal(upg_version(newSVnv(5.006), FALSE))) >= 0) {
+	  HV * hinthv = GvHV(PL_hintgv);
+	  if( hinthv ) {
+	    (void)hv_stores(hinthv, "v_string", newSViv(1));
+	    PL_hints |= HINT_LOCALIZE_HH;
+	  }
+	  /* If we request a version >= 5.9.5, load feature.pm with the
+	   * feature bundle that corresponds to the required version. */
+	  if (vcmp(sv, sv_2mortal(upg_version(newSVnv(5.009005), FALSE))) >= 0) {
 	    SV *const importsv = vnormal(sv);
 	    *SvPVX_mutable(importsv) = ':';
 	    ENTER;
 	    Perl_load_module(aTHX_ 0, newSVpvs("feature"), NULL, importsv, NULL);
 	    LEAVE;
+	  }
 	}
 
 	RETPUSHYES;

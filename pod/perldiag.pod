@@ -4943,6 +4943,9 @@ won't suddenly start understanding newer features, but at least
 they will show a sensible error message indicating the required
 minimum version.
 
+This warning is suppressed if the C<use 5.x.y> is preceded by a
+C<use 5.006> (see C<use VERSION> in L<perlfunc/use>).
+
 =item Warning: something's wrong
 
 (W) You passed warn() an empty string (the equivalent of C<warn "">) or
