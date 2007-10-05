@@ -12721,7 +12721,22 @@ vms_realpath_fromperl(pTHX_ CV *cv)
     Safefree(rslt_spec);
   XSRETURN(1);
 }
-#endif
+
+/*
+ * A thin wrapper around decc$symlink to make sure we follow the 
+ * standard and do not create a symlink with a zero-length name.
+ */
+/*{{{ int my_symlink(const char *path1, const char *path2)*/
+int my_symlink(const char *path1, const char *path2) {
+  if (!path2 || !*path2) {
+    SETERRNO(ENOENT, SS$_NOSUCHFILE);
+    return -1;
+  }
+  return symlink(path1, path2);
+}
+/*}}}*/
+
+#endif /* HAS_SYMLINK */
 
 #if __CRTL_VER >= 70301000 && !defined(__VAX)
 int do_vms_case_tolerant(void);

@@ -274,6 +274,9 @@
 #define my_getpwent()		Perl_my_getpwent(aTHX)
 #define my_endpwent()		Perl_my_endpwent(aTHX)
 #define my_getlogin		Perl_my_getlogin
+#ifdef HAS_SYMLINK
+#  define my_symlink		Perl_my_symlink
+#endif
 #define init_os_extras		Perl_init_os_extras
 #define vms_realpath(a, b, c)	Perl_vms_realpath(aTHX_ a,b,c)
 #define vms_case_tolerant(a)	Perl_vms_case_tolerant(a)
@@ -507,6 +510,9 @@ struct interp_intern {
 #  define fwrite my_fwrite     /* for PerlSIO_fwrite */
 #  define fdopen my_fdopen
 #  define fclose my_fclose
+#ifdef HAS_SYMLINK
+#  define symlink my_symlink
+#endif
 #endif
 
 
@@ -958,7 +964,10 @@ unsigned long int	Perl_do_aspawn (pTHX_ void *, void **, void **);
 unsigned long int	Perl_do_spawn (pTHX_ const char *);
 FILE *  my_fdopen (int, const char *);
 int     my_fclose (FILE *);
-int    my_fwrite (const void *, size_t, size_t, FILE *);
+int     my_fwrite (const void *, size_t, size_t, FILE *);
+#ifdef HAS_SYMLINK
+int     my_symlink(const char *path1, const char *path2);
+#endif
 int	Perl_my_flush (pTHX_ FILE *);
 struct passwd *	Perl_my_getpwnam (pTHX_ const char *name);
 struct passwd *	Perl_my_getpwuid (pTHX_ Uid_t uid);
