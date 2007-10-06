@@ -1758,9 +1758,9 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     }
 
     /* create and initialize $swatch */
-    swatch = newSVpvs("");
     scur   = octets ? (span * octets) : (span + 7) / 8;
-    SvGROW(swatch, scur + 1);
+    swatch = newSV(scur);
+    SvPOK_on(swatch);
     s = (U8*)SvPVX(swatch);
     if (octets && none) {
 	const U8* const e = s + scur;
@@ -2150,12 +2150,14 @@ Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
 		 default: break;
 		 }
 		 if (ok) {
-		     Perl_sv_catpvf(aTHX_ dsv, "\\%c", ok);
+		     const char string = ok;
+		     sv_catpvn(dsv, &string, 1);
 		 }
 	     }
 	     /* isPRINT() is the locale-blind version. */
 	     if (!ok && (flags & UNI_DISPLAY_ISPRINT) && isPRINT(c)) {
-	         Perl_sv_catpvf(aTHX_ dsv, "%c", c);
+		 const char string = c;
+		 sv_catpvn(dsv, &string, 1);
 		 ok = 1;
 	     }
 	 }

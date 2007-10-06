@@ -1223,7 +1223,6 @@ snR	|bool	|num_overflow	|NV value|I32 fldsize|I32 frcsize
 sR	|I32	|dopoptoeval	|I32 startingblock
 sR	|I32	|dopoptolabel	|NN const char *label
 sR	|I32	|dopoptoloop	|I32 startingblock
-sR	|I32	|dopoptosub	|I32 startingblock
 sR	|I32	|dopoptosub_at	|NN const PERL_CONTEXT* cxstk|I32 startingblock
 s	|void	|save_lines	|NULLOK AV *array|NN SV *sv
 sR	|OP*	|doeval		|int gimme|NULLOK OP** startop|NULLOK CV* outside|U32 seq

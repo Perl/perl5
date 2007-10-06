@@ -507,9 +507,8 @@ PerlIO_debug(const char *fmt, ...)
 #else
 	const char *s = CopFILE(PL_curcop);
 	STRLEN len;
-	SV * const sv = newSVpvs("");
-	Perl_sv_catpvf(aTHX_ sv, "%s:%" IVdf " ", s ? s : "(none)",
-		       (IV) CopLINE(PL_curcop));
+	SV * const sv = Perl_newSVpvf(aTHX_ "%s:%" IVdf " ", s ? s : "(none)",
+				      (IV) CopLINE(PL_curcop));
 	Perl_sv_vcatpvf(aTHX_ sv, fmt, &ap);
 
 	s = SvPV_const(sv, len);
@@ -5060,16 +5059,16 @@ int
 PerlIO_vprintf(PerlIO *f, const char *fmt, va_list ap)
 {
     dTHX;
-    SV * const sv = newSVpvs("");
+    SV * sv;
     const char *s;
     STRLEN len;
     SSize_t wrote;
 #ifdef NEED_VA_COPY
     va_list apc;
     Perl_va_copy(ap, apc);
-    sv_vcatpvf(sv, fmt, &apc);
+    sv = vnewSVpvf(fmt, &apc);
 #else
-    sv_vcatpvf(sv, fmt, &ap);
+    sv = vnewSVpvf(fmt, &ap);
 #endif
     s = SvPV_const(sv, len);
     wrote = PerlIO_write(f, s, len);

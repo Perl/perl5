@@ -3231,6 +3231,7 @@ Perl_moreswitches(pTHX_ char *s)
 	    }
 	    s += strlen(s);
 	    my_setenv("PERL5DB", (char *)SvPV_nolen_const(sv));
+	    SvREFCNT_dec(sv);
 	}
 	if (!PL_perldb) {
 	    PL_perldb = PERLDB_ALL;

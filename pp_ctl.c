@@ -38,6 +38,8 @@
 
 #define DOCATCH(o) ((CATCH_GET == TRUE) ? docatch(o) : (o))
 
+#define dopoptosub(plop)	dopoptosub_at(cxstack, (plop))
+
 PP(pp_wantarray)
 {
     dSP;
@@ -1209,12 +1211,6 @@ Perl_is_lvalue_sub(pTHX)
 	return cxstack[cxix].blk_sub.lval;
     else
 	return 0;
-}
-
-STATIC I32
-S_dopoptosub(pTHX_ I32 startingblock)
-{
-    return dopoptosub_at(cxstack, startingblock);
 }
 
 STATIC I32

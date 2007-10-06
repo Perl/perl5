@@ -11002,8 +11002,10 @@ Perl_yyerror(pTHX_ char *s)
 	SV * const where_sv = sv_2mortal(newSVpvs("next char "));
 	if (yychar < 32)
 	    Perl_sv_catpvf(aTHX_ where_sv, "^%c", toCTRL(yychar));
-	else if (isPRINT_LC(yychar))
-	    Perl_sv_catpvf(aTHX_ where_sv, "%c", yychar);
+	else if (isPRINT_LC(yychar)) {
+	    const char string = yychar;
+	    sv_catpvn(where_sv, &string, 1);
+	}
 	else
 	    Perl_sv_catpvf(aTHX_ where_sv, "\\%03o", yychar & 255);
 	where = SvPVX_const(where_sv);
