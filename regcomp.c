@@ -8846,7 +8846,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
             int i;
             int rangestart = -1;
             U8* bitmap = IS_ANYOF_TRIE(op) ? (U8*)ANYOF_BITMAP(o) : (U8*)TRIE_BITMAP(trie);
-            Perl_sv_catpvf(aTHX_ sv, "[");
+            sv_catpvs(sv, "[");
             for (i = 0; i <= 256; i++) {
                 if (i < 256 && BITMAP_TEST(bitmap,i)) {
                     if (rangestart == -1)
@@ -8863,7 +8863,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
                     rangestart = -1;
                 }
             }
-            Perl_sv_catpvf(aTHX_ sv, "]");
+            sv_catpvs(sv, "]");
         } 
 	 
     } else if (k == CURLY) {

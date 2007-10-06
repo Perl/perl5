@@ -2234,16 +2234,16 @@ Perl_sv_catxmlpvn(pTHX_ SV *dsv, const char *pv, STRLEN len, int utf8)
 	    Perl_sv_catpvf(aTHX_ dsv, "STUPIDXML(#x%X)", c);
 	    break;
 	case '<':
-	    Perl_sv_catpvf(aTHX_ dsv, "&lt;");
+	    sv_catpvs(dsv, "&lt;");
 	    break;
 	case '>':
-	    Perl_sv_catpvf(aTHX_ dsv, "&gt;");
+	    sv_catpvs(dsv, "&gt;");
 	    break;
 	case '&':
-	    Perl_sv_catpvf(aTHX_ dsv, "&amp;");
+	    sv_catpvs(dsv, "&amp;");
 	    break;
 	case '"':
-	    Perl_sv_catpvf(aTHX_ dsv, "&#34;");
+	    sv_catpvf(dsv, "&#34;");
 	    break;
 	default:
 	    if (c < 0xD800) {
