@@ -7216,7 +7216,7 @@ Perl_newSVuv(pTHX_ UV u)
 /*
 =for apidoc newSV_type
 
-Creates a new SV, of the type specificied.  The reference count for the new SV
+Creates a new SV, of the type specified.  The reference count for the new SV
 is set to 1.
 
 =cut
