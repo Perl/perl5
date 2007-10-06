@@ -219,7 +219,7 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
     const char * const end = pv + count; /* end of string */
     octbuf[0] = esc;
 
-    if (!flags & PERL_PV_ESCAPE_NOCLEAR) {
+    if (!(flags & PERL_PV_ESCAPE_NOCLEAR)) {
 	    /* This won't alter the UTF-8 flag */
 	    sv_setpvn(dsv, "", 0);
     }
