@@ -1347,7 +1347,7 @@ PERL_CALLCONV void	Perl_mini_mktime(pTHX_ struct tm *pm)
 
 PERL_CALLCONV OP*	Perl_mod(pTHX_ OP* o, I32 type);
 PERL_CALLCONV int	Perl_mode_from_discipline(pTHX_ SV* discp);
-PERL_CALLCONV char*	Perl_moreswitches(pTHX_ char* s)
+PERL_CALLCONV const char*	Perl_moreswitches(pTHX_ const char* s)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV OP*	Perl_my(pTHX_ OP* o)

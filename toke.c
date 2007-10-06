@@ -3890,17 +3890,18 @@ Perl_yylex(pTHX)
 			const U32 oldpdb = PL_perldb;
 			const bool oldn = PL_minus_n;
 			const bool oldp = PL_minus_p;
+			const char *d1 = d;
 
 			do {
-			    if (*d == 'M' || *d == 'm' || *d == 'C') {
-				const char * const m = d;
-				while (*d && !isSPACE(*d))
-				    d++;
+			    if (*d1 == 'M' || *d1 == 'm' || *d1 == 'C') {
+				const char * const m = d1;
+				while (*d1 && !isSPACE(*d1))
+				    d1++;
 				Perl_croak(aTHX_ "Too late for \"-%.*s\" option",
-				      (int)(d - m), m);
+				      (int)(d1 - m), m);
 			    }
-			    d = moreswitches(d);
-			} while (d);
+			    d1 = moreswitches(d1);
+			} while (d1);
 			if (PL_doswitches && !switches_done) {
 			    int argc = PL_origargc;
 			    char **argv = PL_origargv;
