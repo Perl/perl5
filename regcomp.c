@@ -1165,14 +1165,14 @@ is the recommended Unicode-aware way of saying
     STMT_START {                                                           \
 	if (UTF) {							   \
 	    SV *zlopp = newSV(2);					   \
-	    char *flrbbbbb = SvPVX(zlopp);				   \
-	    const char *const kapow = uvuni_to_utf8(flrbbbbb, uvc & 0xFF); \
+	    unsigned char *flrbbbbb = (unsigned char *) SvPVX(zlopp);	   \
+	    unsigned const char *const kapow = uvuni_to_utf8(flrbbbbb, uvc & 0xFF); \
 	    SvCUR_set(zlopp, kapow - flrbbbbb);				   \
 	    SvPOK_on(zlopp);						   \
 	    SvUTF8_on(zlopp);						   \
 	    av_push(revcharmap, zlopp);					   \
 	} else {							   \
-	    unsigned char ooooff = uvc;					   \
+	    char ooooff = uvc;					   	   \
 	    av_push(revcharmap, newSVpvn(&ooooff, 1));			   \
 	}								   \
         } STMT_END
@@ -6492,7 +6492,7 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep)
             | PERL_SCAN_DISALLOW_PREFIX
             | (SIZE_ONLY ? PERL_SCAN_SILENT_ILLDIGIT : 0);
         UV cp;
-	unsigned char string;
+	char string;
         len = (STRLEN)(endbrace - name - 2);
         cp = grok_hex(name + 2, &len, &fl, NULL);
         if ( len != (STRLEN)(endbrace - name - 2) ) {
@@ -6504,7 +6504,7 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep)
             *valuep = cp;
             return NULL;
         }
-	string = (unsigned char) cp;
+	string = cp;
         sv_str= newSVpvn(&string, 1);
     } else {
         /* fetch the charnames handler for this scope */
@@ -9685,7 +9685,7 @@ S_put_byte(pTHX_ SV *sv, int c)
     if (!isPRINT(c))
 	Perl_sv_catpvf(aTHX_ sv, "\\%o", c);
     else {
-	const unsigned char string = (unsigned char) c;
+	const char string = c;
 	if (c == '-' || c == ']' || c == '\\' || c == '^')
 	    sv_catpvs(sv, "\\");
 	sv_catpvn(sv, &string, 1);

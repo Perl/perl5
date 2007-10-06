@@ -2168,13 +2168,13 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim, UV f
 		 default: break;
 		 }
 		 if (ok) {
-		     const unsigned char string = (unsigned char) ok;
+		     const char string = ok;
 		     sv_catpvn(dsv, &string, 1);
 		 }
 	     }
 	     /* isPRINT() is the locale-blind version. */
 	     if (!ok && (flags & UNI_DISPLAY_ISPRINT) && isPRINT(c)) {
-		 const unsigned char string = (unsigned char) c;
+		 const char string = c;
 		 sv_catpvn(dsv, &string, 1);
 		 ok = 1;
 	     }
