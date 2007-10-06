@@ -165,7 +165,7 @@ case 2:
 
   case 24:
 #line 263 "perly.y"
-    { (yyval.opval) = newFOROP(0, Nullch, (line_t)IVAL((ps[(2) - (3)].val.i_tkval)),
+    { (yyval.opval) = newFOROP(0, NULL, (line_t)IVAL((ps[(2) - (3)].val.i_tkval)),
 					Nullop, (ps[(3) - (3)].val.opval), (ps[(1) - (3)].val.opval), Nullop);
 			  TOKEN_GETMAD((ps[(2) - (3)].val.i_tkval),((LISTOP*)(yyval.opval))->op_first->op_sibling,'w');
 			;}
@@ -403,10 +403,10 @@ case 2:
     {
 #ifdef MAD
 			  YYSTYPE tmplval;
-			  tmplval.pval = Nullch;
+			  tmplval.pval = NULL;
 			  (yyval.p_tkval) = newTOKEN(OP_NULL, tmplval, 0);
 #else
-			  (yyval.p_tkval) = Nullch;
+			  (yyval.p_tkval) = NULL;
 #endif
 			;}
     break;

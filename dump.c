@@ -2115,7 +2115,7 @@ Perl_xmldump_sub(pTHX_ const GV *gv)
 {
     SV * const sv = sv_newmortal();
 
-    gv_fullname3(sv, gv, Nullch);
+    gv_fullname3(sv, gv, NULL);
     Perl_xmldump_indent(aTHX_ 0, PL_xmlfp, "\nSUB %s = ", SvPVX(sv));
     if (CvXSUB(GvCV(gv)))
 	Perl_xmldump_indent(aTHX_ 0, PL_xmlfp, "(xsub 0x%"UVxf" %d)\n",
@@ -2132,7 +2132,7 @@ Perl_xmldump_form(pTHX_ const GV *gv)
 {
     SV * const sv = sv_newmortal();
 
-    gv_fullname3(sv, gv, Nullch);
+    gv_fullname3(sv, gv, NULL);
     Perl_xmldump_indent(aTHX_ 0, PL_xmlfp, "\nFORMAT %s = ", SvPVX(sv));
     if (CvROOT(GvFORM(gv)))
 	op_xmldump(CvROOT(GvFORM(gv)));
@@ -2748,7 +2748,7 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	    ENTER;
 	    SAVEFREESV(tmpsv1);
 	    SAVEFREESV(tmpsv2);
-	    gv_fullname3(tmpsv1, (GV*)cSVOPo->op_sv, Nullch);
+	    gv_fullname3(tmpsv1, (GV*)cSVOPo->op_sv, NULL);
 	    s = SvPV(tmpsv1,len);
 	    sv_catxmlpvn(tmpsv2, s, len, 1);
 	    S_xmldump_attr(aTHX_ level, file, "gv=\"%s\"", SvPV(tmpsv2, len));

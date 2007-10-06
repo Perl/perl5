@@ -260,7 +260,7 @@ sideff	:	error
 			  TOKEN_GETMAD($2,$$,'w');
 			}
 	|	expr FOR expr
-			{ $$ = newFOROP(0, Nullch, (line_t)IVAL($2),
+			{ $$ = newFOROP(0, NULL, (line_t)IVAL($2),
 					Nullop, $3, $1, Nullop);
 			  TOKEN_GETMAD($2,((LISTOP*)$$)->op_first->op_sibling,'w');
 			}
@@ -467,10 +467,10 @@ label	:	/* empty */
 			{
 #ifdef MAD
 			  YYSTYPE tmplval;
-			  tmplval.pval = Nullch;
+			  tmplval.pval = NULL;
 			  $$ = newTOKEN(OP_NULL, tmplval, 0);
 #else
-			  $$ = Nullch;
+			  $$ = NULL;
 #endif
 			}
 	|	LABEL
