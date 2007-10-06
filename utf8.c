@@ -1774,9 +1774,9 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     }
 
     /* create and initialize $swatch */
-    swatch = newSVpvs("");
     scur   = octets ? (span * octets) : (span + 7) / 8;
-    SvGROW(swatch, scur + 1);
+    swatch = newSV(scur);
+    SvPOK_on(swatch);
     s = (U8*)SvPVX(swatch);
     if (octets && none) {
 	const U8* const e = s + scur;
