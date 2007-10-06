@@ -173,14 +173,18 @@ SKIP: {
 
     my $abs_path      =  Cwd::abs_path("linktest");
     my $fast_abs_path =  Cwd::fast_abs_path("linktest");
-    my $want          =  File::Spec->catdir("t", $Test_Dir);
+    my $want          =  quotemeta(
+                             File::Spec->rel2abs(
+			         $ENV{PERL_CORE} ? $Test_Dir : File::Spec->catdir('t', $Test_Dir)
+                                                )
+                                  );
 
-    like($abs_path,      qr|$want$|);
-    like($fast_abs_path, qr|$want$|);
-    like(Cwd::_perl_abs_path("linktest"), qr|$want$|) if $EXTRA_ABSPATH_TESTS;
+    like($abs_path,      qr|$want$|i);
+    like($fast_abs_path, qr|$want$|i);
+    like(Cwd::_perl_abs_path("linktest"), qr|$want$|i) if $EXTRA_ABSPATH_TESTS;
 
     rmtree($test_dirs[0], 0, 0);
-    unlink "linktest";
+    1 while unlink "linktest";
 }
 
 if ($ENV{PERL_CORE}) {

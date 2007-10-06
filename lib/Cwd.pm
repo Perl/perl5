@@ -171,7 +171,7 @@ use strict;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
-$VERSION = '3.25';
+$VERSION = '3.25_01';
 
 @ISA = qw/ Exporter /;
 @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
@@ -644,11 +644,19 @@ sub _vms_cwd {
 
 sub _vms_abs_path {
     return $ENV{'DEFAULT'} unless @_;
+    my $path = shift;
+
+    if (-l $path) {
+        my $link_target = readlink($path);
+        die "Can't resolve link $path: $!" unless defined $link_target;
+	    
+        return _vms_abs_path($link_target);
+    }
 
     # may need to turn foo.dir into [.foo]
-    my $path = VMS::Filespec::pathify($_[0]);
-    $path = $_[0] unless defined $path;
-
+    my $pathified = VMS::Filespec::pathify($path);
+    $path = $pathified if defined $pathified;
+	
     return VMS::Filespec::rmsexpand($path);
 }
 
