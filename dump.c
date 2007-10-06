@@ -333,12 +333,15 @@ Perl_pv_pretty( pTHX_ SV *dsv, char const * const str, const STRLEN count,
     const U8 dq = (flags & PERL_PV_PRETTY_QUOTE) ? '"' : '%';
     STRLEN escaped;
     
+    if (!(flags & PERL_PV_PRETTY_NOCLEAR)) {
+	    /* This won't alter the UTF-8 flag */
+	    sv_setpvn(dsv, "", 0);
+    }
+
     if ( dq == '"' )
-        sv_setpvn(dsv, "\"", 1);
+        sv_catpvn(dsv, "\"", 1);
     else if ( flags & PERL_PV_PRETTY_LTGT )
-        sv_setpvn(dsv, "<", 1);
-    else 
-        sv_setpvn(dsv, "", 0);
+        sv_catpvn(dsv, "<", 1);
         
     if ( start_color != NULL ) 
         Perl_sv_catpv( aTHX_ dsv, start_color);
