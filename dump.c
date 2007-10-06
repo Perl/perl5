@@ -2243,7 +2243,7 @@ Perl_sv_catxmlpvn(pTHX_ SV *dsv, const char *pv, STRLEN len, int utf8)
 	    sv_catpvs(dsv, "&amp;");
 	    break;
 	case '"':
-	    sv_catpvf(dsv, "&#34;");
+	    sv_catpvs(dsv, "&#34;");
 	    break;
 	default:
 	    if (c < 0xD800) {
