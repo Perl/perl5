@@ -219,8 +219,10 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
     const char * const end = pv + count; /* end of string */
     octbuf[0] = esc;
 
-    if (!flags & PERL_PV_ESCAPE_NOCLEAR) 
+    if (!flags & PERL_PV_ESCAPE_NOCLEAR) {
+	    /* This won't alter the UTF-8 flag */
 	    sv_setpvn(dsv, "", 0);
+    }
     
     if ((flags & PERL_PV_ESCAPE_UNI_DETECT) && is_utf8_string((U8*)pv, count))
         isuni = 1;
@@ -279,8 +281,13 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
             sv_catpvn(dsv, octbuf, chsize);
             wrote += chsize;
 	} else {
-	    const char string = (char) c;
-            sv_catpvn(dsv, &string, 1);
+	    /* If PERL_PV_ESCAPE_NOBACKSLASH is set then bytes in the range
+	       128-255 can be appended raw to the dsv. If dsv happens to be
+	       UTF-8 then we need catpvf to upgrade them for us.
+	       Or add a new API call sv_catpvc(). Think about that name, and
+	       how to keep it clear that it's unlike the s of catpvs, which is
+	       really an array octets, not a string.  */
+            Perl_sv_catpvf( aTHX_ dsv, "%c", c);
 	    wrote++;
 	}
         if ( flags & PERL_PV_ESCAPE_FIRSTCHAR ) 

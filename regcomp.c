@@ -9674,7 +9674,17 @@ clear_re(pTHX_ void *r)
 STATIC void
 S_put_byte(pTHX_ SV *sv, int c)
 {
-    if (isCNTRL(c) || c == 255 || !isPRINT(c))
+    /* Our definition of isPRINT() ignores locales, so only bytes that are
+       not part of UTF-8 are considered printable. I assume that the same
+       holds for UTF-EBCDIC.
+       Also, code point 255 is not printable in either (it's E0 in EBCDIC,
+       which Wikipedia says:
+
+       EO, or Eight Ones, is an 8-bit EBCDIC character code represented as all
+       ones (binary 1111 1111, hexadecimal FF). It is similar, but not
+       identical, to the ASCII delete (DEL) or rubout control character.
+       ) So the old condition can be simplified to !isPRINT(c)  */
+    if (!isPRINT(c))
 	Perl_sv_catpvf(aTHX_ sv, "\\%o", c);
     else {
 	const unsigned char string = (unsigned char) c;

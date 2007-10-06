@@ -2136,6 +2136,7 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim, UV f
     const char *s, *e;
 
     sv_setpvn(dsv, "", 0);
+    SvUTF8_off(dsv);
     for (s = (const char *)spv, e = s + len; s < e; s += UTF8SKIP(s)) {
 	 UV u;
 	  /* This serves double duty as a flag and a character to print after
