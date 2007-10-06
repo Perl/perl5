@@ -443,7 +443,7 @@ Converts the specified character to lowercase.
 #   define isASCII(c)	((c) <= 127)
 #   define isCNTRL(c)	((c) < ' ' || (c) == 127)
 #   define isGRAPH(c)	(isALNUM(c) || isPUNCT(c))
-#   define isPRINT(c)	(((c) > 32 && (c) < 127) || (c) == ' ')
+#   define isPRINT(c)	(((c) >= 32 && (c) < 127))
 #   define isPUNCT(c)	(((c) >= 33 && (c) <= 47) || ((c) >= 58 && (c) <= 64)  || ((c) >= 91 && (c) <= 96) || ((c) >= 123 && (c) <= 126))
 #   define isXDIGIT(c)  (isDIGIT(c) || ((c) >= 'a' && (c) <= 'f') || ((c) >= 'A' && (c) <= 'F'))
 #   define toUPPER(c)	(isLOWER(c) ? (c) - ('a' - 'A') : (c))
