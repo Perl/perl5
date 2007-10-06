@@ -5035,16 +5035,16 @@ int
 PerlIO_vprintf(PerlIO *f, const char *fmt, va_list ap)
 {
     dTHX;
-    SV * const sv = newSVpvs("");
+    SV * sv;
     const char *s;
     STRLEN len;
     SSize_t wrote;
 #ifdef NEED_VA_COPY
     va_list apc;
     Perl_va_copy(ap, apc);
-    sv_vcatpvf(sv, fmt, &apc);
+    sv = vnewSVpvf(fmt, &apc);
 #else
-    sv_vcatpvf(sv, fmt, &ap);
+    sv = vnewSVpvf(fmt, &ap);
 #endif
     s = SvPV_const(sv, len);
     wrote = PerlIO_write(f, s, len);
