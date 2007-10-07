@@ -2883,6 +2883,8 @@ PP(pp_int)
 
       while (SvAMAGIC(sv)) {
 	SV *tsv = AMG_CALLun(sv,numer);
+	if (!tsv)
+	    break;
 	if (SvROK(tsv) && SvRV(tsv) == SvRV(sv)) {
 	    SETi(PTR2IV(SvRV(sv)));
 	    RETURN;

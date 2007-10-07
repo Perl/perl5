@@ -47,7 +47,7 @@ sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 package main;
 
 $| = 1;
-use Test::More tests => 535;
+use Test::More tests => 536;
 
 
 $a = new Oscalar "087";
@@ -1383,6 +1383,8 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     use overload "0+" => sub { $_[0][0]++; $_[0] };
     package numify_other;
     use overload "0+" => sub { $_[0][0]++; $_[0][1] = bless [], 'numify_int' };
+    package numify_by_fallback;
+    use overload "-" => sub { 1 }, fallback => 1;
 
     package main;
     my $o = bless [], 'numify_int';
@@ -1399,4 +1401,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     is(int($s), 42, 'numifies to numification of other object');
     is($s->[0], 1, 'int() numifies once when returning other object');
     is($s->[1][0], 1, 'returned object numifies too');
+
+    my $m = bless $aref, 'numify_by_fallback';
+    is(int($m), $num_val, 'numifies to usual reference value');
 }
