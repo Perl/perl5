@@ -1123,6 +1123,7 @@
 #if defined(PERL_IN_GV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define gv_init_sv		S_gv_init_sv
+#define gv_get_super_pkg	S_gv_get_super_pkg
 #define require_tie_mod		S_require_tie_mod
 #endif
 #endif
@@ -3391,6 +3392,7 @@
 #if defined(PERL_IN_GV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define gv_init_sv(a,b)		S_gv_init_sv(aTHX_ a,b)
+#define gv_get_super_pkg(a,b)	S_gv_get_super_pkg(aTHX_ a,b)
 #define require_tie_mod(a,b,c,d,e)	S_require_tie_mod(aTHX_ a,b,c,d,e)
 #endif
 #endif

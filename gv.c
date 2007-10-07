@@ -528,6 +528,32 @@ C<call_sv> apply equally to these functions.
 =cut
 */
 
+STATIC HV*
+S_gv_get_super_pkg(pTHX_ const char* name, I32 namelen)
+{
+    AV* superisa;
+    GV** gvp;
+    GV* gv;
+    HV* stash;
+
+    stash = gv_stashpvn(name, namelen, 0);
+    if(stash) return stash;
+
+    /* If we must create it, give it an @ISA array containing
+       the real package this SUPER is for, so that it's tied
+       into the cache invalidation code correctly */
+    stash = gv_stashpvn(name, namelen, GV_ADD);
+    gvp = (GV**)hv_fetchs(stash, "ISA", TRUE);
+    gv = *gvp;
+    gv_init(gv, stash, "ISA", 3, TRUE);
+    superisa = GvAVn(gv);
+    GvMULTI_on(gv);
+    sv_magic((SV*)superisa, (SV*)gv, PERL_MAGIC_isa, NULL, 0);
+    av_push(superisa, newSVpv(CopSTASHPV(PL_curcop), 0));
+
+    return stash;
+}
+
 GV *
 Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 {
@@ -556,7 +582,7 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 	    SV * const tmpstr = sv_2mortal(Perl_newSVpvf(aTHX_ "%s::SUPER",
 						  CopSTASHPV(PL_curcop)));
 	    /* __PACKAGE__::SUPER stash should be autovivified */
-	    stash = gv_stashpvn(SvPVX_const(tmpstr), SvCUR(tmpstr), GV_ADD);
+	    stash = gv_get_super_pkg(SvPVX_const(tmpstr), SvCUR(tmpstr));
 	    DEBUG_o( Perl_deb(aTHX_ "Treating %s as %s::%s\n",
 			 origname, HvNAME_get(stash), name) );
 	}
@@ -569,7 +595,7 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 	    if (!stash && (nsplit - origname) >= 7 &&
 		strnEQ(nsplit - 7, "::SUPER", 7) &&
 		gv_stashpvn(origname, nsplit - origname - 7, 0))
-	      stash = gv_stashpvn(origname, nsplit - origname, GV_ADD);
+	      stash = gv_get_super_pkg(origname, nsplit - origname);
 	}
 	ostash = stash;
     }

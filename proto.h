@@ -3009,6 +3009,9 @@ STATIC I32	S_do_trans_complex_utf8(pTHX_ SV * const sv)
 STATIC void	S_gv_init_sv(pTHX_ GV *gv, I32 sv_type)
 			__attribute__nonnull__(pTHX_1);
 
+STATIC HV*	S_gv_get_super_pkg(pTHX_ const char* name, I32 namelen)
+			__attribute__nonnull__(pTHX_1);
+
 STATIC HV*	S_require_tie_mod(pTHX_ GV *gv, const char *varpv, SV* namesv, const char *methpv, const U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
