@@ -2874,22 +2874,38 @@ PP(pp_int)
 {
     dVAR; dSP; dTARGET; tryAMAGICun(int);
     {
-      const IV iv = TOPi; /* attempt to convert to IV if possible. */
+      SV *sv = TOPs;
+      IV iv;
       /* XXX it's arguable that compiler casting to IV might be subtly
 	 different from modf (for numbers inside (IV_MIN,UV_MAX)) in which
 	 else preferring IV has introduced a subtle behaviour change bug. OTOH
 	 relying on floating point to be accurate is a bug.  */
 
-      if (!SvOK(TOPs))
+      while (SvAMAGIC(sv)) {
+	SV *tsv = AMG_CALLun(sv,numer);
+	if (SvROK(tsv) && SvRV(tsv) == SvRV(sv)) {
+	    SETi(PTR2IV(SvRV(sv)));
+	    RETURN;
+	}
+	else
+	    sv = tsv;
+      }
+      iv = SvIV(sv); /* attempt to convert to IV if possible. */
+
+      if (!SvOK(sv)) {
         SETu(0);
-      else if (SvIOK(TOPs)) {
-	if (SvIsUV(TOPs)) {
-	    const UV uv = TOPu;
-	    SETu(uv);
-	} else
+      }
+      else if (SvIOK(sv)) {
+	if (SvIsUV(sv))
+	    SETu(SvUV(sv));
+	else
 	    SETi(iv);
-      } else {
-	  const NV value = TOPn;
+      }
+      else if (SvROK(sv)) {
+	    SETi(iv);
+      }
+      else {
+	  const NV value = SvNV(sv);
 	  if (value >= 0.0) {
 	      if (value < (NV)UV_MAX + 0.5) {
 		  SETu(U_V(value));
