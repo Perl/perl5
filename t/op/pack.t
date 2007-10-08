@@ -43,7 +43,7 @@ if ($no_signedness) {
 }
 
 for my $size ( 16, 32, 64 ) {
-  if (defined $Config{"u${size}size"} and $Config{"u${size}size"} != ($size >> 3)) {
+  if (defined $Config{"u${size}size"} and ($Config{"u${size}size"}||0) != ($size >> 3)) {
     push @valid_errors, qr/^Perl_my_$maybe_not_avail$size\(\) not available/;
   }
 }
