@@ -1392,7 +1392,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     is($o->[0], 1, 'int() numifies only once');
 
     my $aref = [];
-    my $num_val = 0 + $aref;
+    my $num_val = int($aref);
     my $r = bless $aref, 'numify_self';
     is(int($r), $num_val, 'numifies to self');
     is($r->[0], 1, 'int() numifies once when returning self');
