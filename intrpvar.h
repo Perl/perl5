@@ -162,7 +162,9 @@ PERLVAR(Iregdummy,	regnode)	/* from regcomp.c */
 PERLVARI(Idumpindent,	U16,	4)	/* number of blanks per dump
 					   indentation level */
 
-/* Space for U16 here without increasing the structure size */
+
+PERLVAR(Iutf8locale,	bool)		/* utf8 locale detected */
+PERLVARI(Irehash_seed_set, bool, FALSE)	/* 582 hash initialized? */
 
 PERLVARA(Icolors,6,	char *)		/* from regcomp.c */
 
@@ -255,6 +257,9 @@ PERLVAR(Istatusvalue_vms,U32)
 #else
 PERLVAR(Istatusvalue_posix,I32)
 #endif
+
+PERLVARI(Isig_pending, int,0)           /* Number if highest signal pending */
+PERLVAR(Ipsig_pend, int *)		/* per-signal "count" of pending */
 
 /* shortcuts to various I/O objects */
 PERLVAR(Istdingv,	GV *)
@@ -354,6 +359,7 @@ PERLVAR(Iors_sv,	SV *)		/* output record separator $\ */
 /* statics moved here for shared library purposes */
 PERLVARI(Igensym,	I32,	0)	/* next symbol for getsym() to define */
 PERLVARI(Icv_has_eval, bool, FALSE) /* PL_compcv includes an entereval or similar */
+PERLVAR(Itaint_warn,	bool)      /* taint warns instead of dying */
 PERLVARI(Ilaststype,	U16,	OP_STAT)
 PERLVARI(Ilaststatval,	int,	-1)
 
@@ -546,13 +552,6 @@ PERLVARI(Ibeginav_save, AV*, NULL)	/* save BEGIN{}s when compiling */
 
 PERLVAR(Ibody_arenas, void*) /* pointer to list of body-arenas */
 
-PERLVAR(Ipsig_pend, int *)		/* per-signal "count" of pending */
-PERLVARI(Isig_pending, int,0)           /* Number if highest signal pending */
-
-
-PERLVAR(Itaint_warn,	bool)      /* taint warns instead of dying */
-PERLVAR(Iutf8locale,	bool)		/* utf8 locale detected */
-PERLVARI(Irehash_seed_set, bool, FALSE)	/* 582 hash initialized? */
 
 #ifdef USE_LOCALE_NUMERIC
 
@@ -665,8 +664,8 @@ PERLVARI(Islab_count, U32, 0)	/* Size of the array */
 
 PERLVARI(Iisarev, HV*, NULL) /* Reverse map of @ISA dependencies */
 
-/* If you are adding a U8 or U16, see the 'Space' comments above on where
- * there are gaps which currently will be structure padding.  */
+/* If you are adding a U8 or U16, check to see if there are 'Space' comments
+ * above on where there are gaps which currently will be structure padding.  */
 
 /* Within a stable branch, new variables must be added to the very end, before
  * this comment, for binary compatibility (the offsets of the old members must
