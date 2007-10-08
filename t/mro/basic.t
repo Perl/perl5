@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-require q(./test.pl); plan(tests => 35);
+require q(./test.pl); plan(tests => 38);
 
 {
     package MRO_A;
@@ -188,5 +188,33 @@ is(eval { MRO_N->testfunc() }, 123);
         eval $code;
         ok($@ =~ /Recursive inheritance detected/);
     }
+}
+
+# Check that SUPER caches get invalidated correctly
+{
+    {
+        package SUPERTEST;
+        sub new { bless {} => shift }
+        sub foo { $_[1]+1 }
+
+        package SUPERTEST::MID;
+        our @ISA = 'SUPERTEST';
+
+        package SUPERTEST::KID;
+        our @ISA = 'SUPERTEST::MID';
+        sub foo { my $s = shift; $s->SUPER::foo(@_) }
+
+        package SUPERTEST::REBASE;
+        sub foo { $_[1]+3 }
+    }
+
+    my $stk_obj = SUPERTEST::KID->new();
+    is($stk_obj->foo(1), 2);
+    { no warnings 'redefine';
+      *SUPERTEST::foo = sub { $_[1]+2 };
+    }
+    is($stk_obj->foo(2), 4);
+    @SUPERTEST::MID::ISA = 'SUPERTEST::REBASE';
+    is($stk_obj->foo(3), 6);
 }
 
