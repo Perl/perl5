@@ -1172,7 +1172,7 @@ is the recommended Unicode-aware way of saying
 	    SvUTF8_on(zlopp);						   \
 	    av_push(revcharmap, zlopp);					   \
 	} else {							   \
-	    char ooooff = uvc;					   	   \
+	    char ooooff = (char)uvc;					   	   \
 	    av_push(revcharmap, newSVpvn(&ooooff, 1));			   \
 	}								   \
         } STMT_END
@@ -6504,7 +6504,7 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep)
             *valuep = cp;
             return NULL;
         }
-	string = cp;
+	string = (char)cp;
         sv_str= newSVpvn(&string, 1);
     } else {
         /* fetch the charnames handler for this scope */
