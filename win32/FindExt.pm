@@ -103,12 +103,17 @@ sub find_ext
         }
     }
 
-# Special case:  Add in threads/shared since it is not picked up by the
-# recursive find above (and adding in general recursive finding breaks
-# SDBM_File/sdbm).  A.D.  10/25/2001.
+# Special case:  Add in modules that nest beyond the first level.
+# Currently threads/shared and Hash/Util/FieldHash, since they are
+# not picked up by the recursive find above (and adding in general
+# recursive finding breaks SDBM_File/sdbm).
+# A.D. 20011025 (SDBM), ajgough 20071008 (FieldHash)
 
     if (!$_[0] && -d "threads/shared") {
         $ext{"threads/shared"} = 'dynamic';
+    }
+    if (!$_[0] && -d "Hash/Util/FieldHash") {
+        $ext{"Hash/Util/FieldHash"} = 'dynamic';
     }
 }
 

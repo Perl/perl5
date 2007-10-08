@@ -798,8 +798,7 @@ SETARGV_OBJ	= setargv$(o)
 #  - Win32 extension contains overlapped symbols with win32.c (BUG!)
 #  - MakeMaker isn't capable enough for SDBM_File (smaller bug)
 #  - Encode (encoding search algorithm relies on shared library?)
-#  - Hash/Util (fails various tests when linked statically)
-STATIC_EXT	= * !Win32 !SDBM_File !Encode !Hash/Util
+STATIC_EXT	= * !Win32 !SDBM_File !Encode
 !ELSE
 # specify static extensions here, for example:
 #STATIC_EXT	= Cwd Compress/Raw/Zlib
