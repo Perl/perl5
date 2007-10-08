@@ -569,13 +569,6 @@ PERLVAR(Iregex_padav,   AV*)		/* All regex objects */
 PERLVAR(Ireentrant_buffer, REENTR*)	/* here we store the _r buffers */
 #endif
 
-
-#ifdef PERL_MAD
-PERLVARI(Imadskills,	bool, FALSE)	/* preserve all syntactic info */
-					/* (MAD = Misc Attribute Decoration) */
-PERLVARI(Ixmlfp, PerlIO *,NULL)
-#endif
-
 PERLVAR(Icustom_op_names, HV*)  /* Names of user defined ops */
 PERLVAR(Icustom_op_descs, HV*)  /* Descriptions of user defined ops */
 
@@ -588,12 +581,6 @@ PERLVARI(Idef_layerlist, PerlIO_list_t *,NULL)
 PERLVARI(Iencoding,	SV*, NULL)		/* character encoding */
 
 PERLVAR(Idebug_pad,	struct perl_debug_pad)	/* always needed because of the re extension */
-
-#ifdef PL_OP_SLAB_ALLOC
-PERLVAR(IOpPtr,I32 **)
-PERLVARI(IOpSpace,I32,0)
-PERLVAR(IOpSlab,I32 *)
-#endif
 
 PERLVAR(Iutf8_idstart,	SV *)
 PERLVAR(Iutf8_idcont,	SV *)
@@ -628,28 +615,20 @@ PERLVARI(Iunlockhook,	share_proc_t,	MEMBER_TO_FPTR(PERL_UNLOCK_HOOK))
 
 PERLVARI(Ithreadhook,	thrhook_proc_t,	MEMBER_TO_FPTR(Perl_nothreadhook))
 
-/* Stores the PPID */
-#ifdef THREADS_HAVE_PIDS
-PERLVARI(Ippid,		IV,		0)
-#endif
-
 PERLVARI(Ihash_seed, UV, 0)		/* Hash initializer */
 
 PERLVAR(IDBassertion,   SV *)
 
 PERLVARI(Irehash_seed, UV, 0)		/* 582 hash initializer */
 
-#ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
-/* File descriptor to talk to the child which dumps scalars.  */
-PERLVARI(Idumper_fd, int, -1)
-#endif
+PERLVARI(Iisarev, HV*, NULL) /* Reverse map of @ISA dependencies */
 
 #ifdef PERL_IMPLICIT_CONTEXT
 PERLVARI(Imy_cxt_size, int, 0)		/* size of PL_my_cxt_list */
 PERLVARI(Imy_cxt_list, void **, NULL) /* per-module array of MY_CXT pointers */
-#ifdef PERL_GLOBAL_STRUCT_PRIVATE
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
 PERLVARI(Imy_cxt_keys, const char **, NULL) /* per-module array of pointers to MY_CXT_KEY constants */
-#endif
+#  endif
 #endif
 
 #ifdef PERL_TRACK_MEMPOOL
@@ -657,12 +636,32 @@ PERLVARI(Imy_cxt_keys, const char **, NULL) /* per-module array of pointers to M
 PERLVAR(Imemory_debug_header, struct perl_memory_debug_header)
 #endif
 
+#ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
+/* File descriptor to talk to the child which dumps scalars.  */
+PERLVARI(Idumper_fd, int, -1)
+#endif
+
+/* Stores the PPID */
+#ifdef THREADS_HAVE_PIDS
+PERLVARI(Ippid,		IV,		0)
+#endif
+
+#ifdef PERL_MAD
+PERLVARI(Imadskills,	bool, FALSE)	/* preserve all syntactic info */
+					/* (MAD = Misc Attribute Decoration) */
+PERLVARI(Ixmlfp, PerlIO *,NULL)
+#endif
+
+#ifdef PL_OP_SLAB_ALLOC
+PERLVAR(IOpPtr,I32 **)
+PERLVARI(IOpSpace,I32,0)
+PERLVAR(IOpSlab,I32 *)
+#endif
+
 #ifdef PERL_DEBUG_READONLY_OPS
 PERLVARI(Islabs, I32**, NULL)	/* Array of slabs that have been allocated */
 PERLVARI(Islab_count, U32, 0)	/* Size of the array */
 #endif
-
-PERLVARI(Iisarev, HV*, NULL) /* Reverse map of @ISA dependencies */
 
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */
