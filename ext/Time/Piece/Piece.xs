@@ -241,9 +241,13 @@ my_mini_mktime(struct tm *ptm)
     ptm->tm_wday = (jday + WEEKDAY_BIAS) % 7;
 }
 
-#if defined(WIN32) /* No strptime on Win32 */
+#if defined(WIN32) || (defined(__QNX__) && defined(__WATCOMC__)) /* No strptime on Win32 or QNX4 */
 #define strncasecmp(x,y,n) strnicmp(x,y,n)
+
+#if defined(WIN32)
 #define alloca _alloca
+#endif
+
 #include <time.h>
 #include <ctype.h>
 #include <string.h>

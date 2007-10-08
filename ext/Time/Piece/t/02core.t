@@ -1,6 +1,7 @@
 use Test::More tests => 93;
 
 my $is_win32 = ($^O =~ /Win32/);
+my $is_qnx = ($^O eq 'qnx');
 BEGIN { use_ok('Time::Piece'); }
 ok(1);
 
@@ -60,8 +61,12 @@ cmp_ok($t->week, '==', 9);
 cmp_ok($t->strftime('%d'), '==', 29);
 
 SKIP: {
-  skip "can't strftime %D, %R, %T or %e on Win32", 2 if $is_win32;
+  skip "can't strftime %D, %R, %T or %e on Win32", 1 if $is_win32;
   cmp_ok($t->strftime('%D'), 'eq', '02/29/00'); # Yech!
+}
+SKIP:{
+  skip "can't strftime %D, %R, %T or %e on Win32", 1 if $is_win32;
+  skip "can't strftime %e on QNX", 1 if $is_qnx;
   cmp_ok($t->strftime('%e'), 'eq', '29');       # should test with < 10
 }
 
@@ -76,7 +81,7 @@ cmp_ok($t->strftime('%M'), 'eq', '34'); # should test with < 10
 # and are possibly unportable (am or AM or a.m., and so on)
 
 SKIP: {
-  skip "can't strftime %R on Win32", 1 if $is_win32;
+  skip "can't strftime %R on Win32 or QNX", 1 if $is_win32 or $is_qnx;
   cmp_ok($t->strftime('%R'), 'eq', '12:34');    # should test with > 12
 }
 
@@ -94,7 +99,7 @@ SKIP: {
 cmp_ok($t->strftime('%U'), 'eq', '09'); # Sun cmp Mon
 
 SKIP: {
-    skip "can't strftime %V on Win32", 1 if $is_win32;
+    skip "can't strftime %V on Win32 or QNX", 1 if $is_win32 or $is_qnx;
     # is this test really broken on Mac OS? -- rjbs, 2006-02-08
     cmp_ok($t->strftime('%V'), 'eq', '09'); # Sun cmp Mon
 }
