@@ -3222,6 +3222,7 @@ PP(pp_require)
 #endif
 	{
 	    namesv = newSV(0);
+	    sv_upgrade(namesv, SVt_PV);
 	    for (i = 0; i <= AvFILL(ar); i++) {
 		SV * const dirsv = *av_fetch(ar, i, TRUE);
 
@@ -3351,7 +3352,16 @@ PP(pp_require)
 			|| (*name == ':' && name[1] != ':' && strchr(name+2, ':'))
 #endif
 		  ) {
-		    const char *dir = SvOK(dirsv) ? SvPV_nolen_const(dirsv) : "";
+		    const char *dir;
+		    STRLEN dirlen;
+
+		    if (SvOK(dirsv)) {
+			dir = SvPV_const(dirsv, dirlen);
+		    } else {
+			dir = "";
+			dirlen = 0;
+		    }
+
 #ifdef MACOS_TRADITIONAL
 		    char buf1[256];
 		    char buf2[256];
@@ -3379,7 +3389,26 @@ PP(pp_require)
 				       "%s\\%s",
 				       dir, name);
 #    else
-		    Perl_sv_setpvf(aTHX_ namesv, "%s/%s", dir, name);
+		    /* The equivalent of		    
+		       Perl_sv_setpvf(aTHX_ namesv, "%s/%s", dir, name);
+		       but without the need to parse the format string, or
+		       call strlen on either pointer, and with the correct
+		       allocation up front.  */
+		    {
+			char *tmp = SvGROW(namesv, dirlen + len + 2);
+
+			memcpy(tmp, dir, dirlen);
+			tmp +=dirlen;
+			*tmp++ = '/';
+			/* name came from an SV, so it will have a '\0' at the
+			   end that we can copy as part of this memcpy().  */
+			memcpy(tmp, name, len + 1);
+
+			SvCUR_set(namesv, dirlen + len + 1);
+
+			/* Don't even actually have to turn SvPOK_on() as we
+			   access it directly with SvPVX() below.  */
+		    }
 #    endif
 #  endif
 #endif
