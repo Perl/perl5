@@ -44,9 +44,9 @@
 
 #ifndef S_IRWXU
 #   ifdef S_IRUSR
-#       define S_IRWXU (S_IRUSR|S_IWUSR|S_IWUSR)
-#       define S_IRWXG (S_IRGRP|S_IWGRP|S_IWGRP)
-#       define S_IRWXO (S_IROTH|S_IWOTH|S_IWOTH)
+#       define S_IRWXU (S_IRUSR|S_IWUSR|S_IXUSR)
+#       define S_IRWXG (S_IRGRP|S_IWGRP|S_IXGRP)
+#       define S_IRWXO (S_IROTH|S_IWOTH|S_IXOTH)
 #   else
 #       define S_IRWXU 0700
 #       define S_IRWXG 0070
@@ -248,7 +248,7 @@ BOOT:
         {"IPC_EXCL", IPC_EXCL},
 #endif
 #ifdef IPC_GETACL
-        {"IPC_GETACL", IPC_EXCL},
+        {"IPC_GETACL", IPC_GETACL},
 #endif
 #ifdef IPC_LOCKED
         {"IPC_LOCKED", IPC_LOCKED},
