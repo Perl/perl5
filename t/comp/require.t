@@ -9,9 +9,13 @@ BEGIN {
 # don't make this lexical
 $i = 1;
 
+my @fjles_to_delete = qw (bleah.pm bleah.do bleah.flg urkkk.pm urkkk.pmc
+krunch.pm krunch.pmc whap.pm whap.pmc);
+
+
 my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
 my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
-my $total_tests = 46;
+my $total_tests = 49;
 if ($Is_EBCDIC || $Is_UTF8) { $total_tests -= 3; }
 print "1..$total_tests\n";
 
@@ -199,6 +203,61 @@ if ($@ =~ /^This is an expected error/) {
     print "not ok $i\n";
 }
 
+sub write_file_not_thing {
+    my ($file, $thing, $test) = @_;
+    write_file($file, <<"EOT");
+    print "not ok $test\n";
+    die "The $thing file should not be loaded";
+EOT
+}
+
+{
+    # Right. We really really need Config here.
+    require Config;
+    die "Failed to load Config for some reason"
+	unless $Config::Config{version};
+    my $ccflags = $Config::Config{ccflags};
+    die "Failed to get ccflags for some reason" unless defined $ccflags;
+
+    my $simple = ++$i;
+    my $pmc_older = ++$i;
+    my $pmc_dies = ++$i;
+    if ($ccflags =~ /(?:^|\s)-DPERL_DISABLE_PMC\b/) {
+	print "# .pmc files are ignored, so test that\n";
+	write_file_not_thing('krunch.pmc', '.pmc', $pmc_older);
+	write_file('urkkk.pm', qq(print "ok $simple\n"));
+	write_file('whap.pmc', qq(die "This is not an expected error"));
+
+	print "# Sleeping for 2 seconds before creating some more files\n";
+	sleep 2;
+
+	write_file('krunch.pm', qq(print "ok $pmc_older\n"));
+	write_file_not_thing('urkkk.pmc', '.pmc', $simple);
+	write_file('whap.pm', qq(die "This is an expected error"));
+    } else {
+	print "# .pmc files should be loaded, so test that\n";
+	write_file('krunch.pmc', qq(print "ok $pmc_older\n";));
+	write_file_not_thing('urkkk.pm', '.pm', $simple);
+	write_file('whap.pmc', qq(die "This is an expected error"));
+
+	print "# Sleeping for 2 seconds before creating some more files\n";
+	sleep 2;
+
+	write_file_not_thing('krunch.pm', '.pm', $pmc_older);
+	write_file('urkkk.pmc', qq(print "ok $simple\n";));
+	write_file_not_thing('whap.pm', '.pm', $pmc_dies);
+    }
+    require urkkk;
+    require krunch;
+    eval {CORE::require whap; 1} and die;
+
+    if ($@ =~ /^This is an expected error/) {
+	print "ok $pmc_dies\n";
+    } else {
+	print "not ok $pmc_dies\n";
+    }
+}
+
 ##########################################
 # What follows are UTF-8 specific tests. #
 # Add generic tests before this point.   #
@@ -221,9 +280,9 @@ $i++; do_require(bytes_to_utf16('n', qq(print "ok $i\\n"; 1;\n), 1)); # BE
 $i++; do_require(bytes_to_utf16('v', qq(print "ok $i\\n"; 1;\n), 1)); # LE
 
 END {
-    1 while unlink 'bleah.pm';
-    1 while unlink 'bleah.do';
-    1 while unlink 'bleah.flg';
+    foreach my $file (@fjles_to_delete) {
+	1 while unlink $file;
+    }
 }
 
 # ***interaction with pod (don't put any thing after here)***
