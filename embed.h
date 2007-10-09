@@ -1305,7 +1305,13 @@
 #define save_lines		S_save_lines
 #define doeval			S_doeval
 #define check_type_and_open	S_check_type_and_open
+#endif
+#ifndef PERL_DISABLE_PMC
+#ifdef PERL_CORE
 #define doopen_pm		S_doopen_pm
+#endif
+#endif
+#ifdef PERL_CORE
 #define path_is_absolute	S_path_is_absolute
 #define run_user_filter		S_run_user_filter
 #define make_matcher		S_make_matcher
@@ -3584,7 +3590,13 @@
 #define save_lines(a,b)		S_save_lines(aTHX_ a,b)
 #define doeval(a,b,c,d)		S_doeval(aTHX_ a,b,c,d)
 #define check_type_and_open(a)	S_check_type_and_open(aTHX_ a)
+#endif
+#ifndef PERL_DISABLE_PMC
+#ifdef PERL_CORE
 #define doopen_pm(a,b)		S_doopen_pm(aTHX_ a,b)
+#endif
+#endif
+#ifdef PERL_CORE
 #define path_is_absolute	S_path_is_absolute
 #define run_user_filter(a,b,c)	S_run_user_filter(aTHX_ a,b,c)
 #define make_matcher(a)		S_make_matcher(aTHX_ a)

@@ -3018,10 +3018,10 @@ S_check_type_and_open(pTHX_ const char *name)
     return PerlIO_open(name, PERL_SCRIPT_MODE);
 }
 
+#ifndef PERL_DISABLE_PMC
 STATIC PerlIO *
 S_doopen_pm(pTHX_ const char *name, const STRLEN namelen)
 {
-#ifndef PERL_DISABLE_PMC
     PerlIO *fp;
 
     if (namelen > 3 && strEQ(name + namelen - 3, ".pm")) {
@@ -3045,10 +3045,10 @@ S_doopen_pm(pTHX_ const char *name, const STRLEN namelen)
 	fp = check_type_and_open(name);
     }
     return fp;
-#else
-    return check_type_and_open(name);
-#endif /* !PERL_DISABLE_PMC */
 }
+#else
+#  define doopen_pm(name, namelen) check_type_and_open(name)
+#endif /* !PERL_DISABLE_PMC */
 
 PP(pp_require)
 {

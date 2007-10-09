@@ -3542,10 +3542,12 @@ STATIC PerlIO *	S_check_type_and_open(pTHX_ const char *name)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
+#ifndef PERL_DISABLE_PMC
 STATIC PerlIO *	S_doopen_pm(pTHX_ const char *name, const STRLEN namelen)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
+#endif
 STATIC bool	S_path_is_absolute(const char *name)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1);

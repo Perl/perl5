@@ -1324,7 +1324,9 @@ sR	|I32	|dopoptowhen	|I32 startingblock
 s	|void	|save_lines	|NULLOK AV *array|NN SV *sv
 s	|bool	|doeval		|int gimme|NULLOK OP** startop|NULLOK CV* outside|U32 seq
 sR	|PerlIO *|check_type_and_open|NN const char *name
+#ifndef PERL_DISABLE_PMC
 sR	|PerlIO *|doopen_pm	|NN const char *name|const STRLEN namelen
+#endif
 sRn	|bool	|path_is_absolute|NN const char *name
 sR	|I32	|run_user_filter|int idx|NN SV *buf_sv|int maxlen
 sR	|PMOP*	|make_matcher	|NN regexp* re
