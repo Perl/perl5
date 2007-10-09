@@ -1451,17 +1451,25 @@ sub declare_hints {
     return $decls;
 }
 
+# Internal implementation hints that the core sets automatically, so don't need
+# (or want) to be passed back to the user
+my %ignored_hints = (
+    'open<' => 1,
+    'open>' => 1,
+    'v_string' => 1,
+    );
+
 sub declare_hinthash {
     my ($from, $to, $indent) = @_;
     my @decls;
     for my $key (keys %$to) {
-	next if $key =~ /^open[<>]$/;
+	next if $ignored_hints{$key};
 	if (!defined $from->{$key} or $from->{$key} ne $to->{$key}) {
 	    push @decls, qq(\$^H{'$key'} = q($to->{$key}););
 	}
     }
     for my $key (keys %$from) {
-	next if $key =~ /^open[<>]$/;
+	next if $ignored_hints{$key};
 	if (!exists $to->{$key}) {
 	    push @decls, qq(delete \$^H{'$key'};);
 	}
