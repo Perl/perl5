@@ -3024,7 +3024,7 @@ S_doopen_pm(pTHX_ const char *name, const STRLEN namelen)
 {
     PerlIO *fp;
 
-    if (namelen > 3 && strEQ(name + namelen - 3, ".pm")) {
+    if (namelen > 3 && memEQs(name + namelen - 3, 3, ".pm")) {
 	SV *const pmcsv = newSV(namelen + 2);
 	char *const pmc = SvPVX(pmcsv);
 	Stat_t pmcstat;
