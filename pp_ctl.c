@@ -3026,9 +3026,14 @@ S_doopen_pm(pTHX_ const char *name, const char *mode)
     PerlIO *fp;
 
     if (namelen > 3 && strEQ(name + namelen - 3, ".pm")) {
-	SV * const pmcsv = Perl_newSVpvf(aTHX_ "%s%c", name, 'c');
-	const char * const pmc = SvPV_nolen_const(pmcsv);
+	SV *const pmcsv = newSV(namelen + 2);
+	char *const pmc = SvPVX(pmcsv);
 	Stat_t pmcstat;
+
+	memcpy(pmc, name, namelen);
+	pmc[namelen] = 'c';
+	pmc[namelen + 1] = '\0';
+
 	if (PerlLIO_stat(pmc, &pmcstat) < 0) {
 	    fp = check_type_and_open(name, mode);
 	}
