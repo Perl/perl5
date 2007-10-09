@@ -3538,15 +3538,13 @@ STATIC void	S_save_lines(pTHX_ AV *array, SV *sv)
 			__attribute__nonnull__(pTHX_2);
 
 STATIC bool	S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq);
-STATIC PerlIO *	S_check_type_and_open(pTHX_ const char *name, const char *mode)
+STATIC PerlIO *	S_check_type_and_open(pTHX_ const char *name)
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_1);
 
-STATIC PerlIO *	S_doopen_pm(pTHX_ const char *name, const char *mode)
+STATIC PerlIO *	S_doopen_pm(pTHX_ const char *name, const STRLEN namelen)
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_1);
 
 STATIC bool	S_path_is_absolute(const char *name)
 			__attribute__warn_unused_result__

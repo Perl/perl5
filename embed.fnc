@@ -1323,8 +1323,8 @@ sR	|I32	|dopoptosub_at	|NN const PERL_CONTEXT* cxstk|I32 startingblock
 sR	|I32	|dopoptowhen	|I32 startingblock
 s	|void	|save_lines	|NULLOK AV *array|NN SV *sv
 s	|bool	|doeval		|int gimme|NULLOK OP** startop|NULLOK CV* outside|U32 seq
-sR	|PerlIO *|check_type_and_open|NN const char *name|NN const char *mode
-sR	|PerlIO *|doopen_pm	|NN const char *name|NN const char *mode
+sR	|PerlIO *|check_type_and_open|NN const char *name
+sR	|PerlIO *|doopen_pm	|NN const char *name|const STRLEN namelen
 sRn	|bool	|path_is_absolute|NN const char *name
 sR	|I32	|run_user_filter|int idx|NN SV *buf_sv|int maxlen
 sR	|PMOP*	|make_matcher	|NN regexp* re

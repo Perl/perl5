@@ -3583,7 +3583,7 @@
 #define dopoptowhen(a)		S_dopoptowhen(aTHX_ a)
 #define save_lines(a,b)		S_save_lines(aTHX_ a,b)
 #define doeval(a,b,c,d)		S_doeval(aTHX_ a,b,c,d)
-#define check_type_and_open(a,b)	S_check_type_and_open(aTHX_ a,b)
+#define check_type_and_open(a)	S_check_type_and_open(aTHX_ a)
 #define doopen_pm(a,b)		S_doopen_pm(aTHX_ a,b)
 #define path_is_absolute	S_path_is_absolute
 #define run_user_filter(a,b,c)	S_run_user_filter(aTHX_ a,b,c)

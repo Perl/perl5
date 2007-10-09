@@ -3006,7 +3006,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 }
 
 STATIC PerlIO *
-S_check_type_and_open(pTHX_ const char *name, const char *mode)
+S_check_type_and_open(pTHX_ const char *name)
 {
     Stat_t st;
     const int st_rc = PerlLIO_stat(name, &st);
@@ -3015,14 +3015,13 @@ S_check_type_and_open(pTHX_ const char *name, const char *mode)
 	return NULL;
     }
 
-    return PerlIO_open(name, mode);
+    return PerlIO_open(name, PERL_SCRIPT_MODE);
 }
 
 STATIC PerlIO *
-S_doopen_pm(pTHX_ const char *name, const char *mode)
+S_doopen_pm(pTHX_ const char *name, const STRLEN namelen)
 {
 #ifndef PERL_DISABLE_PMC
-    const STRLEN namelen = strlen(name);
     PerlIO *fp;
 
     if (namelen > 3 && strEQ(name + namelen - 3, ".pm")) {
@@ -3035,19 +3034,19 @@ S_doopen_pm(pTHX_ const char *name, const char *mode)
 	pmc[namelen + 1] = '\0';
 
 	if (PerlLIO_stat(pmc, &pmcstat) < 0) {
-	    fp = check_type_and_open(name, mode);
+	    fp = check_type_and_open(name);
 	}
 	else {
-	    fp = check_type_and_open(pmc, mode);
+	    fp = check_type_and_open(pmc);
 	}
 	SvREFCNT_dec(pmcsv);
     }
     else {
-	fp = check_type_and_open(name, mode);
+	fp = check_type_and_open(name);
     }
     return fp;
 #else
-    return check_type_and_open(name, mode);
+    return check_type_and_open(name);
 #endif /* !PERL_DISABLE_PMC */
 }
 
@@ -3202,7 +3201,7 @@ PP(pp_require)
 
     if (path_is_absolute(name)) {
 	tryname = name;
-	tryrsfp = doopen_pm(name,PERL_SCRIPT_MODE);
+	tryrsfp = doopen_pm(name, len);
     }
 #ifdef MACOS_TRADITIONAL
     if (!tryrsfp) {
@@ -3211,7 +3210,7 @@ PP(pp_require)
 	MacPerl_CanonDir(name, newname, 1);
 	if (path_is_absolute(newname)) {
 	    tryname = newname;
-	    tryrsfp = doopen_pm(newname,PERL_SCRIPT_MODE);
+	    tryrsfp = doopen_pm(newname, strlen(newname));
 	}
     }
 #endif
@@ -3386,7 +3385,7 @@ PP(pp_require)
 #endif
 		    TAINT_PROPER("require");
 		    tryname = SvPVX_const(namesv);
-		    tryrsfp = doopen_pm(tryname, PERL_SCRIPT_MODE);
+		    tryrsfp = doopen_pm(tryname, SvCUR(namesv));
 		    if (tryrsfp) {
 			if (tryname[0] == '.' && tryname[1] == '/')
 			    tryname += 2;
