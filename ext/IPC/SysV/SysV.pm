@@ -14,7 +14,7 @@ use Config;
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = "1.04";
+$VERSION = "1.05";
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
