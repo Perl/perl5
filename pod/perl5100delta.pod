@@ -1,0 +1,611 @@
+TODO: perl591delta and further
+
+=head1 NAME
+
+perldelta - what is new for perl 5.10.0
+
+=head1 DESCRIPTION
+
+This document describes the differences between the 5.8.8 release and
+the 5.10.0 release.
+
+Many of the bug fixes in 5.10.0 were already seen in the 5.8.X maintenance
+releases; they are not duplicated here and are documented in the set of
+man pages named perl58[1-8]?delta.
+
+=head1 Incompatible Changes
+
+=head2 Packing and UTF-8 strings
+
+=for XXX update this
+
+The semantics of pack() and unpack() regarding UTF-8-encoded data has been
+changed. Processing is now by default character per character instead of
+byte per byte on the underlying encoding. Notably, code that used things
+like C<pack("a*", $string)> to see through the encoding of string will now
+simply get back the original $string. Packed strings can also get upgraded
+during processing when you store upgraded characters. You can get the old
+behaviour by using C<use bytes>.
+
+To be consistent with pack(), the C<C0> in unpack() templates indicates
+that the data is to be processed in character mode, i.e. character by
+character; on the contrary, C<U0> in unpack() indicates UTF-8 mode, where
+the packed string is processed in its UTF-8-encoded Unicode form on a byte
+by byte basis. This is reversed with regard to perl 5.8.X.
+
+Moreover, C<C0> and C<U0> can also be used in pack() templates to specify
+respectively character and byte modes.
+
+C<C0> and C<U0> in the middle of a pack or unpack format now switch to the
+specified encoding mode, honoring parens grouping. Previously, parens were
+ignored.
+
+Also, there is a new pack() character format, C<W>, which is intended to
+replace the old C<C>. C<C> is kept for unsigned chars coded as bytes in
+the strings internal representation. C<W> represents unsigned (logical)
+character values, which can be greater than 255. It is therefore more
+robust when dealing with potentially UTF-8-encoded data (as C<C> will wrap
+values outside the range 0..255, and not respect the string encoding).
+
+In practice, that means that pack formats are now encoding-neutral, except
+C<C>.
+
+For consistency, C<A> in unpack() format now trims all Unicode whitespace
+from the end of the string. Before perl 5.9.2, it used to strip only the
+classical ASCII space characters.
+
+=head2 The C<$*> and C<$#> variables have been removed
+
+C<$*>, which was deprecated in favor of the C</s> and C</m> regexp
+modifiers, has been removed.
+
+The deprecated C<$#> variable (output format for numbers) has been
+removed.
+
+Two new warnings, C<$#/$* is no longer supported>, have been added.
+
+=head2 substr() lvalues are no longer fixed-length
+
+The lvalues returned by the three argument form of substr() used to be a
+"fixed length window" on the original string. In some cases this could
+cause surprising action at distance or other undefined behaviour. Now the
+length of the window adjusts itself to the length of the string assigned to
+it.
+
+=head2 Parsing of C<-f _>
+
+The identifier C<_> is now forced to be a bareword after a filetest
+operator. This solves a number of misparsing issues when a global C<_>
+subroutine is defined.
+
+=head2 C<:unique>
+
+The C<:unique> attribute has been made a no-op, since its current
+implementation was fundamentally flawed and not threadsafe.
+
+=head2 Scoping of the C<sort> pragma
+
+The C<sort> pragma is now lexically scoped. Its effect used to be global.
+
+=head2 Scoping of C<bignum>, C<bigint>, C<bigrat>
+
+The three numeric pragmas C<bignum>, C<bigint> and C<bigrat> are now
+lexically scoped. (Tels)
+
+=head2 Effect of pragmas in eval
+
+The compile-time value of the C<%^H> hint variable can now propagate into
+eval("")uated code. This makes it more useful to implement lexical
+pragmas.
+
+As a side-effect of this, the overloaded-ness of constants now propagates
+into eval("").
+
+=head2 chdir FOO
+
+A bareword argument to chdir() is now recognized as a file handle.
+Earlier releases interpreted the bareword as a directory name.
+(Gisle Aas)
+
+=head2 Handling of .pmc files
+
+An old feature of perl was that before C<require> or C<use> look for a
+file with a F<.pm> extension, they will first look for a similar filename
+with a F<.pmc> extension. If this file is found, it will be loaded in
+place of any potentially existing file ending in a F<.pm> extension.
+
+Previously, F<.pmc> files were loaded only if more recent than the
+matching F<.pm> file. Starting with 5.9.4, they'll be always loaded if
+they exist.
+
+=head2 @- and @+ in patterns
+
+The special arrays C<@-> and C<@+> are no longer interpolated in regular
+expressions. (Sadahiro Tomoyuki)
+
+=head2 $AUTOLOAD can now be tainted
+
+If you call a subroutine by a tainted name, and if it defers to an
+AUTOLOAD function, then $AUTOLOAD will be (correctly) tainted.
+(Rick Delaney)
+
+=head2 Tainting and printf
+
+When perl is run under taint mode, C<printf()> and C<sprintf()> will now
+reject any tainted format argument. (Rafael Garcia-Suarez)
+
+=head2 undef and signal handlers
+
+Undefining or deleting a signal handler via C<undef $SIG{FOO}> is now
+equivalent to setting it to C<'DEFAULT'>. (Rafael Garcia-Suarez)
+
+=head2 strictures and array/hash dereferencing in defined()
+
+C<defined @$foo> and C<defined %$bar> are now subject to C<strict 'refs'>
+(that is, C<$foo> and C<$bar> shall be proper references there.)
+(Nicholas Clark)
+
+(However, C<defined(@foo)> and C<defined(%bar)> are discouraged constructs
+anyway.)
+
+=head2 C<(?p{})> has been removed
+
+The regular expression construct C<(?p{})>, which was deprecated in perl
+5.8, has been removed. Use C<(??{})> instead. (Rafael Garcia-Suarez)
+
+=head2 Pseudo-hashes have been removed
+
+Support for pseudo-hashes has been removed from Perl 5.9. (The C<fields>
+pragma remains here, but uses an alternate implementation.)
+
+=head2 Removal of the bytecode compiler and of perlcc
+
+C<perlcc>, the byteloader and the supporting modules (B::C, B::CC,
+B::Bytecode, etc.) are no longer distributed with the perl sources. Those
+experimental tools have never worked reliably, and, due to the lack of
+volunteers to keep them in line with the perl interpreter developments, it
+was decided to remove them instead of shipping a broken version of those.
+The last version of those modules can be found with perl 5.9.4.
+
+However the B compiler framework stays supported in the perl core, as with
+the more useful modules it has permitted (among others, B::Deparse and
+B::Concise).
+
+=head2 Removal of the JPL
+
+The JPL (Java-Perl Linguo) has been removed from the perl sources tarball.
+
+=head2 Recursive inheritance detected earlier
+
+Perl will now immediately throw an exception if you modify any package's
+C<@ISA> in such a way that it would cause recursive inheritance.
+
+Previously, the exception would not occur until Perl attempted to make
+use of the recursive inheritance while resolving a method or doing a
+C<$foo-E<gt>isa($bar)> lookup.
+
+=head1 Core Enhancements
+
+=head2 The C<feature> pragma
+
+The C<feature> pragma is used to enable new syntax that would break Perl's
+backwards-compatibility with older releases of the language. It's a lexical
+pragma, like C<strict> or C<warnings>.
+
+Currently the following new features are available: C<switch> (adds a
+switch statement), C<say> (adds a C<say> built-in function), and C<state>
+(adds an C<state> keyword for declaring "static" variables). Those
+features are described in their own sections of this document.
+
+The C<feature> pragma is also implicitly loaded when you require a minimal
+perl version (with the C<use VERSION> construct) greater than, or equal
+to, 5.9.5. See L<feature> for details.
+
+=head2 New B<-E> command-line switch
+
+B<-E> is equivalent to B<-e>, but it implicitly enables all
+optional features (like C<use feature ":5.10">).
+
+=head2 Defined-or operator
+
+A new operator C<//> (defined-or) has been implemented.
+The following statement:
+
+    $a // $b
+
+is merely equivalent to
+
+   defined $a ? $a : $b
+
+and
+
+   $c //= $d;
+
+can now be used instead of
+
+   $c = $d unless defined $c;
+
+The C<//> operator has the same precedence and associativity as C<||>.
+Special care has been taken to ensure that this operator Do What You Mean
+while not breaking old code, but some edge cases involving the empty
+regular expression may now parse differently.  See L<perlop> for
+details.
+
+=head2 Switch and Smart Match operator
+
+Perl 5 now has a switch statement. It's available when C<use feature
+'switch'> is in effect. This feature introduces three new keywords,
+C<given>, C<when>, and C<default>:
+
+    given ($foo) {
+	when (/^abc/) { $abc = 1; }
+	when (/^def/) { $def = 1; }
+	when (/^xyz/) { $xyz = 1; }
+	default { $nothing = 1; }
+    }
+
+A more complete description of how Perl matches the switch variable
+against the C<when> conditions is given in L<perlsyn/"Switch statements">.
+
+This kind of match is called I<smart match>, and it's also possible to use
+it outside of switch statements, via the new C<~~> operator. See
+L<perlsyn/"Smart matching in detail">.
+
+This feature was contributed by Robin Houston.
+
+=head2 Regular expressions
+
+=over 4
+
+=item Recursive Patterns
+
+It is now possible to write recursive patterns without using the C<(??{})>
+construct. This new way is more efficient, and in many cases easier to
+read.
+
+Each capturing parenthesis can now be treated as an independent pattern
+that can be entered by using the C<(?PARNO)> syntax (C<PARNO> standing for
+"parenthesis number"). For example, the following pattern will match
+nested balanced angle brackets:
+
+    /
+     ^                      # start of line
+     (                      # start capture buffer 1
+	<                   #   match an opening angle bracket
+	(?:                 #   match one of:
+	    (?>             #     don't backtrack over the inside of this group
+		[^<>]+      #       one or more non angle brackets
+	    )               #     end non backtracking group
+	|                   #     ... or ...
+	    (?1)            #     recurse to bracket 1 and try it again
+	)*                  #   0 or more times.
+	>                   #   match a closing angle bracket
+     )                      # end capture buffer one
+     $                      # end of line
+    /x
+
+Note, users experienced with PCRE will find that the Perl implementation
+of this feature differs from the PCRE one in that it is possible to
+backtrack into a recursed pattern, whereas in PCRE the recursion is
+atomic or "possessive" in nature. (Yves Orton)
+
+=item Named Capture Buffers
+
+It is now possible to name capturing parenthesis in a pattern and refer to
+the captured contents by name. The naming syntax is C<< (?<NAME>....) >>.
+It's possible to backreference to a named buffer with the C<< \k<NAME> >>
+syntax. In code, the new magical hashes C<%+> and C<%-> can be used to
+access the contents of the capture buffers.
+
+Thus, to replace all doubled chars, one could write
+
+    s/(?<letter>.)\k<letter>/$+{letter}/g
+
+Only buffers with defined contents will be "visible" in the C<%+> hash, so
+it's possible to do something like
+
+    foreach my $name (keys %+) {
+        print "content of buffer '$name' is $+{$name}\n";
+    }
+
+The C<%-> hash is a bit more complete, since it will contain array refs
+holding values from all capture buffers similarly named, if there should
+be many of them.
+
+C<%+> and C<%-> are implemented as tied hashes through the new module
+C<Tie::Hash::NamedCapture>.
+
+Users exposed to the .NET regex engine will find that the perl
+implementation differs in that the numerical ordering of the buffers
+is sequential, and not "unnamed first, then named". Thus in the pattern
+
+   /(A)(?<B>B)(C)(?<D>D)/
+
+$1 will be 'A', $2 will be 'B', $3 will be 'C' and $4 will be 'D' and not
+$1 is 'A', $2 is 'C' and $3 is 'B' and $4 is 'D' that a .NET programmer
+would expect. This is considered a feature. :-) (Yves Orton)
+
+=item Possessive Quantifiers
+
+Perl now supports the "possessive quantifier" syntax of the "atomic match"
+pattern. Basically a possessive quantifier matches as much as it can and never
+gives any back. Thus it can be used to control backtracking. The syntax is
+similar to non-greedy matching, except instead of using a '?' as the modifier
+the '+' is used. Thus C<?+>, C<*+>, C<++>, C<{min,max}+> are now legal
+quantifiers. (Yves Orton)
+
+=item Backtracking control verbs
+
+The regex engine now supports a number of special-purpose backtrack
+control verbs: (*THEN), (*PRUNE), (*MARK), (*SKIP), (*COMMIT), (*FAIL)
+and (*ACCEPT). See L<perlre> for their descriptions. (Yves Orton)
+
+=item Relative backreferences
+
+A new syntax C<\g{N}> or C<\gN> where "N" is a decimal integer allows a
+safer form of back-reference notation as well as allowing relative
+backreferences. This should make it easier to generate and embed patterns
+that contain backreferences. See L<perlre/"Capture buffers">. (Yves Orton)
+
+=item C<\K> escape
+
+The functionality of Jeff Pinyan's module Regexp::Keep has been added to
+the core. You can now use in regular expressions the special escape C<\K>
+as a way to do something like floating length positive lookbehind. It is
+also useful in substitutions like:
+
+  s/(foo)bar/$1/g
+
+that can now be converted to
+
+  s/foo\Kbar//g
+
+which is much more efficient. (Yves Orton)
+
+=item Vertical and horizontal whitespace, and linebreak
+
+Regular expressions now recognize the C<\v> and C<\h> escapes, that match
+vertical and horizontal whitespace, respectively. C<\V> and C<\H>
+logically match their complements.
+
+C<\R> matches a generic linebreak, that is, vertical whitespace, plus
+the multi-character sequence C<"\x0D\x0A">.
+
+=back
+
+=head2 C<say()>
+
+say() is a new built-in, only available when C<use feature 'say'> is in
+effect, that is similar to print(), but that implicitly appends a newline
+to the printed string. See L<perlfunc/say>. (Robin Houston)
+
+=head2 Lexical C<$_>
+
+The default variable C<$_> can now be lexicalized, by declaring it like
+any other lexical variable, with a simple
+
+    my $_;
+
+The operations that default on C<$_> will use the lexically-scoped
+version of C<$_> when it exists, instead of the global C<$_>.
+
+In a C<map> or a C<grep> block, if C<$_> was previously my'ed, then the
+C<$_> inside the block is lexical as well (and scoped to the block).
+
+In a scope where C<$_> has been lexicalized, you can still have access to
+the global version of C<$_> by using C<$::_>, or, more simply, by
+overriding the lexical declaration with C<our $_>.
+
+=head2 The C<_> prototype
+
+A new prototype character has been added. C<_> is equivalent to C<$> (it
+denotes a scalar), but defaults to C<$_> if the corresponding argument
+isn't supplied. Due to the optional nature of the argument, you can only
+use it at the end of a prototype, or before a semicolon.
+
+This has a small incompatible consequence: the prototype() function has
+been adjusted to return C<_> for some built-ins in appropriate cases (for
+example, C<prototype('CORE::rmdir')>). (Rafael Garcia-Suarez)
+
+=head2 UNITCHECK blocks
+
+C<UNITCHECK>, a new special code block has been introduced, in addition to
+C<BEGIN>, C<CHECK>, C<INIT> and C<END>.
+
+C<CHECK> and C<INIT> blocks, while useful for some specialized purposes,
+are always executed at the transition between the compilation and the
+execution of the main program, and thus are useless whenever code is
+loaded at runtime. On the other hand, C<UNITCHECK> blocks are executed
+just after the unit which defined them has been compiled. See L<perlmod>
+for more information. (Alex Gough)
+
+=head2 New Pragma, C<mro>
+
+A new pragma, C<mro> (for Method Resolution Order) has been added. It
+permits to switch, on a per-class basis, the algorithm that perl uses to
+find inherited methods in case of a mutiple inheritance hierachy. The
+default MRO hasn't changed (DFS, for Depth First Search). Another MRO is
+available: the C3 algorithm. See L<mro> for more information.
+(Brandon Black)
+
+Note that, due to changes in the implentation of class hierarchy search,
+code that used to undef the C<*ISA> glob will most probably break. Anyway,
+undef'ing C<*ISA> had the side-effect of removing the magic on the @ISA
+array and should not have been done in the first place.
+
+=head2 readpipe() is now overridable
+
+The built-in function readpipe() is now overridable. Overriding it permits
+also to override its operator counterpart, C<qx//> (a.k.a. C<``>).
+Moreover, it now defaults to C<$_> if no argument is provided. (Rafael
+Garcia-Suarez)
+
+=head2 default argument for readline()
+
+readline() now defaults to C<*ARGV> if no argument is provided. (Rafael
+Garcia-Suarez)
+
+=head2 state() variables
+
+A new class of variables has been introduced. State variables are similar
+to C<my> variables, but are declared with the C<state> keyword in place of
+C<my>. They're visible only in their lexical scope, but their value is
+persistent: unlike C<my> variables, they're not undefined at scope entry,
+but retain their previous value. (Rafael Garcia-Suarez, Nicholas Clark)
+
+To use state variables, one needs to enable them by using
+
+    use feature "state";
+
+or by using the C<-E> command-line switch in one-liners.
+See L<perlsub/"Persistent variables via state()">.
+
+=head2 Stacked filetest operators
+
+As a new form of syntactic sugar, it's now possible to stack up filetest
+operators. You can now write C<-f -w -x $file> in a row to mean
+C<-x $file && -w _ && -f _>. See L<perlfunc/-X>.
+
+=head2 UNIVERSAL::DOES()
+
+The C<UNIVERSAL> class has a new method, C<DOES()>. It has been added to
+solve semantic problems with the C<isa()> method. C<isa()> checks for
+inheritance, while C<DOES()> has been designed to be overridden when
+module authors use other types of relations between classes (in addition
+to inheritance). (chromatic)
+
+See L<< UNIVERSAL/"$obj->DOES( ROLE )" >>.
+
+=head2 C<CLONE_SKIP()>
+
+Perl has now support for the C<CLONE_SKIP> special subroutine. Like
+C<CLONE>, C<CLONE_SKIP> is called once per package; however, it is called
+just before cloning starts, and in the context of the parent thread. If it
+returns a true value, then no objects of that class will be cloned. See
+L<perlmod> for details. (Contributed by Dave Mitchell.)
+
+=head2 Formats
+
+Formats were improved in several ways. A new field, C<^*>, can be used for
+variable-width, one-line-at-a-time text. Null characters are now handled
+correctly in picture lines. Using C<@#> and C<~~> together will now
+produce a compile-time error, as those format fields are incompatible.
+L<perlform> has been improved, and miscellaneous bugs fixed.
+
+=head2 Byte-order modifiers for pack() and unpack()
+
+There are two new byte-order modifiers, C<E<gt>> (big-endian) and C<E<lt>>
+(little-endian), that can be appended to most pack() and unpack() template
+characters and groups to force a certain byte-order for that type or group.
+See L<perlfunc/pack> and L<perlpacktut> for details.
+
+=head2 Byte count feature in pack()
+
+A new pack() template character, C<".">, returns the number of characters
+read so far.
+
+=head2 C<no VERSION>
+
+You can now use C<no> followed by a version number to specify that you
+want to use a version of perl older than the specified one.
+
+=head2 C<chdir>, C<chmod> and C<chown> on filehandles
+
+C<chdir>, C<chmod> and C<chown> can now work on filehandles as well as
+filenames, if the system supports respectively C<fchdir>, C<fchmod> and
+C<fchown>, thanks to a patch provided by Gisle Aas.
+
+=head2 OS groups
+
+C<$(> and C<$)> now return groups in the order where the OS returns them,
+thanks to Gisle Aas. This wasn't previously the case.
+
+=head2 Recursive sort subs
+
+You can now use recursive subroutines with sort(), thanks to Robin Houston.
+
+=head2 Exceptions in constant folding
+
+The constant folding routine is now wrapped in an exception handler, and
+if folding throws an exception (such as attempting to evaluate 0/0), perl
+now retains the current optree, rather than aborting the whole program.
+(Nicholas Clark, Dave Mitchell)
+
+=head2 Source filters in @INC
+
+It's possible to enhance the mechanism of subroutine hooks in @INC by
+adding a source filter on top of the filehandle opened and returned by the
+hook. This feature was planned a long time ago, but wasn't quite working
+until now. See L<perlfunc/require> for details. (Nicholas Clark)
+
+=head2 New internal variables
+
+=over 4
+
+=item C<${^RE_DEBUG_FLAGS}>
+
+This variable controls what debug flags are in effect for the regular
+expression engine when running under C<use re "debug">. See L<re> for
+details.
+
+=item C<${^CHILD_ERROR_NATIVE}>
+
+This variable gives the native status returned by the last pipe close,
+backtick command, successful call to wait() or waitpid(), or from the
+system() operator. See L<perlrun> for details. (Contributed by Gisle Aas.)
+
+=back
+
+=head2 Miscellaneous
+
+C<unpack()> now defaults to unpacking the C<$_> variable.
+
+C<mkdir()> without arguments now defaults to C<$_>.
+
+The internal dump output has been improved, so that non-printable characters
+such as newline and backspace are output in C<\x> notation, rather than
+octal.
+
+The B<-C> option can no longer be used on the C<#!> line. It wasn't
+working there anyway.
+
+=head2 UCD 5.0.0
+
+The copy of the Unicode Character Database included in Perl 5 has
+been updated to version 5.0.0.
+
+
+=head2 MAD
+
+MAD, which stands for I<Misc Attribute Decoration>, is a
+still-in-development work leading to a Perl 5 to Perl 6 converter. To
+enable it, it's necessary to pass the argument C<-Dmad> to Configure. The
+obtained perl isn't binary compatible with a regular perl 5.9.4, and has
+space and speed penalties; moreover not all regression tests still pass
+with it. (Larry Wall, Nicholas Clark)
+
+=head1 Modules and Pragmata
+=head1 Utility Changes
+=head1 New Documentation
+=head1 Performance Enhancements
+=head1 Installation and Configuration Improvements
+=head1 Selected Bug Fixes
+=head1 New or Changed Diagnostics
+=head1 Changed Internals
+=head1 New Tests
+=head1 Known Problems
+=head1 Platform Specific Problems
+=head1 Reporting Bugs
+
+=head1 SEE ALSO
+
+The F<Changes> file and the perl590delta to perl595delta man pages for
+exhaustive details on what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
