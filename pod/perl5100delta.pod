@@ -54,6 +54,11 @@ For consistency, C<A> in unpack() format now trims all Unicode whitespace
 from the end of the string. Before perl 5.9.2, it used to strip only the
 classical ASCII space characters.
 
+=head2 Byte/character count feature in unpack()
+
+A new unpack() template character, C<".">, returns the number of bytes or
+characters (depending on the selected encoding mode, see above) read so far.
+
 =head2 The C<$*> and C<$#> variables have been removed
 
 C<$*>, which was deprecated in favor of the C</s> and C</m> regexp
@@ -498,11 +503,6 @@ There are two new byte-order modifiers, C<E<gt>> (big-endian) and C<E<lt>>
 (little-endian), that can be appended to most pack() and unpack() template
 characters and groups to force a certain byte-order for that type or group.
 See L<perlfunc/pack> and L<perlpacktut> for details.
-
-=head2 Byte count feature in pack()
-
-A new pack() template character, C<".">, returns the number of characters
-read so far.
 
 =head2 C<no VERSION>
 
