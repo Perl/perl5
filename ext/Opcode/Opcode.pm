@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.10";
+$VERSION = "1.11";
 
 use Carp;
 use Exporter ();
@@ -536,6 +536,14 @@ SystemV Interprocess Communications:
 
     shmctl shmget shmread shmwrite
 
+=item :load
+
+This tag holds opcodes related to loading modules and getting information
+about calling environment and args.
+
+    require dofile 
+    caller
+
 =item :still_to_be_decided
 
     chdir
@@ -550,9 +558,6 @@ SystemV Interprocess Communications:
     pack unpack -- can be used to create/use memory pointers
 
     entereval -- can be used to hide code from initial compile
-    require dofile 
-
-    caller -- get info about calling environment and args
 
     reset
 
