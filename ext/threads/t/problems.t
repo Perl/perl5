@@ -29,9 +29,9 @@ BEGIN {
 
     $| = 1;
     if ($] == 5.008) {
-        print("1..12\n");   ### Number of tests that will be run ###
+        print("1..11\n");   ### Number of tests that will be run ###
     } else {
-        print("1..16\n");   ### Number of tests that will be run ###
+        print("1..15\n");   ### Number of tests that will be run ###
     }
 };
 
@@ -177,21 +177,5 @@ is(keys(%h), 1, "keys correct in parent with restricted hash");
 
 $child = threads->create(sub { return (scalar(keys(%h))); })->join;
 is($child, 1, "keys correct in child with restricted hash");
-
-
-# [perl #45053] Memory corruption with heavy module loading in threads
-#
-# run-time usage of newCONSTSUB (as done by the IO boot code) wasn't
-# thread-safe - got occasional coredumps or malloc corruption
-
-{
-    my @t;
-    push @t, threads->create( sub { require IO }) for 1..100;
-    $_->join for @t;
-    print("ok $test - [perl #45053]\n");
-    $test++;
-}
-
-
 
 # EOF
