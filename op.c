@@ -5696,6 +5696,13 @@ Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
 
     ENTER;
 
+    if (IN_PERL_RUNTIME) {
+	/* at runtime, it's not safe to manipulate PL_curcop: it may be
+	 * an op shared between threads. Use a non-shared COP for our
+	 * dirty work */
+	 SAVEVPTR(PL_curcop);
+	 PL_curcop = &PL_compiling;
+    }
     SAVECOPLINE(PL_curcop);
     CopLINE_set(PL_curcop, PL_parser ? PL_parser->copline : NOLINE);
 
