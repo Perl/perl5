@@ -16,7 +16,7 @@ BEGIN {
        exit 0;
      }
 
-     plan(9);
+     plan(10);
 }
 
 use strict;
@@ -142,5 +142,21 @@ fresh_perl_is(<<'EOI', 'ok', { }, 'Bug #41138');
 EOI
 
 } # TODO
+
+# [perl #45053] Memory corruption with heavy module loading in threads
+#
+# run-time usage of newCONSTSUB (as done by the IO boot code) wasn't
+# thread-safe - got occasional coredumps or malloc corruption
+{
+    local $SIG{__WARN__} = sub {};   # Ignore any thread creation failure warnings
+    my @t;
+    for (1..100) {
+        my $thr = threads->create( sub { require IO });
+        last if !defined($thr);      # Probably ran out of memory
+        push(@t, $thr);
+    }
+    $_->join for @t;
+    ok(1, '[perl #45053]');
+}
 
 # EOF
