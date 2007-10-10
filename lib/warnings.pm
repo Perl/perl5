@@ -10,9 +10,9 @@ our $VERSION = '1.06';
 
 # Verify that we're called correctly so that warnings will work.
 # see also strict.pm.
-unless ( __FILE__ =~ /(^|[\/\\])\Q@{[__PACKAGE__]}\E\.pmc?$/ ) {
+unless ( __FILE__ =~ /(^|[\/\\])\Q${\__PACKAGE__}\E\.pmc?$/ ) {
     my (undef, $f, $l) = caller;
-    die("Incorrect use of pragma '@{[__PACKAGE__,]}' at $f line $l.\n");
+    die("Incorrect use of pragma '${\__PACKAGE__}' at $f line $l.\n");
 }
 
 =head1 NAME
