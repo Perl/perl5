@@ -2298,7 +2298,6 @@ lib/perl5db/t/eval-line-bug	Tests for the Perl debugger
 lib/PerlIO.pm			PerlIO support module
 lib/PerlIO/via/QuotedPrint.pm	PerlIO::via::QuotedPrint
 lib/PerlIO/via/t/QuotedPrint.t	PerlIO::via::QuotedPrint
-lib/ph.t			See if h2ph works
 lib/Pod/Checker.pm		Pod-Parser - check POD documents for syntax errors
 lib/Pod/Escapes/ChangeLog	ChangeLog for Pod::Escapes
 lib/Pod/Escapes.pm		Pod::Escapes
