@@ -199,9 +199,14 @@ sub _extract {
     ### well, then we really don't know.
 
     my $dir;
-    for my $try ( File::Spec->rel2abs( File::Spec->catdir(   
-                    $to, $mod->package_name .'-'. $mod->package_version ) ),
-                  File::Spec->rel2abs( $ae->extract_path ),
+    for my $try (
+        File::Spec->rel2abs( 
+            $self->_safe_path( path =>
+                File::Spec->catdir( $to,  
+                                    $mod->package_name .'-'. 
+                                    $mod->package_version 
+        ) ) ),
+        File::Spec->rel2abs( $ae->extract_path ),
     ) {
         ($dir = $try) && last if -d $try;
     }

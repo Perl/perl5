@@ -10,16 +10,16 @@ To recreate it use the following command:
 
      uupacktool.pl -p lib/CPANPLUS/t/dummy-CPAN/modules/02packages.details.txt.gz lib/CPANPLUS/t/dummy-CPAN/modules/02packages.details.txt.gz.packed
 
-Created at Wed Aug 15 16:13:41 2007
+Created at Tue Oct  9 17:23:15 2007
 #########################################################################
 __UU__
-M'XL("-%#OT4``S`R<&%C:V%G97,N9&5T86EL<RYT>'0`E=-1:]LP$`#@=_^*
-M>]C#!K&D.IB"GAJGR=B6=&5M:-^&:ET3,5LRTKE>]NLG-2TM(6FWX\!@WWVZ
-M`WEN&I3P'*+H5/U+K3$PC:1,$QC]IFSU8_%2`QNB3G(^#`/KT#>L=BV?7DXN
-M>.MTWV#@1Y1S#+4W'1EGHW:Y*P&K6@QP[WJKP5C0QF--SF_APZ.I>MHX'[C1
-M/)NZIF]M>!JE>P6,X`%]B/`HOJ9-]L426HTZGSLO8=*3:Q6AAGND>@/>]60L
-MAM'N\`@A:%?W+5I2:3R6W7A#D<BK;3JM;;0)-*C4_/$!"C86Q2>XV\+$:H\J
-ML&\.K5F?*6M:%7?.%I'/IW$G2NTGXK0LLX4*E*\ZG0:1<(-Z!&,!7Y6%0H@"
-M1"F+F*?P>7F=97/GI*R4EW*VDO+V"O9",'&2GC,^6\6\O>*Q(X\->?K"2'FV
-M_O-*659O*4N^K&+^DW+Q?=_94U+!.T[:Z;CSM-.[SOXV_^M4\<K%RR^/>8><
-B74]^B)L.^MA$CU$<X-+_4S(ARI]B_.QD?P$Z!("8DP,`````
+M'XL("%^M`T<``S`R<&%C:V%G97,N9&5T86EL<RYT>'0`E=-1:]LP$`?P=WV*
+M>]C#"K&L.IB"GA9GR=B6=&6=:=^*9ET345LRTKE>]NDG-2OMPK)VA\$@GW[Z
+M'\A+TZ*$QQ)%KYH[M<'`-9(R;>#T@UC]=?74`UNB7N;Y.(Z\1]_RQG7Y_&)V
+MGG=.#RV&_(CR'D/C34_&V:A=[%O`J@X#W+K!:C`6M/'8D/,[>/-@JH&VSH?<
+MZ)S-73MT-OR.TC\#)G"//D1X$I=IRSY:0JM19TOG)<P&<ITBU'"+U&S!NX&,
+MQ3#9'QXA!.V:H4-+*L7C[,H;BD16[=)I7:M-H%&ES6_OH>!349S`]QW,K/:H
+M`O_LT)K-.V5-I^+,;!7Y;!YGHK3]5)R5)5NI0%G=ZQ1$PA7J"4P%?%(6"B$*
+M$*4LXG,&'];?&%LZ)V6EO)2+6LKK2S@HP<5I>B_JZ\L\-F>Q-TN+G)3GFY_/
+M@'7U+V!=O0HX_W)(/`'IVPM$&N(XL:A?)`[C_P=1Q9L5[[@\1AT0^_;L;])\
+<U,=R/%3QIY1^CI(+4=Z(Z2/!?@$#U+EW<`,`````

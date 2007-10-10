@@ -104,7 +104,7 @@ my $map = {
         pre_hook    => sub {
                         my $mod     = shift;
                         my $clone   = $mod->clone;
-                        $clone->status->prereqs( { $ModPrereq => ~0/2 } );
+                        $clone->status->prereqs( { $ModPrereq => ~0 } );
                         return $clone;
                     },
         failed      => 1,
@@ -273,6 +273,9 @@ my $map = {
     }
     
     {   my $clone   = $Mod->clone;
+
+        ### divide by two -- possibly ~0 is unsigned, and we cause an overflow,
+        ### as happens to version.pm 0.7203 among others.
         my $prereqs = { $ModPrereq => ~0/2 };
     
         $clone->status->prereqs( $prereqs );

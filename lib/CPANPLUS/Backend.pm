@@ -39,7 +39,7 @@ CPANPLUS::Backend
 
 =head1 SYNOPSIS
 
-    my $cb      = CPANPLUS::Backend->new( );
+    my $cb      = CPANPLUS::Backend->new;
     my $conf    = $cb->configure_object;
 
     my $author  = $cb->author_tree('KANE');
@@ -172,7 +172,7 @@ sub author_tree {
 
 =pod
 
-=head2 $conf = $cb->configure_object ()
+=head2 $conf = $cb->configure_object;
 
 Returns a copy of the C<CPANPLUS::Configure> object.
 
@@ -474,6 +474,19 @@ sub parse_module {
         ### set the fetch_from accessor so we know to by pass the
         ### usual mirrors
         $modobj->status->_fetch_from( $mod );
+        
+        ### better guess for the version
+        $modobj->version( $modobj->package_version ) 
+            if defined $modobj->package_version;
+        
+        ### better guess at module name, if possible
+        if ( my $pkgname = $modobj->package_name ) {
+            $pkgname =~ s/-/::/g;
+        
+            ### no sense replacing it unless we changed something
+            $modobj->module( $pkgname ) 
+                if ($pkgname ne $modobj->package_name) || $pkgname !~ /-/;
+        }                
         
         return $modobj;      
     }
@@ -798,9 +811,9 @@ The location where to create the local mirror.
 
 =item index_files
 
-Enable/disable fetching of index files. This is ok if you don't plan
-to use the local mirror as your primary sites, or if you'd like
-up-to-date index files be fetched from elsewhere.
+Enable/disable fetching of index files. You can disable fetching of the
+index files if you don't plan to use the local mirror as your primary 
+site, or if you'd like up-to-date index files be fetched from elsewhere.
 
 Defaults to true.
 
@@ -965,6 +978,10 @@ sub autobundle {
         error( loc( "Could not open '%1' for writing: %2", $file, $! ) );
         return;
     }
+    
+    ### make sure we load the module tree *before* doing this, as it
+    ### starts to chdir all over the place
+    $self->module_tree;
 
     my $string = join "\n\n",
                     map {
@@ -1018,6 +1035,131 @@ EOF
     return $file;
 }
 
+### XXX these wrappers are not individually tested! only the underlying
+### code through source.t and indirectly trought he CustomSource plugin.
+=pod
+
+=head1 CUSTOM MODULE SOURCES
+
+Besides the sources as provided by the general C<CPAN> mirrors, it's 
+possible to add your own sources list to your C<CPANPLUS> index.
+
+The methodology behind this works much like C<Debian's apt-sources>.
+
+The methods below show you how to make use of this functionality. Also
+note that most of these methods are available through the default shell
+plugin command C</cs>, making them available as shortcuts through the
+shell and via the commandline.
+
+=head2 %files = $cb->list_custom_sources
+
+Returns a mapping of registered custom sources and their local indices
+as follows:
+
+    /full/path/to/local/index => http://remote/source
+
+Note that any file starting with an C<#> is being ignored.
+
+=cut
+
+sub list_custom_sources {
+    return shift->__list_custom_module_sources( @_ );
+}
+
+=head2 $local_index = $cb->add_custom_source( uri => URI, [verbose => BOOL] );
+
+Adds an C<URI> to your own sources list and mirrors its index. See the 
+documentation on C<< $cb->update_custom_source >> on how this is done.
+
+Returns the full path to the local index on success, or false on failure.
+
+Note that when adding a new C<URI>, the change to the in-memory tree is
+not saved until you rebuild or save the tree to disk again. You can do 
+this using the C<< $cb->reload_indices >> method.
+
+=cut
+
+sub add_custom_source {
+    return shift->_add_custom_module_source( @_ );
+}
+
+=head2 $local_index = $cb->remove_custom_source( uri => URI, [verbose => BOOL] );
+
+Removes an C<URI> from your own sources list and removes its index.
+
+To find out what C<URI>s you have as part of your own sources list, use
+the C<< $cb->list_custom_sources >> method.
+
+Returns the full path to the deleted local index file on success, or false
+on failure.
+
+=cut
+
+### XXX do clever dispatching based on arg number?
+sub remove_custom_source {
+    return shift->_remove_custom_module_source( @_ );
+}
+
+=head2 $bool = $cb->update_custom_source( [remote => URI] );
+
+Updates the indexes for all your custom sources. It does this by fetching
+a file called C<packages.txt> in the root of the custom sources's C<URI>.
+If you provide the C<remote> argument, it will only update the index for
+that specific C<URI>.
+
+Here's an example of how custom sources would resolve into index files:
+
+  file:///path/to/sources       =>  file:///path/to/sources/packages.txt
+  http://example.com/sources    =>  http://example.com/sources/packages.txt
+  ftp://example.com/sources     =>  ftp://example.com/sources/packages.txt
+  
+The file C<packages.txt> simply holds a list of packages that can be found
+under the root of the C<URI>. This file can be automatically generated for
+you when the remote source is a C<file:// URI>. For C<http://>, C<ftp://>,
+and similar, the administrator of that repository should run the method
+C<< $cb->write_custom_source_index >> on the repository to allow remote
+users to index it.
+
+For details, see the C<< $cb->write_custom_source_index >> method below.
+
+All packages that are added via this mechanism will be attributed to the
+author with C<CPANID> C<LOCAL>. You can use this id to search for all 
+added packages.
+
+=cut
+
+sub update_custom_source {
+    my $self = shift;
+    
+    ### if it mentions /remote/, the request is to update a single uri,
+    ### not all the ones we have, so dispatch appropriately
+    my $rv = grep( /remote/i, @_)
+        ? $self->__update_custom_module_source( @_ )
+        : $self->__update_custom_module_sources( @_ );
+
+    return $rv;
+}    
+
+=head2 $file = $cb->write_custom_source_index( path => /path/to/package/root, [to => /path/to/index/file, verbose => BOOL] );
+
+Writes the index for a custom repository root. Most users will not have to 
+worry about this, but administrators of a repository will need to make sure
+their indexes are up to date.
+
+The index will be written to a file called C<packages.txt> in your repository
+root, which you can specify with the C<path> argument. You can override this
+location by specifying the C<to> argument, but in normal operation, that should
+not be required.
+
+Once the index file is written, users can then add the C<URI> pointing to 
+the repository to their custom list of sources and start using it right away. See the C<< $cb->add_custom_source >> method for user details.
+
+=cut
+
+sub write_custom_source_index {
+    return shift->__write_custom_module_index( @_ );
+}
+
 1;
 
 =pod
@@ -1040,7 +1182,8 @@ under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<CPANPLUS::Configure>, L<CPANPLUS::Module>, L<CPANPLUS::Module::Author>
+L<CPANPLUS::Configure>, L<CPANPLUS::Module>, L<CPANPLUS::Module::Author>, 
+L<CPANPLUS::Selfupdate>
 
 =cut
 

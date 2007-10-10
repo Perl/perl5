@@ -344,14 +344,15 @@ sub _host_to_uri {
     
     my($scheme, $host, $path);
     my $tmpl = {
-        scheme  => { required => 1,     store => \$scheme },
-        host    => { default  => '',    store => \$host },
-        path    => { default  => '',    store => \$path },
+        scheme  => { required => 1,             store => \$scheme },
+        host    => { default  => 'localhost',   store => \$host },
+        path    => { default  => '',            store => \$path },
     };       
 
     check( $tmpl, \%hash ) or return;
 
-    $host ||= 'localhost';
+    ### it's an URI, so unixify the path
+    $path = File::Spec::Unix->catdir( File::Spec->splitdir( $path ) );
 
     return "$scheme://" . File::Spec::Unix->catdir( $host, $path ); 
 }
@@ -391,8 +392,11 @@ sub _home_dir {
 
 =head2 $path = $cb->_safe_path( path => $path );
 
-Returns a path that's safe to us on Win32. Only cleans up
-the path on Win32 if the path exists.
+Returns a path that's safe to us on Win32 and VMS. 
+
+Only cleans up the path on Win32 if the path exists.
+
+On VMS, it encodes dots to _ using C<VMS::Filespec::vmsify>
 
 =cut
 
@@ -408,15 +412,57 @@ sub _safe_path {
 
     check( $tmpl, \%hash ) or return;
     
-    ### only need to fix it up if there's spaces in the path   
-    return $path unless $path =~ /\s+/;
+    if( ON_WIN32 ) {
+        ### only need to fix it up if there's spaces in the path   
+        return $path unless $path =~ /\s+/;
+        
+        ### or if we are on win32
+        return $path if $^O ne 'MSWin32';
     
-    ### or if we are on win32
-    return $path if $^O ne 'MSWin32';
+        ### clean up paths if we are on win32
+        return Win32::GetShortPathName( $path ) || $path;
 
-    ### clean up paths if we are on win32
-    return Win32::GetShortPathName( $path ) || $path;
+    } elsif ( ON_VMS ) {
+        ### XXX According to John Malmberg, there's an VMS issue:
+        ### catdir on VMS can not currently deal with directory components
+        ### with dots in them.  
+        ### Fixing this is a a three step procedure, which will work for 
+        ### VMS in its traditional ODS-2 mode, and it will also work if 
+        ### VMS is in the ODS-5 mode that is being implemented.
 
+        ### 1. Make sure that the value to be converted, $path is 
+        ### in UNIX directory syntax by appending a '/' to it.
+        $path .= '/' unless $path =~ m|/$|;
+
+        ### 2. Use VMS::Filespec::vmsify($path . '/') to convert the dots to
+        ### underscores if needed.  The trailing '/' is needed as so that
+        ### C<vmsify> knows that it should use directory translation instead of
+        ### filename translation, as filename translation leaves one dot.
+        $path = VMS::Filespec::vmsify( $path );
+
+        ### 3. Use $path = File::Spec->splitdir( VMS::Filespec::vmsify( 
+        ### $path . '/') to remove the directory delimiters.
+
+        ### From John Malmberg:
+        ### File::Spec->catdir will put the path back together.
+        ### The '/' trick only works if the string is a directory name 
+        ### with UNIX style directory delimiters or no directory delimiters.  
+        ### It is to force vmsify to treat the input specification as UNIX.
+        ###
+        ### There is a VMS::Filespec::unixpath() to do the appending of the '/'
+        ### to the specification, which will do a VMS::Filespec::vmsify() 
+        ### if needed.
+        ### However it is not a good idea to call vmsify() on a pathname
+        ### returned by unixify(), and it is not a good idea to call unixify()
+        ### on a pathname returned by vmsify().  Because of the nature of the
+        ### conversion, not all file specifications can make the round trip.
+        ###
+        ### I think that directory specifications can safely make the round
+        ### trip, but not ones containing filenames.
+        $path = File::Spec->catdir( File::Spec->splitdir( $path ) )
+    }
+    
+    return $path;
 }
 
 
@@ -525,6 +571,72 @@ sub _split_package_string {
         return;
     }
 }
+
+{   my %escapes = map {
+        chr($_) => sprintf("%%%02X", $_)
+    } 0 .. 255;  
+    
+    sub _uri_encode {
+        my $self = shift;
+        my %hash = @_;
+        
+        my $str;
+        my $tmpl = {
+            uri => { store => \$str, required => 1 }
+        };
+        
+        check( $tmpl, \%hash ) or return;
+
+        ### XXX taken straight from URI::Encode
+        ### Default unsafe characters.  RFC 2732 ^(uric - reserved)
+        $str =~ s|([^A-Za-z0-9\-_.!~*'()])|$escapes{$1}|g;
+    
+        return $str;          
+    }
+    
+    
+    sub _uri_decode {
+        my $self = shift;
+        my %hash = @_;
+        
+        my $str;
+        my $tmpl = {
+            uri => { store => \$str, required => 1 }
+        };
+        
+        check( $tmpl, \%hash ) or return;
+    
+        ### XXX use unencode routine in utils?
+        $str =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg; 
+    
+        return $str;    
+    }
+}
+
+sub _update_timestamp {
+    my $self = shift;
+    my %hash = @_;
+    
+    my $file;
+    my $tmpl = {
+        file => { required => 1, store => \$file, allow => FILE_EXISTS }
+    };
+    
+    check( $tmpl, \%hash ) or return;
+   
+    ### `touch` the file, so windoze knows it's new -jmb
+    ### works on *nix too, good fix -Kane
+    ### make sure it is writable first, otherwise the `touch` will fail
+
+    my $now = time;
+    unless( chmod( 0644, $file) && utime ($now, $now, $file) ) {
+        error( loc("Couldn't touch %1", $file) );
+        return;
+    }
+    
+    return 1;
+}
+
 
 1;
 

@@ -256,15 +256,19 @@ sub _all_installed {
     my $conf = $self->configure_object;
     my %hash = @_;
 
-    my %seen; my @rv;
-
+    ### File::Find uses follow_skip => 1 by default, which doesn't die
+    ### on duplicates, unless they are directories or symlinks.
+    ### Ticket #29796 shows this code dying on Alien::WxWidgets,
+    ### which uses symlinks.
+    ### File::Find doc says to use follow_skip => 2 to ignore duplicates
+    ### so this will stop it from dying.
+    my %find_args = ( follow_skip => 2 );
 
     ### File::Find uses lstat, which quietly becomes stat on win32
     ### it then uses -l _ which is not allowed by the statbuffer because
     ### you did a stat, not an lstat (duh!). so don't tell win32 to
     ### follow symlinks, as that will break badly
-    my %find_args = ();
-    $find_args{'follow_fast'} = 1 unless $^O eq 'MSWin32';
+    $find_args{'follow_fast'} = 1 unless ON_WIN32;
 
     ### never use the @INC hooks to find installed versions of
     ### modules -- they're just there in case they're not on the
@@ -273,34 +277,73 @@ sub _all_installed {
     ### XXX CPANPLUS::inc is now obsolete, remove the calls
     #local @INC = CPANPLUS::inc->original_inc;
 
+    my %seen; my @rv;
     for my $dir (@INC ) {
         next if $dir eq '.';
 
-        ### not a directory after all ###
+        ### not a directory after all 
+        ### may be coderef or some such
         next unless -d $dir;
 
         ### make sure to clean up the directories just in case,
         ### as we're making assumptions about the length
         ### This solves rt.cpan issue #19738
-        $dir = File::Spec->canonpath( $dir );
+        
+        ### John M. notes: On VMS cannonpath can not currently handle 
+        ### the $dir values that are in UNIX format.
+        $dir = File::Spec->canonpath( $dir ) unless ON_VMS;
+        
+        ### have to use F::S::Unix on VMS, or things will break
+        my $file_spec = ON_VMS ? 'File::Spec::Unix' : 'File::Spec';
 
-        File::Find::find(
+        ### XXX in some cases File::Find can actually die!
+        ### so be safe and wrap it in an eval.
+        eval { File::Find::find(
             {   %find_args,
                 wanted      => sub {
 
                     return unless /\.pm$/i;
                     my $mod = $File::Find::name;
 
+                    ### make sure it's in Unix format, as it
+                    ### may be in VMS format on VMS;
+                    $mod = VMS::Filespec::unixify( $mod ) if ON_VMS;                    
+                    
                     $mod = substr($mod, length($dir) + 1, -3);
-                    $mod = join '::', File::Spec->splitdir($mod);
+                    $mod = join '::', $file_spec->splitdir($mod);
 
                     return if $seen{$mod}++;
-                    my $modobj = $self->module_tree($mod) or return;
+
+                    ### From John Malmberg: This is failing on VMS 
+                    ### because ODS-2 does not retain the case of 
+                    ### filenames that are created.
+                    ### The problem is the filename is being converted 
+                    ### to a module name and then looked up in the 
+                    ### %$modtree hash.
+                    ### 
+                    ### As a fix, we do a search on VMS instead --
+                    ### more cpu cycles, but it gets around the case
+                    ### problem --kane
+                    my ($modobj) = do {
+                        ON_VMS
+                            ? $self->search( 
+                                    type    => 'module',
+                                    allow   => [qr/^$mod$/i],
+                                )      
+                            : $self->module_tree($mod) 
+                    };
+                    
+                    ### seperate return, a list context return with one ''
+                    ### in it, is also true!
+                    return unless $modobj;
 
                     push @rv, $modobj;
                 },
             }, $dir
-        );
+        ) };
+
+        ### report the error if file::find died
+        error(loc("Error finding installed files in '%1': %2", $dir, $@)) if $@;
     }
 
     return \@rv;

@@ -139,8 +139,18 @@ SKIP: {
     diag(q[Note: 'sudo' might ask for your password to do the install test])
         if $conf->get_program('sudo');
 
-    ok( $Mod->install( force =>1 ),
+    ### make sure no options are set in PERL5_MM_OPT, as they might
+    ### change the installation target and therefor will 1. mess up
+    ### the tests and 2. leave an installed copy of our test module
+    ### lying around. This addresses bug #29716: 20_CPANPLUS-Dist-MM.t 
+    ### fails (and leaves test files installed) when EUMM options 
+    ### include INSTALL_BASE
+    {   local $ENV{'PERL5_MM_OPT'};
+    
+        ok( $Mod->install( force =>1 ),
                                 "Installing module" );
+    }                                
+                                
     ok( $Mod->status->installed,"   Module installed according to status" );
 
 
@@ -255,9 +265,14 @@ SKIP: {
                                 "   Prior existance noted" );
 
     ### ok, unlink the makefile.pl, now really write one
-    unlink $makefile;
+    1 while unlink $makefile;
 
-    ok( unlink($makefile_pl),   "Deleting Makefile.PL");
+    ### must do '1 while' for VMS
+    {   my $unlink_sts = unlink($makefile_pl);
+        1 while unlink $makefile_pl;
+        ok( $unlink_sts,        "Deleting Makefile.PL");
+    }
+
     ok( !-s $makefile_pl,       "   Makefile.PL deleted" );
     ok( !-s $makefile,          "   Makefile deleted" );
     ok($dist->write_makefile_pl,"   Makefile.PL written" );
@@ -283,7 +298,11 @@ SKIP: {
     ### seems ok, now delete it again and go via install()
     ### to see if it picks up on the missing makefile.pl and
     ### does the right thing
-    ok( unlink($makefile_pl),   "Deleting Makefile.PL");
+    ### must do '1 while' for VMS
+    {   my $unlink_sts = unlink($makefile_pl);
+        1 while unlink $makefile_pl;
+        ok( $unlink_sts,        "Deleting Makefile.PL");
+    }    
     ok( !-s $makefile_pl,       "   Makefile.PL deleted" );
     ok( $dist->status->mk_flush,"Dist status flushed" );
     ok( $dist->prepare,         "   Dist->prepare run again" );
@@ -298,8 +317,8 @@ SKIP: {
     {   local $^W;
         local *CPANPLUS::Dist::MM::write_makefile_pl = sub { 1 };
 
-        unlink $makefile_pl;
-        unlink $makefile;
+        1 while unlink $makefile_pl;
+        1 while unlink $makefile;
 
         ok(!-s $makefile_pl,        "Makefile.PL deleted" );
         ok(!-s $makefile,           "Makefile deleted" );
@@ -331,9 +350,13 @@ SKIP: {
     }
 
     ### clean up afterwards ###
-    ok( unlink($makefile_pl),   "Deleting Makefile.PL");
+    ### must do '1 while' for VMS
+    {   my $unlink_sts = unlink($makefile_pl);
+        1 while unlink $makefile_pl;
+        ok( $unlink_sts,        "Deleting Makefile.PL");
+    }   
+    
     $dist->status->mk_flush;
-
 }
 
 ### test ENV setting in Makefile.PL

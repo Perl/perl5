@@ -7,6 +7,7 @@ BEGIN {
 use strict;
 use Test::More 'no_plan';
 use Cwd;
+use Config;
 use File::Basename;
 
 use CPANPLUS::Internals::Constants;
@@ -45,9 +46,15 @@ ok( DIR_EXISTS->( dir => cwd() ),               "DIR_EXISTS finds dir" );
 
     my $tmpl = {
         MAKEFILE_PL => 'Makefile.PL',
-        MAKEFILE    => 'Makefile',
         BUILD_PL    => 'Build.PL',
         BLIB        => 'blib',
+        MAKEFILE    => do {
+            ### On vms, it's a different name. See constants
+            ### file for details
+            (ON_VMS and $Config::Config{make} =~ /MM[S|K]/i)
+                ? 'DESCRIP.MMS'
+                : 'Makefile'
+        },
     };
     
     while ( my($sub,$res) = each %$tmpl ) {

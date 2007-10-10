@@ -49,19 +49,24 @@ choice.
 
 =cut
 
-
 sub import {
     my $class   = shift;
     my $option  = shift;
-    ### XXX this should offer to reconfigure CPANPLUS, somehow.  --rs
-    my $conf    = CPANPLUS::Configure->new() 
-                    or die loc("No configuration available -- aborting") . $/;
 
     ### find out what shell we're supposed to load ###
     $SHELL      = $option
                     ? $class . '::' . $option
-                    : $conf->get_conf('shell') || $DEFAULT;
-
+                    : do {  ### XXX this should offer to reconfigure 
+                            ### CPANPLUS, somehow.  --rs
+                            ### XXX load Configure only if we really have to
+                            ### as that means any $Conf passed later on will
+                            ### be ignored in favour of the one that was 
+                            ### retrieved via ->new --kane
+                        my $conf = CPANPLUS::Configure->new() or 
+                        die loc("No configuration available -- aborting") . $/;
+                        $conf->get_conf('shell') || $DEFAULT;
+                    };
+                    
     ### load the shell, fall back to the default if required
     ### and die if even that doesn't work
     EVAL: {
@@ -185,11 +190,13 @@ sub _show_banner {
     $rl_avail = loc("ReadLine support %1.", $rl_avail);
     $rl_avail = "\n*** $rl_avail" if (length($rl_avail) > 45);
 
-    print loc("%1 -- CPAN exploration and module installation (v%2)",
+    $self->__print(
+          loc("%1 -- CPAN exploration and module installation (v%2)",
                 $self->which, $self->which->VERSION()), "\n",
           loc("*** Please report bugs to <bug-cpanplus\@rt.cpan.org>."), "\n",
           loc("*** Using CPANPLUS::Backend v%1.  %2",
-                $cpan->VERSION, $rl_avail), "\n\n";
+                $cpan->VERSION, $rl_avail), "\n\n"
+    );
 }
 
 ### checks whether the Term::ReadLine is broken and needs to fallback to Stub
@@ -276,6 +283,24 @@ sub _pager_close {
             }
         }
         return $default;
+    }
+}
+
+### Custom print routines, mainly to be able to catch output
+### in test cases, or redirect it if need be
+{   sub __print {
+        my $self = shift;
+        print @_;
+    }
+    
+    sub __printf {
+        my $self = shift;
+        my $fmt  = shift;
+        
+        ### MUST specify $fmt as a seperate param, and not as part
+        ### of @_, as it will then miss the $fmt and return the 
+        ### number of elements in the list... =/ --kane
+        $self->__print( sprintf( $fmt, @_ ) );
     }
 }
 

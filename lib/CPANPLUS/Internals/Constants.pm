@@ -4,6 +4,7 @@ use strict;
 
 use CPANPLUS::Error;
 
+use Config;
 use File::Spec;
 use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
@@ -39,7 +40,13 @@ use constant TARGET_CREATE  => 'create';
 use constant TARGET_PREPARE => 'prepare';
 use constant TARGET_INSTALL => 'install';
 use constant TARGET_IGNORE  => 'ignore';
-use constant DOT_CPANPLUS   => $^O eq 'VMS' ? '_cpanplus' : '.cpanplus';         
+
+use constant ON_WIN32       => $^O eq 'MSWin32';
+use constant ON_NETWARE     => $^O eq 'NetWare';
+use constant ON_CYGWIN      => $^O eq 'cygwin';
+use constant ON_VMS         => $^O eq 'VMS';
+
+use constant DOT_CPANPLUS   => ON_VMS ? '_cpanplus' : '.cpanplus'; 
 
 use constant OPT_AUTOFLUSH  => '-MCPANPLUS::Internals::Utils::Autoflush';
 
@@ -109,16 +116,23 @@ use constant DIR_EXISTS     => sub {
                                             $dir));
                                     return;
                             };   
+                    
+                            ### On VMS, if the $Config{make} is either MMK 
+                            ### or MMS, then the makefile is 'DESCRIP.MMS'.
+use constant MAKEFILE       => sub { my $file =
+                                        (ON_VMS and 
+                                         $Config::Config{make} =~ /MM[S|K]/i)
+                                            ? 'DESCRIP.MMS'
+                                            : 'Makefile';
 
+                                    return @_
+                                        ? File::Spec->catfile( @_, $file )
+                                        : $file;
+                            };                   
 use constant MAKEFILE_PL    => sub { return @_
                                         ? File::Spec->catfile( @_,
                                                             'Makefile.PL' )
                                         : 'Makefile.PL';
-                            };                   
-use constant MAKEFILE       => sub { return @_
-                                        ? File::Spec->catfile( @_,
-                                                            'Makefile' )
-                                        : 'Makefile';
                             }; 
 use constant BUILD_PL       => sub { return @_
                                         ? File::Spec->catfile( @_,
@@ -199,7 +213,29 @@ use constant OPEN_FILE      => sub {
                                     return $fh if $fh;
                                     return;
                             };      
-                            
+         
+use constant OPEN_DIR       => sub { 
+                                    my $dir = shift;
+                                    my $dh;
+                                    opendir $dh, $dir or error(loc(
+                                        "Could not open dir '%1': %2", $dir, $!
+                                    ));
+                                    
+                                    return $dh if $dh;
+                                    return;
+                            };
+
+use constant READ_DIR       => sub { 
+                                    my $dir = shift;
+                                    my $dh  = OPEN_DIR->( $dir ) or return;
+                                    
+                                    ### exclude . and ..
+                                    my @files =  grep { $_ !~ /^\.{1,2}/ }         
+                                                    readdir($dh);
+                                    
+                                    return @files;
+                            };  
+
 use constant STRIP_GZ_SUFFIX 
                             => sub {
                                     my $file = $_[0] or return;
@@ -236,6 +272,9 @@ use constant CREATE_FILE_URI
                                         : 'file://' . $dir;   
                             };        
 
+use constant CUSTOM_AUTHOR_ID
+                            => 'LOCAL';
+
 use constant DOT_SHELL_DEFAULT_RC
                             => '.shell-default.rc';
 
@@ -268,11 +307,6 @@ use constant INSTALL_LOG_FILE
                                      $name .= '-'. scalar(time) . '.log';
                                      return $name;
                                 };                                        
-
-use constant ON_WIN32       => $^O eq 'MSWin32';
-use constant ON_NETWARE     => $^O eq 'NetWare';
-use constant ON_CYGWIN      => $^O eq 'cygwin';
-use constant ON_VMS         => $^O eq 'VMS';
 
 use constant ON_OLD_CYGWIN  => do { ON_CYGWIN and $] < 5.008 
                                     ? loc(

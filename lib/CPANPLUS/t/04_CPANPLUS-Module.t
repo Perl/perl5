@@ -47,7 +47,7 @@ isa_ok( $Auth->parent,          'CPANPLUS::Backend' );
         name        =>  $ModName,
         comment     =>  undef,
         package     =>  'Foo-Bar-0.01.tar.gz',
-        path        =>  'authors/id/E/EU/EUNOXS',      
+        path        =>  'authors/id/EUNOXS',      
         version     =>  '0.01',
         dslip       =>  'cdpO ',
         description =>  'CPANPLUS Test Package', 
@@ -76,7 +76,7 @@ isa_ok( $Auth->parent,          'CPANPLUS::Backend' );
 
 ### convenience methods ###
 {   ok( 1,                                          "Convenience functions" );
-    is( $Mod->package_name,     'Foo-Bar',          "   Package name");
+    is( $Mod->package_name,      'Foo-Bar',         "   Package name");
     is( $Mod->package_version,   '0.01',            "   Package version");
     is( $Mod->package_extension, 'tar.gz',          "   Package extension");
     ok( !$Mod->package_is_perl_core,                "   Package not core");

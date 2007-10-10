@@ -8,7 +8,7 @@ use strict;
 
 ### make sure to keep the plan -- this is the only test
 ### supported for 'older' T::H (pre 2.28) -- see Makefile.PL for details
-use Test::More tests => 36;
+use Test::More tests => 40;
 
 use Cwd;
 use Data::Dumper;
@@ -37,7 +37,8 @@ rmdir $Dir  if -d $Dir;
     is( File::Spec->rel2abs(cwd()), File::Spec->rel2abs(File::Spec->catdir($Cwd,$Dir)),
                                         "   Cwd() is '$Dir'");  
     ok( $Class->_chdir( dir => $Cwd),   "Chdir back to '$Cwd'" );
-    is( File::Spec->rel2abs(cwd()),$Cwd,"   Cwd() is '$Cwd'" );
+    like( File::Spec->rel2abs(cwd()), qr/$Cwd/i,
+                                        "   Cwd() is '$Cwd'" );
 }
 
 ### test _move ###
@@ -118,8 +119,19 @@ rmdir $Dir  if -d $Dir;
     
     ok( !-e $File,              "   File removed" );
 }
-    
 
+### uri encode/decode tests    
+{   my $org = 'file://foo/bar';
+
+    my $enc = $Class->_uri_encode( uri => $org );
+    
+    ok( $enc,                   "String '$org' encoded" );
+    like( $enc, qr/%/,          "   Contents as expected" );
+    
+    my $dec = $Class->_uri_decode( uri => $enc );
+    ok( $dec,                   "String '$enc' decoded" );
+    is( $dec, $org,             "   Decoded properly" );
+}    
 
         
         
