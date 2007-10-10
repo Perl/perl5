@@ -54,9 +54,33 @@ function with something that doesn't look like a debugger command, such
 as a leading C<;> or perhaps a C<+>, or by wrapping it with parentheses
 or braces.
 
+=head2 Calling the debugger
+
+There are several ways to call the debugger:
+
+=over 4
+
+=item perl -d program_name
+
+On the given program identified by C<program_name>.
+
+=item perl -d -e 0 
+
+Interactively supply an arbitrary C<expression> using C<-e>.
+
+=item perl -d:Ptkdb program_name
+
+Debug a given program via the C<Devel::Ptkdb> GUI.
+
+=item perl -dt threaded_program_name
+
+Debug a given program using threads (experimental).
+
+=back
+
 =head2 Debugger Commands
 
-The debugger understands the following commands:
+The interactive debugger understands the following commands:
 
 =over 12
 
