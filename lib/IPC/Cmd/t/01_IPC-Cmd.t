@@ -35,7 +35,7 @@ my @Prefs = (
     ok( !can_run('10283lkjfdalskfjaf'), q[Not found non-existant binary] );
 }
 
-### run tests
+### run tests that print only to stdout
 {   ### list of commands and regexes matching output ###
     my $map = [
         # command                                    # output regex
@@ -45,6 +45,7 @@ my @Prefs = (
         [ [$^X,qw[-eprint+42 |], $^X, qw|-neprint|], qr/42/,            ],
     ];
 
+    diag( "Running tests that print only to stdout" ) if $Verbose;
     ### for each configuarion
     for my $pref ( @Prefs ) {
         diag( "Running config: IPC::Run: $pref->[0] IPC::Open3: $pref->[1]" )
@@ -108,6 +109,81 @@ my @Prefs = (
     }
 }
 
+### run tests that print only to stderr
+### XXX lots of duplication from stdout tests, only difference
+### is buffer inspection
+{   ### list of commands and regexes matching output ###
+    my $map = [
+        # command                                    # output regex
+        [ "$^X -ewarn+42",                          qr/^42 /, ],
+        [ [$^X, '-ewarn+42'],                       qr/^42 /, ],
+    ];
+
+    diag( "Running tests that print only to stderr" ) if $Verbose;
+    ### for each configuarion
+    for my $pref ( @Prefs ) {
+        diag( "Running config: IPC::Run: $pref->[0] IPC::Open3: $pref->[1]" )
+            if $Verbose;
+
+        $IPC::Cmd::USE_IPC_RUN    = $IPC::Cmd::USE_IPC_RUN      = $pref->[0];
+        $IPC::Cmd::USE_IPC_OPEN3  = $IPC::Cmd::USE_IPC_OPEN3    = $pref->[1];
+
+        ### for each command
+        for my $aref ( @$map ) {
+            my $cmd                 = $aref->[0];
+            my $regex               = $aref->[1];
+
+            my $pp_cmd = ref $cmd ? "@$cmd" : "$cmd";
+            diag( "Running '$pp_cmd' as " . (ref $cmd ? "ARRAY" : "SCALAR") )
+                if $Verbose;
+
+            ### in scalar mode
+            {   diag( "Running stderr command in scalar mode" ) if $Verbose;
+                my $buffer;
+                my $ok = run( command => $cmd, buffer => \$buffer );
+
+                ok( $ok,        "Ran stderr command succesfully in scalar mode." );
+
+                SKIP: {
+           # No buffers are expected if neither IPC::Run nor IPC::Open3 is used.
+                    skip "No buffers available", 1
+                                unless $Class->can_capture_buffer;
+
+                    like( $buffer, $regex,
+                                "   Buffer filled properly from stderr" );
+                }
+            }
+
+            ### in list mode
+            {   diag( "Running stderr command in list mode" ) if $Verbose;
+                my @list = run( command => $cmd );
+                ok( $list[0],   "Ran stderr command successfully in list mode." );
+                ok( !$list[1],  "   No error code set" );
+
+                my $list_length = $Class->can_capture_buffer ? 5 : 2;
+                is( scalar(@list), $list_length,
+                                "   Output list has $list_length entries" );
+
+                SKIP: {
+           # No buffers are expected if neither IPC::Run nor IPC::Open3 is used.
+                    skip "No buffers available", 6
+                                unless $Class->can_capture_buffer;
+
+                    ### the last 3 entries from the RV, are they array refs?
+                    isa_ok( $list[$_], 'ARRAY' ) for 2..4;
+
+                    like( "@{$list[2]}", $regex,
+                                "   Combined buffer holds output" );
+
+                    is( scalar( @{$list[3]} ), 0,
+                                    "   Stdout buffer empty" );
+                    like( "@{$list[4]}", qr/$regex/,
+                            "   Stderr buffer filled" );
+                }
+            }
+        }
+    }
+}
 
 ### test failures
 {   ### for each configuarion
