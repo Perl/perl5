@@ -148,8 +148,13 @@ EOI
 # run-time usage of newCONSTSUB (as done by the IO boot code) wasn't
 # thread-safe - got occasional coredumps or malloc corruption
 {
+    local $SIG{__WARN__} = sub {};   # Ignore any thread creation failure warnings
     my @t;
-    push @t, threads->create( sub { require IO }) for 1..100;
+    for (1..100) {
+        my $thr = threads->create( sub { require IO });
+        last if !defined($thr);      # Probably ran out of memory
+        push(@t, $thr);
+    }
     $_->join for @t;
     ok(1, '[perl #45053]');
 }
