@@ -3878,7 +3878,7 @@ static PerlIO * create_forked_xterm(pTHX_ const char *cmd, const char *mode)
 
      /* LIB$FIND_IMAGE_SIGNAL needs a handler */
     /*---------------------------------------*/
-    VAXC$ESTABLISH((__vms_handler)LIB$SIG_TO_RET);
+    VAXC$ESTABLISH((__vms_handler)lib$sig_to_ret);
 
 
     /* Make sure that this is from the Perl debugger */
@@ -3898,7 +3898,7 @@ static PerlIO * create_forked_xterm(pTHX_ const char *cmd, const char *mode)
 	$DESCRIPTOR(filename2_dsc, "DECW$TERMINALSHR");
 	$DESCRIPTOR(decw_term_port_dsc, "DECW$TERM_PORT");
 
-	status = LIB$FIND_IMAGE_SYMBOL
+       status = lib$find_image_symbol
 			       (&filename1_dsc,
 				&decw_term_port_dsc,
 				(void *)&decw_term_port,
@@ -3908,7 +3908,7 @@ static PerlIO * create_forked_xterm(pTHX_ const char *cmd, const char *mode)
 	/* Try again with the other image name */
 	if (!$VMS_STATUS_SUCCESS(status)) {
 
-	    status = LIB$FIND_IMAGE_SYMBOL
+           status = lib$find_image_symbol
 			       (&filename2_dsc,
 				&decw_term_port_dsc,
 				(void *)&decw_term_port,
@@ -4835,7 +4835,7 @@ static int rms_erase(const char * vmsname)
   rms_set_nam_nop(mynam, NAML$M_OPEN_SPECIAL);
 #endif
 
-  status = SYS$ERASE(&myfab, 0, 0);
+  status = sys$erase(&myfab, 0, 0);
 
   return status;
 }
