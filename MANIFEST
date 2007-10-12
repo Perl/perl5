@@ -991,6 +991,7 @@ ext/Safe/t/safe1.t		See if Safe works
 ext/Safe/t/safe2.t		See if Safe works
 ext/Safe/t/safe3.t		See if Safe works
 ext/Safe/t/safeops.t		Tests that all ops can be trapped by Safe
+ext/Safe/t/safeuniversal.t	Tests Safe with functions from universal.c
 ext/SDBM_File/Makefile.PL	SDBM extension makefile writer
 ext/SDBM_File/sdbm/biblio	SDBM kit
 ext/SDBM_File/sdbm/CHANGES	SDBM kit
