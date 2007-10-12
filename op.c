@@ -7218,6 +7218,8 @@ Perl_ck_require(pTHX_ OP *o)
 	    SV * const sv = kid->op_sv;
 	    U32 was_readonly = SvREADONLY(sv);
 	    char *s;
+	    STRLEN len;
+	    const char *end;
 
 	    if (was_readonly) {
 		if (SvFAKE(sv)) {
@@ -7229,14 +7231,17 @@ Perl_ck_require(pTHX_ OP *o)
 		}
 	    }   
 
-	    for (s = SvPVX(sv); *s; s++) {
+	    s = SvPVX(sv);
+	    len = SvCUR(sv);
+	    end = s + len;
+	    for (; s < end; s++) {
 		if (*s == ':' && s[1] == ':') {
-		    const STRLEN len = strlen(s+2)+1;
 		    *s = '/';
-		    Move(s+2, s+1, len, char);
-		    SvCUR_set(sv, SvCUR(sv) - 1);
+		    Move(s+2, s+1, end - s, char);
+		    --end;
 		}
 	    }
+	    SvEND_set(sv, end);
 	    sv_catpvs(sv, ".pm");
 	    SvFLAGS(sv) |= was_readonly;
 	}

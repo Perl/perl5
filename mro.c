@@ -840,8 +840,7 @@ XS(XS_mro_is_universal)
 
     classname = ST(0);
 
-    classname_pv = SvPV_nolen(classname);
-    classname_len = strlen(classname_pv);
+    classname_pv = SvPV(classname,classname_len);
 
     he = hv_fetch_ent(PL_isarev, classname, 0, 0);
     isarev = he ? (HV*)HeVAL(he) : NULL;
