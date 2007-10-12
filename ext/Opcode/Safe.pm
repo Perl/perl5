@@ -231,9 +231,6 @@ sub share_from {
     my $arg;
     foreach $arg (@$vars) {
 	# catch some $safe->share($var) errors:
-	croak("'$arg' not a valid symbol table name")
-	    unless $arg =~ /^[\$\@%*&]?\w[\w:]*$/
-	    	or $arg =~ /^\$\W$/;
 	my ($var, $type);
 	$type = $1 if ($var = $arg) =~ s/^(\W)//;
 	# warn "share_from $pkg $type $var";
