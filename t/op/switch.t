@@ -8,7 +8,7 @@ BEGIN {
 use strict;
 use warnings;
 
-use Test::More tests => 107;
+use Test::More tests => 108;
 
 # The behaviour of the feature pragma should be tested by lib/switch.t
 # using the tests in t/lib/switch/*. This file tests the behaviour of
@@ -457,6 +457,16 @@ sub bar {"bar"}
 # Other things that should not be smart matched
 {
     my $ok = 0;
+    given(12) {
+        when( /(\d+)/ and ( 1 <= $1 and $1 <= 12 ) ) {
+            $ok = 1;
+        }
+    }
+    ok($ok, "bool not smartmatches");
+}
+
+{
+    my $ok = 0;
     given(0) {
 	when(eof(DATA)) {
 	    $ok = 1;
@@ -500,13 +510,13 @@ sub bar {"bar"}
 }
 
 {
-    my $ok = 1;
-    given(0) {
+    my $ok = 0;
+    given("foo") {
 	when((1 == $ok) || "foo") {
-	    $ok = 0;
+	    $ok = 1;
 	}
     }
-    ok($ok, '((1 == $ok) || "foo") not smartmatched');
+    ok($ok, '((1 == $ok) || "foo") smartmatched');
 }
 
 

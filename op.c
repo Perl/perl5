@@ -4937,6 +4937,11 @@ S_looks_like_bool(pTHX_ const OP *o)
 	    	looks_like_bool(cLOGOPo->op_first)
 	     && looks_like_bool(cLOGOPo->op_first->op_sibling));
 
+	case OP_NULL:
+	    return (
+		o->op_flags & OPf_KIDS
+	    && looks_like_bool(cUNOPo->op_first));
+
 	case OP_ENTERSUB:
 
 	case OP_NOT:	case OP_XOR:

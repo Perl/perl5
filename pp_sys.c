@@ -2012,7 +2012,12 @@ PP(pp_eof)
 		    IoLINES(io) = 0;
 		    IoFLAGS(io) &= ~IOf_START;
 		    do_open(gv, "-", 1, FALSE, O_RDONLY, 0, NULL);
-		    sv_setpvn(GvSV(gv), "-", 1);
+		    if ( GvSV(gv) ) {
+			sv_setpvn(GvSV(gv), "-", 1);
+		    }
+		    else {
+			GvSV(gv) = newSVpvn("-", 1);
+		    }
 		    SvSETMAGIC(GvSV(gv));
 		}
 		else if (!nextargv(gv))

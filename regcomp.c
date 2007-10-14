@@ -4944,9 +4944,13 @@ Perl_reg_named_buff_exists(pTHX_ REGEXP * const rx, SV * const key,
 SV*
 Perl_reg_named_buff_firstkey(pTHX_ REGEXP * const rx, const U32 flags)
 {
-    (void)hv_iterinit(rx->paren_names);
+    if ( rx && rx->paren_names ) {
+	(void)hv_iterinit(rx->paren_names);
 
-    return CALLREG_NAMED_BUFF_NEXTKEY(rx, NULL, flags & ~RXapif_FIRSTKEY);
+	return CALLREG_NAMED_BUFF_NEXTKEY(rx, NULL, flags & ~RXapif_FIRSTKEY);
+    } else {
+	return FALSE;
+    }
 }
 
 SV*

@@ -8,7 +8,12 @@ BEGIN {
 
 # Do a basic test on all the tied methods of Tie::Hash::NamedCapture
 
-print "1..12\n";
+print "1..13\n";
+
+# PL_curpm->paren_names can be a null pointer. See that this succeeds anyway.
+'x' =~ /(.)/;
+() = %+;
+pass( 'still alive' );
 
 "hlagh" =~ /
     (?<a>.)
