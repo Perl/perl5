@@ -23,7 +23,7 @@ use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
 use constant QUOTE  => do { $^O eq 'MSWin32' ? q["] : q['] };            
             
 
-$VERSION        = '0.10';
+$VERSION        = '0.12';
 $PREFER_BIN     = 0;        # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
 $USER_AGENT     = 'File::Fetch/$VERSION';
@@ -50,8 +50,7 @@ local $Module::Load::Conditional::VERBOSE   = 0;
 
 ### see what OS we are on, important for file:// uris ###
 use constant ON_UNIX        => ($^O ne 'MSWin32' and
-                                $^O ne 'MacOS'   and
-                                $^O ne 'VMS');
+                                $^O ne 'MacOS');
 
 =pod
 
@@ -333,6 +332,7 @@ sub fetch {
     local $ENV{FTP_PASSIVE} = $FTP_PASSIVE;
 
     ###
+    my $out_to = File::Spec->catfile( $to, $self->output_file );
     for my $method ( @{ $METHODS->{$self->scheme} } ) {
         my $sub =  '_'.$method.'_fetch';
 
@@ -357,7 +357,7 @@ sub fetch {
         local $IPC::Cmd::USE_IPC_RUN = 0;
         
         if( my $file = $self->$sub( 
-                        to => File::Spec->catfile( $to, $self->output_file )
+                        to => $out_to
         )){
 
             unless( -e $file && -s _ ) {
@@ -1053,18 +1053,21 @@ and URI encoding here:
 
 To indicate to rather use commandline tools than modules
 
-=head1 AUTHORS
+=back
+
+=head1 BUG REPORTS
+
+Please report bugs or other issues to E<lt>bug-file-fetch@rt.cpan.org<gt>.
+
+=head1 AUTHOR
 
 This module by Jos Boumans E<lt>kane@cpan.orgE<gt>.
 
 =head1 COPYRIGHT
 
-This module is copyright (c) 2003-2007 Jos Boumans 
-E<lt>kane@cpan.orgE<gt>. All rights reserved.
+This library is free software; you may redistribute and/or modify it 
+under the same terms as Perl itself.
 
-This library is free software;
-you may redistribute and/or modify it under the same
-terms as Perl itself.
 
 =cut
 
