@@ -8,7 +8,7 @@ BEGIN {
 
 use strict;
 
-plan tests => 5;
+plan tests => 6;
 
 my %h;
 
@@ -109,3 +109,12 @@ sub hash {
     $u += $u << 15; $u %= MASK_U32;
     $u;
 }
+
+# This will crash perl if it fails
+
+use constant PVBM => 'foo';
+
+my $dummy = index 'foo', PVBM;
+eval { my %h = (a => PVBM); 1 };
+
+ok (!$@, 'fbm scalar can be inserted into a hash');
