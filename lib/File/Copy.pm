@@ -466,7 +466,7 @@ E.g.
   copy("file1", ":tmp:file1"); # ok, partial path
   copy("file1", "DataHD:");    # creates DataHD:file1
 
-  move("MacintoshHD:fileA", "DataHD:fileB"); # moves (don't copies) files from one
+  move("MacintoshHD:fileA", "DataHD:fileB"); # moves (doesn't copy) files from one
                                              # volume to another
 
 =back
