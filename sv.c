@@ -3538,7 +3538,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	}
 
 	if (dtype >= SVt_PV) {
-	    if (dtype == SVt_PVGV) {
+	    if (dtype == SVt_PVGV && isGV_with_GP(dstr)) {
 		glob_assign_ref(dstr, sstr);
 		return;
 	    }
