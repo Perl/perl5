@@ -3050,20 +3050,21 @@ Perl_moreswitches(pTHX_ const char *s)
 	/* The following permits -d:Mod to accepts arguments following an =
 	   in the fashion that -MSome::Mod does. */
 	if (*s == ':' || *s == '=') {
-            const char *start;
+	    const char *start = ++s;
+	    const char *const end = s + strlen(s);
 	    SV * const sv = newSVpvs("use Devel::");
-	    start = ++s;
+
 	    /* We now allow -d:Module=Foo,Bar */
 	    while(isALNUM(*s) || *s==':') ++s;
 	    if (*s != '=')
-		sv_catpv(sv, start);
+		sv_catpvn(sv, start, end - start);
 	    else {
 		sv_catpvn(sv, start, s-start);
 		/* Don't use NUL as q// delimiter here, this string goes in the
 		 * environment. */
 		Perl_sv_catpvf(aTHX_ sv, " split(/,/,q{%s});", ++s);
 	    }
-	    s += strlen(s);
+	    s = end;
 	    my_setenv("PERL5DB", SvPV_nolen_const(sv));
 	    SvREFCNT_dec(sv);
 	}
