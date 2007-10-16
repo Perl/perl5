@@ -259,9 +259,9 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	    mode[0] = 'w';
 	    writing = 1;
             if (out_raw)
-                my_strlcat(mode, "b", PERL_MODE_MAX - 1);
+		mode[1] = 'b';
             else if (out_crlf)
-                my_strlcat(mode, "t", PERL_MODE_MAX - 1); 
+		mode[1] = 't';
 	    if (num_svs > 1) {
 		fp = PerlProc_popen_list(mode, num_svs, svp);
 	    }
@@ -290,9 +290,9 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	    writing = 1;
 
             if (out_raw)
-                my_strlcat(mode, "b", PERL_MODE_MAX - 1);
+		mode[1] = 'b';
             else if (out_crlf)
-                my_strlcat(mode, "t", PERL_MODE_MAX - 1);
+		mode[1] = 't';
 	    if (*type == '&') {
 	      duplicity:
 		dodup = PERLIO_DUP_FD;
@@ -416,9 +416,9 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	    } while (isSPACE(*type));
 	    mode[0] = 'r';
             if (in_raw)
-                my_strlcat(mode, "b", PERL_MODE_MAX - 1);
+		mode[1] = 'b';
             else if (in_crlf)
-                my_strlcat(mode, "t", PERL_MODE_MAX - 1);
+		mode[1] = 't';
 	    if (*type == '&') {
 		goto duplicity;
 	    }
@@ -470,9 +470,9 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	    mode[0] = 'r';
 
             if (in_raw)
-                my_strlcat(mode, "b", PERL_MODE_MAX - 1);
+		mode[1] = 'b';
             else if (in_crlf)
-                my_strlcat(mode, "t", PERL_MODE_MAX - 1);
+		mode[1] = 't';
 
 	    if (num_svs > 1) {
 		fp = PerlProc_popen_list(mode,num_svs,svp);
@@ -501,9 +501,9 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	    mode[0] = 'r';
 
             if (in_raw)
-                my_strlcat(mode, "b", PERL_MODE_MAX - 1);
+		mode[1] = 'b';
             else if (in_crlf)
-                my_strlcat(mode, "t", PERL_MODE_MAX - 1);
+		mode[1] = 't';
 
 	    if (*name == '-' && name[1] == '\0') {
 		fp = PerlIO_stdin();
