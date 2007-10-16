@@ -23,6 +23,9 @@
 #define PERL_IN_TOKE_C
 #include "perl.h"
 
+#define new_constant(a,b,c,d,e,f,g)	\
+	S_new_constant(aTHX_ a,b,STR_WITH_LEN(c),d,e,f, g)
+
 #define yylval	(PL_parser->yylval)
 
 /* YYINITDEPTH -- initial size of the parser's stacks.  */
@@ -1568,7 +1571,7 @@ S_tokeq(pTHX_ SV *sv)
     SvCUR_set(sv, d - SvPVX_const(sv));
   finish:
     if ( PL_hints & HINT_NEW_STRING )
-       return new_constant(NULL, 0, "q", sv, pv, "q");
+       return new_constant(NULL, 0, "q", sv, pv, "q", 1);
     return sv;
 }
 
@@ -2273,7 +2276,6 @@ S_scan_const(pTHX_ char *start)
  		    SV *res;
  		    STRLEN len;
  		    const char *str;
- 		    SV *type;
 
  		    if (!e) {
 			yyerror("Missing right brace on \\N{}");
@@ -2294,10 +2296,8 @@ S_scan_const(pTHX_ char *start)
 			goto NUM_ESCAPE_INSERT;
 		    }
 		    res = newSVpvn(s + 1, e - s - 1);
-		    type = newSVpvn(s - 2,e - s + 3);
 		    res = new_constant( NULL, 0, "charnames",
-					res, NULL, SvPVX(type) );
-		    SvREFCNT_dec(type);		
+					res, NULL, s - 2, e - s + 3 );
 		    if (has_utf8)
 			sv_utf8_upgrade(res);
 		    str = SvPV_const(res,len);
@@ -2452,16 +2452,26 @@ S_scan_const(pTHX_ char *start)
 
     /* return the substring (via yylval) only if we parsed anything */
     if (s > PL_bufptr) {
-	if ( PL_hints & ( PL_lex_inpat ? HINT_NEW_RE : HINT_NEW_STRING ) )
-	    sv = new_constant(start, s - start,
-			      (const char *)(PL_lex_inpat ? "qr" : "q"),
-			      sv, NULL,
-			      (const char *)
-			      (( PL_lex_inwhat == OP_TRANS
-				 ? "tr"
-				 : ( (PL_lex_inwhat == OP_SUBST && !PL_lex_inpat)
-				     ? "s"
-				     : "qq"))));
+	if ( PL_hints & ( PL_lex_inpat ? HINT_NEW_RE : HINT_NEW_STRING ) ) {
+	    const char *const key = PL_lex_inpat ? "qr" : "q";
+	    const STRLEN keylen = PL_lex_inpat ? 2 : 1;
+	    const char *type;
+	    STRLEN typelen;
+
+	    if (PL_lex_inwhat == OP_TRANS) {
+		type = "tr";
+		typelen = 2;
+	    } else if (PL_lex_inwhat == OP_SUBST && !PL_lex_inpat) {
+		type = "s";
+		typelen = 1;
+	    } else  {
+		type = "qq";
+		typelen = 2;
+	    }
+
+	    sv = S_new_constant(aTHX_ start, s - start, key, keylen, sv, NULL,
+				type, typelen);
+	}
 	yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
     } else
 	SvREFCNT_dec(sv);
@@ -3495,7 +3505,7 @@ Perl_yylex(pTHX)
 	    if (!PL_lex_inpat)
 		sv = tokeq(sv);
 	    else if ( PL_hints & HINT_NEW_RE )
-		sv = new_constant(NULL, 0, "qr", sv, sv, "q");
+		sv = new_constant(NULL, 0, "qr", sv, sv, "q", 1);
 	    yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
 	    s = PL_bufend;
 	}
@@ -10493,8 +10503,8 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
    and type is used with error messages only. */
 
 STATIC SV *
-S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv,
-	       const char *type)
+S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
+	       SV *sv, SV *pv, const char *type, STRLEN typelen)
 {
     dVAR; dSP;
     HV * const table = GvHV(PL_hintgv);		 /* ^H */
@@ -10528,7 +10538,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv,
  	SvREFCNT_dec(msg);
   	return sv;
     }
-    cvp = hv_fetch(table, key, strlen(key), FALSE);
+    cvp = hv_fetch(table, key, keylen, FALSE);
     if (!cvp || !SvOK(*cvp)) {
 	why1 = "$^H{";
 	why2 = key;
@@ -10540,7 +10550,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv,
     if (!pv && s)
   	pv = sv_2mortal(newSVpvn(s, len));
     if (type && pv)
-  	typesv = sv_2mortal(newSVpv(type, 0));
+  	typesv = sv_2mortal(newSVpvn(type, typelen));
     else
   	typesv = &PL_sv_undef;
 
@@ -12073,9 +12083,9 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	    }
 	    if (just_zero && (PL_hints & HINT_NEW_INTEGER))
 		sv = new_constant(start, s - start, "integer",
-				  sv, NULL, NULL);
+				  sv, NULL, NULL, 0);
 	    else if (PL_hints & HINT_NEW_BINARY)
-		sv = new_constant(start, s - start, "binary", sv, NULL, NULL);
+		sv = new_constant(start, s - start, "binary", sv, NULL, NULL, 0);
 	}
 	break;
 
@@ -12238,13 +12248,13 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	    sv_setnv(sv, nv);
 	}
 
-	if ( floatit ? (PL_hints & HINT_NEW_FLOAT) :
-	               (PL_hints & HINT_NEW_INTEGER) )
-	    sv = new_constant(PL_tokenbuf,
-			      d - PL_tokenbuf,
-			      (const char *)
-			      (floatit ? "float" : "integer"),
-			      sv, NULL, NULL);
+	if ( floatit
+	     ? (PL_hints & HINT_NEW_FLOAT) : (PL_hints & HINT_NEW_INTEGER) ) {
+	    const char *const key = floatit ? "float" : "integer";
+	    const STRLEN keylen = floatit ? 5 : 7;
+	    sv = S_new_constant(aTHX_ PL_tokenbuf, d - PL_tokenbuf,
+				key, keylen, sv, NULL, NULL, 0);
+	}
 	break;
 
     /* if it starts with a v, it could be a v-string */

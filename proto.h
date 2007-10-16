@@ -4128,9 +4128,9 @@ STATIC char *	S_tokenize_use(pTHX_ int is_use, char *s)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 
-STATIC SV*	S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv, const char *type)
+STATIC SV*	S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen, SV *sv, SV *pv, const char *type, STRLEN typelen)
 			__attribute__nonnull__(pTHX_3)
-			__attribute__nonnull__(pTHX_4);
+			__attribute__nonnull__(pTHX_5);
 
 STATIC int	S_ao(pTHX_ int toketype);
 STATIC const char*	S_incl_perldb(pTHX);
