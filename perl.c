@@ -187,6 +187,7 @@ S_init_tls_and_interp(PerlInterpreter *my_perl)
 void
 Perl_sys_init(int* argc, char*** argv)
 {
+    dVAR;
     PERL_UNUSED_ARG(argc); /* may not be used depending on _BODY macro */
     PERL_UNUSED_ARG(argv);
     PERL_SYS_INIT_BODY(argc, argv);
@@ -195,6 +196,7 @@ Perl_sys_init(int* argc, char*** argv)
 void
 Perl_sys_init3(int* argc, char*** argv, char*** env)
 {
+    dVAR;
     PERL_UNUSED_ARG(argc); /* may not be used depending on _BODY macro */
     PERL_UNUSED_ARG(argv);
     PERL_UNUSED_ARG(env);
@@ -204,6 +206,7 @@ Perl_sys_init3(int* argc, char*** argv, char*** env)
 void
 Perl_sys_term(pTHX)
 {
+    dVAR;
     if (!PL_veto_cleanup) {
 	PERL_SYS_TERM_BODY();
     }
