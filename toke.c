@@ -559,6 +559,9 @@ S_missingterm(pTHX_ char *s)
 #define FEATURE_IS_ENABLED(name)				        \
 	((0 != (PL_hints & HINT_LOCALIZE_HH))				\
 	    && S_feature_is_enabled(aTHX_ STR_WITH_LEN(name)))
+/* The longest string we pass in.  */
+#define MAX_FEATURE_LEN (sizeof("switch")-1)
+
 /*
  * S_feature_is_enabled
  * Check whether the named feature is enabled.
@@ -568,8 +571,9 @@ S_feature_is_enabled(pTHX_ const char *name, STRLEN namelen)
 {
     dVAR;
     HV * const hinthv = GvHV(PL_hintgv);
-    char he_name[32] = "feature_";
-    (void) my_strlcpy(&he_name[8], name, 24);
+    char he_name[8 + MAX_FEATURE_LEN] = "feature_";
+    assert(namelen <= MAX_FEATURE_LEN);
+    memcpy(&he_name[8], name, namelen);
 
     return (hinthv && hv_exists(hinthv, he_name, 8 + namelen));
 }
