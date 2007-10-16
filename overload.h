@@ -2,8 +2,8 @@
  *
  *    overload.h
  *
- *    Copyright (C) 1997, 1998, 2000, 2001, 2005 and 2006 by Larry Wall and
- *    others
+ *    Copyright (C) 1997, 1998, 2000, 2001, 2005, 2006, 2007 by Larry Wall
+ *    and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -84,85 +84,5 @@ enum {
     /* Do not leave a trailing comma here.  C9X allows it, C89 doesn't. */
 };
 
-
 #define NofAMmeth max_amg_code
-#define AMG_id2name(id) (PL_AMG_names[id]+1)
 
-#ifdef DOINIT
-EXTCONST char * const PL_AMG_names[NofAMmeth] = {
-  /* Names kept in the symbol table.  fallback => "()", the rest has
-     "(" prepended.  The only other place in perl which knows about
-     this convention is AMG_id2name (used for debugging output and
-     'nomethod' only), the only other place which has it hardwired is
-     overload.pm.  */
-    "()",
-    "(${}",
-    "(@{}",
-    "(%{}",
-    "(*{}",
-    "(&{}",
-    "(++",
-    "(--",
-    "(bool",
-    "(0+",
-    "(\"\"",
-    "(!",
-    "(=",
-    "(abs",
-    "(neg",
-    "(<>",
-    "(int",
-    "(<",
-    "(<=",
-    "(>",
-    "(>=",
-    "(==",
-    "(!=",
-    "(lt",
-    "(le",
-    "(gt",
-    "(ge",
-    "(eq",
-    "(ne",
-    "(nomethod",
-    "(+",
-    "(+=",
-    "(-",
-    "(-=",
-    "(*",
-    "(*=",
-    "(/",
-    "(/=",
-    "(%",
-    "(%=",
-    "(**",
-    "(**=",
-    "(<<",
-    "(<<=",
-    "(>>",
-    "(>>=",
-    "(&",
-    "(&=",
-    "(|",
-    "(|=",
-    "(^",
-    "(^=",
-    "(<=>",
-    "(cmp",
-    "(~",
-    "(atan2",
-    "(cos",
-    "(sin",
-    "(exp",
-    "(log",
-    "(sqrt",
-    "(x",
-    "(x=",
-    "(.",
-    "(.=",
-    "(~~",
-    "DESTROY"
-};
-#else
-EXTCONST char * PL_AMG_names[NofAMmeth];
-#endif /* def INITAMAGIC */

@@ -3,7 +3,6 @@
 # *** Only structures/arrays with constant initializers should go here.
 # *** Usual globals initialized at runtime should be added in *var*.h.
 
-AMG_names
 block_type
 check
 fold

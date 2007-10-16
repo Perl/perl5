@@ -3038,7 +3038,8 @@ os2/OS2/typemap			Common typemap for OS/2 types
 os2/perl2cmd.pl			Corrects installed binaries under OS/2
 os2/perlrexx.c			Support perl interpreter embedded in REXX
 os2/perlrexx.cmd		Test perl interpreter embedded in REXX
-overload.h			generated overload enum and name table
+overload.c			generated overload enum (public)
+overload.h			generated overload name table (implementation)
 overload.pl			generate overload.h
 pad.c				Scratchpad functions
 pad.h				Scratchpad headers

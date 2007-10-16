@@ -33,6 +33,7 @@ Perl stores its global variables.
 #include "EXTERN.h"
 #define PERL_IN_GV_C
 #include "perl.h"
+#include "overload.c"
 
 static const char S_autoload[] = "AUTOLOAD";
 static const STRLEN S_autolen = sizeof(S_autoload)-1;
