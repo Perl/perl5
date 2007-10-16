@@ -2769,8 +2769,10 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	}
 	errno = olderrno;
 #ifdef FIXNEGATIVEZERO
-        if (*s == '-' && s[1] == '0' && !s[2])
-	    my_strlcpy(s, "0", SvLEN(s));
+        if (*s == '-' && s[1] == '0' && !s[2]) {
+	    s[0] = '0';
+	    s[1] = 0;
+	}
 #endif
 	while (*s) s++;
 #ifdef hcx
