@@ -1586,7 +1586,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 	const char * const cooky = PL_AMG_names[i];
 	/* Human-readable form, for debugging: */
 	const char * const cp = (i >= DESTROY_amg ? cooky : AMG_id2name(i));
-	const STRLEN l = strlen(cooky);
+	const STRLEN l = PL_AMG_namelens[i];
 
 	DEBUG_o( Perl_deb(aTHX_ "Checking overloading of \"%s\" in package \"%.256s\"\n",
 		     cp, HvNAME_get(stash)) );

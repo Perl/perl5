@@ -71,15 +71,26 @@ print C <<'EOF';
 
 #define AMG_id2name(id) (PL_AMG_names[id]+1)
 
+const U8 PL_AMG_namelens[NofAMmeth] = {
+EOF
+
+my $last = pop @names;
+
+print C "    $_,\n" foreach map { length $_ } @names;
+
+my $lastlen = length $last;
+print C <<"EOT";
+    $lastlen
+};
+
 char * const PL_AMG_names[NofAMmeth] = {
   /* Names kept in the symbol table.  fallback => "()", the rest has
      "(" prepended.  The only other place in perl which knows about
      this convention is AMG_id2name (used for debugging output and
      'nomethod' only), the only other place which has it hardwired is
      overload.pm.  */
-EOF
+EOT
 
-my $last = pop @names;
 print C "    \"$_\",\n" foreach map { s/(["\\"])/\\$1/g; $_ } @names;
 
 print C <<"EOT";
@@ -88,6 +99,7 @@ print C <<"EOT";
 EOT
 
 close H or die $!;
+close C or die $!;
 
 __DATA__
 # Fallback should be the first
