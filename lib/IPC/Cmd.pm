@@ -13,7 +13,7 @@ BEGIN {
                         $USE_IPC_RUN $USE_IPC_OPEN3 $WARN
                     ];
 
-    $VERSION        = '0.38';
+    $VERSION        = '0.40';
     $VERBOSE        = 0;
     $DEBUG          = 0;
     $WARN           = 1;
@@ -605,8 +605,10 @@ sub _system_run {
                 
             ### we should re-open this filehandle right now, not
             ### just dup it
+            ### Use 2-arg version of open, as 5.5.x doesn't support
+            ### 3-arg version =/
             if( $redir eq '>&' ) {
-                open( $fh, '>', File::Spec->devnull ) or (
+                open( $fh, '>' . File::Spec->devnull ) or (
                     Carp::carp(loc("Could not reopen '$name': %1", $!)),
                     return
                 );
