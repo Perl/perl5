@@ -5685,7 +5685,8 @@ Perl_my_clearenv(pTHX)
         bsiz = l + 1; /* + 1 for the \0. */
         buf = (char*)safesysmalloc(bufsiz);
       } 
-      my_strlcpy(buf, *environ, l + 1);
+      memcpy(buf, *environ, l);
+      buf[l] = '\0';
       (void)unsetenv(buf);
     }
     (void)safesysfree(buf);
