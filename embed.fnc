@@ -1555,7 +1555,6 @@ so	|SV*	|new_constant	|NULLOK const char *s|STRLEN len \
 				|NULLOK SV *pv|NULLOK const char *type \
 				|STRLEN typelen
 s	|int	|ao		|int toketype
-s	|const char*|incl_perldb
 #  if defined(PERL_CR_FILTER)
 s	|I32	|cr_textfilter	|int idx|NULLOK SV *sv|int maxlen
 s	|void	|strip_return	|NN SV *sv

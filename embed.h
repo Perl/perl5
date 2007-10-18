@@ -1536,7 +1536,6 @@
 #endif
 #ifdef PERL_CORE
 #define ao			S_ao
-#define incl_perldb		S_incl_perldb
 #endif
 #  if defined(PERL_CR_FILTER)
 #ifdef PERL_CORE
@@ -3823,7 +3822,6 @@
 #define find_in_my_stash(a,b)	S_find_in_my_stash(aTHX_ a,b)
 #define tokenize_use(a,b)	S_tokenize_use(aTHX_ a,b)
 #define ao(a)			S_ao(aTHX_ a)
-#define incl_perldb()		S_incl_perldb(aTHX)
 #endif
 #  if defined(PERL_CR_FILTER)
 #ifdef PERL_CORE
