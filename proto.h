@@ -2179,6 +2179,9 @@ PERL_CALLCONV SV*	Perl_sv_2mortal(pTHX_ SV* sv);
 PERL_CALLCONV NV	Perl_sv_2nv(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1);
 
+PERL_CALLCONV SV*	Perl_sv_2num(pTHX_ SV* sv)
+			__attribute__nonnull__(pTHX_1);
+
 /* PERL_CALLCONV char*	Perl_sv_2pv(pTHX_ SV* sv, STRLEN* lp)
 			__attribute__nonnull__(pTHX_1); */
 

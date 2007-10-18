@@ -1038,6 +1038,24 @@ Found in file sv.c
 
 =back
 
+=head1 SV-Body Allocation
+
+=over 8
+
+=item sv_2num
+X<sv_2num>
+
+Return an SV with the numeric value of the source SV, doing any necessary
+reference or overload conversion.
+
+	SV*	sv_2num(SV* sv)
+
+=for hackers
+Found in file sv.c
+
+
+=back
+
 =head1 Unicode Support
 
 =over 8
