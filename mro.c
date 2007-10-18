@@ -117,19 +117,19 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
     GV** gvp;
     GV* gv;
     AV* av;
-    const char* stashname;
+    const HEK* stashhek;
     struct mro_meta* meta;
 
     assert(stash);
     assert(HvAUX(stash));
 
-    stashname = HvNAME_get(stash);
-    if (!stashname)
+    stashhek = HvNAME_HEK(stash);
+    if (!stashhek)
       Perl_croak(aTHX_ "Can't linearize anonymous symbol table");
 
     if (level > 100)
         Perl_croak(aTHX_ "Recursive inheritance detected in package '%s'",
-              stashname);
+		   HEK_KEY(stashhek));
 
     meta = HvMROMETA(stash);
 
@@ -141,7 +141,7 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
     /* not in cache, make a new one */
 
     retval = (AV*)sv_2mortal((SV *)newAV());
-    av_push(retval, newSVpv(stashname, 0)); /* add ourselves at the top */
+    av_push(retval, newSVhek(stashhek)); /* add ourselves at the top */
 
     /* fetch our @ISA */
     gvp = (GV**)hv_fetchs(stash, "ISA", FALSE);
@@ -231,21 +231,19 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
     GV** gvp;
     GV* gv;
     AV* isa;
-    const char* stashname;
-    STRLEN stashname_len;
+    const HEK* stashhek;
     struct mro_meta* meta;
 
     assert(stash);
     assert(HvAUX(stash));
 
-    stashname = HvNAME_get(stash);
-    stashname_len = HvNAMELEN_get(stash);
-    if (!stashname)
+    stashhek = HvNAME_HEK(stash);
+    if (!stashhek)
       Perl_croak(aTHX_ "Can't linearize anonymous symbol table");
 
     if (level > 100)
         Perl_croak(aTHX_ "Recursive inheritance detected in package '%s'",
-              stashname);
+		   HEK_KEY(stashhek));
 
     meta = HvMROMETA(stash);
 
@@ -329,7 +327,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
 
         /* Initialize retval to build the return value in */
         retval = newAV();
-        av_push(retval, newSVpvn(stashname, stashname_len)); /* us first */
+        av_push(retval, newSVhek(stashhek)); /* us first */
 
         /* This loop won't terminate until we either finish building
            the MRO, or get an exception. */
@@ -408,14 +406,14 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
                 Safefree(heads);
 
                 Perl_croak(aTHX_ "Inconsistent hierarchy during C3 merge of class '%s': "
-                    "merging failed on parent '%"SVf"'", stashname, SVfARG(cand));
+                    "merging failed on parent '%"SVf"'", HEK_KEY(stashhek), SVfARG(cand));
             }
         }
     }
     else { /* @ISA was undefined or empty */
         /* build a retval containing only ourselves */
         retval = newAV();
-        av_push(retval, newSVpvn(stashname, stashname_len));
+        av_push(retval, newSVhek(stashhek));
     }
 
     /* we don't want anyone modifying the cache entry but us,
