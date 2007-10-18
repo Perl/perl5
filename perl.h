@@ -3112,11 +3112,11 @@ typedef pthread_key_t	perl_key;
 
 #ifdef PERL_CORE
 /* not used; but needed for backward compatibilty with XS code? - RMB */ 
+#  undef UVf
+#else
 #  ifndef UVf
 #    define UVf UVuf
 #  endif
-#else
-#  undef UVf
 #endif
 
 #ifdef HASATTRIBUTE_FORMAT
