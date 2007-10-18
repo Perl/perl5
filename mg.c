@@ -782,10 +782,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	sv_setiv(sv, (IV)PL_hints);
 	break;
     case '\011':		/* ^I */ /* NOT \t in EBCDIC */
-	if (PL_inplace)
-	    sv_setpv(sv, PL_inplace);
-	else
-	    sv_setsv(sv, &PL_sv_undef);
+	sv_setpv(sv, PL_inplace); /* Will undefine sv if PL_inplace is NULL */
 	break;
     case '\017':		/* ^O & ^OPEN */
 	if (nextchar == '\0') {
