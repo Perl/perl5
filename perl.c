@@ -3167,6 +3167,7 @@ Perl_moreswitches(pTHX_ const char *s)
 	forbid_setid('m', -1);	/* XXX ? */
 	if (*++s) {
 	    const char *start;
+	    const char *end;
 	    SV *sv;
 	    const char *use = "use ";
 	    /* -M-foo == 'no foo'	*/
@@ -3177,8 +3178,9 @@ Perl_moreswitches(pTHX_ const char *s)
 	    start = s;
 	    /* We allow -M'Module qw(Foo Bar)'	*/
 	    while(isALNUM(*s) || *s==':') ++s;
+	    end = s + strlen(s);
 	    if (*s != '=') {
-		sv_catpv(sv, start);
+		sv_catpvn(sv, start, end - start);
 		if (*(start-1) == 'm') {
 		    if (*s != '\0')
 			Perl_croak(aTHX_ "Can't use '%c' after -mname", *s);
@@ -3189,12 +3191,13 @@ Perl_moreswitches(pTHX_ const char *s)
                     Perl_croak(aTHX_ "Module name required with -%c option",
 			       s[-1]);
 		sv_catpvn(sv, start, s-start);
-		sv_catpvs(sv, " split(/,/,q");
-		sv_catpvs(sv, "\0");        /* Use NUL as q//-delimiter. */
-		sv_catpv(sv, ++s);
+		/* Use NUL as q''-delimiter.  */
+		sv_catpvs(sv, " split(/,/,q\0");
+		++s;
+		sv_catpvn(sv, s, end - s);
 		sv_catpvs(sv,  "\0)");
 	    }
-	    s += strlen(s);
+	    s = end;
 	    Perl_av_create_and_push(aTHX_ &PL_preambleav, sv);
 	}
 	else
