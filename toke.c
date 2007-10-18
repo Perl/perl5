@@ -5346,7 +5346,7 @@ Perl_yylex(pTHX)
 #ifdef PERL_MAD
 		if (PL_madskills && !PL_thistoken) {
 		    char *start = SvPVX(PL_linestr) + PL_realtokenstart;
-		    PL_thistoken = newSVpv(start,s - start);
+		    PL_thistoken = newSVpvn(start,s - start);
 		    PL_realtokenstart = s - SvPVX(PL_linestr);
 		}
 #endif
