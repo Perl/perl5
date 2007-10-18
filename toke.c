@@ -6918,7 +6918,7 @@ S_pending_ident(pTHX)
     char pit = PL_pending_ident;
     const STRLEN tokenbuf_len = strlen(PL_tokenbuf);
     /* All routes through this function want to know if there is a colon.  */
-    const char *const has_colon = memchr (PL_tokenbuf, ':', tokenbuf_len);
+    const char *const has_colon = (const char*) memchr (PL_tokenbuf, ':', tokenbuf_len);
     PL_pending_ident = 0;
 
     /* PL_realtokenstart = realtokenend = PL_bufptr - SvPVX(PL_linestr); */
