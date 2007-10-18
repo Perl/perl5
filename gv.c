@@ -170,10 +170,24 @@ GP *
 Perl_newGP(pTHX_ GV *const gv)
 {
     GP *gp;
+    U32 hash;
+#ifdef USE_ITHREADS
     const char *const file
 	= (PL_curcop && CopFILE(PL_curcop)) ? CopFILE(PL_curcop) : "";
-    STRLEN len = strlen(file);
-    U32 hash;
+    const STRLEN len = strlen(file);
+#else
+    SV *const temp_sv = CopFILESV(PL_curcop);
+    const char *file;
+    STRLEN len;
+
+    if (temp_sv) {
+	file = SvPVX(temp_sv);
+	len = SvCUR(temp_sv);
+    } else {
+	file = "";
+	len = 0;
+    }
+#endif
 
     PERL_HASH(hash, file, len);
 

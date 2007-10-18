@@ -824,8 +824,18 @@ S_incline(pTHX_ const char *s)
     if (t - s > 0) {
 	const STRLEN len = t - s;
 #ifndef USE_ITHREADS
-	const char * const cf = CopFILE(PL_curcop);
-	STRLEN tmplen = cf ? strlen(cf) : 0;
+	SV *const temp_sv = CopFILESV(PL_curcop);
+	const char *cf;
+	STRLEN tmplen;
+
+	if (temp_sv) {
+	    cf = SvPVX(temp_sv);
+	    tmplen = SvCUR(temp_sv);
+	} else {
+	    cf = NULL;
+	    tmplen = 0;
+	}
+
 	if (tmplen > 7 && strnEQ(cf, "(eval ", 6)) {
 	    /* must copy *{"::_<(eval N)[oldfilename:L]"}
 	     * to *{"::_<newfilename"} */
