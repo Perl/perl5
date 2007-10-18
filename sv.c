@@ -9998,10 +9998,10 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
         /** We are joining here so we don't want do clone
 	    something that is bad **/
 	if (SvTYPE(sstr) == SVt_PVHV) {
-	    const char * const hvname = HvNAME_get(sstr);
+	    const HEK * const hvname = HvNAME_HEK(sstr);
 	    if (hvname)
 		/** don't clone stashes if they already exist **/
-		return (SV*)gv_stashpv(hvname,0);
+		return (SV*)gv_stashpvn(HEK_KEY(hvname), HEK_LEN(hvname), 0);
         }
     }
 

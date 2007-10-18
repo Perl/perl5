@@ -1426,7 +1426,8 @@ Perl_gv_check(pTHX_ const HV *stash)
 #ifdef USE_ITHREADS
 		CopFILE(PL_curcop) = (char *)file;	/* set for warning */
 #else
-		CopFILEGV(PL_curcop) = gv_fetchfile(file);
+		CopFILEGV(PL_curcop)
+		    = gv_fetchfile_flags(file, HEK_LEN(GvFILE_HEK(gv)), 0);
 #endif
 		Perl_warner(aTHX_ packWARN(WARN_ONCE),
 			"Name \"%s::%s\" used only once: possible typo",
