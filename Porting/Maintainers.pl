@@ -34,6 +34,7 @@ package Maintainers;
 	'jand'		=> 'Jan Dubois <jand@activestate.com>',
 	'jdhedden'	=> 'Jerry D. Hedden <jdhedden@cpan.org>',
 	'jhi'		=> 'Jarkko Hietaniemi <jhi@cpan.org>',
+	'jjore'		=> 'Joshua ben Jore <jjore@cpan.org>',
 	'jpeacock'	=> 'John Peacock <jpeacock@rowman.com>',
 	'jstowe'	=> 'Jonathan Stowe <jstowe@cpan.org>',
 	'jv'		=> 'Johan Vromans <jv@cpan.org>',
@@ -124,6 +125,14 @@ package Maintainers;
 		'MAINTAINER'	=> 'smccam',
 		'FILES'		=> q[ext/B/B/Deparse.pm ext/B/t/deparse.t],
 		'CPAN'		=> 0,
+		},
+
+	'B::Lint' =>
+		{
+		'MAINTAINER'	=> 'jjore',
+		'FILES'		=> q[ext/B/B/Lint.pm ext/B/t/lint.t
+				     ext/B/t/pluglib/B/Lint/Plugin/Test.pm],
+		'CPAN'		=> 1,
 		},
 
 	'base' =>
