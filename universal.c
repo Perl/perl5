@@ -161,7 +161,7 @@ Perl_sv_does(pTHX_ SV *sv, const char *name)
     XPUSHs(sv_2mortal(newSVpv(name, 0)));
     PUTBACK;
 
-    methodname = sv_2mortal(newSVpv("isa", 0));
+    methodname = sv_2mortal(newSVpvs("isa"));
     /* ugly hack: use the SvSCREAM flag so S_method_common
      * can figure out we're calling DOES() and not isa(),
      * and report eventual errors correctly. --rgs */
