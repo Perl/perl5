@@ -160,7 +160,7 @@ strings contain a character beyond 0x00FF.
 
 For example,
 
-      perl -e 'print "\x{DF}\n", "\x{0100}\x{DF}\n"'              
+      perl -e 'print "\x{DF}\n", "\x{0100}\x{DF}\n"'
 
 produces a fairly useless mixture of native bytes and UTF-8, as well
 as a warning:
@@ -252,7 +252,7 @@ to be interpreted as the UTF-8 encoding of Unicode characters:
 
    my $chars = pack("U0W*", 0x80, 0x42);
 
-Likewise, you can stop such UTF-8 interpretation by using the special 
+Likewise, you can stop such UTF-8 interpretation by using the special
 C<"C0"> prefix.
 
 =head2 Handling Unicode
@@ -278,7 +278,7 @@ encodings, I/O, and certain special cases:
 
 When you combine legacy data and Unicode the legacy data needs
 to be upgraded to Unicode.  Normally ISO 8859-1 (or EBCDIC, if
-applicable) is assumed. 
+applicable) is assumed.
 
 The C<Encode> module knows about many encodings and has interfaces
 for doing conversions between those encodings:
@@ -517,8 +517,8 @@ CAPITAL LETTER As should be considered equal, or even As of any case.
 The long answer is that you need to consider character normalization
 and casing issues: see L<Unicode::Normalize>, Unicode Technical
 Reports #15 and #21, I<Unicode Normalization Forms> and I<Case
-Mappings>, http://www.unicode.org/unicode/reports/tr15/ and 
-http://www.unicode.org/unicode/reports/tr21/ 
+Mappings>, http://www.unicode.org/unicode/reports/tr15/ and
+http://www.unicode.org/unicode/reports/tr21/
 
 As of Perl 5.8.0, the "Full" case-folding of I<Case
 Mappings/SpecialCasing> is implemented.
@@ -668,10 +668,10 @@ Or use C<unpack> to try decoding it:
     use warnings;
     @chars = unpack("C0U*", $string_of_bytes_that_I_think_is_utf8);
 
-If invalid, a C<Malformed UTF-8 character> warning is produced. The "C0" means 
-"process the string character per character".  Without that, the 
-C<unpack("U*", ...)> would work in C<U0> mode (the default if the format 
-string starts with C<U>) and it would return the bytes making up the UTF-8 
+If invalid, a C<Malformed UTF-8 character> warning is produced. The "C0" means
+"process the string character per character".  Without that, the
+C<unpack("U*", ...)> would work in C<U0> mode (the default if the format
+string starts with C<U>) and it would return the bytes making up the UTF-8
 encoding of the target string, something that will always work.
 
 =item *
@@ -726,7 +726,7 @@ but Perl doesn't know it yet, you can make Perl a believer, too:
 or:
 
     $Unicode = pack("U0a*", $bytes);
-   
+
 You can convert well-formed UTF-8 to a sequence of bytes, but if
 you just want to convert random binary data into UTF-8, you can't.
 B<Any random collection of bytes isn't well-formed UTF-8>.  You can
@@ -790,44 +790,44 @@ show a decimal number in hexadecimal.  If you have just the
 
 Unicode Consortium
 
-    http://www.unicode.org/
+http://www.unicode.org/
 
 =item *
 
 Unicode FAQ
 
-    http://www.unicode.org/unicode/faq/
+http://www.unicode.org/unicode/faq/
 
 =item *
 
 Unicode Glossary
 
-    http://www.unicode.org/glossary/
+http://www.unicode.org/glossary/
 
 =item *
 
 Unicode Useful Resources
 
-    http://www.unicode.org/unicode/onlinedat/resources.html
+http://www.unicode.org/unicode/onlinedat/resources.html
 
 =item *
 
 Unicode and Multilingual Support in HTML, Fonts, Web Browsers and Other Applications
 
-    http://www.alanwood.net/unicode/
+http://www.alanwood.net/unicode/
 
 =item *
 
 UTF-8 and Unicode FAQ for Unix/Linux
 
-    http://www.cl.cam.ac.uk/~mgk25/unicode.html
+http://www.cl.cam.ac.uk/~mgk25/unicode.html
 
 =item *
 
 Legacy Character Sets
 
-    http://www.czyborra.com/
-    http://www.eki.ee/letter/
+http://www.czyborra.com/
+http://www.eki.ee/letter/
 
 =item *
 
@@ -836,7 +836,7 @@ directory
 
     $Config{installprivlib}/unicore
 
-in Perl 5.8.0 or newer, and 
+in Perl 5.8.0 or newer, and
 
     $Config{installprivlib}/unicode
 

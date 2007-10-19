@@ -862,7 +862,7 @@ its Unicode extension (see L<utf8>),
 though it isn't extended by the locale (see L<perllocale>).
 
 B<NOTE:> In order to make things easier for programmers with experience
-with the Python or PCRE regex engines, the pattern C<< (?P<NAME>pattern) >>
+with the Python or PCRE regex engines, the pattern C<< (?PE<lt>NAMEE<gt>pattern) >>
 may be used instead of C<< (?<NAME>pattern) >>; however this form does not
 support the use of single quotes as a delimiter for the name.
 
@@ -2111,7 +2111,7 @@ Perl specific syntax, the following are legal in Perl 5.10:
 
 =over 4
 
-=item C<< (?P<NAME>pattern) >>
+=item C<< (?PE<lt>NAMEE<gt>pattern) >>
 
 Define a named capture buffer. Equivalent to C<< (?<NAME>pattern) >>.
 
