@@ -3072,12 +3072,9 @@ typedef pthread_key_t	perl_key;
     These formats will still work in perl code.   
     See comments in sv.c for futher details.
 
-	-DvdNUMBER=<number> can be used to redefine VDf
-
-	-DvdNUMBER=0 reverts VDf to "vd", as in perl5.8.7,
-	    which works properly but gives compiler warnings
-
     Robin Barker 2005-07-14
+
+    No longer use %1p for VDf = %vd.  RMB 2007-10-19 
 */
 
 #ifndef SVf_
@@ -3098,14 +3095,11 @@ typedef pthread_key_t	perl_key;
 
 #define SVfARG(p) ((void*)(p))
 
-#ifndef vdNUMBER
-#  define vdNUMBER 1
-#endif
- 
-#ifndef VDf
-#  if vdNUMBER 
-#    define VDf STRINGIFY(vdNUMBER) "p"
-#  else
+#ifdef PERL_CORE
+/* not used; but needed for backward compatibilty with XS code? - RMB */ 
+#  undef VDf
+#else
+#  ifndef VDf
 #    define VDf "vd"
 #  endif
 #endif

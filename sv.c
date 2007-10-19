@@ -8626,10 +8626,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		%p		include pointer address (standard)	
 		%-p	(SVf)	include an SV (previously %_)
 		%-<num>p	include an SV with precision <num>	
-		%1p	(VDf)	include a v-string (as %vd)
 		%<num>p		reserved for future extensions
 
 	Robin Barker 2005-07-14
+
+		%1p	(VDf)	removed.  RMB 2007-10-19
 */
  	    char* r = q; 
 	    bool sv = FALSE;	
@@ -8649,13 +8650,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 			is_utf8 = TRUE;
 		    goto string;
 		}
-#if vdNUMBER
-		else if (n == vdNUMBER) {	/* VDf */
-		    vectorize = TRUE;
-		    VECTORIZE_ARGS
-		    goto format_vd;
-	  	}
-#endif
 		else if (n) {
 		    if (ckWARN_d(WARN_INTERNAL))
 			Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
