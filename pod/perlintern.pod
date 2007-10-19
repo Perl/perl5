@@ -1046,7 +1046,8 @@ Found in file sv.c
 X<sv_2num>
 
 Return an SV with the numeric value of the source SV, doing any necessary
-reference or overload conversion.
+reference or overload conversion.  You must use the C<SvNUM(sv)> macro to
+access this function.
 
 	SV*	sv_2num(SV* sv)
 

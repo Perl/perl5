@@ -2505,7 +2505,8 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 =for apidoc sv_2num
 
 Return an SV with the numeric value of the source SV, doing any necessary
-reference or overload conversion.
+reference or overload conversion.  You must use the C<SvNUM(sv)> macro to
+access this function.
 
 =cut
 */
@@ -2513,9 +2514,6 @@ reference or overload conversion.
 SV *
 Perl_sv_2num(pTHX_ register SV *sv)
 {
-    if (!SvROK(sv))
-	return sv;
-
     if (SvAMAGIC(sv)) {
 	SV * const tmpsv = AMG_CALLun(sv,numer);
 	if (tmpsv && (!SvROK(tmpsv) || (SvRV(tmpsv) != SvRV(sv))))
