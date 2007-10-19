@@ -644,7 +644,7 @@ call, but an C<eval>.  In such a case additional elements $evaltext and
 C<$is_require> are set: C<$is_require> is true if the frame is created by a
 C<require> or C<use> statement, $evaltext contains the text of the
 C<eval EXPR> statement.  In particular, for an C<eval BLOCK> statement,
-$filename is C<(eval)>, but $evaltext is undefined.  (Note also that
+$subroutine is C<(eval)>, but $evaltext is undefined.  (Note also that
 each C<use> statement creates a C<require> frame inside an C<eval EXPR>
 frame.)  $subroutine may also be C<(unknown)> if this particular
 subroutine happens to have been deleted from the symbol table.

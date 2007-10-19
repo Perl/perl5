@@ -133,18 +133,21 @@ for example, turn C<-w -U> into C<-wU>.
 
 =item %s argument is not a HASH or ARRAY element
 
-(F) The argument to exists() must be a hash or array element, such as:
+(F) The argument to exists() must be a hash or array element or a
+subroutine with an ampersand, such as:
 
     $foo{$bar}
     $ref->{"susie"}[12]
+    &do_something
 
 =item %s argument is not a HASH or ARRAY element or slice
 
-(F) The argument to delete() must be either a hash or array element,
-such as:
+(F) The argument to delete() must be either a hash or array element or a
+subroutine name, such as:
 
     $foo{$bar}
     $ref->{"susie"}[12]
+    &do_something
 
 or a hash or array slice, such as:
 
