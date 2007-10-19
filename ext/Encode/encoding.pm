@@ -628,6 +628,11 @@ unicode characters since you have to consider such things as character
 width (i.e. double-width for ideographs) and directions (i.e. BIDI for
 Arabic and Hebrew).
 
+=item Thread safety
+
+C<use encoding ...> is not thread-safe (i.e., do not use in threaded
+applications).
+
 =back
 
 =head2 The Logic of :locale
