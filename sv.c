@@ -2514,6 +2514,8 @@ access this function.
 SV *
 Perl_sv_2num(pTHX_ register SV *sv)
 {
+    if (!SvROK(sv))
+	return sv;
     if (SvAMAGIC(sv)) {
 	SV * const tmpsv = AMG_CALLun(sv,numer);
 	if (tmpsv && (!SvROK(tmpsv) || (SvRV(tmpsv) != SvRV(sv))))
