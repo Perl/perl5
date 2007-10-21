@@ -648,13 +648,14 @@ PP(pp_add)
     }
 #endif
     {
-	dPOPnv;
+	NV value = SvNV(svr);
+	(void)POPs;
 	if (!useleft) {
 	    /* left operand is undef, treat as zero. + 0.0 is identity. */
 	    SETn(value);
 	    RETURN;
 	}
-	SETn( value + TOPn );
+	SETn( value + SvNV(svl) );
 	RETURN;
     }
 }

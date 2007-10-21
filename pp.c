@@ -1040,7 +1040,9 @@ PP(pp_pow)
   float_it:
 #endif    
     {
-	dPOPTOPnnrl;
+	NV right = SvNV(svr);
+	NV left  = SvNV(svl);
+	(void)POPs;
 
 #if defined(USE_LONG_DOUBLE) && defined(HAS_AIX_POWL_NEG_BASE_BUG)
     /*
@@ -1206,7 +1208,9 @@ PP(pp_multiply)
     } /* SvIOK(svr) */
 #endif
     {
-      dPOPTOPnnrl;
+      NV right = SvNV(svr);
+      NV left  = SvNV(svl);
+      (void)POPs;
       SETn( left * right );
       RETURN;
     }
@@ -1322,7 +1326,9 @@ PP(pp_divide)
     } /* right wasn't SvIOK */
 #endif /* PERL_TRY_UV_DIVIDE */
     {
-	dPOPPOPnnrl;
+	NV right = SvNV(svr);
+	NV left  = SvNV(svl);
+	(void)POPs;(void)POPs;
 #if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
 	if (! Perl_isnan(right) && right == 0.0)
 #else
@@ -1362,10 +1368,9 @@ PP(pp_modulo)
                     right = -biv;
                 }
             }
-            sp--;
         }
         else {
-	    dright = POPn;
+	    dright = SvNV(svr);
 	    right_neg = dright < 0;
 	    if (right_neg)
 		dright = -dright;
@@ -1376,6 +1381,7 @@ PP(pp_modulo)
                 use_double = TRUE;
             }
 	}
+	sp--;
 
         /* At this point use_double is only true if right is out of range for
            a UV.  In range NV has been rounded down to nearest UV and
@@ -1396,11 +1402,10 @@ PP(pp_modulo)
                         left = -aiv;
                     }
                 }
-                sp--;
             }
         }
 	else {
-	    dleft = POPn;
+	    dleft = SvNV(svl);
 	    left_neg = dleft < 0;
 	    if (left_neg)
 		dleft = -dleft;
@@ -1428,6 +1433,7 @@ PP(pp_modulo)
                 }
             }
         }
+	sp--;
 	if (use_double) {
 	    NV dans;
 
@@ -1699,13 +1705,15 @@ PP(pp_subtract)
     }
 #endif
     {
-	dPOPnv;
+	NV value = SvNV(svr);
+	(void)POPs;
+
 	if (!useleft) {
 	    /* left operand is undef, treat as zero - value */
 	    SETn(-value);
 	    RETURN;
 	}
-	SETn( TOPn - value );
+	SETn( SvNV(svl) - value );
 	RETURN;
     }
 }
