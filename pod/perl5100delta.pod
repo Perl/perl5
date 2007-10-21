@@ -11,182 +11,6 @@ Many of the bug fixes in 5.10.0 were already seen in the 5.8.X maintenance
 releases; they are not duplicated here and are documented in the set of
 man pages named perl58[1-8]?delta.
 
-=head1 Incompatible Changes
-
-=head2 Packing and UTF-8 strings
-
-=for XXX update this
-
-The semantics of pack() and unpack() regarding UTF-8-encoded data has been
-changed. Processing is now by default character per character instead of
-byte per byte on the underlying encoding. Notably, code that used things
-like C<pack("a*", $string)> to see through the encoding of string will now
-simply get back the original $string. Packed strings can also get upgraded
-during processing when you store upgraded characters. You can get the old
-behaviour by using C<use bytes>.
-
-To be consistent with pack(), the C<C0> in unpack() templates indicates
-that the data is to be processed in character mode, i.e. character by
-character; on the contrary, C<U0> in unpack() indicates UTF-8 mode, where
-the packed string is processed in its UTF-8-encoded Unicode form on a byte
-by byte basis. This is reversed with regard to perl 5.8.X.
-
-Moreover, C<C0> and C<U0> can also be used in pack() templates to specify
-respectively character and byte modes.
-
-C<C0> and C<U0> in the middle of a pack or unpack format now switch to the
-specified encoding mode, honoring parens grouping. Previously, parens were
-ignored.
-
-Also, there is a new pack() character format, C<W>, which is intended to
-replace the old C<C>. C<C> is kept for unsigned chars coded as bytes in
-the strings internal representation. C<W> represents unsigned (logical)
-character values, which can be greater than 255. It is therefore more
-robust when dealing with potentially UTF-8-encoded data (as C<C> will wrap
-values outside the range 0..255, and not respect the string encoding).
-
-In practice, that means that pack formats are now encoding-neutral, except
-C<C>.
-
-For consistency, C<A> in unpack() format now trims all Unicode whitespace
-from the end of the string. Before perl 5.9.2, it used to strip only the
-classical ASCII space characters.
-
-=head2 Byte/character count feature in unpack()
-
-A new unpack() template character, C<".">, returns the number of bytes or
-characters (depending on the selected encoding mode, see above) read so far.
-
-=head2 The C<$*> and C<$#> variables have been removed
-
-C<$*>, which was deprecated in favor of the C</s> and C</m> regexp
-modifiers, has been removed.
-
-The deprecated C<$#> variable (output format for numbers) has been
-removed.
-
-Two new warnings, C<$#/$* is no longer supported>, have been added.
-
-=head2 substr() lvalues are no longer fixed-length
-
-The lvalues returned by the three argument form of substr() used to be a
-"fixed length window" on the original string. In some cases this could
-cause surprising action at distance or other undefined behaviour. Now the
-length of the window adjusts itself to the length of the string assigned to
-it.
-
-=head2 Parsing of C<-f _>
-
-The identifier C<_> is now forced to be a bareword after a filetest
-operator. This solves a number of misparsing issues when a global C<_>
-subroutine is defined.
-
-=head2 C<:unique>
-
-The C<:unique> attribute has been made a no-op, since its current
-implementation was fundamentally flawed and not threadsafe.
-
-=head2 Scoping of the C<sort> pragma
-
-The C<sort> pragma is now lexically scoped. Its effect used to be global.
-
-=head2 Scoping of C<bignum>, C<bigint>, C<bigrat>
-
-The three numeric pragmas C<bignum>, C<bigint> and C<bigrat> are now
-lexically scoped. (Tels)
-
-=head2 Effect of pragmas in eval
-
-The compile-time value of the C<%^H> hint variable can now propagate into
-eval("")uated code. This makes it more useful to implement lexical
-pragmas.
-
-As a side-effect of this, the overloaded-ness of constants now propagates
-into eval("").
-
-=head2 chdir FOO
-
-A bareword argument to chdir() is now recognized as a file handle.
-Earlier releases interpreted the bareword as a directory name.
-(Gisle Aas)
-
-=head2 Handling of .pmc files
-
-An old feature of perl was that before C<require> or C<use> look for a
-file with a F<.pm> extension, they will first look for a similar filename
-with a F<.pmc> extension. If this file is found, it will be loaded in
-place of any potentially existing file ending in a F<.pm> extension.
-
-Previously, F<.pmc> files were loaded only if more recent than the
-matching F<.pm> file. Starting with 5.9.4, they'll be always loaded if
-they exist.
-
-=head2 @- and @+ in patterns
-
-The special arrays C<@-> and C<@+> are no longer interpolated in regular
-expressions. (Sadahiro Tomoyuki)
-
-=head2 $AUTOLOAD can now be tainted
-
-If you call a subroutine by a tainted name, and if it defers to an
-AUTOLOAD function, then $AUTOLOAD will be (correctly) tainted.
-(Rick Delaney)
-
-=head2 Tainting and printf
-
-When perl is run under taint mode, C<printf()> and C<sprintf()> will now
-reject any tainted format argument. (Rafael Garcia-Suarez)
-
-=head2 undef and signal handlers
-
-Undefining or deleting a signal handler via C<undef $SIG{FOO}> is now
-equivalent to setting it to C<'DEFAULT'>. (Rafael Garcia-Suarez)
-
-=head2 strictures and array/hash dereferencing in defined()
-
-C<defined @$foo> and C<defined %$bar> are now subject to C<strict 'refs'>
-(that is, C<$foo> and C<$bar> shall be proper references there.)
-(Nicholas Clark)
-
-(However, C<defined(@foo)> and C<defined(%bar)> are discouraged constructs
-anyway.)
-
-=head2 C<(?p{})> has been removed
-
-The regular expression construct C<(?p{})>, which was deprecated in perl
-5.8, has been removed. Use C<(??{})> instead. (Rafael Garcia-Suarez)
-
-=head2 Pseudo-hashes have been removed
-
-Support for pseudo-hashes has been removed from Perl 5.9. (The C<fields>
-pragma remains here, but uses an alternate implementation.)
-
-=head2 Removal of the bytecode compiler and of perlcc
-
-C<perlcc>, the byteloader and the supporting modules (B::C, B::CC,
-B::Bytecode, etc.) are no longer distributed with the perl sources. Those
-experimental tools have never worked reliably, and, due to the lack of
-volunteers to keep them in line with the perl interpreter developments, it
-was decided to remove them instead of shipping a broken version of those.
-The last version of those modules can be found with perl 5.9.4.
-
-However the B compiler framework stays supported in the perl core, as with
-the more useful modules it has permitted (among others, B::Deparse and
-B::Concise).
-
-=head2 Removal of the JPL
-
-The JPL (Java-Perl Linguo) has been removed from the perl sources tarball.
-
-=head2 Recursive inheritance detected earlier
-
-Perl will now immediately throw an exception if you modify any package's
-C<@ISA> in such a way that it would cause recursive inheritance.
-
-Previously, the exception would not occur until Perl attempted to make
-use of the recursive inheritance while resolving a method or doing a
-C<$foo-E<gt>isa($bar)> lookup.
-
 =head1 Core Enhancements
 
 =head2 The C<feature> pragma
@@ -374,13 +198,6 @@ logically match their complements.
 C<\R> matches a generic linebreak, that is, vertical whitespace, plus
 the multi-character sequence C<"\x0D\x0A">.
 
-=item Unicode Character Classes
-
-Perl's regular expression engine now contains support for matching on the
-intersection of two Unicode character classes. You can also now refer to
-user-defined character classes from within other user defined character
-classes.
-
 =back
 
 =head2 C<say()>
@@ -404,7 +221,7 @@ C<$_> inside the block is lexical as well (and scoped to the block).
 
 In a scope where C<$_> has been lexicalized, you can still have access to
 the global version of C<$_> by using C<$::_>, or, more simply, by
-overriding the lexical declaration with C<our $_>.
+overriding the lexical declaration with C<our $_>. (Rafael Garcia-Suarez)
 
 =head2 The C<_> prototype
 
@@ -450,7 +267,7 @@ also to override its operator counterpart, C<qx//> (a.k.a. C<``>).
 Moreover, it now defaults to C<$_> if no argument is provided. (Rafael
 Garcia-Suarez)
 
-=head2 default argument for readline()
+=head2 Default argument for readline()
 
 readline() now defaults to C<*ARGV> if no argument is provided. (Rafael
 Garcia-Suarez)
@@ -559,6 +376,14 @@ This variable gives the native status returned by the last pipe close,
 backtick command, successful call to wait() or waitpid(), or from the
 system() operator. See L<perlrun> for details. (Contributed by Gisle Aas.)
 
+=item C<${^RE_TRIE_MAXBUF}>
+
+See L</"Trie optimisation of literal string alternations">.
+
+=item C<${^WIN32_SLOPPY_STAT}>
+
+See L</"Sloppy stat on Windows">.
+
 =back
 
 =head2 Miscellaneous
@@ -574,14 +399,6 @@ octal.
 The B<-C> option can no longer be used on the C<#!> line. It wasn't
 working there anyway.
 
-=head2 PERLIO_DEBUG
-
-The C<PERLIO_DEBUG> environment variable has no longer any effect for
-setuid scripts and for scripts run with B<-T>.
-
-Moreover, with a thread-enabled perl, using C<PERLIO_DEBUG> could lead to
-an internal buffer overflow. This has been fixed.
-
 =head2 UCD 5.0.0
 
 The copy of the Unicode Character Database included in Perl 5 has
@@ -596,6 +413,190 @@ obtained perl isn't binary compatible with a regular perl 5.9.4, and has
 space and speed penalties; moreover not all regression tests still pass
 with it. (Larry Wall, Nicholas Clark)
 
+=head1 Incompatible Changes
+
+=head2 Packing and UTF-8 strings
+
+=for XXX update this
+
+The semantics of pack() and unpack() regarding UTF-8-encoded data has been
+changed. Processing is now by default character per character instead of
+byte per byte on the underlying encoding. Notably, code that used things
+like C<pack("a*", $string)> to see through the encoding of string will now
+simply get back the original $string. Packed strings can also get upgraded
+during processing when you store upgraded characters. You can get the old
+behaviour by using C<use bytes>.
+
+To be consistent with pack(), the C<C0> in unpack() templates indicates
+that the data is to be processed in character mode, i.e. character by
+character; on the contrary, C<U0> in unpack() indicates UTF-8 mode, where
+the packed string is processed in its UTF-8-encoded Unicode form on a byte
+by byte basis. This is reversed with regard to perl 5.8.X.
+
+Moreover, C<C0> and C<U0> can also be used in pack() templates to specify
+respectively character and byte modes.
+
+C<C0> and C<U0> in the middle of a pack or unpack format now switch to the
+specified encoding mode, honoring parens grouping. Previously, parens were
+ignored.
+
+Also, there is a new pack() character format, C<W>, which is intended to
+replace the old C<C>. C<C> is kept for unsigned chars coded as bytes in
+the strings internal representation. C<W> represents unsigned (logical)
+character values, which can be greater than 255. It is therefore more
+robust when dealing with potentially UTF-8-encoded data (as C<C> will wrap
+values outside the range 0..255, and not respect the string encoding).
+
+In practice, that means that pack formats are now encoding-neutral, except
+C<C>.
+
+For consistency, C<A> in unpack() format now trims all Unicode whitespace
+from the end of the string. Before perl 5.9.2, it used to strip only the
+classical ASCII space characters.
+
+=head2 Byte/character count feature in unpack()
+
+A new unpack() template character, C<".">, returns the number of bytes or
+characters (depending on the selected encoding mode, see above) read so far.
+
+=head2 The C<$*> and C<$#> variables have been removed
+
+C<$*>, which was deprecated in favor of the C</s> and C</m> regexp
+modifiers, has been removed.
+
+The deprecated C<$#> variable (output format for numbers) has been
+removed.
+
+Two new warnings, C<$#/$* is no longer supported>, have been added.
+
+=head2 substr() lvalues are no longer fixed-length
+
+The lvalues returned by the three argument form of substr() used to be a
+"fixed length window" on the original string. In some cases this could
+cause surprising action at distance or other undefined behaviour. Now the
+length of the window adjusts itself to the length of the string assigned to
+it.
+
+=head2 Parsing of C<-f _>
+
+The identifier C<_> is now forced to be a bareword after a filetest
+operator. This solves a number of misparsing issues when a global C<_>
+subroutine is defined.
+
+=head2 C<:unique>
+
+The C<:unique> attribute has been made a no-op, since its current
+implementation was fundamentally flawed and not threadsafe.
+
+=head2 Scoping of the C<sort> pragma
+
+The C<sort> pragma is now lexically scoped. Its effect used to be global.
+
+=head2 Scoping of C<bignum>, C<bigint>, C<bigrat>
+
+The three numeric pragmas C<bignum>, C<bigint> and C<bigrat> are now
+lexically scoped. (Tels)
+
+=head2 Effect of pragmas in eval
+
+The compile-time value of the C<%^H> hint variable can now propagate into
+eval("")uated code. This makes it more useful to implement lexical
+pragmas.
+
+As a side-effect of this, the overloaded-ness of constants now propagates
+into eval("").
+
+=head2 chdir FOO
+
+A bareword argument to chdir() is now recognized as a file handle.
+Earlier releases interpreted the bareword as a directory name.
+(Gisle Aas)
+
+=head2 Handling of .pmc files
+
+An old feature of perl was that before C<require> or C<use> look for a
+file with a F<.pm> extension, they will first look for a similar filename
+with a F<.pmc> extension. If this file is found, it will be loaded in
+place of any potentially existing file ending in a F<.pm> extension.
+
+Previously, F<.pmc> files were loaded only if more recent than the
+matching F<.pm> file. Starting with 5.9.4, they'll be always loaded if
+they exist.
+
+=head2 @- and @+ in patterns
+
+The special arrays C<@-> and C<@+> are no longer interpolated in regular
+expressions. (Sadahiro Tomoyuki)
+
+=head2 $AUTOLOAD can now be tainted
+
+If you call a subroutine by a tainted name, and if it defers to an
+AUTOLOAD function, then $AUTOLOAD will be (correctly) tainted.
+(Rick Delaney)
+
+=head2 Tainting and printf
+
+When perl is run under taint mode, C<printf()> and C<sprintf()> will now
+reject any tainted format argument. (Rafael Garcia-Suarez)
+
+=head2 undef and signal handlers
+
+Undefining or deleting a signal handler via C<undef $SIG{FOO}> is now
+equivalent to setting it to C<'DEFAULT'>. (Rafael Garcia-Suarez)
+
+=head2 strictures and dereferencing in defined()
+
+C<use strict "refs"> was ignoring taking a hard reference in an argument
+to defined(), as in :
+
+    use strict "refs";
+    my $x = "foo";
+    if (defined $$x) {...}
+
+This now correctly produces the run-time error C<Can't use string as a
+SCALAR ref while "strict refs" in use>.
+
+C<defined @$foo> and C<defined %$bar> are now also subject to C<strict
+'refs'> (that is, C<$foo> and C<$bar> shall be proper references there.)
+(C<defined(@foo)> and C<defined(%bar)> are discouraged constructs anyway.)
+(Nicholas Clark)
+
+=head2 C<(?p{})> has been removed
+
+The regular expression construct C<(?p{})>, which was deprecated in perl
+5.8, has been removed. Use C<(??{})> instead. (Rafael Garcia-Suarez)
+
+=head2 Pseudo-hashes have been removed
+
+Support for pseudo-hashes has been removed from Perl 5.9. (The C<fields>
+pragma remains here, but uses an alternate implementation.)
+
+=head2 Removal of the bytecode compiler and of perlcc
+
+C<perlcc>, the byteloader and the supporting modules (B::C, B::CC,
+B::Bytecode, etc.) are no longer distributed with the perl sources. Those
+experimental tools have never worked reliably, and, due to the lack of
+volunteers to keep them in line with the perl interpreter developments, it
+was decided to remove them instead of shipping a broken version of those.
+The last version of those modules can be found with perl 5.9.4.
+
+However the B compiler framework stays supported in the perl core, as with
+the more useful modules it has permitted (among others, B::Deparse and
+B::Concise).
+
+=head2 Removal of the JPL
+
+The JPL (Java-Perl Linguo) has been removed from the perl sources tarball.
+
+=head2 Recursive inheritance detected earlier
+
+Perl will now immediately throw an exception if you modify any package's
+C<@ISA> in such a way that it would cause recursive inheritance.
+
+Previously, the exception would not occur until Perl attempted to make
+use of the recursive inheritance while resolving a method or doing a
+C<$foo-E<gt>isa($bar)> lookup.
+
 =head1 Modules and Pragmata
 
 =head2 New modules
@@ -606,7 +607,8 @@ with it. (Larry Wall, Nicholas Clark)
 
 C<encoding::warnings>, by Audrey Tang, is a module to emit warnings
 whenever an ASCII character string containing high-bit bytes is implicitly
-converted into UTF-8.
+converted into UTF-8. It's a lexical pragma since Perl 5.9.4; on older
+perls, its effect is global.
 
 =item *
 
@@ -641,6 +643,39 @@ has been included for SHA support in the CPAN module.
 =item *
 
 C<ExtUtils::CBuilder> and C<ExtUtils::ParseXS> have been added.
+
+=item *
+
+C<Hash::Util::FieldHash>, by Anno Siegel, has been added. This module
+provides support for I<field hashes>: hashes that maintain an association
+of a reference with a value, in a thread-safe garbage-collected way.
+Such hashes are useful to implement inside-out objects.
+
+=item *
+
+C<Module::Build>, by Ken Williams, has been added. It's an alternative to
+C<ExtUtils::MakeMaker> to build and install perl modules.
+
+=item *
+
+C<Module::Load>, by Jos Boumans, has been added. It provides a single
+interface to load Perl modules and F<.pl> files.
+
+=item *
+
+C<Module::Loaded>, by Jos Boumans, has been added. It's used to mark
+modules as loaded or unloaded.
+
+=item *
+
+C<Package::Constants>, by Jos Boumans, has been added. It's a simple
+helper to list all constants declared in a given package.
+
+=item *
+
+C<Win32API::File>, by Tye McQueen, has been added (for Windows builds).
+This module provides low-level access to Win32 system API calls for
+files/dirs.
 
 =back
 
@@ -707,22 +742,37 @@ Several bugs have been fixed in C<find2perl>, regarding C<-exec> and
 C<-eval>. Also the options C<-path>, C<-ipath> and C<-iname> have been
 added.
 
+=item config_data
+
+C<config_data> is a new utility that comes with C<Module::Build>. It
+provides a command-line interface to the configuration of Perl modules
+that use Module::Build's framework of configurability (that is,
+C<*::ConfigData> modules that contain local configuration information for
+their parent modules.)
+
 =back
 
 =head1 New Documentation
 
+The L<perlpragma> manpage documents how to write one's own lexical
+pragmas in pure Perl (something that is possible starting with 5.9.4).
+
 The new L<perlglossary> manpage is a glossary of terms used in the Perl
 documentation, technical and otherwise, kindly provided by O'Reilly Media,
 Inc.
+
+The L<perlreguts> manpage, courtesy of Yves Orton, describes internals of the
+Perl regular expression engine.
+
+The L<perlunitut> manpage is an tutorial for programming with Unicode and
+string encodings in Perl, courtesy of Juerd Waalboer.
 
 The long-existing feature of C</(?{...})/> regexps setting C<$_> and pos()
 is now documented.
 
 =head1 Performance Enhancements
 
-=over 4
-
-=item In-place sorting
+=head2 In-place sorting
 
 Sorting arrays in place (C<@a = sort @a>) is now optimized to avoid
 making a temporary copy of the array.
@@ -730,24 +780,17 @@ making a temporary copy of the array.
 Likewise, C<reverse sort ...> is now optimized to sort in reverse,
 avoiding the generation of a temporary intermediate list.
 
-=item Lexical array access
+=head2 Lexical array access
 
 Access to elements of lexical arrays via a numeric constant between 0 and
 255 is now faster. (This used to be only the case for global arrays.)
 
-=item Trie optimization
-
-The regexp engine now implements the trie optimization : it's able to
-factorize common prefixes and suffixes in regular expressions. A new
-special variable, ${^RE_TRIE_MAXBUF}, has been added to fine-tune this
-optimization.
-
-=item XS-assisted SWASHGET
+=head2 XS-assisted SWASHGET
 
 Some pure-perl code that perl was using to retrieve Unicode properties and
 transliteration mappings has been reimplemented in XS.
 
-=item Constant subroutines
+=head2 Constant subroutines
 
 The interpreter internals now support a far more memory efficient form of
 inlineable constants. Storing a reference to a constant value in a symbol
@@ -762,51 +805,179 @@ Several of the core modules have been converted to use this feature for
 their system dependent constants - as a result C<use POSIX;> now takes about
 200K less memory.
 
-=item C<PERL_DONT_CREATE_GVSV>
+=head2 C<PERL_DONT_CREATE_GVSV>
 
 The new compilation flag C<PERL_DONT_CREATE_GVSV>, introduced as an option
 in perl 5.8.8, is turned on by default in perl 5.9.3. It prevents perl
 from creating an empty scalar with every new typeglob. See L<perl588delta>
 for details.
 
-=item Weak references are cheaper
+=head2 Weak references are cheaper
 
 Weak reference creation is now I<O(1)> rather than I<O(n)>, courtesy of
 Nicholas Clark. Weak reference deletion remains I<O(n)>, but if deletion only
 happens at program exit, it may be skipped completely.
 
-=item sort() enhancements
+=head2 sort() enhancements
 
 Salvador Fandiño provided improvements to reduce the memory usage of C<sort>
 and to speed up some cases.
+
+=head2 Memory optimisations
+
+Several internal data structures (typeglobs, GVs, CVs, formats) have been
+restructured to use less memory. (Nicholas Clark)
+
+=head2 UTF-8 cache optimisation
+
+The UTF-8 caching code is now more efficient, and used more often.
+(Nicholas Clark)
+
+=head2 Sloppy stat on Windows
+
+On Windows, perl's stat() function normally opens the file to determine
+the link count and update attributes that may have been changed through
+hard links. Setting ${^WIN32_SLOPPY_STAT} to a true value speeds up
+stat() by not performing this operation. (Jan Dubois)
+
+=back
+
+=head2 Regular expressions optimisations
+
+=over 4
+
+=item Engine de-recursivised
+
+The regular expression engine is no longer recursive, meaning that
+patterns that used to overflow the stack will either die with useful
+explanations, or run to completion, which, since they were able to blow
+the stack before, will likely take a very long time to happen. If you were
+experiencing the occasional stack overflow (or segfault) and upgrade to
+discover that now perl apparently hangs instead, look for a degenerate
+regex. (Dave Mitchell)
+
+=item Single char char-classes treated as literals
+
+Classes of a single character are now treated the same as if the character
+had been used as a literal, meaning that code that uses char-classes as an
+escaping mechanism will see a speedup. (Yves Orton)
+
+=item Trie optimisation of literal string alternations
+
+Alternations, where possible, are optimised into more efficient matching
+structures. String literal alternations are merged into a trie and are
+matched simultaneously.  This means that instead of O(N) time for matching
+N alternations at a given point, the new code performs in O(1) time.
+A new special variable, ${^RE_TRIE_MAXBUF}, has been added to fine-tune
+this optimization. (Yves Orton)
+
+B<Note:> Much code exists that works around perl's historic poor
+performance on alternations. Often the tricks used to do so will disable
+the new optimisations. Hopefully the utility modules used for this purpose
+will be educated about these new optimisations by the time 5.10 is
+released.
+
+=item Aho-Corasick start-point optimisation
+
+When a pattern starts with a trie-able alternation and there aren't
+better optimisations available the regex engine will use Aho-Corasick
+matching to find the start point. (Yves Orton)
 
 =back
 
 =head1 Installation and Configuration Improvements
 
-=head2 Compilation improvements
+=head2 Configuration improvements
+
+=over 4
+
+=item C<-Dusesitecustomize>
 
 Run-time customization of @INC can be enabled by passing the
-C<-Dusesitecustomize> flag to configure. When enabled, this will make perl
+C<-Dusesitecustomize> flag to Configure. When enabled, this will make perl
 run F<$sitelibexp/sitecustomize.pl> before anything else.  This script can
 then be set up to add additional entries to @INC.
 
-There is alpha support for relocatable @INC entries.
+=item Relocatable installations
+
+There is now Configure support for creating a relocatable perl tree. If
+you Configure with C<-Duserelocatableinc>, then the paths in @INC (and
+everything else in %Config) can be optionally located via the path of the
+perl executable.
+
+That means that, if the string C<".../"> is found at the start of any
+path, it's substituted with the directory of $^X. So, the relocation can
+be configured on a per-directory basis, although the default with
+C<-Duserelocatableinc> is that everything is relocated. The initial
+install is done to the original configured prefix.
+
+=item strlcat() and strlcpy()
+
+The configuration process now detects whether strlcat() and strlcpy() are
+available.  When they are not available, perl's own version is used (from
+Russ Allbery's public domain implementation).  Various places in the perl
+interpreter now use them. (Steve Peters)
+
+=back
+
+=head2 Compilation improvements
+
+=over 4
+
+=item Parallel build
 
 Parallel makes should work properly now, although there may still be problems
 if C<make test> is instructed to run in parallel.
+
+=item Borland's compilers support
 
 Building with Borland's compilers on Win32 should work more smoothly. In
 particular Steve Hay has worked to side step many warnings emitted by their
 compilers and at least one C compiler internal error.
 
+=item Static build on Windows
+
 Perl extensions on Windows now can be statically built into the Perl DLL,
 thanks to a work by Vadim Konovalov.
 
+=item pport.h files
+
+All F<ppport.h> files in the XS modules bundled with perl are now
+autogenerated at build time. (Marcus Holland-Moritz)
+
+=item Building XS extensions on Windows
+
+Support for building XS extension modules with the free MinGW compiler has
+been improved in the case where perl itself was built with the Microsoft
+VC++ compiler. (ActiveState)
+
+=item Support for Microsoft 64-bit compiler
+
+Support for building perl with Microsoft's 64-bit compiler has been
+improved. (ActiveState)
+
+=back
+
+=head2 Installation improvements
+
+=over 4
+
+=item Module auxiliary files
+
+README files and changelogs for CPAN modules bundled with perl are no
+longer installed.
+
+=back
+
 =head2 New Or Improved Platforms
 
-Perl is being ported to Symbian OS. See L<perlsymbian> for more
+Perl has been reported to work on Symbian OS. See L<perlsymbian> for more
 information.
+
+Many improvements have been made towards making Perl work correctly on
+z/OS.
+
+Perl has been reported to work on DragonFlyBSD.
 
 The VMS port has been improved. See L<perlvms>.
 
@@ -815,11 +986,6 @@ DynaLoader::dl_unload_file() now works on Windows.
 Portability of Perl on various recent compilers on Windows has been
 improved (Borland C++, Visual C++ 7.0).
 
-=head2 Module auxiliary files
-
-README files and changelogs for CPAN modules bundled with perl are no
-longer installed.
-
 =head1 Selected Bug Fixes
 
 =over 4
@@ -827,18 +993,6 @@ longer installed.
 =item strictures in regexp-eval blocks
 
 C<strict> wasn't in effect in regexp-eval blocks (C</(?{...})/>).
-
-=item C<defined $$x>
-
-C<use strict "refs"> was ignoring taking a hard reference in an argument
-to defined(), as in :
-
-    use strict "refs";
-    my $x = "foo";
-    if (defined $$x) {...}
-
-This now correctly produces the run-time error C<Can't use string as a
-SCALAR ref while "strict refs" in use>.
 
 =item Calling CORE::require()
 
@@ -861,16 +1015,68 @@ disabling of specific warning categories would actually turn off all warnings.
 This is now fixed; now C<no warnings 'io';> will only turn off warnings in the
 C<io> class. Previously it would erroneously turn off all warnings.
 
-=item threads and memory usage
+=item threads improvements
 
 Several memory leaks in ithreads were closed. Also, ithreads were made
 less memory-intensive.
+
+C<threads> is now a dual-life module, also available on CPAN. It has been
+expanded in many ways. A kill() method is available for thread signalling.
+One can get thread status, or the list of running or joinable threads.
+
+A new C<< threads->exit() >> method is used to exit from the application
+(this is the default for the main thread) or from the current thread only
+(this is the default for all other threads). On the other hand, the exit()
+built-in now always causes the whole application to terminate. (Jerry
+D. Hedden)
 
 =item chr() and negative values
 
 chr() on a negative value now gives C<\x{FFFD}>, the Unicode replacement
 character, unless when the C<bytes> pragma is in effect, where the low
 eight bytes of the value are used.
+
+=item PERL5SHELL and tainting
+
+On Windows, the PERL5SHELL environment variable is now checked for
+taintedness. (Rafael Garcia-Suarez)
+
+=item Using *FILE{IO}
+
+C<stat()> and C<-X> filetests now treat *FILE{IO} filehandles like *FILE
+filehandles. (Steve Peters)
+
+=item Overloading and reblessing
+
+Overloading now works when references are reblessed into another class.
+Internally, this has been implemented by moving the flag for "overloading"
+from the reference to the referent, which logically is where it should
+always have been. (Nicholas Clark)
+
+=item Overloading and UTF-8
+
+A few bugs related to UTF-8 handling with objects that have
+stringification overloaded have been fixed. (Nicholas Clark)
+
+=item eval memory leaks fixed
+
+Traditionally, C<eval 'syntax error'> has leaked badly. Many (but not all)
+of these leaks have now been eliminated or reduced. (Dave Mitchell)
+
+=item Random device on Windows
+
+In previous versions, perl would read the file F</dev/urandom> if it
+existed when seeding its random number generator.  That file is unlikely
+to exist on Windows, and if it did would probably not contain appropriate
+data, so perl no longer tries to read it on Windows. (Alex Davies)
+
+=item PERLIO_DEBUG
+
+The C<PERLIO_DEBUG> environment variable has no longer any effect for
+setuid scripts and for scripts run with B<-T>.
+
+Moreover, with a thread-enabled perl, using C<PERLIO_DEBUG> could lead to
+an internal buffer overflow. This has been fixed.
 
 =back
 
@@ -989,6 +1195,11 @@ The C<AvFLAGS> macro has been removed.
 
 The C<av_*()> functions, used to manipulate arrays, no longer accept null
 C<AV*> parameters.
+
+=head2 $^H and %^H
+
+The implementation of the special variables $^H and %^H has changed, to
+allow implementing lexical pragmas in pure perl.
 
 =head2 B:: modules inheritance changed
 
