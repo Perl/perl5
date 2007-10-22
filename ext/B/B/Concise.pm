@@ -688,10 +688,9 @@ sub concise_sv {
       if $hr->{svclass} eq "IV" and $sv->FLAGS & SVf_IVisUV;
     Carp::cluck("bad concise_sv: $sv") unless $sv and $$sv;
     $hr->{svaddr} = sprintf("%#x", $$sv);
-    if ($hr->{svclass} eq "GV") {
+    if ($hr->{svclass} eq "GV" && $sv->isGV_with_GP()) {
 	my $gv = $sv;
-	my $stash = $gv->STASH->NAME;
-	if ($stash eq "main") {
+	my $stash = $gv->STASH->NAME; if ($stash eq "main") {
 	    $stash = "";
 	} else {
 	    $stash = $stash . "::";
