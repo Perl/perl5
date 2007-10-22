@@ -36,7 +36,7 @@ optional features (like C<use feature ":5.10">).
 =head2 Defined-or operator
 
 A new operator C<//> (defined-or) has been implemented.
-The following statement:
+The following expression:
 
     $a // $b
 
@@ -44,7 +44,7 @@ is merely equivalent to
 
    defined $a ? $a : $b
 
-and
+and the statement
 
    $c //= $d;
 
@@ -250,12 +250,12 @@ for more information. (Alex Gough)
 
 A new pragma, C<mro> (for Method Resolution Order) has been added. It
 permits to switch, on a per-class basis, the algorithm that perl uses to
-find inherited methods in case of a mutiple inheritance hierachy. The
+find inherited methods in case of a multiple inheritance hierarchy. The
 default MRO hasn't changed (DFS, for Depth First Search). Another MRO is
 available: the C3 algorithm. See L<mro> for more information.
 (Brandon Black)
 
-Note that, due to changes in the implentation of class hierarchy search,
+Note that, due to changes in the implementation of class hierarchy search,
 code that used to undef the C<*ISA> glob will most probably break. Anyway,
 undef'ing C<*ISA> had the side-effect of removing the magic on the @ISA
 array and should not have been done in the first place.
@@ -919,6 +919,9 @@ string encodings in Perl, courtesy of Juerd Waalboer.
 
 A new manual page, L<perlunifaq> (the Perl Unicode FAQ), has been added
 (Juerd Waalboer).
+
+The L<perlcommunity> manpage gives a description of the Perl community
+on the Internet and in real life. (Edgar "Trizor" Bering)
 
 The L<CORE> manual page documents the C<CORE::> namespace. (Tels)
 
