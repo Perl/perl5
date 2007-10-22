@@ -518,8 +518,9 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
     if(isarev) {
         hv_iterinit(isarev);
         while((iter = hv_iternext(isarev))) {
-            SV* const revkey = hv_iterkeysv(iter);
-            HV* revstash = gv_stashsv(revkey, 0);
+	    I32 len;
+            const char* const revkey = hv_iterkey(iter, &len);
+            HV* revstash = gv_stashpvn(revkey, len, 0);
             struct mro_meta* revmeta;
 
             if(!revstash) continue;
@@ -563,8 +564,8 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 
 	if(SvTYPE(mroisarev) != SVt_PVHV) {
 	    SvREFCNT_dec(mroisarev);
-	    mroisarev = newHV();    
-	    HeVAL(he) = (SV *) mroisarev; 
+	    mroisarev = newHV();
+	    HeVAL(he) = (SV *)mroisarev;
         }
 
 	/* This hash only ever contains PL_sv_yes. Storing it over itself is
@@ -645,8 +646,9 @@ Perl_mro_method_changed_in(pTHX_ HV *stash)
 
         hv_iterinit(isarev);
         while((iter = hv_iternext(isarev))) {
-            SV* const revkey = hv_iterkeysv(iter);
-            HV* const revstash = gv_stashsv(revkey, 0);
+	    I32 len;
+            const char* const revkey = hv_iterkey(iter, &len);
+            HV* const revstash = gv_stashpvn(revkey, len, 0);
             struct mro_meta* mrometa;
 
             if(!revstash) continue;
