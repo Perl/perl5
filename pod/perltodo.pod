@@ -428,6 +428,13 @@ warnings are also currently suppressed by adding -D_CRT_NONSTDC_NO_DEPRECATE. It
 might be nice to do as Microsoft suggest here too, although, unlike the secure
 functions issue, there is presumably little or no benefit in this case.
 
+=head2 __FUNCTION__ for MSVC-pre-7.0
+
+Jarkko notes that one can things morally equivalent to C<__FUNCTION__>
+(or C<__func__>) even in MSVC-pre-7.0, contrary to popular belief.
+See L<http://www.codeproject.com/debug/extendedtrace.asp> if you feel like
+making C<PERL_MEM_LOG> more useful on Win32.
+
 =head1 Tasks that need a knowledge of XS
 
 These tasks would need C knowledge, and roughly the level of knowledge of
