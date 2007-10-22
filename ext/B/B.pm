@@ -1146,6 +1146,8 @@ Only when perl was compiled with ithreads.
 
 =item hints
 
+=item hints_hash
+
 =back
 
 
