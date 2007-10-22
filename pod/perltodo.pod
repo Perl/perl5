@@ -336,7 +336,9 @@ background or experience with XS, or how the Perl interpreter works
 
 The way @INC is laid out by default, one cannot upgrade core (dual-life)
 modules without overwriting files. This causes problems for binary
-package builders.
+package builders.  One possible proposal is laid out in this
+message:
+L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2002-04/msg02380.html>.
 
 =head2 -Duse32bit*
 
