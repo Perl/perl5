@@ -112,8 +112,6 @@ perl documentation:
 
 Chris Hall E<lt>hallc@cs.colorado.eduE<gt>
 
-=head1 TODO
-
 =cut
 
 my $usage;
