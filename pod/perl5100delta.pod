@@ -467,7 +467,7 @@ modifiers, has been removed.
 The deprecated C<$#> variable (output format for numbers) has been
 removed.
 
-Two new warnings, C<$#/$* is no longer supported>, have been added.
+Two new severe warnings, C<$#/$* is no longer supported>, have been added.
 
 =head2 substr() lvalues are no longer fixed-length
 
@@ -884,18 +884,18 @@ that use Module::Build's framework of configurability (that is,
 C<*::ConfigData> modules that contain local configuration information for
 their parent modules.)
 
-=head2 C<cpanp>
+=item cpanp
 
 C<cpanp>, the CPANPLUS shell, has been added. (C<cpanp-run-perl>, an
 helper for CPANPLUS operation, has been added too, but isn't intended for
 direct use).
 
-=head2 C<cpan2dist>
+=item cpan2dist
 
 C<cpan2dist> is a new utility, that comes with CPANPLUS. It's a tool to
 create distributions (or packages) from CPAN modules.
 
-=head2 C<pod2html>
+=item pod2html
 
 The output of C<pod2html> has been enhanced to be more customizable via
 CSS. Some formatting problems were also corrected. (Jari Aalto)
@@ -919,6 +919,8 @@ string encodings in Perl, courtesy of Juerd Waalboer.
 
 A new manual page, L<perlunifaq> (the Perl Unicode FAQ), has been added
 (Juerd Waalboer).
+
+The L<CORE> manual page documents the C<CORE::> namespace. (Tels)
 
 The long-existing feature of C</(?{...})/> regexps setting C<$_> and pos()
 is now documented.
@@ -1131,7 +1133,7 @@ improved. (ActiveState)
 
 =item Visual C++
 
-Perl now can be compiled with Microsoft Visual C++ 2005.
+Perl now can be compiled with Microsoft Visual C++.
 
 =item Win32 builds
 
@@ -1357,6 +1359,10 @@ Two deprecation warnings have been added: (Rafael)
     Opening dirhandle %s also as a file
     Opening filehandle %s also as a directory
 
+=item Use of -P is deprecated
+
+Perl's command-line switch C<-P> is now deprecated.
+
 =item perl -V
 
 C<perl -V> has several improvements, making it more useable from shell
@@ -1444,8 +1450,6 @@ an hash/array when the op is flagged with OPf_SPECIAL (Nicholas Clark).
 =for p5p XXX have we some docs on how to create regexp engine plugins, since that's now possible ? (perlreguts)
 
 =for p5p XXX new BIND SV type, #29544, #29642
-
-=head1 New Tests
 
 =head1 Known Problems
 
