@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.11';
+our $VERSION = '1.12';
 require Exporter;
 require Cwd;
 
@@ -969,10 +969,13 @@ sub _find_dir($$$) {
 		if ($Is_MacOS) {
 		    $tmp = (':' x ($CdLvl-$Level)) . ':';
 		}
+		elsif ($Is_VMS) {
+		    $tmp = '[' . ('-' x ($CdLvl-$Level)) . ']';
+		}
 		else {
 		    $tmp = join('/',('..') x ($CdLvl-$Level));
 		}
-		die "Can't cd to $dir_name" . $tmp
+		die "Can't cd to $tmp from $dir_name"
 		    unless chdir ($tmp);
 		$CdLvl = $Level;
 	    }
