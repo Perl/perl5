@@ -66,31 +66,31 @@ cat >_cflags.c <<__EOT__
 #ifdef I_UNISTD
 #include <unistd.h>
 #endif
-#ifdef I_SYSTYPES
+#ifdef I_SYS_TYPES
 #include <sys/types.h>
 #endif
-#ifdef I_SYSPARAM
+#ifdef I_SYS_PARAM
 #include <sys/param.h>
 #endif
-#ifdef I_SYSRESOURCE
+#ifdef I_SYS_RESOURCE
 #include <sys/resource.h>
 #endif
-#ifdef I_SYSSELECT
+#ifdef I_SYS_SELECT
 #include <sys/select.h>
 #endif
 #if defined(HAS_SOCKET) && !defined(VMS) && !defined(WIN32) /* See perl.h. */
 #include <sys/socket.h>
 #endif
-#ifdef I_SYSSTAT
+#ifdef I_SYS_STAT
 #include <sys/stat.h>
 #endif
-#ifdef I_SYSTIME
+#ifdef I_SYS_TIME
 #include <sys/time.h>
 #endif
-#ifdef I_SYSTIMES
+#ifdef I_SYS_TIMES
 #include <sys/times.h>
 #endif
-#ifdef I_SYSWAIT
+#ifdef I_SYS_WAIT
 #include <sys/wait.h>
 #endif
 /* The gcc -ansi can cause a lot of noise in Solaris because of:
@@ -139,7 +139,7 @@ Intel*) ;; # # Is that you, Intel C++?
        case " $ccflags " in
        *" $opt "*) ;; # Skip if already there.
        *) rm -f _cflags$_exe
-          case "`$cc $cflags $warn $opt _cflags.c -o _cflags$_exe 2>&1`" in
+          case "`$cc $cflags $warn $stdflags $opt _cflags.c -o _cflags$_exe 2>&1`" in
           *"unrecognized"*) ;;
           *"implicit declaration"*) ;; # Was something useful hidden?
           *"Invalid"*) ;;
