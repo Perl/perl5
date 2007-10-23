@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Scalar::Util qw( reftype);
 
-our $VERSION = '1.02_01';
+our $VERSION = '1.03';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -71,22 +71,22 @@ Hash::Util::FieldHash - Support for Inside-Out Classes
   fieldhashes @hashrefs;
 
   ### Create an idhash and register it for garbage collection
-  use Hash::Util::FieldHash qw( idhash register);
+  use Hash::Util::FieldHash qw(idhash register);
   idhash my %name;
-  my $obj = \ do { my $o };
+  my $object = \ do { my $o };
   # register the idhash for garbage collection with $object
-  register( $obj, \ %name);
-  # the following entry wil be deleted when $obj goes out of scope
-  $name{ $obj} = 'John Doe';
+  register($object, \ %name);
+  # the following entry will be deleted when $object goes out of scope
+  $name{$object} = 'John Doe';
 
   ### Register an ordinary hash for garbage collection
-  use Hash::Util::FieldHash qw( id register);
+  use Hash::Util::FieldHash qw(id register);
   my %name;
-  my $obj = \ do { my $o };
-  # register the hash %name for garbage collection of $obj's id
-  register $obj, \ %name;
-  # the following entry wil be deleted when $obj goes out of scope
-  $name{id $obj} = 'John Doe';
+  my $object = \ do { my $o };
+  # register the hash %name for garbage collection of $object's id
+  register $object, \ %name;
+  # the following entry will be deleted when $object goes out of scope
+  $name{id $object} = 'John Doe';
 
 =head1 FUNCTIONS
 
@@ -157,7 +157,7 @@ reference address in decimal is used as the key.
 
 =item idhashes
 
-    idhashes \ my( %hash, %gnash, %trash)
+    idhashes \ my(%hash, %gnash, %trash)
     idhashes \ @hashrefs
 
 Creates many idhashes from its hashref arguments.  Returns those
@@ -190,7 +190,7 @@ context.
 A word on terminology:  I shall use the term I<field> for a scalar
 piece of data that a class associates with an object.  Other terms that
 have been used for this concept are "object variable", "(object) property",
-"(object) attribute" and more.  Especally "attribute" has some currency
+"(object) attribute" and more.  Especially "attribute" has some currency
 among Perl programmer, but that clashes with the C<attributes> pragma.  The
 term "field" also has some currency in this sense and doesn't seem
 to conflict with other Perl terminology.
@@ -200,7 +200,7 @@ data with an object ist to store the data inside the object's body, that is,
 the piece of data pointed to by the reference.
 
 In consequence, if two or more classes want to access an object they
-I<must> agree on the type of refrerence and also on the organization of
+I<must> agree on the type of reference and also on the organization of
 data within the object body.  Failure to agree on the type results in
 immediate death when the wrong method tries to access an object.  Failure
 to agree on data organization may lead to one class trampling over the
@@ -338,7 +338,7 @@ class methods, just as if the class name were an object, distinct from
 all other objects, with its own data.  This object may be called
 the I<generic object> of the class.
 
-This works because field hashes respond to keys that are not refrences
+This works because field hashes respond to keys that are not references
 like a normal hash would and use the string offered as the hash key.
 Thus, if a method is called as a class method, the field hash is presented
 with the class name instead of an object and blithely uses it as a key.
@@ -369,7 +369,7 @@ basic accessor methods defined, usually through C<Scalar::Util::refaddr>.
 Further methods may be defined outside this block.  There has to be
 a DESTROY method and, for thread support, a CLONE method.
 
-When field hashes are used, the basic structure reamins the same.
+When field hashes are used, the basic structure remains the same.
 Each lexical hash will be made a field hash.  The call to C<refaddr>
 can be omitted from the accessor methods.  DESTROY and CLONE methods
 are not necessary.
@@ -526,7 +526,7 @@ to a file F<Example.pm>.
 
         sub init {
             my $obj = shift;
-            my ( $first, $last) = @_;
+            my ($first, $last) = @_;
             # create an object if called as class method
             $obj = bless {}, $obj unless ref $obj;
             $obj->{ first} = $first;
@@ -546,13 +546,13 @@ to a file F<Example.pm>.
 
     {
         package Name_id;
-        use Hash::Util::FieldHash qw( id);
+        use Hash::Util::FieldHash qw(id);
 
-        my ( %first, %last);
+        my (%first, %last);
 
         sub init {
             my $obj = shift;
-            my ( $first, $last) = @_;
+            my ($first, $last) = @_;
             # create an object if called as class method
             $obj = bless \ my $o, $obj unless ref $obj;
             $first{ id $obj} = $first;
@@ -580,11 +580,11 @@ to a file F<Example.pm>.
         package Name_idhash;
         use Hash::Util::FieldHash;
 
-        Hash::Util::FieldHash::idhashes( \ my ( %first, %last));
+        Hash::Util::FieldHash::idhashes( \ my (%first, %last) );
 
         sub init {
             my $obj = shift;
-            my ( $first, $last) = @_;
+            my ($first, $last) = @_;
             # create an object if called as class method
             $obj = bless \ my $o, $obj unless ref $obj;
             $first{ $obj} = $first;
@@ -610,16 +610,16 @@ to a file F<Example.pm>.
 
     {
         package Name_id_reg;
-        use Hash::Util::FieldHash qw( id register);
+        use Hash::Util::FieldHash qw(id register);
 
-        my ( %first, %last);
+        my (%first, %last);
 
         sub init {
             my $obj = shift;
-            my ( $first, $last) = @_;
+            my ($first, $last) = @_;
             # create an object if called as class method
             $obj = bless \ my $o, $obj unless ref $obj;
-            register( $obj, \ ( %first, %last));
+            register( $obj, \ (%first, %last) );
             $first{ id $obj} = $first;
             $last{ id $obj} = $last;
             $obj;
@@ -636,16 +636,16 @@ to a file F<Example.pm>.
 
     {
         package Name_idhash_reg;
-        use Hash::Util::FieldHash qw( register);
+        use Hash::Util::FieldHash qw(register);
 
-        Hash::Util::FieldHash::idhashes \ my ( %first, %last);
+        Hash::Util::FieldHash::idhashes \ my (%first, %last);
 
         sub init {
             my $obj = shift;
-            my ( $first, $last) = @_;
+            my ($first, $last) = @_;
             # create an object if called as class method
             $obj = bless \ my $o, $obj unless ref $obj;
-            register( $obj, \ ( %first, %last));
+            register( $obj, \ (%first, %last) );
             $first{ $obj} = $first;
             $last{ $obj} = $last;
             $obj;
@@ -664,11 +664,11 @@ to a file F<Example.pm>.
         package Name_fieldhash;
         use Hash::Util::FieldHash;
 
-        Hash::Util::FieldHash::fieldhashes \ my ( %first, %last);
+        Hash::Util::FieldHash::fieldhashes \ my (%first, %last);
 
         sub init {
             my $obj = shift;
-            my ( $first, $last) = @_;
+            my ($first, $last) = @_;
             # create an object if called as class method
             $obj = bless \ my $o, $obj unless ref $obj;
             $first{ $obj} = $first;
@@ -719,12 +719,12 @@ incompatibility of object bodies.
 
 
     # Verify that the base package works
-    my $n = Name->init( qw( Albert Einstein));
+    my $n = Name->init(qw(Albert Einstein));
     print $n->name, "\n";
     print "\n";
 
     # Create a named file handle (See definition below)
-    my $nf = NamedFile->init( qw( /tmp/x Filomena File));
+    my $nf = NamedFile->init(qw(/tmp/x Filomena File));
     # use as a file handle...
     for ( 1 .. 3 ) {
         my $l = <$nf>;
@@ -742,13 +742,12 @@ incompatibility of object bodies.
 
     sub init {
         my $obj = shift;
-        my ( $file, $first, $last) = @_;
+        my ($file, $first, $last) = @_;
         $obj = $obj->IO::File::new() unless ref $obj;
-        $obj->open( $file) or die "Can't read '$file': $!";
-        $obj->Name::init( $first, $last);
+        $obj->open($file) or die "Can't read '$file': $!";
+        $obj->Name::init($first, $last);
     }
     __END__
-
 
 
 =head1 GUTS
