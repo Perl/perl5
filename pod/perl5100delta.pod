@@ -1167,7 +1167,9 @@ Perl has been reported to work on DragonFlyBSD and MidnightBSD.
 
 The VMS port has been improved. See L<perlvms>.
 
-Support for Cray XT4 Catamount/Qk has been added.
+Support for Cray XT4 Catamount/Qk has been added. See
+F<hints/catamount.sh> in the source code distribution for more
+information.
 
 Vendor patches have been merged for RedHat and Gentoo.
 
@@ -1310,6 +1312,11 @@ in C<local $h{$x}; ++$x>). (Bo Lindbergh)
 =head1 New or Changed Diagnostics
 
 =over 4
+
+=item Use of uninitialized value
+
+Perl will now try to tell you the name of the variable (if any) that was
+undefined.
 
 =item Deprecated use of my() in false conditional
 
