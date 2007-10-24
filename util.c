@@ -4395,10 +4395,10 @@ Perl_new_version(pTHX_ SV *ver)
 
 	/* Begin copying all of the elements */
 	if ( hv_exists((HV *)ver, "qv", 2) )
-	    (void)hv_stores((HV *)hv, "qv", &PL_sv_yes);
+	    (void)hv_stores((HV *)hv, "qv", newSViv(1));
 
 	if ( hv_exists((HV *)ver, "alpha", 5) )
-	    (void)hv_stores((HV *)hv, "alpha", &PL_sv_yes);
+	    (void)hv_stores((HV *)hv, "alpha", newSViv(1));
 	
 	if ( hv_exists((HV*)ver, "width", 5 ) )
 	{

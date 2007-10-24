@@ -5,6 +5,7 @@
 #########################
 
 use Test::More qw(no_plan);
+use Data::Dumper;
 require Test::Harness;
 no warnings 'once';
 *Verbose = \$Test::Harness::Verbose;
@@ -540,6 +541,16 @@ SKIP: {
 	unlike($@, qr/Integer overflow in version/, "Too large version");
 	like($warning, qr/Integer overflow in version/, "Too large version");
     }
+
+    {
+	# http://rt.cpan.org/Public/Bug/Display.html?id=30004
+	my $v1 = $CLASS->new("v0.1_1");
+	(my $alpha1 = Dumper($v1)) =~ s/.+'alpha' => ([^,]+),.+/$1/ms;
+	my $v2 = $CLASS->new($v1);
+	(my $alpha2 = Dumper($v2)) =~ s/.+'alpha' => ([^,]+),.+/$1/ms;
+	is $alpha2, $alpha1, "Don't fall for Data::Dumper's tricks";
+    }
+
 
 }
 
