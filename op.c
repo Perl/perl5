@@ -7243,7 +7243,7 @@ Perl_ck_require(pTHX_ OP *o)
 	    for (; s < end; s++) {
 		if (*s == ':' && s[1] == ':') {
 		    *s = '/';
-		    Move(s+2, s+1, end - s, char);
+		    Move(s+2, s+1, end - s - 1, char);
 		    --end;
 		}
 	    }
