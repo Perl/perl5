@@ -122,7 +122,7 @@ BEGIN { $n_tests += 5 }
     $f{ $key} = $val;
     is( $f{ $key}, $val, "plain key set in field");
     my ( $id) = keys %f;
-    my $refaddr = hex +($key =~ /\(0x([[:xdigit:]]+)\)$/)[ 0];
+    my $refaddr = refaddr($key);
     is $id, $refaddr, "key is refaddr";
     bless $key;
     is( $f{ $key}, $val, "access through blessed");
@@ -314,6 +314,9 @@ BEGIN { plan tests => $n_tests }
 #######################################################################
 
 sub refaddr {
+    # silence possible warnings from hex() on 64bit systems
+    no warnings 'portable';
+
     my $ref = shift;
     hex +($ref =~ /\(0x([[:xdigit:]]+)\)$/)[ 0];
 }
