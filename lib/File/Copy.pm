@@ -98,7 +98,7 @@ sub copy {
     }
 
     if ((($Config{d_symlink} && $Config{d_readlink}) || $Config{d_link}) &&
-	!($^O eq 'MSWin32' || $^O eq 'os2' || $^O eq 'vms')) {
+	!($^O eq 'MSWin32' || $^O eq 'os2')) {
 	my @fs = stat($from);
 	if (@fs) {
 	    my @ts = stat($to);
@@ -122,7 +122,28 @@ sub copy {
 	&& !($from_a_handle && $^O eq 'NetWare')
        )
     {
-	return syscopy($from, $to);
+	my $copy_to = $to;
+
+        if ($^O eq 'VMS' && -e $from) {
+
+            if (! -d $to && ! -d $from) {
+
+                # VMS has sticky defaults on extensions, which means that
+                # if there is a null extension on the destination file, it
+                # will inherit the extension of the source file
+                # So add a '.' for a null extension.
+
+                $copy_to = VMS::Filespec::vmsify($to);
+                my ($vol, $dirs, $file) = File::Spec->splitpath($copy_to);
+                $file = $file . '.' unless ($file =~ /(?<!\^)\./);
+                $copy_to = File::Spec->catpath($vol, $dirs, $file);
+
+                # Get rid of the old versions to be like UNIX
+                1 while unlink $copy_to;
+            }
+        }
+
+        return syscopy($from, $copy_to);
     }
 
     my $closefrom = 0;
@@ -215,7 +236,27 @@ sub move {
       # will not rename with overwrite
       unlink $to;
     }
-    return 1 if rename $from, $to;
+
+    my $rename_to = $to;
+    if (-$^O eq 'VMS' && -e $from) {
+
+        if (! -d $to && ! -d $from) {
+            # VMS has sticky defaults on extensions, which means that
+            # if there is a null extension on the destination file, it
+            # will inherit the extension of the source file
+            # So add a '.' for a null extension.
+
+            $rename_to = VMS::Filespec::vmsify($to);
+            my ($vol, $dirs, $file) = File::Spec->splitpath($rename_to);
+            $file = $file . '.' unless ($file =~ /(?<!\^)\./);
+            $rename_to = File::Spec->catpath($vol, $dirs, $file);
+
+            # Get rid of the old versions to be like UNIX
+            1 while unlink $rename_to;
+        }
+    }
+
+    return 1 if rename $from, $rename_to;
 
     # Did rename return an error even though it succeeded, because $to
     # is on a remote NFS file system, and NFS lost the server's ack?
