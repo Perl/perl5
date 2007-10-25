@@ -6603,7 +6603,7 @@ $!
 $! Okay, we've gotten here. Build munchconfig.exe
 $ COPY/NOLOG [-.vms]munchconfig.c []
 $ COPY/NOLOG [-.vms]'Makefile_SH' []
-$ 'Perl_CC' munchconfig.c
+$ 'Perl_CC' 'ccflags' munchconfig.c
 $ IF Needs_Opt
 $ THEN
 $   OPEN/WRITE CONFIG []munchconfig.opt
