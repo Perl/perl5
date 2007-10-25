@@ -1252,7 +1252,11 @@ sub __update_custom_module_source {
     
     my $uri =  join '/', $remote, $conf->_get_source('custom_index');
     my $ff  =  File::Fetch->new( uri => $uri );           
-    my $dir =  tempdir();
+
+    ### tempdir doesn't clean up by default, as opposed to tempfile()
+    ### so add it explicitly.
+    my $dir =  tempdir( CLEANUP => 1 );
+    
     my $res =  do {  local $File::Fetch::WARN = 0;
                     local $File::Fetch::WARN = 0;
                     $ff->fetch( to => $dir );
