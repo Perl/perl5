@@ -1,5 +1,152 @@
 Revision history for Perl extension Module::Build.
 
+ - All .pm files in the Module-Build distribution (except for
+   M::B::Version.pm, which is kind of tied to version.pm) now have the
+   same $VERSION number explicitly specified.
+
+ - When checking prerequisites, the required version of perl is now
+   checked before we start finding the $VERSION declaration of the
+   distribution, which results in much more intuitive error messages
+   e.g. if the author is using 5.6-isms in their declaration but the
+   user doesn't have 5.6. [Slaven Rezic]
+
+ - Added 'artistic_2' license, corrected 'lgpl' license url (bug #29783)
+   [David Thomas]
+
+ - VMS find_perl_interpreter() is just $^X (bug #29810) [Craig A. Berry]
+
+ - Some large VMS fixes, mostly having to do with the non-case-
+   preserving nature of most VMS filesystems, but also correcting for
+   illegal characters in VMS file specs. [John E. Malmberg and Craig
+   A. Berry]
+
+ - Fixed the _detildefy() method on VMS. [John E. Malmberg and Craig
+   A. Berry]
+
+ - We now use a much more reliable method when Data::Dumper-ing saved
+   state data. [Yves]
+
+ - When a module had 0.000 as its version, a few places in the code
+   thought the module had no version at all.  This is now
+   fixed. [Andrew "Zefram" Main]
+
+ - When finding the default set of script_files, we now compute them
+   as relative paths, not absolute. [Spotted by Curtis "Ovid" Poe]
+
+ - Got rid of a call to eliminate_macros, which isn't needed in
+   Module::Build since there is no external make utility involved.
+   Override expand_test_dir to make up for the fact that the
+   home-grown glob() returns absolute, not relative, paths. [Craig
+   A. Berry]
+
+ - Fixed a catdir() that needed to be catfile() in the .packlist
+   creation code. [John E. Malmberg]
+
+ - If a *.PL file ended abnormally during the build, processing should
+   have stopped, but it didn't.  Fixed. [Matthew Cast and David
+   Golden]
+
+ - Module::Build::Compat adds "require 5.XXXXX" to Makefile.PL when 
+   'perl' is specified as a 'requires' prerequisite [David Golden]
+
+ - Refactored t/compat.t for modularity and transparency; added 
+   labels for all tests; supressed subprocess output to 
+   STDOUT and STDERR [David Golden]
+
+ - Fixed bug in perl_version_to_float when version is already a float
+   [David Golden]
+
+ - Removed a mention of $build->{config} from the documentation, the
+   official interface to Config.pm settings is now via the
+   $build->config() and has been for some time. [Suggested by Michael
+   Schwern]
+
+ - Tweaked some text in the Cookbook to bring it into the modern age,
+   and added a recipe for accessing Config.pm settings. [Ibid]
+
+ - Lots of POD link/readability improvements to the Module::Build::API
+   documentation [Salve J. Nilsen]
+
+ - Added configure_requires as a new type of prereq.  [Suggested by Adam
+   Kennedy]
+
+ - Patch 31156 from bleadperl: some filename dot and extension help
+   for Module::Build on VMS. [Craig Berry]
+
+ - Reworked the _detildefy() method so it doesn't depend on glob()
+   anymore.  This gets rid of a problem with spaces or other special
+   shell characters in things like 'prefix' or 'install_path'
+   entries. [Prodding by Eric Wilhelm]
+
+ - Added midnightbsd to the list of Unix-like OSes we know about
+   [Rafael Garcia-Suarez]
+
+0.2808 - Sat Apr 28 12:59:43 2007
+
+ - Added is_vmsish(), is_windowsish(), and is_unixish() boolean
+   convenience functions.  Fixes some test failures on platforms where
+   $^O is set to a value we don't know about (like 'gnu').
+
+ - Upgraded to version.pm 0.7203. [John Peacock]
+
+ - Support get_action_docs() =head2 style. [ewilhelm]
+
+ - Workaround Test::Pod::Coverage @INC bug. [Eric Wilhelm]
+
+ - Fixed the command-line args --extra_compiler_flags and
+   --extra_linker_flags so they properly shell-split their arguments.
+
+0.2807 - Sat Mar 24 22:19:02 2007
+
+ - Upgraded to version.pm 0.71. [John Peacock]
+
+ - Removed a couple small constructs in the tests ("use warnings;" and
+   "qw$foo bar$[1]") that caused test failures under perl 5.005.
+
+ - Added support for an explicit default value of undef in prompt().
+   [Eric Wilhelm]
+
+ - Improved our prompt() method, which could sometimes hang before the
+   user got a chance to see a prompt. [Andreas Koenig]
+
+ - Added a note about --allow_mb_mismatch to the error message that
+   happens right before someone might want to use that parameter.
+
+ - Added DragonflyBSD to the list of known Unix OSes.
+
+ - get_action_docs() dies on error rather than twiddling $@
+
+ - Made ModuleInfo's _evaluate_version_line() compatible with 'use
+   version ...$VERSION' lines.  [Eric Wilhelm]
+
+ - Added some verbiage in Module::Build::API that officially blesses
+   the _build/prereqs file for external consumption. [Suggested by Andreas Koenig]
+
+ - Added test profiles support via the test_types property and "testall"
+   target. [Eric Wilhelm, Jeff Lavallee]
+
+ - Use syscopy() on OS/2 in copy_if_modified() so we make sure to
+   overwrite any existing target file. [Ilya Zakharevich]
+
+ - Removed seemingly silly '~~' test in t/tilde.t.
+
+ - In our test-time utility library t/lib/MBTest.pm, we need to know
+   about a few .exe-like extensions on OS/2. [Ilya Zakharevich]
+
+ - In t/ppm.t, use DynaLoader::mod2fname() (if available) to determine
+   the correct translation of our test module's name into a DLL
+   name. [Ilya Zakharevich]
+
+ - Avoid an unlink() error on OS/2 when fixing shebang lines. [Ilya
+   Zakharevich]
+
+ - When we're protecting the world from the evils of long RedHat
+   $ENV{PERL5LIB} variables, don't assume $ENV{PERL5LIB} is already
+   defined.  This gets rid of a huge number of warnings for some
+   people. [Dave Rolsky]
+
+0.2806 - Fri Dec 15 22:20:14 2006
+
  - On some systems (haven't identified the actual problem yet)
    $ENV{PERL5LIB} can grow to enormous enough sizes that we can't
    launch any more subprocesses because the environment table is full.

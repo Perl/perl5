@@ -9,19 +9,15 @@ Module::Build::Cookbook - Examples of Module::Build Usage
 =head1 DESCRIPTION
 
 C<Module::Build> isn't conceptually very complicated, but examples are
-always helpful.  I got the idea for writing this cookbook when
-attending Brian Ingerson's "Extreme Programming Tools for Module
-Authors" presentation at YAPC 2003, when he said, straightforwardly,
-"Write A Cookbook."
-
-The definitional of how stuff works is in the main C<Module::Build>
-documentation.  It's best to get familiar with that too.
+always helpful.  The following recipes should help developers and/or
+installers put together the pieces from the other parts of the
+documentation.
 
 
 =head1 BASIC RECIPES
 
 
-=head2 The basic installation recipe for modules that use Module::Build
+=head2 Installing modules that use Module::Build
 
 In most cases, you can just issue the following commands:
 
@@ -57,35 +53,42 @@ double-click on the F<Build.PL> script to create the F<Build> script,
 then double-click on the F<Build> script to run its C<build>, C<test>,
 and C<install> actions.
 
-The F<Build> script knows what perl was used to run C<Build.PL>, so
+The F<Build> script knows what perl was used to run F<Build.PL>, so
 you don't need to re-invoke the F<Build> script with the complete perl
 path each time.  If you invoke it with the I<wrong> perl path, you'll
 get a warning or a fatal error.
 
+=head2 Modifying Config.pm values
 
-=head2 Making a CPAN.pm-compatible distribution
+C<Module::Build> relies heavily on various values from perl's
+C<Config.pm> to do its work.  For example, default installation paths
+are given by C<installsitelib> and C<installvendorman3dir> and
+friends, C linker & compiler settings are given by C<ld>,
+C<lddlflags>, C<cc>, C<ccflags>, and so on.  I<If you're pretty sure
+you know what you're doing>, you can tell C<Module::Build> to pretend
+there are different values in F<Config.pm> than what's really there,
+by passing arguments for the C<--config> parameter on the command
+line:
 
-New versions of CPAN.pm understand how to use a F<Build.PL> script,
-but old versions don't.  If you want to help users who have old
-versions, do the following:
+  perl Build.PL --config cc=gcc --config ld=gcc
 
-Create a file in your distribution named F<Makefile.PL>, with the
-following contents:
+Inside the C<Build.PL> script the same thing can be accomplished by
+passing values for the C<config> parameter to C<new()>:
 
-  use Module::Build::Compat;
-  Module::Build::Compat->run_build_pl(args => \@ARGV);
-  Module::Build::Compat->write_makefile();
+ my $build = Module::Build->new
+   (
+    ...
+    config => { cc => 'gcc', ld => 'gcc' },
+    ...
+   );
 
-Now CPAN will work as usual, i.e.: `perl Makefile.PL`, `make`, `make
-test`, and `make install`, provided the end-user already has
-C<Module::Build> installed.
+In custom build code, the same thing can be accomplished by calling
+the L<Module::Build/config> method:
 
-If the end-user might not have C<Module::Build> installed, it's
-probably best to supply a "traditional" F<Makefile.PL>.  The
-C<Module::Build::Compat> module has some very helpful tools for
-keeping a F<Makefile.PL> in sync with a F<Build.PL>.  See its
-documentation, and also the C<create_makefile_pl> parameter to the
-C<< Module::Build->new() >> method.
+ $build->config( cc => 'gcc' );     # Set
+ $build->config( ld => 'gcc' );     # Set
+ ...
+ my $linker = $build->config('ld'); # Get
 
 
 =head2 Installing modules using the programmatic interface
@@ -131,7 +134,7 @@ F</tmp/my-package-1.003> directory.
 
 To install to a non-standard directory (for example, if you don't have
 permission to install in the system-wide directories), you can use the
-C<install_base>:
+C<install_base> or C<prefix> parameters:
 
   ./Build install --install_base /foo/bar
 
@@ -147,7 +150,7 @@ to install to the same locations.
 
 First, ensure you have at least version 0.28 of Module::Build
 installed and 6.31 of ExtUtils::MakeMaker.  Prior versions have
-differing installation behaviors.
+differing (and in some cases quite strange) installation behaviors.
 
 The following installation flags are equivalent between
 ExtUtils::MakeMaker and Module::Build.
@@ -178,10 +181,10 @@ You can install into the same location with Module::Build using this:
 
 =head3 C<prefix> vs C<install_base>
 
-The behavior of C<prefix> is complicated and depends closely on
+The behavior of C<prefix> is complicated and depends on
 how your Perl is configured.  The resulting installation locations
 will vary from machine to machine and even different installations of
-Perl on the same machine.  Because of this, its difficult to document
+Perl on the same machine.  Because of this, it's difficult to document
 where C<prefix> will place your modules.
 
 In contrast, C<install_base> has predictable, easy to explain
@@ -206,7 +209,7 @@ informative output:
 
   ./Build test --test_files t/mytest.t --verbose 1
 
-I run this so frequently that I actually define the following shell alias:
+I run this so frequently that I define the following shell alias:
 
   alias t './Build test --verbose 1 --test_files'
 
@@ -214,6 +217,24 @@ So then I can just execute C<t t/mytest.t> to run a single test.
 
 
 =head1 ADVANCED RECIPES
+
+
+=head2 Making a CPAN.pm-compatible distribution
+
+New versions of CPAN.pm understand how to use a F<Build.PL> script,
+but old versions don't.  If authors want to help users who have old
+versions, some form of F<Makefile.PL> should be supplied.  The easiest
+way to accomplish this is to use the C<create_makefile_pl> parameter to
+C<< Module::Build->new() >> in the C<Build.PL> script, which can
+create various flavors of F<Makefile.PL> during the C<dist> action.
+
+As a best practice, we recommend using the "traditional" style of
+F<Makefile.PL> unless your distribution has needs that can't be
+accomplished that way.
+
+The C<Module::Build::Compat> module, which is part of
+C<Module::Build>'s distribution, is responsible for creating these
+F<Makefile.PL>s.  Please see L<Module::Build::Compat> for the details.
 
 
 =head2 Changing the order of the build process
@@ -241,8 +262,7 @@ C<Module::Build> code.
 Sometimes you might have extra types of files that you want to install
 alongside the standard types like F<.pm> and F<.pod> files.  For
 instance, you might have a F<Bar.dat> file containing some data
-related to the C<Foo::Bar> module.  Assuming the data doesn't need to
-be created on the fly, the best place for it to end up is probably as
+related to the C<Foo::Bar> module and you'd like for it to end up as
 F<Foo/Bar.dat> somewhere in perl's C<@INC> path so C<Foo::Bar> can
 access it easily at runtime.  The following code from a sample
 C<Build.PL> file demonstrates how to accomplish this:
@@ -260,9 +280,9 @@ This will find all F<.dat> files in the F<lib/> directory, copy them
 to the F<blib/lib/> directory during the C<build> action, and install
 them during the C<install> action.
 
-If your extra files aren't in the C<lib/> directory, you can
-explicitly say where they are, just as you'd do with F<.pm> or F<.pod>
-files:
+If your extra files aren't located in the C<lib/> directory in your
+distribution, you can explicitly say where they are, just as you'd do
+with F<.pm> or F<.pod> files:
 
   use Module::Build;
   my $build = new Module::Build
@@ -276,8 +296,8 @@ files:
 
 If your extra files actually need to be created on the user's machine,
 or if they need some other kind of special processing, you'll probably
-want to create a special method to do so, named
-C<process_${kind}_files()>:
+want to subclass C<Module::Build> and create a special method to
+process them, named C<process_${kind}_files()>:
 
   use Module::Build;
   my $class = Module::Build->subclass(code => <<'EOF');
@@ -300,20 +320,20 @@ L<"Adding new elements to the install process"> for how to actually
 get them installed.
 
 Please note that these examples use some capabilities of Module::Build
-that first appeared in version 0.26.  Before that it could certainly
+that first appeared in version 0.26.  Before that it could
 still be done, but the simple cases took a bit more work.
 
 
 =head2 Adding new elements to the install process
 
-By default, Module::Build creates seven subdirectories of the F<blib/>
-directory during the build process: F<lib/>, F<arch/>, F<bin/>,
-F<script/>, F<bindoc/>, F<libdoc/>, and F<html/> (some of these may be
+By default, Module::Build creates seven subdirectories of the F<blib>
+directory during the build process: F<lib>, F<arch>, F<bin>,
+F<script>, F<bindoc>, F<libdoc>, and F<html> (some of these may be
 missing or empty if there's nothing to go in them).  Anything copied
 to these directories during the build will eventually be installed
 during the C<install> action (see L<Module::Build/"INSTALL PATHS">.
 
-If you need to create a new type of installable element, e.g. C<conf>,
+If you need to create a new custom type of installable element, e.g. C<conf>,
 then you need to tell Module::Build where things in F<blib/conf/>
 should be installed.  To do this, use the C<install_path> parameter to
 the C<new()> method:
@@ -326,11 +346,7 @@ the C<new()> method:
 
 Or you can call the C<install_path()> method later:
 
-  $build->install_path->{conf} || $installation_path;
-
-(Sneakily, or perhaps uglily, C<install_path()> returns a reference to
-a hash of install paths, and you can modify that hash to your heart's
-content.)
+  $build->install_path(conf => $installation_path);
 
 The user may also specify the path on the command line:
 
@@ -338,7 +354,8 @@ The user may also specify the path on the command line:
 
 The important part, though, is that I<somehow> the install path needs
 to be set, or else nothing in the F<blib/conf/> directory will get
-installed.
+installed, and a runtime error during the C<install> action will
+result.
 
 See also L<"Adding new file types to the build process"> for how to
 create the stuff in F<blib/conf/> in the first place.
@@ -385,11 +402,12 @@ do something unusual.  For instance, you might need to change the
 ownership of a file or do something else peculiar to your application.
 
 You can subclass C<Module::Build> on the fly using the C<subclass()>
-method and override the methods that perform the actions. You may need
-to read through C<Module::Build::Authoring> to find the methods you
-want to override, but the general pattern is C<ACTION_> followed by
-the name of the action you want to modify.  Here's an example of how
-it would work for C<install>:
+method and override the methods that perform the actions.  You may
+need to read through C<Module::Build::Authoring> and
+C<Module::Build::API> to find the methods you want to override.  All
+"action" methods are implemented by a method called "ACTION_" followed
+by the action's name, so here's an example of how it would work for
+the C<install> action:
 
   # Build.PL
   use Module::Build;
@@ -408,9 +426,6 @@ it would work for C<install>:
       module_name => 'Your::Module',
       # rest of the usual Module::Build parameters
   )->create_build_script;
-
-See the L<Module::Build::Authoring> pod in 0.27 or above for more
-complete documentation on this.
 
 
 =head1 AUTHOR

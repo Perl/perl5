@@ -6,7 +6,7 @@ use MBTest tests => 52;
 
 use Cwd ();
 my $cwd = Cwd::cwd;
-my $tmp = File::Spec->catdir( $cwd, 't', '_tmp' );
+my $tmp = MBTest->tmpdir;
 
 use DistGen;
 my $dist = DistGen->new( dir => $tmp );
@@ -122,23 +122,18 @@ SKIP: {
 # Getopt::Long specs work as expected.
 {
   use Config;
-  $dist->change_file( 'Build.PL', <<"---" );
-use Module::Build;
-
-my \$build = Module::Build->new(
-  module_name => @{[$dist->name]},
-  license     => 'perl',
-  get_options => { foo => {},
-                   bar => { type    => '+'  },
-                   bat => { type    => '=s' },
-                   dee => { type    => '=s',
-                            default => 'goo'
-                          },
-                 }
-);
-
-\$build->create_build_script;
----
+  $dist->change_build_pl
+    ({
+      module_name => @{[$dist->name]},
+      license     => 'perl',
+      get_options => { foo => {},
+		       bar => { type    => '+'  },
+		       bat => { type    => '=s' },
+		       dee => { type    => '=s',
+				default => 'goo'
+			      },
+		     }
+     });
 
   $dist->regen;
   eval {Module::Build->run_perl_script('Build.PL', [], ['--nouse-rcfile', '--config', "foocakes=barcakes", '--foo', '--bar', '--bar', '-bat=hello', 'gee=whiz', '--any', 'hey', '--destdir', 'yo', '--verbose', '1'])};

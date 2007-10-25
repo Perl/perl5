@@ -2,7 +2,7 @@ package DistGen;
 
 use strict;
 
-use vars qw( $VERSION $VERBOSE );
+use vars qw( $VERSION $VERBOSE @EXPORT_OK);
 
 $VERSION = '0.01';
 $VERBOSE = 0;
@@ -15,6 +15,7 @@ use File::Path ();
 use File::Spec ();
 use IO::File ();
 use Tie::CPHash;
+use Data::Dumper;
 
 BEGIN {
     if( $^O eq 'VMS' ) {
@@ -22,6 +23,13 @@ BEGIN {
         require VMS::Filespec;
         VMS::Filespec->import;
     }
+}
+BEGIN {
+  require Exporter;
+  *{import} = \&Exporter::import;
+  @EXPORT_OK = qw(
+    undent
+  );
 }
 
 sub new {
@@ -52,134 +60,150 @@ sub new {
   return $self;
 }
 
+# not a method
+sub undent {
+  my ($string) = @_;
+
+  my ($space) = $string =~ m/^(\s+)/;
+  $string =~ s/^$space//gm;
+
+  return($string);
+}
 
 sub _gen_default_filedata {
   my $self = shift;
 
-  $self->add_file( 'Build.PL', <<"---" ) unless $self->{filedata}{'Build.PL'};
-use strict;
-use Module::Build;
+  # TODO maybe a public method like this (but with a better name?)
+  my $add_unless = sub {
+    my $self = shift;
+    my ($member, $data) = @_;
+    $self->add_file($member, $data) unless($self->{filedata}{$member});
+  };
 
-my \$builder = Module::Build->new(
-    module_name         => '$self->{name}',
-    license             => 'perl',
-);
+  $self->$add_unless('Build.PL', undent(<<"    ---"));
+    use strict;
+    use Module::Build;
 
-\$builder->create_build_script();
----
+    my \$builder = Module::Build->new(
+        module_name         => '$self->{name}',
+        license             => 'perl',
+    );
+
+    \$builder->create_build_script();
+    ---
 
   my $module_filename =
     join( '/', ('lib', split(/::/, $self->{name})) ) . '.pm';
 
   unless ( $self->{xs} ) {
-    $self->add_file( $module_filename, <<"---" ) unless $self->{filedata}{$module_filename};
-package $self->{name};
+    $self->$add_unless($module_filename, undent(<<"      ---"));
+      package $self->{name};
 
-use vars qw( \$VERSION );
-\$VERSION = '0.01';
+      use vars qw( \$VERSION );
+      \$VERSION = '0.01';
 
-use strict;
+      use strict;
 
-1;
+      1;
 
-__END__
+      __END__
 
-=head1 NAME
+      =head1 NAME
 
-$self->{name} - Perl extension for blah blah blah
+      $self->{name} - Perl extension for blah blah blah
 
-=head1 DESCRIPTION
+      =head1 DESCRIPTION
 
-Stub documentation for $self->{name}.
+      Stub documentation for $self->{name}.
 
-=head1 AUTHOR
+      =head1 AUTHOR
 
-A. U. Thor, a.u.thor\@a.galaxy.far.far.away
+      A. U. Thor, a.u.thor\@a.galaxy.far.far.away
 
-=cut
----
+      =cut
+      ---
 
-  $self->add_file( 't/basic.t', <<"---" ) unless $self->{filedata}{'t/basic.t'};
-use Test::More tests => 1;
-use strict;
+  $self->$add_unless('t/basic.t', undent(<<"    ---"));
+    use Test::More tests => 1;
+    use strict;
 
-use $self->{name};
-ok 1;
----
+    use $self->{name};
+    ok 1;
+    ---
 
   } else {
-    $self->add_file( $module_filename, <<"---" ) unless $self->{filedata}{$module_filename};
-package $self->{name};
+    $self->$add_unless($module_filename, undent(<<"      ---"));
+      package $self->{name};
 
-\$VERSION = '0.01';
+      \$VERSION = '0.01';
 
-require Exporter;
-require DynaLoader;
+      require Exporter;
+      require DynaLoader;
 
-\@ISA = qw(Exporter DynaLoader);
-\@EXPORT_OK = qw( okay );
+      \@ISA = qw(Exporter DynaLoader);
+      \@EXPORT_OK = qw( okay );
 
-bootstrap $self->{name} \$VERSION;
+      bootstrap $self->{name} \$VERSION;
 
-1;
+      1;
 
-__END__
+      __END__
 
-=head1 NAME
+      =head1 NAME
 
-$self->{name} - Perl extension for blah blah blah
+      $self->{name} - Perl extension for blah blah blah
 
-=head1 DESCRIPTION
+      =head1 DESCRIPTION
 
-Stub documentation for $self->{name}.
+      Stub documentation for $self->{name}.
 
-=head1 AUTHOR
+      =head1 AUTHOR
 
-A. U. Thor, a.u.thor\@a.galaxy.far.far.away
+      A. U. Thor, a.u.thor\@a.galaxy.far.far.away
 
-=cut
----
+      =cut
+      ---
 
     my $xs_filename =
       join( '/', ('lib', split(/::/, $self->{name})) ) . '.xs';
-    $self->add_file( $xs_filename, <<"---" ) unless $self->{filedata}{$xs_filename};
-#include "EXTERN.h"
-#include "perl.h"
-#include "XSUB.h"
+    $self->$add_unless($xs_filename, undent(<<"      ---"));
+      #include "EXTERN.h"
+      #include "perl.h"
+      #include "XSUB.h"
 
-MODULE = $self->{name}         PACKAGE = $self->{name}
+      MODULE = $self->{name}         PACKAGE = $self->{name}
 
-SV *
-okay()
-    CODE:
-        RETVAL = newSVpv( "ok", 0 );
-    OUTPUT:
+      SV *
+      okay()
+          CODE:
+              RETVAL = newSVpv( "ok", 0 );
+          OUTPUT:
+              RETVAL
+
+      char *
+      xs_version()
+          CODE:
+        RETVAL = XS_VERSION;
+          OUTPUT:
         RETVAL
 
-char *
-xs_version()
-    CODE:
-	RETVAL = XS_VERSION;
-    OUTPUT:
-	RETVAL
+      char *
+      version()
+          CODE:
+        RETVAL = VERSION;
+          OUTPUT:
+        RETVAL
+      ---
 
-char *
-version()
-    CODE:
-	RETVAL = VERSION;
-    OUTPUT:
-	RETVAL
----
+  $self->$add_unless('t/basic.t', undent(<<"    ---"));
+    use Test::More tests => 2;
+    use strict;
 
-  $self->add_file( 't/basic.t', <<"---" ) unless $self->{filedata}{'t/basic.t'};
-use Test::More tests => 2;
-use strict;
+    use $self->{name};
+    ok 1;
 
-use $self->{name};
-ok 1;
-
-ok( $self->{name}::okay() eq 'ok' );
----
+    ok( $self->{name}::okay() eq 'ok' );
+    ---
   }
 }
 
@@ -357,6 +381,22 @@ sub remove_file {
   $self->{pending}{remove}{$file} = 1;
 }
 
+sub change_build_pl {
+  my ($self, $opts) = @_;
+
+  local $Data::Dumper::Terse = 1;
+  (my $args = Dumper($opts)) =~ s/^\s*\{|\}\s*$//g;
+
+  $self->change_file( 'Build.PL', undent(<<"    ---") );
+    use strict;
+    use Module::Build;
+    my \$b = Module::Build->new(
+    $args
+    );
+    \$b->create_build_script();
+    ---
+}
+
 sub change_file {
   my $self = shift;
   my $file = shift;
@@ -374,92 +414,122 @@ __END__
 
 DistGen - Creates simple distributions for testing.
 
+=head1 SYNOPSIS
 
-=head1 DESCRIPTION
+  use DistGen;
 
+  my $dist = DistGen->new(dir => $tmp);
+  ...
+  $dist->add_file('t/some_test.t', $contents);
+  ...
+  $dist->regen;
 
+  chdir($dist->dirname) or
+    die "Cannot chdir to '@{[$dist->dirname]}': $!";
+  ...
+  $dist->clean;
+  ...
+  chdir($cwd) or die "cannot return to $cwd";
+  $dist->remove;
 
 =head1 API
-
 
 =head2 Constructor
 
 =head3 new()
 
-Create a new distribution generator. Does not actually write the
-contents.
+Create a new object.  Does not write its contents (see L</regen()>.)
+
+  my $tmp = MBTest->tmpdir;
+  my $dist = DistGen->new(
+    name => 'Foo::Bar',
+    dir  => $tmp,
+    xs   => 1,
+  );
+
+The parameters are as follows.
 
 =over
 
 =item name
 
 The name of the module this distribution represents. The default is
-'Simple'.
+'Simple'.  This should be a "Foo::Bar" (module) name, not a "Foo-Bar"
+dist name.
 
 =item dir
 
-The directory in which to create the distribution directory. The
-default is File::Spec->curdir.
+The (parent) directory in which to create the distribution directory.
+The default is File::Spec->curdir.  The distribution will be created
+under this according to the "dist" form of C<name> (e.g. "Foo-Bar".)
 
 =item xs
 
-Generates an XS based module.
+If true, generates an XS based module.
 
 =back
-
 
 =head2 Manipulating the Distribution
 
-=head3 regen( [OPTIONS] )
+These methods immediately affect the filesystem.
 
-Regenerate all files that are missing or that have changed. If the
-optional C<clean> argument is given, it also removes any extraneous
-files that do not belong to the distribution.
+=head3 regen()
 
-=over
+Regenerate all missing or changed files.
 
-=item clean
+  $dist->regen(clean => 1);
 
-When true, removes any files not part of the distribution while
-regenerating.
-
-=back
+If the optional C<clean> argument is given, it also removes any
+extraneous files that do not belong to the distribution.
 
 =head3 clean()
 
 Removes any files that are not part of the distribution.
 
-=head3 revert( [$filename] )
+  $dist->clean;
+
+=begin TODO
+
+=head3 revert()
 
 [Unimplemented] Returns the object to its initial state, or given a
 $filename it returns that file to it's initial state if it is one of
 the built-in files.
 
+  $dist->revert;
+  $dist->revert($filename);
+
+=end TODO
+
 =head3 remove()
 
-Removes the complete distribution.
-
+Removes the entire distribution directory.
 
 =head2 Editing Files
 
-Note that all ${filename}s should be specified with unix-style paths,
+Note that C<$filename> should always be specified with unix-style paths,
 and are relative to the distribution root directory. Eg 'lib/Module.pm'
 
-=head3 add_file( $filename, $content )
+No filesystem action is performed until the distribution is regenerated.
 
-Add a $filename containg $content to the distribution. No action is
-performed until the distribution is regenerated.
+=head3 add_file()
 
-=head3 remove_file( $filename )
+Add a $filename containing $content to the distribution.
 
-Removes $filename from the distribution. No action is performed until
-the distribution is regenerated.
+  $dist->add_file( $filename, $content );
 
-=head3 change_file( $filename, $content )
+=head3 remove_file()
+
+Removes C<$filename> from the distribution.
+
+  $dist->remove_file( $filename );
+
+=head3 change_file()
 
 Changes the contents of $filename to $content. No action is performed
 until the distribution is regenerated.
 
+  $dist->change_file( $filename, $content );
 
 =head2 Properties
 
@@ -469,6 +539,22 @@ Returns the name of the distribution.
 
 =head3 dirname()
 
-Returns the directory name where the distribution is created.
+Returns the directory where the distribution is created.
+
+  $dist->dirname; # e.g. t/_tmp/Simple
+
+=head2 Functions
+
+=head3 undent()
+
+Removes leading whitespace from a multi-line string according to the
+amount of whitespace on the first line.
+
+  my $string = undent("  foo(\n    bar => 'baz'\n  )");
+  $string eq "foo(
+    bar => 'baz'
+  )";
 
 =cut
+
+# vim:ts=2:sw=2:et:sta

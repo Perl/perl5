@@ -6,7 +6,7 @@ use MBTest tests => 18;
 
 use Cwd ();
 my $cwd = Cwd::cwd;
-my $tmp = File::Spec->catdir( $cwd, 't', '_tmp' );
+my $tmp = MBTest->tmpdir;
 
 use Module::Build;
 use Module::Build::ConfigData;
@@ -65,17 +65,13 @@ Simple Simon <simon@simple.sim>
 
 my $dist = DistGen->new( dir => $tmp );
 
-$dist->change_file( 'Build.PL', <<"---" );
-use Module::Build;
-my \$builder = Module::Build->new(
-    module_name         => '@{[$dist->name]}',
+$dist->change_build_pl
+({
+    module_name         => $dist->name,
     dist_version        => '3.14159265',
     license             => 'perl',
     create_readme       => 1,
-);
-
-\$builder->create_build_script();
----
+});
 $dist->regen;
 
 chdir( $dist->dirname ) or die "Can't chdir to '@{[$dist->dirname]}': $!";

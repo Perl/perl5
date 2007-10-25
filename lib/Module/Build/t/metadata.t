@@ -2,32 +2,33 @@
 
 use strict;
 use lib $ENV{PERL_CORE} ? '../lib/Module/Build/t/lib' : 't/lib';
-use MBTest tests => 47;
+use MBTest tests => 49;
 
 use Cwd ();
 my $cwd = Cwd::cwd;
-my $tmp = File::Spec->catdir( $cwd, 't', '_tmp' );
+my $tmp = MBTest->tmpdir;
 
 
 use Module::Build;
 use Module::Build::ConfigData;
-my $has_YAML = Module::Build::ConfigData->feature('YAML_support');
+
+my %metadata = 
+  (
+   module_name   => 'Simple',
+   dist_version  => '3.14159265',
+   dist_author   => [ 'Simple Simon <ss\@somewhere.priv>' ],
+   dist_abstract => 'Something interesting',
+   license       => 'perl',
+   meta_add => {
+		keywords  => [qw(super duper something)],
+		resources => {homepage => 'http://foo.example.com'},
+	       },
+  );
 
 
 use DistGen;
 my $dist = DistGen->new( dir => $tmp );
-$dist->change_file( 'Build.PL', <<"---" );
-
-my \$builder = Module::Build->new(
-    module_name   => '@{[$dist->name]}',
-    dist_version  => '3.14159265',
-    dist_author   => [ 'Simple Simon <ss\@somewhere.priv>' ],
-    dist_abstract => 'Something interesting',
-    license       => 'perl',
-);
-
-\$builder->create_build_script();
----
+$dist->change_build_pl( \%metadata );
 $dist->regen;
 
 my $simple_file = 'lib/Simple.pm';
@@ -53,28 +54,22 @@ my $mb = Module::Build->new_from_context;
 #
 # Test for valid META.yml
 
-SKIP: {
-  skip( 'YAML_support feature is not enabled', 8 ) unless $has_YAML;
-
-  require YAML;
-  require YAML::Node;
-  my $node = YAML::Node->new({});
-  $node = $mb->prepare_metadata( $node );
+{
+  my $node = $mb->prepare_metadata( {} );
 
   # exists() doesn't seem to work here
-  ok defined( $node->{name} ),     "'name' field present in META.yml";
-  ok defined( $node->{version} ),  "'version' field present in META.yml";
-  ok defined( $node->{abstract} ), "'abstract' field present in META.yml";
-  ok defined( $node->{author} ),   "'author' field present in META.yml";
-  ok defined( $node->{license} ),  "'license' field present in META.yml";
-  ok defined( $node->{generated_by} ),
-      "'generated_by' field present in META.yml";
+  is $node->{name}, $metadata{module_name};
+  is $node->{version}, $metadata{dist_version};
+  is $node->{abstract}, $metadata{dist_abstract};
+  is_deeply $node->{author}, $metadata{dist_author};
+  is $node->{license}, $metadata{license};
+  like $node->{generated_by}, qr{Module::Build};
   ok defined( $node->{'meta-spec'}{version} ),
       "'meta-spec' -> 'version' field present in META.yml";
   ok defined( $node->{'meta-spec'}{url} ),
       "'meta-spec' -> 'url' field present in META.yml";
-
-  # TODO : find a way to test for failure when above fields are not present
+  is_deeply $node->{keywords}, $metadata{meta_add}{keywords};
+  is_deeply $node->{resources}, $metadata{meta_add}{resources};
 }
 
 $dist->clean;

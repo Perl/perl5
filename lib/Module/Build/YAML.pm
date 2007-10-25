@@ -1,6 +1,9 @@
 package Module::Build::YAML;
 
 use strict;
+use vars qw($VERSION);
+$VERSION = '0.2808_01';
+$VERSION = eval $VERSION;
 
 use vars qw($VERSION @EXPORT @EXPORT_OK);
 $VERSION = "0.50";

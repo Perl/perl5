@@ -1,6 +1,9 @@
 package Module::Build::Platform::Windows;
 
 use strict;
+use vars qw($VERSION);
+$VERSION = '0.2808_01';
+$VERSION = eval $VERSION;
 
 use Config;
 use File::Basename;
@@ -18,6 +21,13 @@ sub manpage_separator {
 }
 
 sub have_forkpipe { 0 }
+
+sub _detildefy {
+  my ($self, $value) = @_;
+  $value =~ s,^~(?= [/\\] | $ ),$ENV{HOME},x
+    if $ENV{HOME};
+  return $value;
+}
 
 sub ACTION_realclean {
   my ($self) = @_;

@@ -1,17 +1,19 @@
 package Module::Build::Base;
 
 use strict;
+use vars qw($VERSION);
+$VERSION = '0.2808_01';
+$VERSION = eval $VERSION;
 BEGIN { require 5.00503 }
 
 use Carp;
-use Config;
 use File::Copy ();
 use File::Find ();
 use File::Path ();
 use File::Basename ();
 use File::Spec 0.82 ();
 use File::Compare ();
-use Data::Dumper ();
+use Module::Build::Dumper ();
 use IO::File ();
 use Text::ParseWords ();
 
@@ -30,12 +32,12 @@ sub new {
   die "Too early to specify a build action '$self->{action}'.  Do 'Build $self->{action}' instead.\n"
     if $self->{action} && $self->{action} ne 'Build_PL';
 
-  $self->dist_name;
-  $self->dist_version;
-
   $self->check_manifest;
   $self->check_prereq;
   $self->check_autofeatures;
+
+  $self->dist_name;
+  $self->dist_version;
 
   $self->_set_install_paths;
   $self->_find_nested_builds;
@@ -384,6 +386,17 @@ sub _perl_is_same {
   return $self->_backticks(@cmd) eq Config->myconfig;
 }
 
+# cache _discover_perl_interpreter() results
+{
+  my $known_perl;
+  sub find_perl_interpreter {
+    my $self = shift;
+
+    return $known_perl if defined($known_perl);
+    return $known_perl = $self->_discover_perl_interpreter;
+  }
+}
+
 # Returns the absolute path of the perl interperter used to invoke
 # this process. The path is derived from $^X or $Config{perlpath}. On
 # some platforms $^X contains the complete absolute path of the
@@ -393,8 +406,8 @@ sub _perl_is_same {
 # executable extension on platforms that use one. It's a fatal error
 # if the interpreter can't be found because it can result in undefined
 # behavior by routines that depend on it (generating errors or
-# invoking the wrong perl.
-sub find_perl_interpreter {
+# invoking the wrong perl.)
+sub _discover_perl_interpreter {
   my $proto = shift;
   my $c     = ref($proto) ? $proto->{config} : 'Module::Build::Config';
 
@@ -431,7 +444,7 @@ sub find_perl_interpreter {
 
   } else {
 
-    # Try 3.B, First look in $Config{perlpath}, then search the users
+    # Try 3.B, First look in $Config{perlpath}, then search the user's
     # PATH. We do not want to do either if we are running from an
     # uninstalled perl in a perl source tree.
 
@@ -447,7 +460,7 @@ sub find_perl_interpreter {
   my $exe = $c->get('exe_ext');
   foreach my $thisperl ( @potential_perls ) {
 
-    if (defined $exe and $proto->os_type ne 'VMS') {
+    if (defined $exe) {
       $thisperl .= $exe unless $thisperl =~ m/$exe$/i;
     }
 
@@ -576,7 +589,7 @@ sub features     {
 
   return wantarray ? %features : \%features;
 }
-BEGIN { *feature = \&features }
+BEGIN { *feature = \&features } # Alias
 
 sub _mb_feature {
   my $self = shift;
@@ -782,6 +795,7 @@ __PACKAGE__->add_property($_ => {}) for qw(
   meta_merge
   original_prefix
   prefix_relpaths
+  configure_requires
 );
 
 __PACKAGE__->add_property($_) for qw(
@@ -951,7 +965,7 @@ sub dist_version {
 
   die ("Can't determine distribution version, must supply either 'dist_version',\n".
        "'dist_version_from', or 'module_name' parameter")
-    unless $p->{dist_version};
+    unless defined $p->{dist_version};
 
   return $p->{dist_version};
 }
@@ -1026,8 +1040,12 @@ sub _write_data {
   
   my $file = $self->config_file($filename);
   my $fh = IO::File->new("> $file") or die "Can't create '$file': $!";
-  local $Data::Dumper::Terse = 1;
-  print $fh ref($data) ? Data::Dumper::Dumper($data) : $data;
+  unless (ref($data)) {  # e.g. magicnum
+    print $fh $data;
+    return;
+  }
+
+  print {$fh} Module::Build::Dumper->_data_dump($data);
 }
 
 sub write_config {
@@ -1186,6 +1204,7 @@ sub perl_version {
 
 sub perl_version_to_float {
   my ($self, $version) = @_;
+  return $version if grep( /\./, $version ) < 2;
   $version =~ s/\./../;
   $version =~ s/\.(\d+)/sprintf '%03d', $1/eg;
   return $version;
@@ -1219,7 +1238,7 @@ sub check_installed_status {
     }
     
     $status{have} = $pm_info->version();
-    if ($spec and !$status{have}) {
+    if ($spec and !defined($status{have})) {
       @status{ qw(have message) } = (undef, "Couldn't find a \$VERSION in prerequisite $modname");
       return \%status;
     }
@@ -1335,7 +1354,7 @@ sub print_build_script {
   my $case_tolerant = 0+(File::Spec->can('case_tolerant')
 			 && File::Spec->case_tolerant);
   $q{base_dir} = uc $q{base_dir} if $case_tolerant;
-  $q{base_dir} = Win32::GetShortPathName($q{base_dir}) if $^O eq 'MSWin32';
+  $q{base_dir} = Win32::GetShortPathName($q{base_dir}) if $self->is_windowsish;
 
   $q{magic_numfile} = $self->config_file('magicnum');
 
@@ -1677,14 +1696,8 @@ sub read_args {
   return \%args, $action;
 }
 
-
-# (bash shell won't expand tildes mid-word: "--foo=~/thing")
-# TODO: handle ~user/foo
-sub _detildefy {
-    my ($self, $arg) = @_;
-
-    return $arg =~ /^~/ ? (glob $arg)[0] : $arg;
-}
+# Default: do nothing.  Overridden for Unix & Windows.
+sub _detildefy {}
 
 
 # merge Module::Build argument lists that have already been parsed
@@ -1980,7 +1993,8 @@ sub prereq_report {
       my $vspace = q{ } x ($ver_len - length $mod->{need});
       my $f = $mod->{ok} ? ' ' : '!';
       $output .=
-        "  $f $mod->{name} $space     $mod->{need}  $vspace   $mod->{have}\n";
+        "  $f $mod->{name} $space     $mod->{need}  $vspace   ".
+        (defined($mod->{have}) ? $mod->{have} : "")."\n";
     }
   }
   return $output;
@@ -2259,7 +2273,7 @@ sub process_PL_files {
   
   while (my ($file, $to) = each %$files) {
     unless ($self->up_to_date( $file, $to )) {
-      $self->run_perl_script($file, [], [@$to]);
+      $self->run_perl_script($file, [], [@$to]) or die "$file failed";
       $self->add_to_cleanup(@$to);
     }
   }
@@ -2865,7 +2879,7 @@ sub ACTION_ppmdist {
 	File::Spec->abs2rel( File::Spec->rel2abs( $file ),
 			     File::Spec->rel2abs( $dir  ) );
       my $to_file  =
-	File::Spec->catfile( $ppm, 'blib',
+	File::Spec->catdir( $ppm, 'blib',
 			    exists( $types{$type} ) ? $types{$type} : $type,
 			    $rel_file );
       $self->copy_if_modified( from => $file, to => $to_file );
@@ -2879,10 +2893,8 @@ sub ACTION_ppmdist {
 
   # create a tarball;
   # the directory tar'ed must be blib so we need to do a chdir first
-  my $start_wd = $self->cwd;
-  chdir( $ppm ) or die "Can't chdir to $ppm";
-  $self->make_tarball( 'blib', File::Spec->catfile( $start_wd, $ppm ) );
-  chdir( $start_wd ) or die "Can't chdir to $start_wd";
+  my $target = File::Spec->catfile( File::Spec->updir, $ppm );
+  $self->_do_in_dir( $ppm, sub { $self->make_tarball( 'blib', $target ) } );
 
   $self->depends_on( 'ppd' );
 
@@ -2979,13 +2991,17 @@ sub _sign_dir {
     $self->_add_to_manifest($manifest, "SIGNATURE    Added here by Module::Build");
   }
   
-  # We protect the signing with an eval{} to make sure we get back to
-  # the right directory after a signature failure.  Would be nice if
-  # Module::Signature took a directory argument.
+  # Would be nice if Module::Signature took a directory argument.
   
+  $self->_do_in_dir($dir, sub {local $Module::Signature::Quiet = 1; Module::Signature::sign()});
+}
+
+sub _do_in_dir {
+  my ($self, $dir, $do) = @_;
+
   my $start_dir = $self->cwd;
   chdir $dir or die "Can't chdir() to $dir: $!";
-  eval {local $Module::Signature::Quiet = 1; Module::Signature::sign()};
+  eval {$do->()};
   my @err = $@ ? ($@) : ();
   chdir $start_dir or push @err, "Can't chdir() back to $start_dir: $!";
   die join "\n", @err if @err;
@@ -3124,18 +3140,18 @@ sub ACTION_disttest {
 
   $self->depends_on('distdir');
 
-  my $start_dir = $self->cwd;
-  my $dist_dir = $self->dist_dir;
-  chdir $dist_dir or die "Cannot chdir to $dist_dir: $!";
-  # XXX could be different names for scripts
+  $self->_do_in_dir
+    ( $self->dist_dir,
+      sub {
+	# XXX could be different names for scripts
 
-  $self->run_perl_script('Build.PL') # XXX Should this be run w/ --nouse-rcfile
-      or die "Error executing 'Build.PL' in dist directory: $!";
-  $self->run_perl_script('Build')
-      or die "Error executing 'Build' in dist directory: $!";
-  $self->run_perl_script('Build', [], ['test'])
-      or die "Error executing 'Build test' in dist directory";
-  chdir $start_dir;
+	$self->run_perl_script('Build.PL') # XXX Should this be run w/ --nouse-rcfile
+	  or die "Error executing 'Build.PL' in dist directory: $!";
+	$self->run_perl_script('Build')
+	  or die "Error executing 'Build' in dist directory: $!";
+	$self->run_perl_script('Build', [], ['test'])
+	  or die "Error executing 'Build test' in dist directory";
+      });
 }
 
 sub _write_default_maniskip {
@@ -3256,27 +3272,26 @@ sub script_files {
     return $_ = {$_ => 1};
   }
   
-  return $_ = { map {$_,1} $self->_files_in( File::Spec->catdir( $self->base_dir, 'bin' ) ) };
+  return $_ = { map {$_,1} $self->_files_in('bin') };
 }
 BEGIN { *scripts = \&script_files; }
 
 {
-  my %licenses =
-    (
-     perl => 'http://dev.perl.org/licenses/',
-     gpl => 'http://www.opensource.org/licenses/gpl-license.php',
-     apache => 'http://apache.org/licenses/LICENSE-2.0',
-     artistic => 'http://opensource.org/licenses/artistic-license.php',
-     lgpl => 'http://opensource.org/licenses/artistic-license.php',
-     bsd => 'http://www.opensource.org/licenses/bsd-license.php',
-     gpl => 'http://www.opensource.org/licenses/gpl-license.php',
-     mit => 'http://opensource.org/licenses/mit-license.php',
-     mozilla => 'http://opensource.org/licenses/mozilla1.1.php',
-     open_source => undef,
-     unrestricted => undef,
-     restrictive => undef,
-     unknown => undef,
-    );
+  my %licenses = (
+    perl         => 'http://dev.perl.org/licenses/',
+    apache       => 'http://apache.org/licenses/LICENSE-2.0',
+    artistic     => 'http://opensource.org/licenses/artistic-license.php',
+    artistic_2   => 'http://opensource.org/licenses/artistic-license-2.0.php',
+    lgpl         => 'http://opensource.org/licenses/lgpl-license.php',
+    bsd          => 'http://opensource.org/licenses/bsd-license.php',
+    gpl          => 'http://opensource.org/licenses/gpl-license.php',
+    mit          => 'http://opensource.org/licenses/mit-license.php',
+    mozilla      => 'http://opensource.org/licenses/mozilla1.1.php',
+    open_source  => undef,
+    unrestricted => undef,
+    restrictive  => undef,
+    unknown      => undef,
+  );
   sub valid_licenses {
     return \%licenses;
   }
@@ -3382,7 +3397,16 @@ sub prepare_metadata {
     $node->{resources}{license} = $url;
   }
 
-  foreach ( @{$self->prereq_action_types} ) {
+  if (exists $p->{configure_requires}) {
+    foreach my $spec (keys %{$p->{configure_requires}}) {
+      warn ("Warning: $spec is listed in 'configure_requires', but ".
+	    "it is not found in any of the other prereq fields.\n")
+	unless grep exists $p->{$_}{$spec}, 
+	       grep !/conflicts$/, @{$self->prereq_action_types};
+    }
+  }
+
+  foreach ( 'configure_requires', @{$self->prereq_action_types} ) {
     if (exists $p->{$_} and keys %{ $p->{$_} }) {
       $add_node->($_, $p->{$_});
     }

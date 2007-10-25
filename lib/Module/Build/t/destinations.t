@@ -6,7 +6,7 @@ use MBTest tests => 113;
 
 use Cwd ();
 my $cwd = Cwd::cwd;
-my $tmp = File::Spec->catdir( $cwd, 't', '_tmp' );
+my $tmp = MBTest->tmpdir;
 
 use DistGen;
 my $dist = DistGen->new( dir => $tmp );
@@ -16,7 +16,7 @@ chdir( $dist->dirname ) or die "Can't chdir to '@{[$dist->dirname]}': $!";
 
 
 use Config;
-use File::Spec::Functions qw( catdir splitdir splitpath );
+use File::Spec::Functions qw( catdir splitdir );
 
 #########################
 
@@ -300,12 +300,10 @@ sub have_same_ending {
   my ($dir1, $dir2, $message) = @_;
 
   $dir1 =~ s{/$}{} if $^O eq 'cygwin'; # remove any trailing slash
-  my (undef, $dirs1, undef) = splitpath $dir1;
-  my @dir1 = splitdir $dirs1;
+  my @dir1 = splitdir $dir1;
 
   $dir2 =~ s{/$}{} if $^O eq 'cygwin'; # remove any trailing slash
-  my (undef, $dirs2, undef) = splitpath $dir2;
-  my @dir2 = splitdir $dirs2;
+  my @dir2 = splitdir $dir2;
 
   is $dir1[-1], $dir2[-1], $message;
 }

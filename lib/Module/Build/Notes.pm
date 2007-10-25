@@ -3,8 +3,12 @@ package Module::Build::Notes;
 # A class for persistent hashes
 
 use strict;
+use vars qw($VERSION);
+$VERSION = '0.2808_01';
+$VERSION = eval $VERSION;
 use Data::Dumper;
 use IO::File;
+use Module::Build::Dumper;
 
 sub new {
   my ($class, %args) = @_;
@@ -104,8 +108,7 @@ sub _dump {
   my ($self, $file, $data) = @_;
   
   my $fh = IO::File->new("> $file") or die "Can't create '$file': $!";
-  local $Data::Dumper::Terse = 1;
-  print $fh Data::Dumper::Dumper($data);
+  print {$fh} Module::Build::Dumper->_data_dump($data);
 }
 
 sub write_config_data {
@@ -138,6 +141,9 @@ sub config_names  { keys %%$config }
 sub write {
   my $me = __FILE__;
   require IO::File;
+
+  # Can't use Module::Build::Dumper here because M::B is only a
+  # build-time prereq of this module
   require Data::Dumper;
 
   my $mode_orig = (stat $me)[2] & 07777;
@@ -149,9 +155,11 @@ sub write {
   }
   die "Couldn't find __DATA__ token in $me" if eof($fh);
 
-  local $Data::Dumper::Terse = 1;
   seek($fh, tell($fh), 0);
-  $fh->print( Data::Dumper::Dumper([$config, $features, $auto_features]) );
+  my $data = [$config, $features, $auto_features];
+  $fh->print( 'do{ my '
+	      . Data::Dumper->new([$data],['x'])->Purity(1)->Dump()
+	      . '$x; }' );
   truncate($fh, tell($fh));
   $fh->close;
 
@@ -281,8 +289,7 @@ __DATA__
 
 EOF
 
-  local $Data::Dumper::Terse = 1;
-  print $fh Data::Dumper::Dumper([$args{config_data}, $args{feature}, $args{auto_features}]);
+  print {$fh} Module::Build::Dumper->_data_dump([$args{config_data}, $args{feature}, $args{auto_features}]);
 }
 
 1;

@@ -4,11 +4,11 @@
 
 use strict;
 use lib $ENV{PERL_CORE} ? '../lib/Module/Build/t/lib' : 't/lib';
-use MBTest tests => 14;
+use MBTest tests => 15;
 
 use Cwd ();
 my $cwd = Cwd::cwd;
-my $tmp = File::Spec->catdir( $cwd, 't', '_tmp' );
+my $tmp = MBTest->tmpdir;
 
 use DistGen;
 my $dist = DistGen->new( dir => $tmp );
@@ -35,56 +35,58 @@ sub run_sample {
 }
 
 
-{
-    local $ENV{HOME} = 'home';
+my $p = 'install_base';
 
-    my $mb;
+SKIP: {
+    my $home = $ENV{HOME} ? $ENV{HOME} : undef;
+    unless (defined $home) {
+      my @info = eval { getpwuid $> };
+      skip "No home directory for tilde-expansion tests", 14 if $@;
+      $home = $info[7];
+    }
 
-    $mb = run_sample( install_base => '~' );
-    is( $mb->install_base,      $ENV{HOME} );
+    is( run_sample( $p => '~'     )->$p(),  $home );
 
-    $mb = run_sample( install_base => '~/foo' );
-    is( $mb->install_base,      "$ENV{HOME}/foo" );
+    is( run_sample( $p => '~/foo' )->$p(),  "$home/foo" );
 
-    $mb = run_sample( install_base => '~~' );
-    is( $mb->install_base,      '~~' );
+    is( run_sample( $p => '~~'    )->$p(),  '~~' );
 
-  TODO: {
-    local $TODO = "Not handling spaces in _detildefy() properly yet";
+    is( run_sample( $p => '~ foo' )->$p(),  '~ foo' );
 
-    $mb = run_sample( install_base => '~ foo' );
-    is( $mb->install_base,      '~ foo' );
+    is( run_sample( $p => '~/ foo')->$p(),  "$home/ foo" );
+      
+    is( run_sample( $p => '~/fo o')->$p(),  "$home/fo o" );
 
-    # glob() doesn't work on non-existent paths with spaces
-    $mb = run_sample( install_base => '~/ foo' );
-    is( $mb->install_base,      "$ENV{HOME}/ foo" );
+    is( run_sample( $p => 'foo~'  )->$p(),  'foo~' );
 
-    $mb = run_sample( install_base => '~/fo o' );
-    is( $mb->install_base,      "$ENV{HOME}/fo o" );
-  }
+    is( run_sample( prefix => '~' )->prefix,
+	$home );
 
-    $mb = run_sample( install_base => 'foo~' );
-    is( $mb->install_base,      'foo~' );
-
-    $mb = run_sample( prefix => '~' );
-    is( $mb->prefix,            $ENV{HOME} );
-
-    $mb = run_sample( install_path => { html => '~/html',
-					lib  => '~/lib'   }
-                    );
-    is( $mb->install_destination('lib'),  "$ENV{HOME}/lib" );
+    my $mb = run_sample( install_path => { html => '~/html',
+					   lib  => '~/lib'   }
+		       );
+    is( $mb->install_destination('lib'),  "$home/lib" );
     # 'html' is translated to 'binhtml' & 'libhtml'
-    is( $mb->install_destination('binhtml'), "$ENV{HOME}/html" );
-    is( $mb->install_destination('libhtml'), "$ENV{HOME}/html" );
+    is( $mb->install_destination('binhtml'), "$home/html" );
+    is( $mb->install_destination('libhtml'), "$home/html" );
 
     $mb = run_sample( install_path => { lib => '~/lib' } );
-    is( $mb->install_destination('lib'),  "$ENV{HOME}/lib" );
+    is( $mb->install_destination('lib'),  "$home/lib" );
 
     $mb = run_sample( destdir => '~' );
-    is( $mb->destdir,           $ENV{HOME} );
+    is( $mb->destdir,           $home );
 
-    $mb->install_base('~');
-    is( $mb->install_base,      '~', 'API does not expand tildes' );
+    $mb->$p('~');
+    is( $mb->$p(),      '~', 'API does not expand tildes' );
+}
+
+# Again, with named users
+SKIP: {
+    my @info = eval { getpwuid $> };
+    skip "No home directory for tilde-expansion tests", 1 if $@;
+    my ($me, $home) = @info[0,7];
+    
+    is( run_sample( $p => "~$me/foo")->$p(),  "$home/foo" );
 }
 
 

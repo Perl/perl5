@@ -1,6 +1,9 @@
 package Module::Build::Platform::VMS;
 
 use strict;
+use vars qw($VERSION);
+$VERSION = '0.2808_01';
+$VERSION = eval $VERSION;
 use Module::Build::Base;
 
 use vars qw(@ISA);
@@ -345,9 +348,10 @@ sub _detildefy {
 
 =item find_perl_interpreter
 
-On VMS, $^X returns the fully qualified absolute path including version number. 
-It's logically impossible to improve on it for getting the perl we're currently
-running, and attempting to manipulate it is usually lossy.
+On VMS, $^X returns the fully qualified absolute path including version
+number.  It's logically impossible to improve on it for getting the perl
+we're currently running, and attempting to manipulate it is usually
+lossy.
 
 =cut
 

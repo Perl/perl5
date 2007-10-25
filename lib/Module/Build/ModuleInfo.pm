@@ -5,6 +5,9 @@ package Module::Build::ModuleInfo;
 # parrot future to look at other types of modules).
 
 use strict;
+use vars qw($VERSION);
+$VERSION = '0.2808_01';
+$VERSION = eval $VERSION;
 
 use File::Spec;
 use IO::File;

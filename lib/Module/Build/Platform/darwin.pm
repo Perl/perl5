@@ -1,6 +1,9 @@
 package Module::Build::Platform::darwin;
 
 use strict;
+use vars qw($VERSION);
+$VERSION = '0.2808_01';
+$VERSION = eval $VERSION;
 use Module::Build::Platform::Unix;
 
 use vars qw(@ISA);

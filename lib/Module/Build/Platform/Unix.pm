@@ -1,6 +1,9 @@
 package Module::Build::Platform::Unix;
 
 use strict;
+use vars qw($VERSION);
+$VERSION = '0.2808_01';
+$VERSION = eval $VERSION;
 use Module::Build::Base;
 
 use vars qw(@ISA);
@@ -37,6 +40,16 @@ sub _construct {
   }
 
   return $self;
+}
+
+sub _detildefy {
+  my ($self, $value) = @_;
+  $value =~ s[^~(\w*)(?=/|$)]   # tilde with optional username
+    [$1 ?
+     ((getpwnam $1)[7] || "~$1") :
+     (getpwuid $>)[7]
+    ]ex;
+  return $value;
 }
 
 1;

@@ -6,7 +6,7 @@ use MBTest tests => 34;
 
 use Cwd ();
 my $cwd = Cwd::cwd;
-my $tmp = File::Spec->catdir( $cwd, 't', '_tmp' );
+my $tmp = MBTest->tmpdir;
 
 use DistGen;
 my $dist = DistGen->new( dir => $tmp );
@@ -24,17 +24,13 @@ $dist->add_file( 'script', <<'---' );
 #!perl -w
 print "Hello, World!\n";
 ---
-$dist->change_file( 'Build.PL', <<"---" );
-use Module::Build;
-
-my \$build = new Module::Build(
-  module_name => @{[$dist->name]},
+$dist->change_build_pl
+({
+  module_name => $dist->name,
   scripts     => [ 'script' ],
   license     => 'perl',
   requires    => { 'File::Spec' => 0 },
-);
-\$build->create_build_script;
----
+});
 $dist->regen;
 
 
@@ -60,7 +56,7 @@ my $mb = Module::Build->new_from_context(
 ok $mb;
 
 
-my $destdir = File::Spec->catdir($cwd, 't', 'install_test');
+my $destdir = File::Spec->catdir($cwd, 't', 'install_test.' . $$);
 $mb->add_to_cleanup($destdir);
 
 {

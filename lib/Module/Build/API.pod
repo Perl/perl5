@@ -23,7 +23,7 @@ stabilizes.
 
 This method returns a reasonable facsimile of the currently-executing
 C<Module::Build> object representing the current build.  You can use
-this object to query its C<notes()> method, inquire about installed
+this object to query its L</notes()> method, inquire about installed
 modules, and so on.  This is a great way to share information between
 different parts of your build process.  For instance, you can ask
 the user a question during C<perl Build.PL>, then use their answer
@@ -55,8 +55,8 @@ C<Module::Build> was invoked from.
 
 Creates a new Module::Build object.  Arguments to the new() method are
 listed below.  Most arguments are optional, but you must provide
-either the C<module_name> argument, or C<dist_name> and one of
-C<dist_version> or C<dist_version_from>.  In other words, you must
+either the L</module_name> argument, or L</dist_name> and one of
+L</dist_version> or L</dist_version_from>.  In other words, you must
 provide enough information to determine both a distribution name and
 version.
 
@@ -68,14 +68,15 @@ version.
 [version 0.19]
 
 An array reference of files to be cleaned up when the C<clean> action
-is performed.  See also the add_to_cleanup() method.
+is performed. See also the L<add_to_cleanup()|/"add_to_cleanup(@files)">
+method.
 
 =item auto_features
 
 [version 0.26]
 
 This parameter supports the setting of features (see
-L<feature($name)>) automatically based on a set of prerequisites.  For
+L</feature($name)>) automatically based on a set of prerequisites.  For
 instance, for a module that could optionally use either MySQL or
 PostgreSQL databases, you might use C<auto_features> like this:
 
@@ -101,7 +102,7 @@ if there are no failures, the feature will be enabled (set to C<1>).
 Otherwise the failures will be displayed to the user and the feature
 will be disabled (set to C<0>).
 
-See the documentation for L<requires> for the details of how
+See the documentation for L</requires> for the details of how
 requirements can be specified.
 
 =item autosplit
@@ -109,9 +110,9 @@ requirements can be specified.
 [version 0.04]
 
 An optional C<autosplit> argument specifies a file which should be run
-through the C<Autosplit::autosplit()> function.  If multiple files
-should be split, the argument may be given as an array of the files to
-split.
+through the L<AutoSplit::autosplit()|AutoSplit/autosplit> function.
+If multiple files should be split, the argument may be given as an
+array of the files to split.
 
 In general I don't consider autosplitting a great idea, because it's
 not always clear that autosplitting achieves its intended performance
@@ -123,13 +124,13 @@ startup.
 
 [version 0.28]
 
-The Module::Build class or subclass to use in the build
-script.  Defaults to "Module::Build" or the class name passed to or
-created by a call to C<subclass()>.  This property is useful if you're
+The Module::Build class or subclass to use in the build script.
+Defaults to "Module::Build" or the class name passed to or created by
+a call to L</subclass()>.  This property is useful if you're
 writing a custom Module::Build subclass and have a bootstrapping
 problem--that is, your subclass requires modules that may not be
 installed when C<perl Build.PL> is executed, but you've listed in
-C<build_requires> so that they should be available when C<./Build> is
+L</build_requires> so that they should be available when C<./Build> is
 executed.
 
 =item build_requires
@@ -188,7 +189,7 @@ for the details of how requirements can be specified.
 This parameter lets you use Module::Build::Compat during the
 C<distdir> (or C<dist>) action to automatically create a Makefile.PL
 for compatibility with ExtUtils::MakeMaker.  The parameter's value
-should be one of the styles named in the Module::Build::Compat
+should be one of the styles named in the L<Module::Build::Compat>
 documentation.
 
 =item create_readme
@@ -243,8 +244,8 @@ to a module name, so C<dist_name> can be set independently.
 
 [version 0.11]
 
-Specifies a version number for the distribution.  See C<module_name>
-or C<dist_version_from> for ways to have this set automatically from a
+Specifies a version number for the distribution.  See L</module_name>
+or L</dist_version_from> for ways to have this set automatically from a
 C<$VERSION> variable in a module.  One way or another, a version
 number needs to be set.
 
@@ -253,11 +254,11 @@ number needs to be set.
 [version 0.11]
 
 Specifies a file to look for the distribution version in.  Most
-authors won't need to set this directly, they can use C<module_name>
+authors won't need to set this directly, they can use L</module_name>
 to set it to a reasonable default.
 
 The version is extracted from the specified file according to the same
-rules as C<ExtUtils::MakeMaker> and C<CPAN.pm>.  It involves finding
+rules as L<ExtUtils::MakeMaker> and C<CPAN.pm>.  It involves finding
 the first line that matches the regular expression
 
    /([\$*])(([\w\:\']*)\bVERSION)\b.*\=/
@@ -280,9 +281,9 @@ omitted, the F<META.yml> spec says that installation tools should
 treat it as 1 (true), because this is a safer way to behave.
 
 Currently C<Module::Build> doesn't actually do anything with this flag
-- it's up to higher-level tools like C<CPAN.pm> to do
-something useful with it.  It can potentially bring lots of security,
-packaging, and convenience improvements.
+- it's up to higher-level tools like C<CPAN.pm> to do something useful
+with it.  It can potentially bring lots of security, packaging, and
+convenience improvements.
 
 =item extra_compiler_flags
 
@@ -317,7 +318,7 @@ To link your XS code against glib you might write something like:
 
 You can pass arbitrary command line options to F<Build.PL> or
 F<Build>, and they will be stored in the Module::Build object and can
-be accessed via the C<args()> method.  However, sometimes you want
+be accessed via the L</args()> method.  However, sometimes you want
 more flexibility out of your argument processing than this allows.  In
 such cases, use the C<get_options> parameter to pass in a hash
 reference of argument specifications, and the list of arguments to
@@ -428,50 +429,55 @@ Specifies the licensing terms of your distribution.  Valid options include:
 =item apache
 
 The distribution is licensed under the Apache Software License
-(http://opensource.org/licenses/apachepl.php).
+(L<http://opensource.org/licenses/apachepl.php>).
 
 =item artistic
 
 The distribution is licensed under the Artistic License, as specified
-by the F<Artistic> file in the standard perl distribution.
+by the F<Artistic> file in the standard Perl distribution.
+
+=item artistic_2
+
+The distribution is licensed under the Artistic 2.0 License
+(L<http://opensource.org/licenses/artistic-license-2.0.php>.)
 
 =item bsd
 
 The distribution is licensed under the BSD License
-(http://www.opensource.org/licenses/bsd-license.php).
+(L<http://www.opensource.org/licenses/bsd-license.php>).
 
 =item gpl
 
-The distribution is licensed under the terms of the Gnu General
-Public License (http://www.opensource.org/licenses/gpl-license.php).
+The distribution is licensed under the terms of the GNU General
+Public License (L<http://www.opensource.org/licenses/gpl-license.php>).
 
 =item lgpl
 
-The distribution is licensed under the terms of the Gnu Lesser
+The distribution is licensed under the terms of the GNU Lesser
 General Public License
-(http://www.opensource.org/licenses/lgpl-license.php).
+(L<http://www.opensource.org/licenses/lgpl-license.php>).
 
 =item mit
 
 The distribution is licensed under the MIT License
-(http://opensource.org/licenses/mit-license.php).
+(L<http://opensource.org/licenses/mit-license.php>).
 
 =item mozilla
 
 The distribution is licensed under the Mozilla Public
-License.  (http://opensource.org/licenses/mozilla1.0.php or
-http://opensource.org/licenses/mozilla1.1.php)
+License.  (L<http://opensource.org/licenses/mozilla1.0.php> or
+L<http://opensource.org/licenses/mozilla1.1.php>)
 
 =item open_source
 
 The distribution is licensed under some other Open Source
 Initiative-approved license listed at
-http://www.opensource.org/licenses/ .
+L<http://www.opensource.org/licenses/>.
 
 =item perl
 
 The distribution may be copied and redistributed under the same terms
-as perl itself (this is by far the most common licensing option for
+as Perl itself (this is by far the most common licensing option for
 modules on CPAN).  This is a dual license, in which the user may
 choose between either the GPL or the Artistic license.
 
@@ -515,6 +521,8 @@ A hash of key/value pairs that should be added to the F<META.yml> file
 during the C<distmeta> action.  Any existing entries with the same
 names will be overridden.
 
+See the L</"MODULE METADATA"> section for details.
+
 =item meta_merge
 
 [version 0.28]
@@ -528,6 +536,8 @@ behavior on hash-valued and array-valued entries: C<meta_add> will
 completely blow away the existing hash or array value, but
 C<meta_merge> will merge the supplied data into the existing hash or
 array value.
+
+See the L</"MODULE METADATA"> section for details.
 
 =item module_name
 
@@ -618,7 +628,7 @@ files in your distribution.
 
 [version 0.08]
 
-This is just like the C<requires> argument, except that modules listed
+This is just like the L</requires> argument, except that modules listed
 in this section aren't essential, just a good idea.  We'll just print
 a friendly warning if one of these modules aren't found, but we'll
 continue running.
@@ -651,7 +661,7 @@ that the current module depends on.
 
 One note: currently C<Module::Build> doesn't actually I<require> the
 user to have dependencies installed, it just strongly urges.  In the
-future we may require it.  There's also a C<recommends> section for
+future we may require it.  There's also a L</recommends> section for
 things that aren't absolutely required.
 
 Automated tools like CPAN.pm should refuse to install a module if one
@@ -672,7 +682,7 @@ for the details of how requirements can be specified.
 [version 0.18]
 
 An optional parameter specifying a set of files that should be
-installed as executable perl scripts when the module is installed.
+installed as executable Perl scripts when the module is installed.
 May be given as an array reference of the files, or as a hash
 reference whose keys are the files (and whose values will currently be
 ignored).
@@ -689,7 +699,7 @@ though it will continue to exist for several version releases.
 
 [version 0.16]
 
-If a true value is specified for this parameter, C<Module::Signature>
+If a true value is specified for this parameter, L<Module::Signature>
 will be used (via the 'distsign' action) to create a SIGNATURE file
 for your distribution during the 'distdir' action, and to add the
 SIGNATURE file to the MANIFEST (therefore, don't add it yourself).
@@ -824,7 +834,7 @@ first argument.
 
 [version 0.28]
 
-Invokes the C<AutoSplit> module on the C<$from> file, sending the
+Invokes the L<AutoSplit> module on the C<$from> file, sending the
 output to the C<lib/auto> directory inside C<$to>.  C<$to> is
 typically the C<blib/> directory.
 
@@ -852,7 +862,7 @@ prerequisites that were passed to the C<new()> method.
 This method returns a hash reference indicating whether a version
 dependency on a certain module is satisfied.  The C<$module> argument
 is given as a string like C<"Data::Dumper"> or C<"perl">, and the
-C<$version> argument can take any of the forms described in L<requires>
+C<$version> argument can take any of the forms described in L</requires>
 above.  This allows very fine-grained version checking.
 
 The returned hash reference has the following structure:
@@ -873,16 +883,16 @@ for the case when C<$module> isn't installed at all.
 
 This method may be called either as an object method
 (C<< $build->check_installed_status($module, $version) >>)
-or as a class method 
+or as a class method
 (C<< Module::Build->check_installed_status($module, $version) >>).
 
 =item check_installed_version($module, $version)
 
 [version 0.05]
 
-Like C<check_installed_status()>, but simply returns true or false
-depending on whether module C<$module> satisfies the dependency
-C<$version>.
+Like L<check_installed_status()|/"check_installed_status($module, $version)">,
+but simply returns true or false depending on whether module
+C<$module> satisfies the dependency C<$version>.
 
 If the check succeeds, the return value is the actual version of
 C<$module> installed on the system.  This allows you to do the
@@ -931,7 +941,7 @@ out to C<version.pm>.
 
 With a single argument C<$key>, returns the value associated with that
 key in the C<Config.pm> hash, including any changes the author or user
-has specified.  
+has specified.
 
 With C<$key> and C<$value> arguments, sets the value for future
 callers of C<config($key)>.
@@ -948,7 +958,7 @@ resource hog and violates encapsulation.
 
 With a single argument, returns the value of the configuration
 variable C<$name>.  With two arguments, sets the given configuration
-variable to the given value.  The value may be any perl scalar that's
+variable to the given value.  The value may be any Perl scalar that's
 serializable with C<Data::Dumper>.  For instance, if you write a
 module that can use a MySQL or PostgreSQL back-end, you might create
 configuration variables called C<mysql_connect> and
@@ -960,7 +970,7 @@ will be available for querying during the build/test process and after
 installation via the generated C<...::ConfigData> module, as
 C<< ...::ConfigData->config($name) >>.
 
-The C<feature()> and C<config_data()> methods represent
+The L<feature()|/"feature($name)"> and C<config_data()> methods represent
 Module::Build's main support for configuration of installed modules.
 See also L<Module::Build::Authoring/"SAVING CONFIGURATION INFORMATION">.
 
@@ -1016,13 +1026,13 @@ when the C<realclean> action is performed.
 Among the files created in C<_build/> is a F<_build/prereqs> file
 containing the set of prerequisites for this distribution, as a hash
 of hashes.  This file may be C<eval()>-ed to obtain the authoritative
-set of prereqs, which might be different from the contents of META.yml
-(because F<Build.PL> might have set them dynamically).  But fancy
-developers take heed: do not put any fancy custom runtime code in the
-F<_build/prereqs> file, leave it as a static declaration containing
-only strings and numbers.  Similarly, do not alter the structure of
-the internal C<< $self->{properties}{requires} >> (etc.) data members,
-because that's where this data comes from.
+set of prereqs, which might be different from the contents of
+F<META.yml> (because F<Build.PL> might have set them dynamically).
+But fancy developers take heed: do not put any fancy custom runtime
+code in the F<_build/prereqs> file, leave it as a static declaration
+containing only strings and numbers.  Similarly, do not alter the
+structure of the internal C<< $self->{properties}{requires} >> (etc.)
+data members, because that's where this data comes from.
 
 =item current_action()
 
@@ -1037,7 +1047,7 @@ return "code" while that dependency is being executed.  Once that
 action has completed, current_action() will again return "test".
 
 If you need to know the name of the original action invoked by the
-user, see L<invoked_action()> below.
+user, see L</invoked_action()> below.
 
 =item depends_on(@actions)
 
@@ -1056,9 +1066,10 @@ C<invoke_actions_unless_already_invoked()> or something, but for
 better or worse (perhaps better!) we were still thinking in
 C<make>-like dependency terms when we created this method.
 
-See also C<dispatch()>.  The main distinction between the two is that
-C<depends_on()> is meant to call an action from inside another action,
-whereas C<dispatch()> is meant to set the very top action in motion.
+See also L<dispatch()|/"dispatch($action, %args)">.  The main
+distinction between the two is that C<depends_on()> is meant to call
+an action from inside another action, whereas C<dispatch()> is meant
+to set the very top action in motion.
 
 =item dir_contains($first_dir, $second_dir)
 
@@ -1086,9 +1097,10 @@ This method is intended to be used to programmatically invoke build
 actions, e.g. by applications controlling Module::Build-based builds
 rather than by subclasses.
 
-See also C<depends_on()>.  The main distinction between the two is that
-C<depends_on()> is meant to call an action from inside another action,
-whereas C<dispatch()> is meant to set the very top action in motion.
+See also L<depends_on()|/"depends_on(@actions)">.  The main
+distinction between the two is that C<depends_on()> is meant to call
+an action from inside another action, whereas C<dispatch()> is meant
+to set the very top action in motion.
 
 =item dist_dir()
 
@@ -1147,7 +1159,7 @@ installed and configured.
 
 Features set in this way using the Module::Build object will be
 available for querying during the build/test process and after
-installation via the generated C<...::ConfigData> module, as 
+installation via the generated C<...::ConfigData> module, as
 C<< ...::ConfigData->feature($name) >>.
 
 The C<feature()> and C<config_data()> methods represent
@@ -1193,7 +1205,7 @@ Assigning the value C<undef> to an element causes it to be removed.
 [version 0.28]
 
 Returns the directory in which items of type C<$type> (e.g. C<lib>,
-C<arch>, C<bin>, or anything else returned by the C<install_types()>
+C<arch>, C<bin>, or anything else returned by the L</install_types()>
 method) will be installed during the C<install> action.  Any settings
 for C<install_path>, C<install_base>, and C<prefix> are taken into
 account when determining the return value.
@@ -1242,11 +1254,12 @@ exist.
 
 This is the name of the original action invoked by the user.  This
 value is set when the user invokes F<Build.PL>, the F<Build> script,
-or programatically through the L<dispatch()> method.  It does not
-change as sub-actions are executed as dependencies are evaluated.
+or programatically through the L<dispatch()|/"dispatch($action, %args)">
+method.  It does not change as sub-actions are executed as
+dependencies are evaluated.
 
 To get the name of the currently executing dependency, see
-L<current_action()> above.
+L</current_action()> above.
 
 =item notes()
 
@@ -1474,7 +1487,7 @@ Examples:
 
  # All the *.pm files in lib/
  $m->rscan_dir('lib', qr/\.pm$/)
- 
+
  # All the files in blib/ that aren't *.html files
  $m->rscan_dir('blib', sub {-f $_ and not /\.html$/});
 
@@ -1589,6 +1602,8 @@ accessor methods for the following properties:
 
 =item config_dir()
 
+=item configure_requires()
+
 =item conflicts()
 
 =item create_makefile_pl()
@@ -1662,6 +1677,35 @@ accessor methods for the following properties:
 =item verbose()
 
 =item xs_files()
+
+=back
+
+
+=head1 MODULE METADATA
+
+If you would like to add other useful metadata, C<Module::Build>
+supports this with the C<meta_add> and C<meta_merge> arguments to
+L</new>. The authoritative list of supported metadata can be found at
+L<http://module-build.sourceforge.net/META-spec-current.html>, but for
+convenience - here are a few of the more useful ones:
+
+=over 4
+
+=item keywords
+
+For describing the distribution using keyword (or "tags") in order to
+make CPAN.org indexing and search more efficient and useful.
+
+See L<http://module-build.sourceforge.net/META-spec-current.html#keywords>.
+
+=item resources
+
+A list of additional resources available for users of the
+distribution. This can include links to a homepage on the web, a
+bugtracker, the repository location, a even subscription page for the
+distribution mailing list.
+
+See L<http://module-build.sourceforge.net/META-spec-current.html#resources>.
 
 =back
 
