@@ -4407,7 +4407,7 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
 /* This causes some problems, as it changes the error status */
 /*        my_pclose(info->fp); */
     } else { 
-        *psts = SS$_NORMAL;
+        *psts = info->pid;
     }
     return info->fp;
 }  /* end of safe_popen */
@@ -9645,8 +9645,8 @@ Perl_seekdir(pTHX_ DIR *dd, long count)
  *
  * Note on command arguments to perl 'exec' and 'system': When handled
  * in 'VMSish fashion' (i.e. not after a call to vfork) The args
- * are concatenated to form a DCL command string.  If the first arg
- * begins with '$' (i.e. the perl script had "\$ Type" or some such),
+ * are concatenated to form a DCL command string.  If the first non-numeric
+ * arg begins with '$' (i.e. the perl script had "\$ Type" or some such),
  * the command string is handed off to DCL directly.  Otherwise,
  * the first token of the command is taken as the filespec of an image
  * to run.  The filespec is expanded using a default type of '.EXE' and
@@ -10111,6 +10111,7 @@ Perl_vms_do_exec(pTHX_ const char *cmd)
 /*}}}*/
 
 unsigned long int Perl_do_spawn(pTHX_ const char *);
+unsigned long int do_spawn2(pTHX_ const char *, int);
 
 /* {{{ unsigned long int do_aspawn(void *really,void **mark,void **sp) */
 unsigned long int
@@ -10118,10 +10119,27 @@ Perl_do_aspawn(pTHX_ void *really,void **mark,void **sp)
 {
 unsigned long int sts;
 char * cmd;
+int flags = 0;
 
   if (sp > mark) {
+
+    /* We'll copy the (undocumented?) Win32 behavior and allow a 
+     * numeric first argument.  But the only value we'll support
+     * through do_aspawn is a value of 1, which means spawn without
+     * waiting for completion -- other values are ignored.
+     */
+    if (SvNIOKp(*((SV**)mark+1)) && !SvPOKp(*((SV**)mark+1))) {
+	++mark;
+	flags = SvIVx(*(SV**)mark);
+    }
+
+    if (flags && flags == 1)     /* the Win32 P_NOWAIT value */
+        flags = CLI$M_NOWAIT;
+    else
+        flags = 0;
+
     cmd = setup_argstr(aTHX_ (SV *)really,(SV **)mark,(SV **)sp);
-    sts = do_spawn(cmd);
+    sts = do_spawn2(aTHX_ cmd, flags);
     /* pp_sys will clean up cmd */
     return sts;
   }
@@ -10129,9 +10147,18 @@ char * cmd;
 }  /* end of do_aspawn() */
 /*}}}*/
 
+
 /* {{{unsigned long int do_spawn(char *cmd) */
 unsigned long int
 Perl_do_spawn(pTHX_ const char *cmd)
+{
+    return do_spawn2(aTHX_ cmd, 0);
+}
+/*}}}*/
+
+/* {{{unsigned long int do_spawn2(char *cmd) */
+unsigned long int
+do_spawn2(pTHX_ const char *cmd, int flags)
 {
   unsigned long int sts, substs;
 
@@ -10141,7 +10168,7 @@ Perl_do_spawn(pTHX_ const char *cmd)
   TAINT_ENV();
   TAINT_PROPER("spawn");
   if (!cmd || !*cmd) {
-    sts = lib$spawn(0,0,0,0,0,0,&substs,0,0,0,0,0,0);
+    sts = lib$spawn(0,0,0,&flags,0,0,&substs,0,0,0,0,0,0);
     if (!(sts & 1)) {
       switch (sts) {
         case RMS$_FNF:  case RMS$_DNF:
@@ -10170,13 +10197,20 @@ Perl_do_spawn(pTHX_ const char *cmd)
     sts = substs;
   }
   else {
+    char mode[3];
     PerlIO * fp;
-    fp = safe_popen(aTHX_ cmd, "nW", (int *)&sts);
+    if (flags & CLI$M_NOWAIT)
+        strcpy(mode, "n");
+    else
+        strcpy(mode, "nW");
+    
+    fp = safe_popen(aTHX_ cmd, mode, (int *)&sts);
     if (fp != NULL)
       my_pclose(fp);
+    /* sts will be the pid in the nowait case */
   }
   return sts;
-}  /* end of do_spawn() */
+}  /* end of do_spawn2() */
 /*}}}*/
 
 
