@@ -125,6 +125,10 @@ sub can_use_ipc_open3   {
     my $self    = shift;
     my $verbose = shift || 0;
 
+    ### ipc::open3 is not working on VMS becasue of a lack of fork.
+    ### todo, win32 also does not have fork, so need to do more research.
+    return 0 if IS_VMS;
+
     ### ipc::open3 works on every platform, but it can't capture buffers
     ### on win32 :(
     return unless can_load(
