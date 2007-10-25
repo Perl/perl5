@@ -13,7 +13,7 @@ BEGIN {
                         $USE_IPC_RUN $USE_IPC_OPEN3 $WARN
                     ];
 
-    $VERSION        = '0.40';
+    $VERSION        = '0.40_1';
     $VERBOSE        = 0;
     $DEBUG          = 0;
     $WARN           = 1;
