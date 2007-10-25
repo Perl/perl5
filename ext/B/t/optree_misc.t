@@ -100,7 +100,7 @@ if ($] < 5.009) {
 } 
 
 checkOptree ( name      => 'index and PVBM',
-	      prog	=> '$_ = index "foo", "foo"',
+	      prog	=> '$_ = index q(foo), q(foo)',
 	      strip_open_hints => 1,
 	      expect	=> $t,  expect_nt => $nt);
 
