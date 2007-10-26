@@ -1,13 +1,14 @@
-/* vms.c
+/*    vms.c
  *
- * VMS-specific routines for perl5
- * Version: 5.7.0
+ *    VMS-specific routines for perl5
  *
- * August 2005 Convert VMS status code to UNIX status codes
- * August 2000 tweaks to vms_image_init, my_flush, my_fwrite, cando_by_name, 
- *             and Perl_cando by Craig Berry
- * 29-Aug-2000 Charles Lane's piping improvements rolled in
- * 20-Aug-1999 revisions by Charles Bailey  bailey@newman.upenn.edu
+ *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+ *    2002, 2003, 2004, 2005, 2006, 2007 by Charles Bailey and others.
+ *
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
+ *
+ *    Please see Changes*.* or the Perl Repository Browser for revision history.
  */
 
 #include <acedef.h>
