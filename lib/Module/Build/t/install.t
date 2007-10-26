@@ -56,7 +56,7 @@ my $mb = Module::Build->new_from_context(
 ok $mb;
 
 
-my $destdir = File::Spec->catdir($cwd, 't', 'install_test.' . $$);
+my $destdir = File::Spec->catdir($cwd, 't', 'install_test' . $$);
 $mb->add_to_cleanup($destdir);
 
 {

@@ -62,7 +62,7 @@ __PACKAGE__->export(scalar caller, @extra_exports);
 
 { # Setup a temp directory if it doesn't exist
   my $cwd = Cwd::cwd;
-  my $tmp = File::Spec->catdir( $cwd, 't', '_tmp.' . $$);
+  my $tmp = File::Spec->catdir( $cwd, 't', '_tmp' . $$);
   mkdir $tmp, 0777 unless -d $tmp;
 
   sub tmpdir { $tmp }

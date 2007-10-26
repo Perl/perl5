@@ -58,7 +58,7 @@ $dist->regen;
 chdir( $dist->dirname ) or die "Can't chdir to '@{[$dist->dirname]}': $!";
 
 use File::Spec::Functions qw( catdir );
-my $destdir = catdir($cwd, 't', 'install_test.' . $$);
+my $destdir = catdir($cwd, 't', 'install_test' . $$);
 
 
 my $mb = Module::Build->new(
@@ -118,7 +118,7 @@ while (my ($from, $v) = each %distro) {
     next;
   }
   
-  my $to = File::Spec->catfile('blib', ($from =~ /^lib/ ? 'libdoc' : 'bindoc'), $v);
+  my $to = File::Spec->catfile('blib', ($from =~ /^[\.\/\[]*lib/ ? 'libdoc' : 'bindoc'), $v);
   ok $mb->contains_pod($from), "$from should contain POD";
   ok -e $to, "Created $to manpage";
 }
