@@ -1,13 +1,14 @@
-/*  vmsish.h
+/*    vmsish.h
  *
- * VMS-specific C header file for perl5.
+ *    VMS-specific C header file for perl5.
  *
- * revised: 16-Sep-1998 by Charles Bailey  bailey@newman.upenn.edu
- * Version: 5.5.2
+ *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+ *    2002, 2003, 2004, 2005, 2006, 2007 by Charles Bailey and others.
  *
- * Last revised: 10-Oct-2005 by John Malmberg (HP OpenVMS) wb8twy@qsl.net
- *			     Add SYMLINK support, and updated Craig Berry's
- *			     largefile support.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
+ *
+ *    Please see Changes*.* or the Perl Repository Browser for revision history.
  */
 
 #ifndef __vmsish_h_included
