@@ -142,12 +142,11 @@ subroutine with an ampersand, such as:
 
 =item %s argument is not a HASH or ARRAY element or slice
 
-(F) The argument to delete() must be either a hash or array element or a
-subroutine name, such as:
+(F) The argument to delete() must be either a hash or array element,
+such as:
 
     $foo{$bar}
     $ref->{"susie"}[12]
-    &do_something
 
 or a hash or array slice, such as:
 
