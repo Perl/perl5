@@ -6873,7 +6873,7 @@ $    Set Def &mydefault
 $    Goto next_ext
 $ done:
 $    sts = $Status
-$    Set Def &def
+$    Set Def &mydefault
 $    Exit sts
 $!-- make_ext.com
 $EndOfTpl$
