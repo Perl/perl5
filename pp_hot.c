@@ -2735,9 +2735,14 @@ PP(pp_entersub)
 	}
 	/* should call AUTOLOAD now? */
 	else {
-try_autoload:
+try_autoload: 
+	  {
+	    const bool is_method = cLISTOP->op_last &&
+		(cLISTOP->op_last->op_type == OP_METHOD_NAMED ||
+		 cLISTOP->op_last->op_type == OP_METHOD);
+
 	    if ((autogv = gv_autoload4(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv),
-				   FALSE)))
+				   is_method)))
 	    {
 		cv = GvCV(autogv);
 	    }
@@ -2747,6 +2752,7 @@ try_autoload:
 		gv_efullname3(sub_name, gv, NULL);
 		DIE(aTHX_ "Undefined subroutine &%"SVf" called", SVfARG(sub_name));
 	    }
+	  }
 	}
 	if (!cv)
 	    DIE(aTHX_ "Not a CODE reference");
