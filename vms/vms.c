@@ -1,4 +1,4 @@
-*    vms.c
+/*    vms.c
  *
  *    VMS-specific routines for perl5
  *
