@@ -623,6 +623,10 @@ The C<base> pragma now warns if a class tries to inherit from itself.
 C<strict> and C<warnings> will now complain loudly if they are loaded via
 incorrect casing (as in C<use Strict;>). (Johan Vromans)
 
+=item C<version>
+
+The C<version> module provides support for version objects.
+
 =item C<warnings>
 
 The C<warnings> pragma doesn't load C<Carp> anymore. That means that code
@@ -1372,6 +1376,11 @@ Two deprecation warnings have been added: (Rafael)
 =item Use of -P is deprecated
 
 Perl's command-line switch C<-P> is now deprecated.
+
+=item v-string in use/require is non-portable
+
+Perl will warn you against potential backwards compatibility problems with
+the C<use VERSION> syntax.
 
 =item perl -V
 
