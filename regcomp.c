@@ -6898,6 +6898,11 @@ tryagain:
 	    RExC_seen_zerolen++;
 	    ret = reg_node(pRExC_state, KEEPS);
 	    *flagp |= SIMPLE;
+	    /* XXX:dmq : disabling in-place substitution seems to
+	     * be necessary here to avoid cases of memory corruption, as
+	     * with: C<$_="x" x 80; s/x\K/y/> -- rgs
+	     */
+	    RExC_seen |= REG_SEEN_LOOKBEHIND;
 	    goto finish_meta_pat;
 	case 'Z':
 	    ret = reg_node(pRExC_state, SEOL);
