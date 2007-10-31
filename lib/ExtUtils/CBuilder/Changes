@@ -1,5 +1,17 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
+ - Clean up perl_src path using Cwd::realpath().  Only affects usage
+   as part of the perl core.
+
+ - Protect $., $@, $!, $^E, and $? from any clobbering that might
+   occur in our DESTROY method. [Zefram]
+
+ - From bleadperl, a patch to clean up debug symbol files (.pdb for
+   VC++, .tds for BCC) when running have_compiler(). [Steve Hay &
+   Steve Peters]
+
+0.19 - Sun May 13 14:29:18 2007
+
  - When building as part of the perl core (so this is irrelevant for
    people downloading from CPAN) we now try a little harder to find
    the perl sources. [Jos Boumans]
