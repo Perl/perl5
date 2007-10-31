@@ -102,7 +102,7 @@ ok ! -e 'blib';
 
 # cleanup
 chdir( $cwd ) or die "Can''t chdir to '$cwd': $!";
-#$dist->remove;
+$dist->remove;
 
 
 ########################################
