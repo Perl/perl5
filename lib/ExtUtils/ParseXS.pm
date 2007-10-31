@@ -18,7 +18,7 @@ my(@XSStack);	# Stack of conditionals and INCLUDEs
 my($XSS_work_idx, $cpp_next_tmp);
 
 use vars qw($VERSION);
-$VERSION = '2.18';
+$VERSION = '2.18_01';
 
 use vars qw(%input_expr %output_expr $ProtoUsed @InitFileCode $FH $proto_re $Overload $errors $Fallback
 	    $cplusplus $hiertype $WantPrototypes $WantVersionChk $except $WantLineNumbers
@@ -193,8 +193,8 @@ sub process_file {
     close(TYPEMAP);
   }
 
-  foreach my $key (keys %input_expr) {
-    $input_expr{$key} =~ s/;*\s+\z//;
+  foreach my $value (values %input_expr) {
+    $value =~ s/;*\s+\z//;
   }
 
   my ($cast, $size);
