@@ -10048,8 +10048,7 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 
     /* don't clone objects whose class has asked us not to */
     if (SvOBJECT(sstr) && ! (SvFLAGS(SvSTASH(sstr)) & SVphv_CLONEABLE)) {
-	SvFLAGS(dstr) &= ~SVTYPEMASK;
-	SvOBJECT_off(dstr);
+	SvFLAGS(dstr) = 0;
 	return dstr;
     }
 

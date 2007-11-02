@@ -581,6 +581,9 @@ Like C<CLONE>, C<CLONE_SKIP> is called once per package; however, it is
 called just before cloning starts, and in the context of the parent
 thread. If it returns a true value, then no objects of that class will
 be cloned; or rather, they will be copied as unblessed, undef values.
+For example: if in the parent there are two references to a single blessed
+hash, then in the child there will be two references to a single undefined
+scalar value instead.
 This provides a simple mechanism for making a module threadsafe; just add
 C<sub CLONE_SKIP { 1 }> at the top of the class, and C<DESTROY()> will be
 now only be called once per object. Of course, if the child thread needs
