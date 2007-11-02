@@ -1,6 +1,32 @@
 #!./perl -w
 BEGIN { @INC = qw(lib) }
 use strict;
+
+BEGIN {
+    use Config;
+    if ($Config{userelocatableinc}) {
+	# This might be a considered a hack. Need to get information about the
+	# configuration from Config.pm *before* Config.pm expands any .../
+	# prefixes.
+	#
+	# So we set $^X to pretend that we're the already installed perl, so
+	# Config.pm doesits ... expansion off that location.
+
+	my $location = $Config{initialinstalllocation};
+	die <<'OS' unless defined $location;
+$Config{initialinstalllocation} is not defined - can't install a relocatable
+perl without this.
+OS
+	$^X = "$location/perl";
+	# And then remove all trace of ever having loaded Config.pm, so that
+	# it will reload with the revised $^X
+	undef %Config::;
+	delete $INC{"Config.pm"};
+	delete $INC{"Config_heavy.pl"};
+	# You never saw us. We weren't here.
+    }
+}
+
 use Config;
 use Getopt::Long;
 use File::Find;
