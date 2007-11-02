@@ -1482,6 +1482,7 @@
 #define PL_sv_placeholder	(PL_Vars.Gsv_placeholder)
 #define PL_thr_key		(PL_Vars.Gthr_key)
 #define PL_use_safe_putenv	(PL_Vars.Guse_safe_putenv)
+#define PL_veto_cleanup		(PL_Vars.Gveto_cleanup)
 #define PL_version		(PL_Vars.Gversion)
 
 #else /* !PERL_GLOBAL_STRUCT */
@@ -1508,6 +1509,7 @@
 #define PL_Gsv_placeholder	PL_sv_placeholder
 #define PL_Gthr_key		PL_thr_key
 #define PL_Guse_safe_putenv	PL_use_safe_putenv
+#define PL_Gveto_cleanup	PL_veto_cleanup
 #define PL_Gversion		PL_version
 
 #endif /* PERL_GLOBAL_STRUCT */

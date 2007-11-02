@@ -1073,6 +1073,8 @@ END_EXTERN_C
 #define PL_thr_key		(*Perl_Gthr_key_ptr(NULL))
 #undef  PL_use_safe_putenv
 #define PL_use_safe_putenv	(*Perl_Guse_safe_putenv_ptr(NULL))
+#undef  PL_veto_cleanup
+#define PL_veto_cleanup		(*Perl_Gveto_cleanup_ptr(NULL))
 #undef  PL_version
 #define PL_version		(*Perl_Gversion_ptr(NULL))
 

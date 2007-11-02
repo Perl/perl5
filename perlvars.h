@@ -113,3 +113,8 @@ PERLVARI(Ginterp_size,	U16,	sizeof(struct interpreter))
 PERLVARI(Ginterp_size_5_8_9, U16,
 	 PERL_INTERPRETER_SIZE_UPTO_MEMBER(PERL_LAST_5_8_9_INTERP_MEMBER))
 #endif
+
+/* this is currently set without MUTEX protection, so keep it a type which
+ * can be set atomically (ie not a bit field) */
+PERLVARI(Gveto_cleanup,	int, FALSE)	/* exit without cleanup */
+

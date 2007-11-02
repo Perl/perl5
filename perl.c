@@ -165,6 +165,35 @@ S_init_tls_and_interp(PerlInterpreter *my_perl)
     }
 }
 
+
+/* these implement the PERL_SYS_INIT, PERL_SYS_INIT3, PERL_SYS_TERM macros */
+
+void
+Perl_sys_init(int* argc, char*** argv)
+{
+    PERL_UNUSED_ARG(argc); /* may not be used depending on _BODY macro */
+    PERL_UNUSED_ARG(argv);
+    PERL_SYS_INIT_BODY(argc, argv);
+}
+
+void
+Perl_sys_init3(int* argc, char*** argv, char*** env)
+{
+    PERL_UNUSED_ARG(argc); /* may not be used depending on _BODY macro */
+    PERL_UNUSED_ARG(argv);
+    PERL_UNUSED_ARG(env);
+    PERL_SYS_INIT3_BODY(argc, argv, env);
+}
+
+void
+Perl_sys_term()
+{
+    if (!PL_veto_cleanup) {
+	PERL_SYS_TERM_BODY();
+    }
+}
+
+
 #ifdef PERL_IMPLICIT_SYS
 PerlInterpreter *
 perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
@@ -655,6 +684,7 @@ perl_destruct(pTHXx)
 
     if (CALL_FPTR(PL_threadhook)(aTHX)) {
         /* Threads hook has vetoed further cleanup */
+	PL_veto_cleanup = TRUE;
         return STATUS_EXIT;
     }
 
@@ -1391,6 +1421,9 @@ Releases a Perl interpreter.  See L<perlembed>.
 void
 perl_free(pTHXx)
 {
+    if (PL_veto_cleanup)
+	return;
+
 #ifdef PERL_TRACK_MEMPOOL
     {
 	/*
@@ -1446,7 +1479,7 @@ __attribute__((destructor))
 #endif
 perl_fini(void)
 {
-    if (PL_curinterp)
+    if (PL_curinterp  && !PL_veto_cleanup)
 	FREE_THREAD_KEY;
 }
 

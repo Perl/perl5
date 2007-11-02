@@ -2416,6 +2416,10 @@ PERL_CALLCONV int	Perl_signbit(NV f)
 			__attribute__pure__;
 
 #endif
+PERL_CALLCONV void	Perl_sys_init(int* argc, char*** argv);
+PERL_CALLCONV void	Perl_sys_init3(int* argc, char*** argv, char*** env);
+PERL_CALLCONV void	Perl_sys_term(void);
+
 
 END_EXTERN_C
 /*

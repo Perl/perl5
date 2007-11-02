@@ -1710,6 +1710,10 @@ Apnod	|int	|my_vsnprintf	|NN char *buffer|const Size_t len|NN const char *format
 AMdnoP	|int	|Perl_signbit	|NV f
 #endif
 
+Apon	|void	|sys_init	|NN int* argc|NN char*** argv
+Apon	|void	|sys_init3	|NN int* argc|NN char*** argv|NN char*** env
+Apon	|void	|sys_term
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:
