@@ -2413,7 +2413,7 @@ PerlIO_cleanup(pTHX)
     }
 }
 
-void PerlIO_teardown(pTHX) /* Call only from PERL_SYS_TERM(). */
+void PerlIO_teardown() /* Call only from PERL_SYS_TERM(). */
 {
     dVAR;
 #ifdef DEBUGGING
@@ -2421,11 +2421,18 @@ void PerlIO_teardown(pTHX) /* Call only from PERL_SYS_TERM(). */
 	/* By now all filehandles should have been closed, so any
 	 * stray (non-STD-)filehandles indicate *possible* (PerlIO)
 	 * errors. */
+#define PERLIO_TEARDOWN_MESSAGE_BUF_SIZE 64
+#define PERLIO_TEARDOWN_MESSAGE_FD 2
+	char buf[PERLIO_TEARDOWN_MESSAGE_BUF_SIZE];
 	int i;
 	for (i = 3; i < PL_perlio_fd_refcnt_size; i++) {
-	    if (PL_perlio_fd_refcnt[i])
-		PerlIO_debug("PerlIO_cleanup: fd %d refcnt=%d\n",
-			     i, PL_perlio_fd_refcnt[i]);
+	    if (PL_perlio_fd_refcnt[i]) {
+		const STRLEN len =
+		    my_snprintf(buf, sizeof(buf),
+				"PerlIO_teardown: fd %d refcnt=%d\n",
+				i, PL_perlio_fd_refcnt[i]);
+		PerlLIO_write(PERLIO_TEARDOWN_MESSAGE_FD, buf, len);
+	    }
 	}
     }
 #endif
