@@ -2654,7 +2654,7 @@ typedef struct clone_params CLONE_PARAMS;
 
 #define PERL_SYS_INIT(argc, argv)	Perl_sys_init(argc, argv)
 #define PERL_SYS_INIT3(argc, argv, env)	Perl_sys_init3(argc, argv, env)
-#define PERL_SYS_TERM()			Perl_sys_term(aTHX)
+#define PERL_SYS_TERM()			Perl_sys_term()
 
 #ifndef PERL_WRITE_MSG_TO_CONSOLE
 #  define PERL_WRITE_MSG_TO_CONSOLE(io, msg, len) PerlIO_write(io, msg, len)
@@ -3969,12 +3969,12 @@ EXTERN_C void PerlIO_teardown();
 #  define PERLIO_INIT MUTEX_INIT(&PL_perlio_mutex)
 #  define PERLIO_TERM 				\
 	STMT_START {				\
-		PerlIO_teardown(aTHX);		\
+		PerlIO_teardown();		\
 		MUTEX_DESTROY(&PL_perlio_mutex);\
 	} STMT_END
 # else
 #  define PERLIO_INIT
-#  define PERLIO_TERM	PerlIO_teardown(aTHX)
+#  define PERLIO_TERM	PerlIO_teardown()
 # endif
 #else
 #  define PERLIO_INIT
