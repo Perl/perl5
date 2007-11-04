@@ -18,13 +18,7 @@ package TestInit;
 $VERSION = 1.01;
 
 chdir 't' if -d 't';
-if ($^O eq 'VMS') {
-    require File::Spec;
-    @INC = File::Spec->rel2abs('[-.lib]');
-}
-else {
-    @INC = '../lib';
-}
+@INC = '../lib';
 
 # Don't interfere with the taintedness of %ENV, this could perturbate tests
 $ENV{PERL_CORE} = 1 unless ${^TAINT};
