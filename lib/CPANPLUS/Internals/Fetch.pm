@@ -214,23 +214,75 @@ sub _fetch {
             for my $host ( @{$conf->get_conf('hosts')} ) {
                 $found_host++;
     
-                my $mirror_path = File::Spec::Unix->catfile(
-                                        $host->{'path'}, $remote_file
-                                    );
-    
-                ### build pretty print uri ###
                 my $where;
-                if( $host->{'scheme'} eq 'file' ) {
+
+                ### file:// uris are special and need parsing
+                if( $host->{'scheme'} eq 'file' ) {    
+    
+                    ### the full path in the native format of the OS
+                    my $host_spec = 
+                            File::Spec->file_name_is_absolute( $host->{'path'} )
+                                ? $host->{'path'}
+                                : File::Spec->rel2abs( $host->{'path'} );
+    
+                    ### there might be volumes involved on vms/win32
+                    if( ON_WIN32 or ON_VMS ) {
+                        
+                        ### now extract the volume in order to be Win32 and 
+                        ### VMS friendly.
+                        ### 'no_file' indicates that there's no file part
+                        ### of this path, so we only get 2 bits returned.
+                        my ($vol, $host_path) = File::Spec->splitpath(
+                                                    $host_spec, 'no_file' 
+                                                );
+                        
+                        ### and split up the directories
+                        my @host_dirs = File::Spec->splitdir( $host_path );
+        
+                        ### if we got a volume we pretend its a directory for 
+                        ### the sake of the file:// url
+                        if( defined $vol and $vol ) {
+    
+                            ### D:\foo\bar needs to be encoded as D|\foo\bar
+                            ### For details, see the following link:
+                            ###   http://en.wikipedia.org/wiki/File://
+                            ### The RFC doesnt seem to address Windows volume
+                            ### descriptors but it does address VMS volume
+                            ### descriptors, however wikipedia covers a bit of
+                            ### history regarding win32
+                            $vol =~ s/:$/|/ if ON_WIN32; 
+    
+                            ### XXX i'm not sure what cases this is addressing.
+                            ### this comes straight from dmq's file:// patches
+                            ### for win32. --kane
+                            if( $host_dirs[0] ) {
+                                unshift @host_dirs, $vol;
+                            } else {
+                                $host_dirs[0] = $vol;
+                            }                    
+                        }
+        
+                        ### now it's in UNIX format, which is the same format
+                        ### as used for URIs
+                        $host_spec = File::Spec::Unix->catdir( @host_dirs ); 
+                    }
+
+                    ### now create the file:// uri from the components               
                     $where = CREATE_FILE_URI->(
-                                File::Spec::Unix->rel2abs(
-                                    File::Spec::Unix->catdir(
-                                        grep { defined $_ && length $_ }
-                                        $host->{'host'},
-                                        $mirror_path
-                                     )
-                                )
-                            );
-                } else {
+                                    File::Spec::Unix->catfile(
+                                        $host->{'host'} || '',
+                                        $host_spec,
+                                        $remote_file,
+                                    )      
+                                );     
+
+                ### its components will be in unix format, for a http://,
+                ### ftp:// or any other style of URI
+                } else {     
+                    my $mirror_path = File::Spec::Unix->catfile(
+                                            $host->{'path'}, $remote_file
+                                        );
+    
                     my %args = ( scheme => $host->{scheme},
                                  host   => $host->{host},
                                  path   => $mirror_path,

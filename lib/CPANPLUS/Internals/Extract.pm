@@ -201,11 +201,13 @@ sub _extract {
     my $dir;
     for my $try (
         File::Spec->rel2abs( 
-            $self->_safe_path( path =>
-                File::Spec->catdir( $to,  
-                                    $mod->package_name .'-'. 
-                                    $mod->package_version 
-        ) ) ),
+            ### _safe_path must be called before catdir because catdir on 
+            ### VMS currently will not handle the extra dots in the directories.
+            File::Spec->catdir( $self->_safe_path( path => $to ) ,  
+                                $self->_safe_path( path =>
+                                             $mod->package_name .'-'. 
+                                             $mod->package_version
+        ) ) ) ,
         File::Spec->rel2abs( $ae->extract_path ),
     ) {
         ($dir = $try) && last if -d $try;

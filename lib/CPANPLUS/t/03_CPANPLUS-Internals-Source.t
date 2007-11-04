@@ -94,7 +94,15 @@ ok( scalar keys %$mt,           "Moduletree loaded successfully" );
         my %files = $cb->$meth;
         ok( scalar(keys(%files)),
                                 "   Got list of sources" );
-        ok( $files{ $src_file },"   Found proper entry" );
+        
+        ### on VMS, we can't predict the case unfortunately
+        ### so grep for it instead;
+        my $found = map { 
+            my $src_re = quotemeta($src_file);
+            $_ =~ /$src_re/i;
+        } keys %files;
+
+        ok( $found,             "   Found proper entry for $src_file" );
     }        
 
     ### now we can have it be loaded in

@@ -23,6 +23,14 @@ use strict;
 use Test::More      'no_plan';
 use CPANPLUS::Internals::Constants;
 
+### in some subprocesses, the Term::ReadKey code will go
+### balistic and die because it can't figure out terminal
+### dimensions. If we add these env vars, it'll use them
+### as a default and not die. Thanks to Slaven Rezic for
+### reporting this.
+local $ENV{'COLUMNS'} = 80 unless $ENV{'COLUMNS'};
+local $ENV{'LINES'}   = 40 unless $ENV{'LINES'};
+
 my $Conf    = gimme_conf();
 my $Class   = 'CPANPLUS::Shell';
 my $Default = SHELL_DEFAULT;
@@ -55,6 +63,7 @@ isa_ok( $Shell, $Default,       "   Object" );
                         path    => $cs_path,
                     );
      
+    my $base = $Conf->get_conf('base');   
 
     ### XXX have to keep the list ordered, as some methods only work as 
     ### expected *after* others have run
@@ -85,13 +94,17 @@ isa_ok( $Shell, $Default,       "   Object" );
         '/? ?'                  => qr/usage/i,
         
         ### custom source plugin tests
+        ### lower case path matching, as on VMS we can't predict case
         "/? cs"                  => qr|/cs|,
         "/cs --add $cs_uri"      => qr/Added remote source/,
-        "/cs --list"             => do { my $re = quotemeta($cs_uri); qr/$re/ },
-        "/cs --contents $cs_uri" => qr/$TestAuth/,
+        "/cs --list"             => do { my $re = quotemeta($cs_uri); qr/$re/i },
+        "/cs --contents $cs_uri" => qr/$TestAuth/i,
         "/cs --update"           => qr/Updated remote sources/,
         "/cs --update $cs_uri"   => qr/Updated remote sources/,
-        "/cs --write $cs_path"   => qr/Wrote remote source index/,
+
+        ### --write leaves a file that we should clean up, so make
+        ### sure it's in the path that we clean up already anyway
+        "/cs --write $base"      => qr/Wrote remote source index/,
         "/cs --remove $cs_uri"   => qr/Removed remote source/,
     );
 

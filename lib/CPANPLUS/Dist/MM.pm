@@ -305,7 +305,7 @@ sub prepare {
             ### since cpanp-run-perl uses 'do' to execute the file, and do()
             ### checks your @INC.. so, if there's _another_ makefile.pl in
             ### your @INC, it will execute that one...
-            my $makefile_pl = $cb->_safe_path( path => MAKEFILE_PL->( $dir ) );
+            my $makefile_pl = MAKEFILE_PL->( $cb->_safe_path( path => $dir ) );
             
             ### setting autoflush to true fixes issue from rt #8047
             ### XXX this means that we need to keep the path to CPANPLUS

@@ -230,8 +230,14 @@ use constant READ_DIR       => sub {
                                     my $dh  = OPEN_DIR->( $dir ) or return;
                                     
                                     ### exclude . and ..
-                                    my @files =  grep { $_ !~ /^\.{1,2}/ }         
+                                    my @files =  grep { $_ !~ /^\.{1,2}/ }
                                                     readdir($dh);
+
+                                    ### Remove trailing dot on VMS when
+                                    ### using VMS syntax.
+                                    if( ON_VMS ) {
+                                        s/(?<!\^)\.$// for @files;
+                                    }
                                     
                                     return @files;
                             };  
@@ -268,9 +274,11 @@ use constant CREATE_FILE_URI
                             => sub { 
                                     my $dir = $_[0] or return;
                                     return $dir =~ m|^/| 
-                                        ? 'file:/'  . $dir
-                                        : 'file://' . $dir;   
+                                        ? 'file://'  . $dir
+                                        : 'file:///' . $dir;   
                             };        
+
+use constant EMPTY_DSLIP    => '     ';
 
 use constant CUSTOM_AUTHOR_ID
                             => 'LOCAL';

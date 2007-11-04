@@ -21,11 +21,16 @@ use File::Spec ();
 
 my $conf    = gimme_conf();
 my $cb      = CPANPLUS::Backend->new( $conf );
-my $noperms = ($< and not $conf->get_program('sudo')) &&
-              ($conf->get_conf('makemakerflags') or
-                not -w $Config{installsitelib} );
 my $File    = 'Bar.pm';
 my $Verbose = @ARGV ? 1 : 0;
+
+### if we need sudo that's no guarantee we can actually run it
+### so set $noperms if sudo is required, as that may mean tests
+### fail if you're not allowed to execute sudo. This resolves
+### #29904: make test should not use sudo
+my $noperms = $conf->get_program('sudo')        || #you need sudo
+              $conf->get_conf('makemakerflags') || #you set some funky flags
+              not -w $Config{installsitelib};      #cant write to install target
 
 #$IPC::Cmd::DEBUG = $Verbose;
 
@@ -121,10 +126,8 @@ $cb->_flush( list => [qw|lib|] );
 
 SKIP: {
 
-    skip(q[No install tests under core perl], 10) if $ENV{PERL_CORE};
-
-    skip(q[Probably no permissions to install, skipping], 10)
-        if $noperms;
+    skip(q[No install tests under core perl],            10) if $ENV{PERL_CORE};
+    skip(q[Possibly no permission to install, skipping], 10) if $noperms;
 
     ### XXX new EU::I should be forthcoming pending this patch from Steffen
     ### Mueller on p5p: http://www.xray.mpe.mpg.de/mailing-lists/ \ 
@@ -136,8 +139,9 @@ SKIP: {
     diag('other dirs than those in %Config. See bug #6871 on rt.cpan.org ' );
     diag('for details');
 
-    diag(q[Note: 'sudo' might ask for your password to do the install test])
-        if $conf->get_program('sudo');
+    ### we now say 'no perms' if sudo is configured, as per #29904
+    #diag(q[Note: 'sudo' might ask for your password to do the install test])
+    #    if $conf->get_program('sudo');
 
     ### make sure no options are set in PERL5_MM_OPT, as they might
     ### change the installation target and therefor will 1. mess up

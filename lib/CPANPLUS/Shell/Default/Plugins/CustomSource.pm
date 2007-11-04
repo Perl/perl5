@@ -76,7 +76,11 @@ sub _uri_from_cache {
     my %files = reverse $Cb->list_custom_sources;
 
     ### it's an URI we know
-    if( my $local = $files{ $uri } ) {
+    ### VMS can lower case all files, so make sure we check that too
+    my $local = $files{ $uri };
+       $local = $files{ lc $uri } if !$local && ON_VMS;
+       
+    if( $local ) {
         return wantarray 
             ? ($uri, $local)
             : $uri;

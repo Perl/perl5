@@ -132,7 +132,27 @@ sub module_tree {
     if( @_ ) {
         my @rv;
         for my $name ( grep { defined } @_) {
-            push @rv, $modtree->{$name} || '';
+
+            ### From John Malmberg: This is failing on VMS 
+            ### because ODS-2 does not retain the case of 
+            ### filenames that are created.
+            ### The problem is the filename is being converted 
+            ### to a module name and then looked up in the 
+            ### %$modtree hash.
+            ### 
+            ### As a fix, we do a search on VMS instead --
+            ### more cpu cycles, but it gets around the case
+            ### problem --kane
+            my ($modobj) = do {
+                ON_VMS
+                    ? $self->search(
+                          type    => 'module',
+                          allow   => [qr/^$name$/i],
+                      )
+                    : $modtree->{$name}
+            };
+            
+            push @rv, $modobj || '';
         }
         return @rv == 1 ? $rv[0] : @rv;
     } else {
@@ -230,16 +250,19 @@ sub search {
     my $conf = $self->configure_object;
     my %hash = @_;
 
-    local $Params::Check::ALLOW_UNKNOWN = 1;
+    my ($type);
+    my $args = do {
+        local $Params::Check::NO_DUPLICATES = 0;
+        local $Params::Check::ALLOW_UNKNOWN = 1;
 
-    my ($data,$type);
-    my $tmpl = {
-        type    => { required => 1, allow => [CPANPLUS::Module->accessors(),
-                        CPANPLUS::Module::Author->accessors()], store => \$type },
-        allow   => { required => 1, default => [ ], strict_type => 1 },
-    };
+        my $tmpl = {
+            type    => { required => 1, allow => [CPANPLUS::Module->accessors(),
+                            CPANPLUS::Module::Author->accessors()], store => \$type },
+            allow   => { required => 1, default => [ ], strict_type => 1 },
+        };
 
-    my $args = check( $tmpl, \%hash ) or return;
+        check( $tmpl, \%hash )
+    } or return;
 
     ### figure out whether it was an author or a module search
     ### when ambiguous, it'll be an author search.

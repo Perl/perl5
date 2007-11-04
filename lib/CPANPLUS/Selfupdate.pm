@@ -40,7 +40,7 @@ CPANPLUS::Selfupdate
 
     my $Modules = {
         dependencies => {
-            'File::Fetch'               => '0.08', # win32 ftp support
+            'File::Fetch'               => '0.13_02', # win32 file:// support
             'File::Spec'                => '0.82',
             'IPC::Cmd'                  => '0.36', # 5.6.2 compat: 2-arg open
             'Locale::Maketext::Simple'  => '0.01',
@@ -48,9 +48,10 @@ CPANPLUS::Selfupdate
             'Module::Load'              => '0.10',
             'Module::Load::Conditional' => '0.18', # Better parsing: #23995,
                                                    # uses version.pm for <=>
-            'version'                   => '0.70', # needed for M::L::C
+            'version'                   => '0.73', # needed for M::L::C
                                                    # addresses #24630 and 
                                                    # #24675
+                                                   # Address ~0 overflow issue
             'Params::Check'             => '0.22',
             'Package::Constants'        => '0.01',
             'Term::UI'                  => '0.05',
@@ -83,7 +84,6 @@ CPANPLUS::Selfupdate
             cpantest        => [
                 {
                     'YAML::Tiny'     => '0.0',
-                    'File::Fetch'    => '0.08',
                     'Test::Reporter' => '1.34',
                 },
                 sub { 

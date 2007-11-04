@@ -52,8 +52,11 @@ reports. It returns true and loads them if they are, or returns false
 otherwise.
 
 =cut
+
+### XXX remove this list and move it into selfupdate, somehow..
+### this is dual administration
 {   my $query_list = {
-        'File::Fetch'   => '0.08',
+        'File::Fetch'   => '0.13_02',
         'YAML::Tiny'    => '0.0',
         'File::Temp'    => '0.0',
     };

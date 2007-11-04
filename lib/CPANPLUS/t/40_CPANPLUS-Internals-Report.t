@@ -24,6 +24,10 @@ my $conf        = gimme_conf();
 my $CB          = CPANPLUS::Backend->new( $conf );
 my $ModName     = TEST_CONF_MODULE;
 my $ModPrereq   = TEST_CONF_PREREQ;
+
+### divide by many -- possibly ~0 is unsigned, and we cause an overflow,
+### as happens to version.pm 0.7203 among others.
+my $HighVersion = ~0/1000;
 my $Mod         = $CB->module_tree($ModName);
 my $int_ver     = $CPANPLUS::Internals::VERSION;
 
@@ -104,7 +108,7 @@ my $map = {
         pre_hook    => sub {
                         my $mod     = shift;
                         my $clone   = $mod->clone;
-                        $clone->status->prereqs( { $ModPrereq => ~0 } );
+                        $clone->status->prereqs({ $ModPrereq => $HighVersion });
                         return $clone;
                     },
         failed      => 1,
@@ -274,9 +278,7 @@ my $map = {
     
     {   my $clone   = $Mod->clone;
 
-        ### divide by two -- possibly ~0 is unsigned, and we cause an overflow,
-        ### as happens to version.pm 0.7203 among others.
-        my $prereqs = { $ModPrereq => ~0/2 };
+        my $prereqs = { $ModPrereq => $HighVersion };
     
         $clone->status->prereqs( $prereqs );
 
