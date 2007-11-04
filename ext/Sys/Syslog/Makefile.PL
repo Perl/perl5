@@ -108,7 +108,7 @@ elsif (-p "/dev/log" and -w _) {
     # On HP-UX, /dev/log isn't a unix domain socket but a named pipe.
     $_PATH_LOG = "/dev/log";
 }
-elsif (-S "/dev/log" and -w _) {
+elsif ((-S "/dev/log" or -c _) and -w _) {
     # Most unixes have a unix domain socket /dev/log.
     $_PATH_LOG = "/dev/log";
 }
