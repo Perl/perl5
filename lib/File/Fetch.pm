@@ -23,7 +23,7 @@ use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
 use constant QUOTE  => do { $^O eq 'MSWin32' ? q["] : q['] };            
             
 
-$VERSION        = '0.12';
+$VERSION        = '0.13_02';
 $PREFER_BIN     = 0;        # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
 $USER_AGENT     = 'File::Fetch/$VERSION';
@@ -49,8 +49,9 @@ local $Module::Load::Conditional::VERBOSE   = 0;
 local $Module::Load::Conditional::VERBOSE   = 0;
 
 ### see what OS we are on, important for file:// uris ###
-use constant ON_UNIX        => ($^O ne 'MSWin32' and
-                                $^O ne 'MacOS');
+use constant ON_WIN         => ($^O eq 'MSWin32');
+use constant ON_VMS         => ($^O eq 'VMS');                                
+use constant ON_UNIX        => (!ON_WIN and !ON_VMS);
 
 =pod
 
@@ -129,6 +130,8 @@ result of $ff->output_file will be used.
         path            => { default => '/' },
         file            => { required => 1 },
         uri             => { required => 1 },
+        vol             => { }, # windows and vms for file:// uris
+        share           => { }, # windows for file:// uris
         _error_msg      => { no_override => 1 },
         _error_msg_long => { no_override => 1 },
     };
@@ -156,7 +159,7 @@ result of $ff->output_file will be used.
         }
         
         for (qw[path file]) {
-            unless( $args->$_ ) {
+            unless( $args->$_() ) { # 5.5.x needs the ()
                 return File::Fetch->_error(loc("No '%1' specified",$_));
             }
         }
@@ -271,6 +274,18 @@ sub new {
 ###     file    => 'index.html'
 ### };
 ###
+### In the case of file:// urls there maybe be additional fields
+###
+### For windows file shares there may be a 'share' key specified
+###
+###   'share' => 'sharename' 
+###
+### For systems with volume specifications such as VMS and Win32 there may be 
+### a volume specifier provided in the 'vol' field.
+###
+###   'vol' => 'volumename'
+###
+
 sub _parse_uri {
     my $self = shift;
     my $uri  = shift or return;
@@ -281,13 +296,46 @@ sub _parse_uri {
     $uri            =~ s|^(\w+)://||;
     $href->{scheme} = $1;
 
-    ### file:// paths have no host ###
+    ### See rfc 1738 section 3.10
+    ### http://www.faqs.org/rfcs/rfc1738.html
+    ### And wikipedia for more on windows file:// urls
+    ### http://en.wikipedia.org/wiki/File://
     if( $href->{scheme} eq 'file' ) {
-        $href->{path} = $uri;
-        $href->{host} = '';
+        
+        my @parts = split '/',$uri;
+
+        ### file://hostname/...
+        ### file://hostname/...
+        $href->{host} = $parts[0] || '';
+
+        ### index in @parts where the path components begin;
+        my $index = 1;  
+        
+        ### file:///D|/blah.txt
+        ### file:///D:/blah.txt
+        ### file://hostname/D|/blah.txt
+        ### file://hostname/D:/blah.txt
+        if ($parts[1] =~ s/\A([A-Z])\|\z/$1:/i ||   # s/D|/D:/
+            $parts[1] =~ m/\A[A-Z]:\z/i             # m/D:/
+        ) {
+            $href->{vol}    = $parts[1];        
+            $index          = 2;        # index after the volume
+
+        ### file:////hostname/sharename/blah.txt        
+        } elsif ( not length $parts[0] and not length $parts[1] ) {
+            $href->{host}   = $parts[2] || '';  # avoid warnings
+            $href->{share}  = $parts[3] || '';  # avoid warnings        
+
+            $index          = 4         # index after the share
+        }
+
+        ### rebuild the path from the leftover paths;
+        $href->{path} = join '/', '', splice( @parts, $index, $#parts );
 
     } else {
-        @{$href}{qw|host path|} = $uri =~ m|([^/]*)(/.*)$|s;
+        ### using anything but qw() in hash slices may produce warnings 
+        ### in older perls :-(
+        @{$href}{ qw(host path) } = $uri =~ m|([^/]*)(/.*)$|s;
     }
 
     ### split the path into file + dir ###
@@ -766,6 +814,10 @@ sub _curl_fetch {
 ### use File::Copy for fetching file:// urls ###
 ### XXX file:// uri to local path conversion is just too weird...
 ### depend on LWP to do it for us
+###
+### See section 3.10 of RFC 1738 (http://www.faqs.org/rfcs/rfc1738.html)
+### Also see wikipedia on file:// (http://en.wikipedia.org/wiki/File://)
+    
 sub _file_fetch {
     my $self = shift;
     my %hash = @_;
@@ -776,14 +828,45 @@ sub _file_fetch {
     };
     check( $tmpl, \%hash ) or return;
 
+    
+    
     ### prefix a / on unix systems with a file uri, since it would
     ### look somewhat like this:
-    ###     file://home/kane/file
-    ### wheras windows file uris might look like:
-    ###     file://C:/home/kane/file
-    my $path    = ON_UNIX ? '/'. $self->path : $self->path;
+    ###     file:///home/kane/file
+    ### wheras windows file uris for 'c:\some\dir\file' might look like:
+    ###     file:///C:/some/dir/file
+    ###     file:///C|/some/dir/file
+    ### or for a network share '\\host\share\some\dir\file':
+    ###     file:////host/share/some/dir/file
+    ###    
+    ### VMS file uri's for 'DISK$USER:[MY.NOTES]NOTE123456.TXT' might look like:
+    ###     file://vms.host.edu/disk$user/my/notes/note12345.txt
+    ###
+    
+    my $path    = $self->path;
+    my $vol     = $self->vol;
+    my $share   = $self->share;
 
-    my $remote  = File::Spec->catfile( $path, $self->file );
+    my $remote;
+    if (!$share and $self->host) {
+        return $self->_error(loc( 
+            "Currently %1 cannot handle hosts in %2 urls",
+            'File::Fetch', 'file://'
+        ));            
+    }
+    
+    if( $vol ) {
+        $path   = File::Spec->catdir( split /\//, $path );
+        $remote = File::Spec->catpath( $vol, $path, $self->file);
+
+    } elsif( $share ) {
+        ### win32 specific, and a share name, so we wont bother with File::Spec
+        $path   =~ s|/+|\\|g;
+        $remote = "\\\\".$self->host."\\$share\\$path";
+
+    } else {
+        $remote  = File::Spec->catfile( $path, $self->file );
+    }
 
     ### File::Copy is littered with 'die' statements :( ###
     my $rv = eval { File::Copy::copy( $remote, $to ) };

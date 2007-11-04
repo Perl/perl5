@@ -59,6 +59,33 @@ my $map = [
         path    => '/usr/local/tmp/',
         file    => 'foo.txt',
     },
+    {   uri     => 'file:////hostname/share/tmp/foo.txt',
+        scheme  => 'file',
+        host    => 'hostname',
+        share   => 'share',
+        path    => '/tmp/',
+        file    => 'foo.txt',
+    },
+    {   uri     => 'file://hostname/tmp/foo.txt',
+        scheme  => 'file',
+        host    => 'hostname',
+        path    => '/tmp/',
+        file    => 'foo.txt',
+    },    
+    {   uri     => 'file:///D:/tmp/foo.txt',
+        scheme  => 'file',
+        host    => '',
+        vol     => 'D:',
+        path    => '/tmp/',
+        file    => 'foo.txt',
+    },    
+    {   uri     => 'file:///D|/tmp/foo.txt',
+        scheme  => 'file',
+        host    => '',
+        vol     => 'D:',
+        path    => '/tmp/',
+        file    => 'foo.txt',
+    },    
     {	uri	=> 'rsync://cpan.pair.com/CPAN/MIRRORING.FROM',
         scheme	=> 'rsync',
         host	=> 'cpan.pair.com',
@@ -95,7 +122,7 @@ for my $entry (@$map) {
 
 ### file:// tests ###
 {
-    my $prefix = &File::Fetch::ON_UNIX ? 'file:/' : 'file://';
+    my $prefix = &File::Fetch::ON_UNIX ? 'file://' : 'file:///';
     my $uri = $prefix . cwd() .'/'. basename($0);
 
     for (qw[lwp file]) {
