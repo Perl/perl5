@@ -2,7 +2,7 @@
 
 use strict;
 use lib qw[../lib lib];
-use Test::More tests => 13;
+use Test::More tests => 19;
 use Term::ReadLine;
 
 use_ok( 'Term::UI' );
@@ -123,4 +123,22 @@ my $tmpl = {
 
     is_deeply($href, $expected, qq[Parsing options] );
     is($rest, $munged,          qq[Remaining unparsed string '$munged'] );
+}
+
+### more parse_options tests
+{   my @map = (
+        [ 'x --update_source'   => 'x', { update_source => 1 } ],
+        [ '--update_source'     => '',  { update_source => 1 } ],
+    );
+    
+    for my $aref ( @map ) {
+        my( $input, $munged, $expect ) = @$aref;
+        
+        my($href,$rest) = $term->parse_options( $input );
+        
+        ok( $href,              "Parsed '$input'" );
+        is_deeply( $href, $expect,
+                                "   Options parsed correctly" );
+        is( $rest, $munged,     "   Command parsed correctly" );
+    }
 }

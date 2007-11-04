@@ -11,7 +11,7 @@ use strict;
 BEGIN {
     use vars        qw[$VERSION $AUTOREPLY $VERBOSE $INVALID];
     $VERBOSE    =   1;
-    $VERSION    =   '0.16';
+    $VERSION    =   '0.18';
     $INVALID    =   loc('Invalid selection, please try again: ');
 }
 
@@ -404,9 +404,9 @@ sub parse_options {
     my $return = {};
 
     ### there's probably a more elegant way to do this... ###
-    while ( $input =~ s/(?:\s+)--?([-\w]+=("|').+?\2)(?=\Z|\s+)//  or
-            $input =~ s/(?:\s+)--?([-\w]+=\S+)(?=\Z|\s+)//         or
-            $input =~ s/(?:\s+)--?([-\w]+)(?=\Z|\s+)//
+    while ( $input =~ s/(?:^|\s+)--?([-\w]+=("|').+?\2)(?=\Z|\s+)//  or
+            $input =~ s/(?:^|\s+)--?([-\w]+=\S+)(?=\Z|\s+)//         or
+            $input =~ s/(?:^|\s+)--?([-\w]+)(?=\Z|\s+)//
     ) {
         my $match = $1;
 
