@@ -1,6 +1,8 @@
 Revision history for Sys-Syslog
 
 0.22 -- 2007.11.xx -- Sebastien Aperghis-Tramoni (SAPER)
+        [BUGFIX] CPAN-RT#29875: Added workaround SpamAssassin overzealous
+        logging features.
         [FEATURE] Added support for PERROR option.
         [FEATURE] Support for SYSLOG on z/OS, thanks to Chun Bing Ge.
         [CODE] Prevent $@ from being visible outside the module, in trying 

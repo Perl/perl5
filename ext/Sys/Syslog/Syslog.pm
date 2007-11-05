@@ -105,16 +105,21 @@ if ($^O =~ /^(freebsd|linux)$/) {
     @connectMethods = grep { $_ ne 'udp' } @connectMethods;
 }
 
-# use EventLog on Win32
-my $is_Win32 = $^O =~ /Win32/i;
+EVENTLOG: {
+    # use EventLog on Win32
+    my $is_Win32 = $^O =~ /Win32/i;
 
-if (eval "use Sys::Syslog::Win32; 1") {
-    unshift @connectMethods, 'eventlog';
-} elsif ($is_Win32) {
-    warn $@;
+    # some applications are trying to be too smart
+    # yes I'm speaking of YOU, SpamAssassin, grr..
+    local($SIG{__DIE__}, $SIG{__WARN__}, $@);
+
+    if (eval "use Sys::Syslog::Win32; 1") {
+        unshift @connectMethods, 'eventlog';
+    }
+    elsif ($is_Win32) {
+        warn $@;
+    }
 }
-
-$@ = "";
 
 my @defaultMethods = @connectMethods;
 my @fallbackMethods = ();
