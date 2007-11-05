@@ -10,7 +10,8 @@ use Config;
 no warnings 'once';
 
 my $test = 1;
-print "1..29\n";
+my $tests_needing_perlio = 17;
+plan(12 + $tests_needing_perlio);
 print "ok 1\n";
 
 open(DUPOUT,">&STDOUT");
@@ -91,7 +92,7 @@ open(F, ">&DUPOUT") or die "Cannot dup stdout back: $!";
 curr_test(13);
 
 SKIP: {
-    skip("need perlio", 14) unless $Config{useperlio};
+    skip("need perlio", $tests_needing_perlio) unless $Config{useperlio};
     
     ok(open(F, ">&", STDOUT));
     isnt(fileno(F), fileno(STDOUT));
