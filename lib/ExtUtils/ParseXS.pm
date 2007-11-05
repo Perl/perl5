@@ -18,7 +18,7 @@ my(@XSStack);	# Stack of conditionals and INCLUDEs
 my($XSS_work_idx, $cpp_next_tmp);
 
 use vars qw($VERSION);
-$VERSION = '2.18_01';
+$VERSION = '2.18_02';
 
 use vars qw(%input_expr %output_expr $ProtoUsed @InitFileCode $FH $proto_re $Overload $errors $Fallback
 	    $cplusplus $hiertype $WantPrototypes $WantVersionChk $except $WantLineNumbers
@@ -195,6 +195,13 @@ sub process_file {
 
   foreach my $value (values %input_expr) {
     $value =~ s/;*\s+\z//;
+    # Move C pre-processor instructions to column 1 to be strictly ANSI
+    # conformant. Some pre-processors are fussy about this.
+    $value =~ s/^\s+#/#/mg;
+  }
+  foreach my $value (values %output_expr) {
+    # And again.
+    $value =~ s/^\s+#/#/mg;
   }
 
   my ($cast, $size);
