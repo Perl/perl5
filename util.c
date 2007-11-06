@@ -4664,6 +4664,26 @@ Perl_sv_nosharing(pTHX_ SV *sv)
     PERL_UNUSED_ARG(sv);
 }
 
+/*
+
+=for apidoc sv_destroyable
+
+Dummy routine which reports that object can be destroyed when there is no
+sharing module present.  It ignores its single SV argument, and returns
+'true'.  Exists to avoid test for a NULL function pointer and because it
+could potentially warn under some level of strict-ness.
+
+=cut
+*/
+
+bool
+Perl_sv_destroyable(pTHX_ SV *sv)
+{
+    PERL_UNUSED_CONTEXT;
+    PERL_UNUSED_ARG(sv);
+    return TRUE;
+}
+
 U32
 Perl_parse_unicode_opts(pTHX_ char **popt)
 {

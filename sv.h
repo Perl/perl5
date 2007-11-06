@@ -1537,6 +1537,7 @@ Returns a pointer to the character buffer.
 #define SvSHARE(sv) CALL_FPTR(PL_sharehook)(aTHX_ sv)
 #define SvLOCK(sv) CALL_FPTR(PL_lockhook)(aTHX_ sv)
 #define SvUNLOCK(sv) CALL_FPTR(PL_unlockhook)(aTHX_ sv)
+#define SvDESTROYABLE(sv) CALL_FPTR(PL_destroyhook)(aTHX_ sv)
 
 #define SvGETMAGIC(x) STMT_START { if (SvGMAGICAL(x)) mg_get(x); } STMT_END
 #define SvSETMAGIC(x) STMT_START { if (SvSMAGICAL(x)) mg_set(x); } STMT_END

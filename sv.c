@@ -4572,7 +4572,9 @@ Perl_sv_clear(pTHX_ register SV *sv)
     }
 
     if (SvOBJECT(sv)) {
-	if (PL_defstash) {		/* Still have a symbol table? */
+	if (PL_defstash &&	/* Still have a symbol table? */
+	    SvDESTROYABLE(sv))
+	{
 	    dSP;
 	    do {	
 		CV* destructor;
@@ -10923,6 +10925,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_lockhook		= proto_perl->Ilockhook;
     PL_unlockhook	= proto_perl->Iunlockhook;
     PL_threadhook	= proto_perl->Ithreadhook;
+    PL_destroyhook	= proto_perl->Idestroyhook;
 
     PL_runops_std	= proto_perl->Irunops_std;
     PL_runops_dbg	= proto_perl->Irunops_dbg;

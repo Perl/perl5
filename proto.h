@@ -1550,6 +1550,7 @@ PERL_CALLCONV char *	Perl_custom_op_desc(pTHX_ OP* op)
 
 PERL_CALLCONV void	Perl_sv_nosharing(pTHX_ SV *sv);
 /* PERL_CALLCONV void	Perl_sv_nolocking(pTHX_ SV *sv); */
+PERL_CALLCONV bool	Perl_sv_destroyable(pTHX_ SV *sv);
 #ifdef NO_MATHOMS
 /* PERL_CALLCONV void	Perl_sv_nounlocking(pTHX_ SV *sv); */
 #else

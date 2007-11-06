@@ -233,6 +233,8 @@ END_EXTERN_C
 #define PL_def_layerlist	(*Perl_Idef_layerlist_ptr(aTHX))
 #undef  PL_defgv
 #define PL_defgv		(*Perl_Idefgv_ptr(aTHX))
+#undef  PL_destroyhook
+#define PL_destroyhook		(*Perl_Idestroyhook_ptr(aTHX))
 #undef  PL_diehook
 #define PL_diehook		(*Perl_Idiehook_ptr(aTHX))
 #undef  PL_doextract
@@ -1073,10 +1075,10 @@ END_EXTERN_C
 #define PL_thr_key		(*Perl_Gthr_key_ptr(NULL))
 #undef  PL_use_safe_putenv
 #define PL_use_safe_putenv	(*Perl_Guse_safe_putenv_ptr(NULL))
-#undef  PL_veto_cleanup
-#define PL_veto_cleanup		(*Perl_Gveto_cleanup_ptr(NULL))
 #undef  PL_version
 #define PL_version		(*Perl_Gversion_ptr(NULL))
+#undef  PL_veto_cleanup
+#define PL_veto_cleanup		(*Perl_Gveto_cleanup_ptr(NULL))
 
 #endif /* !PERL_CORE */
 #endif /* MULTIPLICITY */

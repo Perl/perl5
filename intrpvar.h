@@ -620,11 +620,14 @@ PERLVARI(Idumper_fd, int, -1)
 PERLVARA(Ibody_roots, PERL_ARENA_ROOTS_SIZE, void*) /* array of body roots */
 PERLVAR(Ibody_arenas, void*) /* pointer to list of body-arenas */
 
+/* Can shared object be destroyed */
+PERLVARI(Idestroyhook, destroyable_proc_t, MEMBER_TO_FPTR(Perl_sv_destroyable))
+
 /* The last unconditional member of the interpreter structure when 5.8.9 was
    released. The offset of the end of this is baked into a global variable in 
    any shared perl library which will allow a sanity test in future perl
    releases.  */
-#define PERL_LAST_5_8_9_INTERP_MEMBER	Ibody_arenas
+#define PERL_LAST_5_8_9_INTERP_MEMBER	Idestroyhook
 
 #if !defined(USE_THREADS)
 PERLVAR(Iptr_table,	PTR_TBL_t*)

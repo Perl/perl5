@@ -578,6 +578,7 @@
 #define PL_debug_pad		(vTHX->Idebug_pad)
 #define PL_def_layerlist	(vTHX->Idef_layerlist)
 #define PL_defgv		(vTHX->Idefgv)
+#define PL_destroyhook		(vTHX->Idestroyhook)
 #define PL_diehook		(vTHX->Idiehook)
 #define PL_doextract		(vTHX->Idoextract)
 #define PL_doswitches		(vTHX->Idoswitches)
@@ -912,6 +913,7 @@
 #define PL_Idebug_pad		PL_debug_pad
 #define PL_Idef_layerlist	PL_def_layerlist
 #define PL_Idefgv		PL_defgv
+#define PL_Idestroyhook		PL_destroyhook
 #define PL_Idiehook		PL_diehook
 #define PL_Idoextract		PL_doextract
 #define PL_Idoswitches		PL_doswitches
@@ -1482,8 +1484,8 @@
 #define PL_sv_placeholder	(PL_Vars.Gsv_placeholder)
 #define PL_thr_key		(PL_Vars.Gthr_key)
 #define PL_use_safe_putenv	(PL_Vars.Guse_safe_putenv)
-#define PL_veto_cleanup		(PL_Vars.Gveto_cleanup)
 #define PL_version		(PL_Vars.Gversion)
+#define PL_veto_cleanup		(PL_Vars.Gveto_cleanup)
 
 #else /* !PERL_GLOBAL_STRUCT */
 
@@ -1509,8 +1511,8 @@
 #define PL_Gsv_placeholder	PL_sv_placeholder
 #define PL_Gthr_key		PL_thr_key
 #define PL_Guse_safe_putenv	PL_use_safe_putenv
-#define PL_Gveto_cleanup	PL_veto_cleanup
 #define PL_Gversion		PL_version
+#define PL_Gveto_cleanup	PL_veto_cleanup
 
 #endif /* PERL_GLOBAL_STRUCT */
 
