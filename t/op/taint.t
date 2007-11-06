@@ -1236,7 +1236,6 @@ foreach my $ord (78, 163, 256) {
     chop $line;
     is($line, 'A1');
     $line =~ /(A\S*)/;
-    local $::TODO = "Bug for UTF-8 not fixed yet" if $ord > 255;
     ok(!tainted($1), "\\S match with chr $ord");
 }
 

@@ -5405,8 +5405,8 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	} else {
 	    while (scan < loceol && !isSPACE(*scan))
 		scan++;
-	    break;
 	}
+	break;
     case NSPACEL:
 	PL_reg_flags |= RF_tainted;
 	if (do_utf8) {
