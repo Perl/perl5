@@ -1730,7 +1730,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	 if (!PL_colorset) reginitcolors();
 	 PerlIO_printf(Perl_debug_log, "%sCompiling REx%s `%s%*s%s'\n",
 		       PL_colors[4],PL_colors[5],PL_colors[0],
-		       (int)(xend - exp), RExC_precomp, PL_colors[1]);
+		       (int)(xend - exp), exp, PL_colors[1]);
     });
 
 redo_first_pass:
