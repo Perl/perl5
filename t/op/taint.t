@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 257;
+plan tests => 263;
 
 $| = 1;
 
@@ -1232,6 +1232,15 @@ SKIP:
     $val = $TAINT;
     $val = $n;
     is ($val, '7000000000', 'Assignment to tainted variable');
+}
+
+foreach my $ord (78, 163, 256) {
+    # 47195
+    my $line = 'A1' . $TAINT . chr $ord;
+    chop $line;
+    is($line, 'A1');
+    $line =~ /(A\S*)/;
+    ok(!tainted($1), "\\S match with chr $ord");
 }
 
 # This may bomb out with the alarm signal so keep it last

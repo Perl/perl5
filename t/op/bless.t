@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan (106);
+plan (108);
 
 sub expected {
     my($object, $package, $type) = @_;
@@ -128,3 +128,14 @@ $h1 = bless {}, "H4";
 $c4 = eval { bless \$test, $h1 };
 is ($@, '', "class is an overloaded ref");
 expected($c4, 'C4', "SCALAR");
+
+{
+    my %h = 1..2;
+    my($k) = keys %h; 
+    my $x=\$k;
+    bless $x, 'pam';
+    is(ref $x, 'pam');
+
+    my $a = bless \(keys %h), 'zap';
+    is(ref $a, 'zap');
+}
