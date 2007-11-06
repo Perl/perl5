@@ -26,7 +26,6 @@ sub handle_file {
 
     open my $fh, "<", $file
         or do { warn "Could not open input file $file: $!"; exit 0 };
-    binmode $fh;
     my $str = do { local $/; <$fh> };
 
     ### unpack?
