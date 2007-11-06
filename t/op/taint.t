@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 261;
+plan tests => 267;
 
 $| = 1;
 
@@ -1228,6 +1228,16 @@ SKIP:
 
     eval 'eval $tainted';
     like ($@, qr/^Insecure dependency in eval/);
+}
+
+foreach my $ord (78, 163, 256) {
+    # 47195
+    my $line = 'A1' . $TAINT . chr $ord;
+    chop $line;
+    is($line, 'A1');
+    $line =~ /(A\S*)/;
+    local $::TODO = "Bug for UTF-8 not fixed yet" if $ord > 255;
+    ok(!tainted($1), "\\S match with chr $ord");
 }
 
 # This may bomb out with the alarm signal so keep it last
