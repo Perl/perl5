@@ -669,6 +669,9 @@ PERLVARI(Islabs, I32**, NULL)	/* Array of slabs that have been allocated */
 PERLVARI(Islab_count, U32, 0)	/* Size of the array */
 #endif
 
+/* Can shared object be destroyed */
+PERLVARI(Idestroyhook, destroyable_proc_t, MEMBER_TO_FPTR(Perl_sv_destroyable))
+
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */
 

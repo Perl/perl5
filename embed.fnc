@@ -1114,6 +1114,7 @@ ApR	|const char *	|custom_op_desc	|NN const OP* op
 
 Adp	|void	|sv_nosharing	|NULLOK SV *sv
 Adpbm	|void	|sv_nolocking	|NULLOK SV *sv
+Adp	|bool	|sv_destroyable	|NULLOK SV *sv
 #ifdef NO_MATHOMS
 Adpbm	|void	|sv_nounlocking	|NULLOK SV *sv
 #else

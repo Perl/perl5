@@ -5098,7 +5098,9 @@ Perl_sv_clear(pTHX_ register SV *sv)
     }
 
     if (SvOBJECT(sv)) {
-	if (PL_defstash) {		/* Still have a symbol table? */
+	if (PL_defstash &&	/* Still have a symbol table? */
+	    SvDESTROYABLE(sv))
+	{
 	    dSP;
 	    HV* stash;
 	    do {	
@@ -11365,6 +11367,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_lockhook		= proto_perl->Ilockhook;
     PL_unlockhook	= proto_perl->Iunlockhook;
     PL_threadhook	= proto_perl->Ithreadhook;
+    PL_destroyhook	= proto_perl->Idestroyhook;
 
 #ifdef THREADS_HAVE_PIDS
     PL_ppid		= proto_perl->Ippid;
