@@ -623,6 +623,12 @@ PERLVARI(Irehash_seed, UV, 0)		/* 582 hash initializer */
 
 PERLVARI(Iisarev, HV*, NULL) /* Reverse map of @ISA dependencies */
 
+/* The last unconditional member of the interpreter structure when 5.10.0 was
+   released. The offset of the end of this is baked into a global variable in 
+   any shared perl library which will allow a sanity test in future perl
+   releases.  */
+#define PERL_LAST_5_10_0_INTERP_MEMBER	Iisarev
+
 #ifdef PERL_IMPLICIT_CONTEXT
 PERLVARI(Imy_cxt_size, int, 0)		/* size of PL_my_cxt_list */
 PERLVARI(Imy_cxt_list, void **, NULL) /* per-module array of MY_CXT pointers */

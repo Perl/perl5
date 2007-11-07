@@ -160,3 +160,29 @@ PERLVARI(Gveto_cleanup,	int, FALSE)	/* exit without cleanup */
 PERLVARI(Grunops_std,	runops_proc_t,	MEMBER_TO_FPTR(Perl_runops_standard))
 PERLVARI(Grunops_dbg,	runops_proc_t,	MEMBER_TO_FPTR(Perl_runops_debug))
 
+
+/* These are baked at compile time into any shared perl library.
+   In future 5.10.x releases this will allow us in main() to sanity test the
+   library we're linking against.  */
+
+PERLVARI(Grevision,	U8,	PERL_REVISION)
+PERLVARI(Gversion,	U8,	PERL_VERSION)
+PERLVARI(Gsubversion,	U8,	PERL_SUBVERSION)
+
+#if defined(MULTIPLICITY)
+#  define PERL_INTERPRETER_SIZE_UPTO_MEMBER(member)			\
+    STRUCT_OFFSET(struct interpreter, member) +				\
+    sizeof(((struct interpreter*)0)->member)
+
+/* These might be useful.  */
+PERLVARI(Ginterpreter_size,	U16,	sizeof(struct interpreter))
+#if defined(PERL_GLOBAL_STRUCT)
+PERLVARI(Gglobal_struct_size,	U16,	sizeof(struct perl_vars))
+#endif
+
+/* This will be useful for subsequent releases, because this has to be the
+   same in your libperl as in main(), else you have a mismatch and must abort.
+*/
+PERLVARI(Ginterpreter_size_5_10_0, U16,
+	 PERL_INTERPRETER_SIZE_UPTO_MEMBER(PERL_LAST_5_10_0_INTERP_MEMBER))
+#endif
