@@ -2416,6 +2416,12 @@ PerlIO_cleanup(pTHX)
 void PerlIO_teardown() /* Call only from PERL_SYS_TERM(). */
 {
     dVAR;
+#if 0
+/* XXX we can't rely on an interpreter being present at this late stage,
+   XXX so we can't use a function like PerlLIO_write that relies on one
+   being present (at least in win32) :-(.
+   Disable for now.
+*/
 #ifdef DEBUGGING
     {
 	/* By now all filehandles should have been closed, so any
@@ -2435,6 +2441,7 @@ void PerlIO_teardown() /* Call only from PERL_SYS_TERM(). */
 	    }
 	}
     }
+#endif
 #endif
     /* Not bothering with PL_perlio_mutex since by now
      * all the interpreters are gone. */
