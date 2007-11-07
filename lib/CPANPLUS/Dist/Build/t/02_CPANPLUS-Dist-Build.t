@@ -39,11 +39,15 @@ my $Conf    = $CB->configure_object;
 
 
 ### create a fake object, so we don't use the actual module tree
+### make sure to add dslip data, so CPANPLUS doesn't try to find
+### it in another module in the package, for which it needs the
+### module tree
 my $Mod = CPANPLUS::Module::Fake->new(
                 module  => 'Foo::Bar',
                 path    => 'src',
                 author  => CPANPLUS::Module::Author::Fake->new,
                 package => 'Foo-Bar-0.01.tar.gz',
+                dslip   => 'RdpO?',
             );
 
 $Conf->set_conf( base       => 'dummy-cpanplus' );
