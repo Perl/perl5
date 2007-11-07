@@ -891,6 +891,19 @@ if ($define{'PERL_MAD'}) {
 		    )];
 }
 
+unless ($define{'MULTIPLICITY'}) {
+    skip_symbols [qw(
+		    PL_interpreter_size
+		    PL_interpreter_size_5_10_0
+		    )];
+}
+
+unless ($define{'PERL_GLOBAL_STRUCT'}) {
+    skip_symbols [qw(
+		    PL_global_struct_size
+		    )];
+}
+
 unless ($define{'PERL_GLOBAL_STRUCT_PRIVATE'}) {
     skip_symbols [qw(
 		    PL_my_cxt_keys
