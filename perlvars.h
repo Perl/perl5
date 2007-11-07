@@ -90,3 +90,26 @@ PERLVARI(Gperlio_fd_refcnt_size, int, 0) /* Size of the array */
 #if defined(USE_ITHREADS)
 PERLVAR(Gperlio_mutex, perl_mutex)    /* Mutex for perlio fd refcounts */
 #endif
+
+/* These are baked at compile time into any shared perl library.
+   In future 5.8.x releases this will allow us in main() to sanity test the
+   library we're linking against.  */
+
+PERLVARI(Grevision,	U8,	PERL_REVISION)
+PERLVARI(Gversion,	U8,	PERL_VERSION)
+PERLVARI(Gsubversion,	U8,	PERL_SUBVERSION)
+
+#if defined(MULTIPLICITY)
+#  define PERL_INTERPRETER_SIZE_UPTO_MEMBER(member)			\
+    STRUCT_OFFSET(struct interpreter, member) +				\
+    sizeof(((struct interpreter*)0)->member)
+
+/* This might be useful.  */
+PERLVARI(Ginterp_size,	U16,	sizeof(struct interpreter))
+
+/* This will be useful for subsequent releases, because this has to be the
+   same in your libperl as in main(), else you have a mismatch and must abort.
+*/
+PERLVARI(Ginterp_size_5_8_9, U16,
+	 PERL_INTERPRETER_SIZE_UPTO_MEMBER(PERL_LAST_5_8_9_INTERP_MEMBER))
+#endif

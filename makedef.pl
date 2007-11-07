@@ -826,6 +826,13 @@ unless ($define{'d_sigaction'}) {
 		    )];
 }
 
+unless ($define{'MULTIPLICITY'}) {
+    skip_symbols [qw(
+		    PL_interp_size
+		    PL_interp_size_5_8_9
+		    )];
+}
+
 sub readvar {
     my $file = shift;
     my $proc = shift || sub { "PL_$_[2]" };

@@ -1043,6 +1043,10 @@ END_EXTERN_C
 #define PL_dollarzero_mutex	(*Perl_Gdollarzero_mutex_ptr(NULL))
 #undef  PL_hexdigit
 #define PL_hexdigit		(*Perl_Ghexdigit_ptr(NULL))
+#undef  PL_interp_size
+#define PL_interp_size		(*Perl_Ginterp_size_ptr(NULL))
+#undef  PL_interp_size_5_8_9
+#define PL_interp_size_5_8_9	(*Perl_Ginterp_size_5_8_9_ptr(NULL))
 #undef  PL_malloc_mutex
 #define PL_malloc_mutex		(*Perl_Gmalloc_mutex_ptr(NULL))
 #undef  PL_op_mutex
@@ -1055,16 +1059,22 @@ END_EXTERN_C
 #define PL_perlio_fd_refcnt_size	(*Perl_Gperlio_fd_refcnt_size_ptr(NULL))
 #undef  PL_perlio_mutex
 #define PL_perlio_mutex		(*Perl_Gperlio_mutex_ptr(NULL))
+#undef  PL_revision
+#define PL_revision		(*Perl_Grevision_ptr(NULL))
 #undef  PL_sh_path
 #define PL_sh_path		(*Perl_Gsh_path_ptr(NULL))
 #undef  PL_sigfpe_saved
 #define PL_sigfpe_saved		(*Perl_Gsigfpe_saved_ptr(NULL))
+#undef  PL_subversion
+#define PL_subversion		(*Perl_Gsubversion_ptr(NULL))
 #undef  PL_sv_placeholder
 #define PL_sv_placeholder	(*Perl_Gsv_placeholder_ptr(NULL))
 #undef  PL_thr_key
 #define PL_thr_key		(*Perl_Gthr_key_ptr(NULL))
 #undef  PL_use_safe_putenv
 #define PL_use_safe_putenv	(*Perl_Guse_safe_putenv_ptr(NULL))
+#undef  PL_version
+#define PL_version		(*Perl_Gversion_ptr(NULL))
 
 #endif /* !PERL_CORE */
 #endif /* MULTIPLICITY */

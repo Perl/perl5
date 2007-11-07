@@ -1467,17 +1467,22 @@
 #define PL_do_undump		(PL_Vars.Gdo_undump)
 #define PL_dollarzero_mutex	(PL_Vars.Gdollarzero_mutex)
 #define PL_hexdigit		(PL_Vars.Ghexdigit)
+#define PL_interp_size		(PL_Vars.Ginterp_size)
+#define PL_interp_size_5_8_9	(PL_Vars.Ginterp_size_5_8_9)
 #define PL_malloc_mutex		(PL_Vars.Gmalloc_mutex)
 #define PL_op_mutex		(PL_Vars.Gop_mutex)
 #define PL_patleave		(PL_Vars.Gpatleave)
 #define PL_perlio_fd_refcnt	(PL_Vars.Gperlio_fd_refcnt)
 #define PL_perlio_fd_refcnt_size	(PL_Vars.Gperlio_fd_refcnt_size)
 #define PL_perlio_mutex		(PL_Vars.Gperlio_mutex)
+#define PL_revision		(PL_Vars.Grevision)
 #define PL_sh_path		(PL_Vars.Gsh_path)
 #define PL_sigfpe_saved		(PL_Vars.Gsigfpe_saved)
+#define PL_subversion		(PL_Vars.Gsubversion)
 #define PL_sv_placeholder	(PL_Vars.Gsv_placeholder)
 #define PL_thr_key		(PL_Vars.Gthr_key)
 #define PL_use_safe_putenv	(PL_Vars.Guse_safe_putenv)
+#define PL_version		(PL_Vars.Gversion)
 
 #else /* !PERL_GLOBAL_STRUCT */
 
@@ -1488,17 +1493,22 @@
 #define PL_Gdo_undump		PL_do_undump
 #define PL_Gdollarzero_mutex	PL_dollarzero_mutex
 #define PL_Ghexdigit		PL_hexdigit
+#define PL_Ginterp_size		PL_interp_size
+#define PL_Ginterp_size_5_8_9	PL_interp_size_5_8_9
 #define PL_Gmalloc_mutex	PL_malloc_mutex
 #define PL_Gop_mutex		PL_op_mutex
 #define PL_Gpatleave		PL_patleave
 #define PL_Gperlio_fd_refcnt	PL_perlio_fd_refcnt
 #define PL_Gperlio_fd_refcnt_size	PL_perlio_fd_refcnt_size
 #define PL_Gperlio_mutex	PL_perlio_mutex
+#define PL_Grevision		PL_revision
 #define PL_Gsh_path		PL_sh_path
 #define PL_Gsigfpe_saved	PL_sigfpe_saved
+#define PL_Gsubversion		PL_subversion
 #define PL_Gsv_placeholder	PL_sv_placeholder
 #define PL_Gthr_key		PL_thr_key
 #define PL_Guse_safe_putenv	PL_use_safe_putenv
+#define PL_Gversion		PL_version
 
 #endif /* PERL_GLOBAL_STRUCT */
 
