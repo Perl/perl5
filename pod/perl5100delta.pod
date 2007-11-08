@@ -1140,7 +1140,7 @@ improved. (ActiveState)
 
 =item Visual C++
 
-Perl now can be compiled with Microsoft Visual C++.
+Perl can now be compiled with Microsoft Visual C++ 2005 (and 2008 Beta 2).
 
 =item Win32 builds
 
