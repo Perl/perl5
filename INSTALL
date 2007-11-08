@@ -1320,7 +1320,7 @@ This will attempt to make perl in the current directory.
 
 =head2 Expected errors
 
-These errors reports are normal, and can be ignored:
+These error reports are normal, and can be ignored:
 
   ...
   make: [extra.pods] Error 1 (ignored)
@@ -2012,7 +2012,7 @@ make install will install the following:
 	cpan2dist	The CPANPLUS distribution creator
 	cpanp		The CPANPLUS shell
 	cpanp-run-perl	An helper for cpanp
-	dprofpp		Perl code profile post-processor
+	dprofpp		Perl code profiler post-processor
 	enc2xs		Encoding module generator
 	find2perl	find-to-perl translator
 	h2ph		Extract constants and simple macros from C headers
