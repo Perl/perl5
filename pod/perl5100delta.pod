@@ -177,7 +177,7 @@ that contain backreferences. See L<perlre/"Capture buffers">. (Yves Orton)
 =item C<\K> escape
 
 The functionality of Jeff Pinyan's module Regexp::Keep has been added to
-the core. You can now use in regular expressions the special escape C<\K>
+the core. In regular expressions you can now use the special escape C<\K>
 as a way to do something like floating length positive lookbehind. It is
 also useful in substitutions like:
 
@@ -225,10 +225,10 @@ overriding the lexical declaration with C<our $_>. (Rafael Garcia-Suarez)
 
 =head2 The C<_> prototype
 
-A new prototype character has been added. C<_> is equivalent to C<$> (it
-denotes a scalar), but defaults to C<$_> if the corresponding argument
-isn't supplied. Due to the optional nature of the argument, you can only
-use it at the end of a prototype, or before a semicolon.
+A new prototype character has been added. C<_> is equivalent to C<$> but
+defaults to C<$_> if the corresponding argument isn't supplied. (both C<$>
+and <_> denote a scalar). Due to the optional nature of the argument, you
+can only use it at the end of a prototype, or before a semicolon.
 
 This has a small incompatible consequence: the prototype() function has
 been adjusted to return C<_> for some built-ins in appropriate cases (for
@@ -282,7 +282,7 @@ but retain their previous value. (Rafael Garcia-Suarez, Nicholas Clark)
 
 To use state variables, one needs to enable them by using
 
-    use feature "state";
+    use feature 'state';
 
 or by using the C<-E> command-line switch in one-liners.
 See L<perlsub/"Persistent variables via state()">.
@@ -302,14 +302,6 @@ module authors use other types of relations between classes (in addition
 to inheritance). (chromatic)
 
 See L<< UNIVERSAL/"$obj->DOES( ROLE )" >>.
-
-=head2 C<CLONE_SKIP()>
-
-Perl has now support for the C<CLONE_SKIP> special subroutine. Like
-C<CLONE>, C<CLONE_SKIP> is called once per package; however, it is called
-just before cloning starts, and in the context of the parent thread. If it
-returns a true value, then no objects of that class will be cloned. See
-L<perlmod> for details. (Contributed by Dave Mitchell.)
 
 =head2 Formats
 
@@ -351,7 +343,9 @@ You can now use recursive subroutines with sort(), thanks to Robin Houston.
 The constant folding routine is now wrapped in an exception handler, and
 if folding throws an exception (such as attempting to evaluate 0/0), perl
 now retains the current optree, rather than aborting the whole program.
-(Nicholas Clark, Dave Mitchell)
+Without this change, programs would not compile if they had expressions that
+happened to generate exceptions, even though those expressions were in code
+that could never be reached at runtime. (Nicholas Clark, Dave Mitchell)
 
 =head2 Source filters in @INC
 
@@ -406,10 +400,10 @@ been updated to version 5.0.0.
 
 =head2 MAD
 
-MAD, which stands for I<Misc Attribute Decoration>, is a
+MAD, which stands for I<Miscellaneous Attribute Decoration>, is a
 still-in-development work leading to a Perl 5 to Perl 6 converter. To
 enable it, it's necessary to pass the argument C<-Dmad> to Configure. The
-obtained perl isn't binary compatible with a regular perl 5.9.4, and has
+obtained perl isn't binary compatible with a regular perl 5.10, and has
 space and speed penalties; moreover not all regression tests still pass
 with it. (Larry Wall, Nicholas Clark)
 
@@ -431,7 +425,8 @@ To be consistent with pack(), the C<C0> in unpack() templates indicates
 that the data is to be processed in character mode, i.e. character by
 character; on the contrary, C<U0> in unpack() indicates UTF-8 mode, where
 the packed string is processed in its UTF-8-encoded Unicode form on a byte
-by byte basis. This is reversed with regard to perl 5.8.X.
+by byte basis. This is reversed with regard to perl 5.8.X, but now consistent
+between pack() and unpack().
 
 Moreover, C<C0> and C<U0> can also be used in pack() templates to specify
 respectively character and byte modes.
@@ -537,11 +532,11 @@ equivalent to setting it to C<'DEFAULT'>. (Rafael Garcia-Suarez)
 
 =head2 strictures and dereferencing in defined()
 
-C<use strict "refs"> was ignoring taking a hard reference in an argument
+C<use strict 'refs'> was ignoring taking a hard reference in an argument
 to defined(), as in :
 
-    use strict "refs";
-    my $x = "foo";
+    use strict 'refs';
+    my $x = 'foo';
     if (defined $$x) {...}
 
 This now correctly produces the run-time error C<Can't use string as a
@@ -636,7 +631,7 @@ anymore, and will require parentheses to be added after the function name:
 
     use warnings;
     require Carp;
-    Carp::confess "argh";
+    Carp::confess 'argh';
 
 =item C<less>
 
@@ -830,9 +825,6 @@ rerunning all bar the last command from a saved command history.
 It can also display the parent inheritance tree of a given class, with the
 C<i> command.
 
-Perl has a new -dt command-line flag, which enables threads support in the
-debugger.
-
 =item ptar
 
 C<ptar> is a pure perl implementation of C<tar>, that comes with
@@ -840,7 +832,7 @@ C<Archive::Tar>.
 
 =item ptardiff
 
-C<ptardiff> is a small script used to generate a diff between the contents
+C<ptardiff> is a small utility used to generate a diff between the contents
 of a tar archive and a directory tree. Like C<ptar>, it comes with
 C<Archive::Tar>.
 
@@ -856,7 +848,7 @@ above).
 
 =item h2ph and h2xs
 
-C<h2ph> and C<h2xs> have been made a bit more robust with regard to
+C<h2ph> and C<h2xs> have been made more robust with regard to
 "modern" C code.
 
 C<h2xs> implements a new option C<--use-xsloader> to force use of
@@ -890,7 +882,7 @@ their parent modules.)
 
 =item cpanp
 
-C<cpanp>, the CPANPLUS shell, has been added. (C<cpanp-run-perl>, an
+C<cpanp>, the CPANPLUS shell, has been added. (C<cpanp-run-perl>, a
 helper for CPANPLUS operation, has been added too, but isn't intended for
 direct use).
 
@@ -1265,7 +1257,7 @@ data, so perl no longer tries to read it on Windows. (Alex Davies)
 
 =item PERLIO_DEBUG
 
-The C<PERLIO_DEBUG> environment variable has no longer any effect for
+The C<PERLIO_DEBUG> environment variable no longer has any effect for
 setuid scripts and for scripts run with B<-T>.
 
 Moreover, with a thread-enabled perl, using C<PERLIO_DEBUG> could lead to
@@ -1298,7 +1290,7 @@ accordingly to the contents of that %INC entry. (Rafael)
 =item C<-t> switch fix
 
 The C<-w> and C<-t> switches can now be used together without messing
-up what categories of warnings are activated or not. (Rafael)
+up which categories of warnings are activated. (Rafael)
 
 =item Duping UTF-8 filehandles
 
@@ -1405,6 +1397,19 @@ difference unless you have code that explicitly makes assumptions about that
 ordering. (The inheritance hierarchy of C<B::*> objects has been changed
 to reflect this.)
 
+=head2 Elimination of SVt_PVBM
+
+Related to this, the internal type C<SVt_PVBM> has been been removed. This
+dedicated type of C<SV> was used by the C<index> operator and parts of the
+regexp engine to facilitate fast Boyer-Moore matches. Its use internally has
+been replaced by C<SV>s of type C<SVt_PVGV>.
+
+=head2 New type SVt_BIND
+
+A new type C<SVt_BIND> has been added, in readiness for the project to
+implement Perl 6 on 5. There deliberately is no implementation yet, and
+they cannot yet be created or destroyed.
+
 =head2 Removal of CPP symbols
 
 The C preprocessor symbols C<PERL_PM_APIVERSION> and
@@ -1416,7 +1421,7 @@ been removed.
 =head2 Less space is used by ops
 
 The C<BASEOP> structure now uses less space. The C<op_seq> field has been
-removed and replaced by the one-bit fields C<op_opt>. C<op_type> is now 9
+removed and replaced by a single bit bit-field C<op_opt>. C<op_type> is now 9
 bits long. (Consequently, the C<B::OP> class doesn't provide an C<seq>
 method anymore.)
 
@@ -1453,7 +1458,7 @@ C<AV*> parameters.
 =head2 $^H and %^H
 
 The implementation of the special variables $^H and %^H has changed, to
-allow implementing lexical pragmas in pure perl.
+allow implementing lexical pragmas in pure Perl.
 
 =head2 B:: modules inheritance changed
 
@@ -1467,8 +1472,6 @@ instead of 3, now that pp_anonhash and pp_anonlist return a reference to
 an hash/array when the op is flagged with OPf_SPECIAL (Nicholas Clark).
 
 =for p5p XXX have we some docs on how to create regexp engine plugins, since that's now possible ? (perlreguts)
-
-=for p5p XXX new BIND SV type, #29544, #29642
 
 =head1 Known Problems
 
