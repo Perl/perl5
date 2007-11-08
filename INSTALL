@@ -1048,6 +1048,12 @@ To build without perl's malloc, you can use the Configure command
 
 or you can answer 'n' at the appropriate interactive Configure prompt.
 
+Note that Perl's malloc isn't always used by default; that actually
+depends on your system. For example, on Linux and FreeBSD (and many more
+systems), Configure chooses to use the system's malloc by default.
+See the appropriate file in the F<hints/> directory to see how the
+default is set.
+
 =item -DPERL_POLLUTE_MALLOC
 
 NOTE: This flag is enabled automatically on some platforms if you just
@@ -1142,7 +1148,7 @@ file, which also explains hint files known as callback-units.
 Note that any hint file is read before any Policy file, meaning that
 Policy overrides hints -- see L</Site-wide Policy settings>.
 
-=item *** WHOA THERE!!! ***
+=item WHOA THERE!!!
 
 If you are re-using an old config.sh, it's possible that Configure detects
 different values from the ones specified in this file.  You will almost
@@ -1314,7 +1320,7 @@ This will attempt to make perl in the current directory.
 
 =head2 Expected errors
 
-These errors are normal, and can be ignored:
+These errors reports are normal, and can be ignored:
 
   ...
   make: [extra.pods] Error 1 (ignored)
@@ -1445,7 +1451,7 @@ If you can't, you can either link with the updated resolver library provided
 with BIND 8.1 or rename /usr/local/bin/arpa/inet.h during the Perl build and
 test process to avoid the problem.
 
-=item *_r() prototype NOT found
+=item .*_r() prototype NOT found
 
 On a related note, if you see a bunch of complaints like the above about
 reentrant functions - specifically networking-related ones - being present
@@ -1996,25 +2002,44 @@ make install will install the following:
 
     scripts
 
-	cppstdin	This is used by perl -P, if your cc -E can't
-			read from stdin.
+	cppstdin	This is used by the deprecated switch perl -P, if
+			your cc -E can't read from stdin.
 	c2ph, pstruct	Scripts for handling C structures in header files.
-	s2p		sed-to-perl translator
+	config_data	Manage Module::Build-like module configuration
+	corelist	Shows versions of modules that come with different
+			versions of perl
+	cpan		The CPAN shell
+	cpan2dist	The CPANPLUS distribution creator
+	cpanp		The CPANPLUS shell
+	cpanp-run-perl	An helper for cpanp
+	dprofpp		Perl code profile post-processor
+	enc2xs		Encoding module generator
 	find2perl	find-to-perl translator
 	h2ph		Extract constants and simple macros from C headers
 	h2xs		Converts C .h header files to Perl extensions.
+	instmodsh	A shell to examine installed modules.
+	libnetcfg	Configure libnet.
 	perlbug		Tool to report bugs in Perl.
 	perldoc		Tool to read perl's pod documentation.
+	perlivp		Perl Installation Verification Procedure
+	piconv		A Perl implementation of the encoding conversion
+			utility iconv
 	pl2pm		Convert Perl 4 .pl files to Perl 5 .pm modules
 	pod2html,	Converters from perl's pod documentation format
 	pod2latex, 	to other useful formats.
 	pod2man,
 	pod2text,
-	pod2checker,
-	pod2select,
 	pod2usage
+	podchecker	POD syntax checker
+	podselect	Prints sections of POD documentation
+	prove		A command-line tool for running tests
+	psed		A Perl implementation of sed
+	ptar		A Perl implementation of tar
+	ptardiff	A diff for tar archives
+	s2p		sed-to-perl translator
+	shasum		A tool to print or check SHA checksums
 	splain		Describe Perl warnings and errors
-	dprofpp		Perl code profile post-processor
+	xsubpp		Compiler to convert Perl XS code into C code
 
     library files
 
