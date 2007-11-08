@@ -1,6 +1,6 @@
 Revision history for Sys-Syslog
 
-0.22 -- 2007.11.xx -- Sebastien Aperghis-Tramoni (SAPER)
+0.22 -- 2007.11.08 -- Sebastien Aperghis-Tramoni (SAPER)
         [BUGFIX] CPAN-RT#29875: Added workaround SpamAssassin overzealous
         logging features.
         [FEATURE] Added support for PERROR option.
