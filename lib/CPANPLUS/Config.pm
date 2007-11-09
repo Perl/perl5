@@ -486,18 +486,42 @@ remains empty if you do not require super user permissiosn to install.
 =cut
 
         $Conf->{'program'}->{'sudo'} = do {
-            $>  # check for all install dirs!
-                # installsiteman3dir is a 5.8'ism.. don't check
-                # it on 5.6.x...
-                ? ( -w $Config{'installsitelib'} &&
-                    ( defined $Config{'installsiteman3dir'} &&
-                           -w $Config{'installsiteman3dir'}
-                    ) &&
-                    -w $Config{'installsitebin'} 
-                        ? undef
-                        : can_run('sudo') 
-                  )
-                : can_run('sudo')
+
+            ### let's assume you dont need sudo,
+            ### unless one of the below criteria tells us otherwise
+            my $sudo = undef;
+            
+            ### you're a normal user, you might need sudo
+            if( $> ) {
+    
+                ### check for all install dirs!
+                ### installsiteman3dir is a 5.8'ism.. don't check
+                ### it on 5.6.x...            
+                ### you have write permissions to the installdir,
+                ### you don't need sudo
+                if( -w $Config{'installsitelib'} &&
+                    ( defined $Config{'installsiteman3dir'} && 
+                      -w $Config{'installsiteman3dir'} 
+                    ) && -w $Config{'installsitebin'} 
+                ) {                    
+                    $sudo = undef;
+                    
+                ### you have PERL_MM_OPT set to some alternate
+                ### install place. You probably have write permissions
+                ### to that
+                } elsif ( $ENV{'PERL_MM_OPT'} and 
+                          $ENV{'PERL_MM_OPT'} =~ /INSTALL|LIB|PREFIX/
+                ) {
+                    $sudo = undef;
+
+                ### you probably don't have write permissions
+                } else {                
+                    $sudo = can_run('sudo');
+                }
+            }  
+            
+            ### and return the value
+            $sudo;
         };
 
 =item perlwrapper

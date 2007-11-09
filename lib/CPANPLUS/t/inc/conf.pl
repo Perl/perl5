@@ -24,7 +24,7 @@ BEGIN {
 
     ### and add them to the environment, so shellouts get them
     $old_env_perl5lib = $ENV{'PERL5LIB'};
-    $ENV{'PERL5LIB'}  = join ':', 
+    $ENV{'PERL5LIB'}  = join $Config{'path_sep'}, 
                         grep { defined } $ENV{'PERL5LIB'}, @paths, @rel2abs;
     
     ### add our own path to the front of $ENV{PATH}, so that cpanp-run-perl
