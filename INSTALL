@@ -2303,36 +2303,13 @@ your old config.sh and Policy.sh files.
 
 If you are upgrading from a previous version of perl, or if you
 change systems or compilers or make other significant changes, or if
-you are experiencing difficulties building perl, you should probably
-not re-use your old config.sh.  Simply remove it:
-
-	rm -f config.sh
-
-If you wish to re-use your old config.sh, be especially attentive to the
-version and architecture-specific questions and answers.  For example,
-the default directory for architecture-dependent library modules
-includes the version name.  By default, Configure will reuse your old
-name (e.g. /opt/perl/lib/i86pc-solaris/5.003) even if you're running
-Configure for a different version, e.g. 5.004.  Similarly, if you used
-a shared libperl.so (see below) with version numbers, you will probably
-want to adjust them as well.
-
-Also, be careful to check your architecture name.  For example, some
-Linux distributions use i386, but Configure uses the output of the arch
-command, which might be i686 instead.  If you pick up a precompiled
-binary, or compile extensions on different systems, they might not all
-agree on the architecture name.
-
-In short, if you wish to use your old config.sh, I recommend running
-Configure interactively rather than blindly accepting the defaults.
+you are experiencing difficulties building perl, you should not re-use
+your old config.sh.
 
 If your reason to reuse your old config.sh is to save your particular
 installation choices, then you can probably achieve the same effect by
 using the Policy.sh file.  See the section on L<"Site-wide Policy
-settings"> above.  If you wish to start with a fresh distribution, you
-also need to remove any old Policy.sh files you may have with
-
-	rm -f Policy.sh
+settings"> above.
 
 =head1 Minimizing the Perl installation
 
@@ -2482,21 +2459,6 @@ is in the pod/ subdirectory and should have been installed during the
 build process.  Type B<man perl> to get started.  Alternatively, you
 can type B<perldoc perl> to use the supplied perldoc script.  This is
 sometimes useful for finding things in the library modules.
-
-Under UNIX, you can produce a documentation book in postscript form,
-along with its table of contents, by going to the pod/ subdirectory and
-running (either):
-
-	./roffitall -groff		# If you have GNU groff installed
-	./roffitall -psroff		# If you have psroff
-
-This will leave you with two postscript files ready to be printed.
-(You may need to fix the roffitall command to use your local troff
-set-up.)
-
-Note that you must have performed the installation already before running
-the above, since the script collects the installed files to generate
-the documentation.
 
 =head1 AUTHOR
 
