@@ -228,9 +228,9 @@ overriding the lexical declaration with C<our $_>. (Rafael Garcia-Suarez)
 =head2 The C<_> prototype
 
 A new prototype character has been added. C<_> is equivalent to C<$> but
-defaults to C<$_> if the corresponding argument isn't supplied. (both C<$>
-and C<_> denote a scalar). Due to the optional nature of the argument, you
-can only use it at the end of a prototype, or before a semicolon.
+defaults to C<$_> if the corresponding argument isn't supplied (both C<$>
+and C<_> denote a scalar). Due to the optional nature of the argument, 
+you can only use it at the end of a prototype, or before a semicolon.
 
 This has a small incompatible consequence: the prototype() function has
 been adjusted to return C<_> for some built-ins in appropriate cases (for
