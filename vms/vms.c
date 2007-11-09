@@ -4829,7 +4829,7 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts)
     }
     if ((*cp2 == '^')) {
 	/* EFS file escape, pass the next character as is */
-	/* Fix me: HEX encoding for UNICODE not implemented */
+	/* Fix me: HEX encoding for Unicode not implemented */
 	cp2++;
     }
     else if ( *cp2 == '.') {
@@ -4843,7 +4843,7 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts)
   for (; cp2 <= dirend; cp2++) {
     if ((*cp2 == '^')) {
 	/* EFS file escape, pass the next character as is */
-	/* Fix me: HEX encoding for UNICODE not implemented */
+	/* Fix me: HEX encoding for Unicode not implemented */
 	*(cp1++) = *(++cp2);
         /* An escaped dot stays as is -- don't convert to slash */
         if (*cp2 == '.') cp2++;

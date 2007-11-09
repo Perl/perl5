@@ -63,7 +63,7 @@ Windows and Mac OS, read L<perlrun>.
 =head2 Safety net
 
 Perl by default is very forgiving. In order to make it more robust
-it is recommened to start every program with the following lines:
+it is recommended to start every program with the following lines:
 
     #!/usr/bin/perl
     use strict;
@@ -369,7 +369,7 @@ You can also use C<while> in a post-condition:
 
 Exactly like C:
 
-    for ($i=0; $i <= $max; $i++) {
+    for ($i = 0; $i <= $max; $i++) {
         ...
     }
 
@@ -537,7 +537,7 @@ expressions.  These are documented at great length in L<perlre>, but for
 the meantime, here's a quick cheat sheet:
 
     .                   a single character
-    \s                  a whitespace character (space, tab, newline)
+    \s                  a whitespace character (space, tab, newline, ...)
     \S                  non-whitespace character
     \d                  a digit (0-9)
     \D                  a non-digit

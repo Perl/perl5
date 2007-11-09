@@ -1761,7 +1761,7 @@ redo_first_pass:
 	return(NULL);
     }
     if (RExC_utf8 && !RExC_orig_utf8) {
-        /* It's possible to write a regexp in ascii that represents unicode
+        /* It's possible to write a regexp in ascii that represents Unicode
         codepoints outside of the byte range, such as via \x{100}. If we
         detect such a sequence we have to convert the entire pattern to utf8
         and then recompile, as our sizing calculation will have been based

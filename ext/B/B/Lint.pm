@@ -175,6 +175,8 @@ the current filename and line number.
 
 =item more tests, validate against older perls
 
+=back
+
 =head1 BUGS
 
 This is only a very preliminary version.

@@ -528,18 +528,18 @@ Bourne shell script functions that can make your life easier:
     function edit {
 	if [ -L $1 ]; then
 	    mv $1 $1.orig
-		cp $1.orig $1
-		vi $1
+	    cp $1.orig $1
+	    vi $1
 	else
-	    /bin/vi $1
-		fi
+	    vi $1
+	fi
     }
 
     function unedit {
 	if [ -L $1.orig ]; then
 	    rm $1
-		mv $1.orig $1
-		fi
+	    mv $1.orig $1
+	fi
     }
 
 Replace "vi" with your favorite flavor of editor.
@@ -549,15 +549,15 @@ files which have been edited in your symlink tree:
 
     mkpatchorig() {
 	local diffopts
-	    for f in `find . -name '*.orig' | sed s,^\./,,`
-		do
-		    case `echo $f | sed 's,.orig$,,;s,.*\.,,'` in
-			c)   diffopts=-p ;;
+	for f in `find . -name '*.orig' | sed s,^\./,,`
+	do
+	    case `echo $f | sed 's,.orig$,,;s,.*\.,,'` in
+		c)   diffopts=-p ;;
 		pod) diffopts='-F^=' ;;
 		*)   diffopts= ;;
-		esac
-		    diff -du $diffopts $f `echo $f | sed 's,.orig$,,'`
-		    done
+	    esac
+	    diff -du $diffopts $f `echo $f | sed 's,.orig$,,'`
+	done
     }
 
 This function produces patches which include enough context to make
@@ -602,8 +602,10 @@ the 5.8 pumpking decides which of those patches is to be backported to the
 maint branch.  Only patches that survive the heat of the development
 branch get applied to maintenance versions.
 
-Your patch should also update the documentation and test suite.  See
-L<Writing a test>.
+Your patch should update the documentation and test suite.  See
+L<Writing a test>.  If you have added or removed files in the distribution,
+edit the MANIFEST file accordingly, sort the MANIFEST file using
+C<make manisort>, and include those changes as part of your patch.
 
 Patching documentation also follows the same order: if accepted, a patch
 is first applied to B<development>, and if relevant then it's backported
@@ -623,9 +625,15 @@ the searchable archives.
 
 The CPAN testers ( http://testers.cpan.org/ ) are a group of
 volunteers who test CPAN modules on a variety of platforms.  Perl
-Smokers ( http://www.nntp.perl.org/group/perl.daily-build )
+Smokers ( http://www.nntp.perl.org/group/perl.daily-build and
+http://www.nntp.perl.org/group/perl.daily-build.reports/ )
 automatically test Perl source releases on platforms with various
-configurations.  Both efforts welcome volunteers.
+configurations.  Both efforts welcome volunteers. In order to get
+involved in smoke testing of the perl itself visit
+L<http://search.cpan.org/dist/Test-Smoke>. In order to start smoke
+testing CPAN modules visit L<http://search.cpan.org/dist/CPAN-YACSmoke/>
+or L<http://search.cpan.org/dist/POE-Component-CPAN-YACSmoke/> or
+L<http://search.cpan.org/dist/CPAN-Reporter/>.
 
 It's a good idea to read and lurk for a while before chipping in.
 That way you'll get to see the dynamic of the conversations, learn the
@@ -1917,7 +1925,7 @@ we can write the more sensible (see L<Test::More> for a full
 explanation of is() and other testing functions).
 
  is( "1.20.300.4000", sprintf "%vd", pack("U*",1,20,300,4000), 
-                                       "U* produces unicode" );
+                                       "U* produces Unicode" );
 
 Now we'll test that we got that space-at-the-beginning business right:
 
@@ -1928,7 +1936,7 @@ And finally we'll test that we don't make Unicode strings if C<U> is B<not>
 the first active format:
 
  isnt( v1.20.300.4000, sprintf "%vd", pack("C0U*",1,20,300,4000),
-                                       "U* not first isn't unicode" );
+                                       "U* not first isn't Unicode" );
 
 Mustn't forget to change the number of tests which appears at the top,
 or else the automated tester will get confused.  This will either look

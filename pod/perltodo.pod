@@ -38,7 +38,7 @@ Write portable self destruct code for tests to stop them burning CPU in
 infinite loops. This needs to avoid using alarm, as some of the tests are
 testing alarm/sleep or timers.
 
-=head2 POD -> HTML conversion in the core still sucks
+=head2 POD -E<gt> HTML conversion in the core still sucks
 
 Which is crazy given just how simple POD purports to be, and how simple HTML
 can be. It's not actually I<as> simple as it sounds, particularly with the
@@ -134,7 +134,7 @@ for example POSIX passes Exporter some very memory hungry data structures.
 There is a script F<embed.pl> that generates several header files to prefix
 all of Perl's symbols in a consistent way, to provide some semblance of
 namespace support in C<C>. Functions are declared in F<embed.fnc>, variables
-in F<interpvar.h> and F<thrdvar.h>. Quite a few of the functions and variables
+in F<interpvar.h>. Quite a few of the functions and variables
 are conditionally declared there, using C<#ifdef>. However, F<embed.pl>
 doesn't understand the C macros, so the rules about which symbols are present
 when is duplicated in F<makedef.pl>. Writing things twice is bad, m'kay.
@@ -303,7 +303,14 @@ C<perl> executable.
 This could be done little differently. Namely C<miniperl> should be built for
 HOST and then full C<perl> with extensions should be compiled for TARGET.
 This, however, might require extra trickery for %Config: we have one config
-first for HOST and then another for TARGET.
+first for HOST and then another for TARGET.  Tools like MakeMaker will be
+mightily confused.  Having around two different types of executables and
+libraries (HOST and TARGET) makes life interesting for Makefiles and
+shell (and Perl) scripts.  There is $Config{run}, normally empty, which
+can be used as an execution wrapper.  Also note that in some
+cross-compilation/execution environments the HOST and the TARGET do
+not see the same filesystem(s), the $Config{run} may need to do some
+file/directory copying back and forth.
 
 =head1 Tasks that need a little C knowledge
 
@@ -453,14 +460,18 @@ filesystem.
 temporarily retired in 5.8.1, and the -C has been repurposed, see
 L<perlrun>.)
 
+Most probably the right way to do this would be this:
+L</"Virtualize operating system access">.
+
 =head2 Unicode in %ENV
 
 Currently the %ENV entries are always byte strings.
+See L</"Virtualize operating system access">.
 
 =head2 Unicode and glob()
 
 Currently glob patterns and filenames returned from File::Glob::glob()
-are always byte strings.
+are always byte strings.  See L</"Virtualize operating system access">.
 
 =head2 use less 'memory'
 
@@ -530,6 +541,8 @@ would mean.)
 PerlIO doesn't do directories or symlinks, either: mkdir(), rmdir(),
 opendir(), closedir(), seekdir(), rewinddir(), glob(); symlink(),
 readlink().
+
+See also L</"Virtualize operating system access">.
 
 =head2 -C on the #! line
 
@@ -623,15 +636,6 @@ instated.
 
 The old perltodo notes "Look at the "reification" code in C<av.c>".
 
-=head2 What hooks would assertions need?
-
-Assertions are in the core, and work. However, assertions needed to be added
-as a core patch, rather than an XS module in ext, or a CPAN module, because
-the core has no hooks in the necessary places. It would be useful to
-investigate what hooks would need to be added to make it possible to provide
-the full assertion support from a CPAN module, so that we aren't constraining
-the imagination of future CPAN authors.
-
 =head2 Properly Unicode safe tokeniser and pads.
 
 The tokeniser isn't actually very UTF-8 clean. C<use utf8;> is a hack -
@@ -650,10 +654,45 @@ if it is ever executed. Variant ??? calls warn, and !!! calls die.>
 
 Those would be nice to add to Perl 5. That could be done without new ops.
 
+=head2 Virtualize operating system access
+
+Implement a set of "vtables" that virtualizes operating system access
+(open(), mkdir(), unlink(), readdir(), getenv(), etc.)  At the very
+least these interfaces should take SVs as "name" arguments instead of
+bare char pointers; probably the most flexible and extensible way
+would be for the Perl-facing interfaces to accept HVs.  The system
+needs to be per-operating-system and per-file-system
+hookable/filterable, preferably both from XS and Perl level
+(L<perlport/"Files and Filesystems"> is good reading at this point,
+in fact, all of L<perlport> is.)
+
+This has actually already been implemented (but only for Win32),
+take a look at F<iperlsys.h> and F<win32/perlhost.h>.  While all Win32
+variants go through a set of "vtables" for operating system access,
+non-Win32 systems currently go straight for the POSIX/UNIX-style
+system/library call.  Similar system as for Win32 should be
+implemented for all platforms.  The existing Win32 implementation
+probably does not need to survive alongside this proposed new
+implementation, the approaches could be merged.
+
+What would this give us?  One often-asked-for feature this would
+enable is using Unicode for filenames, and other "names" like %ENV,
+usernames, hostnames, and so forth.
+(See L<perlunicode/"When Unicode Does Not Happen">.)
+
+But this kind of virtualization would also allow for things like
+virtual filesystems, virtual networks, and "sandboxes" (though as long
+as dynamic loading of random object code is allowed, not very safe
+sandboxes since external code of course know not of Perl's vtables).
+An example of a smaller "sandbox" is that this feature can be used to
+implement per-thread working directories: Win32 already does this.
+
+See also L</"Extend PerlIO and PerlIO::Scalar">.
+
 =head1 Big projects
 
 Tasks that will get your name mentioned in the description of the "Highlights
-of 5.10"
+of 5.12"
 
 =head2 make ithreads more robust
 

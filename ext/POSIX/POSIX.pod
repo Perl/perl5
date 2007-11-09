@@ -1055,7 +1055,7 @@ see L<perlre>.
 
 Sets the real group identifier and the effective group identifier for
 this process.  Similar to assigning a value to the Perl's builtin
-C<$)> variable, see L<perlvar/$GID>, except that the latter
+C<$)> variable, see L<perlvar/$EGID>, except that the latter
 will change only the real user identifier, and that the setgid()
 uses only a single numeric argument, as opposed to a space-separated
 list of numbers.

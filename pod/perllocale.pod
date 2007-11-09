@@ -574,23 +574,23 @@ should use C<\w> inside a C<no locale> block.  See L<"SECURITY">.
 
 =head2 Category LC_NUMERIC: Numeric Formatting
 
-In the scope of S<C<use locale>>, Perl obeys the C<LC_NUMERIC> locale
-information, which controls an application's idea of how numbers should
-be formatted for human readability by the printf(), sprintf(), and
-write() functions.  String-to-numeric conversion by the POSIX::strtod()
+After a proper POSIX::setlocale() call, Perl obeys the C<LC_NUMERIC>
+locale information, which controls an application's idea of how numbers
+should be formatted for human readability by the printf(), sprintf(), and
+write() functions. String-to-numeric conversion by the POSIX::strtod()
 function is also affected.  In most implementations the only effect is to
 change the character used for the decimal point--perhaps from '.'  to ','.
 These functions aren't aware of such niceties as thousands separation and
-so on.  (See L<The localeconv function> if you care about these things.)
+so on. (See L<The localeconv function> if you care about these things.)
 
 Output produced by print() is also affected by the current locale: it
-depends on whether C<use locale> or C<no locale> is in effect, and
 corresponds to what you'd get from printf() in the "C" locale.  The
 same is true for Perl's internal conversions between numeric and
 string formats:
 
-        use POSIX qw(strtod);
-        use locale;
+        use POSIX qw(strtod setlocale LC_NUMERIC);
+
+	setlocale LC_NUMERIC, "";
 
         $n = 5/2;   # Assign numeric 2.5 to $n
 
@@ -922,7 +922,7 @@ and also how strings are parsed by POSIX::strtod() as numbers:
 
         use locale;
         use POSIX qw(locale_h strtod);
-        setlocale(LC_NUMERIC, "de_DE") or die "Entshuldigung";
+        setlocale(LC_NUMERIC, "de_DE") or die "Entschuldigung";
         my $x = strtod("2,34") + 5;
         print $x, "\n"; # Probably shows 7,34.
 
