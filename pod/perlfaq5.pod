@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 8579 $)
+perlfaq5 - Files and Formats ($Revision: 9576 $)
 
 =head1 DESCRIPTION
 
@@ -1178,9 +1178,9 @@ C<close()> function from the C<POSIX> module:
 	
 	POSIX::close( $fd );
 	
-This should rarely be necessary, as the Perl Cclose()> function is to be
+This should rarely be necessary, as the Perl C<close()> function is to be
 used for things that Perl opened itself, even if it was a dup of a
-numeric descriptor as with MHCONTEXT above.  But if you really have
+numeric descriptor as with C<MHCONTEXT> above.  But if you really have
 to, you may be able to do this:
 
 	require 'sys/syscall.ph';
@@ -1280,9 +1280,9 @@ If your array contains lines, just print them:
 
 =head1 REVISION
 
-Revision: $Revision: 8579 $
+Revision: $Revision: 9576 $
 
-Date: $Date: 2007-01-14 19:28:09 +0100 (Sun, 14 Jan 2007) $
+Date: $Date: 2007-05-19 18:58:05 +0200 (Sat, 19 May 2007) $
 
 See L<perlfaq> for source control details and availability.
 
