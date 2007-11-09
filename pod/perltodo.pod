@@ -758,6 +758,12 @@ implement per-thread working directories: Win32 already does this.
 
 See also L</"Extend PerlIO and PerlIO::Scalar">.
 
+=head2 Investigate PADTMP hash pessimisation
+
+The peephole optimier converts constants used for hash key lookups to shared
+hash key scalars. Under ithreads, something is undoing this work. See
+See http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-09/msg00793.html
+
 =head1 Big projects
 
 Tasks that will get your name mentioned in the description of the "Highlights
