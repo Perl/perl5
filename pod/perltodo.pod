@@ -22,6 +22,15 @@ programming languages offer you 1 line of immortality?
 
 =head1 Tasks that only need Perl knowledge
 
+=head2 merge common code in installperl and installman
+
+There are some common subroutines and a common C<BEGIN> block in F<installperl>
+and F<installman>. These should probably be merged. It would also be good to
+check for duplication in all the utility scripts supplied in the source
+tarball. It might be good to move them all to a subdirectory, but this would
+require careful checking to find all places that call them, and change those
+correctly.
+
 =head2 common test code for timed bail out
 
 Write portable self destruct code for tests to stop them burning CPU in
@@ -39,6 +48,13 @@ is needed to improve the cross-linking.
 
 The addition of C<Pod::Simple> and its related modules may make this task
 easier to complete.
+
+=head2 merge checkpods and podchecker
+
+F<pod/checkpods.PL> (and C<make check> in the F<pod/> subdirectory)
+implements a very basic check for pod files, but the errors it discovers
+aren't found by podchecker. Add this check to podchecker, get rid of
+checkpods and have C<make check> use podchecker.
 
 =head2 Parallel testing
 
@@ -327,6 +343,10 @@ cross-compilation/execution environments the HOST and the TARGET do
 not see the same filesystem(s), the $Config{run} may need to do some
 file/directory copying back and forth.
 
+=head2 roffitall
+
+Make F<pod/roffitall> be updated by F<pod/buildtoc>.
+
 =head1 Tasks that need a little C knowledge
 
 These tasks would need a little C knowledge, but don't need any specific
@@ -336,7 +356,17 @@ background or experience with XS, or how the Perl interpreter works
 
 The way @INC is laid out by default, one cannot upgrade core (dual-life)
 modules without overwriting files. This causes problems for binary
-package builders.
+package builders.  One possible proposal is laid out in this
+message:
+L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2002-04/msg02380.html>.
+
+=head2 -Duse32bit*
+
+Natively 64-bit systems need neither -Duse64bitint nor -Duse64bitall.
+On these systems, it might be the default compilation mode, and there
+is currently no guarantee that passing no use64bitall option to the
+Configure process will build a 32bit perl. Implementing -Duse32bit*
+options would be nice for perl 5.12.
 
 =head2 Make it clear from -v if this is the exact official release
 
@@ -359,37 +389,6 @@ This task is really about thinking of an elegant way to arrange the C source
 such that it's trivial for the Pumpking to flag "this is an official release"
 when making a tarball, yet leave the default source saying "I'm not the
 official release".
-
-=head2 Ordering of "global" variables.
-
-F<thrdvar.h> and F<intrpvarh> define the "global" variables that need to be
-per-thread under ithreads, where the variables are actually elements in a
-structure. As C dictates, the variables must be laid out in order of
-declaration. There is a comment
-C</* Important ones in the first cache line (if alignment is done right) */>
-which implies that at some point in the past the ordering was carefully chosen
-(at least in part). However, it's clear that the ordering is less than perfect,
-as currently there are things such as 7 C<bool>s in a row, then something
-typically requiring 4 byte alignment, and then an odd C<bool> later on.
-(C<bool>s are typically defined as C<char>s). So it would be good for someone
-to review the ordering of the variables, to see how much alignment padding can
-be removed.
-
-It's also worth checking that all variables are actually used. Perl 5.8.0
-shipped with C<PL_nrs> still defined in F<thrdvar.h>, despite it being unused
-since a change over a year earlier. Had this been spotted before release, it
-could have been removed, but now it has to remain in the 5.8.x releases to
-keep the structure the same size, to retain binary compatibility.
-
-It's probably worth checking if all need to be the types they are. For example
-
-    PERLVAR(Ierror_count, I32)	/* how many errors so far, max 10 */
-
-might work as well if stored in a signed (or unsigned) 8 bit value, if the
-comment is accurate. C<PL_multi_open> and C<PL_multi_close> can probably
-become C<char>s. Finding variables to downsize coupled with rearrangement
-could shrink the interpreter structure; a size saving which is multiplied by
-the number of threads running.
 
 =head2 Profile Perl - am I hot or not?
 
@@ -450,6 +449,13 @@ been deprecated in favour of ISO C++ conformant names like _fileno. These
 warnings are also currently suppressed with the compiler option /wd4996. It
 might be nice to do as Microsoft suggest here too, although, unlike the secure
 functions issue, there is presumably little or no benefit in this case.
+
+=head2 __FUNCTION__ for MSVC-pre-7.0
+
+Jarkko notes that one can things morally equivalent to C<__FUNCTION__>
+(or C<__func__>) even in MSVC-pre-7.0, contrary to popular belief.
+See L<http://www.codeproject.com/debug/extendedtrace.asp> if you feel like
+making C<PERL_MEM_LOG> more useful on Win32.
 
 =head1 Tasks that need a knowledge of XS
 
@@ -751,6 +757,12 @@ An example of a smaller "sandbox" is that this feature can be used to
 implement per-thread working directories: Win32 already does this.
 
 See also L</"Extend PerlIO and PerlIO::Scalar">.
+
+=head2 Investigate PADTMP hash pessimisation
+
+The peephole optimier converts constants used for hash key lookups to shared
+hash key scalars. Under ithreads, something is undoing this work. See
+See http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-09/msg00793.html
 
 =head1 Big projects
 

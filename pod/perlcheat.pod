@@ -47,9 +47,9 @@ already be overwhelming.
   list ops         ()    capture
   not              (?:)  no capture       REGEX CHARCLASSES
   and              []    character class  .  == [^\n]
-  or xor           |     alternation      \s == [\x20\f\t\r\n]
-                   \b    word boundary    \w == [A-Za-z0-9_]
-                   \z    string end       \d == [0-9]
+  or xor           |     alternation      \s == whitespace
+                   \b    word boundary    \w == word characters
+                   \z    string end       \d == digits
   DO                                      \S, \W and \D negate
   use strict;        DON'T
   use warnings;      "$foo"           LINKS
