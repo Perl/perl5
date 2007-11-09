@@ -95,6 +95,9 @@ manipulation functions applied to the ID returned by fork() will affect the
 waiting pseudo-process that called exec(), not the real process it is
 waiting for after the exec().
 
+When exec() is called inside a pseudo-process then DESTROY methods and
+END blocks will still be called after the external process returns.
+
 =item exit()
 
 exit() always exits just the executing pseudo-process, after automatically

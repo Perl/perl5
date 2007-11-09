@@ -336,7 +336,7 @@ subroutine.
 
 Also note that the C<Animal> classname is now hardwired into the
 subroutine selection.  This is a mess if someone maintains the code,
-changing C<@ISA> for <Mouse> and didn't notice C<Animal> there in
+changing C<@ISA> for C<Mouse> and didn't notice C<Animal> there in
 C<speak>.  So, this is probably not the right way to go.
 
 =head2 Starting the search from a different place
@@ -610,7 +610,7 @@ shows up as we saw it just now.
 All we need is for a method to detect if it is being called on a class
 or called on an instance.  The most straightforward way is with the
 C<ref> operator.  This returns a string (the classname) when used on a
-blessed reference, and C<undef> when used on a string (like a
+blessed reference, and an empty string when used on a string (like a
 classname).  Let's modify the C<name> method first to notice the change:
 
   sub name {

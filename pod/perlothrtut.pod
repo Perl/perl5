@@ -604,7 +604,6 @@ this:
 
     $DataQueue->enqueue(12); 
     $DataQueue->enqueue("A", "B", "C"); 
-    $DataQueue->enqueue(\$thr); 
     sleep 10; 
     $DataQueue->enqueue(undef);
 

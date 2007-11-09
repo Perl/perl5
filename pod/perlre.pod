@@ -69,6 +69,15 @@ X</p> X<regex, preserve> X<regexp, preserve>
 Preserve the string matched such that ${^PREMATCH}, {$^MATCH}, and
 ${^POSTMATCH} are available for use after matching.
 
+=item g and c
+X</g> X</c>
+
+Global matching, and keep the Current position after failed matching.
+Unlike i, m, s and x, these two flags affect the way the regex is used
+rather than the regex itself. See
+L<perlretut/"Using regular expressions in Perl"> for further explanation
+of the g and c modifiers.
+
 =back
 
 These are usually written as "the C</x> modifier", even though the delimiter
@@ -183,9 +192,9 @@ X<\0> X<\c> X<\N> X<\x>
     \e		escape (think troff)  (ESC)
     \033	octal char            (example: ESC)
     \x1B	hex char              (example: ESC)
-    \x{263a}	wide hex char         (example: Unicode SMILEY)
+    \x{263a}	long hex char         (example: Unicode SMILEY)
     \cK		control char          (example: VT)
-    \N{name}	named char
+    \N{name}	named Unicode character
     \l		lowercase next char (think vi)
     \u		uppercase next char (think vi)
     \L		lowercase till \E (think vi)

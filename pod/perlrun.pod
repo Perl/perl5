@@ -280,7 +280,7 @@ An alternate delimiter may be specified using B<-F>.
 =item B<-C [I<number/list>]>
 X<-C>
 
-The C<-C> flag controls some Unicode of the Perl Unicode features.
+The C<-C> flag controls some of the Perl Unicode features.
 
 As of 5.8.1, the C<-C> can be followed either by a number or a list
 of option letters.  The letters, their numeric values, and effects
@@ -862,10 +862,6 @@ execute a portion of your program before dumping, use the dump()
 operator instead.  Note: availability of B<undump> is platform
 specific and may not be available for a specific port of Perl.
 
-This switch has been superseded in favor of the new Perl code
-generator backends to the compiler.  See L<B> and L<B::Bytecode>
-for details.
-
 =item B<-U>
 X<-U>
 
@@ -960,7 +956,7 @@ See L<perllexwarn>.
 =item B<-x>
 X<-x>
 
-=item B<-x> I<directory>
+=item B<-x>I<directory>
 
 tells Perl that the program is embedded in a larger chunk of unrelated
 ASCII text, such as in a mail message.  Leading garbage will be
@@ -972,6 +968,9 @@ disposal of leading garbage.  The program must be terminated with
 C<__END__> if there is trailing garbage to be ignored (the program
 can process any or all of the trailing garbage via the DATA filehandle
 if desired).
+
+The directory, if specified, must appear immedately following the B<-x>
+with no intervening whitespace.
 
 =back
 
@@ -1251,20 +1250,23 @@ PERL_ENCODING environment variable is consulted for an encoding name.
 =item PERL_HASH_SEED
 X<PERL_HASH_SEED>
 
-(Since Perl 5.8.1.)  Used to randomise Perl's internal hash function.
+(Since Perl 5.8.1.)  Used to randomise perl's internal hash function.
 To emulate the pre-5.8.1 behaviour, set to an integer (zero means
 exactly the same order as 5.8.0).  "Pre-5.8.1" means, among other
-things, that hash keys will be ordered the same between different runs
-of Perl.
+things, that hash keys will always have the same ordering between
+different runs of perl.
+
+Most hashes return elements in the same order as Perl 5.8.0 by default.
+On a hash by hash basis, if pathological data is detected during a hash
+key insertion, then that hash will switch to an alternative random hash
+seed.
 
 The default behaviour is to randomise unless the PERL_HASH_SEED is set.
-If Perl has been compiled with C<-DUSE_HASH_SEED_EXPLICIT>, the default
+If perl has been compiled with C<-DUSE_HASH_SEED_EXPLICIT>, the default
 behaviour is B<not> to randomise unless the PERL_HASH_SEED is set.
 
-If PERL_HASH_SEED is unset or set to a non-numeric string, Perl uses
+If PERL_HASH_SEED is unset or set to a non-numeric string, perl uses
 the pseudorandom seed supplied by the operating system and libraries.
-This means that each different run of Perl will have a different
-ordering of the results of keys(), values(), and each().
 
 B<Please note that the hash seed is sensitive information>. Hashes are
 randomized to protect against local and remote attacks against Perl

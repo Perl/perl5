@@ -9,7 +9,7 @@ desperation):
 
     (W) A warning (optional).
     (D) A deprecation (optional).
-    (S) A severe warning (default).
+    (S) A severe warning (enabled by default).
     (F) A fatal error (trappable).
     (P) An internal error you should never see (trappable).
     (X) A very fatal error (nontrappable).
@@ -27,7 +27,7 @@ and B<-W> switches. Warnings may be captured by setting C<$SIG{__WARN__}>
 to a reference to a routine that will be called on each warning instead
 of printing it.  See L<perlvar>.
 
-Default warnings are always enabled unless they are explicitly disabled
+Severe warnings are always enabled, unless they are explicitly disabled
 with the C<warnings> pragma or the B<-X> switch.
 
 Trappable errors may be trapped using the eval operator.  See
@@ -1705,10 +1705,10 @@ L<perlfunc/getsockopt>.
 
 =item Global symbol "%s" requires explicit package name
 
-(F) You've said "use strict vars", which indicates that all variables
-must either be lexically scoped (using "my"), declared beforehand using
-"our", or explicitly qualified to say which package the global variable
-is in (using "::").
+(F) You've said "use strict" or "use strict vars", which indicates 
+that all variables must either be lexically scoped (using "my"), 
+declared beforehand using "our", or explicitly qualified to say 
+which package the global variable is in (using "::").
 
 =item glob failed (%s)
 
@@ -4740,5 +4740,9 @@ not get any randomness out of your system.  This usually indicates
 Something Very Wrong.
 
 =back
+
+=head1 SEE ALSO
+
+L<warnings>, L<perllexwarn>.
 
 =cut

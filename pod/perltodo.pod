@@ -20,16 +20,6 @@ not, but if your patch is incorporated, then we'll add your name to the
 F<AUTHORS> file, which ships in the official distribution. How many other
 programming languages offer you 1 line of immortality?
 
-=head1 The roadmap to 5.10
-
-The roadmap to 5.10 envisages feature based releases, as various items in this
-TODO are completed.
-
-=head2 Needed for the final 5.10.0 release
-
-Review perlguts. Significant changes have occured since 5.8, and we can't
-release a new version without making sure these are covered.
-
 =head1 Tasks that only need Perl knowledge
 
 =head2 common test code for timed bail out
@@ -97,6 +87,28 @@ tests that are currently missing.
 
 A full test suite for the B module would be nice.
 
+=head2 Deparse inlined constants
+
+Code such as this
+
+    use constant PI => 4;
+    warn PI
+
+will currently deparse as
+
+    use constant ('PI', 4);
+    warn 4;
+
+because the tokenizer inlines the value of the constant subroutine C<PI>.
+This allows various compile time optimisations, such as constant folding
+and dead code elimination. Where these haven't happened (such as the example
+above) it ought be possible to make B::Deparse work out the name of the
+original constant, because just enough information survives in the symbol
+table to do this. Specifically, the same scalar is used for the constant in
+the optree as is used for the constant subroutine, so by iterating over all
+symbol tables and generating a mapping of SV address to constant name, it
+would be possible to provide B::Deparse with this functionality.
+
 =head2 A decent benchmark
 
 C<perlbench> seems impervious to any recent changes made to the perl core. It
@@ -117,6 +129,9 @@ As part of the "dists" plan, anything that doesn't belong in the smallest perl
 distribution needs to be dual lifed. Anything else can be too. Figure out what
 changes would be needed to package that module and its tests up for CPAN, and
 do so. Test it with older perl releases, and fix the problems you find.
+
+To make a minimal perl distribution, it's useful to look at
+F<t/lib/commonsense.t>.
 
 =head2 Improving C<threads::shared>
 
@@ -317,6 +332,12 @@ file/directory copying back and forth.
 These tasks would need a little C knowledge, but don't need any specific
 background or experience with XS, or how the Perl interpreter works
 
+=head2 Modernize the order of directories in @INC
+
+The way @INC is laid out by default, one cannot upgrade core (dual-life)
+modules without overwriting files. This causes problems for binary
+package builders.
+
 =head2 Make it clear from -v if this is the exact official release
 
 Currently perl from C<p4>/C<rsync> ships with a F<patchlevel.h> file that
@@ -396,6 +417,11 @@ custom allocates so it would both use less memory and less CPU to allocate
 the various OP structures from arenas. The SV arena code can probably be
 re-used for this.
 
+Note that Configuring perl with C<-Accflags=-DPL_OP_SLAB_ALLOC> will use
+Perl_Slab_alloc() to pack optrees into a contiguous block, which is
+probably superior to the use of OP arenas, esp. from a cache locality
+standpoint.  See L<Profile Perl - am I hot or not?>.
+
 =head2 Improve win32/wince.c
 
 Currently, numerous functions look virtually, if not completely,
@@ -472,6 +498,12 @@ See L</"Virtualize operating system access">.
 
 Currently glob patterns and filenames returned from File::Glob::glob()
 are always byte strings.  See L</"Virtualize operating system access">.
+
+=head2 Unicode and lc/uc operators
+
+Some built-in operators (C<lc>, C<uc>, etc.) behave differently, based on
+what the internal encoding of their argument is. That should not be the
+case. Maybe add a pragma to switch behaviour.
 
 =head2 use less 'memory'
 
@@ -558,10 +590,35 @@ calls during startup, and (by implication) a bit of tweaking of that order.
 These tasks would need C knowledge, and knowledge of how the interpreter works,
 or a willingness to learn.
 
+=head2 state variable initialization in list context
+
+Currently this is illegal:
+
+    state ($a, $b) = foo(); 
+
+The current Perl 6 design is that C<state ($a) = foo();> and
+C<(state $a) = foo();> have different semantics, which is tricky to implement
+in Perl 5 as currently the produce the same opcode trees. It would be useful
+to clarify that the Perl 6 design is firm, and then implement the necessary
+code in Perl 5. There are comments in C<Perl_newASSIGNOP()> that show the
+code paths taken by various assignment constructions involving state variables.
+
 =head2 Implement $value ~~ 0 .. $range
 
 It would be nice to extend the syntax of the C<~~> operator to also
 understand numeric (and maybe alphanumeric) ranges.
+
+=head2 A does() built-in
+
+Like ref(), only useful. It would call the C<DOES> method on objects; it
+would also tell whether something can be dereferenced as an
+array/hash/etc., or used as a regexp, etc.
+L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-03/msg00481.html>
+
+=head2 Tied filehandles and write() don't mix
+
+There is no method on tied filehandles to allow them to be called back by
+formats.
 
 =head2 Attach/detach debugger from running program
 
@@ -569,6 +626,12 @@ The old perltodo notes "With C<gdb>, you can attach the debugger to a running
 program if you pass the process ID. It would be good to do this with the Perl
 debugger on a running Perl program, although I'm not sure how it would be
 done." ssh and screen do this with named pipes in /tmp. Maybe we can too.
+
+=head2 Optimize away empty destructors
+
+Defining an empty DESTROY method might be useful (notably in
+AUTOLOAD-enabled classes), but it's still a bit expensive to call. That
+could probably be optimized.
 
 =head2 LVALUE functions for lists
 

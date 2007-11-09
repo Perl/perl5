@@ -679,6 +679,10 @@ or more newline-separated lines.  Each line must be one of the following:
 
 =item *
 
+A single hexadecimal number denoting a Unicode code point to include.
+
+=item *
+
 Two hexadecimal numbers separated by horizontal whitespace (space or
 tabular characters) denoting a range of Unicode code points to include.
 
@@ -768,10 +772,6 @@ two (or more) classes.
 
 It's important to remember not to use "&" for the first set -- that
 would be intersecting with nothing (resulting in an empty set).
-
-A final note on the user-defined property tests: they will be used
-only if the scalar has been marked as having Unicode characters.
-Old byte-style strings will not be affected.
 
 =head2 User-Defined Case Mappings
 
@@ -1373,7 +1373,7 @@ derived class with such a C<param> method:
     sub param {
       my($self,$name,$value) = @_;
       utf8::upgrade($name);     # make sure it is UTF-8 encoded
-      if (defined $value)
+      if (defined $value) {
         utf8::upgrade($value);  # make sure it is UTF-8 encoded
         return $self->SUPER::param($name,$value);
       } else {

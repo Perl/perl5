@@ -427,12 +427,12 @@ previous timer, and an argument of C<0> may be supplied to cancel the
 previous timer without starting a new one.  The returned value is the
 amount of time remaining on the previous timer.
 
-For delays of finer granularity than one second, you may use Perl's
-four-argument version of select() leaving the first three arguments
-undefined, or you might be able to use the C<syscall> interface to
-access setitimer(2) if your system supports it.  The Time::HiRes
-module (from CPAN, and starting from Perl 5.8 part of the standard
-distribution) may also prove useful.
+For delays of finer granularity than one second, the Time::HiRes module
+(from CPAN, and starting from Perl 5.8 part of the standard
+distribution) provides ualarm().  You may also use Perl's four-argument
+version of select() leaving the first three arguments undefined, or you
+might be able to use the C<syscall> interface to access setitimer(2) if
+your system supports it. See L<perlfaq8> for details.
 
 It is usually a mistake to intermix C<alarm> and C<sleep> calls.
 (C<sleep> may be internally implemented in your system with C<alarm>)
@@ -2191,6 +2191,18 @@ The Socket library makes this slightly easier:
     # or going the other way
     $straddr = inet_ntoa($iaddr);
 
+In the opposite way, to resolve a hostname to the IP address
+you can write this:
+
+    use Socket;
+    $packed_ip = gethostbyname("www.perl.org");
+    if (defined $packed_ip) {
+        $ip_address = inet_ntoa($packed_ip);
+    }
+
+Make sure <gethostbyname()> is called in SCALAR context and that
+its return value is checked for definedness.
+
 If you get tired of remembering which element of the return list
 contains which return value, by-name interfaces are provided
 in standard modules: C<File::stat>, C<Net::hostent>, C<Net::netent>,
@@ -3937,9 +3949,7 @@ X<pop> X<stack>
 =item pop
 
 Pops and returns the last value of the array, shortening the array by
-one element.  Has an effect similar to
-
-    $ARRAY[$#ARRAY--]
+one element.
 
 If there are no elements in the array, returns the undefined value
 (although this may happen at other times as well).  If ARRAY is
@@ -4023,10 +4033,10 @@ the function whose prototype you want to retrieve.
 
 If FUNCTION is a string starting with C<CORE::>, the rest is taken as a
 name for Perl builtin.  If the builtin is not I<overridable> (such as
-C<qw//>) or its arguments cannot be expressed by a prototype (such as
-C<system>) returns C<undef> because the builtin does not really behave
-like a Perl function.  Otherwise, the string describing the equivalent
-prototype is returned.
+C<qw//>) or if its arguments cannot be adequately expressed by a prototype
+(such as C<system>), prototype() returns C<undef>, because the builtin
+does not really behave like a Perl function.  Otherwise, the string
+describing the equivalent prototype is returned.
 
 =item push ARRAY,LIST
 X<push> X<stack>
@@ -4960,11 +4970,12 @@ always sleep the full amount.  They may appear to sleep longer than that,
 however, because your process might not be scheduled right away in a
 busy multitasking system.
 
-For delays of finer granularity than one second, you may use Perl's
-C<syscall> interface to access setitimer(2) if your system supports
-it, or else see L</select> above.  The Time::HiRes module (from CPAN,
-and starting from Perl 5.8 part of the standard distribution) may also
-help.
+For delays of finer granularity than one second, the Time::HiRes module
+(from CPAN, and starting from Perl 5.8 part of the standard
+distribution) provides usleep().  You may also use Perl's four-argument
+version of select() leaving the first three arguments undefined, or you
+might be able to use the C<syscall> interface to access setitimer(2) if
+your system supports it. See L<perlfaq8> for details.
 
 See also the POSIX module's C<pause> function.
 
@@ -5269,14 +5280,22 @@ the following:
 
 produces the output 'h:i: :t:h:e:r:e'.
 
-Empty leading (or trailing) fields are produced when there are positive
-width matches at the beginning (or end) of the string; a zero-width match
-at the beginning (or end) of the string does not produce an empty field.
-For example:
+Empty leading fields are produced when there are positive-width matches at
+the beginning of the string; a zero-width match at the beginning of
+the string does not produce an empty field. For example:
 
    print join(':', split(/(?=\w)/, 'hi there!'));
 
-produces the output 'h:i :t:h:e:r:e!'.
+produces the output 'h:i :t:h:e:r:e!'. Empty trailing fields, on the other
+hand, are produced when there is a match at the end of the string (and
+when LIMIT is given and is not 0), regardless of the length of the match.
+For example:
+
+   print join(':', split(//,   'hi there!', -1));
+   print join(':', split(/\W/, 'hi there!', -1));
+
+produce the output 'h:i: :t:h:e:r:e:!:' and 'hi:there:', respectively,
+both with an empty trailing field.
 
 The LIMIT parameter can be used to split a line partially
 
@@ -5711,7 +5730,7 @@ than the default seed.  Checksumming the compressed output of one or more
 rapidly changing operating system status programs is the usual method.  For
 example:
 
-    srand (time ^ $$ ^ unpack "%L*", `ps axww | gzip`);
+    srand (time ^ $$ ^ unpack "%L*", `ps axww | gzip -f`);
 
 If you're particularly concerned with this, see the C<Math::TrulyRandom>
 module in CPAN.
@@ -6640,7 +6659,7 @@ Imports some semantics into the current package from the named module,
 generally by aliasing certain subroutine or variable names into your
 package.  It is exactly equivalent to
 
-    BEGIN { require Module; import Module LIST; }
+    BEGIN { require Module; Module->import( LIST ); }
 
 except that Module I<must> be a bareword.
 
@@ -7082,7 +7101,8 @@ This function should have been named wantlist() instead.
 X<warn> X<warning> X<STDERR>
 
 Prints the value of LIST to STDERR.  If the last element of LIST does
-not end in a newline, appends the same text as C<die> does.
+not end in a newline, it appends the same file/line number text as C<die>
+does.
 
 If LIST is empty and C<$@> already contains a value (typically from a
 previous eval) that value is used after appending C<"\t...caught">
