@@ -29,7 +29,7 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 local $Params::Check::VERBOSE = 1;
 
-$VERSION = '0.06_01';
+$VERSION = '0.06_02';
 
 =pod
 
@@ -640,7 +640,9 @@ sub install {
         ### don't worry about loading the right version of M::B anymore
         ### the 'new_from_context' already added the 'right' path to
         ### M::B at the top of the build.pl
-        my $cmd     = [$perl, BUILD->($dir), 'install', $buildflags];
+        ### On VMS, flags need to be quoted
+        my $flag    = ON_VMS ? '"install"' : 'install';
+        my $cmd     = [$perl, BUILD->($dir), $flag, $buildflags];
         my $sudo    = $conf->get_program('sudo');
         unshift @$cmd, $sudo if $sudo;
 

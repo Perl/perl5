@@ -1,4 +1,6 @@
-### XXX copied from cpanplus's t/inc/conf.pl
+### On VMS, the ENV is not reset after the program terminates.
+### So reset it here explicitly
+my ($old_env_path, $old_env_perl5lib);
 BEGIN {
     use FindBin; 
     use File::Spec;
@@ -21,13 +23,15 @@ BEGIN {
     use Config;
 
     ### and add them to the environment, so shellouts get them
-    $ENV{'PERL5LIB'} = join ':', 
+    $old_env_perl5lib = $ENV{'PERL5LIB'};
+    $ENV{'PERL5LIB'}  = join $Config{'path_sep'}, 
                         grep { defined } $ENV{'PERL5LIB'}, @paths, @rel2abs;
     
     ### add our own path to the front of $ENV{PATH}, so that cpanp-run-perl
     ### and friends get picked up
-    $ENV{'PATH'} = join $Config{'path_sep'}, 
-                    grep { defined } "$FindBin::Bin/../../../bin", $ENV{'PATH'};
+    $old_env_path = $ENV{PATH};
+    $ENV{'PATH'}  = join $Config{'path_sep'}, 
+                    grep { defined } "$FindBin::Bin/../bin", $ENV{'PATH'};
 
     ### Fix up the path to perl, as we're about to chdir
     ### but only under perlcore, or if the path contains delimiters,
@@ -50,8 +54,27 @@ BEGIN {
     $IPC::Cmd::USE_IPC_RUN = 0 if $^O eq 'MSWin32';
 }
 
+### Use a $^O comparison, as depending on module at this time
+### may cause weird errors/warnings
+END {
+    if ($^O eq 'VMS') {
+        ### VMS environment variables modified by this test need to be put back
+        ### path is "magic" on VMS, we can not tell if it really existed before
+        ### this was run, because VMS will magically pretend that a PATH
+        ### environment variable exists set to the current working directory
+        $ENV{PATH} = $old_path;
+
+        if (defined $old_perl5lib) {
+            $ENV{PERL5LIB} = $old_perl5lib;
+        } else {
+            delete $ENV{PERL5LIB};
+        }
+    }
+}
+
 use strict;
 use CPANPLUS::Configure;
+use CPANPLUS::Error ();
 
 use File::Path      qw[rmtree];
 use FileHandle;
@@ -82,7 +105,7 @@ sub _clean_test_dir {
 
     for my $dir ( @$dirs ) {
 
-        ### if it's not there, don't bother
+        ### no point if it doesn't exist;
         next unless -d $dir;
 
         my $dh;
@@ -92,15 +115,32 @@ sub _clean_test_dir {
             
             my $path = File::Spec->catfile( $dir, $file );
             
+            ### John Malmberg reports yet another VMS issue:
+            ### A directory name on VMS in VMS format ends with .dir 
+            ### when it is referenced as a file.
+            ### In UNIX format traditionally PERL on VMS does not remove the
+            ### '.dir', however the VMS C library conversion routines do remove
+            ### the '.dir' and the VMS C library routines can not handle the
+            ### '.dir' being present on UNIX format filenames.
+            ### So code doing the fixup has on VMS has to be able to handle both
+            ### UNIX format names and VMS format names. 
+            ### XXX See http://www.xray.mpe.mpg.de/
+            ### mailing-lists/perl5-porters/2007-10/msg00064.html
+            ### for details -- the below regex could use some touchups
+            ### according to John. M.            
+            $file =~ s/\.dir//i if $^O eq 'VMS';
+            
+            my $dirpath = File::Spec->catdir( $dir, $file );
+            
             ### directory, rmtree it
             if( -d $path ) {
-                print "Deleting directory '$path'\n" if $verbose;
+                print "# Deleting directory '$path'\n" if $verbose;
                 eval { rmtree( $path ) };
                 warn "Could not delete '$path' while cleaning up '$dir'" if $@;
            
             ### regular file
             } else {
-                print "Deleting file '$path'\n" if $verbose;
+                print "# Deleting file '$path'\n" if $verbose;
                 1 while unlink $path;
             }            
         }       
@@ -111,140 +151,4 @@ sub _clean_test_dir {
     return 1;
 }
 
-1;
-
-__END__
-
-# prereq has to be in our package file && core!
-use constant TEST_CONF_PREREQ           => 'Cwd';   
-use constant TEST_CONF_MODULE           => 'Foo::Bar::EU::NOXS';
-use constant TEST_CONF_INST_MODULE      => 'Foo::Bar';
-use constant TEST_CONF_INVALID_MODULE   => 'fnurk';
-use constant TEST_CONF_MIRROR_DIR       => 'dummy-localmirror';
-
-### we might need this Some Day when we're installing into
-### our own sandbox. see t/20.t for details
-# use constant TEST_INSTALL_DIR       => do {
-#     my $dir = File::Spec->rel2abs( 'dummy-perl' );
-# 
-#     ### clean up paths if we are on win32    
-#     ### dirs with spaces will be.. bad :(
-#     $^O eq 'MSWin32'
-#         ? Win32::GetShortPathName( $dir )
-#         : $dir;
-# };        
-
-# use constant TEST_INSTALL_DIR_LIB 
-#     => File::Spec->catdir( TEST_INSTALL_DIR, 'lib' );
-# use constant TEST_INSTALL_DIR_BIN 
-#     => File::Spec->catdir( TEST_INSTALL_DIR, 'bin' );
-# use constant TEST_INSTALL_DIR_MAN1 
-#     => File::Spec->catdir( TEST_INSTALL_DIR, 'man', 'man1' );
-# use constant TEST_INSTALL_DIR_MAN3
-#     => File::Spec->catdir( TEST_INSTALL_DIR, 'man', 'man3' );
-# use constant TEST_INSTALL_DIR_ARCH
-#     => File::Spec->catdir( TEST_INSTALL_DIR, 'arch' );
-# 
-# use constant TEST_INSTALL_EU_MM_FLAGS =>
-#     ' INSTALLDIRS=site' .
-#     ' INSTALLSITELIB='     . TEST_INSTALL_DIR_LIB .
-#     ' INSTALLSITEARCH='    . TEST_INSTALL_DIR_ARCH .    # .packlist
-#     ' INSTALLARCHLIB='     . TEST_INSTALL_DIR_ARCH .    # perllocal.pod
-#     ' INSTALLSITEBIN='     . TEST_INSTALL_DIR_BIN .
-#     ' INSTALLSCRIPT='      . TEST_INSTALL_DIR_BIN .
-#     ' INSTALLSITEMAN1DIR=' . TEST_INSTALL_DIR_MAN1 .
-#     ' INSTALLSITEMAN3DIR=' . TEST_INSTALL_DIR_MAN3;
-
-
-sub gimme_conf { 
-    my $conf = CPANPLUS::Configure->new();
-    $conf->set_conf( hosts  => [ { 
-                        path        => 'dummy-CPAN',
-                        scheme      => 'file',
-                    } ],      
-    );
-    $conf->set_conf( base       => 'dummy-cpanplus' );
-    $conf->set_conf( dist_type  => '' );
-    $conf->set_conf( signature  => 0 );
-
-    _clean_test_dir( [
-        $conf->get_conf('base'),     
-        TEST_CONF_MIRROR_DIR,
-#         TEST_INSTALL_DIR_LIB,
-#         TEST_INSTALL_DIR_BIN,
-#         TEST_INSTALL_DIR_MAN1, 
-#         TEST_INSTALL_DIR_MAN3,
-    ], 1 );
-        
-    return $conf;
-};
-
-{
-    my $fh;
-    my $file = ".".basename($0).".output";
-    sub output_handle {
-        return $fh if $fh;
-        
-        $fh = FileHandle->new(">$file")
-                    or warn "Could not open output file '$file': $!";
-       
-        $fh->autoflush(1);
-        return $fh;
-    }
-    
-    sub output_file { return $file }
-}
-
-
-### clean these files if we're under perl core
-END { 
-    if ( $ENV{PERL_CORE} ) {
-        close output_handle(); 1 while unlink output_file();
-
-        _clean_test_dir( [
-            gimme_conf->get_conf('base'),   
-            TEST_CONF_MIRROR_DIR,
-    #         TEST_INSTALL_DIR_LIB,
-    #         TEST_INSTALL_DIR_BIN,
-    #         TEST_INSTALL_DIR_MAN1, 
-    #         TEST_INSTALL_DIR_MAN3,
-        ], 1 );
-    }
-}
-
-
-
-### whenever we start a new script, we want to clean out our
-### old files from the test '.cpanplus' dir..
-sub _clean_test_dir {
-    my $dirs    = shift || [];
-    my $verbose = shift || 0;
-
-    for my $dir ( @$dirs ) {
-
-        my $dh;
-        opendir $dh, $dir or die "Could not open basedir '$dir': $!";
-        while( my $file = readdir $dh ) { 
-            next if $file =~ /^\./;  # skip dot files
-            
-            my $path = File::Spec->catfile( $dir, $file );
-            
-            ### directory, rmtree it
-            if( -d $path ) {
-                print "Deleting directory '$path'\n" if $verbose;
-                eval { rmtree( $path ) };
-                warn "Could not delete '$path' while cleaning up '$dir'" if $@;
-           
-            ### regular file
-            } else {
-                print "Deleting file '$path'\n" if $verbose;
-                1 while unlink $path;
-            }            
-        }       
-    
-        close $dh;
-    }
-    
-    return 1;
-}
 1;
