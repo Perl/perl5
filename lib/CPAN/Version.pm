@@ -2,7 +2,7 @@ package CPAN::Version;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = sprintf "%.6f", substr(q$Rev: 2210 $,4)/1000000 + 5.4;
+$VERSION = "5.5";
 
 # CPAN::Version::vcmp courtesy Jost Krieger
 sub vcmp {
@@ -58,6 +58,16 @@ sub vgt {
 sub vlt {
     my($self,$l,$r) = @_;
     0 + ($self->vcmp($l,$r) < 0);
+}
+
+sub vge {
+    my($self,$l,$r) = @_;
+    $self->vcmp($l,$r) >= 0;
+}
+
+sub vle {
+    my($self,$l,$r) = @_;
+    0 + ($self->vcmp($l,$r) <= 0);
 }
 
 sub vstring {

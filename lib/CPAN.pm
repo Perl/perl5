@@ -1,7 +1,7 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.9203';
+$CPAN::VERSION = '1.9204';
 $CPAN::VERSION = eval $CPAN::VERSION if $CPAN::VERSION =~ /_/;
 
 use CPAN::HandleConfig;
@@ -29,6 +29,8 @@ use Safe ();
 use Sys::Hostname qw(hostname);
 use Text::ParseWords ();
 use Text::Wrap ();
+
+sub find_perl ();
 
 # we need to run chdir all over and we would get at wrong libraries
 # there
@@ -909,9 +911,9 @@ sub _perl_fingerprint {
     if (defined $dll) {
         $mtime_dll = (-f $dll ? (stat(_))[9] : '-1');
     }
-    my $mtime_perl = (-f $^X ? (stat(_))[9] : '-1');
+    my $mtime_perl = (-f CPAN::find_perl ? (stat(_))[9] : '-1');
     my $this_fingerprint = {
-                            '$^X' => $^X,
+                            '$^X' => CPAN::find_perl,
                             sitearchexp => $Config::Config{sitearchexp},
                             'mtime_$^X' => $mtime_perl,
                             'mtime_dll' => $mtime_dll,
@@ -1113,6 +1115,7 @@ this variable in either a CPAN/MyConfig.pm or a CPAN/Config.pm in your
 
         seek $fh, 0, 0;
         truncate $fh, 0;
+        $fh->autoflush(1);
         $fh->print($$, "\n");
         $fh->print(hostname(), "\n");
         $self->{LOCK} = $lockfile;
@@ -1183,7 +1186,7 @@ sub fastcwd {Cwd::fastcwd();}
 sub backtickcwd {my $cwd = `cwd`; chomp $cwd; $cwd}
 
 #-> sub CPAN::find_perl ;
-sub find_perl {
+sub find_perl () {
     my($perl) = File::Spec->file_name_is_absolute($^X) ? $^X : "";
     my $pwd  = $CPAN::iCwd = CPAN::anycwd();
     my $candidate = File::Spec->catfile($pwd,$^X);
@@ -1257,7 +1260,7 @@ sub has_usable {
                            ],
                'File::HomeDir' => [
                                    sub {require File::HomeDir;
-                                        unless (File::HomeDir::->VERSION >= 0.52) {
+                                        unless (CPAN::Version->vge(File::HomeDir::->VERSION, 0.52)) {
                                             for ("Will not use File::HomeDir, need 0.52\n") {
                                                 $CPAN::Frontend->mywarn($_);
                                                 die $_;
@@ -1267,7 +1270,7 @@ sub has_usable {
                                   ],
                'Archive::Tar' => [
                                   sub {require Archive::Tar;
-                                       unless (Archive::Tar::->VERSION >= 1.00) {
+                                       unless (CPAN::Version->vge(Archive::Tar::->VERSION, 1.00)) {
                                             for ("Will not use Archive::Tar, need 1.00\n") {
                                                 $CPAN::Frontend->mywarn($_);
                                                 die $_;
@@ -1275,6 +1278,20 @@ sub has_usable {
                                        }
                                   },
                                  ],
+               'File::Temp' => [
+                                # XXX we should probably delete from
+                                # %INC too so we can load after we
+                                # installed a new enough version --
+                                # I'm not sure.
+                                sub {require File::Temp;
+                                     unless (CPAN::Version->vge(File::Temp::->VERSION,0.16)) {
+                                         for ("Will not use File::Temp, need 0.16\n") {
+                                                $CPAN::Frontend->mywarn($_);
+                                                die $_;
+                                         }
+                                     }
+                                },
+                               ]
               };
     if ($usable->{$mod}) {
         for my $c (0..$#{$usable->{$mod}}) {
@@ -1980,7 +1997,7 @@ sub o {
     $o_type ||= "";
     CPAN->debug("o_type[$o_type] o_what[".join(" | ",@o_what)."]\n");
     if ($o_type eq 'conf') {
-        my($cfilter) = $o_what[0] =~ m|^/(.*)/$|;
+        my($cfilter) = $o_what[0] =~ m|^/(.*)/$| if @o_what;
         if (!@o_what or $cfilter) { # print all things, "o conf"
             $cfilter ||= "";
             my $qrfilter = eval 'qr/$cfilter/';
@@ -2862,8 +2879,10 @@ sub expand_by_method {
         my($regex,$command);
         if ($arg =~ m|^/(.*)/$|) {
             $regex = $1;
-        } elsif ($arg =~ m/=/) {
-            $command = 1;
+# FIXME:  there seem to be some ='s in the author data, which trigger
+#         a failure here.  This needs to be contemplated.
+#            } elsif ($arg =~ m/=/) {
+#                $command = 1;
         }
         my $obj;
         CPAN->debug(sprintf "class[%s]regex[%s]command[%s]",
@@ -2940,7 +2959,7 @@ that may go away anytime.\n"
             push @m, $obj;
         }
     }
-    @m = sort {$a->id cmp $b->id} @m;
+	@m = sort {$a->id cmp $b->id} @m;
     if ( $CPAN::DEBUG ) {
         my $wantarray = wantarray;
         my $join_m = join ",", map {$_->id} @m;
@@ -2973,7 +2992,7 @@ sub format_result {
 
     sub report_fh {
         return $installation_report_fh if $installation_report_fh;
-        if ($CPAN::META->has_inst("File::Temp")) {
+        if ($CPAN::META->has_usable("File::Temp")) {
             $installation_report_fh
                 = File::Temp->new(
                                   dir      => File::Spec->tmpdir,
@@ -6012,7 +6031,7 @@ sub containsmods {
         }
         $self->{CONTAINSMODS}{$mod_id} = undef if $mod_file eq $dist_id;
     }
-    keys %{$self->{CONTAINSMODS}||{}};
+    keys %{$self->{CONTAINSMODS}||={}};
 }
 
 #-> sub CPAN::Distribution::upload_date ;
@@ -6237,7 +6256,7 @@ EOF
     $dh->close;
     my ($packagedir);
     # XXX here we want in each branch File::Temp to protect all build_dir directories
-    if (CPAN->has_inst("File::Temp")) {
+    if (CPAN->has_usable("File::Temp")) {
         my $tdir_base;
         my $from_dir;
         my @dirents;
@@ -6475,7 +6494,7 @@ sub store_persistent_state {
     }
 }
 
-#-> CPAN::Distribution::patch
+#-> CPAN::Distribution::try_download
 sub try_download {
     my($self,$patch) = @_;
     my $norm = $self->normalize($patch);
@@ -7623,7 +7642,7 @@ is part of the perl-%s distribution. To install that, you need to run
     }
     if (my $commandline = $self->prefs->{make}{commandline}) {
         $system = $commandline;
-        $ENV{PERL} = $^X;
+        $ENV{PERL} = CPAN::find_perl;
     } else {
         if ($self->{modulebuild}) {
             unless (-f "Build") {
@@ -7822,6 +7841,7 @@ sub _find_prefs {
     my $distroid = $self->pretty_id;
     #CPAN->debug("distroid[$distroid]") if $CPAN::DEBUG;
     my $prefs_dir = $CPAN::Config->{prefs_dir};
+    return if $prefs_dir =~ /^\s*$/;
     eval { File::Path::mkpath($prefs_dir); };
     if ($@) {
         $CPAN::Frontend->mydie("Cannot create directory $prefs_dir");
@@ -7928,7 +7948,7 @@ sub _find_prefs {
                             my $okd = $distroid =~ /$qr/;
                             $ok &&= $okd;
                         } elsif ($sub_attribute eq "perl") {
-                            my $okp = $^X =~ /$qr/;
+                            my $okp = CPAN::find_perl =~ /$qr/;
                             $ok &&= $okp;
                         } elsif ($sub_attribute eq "perlconfig") {
                             for my $perlconfigkey (keys %{$match->{perlconfig}}) {
@@ -8158,7 +8178,7 @@ sub unsat_prereq {
         my($available_version,$available_file,$nmo);
         if ($need_module eq "perl") {
             $available_version = $];
-            $available_file = $^X;
+            $available_file = CPAN::find_perl;
         } else {
             $nmo = $CPAN::META->instance("CPAN::Module",$need_module);
             next if $nmo->uptodate;
@@ -8257,6 +8277,14 @@ sub unsat_prereq {
 
             my $do = $nmo->distribution;
             next NEED unless $do; # not on CPAN
+            if (CPAN::Version->vcmp($need_version, $nmo->{CPAN_VERSION}) > 0){
+                $CPAN::Frontend->mywarn("Warning: Prerequisite ".
+                                        "'$need_module => $need_version' ".
+                                        "for '$self->{ID}' seems ".
+                                        "not available according the the indexes\n"
+                                       );
+                next NEED;
+            }
           NOSAYER: for my $nosayer (
                                     "unwrapped",
                                     "writemakefile",
@@ -8568,7 +8596,7 @@ sub test {
     if (my $commandline
         = exists $prefs_test->{commandline} ? $prefs_test->{commandline} : "") {
         $system = $commandline;
-        $ENV{PERL} = $^X;
+        $ENV{PERL} = CPAN::find_perl;
     } elsif ($self->{modulebuild}) {
         $system = sprintf "%s test", $self->_build_command();
     } else {
@@ -8669,8 +8697,12 @@ sub test {
         $self->{make_test} = CPAN::Distrostatus->new("NO");
         $self->{badtestcnt}++;
         $CPAN::Frontend->mywarn("  $system -- NOT OK\n");
-        CPAN::Shell->optprint("hint",sprintf "//hint// To get more information about failing tests, try:
-  reports %s\n", $self->pretty_id);
+        CPAN::Shell->optprint
+              ("hint",
+               sprintf
+               ("//hint// to see the cpan-testers results for installing this module, try:
+  reports %s\n",
+                $self->pretty_id));
     }
     $self->store_persistent_state;
 }
@@ -8888,7 +8920,7 @@ sub install {
     my $system;
     if (my $commandline = $self->prefs->{install}{commandline}) {
         $system = $commandline;
-        $ENV{PERL} = $^X;
+        $ENV{PERL} = CPAN::find_perl;
     } elsif ($self->{modulebuild}) {
         my($mbuild_install_build_command) =
             exists $CPAN::HandleConfig::keys{mbuild_install_build_command} &&
@@ -9082,7 +9114,7 @@ with browser $browser
                 or $CPAN::Frontend->mydie(qq{
 Could not fork '$html_converter $saved_file': $!});
             my($fh,$filename);
-            if ($CPAN::META->has_inst("File::Temp")) {
+            if ($CPAN::META->has_usable("File::Temp")) {
                 $fh = File::Temp->new(
                                       dir      => File::Spec->tmpdir,
                                       template => 'cpan_htmlconvert_XXXX',
@@ -9142,7 +9174,7 @@ sub _getsave_url {
       if $CPAN::DEBUG;
 
     my($fh,$filename);
-    if ($CPAN::META->has_inst("File::Temp")) {
+    if ($CPAN::META->has_usable("File::Temp")) {
         $fh = File::Temp->new(
                               dir      => File::Spec->tmpdir,
                               template => "cpan_getsave_url_XXXX",
@@ -9282,7 +9314,7 @@ sub reports {
     unless ($CPAN::META->has_usable("LWP")) {
         $CPAN::Frontend->mydie("LWP not installed; cannot continue");
     }
-    unless ($CPAN::META->has_inst("File::Temp")) {
+    unless ($CPAN::META->has_usable("File::Temp")) {
         $CPAN::Frontend->mydie("File::Temp not installed; cannot continue");
     }
 
@@ -9740,22 +9772,21 @@ sub as_glimpse {
         $color_off = Term::ANSIColor::color("reset");
     }
     my $uptodateness = " ";
-    if ($class eq "Bundle") {
-    } elsif ($self->uptodate) {
-        $uptodateness = "=";
-    } elsif ($self->inst_version) {
-        $uptodateness = "<";
-    }
+	unless ($class eq "Bundle") {
+		my $u = $self->uptodate;
+		$uptodateness = $u ? "=" : "<" if defined $u;
+	};
+	my $id = do {
+		my $d = $self->distribution;
+		$d ? $d -> pretty_id : $self->cpan_userid;
+	};
     push @m, sprintf("%-7s %1s %s%-22s%s (%s)\n",
                      $class,
                      $uptodateness,
                      $color_on,
                      $self->id,
                      $color_off,
-                     ($self->distribution ?
-                      $self->distribution->pretty_id :
-                      $self->cpan_userid
-                     ),
+					 $id,
                     );
     join "", @m;
 }
@@ -10106,25 +10137,17 @@ sub test   {
 }
 #-> sub CPAN::Module::uptodate ;
 sub uptodate {
-    my($self) = @_;
-    local($_); # protect against a bug in MakeMaker 6.17
-    my($latest) = $self->cpan_version;
-    $latest ||= 0;
-    my($inst_file) = $self->inst_file;
-    my($have) = 0;
-    if (defined $inst_file) {
-        $have = $self->inst_version;
-    }
-    local($^W)=0;
-    if ($inst_file
-        &&
-        ! CPAN::Version->vgt($latest, $have)
-       ) {
-        CPAN->debug("returning uptodate. inst_file[$inst_file] ".
-                    "latest[$latest] have[$have]") if $CPAN::DEBUG;
-        return 1;
-    }
-    return;
+	my ($self) = @_;
+	local ($_);
+	my $inst = $self->inst_version or return undef;
+	my $cpan = $self->cpan_version;
+	local ($^W) = 0;
+	CPAN::Version->vgt($cpan,$inst) and return 0;
+    CPAN->debug(join("",
+		"returning uptodate. inst_file[",
+		$self->inst_file,
+        "cpan[$cpan] inst[$inst]")) if $CPAN::DEBUG;
+	return 1;
 }
 #-> sub CPAN::Module::install ;
 sub install {
@@ -10442,7 +10465,7 @@ running shell session.
 
 =item Persistence between sessions
 
-If the C<YAML> or the c<YAML::Syck> module is installed a record of
+If the C<YAML> or the C<YAML::Syck> module is installed a record of
 the internal state of all modules is written to disk after each step.
 The files contain a signature of the currently running perl version
 for later perusal.
@@ -10498,7 +10521,7 @@ to clean up and leave the shell loop. You can emulate the effect of a
 SIGTERM by sending two consecutive SIGINTs, which usually means by
 pressing C<^C> twice.
 
-CPAN.pm ignores a SIGPIPE. If the user sets inactivity_timeout, a
+CPAN.pm ignores a SIGPIPE. If the user sets C<inactivity_timeout>, a
 SIGALRM is used during the run of the C<perl Makefile.PL> or C<perl
 Build.PL> subprocess.
 
@@ -10582,9 +10605,9 @@ every step that might have failed before.
 =head2 smoke ***EXPERIMENTAL COMMAND***
 
 B<*** WARNING: this command downloads and executes software from CPAN to
-*** your computer of completely unknown status. You should never do
-*** this with your normal account and better have a dedicated well
-*** separated and secured machine to do this.>
+your computer of completely unknown status. You should never do
+this with your normal account and better have a dedicated well
+separated and secured machine to do this. ***>
 
 The C<smoke> command takes the list of recent uploads to CPAN as
 provided by the C<recent> command and tests them all. While the
@@ -11226,7 +11249,8 @@ distribution name, e.g. "AUTHOR/Foo-Bar-3.14.tar.gz".
 The C<module> related one will be matched against I<all> modules
 contained in the distribution until one module matches.
 
-The C<perl> related one will be matched against C<$^X>.
+The C<perl> related one will be matched against C<$^X> (but with the
+absolute path).
 
 The value associated with C<perlconfig> is itself a hashref that is
 matched against corresponding values in the C<%Config::Config> hash
@@ -11276,8 +11300,8 @@ Arguments to be added to the command line
 
 A full commandline that will be executed as it stands by a system
 call. During the execution the environment variable PERL will is set
-to $^X. If C<commandline> is specified, the content of C<args> is not
-used.
+to $^X (but with an absolute path). If C<commandline> is specified,
+the content of C<args> is not used.
 
 =item eexpect [hash]
 
@@ -12523,7 +12547,7 @@ unusable. Please consider backing up your data before every upgrade.
 
 =head1 BUGS
 
-Please report bugs via http://rt.cpan.org/
+Please report bugs via L<http://rt.cpan.org/>
 
 Before submitting a bug, please make sure that the traditional method
 of building a Perl module package from a shell by following the
@@ -12544,11 +12568,11 @@ See L<http://www.perl.com/perl/misc/Artistic.html>
 =head1 TRANSLATIONS
 
 Kawai,Takanori provides a Japanese translation of this manpage at
-http://homepage3.nifty.com/hippo2000/perltips/CPAN.htm
+L<http://homepage3.nifty.com/hippo2000/perltips/CPAN.htm>
 
 =head1 SEE ALSO
 
-cpan(1), CPAN::Nox(3pm), CPAN::Version(3pm)
+L<cpan>, L<CPAN::Nox>, L<CPAN::Version>
 
 =cut
 
