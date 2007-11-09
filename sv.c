@@ -12096,10 +12096,10 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 
     case OP_ENTERSUB:
     case OP_GOTO:
-	/* XXX tmp hack: these to may call an XS sub, and currently
-	  XS subs don't have a SUB entry on the context stack, so CV nad
-	  pad deteminaion goes wrong, and BAD things happen. So, just
-	  don't try to detemine the value under those circumanstances.
+	/* XXX tmp hack: these two may call an XS sub, and currently
+	  XS subs don't have a SUB entry on the context stack, so CV and
+	  pad determination goes wrong, and BAD things happen. So, just
+	  don't try to determine the value under those circumstances.
 	  Need a better fix at dome point. DAPM 11/2007 */
 	break;
 
