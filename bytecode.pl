@@ -1,3 +1,4 @@
+#!perl -w
 BEGIN {
   push @INC, './lib';
   require 'regen_lib.pl';
@@ -31,6 +32,21 @@ EOT
 
 my $perl_header;
 ($perl_header = $c_header) =~ s{[/ ]?\*/?}{#}g;
+
+# We need the values of two variables from the as-yet uninistalled B.pm
+use vars qw(@optype @specialsv_name);
+{
+    open B, "ext/B/B.pm" or die "B: $!";
+    local $/;
+    my $b = <B>;
+    foreach my $var (qw(optype specialsv_name)) {
+	my ($declaration) = $b =~ /(\@B::$var = qw\(.*?\);)/s;
+	die "Can't find the declaration for \@B::$var" unless $declaration;
+	$declaration =~ s/\@B::/\@/s;
+	eval $declaration or die "$@ from $declaration";
+    }
+    close B;
+}
 
 safer_unlink "ext/ByteLoader/byterun.c", "ext/ByteLoader/byterun.h", "ext/B/B/Asmdata.pm";
 
@@ -83,6 +99,8 @@ for ($i = 0; $i < @optype - 1; $i++) {
 }
 printf BYTERUN_C "    sizeof(%s)\n", $optype[$i], $i;
 
+my $size = @specialsv_name;
+
 print BYTERUN_C <<"EOT";
 };
 
@@ -112,8 +130,8 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 
 EOT
 
-for my $i ( 0 .. $#specialsv ) {
-    print BYTERUN_C "    specialsv_list[$i] = $specialsv[$i];\n";
+for my $i ( 0 .. $#specialsv_name ) {
+    print BYTERUN_C "    specialsv_list[$i] = $specialsv_name[$i];\n";
 }
 
 print BYTERUN_C <<'EOT';
@@ -140,6 +158,7 @@ while (<DATA>) {
 	next;
     }
     ($insn, $lvalue, $argtype, $flags) = split;
+    $flags = '' unless defined $flags;
     my $rvalcast = '';
     if ($argtype =~ m:(.+)/(.+):) {
 	($rvalcast, $argtype) = ("($1)", $2);
