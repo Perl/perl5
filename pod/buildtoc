@@ -384,6 +384,8 @@ sub podset {
 	    unhead1();
 	    output "\n \n\n=head2 ";
 	    $_ = <>;
+	    # Remove svn keyword expansions from the Perl FAQ
+	    s/ \(\$Revision: \d+ \$\)//g;
 	    if ( /^\s*$pod\b/ ) {
 		s/$pod\.pm/$pod/;       # '.pm' in NAME !?
 		output $_;
