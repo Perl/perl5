@@ -1028,9 +1028,6 @@ ext/Unicode/Normalize/t/split.t	Unicode::Normalize
 ext/Unicode/Normalize/t/test.t	Unicode::Normalize
 ext/Unicode/Normalize/t/tie.t	Unicode::Normalize
 ext/util/make_ext		Used by Makefile to execute extension Makefiles
-ext/Win32/Makefile.PL		Win32 extension makefile writer
-ext/Win32/Win32.pm		Win32 extension Perl module
-ext/Win32/Win32.xs		Win32 extension external subroutines
 ext/Win32API/File/buffers.h	Win32API::File extension
 ext/Win32API/File/cFile.h	Win32API::File extension
 ext/Win32API/File/cFile.pc	Win32API::File extension
@@ -1048,6 +1045,9 @@ ext/Win32CORE/Makefile.PL	Win32CORE extension
 ext/Win32CORE/t/win32core.t	Win32CORE extension
 ext/Win32CORE/Win32CORE.c	Win32CORE extension
 ext/Win32CORE/Win32CORE.pm	Win32CORE extension (stubs for Win32 CORE subs)
+ext/Win32/Makefile.PL		Win32 extension makefile writer
+ext/Win32/Win32.pm		Win32 extension Perl module
+ext/Win32/Win32.xs		Win32 extension external subroutines
 ext/XS/APItest/APItest.pm	XS::APItest extension
 ext/XS/APItest/APItest.xs	XS::APItest extension
 ext/XS/APItest/core.c		Test API functions when PERL_CORE is defined
@@ -1064,8 +1064,8 @@ ext/XS/APItest/t/my_cxt.t	XS::APItest: test MY_CXT interface
 ext/XS/APItest/t/printf.t	XS::APItest extension
 ext/XS/APItest/t/push.t		XS::APItest extension
 ext/XS/APItest/t/svsetsv.t	Test behaviour of sv_setsv with/without PERL_CORE
-ext/XS/APItest/t/xs_special_subs.t	Test that XS BEGIN/CHECK/INIT/END work
 ext/XS/APItest/t/xs_special_subs_require.t	for require too
+ext/XS/APItest/t/xs_special_subs.t	Test that XS BEGIN/CHECK/INIT/END work
 ext/XS/Typemap/Makefile.PL	XS::Typemap extension
 ext/XS/Typemap/README		XS::Typemap extension
 ext/XS/Typemap/stdio.c		XS::Typemap extension
@@ -1374,15 +1374,15 @@ lib/CPAN/bin/cpan		easily interact with CPAN from the command line
 lib/CPAN/Debug.pm		helper package for CPAN.pm
 lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
 lib/CPAN/HandleConfig.pm	helper package for CPAN.pm
-lib/CPAN/Kwalify.pm		helper package for CPAN.pm
 lib/CPAN/Kwalify/distroprefs.dd		helper file for validating config files 
 lib/CPAN/Kwalify/distroprefs.yml	helper file for validating config files
+lib/CPAN/Kwalify.pm		helper package for CPAN.pm
 lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
 lib/CPAN/PAUSE2003.pub		CPAN public key
 lib/CPAN/PAUSE2005.pub		CPAN public key
 lib/CPAN/PAUSE2007.pub		CPAN public key
-lib/CPAN/Queue.pm		queueing system for CPAN.pm
 lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
+lib/CPAN/Queue.pm		queueing system for CPAN.pm
 lib/CPAN/SIGNATURE		CPAN public key
 lib/CPAN/t/01loadme.t		See if CPAN the module works
 lib/CPAN/t/02nox.t		See if CPAN::Nox works
@@ -2105,13 +2105,13 @@ lib/Text/Tabs.pm		Do expand and unexpand
 lib/Text/TabsWrap/CHANGELOG	ChangeLog for Tabs+Wrap
 lib/Text/TabsWrap/t/37000.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/39548.t	See if Text::Tabs is working
-lib/Text/TabsWrap/t/Jochen.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/belg4mit.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/fill.t	See if Text::Wrap::fill works
-lib/Text/TabsWrap/t/Jacobson.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/Jacobson2.t	See if Text::Tabs is working
-lib/Text/TabsWrap/t/sep.t	See if Text::Tabs is working
+lib/Text/TabsWrap/t/Jacobson.t	See if Text::Tabs is working
+lib/Text/TabsWrap/t/Jochen.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/sep2.t	See if Text::Tabs is working
+lib/Text/TabsWrap/t/sep.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/tabs.t	See if Text::Tabs works
 lib/Text/TabsWrap/t/wrap.t	See if Text::Wrap::wrap works
 lib/Text/Wrap.pm		Paragraph formatter
@@ -2353,7 +2353,6 @@ os2/dl_os2.c			Addon for dl_open
 os2/Makefile.SHs		Shared library generation for OS/2
 os2/os2add.sym			Overriding symbols to export
 os2/os2_base.t			Additional tests for builtin methods
-os2/os2_pipe.t			Tests for pipe creation logic
 os2/os2.c			Additional code for OS/2
 os2/OS2/ExtAttr/Changes		EA access module
 os2/OS2/ExtAttr/ExtAttr.pm	EA access module
@@ -2364,6 +2363,7 @@ os2/OS2/ExtAttr/myea.h		EA access module
 os2/OS2/ExtAttr/t/os2_ea.t	EA access module
 os2/OS2/ExtAttr/typemap		EA access module
 os2/os2ish.h			Header for OS/2
+os2/os2_pipe.t			Tests for pipe creation logic
 os2/OS2/PrfDB/Changes		System database access module
 os2/OS2/PrfDB/Makefile.PL	System database access module
 os2/OS2/PrfDB/MANIFEST		System database access module
@@ -2374,11 +2374,11 @@ os2/OS2/Process/Makefile.PL	system() constants in a module
 os2/OS2/Process/MANIFEST	system() constants in a module
 os2/OS2/Process/Process.pm	system() constants in a module
 os2/OS2/Process/Process.xs	system() constants in a module
+os2/OS2/Process/t/os2_atoms.t		Test for OS2::Process
+os2/OS2/Process/t/os2_clipboard.t	Test for OS2::Process
 os2/OS2/Process/t/os2_process_kid.t	Tests
 os2/OS2/Process/t/os2_process.t	Tests
 os2/OS2/Process/t/os2_process_text.t	Tests
-os2/OS2/Process/t/os2_atoms.t		Test for OS2::Process
-os2/OS2/Process/t/os2_clipboard.t	Test for OS2::Process
 os2/OS2/REXX/Changes		DLL access module
 os2/OS2/REXX/DLL/Changes	DLL access module
 os2/OS2/REXX/DLL/DLL.pm		DLL access module
@@ -2548,8 +2548,8 @@ pod/perltooc.pod		Perl OO tutorial, part 2
 pod/perltoot.pod		Perl OO tutorial, part 1
 pod/perltrap.pod		Perl traps for the unwary
 pod/perlunicode.pod		Perl Unicode support
-pod/perluniintro.pod		Perl Unicode introduction
 pod/perlunifaq.pod		Perl Unicode FAQ
+pod/perluniintro.pod		Perl Unicode introduction
 pod/perlunitut.pod		Perl Unicode tutorial
 pod/perlutil.pod		utilities packaged with the Perl distribution
 pod/perlvar.pod			Perl predefined variables
