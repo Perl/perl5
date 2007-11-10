@@ -885,7 +885,7 @@ Interaction, perlfaq9 - Networking
 
 =back
 
-=head2 perlfaq1 - General Questions About Perl ($Revision: 9681 $)
+=head2 perlfaq1 - General Questions About Perl
 
 =over 4
 
@@ -937,7 +937,7 @@ http://www.perl.org/advocacy/whyperl.html
 
 =back
 
-=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 9462 $)
+=head2 perlfaq2 - Obtaining and Learning about Perl
 
 =over 4
 
@@ -992,7 +992,7 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =back
 
-=head2 perlfaq3 - Programming Tools ($Revision: 8539 $)
+=head2 perlfaq3 - Programming Tools
 
 =over 4
 
@@ -1077,7 +1077,7 @@ program; what am I doing wrong?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 9681 $)
+=head2 perlfaq4 - Data Manipulation
 
 =over 4
 
@@ -1296,7 +1296,7 @@ array of hashes or arrays?
 
 =back
 
-=head2 perlfaq5 - Files and Formats ($Revision: 9576 $)
+=head2 perlfaq5 - Files and Formats
 
 =over 4
 
@@ -1430,7 +1430,7 @@ X<file, selecting a random line>
 
 =back
 
-=head2 perlfaq6 - Regular Expressions ($Revision: 8539 $)
+=head2 perlfaq6 - Regular Expressions
 
 =over 4
 
@@ -1527,7 +1527,7 @@ X<\E, regex>, X<qr//>
 
 =back
 
-=head2 perlfaq7 - General Perl Language Issues ($Revision: 9620 $)
+=head2 perlfaq7 - General Perl Language Issues
 
 =over 4
 
@@ -1610,7 +1610,7 @@ methods?
 
 =back
 
-=head2 perlfaq8 - System Interaction ($Revision: 9681 $)
+=head2 perlfaq8 - System Interaction
 
 =over 4
 
@@ -1744,7 +1744,7 @@ perl -Idir command line flag, the use lib pragma:
 
 =back
 
-=head2 perlfaq9 - Networking ($Revision: 8539 $)
+=head2 perlfaq9 - Networking
 
 =over 4
 
