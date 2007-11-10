@@ -11,15 +11,14 @@
 #
 package B::Asmdata;
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 use Exporter;
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(%insn_data @insn_name @optype @specialsv_name);
-our(%insn_data, @insn_name, @optype, @specialsv_name);
+our(%insn_data, @insn_name);
 
-@optype = qw(OP UNOP BINOP LOGOP LISTOP PMOP SVOP PADOP PVOP LOOP COP);
-@specialsv_name = qw(Nullsv &PL_sv_undef &PL_sv_yes &PL_sv_no (SV*)pWARN_ALL (SV*)pWARN_NONE (SV*)pWARN_STD);
+use B qw(@optype @specialsv_name);
 
 # XXX insn_data is initialised this way because with a large
 # %insn_data = (foo => [...], bar => [...], ...) initialiser

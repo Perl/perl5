@@ -22,7 +22,7 @@ require Exporter;
 		walkoptree_slow walkoptree walkoptree_exec walksymtable
 		parents comppadlist sv_undef compile_stats timing_info
 		begin_av init_av check_av end_av regex_padav dowarn defstash
-		curstash warnhook diehook inc_gv
+		curstash warnhook diehook inc_gv @optype @specialsv_name
 		);
 push @EXPORT_OK, qw(unitcheck_av) if $] > 5.009;
 
@@ -60,6 +60,13 @@ use strict;
 @B::COP::ISA = 'B::OP';
 
 @B::SPECIAL::ISA = 'B::OBJECT';
+
+@B::optype = qw(OP UNOP BINOP LOGOP LISTOP PMOP SVOP PADOP PVOP LOOP COP);
+# bytecode.pl contained the following comment:
+# Nullsv *must* come first in the following so that the condition
+# ($$sv == 0) can continue to be used to test (sv == Nullsv).
+@B::specialsv_name = qw(Nullsv &PL_sv_undef &PL_sv_yes &PL_sv_no
+			(SV*)pWARN_ALL (SV*)pWARN_NONE (SV*)pWARN_STD);
 
 {
     # Stop "-w" from complaining about the lack of a real B::OBJECT class
@@ -520,7 +527,26 @@ per-thread threadsv variables.
 
 =back
 
+=head2 Exported utility variabiles
 
+=over 4
+
+=item @optype
+
+  my $op_type = $optype[$op_type_num];
+
+A simple mapping of the op type number to its type (like 'COP' or 'BINOP').
+
+=item @specialsv_name
+
+  my $sv_name = $specialsv_name[$sv_index];
+
+Certain SV types are considered 'special'.  They're represented by
+B::SPECIAL and are referred to by a number from the specialsv_list.
+This array maps that number back to the name of the SV (like 'Nullsv'
+or '&PL_sv_undef').
+
+=back
 
 
 =head1 OVERVIEW OF CLASSES
