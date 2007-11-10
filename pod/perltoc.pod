@@ -2683,6 +2683,11 @@ X<warning, reporting> X<warning, registering>
 
 =over 4
 
+=item Calling the debugger
+
+perl -d program_name, perl -d -e 0, perl -d:Ptkdb program_name, perl -dt
+threaded_program_name
+
 =item Debugger Commands
 
 h X<debugger command, h>, h [command], h h, p expr X<debugger command, p>,
@@ -2925,7 +2930,7 @@ C<(?(condition)yes-pattern|no-pattern)>
 
 =item PCRE/Python Support
 
-C<< (?P<NAME>pattern) >>, C<< (?P=NAME) >>, C<< (?P>NAME) >>
+C<< (?PE<lt>NAMEE<gt>pattern) >>, C<< (?P=NAME) >>, C<< (?P>NAME) >>
 
 =item BUGS
 
@@ -5787,9 +5792,9 @@ X<getcwd_sv>, my_snprintf X<my_snprintf>, my_sprintf X<my_sprintf>,
 my_vsnprintf X<my_vsnprintf>, new_version X<new_version>, scan_version
 X<scan_version>, strEQ X<strEQ>, strGE X<strGE>, strGT X<strGT>, strLE
 X<strLE>, strLT X<strLT>, strNE X<strNE>, strnEQ X<strnEQ>, strnNE
-X<strnNE>, sv_nosharing X<sv_nosharing>, upg_version X<upg_version>, vcmp
-X<vcmp>, vnormal X<vnormal>, vnumify X<vnumify>, vstringify X<vstringify>,
-vverify X<vverify>
+X<strnNE>, sv_destroyable X<sv_destroyable>, sv_nosharing X<sv_nosharing>,
+upg_version X<upg_version>, vcmp X<vcmp>, vnormal X<vnormal>, vnumify
+X<vnumify>, vstringify X<vstringify>, vverify X<vverify>
 
 =item MRO Functions
 
@@ -6050,6 +6055,10 @@ djSP X<djSP>, LVRET X<LVRET>
 
 sv_add_arena X<sv_add_arena>, sv_clean_all X<sv_clean_all>, sv_clean_objs
 X<sv_clean_objs>, sv_free_arenas X<sv_free_arenas>
+
+=item SV-Body Allocation
+
+sv_2num X<sv_2num>
 
 =item Unicode Support
 
@@ -6386,9 +6395,13 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 
 =over 4
 
+=item merge common code in installperl and installman
+
 =item common test code for timed bail out
 
 =item POD -E<gt> HTML conversion in the core still sucks
+
+=item merge checkpods and podchecker
 
 =item Parallel testing
 
@@ -6432,6 +6445,8 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 
 =item Cross-compile support
 
+=item roffitall
+
 =back
 
 =item Tasks that need a little C knowledge
@@ -6439,6 +6454,8 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 =over 4
 
 =item Modernize the order of directories in @INC
+
+=item -Duse32bit*
 
 =item Make it clear from -v if this is the exact official release
 
@@ -6449,6 +6466,8 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 =item Improve win32/wince.c
 
 =item Use secure CRT functions when building with VC8 on Win32
+
+=item __FUNCTION__ for MSVC-pre-7.0
 
 =back
 
@@ -6481,6 +6500,8 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 =item Extend PerlIO and PerlIO::Scalar
 
 =item -C on the #! line
+
+=item Propagate const outwards from Perl_moreswitches()
 
 =back
 
@@ -6527,6 +6548,8 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 =item The yada yada yada operators
 
 =item Virtualize operating system access
+
+=item Investigate PADTMP hash pessimisation
 
 =back
 
@@ -6603,204 +6626,11 @@ B<-V>
 
 =back
 
-=head2 perldelta - what is new for perl v5.9.5
+=head2 perldelta - what is new for perl 5.10.0
 
 =over 4
 
 =item DESCRIPTION
-
-=item Incompatible Changes
-
-=over 4
-
-=item Tainting and printf
-
-=item undef and signal handlers
-
-=item strictures and array/hash dereferencing in defined()
-
-=item C<(?p{})> has been removed
-
-=item Pseudo-hashes have been removed
-
-=item Removal of the bytecode compiler and of perlcc
-
-=item Removal of the JPL
-
-=item Recursive inheritance detected earlier
-
-=back
-
-=item Core Enhancements
-
-=over 4
-
-=item Regular expressions
-
-Recursive Patterns, Named Capture Buffers, Possessive Quantifiers,
-Backtracking control verbs, Relative backreferences, C<\K> escape, Vertical
-and horizontal whitespace, and linebreak
-
-=item The C<_> prototype
-
-=item UNITCHECK blocks
-
-=item readpipe() is now overridable
-
-=item default argument for readline()
-
-=item UCD 5.0.0
-
-=item Smart match
-
-=item Implicit loading of C<feature>
-
-=back
-
-=item Modules and Pragmas
-
-=over 4
-
-=item New Pragma, C<mro>
-
-=item bignum, bigint, bigrat
-
-=item Math::BigInt/Math::BigFloat
-
-config(), import(), roundmode common, bpi(), bcos(), bsin(), batan(),
-batan2(), bmuladd(), bexp(), bnok(), from_hex(), from_oct(), and
-from_bin(), as_oct()
-
-=item New Core Modules
-
-=item Module changes
-
-C<assertions>, C<base>, C<strict> and C<warnings>, C<warnings>, C<less>,
-C<Attribute::Handlers>, C<B::Lint>, C<B>, C<Thread>
-
-=back
-
-=item Utility Changes
-
-=over 4
-
-=item C<cpanp>
-
-=item C<cpan2dist>
-
-=item C<pod2html>
-
-=back
-
-=item Documentation
-
-=over 4
-
-=item New manpage, perlunifaq
-
-=back
-
-=item Performance Enhancements
-
-=item Installation and Configuration Improvements
-
-=over 4
-
-=item C++ compatibility
-
-=item Visual C++
-
-=item Static build on Win32
-
-=item win32 builds
-
-=item C<d_pseudofork> and C<d_printf_format_null>
-
-=item Help
-
-=item 64bit systems
-
-=item Ports
-
-=back
-
-=item Selected Bug Fixes
-
-=item New or Changed Diagnostics
-
-=over 4
-
-=item Deprecations
-
-=back
-
-=item Changed Internals
-
-=item Known Problems
-
-=over 4
-
-=item Platform Specific Problems
-
-=back
-
-=item Reporting Bugs
-
-=item SEE ALSO
-
-=back
-
-=head2 perl5100delta, perldelta - what is new for perl 5.10.0
-
-=over 4
-
-=item DESCRIPTION
-
-=item Incompatible Changes
-
-=over 4
-
-=item Packing and UTF-8 strings
-
-=item The C<$*> and C<$#> variables have been removed
-
-=item substr() lvalues are no longer fixed-length
-
-=item Parsing of C<-f _>
-
-=item C<:unique>
-
-=item Scoping of the C<sort> pragma
-
-=item Scoping of C<bignum>, C<bigint>, C<bigrat>
-
-=item Effect of pragmas in eval
-
-=item chdir FOO
-
-=item Handling of .pmc files
-
-=item @- and @+ in patterns
-
-=item $AUTOLOAD can now be tainted
-
-=item Tainting and printf
-
-=item undef and signal handlers
-
-=item strictures and array/hash dereferencing in defined()
-
-=item C<(?p{})> has been removed
-
-=item Pseudo-hashes have been removed
-
-=item Removal of the bytecode compiler and of perlcc
-
-=item Removal of the JPL
-
-=item Recursive inheritance detected earlier
-
-=back
 
 =item Core Enhancements
 
@@ -6832,7 +6662,7 @@ and horizontal whitespace, and linebreak
 
 =item readpipe() is now overridable
 
-=item default argument for readline()
+=item Default argument for readline()
 
 =item state() variables
 
@@ -6840,13 +6670,9 @@ and horizontal whitespace, and linebreak
 
 =item UNIVERSAL::DOES()
 
-=item C<CLONE_SKIP()>
-
 =item Formats
 
 =item Byte-order modifiers for pack() and unpack()
-
-=item Byte count feature in pack()
 
 =item C<no VERSION>
 
@@ -6862,7 +6688,8 @@ and horizontal whitespace, and linebreak
 
 =item New internal variables
 
-C<${^RE_DEBUG_FLAGS}>, C<${^CHILD_ERROR_NATIVE}>
+C<${^RE_DEBUG_FLAGS}>, C<${^CHILD_ERROR_NATIVE}>, C<${^RE_TRIE_MAXBUF}>,
+C<${^WIN32_SLOPPY_STAT}>
 
 =item Miscellaneous
 
@@ -6872,18 +6699,444 @@ C<${^RE_DEBUG_FLAGS}>, C<${^CHILD_ERROR_NATIVE}>
 
 =back
 
+=item Incompatible Changes
+
+=over 4
+
+=item Packing and UTF-8 strings
+
+=item Byte/character count feature in unpack()
+
+=item The C<$*> and C<$#> variables have been removed
+
+=item substr() lvalues are no longer fixed-length
+
+=item Parsing of C<-f _>
+
+=item C<:unique>
+
+=item Effect of pragmas in eval
+
+=item chdir FOO
+
+=item Handling of .pmc files
+
+=item @- and @+ in patterns
+
+=item $AUTOLOAD can now be tainted
+
+=item Tainting and printf
+
+=item undef and signal handlers
+
+=item strictures and dereferencing in defined()
+
+=item C<(?p{})> has been removed
+
+=item Pseudo-hashes have been removed
+
+=item Removal of the bytecode compiler and of perlcc
+
+=item Removal of the JPL
+
+=item Recursive inheritance detected earlier
+
+=back
+
 =item Modules and Pragmata
-=head1 Utility Changes
-=head1 New Documentation
-=head1 Performance Enhancements
-=head1 Installation and Configuration Improvements
-=head1 Selected Bug Fixes
-=head1 New or Changed Diagnostics
-=head1 Changed Internals
-=head1 New Tests
-=head1 Known Problems
-=head1 Platform Specific Problems
-=head1 Reporting Bugs
+
+=over 4
+
+=item Pragmata Changes
+
+C<feature>, C<mro>, Scoping of the C<sort> pragma, Scoping of C<bignum>,
+C<bigint>, C<bigrat>, C<base>, C<strict> and C<warnings>, C<version>,
+C<warnings>, C<less>
+
+=item New modules
+
+=item Selected Changes to Core Modules
+
+C<Attribute::Handlers>, C<B::Lint>, C<B>, C<Thread>
+
+=back
+
+=item Utility Changes
+
+perl -d, ptar, ptardiff, shasum, corelist, h2ph and h2xs, perlivp,
+find2perl, config_data, cpanp, cpan2dist, pod2html
+
+=item New Documentation
+
+=item Performance Enhancements
+
+=over 4
+
+=item In-place sorting
+
+=item Lexical array access
+
+=item XS-assisted SWASHGET
+
+=item Constant subroutines
+
+=item C<PERL_DONT_CREATE_GVSV>
+
+=item Weak references are cheaper
+
+=item sort() enhancements
+
+=item Memory optimisations
+
+=item UTF-8 cache optimisation
+
+=item Sloppy stat on Windows
+
+=item Regular expressions optimisations
+
+Engine de-recursivised, Single char char-classes treated as literals, Trie
+optimisation of literal string alternations, Aho-Corasick start-point
+optimisation
+
+=back
+
+=item Installation and Configuration Improvements
+
+=over 4
+
+=item Configuration improvements
+
+C<-Dusesitecustomize>, Relocatable installations, strlcat() and strlcpy(),
+C<d_pseudofork> and C<d_printf_format_null>, Configure help
+
+=item Compilation improvements
+
+Parallel build, Borland's compilers support, Static build on Windows,
+ppport.h files, C++ compatibility, Building XS extensions on Windows,
+Support for Microsoft 64-bit compiler, Visual C++, Win32 builds
+
+=item Installation improvements
+
+Module auxiliary files
+
+=item New Or Improved Platforms
+
+=back
+
+=item Selected Bug Fixes
+
+strictures in regexp-eval blocks, Calling CORE::require(), Subscripts of
+slices, C<no warnings 'category'> works correctly with -w, threads
+improvements, chr() and negative values, PERL5SHELL and tainting, Using
+*FILE{IO}, Overloading and reblessing, Overloading and UTF-8, eval memory
+leaks fixed, Random device on Windows, PERLIO_DEBUG, PerlIO::scalar and
+read-only scalars, study() and UTF-8, Critical signals, @INC-hook fix,
+C<-t> switch fix, Duping UTF-8 filehandles, Localisation of hash elements
+
+=item New or Changed Diagnostics
+
+Use of uninitialized value, Deprecated use of my() in false conditional,
+!=~ should be !~, Newline in left-justified string, Too late for "-T"
+option, "%s" variable %s masks earlier declaration,
+readdir()/closedir()/etc. attempted on invalid dirhandle, Opening
+dirhandle/filehandle %s also as a file/directory, Use of -P is deprecated,
+v-string in use/require is non-portable, perl -V
+
+=item Changed Internals
+
+=over 4
+
+=item Reordering of SVt_* constants
+
+=item Elimination of SVt_PVBM
+
+=item New type SVt_BIND
+
+=item Removal of CPP symbols
+
+=item Less space is used by ops
+
+=item New parser
+
+=item Use of C<const>
+
+=item Mathoms
+
+=item C<AvFLAGS> has been removed
+
+=item C<av_*> changes
+
+=item $^H and %^H
+
+=item B:: modules inheritance changed
+
+=item Anonymous hash and array constructors
+
+=back
+
+=item Known Problems
+
+=item Platform Specific Problems
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=back
+
+=head2 perl5100delta, perldelta - what is new for perl 5.10.0
+
+=over 4
+
+=item DESCRIPTION
+
+=item Core Enhancements
+
+=over 4
+
+=item The C<feature> pragma
+
+=item New B<-E> command-line switch
+
+=item Defined-or operator
+
+=item Switch and Smart Match operator
+
+=item Regular expressions
+
+Recursive Patterns, Named Capture Buffers, Possessive Quantifiers,
+Backtracking control verbs, Relative backreferences, C<\K> escape, Vertical
+and horizontal whitespace, and linebreak
+
+=item C<say()>
+
+=item Lexical C<$_>
+
+=item The C<_> prototype
+
+=item UNITCHECK blocks
+
+=item New Pragma, C<mro>
+
+=item readpipe() is now overridable
+
+=item Default argument for readline()
+
+=item state() variables
+
+=item Stacked filetest operators
+
+=item UNIVERSAL::DOES()
+
+=item Formats
+
+=item Byte-order modifiers for pack() and unpack()
+
+=item C<no VERSION>
+
+=item C<chdir>, C<chmod> and C<chown> on filehandles
+
+=item OS groups
+
+=item Recursive sort subs
+
+=item Exceptions in constant folding
+
+=item Source filters in @INC
+
+=item New internal variables
+
+C<${^RE_DEBUG_FLAGS}>, C<${^CHILD_ERROR_NATIVE}>, C<${^RE_TRIE_MAXBUF}>,
+C<${^WIN32_SLOPPY_STAT}>
+
+=item Miscellaneous
+
+=item UCD 5.0.0
+
+=item MAD
+
+=back
+
+=item Incompatible Changes
+
+=over 4
+
+=item Packing and UTF-8 strings
+
+=item Byte/character count feature in unpack()
+
+=item The C<$*> and C<$#> variables have been removed
+
+=item substr() lvalues are no longer fixed-length
+
+=item Parsing of C<-f _>
+
+=item C<:unique>
+
+=item Effect of pragmas in eval
+
+=item chdir FOO
+
+=item Handling of .pmc files
+
+=item @- and @+ in patterns
+
+=item $AUTOLOAD can now be tainted
+
+=item Tainting and printf
+
+=item undef and signal handlers
+
+=item strictures and dereferencing in defined()
+
+=item C<(?p{})> has been removed
+
+=item Pseudo-hashes have been removed
+
+=item Removal of the bytecode compiler and of perlcc
+
+=item Removal of the JPL
+
+=item Recursive inheritance detected earlier
+
+=back
+
+=item Modules and Pragmata
+
+=over 4
+
+=item Pragmata Changes
+
+C<feature>, C<mro>, Scoping of the C<sort> pragma, Scoping of C<bignum>,
+C<bigint>, C<bigrat>, C<base>, C<strict> and C<warnings>, C<version>,
+C<warnings>, C<less>
+
+=item New modules
+
+=item Selected Changes to Core Modules
+
+C<Attribute::Handlers>, C<B::Lint>, C<B>, C<Thread>
+
+=back
+
+=item Utility Changes
+
+perl -d, ptar, ptardiff, shasum, corelist, h2ph and h2xs, perlivp,
+find2perl, config_data, cpanp, cpan2dist, pod2html
+
+=item New Documentation
+
+=item Performance Enhancements
+
+=over 4
+
+=item In-place sorting
+
+=item Lexical array access
+
+=item XS-assisted SWASHGET
+
+=item Constant subroutines
+
+=item C<PERL_DONT_CREATE_GVSV>
+
+=item Weak references are cheaper
+
+=item sort() enhancements
+
+=item Memory optimisations
+
+=item UTF-8 cache optimisation
+
+=item Sloppy stat on Windows
+
+=item Regular expressions optimisations
+
+Engine de-recursivised, Single char char-classes treated as literals, Trie
+optimisation of literal string alternations, Aho-Corasick start-point
+optimisation
+
+=back
+
+=item Installation and Configuration Improvements
+
+=over 4
+
+=item Configuration improvements
+
+C<-Dusesitecustomize>, Relocatable installations, strlcat() and strlcpy(),
+C<d_pseudofork> and C<d_printf_format_null>, Configure help
+
+=item Compilation improvements
+
+Parallel build, Borland's compilers support, Static build on Windows,
+ppport.h files, C++ compatibility, Building XS extensions on Windows,
+Support for Microsoft 64-bit compiler, Visual C++, Win32 builds
+
+=item Installation improvements
+
+Module auxiliary files
+
+=item New Or Improved Platforms
+
+=back
+
+=item Selected Bug Fixes
+
+strictures in regexp-eval blocks, Calling CORE::require(), Subscripts of
+slices, C<no warnings 'category'> works correctly with -w, threads
+improvements, chr() and negative values, PERL5SHELL and tainting, Using
+*FILE{IO}, Overloading and reblessing, Overloading and UTF-8, eval memory
+leaks fixed, Random device on Windows, PERLIO_DEBUG, PerlIO::scalar and
+read-only scalars, study() and UTF-8, Critical signals, @INC-hook fix,
+C<-t> switch fix, Duping UTF-8 filehandles, Localisation of hash elements
+
+=item New or Changed Diagnostics
+
+Use of uninitialized value, Deprecated use of my() in false conditional,
+!=~ should be !~, Newline in left-justified string, Too late for "-T"
+option, "%s" variable %s masks earlier declaration,
+readdir()/closedir()/etc. attempted on invalid dirhandle, Opening
+dirhandle/filehandle %s also as a file/directory, Use of -P is deprecated,
+v-string in use/require is non-portable, perl -V
+
+=item Changed Internals
+
+=over 4
+
+=item Reordering of SVt_* constants
+
+=item Elimination of SVt_PVBM
+
+=item New type SVt_BIND
+
+=item Removal of CPP symbols
+
+=item Less space is used by ops
+
+=item New parser
+
+=item Use of C<const>
+
+=item Mathoms
+
+=item C<AvFLAGS> has been removed
+
+=item C<av_*> changes
+
+=item $^H and %^H
+
+=item B:: modules inheritance changed
+
+=item Anonymous hash and array constructors
+
+=back
+
+=item Known Problems
+
+=item Platform Specific Problems
+
+=item Reporting Bugs
 
 =item SEE ALSO
 
@@ -12071,7 +12324,8 @@ Legend of characters above
 
 =item KNOWN PROBLEMS
 
-literals in regex that are longer than 127 bytes, EBCDIC, format
+literals in regex that are longer than 127 bytes, EBCDIC, format, Thread
+safety
 
 =over 4
 
@@ -13396,7 +13650,8 @@ redoop, nextop, lastop
 
 =item B::COP Methods
 
-label, stash, stashpv, file, cop_seq, arybase, line, warnings, io, hints
+label, stash, stashpv, file, cop_seq, arybase, line, warnings, io, hints,
+hints_hash
 
 =back
 
@@ -14566,7 +14821,7 @@ Provide a valid C<CPANPLUS::Configure> object, No arguments
 
 =over 4
 
-=item $conf = $cb->configure_object ()
+=item $conf = $cb->configure_object;
 
 =back
 
@@ -14646,6 +14901,45 @@ path, index_files, force, verbose
 
 =item $file = $cb->autobundle([path => OUTPUT_PATH, force => BOOL, verbose
 => BOOL])
+
+=back
+
+=over 4
+
+=item CUSTOM MODULE SOURCES
+
+=over 4
+
+=item %files = $cb->list_custom_sources
+
+=back
+
+=back
+
+=over 4
+
+=item $local_index = $cb->add_custom_source( uri => URI, [verbose => BOOL]
+);
+
+=back
+
+=over 4
+
+=item $local_index = $cb->remove_custom_source( uri => URI, [verbose =>
+BOOL] );
+
+=back
+
+=over 4
+
+=item $bool = $cb->update_custom_source( [remote => URI] );
+
+=back
+
+=over 4
+
+=item $file = $cb->write_custom_source_index( path =>
+/path/to/package/root, [to => /path/to/index/file, verbose => BOOL] );
 
 =back
 
@@ -15463,6 +15757,51 @@ uptodate, path, verbose
 
 =back
 
+=over 4
+
+=item $file = $cb->_add_custom_module_source( uri => URI, [verbose => BOOL]
+); 
+
+=back
+
+=over 4
+
+=item $file = $cb->_remove_custom_module_source( uri => URI, [verbose =>
+BOOL] ); 
+
+=back
+
+=over 4
+
+=item %files = $cb->__list_custom_module_sources
+
+=back
+
+=over 4
+
+=item $bool = $cb->__update_custom_module_sources( [verbose => BOOL] );
+
+=back
+
+=over 4
+
+=item $ok = $cb->__update_custom_module_source 
+
+=back
+
+=over 4
+
+=item $bool = $cb->__write_custom_module_index( path => /path/to/packages,
+[to => /path/to/index/file, verbose => BOOL] )
+
+=back
+
+=over 4
+
+=item $bool = $cb->__create_custom_module_entries( [verbose => BOOL] ) 
+
+=back
+
 =head2 CPANPLUS::Internals::Utils
 
 =over 4
@@ -15581,10 +15920,11 @@ PACKAGE_STRING );
 
 =item ACCESSORS
 
-name, module, version, path, comment, package, description, dslip, status,
-author, parent
+name, module, version, path, comment, package, description, dslip
 
 =back
+
+status, author, parent
 
 =over 4
 
@@ -16102,6 +16442,20 @@ for CPANPLUS
 =item COPYRIGHT
 
 =item SEE ALSO
+
+=back
+
+=head2 CPANPLUShell::Default::Plugins::CustomSource,
+CPANPLUS::Shell::Default::Plugins::CustomSource 
+
+=over 4
+
+=item SYNOPSIS
+
+    ### elaborate help text
+    CPAN Terminal> /? cs
+
+=item DESCRIPTION
 
 =back
 
@@ -17451,6 +17805,32 @@ Dumper
 
 =back
 
+=head2 Devel::Arena - Perl extension for inspecting the core's arena
+structures
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item EXPORT
+
+sv_stats [DONT_SHARE], shared_string_table, sizes, HEK_size STRING,
+shared_string_table_effectiveness, write_stats_at_END
+
+=back
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
 =head2 Devel::DProf - a Perl code profiler
 
 =over 4
@@ -17607,6 +17987,59 @@ perl 5.6.1, perl 5.6.0, perl 5.005_03, perl 5.005, perl 5.004_05, perl
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=back
+
+=head2 Devel::Size - Perl extension for finding the memory usage of Perl
+variables
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item FUNCTIONS
+
+=over 4
+
+=item size($ref)
+
+=item total_size($ref)
+
+=back
+
+=item EXPORT
+
+=item UNDERSTANDING MEMORY ALLOCATION
+
+=over 4
+
+=item The C library
+
+=item Perl
+
+=back
+
+=item DANGERS
+
+=item Messages: texts originating from this module.
+
+=over 4
+
+=item Errors
+
+=item warnings
+
+=back
+
+=item BUGS
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=item SEE ALSO
 
 =back
 
@@ -18662,7 +19095,8 @@ Legend of characters above
 
 =item KNOWN PROBLEMS
 
-literals in regex that are longer than 127 bytes, EBCDIC, format
+literals in regex that are longer than 127 bytes, EBCDIC, format, Thread
+safety
 
 =over 4
 
@@ -20430,7 +20864,9 @@ characters in them. What do I do?
 
 Implement $PREFER_BIN
 
-=item AUTHORS
+=item BUG REPORTS
+
+=item AUTHOR
 
 =item COPYRIGHT
 
@@ -21362,7 +21798,7 @@ B<lock_hash_recurse>, B<unlock_hash_recurse>
 
 B<hash_unlocked>
 
-b<legal_keys>, B<hidden_keys>, B<all_keys>, B<hash_seed>
+B<legal_keys>, B<hidden_keys>, B<all_keys>, B<hash_seed>
 
 B<hv_store>
 
@@ -21544,7 +21980,7 @@ B<lock_hash_recurse>, B<unlock_hash_recurse>
 
 B<hash_unlocked>
 
-b<legal_keys>, B<hidden_keys>, B<all_keys>, B<hash_seed>
+B<legal_keys>, B<hidden_keys>, B<all_keys>, B<hash_seed>
 
 B<hv_store>
 
@@ -24809,9 +25245,11 @@ Whitespace, IO Redirect
 
 =item See Also
 
-=item AUTHOR
-
 =item ACKNOWLEDGEMENTS
+
+=item BUG REPORTS
+
+=item AUTHOR
 
 =item COPYRIGHT
 
@@ -26347,8 +26785,8 @@ build_requires, create_packlist, c_source, conflicts, create_makefile_pl,
 create_readme, dist_abstract, dist_author, dist_name, dist_version,
 dist_version_from, dynamic_config, extra_compiler_flags,
 extra_linker_flags, get_options, type, store, default, include_dirs,
-install_path, installdirs, license, apache, artistic, bsd, gpl, lgpl, mit,
-mozilla, open_source, perl, restrictive, unrestricted, meta_add,
+install_path, installdirs, license, apache, artistic, artistic_2, bsd, gpl,
+lgpl, mit, mozilla, open_source, perl, restrictive, unrestricted, meta_add,
 meta_merge, module_name, PL_files, pm_files, pod_files, recommends,
 recursive_test_files, requires, script_files, sign, test_files, xs_files,
 new_from_context(%args), resume(), subclass()
@@ -26382,17 +26820,21 @@ up_to_date($source_file, $derived_file), up_to_date(\@source_files,
 
 PL_files(), allow_mb_mismatch(), autosplit(), base_dir(), bindoc_dirs(),
 blib(), build_bat(), build_class(), build_elements(), build_requires(),
-build_script(), c_source(), config_dir(), conflicts(),
-create_makefile_pl(), create_packlist(), create_readme(), debugger(),
-destdir(), get_options(), html_css(), include_dirs(), install_base(),
-install_sets(), installdirs(), libdoc_dirs(), license(), magic_number(),
-mb_version(), meta_add(), meta_merge(), metafile(), module_name(),
-orig_dir(), original_prefix(), perl(), pm_files(), pod_files(), pollute(),
-prefix(), prereq_action_types(), quiet(), recommends(), recurse_into(),
-recursive_test_files(), requires(), scripts(), use_rcfile(), verbose(),
-xs_files()
+build_script(), c_source(), config_dir(), configure_requires(),
+conflicts(), create_makefile_pl(), create_packlist(), create_readme(),
+debugger(), destdir(), get_options(), html_css(), include_dirs(),
+install_base(), install_sets(), installdirs(), libdoc_dirs(), license(),
+magic_number(), mb_version(), meta_add(), meta_merge(), metafile(),
+module_name(), orig_dir(), original_prefix(), perl(), pm_files(),
+pod_files(), pollute(), prefix(), prereq_action_types(), quiet(),
+recommends(), recurse_into(), recursive_test_files(), requires(),
+scripts(), use_rcfile(), verbose(), xs_files()
 
 =back
+
+=item MODULE METADATA
+
+keywords, resources
 
 =item AUTHOR
 
@@ -26416,7 +26858,13 @@ xs_files()
 
 =over 4
 
+=item Types of prerequisites
+
+configure_requires, build_requires, requires, recommends, conflicts
+
 =item Format of prerequisites
+
+=item XS Extensions
 
 =back
 
@@ -26501,9 +26949,9 @@ auto_feature_names(), write()
 
 =over 4
 
-=item The basic installation recipe for modules that use Module::Build
+=item Installing modules that use Module::Build
 
-=item Making a CPAN.pm-compatible distribution
+=item Modifying Config.pm values
 
 =item Installing modules using the programmatic interface
 
@@ -26520,6 +26968,8 @@ auto_feature_names(), write()
 =item ADVANCED RECIPES
 
 =over 4
+
+=item Making a CPAN.pm-compatible distribution
 
 =item Changing the order of the build process
 
@@ -30384,14 +30834,14 @@ B<Note>, B<closelog()>
 =item DIAGNOSTICS
 
 C<Invalid argument passed to setlogsock>, C<eventlog passed to setlogsock,
-but operating system isn't Win32-compatible>, C<no connection to syslog
-available>, C<stream passed to setlogsock, but %s is not writable>,
-C<stream passed to setlogsock, but could not find any device>, C<tcp passed
-to setlogsock, but tcp service unavailable>, C<syslog: expecting argument
-%s>, C<syslog: invalid level/facility: %s>, C<syslog: too many levels
-given: %s>, C<syslog: too many facilities given: %s>, C<syslog: level must
-be given>, C<udp passed to setlogsock, but udp service unavailable>, C<unix
-passed to setlogsock, but path not available>
+but no Win32 API available>, C<no connection to syslog available>, C<stream
+passed to setlogsock, but %s is not writable>, C<stream passed to
+setlogsock, but could not find any device>, C<tcp passed to setlogsock, but
+tcp service unavailable>, C<syslog: expecting argument %s>, C<syslog:
+invalid level/facility: %s>, C<syslog: too many levels given: %s>,
+C<syslog: too many facilities given: %s>, C<syslog: level must be given>,
+C<udp passed to setlogsock, but udp service unavailable>, C<unix passed to
+setlogsock, but path not available>
 
 =item SEE ALSO
 
@@ -30415,6 +30865,8 @@ passed to setlogsock, but path not available>
 
 AnnoCPAN: Annotated CPAN documentation, CPAN Ratings, RT: CPAN's request
 tracker, Search CPAN, Kobes' CPAN Search, Perl Documentation
+
+=item COPYRIGHT
 
 =item LICENSE
 
@@ -30458,14 +30910,14 @@ B<Note>, B<closelog()>
 =item DIAGNOSTICS
 
 C<Invalid argument passed to setlogsock>, C<eventlog passed to setlogsock,
-but operating system isn't Win32-compatible>, C<no connection to syslog
-available>, C<stream passed to setlogsock, but %s is not writable>,
-C<stream passed to setlogsock, but could not find any device>, C<tcp passed
-to setlogsock, but tcp service unavailable>, C<syslog: expecting argument
-%s>, C<syslog: invalid level/facility: %s>, C<syslog: too many levels
-given: %s>, C<syslog: too many facilities given: %s>, C<syslog: level must
-be given>, C<udp passed to setlogsock, but udp service unavailable>, C<unix
-passed to setlogsock, but path not available>
+but no Win32 API available>, C<no connection to syslog available>, C<stream
+passed to setlogsock, but %s is not writable>, C<stream passed to
+setlogsock, but could not find any device>, C<tcp passed to setlogsock, but
+tcp service unavailable>, C<syslog: expecting argument %s>, C<syslog:
+invalid level/facility: %s>, C<syslog: too many levels given: %s>,
+C<syslog: too many facilities given: %s>, C<syslog: level must be given>,
+C<udp passed to setlogsock, but udp service unavailable>, C<unix passed to
+setlogsock, but path not available>
 
 =item SEE ALSO
 
@@ -30489,6 +30941,8 @@ passed to setlogsock, but path not available>
 
 AnnoCPAN: Annotated CPAN documentation, CPAN Ratings, RT: CPAN's request
 tracker, Search CPAN, Kobes' CPAN Search, Perl Documentation
+
+=item COPYRIGHT
 
 =item LICENSE
 
@@ -32054,6 +32508,10 @@ $flags = 0), clock(), stat, stat FH, stat EXPR
 
 =over 4
 
+=item C<timelocal()> and C<timegm()>
+
+=item C<timelocal_nocheck()> and C<timegm_nocheck()>
+
 =item Year Value Interpretation
 
 =item Limits of time_t
@@ -32071,6 +32529,8 @@ $flags = 0), clock(), stat, stat FH, stat EXPR
 =item BUGS
 
 =item SUPPORT
+
+=item COPYRIGHT
 
 =item AUTHOR
 
