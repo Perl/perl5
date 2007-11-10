@@ -742,6 +742,7 @@ sub mkCheckRex {
     $str =~ s/match\\\(.*?\\\)/match\(.*?\)/msg;	# match args
     $str =~ s/(0x[0-9A-Fa-f]+)/0x[0-9A-Fa-f]+/msg;	# hexnum values
     $str =~ s/".*?"/".*?"/msg;				# quoted strings
+    $str =~ s/FAKE:(\w):\d+/FAKE:$1:\\d+/msg;		# parent pad index
 
     $str =~ s/(\d refs?)/\\d+ refs?/msg;		# 1 ref, 2+ refs (plural)
     $str =~ s/leavesub \[\d\]/leavesub [\\d]/msg;	# for -terse

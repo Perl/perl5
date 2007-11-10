@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.71";
+our $VERSION   = "0.74";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -74,6 +74,7 @@ my $big_endian = 1;	# more <sequence#> display
 my $tree_style = 0;	# tree-order details
 my $banner = 1;		# print banner before optree is traversed
 my $do_main = 0;	# force printing of main routine
+my $show_src;		# show source code
 
 # another factor: can affect all styles!
 our @callbacks;		# allow external management
@@ -142,15 +143,17 @@ sub concise_subref {
 
 sub concise_stashref {
     my($order, $h) = @_;
+    local *s;
     foreach my $k (sort keys %$h) {
-	local *s = $h->{$k};
+	next unless defined $h->{$k};
+	*s = $h->{$k};
 	my $coderef = *s{CODE} or next;
 	reset_sequence();
 	print "FUNC: ", *s, "\n";
 	my $codeobj = svref_2object($coderef);
 	next unless ref $codeobj eq 'B::CV';
-	eval { concise_cv_obj($order, $codeobj) }
-	or warn "err $@ on $codeobj";
+	eval { concise_cv_obj($order, $codeobj, $k) };
+	warn "err $@ on $codeobj" if $@;
     }
 }
 
@@ -244,6 +247,7 @@ my @tree_decorations =
    [" ", map("$start_sym$_$end_sym", "q", "w", "t", "x", "m"), "", 0],
   );
 
+my @render_packs; # collect -stash=<packages>
 
 sub compileOpts {
     # set rendering state from options and args
@@ -279,6 +283,7 @@ sub compileOpts {
 	} elsif ($o eq "-littleendian") {
 	    $big_endian = 0;
 	}
+	# miscellaneous, presentation
 	elsif ($o eq "-nobanner") {
 	    $banner = 0;
 	} elsif ($o eq "-banner") {
@@ -288,6 +293,14 @@ sub compileOpts {
 	    $do_main = 1;
 	} elsif ($o eq "-nomain") {
 	    $do_main = 0;
+	} elsif ($o eq "-src") {
+	    $show_src = 1;
+	}
+	elsif ($o =~ /^-stash=(.*)/) {
+	    my $pkg = $1;
+	    no strict 'refs';
+	    eval "require $pkg" unless defined %{$pkg.'::'};
+	    push @render_packs, $pkg;
 	}
 	# line-style options
 	elsif (exists $style{substr($o, 1)}) {
@@ -350,7 +363,12 @@ sub compile {
 		concise_subref($order, $objref, $objname);
 	    }
 	}
-	if (!@args or $do_main) {
+	for my $pkg (@render_packs) {
+	    no strict 'refs';
+	    concise_stashref($order, \%{$pkg.'::'});
+	}
+
+	if (!@args or $do_main or @render_packs) {
 	    print $walkHandle "main program:\n" if $do_main;
 	    concise_main($order);
 	}
@@ -553,6 +571,9 @@ sub fmt_line {    # generate text-line for op.
 
     $text =~ s/\#([a-zA-Z]+)/$hr->{$1}/eg;	# populate #var's
     $text =~ s/[ \t]*~+[ \t]*/ /g;		# squeeze tildes
+
+    $text = "# $hr->{src}\n$text" if $show_src and $hr->{src};
+
     chomp $text;
     return "$text\n" if $text ne "";
     return $text; # suppress empty lines
@@ -634,8 +655,8 @@ our %hints; # used to display each COP's op_hints values
 @hints{4096,8192,16384,32768,65536} = ('I', 'F', 'B', 'S', 'R');
 # taint and eval
 @hints{1048576,2097152} = ('T', 'E');
-# filetest access, UTF-8, assertions, assertions seen
-@hints{4194304,8388608,16777216,33554432} = ('X', 'U', 'A', 'a');
+# filetest access, UTF-8
+@hints{4194304,8388608} = ('X', 'U');
 
 sub _flags {
     my($hash, $x) = @_;
@@ -667,10 +688,9 @@ sub concise_sv {
       if $hr->{svclass} eq "IV" and $sv->FLAGS & SVf_IVisUV;
     Carp::cluck("bad concise_sv: $sv") unless $sv and $$sv;
     $hr->{svaddr} = sprintf("%#x", $$sv);
-    if ($hr->{svclass} eq "GV") {
+    if ($hr->{svclass} eq "GV" && $sv->isGV_with_GP()) {
 	my $gv = $sv;
-	my $stash = $gv->STASH->NAME;
-	if ($stash eq "main") {
+	my $stash = $gv->STASH->NAME; if ($stash eq "main") {
 	    $stash = "";
 	} else {
 	    $stash = $stash . "::";
@@ -700,6 +720,23 @@ sub concise_sv {
 	my $out = $hr->{svclass};
 	return $out .= " $hr->{svval}" ; 
     }
+}
+
+my %srclines;
+
+sub fill_srclines {
+    my $fullnm = shift;
+    if ($fullnm eq '-e') {
+	$srclines{$fullnm} = [ $fullnm, "-src not supported for -e" ];
+	return;
+    }
+    open (my $fh, '<', $fullnm)
+	or warn "# $fullnm: $!, (chdirs not supported by this feature yet)\n"
+	and return;
+    my @l = <$fh>;
+    chomp @l;
+    unshift @l, $fullnm; # like @{_<$fullnm} in debug, array starts at 1
+    $srclines{$fullnm} = \@l;
 }
 
 sub concise_op {
@@ -787,12 +824,22 @@ sub concise_op {
 	$h{coplabel} = $label;
 	$label = $label ? "$label: " : "";
 	my $loc = $op->file;
+	my $pathnm = $loc;
 	$loc =~ s[.*/][];
-	$loc .= ":" . $op->line;
+	my $ln = $op->line;
+	$loc .= ":$ln";
 	my($stash, $cseq) = ($op->stash->NAME, $op->cop_seq - $cop_seq_base);
 	my $arybase = $op->arybase;
 	$arybase = $arybase ? ' $[=' . $arybase : "";
 	$h{arg} = "($label$stash $cseq $loc$arybase)";
+	if ($show_src) {
+	    fill_srclines($pathnm) unless exists $srclines{$pathnm};
+	    # Would love to retain Jim's use of // but this code needs to be
+	    # portable to 5.8.x
+	    my $line = $srclines{$pathnm}[$ln];
+	    $line = "-src unavailable under -e" unless defined $line;
+	    $h{src} = "$ln: $line";
+	}
     } elsif ($h{class} eq "LOOP") {
 	$h{arg} = "(next->" . seq($op->nextop) . " last->" . seq($op->lastop)
 	  . " redo->" . seq($op->redoop) . ")";
@@ -817,7 +864,6 @@ sub concise_op {
     $h{seq} = "" if $h{seq} eq "-";
     if ($] > 5.009) {
 	$h{opt} = $op->opt;
-	$h{static} = $op->static;
 	$h{label} = $labels{$$op};
     } else {
 	$h{seqnum} = $op->seq;
@@ -1055,11 +1101,11 @@ on threaded and un-threaded perls.
 =head1 OPTIONS
 
 Arguments that don't start with a hyphen are taken to be the names of
-subroutines to print the OPs of; if no such functions are specified,
-the main body of the program (outside any subroutines, and not
-including use'd or require'd files) is rendered.  Passing C<BEGIN>,
-C<UNITCHECK>, C<CHECK>, C<INIT>, or C<END> will cause all of the
-corresponding special blocks to be printed.
+subroutines to render; if no such functions are specified, the main
+body of the program (outside any subroutines, and not including use'd
+or require'd files) is rendered.  Passing C<BEGIN>, C<UNITCHECK>,
+C<CHECK>, C<INIT>, or C<END> will cause all of the corresponding
+special blocks to be printed.  Arguments must follow options.
 
 Options affect how things are rendered (ie printed).  They're presented
 here by their visual effect, 1st being strongest.  They're grouped
@@ -1195,7 +1241,42 @@ obviously mutually exclusive with bigendian.
 
 =head2 Other options
 
-These are pairwise exclusive.
+=over 4
+
+=item B<-src>
+
+With this option, the rendering of each statement (starting with the
+nextstate OP) will be preceded by the 1st line of source code that
+generates it.  For example:
+
+    1  <0> enter
+    # 1: my $i;
+    2  <;> nextstate(main 1 junk.pl:1) v:{
+    3  <0> padsv[$i:1,10] vM/LVINTRO
+    # 3: for $i (0..9) {
+    4  <;> nextstate(main 3 junk.pl:3) v:{
+    5  <0> pushmark s
+    6  <$> const[IV 0] s
+    7  <$> const[IV 9] s
+    8  <{> enteriter(next->j last->m redo->9)[$i:1,10] lKS
+    k  <0> iter s
+    l  <|> and(other->9) vK/1
+    # 4:     print "line ";
+    9      <;> nextstate(main 2 junk.pl:4) v
+    a      <0> pushmark s
+    b      <$> const[PV "line "] s
+    c      <@> print vK
+    # 5:     print "$i\n";
+    ...
+
+=item B<-stash="somepackage">
+
+With this, "somepackage" will be required, then the stash is
+inspected, and each function is rendered.
+
+=back
+
+The following options are pairwise exclusive.
 
 =over 4
 
@@ -1434,7 +1515,28 @@ The numeric value of the OP's flags.
 =item B<#hints>
 
 The COP's hint flags, rendered with abbreviated names if possible. An empty
-string if this is not a COP.
+string if this is not a COP. Here are the symbols used:
+
+    $ strict refs
+    & strict subs
+    * strict vars
+    i integers
+    l locale
+    b bytes
+    [ arybase
+    { block scope
+    % localise %^H
+    < open in
+    > open out
+    I overload int
+    F overload float
+    B overload binary
+    S overload string
+    R overload re
+    T taint
+    E eval
+    X filetest access
+    U utf-8
 
 =item B<#hintsval>
 
@@ -1499,13 +1601,6 @@ your program is).
 =item B<#opt>
 
 Whether or not the op has been optimised by the peephole optimiser.
-
-Only available in 5.9 and later.
-
-=item B<#static>
-
-Whether or not the op is statically defined.  This flag is used by the
-B::C compiler backend and indicates that the op should not be freed.
 
 Only available in 5.9 and later.
 
@@ -1578,6 +1673,12 @@ This is B<very> similar to previous, only the first two ops differ.  This
 subroutine rendering is more representative, insofar as a single main
 program will have many subs.
 
+=item perl -MB::Concise -e 'B::Concise::compile("-exec","-src", \%B::Concise::)->()'
+
+This renders all functions in the B::Concise package with the source
+lines.  It eschews the O framework so that the stashref can be passed
+directly to B::Concise::compile().  See -stash option for a more
+convenient way to render a package.
 
 =back
 

@@ -17,11 +17,11 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpCONST_ARYBASE OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER
 	 OPpSORT_REVERSE OPpSORT_INPLACE OPpSORT_DESCEND OPpITER_REVERSED
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
-         CVf_METHOD CVf_LOCKED CVf_LVALUE CVf_ASSERTION
+         CVf_METHOD CVf_LOCKED CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED),
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : 'RXf_SKIPWHITE');
-$VERSION = 0.81;
+$VERSION = 0.83;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -144,8 +144,6 @@ use warnings ();
 # - here-docs?
 
 # Current test.deparse failures
-# comp/assertions 38 - disabled assertions should be like "my($x) if 0"
-#    'sub f : assertion {}; no assertions; my $x=1; {f(my $x=2); print "$x\n"}'
 # comp/hints 6 - location of BEGIN blocks wrt. block openings
 # run/switchI 1 - missing -I switches entirely
 #    perl -Ifoo -e 'print @INC'
@@ -350,7 +348,7 @@ sub next_todo {
 		$name = "$self->{'curstash'}::$name" unless $name =~ /::/;
 		$self->{'curstash'} = $stash;
 	    }
-	    $name =~ s/^\Q$stash\E:://;
+	    $name =~ s/^\Q$stash\E::(?!\z|.*::)//;
 	}
         return "${p}${l}sub $name " . $self->deparse_sub($cv);
     }
@@ -440,7 +438,8 @@ sub begin_is_use {
     # Certain pragmas are dealt with using hint bits,
     # so we ignore them here
     if ($module eq 'strict' || $module eq 'integer'
-	|| $module eq 'bytes' || $module eq 'warnings') {
+	|| $module eq 'bytes' || $module eq 'warnings'
+	|| $module eq 'feature') {
 	return "";
     }
 
@@ -469,7 +468,6 @@ sub stash_subs {
     }
     my %stash = svref_2object($stash)->ARRAY;
     while (my ($key, $val) = each %stash) {
-	next if $key eq 'main::';	# avoid infinite recursion
 	my $class = class($val);
 	if ($class eq "PV") {
 	    # Just a prototype. As an ugly but fairly effective way
@@ -503,7 +501,9 @@ sub stash_subs {
 		$self->todo($cv, 1);
 	    }
 	    if (class($val->HV) ne "SPECIAL" && $key =~ /::$/) {
-		$self->stash_subs($pack . $key);
+		$self->stash_subs($pack . $key)
+		    unless $pack eq '' && $key eq 'main::';
+		    # avoid infinite recursion
 	    }
 	}
     }
@@ -562,6 +562,7 @@ sub new {
     $self->{'ambient_arybase'} = 0;
     $self->{'ambient_warnings'} = undef; # Assume no lexical warnings
     $self->{'ambient_hints'} = 0;
+    $self->{'ambient_hinthash'} = undef;
     $self->init();
 
     while (my $arg = shift @_) {
@@ -610,6 +611,7 @@ sub init {
 				: undef;
     $self->{'hints'}    = $self->{'ambient_hints'};
     $self->{'hints'} &= 0xFF if $] < 5.009;
+    $self->{'hinthash'} = $self->{'ambient_hinthash'};
 
     # also a convenient place to clear out subs_declared
     delete $self->{'subs_declared'};
@@ -687,7 +689,7 @@ sub coderef2text {
 
 sub ambient_pragmas {
     my $self = shift;
-    my ($arybase, $hint_bits, $warning_bits) = (0, 0);
+    my ($arybase, $hint_bits, $warning_bits, $hinthash) = (0, 0);
 
     while (@_ > 1) {
 	my $name = shift();
@@ -776,6 +778,10 @@ sub ambient_pragmas {
 	    $hint_bits = $val;
 	}
 
+	elsif ($name eq '%^H') {
+	    $hinthash = $val;
+	}
+
 	else {
 	    croak "Unknown pragma type: $name";
 	}
@@ -787,6 +793,7 @@ sub ambient_pragmas {
     $self->{'ambient_arybase'} = $arybase;
     $self->{'ambient_warnings'} = $warning_bits;
     $self->{'ambient_hints'} = $hint_bits;
+    $self->{'ambient_hinthash'} = $hinthash;
 }
 
 # This method is the inner loop, so try to keep it simple
@@ -838,18 +845,17 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
     if ($cv->FLAGS & SVf_POK) {
 	$proto = "(". $cv->PV . ") ";
     }
-    if ($cv->CvFLAGS & (CVf_METHOD|CVf_LOCKED|CVf_LVALUE|CVf_ASSERTION)) {
+    if ($cv->CvFLAGS & (CVf_METHOD|CVf_LOCKED|CVf_LVALUE)) {
         $proto .= ": ";
         $proto .= "lvalue " if $cv->CvFLAGS & CVf_LVALUE;
         $proto .= "locked " if $cv->CvFLAGS & CVf_LOCKED;
         $proto .= "method " if $cv->CvFLAGS & CVf_METHOD;
-        $proto .= "assertion " if $cv->CvFLAGS & CVf_ASSERTION;
     }
 
     local($self->{'curcv'}) = $cv;
     local($self->{'curcvlex'});
-    local(@$self{qw'curstash warnings hints'})
-		= @$self{qw'curstash warnings hints'};
+    local(@$self{qw'curstash warnings hints hinthash'})
+		= @$self{qw'curstash warnings hints hinthash'};
     my $body;
     if (not null $cv->ROOT) {
 	my $lineseq = $cv->ROOT->first;
@@ -888,8 +894,8 @@ sub deparse_format {
     local($self->{'curcv'}) = $form;
     local($self->{'curcvlex'});
     local($self->{'in_format'}) = 1;
-    local(@$self{qw'curstash warnings hints'})
-		= @$self{qw'curstash warnings hints'};
+    local(@$self{qw'curstash warnings hints hinthash'})
+		= @$self{qw'curstash warnings hints hinthash'};
     my $op = $form->ROOT;
     my $kid;
     return "\f." if $op->first->name eq 'stub'
@@ -1109,32 +1115,10 @@ sub lineseq {
 	if defined($self->{'limit_seq'})
 	&& (!defined($limit_seq) || $self->{'limit_seq'} < $limit_seq);
     local $self->{'limit_seq'} = $limit_seq;
-    for (my $i = 0; $i < @ops; $i++) {
-	$expr = "";
-	if (is_state $ops[$i]) {
-	    $expr = $self->deparse($ops[$i], 0);
-	    $i++;
-	    if ($i > $#ops) {
-		push @exprs, $expr;
-		last;
-	    }
-	}
-	if (!is_state $ops[$i] and (my $ls = $ops[$i+1]) and
-	    !null($ops[$i+1]) and $ops[$i+1]->name eq "lineseq")
-	{
-	    if ($ls->first && !null($ls->first) && is_state($ls->first)
-		&& (my $sib = $ls->first->sibling)) {
-		if (!null($sib) && $sib->name eq "leaveloop") {
-		    push @exprs, $expr . $self->for_loop($ops[$i], 0);
-		    $i++;
-		    next;
-		}
-	    }
-	}
-	$expr .= $self->deparse($ops[$i], (@ops != 1)/2);
-	$expr =~ s/;\n?\z//;
-	push @exprs, $expr;
-    }
+
+    $self->walk_lineseq($root, \@ops,
+		       sub { push @exprs, $_[0]} );
+
     my $body = join(";\n", grep {length} @exprs);
     my $subs = "";
     if (defined $root && defined $limit_seq && !$self->{'in_format'}) {
@@ -1148,8 +1132,8 @@ sub scopeop {
     my $kid;
     my @kids;
 
-    local(@$self{qw'curstash warnings hints'})
-		= @$self{qw'curstash warnings hints'} if $real_block;
+    local(@$self{qw'curstash warnings hints hinthash'})
+		= @$self{qw'curstash warnings hints hinthash'} if $real_block;
     if ($real_block) {
 	$kid = $op->first->sibling; # skip enter
 	if (is_miniwhile($kid)) {
@@ -1192,35 +1176,38 @@ sub pp_leave { scopeop(1, @_); }
 sub deparse_root {
     my $self = shift;
     my($op) = @_;
-    local(@$self{qw'curstash warnings hints'})
-      = @$self{qw'curstash warnings hints'};
+    local(@$self{qw'curstash warnings hints hinthash'})
+      = @$self{qw'curstash warnings hints hinthash'};
     my @kids;
     return if null $op->first; # Can happen, e.g., for Bytecode without -k
     for (my $kid = $op->first->sibling; !null($kid); $kid = $kid->sibling) {
 	push @kids, $kid;
     }
+    $self->walk_lineseq($op, \@kids,
+			sub { print $self->indent($_[0].';');
+			      print "\n" unless $_[1] == $#kids;
+			  });
+}
+
+sub walk_lineseq {
+    my ($self, $op, $kids, $callback) = @_;
+    my @kids = @$kids;
     for (my $i = 0; $i < @kids; $i++) {
 	my $expr = "";
 	if (is_state $kids[$i]) {
-	    $expr = $self->deparse($kids[$i], 0);
-	    $i++;
+	    $expr = $self->deparse($kids[$i++], 0);
 	    if ($i > $#kids) {
-		print $self->indent($expr);
+		$callback->($expr, $i);
 		last;
 	    }
 	}
 	if (is_for_loop($kids[$i])) {
-	    $expr .= $self->for_loop($kids[$i], 0);
-	    $expr .= ";\n" unless $i == $#kids;
-	    print $self->indent($expr);
-	    $i++;
+	    $callback->($expr . $self->for_loop($kids[$i], 0), $i++);
 	    next;
 	}
 	$expr .= $self->deparse($kids[$i], (@kids != 1)/2);
 	$expr =~ s/;\n?\z//;
-	$expr .= ";";
-	print $self->indent($expr);
-	print "\n" unless $i == $#kids;
+	$callback->($expr, $i);
     }
 }
 
@@ -1236,8 +1223,12 @@ sub gv_name {
 Carp::confess() unless ref($gv) eq "B::GV";
     my $stash = $gv->STASH->NAME;
     my $name = $gv->SAFENAME;
-    if (($stash eq 'main' && $globalnames{$name})
-	or ($stash eq $self->{'curstash'} && !$globalnames{$name})
+    if ($stash eq 'main' && $name =~ /^::/) {
+	$stash = '::';
+    }
+    elsif (($stash eq 'main' && $globalnames{$name})
+	or ($stash eq $self->{'curstash'} && !$globalnames{$name}
+	    && ($stash eq 'main' || $name !~ /::/))
 	or $name =~ /^[^A-Za-z_:]/)
     {
 	$stash = "";
@@ -1416,6 +1407,14 @@ sub pp_nextstate {
 	$self->{'hints'} = $op->hints;
     }
 
+    # hack to check that the hint hash hasn't changed
+    if ($] > 5.009 &&
+	"@{[sort %{$self->{'hinthash'} || {}}]}"
+	ne "@{[sort %{$op->hints_hash->HASH || {}}]}") {
+	push @text, declare_hinthash($self->{'hinthash'}, $op->hints_hash->HASH, $self->{indent_size});
+	$self->{'hinthash'} = $op->hints_hash->HASH;
+    }
+
     # This should go after of any branches that add statements, to
     # increase the chances that it refers to the same line it did in
     # the original program.
@@ -1450,6 +1449,33 @@ sub declare_hints {
         $decls .= "no $pragma;\n";
     }
     return $decls;
+}
+
+# Internal implementation hints that the core sets automatically, so don't need
+# (or want) to be passed back to the user
+my %ignored_hints = (
+    'open<' => 1,
+    'open>' => 1,
+    'v_string' => 1,
+    );
+
+sub declare_hinthash {
+    my ($from, $to, $indent) = @_;
+    my @decls;
+    for my $key (keys %$to) {
+	next if $ignored_hints{$key};
+	if (!defined $from->{$key} or $from->{$key} ne $to->{$key}) {
+	    push @decls, qq(\$^H{'$key'} = q($to->{$key}););
+	}
+    }
+    for my $key (keys %$from) {
+	next if $ignored_hints{$key};
+	if (!exists $to->{$key}) {
+	    push @decls, qq(delete \$^H{'$key'};);
+	}
+    }
+    @decls or return '';
+    return join("\n" . (" " x $indent), "BEGIN {", @decls) . "\n}\n";
 }
 
 sub hint_pragmas {
@@ -1801,8 +1827,7 @@ sub pp_refgen {
 	    return $self->anon_hash_or_list($op, $cx);
 	} elsif (!null($kid->sibling) and
 		 $kid->sibling->name eq "anoncode") {
-	    return "sub " .
-		$self->deparse_sub($self->padval($kid->sibling->targ));
+            return $self->e_anoncode({ code => $self->padval($kid->sibling->targ) });
 	} elsif ($kid->name eq "pushmark") {
             my $sib_name = $kid->sibling->name;
             if ($sib_name =~ /^(pad|rv2)[ah]v$/
@@ -1821,6 +1846,12 @@ sub pp_refgen {
         }
     }
     $self->pfixop($op, $cx, "\\", 20);
+}
+
+sub e_anoncode {
+    my ($self, $info) = @_;
+    my $text = $self->deparse_sub($info->{code});
+    return "sub " . $text;
 }
 
 sub pp_srefgen { pp_refgen(@_) }
@@ -2425,6 +2456,7 @@ sub indirop {
 
 sub pp_prtf { indirop(@_, "printf") }
 sub pp_print { indirop(@_, "print") }
+sub pp_say  { indirop(@_, "say") }
 sub pp_sort { indirop(@_, "sort") }
 
 sub mapop {
@@ -2574,8 +2606,8 @@ sub loop_common {
     my($op, $cx, $init) = @_;
     my $enter = $op->first;
     my $kid = $enter->sibling;
-    local(@$self{qw'curstash warnings hints'})
-		= @$self{qw'curstash warnings hints'};
+    local(@$self{qw'curstash warnings hints hinthash'})
+		= @$self{qw'curstash warnings hints hinthash'};
     my $head = "";
     my $bare = 0;
     my $body;
@@ -2677,7 +2709,7 @@ sub loop_common {
     return $head . "{\n\t" . $body . "\b}" . $cont;
 }
 
-sub pp_leaveloop { loop_common(@_, "") }
+sub pp_leaveloop { shift->loop_common(@_, "") }
 
 sub for_loop {
     my $self = shift;
@@ -3078,7 +3110,7 @@ sub want_list {
     return ($op->flags & OPf_WANT) == OPf_WANT_LIST;
 }
 
-sub method {
+sub _method {
     my $self = shift;
     my($op, $cx) = @_;
     my $kid = $op->first->sibling; # skip pushmark
@@ -3100,18 +3132,18 @@ sub method {
 	$obj = $kid;
 	$kid = $kid->sibling;
 	for (; not null $kid; $kid = $kid->sibling) {
-	    push @exprs, $self->deparse($kid, 6);
+	    push @exprs, $kid;
 	}
     } else {
 	$obj = $kid;
 	$kid = $kid->sibling;
 	for (; !null ($kid->sibling) && $kid->name ne "method_named";
 	      $kid = $kid->sibling) {
-	    push @exprs, $self->deparse($kid, 6);
+	    push @exprs, $kid
 	}
 	$meth = $kid;
     }
-    $obj = $self->deparse($obj, 24);
+
     if ($meth->name eq "method_named") {
 	$meth = $self->const_sv($meth)->PV;
     } else {
@@ -3120,12 +3152,28 @@ sub method {
 	    # As of 5.005_58, this case is probably obsoleted by the
 	    # method_named case above
 	    $meth = $self->const_sv($meth)->PV; # needs to be bare
-	} else {
-	    $meth = $self->deparse($meth, 1);
 	}
     }
-    my $args = join(", ", @exprs);	
-    $kid = $obj . "->" . $meth;
+
+    return { method => $meth, variable_method => ref($meth),
+             object => $obj, args => \@exprs  };
+}
+
+# compat function only
+sub method {
+    my $self = shift;
+    my $info = $self->_method(@_);
+    return $self->e_method( $self->_method(@_) );
+}
+
+sub e_method {
+    my ($self, $info) = @_;
+    my $obj = $self->deparse($info->{object}, 24);
+
+    my $meth = $info->{method};
+    $meth = $self->deparse($meth, 1) if $info->{variable_method};
+    my $args = join(", ", map { $self->deparse($_, 6) } @{$info->{args}} );
+    my $kid = $obj . "->" . $meth;
     if (length $args) {
 	return $kid . "(" . $args . ")"; # parens mandatory
     } else {
@@ -3215,7 +3263,8 @@ sub check_proto {
 sub pp_entersub {
     my $self = shift;
     my($op, $cx) = @_;
-    return $self->method($op, $cx) unless null $op->first->sibling;
+    return $self->e_method($self->_method($op, $cx))
+        unless null $op->first->sibling;
     my $prefix = "";
     my $amper = "";
     my($kid, @exprs);
@@ -3241,6 +3290,13 @@ sub pp_entersub {
 	}
 	$simple = 1; # only calls of named functions can be prototyped
 	$kid = $self->deparse($kid, 24);
+	if (!$amper) {
+	    if ($kid eq 'main::') {
+		$kid = '::';
+	    } elsif ($kid !~ /^(?:\w|::)(?:[\w\d]|::(?!\z))*\z/) {
+		$kid = single_delim("q", "'", $kid) . '->';
+	    }
+	}
     } elsif (is_scalar ($kid->first) && $kid->first->name ne 'rv2cv') {
 	$amper = "&";
 	$kid = $self->deparse($kid, 24);
@@ -4662,6 +4718,11 @@ They exist principally so that you can write code like:
 
 which specifies that the ambient pragmas are exactly those which
 are in scope at the point of calling.
+
+=item %^H
+
+This parameter is used to specify the ambient pragmas which are
+stored in the special hash %^H.
 
 =back
 

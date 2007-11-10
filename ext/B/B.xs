@@ -597,7 +597,6 @@ BOOT:
     specialsv_list[5] = (SV *) pWARN_NONE;
     specialsv_list[6] = (SV *) pWARN_STD;
 #if PERL_VERSION <= 8
-#  define CVf_ASSERTION	0
 #  define OPpPAD_STATE 0
 #endif
 #include "defsubs.h"
@@ -846,7 +845,6 @@ threadsv_names()
 #define OP_type(o)	o->op_type
 #if PERL_VERSION >= 9
 #  define OP_opt(o)	o->op_opt
-#  define OP_static(o)	o->op_static
 #else
 #  define OP_seq(o)	o->op_seq
 #endif
@@ -911,10 +909,6 @@ OP_type(o)
 
 U8
 OP_opt(o)
-	B::OP		o
-
-U8
-OP_static(o)
 	B::OP		o
 
 #else
@@ -1626,6 +1620,18 @@ is_empty(gv)
     OUTPUT:
         RETVAL
 
+bool
+isGV_with_GP(gv)
+	B::GV	gv
+    CODE:
+#if PERL_VERSION >= 9
+	RETVAL = isGV_with_GP(gv) ? TRUE : FALSE;
+#else
+	RETVAL = TRUE; /* In 5.8 and earlier they all are.  */
+#endif
+    OUTPUT:
+	RETVAL
+
 void*
 GvGP(gv)
 	B::GV	gv
@@ -1734,9 +1740,13 @@ B::GV
 IoBOTTOM_GV(io)
 	B::IO	io
 
+#if PERL_VERSION <= 8
+
 short
 IoSUBPROCESS(io)
 	B::IO	io
+
+#endif
 
 bool
 IsSTD(io,name)

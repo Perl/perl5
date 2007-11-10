@@ -115,13 +115,7 @@ BEGIN {
 
 use Getopt::Std;
 use Carp;
-use Test::More tests => ( # per-pkg tests (function ct + require_ok)
-			  40 + 16	# Data::Dumper, Digest::MD5
-			  + 517 + 263	# B::Deparse, B
-			  + 595 + 190	# POSIX, IO::Socket
-			  + 345 * ($] > 5.009)
-			  + 17 * ($] >= 5.009003)
-			  - 366);	# fudge
+use Test::More 'no_plan';
 
 require_ok("B::Concise");
 
@@ -165,7 +159,7 @@ my $testpkgs = {
 	XS => [qw( svref_2object perlstring opnumber main_start
 		   main_root main_cv )],
 
-	constant => [qw/ ASSIGN CVf_ASSERTION CVf_LOCKED CVf_LVALUE
+	constant => [qw/ ASSIGN CVf_LOCKED CVf_LVALUE
 		     CVf_METHOD LIST_CONTEXT OP_CONST OP_LIST OP_RV2SV
 		     OP_STRINGIFY OPf_KIDS OPf_MOD OPf_REF OPf_SPECIAL
 		     OPf_STACKED OPf_WANT OPf_WANT_LIST OPf_WANT_SCALAR

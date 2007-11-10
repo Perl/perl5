@@ -1,6 +1,6 @@
 package B::Debug;
 
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 
 use strict;
 use B qw(peekop class walkoptree walkoptree_exec
@@ -19,9 +19,8 @@ sub B::OP::debug {
 	op_type		%d
 EOT
     if ($] > 5.009) {
-	printf <<'EOT', $op->opt, $op->static;
+	printf <<'EOT', $op->opt;
 	op_opt		%d
-	op_static	%d
 EOT
     } else {
 	printf <<'EOT', $op->seq;
