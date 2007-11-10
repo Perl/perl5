@@ -540,10 +540,18 @@ it is known to fail with 64-bit versions of GCC.
 
 =head2 GDBM and Threads on HP-UX
 
-If you attempt to compile Perl with threads on an 11.X system and also
-link in the GDBM library, then Perl will immediately core dump when it
-starts up.  The only workaround at this point is to relink the GDBM
-library under 11.X, then relink it into Perl.
+If you attempt to compile Perl with (POSIX) threads on an 11.X system
+and also link in the GDBM library, then Perl will immediately core dump
+when it starts up.  The only workaround at this point is to relink the
+GDBM library under 11.X, then relink it into Perl.
+
+the error might show something like:
+
+Pthread internal error: message: __libc_reinit() failed, file: ../pthreads/pthread.c, line: 1096
+Return Pointer is 0xc082bf33
+sh: 5345 Quit(coredump)
+
+and Configure will give up.
 
 =head2 NFS filesystems and utime(2) on HP-UX
 
@@ -614,15 +622,24 @@ bug seems to be to create add to the file F</etc/nsswitch.conf>
 Whether you are using NIS does not matter.  Amazingly enough,
 the same bug also affects Solaris.
 
+=head1 Miscellaneous
+
+HP-UX 11 Y2K patch "Y2K-1100 B.11.00.B0125 HP-UX Core OS Year 2000
+Patch Bundle" has been reported to break the io/fs test #18 which
+tests whether utime() can change timestamps.  The Y2K patch seems to
+break utime() so that over NFS the timestamps do not get changed
+(on local filesystems utime() still works). This has probably been
+fixed on your system by now.
+
 =head1 AUTHOR
 
-Jeff Okamoto <okamoto@corp.hp.com>
 H.Merijn Brand <h.m.brand@xs4all.nl>
+Jeff Okamoto <okamoto@corp.hp.com>
 
 With much assistance regarding shared libraries from Marc Sabatella.
 
 =head1 DATE
 
-Version 0.7.9: 2007-03-14
+Version 0.8.0: 2007-09-09
 
 =cut

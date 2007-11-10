@@ -161,13 +161,20 @@ NT probably won't work.
 Install Visual C++ 2005 first, then the Platform SDK.  Setup your environment
 as follows (assuming default installation locations were chosen):
 
-	SET PATH=%SystemRoot%\system32;%SystemRoot%;C:\Program Files\Microsoft Visual Studio 8\Common7\IDE;C:\Program Files\Microsoft Visual Studio 8\VC\BIN;C:\Program Files\Microsoft Visual Studio 8\Common7\Tools;C:\Program Files\Microsoft Visual Studio 8\SDK\v2.0\bin;C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727;C:\Program Files\Microsoft Visual Studio 8\VC\VCPackages;C:\Program Files\Microsoft Platform SDK\Bin
+	SET PlatformSDKDir=C:\Program Files\Microsoft Platform SDK
 
-	SET INCLUDE=C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE;C:\Program Files\Microsoft Platform SDK\include
+	SET PATH=%SystemRoot%\system32;%SystemRoot%;C:\Program Files\Microsoft Visual Studio 8\Common7\IDE;C:\Program Files\Microsoft Visual Studio 8\VC\BIN;C:\Program Files\Microsoft Visual Studio 8\Common7\Tools;C:\Program Files\Microsoft Visual Studio 8\SDK\v2.0\bin;C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727;C:\Program Files\Microsoft Visual Studio 8\VC\VCPackages;%PlatformSDKDir%\Bin
 
-	SET LIB=C:\Program Files\Microsoft Visual Studio 8\VC\LIB;C:\Program Files\Microsoft Visual Studio 8\SDK\v2.0\lib;C:\Program Files\Microsoft Platform SDK\lib
+	SET INCLUDE=C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE;%PlatformSDKDir%\include
+
+	SET LIB=C:\Program Files\Microsoft Visual Studio 8\VC\LIB;C:\Program Files\Microsoft Visual Studio 8\SDK\v2.0\lib;%PlatformSDKDir%\lib
 
 	SET LIBPATH=C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727
+
+(The PlatformSDKDir might need to be set differently depending on which version
+you are using. Earlier versions installed into "C:\Program Files\Microsoft SDK",
+while the latest versions install into version-specific locations such as
+"C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2".)
 
 Perl should now build using the win32/Makefile.  You will need to edit that
 file to set
@@ -207,11 +214,18 @@ Install the Toolkit first, then the Platform SDK, then the .NET Framework SDK.
 Setup your environment as follows (assuming default installation locations
 were chosen):
 
-	SET PATH=%SystemRoot%\system32;%SystemRoot%;C:\Program Files\Microsoft Visual C++ Toolkit 2003\bin;C:\Program Files\Microsoft SDK\Bin;C:\Program Files\Microsoft.NET\SDK\v1.1\Bin
+	SET PlatformSDKDir=C:\Program Files\Microsoft Platform SDK
 
-	SET INCLUDE=C:\Program Files\Microsoft Visual C++ Toolkit 2003\include;C:\Program Files\Microsoft SDK\include;C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\include
+	SET PATH=%SystemRoot%\system32;%SystemRoot%;C:\Program Files\Microsoft Visual C++ Toolkit 2003\bin;%PlatformSDKDir%\Bin;C:\Program Files\Microsoft.NET\SDK\v1.1\Bin
 
-	SET LIB=C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib;C:\Program Files\Microsoft SDK\lib;C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\lib
+	SET INCLUDE=C:\Program Files\Microsoft Visual C++ Toolkit 2003\include;%PlatformSDKDir%\include;C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\include
+
+	SET LIB=C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib;%PlatformSDKDir%\lib;C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\lib
+
+(The PlatformSDKDir might need to be set differently depending on which version
+you are using. Earlier versions installed into "C:\Program Files\Microsoft SDK",
+while the latest versions install into version-specific locations such as
+"C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2".)
 
 Several required files will still be missing:
 
@@ -225,7 +239,7 @@ following:
 
 	C:\WINDOWS\Microsoft.NET\Framework\v1.1.4322
 
-Copy it from there to C:\Program Files\Microsoft SDK\Bin
+Copy it from there to %PlatformSDKDir%\Bin
 
 =item *
 
@@ -254,12 +268,12 @@ $Config{ar}.
 
 setargv.obj is required to build perlglob.exe (and perl.exe if the USE_SETARGV
 option is enabled).  The Platform SDK supplies this object file in source form
-in C:\Program Files\Microsoft SDK\src\crt.  Copy setargv.c, cruntime.h and
+in %PlatformSDKDir%\src\crt.  Copy setargv.c, cruntime.h and
 internal.h from there to some temporary location and build setargv.obj using
 
 	cl.exe /c /I. /D_CRTBLD setargv.c
 
-Then copy setargv.obj to C:\Program Files\Microsoft SDK\lib
+Then copy setargv.obj to %PlatformSDKDir%\lib
 
 Alternatively, if you don't need perlglob.exe and don't need to enable the
 USE_SETARGV option then you can safely just remove all mention of $(GLOBEXE)

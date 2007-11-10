@@ -42,7 +42,7 @@ own IRC network, L<irc://irc.perl.org>. General (not help-oriented) chat can be
 found at L<irc://irc.perl.org/#perl>. Many other more specific chats are also
 hosted on the network. Information about irc.perl.org is located on the
 network's website: L<http://www.irc.perl.org>. For a more help oriented #perl,
-check out L<irc://irc.freenode.net/#perl>. Perl6 development also has a
+check out L<irc://irc.freenode.net/#perl>. Perl 6 development also has a
 presence in L<irc://irc.freenode.net/#perl6>. Most Perl-related channels will
 be kind enough to point you in the right direction if you ask nicely.
 
@@ -68,7 +68,7 @@ resources for Perl developers as well as a directory of other useful websites.
 =item L<http://use.perl.org/>
 
 use Perl; provides a slashdot-style Perl news website covering all things Perl,
-from minutes of the meetings of the Perl6 Design team to conference
+from minutes of the meetings of the Perl 6 Design team to conference
 announcements with (ir)relevant discussion.
 
 =back

@@ -367,6 +367,39 @@ The PERL5LIB and PERLLIB logical names work as documented in L<perl>,
 except that the element separator is '|' instead of ':'.  The
 directory specifications may use either VMS or Unix syntax.
 
+=head1 The Perl Forked Debugger
+
+The Perl forked debugger places the debugger commands and output in a
+separate X-11 terminal window so that commands and output from multiple
+processes are not mixed together.
+
+Perl on VMS supports an emulation of the forked debugger when Perl is
+run on a VMS system that has X11 support installed.
+
+To use the forked debugger, you need to have the default display set to an
+X-11 Server and some environment variables set that Unix expects.
+
+The forked debugger requires the environment variable C<TERM> to be C<xterm>,
+and the environment variable C<DISPLAY> to exist.  C<xterm> must be in
+lower case.
+
+  $define TERM "xterm"
+
+  $define DISPLAY "hostname:0.0"
+
+Currently the value of C<DISPLAY> is ignored.  It is recommended that it be set
+to be the hostname of the display, the server and screen in UNIX notation.  In
+the future the value of DISPLAY may be honored by Perl instead of using the
+default display.
+
+It may be helpful to always use the forked debugger so that script I/O is
+separated from debugger I/O.  You can force the debugger to be forked by
+assigning a value to the logical name <PERLDB_PIDS> that is not a process
+identification number.
+
+  $define PERLDB_PIDS XXXX
+
+
 =head1 PERL_VMS_EXCEPTION_DEBUG
 
 The PERL_VMS_EXCEPTION_DEBUG being defined as "ENABLE" will cause the VMS
