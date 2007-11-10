@@ -1,6 +1,10 @@
 CHANGES
 -------
 
+  2.008 2 November 2007
+
+      * Minor documentation changes in README
+
   2.006 1 September 20007
 
       * Makefile.PL

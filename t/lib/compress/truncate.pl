@@ -14,12 +14,21 @@ sub run
     my $Error           = getErrorRef($CompressClass);
     my $UnError         = getErrorRef($UncompressClass);
     
-    my $hello = <<EOM ;
-hello world
-this is a test
-some more stuff on this line
-and finally...
-EOM
+#    my $hello = <<EOM ;
+#hello world
+#this is a test
+#some more stuff on this line
+#and finally...
+#EOM
+
+    # ASCII hex equivalent of the text above. This makes the test
+    # harness behave identically on an EBCDIC platform.
+    my $hello = 
+      "\x68\x65\x6c\x6c\x6f\x20\x77\x6f\x72\x6c\x64\x0a\x74\x68\x69\x73" .
+      "\x20\x69\x73\x20\x61\x20\x74\x65\x73\x74\x0a\x73\x6f\x6d\x65\x20" .
+      "\x6d\x6f\x72\x65\x20\x73\x74\x75\x66\x66\x20\x6f\x6e\x20\x74\x68" .
+      "\x69\x73\x20\x6c\x69\x6e\x65\x0a\x61\x6e\x64\x20\x66\x69\x6e\x61" .
+      "\x6c\x6c\x79\x2e\x2e\x2e\x0a" ;
 
     my $blocksize = 10 ;
 

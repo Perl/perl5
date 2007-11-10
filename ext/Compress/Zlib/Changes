@@ -1,6 +1,10 @@
 CHANGES
 -------
 
+  2.008 2 November 2007
+
+      * Minor documentation changes in README
+
   2.007 22 September 20007
 
       * lib/Compress/Zlib.pm -- 1.x Backward Compatability issues

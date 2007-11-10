@@ -1,9 +1,9 @@
 
-                             IO::Compress::Base
+                             IO-Compress-Base
 
-                             Version 2.006
+                             Version 2.008
 
-                            1st September 2007
+                             2nd November 2007
 
 
        Copyright (c) 2005-2007 Paul Marquess. All rights reserved.
@@ -27,7 +27,7 @@ modules.
 PREREQUISITES
 -------------
 
-Before you can build IO::Compress::Base you need to have the following
+Before you can build IO-Compress-Base you need to have the following
 installed on your system:
 
 
@@ -52,7 +52,7 @@ using this sequence of commands:
 INSTALLATION
 ------------
 
-To install IO::Compress::Base, run the command below:
+To install IO-Compress-Base, run the command below:
 
     make install
 
@@ -77,7 +77,7 @@ TROUBLESHOOTING
 FEEDBACK
 --------
 
-How to report a problem with IO::Compress::Base.
+How to report a problem with IO-Compress-Base.
 
 To help me help you, I need all of the following information:
 
@@ -94,24 +94,8 @@ To help me help you, I need all of the following information:
         If your perl does not understand the "-V" option it is too
         old. This module needs Perl version 5.004 or better.     
 
-     b. The version of IO::Compress::Base you have. 
-        If you have successfully installed IO::Compress::Base, this one-liner
-        will tell you:
-
-           perl -MIO::Compress::Base -e 'print qq[ver $IO::Compress::Base::VERSION\n]'
-
-        If you areplete* output from running this
-     
-            perl -V
-     
-        Do not edit the output in any way.
-        Note, I want you to run "perl -V" and NOT "perl -v".
-     
-        If your perl does not understand the "-V" option it is too
-        old. This module needs Perl version 5.004 or better.     
-
-     b. The version of IO::Compress::Base you have. 
-        If you have successfully installed IO::Compress::Base, this one-liner
+     b. The version of IO-Compress-Base you have. 
+        If you have successfully installed IO-Compress-Base, this one-liner
         will tell you:
 
            perl -MIO::Compress::Base -e 'print qq[ver $IO::Compress::Base::VERSION\n]'
@@ -120,15 +104,15 @@ To help me help you, I need all of the following information:
 
            perl -MIO::Compress::Base -e "print qq[ver $IO::Compress::Base::VERSION\n]"
 
-        If you haven't installed IO::Compress::Base then search IO::Compress::Base.pm
+        If you haven't installed IO-Compress-Base then search IO::Compress::Base.pm
         for a line like this:
 
-          $VERSION = "1.05" ;
+          $VERSION = "2.008" ;
 
 
 
- 2. If you are having problems building IO::Compress::Base, send me a
-    complete log of what happened. Start by unpacking the IO::Compress::Base
+ 2. If you are having problems building IO-Compress-Base, send me a
+    complete log of what happened. Start by unpacking the IO-Compress-Base
     module into a fresh directory and keep a log of all the steps
 
         [edit config.in, if necessary]

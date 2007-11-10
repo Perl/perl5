@@ -1,6 +1,17 @@
 CHANGES
 -------
 
+  2.008 2 November 2007
+
+      * Minor documentation changes in README
+
+      * t/compress/truncate.pl
+        EBCDIC Cleanup.
+
+      * IO::Compress::Gzip::Constants.pm
+        Tidied up the character classes used to defined invalid 
+        FNAME & FCOMMENT fields for EBCDIC.
+
   2.006 1 September 2007
 
       * Makefile.PL

@@ -7,7 +7,7 @@ require Exporter;
 
 our ($VERSION, @ISA, @EXPORT, %ZIP_CM_MIN_VERSIONS);
 
-$VERSION = '2.006';
+$VERSION = '2.008';
 
 @ISA = qw(Exporter);
 
@@ -31,6 +31,7 @@ $VERSION = '2.006';
     ZIP_GP_FLAG_STREAMING_MASK
     ZIP_GP_FLAG_PATCHED_MASK
     ZIP_GP_FLAG_STRONG_ENCRYPTED_MASK
+    ZIP_GP_FLAG_LZMA_EOS_PRESENT
 
     ZIP_EXTRA_ID_ZIP64
     ZIP_EXTRA_ID_EXT_TIMESTAMP
@@ -57,6 +58,7 @@ use constant ZIP_GP_FLAG_ENCRYPTED_MASK        => 1 ;
 use constant ZIP_GP_FLAG_STREAMING_MASK        => 8 ;
 use constant ZIP_GP_FLAG_PATCHED_MASK          => 32 ;
 use constant ZIP_GP_FLAG_STRONG_ENCRYPTED_MASK => 64 ;
+use constant ZIP_GP_FLAG_LZMA_EOS_PRESENT      => 2 ;
 
 # Internal File Attributes
 use constant ZIP_IFA_TEXT_MASK                 => 1;

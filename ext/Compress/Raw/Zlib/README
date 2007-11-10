@@ -1,9 +1,9 @@
 
-                             Compress::Raw::Zlib
+                             Compress-Raw-Zlib
 
-                             Version 2.006
+                             Version 2.008
 
-                            1st September 2007
+                             2nd November 2007
 
 
        Copyright (c) 2005-2007 Paul Marquess. All rights reserved.
@@ -33,7 +33,7 @@ This module provides a Perl interface to the zlib compression library.
 PREREQUISITES
 -------------
 
-Before you can build Compress::Raw::Zlib you need to have the following
+Before you can build Compress-Raw-Zlib you need to have the following
 installed on your system:
 
 
@@ -43,10 +43,10 @@ installed on your system:
 
 
 
-By default, Compress::Raw::Zlib will build its own private copy of the 
+By default, Compress-Raw-Zlib will build its own private copy of the 
 zlib library. If you want to use a different version of 
 zlib, follow the instructions in the section called 
-"Controlling the version of zlib used by Compress::Raw::Zlib" 
+"Controlling the version of zlib used by Compress-Raw-Zlib" 
 later in this document.
 
 
@@ -66,17 +66,17 @@ using this sequence of commands:
 INSTALLATION
 ------------
 
-To install Compress::Raw::Zlib, run the command below:
+To install Compress-Raw-Zlib, run the command below:
 
     make install
 
 
 
 
-Controlling the version of zlib used by Compress::Raw::Zlib 
+Controlling the version of zlib used by Compress-Raw-Zlib 
 ----------------------------------------------------------
 
-Compress::Raw::Zlib interfaces to the zlib compression library. There
+Compress-Raw-Zlib interfaces to the zlib compression library. There
 are three options available to control which version/instance of the 
 zlib library is used:
 
@@ -120,7 +120,7 @@ before building this module.
   --------
   
   For option 2, fetch a copy of the zlib source distribution from
-  http://www.zlib.org and unpack it into the Compress::Raw::Zlib source 
+  http://www.zlib.org and unpack it into the Compress-Raw-Zlib source 
   directory. Assuming you have fetched zlib 1.2.3, 
   it will create a directory called zlib-1.2.3. 
   
@@ -170,13 +170,13 @@ Setting the Gzip OS Code
 
 Every gzip stream stores a byte in its header to identify the Operating
 System that was used to create the gzip stream. When you build
-Compress::Raw::Zlib it will attempt to determine the value that is correct for
+Compress-Raw-Zlib it will attempt to determine the value that is correct for
 your Operating System. This will then be used by IO::Gzip as the default
 value for the OS byte in all gzip headers it creates. 
  
 The variable GZIP_OS_CODE in the config.in file controls the setting of
-this value when building Compress::Raw::Zlib. If GZIP_OS_CODE is set to
-AUTO_DETECT, Compress::Raw::Zlib will attempt to determine the correct value for
+this value when building Compress-Raw-Zlib. If GZIP_OS_CODE is set to
+AUTO_DETECT, Compress-Raw-Zlib will attempt to determine the correct value for
 your Operating System.
 
 Alternatively, you can override auto-detection of the default OS code and
@@ -190,7 +190,7 @@ See RFC 1952 for valid OS codes that can be used.
 If you are running one of the less popular Operating Systems, it is
 possible that the default value picked by this module is incorrect or the
 default value (3) is used when there is a better value available. When
-Compress::Raw::Zlib cannot determine what operating system you are running, it
+Compress-Raw-Zlib cannot determine what operating system you are running, it
 will use the default value 3 for the OS code.
 
 If you find you have to change this value, because you think the value auto
@@ -281,7 +281,7 @@ The solution is either:
 HP-UX Notes
 -----------
 
-I've had a report that when building Compress::Raw::Zlib under HP-UX that it
+I've had a report that when building Compress-Raw-Zlib under HP-UX that it
 is necessary to have first built the zlib library with the -fpic
 option.
 
@@ -314,8 +314,8 @@ Win32 Notes
 -----------
 
 If you are running Activestate Perl (from http://www.activestate.com),
-it ships with a pre-compiled version of Compress::Raw::Zlib. To check if a
-newer version of Compress::Raw::Zlib is available run this from the command
+it ships with a pre-compiled version of Compress-Raw-Zlib. To check if a
+newer version of Compress-Raw-Zlib is available run this from the command
 prompt
 
     C:\> ppm verify -upgrade Compress-Zlib
@@ -330,19 +330,19 @@ to a C compiler, you will not be able to build and install this module.
 Win32 & Cygwin Notes
 --------------------
 
-It is not possible to install Compress::Raw::Zlib using the CPAN shell.
-This is because the Compress::Raw::Zlib DLL is itself used by the CPAN shell
+It is not possible to install Compress-Raw-Zlib using the CPAN shell.
+This is because the Compress-Raw-Zlib DLL is itself used by the CPAN shell
 and it is impossible to remove a DLL while it is already loaded under
 Windows.
 
-The workaround is to install Compress::Raw::Zlib manually using the
+The workaround is to install Compress-Raw-Zlib manually using the
 instructions given at the start of this file.
 
 
 FEEDBACK
 --------
 
-How to report a problem with Compress::Raw::Zlib.
+How to report a problem with Compress-Raw-Zlib.
 
 To help me help you, I need all of the following information:
 
@@ -359,24 +359,8 @@ To help me help you, I need all of the following information:
         If your perl does not understand the "-V" option it is too
         old. This module needs Perl version 5.004 or better.     
 
-     b. The version of Compress::Raw::Zlib you have. 
-        If you have successfully installed Compress::Raw::Zlib, this one-liner
-        will tell you:
-
-           perl -MCompress::Raw::Zlib -e 'print qq[ver $Compress::Raw::Zlib::VERSION\n]'
-
-        If you areplete* output from running this
-     
-            perl -V
-     
-        Do not edit the output in any way.
-        Note, I want you to run "perl -V" and NOT "perl -v".
-     
-        If your perl does not understand the "-V" option it is too
-        old. This module needs Perl version 5.004 or better.     
-
-     b. The version of Compress::Raw::Zlib you have. 
-        If you have successfully installed Compress::Raw::Zlib, this one-liner
+     b. The version of Compress-Raw-Zlib you have. 
+        If you have successfully installed Compress-Raw-Zlib, this one-liner
         will tell you:
 
            perl -MCompress::Raw::Zlib -e 'print qq[ver $Compress::Raw::Zlib::VERSION\n]'
@@ -385,14 +369,14 @@ To help me help you, I need all of the following information:
 
            perl -MCompress::Raw::Zlib -e "print qq[ver $Compress::Raw::Zlib::VERSION\n]"
 
-        If you haven't installed Compress::Raw::Zlib then search Compress::Raw::Zlib.pm
+        If you haven't installed Compress-Raw-Zlib then search Compress::Raw::Zlib.pm
         for a line like this:
 
-          $VERSION = "1.05" ;
+          $VERSION = "2.008" ;
 
 
      c. The version of zlib you have used.
-        If you have successfully installed Compress::Raw::Zlib, this one-liner
+        If you have successfully installed Compress-Raw-Zlib, this one-liner
         will tell you:
 
           perl -MCompress::Raw::Zlib -e "print q[zlib ver ]. Compress::Raw::Zlib::ZLIB_VERSION.qq[\n]" 
@@ -401,8 +385,8 @@ To help me help you, I need all of the following information:
         If not, look at the beginning of the file zlib.h. 
 
 
- 2. If you are having problems building Compress::Raw::Zlib, send me a
-    complete log of what happened. Start by unpacking the Compress::Raw::Zlib
+ 2. If you are having problems building Compress-Raw-Zlib, send me a
+    complete log of what happened. Start by unpacking the Compress-Raw-Zlib
     module into a fresh directory and keep a log of all the steps
 
         [edit config.in, if necessary]
