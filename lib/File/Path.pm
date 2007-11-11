@@ -17,7 +17,7 @@ BEGIN {
 
 use Exporter ();
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '2.02';
+$VERSION = '2.02_01';
 @ISA     = qw(Exporter);
 @EXPORT  = qw(mkpath rmtree);
 
@@ -340,7 +340,9 @@ sub _rmtree {
             # not a directory
 
             $root = VMS::Filespec::vmsify("./$root")
-                if $Is_VMS && !File::Spec->file_name_is_absolute($root);
+                if $Is_VMS 
+                   && !File::Spec->file_name_is_absolute($root)
+                   && ($root !~ m/(?<!\^)[\]>]+/);  # not already in VMS syntax
 
             if ($arg->{safe} &&
                 ($Is_VMS ? !&VMS::Filespec::candelete($root)
