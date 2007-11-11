@@ -893,8 +893,8 @@ if ($define{'PERL_MAD'}) {
 
 unless ($define{'MULTIPLICITY'}) {
     skip_symbols [qw(
-		    PL_interpreter_size
-		    PL_interpreter_size_5_10_0
+		    PL_interp_size
+		    PL_interp_size_5_10_0
 		    )];
 }
 

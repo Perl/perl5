@@ -691,10 +691,10 @@
 #define PL_Ghexdigit		(my_vars->Ghexdigit)
 #define PL_hints_mutex		(my_vars->Ghints_mutex)
 #define PL_Ghints_mutex		(my_vars->Ghints_mutex)
-#define PL_interpreter_size	(my_vars->Ginterpreter_size)
-#define PL_Ginterpreter_size	(my_vars->Ginterpreter_size)
-#define PL_interpreter_size_5_10_0	(my_vars->Ginterpreter_size_5_10_0)
-#define PL_Ginterpreter_size_5_10_0	(my_vars->Ginterpreter_size_5_10_0)
+#define PL_interp_size		(my_vars->Ginterp_size)
+#define PL_Ginterp_size		(my_vars->Ginterp_size)
+#define PL_interp_size_5_10_0	(my_vars->Ginterp_size_5_10_0)
+#define PL_Ginterp_size_5_10_0	(my_vars->Ginterp_size_5_10_0)
 #define PL_malloc_mutex		(my_vars->Gmalloc_mutex)
 #define PL_Gmalloc_mutex	(my_vars->Gmalloc_mutex)
 #define PL_mmap_page_size	(my_vars->Gmmap_page_size)
@@ -772,8 +772,8 @@
 #define PL_Gglobal_struct_size	PL_global_struct_size
 #define PL_Ghexdigit		PL_hexdigit
 #define PL_Ghints_mutex		PL_hints_mutex
-#define PL_Ginterpreter_size	PL_interpreter_size
-#define PL_Ginterpreter_size_5_10_0	PL_interpreter_size_5_10_0
+#define PL_Ginterp_size		PL_interp_size
+#define PL_Ginterp_size_5_10_0	PL_interp_size_5_10_0
 #define PL_Gmalloc_mutex	PL_malloc_mutex
 #define PL_Gmmap_page_size	PL_mmap_page_size
 #define PL_Gmy_ctx_mutex	PL_my_ctx_mutex
