@@ -46,24 +46,39 @@ if( $File::Fetch::DEBUG ) {
 }
 
 ### _parse_uri tests
-my $map = [
+### these go on all platforms
+my @map = (
     {   uri     => 'ftp://cpan.org/pub/mirror/index.txt',
         scheme  => 'ftp',
         host    => 'cpan.org',
         path    => '/pub/mirror/',
         file    => 'index.txt'
     },
+    {	uri	    => 'rsync://cpan.pair.com/CPAN/MIRRORING.FROM',
+        scheme	=> 'rsync',
+        host	=> 'cpan.pair.com',
+        path	=> '/CPAN/',
+        file	=> 'MIRRORING.FROM',
+    },
+    {   uri     => 'http://localhost/tmp/index.txt',
+        scheme  => 'http',
+        host    => 'localhost',          # host is empty only on 'file://' 
+        path    => '/tmp/',
+        file    => 'index.txt',
+    },  
+    
+    ### only test host part, the rest is OS dependant
+    {   uri     => 'file://localhost/tmp/index.txt',
+        host    => '',                  # host should be empty on 'file://'
+    },        
+);
+
+### these only if we're not on win32/vms
+push @map, (
     {   uri     => 'file:///usr/local/tmp/foo.txt',
         scheme  => 'file',
         host    => '',
         path    => '/usr/local/tmp/',
-        file    => 'foo.txt',
-    },
-    {   uri     => 'file:////hostname/share/tmp/foo.txt',
-        scheme  => 'file',
-        host    => 'hostname',
-        share   => 'share',
-        path    => '/tmp/',
         file    => 'foo.txt',
     },
     {   uri     => 'file://hostname/tmp/foo.txt',
@@ -72,6 +87,17 @@ my $map = [
         path    => '/tmp/',
         file    => 'foo.txt',
     },    
+) if not &File::Fetch::ON_WIN and not &File::Fetch::ON_VMS;
+
+### these only on win32
+push @map, (
+    {   uri     => 'file:////hostname/share/tmp/foo.txt',
+        scheme  => 'file',
+        host    => 'hostname',
+        share   => 'share',
+        path    => '/tmp/',
+        file    => 'foo.txt',
+    },
     {   uri     => 'file:///D:/tmp/foo.txt',
         scheme  => 'file',
         host    => '',
@@ -86,16 +112,11 @@ my $map = [
         path    => '/tmp/',
         file    => 'foo.txt',
     },    
-    {	uri	=> 'rsync://cpan.pair.com/CPAN/MIRRORING.FROM',
-        scheme	=> 'rsync',
-        host	=> 'cpan.pair.com',
-        path	=> '/CPAN/',
-        file	=> 'MIRRORING.FROM',
-    },
-];
+) if &File::Fetch::ON_WIN;
+
 
 ### parse uri tests ###
-for my $entry (@$map ) {
+for my $entry (@map ) {
     my $uri = $entry->{'uri'};
 
     my $href = File::Fetch->_parse_uri( $uri );
@@ -103,18 +124,20 @@ for my $entry (@$map ) {
 
     for my $key ( sort keys %$entry ) {
         is( $href->{$key}, $entry->{$key},
-                "   '$key' ok ($entry->{$key})");
+                "   '$key' ok ($entry->{$key}) for $uri");
     }
 }
 
 ### File::Fetch->new tests ###
-for my $entry (@$map) {
+for my $entry (@map) {
     my $ff = File::Fetch->new( uri => $entry->{uri} );
-    isa_ok( $ff, "File::Fetch" );
+
+    ok( $ff,                    "Object for uri '$entry->{uri}'" );
+    isa_ok( $ff, "File::Fetch", "   Object" );
 
     for my $acc ( keys %$entry ) {
         is( $ff->$acc(), $entry->{$acc},
-                    "   Accessor '$acc' ok" );
+                                "   Accessor '$acc' ok ($entry->{$acc})" );
     }
 }
 
@@ -175,7 +198,7 @@ sub _fetch_uri {
     
         my $ff  = File::Fetch->new( uri => $uri );
     
-        ok( $ff,        "FF object for $uri (will fetch with $method)" );
+        ok( $ff,                "FF object for $uri (fetch with $method)" );
     
         my $file = $ff->fetch( to => 'tmp' );
     
@@ -183,11 +206,11 @@ sub _fetch_uri {
             skip "You do not have '$method' installed/available", 3
                 if $File::Fetch::METHOD_FAIL->{$method} &&
                    $File::Fetch::METHOD_FAIL->{$method};
-    
-            ok( $file,      "   File ($file) fetched using $method" );
-            ok( -s $file,   "   File has size" );
-            is( basename($file), $ff->output_file,
-                            "   File has expected name" );
+            ok( $file,          "   File ($file) fetched with $method ($uri)" );
+            ok( $file && -s $file,   
+                                "   File has size" );
+            is( $file && basename($file), $ff->output_file,
+                                "   File has expected name" );
     
             unlink $file;
         }
