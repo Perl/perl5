@@ -10,8 +10,10 @@ my ($warn_msg, @files, $file);
 
 
 BEGIN {
+    require File::Spec;
     chdir 't' if -d 't';
-    unshift @INC => '../lib';
+    # May be doing dynamic loading while @INC is all relative
+    unshift @INC => File::Spec->rel2abs('../lib');
 
     $SIG{'__WARN__'} = sub { $warn_msg = $_[0]; warn "# $_[0]"; }
 }

@@ -8,8 +8,12 @@ my ($cwd, $cwd_untainted);
 
 
 BEGIN {
+    require File::Spec;
     chdir 't' if -d 't';
-    unshift @INC => '../lib';
+    # May be doing dynamic loading while @INC is all relative
+    my $lib = File::Spec->rel2abs('../lib');
+    $lib = $1 if $lib =~ m/(.*)/;
+    unshift @INC => $lib;
 }
 
 use Config;
