@@ -1,7 +1,7 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.9204';
+$CPAN::VERSION = '1.9205';
 $CPAN::VERSION = eval $CPAN::VERSION if $CPAN::VERSION =~ /_/;
 
 use CPAN::HandleConfig;
@@ -359,6 +359,7 @@ ReadLine support %s
     soft_chdir_with_alternatives(\@cwd);
 }
 
+#-> CPAN::soft_chdir_with_alternatives ;
 sub soft_chdir_with_alternatives ($) {
     my($cwd) = @_;
     unless (@$cwd) {
@@ -1997,7 +1998,8 @@ sub o {
     $o_type ||= "";
     CPAN->debug("o_type[$o_type] o_what[".join(" | ",@o_what)."]\n");
     if ($o_type eq 'conf') {
-        my($cfilter) = $o_what[0] =~ m|^/(.*)/$| if @o_what;
+        my($cfilter);
+        ($cfilter) = $o_what[0] =~ m|^/(.*)/$| if @o_what;
         if (!@o_what or $cfilter) { # print all things, "o conf"
             $cfilter ||= "";
             my $qrfilter = eval 'qr/$cfilter/';
@@ -2959,7 +2961,7 @@ that may go away anytime.\n"
             push @m, $obj;
         }
     }
-	@m = sort {$a->id cmp $b->id} @m;
+    @m = sort {$a->id cmp $b->id} @m;
     if ( $CPAN::DEBUG ) {
         my $wantarray = wantarray;
         my $join_m = join ",", map {$_->id} @m;
@@ -8277,11 +8279,11 @@ sub unsat_prereq {
 
             my $do = $nmo->distribution;
             next NEED unless $do; # not on CPAN
-            if (CPAN::Version->vcmp($need_version, $nmo->{CPAN_VERSION}) > 0){
+            if (CPAN::Version->vcmp($need_version, $nmo->ro->{CPAN_VERSION}) > 0){
                 $CPAN::Frontend->mywarn("Warning: Prerequisite ".
                                         "'$need_module => $need_version' ".
                                         "for '$self->{ID}' seems ".
-                                        "not available according the the indexes\n"
+                                        "not available according to the indexes\n"
                                        );
                 next NEED;
             }
@@ -9772,21 +9774,21 @@ sub as_glimpse {
         $color_off = Term::ANSIColor::color("reset");
     }
     my $uptodateness = " ";
-	unless ($class eq "Bundle") {
-		my $u = $self->uptodate;
-		$uptodateness = $u ? "=" : "<" if defined $u;
-	};
-	my $id = do {
-		my $d = $self->distribution;
-		$d ? $d -> pretty_id : $self->cpan_userid;
-	};
+    unless ($class eq "Bundle") {
+        my $u = $self->uptodate;
+        $uptodateness = $u ? "=" : "<" if defined $u;
+    };
+    my $id = do {
+        my $d = $self->distribution;
+        $d ? $d -> pretty_id : $self->cpan_userid;
+    };
     push @m, sprintf("%-7s %1s %s%-22s%s (%s)\n",
                      $class,
                      $uptodateness,
                      $color_on,
                      $self->id,
                      $color_off,
-					 $id,
+                     $id,
                     );
     join "", @m;
 }
@@ -10135,20 +10137,22 @@ sub test   {
     # $self->{badtestcnt} ||= 0;
     $self->rematein('test',@_);
 }
+
 #-> sub CPAN::Module::uptodate ;
 sub uptodate {
-	my ($self) = @_;
-	local ($_);
-	my $inst = $self->inst_version or return undef;
-	my $cpan = $self->cpan_version;
-	local ($^W) = 0;
-	CPAN::Version->vgt($cpan,$inst) and return 0;
+    my ($self) = @_;
+    local ($_);
+    my $inst = $self->inst_version or return undef;
+    my $cpan = $self->cpan_version;
+    local ($^W) = 0;
+    CPAN::Version->vgt($cpan,$inst) and return 0;
     CPAN->debug(join("",
-		"returning uptodate. inst_file[",
-		$self->inst_file,
-        "cpan[$cpan] inst[$inst]")) if $CPAN::DEBUG;
-	return 1;
+                     "returning uptodate. inst_file[",
+                     $self->inst_file,
+                     "cpan[$cpan] inst[$inst]")) if $CPAN::DEBUG;
+    return 1;
 }
+
 #-> sub CPAN::Module::install ;
 sub install {
     my($self) = @_;
