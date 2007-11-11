@@ -62,10 +62,10 @@ END {
         ### path is "magic" on VMS, we can not tell if it really existed before
         ### this was run, because VMS will magically pretend that a PATH
         ### environment variable exists set to the current working directory
-        $ENV{PATH} = $old_path;
+        $ENV{PATH} = $old_env_path;
 
-        if (defined $old_perl5lib) {
-            $ENV{PERL5LIB} = $old_perl5lib;
+        if (defined $old_env_perl5lib) {
+            $ENV{PERL5LIB} = $old_env_perl5lib;
         } else {
             delete $ENV{PERL5LIB};
         }
@@ -272,7 +272,7 @@ sub _clean_test_dir {
                 ### mailing-lists/perl5-porters/2007-10/msg00064.html
                 ### for details -- the below regex could use some touchups
                 ### according to John. M.            
-                $file =~ s/\.dir//i if $^O eq 'VMS';
+                $file =~ s/\.dir$//i if $^O eq 'VMS';
                 
                 my $dirpath = File::Spec->catdir( $dir, $file );
 

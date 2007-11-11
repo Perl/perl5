@@ -555,17 +555,17 @@ with CPANPLUS, which is used to enable autoflushing in spawned processes.
 
             my $path;
             BIN: for my $bin (@bins) {
-                
+
                 ### parallel to your cpanp/cpanp-boxed
                 my $maybe = File::Spec->rel2abs(
-                                File::Spec->catdir( dirname($0), $bin )
+                                File::Spec->catfile( dirname($0), $bin )
                             );        
                 $path = $maybe and last BIN if -f $maybe;
         
                 ### parallel to your CPANPLUS.pm:
                 ### $INC{cpanplus}/../bin/cpanp-run-perl
                 $maybe = File::Spec->rel2abs(
-                            File::Spec->catdir( 
+                            File::Spec->catfile( 
                                 dirname($INC{'CPANPLUS.pm'}),
                                 '..',   # lib dir
                                 'bin',  # bin dir
@@ -580,7 +580,7 @@ with CPANPLUS, which is used to enable autoflushing in spawned processes.
                 ### CPANPLUS.pm in
                 ### /tmp/cp/lib/perl5/site_perl/5.8.8
                 $maybe = File::Spec->rel2abs(
-                            File::Spec->catdir( 
+                            File::Spec->catfile( 
                                 dirname( $INC{'CPANPLUS.pm'} ),
                                 '..', '..', '..', '..', # 4x updir
                                 'bin',                  # bin dir
@@ -599,6 +599,11 @@ with CPANPLUS, which is used to enable autoflushing in spawned processes.
                              split(/\Q$Config::Config{path_sep}\E/, $ENV{PATH}),
                              File::Spec->curdir, 
                 ) {             
+
+                    ### On VMS the path could be in UNIX format, and we
+                    ### currently need it to be in VMS format
+                    $dir = VMS::Filespec::vmspath($dir) if ON_VMS;
+
                     $maybe = File::Spec->catfile( $dir, $bin );
                     $path = $maybe and last BIN if -f $maybe;
                 }
