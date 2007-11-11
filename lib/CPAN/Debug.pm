@@ -3,7 +3,7 @@ package CPAN::Debug;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = sprintf "%.6f", substr(q$Rev: 955 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 2212 $,4)/1000000 + 5.4;
 # module is internal to CPAN.pm
 
 %CPAN::DEBUG = qw[
@@ -48,7 +48,7 @@ sub debug {
         last if ++$i>=3;
     }
     pop @caller;
-    if ($CPAN::DEBUG{$caller[0][0]} & $CPAN::DEBUG){
+    if ($CPAN::DEBUG{$caller[0][0]} & $CPAN::DEBUG) {
         if ($arg and ref $arg) {
             eval { require Data::Dumper };
             if ($@) {

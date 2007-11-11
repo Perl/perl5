@@ -9,7 +9,7 @@ BEGIN{
 use base 'Exporter';
 use CPAN;
 
-$VERSION = sprintf "%.6f", substr(q$Rev: 844 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 2411 $,4)/1000000 + 5.4;
 $CPAN::META->has_inst('Digest::MD5','no');
 $CPAN::META->has_inst('LWP','no');
 $CPAN::META->has_inst('Compress::Zlib','no');
@@ -45,7 +45,7 @@ modify it under the same terms as Perl itself.
 
 =head1  SEE ALSO
 
-CPAN(3)
+L<CPAN>
 
 =cut
 

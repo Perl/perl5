@@ -1390,8 +1390,10 @@ lib/complete.pl			A command completion subroutine
 lib/Config.t			See if Config works
 lib/constant.pm			For "use constant"
 lib/constant.t			See if compile-time constants work
+lib/CPAN/API/HOWTO.pm		recipe book for programming with CPAN.pm
 lib/CPAN/bin/cpan		easily interact with CPAN from the command line
 lib/CPAN/Debug.pm		helper package for CPAN.pm
+lib/CPAN/DeferedCode.pm		helper package for CPAN.pm
 lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
 lib/CPAN/HandleConfig.pm	helper package for CPAN.pm
 lib/CPAN/Kwalify/distroprefs.dd		helper file for validating config files 
