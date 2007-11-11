@@ -23,7 +23,11 @@ $| = 1;
 
 use vars qw($ipcsysv); # did we manage to load IPC::SysV?
 
+my ($old_env_path, $old_env_dcl_path, $old_env_term);
 BEGIN {
+   $old_env_path = $ENV{'PATH'};
+   $old_env_dcl_path = $ENV{'DCL$PATH'};
+   $old_env_term = $ENV{'TERM'};
   if ($^O eq 'VMS' && !defined($Config{d_setenv})) {
       $ENV{PATH} = $ENV{PATH};
       $ENV{TERM} = $ENV{TERM} ne ''? $ENV{TERM} : 'dummy';
@@ -57,11 +61,22 @@ if ($Is_VMS) {
     for $x ('DCL$PATH', @MoreEnv) {
 	($old{$x}) = $ENV{$x} =~ /^(.*)$/ if exists $ENV{$x};
     }
+    # VMS note:  PATH and TERM are automatically created by the C
+    # library in VMS on reference to the their keys in %ENV.
+    # There is currently no way to determine if they did not exist
+    # before this test was run.
     eval <<EndOfCleanup;
 	END {
-	    \$ENV{PATH} = '' if $Config{d_setenv};
-	    warn "# Note: logical name 'PATH' may have been deleted\n";
+	    \$ENV{PATH} = \$old_env_path;
+	    warn "# Note: logical name 'PATH' may have been created\n";
+	    \$ENV{'TERM'} = \$old_env_term;
+	    warn "# Note: logical name 'TERM' may have been created\n";
 	    \@ENV{keys %old} = values %old;
+	    if (defined \$old_env_dcl_path) {
+		\$ENV{'DCL\$PATH'} = \$old_env_dcl_path;
+	    } else {
+		delete \$ENV{'DCL\$PATH'};
+	    }
 	}
 EndOfCleanup
 }
