@@ -51,6 +51,7 @@ sv_catpvf_mg                   # U
 sv_cmp_locale                  # U
 sv_derived_from                # U
 sv_gets                        # E (Perl_sv_gets)
+sv_magic_portable              # U
 sv_setpvf                      # U
 sv_setpvf_mg                   # U
 sv_taint                       # U

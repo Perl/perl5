@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 3 $
+##  $Revision: 5 $
 ##  $Author: mhx $
-##  $Date: 2007/01/02 12:32:29 +0100 $
+##  $Date: 2007/08/12 23:57:10 +0200 $
 ##
 ################################################################################
 ##
@@ -83,7 +83,6 @@ __UNDEFINED__  packWARN(a)              (a)
 #  endif
 #endif
 
-/* warner depends on vnewSVpvf */
 #if { VERSION >= 5.004 } && !defined(warner)
 #if { NEED warner }
 
@@ -104,7 +103,6 @@ warner(U32 err, const char *pat, ...)
 
 #define warner  Perl_warner
 
-/* Perl_warner_nocontext depends on warner */
 #define Perl_warner_nocontext  Perl_warner
 
 #endif

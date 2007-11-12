@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 51 $
+#  $Revision: 57 $
 #  $Author: mhx $
-#  $Date: 2007/01/02 12:32:27 +0100 $
+#  $Date: 2007/09/11 23:28:24 +0200 $
 #
 ################################################################################
 #
@@ -27,7 +27,7 @@ my $INCLUDE = 'parts/inc';
 my $DPPP = 'DPPP_';
 
 my %embed = map { ( $_->{name} => $_ ) }
-            parse_embed(qw(parts/embed.fnc parts/apidoc.fnc));
+            parse_embed(qw(parts/embed.fnc parts/apidoc.fnc parts/ppport.fnc));
 
 my(%provides, %prototypes, %explicit);
 
@@ -82,6 +82,7 @@ for (@api) {
 
 my @perl_api;
 for (keys %provides) {
+  next if /^Perl_(.*)/ && exists $embed{$1};
   next if exists $embed{$_};
   push @perl_api, $_;
   check(2, "No API definition for provided element $_ found.");
@@ -125,7 +126,7 @@ $data =~ s{^__UNSUPPORTED_API__(\s*?)^}
           {join "\n", @todo}gem;
 
 $data =~ s{__MIN_PERL__}{5.003}g;
-$data =~ s{__MAX_PERL__}{5.9.4}g;
+$data =~ s{__MAX_PERL__}{5.10.0}g;
 
 open FH, ">PPPort.pm" or die "PPPort.pm: $!\n";
 print FH $data;
@@ -284,6 +285,7 @@ sub make_embed
   my $f = shift;
   my $n = $f->{name};
   my $a = do { my $x = 'a'; join ',', map { $x++ } 1 .. @{$f->{args}} };
+  my $lastarg = ${$f->{args}}[-1];
 
   if ($f->{flags}{n}) {
     if ($f->{flags}{p}) {
@@ -303,6 +305,10 @@ UNDEF
     if ($f->{flags}{p}) {
       if ($f->{flags}{f}) {
         return "#define Perl_$n $DPPP(my_$n)";
+      }
+      elsif (@$lastarg && $lastarg->[0] =~ /\.\.\./) {
+        return $undef . "#define $n $DPPP(my_$n)\n" .
+                        "#define Perl_$n $DPPP(my_$n)";
       }
       else {
         return $undef . "#define $n($a) $DPPP(my_$n)(aTHX_ $a)\n" .
@@ -339,9 +345,9 @@ __DATA__
 #
 ################################################################################
 #
-#  $Revision: 51 $
+#  $Revision: 57 $
 #  $Author: mhx $
-#  $Date: 2007/01/02 12:32:27 +0100 $
+#  $Date: 2007/09/11 23:28:24 +0200 $
 #
 ################################################################################
 #
@@ -502,7 +508,7 @@ package Devel::PPPort;
 use strict;
 use vars qw($VERSION $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.11 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.13 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 sub _init_data
 {
@@ -600,6 +606,8 @@ __DATA__
 %include Sv_set
 
 %include sv_xpvf
+
+%include shared_pv
 
 %include warn
 

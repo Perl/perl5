@@ -5,13 +5,13 @@
 #
 ################################################################################
 #
-#  $Revision: 10 $
+#  $Revision: 12 $
 #  $Author: mhx $
-#  $Date: 2006/12/02 09:58:34 +0100 $
+#  $Date: 2007/08/12 15:06:31 +0200 $
 #
 ################################################################################
 #
-#  Version 3.x, Copyright (C) 2004-2006, Marcus Holland-Moritz.
+#  Version 3.x, Copyright (C) 2004-2007, Marcus Holland-Moritz.
 #  Version 2.x, Copyright (C) 2001, Paul Marquess.
 #  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 #
@@ -31,6 +31,12 @@ use Archive::Tar;
 use Cwd;
 
 # TODO: - extra arguments to Configure
+
+#
+#  --test-archives=1      check if archives can be read
+#  --test-archives=2      like 1, but also extract archives
+#  --test-archives=3      like 2, but also apply patches
+#
 
 my %opt = (
   prefix  => '/tmp/perl/install/<config>/<perl>',
@@ -92,10 +98,37 @@ my @patch = (
   },
   {
     perl => [
-              qr/^5\.004_0[1234]/,
+              qr/^5\.004_0[1234]$/,
             ],
     subs => [
               [ \&patch_doio ],
+            ],
+  },
+  {
+    perl => [
+              qw/
+                5.005
+                5.005_01
+                5.005_02
+              /,
+            ],
+    subs => [
+              [ \&patch_sysv, old_format => 1 ],
+            ],
+  },
+  {
+    perl => [
+              qw/
+                5.005_03
+                5.005_04
+              /,
+              qr/^5\.6\.[0-2]$/,
+              qr/^5\.7\.[0-3]$/,
+              qr/^5\.8\.[0-8]$/,
+              qr/^5\.9\.[0-5]$/
+            ],
+    subs => [
+              [ \&patch_sysv ],
             ],
   },
 );
@@ -111,7 +144,7 @@ GetOptions(\%opt, qw(
   force
   test
   install!
-  test-archives+
+  test-archives=i
 )) or pod2usage(2);
 
 if (exists $opt{config}) {
@@ -149,6 +182,12 @@ if ($opt{'test-archives'}) {
   for my $perl (@perls) {
     eval {
       my $d = extract_source($perl{$perl});
+      if ($opt{'test-archives'} > 2) {
+        my $cwd2 = cwd;
+        chdir $d or die "chdir $d: $!\n";
+        patch_source($perl{$perl}{version});
+        chdir $cwd2 or die "chdir $cwd2:$!\n"
+      }
       rmtree($d) if -e $d;
     };
     warn $@ if $@;
@@ -296,13 +335,13 @@ sub build_and_install
 sub patch_db
 {
   my $ver = shift;
-  print "patching DB_File\n";
+  print "patching ext/DB_File/DB_File.xs\n";
   run_or_die("sed -i -e 's/<db.h>/<db$ver\\/db.h>/' ext/DB_File/DB_File.xs");
 }
 
 sub patch_doio
 {
-  patch('doio.c', <<'END');
+  patch(<<'END');
 --- doio.c.org	2004-06-07 23:14:45.000000000 +0200
 +++ doio.c	2003-11-04 08:03:03.000000000 +0100
 @@ -75,6 +75,16 @@
@@ -325,11 +364,52 @@ sub patch_doio
 END
 }
 
+sub patch_sysv
+{
+  my %opt = @_;
+
+  # check if patching is required
+  return if $^O ne 'linux' or -f '/usr/include/asm/page.h';
+
+  if ($opt{old_format}) {
+    patch(<<'END');
+--- ext/IPC/SysV/SysV.xs.org	1998-07-20 10:20:07.000000000 +0200
++++ ext/IPC/SysV/SysV.xs	2007-08-12 10:51:06.000000000 +0200
+@@ -3,9 +3,6 @@
+ #include "XSUB.h"
+ 
+ #include <sys/types.h>
+-#ifdef __linux__
+-#include <asm/page.h>
+-#endif
+ #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
+ #include <sys/ipc.h>
+ #ifdef HAS_MSG
+END
+  }
+  else {
+    patch(<<'END');
+--- ext/IPC/SysV/SysV.xs.org	2007-08-11 00:12:46.000000000 +0200
++++ ext/IPC/SysV/SysV.xs	2007-08-11 00:10:51.000000000 +0200
+@@ -3,9 +3,6 @@
+ #include "XSUB.h"
+ 
+ #include <sys/types.h>
+-#ifdef __linux__
+-#   include <asm/page.h>
+-#endif
+ #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
+ #ifndef HAS_SEM
+ #   include <sys/ipc.h>
+END
+  }
+}
+
 sub patch
 {
-  my($file, $patch) = @_;
-  print "patching $file\n";
-  my $diff = "$file.diff";
+  my($patch) = @_;
+  print "patching $_\n" for $patch =~ /^\+{3}\s+(\S+)/gm;
+  my $diff = 'tmp.diff';
   write_or_die($diff, $patch);
   run_or_die("patch -s -p0 <$diff");
   unlink $diff or die "unlink $diff: $!\n";
@@ -418,7 +498,7 @@ and don't install them, run:
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004-2006, Marcus Holland-Moritz.
+Copyright (c) 2004-2007, Marcus Holland-Moritz.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

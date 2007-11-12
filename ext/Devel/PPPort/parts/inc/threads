@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 8 $
+##  $Revision: 9 $
 ##  $Author: mhx $
-##  $Date: 2007/01/02 12:32:32 +0100 $
+##  $Date: 2007/08/18 20:16:12 +0200 $
 ##
 ################################################################################
 ##
@@ -37,7 +37,7 @@ __UNDEFINED__  aTHX_
 #if { VERSION < 5.6.0 }
 #  ifdef USE_THREADS
 #    define aTHXR  thr
-#    define aTHXR_ thr, 
+#    define aTHXR_ thr,
 #  else
 #    define aTHXR
 #    define aTHXR_

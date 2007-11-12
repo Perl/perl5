@@ -11,6 +11,7 @@ SvPVutf8_force                 # U
 SvPVutf8_nolen                 # U
 SvPVutf8x                      # U
 SvPVutf8x_force                # U
+SvUOK                          # U
 SvUTF8                         # U
 SvUTF8_off                     # U
 SvUTF8_on                      # U
@@ -85,14 +86,12 @@ is_utf8_punct                  # U
 is_utf8_space                  # U
 is_utf8_upper                  # U
 is_utf8_xdigit                 # U
-load_module                    # U
 magic_dump                     # U
 mess                           # E (Perl_mess)
 my_atof                        # U
 my_fflush_all                  # U
 newANONATTRSUB                 # U
 newATTRSUB                     # U
-newPADOP                       # U
 newXS                          # E (Perl_newXS)
 newXSproto                     # E
 new_collate                    # U (perl_new_collate)
@@ -102,7 +101,6 @@ op_dump                        # U
 perl_parse                     # E (perl_parse)
 pmop_dump                      # U
 pv_display                     # U
-re_intuit_start                # U
 re_intuit_string               # U
 reginitcolors                  # U
 require_pv                     # U (perl_require_pv)
@@ -148,7 +146,6 @@ utf8_distance                  # U
 utf8_hop                       # U
 vcroak                         # U
 vform                          # U
-vload_module                   # U
 vmess                          # U
 vwarn                          # U
 vwarner                        # U

@@ -28,3 +28,5 @@ op_refcnt_unlock               # U
 savesvpv                       # U
 vnormal                        # U
 MY_CXT_CLONE                   # added by devel/scanprov
+UTF8_MAXBYTES                  # added by devel/scanprov
+SV_NOSTEAL                     # added by devel/scanprov

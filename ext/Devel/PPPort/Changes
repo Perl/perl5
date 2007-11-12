@@ -1,3 +1,115 @@
+3.13 - 2007-10-04
+
+    * fix cpan #29748: ppport.h problems with perl5.005_05
+      (spotted by Slaven Rezić)
+    * fix a compiler warning
+
+3.12 - 2007-09-22
+
+    [released without changes]
+
+3.11_06 - 2007-09-11
+
+    * fix cpan #29302: Perl_croak_nocontext doesn't need aTHX_
+      (spotted by Jerry D. Hedden)
+    * fix a Win32 VC++ compiler warning (thanks to Steve Hay for
+      providing a patch)
+    * don't generate redundant specs for provided Perl_ functions
+    * fun with const and casts to avoid compiler warnings
+    * bump max supported version to 5.10.0
+
+3.11_05 - 2007-08-20
+
+    * fix: PERL_HASH() was emitting a warning when passed in a
+      const char pointer
+    * fix: sv_magic_portable() was emitting a warning when
+      passed in a const char pointer
+    * fix: make sure arguments to sv_magic_portable() are only
+      evaluated once
+
+3.11_04 - 2007-08-20
+
+    * fix: ignore strings and XS comments when scanning and
+      patching files
+    * added support for the following API
+        newSVpvn_share
+        PERL_HASH
+        SvSHARED_HASH
+    * use PERL_BCDREVISION for version checking to save some
+      bytes in ppport.h
+    * improve the --strip option
+      - strip all C comments
+      - strip most superfluous whitespace
+      with these changes, the stripped ppport.h is now almost
+      30% smaller:
+                       3.11_03   3.11_04     delta
+        ------------------------------------------
+        uncompressed     87988     62573    -28.9%
+        gzip'd           17985     12725    -29.2%
+
+3.11_03 - 2007-08-14
+
+    * fix an infinite recursion in ppport.h that could be
+      triggered by circular dependencies
+    * fix PERL_BCDREVISION, which wasn't BCD but simply
+      shifted decimal (just in time for 5.10)
+    * fix detection of macros that are not listed in the
+      implementation/dontwarn sections
+
+3.11_02 - 2007-08-13
+
+    * fix cpan #25372: special case sv_magic(sv, obj, how, name, 0)
+    * fix cpan #27906: [PATCH] add UTF8_MAXBYTES
+      (thanks to Steve Peters for providing a patch)
+    * added support for the following API
+        sv_2pv_flags
+        sv_2pvbyte_nolen
+        SV_CONST_RETURN
+        SV_COW_DROP_PV
+        SV_COW_SHARED_HASH_KEYS
+        SV_GMAGIC
+        SV_HAS_TRAILING_NUL
+        SV_IMMEDIATE_UNREF
+        sv_magic_portable
+        SV_MUTABLE_RETURN
+        SV_NOSTEAL
+        sv_pvn_force_flags
+        SV_SMAGIC
+        SV_UTF8_NO_ENCODING
+        SvPV_const
+        SvPV_flags
+        SvPV_flags_const
+        SvPV_flags_const_nolen
+        SvPV_flags_mutable
+        SvPV_force
+        SvPV_force_flags
+        SvPV_force_flags_mutable
+        SvPV_force_flags_nolen
+        SvPV_force_mutable
+        SvPV_force_nolen
+        SvPV_force_nomg_nolen
+        SvPV_mutable
+        SvPV_nolen_const
+        SvPV_nomg_const
+        SvPV_nomg_const_nolen
+        SvUOK
+        UTF8_MAXBYTES
+    * provide compatibility macros for vanished variables
+      PL_expect, PL_copline, PL_rsfp, PL_rsfp_filters
+    * add warnings support to ppport.h
+    * update ppport.h file searching logic
+    * add -c.inc and -xs.inc to the list of supported extensions
+    * document that --copy doesn't include the dot
+    * improve soak script and devel/buildperl.pl
+
+3.11_01 - 2007-03-23
+
+    * added support for the following API
+        PL_expect
+        load_module
+        vload_module
+      (thanks to Nicholas Clark for providing a patch)
+
 3.11 - 2007-02-14
 
     * happy new year!

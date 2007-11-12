@@ -22,3 +22,4 @@ utf8n_to_uvuni                 # U
 uvuni_to_utf8                  # U
 PTR2ul                         # added by devel/scanprov
 UVXf                           # added by devel/scanprov
+SV_IMMEDIATE_UNREF             # added by devel/scanprov
