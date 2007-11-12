@@ -1,10 +1,15 @@
+#
+# $Id: Makefile.PL,v 2.5 2007/05/29 18:15:32 dankogai Exp dankogai $
+#
 use 5.007003;
+use strict;
+use warnings;
 use ExtUtils::MakeMaker;
 
 # Just for sure :)
-my %ARGV = map { split /=/; defined $_[1] or $_[1]=1; @_ } @ARGV;
+my %ARGV = map { my @r = split /=/,$_; defined $r[1] or $r[1]=1; @r } @ARGV;
 $ARGV{DEBUG} and warn "$_ => $ARGV{$_}\n" for keys  %ARGV;
-$ENV{PERL_CORE} ||= $ARGV{PERL_CORE};
+$ENV{PERL_CORE} ||= $ARGV{PERL_CORE} if $ARGV{PERL_CORE};
 
 my %tables = 
     (
@@ -25,6 +30,8 @@ my @pmlibdirs = qw(lib Encode);
 
 $ARGV{MORE_SCRIOPTS} and push @exe_files, @more_exe_files;
 $ARGV{INSTALL_UCM}   and push @pmlibdirs, "ucm";
+my @man =  ();
+@man = ( MAN1PODS => {}, MAN3PODS => {} ) if $ENV{PERL_CORE};
 
 WriteMakefile(
           NAME		=> "Encode",
@@ -36,8 +43,7 @@ WriteMakefile(
           SUFFIX	=> 'gz',
           DIST_DEFAULT => 'all tardist',
           },
-          MAN1PODS	=> {},
-          MAN3PODS	=> {},
+	  @man,
           INC       => "-I./Encode",
           PMLIBDIRS => \@pmlibdirs,
           INSTALLDIRS => 'perl',

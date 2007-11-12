@@ -1,8 +1,52 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.20 2007/04/22 14:56:12 dankogai Exp dankogai $
+# $Id: Changes,v 2.23 2007/05/29 18:15:32 dankogai Exp dankogai $
 #
-$Revision: 2.20 $ $Date: 2007/04/22 14:56:12 $
+$Revision: 2.23 $ $Date: 2007/05/29 18:15:32 $
+! Encode.xs
+  got rid of global fallback_cb; encode_method() now takes one more
+  argument which is a coderef to fallback.  This should make
+  encode_method() thread-safe.
+! Encode.pm
+  Added perluniintro, perlunifaq, and perlunitut to POD
+! Encode.xs
+  Plug a memory leak in Encode -- by rgs
+  Message-Id: <b77c1dce0705290858v2be239c3o2d726e3d59091493@mail.gmail.com>
+! Unicode/Unicode.pm
+  POD fixes on UTF-16LE
+  http://aspn.activestate.com/ASPN/Mail/Message/perl5-porters/3486118
+! Makefile.PL
+  man page generation is now conditional; yes by default but no if $PERL_CORE
+  Message-Id: <b77c1dce0705290237h5c4667cdlf79a48b839170add@mail.gmail.com>
+
+2.22 2007/05/29 07:35:27
+! Encode.pm
+  from_to() does not honor the check while decoding.  That's a feature.
+  To make sure it is a feature it is mentioned in the POD.
+  http://rt.cpan.org/NoAuth/Bug.html?id=27277
+! Makefile.pl
+  Encode used to suppress man page generation.  Now it does.
+  http://rt.cpan.org/NoAuth/Bug.html?id=27200
+! Encode.pm Encode.xs t/fallback.t
+  Addressed: (de|en)code("ascii", "\x{3000}", sub{ $_[0] }) segfaults
+  Reported by MIYAGAWA
+
+2.21 2007/05/12 06:42:19
++ lib/Encode/MIME/Name.pm t/mime-name.t
+! Encode.pm Encode.xs lib/Encode/Encoding.pm
+  new method: mime_name()
+  inspired by: MIYAGAWA
+! t/encoding.t
+  Subject: Re: Compress::Zlib, pack "C" and utf-8 [PATCH]
+  From: Marc Lehmann <schmorp@schmorp.de>
+  Date: Thu, 12 Apr 2007 08:41:53 +0200
+  Message-ID: <20070412064153.GA22475@schmorp.de>
+  http://public.activestate.com/cgi-bin/perlbrowse/p/31194
+! Unicode/Unicode.pm
+  POD fix.
+  Message-Id: <20070417220547.GA11999@zetta.zet>
+
+2.20  2007/04/22 14:56:12
 ! Encode.pm
   Pod fixes.  Now find_encoding() is explained more in details.
 + lib/Encode/GSM0338.pm
@@ -26,19 +70,19 @@ $Revision: 2.20 $ $Date: 2007/04/22 14:56:12 $
   Message-Id: <693254b90704060526s6d850320h71cdda50dfbf7eba@mail.gmail.com>
 ! Encode.pm
   #25216 ([PATCH] Encode.pm: postpone the load of Encode::Encoding)
-  http://rt.cpan.org/NoAuth/Bug.html?id=#25216
+  http://rt.cpan.org/NoAuth/Bug.html?id=25216
 ! lib/Encode/MIME/Header.pm t/mime-header.t
   #24418 (Encode::MIME::Header: wrong encoding with latin1 characters)
-  http://rt.cpan.org/NoAuth/Bug.html?id=#24418
+  http://rt.cpan.org/NoAuth/Bug.html?id=24418
 ! Encode.pm
   #23876 (Add documentation for LEAVE_SRC)
-  http://rt.cpan.org/NoAuth/Bug.html?id=#23876
+  http://rt.cpan.org/NoAuth/Bug.html?id=23876
 ! lib/Encode/Alias.pm t/Aliases.t
   #20781: Thai encoding needs alias for tis-620
-  http://rt.cpan.org/NoAuth/Bug.html?id=#20781
+  http://rt.cpan.org/NoAuth/Bug.html?id=20781
 ! bin/piconv AUTHORS
   #20344: piconv: wrong conversion of utf-16le encoded files (with PATCH)
-  http://rt.cpan.org/NoAuth/Bug.html?id=#20344
+  http://rt.cpan.org/NoAuth/Bug.html?id=20344
 ! Encode.pm Encode.xs bin/enc2xs encoding.pm t/Aliases.t t/utf8strict.t
   Imported from bleedperl's 2.18_01
 
@@ -70,7 +114,7 @@ $Revision: 2.20 $ $Date: 2007/04/22 14:56:12 $
   --xmlcref and --htmlcref added.
 ! Encode.pm
   Copyright Notice Added.
-  http://rt.cpan.org/NoAuth/Bug.html?id=#19056  
+  http://rt.cpan.org/NoAuth/Bug.html?id=19056  
 ! *
   Replaced remaining ^\t with q( ) x 4. -- Perl Best Practice pp. 20
   And all .pm's are now perltidy-ed.
@@ -78,11 +122,11 @@ $Revision: 2.20 $ $Date: 2007/04/22 14:56:12 $
 2.15 2006/04/06 15:44:11
 ! Unicode/Unicode.xs
   Addressed: UTF-16, UTF-32, UCS, UTF-7 decoders mishandle illegal characters
-  http://rt.cpan.org/NoAuth/Bug.html?id=#18556
+  http://rt.cpan.org/NoAuth/Bug.html?id=18556
 ! Encode.pm
   added str2bytes() as an alias to encode() and  bytes2str() as an alias 
   to decode()
-  http://rt.cpan.org/NoAuth/Bug.html?id=#17103
+  http://rt.cpan.org/NoAuth/Bug.html?id=17103
 ! Encode.xs
   Change 26922: Avoid warning with MS Visual C compiler.
   Message-Id: <200601231245.k0NCj2dw009484@smtp3.ActiveState.com>

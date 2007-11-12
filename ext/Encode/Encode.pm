@@ -1,10 +1,10 @@
 #
-# $Id: Encode.pm,v 2.20 2007/04/22 14:56:12 dankogai Exp dankogai $
+# $Id: Encode.pm,v 2.23 2007/05/29 18:15:32 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.20 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.23 $ =~ /(\d+)/g;
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -144,7 +144,7 @@ sub encode($$;$) {
         Carp::croak("Unknown encoding '$name'");
     }
     my $octets = $enc->encode( $string, $check );
-    $_[1] = $string if $check and !( $check & LEAVE_SRC() );
+    $_[1] = $string if $check and !ref $check and !( $check & LEAVE_SRC() );
     return $octets;
 }
 *str2bytes = \&encode;
@@ -160,7 +160,7 @@ sub decode($$;$) {
         Carp::croak("Unknown encoding '$name'");
     }
     my $string = $enc->decode( $octets, $check );
-    $_[1] = $octets if $check and !( $check & LEAVE_SRC() );
+    $_[1] = $octets if $check and !ref $check and !( $check & LEAVE_SRC() );
     return $string;
 }
 *bytes2str = \&decode;
@@ -499,6 +499,20 @@ but only #2 turns UTF8 flag on.  #1 is equivalent to
 
 See L</"The UTF8 flag"> below.
 
+Also note that
+
+  from_to($octets, $from, $to, $check);
+
+is equivalent to
+
+  $octets = encode($to, decode($from, $octets), $check);
+
+Yes, it does not respect the $check during decoding.  It is
+deliberately done that way.  If you need minute control, C<decode>
+then C<encode> as follows;
+
+  $octets = encode($to, decode($from, $octets, $check_from), $check_to);
+
 =item $octets = encode_utf8($string);
 
 Equivalent to C<$octets = encode("utf8", $string);> The characters
@@ -564,6 +578,22 @@ resolve_alias() does not need C<use Encode::Alias>; it can be
 exported via C<use Encode qw(resolve_alias)>.
 
 See L<Encode::Alias> for details.
+
+=head2 Finding IANA Character Set Registry names
+
+The canonical name of a given encoding does not necessarily agree with
+IANA IANA Character Set Registry, commonly seen as C<< Content-Type:
+text/plain; charset=I<whatever> >>.  For most cases canonical names
+work but sometimes it does not (notably 'utf-8-strict').
+
+Therefore as of Encode version 2.21, a new method C<mime_name()> is added.
+
+  use Encode;
+  my $enc = find_encoding('UTF-8');
+  warn $enc->name;      # utf-8-strict
+  warn $enc->mime_name; # UTF-8
+
+See also:  L<Encode::Encoding>
 
 =head1 Encoding via PerlIO
 
@@ -892,7 +922,7 @@ L<Encode::PerlIO>,
 L<encoding>,
 L<perlebcdic>,
 L<perlfunc/open>,
-L<perlunicode>,
+L<perlunicode>, L<perluniintro>, L<perlunifaq>, L<perlunitut>
 L<utf8>,
 the Perl Unicode Mailing List E<lt>perl-unicode@perl.orgE<gt>
 

@@ -57,7 +57,7 @@ print "not " unless unpack("C", pack("C", 0xdf)) == 0xdf;
 print "ok 8\n";
 
 # the first octet of UTF-8 encoded 0x3af 
-print "not " unless unpack("C", chr(0xdf)) == 0xce;
+print "not " unless unpack("U0 C", chr(0xdf)) == 0xce;
 print "ok 9\n";
 
 print "not " unless unpack("U", pack("U", 0xdf)) == 0xdf;
