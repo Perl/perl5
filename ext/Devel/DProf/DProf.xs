@@ -69,25 +69,32 @@ dprof_dbg_sub_notify(pTHX_ SV *Sub) {
 #  define Times(ptr) (dprof_times(aTHX_ ptr))
 #  define NEEDS_DPROF_TIMES
 #else
-#  ifndef HZ
-#    ifdef CLK_TCK
-#      define HZ ((I32)CLK_TCK)
-#    else
-#      define HZ 60
-#    endif
-#  endif
-#  ifdef OS2				/* times() has significant overhead */
+#  ifdef BSDish
 #    define Times(ptr) (dprof_times(aTHX_ ptr))
 #    define NEEDS_DPROF_TIMES
-#    define INCL_DOSPROFILE
-#    define INCL_DOSERRORS
-#    include <os2.h>
-#    define toLongLong(arg) (*(long long*)&(arg))
-#    define DPROF_HZ g_dprof_ticks
-#  else
-#    define Times(ptr) (times(ptr))
+#    define HZ 1000000
 #    define DPROF_HZ HZ
-#  endif 
+#  else
+#    ifndef HZ
+#      ifdef CLK_TCK
+#        define HZ ((I32)CLK_TCK)
+#      else
+#        define HZ 60
+#      endif
+#    endif
+#    ifdef OS2				/* times() has significant overhead */
+#      define Times(ptr) (dprof_times(aTHX_ ptr))
+#      define NEEDS_DPROF_TIMES
+#      define INCL_DOSPROFILE
+#      define INCL_DOSERRORS
+#      include <os2.h>
+#      define toLongLong(arg) (*(long long*)&(arg))
+#      define DPROF_HZ g_dprof_ticks
+#    else
+#      define Times(ptr) (times(ptr))
+#      define DPROF_HZ HZ
+#    endif 
+#  endif
 #endif
 
 XS(XS_Devel__DProf_END);        /* used by prof_mark() */
@@ -224,7 +231,33 @@ dprof_times(pTHX_ struct tms *t)
     times((tbuffer_t *)t);
     return (clock_t) retval;
 #  else		/* !VMS && !OS2 */
+#    ifdef BSDish
+#      include <sys/resource.h>
+    struct rusage ru;
+    struct timeval tv;
+    /* Measure offset from start time to avoid overflow  */
+    static struct timeval tv0 = { 0, 0 };
+
+    if (!tv0.tv_sec)
+        if (gettimeofday(&tv0, NULL) < 0)
+            croak("gettimeofday: %s", SvPV_nolen_const(perl_get_sv("!",TRUE)));
+    
+    if (getrusage(0, &ru) < 0)
+        croak("getrusage: %s", SvPV_nolen_const(perl_get_sv("!",TRUE)));
+
+    if (gettimeofday(&tv, NULL) < 0)
+        croak("gettimeofday: %s", SvPV_nolen_const(perl_get_sv("!",TRUE)));
+
+    t->tms_stime = DPROF_HZ * ru.ru_stime.tv_sec + ru.ru_stime.tv_usec;
+    t->tms_utime = DPROF_HZ * ru.ru_utime.tv_sec + ru.ru_utime.tv_usec;
+
+    if (tv.tv_usec < tv0.tv_usec)
+        tv.tv_sec--, tv.tv_usec += DPROF_HZ;
+
+    return DPROF_HZ * (tv.tv_sec - tv0.tv_sec) + tv.tv_usec - tv0.tv_usec;
+#    else  /* !VMS && !OS2 && !BSD! */
     return times(t);
+#    endif
 #  endif
 #endif
 }

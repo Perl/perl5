@@ -9,7 +9,7 @@
 
 package Data::Dumper;
 
-$VERSION = '2.121_13';
+$VERSION = '2.121_14';
 
 #$| = 1;
 
@@ -253,6 +253,13 @@ sub Dumpperl {
   return wantarray ? @out : join('', @out);
 }
 
+# wrap string in single quotes (escaping if needed)
+sub _quote {
+    my $val = shift;
+    $val =~ s/([\\\'])/\\$1/g;
+    return  "'" . $val .  "'";
+}
+
 #
 # twist, toil and turn;
 # and recurse, of course.
@@ -438,7 +445,7 @@ sub _dump {
     }
     
     if ($realpack) { # we have a blessed ref
-      $out .= ', \'' . $realpack . '\'' . ' )';
+      $out .= ', ' . _quote($realpack) . ' )';
       $out .= '->' . $s->{toaster} . '()'  if $s->{toaster} ne '';
       $s->{apad} = $blesspad;
     }
@@ -502,8 +509,7 @@ sub _dump {
 	$out .= qquote($val, $s->{useqq});
       }
       else {
-	$val =~ s/([\\\'])/\\$1/g;
-	$out .= '\'' . $val .  '\'';
+        $out .= _quote($val);
       }
     }
   }

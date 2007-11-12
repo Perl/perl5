@@ -1147,6 +1147,8 @@ _cleaner2:
 	-rmdir lib/Filter/Util lib/IO/Socket lib/IO
 	-rmdir lib/List lib/MIME lib/Scalar lib/Sys
 	-rmdir lib/threads lib/XS
+	-rmdir lib/CPANPLUS/Dist/Build/t/dummy-*
+	-rmdir lib/CPANPLUS/t/dummy-cpanplus lib/CPANPLUS/t/dummy-localmirror
 
 _realcleaner:
 	@$(LDLIBPTH) $(MAKE) _cleaner1 CLEAN=realclean
