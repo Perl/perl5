@@ -39,7 +39,6 @@ ok(NFKD("A"), "A");
 ok(NFKC("A"), "A");
 
 # don't modify the source
-# don't modify the source
 my $sNFD = "\x{FA19}";
 ok(NFD($sNFD), "\x{795E}");
 ok($sNFD, "\x{FA19}");

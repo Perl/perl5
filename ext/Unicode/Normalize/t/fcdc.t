@@ -19,7 +19,7 @@ BEGIN {
 use Test;
 use strict;
 use warnings;
-BEGIN { plan tests => 68 };
+BEGIN { plan tests => 70 };
 use Unicode::Normalize qw(:all);
 ok(1); # If we made it this far, we're ok.
 
@@ -108,4 +108,6 @@ ok(answer(checkFCC(hexU("0041 030A 0327"))), 'NO');    # A+ring+cedilla
 ok(answer(checkFCC(hexU("00C5 0327"))), 'NO'); # A-ring+cedilla
 ok(answer(checkFCC("\x{AC01}\x{1100}\x{1161}")), 'MAYBE'); # hangul
 ok(answer(checkFCC("\x{212B}\x{F900}")), 'NO'); # compat
+ok(answer(checkFCC("\x{212B}\x{0327}")), 'NO'); # compat
+ok(answer(checkFCC("\x{0327}\x{212B}")), 'NO'); # compat
 

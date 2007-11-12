@@ -19,7 +19,7 @@ BEGIN {
 use Test;
 use strict;
 use warnings;
-BEGIN { plan tests => 202 };
+BEGIN { plan tests => 211 };
 use Unicode::Normalize qw(:all);
 ok(1); # If we made it this far, we're ok.
 
@@ -202,14 +202,23 @@ ok(answer(check("KD","AZaz\t12!#`")), "YES");
 ok(answer(check("KC","AZaz\t12!#`")), "YES");
 
 ok(answer(checkNFD(NFD(_pack_U(0xC1, 0x1100, 0x1173, 0x11AF)))), "YES");
-ok(answer(checkNFD(_pack_U(0x20, 0xC1, 0x1100, 0x1173, 0x11AF))), "NO");
-ok(answer(checkNFC(_pack_U(0x20, 0xC1, 0x1173, 0x11AF))), "MAYBE");
-ok(answer(checkNFC(_pack_U(0x20, 0xC1, 0xAE00, 0x1100))), "YES");
-ok(answer(checkNFC(_pack_U(0x20, 0xC1, 0xAE00, 0x1100, 0x300))), "MAYBE");
-ok(answer(checkNFC(_pack_U(0x20, 0xC1, 0xFF71, 0x2025))),    "YES");
-ok(answer(check("NFC", _pack_U(0x20, 0xC1, 0x212B, 0x300))), "NO");
-ok(answer(checkNFKD(_pack_U(0x20, 0xC1, 0xFF71, 0x2025))),   "NO");
-ok(answer(checkNFKC(_pack_U(0x20, 0xC1, 0xAE00, 0x2025))),   "NO");
+ok(answer(checkNFD(hexU("20 C1 1100 1173 11AF"))), "NO");
+ok(answer(checkNFC(hexU("20 C1 1173 11AF"))), "MAYBE");
+ok(answer(checkNFC(hexU("20 C1 AE00 1100"))), "YES");
+ok(answer(checkNFC(hexU("20 C1 AE00 1100 0300"))), "MAYBE");
+ok(answer(checkNFC(hexU("212B 1100 0300"))), "NO");
+ok(answer(checkNFC(hexU("1100 0300 212B"))), "NO");
+ok(answer(checkNFC(hexU("0041 0327 030A"))), "MAYBE"); # A+cedilla+ring
+ok(answer(checkNFC(hexU("0041 030A 0327"))), "NO");    # A+ring+cedilla
+ok(answer(checkNFC(hexU("20 C1 FF71 2025"))),"YES");
+ok(answer(check("NFC", hexU("20 C1 212B 300"))), "NO");
+ok(answer(checkNFKD(hexU("20 C1 FF71 2025"))),   "NO");
+ok(answer(checkNFKC(hexU("20 C1 AE00 2025"))), "NO");
+ok(answer(checkNFKC(hexU("212B 1100 0300"))), "NO");
+ok(answer(checkNFKC(hexU("1100 0300 212B"))), "NO");
+ok(answer(checkNFKC(hexU("0041 0327 030A"))), "MAYBE"); # A+cedilla+ring
+ok(answer(checkNFKC(hexU("0041 030A 0327"))), "NO");    # A+ring+cedilla
+ok(answer(check("NFKC", hexU("20 C1 212B 300"))), "NO");
 
 "012ABC" =~ /(\d+)(\w+)/;
 ok("012" eq NFC $1 && "ABC" eq NFC $2);
