@@ -19,7 +19,7 @@ use strict;
 use vars qw($VERSION $VMS_TERMCAP);
 use vars qw($termpat $state $first $entry);
 
-$VERSION = '1.10';
+$VERSION = '1.11';
 
 # Version undef: Thu Dec 14 20:02:42 CST 1995 by sanders@bsdi.com
 # Version 1.00:  Thu Nov 30 23:34:29 EST 2000 by schwern@pobox.com
@@ -53,6 +53,8 @@ $VERSION = '1.10';
 #       Don't use try to use $ENV{HOME} if it doesn't exist
 #       Give Win32 'dumb' if TERM isn't set
 #       Provide fallback 'dumb' termcap entry as last resort
+# Version 1.11: Thu Oct 25 09:33:07 BST 2007
+#       EBDIC fixes from Chun Bing Ge <gecb@cn.ibm.com>
 
 # TODO:
 # support Berkeley DB termcaps
@@ -418,18 +420,36 @@ sub Tgetent
             # print STDERR "DEBUG: string $1 = $2\n";
             next if defined $self->{ '_' . ( $cap = $1 ) };
             $_ = $2;
-            s/\\E/\033/g;
-            s/\\(\d\d\d)/pack('c',oct($1) & 0177)/eg;
-            s/\\n/\n/g;
-            s/\\r/\r/g;
-            s/\\t/\t/g;
-            s/\\b/\b/g;
-            s/\\f/\f/g;
-            s/\\\^/\377/g;
-            s/\^\?/\177/g;
-            s/\^(.)/pack('c',ord($1) & 31)/eg;
-            s/\\(.)/$1/g;
-            s/\377/^/g;
+            if ( ord('A') == 193 )
+            {
+               s/\\E/\047/g;
+               s/\\(\d\d\d)/pack('c',oct($1) & 0177)/eg;
+               s/\\n/\n/g;
+               s/\\r/\r/g;
+               s/\\t/\t/g;
+               s/\\b/\b/g;
+               s/\\f/\f/g;
+               s/\\\^/\337/g;
+               s/\^\?/\007/g;
+               s/\^(.)/pack('c',ord($1) & 31)/eg;
+               s/\\(.)/$1/g;
+               s/\337/^/g;
+            }
+            else
+            {
+               s/\\E/\033/g;
+               s/\\(\d\d\d)/pack('c',oct($1) & 0177)/eg;
+               s/\\n/\n/g;
+               s/\\r/\r/g;
+               s/\\t/\t/g;
+               s/\\b/\b/g;
+               s/\\f/\f/g;
+               s/\\\^/\377/g;
+               s/\^\?/\177/g;
+               s/\^(.)/pack('c',ord($1) & 31)/eg;
+               s/\\(.)/$1/g;
+               s/\377/^/g;
+            }
             $self->{ '_' . $cap } = $_;
         }
 
