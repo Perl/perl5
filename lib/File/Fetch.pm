@@ -23,7 +23,7 @@ use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
 use constant QUOTE  => do { $^O eq 'MSWin32' ? q["] : q['] };            
             
 
-$VERSION        = '0.13_03';
+$VERSION        = '0.13_04';
 $VERSION        = eval $VERSION;    # avoid warnings with development releases
 $PREFER_BIN     = 0;                # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
@@ -52,8 +52,8 @@ local $Module::Load::Conditional::VERBOSE   = 0;
 ### see what OS we are on, important for file:// uris ###
 use constant ON_WIN         => ($^O eq 'MSWin32');
 use constant ON_VMS         => ($^O eq 'VMS');                                
-use constant ON_UNIX        => (!ON_WIN and !ON_VMS);
-use constant HAS_VOL        => (ON_WIN or ON_VMS);
+use constant ON_UNIX        => (!ON_WIN);
+use constant HAS_VOL        => (ON_WIN);
 use constant HAS_SHARE      => (ON_WIN);
 =pod
 
@@ -113,12 +113,16 @@ The hostname in the uri.  Will be empty if host was originally
 
 On operating systems with the concept of a volume the second element
 of a file:// is considered to the be volume specification for the file.
-Thus on Win32 and VMS this routine returns the volume, on other operating
-systems this returns nothing. 
+Thus on Win32 this routine returns the volume, on other operating
+systems this returns nothing.
 
 On Windows this value may be empty if the uri is to a network share, in 
 which case the 'share' property will be defined. Additionally, volume 
 specifications that use '|' as ':' will be converted on read to use ':'.
+
+On VMS, which has a volume concept, this field will be empty because VMS
+file specifications are converted to absolute UNIX format and the volume
+information is transparently included.
 
 =item $ff->share
 
@@ -149,7 +153,7 @@ result of $ff->output_file will be used.
         path            => { default => '/' },
         file            => { required => 1 },
         uri             => { required => 1 },
-        vol             => { default => '' }, # windows and vms for file:// uris
+        vol             => { default => '' }, # windows for file:// uris
         share           => { default => '' }, # windows for file:// uris
         _error_msg      => { no_override => 1 },
         _error_msg_long => { no_override => 1 },
@@ -295,7 +299,7 @@ sub new {
 ###
 ### In the case of file:// urls there maybe be additional fields
 ###
-### For systems with volume specifications such as VMS and Win32 there will be 
+### For systems with volume specifications such as Win32 there will be
 ### a volume specifier provided in the 'vol' field.
 ###
 ###   'vol' => 'volumename'
@@ -311,8 +315,10 @@ sub new {
 ###
 ### Similarly if the host interpreting the url is VMS then 
 ### file:///disk$user/my/notes/note12345.txt' means 
-### 'DISK$USER:[MY.NOTES]NOTE123456.TXT' but if it is unix it means 
-### #/disk$user/my/notes/note12345.txt'.
+### 'DISK$USER:[MY.NOTES]NOTE123456.TXT' but will be returned the same as
+### if it is unix where it means /disk$user/my/notes/note12345.txt'.
+### Except for some cases in the File::Spec methods, Perl on VMS will generally
+### handle UNIX format file specifications.
 ###
 ### This means it is impossible to serve certain file:// urls on certain systems.
 ###
@@ -355,7 +361,6 @@ sub _parse_uri {
 
         ### file:///D|/blah.txt
         ### file:///D:/blah.txt
-        ### file:///disk$user/blah.txt
         } elsif (HAS_VOL) {
         
             ### this code comes from dmq's patch, but:
@@ -412,6 +417,9 @@ sub fetch {
     };
 
     check( $tmpl, \%hash ) or return;
+
+    # On VMS force to VMS format so File::Spec will work.
+    $to = VMS::Filespec::vmspath($to) if ON_VMS;
 
     ### create the path if it doesn't exist yet ###
     unless( -d $to ) {
@@ -911,7 +919,12 @@ sub _file_fetch {
         $remote = "\\\\".$self->host."\\$share\\$path";
 
     } else {
-        $remote  = File::Spec->catfile( $path, $self->file );
+        if (ON_VMS) {
+            # File::Spec on VMS can not currently handle UNIX syntax.
+            $remote  = File::Spec::Unix->catfile( $path, $self->file );
+        } else {
+            $remote  = File::Spec->catfile( $path, $self->file );
+        }
     }
 
     ### File::Copy is littered with 'die' statements :( ###
