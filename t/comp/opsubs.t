@@ -1,8 +1,19 @@
 #!./perl -T
 
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
 use warnings;
 use strict;
 $|++;
+
+require "./test.pl";
+
+plan(tests => 36);
+
+use vars qw($TODO);
 
 =pod
 
@@ -11,8 +22,6 @@ C<q()> operator.  Calling C<&q()> or C<main::q()> gets you the function.
 This test verifies this behavior for nine different operators.
 
 =cut
-
-use Test::More tests => 36;
 
 sub m  { return "m-".shift }
 sub q  { return "q-".shift }
