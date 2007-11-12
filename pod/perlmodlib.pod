@@ -1093,7 +1093,7 @@ Message objects for Log::Message
 
 Encoding and decoding of base64 strings
 
-=item MIME::Base64::QuotedPrint
+=item MIME::QuotedPrint
 
 Encoding and decoding of quoted-printable strings
 

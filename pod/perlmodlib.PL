@@ -10,6 +10,8 @@ open (MANIFEST, "../MANIFEST") or die $!;
 push @MANIFEST, 'lib/Config.pod', 'lib/Errno.pm', 'lib/lib.pm',
     'lib/DynaLoader.pm', 'lib/XSLoader.pm';
 
+-f "../lib/DynaLoader.pm" or die "Must be run from a source tree where perl has been built\n";
+
 for (@MANIFEST) {
      my $filename;
      next unless s|^lib/|| or m|^ext/|;
@@ -48,6 +50,9 @@ for (@MANIFEST) {
      $perlname =~ s!\.p(m|od)$!!;
      $perlname =~ s!\b(\w+)/\1\b!$1!;
      $perlname =~ s!/!::!g;
+
+     # modules with non standard locations
+     $perlname =~ s{Base64::QuotedPrint}{QuotedPrint};
 
      ($name, $thing) = split / --? /, $title, 2;
 
