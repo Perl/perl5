@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!perl -wT
 use strict;
 use File::Spec;
 use Test::More;
