@@ -7,6 +7,7 @@ package Maintainers;
 use strict;
 
 use lib "Porting";
+use 5.010;
 
 require "Maintainers.pl";
 use vars qw(%Modules %Maintainers);
