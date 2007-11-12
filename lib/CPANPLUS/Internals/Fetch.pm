@@ -252,6 +252,8 @@ sub _fetch {
                             ### history regarding win32
                             $vol =~ s/:$/|/ if ON_WIN32; 
     
+                            $vol =~ s/:// if ON_VMS;
+
                             ### XXX i'm not sure what cases this is addressing.
                             ### this comes straight from dmq's file:// patches
                             ### for win32. --kane
