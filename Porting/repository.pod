@@ -70,7 +70,10 @@ will be the file F<~/.ssh/identity> which is suitable unless you
 particularly want to keep separate ssh identities for some reason.
 If so, you could save the perl repository private key in the file
 F<~/.ssh/perl>, for example, but I will use the standard filename
-in the remainder of the examples of this document.
+in the remainder of the examples of this document.  (Some ssh
+implementations will default to creating a F<~/.ssh/id_rsa*>
+ssh prototcol 2 RSA key pair instead - see below.  Use the -t rsa1
+option if you really want a protocol 1 key pair.)
 
 After typing in the filename, it will prompt you to type in a
 passphrase. The private key will itself be encrypted so that it is

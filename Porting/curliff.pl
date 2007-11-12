@@ -17,9 +17,10 @@ my @FILES = qw(
 	       README.win32
 	       win32/Makefile
 	       win32/makefile.mk
-	       wince/compile-all.bat
-	       wince/README.perlce
-	       wince/registry.bat
+	       win32/Makefile.ce
+	       win32/ce-helpers/compile-all.bat
+	       win32/ce-helpers/compile.bat
+	       win32/ce-helpers/registry.bat
 	       );
 
 {
