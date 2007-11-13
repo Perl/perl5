@@ -2,7 +2,7 @@
 
 use strict;
 
-use Test::More tests => 98;
+use Test::More tests => 99;
 
 BEGIN {
     use_ok('File::Path');
@@ -53,6 +53,25 @@ is(scalar(@created), 7, "created list of directories");
 @created = mkpath([$tmp_base]);
 is(scalar(@created), 0, "skipped making existing directory")
     or diag("unexpectedly recreated @created");
+
+# create a file
+my $file_name = catfile( $tmp_base, 'a', 'delete.me' );
+my $file_count = 0;
+if (open OUT, "> $file_name") {
+    print OUT "this file may be deleted\n";
+    close OUT;
+    ++$file_count;
+}
+else {
+    diag( "Failed to create file $file_name: $!" );
+}
+
+SKIP: {
+    skip "cannot remove a file we failed to create", 1
+        unless $file_count == 1;
+    my $count = rmtree($file_name);
+    is($count, 1, "rmtree'ed a file");
+}
 
 @created = mkpath('');
 is(scalar(@created), 0, "Can't create a directory named ''");

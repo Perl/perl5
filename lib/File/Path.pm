@@ -17,7 +17,7 @@ BEGIN {
 
 use Exporter ();
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '2.02_01';
+$VERSION = '2.04';
 @ISA     = qw(Exporter);
 @EXPORT  = qw(mkpath rmtree);
 
@@ -26,8 +26,7 @@ my $Is_MacOS = $^O eq 'MacOS';
 
 # These OSes complain if you want to remove a file that you have no
 # write permission to:
-my $Force_Writeable = ($^O eq 'os2' || $^O eq 'dos' || $^O eq 'MSWin32' ||
-                       $^O eq 'amigaos' || $^O eq 'MacOS' || $^O eq 'epoc');
+my $Force_Writeable = grep {$^O eq $_} qw(amigaos dos epoc MSWin32 MacOS os2);
 
 sub _carp {
     require Carp;
@@ -338,7 +337,6 @@ sub _rmtree {
         }
         else {
             # not a directory
-
             $root = VMS::Filespec::vmsify("./$root")
                 if $Is_VMS 
                    && !File::Spec->file_name_is_absolute($root)
@@ -388,8 +386,8 @@ File::Path - Create or remove directory trees
 
 =head1 VERSION
 
-This document describes version 2.02 of File::Path, released
-2007-10-24.
+This document describes version 2.04 of File::Path, released
+2007-11-13.
 
 =head1 SYNOPSIS
 
@@ -847,6 +845,15 @@ setting. (Permissions given in octal).
 =head1 SEE ALSO
 
 =over 4
+
+=item *
+
+L<File::Remove>
+
+Allows files and directories to be moved to the Trashcan/Recycle
+Bin (where they may later be restored if necessary) if the operating
+system supports such functionality. This feature may one day be
+made available directly in C<File::Path>.
 
 =item *
 
