@@ -87,7 +87,7 @@ isa_ok( $mod,  'CPANPLUS::Module' );
     } else {
         $in_file = File::Spec::Unix->catfile(
                           File::Spec::Unix->catdir(
-                              File::Spec->spitdir( $cwd ),
+                              File::Spec->splitdir( $cwd ),
                           ),
                           $base
                       )
