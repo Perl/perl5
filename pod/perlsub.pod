@@ -453,11 +453,10 @@ each time the gimme_another() function is called:
 Also, since C<$x> is lexical, it can't be reached or modified by any Perl
 code outside.
 
-Be aware that assignment to C<state> variables (as in C<state $x = 42>)
-are executed every time; to initialize (or re-initialize) an undefined
-state scalar, you can use, for example, the defined-or assignment :
-
-    state $x //= initial_value();
+When combined with variable declaration, simple scalar assignment to C<state>
+variables (as in C<state $x = 42>) is executed only the first time.  When such
+statements are evaluated subsequent times, the assignment is ignored.  The
+behavior of this sort of assignment to non-scalar variables is undefined.
 
 =head3 Persistent variables with closures
 
