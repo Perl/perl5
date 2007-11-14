@@ -206,7 +206,8 @@ print "ok 12\n";
     if (!(@glob_files == 1 && "@glob_files" eq "a_dej")) {
 	print "not ";
     }
-    print "ok 13\n";
+    my $todo = $^O ne 'VMS' ? '' : " # TODO home-made glob doesn't do regexes";
+    print "ok 13$todo\n";
     chdir $cwd
 	or die "Could not chdir back to $cwd: $!";
 }
