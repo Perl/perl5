@@ -1809,9 +1809,9 @@ lib/Memoize/t/unmemoize.t	Memoize 'unmemoize' function test
 lib/Module/CoreList/bin/corelist	Module::CoreList
 lib/Module/CoreList.pm			Module::CoreList
 lib/Module/CoreList/t/corelist.t	Module::CoreList
+lib/Module/CoreList/t/find_modules.t	Module::CoreList
 lib/Module/Pluggable/Object.pm	Module::Pluggable
 lib/Module/Pluggable.pm	Module::Pluggable
-lib/Module/CoreList/t/find_modules.t	Module::CoreList
 lib/Net/Changes.libnet		libnet
 lib/Net/Cmd.pm			libnet
 lib/Net/Config.eg		libnet

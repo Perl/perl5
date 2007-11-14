@@ -6227,6 +6227,8 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 
 =item -C on the #! line
 
+=item Propagate const outwards from Perl_moreswitches()
+
 =back
 
 =item Tasks that need a knowledge of the interpreter
@@ -9225,6 +9227,8 @@ DJGPP, Pthreads
 
 =item nss_delete core dump from op/pwent or op/grent
 
+=item Miscellaneous
+
 =item AUTHOR
 
 =item DATE
@@ -10109,6 +10113,8 @@ Digital UNIX formerly known as DEC OSF/1) systems
 
 =item PERL5LIB and PERLLIB
 
+=item The Perl Forked Debugger
+
 =item PERL_VMS_EXCEPTION_DEBUG
 
 =item Command line
@@ -10370,8 +10376,9 @@ signal name: ..
 
 =item BUGS AND LIMITATIONS
 
-Using non-threadsafe modules, Parent-child threads, Creating threads inside
-special blocks, Unsafe signals, Perl has been built with
+Thread-safe modules, Using non-thread-safe modules, Current working
+directory, Environment variables, Parent-child threads, Creating threads
+inside special blocks, Unsafe signals, Perl has been built with
 C<PERL_OLD_SIGNALS> (see C<perl -V>), The environment variable
 C<PERL_SIGNALS> is set to C<unsafe> (see L<perlrun/"PERL_SIGNALS">), The
 module L<Perl::Unsafe::Signals> is used, Returning closures from threads,
@@ -13907,6 +13914,8 @@ encode_utf8($string);, $string = decode_utf8($octets [, CHECK]);
 
 =item Defining Aliases
 
+=item Finding IANA Character Set Registry names
+
 =back
 
 =item Encoding via PerlIO
@@ -14032,7 +14041,7 @@ reference, e.g.:
 
 =item Other methods defined in Encode::Encodings
 
--E<gt>name, -E<gt>renew, -E<gt>renewed, -E<gt>perlio_ok(),
+-E<gt>name, -E<gt>mime_name, -E<gt>renew, -E<gt>renewed, -E<gt>perlio_ok(),
 -E<gt>needs_lines()
 
 =item Example: Encode::ROT13
@@ -14140,6 +14149,14 @@ guess_encoding($data, [, I<list of suspects>])
 =item DESCRIPTION
 
 =item BUGS
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::MIME::Name, Encode::MIME::NAME -- internally used by Encode
+
+=over 4
 
 =item SEE ALSO
 
@@ -14376,7 +14393,7 @@ Implementation Base Class
 
 =item Other methods defined in Encode::Encodings
 
--E<gt>name, -E<gt>renew, -E<gt>renewed, -E<gt>perlio_ok(),
+-E<gt>name, -E<gt>mime_name, -E<gt>renew, -E<gt>renewed, -E<gt>perlio_ok(),
 -E<gt>needs_lines()
 
 =item Example: Encode::ROT13
@@ -14458,6 +14475,15 @@ and 'Q' header encoding
 =item DESCRIPTION
 
 =item BUGS
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::lib::Encode::MIME::Name, Encode::MIME::NAME -- internally
+used by Encode
+
+=over 4
 
 =item SEE ALSO
 
@@ -15797,6 +15823,8 @@ cd
 max_exec_len
 
 os_flavor
+
+cflags
 
 =head2 ExtUtils::MM_Win95 - method to customize MakeMaker for Win9X
 
@@ -19197,6 +19225,26 @@ Storable use
 
 =back
 
+=head2 Module::CoreList - what modules shipped with versions of perl
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CAVEATS
+
+=item HISTORY
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=item SEE ALSO
+
+=back
+
 =head2 Module::Pluggable - automatically give your module the ability to
 have plugins
 
@@ -21806,6 +21854,8 @@ B<setlogmask($mask_priority)>, B<setlogsock($sock_type)>,
 B<setlogsock($sock_type, $stream_location)> (added in Perl 5.004_02),
 B<Note>, B<closelog()>
 
+=item THE RULES OF SYS::SYSLOG
+
 =item EXAMPLES
 
 =item CONSTANTS
@@ -21820,18 +21870,31 @@ B<Note>, B<closelog()>
 
 =item DIAGNOSTICS
 
-Invalid argument passed to setlogsock, no connection to syslog available,
-stream passed to setlogsock, but %s is not writable, stream passed to
-setlogsock, but could not find any device, tcp passed to setlogsock, but
-tcp service unavailable, syslog: expecting argument %s, syslog: invalid
-level/facility: %s, syslog: too many levels given: %s, syslog: too many
-facilities given: %s, syslog: level must be given, udp passed to
-setlogsock, but udp service unavailable, unix passed to setlogsock, but
-path not available
+C<Invalid argument passed to setlogsock>, C<eventlog passed to setlogsock,
+but no Win32 API available>, C<no connection to syslog available>, C<stream
+passed to setlogsock, but %s is not writable>, C<stream passed to
+setlogsock, but could not find any device>, C<tcp passed to setlogsock, but
+tcp service unavailable>, C<syslog: expecting argument %s>, C<syslog:
+invalid level/facility: %s>, C<syslog: too many levels given: %s>,
+C<syslog: too many facilities given: %s>, C<syslog: level must be given>,
+C<udp passed to setlogsock, but udp service unavailable>, C<unix passed to
+setlogsock, but path not available>
 
 =item SEE ALSO
 
-=item AUTHORS
+=over 4
+
+=item Manual Pages
+
+=item RFCs
+
+=item Articles
+
+=item Event Log
+
+=back
+
+=item AUTHORS & ACKNOWLEDGEMENTS
 
 =item BUGS
 
@@ -21839,6 +21902,8 @@ path not available
 
 AnnoCPAN: Annotated CPAN documentation, CPAN Ratings, RT: CPAN's request
 tracker, Search CPAN, Kobes' CPAN Search, Perl Documentation
+
+=item COPYRIGHT
 
 =item LICENSE
 
@@ -21865,6 +21930,8 @@ B<setlogmask($mask_priority)>, B<setlogsock($sock_type)>,
 B<setlogsock($sock_type, $stream_location)> (added in Perl 5.004_02),
 B<Note>, B<closelog()>
 
+=item THE RULES OF SYS::SYSLOG
+
 =item EXAMPLES
 
 =item CONSTANTS
@@ -21879,18 +21946,31 @@ B<Note>, B<closelog()>
 
 =item DIAGNOSTICS
 
-Invalid argument passed to setlogsock, no connection to syslog available,
-stream passed to setlogsock, but %s is not writable, stream passed to
-setlogsock, but could not find any device, tcp passed to setlogsock, but
-tcp service unavailable, syslog: expecting argument %s, syslog: invalid
-level/facility: %s, syslog: too many levels given: %s, syslog: too many
-facilities given: %s, syslog: level must be given, udp passed to
-setlogsock, but udp service unavailable, unix passed to setlogsock, but
-path not available
+C<Invalid argument passed to setlogsock>, C<eventlog passed to setlogsock,
+but no Win32 API available>, C<no connection to syslog available>, C<stream
+passed to setlogsock, but %s is not writable>, C<stream passed to
+setlogsock, but could not find any device>, C<tcp passed to setlogsock, but
+tcp service unavailable>, C<syslog: expecting argument %s>, C<syslog:
+invalid level/facility: %s>, C<syslog: too many levels given: %s>,
+C<syslog: too many facilities given: %s>, C<syslog: level must be given>,
+C<udp passed to setlogsock, but udp service unavailable>, C<unix passed to
+setlogsock, but path not available>
 
 =item SEE ALSO
 
-=item AUTHORS
+=over 4
+
+=item Manual Pages
+
+=item RFCs
+
+=item Articles
+
+=item Event Log
+
+=back
+
+=item AUTHORS & ACKNOWLEDGEMENTS
 
 =item BUGS
 
@@ -21898,6 +21978,23 @@ path not available
 
 AnnoCPAN: Annotated CPAN documentation, CPAN Ratings, RT: CPAN's request
 tracker, Search CPAN, Kobes' CPAN Search, Perl Documentation
+
+=item COPYRIGHT
+
+=item LICENSE
+
+=back
+
+=head2 Syslog::win32::Win32, Sys::Syslog::Win32 - Win32 support for
+Sys::Syslog
+
+=over 4
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item AUTHORS
 
 =item LICENSE
 
@@ -22957,8 +23054,7 @@ arrays
 
 =back
 
-=head2 Text::Soundex - Implementation of the Soundex Algorithm as Described
-by Knuth
+=head2 Text::Soundex - Implementation of the soundex algorithm.
 
 =over 4
 
@@ -23698,23 +23794,26 @@ March 18th, 2000
 =item Alphabetical Listing of Win32 Functions
 
 Win32::AbortSystemShutdown(MACHINE), Win32::BuildNumber(),
-Win32::CopyFile(FROM, TO, OVERWRITE), Win32::DomainName(),
+Win32::CopyFile(FROM, TO, OVERWRITE), Win32::CreateDirectory(DIRECTORY),
+Win32::CreateFile(FILE), Win32::DomainName(),
 Win32::ExpandEnvironmentStrings(STRING), Win32::FormatMessage(ERRORCODE),
-Win32::FsType(), Win32::FreeLibrary(HANDLE), Win32::GetArchName(),
-Win32::GetChipName(), Win32::GetCwd(), Win32::GetFileVersion(FILENAME),
-Win32::GetFolderPath(FOLDER [, CREATE]), Win32::GetFullPathName(FILENAME),
-Win32::GetLastError(), Win32::GetLongPathName(PATHNAME),
-Win32::GetNextAvailDrive(), Win32::GetOSVersion(), Win32::GetOSName(),
+Win32::FsType(), Win32::FreeLibrary(HANDLE),
+Win32::GetANSIPathName(FILENAME), Win32::GetArchName(),
+Win32::GetChipName(), Win32::GetCwd(), Win32::GetCurrentThreadId(),
+Win32::GetFileVersion(FILENAME), Win32::GetFolderPath(FOLDER [, CREATE]),
+Win32::GetFullPathName(FILENAME), Win32::GetLastError(),
+Win32::GetLongPathName(PATHNAME), Win32::GetNextAvailDrive(),
+Win32::GetOSVersion(), Win32::GetOSName(),
 Win32::GetShortPathName(PATHNAME), Win32::GetProcAddress(INSTANCE,
 PROCNAME), Win32::GetTickCount(), Win32::GuidGen(), Win32::IsAdminUser(),
 Win32::IsWinNT(), Win32::IsWin95(), Win32::LoadLibrary(LIBNAME),
 Win32::LoginName(), Win32::LookupAccountName(SYSTEM, ACCOUNT, DOMAIN, SID,
 SIDTYPE), Win32::LookupAccountSID(SYSTEM, SID, ACCOUNT, DOMAIN, SIDTYPE),
 Win32::MsgBox(MESSAGE [, FLAGS [, TITLE]]), Win32::NodeName(),
-Win32::RegisterServer(LIBRARYNAME), Win32::SetChildShowWindow(SHOWWINDOW),
-Win32::SetCwd(NEWDIRECTORY), Win32::SetLastError(ERROR),
-Win32::Sleep(TIME), Win32::Spawn(COMMAND, ARGS, PID),
-Win32::UnregisterServer(LIBRARYNAME)
+Win32::OutputDebugString(STRING), Win32::RegisterServer(LIBRARYNAME),
+Win32::SetChildShowWindow(SHOWWINDOW), Win32::SetCwd(NEWDIRECTORY),
+Win32::SetLastError(ERROR), Win32::Sleep(TIME), Win32::Spawn(COMMAND, ARGS,
+PID), Win32::UnregisterServer(LIBRARYNAME)
 
 =back
 
@@ -23856,9 +23955,13 @@ C<":SEM_">, C<":PARTITION_">, C<":ALL">
 
 =back
 
+=head2 Win32CORE - Win32 CORE function stubs
+
 =over 4
 
 =item DESCRIPTION
+
+=item HISTORY
 
 =back
 
