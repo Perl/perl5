@@ -7,6 +7,9 @@
  *
  */
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -15,7 +18,9 @@ static void
 forward(pTHX_ const char *function)
 {
     dXSARGS;
+    DWORD err = GetLastError();
     Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpvn("Win32",5), newSVnv(0.27));
+    SetLastError(err);
     SPAGAIN;
     PUSHMARK(SP-items);
     call_pv(function, GIMME_V);
@@ -52,10 +57,23 @@ FORWARD(Sleep)
 
 XS(boot_Win32CORE)
 {
-    dXSARGS;
+    /* This function only exists because writemain.SH, lib/ExtUtils/Embed.pm
+     * and win32/buildext.pl will all generate references to it.  The function
+     * should never be called though, as Win32CORE.pm doesn't use DynaLoader.
+     */
+}
+#ifdef __CYGWIN__
+__declspec(dllexport)
+#endif
+void
+init_Win32CORE(pTHX)
+{
+    /* This function is called from init_os_extras().  The Perl interpreter
+     * is not yet fully initialized, so don't do anything fancy in here.
+     */
+
     char *file = __FILE__;
 
-    /* these names are Activeware compatible */
     newXS("Win32::GetCwd", w32_GetCwd, file);
     newXS("Win32::SetCwd", w32_SetCwd, file);
     newXS("Win32::GetNextAvailDrive", w32_GetNextAvailDrive, file);
@@ -77,6 +95,4 @@ XS(boot_Win32CORE)
     newXS("Win32::CopyFile", w32_CopyFile, file);
     newXS("Win32::Sleep", w32_Sleep, file);
     /* newXS("Win32::SetChildShowWindow", w32_SetChildShowWindow, file); */
-
-    XSRETURN_YES;
 }

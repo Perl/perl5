@@ -1,7 +1,20 @@
 #!perl
 # vim:syntax=perl:
 
-BEGIN { $|= 1; print "1..10\n"; }
+BEGIN {
+    $|= 1;
+
+    # when building perl, skip this test if Win32API::File isn't being built
+    if ( $ENV{PERL_CORE} ) {
+	require Config;
+	if ( $Config::Config{extensions} !~ m:(?<!\S)Win32API/File(?!\S): ) {
+	    print "1..0 # Skip Win32API::File extension not built\n";
+	    exit();
+	}
+    }
+
+    print "1..10\n";
+}
 END   { print "not ok 1\n" unless $main::loaded; }
 
 use strict;

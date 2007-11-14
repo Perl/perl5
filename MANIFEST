@@ -1052,7 +1052,20 @@ ext/Win32CORE/Makefile.PL	Win32CORE extension
 ext/Win32CORE/t/win32core.t	Win32CORE extension
 ext/Win32CORE/Win32CORE.c	Win32CORE extension
 ext/Win32CORE/Win32CORE.pm	Win32CORE extension (stubs for Win32 CORE subs)
+ext/Win32/longpath.inc		Win32 extension long path support
 ext/Win32/Makefile.PL		Win32 extension makefile writer
+ext/Win32/t/CreateFile.t	See if Win32 extension works
+ext/Win32/t/ExpandEnvironmentStrings.t	See if Win32 extension works
+ext/Win32/t/GetCurrentThreadId.t	See if Win32 extension works
+ext/Win32/t/GetFileVersion.t	See if Win32 extension works
+ext/Win32/t/GetFolderPath.t	See if Win32 extension works
+ext/Win32/t/GetFullPathName.t	See if Win32 extension works
+ext/Win32/t/GetLongPathName.t	See if Win32 extension works
+ext/Win32/t/GetOSVersion.t	See if Win32 extension works
+ext/Win32/t/GetShortPathName.t	See if Win32 extension works
+ext/Win32/t/GuidGen.t		See if Win32 extension works
+ext/Win32/t/Names.t		See if Win32 extension works
+ext/Win32/t/Unicode.t		See if Win32 extension works
 ext/Win32/Win32.pm		Win32 extension Perl module
 ext/Win32/Win32.xs		Win32 extension external subroutines
 ext/XS/APItest/APItest.pm	XS::APItest extension
@@ -3149,8 +3162,6 @@ t/uni/tr_sjis.t			See if Unicode tr/// works
 t/uni/tr_utf8.t			See if Unicode tr/// works
 t/uni/upper.t			See if Unicode casing works
 t/uni/write.t			See if Unicode formats work
-t/win32/getosversion.t		Test if Win32::GetOSVersion() works
-t/win32/longpath.t		Test if Win32::GetLongPathName() works
 t/win32/system.t		See if system works in Win*
 t/win32/system_tests		Test runner for system.t
 t/x2p/s2p.t			See if s2p/psed work

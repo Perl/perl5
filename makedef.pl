@@ -1449,6 +1449,8 @@ foreach my $symbol (@stat_mods)
 	try_symbol($symbol);
     }
 
+try_symbol("init_Win32CORE") if $static_ext =~ /\bWin32CORE\b/;
+
 # Now all symbols should be defined because
 # next we are going to output them.
 
