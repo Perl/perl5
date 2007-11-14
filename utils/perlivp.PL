@@ -119,7 +119,7 @@ print "## Checking Perl version via variable `\$]'.\n" if $opt{'p'};
 !NO!SUBS!
 
 print OUT <<"!GROK!THIS!";
-my \$ivp_VERSION = $];
+my \$ivp_VERSION = "$]";
 
 !GROK!THIS!
 print OUT <<'!NO!SUBS!';
@@ -209,7 +209,7 @@ if (defined($Config{'extensions'})) {
             next if ($_ eq 'threads/shared');
         }
 	# that's a distribution name, not a module name
-	next if $_ eq 'IO/Compress/Zlib';
+	next if /^IO_Compress_(?:Zlib|Base)$/;
         next if $_ eq 'Devel/DProf'; 
 	# test modules
 	next if $_ eq 'XS/APItest';
@@ -287,6 +287,12 @@ for (@modules) {
     $version = undef;
     @missing = ();
     @missing = $installed -> validate($_);
+
+    # .bs files are optional
+    @missing = grep { ! /\.bs$/ } @missing;
+    # man files are often compressed
+    @missing = grep { ! ( -s "$_.gz" || -s "$_.bz2" ) } @missing;
+
     if ($#missing >= 0) {
         print "# file",+($#missing == 0) ? '' : 's'," missing from installation:\n";
         print '# ',join(' ',@missing),"\n";
