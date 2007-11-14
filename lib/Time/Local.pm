@@ -7,7 +7,7 @@ use strict;
 use integer;
 
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK );
-$VERSION   = '1.17';
+$VERSION   = '1.18';
 
 @ISA       = qw( Exporter );
 @EXPORT    = qw( timegm timelocal );
@@ -222,11 +222,15 @@ C<localtime()> and C<gmtime()>.
 
 =head1 FUNCTIONS
 
+=head2 C<timelocal()> and C<timegm()>
+
 This module exports two functions by default, C<timelocal()> and
 C<timegm()>.
 
 The C<timelocal()> and C<timegm()> functions perform range checking on
 the input $sec, $min, $hour, $mday, and $mon values by default.
+
+=head2 C<timelocal_nocheck()> and C<timegm_nocheck()>
 
 If you are working with data you know to be valid, you can speed your
 code up by using the "nocheck" variants, C<timelocal_nocheck()> and
@@ -349,6 +353,15 @@ list. See http://lists.perl.org/ for more details.
 Please submit bugs to the CPAN RT system at
 http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Time-Local or via email
 at bug-time-local@rt.cpan.org.
+
+=head1 COPYRIGHT
+
+Copyright (c) 1997-2003 Graham Barr, 2003-2007 David Rolsky.  All
+rights reserved.  This program is free software; you can redistribute
+it and/or modify it under the same terms as Perl itself.
+
+The full text of the license can be found in the LICENSE file included
+with this module.
 
 =head1 AUTHOR
 

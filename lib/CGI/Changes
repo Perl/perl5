@@ -1,3 +1,10 @@
+  Version 3.29
+  1. The position of file handles is now reset to zero when CGI->new is called.
+    (Mark Stosberg)
+  2. uploadInfo() now works across multiple object instances. Also, the first
+     tests for uploadInfo() were added as part of the fix. (CPAN bug 11895, with
+     contributions from drfrench and Mark Stosberg).
+
   Version 3.28
   1. Applied patch from Allen Day that makes Cookie parsing RFC2109 compliant
 	(attribute/values can be separated by commas as well as semicolons).
@@ -61,6 +68,15 @@
   1.  Doc typo fixes.
   2.  Patch from Steve Peters to default the document type to match the charset.
   3.  Fixed param() so that param(-name=>'foo',-values=>[]) sets the parameter to empty list.
+
+  Version 3.17 Fri Feb 24 14:01:27 EST 2006
+   1. Added patch from Mike Hanafey which caused 0 arguments to CGI::Cookie->new() to
+	be treated as empty.
+   2. Patch to CGI::Carp from Peter Whaite to fix the unfixable problem of CGI::Carp
+     not behaving correctly in an eval() context.
+   3. CGI::Fast->new() calls CGI->_reset_globals to avoid contamination of one session
+	with another's variables.
+   4. Fixed upload failure on files that contain semicolons in their names.
 
   Version 3.16 Wed Feb  8 13:29:11 EST 2006
    1. header() -charset option now works even when the MIME type is not "text".

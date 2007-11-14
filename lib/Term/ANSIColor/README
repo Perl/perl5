@@ -1,4 +1,4 @@
-                       Term::ANSIColor version 1.11
+                       Term::ANSIColor version 1.12
               (A simple ANSI text attribute control module)
 
   Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2005, 2006 Russ Allbery
@@ -100,5 +100,8 @@ THANKS
 
   To Helge Kreutzmann for pointing out the need for warnings in the
   documentation about background colors that span newlines.
+
+  To Baron Schwartz for pointing out that cyan and white were missing from
+  the documentation.
 
   To Larry Wall, as always, for Perl.
