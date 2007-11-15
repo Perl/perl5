@@ -9,15 +9,18 @@ require 5.005_03;
 
 use strict;
 use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
-            $DO_NOT_USE_PREFIX $HAS_PERLIO $HAS_IO_STRING];
+            $DO_NOT_USE_PREFIX $HAS_PERLIO $HAS_IO_STRING
+            $INSECURE_EXTRACT_MODE
+         ];
 
-$DEBUG              = 0;
-$WARN               = 1;
-$FOLLOW_SYMLINK     = 0;
-$VERSION            = "1.36";
-$CHOWN              = 1;
-$CHMOD              = 1;
-$DO_NOT_USE_PREFIX  = 0;
+$DEBUG                  = 0;
+$WARN                   = 1;
+$FOLLOW_SYMLINK         = 0;
+$VERSION                = "1.37_01";
+$CHOWN                  = 1;
+$CHMOD                  = 1;
+$DO_NOT_USE_PREFIX      = 0;
+$INSECURE_EXTRACT_MODE  = 0;
 
 BEGIN {
     use Config;
@@ -542,18 +545,42 @@ sub _extract_file {
     my $dir;
     ### is $name an absolute path? ###
     if( File::Spec->file_name_is_absolute( $dirs ) ) {
+
+        ### absolute names are not allowed to be in tarballs under
+        ### strict mode, so only allow it if a user tells us to do it
+        if( not defined $alt and not $INSECURE_EXTRACT_MODE ) {
+            $self->_error( 
+                q[Entry ']. $entry->full_path .q[' is an absolute path. ].
+                q[Not extracting absolute paths under SECURE EXTRACT MODE]
+            );  
+            return;
+        }
+        
+        ### user asked us to, it's fine.
         $dir = $dirs;
 
     ### it's a relative path ###
     } else {
         my $cwd     = (defined $self->{cwd} ? $self->{cwd} : cwd());
 
-
-
         my @dirs = defined $alt
             ? File::Spec->splitdir( $dirs )         # It's a local-OS path
             : File::Spec::Unix->splitdir( $dirs );  # it's UNIX-style, likely
                                                     # straight from the tarball
+
+        ### paths that leave the current directory are not allowed under
+        ### strict mode, so only allow it if a user tells us to do this.
+        if( not defined $alt            and 
+            not $INSECURE_EXTRACT_MODE  and 
+            grep { $_ eq '..' } @dirs
+        ) {
+            $self->_error(
+                q[Entry ']. $entry->full_path .q[' is attempting to leave the ].
+                q[current working directory. Not extracting under SECURE ].
+                q[EXTRACT MODE]
+            );
+            return;
+        }            
         
         ### '.' is the directory delimiter, of which the first one has to
         ### be escaped/changed.
@@ -1554,6 +1581,23 @@ Holds the last reported error. Kept for historical reasons, but its
 use is very much discouraged. Use the C<error()> method instead:
 
     warn $tar->error unless $tar->extract;
+
+=head2 $Archive::Tar::INSECURE_EXTRACT_MODE
+
+This variable indicates whether C<Archive::Tar> should allow
+files to be extracted outside their current working directory.
+
+Allowing this could have security implications, as a malicious
+tar archive could alter or replace any file the extracting user
+has permissions to. Therefor, the default is to not allow 
+insecure extractions. 
+
+If you trust the archive, or have other reasons to allow the 
+archive to write files outside your current working directory, 
+set this variable to C<true>.
+
+Note that this is a backwards incompatible change from version
+C<1.36> and before.
 
 =head2 $Archive::Tar::HAS_PERLIO
 

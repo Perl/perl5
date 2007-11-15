@@ -6,13 +6,16 @@ use Archive::Tar;
 use File::Find;
 
 my $opts = {};
-getopts('dcvzthxf:', $opts) or die usage();
+getopts('dcvzthxf:I', $opts) or die usage();
 
 ### show the help message ###
 die usage() if $opts->{h};
 
 ### enable debugging (undocumented feature)
-local $Archive::Tar::DEBUG = 1 if $opts->{d};
+local $Archive::Tar::DEBUG                  = 1 if $opts->{d};
+
+### enable insecure extracting.
+local $Archive::Tar::INSECURE_EXTRACT_MODE  = 1 if $opts->{I};
 
 ### sanity checks ###
 unless ( 1 == grep { defined $opts->{$_} } qw[x t c] ) {
@@ -23,6 +26,7 @@ my $compress    = $opts->{z} ? 1 : 0;
 my $verbose     = $opts->{v} ? 1 : 0;
 my $file        = $opts->{f} ? $opts->{f} : 'default.tar';
 my $tar         = Archive::Tar->new();
+
 
 if( $opts->{c} ) {
     my @files;
@@ -64,6 +68,8 @@ Options:
     z   Read/Write zlib compressed ARCHIVE_FILE (not always available)
     v   Print filenames as they are added or extraced from ARCHIVE_FILE
     h   Prints this help message
+    I   Enable 'Insecure Extract Mode', which allows archives to extract
+        files outside the current working directory. (Not advised).
 
 See Also:
     tar(1)
