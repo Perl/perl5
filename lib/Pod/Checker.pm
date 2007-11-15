@@ -10,7 +10,7 @@
 package Pod::Checker;
 
 use vars qw($VERSION);
-$VERSION = 1.43;  ## Current version of this package
+$VERSION = 1.4301;  ## Current version of this package
 require  5.005;    ## requires this Perl version or later
 
 use Pod::ParseUtils; ## for hyperlinks and lists
@@ -364,6 +364,7 @@ my %VALID_COMMANDS = (
     'for'    =>  1,
     'begin'  =>  1,
     'end'    =>  1,
+    'encoding' => '1',
 );
 
 my %VALID_SEQUENCES = (
