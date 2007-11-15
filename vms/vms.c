@@ -12876,9 +12876,9 @@ Perl_vms_start_glob
 
 	if (!found) {
 	    /* Be POSIXish: return the input pattern when no matches */
-	    begin = SvPVX(tmpglob);
-	    strcat(begin,"\n");
-	    ok = (PerlIO_puts(tmpfp,begin) != EOF);
+	    strcpy(rstr,SvPVX(tmpglob));
+	    strcat(rstr,"\n");
+	    ok = (PerlIO_puts(tmpfp,rstr) != EOF);
 	}
 
 	if (ok && sts != RMS$_NMF &&
