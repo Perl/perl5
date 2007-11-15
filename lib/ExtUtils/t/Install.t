@@ -17,7 +17,7 @@ use TieOut;
 use File::Path;
 use File::Spec;
 
-use Test::More tests => 33;
+use Test::More tests => 38;
 
 use MakeMaker::Test::Setup::BFD;
 
@@ -98,13 +98,32 @@ ok( -r 'install-test/packlist',              '  packlist exists' );
 ok( -r 'install-test/lib/perl/Big/Dummy.pm', '  UNINST=1 preserved same' );
 
 
-
-# Test UNINST=1 removing other versions in other dirs.
 chmod 0644, 'blib/lib/Big/Dummy.pm' or die $!;
 open(DUMMY, ">>blib/lib/Big/Dummy.pm") or die $!;
 print DUMMY "Extra stuff\n";
 close DUMMY;
 
+
+# Test UNINST=0 does not remove other versions in other dirs.
+{
+  ok( -r 'install-test/lib/perl/Big/Dummy.pm', 'different install exists' );
+
+  local @INC = ('install-test/lib/perl');
+  local $ENV{PERL5LIB} = '';
+  install( { 'blib/lib' => 'install-test/other_lib/perl',
+           read   => 'install-test/packlist',
+           write  => 'install-test/packlist'
+         },
+       0, 0, 0);
+  ok( -d 'install-test/other_lib/perl',        'install made other dir' );
+  ok( -r 'install-test/other_lib/perl/Big/Dummy.pm', '  .pm file installed' );
+  ok( -r 'install-test/packlist',              '  packlist exists' );
+  ok( -r 'install-test/lib/perl/Big/Dummy.pm',
+                                             '  UNINST=0 left different' );
+}
+
+
+# Test UNINST=1 removing other versions in other dirs.
 {
   local @INC = ('install-test/lib/perl');
   local $ENV{PERL5LIB} = '';

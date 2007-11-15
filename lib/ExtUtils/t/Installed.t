@@ -21,7 +21,7 @@ use File::Path;
 use File::Basename;
 use File::Spec;
 
-use Test::More tests => 46;
+use Test::More tests => 63;
 
 BEGIN { use_ok( 'ExtUtils::Installed' ) }
 
@@ -29,6 +29,10 @@ my $mandirs =  !!$Config{man1direxp} + !!$Config{man3direxp};
 
 # saves having to qualify package name for class methods
 my $ei = bless( {}, 'ExtUtils::Installed' );
+
+# Make sure meta info is available
+$ei->{':private:'}{Config} = \%Config;
+$ei->{':private:'}{INC} = \@INC;
 
 # _is_prefix
 ok( $ei->_is_prefix('foo/bar', 'foo'),
@@ -100,10 +104,10 @@ FAKE
 
 close FAKEMOD;
 
+my $fake_mod_dir = File::Spec->catdir(cwd(), 'auto', 'FakeMod');
 {
     # avoid warning and death by localizing glob
     local *ExtUtils::Installed::Config;
-    my $fake_mod_dir = File::Spec->catdir(cwd(), 'auto', 'FakeMod');
     %ExtUtils::Installed::Config = (
         %Config,
         archlibexp         => cwd(),
@@ -120,6 +124,73 @@ close FAKEMOD;
         'new() should set Perl version from %Config' );
 
     ok( exists $realei->{FakeMod}, 'new() should find modules with .packlists');
+    isa_ok( $realei->{FakeMod}{packlist}, 'ExtUtils::Packlist' );
+    is( $realei->{FakeMod}{version}, '1.1.1',
+	'... should find version in modules' );
+}
+
+# Now try this using PERL5LIB
+{
+    local $ENV{PERL5LIB} = join $Config{path_sep}, $fake_mod_dir;
+    local *ExtUtils::Installed::Config;
+    %ExtUtils::Installed::Config = (
+        %Config,
+        archlibexp         => cwd(),
+        sitearchexp        => cwd(),
+    );
+
+    my $realei = ExtUtils::Installed->new();
+    isa_ok( $realei, 'ExtUtils::Installed' );
+    isa_ok( $realei->{Perl}{packlist}, 'ExtUtils::Packlist' );
+    is( $realei->{Perl}{version}, $Config{version},
+        'new() should set Perl version from %Config' );
+
+    ok( exists $realei->{FakeMod},
+        'new() should find modules with .packlists using PERL5LIB'
+    );
+    isa_ok( $realei->{FakeMod}{packlist}, 'ExtUtils::Packlist' );
+    is( $realei->{FakeMod}{version}, '1.1.1',
+	'... should find version in modules' );
+}
+
+# Do the same thing as the last block, but with overrides for
+# %Config and @INC.
+{
+    my $config_override = { %Config::Config };
+    $config_override->{archlibexp} = cwd();
+    $config_override->{sitearchexp} = $fake_mod_dir;
+    $config_override->{version} = 'fake_test_version';
+
+    my @inc_override = (@INC, $fake_mod_dir);
+
+    my $realei = ExtUtils::Installed->new(
+        'config_override' => $config_override,
+        'inc_override' => \@inc_override,
+    );
+    isa_ok( $realei, 'ExtUtils::Installed' );
+    isa_ok( $realei->{Perl}{packlist}, 'ExtUtils::Packlist' );
+    is( $realei->{Perl}{version}, 'fake_test_version',
+        'new(config_override => HASH) overrides %Config' );
+
+    ok( exists $realei->{FakeMod}, 'new() with overrides should find modules with .packlists');
+    isa_ok( $realei->{FakeMod}{packlist}, 'ExtUtils::Packlist' );
+    is( $realei->{FakeMod}{version}, '1.1.1',
+	'... should find version in modules' );
+}
+
+# Check if extra_libs works.
+{
+    my $realei = ExtUtils::Installed->new(
+        'extra_libs' => [ cwd() ],
+    );
+    isa_ok( $realei, 'ExtUtils::Installed' );
+    isa_ok( $realei->{Perl}{packlist}, 'ExtUtils::Packlist' );
+    ok( exists $realei->{FakeMod}, 
+        'new() with extra_libs should find modules with .packlists');
+    
+    #{ use Data::Dumper; local $realei->{':private:'}{Config};
+    #  warn Dumper($realei); }
+    
     isa_ok( $realei->{FakeMod}{packlist}, 'ExtUtils::Packlist' );
     is( $realei->{FakeMod}{version}, '1.1.1',
 	'... should find version in modules' );

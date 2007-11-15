@@ -13,7 +13,7 @@ use vars qw($VERSION @ISA @EXPORT_OK
           $Is_MacOS $Is_VMS 
           $Debug $Verbose $Quiet $MANIFEST $DEFAULT_MSKIP);
 
-$VERSION = '1.51';
+$VERSION = '1.51_01';
 @ISA=('Exporter');
 @EXPORT_OK = qw(mkmanifest
                 manicheck  filecheck  fullcheck  skipcheck
@@ -93,7 +93,9 @@ sub mkmanifest {
     my $read = (-r 'MANIFEST' && maniread()) or $manimiss++;
     $read = {} if $manimiss;
     local *M;
-    rename $MANIFEST, "$MANIFEST.bak" unless $manimiss;
+    my $bakbase = $MANIFEST;
+    $bakbase =~ s/\./_/g if $Is_VMS; # avoid double dots
+    rename $MANIFEST, "$bakbase.bak" unless $manimiss;
     open M, ">$MANIFEST" or die "Could not open $MANIFEST: $!";
     my $skip = _maniskip();
     my $found = manifind();
@@ -112,7 +114,6 @@ sub mkmanifest {
 	    warn "Added to $MANIFEST: $file\n" unless exists $read->{$file};
 	}
 	my $text = $all{$file};
-	($file,$text) = split(/\s+/,$text,2) if $Is_VMS && $text;
 	$file = _unmacify($file);
 	my $tabs = (5 - (length($file)+1)/8);
 	$tabs = 1 if $tabs < 1;
@@ -405,8 +406,10 @@ sub _check_mskip_directives {
     }
     close M;
     return unless $flag;
-    rename $mfile, "$mfile.bak";
-    warn "Debug: Saving original $mfile as $mfile.bak\n" if $Debug;
+    my $bakbase = $mfile;
+    $bakbase =~ s/\./_/g if $Is_VMS;  # avoid double dots
+    rename $mfile, "$bakbase.bak";
+    warn "Debug: Saving original $mfile as $bakbase.bak\n" if $Debug;
     unless (open M, ">$mfile") {
         warn "Problem opening $mfile: $!";
         return;

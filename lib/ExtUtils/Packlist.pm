@@ -5,7 +5,7 @@ use strict;
 use Carp qw();
 use Config;
 use vars qw($VERSION $Relocations);
-$VERSION = '1.41';
+$VERSION = '1.43';
 $VERSION = eval $VERSION;
 
 # Used for generating filehandle globs.  IO::File might not be available!
@@ -131,17 +131,17 @@ while (defined($line = <$fh>))
       $data = { map { split('=', $_) } split(' ', $2)};
 
       if ($Config{userelocatableinc} && $data->{relocate_as})
-          {
+      {
 	  require File::Spec;
 	  require Cwd;
 	  my ($vol, $dir) = File::Spec->splitpath($packfile);
 	  my $newpath = File::Spec->catpath($vol, $dir, $data->{relocate_as});
 	  $key = Cwd::realpath($newpath);
-          }
       }
+         }
    $key =~ s!/\./!/!g;   # Some .packlists have spurious '/./' bits in the paths
-   $self->{data}->{$key} = $data;
-   }
+      $self->{data}->{$key} = $data;
+      }
 close($fh);
 }
 

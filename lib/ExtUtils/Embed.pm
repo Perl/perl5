@@ -18,7 +18,8 @@ use vars qw(@ISA @EXPORT $VERSION
 	    );
 use strict;
 
-$VERSION = 1.26;
+# This is not a dual-life module, so no need for development version numbers
+$VERSION = '1.27';
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&xsinit &ldopts 
@@ -133,7 +134,9 @@ sub xsi_body {
 
 sub static_ext {
     unless (scalar @Extensions) {
-	@Extensions = sort split /\s+/, $Config{static_ext};
+      my $static_ext = $Config{static_ext};
+      $static_ext =~ s/^\s+//;
+      @Extensions = sort split /\s+/, $static_ext;
 	unshift @Extensions, qw(DynaLoader);
     }
     @Extensions;
