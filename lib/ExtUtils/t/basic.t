@@ -16,7 +16,7 @@ BEGIN {
 use strict;
 use Config;
 
-use Test::More tests => 80;
+use Test::More tests => 83;
 use MakeMaker::Test::Utils;
 use MakeMaker::Test::Setup::BFD;
 use File::Find;
@@ -248,6 +248,11 @@ my $meta_yml = "$distdir/META.yml";
 ok( !-f 'META.yml',  'META.yml not written to source dir' );
 ok( -f $meta_yml,    'META.yml written to dist dir' );
 ok( !-e "META_new.yml", 'temp META.yml file not left around' );
+
+ok open META, $meta_yml or diag $!;
+my @meta = <META>;
+like $meta[-1], '/\n$/', "META.yml ends with a newline";
+ok close META;
 
 my $manifest = maniread("$distdir/MANIFEST");
 # VMS is non-case preserving, so we can't know what the MANIFEST will
