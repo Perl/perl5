@@ -1,2 +1,8 @@
 # uses GDBM dbm compatibility feature - at least on SuSE 8.0
-$self->{LIBS} = ['-lgdbm -lgdbm_compat'];
+$self->{LIBS} = ['-lgdbm'];
+
+# Debian/Ubuntu have /usr/lib/libgdbm_compat.so.3* but not this file,
+# so linking may fail
+if (-f '/usr/lib/libgdbm_compat.so') {
+    $self->{LIBS}->[0] .= ' -lgdbm_compat';
+}
