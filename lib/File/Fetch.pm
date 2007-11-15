@@ -299,7 +299,7 @@ sub new {
 ###
 ### In the case of file:// urls there maybe be additional fields
 ###
-### For systems with volume specifications such as Win32 there will be
+### For systems with volume specifications such as Win32 there will be 
 ### a volume specifier provided in the 'vol' field.
 ###
 ###   'vol' => 'volumename'
@@ -418,7 +418,7 @@ sub fetch {
 
     check( $tmpl, \%hash ) or return;
 
-    # On VMS force to VMS format so File::Spec will work.
+    ### On VMS force to VMS format so File::Spec will work.
     $to = VMS::Filespec::vmspath($to) if ON_VMS;
 
     ### create the path if it doesn't exist yet ###
@@ -919,12 +919,12 @@ sub _file_fetch {
         $remote = "\\\\".$self->host."\\$share\\$path";
 
     } else {
-        if (ON_VMS) {
-            # File::Spec on VMS can not currently handle UNIX syntax.
-            $remote  = File::Spec::Unix->catfile( $path, $self->file );
-        } else {
-            $remote  = File::Spec->catfile( $path, $self->file );
-        }
+        ### File::Spec on VMS can not currently handle UNIX syntax.
+        my $file_class = ON_VMS
+            ? 'File::Spec::Unix'
+            : 'File::Spec';
+
+        $remote  = $file_class->catfile( $path, $self->file );
     }
 
     ### File::Copy is littered with 'die' statements :( ###
