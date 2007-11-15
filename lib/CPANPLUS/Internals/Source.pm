@@ -1040,11 +1040,8 @@ sub _add_custom_module_source {
     
     check( $tmpl, \%hash ) or return;
     
-    my $index = File::Spec->catfile(
-                    $conf->get_conf('base'),
-                    $conf->_get_build('custom_sources'),        
-                    $self->_uri_encode( uri => $uri ),
-                );     
+    ### what index file should we use on disk?
+    my $index = $self->__custom_module_source_index_file( uri => $uri );
 
     ### already have it.
     if( IS_FILE->( $index ) ) {
@@ -1061,12 +1058,17 @@ sub _add_custom_module_source {
     
     ### write the file
     my $fh = OPEN_FILE->( $index => '>' ) or do {
-        error(loc("Could not write index file for '%1'", $uri));
+        error(loc("Could not open index file for '%1'", $uri));
         return;
     };
     
-    ### basically we 'touched' it.
-    close $fh;
+    ### basically we 'touched' it. Check the return value, may be 
+    ### important on win32 and similar OS, where there's file length
+    ### limits
+    close $fh or do {
+        error(loc("Could not write index file to disk for '%1'", $uri));
+        return;
+    };        
         
     $self->__update_custom_module_source(
                 remote  => $uri,
@@ -1079,6 +1081,34 @@ sub _add_custom_module_source {
                 return;                
             };
             
+    return $index;
+}
+
+=head2 $index = $cb->__custom_module_source_index_file( uri => $uri );
+
+Returns the full path to the encoded index file for C<$uri>, as used by
+all C<custom module source> routines.
+
+=cut
+
+sub __custom_module_source_index_file {
+    my $self = shift;
+    my $conf = $self->configure_object;
+    my %hash = @_;
+    
+    my($verbose,$uri);
+    my $tmpl = {   
+        uri     => { required => 1, store => \$uri }
+    };
+    
+    check( $tmpl, \%hash ) or return;
+    
+    my $index = File::Spec->catfile(
+                    $conf->get_conf('base'),
+                    $conf->_get_build('custom_sources'),        
+                    $self->_uri_encode( uri => $uri ),
+                );     
+
     return $index;
 }
 

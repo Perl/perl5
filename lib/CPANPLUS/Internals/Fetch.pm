@@ -251,14 +251,23 @@ sub _fetch {
                             ### descriptors, however wikipedia covers a bit of
                             ### history regarding win32
                             $vol =~ s/:$/|/ if ON_WIN32; 
-    
+                            
                             $vol =~ s/:// if ON_VMS;
-
+    
                             ### XXX i'm not sure what cases this is addressing.
                             ### this comes straight from dmq's file:// patches
                             ### for win32. --kane
+                            ### According to dmq, the best summary is:
+                            ### "if file:// urls dont look right on VMS reuse
+                            ### the win32 logic and see if that fixes things"
+             
+                            ### first element not empty? Might happen on VMS.
+                            ### prepend the volume in that case.
                             if( $host_dirs[0] ) {
                                 unshift @host_dirs, $vol;
+                            
+                            ### element empty? reuse it to store the volume
+                            ### encoded as a directory name. (Win32/VMS)
                             } else {
                                 $host_dirs[0] = $vol;
                             }                    

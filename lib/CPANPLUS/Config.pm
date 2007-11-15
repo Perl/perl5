@@ -555,7 +555,7 @@ with CPANPLUS, which is used to enable autoflushing in spawned processes.
 
             my $path;
             BIN: for my $bin (@bins) {
-
+                
                 ### parallel to your cpanp/cpanp-boxed
                 my $maybe = File::Spec->rel2abs(
                                 File::Spec->catfile( dirname($0), $bin )

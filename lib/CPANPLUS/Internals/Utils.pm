@@ -419,9 +419,6 @@ sub _safe_path {
         ### only need to fix it up if there's spaces in the path   
         return $path unless $path =~ /\s+/;
         
-        ### or if we are on win32
-        return $path if $^O ne 'MSWin32';
-    
         ### clean up paths if we are on win32
         return Win32::GetShortPathName( $path ) || $path;
 

@@ -54,7 +54,7 @@ CPANPLUS::Selfupdate
                                                    # Address ~0 overflow issue
             'Params::Check'             => '0.22',
             'Package::Constants'        => '0.01',
-            'Term::UI'                  => '0.05',
+            'Term::UI'                  => '0.18', # option parsing
             'Test::Harness'             => '2.62', # due to bug #19505
                                                    # only 2.58 and 2.60 are bad
             'Test::More'                => '0.47', # to run our tests

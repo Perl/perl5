@@ -76,25 +76,16 @@ isa_ok( $mod,  'CPANPLUS::Module' );
     ### create a file URI. Make sure to split it by LOCAL rules
     ### and JOIN by unix rules, so we get a proper file uri
     ### otherwise, we might break win32. See bug #18702
-
-    my $cwd = cwd();
-    my $in_file;
-
-    if ($^O eq 'VMS') {
-        $in_file = File::Spec->catfile($cwd, $base);
-        ### Force UNIX syntax on VMS
-        $in_file = VMS::Filespec::unixify($in_file);
-    } else {
-        $in_file = File::Spec::Unix->catfile(
-                          File::Spec::Unix->catdir(
-                              File::Spec->splitdir( $cwd ),
-                          ),
-                          $base
-                      )
-    }
-
+    my $cwd     = cwd();
+    my $in_file = $^O eq 'VMS'
+        ? VMS::Filespec::unixify( File::Spec->catfile($cwd, $base) )
+        : File::Spec::Unix->catfile(
+              File::Spec::Unix->catdir( File::Spec->splitdir( $cwd ) ),
+              $base
+          ); 
+          
     my $target  = CREATE_FILE_URI->($in_file);
-                  
+
     my $fake    = $cb->parse_module( module => $target );
     
     ok( IS_FAKE_MODOBJ->(mod => $fake), 

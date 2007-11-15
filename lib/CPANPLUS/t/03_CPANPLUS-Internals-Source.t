@@ -46,7 +46,8 @@ ok( scalar keys %$mt,           "Moduletree loaded successfully" );
 
 ### check custom sources
 ### XXX whitebox test
-{   ### first, find a file to serve as a source
+SKIP: {   
+    ### first, find a file to serve as a source
     my $mod     = $mt->{$modname};
     my $package = File::Spec->rel2abs(
                         File::Spec->catfile( 
@@ -67,12 +68,22 @@ ok( scalar keys %$mt,           "Moduletree loaded successfully" );
                         path    => File::Spec->catfile( dirname($package) )
                     );
 
-    ### local file
+    my $expected_file = $cb->__custom_module_source_index_file( uri => $uri );
+    
+    ok( $expected_file,         "Sources should be written to '$uri'" );
+    
+    skip( "Index file size too long (>260 chars). Can't write to disk", 28 )
+        if length $expected_file > 260 and ON_WIN32;
+            
+
+    ### local file 
+    ### 2 tests
     my $src_file = $cb->_add_custom_module_source( uri => $uri );
     ok( $src_file,              "Sources written to '$src_file'" );                     
     ok( -e $src_file,           "   File exists" );                     
                      
-    ### and write the file   
+    ### and write the file  
+    ### 5 tests
     {   my $meth = '__write_custom_module_index';
         can_ok( $cb,    $meth );
 
@@ -88,6 +99,7 @@ ok( scalar keys %$mt,           "Moduletree loaded successfully" );
     }              
     
     ### let's see if we can find our custom files
+    ### 3 tests
     {   my $meth = '__list_custom_module_sources';
         can_ok( $cb,    $meth );
         
@@ -106,6 +118,7 @@ ok( scalar keys %$mt,           "Moduletree loaded successfully" );
     }        
 
     ### now we can have it be loaded in
+    ### 6 tests
     {   my $meth = '__create_custom_module_entries';
         can_ok( $cb,    $meth );
 
@@ -128,6 +141,7 @@ ok( scalar keys %$mt,           "Moduletree loaded successfully" );
     }
 
     ### test updating custom sources
+    ### 3 tests
     {   my $meth    = '__update_custom_module_sources';
         can_ok( $cb,    $meth );
         
@@ -143,6 +157,7 @@ ok( scalar keys %$mt,           "Moduletree loaded successfully" );
     }
     
     ### now update it individually
+    ### 3 tests    
     {   my $meth    = '__update_custom_module_source';
         can_ok( $cb,    $meth );
         
@@ -158,6 +173,7 @@ ok( scalar keys %$mt,           "Moduletree loaded successfully" );
     }
 
     ### now update using the higher level API, see if it's part of the update
+    ### 3 tests    
     {   CPANPLUS::Error->flush;
 
         ### mark what time it is now, sleep 1 second for better measuring
@@ -178,6 +194,7 @@ ok( scalar keys %$mt,           "Moduletree loaded successfully" );
     }
     
     ### now remove the index file;
+    ### 3 tests    
     {   my $meth = '_remove_custom_module_source';
         can_ok( $cb,    $meth );
         
