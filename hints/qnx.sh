@@ -253,6 +253,9 @@ else
   # recognize that option, so we're better off setting cc=gcc.
   cc='gcc'
 
+  # gcc uses $QNX_TARGET/usr/include as the include directory.
+  usrinc="$QNX_TARGET/usr/include"
+
   # If we use perl's malloc, it dies with an invalid sbrk.
   # This is probably worth tracking down someday.
   usemymalloc='false'
