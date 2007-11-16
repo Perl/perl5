@@ -10,7 +10,7 @@ use Config;
 no warnings 'once';
 
 my $test = 1;
-print "1..26\n";
+print "1..29\n";
 print "ok 1\n";
 
 open(DUPOUT,">&STDOUT");
@@ -132,6 +132,25 @@ SKIP: {
 	$line = <G>; chomp $line; is($line, "fff");
     }
     close G;
+
+    open UTFOUT, '>:utf8', "dup$$" or die $!;
+    open UTFDUP, '>&UTFOUT' or die $!;
+    # some old greek saying.
+    my $message = "\x{03A0}\x{0391}\x{039D}\x{03A4}\x{0391} \x{03A1}\x{0395}\x{0399}\n";
+    print UTFOUT $message;
+    print UTFDUP $message;
+    binmode UTFDUP, ':utf8';
+    print UTFDUP $message;
+    close UTFOUT;
+    close UTFDUP;
+    open(UTFIN, "<:utf8", "dup$$") or die $!;
+    {
+	my $line;
+	$line = <UTFIN>; is($line, $message);
+	$line = <UTFIN>; is($line, $message);
+	$line = <UTFIN>; is($line, $message);
+    }
+    close UTFIN;
 
     END { 1 while unlink "dup$$" }
 }
