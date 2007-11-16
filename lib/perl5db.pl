@@ -6208,21 +6208,38 @@ a new window.
 # it creates, but since it appears frontmost and windows are enumerated
 # front to back, we can use "first window" === "window 1".
 #
-# There's no direct accessor for the tty device name, so we fiddle
-# with the window title options until it says what we want.
-#
 # Since "do script" is implemented by supplying the argument (plus a
 # return character) as terminal input, there's a potential race condition
 # where the debugger could beat the shell to reading the command.
 # To prevent this, we wait for the screen to clear before proceeding.
 #
-# Tested and found to be functional in Mac OS X 10.3.9 and 10.4.8.
+# 10.3 and 10.4:
+# There's no direct accessor for the tty device name, so we fiddle
+# with the window title options until it says what we want.
+#
+# 10.5:
+# There _is_ a direct accessor for the tty device name, _and_ there's
+# a new possible component of the window title (the name of the settings
+# set).  A separate version is needed.
 
-sub macosx_get_fork_TTY
-{
-    my($pipe,$tty);
+my @script_versions=
 
-    return unless open($pipe,'-|','/usr/bin/osascript','-e',<<'__SCRIPT__');
+    ([237, <<'__LEOPARD__'],
+tell application "Terminal"
+    do script "clear;exec sleep 100000"
+    tell first tab of first window
+        copy tty to thetty
+        set custom title to "forked perl debugger"
+        set title displays custom title to true
+        repeat while (length of first paragraph of (get contents)) > 0
+            delay 0.1
+        end repeat
+    end tell
+end tell
+thetty
+__LEOPARD__
+
+     [100, <<'__JAGUAR_TIGER__'],
 tell application "Terminal"
     do script "clear;exec sleep 100000"
     tell first window
@@ -6232,16 +6249,31 @@ tell application "Terminal"
         set title displays device name to true
         set title displays custom title to true
         set custom title to ""
-        copy name to thetitle
+        copy "/dev/" & name to thetty
         set custom title to "forked perl debugger"
         repeat while (length of first paragraph of (get contents)) > 0
             delay 0.1
         end repeat
     end tell
 end tell
-"/dev/" & thetitle
-__SCRIPT__
+thetty
+__JAGUAR_TIGER__
 
+);
+
+sub macosx_get_fork_TTY
+{
+    my($version,$script,$pipe,$tty);
+
+    return unless $version=$ENV{TERM_PROGRAM_VERSION};
+    foreach my $entry (@script_versions) {
+	if ($version>=$entry->[0]) {
+	    $script=$entry->[1];
+	    last;
+	}
+    }
+    return unless defined($script);
+    return unless open($pipe,'-|','/usr/bin/osascript','-e',$script);
     $tty=readline($pipe);
     close($pipe);
     return unless defined($tty) && $tty =~ m(^/dev/);
