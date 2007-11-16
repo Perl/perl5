@@ -159,6 +159,7 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 XS(XS_attributes_bootstrap)
 {
     dXSARGS;
+    PERL_UNUSED_ARG(cv);
 
     if( items > 1 )
         Perl_croak(aTHX_ "Usage: attributes::bootstrap $module");
@@ -175,6 +176,7 @@ XS(XS_attributes__modify_attrs)
 {
     dXSARGS;
     SV *rv, *sv;
+    PERL_UNUSED_ARG(cv);
 
     if (items < 1) {
 usage:
@@ -197,6 +199,7 @@ XS(XS_attributes__fetch_attrs)
     dXSARGS;
     SV *rv, *sv;
     cv_flags_t cvflags;
+    PERL_UNUSED_ARG(cv);
 
     if (items != 1) {
 usage:
@@ -240,6 +243,7 @@ XS(XS_attributes__guess_stash)
     dXSARGS;
     SV *rv, *sv;
     dXSTARG;
+    PERL_UNUSED_ARG(cv);
 
     if (items != 1) {
 usage:
@@ -288,6 +292,7 @@ XS(XS_attributes_reftype)
     dXSARGS;
     SV *rv, *sv;
     dXSTARG;
+    PERL_UNUSED_ARG(cv);
 
     if (items != 1) {
 usage:

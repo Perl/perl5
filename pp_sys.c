@@ -3305,7 +3305,7 @@ PP(pp_fttext)
 
 #if defined(DOSISH) || defined(USEMYBINMODE)
     /* ignore trailing ^Z on short files */
-    if (len && len < sizeof(tbuf) && tbuf[len-1] == 26)
+    if (len && len < (I32)sizeof(tbuf) && tbuf[len-1] == 26)
 	--len;
 #endif
 
@@ -4610,7 +4610,7 @@ PP(pp_ghostent)
 	const int addrtype = POPi;
 	SV * const addrsv = POPs;
 	STRLEN addrlen;
-	Netdb_host_t addr = (Netdb_host_t) SvPVbyte(addrsv, addrlen);
+	UV addr = PTR2UV(SvPVbyte(addrsv, addrlen));
 
 	hent = PerlSock_gethostbyaddr((const char*)addr, (Netdb_hlen_t) addrlen, addrtype);
 #else
