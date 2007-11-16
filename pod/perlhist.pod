@@ -393,6 +393,7 @@ the strings?).
           5.9.3         2006-Jan-28
           5.9.4         2006-Aug-15
           5.9.5         2007-Jul-07
+          5.10.0-RC1    2007-Nov-17
 
 =head2 SELECTED RELEASE SIZES
 

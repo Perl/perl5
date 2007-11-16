@@ -97,6 +97,8 @@ POD = \
 	perlpodspec.pod	\
 	perlport.pod	\
 	perlre.pod	\
+	perlrebackslash.pod	\
+	perlrecharclass.pod	\
 	perlref.pod	\
 	perlreftut.pod	\
 	perlreguts.pod	\
@@ -207,6 +209,8 @@ MAN = \
 	perlpodspec.man	\
 	perlport.man	\
 	perlre.man	\
+	perlrebackslash.man	\
+	perlrecharclass.man	\
 	perlref.man	\
 	perlreftut.man	\
 	perlreguts.man	\
@@ -317,6 +321,8 @@ HTML = \
 	perlpodspec.html	\
 	perlport.html	\
 	perlre.html	\
+	perlrebackslash.html	\
+	perlrecharclass.html	\
 	perlref.html	\
 	perlreftut.html	\
 	perlreguts.html	\
@@ -427,6 +433,8 @@ TEX = \
 	perlpodspec.tex	\
 	perlport.tex	\
 	perlre.tex	\
+	perlrebackslash.tex	\
+	perlrecharclass.tex	\
 	perlref.tex	\
 	perlreftut.tex	\
 	perlreguts.tex	\
