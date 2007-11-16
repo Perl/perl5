@@ -18,6 +18,7 @@ use bignum;
 my @W;
 {
 # catch warnings:
+require Carp;
 no warnings 'redefine';
 *Carp::carp = sub { push @W, $_[0]; };
 }
