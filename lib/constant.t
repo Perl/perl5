@@ -1,8 +1,10 @@
-#!./perl
+#!./perl -T
 
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
+    if ($ENV{PERL_CORE}) {
+        chdir 't' if -d 't';
+        @INC = '../lib';
+    }
 }
 
 use warnings;
@@ -14,7 +16,7 @@ END { print STDERR @warnings }
 
 
 use strict;
-use Test::More tests => 101;
+use Test::More tests => 103;
 my $TB = Test::More->builder;
 
 BEGIN { use_ok('constant'); }
@@ -80,7 +82,7 @@ is length(MESS), 8;
 
 use constant TRAILING	=> '12 cats';
 {
-    no warnings 'numeric';
+    local $^W;
     cmp_ok TRAILING, '==', 12;
 }
 is TRAILING, '12 cats';
@@ -126,11 +128,12 @@ use constant CARRAY	=> [ undef, "ok 39\n" ];
 use constant CPHASH	=> [ { foo => 1 }, "ok 40\n" ];
 use constant CCODE	=> sub { "ok $_[0]\n" };
 
-print ${+CSCALAR};
-print CHASH->{foo};
-print CARRAY->[1];
-print CPHASH->{foo};
-print CCODE->($curr_test+5);
+my $output = $TB->output ;
+print $output ${+CSCALAR};
+print $output CHASH->{foo};
+print $output CARRAY->[1];
+print $output CPHASH->{foo};
+print $output CCODE->($curr_test+5);
 
 $TB->current_test($curr_test+5);
 
@@ -183,6 +186,7 @@ ok $constant::declared{'Other::IN_OTHER_PACK'};
 @warnings = ();
 eval q{
     no warnings;
+    #local $^W if $] < 5.006;
     use warnings 'constant';
     use constant 'BEGIN' => 1 ;
     use constant 'INIT' => 1 ;
@@ -198,9 +202,9 @@ eval q{
     use constant 'ENV' => 1 ;
     use constant 'INC' => 1 ;
     use constant 'SIG' => 1 ;
+    use constant 'UNITCHECK' => 1;
 };
 
-is @warnings, 15 ;
 my @Expected_Warnings = 
   (
    qr/^Constant name 'BEGIN' is a Perl keyword at/,
@@ -218,10 +222,46 @@ my @Expected_Warnings =
    qr/^Constant name 'ENV' is forced into package main:: at/,
    qr/^Constant name 'INC' is forced into package main:: at/,
    qr/^Constant name 'SIG' is forced into package main:: at/,
+   qr/^Constant name 'UNITCHECK' is a Perl keyword at/,
 );
+
+unless ($] > 5.009) {
+    # Remove the UNITCHECK warning
+    pop @Expected_Warnings;
+    # But keep the count the same
+    push @Expected_Warnings, qr/^$/;
+    push @warnings, "";
+}
+
+# when run under "make test"
+if (@warnings == 16) {
+    push @warnings, "";
+    push @Expected_Warnings, qr/^$/;
+}
+# when run directly: perl -wT -Ilib t/constant.t
+elsif (@warnings == 17) {
+    splice @Expected_Warnings, 1, 0, 
+        qr/^Prototype mismatch: sub main::BEGIN \(\) vs none at/;
+}
+# when run directly under 5.6.2: perl -wT -Ilib t/constant.t
+elsif (@warnings == 15) {
+    splice @Expected_Warnings, 1, 1;
+    push @warnings, "", "";
+    push @Expected_Warnings, qr/^$/, qr/^$/;
+}
+else {
+    my $rule = " -" x 20;
+    diag "/!\\ unexpected case: ", scalar @warnings, " warnings\n$rule\n";
+    diag map { "  $_" } @warnings;
+    diag $rule, $/;
+}
+
+is @warnings, 17;
+
 for my $idx (0..$#warnings) {
     like $warnings[$idx], $Expected_Warnings[$idx];
 }
+
 @warnings = ();
 
 
@@ -274,8 +314,11 @@ sub zit;
     local $SIG{'__WARN__'} = sub { push @warnings, @_ };
     eval 'use constant zit => 4; 1' or die $@;
 
+    # empty prototypes are reported differently in different versions
+    my $no_proto = $] < 5.008 ? "" : ": none";
+
     is(scalar @warnings, 1, "1 warning");
-    like ($warnings[0], qr/^Prototype mismatch: sub main::zit: none vs \(\)/,
+    like ($warnings[0], qr/^Prototype mismatch: sub main::zit$no_proto vs \(\)/,
 	  "about the prototype mismatch");
 
     my $value = eval 'zit';
