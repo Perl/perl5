@@ -50,12 +50,10 @@ $|=1;
 my $Is_VMS      = $^O eq 'VMS';
 my $Is_MacOS    = $^O eq 'MacOS';
 my $Is_Win32    = $^O eq 'MSWin32';
-my $Is_Cygwin   = $^O eq 'cygwin';
 
 # When in doubt, skip.
 skip_all("MacOS")    if $Is_MacOS;
 skip_all("VMS")      if $Is_VMS;
-skip_all("cygwin")   if $Is_Cygwin;
 skip_all("Win32")    if $Is_Win32;
 
 sub make_tmp_file {
