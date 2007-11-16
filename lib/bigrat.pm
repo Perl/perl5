@@ -1,7 +1,7 @@
 package bigrat;
 use 5.006002;
 
-$VERSION = '0.09';
+$VERSION = '0.10';
 require Exporter;
 @ISA		= qw( Exporter );
 @EXPORT_OK	= qw( ); 
@@ -80,7 +80,7 @@ sub import
   # see also bignum->import() for additional comments
 
   # some defaults
-  my $lib = ''; my $upgrade = 'Math::BigFloat';
+  my $lib = ''; my $lib_kind = 'try'; my $upgrade = 'Math::BigFloat';
 
   my @import = ( ':constant' );				# drive it w/ constant
   my @a = @_; my $l = scalar @_; my $j = 0;
@@ -95,9 +95,10 @@ sub import
       my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existant..."
       splice @a, $j, $s; $j -= $s;
       }
-    elsif ($_[$i] =~ /^(l|lib)$/)
+    elsif ($_[$i] =~ /^(l|lib|try|only)$/)
       {
       # this causes a different low lib to take care...
+      $lib_kind = $1; $lib_kind = 'lib' if $lib_kind eq 'l';
       $lib = $_[$i+1] || '';
       my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existant..."
       splice @a, $j, $s; $j -= $s; $i++;
@@ -152,7 +153,7 @@ sub import
     require Math::BigInt if $_lite == 0;        # not already loaded?
     $class = 'Math::BigInt';                    # regardless of MBIL or not
     }
-  push @import, 'lib' => $lib if $lib ne '';
+  push @import, $lib_kind => $lib if $lib ne ''; 
   # Math::BigInt::Trace or plain Math::BigInt
   $class->import(@import, upgrade => $upgrade);
 
@@ -200,7 +201,7 @@ bigrat - Transparent BigNumber/BigRational support for Perl
 
 =head1 DESCRIPTION
 
-All operators (inlcuding basic math operations) are overloaded. Integer and
+All operators (including basic math operations) are overloaded. Integer and
 floating-point constants are created as proper BigInts or BigFloats,
 respectively.
 
@@ -229,12 +230,22 @@ Math::BigInt::Calc. This is equivalent to saying:
 
 You can change this by using:
 
-	use bigrat lib => 'BitVect';
+        use bignum lib => 'GMP';
 
 The following would first try to find Math::BigInt::Foo, then
 Math::BigInt::Bar, and when this also fails, revert to Math::BigInt::Calc:
 
 	use bigrat lib => 'Foo,Math::BigInt::Bar';
+
+Using C<lib> warns if none of the specified libraries can be found and
+L<Math::BigInt> did fall back to one of the default libraries.
+To supress this warning, use C<try> instead:
+
+        use bignum try => 'GMP';
+
+If you want the code to die instead of falling back, use C<only> instead:
+
+        use bignum only => 'GMP';
 
 Please see respective module documentation for further details.
 
@@ -277,7 +288,7 @@ C<$Math::BigInt::upgrade>.
 
 Math with the numbers is done (by default) by a module called
 
-=head2 Cavaet
+=head2 Caveat
 
 But a warning is in order. When using the following to make a copy of a number,
 only a shallow copy will be made.
@@ -296,7 +307,7 @@ following work:
         print $x + 1, " ", $y,"\n";     # prints 10 9
 
 but calling any method that modifies the number directly will result in
-B<both> the original and the copy beeing destroyed:
+B<both> the original and the copy being destroyed:
 
         $x = 9; $y = $x;
         print $x->badd(1), " ", $y,"\n";        # prints 10 10

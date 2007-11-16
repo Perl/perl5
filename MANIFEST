@@ -1721,6 +1721,7 @@ lib/Math/BigInt/t/alias.inc	Support for BigInt tests
 lib/Math/BigInt/t/bare_mbf.t	Test MBF under Math::BigInt::BareCalc
 lib/Math/BigInt/t/bare_mbi.t	Test MBI under Math::BigInt::BareCalc
 lib/Math/BigInt/t/bare_mif.t	Rounding tests under BareCalc
+lib/Math/BigInt/t/big_pi_e.t	test bpi() and bexp()
 lib/Math/BigInt/t/bigfltpm.inc	Shared tests for bigfltpm.t and sub_mbf.t
 lib/Math/BigInt/t/bigfltpm.t	See if BigFloat.pm works
 lib/Math/BigInt/t/bigintc.t	See if BigInt/Calc.pm works
@@ -1735,7 +1736,6 @@ lib/Math/BigInt/t/constant.t	Test Math::BigInt/BigFloat under :constant
 lib/Math/BigInt/t/const_mbf.t	Test Math::BigInt
 lib/Math/BigInt/t/downgrade.t	Test if use Math::BigInt(); under downgrade works
 lib/Math/BigInt/t/_e_math.t	Helper routine in BigFloat for _e math
-lib/Math/BigInt/t/fallback.t	Test Math::BigInt
 lib/Math/BigInt/t/inf_nan.t	Special tests for inf and NaN handling
 lib/Math/BigInt/t/isa.t		Test for Math::BigInt inheritance
 lib/Math/BigInt/t/lib_load.t	Test sane lib names
@@ -1754,6 +1754,7 @@ lib/Math/BigInt/t/req_mbfi.t	test: require Math::BigFloat; ->binf();
 lib/Math/BigInt/t/req_mbfn.t	test: require Math::BigFloat; ->new();
 lib/Math/BigInt/t/req_mbfw.t	require Math::BigFloat; import ( with => );
 lib/Math/BigInt/t/require.t	Test if require Math::BigInt works
+lib/Math/BigInt/t/round.t	Test rounding with non-integer A and P
 lib/Math/BigInt/t/sub_ali.t	Tests for aliases in BigInt subclasses
 lib/Math/BigInt/t/sub_mbf.t	Empty subclass test of BigFloat
 lib/Math/BigInt/t/sub_mbi.t	Empty subclass test of BigInt
@@ -1773,10 +1774,12 @@ lib/Math/BigRat.pm		Math::BigRat
 lib/Math/BigRat/t/big_ap.t		Math::BigRat test
 lib/Math/BigRat/t/bigfltpm.inc		Math::BigRat test
 lib/Math/BigRat/t/bigfltrt.t		Math::BigRat test
+lib/Math/BigRat/t/biglog.t		Math::BigRat test
 lib/Math/BigRat/t/bigratpm.inc		Math::BigRat test
 lib/Math/BigRat/t/bigratpm.t		Math::BigRat test
 lib/Math/BigRat/t/bigrat.t		Math::BigRat test
 lib/Math/BigRat/t/bigratup.t	test under $Math::BigInt::upgrade
+lib/Math/BigRat/t/bigroot.t		Math::BigRat test
 lib/Math/BigRat/t/requirer.t	see if require works properly
 lib/Math/BigRat/t/trap.t	see if trap_nan and trap_inf work
 lib/Math/Complex.pm		A Complex package

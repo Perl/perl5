@@ -37,7 +37,7 @@ BEGIN
     }
   print "# INC = @INC\n";
 
-  plan tests => 66;
+  plan tests => 70;
   }
 
 use Math::BigFloat;
@@ -141,11 +141,21 @@ ok ($cl->new('10')->bpow('0.6',10),   '3.981071706');
 # blog should handle bigint input
 is (Math::BigFloat::blog(Math::BigInt->new(100),10), 2, "blog(100)");
 
+#############################################################################
 # some integer results
 is ($cl->new(2)->bpow(32)->blog(2),  '32', "2 ** 32");
 is ($cl->new(3)->bpow(32)->blog(3),  '32', "3 ** 32");
 is ($cl->new(2)->bpow(65)->blog(2),  '65', "2 ** 65");
 
+my $x = Math::BigInt->new( '777' ) ** 256;
+my $base = Math::BigInt->new( '12345678901234' );
+is ($x->copy()->blog($base), 56, 'blog(777**256, 12345678901234)');
+
+$x = Math::BigInt->new( '777' ) ** 777;
+$base = Math::BigInt->new( '777' );
+is ($x->copy()->blog($base), 777, 'blog(777**777, 777)');
+
+#############################################################################
 # test for bug in bsqrt() not taking negative _e into account
 test_bpow ('200','0.5',10,      '14.14213562');
 test_bpow ('20','0.5',10,       '4.472135955');
@@ -171,12 +181,22 @@ test_bpow ('9.86902225','0.5',undef, '3.1415');
 test_bpow ('0.2','0.41',10,   '0.5169187652');
 
 #############################################################################
-# test bexp()
+# test bexp() with cached results
 
 is ($cl->new(1)->bexp(), '2.718281828459045235360287471352662497757', 'bexp(1)');
 is ($cl->new(2)->bexp(40), $cl->new(1)->bexp(45)->bpow(2,40), 'bexp(2)'); 
 
 is ($cl->new("12.5")->bexp(61), $cl->new(1)->bexp(65)->bpow(12.5,61), 'bexp(12.5)'); 
+
+#############################################################################
+# test bexp() with big values (non-cached)
+
+is ($cl->new(1)->bexp(100), 
+  '2.718281828459045235360287471352662497757247093699959574966967627724076630353547594571382178525166427',
+ 'bexp(100)');
+
+is ($cl->new("12.5")->bexp(91), $cl->new(1)->bexp(95)->bpow(12.5,91), 
+  'bexp(12.5) to 91 digits'); 
 
 # all done
 1;

@@ -69,7 +69,7 @@ my $version = '1.76';	# adjust manually to match latest release
 my ($func,@args,$ans,$rc,$class,$try);
 while (<DATA>)
   {
-  chomp;
+  $_ =~ s/[\n\r]//g;	# remove newlines
   next if /^#/; # skip comments
   if (s/^&//)
     {

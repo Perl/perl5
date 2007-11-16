@@ -8,7 +8,7 @@ require Exporter;
 use vars qw/@ISA $VERSION/;
 @ISA = qw(Exporter);
 
-$VERSION = '0.04';
+$VERSION = '0.05';
 
 sub api_version () { 1; }
 
@@ -16,14 +16,14 @@ sub api_version () { 1; }
 
 # uses Calc, but only features the strictly necc. methods.
 
-use Math::BigInt::Calc '0.48';
+use Math::BigInt::Calc '0.51';
 
 BEGIN
   {
   no strict 'refs';
   foreach (qw/	
 	base_len new zero one two ten copy str num add sub mul div mod inc dec
-	acmp len digit zeros
+	acmp alen len digit zeros
 	rsft lsft
 	fac pow gcd log_int sqrt root
 	is_zero is_one is_odd is_even is_one is_two is_ten check
