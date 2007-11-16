@@ -302,6 +302,8 @@ matched. For example:
 (Mnemonic: be positive and forward looking.)
 This variable is read-only and dynamically scoped to the current BLOCK.
 
+=item $LAST_SUBMATCH_RESULT
+
 =item $^N
 X<$^N>
 
@@ -800,6 +802,10 @@ to set the exit value for the die() operator.  (Mnemonic: What just
 went bang?)
 
 Also see L<Error Indicators>.
+
+=item %OS_ERROR
+
+=item %ERRNO
 
 =item %!
 X<%!>
