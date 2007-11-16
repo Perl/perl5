@@ -186,7 +186,6 @@ eval q{
     use constant 'BEGIN' => 1 ;
     use constant 'INIT' => 1 ;
     use constant 'CHECK' => 1 ;
-    use constant 'UNITCHECK' => 1;
     use constant 'END' => 1 ;
     use constant 'DESTROY' => 1 ;
     use constant 'AUTOLOAD' => 1 ;
@@ -198,6 +197,7 @@ eval q{
     use constant 'ENV' => 1 ;
     use constant 'INC' => 1 ;
     use constant 'SIG' => 1 ;
+    use constant 'UNITCHECK' => 1;
 };
 
 my @Expected_Warnings = 
@@ -206,7 +206,6 @@ my @Expected_Warnings =
    qr/^Constant subroutine BEGIN redefined at/,
    qr/^Constant name 'INIT' is a Perl keyword at/,
    qr/^Constant name 'CHECK' is a Perl keyword at/,
-   qr/^Constant name 'UNITCHECK' is a Perl keyword at/,
    qr/^Constant name 'END' is a Perl keyword at/,
    qr/^Constant name 'DESTROY' is a Perl keyword at/,
    qr/^Constant name 'AUTOLOAD' is a Perl keyword at/,
@@ -218,7 +217,16 @@ my @Expected_Warnings =
    qr/^Constant name 'ENV' is forced into package main:: at/,
    qr/^Constant name 'INC' is forced into package main:: at/,
    qr/^Constant name 'SIG' is forced into package main:: at/,
+   qr/^Constant name 'UNITCHECK' is a Perl keyword at/,
 );
+
+unless ($] > 5.009) {
+    # Remove the UNITCHECK warning
+    pop @Expected_Warnings;
+    # But keep the count the same
+    push @Expected_Warnings, qr/^$/;
+    push @warnings, "";
+}
 
 # when run under "make test"
 if (@warnings == 16) {

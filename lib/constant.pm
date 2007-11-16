@@ -4,12 +4,13 @@ use strict;
 use warnings::register;
 
 use vars qw($VERSION %declared);
-$VERSION = '1.12';
+$VERSION = '1.13';
 
 #=======================================================================
 
 # Some names are evil choices.
-my %keywords = map +($_, 1), qw{ BEGIN INIT CHECK UNITCHECK END DESTROY AUTOLOAD };
+my %keywords = map +($_, 1), qw{ BEGIN INIT CHECK END DESTROY AUTOLOAD };
+$keywords{UNITCHECK}++ if $] > 5.009;
 
 my %forced_into_main = map +($_, 1),
     qw{ STDIN STDOUT STDERR ARGV ARGVOUT ENV INC SIG };
