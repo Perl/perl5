@@ -39,6 +39,7 @@ my $p = 'install_base';
 
 SKIP: {
     my $home = $ENV{HOME} ? $ENV{HOME} : undef;
+    skip "Needs case and syntax tweaks for VMS", 14 if $^O eq 'VMS';
     unless (defined $home) {
       my @info = eval { getpwuid $> };
       skip "No home directory for tilde-expansion tests", 14 if $@;
@@ -82,6 +83,7 @@ SKIP: {
 
 # Again, with named users
 SKIP: {
+    skip "Needs case and syntax tweaks for VMS", 1 if $^O eq 'VMS';
     my @info = eval { getpwuid $> };
     skip "No home directory for tilde-expansion tests", 1 if $@;
     my ($me, $home) = @info[0,7];

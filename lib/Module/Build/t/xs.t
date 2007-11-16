@@ -12,6 +12,8 @@ use Module::Build;
     plan skip_all => 'C_support not enabled';
   } elsif ( !$have_c_compiler ) {
     plan skip_all => 'C_support enabled, but no compiler found';
+  } elsif ( $^O eq 'VMS' ) {
+    plan skip_all => 'Child test output confuses harness';
   } else {
     plan tests => 22;
   }

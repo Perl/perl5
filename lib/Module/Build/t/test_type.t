@@ -1,5 +1,12 @@
 #!/usr/bin/perl -w
 
+BEGIN {
+    if ($^O eq 'VMS') {
+        print '1..0 # Child test output confuses harness';
+        exit;
+    }
+}
+
 use strict;
 use lib $ENV{PERL_CORE} ? '../lib/Module/Build/t/lib' : 't/lib';
 use MBTest tests => 8;
