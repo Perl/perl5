@@ -1735,7 +1735,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     VOL bool dosearch = FALSE;
     const char *validarg = "";
     register SV *sv;
-    register char *s;
     const char *cddir = NULL;
 #ifdef USE_SITECUSTOMIZE
     bool minus_f = FALSE;
@@ -1749,6 +1748,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     SAVEFREESV(sv);
     init_main_stash();
 
+    {
+	const char *s;
     for (argc--,argv++; argc > 0; argc--,argv++) {
 	if (argv[0][0] != '-' || !argv[0][1])
 	    break;
@@ -1792,7 +1793,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	case 'W':
 	case 'X':
 	case 'w':
-	    if ((s = moreswitches(s)))
+	    if ((s = moreswitches((char *)s)))
 		goto reswitch;
 	    break;
 
@@ -2093,7 +2094,12 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    Perl_croak(aTHX_ "Unrecognized switch: -%s  (-h will show valid options)",s);
 	}
     }
+    }
+
   switch_end:
+
+    {
+	char *s;
 
     if (
 #ifndef SECURE_INTERNAL_GETENV
@@ -2146,6 +2152,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		}
 	    }
 	}
+    }
     }
 
 #ifdef USE_SITECUSTOMIZE
@@ -2304,6 +2311,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	 }
     }
 
+    {
+	const char *s;
     if ((s = PerlEnv_getenv("PERL_SIGNALS"))) {
 	 if (strEQ(s, "unsafe"))
 	      PL_signals |=  PERL_SIGNALS_UNSAFE_FLAG;
@@ -2311,6 +2320,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	      PL_signals &= ~PERL_SIGNALS_UNSAFE_FLAG;
 	 else
 	      Perl_croak(aTHX_ "PERL_SIGNALS illegal: \"%s\"", s);
+    }
     }
 
     tmpfp = PL_rsfp;
@@ -2363,8 +2373,11 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     FREETMPS;
 
 #ifdef MYMALLOC
+    {
+	const char *s;
     if ((s=PerlEnv_getenv("PERL_DEBUG_MSTATS")) && atoi(s) >= 2)
 	dump_mstats("after compilation:");
+    }
 #endif
 
     ENTER;
@@ -3282,7 +3295,7 @@ Perl_moreswitches(pTHX_ char *s)
 	while (*s && isSPACE(*s))
 	    ++s;
 	if (*s) {
-	    char *e, *p;
+	    const char *e, *p;
 	    p = s;
 	    /* ignore trailing spaces (possibly followed by other switches) */
 	    do {
@@ -3294,7 +3307,8 @@ Perl_moreswitches(pTHX_ char *s)
 	    e = savepvn(s, e-s);
 	    incpush(e, TRUE, TRUE, FALSE, FALSE);
 	    Safefree(e);
-	    s = p;
+	    /* This cast is a side effect of the Bowdlerisation of 5.8.x  */
+	    s = (char *)p;
 	    if (*s == '-')
 		s++;
 	}
@@ -3331,7 +3345,7 @@ Perl_moreswitches(pTHX_ char *s)
     case 'm':
 	forbid_setid('m', -1);	/* XXX ? */
 	if (*++s) {
-	    char *start;
+	    const char *start;
 	    SV *sv;
 	    const char *use = "use ";
 	    /* -M-foo == 'no foo'	*/
@@ -4389,7 +4403,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 STATIC void
 S_find_beginning(pTHX_ SV* linestr_sv)
 {
-    register char *s;
+    const char *s;
     register const char *s2;
 #ifdef MACOS_TRADITIONAL
     int maclines = 0;
@@ -4432,7 +4446,7 @@ S_find_beginning(pTHX_ SV* linestr_sv)
 		while (isDIGIT(s2[-1]) || s2[-1] == '-' || s2[-1] == '.'
 		       || s2[-1] == '_') s2--;
 		if (strnEQ(s2-4,"perl",4))
-		    while ((s = moreswitches(s)))
+		    while ((s = moreswitches((char *)s)))
 			;
 	    }
 #ifdef MACOS_TRADITIONAL
