@@ -176,7 +176,7 @@ Mnemonic: I<N>amed character.
 
 Octal escapes consist of a backslash followed by two or three octal digits
 matching the code point of the character you want to use. This allows for
-522 characters (C<\00> up to C<\777>) that can be expressed this way.
+512 characters (C<\00> up to C<\777>) that can be expressed this way.
 Enough in pre-Unicode days, but most Unicode characters cannot be escaped
 this way.
 
