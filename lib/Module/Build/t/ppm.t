@@ -20,6 +20,8 @@ my $HTML_support = Module::Build::ConfigData->feature('HTML_support');
     plan skip_all => "Archive::Tar not installed to read archives.";
   } elsif ( ! eval {IO::Zlib->VERSION(1.01)} ) {
     plan skip_all => "IO::Zlib 1.01 required to read compressed archives.";
+  } elsif ( $^O eq 'VMS' ) {
+    plan skip_all => "Needs porting work on VMS";
   } else {
     plan tests => 12;
   }
