@@ -2810,12 +2810,8 @@ PP(pp_stat)
                         PL_laststatval = 
                             PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &PL_statcache);   
                     } else if (IoDIRP(io)) {
-#ifdef HAS_DIRFD
                         PL_laststatval =
-                            PerlLIO_fstat(dirfd(IoDIRP(io)), &PL_statcache);
-#else
-                        DIE(aTHX_ PL_no_func, "dirfd");
-#endif
+                            PerlLIO_fstat(my_dirfd(IoDIRP(io)), &PL_statcache);
                     } else {
                         PL_laststatval = -1;
                     }
@@ -3406,11 +3402,7 @@ PP(pp_chdir)
 		PUSHi(fchdir(PerlIO_fileno(IoIFP(io))) >= 0);
 	    }
 	    else if (IoDIRP(io)) {
-#ifdef HAS_DIRFD
-		PUSHi(fchdir(dirfd(IoDIRP(io))) >= 0);
-#else
-		DIE(aTHX_ PL_no_func, "dirfd");
-#endif
+		PUSHi(fchdir(my_dirfd(IoDIRP(io))) >= 0);
 	    }
 	    else {
 		if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))

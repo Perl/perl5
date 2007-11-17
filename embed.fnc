@@ -1458,6 +1458,7 @@ Apd	|char*	|sv_2pv_flags	|NN SV* sv|NULLOK STRLEN* lp|I32 flags
 Apd	|void	|sv_copypv	|NN SV* dsv|NN SV* ssv
 Ap	|char*	|my_atof2	|NN const char *s|NN NV* value
 Apn	|int	|my_socketpair	|int family|int type|int protocol|int fd[2]
+Ap	|int	|my_dirfd	|NULLOK DIR* dir
 
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
 Ap	|int	|PerlIO_close		|NULLOK PerlIO *f

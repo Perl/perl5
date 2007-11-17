@@ -1487,6 +1487,7 @@
 #define sv_copypv		Perl_sv_copypv
 #define my_atof2		Perl_my_atof2
 #define my_socketpair		Perl_my_socketpair
+#define my_dirfd		Perl_my_dirfd
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
 #define PerlIO_close		Perl_PerlIO_close
 #define PerlIO_fill		Perl_PerlIO_fill
@@ -3604,6 +3605,7 @@
 #define sv_copypv(a,b)		Perl_sv_copypv(aTHX_ a,b)
 #define my_atof2(a,b)		Perl_my_atof2(aTHX_ a,b)
 #define my_socketpair		Perl_my_socketpair
+#define my_dirfd(a)		Perl_my_dirfd(aTHX_ a)
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
 #define PerlIO_close(a)		Perl_PerlIO_close(aTHX_ a)
 #define PerlIO_fill(a)		Perl_PerlIO_fill(aTHX_ a)
