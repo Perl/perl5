@@ -1672,12 +1672,11 @@ PERL_CALLCONV void	Perl_Slab_Free(pTHX_ void *op);
 #endif
 
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
-STATIC void	S_find_beginning(pTHX);
+STATIC void	S_find_beginning(pTHX_ SV* linestr_sv);
 STATIC void	S_forbid_setid(pTHX_ const char flag, const int suidscript);
 STATIC void	S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep, bool canrelocate);
 STATIC void	S_init_interp(pTHX);
 STATIC void	S_init_ids(pTHX);
-STATIC void	S_init_lexer(pTHX);
 STATIC void	S_init_main_stash(pTHX);
 STATIC void	S_init_perllib(pTHX);
 STATIC void	S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env);
@@ -1688,7 +1687,7 @@ STATIC void	S_my_exit_jump(pTHX)
 STATIC void	S_nuke_stacks(pTHX);
 STATIC int	S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv, int *suidscript);
 STATIC void	S_usage(pTHX_ const char *name);
-STATIC void	S_validate_suid(pTHX_ const char *validarg, const char *scriptname, int fdscript, int suidscript);
+STATIC void	S_validate_suid(pTHX_ const char *validarg, const char *scriptname, int fdscript, int suidscript, SV* linestr_sv);
 #  if defined(IAMSUID)
 STATIC int	S_fd_on_nosuid_fs(pTHX_ int fd);
 #  endif

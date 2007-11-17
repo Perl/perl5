@@ -1728,6 +1728,7 @@ S_vparse_body(pTHX_ va_list args)
 STATIC void *
 S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 {
+    PerlIO *tmpfp;
     int argc = PL_origargc;
     char **argv = PL_origargv;
     const char *scriptname = NULL;
@@ -1739,8 +1740,11 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #ifdef USE_SITECUSTOMIZE
     bool minus_f = FALSE;
 #endif
+    SV *linestr_sv = newSV_type(SVt_PVIV);
 
-    sv_setpvn(PL_linestr,"",0);
+    SvGROW(linestr_sv, 80);
+    sv_setpvn(linestr_sv,"",0);
+
     sv = newSVpvs("");		/* first used for -I flags */
     SAVEFREESV(sv);
     init_main_stash();
@@ -2181,7 +2185,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	const int fdscript
 	    = open_script(scriptname, dosearch, sv, &suidscript);
 
-	validate_suid(validarg, scriptname, fdscript, suidscript);
+	validate_suid(validarg, scriptname, fdscript, suidscript, linestr_sv);
 
 #ifndef PERL_MICRO
 #  if defined(SIGCHLD) || defined(SIGCLD)
@@ -2211,7 +2215,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    forbid_setid('x', suidscript);
 	    /* Hence you can't get here if suidscript >= 0  */
 
-	    find_beginning();
+	    find_beginning(linestr_sv);
 	    if (cddir && PerlDir_chdir( (char *)cddir ) < 0)
 		Perl_croak(aTHX_ "Can't chdir to %s",cddir);
 	}
@@ -2309,7 +2313,11 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	      Perl_croak(aTHX_ "PERL_SIGNALS illegal: \"%s\"", s);
     }
 
-    init_lexer();
+    tmpfp = PL_rsfp;
+    PL_rsfp = NULL;
+    lex_start(linestr_sv);
+    PL_rsfp = tmpfp;
+    PL_subname = newSVpvs("main");
 
     /* now parse the script */
 
@@ -3969,7 +3977,7 @@ S_fd_on_nosuid_fs(pTHX_ int fd)
 
 STATIC void
 S_validate_suid(pTHX_ const char *validarg, const char *scriptname,
-		int fdscript, int suidscript)
+		int fdscript, int suidscript, SV *linestr_sv)
 {
 #ifdef IAMSUID
     /* int which; */
@@ -4108,9 +4116,9 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname,
 	PL_doswitches = FALSE;		/* -s is insecure in suid */
 	/* PSz 13 Nov 03  But -s was caught elsewhere ... so unsetting it here is useless(?!) */
 	CopLINE_inc(PL_curcop);
-	if (sv_gets(PL_linestr, PL_rsfp, 0) == NULL)
+	if (sv_gets(linestr_sv, PL_rsfp, 0) == NULL)
 	    Perl_croak(aTHX_ "No #! line");
-	linestr = SvPV_nolen_const(PL_linestr);
+	linestr = SvPV_nolen_const(linestr_sv);
 	/* required even on Sys V */
 	if (!*linestr || !linestr[1] || strnNE(linestr,"#!",2))
 	    Perl_croak(aTHX_ "No #! line");
@@ -4374,10 +4382,11 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #endif /* DOSUID */
     PERL_UNUSED_ARG(validarg);
     PERL_UNUSED_ARG(scriptname);
+    PERL_UNUSED_ARG(linestr_sv);
 }
 
 STATIC void
-S_find_beginning(pTHX)
+S_find_beginning(pTHX_ SV* linestr_sv)
 {
     register char *s;
     register const char *s2;
@@ -4391,7 +4400,7 @@ S_find_beginning(pTHX)
     /* Since the Mac OS does not honor #! arguments for us, we do it ourselves */
 
     while (PL_doextract || gMacPerl_AlwaysExtract) {
-	if ((s = sv_gets(PL_linestr, PL_rsfp, 0)) == NULL) {
+	if ((s = sv_gets(linestr_sv, PL_rsfp, 0)) == NULL) {
 	    if (!gMacPerl_AlwaysExtract)
 		Perl_croak(aTHX_ "No Perl script found in input\n");
 
@@ -4408,7 +4417,7 @@ S_find_beginning(pTHX)
 	}
 #else
     while (PL_doextract) {
-	if ((s = sv_gets(PL_linestr, PL_rsfp, 0)) == NULL)
+	if ((s = sv_gets(linestr_sv, PL_rsfp, 0)) == NULL)
 	    Perl_croak(aTHX_ "No Perl script found in input\n");
 #endif
 	s2 = s;
@@ -4643,16 +4652,6 @@ S_nuke_stacks(pTHX)
     Safefree(PL_retstack);
 }
 
-STATIC void
-S_init_lexer(pTHX)
-{
-    PerlIO *tmpfp;
-    tmpfp = PL_rsfp;
-    PL_rsfp = NULL;
-    lex_start(PL_linestr);
-    PL_rsfp = tmpfp;
-    PL_subname = newSVpvs("main");
-}
 
 STATIC void
 S_init_predump_symbols(pTHX)
