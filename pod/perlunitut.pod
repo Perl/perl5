@@ -201,7 +201,7 @@ Gray.
 
 =head1 AUTHOR
 
-Juerd Waalboer <juerd@cpan.org>
+Juerd Waalboer <#####@juerd.nl>
 
 =head1 SEE ALSO
 

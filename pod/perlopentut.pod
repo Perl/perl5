@@ -917,7 +917,7 @@ second argument contains something else in addition to the usual
 C<< '<' >>, C<< '>' >>, C<< '>>' >>, C<< '|' >> and their variants,
 for example:
 
-    open(my $fh, "<:utf8", $fn);
+    open(my $fh, "<:crlf", $fn);
 
 =item *
 

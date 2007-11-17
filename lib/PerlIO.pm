@@ -139,6 +139,10 @@ and then read it back in.
 	$in = <F>;
 	close(F);
 
+Note that this layer does not validate byte sequences. For reading
+input, using C<:encoding(utf8)> instead of bare C<:utf8>, is strongly
+recommended.
+
 =item :bytes
 
 This is the inverse of C<:utf8> layer. It turns off the flag

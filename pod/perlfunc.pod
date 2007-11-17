@@ -4345,10 +4345,10 @@ See L<perlipc/"UDP: Message Passing"> for examples.
 Note the I<characters>: depending on the status of the socket, either
 (8-bit) bytes or characters are received.  By default all sockets
 operate on bytes, but for example if the socket has been changed using
-binmode() to operate with the C<:utf8> I/O layer (see the C<open>
-pragma, L<open>), the I/O will operate on UTF-8 encoded Unicode
-characters, not bytes.  Similarly for the C<:encoding> pragma:
-in that case pretty much any characters can be read.
+binmode() to operate with the C<:encoding(utf8)> I/O layer (see the
+C<open> pragma, L<open>), the I/O will operate on UTF-8 encoded Unicode
+characters, not bytes.  Similarly for the C<:encoding> pragma: in that
+case pretty much any characters can be read.
 
 =item redo LABEL
 X<redo>
@@ -4784,7 +4784,7 @@ of the file) from the Fcntl module.  Returns C<1> upon success, C<0>
 otherwise.
 
 Note the I<in bytes>: even if the filehandle has been set to
-operate on characters (for example by using the C<:utf8> open
+operate on characters (for example by using the C<:encoding(utf8)> open
 layer), tell() will return byte offsets, not character offsets
 (because implementing that would render seek() and tell() rather slow).
 
@@ -4974,10 +4974,10 @@ L<perlipc/"UDP: Message Passing"> for examples.
 Note the I<characters>: depending on the status of the socket, either
 (8-bit) bytes or characters are sent.  By default all sockets operate
 on bytes, but for example if the socket has been changed using
-binmode() to operate with the C<:utf8> I/O layer (see L</open>, or the
-C<open> pragma, L<open>), the I/O will operate on UTF-8 encoded
-Unicode characters, not bytes.  Similarly for the C<:encoding> pragma:
-in that case pretty much any characters can be sent.
+binmode() to operate with the C<:encoding(utf8)> I/O layer (see
+L</open>, or the C<open> pragma, L<open>), the I/O will operate on UTF-8
+encoded Unicode characters, not bytes.  Similarly for the C<:encoding>
+pragma: in that case pretty much any characters can be sent.
 
 =item setpgrp PID,PGRP
 X<setpgrp> X<group>
@@ -6328,9 +6328,9 @@ POSITION, and C<2> to set it to EOF plus POSITION (typically
 negative).
 
 Note the I<in bytes>: even if the filehandle has been set to operate
-on characters (for example by using the C<:utf8> I/O layer), tell()
-will return byte offsets, not character offsets (because implementing
-that would render sysseek() very slow).
+on characters (for example by using the C<:encoding(utf8)> I/O layer),
+tell() will return byte offsets, not character offsets (because
+implementing that would render sysseek() very slow).
 
 sysseek() bypasses normal buffered IO, so mixing this with reads (other
 than C<sysread>, for example C<< <> >> or read()) C<print>, C<write>,
@@ -6455,9 +6455,9 @@ the actual filehandle.  If FILEHANDLE is omitted, assumes the file
 last read.
 
 Note the I<in bytes>: even if the filehandle has been set to
-operate on characters (for example by using the C<:utf8> open
-layer), tell() will return byte offsets, not character offsets
-(because that would render seek() and tell() rather slow).
+operate on characters (for example by using the C<:encoding(utf8)> open
+layer), tell() will return byte offsets, not character offsets (because
+that would render seek() and tell() rather slow).
 
 The return value of tell() for the standard streams like the STDIN
 depends on the operating system: it may return -1 or something else.

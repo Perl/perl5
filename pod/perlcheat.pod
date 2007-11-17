@@ -84,7 +84,7 @@ Perl 6 version to show that Perl will stay Perl.
 
 =head1 AUTHOR
 
-Juerd Waalboer <juerd@cpan.org>, with the help of many Perl Monks.
+Juerd Waalboer <#####@juerd.nl>, with the help of many Perl Monks.
 
 =head1 SEE ALSO
 
