@@ -1,3 +1,31 @@
+0.72  Wed Sep 19 20:08:07 PDT 2007
+    Bug unfixes
+    * The BEGIN { use_ok } fix for [rt.cpan.org 28345] revealed a small pile of 
+      mistakes in CPAN module test suites.  Rolling the fix back to give the authors
+      a bit of time to fix their tests.
+
+0.71  Thu Sep 13 20:42:36 PDT 2007
+    Bug fixes
+    - Fixed a problem with BEGIN { use_ok } silently failing when there's no
+      plan set.  [rt.cpan.org 28345]  Thanks Adriano Ferreira and Yitzchak.
+    - Fixed an obscure problem with is_deeply() and overloading ==
+      [rt.cpan.org 20768].  Thanks Sisyphus.
+
+    Test fixes
+    - Removed dependency on Text::Soundex [rt.cpan.org 25022]
+    - Fixed a 5.5.x failure in fail-more.t
+    * Got rid of the annoying sort_bug.t test that revealed problems with some
+      threaded perls.  It was testing the deprecated eq_* functions and not worth the
+      bother.  Now it tests is_deeply().  [rt.cpan.org 17791]
+
+    Doc fixes
+    - Minor POD mistake in Test::Builder [rt.cpan.org 28869]
+    * Test::FAQ has been updated with some more answers.
+
+    Install fixes
+    - Fixed the "LICENSE is not a known MakeMaker parameter name" warning
+      on older MakeMakers for real this time.
+
 0.70  Thu Mar 15 15:53:05 PDT 2007
     Bug Fixes
     * The change to is_fh() in 0.68 broke the case where a reference to

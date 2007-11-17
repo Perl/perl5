@@ -264,7 +264,6 @@ my $more_err_re = <<ERR;
 #   at $Filename line 84\\.
 #     Tried to use 'Hooble::mooble::yooble'.
 #     Error:  Can't locate Hooble.* in \\\@INC .*
-# BEGIN failed--compilation aborted at $Filename line 84.
 ERR
 
 My::Test::like($err->read, "/^$more_err_re/");

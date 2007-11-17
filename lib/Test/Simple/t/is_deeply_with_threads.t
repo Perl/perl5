@@ -1,7 +1,6 @@
 #!/usr/bin/perl -w
 
-# Test to see if we've worked around some wacky sort/threading bug
-# See [rt.cpan.org 6782]
+# Test to see if is_deeply() plays well with threads.
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {
@@ -26,12 +25,9 @@ BEGIN {
 }
 use Test::More;
 
-# Passes with $nthreads = 1 and with eq_set().
-# Passes with $nthreads = 2 and with eq_array().
-# Fails  with $nthreads = 2 and with eq_set().
-my $Num_Threads = 2;
+my $Num_Threads = 5;
 
-plan tests => $Num_Threads;
+plan tests => $Num_Threads * 100 + 5;
 
 
 sub do_one_thread {
@@ -42,10 +38,8 @@ sub do_one_thread {
     my @list2 = @list;
     print "# kid $kid before eq_set\n";
 
-    for my $j (1..99) {
-        # With eq_set, either crashes or panics
-        eq_set(\@list, \@list2);
-        eq_array(\@list, \@list2);
+    for my $j (1..100) {
+        is_deeply(\@list, \@list2);
     }
     print "# kid $kid exit\n";
     return 42;
