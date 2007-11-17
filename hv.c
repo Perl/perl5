@@ -36,12 +36,9 @@ holds the key and hash value.
 STATIC void
 S_more_he(pTHX)
 {
-    HE* he;
-    HE* heend;
+    HE* he = (HE*) Perl_get_arena(aTHX_ PERL_ARENA_SIZE, HE_SVSLOT);
+    HE * const heend = &he[PERL_ARENA_SIZE / sizeof(HE) - 1];
 
-    he = (HE*) Perl_get_arena(aTHX_ PERL_ARENA_SIZE, HE_SVSLOT);
-
-    heend = &he[PERL_ARENA_SIZE / sizeof(HE) - 1];
     PL_body_roots[HE_SVSLOT] = he;
     while (he < heend) {
 	HeNEXT(he) = (HE*)(he + 1);
@@ -1071,7 +1068,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 STATIC void
 S_hsplit(pTHX_ HV *hv)
 {
-    register XPVHV* xhv = (XPVHV*)SvANY(hv);
+    register XPVHV* const xhv = (XPVHV*)SvANY(hv);
     const I32 oldsize = (I32) xhv->xhv_max+1; /* HvMAX(hv)+1 (sick) */
     register I32 newsize = oldsize * 2;
     register I32 i;

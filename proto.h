@@ -1833,7 +1833,9 @@ STATIC I32	S_regcurly(const char *)
 			__attribute__warn_unused_result__;
 
 STATIC regnode*	S_reg_node(pTHX_ struct RExC_state_t *state, U8 op);
-STATIC UV	S_reg_recode(pTHX_ const char value, SV **encp);
+STATIC UV	S_reg_recode(pTHX_ const char value, SV **encp)
+			__attribute__nonnull__(pTHX_2);
+
 STATIC regnode*	S_regpiece(pTHX_ struct RExC_state_t *state, I32 *flagp);
 STATIC void	S_reginsert(pTHX_ struct RExC_state_t *state, U8 op, regnode *opnd);
 STATIC void	S_regtail(pTHX_ const struct RExC_state_t *state, regnode *p, const regnode *val);
