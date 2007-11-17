@@ -74,12 +74,7 @@ quoted constructs>.
  \e                Escape character.
  \E                Turn off \Q, \L and \U processing.
  \f                Form feed.
- \g{}, \g1         Named, absolute or relative backreference.
  \G                Pos assertion.
- \h                Character class for horizontal white space.
- \H                Character class for non horizontal white space.
- \k{}, \k<>, \k''  Named backreference.
- \K                Keep the stuff left of \K.
  \l                Lowercase next character.
  \L                Lowercase till \E.
  \n                (Logical) newline character.
@@ -88,14 +83,11 @@ quoted constructs>.
  \P{}, \PP         Character without a Unicode property.
  \Q                Quotemeta till \E.
  \r                Return character.
- \R                Generic new line.
  \s                Character class for white space.
  \S                Character class for non white space.
  \t                Tab character.
  \u                Titlecase next character.
  \U                Uppercase till \E.
- \v                Character class for vertical white space.
- \V                Character class for non vertical white space.
  \w                Character class for word characters.
  \W                Character class for non-word characters.
  \x{}, \x00        Hexadecimal escape sequence.
@@ -293,14 +285,12 @@ L<perlrecharclass>.
 C<\w> is a character class that matches any I<word> character (letters,
 digits, underscore). C<\d> is a character class that matches any digit,
 while the character class C<\s> matches any white space character.
-New in perl 5.10 are the classes C<\h> and C<\v> which match horizontal
-and vertical white space characters.
 
-The uppercase variants (C<\W>, C<\D>, C<\S>, C<\H>, and C<\V>) are
+The uppercase variants (C<\W>, C<\D>, C<\S>) are
 character classes that match any character that isn't a word character,
-digit, white space, horizontal white space or vertical white space.
+digit or white space.
 
-Mnemonics: I<w>ord, I<d>igit, I<s>pace, I<h>orizontal, I<v>ertical.
+Mnemonics: I<w>ord, I<d>igit, I<s>pace
 
 =head3 Unicode classes
 
@@ -319,8 +309,9 @@ Mnemonic: I<p>roperty.
 
 If capturing parenthesis are used in a regular expression, we can refer
 to the part of the source string that was matched, and match exactly the
-same thing. There are three ways of referring to such I<backreference>:
-absolutely, relatively, and by name.
+same thing. In Perl 5.8.x and earlier there is only one way of referring to
+a I<backreference>, by absolution number. Perl 5.10 adds the ability to
+reference relatively and by name.
 
 =for later add link to perlrecapture
 
@@ -337,57 +328,6 @@ as well.
  /(\w+) \1/;    # Finds a duplicated word, (e.g. "cat cat").
  /(.)(.)\2\1/;  # Match a four letter palindrome (e.g. "ABBA").
 
-
-=head3 Relative referencing
-
-New in perl 5.10 is different way of referring to capture buffers: C<\g>.
-C<\g> takes a number as argument, with the number in curly braces (the
-braces are optional). If the number (N) does not have a sign, it's a reference
-to the Nth capture group (so C<\g{2}> is equivalent to C<\2> - except that
-C<\g> always refers to a capture group and will never be seen as an octal
-escape). If the number is negative, the reference is relative, referring to
-the Nth group before the C<\g{-N}>.
-
-The big advantage of C<\g{-N}> is that it makes it much easier to write
-patterns with references that can be interpolated in larger patterns,
-even if the larger pattern also contains capture groups.
-
-Mnemonic: I<g>roup.
-
-=head4 Examples
-
- /(A)        # Buffer 1
-  (          # Buffer 2
-    (B)      # Buffer 3
-    \g{-1}   # Refers to buffer 3 (B)
-    \g{-3}   # Refers to buffer 1 (A)
-  )
- /x;         # Matches "ABBA".
-
- my $qr = qr /(.)(.)\g{-2}\g{-1}/;  # Matches 'abab', 'cdcd', etc.
- /$qr$qr/                           # Matches 'ababcdcd'.
-
-=head3 Named referencing
-
-Also new in perl 5.10 is the use of named capture buffers, which can be
-referred to by name. This is done with C<\g{name}>, which is a
-backreference to the capture buffer with the name I<name>.
-
-To be compatible with .Net regular expressions, C<\g{name}> may also be
-written as C<\k{name}>, C<< \k<name> >> or C<\k'name'>.
-
-Note that C<\g{}> has the potential to be ambiguous, as it could be a named
-reference, or an absolute or relative reference (if its argument is numeric).
-However, names are not allowed to start with digits, nor are allowed to
-contain a hyphen, so there is no ambiguity.
-
-=head4 Examples
-
- /(?<word>\w+) \g{word}/ # Finds duplicated word, (e.g. "cat cat")
- /(?<word>\w+) \k{word}/ # Same.
- /(?<word>\w+) \k<word>/ # Same.
- /(?<letter1>.)(?<letter2>.)\g{letter2}\g{letter1}/
-                         # Match a four letter palindrome (e.g. "ABBA")
 
 =head2 Assertions
 
@@ -479,28 +419,6 @@ in UTF-8 format, and the character to be matched is a multi-octet character.
 C<\C> was introduced in perl 5.6.
 
 Mnemonic: oI<C>tet.
-
-=item \K
-
-This is new in perl 5.10. Anything that is matched left of C<\K> is
-not included in C<$&> - and will not be replaced if the pattern is
-used in a substitution. This will allow you to write C<s/PAT1 \K PAT2/REPL/x>
-instead of C<s/(PAT1) PAT2/${1}REPL/x> or C<s/(?<=PAT1) PAT2/REPL/x>.
-
-Mnemonic: I<K>eep.
-
-=item \R
-
-C<\R> matches a I<generic newline>, that is, anything that is considered
-a newline by Unicode. This includes all characters matched by C<\v>
-(vertical white space), and the multi character sequence C<"\x0D\x0A">
-(carriage return followed by a line feed, aka the network newline, or
-the newline used in Windows text files). C<\R> is equivalent with
-C<< (?>\x0D\x0A)|\v) >>. Since C<\R> can match a more than one character,
-it cannot be put inside a bracketed character class; C</[\R]/> is an error.
-C<\R> is introduced in perl 5.10.
-
-Mnemonic: none really. C<\R> was picked because PCRE already uses C<\R>.
 
 =item \X
 
