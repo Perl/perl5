@@ -165,8 +165,7 @@ Christophe Grosjean             <christophe.grosjean@gmail.com>
 Christopher Chan-Nui		<channui@austin.ibm.com>
 Christopher Davis		<ckd@loiosh.kei.com>
 chromatic			<chromatic@wgz.org>
-Chuck D. Phillips		<cdp@hpescdp.fc.hp.com>
-Chuck Phillips			<cdp@fc.hp.com>
+Chuck Phillips			<perl@cadop.com>
 Chunhui Teng			<cteng@nortel.ca>
 Clark Cooper			<coopercc@netheaven.com>
 Claes Jacobsson			<claes@surfar.nu>
@@ -721,8 +720,9 @@ Raphael Manfredi		<Raphael.Manfredi@pobox.com>
 Raul Dias			<raul@dias.com.br>
 Raymund Will			<ray@caldera.de>
 Redvers Davies			<red@criticalintegration.com>
-Reini Urban			<rurban@sbox.tu-graz.ac.at>
+Reini Urban			<rurban@x-ray.at>
 Rex Dieter			<rdieter@math.unl.edu>
+Ricardo SIGNES			<rjbs@cpan.org>
 Rich Morin			<rdm@cfcl.com>
 Rich Salz			<rsalz@bbn.com>
 Richard A. Wells		<Rwells@uhs.harvard.edu>
@@ -735,13 +735,13 @@ Richard L. England		<richard_england@mentorg.com>
 Richard L. Maus, Jr.		<rmaus@monmouth.com>
 Richard Soderberg		<p5-authors@crystalflame.net>
 Richard Yeh			<rcyeh@cco.caltech.edu>
-Richardo Signes                 <rjbs-perl-p5p@lists.manxome.org>
 Rick Delaney			<rick@consumercontact.com>
 Rick Pluta
 Rickard Westman
 Rob Brown			<bbb@cpan.org>
 Rob Henderson			<robh@cs.indiana.edu>
 Rob Napier			<rnapier@employees.org>
+Robert May			<robertmay@cpan.org>
 Robert Millan			<rmh@debian.org>
 Robert Partington		<rjp@riffraff.plig.net>
 Robert Sanders			<Robert.Sanders@linux.org>
@@ -908,5 +908,6 @@ Yitzchak Scott-Thoennes		<sthoenna@efn.org>
 Yutaka OIWA			<oiwa@is.s.u-tokyo.ac.jp>
 Yutao Feng
 Yuval Kogman
-Yves Orton			<demerphq@hotmail.com>
+Yves Orton			<demerphq@gmail.com>
 Zachary Miller			<zcmiller@simon.er.usgs.gov>
+Ævar Arnfjörð Bjarmason		<avar@cpan.org>
