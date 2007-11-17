@@ -285,37 +285,6 @@ if (($Is_W32 and ! $Is_NetWare) or $Is_Cygwin) {
 	my $v_e_r_s = $ver; $v_e_r_s =~ tr/./_/;
 	$perldll =~ s/(\..*)?$/$v_e_r_s.$dlext/;
 	$perldll =~ s/^lib/cyg/;
-	if ($Config{useshrplib} eq 'true') {
-	    # install ld2 and perlld as well
-	    foreach ('ld2', 'perlld') {
-		safe_unlink("$installbin/$_");
-		copy("$_", "$installbin/$_");
-		chmod(0755, "$installbin/$_");
-		$packlist->{"$installbin/$_"} = { type => 'file' };
-	    };
-	    open (LD2, ">$installbin/ld2");
-	    print LD2 <<SHELL;
-#!/bin/sh
-#
-# ld wrapper, passes all args to perlld;
-#
-for trythis in $installbin/perl
-do
-  if [ -x \$trythis ]
-  then
-    \$trythis $installbin/perlld "\$\@"
-    exit \$?
-  fi
-done
-# hard luck!
-echo I see no perl executable around there
-echo perl is required to build dynamic libraries
-echo look if the path to perl in /bin/ld2 is correct
-exit 1
-SHELL
-	    close LD2;
-	    chmod(0755, "$installbin/ld2");
-	};
     } else {
 	$perldll = 'perl58.' . $dlext;
     }
@@ -853,13 +822,23 @@ sub installlib {
     return if $dir =~ m{\bXS/(?:APItest|Typemap)\b};
     return if $name =~ m{\b(?:APItest|Typemap)\.pm$};
     # ignore the demo files
-    return if $dir =~ /\bdemos?\b/;
+    return if $dir =~ /\b(?:demos?|eg)\b/;
 
     # ignore READMEs, MANIFESTs, INSTALL docs, META.ymls and change logs.
     # Changes.e2x and README.e2x are needed by enc2xs.
-    return if $name =~ m{^(?:README(?:\.\w+)?|MANIFEST|META\.yml|INSTALL)$} && $name ne 'README.e2x';
-    return if $name =~ m{^(?:TODO|BUGS|CREDITS)$}i;
+    return if $name =~ m{^(?:README(?:\.\w+)?)$} && $name ne 'README.e2x';
+    return if $name =~ m{^(?:MANIFEST|META\.yml)$};
+    return if $name =~ m{^(?:INSTALL|TODO|BUGS|CREDITS)$}i;
     return if $name =~ m{^change(?:s|log)(?:\.libnet)?$}i;
+    return if $name =~ m{^(?:SIGNATURE|PAUSE200\d\.pub)$}; # CPAN files
+    return if $name =~ m{^(?:NOTES|PATCHING)$}; # ExtUtils files
+
+    # if using a shared perl library then ignore:
+    # - static library files [of statically linked extensions];
+    # - import library files and export library files (only present on Win32
+    #   anyway?) and empty bootstrap files [of dynamically linked extensions].
+    return if $Config{useshrplib} eq 'true' and
+             ($name =~ /$Config{_a}$/ or $name =~ /\.exp$/ or ($name =~ /\.bs$/ and -z $name));
 
     $name = "$dir/$name" if $dir ne '';
 
