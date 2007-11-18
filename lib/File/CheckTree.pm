@@ -13,7 +13,7 @@ our @EXPORT  = qw(validate);
 
 =head1 NAME
 
-validate - run many filetest checks on a tree
+File::CheckTree - run many filetest checks on a tree
 
 =head1 SYNOPSIS
 

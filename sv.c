@@ -328,7 +328,7 @@ Perl_sv_add_arena(pTHX_ char *ptr, U32 size, U32 flags)
 #ifdef DEBUGGING
 	SvREFCNT(sv) = 0;
 #endif
-	/* Must always set typemask because it's awlays checked in on cleanup
+	/* Must always set typemask because it's always checked in on cleanup
 	   when the arenas are walked looking for objects.  */
 	SvFLAGS(sv) = SVTYPEMASK;
 	sv++;
@@ -6477,11 +6477,11 @@ Perl_newSVhek(pTHX_ const HEK *hek)
 
 Creates a new SV with its SvPVX_const pointing to a shared string in the string
 table. If the string does not already exist in the table, it is created
-first.  Turns on READONLY and FAKE.  The string's hash is stored in the UV
-slot of the SV; if the C<hash> parameter is non-zero, that value is used;
-otherwise the hash is computed.  The idea here is that as the string table
-is used for shared hash keys these strings will have SvPVX_const == HeKEY and
-hash lookup will avoid string compare.
+first.  Turns on READONLY and FAKE. If the C<hash> parameter is non-zero, that
+value is used; otherwise the hash is computed. The string's hash can be later
+be retrieved from the SV with the C<SvSHARED_HASH()> macro. The idea here is
+that as the string table is used for shared hash keys these strings will have
+SvPVX_const == HeKEY and hash lookup will avoid string compare.
 
 =cut
 */
@@ -9091,7 +9091,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 All the macros and functions in this section are for the private use of
 the main function, perl_clone().
 
-The foo_dup() functions make an exact copy of an existing foo thinngy.
+The foo_dup() functions make an exact copy of an existing foo thingy.
 During the course of a cloning, a hash table is used to map old addresses
 to new addresses. The table is created and manipulated with the
 ptr_table_* functions.

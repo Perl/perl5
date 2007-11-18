@@ -173,6 +173,10 @@ PERLVAR(IArgv,		char **)	/* stuff to free from do_aexec, vfork safe */
 PERLVAR(ICmd,		char *)		/* stuff to free from do_aexec, vfork safe */
 PERLVARI(Igensym,	I32,	0)	/* next symbol for getsym() to define */
 PERLVAR(Ipreambled,	bool)
+/* Elements in this array have ';' appended and are injected as a single line
+   into the tokeniser. You can't put any (literal) newlines into any program
+   you stuff in into this array, as the point where it's injected is expecting
+   a single physical line. */
 PERLVAR(Ipreambleav,	AV *)
 PERLVARI(Ilaststatval,	int,	-1)
 PERLVARI(Ilaststype,	I32,	OP_STAT)
