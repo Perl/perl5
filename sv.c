@@ -767,16 +767,17 @@ are used for this, except for arena_size.
 For the sv-types that have no bodies, arenas are not used, so those
 PL_body_roots[sv_type] are unused, and can be overloaded.  In
 something of a special case, SVt_NULL is borrowed for HE arenas;
-PL_body_roots[SVt_NULL] is filled by S_more_he, but the
+PL_body_roots[HE_SVSLOT=SVt_NULL] is filled by S_more_he, but the
 bodies_by_type[SVt_NULL] slot is not used, as the table is not
-available in hv.c,
+available in hv.c.
 
-PTEs also use arenas, but are never seen in Perl_sv_upgrade.
-Nonetheless, they get their own slot in bodies_by_type[SVt_NULL], so
-they can just use the same allocation semantics.  At first, PTEs were
-also overloaded to a non-body sv-type, but this yielded hard-to-find
-malloc bugs, so was simplified by claiming a new slot.  This choice
-has no consequence at this time.
+PTEs also use arenas, but are never seen in Perl_sv_upgrade. Nonetheless,
+they get their own slot in bodies_by_type[PTE_SVSLOT is after the last real
+SV type], so they can just use the same allocation semantics.
+
+At first, PTEs were also overloaded to a non-body sv-type, but this yielded
+hard-to-find malloc bugs, so was simplified by claiming a new slot.  This
+choice has no consequence at this time.
 
 */
 
