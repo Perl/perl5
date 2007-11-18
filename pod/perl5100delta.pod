@@ -111,10 +111,10 @@ nested balanced angle brackets:
      $                      # end of line
     /x
 
-Note, users experienced with PCRE will find that the Perl implementation
-of this feature differs from the PCRE one in that it is possible to
-backtrack into a recursed pattern, whereas in PCRE the recursion is
-atomic or "possessive" in nature. (Yves Orton)
+PCRE users should note that Perl's recursive regex feature allows
+backtracking into a recursed pattern, whereas in PCRE the recursion is
+atomic or "possessive" in nature.  As in the example above, you can
+add (?>) to control this selectively.  (Yves Orton)
 
 =item Named Capture Buffers
 
@@ -124,7 +124,7 @@ It's possible to backreference to a named buffer with the C<< \k<NAME> >>
 syntax. In code, the new magical hashes C<%+> and C<%-> can be used to
 access the contents of the capture buffers.
 
-Thus, to replace all doubled chars, one could write
+Thus, to replace all doubled chars with a single copy, one could write
 
     s/(?<letter>.)\k<letter>/$+{letter}/g
 
@@ -1036,7 +1036,7 @@ released.
 =item Aho-Corasick start-point optimisation
 
 When a pattern starts with a trie-able alternation and there aren't
-better optimisations available the regex engine will use Aho-Corasick
+better optimisations available, the regex engine will use Aho-Corasick
 matching to find the start point. (Yves Orton)
 
 =back

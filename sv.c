@@ -544,7 +544,8 @@ Perl_sv_clean_all(pTHX)
   memory in the last arena-set (1/2 on average).  In trade, we get
   back the 1st slot in each arena (ie 1.7% of a CV-arena, less for
   smaller types).  The recovery of the wasted space allows use of
-  small arenas for large, rare body types,
+  small arenas for large, rare body types, by changing array* fields
+  in body_details_by_type[] below.
 */
 struct arena_desc {
     char       *arena;		/* the raw storage, allocated aligned */
@@ -555,7 +556,7 @@ struct arena_desc {
 struct arena_set;
 
 /* Get the maximum number of elements in set[] such that struct arena_set
-   will fit within PERL_ARENA_SIZE, which is probabably just under 4K, and
+   will fit within PERL_ARENA_SIZE, which is probably just under 4K, and
    therefore likely to be 1 aligned memory page.  */
 
 #define ARENAS_PER_SET  ((PERL_ARENA_SIZE - sizeof(struct arena_set*) \
