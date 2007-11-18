@@ -3519,7 +3519,7 @@ PP(pp_ucfirst)
 	need = slen + 1;
     }
 
-    if (SvPADTMP(source) && !SvREADONLY(source) && inplace) {
+    if (SvPADTMP(source) && !SvREADONLY(source) && inplace && SvTEMP(source)) {
 	/* We can convert in place.  */
 
 	dest = source;
@@ -3601,7 +3601,7 @@ PP(pp_uc)
     SvGETMAGIC(source);
 
     if (SvPADTMP(source) && !SvREADONLY(source) && !SvAMAGIC(source)
-	&& !DO_UTF8(source)) {
+	&& SvTEMP(source) && !DO_UTF8(source)) {
 	/* We can convert in place.  */
 
 	dest = source;
@@ -3700,7 +3700,7 @@ PP(pp_lc)
     SvGETMAGIC(source);
 
     if (SvPADTMP(source) && !SvREADONLY(source) && !SvAMAGIC(source)
-	&& !DO_UTF8(source)) {
+	&& SvTEMP(source) && !DO_UTF8(source)) {
 	/* We can convert in place.  */
 
 	dest = source;

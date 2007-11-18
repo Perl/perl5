@@ -2807,7 +2807,8 @@ Perl_yylex(pTHX)
     default:
 	if (isIDFIRST_lazy_if(s,UTF))
 	    goto keylookup;
-	Perl_croak(aTHX_ "Unrecognized character \\x%02X", *s & 255);
+	len = UTF ? Perl_utf8_length(aTHX_ (U8 *) PL_linestart, (U8 *) s) : (STRLEN) (s - PL_linestart);
+	Perl_croak(aTHX_ "Unrecognized character \\x%02X in column %d", *s & 255, (int) len + 1);
     case 4:
     case 26:
 	goto fake_eof;			/* emulate EOF on ^D or ^Z */
@@ -11034,8 +11035,10 @@ Perl_yyerror(pTHX_ char *s)
                 (int)PL_multi_open,(int)PL_multi_close,(IV)PL_multi_start);
         PL_multi_end = 0;
     }
-    if (PL_in_eval & EVAL_WARNONLY && ckWARN_d(WARN_SYNTAX))
-	Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "%"SVf, (void*)msg);
+    if (PL_in_eval & EVAL_WARNONLY) {
+	if (ckWARN_d(WARN_SYNTAX))
+	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "%"SVf, (void*)msg);
+    }
     else
 	qerror(msg);
     if (PL_error_count >= 10) {

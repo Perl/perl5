@@ -3806,5 +3806,14 @@ sub iseq($$;$) {
     }
 }
 
+# [perl #45337] utf8 + "[a]a{2}" + /$.../ = panic: sv_len_utf8 cache
+
+{
+    local ${^UTF8CACHE} = -1;
+    my $s="[a]a{2}";
+    utf8::upgrade $s;
+    ok("aaa" =~ /$s/, "#45337");
+}
+
 # Don't forget to update this!
-BEGIN{print "1..1267\n"};
+BEGIN{print "1..1268\n"};

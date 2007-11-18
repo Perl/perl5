@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..55\n";
+print "1..56\n";
 
 $x = 'x';
 
@@ -263,3 +263,7 @@ print ((exists $str{xyz::bar} ? "" : "not ")."ok $test\n"); ++$test;
 
 sub foo::::::bar { print "ok $test\n"; $test++ }
 foo::::::bar;
+
+eval "\$x =\xE2foo";
+if ($@ =~ /Unrecognized character \\xE2 in column 5/) { print "ok $test\n"; } else { print "not ok $test\n"; }
+$test++;
