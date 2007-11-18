@@ -272,6 +272,7 @@ struct vs_str_st {
 #define do_tovmspath(a,b,c,d)		mp_do_tovmspath(aTHX_ a,b,c,d)
 #define do_rmsexpand(a,b,c,d,e,f,g)	mp_do_rmsexpand(aTHX_ a,b,c,d,e,f,g)
 #define do_vms_realpath(a,b,c)		mp_do_vms_realpath(aTHX_ a,b,c)
+#define do_vms_realname(a,b,c)		mp_do_vms_realname(aTHX_ a,b,c)
 #define do_tounixspec(a,b,c,d)		mp_do_tounixspec(aTHX_ a,b,c,d)
 #define do_tounixpath(a,b,c,d)		mp_do_tounixpath(aTHX_ a,b,c,d)
 #define do_vms_case_tolerant(a)		mp_do_vms_case_tolerant(a)
@@ -5343,13 +5344,14 @@ mp_do_rmsexpand
       /* Unless we are forcing to VMS format, a UNIX input means
        * UNIX output, and that requires long names to be used
        */
+#if !defined(__VAX) && defined(NAML$C_MAXRSS)
       if ((opts & PERL_RMSEXPAND_M_VMS) == 0)
 	opts |= PERL_RMSEXPAND_M_LONG;
-      else {
+      else
+#endif
 	isunix = 0;
       }
     }
-  }
 
   rms_set_fna(myfab, mynam, (char *)filespec, strlen(filespec)); /* cast ok */
   rms_bind_fab_nam(myfab, mynam);
@@ -12091,7 +12093,7 @@ Perl_rmscopy(pTHX_ const char *spec_in, const char *spec_out, int preserve_dates
       return 0;
     }
 
-    esa = PerlMem_malloc(NAM$C_MAXRSS + 1);
+    esa = PerlMem_malloc(VMS_MAXRSS);
     if (esa == NULL) _ckvmssts(SS$_INSFMEM);
     esal = NULL;
 #if !defined(__VAX) && defined(NAML$C_MAXRSS)
@@ -12106,7 +12108,7 @@ Perl_rmscopy(pTHX_ const char *spec_in, const char *spec_out, int preserve_dates
     rms_bind_fab_nam(fab_in, nam);
     fab_in.fab$l_xab = (void *) &xabdat;
 
-    rsa = PerlMem_malloc(NAML$C_MAXRSS);
+    rsa = PerlMem_malloc(VMS_MAXRSS);
     if (rsa == NULL) _ckvmssts(SS$_INSFMEM);
     rsal = NULL;
 #if !defined(__VAX) && defined(NAML$C_MAXRSS)
@@ -12903,7 +12905,6 @@ Perl_vms_start_glob
 }
 
 
-#ifdef HAS_SYMLINK
 static char *
 mp_do_vms_realpath(pTHX_ const char *filespec, char * rslt_spec,
 		   int *utf8_fl);
@@ -12932,6 +12933,35 @@ vms_realpath_fromperl(pTHX_ CV *cv)
 	XSRETURN(1);
 }
 
+static char *
+mp_do_vms_realname(pTHX_ const char *filespec, char * rslt_spec,
+		   int *utf8_fl);
+
+void
+vms_realname_fromperl(pTHX_ CV *cv)
+{
+    dXSARGS;
+    char *fspec, *rslt_spec, *rslt;
+    STRLEN n_a;
+
+    if (!items || items != 1)
+	Perl_croak(aTHX_ "Usage: VMS::Filespec::vms_realname(spec)");
+
+    fspec = SvPV(ST(0),n_a);
+    if (!fspec || !*fspec) XSRETURN_UNDEF;
+
+    Newx(rslt_spec, VMS_MAXRSS + 1, char);
+    rslt = do_vms_realname(fspec, rslt_spec, NULL);
+
+    ST(0) = sv_newmortal();
+    if (rslt != NULL)
+	sv_usepvn(ST(0),rslt,strlen(rslt));
+    else
+	Safefree(rslt_spec);
+	XSRETURN(1);
+}
+
+#ifdef HAS_SYMLINK
 /*
  * A thin wrapper around decc$symlink to make sure we follow the 
  * standard and do not create a symlink with a zero-length name.
@@ -12948,7 +12978,6 @@ int my_symlink(const char *path1, const char *path2) {
 
 #endif /* HAS_SYMLINK */
 
-#if __CRTL_VER >= 70301000 && !defined(__VAX)
 int do_vms_case_tolerant(void);
 
 void
@@ -12958,7 +12987,6 @@ vms_case_tolerant_fromperl(pTHX_ CV *cv)
   ST(0) = boolSV(do_vms_case_tolerant());
   XSRETURN(1);
 }
-#endif
 
 void  
 Perl_sys_intern_dup(pTHX_ struct interp_intern *src, 
@@ -13010,21 +13038,16 @@ init_os_extras(void)
   newXSproto("DynaLoader::mod2fname", mod2fname, file, "$");
   newXS("File::Copy::rmscopy",rmscopy_fromperl,file);
   newXSproto("vmsish::hushed",hushexit_fromperl,file,";$");
-#ifdef HAS_SYMLINK
   newXSproto("VMS::Filespec::vms_realpath",vms_realpath_fromperl,file,"$;$");
-#endif
-#if __CRTL_VER >= 70301000 && !defined(__VAX)
+  newXSproto("VMS::Filespec::vms_realname",vms_realname_fromperl,file,"$;$");
   newXSproto("VMS::Filepec::vms_case_tolerant",
              vms_case_tolerant_fromperl, file, "$");
-#endif
 
   store_pipelocs(aTHX);         /* will redo any earlier attempts */
 
   return;
 }
   
-#ifdef HAS_SYMLINK
-
 #if __CRTL_VER == 80200000
 /* This missed getting in to the DECC SDK for 8.2 */
 char *realpath(const char *file_name, char * resolved_name, ...);
@@ -13052,7 +13075,7 @@ int vms_fid_to_name(char * outname, int outlen, const char * name)
 {
 struct statbuf_t {
     char	   * st_dev;
-    __ino16_t	   st_ino[3];
+    unsigned short st_ino[3];
     unsigned short padw;
     unsigned long  padl[30];  /* plenty of room */
 } statbuf;
@@ -13087,8 +13110,15 @@ mp_do_vms_realpath(pTHX_ const char *filespec, char *outbuf,
 {
     char * rslt = NULL;
 
-    if (decc_posix_compliant_pathnames) 
+#ifdef HAS_SYMLINK
+    if (decc_posix_compliant_pathnames > 0 ) {
+	/* realpath currently only works if posix compliant pathnames are
+	 * enabled.  It may start working when they are not, but in that
+	 * case we still want the fallback behavior for backwards compatibility
+	 */
         rslt = realpath(filespec, outbuf);
+    }
+#endif
 
     if (rslt == NULL) {
         char * vms_spec;
@@ -13138,17 +13168,57 @@ mp_do_vms_realpath(pTHX_ const char *filespec, char *outbuf,
     return rslt;
 }
 
+static char *
+mp_do_vms_realname(pTHX_ const char *filespec, char *outbuf,
+		   int *utf8_fl)
+{
+    char * v_spec, * r_spec, * d_spec, * n_spec, * e_spec, * vs_spec;
+    int sts, v_len, r_len, d_len, n_len, e_len, vs_len;
+    int file_len;
+
+    /* Fall back to fid_to_name */
+
+    sts = vms_fid_to_name(outbuf, VMS_MAXRSS + 1, filespec);
+    if (sts == 0) {
+
+
+	/* Now need to trim the version off */
+	sts = vms_split_path
+		  (outbuf,
+		   &v_spec,
+		   &v_len,
+		   &r_spec,
+		   &r_len,
+		   &d_spec,
+		   &d_len,
+		   &n_spec,
+		   &n_len,
+		   &e_spec,
+		   &e_len,
+		   &vs_spec,
+		   &vs_len);
+
+
+	if (sts == 0) {
+	    int file_len;
+
+	/* Trim off the version */
+	file_len = v_len + r_len + d_len + n_len + e_len;
+	outbuf[file_len] = 0;
+	}
+    }
+    return outbuf;
+}
+
+
 /*}}}*/
 /* External entry points */
 char *Perl_vms_realpath(pTHX_ const char *filespec, char *outbuf, int *utf8_fl)
 { return do_vms_realpath(filespec, outbuf, utf8_fl); }
-#else
-char *Perl_vms_realpath(pTHX_ const char *filespec, char *outbuf, int *utf8_fl)
-{ return NULL; }
-#endif
 
+char *Perl_vms_realname(pTHX_ const char *filespec, char *outbuf, int *utf8_fl)
+{ return do_vms_realname(filespec, outbuf, utf8_fl); }
 
-#if __CRTL_VER >= 70301000 && !defined(__VAX)
 /* case_tolerant */
 
 /*{{{int do_vms_case_tolerant(void)*/
@@ -13161,6 +13231,7 @@ int do_vms_case_tolerant(void)
 }
 /*}}}*/
 /* External entry points */
+#if __CRTL_VER >= 70301000 && !defined(__VAX)
 int Perl_vms_case_tolerant(void)
 { return do_vms_case_tolerant(); }
 #else

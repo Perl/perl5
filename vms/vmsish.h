@@ -280,6 +280,7 @@
 #endif
 #define init_os_extras		Perl_init_os_extras
 #define vms_realpath(a, b, c)	Perl_vms_realpath(aTHX_ a,b,c)
+#define vms_realname(a, b, c)	Perl_vms_realname(aTHX_ a,b,c)
 #define vms_case_tolerant(a)	Perl_vms_case_tolerant(a)
 
 /* Delete if at all possible, changing protections if necessary. */
