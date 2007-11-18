@@ -2003,15 +2003,14 @@ STATIC I32	S_sublex_start(pTHX)
 STATIC char *	S_filter_gets(pTHX_ SV *sv, PerlIO *fp, STRLEN append)
 			__attribute__warn_unused_result__;
 
-STATIC HV *	S_find_in_my_stash(pTHX_ const char *pkgname, I32 len)
+STATIC HV *	S_find_in_my_stash(pTHX_ const char *pkgname, STRLEN len)
 			__attribute__warn_unused_result__;
 
 STATIC char *	S_tokenize_use(pTHX_ int is_use, char *s)
 			__attribute__warn_unused_result__;
 
-STATIC SV*	S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv, const char *type);
+STATIC SV*	S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen, SV *sv, SV *pv, const char *type, STRLEN typelen);
 STATIC int	S_ao(pTHX_ int toketype);
-STATIC const char*	S_incl_perldb(pTHX);
 #  if defined(PERL_CR_FILTER)
 STATIC I32	S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 STATIC void	S_strip_return(pTHX_ SV *sv);

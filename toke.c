@@ -23,6 +23,9 @@
 #define PERL_IN_TOKE_C
 #include "perl.h"
 
+#define new_constant(a,b,c,d,e,f,g)	\
+	S_new_constant(aTHX_ a,b,STR_WITH_LEN(c),d,e,f, g)
+
 #define yychar	PL_yychar
 #define yylval	PL_yylval
 static int
@@ -1180,7 +1183,7 @@ S_tokeq(pTHX_ SV *sv)
     SvCUR_set(sv, d - SvPVX_const(sv));
   finish:
     if ( PL_hints & HINT_NEW_STRING )
-       return new_constant(NULL, 0, "q", sv, pv, "q");
+       return new_constant(NULL, 0, "q", sv, pv, "q", 1);
     return sv;
 }
 
@@ -1881,8 +1884,12 @@ S_scan_const(pTHX_ char *start)
 			goto NUM_ESCAPE_INSERT;
 		    }
 		    res = newSVpvn(s + 1, e - s - 1);
+		    /* If 28868 is merged, this becomes
 		    res = new_constant( NULL, 0, "charnames",
-					res, NULL, "\\N{...}" );
+					res, NULL, s - 2, e - s + 3 );
+		     */
+		    res = new_constant( NULL, 0, "charnames",
+					res, NULL, "\\N{...}", 8 );
 		    if (has_utf8)
 			sv_utf8_upgrade(res);
 		    str = SvPV_const(res,len);
@@ -2037,16 +2044,26 @@ S_scan_const(pTHX_ char *start)
 
     /* return the substring (via yylval) only if we parsed anything */
     if (s > PL_bufptr) {
-	if ( PL_hints & ( PL_lex_inpat ? HINT_NEW_RE : HINT_NEW_STRING ) )
-	    sv = new_constant(start, s - start,
-			      (const char *)(PL_lex_inpat ? "qr" : "q"),
-			      sv, NULL,
-			      (const char *)
-			      (( PL_lex_inwhat == OP_TRANS
-				 ? "tr"
-				 : ( (PL_lex_inwhat == OP_SUBST && !PL_lex_inpat)
-				     ? "s"
-				     : "qq"))));
+	if ( PL_hints & ( PL_lex_inpat ? HINT_NEW_RE : HINT_NEW_STRING ) ) {
+	    const char *const key = PL_lex_inpat ? "qr" : "q";
+	    const STRLEN keylen = PL_lex_inpat ? 2 : 1;
+	    const char *type;
+	    STRLEN typelen;
+
+	    if (PL_lex_inwhat == OP_TRANS) {
+		type = "tr";
+		typelen = 2;
+	    } else if (PL_lex_inwhat == OP_SUBST && !PL_lex_inpat) {
+		type = "s";
+		typelen = 1;
+	    } else  {
+		type = "qq";
+		typelen = 2;
+	    }
+
+	    sv = S_new_constant(aTHX_ start, s - start, key, keylen, sv, NULL,
+				type, typelen);
+	}
 	yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
     } else
 	SvREFCNT_dec(sv);
@@ -2295,28 +2312,6 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
     return 0;
 }
 
-/*
- * S_incl_perldb
- * Return a string of Perl code to load the debugger.  If PERL5DB
- * is set, it will return the contents of that, otherwise a
- * compile-time require of perl5db.pl.
- */
-
-STATIC const char*
-S_incl_perldb(pTHX)
-{
-    if (PL_perldb) {
-	const char * const pdb = PerlEnv_getenv("PERL5DB");
-
-	if (pdb)
-	    return pdb;
-	SETERRNO(0,SS_NORMAL);
-	return "BEGIN { require 'perl5db.pl' }";
-    }
-    return "";
-}
-
-
 /* Encoded script support. filter_add() effectively inserts a
  * 'pre-processing' function into the current source input stream.
  * Note that the filter function only applies to the current source file
@@ -2473,7 +2468,7 @@ S_filter_gets(pTHX_ register SV *sv, register PerlIO *fp, STRLEN append)
 }
 
 STATIC HV *
-S_find_in_my_stash(pTHX_ const char *pkgname, I32 len)
+S_find_in_my_stash(pTHX_ const char *pkgname, STRLEN len)
 {
     GV *gv;
 
@@ -2492,10 +2487,10 @@ S_find_in_my_stash(pTHX_ const char *pkgname, I32 len)
     if (gv && GvCV(gv)) {
 	SV * const sv = cv_const_sv(GvCV(gv));
 	if (sv)
-            pkgname = SvPV_nolen_const(sv);
+            pkgname = SvPV_const(sv, len);
     }
 
-    return gv_stashpv(pkgname, 0);
+    return gv_stashpvn(pkgname, len, 0);
 }
 
 STATIC char *
@@ -2770,7 +2765,7 @@ Perl_yylex(pTHX)
 	    if (!PL_lex_inpat)
 		sv = tokeq(sv);
 	    else if ( PL_hints & HINT_NEW_RE )
-		sv = new_constant(NULL, 0, "qr", sv, sv, "q");
+		sv = new_constant(NULL, 0, "qr", sv, sv, "q", 1);
 	    yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
 	    s = PL_bufend;
 	}
@@ -2837,15 +2832,29 @@ Perl_yylex(pTHX)
 	PL_last_lop = 0;
 	if (!PL_in_eval && !PL_preambled) {
 	    PL_preambled = TRUE;
-	    sv_setpv(PL_linestr,incl_perldb());
-	    if (SvCUR(PL_linestr))
-		sv_catpvs(PL_linestr,";");
-	    if (PL_preambleav){
-		while(AvFILLp(PL_preambleav) >= 0) {
-		    SV *tmpsv = av_shift(PL_preambleav);
-		    sv_catsv(PL_linestr, tmpsv);
+	    if (PL_perldb) {
+		/* Generate a string of Perl code to load the debugger.
+		 * If PERL5DB is set, it will return the contents of that,
+		 * otherwise a compile-time require of perl5db.pl.  */
+
+		const char * const pdb = PerlEnv_getenv("PERL5DB");
+
+		if (pdb) {
+		    sv_setpv(PL_linestr, pdb);
+		    sv_catpvs(PL_linestr,";");
+		} else {
+		    SETERRNO(0,SS_NORMAL);
+		    sv_setpvs(PL_linestr, "BEGIN { require 'perl5db.pl' };");
+		}
+	    } else
+		sv_setpvs(PL_linestr,"");
+	    if (PL_preambleav) {
+		SV **svp = AvARRAY(PL_preambleav);
+		SV **const end = svp + AvFILLp(PL_preambleav);
+		while(svp <= end) {
+		    sv_catsv(PL_linestr, *svp);
+		    ++svp;
 		    sv_catpvs(PL_linestr, ";");
-		    sv_free(tmpsv);
 		}
 		sv_free((SV*)PL_preambleav);
 		PL_preambleav = NULL;
@@ -4177,12 +4186,7 @@ Perl_yylex(pTHX)
 	    }
 	    /* avoid v123abc() or $h{v1}, allow C<print v10;> */
 	    else if (!isALPHA(*start) && (PL_expect == XTERM || PL_expect == XREF || PL_expect == XSTATE)) {
-		/* XXX Use gv_fetchpvn rather than stomping on a const string */
-		const char c = *start;
-		GV *gv;
-		*start = '\0';
-		gv = gv_fetchpv(s, 0, SVt_PVCV);
-		*start = c;
+		GV *const gv = gv_fetchpvn_flags(s, start - s, 0, SVt_PVCV);
 		if (!gv) {
 		    s = scan_num(s, &yylval);
 		    TERM(THING);
@@ -5758,6 +5762,9 @@ S_pending_ident(pTHX)
     PADOFFSET tmp = 0;
     /* pit holds the identifier we read and pending_ident is reset */
     char pit = PL_pending_ident;
+    const STRLEN tokenbuf_len = strlen(PL_tokenbuf);
+    /* All routes through this function want to know if there is a colon.  */
+    const char *const has_colon = (const char*) memchr (PL_tokenbuf, ':', tokenbuf_len);
     PL_pending_ident = 0;
 
     DEBUG_T({ PerlIO_printf(Perl_debug_log,
@@ -5771,14 +5778,14 @@ S_pending_ident(pTHX)
     */
     if (PL_in_my) {
         if (PL_in_my == KEY_our) {	/* "our" is merely analogous to "my" */
-            if (strchr(PL_tokenbuf,':'))
+            if (has_colon)
                 yyerror(Perl_form(aTHX_ "No package name allowed for "
                                   "variable %s in \"our\"",
                                   PL_tokenbuf));
             tmp = allocmy(PL_tokenbuf);
         }
         else {
-            if (strchr(PL_tokenbuf,':'))
+            if (has_colon)
                 yyerror(Perl_form(aTHX_ PL_no_myglob,PL_tokenbuf));
 
             yylval.opval = newOP(OP_PADANY, 0);
@@ -5799,7 +5806,7 @@ S_pending_ident(pTHX)
        (although why you'd do that is anyone's guess).
     */
 
-    if (!strchr(PL_tokenbuf,':')) {
+    if (!has_colon) {
 #ifdef USE_5005THREADS
         /* Check for single character per-thread SVs */
         if (PL_tokenbuf[0] == '$' && PL_tokenbuf[2] == '\0'
@@ -5820,7 +5827,7 @@ S_pending_ident(pTHX)
                 SV * const sym
 		  = newSVpv(HvNAME_get(PAD_COMPNAME_OURSTASH(tmp)), 0);
                 sv_catpvs(sym, "::");
-                sv_catpv(sym, PL_tokenbuf+1);
+                sv_catpvn(sym, PL_tokenbuf+1, tokenbuf_len - 1);
                 yylval.opval = (OP*)newSVOP(OP_CONST, 0, sym);
                 yylval.opval->op_private = OPpCONST_ENTERED;
                 gv_fetchsv(sym,
@@ -5863,7 +5870,8 @@ S_pending_ident(pTHX)
        table.
     */
     if (pit == '@' && PL_lex_state != LEX_NORMAL && !PL_lex_brackets) {
-        GV *gv = gv_fetchpv(PL_tokenbuf+1, 0, SVt_PVAV);
+        GV *const gv = gv_fetchpvn_flags(PL_tokenbuf + 1, tokenbuf_len - 1, 0,
+					 SVt_PVAV);
         if ((!gv || ((PL_tokenbuf[0] == '@') ? !GvAV(gv) : !GvHV(gv)))
              && ckWARN(WARN_AMBIGUOUS))
         {
@@ -5875,9 +5883,11 @@ S_pending_ident(pTHX)
     }
 
     /* build ops for a bareword */
-    yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(PL_tokenbuf+1, 0));
+    yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpvn(PL_tokenbuf + 1,
+						      tokenbuf_len - 1));
     yylval.opval->op_private = OPpCONST_ENTERED;
-    gv_fetchpv(PL_tokenbuf+1, PL_in_eval ? (GV_ADDMULTI | GV_ADDINEVAL) : TRUE,
+       gv_fetchpvn_flags(PL_tokenbuf + 1, tokenbuf_len - 1,
+	       PL_in_eval ? (GV_ADDMULTI | GV_ADDINEVAL) : TRUE,
                ((PL_tokenbuf[0] == '$') ? SVt_PV
                 : (PL_tokenbuf[0] == '@') ? SVt_PVAV
                 : SVt_PVHV));
@@ -9234,8 +9244,8 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
    and type is used with error messages only. */
 
 STATIC SV *
-S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv,
-	       const char *type)
+S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
+	       SV *sv, SV *pv, const char *type, STRLEN typelen)
 {
     dSP;
     HV * const table = GvHV(PL_hintgv);		 /* ^H */
@@ -9269,7 +9279,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv,
  	SvREFCNT_dec(msg);
   	return sv;
     }
-    cvp = hv_fetch(table, key, strlen(key), FALSE);
+    cvp = hv_fetch(table, key, keylen, FALSE);
     if (!cvp || !SvOK(*cvp)) {
 	why1 = "$^H{";
 	why2 = key;
@@ -9281,7 +9291,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv,
     if (!pv && s)
   	pv = sv_2mortal(newSVpvn(s, len));
     if (type && pv)
-  	typesv = sv_2mortal(newSVpv(type, 0));
+  	typesv = sv_2mortal(newSVpvn(type, typelen));
     else
   	typesv = &PL_sv_undef;
 
@@ -10594,9 +10604,9 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	    }
 	    if (just_zero && (PL_hints & HINT_NEW_INTEGER))
 		sv = new_constant(start, s - start, "integer",
-				  sv, NULL, NULL);
+				  sv, NULL, NULL, 0);
 	    else if (PL_hints & HINT_NEW_BINARY)
-		sv = new_constant(start, s - start, "binary", sv, NULL, NULL);
+		sv = new_constant(start, s - start, "binary", sv, NULL, NULL, 0);
 	}
 	break;
 
@@ -10759,13 +10769,13 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	    sv_setnv(sv, nv);
 	}
 
-	if ( floatit ? (PL_hints & HINT_NEW_FLOAT) :
-	               (PL_hints & HINT_NEW_INTEGER) )
-	    sv = new_constant(PL_tokenbuf,
-			      d - PL_tokenbuf,
-			      (const char *)
-			      (floatit ? "float" : "integer"),
-			      sv, NULL, NULL);
+	if ( floatit
+	     ? (PL_hints & HINT_NEW_FLOAT) : (PL_hints & HINT_NEW_INTEGER) ) {
+	    const char *const key = floatit ? "float" : "integer";
+	    const STRLEN keylen = floatit ? 5 : 7;
+	    sv = S_new_constant(aTHX_ PL_tokenbuf, d - PL_tokenbuf,
+				key, keylen, sv, NULL, NULL, 0);
+	}
 	break;
 
     /* if it starts with a v, it could be a v-string */

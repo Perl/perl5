@@ -189,7 +189,7 @@ void
 Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 {
     const bool doproto = SvTYPE(gv) > SVt_NULL;
-    const char * const proto = (doproto && SvPOK(gv)) ? SvPVX_const(gv) : NULL;
+    char * const proto = (doproto && SvPOK(gv)) ? SvPVX(gv) : NULL;
     SV *const has_constant = doproto && SvROK(gv) ? SvRV(gv) : NULL;
     const U32 exported_constant = has_constant ? SvPCS_IMPORTED(gv) : 0;
 

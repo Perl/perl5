@@ -1292,7 +1292,7 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
 	    sigaddset(&set,i);
 	    sigprocmask(SIG_BLOCK, &set, &save);
 	    ENTER;
-	    save_sv = newSVpv((char *)(&save), sizeof(sigset_t));
+	    save_sv = newSVpvn((char *)(&save), sizeof(sigset_t));
 	    SAVEFREESV(save_sv);
 	    SAVEDESTRUCTOR_X(restore_sigmask, save_sv);
 #endif
@@ -1480,7 +1480,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	sigaddset(&set,i);
 	sigprocmask(SIG_BLOCK, &set, &save);
 	ENTER;
-	save_sv = newSVpv((char *)(&save), sizeof(sigset_t));
+	save_sv = newSVpvn((char *)(&save), sizeof(sigset_t));
 	SAVEFREESV(save_sv);
 	SAVEDESTRUCTOR_X(restore_sigmask, save_sv);
 #endif
@@ -2878,7 +2878,7 @@ Perl_sighandler(int sig)
 #endif
 		   EXTEND(SP, 2);
 		   PUSHs((SV*)rv);
-		   PUSHs(newSVpv((char *)sip, sizeof(*sip)));
+		   PUSHs(newSVpvn((char *)sip, sizeof(*sip)));
 	      }
 
               va_end(args);
