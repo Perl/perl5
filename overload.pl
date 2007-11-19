@@ -108,44 +108,15 @@ close H or die $!;
 close C or die $!;
 
 __DATA__
+# This is the 5.8.8 order.
+# fallback => "()", the rest have"(" prepended.
 # Fallback should be the first
 fallback	()
-
-# These 5 are the most common in the fallback switch statement in amagic_call
-to_sv		(${}
-to_av		(@{}
-to_hv		(%{}
-to_gv		(*{}
-to_cv		(&{}
-
-# These have non-default cases in that switch statement
-inc		(++
-dec		(--
-bool_		(bool
-numer		(0+
-string		(""
-not		(!
-copy		(=
 abs		(abs
-neg		(neg
-iter		(<>
-int		(int
-
-# These 12 feature in the next switch statement
-lt		(<
-le		(<=
-gt		(>
-ge		(>=
-eq		(==
-ne		(!=
-slt		(lt
-sle		(le
-sgt		(gt
-sge		(ge
-seq		(eq
-sne		(ne
-
+bool_		(bool
 nomethod	(nomethod
+string		(""
+numer		(0+
 add		(+
 add_ass		(+=
 subtr		(-
@@ -168,9 +139,24 @@ bor		(|
 bor_ass		(|=
 bxor		(^
 bxor_ass	(^=
+lt		(<
+le		(<=
+gt		(>
+ge		(>=
+eq		(==
+ne		(!=
 ncmp		(<=>
 scmp		(cmp
+slt		(lt
+sle		(le
+sgt		(gt
+sge		(ge
+seq		(eq
+sne		(ne
+not		(!
 compl		(~
+inc		(++
+dec		(--
 atan2		(atan2
 cos		(cos
 sin		(sin
@@ -181,6 +167,14 @@ repeat		(x
 repeat_ass	(x=
 concat		(.
 concat_ass	(.=
-smart		(~~
+copy		(=
+neg		(neg
+to_sv		(${}
+to_av		(@{}
+to_hv		(%{}
+to_gv		(*{}
+to_cv		(&{}
+iter		(<>
+int		(int
 # Note: Perl_Gv_AMupdate() assumes that DESTROY is the last entry
 DESTROY		DESTROY
