@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu May 10 00:08:36 CEST 2007 [metaconfig 3.0 PL70]
+# Generated on Sun Sep  9 11:36:23 CEST 2007 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -181,6 +181,7 @@ true)
 	esac
 	;;
 esac
+test -x "${newsh}" || unset newsh
 
 : if needed set CDPATH to a harmless value that is not chatty
 : avoid bash 2.02 problems with empty CDPATH.
@@ -1688,16 +1689,17 @@ Usage: $me [-dehrsEKOSV] [-f config.sh] [-D symbol] [-D symbol=value]
          -U symbol=   symbol gets completely empty
        e.g.:  -Uversiononly
   -A : manipulate symbol after the platform specific hints have been applied:
-	 -A symbol=value		append " "value to symbol
-	 -A append:symbol=value		append value to symbol
-	 -A define:symbol=value		define symbol to have value
-         -A clear:symbol		define symbol to be ''
-	 -A define:symbol		define symbol to be 'define'
-	 -A eval:symbol=value		define symbol to be eval of value
-	 -A prepend:symbol=value	prepend value to symbol
-	 -A undef:symbol		define symbol to be 'undef'
-	 -A undef:symbol=		define symbol to be ''
+         -A append:symbol=value   append value to symbol
+         -A symbol=value          like append:, but with a separating space
+         -A define:symbol=value   define symbol to have value
+         -A clear:symbol          define symbol to be ''
+         -A define:symbol         define symbol to be 'define'
+         -A eval:symbol=value     define symbol to be eval of value
+         -A prepend:symbol=value  prepend value to symbol
+         -A undef:symbol          define symbol to be 'undef'
+         -A undef:symbol=         define symbol to be ''
        e.g.:  -A prepend:libswanted='cl pthread '
+              -A ccflags=-DSOME_MACRO
   -V : print version number and exit (with a zero status).
 EOM
 	exit 1
@@ -2482,6 +2484,19 @@ FOO
 	;;
 esac
 
+# This question was auctioned at YAPC::Europe-2007 in Vienna
+# I never promised you could answer it. I only auctioned the question.
+cat <<FOO
+The following message is sponsored by
+
+  Dresden.pm<--The stars should be here.
+
+Dear Perl user, system administrator or package
+maintainer, the Perl community sends greetings to
+you. Do you (emblematical) greet back [Y/n]? n
+
+FOO
+
 cat <<EOS >trygcc
 $startsh
 EOS
@@ -2503,15 +2518,36 @@ EOM
         case "$cc" in
         *gcc*) trygcc=no ;;
         esac
-        case "`$cc -v -c try.c 2>&1`" in
-        *gcc*) trygcc=no ;;
-        esac
+	# Skip this test because it gives a false match on output like:
+	#    ./trygcc: line 23: cc: command not found
+        # case "`$cc -v -c try.c 2>&1`" in
+        # *gcc*) trygcc=no ;;
+        # esac
         if $test X"$trygcc" = Xyes; then
             if gcc -o try -c try.c; then
                 echo " "
                 echo "You seem to have a working gcc, though." >&4
-                rp="Would you like to use it?"
-                dflt=y
+		# Switching compilers may undo the work of hints files.
+		# The most common problem is -D_REENTRANT for threads.
+		# This heuristic catches that case, but gets false positives
+		# if -Dusethreads was not actually specified.  Better to
+		# bail out here with a useful message than fail 
+		# mysteriously later. Should we perhaps just try to
+		# re-invoke Configure -Dcc=gcc config_args ?
+		if $test -f usethreads.cbu; then
+			$cat >&4 <<EOM 
+
+*** However, any setting of the C compiler flags (e.g. for thread support)
+*** will be lost.  It may be necessary for you to restart Configure and
+*** add -Dcc=gcc to your Configure command line.
+
+EOM
+			rp="Would you like to go ahead and try gcc anyway?"
+			dflt=n
+		else
+			rp="Would you like to use it?"
+			dflt=y
+		fi
                 if $test -f myread; then
                     . ./myread
                 else
@@ -2524,15 +2560,6 @@ EOM
                 fi  
                 case "$ans" in
                 [yY]*) cc=gcc; ccname=gcc; ccflags=''; despair=no;
-                       if $test -f usethreads.cbu; then
-                           $cat >&4 <<EOM 
-
-*** However, any setting of the C compiler flags (e.g. for thread support)
-*** has been lost.  It may be necessary to pass -Dcc=gcc to Configure
-*** (together with e.g. -Dusethreads).
-
-EOM
-                       fi;;
                 esac
             fi
         fi
@@ -7585,21 +7612,20 @@ eval $inhdr
 
 echo " "
 echo "Checking for C++..." >&4
-cat >try.c <<'EOCP'
+$cat >try.c <<'EOCP'
 #include <stdio.h>
 int main(void)
 {
 #ifdef __cplusplus
-    printf("define\n");
-#else
-    printf("undef\n");
-#endif
     return 0;
+#else
+    return 1;
+#endif
 }
 EOCP
 set try
-if eval $compile_ok && $run ./try >cplusplus$$; then
-	val=`$cat cplusplus$$`
+if eval $compile_ok && $run ./try; then
+	val="$define"
 	echo "You are using a C++ compiler."
 else
 	val="$undef"
@@ -10814,36 +10840,73 @@ if set vprintf val -f d_vprintf; eval $csym; $val; then
 	echo 'vprintf() found.' >&4
 	val="$define"
 	$cat >try.c <<EOF
-#include <varargs.h>
+#$i_stdarg I_STDARG  /* Only one of these can be defined by i_varhrd */
+#$i_varargs I_VARARGS
+
 #$i_stdlib I_STDLIB
-#ifdef I_STDLIB
-#include <stdlib.h>
+#$i_unistd I_UNISTD
+
+#ifdef I_STDARG
+#  include <stdarg.h>
+#else /* I_VARARGS */
+#  include <varargs.h>
 #endif
 
-int main() { xxx("foo"); }
+#ifdef I_UNISTD
+#  include <unistd.h>
+#endif
+
+#ifdef I_STDLIB
+#  include <stdlib.h>
+#endif
+
+#include <stdio.h> /* vsprintf prototype */
+
+#ifdef I_STDARG
+void xxx(int n, ...)
+{
+    va_list args;
+    char buf[10];
+    va_start(args, n);
+    exit((unsigned long)vsprintf(buf,"%s",args) > 10L);
+}
+int main() { xxx(1, "foo"); }
+
+#else /* I_VARARGS */
 
 xxx(va_alist)
 va_dcl
 {
-	va_list args;
-	char buf[10];
-
-	va_start(args);
-	exit((unsigned long)vsprintf(buf,"%s",args) > 10L);
+    va_list args;
+    char buf[10];
+    va_start(args);
+    exit((unsigned long)vsprintf(buf,"%s",args) > 10L);
 }
+int main() { xxx("foo"); }
+
+#endif
+
 EOF
 	set try
-	if eval $compile && $run ./try; then
-		echo "Your vsprintf() returns (int)." >&4
-		val2="$undef"
+	if eval $compile_ok; then
+		if $run ./try; then
+			echo "Your vsprintf() returns (int)." >&4
+			val2="$undef"
+		else
+			echo "Your vsprintf() returns (char*)." >&4
+			val2="$define"
+		fi
 	else
-		echo "Your vsprintf() returns (char*)." >&4
-		val2="$define"
+		echo 'I am unable to compile the vsprintf() test program.' >&4
+		# We shouldn't get here.  If we do, assume the standard signature,
+		# not the old BSD one.
+		echo 'Guessing that vsprintf() returns (int).' >&4
+		val2="$undef"
 	fi
 else
 	echo 'vprintf() NOT found.' >&4
-		val="$undef"
-		val2="$undef"
+	val="$undef"
+	val2="$undef"
 fi
 $rm_try
 set d_vprintf
@@ -12169,6 +12232,14 @@ esac
 set i_fcntl
 eval $setvar
 
+: see if fork exists
+set fork d_fork
+eval $inlibc
+
+: see if pipe exists
+set pipe d_pipe
+eval $inlibc
+
 : check for non-blocking I/O stuff
 case "$h_sysfile" in
 true) echo "#include <sys/file.h>" > head.c;;
@@ -12229,6 +12300,8 @@ echo " "
 echo "Let's see what value errno gets from read() on a $o_nonblock file..." >&4
 case "$eagain" in
 '')
+	case "$d_fork:$d_pipe" in
+	define:define)
 	$cat head.c > try.c
 	$cat >>try.c <<EOCP
 #include <errno.h>
@@ -12361,6 +12434,12 @@ EOCP
 		echo "I can't compile the test program--assuming errno EAGAIN will do."
 		eagain=EAGAIN
 	fi
+	;;
+	*)	echo "Can't figure out how to test this--assuming errno EAGAIN will do."
+		eagain=EAGAIN
+		val="$define"
+		;;
+	esac
 	set d_eofnblk
 	eval $setvar
 	;;
@@ -12844,10 +12923,6 @@ eval $inlibc
 echo " "
 set d_flockproto flock $i_sysfile sys/file.h
 eval $hasproto
-
-: see if fork exists
-set fork d_fork
-eval $inlibc
 
 : see if fp_class exists
 set fp_class d_fp_class
@@ -14614,7 +14689,7 @@ EOCP
 	    echo "Yes, it does ($foo)" >&4
 	    d_libm_lib_version="$define"
 	else
-	    echo "No, it does not (probably harmless)\n" >&4
+	    echo "No, it does not (probably harmless)" >&4
 	    fi
 	$rm_try
 	;;
@@ -15546,10 +15621,6 @@ fi
 
 : see if pause exists
 set pause d_pause
-eval $inlibc
-
-: see if pipe exists
-set pipe d_pipe
 eval $inlibc
 
 : see if poll exists
@@ -21089,6 +21160,12 @@ for xxx in $known_extensions ; do
 		$define$define) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
+	IPC/SysV|ipc/sysv)
+		: XXX Do we need a useipcsysv variable here
+		case "${d_msg}${d_sem}${d_shm}" in
+		*"${define}"*) avail_ext="$avail_ext $xxx" ;;
+		esac
+		;;
 	NDBM_File|ndbm_fil)
 		case "$i_ndbm" in
 		$define)
@@ -21106,24 +21183,28 @@ for xxx in $known_extensions ; do
 	ODBM_File|odbm_fil)
 		case "${i_dbm}${i_rpcsvcdbm}" in
 		*"${define}"*)
-		    case "$osname-$use64bitint" in
-		    hpux-define)
-			case "$libs" in
-			*-ldbm*) avail_ext="$avail_ext $xxx" ;;
+		    case "$d_cplusplus" in
+		    define) ;; # delete as a function name will not work
+		    *)  case "$osname-$use64bitint" in
+			hpux-define)
+			    case "$libs" in
+			    *-ldbm*) avail_ext="$avail_ext $xxx" ;;
+			    esac
+			    ;;
+			*) avail_ext="$avail_ext $xxx" ;;
 			esac
 			;;
-		    *) avail_ext="$avail_ext $xxx" ;;
 		    esac
 		    ;;
 		esac
 		;;
-	POSIX|posix)
-		case "$useposix" in
+	Opcode|opcode)
+		case "$useopcode" in
 		true|define|y) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
-	Opcode|opcode)
-		case "$useopcode" in
+	POSIX|posix)
+		case "$useposix" in
 		true|define|y) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
@@ -21151,6 +21232,20 @@ for xxx in $known_extensions ; do
                         esac
 		esac
 		;;
+	threads|threads/shared)
+		# threads and threads::shared are special cases.
+		# To stop people from asking "Perl 5.8.0 was supposed
+		# to have this new fancy threads implementation but my
+		# perl doesn't have it" and from people trying to
+		# (re)install the threads module using CPAN.pm and
+		# CPAN.pm then offering to reinstall Perl 5.8.0,
+		# the threads.pm and threads/shared.pm will always be
+		# there, croaking informatively ("you need to rebuild
+		# all of Perl with threads, sorry") when threads haven't
+		# been compiled in.
+		# --jhi
+		avail_ext="$avail_ext $xxx"
+		;;
 	Win32*)
 		case "$osname" in
 		cygwin) avail_ext="$avail_ext $xxx" ;;
@@ -21167,26 +21262,6 @@ for xxx in $known_extensions ; do
 		# This is just for testing.  Skip it unless we have dynamic loading.
 		case "$usedl" in
 		$define) avail_ext="$avail_ext $xxx" ;;
-		esac
-		;;
-	threads|threads/shared)
-		# threads and threads::shared are special cases.
-		# To stop people from asking "Perl 5.8.0 was supposed
-		# to have this new fancy threads implementation but my
-		# perl doesn't have it" and from people trying to
-		# (re)install the threads module using CPAN.pm and
-		# CPAN.pm then offering to reinstall Perl 5.8.0,
-		# the threads.pm and threads/shared.pm will always be
-		# there, croaking informatively ("you need to rebuild
-		# all of Perl with threads, sorry") when threads haven't
-		# been compiled in.
-		# --jhi
-		avail_ext="$avail_ext $xxx"
-		;;
-	IPC/SysV|ipc/sysv)
-		: XXX Do we need a useipcsysv variable here
-		case "${d_msg}${d_sem}${d_shm}" in
-		*"${define}"*) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
 	*)	avail_ext="$avail_ext $xxx"
