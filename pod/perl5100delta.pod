@@ -572,7 +572,7 @@ B::Concise).
 
 =head2 Removal of the JPL
 
-The JPL (Java-Perl Linguo) has been removed from the perl sources tarball.
+The JPL (Java-Perl Lingo) has been removed from the perl sources tarball.
 
 =head2 Recursive inheritance detected earlier
 
