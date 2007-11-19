@@ -38,7 +38,8 @@ archname='cygwin'
 # dynamic loading
 # - otherwise -fpic
 cccdlflags=' '
-ld='ld2'
+lddlflags=' --shared'
+ld='g++'
 
 case "$osvers" in
 
@@ -57,9 +58,10 @@ static_ext="$static_ext Win32CORE"
 d_eofnblk='define'
 
 # suppress auto-import warnings
-ldflags="$ldflags -Wl,--enable-auto-import"
+ldflags="$ldflags -Wl,--enable-auto-import -Wl,--export-all-symbols -Wl,--stack,8388608 -Wl,--enable-auto-image-base -Wl,--enable-auto-import"
+lddlflags="$lddlflags $ldflags"
 
 # strip exe's and dll's
 #ldflags="$ldflags -s"
-#ccdlflags="$ccdlflags -s"
+ccdlflags="$ccdlflags -s"
 #lddlflags="$lddlflags -s"
