@@ -7,7 +7,7 @@
 #	MS Platform SDK 64-bit compiler and tools **experimental**
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl59.dll).  Also makes individual DLLs for the XS extensions.
+# (perl510.dll).  Also makes individual DLLs for the XS extensions.
 #
 
 ##
@@ -188,7 +188,7 @@ CRYPT_SRC	*= fcrypt.c
 # set this to additionally provide a statically linked perl-static.exe.
 # Note that dynamic loading will not work with this perl, so you must
 # include required modules statically using the STATIC_EXT or ALL_STATIC
-# variables below. A static library perl59s.lib will also be created.
+# variables below. A static library perl510s.lib will also be created.
 # Ordinary perl.exe is not affected by this option.
 #
 #BUILD_STATIC	*= define
@@ -784,8 +784,8 @@ CFGH_TMPL	= config_H.bc
 
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
-PERLIMPLIB	= ..\libperl59$(a)
-PERLSTATICLIB	= ..\libperl59s$(a)
+PERLIMPLIB	= ..\libperl510$(a)
+PERLSTATICLIB	= ..\libperl510s$(a)
 
 .ELSE
 
@@ -801,9 +801,9 @@ CFGH_TMPL	= config_H.vc
 
 # makedef.pl must be updated if this changes, and this should normally
 # only change when there is an incompatible revision of the public API.
-PERLIMPLIB	*= ..\perl59$(a)
-PERLSTATICLIB	*= ..\perl59s$(a)
-PERLDLL		= ..\perl59.dll
+PERLIMPLIB	*= ..\perl510$(a)
+PERLSTATICLIB	*= ..\perl510s$(a)
+PERLDLL		= ..\perl510.dll
 
 XCOPY		= xcopy /f /r /i /d /y
 RCOPY		= xcopy /f /r /i /e /d /y

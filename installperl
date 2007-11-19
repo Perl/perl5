@@ -286,7 +286,7 @@ if (($Is_W32 and ! $Is_NetWare) or $Is_Cygwin) {
 	$perldll =~ s/(\..*)?$/$v_e_r_s.$dlext/;
 	$perldll =~ s/^lib/cyg/;
     } else {
-	$perldll = 'perl59.' . $dlext;
+	$perldll = 'perl510.' . $dlext;
     }
 
     if ($dlsrc ne "dl_none.xs") {
