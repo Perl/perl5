@@ -1123,12 +1123,6 @@ Efforts have been made to make perl and the core XS modules compilable
 with various C++ compilers (although the situation is not perfect with
 some of the compilers on some of the platforms tested.)
 
-=item Building XS extensions on Windows
-
-Support for building XS extension modules with the free MinGW compiler has
-been improved in the case where perl itself was built with the Microsoft
-VC++ compiler. (ActiveState)
-
 =item Support for Microsoft 64-bit compiler
 
 Support for building perl with Microsoft's 64-bit compiler has been
