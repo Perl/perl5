@@ -33,6 +33,7 @@ Perl stores its global variables.
 #include "EXTERN.h"
 #define PERL_IN_GV_C
 #include "perl.h"
+#include "overload.c"
 
 const char S_autoload[] = "AUTOLOAD";
 const STRLEN S_autolen = sizeof(S_autoload)-1;
@@ -1521,7 +1522,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 	const char * const cooky = PL_AMG_names[i];
 	/* Human-readable form, for debugging: */
 	const char * const cp = (i >= DESTROY_amg ? cooky : AMG_id2name(i));
-	const STRLEN l = strlen(cooky);
+	const STRLEN l = PL_AMG_namelens[i];
 
 	DEBUG_o( Perl_deb(aTHX_ "Checking overloading of \"%s\" in package \"%.256s\"\n",
 		     cp, HvNAME_get(stash)) );
@@ -1937,7 +1938,8 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     PUSHs(lr>0? left: right);
     PUSHs( lr > 0 ? &PL_sv_yes : ( assign ? &PL_sv_undef : &PL_sv_no ));
     if (notfound) {
-      PUSHs( sv_2mortal(newSVpv(AMG_id2name(method + assignshift),0)));
+      PUSHs( sv_2mortal(newSVpvn(AMG_id2name(method + assignshift),
+				 AMG_id2namelen(method + assignshift))));
     }
     PUSHs((SV*)cv);
     PUTBACK;
