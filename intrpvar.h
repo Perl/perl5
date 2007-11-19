@@ -303,7 +303,7 @@ PERLVAR(Isv_yes,	SV)
 
 #ifdef CSH
 PERLVARI(Icshname,	const char *,	CSH)
-PERLVARI(Icshlen,	I32,	0)
+PERLVARI(Icshlen,	I32,	(sizeof(CSH "") - 1))
 #endif
 
 PERLVAR(Ilex_state,	U32)		/* next token is determined */

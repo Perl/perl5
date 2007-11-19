@@ -4164,7 +4164,6 @@ Perl_yylex(pTHX)
 	if (!s)
 	    missingterm(NULL);
 	yylval.ival = OP_BACKTICK;
-	set_csh();
 	TERM(sublex_start());
 
     case '\\':
@@ -4874,7 +4873,6 @@ Perl_yylex(pTHX)
 	    UNI(OP_EACH);
 
 	case KEY_exec:
-	    set_csh();
 	    LOP(OP_EXEC,XREF);
 
 	case KEY_endhostent:
@@ -5028,7 +5026,6 @@ Perl_yylex(pTHX)
 	    FUN0(OP_GETLOGIN);
 
 	case KEY_glob:
-	    set_csh();
 	    LOP(OP_GLOB,XTERM);
 
 	case KEY_hex:
@@ -5299,7 +5296,6 @@ Perl_yylex(pTHX)
 	    if (!s)
 		missingterm(NULL);
 	    yylval.ival = OP_BACKTICK;
-	    set_csh();
 	    TERM(sublex_start());
 
 	case KEY_return:
@@ -5359,11 +5355,9 @@ Perl_yylex(pTHX)
 	    UNI(OP_READDIR);
 
 	case KEY_readline:
-	    set_csh();
 	    UNI(OP_READLINE);
 
 	case KEY_readpipe:
-	    set_csh();
 	    UNI(OP_BACKTICK);
 
 	case KEY_rewinddir:
@@ -5614,7 +5608,6 @@ Perl_yylex(pTHX)
 	    }
 
 	case KEY_system:
-	    set_csh();
 	    LOP(OP_SYSTEM,XREF);
 
 	case KEY_symlink:
@@ -9987,7 +9980,6 @@ S_scan_inputsymbol(pTHX_ char *start)
 
     if (d - PL_tokenbuf != len) {
 	yylval.ival = OP_GLOB;
-	set_csh();
 	s = scan_str(start,FALSE,FALSE);
 	if (!s)
 	   Perl_croak(aTHX_ "Glob not terminated");
@@ -10895,19 +10887,6 @@ S_scan_formline(pTHX_ register char *s)
 	PL_bufptr = s;
     }
     return s;
-}
-
-STATIC void
-S_set_csh(pTHX)
-{
-#ifdef CSH
-    if (!PL_cshlen)
-	PL_cshlen = strlen(PL_cshname);
-#else
-#if defined(USE_ITHREADS)
-    PERL_UNUSED_CONTEXT;
-#endif
-#endif
 }
 
 I32
