@@ -118,14 +118,18 @@ my @writables = qw(
     embed.h
     embedvar.h
     global.sym
+    overload.c
+    overload.h
     pod/perlintern.pod
     pod/perlapi.pod
+    pod/perltoc.pod
     perlapi.h
     perlapi.c
-    ext/B/B/Asmdata.pm
-    ext/Devel/PPPort/PPPort.xs
     ext/Devel/PPPort/module2.c
     ext/Devel/PPPort/module3.c
+    reentr.c
+    reentr.h
+    regcharclass.h
     regnodes.h
     warnings.h
     lib/warnings.pm
