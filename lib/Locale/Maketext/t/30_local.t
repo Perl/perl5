@@ -1,5 +1,7 @@
+#!/usr/bin/perl -Tw
 
-require 5;
+use strict;
+
 use Test;
 BEGIN { plan tests => 4; }
 use Locale::Maketext;
@@ -11,8 +13,8 @@ print "# --- Making sure that Perl globals are localized ---\n";
 # declare a class...
 {
   package Woozle;
-  @ISA = ('Locale::Maketext');
-  %Lexicon = (
+  our @ISA = ('Locale::Maketext');
+  our %Lexicon = (
     _AUTO => 1
   );
   keys %Lexicon; # dodges the 'used only once' warning
@@ -24,7 +26,7 @@ ok defined( $lh = Woozle->new() ) && ref($lh);
 
 print "# Make sure \$@ is localized...\n";
 $@ = 'foo';
-ok $lh && $lh->maketext('Eval error: [_1]', $@), "Eval error: foo";
+ok $lh && $lh->maketext('Eval error: [_1]', $@), 'Eval error: foo';
 
 print "# Byebye!\n";
 ok 1;
