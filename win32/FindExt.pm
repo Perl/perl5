@@ -1,6 +1,6 @@
 package FindExt;
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 use strict;
 use warnings;
@@ -20,12 +20,18 @@ sub getcwd {
     return $ENV{'PWD'} = $_;
 }
 
-sub set_static_extensions
-{
+sub set_static_extensions {
     # adjust results of scan_ext, and also save
     # statics in case scan_ext hasn't been called yet.
+    # if '*' is passed then all XS extensions are static
+    # (with possible exclusions)
     %static = ();
-    for (@_) {
+    my @list = @_;
+    if ($_[0] eq '*') {
+	my %excl = map {$_=>1} map {m/^!(.*)$/} @_[1 .. $#_];
+	@list = grep {!exists $excl{$_}} keys %ext;
+    }
+    for (@list) {
         $static{$_} = 1;
         $ext{$_} = 'static' if $ext{$_} && $ext{$_} eq 'dynamic';
     }
@@ -97,19 +103,15 @@ sub find_ext
         }
     }
 
-# Special case:  Add in threads/shared since it is not picked up by the
-# recursive find above (and adding in general recursive finding breaks
-# SDBM_File/sdbm).  A.D.  10/25/2001.
+# Special case:  Add in modules that nest beyond the first level.
+# Currently threads/shared and Hash/Util/FieldHash, since they are
+# not picked up by the recursive find above (and adding in general
+# recursive finding breaks SDBM_File/sdbm).
+# A.D. 20011025 (SDBM), ajgough 20071008 (FieldHash)
 # Ditto for IO/Compress/Base and IO/Compress/Zlib
 
     if (!$_[0] && -d "threads/shared") {
         $ext{"threads/shared"} = 'dynamic';
-    }
-    if (!$_[0] && -d "IO/Compress/Base") {
-        $ext{"IO/Compress/Base"} = 'nonxs';
-    }
-    if (!$_[0] && -d "IO/Compress/Zlib") {
-        $ext{"IO/Compress/Zlib"} = 'nonxs';
     }
 }
 

@@ -63,8 +63,7 @@ if ($opts{'list-static-libs'} || $opts{'create-perllibst-h'}) {
     print $fh "#ifdef STATIC2\n",(map {"    EXTERN_C void boot_$_ (pTHX_ CV* cv);\n"} @statics1),"#undef STATIC2\n#endif\n";
     print $fh "#ifdef STATIC3\n",(map {"    newXS(\"$statics2[$_]::bootstrap\", boot_$statics1[$_], file);\n"} 0 .. $#statics),"#undef STATIC3\n#endif\n";
     close $fh;
-  }
-  else {
+  } else {
     my %extralibs;
     for (@statics) {
       open my $fh, "<..\\lib\\auto\\$_\\extralibs.ld" or die "can't open <..\\lib\\auto\\$_\\extralibs.ld: $!";
@@ -76,17 +75,14 @@ if ($opts{'list-static-libs'} || $opts{'create-perllibst-h'}) {
   exit(0);
 }
 
-my $here = getcwd();
+(my $here = getcwd()) =~ s{/}{\\}g;
 my $perl = $^X;
-$here =~ s,/,\\,g;
-if ($perl =~ m#^\.\.#)
- {
-  $perl = "$here\\$perl";
- }
+if ($perl =~ m#^\.\.#) {
+    $perl = "$here\\$perl";
+}
 (my $topdir = $perl) =~ s/\\[^\\]+$//;
 # miniperl needs to find perlglob and pl2bat
 $ENV{PATH} = "$topdir;$topdir\\win32\\bin;$ENV{PATH}";
-#print "PATH=$ENV{PATH}\n";
 my $pl2bat = "$topdir\\win32\\bin\\pl2bat";
 unless (-f "$pl2bat.bat") {
     my @args = ($perl, ("$pl2bat.pl") x 2);
@@ -100,7 +96,7 @@ my $dmod = -M $dep;
 my $dir  = shift;
 chdir($dir) || die "Cannot cd to $dir\n";
 my $targ  = shift;
-(my $ext = getcwd()) =~ s,/,\\,g;
+(my $ext = getcwd()) =~ s{/}{\\}g;
 my $code;
 FindExt::scan_ext($ext);
 FindExt::set_static_extensions(split ' ', $Config{static_ext}) if $ext ne "ext";
