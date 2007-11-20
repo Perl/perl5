@@ -607,7 +607,7 @@ is applied recursively to the first argument.
 These rules look complicated, but usually they will do what
 you want. For example you could write:
 
-    when (/^\d$/ && $_ < 75) { ... }
+    when (/^\d+$/ && $_ < 75) { ... }
 
 Another useful shortcut is that, if you use a literal array
 or hash as the argument to C<when>, it is turned into a
