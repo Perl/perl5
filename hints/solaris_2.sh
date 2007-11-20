@@ -42,6 +42,14 @@ esac
 set `echo $glibpth | sed -e 's@/usr/ucblib@@' -e 's@ /lib @ @'`
 glibpth="$*"
 
+# In Solaris 10, we don't want versioned shared libraries because those
+# often indicate a private use only library.  Especially badly that would
+# break things with SUNWbdb (Berkeley DB) being installed, which brings in
+# /usr/lib/libdb.so.1, but that is not really meant for public consumption.
+case "`uname -r`" in
+5.10) ignore_versioned_solibs=y ;;
+esac
+
 # Remove unwanted libraries.  -lucb contains incompatible routines.
 # -lld and -lsec don't do anything useful. -lcrypt does not
 # really provide anything we need over -lc, so we drop it, too.
