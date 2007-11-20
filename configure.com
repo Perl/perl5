@@ -6396,7 +6396,6 @@ $ WC "selecttype='" + selecttype + "'"
 $ WC "sh='MCR'"
 $ WC "shmattype='" + " '"
 $ WC "shortsize='" + shortsize + "'"
-$ WC "shrplib='define'"
 $ IF (f$length(sig_name) .GE. 244)
 $ THEN
 $     tmp = "sig_name='" + sig_name + "'"
@@ -6480,6 +6479,7 @@ $ WC "useposix='false'"
 $ WC "usereentrant='undef'"
 $ WC "userelocatableinc='undef'"
 $ WC "usesecurelog='" + usesecurelog + "'"  ! VMS-specific
+$ WC "useshrplib='true'"
 $ WC "usesitecustomize='" + usesitecustomize + "'"
 $ WC "usesocks='undef'"
 $ WC "usethreads='" + usethreads + "'"

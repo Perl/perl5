@@ -18,7 +18,7 @@ use vars qw($VERSION @ISA
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.54';
+$VERSION = '1.54_01';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -926,7 +926,7 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)$(DFSEP).
 
     my $libs = '$(LDLOADLIBS)';
 
-    if (($Is_NetBSD || $Is_Interix) && $Config{'useshrplib'}) {
+    if (($Is_NetBSD || $Is_Interix) && $Config{'useshrplib'} eq 'true') {
 	# Use nothing on static perl platforms, and to the flags needed
 	# to link against the shared libperl library on shared perl
 	# platforms.  We peek at lddlflags to see if we need -Wl,-R
