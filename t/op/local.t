@@ -5,7 +5,7 @@ BEGIN {
     @INC = qw(. ../lib);
     require './test.pl';
 }
-plan tests => 114;
+plan tests => 122;
 
 my $list_assignment_supported = 1;
 
@@ -424,5 +424,39 @@ sub f { ok(0 == $[); }
     sub { local $_[0]; shift }->($y);
     ok(!$x,  '[perl #39012]');
     
+}
+
+# when localising a hash element, the key should be copied, not referenced
+
+{
+    my %h=('k1' => 111);
+    my $k='k1';
+    {
+	local $h{$k}=222;
+
+	is($h{'k1'},222);
+	$k='k2';
+    }
+    ok(! exists($h{'k2'}));
+    is($h{'k1'},111);
+}
+{
+    my %h=('k1' => 111);
+    our $k = 'k1';  # try dynamic too
+    {
+	local $h{$k}=222;
+	is($h{'k1'},222);
+	$k='k2';
+    }
+    ok(! exists($h{'k2'}));
+    is($h{'k1'},111);
+}
+
+# Keep this test last, as it can SEGV
+{
+    local *@;
+    pass("Localised *@");
+    eval {1};
+    pass("Can eval with *@ localised");
 }
 
