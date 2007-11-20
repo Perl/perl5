@@ -385,6 +385,17 @@ ARCHNAME	!:= $(ARCHNAME)-thread
 DELAYLOAD	*= -DELAYLOAD:ws2_32.dll -DELAYLOAD:shell32.dll delayimp.lib
 .ENDIF
 
+# Visual C++ 2005 (VC++ 8.x) creates manifest files for EXEs and DLLs. These
+# either need copying everywhere with the binaries, or else need embedding in
+# them otherwise MSVCR80.dll won't be found. Embed them for simplicity, and
+# delete them afterwards so that they don't get installed too.
+.IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE"
+EMBED_EXE_MANI	= mt -nologo -manifest $@.manifest -outputresource:$@;1 && \
+		  del $@.manifest
+EMBED_DLL_MANI	= mt -nologo -manifest $@.manifest -outputresource:$@;2 && \
+		  del $@.manifest
+.ENDIF
+
 ARCHDIR		= ..\lib\$(ARCHNAME)
 COREDIR		= ..\lib\CORE
 AUTODIR		= ..\lib\auto
@@ -629,26 +640,15 @@ BLINK_FLAGS	= $(PRIV_LINK_FLAGS) $(LINK_FLAGS)
 #################### do not edit below this line #######################
 ############# NO USER-SERVICEABLE PARTS BEYOND THIS POINT ##############
 
-# Some dmake's built with Borland C++, including Sarathy's one at:
-# http://search.cpan.org/CPAN/authors/id/G/GS/GSAR/dmake-4.1pl1-win32.zip
-# require backslashes to be doubled-up when written to $(mktmp) files.
-# Other dmake's do not require this and would actually output a double
-# backslash if they were doubled-up.
-.IF "$(shell @type $(mktmp \\))"=="\\"
-B=\\
+# Some old dmakes (including Sarathy's one at
+# http://search.cpan.org/CPAN/authors/id/G/GS/GSAR/dmake-4.1pl1-win32.zip)
+# don't support logical OR (||) or logical AND (&&) in conditional
+# expressions and hence don't process this makefile correctly. Determine
+# whether this is the case so that we can give the user an error message.
+.IF 1 == 1 || 1 == 1
+NEWDMAKE = define
 .ELSE
-B=\\\
-.ENDIF
-
-# There is a related issue with other escape sequences: Sarathy's old
-# dmake automatically maps escape sequences like \n to their ASCII values
-# when used in macros, while other dmake's only do so if this behaviour
-# is explicitly requested with the :m modifier.
-DONTUSETHIS=\n
-.IF "$(shell @type $(mktmp \n))"=="\n"
-N=$(DONTUSETHIS:m)
-.ELSE
-N=$(DONTUSETHIS)
+NEWDMAKE = undef
 .ENDIF
 
 o *= .obj
@@ -682,11 +682,12 @@ $(o).dll:
 .ELSE
 	$(LINK32) -dll -subsystem:windows -implib:$(*B).lib -def:$(*B).def \
 	    -out:$@ $(BLINK_FLAGS) $(LIBFILES) $< $(LIBPERL)
+	$(EMBED_DLL_MANI)
 .ENDIF
 
 .rc.res:
 .IF "$(CCTYPE)" == "GCC"
-	$(RSC) --use-temp-file -I . -I .. -O COFF -i $< -o $@
+	$(RSC) --use-temp-file --include-dir=. --include-dir=.. -O COFF -i $< -o $@
 .ELSE
 	$(RSC) -i.. $<
 .ENDIF
@@ -951,8 +952,8 @@ DYNALOADER	= $(EXTDIR)\DynaLoader\DynaLoader
 #	-- BKS 10-17-1999
 CFG_VARS	=					\
 		INST_DRV=$(INST_DRV)		~	\
-		INST_TOP=$(INST_TOP:s,\,$B,)	~	\
-		INST_VER=$(INST_VER:s,\,$B,)	~	\
+		INST_TOP=$(INST_TOP)	~	\
+		INST_VER=$(INST_VER)	~	\
 		INST_ARCH=$(INST_ARCH)		~	\
 		archname=$(ARCHNAME)		~	\
 		cc=$(CC)			~	\
@@ -962,9 +963,9 @@ CFG_VARS	=					\
 		d_crypt=$(D_CRYPT)		~	\
 		d_mymalloc=$(PERL_MALLOC)	~	\
 		libs=$(LIBFILES:f)		~	\
-		incpath=$(CCINCDIR:s,\,$B,)	~	\
+		incpath=$(CCINCDIR)	~	\
 		libperl=$(PERLIMPLIB:f)		~	\
-		libpth=$(CCLIBDIR:s,\,$B,);$(EXTRALIBDIRS:s,\,$B,)	~	\
+		libpth=$(CCLIBDIR);$(EXTRALIBDIRS)	~	\
 		libc=$(LIBC)			~	\
 		make=dmake			~	\
 		_o=$(o)				~	\
@@ -979,7 +980,7 @@ CFG_VARS	=					\
 		useperlio=$(USE_PERLIO)		~	\
 		uselargefiles=$(USE_LARGE_FILES)	~	\
 		usesitecustomize=$(USE_SITECUST)	~	\
-		LINK_FLAGS=$(LINK_FLAGS:s,\,$B,)	~	\
+		LINK_FLAGS=$(LINK_FLAGS)	~	\
 		optimize=$(OPTIMIZE)
 
 #
@@ -1009,7 +1010,7 @@ ODBCCP32_DLL = $(windir)\system\odbccp32.dll
 # Top targets
 #
 
-all : .\config.h $(GLOBEXE) $(MINIPERL) $(MK2)		\
+all : CHECKDMAKE .\config.h $(GLOBEXE) $(MINIPERL) $(MK2)		\
 	$(RIGHTMAKE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE)	\
 	$(X2P) MakePPPort Extensions $(PERLSTATIC)
 
@@ -1074,6 +1075,15 @@ __no_such_target:
 __not_needed:
 	$(NOOP)
 
+CHECKDMAKE :
+.IF "$(NEWDMAKE)" == "define"
+	$(NOOP)
+.ELSE
+	@echo Your dmake doesn't support ^|^| or ^&^& in conditional expressions.
+	@echo Please get the latest dmake from http://search.cpan.org/dist/dmake/
+	@exit 1
+.ENDIF
+
 $(GLOBEXE) : perlglob$(o)
 .IF "$(CCTYPE)" == "BORLAND"
 	$(CC) -c -w -v -tWM -I"$(CCINCDIR)" perlglob.c
@@ -1084,6 +1094,7 @@ $(GLOBEXE) : perlglob$(o)
 .ELSE
 	$(LINK32) $(BLINK_FLAGS) $(LIBFILES) -out:$@ -subsystem:$(SUBSYS) \
 	    perlglob$(o) setargv$(o)
+	$(EMBED_EXE_MANI)
 .ENDIF
 
 perlglob$(o)  : perlglob.c
@@ -1129,13 +1140,14 @@ $(MINIPERL) : $(MINIDIR) $(MINI_OBJ) $(CRTIPMLIBS)
 	if not exist $(CCLIBDIR)\PSDK\odbccp32.lib \
 	    cd $(CCLIBDIR)\PSDK && implib odbccp32.lib $(ODBCCP32_DLL)
 	$(LINK32) -Tpe -ap $(BLINK_FLAGS) \
-	    @$(mktmp c0x32$(o) $(MINI_OBJ:s,\,$B,),$(@:s,\,$B,),,$(LIBFILES),)
+	    @$(mktmp c0x32$(o) $(MINI_OBJ),$@,,$(LIBFILES),)
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -v -mconsole -o $@ $(BLINK_FLAGS) \
-	    $(mktmp $(LKPRE) $(MINI_OBJ:s,\,$B,) $(LIBFILES) $(LKPOST))
+	    $(mktmp $(LKPRE) $(MINI_OBJ) $(LIBFILES) $(LKPOST))
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ $(BLINK_FLAGS) \
-	    @$(mktmp $(LIBFILES) $(MINI_OBJ:s,\,$B,))
+	    @$(mktmp $(LIBFILES) $(MINI_OBJ))
+	$(EMBED_EXE_MANI)
 .ENDIF
 
 $(MINIDIR) :
@@ -1179,50 +1191,49 @@ perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl
 $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpd -ap $(BLINK_FLAGS) \
-	    @$(mktmp c0d32$(o) $(PERLDLL_OBJ:s,\,$B,)$N \
-		$(@:s,\,$B,),$N \
-	        $(subst,\,$B $(shell @type Extensions_static)) $(LIBFILES)$N \
-		perldll.def$N)
+	    @$(mktmp c0d32$(o) $(PERLDLL_OBJ),$@,, \
+	        $(shell @type Extensions_static) $(LIBFILES),perldll.def)
 	$(IMPLIB) $*.lib $@
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -mdll -o $@ -Wl,--base-file -Wl,perl.base $(BLINK_FLAGS) \
-	    $(mktmp $(LKPRE) $(PERLDLL_OBJ:s,\,$B,) \
-	        $(subst,\,$B $(shell @type Extensions_static)) \
-	        $(LIBFILES) $(LKPOST))
+	    $(mktmp $(LKPRE) $(PERLDLL_OBJ) \
+		$(shell @type Extensions_static) \
+		$(LIBFILES) $(LKPOST))
 	dlltool --output-lib $(PERLIMPLIB) \
 		--dllname $(PERLDLL:b).dll \
 		--def perldll.def \
 		--base-file perl.base \
 		--output-exp perl.exp
 	$(LINK32) -mdll -o $@ $(BLINK_FLAGS) \
-	    $(mktmp $(LKPRE) $(PERLDLL_OBJ:s,\,$B,) \
-	        $(subst,\,$B $(shell @type Extensions_static)) \
-	        $(LIBFILES) perl.exp $(LKPOST))
+	    $(mktmp $(LKPRE) $(PERLDLL_OBJ) \
+		$(shell @type Extensions_static) \
+		$(LIBFILES) perl.exp $(LKPOST))
 .ELSE
 	$(LINK32) -dll -def:perldll.def -out:$@ $(BLINK_FLAGS) \
 	    @Extensions_static \
 	    @$(mktmp -base:0x28000000 $(DELAYLOAD) $(LIBFILES) \
-	        $(PERLDLL_RES:s,\,$B,) $(PERLDLL_OBJ:s,\,$B,))
+		$(PERLDLL_RES) $(PERLDLL_OBJ))
+	$(EMBED_DLL_MANI)
 .ENDIF
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 
 $(PERLSTATICLIB): Extensions_static
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LIB32) $(LIB_FLAGS) $@ \
-	    @$(mktmp $(subst,\,$B $(shell @type Extensions_static)) \
-	        $(PERLDLL_OBJ:s,\,$B,))
+	    @$(mktmp $(shell @type Extensions_static) \
+		$(PERLDLL_OBJ))
 .ELIF "$(CCTYPE)" == "GCC"
 # XXX: It would be nice if MinGW's ar accepted a temporary file, but this
 # doesn't seem to work:
 #	$(LIB32) $(LIB_FLAGS) $@ \
-#	    $(mktmp $(LKPRE) $(subst,\,$B $(shell @type Extensions_static)) \
-#	        $(PERLDLL_OBJ:s,\,$B,) $(LKPOST))
+#	    $(mktmp $(LKPRE) $(shell @type Extensions_static) \
+#		$(PERLDLL_OBJ) $(LKPOST))
 	$(LIB32) $(LIB_FLAGS) $@ \
-	    $(subst,\,$B $(shell @type Extensions_static)) \
-	    $(PERLDLL_OBJ:s,\,$B,)
+	    $(shell @type Extensions_static) \
+	    $(PERLDLL_OBJ)
 .ELSE
 	$(LIB32) $(LIB_FLAGS) -out:$@ @Extensions_static \
-	    @$(mktmp $(PERLDLL_OBJ:s,\,$B,))
+	    @$(mktmp $(PERLDLL_OBJ))
 .ENDIF
 	$(XCOPY) $(PERLSTATICLIB) $(COREDIR)
 
@@ -1254,40 +1265,40 @@ $(X2P) : $(MINIPERL) $(X2P_OBJ)
 	$(MINIPERL) ..\x2p\s2p.PL
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpe -ap $(BLINK_FLAGS) \
-	    @$(mktmp c0x32$(o) $(X2P_OBJ:s,\,$B,),$(@:s,\,$B,),,$(LIBFILES),)
+	    @$(mktmp c0x32$(o) $(X2P_OBJ),$@,,$(LIBFILES),)
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -v -o $@ $(BLINK_FLAGS) \
-	    $(mktmp $(LKPRE) $(X2P_OBJ:s,\,$B,) $(LIBFILES) $(LKPOST))
+	    $(mktmp $(LKPRE) $(X2P_OBJ) $(LIBFILES) $(LKPOST))
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ $(BLINK_FLAGS) \
-	    @$(mktmp $(LIBFILES) $(X2P_OBJ:s,\,$B,))
+	    @$(mktmp $(LIBFILES) $(X2P_OBJ))
+	$(EMBED_EXE_MANI)
 .ENDIF
 
 perlmain.c : runperl.c
 	copy runperl.c perlmain.c
 
 perlmain$(o) : perlmain.c
-	$(CC) $(CFLAGS_O) -UPERLDLL $(OBJOUT_FLAG)$@ -c perlmain.c
+	$(CC) $(CFLAGS_O:s,-DPERLDLL,-UPERLDLL,) $(OBJOUT_FLAG)$@ -c perlmain.c
 
 perlmainst.c : runperl.c
 	copy runperl.c perlmainst.c
 
 perlmainst$(o) : perlmainst.c
-	$(CC) $(CFLAGS_O) -DPERLDLL $(OBJOUT_FLAG)$@ -c perlmainst.c
+	$(CC) $(CFLAGS_O) $(OBJOUT_FLAG)$@ -c perlmainst.c
 
 $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpe -ap $(BLINK_FLAGS) \
-	    @$(mktmp c0x32$(o) $(PERLEXE_OBJ:s,\,$B,)$N \
-	    $(@:s,\,$B,),$N \
-	    $(PERLIMPLIB:s,\,$B,) $(LIBFILES),$N \
-	    $(PERLEXE_RES:s,\,$B,)$N)
+	    @$(mktmp c0x32$(o) $(PERLEXE_OBJ),$@,, \
+		$(PERLIMPLIB) $(LIBFILES),,$(PERLEXE_RES))
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -mconsole -o $@ $(BLINK_FLAGS)  \
 	    $(PERLEXE_OBJ) $(PERLEXE_RES) $(PERLIMPLIB) $(LIBFILES)
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ -stack:0x1000000 $(BLINK_FLAGS) \
 	    $(LIBFILES) $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) $(PERLEXE_RES)
+	$(EMBED_EXE_MANI)
 .ENDIF
 	copy $(PERLEXE) $(WPERLEXE)
 	$(MINIPERL) -I..\lib bin\exetype.pl $(WPERLEXE) WINDOWS
@@ -1297,16 +1308,14 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 $(PERLEXESTATIC): $(PERLSTATICLIB) $(CONFIGPM) $(PERLEXEST_OBJ) $(PERLEXE_RES)
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpe -ap $(BLINK_FLAGS) \
-	    @$(mktmp c0x32$(o) $(PERLEXEST_OBJ:s,\,$B,)$N \
-	    $(@:s,\,$B,),$N \
-	    $(subst,\,$B $(shell @type Extensions_static)) \
-	    $(PERLSTATICLIB:s,\,$B,) $(LIBFILES),$N \
-	    $(PERLEXE_RES:s,\,$B,)$N)
+	    @$(mktmp c0x32$(o) $(PERLEXEST_OBJ),$@,, \
+		$(shell @type Extensions_static) $(PERLSTATICLIB) $(LIBFILES),, \
+		$(PERLEXE_RES))
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -mconsole -o $@ $(BLINK_FLAGS) \
-	    $(mktmp $(LKPRE) $(subst,\,$B $(shell @type Extensions_static)) \
-	        $(PERLSTATICLIB:s,\,$B,) $(LIBFILES) $(PERLEXEST_OBJ) \
-	        $(PERLEXE_RES:s,\,$B,) $(LKPOST))
+	    $(mktmp $(LKPRE) $(shell @type Extensions_static) \
+		$(PERLSTATICLIB) $(LIBFILES) $(PERLEXEST_OBJ) \
+		$(PERLEXE_RES) $(LKPOST))
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ -stack:0x1000000 $(BLINK_FLAGS) \
 	    @Extensions_static $(PERLSTATICLIB) \

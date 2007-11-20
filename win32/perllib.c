@@ -216,7 +216,7 @@ RunPerl(int argc, char **argv, char **env)
     osver.dwOSVersionInfoSize = sizeof(osver);
     GetVersionEx(&osver);
 
-    if (osver.dwPlatformId == VER_PLATFORM_WIN32_NT) {
+    if (osver.dwMajorVersion > 4) {
         WCHAR widename[MAX_PATH];
         GetModuleFileNameW(NULL, widename, sizeof(widename)/sizeof(WCHAR));
         argv[0] = ansi = win32_ansipath(widename);

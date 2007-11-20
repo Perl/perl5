@@ -22,7 +22,7 @@
    LPWSTR* WINAPI CommandLineToArgvW(LPCWSTR lpCommandLine, int * pNumArgs);
 #endif
 #ifndef WC_NO_BEST_FIT_CHARS
-#  define WC_NO_BEST_FIT_CHARS 0x00000400
+#  define WC_NO_BEST_FIT_CHARS 0x00000400 /* requires Windows 2000 or later */
 #endif
 #include <winnt.h>
 #include <tlhelp32.h>
@@ -158,7 +158,22 @@ _matherr(struct _exception *a)
 }
 #endif
 
-#if _MSC_VER >= 1400
+/* VS2005 (MSC version 14) provides a mechanism to set an invalid
+ * parameter handler.  This functionality is not available in the
+ * 64-bit compiler from the Platform SDK, which unfortunately also
+ * believes itself to be MSC version 14.
+ *
+ * There is no #define related to _set_invalid_parameter_handler(),
+ * but we can check for one of the constants defined for
+ * _set_abort_behavior(), which was introduced into stdlib.h at
+ * the same time.
+ */
+
+#if _MSC_VER >= 1400 && defined(_WRITE_ABORT_MSG)
+#  define SET_INVALID_PARAMETER_HANDLER
+#endif
+
+#ifdef SET_INVALID_PARAMETER_HANDLER
 void my_invalid_parameter_handler(const wchar_t* expression,
     const wchar_t* function, 
     const wchar_t* file, 
@@ -185,6 +200,12 @@ IsWinNT(void)
     return (win32_os_id() == VER_PLATFORM_WIN32_NT);
 }
 
+int
+IsWin2000(void)
+{
+    return (g_osver.dwMajorVersion > 4);
+}
+
 EXTERN_C void
 set_w32_module_name(void)
 {
@@ -198,7 +219,7 @@ set_w32_module_name(void)
     osver.dwOSVersionInfoSize = sizeof(osver);
     GetVersionEx(&osver);
 
-    if (osver.dwPlatformId == VER_PLATFORM_WIN32_NT) {
+    if (osver.dwMajorVersion > 4) {
         WCHAR modulename[MAX_PATH];
         WCHAR fullname[MAX_PATH];
         char *ansi;
@@ -845,7 +866,7 @@ win32_opendir(char *filename)
     scanname[len] = '\0';
 
     /* do the FindFirstFile call */
-    if (IsWinNT()) {
+    if (IsWin2000()) {
         WCHAR wscanname[sizeof(scanname)];
         MultiByteToWideChar(CP_ACP, 0, scanname, -1, wscanname, sizeof(wscanname)/sizeof(WCHAR));
 	dirp->handle = FindFirstFileW(PerlDir_mapW(wscanname), &wFindData);
@@ -936,7 +957,7 @@ win32_readdir(DIR *dirp)
 	    /* finding the next file that matches the wildcard
 	     * (which should be all of them in this directory!).
 	     */
-	    if (IsWinNT()) {
+	    if (IsWin2000()) {
                 WIN32_FIND_DATAW wFindData;
 		res = FindNextFileW(dirp->handle, &wFindData);
 		if (res) {
@@ -1203,7 +1224,7 @@ kill_process_tree_toolhelp(DWORD pid, int sig)
     int killed = 0;
 
     process_handle = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
-    if (process_handle == INVALID_HANDLE_VALUE)
+    if (process_handle == NULL)
         return 0;
 
     killed += terminate_process(pid, process_handle, sig);
@@ -1238,7 +1259,7 @@ kill_process_tree_sysinfo(SYSTEM_PROCESSES *process_info, DWORD pid, int sig)
     int killed = 0;
 
     process_handle = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
-    if (process_handle == INVALID_HANDLE_VALUE)
+    if (process_handle == NULL)
         return 0;
 
     killed += terminate_process(pid, process_handle, sig);
@@ -1293,7 +1314,8 @@ my_kill(int pid, int sig)
         return killpg(pid, -sig);
 
     process_handle = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
-    if (process_handle != INVALID_HANDLE_VALUE) {
+    /* OpenProcess() returns NULL on error, *not* INVALID_HANDLE_VALUE */
+    if (process_handle != NULL) {
         retval = terminate_process(pid, process_handle, sig);
         CloseHandle(process_handle);
     }
@@ -4638,7 +4660,7 @@ win32_ctrlhandler(DWORD dwCtrlType)
 }
 
 
-#if _MSC_VER >= 1400
+#ifdef SET_INVALID_PARAMETER_HANDLER
 #  include <crtdbg.h>
 #endif
 
@@ -4650,8 +4672,8 @@ ansify_path(void)
     WCHAR *wide_path;
     WCHAR *wide_dir;
 
-    /* there is no Unicode environment on Windows 9X */
-    if (IsWin95())
+    /* win32_ansipath() requires Windows 2000 or later */
+    if (!IsWin2000())
         return;
 
     /* fetch Unicode version of PATH */
@@ -4745,7 +4767,7 @@ Perl_win32_init(int *argcp, char ***argvp)
 {
     HMODULE module;
 
-#if _MSC_VER >= 1400
+#ifdef SET_INVALID_PARAMETER_HANDLER
     _invalid_parameter_handler oldHandler, newHandler;
     newHandler = my_invalid_parameter_handler;
     oldHandler = _set_invalid_parameter_handler(newHandler);
@@ -4857,6 +4879,16 @@ Perl_sys_intern_init(pTHX)
 	/* Force C runtime signal stuff to set its console handler */
 	signal(SIGINT,win32_csighandler);
 	signal(SIGBREAK,win32_csighandler);
+
+        /* We spawn asynchronous processes with the CREATE_NEW_PROCESS_GROUP
+         * flag.  This has the side-effect of disabling Ctrl-C events in all
+         * processes in this group.  At least on Windows NT and later we
+         * can re-enable Ctrl-C handling by calling SetConsoleCtrlHandler()
+         * with a NULL handler.  This is not valid on Windows 9X.
+         */
+        if (IsWinNT())
+            SetConsoleCtrlHandler(NULL,FALSE);
+
 	/* Push our handler on top */
 	SetConsoleCtrlHandler(win32_ctrlhandler,TRUE);
     }

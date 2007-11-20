@@ -127,8 +127,11 @@ struct utsname {
 /* Define USE_FIXED_OSFHANDLE to fix MSVCRT's _open_osfhandle() on W95.
    It now uses some black magic to work seamlessly with the DLL CRT and
    works with MSVC++ 4.0+ or GCC/Mingw32
-	-- BKS 1-24-2000 */
-#if (defined(_M_IX86) && _MSC_VER >= 1000) || defined(__MINGW32__)
+	-- BKS 1-24-2000
+   Only use this fix for VC++ 6.x or earlier (and for GCC, which we assume
+   uses MSVCRT.DLL). Later versions use MSVCR70.dll, MSVCR71.dll, etc, which
+   do not require the fix. */
+#if (defined(_M_IX86) && _MSC_VER >= 1000 && _MSC_VER <= 1200) || defined(__MINGW32__)
 #define USE_FIXED_OSFHANDLE
 #endif
 
