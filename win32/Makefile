@@ -401,7 +401,7 @@ ARCHNAME	= $(ARCHNAME)-thread
 !IF "$(CCTYPE)" == "MSVC60" || "$(CCTYPE)" == "MSVC70"     || \
     "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE" || \
     "$(CCTYPE)" == "MSVC90" || "$(CCTYPE)" == "MSVC90FREE"
-DELAYLOAD	= -DELAYLOAD:ws2_32.dll -DELAYLOAD:shell32.dll delayimp.lib
+DELAYLOAD	= -DELAYLOAD:ws2_32.dll delayimp.lib
 !ENDIF
 
 # Visual C++ 2005 and 2008 (VC++ 8.x and 9.x) create manifest files for EXEs and

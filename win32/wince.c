@@ -2833,14 +2833,6 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
 #  endif /* USE_ITHREADS */
 #endif /* HAVE_INTERP_INTERN */
 
-void
-win32_argv2utf8(int argc, char** argv)
-{
-  /* do nothing, since we're not aware of command line arguments
-   * currently ...
-   */
-}
-
 // added to remove undefied symbol error in CodeWarrior compilation
 int
 Perl_Ireentrant_buffer_ptr(aTHX)
