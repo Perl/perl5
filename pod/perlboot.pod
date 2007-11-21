@@ -26,7 +26,7 @@ Let's let the animals talk for a moment:
       print "a Horse goes neigh!\n";
     }
     sub Sheep::speak {
-      print "a Sheep goes baaaah!\n"
+      print "a Sheep goes baaaah!\n";
     }
 
     Cow::speak;
@@ -106,7 +106,7 @@ example:
       print "a Horse goes neigh!\n";
     }
     sub Sheep::speak {
-      print "a Sheep goes baaaah!\n"
+      print "a Sheep goes baaaah!\n";
     }
 
     @pasture = qw(Cow Cow Horse Sheep Sheep);
@@ -172,7 +172,7 @@ This method provides the constant text for the sound itself.
       sub sound { "moooo" }
       sub speak {
 	my $class = shift;
-	print "a $class goes ", $class->sound, "!\n"
+	print "a $class goes ", $class->sound, "!\n";
       }
     }
 
@@ -184,7 +184,7 @@ returns C<moooo>.  But how different would this be for the C<Horse>?
       sub sound { "neigh" }
       sub speak {
 	my $class = shift;
-	print "a $class goes ", $class->sound, "!\n"
+	print "a $class goes ", $class->sound, "!\n";
       }
     }
 
@@ -200,7 +200,7 @@ definition for C<speak>:
     { package Animal;
       sub speak {
 	my $class = shift;
-	print "a $class goes ", $class->sound, "!\n"
+	print "a $class goes ", $class->sound, "!\n";
       }
     }
 
@@ -423,7 +423,7 @@ and the C<Horse> class:
   { package Animal;
     sub speak {
       my $class = shift;
-      print "a $class goes ", $class->sound, "!\n"
+      print "a $class goes ", $class->sound, "!\n";
     }
   }
   { package Horse;
@@ -574,7 +574,7 @@ C<Animal>, so let's put it there:
   { package Animal;
     sub speak {
       my $class = shift;
-      print "a $class goes ", $class->sound, "!\n"
+      print "a $class goes ", $class->sound, "!\n";
     }
     sub name {
       my $self = shift;
