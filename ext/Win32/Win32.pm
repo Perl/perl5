@@ -8,7 +8,7 @@ BEGIN {
     require DynaLoader;
 
     @ISA = qw|Exporter DynaLoader|;
-    $VERSION = '0.33';
+    $VERSION = '0.34';
     $XS_VERSION = $VERSION;
     $VERSION = eval $VERSION;
 
@@ -526,7 +526,7 @@ elements are, respectively: An arbitrary descriptive string, the major
 version number of the operating system, the minor version number, the
 build number, and a digit indicating the actual operating system.
 For the ID, the values are 0 for Win32s, 1 for Windows 9X/Me and 2 for
-Windows NT/2000/XP/2003.  In scalar context it returns just the ID.
+Windows NT/2000/XP/2003/Vista.  In scalar context it returns just the ID.
 
 Currently known values for ID MAJOR and MINOR are as follows:
 
@@ -572,7 +572,7 @@ constants.
 PRODUCTTYPE provides additional information about the system.  It should
 be one of the following integer values:
 
-    1 - Workstation (NT 4, 2000 Pro, XP Home, XP Pro)
+    1 - Workstation (NT 4, 2000 Pro, XP Home, XP Pro, Vista)
     2 - Domaincontroller
     3 - Server
 
@@ -587,7 +587,7 @@ GetOSVersion() in list context.
 
 Currently the possible values for the OS name are
 
- Win32s Win95 Win98 WinMe WinNT3.51 WinNT4 Win2000 WinXP/.Net Win2003
+ Win32s Win95 Win98 WinMe WinNT3.51 WinNT4 Win2000 WinXP/.Net Win2003 WinVista
 
 This routine is just a simple interface into GetOSVersion().  More
 specific or demanding situations should use that instead.  Another
