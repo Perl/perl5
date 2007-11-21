@@ -15,12 +15,6 @@
 #define Win32_Winsock
 #endif
 #include <windows.h>
-/* GCC-2.95.2/Mingw32-1.1 forgot the WINAPI on CommandLineToArgvW() */
-#if defined(__MINGW32__) && (__MINGW32_MAJOR_VERSION==1)	
-#  include <shellapi.h>
-#else
-   LPWSTR* WINAPI CommandLineToArgvW(LPCWSTR lpCommandLine, int * pNumArgs);
-#endif
 #ifndef WC_NO_BEST_FIT_CHARS
 #  define WC_NO_BEST_FIT_CHARS 0x00000400 /* requires Windows 2000 or later */
 #endif
@@ -141,7 +135,7 @@ HANDLE	w32_perldll_handle = INVALID_HANDLE_VALUE;
 char	w32_module_name[MAX_PATH+1];
 END_EXTERN_C
 
-static DWORD	w32_platform = (DWORD)-1;
+static OSVERSIONINFO g_osver = {0, 0, 0, 0, 0, ""};
 
 static HANDLE (WINAPI *pfnCreateToolhelp32Snapshot)(DWORD, DWORD) = NULL;
 static BOOL   (WINAPI *pfnProcess32First)(HANDLE, PROCESSENTRY32*) = NULL;
@@ -191,13 +185,13 @@ void my_invalid_parameter_handler(const wchar_t* expression,
 int
 IsWin95(void)
 {
-    return (win32_os_id() == VER_PLATFORM_WIN32_WINDOWS);
+    return (g_osver.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS);
 }
 
 int
 IsWinNT(void)
 {
-    return (win32_os_id() == VER_PLATFORM_WIN32_NT);
+    return (g_osver.dwPlatformId == VER_PLATFORM_WIN32_NT);
 }
 
 int
@@ -520,15 +514,7 @@ Perl_my_pclose(pTHX_ PerlIO *fp)
 DllExport unsigned long
 win32_os_id(void)
 {
-    static OSVERSIONINFO osver;
-
-    if (osver.dwPlatformId != w32_platform) {
-	memset(&osver, 0, sizeof(OSVERSIONINFO));
-	osver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-	GetVersionEx(&osver);
-	w32_platform = osver.dwPlatformId;
-    }
-    return (unsigned long)w32_platform;
+    return (unsigned long)g_osver.dwPlatformId;
 }
 
 DllExport int
@@ -1909,44 +1895,34 @@ win32_uname(struct utsname *name)
 {
     struct hostent *hep;
     STRLEN nodemax = sizeof(name->nodename)-1;
-    OSVERSIONINFO osver;
 
-    memset(&osver, 0, sizeof(OSVERSIONINFO));
-    osver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-    if (GetVersionEx(&osver)) {
-	/* sysname */
-	switch (osver.dwPlatformId) {
-	case VER_PLATFORM_WIN32_WINDOWS:
-	    strcpy(name->sysname, "Windows");
-	    break;
-	case VER_PLATFORM_WIN32_NT:
-	    strcpy(name->sysname, "Windows NT");
-	    break;
-	case VER_PLATFORM_WIN32s:
-	    strcpy(name->sysname, "Win32s");
-	    break;
-	default:
-	    strcpy(name->sysname, "Win32 Unknown");
-	    break;
-	}
-
-	/* release */
-	sprintf(name->release, "%d.%d",
-		osver.dwMajorVersion, osver.dwMinorVersion);
-
-	/* version */
-	sprintf(name->version, "Build %d",
-		osver.dwPlatformId == VER_PLATFORM_WIN32_NT
-		? osver.dwBuildNumber : (osver.dwBuildNumber & 0xffff));
-	if (osver.szCSDVersion[0]) {
-	    char *buf = name->version + strlen(name->version);
-	    sprintf(buf, " (%s)", osver.szCSDVersion);
-	}
+    /* sysname */
+    switch (g_osver.dwPlatformId) {
+    case VER_PLATFORM_WIN32_WINDOWS:
+        strcpy(name->sysname, "Windows");
+        break;
+    case VER_PLATFORM_WIN32_NT:
+        strcpy(name->sysname, "Windows NT");
+        break;
+    case VER_PLATFORM_WIN32s:
+        strcpy(name->sysname, "Win32s");
+        break;
+    default:
+        strcpy(name->sysname, "Win32 Unknown");
+        break;
     }
-    else {
-	*name->sysname = '\0';
-	*name->version = '\0';
-	*name->release = '\0';
+
+    /* release */
+    sprintf(name->release, "%d.%d",
+    	g_osver.dwMajorVersion, g_osver.dwMinorVersion);
+
+    /* version */
+    sprintf(name->version, "Build %d",
+    	g_osver.dwPlatformId == VER_PLATFORM_WIN32_NT
+    	? g_osver.dwBuildNumber : (g_osver.dwBuildNumber & 0xffff));
+    if (g_osver.szCSDVersion[0]) {
+        char *buf = name->version + strlen(name->version);
+        sprintf(buf, " (%s)", g_osver.szCSDVersion);
     }
 
     /* nodename */
@@ -4853,6 +4829,11 @@ void
 Perl_sys_intern_init(pTHX)
 {
     int i;
+
+    if (g_osver.dwOSVersionInfoSize == 0) {
+	g_osver.dwOSVersionInfoSize = sizeof(g_osver);
+	GetVersionEx(&g_osver);
+    }
 
     w32_perlshell_tokens	= Nullch;
     w32_perlshell_vec		= (char**)NULL;
