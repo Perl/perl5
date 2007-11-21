@@ -769,7 +769,7 @@ package Maintainers;
 	'Safe' =>
 		{
 		'MAINTAINER'	=> 'rgarcia',
-		'FILES'		=> q[ext/Safe],
+		'FILES'		=> q[ext/Safe ext/Opcode/Safe.pm],
 		'CPAN'		=> 1,
 		},
 
