@@ -26,7 +26,7 @@
 #define new_constant(a,b,c,d,e,f,g)	\
 	S_new_constant(aTHX_ a,b,STR_WITH_LEN(c),d,e,f, g)
 
-#define yylval	(PL_parser->yylval)
+#define pl_yylval	(PL_parser->yylval)
 
 /* YYINITDEPTH -- initial size of the parser's stacks.  */
 #define YYINITDEPTH 200
@@ -239,19 +239,19 @@ static const char* const lex_state_names[] = {
 #define PRETERMBLOCK(retval) return (PL_expect = XTERMBLOCK,PL_bufptr = s, REPORT(retval))
 #define PREREF(retval) return (PL_expect = XREF,PL_bufptr = s, REPORT(retval))
 #define TERM(retval) return (CLINE, PL_expect = XOPERATOR, PL_bufptr = s, REPORT(retval))
-#define LOOPX(f) return (yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)LOOPEX))
-#define FTST(f)  return (yylval.ival=f, PL_expect=XTERMORDORDOR, PL_bufptr=s, REPORT((int)UNIOP))
-#define FUN0(f)  return (yylval.ival=f, PL_expect=XOPERATOR, PL_bufptr=s, REPORT((int)FUNC0))
-#define FUN1(f)  return (yylval.ival=f, PL_expect=XOPERATOR, PL_bufptr=s, REPORT((int)FUNC1))
-#define BOop(f)  return ao((yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)BITOROP)))
-#define BAop(f)  return ao((yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)BITANDOP)))
-#define SHop(f)  return ao((yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)SHIFTOP)))
-#define PWop(f)  return ao((yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)POWOP)))
-#define PMop(f)  return(yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)MATCHOP))
-#define Aop(f)   return ao((yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)ADDOP)))
-#define Mop(f)   return ao((yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)MULOP)))
-#define Eop(f)   return (yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)EQOP))
-#define Rop(f)   return (yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)RELOP))
+#define LOOPX(f) return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)LOOPEX))
+#define FTST(f)  return (pl_yylval.ival=f, PL_expect=XTERMORDORDOR, PL_bufptr=s, REPORT((int)UNIOP))
+#define FUN0(f)  return (pl_yylval.ival=f, PL_expect=XOPERATOR, PL_bufptr=s, REPORT((int)FUNC0))
+#define FUN1(f)  return (pl_yylval.ival=f, PL_expect=XOPERATOR, PL_bufptr=s, REPORT((int)FUNC1))
+#define BOop(f)  return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)BITOROP)))
+#define BAop(f)  return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)BITANDOP)))
+#define SHop(f)  return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)SHIFTOP)))
+#define PWop(f)  return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)POWOP)))
+#define PMop(f)  return(pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)MATCHOP))
+#define Aop(f)   return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)ADDOP)))
+#define Mop(f)   return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)MULOP)))
+#define Eop(f)   return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)EQOP))
+#define Rop(f)   return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)RELOP))
 
 /* This bit of chicanery makes a unary function followed by
  * a parenthesis into a function with one argument, highest precedence.
@@ -259,7 +259,7 @@ static const char* const lex_state_names[] = {
  * operator (such as C<shift // 0>).
  */
 #define UNI2(f,x) { \
-	yylval.ival = f; \
+	pl_yylval.ival = f; \
 	PL_expect = x; \
 	PL_bufptr = s; \
 	PL_last_uni = PL_oldbufptr; \
@@ -273,7 +273,7 @@ static const char* const lex_state_names[] = {
 #define UNIDOR(f) UNI2(f,XTERMORDORDOR)
 
 #define UNIBRACK(f) { \
-	yylval.ival = f; \
+	pl_yylval.ival = f; \
 	PL_bufptr = s; \
 	PL_last_uni = PL_oldbufptr; \
 	if (*s == '(') \
@@ -283,15 +283,15 @@ static const char* const lex_state_names[] = {
 	}
 
 /* grandfather return to old style */
-#define OLDLOP(f) return(yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)LSTOP)
+#define OLDLOP(f) return(pl_yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)LSTOP)
 
 #ifdef DEBUGGING
 
-/* how to interpret the yylval associated with the token */
+/* how to interpret the pl_yylval associated with the token */
 enum token_type {
     TOKENTYPE_NONE,
     TOKENTYPE_IVAL,
-    TOKENTYPE_OPNUM, /* yylval.ival contains an opcode number */
+    TOKENTYPE_OPNUM, /* pl_yylval.ival contains an opcode number */
     TOKENTYPE_PVAL,
     TOKENTYPE_OPVAL,
     TOKENTYPE_GVVAL
@@ -371,7 +371,7 @@ static struct debug_tokens {
     { 0,		TOKENTYPE_NONE,		NULL }
 };
 
-/* dump the returned token in rv, plus any optional arg in yylval */
+/* dump the returned token in rv, plus any optional arg in pl_yylval */
 
 STATIC int
 S_tokereport(pTHX_ I32 rv)
@@ -403,22 +403,22 @@ S_tokereport(pTHX_ I32 rv)
 	case TOKENTYPE_GVVAL: /* doesn't appear to be used */
 	    break;
 	case TOKENTYPE_IVAL:
-	    Perl_sv_catpvf(aTHX_ report, "(ival=%"IVdf")", (IV)yylval.ival);
+	    Perl_sv_catpvf(aTHX_ report, "(ival=%"IVdf")", (IV)pl_yylval.ival);
 	    break;
 	case TOKENTYPE_OPNUM:
 	    Perl_sv_catpvf(aTHX_ report, "(ival=op_%s)",
-				    PL_op_name[yylval.ival]);
+				    PL_op_name[pl_yylval.ival]);
 	    break;
 	case TOKENTYPE_PVAL:
-	    Perl_sv_catpvf(aTHX_ report, "(pval=\"%s\")", yylval.pval);
+	    Perl_sv_catpvf(aTHX_ report, "(pval=\"%s\")", pl_yylval.pval);
 	    break;
 	case TOKENTYPE_OPVAL:
-	    if (yylval.opval) {
+	    if (pl_yylval.opval) {
 		Perl_sv_catpvf(aTHX_ report, "(opval=op_%s)",
-				    PL_op_name[yylval.opval->op_type]);
-		if (yylval.opval->op_type == OP_CONST) {
+				    PL_op_name[pl_yylval.opval->op_type]);
+		if (pl_yylval.opval->op_type == OP_CONST) {
 		    Perl_sv_catpvf(aTHX_ report, " %s",
-			SvPEEK(cSVOPx_sv(yylval.opval)));
+			SvPEEK(cSVOPx_sv(pl_yylval.opval)));
 		}
 
 	    }
@@ -458,11 +458,11 @@ S_ao(pTHX_ int toketype)
     if (*PL_bufptr == '=') {
 	PL_bufptr++;
 	if (toketype == ANDAND)
-	    yylval.ival = OP_ANDASSIGN;
+	    pl_yylval.ival = OP_ANDASSIGN;
 	else if (toketype == OROR)
-	    yylval.ival = OP_ORASSIGN;
+	    pl_yylval.ival = OP_ORASSIGN;
 	else if (toketype == DORDOR)
-	    yylval.ival = OP_DORASSIGN;
+	    pl_yylval.ival = OP_DORASSIGN;
 	toketype = ASSIGNOP;
     }
     return toketype;
@@ -1218,7 +1218,7 @@ STATIC I32
 S_lop(pTHX_ I32 f, int x, char *s)
 {
     dVAR;
-    yylval.ival = f;
+    pl_yylval.ival = f;
     CLINE;
     PL_expect = x;
     PL_bufptr = s;
@@ -1503,8 +1503,8 @@ S_force_version(pTHX_ char *s, int guessing)
 #endif
         if (*d == ';' || isSPACE(*d) || *d == '}' || !*d) {
 	    SV *ver;
-            s = scan_num(s, &yylval);
-            version = yylval.opval;
+            s = scan_num(s, &pl_yylval);
+            version = pl_yylval.opval;
 	    ver = cSVOPx(version)->op_sv;
 	    if (SvPOK(ver) && !SvNIOK(ver)) {
 		SvUPGRADE(ver, SVt_PVNV);
@@ -1607,10 +1607,10 @@ S_tokeq(pTHX_ SV *sv)
 
 /*
  * S_sublex_start
- * Assumes that yylval.ival is the op we're creating (e.g. OP_LCFIRST).
+ * Assumes that pl_yylval.ival is the op we're creating (e.g. OP_LCFIRST).
  *
  * Pattern matching will set PL_lex_op to the pattern-matching op to
- * make (we return THING if yylval.ival is OP_NULL, PMFUNC otherwise).
+ * make (we return THING if pl_yylval.ival is OP_NULL, PMFUNC otherwise).
  *
  * OP_CONST and OP_READLINE are easy--just make the new op and return.
  *
@@ -1625,10 +1625,10 @@ STATIC I32
 S_sublex_start(pTHX)
 {
     dVAR;
-    register const I32 op_type = yylval.ival;
+    register const I32 op_type = pl_yylval.ival;
 
     if (op_type == OP_NULL) {
-	yylval.opval = PL_lex_op;
+	pl_yylval.opval = PL_lex_op;
 	PL_lex_op = NULL;
 	return THING;
     }
@@ -1645,7 +1645,7 @@ S_sublex_start(pTHX)
 	    SvREFCNT_dec(sv);
 	    sv = nsv;
 	}
-	yylval.opval = (OP*)newSVOP(op_type, 0, sv);
+	pl_yylval.opval = (OP*)newSVOP(op_type, 0, sv);
 	PL_lex_stuff = NULL;
 	/* Allow <FH> // "foo" */
 	if (op_type == OP_READLINE)
@@ -1655,7 +1655,7 @@ S_sublex_start(pTHX)
     else if (op_type == OP_BACKTICK && PL_lex_op) {
 	/* readpipe() vas overriden */
 	cSVOPx(cLISTOPx(cUNOPx(PL_lex_op)->op_first)->op_first->op_sibling)->op_sv = tokeq(PL_lex_stuff);
-	yylval.opval = PL_lex_op;
+	pl_yylval.opval = PL_lex_op;
 	PL_lex_op = NULL;
 	PL_lex_stuff = NULL;
 	return THING;
@@ -1668,7 +1668,7 @@ S_sublex_start(pTHX)
 
     PL_expect = XTERM;
     if (PL_lex_op) {
-	yylval.opval = PL_lex_op;
+	pl_yylval.opval = PL_lex_op;
 	PL_lex_op = NULL;
 	return PMFUNC;
     }
@@ -1752,7 +1752,7 @@ S_sublex_done(pTHX)
 	if (SvUTF8(PL_linestr))
 	    SvUTF8_on(sv);
 	PL_expect = XOPERATOR;
-	yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
+	pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
 	return THING;
     }
 
@@ -1825,7 +1825,7 @@ S_sublex_done(pTHX)
   Returns a pointer to the character scanned up to. If this is
   advanced from the start pointer supplied (i.e. if anything was
   successfully parsed), will leave an OP for the substring scanned
-  in yylval. Caller must intuit reason for not parsing further
+  in pl_yylval. Caller must intuit reason for not parsing further
   by looking at the next characters herself.
 
   In patterns:
@@ -2464,7 +2464,7 @@ S_scan_const(pTHX_ char *start)
 	SvPV_shrink_to_cur(sv);
     }
 
-    /* return the substring (via yylval) only if we parsed anything */
+    /* return the substring (via pl_yylval) only if we parsed anything */
     if (s > PL_bufptr) {
 	if ( PL_hints & ( PL_lex_inpat ? HINT_NEW_RE : HINT_NEW_STRING ) ) {
 	    const char *const key = PL_lex_inpat ? "qr" : "q";
@@ -2486,7 +2486,7 @@ S_scan_const(pTHX_ char *start)
 	    sv = S_new_constant(aTHX_ start, s - start, key, keylen, sv, NULL,
 				type, typelen);
 	}
-	yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
+	pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
     } else
 	SvREFCNT_dec(sv);
     return s;
@@ -2957,7 +2957,7 @@ S_readpipe_override(pTHX)
 {
     GV **gvp;
     GV *gv_readpipe = gv_fetchpvs("readpipe", GV_NOTQUAL, SVt_PVCV);
-    yylval.ival = OP_BACKTICK;
+    pl_yylval.ival = OP_BACKTICK;
     if ((gv_readpipe
 		&& GvCVu(gv_readpipe) && GvIMPORTED_CV(gv_readpipe))
 	    ||
@@ -3080,8 +3080,8 @@ Perl_madlex(pTHX)
     case FUNC0SUB:
     case UNIOPSUB:
     case LSTOPSUB:
-	if (yylval.opval)
-	    append_madprops(PL_thismad, yylval.opval, 0);
+	if (pl_yylval.opval)
+	    append_madprops(PL_thismad, pl_yylval.opval, 0);
 	PL_thismad = 0;
 	return optype;
 
@@ -3151,7 +3151,7 @@ Perl_madlex(pTHX)
     }
 
     /* Create new token struct.  Note: opvals return early above. */
-    yylval.tkval = newTOKEN(optype, yylval, PL_thismad);
+    pl_yylval.tkval = newTOKEN(optype, pl_yylval, PL_thismad);
     PL_thismad = 0;
     return optype;
 }
@@ -3180,7 +3180,7 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
 	s = force_word(s,WORD,FALSE,TRUE,FALSE);
 	s = force_version(s, FALSE);
     }
-    yylval.ival = is_use;
+    pl_yylval.ival = is_use;
     return s;
 }
 #ifdef DEBUGGING
@@ -3261,7 +3261,7 @@ Perl_yylex(pTHX)
     case LEX_KNOWNEXT:
 #ifdef PERL_MAD
 	PL_lasttoke--;
-	yylval = PL_nexttoke[PL_lasttoke].next_val;
+	pl_yylval = PL_nexttoke[PL_lasttoke].next_val;
 	if (PL_madskills) {
 	    PL_thismad = PL_nexttoke[PL_lasttoke].next_mad;
 	    PL_nexttoke[PL_lasttoke].next_mad = 0;
@@ -3281,7 +3281,7 @@ Perl_yylex(pTHX)
   	}
 #else
 	PL_nexttoke--;
-	yylval = PL_nextval[PL_nexttoke];
+	pl_yylval = PL_nextval[PL_nexttoke];
 	if (!PL_nexttoke) {
 	    PL_lex_state = PL_lex_defer;
 	    PL_expect = PL_lex_expect;
@@ -3497,7 +3497,7 @@ Perl_yylex(pTHX)
 		sv = tokeq(sv);
 	    else if ( PL_hints & HINT_NEW_RE )
 		sv = new_constant(NULL, 0, "qr", sv, sv, "q", 1);
-	    yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
+	    pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
 	    s = PL_bufend;
 	}
 	else {
@@ -3513,7 +3513,7 @@ Perl_yylex(pTHX)
 	    if (PL_madskills) {
 		curmad('X', newSVpvn(PL_bufptr,s-PL_bufptr));
 	    }
-	    NEXTVAL_NEXTTOKE = yylval;
+	    NEXTVAL_NEXTTOKE = pl_yylval;
 	    PL_expect = XTERM;
 	    force_next(THING);
 	    if (PL_lex_starts++) {
@@ -4287,7 +4287,7 @@ Perl_yylex(pTHX)
 			sv_free(sv);
 			if (PL_in_my == KEY_our) {
 #ifdef USE_ITHREADS
-			    GvUNIQUE_on(cGVOPx_gv(yylval.opval));
+			    GvUNIQUE_on(cGVOPx_gv(pl_yylval.opval));
 #else
 			    /* skip to avoid loading attributes.pm */
 #endif
@@ -4570,7 +4570,7 @@ Perl_yylex(pTHX)
 	    }
 	    break;
 	}
-	yylval.ival = CopLINE(PL_curcop);
+	pl_yylval.ival = CopLINE(PL_curcop);
 	if (isSPACE(*s) || *s == '#')
 	    PL_copline = NOLINE;   /* invalidate current command line number */
 	TOKEN('{');
@@ -4643,7 +4643,7 @@ Perl_yylex(pTHX)
 	}
 	else
 	    PREREF('&');
-	yylval.ival = (OPpENTERSUB_AMPER<<8);
+	pl_yylval.ival = (OPpENTERSUB_AMPER<<8);
 	TERM('&');
 
     case '|':
@@ -4715,7 +4715,7 @@ Perl_yylex(pTHX)
 		goto leftbracket;
 	    }
 	}
-	yylval.ival = 0;
+	pl_yylval.ival = 0;
 	OPERATOR(ASSIGNOP);
     case '!':
 	s++;
@@ -4819,9 +4819,9 @@ Perl_yylex(pTHX)
 
 	/* This kludge not intended to be bulletproof. */
 	if (PL_tokenbuf[1] == '[' && !PL_tokenbuf[2]) {
-	    yylval.opval = newSVOP(OP_CONST, 0,
+	    pl_yylval.opval = newSVOP(OP_CONST, 0,
 				   newSViv(CopARYBASE_get(&PL_compiling)));
-	    yylval.opval->op_private = OPpCONST_ARYBASE;
+	    pl_yylval.opval->op_private = OPpCONST_ARYBASE;
 	    TERM(THING);
 	}
 
@@ -5017,10 +5017,10 @@ Perl_yylex(pTHX)
 		s++;
 		if (*s == tmp) {
 		    s++;
-		    yylval.ival = OPf_SPECIAL;
+		    pl_yylval.ival = OPf_SPECIAL;
 		}
 		else
-		    yylval.ival = 0;
+		    pl_yylval.ival = 0;
 		OPERATOR(DOTDOT);
 	    }
 	    if (PL_expect != XOPERATOR)
@@ -5030,7 +5030,7 @@ Perl_yylex(pTHX)
 	/* FALL THROUGH */
     case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
-	s = scan_num(s, &yylval);
+	s = scan_num(s, &pl_yylval);
 	DEBUG_T( { printbuf("### Saw number in %s\n", s); } );
 	if (PL_expect == XOPERATOR)
 	    no_op("Number",s);
@@ -5050,7 +5050,7 @@ Perl_yylex(pTHX)
 	}
 	if (!s)
 	    missingterm(NULL);
-	yylval.ival = OP_CONST;
+	pl_yylval.ival = OP_CONST;
 	TERM(sublex_start());
 
     case '"':
@@ -5067,12 +5067,12 @@ Perl_yylex(pTHX)
 	}
 	if (!s)
 	    missingterm(NULL);
-	yylval.ival = OP_CONST;
+	pl_yylval.ival = OP_CONST;
 	/* FIXME. I think that this can be const if char *d is replaced by
 	   more localised variables.  */
 	for (d = SvPV(PL_lex_stuff, len); len; len--, d++) {
 	    if (*d == '$' || *d == '@' || *d == '\\' || !UTF8_IS_INVARIANT((U8)*d)) {
-		yylval.ival = OP_STRINGIFY;
+		pl_yylval.ival = OP_STRINGIFY;
 		break;
 	    }
 	}
@@ -5103,7 +5103,7 @@ Perl_yylex(pTHX)
 	    while (isDIGIT(*start) || *start == '_')
 		start++;
 	    if (*start == '.' && isDIGIT(start[1])) {
-		s = scan_num(s, &yylval);
+		s = scan_num(s, &pl_yylval);
 		TERM(THING);
 	    }
 	    /* avoid v123abc() or $h{v1}, allow C<print v10;> */
@@ -5112,7 +5112,7 @@ Perl_yylex(pTHX)
 			|| PL_expect == XTERMORDORDOR)) {
 		GV *const gv = gv_fetchpvn_flags(s, start - s, 0, SVt_PVCV);
 		if (!gv) {
-		    s = scan_num(s, &yylval);
+		    s = scan_num(s, &pl_yylval);
 		    TERM(THING);
 		}
 	    }
@@ -5181,7 +5181,7 @@ Perl_yylex(pTHX)
 	if (!tmp && PL_expect == XSTATE
 	      && d < PL_bufend && *d == ':' && *(d + 1) != ':') {
 	    s = d + 1;
-	    yylval.pval = CopLABEL_alloc(PL_tokenbuf);
+	    pl_yylval.pval = CopLABEL_alloc(PL_tokenbuf);
 	    CLINE;
 	    TOKEN(LABEL);
 	}
@@ -5192,10 +5192,10 @@ Perl_yylex(pTHX)
 	/* Is this a word before a => operator? */
 	if (*d == '=' && d[1] == '>') {
 	    CLINE;
-	    yylval.opval
+	    pl_yylval.opval
 		= (OP*)newSVOP(OP_CONST, 0,
 			       S_newSV_maybe_utf8(aTHX_ PL_tokenbuf, len));
-	    yylval.opval->op_private = OPpCONST_BARE;
+	    pl_yylval.opval->op_private = OPpCONST_BARE;
 	    TERM(WORD);
 	}
 
@@ -5345,8 +5345,8 @@ Perl_yylex(pTHX)
 		/* Presume this is going to be a bareword of some sort. */
 
 		CLINE;
-		yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
-		yylval.opval->op_private = OPpCONST_BARE;
+		pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
+		pl_yylval.opval->op_private = OPpCONST_BARE;
 		/* UTF-8 package name? */
 		if (UTF && !IN_BYTES &&
 		    is_utf8_string((U8*)SvPVX_const(sv), SvCUR(sv)))
@@ -5425,9 +5425,9 @@ Perl_yylex(pTHX)
 		/* Is this a word before a => operator? */
 		if (*s == '=' && s[1] == '>' && !pkgname) {
 		    CLINE;
-		    sv_setpv(((SVOP*)yylval.opval)->op_sv, PL_tokenbuf);
+		    sv_setpv(((SVOP*)pl_yylval.opval)->op_sv, PL_tokenbuf);
 		    if (UTF && !IN_BYTES && is_utf8_string((U8*)PL_tokenbuf, len))
-		      SvUTF8_on(((SVOP*)yylval.opval)->op_sv);
+		      SvUTF8_on(((SVOP*)pl_yylval.opval)->op_sv);
 		    TERM(WORD);
 		}
 
@@ -5450,7 +5450,7 @@ Perl_yylex(pTHX)
 		    }
 		    start_force(PL_curforce);
 #endif
-		    NEXTVAL_NEXTTOKE.opval = yylval.opval;
+		    NEXTVAL_NEXTTOKE.opval = pl_yylval.opval;
 		    PL_expect = XOPERATOR;
 #ifdef PERL_MAD
 		    if (PL_madskills) {
@@ -5460,7 +5460,7 @@ Perl_yylex(pTHX)
 		    }
 #endif
 		    force_next(WORD);
-		    yylval.ival = 0;
+		    pl_yylval.ival = 0;
 		    TOKEN('&');
 		}
 
@@ -5489,9 +5489,9 @@ Perl_yylex(pTHX)
 		    /* Check for a constant sub */
 		    if ((sv = gv_const_sv(gv))) {
 		  its_constant:
-			SvREFCNT_dec(((SVOP*)yylval.opval)->op_sv);
-			((SVOP*)yylval.opval)->op_sv = SvREFCNT_inc_simple(sv);
-			yylval.opval->op_private = 0;
+			SvREFCNT_dec(((SVOP*)pl_yylval.opval)->op_sv);
+			((SVOP*)pl_yylval.opval)->op_sv = SvREFCNT_inc_simple(sv);
+			pl_yylval.opval->op_private = 0;
 			TOKEN(WORD);
 		    }
 
@@ -5504,9 +5504,9 @@ Perl_yylex(pTHX)
 			cv = GvCV(gv);
 		    }
 
-		    op_free(yylval.opval);
-		    yylval.opval = newCVREF(0, newGVOP(OP_GV, 0, gv));
-		    yylval.opval->op_private |= OPpENTERSUB_NOPAREN;
+		    op_free(pl_yylval.opval);
+		    pl_yylval.opval = newCVREF(0, newGVOP(OP_GV, 0, gv));
+		    pl_yylval.opval->op_private |= OPpENTERSUB_NOPAREN;
 		    PL_last_lop = PL_oldbufptr;
 		    PL_last_lop_op = OP_ENTERSUB;
 		    /* Is there a prototype? */
@@ -5539,7 +5539,7 @@ Perl_yylex(pTHX)
 			    PL_thiswhite = 0;
 			}
 			start_force(PL_curforce);
-			NEXTVAL_NEXTTOKE.opval = yylval.opval;
+			NEXTVAL_NEXTTOKE.opval = pl_yylval.opval;
 			PL_expect = XTERM;
 			if (PL_madskills) {
 			    PL_nextwhite = nextPL_nextwhite;
@@ -5572,15 +5572,15 @@ Perl_yylex(pTHX)
 		    }
 		    if (probable_sub) {
 			gv = gv_fetchpv(PL_tokenbuf, GV_ADD, SVt_PVCV);
-			op_free(yylval.opval);
-			yylval.opval = newCVREF(0, newGVOP(OP_GV, 0, gv));
-			yylval.opval->op_private |= OPpENTERSUB_NOPAREN;
+			op_free(pl_yylval.opval);
+			pl_yylval.opval = newCVREF(0, newGVOP(OP_GV, 0, gv));
+			pl_yylval.opval->op_private |= OPpENTERSUB_NOPAREN;
 			PL_last_lop = PL_oldbufptr;
 			PL_last_lop_op = OP_ENTERSUB;
 			PL_nextwhite = PL_thiswhite;
 			PL_thiswhite = 0;
 			start_force(PL_curforce);
-			NEXTVAL_NEXTTOKE.opval = yylval.opval;
+			NEXTVAL_NEXTTOKE.opval = pl_yylval.opval;
 			PL_expect = XTERM;
 			PL_nextwhite = nextPL_nextwhite;
 			curmad('X', PL_thistoken);
@@ -5589,7 +5589,7 @@ Perl_yylex(pTHX)
 			TOKEN(NOAMP);
 		    }
 #else
-		    NEXTVAL_NEXTTOKE.opval = yylval.opval;
+		    NEXTVAL_NEXTTOKE.opval = pl_yylval.opval;
 		    PL_expect = XTERM;
 		    force_next(WORD);
 		    TOKEN(NOAMP);
@@ -5599,7 +5599,7 @@ Perl_yylex(pTHX)
 		/* Call it a bare word */
 
 		if (PL_hints & HINT_STRICT_SUBS)
-		    yylval.opval->op_private |= OPpCONST_STRICT;
+		    pl_yylval.opval->op_private |= OPpCONST_STRICT;
 		else {
 		bareword:
 		    if (lastchar != '-') {
@@ -5628,17 +5628,17 @@ Perl_yylex(pTHX)
 	    }
 
 	case KEY___FILE__:
-	    yylval.opval = (OP*)newSVOP(OP_CONST, 0,
+	    pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0,
 					newSVpv(CopFILE(PL_curcop),0));
 	    TERM(THING);
 
 	case KEY___LINE__:
-            yylval.opval = (OP*)newSVOP(OP_CONST, 0,
+            pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0,
                                     Perl_newSVpvf(aTHX_ "%"IVdf, (IV)CopLINE(PL_curcop)));
 	    TERM(THING);
 
 	case KEY___PACKAGE__:
-	    yylval.opval = (OP*)newSVOP(OP_CONST, 0,
+	    pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0,
 					(PL_curstash
 					 ? newSVhek(HvNAME_HEK(PL_curstash))
 					 : &PL_sv_undef));
@@ -5878,10 +5878,10 @@ Perl_yylex(pTHX)
 		s = force_word(s,WORD,TRUE,TRUE,FALSE);
 	    if (orig_keyword == KEY_do) {
 		orig_keyword = 0;
-		yylval.ival = 1;
+		pl_yylval.ival = 1;
 	    }
 	    else
-		yylval.ival = 0;
+		pl_yylval.ival = 0;
 	    OPERATOR(DO);
 
 	case KEY_die:
@@ -5909,7 +5909,7 @@ Perl_yylex(pTHX)
 	    PREBLOCK(ELSE);
 
 	case KEY_elsif:
-	    yylval.ival = CopLINE(PL_curcop);
+	    pl_yylval.ival = CopLINE(PL_curcop);
 	    OPERATOR(ELSIF);
 
 	case KEY_eq:
@@ -5960,7 +5960,7 @@ Perl_yylex(pTHX)
 
 	case KEY_for:
 	case KEY_foreach:
-	    yylval.ival = CopLINE(PL_curcop);
+	    pl_yylval.ival = CopLINE(PL_curcop);
 	    s = SKIPSPACE1(s);
 	    if (PL_expect == XSTATE && isIDFIRST_lazy_if(s,UTF)) {
 		char *p = s;
@@ -6098,7 +6098,7 @@ Perl_yylex(pTHX)
 	    FUN0(OP_GETLOGIN);
 
 	case KEY_given:
-	    yylval.ival = CopLINE(PL_curcop);
+	    pl_yylval.ival = CopLINE(PL_curcop);
 	    OPERATOR(GIVEN);
 
 	case KEY_glob:
@@ -6108,7 +6108,7 @@ Perl_yylex(pTHX)
 	    UNI(OP_HEX);
 
 	case KEY_if:
-	    yylval.ival = CopLINE(PL_curcop);
+	    pl_yylval.ival = CopLINE(PL_curcop);
 	    OPERATOR(IF);
 
 	case KEY_index:
@@ -6140,7 +6140,7 @@ Perl_yylex(pTHX)
 	    UNI(OP_LCFIRST);
 
 	case KEY_local:
-	    yylval.ival = 0;
+	    pl_yylval.ival = 0;
 	    OPERATOR(LOCAL);
 
 	case KEY_length:
@@ -6219,7 +6219,7 @@ Perl_yylex(pTHX)
 		}
 #endif
 	    }
-	    yylval.ival = 1;
+	    pl_yylval.ival = 1;
 	    OPERATOR(MY);
 
 	case KEY_next:
@@ -6260,7 +6260,7 @@ Perl_yylex(pTHX)
 	    LOP(OP_OPEN,XTERM);
 
 	case KEY_or:
-	    yylval.ival = OP_OR;
+	    pl_yylval.ival = OP_OR;
 	    OPERATOR(OROP);
 
 	case KEY_ord:
@@ -6306,7 +6306,7 @@ Perl_yylex(pTHX)
 	    s = scan_str(s,!!PL_madskills,FALSE);
 	    if (!s)
 		missingterm(NULL);
-	    yylval.ival = OP_CONST;
+	    pl_yylval.ival = OP_CONST;
 	    TERM(sublex_start());
 
 	case KEY_quotemeta:
@@ -6370,7 +6370,7 @@ Perl_yylex(pTHX)
 	    s = scan_str(s,!!PL_madskills,FALSE);
 	    if (!s)
 		missingterm(NULL);
-	    yylval.ival = OP_STRINGIFY;
+	    pl_yylval.ival = OP_STRINGIFY;
 	    if (SvIVX(PL_lex_stuff) == '\'')
 		SvIV_set(PL_lex_stuff, 0);	/* qq'$foo' should intepolate */
 	    TERM(sublex_start());
@@ -6406,10 +6406,10 @@ Perl_yylex(pTHX)
 	    }
 	    if (orig_keyword == KEY_require) {
 		orig_keyword = 0;
-		yylval.ival = 1;
+		pl_yylval.ival = 1;
 	    }
 	    else 
-		yylval.ival = 0;
+		pl_yylval.ival = 0;
 	    PL_expect = XTERM;
 	    PL_bufptr = s;
 	    PL_last_uni = PL_oldbufptr;
@@ -6465,7 +6465,7 @@ Perl_yylex(pTHX)
 
 	case KEY_s:
 	    s = scan_subst(s);
-	    if (yylval.opval)
+	    if (pl_yylval.opval)
 		TERM(sublex_start());
 	    else
 		TOKEN(1);	/* force error */
@@ -6820,11 +6820,11 @@ Perl_yylex(pTHX)
 	    UNI(OP_UNTIE);
 
 	case KEY_until:
-	    yylval.ival = CopLINE(PL_curcop);
+	    pl_yylval.ival = CopLINE(PL_curcop);
 	    OPERATOR(UNTIL);
 
 	case KEY_unless:
-	    yylval.ival = CopLINE(PL_curcop);
+	    pl_yylval.ival = CopLINE(PL_curcop);
 	    OPERATOR(UNLESS);
 
 	case KEY_unlink:
@@ -6856,11 +6856,11 @@ Perl_yylex(pTHX)
 	    LOP(OP_VEC,XTERM);
 
 	case KEY_when:
-	    yylval.ival = CopLINE(PL_curcop);
+	    pl_yylval.ival = CopLINE(PL_curcop);
 	    OPERATOR(WHEN);
 
 	case KEY_while:
-	    yylval.ival = CopLINE(PL_curcop);
+	    pl_yylval.ival = CopLINE(PL_curcop);
 	    OPERATOR(WHILE);
 
 	case KEY_warn:
@@ -6897,7 +6897,7 @@ Perl_yylex(pTHX)
 	    goto just_a_word;
 
 	case KEY_xor:
-	    yylval.ival = OP_XOR;
+	    pl_yylval.ival = OP_XOR;
 	    OPERATOR(OROP);
 
 	case KEY_y:
@@ -6946,8 +6946,8 @@ S_pending_ident(pTHX)
                 yyerror(Perl_form(aTHX_ PL_no_myglob,
 			    PL_in_my == KEY_my ? "my" : "state", PL_tokenbuf));
 
-            yylval.opval = newOP(OP_PADANY, 0);
-            yylval.opval->op_targ = allocmy(PL_tokenbuf);
+            pl_yylval.opval = newOP(OP_PADANY, 0);
+            pl_yylval.opval->op_targ = allocmy(PL_tokenbuf);
             return PRIVATEREF;
         }
     }
@@ -6976,8 +6976,8 @@ S_pending_ident(pTHX)
 		SV *  const sym = newSVhek(stashname);
                 sv_catpvs(sym, "::");
                 sv_catpvn(sym, PL_tokenbuf+1, tokenbuf_len - 1);
-                yylval.opval = (OP*)newSVOP(OP_CONST, 0, sym);
-                yylval.opval->op_private = OPpCONST_ENTERED;
+                pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0, sym);
+                pl_yylval.opval->op_private = OPpCONST_ENTERED;
                 gv_fetchsv(sym,
                     (PL_in_eval
                         ? (GV_ADDMULTI | GV_ADDINEVAL)
@@ -7006,8 +7006,8 @@ S_pending_ident(pTHX)
                 }
             }
 
-            yylval.opval = newOP(OP_PADANY, 0);
-            yylval.opval->op_targ = tmp;
+            pl_yylval.opval = newOP(OP_PADANY, 0);
+            pl_yylval.opval->op_targ = tmp;
             return PRIVATEREF;
         }
     }
@@ -7035,9 +7035,9 @@ S_pending_ident(pTHX)
     }
 
     /* build ops for a bareword */
-    yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpvn(PL_tokenbuf + 1,
+    pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpvn(PL_tokenbuf + 1,
 						      tokenbuf_len - 1));
-    yylval.opval->op_private = OPpCONST_ENTERED;
+    pl_yylval.opval->op_private = OPpCONST_ENTERED;
     gv_fetchpvn_flags(
 	    PL_tokenbuf + 1, tokenbuf_len - 1,
 	    /* If the identifier refers to a stash, don't autovivify it.
@@ -10890,7 +10890,7 @@ S_scan_pat(pTHX_ char *start, I32 type)
     }
 
     PL_lex_op = (OP*)pm;
-    yylval.ival = OP_MATCH;
+    pl_yylval.ival = OP_MATCH;
     return s;
 }
 
@@ -10906,7 +10906,7 @@ S_scan_subst(pTHX_ char *start)
     char *modstart;
 #endif
 
-    yylval.ival = OP_NULL;
+    pl_yylval.ival = OP_NULL;
 
     s = scan_str(start,!!PL_madskills,FALSE);
 
@@ -10994,7 +10994,7 @@ S_scan_subst(pTHX_ char *start)
     }
 
     PL_lex_op = (OP*)pm;
-    yylval.ival = OP_SUBST;
+    pl_yylval.ival = OP_SUBST;
     return s;
 }
 
@@ -11012,7 +11012,7 @@ S_scan_trans(pTHX_ char *start)
     char *modstart;
 #endif
 
-    yylval.ival = OP_NULL;
+    pl_yylval.ival = OP_NULL;
 
     s = scan_str(start,!!PL_madskills,FALSE);
     if (!s)
@@ -11074,7 +11074,7 @@ S_scan_trans(pTHX_ char *start)
       (DO_UTF8(PL_lex_repl) ? OPpTRANS_TO_UTF   : 0);
 
     PL_lex_op = o;
-    yylval.ival = OP_TRANS;
+    pl_yylval.ival = OP_TRANS;
 
 #ifdef PERL_MAD
     if (PL_madskills) {
@@ -11345,14 +11345,14 @@ retval:
 	    sv_recode_to_utf8(tmpstr, PL_encoding);
     }
     PL_lex_stuff = tmpstr;
-    yylval.ival = op_type;
+    pl_yylval.ival = op_type;
     return s;
 }
 
 /* scan_inputsymbol
    takes: current position in input buffer
    returns: new position in input buffer
-   side-effects: yylval and lex_op are set.
+   side-effects: pl_yylval and lex_op are set.
 
    This code handles:
 
@@ -11412,7 +11412,7 @@ S_scan_inputsymbol(pTHX_ char *start)
     */
 
     if (d - PL_tokenbuf != len) {
-	yylval.ival = OP_GLOB;
+	pl_yylval.ival = OP_GLOB;
 	s = scan_str(start,!!PL_madskills,FALSE);
 	if (!s)
 	   Perl_croak(aTHX_ "Glob not terminated");
@@ -11487,8 +11487,8 @@ intro_sym:
 	    }
 	    if (!readline_overriden)
 		PL_lex_op->op_flags |= OPf_SPECIAL;
-	    /* we created the ops in PL_lex_op, so make yylval.ival a null op */
-	    yylval.ival = OP_NULL;
+	    /* we created the ops in PL_lex_op, so make pl_yylval.ival a null op */
+	    pl_yylval.ival = OP_NULL;
 	}
 
 	/* If it's none of the above, it must be a literal filehandle
@@ -11501,7 +11501,7 @@ intro_sym:
 			    newGVOP(OP_GV, 0, gv),
 			    newCVREF(0, newGVOP(OP_GV, 0, gv_readline))))
 		: (OP*)newUNOP(OP_READLINE, 0, newGVOP(OP_GV, 0, gv));
-	    yylval.ival = OP_NULL;
+	    pl_yylval.ival = OP_NULL;
 	}
     }
 
@@ -11881,7 +11881,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
   scan_num
   takes: pointer to position in buffer
   returns: pointer to new position in buffer
-  side-effects: builds ops for the constant in yylval.op
+  side-effects: builds ops for the constant in pl_yylval.op
 
   Read a number in any of the formats that Perl accepts:
 
