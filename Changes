@@ -1330,7 +1330,7 @@ ____________________________________________________________________________
 	   ! embed.fnc embed.h proto.h toke.c
 ____________________________________________________________________________
 [ 32137] By: nicholas				   on 2007/10/18  18:07:19
-	Log: Simplify the logical for retrieving PL_inplace into $^I, as sv_setpv()
+	Log: Simplify the logic for retrieving PL_inplace into $^I, as sv_setpv()
 	     will do the "right" thing if we want NULL to map to undef.
      Branch: perl
 	   ! mg.c
@@ -2334,7 +2334,6 @@ ____________________________________________________________________________
 	Log: Subject: [PATCH] bring File::Path up to 2.01 (was: Re: Freeze ?)
 	     From: David Landgren <david@landgren.net>
 	     Date: Sun, 30 Sep 2007 15:19:49 +0200
-
 	     Message-ID: <46FFA275.6010304@landgren.net>
      Branch: perl
 	   ! lib/File/Path.pm lib/File/Path.t
