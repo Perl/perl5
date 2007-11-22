@@ -1396,6 +1396,7 @@ lib/complete.pl			A command completion subroutine
 lib/Config.t			See if Config works
 lib/constant.pm			For "use constant"
 lib/constant.t			See if compile-time constants work
+lib/CORE.pod			document the CORE namespace
 lib/CPAN/API/HOWTO.pm		recipe book for programming with CPAN.pm
 lib/CPAN/bin/cpan		easily interact with CPAN from the command line
 lib/CPAN/Debug.pm		helper package for CPAN.pm
@@ -2999,7 +3000,7 @@ t/op/die.t			See if die works
 t/op/do.t			See if subroutines work
 t/op/each.t			See if hash iterators work
 t/op/eval.t			See if eval operator works
-t/op/exec.t			See if exec and system work
+t/op/exec.t			See if exec, system and qx work
 t/op/exists_sub.t		See if exists(&sub) works
 t/op/exp.t			See if math functions work
 t/op/fh.t			See if filehandles work
