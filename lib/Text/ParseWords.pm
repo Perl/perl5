@@ -1,7 +1,7 @@
 package Text::ParseWords;
 
 use vars qw($VERSION @ISA @EXPORT $PERL_SINGLE_QUOTE);
-$VERSION = "3.25";
+$VERSION = "3.26";
 
 require 5.000;
 
@@ -61,15 +61,35 @@ sub parse_line {
     no warnings 'uninitialized';	# we will be testing undef strings
 
     while (length($line)) {
-	$line =~ s/^(["'])			# a $quote
-        	    ((?:\\.|(?!\1)[^\\])*)	# and $quoted text
-		    \1				# followed by the same quote
-		   |				# --OR--
-		   ^((?:\\.|[^\\"'])*?)		# an $unquoted text
-		    (\Z(?!\n)|(?-x:$delimiter)|(?!^)(?=["']))  
-		    				# plus EOL, delimiter, or quote
-		  //xs or return;		# extended layout
-	my($quote, $quoted, $unquoted, $delim) = ($1, $2, $3, $4);
+        # This pattern is optimised to be stack conservative on older perls.
+        # Do not refactor without being careful and testing it on very long strings.
+        # See Perl bug #42980 for an example of a stack busting input.
+        $line =~ s/^
+                    (?: 
+                        # double quoted string
+                        (")                             # $quote
+                        ((?>[^\\"]*(?:\\.[^\\"]*)*))"   # $quoted 
+		    |	# --OR--
+                        # singe quoted string
+                        (')                             # $quote
+                        ((?>[^\\']*(?:\\.[^\\']*)*))'   # $quoted
+                    |   # --OR--
+                        # unquoted string
+		        (                               # $unquoted 
+                            (?:\\.|[^\\"'])*?           
+                        )		
+                        # followed by
+		        (                               # $delim
+                            \Z(?!\n)                    # EOL
+                        |   # --OR--
+                            (?-x:$delimiter)            # delimiter
+                        |   # --OR--                    
+                            (?!^)(?=["'])               # a quote
+                        )  
+		    )//xs or return;		# extended layout                  
+        my ($quote, $quoted, $unquoted, $delim) = (($1 ? ($1,$2) : ($3,$4)), $5, $6);
+
+
 	return() unless( defined($quote) || length($unquoted) || length($delim));
 
         if ($keep) {

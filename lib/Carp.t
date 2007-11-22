@@ -8,7 +8,7 @@ my $Is_VMS = $^O eq 'VMS';
 
 use Carp qw(carp cluck croak confess);
 
-plan tests => 36;
+plan tests => 37;
 
 ok 1;
 
@@ -253,6 +253,18 @@ sub w { cluck @_ }
 
     is($?>>8, 42, 'confess() doesn\'t clobber $!');
 }
+
+# undef used to be incorrectly reported as the string "undef"
+sub cluck_undef {
+
+local $SIG{__WARN__} = sub {
+    like $_[0], qr/^Bang! at.+\b(?i:carp\.t) line \d+\n\tmain::cluck_undef\(0, 'undef', 2, undef, 4\) called at.+\b(?i:carp\.t) line \d+$/, "cluck doesn't quote undef" };
+
+cluck "Bang!"
+
+}
+
+cluck_undef (0, "undef", 2, undef, 4);
 
 # line 1 "A"
 package A;

@@ -7,7 +7,7 @@ BEGIN {
 
 use Test;
 
-BEGIN { plan tests => 6 }
+BEGIN { plan tests => 8 }
 
 use strict;
 
@@ -49,10 +49,11 @@ chdir(File::Spec->updir) or die "cannot change to parent of t/ directory: $!";
             # indented comment, followed blank line (w/o whitespace):
 
             README -f
-            $path_to_README -e || warn
+            '$path_to_README' -e || warn
         };
     };
 
+    print STDERR $_ for @warnings;
     if ( !$@ && !@warnings && defined($num_warnings) && $num_warnings == 0 ) {
         ok(1);
     }
@@ -201,4 +202,40 @@ chdir(File::Spec->updir) or die "cannot change to parent of t/ directory: $!";
     else {
         ok(0);
     }
+}
+
+#### TEST 7 -- Quoted file names ####
+{
+    my $num_warnings;
+    eval {
+        $num_warnings = validate q{
+            "a file with whitespace" !-ef
+            'a file with whitespace' !-ef
+        };
+    };
+
+    if ( !$@ ) {
+	# No errors mean we compile correctly
+        ok(1);
+    } else {
+        ok(0);
+	print STDERR $@;
+    };
+}
+
+#### TEST 8 -- Malformed query ####
+{
+    my $num_warnings;
+    eval {
+        $num_warnings = validate q{
+            a file with whitespace !-ef
+        };
+    };
+
+    if ( $@ =~ /syntax error/) {
+	# We got a syntax error for a malformed file query
+        ok(1);
+    } else {
+        ok(0);
+    };
 }

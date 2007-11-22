@@ -26,7 +26,10 @@ print "1..5\n";
 $domain = domainname();
 
 if(defined $domain && $domain ne "") {
- print "ok 1\n";
+ print "ok 1 - defined, non-empty domainname\n";
+}
+elsif (not defined $domain) {
+ print "ok 1 # SKIP domain not fully defined\n";
 }
 else {
  print "not ok 1\n";

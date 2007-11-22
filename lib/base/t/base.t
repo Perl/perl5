@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More tests => 11;
+use Test::More tests => 12;
 
 use_ok('base');
 
@@ -85,3 +85,9 @@ package Test::SIGDIE;
          'Base class empty error message');
 
 }
+
+package Schlozhauer;
+use constant FIELDS => 6;
+package Basilisco;
+eval q{ use base 'Schlozhauer' };
+::is( $@, '', 'Can coexist with a FIELDS constant' );

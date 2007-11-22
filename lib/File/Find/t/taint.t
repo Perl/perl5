@@ -1,5 +1,5 @@
 #!./perl -T
-
+use strict;
 
 my %Expect_File = (); # what we expect for $_
 my %Expect_Name = (); # what we expect for $File::Find::name/fullname
@@ -8,8 +8,12 @@ my ($cwd, $cwd_untainted);
 
 
 BEGIN {
+    require File::Spec;
     chdir 't' if -d 't';
-    unshift @INC => '../lib';
+    # May be doing dynamic loading while @INC is all relative
+    my $lib = File::Spec->rel2abs('../lib');
+    $lib = $1 if $lib =~ m/(.*)/;
+    unshift @INC => $lib;
 }
 
 use Config;
@@ -46,6 +50,9 @@ use File::Find;
 use File::Spec;
 use Cwd;
 
+my $orig_dir = cwd();
+( my $orig_dir_untainted ) = $orig_dir =~ m|^(.+)$|; # untaint it
+
 cleanup();
 
 my $found;
@@ -64,8 +71,10 @@ my $case = 2;
 my $FastFileTests_OK = 0;
 
 sub cleanup {
+    chdir($orig_dir_untainted);
+    my $need_updir = 0;
     if (-d dir_path('for_find')) {
-        chdir(dir_path('for_find'));
+        $need_updir = 1 if chdir(dir_path('for_find'));
     }
     if (-d dir_path('fa')) {
 	unlink file_path('fa', 'fa_ord'),
@@ -82,7 +91,10 @@ sub cleanup {
 	rmdir dir_path('fb', 'fba');
 	rmdir dir_path('fb');
     }
-    chdir File::Spec->updir;
+    if ($need_updir) {
+        my $updir = $^O eq 'VMS' ? File::Spec::VMS->updir() : File::Spec->updir;
+        chdir($updir);
+    }
     if (-d dir_path('for_find')) {
 	rmdir dir_path('for_find') or print "# Can't rmdir for_find: $!\n";
     }

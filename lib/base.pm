@@ -2,7 +2,7 @@ package base;
 
 use strict 'vars';
 use vars qw($VERSION);
-$VERSION = '2.08';
+$VERSION = '2.10';
 
 # constant.pm is slow
 sub SUCCESS () { 1 }
@@ -18,7 +18,7 @@ my $Fattr = \%fields::attr;
 sub has_fields {
     my($base) = shift;
     my $fglob = ${"$base\::"}{FIELDS};
-    return( ($fglob && *$fglob{HASH}) ? 1 : 0 );
+    return( ($fglob && 'GLOB' eq ref($fglob) && *$fglob{HASH}) ? 1 : 0 );
 }
 
 sub has_version {
@@ -82,19 +82,24 @@ sub import {
 	      unless defined ${$base.'::VERSION'};
         }
         else {
-            local $SIG{__DIE__};
-            eval "require $base";
-            # Only ignore "Can't locate" errors from our eval require.
-            # Other fatal errors (syntax etc) must be reported.
-            die if $@ && $@ !~ /^Can't locate .*? at \(eval /;
-            unless (%{"$base\::"}) {
-                require Carp;
-                Carp::croak(<<ERROR);
+	    my $sigdie;
+	    {
+		local $SIG{__DIE__};
+		eval "require $base";
+		# Only ignore "Can't locate" errors from our eval require.
+		# Other fatal errors (syntax etc) must be reported.
+		die if $@ && $@ !~ /^Can't locate .*? at \(eval /;
+		unless (%{"$base\::"}) {
+		    require Carp;
+		    Carp::croak(<<ERROR);
 Base class package "$base" is empty.
     (Perhaps you need to 'use' the module which defines that package first.)
 ERROR
-
-            }
+		}
+		$sigdie = $SIG{__DIE__};
+	    }
+	    # Make sure a global $SIG{__DIE__} makes it out of the localization.
+	    $SIG{__DIE__} = $sigdie if defined $sigdie;
             ${$base.'::VERSION'} = "-1, set by base.pm"
               unless defined ${$base.'::VERSION'};
         }
