@@ -91,6 +91,7 @@ private:
     - lib/Switch
     - lib/Term/ANSIColor
     - lib/Term/UI
+    - lib/Test/Builder
     - lib/Test/Harness
     - lib/Test/Simple
     - lib/Test/t
@@ -115,6 +116,7 @@ private:
     - ext/DynaLoader/t/XSLoader.t
     - ext/DynaLoader/XSLoader_pm.PL
     - ext/Filter/t/call.t
+    - ext/Opcode/Safe.pm
     - ext/threads/threads.pm
     - ext/threads/threads.xs
     - lib/Archive/Extract.pm
