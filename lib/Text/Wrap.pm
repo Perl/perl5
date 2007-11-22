@@ -122,7 +122,7 @@ Text::Wrap - line wrapping to form simple paragraphs
 
 B<Example 1>
 
-	use Text::Wrap
+	use Text::Wrap;
 
 	$initial_tab = "\t";	# Tab before first line
 	$subsequent_tab = "";	# All other lines flush left
@@ -145,7 +145,7 @@ B<Example 2>
 
 B<Example 3>
 	
-	use Text::Wrap
+	use Text::Wrap;
 
 	$Text::Wrap::columns = 72;
 	print wrap('', '', @text);

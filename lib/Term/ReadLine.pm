@@ -294,9 +294,16 @@ sub Attribs { {} }
 my %features = (tkRunning => 1, ornaments => 1, 'newTTY' => 1);
 sub Features { \%features }
 
+sub get_line {
+  my $self = shift;
+  my $in = $self->IN;
+  local ($/) = "\n";
+  return scalar <$in>;
+}
+
 package Term::ReadLine;		# So late to allow the above code be defined?
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 my ($which) = exists $ENV{PERL_RL} ? split /\s+/, $ENV{PERL_RL} : undef;
 if ($which) {
