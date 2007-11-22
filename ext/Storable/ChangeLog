@@ -1,3 +1,9 @@
+Thu Nov 22 13:24:18 IST 2007   Abhijit Menon-Sen <ams@toroid.org>
+
+    Version 2.18
+
+	Compile fixes for older Perls. (No functional changes.)
+
 Sat Nov 17 02:12:12 IST 2007   Abhijit Menon-Sen <ams@toroid.org>
 
     Version 2.17

@@ -20,6 +20,7 @@
 #if !defined(PERL_VERSION) || PERL_VERSION < 8
 #define NEED_load_module
 #define NEED_vload_module
+#define NEED_newCONSTSUB
 #include "ppport.h"             /* handle old perls */
 #endif
 
