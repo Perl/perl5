@@ -66,31 +66,31 @@ cat >_cflags.c <<__EOT__
 #ifdef I_UNISTD
 #include <unistd.h>
 #endif
-#ifdef I_SYSTYPES
+#ifdef I_SYS_TYPES
 #include <sys/types.h>
 #endif
-#ifdef I_SYSPARAM
+#ifdef I_SYS_PARAM
 #include <sys/param.h>
 #endif
-#ifdef I_SYSRESOURCE
+#ifdef I_SYS_RESOURCE
 #include <sys/resource.h>
 #endif
-#ifdef I_SYSSELECT
+#ifdef I_SYS_SELECT
 #include <sys/select.h>
 #endif
 #if defined(HAS_SOCKET) && !defined(VMS) && !defined(WIN32) /* See perl.h. */
 #include <sys/socket.h>
 #endif
-#ifdef I_SYSSTAT
+#ifdef I_SYS_STAT
 #include <sys/stat.h>
 #endif
-#ifdef I_SYSTIME
+#ifdef I_SYS_TIME
 #include <sys/time.h>
 #endif
-#ifdef I_SYSTIMES
+#ifdef I_SYS_TIMES
 #include <sys/times.h>
 #endif
-#ifdef I_SYSWAIT
+#ifdef I_SYS_WAIT
 #include <sys/wait.h>
 #endif
 /* The gcc -ansi can cause a lot of noise in Solaris because of:
@@ -104,17 +104,32 @@ int main(int argc, char *argv[]) {
  * that struct cannot be compared in some gcc releases with a flat
  * integer, such as a STRLEN. */
 
+  IV iv;
   Off_t t0a = 2;
   STRLEN t0b = 3;
   int t0c = t0a == t0b;
 
-  return 0;
+/* In FreeBSD 6.2 (and probably other releases too), with -Duse64bitint,
+   perl will use atoll(3).  However, that declaration is hidden in <stdlib.h>
+   if we force the compiler to use -std=c89 mode.
+*/
+  iv = Atol("42");
+
+  return (!t0c && (iv == 42)) ? 0 : -1; /* Try to avoid 'unused' warnings. */
 }
 __EOT__
 
 stdflags=''
 
-# Further gcc warning options.
+# Further gcc warning options.  Build up a list of options that work.
+# Note that some problems may only show up with combinations of options,
+# e.g. a warning might show up only with -Wall -ansi, not with either
+# one individually.
+# TODO:  Ponder whether to migrate this back to Configure so hints files can 
+# tweak it.  Also, be paranoid about whether results we've deduced in Configure
+# (especially about things like long long, which are not in C89) will still be 
+# valid if we now add flags like -std=c89.
+
 case "$gccversion" in
 '') ;;
 [12]*) ;; # gcc versions 1 (gasp!) and 2 are not good for this.
@@ -124,8 +139,9 @@ Intel*) ;; # # Is that you, Intel C++?
        case " $ccflags " in
        *" $opt "*) ;; # Skip if already there.
        *) rm -f _cflags$_exe
-          case "`$cc $cflags $opt _cflags.c -o _cflags$_exe 2>&1`" in
+          case "`$cc $cflags $warn $stdflags $opt _cflags.c -o _cflags$_exe 2>&1`" in
           *"unrecognized"*) ;;
+          *"implicit declaration"*) ;; # Was something useful hidden?
           *"Invalid"*) ;;
           *"is valid for C"*) ;;
           *) if test -x _cflags$_exe
@@ -157,6 +173,18 @@ case "$gccversion" in
       ccflags="`echo $ccflags|sed 's/-pedantic/ /'`"
       warn="`echo $warn|sed 's/-pedantic/ /'`"
       ;;
+    esac
+    # Similarly, since 'long long' isn't part of C89, FreeBSD 6.2 headers
+    # don't declare atoll() under -std=c89, but we need it.  In general,
+    # insisting on -std=c89 is inconsistent with insisting on using
+    # 'long long'. So drop -std=c89 and -ansi as well if we're using 
+    # 'long long' as our main integral type.
+    case "$ivtype" in
+    "long long")
+	ccflags=`echo $ccflags|sed -e 's/-pedantic/ /' -e 's/-std=c89/ /' -e 's/-ansi/ /'`
+	warn=`echo $warn|sed -e 's/-pedantic/ /' -e 's/-ansi/ /'`
+	stdflags=`echo $warn|sed -e 's/-std=c89/ /'`
+	;;
     esac
   fi
   # Using certain features (like the gcc statement expressions)

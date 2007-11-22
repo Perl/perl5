@@ -2,7 +2,7 @@ package ExtUtils::XSSymSet;
 
 use strict;
 use vars qw( $VERSION );
-$VERSION = '1.0';
+$VERSION = '1.1';
 
 
 sub new { 
@@ -36,9 +36,10 @@ sub trimsym {
     if (length $trimmed > $maxlen) {
       my $squeezed = $trimmed;
       my($xs,$prefix,$func) = $trimmed =~ /^(XS_)?(.*)_([^_]*)$/;
+      $xs ||= '';
+      my $frac = 3; # replaces broken length-based calculations but w/same result
+      my $pat = '([^_])';
       if (length $func <= 12) {  # Try to preserve short function names
-        my $frac = int(length $prefix / (length $trimmed - $maxlen) + 0.5);
-        my $pat = '([^_])';
         if ($frac > 1) { $pat .= '[^A-Z_]{' . ($frac - 1) . '}'; }
         $prefix =~ s/$pat/$1/g;
         $squeezed = "$xs$prefix" . "_$func";
@@ -49,8 +50,6 @@ sub trimsym {
         }
       }
       else { 
-        my $frac = int(length $trimmed / (length $trimmed - $maxlen) + 0.5);
-        my $pat = '([^_])';
         if ($frac > 1) { $pat .= '[^A-Z_]{' . ($frac - 1) . '}'; }
         $squeezed = "$prefix$func";
         $squeezed =~ s/$pat/$1/g;
