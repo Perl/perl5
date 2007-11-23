@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq6 - Regular Expressions ($Revision: 8539 $)
+perlfaq6 - Regular Expressions ($Revision: 10126 $)
 
 =head1 DESCRIPTION
 
@@ -153,9 +153,8 @@ Here's another example of using C<..>:
 X<$/, regexes in> X<$INPUT_RECORD_SEPARATOR, regexes in>
 X<$RS, regexes in>
 
-Up to Perl 5.8.0, $/ has to be a string.  This may change in 5.10,
-but don't get your hopes up. Until then, you can use these examples
-if you really need to do this.
+$/ has to be a string.  You can use these examples if you really need to 
+do this.
 
 If you have File::Stream, this is easy.
 
@@ -606,7 +605,7 @@ but faster.
 		{
 		foreach $pattern ( @patterns )
 			{
-			print if /\b$pattern\b/i;
+			print if /$pattern/i;
 			next LINE;
 			}
 		}
@@ -984,9 +983,9 @@ Or...
 
 =head1 REVISION
 
-Revision: $Revision: 8539 $
+Revision: $Revision: 10126 $
 
-Date: $Date: 2007-01-11 00:07:14 +0100 (Thu, 11 Jan 2007) $
+Date: $Date: 2007-10-27 21:29:20 +0200 (Sat, 27 Oct 2007) $
 
 See L<perlfaq> for source control details and availability.
 

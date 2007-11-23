@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq8 - System Interaction ($Revision: 9681 $)
+perlfaq8 - System Interaction ($Revision: 10183 $)
 
 =head1 DESCRIPTION
 
@@ -461,48 +461,25 @@ probably get away with setting an environment variable:
 	system "trn comp.lang.perl.misc";
 
 =head2 How can I sleep() or alarm() for under a second?
+X<Time::HiRes> X<BSD::Itimer> X<sleep> X<select>
 
-If you want finer granularity than the 1 second that the sleep()
-function provides, the easiest way is to use the select() function as
-documented in L<perlfunc/"select">.  Try the Time::HiRes and
-the BSD::Itimer modules (available from CPAN, and starting from
-Perl 5.8 Time::HiRes is part of the standard distribution).
+If you want finer granularity than the 1 second that the C<sleep()>
+function provides, the easiest way is to use the C<select()> function as
+documented in L<perlfunc/"select">.  Try the C<Time::HiRes> and
+the C<BSD::Itimer> modules (available from CPAN, and starting from
+Perl 5.8 C<Time::HiRes> is part of the standard distribution).
 
 =head2 How can I measure time under a second?
+X<Time::HiRes> X<BSD::Itimer> X<sleep> X<select>
 
-In general, you may not be able to.  The Time::HiRes module (available
-from CPAN, and starting from Perl 5.8 part of the standard distribution)
-provides this functionality for some systems.
+(contributed by brian d foy)
 
-If your system supports both the syscall() function in Perl as well as
-a system call like gettimeofday(2), then you may be able to do
-something like this:
-
-	require 'sys/syscall.ph';
-
-	$TIMEVAL_T = "LL";
-
-	$done = $start = pack($TIMEVAL_T, ());
-
-	syscall(&SYS_gettimeofday, $start, 0) != -1
-		or die "gettimeofday: $!";
-
-	   ##########################
-	   # DO YOUR OPERATION HERE #
-	   ##########################
-
-	syscall( &SYS_gettimeofday, $done, 0) != -1
-		or die "gettimeofday: $!";
-
-	@start = unpack($TIMEVAL_T, $start);
-	@done  = unpack($TIMEVAL_T, $done);
-
-	# fix microseconds
-	for ($done[1], $start[1]) { $_ /= 1_000_000 }
-
-	$delta_time = sprintf "%.4f", ($done[0]  + $done[1]  )
-											-
-								 ($start[0] + $start[1] );
+The C<Time::HiRes> module (part of the standard distribution as of
+Perl 5.8) measures time with the C<gettimeofday()> system call, which
+returns the time in microseconds since the epoch. If you can't install
+C<Time::HiRes> for older Perls and you are on a Unixish system, you
+may be able to call C<gettimeofday(2)> directly. See
+L<perlfunc/syscall>.
 
 =head2 How can I do an atexit() or setjmp()/longjmp()? (Exception handling)
 
@@ -1030,8 +1007,24 @@ The alarm() function is not implemented on all versions of Windows.
 Check the documentation for your specific version of Perl.
 
 =head2 How do I set CPU limits?
+X<BSD::Resource> X<limit> X<CPU>
 
-Use the BSD::Resource module from CPAN.
+(contributed by Xho)
+
+Use the C<BSD::Resource> module from CPAN. As an example:
+
+	use BSD::Resource;
+	setrlimit(RLIMIT_CPU,10,20) or die $!;
+
+This sets the soft and hard limits to 10 and 20 seconds, respectively.
+After 10 seconds of time spent running on the CPU (not "wall" time),
+the process will be sent a signal (XCPU on some systems) which, if not
+trapped, will cause the process to terminate.  If that signal is
+trapped, then after 10 more seconds (20 seconds in total) the process
+will be killed with a non-trappable signal.
+
+See the C<BSD::Resource> and your systems documentation for the gory
+details.
 
 =head2 How do I avoid zombies on a Unix system?
 
@@ -1317,9 +1310,9 @@ but other times it is not.  Modern programs C<use Socket;> instead.
 
 =head1 REVISION
 
-Revision: $Revision: 9681 $
+Revision: $Revision: 10183 $
 
-Date: $Date: 2007-06-26 01:36:56 +0200 (Tue, 26 Jun 2007) $
+Date: $Date: 2007-11-07 09:35:12 +0100 (Wed, 07 Nov 2007) $
 
 See L<perlfaq> for source control details and availability.
 

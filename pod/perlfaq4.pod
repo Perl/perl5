@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 9681 $)
+perlfaq4 - Data Manipulation ($Revision: 10126 $)
 
 =head1 DESCRIPTION
 
@@ -1006,12 +1006,15 @@ C<Text::Metaphone>, and C<Text::DoubleMetaphone> modules.
 (contributed by brian d foy)
 
 If you can avoid it, don't, or if you can use a templating system,
-such as C<Text::Template> or C<Template> Toolkit, do that instead.
+such as C<Text::Template> or C<Template> Toolkit, do that instead. You
+might even be able to get the job done with C<sprintf> or C<printf>:
+
+	my $string = sprintf 'Say hello to %s and %s', $foo, $bar;
 
 However, for the one-off simple case where I don't want to pull out a
 full templating system, I'll use a string that has two Perl scalar
 variables in it. In this example, I want to expand C<$foo> and C<$bar>
-to their variable's values.
+to their variable's values:
 
 	my $foo = 'Fred';
 	my $bar = 'Barney';
@@ -1021,17 +1024,22 @@ One way I can do this involves the substitution operator and a double
 C</e> flag.  The first C</e> evaluates C<$1> on the replacement side and
 turns it into C<$foo>. The second /e starts with C<$foo> and replaces
 it with its value. C<$foo>, then, turns into 'Fred', and that's finally
-what's left in the string.
+what's left in the string:
 
 	$string =~ s/(\$\w+)/$1/eeg; # 'Say hello to Fred and Barney'
 
 The C</e> will also silently ignore violations of strict, replacing
-undefined variable names with the empty string.
+undefined variable names with the empty string. Since I'm using the
+C</e> flag (twice even!), I have all of the same security problems I 
+have with C<eval> in its string form. If there's something odd in
+C<$foo>, perhaps something like C<@{[ system "rm -rf /" ]}>, then
+I could get myself in trouble.
 
-I could also pull the values from a hash instead of evaluating 
-variable names. Using a single C</e>, I can check the hash to ensure
-the value exists, and if it doesn't, I can replace the missing value
-with a marker, in this case C<???> to signal that I missed something:
+To get around the security problem, I could also pull the values from
+a hash instead of evaluating variable names. Using a single C</e>, I
+can check the hash to ensure the value exists, and if it doesn't, I
+can replace the missing value with a marker, in this case C<???> to
+signal that I missed something:
 
 	my $string = 'This has $foo and $bar';
 	
@@ -1308,7 +1316,7 @@ multiple values against the same array.
 
 If you are testing only once, the standard module C<List::Util> exports
 the function C<first> for this purpose.  It works by stopping once it
-finds the element. It's written in C for speed, and its Perl equivalant
+finds the element. It's written in C for speed, and its Perl equivalent
 looks like this subroutine:
 
 	sub first (&@) {
@@ -1588,14 +1596,18 @@ Or, simply:
 	my $element = $array[ rand @array ];
 
 =head2 How do I permute N elements of a list?
+X<List::Permuter> X<permute> X<Algorithm::Loops> X<Knuth>
+X<The Art of Computer Programming> X<Fischer-Krause>
 
-Use the C<List::Permutor> module on CPAN.  If the list is actually an
+Use the C<List::Permutor> module on CPAN. If the list is actually an
 array, try the C<Algorithm::Permute> module (also on CPAN). It's
-written in XS code and is very efficient.
+written in XS code and is very efficient:
 
 	use Algorithm::Permute;
+
 	my @array = 'a'..'d';
 	my $p_iterator = Algorithm::Permute->new ( \@array );
+
 	while (my @perm = $p_iterator->next) {
 	   print "next permutation: (@perm)\n";
 		}
@@ -1603,16 +1615,17 @@ written in XS code and is very efficient.
 For even faster execution, you could do:
 
 	use Algorithm::Permute;
+
 	my @array = 'a'..'d';
+
 	Algorithm::Permute::permute {
 		print "next permutation: (@array)\n";
 		} @array;
 
-Here's a little program that generates all permutations of
-all the words on each line of input. The algorithm embodied
-in the C<permute()> function is discussed in Volume 4 (still
-unpublished) of Knuth's I<The Art of Computer Programming>
-and will work on any list:
+Here's a little program that generates all permutations of all the
+words on each line of input. The algorithm embodied in the
+C<permute()> function is discussed in Volume 4 (still unpublished) of
+Knuth's I<The Art of Computer Programming> and will work on any list:
 
 	#!/usr/bin/perl -n
 	# Fischer-Krause ordered permutation generator
@@ -1630,7 +1643,22 @@ and will work on any list:
 		}
 	}
 
-	permute {print"@_\n"} split;
+	permute { print "@_\n" } split;
+
+The C<Algorithm::Loops> module also provides the C<NextPermute> and
+C<NextPermuteNum> functions which efficiently find all unique permutations
+of an array, even if it contains duplicate values, modifying it in-place:
+if its elements are in reverse-sorted order then the array is reversed,
+making it sorted, and it returns false; otherwise the next
+permutation is returned.
+
+C<NextPermute> uses string order and C<NextPermuteNum> numeric order, so
+you can enumerate all the permutations of C<0..9> like this:
+
+	use Algorithm::Loops qw(NextPermuteNum);
+	
+    my @list= 0..9;
+    do { print "@list\n" } while NextPermuteNum @list;
 
 =head2 How do I sort an array by (anything)?
 
@@ -2260,9 +2288,9 @@ the C<PDL> module from CPAN instead--it makes number-crunching easy.
 
 =head1 REVISION
 
-Revision: $Revision: 9681 $
+Revision: $Revision: 10126 $
 
-Date: $Date: 2007-06-26 01:36:56 +0200 (Tue, 26 Jun 2007) $
+Date: $Date: 2007-10-27 21:29:20 +0200 (Sat, 27 Oct 2007) $
 
 See L<perlfaq> for source control details and availability.
 
