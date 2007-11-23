@@ -11,7 +11,7 @@ $DOWARN = 1; # enable run-time warnings now
 use Config;
 
 require "test.pl";
-plan( tests => 53 );
+plan( tests => 54 );
 
 eval 'use v5.5.640';
 is( $@, '', "use v5.5.640; $@");
@@ -264,3 +264,13 @@ ok( exists $h{chr(65).chr(66)}, "v-stringness is engaged for vX.Y" );
 ok( exists $h{chr(65).chr(66).chr(67)}, "v-stringness is engaged for X.Y.Z" );
 
 
+# The following tests whether v-strings are correctly
+# interpreted by the tokeniser when it's in a XTERMORDORDOR
+# state (fittingly, the only tokeniser state to contain the
+# word MORDOR).
+
+*{"\3"} = *DATA;
+is( (readline v3), "This is what we expect to see!\n", "v-strings even work in Mordor" );
+
+__DATA__
+This is what we expect to see!
