@@ -1996,12 +1996,16 @@ PP(pp_eof)
 		    IoLINES(io) = 0;
 		    IoFLAGS(io) &= ~IOf_START;
 		    do_open(gv, (char *)"-", 1, FALSE, O_RDONLY, 0, NULL);
+#ifdef PERL_DONT_CREATE_GVSV
 		    if ( GvSV(gv) ) {
+#endif
 			sv_setpvn(GvSV(gv), "-", 1);
+#ifdef PERL_DONT_CREATE_GVSV
 		    }
 		    else {
 			GvSV(gv) = newSVpvn("-", 1);
 		    }
+#endif
 		    SvSETMAGIC(GvSV(gv));
 		}
 		else if (!nextargv(gv))
