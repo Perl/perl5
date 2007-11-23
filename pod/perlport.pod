@@ -1872,6 +1872,12 @@ and makes it exit immediately with exit status $sig.  As in Unix, if
 $sig is 0 and the specified process exists, it returns true without
 actually terminating it. (Win32)
 
+C<kill(-9, $pid)> will terminate the process specified by $pid and
+recursively all child processes owned by it.  This is different from
+the Unix semantics, where the signal will be delivered to all
+processes in the same process group as the process specified by
+$pid. (Win32)
+
 Is not supported for process identification number of 0 or negative
 numbers. (VMS)
 
