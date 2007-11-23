@@ -5,7 +5,7 @@ use strict;
 our($VERSION, $ithreads, $othreads);
 
 BEGIN {
-    $VERSION = '2.00';
+    $VERSION = '2.01';
     use Config;
     $ithreads = $Config{useithreads};
     $othreads = $Config{use5005threads};
@@ -49,6 +49,8 @@ and to implement fork() emulation on Win32 platforms.
 In Perl 5.8 the ithreads model became available through the C<threads>
 module.
 
+In Perl 5.10, the 5005threads model will be removed from the Perl interpreter.
+
 Neither model is configured by default into Perl (except, as mentioned
 above, in Win32 ithreads are always available.)  You can see your
 Perl's threading configuration by running C<perl -V> and looking for
@@ -77,12 +79,12 @@ use ithreads instead.
 
 =head1 SYNOPSIS
 
-    use Thread;
+    use Thread qw(:DEFAULT async yield);
 
     my $t = Thread->new(\&start_sub, @start_args);
 
     $result = $t->join;
-    $result = $t->eval;
+    $result = $t->eval;         # not available with ithreads
     $t->detach;
 
     if ($t->done) {
@@ -90,24 +92,22 @@ use ithreads instead.
     }
 
     if($t->equal($another_thread)) {
-    	# ...
+        # ...
     }
 
     yield();
 
-    my $tid = Thread->self->tid; 
+    my $tid = Thread->self->tid;
 
     lock($scalar);
     lock(@array);
     lock(%hash);
 
-    lock(\&sub);	# not available with ithreads
+    lock(\&sub);                # not available with ithreads
 
-    $flags = $t->flags;	# not available with ithreads
+    $flags = $t->flags;         # not available with ithreads
 
-    my @list = Thread->list;	# not available with ithreads
-
-    use Thread 'async';
+    my @list = Thread->list;
 
 =head1 DESCRIPTION
 
@@ -151,8 +151,9 @@ block.
 
 With 5005threads you may also C<lock> a sub, using C<lock &sub>.
 Any calls to that sub from another thread will block until the lock
-is released. This behaviour is not equivalent to declaring the sub
-with the C<locked> attribute.  The C<locked> attribute serializes
+is released.  This behaviour is not equivalent to declaring the sub
+with the C<:locked> attribute (5005threads only).  The C<:locked>
+attribute serializes
 access to a subroutine, but allows different threads non-simultaneous
 access. C<lock &sub>, on the other hand, will not allow I<any> other
 thread access for the duration of the lock.
@@ -171,6 +172,10 @@ returns a thread object.
 
 The C<Thread-E<gt>self> function returns a thread object that represents
 the thread making the C<Thread-E<gt>self> call.
+
+=item Thread->list
+
+Returns a list of all non-joined, non-detached Thread objects.
 
 =item cond_wait VARIABLE
 
@@ -236,7 +241,7 @@ that all traces of its existence can be removed once it stops running.
 Errors in detached threads will not be visible anywhere - if you want
 to catch them, you should use $SIG{__DIE__} or something like that.
 
-=item equal 
+=item equal
 
 C<equal> tests whether two thread objects represent the same thread and
 returns true if they do.
@@ -258,7 +263,7 @@ and the value may not be all that meaningful to you.
 =item done
 
 The C<done> method returns true if the thread you're checking has
-finished, and false otherwise.  (Not available with ithreads.)
+finished, and false otherwise.
 
 =back
 
@@ -288,7 +293,7 @@ L<Thread::Specific> (not available with ithreads)
 #
 
 sub async (&) {
-    return Thread->new($_[0]);
+    return Thread->new(shift);
 }
 
 sub eval {
@@ -298,12 +303,12 @@ sub eval {
 sub unimplemented {
     print $_[0], " unimplemented with ",
           $Config{useithreads} ? "ithreads" : "5005threads", "\n";
-
 }
 
 sub unimplement {
+    no strict 'refs';
+    no warnings 'redefine';
     for my $m (@_) {
-	no strict 'refs';
 	*{"Thread::$m"} = sub { unimplemented $m };
     }
 }
@@ -314,18 +319,17 @@ BEGIN {
 	    require Carp;
 	    Carp::croak("This Perl has both ithreads and 5005threads (serious malconfiguration)");
 	}
-	XSLoader::load 'threads';
+	no strict 'refs';
+	require threads;
 	for my $m (qw(new join detach yield self tid equal list)) {
-	    no strict 'refs';
 	    *{"Thread::$m"} = \&{"threads::$m"};
 	}
-	require 'threads/shared.pm';
+	require threads::shared;
 	for my $m (qw(cond_signal cond_broadcast cond_wait)) {
-	    no strict 'refs';
-	    *{"Thread::$m"} = \&{"threads::shared::${m}_enabled"};
+	    *{"Thread::$m"} = \&{"threads::shared::$m"};
 	}
-	# trying to unimplement eval gives redefined warning
-	unimplement(qw(done flags));
+	*Thread::done = sub { return ! shift->threads::is_running(); };
+	unimplement(qw(eval flags));
     } elsif ($othreads) {
 	XSLoader::load 'Thread';
     } else {
