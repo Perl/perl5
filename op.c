@@ -1303,6 +1303,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 #ifdef USE_5005THREADS
     case OP_THREADSV:
 	PL_modcount++;	/* XXX ??? */
+	localize = 1;
 	break;
 #endif /* USE_5005THREADS */
 
