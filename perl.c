@@ -1874,52 +1874,17 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 
 		Perl_av_create_and_push(aTHX_ &PL_preambleav, newSVpvs("use Config;"));
 		if (*++s != ':')  {
-		    STRLEN opts;
-		
-		    opts_prog = newSVpvs("print Config::myconfig(),");
-#ifdef VMS
-		    sv_catpvs(opts_prog,"\"\\nCharacteristics of this PERLSHR image: \\n\",");
-#else
-		    sv_catpvs(opts_prog,"\"\\nCharacteristics of this binary (from libperl): \\n\",");
-#endif
-		    opts = SvCUR(opts_prog);
-
-		    Perl_sv_catpv(aTHX_ opts_prog,"\"  Compile-time options:"
+		    /* Can't do newSVpvs() as that would involve pre-processor
+		       condititionals inside a macro expansion.  */
+		    opts_prog = Perl_newSVpv(aTHX_ "$_ = join ' ', sort qw("
 #  ifdef DEBUGGING
 			     " DEBUGGING"
-#  endif
-#  ifdef DEBUG_LEAKING_SCALARS
-			     " DEBUG_LEAKING_SCALARS"
-#  endif
-#  ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
-			     " DEBUG_LEAKING_SCALARS_FORK_DUMP"
-#  endif
-#  ifdef FAKE_THREADS
-			     " FAKE_THREADS"
-#  endif
-#  ifdef MULTIPLICITY
-			     " MULTIPLICITY"
-#  endif
-#  ifdef MYMALLOC
-			     " MYMALLOC"
 #  endif
 #  ifdef NO_MATHOMS
                             " NO_MATHOMS"
 #  endif
 #  ifdef PERL_DONT_CREATE_GVSV
 			     " PERL_DONT_CREATE_GVSV"
-#  endif
-#  ifdef PERL_GLOBAL_STRUCT
-			     " PERL_GLOBAL_STRUCT"
-#  endif
-#  ifdef PERL_IMPLICIT_CONTEXT
-			     " PERL_IMPLICIT_CONTEXT"
-#  endif
-#  ifdef PERL_IMPLICIT_SYS
-			     " PERL_IMPLICIT_SYS"
-#  endif
-#  ifdef PERL_MAD
-			     " PERL_MAD"
 #  endif
 #  ifdef PERL_MALLOC_WRAP
 			     " PERL_MALLOC_WRAP"
@@ -1939,85 +1904,24 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef PERL_MEM_LOG_TIMESTAMP
 			     " PERL_MEM_LOG_TIMESTAMP"
 #  endif
-#  ifdef PERL_NEED_APPCTX
-			     " PERL_NEED_APPCTX"
-#  endif
-#  ifdef PERL_NEED_TIMESBASE
-			     " PERL_NEED_TIMESBASE"
-#  endif
-#  ifdef PERL_OLD_COPY_ON_WRITE
-			     " PERL_OLD_COPY_ON_WRITE"
-#  endif
-#  ifdef PERL_POISON
-			     " PERL_POISON"
-#  endif
-#  ifdef PERL_TRACK_MEMPOOL
-			     " PERL_TRACK_MEMPOOL"
-#  endif
 #  ifdef PERL_USE_SAFE_PUTENV
 			     " PERL_USE_SAFE_PUTENV"
-#  endif
-#  ifdef PL_OP_SLAB_ALLOC
-			     " PL_OP_SLAB_ALLOC"
-#  endif
-#  ifdef THREADS_HAVE_PIDS
-			     " THREADS_HAVE_PIDS"
-#  endif
-#  ifdef USE_5005THREADS
-			     " USE_5005THREADS"
-#  endif
-#  ifdef USE_64_BIT_ALL
-			     " USE_64_BIT_ALL"
-#  endif
-#  ifdef USE_64_BIT_INT
-			     " USE_64_BIT_INT"
-#  endif
-#  ifdef USE_ITHREADS
-			     " USE_ITHREADS"
-#  endif
-#  ifdef USE_LARGE_FILES
-			     " USE_LARGE_FILES"
-#  endif
-#  ifdef USE_LONG_DOUBLE
-			     " USE_LONG_DOUBLE"
-#  endif
-#  ifdef USE_PERLIO
-			     " USE_PERLIO"
-#  endif
-#  ifdef USE_REENTRANT_API
-			     " USE_REENTRANT_API"
-#  endif
-#  ifdef USE_SFIO
-			     " USE_SFIO"
 #  endif
 #  ifdef USE_SITECUSTOMIZE
 			     " USE_SITECUSTOMIZE"
 #  endif	       
-#  ifdef USE_SOCKS
-			     " USE_SOCKS"
-#  endif
-			     );
+					     , 0);
 
-		    while (SvCUR(opts_prog) > opts+76) {
-			/* find last space after "options: " and before col 76
-			 */
+		    sv_catpv(opts_prog, PL_bincompat_options);
+		    /* Terminate the qw(, and then wrap at 76 columns.  */
+		    sv_catpvs(opts_prog, "); s/(?=.{53})(.{1,53}) /$1\\n                        /mg;print Config::myconfig(),");
+#ifdef VMS
+		    sv_catpvs(opts_prog,"\"\\nCharacteristics of this PERLSHR image: \\n");
+#else
+		    sv_catpvs(opts_prog,"\"\\nCharacteristics of this binary (from libperl): \\n");
+#endif
 
-			const char *space;
-			char * const pv = SvPV_nolen(opts_prog);
-			const char c = pv[opts+76];
-			pv[opts+76] = '\0';
-			space = strrchr(pv+opts+26, ' ');
-			pv[opts+76] = c;
-			if (!space) break; /* "Can't happen" */
-
-			/* break the line before that space */
-
-			opts = space - pv;
-			Perl_sv_insert(aTHX_ opts_prog, opts, 0,
-				  STR_WITH_LEN("\\n                       "));
-		    }
-
-		    sv_catpvs(opts_prog,"\\n\",");
+		    sv_catpvs(opts_prog,"  Compile-time options: $_\\n\",");
 
 #if defined(LOCAL_PATCH_COUNT)
 		    if (LOCAL_PATCH_COUNT > 0) {
@@ -2032,14 +1936,14 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		    }
 #endif
 		    Perl_sv_catpvf(aTHX_ opts_prog,
-				   "\"  Built under %s\\n\"",OSNAME);
+				   "\"  Built under %s\\n",OSNAME);
 #ifdef __DATE__
 #  ifdef __TIME__
 		    Perl_sv_catpvf(aTHX_ opts_prog,
-				   ",\"  Compiled at %s %s\\n\"",__DATE__,
+				   "  Compiled at %s %s\\n\"",__DATE__,
 				   __TIME__);
 #  else
-		    Perl_sv_catpvf(aTHX_ opts_prog,",\"  Compiled on %s\\n\"",
+		    Perl_sv_catpvf(aTHX_ opts_prog,"  Compiled on %s\\n\"",
 				   __DATE__);
 #  endif
 #endif
