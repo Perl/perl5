@@ -2024,24 +2024,35 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                 trie->startstate = state;
                 trie->minlen -= (state - 1);
                 trie->maxlen -= (state - 1);
-                DEBUG_r({
-                    regnode *fix = convert;
-                    U32 word = trie->wordcount;
-                    mjd_nodelen++;
-                    Set_Node_Offset_Length(convert, mjd_offset, state - 1);
-                    while( ++fix < n ) {
-                        Set_Node_Offset_Length(fix, 0, 0);
-                    }
-                    while (word--) {
-                        SV ** const tmp = av_fetch( trie_words, word, 0 );
-                        if (tmp) {
-                            if ( STR_LEN(convert) <= SvCUR(*tmp) )
-                                sv_chop(*tmp, SvPV_nolen(*tmp) + STR_LEN(convert));
-                            else
-                                sv_chop(*tmp, SvPV_nolen(*tmp) + SvCUR(*tmp));
-                        }
-                    }    
-                });
+#ifdef DEBUGGING
+               /* At least the UNICOS C compiler choked on this
+                * being argument to DEBUG_r(), so let's just have
+                * it right here. */
+               if (
+#ifdef PERL_EXT_RE_BUILD
+                   1
+#else
+                   DEBUG_r_TEST
+#endif
+                   ) {
+                   regnode *fix = convert;
+                   U32 word = trie->wordcount;
+                   mjd_nodelen++;
+                   Set_Node_Offset_Length(convert, mjd_offset, state - 1);
+                   while( ++fix < n ) {
+                       Set_Node_Offset_Length(fix, 0, 0);
+                   }
+                   while (word--) {
+                       SV ** const tmp = av_fetch( trie_words, word, 0 );
+                       if (tmp) {
+                           if ( STR_LEN(convert) <= SvCUR(*tmp) )
+                               sv_chop(*tmp, SvPV_nolen(*tmp) + STR_LEN(convert));
+                           else
+                               sv_chop(*tmp, SvPV_nolen(*tmp) + SvCUR(*tmp));
+                       }
+                   }
+               }
+#endif
                 if (trie->maxlen) {
                     convert = n;
 		} else {
