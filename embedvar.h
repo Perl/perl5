@@ -42,7 +42,6 @@
 
 #define PL_Argv			(vTHX->IArgv)
 #define PL_Cmd			(vTHX->ICmd)
-#define PL_DBassertion		(vTHX->IDBassertion)
 #define PL_DBcv			(vTHX->IDBcv)
 #define PL_DBgv			(vTHX->IDBgv)
 #define PL_DBline		(vTHX->IDBline)
@@ -355,7 +354,6 @@
 
 #define PL_IArgv		PL_Argv
 #define PL_ICmd			PL_Cmd
-#define PL_IDBassertion		PL_DBassertion
 #define PL_IDBcv		PL_DBcv
 #define PL_IDBgv		PL_DBgv
 #define PL_IDBline		PL_DBline

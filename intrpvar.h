@@ -617,8 +617,6 @@ PERLVARI(Ithreadhook,	thrhook_proc_t,	MEMBER_TO_FPTR(Perl_nothreadhook))
 
 PERLVARI(Ihash_seed, UV, 0)		/* Hash initializer */
 
-PERLVAR(IDBassertion,   SV *)
-
 PERLVARI(Irehash_seed, UV, 0)		/* 582 hash initializer */
 
 PERLVARI(Iisarev, HV*, NULL) /* Reverse map of @ISA dependencies */
