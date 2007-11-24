@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 9462 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 10144 $)
 
 =head1 DESCRIPTION
 
@@ -54,10 +54,7 @@ Some URLs that might help you are:
 
 Someone looking for a perl for Win16 might look to Laszlo Molnar's
 djgpp port in http://www.cpan.org/ports/#msdos , which comes with
-clear installation instructions.  A simple installation guide for
-MS-DOS using Ilya Zakharevich's OS/2 port is available at
-http://www.cs.ruu.nl/%7Epiet/perl5dos.html
-and similarly for Windows 3.1 at http://www.cs.ruu.nl/%7Epiet/perlwin3.html .
+clear installation instructions.
 
 =head2 I don't have a C compiler. How can I build my own Perl interpreter?
 
@@ -71,7 +68,8 @@ information on where to get such a binary version.
 You might look around the net for a pre-built binary of Perl (or a 
 C compiler!) that meets your needs, though:
 
-For Windows, Vanilla Perl (http://vanillaperl.com/) comes with a 
+For Windows, Vanilla Perl ( http://vanillaperl.com/ ) and Strawberry Perl
+( http://strawberryperl.com/ ) come with a 
 bundled C compiler. ActivePerl is a pre-compiled version of Perl
 ready-to-use.
 
@@ -323,7 +321,12 @@ Recommended books on (or mostly on) Perl follow.
 	Intermediate Perl (the "Alpaca Book")
 	by Randal L. Schwartz and brian d foy, with Tom Phoenix (foreword by Damian Conway)
 	ISBN 0-596-10206-2 [1st edition March 2006]
-	http://www.oreilly.com/catalog/lrnperlorm/
+	http://www.oreilly.com/catalog/intermediateperl/
+
+	Mastering Perl
+	by brian d foy
+	ISBN 0-596-52724-1 [1st edition July 2007]
+	http://www.oreilly.com/catalog/9780596527242/
 
 =item Task-Oriented
 
@@ -401,6 +404,11 @@ Recommended books on (or mostly on) Perl follow.
 	ISBN 0-596-00503-2 [1st edition January 2004]
 	http://www.oreilly.com/catalog/perldebugpr/
 
+	Pro Perl Debugging
+	by Richard Foley with Andy Lester
+	ISBN 1-59059-454-1 [1st edition July 2005]
+	http://www.apress.com/book/view/1590594541
+	
 =back
 
 =head2 Which magazines have Perl content?
@@ -501,9 +509,9 @@ The Perl Foundation is an advocacy organization for the Perl language
 which maintains the web site http://www.perl.org/ as a general
 advocacy site for the Perl language. It uses the domain to provide
 general support services to the Perl community, including the hosting
-of mailing lists, web sites, and other services.  The web site
-http://www.perl.org/ is a general advocacy site for the Perl language,
-and there are many other sub-domains for special topics, such as
+of mailing lists, web sites, and other services.  There are also many
+other sub-domains for special topics like learning Perl, Perl news, jobs
+in Perl, such as:
 
 	http://learn.perl.org/
 	http://use.perl.org/
@@ -521,9 +529,9 @@ the I<What is CPAN?> question earlier in this document.
 
 =head1 REVISION
 
-Revision: $Revision: 9462 $
+Revision: $Revision: 10144 $
 
-Date: $Date: 2007-04-27 08:24:33 +0200 (Fri, 27 Apr 2007) $
+Date: $Date: 2007-10-31 13:50:01 +0100 (Wed, 31 Oct 2007) $
 
 See L<perlfaq> for source control details and availability.
 

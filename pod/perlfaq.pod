@@ -61,13 +61,13 @@ it, try the resources in L<perlfaq2>.
 
 Tom Christiansen wrote the original perlfaq then expanded it with the
 help of Nat Torkington.  The perlfaq-workers maintain current document
-and the dezinens of comp.lang.perl.misc regularly review and update the
+and the denizens of comp.lang.perl.misc regularly review and update the
 FAQ. Several people have contributed answers, corrections, and comments,
 and the perlfaq notes those contributions wherever appropriate.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Tom Christainsen wrote the original version of this document.
+Tom Christiansen wrote the original version of this document.
 brian d foy C<< <bdfoy@cpan.org> >> wrote this version. See the
 individual perlfaq documents for additional copyright information.
 
@@ -313,7 +313,7 @@ How can I use curses with Perl?
 
 =item *
 
-How can I use X or Tk with Perl?
+How can I write a GUI (X, Tk, Gtk, etc.) in Perl?
 
 =item *
 
@@ -747,6 +747,10 @@ How can I write() into a string?
 
 =item *
 
+How can I open a filehandle to a string?
+
+=item *
+
 How can I output my numbers with commas added?
 
 =item *
@@ -998,6 +1002,10 @@ How do I declare/create a structure?
 =item *
 
 How do I create a module?
+
+=item *
+
+How do I adopt or take over a module already on CPAN?
 
 =item *
 

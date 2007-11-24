@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 9576 $)
+perlfaq5 - Files and Formats ($Revision: 10126 $)
 
 =head1 DESCRIPTION
 
@@ -10,30 +10,28 @@ formats, and footers.
 =head2 How do I flush/unbuffer an output filehandle?  Why must I do this?
 X<flush> X<buffer> X<unbuffer> X<autoflush>
 
-Perl does not support truly unbuffered output (except
-insofar as you can C<syswrite(OUT, $char, 1)>), although it
-does support is "command buffering", in which a physical
-write is performed after every output command.
+Perl does not support truly unbuffered output (except insofar as you
+can C<syswrite(OUT, $char, 1)>), although it does support is "command
+buffering", in which a physical write is performed after every output
+command.
 
-The C standard I/O library (stdio) normally buffers
-characters sent to devices so that there isn't a system call
-for each byte. In most stdio implementations, the type of
-output buffering and the size of the buffer varies according
-to the type of device. Perl's print() and write() functions
-normally buffer output, while syswrite() bypasses buffering
-all together.
+The C standard I/O library (stdio) normally buffers characters sent to
+devices so that there isn't a system call for each byte. In most stdio
+implementations, the type of output buffering and the size of the
+buffer varies according to the type of device. Perl's C<print()> and
+C<write()> functions normally buffer output, while C<syswrite()>
+bypasses buffering all together.
 
-If you want your output to be sent immediately when you
-execute print() or write() (for instance, for some network
-protocols), you must set the handle's autoflush flag. This
-flag is the Perl variable $| and when it is set to a true
-value, Perl will flush the handle's buffer after each
-print() or write(). Setting $| affects buffering only for
-the currently selected default file handle. You choose this
-handle with the one argument select() call (see
+If you want your output to be sent immediately when you execute
+C<print()> or C<write()> (for instance, for some network protocols),
+you must set the handle's autoflush flag. This flag is the Perl
+variable C<$|> and when it is set to a true value, Perl will flush the
+handle's buffer after each C<print()> or C<write()>. Setting C<$|>
+affects buffering only for the currently selected default filehandle.
+You choose this handle with the one argument C<select()> call (see
 L<perlvar/$E<verbar>> and L<perlfunc/select>).
 
-Use select() to choose the desired handle, then set its
+Use C<select()> to choose the desired handle, then set its
 per-filehandle variables.
 
 	$old_fh = select(OUTPUT_HANDLE);
@@ -41,20 +39,28 @@ per-filehandle variables.
 	select($old_fh);
 
 Some modules offer object-oriented access to handles and their
-variables, although they may be overkill if this is the only
-thing you do with them.  You can use IO::Handle:
+variables, although they may be overkill if this is the only thing you
+do with them.  You can use C<IO::Handle>:
 
 	use IO::Handle;
-	open(DEV, ">/dev/printer");   # but is this?
-	DEV->autoflush(1);
+	open my( $printer ), ">", "/dev/printer");   # but is this?
+	$printer->autoflush(1);
 
-or IO::Socket:
+or C<IO::Socket> (which inherits from C<IO::Handle>):
 
 	use IO::Socket;		  # this one is kinda a pipe?
 	my $sock = IO::Socket::INET->new( 'www.example.com:80' );
 
 	$sock->autoflush();
 
+You can also flush an C<IO::Handle> object without setting
+C<autoflush>. Call the C<flush> method to flush the buffer yourself:
+
+	use IO::Handle;
+	open my( $printer ), ">", "/dev/printer"); 
+	$printer->flush; # one time flush
+
+	
 =head2 How do I change, delete, or insert a line in a file, or append to the beginning of a file?
 X<file, editing>
 
@@ -316,24 +322,25 @@ temporary files in one process, use a counter:
 	BEGIN {
 	use Fcntl;
 	my $temp_dir = -d '/tmp' ? '/tmp' : $ENV{TMPDIR} || $ENV{TEMP};
-	my $base_name = sprintf("%s/%d-%d-0000", $temp_dir, $$, time());
+	my $base_name = sprintf "%s/%d-%d-0000", $temp_dir, $$, time;
 
 	sub temp_file {
 		local *FH;
 		my $count = 0;
-		until (defined(fileno(FH)) || $count++ > 100) {
-		$base_name =~ s/-(\d+)$/"-" . (1 + $1)/e;
-		# O_EXCL is required for security reasons.
-		sysopen(FH, $base_name, O_WRONLY|O_EXCL|O_CREAT);
-		}
+		until( defined(fileno(FH)) || $count++ > 100 ) {
+			$base_name =~ s/-(\d+)$/"-" . (1 + $1)/e;
+			# O_EXCL is required for security reasons.
+			sysopen FH, $base_name, O_WRONLY|O_EXCL|O_CREAT;
+			}
 
-	if (defined(fileno(FH))
-		return (*FH, $base_name);
-	    }
-	else {
-		return ();
-	    }
-	}
+		if( defined fileno(FH) ) {
+			return (*FH, $base_name);
+			}
+		else {
+			return ();
+			}
+		}
+		
 	}
 
 =head2 How can I manipulate fixed-record-length files?
@@ -514,8 +521,27 @@ techniques to make it possible for the intrepid hacker.
 =head2 How can I write() into a string?
 X<write, into a string>
 
-See L<perlform/"Accessing Formatting Internals"> for an swrite() function.
+See L<perlform/"Accessing Formatting Internals"> for an C<swrite()> function.
 
+=head2 How can I open a filehandle to a string?
+X<string>, X<open>, X<IO::Scalar>, X<filehandle>
+
+(contributed by Peter J. Holzer, hjp-usenet2@hjp.at)
+
+Since Perl 5.8.0, you can pass a reference to a scalar instead of the
+filename to create a file handle which you can used to read from or write to
+a string:
+
+	open(my $fh, '>', \$string) or die "Could not open string for writing";
+	print $fh "foo\n";
+	print $fh "bar\n";	# $string now contains "foo\nbar\n"
+
+	open(my $fh, '<', \$string) or die "Could not open string for reading";
+	my $x = <$fh>;	# $x now contains "foo\n"
+
+With older versions of Perl, the C<IO::String> module provides similar
+functionality.
+    
 =head2 How can I output my numbers with commas added?
 X<number, commify>
 
@@ -683,7 +709,7 @@ only version of open() and so it is prevalent in old code and books.
 
 Unless you have a particular reason to use the two argument form you
 should use the three argument form of open() which does not treat any
-charcters in the filename as special.
+characters in the filename as special.
 
 	open FILE, "<", "  file  ";  # filename is "   file   "
 	open FILE, ">", ">file";     # filename is ">file"
@@ -770,7 +796,7 @@ atomic test-and-set instruction.   In theory, this "ought" to work:
 except that lamentably, file creation (and deletion) is not atomic
 over NFS, so this won't work (at least, not every time) over the net.
 Various schemes involving link() have been suggested, but
-these tend to involve busy-wait, which is also subdesirable.
+these tend to involve busy-wait, which is also less than desirable.
 
 =head2 I still don't get locking.  I just want to increment the number in the file.  How can I do this?
 X<counter> X<file, counter>
@@ -1280,9 +1306,9 @@ If your array contains lines, just print them:
 
 =head1 REVISION
 
-Revision: $Revision: 9576 $
+Revision: $Revision: 10126 $
 
-Date: $Date: 2007-05-19 18:58:05 +0200 (Sat, 19 May 2007) $
+Date: $Date: 2007-10-27 21:29:20 +0200 (Sat, 27 Oct 2007) $
 
 See L<perlfaq> for source control details and availability.
 

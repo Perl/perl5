@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq7 - General Perl Language Issues ($Revision: 9620 $)
+perlfaq7 - General Perl Language Issues ($Revision: 10100 $)
 
 =head1 DESCRIPTION
 
@@ -197,6 +197,45 @@ You may also want to see Sam Tregar's "Writing Perl Modules
 for CPAN" ( http://apress.com/book/bookDisplay.html?bID=14 )
 which is the best hands-on guide to creating module
 distributions.
+
+=head2 How do I adopt or take over a module already on CPAN?
+
+(contributed by brian d foy)
+
+The easiest way to take over a module is to have the current
+module maintainer either make you a co-maintainer or transfer
+the module to you.
+
+If you can't reach the author for some reason (e.g. email bounces),
+the PAUSE admins at modules@perl.org can help. The PAUSE admins
+treat each case individually.
+
+=over 4
+
+=item
+
+Get a login for the Perl Authors Upload Server (PAUSE) if you don't
+already have one: http://pause.perl.org
+
+=item
+
+Write to modules@perl.org explaining what you did to contact the
+current maintainer. The PAUSE admins will also try to reach the
+maintainer.
+
+=item 
+
+Post a public message in a heavily trafficked site announcing your
+intention to take over the module.
+
+=item
+
+Wait a bit. The PAUSE admins don't want to act too quickly in case
+the current maintainer is on holiday. If there's no response to 
+private communication or the public post, a PAUSE admin can transfer
+it to you.
+
+=back
 
 =head2 How do I create a class?
 
@@ -972,9 +1011,9 @@ where you expect it so you need to adjust your shebang line.
 
 =head1 REVISION
 
-Revision: $Revision: 9620 $
+Revision: $Revision: 10100 $
 
-Date: $Date: 2007-05-29 19:57:58 +0200 (Tue, 29 May 2007) $
+Date: $Date: 2007-10-21 20:59:30 +0200 (Sun, 21 Oct 2007) $
 
 See L<perlfaq> for source control details and availability.
 
