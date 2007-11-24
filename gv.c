@@ -575,6 +575,17 @@ S_gv_get_super_pkg(pTHX_ const char* name, I32 namelen)
     return stash;
 }
 
+/* FIXME. If changing this function note the comment in pp_hot's
+   S_method_common:
+
+   This code tries to figure out just what went wrong with
+   gv_fetchmethod.  It therefore needs to duplicate a lot of
+   the internals of that function. ...
+
+   I'd guess that with one more flag bit that could all be moved inside
+   here.
+*/
+
 GV *
 Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 {
