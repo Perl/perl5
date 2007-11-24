@@ -407,6 +407,12 @@ obtained perl isn't binary compatible with a regular perl 5.10, and has
 space and speed penalties; moreover not all regression tests still pass
 with it. (Larry Wall, Nicholas Clark)
 
+=head2 kill() on Windows
+
+On Windows platforms, C<kill(-9, $pid)> now kills a process tree.
+(On UNIX, this delivers the signal to all processes in the same process
+group.)
+
 =head1 Incompatible Changes
 
 =head2 Packing and UTF-8 strings
