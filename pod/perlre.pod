@@ -761,6 +761,9 @@ which buffer the captured content will be stored.
     / ( a )  (?| x ( y ) z | (p (q) r) | (t) u (v) ) ( z ) /x
     # 1            2         2  3        2     3     4  
 
+Note: as of Perl 5.10.0, branch resets interfere with the contents of
+the C<%+> hash, that holds named captures. Consider using C<%-> instead.
+
 =item Look-Around Assertions
 X<look-around assertion> X<lookaround assertion> X<look-around> X<lookaround>
 
@@ -837,9 +840,9 @@ only for fixed-width look-behind.
 X<< (?<NAME>) >> X<(?'NAME')> X<named capture> X<capture>
 
 A named capture buffer. Identical in every respect to normal capturing
-parentheses C<()> but for the additional fact that C<%+> may be used after
-a successful match to refer to a named buffer. See C<perlvar> for more
-details on the C<%+> hash.
+parentheses C<()> but for the additional fact that C<%+> or C<%-> may be
+used after a successful match to refer to a named buffer. See C<perlvar>
+for more details on the C<%+> and C<%-> hashes.
 
 If multiple distinct capture buffers have the same name then the
 $+{NAME} will refer to the leftmost defined buffer in the match.
