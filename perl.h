@@ -5335,6 +5335,9 @@ typedef struct am_table_short AMTS;
 #define dMY_CXT	\
 	dMY_CXT_SV;							\
 	my_cxt_t *my_cxtp = INT2PTR(my_cxt_t*, SvUV(my_cxt_sv))
+#define dMY_CXT_INTERP(my_perl)						\
+	SV *my_cxt_sv = *hv_fetchs(my_perl->Imodglobal, MY_CXT_KEY, TRUE); \
+	my_cxt_t *my_cxtp = INT2PTR(my_cxt_t*, SvUV(my_cxt_sv))
 
 /* Creates and zeroes the per-interpreter data.
  * (We allocate my_cxtp in a Perl SV so that it will be released when
