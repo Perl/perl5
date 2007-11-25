@@ -433,6 +433,16 @@ if you really have to, make it conditional on C<$^O ne 'VMS'> since in
 VMS the C<%ENV> table is much more than a per-process key-value string
 table.
 
+On VMS, some entries in the %ENV hash are dynamically created when
+their key is used on a read if they did not previously exist.  The
+values for C<$ENV{HOME}>, C<$ENV{TERM}>, C<$ENV{HOME}>, and C<$ENV{USER}>,
+are known to be dynamically generated.  The specific names that are
+dynamically generated may vary with the version of the C library on VMS,
+and more may exist than is documented.
+
+On VMS by default, changes to the %ENV hash are persistent after the process
+exits.  This can cause unintended issues.
+
 Don't count on signals or C<%SIG> for anything.
 
 Don't count on filename globbing.  Use C<opendir>, C<readdir>, and
@@ -2031,7 +2041,10 @@ not performing this operation. (Win32)
 
 =item symlink
 
-Not implemented. (Win32, VMS, S<RISC OS>)
+Not implemented. (Win32, S<RISC OS>)
+
+Implemented on 64 bit VMS 8.3.  VMS requires the symbolic link to be in Unix
+syntax if it is intended to resolve to a valid path.
 
 =item syscall
 

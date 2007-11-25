@@ -593,11 +593,10 @@ not been specifically tested.)
 
    statvfs, socketpair
 
-The following functions are expected to soon be available on Perls built
-on 64 bit OpenVMS 8.2 or later with the RMS Symbolic link package.  Use
-of symbolic links at this time effectively requires the
-DECC$POSIX_COMPLIANT_PATHNAMES to defined as 3, and operating in a
-DECC$FILENAME_UNIX_REPORT mode.
+The following functions are available on Perls built on 64 bit OpenVMS 8.3.
+The target for a symbolic link needs to be in Unix format if it is intended to
+resolve to a valid path.  The POSIX root must also be set up and there must be
+a path from that POSIX root to the symbolic link target.
 
     lchown, link, lstat, readlink, symlink
 
