@@ -4,7 +4,7 @@ use Carp;
 use warnings;
 use strict;
 use vars qw($VERSION $AUTOLOAD);
-$VERSION = '0.78_07';
+$VERSION = '0.79';
 # $DB::single=1;
 
 my %symcache;
