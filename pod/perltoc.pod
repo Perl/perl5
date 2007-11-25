@@ -1031,7 +1031,10 @@ Alpha, BBEdit and BBEdit Lite
 
 =item How can I use curses with Perl?
 
-=item How can I use X or Tk with Perl?
+=item How can I write a GUI (X, Tk, Gtk, etc.) in Perl?
+X<GUI> X<Tk> X<Wx> X<WxWidgets> X<Gtk> X<Gtk2> X<CamelBones> X<Qt>
+
+Tk, Wx, Gtk and Gtk2, Win32::GUI, CamelBones, Qt, Athena
 
 =item How can I make my Perl program run faster?
 
@@ -1221,6 +1224,8 @@ intersection of two arrays?
 =item How do I select a random element from an array?
 
 =item How do I permute N elements of a list?
+X<List::Permuter> X<permute> X<Algorithm::Loops> X<Knuth>
+X<The Art of Computer Programming> X<Fischer-Krause>
 
 =item How do I sort an array by (anything)?
 
@@ -1307,10 +1312,6 @@ array of hashes or arrays?
 =item How do I flush/unbuffer an output filehandle?  Why must I do this?
 X<flush> X<buffer> X<unbuffer> X<autoflush>
 
-=item How do I change, delete, or insert a line in a file, or append to the
-beginning of a file?
-X<file, editing>
-
 =item How do I count the number of lines in a file?
 X<file, counting lines> X<lines> X<line>
 
@@ -1339,8 +1340,8 @@ X<footer>
 =item How can I write() into a string?
 X<write, into a string>
 
-=item How can I output my numbers with commas added?
-X<number, commify>
+=item How can I open a filehandle to a string?
+X<string>, X<open>, X<IO::Scalar>, X<filehandle>
 
 =item How can I translate tildes (~) in a filename?
 X<tilde> X<tilde expansion>
@@ -1555,6 +1556,8 @@ commas?
 
 =item How do I create a module?
 
+=item How do I adopt or take over a module already on CPAN?
+
 =item How do I create a class?
 
 =item How can I tell if a variable is tainted?
@@ -1655,8 +1658,10 @@ STDIN, STDOUT, and STDERR are shared, Signals, Zombies
 =item How do I set the time and date?
 
 =item How can I sleep() or alarm() for under a second?
+X<Time::HiRes> X<BSD::Itimer> X<sleep> X<select>
 
 =item How can I measure time under a second?
+X<Time::HiRes> X<BSD::Itimer> X<sleep> X<select>
 
 =item How can I do an atexit() or setjmp()/longjmp()? (Exception handling)
 
@@ -1709,6 +1714,7 @@ complete?
 =item How do I timeout a slow event?
 
 =item How do I set CPU limits?
+X<BSD::Resource> X<limit> X<CPU>
 
 =item How do I avoid zombies on a Unix system?
 
@@ -2793,8 +2799,8 @@ $ARG, $_ X<$_> X<$ARG>, $a, $b X<$a> X<$b>, $<I<digits>> X<$1> X<$2> X<$3>,
 $MATCH, $& X<$&> X<$MATCH>, ${^MATCH} X<${^MATCH}>, $PREMATCH, $` X<$`>
 X<$PREMATCH>, ${^PREMATCH} X<${^PREMATCH}>, $POSTMATCH, $' X<$'>
 X<$POSTMATCH>, ${^POSTMATCH} X<${^POSTMATCH}>, $LAST_PAREN_MATCH, $+ X<$+>
-X<$LAST_PAREN_MATCH>, $^N X<$^N>, @LAST_MATCH_END, @+ X<@+>
-X<@LAST_MATCH_END>, %+ X<%+>, HANDLE->input_line_number(EXPR),
+X<$LAST_PAREN_MATCH>, $LAST_SUBMATCH_RESULT, $^N X<$^N>, @LAST_MATCH_END,
+@+ X<@+> X<@LAST_MATCH_END>, %+ X<%+>, HANDLE->input_line_number(EXPR),
 $INPUT_LINE_NUMBER, $NR, $. X<$.> X<$NR> X<$INPUT_LINE_NUMBER> X<line
 number>, IO::Handle->input_record_separator(EXPR), $INPUT_RECORD_SEPARATOR,
 $RS, $/ X<$/> X<$RS> X<$INPUT_RECORD_SEPARATOR>, HANDLE->autoflush(EXPR),
@@ -2822,27 +2828,28 @@ IO::Handle->format_formfeed EXPR, $FORMAT_FORMFEED, $^L X<$^L>
 X<$FORMAT_FORMFEED>, $ACCUMULATOR, $^A X<$^A> X<$ACCUMULATOR>,
 $CHILD_ERROR, $? X<$?> X<$CHILD_ERROR>, ${^CHILD_ERROR_NATIVE}
 X<$^CHILD_ERROR_NATIVE>, ${^ENCODING} X<$^ENCODING>, $OS_ERROR, $ERRNO, $!
-X<$!> X<$ERRNO> X<$OS_ERROR>, %! X<%!>, $EXTENDED_OS_ERROR, $^E X<$^E>
-X<$EXTENDED_OS_ERROR>, $EVAL_ERROR, $@ X<$@> X<$EVAL_ERROR>, $PROCESS_ID,
-$PID, $$ X<$$> X<$PID> X<$PROCESS_ID>, $REAL_USER_ID, $UID, $< X<< $< >>
-X<$UID> X<$REAL_USER_ID>, $EFFECTIVE_USER_ID, $EUID, $> X<< $> >> X<$EUID>
-X<$EFFECTIVE_USER_ID>, $REAL_GROUP_ID, $GID, $( X<$(> X<$GID>
-X<$REAL_GROUP_ID>, $EFFECTIVE_GROUP_ID, $EGID, $) X<$)> X<$EGID>
-X<$EFFECTIVE_GROUP_ID>, $PROGRAM_NAME, $0 X<$0> X<$PROGRAM_NAME>, $[ X<$[>,
-$] X<$]>, $COMPILING, $^C X<$^C> X<$COMPILING>, $DEBUGGING, $^D X<$^D>
-X<$DEBUGGING>, ${^RE_DEBUG_FLAGS}, ${^RE_TRIE_MAXBUF}, $SYSTEM_FD_MAX, $^F
-X<$^F> X<$SYSTEM_FD_MAX>, $^H, %^H, $INPLACE_EDIT, $^I X<$^I>
-X<$INPLACE_EDIT>, $^M X<$^M>, $OSNAME, $^O X<$^O> X<$OSNAME>, ${^OPEN},
-$PERLDB, $^P X<$^P> X<$PERLDB>, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40,
-0x80, 0x100, 0x200, 0x400, $LAST_REGEXP_CODE_RESULT, $^R X<$^R>
-X<$LAST_REGEXP_CODE_RESULT>, $EXCEPTIONS_BEING_CAUGHT, $^S X<$^S>
-X<$EXCEPTIONS_BEING_CAUGHT>, $BASETIME, $^T X<$^T> X<$BASETIME>, ${^TAINT},
-${^UNICODE}, ${^UTF8CACHE}, ${^UTF8LOCALE}, $PERL_VERSION, $^V X<$^V>
-X<$PERL_VERSION>, $WARNING, $^W X<$^W> X<$WARNING>, ${^WARNING_BITS},
-${^WIN32_SLOPPY_STAT}, $EXECUTABLE_NAME, $^X X<$^X> X<$EXECUTABLE_NAME>,
-ARGV X<ARGV>, $ARGV X<$ARGV>, @ARGV X<@ARGV>, ARGVOUT X<ARGVOUT>, @F X<@F>,
-@INC X<@INC>, @ARG, @_ X<@_> X<@ARG>, %INC X<%INC>, %ENV, $ENV{expr}
-X<%ENV>, %SIG, $SIG{expr} X<%SIG>
+X<$!> X<$ERRNO> X<$OS_ERROR>, %OS_ERROR, %ERRNO, %! X<%!>,
+$EXTENDED_OS_ERROR, $^E X<$^E> X<$EXTENDED_OS_ERROR>, $EVAL_ERROR, $@ X<$@>
+X<$EVAL_ERROR>, $PROCESS_ID, $PID, $$ X<$$> X<$PID> X<$PROCESS_ID>,
+$REAL_USER_ID, $UID, $< X<< $< >> X<$UID> X<$REAL_USER_ID>,
+$EFFECTIVE_USER_ID, $EUID, $> X<< $> >> X<$EUID> X<$EFFECTIVE_USER_ID>,
+$REAL_GROUP_ID, $GID, $( X<$(> X<$GID> X<$REAL_GROUP_ID>,
+$EFFECTIVE_GROUP_ID, $EGID, $) X<$)> X<$EGID> X<$EFFECTIVE_GROUP_ID>,
+$PROGRAM_NAME, $0 X<$0> X<$PROGRAM_NAME>, $[ X<$[>, $] X<$]>, $COMPILING,
+$^C X<$^C> X<$COMPILING>, $DEBUGGING, $^D X<$^D> X<$DEBUGGING>,
+${^RE_DEBUG_FLAGS}, ${^RE_TRIE_MAXBUF}, $SYSTEM_FD_MAX, $^F X<$^F>
+X<$SYSTEM_FD_MAX>, $^H, %^H, $INPLACE_EDIT, $^I X<$^I> X<$INPLACE_EDIT>,
+$^M X<$^M>, $OSNAME, $^O X<$^O> X<$OSNAME>, ${^OPEN}, $PERLDB, $^P X<$^P>
+X<$PERLDB>, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200,
+0x400, $LAST_REGEXP_CODE_RESULT, $^R X<$^R> X<$LAST_REGEXP_CODE_RESULT>,
+$EXCEPTIONS_BEING_CAUGHT, $^S X<$^S> X<$EXCEPTIONS_BEING_CAUGHT>,
+$BASETIME, $^T X<$^T> X<$BASETIME>, ${^TAINT}, ${^UNICODE}, ${^UTF8CACHE},
+${^UTF8LOCALE}, $PERL_VERSION, $^V X<$^V> X<$PERL_VERSION>, $WARNING, $^W
+X<$^W> X<$WARNING>, ${^WARNING_BITS}, ${^WIN32_SLOPPY_STAT},
+$EXECUTABLE_NAME, $^X X<$^X> X<$EXECUTABLE_NAME>, ARGV X<ARGV>, $ARGV
+X<$ARGV>, @ARGV X<@ARGV>, ARGVOUT X<ARGVOUT>, @F X<@F>, @INC X<@INC>, @ARG,
+@_ X<@_> X<@ARG>, %INC X<%INC>, %ENV, $ENV{expr} X<%ENV>, %SIG, $SIG{expr}
+X<%SIG>
 
 =item Error Indicators
 X<error> X<exception>
@@ -3977,15 +3984,17 @@ classes, Use of "Is" Prefix, Blocks
 
 =over 4
 
-=item DESCRIPTION
+=item Q and A
 
 =over 4
 
 =item perlunitut isn't really a Unicode tutorial, is it?
 
-=item What about binary data, like images?
+=item What character encodings does Perl support?
 
-=item What about the UTF8 flag?
+=item Which version of perl should I use?
+
+=item What about binary data, like images?
 
 =item When should I decode or encode?
 
@@ -3995,29 +4004,42 @@ classes, Use of "Is" Prefix, Blocks
 
 =item Is there a way to automatically decode or encode?
 
-=item Cheat?! Tell me, how can I cheat?
-
 =item What if I don't know which encoding was used?
 
 =item Can I use Unicode in my Perl sources?
 
 =item Data::Dumper doesn't restore the UTF8 flag; is it broken?
 
+=item Why do regex character classes sometimes match only in the ASCII
+range?
+
+=item Why do some characters not uppercase or lowercase correctly?
+
 =item How can I determine if a string is a text string or a binary string?
 
 =item How do I convert from encoding FOO to encoding BAR?
 
+=item What are C<decode_utf8> and C<encode_utf8>?
+
+=item What is a "wide character"?
+
+=back
+
+=item INTERNALS
+
+=over 4
+
+=item What is "the UTF8 flag"?
+
 =item What about the C<use bytes> pragma?
 
-=item What are C<decode_utf8> and C<encode_utf8>?
+=item What about the C<use encoding> pragma?
+
+=item What is the difference between C<:encoding> and C<:utf8>?
 
 =item What's the difference between C<UTF-8> and C<utf8>?
 
 =item I lost track; what encoding is the internal format really?
-
-=item What character encodings does Perl support?
-
-=item Which version of perl should I use?
 
 =back
 
@@ -4319,7 +4341,7 @@ List::Util, Locale::Constants, Locale::Country, Locale::Currency,
 Locale::Language, Locale::Maketext, Locale::Maketext::Simple,
 Locale::Maketext::TPJ13, Locale::Script, Log::Message,
 Log::Message::Config, Log::Message::Handlers, Log::Message::Item,
-MIME::Base64, MIME::Base64::QuotedPrint, Math::BigFloat, Math::BigInt,
+MIME::Base64, MIME::QuotedPrint, Math::BigFloat, Math::BigInt,
 Math::BigInt::Calc, Math::BigInt::CalcEmu, Math::BigInt::FastCalc,
 Math::BigRat, Math::Complex, Math::Trig, Memoize, Memoize::AnyDBM_File,
 Memoize::Expire, Memoize::ExpireFile, Memoize::ExpireTest,
@@ -6403,6 +6425,8 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 
 =item merge checkpods and podchecker
 
+=item perlmodlib.PL rewrite
+
 =item Parallel testing
 
 =item Make Schwern poorer
@@ -6453,6 +6477,8 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 
 =over 4
 
+=item Exterminate PL_na!
+
 =item Modernize the order of directories in @INC
 
 =item -Duse32bit*
@@ -6468,6 +6494,8 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 =item Use secure CRT functions when building with VC8 on Win32
 
 =item __FUNCTION__ for MSVC-pre-7.0
+
+=item strcat(), strcpy(), strncat(), strncpy(), sprintf(), vsprintf()
 
 =back
 
@@ -6493,8 +6521,6 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 
 =item readpipe(LIST)
 
-=item strcat(), strcpy(), strncat(), strncpy(), sprintf(), vsprintf()
-
 =item Audit the code for destruction ordering assumptions
 
 =item Extend PerlIO and PerlIO::Scalar
@@ -6502,6 +6528,9 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 =item -C on the #! line
 
 =item Propagate const outwards from Perl_moreswitches()
+
+=item Duplicate logic in S_method_common() and
+Perl_gv_fetchmethod_autoload()
 
 =back
 
@@ -6697,6 +6726,8 @@ C<${^WIN32_SLOPPY_STAT}>
 
 =item MAD
 
+=item kill() on Windows
+
 =back
 
 =item Incompatible Changes
@@ -6812,8 +6843,8 @@ C<d_pseudofork> and C<d_printf_format_null>, Configure help
 =item Compilation improvements
 
 Parallel build, Borland's compilers support, Static build on Windows,
-ppport.h files, C++ compatibility, Building XS extensions on Windows,
-Support for Microsoft 64-bit compiler, Visual C++, Win32 builds
+ppport.h files, C++ compatibility, Support for Microsoft 64-bit compiler,
+Visual C++, Win32 builds
 
 =item Installation improvements
 
@@ -6955,6 +6986,8 @@ C<${^WIN32_SLOPPY_STAT}>
 
 =item MAD
 
+=item kill() on Windows
+
 =back
 
 =item Incompatible Changes
@@ -7070,8 +7103,8 @@ C<d_pseudofork> and C<d_printf_format_null>, Configure help
 =item Compilation improvements
 
 Parallel build, Borland's compilers support, Static build on Windows,
-ppport.h files, C++ compatibility, Building XS extensions on Windows,
-Support for Microsoft 64-bit compiler, Visual C++, Win32 builds
+ppport.h files, C++ compatibility, Support for Microsoft 64-bit compiler,
+Visual C++, Win32 builds
 
 =item Installation improvements
 
@@ -7142,7 +7175,7 @@ v-string in use/require is non-portable, perl -V
 
 =back
 
-=head2 perl595delta, perldelta - what is new for perl v5.9.5
+=head2 perl595delta - what is new for perl v5.9.5
 
 =over 4
 
@@ -7289,7 +7322,7 @@ C<Attribute::Handlers>, C<B::Lint>, C<B>, C<Thread>
 
 =back
 
-=head2 perl594delta, perldelta - what is new for perl v5.9.4
+=head2 perl594delta - what is new for perl v5.9.4
 
 =over 4
 
@@ -7421,7 +7454,7 @@ State variable %s will be reinitialized
 
 =back
 
-=head2 perl593delta, perldelta - what is new for perl v5.9.3
+=head2 perl593delta - what is new for perl v5.9.3
 
 =over 4
 
@@ -7592,7 +7625,7 @@ pattern
 
 =back
 
-=head2 perl592delta, perldelta - what is new for perl v5.9.2
+=head2 perl592delta - what is new for perl v5.9.2
 
 =over 4
 
@@ -7666,7 +7699,7 @@ B::Concise, Socket, Sys::Syslog, threads
 
 =back
 
-=head2 perl591delta, perldelta - what is new for perl v5.9.1
+=head2 perl591delta - what is new for perl v5.9.1
 
 =over 4
 
@@ -7752,7 +7785,7 @@ Benchmark, Carp, Exporter, FindBin, List::Util, threads::shared
 
 =back
 
-=head2 perl590delta, perldelta - what is new for perl v5.9.0
+=head2 perl590delta - what is new for perl v5.9.0
 
 =over 4
 
@@ -7913,7 +7946,7 @@ Win32::GetOSVersion
 
 =back
 
-=head2 perl588delta, perldelta - what is new for perl v5.8.8
+=head2 perl588delta - what is new for perl v5.8.8
 
 =over 4
 
@@ -7980,7 +8013,7 @@ pattern
 
 =back
 
-=head2 perl587delta, perldelta - what is new for perl v5.8.7
+=head2 perl587delta - what is new for perl v5.8.7
 
 =over 4
 
@@ -13286,6 +13319,8 @@ FILE, HARDLINK, SYMLINK, CHARDEV, BLOCKDEV, DIR, FIFO, SOCKET
 
 =item $Archive::Tar::error
 
+=item $Archive::Tar::INSECURE_EXTRACT_MODE
+
 =item $Archive::Tar::HAS_PERLIO
 
 =item $Archive::Tar::HAS_IO_STRING
@@ -15766,6 +15801,12 @@ uptodate, path, verbose
 
 =over 4
 
+=item $index = $cb->__custom_module_source_index_file( uri => $uri );
+
+=back
+
+=over 4
+
 =item $file = $cb->_remove_custom_module_source( uri => URI, [verbose =>
 BOOL] ); 
 
@@ -17805,32 +17846,6 @@ Dumper
 
 =back
 
-=head2 Devel::Arena - Perl extension for inspecting the core's arena
-structures
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item EXPORT
-
-sv_stats [DONT_SHARE], shared_string_table, sizes, HEK_size STRING,
-shared_string_table_effectiveness, write_stats_at_END
-
-=back
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
 =head2 Devel::DProf - a Perl code profiler
 
 =over 4
@@ -17987,59 +18002,6 @@ perl 5.6.1, perl 5.6.0, perl 5.005_03, perl 5.005, perl 5.004_05, perl
 =item SYNOPSIS
 
 =item DESCRIPTION
-
-=back
-
-=head2 Devel::Size - Perl extension for finding the memory usage of Perl
-variables
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item FUNCTIONS
-
-=over 4
-
-=item size($ref)
-
-=item total_size($ref)
-
-=back
-
-=item EXPORT
-
-=item UNDERSTANDING MEMORY ALLOCATION
-
-=over 4
-
-=item The C library
-
-=item Perl
-
-=back
-
-=item DANGERS
-
-=item Messages: texts originating from this module.
-
-=over 4
-
-=item Errors
-
-=item warnings
-
-=back
-
-=item BUGS
-
-=item AUTHOR
-
-=item COPYRIGHT
-
-=item SEE ALSO
 
 =back
 
@@ -20788,7 +20750,8 @@ rmscopy($from,$to[,$date_flag]) X<rmscopy>
 
 =item ACCESSORS
 
-$ff->uri, $ff->scheme, $ff->host, $ff->path, $ff->file
+$ff->uri, $ff->scheme, $ff->host, $ff->vol, $ff->share, $ff->path,
+$ff->file
 
 =back
 
