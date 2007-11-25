@@ -29,6 +29,425 @@ Version v5.9.X		Development release working toward v5.10
 --------------
 
 ____________________________________________________________________________
+[ 32490] By: rgs				   on 2007/11/25  17:26:03
+	Log: The version appears in the docs too. And update release date.
+     Branch: perl
+	   ! lib/Attribute/Handlers.pm
+____________________________________________________________________________
+[ 32489] By: rgs				   on 2007/11/25  17:22:19
+	Log: Bump version to 0.79
+     Branch: perl
+	   ! lib/Attribute/Handlers.pm
+____________________________________________________________________________
+[ 32488] By: rgs				   on 2007/11/25  17:20:33
+	Log: Change to Attribute::Handlers suggested by Damian in
+	     Subject: Re: [PATCH] Attribute::Handlers till ears are bleeding
+	     From: Damian Conway <damian@conway.org>
+	     Date: Fri, 23 Nov 2007 07:43:05 +1100
+	     Message-ID: <4745E9D9.1050102@conway.org>
+     Branch: perl
+	   ! lib/Attribute/Handlers.pm
+	   ! lib/Attribute/Handlers/t/data_convert.t
+____________________________________________________________________________
+[ 32487] By: rgs				   on 2007/11/25  17:01:43
+	Log: Regen table of contents
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 32485] By: rgs				   on 2007/11/25  16:07:33
+	Log: Bump patchlevel to RC2
+     Branch: perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 32484] By: rgs				   on 2007/11/25  15:43:11
+	Log: Document bug #47762, and mention %-
+     Branch: perl
+	   ! pod/perlre.pod
+____________________________________________________________________________
+[ 32481] By: nicholas				   on 2007/11/24  22:37:38
+	Log: Nick's a muppet (*and* perforce branching is hard, or at least hateful,
+	     in as much as a branch spec is merely a shorthand - it's actually all
+	     a flat namespace underneath). So this shouldn't be here, but it's all
+	     due to a transcription typo on my part in the integrate command.
+	     Whereas the branch spec I carefully made is valid, but no $expletive
+	     use in actually creating the $expletive branch.
+	     Doesn't excuse my mistake. But does explain it.
+     Branch: perl
+	   - blead-maint-fixup/ext/XS/APItest/APItest.pm
+	   - blead-maint-fixup/ext/XS/APItest/APItest.xs
+	   - blead-maint-fixup/ext/XS/APItest/MANIFEST
+	   - blead-maint-fixup/ext/XS/APItest/Makefile.PL
+	   - blead-maint-fixup/ext/XS/APItest/README
+	   - blead-maint-fixup/ext/XS/APItest/core.c
+	   - blead-maint-fixup/ext/XS/APItest/core_or_not.inc
+	   - blead-maint-fixup/ext/XS/APItest/exception.c
+	   - blead-maint-fixup/ext/XS/APItest/notcore.c
+	   - blead-maint-fixup/ext/XS/APItest/t/call.t
+	   - blead-maint-fixup/ext/XS/APItest/t/exception.t
+	   - blead-maint-fixup/ext/XS/APItest/t/hash.t
+	   - blead-maint-fixup/ext/XS/APItest/t/my_cxt.t
+	   - blead-maint-fixup/ext/XS/APItest/t/op.t
+	   - blead-maint-fixup/ext/XS/APItest/t/printf.t
+	   - blead-maint-fixup/ext/XS/APItest/t/push.t
+	   - blead-maint-fixup/ext/XS/APItest/t/svsetsv.t
+	   - blead-maint-fixup/ext/XS/APItest/t/xs_special_subs.t
+	   - blead-maint-fixup/ext/XS/APItest/t/xs_special_subs_require.t
+____________________________________________________________________________
+[ 32480] By: nicholas				   on 2007/11/24  20:15:51
+	Log: Create a branch for code changes to XS code that 5.8.x needs, which
+	     can't yet be merged to blead beacuse of the code freeze for 5.10.
+	     For now, XS::APItest
+     Branch: perl
+	  +> blead-maint-fixup/ext/XS/APItest/APItest.pm
+	  +> blead-maint-fixup/ext/XS/APItest/APItest.xs
+	  +> blead-maint-fixup/ext/XS/APItest/MANIFEST
+	  +> blead-maint-fixup/ext/XS/APItest/Makefile.PL
+	  +> blead-maint-fixup/ext/XS/APItest/README
+	  +> blead-maint-fixup/ext/XS/APItest/core.c
+	  +> blead-maint-fixup/ext/XS/APItest/core_or_not.inc
+	  +> blead-maint-fixup/ext/XS/APItest/exception.c
+	  +> blead-maint-fixup/ext/XS/APItest/notcore.c
+	  +> blead-maint-fixup/ext/XS/APItest/t/call.t
+	  +> blead-maint-fixup/ext/XS/APItest/t/exception.t
+	  +> blead-maint-fixup/ext/XS/APItest/t/hash.t
+	  +> blead-maint-fixup/ext/XS/APItest/t/my_cxt.t
+	  +> blead-maint-fixup/ext/XS/APItest/t/op.t
+	  +> blead-maint-fixup/ext/XS/APItest/t/printf.t
+	  +> blead-maint-fixup/ext/XS/APItest/t/push.t
+	  +> blead-maint-fixup/ext/XS/APItest/t/svsetsv.t
+	  +> blead-maint-fixup/ext/XS/APItest/t/xs_special_subs.t
+	  +> blead-maint-fixup/ext/XS/APItest/t/xs_special_subs_require.t
+____________________________________________________________________________
+[ 32478] By: nicholas				   on 2007/11/24  11:40:28
+	Log: Eliminating the duplicate logic in S_method_common() and
+	     Perl_gv_fetchmethod_autoload() is clearly TODO.
+	     Move the paragraph
+	     "strcat(), strcpy(), strncat(), strncpy(), sprintf(), vsprintf()"
+	     to the section "Tasks that need a little C knowledge" as it doesn't
+	     need any XS knowledge.
+     Branch: perl
+	   ! gv.c pod/perltodo.pod
+____________________________________________________________________________
+[ 32477] By: nicholas				   on 2007/11/24  10:44:25
+	Log: Remove (probably) the last vestige of the assertions implementation -
+	     a now unused variable.
+     Branch: perl
+	   ! embedvar.h intrpvar.h perlapi.h
+____________________________________________________________________________
+[ 32476] By: rgs				   on 2007/11/24  09:09:21
+	Log: Mention kill improvements on Windows
+     Branch: perl
+	   ! pod/perl5100delta.pod
+____________________________________________________________________________
+[ 32475] By: rgs				   on 2007/11/24  09:06:24
+	Log: Subject: [PATCH] Document different kill(-9, ...) semantics on Windows
+	     From: "Jan Dubois" <jand@activestate.com>
+	     Date: Fri, 23 Nov 2007 14:48:43 -0800
+	     Message-ID: <003201c82e23$0003a0f0$000ae2d0$@com>
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 32474] By: craigb				   on 2007/11/24  02:17:28
+	Log: Subject: [patch@32376] VMS symbolic links part 4 of 4 - Final part
+	From: "John E. Malmberg" <wb8tyw@qsl.net>
+	Date: Sun, 18 Nov 2007 02:15:22 -0600
+	Message-id: <473FF49A.5000302@qsl.net>
+	     
+	     [.vms...] parts with revisions to compile on older systems and some
+	     POD clean-up.
+
+     Branch: perl
+	   ! vms/ext/Filespec.pm vms/vms.c vms/vmsish.h
+____________________________________________________________________________
+[ 32468] By: nicholas				   on 2007/11/23  18:04:30
+	Log: Subject: Re: Are we missing some tests?
+	     From: Robin Houston <robin@cpan.org>
+	     Message-Id: <7C63C4C8-B0DA-46F2-81D7-F2C14AFF76B8@cpan.org>
+	     Date: Fri, 23 Nov 2007 16:15:46 +0000
+     Branch: perl
+	   ! t/op/ver.t
+____________________________________________________________________________
+[ 32467] By: rgs				   on 2007/11/23  16:22:14
+	Log: Subject: [PATCH] Re: RC1 build failure
+	     From: Jarkko Hietaniemi <jhi@iki.fi>
+	     Date: Fri, 23 Nov 2007 10:39:11 -0500
+	     Message-ID: <4746F41F.6090508@iki.fi>
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 32466] By: rgs				   on 2007/11/23  15:00:57
+	Log: Subject: [PATCH] document return value of Getopt::Std::getopts()
+	     From: Mark Jason Dominus <mjd@plover.com>
+	     Date: Fri, 23 Nov 2007 09:54:38 -0500
+	     Message-ID: <20071123145438.6593.qmail@plover.com>
+     Branch: perl
+	   ! lib/Getopt/Std.pm
+____________________________________________________________________________
+[ 32464] By: rgs				   on 2007/11/23  11:39:00
+	Log: FAQ sync
+     Branch: perl
+	   ! pod/perlfaq.pod pod/perlfaq1.pod pod/perlfaq2.pod
+	   ! pod/perlfaq3.pod pod/perlfaq4.pod pod/perlfaq5.pod
+	   ! pod/perlfaq6.pod pod/perlfaq7.pod pod/perlfaq8.pod
+____________________________________________________________________________
+[ 32462] By: rgs				   on 2007/11/23  11:00:58
+	Log: Bump $open::VERSION
+     Branch: perl
+	   ! lib/open.pm
+____________________________________________________________________________
+[ 32461] By: rgs				   on 2007/11/23  10:58:24
+	Log: Subject: [patch] :utf8 updates
+	     From: Juerd Waalboer <juerd@convolution.nl>
+	     Date: Sat, 17 Nov 2007 20:03:00 +0100
+	     Message-ID: <20071117190300.GY10696@c4.convolution.nl>
+     Branch: perl
+	   ! AUTHORS lib/PerlIO.pm lib/open.pm pod/perlcheat.pod
+	   ! pod/perlfunc.pod pod/perlopentut.pod pod/perlrun.pod
+	   ! pod/perlunicode.pod pod/perlunifaq.pod pod/perluniintro.pod
+	   ! pod/perlunitut.pod
+____________________________________________________________________________
+[ 32460] By: nicholas				   on 2007/11/22  23:56:00
+	Log: Fix my typo in change 32137.
+	     Fix the bogus blank line in change 31997.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
+[ 32448] By: rgs				   on 2007/11/22  10:29:15
+	Log: Regenerate META.yml (missing dual-life modules)
+     Branch: perl
+	   ! META.yml
+____________________________________________________________________________
+[ 32447] By: ams				   on 2007/11/22  07:55:43
+	Log: 2.18 release.
+     Branch: perl
+	   ! ext/Storable/ChangeLog ext/Storable/Storable.pm
+____________________________________________________________________________
+[ 32446] By: ams				   on 2007/11/22  07:53:19
+	Log: 5.00404 compile fix from Slaven Rezic.
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[ 32445] By: rgs				   on 2007/11/22  07:09:59
+	Log: Upgrade to Win32 0.34
+     Branch: perl
+	   ! ext/Win32/Win32.pm
+____________________________________________________________________________
+[ 32444] By: rgs				   on 2007/11/22  06:34:54
+	Log: Add the Changes file for Win32.pm
+     Branch: perl
+	   + ext/Win32/Changes
+	   ! MANIFEST
+____________________________________________________________________________
+[ 32443] By: rgs				   on 2007/11/21  18:17:36
+	Log: Rename yylval to pl_yylval, to avoid confusing bogus C preprocessors
+	     that attempt to expand it recursively. (like, on UNICOS)
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[ 32441] By: nicholas				   on 2007/11/21  18:06:35
+	Log: Make genlog 'unexpand -a' all the spaces into tabs, which results in
+	     smaller Changes files.
+     Branch: perl
+	   ! Porting/genlog
+____________________________________________________________________________
+[ 32440] By: rgs				   on 2007/11/21  18:05:09
+	Log: Test::More and Test::Builder are actually part of the Test::Simple distribution
+     Branch: perl
+	   ! Porting/Maintainers.pl
+____________________________________________________________________________
+[ 32439] By: rgs				   on 2007/11/21  17:57:47
+	Log: Safe.pm is actually not under ext/Safe
+     Branch: perl
+	   ! Porting/Maintainers.pl
+____________________________________________________________________________
+[ 32434] By: rgs				   on 2007/11/21  13:49:25
+	Log: Update copyright in the README
+     Branch: perl
+	   ! README
+____________________________________________________________________________
+[ 32433] By: nicholas				   on 2007/11/21  12:06:31
+	Log: Run unexpand -a on all the Changes files, which were a jumbled mix of
+	     tabs and spaces. Now they're all tabs, and about 1300K smaller.
+	     The diff may look huge, but run diff -db and you'll see that it's all
+	     whitespace.
+     Branch: perl
+	   ! Changes Changes5.000 Changes5.001 Changes5.002 Changes5.003
+	   ! Changes5.004 Changes5.005 Changes5.6 Changes5.8
+____________________________________________________________________________
+[ 32432] By: rgs				   on 2007/11/21  10:26:33
+	Log: Remove rules to regenerate regnodes.h
+     Branch: perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 32431] By: rgs				   on 2007/11/21  10:17:33
+	Log: Subject: RE: Net/Ping/t/510_ping_udp.t fails on Windows Vista
+	     From: "Steve Hay" <SteveHay@planit.com>
+	     Date: Wed, 21 Nov 2007 09:45:57 -0000
+	     Message-ID: <1B32FF956ABF414C9BCE5E487A1497E7DC885B@ukmail02.planit.group>
+     Branch: perl
+	   ! ext/Win32/Win32.pm
+____________________________________________________________________________
+[ 32430] By: rgs				   on 2007/11/21  10:13:04
+	Log: Subject: [PATCH] Improve example code
+	     From: "Jan Dubois" <jand@activestate.com>
+	     Date: Tue, 20 Nov 2007 15:39:50 -0800
+	     Message-ID: <076601c82bce$a4fcfe00$eef6fa00$@com>
+     Branch: perl
+	   ! pod/perlsyn.pod
+____________________________________________________________________________
+[ 32429] By: merijn				   on 2007/11/21  07:15:56
+	Log: Subject: [PATCH] RC1: Future-proof solaris 10 versioned solibs hint
+	     From: Andy Dougherty <doughera@lafayette.edu>
+	     Date: Tue, 20 Nov 2007 13:49:41 -0500 (EST)
+	     Message-ID: <Pine.LNX.4.64.0711201346560.31844@fractal.phys.lafayette.edu>
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[ 32428] By: stevep				   on 2007/11/20  17:51:05
+	Log: Skip the udp ping tests if testing on Vista.  Also, switched
+	     the getservbyname() call to check for a udp echo port.
+     Branch: perl
+	   ! lib/Net/Ping/t/510_ping_udp.t
+____________________________________________________________________________
+[ 32427] By: nicholas				   on 2007/11/20  16:59:49
+	Log: Update the files that need to be read/write in makerel, removing one
+	     exterminated file, one file that is now a dummy, and adding in various
+	     files that are actually read/write because they are regenerated from
+	     source files. Change the type of regcharclass.h to read/write in
+	     Perforce as it is auto-generated. (And all other auto-generated files
+	     are read/write. There's some irony here - the only read/write files
+	     are the ones you shouldn't edit. All the ones you can edit are read
+	     only.)
+     Branch: perl
+	   ! Porting/makerel regcharclass.h
+____________________________________________________________________________
+[ 32426] By: nicholas				   on 2007/11/20  16:57:36
+	Log: Note that traces of PL_na cling on in dark corners of the source code.
+	     Exterminate! Exterminate! Exterminate!
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 32425] By: merijn				   on 2007/11/20  16:10:37
+	Log: Subject: Re: [PATCH] various RC1 nits
+	     From: Jarkko Hietaniemi <jhi@iki.fi>
+	     Date: Tue, 20 Nov 2007 10:51:54 -0500
+	     Message-ID: <4743029A.3010002@iki.fi>
+     Branch: perl
+	   ! Cross/Makefile-cross-SH Makefile.micro Porting/config_H
+	   ! hints/catamount.sh perl.h uconfig.sh
+____________________________________________________________________________
+[ 32423] By: rgs				   on 2007/11/20  15:53:24
+	Log: Regenerate META.yml
+     Branch: perl
+	   ! META.yml
+____________________________________________________________________________
+[ 32420] By: stevep				   on 2007/11/20  15:21:56
+	Log: Update to Time-Piece.  The only change in the core is to the
+	     version number.
+     Branch: perl
+	   ! ext/Time/Piece/Piece.pm
+____________________________________________________________________________
+[ 32418] By: rgs				   on 2007/11/20  13:48:14
+	Log: Subject: [PATCH] RC1: In Solaris 10 do not use versioned solibs
+	     From: Jarkko Hietaniemi <jhi@iki.fi>
+	     Date: Tue, 20 Nov 2007 08:29:05 -0500
+	     Message-ID: <4742E121.2090306@iki.fi>
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[ 32415] By: rgs				   on 2007/11/20  11:43:29
+	Log: Upgrade to Locale::Maketext 1.12
+     Branch: perl
+	   ! lib/Locale/Maketext.pm lib/Locale/Maketext.pod
+	   ! lib/Locale/Maketext/ChangeLog lib/Locale/Maketext/Guts.pm
+	   ! lib/Locale/Maketext/GutsLoader.pm
+	   ! lib/Locale/Maketext/TPJ13.pod
+	   ! lib/Locale/Maketext/t/01_about_verbose.t
+	   ! lib/Locale/Maketext/t/10_make.t lib/Locale/Maketext/t/20_get.t
+	   ! lib/Locale/Maketext/t/30_local.t
+	   ! lib/Locale/Maketext/t/40_super.t
+	   ! lib/Locale/Maketext/t/50_super.t
+	   ! lib/Locale/Maketext/t/60_super.t
+	   ! lib/Locale/Maketext/t/90_utf8.t
+____________________________________________________________________________
+[ 32414] By: rgs				   on 2007/11/20  10:43:24
+	Log: Subject: [PATCH] Fix VERSION in lib/Module/Build/YAML.pm (resubmitted)
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Thu, 8 Nov 2007 09:35:46 -0500
+	     Message-ID: <1ff86f510711080635h26362cefn3ab6c528610a9871@mail.gmail.com>
+     Branch: perl
+	   ! lib/Module/Build/YAML.pm
+____________________________________________________________________________
+[ 32412] By: rgs				   on 2007/11/20  08:17:55
+	Log: Subject: [PATCH] Correction to perl5100delta.pod
+	     From: "Jan Dubois" <jand@activestate.com>
+	     Date: Mon, 19 Nov 2007 16:03:25 -0800
+	     Message-ID: <03d101c82b08$c5bf7210$513e5630$@com>
+     Branch: perl
+	   ! pod/perl5100delta.pod
+____________________________________________________________________________
+[ 32411] By: rgs				   on 2007/11/20  08:16:21
+	Log: Subject: [PATCH] Rename "perl59" to "perl510"
+	     From: "Jan Dubois" <jand@activestate.com>
+	     Date: Mon, 19 Nov 2007 15:53:11 -0800
+	     Message-ID: <03cd01c82b07$581a1950$084e4bf0$@com>
+     Branch: perl
+	   ! README.win32 hints/dgux.sh installperl makedef.pl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 32410] By: rgs				   on 2007/11/20  08:14:11
+	Log: Subject: [Patch] perlboot.pod / added semicolons
+	     From: "Spiros Denaxas" <spiros@lokku.com>
+	     Date: Mon, 19 Nov 2007 23:43:11 +0000
+	     Message-ID: <bba689ec0711191543l31c7b3faw690d5fd7c5574823@mail.gmail.com>
+     Branch: perl
+	   ! pod/perlboot.pod
+____________________________________________________________________________
+[ 32405] By: rgs				   on 2007/11/19  14:15:31
+	Log: Subject: [PATCH] Attribute::Handlers till ears are bleeding
+	     From: Michael G Schwern <schwern@pobox.com>
+	     Date: Sun, 18 Nov 2007 16:20:31 -0800
+	     Message-ID: <4740D6CF.6030407@pobox.com>
+     Branch: perl
+	   + lib/Attribute/Handlers/t/data_convert.t
+	   ! MANIFEST lib/Attribute/Handlers.pm
+____________________________________________________________________________
+[ 32401] By: rgs				   on 2007/11/19  10:58:03
+	Log: Subject: rc1 patch - delta, comment nits
+	     From: Jim Cromie <jim.cromie@gmail.com>
+	     Date: Sun, 18 Nov 2007 18:01:13 -0700
+	     Message-ID: <4740E059.30808@gmail.com>
+     Branch: perl
+	   ! pod/perl5100delta.pod sv.c
+____________________________________________________________________________
+[ 32399] By: rgs				   on 2007/11/19  10:29:24
+	Log: Typo (found by Jarkko)
+     Branch: perl
+	   ! pod/perl5100delta.pod
+____________________________________________________________________________
+[ 32395] By: nicholas				   on 2007/11/18  22:25:26
+	Log: Re-indent erroneous changelogs. [Software that pastes carriage returns
+	     considered hateful.]
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
+[ 32376] By: nicholas				   on 2007/11/17  18:57:51
+	Log: 0777 is 512, not 522. (A typo.)
+     Branch: perl
+	   ! pod/perlrebackslash.pod
+____________________________________________________________________________
+[ 32372] By: nicholas				   on 2007/11/17  16:57:55
+	Log: Placate the black box index parser on search.cpan.org.
+     Branch: perl
+	   ! pod/perl587delta.pod pod/perl588delta.pod pod/perl590delta.pod
+	   ! pod/perl591delta.pod pod/perl592delta.pod pod/perl593delta.pod
+	   ! pod/perl594delta.pod pod/perl595delta.pod
+____________________________________________________________________________
+[ 32367] By: rgs				   on 2007/11/17  14:13:05
+	Log: Regenerate Changes
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [ 32366] By: nicholas				   on 2007/11/17  14:07:51
 	Log: Subject: typo in perl5100delta.pod
 	     From: YAMASHINA Hio <hio@hio.jp>
