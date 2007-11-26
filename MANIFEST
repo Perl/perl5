@@ -3496,6 +3496,7 @@ t/lib/MakeMaker/Test/Setup/BFD.pm	MakeMaker test utilities
 t/lib/MakeMaker/Test/Setup/PL_FILES.pm	MakeMaker test utilities
 t/lib/MakeMaker/Test/Setup/Problem.pm	MakeMaker test utilities
 t/lib/MakeMaker/Test/Setup/Recurs.pm	MakeMaker test utilities
+t/lib/MakeMaker/Test/Setup/XS.pm	MakeMaker test utilities
 t/lib/MakeMaker/Test/Utils.pm	MakeMaker test utilities
 t/lib/Math/BigFloat/Subclass.pm	Empty subclass of BigFloat for test
 t/lib/Math/BigInt/BareCalc.pm	Bigint's simulation of Calc

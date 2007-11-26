@@ -14,6 +14,9 @@ chdir 't';
 use Test::More;
 use ExtUtils::MakeMaker;
 
+my $Has_Version = eval 'require version; "version"->import';
+my $Has_Our     = eval 'our $foo';
+
 my %versions = (q[$VERSION = '1.00']        => '1.00',
                 q[*VERSION = \'1.01']       => '1.01',
                 q[($VERSION) = q$Revision: 32208 $ =~ /(\d+)/g;] => 32208,
@@ -29,25 +32,43 @@ my %versions = (q[$VERSION = '1.00']        => '1.00',
                 q[local $FOO::VERSION = '1.30'] => 'undef',
                );
 
-if( eval 'our $foo' ) {
+if( $Has_Our ) {
     $versions{q[our $VERSION = '1.23';]}   = '1.23',
 }
 
-if( eval 'require version; "version"->import' ) {
+if( $Has_Version ) {
     $versions{q[use version; $VERSION = qv(1.2.3);]} = qv(1.2.3);
     $versions{q[$VERSION = qv(1.2.3)]}               = qv(1.2.3);
 }
 
-plan tests => 2 * keys %versions;
+plan tests => (2 * keys %versions) + 4;
 
 while( my($code, $expect) = each %versions ) {
+    is( parse_version_string($code), $expect, $code );
+}
+
+
+sub parse_version_string {
+    my $code = shift;
+
     open(FILE, ">VERSION.tmp") || die $!;
     print FILE "$code\n";
     close FILE;
 
     $_ = 'foo';
-    is( MM->parse_version('VERSION.tmp'), $expect, $code );
+    my $version = MM->parse_version('VERSION.tmp');
     is( $_, 'foo', '$_ not leaked by parse_version' );
-
+    
     unlink "VERSION.tmp";
+    
+    return $version;
+}
+
+
+SKIP: {
+    skip "need version.pm", 2 unless $Has_Version;
+    is parse_version_string(q[ $VERSION = '1.00'; sub version { $VERSION } ]),
+       '1.00';
+    is parse_version_string(q[ use version; $VERSION = version->new(1.23) ]),
+       '1.23';
 }

@@ -15,7 +15,7 @@ BEGIN {
 chdir 't';
 
 use strict;
-use Test::More 'no_plan';
+use Test::More tests => 5;
 
 use ExtUtils::MakeMaker qw(WriteEmptyMakefile);
 use TieOut;
