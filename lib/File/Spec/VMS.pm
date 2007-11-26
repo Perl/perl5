@@ -4,7 +4,7 @@ use strict;
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '1.4_01';
+$VERSION = '3.25_02';
 
 @ISA = qw(File::Spec::Unix);
 
@@ -35,6 +35,8 @@ Removes redundant portions of file specifications according to VMS syntax.
 
 sub canonpath {
     my($self,$path) = @_;
+
+    return undef unless defined $path;
 
     if ($path =~ m|/|) { # Fake Unix
       my $pathify = $path =~ m|/\Z(?!\n)|;
@@ -260,6 +262,8 @@ Split dirspec using VMS syntax.
 
 sub splitdir {
     my($self,$dirspec) = @_;
+    my @dirs = ();
+    return @dirs if ( (!defined $dirspec) || ('' eq $dirspec) );
     $dirspec =~ tr/<>/[]/;			# < and >	==> [ and ]
     $dirspec =~ s/\]\[\./\.\]\[/g;		# ][.		==> .][
     $dirspec =~ s/\[000000\.\]\[/\[/g;		# [000000.][	==> [
@@ -275,7 +279,7 @@ sub splitdir {
 						# [--]		==> [-.-]
     $dirspec = "[$dirspec]" unless $dirspec =~ /[\[<]/; # make legal
     $dirspec =~ s/^(\[|<)\./$1/;
-    my(@dirs) = split /(?<!\^)\./, vmspath($dirspec);
+    @dirs = split /(?<!\^)\./, vmspath($dirspec);
     $dirs[0] =~ s/^[\[<]//s;  $dirs[-1] =~ s/[\]>]\Z(?!\n)//s;
     @dirs;
 }
