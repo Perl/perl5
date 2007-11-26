@@ -337,13 +337,26 @@ C<SV*>.
 /* These don't exist for 5.8.x, but there will be fewer merge conflicts in
    various *ish.h headers if they are defined as no-ops.  */
 
+#define hv_store_ent(zlonk, awk, touche, zgruppp)			\
+    ((HE *) hv_common((zlonk), (awk), NULL, 0, 0, HV_FETCH_ISSTORE,	\
+		      (touche), (zgruppp)))
+
+#define hv_exists_ent(zlonk, awk, zgruppp)				\
+    (hv_common((zlonk), (awk), NULL, 0, 0, HV_FETCH_ISEXISTS, 0, (zgruppp))\
+     ? TRUE : FALSE)
+#define hv_fetch_ent(zlonk, awk, touche, zgruppp)			\
+    ((HE *) hv_common((zlonk), (awk), NULL, 0, 0,			\
+		      ((touche) ? HV_FETCH_LVALUE : 0), NULL, (zgruppp)))
+#define hv_delete_ent(zlonk, awk, touche, zgruppp)			\
+    ((SV *) hv_common((zlonk), (awk), NULL, 0, 0, (touche) | HV_DELETE,	\
+		      NULL, (zgruppp)))
+
 #define HINTS_REFCNT_INIT            NOOP
 #define HINTS_REFCNT_TERM            NOOP
 
 /* Hash actions
  * Passed in PERL_MAGIC_uvar calls
  */
-#define HV_DELETE		-1
 #define HV_DISABLE_UVAR_XKEY	0x01
 /* We need to ensure that these don't clash with G_DISCARD, which is 2, as it
    is documented as being passed to hv_delete().  */
@@ -351,6 +364,7 @@ C<SV*>.
 #define HV_FETCH_ISEXISTS	0x08
 #define HV_FETCH_LVALUE		0x10
 #define HV_FETCH_JUST_SV	0x20
+#define HV_DELETE		0x40
 
 /*
  * Local variables:

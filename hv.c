@@ -205,7 +205,6 @@ information on how to use this function on tied hashes.
 SV**
 Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen_i32, SV *val, U32 hash)
 {
-    HE *hek;
     STRLEN klen;
     int flags;
 
@@ -216,19 +215,16 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen_i32, SV *val, U32 hash)
 	klen = klen_i32;
 	flags = 0;
     }
-    hek = hv_fetch_common (hv, NULL, key, klen, flags,
-			   (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV), val, hash);
-    return hek ? &HeVAL(hek) : NULL;
+    return (SV **) hv_common(hv, NULL, key, klen, flags,
+			     (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV), val, hash);
 }
 
-/* XXX This looks like an ideal candidate to inline */
 SV**
 Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
                  register U32 hash, int flags)
 {
-    HE * const hek = hv_fetch_common (hv, NULL, key, klen, flags,
-			       (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV), val, hash);
-    return hek ? &HeVAL(hek) : NULL;
+    return (SV**) hv_common(hv, NULL, key, klen, flags,
+			    (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV), val, hash);
 }
 
 /*
@@ -260,13 +256,6 @@ information on how to use this function on tied hashes.
 =cut
 */
 
-/* XXX This looks like an ideal candidate to inline */
-HE *
-Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, U32 hash)
-{
-  return hv_fetch_common(hv, keysv, NULL, 0, 0, HV_FETCH_ISSTORE, val, hash);
-}
-
 /*
 =for apidoc hv_exists
 
@@ -289,7 +278,7 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen_i32)
 	klen = klen_i32;
 	flags = 0;
     }
-    return hv_fetch_common(hv, NULL, key, klen, flags, HV_FETCH_ISEXISTS, 0, 0)
+    return hv_common(hv, NULL, key, klen, flags, HV_FETCH_ISEXISTS, 0, 0)
 	? TRUE : FALSE;
 }
 
@@ -310,7 +299,6 @@ information on how to use this function on tied hashes.
 SV**
 Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 lval)
 {
-    HE *hek;
     STRLEN klen;
     int flags;
 
@@ -321,10 +309,9 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 lval)
 	klen = klen_i32;
 	flags = 0;
     }
-    hek = hv_fetch_common (hv, NULL, key, klen, flags,
-			   lval ? (HV_FETCH_JUST_SV | HV_FETCH_LVALUE) : HV_FETCH_JUST_SV,
-			   NULL, 0);
-    return hek ? &HeVAL(hek) : NULL;
+    return (SV **) hv_common(hv, NULL, key, klen, flags,
+			     lval ? (HV_FETCH_JUST_SV | HV_FETCH_LVALUE)
+			     : HV_FETCH_JUST_SV, NULL, 0);
 }
 
 /*
@@ -336,14 +323,6 @@ computed.
 
 =cut
 */
-
-/* XXX This looks like an ideal candidate to inline */
-bool
-Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
-{
-    return hv_fetch_common(hv, keysv, NULL, 0, 0, HV_FETCH_ISEXISTS, 0, hash)
-	? TRUE : FALSE;
-}
 
 /* returns an HE * structure with the all fields set */
 /* note that hent_val will be a mortal sv for MAGICAL hashes */
@@ -364,16 +343,9 @@ information on how to use this function on tied hashes.
 =cut
 */
 
-HE *
-Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
-{
-    return hv_fetch_common(hv, keysv, NULL, 0, 0, 
-			   (lval ? HV_FETCH_LVALUE : 0), NULL, hash);
-}
-
-STATIC HE *
-S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
-		  int flags, int action, SV *val, register U32 hash)
+void *
+Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
+	       int flags, int action, SV *val, register U32 hash)
 {
     XPVHV* xhv;
     HE *entry;
@@ -381,8 +353,11 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     SV *sv;
     bool is_utf8;
     int masked_flags;
+    const int return_svp = action & HV_FETCH_JUST_SV;
 
     if (!hv)
+	return NULL;
+    if (SvTYPE(hv) == SVTYPEMASK)
 	return NULL;
 
     if (keysv) {
@@ -395,13 +370,19 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	is_utf8 = ((flags & HVhek_UTF8) ? TRUE : FALSE);
     }
 
+    if (action & HV_DELETE) {
+	return (void *) hv_delete_common(hv, keysv, key, klen,
+					 flags | (is_utf8 ? HVhek_UTF8 : 0),
+					 action, hash);
+    }
+
     xhv = (XPVHV*)SvANY(hv);
     if (SvMAGICAL(hv)) {
 	if (SvRMAGICAL(hv) && !(action & (HV_FETCH_ISSTORE|HV_FETCH_ISEXISTS))) {
 	    if (mg_find((SV*)hv, PERL_MAGIC_tied) || SvGMAGICAL((SV*)hv)) {
 		sv = sv_newmortal();
 
-		/* XXX should be able to skimp on the HE/HEK here when
+		/* FIXME should be able to skimp on the HE/HEK here when
 		   HV_FETCH_JUST_SV is true.  */
 
 		if (!keysv) {
@@ -436,7 +417,10 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		if (flags & HVhek_FREEKEY)
 		    Safefree(key);
 
-		return entry;
+		if (return_svp) {
+		    return entry ? (void *) &HeVAL(entry) : NULL;
+		}
+		return (void *) entry;
 	    }
 #ifdef ENV_IS_CASELESS
 	    else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
@@ -448,26 +432,27 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 			const char * const nkey = strupr(savepvn(key,klen));
 			/* Note that this fetch is for nkey (the uppercased
 			   key) whereas the store is for key (the original)  */
-			entry = hv_fetch_common(hv, NULL, nkey, klen,
-						HVhek_FREEKEY, /* free nkey */
-						0 /* non-LVAL fetch */
-						| HV_DISABLE_UVAR_XKEY,
-						NULL /* no value */,
-						0 /* compute hash */);
+			void *result = hv_common(hv, NULL, nkey, klen,
+						 HVhek_FREEKEY, /* free nkey */
+						 0 /* non-LVAL fetch */
+						 | HV_DISABLE_UVAR_XKEY
+						 | return_svp,
+						 NULL /* no value */,
+						 0 /* compute hash */);
 			if (!entry && (action & HV_FETCH_LVALUE)) {
 			    /* This call will free key if necessary.
 			       Do it this way to encourage compiler to tail
 			       call optimise.  */
-			    entry = hv_fetch_common(hv, keysv, key, klen,
-						    flags,
-						    HV_FETCH_ISSTORE
-						    | HV_DISABLE_UVAR_XKEY,
-						    newSV(0), hash);
+			    result = hv_common(hv, keysv, key, klen, flags,
+					       HV_FETCH_ISSTORE
+					       | HV_DISABLE_UVAR_XKEY
+					       | return_svp,
+					       newSV(0), hash);
 			} else {
 			    if (flags & HVhek_FREEKEY)
 				Safefree(key);
 			}
-			return entry;
+			return result;
 		    }
 	    }
 #endif
@@ -496,7 +481,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		/* This cast somewhat evil, but I'm merely using NULL/
 		   not NULL to return the boolean exists.
 		   And I know hv is not NULL.  */
-		return SvTRUE(svret) ? (HE *)hv : NULL;
+		return SvTRUE(svret) ? (void *)hv : NULL;
 		}
 #ifdef ENV_IS_CASELESS
 	    else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
@@ -585,7 +570,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
             if (flags & HVhek_FREEKEY)
                 Safefree(key);
 
-	    return 0;
+	    return NULL;
 	}
     }
 
@@ -700,6 +685,9 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	}
 	if (flags & HVhek_FREEKEY)
 	    Safefree(key);
+	if (return_svp) {
+	    return entry ? (void *) &HeVAL(entry) : NULL;
+	}
 	return entry;
     }
 #ifdef DYNAMIC_ENV_FETCH  /* %ENV lookup?  If so, try to fetch the value now */
@@ -710,9 +698,9 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	if (env) {
 	    sv = newSVpvn(env,len);
 	    SvTAINTED_on(sv);
-	    return hv_fetch_common(hv, keysv, key, klen, flags,
-				   HV_FETCH_ISSTORE|HV_DISABLE_UVAR_XKEY, sv,
-				   hash);
+	    return hv_common(hv, keysv, key, klen, flags,
+			     HV_FETCH_ISSTORE|HV_DISABLE_UVAR_XKEY|return_svp,
+			     sv, hash);
 	}
     }
 #endif
@@ -726,7 +714,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	/* Not doing some form of store, so return failure.  */
 	if (flags & HVhek_FREEKEY)
 	    Safefree(key);
-	return 0;
+	return NULL;
     }
     if (action & HV_FETCH_LVALUE) {
 	val = newSV(0);
@@ -735,9 +723,9 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	       which in turn might do some tied magic. So we need to make that
 	       magic check happen.  */
 	    /* gonna assign to this, so it better be there */
-	    return hv_fetch_common(hv, keysv, key, klen, flags,
-				   HV_FETCH_ISSTORE|HV_DISABLE_UVAR_XKEY, val,
-				   hash);
+	    return hv_common(hv, keysv, key, klen, flags,
+			     HV_FETCH_ISSTORE|HV_DISABLE_UVAR_XKEY|return_svp,
+			     val, hash);
 	    /* XXX Surely that could leak if the fetch-was-store fails?
 	       Just like the hv_fetch.  */
 	}
@@ -800,7 +788,10 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	}
     }
 
-    return entry;
+    if (return_svp) {
+	return entry ? (void *) &HeVAL(entry) : NULL;
+    }
+    return (void *) entry;
 }
 
 STATIC void
@@ -874,7 +865,8 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 flags)
 	klen = klen_i32;
 	k_flags = 0;
     }
-    return hv_delete_common(hv, NULL, key, klen, k_flags, flags, 0);
+    return (SV *) hv_common(hv, NULL, key, klen, k_flags, flags | HV_DELETE,
+			    NULL, 0);
 }
 
 /*
@@ -888,13 +880,6 @@ precomputed hash value, or 0 to ask for it to be computed.
 =cut
 */
 
-/* XXX This looks like an ideal candidate to inline */
-SV *
-Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
-{
-    return hv_delete_common(hv, keysv, NULL, 0, 0, flags, hash);
-}
-
 STATIC SV *
 S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		   int k_flags, I32 d_flags, U32 hash)
@@ -903,21 +888,8 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     register HE *entry;
     register HE **oentry;
     HE *const *first_entry;
-    bool is_utf8;
+    bool is_utf8 = (k_flags & HVhek_UTF8) ? TRUE : FALSE;
     int masked_flags;
-
-    if (!hv)
-	return NULL;
-
-    if (keysv) {
-	if (k_flags & HVhek_FREEKEY)
-	    Safefree(key);
-	key = SvPV_const(keysv, klen);
-	k_flags = 0;
-	is_utf8 = (SvUTF8(keysv) != 0);
-    } else {
-	is_utf8 = ((k_flags & HVhek_UTF8) ? TRUE : FALSE);
-    }
 
     if (SvRMAGICAL(hv)) {
 	bool needs_copy;
@@ -926,10 +898,10 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
 	if (needs_copy) {
 	    SV *sv;
-	    entry = hv_fetch_common(hv, keysv, key, klen,
-				    k_flags & ~HVhek_FREEKEY,
-				    HV_FETCH_LVALUE|HV_DISABLE_UVAR_XKEY,
-				    NULL, hash);
+	    entry = (HE *) hv_common(hv, keysv, key, klen,
+				     k_flags & ~HVhek_FREEKEY,
+				     HV_FETCH_LVALUE|HV_DISABLE_UVAR_XKEY,
+				     NULL, hash);
 	    sv = entry ? HeVAL(entry) : NULL;
 	    if (sv) {
 		if (SvMAGICAL(sv)) {

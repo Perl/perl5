@@ -1270,6 +1270,33 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, char *patend, register SV **beglist, SV 
     packlist(cat, pat, patend, beglist, endlist);
 }
 
+HE *
+Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, U32 hash)
+{
+  return (HE *)hv_common(hv, keysv, NULL, 0, 0, HV_FETCH_ISSTORE, val, hash);
+}
+
+bool
+Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
+{
+    return hv_common(hv, keysv, NULL, 0, 0, HV_FETCH_ISEXISTS, 0, hash)
+	? TRUE : FALSE;
+}
+
+HE *
+Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, U32 hash)
+{
+    return (HE *)hv_common(hv, keysv, NULL, 0, 0, 
+		     (lval ? HV_FETCH_LVALUE : 0), NULL, hash);
+}
+
+SV *
+Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
+{
+    return (SV *) hv_common(hv, keysv, NULL, 0, 0, flags | HV_DELETE, NULL,
+			    hash);
+}
+
 bool
 /* Whilst this should really be STATIC, it was not in 5.8.7, hence something
    may have linked against it.  */
