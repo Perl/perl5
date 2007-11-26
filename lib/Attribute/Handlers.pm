@@ -190,7 +190,10 @@ sub _apply_handler_AH_ {
 	my $sym = findsym($pkg, $ref);
 	$sym ||= $type eq 'CODE' ? 'ANON' : 'LEXICAL';
 	no warnings;
-	if (!$raw) {
+	if ($raw) {
+	    $data = [$data];
+	}
+	else {
 	    $data = !$raw && eval("package $pkg; no warnings; no strict;
 				   local \$SIG{__WARN__}=sub{die}; [$data]");
 	    if (my $error = $@) {
