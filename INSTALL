@@ -671,14 +671,14 @@ present, at run time.  Of course, you can still search other @INC
 directories ahead of those in APPLLIB_EXP by using any of the standard
 run-time methods: $PERLLIB, $PERL5LIB, -I, use lib, etc.
 
-=item USE_SITECUSTOMIZE
+=item usesitecustomize
 
 Run-time customization of @INC can be enabled with:
 
 	sh Configure -Dusesitecustomize
 
-Which will define USE_SITECUSTOMIZE and $Config{usesitecustomize}.
-When enabled, make perl run F<$sitelibexp/sitecustomize.pl> before
+which will define USE_SITECUSTOMIZE and $Config{usesitecustomize}.
+When enabled, this makes perl run F<$sitelibexp/sitecustomize.pl> before
 anything else.  This script can then be set up to add additional
 entries to @INC.
 
@@ -1808,24 +1808,17 @@ If make test bombs out, just cd to the t directory and run ./TEST
 by hand to see if it makes any difference.  If individual tests
 bomb, you can run them by hand, e.g.,
 
-	./perl op/groups.t
+	cd t ; ./perl -MTestInit op/groups.t
 
 Another way to get more detailed information about failed tests and
 individual subtests is to cd to the t directory and run
 
-	./perl harness
+	cd t ; ./perl harness <list of tests>
 
 (this assumes that most basic tests succeed, since harness uses
-complicated constructs).  For extension and library tests you
-need a little bit more: you need to setup your environment variable
-PERL_CORE to a true value (like "1"), and you need to supply the
-right Perl library path:
+complicated constructs). If no list of tests is provided, harness
+will run all tests.
 
-	setenv PERL_CORE 1
-	./perl -I../lib ../ext/Socket/Socket.t
-	./perl -I../lib ../lib/less.t
-
-(For csh-like shells on UNIX; adjust appropriately for other platforms.)
 You should also read the individual tests to see if there are any helpful
 comments that apply to your system.  You may also need to setup your
 shared library path if you get errors like:
@@ -1840,7 +1833,7 @@ See L</"Building a shared Perl library"> earlier in this document.
 
 Note:  One possible reason for errors is that some external programs
 may be broken due to the combination of your environment and the way
-B<make test> exercises them.  For example, this may happen if you have
+'make test' exercises them.  For example, this may happen if you have
 one or more of these environment variables set:  LC_ALL LC_CTYPE
 LC_COLLATE LANG.  In some versions of UNIX, the non-English locales
 are known to cause programs to exhibit mysterious errors.
@@ -1881,7 +1874,7 @@ test 85 will fail if run under either t/TEST or t/harness.
 
 Try stopping other jobs on the system and then running the test by itself:
 
-	cd t; ./perl op/pat.t
+	cd t; ./perl -MTestInit op/pat.t
 
 to see if you have any better luck.  If your perl still fails this
 test, it does not necessarily mean you have a broken perl.  This test
