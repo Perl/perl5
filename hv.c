@@ -1292,9 +1292,9 @@ Perl_newHVhv(pTHX_ HV *ohv)
 
 	hv_iterinit(ohv);
 	while ((entry = hv_iternext_flags(ohv, 0))) {
-	    hv_store_flags(hv, HeKEY(entry), HeKLEN(entry),
-                           newSVsv(HeVAL(entry)), HeHASH(entry),
-                           HeKFLAGS(entry));
+	    (void)hv_store_flags(hv, HeKEY(entry), HeKLEN(entry),
+			         newSVsv(HeVAL(entry)), HeHASH(entry),
+			         HeKFLAGS(entry));
 	}
 	HvRITER_set(ohv, riter);
 	HvEITER_set(ohv, eiter);
@@ -1507,7 +1507,7 @@ Perl_hv_undef(pTHX_ HV *hv)
     if ((name = HvNAME_get(hv))) {
 	/* FIXME - strlen HvNAME  */
         if(PL_stashcache)
-	    hv_delete(PL_stashcache, name, strlen(name), G_DISCARD);
+	    (void)hv_delete(PL_stashcache, name, strlen(name), G_DISCARD);
 	hv_name_set(hv, NULL, 0, 0);
     }
     xhv->xhv_max   = 7;	/* HvMAX(hv) = 7 (it's a normal hash) */

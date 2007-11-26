@@ -1449,7 +1449,7 @@ Perl_gp_free(pTHX_ GV *gv)
 	/* FIXME strlen HvNAME  */
 	const char *hvname = HvNAME_get(gp->gp_hv);
 	if (PL_stashcache && hvname)
-	    hv_delete(PL_stashcache, hvname, strlen(hvname), G_DISCARD);
+	    (void)hv_delete(PL_stashcache, hvname, strlen(hvname), G_DISCARD);
 	SvREFCNT_dec(gp->gp_hv);
     }
     SvREFCNT_dec(gp->gp_io);
