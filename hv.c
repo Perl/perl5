@@ -199,35 +199,6 @@ hv_store_ent.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
-=cut
-*/
-
-SV**
-Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen_i32, SV *val, U32 hash)
-{
-    STRLEN klen;
-    int flags;
-
-    if (klen_i32 < 0) {
-	klen = -klen_i32;
-	flags = HVhek_UTF8;
-    } else {
-	klen = klen_i32;
-	flags = 0;
-    }
-    return (SV **) hv_common(hv, NULL, key, klen, flags,
-			     (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV), val, hash);
-}
-
-SV**
-Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
-                 register U32 hash, int flags)
-{
-    return (SV**) hv_common(hv, NULL, key, klen, flags,
-			    (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV), val, hash);
-}
-
-/*
 =for apidoc hv_store_ent
 
 Stores C<val> in a hash.  The hash key is specified as C<key>.  The C<hash>
@@ -253,36 +224,11 @@ hv_store in preference to hv_store_ent.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
-=cut
-*/
-
-/*
 =for apidoc hv_exists
 
 Returns a boolean indicating whether the specified hash key exists.  The
 C<klen> is the length of the key.
 
-=cut
-*/
-
-bool
-Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen_i32)
-{
-    STRLEN klen;
-    int flags;
-
-    if (klen_i32 < 0) {
-	klen = -klen_i32;
-	flags = HVhek_UTF8;
-    } else {
-	klen = klen_i32;
-	flags = 0;
-    }
-    return hv_common(hv, NULL, key, klen, flags, HV_FETCH_ISEXISTS, 0, 0)
-	? TRUE : FALSE;
-}
-
-/*
 =for apidoc hv_fetch
 
 Returns the SV which corresponds to the specified key in the hash.  The
@@ -293,28 +239,6 @@ dereferencing it to an C<SV*>.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
-=cut
-*/
-
-SV**
-Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 lval)
-{
-    STRLEN klen;
-    int flags;
-
-    if (klen_i32 < 0) {
-	klen = -klen_i32;
-	flags = HVhek_UTF8;
-    } else {
-	klen = klen_i32;
-	flags = 0;
-    }
-    return (SV **) hv_common(hv, NULL, key, klen, flags,
-			     lval ? (HV_FETCH_JUST_SV | HV_FETCH_LVALUE)
-			     : HV_FETCH_JUST_SV, NULL, 0);
-}
-
-/*
 =for apidoc hv_exists_ent
 
 Returns a boolean indicating whether the specified hash key exists. C<hash>
@@ -342,6 +266,24 @@ information on how to use this function on tied hashes.
 
 =cut
 */
+
+/* Common code for hv_delete()/hv_exists()/hv_fetch()/hv_store()  */
+void *
+Perl_hv_common_key_len(pTHX_ HV *hv, const char *key, I32 klen_i32,
+		       const int action, SV *val, const U32 hash)
+{
+    STRLEN klen;
+    int flags;
+
+    if (klen_i32 < 0) {
+	klen = -klen_i32;
+	flags = HVhek_UTF8;
+    } else {
+	klen = klen_i32;
+	flags = 0;
+    }
+    return hv_common(hv, NULL, key, klen, flags, action, val, hash);
+}
 
 void *
 Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
@@ -439,7 +381,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 						 | return_svp,
 						 NULL /* no value */,
 						 0 /* compute hash */);
-			if (!entry && (action & HV_FETCH_LVALUE)) {
+			if (!result && (action & HV_FETCH_LVALUE)) {
 			    /* This call will free key if necessary.
 			       Do it this way to encourage compiler to tail
 			       call optimise.  */
@@ -849,27 +791,6 @@ hash and returned to the caller.  The C<klen> is the length of the key.
 The C<flags> value will normally be zero; if set to G_DISCARD then NULL
 will be returned.
 
-=cut
-*/
-
-SV *
-Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 flags)
-{
-    STRLEN klen;
-    int k_flags;
-
-    if (klen_i32 < 0) {
-	klen = -klen_i32;
-	k_flags = HVhek_UTF8;
-    } else {
-	klen = klen_i32;
-	k_flags = 0;
-    }
-    return (SV *) hv_common(hv, NULL, key, klen, k_flags, flags | HV_DELETE,
-			    NULL, 0);
-}
-
-/*
 =for apidoc hv_delete_ent
 
 Deletes a key/value pair in the hash.  The value SV is removed from the
