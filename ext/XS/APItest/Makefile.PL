@@ -1,5 +1,6 @@
 use 5.008;
 use ExtUtils::MakeMaker;
+use ExtUtils::Constant 0.11 'WriteConstants';
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 WriteMakefile(
@@ -17,6 +18,14 @@ WriteMakefile(
 	# Un-comment this if you add C files to link with later:
     # 'OBJECT'		=> '$(O_FILES)', # link all the C files too
     MAN3PODS		=> {},  # Pods will be built by installman.
+    realclean => {FILES	=> 'const-c.inc const-xs.inc'},
+);
+
+WriteConstants(
+    PROXYSUBS => 1,
+    NAME => 'XS::APItest',
+    NAMES => [qw(HV_DELETE HV_DISABLE_UVAR_XKEY G_DISCARD HV_FETCH_ISSTORE
+		 HV_FETCH_ISEXISTS HV_FETCH_LVALUE HV_FETCH_JUST_SV)],
 );
 
 sub MY::install { "install ::\n"  };
