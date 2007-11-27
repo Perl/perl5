@@ -122,7 +122,7 @@ rules. It's not a character class, as it can match a multi-character
 sequence. Therefore, it cannot be used inside a bracketed character
 class. Details are discussed in L<perlrebackslash>.
 
-C<\h>, C<\H>, C<\v>, C<\V>, and C<\R> are new in perl 5.10.
+C<\h>, C<\H>, C<\v>, C<\V>, and C<\R> are new in perl 5.10.0.
 
 Note that unlike C<\s>, C<\d> and C<\w>, C<\h> and C<\v> always match
 the same characters, regardless whether the source string is in UTF-8

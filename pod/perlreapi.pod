@@ -302,7 +302,7 @@ variables, to do this in another engine use the following callback
             Perl_croak(aTHX_ PL_no_modify);
     }
 
-Actually perl 5.10 will not I<always> croak in a statement that looks
+Actually perl will not I<always> croak in a statement that looks
 like it would modify a numbered capture variable. This is because the
 STORE callback will not be called if perl can determine that it
 doesn't have to modify the value. This is exactly how tied variables

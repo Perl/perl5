@@ -1036,8 +1036,7 @@ this optimization. (Yves Orton)
 B<Note:> Much code exists that works around perl's historic poor
 performance on alternations. Often the tricks used to do so will disable
 the new optimisations. Hopefully the utility modules used for this purpose
-will be educated about these new optimisations by the time 5.10 is
-released.
+will be educated about these new optimisations.
 
 =item Aho-Corasick start-point optimisation
 

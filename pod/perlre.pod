@@ -521,14 +521,14 @@ backreferences.
 
 X<\g{1}> X<\g{-1}> X<\g{name}> X<relative backreference> X<named backreference>
 In order to provide a safer and easier way to construct patterns using
-backreferences, Perl 5.10 provides the C<\g{N}> notation. The curly
-brackets are optional, however omitting them is less safe as the meaning
-of the pattern can be changed by text (such as digits) following it.
-When N is a positive integer the C<\g{N}> notation is exactly equivalent
-to using normal backreferences. When N is a negative integer then it is
-a relative backreference referring to the previous N'th capturing group.
-When the bracket form is used and N is not an integer, it is treated as a
-reference to a named buffer.
+backreferences, Perl provides the C<\g{N}> notation (starting with perl
+5.10.0). The curly brackets are optional, however omitting them is less
+safe as the meaning of the pattern can be changed by text (such as digits)
+following it. When N is a positive integer the C<\g{N}> notation is
+exactly equivalent to using normal backreferences. When N is a negative
+integer then it is a relative backreference referring to the previous N'th
+capturing group. When the bracket form is used and N is not an integer, it
+is treated as a reference to a named buffer.
 
 Thus C<\g{-1}> refers to the last buffer, C<\g{-2}> refers to the
 buffer before that. For example:
@@ -544,7 +544,7 @@ buffer before that. For example:
 
 and would match the same as C</(Y) ( (X) \3 \1 )/x>.
 
-Additionally, as of Perl 5.10 you may use named capture buffers and named
+Additionally, as of Perl 5.10.0 you may use named capture buffers and named
 backreferences. The notation is C<< (?<name>...) >> to declare and C<< \k<name> >>
 to reference. You may also use apostrophes instead of angle brackets to delimit the
 name; and you may use the bracketed C<< \g{name} >> backreference syntax.
@@ -614,7 +614,7 @@ already paid the price.  As of 5.005, C<$&> is not so costly as the
 other two.
 X<$&> X<$`> X<$'>
 
-As a workaround for this problem, Perl 5.10 introduces C<${^PREMATCH}>,
+As a workaround for this problem, Perl 5.10.0 introduces C<${^PREMATCH}>,
 C<${^MATCH}> and C<${^POSTMATCH}>, which are equivalent to C<$`>, C<$&>
 and C<$'>, B<except> that they are only guaranteed to be defined after a
 successful match that was executed with the C</p> (preserve) modifier.
@@ -740,7 +740,7 @@ X<(?|)> X<Branch reset>
 
 This is the "branch reset" pattern, which has the special property
 that the capture buffers are numbered from the same starting point
-in each alternation branch. It is available starting from perl 5.10.
+in each alternation branch. It is available starting from perl 5.10.0.
 
 Capture buffers are numbered from left to right, but inside this
 construct the numbering is restarted for each branch.
@@ -2108,9 +2108,9 @@ part of this regular expression needs to be converted explicitly
 
 =head1 PCRE/Python Support
 
-As of Perl 5.10 Perl supports several Python/PCRE specific extensions
+As of Perl 5.10.0, Perl supports several Python/PCRE specific extensions
 to the regex syntax. While Perl programmers are encouraged to use the
-Perl specific syntax, the following are legal in Perl 5.10:
+Perl specific syntax, the following are also accepted:
 
 =over 4
 

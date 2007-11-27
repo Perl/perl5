@@ -293,7 +293,7 @@ L<perlrecharclass>.
 C<\w> is a character class that matches any I<word> character (letters,
 digits, underscore). C<\d> is a character class that matches any digit,
 while the character class C<\s> matches any white space character.
-New in perl 5.10 are the classes C<\h> and C<\v> which match horizontal
+New in perl 5.10.0 are the classes C<\h> and C<\v> which match horizontal
 and vertical white space characters.
 
 The uppercase variants (C<\W>, C<\D>, C<\S>, C<\H>, and C<\V>) are
@@ -340,7 +340,7 @@ as well.
 
 =head3 Relative referencing
 
-New in perl 5.10 is different way of referring to capture buffers: C<\g>.
+New in perl 5.10.0 is a different way of referring to capture buffers: C<\g>.
 C<\g> takes a number as argument, with the number in curly braces (the
 braces are optional). If the number (N) does not have a sign, it's a reference
 to the Nth capture group (so C<\g{2}> is equivalent to C<\2> - except that
@@ -369,7 +369,7 @@ Mnemonic: I<g>roup.
 
 =head3 Named referencing
 
-Also new in perl 5.10 is the use of named capture buffers, which can be
+Also new in perl 5.10.0 is the use of named capture buffers, which can be
 referred to by name. This is done with C<\g{name}>, which is a
 backreference to the capture buffer with the name I<name>.
 
@@ -482,7 +482,7 @@ Mnemonic: oI<C>tet.
 
 =item \K
 
-This is new in perl 5.10. Anything that is matched left of C<\K> is
+This is new in perl 5.10.0. Anything that is matched left of C<\K> is
 not included in C<$&> - and will not be replaced if the pattern is
 used in a substitution. This will allow you to write C<s/PAT1 \K PAT2/REPL/x>
 instead of C<s/(PAT1) PAT2/${1}REPL/x> or C<s/(?<=PAT1) PAT2/REPL/x>.
@@ -498,7 +498,7 @@ a newline by Unicode. This includes all characters matched by C<\v>
 the newline used in Windows text files). C<\R> is equivalent with
 C<< (?>\x0D\x0A)|\v) >>. Since C<\R> can match a more than one character,
 it cannot be put inside a bracketed character class; C</[\R]/> is an error.
-C<\R> is introduced in perl 5.10.
+C<\R> was introduced in perl 5.10.0.
 
 Mnemonic: none really. C<\R> was picked because PCRE already uses C<\R>,
 and more importantly because Unicode recommends such a regular expression
