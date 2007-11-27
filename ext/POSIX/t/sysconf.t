@@ -53,18 +53,24 @@ $curdir = VMS::Filespec::fileify($curdir) if $^O eq 'VMS';
 
 my $r;
 
+my $TTY = "/dev/tty";
+
 sub _check_and_report {
     my ($eval_status, $return_val, $description) = @_;
     my $success = defined($return_val) || $! == 0;
     is( $eval_status, '', $description );
-    ok( $success, "\tchecking that the returned value is defined (" 
-                    . (defined($return_val) ? "yes, it's $return_val)" : "it isn't)"
-                    . " or that errno is clear ("
-                    . (!($!+0) ? "it is)" : "it isn't, it's $!)"))
-                    );
+    SKIP: {
+	skip "terminal constants set errno on QNX", 1
+	    if $^O eq 'nto' and $description =~ $TTY;
+        ok( $success, "\tchecking that the returned value is defined (" 
+                        . (defined($return_val) ? "yes, it's $return_val)" : "it isn't)"
+                        . " or that errno is clear ("
+                        . (!($!+0) ? "it is)" : "it isn't, it's $!)"))
+                        );
+    }
     SKIP: {
         skip "constant not implemented on $^O or no limit in effect", 1 
-            if $success && !defined($return_val);
+            if !defined($return_val);
         ok( looks_like_number($return_val), "\tchecking that the returned value looks like a number" );
     }
 }
@@ -91,8 +97,6 @@ for my $constant (@path_consts) {
 }
 
 SKIP: {
-    my $TTY = "/dev/tty";
-
     my $n = 2 * 3 * @path_consts_terminal;
 
     -c $TTY
