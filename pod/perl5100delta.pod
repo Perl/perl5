@@ -1388,9 +1388,15 @@ details.
 
 =head1 Changed Internals
 
-In general, the source code of perl has been refactored, tied up, and
-optimized in many places. Also, memory management and allocation has been
-improved in a couple of points.
+In general, the source code of perl has been refactored, tidied up,
+and optimized in many places. Also, memory management and allocation
+has been improved in several points.
+
+When compiling the perl core with gcc, as many gcc warning flags are
+turned on as is possible on the platform.  (This quest for cleanliness
+doesn't extend to XS code because we cannot guarantee the tidiness of
+code we didn't write.)  Similar strictness flags have been added or
+tightened for various other C compilers.
 
 =head2 Reordering of SVt_* constants
 
