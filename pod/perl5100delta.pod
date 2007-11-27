@@ -809,6 +809,16 @@ for F<.tar> (plain, gziped or bzipped) or F<.zip> files.
 C<CPANPLUS> provides an API and a command-line tool to access the CPAN
 mirrors.
 
+=item *
+
+C<Pod::Escapes> provides utilities that are useful in decoding Pod
+EE<lt>...E<gt> sequences.
+
+=item *
+
+C<Pod::Simple> is now the backend for several of the Pod-related modules
+included with Perl.
+
 =back
 
 =head2 Selected Changes to Core Modules
