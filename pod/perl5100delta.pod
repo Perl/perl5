@@ -260,6 +260,29 @@ code that used to undef the C<*ISA> glob will most probably break. Anyway,
 undef'ing C<*ISA> had the side-effect of removing the magic on the @ISA
 array and should not have been done in the first place.
 
+=head2 readdir() may return a "short filename" on Windows
+
+The readdir() function may return a "short filename" when the long
+filename contains characters outside the ANSI codepage.  Similarly
+Cwd::cwd() may return a short directory name, and glob() may return short
+names as well.  On the NTFS file system these short names can always be
+represented in the ANSI codepage.  This will not be true for all other file
+system drivers; e.g. the FAT filesystem stores short filenames in the OEM
+codepage, so some files on FAT volumes remain unaccessible through the
+ANSI APIs.
+
+Similarly, $^X, @INC, and $ENV{PATH} are preprocessed at startup to make
+sure all paths are valid in the ANSI codepage (if possible).
+
+The Win32::GetLongPathName() function now returns the UTF-8 encoded
+correct long file name instead of using replacement characters to force
+the name into the ANSI codepage.  The new Win32::GetANSIPathName()
+function can be used to turn a long pathname into a short one only if the
+long one cannot be represented in the ANSI codepage.
+
+Many other functions in the C<Win32> module have been improved to accept
+UTF-8 encoded arguments.  Please see L<Win32> for details.
+
 =head2 readpipe() is now overridable
 
 The built-in function readpipe() is now overridable. Overriding it permits
