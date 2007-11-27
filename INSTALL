@@ -1866,6 +1866,10 @@ F<ext/Time/HiRes/t/HiRes.t>, F<ext/threads/shared/t/waithires.t>,
 F<ext/threads/shared/t/stress.t>, F<lib/Benchmark.t>,
 F<lib/Memoize/t/expmod_t.t>, and F<lib/Memoize/t/speed.t>.
 
+You might also experience some failures in F<t/op/stat.t> if you build
+perl on an NFS filesystem, if the remote clock and the system clock are
+different.
+
 =item Out of memory
 
 On some systems, particularly those with smaller amounts of RAM, some
