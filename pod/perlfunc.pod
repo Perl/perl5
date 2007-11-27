@@ -5791,7 +5791,7 @@ So:
 would use C<$a> for the width, C<$b> for the precision and C<$c>
 as the value to format, while:
 
-  print '<%*1$.*s>', $a, $b;
+  printf '<%*1$.*s>', $a, $b;
 
 would use C<$a> for the width and the precision, and C<$b> as the
 value to format.
