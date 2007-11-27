@@ -2,7 +2,7 @@ package ExtUtils::MM_Any;
 
 use strict;
 use vars qw($VERSION @ISA);
-$VERSION = '6.37_02';
+$VERSION = '6.37_03';
 
 use Carp;
 use File::Spec;

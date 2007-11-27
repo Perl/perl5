@@ -37,11 +37,13 @@ WriteMakefile(
 END
 
              'XS-Test/Test.xs'              => <<'END',
-#include "EXTERN.h";
-#include "perl.h";
-#include "XSUB.h";
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
 
 MODULE = XS::Test       PACKAGE = XS::Test
+
+PROTOTYPES: DISABLE
 
 int
 is_even(input)

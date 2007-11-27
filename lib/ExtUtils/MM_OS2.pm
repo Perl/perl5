@@ -6,7 +6,7 @@ use vars qw($VERSION @ISA);
 use ExtUtils::MakeMaker qw(neatvalue);
 use File::Spec;
 
-$VERSION = '6.37_02';
+$VERSION = '6.37_03';
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;

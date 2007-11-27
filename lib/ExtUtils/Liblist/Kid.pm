@@ -10,7 +10,7 @@ use 5.00503;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = 6.37_02;
+$VERSION = 6.37_03;
 
 use Config;
 use Cwd 'cwd';

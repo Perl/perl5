@@ -14,31 +14,27 @@ chdir 't';
 use Test::More;
 use ExtUtils::MakeMaker;
 
-my $Has_Version = eval 'require version; "version"->import';
-my $Has_Our     = eval 'our $foo';
+my $Has_Version = eval 'require version; "version"->import; 1';
 
-my %versions = (q[$VERSION = '1.00']        => '1.00',
-                q[*VERSION = \'1.01']       => '1.01',
+my %versions = (q[$VERSION = '1.00']            => '1.00',
+                q[*VERSION = \'1.01']           => '1.01',
                 q[($VERSION) = q$Revision: 32208 $ =~ /(\d+)/g;] => 32208,
-                q[$FOO::VERSION = '1.10';]  => '1.10',
-                q[*FOO::VERSION = \'1.11';] => '1.11',
-                '$VERSION = 0.02'   => 0.02,
-                '$VERSION = 0.0'    => 0.0,
-                '$VERSION = -1.0'   => -1.0,
-                '$VERSION = undef'  => 'undef',
-                '$wibble  = 1.0'    => 'undef',
+                q[$FOO::VERSION = '1.10';]      => '1.10',
+                q[*FOO::VERSION = \'1.11';]     => '1.11',
+                '$VERSION = 0.02'               => 0.02,
+                '$VERSION = 0.0'                => 0.0,
+                '$VERSION = -1.0'               => -1.0,
+                '$VERSION = undef'              => 'undef',
+                '$wibble  = 1.0'                => 'undef',
                 q[my $VERSION = '1.01']         => 'undef',
                 q[local $VERISON = '1.02']      => 'undef',
                 q[local $FOO::VERSION = '1.30'] => 'undef',
+                q[our $VERSION = '1.23';]       => '1.23',
                );
 
-if( $Has_Our ) {
-    $versions{q[our $VERSION = '1.23';]}   = '1.23',
-}
-
 if( $Has_Version ) {
-    $versions{q[use version; $VERSION = qv(1.2.3);]} = qv(1.2.3);
-    $versions{q[$VERSION = qv(1.2.3)]}               = qv(1.2.3);
+    $versions{q[use version; $VERSION = qv("1.2.3");]} = qv("1.2.3");
+    $versions{q[$VERSION = qv("1.2.3")]}               = qv("1.2.3");
 }
 
 plan tests => (2 * keys %versions) + 4;
@@ -65,10 +61,13 @@ sub parse_version_string {
 }
 
 
+# This is a specific test to see if a version subroutine in the $VERSION
+# declaration confuses later calls to the version class.
+# [rt.cpan.org 30747]
 SKIP: {
-    skip "need version.pm", 2 unless $Has_Version;
+    skip "need version.pm", 4 unless $Has_Version;
     is parse_version_string(q[ $VERSION = '1.00'; sub version { $VERSION } ]),
        '1.00';
-    is parse_version_string(q[ use version; $VERSION = version->new(1.23) ]),
-       '1.23';
+    is parse_version_string(q[ use version; $VERSION = version->new("1.2.3") ]),
+       qv("1.2.3");
 }
