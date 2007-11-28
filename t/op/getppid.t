@@ -40,7 +40,12 @@ sub fork_and_retrieve {
 	    unless my ($first, $second) = /^(\d+),(\d+)\z/;
 	cmp_ok ($first, '>=', 1, "Parent of $which grandchild");
 	cmp_ok ($second, '>=', 1, "New parent of orphaned $which grandchild");
-	isnt($first, $second, "Orphaned $which grandchild got a new parent");
+	SKIP: {
+	    skip("Orphan processes are not reparented on QNX", 1)
+		if $^O eq 'nto';
+	    isnt($first, $second,
+                 "Orphaned $which grandchild got a new parent");
+	}
 	return $second;
     }
     else {
@@ -68,5 +73,8 @@ sub fork_and_retrieve {
 
 my $first = fork_and_retrieve("first");
 my $second = fork_and_retrieve("second");
-is ($first, $second, "Both orphaned grandchildren get the same new parent");
+SKIP: {
+    skip ("Orphan processes are not reparented on QNX", 1) if $^O eq 'nto';
+    is ($first, $second, "Both orphaned grandchildren get the same new parent");
+}
 isnt ($first, $$, "And that new parent isn't this process");
