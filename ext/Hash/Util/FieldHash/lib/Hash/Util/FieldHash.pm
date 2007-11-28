@@ -196,7 +196,7 @@ term "field" also has some currency in this sense and doesn't seem
 to conflict with other Perl terminology.
 
 In Perl, an object is a blessed reference.  The standard way of associating
-data with an object ist to store the data inside the object's body, that is,
+data with an object is to store the data inside the object's body, that is,
 the piece of data pointed to by the reference.
 
 In consequence, if two or more classes want to access an object they
@@ -324,7 +324,7 @@ must be provided by each inside-out class.
 
 A general solution to the serialization problem would require another
 level of registry, one that that associates I<classes> and fields.
-So far, he functions of C<Hash::Util::Fieldhash> are unaware of
+So far, the functions of C<Hash::Util::FieldHash> are unaware of
 any classes, which I consider a feature.  Therefore C<Hash::Util::FieldHash>
 doesn't address the serialization problems.
 
@@ -509,7 +509,7 @@ No destructor is needed and objects are thread safe.
 
 =item * C<Name_fieldhash>
 
-Fieldhash-based inside-out implementation.  Object registry happens
+FieldHash-based inside-out implementation.  Object registry happens
 automatically.  No destructor is needed and objects are thread safe.
 
 =back
@@ -696,7 +696,7 @@ which implementation is run.
 
 The script first verifies the function of the C<Name> class.
 
-In the second step, the free inheritablility of the implementation
+In the second step, the free inheritability of the implementation
 (or lack thereof) is demonstrated.  For this purpose it constructs
 a class called C<NamedFile> which is a common subclass of C<Name> and
 the standard class C<IO::File>.  This puts inheritability to the test
@@ -753,7 +753,7 @@ incompatibility of object bodies.
 =head1 GUTS
 
 To make C<Hash::Util::FieldHash> work, there were two changes to
-F<perl> itself.  C<PERL_MAGIC_uvar> was made avaliable for hashes,
+F<perl> itself.  C<PERL_MAGIC_uvar> was made avalaible for hashes,
 and weak references now call uvar C<get> magic after a weakref has been
 cleared.  The first feature is used to make field hashes intercept
 their keys upon access.  The second one triggers garbage collection.
