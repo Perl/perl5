@@ -100,6 +100,12 @@ __DATA__
 	\%::		[keys %main::]
 !	\%::		[]
 	{"" => 1}	[undef]
+	{ foo => 1 }	["foo"]
+	{ foo => 1 }	["foo", "bar"]
+	\%hash		["foo", "bar"]
+	\%hash		["foo"]
+!	\%hash		["quux"]
+	\%hash		[qw(foo quux)]
 
 #  - a regex
 	{foo => 1}	qr/^(fo[ox])$/
@@ -116,6 +122,7 @@ __DATA__
 !	[]		[1]
 	[["foo"], ["bar"]]	[qr/o/, qr/a/]
 	["foo", "bar"]		[qr/o/, qr/a/]
+!	["foo", "bar"]		[qr/o/, "foo"]
 	$deep1		$deep1
 !	$deep1		$deep2
 
@@ -158,3 +165,15 @@ __DATA__
 
 	%hash		"foo"
 	%hash		/bar/
+	%hash		[qw(bar)]
+!	%hash		[qw(a b c)]
+	%hash		%hash
+	%hash		{%hash}
+	%hash		%tied_hash
+	%tied_hash	%tied_hash
+	%hash		{ foo => 5, bar => 10 }
+!	%hash		{ foo => 5, bar => 10, quux => 15 }
+
+	@nums		{  1, '',  2, '' }
+	@nums		{  1, '', 12, '' }
+!	@nums		{ 11, '', 12, '' }

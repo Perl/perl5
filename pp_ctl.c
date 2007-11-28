@@ -4032,23 +4032,19 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    AV * const other_av = (AV *) SvRV(Other);
 	    const I32 other_len = av_len(other_av) + 1;
 	    I32 i;
-	    
-	    if (HvUSEDKEYS((HV *) This) != other_len)
-		RETPUSHNO;
-	    
-	    for(i = 0; i < other_len; ++i) {
+
+	    for (i = 0; i < other_len; ++i) {
 		SV ** const svp = av_fetch(other_av, i, FALSE);
 		char *key;
 		STRLEN key_len;
 
-		if (!svp)	/* ??? When can this happen? */
-		    RETPUSHNO;
-
-		key = SvPV(*svp, key_len);
-	    	if(!hv_exists((HV *) This, key, key_len))
-		    RETPUSHNO;
+		if (svp) {	/* ??? When can this not happen? */
+		    key = SvPV(*svp, key_len);
+		    if (hv_exists((HV *) This, key, key_len))
+		        RETPUSHYES;
+		}
 	    }
-	    RETPUSHYES;
+	    RETPUSHNO;
 	}
 	else if (SM_OTHER_REGEX) {
 	    PMOP * const matcher = make_matcher(other_regex);
