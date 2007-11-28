@@ -905,7 +905,7 @@ $   config_symbols0 ="|archlib|archlibexp|bin|binexp|builddir|cf_email|config_sh
 $   config_symbols1 ="|installprivlib|installscript|installsitearch|installsitelib|most|oldarchlib|oldarchlibexp|osname|pager|perl_symbol|perl_verb|"
 $   config_symbols2 ="|prefix|privlib|privlibexp|scriptdir|sitearch|sitearchexp|sitebin|sitelib|sitelib_stem|sitelibexp|try_cxx|use64bitall|use64bitint|"
 $   config_symbols3 ="|usecasesensitive|usedefaulttypes|usedevel|useieee|useithreads|uselongdouble|usemultiplicity|usemymalloc|usedebugging_perl|"
-$   config_symbols4 ="|useperlio|usesecurelog||usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|uselargefiles|usesitecustomize|"
+$   config_symbols4 ="|useperlio|usesecurelog|usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|uselargefiles|usesitecustomize|"
 $   config_symbols5 ="|buildmake|builder|usethreadupcalls|usekernelthreads|usedecterm"
 $!  
 $   open/read CONFIG 'config_sh'
@@ -1369,6 +1369,20 @@ $   THEN
 $     line = F$EDIT(line,"COMPRESS, TRIM")
 $     perl_patchlevel = F$ELEMENT(1,"""",line)
 $     perl_patchlevel = perl_patchlevel - "DEVEL"
+$     got_perl_patchlevel = "true"
+$   ENDIF
+$   IF ((F$LOCATE("""SMOKE",line).NE.F$LENGTH(line)).AND.(.NOT.got_perl_patchlevel))
+$   THEN
+$     line = F$EDIT(line,"COMPRESS, TRIM")
+$     perl_patchlevel = F$ELEMENT(1,"""",line)
+$     perl_patchlevel = perl_patchlevel - "SMOKE"
+$     got_perl_patchlevel = "true"
+$   ENDIF
+$   IF ((F$LOCATE("""MAINT",line).NE.F$LENGTH(line)).AND.(.NOT.got_perl_patchlevel))
+$   THEN
+$     line = F$EDIT(line,"COMPRESS, TRIM")
+$     perl_patchlevel = F$ELEMENT(1,"""",line)
+$     perl_patchlevel = perl_patchlevel - "MAINT"
 $     got_perl_patchlevel = "true"
 $   ENDIF
 $   IF (.NOT. got_patch) .OR. -
@@ -2770,7 +2784,13 @@ $ IF .NOT. Has_socketshr .AND. .NOT. Has_Dec_C_Sockets
 $ THEN
 $   dflt = dflt - "Socket"            ! optional on VMS
 $ ENDIF
-$ IF .NOT. use_threads  THEN dflt = dflt - "Thread"
+$ ! Build this one only for threads without ithreads
+$ IF F$TYPE(useithreads) .EQS. "" .OR. .NOT. use_threads
+$ THEN
+$   dflt = dflt - "Thread"
+$ ELSE
+$   IF useithreads .OR. useithreads .EQS. "define" THEN dflt = dflt - "Thread"
+$ ENDIF
 $ dflt = dflt - "Win32API/File" - "Win32CORE" - "Win32"  ! need Dave Cutler's other project
 $ dflt = F$EDIT(dflt,"TRIM,COMPRESS")
 $!
@@ -5694,6 +5714,7 @@ $ WC "PERL_API_REVISION='" + api_revision + "'"
 $ WC "PERL_API_VERSION='" + api_version + "'" 
 $ WC "PERL_API_SUBVERSION='" + api_subversion + "'"
 $ WC "PERL_PATCHLEVEL='" + perl_patchlevel + "'"
+$ WC "perl_patchlevel='" + perl_patchlevel + "'"
 $ WC "PERL_CONFIG_SH='true'"
 $ WC "_a='" + lib_ext + "'"
 $ WC "_exe='" + exe_ext + "'"
