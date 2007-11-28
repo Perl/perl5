@@ -1895,7 +1895,7 @@ STATIC void	S_to_byte_substr(pTHX_ regexp * prog);
 #endif
 
 #if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
-STATIC CV*	S_deb_curcv(pTHX_ I32 ix);
+STATIC CV*	S_deb_curcv(pTHX_ const I32 ix);
 STATIC void	S_debprof(pTHX_ const OP *o);
 STATIC SV*	S_pm_description(pTHX_ const PMOP *pm);
 #endif

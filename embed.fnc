@@ -1326,7 +1326,7 @@ Es	|void	|to_byte_substr	|NN regexp * prog
 #endif
 
 #if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
-s	|CV*	|deb_curcv	|I32 ix
+s	|CV*	|deb_curcv	|const I32 ix
 s	|void	|debprof	|NN const OP *o
 s	|SV*	|pm_description	|NN const PMOP *pm
 #endif
