@@ -159,7 +159,6 @@ like $@, qr/Can't declare scalar dereference in "my"/;
 
 
 my @code = qw(lvalue locked method);
-unshift @code, 'assertion' if $] >= 5.009;
 my @other = qw(shared unique);
 my %valid;
 $valid{CODE} = {map {$_ => 1} @code};

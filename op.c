@@ -6416,11 +6416,13 @@ Perl_ck_subr(pTHX_ OP *o)
 	    cv = GvCVu(gv);
 	    if (!cv)
 		tmpop->op_private |= OPpEARLY_CV;
-	    else if (SvPOK(cv)) {
-		STRLEN len;
-		namegv = CvANON(cv) ? gv : CvGV(cv);
-		proto = SvPV((SV*)cv, len);
-		proto_end = proto + len;
+	    else {
+		if (SvPOK(cv)) {
+		    STRLEN len;
+		    namegv = CvANON(cv) ? gv : CvGV(cv);
+		    proto = SvPV((SV*)cv, len);
+		    proto_end = proto + len;
+		}
 	    }
 	}
     }
