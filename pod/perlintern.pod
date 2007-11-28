@@ -933,6 +933,25 @@ Found in file sv.c
 
 =back
 
+=head1 SV-Body Allocation
+
+=over 8
+
+=item sv_2num
+X<sv_2num>
+
+Return an SV with the numeric value of the source SV, doing any necessary
+reference or overload conversion.  You must use the C<SvNUM(sv)> macro to
+access this function.
+
+	SV*	sv_2num(SV* sv)
+
+=for hackers
+Found in file sv.c
+
+
+=back
+
 =head1 AUTHORS
 
 The autodocumentation system was originally added to the Perl core by

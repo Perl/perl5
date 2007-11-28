@@ -1184,6 +1184,7 @@ PERL_CALLCONV IO*	Perl_sv_2io(pTHX_ SV* sv);
 PERL_CALLCONV IV	Perl_sv_2iv_flags(pTHX_ SV* sv, I32 flags);
 PERL_CALLCONV SV*	Perl_sv_2mortal(pTHX_ SV* sv);
 PERL_CALLCONV NV	Perl_sv_2nv(pTHX_ SV* sv);
+PERL_CALLCONV SV*	Perl_sv_2num(pTHX_ SV* sv);
 /* PERL_CALLCONV char*	sv_2pv(pTHX_ SV* sv, STRLEN* lp); */
 PERL_CALLCONV char*	Perl_sv_2pvutf8(pTHX_ SV* sv, STRLEN* lp);
 PERL_CALLCONV char*	Perl_sv_2pvbyte(pTHX_ SV* sv, STRLEN* lp);

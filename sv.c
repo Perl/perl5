@@ -2441,6 +2441,29 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     return SvNVX(sv);
 }
 
+/*
+=for apidoc sv_2num
+
+Return an SV with the numeric value of the source SV, doing any necessary
+reference or overload conversion.  You must use the C<SvNUM(sv)> macro to
+access this function.
+
+=cut
+*/
+
+SV *
+Perl_sv_2num(pTHX_ register SV *sv)
+{
+    if (!SvROK(sv))
+	return sv;
+    if (SvAMAGIC(sv)) {
+	SV * const tmpsv = AMG_CALLun(sv,numer);
+	if (tmpsv && (!SvROK(tmpsv) || (SvRV(tmpsv) != SvRV(sv))))
+	    return sv_2num(tmpsv);
+    }
+    return sv_2mortal(newSVuv(PTR2UV(SvRV(sv))));
+}
+
 /* uiv_2buf(): private routine for use by sv_2pv_flags(): print an IV or
  * UV as a string towards the end of buf, and return pointers to start and
  * end of it.

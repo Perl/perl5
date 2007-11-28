@@ -47,7 +47,7 @@ sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 package main;
 
 $| = 1;
-use Test::More tests => 527;
+use Test::More tests => 555;
 
 
 $a = new Oscalar "087";
@@ -1368,3 +1368,56 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     is("$wham_eth", $string);
     is ($crunch_eth->Pie("Blackbird"), "$string, Blackbird");
 }
+
+{
+    package numify_int;
+    use overload "0+" => sub { $_[0][0] += 1; 42 };
+    package numify_self;
+    use overload "0+" => sub { $_[0][0]++; $_[0] };
+    package numify_other;
+    use overload "0+" => sub { $_[0][0]++; $_[0][1] = bless [], 'numify_int' };
+    package numify_by_fallback;
+    use overload fallback => 1;
+
+    package main;
+    my $o = bless [], 'numify_int';
+    is(int($o), 42, 'numifies to integer');
+    is($o->[0], 1, 'int() numifies only once');
+
+    my $aref = [];
+    my $num_val = int($aref);
+    my $r = bless $aref, 'numify_self';
+    is(int($r), $num_val, 'numifies to self');
+    is($r->[0], 1, 'int() numifies once when returning self');
+
+    my $s = bless [], 'numify_other';
+    is(int($s), 42, 'numifies to numification of other object');
+    is($s->[0], 1, 'int() numifies once when returning other object');
+    is($s->[1][0], 1, 'returned object numifies too');
+
+    my $m = bless $aref, 'numify_by_fallback';
+    is(int($m), $num_val, 'numifies to usual reference value');
+    is(abs($m), $num_val, 'numifies to usual reference value');
+    is(-$m, -$num_val, 'numifies to usual reference value');
+    is(0+$m, $num_val, 'numifies to usual reference value');
+    is($m+0, $num_val, 'numifies to usual reference value');
+    is($m+$m, 2*$num_val, 'numifies to usual reference value');
+    is(0-$m, -$num_val, 'numifies to usual reference value');
+    is(1*$m, $num_val, 'numifies to usual reference value');
+    is($m/1, $num_val, 'numifies to usual reference value');
+    is($m%100, $num_val%100, 'numifies to usual reference value');
+    is($m**1, $num_val, 'numifies to usual reference value');
+
+    is(abs($aref), $num_val, 'abs() of ref');
+    is(-$aref, -$num_val, 'negative of ref');
+    is(0+$aref, $num_val, 'ref addition');
+    is($aref+0, $num_val, 'ref addition');
+    is($aref+$aref, 2*$num_val, 'ref addition');
+    is(0-$aref, -$num_val, 'subtraction of ref');
+    is(1*$aref, $num_val, 'multiplicaton of ref');
+    is($aref/1, $num_val, 'division of ref');
+    is($aref%100, $num_val%100, 'modulo of ref');
+    is($aref**1, $num_val, 'exponentiation of ref');
+}
+
+# EOF

@@ -442,8 +442,11 @@ PP(pp_or)
 
 PP(pp_add)
 {
-    dSP; dATARGET; bool useleft; tryAMAGICbin(add,opASSIGN);
-    useleft = USE_LEFT(TOPm1s);
+    dSP; dATARGET; bool useleft; SV *svl, *svr;
+    tryAMAGICbin(add,opASSIGN);
+    svl = sv_2num(TOPm1s);
+    svr = sv_2num(TOPs);
+    useleft = USE_LEFT(svl);
 #ifdef PERL_PRESERVE_IVUV
     /* We must see if we can perform the addition with integers if possible,
        as the integer code detects overflow while the NV code doesn't.
@@ -491,8 +494,8 @@ PP(pp_add)
        unsigned code below is actually shorter than the old code. :-)
     */
 
-    SvIV_please(TOPs);
-    if (SvIOK(TOPs)) {
+    SvIV_please(svr);
+    if (SvIOK(svr)) {
 	/* Unless the left argument is integer in range we are going to have to
 	   use NV maths. Hence only attempt to coerce the right argument if
 	   we know the left is integer.  */
@@ -508,12 +511,12 @@ PP(pp_add)
 	       lots of code to speed up what is probably a rarish case.  */
 	} else {
 	    /* Left operand is defined, so is it IV? */
-	    SvIV_please(TOPm1s);
-	    if (SvIOK(TOPm1s)) {
-		if ((auvok = SvUOK(TOPm1s)))
-		    auv = SvUVX(TOPm1s);
+	    SvIV_please(svl);
+	    if (SvIOK(svl)) {
+		if ((auvok = SvUOK(svl)))
+		    auv = SvUVX(svl);
 		else {
-		    register const IV aiv = SvIVX(TOPm1s);
+		    register const IV aiv = SvIVX(svl);
 		    if (aiv >= 0) {
 			auv = aiv;
 			auvok = 1;	/* Now acting as a sign flag.  */
@@ -528,12 +531,12 @@ PP(pp_add)
 	    bool result_good = 0;
 	    UV result;
 	    register UV buv;
-	    bool buvok = SvUOK(TOPs);
+	    bool buvok = SvUOK(svr);
 	
 	    if (buvok)
-		buv = SvUVX(TOPs);
+		buv = SvUVX(svr);
 	    else {
-		register const IV biv = SvIVX(TOPs);
+		register const IV biv = SvIVX(svr);
 		if (biv >= 0) {
 		    buv = biv;
 		    buvok = 1;
@@ -591,13 +594,14 @@ PP(pp_add)
     }
 #endif
     {
-	dPOPnv;
+	NV value = SvNV(svr);
+	(void)POPs;
 	if (!useleft) {
 	    /* left operand is undef, treat as zero. + 0.0 is identity. */
 	    SETn(value);
 	    RETURN;
 	}
-	SETn( value + TOPn );
+	SETn( value + SvNV(svl) );
 	RETURN;
     }
 }
