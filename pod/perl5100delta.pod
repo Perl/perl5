@@ -21,7 +21,7 @@ pragma, like C<strict> or C<warnings>.
 
 Currently the following new features are available: C<switch> (adds a
 switch statement), C<say> (adds a C<say> built-in function), and C<state>
-(adds an C<state> keyword for declaring "static" variables). Those
+(adds a C<state> keyword for declaring "static" variables). Those
 features are described in their own sections of this document.
 
 The C<feature> pragma is also implicitly loaded when you require a minimal
@@ -191,7 +191,7 @@ which is much more efficient. (Yves Orton)
 
 =item Vertical and horizontal whitespace, and linebreak
 
-Regular expressions now recognize the C<\v> and C<\h> escapes, that match
+Regular expressions now recognize the C<\v> and C<\h> escapes that match
 vertical and horizontal whitespace, respectively. C<\V> and C<\H>
 logically match their complements.
 
@@ -856,7 +856,7 @@ C<i> command.
 
 =item ptar
 
-C<ptar> is a pure perl implementation of C<tar>, that comes with
+C<ptar> is a pure perl implementation of C<tar> that comes with
 C<Archive::Tar>.
 
 =item ptardiff
@@ -917,7 +917,7 @@ direct use).
 
 =item cpan2dist
 
-C<cpan2dist> is a new utility, that comes with CPANPLUS. It's a tool to
+C<cpan2dist> is a new utility that comes with CPANPLUS. It's a tool to
 create distributions (or packages) from CPAN modules.
 
 =item pod2html
@@ -1325,7 +1325,7 @@ properly carry that layer on the duped filehandle. (Rafael)
 
 =item Localisation of hash elements
 
-Localizing an hash element whose key was given as a variable didn't work
+Localizing a hash element whose key was given as a variable didn't work
 correctly if the variable was changed while the local() was in effect (as
 in C<local $h{$x}; ++$x>). (Bo Lindbergh)
 
