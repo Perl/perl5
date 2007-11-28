@@ -3564,6 +3564,7 @@ FILE *
 PerlIO_findFILE(PerlIO *f)
 {
     PerlIOl *l = *f;
+    FILE *stdio;
     while (l) {
 	if (l->tab == &PerlIO_stdio) {
 	    PerlIOStdio *s = PerlIOSelf(&l, PerlIOStdio);
@@ -3572,7 +3573,19 @@ PerlIO_findFILE(PerlIO *f)
 	l = *PerlIONext(&l);
     }
     /* Uses fallback "mode" via PerlIO_modestr() in PerlIO_exportFILE */
-    return PerlIO_exportFILE(f, NULL);
+    /* However, we're not really exporting a FILE * to someone else (who
+       becomes responsible for closing it, or calling PerlIO_releaseFILE())
+       So we need to undo its refernce count increase on the underlying file
+       descriptor. We have to do this, because if the loop above returns you
+       the FILE *, then *it* didn't increase any reference count. So there's
+       only one way to be consistent. */
+    stdio = PerlIO_exportFILE(f, NULL);
+    if (stdio) {
+	const int fd = fileno(stdio);
+	if (fd >= 0)
+	    PerlIOUnix_refcnt_dec(fd);
+    }
+    return stdio;
 }
 
 /* Use this to reverse PerlIO_exportFILE calls. */
