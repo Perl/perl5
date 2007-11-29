@@ -851,12 +851,15 @@ EOM
        if ((exists $ENV{LC_ALL}   && $ENV{LC_ALL}   =~ /utf-?8/i) ||
            (exists $ENV{LC_CTYPE} && $ENV{LC_CTYPE} =~ /utf-?8/i) ||
            (exists $ENV{LANG}     && $ENV{LANG}     =~ /utf-?8/i)) {
-            print  <<EOM;
+            print <<EOM;
+
 NOTE: if you get an error like this (the Makefile line number may vary):
 Makefile:91: *** missing separator
 then set the environment variable LC_ALL to "C" and retry
 from scratch (re-run perl "Makefile.PL").
 (And consider upgrading your Perl.)
+(You got this message because you seem to have an
+ UTF-8 locale active in your shell environment.)
 EOM
         }
     }

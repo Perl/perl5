@@ -821,8 +821,8 @@ nanosleep(nsec)
 	CODE:
 	if (nsec < 0.0)
 	    croak("Time::HiRes::nanosleep(%"NVgf"): negative time not invented yet", nsec);
-	sleepfor.tv_sec = nsec / 1e9;
-	sleepfor.tv_nsec = nsec - ((NV)sleepfor.tv_sec) * 1e9;
+	sleepfor.tv_sec = (Time_t)(nsec / 1e9);
+	sleepfor.tv_nsec = (long)(nsec - ((NV)sleepfor.tv_sec) * 1e9);
 	if (!nanosleep(&sleepfor, &unslept)) {
 	    RETVAL = nsec;
 	} else {
@@ -1147,8 +1147,8 @@ clock_nanosleep(clock_id, nsec, flags = 0)
     CODE:
 	if (nsec < 0.0)
 	    croak("Time::HiRes::clock_nanosleep(..., %"NVgf"): negative time not invented yet", nsec);
-	sleepfor.tv_sec = nsec / 1e9;
-	sleepfor.tv_nsec = nsec - ((NV)sleepfor.tv_sec) * 1e9;
+	sleepfor.tv_sec = (Time_t)(nsec / 1e9);
+	sleepfor.tv_nsec = (long)(nsec - ((NV)sleepfor.tv_sec) * 1e9);
 	if (!clock_nanosleep(clock_id, flags, &sleepfor, &unslept)) {
 	    RETVAL = nsec;
 	} else {

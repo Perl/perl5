@@ -1,5 +1,13 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9709	[2007-11-28]
+	- casting fixes from Robin Barker for g++ and 64bitint
+	- in QNX skip the itimer tests because though the API
+	  is there, the implementation isn't, from Matt Kraai
+	- raise the dead man timer to 180 seconds for really
+	  slow/busy systems
+	- elaborate the UTF-8 locale warning from Makefile.PL
+
 1.9708	[2007-10-05]
 	- [rt.cpan.org #29747]: Build failure with perl 5.005_05
 	  Fixed by regenerating the ppport.h using Devel::PPPort 3.13.
