@@ -858,8 +858,9 @@ Makefile:91: *** missing separator
 then set the environment variable LC_ALL to "C" and retry
 from scratch (re-run perl "Makefile.PL").
 (And consider upgrading your Perl.)
-(You got this message because you seem to have an
- UTF-8 locale active in your shell environment.)
+(You got this message because you seem to have
+ an UTF-8 locale active in your shell environment, this used
+ to cause broken Makefiles to be created from Makefile.PLs.)
 EOM
         }
     }

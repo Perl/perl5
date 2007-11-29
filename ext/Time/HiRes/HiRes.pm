@@ -23,7 +23,7 @@ require DynaLoader;
 		 stat
 		);
 	
-$VERSION = '1.9709';
+$VERSION = '1.9710';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 

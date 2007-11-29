@@ -1,5 +1,9 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9710	[2007-11-29]
+	- I got the sense of the QNX test the wrong way in an attempt
+	  to generalize it
+
 1.9709	[2007-11-28]
 	- casting fixes from Robin Barker for g++ and 64bitint
 	- in QNX skip the itimer tests because though the API
