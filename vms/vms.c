@@ -13179,7 +13179,10 @@ mp_do_vms_realname(pTHX_ const char *filespec, char *outbuf,
     /* Fall back to fid_to_name */
 
     sts = vms_fid_to_name(outbuf, VMS_MAXRSS + 1, filespec);
-    if (sts == 0) {
+    if (sts != 0) {
+	return NULL;
+    }
+    else {
 
 
 	/* Now need to trim the version off */
