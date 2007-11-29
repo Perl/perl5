@@ -1,7 +1,7 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 2.12 2006-09-16 20:55:41 eagle Exp $
+# $Id: Man.pm,v 2.16 2007-11-29 01:35:53 eagle Exp $
 #
-# Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+# Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
 #     Russ Allbery <rra@stanford.edu>
 # Substantial contributions by Sean Burke <sburke@cpan.org>
 #
@@ -40,7 +40,7 @@ use POSIX qw(strftime);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = '2.12_01';
+$VERSION = '2.16';
 
 # Set the debugging level.  If someone has inserted a debug function into this
 # class already, use that.  Otherwise, use any Pod::Simple debug function
@@ -333,6 +333,7 @@ sub formatting {
         $options{cleanup} = 0;
     } elsif ($element eq 'Verbatim' || $element eq 'C') {
         $options{guesswork} = 0;
+        $options{literal} = 1;
     }
     return \%options;
 }
@@ -345,6 +346,7 @@ sub format_text {
     my $guesswork = $$options{guesswork} && !$$self{IN_NAME};
     my $cleanup = $$options{cleanup};
     my $convert = $$options{convert};
+    my $literal = $$options{literal};
 
     # Normally we do character translation, but we won't even do that in
     # <Data> blocks.
@@ -361,6 +363,13 @@ sub format_text {
     if ($cleanup) {
         $text =~ s/-/\\-/g;
         $text =~ s/_(?=_)/_\\|/g;
+    }
+
+    # Ensure that *roff doesn't convert literal quotes to UTF-8 single quotes,
+    # but don't mess up our accept escapes.
+    if ($literal) {
+        $text =~ s/(?<!\\\*)\'/\\*\(Aq/g;
+        $text =~ s/(?<!\\\*)\`/\\\`/g;
     }
 
     # If guesswork is asked for, do that.  This involves more substantial
@@ -391,7 +400,8 @@ sub quote_literal {
       ^\s*
       (?:
          ( [\'\`\"] ) .* \1                             # already quoted
-       | \` .* \'                                       # `quoted'
+       | \\\*\(Aq .* \\\*\(Aq                           # quoted and escaped
+       | \\?\` .* ( \' | \\\*\(Aq )                     # `quoted'
        | \$+ [\#^]? \S $index                           # special ($^Foo, $")
        | [\$\@%&*]+ \#? [:\'\w]+ $index                 # plain var or func
        | [\$\@%&*]* [:\'\w]+ (?: -> )? \(\s*[^\s,]\s*\) # 0/1-arg func call
@@ -791,13 +801,10 @@ sub devise_title {
         my @dirs = File::Spec->splitdir ($dirs);
         my $cut = 0;
         my $i;
-        for ($i = 0; $i < scalar @dirs; $i++) {
-            if ($dirs[$i] eq 'lib' && $i+1 < scalar(@dirs) && $dirs[$i + 1] =~ /perl/) {
-                $cut = $i + 2;
-                last;
-            } elsif ($dirs[$i] =~ /perl/) {
+        for ($i = 0; $i < @dirs; $i++) {
+            if ($dirs[$i] =~ /perl/) {
                 $cut = $i + 1;
-                $cut++ if $dirs[$i + 1] eq 'lib';
+                $cut++ if ($dirs[$i + 1] && $dirs[$i + 1] eq 'lib');
                 last;
             }
         }
@@ -1346,16 +1353,24 @@ sub preamble_template {
 .    ds R" ''
 'br\}
 .\"
+.\" Escape single quotes in literal strings from groff's Unicode transform.
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\"
 .\" If the F register is turned on, we'll generate index entries on stderr for
 .\" titles (.TH), headers (.SH), subsections (.Sh), items (.Ip), and index
 .\" entries marked with X<> in POD.  Of course, you'll have to process the
 .\" output yourself in some meaningful fashion.
-.if \nF \{\
+.ie \nF \{\
 .    de IX
 .    tm Index:\\$1\t\\n%\t"\\$2"
 ..
 .    nr % 0
 .    rr F
+.\}
+.el \{\
+.    de IX
+..
 .\}
 .\"
 .\" Accent mark definitions (@(#)ms.acc 1.5 88/02/08 SMI; from UCB 4.2).
@@ -1657,7 +1672,7 @@ mine).
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
 by Russ Allbery <rra@stanford.edu>.
 
 This program is free software; you may redistribute it and/or modify it

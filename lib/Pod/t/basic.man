@@ -230,7 +230,7 @@ the first < seen.
 Lets make sure these work for empty ones too, like \f(CW\*(C`\*(C'\fR and \f(CW\*(C`>>\*(C'\fR
 (just to be obnoxious)
 .PP
-The statement: \f(CW\*(C`This is dog kind's \f(CIfinest\f(CW hour!\*(C'\fR is a parody of a
+The statement: \f(CW\*(C`This is dog kind\*(Aqs \f(CIfinest\f(CW hour!\*(C'\fR is a parody of a
 quotation from Winston Churchill.
 .PP
 The following tests are added to those:
@@ -264,16 +264,16 @@ Throw in a few verbatim paragraphs.
 .PP
 .Vb 8
 \&    use Term::ANSIColor;
-\&    print color 'bold blue';
+\&    print color \*(Aqbold blue\*(Aq;
 \&    print "This text is bold blue.\en";
-\&    print color 'reset';
+\&    print color \*(Aqreset\*(Aq;
 \&    print "This text is normal.\en";
-\&    print colored ("Yellow on magenta.\en", 'yellow on_magenta');
+\&    print colored ("Yellow on magenta.\en", \*(Aqyellow on_magenta\*(Aq);
 \&    print "This text is normal.\en";
-\&    print colored ['yellow on_magenta'], "Yellow on magenta.\en";
+\&    print colored [\*(Aqyellow on_magenta\*(Aq], "Yellow on magenta.\en";
 \&
 \&    use Term::ANSIColor qw(uncolor);
-\&    print uncolor '01;31', "\en";
+\&    print uncolor \*(Aq01;31\*(Aq, "\en";
 .Ve
 .PP
 But this isn't verbatim (make sure it wraps properly), and the next

@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
-# $Id: man.t,v 1.10 2006-09-16 20:25:25 eagle Exp $
+# $Id: man.t,v 1.12 2007-11-29 01:35:54 eagle Exp $
 #
 # man.t -- Additional specialized tests for Pod::Man.
 #
-# Copyright 2002, 2003, 2004, 2006 by Russ Allbery <rra@stanford.edu>
+# Copyright 2002, 2003, 2004, 2006, 2007 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -17,7 +17,7 @@ BEGIN {
     }
     unshift (@INC, '../blib/lib');
     $| = 1;
-    print "1..21\n";
+    print "1..22\n";
 }
 
 END {
@@ -29,8 +29,6 @@ use Pod::Man;
 $loaded = 1;
 print "ok 1\n";
 
-my $have_encoding = eval { require PerlIO::encoding; 1; } && ! $@;
-
 my $parser = Pod::Man->new or die "Cannot create parser\n";
 my $n = 2;
 while (<DATA>) {
@@ -38,12 +36,12 @@ while (<DATA>) {
     open (TMP, '> tmp.pod') or die "Cannot create tmp.pod: $!\n";
 
     # We have a test in ISO 8859-1 encoding.  Make sure that nothing strange
-    # happens if Perl thinks the world is Unicode.
-    binmode (\*TMP, ':encoding(iso-8859-1)') if $have_encoding;
+    # happens if Perl thinks the world is Unicode.  Wrap this in eval so that
+    # older versions of Perl don't croak.
+    eval { binmode (\*TMP, ':encoding(iso-8859-1)') };
 
     while (<DATA>) {
         last if $_ eq "###\n";
-        no warnings 'utf8';
         print TMP $_;
     }
     close TMP;
@@ -359,8 +357,8 @@ Blorp C<'
 ###
 .SH "Newline C Quote Weirdness"
 .IX Header "Newline C Quote Weirdness"
-Blorp \f(CW'
-\&''\fR. Yes.
+Blorp \f(CW\*(Aq
+\&\*(Aq\*(Aq\fR. Yes.
 ###
 
 ###
@@ -422,4 +420,14 @@ $-0.13 should have a real hyphen.
 .IX Header "Hyphen in S<>"
 Don't transform\ even-this\ hyphen.  This \*(L"one's-fine!\*(R", as well.  However,
 $\-0.13 should have a real hyphen.
+###
+
+###
+=head1 Quote escaping
+
+Don't escape `this' but do escape C<`this'> (and don't surround it in quotes).
+###
+.SH "Quote escaping"
+.IX Header "Quote escaping"
+Don't escape `this' but do escape \f(CW\`this\*(Aq\fR (and don't surround it in quotes).
 ###
