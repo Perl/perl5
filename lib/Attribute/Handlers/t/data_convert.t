@@ -41,14 +41,14 @@ sub test5 :Loud(till,ears,are,bleeding) {
     [qw(till ears are bleeding)]
 }
 
-sub test6 :Loud("turn it up to 11, man!") {
-    'turn it up to 11, man!';
+sub test6 :Loud(my,ears,are,bleeding) {
+    'my,ears,are,bleeding';
 }
 
-::ok !defined eval q{
-    sub test7 :Loud(my,ears,are,bleeding) {}
-}, 'test7';
+sub test7 :Loud(qw/my ears are bleeding) {
+    'qw/my ears are bleeding'; #'
+}
 
-::ok !defined eval q{
-    sub test8 :Loud(qw/my ears are bleeding) {}
-}, 'test8';
+sub test8 :Loud("turn it up to 11, man!") {
+    'turn it up to 11, man!';
+}

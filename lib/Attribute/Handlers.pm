@@ -190,17 +190,9 @@ sub _apply_handler_AH_ {
 	my $sym = findsym($pkg, $ref);
 	$sym ||= $type eq 'CODE' ? 'ANON' : 'LEXICAL';
 	no warnings;
-	if ($raw) {
-	    $data = [$data];
-	}
-	else {
-	    $data = !$raw && eval("package $pkg; no warnings; no strict;
-				   local \$SIG{__WARN__}=sub{die}; [$data]");
-	    if (my $error = $@) {
-		$error =~ s{\s+ at \s+ \(eval \s+ \S+\) \s+ line \s+ \S+}{}x;
-		die "Bad data for $attr attribute: $error\n";
-	    }
-	}
+	my $evaled = !$raw && eval("package $pkg; no warnings; no strict;
+				    local \$SIG{__WARN__}=sub{die}; [$data]");
+	$data = $evaled || [$data];
 	$pkg->$handler($sym,
 		       (ref $sym eq 'GLOB' ? *{$sym}{ref $ref}||$ref : $ref),
 		       $attr,
@@ -818,11 +810,6 @@ Let's you write:
 An attribute handler was specified with an C<:ATTR(I<ref_type>)>, but the
 type of referent it was defined to handle wasn't one of the five permitted:
 C<SCALAR>, C<ARRAY>, C<HASH>, C<CODE>, or C<ANY>.
-
-=item C<Bad data for %s attribute: %s>
-
-The data specified as part of the named attribute wasn't valid Perl.
-The error message indicates why it didn't compile.
 
 =item C<Attribute handler %s doesn't handle %s attributes>
 
