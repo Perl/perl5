@@ -1,3 +1,6 @@
+6.38  Wed Nov 28 16:01:12 PST 2007
+    Releasing 6.37_03 as 6.38.
+
 6.37_03  Mon Nov 26 14:15:34 PST 2007
     Tests
     - parse_version.t had wrong test count when version.pm isn't installed.

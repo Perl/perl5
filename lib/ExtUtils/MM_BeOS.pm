@@ -27,7 +27,7 @@ require ExtUtils::MM_Unix;
 
 use vars qw(@ISA $VERSION);
 @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
-$VERSION = '6.37_03';
+$VERSION = '6.38';
 
 
 =item os_flavor
