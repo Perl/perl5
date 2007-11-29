@@ -701,6 +701,7 @@ Perl_PerlIO_stdin
 Perl_PerlIO_stdout
 Perl_PerlIO_stderr
 Perl_pad_push
+Perl_find_runcv
 Perl_hv_clear_placeholders
 Perl_hv_scalar
 Perl_op_refcnt_lock

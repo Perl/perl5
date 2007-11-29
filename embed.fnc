@@ -1528,7 +1528,7 @@ sd	|void	|cv_dump	|NN const CV *cv|NN const char *title
 #  endif
 s	|CV*	|cv_clone2	|NN CV *proto|NULLOK CV *outside
 #endif
-pdR	|CV*	|find_runcv	|NULLOK U32 *db_seqp
+ApdR	|CV*	|find_runcv	|NULLOK U32 *db_seqp
 p	|void	|free_tied_hv_pool
 #if defined(DEBUGGING)
 pR	|int	|get_debug_opts	|NN char **s
