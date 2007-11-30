@@ -1,8 +1,12 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9711	[2007-11-29]
+	- lost VMS test skippage from Craig Berry
+	- reformat the test code a little
+
 1.9710	[2007-11-29]
 	- I got the sense of the QNX test the wrong way in an attempt
-	  to generalize it
+	  to generalize it for future
 
 1.9709	[2007-11-28]
 	- casting fixes from Robin Barker for g++ and 64bitint
