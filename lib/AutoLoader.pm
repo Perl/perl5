@@ -15,7 +15,7 @@ BEGIN {
     $is_epoc = $^O eq 'epoc';
     $is_vms = $^O eq 'VMS';
     $is_macos = $^O eq 'MacOS';
-    $VERSION = '5.64';
+    $VERSION = '5.64_01';
 }
 
 AUTOLOAD {
@@ -49,21 +49,6 @@ AUTOLOAD {
     }
     $@ = $save;
     goto &$sub;
-}
-
-sub can {
-    my ($self, $method) = @_;
-
-    my $parent          = $self->SUPER::can( $method );
-    return $parent if $parent;
-
-    my $package         = ref( $self ) || $self;
-    my $filename        = AutoLoader::find_filename( $package . '::' . $method );
-    local $@;
-    return unless eval { require $filename };
-
-    no strict 'refs';
-    return \&{ $package . '::' . $method };
 }
 
 sub find_filename {
@@ -152,7 +137,6 @@ sub import {
 	if ( @_ and $_[0] =~ /^&?AUTOLOAD$/ ) {
 	    no strict 'refs';
 	    *{ $callpkg . '::AUTOLOAD' } = \&AUTOLOAD;
-	    *{ $callpkg . '::can'      } = \&can;
 	}
     }
 
@@ -198,7 +182,7 @@ sub unimport {
 
     no strict 'refs';
 
-    for my $exported (qw( AUTOLOAD can )) {
+    for my $exported (qw( AUTOLOAD )) {
 	my $symname = $callpkg . '::' . $exported;
 	undef *{ $symname } if \&{ $symname } == \&{ $exported };
 	*{ $symname } = \&{ $symname };
