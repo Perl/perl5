@@ -344,10 +344,12 @@ Example:
 The interpretation of the file permission operators C<-r>, C<-R>,
 C<-w>, C<-W>, C<-x>, and C<-X> is by default based solely on the mode
 of the file and the uids and gids of the user.  There may be other
-reasons you can't actually read, write, or execute the file.  Such
-reasons may be for example network filesystem access controls, ACLs
-(access control lists), read-only filesystems, and unrecognized
-executable formats.
+reasons you can't actually read, write, or execute the file: for
+example network filesystem access controls, ACLs (access control lists),
+read-only filesystems, and unrecognized executable formats.  Note
+that the use of these six specific operators to verify if some operation
+is possible is usually a mistake, because it may be open to race
+conditions.
 
 Also note that, for the superuser on the local filesystems, the C<-r>,
 C<-R>, C<-w>, and C<-W> tests always return 1, and C<-x> and C<-X> return 1
@@ -362,8 +364,11 @@ will test whether the permission can (not) be granted using the
 access() family of system calls.  Also note that the C<-x> and C<-X> may
 under this pragma return true even if there are no execute permission
 bits set (nor any extra execute permission ACLs).  This strangeness is
-due to the underlying system calls' definitions.  Read the
-documentation for the C<filetest> pragma for more information.
+due to the underlying system calls' definitions. Note also that, due to
+the implementation of C<use filetest 'access'>, the C<_> special
+filehandle won't cache the results of the file tests when this pragma is
+in effect.  Read the documentation for the C<filetest> pragma for more
+information.
 
 Note that C<-s/a/b/> does not do a negated substitution.  Saying
 C<-exp($foo)> still works as expected, however--only single letters
