@@ -249,4 +249,7 @@ else
   # If we use perl's malloc, it dies with an invalid sbrk.
   # This is probably worth tracking down someday.
   usemymalloc='false'
+
+  # crypt isn't detected in the C library even though it's there.
+  d_crypt='define'
 fi
