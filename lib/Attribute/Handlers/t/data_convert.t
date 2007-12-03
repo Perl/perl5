@@ -26,7 +26,7 @@ sub test1 :Loud(till=>ears=>are=>bleeding) {
 }
 
 sub test2 :Loud(['till','ears','are','bleeding']) {
-    [qw(till ears are bleeding)]
+    [[qw(till ears are bleeding)]]
 }
 
 sub test3 :Loud(qw/till ears are bleeding/) {
@@ -50,5 +50,5 @@ sub test7 :Loud(qw/my ears are bleeding) {
 }
 
 sub test8 :Loud("turn it up to 11, man!") {
-    'turn it up to 11, man!';
+    ['turn it up to 11, man!'];
 }

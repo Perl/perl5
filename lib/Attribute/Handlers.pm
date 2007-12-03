@@ -192,11 +192,11 @@ sub _apply_handler_AH_ {
 	no warnings;
 	my $evaled = !$raw && eval("package $pkg; no warnings; no strict;
 				    local \$SIG{__WARN__}=sub{die}; [$data]");
-	$data = $evaled || [$data];
+	$data = $evaled unless $@;
 	$pkg->$handler($sym,
 		       (ref $sym eq 'GLOB' ? *{$sym}{ref $ref}||$ref : $ref),
 		       $attr,
-		       (@$data>1? $data : $data->[0]),
+		       $data,
 		       $phase,
 		       $filename,
 		       $linenum,
@@ -390,40 +390,46 @@ which it belongs, so the symbol table argument (C<$_[1]>) is set to the
 string C<'LEXICAL'> in that case. Likewise, ascribing an attribute to
 an anonymous subroutine results in a symbol table argument of C<'ANON'>.
 
-The data argument passes in the value (if any) associated with the 
+The data argument passes in the value (if any) associated with the
 attribute. For example, if C<&foo> had been declared:
 
         sub foo :Loud("turn it up to 11, man!") {...}
 
-then the string C<"turn it up to 11, man!"> would be passed as the
-last argument.
+then a reference to an array containing the string
+C<"turn it up to 11, man!"> would be passed as the last argument.
 
 Attribute::Handlers makes strenuous efforts to convert
 the data argument (C<$_[4]>) to a useable form before passing it to
 the handler (but see L<"Non-interpretive attribute handlers">).
+If those efforts succeed, the interpreted data is passed in an array
+reference; if they fail, the raw data is passed as a string.
 For example, all of these:
 
-        sub foo :Loud(till=>ears=>are=>bleeding) {...}
-        sub foo :Loud(['till','ears','are','bleeding']) {...}
-        sub foo :Loud(qw/till ears are bleeding/) {...}
-        sub foo :Loud(qw/my, ears, are, bleeding/) {...}
-        sub foo :Loud(till,ears,are,bleeding) {...}
+    sub foo :Loud(till=>ears=>are=>bleeding) {...}
+    sub foo :Loud(qw/till ears are bleeding/) {...}
+    sub foo :Loud(qw/my, ears, are, bleeding/) {...}
+    sub foo :Loud(till,ears,are,bleeding) {...}
 
 causes it to pass C<['till','ears','are','bleeding']> as the handler's
-data argument. However, if the data can't be parsed as valid Perl, then
+data argument. While:
+
+    sub foo :Loud(['till','ears','are','bleeding']) {...}
+
+causes it to pass C<[ ['till','ears','are','bleeding'] ]>; the array
+reference specified in the data being passed inside the standard
+array reference indicating successful interpretation.
+
+However, if the data can't be parsed as valid Perl, then
 it is passed as an uninterpreted string. For example:
 
-        sub foo :Loud(my,ears,are,bleeding) {...}
-        sub foo :Loud(qw/my ears are bleeding) {...}
+    sub foo :Loud(my,ears,are,bleeding) {...}
+    sub foo :Loud(qw/my ears are bleeding) {...}
 
-cause the strings C<'my,ears,are,bleeding'> and C<'qw/my ears are bleeding'>
-respectively to be passed as the data argument.
+cause the strings C<'my,ears,are,bleeding'> and
+C<'qw/my ears are bleeding'> respectively to be passed as the
+data argument.
 
-If the attribute has only a single associated scalar data value, that value is
-passed as a scalar. If multiple values are associated, they are passed as an
-array reference. If no value is associated with the attribute, C<undef> is
-passed.
-
+If no value is associated with the attribute, C<undef> is passed.
 
 =head2 Typed lexicals
 

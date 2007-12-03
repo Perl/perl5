@@ -7,7 +7,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 16;
+use Test::More tests => 18;
 use Attribute::Handlers;
 
 sub Args : ATTR(CODE) {
@@ -16,10 +16,11 @@ sub Args : ATTR(CODE) {
     is( $symbol,	\*foo,		'symbol' );
     is( $referent,	\&foo,		'referent' );
     is( $attr,		'Args',		'attr' );
-    is( $data,		'bar',		'data' );
+    is( ref $data,	'ARRAY',	'data' );
+    is( $data->[0],	'bar',		'data' );
     is( $phase,		'CHECK',	'phase' );
     is( $filename,	__FILE__,	'filename' );
-    is( $linenum,	25,		'linenum' );
+    is( $linenum,	26,		'linenum' );
 }
 
 sub foo :Args(bar) {}
@@ -32,11 +33,12 @@ sub SArgs : ATTR(SCALAR) {
     is( $symbol,	'LEXICAL',	'symbol' );
     is( $referent,	\$bar,		'referent' );
     is( $attr,		'SArgs',	'attr' );
-    is( $data,		'grumpf',	'data' );
+    is( ref $data,	'ARRAY',	'data' );
+    is( $data->[0],	'grumpf',	'data' );
     is( $phase,		'CHECK',	'phase' );
     TODO: {
 	local $TODO = "Doesn't work correctly";
     is( $filename,	__FILE__,	'filename' );
-    is( $linenum,	25,		'linenum' );
+    is( $linenum,	28,		'linenum' );
     }
 }
