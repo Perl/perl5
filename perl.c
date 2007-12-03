@@ -563,7 +563,7 @@ int
 perl_destruct(pTHXx)
 {
     dVAR;
-    VOL int destruct_level;  /* 0=none, 1=full, 2=full with checks */
+    VOL signed char destruct_level;  /* see possible values in intrpvar.h */
     HV *hv;
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
     pid_t child;
