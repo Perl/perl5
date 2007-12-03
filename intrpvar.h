@@ -194,7 +194,8 @@ PERLVAR(Itainted,	bool)		/* using variables controlled by $< */
 
 /* This value may be set when embedding for full cleanup  */
 /* 0=none, 1=full, 2=full with checks */
-PERLVARI(Iperl_destruct_level,	U8,	0)
+/* mod_perl is special, and also assigns a meaning -1 */
+PERLVARI(Iperl_destruct_level,	signed char,	0)
 
 PERLVAR(Iperldb,	U32)
 
