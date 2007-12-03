@@ -182,113 +182,113 @@ translates to the full file specification of the shareable image.
 
 =head2 Syntax
 
-We have tried to make Perl aware of both VMS-style and Unix-
-style file specifications wherever possible.  You may use 
-either style, or both, on the command line and in scripts, 
-but you may not combine the two styles within a single file 
-specification.  VMS Perl interprets Unix pathnames in much
-the same way as the CRTL (I<e.g.> the first component of
-an absolute path is read as the device name for the
-VMS file specification).  There are a set of functions
-provided in the C<VMS::Filespec> package for explicit
-interconversion between VMS and Unix syntax; its
-documentation provides more details.
+We have tried to make Perl aware of both VMS-style and Unix-style file
+specifications wherever possible.  You may use either style, or both,
+on the command line and in scripts, but you may not combine the two
+styles within a single file specification.  VMS Perl interprets Unix
+pathnames in much the same way as the CRTL (I<e.g.> the first component
+of an absolute path is read as the device name for the VMS file
+specification).  There are a set of functions provided in the
+C<VMS::Filespec> package for explicit interconversion between VMS and
+Unix syntax; its documentation provides more details.
 
-Perl is now in the process of evolving to follow the setting of
-the DECC$* feature logical names in the interpretation of UNIX pathnames.
-This is still a work in progress.
-
-For handling extended characters, and case sensitivity, as long as
-DECC$POSIX_COMPLIANT_PATHNAMES, DECC$FILENAME_UNIX_REPORT, and
-DECC$FILENAME_UNIX_ONLY are not set, then the older Perl behavior
-for conversions of file specifications from UNIX to VMS is followed,
-except that VMS paths with concealed rooted logical names are now
-translated correctly to UNIX paths.
-
-With those features set, then new routines may handle the translation,
-because some of the rules are different.  The presence of ./.../
-in a UNIX path is no longer translated to the VMS [...].  It will
-translate to [.^.^.^.].  To be compatible with what MakeMaker expects,
-if a VMS path can not be translated to a UNIX path when unixify
-is called, it is passed through unchanged.  So unixify("[...]") will
-return "[...]".
-
-The handling of extended characters will also be better with the
-newer translation routines.  But more work is needed to fully support
-extended file syntax names.  In particular, at this writing Pathtools
-can not deal with directories containing some extended characters.
-
-There are several ambiguous cases where a conversion routine can not
-determine if an input filename is in UNIX format or in VMS format,
-since now both VMS UNIX file specifications can have characters in
-them that could be mistaken for syntax delimiters of the other type.
-So some pathnames simply can not be used in a mode that allows either
-type of pathname to be present.
-
-Perl will tend to assume that an ambiguous filename is in UNIX format.
-
-Allowing "." as a version delimiter is simply incompatible with
-determining if a pathname is already VMS format or UNIX with the
-extended file syntax.  There is no way to know if "perl-5.8.6" that
-TAR produces is a UNIX "perl-5.8.6" or a VMS "perl-5.8;6" when
-passing it to unixify() or vmsify().
-
-The DECC$FILENAME_UNIX_REPORT or the DECC$FILENAME_UNIX_ONLY logical
-names control how Perl interprets filenames.
-
-The DECC$FILENAME_UNIX_ONLY setting has not been tested at this time.
-Perl uses traditional OpenVMS file specifications internally and in
-the test harness, so this mode may have limited use, or require more
-changes to make usable.
-
-Everything about DECC$FILENAME_UNIX_REPORT should be assumed to apply
-to DECC$FILENAME_UNIX_ONLY mode.  The DECC$FILENAME_UNIX_ONLY differs
-in that it expects all filenames passed to the C runtime to be already
-in UNIX format.
-
-Again, currently most of the core Perl modules have not yet been updated
-to understand that VMS is not as limited as it use to be.  Fixing that
-is a work in progress.
-
-The logical name DECC$POSIX_COMPLIANT_PATHNAMES is new with the
-RMS Symbolic Link SDK.  This version of Perl does not support it being set.
-
-
-Filenames are case-insensitive on VAX, and on ODS-2 formatted
-volumes on ALPHA and I64.
-
-On ODS-5 volumes filenames are case preserved and on newer
-versions of OpenVMS can be optionally case sensitive.
-
-On ALPHA and I64, Perl is in the process of being changed to follow the
-process case sensitivity setting to report if the file system is case
-sensitive.
-
-Perl programs should not assume that VMS is case blind, or that
-filenames will be in lowercase.
-
-Programs should use the File::Spec:case_tolerant setting to determine
-the state, and not the $^O setting.
-
-For consistency, when the above feature is clear and when not
-otherwise overridden by DECC feature logical names, most Perl routines
-return file specifications using lower case letters only,
-regardless of the case used in the arguments passed to them.
-(This is true only when running under VMS; Perl respects the
-case-sensitivity of OSs like Unix.)
-
-We've tried to minimize the dependence of Perl library 
-modules on Unix syntax, but you may find that some of these, 
-as well as some scripts written for Unix systems, will 
-require that you use Unix syntax, since they will assume that 
-'/' is the directory separator, I<etc.>  If you find instances 
-of this in the Perl distribution itself, please let us know, 
-so we can try to work around them. 
+We've tried to minimize the dependence of Perl library
+modules on Unix syntax, but you may find that some of these,
+as well as some scripts written for Unix systems, will
+require that you use Unix syntax, since they will assume that
+'/' is the directory separator, I<etc.>  If you find instances
+of this in the Perl distribution itself, please let us know,
+so we can try to work around them.
 
 Also when working on Perl programs on VMS, if you need a syntax
-in a specific operating system format, then you need to either
+in a specific operating system format, then you need either to
 check the appropriate DECC$ feature logical, or call a conversion
 routine to force it to that format.
+
+The feature logical name DECC$FILENAME_UNIX_REPORT modifies traditional
+Perl behavior in the conversion of file specifications from UNIX to VMS
+format in order to follow the extended character handling rules now
+expected by the CRTL.  Specifically, when this feature is in effect, the
+C<./.../> in a UNIX path is now translated to C<[.^.^.^.]> instead of
+the traditional VMS C<[...]>.  To be compatible with what MakeMaker
+expects, if a VMS path cannot be translated to a UNIX path, it is
+passed through unchanged, so C<unixify("[...]")> will return C<[...]>.
+
+The handling of extended characters is largely complete in the
+VMS-specific C infrastructure of Perl, but more work is still needed to
+fully support extended syntax filenames in several core modules.  In
+particular, at this writing PathTools has only partial support for
+directories containing some extended characters.
+
+There are several ambiguous cases where a conversion routine cannot
+determine whether an input filename is in UNIX format or in VMS format,
+since now both VMS and UNIX file specifications may have characters in
+them that could be mistaken for syntax delimiters of the other type. So
+some pathnames simply cannot be used in a mode that allows either type
+of pathname to be present.  Perl will tend to assume that an ambiguous
+filename is in UNIX format.
+
+Allowing "." as a version delimiter is simply incompatible with
+determining whether a pathname is in VMS format or in UNIX format with
+extended file syntax.  There is no way to know whether "perl-5.8.6" is a
+UNIX "perl-5.8.6" or a VMS "perl-5.8;6" when passing it to unixify() or
+vmsify().
+
+The DECC$FILENAME_UNIX_REPORT logical name controls how Perl interprets
+filenames to the extent that Perl uses the CRTL internally for many
+purposes, and attempts to follow CRTL conventions for reporting
+filenames.  The DECC$FILENAME_UNIX_ONLY feature differs in that it
+expects all filenames passed to the C run-time to be already in UNIX
+format.  This feature is not yet supported in Perl since Perl uses
+traditional OpenVMS file specifications internally and in the test
+harness, and it is not yet clear whether this mode will be useful or
+useable.  The feature logical name DECC$POSIX_COMPLIANT_PATHNAMES is new
+with the RMS Symbolic Link SDK and included with OpenVMS v8.3, but is
+not yet supported in Perl.
+
+=head2 Filename Case
+
+Perl follows VMS defaults and override settings in preserving (or not
+preserving) filename case.  Case is not preserved on ODS-2 formatted
+volumes on any architecture.  On ODS-5 volumes, filenames may be case
+preserved depending on process and feature settings.  Perl now honors
+DECC$EFS_CASE_PRESERVE and DECC$ARGV_PARSE_STYLE on those systems where
+the CRTL supports these features.  When these features are not enabled
+or the CRTL does not support them, Perl follows the traditional CRTL
+behavior of downcasing command-line arguments and returning file
+specifications in lower case only.
+
+I<N. B.>  It is very easy to get tripped up using a mixture of other
+programs, external utilities, and Perl scripts that are in varying
+states of being able to handle case preservation.  For example, a file
+created by an older version of an archive utility or a build utility
+such as MMK or MMS may generate a filename in all upper case even on an
+ODS-5 volume.  If this filename is later retrieved by a Perl script or
+module in a case preserving environment, that upper case name may not
+match the mixed-case or lower-case expections of the Perl code.  Your
+best bet is to follow an all-or-nothing approach to case preservation:
+either don't use it at all, or make sure your entire toolchain and
+application environment support and use it.
+
+OpenVMS Alpha v7.3-1 and later and all version of OpenVMS I64 support
+case sensitivity as a process setting (see C<SET PROCESS
+/CASE_LOOKUP=SENSITIVE>). Perl does not currently suppport case
+sensitivity on VMS, but it may in the future, so Perl programs should
+use the C<File::Spec->case_tolerant> method to determine the state, and
+not the C<$^O> variable.
+
+=head2 Symbolic Links
+
+When built on an ODS-5 volume with symbolic links enabled, Perl by
+default supports symbolic links when the requisite support is available
+in the filesystem and CRTL (generally 64-bit OpenVMS v8.3 and later). 
+There are a number of limitations and caveats to be aware of when
+working with symbolic links on VMS.  Most notably, the target of a valid
+symbolic link must be expressed as a UNIX-style path and it must exist
+on a volume visible from your POSIX root (see the C<SHOW ROOT> command
+in DCL help).  For further details on symbolic link capabilities and
+requirements, see chapter 12 of the CRTL manual that ships with OpenVMS
+v8.3 or later.
 
 =head2 Wildcard expansion
 
@@ -517,20 +517,20 @@ Perl functions were implemented in the VMS port of Perl
 
     file tests*, abs, alarm, atan, backticks*, binmode*, bless,
     caller, chdir, chmod, chown, chomp, chop, chr,
-    close, closedir, cos, crypt*, defined, delete,
-    die, do, dump*, each, endpwent, eof, eval, exec*,
-    exists, exit, exp, fileno, getc, getlogin, getppid,
+    close, closedir, cos, crypt*, defined, delete, die, do, dump*, 
+    each, endgrent, endpwent, eof, eval, exec*, exists, exit, exp, 
+    fileno, flock  getc, getgrent*, getgrgid*, getgrnam, getlogin, getppid,
     getpwent*, getpwnam*, getpwuid*, glob, gmtime*, goto,
-    grep, hex, import, index, int, join, keys, kill*,
-    last, lc, lcfirst, length, local, localtime, log, m//,
+    grep, hex, ioctl, import, index, int, join, keys, kill*,
+    last, lc, lcfirst, lchown*, length, link*, local, localtime, log, lstat, m//,
     map, mkdir, my, next, no, oct, open, opendir, ord, pack,
     pipe, pop, pos, print, printf, push, q//, qq//, qw//,
-    qx//*, quotemeta, rand, read, readdir, redo, ref, rename,
+    qx//*, quotemeta, rand, read, readdir, readlink*, redo, ref, rename,
     require, reset, return, reverse, rewinddir, rindex,
     rmdir, s///, scalar, seek, seekdir, select(internal),
-    select (system call)*, setpwent, shift, sin, sleep,
-    sort, splice, split, sprintf, sqrt, srand, stat,
-    study, substr, sysread, system*, syswrite, tell,
+    select (system call)*, setgrent, setpwent, shift, sin, sleep,
+    socketpair, sort, splice, split, sprintf, sqrt, srand, stat,
+    study, substr, symlink*, sysread, system*, syswrite, tell,
     telldir, tie, time, times*, tr///, uc, ucfirst, umask,
     undef, unlink*, unpack, untie, unshift, use, utime*,
     values, vec, wait, waitpid*, wantarray, warn, write, y///
@@ -539,12 +539,10 @@ The following functions were not implemented in the VMS port,
 and calling them produces a fatal error (usually) or 
 undefined behavior (rarely, we hope):
 
-    chroot, dbmclose, dbmopen, flock, fork*,
-    getpgrp, getpriority, getgrent, getgrgid,
-    getgrnam, setgrent, endgrent, ioctl, link, lstat,
-    msgctl, msgget, msgsend, msgrcv, readlink, semctl,
+    chroot, dbmclose, dbmopen, fork*, getpgrp, getpriority,  
+    msgctl, msgget, msgsend, msgrcv, semctl,
     semget, semop, setpgrp, setpriority, shmctl, shmget,
-    shmread, shmwrite, socketpair, symlink, syscall
+    shmread, shmwrite, syscall
 
 The following functions are available on Perls compiled with Dec C
 5.2 or greater and running VMS 7.0 or greater:
@@ -570,35 +568,24 @@ your copy of Perl:
     getsockopt, listen, recv, select(system call)*,
     send, setsockopt, shutdown, socket
 
-The following function is available on Perls built on 64 bit OpenVMS 8.2
-with hard links enabled on an ODS-5 formatted build disk.  If someone with
-an OpenVMS 7.3-1 system were to modify configure.com and test the results,
-this feature can be brought back to OpenVMS 7.3-1 and later.  Hardlinks
-must be enabled on the build disk because if the build procedure sees
-this feature enabled, it uses it.
+The following function is available on Perls built on 64 bit OpenVMS v8.2
+with hard links enabled on an ODS-5 formatted build disk.  CRTL support
+is in principle available as of OpenVMS v7.3-1, and better configuration
+support could detect this.
 
     link
 
 The following functions are available on Perls built on 64 bit OpenVMS
-8.2 and can be implemented on OpenVMS 7.3-2 if someone were to modify
-configure.com and test the results.  (While in the build, at the time
-of this writing, they have not been specifically tested.)
+v8.2 and later.  CRTL support is in principle available as of OpenVMS
+v7.3-2, and better configuration support could detect this.
 
    getgrgid, getgrnam, getpwnam, getpwuid,
    setgrent, ttyname
 
-The following functions are available on Perls built on 64 bit OpenVMS 8.2
-and later.  (While in the build, at the time of this writing, they have
-not been specifically tested.)
+The following functions are available on Perls built on 64 bit OpenVMS v8.2
+and later.  
 
    statvfs, socketpair
-
-The following functions are available on Perls built on 64 bit OpenVMS 8.3.
-The target for a symbolic link needs to be in Unix format if it is intended to
-resolve to a valid path.  The POSIX root must also be set up and there must be
-a path from that POSIX root to the symbolic link target.
-
-    lchown, link, lstat, readlink, symlink
 
 =over 4
 
@@ -787,13 +774,14 @@ true, a warning message is printed, and C<undef> is returned.
 
 =item kill
 
-In most cases, C<kill> is implemented via the CRTL's C<kill()>
-function, so it will behave according to that function's
-documentation.  If you send a SIGKILL, however, the $DELPRC system
-service is called directly.  This insures that the target
-process is actually deleted, if at all possible.  (The CRTL's C<kill()>
-function is presently implemented via $FORCEX, which is ignored by
-supervisor-mode images like DCL.)
+In most cases, C<kill> is implemented via the undocumented system
+service <$SIGPRC>, which has the same calling sequence as <$FORCEX>, but
+throws an exception in the target process rather than forcing it to call
+C<$EXIT>.  Generally speaking, C<kill> follows the behavior of the
+CRTL's C<kill()> function, but unlike that function can be called from
+within a signal handler.  Also, unlike the C<kill> in some versions of
+the CRTL, Perl's C<kill> checks the validity of the signal passed in and
+returns an error rather than attempting to send an unrecognized signal.
 
 Also, negative signal values don't do anything special under
 VMS; they're just converted to the corresponding positive value.
@@ -1224,8 +1212,8 @@ problems.
 
 =head1 Revision date
 
-This document was last updated on 14-Oct-2005, for Perl 5,
-patchlevel 8.
+This document was last updated on 3-Dec-2007, for Perl 5,
+patchlevel 10.
 
 =head1 AUTHOR
 

@@ -159,28 +159,35 @@ for more details.
 
 You may need to set up a foreign symbol for the unpacking utility of choice.
 
-If you unpack a perl source kit with a name containing multiple periods on
-an ODS-5 volume using recent versions of vmstar (e.g. V3.4 or later) you may
-need to be especially careful in unpacking the tape archive file.  Try to use
-the ODS-2 compatability qualifiers such as:
+As of version 5.10.0, Perl will still build and run on ODS-2 volumes,
+including on VAX, but there are a number of modules whose temporary
+files and tests are much happier residing on ODS-5 volumes.  For
+example, CPANPLUS will fail most of its tests on an ODS-2 volume because
+it includes files with multiple dots that will have been converted to
+underscores and the tests will have difficulty finding them.  So your
+best bet is to unpack the Perl source kit on an ODS-5 volume using
+recent versions of vmstar (e.g. V3.4 or later).  Contrary to advice
+provided with previous versions of Perl, do I<not> use the ODS-2
+compatability qualifier.  Instead, use a command like the following:
 
-    vmstar /extract/verbose/ods2 perl-V^.VIII^.III.tar
+    vmstar /extract/verbose perl-V^.VIII^.III.tar
 
 or:
 
-    vmstar -xvof perl-5^.8^.3.tar
+    vmstar -xvf perl-5^.10^.0.tar
 
-If you neglected to use the /ODS2 qualifier or the -o switch then you
-could rename the source directory:
+Then rename the top-level source directory like so:
 
-    set security/protection=(o:rwed) perl-5^.8^.3.dir
-    rename perl-5^.8^.3.dir perl-5_8_3.dir
+    set security/protection=(o:rwed) perl-5^.10^.0.dir
+    rename perl-5^.10^.0.dir perl-5_10_0.dir
 
-Perl on VMS as of 5.8.3 does not completely handle extended file
-parse styles such as are encountered on ODS-5.  While it can be built,
-installed, and run on ODS-5 filesystems; it may encounter
-trouble with characters that are otherwise illegal on ODS-2
-volumes (notably the ^. escaped period sequence).
+The reason for this last step is that while filenames with multiple dots
+are generally supported by Perl on VMS, I<directory> names with multiple
+dots are a special case with special problems because the dot is the
+traditional directory delimiter on VMS.  Rudimentary support for
+multi-dot directory names is available, but some of the oldest and most
+essential parts of Perl (such as searching for and loading library
+modules) do not yet fully support the ODS-5 caret-escape syntax.
 
 =head1 Configuring the Perl build
 
@@ -352,7 +359,8 @@ test suite must be the owner of the directory tree in which Perl has been
 built; otherwise the manipulations of temporary files and directories
 attempted by some of the tests will fail.
 
-If any tests fail, it means something is wrong with Perl. If the test suite
+If any tests fail, it means something is wrong with Perl, or at least
+with the particular module or feature that reported failure. If the test suite
 hangs (some tests can take upwards of two or three minutes, or more if
 you're on an especially slow machine, depending on your machine speed, so
 don't be hasty), then the test *after* the last one displayed failed. Don't
@@ -752,7 +760,6 @@ Vmsperl pages on the web include:
     http://duphy4.physics.drexel.edu/pub/cgi_info.htmlx
     http://www.cpan.org/modules/by-module/VMS/
     http://www.xray.mpe.mpg.de/mailing-lists/vmsperl/
-    http://www.best.com/~pvhp/vms/
     http://www-ang.kfunigraz.ac.at/~binder/perl.html
     http://lists.perl.org/showlist.cgi?name=vmsperl
     http://archive.develooper.com/vmsperl@perl.org/
@@ -767,7 +774,7 @@ of extending vmsperl with CPAN modules after Perl has been installed.
 
 =head1 AUTHORS
 
-Revised 10-October-2001 by Craig Berry craigberry@mac.com.  
+Revised 3-December-2007 by Craig Berry craigberry@mac.com.  
 Revised 25-February-2000 by Peter Prymmer pvhp@best.com.  
 Revised 27-October-1999 by Craig Berry craigberry@mac.com.  
 Revised 01-March-1999 by Dan Sugalski dan@sidhe.org.  
