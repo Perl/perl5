@@ -959,7 +959,7 @@ package Maintainers;
 	'win32' =>
 		{
 		'MAINTAINER'	=> 'jand',
-		'FILES'		=> q[win32 README.win32 t/win32 ext/Win32CORE],
+		'FILES'		=> q[win32 t/win32 ext/Win32CORE],
 		'CPAN'		=> 1,
 		},
 
