@@ -22,6 +22,13 @@ programming languages offer you 1 line of immortality?
 
 =head1 Tasks that only need Perl knowledge
 
+=head2 Remove duplication of test setup.
+
+Schwern notes, that there's duplication of code - lots and lots of tests have
+some variation on the big block of C<$Is_Foo> checks.  We can safely put this
+into a file, change it to build an C<%Is> hash and require it.  Maybe just put
+it into F<test.pl>. Throw in the handy tainting subroutines.
+
 =head2 merge common code in installperl and installman
 
 There are some common subroutines and a common C<BEGIN> block in F<installperl>
