@@ -2362,6 +2362,29 @@ running 'make test_notty'.
 
 =back
 
+=head3 Other environment variables that may influence tests
+
+=over 4
+
+=item PERL_TEST_Net_Ping
+
+Setting this variable runs all the Net::Ping modules tests,
+otherwise some tests that interact with the outside world are skipped.
+See L<perl58delta>.
+
+=item PERL_TEST_NOVREXX
+
+Setting this variable skips the vrexx.t tests for OS2::REXX.
+
+=item PERL_TEST_NUMCONVERTS
+
+This sets a variable in op/numconvert.t.
+
+=back
+
+See also the documentation for the Test and Test::Harness modules,
+for more environment variables that affect testing.
+
 =head2 Common problems when patching Perl source code
 
 Perl source plays by ANSI C89 rules: no C99 (or C++) extensions.  In
