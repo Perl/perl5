@@ -68,7 +68,7 @@ use Time::HiRes qw(gettimeofday);
 
 my $have_alarm = $Config{d_alarm};
 my $have_fork  = $Config{d_fork};
-my $waitfor = 90; # 30-45 seconds is normal (load affects this).
+my $waitfor = 180; # 30-45 seconds is normal (load affects this).
 my $timer_pid;
 my $TheEnd;
 
@@ -107,13 +107,13 @@ if (open(XDEFINE, "xdefine")) {
 # However, if the system is busy, there are no guarantees on how
 # quickly we will return.  This limit used to be 10%, but that
 # was occasionally triggered falsely.  
-# Try 20%.  
+# So let's try 25%.
 # Another possibility might be to print "ok" if the test completes fine
 # with (say) 10% slosh, "skip - system may have been busy?" if the test
 # completes fine with (say) 30% slosh, and fail otherwise.  If you do that,
 # consider changing over to test.pl at the same time.
 # --A.D., Nov 27, 2001
-my $limit = 0.20; # 20% is acceptable slosh for testing timers
+my $limit = 0.25; # 25% is acceptable slosh for testing timers
 
 sub skip {
     map { print "ok $_ # skipped\n" } @_;
@@ -261,27 +261,43 @@ unless (   defined &Time::HiRes::gettimeofday
     sleep (0.5);
     print "# sleep...", Time::HiRes::tv_interval($r), "\nok 16\n";
 
+    $r = [Time::HiRes::gettimeofday()];
+    $i = 5;
     my $oldaction;
+    if ($use_sigaction) {
+	$oldaction = new POSIX::SigAction;
+	printf "# sigaction tick, ALRM = %d\n", &POSIX::SIGALRM;
 
-    # on VMS timers can not interrupt select.
-    if ($^O ne 'VMS') {
-	$r = [Time::HiRes::gettimeofday()];
-	$i = 5;
-	if ($use_sigaction) {
-	    $oldaction = new POSIX::SigAction;
-	    printf "# sigaction tick, ALRM = %d\n", &POSIX::SIGALRM;
-	    # Perl's deferred signals may be too wimpy to break through
-	    # a restartable select(), so use POSIX::sigaction if available.
-	    POSIX::sigaction(&POSIX::SIGALRM, POSIX::SigAction->new("tick"),
-			     $oldaction)
-		or die "Error setting SIGALRM handler with sigaction: $!\n";
-	} else {
-	    print "# SIG tick\n";
-	    $SIG{ALRM} = "tick";
+	# Perl's deferred signals may be too wimpy to break through
+	# a restartable select(), so use POSIX::sigaction if available.
+
+	sub tick {
+	    $i--;
+	    my $ival = Time::HiRes::tv_interval ($r);
+	    print "# Tick! $i $ival\n";
+	    my $exp = 0.3 * (5 - $i);
+	    # This test is more sensitive, so impose a softer limit.
+	    if (abs($ival/$exp - 1) > 4*$limit) {
+		my $ratio = abs($ival/$exp);
+		$not = "tick: $exp sleep took $ival ratio $ratio";
+		$i = 0;
+	    }
 	}
 
-	while ($i > 0)
-	{
+	POSIX::sigaction(&POSIX::SIGALRM,
+			 POSIX::SigAction->new("tick"),
+			 $oldaction)
+	    or die "Error setting SIGALRM handler with sigaction: $!\n";
+    } else {
+	print "# SIG tick\n";
+	$SIG{ALRM} = "tick";
+    }
+
+    # On VMS timers can not interrupt select.
+    if ($^O eq 'VMS') {
+	$ok = "Skip: VMS select() does not get interrupted.";
+    } else {
+	while ($i > 0) {
 	    alarm(0.3);
 	    select (undef, undef, undef, 3);
 	    my $ival = Time::HiRes::tv_interval ($r);
@@ -293,11 +309,10 @@ unless (   defined &Time::HiRes::gettimeofday
 	    # from the alarm.  If this happens, let's just skip
 	    # this particular test.  --jhi
 	    if (abs($ival/3.3 - 1) < $limit) {
-		$ok = 
- "Skip: your select() may get restarted by your SIGALRM (or just retry test)";
+		$ok = "Skip: your select() may get restarted by your SIGALRM (or just retry test)";
 		undef $not;
 		last;
-		}
+	    }
 	    my $exp = 0.3 * (5 - $i);
 	    # This test is more sensitive, so impose a softer limit.
 	    if (abs($ival/$exp - 1) > 3*$limit) {
@@ -307,31 +322,12 @@ unless (   defined &Time::HiRes::gettimeofday
 	    }
 	    $ok = $i;
 	}
+    }
+
+    if ($use_sigaction) {
+	POSIX::sigaction(&POSIX::SIGALRM, $oldaction);
     } else {
-	$ok = "Skip: VMS select() does not get interrupted.";
-    }
-
-    sub tick
-    {
-	$i--;
-	my $ival = Time::HiRes::tv_interval ($r);
-	print "# Tick! $i $ival\n";
-	my $exp = 0.3 * (5 - $i);
-	# This test is more sensitive, so impose a softer limit.
-	if (abs($ival/$exp - 1) > 4*$limit) {
-	    my $ratio = abs($ival/$exp);
-	    $not = "tick: $exp sleep took $ival ratio $ratio";
-	    $i = 0;
-	}
-    }
-
-
-    if ($^O ne 'VMS') {
-	if ($use_sigaction) {
-	    POSIX::sigaction(&POSIX::SIGALRM, $oldaction);
-	} else {
-	    alarm(0); # can't cancel usig %SIG
-	}
+	alarm(0); # can't cancel usig %SIG
     }
 
     print $not ? "not ok 17 # $not\n" : "ok 17 # $ok\n";
@@ -340,7 +336,8 @@ unless (   defined &Time::HiRes::gettimeofday
 unless (   defined &Time::HiRes::setitimer
 	&& defined &Time::HiRes::getitimer
 	&& has_symbol('ITIMER_VIRTUAL')
-	&& $Config{sig_name} =~ m/\bVTALRM\b/) {
+	&& $Config{sig_name} =~ m/\bVTALRM\b/
+        && $^O !~ /^(nto)$/) { # nto: QNX 6 has the API but no implementation
     for (18..19) {
 	print "ok $_ # Skip: no virtual interval timers\n";
     }
