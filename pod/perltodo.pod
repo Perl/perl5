@@ -641,8 +641,8 @@ Perl's diagnostics (error messages, see L<perldiag>) could use
 reorganizing so that each error message has its
 stable-for-all-eternity unique id, categorized by severity, type, and
 subsystem.  (The error messages would be listed in a datafile outside
-of the Perl source code, and the source code would only refer the
-messages by the is.)  This clean-up and regularizing should apply
+of the Perl source code, and the source code would only refer to the
+messages by the id.)  This clean-up and regularizing should apply
 for all croak() messages.
 
 This would enable all sorts of things: easier translation/localization
