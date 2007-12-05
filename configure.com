@@ -853,7 +853,6 @@ $   ENDIF
 $ ENDIF  !(needman .EQS. "true")
 $!
 $!: see if sh knows # comments             !sfn
-$ sharpbang = "$ "
 $!: figure out how to guarantee sh startup !sfn
 $!: find out where common programs are     !sfn
 $!loclist="awk/cat/comm/cp/echo/expr/find/grep/ln/ls/mkdir/rm/sed/sort/touch/tr/uniq"
@@ -6370,6 +6369,7 @@ $ WC "seedfunc='" + seedfunc + "'"
 $ WC "selectminbits='32'"
 $ WC "selecttype='" + selecttype + "'"
 $ WC "sh='MCR'"
+$ WC "sharpbang='#!'"
 $ WC "shmattype='" + " '"
 $ WC "shortsize='" + shortsize + "'"
 $ IF (f$length(sig_name) .GE. 244)
