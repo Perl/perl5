@@ -1,3 +1,5 @@
+=encoding utf8
+
 =head1 NAME
 
 perldelta - what is new for perl 5.10.0
