@@ -486,6 +486,14 @@ ever creep back to libperl.a.
 Note, of course, that this will only tell whether B<your> platform
 is using those naughty interfaces.
 
+=head2 -D_FORTIFY_SOURCE=2, -fstack-protector
+
+Recent glibcs support C<-D_FORTIFY_SOURCE=2> and recent gcc
+(4.1 onwards?) supports C<-fstack-protector>, both of which give
+protection against various kinds of buffer overflow problems.
+These should probably be used for compiling Perl whenever available,
+Configure and/or hints files should be adjusted to probe for the
+availability of these features and enable them as appropriate.
 
 =head1 Tasks that need a knowledge of XS
 
@@ -638,7 +646,7 @@ fixed strings such as C<ISA> and pass them in to functions.)
 =head2 Organize error messages
 
 Perl's diagnostics (error messages, see L<perldiag>) could use
-reorganizing so that each error message has its
+reorganizing and formalizing  so that each error message has its
 stable-for-all-eternity unique id, categorized by severity, type, and
 subsystem.  (The error messages would be listed in a datafile outside
 of the Perl source code, and the source code would only refer to the
@@ -656,7 +664,7 @@ existing software depending on some particular error message...)
 This kind of functionality is known as I<message catalogs>.  Look for
 inspiration for example in the catgets() system, possibly even use it
 if available-- but B<only> if available, all platforms will B<not>
-catgets().
+have catgets().
 
 For the really pure at heart, consider extending this item to cover
 also the warning messages (see L<perllexwarn>, C<warnings.pl>).
