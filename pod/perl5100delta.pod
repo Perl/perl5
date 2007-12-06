@@ -834,6 +834,9 @@ included with Perl.
 C<Attribute::Handlers> can now report the caller's file and line number.
 (David Feldman)
 
+All interpreted attributes are now passed as array references. (Damian
+Conway)
+
 =item C<B::Lint>
 
 C<B::Lint> is now based on C<Module::Pluggable>, and so can be extended
