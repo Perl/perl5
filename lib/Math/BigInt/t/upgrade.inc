@@ -485,7 +485,7 @@ E1:NaN
 E23:NaN
 1.23E1:12.3^
 1.23E-1:0.123^
-# bug with two E's in number beeing valid
+# bug with two E's in number being valid
 1e2e3:NaN
 1e2r:NaN
 1e2.0:NaN

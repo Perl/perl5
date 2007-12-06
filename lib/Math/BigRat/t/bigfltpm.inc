@@ -283,7 +283,7 @@ ok ($class->new(-1)->is_one('-'),1);
 ok ($class->new(1)->fdiv('0.5')->bsstr(),'2e+0');
 
 ###############################################################################
-# [perl #30609] bug with $x -= $x not beeing 0, but 2*$x
+# [perl #30609] bug with $x -= $x not being 0, but 2*$x
 
 $x = $class->new(3);  $x -= $x; ok ($x, 0);
 $x = $class->new(-3); $x -= $x; ok ($x, 0);
