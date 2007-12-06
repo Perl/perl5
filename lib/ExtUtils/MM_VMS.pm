@@ -18,7 +18,7 @@ use File::Basename;
 # $Revision can't be on the same line or SVN/K gets confused
 use vars qw($Revision
             $VERSION @ISA);
-$VERSION = '6.38';
+$VERSION = '6.40';
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
@@ -1571,23 +1571,7 @@ map_clean :
 
     join '', @m;
 }
-  
-# --- Output postprocessing section ---
 
-=item nicetext (override)
-
-Insure that colons marking targets are preceded by space, in order
-to distinguish the target delimiter from a colon appearing as
-part of a filespec.
-
-=cut
-
-sub nicetext {
-    my($self,$text) = @_;
-    return $text if $text =~ m/^\w+\s*=/; # leave macro defs alone
-    $text =~ s/([^\s:])(:+\s)/$1 $2/gs;
-    $text;
-}
 
 =item prefixify (override)
 

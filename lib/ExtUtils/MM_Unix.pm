@@ -18,7 +18,7 @@ use vars qw($VERSION @ISA
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '6.38';
+$VERSION = '6.40';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -1198,7 +1198,7 @@ Writes an empty FORCE: target.
 sub force {
     my($self) = shift;
     '# Phony target to force checking subdirectories.
-FORCE:
+FORCE :
 	$(NOECHO) $(NOOP)
 ';
 }
@@ -2539,7 +2539,7 @@ $tmp/perlmain.c: $makefilename}, q{
 
 
     push @m, q{
-doc_inst_perl:
+doc_inst_perl :
 	$(NOECHO) $(ECHO) Appending installation info to $(DESTINSTALLARCHLIB)/perllocal.pod
 	-$(NOECHO) $(MKPATH) $(DESTINSTALLARCHLIB)
 	-$(NOECHO) $(DOC_INSTALL) \
@@ -2552,9 +2552,9 @@ doc_inst_perl:
 };
 
     push @m, q{
-inst_perl: pure_inst_perl doc_inst_perl
+inst_perl : pure_inst_perl doc_inst_perl
 
-pure_inst_perl: $(MAP_TARGET)
+pure_inst_perl : $(MAP_TARGET)
 	}.$self->{CP}.q{ $(MAP_TARGET) }.$self->catfile('$(DESTINSTALLBIN)','$(MAP_TARGET)').q{
 
 clean :: map_clean
@@ -2646,22 +2646,6 @@ sub needs_linking {
     return $self->{NEEDS_LINKING} = 0;
 }
 
-=item nicetext
-
-misnamed method (will have to be changed). The MM_Unix method just
-returns the argument without further processing.
-
-On VMS used to insure that colons marking targets are preceded by
-space - most Unix Makes don't need this, but it's necessary under VMS
-to distinguish the target delimiter from a colon appearing as part of
-a filespec.
-
-=cut
-
-sub nicetext {
-    my($self,$text) = @_;
-    $text;
-}
 
 =item parse_abstract
 
@@ -3038,7 +3022,7 @@ PPD_XML
 
     return sprintf <<'PPD_OUT', join "\n\t", @ppd_cmds;
 # Creates a PPD (Perl Package Description) for a binary distribution.
-ppd:
+ppd :
 	%s
 PPD_OUT
 

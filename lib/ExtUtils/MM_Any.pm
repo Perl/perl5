@@ -2,7 +2,7 @@ package ExtUtils::MM_Any;
 
 use strict;
 use vars qw($VERSION @ISA);
-$VERSION = '6.38';
+$VERSION = '6.40';
 
 use Carp;
 use File::Spec;
@@ -648,7 +648,7 @@ confused or something gets snuck in before the real 'all' target.
 
 sub makemakerdflt_target {
     return <<'MAKE_FRAG';
-makemakerdflt: all
+makemakerdflt : all
 	$(NOECHO) $(NOOP)
 MAKE_FRAG
 
@@ -711,7 +711,7 @@ sub metafile_target {
     my $self = shift;
 
     return <<'MAKE_FRAG' if $self->{NO_META};
-metafile:
+metafile :
 	$(NOECHO) $(NOOP)
 MAKE_FRAG
 

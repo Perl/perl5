@@ -1,4 +1,4 @@
-# $Id: /local/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker.pm 40911 2007-11-29T00:01:57.856094Z schwern  $
+# $Id: /local/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker.pm 41130 2007-12-06T11:04:43.533533Z schwern  $
 package ExtUtils::MakeMaker;
 
 BEGIN {require 5.005_03;}
@@ -21,8 +21,8 @@ use vars qw(
 use vars qw($Revision);
 use strict;
 
-$VERSION = '6.38';
-($Revision) = q$Revision: 40911 $ =~ /Revision:\s+(\S+)/;
+$VERSION = '6.40';
+($Revision) = q$Revision: 41130 $ =~ /Revision:\s+(\S+)/;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&WriteMakefile &writeMakefile $Verbose &prompt);
@@ -635,7 +635,7 @@ END
             my(%a) = %{$self->{$section} || {}};
             push @{$self->{RESULT}}, "\n# --- MakeMaker $section section:";
             push @{$self->{RESULT}}, "# " . join ", ", %a if $Verbose && %a;
-            push @{$self->{RESULT}}, $self->nicetext($self->$method( %a ));
+            push @{$self->{RESULT}}, $self->$method( %a );
         }
     }
 
@@ -660,15 +660,15 @@ sub WriteEmptyMakefile {
     }
     open MF, '>'.$new or die "open $new for write: $!";
     print MF <<'EOP';
-all:
+all :
 
-clean:
+clean :
 
-install:
+install :
 
-makemakerdflt:
+makemakerdflt :
 
-test:
+test :
 
 EOP
     close MF or die "close $new for write: $!";
@@ -2188,7 +2188,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    ($VERSION) = q$Revision: 40911 $ =~ /(\d+)/g;
+    ($VERSION) = q$Revision: 41130 $ =~ /(\d+)/g;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0

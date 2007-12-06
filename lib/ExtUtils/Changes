@@ -1,3 +1,11 @@
+6.40  Thu Dec  6 03:00:47 PST 2007
+    Bug Fixes
+    - Remove the dubious nicetext() Makefile formatting hack to account for
+      a lack of space between the target and colon needed on VMS.  This
+      interfered with META.yml creation on VMS and possibly other output.
+    - Fix the remaining targets which don't have a space between the target
+      and the colon.
+
 6.38  Wed Nov 28 16:01:12 PST 2007
     Releasing 6.37_03 as 6.38.
 
