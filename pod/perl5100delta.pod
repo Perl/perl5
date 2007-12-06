@@ -1204,6 +1204,9 @@ z/OS.
 
 Perl has been reported to work on DragonFlyBSD and MidnightBSD.
 
+Perl has also been reported to work on NexentaOS
+( http://www.gnusolaris.org/ ).
+
 The VMS port has been improved. See L<perlvms>.
 
 Support for Cray XT4 Catamount/Qk has been added. See
@@ -1525,6 +1528,10 @@ an hash/array when the op is flagged with OPf_SPECIAL (Nicholas Clark).
 There's still a remaining problem in the implementation of the lexical
 C<$_>: it doesn't work inside C</(?{...})/> blocks. (See the TODO test in
 F<t/op/mydef.t>.)
+
+Stacked filetest operators won't work when the C<filetest> pragma is in
+effect, because they rely on the stat() buffer C<_> being populated, and
+filetest bypasses stat().
 
 =head1 Platform Specific Problems
 
