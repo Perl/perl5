@@ -888,7 +888,7 @@ retrieves the return op from it, and returns it.
 
 =item Exception handing
 
-Perl's exception handing (i.e. C<die> etc) is built on top of the low-level
+Perl's exception handing (i.e. C<die> etc.) is built on top of the low-level
 C<setjmp()>/C<longjmp()> C-library functions. These basically provide a
 way to capture the current PC and SP registers and later restore them; i.e.
 a C<longjmp()> continues at the point in code where a previous C<setjmp()>
@@ -1556,7 +1556,7 @@ C<-Wdeclaration-after-statement>
 =back
 
 The following flags would be nice to have but they would first need
-their own Stygian stablemaster:
+their own Augean stablemaster:
 
 =over 4
 
@@ -2113,7 +2113,7 @@ that need to be moved.  Perhaps you could move them?  Thanks!
 
 =item F<t/mro/>
 
-Tests for perl's method resultion order implementations
+Tests for perl's method resolution order implementations
 (see L<mro>).
 
 =item F<t/op/>
