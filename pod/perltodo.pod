@@ -639,7 +639,7 @@ fixed strings such as C<ISA> and pass them in to functions.)
 =head2 Organize error messages
 
 Perl's diagnostics (error messages, see L<perldiag>) could use
-reorganizing and formalizing  so that each error message has its
+reorganizing and formalizing so that each error message has its
 stable-for-all-eternity unique id, categorized by severity, type, and
 subsystem.  (The error messages would be listed in a datafile outside
 of the Perl source code, and the source code would only refer to the
@@ -674,9 +674,9 @@ Currently this is illegal:
     state ($a, $b) = foo(); 
 
 In Perl 6, C<state ($a) = foo();> and C<(state $a) = foo();> have different
-semantics, which is tricky to implement in Perl 5 as currently the produce
+semantics, which is tricky to implement in Perl 5 as currently they produce
 the same opcode trees. The Perl 6 design is firm, so it would be good to
-implement the  necessary code in Perl 5. There are comments in
+implement the necessary code in Perl 5. There are comments in
 C<Perl_newASSIGNOP()> that show the code paths taken by various assignment
 constructions involving state variables.
 
@@ -768,9 +768,9 @@ XS, one for perl) and swap between if a sub is redefined.
 
 =head2 Self ties
 
-self ties are currently illegal because they caused too many segfaults. Maybe
-the causes of these could be tracked down and self-ties on all types re-
-instated.
+Self ties are currently illegal because they caused too many segfaults. Maybe
+the causes of these could be tracked down and self-ties on all types
+re-instated.
 
 =head2 Optimize away @_
 
