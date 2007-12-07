@@ -766,11 +766,11 @@ perl and XS subroutines. Subroutine implementations rarely change between
 perl and XS at run time, so investigate using 2 ops to enter subs (one for
 XS, one for perl) and swap between if a sub is redefined.
 
-=head2 Self ties
+=head2 Self-ties
 
-Self ties are currently illegal because they caused too many segfaults. Maybe
+Self-ties are currently illegal because they caused too many segfaults. Maybe
 the causes of these could be tracked down and self-ties on all types
-re-instated.
+reinstated.
 
 =head2 Optimize away @_
 
