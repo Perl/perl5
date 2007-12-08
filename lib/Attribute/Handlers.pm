@@ -190,9 +190,14 @@ sub _apply_handler_AH_ {
 	my $sym = findsym($pkg, $ref);
 	$sym ||= $type eq 'CODE' ? 'ANON' : 'LEXICAL';
 	no warnings;
-	my $evaled = !$raw && eval("package $pkg; no warnings; no strict;
-				    local \$SIG{__WARN__}=sub{die}; [$data]");
-	$data = $evaled unless $@;
+	if (!$raw && defined($data)) {
+	    if ($data ne '') {
+		my $evaled = eval("package $pkg; no warnings; no strict;
+				   local \$SIG{__WARN__}=sub{die}; [$data]");
+		$data = $evaled unless $@;
+	    }
+	    else { $data = undef }
+	}
 	$pkg->$handler($sym,
 		       (ref $sym eq 'GLOB' ? *{$sym}{ref $ref}||$ref : $ref),
 		       $attr,
