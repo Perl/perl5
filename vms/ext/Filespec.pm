@@ -3,7 +3,7 @@
 #
 #   Version:  see $VERSION below
 #   Author:   Charles Bailey  bailey@newman.upenn.edu
-#   Revised:  30-Oct-2007
+#   Revised:  6-DEC-2007
 
 =head1 NAME
 
@@ -11,18 +11,18 @@ VMS::Filespec - convert between VMS and Unix file specification syntax
 
 =head1 SYNOPSIS
 
-use VMS::Filespec;
-$fullspec = rmsexpand('[.VMS]file.specification'[, 'default:[file.spec]']);
-$vmsspec = vmsify('/my/Unix/file/specification');
-$unixspec = unixify('my:[VMS]file.specification');
-$path = pathify('my:[VMS.or.Unix.directory]specification.dir');
-$dirfile = fileify('my:[VMS.or.Unix.directory.specification]');
-$vmsdir = vmspath('my/VMS/or/Unix/directory/specification.dir');
-$unixdir = unixpath('my:[VMS.or.Unix.directory]specification.dir');
-candelete('my:[VMS.or.Unix]file.specification');
-$case_tolerant = vms_case_tolerant;
-$unixspec = vms_realpath('file_specification');
-$vmsspec = vms_realname('file_specification');
+  use VMS::Filespec;
+  $fullspec = rmsexpand('[.VMS]file.specification'[, 'default:[file.spec]']);
+  $vmsspec = vmsify('/my/Unix/file/specification');
+  $unixspec = unixify('my:[VMS]file.specification');
+  $path = pathify('my:[VMS.or.Unix.directory]specification.dir');
+  $dirfile = fileify('my:[VMS.or.Unix.directory.specification]');
+  $vmsdir = vmspath('my/VMS/or/Unix/directory/specification.dir');
+  $unixdir = unixpath('my:[VMS.or.Unix.directory]specification.dir');
+  candelete('my:[VMS.or.Unix]file.specification');
+  $case_tolerant = vms_case_tolerant;
+  $unixspec = vms_realpath('file_specification');
+  $vmsspec = vms_realname('file_specification');
 
 =head1 DESCRIPTION
 
@@ -203,25 +203,19 @@ It will always return a UNIX format specification.
 
 If the C<realpath> function is not available, or is unable to return the
 real path of the file, C<vms_realpath> will use the C<vms_realfile>
-function and convert the output to a UNIX format specification.
+function and convert the output to a UNIX format specification.  It is
+not available on non-VMS systems.
 
-This function is intended for use by Cwd.pm for the implementation of
-the abs_path function with support for symbolic links.  It is not available
-on non-VMS systems.
+=head2 vms_realname
 
-head2 vms_realname
-
-This uses the VMS LIB$FID_TO_NAME function to find the name of the primary
-link to a file, and returns the filename in VMS format.
-
-This function is intended for use by Cwd.pm for the implementation of
-the abs_path function with support for symbolic links.  It is not available
-on non-VMS systems.
+This uses the C<LIB$FID_TO_NAME> run-time library call to find the name
+of the primary link to a file, and returns the filename in VMS format. 
+This function is not available on non-VMS systems.
 
 
 =head1 REVISION
 
-This document was last revised 15-Nov-2007, for Perl 5.10.0
+This document was last revised 6-DEC-2007, for Perl 5.10.0
 
 =cut
 
