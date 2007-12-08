@@ -611,11 +611,11 @@ but more subtle effect.
 
 =head2 AUTHOR
 
-Originally designed and implemented by Malcolm Beattie,
-mbeattie@sable.ox.ac.uk.
+Originally designed and implemented by Malcolm Beattie.
 
-Reworked to use the Opcode module and other changes added by Tim Bunce
-E<lt>F<Tim.Bunce@ig.co.uk>E<gt>.
+Reworked to use the Opcode module and other changes added by Tim Bunce.
+
+Currently maintained by the Perl 5 Porters, <perl5-porters@perl.org>.
 
 =cut
 
