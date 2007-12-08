@@ -518,7 +518,7 @@ to not export:
 
 =item *
 
-method names (because you don't need to to
+method names (because you don't need to
 and that's likely to not do what you want),
 
 =item *
