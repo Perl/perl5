@@ -3,7 +3,7 @@ package ExtUtils::MM;
 use strict;
 use ExtUtils::MakeMaker::Config;
 use vars qw(@ISA $VERSION);
-$VERSION = '6.40';
+$VERSION = '6.42';
 
 require ExtUtils::Liblist;
 require ExtUtils::MakeMaker;

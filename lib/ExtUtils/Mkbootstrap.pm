@@ -4,7 +4,7 @@ package ExtUtils::Mkbootstrap;
 use strict 'refs';
 
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '6.40';
+$VERSION = '6.42';
 
 require Exporter;
 @ISA = ('Exporter');

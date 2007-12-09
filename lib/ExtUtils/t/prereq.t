@@ -14,7 +14,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 11;
+use Test::More tests => 13;
 
 use TieOut;
 use MakeMaker::Test::Utils;
@@ -103,6 +103,29 @@ MakeMaker FATAL: prerequisites not found.
     I::Do::Not::Exist not installed
     Nor::Do::I not installed
     strict 99999
+
+Please install these modules first and rerun 'perl Makefile.PL'.
+END
+
+
+    $warnings = '';
+    eval {
+        WriteMakefile(
+            NAME            => 'Big::Dummy',
+            PREREQ_PM       => {
+                "I::Do::Not::Exist" => 0,
+            },
+            CONFIGURE => sub {
+                require I::Do::Not::Exist;
+            },
+            PREREQ_FATAL    => 1,
+        );
+    };
+    
+    is $warnings, '';
+    is $@, <<'END', "PREREQ_FATAL happens before CONFIGURE";
+MakeMaker FATAL: prerequisites not found.
+    I::Do::Not::Exist not installed
 
 Please install these modules first and rerun 'perl Makefile.PL'.
 END

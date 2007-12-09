@@ -2,7 +2,7 @@ package ExtUtils::MM_Any;
 
 use strict;
 use vars qw($VERSION @ISA);
-$VERSION = '6.40';
+$VERSION = '6.42';
 
 use Carp;
 use File::Spec;
@@ -234,6 +234,24 @@ sub wraplist {
     my $self = shift;
     return join " \\\n\t", @_;
 }
+
+
+=head3 maketext_filter
+
+    my $filter_make_text = $mm->maketext_filter($make_text);
+
+The text of the Makefile is run through this method before writing to
+disk.  It allows systems a chance to make portability fixes to the
+Makefile.
+
+By default it does nothing.
+
+This method is protected and not intended to be called outside of
+MakeMaker.
+
+=cut
+
+sub maketext_filter { return $_[1] }
 
 
 =head3 cd  I<Abstract>

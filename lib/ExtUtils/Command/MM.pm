@@ -9,7 +9,7 @@ use vars qw($VERSION @ISA @EXPORT);
 
 @EXPORT  = qw(test_harness pod2man perllocal_install uninstall 
               warn_if_old_packlist);
-$VERSION = '6.40';
+$VERSION = '6.42';
 
 my $Is_VMS = $^O eq 'VMS';
 
