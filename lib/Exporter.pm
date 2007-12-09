@@ -9,7 +9,7 @@ require 5.006;
 our $Debug = 0;
 our $ExportLevel = 0;
 our $Verbose ||= 0;
-our $VERSION = '5.61';
+our $VERSION = '5.62';
 our (%Cache);
 # Carp does this now for us, so we can finally live w/o Carp
 #$Carp::Internal{Exporter} = 1;
@@ -509,9 +509,21 @@ C<base> code to just establish the IS-A relationship.
 For more details, see the documentation and code of
 L<base> and L<parent>.
 
+Another thorough remedy to that runtime vs. 
+compile-time trap is to use L<Exporter::Easy>,
+which is a wrapper of Exporter that allows all
+boilerplate code at a single gulp in the
+use statement.
+
+   use Exporter::Easy (
+       OK => [ qw(munge frobnicate) ],
+   );
+   # @ISA setup is automatic
+   # all assignments happen at compile time
+
 =head2 What not to Export
 
-You have been warned already in L</Selecting What to Export>
+You have been warned already in L</Selecting What To Export>
 to not export:
 
 =over 4
