@@ -11,6 +11,17 @@
  *    Please see Changes*.* or the Perl Repository Browser for revision history.
  */
 
+/*
+ *               Yet small as was their hunted band
+ *               still fell and fearless was each hand,
+ *               and strong deeds they wrought yet oft,
+ *               and loved the woods, whose ways more soft
+ *               them seemed than thralls of that black throne
+ *               to live and languish in halls of stone.
+ *
+ *                           The Lay of Leithian, 135-40
+ */
+ 
 #include <acedef.h>
 #include <acldef.h>
 #include <armdef.h>
