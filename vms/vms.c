@@ -9602,16 +9602,13 @@ Perl_readdir(pTHX_ DIR *dd)
     }
     dd->count++;
     /* Force the buffer to end with a NUL, and downcase name to match C convention. */
+    buff[res.dsc$w_length] = '\0';
+    p = buff + res.dsc$w_length;
+    while (--p >= buff) if (!isspace(*p)) break;  
+    *p = '\0';
     if (!decc_efs_case_preserve) {
-      buff[VMS_MAXRSS - 1] = '\0';
       for (p = buff; *p; p++) *p = _tolower(*p);
     }
-    else {
-      /* we don't want to force to lowercase, just null terminate */
-      buff[res.dsc$w_length] = '\0';
-    }
-    while (--p >= buff) if (!isspace(*p)) break;  /* Do we really need this? */
-    *p = '\0';
 
     /* Skip any directory component and just copy the name. */
     sts = vms_split_path
