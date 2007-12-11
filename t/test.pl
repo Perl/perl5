@@ -397,6 +397,7 @@ my $is_mswin    = $^O eq 'MSWin32';
 my $is_netware  = $^O eq 'NetWare';
 my $is_macos    = $^O eq 'MacOS';
 my $is_vms      = $^O eq 'VMS';
+my $is_cygwin   = $^O eq 'cygwin';
 
 sub _quote_args {
     my ($runperl, $args) = @_;
@@ -530,6 +531,7 @@ sub runperl {
 	    join $sep, grep { $_ ne "" and $_ ne "." and -d $_ and
 		($is_mswin or $is_vms or !(stat && (stat _)[2]&0022)) }
 		    split quotemeta ($sep), $1;
+	$ENV{PATH} .= "$sep/bin" if $is_cygwin;  # Must have /bin under Cygwin
 
 	$runperl =~ /(.*)/s;
 	$runperl = $1;
