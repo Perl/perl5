@@ -618,6 +618,14 @@ C<$foo-E<gt>isa($bar)> lookup.
 
 =head1 Modules and Pragmata
 
+=head2 Upgrading individual core modules
+
+Even more core modules are now also available separately through the
+CPAN.  If you wish to update one of these modules, you don't need to
+wait for a new perl release.  From within the cpan shell, running the
+'r' command will report on modules with upgrades available.  See
+C<perldoc CPAN> for more information.
+
 =head2 Pragmata Changes
 
 =over 4
