@@ -76,9 +76,8 @@ like($contents, qr/sub factorial/,
     'The ${main::_<filename} variable in the debugger was not destroyed'
 );
 
-TODO: {
+{
     local $ENV{PERLDB_OPTS} = "ReadLine=0";
-    local $::TODO = "lvalueness isn't propagated in the debugger";
     my $output = runperl(switches => [ '-d' ], progfile => '../lib/perl5db/t/lvalue-bug');
     like($output, qr/foo is defined/, 'lvalue subs work in the debugger');
 }

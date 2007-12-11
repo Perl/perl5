@@ -2770,7 +2770,14 @@ try_autoload:
 	 Perl_get_db_sub(aTHX_ &sv, cv);
 	 if (CvISXSUB(cv))
 	     PL_curcopdb = PL_curcop;
-	 cv = GvCV(PL_DBsub);
+         if (CvLVALUE(cv)) {
+             /* check for lsub that handles lvalue subroutines */
+	     cv = GvCV(gv_HVadd(gv_fetchpv("DB::lsub", GV_ADDMULTI, SVt_PVHV)));
+             /* if lsub not found then fall back to DB::sub */
+	     if (!cv) cv = GvCV(PL_DBsub);
+         } else {
+             cv = GvCV(PL_DBsub);
+         }
 
 	if (!cv || (!CvXSUB(cv) && !CvSTART(cv)))
 	    DIE(aTHX_ "No DB::sub routine defined");
