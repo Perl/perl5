@@ -444,8 +444,6 @@ group.)
 
 =head2 Packing and UTF-8 strings
 
-=for XXX update this
-
 The semantics of pack() and unpack() regarding UTF-8-encoded data has been
 changed. Processing is now by default character per character instead of
 byte per byte on the underlying encoding. Notably, code that used things
