@@ -1541,6 +1541,11 @@ Stacked filetest operators won't work when the C<filetest> pragma is in
 effect, because they rely on the stat() buffer C<_> being populated, and
 filetest bypasses stat().
 
+When compiled with g++ and thread support on Linux, it's reported that the
+C<$!> stops working correctly. This is related to the fact that the glibc
+provides two strerror_r(3) implementation, and perl selects the wrong
+one.
+
 =head1 Platform Specific Problems
 
 =head1 Reporting Bugs
