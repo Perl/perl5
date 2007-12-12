@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 10126 $)
+perlfaq4 - Data Manipulation ($Revision: 10394 $)
 
 =head1 DESCRIPTION
 
@@ -2071,10 +2071,16 @@ end up doing is not what they do with ordinary hashes.
 
 =head2 How do I reset an each() operation part-way through?
 
-Using C<keys %hash> in scalar context returns the number of keys in
-the hash I<and> resets the iterator associated with the hash.  You may
-need to do this if you use C<last> to exit a loop early so that when
-you re-enter it, the hash iterator has been reset.
+(contributed by brian d foy)
+
+You can use the C<keys> or C<values> functions to reset C<each>. To
+simply reset the iterator used by C<each> without doing anything else,
+use one of them in void context:
+
+	keys %hash; # resets iterator, nothing else.
+	values %hash; # resets iterator, nothing else.
+
+See the documentation for C<each> in L<perlfunc>.
 
 =head2 How can I get the unique keys from two hashes?
 
@@ -2288,9 +2294,9 @@ the C<PDL> module from CPAN instead--it makes number-crunching easy.
 
 =head1 REVISION
 
-Revision: $Revision: 10126 $
+Revision: $Revision: 10394 $
 
-Date: $Date: 2007-10-27 21:29:20 +0200 (Sat, 27 Oct 2007) $
+Date: $Date: 2007-12-09 18:47:15 +0100 (Sun, 09 Dec 2007) $
 
 See L<perlfaq> for source control details and availability.
 
