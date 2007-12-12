@@ -2221,7 +2221,7 @@ are expected to succeed (until they're specifically fixed, of course).
 =item minitest
 
 Run F<miniperl> on F<t/base>, F<t/comp>, F<t/cmd>, F<t/run>, F<t/io>,
-F<t/op>, and F<t/uni> tests.
+F<t/op>, F<t/uni> and F<t/mro> tests.
 
 =item test.valgrind check.valgrind utest.valgrind ucheck.valgrind
 
