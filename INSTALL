@@ -2450,6 +2450,13 @@ use something like the below
 (The 'strace' is Linux-specific, other similar utilities include 'truss'
 and 'ktrace'.)
 
+=head2 C<-DNO_MATHOMS>
+
+If you configure perl with C<-Accflags=-DNO_MATHOMS>, the functions from
+F<mathoms.c> will not be compiled in. Those functions are no longer used
+by perl itself; for source compatibility reasons, though, they weren't
+completely removed.
+
 =head1 DOCUMENTATION
 
 Read the manual entries before running perl.  The main documentation
