@@ -38,8 +38,9 @@ CPANPLUS::Dist
 
 =head1 DESCRIPTION
 
-C<CPANPLUS::Dist> is a base class for any type of C<CPANPLUS::Dist::>
-modules.
+C<CPANPLUS::Dist> is a base class for C<CPANPLUS::Dist::MM>
+and C<CPANPLUS::Dist::Build>. Developers of other C<CPANPLUS::Dist::*>
+plugins should look at C<CPANPLUS::Dist::Base>.
 
 =head1 ACCESSORS
 

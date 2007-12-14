@@ -23,7 +23,7 @@ use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
 use constant QUOTE  => do { $^O eq 'MSWin32' ? q["] : q['] };            
             
 
-$VERSION        = '0.13_04';
+$VERSION        = '0.14';
 $VERSION        = eval $VERSION;    # avoid warnings with development releases
 $PREFER_BIN     = 0;                # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';

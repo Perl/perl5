@@ -10,7 +10,7 @@ To recreate it use the following command:
 
      uupacktool.pl -p lib/CPANPLUS/t/dummy-CPAN/modules/02packages.details.txt.gz lib/CPANPLUS/t/dummy-CPAN/modules/02packages.details.txt.gz.packed
 
-Created at Wed Nov 14 12:37:28 2007
+Created at Fri Dec 14 13:43:16 2007
 #########################################################################
 __UU__
 M'XL("$TN$T<``S`R<&%C:V%G97,N9&5T86EL<RYT>'0`G=-1;],P$`#@=_^*

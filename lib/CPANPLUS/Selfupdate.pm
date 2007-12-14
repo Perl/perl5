@@ -40,7 +40,7 @@ CPANPLUS::Selfupdate
 
     my $Modules = {
         dependencies => {
-            'File::Fetch'               => '0.13_02', # win32 file:// support
+            'File::Fetch'               => '0.13_04', # win32 & VMS file://
             'File::Spec'                => '0.82',
             'IPC::Cmd'                  => '0.36', # 5.6.2 compat: 2-arg open
             'Locale::Maketext::Simple'  => '0.01',
