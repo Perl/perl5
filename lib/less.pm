@@ -153,5 +153,3 @@ At least it's backwards compatible in not doing much.
 =back
 
 =cut
-
-1;
