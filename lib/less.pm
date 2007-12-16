@@ -67,6 +67,8 @@ sub unimport {
     return;
 }
 
+1;
+
 __END__
 
 =head1 NAME
