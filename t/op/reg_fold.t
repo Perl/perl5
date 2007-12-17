@@ -1,13 +1,18 @@
+#!perl
+
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
 use strict;
 use warnings;
 use Test::More;
 my $count=1;
 my @tests;
-use Cwd;
 
 my $file="../lib/unicore/CaseFolding.txt";
-open my $fh,"<",$file 
-    or die "Failed to read '$file' from '".cwd()."': $!";
+open my $fh,"<",$file or die "Failed to read '$file': $!";
 while (<$fh>) {
     chomp;
     my ($line,$comment)= split/\s+#\s+/, $_;
@@ -21,8 +26,8 @@ while (<$fh>) {
     if ($cpv<256) {
         push @str,"do{my \$c=$chr; utf8::upgrade(\$c); \$c}"
     }
-    
-    foreach my $str ( @str ) {    
+
+    foreach my $str ( @str ) {
         my $expr="$str=~/@fc/ix";
         my $t=($cpv > 256 || $str=~/^do/) ? "unicode" : "latin";
         push @tests,
@@ -31,7 +36,7 @@ while (<$fh>) {
             if $cp eq '0390' or $cp eq '03B0';
         $count++;
     }
-}    
+}
 eval join ";\n","plan tests=>".($count-1),@tests,"1"
     or die $@;
 __DATA__
