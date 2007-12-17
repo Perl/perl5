@@ -260,7 +260,10 @@ available: the C3 algorithm. See L<mro> for more information.
 Note that, due to changes in the implementation of class hierarchy search,
 code that used to undef the C<*ISA> glob will most probably break. Anyway,
 undef'ing C<*ISA> had the side-effect of removing the magic on the @ISA
-array and should not have been done in the first place.
+array and should not have been done in the first place. Also, the
+cache C<*::ISA::CACHE::> no longer exists; to force reset the @ISA cache,
+you now need to use the C<mro> API, or more simply to assign to @ISA
+(e.g. with C<@ISA = @ISA>).
 
 =head2 readdir() may return a "short filename" on Windows
 
