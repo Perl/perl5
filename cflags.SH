@@ -183,7 +183,7 @@ case "$gccversion" in
     "long long")
 	ccflags=`echo $ccflags|sed -e 's/-pedantic/ /' -e 's/-std=c89/ /' -e 's/-ansi/ /'`
 	warn=`echo $warn|sed -e 's/-pedantic/ /' -e 's/-ansi/ /'`
-	stdflags=`echo $warn|sed -e 's/-std=c89/ /'`
+	stdflags=`echo $stdflags|sed -e 's/-std=c89/ /'`
 	;;
     esac
   fi
