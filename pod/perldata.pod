@@ -390,10 +390,9 @@ more dots in the literal, the leading C<v> may be omitted.
     print 102.111.111;        # same
 
 Such literals are accepted by both C<require> and C<use> for
-doing a version check.  The C<$^V> special variable also contains the
-running Perl interpreter's version in this form.  See L<perlvar/$^V>.
-Note that using the v-strings for IPv4 addresses is not portable unless
-you also use the inet_aton()/inet_ntoa() routines of the Socket package.
+doing a version check.  Note that using the v-strings for IPv4
+addresses is not portable unless you also use the
+inet_aton()/inet_ntoa() routines of the Socket package.
 
 Note that since Perl 5.8.1 the single-number v-strings (like C<v65>)
 are not v-strings before the C<< => >> operator (which is usually used

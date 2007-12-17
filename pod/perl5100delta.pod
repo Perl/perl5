@@ -543,6 +543,14 @@ Previously, F<.pmc> files were loaded only if more recent than the
 matching F<.pm> file. Starting with 5.9.4, they'll be always loaded if
 they exist.
 
+=head2 $^V is now a C<version> object instead of a v-string
+
+$^V can still be used with the C<%vd> format in printf, but any
+character-level operations will now access the string representation
+of the C<version> object and not the ordinals of a v-string.
+Expressions like C<< substr($^V, 0, 2) >> or C<< split //, $^V >>
+no longer work and must be rewritten.
+
 =head2 @- and @+ in patterns
 
 The special arrays C<@-> and C<@+> are no longer interpolated in regular
