@@ -989,7 +989,11 @@ Perl_re_intuit_start(pTHX_ REGEXP * const prog, SV *sv, char *strpos,
     return NULL;
 }
 
-
+#define DECL_TRIE_TYPE(scan) \
+    const enum { trie_plain, trie_utf8, trie_utf8_fold, trie_latin_utf8_fold } \
+		    trie_type = (scan->flags != EXACT) \
+		              ? (do_utf8 ? trie_utf8_fold : (UTF ? trie_latin_utf8_fold : trie_plain)) \
+                              : (do_utf8 ? trie_utf8 : trie_plain)
 
 #define REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc, uscan, len,  \
 uvc, charid, foldlen, foldbuf, uniflags) STMT_START {                       \
@@ -1003,6 +1007,19 @@ uvc, charid, foldlen, foldbuf, uniflags) STMT_START {                       \
 	} else {                                                            \
 	    uvc = utf8n_to_uvuni( (U8*)uc, UTF8_MAXLEN, &len, uniflags );   \
 	    uvc = to_uni_fold( uvc, foldbuf, &foldlen );                    \
+	    foldlen -= UNISKIP( uvc );                                      \
+	    uscan = foldbuf + UNISKIP( uvc );                               \
+	}                                                                   \
+	break;                                                              \
+    case trie_latin_utf8_fold:                                              \
+	if ( foldlen>0 ) {                                                  \
+	    uvc = utf8n_to_uvuni( uscan, UTF8_MAXLEN, &len, uniflags );     \
+	    foldlen -= len;                                                 \
+	    uscan += len;                                                   \
+	    len=0;                                                          \
+	} else {                                                            \
+	    len = 1;                                                        \
+	    uvc = to_uni_fold( *(U8*)uc, foldbuf, &foldlen );               \
 	    foldlen -= UNISKIP( uvc );                                      \
 	    uscan = foldbuf + UNISKIP( uvc );                               \
 	}                                                                   \
@@ -1029,12 +1046,14 @@ uvc, charid, foldlen, foldbuf, uniflags) STMT_START {                       \
     }                                                                       \
 } STMT_END
 
-#define REXEC_FBC_EXACTISH_CHECK(CoNd)                  \
+#define REXEC_FBC_EXACTISH_CHECK(CoNd)                 \
+{                                                      \
+    char *my_strend= (char *)strend;                   \
     if ( (CoNd)                                        \
 	 && (ln == len ||                              \
-	     ibcmp_utf8(s, NULL, 0,  do_utf8,          \
+	     !ibcmp_utf8(s, &my_strend, 0,  do_utf8,   \
 			m, NULL, ln, (bool)UTF))       \
-	 && (!reginfo || regtry(reginfo, &s)) )         \
+	 && (!reginfo || regtry(reginfo, &s)) )        \
 	goto got_it;                                   \
     else {                                             \
 	 U8 foldbuf[UTF8_MAXBYTES_CASE+1];             \
@@ -1042,15 +1061,14 @@ uvc, charid, foldlen, foldbuf, uniflags) STMT_START {                       \
 	 f = to_utf8_fold(tmpbuf, foldbuf, &foldlen);  \
 	 if ( f != c                                   \
 	      && (f == c1 || f == c2)                  \
-	      && (ln == foldlen ||                     \
-		  !ibcmp_utf8((char *) foldbuf,        \
-			      NULL, foldlen, do_utf8,  \
-			      m,                       \
-			      NULL, ln, (bool)UTF))    \
-	      && (!reginfo || regtry(reginfo, &s)) )    \
+	      && (ln == len ||                         \
+	        !ibcmp_utf8(s, &my_strend, 0,  do_utf8,\
+			      m, NULL, ln, (bool)UTF)) \
+	      && (!reginfo || regtry(reginfo, &s)) )   \
 	      goto got_it;                             \
     }                                                  \
-    s += len
+}                                                      \
+s += len
 
 #define REXEC_FBC_EXACTISH_SCAN(CoNd)                     \
 STMT_START {                                              \
@@ -1210,14 +1228,26 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		U8 tmpbuf1[UTF8_MAXBYTES_CASE+1];
 		U8 tmpbuf2[UTF8_MAXBYTES_CASE+1];
 		const U32 uniflags = UTF8_ALLOW_DEFAULT;
+		
+                /* XXX: Since the node will be case folded at compile
+                   time this logic is a little odd, although im not 
+                   sure that its actually wrong. --dmq */
+                   
+		c1 = to_utf8_lower((U8*)m, tmpbuf1, &ulen1);
+		c2 = to_utf8_upper((U8*)m, tmpbuf2, &ulen2);
 
-		to_utf8_lower((U8*)m, tmpbuf1, &ulen1);
-		to_utf8_upper((U8*)m, tmpbuf2, &ulen2);
-
+		/* XXX: This is kinda strange. to_utf8_XYZ returns the 
+                   codepoint of the first character in the converted
+                   form, yet originally we did the extra step. 
+                   No tests fail by commenting this code out however
+                   so Ive left it out. -- dmq.
+                   
 		c1 = utf8n_to_uvchr(tmpbuf1, UTF8_MAXBYTES_CASE, 
 				    0, uniflags);
 		c2 = utf8n_to_uvchr(tmpbuf2, UTF8_MAXBYTES_CASE,
 				    0, uniflags);
+                */
+                
 		lnc = 0;
 		while (sm < ((U8 *) m + ln)) {
 		    lnc++;
@@ -1252,24 +1282,33 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	     * matching (called "loose matching" in Unicode).
 	     * ibcmp_utf8() will do just that. */
 
-	    if (do_utf8) {
+	    if (do_utf8 || UTF) {
 	        UV c, f;
 	        U8 tmpbuf [UTF8_MAXBYTES+1];
-		STRLEN len, foldlen;
+		STRLEN len = 1;
+		STRLEN foldlen;
 		const U32 uniflags = UTF8_ALLOW_DEFAULT;
 		if (c1 == c2) {
 		    /* Upper and lower of 1st char are equal -
 		     * probably not a "letter". */
 		    while (s <= e) {
-		        c = utf8n_to_uvchr((U8*)s, UTF8_MAXBYTES, &len,
+		        if (do_utf8) {
+		            c = utf8n_to_uvchr((U8*)s, UTF8_MAXBYTES, &len,
 					   uniflags);
+                        } else {
+                            c = *((U8*)s);
+                        }					  
 			REXEC_FBC_EXACTISH_CHECK(c == c1);
 		    }
 		}
 		else {
 		    while (s <= e) {
-		      c = utf8n_to_uvchr((U8*)s, UTF8_MAXBYTES, &len,
+		        if (do_utf8) {
+		            c = utf8n_to_uvchr((U8*)s, UTF8_MAXBYTES, &len,
 					   uniflags);
+                        } else {
+                            c = *((U8*)s);
+                        }
 
 			/* Handle some of the three Greek sigmas cases.
 			 * Note that not all the possible combinations
@@ -1287,6 +1326,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		}
 	    }
 	    else {
+	        /* Neither pattern nor string are UTF8 */
 		if (c1 == c2)
 		    REXEC_FBC_EXACTISH_SCAN(*(U8*)s == c1);
 		else
@@ -1461,10 +1501,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	case AHOCORASICKC:
 	case AHOCORASICK: 
 	    {
-	        const enum { trie_plain, trie_utf8, trie_utf8_fold }
-		    trie_type = do_utf8 ?
-			  (c->flags == EXACT ? trie_utf8 : trie_utf8_fold)
-			: trie_plain;
+	        DECL_TRIE_TYPE(c);
                 /* what trie are we using right now */
         	reg_ac_data *aho
         	    = (reg_ac_data*)progi->data->data[ ARG( c ) ];
@@ -2872,10 +2909,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	case TRIE:
 	    {
                 /* what type of TRIE am I? (utf8 makes this contextual) */
-	        const enum { trie_plain, trie_utf8, trie_utf8_fold }
-		    trie_type = do_utf8 ?
-			  (scan->flags == EXACT ? trie_utf8 : trie_utf8_fold)
-			: trie_plain;
+                DECL_TRIE_TYPE(scan);
 
                 /* what trie are we using right now */
 		reg_trie_data * const trie

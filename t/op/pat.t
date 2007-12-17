@@ -3406,9 +3406,9 @@ if (!$ENV{PERL_SKIP_PSYCHO_TEST}){
     ok($utf8 =~ /(abc|\xe9)/i, "utf8/latin trie");
     ok($utf8 =~ /(abc|$latin1)/i, "utf8/latin trie runtime");
 
-    ok("\xe9" =~ /$utf8/i, "# TODO latin/utf8");
+    ok("\xe9" =~ /$utf8/i, "# latin/utf8");
     ok("\xe9" =~ /(abc|$utf8)/i, "# latin/utf8 trie");
-    ok($latin1 =~ /$utf8/i, "# TODO latin/utf8 runtime");
+    ok($latin1 =~ /$utf8/i, "# latin/utf8 runtime");
     ok($latin1 =~ /(abc|$utf8)/i, "# latin/utf8 trie runtime");
 }
 
@@ -4487,6 +4487,23 @@ sub kt
     iseq($1,"\xd6","#45605");
 }
 
+{
+    # Regardless of utf8ness any character matches itself when 
+    # doing a case insensitive match. See also [perl #36207] 
+    for my $o (0..255) {
+        my @ch=(chr($o),chr($o));
+        utf8::upgrade($ch[1]);
+        for my $u_str (0,1) {
+            for my $u_pat (0,1) {
+                ok( $ch[$u_str]=~/\Q$ch[$u_pat]\E/i,
+                    "\$c=~/\$c/i : chr($o) : u_str=$u_str u_pat=$u_pat");
+                ok( $ch[$u_str]=~/\Q$ch[$u_pat]\E|xyz/i,
+                "# \$c=~/\$c|xyz/i : chr($o) : u_str=$u_str u_pat=$u_pat");
+            }
+        }
+    }
+}
+
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
 # Keep the following tests last -- they may crash perl
@@ -4545,6 +4562,6 @@ ok($@=~/\QSequence \k... not terminated in regex;\E/);
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 1965;
+    $::TestCount = 4013;
     print "1..$::TestCount\n";
 }

@@ -2254,13 +2254,18 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const
      
      if (pe1)
 	  e1 = *(U8**)pe1;
+     /* assert(e1 || l1); */
      if (e1 == 0 || (l1 && l1 < (UV)(e1 - (const U8*)s1)))
 	  f1 = (const U8*)s1 + l1;
      if (pe2)
 	  e2 = *(U8**)pe2;
+     /* assert(e2 || l2); */
      if (e2 == 0 || (l2 && l2 < (UV)(e2 - (const U8*)s2)))
 	  f2 = (const U8*)s2 + l2;
 
+     /* This shouldn't happen. However, putting an assert() there makes some
+      * tests fail. */
+     /* assert((e1 == 0 && f1 == 0) || (e2 == 0 && f2 == 0) || (f1 == 0 && f2 == 0)); */
      if ((e1 == 0 && f1 == 0) || (e2 == 0 && f2 == 0) || (f1 == 0 && f2 == 0))
 	  return 1; /* mismatch; possible infinite loop or false positive */
 
