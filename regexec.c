@@ -1227,7 +1227,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		U8 *sm = (U8 *) m;
 		U8 tmpbuf1[UTF8_MAXBYTES_CASE+1];
 		U8 tmpbuf2[UTF8_MAXBYTES_CASE+1];
-		const U32 uniflags = UTF8_ALLOW_DEFAULT;
+		/* used by commented-out code below */
+		/*const U32 uniflags = UTF8_ALLOW_DEFAULT;*/
 		
                 /* XXX: Since the node will be case folded at compile
                    time this logic is a little odd, although im not 
