@@ -3466,6 +3466,8 @@ string
 
 =item Ignoring A Thread
 
+=item Process and Thread Termination
+
 =back
 
 =item Threads And Data
@@ -6290,9 +6292,9 @@ finish, 'enter', print
 
 =item Writing a test
 
-F<t/base/>, F<t/cmd/>, F<t/comp/>, F<t/io/>, F<t/lib/>, F<t/op/>,
-F<t/pod/>, F<t/run/>, F<t/uni/>, F<t/win32/>, F<t/x2p>, t/base t/comp,
-t/cmd t/run t/io t/op, t/lib ext lib
+F<t/base/>, F<t/cmd/>, F<t/comp/>, F<t/io/>, F<t/lib/>, F<t/mro/>,
+F<t/op/>, F<t/pod/>, F<t/run/>, F<t/uni/>, F<t/win32/>, F<t/x2p>, t/base
+t/comp, t/cmd t/run t/io t/op, t/lib ext lib
 
 =item Special Make Test Targets
 
@@ -6304,7 +6306,8 @@ check.utf8, minitest.utf16 test.utf16, test_harness, test-notty test_notty
 =item Running tests by hand
 
 -v, -torture, -re=PATTERN, -re LIST OF PATTERNS, PERL_CORE=1,
-PERL_DESTRUCT_LEVEL=2, PERL, PERL_SKIP_TTY_TEST
+PERL_DESTRUCT_LEVEL=2, PERL, PERL_SKIP_TTY_TEST, PERL_TEST_Net_Ping,
+PERL_TEST_NOVREXX, PERL_TEST_NUMCONVERTS
 
 =item Common problems when patching Perl source code
 
@@ -6417,6 +6420,8 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 
 =over 4
 
+=item Remove duplication of test setup.
+
 =item merge common code in installperl and installman
 
 =item common test code for timed bail out
@@ -6493,9 +6498,9 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 
 =item Use secure CRT functions when building with VC8 on Win32
 
-=item __FUNCTION__ for MSVC-pre-7.0
-
 =item strcat(), strcpy(), strncat(), strncpy(), sprintf(), vsprintf()
+
+=item -D_FORTIFY_SOURCE=2, -fstack-protector
 
 =back
 
@@ -6531,6 +6536,8 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 
 =item Duplicate logic in S_method_common() and
 Perl_gv_fetchmethod_autoload()
+
+=item Organize error messages
 
 =back
 
@@ -6568,7 +6575,7 @@ Perl_gv_fetchmethod_autoload()
 
 =item entersub XS vs Perl
 
-=item Self ties
+=item Self-ties
 
 =item Optimize away @_
 
@@ -6689,6 +6696,8 @@ and horizontal whitespace, and linebreak
 
 =item New Pragma, C<mro>
 
+=item readdir() may return a "short filename" on Windows
+
 =item readpipe() is now overridable
 
 =item Default argument for readline()
@@ -6752,6 +6761,8 @@ C<${^WIN32_SLOPPY_STAT}>
 
 =item Handling of .pmc files
 
+=item $^V is now a C<version> object instead of a v-string
+
 =item @- and @+ in patterns
 
 =item $AUTOLOAD can now be tainted
@@ -6777,6 +6788,8 @@ C<${^WIN32_SLOPPY_STAT}>
 =item Modules and Pragmata
 
 =over 4
+
+=item Upgrading individual core modules
 
 =item Pragmata Changes
 
@@ -6949,6 +6962,8 @@ and horizontal whitespace, and linebreak
 
 =item New Pragma, C<mro>
 
+=item readdir() may return a "short filename" on Windows
+
 =item readpipe() is now overridable
 
 =item Default argument for readline()
@@ -7012,6 +7027,8 @@ C<${^WIN32_SLOPPY_STAT}>
 
 =item Handling of .pmc files
 
+=item $^V is now a C<version> object instead of a v-string
+
 =item @- and @+ in patterns
 
 =item $AUTOLOAD can now be tainted
@@ -7037,6 +7054,8 @@ C<${^WIN32_SLOPPY_STAT}>
 =item Modules and Pragmata
 
 =over 4
+
+=item Upgrading individual core modules
 
 =item Pragmata Changes
 
@@ -11653,6 +11672,10 @@ Digital UNIX formerly known as DEC OSF/1) systems
 
 =item Syntax
 
+=item Filename Case
+
+=item Symbolic Links
+
 =item Wildcard expansion
 
 =item Pipes
@@ -12463,7 +12486,11 @@ new, phash
 
 =over 4
 
-=item subpragma access
+=item Consider this carefully
+
+=item The "access" sub-pragma
+
+=item Limitation with regard to C<_>
 
 =back
 
@@ -19186,6 +19213,22 @@ C<use ModuleName;>, C<use ModuleName ();>, C<use ModuleName qw(...);>
 
 =back
 
+=item Good Practices
+
+=over 4
+
+=item Declaring C<@EXPORT_OK> and Friends
+
+=item Playing Safe
+
+=item What not to Export
+
+=back
+
+=item SEE ALSO
+
+=item LICENSE
+
 =back
 
 =head2 Exporter::Heavy - Exporter guts
@@ -19946,8 +19989,6 @@ maybe_command
 
 needs_linking (o)
 
-nicetext
-
 parse_abstract
 
 parse_version
@@ -20115,7 +20156,7 @@ perldepend (override)
 
 makeaperl (override)
 
-nicetext (override)
+maketext_filter (override)
 
 prefixify (override)
 
