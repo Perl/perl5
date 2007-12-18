@@ -119,6 +119,7 @@ perl.man: perl.man.1 perl.man.2
 install: perl perl.man
 # won't work with csh
 	export PATH || exit 1
+	- ./makedir $(bin)
 	- mv $(bin)/perl $(bin)/perl.old
 	- if test `pwd` != $(bin); then cp $(public) $(bin); fi
 	cd $(bin); \
@@ -139,6 +140,7 @@ done
 #done
 	- if test `pwd` != $(mansrc); then \
 for page in $(manpages); do \
+./makedir $(mansrc); \
 cp $$page $(mansrc)/`basename $$page .man`.$(manext); \
 done; \
 fi
