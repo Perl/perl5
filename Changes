@@ -29,6 +29,21 @@ Version v5.9.X		Development release working toward v5.10
 --------------
 
 ____________________________________________________________________________
+[ 32641] By: rgs				   on 2007/12/18  10:39:53
+	Log: Add 5.10.0 data to Module::CoreList
+     Branch: perl
+	   ! lib/Module/CoreList.pm
+____________________________________________________________________________
+[ 32640] By: rgs				   on 2007/12/18  10:33:23
+	Log: Two more people in AUTHORS
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 32639] By: rgs				   on 2007/12/18  10:25:40
+	Log: Regen Changes
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [ 32638] By: rgs				   on 2007/12/18  09:58:49
 	Log: 5.10.0 is planned for today.
      Branch: perl
