@@ -33,6 +33,9 @@
 #include <setjmp.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #ifdef TMINSYS
 #include <sys/time.h>
@@ -60,12 +63,6 @@ typedef struct htbl HASH;
 #include "cmd.h"
 #include "array.h"
 #include "hash.h"
-
-#ifdef CHARSPRINTF
-    char *sprintf();
-#else
-    int sprintf();
-#endif
 
 /* A string is TRUE if not "" or "0". */
 #define True(val) (tmps = (val), (*tmps && !(*tmps == '0' && !tmps[1])))
