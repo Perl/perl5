@@ -31,6 +31,11 @@
 #include "util.h"
 #include "perl.h"
 
+#ifndef HAS_VFORK
+#   define vfork fork
+#endif
+
+
 ARG *debarg;
 
 bool

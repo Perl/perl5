@@ -41,6 +41,9 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 
 #$d_bcopy BCOPY /**/
 
+#$d_vfork HAS_VFORK	/**/
+
+
 /* EUNICE:
  *	This symbol, if defined, indicates that the program is being compiled
  *	under the EUNICE package under VMS.  The program will need to handle
