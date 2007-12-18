@@ -6,7 +6,7 @@ use strict;
 use Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(AUTOLOAD);
-our $VERSION = "1.11";
+our $VERSION = "1.12";
 sub Version {$VERSION}
 sub DEBUG () { 0 }
 
@@ -88,7 +88,7 @@ sub _load_stubs {
 
     local($/) = "\n";
     while(defined($line = <$fh>) and $line !~ m/^__END__/) {
-	if ($line =~ m/^sub\s+([\w:]+)\s*((?:\([\\\$\@\%\&\*\;]*\))?(?:$attr_list)?)/) {
+	if ($line =~ m/^\s*sub\s+([\w:]+)\s*((?:\([\\\$\@\%\&\*\;]*\))?(?:$attr_list)?)/) {
             push(@stubs, $self->_add_to_cache($name, $currpack, \@lines, $protoype));
             $protoype = $2;
             @lines = ($line);

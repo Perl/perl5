@@ -13,7 +13,7 @@ BEGIN {
     @INC = $dir;
     push @INC, '../lib';
 
-    print "1..19\n";
+    print "1..20\n";
 
     # First we must set up some selfloader files
     mkdir $dir, 0755            or die "Can't mkdir $dir: $!";
@@ -40,7 +40,6 @@ sub bazmarkhianish { shift; shift || "baz" }
 
 package sheep;
 sub bleat { shift; shift || "baa" }
-
 __END__
 sub never { die "D'oh" }
 EOT
@@ -56,12 +55,17 @@ use SelfLoader;
 
 sub new { bless {}, shift }
 sub a;
+sub with_whitespace_in_front;
 
 1;
 __DATA__
 
 sub a { 'a Bar'; }
 sub b { 'b Bar' }
+
+ sub with_whitespace_in_front {
+  "with_whitespace_in_front Bar"
+}
 
 __END__ DATA
 sub never { die "D'oh" }
@@ -147,16 +151,20 @@ print "ok 11\n";
 print "not " unless $bar->c() eq 'c Baz';
 print "ok 12\n";
 
+# check that subs with whitespace in front work
+print "not " unless $bar->with_whitespace_in_front() eq 'with_whitespace_in_front Bar';
+print "ok 13\n";
+
 # This selfloads Bar::a because it is stubbed. It also stubs Bar::b as a side
 # effect
 print "not " unless $bar->a() eq 'a Bar';
-print "ok 13\n";
-
-print "not " unless $bar->b() eq 'b Bar';
 print "ok 14\n";
 
-print "not " unless $bar->c() eq 'c Baz';
+print "not " unless $bar->b() eq 'b Bar';
 print "ok 15\n";
+
+print "not " unless $bar->c() eq 'c Baz';
+print "ok 16\n";
 
 
 
@@ -166,18 +174,18 @@ eval {
     $foo->never;
 };
 if ($@ =~ /^Undefined subroutine/) {
-    print "ok 16\n";
+    print "ok 17\n";
 } else {
-    print "not ok 16 $@\n";
+    print "not ok 17 $@\n";
 }
 
 # Try to read from the data file handle
 my $foodata = <Foo::DATA>;
 close Foo::DATA;
 if (defined $foodata) {
-    print "not ok 17 # $foodata\n";
+    print "not ok 18 # $foodata\n";
 } else {
-    print "ok 17\n";
+    print "ok 18\n";
 }
 
 # Check that __END__ DATA is honoured
@@ -186,18 +194,18 @@ eval {
     $bar->never;
 };
 if ($@ =~ /^Undefined subroutine/) {
-    print "ok 18\n";
+    print "ok 19\n";
 } else {
-    print "not ok 18 $@\n";
+    print "not ok 19 $@\n";
 }
 
 # Try to read from the data file handle
 my $bardata = <Bar::DATA>;
 close Bar::DATA;
 if ($bardata ne "sub never { die \"D'oh\" }\n") {
-    print "not ok 19 # $bardata\n";
+    print "not ok 20 # $bardata\n";
 } else {
-    print "ok 19\n";
+    print "ok 20\n";
 }
 
 # cleanup
