@@ -667,6 +667,22 @@ also the warning messages (see L<perllexwarn>, C<warnings.pl>).
 These tasks would need C knowledge, and knowledge of how the interpreter works,
 or a willingness to learn.
 
+=head2 UTF-8 revamp
+
+The handling of Unicode is unclean in many places. For example, the regexp
+engine matches in Unicode semantics whenever the string or the pattern is
+flagged as UTF-8, but that should not be dependent on an internal storage
+detail of the string. Likewise, case folding behaviour is dependent on the
+UTF8 internal flag being on or off.
+
+=head2 Properly Unicode safe tokeniser and pads.
+
+The tokeniser isn't actually very UTF-8 clean. C<use utf8;> is a hack -
+variable names are stored in stashes as raw bytes, without the utf-8 flag
+set. The pad API only takes a C<char *> pointer, so that's all bytes too. The
+tokeniser ignores the UTF-8-ness of C<PL_rsfp>, or any SVs returned from
+source filters.  All this could be fixed.
+
 =head2 state variable initialization in list context
 
 Currently this is illegal:
@@ -775,14 +791,6 @@ reinstated.
 =head2 Optimize away @_
 
 The old perltodo notes "Look at the "reification" code in C<av.c>".
-
-=head2 Properly Unicode safe tokeniser and pads.
-
-The tokeniser isn't actually very UTF-8 clean. C<use utf8;> is a hack -
-variable names are stored in stashes as raw bytes, without the utf-8 flag
-set. The pad API only takes a C<char *> pointer, so that's all bytes too. The
-tokeniser ignores the UTF-8-ness of C<PL_rsfp>, or any SVs returned from
-source filters.  All this could be fixed.
 
 =head2 The yada yada yada operators
 
