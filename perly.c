@@ -23,7 +23,6 @@ bool allstabs = FALSE;		/* init all customary symbols in symbol table?*/
 char *filename;
 char *e_tmpname = "/tmp/perl-eXXXXXX";
 FILE *e_fp = Nullfp;
-ARG *l();
 
 main(argc,argv,env)
 register int argc;

@@ -42,6 +42,15 @@ char *tokename[] = {
 "???"
 };
 
+/* Forward declarations for newer toys */
+ARG *l();
+ARG *mod_match( int, ARG *, ARG *);
+ARG *addflags( int, int, ARG *);
+ARG *hide_ary( ARG * );
+ARG *make_list( ARG * );
+ARG *listish( ARG * );
+ARG *cval_to_arg(char *);
+ARG *cmd_to_arg(CMD *);
 %}
 
 %start prog
