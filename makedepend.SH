@@ -92,6 +92,7 @@ for file in `$cat .clist`; do
 	-e '/^#.*<builtin>/d' \
 	-e '/^#.*<built-in>/d' \
 	-e '/^#.*<command line>/d' \
+	-e '/^#.*<command-line>/d' \
 	-e '/^# *[0-9]/!d' \
 	-e 's/^.*"\(.*\)".*$/'$filebase'.o: \1/' \
 	-e 's|: \./|: |' \
