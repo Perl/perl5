@@ -395,6 +395,7 @@ the strings?).
           5.9.5         2007-Jul-07
           5.10.0-RC1    2007-Nov-17
           5.10.0-RC2    2007-Nov-25
+          5.10.0        2007-Dec-18
 
 =head2 SELECTED RELEASE SIZES
 
