@@ -136,7 +136,7 @@ else
     <.deptmp $sed -n 's|h:#include <\(.*\)>.*$|h: /usr/include/\1|p' \
        >> Makefile.new
     for file in `$cat .shlist`; do
-	$echo `$expr X$file : 'X\(.*\).SH`: $file config.sh \; \
+	$echo `$expr X$file : 'X\(.*\).SH'`: $file config.sh \; \
 	    /bin/sh $file >> Makefile.new
     done
 fi
