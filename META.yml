@@ -208,6 +208,7 @@ private:
     - lib/ExtUtils/t/Installed.t
     - lib/ExtUtils/t/Liblist.t
     - lib/ExtUtils/t/make.t
+    - lib/ExtUtils/t/maketext_filter.t
     - lib/ExtUtils/t/Manifest.t
     - lib/ExtUtils/t/Mkbootstrap.t
     - lib/ExtUtils/t/MM_Any.t
