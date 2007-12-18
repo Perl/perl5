@@ -1282,7 +1282,7 @@ D. Hedden)
 
 chr() on a negative value now gives C<\x{FFFD}>, the Unicode replacement
 character, unless when the C<bytes> pragma is in effect, where the low
-eight bytes of the value are used.
+eight bits of the value are used.
 
 =item PERL5SHELL and tainting
 
@@ -1538,7 +1538,7 @@ inherits from C<B::SV> (it used to inherit from C<B::IV>).
 
 The anonymous hash and array constructors now take 1 op in the optree
 instead of 3, now that pp_anonhash and pp_anonlist return a reference to
-an hash/array when the op is flagged with OPf_SPECIAL (Nicholas Clark).
+an hash/array when the op is flagged with OPf_SPECIAL. (Nicholas Clark)
 
 =head1 Known Problems
 
