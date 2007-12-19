@@ -28,3 +28,11 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.11.X		Development release working toward v5.12
 ---------------
 
+____________________________________________________________________________
+[ 32643] By: nicholas				   on 2007/12/19  11:25:43
+	Log: Record all the changes up to 5.10.0, and ready a new changes file for
+	     5.11
+     Branch: perl
+	  +> Changes5.10
+	   ! Changes MANIFEST
+
