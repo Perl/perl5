@@ -1083,6 +1083,7 @@ ext/Sys/Hostname/t/Hostname.t	See if Sys::Hostname works
 ext/Sys/Syslog/Changes		Changlog for Sys::Syslog
 ext/Sys/Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file
 ext/Sys/Syslog/fallback/const-xs.inc	Sys::Syslog constants fallback file
+ext/Sys/Syslog/fallback/syslog.h	Sys::Syslog header fallback file
 ext/Sys/Syslog/Makefile.PL	Sys::Syslog extension makefile writer
 ext/Sys/Syslog/README		README for Sys::Syslog
 ext/Sys/Syslog/README.win32	README for Sys::Syslog on Windows
