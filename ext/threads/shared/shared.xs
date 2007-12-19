@@ -1108,6 +1108,24 @@ Perl_sharedsv_locksv(pTHX_ SV *sv)
 }
 
 
+/* Can a shared object be destroyed?
+ * True if not a shared,
+ * or if detroying last proxy on a shared object
+ */
+#ifdef PL_destroyhook
+bool
+Perl_shared_object_destroy(pTHX_ SV *sv)
+{
+    SV *ssv;
+
+    if (SvROK(sv))
+        sv = SvRV(sv);
+    ssv = Perl_sharedsv_find(aTHX_ sv);
+    return (!ssv || (SvREFCNT(ssv) <= 1));
+}
+#endif
+
+
 /* Saves a space for keeping SVs wider than an interpreter. */
 
 void
@@ -1121,6 +1139,9 @@ Perl_sharedsv_init(pTHX)
     recursive_lock_init(aTHX_ &PL_sharedsv_lock);
     PL_lockhook = &Perl_sharedsv_locksv;
     PL_sharehook = &Perl_sharedsv_share;
+#ifdef PL_destroyhook
+    PL_destroyhook = &Perl_shared_object_destroy;
+#endif
 }
 
 #endif /* USE_ITHREADS */
