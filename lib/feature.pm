@@ -1,6 +1,6 @@
 package feature;
 
-our $VERSION = '1.11';
+our $VERSION = '1.12';
 
 # (feature name) => (internal name, used in %^H)
 my %feature = (
@@ -11,11 +11,13 @@ my %feature = (
 
 my %feature_bundle = (
     "5.10.0" => [qw(switch say state)],
+    "5.11.0" => [qw(switch say state)],
 );
 
 # latest version here
-$feature_bundle{"5.10"} = $feature_bundle{sprintf("%vd",$^V)};
+$feature_bundle{"5.11"} = $feature_bundle{sprintf("%vd",$^V)};
 
+$feature_bundle{"5.10"} = $feature_bundle{"5.10.0"};
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10.0"};
 
 # TODO:
