@@ -19,6 +19,10 @@ use warnings qw(closure deprecated exiting glob io misc numeric once overflow
                 pack portable recursion redefine regexp severe signal substr
                 syntax taint uninitialized unpack untie utf8 void);
 
+# if someone is using warnings::compat, the previous trick won't work, so we
+# must manually disable warnings
+$^W = 0 if $] < 5.006;
+
 my $is_Win32  = $^O =~ /win32/i;
 my $is_Cygwin = $^O =~ /cygwin/i;
 
@@ -188,6 +192,9 @@ SKIP: {
     skip "not testing setlogsock('stream') on Win32", 10 if $is_Win32;
     skip "the 'unix' mechanism works, so the tests will likely fail with the 'stream' mechanism", 10 
         if grep {/unix/} @passed;
+
+    skip "not testing setlogsock('stream'): _PATH_LOG unavailable", 10
+        unless -e Sys::Syslog::_PATH_LOG();
 
     # setlogsock() with "stream" and an undef path
     $r = eval { setlogsock("stream", undef ) } || '';

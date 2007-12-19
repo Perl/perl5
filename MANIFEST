@@ -89,6 +89,7 @@ ext/B/B/Deparse.pm	Compiler Deparse backend
 ext/B/B/disassemble	Disassemble compiler bytecode output
 ext/B/B/Disassembler.pm	Compiler Disassembler backend
 ext/B/B/Lint.pm		Compiler Lint backend
+ext/B/B/Lint/Debug.pm	Adds debugging stringification to B::
 ext/B/B/makeliblinks	Make a simplistic XSUB .so symlink tree for compiler
 ext/B/B.pm		Compiler backend support functions and methods
 ext/B/B/Showlex.pm	Compiler Showlex backend
@@ -821,6 +822,7 @@ ext/Safe/t/safe1.t		See if Safe works
 ext/Safe/t/safe2.t		See if Safe works
 ext/Safe/t/safe3.t		See if Safe works
 ext/Safe/t/safeops.t		Tests that all ops can be trapped by Safe
+ext/Safe/t/safeuniversal.t	Tests Safe with functions from universal.c
 ext/SDBM_File/Makefile.PL	SDBM extension makefile writer
 ext/SDBM_File/sdbm/biblio	SDBM kit
 ext/SDBM_File/sdbm/CHANGES	SDBM kit
@@ -910,6 +912,7 @@ ext/Sys/Hostname/t/Hostname.t	See if Sys::Hostname works
 ext/Sys/Syslog/Changes		Changlog for Sys::Syslog
 ext/Sys/Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file
 ext/Sys/Syslog/fallback/const-xs.inc	Sys::Syslog constants fallback file
+ext/Sys/Syslog/fallback/syslog.h	Sys::Syslog header fallback file
 ext/Sys/Syslog/Makefile.PL	Sys::Syslog extension makefile writer
 ext/Sys/Syslog/README		README for Sys::Syslog
 ext/Sys/Syslog/README.win32	README for Sys::Syslog on Windows
@@ -961,6 +964,7 @@ ext/threads/shared/t/disabled.t	Test threads::shared when threads are disabled.
 ext/threads/shared/t/hv_refs.t	Test shared hashes containing references
 ext/threads/shared/t/hv_simple.t	Tests for basic shared hash functionality.
 ext/threads/shared/t/no_share.t	Tests for disabled share on variables.
+ext/threads/shared/t/object.t	Shared objects tests
 ext/threads/shared/t/shared_attr.t	Test :shared attribute
 ext/threads/shared/t/stress.t	Stress test
 ext/threads/shared/t/sv_refs.t	thread shared variables
