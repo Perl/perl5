@@ -9,6 +9,8 @@ my %feature = (
     state  => "feature_state",
 );
 
+# NB. the latest bundle must be loaded by the -E switch (see toke.c)
+
 my %feature_bundle = (
     "5.10.0" => [qw(switch say state)],
     "5.11.0" => [qw(switch say state)],
