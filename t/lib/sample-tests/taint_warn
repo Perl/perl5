@@ -8,4 +8,4 @@ my $warnings = '';
     local $SIG{__WARN__} = sub { $warnings .= join '', @_ };
     kill 0, $^X;
 }
-like( $warnings, '/^Insecure dependency/',   '-t honored' );
+like( $warnings, '/^Insecure dependency/', '-t honored' );
