@@ -10,7 +10,7 @@ require 5.005;
 require Exporter;
 
 {   no strict 'vars';
-    $VERSION = '0.22';
+    $VERSION = '0.23';
     @ISA = qw(Exporter);
 
     %EXPORT_TAGS = (
@@ -221,7 +221,7 @@ sub setlogsock {
 
     } elsif (lc $setsock eq 'pipe') {
         for my $path ($syslog_path, &_PATH_LOG, "/dev/log") {
-            next unless defined $path and length $path and -w $path;
+            next unless defined $path and length $path and -p $path and -w _;
             $syslog_path = $path;
             last
         }
@@ -771,7 +771,7 @@ Sys::Syslog - Perl interface to the UNIX syslog(3) calls
 
 =head1 VERSION
 
-Version 0.22
+Version 0.23
 
 =head1 SYNOPSIS
 
