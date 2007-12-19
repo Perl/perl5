@@ -5,14 +5,16 @@ use Test::More;
 use strict;
 use Fcntl;
 
-BEGIN {use_ok( "File::Temp" ); }
+BEGIN {
+    # see if we have O_EXLOCK
+    eval { &Fcntl::O_EXLOCK; };
+    if ($@) {
+        plan skip_all => 'Do not seem to have O_EXLOCK';
+    } else {
+        plan tests => 3;
+    }
 
-# see if we have O_EXLOCK
-eval { &Fcntl::O_EXLOCK; };
-if ($@) {
-  plan skip_all => 'Do not seem to have O_EXLOCK';
-} else {
-  plan tests => 3;
+    use_ok( "File::Temp" ); 
 }
 
 # Get a tempfile with O_EXLOCK
