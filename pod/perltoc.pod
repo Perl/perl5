@@ -6545,6 +6545,10 @@ Perl_gv_fetchmethod_autoload()
 
 =over 4
 
+=item UTF-8 revamp
+
+=item Properly Unicode safe tokeniser and pads.
+
 =item state variable initialization in list context
 
 =item Implement $value ~~ 0 .. $range
@@ -6578,8 +6582,6 @@ Perl_gv_fetchmethod_autoload()
 =item Self-ties
 
 =item Optimize away @_
-
-=item Properly Unicode safe tokeniser and pads.
 
 =item The yada yada yada operators
 
@@ -6662,7 +6664,7 @@ B<-V>
 
 =back
 
-=head2 perldelta - what is new for perl 5.10.0
+=head2 perldelta, perl5100delta - what is new for perl 5.10.0
 
 =over 4
 
@@ -6919,6 +6921,12 @@ v-string in use/require is non-portable, perl -V
 =back
 
 =item Known Problems
+
+=over 4
+
+=item UTF-8 problems
+
+=back
 
 =item Platform Specific Problems
 
@@ -6928,7 +6936,47 @@ v-string in use/require is non-portable, perl -V
 
 =back
 
-=head2 perl5100delta, perldelta - what is new for perl 5.10.0
+=head2 perl5110delta, perldelta - what is new for perl v5.11.0
+
+=over 4
+
+=item DESCRIPTION
+
+=item Incompatible Changes
+
+=item Core Enhancements
+
+=item Modules and Pragmata
+
+=item Utility Changes
+
+=item Documentation
+
+=item Performance Enhancements
+
+=item Installation and Configuration Improvements
+
+=item Selected Bug Fixes
+
+=item New or Changed Diagnostics
+
+=item Changed Internals
+
+=item Known Problems
+
+=over 4
+
+=item Platform Specific Problems
+
+=back
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=back
+
+=head2 perl5100delta - what is new for perl 5.10.0
 
 =over 4
 
@@ -7185,6 +7233,12 @@ v-string in use/require is non-portable, perl -V
 =back
 
 =item Known Problems
+
+=over 4
+
+=item UTF-8 problems
+
+=back
 
 =item Platform Specific Problems
 
@@ -17873,6 +17927,32 @@ Dumper
 
 =back
 
+=head2 Devel::Arena - Perl extension for inspecting the core's arena
+structures
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item EXPORT
+
+sv_stats [DONT_SHARE], shared_string_table, sizes, HEK_size STRING,
+shared_string_table_effectiveness, write_stats_at_END
+
+=back
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
 =head2 Devel::DProf - a Perl code profiler
 
 =over 4
@@ -18029,6 +18109,59 @@ perl 5.6.1, perl 5.6.0, perl 5.005_03, perl 5.005, perl 5.004_05, perl
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=back
+
+=head2 Devel::Size - Perl extension for finding the memory usage of Perl
+variables
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item FUNCTIONS
+
+=over 4
+
+=item size($ref)
+
+=item total_size($ref)
+
+=back
+
+=item EXPORT
+
+=item UNDERSTANDING MEMORY ALLOCATION
+
+=over 4
+
+=item The C library
+
+=item Perl
+
+=back
+
+=item DANGERS
+
+=item Messages: texts originating from this module.
+
+=over 4
+
+=item Errors
+
+=item warnings
+
+=back
+
+=item BUGS
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=item SEE ALSO
 
 =back
 
