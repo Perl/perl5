@@ -349,7 +349,7 @@ Creates a new AV.  The reference count is set to 1.
 	AV*	newAV()
 
 =for hackers
-Found in file av.c
+Found in file av.h
 
 =item sortsv
 X<sortsv>
@@ -1912,7 +1912,7 @@ Creates a new HV.  The reference count is set to 1.
 	HV*	newHV()
 
 =for hackers
-Found in file hv.c
+Found in file hv.h
 
 
 =back

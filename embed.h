@@ -1981,6 +1981,7 @@
 #define pp_aeach		Perl_pp_aeach
 #define pp_aelem		Perl_pp_aelem
 #define pp_aelemfast		Perl_pp_aelemfast
+#define pp_akeys		Perl_pp_akeys
 #define pp_alarm		Perl_pp_alarm
 #define pp_and			Perl_pp_and
 #define pp_andassign		Perl_pp_andassign
@@ -1990,6 +1991,7 @@
 #define pp_aslice		Perl_pp_aslice
 #define pp_atan2		Perl_pp_atan2
 #define pp_av2arylen		Perl_pp_av2arylen
+#define pp_avalues		Perl_pp_avalues
 #define pp_backtick		Perl_pp_backtick
 #define pp_bind			Perl_pp_bind
 #define pp_binmode		Perl_pp_binmode
@@ -4289,6 +4291,7 @@
 #define pp_aeach()		Perl_pp_aeach(aTHX)
 #define pp_aelem()		Perl_pp_aelem(aTHX)
 #define pp_aelemfast()		Perl_pp_aelemfast(aTHX)
+#define pp_akeys()		Perl_pp_akeys(aTHX)
 #define pp_alarm()		Perl_pp_alarm(aTHX)
 #define pp_and()		Perl_pp_and(aTHX)
 #define pp_andassign()		Perl_pp_andassign(aTHX)
@@ -4298,6 +4301,7 @@
 #define pp_aslice()		Perl_pp_aslice(aTHX)
 #define pp_atan2()		Perl_pp_atan2(aTHX)
 #define pp_av2arylen()		Perl_pp_av2arylen(aTHX)
+#define pp_avalues()		Perl_pp_avalues(aTHX)
 #define pp_backtick()		Perl_pp_backtick(aTHX)
 #define pp_bind()		Perl_pp_bind(aTHX)
 #define pp_binmode()		Perl_pp_binmode(aTHX)
