@@ -1,5 +1,3 @@
-use strict;
-
 sub _autoflush {
     my $flushed = shift;
     my $old_fh  = select $flushed;

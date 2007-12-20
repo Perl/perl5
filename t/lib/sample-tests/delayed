@@ -1,5 +1,11 @@
 # Used to test Process.pm
 
+BEGIN {
+    if ( $ENV{PERL_CORE} ) {
+        unshift @INC, '../lib';
+    }
+}
+
 use Time::HiRes qw(sleep);
 
 my $delay = 0.01;
@@ -19,7 +25,7 @@ my @parts = (
 
 my $delay_at = shift || 0;
 
-while ( @parts ) {
+while (@parts) {
     sleep $delay if ( $delay_at & 1 );
     $delay_at >>= 1;
     print shift @parts;

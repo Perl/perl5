@@ -1,11 +1,16 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-    chdir 't' and @INC = '../lib' if $ENV{PERL_CORE};
+    if ( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = '../lib';
+    }
+    else {
+        push @INC, 't/lib';
+    }
 }
 
 use strict;
-use lib 't/lib';
 
 use Test::More 'no_plan';
 
@@ -23,9 +28,11 @@ use TAP::Parser;
 my $IsVMS   = $^O eq 'VMS';
 my $IsWin32 = $^O eq 'MSWin32';
 
-my $SAMPLE_TESTS
-  = File::Spec->catdir( File::Spec->curdir, ($ENV{PERL_CORE} ? 'lib' : 't'),
-			'sample-tests' );
+my $SAMPLE_TESTS = File::Spec->catdir(
+    File::Spec->curdir,
+    ( $ENV{PERL_CORE} ? 'lib' : 't' ),
+    'sample-tests'
+);
 
 my %deprecated = map { $_ => 1 } qw(
   TAP::Parser::good_plan
@@ -2350,44 +2357,45 @@ my %samples = (
         wait          => 0,
         version       => 12,
     },
-    switches => {
-        results => [
-            {   is_plan       => TRUE,
-                passed        => TRUE,
-                is_ok         => TRUE,
-                raw           => '1..1',
-                tests_planned => 1,
-            },
-            {   actual_passed => TRUE,
-                is_actual_ok  => TRUE,
-                passed        => TRUE,
-                is_ok         => TRUE,
-                is_test       => TRUE,
-                has_skip      => FALSE,
-                has_todo      => FALSE,
-                number        => 1,
-                description   => "",
-                explanation   => '',
-            },
-        ],
-        __ARGS__      => { switches => ['-Mstrict'] },
-        plan          => '1..1',
-        passed        => [1],
-        actual_passed => [1],
-        failed        => [],
-        actual_failed => [],
-        todo          => [],
-        todo_passed   => [],
-        skipped       => [],
-        good_plan     => TRUE,
-        is_good_plan  => TRUE,
-        tests_planned => 1,
-        tests_run     => TRUE,
-        parse_errors  => [],
-        'exit'        => 0,
-        wait          => 0,
-        version       => 12,
-    },
+
+    # switches => {
+    #     results => [
+    #         {   is_plan       => TRUE,
+    #             passed        => TRUE,
+    #             is_ok         => TRUE,
+    #             raw           => '1..1',
+    #             tests_planned => 1,
+    #         },
+    #         {   actual_passed => TRUE,
+    #             is_actual_ok  => TRUE,
+    #             passed        => TRUE,
+    #             is_ok         => TRUE,
+    #             is_test       => TRUE,
+    #             has_skip      => FALSE,
+    #             has_todo      => FALSE,
+    #             number        => 1,
+    #             description   => "",
+    #             explanation   => '',
+    #         },
+    #     ],
+    #     __ARGS__      => { switches => ['-Mstrict'] },
+    #     plan          => '1..1',
+    #     passed        => [1],
+    #     actual_passed => [1],
+    #     failed        => [],
+    #     actual_failed => [],
+    #     todo          => [],
+    #     todo_passed   => [],
+    #     skipped       => [],
+    #     good_plan     => TRUE,
+    #     is_good_plan  => TRUE,
+    #     tests_planned => 1,
+    #     tests_run     => TRUE,
+    #     parse_errors  => [],
+    #     'exit'        => 0,
+    #     wait          => 0,
+    #     version       => 12,
+    # },
     inc_taint => {
         results => [
             {   is_plan       => TRUE,
@@ -2796,7 +2804,7 @@ my %samples = (
         tests_planned => 5,
         tests_run     => 5,
         parse_errors =>
-          ['Explicit TAP version must be at least 13. Got version 12'],
+          [ 'Explicit TAP version must be at least 13. Got version 12' ],
         'exit'  => 0,
         wait    => 0,
         version => 12,
@@ -2876,7 +2884,7 @@ my %samples = (
         tests_planned => 5,
         tests_run     => 5,
         parse_errors =>
-          ['If TAP version is present it must be the first line of output'],
+          [ 'If TAP version is present it must be the first line of output' ],
         'exit'  => 0,
         wait    => 0,
         version => 12,
@@ -3027,14 +3035,17 @@ for my $hide_fork ( 0 .. $can_open3 ) {
         # the following acrobatics are necessary to make it easy for the
         # Test::Builder::failure_output() method to be overridden when
         # TAP::Parser is not installed.  Otherwise, these tests will fail.
-        unshift @{ $args->{switches} }, '-It/lib';
+
+        unshift @{ $args->{switches} },
+          $ENV{PERL_CORE} ? ( map {"-I$_"} @INC ) : ('-It/lib');
 
         $args->{source} = File::Spec->catfile( $SAMPLE_TESTS, $test );
         $args->{merge} = !$hide_fork;
 
         my $parser = eval { analyze_test( $test, [@$results], $args ) };
         my $error = $@;
-        ok !$error, "'$test' should parse successfully" or diag $error;
+        ok !$error, "'$test' should parse successfully"
+          or diag $error;
 
         if ($error) {
             my $tests = 0;
@@ -3070,9 +3081,7 @@ for my $hide_fork ( 0 .. $can_open3 ) {
     }
 }
 
-my %Unix2VMS_Exit_Codes = (
-    1 => 4,
-);
+my %Unix2VMS_Exit_Codes = ( 1 => 4, );
 
 sub _vmsify_answer {
     my ( $method, $answer ) = @_;
@@ -3100,7 +3109,8 @@ sub analyze_test {
           = $result->is_test
           ? $result->description
           : $result->raw;
-        $desc = $result->plan if $result->is_plan && $desc =~ /SKIP/i;
+        $desc = $result->plan
+          if $result->is_plan && $desc =~ /SKIP/i;
         $desc =~ s/#/<hash>/g;
         $desc =~ s/\s+/ /g;      # Drop newlines
         ok defined $expected,

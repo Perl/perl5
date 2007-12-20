@@ -1,6 +1,14 @@
 #!/usr/bin/perl -Tw
 
-use lib qw(t/lib);
+BEGIN {
+    if ( $ENV{PERL_CORE} ) {
+        unshift @INC, '../lib';
+    }
+    else {
+        unshift @INC, 't/lib';
+    }
+}
+
 use Test::More tests => 1;
 
 ok( grep( /examples/, @INC ) );
