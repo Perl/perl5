@@ -1,5 +1,13 @@
 Revision history for Test-Harness
 
+3.06
+        - Skip t/unicode.t if PERL_UNICODE set. Fixes #31731.
+          Thanks Lukas.
+        - App::Prove::State no longer complains about tests that
+          are deleted.
+        - --state=new and --state=old now consider the modification time
+          of test scripts.
+
 3.05    2007-12-09
         - Skip unicode.t if Encode unavailable
         - Support for .proverc files.

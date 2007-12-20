@@ -48,11 +48,11 @@ TAP::Formatter::Console::ParallelSession - Harness output delegate for parallel 
 
 =head1 VERSION
 
-Version 3.05
+Version 3.06
 
 =cut
 
-$VERSION = '3.05';
+$VERSION = '3.06';
 
 =head1 DESCRIPTION
 

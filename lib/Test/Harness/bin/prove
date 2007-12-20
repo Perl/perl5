@@ -164,7 +164,7 @@ possible, for example, to recreate the ordering of a shuffled test.
 Run only the tests that failed on the last run.
 
     # Run all tests
-e    $ prove -b --state=save
+    $ prove -b --state=save
     
     # Run failures
     $ prove -b --state=failed
