@@ -1509,7 +1509,6 @@ PERL_CALLCONV CV*	Perl_newXS(pTHX_ const char* name, XSUBADDR_t f, const char* f
 			__attribute__nonnull__(pTHX_3);
 
 /* PERL_CALLCONV AV*	Perl_newAV(pTHX)
-			__attribute__malloc__
 			__attribute__warn_unused_result__; */
 
 PERL_CALLCONV OP*	Perl_newAVREF(pTHX_ OP* o)
@@ -1545,7 +1544,6 @@ PERL_CALLCONV OP*	Perl_newHVREF(pTHX_ OP* o)
 			__attribute__nonnull__(pTHX_1);
 
 /* PERL_CALLCONV HV*	Perl_newHV(pTHX)
-			__attribute__malloc__
 			__attribute__warn_unused_result__; */
 
 PERL_CALLCONV HV*	Perl_newHVhv(pTHX_ HV* hv)
