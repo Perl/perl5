@@ -11,7 +11,7 @@ BEGIN {
     if ($@) {
         plan skip_all => 'Do not seem to have O_EXLOCK';
     } else {
-        plan tests => 3;
+        plan tests => 4;
     }
 
     use_ok( "File::Temp" ); 
