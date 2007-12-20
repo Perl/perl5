@@ -371,25 +371,6 @@ Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
 }
 
 /*
-=for apidoc newAV
-
-Creates a new AV.  The reference count is set to 1.
-
-=cut
-*/
-
-AV *
-Perl_newAV(pTHX)
-{
-    register AV * const av = (AV*)newSV_type(SVt_PVAV);
-    /* sv_upgrade does AvREAL_only()  */
-    AvALLOC(av) = 0;
-    AvARRAY(av) = NULL;
-    AvMAX(av) = AvFILLp(av) = -1;
-    return av;
-}
-
-/*
 =for apidoc av_make
 
 Creates a new AV and populates it with a list of SVs.  The SVs are copied

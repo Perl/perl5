@@ -1309,6 +1309,13 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
 	    AvMAX(sv)	= -1;
 	    AvFILLp(sv)	= -1;
 	    AvREAL_only(sv);
+	    if (old_type >= SVt_RV) {
+		AvALLOC(sv) = 0;
+	    } else {
+		/* It will have been zeroed when the new body was allocated.
+		   Lets not write to it, in case it confuses a write-back
+		   cache.  */
+	    }
 	}
 
 	/* SVt_NULL isn't the only thing upgraded to AV or HV.

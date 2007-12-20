@@ -116,6 +116,16 @@ Same as C<av_len()>.  Deprecated, use C<av_len()> instead.
 #define NEGATIVE_INDICES_VAR "NEGATIVE_INDICES"
 
 /*
+=for apidoc newAV
+
+Creates a new AV.  The reference count is set to 1.
+
+=cut
+*/
+
+#define newAV()	((AV *)newSV_type(SVt_PVAV))
+
+/*
  * Local variables:
  * c-indentation-style: bsd
  * c-basic-offset: 4

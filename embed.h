@@ -554,7 +554,6 @@
 #define newSUB			Perl_newSUB
 #define newXS_flags		Perl_newXS_flags
 #define newXS			Perl_newXS
-#define newAV			Perl_newAV
 #define newAVREF		Perl_newAVREF
 #define newBINOP		Perl_newBINOP
 #define newCVREF		Perl_newCVREF
@@ -2871,7 +2870,6 @@
 #define newSUB(a,b,c,d)		Perl_newSUB(aTHX_ a,b,c,d)
 #define newXS_flags(a,b,c,d,e)	Perl_newXS_flags(aTHX_ a,b,c,d,e)
 #define newXS(a,b,c)		Perl_newXS(aTHX_ a,b,c)
-#define newAV()			Perl_newAV(aTHX)
 #define newAVREF(a)		Perl_newAVREF(aTHX_ a)
 #define newBINOP(a,b,c,d)	Perl_newBINOP(aTHX_ a,b,c,d)
 #define newCVREF(a,b)		Perl_newCVREF(aTHX_ a,b)

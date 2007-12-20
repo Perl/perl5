@@ -74,7 +74,7 @@ PERL_CALLCONV void Perl_sv_usepvn(pTHX_ SV *sv, char *ptr, STRLEN len);
 PERL_CALLCONV int Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...);
 PERL_CALLCONV int Perl_printf_nocontext(const char *format, ...);
 PERL_CALLCONV int Perl_magic_setglob(pTHX_ SV* sv, MAGIC* mg);
-
+PERL_CALLCONV AV * Perl_newAV(pTHX);
 
 /* ref() is now a macro using Perl_doref;
  * this version provided for binary compatibility only.
@@ -1334,6 +1334,16 @@ Perl_magic_setglob(pTHX_ SV *sv, MAGIC *mg)
     Perl_croak(aTHX_ "Perl_magic_setglob is dead code?");
 
     return 0;
+}
+
+AV *
+Perl_newAV(pTHX)
+{
+    return (AV*)newSV_type(SVt_PVAV);
+    /* sv_upgrade does AvREAL_only():
+    AvALLOC(av) = 0;
+    AvARRAY(av) = NULL;
+    AvMAX(av) = AvFILLp(av) = -1; */
 }
 
 #endif /* NO_MATHOMS */
