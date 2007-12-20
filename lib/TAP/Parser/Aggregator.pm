@@ -10,11 +10,11 @@ TAP::Parser::Aggregator - Aggregate TAP::Parser results
 
 =head1 VERSION
 
-Version 3.05
+Version 3.06
 
 =cut
 
-$VERSION = '3.05';
+$VERSION = '3.06';
 
 =head1 SYNOPSIS
 
@@ -249,7 +249,8 @@ Return true if all the tests passed and no parse errors were detected.
 
 sub all_passed {
     my $self = shift;
-    return $self->total
+    return
+         $self->total
       && $self->total == $self->passed
       && !$self->has_errors;
 }
@@ -370,7 +371,8 @@ Returns true if I<any> of the parsers failed.  This includes:
 
 sub has_errors {
     my $self = shift;
-    return $self->failed
+    return
+         $self->failed
       || $self->parse_errors
       || $self->exit
       || $self->wait;

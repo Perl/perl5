@@ -1,10 +1,12 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-    if ($ENV{PERL_CORE}) {
-	# FIXME
-	print "1..0 # Skip pending resolution of how to avoid creating a directory t in the core\n";
-	exit 0;
+    if ( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = ( '../lib', 'lib' );
+    }
+    else {
+        unshift @INC, 't/lib';
     }
 }
 
@@ -13,8 +15,6 @@ BEGIN {
 # nearly everything
 
 use strict;
-use lib 't/lib';
-
 use Test::More;
 
 my $useOrigOpen;
@@ -66,7 +66,8 @@ plan tests => 4;
 
     # coverage tests for the basically untested T::H::_open_spool
 
-    $ENV{PERL_TEST_HARNESS_DUMP_TAP} = File::Spec->catfile(qw(t spool));
+    my @spool = ( $ENV{PERL_CORE} ? ('spool') : ( 't', 'spool' ) );
+    $ENV{PERL_TEST_HARNESS_DUMP_TAP} = File::Spec->catfile(@spool);
 
 # now given that we're going to be writing stuff to the file system, make sure we have
 # a cleanup hook
@@ -98,11 +99,10 @@ plan tests => 4;
 
     is @die, 1, 'open failed, die as expected';
 
-    my $spoolDir
-      = quotemeta( File::Spec->catfile(qw( t spool source_tests harness )) );
+    my $spoolDir = quotemeta(
+        File::Spec->catfile( @spool, qw( source_tests harness ) ) );
 
-    like pop @die, qr/ Can't write $spoolDir [(] /,
-      '...with expected message';
+    like pop @die, qr/ Can't write $spoolDir \( /, '...with expected message';
 
     # now make close fail
 

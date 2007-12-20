@@ -20,7 +20,7 @@ BEGIN {
         errors     => sub { shift; shift },
         color      => sub { shift; shift },
         jobs       => sub { shift; shift },
-        stdout => sub {
+        stdout     => sub {
             my ( $self, $ref ) = @_;
             $self->_croak("option 'stdout' needs a filehandle")
               unless ( ref $ref || '' ) eq 'GLOB'
@@ -52,11 +52,11 @@ TAP::Formatter::Console - Harness output delegate for default console output
 
 =head1 VERSION
 
-Version 3.05
+Version 3.06
 
 =cut
 
-$VERSION = '3.05';
+$VERSION = '3.06';
 
 =head1 DESCRIPTION
 
@@ -312,8 +312,9 @@ sub summary {
             $self->_printed_summary_header(0);
             my ($parser) = $aggregate->parsers($test);
             $self->_output_summary_failure(
-                'failed', "  Failed test number(s):  ",
-                $test,    $parser
+                'failed',
+                [ '  Failed test:  ', '  Failed tests:  ' ],
+                $test, $parser
             );
             $self->_output_summary_failure(
                 'todo_passed',
@@ -363,10 +364,12 @@ sub _output_summary_failure {
     # ugly hack.  Must rethink this :(
     my $output = $method eq 'failed' ? '_failure_output' : '_output';
 
-    if ( $parser->$method() ) {
+    if ( my @r = $parser->$method() ) {
         $self->_summary_test_header( $test, $parser );
-        $self->$output($name);
-        my @results = $self->_balanced_range( 40, $parser->$method() );
+        my ( $singular, $plural )
+          = 'ARRAY' eq ref $name ? @$name : ( $name, $name );
+        $self->$output( @r == 1 ? $singular : $plural );
+        my @results = $self->_balanced_range( 40, @r );
         $self->$output( sprintf "%s\n" => shift @results );
         my $spaces = ' ' x 16;
         while (@results) {

@@ -22,11 +22,11 @@ TAP::Harness - Run test scripts with statistics
 
 =head1 VERSION
 
-Version 3.05
+Version 3.06
 
 =cut
 
-$VERSION = '3.05';
+$VERSION = '3.06';
 
 $ENV{HARNESS_ACTIVE}  = 1;
 $ENV{HARNESS_VERSION} = $VERSION;
@@ -431,7 +431,13 @@ sub _aggregate_single {
 
         while ( defined( my $result = $parser->next ) ) {
             $session->result($result);
-            exit 1 if $result->is_bailout;
+            if ( $result->is_bailout ) {
+
+                # Keep reading until input is exhausted in the hope
+                # of allowing any pending diagnostics to show up.
+                1 while $parser->next;
+                exit 1;
+            }
         }
 
         $self->finish_parser( $parser, $session );

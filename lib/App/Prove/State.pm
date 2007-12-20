@@ -20,11 +20,11 @@ App::Prove::State - State storage for the C<prove> command.
 
 =head1 VERSION
 
-Version 3.05
+Version 3.06
 
 =cut
 
-$VERSION = '3.05';
+$VERSION = '3.06';
 
 =head1 DESCRIPTION
 
@@ -178,20 +178,10 @@ sub apply_switch {
             $self->_select( order => sub { $_->{elapsed} } );
         },
         new => sub {
-            $self->_select(
-                order => sub {
-                        ( $_->{total_failures} || 0 )
-                      + ( $_->{total_passes} || 0 );
-                }
-            );
+            $self->_select( order => sub { -$_->{mtime} } );
         },
         old => sub {
-            $self->_select(
-                order => sub {
-                    -(    ( $_->{total_failures} || 0 )
-                        + ( $_->{total_passes} || 0 ) );
-                }
-            );
+            $self->_select( order => sub { $_->{mtime} } );
         },
         save => sub {
             $self->{should_save}++;
@@ -259,6 +249,7 @@ sub _query_clause {
 
     # Select
     for my $test ( sort keys %$tests ) {
+        next unless -f $test;
         local $_ = $tests->{$test};
         push @got, $test if $where->();
     }
@@ -296,7 +287,7 @@ sub _get_raw_tests {
         }
 
         push @tests,
-          sort -d $arg
+            sort -d $arg
           ? $recurse
               ? $self->_expand_dir_recursive($arg)
               : glob( File::Spec->catfile( $arg, '*.t' ) )
@@ -405,7 +396,20 @@ sub load {
     # $writer->write( $self->{tests} || {}, \*FH );
     close FH;
     $self->_regen_seq;
+    $self->_prune_and_stamp;
     $self->{_}->{generation}++;
+}
+
+sub _prune_and_stamp {
+    my $self = shift;
+    for my $name ( keys %{ $self->{_}->{tests} || {} } ) {
+        if ( my @stat = stat $name ) {
+            $self->{_}->{tests}->{$name}->{mtime} = $stat[9];
+        }
+        else {
+            delete $self->{_}->{tests}->{$name};
+        }
+    }
 }
 
 sub _regen_seq {

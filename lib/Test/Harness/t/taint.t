@@ -1,10 +1,12 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-    if ($ENV{PERL_CORE}) {
-	# FIXME
-	print "1..0 # Skip pending resolution of how to set the library with -I\n";
-	exit 0;
+    if ( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = ( '../lib', 'lib' );
+    }
+    else {
+        unshift @INC, 't/lib';
     }
 }
 
@@ -12,17 +14,17 @@ BEGIN {
 # tests
 
 use strict;
-use lib 't/lib';
-
 use Test::More ( $^O eq 'VMS' ? ( skip_all => 'VMS' ) : ( tests => 3 ) );
 
 use Config;
 use TAP::Parser;
 
+my $lib_path = join( ', ', map "'$_'", grep !ref, grep defined, @INC );
+
 sub run_test_file {
     my ( $test_template, @args ) = @_;
 
-    my $test_file = 't/temp_test.tmp';
+    my $test_file = 'temp_test.tmp';
 
     open TEST, ">$test_file" or die $!;
     printf TEST $test_template, @args;
@@ -38,13 +40,13 @@ sub run_test_file {
 {
     local $ENV{PERL5LIB} = join $Config{path_sep}, grep defined, 'wibble',
       $ENV{PERL5LIB};
-    run_test_file(<<'END');
+    run_test_file( <<'END', $lib_path );
 #!/usr/bin/perl -T
 
-use lib 't/lib';
+BEGIN { unshift @INC, ( %s ); }
 use Test::More tests => 1;
 
-is( $INC[1], 'wibble' ) or diag join "\n", @INC;
+ok grep(/^wibble$/, @INC) or diag join "\n", @INC;
 END
 }
 
@@ -53,17 +55,18 @@ END
     local $ENV{PERL5LIB};
     local $ENV{PERLLIB} = join $Config{path_sep}, grep defined, 'wibble',
       $perl5lib;
-    run_test_file(<<'END');
+    run_test_file( <<'END', $lib_path );
 #!/usr/bin/perl -T
 
-use lib 't/lib';
+BEGIN { unshift @INC, ( %s ); }
 use Test::More tests => 1;
 
-is( $INC[1], 'wibble' ) or diag join "\n", @INC;
+ok grep(/^wibble$/, @INC) or diag join "\n", @INC;
 END
 }
 
 {
+    local $ENV{PERL5LIB} = join $Config{path_sep}, @INC;
     local $ENV{PERL5OPT} = '-Mstrict';
     run_test_file(<<'END');
 #!/usr/bin/perl -T

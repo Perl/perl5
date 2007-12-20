@@ -16,11 +16,11 @@ TAP::Parser::Source::Perl - Stream Perl output
 
 =head1 VERSION
 
-Version 3.05
+Version 3.06
 
 =cut
 
-$VERSION = '3.05';
+$VERSION = '3.06';
 
 =head1 DESCRIPTION
 
@@ -272,7 +272,7 @@ sub _switches {
 
 sub _get_perl {
     my $proto = shift;
-    return $ENV{HARNESS_PERL}           if defined $ENV{HARNESS_PERL};
+    return $ENV{HARNESS_PERL} if defined $ENV{HARNESS_PERL};
     return Win32::GetShortPathName($^X) if IS_WIN32;
     return $^X;
 }

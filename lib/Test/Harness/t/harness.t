@@ -1,20 +1,12 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-    if( $ENV{PERL_CORE} ) {
+    if ( $ENV{PERL_CORE} ) {
         chdir 't';
-        @INC = ('../lib', 'lib');
+        @INC = ( '../lib', 'lib' );
     }
     else {
-	use lib 't/lib';
-    }
-}
-
-BEGIN {
-    if ($ENV{PERL_CORE}) {
-	# FIXME
-	print "1..0 # Skip pending resolution of a clean way to record the change in location of the sample tests\n";
-	exit 0;
+        unshift @INC, 't/lib';
     }
 }
 
@@ -26,6 +18,9 @@ use IO::c55Capture;
 use TAP::Harness;
 
 my $HARNESS = 'TAP::Harness';
+
+my $source_tests = $ENV{PERL_CORE} ? 'lib/source_tests' : 't/source_tests';
+my $sample_tests = $ENV{PERL_CORE} ? 'lib/sample-tests' : 't/sample-tests';
 
 plan tests => 106;
 
@@ -108,7 +103,7 @@ foreach my $test_args ( get_arg_sets() ) {
 
     # normal tests in verbose mode
 
-    ok my $aggregate = _runtests( $harness, 't/source_tests/harness' ),
+    ok my $aggregate = _runtests( $harness, "$source_tests/harness" ),
       '... runtests returns the aggregate';
 
     isa_ok $aggregate, 'TAP::Parser::Aggregator';
@@ -116,7 +111,7 @@ foreach my $test_args ( get_arg_sets() ) {
     chomp(@output);
 
     my @expected = (
-        't/source_tests/harness....',
+        "$source_tests/harness....",
         '1..1',
         '[[reset]]',
         'ok 1 - this is a test',
@@ -139,7 +134,7 @@ foreach my $test_args ( get_arg_sets() ) {
 
     @output = ();
     ok $aggregate
-      = _runtests( $harness, [ 't/source_tests/harness', 'My Nice Test' ] ),
+      = _runtests( $harness, [ "$source_tests/harness", 'My Nice Test' ] ),
       '... runtests returns the aggregate';
 
     isa_ok $aggregate, 'TAP::Parser::Aggregator';
@@ -169,9 +164,10 @@ foreach my $test_args ( get_arg_sets() ) {
     # run same test twice
 
     @output = ();
-    ok $aggregate
-      = _runtests( $harness, [ 't/source_tests/harness', 'My Nice Test' ],
-        [ 't/source_tests/harness', 'My Nice Test Again' ] ),
+    ok $aggregate = _runtests(
+        $harness, [ "$source_tests/harness", 'My Nice Test' ],
+        [ "$source_tests/harness", 'My Nice Test Again' ]
+      ),
       '... runtests returns the aggregate';
 
     isa_ok $aggregate, 'TAP::Parser::Aggregator';
@@ -207,11 +203,11 @@ foreach my $test_args ( get_arg_sets() ) {
     # normal tests in quiet mode
 
     @output = ();
-    _runtests( $harness_whisper, 't/source_tests/harness' );
+    _runtests( $harness_whisper, "$source_tests/harness" );
 
     chomp(@output);
     @expected = (
-        't/source_tests/harness....',
+        "$source_tests/harness....",
         'ok',
         'All tests successful.',
     );
@@ -230,7 +226,7 @@ foreach my $test_args ( get_arg_sets() ) {
     # normal tests in really_quiet mode
 
     @output = ();
-    _runtests( $harness_mute, 't/source_tests/harness' );
+    _runtests( $harness_mute, "$source_tests/harness" );
 
     chomp(@output);
     @expected = (
@@ -251,7 +247,7 @@ foreach my $test_args ( get_arg_sets() ) {
     # normal tests with failures
 
     @output = ();
-    _runtests( $harness, 't/source_tests/harness_failure' );
+    _runtests( $harness, "$source_tests/harness_failure" );
 
     $status  = pop @output;
     $summary = pop @output;
@@ -263,7 +259,7 @@ foreach my $test_args ( get_arg_sets() ) {
     @output = @output[ 0 .. 9 ];
 
     @expected = (
-        't/source_tests/harness_failure....',
+        "$source_tests/harness_failure....",
         '1..2',
         '[[reset]]',
         'ok 1 - this is a test',
@@ -283,10 +279,10 @@ foreach my $test_args ( get_arg_sets() ) {
         'Test Summary Report',
         '-------------------',
         '[[red]]',
-        't/source_tests/harness_failure (Wstat: 0 Tests: 2 Failed: 1)',
+        "$source_tests/harness_failure (Wstat: 0 Tests: 2 Failed: 1)",
         '[[reset]]',
         '[[red]]',
-        'Failed test number(s):',
+        'Failed test:',
         '[[reset]]',
         '[[red]]',
         '2',
@@ -299,17 +295,17 @@ foreach my $test_args ( get_arg_sets() ) {
     # quiet tests with failures
 
     @output = ();
-    _runtests( $harness_whisper, 't/source_tests/harness_failure' );
+    _runtests( $harness_whisper, "$source_tests/harness_failure" );
 
     $status   = pop @output;
     $summary  = pop @output;
     @expected = (
-        't/source_tests/harness_failure....',
+        "$source_tests/harness_failure....",
         'Failed 1/2 subtests',
         'Test Summary Report',
         '-------------------',
-        't/source_tests/harness_failure (Wstat: 0 Tests: 2 Failed: 1)',
-        'Failed test number(s):',
+        "$source_tests/harness_failure (Wstat: 0 Tests: 2 Failed: 1)",
+        'Failed test:',
         '2',
     );
 
@@ -322,15 +318,15 @@ foreach my $test_args ( get_arg_sets() ) {
     # really quiet tests with failures
 
     @output = ();
-    _runtests( $harness_mute, 't/source_tests/harness_failure' );
+    _runtests( $harness_mute, "$source_tests/harness_failure" );
 
     $status   = pop @output;
     $summary  = pop @output;
     @expected = (
         'Test Summary Report',
         '-------------------',
-        't/source_tests/harness_failure (Wstat: 0 Tests: 2 Failed: 1)',
-        'Failed test number(s):',
+        "$source_tests/harness_failure (Wstat: 0 Tests: 2 Failed: 1)",
+        'Failed test:',
         '2',
     );
 
@@ -345,13 +341,13 @@ foreach my $test_args ( get_arg_sets() ) {
     @output = ();
     _runtests(
         $harness_directives,
-        't/source_tests/harness_directives'
+        "$source_tests/harness_directives"
     );
 
     chomp(@output);
 
     @expected = (
-        't/source_tests/harness_directives....',
+        "$source_tests/harness_directives....",
         'not ok 2 - we have a something # TODO some output',
         "ok 3 houston, we don't have liftoff # SKIP no funding",
         'ok',
@@ -360,7 +356,7 @@ foreach my $test_args ( get_arg_sets() ) {
         # ~TODO {{{ this should be an option
         #'Test Summary Report',
         #'-------------------',
-        #'t/source_tests/harness_directives (Wstat: 0 Tests: 3 Failed: 0)',
+        #"$source_tests/harness_directives (Wstat: 0 Tests: 3 Failed: 0)",
         #'Tests skipped:',
         #'3',
         # }}}
@@ -401,7 +397,7 @@ foreach my $test_args ( get_arg_sets() ) {
     );
 
     @output = ();
-    _runtests( $harness, 't/source_tests/harness_badtap' );
+    _runtests( $harness, "$source_tests/harness_badtap" );
     chomp(@output);
 
     @output   = map { trim($_) } @output;
@@ -409,7 +405,7 @@ foreach my $test_args ( get_arg_sets() ) {
     @summary  = @output[ 12 .. ( $#output - 1 ) ];
     @output   = @output[ 0 .. 11 ];
     @expected = (
-        't/source_tests/harness_badtap....',
+        "$source_tests/harness_badtap....",
         '1..2',
         '[[reset]]',
         'ok 1 - this is a test',
@@ -431,10 +427,10 @@ foreach my $test_args ( get_arg_sets() ) {
         'Test Summary Report',
         '-------------------',
         '[[red]]',
-        't/source_tests/harness_badtap (Wstat: 0 Tests: 2 Failed: 1)',
+        "$source_tests/harness_badtap (Wstat: 0 Tests: 2 Failed: 1)",
         '[[reset]]',
         '[[red]]',
-        'Failed test number(s):',
+        'Failed test:',
         '[[reset]]',
         '[[red]]',
         '2',
@@ -458,18 +454,18 @@ foreach my $test_args ( get_arg_sets() ) {
     # only show failures
 
     @output = ();
-    _runtests( $harness_failures, 't/source_tests/harness_failure' );
+    _runtests( $harness_failures, "$source_tests/harness_failure" );
 
     chomp(@output);
 
     @expected = (
-        't/source_tests/harness_failure....',
+        "$source_tests/harness_failure....",
         'not ok 2 - this is another test',
         'Failed 1/2 subtests',
         'Test Summary Report',
         '-------------------',
-        't/source_tests/harness_failure (Wstat: 0 Tests: 2 Failed: 1)',
-        'Failed test number(s):',
+        "$source_tests/harness_failure (Wstat: 0 Tests: 2 Failed: 1)",
+        'Failed test:',
         '2',
     );
 
@@ -484,16 +480,16 @@ foreach my $test_args ( get_arg_sets() ) {
     # check the status output for no tests
 
     @output = ();
-    _runtests( $harness_failures, 't/sample-tests/no_output' );
+    _runtests( $harness_failures, "$sample_tests/no_output" );
 
     chomp(@output);
 
     @expected = (
-        't/sample-tests/no_output....',
+        "$sample_tests/no_output....",
         'No subtests run',
         'Test Summary Report',
         '-------------------',
-        't/sample-tests/no_output (Wstat: 0 Tests: 0 Failed: 0)',
+        "$sample_tests/no_output (Wstat: 0 Tests: 0 Failed: 0)",
         'Parse errors: No plan found in TAP output',
     );
 
@@ -524,7 +520,12 @@ SKIP: {
         }
     );
 
-    eval { _runtests( $harness, 't/data/catme.1' ) };
+    eval {
+        _runtests(
+            $harness,
+            $ENV{PERL_CORE} ? 'lib/data/catme.1' : 't/data/catme.1'
+        );
+    };
 
     my @output = tied($$capture)->dump;
     my $status = pop @output;
@@ -547,9 +548,9 @@ SKIP: {
 
     _runtests(
         $harness,
-        't/source_tests/harness_complain'
+        "$source_tests/harness_complain"
         ,    # will get mad if run with args
-        't/source_tests/harness',
+        "$source_tests/harness",
     );
 
     my @output = tied($$capture)->dump;
@@ -788,7 +789,8 @@ sub _runtests {
 
     # coverage tests for the basically untested T::H::_open_spool
 
-    $ENV{PERL_TEST_HARNESS_DUMP_TAP} = File::Spec->catfile(qw(t spool));
+    my @spool = ( $ENV{PERL_CORE} ? ('spool') : ( 't', 'spool' ) );
+    $ENV{PERL_TEST_HARNESS_DUMP_TAP} = File::Spec->catfile(@spool);
 
 # now given that we're going to be writing stuff to the file system, make sure we have
 # a cleanup hook
@@ -807,14 +809,14 @@ sub _runtests {
 
     # normal tests in verbose mode
 
-    my $parser = $harness->runtests(
-        File::Spec->catfile(qw (t source_tests harness )) );
+    my $parser
+      = $harness->runtests( File::Spec->catfile( $source_tests, 'harness' ) );
 
     isa_ok $parser, 'TAP::Parser::Aggregator',
       '... runtests returns the aggregate';
 
     ok -e File::Spec->catfile(
         $ENV{PERL_TEST_HARNESS_DUMP_TAP},
-        qw( t source_tests harness )
+        $source_tests, 'harness'
     );
 }

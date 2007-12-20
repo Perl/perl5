@@ -9,8 +9,12 @@ my @schedule;
 my %make_test;
 
 BEGIN {
-    plan skip_all => "unicode on Perl < 5.8.0"
+    # TODO: Investigate failure on 5.8.0
+    plan skip_all => "unicode on Perl <= 5.8.0"
       unless $] > 5.008;
+
+    plan skip_all => "PERL_UNICODE set"
+      if defined $ENV{PERL_UNICODE};
 
     eval "use File::Temp";
     plan skip_all => "File::Temp unavailable"

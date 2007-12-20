@@ -19,11 +19,11 @@ TAP::Parser - Parse L<TAP|Test::Harness::TAP> output
 
 =head1 VERSION
 
-Version 3.05
+Version 3.06
 
 =cut
 
-$VERSION = '3.05';
+$VERSION = '3.06';
 
 my $DEFAULT_TAP_VERSION = 12;
 my $MAX_TAP_VERSION     = 13;
@@ -865,7 +865,8 @@ failed, any TODO tests unexpectedly succeeded, or any parse errors occurred.
 
 sub has_problems {
     my $self = shift;
-    return $self->failed
+    return
+         $self->failed
       || $self->parse_errors
       || $self->wait
       || $self->exit;
