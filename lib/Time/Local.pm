@@ -7,7 +7,7 @@ use strict;
 use integer;
 
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK );
-$VERSION   = '1.18';
+$VERSION   = '1.18_01';
 
 @ISA       = qw( Exporter );
 @EXPORT    = qw( timegm timelocal );
@@ -29,15 +29,12 @@ use constant SECS_PER_MINUTE => 60;
 use constant SECS_PER_HOUR   => 3600;
 use constant SECS_PER_DAY    => 86400;
 
-my $MaxInt = ( ( 1 << ( 8 * $Config{intsize} - 2 ) ) -1 ) * 2 + 1;
+my $MaxInt = ( ( 1 << ( 8 * $Config{ivsize} - 2 ) ) - 1 ) * 2 + 1;
 my $MaxDay = int( ( $MaxInt - ( SECS_PER_DAY / 2 ) ) / SECS_PER_DAY ) - 1;
 
 if ( $^O eq 'MacOS' ) {
     # time_t is unsigned...
-    $MaxInt = ( 1 << ( 8 * $Config{intsize} ) ) - 1;
-}
-else {
-    $MaxInt = ( ( 1 << ( 8 * $Config{intsize} - 2 ) ) - 1 ) * 2 + 1;
+    $MaxInt = ( 1 << ( 8 * $Config{ivsize} ) ) - 1;
 }
 
 # Determine the EPOC day for this machine
