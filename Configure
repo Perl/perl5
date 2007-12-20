@@ -5045,6 +5045,25 @@ case "$DEBUGGING" in
 both|$define) dflt='-DDEBUGGING'
 esac
 
+: argument order is deliberate, as the flag will start with - which set could
+: think is an option
+checkccflag='check=$1; flag=$2;
+echo " ";
+echo "Checking if your compiler accepts $flag" 2>&1;
+echo "int main(void) { return 0; }" > gcctest.c;
+if $cc -O2 $flag -o gcctest gcctest.c; then
+    echo "Yes, it does." 2>&1;
+    case "$ccflags" in
+    *$check*)
+	echo "Leaving current flags $ccflags alone." 2>&1
+	;;
+    *) dflt="$dflt $flag" ;;
+    esac
+else
+    echo "Nope, it does not, but that is ok." 2>&1;
+fi
+'
+
 : We will not override a previous value, but we might want to
 : augment a hint file
 case "$hint" in
@@ -5067,40 +5086,16 @@ default|recommended)
 	case "$gccversion" in
 	1*) ;;
 	2.[0-8]*) ;;
-	?*) 	echo " "
-		echo "Checking if your compiler accepts -fno-strict-aliasing" 2>&1
-		echo 'int main(void) { return 0; }' > gcctest.c
-		if $cc -O2 -fno-strict-aliasing -o gcctest gcctest.c; then
-			echo "Yes, it does." 2>&1
-			case "$ccflags" in
-			*strict-aliasing*)
-				echo "Leaving current flags $ccflags alone." 2>&1
-				;;
-			*) dflt="$dflt -fno-strict-aliasing" ;;
-			esac
-		else
-			echo "Nope, it doesn't, but that's ok." 2>&1
-		fi
+	?*) 	set strict-aliasing -fno-strict-aliasing
+		eval $checkccflag
 		;;
 	esac
 	# For gcc, adding -pipe speeds up compilations for some, but apparently
 	# some assemblers can't read from stdin.  (It also slows down compilations
 	# in other cases, but those are apparently rarer these days.)  AD 5/2004.
 	case "$gccversion" in
-	?*)	echo " "
-		echo "Checking if your compiler accepts -pipe" 2>&1
-		echo 'int main(void) { return 0; }' > gcctest.c
-		if $cc -pipe -o gcctest gcctest.c; then
-			echo "Yes, it does." 2>&1
-			case "$ccflags" in
-			*-pipe*)
-				echo "Leaving current flags $ccflags alone." 2>&1
-				;;
-			*) dflt="$dflt -pipe" ;;
-			esac
-		else
-			echo "Nope, it doesn't, but that's ok." 2>&1
-		fi
+	?*)	set pipe -pipe
+		eval $checkccflag
 		;;
 	esac
 	;;
