@@ -40,6 +40,10 @@ my $taint_inc
   = Data::Dumper->new( [ [ grep { $_ ne '.' } @INC ] ] )->Terse(1)->Purity(1)
   ->Dump;
 
+# The tail of @INC is munged during core testing. We're only *really*
+# interested in whether 'wibble' makes it anyway.
+my $cmp_slice = $ENV{PERL_CORE} ? '[0..1]' : '';
+
 my $test_template = <<'END';
 #!/usr/bin/perl %s
 
@@ -48,7 +52,8 @@ use Test::More tests => 2;
 sub _strip_dups {
     my %%dups;
     # Drop '.' which sneaks in on some platforms
-    return grep { $_ ne '.' } grep { !$dups{$_}++ } @_;
+    my @r = grep { $_ ne '.' } grep { !$dups{$_}++ } @_;
+    return @r%s;
 }
 
 # Make sure we did something sensible with PERL5LIB
@@ -66,11 +71,11 @@ is_deeply(
 END
 
 open TEST, ">inc_check.t.tmp";
-printf TEST $test_template, '', $inc, $inc;
+printf TEST $test_template, '', $cmp_slice, $inc, $inc;
 close TEST;
 
 open TEST, ">inc_check_taint.t.tmp";
-printf TEST $test_template, '-T', $taint_inc, $taint_inc;
+printf TEST $test_template, '-T', $cmp_slice, $taint_inc, $taint_inc;
 close TEST;
 END { 1 while unlink 'inc_check_taint.t.tmp', 'inc_check.t.tmp'; }
 

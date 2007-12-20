@@ -1,3 +1,8 @@
+BEGIN {
+    if ( $ENV{PERL_CORE} ) {
+        unshift @INC, '../lib';
+    }
+}
 use Test::More 'no_plan';
 diag 'comments';
 ok 1;

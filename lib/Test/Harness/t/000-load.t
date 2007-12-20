@@ -45,5 +45,7 @@ BEGIN {
         is $class->VERSION, TAP::Parser->VERSION,
           "... and $class should have the correct version";
     }
-    diag("Testing Test::Harness $Test::Harness::VERSION, Perl $], $^X");
+
+    diag("Testing Test::Harness $Test::Harness::VERSION, Perl $], $^X")
+      unless $ENV{PERL_CORE};
 }
