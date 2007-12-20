@@ -15199,7 +15199,7 @@ int main() {
 }
 EOCP
 
-i8type=char
+i8type="signed char"
 u8type="unsigned char"
 i8size=1
 u8size=1
