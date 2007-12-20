@@ -561,7 +561,6 @@
 #define newGVgen		Perl_newGVgen
 #define newGVREF		Perl_newGVREF
 #define newHVREF		Perl_newHVREF
-#define newHV			Perl_newHV
 #define newHVhv			Perl_newHVhv
 #define newIO			Perl_newIO
 #define newLISTOP		Perl_newLISTOP
@@ -2877,7 +2876,6 @@
 #define newGVgen(a)		Perl_newGVgen(aTHX_ a)
 #define newGVREF(a,b)		Perl_newGVREF(aTHX_ a,b)
 #define newHVREF(a)		Perl_newHVREF(aTHX_ a)
-#define newHV()			Perl_newHV(aTHX)
 #define newHVhv(a)		Perl_newHVhv(aTHX_ a)
 #define newIO()			Perl_newIO(aTHX)
 #define newLISTOP(a,b,c,d)	Perl_newLISTOP(aTHX_ a,b,c,d)
