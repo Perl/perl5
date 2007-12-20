@@ -545,6 +545,16 @@ struct refcounted_he {
 #define HV_DELETE		0x40
 
 /*
+=for apidoc newHV
+
+Creates a new HV.  The reference count is set to 1.
+
+=cut
+*/
+
+#define newHV()	((HV*)newSV_type(SVt_PVHV))
+
+/*
  * Local variables:
  * c-indentation-style: bsd
  * c-basic-offset: 4

@@ -574,7 +574,7 @@ Apa	|OP*	|newGVOP	|I32 type|I32 flags|NN GV* gv
 Apa	|GV*	|newGVgen	|NN const char* pack
 Apa	|OP*	|newGVREF	|I32 type|NULLOK OP* o
 ApaR	|OP*	|newHVREF	|NN OP* o
-ApdaR	|HV*	|newHV
+AmdbaR	|HV*	|newHV
 ApaR	|HV*	|newHVhv	|NULLOK HV* hv
 Apa	|IO*	|newIO
 Apa	|OP*	|newLISTOP	|I32 type|I32 flags|NULLOK OP* first|NULLOK OP* last

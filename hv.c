@@ -1316,30 +1316,6 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
     }
 }
 
-/*
-=for apidoc newHV
-
-Creates a new HV.  The reference count is set to 1.
-
-=cut
-*/
-
-HV *
-Perl_newHV(pTHX)
-{
-    register XPVHV* xhv;
-    HV * const hv = (HV*)newSV_type(SVt_PVHV);
-    xhv = (XPVHV*)SvANY(hv);
-    assert(!SvOK(hv));
-#ifndef NODEFAULT_SHAREKEYS
-    HvSHAREKEYS_on(hv);         /* key-sharing on by default */
-#endif
-
-    xhv->xhv_max    = 7;	/* HvMAX(hv) = 7 (start with 8 buckets) */
-    xhv->xhv_fill   = 0;	/* HvFILL(hv) = 0 */
-    return hv;
-}
-
 HV *
 Perl_newHVhv(pTHX_ HV *ohv)
 {

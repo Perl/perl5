@@ -1316,6 +1316,20 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
 		   Lets not write to it, in case it confuses a write-back
 		   cache.  */
 	    }
+	} else {
+	    assert(!SvOK(sv));
+	    SvOK_off(sv);
+#ifndef NODEFAULT_SHAREKEYS
+	    HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+	    HvMAX(sv) = 7; /* (start with 8 buckets) */
+	    if (old_type >= SVt_RV) {
+		HvFILL(sv) = 0;
+	    } else {
+		/* It will have been zeroed when the new body was allocated.
+		   Lets not write to it, in case it confuses a write-back
+		   cache.  */
+	    }
 	}
 
 	/* SVt_NULL isn't the only thing upgraded to AV or HV.
