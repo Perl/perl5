@@ -1328,7 +1328,7 @@ libswanted_uselargefiles=''
 : List of libraries we want.
 : If anyone needs extra -lxxx, put those in a hint file.
 libswanted="sfio socket bind inet nsl nm ndbm gdbm dbm db malloc dl dld ld sun"
-libswanted="$libswanted m crypt sec util c cposix posix ucb bsd BSD"
+libswanted="$libswanted m crypt sec util c cposix posix ucb bsd BSD ssp"
 : We probably want to search /usr/shlib before most other libraries.
 : This is only used by the lib/ExtUtils/MakeMaker.pm routine extliblist.
 glibpth=`echo " $glibpth " | sed -e 's! /usr/shlib ! !'`
@@ -5047,17 +5047,19 @@ esac
 
 : argument order is deliberate, as the flag will start with - which set could
 : think is an option
-checkccflag='check=$1; flag=$2;
+checkccflag='check=$1; flag=$2; callback=$3;
 echo " ";
 echo "Checking if your compiler accepts $flag" 2>&1;
 echo "int main(void) { return 0; }" > gcctest.c;
-if $cc -O2 $flag -o gcctest gcctest.c; then
+if $cc -O2 $flag -o gcctest gcctest.c && ./gcctest; then
     echo "Yes, it does." 2>&1;
     case "$ccflags" in
     *$check*)
 	echo "Leaving current flags $ccflags alone." 2>&1
 	;;
-    *) dflt="$dflt $flag" ;;
+    *) dflt="$dflt $flag";
+	eval $callback
+	;;
     esac
 else
     echo "Nope, it does not, but that is ok." 2>&1;
@@ -5095,6 +5097,18 @@ default|recommended)
 	# in other cases, but those are apparently rarer these days.)  AD 5/2004.
 	case "$gccversion" in
 	?*)	set pipe -pipe
+		eval $checkccflag
+		;;
+	esac
+
+	# on x86_64 (at least) we require an extra library (libssp) in the
+	# link command line. This library is not named, so I infer that it is
+	# an implementation detail that may change. Hence the safest approach
+	# is to add the flag to the flags passed to the compiler at link time,
+	# as that way the compiler can do the right implementation dependant
+	# thing. (NWC)
+	case "$gccversion" in
+	?*)	set stack-protector -fstack-protector 'ldflags="$ldflags -fstack-protector"'
 		eval $checkccflag
 		;;
 	esac
