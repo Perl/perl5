@@ -1383,14 +1383,14 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
     Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
 #else
     if (sp > mark) {
-	char **a;
+	const char **a;
 	const char *tmps = NULL;
-	Newx(PL_Argv, sp - mark + 1, char*);
+	Newx(PL_Argv, sp - mark + 1, const char*);
 	a = PL_Argv;
 
 	while (++mark <= sp) {
 	    if (*mark)
-		*a++ = (char*)SvPV_nolen_const(*mark);
+		*a++ = SvPV_nolen_const(*mark);
 	    else
 		*a++ = "";
 	}
@@ -1429,7 +1429,7 @@ bool
 Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 {
     dVAR;
-    register char **a;
+    register const char **a;
     register char *s;
     char *buf;
     char *cmd;
@@ -1525,7 +1525,7 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 	}
     }
 
-    Newx(PL_Argv, (s - cmd) / 2 + 2, char*);
+    Newx(PL_Argv, (s - cmd) / 2 + 2, const char*);
     PL_Cmd = savepvn(cmd, s-cmd);
     a = PL_Argv;
     for (s = PL_Cmd; *s;) {
@@ -1541,7 +1541,7 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
     *a = NULL;
     if (PL_Argv[0]) {
 	PERL_FPU_PRE_EXEC
-	PerlProc_execvp(PL_Argv[0],PL_Argv);
+	PerlProc_execvp(PL_Argv[0],EXEC_ARGV_CAST(PL_Argv));
 	PERL_FPU_POST_EXEC
 	if (errno == ENOEXEC) {		/* for system V NIH syndrome */
 	    do_execfree();

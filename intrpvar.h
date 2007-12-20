@@ -347,7 +347,7 @@ PERLVARI(Icurcopdb,	COP *,	NULL)
 PERLVAR(Ifilemode,	int)		/* so nextargv() can preserve mode */
 PERLVAR(Ilastfd,	int)		/* what to preserve mode on */
 PERLVAR(Ioldname,	char *)		/* what to preserve mode on */
-PERLVAR(IArgv,		char **)	/* stuff to free from do_aexec, vfork safe */
+PERLVAR(IArgv,		const char **)	/* stuff to free from do_aexec, vfork safe */
 PERLVAR(ICmd,		char *)		/* stuff to free from do_aexec, vfork safe */
 /* Elements in this array have ';' appended and are injected as a single line
    into the tokeniser. You can't put any (literal) newlines into any program

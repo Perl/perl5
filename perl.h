@@ -5791,7 +5791,7 @@ int flock(int fd, int op);
 #endif
 
 #ifndef EXEC_ARGV_CAST
-#define EXEC_ARGV_CAST(x) x
+#define EXEC_ARGV_CAST(x) (char **)x
 #endif
 
 #define IS_NUMBER_IN_UV		      0x01 /* number within UV range (maybe not
