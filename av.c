@@ -945,8 +945,8 @@ Perl_av_exists(pTHX_ AV *av, I32 key)
 	return FALSE;
 }
 
-SV **
-Perl_av_arylen_p(pTHX_ AV *av) {
+MAGIC *
+S_get_aux_mg(pTHX_ AV *av) {
     dVAR;
     MAGIC *mg;
 
@@ -961,7 +961,20 @@ Perl_av_arylen_p(pTHX_ AV *av) {
 	/* sv_magicext won't set this for us because we pass in a NULL obj  */
 	mg->mg_flags |= MGf_REFCOUNTED;
     }
+    return mg;
+}
+
+SV **
+Perl_av_arylen_p(pTHX_ AV *av) {
+    MAGIC *const mg = get_aux_mg(av);
     return &(mg->mg_obj);
+}
+
+/* This will change to returning IV ** at some point soon */
+I32 *
+Perl_av_iter_p(pTHX_ AV *av) {
+    MAGIC *const mg = get_aux_mg(av);
+    return &(mg->mg_len);
 }
 
 /*

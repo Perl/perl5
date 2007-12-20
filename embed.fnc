@@ -115,6 +115,10 @@ Apd	|void	|av_undef	|NN AV* ar
 ApdoxM	|SV**	|av_create_and_unshift_one|NN AV **const avp|NN SV *const val
 Apd	|void	|av_unshift	|NN AV* ar|I32 num
 Apo	|SV**	|av_arylen_p	|NN AV* av
+AMpo	|I32*	|av_iter_p	|NN AV* av
+#if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
+s	|MAGIC*	|get_aux_mg	|NN AV *av
+#endif
 pR	|OP*	|bind_match	|I32 type|NN OP* left|NN OP* pat
 pR	|OP*	|block_end	|I32 floor|NULLOK OP* seq
 ApR	|I32	|block_gimme
@@ -1215,6 +1219,7 @@ pR	|OP*	|ck_substr	|NN OP *o
 pR	|OP*	|ck_svconst	|NN OP *o
 pR	|OP*	|ck_trunc	|NN OP *o
 pR	|OP*	|ck_unpack	|NN OP *o
+pR	|OP*	|ck_each	|NN OP *o
 sRn	|bool	|is_handle_constructor|NN const OP *o|I32 numargs
 sR	|I32	|is_list_assignment|NULLOK const OP *o
 #  ifdef USE_ITHREADS

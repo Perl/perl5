@@ -12,6 +12,7 @@ Perl_ck_concat
 Perl_ck_defined
 Perl_ck_delete
 Perl_ck_die
+Perl_ck_each
 Perl_ck_eof
 Perl_ck_eval
 Perl_ck_exec
@@ -174,6 +175,9 @@ Perl_pp_rv2av
 Perl_pp_aelemfast
 Perl_pp_aelem
 Perl_pp_aslice
+Perl_pp_aeach
+Perl_pp_akeys
+Perl_pp_avalues
 Perl_pp_each
 Perl_pp_values
 Perl_pp_keys

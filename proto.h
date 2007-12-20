@@ -189,6 +189,14 @@ PERL_CALLCONV void	Perl_av_unshift(pTHX_ AV* ar, I32 num)
 PERL_CALLCONV SV**	Perl_av_arylen_p(pTHX_ AV* av)
 			__attribute__nonnull__(pTHX_1);
 
+PERL_CALLCONV I32*	Perl_av_iter_p(pTHX_ AV* av)
+			__attribute__nonnull__(pTHX_1);
+
+#if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
+STATIC MAGIC*	S_get_aux_mg(pTHX_ AV *av)
+			__attribute__nonnull__(pTHX_1);
+
+#endif
 PERL_CALLCONV OP*	Perl_bind_match(pTHX_ I32 type, OP* left, OP* pat)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2)
@@ -3261,6 +3269,10 @@ PERL_CALLCONV OP*	Perl_ck_trunc(pTHX_ OP *o)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV OP*	Perl_ck_unpack(pTHX_ OP *o)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV OP*	Perl_ck_each(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 

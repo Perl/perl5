@@ -7892,6 +7892,27 @@ Perl_ck_substr(pTHX_ OP *o)
     return o;
 }
 
+OP *
+Perl_ck_each(pTHX_ OP *o)
+{
+
+    OP *kid = cLISTOPo->op_first;
+
+    if (kid->op_type == OP_PADAV || kid->op_type == OP_RV2AV) {
+	const unsigned new_type = o->op_type == OP_EACH ? OP_AEACH
+	    : o->op_type == OP_KEYS ? OP_AKEYS : OP_AVALUES;
+	o->op_type = new_type;
+	o->op_ppaddr = PL_ppaddr[new_type];
+    }
+    else if (!(kid->op_type == OP_PADHV || kid->op_type == OP_RV2HV
+	       || (kid->op_type == OP_CONST && kid->op_private & OPpCONST_BARE)
+	       )) {
+	bad_type(1, "hash or array", PL_op_desc[o->op_type], kid);
+	return o;
+    }
+    return ck_fun(o);
+}
+
 /* A peephole optimizer.  We visit the ops in the order they're to execute.
  * See the comments at the top of this file for more details about when
  * peep() is called */

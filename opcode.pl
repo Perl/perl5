@@ -91,6 +91,7 @@ my @raw_alias = (
 		 Perl_pp_sin => [qw(cos exp log sqrt)],
 		 Perl_pp_bit_or => ['bit_xor'],
 		 Perl_pp_rv2av => ['rv2hv'],
+		 Perl_pp_akeys => ['avalues'],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {
@@ -736,11 +737,15 @@ aelemfast	constant array element	ck_null		s$	A S
 aelem		array element		ck_null		s2	A S
 aslice		array slice		ck_null		m@	A L
 
+aeach		each on array		ck_each		%	A
+akeys		keys on array		ck_each		t%	A
+avalues		values on array		ck_each		t%	A
+
 # Hashes.
 
-each		each			ck_fun		%	H
-values		values			ck_fun		t%	H
-keys		keys			ck_fun		t%	H
+each		each			ck_each		%	H
+values		values			ck_each		t%	H
+keys		keys			ck_each		t%	H
 delete		delete			ck_delete	%	S
 exists		exists			ck_exists	is%	S
 rv2hv		hash dereference	ck_rvconst	dt1	

@@ -71,6 +71,11 @@
 #define av_store		Perl_av_store
 #define av_undef		Perl_av_undef
 #define av_unshift		Perl_av_unshift
+#if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define get_aux_mg		S_get_aux_mg
+#endif
+#endif
 #ifdef PERL_CORE
 #define bind_match		Perl_bind_match
 #define block_end		Perl_block_end
@@ -1204,6 +1209,7 @@
 #define ck_svconst		Perl_ck_svconst
 #define ck_trunc		Perl_ck_trunc
 #define ck_unpack		Perl_ck_unpack
+#define ck_each			Perl_ck_each
 #define is_handle_constructor	S_is_handle_constructor
 #define is_list_assignment	S_is_list_assignment
 #endif
@@ -1931,6 +1937,7 @@
 #define ck_defined		Perl_ck_defined
 #define ck_delete		Perl_ck_delete
 #define ck_die			Perl_ck_die
+#define ck_each			Perl_ck_each
 #define ck_eof			Perl_ck_eof
 #define ck_eval			Perl_ck_eval
 #define ck_exec			Perl_ck_exec
@@ -1971,6 +1978,7 @@
 #define pp_abs			Perl_pp_abs
 #define pp_accept		Perl_pp_accept
 #define pp_add			Perl_pp_add
+#define pp_aeach		Perl_pp_aeach
 #define pp_aelem		Perl_pp_aelem
 #define pp_aelemfast		Perl_pp_aelemfast
 #define pp_alarm		Perl_pp_alarm
@@ -2370,6 +2378,11 @@
 #define av_store(a,b,c)		Perl_av_store(aTHX_ a,b,c)
 #define av_undef(a)		Perl_av_undef(aTHX_ a)
 #define av_unshift(a,b)		Perl_av_unshift(aTHX_ a,b)
+#if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define get_aux_mg(a)		S_get_aux_mg(aTHX_ a)
+#endif
+#endif
 #ifdef PERL_CORE
 #define bind_match(a,b,c)	Perl_bind_match(aTHX_ a,b,c)
 #define block_end(a,b)		Perl_block_end(aTHX_ a,b)
@@ -3489,6 +3502,7 @@
 #define ck_svconst(a)		Perl_ck_svconst(aTHX_ a)
 #define ck_trunc(a)		Perl_ck_trunc(aTHX_ a)
 #define ck_unpack(a)		Perl_ck_unpack(aTHX_ a)
+#define ck_each(a)		Perl_ck_each(aTHX_ a)
 #define is_handle_constructor	S_is_handle_constructor
 #define is_list_assignment(a)	S_is_list_assignment(aTHX_ a)
 #endif
@@ -4231,6 +4245,7 @@
 #define ck_defined(a)		Perl_ck_defined(aTHX_ a)
 #define ck_delete(a)		Perl_ck_delete(aTHX_ a)
 #define ck_die(a)		Perl_ck_die(aTHX_ a)
+#define ck_each(a)		Perl_ck_each(aTHX_ a)
 #define ck_eof(a)		Perl_ck_eof(aTHX_ a)
 #define ck_eval(a)		Perl_ck_eval(aTHX_ a)
 #define ck_exec(a)		Perl_ck_exec(aTHX_ a)
@@ -4271,6 +4286,7 @@
 #define pp_abs()		Perl_pp_abs(aTHX)
 #define pp_accept()		Perl_pp_accept(aTHX)
 #define pp_add()		Perl_pp_add(aTHX)
+#define pp_aeach()		Perl_pp_aeach(aTHX)
 #define pp_aelem()		Perl_pp_aelem(aTHX)
 #define pp_aelemfast()		Perl_pp_aelemfast(aTHX)
 #define pp_alarm()		Perl_pp_alarm(aTHX)

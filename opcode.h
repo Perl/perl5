@@ -163,6 +163,9 @@ EXTCONST char* const PL_op_name[] = {
 	"aelemfast",
 	"aelem",
 	"aslice",
+	"aeach",
+	"akeys",
+	"avalues",
 	"each",
 	"values",
 	"keys",
@@ -532,6 +535,9 @@ EXTCONST char* const PL_op_desc[] = {
 	"constant array element",
 	"array element",
 	"array slice",
+	"each on array",
+	"keys on array",
+	"values on array",
 	"each",
 	"values",
 	"keys",
@@ -915,6 +921,9 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_aelemfast),
 	MEMBER_TO_FPTR(Perl_pp_aelem),
 	MEMBER_TO_FPTR(Perl_pp_aslice),
+	MEMBER_TO_FPTR(Perl_pp_aeach),
+	MEMBER_TO_FPTR(Perl_pp_akeys),
+	MEMBER_TO_FPTR(Perl_pp_akeys),	/* Perl_pp_avalues */
 	MEMBER_TO_FPTR(Perl_pp_each),
 	MEMBER_TO_FPTR(Perl_do_kv),	/* Perl_pp_values */
 	MEMBER_TO_FPTR(Perl_do_kv),	/* Perl_pp_keys */
@@ -1295,9 +1304,12 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* aelemfast */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* aelem */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* aslice */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* each */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* values */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* keys */
+	MEMBER_TO_FPTR(Perl_ck_each),	/* aeach */
+	MEMBER_TO_FPTR(Perl_ck_each),	/* akeys */
+	MEMBER_TO_FPTR(Perl_ck_each),	/* avalues */
+	MEMBER_TO_FPTR(Perl_ck_each),	/* each */
+	MEMBER_TO_FPTR(Perl_ck_each),	/* values */
+	MEMBER_TO_FPTR(Perl_ck_each),	/* keys */
 	MEMBER_TO_FPTR(Perl_ck_delete),	/* delete */
 	MEMBER_TO_FPTR(Perl_ck_exists),	/* exists */
 	MEMBER_TO_FPTR(Perl_ck_rvconst),	/* rv2hv */
@@ -1669,6 +1681,9 @@ EXTCONST U32 PL_opargs[] = {
 	0x00026c04,	/* aelemfast */
 	0x00026404,	/* aelem */
 	0x00046801,	/* aslice */
+	0x00007600,	/* aeach */
+	0x00007608,	/* akeys */
+	0x00007608,	/* avalues */
 	0x00009600,	/* each */
 	0x00009608,	/* values */
 	0x00009608,	/* keys */

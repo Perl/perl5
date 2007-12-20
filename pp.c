@@ -3929,6 +3929,67 @@ PP(pp_aslice)
     RETURN;
 }
 
+PP(pp_aeach)
+{
+    dVAR;
+    dSP;
+    AV *array = (AV*)POPs;
+    const I32 gimme = GIMME_V;
+    I32 *iterp = Perl_av_iter_p(aTHX_ array);
+    const IV current = (*iterp)++;
+
+    if (current > av_len(array)) {
+	*iterp = 0;
+	if (gimme == G_SCALAR)
+	    RETPUSHUNDEF;
+	else
+	    RETURN;
+    }
+
+    EXTEND(SP, 2);
+    mPUSHi(CopARYBASE_get(PL_curcop) + current);
+    if (gimme == G_ARRAY) {
+	SV **const element = av_fetch(array, current, 0);
+        PUSHs(element ? *element : &PL_sv_undef);
+    }
+    RETURN;
+}
+
+PP(pp_akeys)
+{
+    dVAR;
+    dSP;
+    AV *array = (AV*)POPs;
+    const I32 gimme = GIMME_V;
+
+    *Perl_av_iter_p(aTHX_ array) = 0;
+
+    if (gimme == G_SCALAR) {
+	dTARGET;
+	PUSHi(av_len(array) + 1);
+    }
+    else if (gimme == G_ARRAY) {
+        IV n = Perl_av_len(aTHX_ array);
+        IV i = CopARYBASE_get(PL_curcop);
+
+        EXTEND(SP, n + 1);
+
+	if (PL_op->op_type == OP_AKEYS) {
+	    n += i;
+	    for (;  i <= n;  i++) {
+		mPUSHi(i);
+	    }
+	}
+	else {
+	    for (i = 0;  i <= n;  i++) {
+		SV *const *const elem = Perl_av_fetch(aTHX_ array, i, 0);
+		PUSHs(elem ? *elem : &PL_sv_undef);
+	    }
+	}
+    }
+    RETURN;
+}
+
 /* Associative arrays. */
 
 PP(pp_each)
