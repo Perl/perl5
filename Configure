@@ -1328,7 +1328,7 @@ libswanted_uselargefiles=''
 : List of libraries we want.
 : If anyone needs extra -lxxx, put those in a hint file.
 libswanted="sfio socket bind inet nsl nm ndbm gdbm dbm db malloc dl dld ld sun"
-libswanted="$libswanted m crypt sec util c cposix posix ucb bsd BSD ssp"
+libswanted="$libswanted m crypt sec util c cposix posix ucb bsd BSD"
 : We probably want to search /usr/shlib before most other libraries.
 : This is only used by the lib/ExtUtils/MakeMaker.pm routine extliblist.
 glibpth=`echo " $glibpth " | sed -e 's! /usr/shlib ! !'`
