@@ -435,7 +435,13 @@
 #define magic_setfm		Perl_magic_setfm
 #define magic_sethint		Perl_magic_sethint
 #define magic_setisa		Perl_magic_setisa
+#endif
+#ifndef NO_MATHOMS
+#ifdef PERL_CORE
 #define magic_setglob		Perl_magic_setglob
+#endif
+#endif
+#ifdef PERL_CORE
 #define magic_setmglob		Perl_magic_setmglob
 #define magic_setnkeys		Perl_magic_setnkeys
 #define magic_setpack		Perl_magic_setpack
@@ -2747,7 +2753,13 @@
 #define magic_setfm(a,b)	Perl_magic_setfm(aTHX_ a,b)
 #define magic_sethint(a,b)	Perl_magic_sethint(aTHX_ a,b)
 #define magic_setisa(a,b)	Perl_magic_setisa(aTHX_ a,b)
+#endif
+#ifndef NO_MATHOMS
+#ifdef PERL_CORE
 #define magic_setglob(a,b)	Perl_magic_setglob(aTHX_ a,b)
+#endif
+#endif
+#ifdef PERL_CORE
 #define magic_setmglob(a,b)	Perl_magic_setmglob(aTHX_ a,b)
 #define magic_setnkeys(a,b)	Perl_magic_setnkeys(aTHX_ a,b)
 #define magic_setpack(a,b)	Perl_magic_setpack(aTHX_ a,b)

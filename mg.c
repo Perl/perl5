@@ -1943,30 +1943,6 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 }
 
 int
-Perl_magic_setglob(pTHX_ SV *sv, MAGIC *mg)
-{
-    GV* gv;
-    PERL_UNUSED_ARG(mg);
-
-    Perl_croak(aTHX_ "Perl_magic_setglob is dead code?");
-
-    if (!SvOK(sv))
-	return 0;
-    if (isGV_with_GP(sv)) {
-	/* We're actually already a typeglob, so don't need the stuff below.
-	 */
-	return 0;
-    }
-    gv =  gv_fetchsv(sv, GV_ADD, SVt_PVGV);
-    if (sv == (SV*)gv)
-	return 0;
-    if (GvGP(sv))
-	gp_free((GV*)sv);
-    GvGP(sv) = gp_ref(GvGP(gv));
-    return 0;
-}
-
-int
 Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
 {
     STRLEN len;

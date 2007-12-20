@@ -73,6 +73,7 @@ PERL_CALLCONV void Perl_sv_usepvn_mg(pTHX_ SV *sv, char *ptr, STRLEN len);
 PERL_CALLCONV void Perl_sv_usepvn(pTHX_ SV *sv, char *ptr, STRLEN len);
 PERL_CALLCONV int Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...);
 PERL_CALLCONV int Perl_printf_nocontext(const char *format, ...);
+PERL_CALLCONV int Perl_magic_setglob(pTHX_ SV* sv, MAGIC* mg);
 
 
 /* ref() is now a macro using Perl_doref;
@@ -1321,6 +1322,18 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 flags)
     }
     return (SV *) hv_common(hv, NULL, key, klen, k_flags, flags | HV_DELETE,
 			    NULL, 0);
+}
+
+/* Functions after here were made mathoms post 5.10.0 but pre 5.8.9 */
+int
+Perl_magic_setglob(pTHX_ SV *sv, MAGIC *mg)
+{
+    PERL_UNUSED_ARG(mg);
+    PERL_UNUSED_ARG(sv);
+
+    Perl_croak(aTHX_ "Perl_magic_setglob is dead code?");
+
+    return 0;
 }
 
 #endif /* NO_MATHOMS */
