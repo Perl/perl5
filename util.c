@@ -4176,10 +4176,6 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
     SV * const hv = newSVrv(rv, "version"); /* create an SV and upgrade the RV */
     (void)sv_upgrade(hv, SVt_PVHV); /* needs to be an HV type */
 
-#ifndef NODEFAULT_SHAREKEYS
-    HvSHAREKEYS_on(hv);         /* key-sharing on by default */
-#endif
-
     while (isSPACE(*s)) /* leading whitespace is OK */
 	s++;
 
@@ -4386,9 +4382,6 @@ Perl_new_version(pTHX_ SV *ver)
 	/* This will get reblessed later if a derived class*/
 	SV * const hv = newSVrv(rv, "version"); 
 	(void)sv_upgrade(hv, SVt_PVHV); /* needs to be an HV type */
-#ifndef NODEFAULT_SHAREKEYS
-	HvSHAREKEYS_on(hv);         /* key-sharing on by default */
-#endif
 
 	if ( SvROK(ver) )
 	    ver = SvRV(ver);
