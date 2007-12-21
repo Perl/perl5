@@ -1427,7 +1427,7 @@ Entries are returned in an apparently random order.  The actual random
 order is subject to change in future versions of perl, but it is
 guaranteed to be in the same order as either the C<keys> or C<values>
 function would produce on the same (unmodified) hash.  Since Perl
-5.8.1 the ordering is different even between different runs of Perl
+5.8.2 the ordering can be different even between different runs of Perl
 for security reasons (see L<perlsec/"Algorithmic Complexity Attacks">).
 
 When the hash is entirely read, a null array is returned in list context
