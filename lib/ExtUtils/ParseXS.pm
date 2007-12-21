@@ -941,7 +941,7 @@ EOF
   #-Wall: if there is no $Full_func_name there are no xsubs in this .xs
   #so `file' is unused
   print Q(<<"EOF") if $Full_func_name;
-#    char* file = __FILE__;
+#    const char* file = __FILE__;
 EOF
 
   print Q("#\n");
