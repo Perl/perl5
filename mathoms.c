@@ -1318,16 +1318,6 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 flags)
 }
 
 /* Functions after here were made mathoms post 5.10.0 but pre 5.8.9 */
-int
-Perl_magic_setglob(pTHX_ SV *sv, MAGIC *mg)
-{
-    PERL_UNUSED_ARG(mg);
-    PERL_UNUSED_ARG(sv);
-
-    Perl_croak(aTHX_ "Perl_magic_setglob is dead code?");
-
-    return 0;
-}
 
 AV *
 Perl_newAV(pTHX)
