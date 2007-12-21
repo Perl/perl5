@@ -497,6 +497,7 @@ Perl_mg_free(pTHX_ SV *sv)
 	if (mg->mg_flags & MGf_REFCOUNTED)
 	    SvREFCNT_dec(mg->mg_obj);
 	Safefree(mg);
+	SvMAGIC_set(sv, moremagic);
     }
     SvMAGIC_set(sv, NULL);
     return 0;
