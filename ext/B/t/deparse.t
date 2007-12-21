@@ -27,7 +27,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 54;
+use Test::More tests => 56;
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -384,3 +384,13 @@ $a = sub {
     return $x++;
 }
 ;
+####
+# SKIP ?$] < 5.011 && 'each @array not implemented on this Perl version'
+# 49 each @array;
+each @ARGV;
+each @$a;
+####
+# SKIP ?$] < 5.011 && 'each @array not implemented on this Perl version'
+# 50 keys @array; values @array
+keys @$a if keys @ARGV;
+values @ARGV if values @$a;
