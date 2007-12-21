@@ -252,7 +252,7 @@ char *strcpy(), *strcat();
 #define OSTAR		88
 
 #ifdef DOINIT
-char *opname[] = {
+const char *opname[] = {
     "0",
     "PROG",
     "JUNK",
@@ -345,7 +345,7 @@ char *opname[] = {
     "89"
 };
 #else
-extern char *opname[];
+extern const char *opname[];
 #endif
 
 EXT int mop INIT(1);
@@ -370,8 +370,8 @@ typedef struct htbl HASH;
 
 /* A string is TRUE if not "" or "0". */
 #define True(val) (tmps = (val), (*tmps && !(*tmps == '0' && !tmps[1])))
-EXT char *Yes INIT("1");
-EXT char *No INIT("");
+EXT const char *Yes INIT("1");
+EXT const char *No INIT("");
 
 #define str_get(str) (Str = (str), (Str->str_pok ? Str->str_ptr : str_2ptr(Str)))
 EXT STR *Str;
@@ -397,8 +397,8 @@ void putone ( void );
 int rememberargs ( int arg );
 char * scannum ( char *s );
 char * scanpat ( char *s );
-int string ( char *ptr, int len );
-void yyerror ( char *s );
+int string ( const char *ptr, int len );
+void yyerror ( const char *s );
 int yylex ( void );
 
 EXT int line INIT(0);
