@@ -1309,7 +1309,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
 	    AvMAX(sv)	= -1;
 	    AvFILLp(sv)	= -1;
 	    AvREAL_only(sv);
-	    if (old_type >= SVt_RV) {
+	    if (old_type_details->body_size) {
 		AvALLOC(sv) = 0;
 	    } else {
 		/* It will have been zeroed when the new body was allocated.
@@ -1323,7 +1323,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
 	    HvSHAREKEYS_on(sv);         /* key-sharing on by default */
 #endif
 	    HvMAX(sv) = 7; /* (start with 8 buckets) */
-	    if (old_type >= SVt_RV) {
+	    if (old_type_details->body_size) {
 		HvFILL(sv) = 0;
 	    } else {
 		/* It will have been zeroed when the new body was allocated.
