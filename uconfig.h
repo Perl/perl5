@@ -627,7 +627,13 @@
  *	This symbol, if defined, indicates to the C program that it should
  *	include <arpa/inet.h> to get inet_addr and friends declarations.
  */
-/*#define	I_ARPA_INET		/ **/
+#define	I_ARPA_INET		/**/
+
+/* I_ASSERT:
+ *	This symbol, if defined, indicates to the C program that it could
+ *	include <assert.h> to get the assert() macro.
+ */
+#define	I_ASSERT		/**/
 
 /* I_DBM:
  *	This symbol, if defined, indicates that <dbm.h> exists and should

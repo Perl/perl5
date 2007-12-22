@@ -640,6 +640,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_arpainet	I_ARPA_INET		/**/
 
+/* I_ASSERT:
+ *	This symbol, if defined, indicates to the C program that it could
+ *	include <assert.h> to get the assert() macro.
+ */
+#$i_assert	I_ASSERT		/**/
+
 /* I_DBM:
  *	This symbol, if defined, indicates that <dbm.h> exists and should
  *	be included.
