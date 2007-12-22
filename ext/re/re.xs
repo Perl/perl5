@@ -105,7 +105,7 @@ PPCODE:
                modifiers" in this scenario. 
             */
 
-            char *fptr = INT_PAT_MODS;
+            const char *fptr = INT_PAT_MODS;
             char ch;
             U16 match_flags = (U16)((re->extflags & PMf_COMPILETIME) >> 12);
 

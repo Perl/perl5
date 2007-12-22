@@ -321,7 +321,7 @@ MODULE = Devel::Peek		PACKAGE = Devel::Peek
 
 void
 mstat(str="Devel::Peek::mstat: ")
-char *str
+const char *str
 
 void
 fill_mstats(SV *sv, int level = 0)

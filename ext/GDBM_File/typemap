@@ -37,7 +37,8 @@ T_DATUM_V
 	    $var.dsize = (int)PL_na;
 	}
 	else {
-	    $var.dptr = \"\";
+	    $var.dptr = (char *)\"\";	
+	    /* better would be for .dptr to be const char * */
 	    $var.dsize = 0;
 	}
 OUTPUT

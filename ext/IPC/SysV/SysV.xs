@@ -222,7 +222,7 @@ BOOT:
     /*
      * constant subs for IPC::SysV
      */
-     struct { char *n; I32 v; } IPC__SysV__const[] = {
+     struct { const char *n; I32 v; } IPC__SysV__const[] = {
 #ifdef GETVAL
         {"GETVAL", GETVAL},
 #endif
@@ -434,7 +434,7 @@ BOOT:
         {"S_IRWXO", S_IRWXO},
 #endif
 	{Nullch,0}};
-    char *name;
+    const char *name;
     int i;
 
     for(i = 0 ; (name = IPC__SysV__const[i].n) ; i++) {

@@ -205,7 +205,7 @@ void
 dl_install_xsub(perl_name, symref, filename="$Package")
     char *		perl_name
     void *		symref 
-    char *		filename
+    const char *	filename
     CODE:
     ST(0) = sv_2mortal(newRV((SV*)newXS_flags(perl_name,
 					      (void(*)(pTHX_ CV *))symref,
