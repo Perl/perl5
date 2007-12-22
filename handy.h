@@ -19,23 +19,25 @@
 #endif
 #endif
 
-#define Null(type) ((type)NULL)
+#ifndef PERL_CORE
+#  define Null(type) ((type)NULL)
 
 /*
 =head1 Handy Values
 
 =for apidoc AmU||Nullch
-Null character pointer.
+Null character pointer. (No longer available when C<PERL_CORE> is defined.)
 
 =for apidoc AmU||Nullsv
-Null SV pointer.
+Null SV pointer. (No longer available when C<PERL_CORE> is defined.)
 
 =cut
 */
 
-#define Nullch Null(char*)
-#define Nullfp Null(PerlIO*)
-#define Nullsv Null(SV*)
+#  define Nullch Null(char*)
+#  define Nullfp Null(PerlIO*)
+#  define Nullsv Null(SV*)
+#endif
 
 #ifdef TRUE
 #undef TRUE

@@ -509,7 +509,7 @@ struct loop {
 #define cSVOPo_sv		cSVOPx_sv(o)
 #define kSVOP_sv		cSVOPx_sv(kid)
 
-#define Nullop Null(OP*)
+#define Nullop ((OP*)NULL)
 
 /* Lowest byte-and-a-bit of PL_opargs */
 #define OA_MARK 1

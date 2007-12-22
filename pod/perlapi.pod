@@ -1405,7 +1405,7 @@ Found in file av.h
 =item Nullch
 X<Nullch>
 
-Null character pointer.
+Null character pointer. (No longer available when C<PERL_CORE> is defined.)
 
 =for hackers
 Found in file handy.h
@@ -1429,7 +1429,7 @@ Found in file hv.h
 =item Nullsv
 X<Nullsv>
 
-Null SV pointer.
+Null SV pointer. (No longer available when C<PERL_CORE> is defined.)
 
 =for hackers
 Found in file handy.h

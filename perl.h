@@ -4723,6 +4723,11 @@ START_EXTERN_C
 END_EXTERN_C
 #endif
 
+#ifdef PERL_CORE
+/* All core uses now exterminated. Ensure no zombies can return:  */
+#  undef PL_na
+#endif
+
 #if defined(WIN32)
 /* Now all the config stuff is setup we can include embed.h */
 #  include "embed.h"
