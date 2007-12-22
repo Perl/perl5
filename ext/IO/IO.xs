@@ -205,7 +205,7 @@ MODULE = IO	PACKAGE = IO::File	PREFIX = f
 
 void
 new_tmpfile(packname = "IO::File")
-    char *	packname
+    const char * packname
     PREINIT:
 	OutputStream fp;
 	GV *gv;
