@@ -2,7 +2,8 @@
 #include "perl.h"
 #include "XSUB.h"
 #ifndef NO_PPPORT_H
-#   define NEED_sv_2pv_nolen
+#   define NEED_my_strlcpy
+#   define NEED_my_strlcat
 #   include "ppport.h"
 #endif
 
@@ -10,9 +11,8 @@
 #   include <unistd.h>
 #endif
 
-/* The realpath() implementation from OpenBSD 2.9 (realpath.c 1.4)
+/* The realpath() implementation from OpenBSD 3.9 to 4.2 (realpath.c 1.13)
  * Renamed here to bsd_realpath() to avoid library conflicts.
- * --jhi 2000-06-20 
  */
 
 /* See
@@ -22,11 +22,7 @@
  */
 
 /*
- * Copyright (c) 1994
- *	The Regents of the University of California.  All rights reserved.
- *
- * This code is derived from software contributed to Berkeley by
- * Jan-Simon Pendry.
+ * Copyright (c) 2003 Constantin S. Svintsoff <kostik@iclub.nsu.ru>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,14 +32,14 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the University nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * 3. The names of the authors may not be used to endorse or promote
+ *    products derived from this software without specific prior written
+ *    permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
  * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
@@ -53,10 +49,6 @@
  * SUCH DAMAGE.
  */
 
-#if defined(LIBC_SCCS) && !defined(lint)
-static char *rcsid = "$OpenBSD: realpath.c,v 1.4 1998/05/18 09:55:19 deraadt Exp $";
-#endif /* LIBC_SCCS and not lint */
-
 /* OpenBSD system #includes removed since the Perl ones should do. --jhi */
 
 #ifndef MAXSYMLINKS
@@ -64,7 +56,7 @@ static char *rcsid = "$OpenBSD: realpath.c,v 1.4 1998/05/18 09:55:19 deraadt Exp
 #endif
 
 /*
- * char *realpath(const char *path, char resolved_path[MAXPATHLEN]);
+ * char *realpath(const char *path, char resolved[MAXPATHLEN]);
  *
  * Find the real name of path, by removing all ".", ".." and symlink
  * components.  Returns (resolved) on success, or (NULL) on failure,
@@ -79,7 +71,8 @@ bsd_realpath(const char *path, char *resolved)
        return Perl_rmsexpand(aTHX_ (char*)path, resolved, NULL, 0);
 #else
 	int rootd, serrno;
-	char *p, *q, wbuf[MAXPATHLEN];
+	const char *p;
+	char *q, wbuf[MAXPATHLEN];
 	int symlinks = 0;
 
 	/* Save the starting point. */
@@ -112,17 +105,18 @@ bsd_realpath(const char *path, char *resolved)
 loop:
 	q = strrchr(resolved, '/');
 	if (q != NULL) {
+		const char *dir;
 		p = q + 1;
 		if (q == resolved)
-			q = "/";
+			dir = "/";
 		else {
 			do {
 				--q;
 			} while (q > resolved && *q == '/');
 			q[1] = '\0';
-			q = resolved;
+			dir = resolved;
 		}
-		if (chdir(q) < 0)
+		if (chdir(dir) < 0)
 			goto err1;
 	} else
 		p = resolved;
