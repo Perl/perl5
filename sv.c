@@ -1123,11 +1123,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
     if (old_type == new_type)
 	return;
 
-    if (old_type > new_type)
-	Perl_croak(aTHX_ "sv_upgrade from type %d down to type %d",
-		(int)old_type, (int)new_type);
-
-
     old_body = SvANY(sv);
 
     /* Copying structures onto other structures that have been neatly zeroed
@@ -1208,6 +1203,11 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
 	    Perl_croak(aTHX_ "Can't upgrade %s (%" UVuf ") to %" UVuf,
 		       sv_reftype(sv, 0), (UV) old_type, (UV) new_type);
     }
+
+    if (old_type > new_type)
+	Perl_croak(aTHX_ "sv_upgrade from type %d down to type %d",
+		(int)old_type, (int)new_type);
+
     new_type_details = bodies_by_type + new_type;
 
     SvFLAGS(sv) &= ~SVTYPEMASK;
@@ -1485,10 +1485,8 @@ Perl_sv_setiv(pTHX_ register SV *sv, IV i)
     SV_CHECK_THINKFIRST_COW_DROP(sv);
     switch (SvTYPE(sv)) {
     case SVt_NULL:
-	sv_upgrade(sv, SVt_IV);
-	break;
     case SVt_NV:
-	sv_upgrade(sv, SVt_PVNV);
+	sv_upgrade(sv, SVt_IV);
 	break;
     case SVt_RV:
     case SVt_PV:
