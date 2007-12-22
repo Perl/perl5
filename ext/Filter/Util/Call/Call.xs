@@ -53,7 +53,7 @@ filter_call(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
     dMY_CXT;
     SV   *my_sv = FILTER_DATA(idx);
-    char *nl = "\n";
+    const char *nl = "\n";
     char *p;
     char *out_ptr;
     int n;
@@ -245,7 +245,7 @@ filter_del()
 
 void
 unimport(package="$Package", ...)
-    char *package
+    const char *package
     PPCODE:
     filter_del(filter_call);
 
