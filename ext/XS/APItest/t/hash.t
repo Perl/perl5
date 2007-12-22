@@ -49,13 +49,16 @@ main_tests (\@keys, \@testkeys, ' [utf8 hash]');
 {
   my %h = (a=>'cheat');
   tie %h, 'Tie::StdHash';
-  is (XS::APItest::Hash::store(\%h, chr 258,  1), undef);
+  # is bug 36327 fixed?
+  my $result = ($] > 5.009) ? undef : 1;
+
+  is (XS::APItest::Hash::store(\%h, chr 258,  1), $result);
     
   ok (!exists $h{$utf8_for_258},
       "hv_store doesn't insert a key with the raw utf8 on a tied hash");
 }
 
-{
+if ($] > 5.009) {
     my $strtab = strtab();
     is (ref $strtab, 'HASH', "The shared string table quacks like a hash");
     my $wibble = "\0";
@@ -382,19 +385,28 @@ sub test_store {
 
   my $class = tied %$hash;
 
-  my %h1 = @$defaults;
-  my %h2 = @$defaults;
+  # It's important to do this with nice new hashes created each time round
+  # the loop, rather than hashes in the pad, which get recycled, and may have
+  # xhv_array non-NULL
+  my $h1 = {@$defaults};
+  my $h2 = {@$defaults};
   if (defined $class) {
-    tie %h1, ref $class;
-    tie %h2, ref $class;
-    $HV_STORE_IS_CRAZY = undef;
+    tie %$h1, ref $class;
+    tie %$h2, ref $class;
+    if ($] > 5.009) {
+      # bug 36327 is fixed
+      $HV_STORE_IS_CRAZY = undef;
+    } else {
+      # HV store_ent returns 1 if there was already underlying hash storage
+      $HV_STORE_IS_CRAZY = undef unless @$defaults;
+    }
   }
-  is (XS::APItest::Hash::store_ent(\%h1, $key, 1), $HV_STORE_IS_CRAZY,
-      "hv_store_ent$message $printable"); 
-  ok (brute_force_exists (\%h1, $key), "hv_store_ent$message $printable");
-  is (XS::APItest::Hash::store(\%h2, $key,  1), $HV_STORE_IS_CRAZY,
+  is (XS::APItest::Hash::store_ent($h1, $key, 1), $HV_STORE_IS_CRAZY,
+      "hv_store_ent$message $printable");
+  ok (brute_force_exists ($h1, $key), "hv_store_ent$message $printable");
+  is (XS::APItest::Hash::store($h2, $key,  1), $HV_STORE_IS_CRAZY,
       "hv_store$message $printable");
-  ok (brute_force_exists (\%h2, $key), "hv_store$message $printable");
+  ok (brute_force_exists ($h2, $key), "hv_store$message $printable");
 }
 
 sub test_fetch_present {
