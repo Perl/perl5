@@ -4092,7 +4092,7 @@ XS(XS_OS2_pipe)
 	Perl_croak(aTHX_ "Usage: OS2::pipe(pszName, ulOpenMode, connect= 1, count= 1, ulInbufLength= 8192, ulOutbufLength= ulInbufLength, ulPipeMode= count | NP_NOWAIT | NP_TYPE_BYTE | NP_READMODE_BYTE, ulTimeout= 0)");
     {
 	ULONG	RETVAL;
-	PCSZ	pszName = ( SvOK(ST(0)) ? (PCSZ)SvPV(ST(0),PL_na) : NULL );
+	PCSZ	pszName = ( SvOK(ST(0)) ? (PCSZ)SvPV_nolen(ST(0)) : NULL );
 	HPIPE	hpipe;
 	SV	*OpenMode = ST(1);
 	ULONG	ulOpenMode;
@@ -4450,7 +4450,7 @@ XS(XS_OS2_open)
 	ULONG rc;
 #line 113 "pipe.c"
 	ULONG	RETVAL;
-	PCSZ	pszFileName = ( SvOK(ST(0)) ? (PCSZ)SvPV(ST(0),PL_na) : NULL );
+	PCSZ	pszFileName = ( SvOK(ST(0)) ? (PCSZ)SvPV_nolen(ST(0)) : NULL );
 	HFILE	hFile;
 	ULONG	ulAction;
 	ULONG	ulOpenMode = (ULONG)SvUV(ST(1));

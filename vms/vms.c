@@ -12673,8 +12673,7 @@ mod2fname(pTHX_ CV *cv)
     if (counter) {
       strcat(work_name, "__");
     }
-    strcat(work_name, SvPV(*av_fetch(in_array, counter, FALSE),
-			   PL_na));
+    strcat(work_name, SvPV_nolen(*av_fetch(in_array, counter, FALSE)));
   }
 
   /* Check to see if we actually have to bother...*/

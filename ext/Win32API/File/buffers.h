@@ -214,7 +214,7 @@
 #define null_arg(sv)	(  SvROK(sv)  &&  SVt_PVAV == SvTYPE(SvRV(sv))	\
 			   &&  -1 == av_len((AV*)SvRV(sv))  )
 
-#define PV_or_null(sv)	( null_arg(sv) ? NULL : SvPV(sv,PL_na) )
+#define PV_or_null(sv)	( null_arg(sv) ? NULL : SvPV_nolen(sv) )
 
 /* Minimum buffer size to use when no buffer existed: */
 #define MIN_GROW_SIZE	128
@@ -233,7 +233,7 @@
 
 /* Whether the buffer size we got lets us change what buffer size we use: */
 #define autosize(sv)	(!(  SvOK(sv)  &&  ! SvROK(sv)		\
-			 &&  SvPV(sv,PL_na)  &&  '=' == *SvPV(sv,PL_na)  ))
+			 &&  SvPV_nolen(sv)  &&  '=' == *SvPV_nolen(sv)  ))
 
 /* Get the IV/UV for a parameter that might be C<[]> or C<undef>: */
 #define optIV(sv)	( null_arg(sv) ? 0 : !SvOK(sv) ? 0 : SvIV(sv) )
@@ -259,7 +259,7 @@
 /* Initialize a buffer size argument of type DWORD: */
 #define init_buf_l( svSize )						\
 	(  null_arg(svSize) ? 0 : autosize(svSize) ? optUV(svSize)	\
-	   : strtoul( 1+SvPV(svSize,PL_na), NULL, 10 )  )
+	   : strtoul( 1+SvPV_nolen(svSize), NULL, 10 )  )
 /* In INPUT section put "= init_buf_l($arg);" after variable name. */
 
 /* Lengths in WCHARs are initialized the same as lengths in bytes: */

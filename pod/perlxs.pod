@@ -562,7 +562,7 @@ and $type can be used as in typemaps.
 
      bool_t
      rpcb_gettime(host,timep)
-          char *host = (char *)SvPV($arg,PL_na);
+          char *host = (char *)SvPV_nolen($arg);
           time_t &timep = 0;
         OUTPUT:
           timep
@@ -589,7 +589,7 @@ Here's a truly obscure example:
      bool_t
      rpcb_gettime(host,timep)
           time_t &timep; /* \$v{timep}=@{[$v{timep}=$arg]} */
-          char *host + SvOK($v{timep}) ? SvPV($arg,PL_na) : NULL;
+          char *host + SvOK($v{timep}) ? SvPV_nolen($arg) : NULL;
         OUTPUT:
           timep
 
