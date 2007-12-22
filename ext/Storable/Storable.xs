@@ -1682,7 +1682,7 @@ static SV *pkg_fetchmeth(
         pTHX_
 	HV *cache,
 	HV *pkg,
-	char *method)
+	const char *method)
 {
 	GV *gv;
 	SV *sv;
@@ -1722,7 +1722,7 @@ static void pkg_hide(
         pTHX_
 	HV *cache,
 	HV *pkg,
-	char *method)
+	const char *method)
 {
 	const char *hvname = HvNAME_get(pkg);
 	(void) hv_store(cache,
@@ -1738,7 +1738,7 @@ static void pkg_uncache(
         pTHX_
 	HV *cache,
 	HV *pkg,
-	char *method)
+	const char *method)
 {
 	const char *hvname = HvNAME_get(pkg);
 	(void) hv_delete(cache, hvname, strlen(hvname), G_DISCARD);
@@ -1756,7 +1756,7 @@ static SV *pkg_can(
         pTHX_
 	HV *cache,
 	HV *pkg,
-	char *method)
+	const char *method)
 {
 	SV **svh;
 	SV *sv;
