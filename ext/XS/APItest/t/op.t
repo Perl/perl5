@@ -11,6 +11,10 @@ BEGIN {
     print "1..0 # Skip: XS::APItest was not built\n";
     exit 0;
   }
+  if ($] < 5.009) {
+    print "1..0 # Skip: hints hash not present before 5.10.0\n";
+    exit 0;
+  }
 }
 
 use strict;

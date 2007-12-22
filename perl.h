@@ -5561,6 +5561,7 @@ typedef struct am_table_short AMTS;
 #define START_MY_CXT	static my_cxt_t my_cxt;
 #define dMY_CXT_SV	dNOOP
 #define dMY_CXT		dNOOP
+#define dMY_CXT_INTERP(my_perl)	dNOOP
 #define MY_CXT_INIT	NOOP
 #define MY_CXT_CLONE	NOOP
 #define MY_CXT		my_cxt
