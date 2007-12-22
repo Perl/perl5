@@ -18,7 +18,7 @@ INPUT
 T_DATUM_K
 	{
 	    STRLEN len;
-3B	    DBM_ckFilter($arg, filter_store_key, \"filter_store_key\");
+	    DBM_ckFilter($arg, filter_store_key, \"filter_store_key\");
 	    $var.dptr = SvPVbyte($arg, len);
 	    $var.dsize = (int)len;
 	}
