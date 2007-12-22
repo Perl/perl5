@@ -42,7 +42,8 @@ T_DATUM_V
 	    $var.dsize = (int)len;
 	}
 	else {
-	    $var.dptr = \"\";
+	    $var.dptr = (char *)\"\";	
+	    /* better would be for .dptr to be const char * */
 	    $var.dsize = 0;
 	}
 OUTPUT

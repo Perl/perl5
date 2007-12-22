@@ -410,7 +410,7 @@ MODULE = SigSet		PACKAGE = POSIX::SigSet		PREFIX = sig
 
 POSIX::SigSet
 new(packname = "POSIX::SigSet", ...)
-    char *		packname
+    const char *	packname
     CODE:
 	{
 	    int i;
@@ -455,7 +455,7 @@ MODULE = Termios	PACKAGE = POSIX::Termios	PREFIX = cf
 
 POSIX::Termios
 new(packname = "POSIX::Termios", ...)
-    char *		packname
+    const char *	packname
     CODE:
 	{
 #ifdef I_TERMIOS
