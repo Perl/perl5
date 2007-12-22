@@ -1,8 +1,18 @@
-# IPC::Msg.pm
+################################################################################
 #
-# Copyright (c) 1997 Graham Barr <gbarr@pobox.com>. All rights reserved.
-# This program is free software; you can redistribute it and/or
-# modify it under the same terms as Perl itself.
+#  $Revision: 17 $
+#  $Author: mhx $
+#  $Date: 2007/10/15 20:29:06 +0200 $
+#
+################################################################################
+#
+#  Version 2.x, Copyright (C) 2007, Marcus Holland-Moritz <mhx@cpan.org>.
+#  Version 1.x, Copyright (C) 1997, Graham Barr <gbarr@pobox.com>.
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the same terms as Perl itself.
+#
+################################################################################
 
 package IPC::Msg;
 
@@ -11,8 +21,11 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 
-$VERSION = "1.02";
+$VERSION = do { my @r = '$Snapshot: /IPC-SysV/1.99_07 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 $VERSION = eval $VERSION;
+
+# Figure out if we have support for native sized types
+my $N = do { my $foo = eval { pack "L!", 0 }; $@ ? '' : '!' };
 
 {
     package IPC::Msg::stat;
@@ -91,14 +104,14 @@ sub rcv {
     msgrcv($$self,$buf,$_[1],$_[2] || 0, $_[3] || 0) or
 	return;
     my $type;
-    ($type,$_[0]) = unpack("l! a*",$buf);
+    ($type,$_[0]) = unpack("l$N a*",$buf);
     $type;
 }
 
 sub snd {
     @_ <= 4 && @_ >= 3 or  croak '$msg->snd( TYPE, BUF, FLAGS )';
     my $self = shift;
-    msgsnd($$self,pack("l! a*",$_[0],$_[1]), $_[2] || 0);
+    msgsnd($$self,pack("l$N a*",$_[0],$_[1]), $_[2] || 0);
 }
 
 
@@ -115,7 +128,7 @@ IPC::Msg - SysV Msg IPC object class
     use IPC::SysV qw(IPC_PRIVATE S_IRUSR S_IWUSR);
     use IPC::Msg;
 
-    $msg = new IPC::Msg(IPC_PRIVATE, S_IRUSR | S_IWUSR);
+    $msg = IPC::Msg->new(IPC_PRIVATE, S_IRUSR | S_IWUSR);
 
     $msg->snd(pack("l! a*",$msgtype,$msg));
 
@@ -146,8 +159,8 @@ C<KEY> is equal to C<IPC_PRIVATE>
 
 =item *
 
-C<KEY> does not already  have  a  message queue
-associated with it, and C<I<FLAGS> & IPC_CREAT> is true.
+C<KEY> does not already have a message queue associated with
+it, and C<I<FLAGS> & IPC_CREAT> is true.
 
 =back
 
@@ -212,17 +225,21 @@ of these fields see you system documentation.
 
 =head1 SEE ALSO
 
-L<IPC::SysV> L<Class::Struct>
+L<IPC::SysV>, L<Class::Struct>
 
-=head1 AUTHOR
+=head1 AUTHORS
 
-Graham Barr <gbarr@pobox.com>
+Graham Barr <gbarr@pobox.com>,
+Marcus Holland-Moritz <mhx@cpan.org>
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997 Graham Barr. All rights reserved.
-This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
+Version 2.x, Copyright (C) 2007, Marcus Holland-Moritz.
+
+Version 1.x, Copyright (c) 1997, Graham Barr.
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
 
 =cut
 
