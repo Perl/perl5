@@ -79,7 +79,8 @@ bsd_realpath(const char *path, char *resolved)
        return Perl_rmsexpand(aTHX_ (char*)path, resolved, NULL, 0);
 #else
 	int rootd, serrno;
-	char *p, *q, wbuf[MAXPATHLEN];
+	const char *p;
+	char *q, wbuf[MAXPATHLEN];
 	int symlinks = 0;
 
 	/* Save the starting point. */
@@ -112,17 +113,18 @@ bsd_realpath(const char *path, char *resolved)
 loop:
 	q = strrchr(resolved, '/');
 	if (q != NULL) {
+		const char *dir;
 		p = q + 1;
 		if (q == resolved)
-			q = "/";
+			dir = "/";
 		else {
 			do {
 				--q;
 			} while (q > resolved && *q == '/');
 			q[1] = '\0';
-			q = resolved;
+			dir = resolved;
 		}
-		if (chdir(q) < 0)
+		if (chdir(dir) < 0)
 			goto err1;
 	} else
 		p = resolved;
