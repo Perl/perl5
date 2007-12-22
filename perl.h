@@ -3760,13 +3760,21 @@ Gid_t getegid (void);
 #define PERL_MAGIC_arylen_p	  '@' /* to move arylen out of XPVAV */
 #define PERL_MAGIC_ext		  '~' /* Available for use by extensions */
 
+#if defined(DEBUGGING) && defined(I_ASSERT)
+#  include <assert.h>
+#endif
 
-#ifndef assert  /* <assert.h> might have been included somehow */
-#define assert(what)	PERL_DEB( 					\
+/* Keep the old croak based assert for those who want it, and as a fallback if
+   the platform is so hertically non-ANSI that it can't assert.  */
+
+#define Perl_assert(what)	PERL_DEB( 				\
 	((what) ? ((void) 0) :						\
 	    (Perl_croak_nocontext("Assertion %s failed: file \"" __FILE__ \
 			"\", line %d", STRINGIFY(what), __LINE__),	\
 	    (void) 0)))
+
+#ifndef assert
+#  define assert(what)	Perl_assert(what)
 #endif
 
 struct ufuncs {
