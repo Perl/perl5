@@ -1,33 +1,52 @@
+/*******************************************************************************
+*
+*  $Revision: 31 $
+*  $Author: mhx $
+*  $Date: 2007/12/29 19:46:18 +0100 $
+*
+********************************************************************************
+*
+*  Version 2.x, Copyright (C) 2007, Marcus Holland-Moritz <mhx@cpan.org>.
+*  Version 1.x, Copyright (C) 1999, Graham Barr <gbarr@pobox.com>.
+*
+*  This program is free software; you can redistribute it and/or
+*  modify it under the same terms as Perl itself.
+*
+*******************************************************************************/
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
 
+#define NEED_sv_2pv_flags
+#define NEED_sv_pvn_force_flags
+#include "ppport.h"
+
 #include <sys/types.h>
+
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-#ifndef HAS_SEM
-#   include <sys/ipc.h>
-#endif
-#   ifdef HAS_MSG
-#       include <sys/msg.h>
-#   endif
-#   ifdef HAS_SHM
-#       if defined(PERL_SCO) || defined(PERL_ISC)
-#           include <sys/sysmacros.h>	/* SHMLBA */
-#       endif
-#      include <sys/shm.h>
-#      ifndef HAS_SHMAT_PROTOTYPE
-           extern Shmat_t shmat (int, char *, int);
-#      endif
-#      if defined(HAS_SYSCONF) && defined(_SC_PAGESIZE)
-#          undef  SHMLBA /* not static: determined at boot time */
-#          define SHMLBA sysconf(_SC_PAGESIZE)
-#      elif defined(HAS_GETPAGESIZE)
-#          undef  SHMLBA /* not static: determined at boot time */
-#          define SHMLBA getpagesize()
-#      elif defined(__linux__)
-#          include <asm/page.h>          
-#      endif
-#   endif
+#  ifndef HAS_SEM
+#    include <sys/ipc.h>
+#  endif
+#  ifdef HAS_MSG
+#    include <sys/msg.h>
+#  endif
+#  ifdef HAS_SHM
+#    if defined(PERL_SCO) || defined(PERL_ISC)
+#      include <sys/sysmacros.h>	/* SHMLBA */
+#    endif
+#    include <sys/shm.h>
+#    ifndef HAS_SHMAT_PROTOTYPE
+       extern Shmat_t shmat(int, char *, int);
+#    endif
+#    if defined(HAS_SYSCONF) && defined(_SC_PAGESIZE)
+#      undef  SHMLBA /* not static: determined at boot time */
+#      define SHMLBA sysconf(_SC_PAGESIZE)
+#    elif defined(HAS_GETPAGESIZE)
+#      undef  SHMLBA /* not static: determined at boot time */
+#      define SHMLBA getpagesize()
+#    endif
+#  endif
 #endif
 
 /* Required to get 'struct pte' for SHMLBA on ULTRIX. */
@@ -39,20 +58,70 @@
  * Ugly.  More beautiful solutions welcome.
  * Shouting at BSDI sounds quite beautiful. */
 #ifdef __bsdi__
-#   include <vm/vm_param.h>	/* move upwards under HAS_SHM? */
+#  include <vm/vm_param.h>	/* move upwards under HAS_SHM? */
 #endif
 
 #ifndef S_IRWXU
-#   ifdef S_IRUSR
-#       define S_IRWXU (S_IRUSR|S_IWUSR|S_IXUSR)
-#       define S_IRWXG (S_IRGRP|S_IWGRP|S_IXGRP)
-#       define S_IRWXO (S_IROTH|S_IWOTH|S_IXOTH)
-#   else
-#       define S_IRWXU 0700
-#       define S_IRWXG 0070
-#       define S_IRWXO 0007
-#   endif
+#  ifdef S_IRUSR
+#    define S_IRWXU (S_IRUSR|S_IWUSR|S_IXUSR)
+#    define S_IRWXG (S_IRGRP|S_IWGRP|S_IXGRP)
+#    define S_IRWXO (S_IROTH|S_IWOTH|S_IXOTH)
+#  else
+#    define S_IRWXU 0700
+#    define S_IRWXG 0070
+#    define S_IRWXO 0007
+#  endif
 #endif
+
+#define AV_FETCH_IV(ident, av, index)                         \
+        STMT_START {                                          \
+          SV **svp;                                           \
+          if ((svp = av_fetch((av), (index), FALSE)) != NULL) \
+            ident = SvIV(*svp);                               \
+        } STMT_END
+
+#define AV_STORE_IV(ident, av, index)                         \
+          av_store((av), (index), newSViv(ident))
+
+static const char *s_fmt_not_isa = "Method %s not called a %s object";
+static const char *s_bad_length = "Bad arg length for %s, length is %d, should be %d";
+static const char *s_sysv_unimpl PERL_UNUSED_DECL
+                                 = "System V %sxxx is not implemented on this machine";
+
+static const char *s_pkg_msg = "IPC::Msg::stat";
+static const char *s_pkg_sem = "IPC::Semaphore::stat";
+static const char *s_pkg_shm = "IPC::SharedMem::stat";
+
+static void *sv2addr(SV *sv)
+{
+  if (SvPOK(sv) && SvCUR(sv) == sizeof(void *))
+  {
+    return *((void **) SvPVX(sv));
+  }
+
+  croak("invalid address value");
+
+  return 0;
+}
+
+static void assert_sv_isa(SV *sv, const char *name, const char *method)
+{
+  if (!sv_isa(sv, name))
+  {
+    croak(s_fmt_not_isa, method, name);
+  }
+}
+
+static void assert_data_length(const char *name, int got, int expected)
+{
+  if (got != expected)
+  {
+    croak(s_bad_length, name, got, expected);
+  }
+}
+
+#include "const-c.inc"
+
 
 MODULE=IPC::SysV	PACKAGE=IPC::Msg::stat
 
@@ -62,383 +131,286 @@ void
 pack(obj)
     SV	* obj
 PPCODE:
-{
+  {
 #ifdef HAS_MSG
-    SV *sv;
+    AV *list = (AV*) SvRV(obj);
     struct msqid_ds ds;
-    AV *list = (AV*)SvRV(obj);
-    sv = *av_fetch(list,0,TRUE); ds.msg_perm.uid = SvIV(sv);
-    sv = *av_fetch(list,1,TRUE); ds.msg_perm.gid = SvIV(sv);
-    sv = *av_fetch(list,4,TRUE); ds.msg_perm.mode = SvIV(sv);
-    sv = *av_fetch(list,6,TRUE); ds.msg_qbytes = SvIV(sv);
-    ST(0) = sv_2mortal(newSVpvn((char *)&ds,sizeof(ds)));
+    assert_sv_isa(obj, s_pkg_msg, "pack");
+    AV_FETCH_IV(ds.msg_perm.uid , list,  0);
+    AV_FETCH_IV(ds.msg_perm.gid , list,  1);
+    AV_FETCH_IV(ds.msg_perm.cuid, list,  2);
+    AV_FETCH_IV(ds.msg_perm.cgid, list,  3);
+    AV_FETCH_IV(ds.msg_perm.mode, list,  4);
+    AV_FETCH_IV(ds.msg_qnum     , list,  5);
+    AV_FETCH_IV(ds.msg_qbytes   , list,  6);
+    AV_FETCH_IV(ds.msg_lspid    , list,  7);
+    AV_FETCH_IV(ds.msg_lrpid    , list,  8);
+    AV_FETCH_IV(ds.msg_stime    , list,  9);
+    AV_FETCH_IV(ds.msg_rtime    , list, 10);
+    AV_FETCH_IV(ds.msg_ctime    , list, 11);
+    ST(0) = sv_2mortal(newSVpvn((char *) &ds, sizeof(ds)));
     XSRETURN(1);
 #else
-    croak("System V msgxxx is not implemented on this machine");
+    croak(s_sysv_unimpl, "msg");
 #endif
-}
+  }
 
 void
-unpack(obj,buf)
-    SV * obj
-    SV * buf
-PPCODE:
-{
-#ifdef HAS_MSG
-    STRLEN len;
-    SV **sv_ptr;
-    struct msqid_ds *ds = (struct msqid_ds *)SvPV(buf,len);
-    AV *list = (AV*)SvRV(obj);
-    if (len != sizeof(*ds)) {
-	croak("Bad arg length for %s, length is %d, should be %d",
-		    "IPC::Msg::stat",
-		    len, sizeof(*ds));
-    }
-    sv_ptr = av_fetch(list,0,TRUE);
-    sv_setiv(*sv_ptr, ds->msg_perm.uid);
-    sv_ptr = av_fetch(list,1,TRUE);
-    sv_setiv(*sv_ptr, ds->msg_perm.gid);
-    sv_ptr = av_fetch(list,2,TRUE);
-    sv_setiv(*sv_ptr, ds->msg_perm.cuid);
-    sv_ptr = av_fetch(list,3,TRUE);
-    sv_setiv(*sv_ptr, ds->msg_perm.cgid);
-    sv_ptr = av_fetch(list,4,TRUE);
-    sv_setiv(*sv_ptr, ds->msg_perm.mode);
-    sv_ptr = av_fetch(list,5,TRUE);
-    sv_setiv(*sv_ptr, ds->msg_qnum);
-    sv_ptr = av_fetch(list,6,TRUE);
-    sv_setiv(*sv_ptr, ds->msg_qbytes);
-    sv_ptr = av_fetch(list,7,TRUE);
-    sv_setiv(*sv_ptr, ds->msg_lspid);
-    sv_ptr = av_fetch(list,8,TRUE);
-    sv_setiv(*sv_ptr, ds->msg_lrpid);
-    sv_ptr = av_fetch(list,9,TRUE);
-    sv_setiv(*sv_ptr, ds->msg_stime);
-    sv_ptr = av_fetch(list,10,TRUE);
-    sv_setiv(*sv_ptr, ds->msg_rtime);
-    sv_ptr = av_fetch(list,11,TRUE);
-    sv_setiv(*sv_ptr, ds->msg_ctime);
-    XSRETURN(1);
-#else
-    croak("System V msgxxx is not implemented on this machine");
-#endif
-}
-
-MODULE=IPC::SysV	PACKAGE=IPC::Semaphore::stat
-
-void
-unpack(obj,ds)
+unpack(obj, ds)
     SV * obj
     SV * ds
 PPCODE:
-{
-#ifdef HAS_SEM
+  {
+#ifdef HAS_MSG
+    AV *list = (AV*) SvRV(obj);
     STRLEN len;
-    AV *list = (AV*)SvRV(obj);
-    struct semid_ds *data = (struct semid_ds *)SvPV(ds,len);
-    if(!sv_isa(obj, "IPC::Semaphore::stat"))
-	croak("method %s not called a %s object",
-		"unpack","IPC::Semaphore::stat");
-    if (len != sizeof(*data)) {
-	croak("Bad arg length for %s, length is %d, should be %d",
-		    "IPC::Semaphore::stat",
-		    len, sizeof(*data));
-    }
-    sv_setiv(*av_fetch(list,0,TRUE), data[0].sem_perm.uid);
-    sv_setiv(*av_fetch(list,1,TRUE), data[0].sem_perm.gid);
-    sv_setiv(*av_fetch(list,2,TRUE), data[0].sem_perm.cuid);
-    sv_setiv(*av_fetch(list,3,TRUE), data[0].sem_perm.cgid);
-    sv_setiv(*av_fetch(list,4,TRUE), data[0].sem_perm.mode);
-    sv_setiv(*av_fetch(list,5,TRUE), data[0].sem_ctime);
-    sv_setiv(*av_fetch(list,6,TRUE), data[0].sem_otime);
-    sv_setiv(*av_fetch(list,7,TRUE), data[0].sem_nsems);
+    const struct msqid_ds *data = (struct msqid_ds *) SvPV_const(ds, len);
+    assert_sv_isa(obj, s_pkg_msg, "unpack");
+    assert_data_length(s_pkg_msg, len, sizeof(*data));
+    AV_STORE_IV(data->msg_perm.uid , list,  0);
+    AV_STORE_IV(data->msg_perm.gid , list,  1);
+    AV_STORE_IV(data->msg_perm.cuid, list,  2);
+    AV_STORE_IV(data->msg_perm.cgid, list,  3);
+    AV_STORE_IV(data->msg_perm.mode, list,  4);
+    AV_STORE_IV(data->msg_qnum     , list,  5);
+    AV_STORE_IV(data->msg_qbytes   , list,  6);
+    AV_STORE_IV(data->msg_lspid    , list,  7);
+    AV_STORE_IV(data->msg_lrpid    , list,  8);
+    AV_STORE_IV(data->msg_stime    , list,  9);
+    AV_STORE_IV(data->msg_rtime    , list, 10);
+    AV_STORE_IV(data->msg_ctime    , list, 11);
     XSRETURN(1);
 #else
-    croak("System V semxxx is not implemented on this machine");
+    croak(s_sysv_unimpl, "msg");
 #endif
-}
+  }
+
+
+MODULE=IPC::SysV	PACKAGE=IPC::Semaphore::stat
+
+PROTOTYPES: ENABLE
 
 void
 pack(obj)
     SV	* obj
 PPCODE:
-{
+  {
 #ifdef HAS_SEM
-    SV **sv_ptr;
+    AV *list = (AV*) SvRV(obj);
     struct semid_ds ds;
-    AV *list = (AV*)SvRV(obj);
-    if(!sv_isa(obj, "IPC::Semaphore::stat"))
-	croak("method %s not called a %s object",
-		"pack","IPC::Semaphore::stat");
-    if((sv_ptr = av_fetch(list,0,TRUE)) && *sv_ptr)
-	ds.sem_perm.uid = SvIV(*sv_ptr);
-    if((sv_ptr = av_fetch(list,1,TRUE)) && *sv_ptr)
-	ds.sem_perm.gid = SvIV(*sv_ptr);
-    if((sv_ptr = av_fetch(list,2,TRUE)) && *sv_ptr)
-	ds.sem_perm.cuid = SvIV(*sv_ptr);
-    if((sv_ptr = av_fetch(list,3,TRUE)) && *sv_ptr)
-	ds.sem_perm.cgid = SvIV(*sv_ptr);
-    if((sv_ptr = av_fetch(list,4,TRUE)) && *sv_ptr)
-	ds.sem_perm.mode = SvIV(*sv_ptr);
-    if((sv_ptr = av_fetch(list,5,TRUE)) && *sv_ptr)
-	ds.sem_ctime = SvIV(*sv_ptr);
-    if((sv_ptr = av_fetch(list,6,TRUE)) && *sv_ptr)
-	ds.sem_otime = SvIV(*sv_ptr);
-    if((sv_ptr = av_fetch(list,7,TRUE)) && *sv_ptr)
-	ds.sem_nsems = SvIV(*sv_ptr);
-    ST(0) = sv_2mortal(newSVpvn((char *)&ds,sizeof(ds)));
+    assert_sv_isa(obj, s_pkg_sem, "pack");
+    AV_FETCH_IV(ds.sem_perm.uid , list, 0);
+    AV_FETCH_IV(ds.sem_perm.gid , list, 1);
+    AV_FETCH_IV(ds.sem_perm.cuid, list, 2);
+    AV_FETCH_IV(ds.sem_perm.cgid, list, 3);
+    AV_FETCH_IV(ds.sem_perm.mode, list, 4);
+    AV_FETCH_IV(ds.sem_ctime    , list, 5);
+    AV_FETCH_IV(ds.sem_otime    , list, 6);
+    AV_FETCH_IV(ds.sem_nsems    , list, 7);
+    ST(0) = sv_2mortal(newSVpvn((char *) &ds, sizeof(ds)));
     XSRETURN(1);
 #else
-    croak("System V semxxx is not implemented on this machine");
+    croak(s_sysv_unimpl, "sem");
 #endif
-}
+  }
+
+void
+unpack(obj, ds)
+    SV * obj
+    SV * ds
+PPCODE:
+  {
+#ifdef HAS_SEM
+    AV *list = (AV*) SvRV(obj);
+    STRLEN len;
+    const struct semid_ds *data = (struct semid_ds *) SvPV_const(ds, len);
+    assert_sv_isa(obj, s_pkg_sem, "unpack");
+    assert_data_length(s_pkg_sem, len, sizeof(*data));
+    AV_STORE_IV(data->sem_perm.uid , list, 0);
+    AV_STORE_IV(data->sem_perm.gid , list, 1);
+    AV_STORE_IV(data->sem_perm.cuid, list, 2);
+    AV_STORE_IV(data->sem_perm.cgid, list, 3);
+    AV_STORE_IV(data->sem_perm.mode, list, 4);
+    AV_STORE_IV(data->sem_ctime    , list, 5);
+    AV_STORE_IV(data->sem_otime    , list, 6);
+    AV_STORE_IV(data->sem_nsems    , list, 7);
+    XSRETURN(1);
+#else
+    croak(s_sysv_unimpl, "sem");
+#endif
+  }
+
+
+MODULE=IPC::SysV	PACKAGE=IPC::SharedMem::stat
+
+PROTOTYPES: ENABLE
+
+void
+pack(obj)
+    SV	* obj
+PPCODE:
+  {
+#ifdef HAS_SHM
+    AV *list = (AV*) SvRV(obj);
+    struct shmid_ds ds;
+    assert_sv_isa(obj, s_pkg_shm, "pack");
+    AV_FETCH_IV(ds.shm_perm.uid , list,  0);
+    AV_FETCH_IV(ds.shm_perm.gid , list,  1);
+    AV_FETCH_IV(ds.shm_perm.cuid, list,  2);
+    AV_FETCH_IV(ds.shm_perm.cgid, list,  3);
+    AV_FETCH_IV(ds.shm_perm.mode, list,  4);
+    AV_FETCH_IV(ds.shm_segsz    , list,  5);
+    AV_FETCH_IV(ds.shm_lpid     , list,  6);
+    AV_FETCH_IV(ds.shm_cpid     , list,  7);
+    AV_FETCH_IV(ds.shm_nattch   , list,  8);
+    AV_FETCH_IV(ds.shm_atime    , list,  9);
+    AV_FETCH_IV(ds.shm_dtime    , list, 10);
+    AV_FETCH_IV(ds.shm_ctime    , list, 11);
+    ST(0) = sv_2mortal(newSVpvn((char *) &ds, sizeof(ds)));
+    XSRETURN(1);
+#else
+    croak(s_sysv_unimpl, "shm");
+#endif
+  }
+
+void
+unpack(obj, ds)
+    SV * obj
+    SV * ds
+PPCODE:
+  {
+#ifdef HAS_SHM
+    AV *list = (AV*) SvRV(obj);
+    STRLEN len;
+    const struct shmid_ds *data = (struct shmid_ds *) SvPV_const(ds, len);
+    assert_sv_isa(obj, s_pkg_shm, "unpack");
+    assert_data_length(s_pkg_shm, len, sizeof(*data));
+    AV_STORE_IV(data->shm_perm.uid , list,  0);
+    AV_STORE_IV(data->shm_perm.gid , list,  1);
+    AV_STORE_IV(data->shm_perm.cuid, list,  2);
+    AV_STORE_IV(data->shm_perm.cgid, list,  3);
+    AV_STORE_IV(data->shm_perm.mode, list,  4);
+    AV_STORE_IV(data->shm_segsz    , list,  5);
+    AV_STORE_IV(data->shm_lpid     , list,  6);
+    AV_STORE_IV(data->shm_cpid     , list,  7);
+    AV_STORE_IV(data->shm_nattch   , list,  8);
+    AV_STORE_IV(data->shm_atime    , list,  9);
+    AV_STORE_IV(data->shm_dtime    , list, 10);
+    AV_STORE_IV(data->shm_ctime    , list, 11);
+    XSRETURN(1);
+#else
+    croak(s_sysv_unimpl, "shm");
+#endif
+  }
+
 
 MODULE=IPC::SysV	PACKAGE=IPC::SysV
 
+PROTOTYPES: ENABLE
+
 void
-ftok(path, id)
-        char *          path
-        int             id
-    CODE:
+ftok(path, id = &PL_sv_undef)
+    const char *path
+    SV *id
+  PREINIT:
+    int proj_id = 1;
+    key_t k;
+  CODE:
 #if defined(HAS_SEM) || defined(HAS_SHM)
-        key_t k = ftok(path, id);
-        ST(0) = k == (key_t) -1 ? &PL_sv_undef : sv_2mortal(newSViv(k));
+    if (SvOK(id))
+    {
+      if (SvIOK(id))
+      {
+        proj_id = (int) SvIVX(id);
+      }
+      else if (SvPOK(id) && SvCUR(id) == sizeof(char))
+      {
+        proj_id = (int) *SvPVX(id);
+      }
+      else
+      {
+        croak("invalid project id");
+      }
+    }
+
+    k = ftok(path, proj_id);
+    ST(0) = k == (key_t) -1 ? &PL_sv_undef : sv_2mortal(newSViv(k));
+    XSRETURN(1);
 #else
-	Perl_die(aTHX_ PL_no_func, "ftok"); return;
+    Perl_die(aTHX_ PL_no_func, "ftok"); return;
 #endif
 
 void
-SHMLBA()
-    CODE:
-#ifdef SHMLBA
-    ST(0) = sv_2mortal(newSViv(SHMLBA));
-#else
-    croak("SHMLBA is not defined on this architecture");
-#endif
-
-BOOT:
-{
-    HV *stash = gv_stashpvn("IPC::SysV", 9, GV_ADD);
-    /*
-     * constant subs for IPC::SysV
-     */
-     struct { char *n; I32 v; } IPC__SysV__const[] = {
-#ifdef GETVAL
-        {"GETVAL", GETVAL},
-#endif
-#ifdef GETPID
-        {"GETPID", GETPID},
-#endif
-#ifdef GETNCNT
-        {"GETNCNT", GETNCNT},
-#endif
-#ifdef GETZCNT
-        {"GETZCNT", GETZCNT},
-#endif
-#ifdef GETALL
-        {"GETALL", GETALL},
-#endif
-#ifdef IPC_ALLOC
-        {"IPC_ALLOC", IPC_ALLOC},
-#endif
-#ifdef IPC_CREAT
-        {"IPC_CREAT", IPC_CREAT},
-#endif
-#ifdef IPC_EXCL
-        {"IPC_EXCL", IPC_EXCL},
-#endif
-#ifdef IPC_GETACL
-        {"IPC_GETACL", IPC_GETACL},
-#endif
-#ifdef IPC_LOCKED
-        {"IPC_LOCKED", IPC_LOCKED},
-#endif
-#ifdef IPC_M
-        {"IPC_M", IPC_M},
-#endif
-#ifdef IPC_NOERROR
-        {"IPC_NOERROR", IPC_NOERROR},
-#endif
-#ifdef IPC_NOWAIT
-        {"IPC_NOWAIT", IPC_NOWAIT},
-#endif
-#ifdef IPC_PRIVATE
-        {"IPC_PRIVATE", IPC_PRIVATE},
-#endif
-#ifdef IPC_R
-        {"IPC_R", IPC_R},
-#endif
-#ifdef IPC_RMID
-        {"IPC_RMID", IPC_RMID},
-#endif
-#ifdef IPC_SET
-        {"IPC_SET", IPC_SET},
-#endif
-#ifdef IPC_SETACL
-        {"IPC_SETACL", IPC_SETACL},
-#endif
-#ifdef IPC_SETLABEL
-        {"IPC_SETLABEL", IPC_SETLABEL},
-#endif
-#ifdef IPC_STAT
-        {"IPC_STAT", IPC_STAT},
-#endif
-#ifdef IPC_W
-        {"IPC_W", IPC_W},
-#endif
-#ifdef IPC_WANTED
-        {"IPC_WANTED", IPC_WANTED},
-#endif
-#ifdef MSG_NOERROR
-        {"MSG_NOERROR", MSG_NOERROR},
-#endif
-#ifdef MSG_FWAIT
-        {"MSG_FWAIT", MSG_FWAIT},
-#endif
-#ifdef MSG_LOCKED
-        {"MSG_LOCKED", MSG_LOCKED},
-#endif
-#ifdef MSG_MWAIT
-        {"MSG_MWAIT", MSG_MWAIT},
-#endif
-#ifdef MSG_WAIT
-        {"MSG_WAIT", MSG_WAIT},
-#endif
-#ifdef MSG_R
-        {"MSG_R", MSG_R},
-#endif
-#ifdef MSG_RWAIT
-        {"MSG_RWAIT", MSG_RWAIT},
-#endif
-#ifdef MSG_STAT
-        {"MSG_STAT", MSG_STAT},
-#endif
-#ifdef MSG_W
-        {"MSG_W", MSG_W},
-#endif
-#ifdef MSG_WWAIT
-        {"MSG_WWAIT", MSG_WWAIT},
-#endif
-#ifdef SEM_A
-        {"SEM_A", SEM_A},
-#endif
-#ifdef SEM_ALLOC
-        {"SEM_ALLOC", SEM_ALLOC},
-#endif
-#ifdef SEM_DEST
-        {"SEM_DEST", SEM_DEST},
-#endif
-#ifdef SEM_ERR
-        {"SEM_ERR", SEM_ERR},
-#endif
-#ifdef SEM_R
-        {"SEM_R", SEM_R},
-#endif
-#ifdef SEM_ORDER
-        {"SEM_ORDER", SEM_ORDER},
-#endif
-#ifdef SEM_UNDO
-        {"SEM_UNDO", SEM_UNDO},
-#endif
-#ifdef SETVAL
-        {"SETVAL", SETVAL},
-#endif
-#ifdef SETALL
-        {"SETALL", SETALL},
-#endif
-#ifdef SHM_CLEAR
-        {"SHM_CLEAR", SHM_CLEAR},
-#endif
-#ifdef SHM_COPY
-        {"SHM_COPY", SHM_COPY},
-#endif
-#ifdef SHM_DCACHE
-        {"SHM_DCACHE", SHM_DCACHE},
-#endif
-#ifdef SHM_DEST
-        {"SHM_DEST", SHM_DEST},
-#endif
-#ifdef SHM_ECACHE
-        {"SHM_ECACHE", SHM_ECACHE},
-#endif
-#ifdef SHM_FMAP
-        {"SHM_FMAP", SHM_FMAP},
-#endif
-#ifdef SHM_ICACHE
-        {"SHM_ICACHE", SHM_ICACHE},
-#endif
-#ifdef SHM_INIT
-        {"SHM_INIT", SHM_INIT},
-#endif
-#ifdef SHM_LOCK
-        {"SHM_LOCK", SHM_LOCK},
-#endif
-#ifdef SHM_LOCKED
-        {"SHM_LOCKED", SHM_LOCKED},
-#endif
-#ifdef SHM_MAP
-        {"SHM_MAP", SHM_MAP},
-#endif
-#ifdef SHM_NOSWAP
-        {"SHM_NOSWAP", SHM_NOSWAP},
-#endif
-#ifdef SHM_RDONLY
-        {"SHM_RDONLY", SHM_RDONLY},
-#endif
-#ifdef SHM_REMOVED
-        {"SHM_REMOVED", SHM_REMOVED},
-#endif
-#ifdef SHM_RND
-        {"SHM_RND", SHM_RND},
-#endif
-#ifdef SHM_SHARE_MMU
-        {"SHM_SHARE_MMU", SHM_SHARE_MMU},
-#endif
-#ifdef SHM_SHATTR
-        {"SHM_SHATTR", SHM_SHATTR},
-#endif
-#ifdef SHM_SIZE
-        {"SHM_SIZE", SHM_SIZE},
-#endif
-#ifdef SHM_UNLOCK
-        {"SHM_UNLOCK", SHM_UNLOCK},
-#endif
-#ifdef SHM_W
-        {"SHM_W", SHM_W},
-#endif
-#ifdef S_IRUSR
-        {"S_IRUSR", S_IRUSR},
-#endif
-#ifdef S_IWUSR
-        {"S_IWUSR", S_IWUSR},
-#endif
-#ifdef S_IRWXU
-        {"S_IRWXU", S_IRWXU},
-#endif
-#ifdef S_IRGRP
-        {"S_IRGRP", S_IRGRP},
-#endif
-#ifdef S_IWGRP
-        {"S_IWGRP", S_IWGRP},
-#endif
-#ifdef S_IRWXG
-        {"S_IRWXG", S_IRWXG},
-#endif
-#ifdef S_IROTH
-        {"S_IROTH", S_IROTH},
-#endif
-#ifdef S_IWOTH
-        {"S_IWOTH", S_IWOTH},
-#endif
-#ifdef S_IRWXO
-        {"S_IRWXO", S_IRWXO},
-#endif
-	{Nullch,0}};
-    char *name;
-    int i;
-
-    for(i = 0 ; (name = IPC__SysV__const[i].n) ; i++) {
-	newCONSTSUB(stash,name, newSViv(IPC__SysV__const[i].v));
+memread(addr, sv, pos, size)
+    SV *addr
+    SV *sv
+    int pos
+    int size
+  CODE:
+    char *caddr = (char *) sv2addr(addr);
+    char *dst;
+    if (!SvOK(sv))
+    {
+      sv_setpvn(sv, "", 0);
     }
-}
+    SvPV_force_nolen(sv);
+    dst = SvGROW(sv, (STRLEN) size + 1);
+    Copy(caddr + pos, dst, size, char);
+    SvCUR_set(sv, size);
+    *SvEND(sv) = '\0';
+    SvSETMAGIC(sv);
+#ifndef INCOMPLETE_TAINTS
+    /* who knows who has been playing with this memory? */
+    SvTAINTED_on(sv);
+#endif
+    XSRETURN_YES;
+
+void
+memwrite(addr, sv, pos, size)
+    SV *addr
+    SV *sv
+    int pos
+    int size
+  CODE:
+    char *caddr = (char *) sv2addr(addr);
+    STRLEN len;
+    const char *src = SvPV_const(sv, len);
+    int n = ((int) len > size) ? size : (int) len;
+    Copy(src, caddr + pos, n, char);
+    if (n < size)
+    {
+      memzero(caddr + pos + n, size - n);
+    }
+    XSRETURN_YES;
+
+void
+shmat(id, addr, flag)
+    int id
+    SV *addr
+    int flag
+  CODE:
+#ifdef HAS_SHM
+    void *caddr = SvOK(addr) ? sv2addr(addr) : NULL;
+    void *shm = (void *) shmat(id, caddr, flag);
+    ST(0) = shm == (void *) -1 ? &PL_sv_undef
+                               : sv_2mortal(newSVpvn((char *) &shm, sizeof(void *)));
+    XSRETURN(1);
+#else
+    Perl_die(aTHX_ PL_no_func, "shmat"); return;
+#endif
+
+void
+shmdt(addr)
+    SV *addr
+  CODE:
+#ifdef HAS_SHM
+    void *caddr = sv2addr(addr);
+    int rv = shmdt(caddr);
+    ST(0) = rv == -1 ? &PL_sv_undef : sv_2mortal(newSViv(rv));
+    XSRETURN(1);
+#else
+    Perl_die(aTHX_ PL_no_func, "shmdt"); return;
+#endif
+
+INCLUDE: const-xs.inc
 

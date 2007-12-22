@@ -1,65 +1,109 @@
+################################################################################
+#
+#  $Revision: 10 $
+#  $Author: mhx $
+#  $Date: 2007/10/22 13:10:24 +0200 $
+#
+################################################################################
+#
+#  Version 2.x, Copyright (C) 2007, Marcus Holland-Moritz <mhx@cpan.org>.
+#  Version 1.x, Copyright (C) 1999, Graham Barr <gbarr@pobox.com>.
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the same terms as Perl itself.
+#
+################################################################################
+
 BEGIN {
+  if ($ENV{'PERL_CORE'}) {
     chdir 't' if -d 't';
+    @INC = '../lib' if -d '../lib' && -d '../ext';
+  }
 
-    @INC = '../lib';
+  require Test::More; import Test::More;
+  require Config; import Config;
 
-    require Config; import Config;
+  if ($ENV{'PERL_CORE'} && $Config{'extensions'} !~ m[\bIPC/SysV\b]) {
+    plan(skip_all => 'IPC::SysV was not built');
+  }
+}
 
-    my $reason;
-
-    if ($Config{'extensions'} !~ /\bIPC\/SysV\b/) {
-      $reason = 'IPC::SysV was not built';
-    } elsif ($Config{'d_sem'} ne 'define') {
-      $reason = '$Config{d_sem} undefined';
-    } elsif ($Config{'d_msg'} ne 'define') {
-      $reason = '$Config{d_msg} undefined';
-    }
-    if ($reason) {
-	print "1..0 # Skip: $reason\n";
-	exit 0;
-    }
+if ($Config{'d_sem'} ne 'define') {
+  plan(skip_all => '$Config{d_sem} undefined');
+} elsif ($Config{'d_msg'} ne 'define') {
+  plan(skip_all => '$Config{d_msg} undefined');
 }
 
 use IPC::SysV qw(IPC_PRIVATE IPC_RMID IPC_NOWAIT IPC_STAT S_IRWXU S_IRWXG S_IRWXO);
+use strict;
 
 use IPC::Msg;
 #Creating a message queue
 
-print "1..9\n";
+my $msq = sub {
+  my $code = shift;
+  if (exists $SIG{SYS}) {
+    local $SIG{SYS} = sub { plan(skip_all => "SIGSYS caught") };
+    return $code->();
+  }
+  return $code->();
+}->(sub { new IPC::Msg(IPC_PRIVATE, S_IRWXU | S_IRWXG | S_IRWXO) });
 
-my $msq =
-    new IPC::Msg(IPC_PRIVATE, S_IRWXU | S_IRWXG | S_IRWXO)
-    || die "msgget: ",$!+0," $!\n";
-	
-print "ok 1\n";
+unless (defined $msq) {
+  my $info = "IPC::Msg->new failed: $!";
+  if ($! == &IPC::SysV::ENOSPC || $! == &IPC::SysV::ENOSYS) {
+    plan(skip_all => $info);
+  }
+  else {
+    die $info;
+  }
+}
+
+plan(tests => 9);
+
+pass('create message queue');
 
 #Putting a message on the queue
-$msgtype = 1;
-$msg = "hello";
-print $msq->snd($msgtype,$msg,IPC_NOWAIT) ? "ok 2\n" : "not ok 2 # $!\n";
+my $test_name = 'enqueue message';
+
+my $msgtype = 1;
+my $msg = "hello";
+if ($msq->snd($msgtype,$msg,IPC_NOWAIT)) {
+  pass($test_name);
+}
+else {
+  print "# snd: $!\n";
+  fail($test_name);
+}
 
 #Check if there are messages on the queue
-$ds = $msq->stat() or print "not ";
-print "ok 3\n";
+my $ds = $msq->stat;
+ok($ds, 'stat');
 
-print "not " unless $ds && $ds->qnum() == 1;
-print "ok 4\n";
+if ($ds) {
+  is($ds->qnum, 1, 'qnum');
+}
+else {
+  fail('qnum');
+}
 
-#Retreiving a message from the queue
-$rmsgtype = 0; # Give me any type
-$rmsgtype = $msq->rcv($rmsg,256,$rmsgtype,IPC_NOWAIT) || print "not ";
-print "ok 5\n";
+#Retrieving a message from the queue
+my $rmsg;
+my $rmsgtype = 0; # Give me any type
+$rmsgtype = $msq->rcv($rmsg,256,$rmsgtype,IPC_NOWAIT);
+is($rmsgtype, $msgtype, 'rmsgtype');
+is($rmsg, $msg, 'rmsg');
 
-print "not " unless $rmsgtype == $msgtype && $rmsg eq $msg;
-print "ok 6\n";
+$ds = $msq->stat;
+ok($ds, 'stat');
 
-$ds = $msq->stat() or print "not ";
-print "ok 7\n";
-
-print "not " unless $ds && $ds->qnum() == 0;
-print "ok 8\n";
+if ($ds) {
+  is($ds->qnum, 0, 'qnum');
+}
+else {
+  fail('qnum');
+}
 
 END {
-	(defined $msq && $msq->remove) || print "not ";
-	print "ok 9\n";
+  ok($msq->remove, 'remove message') if defined $msq;
 }
