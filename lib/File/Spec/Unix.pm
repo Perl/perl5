@@ -3,7 +3,7 @@ package File::Spec::Unix;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '3.2501';
+$VERSION = '3.2701';
 
 =head1 NAME
 
@@ -41,6 +41,7 @@ actually traverse the filesystem cleaning up paths like this.
 
 sub canonpath {
     my ($self,$path) = @_;
+    return unless defined $path;
     
     # Handle POSIX-style node names beginning with double slash (qnx, nto)
     # (POSIX says: "a pathname that begins with two successive slashes

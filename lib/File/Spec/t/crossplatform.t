@@ -7,7 +7,7 @@ use Test::More;
 local $|=1;
 
 my @platforms = qw(Cygwin Epoc Mac OS2 Unix VMS Win32);
-my $tests_per_platform = 7;
+my $tests_per_platform = 10;
 
 plan tests => 1 + @platforms * $tests_per_platform;
 
@@ -56,6 +56,17 @@ foreach my $platform (@platforms) {
 
     is $module->file_name_is_absolute($base), 1, "$base is absolute on $platform";
 
+    # splitdir('') -> ()
+    my @result = $module->splitdir('');
+    is @result, 0, "$platform->splitdir('') -> ()";
+
+    # canonpath() -> undef
+    $result = $module->canonpath();
+    is $result, undef, "$platform->canonpath() -> undef";
+
+    # canonpath(undef) -> undef
+    $result = $module->canonpath(undef);
+    is $result, undef, "$platform->canonpath(undef) -> undef";
 
     # abs2rel('A:/foo/bar', 'A:/foo')    ->  'bar'
     $file = $module->catpath($v, $module->catdir($module->rootdir, 'foo', 'bar'), 'file');

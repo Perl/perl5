@@ -68,7 +68,7 @@ use Time::HiRes qw(gettimeofday);
 
 my $have_alarm = $Config{d_alarm};
 my $have_fork  = $Config{d_fork};
-my $waitfor = 180; # 30-45 seconds is normal (load affects this).
+my $waitfor = 360; # 30-45 seconds is normal (load affects this).
 my $timer_pid;
 my $TheEnd;
 
@@ -502,13 +502,14 @@ if ($have_ualarm && $] >= 5.008001) {
     };
 
     # Next setup a periodic timer (the two-argument alarm() of
-    # Time::HiRes, behind the curtains the libc ualarm()) which has
-    # a signal handler that takes so much time (on the first initial
-    # invocation) that the first periodic invocation (second invocation)
-    # will happen before the first invocation has finished.  In Perl 5.8.0
-    # the "safe signals" concept was implemented, with unfortunately at least
-    # one bug that caused a core dump on reentering the handler. This bug
-    # was fixed by the time of Perl 5.8.1.
+    # Time::HiRes, behind the curtains the libc getitimer() or
+    # ualarm()) which has a signal handler that takes so much time (on
+    # the first initial invocation) that the first periodic invocation
+    # (second invocation) will happen before the first invocation has
+    # finished.  In Perl 5.8.0 the "safe signals" concept was
+    # implemented, with unfortunately at least one bug that caused a
+    # core dump on reentering the handler. This bug was fixed by the
+    # time of Perl 5.8.1.
 
     # Do not try mixing sleep() and alarm() for testing this.
 
@@ -620,6 +621,16 @@ if ($have_clock) {
     skip 33;
 }
 
+sub bellish {  # Cheap emulation of a bell curve.
+    my ($min, $max) = @_;
+    my $rand = ($max - $min) / 5;
+    my $sum = 0; 
+    for my $i (0..4) {
+	$sum += rand($rand);
+    }
+    return $min + $sum;
+}
+
 if ($have_ualarm) {
     # 1_100_000 sligthly over 1_000_000,
     # 2_200_000 slightly over 2**31/1000,
@@ -629,21 +640,29 @@ if ($have_ualarm) {
 	       [36, 2_200_000],
 	       [37, 4_300_000]) {
 	my ($i, $n) = @$t;
-	my $alarmed = 0;
-	local $SIG{ ALRM } = sub { $alarmed++ };
-	my $t0 = Time::HiRes::time();
-	print "# t0 = $t0\n";
-	print "# ualarm($n)\n";
-	ualarm($n); 1 while $alarmed == 0;
-	my $t1 = Time::HiRes::time();
-	print "# t1 = $t1\n";
-	my $dt = $t1 - $t0;
-	print "# dt = $dt\n";
-	my $r = $dt / ($n/1e6);
-	print "# r = $r\n";
-	ok $i,
-	($n < 1_000_000 || # Too much noise.
-	 $r >= 0.8 && $r <= 1.6), "ualarm($n) close enough";
+	my $ok;
+	for my $retry (1..10) {
+	    my $alarmed = 0;
+	    local $SIG{ ALRM } = sub { $alarmed++ };
+	    my $t0 = Time::HiRes::time();
+	    print "# t0 = $t0\n";
+	    print "# ualarm($n)\n";
+	    ualarm($n); 1 while $alarmed == 0;
+	    my $t1 = Time::HiRes::time();
+	    print "# t1 = $t1\n";
+	    my $dt = $t1 - $t0;
+	    print "# dt = $dt\n";
+	    my $r = $dt / ($n/1e6);
+	    print "# r = $r\n";
+	    $ok =
+		($n < 1_000_000 || # Too much noise.
+		 ($r >= 0.8 && $r <= 1.6));
+	    last if $ok;
+	    my $nap = bellish(3, 15);
+	    printf "# Retrying in %.1f seconds...\n", $nap;
+	    Time::HiRes::sleep($nap);
+	}
+	ok $i, $ok, "ualarm($n) close enough";
     }
 } else {
     print "# No ualarm\n";

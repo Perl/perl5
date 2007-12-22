@@ -135,16 +135,11 @@ foreach my $func (qw(cwd getcwd fastcwd fastgetcwd)) {
 # Cwd::chdir should also update $ENV{PWD}
 dir_ends_with( $ENV{PWD}, $Test_Dir, 'Cwd::chdir() updates $ENV{PWD}' );
 my $updir = File::Spec->updir;
-Cwd::chdir $updir;
-print "#$ENV{PWD}\n";
-Cwd::chdir $updir;
-print "#$ENV{PWD}\n";
-Cwd::chdir $updir;
-print "#$ENV{PWD}\n";
-Cwd::chdir $updir;
-print "#$ENV{PWD}\n";
-Cwd::chdir $updir;
-print "#$ENV{PWD}\n";
+
+for (1..@test_dirs) {
+  Cwd::chdir $updir;
+  print "#$ENV{PWD}\n";
+}
 
 rmtree($test_dirs[0], 0, 0);
 

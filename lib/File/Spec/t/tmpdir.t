@@ -14,9 +14,8 @@ File::Spec->tmpdir;
 ok scalar keys %ENV, $num_keys, "tmpdir() shouldn't change the contents of %ENV";
 
 if ($^O eq 'VMS') {
-  skip('Can\'t make list assignment to \%ENV on this system', 1);
-}
-else {
+  skip("Can't make list assignment to %ENV on this system", 1);
+} else {
   local %ENV;
   File::Spec::Win32->tmpdir;
   ok scalar keys %ENV, 0, "Win32->tmpdir() shouldn't change the contents of %ENV";

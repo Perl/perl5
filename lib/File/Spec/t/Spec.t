@@ -191,10 +191,10 @@ if ($^O eq 'MacOS') {
 [ "Win32->catdir('\\d1','d2')",             '\\d1\\d2'         ],
 [ "Win32->catdir('\\d1','\\d2')",           '\\d1\\d2'         ],
 [ "Win32->catdir('\\d1','\\d2\\')",         '\\d1\\d2'         ],
-[ "Win32->catdir('','/d1','d2')",           '\\\\d1\\d2'         ],
-[ "Win32->catdir('','','/d1','d2')",        '\\\\\\d1\\d2'       ],
-[ "Win32->catdir('','//d1','d2')",          '\\\\\\d1\\d2'       ],
-[ "Win32->catdir('','','//d1','d2')",       '\\\\\\\\d1\\d2'     ],
+[ "Win32->catdir('','/d1','d2')",           '\\d1\\d2'         ],
+[ "Win32->catdir('','','/d1','d2')",        '\\d1\\d2'         ],
+[ "Win32->catdir('','//d1','d2')",          '\\d1\\d2'         ],
+[ "Win32->catdir('','','//d1','d2')",       '\\d1\\d2'         ],
 [ "Win32->catdir('','d1','','d2','')",      '\\d1\\d2'           ],
 [ "Win32->catdir('','d1','d2','d3','')",    '\\d1\\d2\\d3'       ],
 [ "Win32->catdir('d1','d2','d3','')",       'd1\\d2\\d3'         ],
@@ -206,13 +206,16 @@ if ($^O eq 'MacOS') {
 [ "Win32->catdir('A:/d1','B:/d2','d3','')", 'A:\\d1\\B:\\d2\\d3' ],
 [ "Win32->catdir('A:/')",                   'A:\\'               ],
 [ "Win32->catdir('\\', 'foo')",             '\\foo'              ],
-
+[ "Win32->catdir('','','..')",              '\\'                 ],
+[ "Win32->catdir('A:', 'foo')",             'A:\\foo'            ],
 
 [ "Win32->catfile('a','b','c')",        'a\\b\\c' ],
 [ "Win32->catfile('a','b','.\\c')",      'a\\b\\c'  ],
 [ "Win32->catfile('.\\a','b','c')",      'a\\b\\c'  ],
 [ "Win32->catfile('c')",                'c' ],
 [ "Win32->catfile('.\\c')",              'c' ],
+[ "Win32->catfile('a/..','../b')",       '..\\b' ],
+[ "Win32->catfile('A:', 'foo')",         'A:\\foo'            ],
 
 
 [ "Win32->canonpath('')",               ''                    ],
@@ -224,9 +227,9 @@ if ($^O eq 'MacOS') {
 [ "Win32->canonpath('//a\\b//c')",      '\\\\a\\b\\c'         ],
 [ "Win32->canonpath('/a/..../c')",      '\\a\\....\\c'        ],
 [ "Win32->canonpath('//a/b\\c')",       '\\\\a\\b\\c'         ],
-[ "Win32->canonpath('////')",           '\\\\\\'              ],
+[ "Win32->canonpath('////')",           '\\'                  ],
 [ "Win32->canonpath('//')",             '\\'                  ],
-[ "Win32->canonpath('/.')",             '\\.'                 ],
+[ "Win32->canonpath('/.')",             '\\'                  ],
 [ "Win32->canonpath('//a/b/../../c')",  '\\\\a\\b\\c'         ],
 [ "Win32->canonpath('//a/b/c/../d')",   '\\\\a\\b\\d'         ],
 [ "Win32->canonpath('//a/b/c/../../d')",'\\\\a\\b\\d'         ],
@@ -694,6 +697,7 @@ if ($^O eq 'MacOS') {
 [ "Cygwin->rel2abs('..','/t1/t2/t3')",             '/t1/t2/t3/..'    ],
 [ "Cygwin->rel2abs('../t4','/t1/t2/t3')",          '/t1/t2/t3/../t4' ],
 [ "Cygwin->rel2abs('/t1','/t1/t2/t3')",            '/t1'             ],
+[ "Cygwin->rel2abs('//t1/t2/t3','/foo')",          '//t1/t2/t3'      ],
 
 ) ;
 
