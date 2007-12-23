@@ -1123,6 +1123,12 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
     if (old_type == new_type)
 	return;
 
+    if (old_type == SVt_RV) {
+	/* Verify my assumption that no-one upgrades a scalar which has a
+	   referant but isn't flagged as a reference.  */
+	assert(!(!SvROK(sv) && SvRV(sv)));
+    }
+
     old_body = SvANY(sv);
 
     /* Copying structures onto other structures that have been neatly zeroed
