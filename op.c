@@ -940,6 +940,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_GVSV:
     case OP_WANTARRAY:
     case OP_GV:
+    case OP_SMARTMATCH:
     case OP_PADSV:
     case OP_PADAV:
     case OP_PADHV:
@@ -1007,6 +1008,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_PROTOTYPE:
       func_ops:
 	if (!(o->op_private & (OPpLVAL_INTRO|OPpOUR_INTRO)))
+	    /* Otherwise it's "Useless use of grep iterator" */
 	    useless = OP_DESC(o);
 	break;
 
