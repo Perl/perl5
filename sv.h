@@ -1431,6 +1431,7 @@ the scalar's value cannot change unless written to.
     STMT_START {							\
 		     assert(SvTYPE(sv) >= SVt_PV);			\
 		     if (SvLEN(sv)) {					\
+			 assert(!SvROK(sv));				\
 			 if(SvOOK(sv)) {				\
 			     SvPV_set(sv, SvPVX_mutable(sv) - SvIVX(sv)); \
 			     SvFLAGS(sv) &= ~SVf_OOK;			\
