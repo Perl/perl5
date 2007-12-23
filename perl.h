@@ -3765,7 +3765,7 @@ Gid_t getegid (void);
 #endif
 
 /* Keep the old croak based assert for those who want it, and as a fallback if
-   the platform is so hertically non-ANSI that it can't assert.  */
+   the platform is so hectically non-ANSI that it can't assert.  */
 
 #define Perl_assert(what)	PERL_DEB( 				\
 	((what) ? ((void) 0) :						\
