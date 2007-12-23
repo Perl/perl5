@@ -881,6 +881,20 @@ I<';' isn't legal inside an expression - if you need multiple statements use a
 do {...} block>. See the thread starting at
 http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2008-09/msg00573.html
 
+=head2 lexicals used only once
+
+This warns:
+
+    $ perl -we '$pie = 42'
+    Name "main::pie" used only once: possible typo at -e line 1.
+
+This does not:
+
+    $ perl -we 'my $pie = 42'
+
+Logically all lexicals used only once should warn, if the user asks for
+warnings.
+
 =head2 UTF-8 revamp
 
 The handling of Unicode is unclean in many places. For example, the regexp
