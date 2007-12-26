@@ -148,13 +148,18 @@ don't use it:
 
 =item *
 
-Various unary functions, including functions like ord() and int(), as well
-as the all file tests (C<-f>, C<-d>) except for C<-t>, which defaults to
-STDIN.
+The following functions:
+
+abs, alarm, chomp chop, chr, chroot, cos, defined, eval, exp, glob,
+hex, int, lc, lcfirst, length, log, lstat, mkdir, ord, pos, print,
+quotemeta, readlink, readpipe, ref, require, reverse, rmdir, sin, split, 
+sqrt, stat, study, uc, ucfirst, unlink, unpack.
 
 =item *
 
-Various list functions like print() and unlink().
+All file tests (C<-f>, C<-d>) except for C<-t>, which defaults to STDIN.
+See L<perlfunc/-X>
+
 
 =item *
 
@@ -169,6 +174,10 @@ variable is supplied.
 =item *
 
 The implicit iterator variable in the grep() and map() functions.
+
+=item *
+
+The implicit variable of given().
 
 =item *
 
