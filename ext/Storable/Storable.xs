@@ -4497,7 +4497,7 @@ static SV *retrieve_ref(pTHX_ stcxt_t *cxt, const char *cname)
 
 	if (cname) {
 		/* No need to do anything, as rv will already be PVMG.  */
-		assert (SvTYPE(rv) >= SVt_RV);
+		assert (SvTYPE(rv) == SVt_RV || SvTYPE(rv) >= SVt_PV);
 	} else {
 		sv_upgrade(rv, SVt_RV);
 	}

@@ -25,8 +25,8 @@ static const char* const svclassnames[] = {
     "B::BIND",
 #endif
     "B::IV",
-    "B::NV",
     "B::RV",
+    "B::NV",
     "B::PV",
     "B::PVIV",
     "B::PVNV",

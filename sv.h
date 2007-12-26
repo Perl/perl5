@@ -47,8 +47,8 @@ typedef enum {
 	SVt_NULL,	/* 0 */
 	SVt_BIND,	/* 1 */
 	SVt_IV,		/* 2 */
-	SVt_NV,		/* 3 */
-	SVt_RV,		/* 4 */
+	SVt_RV,		/* 3 */
+	SVt_NV,		/* 4 */
 	SVt_PV,		/* 5 */
 	SVt_PVIV,	/* 6 */
 	SVt_PVNV,	/* 7 */
@@ -1298,7 +1298,7 @@ the scalar's value cannot change unless written to.
 	 }))
 #    define SvRV(sv)							\
 	(*({ SV *const _svi = (SV *) (sv);				\
-	    assert(SvTYPE(_svi) >= SVt_RV);				\
+	    assert(SvTYPE(_svi) >= SVt_PV || SvTYPE(_svi) == SVt_RV);	\
 	    assert(SvTYPE(_svi) != SVt_PVAV);				\
 	    assert(SvTYPE(_svi) != SVt_PVHV);				\
 	    assert(SvTYPE(_svi) != SVt_PVCV);				\
@@ -1383,7 +1383,7 @@ the scalar's value cannot change unless written to.
 		assert(!isGV_with_GP(sv));		\
 		(((XPVUV*)SvANY(sv))->xuv_uv = (val)); } STMT_END
 #define SvRV_set(sv, val) \
-        STMT_START { assert(SvTYPE(sv) >=  SVt_RV); \
+        STMT_START { assert(SvTYPE(sv) >=  SVt_PV || SvTYPE(sv) ==  SVt_RV); \
 		assert(SvTYPE(sv) != SVt_PVAV);		\
 		assert(SvTYPE(sv) != SVt_PVHV);		\
 		assert(SvTYPE(sv) != SVt_PVCV);		\

@@ -890,12 +890,12 @@ static const struct body_details bodies_by_type[] = {
       FIT_ARENA(0, sizeof(struct ptr_tbl_ent))
     },
 
+    /* RVs are in the head now.  */
+    { 0, 0, 0, SVt_RV, FALSE, NONV, NOARENA, 0 },
+
     /* 8 bytes on most ILP32 with IEEE doubles */
     { sizeof(NV), sizeof(NV), 0, SVt_NV, FALSE, HADNV, HASARENA,
       FIT_ARENA(0, sizeof(NV)) },
-
-    /* RVs are in the head now.  */
-    { 0, 0, 0, SVt_RV, FALSE, NONV, NOARENA, 0 },
 
     /* 8 bytes on most ILP32 with IEEE doubles */
     { sizeof(xpv_allocated),
@@ -1235,7 +1235,11 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
 	return;
     case SVt_RV:
 	assert(old_type == SVt_NULL);
-	SvANY(sv) = &sv->sv_u.svu_rv;
+	SvANY(sv) = (XPVIV*)((char*)&(sv->sv_u.svu_iv) - STRUCT_OFFSET(XPVIV, xiv_iv));
+	/* Could leave this in, but changing it happens to make the next step
+	   clearler. The key part is that SvANY(sv) is not NULL:
+	   SvANY(sv) = &sv->sv_u.svu_rv;
+	*/
 	SvRV_set(sv, 0);
 	return;
     case SVt_PVHV:
@@ -1286,7 +1290,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
 	   The target created by newSVrv also is, and it can have magic.
 	   However, it never has SvPVX set.
 	*/
-	if (old_type >= SVt_RV) {
+	if (old_type == SVt_RV || old_type >= SVt_PV) {
 	    assert(SvPVX_const(sv) == 0);
 	}
 
@@ -1357,7 +1361,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
 
 	if (new_type == SVt_PVIO)
 	    IoPAGE_LEN(sv) = 60;
-	if (old_type < SVt_RV)
+	if (old_type < SVt_RV || old_type == SVt_NV)
 	    SvPV_set(sv, NULL);
 	break;
     default:
@@ -3483,7 +3487,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	goto undef_sstr;
 
     case SVt_RV:
-	if (dtype < SVt_RV)
+	if (dtype < SVt_PV && dtype != SVt_RV)
 	    sv_upgrade(dstr, SVt_RV);
 	break;
     case SVt_PVFM:
@@ -7856,7 +7860,7 @@ Perl_newSVrv(pTHX_ SV *rv, const char *classname)
 	sv_upgrade(rv, SVt_RV);
     } else if (SvROK(rv)) {
 	SvREFCNT_dec(SvRV(rv));
-    } else if (SvTYPE(rv) < SVt_RV)
+    } else if (SvTYPE(rv) < SVt_RV || SvTYPE(rv) == SVt_NV)
 	sv_upgrade(rv, SVt_RV);
     else if (SvTYPE(rv) > SVt_RV) {
 	SvPV_free(rv);

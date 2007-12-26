@@ -2940,7 +2940,7 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
     if (!SvOK(sv)) {
 	if (SvREADONLY(sv))
 	    Perl_croak(aTHX_ PL_no_modify);
-	if (SvTYPE(sv) < SVt_RV)
+	if (SvTYPE(sv) < SVt_RV || SvTYPE(sv) == SVt_NV)
 	    sv_upgrade(sv, SVt_RV);
 	else if (SvTYPE(sv) >= SVt_PV) {
 	    SvPV_free(sv);

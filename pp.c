@@ -172,7 +172,7 @@ PP(pp_rv2gv)
 			const char * const name = CopSTASHPV(PL_curcop);
 			gv = newGVgen(name);
 		    }
-		    if (SvTYPE(sv) < SVt_RV)
+		    if (SvTYPE(sv) < SVt_RV || SvTYPE(sv) == SVt_NV)
 			sv_upgrade(sv, SVt_RV);
 		    else if (SvPVX_const(sv)) {
 			SvPV_free(sv);
