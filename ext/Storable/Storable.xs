@@ -3434,7 +3434,9 @@ static int sv_type(pTHX_ SV *sv)
 {
 	switch (SvTYPE(sv)) {
 	case SVt_NULL:
+#if PERL_VERSION <= 10
 	case SVt_IV:
+#endif
 	case SVt_NV:
 		/*
 		 * No need to check for ROK, that can't be set here since there
@@ -3442,7 +3444,11 @@ static int sv_type(pTHX_ SV *sv)
 		 */
 		return svis_SCALAR;
 	case SVt_PV:
+#if PERL_VERSION <= 10
 	case SVt_RV:
+#else
+	case SVt_IV:
+#endif
 	case SVt_PVIV:
 	case SVt_PVNV:
 		/*

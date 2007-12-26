@@ -25,14 +25,19 @@ static const char* const svclassnames[] = {
     "B::BIND",
 #endif
     "B::IV",
-    "B::RV",
     "B::NV",
+#if PERL_VERSION <= 10
+    "B::RV",
+#endif
     "B::PV",
     "B::PVIV",
     "B::PVNV",
     "B::PVMG",
 #if PERL_VERSION <= 8
     "B::BM",
+#endif
+#if PERL_VERSION >= 11
+    "B::ORANGE",
 #endif
 #if PERL_VERSION >= 9
     "B::GV",
@@ -1366,6 +1371,24 @@ packiv(sv)
 	    ST(0) = sv_2mortal(newSVpvn((char *)&w, 4));
 	}
 
+
+#if PERL_VERSION >= 11
+
+B::SV
+RV(sv)
+        B::IV   sv
+    CODE:
+        if( SvROK(sv) ) {
+            RETVAL = SvRV(sv);
+        }
+        else {
+            croak( "argument is not SvROK" );
+        }
+    OUTPUT:
+        RETVAL
+
+#endif
+
 MODULE = B	PACKAGE = B::NV		PREFIX = Sv
 
 NV
@@ -1392,11 +1415,15 @@ U32
 PARENT_FAKELEX_FLAGS(sv)
 	B::NV	sv
 
+#if PERL_VERSION < 11
+
 MODULE = B	PACKAGE = B::RV		PREFIX = Sv
 
 B::SV
 SvRV(sv)
 	B::RV	sv
+
+#endif
 
 MODULE = B	PACKAGE = B::PV		PREFIX = Sv
 

@@ -31,12 +31,12 @@ static const char* const svtypenames[SVt_LAST] = {
     "NULL",
     "BIND",
     "IV",
-    "RV",
     "NV",
     "PV",
     "PVIV",
     "PVNV",
     "PVMG",
+    "ORANGE",
     "PVGV",
     "PVLV",
     "PVAV",
@@ -51,12 +51,12 @@ static const char* const svshorttypenames[SVt_LAST] = {
     "UNDEF",
     "BIND",
     "IV",
-    "RV",
     "NV",
     "PV",
     "PVIV",
     "PVNV",
     "PVMG",
+    "ORANGE",
     "GV",
     "PVLV",
     "AV",
@@ -1529,7 +1529,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     }
     if ((type >= SVt_PVIV && type != SVt_PVAV && type != SVt_PVHV
 	 && type != SVt_PVCV && !isGV_with_GP(sv))
-	|| type == SVt_IV) {
+	|| (type == SVt_IV && !SvROK(sv))) {
 	if (SvIsUV(sv)
 #ifdef PERL_OLD_COPY_ON_WRITE
 	               || SvIsCOW(sv)
@@ -2371,9 +2371,6 @@ Perl_sv_xmlpeek(pTHX_ SV *sv)
     case SVt_NV:
 	sv_catpv(t, " NV=\"");
 	break;
-    case SVt_RV:
-	sv_catpv(t, " RV=\"");
-	break;
     case SVt_PV:
 	sv_catpv(t, " PV=\"");
 	break;
@@ -2406,6 +2403,9 @@ Perl_sv_xmlpeek(pTHX_ SV *sv)
 	break;
     case SVt_BIND:
 	sv_catpv(t, " BIND=\"");
+	break;
+    case SVt_ORANGE:
+	sv_catpv(t, " ORANGE=\"");
 	break;
     case SVt_PVFM:
 	sv_catpv(t, " FM=\"");

@@ -890,9 +890,6 @@ static const struct body_details bodies_by_type[] = {
       FIT_ARENA(0, sizeof(struct ptr_tbl_ent))
     },
 
-    /* RVs are in the head now.  */
-    { 0, 0, 0, SVt_RV, FALSE, NONV, NOARENA, 0 },
-
     /* 8 bytes on most ILP32 with IEEE doubles */
     { sizeof(NV), sizeof(NV), 0, SVt_NV, FALSE, HADNV, HASARENA,
       FIT_ARENA(0, sizeof(NV)) },
@@ -918,7 +915,10 @@ static const struct body_details bodies_by_type[] = {
     /* 28 */
     { sizeof(XPVMG), copy_length(XPVMG, xmg_stash), 0, SVt_PVMG, FALSE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVMG)) },
-    
+
+    /* There are plans for this  */
+    { 0, 0, 0, SVt_ORANGE, FALSE, NONV, NOARENA, 0 },
+
     /* 48 */
     { sizeof(XPVGV), sizeof(XPVGV), 0, SVt_PVGV, TRUE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVGV)) },
@@ -1115,6 +1115,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
     const struct body_details *new_type_details;
     const struct body_details *const old_type_details
 	= bodies_by_type + old_type;
+    SV *referant = NULL;
 
     if (new_type != SVt_PV && SvIsCOW(sv)) {
 	sv_force_normal_flags(sv, 0);
@@ -1122,12 +1123,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
 
     if (old_type == new_type)
 	return;
-
-    if (old_type == SVt_RV) {
-	/* Verify my assumption that no-one upgrades a scalar which has a
-	   referant but isn't flagged as a reference.  */
-	assert(!(!SvROK(sv) && SvRV(sv)));
-    }
 
     old_body = SvANY(sv);
 
@@ -1173,17 +1168,24 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
     case SVt_NULL:
 	break;
     case SVt_IV:
-	if (new_type < SVt_PVIV) {
-	    new_type = (new_type == SVt_NV)
-		? SVt_PVNV : SVt_PVIV;
+	if (SvROK(sv)) {
+	    referant = SvRV(sv);
+	    if (new_type < SVt_PVIV) {
+		new_type = SVt_PVIV;
+		/* FIXME to check SvROK(sv) ? SVt_PV : and fake up
+		   old_body_details */
+	    }
+	} else {
+	    if (new_type < SVt_PVIV) {
+		new_type = (new_type == SVt_NV)
+		    ? SVt_PVNV : SVt_PVIV;
+	    }
 	}
 	break;
     case SVt_NV:
 	if (new_type < SVt_PVNV) {
 	    new_type = SVt_PVNV;
 	}
-	break;
-    case SVt_RV:
 	break;
     case SVt_PV:
 	assert(new_type > SVt_PV);
@@ -1233,15 +1235,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
 	SvANY(sv) = new_XNV();
 	SvNV_set(sv, 0);
 	return;
-    case SVt_RV:
-	assert(old_type == SVt_NULL);
-	SvANY(sv) = (XPVIV*)((char*)&(sv->sv_u.svu_iv) - STRUCT_OFFSET(XPVIV, xiv_iv));
-	/* Could leave this in, but changing it happens to make the next step
-	   clearler. The key part is that SvANY(sv) is not NULL:
-	   SvANY(sv) = &sv->sv_u.svu_rv;
-	*/
-	SvRV_set(sv, 0);
-	return;
     case SVt_PVHV:
     case SVt_PVAV:
 	assert(new_type_details->body_size);
@@ -1290,7 +1283,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
 	   The target created by newSVrv also is, and it can have magic.
 	   However, it never has SvPVX set.
 	*/
-	if (old_type == SVt_RV || old_type >= SVt_PV) {
+	if (old_type == SVt_IV) {
+	    assert(!SvROK(sv));
+	} else if (old_type >= SVt_PV) {
 	    assert(SvPVX_const(sv) == 0);
 	}
 
@@ -1361,8 +1356,11 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
 
 	if (new_type == SVt_PVIO)
 	    IoPAGE_LEN(sv) = 60;
-	if (old_type < SVt_RV || old_type == SVt_NV)
-	    SvPV_set(sv, NULL);
+	if (old_type < SVt_PV) {
+	    /* referant will be NULL unless the old type was SVt_IV emulating
+	       SVt_RV */
+	    sv->sv_u.svu_rv = referant;
+	}
 	break;
     default:
 	Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
@@ -1498,7 +1496,6 @@ Perl_sv_setiv(pTHX_ register SV *sv, IV i)
     case SVt_NV:
 	sv_upgrade(sv, SVt_IV);
 	break;
-    case SVt_RV:
     case SVt_PV:
 	sv_upgrade(sv, SVt_PVIV);
 	break;
@@ -1596,7 +1593,6 @@ Perl_sv_setnv(pTHX_ register SV *sv, NV num)
     case SVt_IV:
 	sv_upgrade(sv, SVt_NV);
 	break;
-    case SVt_RV:
     case SVt_PV:
     case SVt_PVIV:
 	sv_upgrade(sv, SVt_PVNV);
@@ -3440,7 +3436,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		sv_upgrade(dstr, SVt_IV);
 		break;
 	    case SVt_NV:
-	    case SVt_RV:
 	    case SVt_PV:
 		sv_upgrade(dstr, SVt_PVIV);
 		break;
@@ -3458,7 +3453,11 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    assert(!SvTAINTED(sstr));
 	    return;
 	}
-	goto undef_sstr;
+	if (!SvROK(sstr))
+	    goto undef_sstr;
+	if (dtype < SVt_PV && dtype != SVt_IV)
+	    sv_upgrade(dstr, SVt_IV);
+	break;
 
     case SVt_NV:
 	if (SvNOK(sstr)) {
@@ -3467,7 +3466,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    case SVt_IV:
 		sv_upgrade(dstr, SVt_NV);
 		break;
-	    case SVt_RV:
 	    case SVt_PV:
 	    case SVt_PVIV:
 		sv_upgrade(dstr, SVt_PVNV);
@@ -3486,10 +3484,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	}
 	goto undef_sstr;
 
-    case SVt_RV:
-	if (dtype < SVt_PV && dtype != SVt_RV)
-	    sv_upgrade(dstr, SVt_RV);
-	break;
     case SVt_PVFM:
 #ifdef PERL_OLD_COPY_ON_WRITE
 	if ((SvFLAGS(sstr) & CAN_COW_MASK) == CAN_COW_FLAGS) {
@@ -5056,13 +5050,9 @@ Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
 #else
     StructCopy(nsv,sv,SV);
 #endif
-    /* Currently could join these into one piece of pointer arithmetic, but
-       it would be unclear.  */
-    if(SvTYPE(sv) == SVt_IV)
+    if(SvTYPE(sv) == SVt_IV) {
 	SvANY(sv)
 	    = (XPVIV*)((char*)&(sv->sv_u.svu_iv) - STRUCT_OFFSET(XPVIV, xiv_iv));
-    else if (SvTYPE(sv) == SVt_RV) {
-	SvANY(sv) = &sv->sv_u.svu_rv;
     }
 	
 
@@ -5124,6 +5114,15 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	/* See the comment in sv.h about the collusion between this early
 	   return and the overloading of the NULL and IV slots in the size
 	   table.  */
+	if (SvROK(sv)) {
+	    SV * const target = SvRV(sv);
+	    if (SvWEAKREF(sv))
+	        sv_del_backref(target, sv);
+	    else
+	        SvREFCNT_dec(target);
+	}
+	SvFLAGS(sv) &= SVf_BREAK;
+	SvFLAGS(sv) |= SVTYPEMASK;
 	return;
     }
 
@@ -5254,7 +5253,6 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	    /* Don't even bother with turning off the OOK flag.  */
 	}
     case SVt_PV:
-    case SVt_RV:
 	if (SvROK(sv)) {
 	    SV * const target = SvRV(sv);
 	    if (SvWEAKREF(sv))
@@ -7302,7 +7300,7 @@ SV *
 Perl_newRV_noinc(pTHX_ SV *tmpRef)
 {
     dVAR;
-    register SV *sv = newSV_type(SVt_RV);
+    register SV *sv = newSV_type(SVt_IV);
     SvTEMP_off(tmpRef);
     SvRV_set(sv, tmpRef);
     SvROK_on(sv);
@@ -7746,7 +7744,6 @@ Perl_sv_reftype(pTHX_ const SV *sv, int ob)
 	case SVt_NULL:
 	case SVt_IV:
 	case SVt_NV:
-	case SVt_RV:
 	case SVt_PV:
 	case SVt_PVIV:
 	case SVt_PVNV:
@@ -7857,12 +7854,12 @@ Perl_newSVrv(pTHX_ SV *rv, const char *classname)
 	SvFLAGS(rv) = 0;
 	SvREFCNT(rv) = refcnt;
 
-	sv_upgrade(rv, SVt_RV);
+	sv_upgrade(rv, SVt_IV);
     } else if (SvROK(rv)) {
 	SvREFCNT_dec(SvRV(rv));
-    } else if (SvTYPE(rv) < SVt_RV || SvTYPE(rv) == SVt_NV)
-	sv_upgrade(rv, SVt_RV);
-    else if (SvTYPE(rv) > SVt_RV) {
+    } else if (SvTYPE(rv) < SVt_PV && SvTYPE(rv) != SVt_IV)
+	sv_upgrade(rv, SVt_IV);
+    else if (SvTYPE(rv) >= SVt_PV) {
 	SvPV_free(rv);
 	SvCUR_set(rv, 0);
 	SvLEN_set(rv, 0);
@@ -10023,10 +10020,7 @@ Perl_rvpv_dup(pTHX_ SV *dstr, const SV *sstr, CLONE_PARAMS* param)
     }
     else {
 	/* Copy the NULL */
-	if (SvTYPE(dstr) == SVt_RV)
-	    SvRV_set(dstr, NULL);
-	else
-	    SvPV_set(dstr, NULL);
+	SvPV_set(dstr, NULL);
     }
 }
 
@@ -10092,15 +10086,15 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 	break;
     case SVt_IV:
 	SvANY(dstr)	= (XPVIV*)((char*)&(dstr->sv_u.svu_iv) - STRUCT_OFFSET(XPVIV, xiv_iv));
-	SvIV_set(dstr, SvIVX(sstr));
+	if(SvROK(sstr)) {
+	    Perl_rvpv_dup(aTHX_ dstr, sstr, param);
+	} else {
+	    SvIV_set(dstr, SvIVX(sstr));
+	}
 	break;
     case SVt_NV:
 	SvANY(dstr)	= new_XNV();
 	SvNV_set(dstr, SvNVX(sstr));
-	break;
-    case SVt_RV:
-	SvANY(dstr)	= &(dstr->sv_u.svu_rv);
-	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	break;
 	/* case SVt_BIND: */
     default:

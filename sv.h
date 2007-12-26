@@ -47,12 +47,13 @@ typedef enum {
 	SVt_NULL,	/* 0 */
 	SVt_BIND,	/* 1 */
 	SVt_IV,		/* 2 */
-	SVt_RV,		/* 3 */
-	SVt_NV,		/* 4 */
-	SVt_PV,		/* 5 */
-	SVt_PVIV,	/* 6 */
-	SVt_PVNV,	/* 7 */
-	SVt_PVMG,	/* 8 */
+	SVt_NV,		/* 3 */
+	/* RV was here, before it was merged with IV.  */
+	SVt_PV,		/* 4 */
+	SVt_PVIV,	/* 5 */
+	SVt_PVNV,	/* 6 */
+	SVt_PVMG,	/* 7 */
+	SVt_ORANGE,	/* 8 */
 	/* PVBM was here, before BIND replaced it.  */
 	SVt_PVGV,	/* 9 */
 	SVt_PVLV,	/* 10 */
@@ -69,6 +70,9 @@ typedef enum {
    purposes eternal code wanting to consider PVBM probably needs to think of
    PVMG instead.  */
 #  define SVt_PVBM	SVt_PVMG
+/* Anything wanting to create a reference from clean should ensure that it has
+   a scalar of type SVt_IV now:  */
+#  define SVt_RV	SVt_IV
 #endif
 
 /* There is collusion here with sv_clear - sv_clear exits early for SVt_NULL
@@ -1298,7 +1302,7 @@ the scalar's value cannot change unless written to.
 	 }))
 #    define SvRV(sv)							\
 	(*({ SV *const _svi = (SV *) (sv);				\
-	    assert(SvTYPE(_svi) >= SVt_PV || SvTYPE(_svi) == SVt_RV);	\
+	    assert(SvTYPE(_svi) >= SVt_PV || SvTYPE(_svi) == SVt_IV);	\
 	    assert(SvTYPE(_svi) != SVt_PVAV);				\
 	    assert(SvTYPE(_svi) != SVt_PVHV);				\
 	    assert(SvTYPE(_svi) != SVt_PVCV);				\
@@ -1383,7 +1387,7 @@ the scalar's value cannot change unless written to.
 		assert(!isGV_with_GP(sv));		\
 		(((XPVUV*)SvANY(sv))->xuv_uv = (val)); } STMT_END
 #define SvRV_set(sv, val) \
-        STMT_START { assert(SvTYPE(sv) >=  SVt_PV || SvTYPE(sv) ==  SVt_RV); \
+        STMT_START { assert(SvTYPE(sv) >=  SVt_PV || SvTYPE(sv) ==  SVt_IV); \
 		assert(SvTYPE(sv) != SVt_PVAV);		\
 		assert(SvTYPE(sv) != SVt_PVHV);		\
 		assert(SvTYPE(sv) != SVt_PVCV);		\

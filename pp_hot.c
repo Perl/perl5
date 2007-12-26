@@ -150,7 +150,7 @@ PP(pp_sassign)
 		   The gv becomes a(nother) reference to the constant.  */
 		SV *const value = SvRV(cv);
 
-		SvUPGRADE((SV *)gv, SVt_RV);
+		SvUPGRADE((SV *)gv, SVt_IV);
 		SvPCS_IMPORTED_on(gv);
 		SvRV_set(gv, value);
 		SvREFCNT_inc_simple_void(value);
@@ -2940,8 +2940,8 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
     if (!SvOK(sv)) {
 	if (SvREADONLY(sv))
 	    Perl_croak(aTHX_ PL_no_modify);
-	if (SvTYPE(sv) < SVt_RV || SvTYPE(sv) == SVt_NV)
-	    sv_upgrade(sv, SVt_RV);
+	if (SvTYPE(sv) < SVt_PV && SvTYPE(sv) != SVt_IV)
+	    sv_upgrade(sv, SVt_IV);
 	else if (SvTYPE(sv) >= SVt_PV) {
 	    SvPV_free(sv);
             SvLEN_set(sv, 0);
