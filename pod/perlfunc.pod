@@ -3057,6 +3057,14 @@ X<open> X<pipe> X<file, open> X<fopen>
 Opens the file whose filename is given by EXPR, and associates it with
 FILEHANDLE.
 
+Simple examples to open a file for reading:
+
+    open(my $fh, '<', "input.txt") or die $!;
+
+and for writing:
+
+    open(my $fh, '>', "output.txt") or die $!;
+
 (The following is a comprehensive reference to open(): for a gentler
 introduction you may consider L<perlopentut>.)
 
@@ -3128,7 +3136,7 @@ You may use the three-argument form of open to specify IO "layers"
 that affect how the input and output are processed (see L<open> and
 L<PerlIO> for more details). For example
 
-  open(FH, "<:encoding(UTF-8)", "file")
+  open(my $fh, "<:encoding(UTF-8)", "file")
 
 will open the UTF-8 encoded file containing Unicode characters,
 see L<perluniintro>. Note that if layers are specified in the
@@ -3158,7 +3166,7 @@ working with an unopened filehandle is actually what you want to do.
 As a special case the 3-arg form with a read/write mode and the third
 argument being C<undef>:
 
-    open(TMP, "+>", undef) or die ...
+    open(my $tmp, "+>", undef) or die ...
 
 opens a filehandle to an anonymous temporary file.  Also using "+<"
 works for symmetry, but you really should consider writing something
@@ -3186,10 +3194,10 @@ Examples:
     open(LOG, '>>/usr/spool/news/twitlog');	# (log is reserved)
     # if the open fails, output is discarded
 
-    open(DBASE, '+<', 'dbase.mine')		# open for update
+    open(my $dbase, '+<', 'dbase.mine')		# open for update
 	or die "Can't open 'dbase.mine' for update: $!";
 
-    open(DBASE, '+<dbase.mine')			# ditto
+    open(my $dbase, '+<dbase.mine')			# ditto
 	or die "Can't open 'dbase.mine' for update: $!";
 
     open(ARTICLE, '-|', "caesar <$article")     # decrypt article
