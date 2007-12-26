@@ -1440,6 +1440,20 @@ the scalar's value cannot change unless written to.
 		     }							\
 		 } STMT_END
 
+#ifdef PERL_CORE
+/* Code that crops up in three places to take a scalar and ready it to hold
+   a reference */
+#  define prepare_SV_for_RV(sv)						\
+    STMT_START {							\
+		    if (SvTYPE(sv) < SVt_RV)				\
+			sv_upgrade(sv, SVt_RV);				\
+		    else if (SvPVX_const(sv)) {				\
+			SvPV_free(sv);					\
+			SvLEN_set(sv, 0);				\
+                        SvCUR_set(sv, 0);				\
+		    }							\
+		 } STMT_END
+#endif
 
 #define PERL_FBM_TABLE_OFFSET 1	/* Number of bytes between EOS and table */
 
