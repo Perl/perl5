@@ -893,7 +893,8 @@ This does not:
     $ perl -we 'my $pie = 42'
 
 Logically all lexicals used only once should warn, if the user asks for
-warnings.
+warnings.  An unworked RT ticket (#5087) has been open for almost seven
+years for this discrepancy.
 
 =head2 UTF-8 revamp
 
