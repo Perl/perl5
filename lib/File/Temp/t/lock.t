@@ -6,16 +6,18 @@ use strict;
 use Fcntl;
 
 BEGIN {
-    # see if we have O_EXLOCK
-    eval { &Fcntl::O_EXLOCK; };
-    if ($@) {
-        plan skip_all => 'Do not seem to have O_EXLOCK';
-    } else {
-        plan tests => 4;
-    }
-
-    use_ok( "File::Temp" ); 
+# see if we have O_EXLOCK
+  eval { &Fcntl::O_EXLOCK; };
+  if ($@) {
+    plan skip_all => 'Do not seem to have O_EXLOCK';
+  } else {
+    plan tests => 4;
+    use_ok( "File::Temp" );
+  }
 }
+
+# Need Symbol package for lexical filehandle on older perls
+require Symbol if $] < 5.006;
 
 # Get a tempfile with O_EXLOCK
 my $fh = new File::Temp();
@@ -29,7 +31,9 @@ my $status;
 eval {
    local $SIG{ALRM} = sub { die "alarm\n" }; # NB: \n required
    alarm $timeout;
-   $status = sysopen(my $newfh, "$fh", $flags, 0600);
+   my $newfh;
+   $newfh = &Symbol::gensym if $] < 5.006;
+   $status = sysopen($newfh, "$fh", $flags, 0600);
    alarm 0;
 };
 if ($@) {
@@ -44,7 +48,9 @@ $fh = new File::Temp( EXLOCK => 0 );
 eval {
    local $SIG{ALRM} = sub { die "alarm\n" }; # NB: \n required
    alarm $timeout;
-   $status = sysopen(my $newfh, "$fh", $flags, 0600);
+   my $newfh;
+   $newfh = &Symbol::gensym if $] < 5.006;
+   $status = sysopen($newfh, "$fh", $flags, 0600);
    alarm 0;
 };
 if ($@) {
