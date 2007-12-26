@@ -41,7 +41,9 @@ foreach my $source_type (@keys) {
 	my $vars = {};
 	$vars->{dest} = $types{$dest_type};
 	$vars->{source} = $types{$source_type};
-	diag "Assigning $source_type to $dest_type";
+	# The assignment can potentially trigger assertion failures, so it's
+	# useful to have the diagnostics about what was attempted printed first
+	print "# Assigning $source_type to $dest_type\n";
 	$vars->{dest} = $vars->{source};
 	is ($vars->{dest}, $vars->{source});
     }
