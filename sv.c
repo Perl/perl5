@@ -1095,6 +1095,9 @@ S_new_body(pTHX_ svtype sv_type)
 
 #endif
 
+static const struct body_details fake_rv =
+    { 0, 0, 0, SVt_IV, FALSE, NONV, NOARENA, 0 };
+
 /*
 =for apidoc sv_upgrade
 
@@ -1113,7 +1116,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
     void*	new_body;
     const svtype old_type = SvTYPE(sv);
     const struct body_details *new_type_details;
-    const struct body_details *const old_type_details
+    const struct body_details *old_type_details
 	= bodies_by_type + old_type;
     SV *referant = NULL;
 
@@ -1170,11 +1173,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
     case SVt_IV:
 	if (SvROK(sv)) {
 	    referant = SvRV(sv);
-	    if (new_type < SVt_PVIV) {
-		new_type = SVt_PVIV;
-		/* FIXME to check SvROK(sv) ? SVt_PV : and fake up
-		   old_body_details */
-	    }
+	    old_type_details = &fake_rv;
+	    if (new_type == SVt_NV)
+		new_type = SVt_PVNV;
 	} else {
 	    if (new_type < SVt_PVIV) {
 		new_type = (new_type == SVt_NV)
