@@ -2940,13 +2940,7 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
     if (!SvOK(sv)) {
 	if (SvREADONLY(sv))
 	    Perl_croak(aTHX_ PL_no_modify);
-	if (SvTYPE(sv) < SVt_PV && SvTYPE(sv) != SVt_IV)
-	    sv_upgrade(sv, SVt_IV);
-	else if (SvTYPE(sv) >= SVt_PV) {
-	    SvPV_free(sv);
-            SvLEN_set(sv, 0);
-	    SvCUR_set(sv, 0);
-	}
+	prepare_SV_for_RV(sv);
 	switch (to_what) {
 	case OPpDEREF_SV:
 	    SvRV_set(sv, newSV(0));
