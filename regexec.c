@@ -3741,7 +3741,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			if (!(SvFLAGS(ret)
 			      & (SVs_TEMP | SVs_PADTMP | SVf_READONLY
 				 | SVs_GMG))) {
-			    SvUPGRADE(ret, SVt_ORANGE);
+			    /* This isn't a first class regexp. Instead, it's
+			       caching a regexp onto an existing, Perl visible
+			       scalar.  */
 			    sv_magic(ret,(SV*)ReREFCNT_inc(re),
 					PERL_MAGIC_qr,0,0);
 			}

@@ -4512,6 +4512,12 @@ sub kt
     }
 }
 
+{
+    my $a = 3; "" =~ /(??{ $a })/;
+    my $b = $a;
+    iseq($b, $a, "copy of scalar used for postponed subexpression");
+}
+
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
 # Keep the following tests last -- they may crash perl
@@ -4570,6 +4576,6 @@ ok($@=~/\QSequence \k... not terminated in regex;\E/);
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 4013;
+    $::TestCount = 4014;
     print "1..$::TestCount\n";
 }
