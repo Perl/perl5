@@ -10,21 +10,23 @@ package Math::Trig;
 use 5.005;
 use strict;
 
-use Math::Complex 1.36;
+use Math::Complex 1.47;
 use Math::Complex qw(:trig :pi);
 
 use vars qw($VERSION $PACKAGE @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
 @ISA = qw(Exporter);
 
-$VERSION = 1.04;
+$VERSION = 1.12;
 
 my @angcnv = qw(rad2deg rad2grad
 		deg2rad deg2grad
 		grad2rad grad2deg);
 
+my @areal = qw(asin_real acos_real);
+
 @EXPORT = (@{$Math::Complex::EXPORT_TAGS{'trig'}},
-	   @angcnv);
+	   @angcnv, @areal);
 
 my @rdlcnv = qw(cartesian_to_cylindrical
 		cartesian_to_spherical
@@ -44,7 +46,7 @@ my @greatcircle = qw(
 
 my @pi = qw(pi pi2 pi4 pip2 pip4);
 
-@EXPORT_OK = (@rdlcnv, @greatcircle, @pi);
+@EXPORT_OK = (@rdlcnv, @greatcircle, @pi, 'Inf');
 
 # See e.g. the following pages:
 # http://www.movable-type.co.uk/scripts/LatLong.html
@@ -92,6 +94,22 @@ sub rad2grad ($;$) { my $d = _RG * $_[0]; $_[1] ? $d : grad2grad($d) }
 
 sub grad2rad ($;$) { my $d = _GR * $_[0]; $_[1] ? $d : rad2rad($d) }
 
+#
+# acos and asin functions which always return a real number
+#
+
+sub acos_real {
+    return 0  if $_[0] >=  1;
+    return pi if $_[0] <= -1;
+    return acos($_[0]);
+}
+
+sub asin_real {
+    return  &pip2 if $_[0] >=  1;
+    return -&pip2 if $_[0] <= -1;
+    return asin($_[0]);
+}
+
 sub cartesian_to_spherical {
     my ( $x, $y, $z ) = @_;
 
@@ -99,7 +117,7 @@ sub cartesian_to_spherical {
 
     return ( $rho,
              atan2( $y, $x ),
-             $rho ? acos( $z / $rho ) : 0 );
+             $rho ? acos_real( $z / $rho ) : 0 );
 }
 
 sub spherical_to_cartesian {
@@ -141,8 +159,8 @@ sub great_circle_distance {
     my $lat1 = pip2 - $phi1;
 
     return $rho *
-        acos(cos( $lat0 ) * cos( $lat1 ) * cos( $theta0 - $theta1 ) +
-             sin( $lat0 ) * sin( $lat1 ) );
+	acos_real( cos( $lat0 ) * cos( $lat1 ) * cos( $theta0 - $theta1 ) +
+		   sin( $lat0 ) * sin( $lat1 ) );
 }
 
 sub great_circle_direction {
@@ -154,9 +172,9 @@ sub great_circle_direction {
     my $lat1 = pip2 - $phi1;
 
     my $direction =
-	acos((sin($lat1) - sin($lat0) * cos($distance)) /
-	     (cos($lat0) * sin($distance)));
-
+ 	acos_real((sin($lat1) - sin($lat0) * cos($distance)) /
+		  (cos($lat0) * sin($distance)));
+  
     $direction = pi2 - $direction
 	if sin($theta1 - $theta0) < 0;
 
@@ -189,7 +207,7 @@ sub great_circle_waypoint {
     my $z = $A * sin($lat0)                + $B * sin($lat1);
 
     my $theta = atan2($y, $x);
-    my $phi   = acos($z);
+    my $phi   = acos_real($z);
     
     return ($theta, $phi);
 }
@@ -203,7 +221,8 @@ sub great_circle_destination {
 
     my $lat0 = pip2 - $phi0;
 
-    my $phi1   = asin(sin($lat0)*cos($dst)+cos($lat0)*sin($dst)*cos($dir0));
+    my $phi1   = asin_real(sin($lat0)*cos($dst) + 
+			   cos($lat0)*sin($dst)*cos($dir0));
     my $theta1 = $theta0 + atan2(sin($dir0)*sin($dst)*cos($lat0),
 				 cos($dst)-sin($lat0)*sin($phi1));
 
@@ -538,7 +557,7 @@ optional, it defaults to 1 (the unit sphere), therefore the distance
 defaults to radians.
 
 If you think geographically the I<theta> are longitudes: zero at the
-Greenwhich meridian, eastward positive, westward negative--and the
+Greenwhich meridian, eastward positive, westward negative -- and the
 I<phi> are latitudes: zero at the North Pole, northward positive,
 southward negative.  B<NOTE>: this formula thinks in mathematics, not
 geographically: the I<phi> zero is at the North Pole, not at the
@@ -617,9 +636,11 @@ You can import all the great circle formulas by
 
 Notice that the resulting directions might be somewhat surprising if
 you are looking at a flat worldmap: in such map projections the great
-circles quite often do not look like the shortest routes-- but for
+circles quite often do not look like the shortest routes --  but for
 example the shortest possible routes from Europe or North America to
-Asia do often cross the polar regions.
+Asia do often cross the polar regions.  (The common Mercator projection
+does B<not> show great circles as straight lines: straight lines in the
+Mercator projection are lines of constant bearing.)
 
 =head1 EXAMPLES
 
@@ -647,13 +668,58 @@ The midpoint between London and Tokyo being
 
     my @M = great_circle_midpoint(@L, @T);
 
-or about 89.16N 68.93E, practically at the North Pole.
+or about 68.93N 89.16E, in the frozen wastes of Siberia.
 
 =head2 CAVEAT FOR GREAT CIRCLE FORMULAS
 
 The answers may be off by few percentages because of the irregular
 (slightly aspherical) form of the Earth.  The errors are at worst
 about 0.55%, but generally below 0.3%.
+
+=head2 Real-valued asin and acos
+
+For small inputs asin() and acos() may return complex numbers even
+when real numbers would be enough and correct, this happens because of
+floating-point inaccuracies.  You can see these inaccuracies for
+example by trying theses:
+
+  print cos(1e-6)**2+sin(1e-6)**2 - 1,"\n";
+  printf "%.20f", cos(1e-6)**2+sin(1e-6)**2,"\n";
+
+which will print something like this
+
+  -1.11022302462516e-16
+  0.99999999999999988898
+
+even though the expected results are of course exactly zero and one.
+The formulas used to compute asin() and acos() are quite sensitive to
+this, and therefore they might accidentally slip into the complex
+plane even when they should not.  To counter this there are two
+interfaces that are guaranteed to return a real-valued output.
+
+=over 4
+
+=item asin_real
+
+    use Math::Trig qw(asin_real);
+
+    $real_angle = asin_real($input_sin);
+
+Return a real-valued arcus sine if the input is between [-1, 1],
+B<inclusive> the endpoints.  For inputs greater than one, pi/2
+is returned.  For inputs less than minus one, -pi/2 is returned.
+
+=item acos_real
+
+    use Math::Trig qw(acos_real);
+
+    $real_angle = acos_real($input_cos);
+
+Return a real-valued arcus cosine if the input is between [-1, 1],
+B<inclusive> the endpoints.  For inputs greater than one, zero
+is returned.  For inputs less than minus one, pi is returned.
+
+=back
 
 =head1 BUGS
 
@@ -669,10 +735,17 @@ an answer instead of giving a fatal runtime error.
 
 Do not attempt navigation using these formulas.
 
+L<Math::Complex>
+
 =head1 AUTHORS
 
 Jarkko Hietaniemi <F<jhi!at!iki.fi>> and 
 Raphael Manfredi <F<Raphael_Manfredi!at!pobox.com>>.
+
+=head1 LICENSE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself. 
 
 =cut
 
