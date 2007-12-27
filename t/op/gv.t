@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 
 require './test.pl';
-plan( tests => 161 );
+plan( tests => 167 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -494,6 +494,30 @@ foreach my $value ([1,2,3], {1=>2}, *STDOUT{IO}, \&ok, *STDOUT{FORMAT}) {
              "Assigment works when glob created midway (bug 45607)"); 1'
 	or die $@;
 }
+
+# For now these tests are here, but they would probably be better in a file for
+# tests for croaks. (And in turn, that probably deserves to be in a different
+# directory. Gerard Goossen has a point about the layout being unclear
+
+sub coerce_integer {
+    no warnings 'numeric';
+    $_[0] |= 0;
+}
+sub coerce_number {
+    no warnings 'numeric';
+    $_[0] += 0;
+}
+sub coerce_string {
+    $_[0] .= '';
+}
+
+foreach my $type (qw(integer number string)) {
+    my $prog = "coerce_$type(*STDERR)";
+    is (scalar eval "$prog; 1", undef, "$prog failed...");
+    like ($@, qr/Can't coerce GLOB to $type in/,
+	  "with the correct error message");
+}
+
 __END__
 Perl
 Rules
