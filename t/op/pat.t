@@ -3074,12 +3074,15 @@ ok("A" =~ /\p{AsciiHexAndDash}/, "'A' is AsciiHexAndDash");
     ok($a !~ /^\C{4}y/,     q{don't match \C{4}y});
 }
 
-$_ = 'aaaaaaaaaa';
-utf8::upgrade($_); chop $_; $\="\n";
-ok(/[^\s]+/, "m/[^\s]/ utf8");
-ok(/[^\d]+/, "m/[^\d]/ utf8");
-ok(($a = $_, $_ =~ s/[^\s]+/./g), "s/[^\s]/ utf8");
-ok(($a = $_, $a =~ s/[^\d]+/./g), "s/[^\s]/ utf8");
+{
+    local $\;
+    $_ = 'aaaaaaaaaa';
+    utf8::upgrade($_); chop $_; $\="\n";
+    ok(/[^\s]+/, "m/[^\s]/ utf8");
+    ok(/[^\d]+/, "m/[^\d]/ utf8");
+    ok(($a = $_, $_ =~ s/[^\s]+/./g), "s/[^\s]/ utf8");
+    ok(($a = $_, $a =~ s/[^\d]+/./g), "s/[^\s]/ utf8");
+}
 
 ok("\x{100}" =~ /\x{100}/, "[perl #15397]");
 ok("\x{100}" =~ /(\x{100})/, "[perl #15397]");
