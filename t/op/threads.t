@@ -16,7 +16,7 @@ BEGIN {
        exit 0;
      }
 
-     plan(11);
+     plan(13);
 }
 
 use strict;
@@ -159,6 +159,15 @@ EOI
     ok(1, '[perl #45053]');
 }
 
+sub matchit {
+    is (ref $_[1], "Regexp");
+    like ($_[0], $_[1]);
+}
+
+threads->new(\&matchit, "Pie", qr/pie/i)->join();
+
+# tests in threads don't get counted, so
+curr_test(curr_test() + 2);
 
 # the seen_evals field of a regexp was getting zeroed on clone, so
 # within a thread it didn't  know that a regex object contrained a 'safe'
