@@ -10121,6 +10121,7 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 	    case SVt_PVAV:
 	    case SVt_PVCV:
 	    case SVt_PVLV:
+	    case SVt_ORANGE:
 	    case SVt_PVMG:
 	    case SVt_PVNV:
 	    case SVt_PVIV:
@@ -10174,6 +10175,8 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 	    case SVt_PVNV:
 		break;
 	    case SVt_PVMG:
+		break;
+	    case SVt_ORANGE:
 		break;
 	    case SVt_PVLV:
 		/* XXX LvTARGOFF sometimes holds PMOP* when DEBUGGING */

@@ -16,7 +16,7 @@ BEGIN {
        exit 0;
      }
 
-     plan(10);
+     plan(12);
 }
 
 use strict;
@@ -158,5 +158,15 @@ EOI
     $_->join for @t;
     ok(1, '[perl #45053]');
 }
+
+sub matchit {
+    is (ref $_[1], "Regexp");
+    like ($_[0], $_[1]);
+}
+
+threads->new(\&matchit, "Pie", qr/pie/i)->join();
+
+# tests in threads don't get counted, so
+curr_test(curr_test() + 2);
 
 # EOF
