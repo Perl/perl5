@@ -144,6 +144,6 @@ int
 hiterinit(register HASH *tb)
 {
     tb->tbl_riter = -1;
-    tb->tbl_eiter = Null(HENT*);
+    tb->tbl_eiter = (HENT*)NULL;
     return tb->tbl_fill;
 }
