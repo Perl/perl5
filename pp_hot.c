@@ -1197,6 +1197,7 @@ PP(pp_qr)
     SV * const sv = newSVrv(rv, SvPV_nolen(pkg));
     if (rx->extflags & RXf_TAINTED)
         SvTAINTED_on(rv);
+    sv_upgrade(sv, SVt_ORANGE);
     sv_magic(sv,(SV*)ReREFCNT_inc(rx), PERL_MAGIC_qr,0,0);
     XPUSHs(rv);
     RETURN;

@@ -5921,7 +5921,7 @@ Perl_get_re_arg(pTHX_ SV *sv) {
             mg_get(sv);
         if (SvROK(sv) &&
             (tmpsv = (SV*)SvRV(sv)) &&            /* assign deliberate */
-            SvTYPE(tmpsv) == SVt_PVMG &&
+            SvTYPE(tmpsv) == SVt_ORANGE &&
             (mg = mg_find(tmpsv, PERL_MAGIC_qr))) /* assign deliberate */
         {
             return (REGEXP *)mg->mg_obj;

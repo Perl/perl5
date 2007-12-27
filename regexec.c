@@ -3730,9 +3730,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			re = CALLREGCOMP(ret, pm_flags);
 			if (!(SvFLAGS(ret)
 			      & (SVs_TEMP | SVs_PADTMP | SVf_READONLY
-				| SVs_GMG)))
+				 | SVs_GMG))) {
+			    SvUPGRADE(ret, SVt_ORANGE);
 			    sv_magic(ret,(SV*)ReREFCNT_inc(re),
 					PERL_MAGIC_qr,0,0);
+			}
 			PL_regsize = osize;
 		    }
 		}

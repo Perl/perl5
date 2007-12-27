@@ -34,10 +34,11 @@ use strict;
 @B::IV::ISA = 'B::SV';
 @B::NV::ISA = 'B::SV';
 # RV is eliminated with 5.11.0, but effectively is a specialisation of IV now.
-@B::RV::ISA = $] > 5.011 ? 'B::IV' : 'B::SV';
+@B::RV::ISA = $] >= 5.011 ? 'B::IV' : 'B::SV';
 @B::PVIV::ISA = qw(B::PV B::IV);
 @B::PVNV::ISA = qw(B::PVIV B::NV);
 @B::PVMG::ISA = 'B::PVNV';
+@B::ORANGE::ISA = 'B::PVMG' if $] >= 5.011;
 # Change in the inheritance hierarchy post 5.9.0
 @B::PVLV::ISA = $] > 5.009 ? 'B::GV' : 'B::PVMG';
 # BM is eliminated post 5.9.5, but effectively is a specialisation of GV now.

@@ -275,6 +275,27 @@ do_test(14,
       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$dump2"
     OUTSIDE = $ADDR \\(MAIN\\)');
 
+if ($] >= 5.011) {
+do_test(15,
+        qr(tic),
+'SV = $RV\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(ROK\\)
+  RV = $ADDR
+  SV = ORANGE\\($ADDR\\) at $ADDR
+    REFCNT = 1
+    FLAGS = \\(OBJECT,SMG\\)
+    IV = 0
+    NV = 0
+    PV = 0
+    MAGIC = $ADDR
+      MG_VIRTUAL = $ADDR
+      MG_TYPE = PERL_MAGIC_qr\(r\)
+      MG_OBJ = $ADDR
+        PAT = "\(\?-xism:tic\)"
+        REFCNT = 2
+    STASH = $ADDR\\t"Regexp"');
+} else {
 do_test(15,
         qr(tic),
 'SV = $RV\\($ADDR\\) at $ADDR
@@ -294,6 +315,7 @@ do_test(15,
         PAT = "\(\?-xism:tic\)"
         REFCNT = 2
     STASH = $ADDR\\t"Regexp"');
+}
 
 do_test(16,
         (bless {}, "Tac"),

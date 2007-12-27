@@ -916,8 +916,9 @@ static const struct body_details bodies_by_type[] = {
     { sizeof(XPVMG), copy_length(XPVMG, xmg_stash), 0, SVt_PVMG, FALSE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVMG)) },
 
-    /* There are plans for this  */
-    { 0, 0, 0, SVt_ORANGE, FALSE, NONV, NOARENA, 0 },
+    /* 28 */
+    { sizeof(XPVMG), copy_length(XPVMG, xmg_stash), 0, SVt_ORANGE, FALSE, HADNV,
+      HASARENA, FIT_ARENA(0, sizeof(XPVMG)) },
 
     /* 48 */
     { sizeof(XPVGV), sizeof(XPVGV), 0, SVt_PVGV, TRUE, HADNV,
@@ -1309,6 +1310,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
     case SVt_PVGV:
     case SVt_PVCV:
     case SVt_PVLV:
+    case SVt_ORANGE:
     case SVt_PVMG:
     case SVt_PVNV:
     case SVt_PV:
@@ -2696,7 +2698,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		if (!referent) {
 		    len = 7;
 		    retval = buffer = savepvn("NULLREF", len);
-		} else if (SvTYPE(referent) == SVt_PVMG
+		} else if (SvTYPE(referent) == SVt_ORANGE
 			   && ((SvFLAGS(referent) &
 				(SVs_OBJECT|SVf_OK|SVs_GMG|SVs_SMG|SVs_RMG))
 			       == (SVs_OBJECT|SVs_SMG))
@@ -7768,6 +7770,7 @@ Perl_sv_reftype(pTHX_ const SV *sv, int ob)
 	case SVt_PVFM:		return "FORMAT";
 	case SVt_PVIO:		return "IO";
 	case SVt_BIND:		return "BIND";
+	case SVt_ORANGE:	return "ORANGE";
 	default:		return "UNKNOWN";
 	}
     }
