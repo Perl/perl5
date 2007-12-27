@@ -2033,9 +2033,10 @@ $test = 687;
 # Force scalar context on the patern match
 sub ok ($;$) {
     my($ok, $name) = @_;
+    my $todo = $TODO ? " # TODO $TODO" : '';
 
     printf "%sok %d - %s\n", ($ok ? "" : "not "), $test,
-        ($name||$Message)."\tLine ".((caller)[2]);
+        ($name||$Message)."$todo\tLine ".((caller)[2]);
 
     printf "# Failed test at line %d\n", (caller)[2] unless $ok;
 
@@ -3448,6 +3449,7 @@ if (!$ENV{PERL_SKIP_PSYCHO_TEST}){
 }
 
 {
+    local $TODO = "See changes 26925-26928, which reverted change 26410";
     package lv;
     $var = "abc";
     sub variable : lvalue { $var }
@@ -3456,16 +3458,17 @@ if (!$ENV{PERL_SKIP_PSYCHO_TEST}){
     my $o = bless [], "lv";
     my $f = "";
     eval { for (1..2) { $f .= $1 if $o->variable =~ /(.)/g } };
-    ok($f eq "ab", "pos retained between calls # TODO") or print "# $@\n";
+    ok($f eq "ab", "pos retained between calls") or print "# $@\n";
 }
 
 {
+    local $TODO = "See changes 26925-26928, which reverted change 26410";
     $var = "abc";
     sub variable : lvalue { $var }
 
     my $f = "";
     eval { for (1..2) { $f .= $1 if variable() =~ /(.)/g } };
-    ok($f eq "ab", "pos retained between calls # TODO") or print "# $@\n";
+    ok($f eq "ab", "pos retained between calls") or print "# $@\n";
 }
 
 # [perl #37836] Simple Regex causes SEGV when run on specific data
@@ -3695,13 +3698,14 @@ SKIP:{
 
 sub iseq($$;$) { 
     my ( $got, $expect, $name)=@_;
+    my $todo = $TODO ? " # TODO $TODO" : '';
     
     $_=defined($_) ? "'$_'" : "undef"
         for $got, $expect;
         
     my $ok=  $got eq $expect;
         
-    printf "%sok %d - %s\n", ($ok ? "" : "not "), $test,
+    printf "%sok %d - %s$todo\n", ($ok ? "" : "not "), $test,
         ($name||$Message)."\tLine ".((caller)[2]);
 
     printf "# Failed test at line %d\n".
@@ -4109,12 +4113,13 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     iseq($^R,'Nothing');
 }
 {
-    local $Message="RT#22395";
+    local $Message="RT 22395";
+    local $TODO = "Should be L+1 not L*(L+3)/2 (L=$l)";
     our $count;
     for my $l (10,100,1000) {
 	$count=0;
 	('a' x $l) =~ /(.*)(?{$count++})[bc]/;
-	iseq( $count, $l + 1, "# TODO Should be L+1 not L*(L+3)/2 (L=$l)");
+	iseq( $count, $l + 1);
     }
 }
 {
