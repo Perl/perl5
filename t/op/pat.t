@@ -4679,6 +4679,12 @@ SKIP: {
 }
 
 
+{
+    my $a = 3; "" =~ /(??{ $a })/;
+    my $b = $a;
+    iseq($b, $a, "copy of scalar used for postponed subexpression");
+}
+
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
 # Keep the following tests last -- they may crash perl
@@ -4740,7 +4746,7 @@ iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 4037;
+    $::TestCount = 4038;
     print "1..$::TestCount\n";
 }
 
