@@ -3138,13 +3138,13 @@ ok("bbbbac" =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
     foreach (1,2,3,4) {
 	    $p++ if /(??{ $p })/
     }
-    ok ($p == 5, "[perl #20683] (??{ }) returns stale values");
+    iseq ($p, 5, "[perl #20683] (??{ }) returns stale values");
     { package P; $a=1; sub TIESCALAR { bless[] } sub FETCH { $a++ } }
     tie $p, P;
     foreach (1,2,3,4) {
 	    /(??{ $p })/
     }
-    ok ( $p == 5, "(??{ }) returns stale values");
+    iseq ( $p, 5, "(??{ }) returns stale values");
 }
 
 {
