@@ -3713,10 +3713,20 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    if(SvROK(ret) && SvSMAGICAL(sv = SvRV(ret)))
 			mg = mg_find(sv, PERL_MAGIC_qr);
 		    else if (SvSMAGICAL(ret)) {
-			if (SvGMAGICAL(ret))
+			if (SvGMAGICAL(ret)) {
+			    /* I don't believe that there is ever qr magic
+			       here.  */
+			    assert(!mg_find(ret, PERL_MAGIC_qr));
 			    sv_unmagic(ret, PERL_MAGIC_qr);
-			else
+			}
+			else {
 			    mg = mg_find(ret, PERL_MAGIC_qr);
+			    /* testing suggests mg only ends up non-NULL for
+			       scalars who were upgraded and compiled in the
+			       else block below. In turn, this is only
+			       triggered in the "postponed utf8 string" tests
+			       in t/op/pat.t  */
+			}
 		    }
 
 		    if (mg) {
