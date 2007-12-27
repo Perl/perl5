@@ -3654,7 +3654,8 @@ Perl_yylex(pTHX)
 		}
 	    }
 	    if (PL_minus_E)
-		sv_catpvs(PL_linestr,"use feature ':5.11';");
+		sv_catpvs(PL_linestr,
+			  "use feature ':5." STRINGIFY(PERL_VERSION) "';");
 	    sv_catpvs(PL_linestr, "\n");
 	    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
