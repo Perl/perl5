@@ -99,11 +99,11 @@ typedef struct regexp {
         
         /* Information about the match that isn't often used */
 	I32 prelen;		/* length of precomp */
-	const char *precomp;	/* pre-compilation regular expression */
 	/* wrapped can't be const char*, as it is returned by sv_2pv_flags */
 	char *wrapped;          /* wrapped version of the pattern */
 	I32 wraplen;		/* length of wrapped */
-	I32 seen_evals;         /* number of eval groups in the pattern - for security checks */ 
+	unsigned pre_prefix:4;	/* offset from wrapped to the start of precomp */
+	unsigned seen_evals:28;	/* number of eval groups in the pattern - for security checks */ 
         HV *paren_names;	/* Optional hash of paren names */
         
         /* Refcount of this regexp */
@@ -354,7 +354,7 @@ and check for NULL.
 					 : RX_MATCH_COPIED_off(prog))
 
 /* For source compatibility. We used to store these explicitly.  */
-#define RX_PRECOMP(prog)		((prog)->precomp)
+#define RX_PRECOMP(prog)		((prog)->wrapped + (prog)->pre_prefix)
 #define RX_PRELEN(prog)			((prog)->prelen)
 
 #endif /* PLUGGABLE_RE_EXTENSION */

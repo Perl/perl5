@@ -4319,7 +4319,8 @@ redo_first_pass:
 
         *p++ = ':';
         Copy(RExC_precomp, p, RX_PRELEN(r), char);
-        RX_PRECOMP(r) = p;
+	assert ((r->wrapped - p) < 16);
+	r->pre_prefix = p - r->wrapped;
         p += RX_PRELEN(r);
         if (has_runon)
             *p++ = '\n';
@@ -9371,7 +9372,6 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
     dVAR;
     regexp *ret;
     I32 npar;
-    U32 precomp_offset;
 
     if (!r)
 	return (REGEXP *)NULL;
@@ -9420,10 +9420,7 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
 	}
     }
 
-    precomp_offset = RX_PRECOMP(ret) - ret->wrapped;
-
     ret->wrapped        = SAVEPVN(ret->wrapped, ret->wraplen+1);
-    RX_PRECOMP(ret)     = ret->wrapped + precomp_offset;
     ret->paren_names    = hv_dup_inc(ret->paren_names, param);
 
     if (ret->pprivate)
