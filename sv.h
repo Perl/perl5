@@ -1448,7 +1448,7 @@ the scalar's value cannot change unless written to.
     STMT_START {							\
 		    if (SvTYPE(sv) < SVt_PV && SvTYPE(sv) != SVt_IV)	\
 			sv_upgrade(sv, SVt_IV);				\
-		    else if (SvPVX_const(sv)) {				\
+		    else if (SvTYPE(sv) >= SVt_PV) {			\
 			SvPV_free(sv);					\
 			SvLEN_set(sv, 0);				\
                         SvCUR_set(sv, 0);				\
