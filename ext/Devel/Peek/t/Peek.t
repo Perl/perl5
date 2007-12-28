@@ -287,7 +287,8 @@ do_test(15,
     FLAGS = \\(\\)
     IV = 0
     NV = 0
-    PV = 0');
+    PV = 0
+    REGEXP = $ADDR');
 } else {
 do_test(15,
         qr(tic),
