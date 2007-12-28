@@ -501,7 +501,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const prog, SV *sv, char *strpos,
 #ifdef QDEBUGGING	/* 7/99: reports of failure (with the older version) */
     if (end_shift < 0)
 	Perl_croak(aTHX_ "panic: end_shift: %"IVdf" pattern:\n%s\n ",
-		   (IV)end_shift, prog->precomp);
+		   (IV)end_shift, RX_PRECOMP(prog));
 #endif
 
   restart:
@@ -2558,7 +2558,7 @@ S_debug_start_match(pTHX_ const regexp *prog, const bool do_utf8,
             reginitcolors();    
     {
         RE_PV_QUOTED_DECL(s0, utf8_pat, PERL_DEBUG_PAD_ZERO(0), 
-            prog->precomp, prog->prelen, 60);   
+            RX_PRECOMP(prog), RX_PRELEN(prog), 60);   
         
         RE_PV_QUOTED_DECL(s1, do_utf8, PERL_DEBUG_PAD_ZERO(1), 
             start, end - start, 60); 

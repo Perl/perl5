@@ -1261,7 +1261,7 @@ PP(pp_match)
 
 
     /* empty pattern special-cased to use last successful pattern if possible */
-    if (!rx->prelen && PL_curpm) {
+    if (!RX_PRELEN(rx) && PL_curpm) {
 	pm = PL_curpm;
 	rx = PM_GETRE(pm);
     }
@@ -2091,7 +2091,7 @@ PP(pp_subst)
 				   position, once with zero-length,
 				   second time with non-zero. */
 
-    if (!rx->prelen && PL_curpm) {
+    if (!RX_PRELEN(rx) && PL_curpm) {
 	pm = PL_curpm;
 	rx = PM_GETRE(pm);
     }

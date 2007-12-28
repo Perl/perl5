@@ -116,7 +116,7 @@ PPCODE:
                 match_flags >>= 1;
             }
 
-            pattern = sv_2mortal(newSVpvn(re->precomp,re->prelen));
+            pattern = sv_2mortal(newSVpvn(RX_PRECOMP(re),RX_PRELEN(re)));
             if (re->extflags & RXf_UTF8) SvUTF8_on(pattern);
 
             /* return the pattern and the modifiers */

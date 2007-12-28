@@ -544,7 +544,7 @@ Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
 	ch = '/';
     if (PM_GETRE(pm))
 	Perl_dump_indent(aTHX_ level, file, "PMf_PRE %c%s%c%s\n",
-	     ch, PM_GETRE(pm)->precomp, ch,
+	     ch, RX_PRECOMP(PM_GETRE(pm)), ch,
 	     (pm->op_private & OPpRUNTIME) ? " (RUNTIME)" : "");
     else
 	Perl_dump_indent(aTHX_ level, file, "PMf_PRE (RUNTIME)\n");
@@ -2456,7 +2456,7 @@ Perl_do_pmop_xmldump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
     level++;
     if (PM_GETRE(pm)) {
 	const regexp *const r = PM_GETRE(pm);
-	SV * const tmpsv = newSVpvn(r->precomp,r->prelen);
+	SV * const tmpsv = newSVpvn(RX_PRECOMP(r),r->prelen);
 	SvUTF8_on(tmpsv);
 	Perl_xmldump_indent(aTHX_ level, file, "pre=\"%s\"\n",
 	     SvPVX(tmpsv));

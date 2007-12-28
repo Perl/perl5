@@ -1109,7 +1109,7 @@ PMOP_precomp(o)
 	ST(0) = sv_newmortal();
 	rx = PM_GETRE(o);
 	if (rx)
-	    sv_setpvn(ST(0), rx->precomp, rx->prelen);
+	    sv_setpvn(ST(0), RX_PRECOMP(rx), RX_PRELEN(rx));
 
 #if PERL_VERSION >= 9
 
@@ -1525,7 +1525,7 @@ precomp(sv)
     CODE:
 	rx = ((struct xregexp *)SvANY(sv))->xrx_regexp;
 	/* FIXME - UTF-8? And the equivalent precomp methods? */
-	RETVAL = newSVpvn( rx->precomp, rx->prelen );
+	RETVAL = newSVpvn( RX_PRECOMP(rx), RX_PRELEN(rx) );
     OUTPUT:
         RETVAL
 
@@ -1591,7 +1591,7 @@ precomp(mg)
             REGEXP* rx = (REGEXP*)mg->mg_obj;
             RETVAL = Nullsv;
             if( rx )
-                RETVAL = newSVpvn( rx->precomp, rx->prelen );
+                RETVAL = newSVpvn( RX_PRECOMP(rx), RX_PRELEN(rx) );
         }
         else {
             croak( "precomp is only meaningful on r-magic" );

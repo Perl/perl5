@@ -353,6 +353,10 @@ and check for NULL.
 					 ? RX_MATCH_COPIED_on(prog) \
 					 : RX_MATCH_COPIED_off(prog))
 
+/* For source compatibility. We used to store these explicitly.  */
+#define RX_PRECOMP(prog)		((prog)->precomp)
+#define RX_PRELEN(prog)			((prog)->prelen)
+
 #endif /* PLUGGABLE_RE_EXTENSION */
 
 /* Stuff that needs to be included in the plugable extension goes below here */

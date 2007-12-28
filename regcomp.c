@@ -4281,7 +4281,7 @@ redo_first_pass:
     RXi_SET( r, ri );
     r->engine= RE_ENGINE_PTR;
     r->refcnt = 1;
-    r->prelen = plen;
+    RX_PRELEN(r) = plen;
     r->extflags = pm_flags;
     {
         bool has_p     = ((r->extflags & RXf_PMf_KEEPCOPY) == RXf_PMf_KEEPCOPY);
@@ -4290,7 +4290,7 @@ redo_first_pass:
 	U16 reganch = (U16)((r->extflags & RXf_PMf_STD_PMMOD) >> 12);
 	const char *fptr = STD_PAT_MODS;        /*"msix"*/
 	char *p;
-        r->wraplen = r->prelen + has_minus + has_p + has_runon
+        r->wraplen = RX_PRELEN(r) + has_minus + has_p + has_runon
             + (sizeof(STD_PAT_MODS) - 1)
             + (sizeof("(?:)") - 1);
 
@@ -4318,9 +4318,9 @@ redo_first_pass:
         }
 
         *p++ = ':';
-        Copy(RExC_precomp, p, r->prelen, char);
-        r->precomp = p;
-        p += r->prelen;
+        Copy(RExC_precomp, p, RX_PRELEN(r), char);
+        RX_PRECOMP(r) = p;
+        p += RX_PRELEN(r);
         if (has_runon)
             *p++ = '\n';
         *p++ = ')';
@@ -4794,17 +4794,17 @@ reStudy:
         r->paren_names = NULL;
 
 #ifdef STUPID_PATTERN_CHECKS            
-    if (r->prelen == 0)
+    if (RX_PRELEN(r) == 0)
         r->extflags |= RXf_NULL;
-    if (r->extflags & RXf_SPLIT && r->prelen == 1 && r->precomp[0] == ' ')
+    if (r->extflags & RXf_SPLIT && RX_PRELEN(r) == 1 && RX_PRECOMP(r)[0] == ' ')
         /* XXX: this should happen BEFORE we compile */
         r->extflags |= (RXf_SKIPWHITE|RXf_WHITE); 
-    else if (r->prelen == 3 && memEQ("\\s+", r->precomp, 3))
+    else if (RX_PRELEN(r) == 3 && memEQ("\\s+", RX_PRECOMP(r), 3))
         r->extflags |= RXf_WHITE;
-    else if (r->prelen == 1 && r->precomp[0] == '^')
+    else if (RX_PRELEN(r) == 1 && RX_PRECOMP(r)[0] == '^')
         r->extflags |= RXf_START_ONLY;
 #else
-    if (r->extflags & RXf_SPLIT && r->prelen == 1 && r->precomp[0] == ' ')
+    if (r->extflags & RXf_SPLIT && RX_PRELEN(r) == 1 && RX_PRECOMP(r)[0] == ' ')
             /* XXX: this should happen BEFORE we compile */
             r->extflags |= (RXf_SKIPWHITE|RXf_WHITE); 
     else {
@@ -9244,7 +9244,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const r)
 	{
 	    SV *dsv= sv_newmortal();
             RE_PV_QUOTED_DECL(s, (r->extflags & RXf_UTF8),
-                dsv, r->precomp, r->prelen, 60);
+                dsv, RX_PRECOMP(r), RX_PRELEN(r), 60);
             PerlIO_printf(Perl_debug_log,"%sFreeing REx:%s %s\n", 
                 PL_colors[4],PL_colors[5],s);
         }
@@ -9420,7 +9420,7 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
     }
 
     ret->wrapped        = SAVEPVN(ret->wrapped, ret->wraplen+1);
-    ret->precomp        = ret->wrapped + (ret->precomp - ret->wrapped);
+    RX_PRECOMP(ret)        = ret->wrapped + (RX_PRECOMP(ret) - ret->wrapped);
     ret->paren_names    = hv_dup_inc(ret->paren_names, param);
 
     if (ret->pprivate)

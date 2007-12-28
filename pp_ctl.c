@@ -130,8 +130,8 @@ PP(pp_regcomp)
 	re = PM_GETRE(pm);
 
 	/* Check against the last compiled regexp. */
-	if (!re || !re->precomp || re->prelen != (I32)len ||
-	    memNE(re->precomp, t, len))
+	if (!re || !RX_PRECOMP(re) || RX_PRELEN(re) != (I32)len ||
+	    memNE(RX_PRECOMP(re), t, len))
 	{
 	    const regexp_engine *eng = re ? re->engine : NULL;
             U32 pm_flags = pm->op_pmflags & PMf_COMPILETIME;
@@ -172,7 +172,7 @@ PP(pp_regcomp)
     }
 #endif
 
-    if (!PM_GETRE(pm)->prelen && PL_curpm)
+    if (!RX_PRELEN(PM_GETRE(pm)) && PL_curpm)
 	pm = PL_curpm;
 
 
