@@ -1194,11 +1194,11 @@ PP(pp_qr)
     REGEXP * rx = PM_GETRE(pm);
     SV * const pkg = CALLREG_PACKAGE(rx);
     SV * const rv = sv_newmortal();
-    SV * const sv = newSVrv(rv, SvPV_nolen(pkg));
+    SV * const sv = newSVrv(rv, pkg ? SvPV_nolen(pkg) : NULL);
     if (rx->extflags & RXf_TAINTED)
         SvTAINTED_on(rv);
-    sv_upgrade(sv, SVt_ORANGE);
-    sv_magic(sv,(SV*)ReREFCNT_inc(rx), PERL_MAGIC_qr,0,0);
+    sv_upgrade(sv, SVt_REGEXP);
+    ((struct xregexp *)SvANY(sv))->xrx_regexp = ReREFCNT_inc(rx);
     XPUSHs(rv);
     RETURN;
 }

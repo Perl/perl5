@@ -5209,7 +5209,7 @@ SV*
 Perl_reg_qr_package(pTHX_ REGEXP * const rx)
 {
 	PERL_UNUSED_ARG(rx);
-	return newSVpvs("Regexp");
+	return NULL;
 }
 
 /* Scans the name of a named buffer from the pattern.

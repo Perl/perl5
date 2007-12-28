@@ -53,7 +53,7 @@ typedef enum {
 	SVt_PVIV,	/* 5 */
 	SVt_PVNV,	/* 6 */
 	SVt_PVMG,	/* 7 */
-	SVt_ORANGE,	/* 8 */
+	SVt_REGEXP,	/* 8 */
 	/* PVBM was here, before BIND replaced it.  */
 	SVt_PVGV,	/* 9 */
 	SVt_PVLV,	/* 10 */
@@ -535,6 +535,37 @@ struct xpvmg {
 	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
     } xmg_u;
     HV*		xmg_stash;	/* class package */
+};
+
+struct xregexp {
+    union {
+	NV	xnv_nv;		/* numeric value, if any */
+	HV *	xgv_stash;
+	struct {
+	    U32	xlow;
+	    U32	xhigh;
+	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
+	struct {
+	    U32 xbm_previous;	/* how many characters in string before rare? */
+	    U8	xbm_flags;
+	    U8	xbm_rare;	/* rarest character in string */
+	}	xbm_s;		/* fields from PVBM */
+    }		xnv_u;
+    STRLEN	xpv_cur;	/* length of svu_pv as a C string */
+    STRLEN	xpv_len;	/* allocated size */
+    union {
+	IV	xivu_iv;	/* integer value or pv offset */
+	UV	xivu_uv;
+	void *	xivu_p1;
+	I32	xivu_i32;
+	HEK *	xivu_namehek;
+    }		xiv_u;
+    union {
+	MAGIC*	xmg_magic;	/* linked list of magicalness */
+	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
+    } xmg_u;
+    HV*		xmg_stash;	/* class package */
+    REGEXP *	xrx_regexp;	/* Our regular expression */
 };
 
 struct xpvlv {

@@ -282,19 +282,12 @@ do_test(15,
   REFCNT = 1
   FLAGS = \\(ROK\\)
   RV = $ADDR
-  SV = ORANGE\\($ADDR\\) at $ADDR
+  SV = REGEXP\\($ADDR\\) at $ADDR
     REFCNT = 1
-    FLAGS = \\(OBJECT,SMG\\)
+    FLAGS = \\(\\)
     IV = 0
     NV = 0
-    PV = 0
-    MAGIC = $ADDR
-      MG_VIRTUAL = $ADDR
-      MG_TYPE = PERL_MAGIC_qr\(r\)
-      MG_OBJ = $ADDR
-        PAT = "\(\?-xism:tic\)"
-        REFCNT = 2
-    STASH = $ADDR\\t"Regexp"');
+    PV = 0');
 } else {
 do_test(15,
         qr(tic),

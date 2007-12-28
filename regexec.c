@@ -3707,12 +3707,21 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		{
 		    /* extract RE object from returned value; compiling if
 		     * necessary */
-
 		    MAGIC *mg = NULL;
-		    const SV *sv;
-		    if(SvROK(ret) && SvSMAGICAL(sv = SvRV(ret)))
-			mg = mg_find(sv, PERL_MAGIC_qr);
-		    else if (SvSMAGICAL(ret)) {
+		    re = NULL;
+
+		    if (SvROK(ret)) {
+			const SV *const sv = SvRV(ret);
+
+			if (SvTYPE(sv) == SVt_REGEXP) {
+			    re = ((struct xregexp *)SvANY(sv))->xrx_regexp;
+			} else if (SvSMAGICAL(sv)) {
+			    mg = mg_find(sv, PERL_MAGIC_qr);
+			    assert(mg);
+			}
+		    } else if (SvTYPE(ret) == SVt_REGEXP) {
+			re = ((struct xregexp *)SvANY(ret))->xrx_regexp;
+		    } else if (SvSMAGICAL(ret)) {
 			if (SvGMAGICAL(ret)) {
 			    /* I don't believe that there is ever qr magic
 			       here.  */
@@ -3730,8 +3739,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    }
 
 		    if (mg) {
-			re = reg_temp_copy((regexp *)mg->mg_obj); /*XXX:dmq*/
+			re = (regexp *)mg->mg_obj; /*XXX:dmq*/
+			assert(re);
 		    }
+		    if (re)
+			re = reg_temp_copy(re);
 		    else {
 			U32 pm_flags = 0;
 			const I32 osize = PL_regsize;

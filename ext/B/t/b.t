@@ -74,8 +74,11 @@ ok( B::svref_2object(\$.)->MAGIC->TYPE eq "\0", '$. has \0 magic' );
 	'$. has no more magic' );
 }
 
-ok(B::svref_2object(qr/foo/)->MAGIC->precomp() eq 'foo', 'Get string from qr//');
-like(B::svref_2object(qr/foo/)->MAGIC->REGEX(), qr/\d+/, "REGEX() returns numeric value");
+my $r = qr/foo/;
+my $obj = B::svref_2object($r);
+my $regexp =  ($] < 5.011) ? $obj->MAGIC : $obj;
+ok($regexp->precomp() eq 'foo', 'Get string from qr//');
+like($regexp->REGEX(), qr/\d+/, "REGEX() returns numeric value");
 my $iv = 1;
 my $iv_ref = B::svref_2object(\$iv);
 is(ref $iv_ref, "B::IV", "Test B:IV return from svref_2object");
