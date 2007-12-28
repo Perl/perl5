@@ -4290,7 +4290,7 @@ redo_first_pass:
 	U16 reganch = (U16)((r->extflags & RXf_PMf_STD_PMMOD) >> 12);
 	const char *fptr = STD_PAT_MODS;        /*"msix"*/
 	char *p;
-        r->wraplen = RX_PRELEN(r) + has_minus + has_p + has_runon
+        r->wraplen = plen + has_minus + has_p + has_runon
             + (sizeof(STD_PAT_MODS) - 1)
             + (sizeof("(?:)") - 1);
 
@@ -4318,10 +4318,10 @@ redo_first_pass:
         }
 
         *p++ = ':';
-        Copy(RExC_precomp, p, RX_PRELEN(r), char);
+        Copy(RExC_precomp, p, plen, char);
 	assert ((r->wrapped - p) < 16);
 	r->pre_prefix = p - r->wrapped;
-        p += RX_PRELEN(r);
+        p += plen;
         if (has_runon)
             *p++ = '\n';
         *p++ = ')';
