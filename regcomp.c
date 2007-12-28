@@ -9371,6 +9371,7 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
     dVAR;
     regexp *ret;
     I32 npar;
+    U32 precomp_offset;
 
     if (!r)
 	return (REGEXP *)NULL;
@@ -9419,8 +9420,10 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
 	}
     }
 
+    precomp_offset = RX_PRECOMP(ret) - ret->wrapped;
+
     ret->wrapped        = SAVEPVN(ret->wrapped, ret->wraplen+1);
-    RX_PRECOMP(ret)        = ret->wrapped + (RX_PRECOMP(ret) - ret->wrapped);
+    RX_PRECOMP(ret)     = ret->wrapped + precomp_offset;
     ret->paren_names    = hv_dup_inc(ret->paren_names, param);
 
     if (ret->pprivate)
