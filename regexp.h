@@ -98,7 +98,6 @@ typedef struct regexp {
         
         
         /* Information about the match that isn't often used */
-	I32 prelen;		/* length of precomp */
 	/* wrapped can't be const char*, as it is returned by sv_2pv_flags */
 	char *wrapped;          /* wrapped version of the pattern */
 	I32 wraplen;		/* length of wrapped */
@@ -355,7 +354,10 @@ and check for NULL.
 
 /* For source compatibility. We used to store these explicitly.  */
 #define RX_PRECOMP(prog)		((prog)->wrapped + (prog)->pre_prefix)
-#define RX_PRELEN(prog)			((prog)->prelen)
+/* FIXME? Are we hardcoding too much here and constraining plugin extension
+   writers? Specifically, the value 1 assumes that the wrapped version always
+   has exactly one character at the end, a ')'. Will that always be true?  */
+#define RX_PRELEN(prog)			((prog)->wraplen - (prog)->pre_prefix - 1)
 
 #endif /* PLUGGABLE_RE_EXTENSION */
 
