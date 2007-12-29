@@ -367,7 +367,8 @@ struct pmop {
 #define PMf_EVAL	0x0400		/* evaluating replacement as expr */
 
 /* The following flags have exact equivalents in regcomp.h with the prefix RXf_
- * which are stored in the regexp->extflags member.
+ * which are stored in the regexp->extflags member. If you change them here,
+ * you have to change them there, and vice versa.
  */
 #define PMf_LOCALE	0x00800		/* use locale for character types */
 #define PMf_MULTILINE	0x01000		/* assume multiple lines */
