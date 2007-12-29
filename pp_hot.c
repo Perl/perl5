@@ -2035,6 +2035,7 @@ PP(pp_subst)
     const I32 oldsave = PL_savestack_ix;
     STRLEN slen;
     bool doutf8 = FALSE;
+    I32 matched;
 #ifdef PERL_OLD_COPY_ON_WRITE
     bool is_cow;
 #endif
@@ -2121,7 +2122,8 @@ PP(pp_subst)
 
     /* only replace once? */
     once = !(rpm->op_pmflags & PMf_GLOBAL);
-
+    matched = CALLREGEXEC(rx, s, strend, orig, 0, TARG, NULL,
+			 r_flags | REXEC_CHECKED);
     /* known replacement string? */
     if (dstr) {
 	/* replacement needing upgrading? */
@@ -2153,8 +2155,7 @@ PP(pp_subst)
 	&& (I32)clen <= rx->minlenret && (once || !(r_flags & REXEC_COPY_STR))
 	&& !(rx->extflags & RXf_LOOKBEHIND_SEEN)
 	&& (!doutf8 || SvUTF8(TARG))) {
-	if (!CALLREGEXEC(rx, s, strend, orig, 0, TARG, NULL,
-			 r_flags | REXEC_CHECKED))
+	if (!matched)
 	{
 	    SPAGAIN;
 	    PUSHs(&PL_sv_no);
@@ -2258,8 +2259,7 @@ PP(pp_subst)
 	RETURN;
     }
 
-    if (CALLREGEXEC(rx, s, strend, orig, 0, TARG, NULL,
-		    r_flags | REXEC_CHECKED))
+    if (matched)
     {
 	if (force_on_match) {
 	    force_on_match = 0;
