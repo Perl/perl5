@@ -107,7 +107,8 @@ PPCODE:
 
             const char *fptr = INT_PAT_MODS;
             char ch;
-            U16 match_flags = (U16)((re->extflags & PMf_COMPILETIME) >> 12);
+            U16 match_flags = (U16)((re->extflags & PMf_COMPILETIME)
+				    >> RXf_PMf_STD_PMMOD_SHIFT);
 
             while((ch = *fptr++)) {
                 if(match_flags & 1) {
