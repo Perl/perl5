@@ -4994,10 +4994,8 @@ Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, const char *little, 
     else if ((i = mid - big)) {	/* faster from front */
 	midend -= littlelen;
 	mid = midend;
+	Move(big, midend - i, i, char);
 	sv_chop(bigstr,midend-i);
-	big += i;
-	while (i--)
-	    *--midend = *--big;
 	if (littlelen)
 	    Move(little, mid, littlelen,char);
     }
