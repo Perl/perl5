@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Oct  8 10:22:27 CEST 2007 [metaconfig 3.0 PL70]
+# Generated on Sat Dec 29 15:53:27 CET 2007 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -839,8 +839,8 @@ installhtml1dir=''
 html3dir=''
 html3direxp=''
 installhtml3dir=''
-i_assert=''
 i_arpainet=''
+i_assert=''
 i_crypt=''
 db_hashtype=''
 db_prefixtype=''
@@ -5089,7 +5089,7 @@ default|recommended)
 	case "$gccversion" in
 	1*) ;;
 	2.[0-8]*) ;;
-	?*) 	set strict-aliasing -fno-strict-aliasing
+	?*)	set strict-aliasing -fno-strict-aliasing
 		eval $checkccflag
 		;;
 	esac
@@ -19744,7 +19744,7 @@ else
 fi
 $rm -f foo* bar*
 
-: check for type of arguments to select. 
+: check for type of arguments to select.
 case "$selecttype" in
 '') case "$d_select" in
 	$define)
@@ -19753,7 +19753,7 @@ case "$selecttype" in
 Checking to see what type of arguments are accepted by select().
 EOM
 		hdrs="$define sys/types.h
-			$i_systime sys/time.h 
+			$i_systime sys/time.h
 			$i_sysselct sys/select.h
 			$d_socket sys/socket.h"
 		: The first arg can be int, unsigned, or size_t
@@ -20171,7 +20171,7 @@ echo $sig_name | $awk \
 	printf "\n"
 }'
 sig_size=`echo $sig_name | awk '{print NF}'`
-$rm -f signal signal.c signal.awk signal.lst signal_cmd 
+$rm -f signal signal.c signal.awk signal.lst signal_cmd
 
 echo " "
 case "$sizetype" in
@@ -20515,6 +20515,11 @@ case "$yacc" in
 	esac
 	;;
 esac
+
+
+: see if this is a assert.h system
+set assert.h i_assert
+eval $inhdr
 
 : see if this is a fp.h system
 set fp.h i_fp
@@ -20922,10 +20927,6 @@ val=$val3; set i_termios; eval $setvar
 
 : see if stddef is available
 set stddef.h i_stddef
-eval $inhdr
-
-: see if assert.h is available
-set assert.h i_assert
 eval $inhdr
 
 : see if sys/access.h is available
