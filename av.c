@@ -977,8 +977,10 @@ Perl_av_iter_p(pTHX_ AV *av) {
     return &(mg->mg_len);
 #else
     if (!mg->mg_ptr) {
+	IV *temp;
 	mg->mg_len = IVSIZE;
-	Newxz(mg->mg_ptr, 1, IV);
+	Newxz(temp, 1, IV);
+	mg->mg_ptr = (char *) temp;
     }
     return (IV *)mg->mg_ptr;
 #endif
