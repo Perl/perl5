@@ -126,7 +126,7 @@ PPCODE:
         } else {
             /* Scalar, so use the string that Perl would return */
             /* return the pattern in (?msix:..) format */
-            pattern = sv_2mortal(newSVpvn(re->wrapped,re->wraplen));
+            pattern = sv_2mortal(newSVpvn(RX_WRAPPED(re),RX_WRAPLEN(re)));
             if (re->extflags & RXf_UTF8) 
                 SvUTF8_on(pattern);
             XPUSHs(pattern);

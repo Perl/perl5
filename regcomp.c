@@ -4289,12 +4289,12 @@ redo_first_pass:
 	U16 reganch = (U16)((r->extflags & RXf_PMf_STD_PMMOD) >> 12);
 	const char *fptr = STD_PAT_MODS;        /*"msix"*/
 	char *p;
-        r->wraplen = plen + has_minus + has_p + has_runon
+        RX_WRAPLEN(r) = plen + has_minus + has_p + has_runon
             + (sizeof(STD_PAT_MODS) - 1)
             + (sizeof("(?:)") - 1);
 
-        Newx(r->wrapped, r->wraplen + 1, char );
-        p = r->wrapped;
+        Newx(RX_WRAPPED(r), RX_WRAPLEN(r) + 1, char );
+        p = RX_WRAPPED(r);
         *p++='('; *p++='?';
         if (has_p)
             *p++ = KEEPCOPY_PAT_MOD; /*'p'*/
@@ -4318,8 +4318,8 @@ redo_first_pass:
 
         *p++ = ':';
         Copy(RExC_precomp, p, plen, char);
-	assert ((r->wrapped - p) < 16);
-	r->pre_prefix = p - r->wrapped;
+	assert ((RX_WRAPPED(r) - p) < 16);
+	r->pre_prefix = p - RX_WRAPPED(r);
         p += plen;
         if (has_runon)
             *p++ = '\n';
@@ -9146,7 +9146,7 @@ Perl_pregfree(pTHX_ struct regexp *r)
         CALLREGFREE_PVT(r); /* free the private data */
         if (r->paren_names)
             SvREFCNT_dec(r->paren_names);
-        Safefree(r->wrapped);
+        Safefree(RX_WRAPPED(r));
     }        
     if (r->substrs) {
         if (r->anchored_substr)
@@ -9419,7 +9419,7 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
 	}
     }
 
-    ret->wrapped        = SAVEPVN(ret->wrapped, ret->wraplen+1);
+    RX_WRAPPED(ret)     = SAVEPVN(RX_WRAPPED(ret), RX_WRAPLEN(ret)+1);
     ret->paren_names    = hv_dup_inc(ret->paren_names, param);
 
     if (ret->pprivate)
@@ -9587,8 +9587,8 @@ Perl_reg_stringify(pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags, I32 *haseval ) {
     if (flags)    
 	*flags = ((re->extflags & RXf_UTF8) ? 1 : 0);
     if (lp)
-	*lp = re->wraplen;
-    return re->wrapped;
+	*lp = RX_WRAPLEN(re);
+    return RX_WRAPPED(re);
 }
 
 /*

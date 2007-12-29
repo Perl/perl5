@@ -1285,7 +1285,8 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
             if (mg->mg_type == PERL_MAGIC_qr) {
 		const regexp * const re = (regexp *)mg->mg_obj;
 		SV * const dsv = sv_newmortal();
-                const char * const s =  pv_pretty(dsv, re->wrapped, re->wraplen, 
+                const char * const s
+		    = pv_pretty(dsv, RX_WRAPPED(re), RX_WRAPLEN(re), 
                     60, NULL, NULL,
                     ( PERL_PV_PRETTY_QUOTE | PERL_PV_ESCAPE_RE | PERL_PV_PRETTY_ELLIPSES |
                     ((re->extflags & RXf_UTF8) ? PERL_PV_ESCAPE_UNI : 0))

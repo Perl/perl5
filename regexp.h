@@ -358,6 +358,9 @@ and check for NULL.
    writers? Specifically, the value 1 assumes that the wrapped version always
    has exactly one character at the end, a ')'. Will that always be true?  */
 #define RX_PRELEN(prog)			((prog)->wraplen - (prog)->pre_prefix - 1)
+#define RX_WRAPPED(prog)		((prog)->wrapped)
+#define RX_WRAPLEN(prog)		((prog)->wraplen)
+
 
 #endif /* PLUGGABLE_RE_EXTENSION */
 
