@@ -392,210 +392,94 @@ perform the upgrade if necessary.  See C<svtype>.
 /* RV upwards. However, SVf_ROK and SVp_IOK are exclusive  */
 #define SVprv_WEAKREF   0x80000000  /* Weak reference */
 
+#define _XPV_ALLOCATED_HEAD						\
+    STRLEN	xpv_cur;	/* length of svu_pv as a C string */    \
+    STRLEN	xpv_len 	/* allocated size */
+
+#define _XPV_HEAD	\
+    union _xnvu xnv_u;	\
+    _XPV_ALLOCATED_HEAD
+
+union _xnvu {
+    NV	    xnv_nv;		/* numeric value, if any */
+    HV *    xgv_stash;
+    struct {
+	U32 xlow;
+	U32 xhigh;
+    }	    xpad_cop_seq;	/* used by pad.c for cop_sequence */
+    struct {
+	U32 xbm_previous;	/* how many characters in string before rare? */
+	U8  xbm_flags;
+	U8  xbm_rare;		/* rarest character in string */
+    }	    xbm_s;		/* fields from PVBM */
+};
+
+union _xivu {
+    IV	    xivu_iv;		/* integer value */
+				/* xpvfm: pv offset */
+    UV	    xivu_uv;
+    void *  xivu_p1;
+    I32	    xivu_i32;
+    HEK *   xivu_namehek;	/* xpvlv, xpvgv: GvNAME */
+};
+
+union _xmgu {
+    MAGIC*  xmg_magic;		/* linked list of magicalness */
+    HV*	    xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
+};
 
 struct xpv {
-    union {
-	NV	xnv_nv;		/* numeric value, if any */
-	HV *	xgv_stash;
-	struct {
-	    U32	xlow;
-	    U32	xhigh;
-	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
-	struct {
-	    U32 xbm_previous;	/* how many characters in string before rare? */
-	    U8	xbm_flags;
-	    U8	xbm_rare;	/* rarest character in string */
-	}	xbm_s;		/* fields from PVBM */
-    }		xnv_u;
-    STRLEN	xpv_cur;	/* length of svu_pv as a C string */
-    STRLEN	xpv_len;	/* allocated size */
+    _XPV_HEAD;
 };
 
 typedef struct {
-    STRLEN	xpv_cur;	/* length of svu_pv as a C string */
-    STRLEN	xpv_len;	/* allocated size */
+    _XPV_ALLOCATED_HEAD;
 } xpv_allocated;
 
 struct xpviv {
-    union {
-	NV	xnv_nv;		/* numeric value, if any */
-	HV *	xgv_stash;
-	struct {
-	    U32	xlow;
-	    U32	xhigh;
-	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
-	struct {
-	    U32 xbm_previous;	/* how many characters in string before rare? */
-	    U8	xbm_flags;
-	    U8	xbm_rare;	/* rarest character in string */
-	}	xbm_s;		/* fields from PVBM */
-    }		xnv_u;
-    STRLEN	xpv_cur;	/* length of svu_pv as a C string */
-    STRLEN	xpv_len;	/* allocated size */
-    union {
-	IV	xivu_iv;	/* integer value or pv offset */
-	UV	xivu_uv;
-	void *	xivu_p1;
-	I32	xivu_i32;
-	HEK *	xivu_namehek;
-    }		xiv_u;
+    _XPV_HEAD;
+    union _xivu xiv_u;
 };
 
 typedef struct {
-    STRLEN	xpv_cur;	/* length of svu_pv as a C string */
-    STRLEN	xpv_len;	/* allocated size */
-    union {
-	IV	xivu_iv;	/* integer value or pv offset */
-	UV	xivu_uv;
-	void *	xivu_p1;
-	I32	xivu_i32;
-	HEK *	xivu_namehek;
-    }		xiv_u;
+    _XPV_ALLOCATED_HEAD;
+    union _xivu xiv_u;
 } xpviv_allocated;
 
 #define xiv_iv xiv_u.xivu_iv
 
 struct xpvuv {
-    union {
-	NV	xnv_nv;		/* numeric value, if any */
-	HV *	xgv_stash;
-	struct {
-	    U32	xlow;
-	    U32	xhigh;
-	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
-	struct {
-	    U32 xbm_previous;	/* how many characters in string before rare? */
-	    U8	xbm_flags;
-	    U8	xbm_rare;	/* rarest character in string */
-	}	xbm_s;		/* fields from PVBM */
-    }		xnv_u;
-    STRLEN	xpv_cur;	/* length of svu_pv as a C string */
-    STRLEN	xpv_len;	/* allocated size */
-    union {
-	IV	xuvu_iv;
-	UV	xuvu_uv;	/* unsigned value or pv offset */
-	void *	xuvu_p1;
-	HEK *	xivu_namehek;
-    }		xuv_u;
+    _XPV_HEAD;
+    union _xivu xuv_u;
 };
 
-#define xuv_uv xuv_u.xuvu_uv
+#define xuv_uv xuv_u.xivu_uv
 
 struct xpvnv {
-    union {
-	NV	xnv_nv;		/* numeric value, if any */
-	HV *	xgv_stash;
-	struct {
-	    U32	xlow;
-	    U32	xhigh;
-	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
-	struct {
-	    U32 xbm_previous;	/* how many characters in string before rare? */
-	    U8	xbm_flags;
-	    U8	xbm_rare;	/* rarest character in string */
-	}	xbm_s;		/* fields from PVBM */
-    }		xnv_u;
-    STRLEN	xpv_cur;	/* length of svu_pv as a C string */
-    STRLEN	xpv_len;	/* allocated size */
-    union {
-	IV	xivu_iv;	/* integer value or pv offset */
-	UV	xivu_uv;
-	void *	xivu_p1;
-	I32	xivu_i32;
-	HEK *	xivu_namehek;
-    }		xiv_u;
+    _XPV_HEAD;
+    union _xivu xiv_u;
 };
+
+#define _XPVMG_HEAD				    \
+    union _xivu xiv_u;				    \
+    union _xmgu	xmg_u;				    \
+    HV*		xmg_stash	/* class package */
 
 /* These structure must match the beginning of struct xpvhv in hv.h. */
 struct xpvmg {
-    union {
-	NV	xnv_nv;		/* numeric value, if any */
-	HV *	xgv_stash;
-	struct {
-	    U32	xlow;
-	    U32	xhigh;
-	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
-	struct {
-	    U32 xbm_previous;	/* how many characters in string before rare? */
-	    U8	xbm_flags;
-	    U8	xbm_rare;	/* rarest character in string */
-	}	xbm_s;		/* fields from PVBM */
-    }		xnv_u;
-    STRLEN	xpv_cur;	/* length of svu_pv as a C string */
-    STRLEN	xpv_len;	/* allocated size */
-    union {
-	IV	xivu_iv;	/* integer value or pv offset */
-	UV	xivu_uv;
-	void *	xivu_p1;
-	I32	xivu_i32;
-	HEK *	xivu_namehek;
-    }		xiv_u;
-    union {
-	MAGIC*	xmg_magic;	/* linked list of magicalness */
-	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
-    } xmg_u;
-    HV*		xmg_stash;	/* class package */
+    _XPV_HEAD;
+    _XPVMG_HEAD;
 };
 
 struct xregexp {
-    union {
-	NV	xnv_nv;		/* numeric value, if any */
-	HV *	xgv_stash;
-	struct {
-	    U32	xlow;
-	    U32	xhigh;
-	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
-	struct {
-	    U32 xbm_previous;	/* how many characters in string before rare? */
-	    U8	xbm_flags;
-	    U8	xbm_rare;	/* rarest character in string */
-	}	xbm_s;		/* fields from PVBM */
-    }		xnv_u;
-    STRLEN	xpv_cur;	/* length of svu_pv as a C string */
-    STRLEN	xpv_len;	/* allocated size */
-    union {
-	IV	xivu_iv;	/* integer value or pv offset */
-	UV	xivu_uv;
-	void *	xivu_p1;
-	I32	xivu_i32;
-	HEK *	xivu_namehek;
-    }		xiv_u;
-    union {
-	MAGIC*	xmg_magic;	/* linked list of magicalness */
-	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
-    } xmg_u;
-    HV*		xmg_stash;	/* class package */
+    _XPV_HEAD;
+    _XPVMG_HEAD;
     REGEXP *	xrx_regexp;	/* Our regular expression */
 };
 
 struct xpvlv {
-    union {
-	NV	xnv_nv;		/* numeric value, if any */
-	HV *	xgv_stash;
-	struct {
-	    U32	xlow;
-	    U32	xhigh;
-	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
-	struct {
-	    U32 xbm_previous;	/* how many characters in string before rare? */
-	    U8	xbm_flags;
-	    U8	xbm_rare;	/* rarest character in string */
-	}	xbm_s;		/* fields from PVBM */
-    }		xnv_u;
-    STRLEN	xpv_cur;	/* length of svu_pv as a C string */
-    STRLEN	xpv_len;	/* allocated size */
-    union {
-	IV	xivu_iv;	/* integer value or pv offset */
-	UV	xivu_uv;
-	void *	xivu_p1;
-	I32	xivu_i32;
-	HEK *	xivu_namehek;	/* GvNAME */
-    }		xiv_u;
-    union {
-	MAGIC*	xmg_magic;	/* linked list of magicalness */
-	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
-    } xmg_u;
-    HV*		xmg_stash;	/* class package */
+    _XPV_HEAD;
+    _XPVMG_HEAD;
 
     STRLEN	xlv_targoff;
     STRLEN	xlv_targlen;
@@ -607,153 +491,50 @@ struct xpvlv {
 /* This structure works in 3 ways - regular scalar, GV with GP, or fast
    Boyer-Moore.  */
 struct xpvgv {
-    union {
-	NV	xnv_nv;
-	HV *	xgv_stash;	/* The stash of this GV */
-	struct {
-	    U32	xlow;
-	    U32	xhigh;
-	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
-	struct {
-	    U32 xbm_previous;	/* how many characters in string before rare? */
-	    U8	xbm_flags;
-	    U8	xbm_rare;	/* rarest character in string */
-	}	xbm_s;		/* fields from PVBM */
-    }		xnv_u;
-    STRLEN	xpv_cur;	/* xgv_flags */
-    STRLEN	xpv_len;	/* 0 */
-    union {
-	IV	xivu_iv;
-	UV	xivu_uv;
-	void *	xivu_p1;
-	I32	xivu_i32;	/* is this constant pattern being useful? */
-	HEK *	xivu_namehek;	/* GvNAME */
-    }		xiv_u;
-    union {
-	MAGIC*	xmg_magic;	/* linked list of magicalness */
-	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
-    } xmg_u;
-    HV*		xmg_stash;	/* class package */
-
+    _XPV_HEAD;
+    _XPVMG_HEAD;
 };
 
 /* This structure must match XPVCV in cv.h */
 
 typedef U16 cv_flags_t;
 
-struct xpvfm {
-    union {
-	NV	xnv_nv;		/* numeric value, if any */
-	HV *	xgv_stash;
-	struct {
-	    U32	xlow;
-	    U32	xhigh;
-	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
-	struct {
-	    U32 xbm_previous;	/* how many characters in string before rare? */
-	    U8	xbm_flags;
-	    U8	xbm_rare;	/* rarest character in string */
-	}	xbm_s;		/* fields from PVBM */
-    }		xnv_u;
-    STRLEN	xpv_cur;	/* length of svu_pv as a C string */
-    STRLEN	xpv_len;	/* allocated size */
-    union {
-	IV	xivu_iv;	/* PVFMs use the pv offset */
-	UV	xivu_uv;
-	void *	xivu_p1;
-	I32	xivu_i32;
-	HEK *	xivu_namehek;
-    }		xiv_u;
-    union {
-	MAGIC*	xmg_magic;	/* linked list of magicalness */
-	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
-    } xmg_u;
-    HV*		xmg_stash;	/* class package */
+#define _XPVCV_COMMON								\
+    HV *	xcv_stash;							\
+    union {									\
+	OP *	xcv_start;							\
+	ANY	xcv_xsubany;							\
+    }		xcv_start_u;					    		\
+    union {									\
+	OP *	xcv_root;							\
+	void	(*xcv_xsub) (pTHX_ CV*);					\
+    }		xcv_root_u;							\
+    GV *	xcv_gv;								\
+    char *	xcv_file;							\
+    AV *	xcv_padlist;							\
+    CV *	xcv_outside;							\
+    U32		xcv_outside_seq; /* the COP sequence (at the point of our	\
+				  * compilation) in the lexically enclosing	\
+				  * sub */					\
+    cv_flags_t	xcv_flags
 
-    HV *	xcv_stash;
-    union {
-	OP *	xcv_start;
-	ANY	xcv_xsubany;
-    }		xcv_start_u;
-    union {
-	OP *	xcv_root;
-	void	(*xcv_xsub) (pTHX_ CV*);
-    }		xcv_root_u;
-    GV *	xcv_gv;
-    char *	xcv_file;
-    AV *	xcv_padlist;
-    CV *	xcv_outside;
-    U32		xcv_outside_seq; /* the COP sequence (at the point of our
-				  * compilation) in the lexically enclosing
-				  * sub */
-    cv_flags_t	xcv_flags;
+struct xpvfm {
+    _XPV_HEAD;
+    _XPVMG_HEAD;
+    _XPVCV_COMMON;
     IV		xfm_lines;
 };
 
 typedef struct {
-    STRLEN	xpv_cur;	/* length of svu_pv as a C string */
-    STRLEN	xpv_len;	/* allocated size */
-    union {
-	IV	xivu_iv;	/* PVFMs use the pv offset */
-	UV	xivu_uv;
-	void *	xivu_p1;
-	I32	xivu_i32;
-	HEK *	xivu_namehek;
-    }		xiv_u;
-    union {
-	MAGIC*	xmg_magic;	/* linked list of magicalness */
-	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
-    } xmg_u;
-    HV*		xmg_stash;	/* class package */
-
-    HV *	xcv_stash;
-    union {
-	OP *	xcv_start;
-	ANY	xcv_xsubany;
-    }		xcv_start_u;
-    union {
-	OP *	xcv_root;
-	void	(*xcv_xsub) (pTHX_ CV*);
-    }		xcv_root_u;
-    GV *	xcv_gv;
-    char *	xcv_file;
-    AV *	xcv_padlist;
-    CV *	xcv_outside;
-    U32		xcv_outside_seq; /* the COP sequence (at the point of our
-				  * compilation) in the lexically enclosing
-				  * sub */
-    cv_flags_t	xcv_flags;
+    _XPV_ALLOCATED_HEAD;
+    _XPVMG_HEAD;
+    _XPVCV_COMMON;
     IV		xfm_lines;
 } xpvfm_allocated;
 
 struct xpvio {
-    union {
-	NV	xnv_nv;		/* numeric value, if any */
-	HV *	xgv_stash;
-	struct {
-	    U32	xlow;
-	    U32	xhigh;
-	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
-	struct {
-	    U32 xbm_previous;	/* how many characters in string before rare? */
-	    U8	xbm_flags;
-	    U8	xbm_rare;	/* rarest character in string */
-	}	xbm_s;		/* fields from PVBM */
-    }		xnv_u;
-    STRLEN	xpv_cur;	/* length of svu_pv as a C string */
-    STRLEN	xpv_len;	/* allocated size */
-    union {
-	IV	xivu_iv;	/* integer value or pv offset */
-	UV	xivu_uv;
-	void *	xivu_p1;
-	I32	xivu_i32;
-	HEK *	xivu_namehek;
-    }		xiv_u;
-    union {
-	MAGIC*	xmg_magic;	/* linked list of magicalness */
-	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
-    } xmg_u;
-    HV*		xmg_stash;	/* class package */
+    _XPV_HEAD;
+    _XPVMG_HEAD;
 
     PerlIO *	xio_ifp;	/* ifp and ofp are normally the same */
     PerlIO *	xio_ofp;	/* but sockets need separate streams */

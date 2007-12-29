@@ -11,86 +11,15 @@
 /* This structure must the beginning of XPVFM in sv.h  */
 
 struct xpvcv {
-    union {
-	NV	xnv_nv;		/* numeric value, if any */
-	HV *	xgv_stash;
-	struct {
-	    U32	xlow;
-	    U32	xhigh;
-	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
-	struct {
-	    U32 xbm_previous;	/* how many characters in string before rare? */
-	    U8	xbm_flags;
-	    U8	xbm_rare;	/* rarest character in string */
-	}	xbm_s;		/* fields from PVBM */
-    }		xnv_u;
-    STRLEN	xpv_cur;	/* length of xp_pv as a C string */
-    STRLEN	xpv_len;	/* allocated size */
-    union {
-	IV	xivu_iv;
-	UV	xivu_uv;
-	void *	xivu_p1;
-	I32	xivu_i32;	/* depth, >= 2 indicates recursive call */
-	HEK *	xivu_namehek;
-    }		xiv_u;
-    union {
-	MAGIC*	xmg_magic;	/* linked list of magicalness */
-	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
-    } xmg_u;
-    HV*		xmg_stash;	/* class package */
-
-    HV *	xcv_stash;
-    union {
-	OP *	xcv_start;
-	ANY	xcv_xsubany;
-    }		xcv_start_u;
-    union {
-	OP *	xcv_root;
-	void	(*xcv_xsub) (pTHX_ CV*);
-    }		xcv_root_u;
-    GV *	xcv_gv;
-    char *	xcv_file;
-    PADLIST *	xcv_padlist;
-    CV *	xcv_outside;
-    U32		xcv_outside_seq; /* the COP sequence (at the point of our
-				  * compilation) in the lexically enclosing
-				  * sub */
-    cv_flags_t	xcv_flags;
+    _XPV_HEAD;
+    _XPVMG_HEAD;
+    _XPVCV_COMMON;
 };
 
 typedef struct {
-    STRLEN	xpv_cur;	/* length of xp_pv as a C string */
-    STRLEN	xpv_len;	/* allocated size */
-    union {
-	IV	xivu_iv;
-	UV	xivu_uv;
-	void *	xivu_p1;
-	I32	xivu_i32;	/* depth, >= 2 indicates recursive call */
-	HEK *	xivu_namehek;
-    }		xiv_u;
-    union {
-	MAGIC*	xmg_magic;	/* linked list of magicalness */
-	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
-    } xmg_u;
-    HV*		xmg_stash;	/* class package */
-
-    HV *	xcv_stash;
-    union {
-	OP *	xcv_start;
-	ANY	xcv_xsubany;
-    }		xcv_start_u;
-    union {
-	OP *	xcv_root;
-	void	(*xcv_xsub) (pTHX_ CV*);
-    }		xcv_root_u;
-    GV *	xcv_gv;
-    char *	xcv_file;
-    PADLIST *	xcv_padlist;
-    CV *	xcv_outside;
-    U32		xcv_outside_seq; /* the COP sequence (at the point of our
-				  * compilation) in the lexically enclosing
-				  * sub */
-    cv_flags_t	xcv_flags;
+    _XPV_ALLOCATED_HEAD;
+    _XPVMG_HEAD;
+    _XPVCV_COMMON;
 } xpvcv_allocated;
 
 /*

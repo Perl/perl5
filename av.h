@@ -8,52 +8,26 @@
  *
  */
 
+#define _XPVAV_ALLOCATED_HEAD						\
+    SSize_t	xav_fill;       /* Index of last element present */	\
+    SSize_t	xav_max         /* max index for which array has space */
+
+#define _XPVAV_HEAD	\
+    union _xnvu xnv_u;	\
+    _XPVAV_ALLOCATED_HEAD
+
 struct xpvav {
-    union {
-	NV	xnv_nv;		/* numeric value, if any */
-	HV *	xgv_stash;
-	struct {
-	    U32	xlow;
-	    U32	xhigh;
-	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
-	struct {
-	    U32 xbm_previous;	/* how many characters in string before rare? */
-	    U8	xbm_flags;
-	    U8	xbm_rare;	/* rarest character in string */
-	}	xbm_s;		/* fields from PVBM */
-    }		xnv_u;
-    SSize_t	xav_fill;       /* Index of last element present */
-    SSize_t	xav_max;        /* max index for which array has space */
-    union {
-	IV	xivu_iv;	/* integer value or pv offset */
-	UV	xivu_uv;
-	void *	xivu_p1;
-	I32	xivu_i32;
-	HEK *	xivu_namehek;
-    }		xiv_u;
-    union {
-	MAGIC*	xmg_magic;	/* linked list of magicalness */
-	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
-    } xmg_u;
-    HV*		xmg_stash;	/* class package */
+    _XPVAV_HEAD;
+    _XPVMG_HEAD;
 };
 
 typedef struct {
-    SSize_t	xav_fill;       /* Index of last element present */
-    SSize_t	xav_max;        /* max index for which array has space */
-    union {
-	IV	xivu_iv;	/* integer value or pv offset */
-	UV	xivu_uv;
-	void *	xivu_p1;
-	I32	xivu_i32;
-	HEK *	xivu_namehek;
-    }		xiv_u;
-    union {
-	MAGIC*	xmg_magic;	/* linked list of magicalness */
-	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
-    } xmg_u;
-    HV*		xmg_stash;	/* class package */
+    _XPVAV_ALLOCATED_HEAD;
+    _XPVMG_HEAD;
 } xpvav_allocated;
+
+#undef _XPVAV_ALLOCATED_HEAD
+#undef _XPVAV_HEAD
 
 /* SV**	xav_alloc; */
 #define xav_alloc xiv_u.xivu_p1

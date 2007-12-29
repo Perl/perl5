@@ -66,56 +66,30 @@ struct xpvhv_aux {
     struct mro_meta *xhv_mro_meta;
 };
 
+#define _XPVHV_ALLOCATED_HEAD						    \
+    STRLEN	xhv_fill;	/* how full xhv_array currently is */	    \
+    STRLEN	xhv_max;	/* subscript of last element of xhv_array */
+
+#define _XPVHV_HEAD	\
+    union _xnvu xnv_u;	\
+    _XPVHV_ALLOCATED_HEAD
+
 /* hash structure: */
 /* This structure must match the beginning of struct xpvmg in sv.h. */
 struct xpvhv {
-    union {
-	NV	xnv_nv;		/* numeric value, if any */
-	HV *	xgv_stash;
-	struct {
-	    U32	xlow;
-	    U32	xhigh;
-	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
-	struct {
-	    U32 xbm_previous;	/* how many characters in string before rare? */
-	    U8	xbm_flags;
-	    U8	xbm_rare;	/* rarest character in string */
-	}	xbm_s;		/* fields from PVBM */
-    }		xnv_u;
-    STRLEN	xhv_fill;	/* how full xhv_array currently is */
-    STRLEN	xhv_max;	/* subscript of last element of xhv_array */
-    union {
-	IV	xivu_iv;	/* integer value or pv offset */
-	UV	xivu_uv;
-	void *	xivu_p1;
-	I32	xivu_i32;
-	HEK *	xivu_namehek;
-    }		xiv_u;
-    union {
-	MAGIC*	xmg_magic;	/* linked list of magicalness */
-	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
-    } xmg_u;
-    HV*		xmg_stash;	/* class package */
+    _XPVHV_HEAD;
+    _XPVMG_HEAD;
 };
 
 #define xhv_keys xiv_u.xivu_iv
 
 typedef struct {
-    STRLEN	xhv_fill;	/* how full xhv_array currently is */
-    STRLEN	xhv_max;	/* subscript of last element of xhv_array */
-    union {
-	IV	xivu_iv;	/* integer value or pv offset */
-	UV	xivu_uv;
-	void *	xivu_p1;
-	I32	xivu_i32;
-	HEK *	xivu_namehek;
-    }		xiv_u;
-    union {
-	MAGIC*	xmg_magic;	/* linked list of magicalness */
-	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
-    } xmg_u;
-    HV*		xmg_stash;	/* class package */
+    _XPVHV_ALLOCATED_HEAD;
+    _XPVMG_HEAD;
 } xpvhv_allocated;
+
+#undef _XPVHV_ALLOCATED_HEAD
+#undef _XPVHV_HEAD
 
 /* hash a key */
 /* FYI: This is the "One-at-a-Time" algorithm by Bob Jenkins
