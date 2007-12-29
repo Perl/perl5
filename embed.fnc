@@ -115,7 +115,7 @@ Apd	|void	|av_undef	|NN AV* ar
 ApdoxM	|SV**	|av_create_and_unshift_one|NN AV **const avp|NN SV *const val
 Apd	|void	|av_unshift	|NN AV* ar|I32 num
 Apo	|SV**	|av_arylen_p	|NN AV* av
-AMpo	|I32*	|av_iter_p	|NN AV* av
+Apo	|IV*	|av_iter_p	|NN AV* av
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 s	|MAGIC*	|get_aux_mg	|NN AV *av
 #endif

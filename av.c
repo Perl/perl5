@@ -970,11 +970,18 @@ Perl_av_arylen_p(pTHX_ AV *av) {
     return &(mg->mg_obj);
 }
 
-/* This will change to returning IV ** at some point soon */
-I32 *
+IV *
 Perl_av_iter_p(pTHX_ AV *av) {
     MAGIC *const mg = get_aux_mg(av);
+#if IVSIZE == I32SIZE
     return &(mg->mg_len);
+#else
+    if (!mg->mg_ptr) {
+	mg->mg_len = IVSIZE;
+	Newxz(mg->mg_ptr, 1, IV);
+    }
+    return (IV *)mg->mg_ptr;
+#endif
 }
 
 /*

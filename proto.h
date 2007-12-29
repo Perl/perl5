@@ -189,7 +189,7 @@ PERL_CALLCONV void	Perl_av_unshift(pTHX_ AV* ar, I32 num)
 PERL_CALLCONV SV**	Perl_av_arylen_p(pTHX_ AV* av)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV I32*	Perl_av_iter_p(pTHX_ AV* av)
+PERL_CALLCONV IV*	Perl_av_iter_p(pTHX_ AV* av)
 			__attribute__nonnull__(pTHX_1);
 
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)

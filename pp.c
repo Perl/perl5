@@ -3929,7 +3929,7 @@ PP(pp_aeach)
     dSP;
     AV *array = (AV*)POPs;
     const I32 gimme = GIMME_V;
-    I32 *iterp = Perl_av_iter_p(aTHX_ array);
+    IV *iterp = Perl_av_iter_p(aTHX_ array);
     const IV current = (*iterp)++;
 
     if (current > av_len(array)) {
