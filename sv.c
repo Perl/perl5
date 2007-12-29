@@ -4211,6 +4211,10 @@ Perl_sv_chop(pTHX_ register SV *sv, register const char *ptr)
     if (!ptr || !SvPOKp(sv))
 	return;
     delta = ptr - SvPVX_const(sv);
+    if (!delta) {
+	/* Nothing to do.  */
+	return;
+    }
     SV_CHECK_THINKFIRST(sv);
     if (SvTYPE(sv) < SVt_PVIV)
 	sv_upgrade(sv,SVt_PVIV);
