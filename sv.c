@@ -1447,6 +1447,16 @@ Perl_sv_backoff(pTHX_ register SV *sv)
     assert(SvTYPE(sv) != SVt_PVAV);
     if (SvIVX(sv)) {
 	const char * const s = SvPVX_const(sv);
+#ifdef DEBUGGING
+	/* Validate the preceding buffer's sentinals to verify that no-one is
+	   using it.  */
+	const U8 *p = (const U8*) s;
+	const U8 *const real_start = p - SvIVX(sv);
+	while (p > real_start) {
+	    --p;
+	    assert (*p == (U8)PTR2UV(p));
+	}
+#endif
 	SvLEN_set(sv, SvLEN(sv) + SvIVX(sv));
 	SvPV_set(sv, SvPVX(sv) - SvIVX(sv));
 	SvIV_set(sv, 0);
@@ -4335,6 +4345,7 @@ Perl_sv_chop(pTHX_ register SV *sv, register const char *ptr)
     if (ptr <= SvPVX_const(sv))
 	Perl_croak(aTHX_ "panic: sv_chop ptr=%p, start=%p, end=%p",
 		   ptr, SvPVX_const(sv), SvPVX_const(sv) + max_delta);
+    assert(ptr > SvPVX_const(sv));
     SV_CHECK_THINKFIRST(sv);
 
     if (SvTYPE(sv) < SVt_PVIV)
@@ -4365,6 +4376,18 @@ Perl_sv_chop(pTHX_ register SV *sv, register const char *ptr)
     SvCUR_set(sv, SvCUR(sv) - delta);
     SvPV_set(sv, SvPVX(sv) + delta);
     SvIV_set(sv, SvIVX(sv) + delta);
+#ifdef DEBUGGING
+    {
+	/* Fill the preceding buffer with sentinals to verify that no-one is
+	   using it.  */
+	U8 *p = (U8*) SvPVX(sv);
+	const U8 *const real_start = p - SvIVX(sv);
+	while (p > real_start) {
+	    --p;
+	    *p = (U8)PTR2UV(p);
+	}
+    }
+#endif
 }
 
 /*
