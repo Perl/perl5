@@ -1,3 +1,8 @@
+2.00 - 2007-12-30
+
+    * fixed compilation issues with C++ compiler
+    * ignore .swp files in when scanning lib directory
+
 1.99_07 - 2007-10-22
 
     * terminate Makefile.PL on MSWin32 with a message that the

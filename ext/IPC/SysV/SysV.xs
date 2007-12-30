@@ -1,8 +1,8 @@
 /*******************************************************************************
 *
-*  $Revision: 30 $
+*  $Revision: 31 $
 *  $Author: mhx $
-*  $Date: 2007/10/18 19:57:29 +0200 $
+*  $Date: 2007/12/29 19:46:18 +0100 $
 *
 ********************************************************************************
 *
@@ -347,7 +347,7 @@ memread(addr, sv, pos, size)
     int pos
     int size
   CODE:
-    char *caddr = sv2addr(addr);
+    char *caddr = (char *) sv2addr(addr);
     char *dst;
     if (!SvOK(sv))
     {
@@ -372,7 +372,7 @@ memwrite(addr, sv, pos, size)
     int pos
     int size
   CODE:
-    char *caddr = sv2addr(addr);
+    char *caddr = (char *) sv2addr(addr);
     STRLEN len;
     const char *src = SvPV_const(sv, len);
     int n = ((int) len > size) ? size : (int) len;
