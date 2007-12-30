@@ -68,7 +68,7 @@ struct xpvhv_aux {
 
 #define _XPVHV_ALLOCATED_HEAD						    \
     STRLEN	xhv_fill;	/* how full xhv_array currently is */	    \
-    STRLEN	xhv_max;	/* subscript of last element of xhv_array */
+    STRLEN	xhv_max		/* subscript of last element of xhv_array */
 
 #define _XPVHV_HEAD	\
     union _xnvu xnv_u;	\
