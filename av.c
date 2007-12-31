@@ -974,7 +974,7 @@ IV *
 Perl_av_iter_p(pTHX_ AV *av) {
     MAGIC *const mg = get_aux_mg(av);
 #if IVSIZE == I32SIZE
-    return &(mg->mg_len);
+    return (IV *)&(mg->mg_len);
 #else
     if (!mg->mg_ptr) {
 	IV *temp;
