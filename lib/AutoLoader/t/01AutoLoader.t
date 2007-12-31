@@ -1,8 +1,10 @@
 #!./perl -w
 
 BEGIN {
+  if ($ENV{PERL_CORE}) {
     chdir 't' if -d 't';
-	@INC = '../lib';
+    @INC = '../lib';
+  }
 }
 
 use strict;
@@ -13,7 +15,7 @@ my $dir;
 BEGIN
 {
 	$dir = File::Spec->catdir( "auto-$$" );
-	unshift @INC, $dir;
+    unshift @INC, $dir;
 }
 
 use Test::More tests => 22;
