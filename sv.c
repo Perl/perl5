@@ -5256,6 +5256,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 
     assert(sv);
     assert(SvREFCNT(sv) == 0);
+    assert(SvTYPE(sv) != SVTYPEMASK);
 
     if (type <= SVt_IV) {
 	/* See the comment in sv.h about the collusion between this early
