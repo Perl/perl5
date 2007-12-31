@@ -560,25 +560,25 @@ time. The exceptions are that when EXPR is:
 
 =over 4
 
-=item o
+=item *
 
 a subroutine or method call
 
-=item o
+=item *
 
 a regular expression match, i.e. C</REGEX/> or C<$foo =~ /REGEX/>,
 or a negated regular expression match C<$foo !~ /REGEX/>.
 
-=item o
+=item *
 
 a comparison such as C<$_ E<lt> 10> or C<$x eq "abc">
 (or of course C<$_ ~~ $c>)
 
-=item o
+=item *
 
 C<defined(...)>, C<exists(...)>, or C<eof(...)>
 
-=item o
+=item *
 
 A negated expression C<!(...)> or C<not (...)>, or a logical
 exclusive-or C<(...) xor (...)>.

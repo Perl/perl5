@@ -103,7 +103,7 @@ nested balanced angle brackets:
 	<                   #   match an opening angle bracket
 	(?:                 #   match one of:
 	    (?>             #     don't backtrack over the inside of this group
-		[^<>]+      #       one or more non angle brackets
+	        [^<>]+      #       one or more non angle brackets
 	    )               #     end non backtracking group
 	|                   #     ... or ...
 	    (?1)            #     recurse to bracket 1 and try it again
@@ -313,7 +313,7 @@ To use state variables, one needs to enable them by using
     use feature 'state';
 
 or by using the C<-E> command-line switch in one-liners.
-See L<perlsub/"Persistent variables via state()">.
+See L<perlsub/"Persistent Private Variables">.
 
 =head2 Stacked filetest operators
 
