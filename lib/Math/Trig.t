@@ -28,7 +28,7 @@ BEGIN {
 
 plan(tests => 69);
 
-use Math::Trig 1.03;
+use Math::Trig 1.05;
 
 my $pip2 = pi / 2;
 
@@ -145,8 +145,8 @@ use Math::Trig ':radial';
     ok(near(great_circle_distance(0, 0, pi, pi), pi));
 
     # London to Tokyo.
-    my @L = (deg2rad(-0.5), deg2rad(90 - 51.3));
-    my @T = (deg2rad(139.8),deg2rad(90 - 35.7));
+    my @L = (deg2rad(-0.5),  deg2rad(90 - 51.3));
+    my @T = (deg2rad(139.8), deg2rad(90 - 35.7));
 
     my $km = great_circle_distance(@L, @T, 6378);
 

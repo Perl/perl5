@@ -9,7 +9,7 @@ package Math::Complex;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $Inf);
 
-$VERSION = 1.37;
+$VERSION = 1.38;
 
 BEGIN {
     unless ($^O eq 'unicosmk') {
