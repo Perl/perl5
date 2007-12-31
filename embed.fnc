@@ -456,11 +456,13 @@ p	|int	|magic_set	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setamagic|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setarylen|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_freearylen_p|NN SV* sv|NN MAGIC* mg
+#ifndef NO_MATHOMS
 p	|int	|magic_setbm	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setfm	|NN SV* sv|NN MAGIC* mg
+#endif
 p	|int	|magic_setdbline|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setdefelem|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setenv	|NN SV* sv|NN MAGIC* mg
-p	|int	|magic_setfm	|NN SV* sv|NN MAGIC* mg
 dp	|int	|magic_sethint	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setisa	|NN SV* sv|NN MAGIC* mg
 #ifndef NO_MATHOMS

@@ -1356,6 +1356,18 @@ Perl_newHV(pTHX)
     return hv;
 }
 
+int
+Perl_magic_setbm(pTHX_ SV *sv, MAGIC *mg)
+{
+    return Perl_magic_setregexp(aTHX_ sv, mg);
+}
+
+int
+Perl_magic_setfm(pTHX_ SV *sv, MAGIC *mg)
+{
+    return Perl_magic_setregexp(aTHX_ sv, mg);
+}
+
 #endif /* NO_MATHOMS */
 
 /*

@@ -428,11 +428,17 @@
 #define magic_setamagic		Perl_magic_setamagic
 #define magic_setarylen		Perl_magic_setarylen
 #define magic_freearylen_p	Perl_magic_freearylen_p
+#endif
+#ifndef NO_MATHOMS
+#ifdef PERL_CORE
 #define magic_setbm		Perl_magic_setbm
+#define magic_setfm		Perl_magic_setfm
+#endif
+#endif
+#ifdef PERL_CORE
 #define magic_setdbline		Perl_magic_setdbline
 #define magic_setdefelem	Perl_magic_setdefelem
 #define magic_setenv		Perl_magic_setenv
-#define magic_setfm		Perl_magic_setfm
 #define magic_sethint		Perl_magic_sethint
 #define magic_setisa		Perl_magic_setisa
 #endif
@@ -2744,11 +2750,17 @@
 #define magic_setamagic(a,b)	Perl_magic_setamagic(aTHX_ a,b)
 #define magic_setarylen(a,b)	Perl_magic_setarylen(aTHX_ a,b)
 #define magic_freearylen_p(a,b)	Perl_magic_freearylen_p(aTHX_ a,b)
+#endif
+#ifndef NO_MATHOMS
+#ifdef PERL_CORE
 #define magic_setbm(a,b)	Perl_magic_setbm(aTHX_ a,b)
+#define magic_setfm(a,b)	Perl_magic_setfm(aTHX_ a,b)
+#endif
+#endif
+#ifdef PERL_CORE
 #define magic_setdbline(a,b)	Perl_magic_setdbline(aTHX_ a,b)
 #define magic_setdefelem(a,b)	Perl_magic_setdefelem(aTHX_ a,b)
 #define magic_setenv(a,b)	Perl_magic_setenv(aTHX_ a,b)
-#define magic_setfm(a,b)	Perl_magic_setfm(aTHX_ a,b)
 #define magic_sethint(a,b)	Perl_magic_sethint(aTHX_ a,b)
 #define magic_setisa(a,b)	Perl_magic_setisa(aTHX_ a,b)
 #endif
