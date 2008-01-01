@@ -24,6 +24,17 @@ my $noplan;
 $TODO = 0;
 $NO_ENDING = 0;
 
+# Use this instead of print to avoid interference while testing globals.
+sub _print {
+    local($\, $", $,) = (undef, ' ', '');
+    print STDOUT @_;
+}
+
+sub _print_stderr {
+    local($\, $", $,) = (undef, ' ', '');
+    print STDERR @_;
+}
+
 sub plan {
     my $n;
     if (@_ == 1) {
@@ -36,7 +47,7 @@ sub plan {
 	my %plan = @_;
 	$n = $plan{tests};
     }
-    print STDOUT "1..$n\n" unless $noplan;
+    _print "1..$n\n" unless $noplan;
     $planned = $n;
 }
 
@@ -44,10 +55,10 @@ END {
     my $ran = $test - 1;
     if (!$NO_ENDING) {
 	if (defined $planned && $planned != $ran) {
-	    print STDERR
+	    _print_stderr
 		"# Looks like you planned $planned tests but ran $ran.\n";
 	} elsif ($noplan) {
-	    print "1..$ran\n";
+	    _print "1..$ran\n";
 	}
     }
 }
@@ -58,8 +69,8 @@ sub _diag {
     return unless @_;
     my @mess = map { /^#/ ? "$_\n" : "# $_\n" }
                map { split /\n/ } @_;
-    my $fh = $TODO ? *STDOUT : *STDERR;
-    print $fh @mess;
+    my $func = $TODO ? \&_print : \&_print_stderr;
+    $func->(@mess);
 
 }
 
@@ -69,9 +80,9 @@ sub diag {
 
 sub skip_all {
     if (@_) {
-	print STDOUT "1..0 # Skipped: @_\n";
+	_print "1..0 # Skipped: @_\n";
     } else {
-	print STDOUT "1..0\n";
+	_print "1..0\n";
     }
     exit(0);
 }
@@ -90,7 +101,7 @@ sub _ok {
     }
 
     $out .= " # TODO $TODO" if $TODO;
-    print STDOUT "$out\n";
+    _print "$out\n";
 
     unless ($pass) {
 	_diag "# Failed $where\n";
@@ -306,7 +317,7 @@ sub skip {
     my $why = shift;
     my $n    = @_ ? shift : 1;
     for (1..$n) {
-        print STDOUT "ok $test # skip: $why\n";
+        _print "ok $test # skip: $why\n";
         $test = $test + 1;
     }
     local $^W = 0;
@@ -318,7 +329,7 @@ sub todo_skip {
     my $n   = @_ ? shift : 1;
 
     for (1..$n) {
-        print STDOUT "not ok $test # TODO & SKIP: $why\n";
+        _print "not ok $test # TODO & SKIP: $why\n";
         $test = $test + 1;
     }
     local $^W = 0;
@@ -345,12 +356,12 @@ sub eq_hash {
     $key = "" . $key;
     if (exists $orig->{$key}) {
       if ($orig->{$key} ne $value) {
-        print STDOUT "# key ", _qq($key), " was ", _qq($orig->{$key}),
+        _print "# key ", _qq($key), " was ", _qq($orig->{$key}),
                      " now ", _qq($value), "\n";
         $fail = 1;
       }
     } else {
-      print STDOUT "# key ", _qq($key), " is ", _qq($value),
+      _print "# key ", _qq($key), " is ", _qq($value),
                    ", not in original.\n";
       $fail = 1;
     }
@@ -359,7 +370,7 @@ sub eq_hash {
     # Force a hash recompute if this perl's internals can cache the hash key.
     $_ = "" . $_;
     next if (exists $suspect->{$_});
-    print STDOUT "# key ", _qq($_), " was ", _qq($orig->{$_}), " now missing.\n";
+    _print "# key ", _qq($_), " was ", _qq($orig->{$_}), " now missing.\n";
     $fail = 1;
   }
   !$fail;
@@ -476,7 +487,7 @@ sub _create_runperl { # Create the string to qx in runperl().
 	    if ($args{verbose}) {
 		my $stdindisplay = $stdin;
 		$stdindisplay =~ s/\n/\n\#/g;
-		print STDERR "# $stdindisplay\n";
+		_print_stderr "# $stdindisplay\n";
 	    }
 	    `$stdin`;
 	    $runperl .= q{ < teststdin };
@@ -494,7 +505,7 @@ sub _create_runperl { # Create the string to qx in runperl().
     if ($args{verbose}) {
 	my $runperldisplay = $runperl;
 	$runperldisplay =~ s/\n/\n\#/g;
-	print STDERR "# $runperldisplay\n";
+	_print_stderr "# $runperldisplay\n";
     }
     return $runperl;
 }
@@ -547,7 +558,7 @@ sub runperl {
 *run_perl = \&runperl; # Nice alias.
 
 sub DIE {
-    print STDERR "# @_\n";
+    _print_stderr "# @_\n";
     exit 1;
 }
 
@@ -603,7 +614,7 @@ sub which_perl {
 sub unlink_all {
     foreach my $file (@_) {
         1 while unlink $file;
-        print STDERR "# Couldn't unlink '$file': $!\n" if -f $file;
+        _print_stderr "# Couldn't unlink '$file': $!\n" if -f $file;
     }
 }
 
