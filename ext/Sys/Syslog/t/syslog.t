@@ -193,6 +193,9 @@ SKIP: {
     skip "the 'unix' mechanism works, so the tests will likely fail with the 'stream' mechanism", 10 
         if grep {/unix/} @passed;
 
+    skip "not testing setlogsock('stream'): _PATH_LOG unavailable", 10
+        unless -e Sys::Syslog::_PATH_LOG();
+
     # setlogsock() with "stream" and an undef path
     $r = eval { setlogsock("stream", undef ) } || '';
     is( $@, '', "setlogsock() called, with 'stream' and an undef path" );
