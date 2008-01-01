@@ -345,3 +345,13 @@ Clone the state variables associated with running and compiling pads.
     PL_padix_floor		= proto_perl->Ipadix_floor;		\
     PL_pad_reset_pending	= proto_perl->Ipad_reset_pending;	\
     PL_cop_seqmax		= proto_perl->Icop_seqmax;
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */
