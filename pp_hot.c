@@ -731,6 +731,11 @@ PP(pp_print)
 	*MARK = SvTIED_obj((SV*)io, mg);
 	PUTBACK;
 	ENTER;
+	if( PL_op->op_type == OP_SAY ) {
+		/* local $\ = "\n" */
+		SAVESPTR(PL_ors_sv);
+		PL_ors_sv = newSVpvs("\n");
+	}
 	call_method("PRINT", G_SCALAR);
 	LEAVE;
 	SPAGAIN;
