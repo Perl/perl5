@@ -67,9 +67,11 @@ typedef struct regexp_paren_pair {
 */
 
 typedef struct regexp {
+	_XPV_HEAD;
+	_XPVMG_HEAD;
         /* what engine created this regexp? */
 	const struct regexp_engine* engine; 
-	struct regexp* mother_re; /* what re is this a lightweight copy of? */
+	REGEXP *mother_re;	/* what re is this a lightweight copy of? */
 	
 	/* Information about the match that the perl core uses to manage things */
 	U32 extflags;           /* Flags used both externally and internally */
@@ -104,9 +106,6 @@ typedef struct regexp {
 	unsigned pre_prefix:4;	/* offset from wrapped to the start of precomp */
 	unsigned seen_evals:28;	/* number of eval groups in the pattern - for security checks */ 
         HV *paren_names;	/* Optional hash of paren names */
-        
-        /* Refcount of this regexp */
-	I32 refcnt;             /* Refcount of this regexp */
 } regexp;
 
 /* used for high speed searches */
@@ -369,25 +368,25 @@ and check for NULL.
 #define RXp_EXTFLAGS(rx)	((rx)->extflags)
 
 /* For source compatibility. We used to store these explicitly.  */
-#define RX_PRECOMP(prog)	((prog)->wrapped + (prog)->pre_prefix)
-#define RX_PRELEN(prog)		((prog)->wraplen - (prog)->pre_prefix - 1)
-#define RX_WRAPPED(prog)	((prog)->wrapped)
-#define RX_WRAPLEN(prog)	((prog)->wraplen)
-#define RX_CHECK_SUBSTR(prog)	((prog)->check_substr)
-#define RX_EXTFLAGS(prog)	((prog)->extflags)
-#define RX_REFCNT(prog)		((prog)->refcnt)
-#define RX_ENGINE(prog)		((prog)->engine)
-#define RX_SUBBEG(prog)		((prog)->subbeg)
-#define RX_OFFS(prog)		((prog)->offs)
-#define RX_NPARENS(prog)	((prog)->nparens)
-#define RX_SUBLEN(prog)		((prog)->sublen)
-#define RX_SUBBEG(prog)		((prog)->subbeg)
-#define RX_MINLEN(prog)		((prog)->minlen)
-#define RX_MINLENRET(prog)	((prog)->minlenret)
-#define RX_GOFS(prog)		((prog)->gofs)
-#define RX_LASTPAREN(prog)	((prog)->lastparen)
-#define RX_LASTCLOSEPAREN(prog)	((prog)->lastcloseparen)
-#define RX_SEEN_EVALS(prog)	((prog)->seen_evals)
+#define RX_PRECOMP(prog)	RXp_PRECOMP((struct regexp *)SvANY(prog))
+#define RX_PRELEN(prog)		RXp_PRELEN((struct regexp *)SvANY(prog))
+#define RX_WRAPPED(prog)	RXp_WRAPPED((struct regexp *)SvANY(prog))
+#define RX_WRAPLEN(prog)	RXp_WRAPLEN((struct regexp *)SvANY(prog))
+#define RX_CHECK_SUBSTR(prog)	(((struct regexp *)SvANY(prog))->check_substr)
+#define RX_EXTFLAGS(prog)	RXp_EXTFLAGS((struct regexp *)SvANY(prog))
+#define RX_REFCNT(prog)		SvREFCNT(prog)
+#define RX_ENGINE(prog)		(((struct regexp *)SvANY(prog))->engine)
+#define RX_SUBBEG(prog)		(((struct regexp *)SvANY(prog))->subbeg)
+#define RX_OFFS(prog)		(((struct regexp *)SvANY(prog))->offs)
+#define RX_NPARENS(prog)	(((struct regexp *)SvANY(prog))->nparens)
+#define RX_SUBLEN(prog)		(((struct regexp *)SvANY(prog))->sublen)
+#define RX_SUBBEG(prog)		(((struct regexp *)SvANY(prog))->subbeg)
+#define RX_MINLEN(prog)		(((struct regexp *)SvANY(prog))->minlen)
+#define RX_MINLENRET(prog)	(((struct regexp *)SvANY(prog))->minlenret)
+#define RX_GOFS(prog)		(((struct regexp *)SvANY(prog))->gofs)
+#define RX_LASTPAREN(prog)	(((struct regexp *)SvANY(prog))->lastparen)
+#define RX_LASTCLOSEPAREN(prog)	(((struct regexp *)SvANY(prog))->lastcloseparen)
+#define RX_SEEN_EVALS(prog)	(((struct regexp *)SvANY(prog))->seen_evals)
 
 #endif /* PLUGGABLE_RE_EXTENSION */
 
@@ -424,8 +423,25 @@ and check for NULL.
 #define REXEC_IGNOREPOS	0x08		/* \G matches at start. */
 #define REXEC_NOT_FIRST	0x10		/* This is another iteration of //g. */
 
-#define ReREFCNT_inc(re) ((void)(re && re->refcnt++), re)
-#define ReREFCNT_dec(re) CALLREGFREE(re)
+#if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
+#  define ReREFCNT_inc(re)						\
+    ({									\
+	/* This is here to generate a casting warning if incorrect.  */	\
+	REGEXP *const zwapp = (re);					\
+	SvREFCNT_inc(zwapp);						\
+    })
+#  define ReREFCNT_dec(re)						\
+    ({									\
+	/* This is here to generate a casting warning if incorrect.  */	\
+	REGEXP *const boff = (re);					\
+	SvREFCNT_dec(boff);						\
+    })
+#else
+#  define ReREFCNT_dec(re)	SvREFCNT_dec(re)
+#  define ReREFCNT_inc(re)	SvREFCNT_inc(re)
+#endif
+
+/* FIXME for plugins. */
 
 #define FBMcf_TAIL_DOLLAR	1
 #define FBMcf_TAIL_DOLLARM	2
@@ -446,7 +462,7 @@ typedef struct _reg_trie_accepted reg_trie_accepted;
  * Perl_regexec_flags and then passed to regtry(), regmatch() etc */
 
 typedef struct {
-    regexp *prog;
+    REGEXP *prog;
     char *bol;
     char *till;
     SV *sv;
@@ -516,7 +532,7 @@ typedef struct regmatch_state {
 	    struct regmatch_state *prev_yes_state;
 	    struct regmatch_state *prev_eval;
 	    struct regmatch_state *prev_curlyx;
-	    regexp	*prev_rex;
+	    REGEXP	*prev_rex;
 	    U32		toggle_reg_flags; /* what bits in PL_reg_flags to
 					    flip when transitioning between
 					    inner and outer rexen */

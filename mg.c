@@ -2151,17 +2151,6 @@ Perl_magic_setregexp(pTHX_ SV *sv, MAGIC *mg)
     return sv_unmagic(sv, type);
 }
 
-int
-Perl_magic_freeregexp(pTHX_ SV *sv, MAGIC *mg)
-{
-    dVAR;
-    regexp * const re = (regexp *)mg->mg_obj;
-    PERL_UNUSED_ARG(sv);
-
-    ReREFCNT_dec(re);
-    return 0;
-}
-
 #ifdef USE_LOCALE_COLLATE
 int
 Perl_magic_setcollxfrm(pTHX_ SV *sv, MAGIC *mg)

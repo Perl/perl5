@@ -1108,10 +1108,6 @@ PERL_CALLCONV int	Perl_magic_existspack(pTHX_ SV* sv, const MAGIC* mg)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV int	Perl_magic_freeregexp(pTHX_ SV* sv, MAGIC* mg)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-
 PERL_CALLCONV int	Perl_magic_freeovrld(pTHX_ SV* sv, MAGIC* mg)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
@@ -1852,6 +1848,9 @@ PERL_CALLCONV I32	Perl_pregexec(pTHX_ REGEXP * const prog, char* stringarg, char
 			__attribute__nonnull__(pTHX_6);
 
 PERL_CALLCONV void	Perl_pregfree(pTHX_ REGEXP* r);
+PERL_CALLCONV void	Perl_pregfree2(pTHX_ REGEXP* prog)
+			__attribute__nonnull__(pTHX_1);
+
 PERL_CALLCONV REGEXP*	Perl_reg_temp_copy(pTHX_ REGEXP* r)
 			__attribute__nonnull__(pTHX_1);
 
@@ -2892,9 +2891,10 @@ PERL_CALLCONV HEK*	Perl_hek_dup(pTHX_ HEK* e, CLONE_PARAMS* param)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV REGEXP*	Perl_re_dup(pTHX_ const REGEXP* r, CLONE_PARAMS* param)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_2);
+PERL_CALLCONV void	Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS* param)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
 
 PERL_CALLCONV PerlIO*	Perl_fp_dup(pTHX_ PerlIO* fp, char type, CLONE_PARAMS* param)
 			__attribute__nonnull__(pTHX_3);

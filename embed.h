@@ -409,7 +409,6 @@
 #define magic_clearpack		Perl_magic_clearpack
 #define magic_clearsig		Perl_magic_clearsig
 #define magic_existspack	Perl_magic_existspack
-#define magic_freeregexp	Perl_magic_freeregexp
 #define magic_freeovrld		Perl_magic_freeovrld
 #define magic_get		Perl_magic_get
 #define magic_getarylen		Perl_magic_getarylen
@@ -682,6 +681,7 @@
 #define regclass_swash		Perl_regclass_swash
 #define pregexec		Perl_pregexec
 #define pregfree		Perl_pregfree
+#define pregfree2		Perl_pregfree2
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define reg_temp_copy		Perl_reg_temp_copy
 #endif
@@ -1081,7 +1081,7 @@
 #define any_dup			Perl_any_dup
 #define he_dup			Perl_he_dup
 #define hek_dup			Perl_hek_dup
-#define re_dup			Perl_re_dup
+#define re_dup_guts		Perl_re_dup_guts
 #define fp_dup			Perl_fp_dup
 #define dirp_dup		Perl_dirp_dup
 #define gp_dup			Perl_gp_dup
@@ -2703,7 +2703,6 @@
 #define magic_clearpack(a,b)	Perl_magic_clearpack(aTHX_ a,b)
 #define magic_clearsig(a,b)	Perl_magic_clearsig(aTHX_ a,b)
 #define magic_existspack(a,b)	Perl_magic_existspack(aTHX_ a,b)
-#define magic_freeregexp(a,b)	Perl_magic_freeregexp(aTHX_ a,b)
 #define magic_freeovrld(a,b)	Perl_magic_freeovrld(aTHX_ a,b)
 #define magic_get(a,b)		Perl_magic_get(aTHX_ a,b)
 #define magic_getarylen(a,b)	Perl_magic_getarylen(aTHX_ a,b)
@@ -2973,6 +2972,7 @@
 #define regclass_swash(a,b,c,d,e)	Perl_regclass_swash(aTHX_ a,b,c,d,e)
 #define pregexec(a,b,c,d,e,f,g)	Perl_pregexec(aTHX_ a,b,c,d,e,f,g)
 #define pregfree(a)		Perl_pregfree(aTHX_ a)
+#define pregfree2(a)		Perl_pregfree2(aTHX_ a)
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define reg_temp_copy(a)	Perl_reg_temp_copy(aTHX_ a)
 #endif
@@ -3365,7 +3365,7 @@
 #define any_dup(a,b)		Perl_any_dup(aTHX_ a,b)
 #define he_dup(a,b,c)		Perl_he_dup(aTHX_ a,b,c)
 #define hek_dup(a,b)		Perl_hek_dup(aTHX_ a,b)
-#define re_dup(a,b)		Perl_re_dup(aTHX_ a,b)
+#define re_dup_guts(a,b,c)	Perl_re_dup_guts(aTHX_ a,b,c)
 #define fp_dup(a,b,c)		Perl_fp_dup(aTHX_ a,b,c)
 #define dirp_dup(a)		Perl_dirp_dup(aTHX_ a)
 #define gp_dup(a,b)		Perl_gp_dup(aTHX_ a,b)

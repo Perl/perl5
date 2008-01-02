@@ -283,12 +283,11 @@ do_test(15,
   FLAGS = \\(ROK\\)
   RV = $ADDR
   SV = REGEXP\\($ADDR\\) at $ADDR
-    REFCNT = 1
+    REFCNT = 2
     FLAGS = \\(\\)
     IV = 0
     NV = 0
-    PV = 0
-    REGEXP = $ADDR');
+    PV = 0');
 } else {
 do_test(15,
         qr(tic),

@@ -1194,11 +1194,21 @@ PP(pp_qr)
     REGEXP * rx = PM_GETRE(pm);
     SV * const pkg = CALLREG_PACKAGE(rx);
     SV * const rv = sv_newmortal();
-    SV * const sv = newSVrv(rv, pkg ? SvPV_nolen(pkg) : NULL);
+
+    SvUPGRADE(rv, SVt_IV);
+    /* This RV is about to own a reference to the regexp. (In addition to the
+       reference already owned by the PMOP.  */
+    ReREFCNT_inc(rx);
+    SvRV_set(rv, rx);
+    SvROK_on(rv);
+
+    if (pkg) {
+	HV* const stash = gv_stashpv(SvPV_nolen(pkg), GV_ADD);
+	(void)sv_bless(rv, stash);
+    }
+
     if (RX_EXTFLAGS(rx) & RXf_TAINTED)
         SvTAINTED_on(rv);
-    sv_upgrade(sv, SVt_REGEXP);
-    ((struct xregexp *)SvANY(sv))->xrx_regexp = ReREFCNT_inc(rx);
     XPUSHs(rv);
     RETURN;
 }

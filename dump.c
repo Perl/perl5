@@ -1592,8 +1592,10 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    Perl_dump_indent(aTHX_ level, file, "  PV = 0\n");
     }
     if (type == SVt_REGEXP) {
+	/* FIXME dumping
 	    Perl_dump_indent(aTHX_ level, file, "  REGEXP = 0x%"UVxf"\n",
-			     PTR2UV(((struct xregexp *)SvANY(sv))->xrx_regexp));
+			     PTR2UV(((struct regexp *)SvANY(sv))->xrx_regexp));
+	*/
     }
     if (type >= SVt_PVMG) {
 	if (type == SVt_PVMG && SvPAD_OUR(sv)) {
