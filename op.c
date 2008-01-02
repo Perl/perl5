@@ -3532,7 +3532,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	if (curop == repl
 	    && !(repl_has_vars
 		 && (!PM_GETRE(pm)
-		     || PM_GETRE(pm)->extflags & RXf_EVAL_SEEN)))
+		     || RX_EXTFLAGS(PM_GETRE(pm)) & RXf_EVAL_SEEN)))
 	{
 	    pm->op_pmflags |= PMf_CONST;	/* const for long enough */
 	    prepend_elem(o->op_type, scalar(repl), o);

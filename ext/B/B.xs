@@ -1121,7 +1121,7 @@ PMOP_reflags(o)
 	ST(0) = sv_newmortal();
 	rx = PM_GETRE(o);
 	if (rx)
-	    sv_setuv(ST(0), rx->extflags);
+	    sv_setuv(ST(0), RX_EXTFLAGS(rx));
 
 #endif
 
@@ -1512,7 +1512,7 @@ MODULE = B	PACKAGE = B::REGEXP
 
 IV
 REGEX(sv)
-	B::PVMG	sv
+	B::REGEXP	sv
     CODE:
 	RETVAL = PTR2IV(((struct xregexp *)SvANY(sv))->xrx_regexp);
     OUTPUT:
@@ -1520,7 +1520,7 @@ REGEX(sv)
 
 SV*
 precomp(sv)
-	B::PVMG	sv
+	B::REGEXP	sv
 	REGEXP* rx = NO_INIT
     CODE:
 	rx = ((struct xregexp *)SvANY(sv))->xrx_regexp;

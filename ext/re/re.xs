@@ -107,7 +107,7 @@ PPCODE:
 
             const char *fptr = INT_PAT_MODS;
             char ch;
-            U16 match_flags = (U16)((re->extflags & PMf_COMPILETIME)
+            U16 match_flags = (U16)((RX_EXTFLAGS(re) & PMf_COMPILETIME)
 				    >> RXf_PMf_STD_PMMOD_SHIFT);
 
             while((ch = *fptr++)) {
@@ -118,7 +118,7 @@ PPCODE:
             }
 
             pattern = sv_2mortal(newSVpvn(RX_PRECOMP(re),RX_PRELEN(re)));
-            if (re->extflags & RXf_UTF8) SvUTF8_on(pattern);
+            if (RX_EXTFLAGS(re) & RXf_UTF8) SvUTF8_on(pattern);
 
             /* return the pattern and the modifiers */
             XPUSHs(pattern);
@@ -128,7 +128,7 @@ PPCODE:
             /* Scalar, so use the string that Perl would return */
             /* return the pattern in (?msix:..) format */
             pattern = sv_2mortal(newSVpvn(RX_WRAPPED(re),RX_WRAPLEN(re)));
-            if (re->extflags & RXf_UTF8) 
+            if (RX_EXTFLAGS(re) & RXf_UTF8) 
                 SvUTF8_on(pattern);
             XPUSHs(pattern);
             XSRETURN(1);
@@ -169,15 +169,15 @@ PPCODE:
     {
         SV *an = &PL_sv_no;
         SV *fl = &PL_sv_no;
-        if (re->anchored_substr) {
-            an = newSVsv(re->anchored_substr);
-        } else if (re->anchored_utf8) {
-            an = newSVsv(re->anchored_utf8);
+        if (RX_ANCHORED_SUBSTR(re)) {
+            an = newSVsv(RX_ANCHORED_SUBSTR(re));
+        } else if (RX_ANCHORED_UTF8(re)) {
+            an = newSVsv(RX_ANCHORED_UTF8(re));
         }
-        if (re->float_substr) {
-            fl = newSVsv(re->float_substr);
-        } else if (re->float_utf8) {
-            fl = newSVsv(re->float_utf8);
+        if (RX_FLOAT_SUBSTR(re)) {
+            fl = newSVsv(RX_FLOAT_SUBSTR(re));
+        } else if (RX_FLOAT_UTF8(re)) {
+            fl = newSVsv(RX_FLOAT_UTF8(re));
         }
         XPUSHs(an);
         XPUSHs(fl);

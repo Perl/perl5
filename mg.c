@@ -516,14 +516,14 @@ Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
 	if (rx) {
 	    if (mg->mg_obj) {			/* @+ */
 		/* return the number possible */
-		return rx->nparens;
+		return RX_NPARENS(rx);
 	    } else {				/* @- */
-		I32 paren = rx->lastparen;
+		I32 paren = RX_LASTPAREN(rx);
 
 		/* return the last filled */
 		while ( paren >= 0
-			&& (rx->offs[paren].start == -1
-			    || rx->offs[paren].end == -1) )
+			&& (RX_OFFS(rx)[paren].start == -1
+			    || RX_OFFS(rx)[paren].end == -1) )
 		    paren--;
 		return (U32)paren;
 	    }
@@ -545,9 +545,9 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 	    register I32 t;
 	    if (paren < 0)
 		return 0;
-	    if (paren <= (I32)rx->nparens &&
-		(s = rx->offs[paren].start) != -1 &&
-		(t = rx->offs[paren].end) != -1)
+	    if (paren <= (I32)RX_NPARENS(rx) &&
+		(s = RX_OFFS(rx)[paren].start) != -1 &&
+		(t = RX_OFFS(rx)[paren].end) != -1)
 		{
 		    register I32 i;
 		    if (mg->mg_obj)		/* @+ */
@@ -556,7 +556,7 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 			i = s;
 
 		    if (i > 0 && RX_MATCH_UTF8(rx)) {
-			const char * const b = rx->subbeg;
+			const char * const b = RX_SUBBEG(rx);
 			if (b)
 			    i = utf8_length((U8*)b, (U8*)(b+i));
 		    }
@@ -632,14 +632,14 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 	}
     case '+':
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	    paren = rx->lastparen;
+	    paren = RX_LASTPAREN(rx);
 	    if (paren)
 		goto getparen;
 	}
 	return 0;
     case '\016': /* ^N */
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	    paren = rx->lastcloseparen;
+	    paren = RX_LASTCLOSEPAREN(rx);
 	    if (paren)
 		goto getparen;
 	}
@@ -886,8 +886,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '+':
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	    if (rx->lastparen) {
-	        CALLREG_NUMBUF_FETCH(rx,rx->lastparen,sv);
+	    if (RX_LASTPAREN(rx)) {
+	        CALLREG_NUMBUF_FETCH(rx,RX_LASTPAREN(rx),sv);
 	        break;
 	    }
 	}
@@ -895,8 +895,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '\016':		/* ^N */
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	    if (rx->lastcloseparen) {
-	        CALLREG_NUMBUF_FETCH(rx,rx->lastcloseparen,sv);
+	    if (RX_LASTCLOSEPAREN(rx)) {
+	        CALLREG_NUMBUF_FETCH(rx,RX_LASTCLOSEPAREN(rx),sv);
 	        break;
 	    }
 

@@ -201,13 +201,13 @@
 #define CALLREGCOMP_ENG(prog, sv, flags) \
     CALL_FPTR(((prog)->comp))(aTHX_ sv, flags)
 #define CALLREGEXEC(prog,stringarg,strend,strbeg,minend,screamer,data,flags) \
-    CALL_FPTR((prog)->engine->exec)(aTHX_ (prog),(stringarg),(strend), \
+    CALL_FPTR(RX_ENGINE(prog)->exec)(aTHX_ (prog),(stringarg),(strend), \
         (strbeg),(minend),(screamer),(data),(flags))
 #define CALLREG_INTUIT_START(prog,sv,strpos,strend,flags,data) \
-    CALL_FPTR((prog)->engine->intuit)(aTHX_ (prog), (sv), (strpos), \
+    CALL_FPTR(RX_ENGINE(prog)->intuit)(aTHX_ (prog), (sv), (strpos), \
         (strend),(flags),(data))
 #define CALLREG_INTUIT_STRING(prog) \
-    CALL_FPTR((prog)->engine->checkstr)(aTHX_ (prog))
+    CALL_FPTR(RX_ENGINE(prog)->checkstr)(aTHX_ (prog))
 
 #define CALLREG_AS_STR(mg,lp,flags,haseval) \
         Perl_reg_stringify(aTHX_ (mg), (lp), (flags), (haseval))
@@ -217,56 +217,56 @@
     Perl_pregfree(aTHX_ (prog))
 
 #define CALLREGFREE_PVT(prog) \
-    if(prog) CALL_FPTR((prog)->engine->free)(aTHX_ (prog))
+    if(prog) CALL_FPTR(RX_ENGINE(prog)->free)(aTHX_ (prog))
 
 #define CALLREG_NUMBUF_FETCH(rx,paren,usesv)                                \
-    CALL_FPTR((rx)->engine->numbered_buff_FETCH)(aTHX_ (rx),(paren),(usesv))
+    CALL_FPTR(RX_ENGINE(rx)->numbered_buff_FETCH)(aTHX_ (rx),(paren),(usesv))
 
 #define CALLREG_NUMBUF_STORE(rx,paren,value) \
-    CALL_FPTR((rx)->engine->numbered_buff_STORE)(aTHX_ (rx),(paren),(value))
+    CALL_FPTR(RX_ENGINE(rx)->numbered_buff_STORE)(aTHX_ (rx),(paren),(value))
 
 #define CALLREG_NUMBUF_LENGTH(rx,sv,paren)                              \
-    CALL_FPTR((rx)->engine->numbered_buff_LENGTH)(aTHX_ (rx),(sv),(paren))
+    CALL_FPTR(RX_ENGINE(rx)->numbered_buff_LENGTH)(aTHX_ (rx),(sv),(paren))
 
 #define CALLREG_NAMED_BUFF_FETCH(rx, key, flags) \
-    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), (key), NULL, ((flags) | RXapif_FETCH))
+    CALL_FPTR(RX_ENGINE(rx)->named_buff)(aTHX_ (rx), (key), NULL, ((flags) | RXapif_FETCH))
 
 #define CALLREG_NAMED_BUFF_STORE(rx, key, value, flags) \
-    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), (key), (value), ((flags) | RXapif_STORE))
+    CALL_FPTR(RX_ENGINE(rx)->named_buff)(aTHX_ (rx), (key), (value), ((flags) | RXapif_STORE))
 
 #define CALLREG_NAMED_BUFF_DELETE(rx, key, flags) \
-    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx),(key), NULL, ((flags) | RXapif_DELETE))
+    CALL_FPTR(RX_ENGINE(rx)->named_buff)(aTHX_ (rx),(key), NULL, ((flags) | RXapif_DELETE))
 
 #define CALLREG_NAMED_BUFF_CLEAR(rx, flags) \
-    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), NULL, NULL, ((flags) | RXapif_CLEAR))
+    CALL_FPTR(RX_ENGINE(rx)->named_buff)(aTHX_ (rx), NULL, NULL, ((flags) | RXapif_CLEAR))
 
 #define CALLREG_NAMED_BUFF_EXISTS(rx, key, flags) \
-    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), (key), NULL, ((flags) | RXapif_EXISTS))
+    CALL_FPTR(RX_ENGINE(rx)->named_buff)(aTHX_ (rx), (key), NULL, ((flags) | RXapif_EXISTS))
 
 #define CALLREG_NAMED_BUFF_FIRSTKEY(rx, flags) \
-    CALL_FPTR((rx)->engine->named_buff_iter)(aTHX_ (rx), NULL, ((flags) | RXapif_FIRSTKEY))
+    CALL_FPTR(RX_ENGINE(rx)->named_buff_iter)(aTHX_ (rx), NULL, ((flags) | RXapif_FIRSTKEY))
 
 #define CALLREG_NAMED_BUFF_NEXTKEY(rx, lastkey, flags) \
-    CALL_FPTR((rx)->engine->named_buff_iter)(aTHX_ (rx), (lastkey), ((flags) | RXapif_NEXTKEY))
+    CALL_FPTR(RX_ENGINE(rx)->named_buff_iter)(aTHX_ (rx), (lastkey), ((flags) | RXapif_NEXTKEY))
 
 #define CALLREG_NAMED_BUFF_SCALAR(rx, flags) \
-    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), NULL, NULL, ((flags) | RXapif_SCALAR))
+    CALL_FPTR(RX_ENGINE(rx)->named_buff)(aTHX_ (rx), NULL, NULL, ((flags) | RXapif_SCALAR))
 
 #define CALLREG_NAMED_BUFF_COUNT(rx) \
-    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), NULL, NULL, RXapif_REGNAMES_COUNT)
+    CALL_FPTR(RX_ENGINE(rx)->named_buff)(aTHX_ (rx), NULL, NULL, RXapif_REGNAMES_COUNT)
 
 #define CALLREG_NAMED_BUFF_ALL(rx, flags) \
-    CALL_FPTR((rx)->engine->named_buff)(aTHX_ (rx), NULL, NULL, flags)
+    CALL_FPTR(RX_ENGINE(rx)->named_buff)(aTHX_ (rx), NULL, NULL, flags)
 
 #define CALLREG_PACKAGE(rx) \
-    CALL_FPTR((rx)->engine->qr_package)(aTHX_ (rx))
+    CALL_FPTR(RX_ENGINE(rx)->qr_package)(aTHX_ (rx))
 
 #if defined(USE_ITHREADS)         
 #define CALLREGDUPE(prog,param) \
     Perl_re_dup(aTHX_ (prog),(param))
 
 #define CALLREGDUPE_PVT(prog,param) \
-    (prog ? CALL_FPTR((prog)->engine->dupe)(aTHX_ (prog),(param)) \
+    (prog ? CALL_FPTR(RX_ENGINE(prog)->dupe)(aTHX_ (prog),(param)) \
           : (REGEXP *)NULL) 
 #endif
 
