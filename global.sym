@@ -398,6 +398,7 @@ Perl_regdump
 Perl_regclass_swash
 Perl_pregexec
 Perl_pregfree
+Perl_pregfree2
 Perl_reg_temp_copy
 Perl_regfree_internal
 Perl_reg_stringify
@@ -673,7 +674,7 @@ Perl_ss_dup
 Perl_any_dup
 Perl_he_dup
 Perl_hek_dup
-Perl_re_dup
+Perl_re_dup_guts
 Perl_fp_dup
 Perl_dirp_dup
 Perl_gp_dup
