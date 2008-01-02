@@ -9134,7 +9134,7 @@ Perl_re_intuit_string(pTHX_ REGEXP * const prog)
 */
 #ifndef PERL_IN_XSUB_RE
 void
-Perl_pregfree(pTHX_ struct regexp *r)
+Perl_pregfree(pTHX_ REGEXP *r)
 {
     dVAR;
     GET_RE_DEBUG_FLAGS_DECL;
@@ -9187,8 +9187,8 @@ Perl_pregfree(pTHX_ struct regexp *r)
 */    
     
     
-regexp *
-Perl_reg_temp_copy (pTHX_ struct regexp *r) {
+REGEXP *
+Perl_reg_temp_copy (pTHX_ REGEXP *r) {
     regexp *ret;
     register const I32 npar = r->nparens+1;
     (void)ReREFCNT_inc(r);
@@ -9582,7 +9582,7 @@ Perl_regdupe_internal(pTHX_ REGEXP * const r, CLONE_PARAMS *param)
 char *
 Perl_reg_stringify(pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags, I32 *haseval ) {
     dVAR;
-    const regexp * const re = (regexp *)mg->mg_obj;
+    const REGEXP * const re = (REGEXP *)mg->mg_obj;
     if (haseval) 
         *haseval = RX_SEEN_EVALS(re);
     if (flags)    
@@ -9703,7 +9703,7 @@ static void
 clear_re(pTHX_ void *r)
 {
     dVAR;
-    ReREFCNT_dec((regexp *)r);
+    ReREFCNT_dec((REGEXP *)r);
 }
 
 #ifdef DEBUGGING

@@ -77,7 +77,7 @@ PP(pp_regcomp)
     dSP;
     register PMOP *pm = (PMOP*)cLOGOP->op_other;
     SV *tmpstr;
-    regexp *re = NULL;
+    REGEXP *re = NULL;
 
     /* prevent recompiling under /o and ithreads. */
 #if defined(USE_ITHREADS)
@@ -3836,7 +3836,7 @@ PP(pp_leavegiven)
 
 /* Helper routines used by pp_smartmatch */
 STATIC PMOP *
-S_make_matcher(pTHX_ regexp *re)
+S_make_matcher(pTHX_ REGEXP *re)
 {
     dVAR;
     PMOP *matcher = (PMOP *) newPMOP(OP_MATCH, OPf_WANT_SCALAR | OPf_STACKED);
@@ -3889,7 +3889,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     SV *e = TOPs;	/* e is for 'expression' */
     SV *d = TOPm1s;	/* d is for 'default', as in PL_defgv */
     SV *This, *Other;	/* 'This' (and Other to match) to play with C++ */
-    regexp *this_regex, *other_regex;
+    REGEXP *this_regex, *other_regex;
 
 #   define NOT_EMPTY_PROTO(cv) (!SvPOK(cv) || SvCUR(cv) == 0)
 
