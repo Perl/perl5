@@ -2510,9 +2510,9 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 			       by copying it to a temporary.  */
 			    STRLEN len;
 			    const char *const pv = SvPV_const(*beglist, len);
-			    SV *const temp = sv_2mortal(newSVpvn(pv, len));
-			    if (SvUTF8(*beglist))
-				SvUTF8_on(temp);
+			    SV *const temp
+				= sv_2mortal(newSVpvn_flags(pv, len,
+							    SvUTF8(*beglist)));
 			    *beglist = temp;
 			}
 			count = DO_UTF8(*beglist) ?

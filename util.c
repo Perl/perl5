@@ -1270,8 +1270,7 @@ S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8, bool warn)
 	    *hook = NULL;
 	}
 	if (warn || message) {
-	    msg = newSVpvn(message, msglen);
-	    SvFLAGS(msg) |= utf8;
+	    msg = newSVpvn_flags(message, msglen, utf8);
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
 	}

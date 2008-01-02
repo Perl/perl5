@@ -6042,8 +6042,7 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 	 * invalidate pv1, so we may need to make a copy */
 	if (sv1 == sv2 && (SvTHINKFIRST(sv1) || SvGMAGICAL(sv1))) {
 	    pv1 = SvPV_const(sv1, cur1);
-	    sv1 = sv_2mortal(newSVpvn(pv1, cur1));
-	    if (SvUTF8(sv2)) SvUTF8_on(sv1);
+	    sv1 = sv_2mortal(newSVpvn_flags(pv1, cur1, SvUTF8(sv2)));
 	}
 	pv1 = SvPV_const(sv1, cur1);
     }
@@ -7068,6 +7067,37 @@ Perl_newSVpvn(pTHX_ const char *s, STRLEN len)
     return sv;
 }
 
+/*
+=for apidoc newSVpvn_flags
+
+Creates a new SV and copies a string into it.  The reference count for the
+SV is set to 1.  Note that if C<len> is zero, Perl will create a zero length
+string.  You are responsible for ensuring that the source string is at least
+C<len> bytes long.  If the C<s> argument is NULL the new SV will be undefined.
+Currently the only flag bit accepted is SVf_UTF8. If this is set, then it
+will be set on the new SV. C<newSVpvn_utf8()> is a convenience wrapper for
+this function, defined as
+
+    #define newSVpvn_utf8(s, len, u)			\
+	newSVpvn_flags((s), (len), (u) ? SVf_UTF8 : 0)
+
+=cut
+*/
+
+SV *
+Perl_newSVpvn_flags(pTHX_ const char *s, STRLEN len, U32 flags)
+{
+    dVAR;
+    register SV *sv;
+
+    /* All the flags we don't support must be zero.
+       And we're new code so I'm going to assert this from the start.  */
+    assert(!(flags & ~SVf_UTF8));
+    new_SV(sv);
+    sv_setpvn(sv,s,len);
+    SvFLAGS(sv) |= flags;
+    return sv;
+}
 
 /*
 =for apidoc newSVhek

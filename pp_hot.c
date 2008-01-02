@@ -2278,10 +2278,8 @@ PP(pp_subst)
       have_a_cow:
 #endif
 	rxtainted |= RX_MATCH_TAINTED(rx);
-	dstr = newSVpvn(m, s-m);
+	dstr = newSVpvn_utf8(m, s-m, DO_UTF8(TARG));
 	SAVEFREESV(dstr);
-	if (DO_UTF8(TARG))
-	    SvUTF8_on(dstr);
 	PL_curpm = pm;
 	if (!c) {
 	    register PERL_CONTEXT *cx;
