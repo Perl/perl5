@@ -1869,8 +1869,8 @@ PERL_CALLCONV I32	Perl_pregexec(pTHX_ REGEXP * const prog, char* stringarg, char
 			__attribute__nonnull__(pTHX_4)
 			__attribute__nonnull__(pTHX_6);
 
-PERL_CALLCONV void	Perl_pregfree(pTHX_ struct regexp* r);
-PERL_CALLCONV struct regexp*	Perl_reg_temp_copy(pTHX_ struct regexp* r)
+PERL_CALLCONV void	Perl_pregfree(pTHX_ REGEXP* r);
+PERL_CALLCONV REGEXP*	Perl_reg_temp_copy(pTHX_ REGEXP* r)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV void	Perl_regfree_internal(pTHX_ REGEXP * const r);
@@ -3596,7 +3596,7 @@ STATIC I32	S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 
-STATIC PMOP*	S_make_matcher(pTHX_ regexp* re)
+STATIC PMOP*	S_make_matcher(pTHX_ REGEXP* re)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 

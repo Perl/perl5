@@ -690,8 +690,8 @@ Ap	|SV*	|regclass_swash	|NULLOK const regexp *prog|NN const struct regnode *n|bo
 Ap	|I32	|pregexec	|NN REGEXP * const prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg|I32 minend \
 				|NN SV* screamer|U32 nosave
-Ap	|void	|pregfree	|NULLOK struct regexp* r
-EXp	|struct regexp*	|reg_temp_copy	|NN struct regexp* r
+Ap	|void	|pregfree	|NULLOK REGEXP* r
+EXp	|REGEXP*|reg_temp_copy	|NN REGEXP* r
 Ap	|void	|regfree_internal|NULLOK REGEXP * const r
 Ap	|char *	|reg_stringify  |NN MAGIC *mg|NULLOK STRLEN *lp|NULLOK U32 *flags|NULLOK I32 *haseval
 #if defined(USE_ITHREADS)
@@ -1353,7 +1353,7 @@ sR	|PerlIO *|doopen_pm	|NN const char *name|const STRLEN namelen
 #endif
 sRn	|bool	|path_is_absolute|NN const char *name
 sR	|I32	|run_user_filter|int idx|NN SV *buf_sv|int maxlen
-sR	|PMOP*	|make_matcher	|NN regexp* re
+sR	|PMOP*	|make_matcher	|NN REGEXP* re
 sR	|bool	|matcher_matches_sv|NN PMOP* matcher|NN SV* sv
 s	|void	|destroy_matcher|NN PMOP* matcher
 s	|OP*	|do_smartmatch	|NULLOK HV* seen_this|NULLOK HV* seen_other
