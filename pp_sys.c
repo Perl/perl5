@@ -4700,7 +4700,7 @@ PP(pp_ghostent)
 	}
 #else
 	if (hent->h_addr)
-	    PUSHs(newSVpvn(hent->h_addr, len));
+	    mPUSHp(hent->h_addr, len);
 	else
 	    PUSHs(sv_mortalcopy(&PL_sv_no));
 #endif /* h_addr */

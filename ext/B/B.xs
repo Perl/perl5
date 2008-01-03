@@ -2013,7 +2013,7 @@ HvARRAY(hv)
 	    (void)hv_iterinit(hv);
 	    EXTEND(sp, HvKEYS(hv) * 2);
 	    while ((sv = hv_iternextsv(hv, &key, &len))) {
-		PUSHs(newSVpvn(key, len));
+		mPUSHp(key, len);
 		PUSHs(make_sv_object(aTHX_ sv_newmortal(), sv));
 	    }
 	}
