@@ -943,7 +943,6 @@ XS(XS_PerlIO_get_layers)
 	}
 
 	if (gv && (io = GvIO(gv))) {
-	     dTARGET;
 	     AV* const av = PerlIO_get_layers(aTHX_ input ?
 					IoIFP(io) : IoOFP(io));
 	     I32 i;
