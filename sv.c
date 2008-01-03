@@ -1448,7 +1448,7 @@ Perl_sv_backoff(pTHX_ register SV *sv)
     if (SvIVX(sv)) {
 	const char * const s = SvPVX_const(sv);
 #ifdef DEBUGGING
-	/* Validate the preceding buffer's sentinals to verify that no-one is
+	/* Validate the preceding buffer's sentinels to verify that no-one is
 	   using it.  */
 	const U8 *p = (const U8*) s;
 	const U8 *const real_start = p - SvIVX(sv);
