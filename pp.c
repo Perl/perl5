@@ -624,7 +624,7 @@ PP(pp_gelem)
 	    break;
 	case 'N':
 	    if (strEQ(second_letter, "AME"))
-		sv = newSVpvn(GvNAME(gv), GvNAMELEN(gv));
+		sv = newSVhek(GvNAME_HEK(gv));
 	    break;
 	case 'P':
 	    if (strEQ(second_letter, "ACKAGE")) {
