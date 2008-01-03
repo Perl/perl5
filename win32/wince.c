@@ -2440,12 +2440,12 @@ XS(w32_GetOSVersion)
     if (!XCEGetVersionExA(&osver)) {
       XSRETURN_EMPTY;
     }
-    XPUSHs(newSVpvn(osver.szCSDVersion, strlen(osver.szCSDVersion)));
-    XPUSHs(newSViv(osver.dwMajorVersion));
-    XPUSHs(newSViv(osver.dwMinorVersion));
-    XPUSHs(newSViv(osver.dwBuildNumber));
+    mXPUSHp(osver.szCSDVersion, strlen(osver.szCSDVersion));
+    mXPUSHi(osver.dwMajorVersion);
+    mXPUSHi(osver.dwMinorVersion);
+    mXPUSHi(osver.dwBuildNumber);
     /* WINCE = 3 */
-    XPUSHs(newSViv(osver.dwPlatformId));
+    mXPUSHi(osver.dwPlatformId);
     PUTBACK;
 }
 
@@ -2554,15 +2554,15 @@ XS(w32_GetPowerStatus)
       XSRETURN_EMPTY;
     }
 
-  XPUSHs(newSViv(sps.ACLineStatus));
-  XPUSHs(newSViv(sps.BatteryFlag));
-  XPUSHs(newSViv(sps.BatteryLifePercent));
-  XPUSHs(newSViv(sps.BatteryLifeTime));
-  XPUSHs(newSViv(sps.BatteryFullLifeTime));
-  XPUSHs(newSViv(sps.BackupBatteryFlag));
-  XPUSHs(newSViv(sps.BackupBatteryLifePercent));
-  XPUSHs(newSViv(sps.BackupBatteryLifeTime));
-  XPUSHs(newSViv(sps.BackupBatteryFullLifeTime));
+  mXPUSHi(sps.ACLineStatus);
+  mXPUSHi(sps.BatteryFlag);
+  mXPUSHi(sps.BatteryLifePercent);
+  mXPUSHi(sps.BatteryLifeTime);
+  mXPUSHi(sps.BatteryFullLifeTime);
+  mXPUSHi(sps.BackupBatteryFlag);
+  mXPUSHi(sps.BackupBatteryLifePercent);
+  mXPUSHi(sps.BackupBatteryLifeTime);
+  mXPUSHi(sps.BackupBatteryFullLifeTime);
 
   PUTBACK;
 }

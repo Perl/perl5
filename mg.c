@@ -2829,7 +2829,7 @@ Perl_sighandler(int sig)
 #endif
 		   EXTEND(SP, 2);
 		   PUSHs((SV*)rv);
-		   PUSHs(newSVpvn((char *)sip, sizeof(*sip)));
+		   mPUSHp((char *)sip, sizeof(*sip));
 	      }
 
 	 }
