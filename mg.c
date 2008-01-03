@@ -2311,14 +2311,16 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 
 	    tmp_he
 		= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints_hash, 
-					 sv_2mortal(newSVpvs("open>")), tmp);
+					 newSVpvs_flags("open>", SVs_TEMP),
+					 tmp);
 
 	    /* The UTF-8 setting is carried over  */
 	    sv_setpvn(tmp, start, out ? (STRLEN)(out - start) : len);
 
 	    PL_compiling.cop_hints_hash
 		= Perl_refcounted_he_new(aTHX_ tmp_he,
-					 sv_2mortal(newSVpvs("open<")), tmp);
+					 newSVpvs_flags("open<", SVs_TEMP),
+					 tmp);
 	}
 	break;
     case '\020':	/* ^P */

@@ -1025,7 +1025,7 @@ S_mess_alloc(pTHX)
     XPVMG *any;
 
     if (!PL_dirty)
-	return sv_2mortal(newSVpvs(""));
+	return newSVpvs_flags("", SVs_TEMP);
 
     if (PL_mess_sv)
 	return PL_mess_sv;

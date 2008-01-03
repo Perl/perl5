@@ -413,7 +413,7 @@ PP(pp_prototype)
 			|| code == -KEY_exec || code == -KEY_system)
 		    goto set;
 		if (code == -KEY_mkdir) {
-		    ret = sv_2mortal(newSVpvs("_;$"));
+		    ret = newSVpvs_flags("_;$", SVs_TEMP);
 		    goto set;
 		}
 		if (code == -KEY_readpipe) {

@@ -12504,7 +12504,7 @@ Perl_yyerror(pTHX_ const char *s)
 	    where = "within string";
     }
     else {
-	SV * const where_sv = sv_2mortal(newSVpvs("next char "));
+	SV * const where_sv = newSVpvs_flags("next char ", SVs_TEMP);
 	if (yychar < 32)
 	    Perl_sv_catpvf(aTHX_ where_sv, "^%c", toCTRL(yychar));
 	else if (isPRINT_LC(yychar)) {

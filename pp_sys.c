@@ -388,7 +388,7 @@ PP(pp_glob)
     PL_last_in_gv = (GV*)*PL_stack_sp--;
 
     SAVESPTR(PL_rs);		/* This is not permanent, either. */
-    PL_rs = sv_2mortal(newSVpvs("\000"));
+    PL_rs = newSVpvs_flags("\000", SVs_TEMP);
 #ifndef DOSISH
 #ifndef CSH
     *SvPVX(PL_rs) = '\n';
@@ -437,7 +437,7 @@ PP(pp_warn)
 	tmps = SvPV_const(tmpsv, len);
     }
     if (!tmps || !len)
-	tmpsv = sv_2mortal(newSVpvs("Warning: something's wrong"));
+	tmpsv = newSVpvs_flags("Warning: something's wrong", SVs_TEMP);
 
     Perl_warn(aTHX_ "%"SVf, SVfARG(tmpsv));
     RETSETYES;
@@ -501,7 +501,7 @@ PP(pp_die)
 	}
     }
     if (!tmps || !len)
-	tmpsv = sv_2mortal(newSVpvs("Died"));
+	tmpsv = newSVpvs_flags("Died", SVs_TEMP);
 
     DIE(aTHX_ "%"SVf, SVfARG(tmpsv));
 }
@@ -936,7 +936,7 @@ PP(pp_dbmopen)
     GV *gv;
 
     HV * const hv = (HV*)POPs;
-    SV * const sv = sv_2mortal(newSVpvs("AnyDBM_File"));
+    SV * const sv = newSVpvs_flags("AnyDBM_File", SVs_TEMP);
     stash = gv_stashsv(sv, 0);
     if (!stash || !(gv = gv_fetchmethod(stash, "TIEHASH"))) {
 	PUTBACK;
@@ -2898,7 +2898,7 @@ PP(pp_stat)
 #ifdef USE_STAT_RDEV
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_rdev)));
 #else
-	PUSHs(sv_2mortal(newSVpvs("")));
+	PUSHs(newSVpvs_flags("", SVs_TEMP));
 #endif
 #if Off_t_size > IVSIZE
 	PUSHs(sv_2mortal(newSVnv((NV)PL_statcache.st_size)));
@@ -2918,8 +2918,8 @@ PP(pp_stat)
 	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_blksize)));
 	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_blocks)));
 #else
-	PUSHs(sv_2mortal(newSVpvs("")));
-	PUSHs(sv_2mortal(newSVpvs("")));
+	PUSHs(newSVpvs_flags("", SVs_TEMP));
+	PUSHs(newSVpvs_flags("", SVs_TEMP));
 #endif
     }
     RETURN;
@@ -4607,7 +4607,7 @@ S_space_join_names_mortal(pTHX_ char *const *array)
     SV *target;
 
     if (array && *array) {
-	target = sv_2mortal(newSVpvs(""));
+	target = newSVpvs_flags("", SVs_TEMP);
 	while (1) {
 	    sv_catpv(target, *array);
 	    if (!*++array)

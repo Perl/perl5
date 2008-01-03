@@ -536,7 +536,7 @@ malformed:
     }
 
     if (dowarn) {
-	SV* const sv = sv_2mortal(newSVpvs("Malformed UTF-8 character "));
+	SV* const sv = newSVpvs_flags("Malformed UTF-8 character ", SVs_TEMP);
 
 	switch (warning) {
 	case 0: /* Intentionally empty. */ break;

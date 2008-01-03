@@ -261,7 +261,7 @@ struct cop {
 		PL_hints |= HINT_LOCALIZE_HH | HINT_ARYBASE;		\
 	    (c)->cop_hints_hash						\
 	       = Perl_refcounted_he_new(aTHX_ (c)->cop_hints_hash,	\
-					sv_2mortal(newSVpvs("$[")),	\
+					newSVpvs_flags("$[", SVs_TEMP),	\
 					sv_2mortal(newSViv(b)));	\
 	}								\
     } STMT_END

@@ -1643,12 +1643,12 @@ PP(pp_caller)
 	    PUSHs(sv_2mortal(newSViv((I32)cx->blk_sub.hasargs)));
 	}
 	else {
-	    PUSHs(sv_2mortal(newSVpvs("(unknown)")));
+	    PUSHs(newSVpvs_flags("(unknown)", SVs_TEMP));
 	    PUSHs(sv_2mortal(newSViv((I32)cx->blk_sub.hasargs)));
 	}
     }
     else {
-	PUSHs(sv_2mortal(newSVpvs("(eval)")));
+	PUSHs(newSVpvs_flags("(eval)", SVs_TEMP));
 	PUSHs(sv_2mortal(newSViv(0)));
     }
     gimme = (I32)cx->blk_gimme;
