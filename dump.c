@@ -2411,7 +2411,7 @@ Perl_sv_xmlpeek(pTHX_ SV *sv)
     case SVt_BIND:
 	sv_catpv(t, " BIND=\"");
 	break;
-    case SVt_ORANGE:
+    case SVt_REGEXP:
 	sv_catpv(t, " ORANGE=\"");
 	break;
     case SVt_PVFM:
@@ -2458,8 +2458,9 @@ Perl_do_pmop_xmldump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
     Perl_xmldump_indent(aTHX_ level, file, "<pmop \n");
     level++;
     if (PM_GETRE(pm)) {
-	const regexp *const r = PM_GETRE(pm);
-	SV * const tmpsv = newSVpvn(RX_PRECOMP(r),r->prelen);
+	REGEXP *const r = PM_GETRE(pm);
+	/* FIXME ORANGE - REGEXP can be 8 bit, so this is sometimes buggy:  */
+	SV * const tmpsv = newSVpvn(RX_PRECOMP(r),RX_PRELEN(r));
 	SvUTF8_on(tmpsv);
 	Perl_xmldump_indent(aTHX_ level, file, "pre=\"%s\"\n",
 	     SvPVX(tmpsv));
@@ -2469,7 +2470,7 @@ Perl_do_pmop_xmldump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
     }
     else
 	Perl_xmldump_indent(aTHX_ level, file, "pre=\"\" when=\"RUN\"\n");
-    if (pm->op_pmflags || (PM_GETRE(pm) && PM_GETRE(pm)->check_substr)) {
+    if (pm->op_pmflags || (PM_GETRE(pm) && RX_CHECK_SUBSTR(PM_GETRE(pm)))) {
 	SV * const tmpsv = pm_description(pm);
 	Perl_xmldump_indent(aTHX_ level, file, "pmflags=\"%s\"\n", SvCUR(tmpsv) ? SvPVX(tmpsv) + 1 : "");
 	SvREFCNT_dec(tmpsv);
@@ -2745,12 +2746,10 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	S_xmldump_attr(aTHX_ level, file, "padix=\"%" IVdf "\"", (IV)cPADOPo->op_padix);
 #else
 	if (cSVOPo->op_sv) {
-	    SV * const tmpsv1 = newSV(0);
-	    SV * const tmpsv2 = newSVpvn("",0);
+	    SV * const tmpsv1 = newSVpvn_utf8(NULL, 0, TRUE);
+	    SV * const tmpsv2 = newSVpvn_utf8("", 0, TRUE);
 	    char *s;
 	    STRLEN len;
-	    SvUTF8_on(tmpsv1);
-	    SvUTF8_on(tmpsv2);
 	    ENTER;
 	    SAVEFREESV(tmpsv1);
 	    SAVEFREESV(tmpsv2);
@@ -2836,10 +2835,9 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 
     if (PL_madskills && o->op_madprop) {
 	char prevkey = '\0';
-	SV * const tmpsv = newSVpvn("", 0);
+	SV * const tmpsv = newSVpvn_utf8("", 0, TRUE);
 	const MADPROP* mp = o->op_madprop;
 
-	sv_utf8_upgrade(tmpsv);
 	if (!contents) {
 	    contents = 1;
 	    PerlIO_printf(file, ">\n");
