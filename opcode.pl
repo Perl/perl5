@@ -290,6 +290,8 @@ END
 
 # Emit allowed argument types.
 
+my $ARGBITS = 32;
+
 print <<END;
 #ifndef PERL_GLOBAL_STRUCT_INIT
 
@@ -326,39 +328,54 @@ my %opclass = (
     '}',  13,		# loopexop
 );
 
+my %opflags = (
+    'm' =>   1,		# needs stack mark
+    'f' =>   2,		# fold constants
+    's' =>   4,		# always produces scalar
+    't' =>   8,		# needs target scalar
+    'T' =>   8 | 256,	# ... which may be lexical
+    'i' =>  16,		# always produces integer
+    'I' =>  32,		# has corresponding int op
+    'd' =>  64,		# danger, unknown side effects
+    'u' => 128,		# defaults to $_
+);
+
 my %OP_IS_SOCKET;
 my %OP_IS_FILETEST;
+my $OCSHIFT = 9;
+my $OASHIFT = 13;
 
-for (@ops) {
+for my $op (@ops) {
     my $argsum = 0;
-    my $flags = $flags{$_};
-    $argsum |= 1 if $flags =~ /m/;		# needs stack mark
-    $argsum |= 2 if $flags =~ /f/;		# fold constants
-    $argsum |= 4 if $flags =~ /s/;		# always produces scalar
-    $argsum |= 8 if $flags =~ /t/;		# needs target scalar
-    $argsum |= (8|256) if $flags =~ /T/;	# ... which may be lexical
-    $argsum |= 16 if $flags =~ /i/;		# always produces integer
-    $argsum |= 32 if $flags =~ /I/;		# has corresponding int op
-    $argsum |= 64 if $flags =~ /d/;		# danger, unknown side effects
-    $argsum |= 128 if $flags =~ /u/;		# defaults to $_
-    $flags =~ /([\W\d_])/ or die qq[Opcode "$_" has no class indicator];
-    $argsum |= $opclass{$1} << 9;
-    my $mul = 0x2000;				# 2 ^ OASHIFT
-    for my $arg (split(' ',$args{$_})) {
+    my $flags = $flags{$op};
+    for my $flag (keys %opflags) {
+	if ($flags =~ s/$flag//) {
+	    die "Flag collision for '$op' ($flags{$op}, $flag)"
+		if $argsum & $opflags{$flag};
+	    $argsum |= $opflags{$flag};
+	}
+    }
+    die qq[Opcode '$op' has no class indicator ($flags{$op} => $flags)]
+	unless exists $opclass{$flags};
+    $argsum |= $opclass{$flags} << $OCSHIFT;
+    my $argshift = $OASHIFT;
+    for my $arg (split(' ',$args{$op})) {
 	if ($arg =~ /^F/) {
-           $OP_IS_SOCKET{$_}   = 1 if $arg =~ s/s//;
-           $OP_IS_FILETEST{$_} = 1 if $arg =~ s/-//;
+           $OP_IS_SOCKET{$op}   = 1 if $arg =~ s/s//;
+           $OP_IS_FILETEST{$op} = 1 if $arg =~ s/-//;
         }
 	my $argnum = ($arg =~ s/\?//) ? 8 : 0;
-        die "op = $_, arg = $arg\n" unless length($arg) == 1;
+        die "op = $op, arg = $arg\n"
+	    unless exists $argnum{$arg};
 	$argnum += $argnum{$arg};
-	warn "# Conflicting bit 32 for '$_'.\n"
-	    if $argnum & 8 and $mul == 0x10000000;
-	$argsum += $argnum * $mul;
-	$mul <<= 4;
+	die "Argument overflow for '$op'\n"
+	    if $argshift >= $ARGBITS ||
+	       $argnum > ((1 << ($ARGBITS - $argshift)) - 1);
+	$argsum += $argnum << $argshift;
+	$argshift += 4;
     }
     $argsum = sprintf("0x%08x", $argsum);
-    print "\t", &tab(3, "$argsum,"), "/* $_ */\n";
+    print "\t", &tab(3, "$argsum,"), "/* $op */\n";
 }
 
 print <<END;
@@ -749,7 +766,7 @@ keys		keys			ck_each		t%	H
 delete		delete			ck_delete	%	S
 exists		exists			ck_exists	is%	S
 rv2hv		hash dereference	ck_rvconst	dt1	
-helem		hash element		ck_null		s2@	H S
+helem		hash element		ck_null		s2	H S
 hslice		hash slice		ck_null		m@	H L
 
 # Explosives and implosives.
