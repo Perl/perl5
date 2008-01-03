@@ -246,9 +246,6 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpSORT_QSORT		32	/* Use quicksort (not mergesort) */
 #define OPpSORT_STABLE		64	/* Use a stable algorithm */
 
-/* Private for OP_THREADSV */
-#define OPpDONE_SVREF		64	/* Been through newSVREF once */
-
 /* Private for OP_OPEN and OP_BACKTICK */
 #define OPpOPEN_IN_RAW		16	/* binmode(F,":raw") on input fh */
 #define OPpOPEN_IN_CRLF		32	/* binmode(F,":crlf") on input fh */
