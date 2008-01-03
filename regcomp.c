@@ -5249,8 +5249,9 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags) {
     }
 
     if ( flags ) {
-        SV* sv_name = sv_2mortal(newSVpvn_utf8(name_start,
-            (int)(RExC_parse - name_start), UTF));
+        SV* sv_name
+	    = newSVpvn_flags(name_start, (int)(RExC_parse - name_start),
+			     SVs_TEMP | (UTF ? SVf_UTF8 : 0));
         if ( flags == REG_RSN_RETURN_NAME)
             return sv_name;
         else if (flags==REG_RSN_RETURN_DATA) {
@@ -6742,7 +6743,7 @@ STATIC UV
 S_reg_recode(pTHX_ const char value, SV **encp)
 {
     STRLEN numlen = 1;
-    SV * const sv = sv_2mortal(newSVpvn(&value, numlen));
+    SV * const sv = newSVpvn_flags(&value, numlen, SVs_TEMP);
     const char * const s = *encp ? sv_recode_to_utf8(sv, *encp) : SvPVX(sv);
     const STRLEN newlen = SvCUR(sv);
     UV uv = UNICODE_REPLACEMENT;

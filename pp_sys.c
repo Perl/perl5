@@ -4697,7 +4697,7 @@ PP(pp_ghostent)
 	PUSHs(sv_2mortal(newSViv((IV)len)));
 #ifdef h_addr
 	for (elem = hent->h_addr_list; elem && *elem; elem++) {
-	    XPUSHs(sv_2mortal(newSVpvn(*elem, len)));
+	    XPUSHs(newSVpvn_flags(*elem, len, SVs_TEMP));
 	}
 #else
 	if (hent->h_addr)

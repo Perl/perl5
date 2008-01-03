@@ -1049,7 +1049,7 @@ XS(XS_mro_nextcan)
     /* beyond here is just for cache misses, so perf isn't as critical */
 
     stashname_len = subname - fq_subname - 2;
-    stashname = sv_2mortal(newSVpvn(fq_subname, stashname_len));
+    stashname = newSVpvn_flags(fq_subname, stashname_len, SVs_TEMP);
 
     linear_av = mro_get_linear_isa_c3(selfstash, 0); /* has ourselves at the top of the list */
 

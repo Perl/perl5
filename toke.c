@@ -1570,7 +1570,7 @@ S_tokeq(pTHX_ SV *sv)
 	goto finish;
     d = s;
     if ( PL_hints & HINT_NEW_STRING ) {
-	pv = sv_2mortal(newSVpvn_flags(SvPVX_const(pv), len, SvUTF8(sv)));
+	pv = newSVpvn_flags(SvPVX_const(pv), len, SVs_TEMP | SvUTF8(sv));
     }
     while (s < send) {
 	if (*s == '\\') {
@@ -10551,9 +10551,9 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
     sv_2mortal(sv);			/* Parent created it permanently */
     cv = *cvp;
     if (!pv && s)
-  	pv = sv_2mortal(newSVpvn(s, len));
+  	pv = newSVpvn_flags(s, len, SVs_TEMP);
     if (type && pv)
-  	typesv = sv_2mortal(newSVpvn(type, typelen));
+  	typesv = newSVpvn_flags(type, typelen, SVs_TEMP);
     else
   	typesv = &PL_sv_undef;
 

@@ -248,7 +248,7 @@ PP(pp_concat)
 	/* mg_get(right) may happen here ... */
 	rpv = SvPV_const(right, rlen);
 	rbyte = !DO_UTF8(right);
-	right = sv_2mortal(newSVpvn(rpv, rlen));
+	right = newSVpvn_flags(rpv, rlen, SVs_TEMP);
 	rpv = SvPV_const(right, rlen);	/* no point setting UTF-8 here */
 	rcopied = TRUE;
     }
@@ -287,7 +287,7 @@ PP(pp_concat)
 	    sv_utf8_upgrade_nomg(TARG);
 	else {
 	    if (!rcopied)
-		right = sv_2mortal(newSVpvn(rpv, rlen));
+		right = newSVpvn_flags(rpv, rlen, SVs_TEMP);
 	    sv_utf8_upgrade_nomg(right);
 	    rpv = SvPV_const(right, rlen);
 	}

@@ -449,7 +449,7 @@ PP(pp_prototype)
 		if (defgv && str[n - 1] == '$')
 		    str[n - 1] = '_';
 		str[n++] = '\0';
-		ret = sv_2mortal(newSVpvn(str, n - 1));
+		ret = newSVpvn_flags(str, n - 1, SVs_TEMP);
 	    }
 	    else if (code)		/* Non-Overridable */
 		goto set;
@@ -461,7 +461,7 @@ PP(pp_prototype)
     }
     cv = sv_2cv(TOPs, &stash, &gv, 0);
     if (cv && SvPOK(cv))
-	ret = sv_2mortal(newSVpvn(SvPVX_const(cv), SvCUR(cv)));
+	ret = newSVpvn_flags(SvPVX_const(cv), SvCUR(cv), SVs_TEMP);
   set:
     SETs(ret);
     RETURN;
@@ -3312,7 +3312,8 @@ PP(pp_index)
 	   Otherwise I need to avoid calls to sv_pos_u2b(), which (dangerously)
 	   will trigger magic and overloading again, as will fbm_instr()
 	*/
-	big = sv_2mortal(newSVpvn_utf8(big_p, biglen, big_utf8));
+	big = newSVpvn_flags(big_p, biglen,
+			     SVs_TEMP | (big_utf8 ? SVf_UTF8 : 0));
 	big_p = SvPVX(big);
     }
     if (SvGAMAGIC(little) || (is_index && !SvOK(little))) {
@@ -3324,7 +3325,8 @@ PP(pp_index)
 	   This is all getting to messy. The API isn't quite clean enough,
 	   because data access has side effects.
 	*/
-	little = sv_2mortal(newSVpvn_utf8(little_p, llen, little_utf8));
+	little = newSVpvn_flags(little_p, llen,
+				SVs_TEMP | (little_utf8 ? SVf_UTF8 : 0));
 	little_p = SvPVX(little);
     }
 

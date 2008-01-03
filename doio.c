@@ -176,7 +176,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 
         IoTYPE(io) = PerlIO_intmode2str(rawmode, &mode[ix], &writing);
 
-	namesv = sv_2mortal(newSVpvn(oname,len));
+	namesv = newSVpvn_flags(oname, len, SVs_TEMP);
 	num_svs = 1;
 	svp = &namesv;
 	type = NULL;
@@ -399,7 +399,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 		}
 		else  {
 		    if (!num_svs) {
-			namesv = sv_2mortal(newSVpvn(type,tend - type));
+			namesv = newSVpvn_flags(type, tend - type, SVs_TEMP);
 			num_svs = 1;
 			svp = &namesv;
 		        type = NULL;
@@ -432,7 +432,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	    }
 	    else {
 		if (!num_svs) {
-		    namesv = sv_2mortal(newSVpvn(type,tend - type));
+		    namesv = newSVpvn_flags(type, tend - type, SVs_TEMP);
 		    num_svs = 1;
 		    svp = &namesv;
 		    type = NULL;
@@ -511,7 +511,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	    }
 	    else {
 		if (!num_svs) {
-		    namesv = sv_2mortal(newSVpvn(type,tend - type));
+		    namesv = newSVpvn_flags(type, tend - type, SVs_TEMP);
 		    num_svs = 1;
 		    svp = &namesv;
 		    type = NULL;

@@ -1607,7 +1607,7 @@ S_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, I32 flags, int
     if (n > 1) {
 	if (mg->mg_ptr) {
 	    if (mg->mg_len >= 0)
-		PUSHs(sv_2mortal(newSVpvn(mg->mg_ptr, mg->mg_len)));
+		PUSHs(newSVpvn_flags(mg->mg_ptr, mg->mg_len, SVs_TEMP));
 	    else if (mg->mg_len == HEf_SVKEY)
 		PUSHs((SV*)mg->mg_ptr);
 	}
@@ -2305,9 +2305,9 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 
 	    /* Opening for input is more common than opening for output, so
 	       ensure that hints for input are sooner on linked list.  */
-	    tmp = sv_2mortal(out ? newSVpvn(out + 1, start + len - out - 1)
-			     : newSVpvs(""));
-	    SvFLAGS(tmp) |= SvUTF8(sv);
+	    tmp = out ? newSVpvn_flags(out + 1, start + len - out - 1,
+				       SVs_TEMP | SvUTF8(sv))
+		: newSVpvn_flags("", 0, SVs_TEMP | SvUTF8(sv));
 
 	    tmp_he
 		= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints_hash, 
@@ -2960,7 +2960,7 @@ Perl_magic_sethint(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
     SV *key = (mg->mg_len == HEf_SVKEY) ? (SV *)mg->mg_ptr
-	: sv_2mortal(newSVpvn(mg->mg_ptr, mg->mg_len));
+	: newSVpvn_flags(mg->mg_ptr, mg->mg_len, SVs_TEMP);
 
     /* mg->mg_obj isn't being used.  If needed, it would be possible to store
        an alternative leaf in there, with PL_compiling.cop_hints being used if
