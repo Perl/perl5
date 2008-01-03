@@ -1512,7 +1512,11 @@ variable C<PL_na>, though this is rather less efficient than using a local
 variable.  Remember though, that hash keys in perl are free to contain
 embedded nulls, so using C<strlen()> or similar is not a good way to find
 the length of hash keys. This is very similar to the C<SvPV()> macro
-described elsewhere in this document.
+described elsewhere in this document. See also C<HeUTF8>.
+
+If you are using C<HePV> to get values to pass to C<newSVpvn()> to create a
+new SV, you should consider using C<newSVhek(HeKEY_hek(he))> as it is more
+efficient.
 
 	char*	HePV(HE* he, STRLEN len)
 
@@ -1549,6 +1553,20 @@ indicate the presence of an C<SV*> key, and returns the same
 C<SV*>.
 
 	SV*	HeSVKEY_set(HE* he, SV* sv)
+
+=for hackers
+Found in file hv.h
+
+=item HeUTF8
+X<HeUTF8>
+
+Returns whether the C<char *> value returned by C<HePV> is encoded in UTF-8,
+doing any necessary dereferencing of possibly C<SV*> keys.  The value returned
+will be 0 or non-0, not necesarily 1 (or even a value with any low bits set),
+so B<do not> blindly assign this to a C<bool> variable, as C<bool> may be a
+typedef for C<char>.
+
+	char*	HeUTF8(HE* he, STRLEN len)
 
 =for hackers
 Found in file hv.h
