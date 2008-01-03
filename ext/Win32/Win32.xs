@@ -1245,17 +1245,17 @@ XS(w32_GetOSVersion)
     if (GIMME_V == G_SCALAR) {
         XSRETURN_IV(g_osver.dwPlatformId);
     }
-    XPUSHs(newSVpvn(g_osver.szCSDVersion, strlen(g_osver.szCSDVersion)));
+    mXPUSHp(g_osver.szCSDVersion, strlen(g_osver.szCSDVersion));
 
-    XPUSHs(newSViv(g_osver.dwMajorVersion));
-    XPUSHs(newSViv(g_osver.dwMinorVersion));
-    XPUSHs(newSViv(g_osver.dwBuildNumber));
-    XPUSHs(newSViv(g_osver.dwPlatformId));
+    mXPUSHi(g_osver.dwMajorVersion);
+    mXPUSHi(g_osver.dwMinorVersion);
+    mXPUSHi(g_osver.dwBuildNumber);
+    mXPUSHi(g_osver.dwPlatformId);
     if (g_osver_ex) {
-        XPUSHs(newSViv(g_osver.wServicePackMajor));
-        XPUSHs(newSViv(g_osver.wServicePackMinor));
-        XPUSHs(newSViv(g_osver.wSuiteMask));
-        XPUSHs(newSViv(g_osver.wProductType));
+        mXPUSHi(g_osver.wServicePackMajor);
+        mXPUSHi(g_osver.wServicePackMinor);
+        mXPUSHi(g_osver.wSuiteMask);
+        mXPUSHi(g_osver.wProductType);
     }
     PUTBACK;
 }

@@ -4360,10 +4360,10 @@ XS(XS_OS2_pipeCntl)
 				      &PipeState), "DosPeekNPipe() for state");
 	    if (state) {
 		EXTEND(SP, 3);
-		PUSHs(newSVuv(PipeState));
+		mPUSHu(PipeState);
 		/*   Bytes (available/in-message) */
-		PUSHs(newSViv(BytesAvail.cbpipe));
-		PUSHs(newSViv(BytesAvail.cbmessage));
+		mPUSHi(BytesAvail.cbpipe);
+		mPUSHi(BytesAvail.cbmessage);
 		XSRETURN(3);
 	    } else if (info) {
 		/* L S S C C C/Z*
@@ -4390,12 +4390,12 @@ XS(XS_OS2_pipeCntl)
 		else
 		    size = strlen(b.pInfo.szName);
 		EXTEND(SP, 6);
-		PUSHs(newSVpvn(b.pInfo.szName, size));
-		PUSHs(newSVuv(b.id));
-		PUSHs(newSViv(b.pInfo.cbOut));
-		PUSHs(newSViv(b.pInfo.cbIn));
-		PUSHs(newSViv(b.pInfo.cbMaxInst));
-		PUSHs(newSViv(b.pInfo.cbCurInst));
+		mPUSHp(b.pInfo.szName, size);
+		mPUSHu(b.id);
+		mPUSHi(b.pInfo.cbOut);
+		mPUSHi(b.pInfo.cbIn);
+		mPUSHi(b.pInfo.cbMaxInst);
+		mPUSHi(b.pInfo.cbCurInst);
 		XSRETURN(6);
 	    } else if (BytesAvail.cbpipe == 0) {
 		XSRETURN_NO;
