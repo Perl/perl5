@@ -954,7 +954,7 @@ Set the actual length of the string which is in the SV.  See C<SvIV_set>.
 
 #define SvOKp(sv)		(SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK))
 #define SvIOKp(sv)		(SvFLAGS(sv) & SVp_IOK)
-#define SvIOKp_on(sv)		(assert_not_glob(sv) SvRELEASE_IVX(sv), \
+#define SvIOKp_on(sv)		(assert_not_glob(sv) SvRELEASE_IVX_(sv)	\
 				    SvFLAGS(sv) |= SVp_IOK)
 #define SvNOKp(sv)		(SvFLAGS(sv) & SVp_NOK)
 #define SvNOKp_on(sv)		(assert_not_glob(sv) SvFLAGS(sv) |= SVp_NOK)
@@ -963,7 +963,7 @@ Set the actual length of the string which is in the SV.  See C<SvIV_set>.
 				 SvFLAGS(sv) |= SVp_POK)
 
 #define SvIOK(sv)		(SvFLAGS(sv) & SVf_IOK)
-#define SvIOK_on(sv)		(assert_not_glob(sv) SvRELEASE_IVX(sv), \
+#define SvIOK_on(sv)		(assert_not_glob(sv) SvRELEASE_IVX_(sv)	\
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
 #define SvIOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVp_IOK|SVf_IVisUV))
 #define SvIOK_only(sv)		(SvOK_off(sv), \
@@ -1433,7 +1433,8 @@ the scalar's value cannot change unless written to.
 		     if (SvLEN(sv)) {					\
 			 assert(!SvROK(sv));				\
 			 if(SvOOK(sv)) {				\
-			     SvPV_set(sv, SvPVX_mutable(sv) - SvIVX(sv)); \
+			     SvPV_set(sv, SvPVX_mutable(sv)		\
+					  - sv_read_offset(sv));	\
 			     SvFLAGS(sv) &= ~SVf_OOK;			\
 			 }						\
 			 Safefree(SvPVX(sv));				\
@@ -1911,10 +1912,16 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>
 
 #ifdef PERL_OLD_COPY_ON_WRITE
 #define SvRELEASE_IVX(sv)   \
-    ((SvIsCOW(sv) ? sv_force_normal_flags(sv, 0) : (void) 0), SvOOK_off(sv))
+    ((SvIsCOW(sv) ? sv_force_normal_flags(sv, 0) : (void) 0), 0)
 #  define SvIsCOW_normal(sv)	(SvIsCOW(sv) && SvLEN(sv))
+#  define SvRELEASE_IVX_(sv)	SvRELEASE_IVX(sv),
 #else
-#  define SvRELEASE_IVX(sv)   SvOOK_off(sv)
+#  define SvRELEASE_IVX(sv)   0
+/* This little game brought to you by the need to shut this warning up:
+mg.c: In function `Perl_magic_get':
+mg.c:1024: warning: left-hand operand of comma expression has no effect
+*/
+#  define SvRELEASE_IVX_(sv)  /**/
 #endif /* PERL_OLD_COPY_ON_WRITE */
 
 #define CAN_COW_MASK	(SVs_OBJECT|SVs_GMG|SVs_SMG|SVs_RMG|SVf_IOK|SVf_NOK| \

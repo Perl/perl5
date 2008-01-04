@@ -2371,6 +2371,9 @@ PERL_CALLCONV char*	Perl_sv_pvutf8n_force(pTHX_ SV* sv, STRLEN* lp)
 PERL_CALLCONV char*	Perl_sv_pvbyten_force(pTHX_ SV* sv, STRLEN* lp)
 			__attribute__nonnull__(pTHX_1);
 
+PERL_CALLCONV UV	Perl_sv_read_offset(pTHX_ const SV *const sv)
+			__attribute__nonnull__(pTHX_1);
+
 PERL_CALLCONV char*	Perl_sv_recode_to_utf8(pTHX_ SV* sv, SV *encoding)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);

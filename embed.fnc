@@ -886,6 +886,7 @@ Apd	|void	|sv_pos_b2u	|NULLOK SV* sv|NN I32* offsetp
 Amdb	|char*	|sv_pvn_force	|NN SV* sv|NULLOK STRLEN* lp
 Apd	|char*	|sv_pvutf8n_force|NN SV* sv|NULLOK STRLEN* lp
 Apd	|char*	|sv_pvbyten_force|NN SV* sv|NULLOK STRLEN* lp
+Ap	|UV	|sv_read_offset	|NN const SV *const sv
 Apd	|char*	|sv_recode_to_utf8	|NN SV* sv|NN SV *encoding
 Apd	|bool	|sv_cat_decode	|NN SV* dsv|NN SV *encoding|NN SV *ssv|NN int *offset \
 				|NN char* tstr|int tlen
