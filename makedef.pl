@@ -734,7 +734,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    Perl_he_dup
 		    Perl_mg_dup
 		    Perl_mro_meta_dup
-		    Perl_re_dup
+		    Perl_re_dup_guts
 		    Perl_sv_dup
 		    Perl_rvpv_dup
 		    Perl_hek_dup
