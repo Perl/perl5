@@ -3338,6 +3338,18 @@ not use C<TARG>.  See also C<PUSHp>, C<mXPUSHp> and C<XPUSHp>.
 =for hackers
 Found in file pp.h
 
+=item mPUSHs
+X<mPUSHs>
+
+Push an SV onto the stack and mortalizes the SV.  The stack must have room
+for this element.  Does not handle 'set' magic.  Does not use C<TARG>.
+See also C<PUSHs> and C<mXPUSHs>.
+
+	void	mPUSHs(SV* sv)
+
+=for hackers
+Found in file pp.h
+
 =item mPUSHu
 X<mPUSHu>
 
@@ -3382,6 +3394,18 @@ indicates the length of the string.  Handles 'set' magic.  Does not use
 C<TARG>.  See also C<XPUSHp>, C<mPUSHp> and C<PUSHp>.
 
 	void	mXPUSHp(char* str, STRLEN len)
+
+=for hackers
+Found in file pp.h
+
+=item mXPUSHs
+X<mXPUSHs>
+
+Push an SV onto the stack, extending the stack if necessary and mortalizes
+the SV.  Does not handle 'set' magic.  Does not use C<TARG>.  See also
+C<XPUSHs> and C<mPUSHs>.
+
+	void	mXPUSHs(SV* sv)
 
 =for hackers
 Found in file pp.h
@@ -5208,6 +5232,17 @@ X<newSVpvs>
 Like C<newSVpvn>, but takes a literal string instead of a string/length pair.
 
 	SV*	newSVpvs(const char* s)
+
+=for hackers
+Found in file handy.h
+
+=item newSVpvs_flags
+X<newSVpvs_flags>
+
+Like C<newSVpvn_flags>, but takes a literal string instead of a string/length
+pair.
+
+	SV*	newSVpvs_flags(const char* s, U32 flags)
 
 =for hackers
 Found in file handy.h
