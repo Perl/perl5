@@ -1,5 +1,3 @@
-#!./perl
-
 BEGIN {
     chdir 't' if -d 't';
     $dir = "self-$$";
@@ -10,8 +8,8 @@ BEGIN {
 	$sep = ":";
     }
 
-    @INC = $dir;
-    push @INC, '../lib';
+    unshift @INC, $dir;
+    unshift @INC, '../lib';
 
     print "1..20\n";
 
