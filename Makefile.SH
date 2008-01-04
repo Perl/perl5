@@ -454,6 +454,15 @@ all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT) extra.pods $(private) $(unidatafiles) $
 	@echo " ";
 	@echo "	Everything is up to date. Type '$(MAKE) test' to run test suite."
 
+sperl$(OBJ_EXT): perl.c $(h)
+	$(RMS) sperl.c
+	$(LNS) perl.c sperl.c
+	$(CCCMD) -DIAMSUID sperl.c
+	$(RMS) sperl.c
+
+sperl.i: perl.c $(h)
+	$(CCCMDSRC) -DIAMSUID -E perl.c > sperl.i
+
 .PHONY: all compile translators utilities
 
 compile: all
@@ -830,12 +839,6 @@ esac
 
 $spitshell >>Makefile <<'!NO!SUBS!'
 
-sperl$(OBJ_EXT): perl.c $(h)
-	$(RMS) sperl.c
-	$(LNS) perl.c sperl.c
-	$(CCCMD) -DIAMSUID sperl.c
-	$(RMS) sperl.c
-
 # We have to call our ./makedir because Ultrix 4.3 make can't handle the line
 #	test -d lib/auto || mkdir lib/auto
 # We need to autosplit in two steps because VOS can't handle so many args
@@ -1063,7 +1066,7 @@ d_dummy $(dynamic_ext):	miniperl$(EXE_EXT) preplibrary makeppport $(DYNALOADER) 
 s_dummy $(static_ext):	miniperl$(EXE_EXT) preplibrary makeppport $(DYNALOADER) FORCE
 	@$(LDLIBPTH) sh ext/util/make_ext $(STATIC) $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
-n_dummy $(nonxs_ext):	miniperl$(EXE_EXT) preplibrary $(DYNALOADER) FORCE
+n_dummy $(nonxs_ext):	miniperl$(EXE_EXT) preplibrary FORCE
 	@$(LDLIBPTH) sh ext/util/make_ext nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 !NO!SUBS!
 
@@ -1156,7 +1159,8 @@ _cleaner2:
 	rm -f lib/ExtUtils/ParseXS/t/XSTest.c
 	rm -f lib/ExtUtils/ParseXS/t/XSTest$(OBJ_EXT)
 	rm -f lib/ExtUtils/ParseXS/t/XSTest$(DLSUFFIX)
-	-rmdir lib/B lib/Data
+	rm -fr lib/B
+	-rmdir lib/Data
 	-rmdir lib/Filter/Util lib/IO/Socket lib/IO
 	-rmdir lib/List lib/MIME lib/Scalar lib/Sys
 	-rmdir lib/threads lib/XS
@@ -1210,7 +1214,7 @@ makedepend: makedepend.SH config.sh
 	test.utf16 check.utf16 utest.utf16 ucheck.utf16 \
 	test.third check.third utest.third ucheck.third test_notty.third \
 	test.deparse test_notty.deparse test_harness test_harness_notty \
-	test.bytecompile minitest coretest test.taintwarn
+	test.bytecompile minitest coretest test.taintwarn test-reonly
 
 # Cannot delegate rebuilding of t/perl to make
 # to allow interlaced test and minitest
@@ -1243,9 +1247,9 @@ cleanup_unpacked_files:
 # see t/op/stat.t
 _test:
 	if (true </dev/tty) >/dev/null 2>&1; then \
-	  $(MAKE) TEST_ARGS=$(TEST_ARGS) TESTFILE=$(TESTFILE) _test_tty   ; \
+	  $(MAKE) TEST_ARGS='$(TEST_ARGS)' TESTFILE=$(TESTFILE) _test_tty   ; \
 	else \
-	  $(MAKE) TEST_ARGS=$(TEST_ARGS) TESTFILE=$(TESTFILE) _test_notty ; \
+	  $(MAKE) TEST_ARGS='$(TEST_ARGS)' TESTFILE=$(TESTFILE) _test_notty ; \
 	fi
 	@echo "Ran tests" > t/rantests
 
@@ -1354,6 +1358,9 @@ test_harness: test_prep
 
 test_harness_notty: test_prep
 	PERL=./perl HARNESS_NOTTY=1 $(MAKE) TESTFILE=harness _test
+
+test-reonly: test_prep
+	PERL=./perl TEST_ARGS='-re \\bpat\\b \\breg \\bre\b \\bsubst \\brxcode' $(MAKE) TESTFILE=harness _test
 
 # Handy way to run perlbug -ok without having to install and run the
 # installed perlbug. We don't re-run the tests here - we trust the user.
