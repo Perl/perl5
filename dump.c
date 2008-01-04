@@ -1535,6 +1535,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    Perl_dump_indent(aTHX_ level, file, "  UV = %"UVuf, (UV)SvUVX(sv));
 	else
 	    Perl_dump_indent(aTHX_ level, file, "  IV = %"IVdf, (IV)SvIVX(sv));
+	if (SvOOK(sv))
+	    PerlIO_printf(file, "  (OFFSET)");
 #ifdef PERL_OLD_COPY_ON_WRITE
 	if (SvIsCOW_shared_hash(sv))
 	    PerlIO_printf(file, "  (HASH)");
@@ -1572,17 +1574,9 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     }
     if ((type <= SVt_PVLV && !isGV_with_GP(sv)) || type == SVt_PVFM) {
 	if (SvPVX_const(sv)) {
-	    UV delta = SvOOK(sv) ? sv_read_offset(sv) : 0;
-	    if (SvOOK(sv)) {
-		Perl_dump_indent(aTHX_ level, file,"  OFFSET = %"UVuf"\n",
-				 (UV) delta);
-	    }
 	    Perl_dump_indent(aTHX_ level, file,"  PV = 0x%"UVxf" ", PTR2UV(SvPVX_const(sv)));
-	    if (SvOOK(sv)) {
-		PerlIO_printf(file, "( %s . ) ",
-			      pv_display(d, SvPVX_const(sv) - delta, delta, 0,
-					 pvlim));
-	    }
+	    if (SvOOK(sv))
+		PerlIO_printf(file, "( %s . ) ", pv_display(d, SvPVX_const(sv)-SvIVX(sv), SvIVX(sv), 0, pvlim));
 	    PerlIO_printf(file, "%s", pv_display(d, SvPVX_const(sv), SvCUR(sv), SvLEN(sv), pvlim));
 	    if (SvUTF8(sv)) /* the 6?  \x{....} */
 	        PerlIO_printf(file, " [UTF8 \"%s\"]", sv_uni_display(d, sv, 6 * SvCUR(sv), UNI_DISPLAY_QQ));
