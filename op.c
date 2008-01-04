@@ -7895,7 +7895,7 @@ Perl_ck_substr(pTHX_ OP *o)
 OP *
 Perl_ck_each(pTHX_ OP *o)
 {
-
+    dVAR;
     OP *kid = cLISTOPo->op_first;
 
     if (kid->op_type == OP_PADAV || kid->op_type == OP_RV2AV) {
