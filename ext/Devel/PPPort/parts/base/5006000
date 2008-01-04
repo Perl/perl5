@@ -224,9 +224,8 @@ PTR2IV                         # added by devel/scanprov
 PTR2NV                         # added by devel/scanprov
 PTR2UV                         # added by devel/scanprov
 PTRV                           # added by devel/scanprov
-Perl_warner                    # added by devel/scanprov
-Perl_warner_nocontext          # added by devel/scanprov
 SVf                            # added by devel/scanprov
+SVf_UTF8                       # added by devel/scanprov
 UVSIZE                         # added by devel/scanprov
 UVTYPE                         # added by devel/scanprov
 UVof                           # added by devel/scanprov

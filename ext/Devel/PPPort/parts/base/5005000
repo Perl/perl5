@@ -17,7 +17,6 @@ regexec_flags                  # E
 regnext                        # E (Perl_regnext)
 runops_debug                   # E
 runops_standard                # E
-save_hints                     # E
 save_iv                        # E (save_iv)
 screaminstr                    # E (Perl_screaminstr)
 sv_iv                          # E

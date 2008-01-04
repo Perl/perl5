@@ -1,3 +1,17 @@
+3.13_01 - 2008-01-04
+
+    * fix dependency detection algorithm for functions
+    * fix some potential memory leaks in the test suite
+    * no need to use *_mg functions for mX?PUSH macros
+    * added support for the following API
+        mPUSHs
+        mXPUSHs
+        newSVpvn_flags
+        newSVpvn_utf8
+        newSVpvs_flags
+        SVf_UTF8
+    * make sure soak works with cromfs
+
 3.13 - 2007-10-04
 
     * fix cpan #29748: ppport.h problems with perl5.005_05

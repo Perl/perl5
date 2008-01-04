@@ -17,10 +17,11 @@ regexec_flags                  # U
 regnext                        # E (Perl_regnext)
 runops_debug                   # U
 runops_standard                # U
-save_hints                     # U
 save_iv                        # U (save_iv)
 screaminstr                    # E (Perl_screaminstr)
 sv_iv                          # U
 sv_nv                          # U
 sv_peek                        # U
+sv_pvn                         # U
+sv_pvn_nomg                    # U
 sv_true                        # U

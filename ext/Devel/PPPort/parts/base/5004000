@@ -32,13 +32,13 @@ gv_fetchmethod_autoload        # E
 gv_fullname3                   # U
 gv_stashpvn                    # E
 hv_delayfree_ent               # E
-hv_delete_ent                  # E
-hv_exists_ent                  # E
-hv_fetch_ent                   # E
+hv_delete_ent                  # U
+hv_exists_ent                  # U
+hv_fetch_ent                   # U
 hv_free_ent                    # E
 hv_iterkeysv                   # E
 hv_ksplit                      # E
-hv_store_ent                   # E
+hv_store_ent                   # U
 ibcmp_locale                   # E
 my_failure_exit                # E
 my_memcmp                      # U
@@ -63,6 +63,7 @@ sv_untaint                     # E
 sv_vcatpvfn                    # E
 sv_vsetpvfn                    # E
 unsharepvn                     # E
+PERL_HASH                      # added by devel/scanprov
 PERL_INT_MAX                   # added by devel/scanprov
 PERL_INT_MIN                   # added by devel/scanprov
 PERL_LONG_MAX                  # added by devel/scanprov
@@ -85,4 +86,3 @@ SvUVXx                         # added by devel/scanprov
 boolSV                         # added by devel/scanprov
 memEQ                          # added by devel/scanprov
 memNE                          # added by devel/scanprov
-PERL_HASH                      # added by devel/scanprov

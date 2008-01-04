@@ -4,13 +4,13 @@
 #
 ################################################################################
 #
-#  $Revision: 22 $
+#  $Revision: 23 $
 #  $Author: mhx $
-#  $Date: 2007/08/19 01:18:23 +0200 $
+#  $Date: 2008/01/04 10:47:40 +0100 $
 #
 ################################################################################
 #
-#  Version 3.x, Copyright (C) 2004-2007, Marcus Holland-Moritz.
+#  Version 3.x, Copyright (C) 2004-2008, Marcus Holland-Moritz.
 #  Version 2.x, Copyright (C) 2001, Paul Marquess.
 #  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 #
