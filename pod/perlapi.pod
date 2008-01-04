@@ -3306,8 +3306,7 @@ Found in file pp.h
 X<mPUSHi>
 
 Push an integer onto the stack.  The stack must have room for this element.
-Handles 'set' magic.  Does not use C<TARG>.  See also C<PUSHi>, C<mXPUSHi>
-and C<XPUSHi>.
+Does not use C<TARG>.  See also C<PUSHi>, C<mXPUSHi> and C<XPUSHi>.
 
 	void	mPUSHi(IV iv)
 
@@ -3318,8 +3317,7 @@ Found in file pp.h
 X<mPUSHn>
 
 Push a double onto the stack.  The stack must have room for this element.
-Handles 'set' magic.  Does not use C<TARG>.  See also C<PUSHn>, C<mXPUSHn>
-and C<XPUSHn>.
+Does not use C<TARG>.  See also C<PUSHn>, C<mXPUSHn> and C<XPUSHn>.
 
 	void	mPUSHn(NV nv)
 
@@ -3330,8 +3328,8 @@ Found in file pp.h
 X<mPUSHp>
 
 Push a string onto the stack.  The stack must have room for this element.
-The C<len> indicates the length of the string.  Handles 'set' magic.  Does
-not use C<TARG>.  See also C<PUSHp>, C<mXPUSHp> and C<XPUSHp>.
+The C<len> indicates the length of the string.  Does not use C<TARG>.
+See also C<PUSHp>, C<mXPUSHp> and C<XPUSHp>.
 
 	void	mPUSHp(char* str, STRLEN len)
 
@@ -3342,8 +3340,7 @@ Found in file pp.h
 X<mPUSHs>
 
 Push an SV onto the stack and mortalizes the SV.  The stack must have room
-for this element.  Does not handle 'set' magic.  Does not use C<TARG>.
-See also C<PUSHs> and C<mXPUSHs>.
+for this element.  Does not use C<TARG>.  See also C<PUSHs> and C<mXPUSHs>.
 
 	void	mPUSHs(SV* sv)
 
@@ -3354,8 +3351,7 @@ Found in file pp.h
 X<mPUSHu>
 
 Push an unsigned integer onto the stack.  The stack must have room for this
-element.  Handles 'set' magic.  Does not use C<TARG>.  See also C<PUSHu>,
-C<mXPUSHu> and C<XPUSHu>.
+element.  Does not use C<TARG>.  See also C<PUSHu>, C<mXPUSHu> and C<XPUSHu>.
 
 	void	mPUSHu(UV uv)
 
@@ -3365,9 +3361,8 @@ Found in file pp.h
 =item mXPUSHi
 X<mXPUSHi>
 
-Push an integer onto the stack, extending the stack if necessary.  Handles
-'set' magic.  Does not use C<TARG>.  See also C<XPUSHi>, C<mPUSHi> and
-C<PUSHi>.
+Push an integer onto the stack, extending the stack if necessary.
+Does not use C<TARG>.  See also C<XPUSHi>, C<mPUSHi> and C<PUSHi>.
 
 	void	mXPUSHi(IV iv)
 
@@ -3377,9 +3372,8 @@ Found in file pp.h
 =item mXPUSHn
 X<mXPUSHn>
 
-Push a double onto the stack, extending the stack if necessary.  Handles
-'set' magic.  Does not use C<TARG>.  See also C<XPUSHn>, C<mPUSHn> and
-C<PUSHn>.
+Push a double onto the stack, extending the stack if necessary.
+Does not use C<TARG>.  See also C<XPUSHn>, C<mPUSHn> and C<PUSHn>.
 
 	void	mXPUSHn(NV nv)
 
@@ -3390,8 +3384,8 @@ Found in file pp.h
 X<mXPUSHp>
 
 Push a string onto the stack, extending the stack if necessary.  The C<len>
-indicates the length of the string.  Handles 'set' magic.  Does not use
-C<TARG>.  See also C<XPUSHp>, C<mPUSHp> and C<PUSHp>.
+indicates the length of the string.  Does not use C<TARG>.  See also C<XPUSHp>,
+C<mPUSHp> and C<PUSHp>.
 
 	void	mXPUSHp(char* str, STRLEN len)
 
@@ -3402,8 +3396,7 @@ Found in file pp.h
 X<mXPUSHs>
 
 Push an SV onto the stack, extending the stack if necessary and mortalizes
-the SV.  Does not handle 'set' magic.  Does not use C<TARG>.  See also
-C<XPUSHs> and C<mPUSHs>.
+the SV.  Does not use C<TARG>.  See also C<XPUSHs> and C<mPUSHs>.
 
 	void	mXPUSHs(SV* sv)
 
@@ -3414,8 +3407,7 @@ Found in file pp.h
 X<mXPUSHu>
 
 Push an unsigned integer onto the stack, extending the stack if necessary.
-Handles 'set' magic.  Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu>
-and C<PUSHu>.
+Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 
 	void	mXPUSHu(UV uv)
 
@@ -3529,8 +3521,7 @@ Found in file pp.h
 X<PUSHmortal>
 
 Push a new mortal SV onto the stack.  The stack must have room for this
-element.  Does not handle 'set' magic.  Does not use C<TARG>.  See also
-C<PUSHs>, C<XPUSHmortal> and C<XPUSHs>.
+element.  Does not use C<TARG>.  See also C<PUSHs>, C<XPUSHmortal> and C<XPUSHs>.
 
 	void	PUSHmortal()
 
@@ -3637,9 +3628,8 @@ Found in file pp.h
 =item XPUSHmortal
 X<XPUSHmortal>
 
-Push a new mortal SV onto the stack, extending the stack if necessary.  Does
-not handle 'set' magic.  Does not use C<TARG>.  See also C<XPUSHs>,
-C<PUSHmortal> and C<PUSHs>.
+Push a new mortal SV onto the stack, extending the stack if necessary.
+Does not use C<TARG>.  See also C<XPUSHs>, C<PUSHmortal> and C<PUSHs>.
 
 	void	XPUSHmortal()
 
