@@ -305,14 +305,14 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 
 #define mPUSHs(s)	PUSHs(sv_2mortal(s))
 #define PUSHmortal	PUSHs(sv_newmortal())
-#define mPUSHp(p,l)	sv_setpvn(PUSHmortal, (p), (l))
+#define mPUSHp(p,l)	PUSHs(newSVpvn_flags((p), (l), SVs_TEMP))
 #define mPUSHn(n)	sv_setnv(PUSHmortal, (NV)(n))
 #define mPUSHi(i)	sv_setiv(PUSHmortal, (IV)(i))
 #define mPUSHu(u)	sv_setuv(PUSHmortal, (UV)(u))
 
 #define mXPUSHs(s)	XPUSHs(sv_2mortal(s))
 #define XPUSHmortal	XPUSHs(sv_newmortal())
-#define mXPUSHp(p,l)	STMT_START { EXTEND(sp,1); sv_setpvn(PUSHmortal, (p), (l)); } STMT_END
+#define mXPUSHp(p,l)	STMT_START { EXTEND(sp,1); mPUSHp((p), (l)); } STMT_END
 #define mXPUSHn(n)	STMT_START { EXTEND(sp,1); sv_setnv(PUSHmortal, (NV)(n)); } STMT_END
 #define mXPUSHi(i)	STMT_START { EXTEND(sp,1); sv_setiv(PUSHmortal, (IV)(i)); } STMT_END
 #define mXPUSHu(u)	STMT_START { EXTEND(sp,1); sv_setuv(PUSHmortal, (UV)(u)); } STMT_END
