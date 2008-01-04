@@ -4251,8 +4251,8 @@ PP(pp_anonlist)
     const I32 items = SP - MARK;
     SV * const av = (SV *) av_make(items, MARK+1);
     SP = ORIGMARK;		/* av_make() might realloc stack_sp */
-    XPUSHs(sv_2mortal((PL_op->op_flags & OPf_SPECIAL)
-		      ? newRV_noinc(av) : av));
+    mXPUSHs((PL_op->op_flags & OPf_SPECIAL)
+	    ? newRV_noinc(av) : av);
     RETURN;
 }
 
@@ -4271,8 +4271,8 @@ PP(pp_anonhash)
 	(void)hv_store_ent(hv,key,val,0);
     }
     SP = ORIGMARK;
-    XPUSHs(sv_2mortal((PL_op->op_flags & OPf_SPECIAL)
-		      ? newRV_noinc((SV*) hv) : (SV*)hv));
+    mXPUSHs((PL_op->op_flags & OPf_SPECIAL)
+	    ? newRV_noinc((SV*) hv) : (SV*) hv);
     RETURN;
 }
 

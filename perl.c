@@ -2522,7 +2522,7 @@ Perl_call_argv(pTHX_ const char *sub_name, I32 flags, register char **argv)
     PUSHMARK(SP);
     if (argv) {
 	while (*argv) {
-	    XPUSHs(sv_2mortal(newSVpv(*argv,0)));
+	    mXPUSHs(newSVpv(*argv,0));
 	    argv++;
 	}
 	PUTBACK;

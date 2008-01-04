@@ -822,7 +822,7 @@ XS(XS_mro_get_isarev)
         while((iter = hv_iternext(isarev)))
             av_push(ret_array, newSVsv(hv_iterkeysv(iter)));
     }
-    XPUSHs(sv_2mortal(newRV_noinc((SV*)ret_array)));
+    mXPUSHs(newRV_noinc((SV*)ret_array));
 
     PUTBACK;
     return;
@@ -912,9 +912,7 @@ XS(XS_mro_get_pkg_gen)
 
     SP -= items;
 
-    XPUSHs(sv_2mortal(newSViv(
-        class_stash ? HvMROMETA(class_stash)->pkg_gen : 0
-    )));
+    mXPUSHi(class_stash ? HvMROMETA(class_stash)->pkg_gen : 0);
     
     PUTBACK;
     return;
@@ -1041,7 +1039,7 @@ XS(XS_mro_nextcan)
 		    Perl_croak(aTHX_ "No next::method '%s' found for %s", subname, hvname);
                 XSRETURN_EMPTY;
 	    }
-	    XPUSHs(sv_2mortal(newRV_inc(val)));
+	    mXPUSHs(newRV_inc(val));
             XSRETURN(1);
 	}
     }
@@ -1102,7 +1100,7 @@ XS(XS_mro_nextcan)
             if (SvTYPE(candidate) == SVt_PVGV && (cand_cv = GvCV(candidate)) && !GvCVGEN(candidate)) {
                 SvREFCNT_inc_simple_void_NN((SV*)cand_cv);
                 (void)hv_store_ent(nmcache, newSVsv(sv), (SV*)cand_cv, 0);
-                XPUSHs(sv_2mortal(newRV_inc((SV*)cand_cv)));
+                mXPUSHs(newRV_inc((SV*)cand_cv));
                 XSRETURN(1);
             }
         }

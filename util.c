@@ -1216,7 +1216,7 @@ Perl_write_to_stderr(pTHX_ const char* message, int msglen)
 	PUSHMARK(SP);
 	EXTEND(SP,2);
 	PUSHs(SvTIED_obj((SV*)io, mg));
-	PUSHs(newSVpvn_flags(message, msglen, SVs_TEMP));
+	mPUSHp(message, msglen);
 	PUTBACK;
 	call_method("PRINT", G_SCALAR);
 

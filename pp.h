@@ -224,6 +224,11 @@ called to declare it.  Do not call multiple C<TARG>-oriented macros to
 return lists from XSUB's - see C<mXPUSHu> instead.  See also C<PUSHu> and
 C<mPUSHu>.
 
+=for apidoc Am|void|mPUSHs|SV* sv
+Push an SV onto the stack and mortalizes the SV.  The stack must have room
+for this element.  Does not handle 'set' magic.  Does not use C<TARG>.
+See also C<PUSHs> and C<mXPUSHs>.
+
 =for apidoc Am|void|PUSHmortal
 Push a new mortal SV onto the stack.  The stack must have room for this
 element.  Does not handle 'set' magic.  Does not use C<TARG>.  See also
@@ -248,6 +253,11 @@ and C<XPUSHi>.
 Push an unsigned integer onto the stack.  The stack must have room for this
 element.  Handles 'set' magic.  Does not use C<TARG>.  See also C<PUSHu>,
 C<mXPUSHu> and C<XPUSHu>.
+
+=for apidoc Am|void|mXPUSHs|SV* sv
+Push an SV onto the stack, extending the stack if necessary and mortalizes
+the SV.  Does not handle 'set' magic.  Does not use C<TARG>.  See also
+C<XPUSHs> and C<mPUSHs>.
 
 =for apidoc Am|void|XPUSHmortal
 Push a new mortal SV onto the stack, extending the stack if necessary.  Does
@@ -303,12 +313,14 @@ and C<PUSHu>.
 #define XPUSHu(u)	STMT_START { sv_setuv(TARG, (UV)(u)); XPUSHTARG; } STMT_END
 #define XPUSHundef	STMT_START { SvOK_off(TARG); XPUSHs(TARG); } STMT_END
 
+#define mPUSHs(s)	PUSHs(sv_2mortal(s))
 #define PUSHmortal	PUSHs(sv_newmortal())
 #define mPUSHp(p,l)	sv_setpvn_mg(PUSHmortal, (p), (l))
 #define mPUSHn(n)	sv_setnv_mg(PUSHmortal, (NV)(n))
 #define mPUSHi(i)	sv_setiv_mg(PUSHmortal, (IV)(i))
 #define mPUSHu(u)	sv_setuv_mg(PUSHmortal, (UV)(u))
 
+#define mXPUSHs(s)	XPUSHs(sv_2mortal(s))
 #define XPUSHmortal	XPUSHs(sv_newmortal())
 #define mXPUSHp(p,l)	STMT_START { EXTEND(sp,1); sv_setpvn_mg(PUSHmortal, (p), (l)); } STMT_END
 #define mXPUSHn(n)	STMT_START { EXTEND(sp,1); sv_setnv_mg(PUSHmortal, (NV)(n)); } STMT_END
