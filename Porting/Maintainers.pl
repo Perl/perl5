@@ -774,6 +774,13 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'SelfLoader' =>
+		{
+		'MAINTAINER'	=> 'smueller',
+		'FILES'		=> q[lib/SelfLoader.pm lib/SelfLoader],
+		'CPAN'		=> 1,
+		},
+
 	'Shell' =>
 		{
 		'MAINTAINER'	=> 'ferreira',
