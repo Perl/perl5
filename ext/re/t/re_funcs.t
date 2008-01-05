@@ -11,6 +11,7 @@ BEGIN {
 }
 
 use strict;
+use warnings;
 
 use Test::More; # test count at bottom of file
 use re qw(is_regexp regexp_pattern regmust 
@@ -42,7 +43,7 @@ use re qw(is_regexp regexp_pattern regmust
 if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){
     my @names = sort +regnames();
     is("@names","A B","regnames");
-    my @names = sort +regnames(0);
+    @names = sort +regnames(0);
     is("@names","A B","regnames");
     my $names = regnames();
     is($names, "B", "regnames in scalar context");
