@@ -102,7 +102,7 @@ package Maintainers;
 	'AutoLoader' =>
 		{
 		'MAINTAINER'	=> 'smueller',
-		'FILES'		=> q[lib/AutoLoader.pm lib/AutoLoader.t],
+		'FILES'		=> q[lib/AutoLoader.pm lib/AutoSplit.pm lib/AutoLoader],
 		'CPAN'		=> 1,
 	},
 
