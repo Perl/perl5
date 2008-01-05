@@ -1180,7 +1180,7 @@ makedepend: makedepend.SH config.sh
 	test.utf16 check.utf16 utest.utf16 ucheck.utf16 \
 	test.third check.third utest.third ucheck.third test_notty.third \
 	test.deparse test_notty.deparse test_harness test_harness_notty \
-	minitest coretest test.taintwarn
+	minitest coretest test.taintwarn test-reonly
 
 # Cannot delegate rebuilding of t/perl to make
 # to allow interlaced test and minitest
@@ -1213,9 +1213,9 @@ cleanup_unpacked_files:
 # see t/op/stat.t
 _test:
 	if (true </dev/tty) >/dev/null 2>&1; then \
-	  $(MAKE) TEST_ARGS=$(TEST_ARGS) TESTFILE=$(TESTFILE) _test_tty   ; \
+	  $(MAKE) TEST_ARGS='$(TEST_ARGS)' TESTFILE=$(TESTFILE) _test_tty   ; \
 	else \
-	  $(MAKE) TEST_ARGS=$(TEST_ARGS) TESTFILE=$(TESTFILE) _test_notty ; \
+	  $(MAKE) TEST_ARGS='$(TEST_ARGS)' TESTFILE=$(TESTFILE) _test_notty ; \
 	fi
 	@echo "Ran tests" > t/rantests
 
@@ -1319,6 +1319,9 @@ test_harness: test_prep
 
 test_harness_notty: test_prep
 	PERL=./perl HARNESS_NOTTY=1 $(MAKE) TESTFILE=harness _test
+
+test-reonly: test_prep
+	PERL=./perl TEST_ARGS='-re \\bpat\\b \\breg \\bre\b \\bsubst \\brxcode' $(MAKE) TESTFILE=harness _test
 
 # Handy way to run perlbug -ok without having to install and run the
 # installed perlbug. We don't re-run the tests here - we trust the user.
