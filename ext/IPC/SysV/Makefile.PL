@@ -1,8 +1,8 @@
 ################################################################################
 #
-#  $Revision: 15 $
+#  $Revision: 16 $
 #  $Author: mhx $
-#  $Date: 2007/12/22 17:39:55 +0100 $
+#  $Date: 2008/01/05 16:41:20 +0100 $
 #
 ################################################################################
 #
@@ -55,7 +55,8 @@ sub configure
 
   if ($ENV{'PERL_CORE'}) {
     # Pods will be built by installman.
-    push @moreopts, MAN3PODS => {};
+    push @moreopts, MAN3PODS  => {},
+                    realclean => { FILES => "const-c.inc const-xs.inc" };
   }
   else {
     # IPC::SysV is in the core since 5.005
