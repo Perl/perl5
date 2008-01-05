@@ -401,7 +401,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
 	PL_reg_flags |= RF_utf8;
     }
     DEBUG_EXECUTE_r( 
-        debug_start_match(prog, do_utf8, strpos, strend, 
+        debug_start_match(rx, do_utf8, strpos, strend, 
             sv ? "Guessing start of match in sv for"
                : "Guessing start of match in string for");
 	      );
@@ -1784,7 +1784,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 
     RX_MATCH_UTF8_set(rx, do_utf8);
     DEBUG_EXECUTE_r( 
-        debug_start_match(prog, do_utf8, startpos, strend, 
+        debug_start_match(rx, do_utf8, startpos, strend, 
         "Matching");
     );
 
@@ -2553,15 +2553,15 @@ regmatch(), slabs allocated since entry are freed.
 #ifdef DEBUGGING
 
 STATIC void
-S_debug_start_match(pTHX_ const regexp *prog, const bool do_utf8, 
+S_debug_start_match(pTHX_ const REGEXP *prog, const bool do_utf8, 
     const char *start, const char *end, const char *blurb)
 {
-    const bool utf8_pat= prog->extflags & RXf_UTF8 ? 1 : 0;
+    const bool utf8_pat = RX_UTF8(prog) ? 1 : 0;
     if (!PL_colorset)   
             reginitcolors();    
     {
         RE_PV_QUOTED_DECL(s0, utf8_pat, PERL_DEBUG_PAD_ZERO(0), 
-            RXp_PRECOMP(prog), RXp_PRELEN(prog), 60);   
+            RX_PRECOMP(prog), RX_PRELEN(prog), 60);   
         
         RE_PV_QUOTED_DECL(s1, do_utf8, PERL_DEBUG_PAD_ZERO(1), 
             start, end - start, 60); 
@@ -3775,7 +3775,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
                 re->sublen = rex->sublen;
 		rei = RXi_GET(re);
                 DEBUG_EXECUTE_r(
-                    debug_start_match(re, do_utf8, locinput, PL_regeol, 
+                    debug_start_match(re_sv, do_utf8, locinput, PL_regeol, 
                         "Matching embedded");
 		);		
 		startpoint = rei->program + 1;

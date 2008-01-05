@@ -358,19 +358,17 @@ and check for NULL.
 					 ? RX_MATCH_COPIED_on(prog) \
 					 : RX_MATCH_COPIED_off(prog))
 
-#define RXp_PRECOMP(rx)		((rx)->wrapped + (rx)->pre_prefix)
 /* FIXME? Are we hardcoding too much here and constraining plugin extension
    writers? Specifically, the value 1 assumes that the wrapped version always
    has exactly one character at the end, a ')'. Will that always be true?  */
 #define RXp_PRELEN(rx)		((rx)->wraplen - (rx)->pre_prefix - 1)
-#define RXp_WRAPPED(rx)		((rx)->wrapped)
 #define RXp_WRAPLEN(rx)		((rx)->wraplen)
 #define RXp_EXTFLAGS(rx)	((rx)->extflags)
 
 /* For source compatibility. We used to store these explicitly.  */
-#define RX_PRECOMP(prog)	RXp_PRECOMP((struct regexp *)SvANY(prog))
+#define RX_PRECOMP(prog)	(((struct regexp *)SvANY(prog))->wrapped + ((struct regexp *)SvANY(prog))->pre_prefix)
 #define RX_PRELEN(prog)		RXp_PRELEN((struct regexp *)SvANY(prog))
-#define RX_WRAPPED(prog)	RXp_WRAPPED((struct regexp *)SvANY(prog))
+#define RX_WRAPPED(prog)	(((struct regexp *)SvANY(prog))->wrapped)
 #define RX_WRAPLEN(prog)	RXp_WRAPLEN((struct regexp *)SvANY(prog))
 #define RX_CHECK_SUBSTR(prog)	(((struct regexp *)SvANY(prog))->check_substr)
 #define RX_EXTFLAGS(prog)	RXp_EXTFLAGS((struct regexp *)SvANY(prog))
@@ -417,6 +415,9 @@ and check for NULL.
 #define RX_MATCH_UTF8_set(prog, t)	((t) \
 			? (RX_MATCH_UTF8_on(prog), (PL_reg_match_utf8 = 1)) \
 			: (RX_MATCH_UTF8_off(prog), (PL_reg_match_utf8 = 0)))
+
+/* Whether the pattern stored at RX_WRAPPED is in UTF-8  */
+#define RX_UTF8(prog)			(RX_EXTFLAGS(prog) & RXf_UTF8)
     
 #define REXEC_COPY_STR	0x01		/* Need to copy the string. */
 #define REXEC_CHECKED	0x02		/* check_substr already checked. */

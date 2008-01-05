@@ -4294,8 +4294,8 @@ redo_first_pass:
             + (sizeof(STD_PAT_MODS) - 1)
             + (sizeof("(?:)") - 1);
 
-        Newx(RXp_WRAPPED(r), RXp_WRAPLEN(r) + 1, char );
-        p = RXp_WRAPPED(r);
+        Newx(RX_WRAPPED(rx), RXp_WRAPLEN(r) + 1, char );
+        p = RX_WRAPPED(rx);
         *p++='('; *p++='?';
         if (has_p)
             *p++ = KEEPCOPY_PAT_MOD; /*'p'*/
@@ -4319,8 +4319,8 @@ redo_first_pass:
 
         *p++ = ':';
         Copy(RExC_precomp, p, plen, char);
-	assert ((RXp_WRAPPED(r) - p) < 16);
-	r->pre_prefix = p - RXp_WRAPPED(r);
+	assert ((RX_WRAPPED(rx) - p) < 16);
+	r->pre_prefix = p - RX_WRAPPED(rx);
         p += plen;
         if (has_runon)
             *p++ = '\n';
@@ -4798,7 +4798,7 @@ reStudy:
 #ifdef STUPID_PATTERN_CHECKS            
     if (RX_PRELEN(r) == 0)
         r->extflags |= RXf_NULL;
-    if (r->extflags & RXf_SPLIT && RX_PRELEN(r) == 1 && RXp_PRECOMP(r)[0] == ' ')
+    if (r->extflags & RXf_SPLIT && RX_PRELEN(r) == 1 && RX_PRECOMP(rx)[0] == ' ')
         /* XXX: this should happen BEFORE we compile */
         r->extflags |= (RXf_SKIPWHITE|RXf_WHITE); 
     else if (RX_PRELEN(r) == 3 && memEQ("\\s+", RXp_PRECOMP(r), 3))
@@ -4806,7 +4806,7 @@ reStudy:
     else if (RX_PRELEN(r) == 1 && RXp_PRECOMP(r)[0] == '^')
         r->extflags |= RXf_START_ONLY;
 #else
-    if (r->extflags & RXf_SPLIT && RXp_PRELEN(r) == 1 && RXp_PRECOMP(r)[0] == ' ')
+    if (r->extflags & RXf_SPLIT && RXp_PRELEN(r) == 1 && RX_PRECOMP(rx)[0] == ' ')
             /* XXX: this should happen BEFORE we compile */
             r->extflags |= (RXf_SKIPWHITE|RXf_WHITE); 
     else {
@@ -9159,7 +9159,7 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
         CALLREGFREE_PVT(rx); /* free the private data */
         if (r->paren_names)
             SvREFCNT_dec(r->paren_names);
-        Safefree(RXp_WRAPPED(r));
+        Safefree(RX_WRAPPED(rx));
     }        
     if (r->substrs) {
         if (r->anchored_substr)
@@ -9258,7 +9258,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
 	{
 	    SV *dsv= sv_newmortal();
             RE_PV_QUOTED_DECL(s, (r->extflags & RXf_UTF8),
-                dsv, RXp_PRECOMP(r), RXp_PRELEN(r), 60);
+                dsv, RX_PRECOMP(rx), RXp_PRELEN(r), 60);
             PerlIO_printf(Perl_debug_log,"%sFreeing REx:%s %s\n", 
                 PL_colors[4],PL_colors[5],s);
         }
