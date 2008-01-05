@@ -4294,8 +4294,9 @@ redo_first_pass:
             + (sizeof(STD_PAT_MODS) - 1)
             + (sizeof("(?:)") - 1);
 
-        Newx(RX_WRAPPED(rx), RXp_WRAPLEN(r) + 1, char );
-        p = RX_WRAPPED(rx);
+	p = sv_grow(rx, RXp_WRAPLEN(r) + 1);
+	SvCUR_set(rx, RXp_WRAPLEN(r));
+	SvPOK_on(rx);
         *p++='('; *p++='?';
         if (has_p)
             *p++ = KEEPCOPY_PAT_MOD; /*'p'*/
@@ -9159,7 +9160,6 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
         CALLREGFREE_PVT(rx); /* free the private data */
         if (r->paren_names)
             SvREFCNT_dec(r->paren_names);
-        Safefree(RX_WRAPPED(rx));
     }        
     if (r->substrs) {
         if (r->anchored_substr)
@@ -9206,7 +9206,13 @@ Perl_reg_temp_copy (pTHX_ REGEXP *rx) {
     register const I32 npar = r->nparens+1;
     (void)ReREFCNT_inc(rx);
     /* FIXME ORANGE (once we start actually using the regular SV fields.) */
+    /* We can take advantage of the existing "copied buffer" mechanism in SVs
+       by pointing directly at the buffer, but flagging that the allocated
+       space in the copy is zero. As we've just done a struct copy, it's now
+       a case of zero-ing that, rather than copying the current length.  */
+    SvPV_set(ret_x, RX_WRAPPED(rx));
     StructCopy(r, ret, regexp);
+    SvLEN_set(ret_x, 0);
     Newx(ret->offs, npar, regexp_paren_pair);
     Copy(r->offs, ret->offs, npar, regexp_paren_pair);
     if (r->substrs) {
@@ -9425,7 +9431,6 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 	}
     }
 
-    RXp_WRAPPED(ret)    = SAVEPVN(RXp_WRAPPED(ret), RXp_WRAPLEN(ret)+1);
     ret->paren_names    = hv_dup_inc(ret->paren_names, param);
 
     if (ret->pprivate)

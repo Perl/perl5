@@ -100,8 +100,6 @@ typedef struct regexp {
         
         
         /* Information about the match that isn't often used */
-	/* wrapped can't be const char*, as it is returned by sv_2pv_flags */
-	char *wrapped;          /* wrapped version of the pattern */
 	I32 wraplen;		/* length of wrapped */
 	unsigned pre_prefix:4;	/* offset from wrapped to the start of precomp */
 	unsigned seen_evals:28;	/* number of eval groups in the pattern - for security checks */ 
@@ -366,9 +364,9 @@ and check for NULL.
 #define RXp_EXTFLAGS(rx)	((rx)->extflags)
 
 /* For source compatibility. We used to store these explicitly.  */
-#define RX_PRECOMP(prog)	(((struct regexp *)SvANY(prog))->wrapped + ((struct regexp *)SvANY(prog))->pre_prefix)
+#define RX_PRECOMP(prog)	(RX_WRAPPED(prog) + ((struct regexp *)SvANY(prog))->pre_prefix)
 #define RX_PRELEN(prog)		RXp_PRELEN((struct regexp *)SvANY(prog))
-#define RX_WRAPPED(prog)	(((struct regexp *)SvANY(prog))->wrapped)
+#define RX_WRAPPED(prog)	SvPVX(prog)
 #define RX_WRAPLEN(prog)	RXp_WRAPLEN((struct regexp *)SvANY(prog))
 #define RX_CHECK_SUBSTR(prog)	(((struct regexp *)SvANY(prog))->check_substr)
 #define RX_EXTFLAGS(prog)	RXp_EXTFLAGS((struct regexp *)SvANY(prog))

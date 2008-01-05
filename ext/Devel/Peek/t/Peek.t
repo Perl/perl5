@@ -284,10 +284,12 @@ do_test(15,
   RV = $ADDR
   SV = REGEXP\\($ADDR\\) at $ADDR
     REFCNT = 2
-    FLAGS = \\(\\)
+    FLAGS = \\(POK,pPOK\\)
     IV = 0
     NV = 0
-    PV = 0');
+    PV = $ADDR "\\(\\?-xism:tic\\)"\\\0
+    CUR = 12
+    LEN = \\d+');
 } else {
 do_test(15,
         qr(tic),
