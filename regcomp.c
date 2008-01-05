@@ -4793,9 +4793,9 @@ reStudy:
     if (RExC_seen & REG_SEEN_CUTGROUP)
 	r->intflags |= PREGf_CUTGROUP_SEEN;
     if (RExC_paren_names)
-        r->paren_names = (HV*)SvREFCNT_inc(RExC_paren_names);
+        RXp_PAREN_NAMES(r) = (HV*)SvREFCNT_inc(RExC_paren_names);
     else
-        r->paren_names = NULL;
+        RXp_PAREN_NAMES(r) = NULL;
 
 #ifdef STUPID_PATTERN_CHECKS            
     if (RX_PRELEN(rx) == 0)
@@ -4916,8 +4916,8 @@ Perl_reg_named_buff_fetch(pTHX_ REGEXP * const r, SV * const namesv,
     if (flags & RXapif_ALL)
         retarray=newAV();
 
-    if (rx && rx->paren_names) {
-        HE *he_str = hv_fetch_ent( rx->paren_names, namesv, 0, 0 );
+    if (rx && RXp_PAREN_NAMES(rx)) {
+        HE *he_str = hv_fetch_ent( RXp_PAREN_NAMES(rx), namesv, 0, 0 );
         if (he_str) {
             IV i;
             SV* sv_dat=HeVAL(he_str);
@@ -4951,9 +4951,9 @@ Perl_reg_named_buff_exists(pTHX_ REGEXP * const r, SV * const key,
                            const U32 flags)
 {
     struct regexp *const rx = (struct regexp *)SvANY(r);
-    if (rx && rx->paren_names) {
+    if (rx && RXp_PAREN_NAMES(rx)) {
         if (flags & RXapif_ALL) {
-            return hv_exists_ent(rx->paren_names, key, 0);
+            return hv_exists_ent(RXp_PAREN_NAMES(rx), key, 0);
         } else {
 	    SV *sv = CALLREG_NAMED_BUFF_FETCH(r, key, flags);
             if (sv) {
@@ -4972,8 +4972,8 @@ SV*
 Perl_reg_named_buff_firstkey(pTHX_ REGEXP * const r, const U32 flags)
 {
     struct regexp *const rx = (struct regexp *)SvANY(r);
-    if ( rx && rx->paren_names ) {
-	(void)hv_iterinit(rx->paren_names);
+    if ( rx && RXp_PAREN_NAMES(rx) ) {
+	(void)hv_iterinit(RXp_PAREN_NAMES(rx));
 
 	return CALLREG_NAMED_BUFF_NEXTKEY(r, NULL, flags & ~RXapif_FIRSTKEY);
     } else {
@@ -4985,8 +4985,8 @@ SV*
 Perl_reg_named_buff_nextkey(pTHX_ REGEXP * const r, const U32 flags)
 {
     struct regexp *const rx = (struct regexp *)SvANY(r);
-    if (rx && rx->paren_names) {
-        HV *hv = rx->paren_names;
+    if (rx && RXp_PAREN_NAMES(rx)) {
+        HV *hv = RXp_PAREN_NAMES(rx);
         HE *temphe;
         while ( (temphe = hv_iternext_flags(hv,0)) ) {
             IV i;
@@ -5018,9 +5018,9 @@ Perl_reg_named_buff_scalar(pTHX_ REGEXP * const r, const U32 flags)
     I32 length;
     struct regexp *const rx = (struct regexp *)SvANY(r);
 
-    if (rx && rx->paren_names) {
+    if (rx && RXp_PAREN_NAMES(rx)) {
         if (flags & (RXapif_ALL | RXapif_REGNAMES_COUNT)) {
-            return newSViv(HvTOTALKEYS(rx->paren_names));
+            return newSViv(HvTOTALKEYS(RXp_PAREN_NAMES(rx)));
         } else if (flags & RXapif_ONE) {
             ret = CALLREG_NAMED_BUFF_ALL(r, (flags | RXapif_REGNAMES));
             av = (AV*)SvRV(ret);
@@ -5040,8 +5040,8 @@ Perl_reg_named_buff_all(pTHX_ REGEXP * const r, const U32 flags)
     struct regexp *const rx = (struct regexp *)SvANY(r);
     AV *av = newAV();
 
-    if (rx && rx->paren_names) {
-        HV *hv= rx->paren_names;
+    if (rx && RXp_PAREN_NAMES(rx)) {
+        HV *hv= RXp_PAREN_NAMES(rx);
         HE *temphe;
         (void)hv_iterinit(hv);
         while ( (temphe = hv_iternext_flags(hv,0)) ) {
@@ -8921,7 +8921,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	Perl_sv_catpvf(aTHX_ sv, "[%d/%d]", o->flags & 0xf, o->flags>>4);
     else if (k == REF || k == OPEN || k == CLOSE || k == GROUPP || OP(o)==ACCEPT) {
 	Perl_sv_catpvf(aTHX_ sv, "%d", (int)ARG(o));	/* Parenth number */
-	if ( prog->paren_names ) {
+	if ( RXp_PAREN_NAMES(prog) ) {
             if ( k != REF || OP(o) < NREF) {	    
 	        AV *list= (AV *)progi->data->data[progi->name_list_idx];
 	        SV **name= av_fetch(list, ARG(o), 0 );
@@ -9159,8 +9159,8 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
         ReREFCNT_dec(r->mother_re);
     } else {
         CALLREGFREE_PVT(rx); /* free the private data */
-        if (r->paren_names)
-            SvREFCNT_dec(r->paren_names);
+        if (RXp_PAREN_NAMES(r))
+            SvREFCNT_dec(RXp_PAREN_NAMES(r));
     }        
     if (r->substrs) {
         if (r->anchored_substr)
@@ -9433,7 +9433,7 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 	}
     }
 
-    ret->paren_names    = hv_dup_inc(ret->paren_names, param);
+    RXp_PAREN_NAMES(ret) = hv_dup_inc(RXp_PAREN_NAMES(ret), param);
 
     if (ret->pprivate)
 	RXi_SET(ret,CALLREGDUPE_PVT(dstr,param));

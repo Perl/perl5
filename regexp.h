@@ -105,6 +105,8 @@ typedef struct regexp {
         HV *paren_names;	/* Optional hash of paren names */
 } regexp;
 
+#define RXp_PAREN_NAMES(rx)	((rx)->paren_names)
+
 /* used for high speed searches */
 typedef struct re_scream_pos_data_s
 {
