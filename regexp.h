@@ -356,18 +356,16 @@ and check for NULL.
 					 ? RX_MATCH_COPIED_on(prog) \
 					 : RX_MATCH_COPIED_off(prog))
 
-/* FIXME? Are we hardcoding too much here and constraining plugin extension
-   writers? Specifically, the value 1 assumes that the wrapped version always
-   has exactly one character at the end, a ')'. Will that always be true?  */
-#define RXp_PRELEN(rx)		((rx)->wraplen - (rx)->pre_prefix - 1)
-#define RXp_WRAPLEN(rx)		((rx)->wraplen)
 #define RXp_EXTFLAGS(rx)	((rx)->extflags)
 
 /* For source compatibility. We used to store these explicitly.  */
 #define RX_PRECOMP(prog)	(RX_WRAPPED(prog) + ((struct regexp *)SvANY(prog))->pre_prefix)
-#define RX_PRELEN(prog)		RXp_PRELEN((struct regexp *)SvANY(prog))
+/* FIXME? Are we hardcoding too much here and constraining plugin extension
+   writers? Specifically, the value 1 assumes that the wrapped version always
+   has exactly one character at the end, a ')'. Will that always be true?  */
+#define RX_PRELEN(prog)		(RX_WRAPLEN(prog) - ((struct regexp *)SvANY(prog))->pre_prefix - 1)
 #define RX_WRAPPED(prog)	SvPVX(prog)
-#define RX_WRAPLEN(prog)	RXp_WRAPLEN((struct regexp *)SvANY(prog))
+#define RX_WRAPLEN(prog)	(((struct regexp *)SvANY(prog))->wraplen)
 #define RX_CHECK_SUBSTR(prog)	(((struct regexp *)SvANY(prog))->check_substr)
 #define RX_EXTFLAGS(prog)	RXp_EXTFLAGS((struct regexp *)SvANY(prog))
 #define RX_REFCNT(prog)		SvREFCNT(prog)
