@@ -3767,7 +3767,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			    const char *const p = SvPV(ret, len);
 			    ret = newSVpvn_flags(p, len, SVs_TEMP);
 			}
-			assert(!(pm_flags & RXf_UTF8));
 			rx = CALLREGCOMP(ret, pm_flags);
 			if (!(SvFLAGS(ret)
 			      & (SVs_TEMP | SVs_PADTMP | SVf_READONLY

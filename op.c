@@ -3449,7 +3449,6 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	    const char *const p = SvPV(pat, len);
 	    pat = newSVpvn_flags(p, len, SVs_TEMP);
 	}
-	assert(!(pm_flags & RXf_UTF8));
 
 	PM_SETRE(pm, CALLREGCOMP(pat, pm_flags));
 

@@ -4176,9 +4176,6 @@ Perl_re_compile(pTHX_ const SV * const pattern, U32 pm_flags)
     DEBUG_r(if (!PL_colorset) reginitcolors());
 
     RExC_utf8 = RExC_orig_utf8 = SvUTF8(pattern);
-    assert(!(pm_flags & RXf_UTF8));
-    if (RExC_utf8)
-	pm_flags |= RXf_UTF8;
 
     DEBUG_COMPILE_r({
         SV *dsv= sv_newmortal();
@@ -4300,6 +4297,7 @@ redo_first_pass:
 	p = sv_grow(rx, wraplen + 1);
 	SvCUR_set(rx, wraplen);
 	SvPOK_on(rx);
+	SvFLAGS(rx) |= SvUTF8(pattern);
         *p++='('; *p++='?';
         if (has_p)
             *p++ = KEEPCOPY_PAT_MOD; /*'p'*/
@@ -4413,7 +4411,7 @@ reStudy:
     /*dmq: removed as part of de-PMOP: pm->op_pmflags = RExC_flags; */
  
     if (UTF)
-        r->extflags |= RXf_UTF8;	/* Unicode in it? */
+	SvUTF8_on(rx);	/* Unicode in it? */
     ri->regstclass = NULL;
     if (RExC_naughty >= 10)	/* Probably an expensive pattern. */
 	r->intflags |= PREGf_NAUGHTY;
@@ -9214,6 +9212,7 @@ Perl_reg_temp_copy (pTHX_ REGEXP *rx) {
        space in the copy is zero. As we've just done a struct copy, it's now
        a case of zero-ing that, rather than copying the current length.  */
     SvPV_set(ret_x, RX_WRAPPED(rx));
+    SvFLAGS(ret_x) |= SvFLAGS(rx) & (SVf_POK|SVp_POK|SVf_UTF8);
     StructCopy(r, ret, regexp);
     SvLEN_set(ret_x, 0);
     Newx(ret->offs, npar, regexp_paren_pair);

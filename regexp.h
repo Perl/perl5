@@ -302,7 +302,6 @@ and check for NULL.
 #define RXf_CHECK_ALL   	0x00040000
 
 /* UTF8 related */
-#define RXf_UTF8        	0x00080000
 #define RXf_MATCH_UTF8  	0x00100000
 
 /* Intuit related */
@@ -412,7 +411,7 @@ and check for NULL.
 			: (RX_MATCH_UTF8_off(prog), (PL_reg_match_utf8 = 0)))
 
 /* Whether the pattern stored at RX_WRAPPED is in UTF-8  */
-#define RX_UTF8(prog)			(RX_EXTFLAGS(prog) & RXf_UTF8)
+#define RX_UTF8(prog)			SvUTF8(prog)
     
 #define REXEC_COPY_STR	0x01		/* Need to copy the string. */
 #define REXEC_CHECKED	0x02		/* check_substr already checked. */
