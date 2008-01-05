@@ -1199,7 +1199,7 @@ PP(pp_qr)
     /* This RV is about to own a reference to the regexp. (In addition to the
        reference already owned by the PMOP.  */
     ReREFCNT_inc(rx);
-    SvRV_set(rv, rx);
+    SvRV_set(rv, (SV*) rx);
     SvROK_on(rv);
 
     if (pkg) {

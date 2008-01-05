@@ -5921,7 +5921,7 @@ Perl_get_re_arg(pTHX_ SV *sv) {
             (tmpsv = (SV*)SvRV(sv)) &&            /* assign deliberate */
             SvTYPE(tmpsv) == SVt_REGEXP)
         {
-            return tmpsv;
+            return (REGEXP*) tmpsv;
         }
     }
  

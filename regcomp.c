@@ -4264,7 +4264,7 @@ redo_first_pass:
     /* Allocate space and zero-initialize. Note, the two step process 
        of zeroing when in debug mode, thus anything assigned has to 
        happen after that */
-    rx = newSV_type(SVt_REGEXP);
+    rx = (REGEXP*) newSV_type(SVt_REGEXP);
     r = (struct regexp*)SvANY(rx);
     Newxc(ri, sizeof(regexp_internal) + (unsigned)RExC_size * sizeof(regnode),
 	 char, regexp_internal);
@@ -4294,7 +4294,7 @@ redo_first_pass:
             + (sizeof(STD_PAT_MODS) - 1)
             + (sizeof("(?:)") - 1);
 
-	p = sv_grow(rx, wraplen + 1);
+	p = sv_grow((SV *)rx, wraplen + 1);
 	SvCUR_set(rx, wraplen);
 	SvPOK_on(rx);
 	SvFLAGS(rx) |= SvUTF8(pattern);
@@ -9201,7 +9201,7 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
     
 REGEXP *
 Perl_reg_temp_copy (pTHX_ REGEXP *rx) {
-    REGEXP *ret_x = newSV_type(SVt_REGEXP);
+    REGEXP *ret_x = (REGEXP*) newSV_type(SVt_REGEXP);
     struct regexp *ret = (struct regexp *)SvANY(ret_x);
     struct regexp *const r = (struct regexp *)SvANY(rx);
     register const I32 npar = r->nparens+1;

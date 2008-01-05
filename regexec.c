@@ -3633,7 +3633,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 #define ST st->u.eval
 	{
 	    SV *ret;
-	    SV *re_sv;
+	    REGEXP *re_sv;
             regexp *re;
             regexp_internal *rei;
             regnode *startpoint;
@@ -3720,13 +3720,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			SV *const sv = SvRV(ret);
 
 			if (SvTYPE(sv) == SVt_REGEXP) {
-			    rx = sv;
+			    rx = (REGEXP*) sv;
 			} else if (SvSMAGICAL(sv)) {
 			    mg = mg_find(sv, PERL_MAGIC_qr);
 			    assert(mg);
 			}
 		    } else if (SvTYPE(ret) == SVt_REGEXP) {
-			rx = ret;
+			rx = (REGEXP*) ret;
 		    } else if (SvSMAGICAL(ret)) {
 			if (SvGMAGICAL(ret)) {
 			    /* I don't believe that there is ever qr magic
@@ -3745,7 +3745,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    }
 
 		    if (mg) {
-			rx = mg->mg_obj; /*XXX:dmq*/
+			rx = (REGEXP *) mg->mg_obj; /*XXX:dmq*/
 			assert(rx);
 		    }
 		    if (rx) {
@@ -3774,7 +3774,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			    /* This isn't a first class regexp. Instead, it's
 			       caching a regexp onto an existing, Perl visible
 			       scalar.  */
-			    sv_magic(ret, rx, PERL_MAGIC_qr, 0, 0);
+			    sv_magic(ret, (SV*) rx, PERL_MAGIC_qr, 0, 0);
 			}
 			PL_regsize = osize;
 		    }

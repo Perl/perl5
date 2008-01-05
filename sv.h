@@ -150,6 +150,11 @@ struct io {
     _SV_HEAD_UNION;
 };
 
+struct p5rx {
+    _SV_HEAD(struct regexp*);	/* pointer to regexp body */
+    _SV_HEAD_UNION;
+};
+
 #undef _SV_HEAD
 #undef _SV_HEAD_UNION		/* ensure no pollution */
 
