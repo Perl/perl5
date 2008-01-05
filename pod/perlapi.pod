@@ -4366,12 +4366,28 @@ Found in file sv.h
 =item SvOOK
 X<SvOOK>
 
-Returns a U32 indicating whether the SvIVX is a valid offset value for
-the SvPVX.  This hack is used internally to speed up removal of characters
-from the beginning of a SvPV.  When SvOOK is true, then the start of the
-allocated string buffer is really (SvPVX - SvIVX).
+Returns a U32 indicating whether the pointer to the string buffer is offset.
+This hack is used internally to speed up removal of characters from the
+beginning of a SvPV.  When SvOOK is true, then the start of the
+allocated string buffer is actually C<SvOOK_offset()> bytes before SvPVX.
+This offset used to be stored in SvIVX, but is now stored within the spare
+part of the buffer.
 
 	U32	SvOOK(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvOOK_offset
+X<SvOOK_offset>
+
+Reads into I<len> the offset from SvPVX back to the true start of the
+allocated buffer, which will be non-zero if C<sv_chop> has been used to
+efficiently remove characters from start of the buffer. Implemented as a
+macro, which takes the address of I<len>, which must be of type C<STRLEN>.
+Evaluates I<sv> more than once. Sets I<len> to 0 if C<SvOOK(sv)> is false.
+
+	void	SvOOK_offset(NN SV*sv, STRLEN len)
 
 =for hackers
 Found in file sv.h

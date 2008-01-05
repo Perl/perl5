@@ -912,7 +912,6 @@
 #define sv_pos_b2u		Perl_sv_pos_b2u
 #define sv_pvutf8n_force	Perl_sv_pvutf8n_force
 #define sv_pvbyten_force	Perl_sv_pvbyten_force
-#define sv_read_offset		Perl_sv_read_offset
 #define sv_recode_to_utf8	Perl_sv_recode_to_utf8
 #define sv_cat_decode		Perl_sv_cat_decode
 #define sv_reftype		Perl_sv_reftype
@@ -3231,7 +3230,6 @@
 #define sv_pos_b2u(a,b)		Perl_sv_pos_b2u(aTHX_ a,b)
 #define sv_pvutf8n_force(a,b)	Perl_sv_pvutf8n_force(aTHX_ a,b)
 #define sv_pvbyten_force(a,b)	Perl_sv_pvbyten_force(aTHX_ a,b)
-#define sv_read_offset(a)	Perl_sv_read_offset(aTHX_ a)
 #define sv_recode_to_utf8(a,b)	Perl_sv_recode_to_utf8(aTHX_ a,b)
 #define sv_cat_decode(a,b,c,d,e,f)	Perl_sv_cat_decode(aTHX_ a,b,c,d,e,f)
 #define sv_reftype(a,b)		Perl_sv_reftype(aTHX_ a,b)

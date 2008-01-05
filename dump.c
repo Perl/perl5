@@ -1572,10 +1572,13 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     }
     if ((type <= SVt_PVLV && !isGV_with_GP(sv)) || type == SVt_PVFM) {
 	if (SvPVX_const(sv)) {
-	    UV delta = SvOOK(sv) ? sv_read_offset(sv) : 0;
+	    STRLEN delta;
 	    if (SvOOK(sv)) {
+		SvOOK_offset(sv, delta);
 		Perl_dump_indent(aTHX_ level, file,"  OFFSET = %"UVuf"\n",
 				 delta);
+	    } else {
+		delta = 0;
 	    }
 	    Perl_dump_indent(aTHX_ level, file,"  PV = 0x%"UVxf" ", PTR2UV(SvPVX_const(sv)));
 	    if (SvOOK(sv)) {
