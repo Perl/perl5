@@ -397,7 +397,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
 
     RX_MATCH_UTF8_set(rx,do_utf8);
 
-    if (prog->extflags & RXf_UTF8) {
+    if (RX_UTF8(rx)) {
 	PL_reg_flags |= RF_utf8;
     }
     DEBUG_EXECUTE_r( 
@@ -1806,7 +1806,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
     PL_reg_eval_set = 0;
     PL_reg_maxiter = 0;
 
-    if (prog->extflags & RXf_UTF8)
+    if (RX_UTF8(rx))
 	PL_reg_flags |= RF_utf8;
 
     /* Mark beginning of line for ^ and lookbehind. */
@@ -3805,7 +3805,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		PL_reg_maxiter = 0;
 
 		ST.toggle_reg_flags = PL_reg_flags;
-		if (re->extflags & RXf_UTF8)
+		if (RX_UTF8(re_sv))
 		    PL_reg_flags |= RF_utf8;
 		else
 		    PL_reg_flags &= ~RF_utf8;

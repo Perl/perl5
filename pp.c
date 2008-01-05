@@ -4837,7 +4837,7 @@ PP(pp_split)
             }
         }
     }
-    else if (do_utf8 == ((RX_EXTFLAGS(rx) & RXf_UTF8) != 0) &&
+    else if (do_utf8 == (RX_UTF8(rx) != 0) &&
 	     (RX_EXTFLAGS(rx) & RXf_USE_INTUIT) && !RX_NPARENS(rx)
 	     && (RX_EXTFLAGS(rx) & RXf_CHECK_ALL)
 	     && !(RX_EXTFLAGS(rx) & RXf_ANCH)) {
@@ -4845,7 +4845,7 @@ PP(pp_split)
 	SV * const csv = CALLREG_INTUIT_STRING(rx);
 
 	len = RX_MINLENRET(rx);
-	if (len == 1 && !(RX_EXTFLAGS(rx) & RXf_UTF8) && !tail) {
+	if (len == 1 && !RX_UTF8(rx) && !tail) {
 	    const char c = *SvPV_nolen_const(csv);
 	    while (--limit) {
 		for (m = s; m < strend && *m != c; m++)

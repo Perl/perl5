@@ -1289,7 +1289,7 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
 		    = pv_pretty(dsv, RX_WRAPPED(re), RX_WRAPLEN(re), 
                     60, NULL, NULL,
                     ( PERL_PV_PRETTY_QUOTE | PERL_PV_ESCAPE_RE | PERL_PV_PRETTY_ELLIPSES |
-                    ((RX_EXTFLAGS(re) & RXf_UTF8) ? PERL_PV_ESCAPE_UNI : 0))
+                    (RX_UTF8(re) ? PERL_PV_ESCAPE_UNI : 0))
                 );
 		Perl_dump_indent(aTHX_ level+1, file, "    PAT = %s\n", s);
 		Perl_dump_indent(aTHX_ level+1, file, "    REFCNT = %"IVdf"\n",

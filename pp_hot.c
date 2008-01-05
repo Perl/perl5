@@ -1322,7 +1322,7 @@ play_it_again:
 	    minmatch = had_zerolen;
     }
     if (RX_EXTFLAGS(rx) & RXf_USE_INTUIT &&
-	DO_UTF8(TARG) == ((RX_EXTFLAGS(rx) & RXf_UTF8) != 0)) {
+	DO_UTF8(TARG) == (RX_UTF8(rx) != 0)) {
 	/* FIXME - can PL_bostr be made const char *?  */
 	PL_bostr = (char *)truebase;
 	s = CALLREG_INTUIT_START(rx, TARG, (char *)s, (char *)strend, r_flags, NULL);
