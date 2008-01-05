@@ -286,7 +286,6 @@ do_test(15,
     REFCNT = 2
     FLAGS = \\(POK,pPOK\\)
     IV = 0
-    NV = 0
     PV = $ADDR "\\(\\?-xism:tic\\)"\\\0
     CUR = 12
     LEN = \\d+');

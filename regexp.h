@@ -66,43 +66,52 @@ typedef struct regexp_paren_pair {
   regexp's data array based on the data item's type.
 */
 
+#define _REGEXP_COMMON							\
+        /* what engine created this regexp? */				\
+	const struct regexp_engine* engine; 				\
+	REGEXP *mother_re; /* what re is this a lightweight copy of? */	\
+	/* Information about the match that the perl core uses to */	\
+	/* manage things */						\
+	U32 extflags;	/* Flags used both externally and internally */	\
+	I32 minlen;	/* mininum possible length of string to match */\
+	I32 minlenret;	/* mininum possible length of $& */		\
+	U32 gofs;	/* chars left of pos that we search from */	\
+	/* substring data about strings that must appear in the */	\
+	/* final match, used for optimisations */			\
+	struct reg_substr_data *substrs;				\
+	U32 nparens;	/* number of capture buffers */			\
+	/* private engine specific data */				\
+	U32 intflags;	/* Engine Specific Internal flags */		\
+	void *pprivate;	/* Data private to the regex engine which */	\
+			/* created this object. */			\
+	/* Data about the last/current match. These are modified */	\
+	/* during matching */						\
+	U32 lastparen;			/* last open paren matched */	\
+	U32 lastcloseparen;		/* last close paren matched */	\
+	regexp_paren_pair *swap;	/* Swap copy of *offs */	\
+	/* Array of offsets for (@-) and (@+) */			\
+	regexp_paren_pair *offs;					\
+	/* saved or original string so \digit works forever. */		\
+	char *subbeg;							\
+	SV_SAVED_COPY	/* If non-NULL, SV which is COW from original */\
+	I32 sublen;	/* Length of string pointed by subbeg */	\
+	/* Information about the match that isn't often used */		\
+	/* offset from wrapped to the start of precomp */		\
+	unsigned pre_prefix:4;						\
+	/* number of eval groups in the pattern - for security checks */\
+	unsigned seen_evals:28
+
 typedef struct regexp {
 	_XPV_HEAD;
 	_XPVMG_HEAD;
-        /* what engine created this regexp? */
-	const struct regexp_engine* engine; 
-	REGEXP *mother_re;	/* what re is this a lightweight copy of? */
-	
-	/* Information about the match that the perl core uses to manage things */
-	U32 extflags;           /* Flags used both externally and internally */
-	I32 minlen;		/* mininum possible length of string to match */
-	I32 minlenret;		/* mininum possible length of $& */
-	U32 gofs;               /* chars left of pos that we search from */
-	struct reg_substr_data *substrs; /* substring data about strings that must appear
-                                   in the final match, used for optimisations */
-	U32 nparens;		/* number of capture buffers */
-
-        /* private engine specific data */
-	U32 intflags;		/* Engine Specific Internal flags */
-	void *pprivate;         /* Data private to the regex engine which 
-                                   created this object. */
-        
-        /* Data about the last/current match. These are modified during matching*/
-        U32 lastparen;		/* last open paren matched */
-	U32 lastcloseparen;	/* last close paren matched */
-        regexp_paren_pair *swap;  /* Swap copy of *offs */ 
-        regexp_paren_pair *offs;  /* Array of offsets for (@-) and (@+) */
-
-	char *subbeg;		/* saved or original string 
-				   so \digit works forever. */
-	SV_SAVED_COPY           /* If non-NULL, SV which is COW from original */
-	I32 sublen;		/* Length of string pointed by subbeg */
-        
-        
-        /* Information about the match that isn't often used */
-	unsigned pre_prefix:4;	/* offset from wrapped to the start of precomp */
-	unsigned seen_evals:28;	/* number of eval groups in the pattern - for security checks */ 
+	_REGEXP_COMMON;
 } regexp;
+
+struct regexp_allocated {
+	_XPV_ALLOCATED_HEAD;
+	_XPVMG_HEAD;
+	_REGEXP_COMMON;
+};
 
 /*        HV *paren_names;	 Optional hash of paren names
 	  now stored in the IV union */

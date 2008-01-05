@@ -917,8 +917,10 @@ static const struct body_details bodies_by_type[] = {
       HASARENA, FIT_ARENA(0, sizeof(XPVMG)) },
 
     /* something big */
-    { sizeof(struct regexp), sizeof(struct regexp), 0,
-      SVt_REGEXP, FALSE, HADNV, HASARENA, FIT_ARENA(0, sizeof(struct regexp))
+    { sizeof(struct regexp_allocated), sizeof(struct regexp_allocated),
+      + relative_STRUCT_OFFSET(struct regexp_allocated, regexp, xpv_cur),
+      SVt_REGEXP, FALSE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(struct regexp_allocated))
     },
 
     /* 48 */

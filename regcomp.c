@@ -9206,14 +9206,13 @@ Perl_reg_temp_copy (pTHX_ REGEXP *rx) {
     struct regexp *const r = (struct regexp *)SvANY(rx);
     register const I32 npar = r->nparens+1;
     (void)ReREFCNT_inc(rx);
-    /* FIXME ORANGE (once we start actually using the regular SV fields.) */
     /* We can take advantage of the existing "copied buffer" mechanism in SVs
        by pointing directly at the buffer, but flagging that the allocated
        space in the copy is zero. As we've just done a struct copy, it's now
        a case of zero-ing that, rather than copying the current length.  */
     SvPV_set(ret_x, RX_WRAPPED(rx));
     SvFLAGS(ret_x) |= SvFLAGS(rx) & (SVf_POK|SVp_POK|SVf_UTF8);
-    StructCopy(r, ret, regexp);
+    StructCopy(&(r->xpv_cur), &(ret->xpv_cur), struct regexp_allocated);
     SvLEN_set(ret_x, 0);
     Newx(ret->offs, npar, regexp_paren_pair);
     Copy(r->offs, ret->offs, npar, regexp_paren_pair);
