@@ -102,10 +102,12 @@ typedef struct regexp {
         /* Information about the match that isn't often used */
 	unsigned pre_prefix:4;	/* offset from wrapped to the start of precomp */
 	unsigned seen_evals:28;	/* number of eval groups in the pattern - for security checks */ 
-        HV *paren_names;	/* Optional hash of paren names */
 } regexp;
 
-#define RXp_PAREN_NAMES(rx)	((rx)->paren_names)
+/*        HV *paren_names;	 Optional hash of paren names
+	  now stored in the IV union */
+
+#define RXp_PAREN_NAMES(rx)	((rx)->xiv_u.xivu_hv)
 
 /* used for high speed searches */
 typedef struct re_scream_pos_data_s

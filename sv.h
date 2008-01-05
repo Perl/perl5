@@ -421,6 +421,7 @@ union _xivu {
     void *  xivu_p1;
     I32	    xivu_i32;
     HEK *   xivu_namehek;	/* xpvlv, xpvgv: GvNAME */
+    HV *    xivu_hv;		/* regexp: paren_names */
 };
 
 union _xmgu {
