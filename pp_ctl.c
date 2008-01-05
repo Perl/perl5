@@ -130,7 +130,7 @@ PP(pp_regcomp)
 	re = PM_GETRE(pm);
 
 	/* Check against the last compiled regexp. */
-	if (!re || !RX_PRECOMP(re) || RX_PRELEN(re) != (I32)len ||
+	if (!re || !RX_PRECOMP(re) || RX_PRELEN(re) != len ||
 	    memNE(RX_PRECOMP(re), t, len))
 	{
 	    const regexp_engine *eng = re ? RX_ENGINE(re) : NULL;
