@@ -330,8 +330,8 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
     RX_MATCH_COPIED_off(rx);
 
 #ifdef PERL_OLD_COPY_ON_WRITE
-    *p++ = PTR2UV(rx->saved_copy);
-    rx->saved_copy = NULL;
+    *p++ = PTR2UV(RX_SAVED_COPY(rx));
+    RX_SAVED_COPY(rx) = NULL;
 #endif
 
     *p++ = RX_NPARENS(rx);
@@ -356,9 +356,9 @@ Perl_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
     *p++ = 0;
 
 #ifdef PERL_OLD_COPY_ON_WRITE
-    if (rx->saved_copy)
-	SvREFCNT_dec (rx->saved_copy);
-    rx->saved_copy = INT2PTR(SV*,*p);
+    if (RX_SAVED_COPY(rx))
+	SvREFCNT_dec (RX_SAVED_COPY(rx));
+    RX_SAVED_COPY(rx) = INT2PTR(SV*,*p);
     *p++ = 0;
 #endif
 

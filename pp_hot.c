@@ -1479,16 +1479,17 @@ yup:					/* Confirmed by INTUIT */
 			      (int) SvTYPE(TARG), (void*)truebase, (void*)t,
 			      (int)(t-truebase));
 	    }
-	    rx->saved_copy = sv_setsv_cow(rx->saved_copy, TARG);
-	    RX_SUBBEG(rx) = (char *) SvPVX_const(rx->saved_copy) + (t - truebase);
-	    assert (SvPOKp(rx->saved_copy));
+	    RX_SAVED_COPY(rx) = sv_setsv_cow(RX_SAVED_COPY(rx), TARG);
+	    RX_SUBBEG(rx)
+		= (char *) SvPVX_const(RX_SAVED_COPY(rx)) + (t - truebase);
+	    assert (SvPOKp(RX_SAVED_COPY(rx)));
 	} else
 #endif
 	{
 
 	    RX_SUBBEG(rx) = savepvn(t, strend - t);
 #ifdef PERL_OLD_COPY_ON_WRITE
-	    rx->saved_copy = NULL;
+	    RX_SAVED_COPY(rx) = NULL;
 #endif
 	}
 	RX_SUBLEN(rx) = strend - t;

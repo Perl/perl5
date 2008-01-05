@@ -387,6 +387,7 @@ and check for NULL.
 #define RX_LASTPAREN(prog)	(((struct regexp *)SvANY(prog))->lastparen)
 #define RX_LASTCLOSEPAREN(prog)	(((struct regexp *)SvANY(prog))->lastcloseparen)
 #define RX_SEEN_EVALS(prog)	(((struct regexp *)SvANY(prog))->seen_evals)
+#define RX_SAVED_COPY(prog)	(((struct regexp *)SvANY(prog))->saved_copy)
 
 #endif /* PLUGGABLE_RE_EXTENSION */
 
@@ -394,8 +395,8 @@ and check for NULL.
 
 #ifdef PERL_OLD_COPY_ON_WRITE
 #define RX_MATCH_COPY_FREE(rx) \
-	STMT_START {if (rx->saved_copy) { \
-	    SV_CHECK_THINKFIRST_COW_DROP(rx->saved_copy); \
+	STMT_START {if (RX_SAVED_COPY(rx)) { \
+	    SV_CHECK_THINKFIRST_COW_DROP(RX_SAVED_COPY(rx)); \
 	} \
 	if (RX_MATCH_COPIED(rx)) { \
 	    Safefree(RX_SUBBEG(rx)); \
