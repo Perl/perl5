@@ -100,7 +100,6 @@ typedef struct regexp {
         
         
         /* Information about the match that isn't often used */
-	I32 wraplen;		/* length of wrapped */
 	unsigned pre_prefix:4;	/* offset from wrapped to the start of precomp */
 	unsigned seen_evals:28;	/* number of eval groups in the pattern - for security checks */ 
         HV *paren_names;	/* Optional hash of paren names */
@@ -365,7 +364,7 @@ and check for NULL.
    has exactly one character at the end, a ')'. Will that always be true?  */
 #define RX_PRELEN(prog)		(RX_WRAPLEN(prog) - ((struct regexp *)SvANY(prog))->pre_prefix - 1)
 #define RX_WRAPPED(prog)	SvPVX(prog)
-#define RX_WRAPLEN(prog)	(((struct regexp *)SvANY(prog))->wraplen)
+#define RX_WRAPLEN(prog)	SvCUR(prog)
 #define RX_CHECK_SUBSTR(prog)	(((struct regexp *)SvANY(prog))->check_substr)
 #define RX_EXTFLAGS(prog)	RXp_EXTFLAGS((struct regexp *)SvANY(prog))
 #define RX_REFCNT(prog)		SvREFCNT(prog)

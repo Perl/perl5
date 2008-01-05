@@ -4290,12 +4290,12 @@ redo_first_pass:
 			    >> RXf_PMf_STD_PMMOD_SHIFT);
 	const char *fptr = STD_PAT_MODS;        /*"msix"*/
 	char *p;
-        RX_WRAPLEN(rx) = plen + has_minus + has_p + has_runon
+	const STRLEN wraplen = plen + has_minus + has_p + has_runon
             + (sizeof(STD_PAT_MODS) - 1)
             + (sizeof("(?:)") - 1);
 
-	p = sv_grow(rx, RX_WRAPLEN(rx) + 1);
-	SvCUR_set(rx, RX_WRAPLEN(rx));
+	p = sv_grow(rx, wraplen + 1);
+	SvCUR_set(rx, wraplen);
 	SvPOK_on(rx);
         *p++='('; *p++='?';
         if (has_p)
