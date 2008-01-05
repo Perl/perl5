@@ -1441,15 +1441,13 @@ wrapper instead.
 int
 Perl_sv_backoff(pTHX_ register SV *sv)
 {
-    STRLEN delta;
+    UV delta = sv_read_offset(sv);
     const char * const s = SvPVX_const(sv);
     PERL_UNUSED_CONTEXT;
     assert(SvOOK(sv));
     assert(SvTYPE(sv) != SVt_PVHV);
     assert(SvTYPE(sv) != SVt_PVAV);
 
-    SvOOK_offset(sv, delta);
-    
     SvLEN_set(sv, SvLEN(sv) + delta);
     SvPV_set(sv, SvPVX(sv) - delta);
     Move(s, SvPVX(sv), SvCUR(sv)+1, char);
@@ -4303,6 +4301,43 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 	sv_unglob(sv);
 }
 
+UV
+Perl_sv_read_offset(pTHX_ const SV *const sv) {
+    U8 *p;
+    UV delta = 0;
+    U8 c;
+
+    if (!SvOOK(sv))
+	return 0;
+    p = (U8*)SvPVX_const(sv);
+    if (!p)
+	return 0;
+
+    c = *--p;
+    delta = c & 0x7F;
+    while ((c & 0x80)) {
+	UV const last_delta = delta;
+	delta <<= 7;
+	if (delta < last_delta)
+	    Perl_croak(aTHX_ "panic: overflow in sv_read_offset from %"UVuf
+		       " to %"UVuf, last_delta, delta);
+	c = *--p;
+	delta |= c & 0x7F;
+    }
+#ifdef DEBUGGING
+    {
+	/* Validate the preceding buffer's sentinels to verify that no-one is
+	   using it.  */
+	const U8 *const real_start = (U8 *) SvPVX_const(sv) - delta;
+	while (p > real_start) {
+	    --p;
+	    assert (*p == (U8)PTR2UV(p));
+	}
+    }
+#endif
+    return delta;
+}
+
 /*
 =for apidoc sv_chop
 
@@ -4319,9 +4354,9 @@ refer to the same chunk of data.
 void
 Perl_sv_chop(pTHX_ register SV *sv, register const char *ptr)
 {
-    STRLEN delta;
-    STRLEN old_delta;
+    register STRLEN delta;
     STRLEN max_delta;
+    UV old_delta;
     U8 *p;
 #ifdef DEBUGGING
     const U8 *real_start;
@@ -4360,7 +4395,7 @@ Perl_sv_chop(pTHX_ register SV *sv, register const char *ptr)
 	SvFLAGS(sv) |= SVf_OOK;
 	old_delta = 0;
     } else {
-	SvOOK_offset(sv, old_delta);
+	old_delta = sv_read_offset(sv);
     }
     SvLEN_set(sv, SvLEN(sv) - delta);
     SvCUR_set(sv, SvCUR(sv) - delta);
@@ -4374,13 +4409,22 @@ Perl_sv_chop(pTHX_ register SV *sv, register const char *ptr)
     real_start = p - delta;
 #endif
 
-    assert(delta);
-    if (delta < 0x100) {
+    if (delta < 0x80) {
 	*--p = (U8) delta;
     } else {
-	*--p = 0;
-	p -= sizeof(STRLEN);
-	Copy((U8*)&delta, p, sizeof(STRLEN), U8);
+	/* Code lovingly ripped from pp_pack.c:  */
+	U8   buf[(sizeof(UV)*CHAR_BIT)/7+1];
+	U8  *in = buf;
+	STRLEN len;
+	do {
+	    *in++ = (U8)((delta & 0x7f) | 0x80);
+	    delta >>= 7;
+	} while (delta);
+	buf[0] &= 0x7f; /* clear continue bit */
+
+	len = in - buf;
+	p -= len;
+	Copy(buf, p, len, U8);
     }
 
 #ifdef DEBUGGING
@@ -5418,9 +5462,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
       freescalar:
 	/* Don't bother with SvOOK_off(sv); as we're only going to free it.  */
 	if (SvOOK(sv)) {
-	    STRLEN offset;
-	    SvOOK_offset(sv, offset);
-	    SvPV_set(sv, SvPVX_mutable(sv) - offset);
+	    SvPV_set(sv, SvPVX_mutable(sv) - sv_read_offset(sv));
 	    /* Don't even bother with turning off the OOK flag.  */
 	}
     case SVt_RV:
