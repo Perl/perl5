@@ -3746,7 +3746,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
 		    if (mg) {
 			rx = mg->mg_obj; /*XXX:dmq*/
-			assert(re);
+			assert(rx);
 		    }
 		    if (rx) {
 			rx = reg_temp_copy(rx);
