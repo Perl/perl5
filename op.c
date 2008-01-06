@@ -627,7 +627,7 @@ clear_pmop:
             av_push((AV*) PL_regex_pad[0],(SV*) PL_regex_pad[(cPMOPo)->op_pmoffset]);
             SvREADONLY_off(PL_regex_pad[(cPMOPo)->op_pmoffset]);
 	    SvREPADTMP_on(PL_regex_pad[(cPMOPo)->op_pmoffset]);
-            PM_SETRE(cPMOPo, (cPMOPo)->op_pmoffset);
+            PM_SETRE_OFFSET(cPMOPo, (cPMOPo)->op_pmoffset);
         }
 #else
 	ReREFCNT_dec(PM_GETRE(cPMOPo));
