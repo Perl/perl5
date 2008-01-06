@@ -383,7 +383,7 @@ ok($casespec->{az}->{code} eq '0307' &&
 
 for (1) {my $a=compexcl $_}
 ok(1, 'compexcl read-only $_: perl #7305');
-grep {compexcl $_} %{{1=>2}};
+map {compexcl $_} %{{1=>2}};
 ok(1, 'compexcl read-only hash: perl #7305');
 
 is(Unicode::UCD::_getcode('123'),     123, "_getcode(123)");
