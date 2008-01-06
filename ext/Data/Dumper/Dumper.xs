@@ -272,6 +272,11 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
     char *iname;
     STRLEN inamelen, idlen = 0;
     U32 realtype;
+    bool no_bless = 0; /* when a qr// is blessed into Regexp we dont want to bless it.
+                          in later perls we should actually check the classname of the 
+                          engine. this gets tricky as it involves lexical issues that arent so
+                          easy to resolve */
+    bool is_regex = 0; /* we are dumping a regex, we need to know this before we bless */
 
     if (!val)
 	return 0;
@@ -394,23 +399,23 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		SvREFCNT_dec(seenentry);
 	    }
 	}
-
-	if (realpack && *realpack == 'R' && strEQ(realpack, "Regexp")) {
-	    STRLEN rlen;
-	    const char *rval = SvPV(val, rlen);
-	    const char *slash = strchr(rval, '/');
-	    sv_catpvn(retval, "qr/", 3);
-	    while (slash) {
-		sv_catpvn(retval, rval, slash-rval);
-		sv_catpvn(retval, "\\/", 2);
-		rlen -= slash-rval+1;
-		rval = slash+1;
-		slash = strchr(rval, '/');
-	    }
-	    sv_catpvn(retval, rval, rlen);
-	    sv_catpvn(retval, "/", 1);
-	    return 1;
-	}
+        /* regexps dont have to be blessed into package "Regexp"
+         * they can be blessed into any package. 
+         */
+#if PERL_VERSION < 8
+	if (realpack && *realpack == 'R' && strEQ(realpack, "Regexp")) 
+#elif PERL_VERSION < 11
+        if (realpack && realtype == SVt_PVMG && mg_find(sv, PERL_MAGIC_qr))
+#else        
+        if (realpack && realtype == SVt_REGEXP) 
+#endif
+        {
+            is_regex = 1;
+            if (strEQ(realpack, "Regexp")) 
+                no_bless = 1;
+            else
+                no_bless = 0;
+        }
 
 	/* If purity is not set and maxdepth is set, then check depth:
 	 * if we have reached maximum depth, return the string
@@ -426,7 +431,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    return 1;
 	}
 
-	if (realpack) {				/* we have a blessed ref */
+	if (realpack && !no_bless) {				/* we have a blessed ref */
 	    STRLEN blesslen;
 	    const char * const blessstr = SvPV(bless, blesslen);
 	    sv_catpvn(retval, blessstr, blesslen);
@@ -441,7 +446,23 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	(*levelp)++;
 	ipad = sv_x(aTHX_ Nullsv, SvPVX_const(xpad), SvCUR(xpad), *levelp);
 
-	if (
+        if (is_regex) 
+        {
+            STRLEN rlen;
+	    const char *rval = SvPV(val, rlen);
+	    const char *slash = strchr(rval, '/');
+	    sv_catpvn(retval, "qr/", 3);
+	    while (slash) {
+		sv_catpvn(retval, rval, slash-rval);
+		sv_catpvn(retval, "\\/", 2);
+		rlen -= slash-rval+1;
+		rval = slash+1;
+		slash = strchr(rval, '/');
+	    }
+	    sv_catpvn(retval, rval, rlen);
+	    sv_catpvn(retval, "/", 1);
+	} 
+        else if (
 #if PERL_VERSION < 9
 		realtype <= SVt_PVBM
 #else
@@ -779,7 +800,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    warn("cannot handle ref type %ld", realtype);
 	}
 
-	if (realpack) {  /* free blessed allocs */
+	if (realpack && !no_bless) {  /* free blessed allocs */
 	    I32 plen;
 	    I32 pticks;
 

@@ -9,7 +9,7 @@
 
 package Data::Dumper;
 
-$VERSION = '2.121_17';
+$VERSION = '2.121_15';
 
 #$| = 1;
 
@@ -326,11 +326,11 @@ sub _dump {
 			    $val ];
       }
     }
-
-    if ($realpack and $realpack eq 'Regexp') {
-	$out = "$val";
-	$out =~ s,/,\\/,g;
-	return "qr/$out/";
+    my $no_bless = 0; 
+    my $is_regex = 0;
+    if ( $realpack and ($] >= 5.009005 ? re::is_regexp($val) : $realpack eq 'Regexp') ) {
+        $is_regex = 1;
+        $no_bless = $realpack eq 'Regexp';
     }
 
     # If purity is not set and maxdepth is set, then check depth: 
@@ -345,7 +345,7 @@ sub _dump {
     }
 
     # we have a blessed ref
-    if ($realpack) {
+    if ($realpack and !$no_bless) {
       $out = $s->{'bless'} . '( ';
       $blesspad = $s->{apad};
       $s->{apad} .= '       ' if ($s->{indent} >= 2);
@@ -354,7 +354,30 @@ sub _dump {
     $s->{level}++;
     $ipad = $s->{xpad} x $s->{level};
 
-    if ($realtype eq 'SCALAR' || $realtype eq 'REF') {
+    if ($is_regex) {
+        my $pat;
+        # This really sucks, re:regexp_pattern is in ext/re/re.xs and not in 
+        # universal.c, and even worse we cant just require that re to be loaded
+        # we *have* to use() it. 
+        # We should probably move it to universal.c for 5.10.1 and fix this.
+        # Currently we only use re::regexp_pattern when the re is blessed into another
+        # package. This has the disadvantage of meaning that a DD dump won't round trip
+        # as the pattern will be repeatedly wrapped with the same modifiers.
+        # This is an aesthetic issue so we will leave it for now, but we could use
+        # regexp_pattern() in list context to get the modifiers separately.
+        # But since this means loading the full debugging engine in process we wont
+        # bother unless its necessary for accuracy.
+        if ($realpack ne 'Regexp' and $] > 5.009005) {
+            defined *re::regexp_pattern{CODE} 
+                or do { eval 'use re (regexp_pattern); 1' or die $@ };
+            $pat = re::regexp_pattern($val);
+        } else {
+            $pat = "$val";
+        }
+        $pat =~ s,/,\\/,g;
+        $out .= "qr/$pat/";
+    }
+    elsif ($realtype eq 'SCALAR' || $realtype eq 'REF') {
       if ($realpack) {
 	$out .= 'do{\\(my $o = ' . $s->_dump($$val, "\${$name}") . ')}';
       }
@@ -444,7 +467,7 @@ sub _dump {
       croak "Can\'t handle $realtype type.";
     }
     
-    if ($realpack) { # we have a blessed ref
+    if ($realpack and !$no_bless) { # we have a blessed ref
       $out .= ', ' . _quote($realpack) . ' )';
       $out .= '->' . $s->{toaster} . '()'  if $s->{toaster} ne '';
       $s->{apad} = $blesspad;
