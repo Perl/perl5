@@ -19,7 +19,9 @@ use Carp 'croak';
 #   http://stein.cshl.org/WWW/software/CGI/
 
 $CGI::revision = '$Id: CGI.pm,v 1.240 2007/11/30 18:58:27 lstein Exp $';
-$CGI::VERSION='3.33_01';
+$CGI::VERSION='3.33_02';
+$CGI::VERSION=eval $CGI::VERSION;
+
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -3292,10 +3294,10 @@ sub previous_or_default {
 
     if (!$override && ($self->{'.fieldnames'}->{$name} || 
 		       defined($self->param($name)) ) ) {
-	grep($selected{$_}++,$self->param($name));
+	$selected{$_}++ for $self->param($name);
     } elsif (defined($defaults) && ref($defaults) && 
 	     (ref($defaults) eq 'ARRAY')) {
-	grep($selected{$_}++,@{$defaults});
+	$selected{$_}++ for @{$defaults};
     } else {
 	$selected{$defaults}++ if defined($defaults);
     }

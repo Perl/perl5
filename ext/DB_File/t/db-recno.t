@@ -994,7 +994,7 @@ EOM
    $h[0] = "joe" ;
    ok(155, $h[0] eq "joe");
 
-   eval { grep { $h[$_] } (1, 2, 3) };
+   eval { my @r= grep { $h[$_] } (1, 2, 3) };
    ok (156, ! $@);
 
 
@@ -1008,7 +1008,7 @@ EOM
 
    ok(157, $h[1] eq "joe");
 
-   eval { grep { $h[$_] } (1, 2, 3) };
+   eval { my @r= grep { $h[$_] } (1, 2, 3) };
    ok (158, ! $@);
 
    undef $db ;

@@ -68,7 +68,8 @@ use XSLoader ();
 	GDBM_WRITER
 );
 
-$VERSION = "1.08";
+$VERSION = "1.08_01";
+$VERSION = eval $VERSION;
 
 sub AUTOLOAD {
     my($constname);

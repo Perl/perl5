@@ -165,7 +165,8 @@ our ($db_version, $use_XSLoader, $splice_end_array, $Error);
 use Carp;
 
 
-$VERSION = "1.816_1" ;
+$VERSION = "1.816_2" ;
+$VERSION = eval $VERSION;
 
 {
     local $SIG{__WARN__} = sub {$splice_end_array = "@_";};

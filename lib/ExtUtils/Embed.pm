@@ -281,7 +281,7 @@ sub canon {
        s:^(lib|ext)/(auto/)?::;
        s:/\w+\.\w+$::;
     }
-    grep(s:/:$as:, @ext) if ($as ne '/');
+    map(s:/:$as:, @ext) if ($as ne '/');
     @ext;
 }
 
