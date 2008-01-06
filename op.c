@@ -118,6 +118,7 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 void *
 Perl_Slab_Alloc(pTHX_ size_t sz)
 {
+    dVAR;
     /*
      * To make incrementing use count easy PL_OpSlab is an I32 *
      * To make inserting the link to slab PL_OpPtr is I32 **
@@ -129,7 +130,7 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
 #ifdef PERL_DEBUG_READONLY_OPS
 	/* We need to allocate chunk by chunk so that we can control the VM
 	   mapping */
-	PL_OpPtr = mmap(0, PERL_SLAB_SIZE*sizeof(I32*), PROT_READ|PROT_WRITE,
+	PL_OpPtr = (I32**) mmap(0, PERL_SLAB_SIZE*sizeof(I32*), PROT_READ|PROT_WRITE,
 			MAP_ANON|MAP_PRIVATE, -1, 0);
 
 	DEBUG_m(PerlIO_printf(Perl_debug_log, "mapped %lu at %p\n",
@@ -161,7 +162,7 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
 #ifdef PERL_DEBUG_READONLY_OPS
 	/* We remember this slab.  */
 	/* This implementation isn't efficient, but it is simple. */
-	PL_slabs = realloc(PL_slabs, sizeof(I32**) * (PL_slab_count + 1));
+	PL_slabs = (I32**) realloc(PL_slabs, sizeof(I32**) * (PL_slab_count + 1));
 	PL_slabs[PL_slab_count++] = PL_OpSlab;
 	DEBUG_m(PerlIO_printf(Perl_debug_log, "Allocate %p\n", PL_OpSlab));
 #endif
@@ -261,6 +262,7 @@ Perl_Slab_Free(pTHX_ void *op)
 	if (count) {
 	    while (count--) {
 		if (PL_slabs[count] == slab) {
+		    dVAR;
 		    /* Found it. Move the entry at the end to overwrite it.  */
 		    DEBUG_m(PerlIO_printf(Perl_debug_log,
 					  "Deallocate %p by moving %p from %lu to %lu\n",
