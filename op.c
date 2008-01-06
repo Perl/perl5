@@ -3420,6 +3420,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 
     if (is_list_assignment(left)) {
 	OP *curop;
+	bool maybe_common_vars = TRUE;
 
 	PL_modcount = 0;
 	/* Grandfathering $[ assignment here.  Bletch.*/
@@ -3445,6 +3446,77 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	    }
 	}
 
+	/* For ease of merging, now that this loop is not just for detecting
+	   state list assignments, but also for detecting common variables,
+	   and the comments about state variables also illustrate my, our and
+	   undef, for future maintenance it seems to be simplest to keep the
+	   code as close as possible, and arrange for the state branches to
+	   become dead code that the compiler can eliminate, rather than edit
+	   them away right now and cause head scratching at the next merge.  */
+#ifdef OPpPAD_STATE
+#  error You should not have OPpPAD_STATE defined
+#else
+#  define OPpPAD_STATE 0
+#endif
+	if ((left->op_type == OP_LIST
+	     || (left->op_type == OP_NULL && left->op_targ == OP_LIST)))
+	{
+	    OP* lop = ((LISTOP*)left)->op_first;
+	    maybe_common_vars = FALSE;
+	    while (lop) {
+		if (lop->op_type == OP_PADSV ||
+		    lop->op_type == OP_PADAV ||
+		    lop->op_type == OP_PADHV ||
+		    lop->op_type == OP_PADANY) {
+		    if (!(lop->op_private & OPpLVAL_INTRO))
+			maybe_common_vars = TRUE;
+
+		    if (lop->op_private & OPpPAD_STATE) {
+			if (left->op_private & OPpLVAL_INTRO) {
+			    /* Each variable in state($a, $b, $c) = ... */
+			}
+			else {
+			    /* Each state variable in
+			       (state $a, my $b, our $c, $d, undef) = ... */
+			}
+			/* No state in maint-5.8, so no error */
+		    } else {
+			/* Each my variable in
+			   (state $a, my $b, our $c, $d, undef) = ... */
+		    }
+		} else if (lop->op_type == OP_UNDEF ||
+			   lop->op_type == OP_PUSHMARK) {
+		    /* undef may be interesting in
+		       (state $a, undef, state $c) */
+		} else {
+		    /* Other ops in the list. */
+		    maybe_common_vars = TRUE;
+		}
+		lop = lop->op_sibling;
+	    }
+	}
+	else if ((left->op_private & OPpLVAL_INTRO)
+		&& (   left->op_type == OP_PADSV
+		    || left->op_type == OP_PADAV
+		    || left->op_type == OP_PADHV
+		    || left->op_type == OP_PADANY))
+	{
+	    maybe_common_vars = FALSE;
+	    if (left->op_private & OPpPAD_STATE) {
+		/* All single variable list context state assignments, hence
+		   state ($a) = ...
+		   (state $a) = ...
+		   state @a = ...
+		   state (@a) = ...
+		   (state @a) = ...
+		   state %a = ...
+		   state (%a) = ...
+		   (state %a) = ...
+		*/
+		/* No state in maint-5.8, so no error */
+	    }
+	}
+
 	/* PL_generation sorcery:
 	 * an assignment like ($a,$b) = ($c,$d) is easier than
 	 * ($a,$b) = ($c,$a), since there is no need for temporary vars.
@@ -3458,7 +3530,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	 * to clear the flag, then to test and set it.  To find somewhere
 	 * to store these values, evil chicanery is done with SvCUR().
 	 */
-	{
+	if (maybe_common_vars) {
 	    OP *lastop = o;
 	    PL_generation++;
 	    for (curop = LINKLIST(o); curop != o; curop = LINKLIST(curop)) {
