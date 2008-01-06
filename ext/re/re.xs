@@ -128,9 +128,13 @@ PPCODE:
         } else {
             /* Scalar, so use the string that Perl would return */
             /* return the pattern in (?msix:..) format */
+#if PERL_VERSION >= 11
+            pattern = sv_2mortal(newSVsv((SV*)re));
+#else
             pattern = sv_2mortal(newSVpvn(RX_WRAPPED(re),RX_WRAPLEN(re)));
             if (RX_UTF8(re))
                 SvUTF8_on(pattern);
+#endif
             XPUSHs(pattern);
             XSRETURN(1);
         }
