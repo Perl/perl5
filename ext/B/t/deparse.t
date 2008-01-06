@@ -27,7 +27,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 57;
+use Test::More tests => 58;
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -395,3 +395,8 @@ each @$a;
 # 50 keys @array; values @array
 keys @$a if keys @ARGV;
 values @ARGV if values @$a;
+####
+my $a = {};
+my $b = \{};
+my $c = [];
+my $d = \[];
