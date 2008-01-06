@@ -5,7 +5,15 @@ $| = 1;
 
 use strict;
 
-BEGIN { print "1..8\n"; }
+BEGIN {
+    require Config;
+    if ( $Config::Config{d_fork} ) {
+        print "1..8\n";
+    } else {
+        print "1..0 # Skip No fork available\n";
+        exit;
+    }
+}
 
 use File::Temp;
 
