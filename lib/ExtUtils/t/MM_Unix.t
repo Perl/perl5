@@ -171,12 +171,13 @@ is ($t->libscan('Fatty'), 'Fatty', 'libscan on something not a VC file' );
 
 open(FILE, ">command"); print FILE "foo"; close FILE;
 SKIP: {
-skip ("no separate execute mode", 1) if ($^O eq "vos");
-ok (!$t->maybe_command('command') ,"non executable file isn't a command");
-}
+    skip("no separate execute mode on VOS", 2) if $^O eq "vos";
 
-chmod 0755, "command";
-ok ($t->maybe_command('command'),        "executable file is a command");
+    ok !$t->maybe_command('command') ,"non executable file isn't a command";
+
+    chmod 0755, "command";
+    ok ($t->maybe_command('command'),        "executable file is a command");
+}
 unlink "command";
 
 

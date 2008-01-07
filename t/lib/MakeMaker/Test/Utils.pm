@@ -4,21 +4,55 @@ use File::Spec;
 use strict;
 use Config;
 
-use vars qw($VERSION @ISA @EXPORT);
-
 require Exporter;
-@ISA = qw(Exporter);
+our @ISA = qw(Exporter);
 
-$VERSION = 0.03;
+our $VERSION = 0.04;
 
-@EXPORT = qw(which_perl perl_lib makefile_name makefile_backup
-             make make_run run make_macro calibrate_mtime
-             setup_mm_test_root
-	     have_compiler
-            );
+our $Is_VMS   = $^O eq 'VMS';
+our $Is_MacOS = $^O eq 'MacOS';
 
-my $Is_VMS   = $^O eq 'VMS';
-my $Is_MacOS = $^O eq 'MacOS';
+our @EXPORT = qw(which_perl perl_lib makefile_name makefile_backup
+                 make make_run run make_macro calibrate_mtime
+                 setup_mm_test_root
+                 have_compiler slurp
+                 $Is_VMS $Is_MacOS
+                );
+
+
+# Setup the code to clean out %ENV
+{
+    # Environment variables which might effect our testing
+    my @delete_env_keys = qw(
+        PERL_MM_OPT
+        PERL_MM_USE_DEFAULT
+        HARNESS_TIMER
+        HARNESS_OPTIONS
+        HARNESS_VERBOSE
+    );
+
+    # Remember the ENV values because on VMS %ENV is global
+    # to the user, not the process.
+    my %restore_env_keys;
+
+    sub clean_env {
+        for my $key (@delete_env_keys) {
+            if( exists $ENV{$key} ) {
+                $restore_env_keys{$key} = delete $ENV{$key};
+            }
+            else {
+                delete $ENV{$key};
+            }
+        }
+    }
+
+    END {
+        while( my($key, $val) = each %restore_env_keys ) {
+            $ENV{$key} = $val;
+        }
+    }
+}
+clean_env();
 
 
 =head1 NAME
@@ -44,6 +78,8 @@ MakeMaker::Test::Utils - Utility routines for testing MakeMaker
   my $out           = run($cmd);
 
   my $have_compiler = have_compiler();
+
+  my $text          = slurp($filename);
 
 
 =head1 DESCRIPTION
@@ -321,6 +357,26 @@ sub have_compiler {
     return $have_compiler;
 }
 
+=item slurp
+
+  $contents = slurp($filename);
+
+Returns the $contents of $filename.
+
+Will die if $filename cannot be opened.
+
+=cut
+
+sub slurp {
+    my $filename = shift;
+
+    local $/ = undef;
+    open my $fh, $filename or die "Can't open $filename for reading: $!";
+    my $text = <$fh>;
+    close $fh;
+
+    return $text;
+}
 
 =back
 
