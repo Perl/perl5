@@ -1,3 +1,40 @@
+6.43_01  Tue Jan  1 16:06:47 PST 2008
+    Bug Fixes
+    * Change the "is this really a Perl core library directory" checks to
+      look for strict instead of Exporter.  Now that Exporter is on CPAN
+      it can wind up in site_perl.
+    * split_command() will now set aside a little more space for macro
+      expansion.  This should help on systems with cramped command line
+      lengths.  Specifically, Pugs on Win32.  [rt.cpan.org 20145]
+
+    Installation
+    * MakeMaker would not install if the installed MakeMaker was too old,
+      like on 5.6.1.  The installation process was still using the
+      installed MakeMaker in a few places.  This has been fixed.
+      [rt.cpan.org 24746]
+
+    OS X
+    * "make dist" will no longer bundle up resource fork files (._foo).
+      [rt.cpan.org 29525]
+
+    Docs
+    * The documentation of VERSION_FROM was recommending vstrings (1.2.3)
+      which have never worked right.
+    * The documentation for the accepted values of LICENSE moved to
+      Module::Build::API. [rt.cpan.org 32020]
+
+    Tests
+    * The compilation test was testing the installed modules, not the
+      about-to-be-installed.
+    * xs.t would fail if ExtUtils::CBuilder was not installed.
+    
+    Misc
+    * Cleanups brought to you by no more 5.5 compatibility!
+    * MakeMaker is now perlcritic clean at severity level 5... except
+      the really silly ones.
+    * DIE use vars DIE!
+    * Added some resources to the META.yml
+
 6.42  Fri Dec  7 17:00:14 PST 2007
     Bug Fixes
     - 6.33 moved PREREQ_FATAL to happen after CONFIGURE.  This meant if
