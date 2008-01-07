@@ -212,7 +212,8 @@ PP(pp_substcont)
     if(old != rx) {
 	if(old)
 	    ReREFCNT_dec(old);
-	PM_SETRE(pm,ReREFCNT_inc(rx));
+        ReREFCNT_inc(rx);
+	PM_SETRE(pm,rx);
     }
 
     rxres_restore(&cx->sb_rxres, rx);
@@ -309,7 +310,7 @@ PP(pp_substcont)
 	mg->mg_len = i;
     }
     if (old != rx)
-	(void)ReREFCNT_inc(rx);
+	ReREFCNT_inc(rx);
     cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
     rxres_save(&cx->sb_rxres, rx);
     RETURNOP(pm->op_pmstashstartu.op_pmreplstart);
@@ -3828,7 +3829,8 @@ S_make_matcher(pTHX_ REGEXP *re)
 {
     dVAR;
     PMOP *matcher = (PMOP *) newPMOP(OP_MATCH, OPf_WANT_SCALAR | OPf_STACKED);
-    PM_SETRE(matcher, ReREFCNT_inc(re));
+    ReREFCNT_inc(re);
+    PM_SETRE(matcher, re);
     
     SAVEFREEOP((OP *) matcher);
     ENTER; SAVETMPS;
