@@ -437,7 +437,7 @@ and check for NULL.
     ({									\
 	/* This is here to generate a casting warning if incorrect.  */	\
 	REGEXP *const zwapp = (re);					\
-	SvREFCNT_inc(zwapp);						\
+	(REGEXP *) SvREFCNT_inc(zwapp);					\
     })
 #  define ReREFCNT_dec(re)						\
     ({									\
@@ -447,7 +447,7 @@ and check for NULL.
     })
 #else
 #  define ReREFCNT_dec(re)	SvREFCNT_dec(re)
-#  define ReREFCNT_inc(re)	SvREFCNT_inc(re)
+#  define ReREFCNT_inc(re)	((REGEXP *) SvREFCNT_inc(re))
 #endif
 
 /* FIXME for plugins. */
