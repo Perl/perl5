@@ -27,7 +27,7 @@ use ExtUtils::MakeMaker qw( neatvalue );
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 our @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
-our $VERSION = '6.46';
+our $VERSION = '6.48';
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 
@@ -125,8 +125,6 @@ Using \ for Windows.
 
 sub init_DIRFILESEP {
     my($self) = shift;
-
-    my $make = $self->make;
 
     # The ^ makes sure its not interpreted as an escape in nmake
     $self->{DIRFILESEP} = $self->is_make_type('nmake') ? '^\\' :

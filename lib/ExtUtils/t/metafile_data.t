@@ -9,7 +9,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 3;
+use Test::More tests => 5;
 
 use Data::Dumper;
 
@@ -131,5 +131,89 @@ my $new_mm = sub {
 
         wibble  => 23,
         wobble  => 42,
+    ];
+}
+
+
+# Test MIN_PERL_VERSION
+{
+    my $mm = $new_mm->(
+        DISTNAME        => 'Foo-Bar',
+        VERSION         => 1.23,
+        PM              => {
+            "Foo::Bar"          => 'lib/Foo/Bar.pm',
+        },
+        MIN_PERL_VERSION => 5.006,
+    );
+
+    is_deeply [$mm->metafile_data], [
+        name            => 'Foo-Bar',
+        version         => 1.23,
+        abstract        => undef,
+        author          => [],
+        license         => 'unknown',
+        distribution_type       => 'module',
+
+        configure_requires      => {
+            'ExtUtils::MakeMaker'       => 0,
+        },
+
+        requires        => {
+            perl        => '5.006',
+        },
+
+        no_index        => {
+            directory           => [qw(t inc)],
+        },
+
+        generated_by => "ExtUtils::MakeMaker version $ExtUtils::MakeMaker::VERSION",
+        'meta-spec'  => {
+            url         => 'http://module-build.sourceforge.net/META-spec-v1.4.html', 
+            version     => 1.4
+        },
+    ];
+}
+
+
+# Test MIN_PERL_VERSION
+{
+    my $mm = $new_mm->(
+        DISTNAME        => 'Foo-Bar',
+        VERSION         => 1.23,
+        PM              => {
+            "Foo::Bar"          => 'lib/Foo/Bar.pm',
+        },
+        MIN_PERL_VERSION => 5.006,
+        PREREQ_PM => {
+            'Foo::Bar'  => 1.23,
+        },
+    );
+
+    is_deeply [$mm->metafile_data], [
+        name            => 'Foo-Bar',
+        version         => 1.23,
+        abstract        => undef,
+        author          => [],
+        license         => 'unknown',
+        distribution_type       => 'module',
+
+        configure_requires      => {
+            'ExtUtils::MakeMaker'       => 0,
+        },
+
+        requires        => {
+            perl        => '5.006',
+            'Foo::Bar'  => 1.23,
+        },
+
+        no_index        => {
+            directory           => [qw(t inc)],
+        },
+
+        generated_by => "ExtUtils::MakeMaker version $ExtUtils::MakeMaker::VERSION",
+        'meta-spec'  => {
+            url         => 'http://module-build.sourceforge.net/META-spec-v1.4.html', 
+            version     => 1.4
+        },
     ];
 }

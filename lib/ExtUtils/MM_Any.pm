@@ -1,7 +1,7 @@
 package ExtUtils::MM_Any;
 
 use strict;
-our $VERSION = '6.46';
+our $VERSION = '6.48';
 
 use Carp;
 use File::Spec;
@@ -842,8 +842,12 @@ sub metafile_data {
             version     => 1.4
         },
     );
+
+    # The author key is required and it takes a list.
     $meta{author}   = defined $self->{AUTHOR}    ? [$self->{AUTHOR}] : [];
+
     $meta{requires} = $self->{PREREQ_PM} if defined $self->{PREREQ_PM};
+    $meta{requires}{perl} = $self->{MIN_PERL_VERSION} if $self->{MIN_PERL_VERSION};
 
     while( my($key, $val) = each %$meta_add ) {
         $meta{$key} = $val;
