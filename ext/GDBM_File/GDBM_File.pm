@@ -69,7 +69,7 @@ use XSLoader ();
 );
 
 $VERSION = "1.08_01";
-$VERSION = eval $VERSION;
+$VERSION = eval $VERSION; # Needed for dev versions
 
 sub AUTOLOAD {
     my($constname);

@@ -7,6 +7,7 @@ WriteMakefile(
     XSPROTOARG => '-noprototypes', 		# XXX remove later?
     VERSION_FROM => 'GDBM_File.pm',
     realclean => {FILES=> 'const-c.inc const-xs.inc'},
+    XS_VERSION => eval MM->parse_version('GDBM_File.pm'), #silence warnings if we are a dev release
 );
 WriteConstants(
     NAME => 'GDBM_File',

@@ -166,7 +166,7 @@ use Carp;
 
 
 $VERSION = "1.816_2" ;
-$VERSION = eval $VERSION;
+$VERSION = eval $VERSION; # needed for dev releases 
 
 {
     local $SIG{__WARN__} = sub {$splice_end_array = "@_";};
