@@ -339,7 +339,9 @@ perform the upgrade if necessary.  See C<svtype>.
 				       means that a hv_aux struct is present
 				       after the main array */
 #define SVf_BREAK	0x04000000  /* refcnt is artificially low - used by
-				       SV's in final arena cleanup */
+				       SVs in final arena cleanup.
+				       Set in S_regtry on PL_reg_curpm, so that
+				       perl_destruct will skip it. */
 #define SVf_READONLY	0x08000000  /* may not be modified */
 
 

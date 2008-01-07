@@ -2256,7 +2256,8 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
 #ifdef USE_ITHREADS
             {
 		SV* const repointer = newSViv(0);
-                /* so we know which PL_regex_padav element is PL_reg_curpm */
+                /* so we know which PL_regex_padav element is PL_reg_curpm
+		   when clearing up in perl_destruct() */
                 SvFLAGS(repointer) |= SVf_BREAK;
                 av_push(PL_regex_padav,repointer);
                 PL_reg_curpm->op_pmoffset = av_len(PL_regex_padav);
