@@ -2115,7 +2115,7 @@ sub pp_aassign { binop(@_, "=", 7, SWAP_CHILDREN | LIST_CONTEXT) }
 sub pp_smartmatch {
     my ($self, $op, $cx) = @_;
     if ($op->flags & OPf_SPECIAL) {
-	return $self->deparse($op->first, $cx);
+	return $self->deparse($op->last, $cx);
     }
     else {
 	binop(@_, "~~", 14);
