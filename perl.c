@@ -887,9 +887,6 @@ perl_destruct(pTHXx)
 		/* So stop it pointing to what is now a dead reference.  */
 		SvROK_off(resv);
             }
-	    else if(SvREPADTMP(resv)) {
-	      SvREPADTMP_off(resv);
-            }
         }
     }
     SvREFCNT_dec(PL_regex_padav);

@@ -328,12 +328,10 @@ perform the upgrade if necessary.  See C<svtype>.
 				       3: For PVCV, whether CvUNIQUE(cv)
 					  refers to an eval or once only
 					  [CvEVAL(cv), CvSPECIAL(cv)]
-				       4: Whether the regexp pointer is in
-					  fact an offset [SvREPADTMP(sv)]
-				       5: On a pad name SV, that slot in the
+				       4: On a pad name SV, that slot in the
 					  frame AV is a REFCNT'ed reference
 					  to a lexical from "outside". */
-#define SVphv_REHASH	SVf_FAKE    /* 6: On a PVHV, hash values are being
+#define SVphv_REHASH	SVf_FAKE    /* 5: On a PVHV, hash values are being
 					  recalculated */
 #define SVf_OOK		0x02000000  /* has valid offset value. For a PVHV this
 				       means that a hv_aux struct is present
@@ -989,14 +987,6 @@ the scalar's value cannot change unless written to.
 #define SvTAIL_on(sv)		(SvFLAGS(sv) |= SVpbm_TAIL)
 #define SvTAIL_off(sv)		(SvFLAGS(sv) &= ~SVpbm_TAIL)
 
-
-#ifdef USE_ITHREADS
-/* The following uses the FAKE flag to show that a regex pointer is infact
-   its own offset in the regexpad for ithreads */
-#define SvREPADTMP(sv)		(SvFLAGS(sv) & SVf_FAKE)
-#define SvREPADTMP_on(sv)	(SvFLAGS(sv) |= SVf_FAKE)
-#define SvREPADTMP_off(sv)	(SvFLAGS(sv) &= ~SVf_FAKE)
-#endif
 
 #define SvPAD_TYPED(sv) \
 	((SvFLAGS(sv) & (SVpad_NAME|SVpad_TYPED)) == (SVpad_NAME|SVpad_TYPED))
