@@ -210,6 +210,7 @@ XS(XS_re_is_regexp);
 XS(XS_re_regname);
 XS(XS_re_regnames);
 XS(XS_re_regnames_count);
+XS(XS_re_regexp_pattern);
 XS(XS_Tie_Hash_NamedCapture_FETCH);
 XS(XS_Tie_Hash_NamedCapture_STORE);
 XS(XS_Tie_Hash_NamedCapture_DELETE);
@@ -273,6 +274,7 @@ Perl_boot_core_UNIVERSAL(pTHX)
     newXSproto("re::regname", XS_re_regname, file, ";$$");
     newXSproto("re::regnames", XS_re_regnames, file, ";$");
     newXSproto("re::regnames_count", XS_re_regnames_count, file, "");
+    newXSproto("re::regexp_pattern", XS_re_regexp_pattern, file, "$");
     newXS("Tie::Hash::NamedCapture::FETCH", XS_Tie_Hash_NamedCapture_FETCH, file);
     newXS("Tie::Hash::NamedCapture::STORE", XS_Tie_Hash_NamedCapture_STORE, file);
     newXS("Tie::Hash::NamedCapture::DELETE", XS_Tie_Hash_NamedCapture_DELETE, file);
@@ -1181,6 +1183,99 @@ XS(XS_re_regnames)
 
     PUTBACK;
     return;
+}
+
+XS(XS_re_regexp_pattern)
+{
+    dVAR;
+    dXSARGS;
+    REGEXP *re;
+    PERL_UNUSED_ARG(cv);
+
+    if (items != 1)
+       Perl_croak(aTHX_ "Usage: %s(%s)", "re::regexp_pattern", "sv");
+
+    SP -= items;
+
+    /*
+       Checks if a reference is a regex or not. If the parameter is
+       not a ref, or is not the result of a qr// then returns false
+       in scalar context and an empty list in list context.
+       Otherwise in list context it returns the pattern and the
+       modifiers, in scalar context it returns the pattern just as it
+       would if the qr// was stringified normally, regardless as
+       to the class of the variable and any strigification overloads
+       on the object.
+    */
+
+    if ((re = SvRX(ST(0)))) /* assign deliberate */
+    {
+        /* Housten, we have a regex! */
+        SV *pattern;
+        STRLEN left = 0;
+        char reflags[6];
+
+        if ( GIMME_V == G_ARRAY ) {
+            /*
+               we are in list context so stringify
+               the modifiers that apply. We ignore "negative
+               modifiers" in this scenario.
+            */
+
+            const char *fptr = INT_PAT_MODS;
+            char ch;
+            U16 match_flags = (U16)((RX_EXTFLAGS(re) & PMf_COMPILETIME)
+                                    >> RXf_PMf_STD_PMMOD_SHIFT);
+
+            while((ch = *fptr++)) {
+                if(match_flags & 1) {
+                    reflags[left++] = ch;
+                }
+                match_flags >>= 1;
+            }
+
+            pattern = sv_2mortal(newSVpvn(RX_PRECOMP(re),RX_PRELEN(re)));
+            if (RX_UTF8(re))
+                SvUTF8_on(pattern);
+
+            /* return the pattern and the modifiers */
+            XPUSHs(pattern);
+            XPUSHs(sv_2mortal(newSVpvn(reflags,left)));
+            XSRETURN(2);
+        } else {
+            /* Scalar, so use the string that Perl would return */
+            /* return the pattern in (?msix:..) format */
+#if PERL_VERSION >= 11
+            pattern = sv_2mortal(newSVsv((SV*)re));
+#else
+            pattern = sv_2mortal(newSVpvn(RX_WRAPPED(re),RX_WRAPLEN(re)));
+            if (RX_UTF8(re))
+                SvUTF8_on(pattern);
+#endif
+            XPUSHs(pattern);
+            XSRETURN(1);
+        }
+    } else {
+        /* It ain't a regexp folks */
+        if ( GIMME_V == G_ARRAY ) {
+            /* return the empty list */
+            XSRETURN_UNDEF;
+        } else {
+            /* Because of the (?:..) wrapping involved in a
+               stringified pattern it is impossible to get a
+               result for a real regexp that would evaluate to
+               false. Therefore we can return PL_sv_no to signify
+               that the object is not a regex, this means that one
+               can say
+
+                 if (regex($might_be_a_regex) eq '(?:foo)') { }
+
+               and not worry about undefined values.
+            */
+            XSRETURN_NO;
+        }
+    }
+    /* NOT-REACHED */
 }
 
 XS(XS_Tie_Hash_NamedCapture_FETCH)

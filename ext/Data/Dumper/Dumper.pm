@@ -9,7 +9,7 @@
 
 package Data::Dumper;
 
-$VERSION = '2.121_15';
+$VERSION = '2.121_16';
 
 #$| = 1;
 
@@ -367,9 +367,7 @@ sub _dump {
         # regexp_pattern() in list context to get the modifiers separately.
         # But since this means loading the full debugging engine in process we wont
         # bother unless its necessary for accuracy.
-        if ($realpack ne 'Regexp' and $] > 5.009005) {
-            defined *re::regexp_pattern{CODE} 
-                or do { eval 'use re (regexp_pattern); 1' or die $@ };
+        if (($realpack ne 'Regexp') && defined(*re::regexp_pattern{CODE})) {
             $pat = re::regexp_pattern($val);
         } else {
             $pat = "$val";
