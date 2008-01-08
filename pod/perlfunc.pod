@@ -1928,11 +1928,11 @@ Here's a mailbox appender for BSD systems.
 	flock(MBOX,LOCK_UN);
     }
 
-    open(MBOX, ">>/usr/spool/mail/$ENV{'USER'}")
+    open(my $mbox, ">>", "/usr/spool/mail/$ENV{'USER'}")
 	    or die "Can't open mailbox: $!";
 
     lock();
-    print MBOX $msg,"\n\n";
+    print $mbox $msg,"\n\n";
     unlock();
 
 On systems that support a real flock(), locks are inherited across fork()
@@ -3410,7 +3410,7 @@ them, and automatically close whenever and however you leave that scope:
     #...
     sub read_myfile_munged {
 	my $ALL = shift;
-	my $handle = new IO::File;
+	my $handle = IO::File->new;
 	open($handle, "myfile") or die "myfile: $!";
 	$first = <$handle>
 	    or return ();     # Automatically closed here.
@@ -3431,6 +3431,8 @@ dirhandle, usually the real dirhandle name.  If DIRHANDLE is an undefined
 scalar variable (or array or hash element), the variable is assigned a
 reference to a new anonymous dirhandle.
 DIRHANDLEs have their own namespace separate from FILEHANDLEs.
+
+See example at C<readdir>.
 
 =item ord EXPR
 X<ord> X<encoding>
@@ -4283,9 +4285,9 @@ If you're planning to filetest the return values out of a C<readdir>, you'd
 better prepend the directory in question.  Otherwise, because we didn't
 C<chdir> there, it would have been testing the wrong file.
 
-    opendir(DIR, $some_dir) || die "can't opendir $some_dir: $!";
-    @dots = grep { /^\./ && -f "$some_dir/$_" } readdir(DIR);
-    closedir DIR;
+    opendir(my $dh, $some_dir) || die "can't opendir $some_dir: $!";
+    @dots = grep { /^\./ && -f "$some_dir/$_" } readdir($dh);
+    closedir $dh;
 
 =item readline EXPR
 
