@@ -624,7 +624,8 @@ clear_pmop:
 #ifdef USE_ITHREADS
 	if(PL_regex_pad) {        /* We could be in destruction */
 	    ReREFCNT_dec(PM_GETRE(cPMOPo));
-            av_push((AV*) PL_regex_pad[0],(SV*) PL_regex_pad[(cPMOPo)->op_pmoffset]);
+            av_push((AV*) PL_regex_pad[0],
+		    (SV*) SvREFCNT_inc_simple_NN(PL_regex_pad[(cPMOPo)->op_pmoffset]));
             SvREADONLY_off(PL_regex_pad[(cPMOPo)->op_pmoffset]);
 	    SvREPADTMP_on(PL_regex_pad[(cPMOPo)->op_pmoffset]);
             PM_SETRE_OFFSET(cPMOPo, (cPMOPo)->op_pmoffset);
@@ -3373,7 +3374,7 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
 	sv_setiv(repointer,0);
     } else {
 	SV * const repointer = newSViv(0);
-	av_push(PL_regex_padav, SvREFCNT_inc_simple_NN(repointer));
+	av_push(PL_regex_padav, repointer);
 	pmop->op_pmoffset = av_len(PL_regex_padav);
 	PL_regex_pad = AvARRAY(PL_regex_padav);
     }

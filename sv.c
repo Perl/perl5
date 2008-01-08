@@ -11273,8 +11273,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	    SV * const sv =
 		SvREPADTMP(regex)
 		    ? sv_dup_inc((SV*) regex, param)
-		    : SvREFCNT_inc(
-			newSViv(PTR2IV(sv_dup_inc(INT2PTR(SV *, SvIVX(regex)), param))))
+		    : newSViv(PTR2IV(sv_dup_inc(INT2PTR(SV *, SvIVX(regex)), param)))
 		;
 	    if (SvFLAGS(regex) & SVf_BREAK)
 		SvFLAGS(sv) |= SVf_BREAK; /* unrefcnted PL_curpm */
