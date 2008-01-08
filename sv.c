@@ -11256,24 +11256,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_regmatch_slab	= NULL;
     
     /* Clone the regex array */
-    PL_regex_padav = newAV();
-    {
-	const I32 len = av_len((AV*)proto_perl->Iregex_padav);
-	SV* const * const regexen = AvARRAY((AV*)proto_perl->Iregex_padav);
-	IV i;
-	av_push(PL_regex_padav, sv_dup_inc_NN(regexen[0],param));
-	for(i = 1; i <= len; i++) {
-	    const SV * const regex = regexen[i];
-	    /* FIXME for plugins
-			newSViv(PTR2IV(CALLREGDUPE(
-				INT2PTR(REGEXP *, SvIVX(regex)), param))))
-	    */
-	    SV * const sv = sv_dup_inc((SV*) regex, param);
-	    if (SvFLAGS(regex) & SVf_BREAK)
-		assert(SvFLAGS(sv) & SVf_BREAK); /* unrefcnted PL_curpm */
-	    av_push(PL_regex_padav, sv);
-	}
-    }
+    /* ORANGE FIXME for plugins, probably in the SV dup code.
+       newSViv(PTR2IV(CALLREGDUPE(
+       INT2PTR(REGEXP *, SvIVX(regex)), param))))
+    */
+    PL_regex_padav = av_dup_inc(proto_perl->Iregex_padav, param);
     PL_regex_pad = AvARRAY(PL_regex_padav);
 
     /* shortcuts to various I/O objects */
