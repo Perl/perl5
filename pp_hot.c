@@ -1197,8 +1197,17 @@ PP(pp_qr)
     dVAR; dSP;
     register PMOP * const pm = cPMOP;
     REGEXP * rx = PM_GETRE(pm);
-    SV * const pkg = CALLREG_PACKAGE(rx);
+    SV * const pkg = rx ? CALLREG_PACKAGE(rx) : NULL;
     SV * const rv = sv_newmortal();
+
+    if (!rx) {
+	/* FIXME ORANGE.
+	   This can go if/when regexps are stored directly in PL_regex_pad
+	   rather than via references. do_clean_objs finds and frees them
+	   when they are stored as references.  */
+	XPUSHs(rv);
+	RETURN;
+    }
 
     SvUPGRADE(rv, SVt_IV);
     /* This RV is about to own a reference to the regexp. (In addition to the

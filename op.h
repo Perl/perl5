@@ -329,18 +329,26 @@ struct pmop {
 };
 
 #ifdef USE_ITHREADS
-#define PM_GETRE(o)     (INT2PTR(REGEXP*,SvIVX(PL_regex_pad[(o)->op_pmoffset])))
+#define PM_GETRE(o)     (SvROK(PL_regex_pad[(o)->op_pmoffset]) ? 	\
+			 (REGEXP*)SvRV(PL_regex_pad[(o)->op_pmoffset]) : NULL)
 /* The assignment is just to enforce type safety (or at least get a warning).
  */
 #define PM_SETRE(o,r)	STMT_START {					\
                             const REGEXP *const slosh = (r);		\
-                            PM_SETRE_OFFSET((o), PTR2IV(slosh));	\
+			    SV *const whap = PL_regex_pad[(o)->op_pmoffset]; \
+			    SvIOK_off(whap);				\
+			    SvROK_on(whap);				\
+			    SvRV_set(whap, (SV*)slosh);			\
                         } STMT_END
 /* Actually you can assign any IV, not just an offset. And really should it be
    UV? */
+/* Need to turn the SvOK off as the regexp code is quite carefully manually
+   reference counting the thing pointed to, so don't want sv_setiv also
+   deciding to clear a reference count because it sees an SV.  */
 #define PM_SETRE_OFFSET(o,iv) \
 			STMT_START { \
                             SV* const sv = PL_regex_pad[(o)->op_pmoffset]; \
+			    SvROK_off(sv);				\
                             sv_setiv(sv, (iv)); \
                         } STMT_END
 

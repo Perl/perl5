@@ -884,13 +884,11 @@ perl_destruct(pTHXx)
                  * flag is set in regexec.c:S_regtry
                  */
                 SvFLAGS(resv) &= ~SVf_BREAK;
+		/* So stop it pointing to what is now a dead reference.  */
+		SvROK_off(resv);
             }
 	    else if(SvREPADTMP(resv)) {
 	      SvREPADTMP_off(resv);
-	    }
-            else if(SvIOKp(resv)) {
-		REGEXP *re = INT2PTR(REGEXP *,SvIVX(resv));
-                ReREFCNT_dec(re);
             }
         }
     }

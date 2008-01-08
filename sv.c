@@ -11268,15 +11268,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 			newSViv(PTR2IV(CALLREGDUPE(
 				INT2PTR(REGEXP *, SvIVX(regex)), param))))
 	    */
-	    /* And while we're at it, can we FIXME on the whole hiding 
-	       pointer inside an IV hack? */
-	    SV * const sv =
-		SvREPADTMP(regex)
-		    ? sv_dup_inc((SV*) regex, param)
-		    : newSViv(PTR2IV(sv_dup_inc(INT2PTR(SV *, SvIVX(regex)), param)))
-		;
+	    SV * const sv = sv_dup_inc((SV*) regex, param);
 	    if (SvFLAGS(regex) & SVf_BREAK)
-		SvFLAGS(sv) |= SVf_BREAK; /* unrefcnted PL_curpm */
+		assert(SvFLAGS(sv) & SVf_BREAK); /* unrefcnted PL_curpm */
 	    av_push(PL_regex_padav, sv);
 	}
     }
