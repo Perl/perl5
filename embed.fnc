@@ -693,7 +693,7 @@ Ap	|char *	|reg_stringify  |NN MAGIC *mg|NULLOK STRLEN *lp|NULLOK U32 *flags|NUL
 Ap	|void*	|regdupe_internal|NN REGEXP * const r|NN CLONE_PARAMS* param
 #endif
 Ap	|REGEXP*|pregcomp	|NN const SV * const pattern|const U32 flags
-Ap	|REGEXP*|re_compile	|NN const SV * const pattern|const U32 flags
+Ap	|REGEXP*|re_compile	|NN const SV * const pattern|U32 flags
 Ap	|char*	|re_intuit_start|NN REGEXP * const rx|NULLOK SV* sv|NN char* strpos \
 				|NN char* strend|const U32 flags \
 				|NULLOK re_scream_pos_data *data

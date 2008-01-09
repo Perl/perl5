@@ -1871,7 +1871,7 @@ PERL_CALLCONV void*	Perl_regdupe_internal(pTHX_ REGEXP * const r, CLONE_PARAMS* 
 PERL_CALLCONV REGEXP*	Perl_pregcomp(pTHX_ const SV * const pattern, const U32 flags)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV REGEXP*	Perl_re_compile(pTHX_ const SV * const pattern, const U32 flags)
+PERL_CALLCONV REGEXP*	Perl_re_compile(pTHX_ const SV * const pattern, U32 flags)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV char*	Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV* sv, char* strpos, char* strend, const U32 flags, re_scream_pos_data *data)
