@@ -687,7 +687,6 @@
 #define reg_temp_copy		Perl_reg_temp_copy
 #endif
 #define regfree_internal	Perl_regfree_internal
-#define reg_stringify		Perl_reg_stringify
 #if defined(USE_ITHREADS)
 #define regdupe_internal	Perl_regdupe_internal
 #endif
@@ -2979,7 +2978,6 @@
 #define reg_temp_copy(a)	Perl_reg_temp_copy(aTHX_ a)
 #endif
 #define regfree_internal(a)	Perl_regfree_internal(aTHX_ a)
-#define reg_stringify(a,b,c,d)	Perl_reg_stringify(aTHX_ a,b,c,d)
 #if defined(USE_ITHREADS)
 #define regdupe_internal(a,b)	Perl_regdupe_internal(aTHX_ a,b)
 #endif

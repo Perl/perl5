@@ -402,7 +402,6 @@ Perl_pregfree
 Perl_pregfree2
 Perl_reg_temp_copy
 Perl_regfree_internal
-Perl_reg_stringify
 Perl_regdupe_internal
 Perl_pregcomp
 Perl_re_compile

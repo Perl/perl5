@@ -2726,21 +2726,25 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		    len = 7;
 		    retval = buffer = savepvn("NULLREF", len);
 		} else if (SvTYPE(referent) == SVt_REGEXP) {
-                    char *str = NULL;
-                    I32 haseval = 0;
-                    U32 flags = 0;
-		    struct magic temp;
-		    /* FIXME - get rid of this cast away of const, or work out
-		       how to do it better.  */
-		    temp.mg_obj = (SV *)referent;
-		    assert(temp.mg_obj);
-                    (str) = CALLREG_AS_STR(&temp,lp,&flags,&haseval);
-                    if (flags & 1)
-	                SvUTF8_on(sv);
-                    else
-	                SvUTF8_off(sv);
-                    PL_reginterp_cnt += haseval;
-		    return str;
+		    const REGEXP * const re = (REGEXP *)referent;
+		    I32 seen_evals = 0;
+
+		    assert(re);
+			
+		    /* If the regex is UTF-8 we want the containing scalar to
+		       have an UTF-8 flag too */
+		    if (RX_UTF8(re))
+			SvUTF8_on(sv);
+		    else
+			SvUTF8_off(sv);	
+
+		    if ((seen_evals = RX_SEEN_EVALS(re)))
+			PL_reginterp_cnt += seen_evals;
+
+		    if (lp)
+			*lp = RX_WRAPLEN(re);
+ 
+		    return RX_WRAPPED(re);
 		} else {
 		    const char *const typestr = sv_reftype(referent, 0);
 		    const STRLEN typelen = strlen(typestr);

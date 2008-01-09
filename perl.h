@@ -209,10 +209,6 @@
 #define CALLREG_INTUIT_STRING(prog) \
     CALL_FPTR(RX_ENGINE(prog)->checkstr)(aTHX_ (prog))
 
-#define CALLREG_AS_STR(mg,lp,flags,haseval) \
-        Perl_reg_stringify(aTHX_ (mg), (lp), (flags), (haseval))
-#define CALLREG_STRINGIFY(mg,lp,flags) CALLREG_AS_STR(mg,lp,flags,0)
-
 #define CALLREGFREE(prog) \
     Perl_pregfree(aTHX_ (prog))
 
