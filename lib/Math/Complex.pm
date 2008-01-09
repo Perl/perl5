@@ -9,9 +9,10 @@ package Math::Complex;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $Inf);
 
-$VERSION = 1.42;
+$VERSION = 1.43;
 
 BEGIN {
+    # For 64-bit doubles, anyway.
     my $IEEE_DBL_MAX = eval "1.7976931348623157e+308";
     if ($^O eq 'unicosmk') {
 	$Inf = $IEEE_DBL_MAX;
