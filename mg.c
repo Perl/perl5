@@ -1553,6 +1553,29 @@ Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)
 }
 
 int
+Perl_magic_clearisa(pTHX_ SV *sv, MAGIC *mg)
+{
+    dVAR;
+    HV* stash;
+
+    /* Bail out if destruction is going on */
+    if(PL_dirty) return 0;
+
+    av_clear((AV*)sv);
+
+    /* XXX see comments in magic_setisa */
+    stash = GvSTASH(
+        SvTYPE(mg->mg_obj) == SVt_PVGV
+            ? (GV*)mg->mg_obj
+            : (GV*)SvMAGIC(mg->mg_obj)->mg_obj
+    );
+
+    mro_isa_changed_in(stash);
+
+    return 0;
+}
+
+int
 Perl_magic_setamagic(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
