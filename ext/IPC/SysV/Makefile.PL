@@ -76,9 +76,14 @@ sub configure
 
 sub MY::libscan
 {
- my($self, $path) = @_;
- return '' if $path =~ m! /(RCS|CVS|SCCS)/ | [~%]$ | \.(swp|orig|rej)$ !x;
- $path;
+  package MY;
+  my($self, $path) = @_;
+  return $path if $self->SUPER::libscan($path) and
+                  $path !~ m! [~%]$
+                            | \.(cache\.cm|swp|orig|rej)$
+                            | regen\.pl$
+                            !x;
+  return '';
 }
 
 sub MY::postamble
