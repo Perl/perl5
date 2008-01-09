@@ -9458,7 +9458,6 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 
     ret->mother_re      = NULL;
     ret->gofs = 0;
-    ret->seen_evals = 0;
 }
 #endif /* PERL_IN_XSUB_RE */
 
