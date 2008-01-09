@@ -87,7 +87,7 @@ legal_ref_keys(hash)
             XPUSHs( key );
         }
 
-SV*
+void
 hv_store(hvref, key, val)
 	SV* hvref
 	SV* key
@@ -98,7 +98,7 @@ hv_store(hvref, key, val)
     CODE:
     {
 	if (!SvROK(hvref) || SvTYPE(SvRV(hvref)) != SVt_PVHV)
-	   croak("First argument to alias_hv() must be a hash reference");
+	   croak("First argument to hv_store() must be a hash reference");
 	hv = (HV*)SvRV(hvref);
         SvREFCNT_inc(val);
 	if (!hv_store_ent(hv, key, val, 0)) {
@@ -107,7 +107,5 @@ hv_store(hvref, key, val)
 	} else {
 	    XSRETURN_YES;
 	}
-
     }
-    OUTPUT:
-        RETVAL
+
