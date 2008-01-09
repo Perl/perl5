@@ -2259,7 +2259,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
                 /* so we know which PL_regex_padav element is PL_reg_curpm
 		   when clearing up in perl_destruct() */
                 SvFLAGS(repointer) |= SVf_BREAK;
-                av_push(PL_regex_padav,SvREFCNT_inc_simple_NN(repointer));
+                av_push(PL_regex_padav, repointer);
                 PL_reg_curpm->op_pmoffset = av_len(PL_regex_padav);
                 PL_regex_pad = AvARRAY(PL_regex_padav);
             }
