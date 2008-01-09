@@ -3209,8 +3209,7 @@ PP(pp_require)
 	if (vms_unixname)
 #endif
 	{
-	    namesv = newSV(0);
-	    sv_upgrade(namesv, SVt_PV);
+	    namesv = newSV_type(SVt_PV);
 	    for (i = 0; i <= AvFILL(ar); i++) {
 		SV * const dirsv = *av_fetch(ar, i, TRUE);
 
