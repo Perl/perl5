@@ -1287,10 +1287,7 @@ print "ok 246\n";
 print "not " unless "\x{abcd}" =~ /\x{abcd}/;
 print "ok 247\n";
 
-if ($::running_as_thread) {
-    print "not ok 248 # TODO & SKIP: SEGVs in 5.10 when threaded\n";
-    print "not ok 249 # TODO & SKIP: SEGVs in 5.10 when threaded\n";
-} else {
+{
     # bug id 20001008.001
 
     $test = 248;
