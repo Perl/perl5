@@ -9,6 +9,10 @@ BEGIN {
 use strict;
 plan( tests => 69 );
 
+run_tests() unless caller;
+
+sub run_tests {
+
 my $foo = 'Now is the time for all good men to come to the aid of their country.';
 
 my $first = substr($foo,0,index($foo,'the'));
@@ -154,4 +158,6 @@ SKIP: {
 
     local ${^UTF8CACHE} = -1;
     is(index($t, 'xyz'), 4, "0xfffffffd and utf8cache");
+}
+
 }

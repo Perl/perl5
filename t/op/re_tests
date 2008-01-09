@@ -503,14 +503,14 @@ a(?:b|(c|e){1,2}?|d)+?(.)	ace	y	$1$2	ce
 '(ab)\d\1'i	Ab4ab	y	$1	Ab
 '(ab)\d\1'i	ab4Ab	y	$1	ab
 foo\w*\d{4}baz	foobar1234baz	y	$&	foobar1234baz
-a(?{})b	cabd	y	$&	ab
+a(?{})b	cabd	yt	$&	ab	threads confuse eval
 a(?{)b	-	c	-	Sequence (?{...}) not terminated or not {}-balanced
 a(?{{})b	-	c	-	Sequence (?{...}) not terminated or not {}-balanced
 a(?{}})b	-	c	-	
 a(?{"{"})b	-	c	-	Sequence (?{...}) not terminated or not {}-balanced
-a(?{"\{"})b	cabd	y	$&	ab
+a(?{"\{"})b	cabd	yt	$&	ab	threads confuse eval
 a(?{"{"}})b	-	c	-	Unmatched right curly bracket
-a(?{$::bl="\{"}).b	caxbd	y	$::bl	{
+a(?{$::bl="\{"}).b	caxbd	yt	$::bl	{	threads confuse eval
 x(~~)*(?:(?:F)?)?	x~~	y	-	-
 ^a(?#xxx){3}c	aaac	y	$&	aaac
 '^a (?#xxx) (?#yyy) {3}c'x	aaac	y	$&	aaac
@@ -550,10 +550,10 @@ x(~~)*(?:(?:F)?)?	x~~	y	-	-
 ^(\(+)?blah(?(1)(\)))$	(blah	n	-	-
 (?(1?)a|b)	a	c	-	Switch condition not recognized
 (?(1)a|b|c)	a	c	-	Switch (?(condition)... contains too many branches
-(?(?{0})a|b)	a	n	-	-
-(?(?{0})b|a)	a	y	$&	a
-(?(?{1})b|a)	a	n	-	-
-(?(?{1})a|b)	a	y	$&	a
+(?(?{0})a|b)	a	nt	-	-	threads confuse eval
+(?(?{0})b|a)	a	yt	$&	a	threads confuse eval
+(?(?{1})b|a)	a	nt	-	-	threads confuse eval
+(?(?{1})a|b)	a	yt	$&	a	threads confuse eval
 (?(?!a)a|b)	a	n	-	-
 (?(?!a)b|a)	a	y	$&	a
 (?(?=a)b|a)	a	n	-	-
@@ -573,8 +573,8 @@ $(?<=^(a))	a	y	$1	a
 ([\w:]+::)?(\w+)$	abcd	y	$1-$2	-abcd
 ([\w:]+::)?(\w+)$	xy:z:::abcd	y	$1-$2	xy:z:::-abcd
 ^[^bcd]*(c+)	aexycd	y	$1	c
-(?{$a=2})a*aa(?{local$a=$a+1})k*c(?{$b=$a})	yaaxxaaaacd	y	$b	3
-(?{$a=2})(a(?{local$a=$a+1}))*aak*c(?{$b=$a})	yaaxxaaaacd	y	$b	4
+(?{$a=2})a*aa(?{local$a=$a+1})k*c(?{$b=$a})	yaaxxaaaacd	yt	$b	3	threads confuse eval
+(?{$a=2})(a(?{local$a=$a+1}))*aak*c(?{$b=$a})	yaaxxaaaacd	yt	$b	4	threads confuse eval
 (>a+)ab	aaab	n	-	-
 (?>a+)b	aaab	y	-	-
 ([[:]+)	a:[b]:	y	$1	:[
@@ -817,7 +817,7 @@ abb$	b\nca	n	-	-
 'abb$'m	b\nca	n	-	-
 (^|x)(c)	ca	y	$2	c
 a*abc?xyz+pqr{3}ab{2,}xy{4,5}pq{0,6}AB{0,}zz	x	n	-	-
-a(?{$a=2;$b=3;($b)=$a})b	yabz	y	$b	2
+a(?{$a=2;$b=3;($b)=$a})b	yabz	yt	$b	2	threads confuse eval
 round\(((?>[^()]+))\)	_I(round(xs * sz),1)	y	$1	xs * sz
 '((?x:.) )'	x 	y	$1-	x -
 '((?-x:.) )'x	x 	y	$1-	x-
@@ -896,7 +896,7 @@ tt+$	xxxtt	y	-	-
 (abc)?(abc)+	abc	y	$1:$2	:abc	-
 'b\s^'m	a\nb\n	n	-	-
 \ba	a	y	-	-
-^(a(??{"(?!)"})|(a)(?{1}))b	ab	y	$2	a	# [ID 20010811.006]
+^(a(??{"(?!)"})|(a)(?{1}))b	ab	yt	$2	a	# [ID 20010811.006]	threads confuse eval
 ab(?i)cd	AbCd	n	-	-	# [ID 20010809.023]
 ab(?i)cd	abCd	y	-	-
 (A|B)*(?(1)(CD)|(CD))	CD	y	$2-$3	-CD
@@ -941,7 +941,7 @@ ab(?i)cd	abCd	y	-	-
 (.*?)(?<=[bc])	abcd	y	$1	ab
 (.*?)(?<=[bc])c	abcd	y	$1	ab
 2(]*)?$\1	2	y	$&	2
-(??{})	x	y	-	-
+(??{})	x	yt	-	-	threads confuse eval
 a(b)??	abc	y	<$1>	<>	# undef [perl #16773]
 (\d{1,3}\.){3,}	128.134.142.8	y	<$1>	<142.>	# [perl #18019]
 ^.{3,4}(.+)\1\z	foobarbar	y	$1	bar	# 16 tests for [perl #23171]
@@ -974,8 +974,8 @@ x(?#	x	c	-	Sequence (?#... not terminated
 (x.|foo|fool|x.|money|parted|y.)$	fools	n	-	-
 (foo|fool|money|parted)$	fools	n	-	-
 (a|aa|aaa||aaaa|aaaaa|aaaaaa)(b|c)	aaaaaaaaaaaaaaab	y	$1$2	aaaaaab
-(a|aa|aaa||aaaa|aaaaa|aaaaaa)(??{$1&&""})(b|c)	aaaaaaaaaaaaaaab	y	$1$2	aaaaaab
-(a|aa|aaa|aaaa|aaaaa|aaaaaa)(??{$1&&"foo"})(b|c)	aaaaaaaaaaaaaaab	n	-	-
+(a|aa|aaa||aaaa|aaaaa|aaaaaa)(??{$1&&""})(b|c)	aaaaaaaaaaaaaaab	yt	$1$2	aaaaaab	threads confuse eval
+(a|aa|aaa|aaaa|aaaaa|aaaaaa)(??{$1&&"foo"})(b|c)	aaaaaaaaaaaaaaab	nt	-	-	threads confuse eval
 ^(a*?)(?!(aa|aaaa)*$)	aaaaaaaaaaaaaaaaaaaa	y	$1	a	# [perl #34195]
 ^(a*?)(?!(aa|aaaa)*$)(?=a\z)	aaaaaaaa	y	$1	aaaaaaa
 ^(.)\s+.$(?(1))	A B	y	$1	A	# [perl #37688]
@@ -1019,18 +1019,18 @@ X(?=foo)	..XfooY..	y	pos	3
 X(?<=foo.)[YZ]	..XfooXY..	y	pos	8
 (?=XY*foo)	Xfoo	y	pos	0
 ^(?=XY*foo)	Xfoo	y	pos	0
-^(??{"a+"})a	aa	y	$&	aa
-^(?:(??{"a+"})|b)a	aa	y	$&	aa
-^(??{chr 0x100}).$	\x{100}\x{100}	y	$&	\x{100}\x{100}
-^(??{q(\x{100})}).	\x{100}\x{100}	y	$&	\x{100}\x{100}
-^(??{q(.+)})\x{100}	\x{100}\x{100}	y	$&	\x{100}\x{100}
-^(??{q(.)})\x{100}	\x{100}\x{100}	y	$&	\x{100}\x{100}
-^(??{chr 0x100})\xbb	\x{100}\x{bb}	y	$&	\x{100}\x{bb}
-^(.)(??{"(.)(.)"})(.)$	abcd	y	$1-$2	a-d
-^(.)(??{"(bz+|.)(.)"})(.)$	abcd	y	$1-$2	a-d
-^(.)((??{"(.)(cz+)"})|.)	abcd	y	$1-$2	a-b
-^a(?>(??{q(b)}))(??{q(c)})d	abcd	y	-	-
-^x(??{""})+$	x	y	$&	x
+^(??{"a+"})a	aa	yt	$&	aa	threads confuse eval
+^(?:(??{"a+"})|b)a	aa	yt	$&	aa	threads confuse eval
+^(??{chr 0x100}).$	\x{100}\x{100}	yt	$&	\x{100}\x{100}	threads confuse eval
+^(??{q(\x{100})}).	\x{100}\x{100}	yt	$&	\x{100}\x{100}	threads confuse eval
+^(??{q(.+)})\x{100}	\x{100}\x{100}	yt	$&	\x{100}\x{100}	threads confuse eval
+^(??{q(.)})\x{100}	\x{100}\x{100}	yt	$&	\x{100}\x{100}	threads confuse eval
+^(??{chr 0x100})\xbb	\x{100}\x{bb}	yt	$&	\x{100}\x{bb}	threads confuse eval
+^(.)(??{"(.)(.)"})(.)$	abcd	yt	$1-$2	a-d	threads confuse eval
+^(.)(??{"(bz+|.)(.)"})(.)$	abcd	yt	$1-$2	a-d	threads confuse eval
+^(.)((??{"(.)(cz+)"})|.)	abcd	yt	$1-$2	a-b	threads confuse eval
+^a(?>(??{q(b)}))(??{q(c)})d	abcd	yt	-	-	threads confuse eval
+^x(??{""})+$	x	yt	$&	x	threads confuse eval
 ^(<(?:[^<>]+|(?3)|(?1))*>)()(!>!>!>)$	<<!>!>!>><>>!>!>!>	y	$1	<<!>!>!>><>>
 ^(<(?:[^<>]+|(?1))*>)$	<<><<<><>>>>	y	$1	<<><<<><>>>>
 ((?2)*)([fF]o+)	fooFoFoo	y	$1-$2	fooFo-Foo
@@ -1040,13 +1040,13 @@ X(?<=foo.)[YZ]	..XfooXY..	y	pos	8
 (?<n>foo|bar|baz)(?<m>[ew]+)	snofooewa	y	$+{n}	foo
 (?<n>foo|bar|baz)(?<m>[ew]+)	snofooewa	y	$+{m}	ew
 (?<n>foo)|(?<n>bar)|(?<n>baz)	snofooewa	y	$+{n}	foo
-(?<n>foo)(??{ $+{n} })	snofooefoofoowaa	y	$+{n}	foo
+(?<n>foo)(??{ $+{n} })	snofooefoofoowaa	yt	$+{n}	foo	threads confuse eval
 (?P<n>foo|bar|baz)	snofooewa	y	$1	foo
 (?P<n>foo|bar|baz)	snofooewa	y	$+{n}	foo
 (?P<n>foo|bar|baz)(?P<m>[ew]+)	snofooewa	y	$+{n}	foo
 (?P<n>foo|bar|baz)(?P<m>[ew]+)	snofooewa	y	$+{m}	ew
 (?P<n>foo)|(?P<n>bar)|(?P<n>baz)	snofooewa	y	$+{n}	foo
-(?P<n>foo)(??{ $+{n} })	snofooefoofoowaa	y	$+{n}	foo
+(?P<n>foo)(??{ $+{n} })	snofooefoofoowaa	yt	$+{n}	foo	threads confuse eval
 (?P<=n>foo|bar|baz)	snofooewa	c	-	Sequence (?P<=...) not recognized
 (?P<!n>foo|bar|baz)	snofooewa	c	-	Sequence (?P<!...) not recognized
 (?PX<n>foo|bar|baz)	snofooewa	c	-	Sequence (?PX<...) not recognized
@@ -1055,7 +1055,7 @@ X(?<=foo.)[YZ]	..XfooXY..	y	pos	8
 /(?'n'foo|bar|baz)(?'m'[ew]+)/	snofooewa	y	$+{n}	foo
 /(?'n'foo|bar|baz)(?'m'[ew]+)/	snofooewa	y	$+{m}	ew
 /(?'n'foo)|(?'n'bar)|(?<n>baz)/	snobazewa	y	$+{n}	baz
-/(?'n'foo)(??{ $+{n} })/	snofooefoofoowaa	y	$+{n}	foo
+/(?'n'foo)(??{ $+{n} })/	snofooefoofoowaa	yt	$+{n}	foo	threads confuse eval
 /(?'n'foo)\k<n>/	..foofoo..	y	$1	foo
 /(?'n'foo)\k<n>/	..foofoo..	y	$+{n}	foo
 /(?<n>foo)\k'n'/	..foofoo..	y	$1	foo
@@ -1295,7 +1295,7 @@ X(\w+)(?=\s)|X(\w+)	Xab	y	[$1-$2]	[-ab]
 #Bug #41492
 (?(DEFINE)(?<A>(?&B)+)(?<B>a))(?&A)	a	y	$&	a
 (?(DEFINE)(?<A>(?&B)+)(?<B>a))(?&A)	aa	y	$&	aa
-\x{100}?(??{""})xxx	xxx	y	$&	xxx
+\x{100}?(??{""})xxx	xxx	yt	$&	xxx	threads confuse eval
 
 foo(\R)bar	foo\r\nbar	y	$1	\r\n
 foo(\R)bar	foo\nbar	y	$1	\n
