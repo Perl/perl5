@@ -3368,8 +3368,12 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
 #ifdef USE_ITHREADS
     if (av_len((AV*) PL_regex_pad[0]) > -1) {
 	SV * const repointer = av_pop((AV*)PL_regex_pad[0]);
-	pmop->op_pmoffset = SvIV(repointer);
+	const IV offset = SvIV(repointer);
+	pmop->op_pmoffset = offset;
 	sv_setiv(repointer,0);
+	assert(repointer == PL_regex_pad[offset]);
+	/* One reference remains, in PL_regex_pad[offset]  */
+	SvREFCNT_dec(repointer);
     } else {
 	SV * const repointer = newSViv(0);
 	av_push(PL_regex_padav, repointer);
