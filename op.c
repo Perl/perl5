@@ -3370,7 +3370,7 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
 	SV * const repointer = av_pop((AV*)PL_regex_pad[0]);
 	const IV offset = SvIV(repointer);
 	pmop->op_pmoffset = offset;
-	sv_setiv(repointer,0);
+	SvOK_off(repointer);
 	assert(repointer == PL_regex_pad[offset]);
 	/* One reference remains, in PL_regex_pad[offset]  */
 	SvREFCNT_dec(repointer);
