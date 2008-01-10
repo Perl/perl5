@@ -1222,7 +1222,8 @@ perl_destruct(pTHXx)
 			" flags=0x%"UVxf
 			" refcnt=%"UVuf pTHX__FORMAT "\n"
 			"\tallocated at %s:%d %s %s%s\n",
-			(void*)sv, sv->sv_flags, sv->sv_refcnt pTHX__VALUE,
+			(void*)sv, (UV)sv->sv_flags, (UV)sv->sv_refcnt
+			pTHX__VALUE,
 			sv->sv_debug_file ? sv->sv_debug_file : "(unknown)",
 			sv->sv_debug_line,
 			sv->sv_debug_inpad ? "for" : "by",
