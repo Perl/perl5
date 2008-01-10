@@ -537,20 +537,14 @@ print "not " unless $1 and /$1/;
 print "ok $test\n";
 $test++;
 
-if ($::running_as_thread) {
-    print "not ok $test # TODO & SKIP: croaks in 5.10 when threaded\n";
-    $test++;
-} else {
 $a=qr/(?{++$b})/;
 $b = 7;
 /$a$a/;
 print "not " unless $b eq '9';
 print "ok $test\n";
 $test++;
-}
 
 {
-    local $TODO = $::running_as_thread;
     $c="$a";
     /$a$a/;
     iseq($b, '11');
@@ -559,10 +553,7 @@ $test++;
 {
   use re "eval";
   /$a$c$a/;
-  {
-      local $TODO = $::running_as_thread;
-      iseq($b, '14');
-  }
+  iseq($b, '14');
 
   local $lex_a = 2;
   my $lex_a = 43;
@@ -584,7 +575,6 @@ $test++;
   $match = eval { /$a$c$a/ };
   # FIXME - split this one. That would require removing a lot of hard coded
   # test numbers.
-  local $TODO = $::running_as_thread;
   ok($b eq '14' and $@ =~ /Eval-group not allowed/ and not $match);
 }
 
@@ -4597,12 +4587,7 @@ sub kt
      s/(*:X)A+|(*:Y)B+|(*:Z)C+/$REGMARK/g;
      iseq $_, "ZYX";
 }
-if ($::running_as_thread) {
-    for (1..3) {
-	print "not ok $test # TODO & SKIP: croaks when threaded\n";
-	$test++;
-    }
-} else {
+{
     our @ctl_n=();
     our @plus=();
     our $nested_tags;
