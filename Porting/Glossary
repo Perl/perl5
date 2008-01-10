@@ -2418,6 +2418,9 @@ dynamic_ext (Extensions.U):
 	This variable holds a list of XS extension files we want to
 	link dynamically into the package.  It is used by Makefile.
 
+dtrace (dtrace.U):
+	This variable holds the location of the dtrace executable.
+
 eagain (nblock_io.U):
 	This variable bears the symbolic errno code set by read() when no
 	data is present on the file and non-blocking I/O was enabled (otherwise,
@@ -4787,6 +4790,10 @@ usecrosscompile (Cross.U):
 usedl (dlsrc.U):
 	This variable indicates if the system supports dynamic
 	loading of some sort.  See also dlsrc and dlobj.
+
+usedtrace (trace.U):
+	This variable indicates whether we are compiling with dtrace support.
+	See also dtrace.
 
 usefaststdio (usefaststdio.U):
 	This variable conditionally defines the USE_FAST_STDIO symbol,

@@ -6127,6 +6127,7 @@ $ WC "dlobj='" + dlobj + "'"
 $ WC "dlsrc='dl_vms.c'"
 $ WC "doublesize='" + doublesize + "'"
 $ WC "drand01='" + drand01 + "'"
+$ WC "dtrace=''"
 $!
 $! The extensions symbol may be quite long
 $!
@@ -6442,6 +6443,7 @@ $ WC "usedebugging_perl='"+use_debugging_perl+"'"
 $ WC "usedefaulttypes='" + usedefaulttypes + "'"    ! VMS-specific
 $ WC "usecrosscompile='undef'"
 $ WC "usedl='" + usedl + "'"
+$ WC "usedtrace='undef'"
 $ WC "usefaststdio='" + usefaststdio + "'"
 $ WC "useieee='" + useieee + "'"                    ! VMS-specific
 $ WC "useithreads='" + useithreads + "'"

@@ -238,6 +238,7 @@ cpio=''
 cpp=''
 csh=''
 date=''
+dtrace=''
 echo=''
 egrep=''
 emacs=''
@@ -1193,6 +1194,7 @@ use5005threads=''
 useithreads=''
 usereentrant=''
 usethreads=''
+usedtrace=''
 incpath=''
 mips_type=''
 usrinc=''
@@ -8949,6 +8951,71 @@ esac
 set usefaststdio
 eval $setvar
 
+: DTrace support
+dflt_dtrace='/usr/sbin/dtrace'
+cat <<EOM
+
+Perl can be built to support DTrace on platforms that support it.
+DTrace is a diagnosis and performance analysis tool from Sun.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+EOM
+
+while test 1 ; do
+	case "$usedtrace" in
+	$define|true|[yY]*) 
+		dflt='y' 
+		;;
+	?*)
+		dflt='y' 
+		dflt_dtrace=$usedtrace
+		;;
+	*) 
+		dflt='n' 
+		;;
+	esac
+
+	rp='Support DTrace if available?'
+	. ./myread
+	case "$ans" in
+	y|Y)	val="$define" ;;
+	*)      val="$undef" ;;
+	esac
+	set usedtrace
+	eval $setvar
+
+	test "X$usedtrace" != "X$define" && break
+
+	echo " "
+	rp='Where is the dtrace executable?'
+	dflt=$dflt_dtrace
+	. ./getfile
+	val="$ans"
+	set dtrace
+	eval $setvar
+	
+	if test -f $dtrace
+	then
+		if ! $dtrace -h -s ../perldtrace.d \
+			-o perldtrace.tmp >/dev/null 2>&1 \
+			&& rm -f perldtrace.tmp
+		then
+			cat >&2 <<EOM
+
+*** $me:  Fatal Error:  $dtrace doesn't support -h flag
+***
+*** Your installed dtrace doesn't support the -h switch to compile a D
+*** program into a C header. Can't continue.
+
+EOM
+			exit 1
+		fi
+		break;
+	fi
+
+	echo "$dtrace was not found."
+	echo " "
+done
 
 : define an is-a-typedef? function
 typedef='type=$1; var=$2; def=$3; shift; shift; shift; inclist=$@;
@@ -22063,6 +22130,7 @@ dlsrc='$dlsrc'
 doublesize='$doublesize'
 drand01='$drand01'
 drand48_r_proto='$drand48_r_proto'
+dtrace='$dtrace'
 dynamic_ext='$dynamic_ext'
 eagain='$eagain'
 ebcdic='$ebcdic'
@@ -22523,6 +22591,7 @@ use64bitall='$use64bitall'
 use64bitint='$use64bitint'
 usecrosscompile='$usecrosscompile'
 usedl='$usedl'
+usedtrace='$usedtrace'
 usefaststdio='$usefaststdio'
 useithreads='$useithreads'
 uselargefiles='$uselargefiles'

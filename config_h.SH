@@ -2800,6 +2800,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_oldpthreads	OLD_PTHREADS_API		/**/
 #$usereentrant	USE_REENTRANT_API	/**/
 
+/* USE_DTRACE
+ *	This symbol, if defined, indicates that Perl should
+ *	be built with support for DTrace.
+ */
+#$usedtrace USE_DTRACE			/**/
+
 /* PERL_VENDORARCH:
  *	If defined, this symbol contains the name of a private library.
  *	The library is private in the sense that it needn't be in anyone's
