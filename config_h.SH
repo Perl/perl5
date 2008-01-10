@@ -3,6 +3,7 @@
 #
 # See Porting/config_h.pl
 
+: Set up for generating config_h.SH
 case "$CONFIG_SH" in
 '') CONFIG_SH=config.sh ;;
 esac
@@ -959,7 +960,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 		/* If you can get stringification with catify, tell me how! */
 #endif
 #if $cpp_stuff == 42
-#define PeRl_CaTiFy(a, b)	a ## b	
+#define PeRl_CaTiFy(a, b)	a ## b
 #define PeRl_StGiFy(a)	#a
 /* the additional level of indirection enables these macros to be
  * used as arguments to other macros.  See K&R 2nd ed., page 231. */
@@ -2987,6 +2988,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)
 #   define _GNU_SOURCE
 #endif
+
 /* HAS_ISASCII:
  *	This manifest constant lets the C program know that isascii
  *	is available.
@@ -4434,7 +4436,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #ifndef USE_64_BIT_INT
 #$use64bitint	USE_64_BIT_INT		/**/
 #endif
-
 #ifndef USE_64_BIT_ALL
 #$use64bitall	USE_64_BIT_ALL		/**/
 #endif

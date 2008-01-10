@@ -2414,6 +2414,9 @@ drand48_r_proto (d_drand48_r.U):
 	REENTRANT_PROTO_T_ABC macros of reentr.h if d_drand48_r
 	is defined.
 
+dtrace (usedtrace.U):
+	This variable holds the location of the dtrace executable.
+
 dynamic_ext (Extensions.U):
 	This variable holds a list of XS extension files we want to
 	link dynamically into the package.  It is used by Makefile.
@@ -4539,9 +4542,9 @@ srandom_r_proto (d_srandom_r.U):
 	is defined.
 
 src (src.U):
-	This variable holds the path to the package source. It is up to
-	the Makefile to use this variable and set VPATH accordingly to
-	find the sources remotely.
+	This variable holds the (possibly relative) path of the package source.
+	It is up to the Makefile to use this variable and set VPATH accordingly
+	to find the sources remotely.  Use $pkgsrc to have an absolute path.
 
 sSCNfldbl (longdblfio.U):
 	This variable, if defined, contains the string used by stdio to
@@ -4787,6 +4790,10 @@ usecrosscompile (Cross.U):
 usedl (dlsrc.U):
 	This variable indicates if the system supports dynamic
 	loading of some sort.  See also dlsrc and dlobj.
+
+usedtrace (usedtrace.U):
+	This variable indicates whether we are compiling with dtrace
+	support. See also dtrace.
 
 usefaststdio (usefaststdio.U):
 	This variable conditionally defines the USE_FAST_STDIO symbol,

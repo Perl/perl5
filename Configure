@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Wed Jan  9 22:02:14 CET 2008 [metaconfig 3.0 PL70]
+# Generated on Mon Jan 14 17:33:05 CET 2008 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1174,6 +1174,8 @@ uidtype=''
 archname64=''
 use64bitall=''
 use64bitint=''
+dtrace=''
+usedtrace=''
 usefaststdio=''
 ccflags_uselargefiles=''
 ldflags_uselargefiles=''
@@ -1235,6 +1237,7 @@ yacc=''
 yaccflags=''
 CONFIG=''
 
+: Detect odd OSs
 define='define'
 undef='undef'
 smallmach='pdp11 i8086 z8000 i80286 iAPX286'
@@ -1730,7 +1733,7 @@ touch optdef.sh
 touch posthint.sh
 
 : set package name
-package=perl5
+package='perl5'
 first=`echo $package | sed -e 's/^\(.\).*/\1/'`
 last=`echo $package | sed -e 's/^.\(.*\)/\1/'`
 case "`echo AbyZ | tr '[:lower:]' '[:upper:]' 2>/dev/null`" in
@@ -1776,11 +1779,11 @@ case "$src" in
 '')	src=/
 	rsrc=/
 	;;
-/*) rsrc="$src";;
-*) rsrc="../$src";;
+/*)	rsrc="$src";;
+*)	rsrc="../$src";;
 esac
 if test -f $rsrc/Configure && \
-	$contains "^package=$package$" $rsrc/Configure >/dev/null 2>&1
+	$contains "^package='$package'\$" $rsrc/Configure >/dev/null 2>&1
 then
    : found it, so we are ok.
 else
@@ -2668,7 +2671,7 @@ case "$lns" in
 esac
 echo " "
 
-
+: Make symlinks util
 case "$mksymlinks" in
 $define|true|[yY]*)
 	case "$src" in
@@ -3899,12 +3902,12 @@ esac
 prefix="$ans"
 prefixexp="$ansexp"
 
+: is AFS running?
 case "$afsroot" in
 '')	afsroot=/afs ;;
 *)	afsroot=$afsroot ;;
 esac
 
-: is AFS running?
 echo " "
 case "$afs" in
 $define|true)	afs=true ;;
@@ -4019,6 +4022,7 @@ $undef$define) . ./whoa; eval "$var=\$tu";;
 *) eval "$var=$val";;
 esac'
 
+: Check is we will use socks
 case "$usesocks" in
 $define|true|[yY]*)	dflt='y';;
 *) dflt='n';;
@@ -4044,6 +4048,7 @@ case "$usesocks" in
 $define|true|[yY]*) useperlio="$define";;
 esac
 
+: Check if we want perlio
 case "$useperlio" in
 $define|true|[yY]*|'')	dflt='y';;
 *) dflt='n';;
@@ -4062,16 +4067,16 @@ EOM
 rp='Use the PerlIO abstraction layer?'
 . ./myread
 case "$ans" in
-y|Y) 
+y|Y)
 	val="$define"
 	;;
-*)      
+*)
 	echo "Ok, doing things the stdio way."
 	val="$undef"
 	;;
 esac
 set useperlio
-eval $setvar 
+eval $setvar
 
 case "$usesocks" in
 $define|true|[yY]*)
@@ -4088,7 +4093,6 @@ EOM
 	;;
 esac
 
-	
 : get the patchlevel
 echo " "
 echo "Getting the current patchlevel..." >&4
@@ -4295,6 +4299,7 @@ EOM
     esac
 fi
 
+: Check if multiplicity is required
 cat <<EOM
 
 Perl can be built so that multiple Perl interpreters can coexist
@@ -4325,7 +4330,7 @@ esac
 set usemultiplicity
 eval $setvar
 
-
+: Check if morebits is requested
 case "$usemorebits" in
 "$define"|true|[yY]*)
 	use64bitint="$define"
@@ -4431,6 +4436,7 @@ chmod +x bsd usg v7 osf1 eunice xenix venix os2
 $eunicefix bsd usg v7 osf1 eunice xenix venix os2
 $rm -f foo
 
+: Checking the C compiler
 case "$cc" in
 '') dflt=cc;;
 *) dflt="$cc";;
@@ -4844,6 +4850,7 @@ case "$firstmakefile" in
 '') firstmakefile='makefile';;
 esac
 
+: Check for uselongdouble support
 case "$ccflags" in
 *-DUSE_LONG_DOUBLE*|*-DUSE_MORE_BITS*) uselongdouble="$define" ;;
 esac
@@ -5700,7 +5707,7 @@ case "$quadtype" in
 	;;
 esac
 
-
+: Do we want 64bit support
 case "$uselonglong" in
 "$define"|true|[yY]*)
 	cat <<EOM >&4
@@ -7055,6 +7062,88 @@ EOM
 	;;
 esac
 
+: DTrace support
+dflt_dtrace='/usr/sbin/dtrace'
+cat <<EOM
+
+Perl can be built to support DTrace on platforms that support it.
+DTrace is a diagnosis and performance analysis tool from Sun.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+EOM
+
+while $test 1 ; do
+	case "$usedtrace" in
+	$define|true|[yY]*)
+		dflt='y'
+		;;
+	?*)
+		dflt='y'
+		dflt_dtrace=$usedtrace
+		;;
+	*)
+		dflt='n'
+		;;
+	esac
+
+	rp='Support DTrace if available?'
+	. ./myread
+	case "$ans" in
+	y|Y)	val="$define" ;;
+	*)      val="$undef" ;;
+	esac
+	set usedtrace
+	eval $setvar
+
+	test "X$usedtrace" != "X$define" && break
+
+	echo " "
+	rp='Where is the dtrace executable?'
+	dflt=$dflt_dtrace
+	. ./getfile
+	val="$ans"
+	set dtrace
+	eval $setvar
+
+	if $test -f $dtrace
+	then
+		if $dtrace -h -s ../perldtrace.d \
+			-o perldtrace.tmp >/dev/null 2>&1 \
+			&& rm -f perldtrace.tmp
+		then
+			echo " "
+			echo "Good: your $dtrace knows about the -h flag."
+		else
+			cat >&2 <<EOM
+
+*** $me:  Fatal Error:  $dtrace doesn't support -h flag
+***
+*** Your installed dtrace doesn't support the -h switch to compile a D
+*** program into a C header. Can't continue.
+
+EOM
+			exit 1
+		fi
+		break;
+	fi
+
+	case "$fastread" in
+	yes)
+		cat >&2 <<EOM
+
+*** $me:  Fatal Error:  $dtrace not found.
+*** Can't continue.
+
+EOM
+		exit 1
+		;;
+	*)
+		echo "*** $dtrace was not found."
+		echo " "
+		;;
+	esac
+done
+
 : See if we want extra modules installed
 echo " "
 case "$extras" in
@@ -7331,9 +7420,9 @@ case "$nm_so_opt" in
 	;;
 esac
 
+: get list of predefined functions in a handy place
 case "$runnm" in
 true)
-: get list of predefined functions in a handy place
 echo " "
 case "$libc" in
 '') libc=unknown
@@ -7960,6 +8049,7 @@ EOM
     ;;
 esac
 
+: Do we want a shared libperl?
 also=''
 case "$usedl" in
 $undef)
@@ -8112,7 +8202,7 @@ shrpdir=$archlibexp/CORE
 xxx=''
 tmp_shrpenv=''
 if "$useshrplib"; then
-    case "$osname" in 
+    case "$osname" in
 	aix)
 		# We'll set it in Makefile.SH...
 		;;
@@ -8141,7 +8231,7 @@ if "$useshrplib"; then
 	esac
 	case "$xxx" in
 	'') ;;
-	*)	
+	*)
 		# Only add $xxx if it isn't already in ccdlflags.
 		case " $ccdlflags " in
 		*" $xxx "*)	;;
@@ -8149,7 +8239,7 @@ if "$useshrplib"; then
 			cat <<EOM >&4
 
 Adding $xxx to the flags
-passed to $ld so that the perl executable will find the 
+passed to $ld so that the perl executable will find the
 installed shared $libperl.
 
 EOM
@@ -8647,6 +8737,7 @@ case "$phostname" in
 	;;
 esac
 
+: Ask for e-mail
 $cat <<EOM
 
 I need to get your e-mail address in Internet format if possible, i.e.
@@ -8682,6 +8773,7 @@ while test "$cont"; do
 	esac
 done
 
+: Ask e-mail of administrator
 $cat <<EOM
 
 If you or somebody else will be maintaining perl at your site, please
@@ -8920,6 +9012,7 @@ rp='Pathname where add-on public executable scripts should be installed?'
 prefixvar=sitescript
 . ./setprefixvar
 
+: Check if faststdio is requested and available
 case "$usefaststdio" in
 $define|true|[yY]*|'')
 	xversion=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $rsrc/patchlevel.h`
@@ -8943,7 +9036,7 @@ EOM
 rp='Use the "fast stdio" if available?'
 . ./myread
 case "$ans" in
-y|Y)	val="$define" ;;     
+y|Y)	val="$define" ;;
 *)      val="$undef" ;;
 esac
 set usefaststdio
@@ -9831,6 +9924,7 @@ EOSH
 chmod +x protochk
 $eunicefix protochk
 
+: Define hasproto macro for Configure internal use
 hasproto='varname=$1; func=$2; shift; shift;
 while $test $# -ge 2; do
 	case "$1" in
@@ -9858,6 +9952,7 @@ eval $inhdr
 set sys/select.h i_sysselct
 eval $inhdr
 
+: Define hasfield macro for Configure internal use
 hasfield='varname=$1; struct=$2; field=$3; shift; shift; shift;
 while $test $# -ge 2; do
 	case "$1" in
@@ -10958,6 +11053,7 @@ eval $inlibc
 set clearenv d_clearenv
 eval $inlibc
 
+: Define hasstruct macro for Configure internal use
 hasstruct='varname=$1; struct=$2; shift; shift;
 while $test $# -ge 2; do
 	case "$1" in
@@ -10976,9 +11072,9 @@ set $varname;
 eval $setvar;
 $rm_try'
 
+: see whether socket exists
 socketlib=''
 sockethdr=''
-: see whether socket exists
 echo " "
 $echo $n "Hmm... $c" >&4
 if set socket val -f d_socket; eval $csym; $val; then
@@ -11063,7 +11159,7 @@ done
 set sys/uio.h i_sysuio
 eval $inhdr
 
-
+: Check for cmsghdr support
 echo " "
 echo "Checking to see if your system supports struct cmsghdr..." >&4
 set d_cmsghdr_s cmsghdr $i_systypes sys/types.h $d_socket sys/socket.h $i_sysuio sys/uio.h
@@ -11551,6 +11647,7 @@ runnm="$xxx_runnm"
 set dlfcn.h i_dlfcn
 eval $inhdr
 
+: Check what extension to use for shared libs
 case "$usedl" in
 $define|y|true)
 	$cat << EOM
@@ -12971,7 +13068,6 @@ eval $inlibc
 set fpclassl d_fpclassl
 eval $inlibc
 
-
 : check for fpos64_t
 echo " "
 echo "Checking to see if you have fpos64_t..." >&4
@@ -13006,7 +13102,7 @@ eval $inhdr
 set sys/mount.h i_sysmount
 eval $inhdr
 
-
+: Check for fs_data_s
 echo " "
 echo "Checking to see if your system supports struct fs_data..." >&4
 set d_fs_data_s fs_data $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h
@@ -13027,11 +13123,9 @@ esac
 set fsetpos d_fsetpos
 eval $inlibc
 
-
 : see if fstatfs exists
 set fstatfs d_fstatfs
 eval $inlibc
-
 
 : see if statvfs exists
 set statvfs d_statvfs
@@ -13095,7 +13189,6 @@ eval $inlibc
 : see if getespwnam exists
 set getespwnam d_getespwnam
 eval $inlibc
-
 
 : see if getfsstat exists
 set getfsstat d_getfsstat
@@ -13842,6 +13935,7 @@ eval $hasproto
 set getpagesize d_getpagsz
 eval $inlibc
 
+: Optional checks for getprotobyname and getprotobynumber
 
 : see if getprotobyname exists
 set getprotobyname d_getpbyname
@@ -14202,6 +14296,7 @@ case "$d_getpwuid_r" in
 	;;
 esac
 
+: Optional checks for getsbyname and getsbyport
 
 : see if getservbyname exists
 set getservbyname d_getsbyname
@@ -15104,7 +15199,7 @@ fi
 set d_msg
 eval $setvar
 
-
+: Check for msghdr_s
 echo " "
 echo "Checking to see if your system supports struct msghdr..." >&4
 set d_msghdr_s msghdr $i_systypes sys/types.h $d_socket sys/socket.h $i_sysuio sys/uio.h
@@ -15699,7 +15794,6 @@ eval $setvar
 : see if pthread_attr_setscope exists
 set pthread_attr_setscope d_pthread_attr_setscope
 eval $inlibc
-
 
 : see whether the various POSIXish _yields exist
 $cat >try.c <<EOP
@@ -16825,7 +16919,6 @@ eval $inlibc
 set sfio.h i_sfio
 eval $inhdr
 
-
 : see if sfio library is available
 case "$i_sfio" in
 $define)
@@ -17343,24 +17436,21 @@ eval $hasproto
 set sys/stat.h i_sysstat
 eval $inhdr
 
-
 : see if stat knows about block sizes
 echo " "
 echo "Checking to see if your struct stat has st_blocks field..." >&4
 set d_statblks stat st_blocks $i_sysstat sys/stat.h
 eval $hasfield
 
-
 : see if this is a sys/vfs.h system
 set sys/vfs.h i_sysvfs
 eval $inhdr
-
 
 : see if this is a sys/statfs.h system
 set sys/statfs.h i_sysstatfs
 eval $inhdr
 
-
+: Check for statfs_s
 echo " "
 echo "Checking to see if your system supports struct statfs..." >&4
 set d_statfs_s statfs $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h $i_sysvfs sys/vfs.h $i_sysstatfs sys/statfs.h
@@ -17371,10 +17461,9 @@ case "$d_statfs_s" in
 esac
 
 
-
 : see if struct statfs knows about f_flags
 case "$d_statfs_s" in
-define)	
+define)
 	echo " "
 	echo "Checking to see if your struct statfs has f_flags field..." >&4
 	set d_statfs_f_flags statfs f_flags $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h $i_sysvfs sys/vfs.h $i_sysstatfs sys/statfs.h
@@ -19037,7 +19126,7 @@ We won't be flushing handles at all before fork/exec/popen.
 EOM
 	;;
 esac
-$rm_try
+$rm_try tryp
 
 : Store the full pathname to the ar program for use in the C program
 : Respect a hint or command line value for full_ar.
@@ -19302,7 +19391,7 @@ case "$sPRId64" in
 	;;
 esac
 
-
+: Check format strings for internal types
 echo " "
 $echo "Checking the format strings to be used for Perl's internal types..." >&4
 
@@ -19361,6 +19450,7 @@ case "$ivdformat" in
     ;;
 esac
 
+: Check format string for GID
 
 echo " "
 $echo "Checking the format string to be used for gids..." >&4
@@ -19407,7 +19497,6 @@ eval $inlibc
 : see if setgroups exists
 set setgroups d_setgrps
 eval $inlibc
-
 
 : Find type of 2nd arg to 'getgroups()' and 'setgroups()'
 echo " "
@@ -20472,7 +20561,7 @@ else
 fi
 
 
-
+: Check format string for UID
 echo " "
 $echo "Checking the format string to be used for uids..." >&4
 
@@ -20511,7 +20600,7 @@ case "$uidsign" in
 	;;
 esac
 
-
+: Check if site customization support was requested
 case "$usesitecustomize" in
     $define|true|[Yy]*)
 	usesitecustomize="$define"
@@ -20551,7 +20640,6 @@ case "$yacc" in
 	esac
 	;;
 esac
-
 
 : see if this is a assert.h system
 set assert.h i_assert
@@ -21009,11 +21097,9 @@ fi
 set i_syssockio
 eval $setvar
 
-
 : see if this is a syslog.h system
 set syslog.h i_syslog
 eval $inhdr
-
 
 : see if this is a sys/mode.h system
 set sys/mode.h i_sysmode
@@ -21034,7 +21120,6 @@ eval $inhdr
 : see if this is a sys/un.h system
 set sys/un.h i_sysun
 eval $inhdr
-
 
 : see if this is a sys/utsname.h system
 set sys/utsname.h i_sysutsname
@@ -22065,6 +22150,7 @@ dlsrc='$dlsrc'
 doublesize='$doublesize'
 drand01='$drand01'
 drand48_r_proto='$drand48_r_proto'
+dtrace='$dtrace'
 dynamic_ext='$dynamic_ext'
 eagain='$eagain'
 ebcdic='$ebcdic'
@@ -22525,6 +22611,7 @@ use64bitall='$use64bitall'
 use64bitint='$use64bitint'
 usecrosscompile='$usecrosscompile'
 usedl='$usedl'
+usedtrace='$usedtrace'
 usefaststdio='$usefaststdio'
 useithreads='$useithreads'
 uselargefiles='$uselargefiles'
