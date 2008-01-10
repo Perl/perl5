@@ -2640,6 +2640,7 @@ Policy_sh.SH		Hold site-wide preferences between Configure runs.
 Porting/add-package.pl	Add/Update CPAN modules that are part of Core
 Porting/apply		Apply patches sent by mail
 Porting/check83.pl	Check whether we are 8.3-friendly
+Porting/checkansi.pl	Check source code for ANSI-C violations
 Porting/checkAUTHORS.pl	Check that the AUTHORS file is complete
 Porting/checkcase.pl	Check whether we are case-insensitive-fs-friendly
 Porting/checkcfgvar.pl	Check that config scripts define all symbols
@@ -2653,6 +2654,7 @@ Porting/Contract	Social contract for contributed modules in Perl core
 Porting/corecpan.pl	Reports outdated dual-lived modules
 Porting/corelist.pl	Generates data for Module::CoreList
 Porting/curliff.pl	Curliff or liff your curliffable files.
+Porting/expand-macro.pl	A tool to expand C macro definitions in the Perl source
 Porting/findrfuncs	Find reentrant variants of functions used in an executable
 Porting/findvars	Find occurrences of words
 Porting/fixCORE		Find and fix modules that generate warnings

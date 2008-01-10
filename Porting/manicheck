@@ -76,8 +76,8 @@ for (sort keys %mani) {
 
 $" = "\n" if $l;
 
-unshift @xtra, "extra:"   if @xtra;
-unshift @miss, "missing:" if @miss;
+unshift @xtra, "extra:"   if @xtra && !$x;
+unshift @miss, "missing:" if @miss && !$m;
 
 print "@xtra\n", if @xtra && !$m;
 print "@miss\n"  if @miss && !$x;
