@@ -2264,10 +2264,15 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
             }
 #endif      
         }
+#ifdef USE_ITHREADS
+	/* It seems that non-ithreads works both with and without this code.
+	   So for efficiency reasons it seems best not to have the code
+	   compiled when it is not needed.  */
 	/* This is safe against NULLs: */
 	ReREFCNT_dec(PM_GETRE(PL_reg_curpm));
 	/* PM_reg_curpm owns a reference to this regexp.  */
 	ReREFCNT_inc(rx);
+#endif
 	PM_SETRE(PL_reg_curpm, rx);
 	PL_reg_oldcurpm = PL_curpm;
 	PL_curpm = PL_reg_curpm;
