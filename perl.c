@@ -872,23 +872,6 @@ perl_destruct(pTHXx)
      * REGEXPs in the parent interpreter
      * we need to manually ReREFCNT_dec for the clones
      */
-    {
-        I32 i = AvFILLp(PL_regex_padav) + 1;
-        SV * const * const ary = AvARRAY(PL_regex_padav);
-
-        while (i) {
-            SV * const resv = ary[--i];
-
-            if (SvFLAGS(resv) & SVf_BREAK) {
-                /* this is PL_reg_curpm, already freed
-                 * flag is set in regexec.c:S_regtry
-                 */
-                SvFLAGS(resv) &= ~SVf_BREAK;
-		/* So stop it pointing to what is now a dead reference.  */
-		SvROK_off(resv);
-            }
-        }
-    }
     SvREFCNT_dec(PL_regex_padav);
     PL_regex_padav = NULL;
     PL_regex_pad = NULL;
