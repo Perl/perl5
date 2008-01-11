@@ -920,8 +920,8 @@ EXTERN_C int usleep(unsigned int);
 #endif
 
 /* Maximum level of recursion */
-#ifndef PERL_MAX_SUB_DEPTH
-#define PERL_MAX_SUB_DEPTH 100
+#ifndef PERL_SUB_DEPTH_WARN
+#define PERL_SUB_DEPTH_WARN 100
 #endif
 
 #endif /* PERL_CORE */
