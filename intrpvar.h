@@ -215,7 +215,6 @@ PERLVAR(Ilocalpatches,	const char * const *)
 PERLVARI(Isplitstr,	const char *, " ")
 
 PERLVAR(Iminus_c,	bool)
-PERLVAR(Ipreprocess,	bool)
 PERLVAR(Iminus_n,	bool)
 PERLVAR(Iminus_p,	bool)
 PERLVAR(Iminus_l,	bool)

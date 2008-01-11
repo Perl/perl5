@@ -894,7 +894,6 @@ perl_destruct(pTHXx)
     }
 
     /* switches */
-    PL_preprocess   = FALSE;
     PL_minus_n      = FALSE;
     PL_minus_p      = FALSE;
     PL_minus_l      = FALSE;
@@ -1804,12 +1803,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    else
 		Perl_croak(aTHX_ "No directory specified for -I");
 	    break;
-	case 'P':
-	    forbid_setid('P', -1);
-	    PL_preprocess = TRUE;
-	    s++;
-	    deprecate("-P");
-	    goto reswitch;
 	case 'S':
 	    forbid_setid('S', -1);
 	    dosearch = TRUE;
@@ -2225,7 +2218,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #endif
     CopLINE_set(PL_curcop, 0);
     PL_curstash = PL_defstash;
-    PL_preprocess = FALSE;
     if (PL_e_script) {
 	SvREFCNT_dec(PL_e_script);
 	PL_e_script = NULL;
@@ -2862,7 +2854,6 @@ S_usage(pTHX_ const char *name)		/* XXX move this out into a module ? */
 "-[mM][-]module    execute \"use/no module...\" before executing program",
 "-n                assume \"while (<>) { ... }\" loop around program",
 "-p                assume loop like -n but print line also, like sed",
-"-P                run program through C preprocessor before compilation",
 "-s                enable rudimentary parsing for switches after programfile",
 "-S                look for programfile using PATH environment variable",
 "-t                enable tainting warnings",
@@ -2902,7 +2893,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
       "  t  Trace execution",
       "  o  Method and overloading resolution",
       "  c  String/numeric conversions",
-      "  P  Print profiling info, preprocessor command for -P, source file input state",
+      "  P  Print profiling info, source file input state",
       "  m  Memory allocation",
       "  f  Format processing",
       "  r  Regular expression parsing and execution",
@@ -3371,10 +3362,6 @@ Internet, point your browser at http://www.perl.org/, the Perl Home Page.\n\n");
     case 'S':			/* OS/2 needs -S on "extproc" line. */
 	break;
 #endif
-    case 'P':
-	if (PL_preprocess)
-	    return s+1;
-	/* FALL THROUGH */
     default:
 	Perl_croak(aTHX_ "Can't emulate -%.1s on #! line",s);
     }
@@ -3584,72 +3571,6 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv,
 	Perl_croak(aTHX_ "suidperl needs (suid) fd script\n");
     }
 #else /* IAMSUID */
-    else if (PL_preprocess) {
-	const char * const cpp_cfg = CPPSTDIN;
-	SV * const cpp = newSVpvs("");
-	SV * const cmd = newSV(0);
-
-	if (cpp_cfg[0] == 0) /* PERL_MICRO? */
-	     Perl_croak(aTHX_ "Can't run with cpp -P with CPPSTDIN undefined");
-	if (strEQ(cpp_cfg, "cppstdin"))
-	    Perl_sv_catpvf(aTHX_ cpp, "%s/", BIN_EXP);
-	sv_catpv(cpp, cpp_cfg);
-
-#       ifndef VMS
-	    sv_catpvs(sv, "-I");
-	    sv_catpv(sv,PRIVLIB_EXP);
-#       endif
-
-	DEBUG_P(PerlIO_printf(Perl_debug_log,
-			      "PL_preprocess: scriptname=\"%s\", cpp=\"%s\", sv=\"%s\", CPPMINUS=\"%s\"\n",
-			      scriptname, SvPVX_const (cpp), SvPVX_const (sv),
-			      CPPMINUS));
-
-#       if defined(MSDOS) || defined(WIN32) || defined(VMS)
-            quote = "\"";
-#       else
-            quote = "'";
-#       endif
-
-#       ifdef VMS
-            cpp_discard_flag = "";
-#       else
-            cpp_discard_flag = "-C";
-#       endif
-
-#       ifdef OS2
-            perl = os2_execname(aTHX);
-#       else
-            perl = PL_origargv[0];
-#       endif
-
-
-        /* This strips off Perl comments which might interfere with
-           the C pre-processor, including #!.  #line directives are
-           deliberately stripped to avoid confusion with Perl's version
-           of #line.  FWP played some golf with it so it will fit
-           into VMS's 255 character buffer.
-        */
-        if( PL_doextract )
-            code = "(1../^#!.*perl/i)|/^\\s*#(?!\\s*((ifn?|un)def|(el|end)?if|define|include|else|error|pragma)\\b)/||!($|=1)||print";
-        else
-            code = "/^\\s*#(?!\\s*((ifn?|un)def|(el|end)?if|define|include|else|error|pragma)\\b)/||!($|=1)||print";
-
-        Perl_sv_setpvf(aTHX_ cmd, "\
-%s -ne%s%s%s %s | %"SVf" %s %"SVf" %s",
-                       perl, quote, code, quote, scriptname, SVfARG(cpp),
-                       cpp_discard_flag, SVfARG(sv), CPPMINUS);
-
-	PL_doextract = FALSE;
-
-        DEBUG_P(PerlIO_printf(Perl_debug_log,
-                              "PL_preprocess: cmd=\"%s\"\n",
-                              SvPVX_const(cmd)));
-
-	*rsfpp = PerlProc_popen((char *)SvPVX_const(cmd), (char *)"r");
-	SvREFCNT_dec(cmd);
-	SvREFCNT_dec(cpp);
-    }
     else if (!*scriptname) {
 	forbid_setid(0, *suidscript);
 	*rsfpp = PerlIO_stdin();
@@ -4172,8 +4093,6 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 	    Perl_croak(aTHX_ "Effective UID cannot exec script\n");	/* they can't do this */
     }
 #  ifdef IAMSUID
-    else if (PL_preprocess)	/* PSz 13 Nov 03  Caught elsewhere, useless(?!) here */
-	Perl_croak(aTHX_ "-P not allowed for setuid/setgid script\n");
     else if (fdscript < 0 || suidscript != 1)
 	/* PSz 13 Nov 03  Caught elsewhere, useless(?!) here */
 	Perl_croak(aTHX_ "(suid) fdscript needed in suidperl\n");

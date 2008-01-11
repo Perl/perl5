@@ -235,7 +235,6 @@
 #define PL_pidstatus		(vTHX->Ipidstatus)
 #define PL_ppid			(vTHX->Ippid)
 #define PL_preambleav		(vTHX->Ipreambleav)
-#define PL_preprocess		(vTHX->Ipreprocess)
 #define PL_profiledata		(vTHX->Iprofiledata)
 #define PL_psig_name		(vTHX->Ipsig_name)
 #define PL_psig_pend		(vTHX->Ipsig_pend)
@@ -547,7 +546,6 @@
 #define PL_Ipidstatus		PL_pidstatus
 #define PL_Ippid		PL_ppid
 #define PL_Ipreambleav		PL_preambleav
-#define PL_Ipreprocess		PL_preprocess
 #define PL_Iprofiledata		PL_profiledata
 #define PL_Ipsig_name		PL_psig_name
 #define PL_Ipsig_pend		PL_psig_pend

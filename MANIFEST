@@ -3465,8 +3465,6 @@ t/cmd/while.t			See if while loops work
 t/comp/bproto.t			See if builtins conform to their prototypes
 t/comp/cmdopt.t			See if command optimization works
 t/comp/colon.t			See if colons are parsed correctly
-t/comp/cpp.aux			main file for cpp.t
-t/comp/cpp.t			See if C preprocessor works
 t/comp/decl.t			See if declarations work
 t/comp/fold.t			See if constant folding works
 t/comp/hints.t			See if %^H works
@@ -4009,8 +4007,6 @@ t/run/switchF.t			Test the -F switch
 t/run/switchI.t			Test the -I switch
 t/run/switchn.t			Test the -n switch
 t/run/switchp.t			Test the -p switch
-t/run/switchPx.aux		Data for switchPx.t
-t/run/switchPx.t		Test the -Px combination
 t/run/switcht.t			Test the -t switch
 t/run/switchx2.aux		Data for switchx.t
 t/run/switchx.aux		Data for switchx.t

@@ -3294,11 +3294,6 @@ fine from VMS' perspective, it's probably not what you intended.
 
 (F) The unpack format P must have an explicit size, not "*".
 
-=item B<-P> not allowed for setuid/setgid script
-
-(F) The script would have to be opened by the C preprocessor by name,
-which provides a race condition that breaks security.
-
 =item POSIX class [:%s:] unknown in regex; marked by <-- HERE in m/%s/
 
 (F) The class in the character class [: :] syntax is unknown.  The <-- HERE

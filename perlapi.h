@@ -506,8 +506,6 @@ END_EXTERN_C
 #define PL_ppid			(*Perl_Ippid_ptr(aTHX))
 #undef  PL_preambleav
 #define PL_preambleav		(*Perl_Ipreambleav_ptr(aTHX))
-#undef  PL_preprocess
-#define PL_preprocess		(*Perl_Ipreprocess_ptr(aTHX))
 #undef  PL_profiledata
 #define PL_profiledata		(*Perl_Iprofiledata_ptr(aTHX))
 #undef  PL_psig_name
