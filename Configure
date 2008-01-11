@@ -8996,10 +8996,13 @@ while test 1 ; do
 	
 	if test -f $dtrace
 	then
-		if ! $dtrace -h -s ../perldtrace.d \
+		if $dtrace -h -s ../perldtrace.d \
 			-o perldtrace.tmp >/dev/null 2>&1 \
 			&& rm -f perldtrace.tmp
 		then
+			echo " "
+			echo "Good: your $dtrace knows about the -h flag."
+		else
 			cat >&2 <<EOM
 
 *** $me:  Fatal Error:  $dtrace doesn't support -h flag
