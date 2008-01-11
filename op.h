@@ -329,29 +329,21 @@ struct pmop {
 };
 
 #ifdef USE_ITHREADS
-#define PM_GETRE(o)     (SvROK(PL_regex_pad[(o)->op_pmoffset]) ? 	\
-			 (REGEXP*)SvRV(PL_regex_pad[(o)->op_pmoffset]) : NULL)
+#define PM_GETRE(o)	(SvTYPE(PL_regex_pad[(o)->op_pmoffset]) == SVt_REGEXP \
+		 	 ? (REGEXP*)(PL_regex_pad[(o)->op_pmoffset]) : NULL)
 /* The assignment is just to enforce type safety (or at least get a warning).
  */
+/* With first class regexps not via a reference one needs to assign
+   &PL_sv_undef under ithreads. (This would probably work unthreaded, but NULL
+   is cheaper. I guess we could allow NULL, but the check above would get
+   more complex, and we'd have an AV with (SV*)NULL in it, which feels bad */
+/* BEWARE - something that calls this macro passes (r) which has a side
+   effect.  */
 #define PM_SETRE(o,r)	STMT_START {					\
-                            const REGEXP *const slosh = (r);		\
-			    SV *const whap = PL_regex_pad[(o)->op_pmoffset]; \
-			    SvIOK_off(whap);				\
-			    SvROK_on(whap);				\
-			    SvRV_set(whap, (SV*)slosh);			\
+                            const REGEXP *const whap = (r);		\
+                            assert(whap);				\
+			    PL_regex_pad[(o)->op_pmoffset] = (SV*)whap;	\
                         } STMT_END
-/* Actually you can assign any IV, not just an offset. And really should it be
-   UV? */
-/* Need to turn the SvOK off as the regexp code is quite carefully manually
-   reference counting the thing pointed to, so don't want sv_setiv also
-   deciding to clear a reference count because it sees an SV.  */
-#define PM_SETRE_OFFSET(o,iv) \
-			STMT_START { \
-                            SV* const sv = PL_regex_pad[(o)->op_pmoffset]; \
-			    SvROK_off(sv);				\
-                            sv_setiv(sv, (iv)); \
-                        } STMT_END
-
 #  ifndef PERL_CORE
 /* No longer used anywhere in the core.  Migrate to Devel::PPPort?  */
 #define PM_GETRE_SAFE(o) (PL_regex_pad ? PM_GETRE(o) : (REGEXP*)0)

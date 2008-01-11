@@ -2255,7 +2255,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
 	    Newxz(PL_reg_curpm, 1, PMOP);
 #ifdef USE_ITHREADS
             {
-		SV* const repointer = newSViv(0);
+		SV* const repointer = &PL_sv_undef;
                 /* this regexp is also owned by the new PL_reg_curpm, which
 		   will try to free it.  */
                 av_push(PL_regex_padav, repointer);
