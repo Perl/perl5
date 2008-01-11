@@ -344,18 +344,9 @@ struct pmop {
                             assert(whap);				\
 			    PL_regex_pad[(o)->op_pmoffset] = (SV*)whap;	\
                         } STMT_END
-#  ifndef PERL_CORE
-/* No longer used anywhere in the core.  Migrate to Devel::PPPort?  */
-#define PM_GETRE_SAFE(o) (PL_regex_pad ? PM_GETRE(o) : (REGEXP*)0)
-#define PM_SETRE_SAFE(o,r) if (PL_regex_pad) PM_SETRE(o,r)
-#  endif
 #else
 #define PM_GETRE(o)     ((o)->op_pmregexp)
 #define PM_SETRE(o,r)   ((o)->op_pmregexp = (r))
-#  ifndef PERL_CORE
-#define PM_GETRE_SAFE PM_GETRE
-#define PM_SETRE_SAFE PM_SETRE
-#  endif
 #endif
 
 
