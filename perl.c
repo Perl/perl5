@@ -2030,7 +2030,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     {
 	int suidscript;
 	const int fdscript
-	    = open_script(scriptname, dosearch, sv, &suidscript, &rsfp);
+	    = open_script(scriptname, dosearch, &suidscript, &rsfp);
 
 	validate_suid(validarg, scriptname, fdscript, suidscript,
 		linestr_sv, rsfp);
@@ -3488,15 +3488,9 @@ S_init_main_stash(pTHX)
 }
 
 STATIC int
-S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv,
+S_open_script(pTHX_ const char *scriptname, bool dosearch,
 	      int *suidscript, PerlIO **rsfpp)
 {
-#ifndef IAMSUID
-    const char *quote;
-    const char *code;
-    const char *cpp_discard_flag;
-    const char *perl;
-#endif
     int fdscript = -1;
     dVAR;
 
