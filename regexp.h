@@ -378,14 +378,46 @@ and check for NULL.
 #define RX_WRAPPED(prog)	SvPVX(prog)
 #define RX_WRAPLEN(prog)	SvCUR(prog)
 #define RX_CHECK_SUBSTR(prog)	(((struct regexp *)SvANY(prog))->check_substr)
-#define RX_EXTFLAGS(prog)	RXp_EXTFLAGS((struct regexp *)SvANY(prog))
 #define RX_REFCNT(prog)		SvREFCNT(prog)
-#define RX_ENGINE(prog)		(((struct regexp *)SvANY(prog))->engine)
-#define RX_SUBBEG(prog)		(((struct regexp *)SvANY(prog))->subbeg)
-#define RX_OFFS(prog)		(((struct regexp *)SvANY(prog))->offs)
-#define RX_NPARENS(prog)	(((struct regexp *)SvANY(prog))->nparens)
+#if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
+#  define RX_EXTFLAGS(prog)						\
+    (*({								\
+	REGEXP *const thwape = (prog);					\
+	assert(SvTYPE(thwape) == SVt_REGEXP);				\
+	&RXp_EXTFLAGS(SvANY(thwape));					\
+    }))
+#  define RX_ENGINE(prog)						\
+    (*({								\
+	REGEXP *const thwape = (prog);					\
+	assert(SvTYPE(thwape) == SVt_REGEXP);				\
+	&SvANY(thwape)->engine;						\
+    }))
+#  define RX_SUBBEG(prog)						\
+    (*({								\
+	REGEXP *const thwape = (prog);					\
+	assert(SvTYPE(thwape) == SVt_REGEXP);				\
+	&SvANY(thwape)->subbeg;						\
+    }))
+#  define RX_SUBBEG(prog)						\
+    (*({								\
+	REGEXP *const thwape = (prog);					\
+	assert(SvTYPE(thwape) == SVt_REGEXP);				\
+	&SvANY(thwape)->subbeg;						\
+    }))
+#  define RX_NPARENS(prog)						\
+    (*({								\
+	REGEXP *const thwape = (prog);					\
+	assert(SvTYPE(thwape) == SVt_REGEXP);				\
+	&SvANY(thwape)->nparens;					\
+    }))
+#else
+#  define RX_EXTFLAGS(prog)	RXp_EXTFLAGS((struct regexp *)SvANY(prog))
+#  define RX_ENGINE(prog)	(((struct regexp *)SvANY(prog))->engine)
+#  define RX_SUBBEG(prog)	(((struct regexp *)SvANY(prog))->subbeg)
+#  define RX_OFFS(prog)		(((struct regexp *)SvANY(prog))->offs)
+#  define RX_NPARENS(prog)	(((struct regexp *)SvANY(prog))->nparens)
+#endif
 #define RX_SUBLEN(prog)		(((struct regexp *)SvANY(prog))->sublen)
-#define RX_SUBBEG(prog)		(((struct regexp *)SvANY(prog))->subbeg)
 #define RX_MINLEN(prog)		(((struct regexp *)SvANY(prog))->minlen)
 #define RX_MINLENRET(prog)	(((struct regexp *)SvANY(prog))->minlenret)
 #define RX_GOFS(prog)		(((struct regexp *)SvANY(prog))->gofs)
@@ -437,6 +469,7 @@ and check for NULL.
     ({									\
 	/* This is here to generate a casting warning if incorrect.  */	\
 	REGEXP *const zwapp = (re);					\
+	assert(SvTYPE(zwapp) == SVt_REGEXP);				\
 	(REGEXP *) SvREFCNT_inc(zwapp);					\
     })
 #  define ReREFCNT_dec(re)						\
