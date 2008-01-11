@@ -398,11 +398,11 @@ and check for NULL.
 	assert(SvTYPE(thwape) == SVt_REGEXP);				\
 	&SvANY(thwape)->subbeg;						\
     }))
-#  define RX_SUBBEG(prog)						\
+#  define RX_OFFS(prog)							\
     (*({								\
 	REGEXP *const thwape = (prog);					\
 	assert(SvTYPE(thwape) == SVt_REGEXP);				\
-	&SvANY(thwape)->subbeg;						\
+	&SvANY(thwape)->offs;						\
     }))
 #  define RX_NPARENS(prog)						\
     (*({								\
