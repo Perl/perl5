@@ -623,9 +623,11 @@ clear_pmop:
          */
 #ifdef USE_ITHREADS
 	if(PL_regex_pad) {        /* We could be in destruction */
+	    const IV offset = (cPMOPo)->op_pmoffset;
 	    ReREFCNT_dec(PM_GETRE(cPMOPo));
-            av_push((AV*) PL_regex_pad[0], newSViv((cPMOPo)->op_pmoffset));
-	    PL_regex_pad[(cPMOPo)->op_pmoffset] = &PL_sv_undef;
+	    PL_regex_pad[offset] = &PL_sv_undef;
+            sv_catpvn_nomg(PL_regex_pad[0], (const char *)&offset,
+			   sizeof(offset));
         }
 #else
 	ReREFCNT_dec(PM_GETRE(cPMOPo));
@@ -3364,13 +3366,20 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
 
 
 #ifdef USE_ITHREADS
-    if (av_len((AV*) PL_regex_pad[0]) > -1) {
-	SV * const repointer = av_pop((AV*)PL_regex_pad[0]);
-	const IV offset = SvIV(repointer);
+    assert(SvPOK(PL_regex_pad[0]));
+    if (SvCUR(PL_regex_pad[0])) {
+	/* Pop off the "packed" IV from the end.  */
+	SV *const repointer_list = PL_regex_pad[0];
+	const char *p = SvEND(repointer_list) - sizeof(IV);
+	const IV offset = *((IV*)p);
+
+	assert(SvCUR(repointer_list) % sizeof(IV) == 0);
+
+	SvEND_set(repointer_list, p);
+
 	pmop->op_pmoffset = offset;
 	/* This slot should be free, so assert this:  */
 	assert(PL_regex_pad[offset] == &PL_sv_undef);
-	SvREFCNT_dec(repointer);
     } else {
 	SV * const repointer = &PL_sv_undef;
 	av_push(PL_regex_padav, repointer);

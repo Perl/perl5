@@ -353,8 +353,9 @@ perl_construct(pTHXx)
     sv_setpvn(PERL_DEBUG_PAD(1), "", 0);	/* ext/re needs these */
     sv_setpvn(PERL_DEBUG_PAD(2), "", 0);	/* even without DEBUGGING. */
 #ifdef USE_ITHREADS
-    /* First entry is an array of empty elements */
-    Perl_av_create_and_push(aTHX_ &PL_regex_padav,(SV*)newAV());
+    /* First entry is a list of empty elements. It needs to be initialised
+       else all hell breaks loose in S_find_uninit_var().  */
+    Perl_av_create_and_push(aTHX_ &PL_regex_padav, newSVpvs(""));
     PL_regex_pad = AvARRAY(PL_regex_padav);
 #endif
 #ifdef USE_REENTRANT_API

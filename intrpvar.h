@@ -564,7 +564,8 @@ PERLVAR(Iregex_pad,     SV**)		/* Shortcut into the array of
 					   regex_padav */
 PERLVAR(Iregex_padav,   AV*)		/* All regex objects, indexed via the
 					   values in op_pmoffset of pmop.
-					   Entry 0 is an array of IVs listing
+					   Entry 0 is an SV whose PV is a
+					   "packed" list of IVs listing
 					   the now-free slots in the array */
 #endif
 
