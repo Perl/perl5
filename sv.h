@@ -1685,6 +1685,8 @@ Like C<sv_catsv> but doesn't process magic.
 #define SV_COW_SHARED_HASH_KEYS	512
 /* This one is only enabled for PERL_OLD_COPY_ON_WRITE */
 #define SV_COW_OTHER_PVS	1024
+/* Make sv_2pv_flags return NULL if something is undefined.  */
+#define SV_UNDEF_RETURNS_NULL	2048
 
 /* The core is safe for this COW optimisation. XS code on CPAN may not be.
    So only default to doing the COW setup if we're in the core.

@@ -3018,25 +3018,35 @@ PP(pp_length)
     dVAR; dSP; dTARGET;
     SV * const sv = TOPs;
 
-    if (SvAMAGIC(sv)) {
-	/* For an overloaded scalar, we can't know in advance if it's going to
-	   be UTF-8 or not. Also, we can't call sv_len_utf8 as it likes to
-	   cache the length. Maybe that should be a documented feature of it.
+    if (!SvOK(sv) && !SvGMAGICAL(sv)) {
+	/* FIXME - this doesn't allow GMAGIC to return undef for consistency.
+	 */
+	SETs(&PL_sv_undef);
+    } else if (SvGAMAGIC(sv)) {
+	/* For an overloaded or magic scalar, we can't know in advance if
+	   it's going to be UTF-8 or not. Also, we can't call sv_len_utf8 as
+	   it likes to cache the length. Maybe that should be a documented
+	   feature of it.
 	*/
 	STRLEN len;
-	const char *const p = SvPV_const(sv, len);
+	const char *const p
+	    = sv_2pv_flags(sv, &len,
+			   SV_UNDEF_RETURNS_NULL|SV_CONST_RETURN|SV_GMAGIC);
 
-	if (DO_UTF8(sv)) {
+	if (!p)
+	    SETs(&PL_sv_undef);
+	else if (DO_UTF8(sv)) {
 	    SETi(utf8_length((U8*)p, (U8*)p + len));
 	}
 	else
 	    SETi(len);
-
+    } else {
+	/* Neither magic nor overloaded.  */
+	if (DO_UTF8(sv))
+	    SETi(sv_len_utf8(sv));
+	else
+	    SETi(sv_len(sv));
     }
-    else if (DO_UTF8(sv))
-	SETi(sv_len_utf8(sv));
-    else
-	SETi(sv_len(sv));
     RETURN;
 }
 

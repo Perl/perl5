@@ -826,8 +826,8 @@ $v = eval {log $m1};
 $v = sqrt $m1;
 $v = hex $m1;
 $v = oct $m1;
-$v = length $m1;
-$v = length;
+$v = oct;
+$v = length; # does not warn
 EXPECT
 Use of uninitialized value $g1 in atan2 at - line 5.
 Use of uninitialized value $m1 in atan2 at - line 5.
@@ -840,8 +840,7 @@ Use of uninitialized value $m1 in log at - line 11.
 Use of uninitialized value $m1 in sqrt at - line 12.
 Use of uninitialized value $m1 in hex at - line 13.
 Use of uninitialized value $m1 in oct at - line 14.
-Use of uninitialized value $m1 in length at - line 15.
-Use of uninitialized value $_ in length at - line 16.
+Use of uninitialized value $_ in oct at - line 15.
 ########
 use warnings 'uninitialized';
 my ($m1, $v);

@@ -2667,9 +2667,10 @@ X<length> X<size>
 =item length
 
 Returns the length in I<characters> of the value of EXPR.  If EXPR is
-omitted, returns length of C<$_>.  Note that this cannot be used on
-an entire array or hash to find out how many elements these have.
-For that, use C<scalar @array> and C<scalar keys %hash> respectively.
+omitted, returns length of C<$_>.  If EXPR is undefined, returns C<undef>.
+Note that this cannot be used on an entire array or hash to find out how
+many elements these have. For that, use C<scalar @array> and C<scalar keys
+%hash> respectively.
 
 Note the I<characters>: if the EXPR is in Unicode, you will get the
 number of characters, not the number of bytes.  To get the length

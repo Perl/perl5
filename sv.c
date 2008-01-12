@@ -2810,10 +2810,12 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	    }
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
-	    if (ckWARN(WARN_UNINITIALIZED))
-		report_uninit(sv);
 	    if (lp)
 		*lp = 0;
+	    if (flags & SV_UNDEF_RETURNS_NULL)
+		return NULL;
+	    if (ckWARN(WARN_UNINITIALIZED))
+		report_uninit(sv);
 	    return (char *)"";
 	}
     }
@@ -2867,10 +2869,12 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	if (isGV_with_GP(sv))
 	    return glob_2pv((GV *)sv, lp);
 
-	if (!PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP) && ckWARN(WARN_UNINITIALIZED))
-	    report_uninit(sv);
 	if (lp)
 	    *lp = 0;
+	if (flags & SV_UNDEF_RETURNS_NULL)
+	    return NULL;
+	if (!PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP) && ckWARN(WARN_UNINITIALIZED))
+	    report_uninit(sv);
 	if (SvTYPE(sv) < SVt_PV)
 	    /* Typically the caller expects that sv_any is not NULL now.  */
 	    sv_upgrade(sv, SVt_PV);
