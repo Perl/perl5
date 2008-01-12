@@ -6127,7 +6127,7 @@ $ WC "dlobj='" + dlobj + "'"
 $ WC "dlsrc='dl_vms.c'"
 $ WC "doublesize='" + doublesize + "'"
 $ WC "drand01='" + drand01 + "'"
-$ WC "dtrace=''"
+$ WC "dtrace='" + "'"
 $!
 $! The extensions symbol may be quite long
 $!
