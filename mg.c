@@ -308,12 +308,15 @@ Perl_mg_length(pTHX_ SV *sv)
 	}
     }
 
-    if (DO_UTF8(sv)) {
+    {
+	/* You can't know whether it's UTF-8 until you get the string again...
+	 */
         const U8 *s = (U8*)SvPV_const(sv, len);
-	len = utf8_length(s, s + len);
+
+	if (DO_UTF8(sv)) {
+	    len = utf8_length(s, s + len);
+	}
     }
-    else
-        (void)SvPV_const(sv, len);
     return len;
 }
 
