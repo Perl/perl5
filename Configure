@@ -8961,7 +8961,7 @@ DTrace is a diagnosis and performance analysis tool from Sun.
 If this doesn't make any sense to you, just accept the default '$dflt'.
 EOM
 
-while test 1 ; do
+while $test 1 ; do
 	case "$usedtrace" in
 	$define|true|[yY]*) 
 		dflt='y' 
@@ -8994,7 +8994,7 @@ while test 1 ; do
 	set dtrace
 	eval $setvar
 	
-	if test -f $dtrace
+	if $test -f $dtrace
 	then
 		if $dtrace -h -s ../perldtrace.d \
 			-o perldtrace.tmp >/dev/null 2>&1 \
@@ -9016,8 +9016,21 @@ EOM
 		break;
 	fi
 
-	echo "$dtrace was not found."
-	echo " "
+	case "$fastread" in
+	yes)
+		cat >&2 <<EOM
+
+*** $me:  Fatal Error:  $dtrace not found.
+*** Can't continue.
+
+EOM
+		exit 1
+		;;
+	*)
+		echo "*** $dtrace was not found."
+		echo " "
+		;;
+	esac
 done
 
 : define an is-a-typedef? function
