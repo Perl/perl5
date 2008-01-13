@@ -9,7 +9,7 @@ package Math::Complex;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $Inf);
 
-$VERSION = 1.43;
+$VERSION = 1.44;
 
 BEGIN {
     # For 64-bit doubles, anyway.
@@ -1927,6 +1927,8 @@ Here are some examples:
 	$j->arg(2);			# (the last two aka rho, theta)
 					# can be used also as mutators.
 
+=head1 CONSTANTS
+
 =head2 PI
 
 The constant C<pi> and some handy multiples of it (pi2, pi4,
@@ -1954,6 +1956,13 @@ it can be for example any of
    1.#INF
 
 or it can be something else. 
+
+Also note that in some platforms trying to use the infinity in
+arithmetic operations may result in Perl crashing because using
+an infinity causes SIGFPE or its moral equivalent to be sent.
+The way to ignore this is
+
+  local $SIG{FPE} = sub { };
 
 =head1 ERRORS DUE TO DIVISION BY ZERO OR LOGARITHM OF ZERO
 
@@ -2018,6 +2027,10 @@ In Cray UNICOS there is some strange numerical instability that results
 in root(), cos(), sin(), cosh(), sinh(), losing accuracy fast.  Beware.
 The bug may be in UNICOS math libs, in UNICOS C compiler, in Math::Complex.
 Whatever it is, it does not manifest itself anywhere else where Perl runs.
+
+=head1 SEE ALSO
+
+L<Math::Trig>
 
 =head1 AUTHORS
 

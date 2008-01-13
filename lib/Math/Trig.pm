@@ -10,14 +10,14 @@ package Math::Trig;
 use 5.005;
 use strict;
 
-use Math::Complex 1.43;
+use Math::Complex 1.44;
 use Math::Complex qw(:trig :pi);
 
 use vars qw($VERSION $PACKAGE @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
 @ISA = qw(Exporter);
 
-$VERSION = 1.08;
+$VERSION = 1.09;
 
 my @angcnv = qw(rad2deg rad2grad
 		deg2rad deg2grad
@@ -668,6 +668,8 @@ cannot be completely avoided if we want things like C<asin(2)> to give
 an answer instead of giving a fatal runtime error.
 
 Do not attempt navigation using these formulas.
+
+L<Math::Complex>
 
 =head1 AUTHORS
 
