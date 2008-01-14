@@ -5340,15 +5340,23 @@ Perl_sv_free(pTHX_ SV *sv)
 	    return;
 	}
 	if (ckWARN_d(WARN_INTERNAL)) {
-	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
-                        "Attempt to free unreferenced scalar: SV 0x%"UVxf
-                        pTHX__FORMAT, PTR2UV(sv) pTHX__VALUE);
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 	    Perl_dump_sv_child(aTHX_ sv);
 #else
   #ifdef DEBUG_LEAKING_SCALARS
-	sv_dump(sv);
+	    sv_dump(sv);
   #endif
+#ifdef DEBUG_LEAKING_SCALARS_ABORT
+	    if (PL_warnhook == PERL_WARNHOOK_FATAL
+		|| ckDEAD(packWARN(WARN_INTERNAL))) {
+		/* Don't let Perl_warner cause us to escape our fate:  */
+		abort();
+	    }
+#endif
+	    /* This may not return:  */
+	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
+                        "Attempt to free unreferenced scalar: SV 0x%"UVxf
+                        pTHX__FORMAT, PTR2UV(sv) pTHX__VALUE);
 #endif
 	}
 #ifdef DEBUG_LEAKING_SCALARS_ABORT
@@ -10066,8 +10074,14 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
     dVAR;
     SV *dstr;
 
-    if (!sstr || SvTYPE(sstr) == SVTYPEMASK)
+    if (!sstr)
 	return NULL;
+    if (SvTYPE(sstr) == SVTYPEMASK) {
+#ifdef DEBUG_LEAKING_SCALARS_ABORT
+	abort();
+#endif
+	return NULL;
+    }
     /* look for it in the table first */
     dstr = (SV*)ptr_table_fetch(PL_ptr_table, sstr);
     if (dstr)

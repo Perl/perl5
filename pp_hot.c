@@ -1949,6 +1949,15 @@ PP(pp_iter)
 	    *itersvp = newSViv(cx->blk_loop.iterix++);
 	    SvREFCNT_dec(oldsv);
 	}
+
+	/* Handle end of range at IV_MAX */
+	if ((cx->blk_loop.iterix == IV_MIN) &&
+	    (cx->blk_loop.itermax == IV_MAX))
+	{
+	    cx->blk_loop.iterix++;
+	    cx->blk_loop.itermax++;
+	}
+
 	RETPUSHYES;
     }
 

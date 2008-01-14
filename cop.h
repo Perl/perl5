@@ -722,6 +722,7 @@ L<perlcall>.
 #define G_SCALAR	0
 #define G_ARRAY		1
 #define G_VOID		128	/* skip this bit when adding flags below */
+#define G_WANT		(128|1)
 
 /* extra flags for Perl_call_* routines */
 #define G_DISCARD	2	/* Call FREETMPS.

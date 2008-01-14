@@ -1855,8 +1855,25 @@ PP(pp_enteriter)
 	    SvGETMAGIC(sv);
 	    SvGETMAGIC(right);
 	    if (RANGE_IS_NUMERIC(sv,right)) {
-		if ((SvOK(sv) && SvNV(sv) < IV_MIN) ||
-		    (SvOK(right) && SvNV(right) >= IV_MAX))
+#ifdef NV_PRESERVES_UV
+		if ((SvOK(sv) && ((SvNV(sv) < (NV)IV_MIN) ||
+				  (SvNV(sv) > (NV)IV_MAX)))
+			||
+		    (SvOK(right) && ((SvNV(right) > (NV)IV_MAX) ||
+				     (SvNV(right) < (NV)IV_MIN))))
+#else
+		if ((SvOK(sv) && ((SvNV(sv) <= (NV)IV_MIN)
+				  ||
+		                  ((SvNV(sv) > 0) &&
+					((SvUV(sv) > (UV)IV_MAX) ||
+					 (SvNV(sv) > (NV)UV_MAX)))))
+			||
+		    (SvOK(right) && ((SvNV(right) <= (NV)IV_MIN)
+				     ||
+				     ((SvNV(right) > 0) &&
+					((SvUV(right) > (UV)IV_MAX) ||
+					 (SvNV(right) > (NV)UV_MAX))))))
+#endif
 		    DIE(aTHX_ "Range iterator outside integer range");
 		cx->blk_loop.iterix = SvIV(sv);
 		cx->blk_loop.itermax = SvIV(right);
