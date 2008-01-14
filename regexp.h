@@ -382,31 +382,31 @@ and check for NULL.
 #if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
 #  define RX_EXTFLAGS(prog)						\
     (*({								\
-	REGEXP *const thwape = (prog);					\
+	const REGEXP *const thwape = (prog);				\
 	assert(SvTYPE(thwape) == SVt_REGEXP);				\
 	&RXp_EXTFLAGS(SvANY(thwape));					\
     }))
 #  define RX_ENGINE(prog)						\
     (*({								\
-	REGEXP *const thwape = (prog);					\
+	const REGEXP *const thwape = (prog);				\
 	assert(SvTYPE(thwape) == SVt_REGEXP);				\
 	&SvANY(thwape)->engine;						\
     }))
 #  define RX_SUBBEG(prog)						\
     (*({								\
-	REGEXP *const thwape = (prog);					\
+	const REGEXP *const thwape = (prog);				\
 	assert(SvTYPE(thwape) == SVt_REGEXP);				\
 	&SvANY(thwape)->subbeg;						\
     }))
 #  define RX_OFFS(prog)							\
     (*({								\
-	REGEXP *const thwape = (prog);					\
+	const REGEXP *const thwape = (prog);				\
 	assert(SvTYPE(thwape) == SVt_REGEXP);				\
 	&SvANY(thwape)->offs;						\
     }))
 #  define RX_NPARENS(prog)						\
     (*({								\
-	REGEXP *const thwape = (prog);					\
+	const REGEXP *const thwape = (prog);				\
 	assert(SvTYPE(thwape) == SVt_REGEXP);				\
 	&SvANY(thwape)->nparens;					\
     }))
@@ -470,7 +470,8 @@ and check for NULL.
 	/* This is here to generate a casting warning if incorrect.  */	\
 	REGEXP *const zwapp = (re);					\
 	assert(SvTYPE(zwapp) == SVt_REGEXP);				\
-	(REGEXP *) SvREFCNT_inc(zwapp);					\
+	SvREFCNT_inc(zwapp);						\
+	zwapp;								\
     })
 #  define ReREFCNT_dec(re)						\
     ({									\
