@@ -1,6 +1,6 @@
 # $Id: encoding.pm,v 2.6 2007/04/22 14:56:12 dankogai Exp $
 package encoding;
-our $VERSION = do { my @r = ( q$Revision: 2.6 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = '2.6_01';
 
 use Encode;
 use strict;
@@ -51,10 +51,10 @@ sub _get_locale_encoding {
     no warnings 'uninitialized';
 
     if ( not $locale_encoding && in_locale() ) {
-        if ( $ENV{LC_ALL} =~ /^([^.]+)\.([^.]+)$/ ) {
+        if ( $ENV{LC_ALL} =~ /^([^.]+)\.([^.@]+)(@.*)?$/ ) {
             ( $country_language, $locale_encoding ) = ( $1, $2 );
         }
-        elsif ( $ENV{LANG} =~ /^([^.]+)\.([^.]+)$/ ) {
+        elsif ( $ENV{LANG} =~ /^([^.]+)\.([^.@]+)(@.*)?$/ ) {
             ( $country_language, $locale_encoding ) = ( $1, $2 );
         }
 
