@@ -50,7 +50,7 @@ sub _get_locale_encoding {
 
     no warnings 'uninitialized';
 
-    if ( not $locale_encoding && in_locale() ) {
+    if ( (not $locale_encoding) && in_locale() ) {
         if ( $ENV{LC_ALL} =~ /^([^.]+)\.([^.@]+)(@.*)?$/ ) {
             ( $country_language, $locale_encoding ) = ( $1, $2 );
         }
