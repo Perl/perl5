@@ -10,10 +10,7 @@ use Exporter;
 use SelfLoader;
 use vars qw { $VERSION @ISA %EXPORT_TAGS };
 
-# I really don't want to bring the XS version module into maint. So for now,
-# I'm commiting the sin of Bowdlerising Damian's module:
-# use version; $VERSION = qv('2.0.0');
-$VERSION = 2.000000;
+$VERSION    = 1.98;
 @ISA		= qw ( Exporter );
 		     
 %EXPORT_TAGS	= ( ALL => [ qw(
@@ -331,7 +328,7 @@ sub _match_tagged	# ($$$$$$$)
 
 	if (!defined $rdel)
 	{
-		$rdelspec = substr($$textref, $-[0], $+[0] - $-[0]);
+		$rdelspec = $&;
 		unless ($rdelspec =~ s/\A([[(<{]+)($XMLNAME).*/ quotemeta "$1\/$2". _revbracket($1) /oes)
 		{
 			_failmsg "Unable to construct closing tag to match: $rdel",
@@ -722,7 +719,8 @@ sub _match_quotelike($$$$)	# ($textref, $prepat, $allow_raw_match)
 		       );
 	}
 
-	unless ($$textref =~ m{\G(\b(?:m|s|qq|qx|qw|q|qr|tr|y)\b(?=\s*\S)|<<)}gc)
+	unless ($$textref =~
+    m{\G(\b(?:m|s|qq|qx|qw|q|qr|tr|y)\b(?=\s*\S)|<<(?=\s*["'A-Za-z_]))}gc)
 	{
 		_failmsg q{No quotelike operator found after prefix at "} .
 			     substr($$textref, pos($$textref), 20) .
@@ -796,15 +794,13 @@ sub _match_quotelike($$$$)	# ($textref, $prepat, $allow_raw_match)
 		$rdel1 =~ tr/[({</])}>/;
 		defined(_match_bracketed($textref,"",$ldel1,"","",$rdel1))
 		|| do { pos $$textref = $startpos; return };
-        $ld2pos = pos($$textref);
-        $rd1pos = $ld2pos-1;
 	}
 	else
 	{
-		$$textref =~ /\G$ldel1[^\\$ldel1]*(\\.[^\\$ldel1]*)*$ldel1/gcs
+		$$textref =~ /$ldel1[^\\$ldel1]*(\\.[^\\$ldel1]*)*$ldel1/gcs
 		|| do { pos $$textref = $startpos; return };
-        $ld2pos = $rd1pos = pos($$textref)-1;
 	}
+	$ld2pos = $rd1pos = pos($$textref)-1;
 
 	my $second_arg = $op =~ /s|tr|y/ ? 1 : 0;
 	if ($second_arg)
@@ -928,10 +924,7 @@ sub extract_multiple (;$$$$)	# ($text, $functions_ref, $max_fields, $ignoreunkno
 				elsif (ref($func) eq 'Text::Balanced::Extractor')
 					{ @bits = $field = $func->extract($$textref) }
 				elsif( $$textref =~ m/\G$func/gc )
-					{ @bits = $field = defined($1)
-                                ? $1
-                                : substr($$textref, $-[0], $+[0] - $-[0])
-                    }
+					{ @bits = $field = defined($1) ? $1 : $& }
 				$pref ||= "";
 				if (defined($field) && length($field))
 				{
@@ -1132,9 +1125,9 @@ The substring to be extracted must appear at the
 current C<pos> location of the string's variable
 (or at index zero, if no C<pos> position is defined).
 In other words, the C<extract_...> subroutines I<don't>
-extract the first occurrence of a substring anywhere
+extract the first occurance of a substring anywhere
 in a string (like an unanchored regex would). Rather,
-they extract an occurrence of the substring appearing
+they extract an occurance of the substring appearing
 immediately at the current matching position in the
 string (like a C<\G>-anchored regex would).
 
@@ -1400,7 +1393,7 @@ See also: C<"extract_quotelike"> and C<"extract_codeblock">.
 
 C<extract_variable> extracts any valid Perl variable or
 variable-involved expression, including scalars, arrays, hashes, array
-accesses, hash look-ups, method calls through objects, subroutine calls
+accesses, hash look-ups, method calls through objects, subroutine calles
 through subroutine references, etc.
 
 The subroutine takes up to two optional arguments:
@@ -2059,7 +2052,7 @@ If none of the extractor subroutines succeeds, then one
 character is extracted from the start of the text and the extraction
 subroutines reapplied. Characters which are thus removed are accumulated and
 eventually become the next field (unless the fourth argument is true, in which
-case they are discarded).
+case they are disgarded).
 
 For example, the following extracts substrings that are valid Perl variables:
 
