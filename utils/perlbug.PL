@@ -506,7 +506,7 @@ EOF
 	}
     }
     my $report_about_module = '';
-    if ($::HaveCoreList) {
+    if ($::HaveCoreList && !$ok) {
 	paraprint <<EOF;
 Is your report about a Perl module? If yes, enter its name. If not, skip.
 EOF
