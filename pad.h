@@ -306,8 +306,7 @@ ling pad (lvalue) to C<gen>.  Note that C<SvUV_set> is hijacked for this purpose
 =for apidoc m|void|PAD_DUP|PADLIST dstpad|PADLIST srcpad|CLONE_PARAMS* param
 Clone a padlist.
 
-=for apidoc m|void|PAD_CLONE_VARS|PerlInterpreter *proto_perl \
-|CLONE_PARAMS* param
+=for apidoc m|void|PAD_CLONE_VARS|PerlInterpreter *proto_perl|CLONE_PARAMS* param
 Clone the state variables associated with running and compiling pads.
 
 =cut

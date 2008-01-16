@@ -119,10 +119,9 @@ Found in file pad.h
 =item PAD_CLONE_VARS
 X<PAD_CLONE_VARS>
 
-|CLONE_PARAMS* param
 Clone the state variables associated with running and compiling pads.
 
-	void	PAD_CLONE_VARS(PerlInterpreter *proto_perl \)
+	void	PAD_CLONE_VARS(PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 
 =for hackers
 Found in file pad.h
