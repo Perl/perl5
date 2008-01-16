@@ -419,7 +419,9 @@ char *
 Perl_ninstr(pTHX_ const char *big, const char *bigend, const char *little, const char *lend)
 {
     PERL_UNUSED_CONTEXT;
-    if (little >= lend)
+    if (!*little && /* This re-instates the bug fixed by change 26510, which
+		     Compress::Zlib 1.42 (among others) relies on.  */
+	little >= lend)
         return (char*)big;
     {
         char first = *little++;
@@ -449,7 +451,7 @@ Perl_rninstr(pTHX_ register const char *big, const char *bigend, const char *lit
     register const char * const littleend = lend;
     PERL_UNUSED_CONTEXT;
 
-    if (little >= littleend)
+    if (!first && little >= littleend)
 	return (char*)bigend;
     bigbeg = big;
     big = bigend - (littleend - little++);
