@@ -165,8 +165,7 @@ my $TEST = catfile(curdir(), 'TEST');
 	    };
 	}
     }
-
-    $ENV{PATH} = '';
+    $ENV{PATH} = ($Is_Cygwin) ? '/usr/bin' : '';
     delete @ENV{@MoreEnv};
     $ENV{TERM} = 'dumb';
 

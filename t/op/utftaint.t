@@ -144,9 +144,6 @@ for my $ary ([ascii => 'perl'], [latin1 => "\xB6"]) {
 }
 
 {
-    my @keys = qw(CDPATH IFS ENV BASH_ENV);
-    push @keys, qw(PATH) unless $^O eq 'MSWin32';
-    local @ENV{@keys} = (undef) x scalar(@keys);
     fresh_perl_is('$a = substr $^X, 0, 0; /\x{100}/i; /$a\x{100}/i || print q,ok,',
 		  'ok', {switches => ["-T", "-l"]},
 		  "matching a regexp is taint agnostic");
