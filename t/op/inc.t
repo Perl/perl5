@@ -2,7 +2,7 @@
 
 # use strict;
 
-print "1..34\n";
+print "1..50\n";
 
 my $test = 1;
 
@@ -194,3 +194,68 @@ ok ($a == 2147483647, $a);
     $x--;
     ok ($x == 0, "(void) i_postdec");
 }
+
+# I'm sure that there's an IBM format with a 48 bit mantissa
+# IEEE doubles have a 53 bit mantissa
+# 80 bit long doubles have a 64 bit mantissa
+# sparcs have a 112 bit mantissa for their long doubles. Just to be awkward :-)
+
+sub check_some_code {
+    my ($start, $warn, $action, $description) = @_;
+    my $warn_line = ($warn ? 'use' : 'no') . " warnings 'imprecision';";
+    my @warnings;
+    local $SIG{__WARN__} = sub {push @warnings, "@_"};
+
+    print "# checking $action under $warn_line\n";
+    my $code = <<"EOC";
+$warn_line
+my \$i = \$start;
+for(0 .. 3) {
+    my \$a = $action;
+}
+1;
+EOC
+    eval $code or die "# $@\n$code";
+
+    if ($warn) {
+	unless (ok (scalar @warnings == 2, scalar @warnings)) {
+	    print STDERR "# $_" foreach @warnings;
+	}
+	foreach (@warnings) {
+	    unless (ok (/Lost precision when incrementing \d+/, $_)) {
+		print STDERR "# $_"
+	    }
+	}
+    } else {
+	unless (ok (scalar @warnings == 0)) {
+	    print STDERR "# @$_" foreach @warnings;
+	}
+    }
+}
+
+my $found;
+for my $n (47..113) {
+    my $power_of_2 = 2**$n;
+    my $plus_1 = $power_of_2 + 1;
+    next if $plus_1 != $power_of_2;
+    print "# Testing for 2**$n ($power_of_2) which overflows the mantissa\n";
+    # doing int here means that for NV > IV on the first go we're in the
+    # IV upgrade to NV case, and the second go we're in the NV already case.
+    my $start = int($power_of_2 - 2);
+    my $check = $power_of_2 - 2;
+    die "Something wrong with our rounding assumptions: $check vs $start"
+	unless $start == $check;
+
+    foreach my $warn (0, 1) {
+	foreach (['++$i', 'pre-inc'], ['$i++', 'post-inc']) {
+	    check_some_code($start, $warn, @$_);
+	}
+	foreach (['--$i', 'pre-dec'], ['$i--', 'post-dec']) {
+	    check_some_code(-$start, $warn, @$_);
+	}
+    }
+
+    $found = 1;
+    last;
+}
+die "Could not find a value which overflows the mantissa" unless $found;
