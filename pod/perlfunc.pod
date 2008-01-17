@@ -2750,7 +2750,8 @@ Wednesday.  C<$yday> is the day of the year, in the range C<0..364>
 C<$isdst> is true if the specified time occurs during Daylight Saving
 Time, false otherwise.
 
-If EXPR is omitted, C<localtime()> uses the current time (C<localtime(time)>).
+If EXPR is omitted, C<localtime()> uses the current time (as returned
+by the C<time()> built-in).
 
 In scalar context, C<localtime()> returns the ctime(3) value:
 
