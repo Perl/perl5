@@ -26,10 +26,10 @@ BEGIN {
     }
 }
 
-plan(tests => 135);
+plan(tests => 153);
 
-use Math::Trig 1.09;
-use Math::Trig 1.09 qw(Inf);
+use Math::Trig 1.12;
+use Math::Trig 1.12 qw(:pi Inf);
 
 my $pip2 = pi / 2;
 
@@ -362,5 +362,31 @@ cmp_ok(cosh(-1e5), '==', Inf());
 cmp_ok(csch(-1e5), '==', 0);
 cmp_ok(tanh(-1e5), '==', -1);
 cmp_ok(coth(-1e5), '==', -1);
+
+print "# great_circle_distance with small angles\n";
+
+for my $e (qw(1e-2 1e-3 1e-4 1e-5)) {
+    # Can't assume == 0 because of floating point fuzz,
+    # but let's hope for at least < $e.
+    cmp_ok(great_circle_distance(0, $e, 0, $e), '<', $e);
+}
+
+print "# asin_real, acos_real\n";
+
+is(acos_real(-2.0), pi);
+is(acos_real(-1.0), pi);
+is(acos_real(-0.5), acos(-0.5));
+is(acos_real( 0.0), acos( 0.0));
+is(acos_real( 0.5), acos( 0.5));
+is(acos_real( 1.0), 0);
+is(acos_real( 2.0), 0);
+
+is(asin_real(-2.0), -&pip2);
+is(asin_real(-1.0), -&pip2);
+is(asin_real(-0.5), asin(-0.5));
+is(asin_real( 0.0), asin( 0.0));
+is(asin_real( 0.5), asin( 0.5));
+is(asin_real( 1.0),  pip2);
+is(asin_real( 2.0),  pip2);
 
 # eof

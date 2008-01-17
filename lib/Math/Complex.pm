@@ -9,7 +9,7 @@ package Math::Complex;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $Inf);
 
-$VERSION = 1.44;
+$VERSION = 1.47;
 
 BEGIN {
     # For 64-bit doubles, anyway.
