@@ -229,7 +229,7 @@ static const char* const lex_state_names[] = {
  */
 
 #ifdef DEBUGGING /* Serve -DT. */
-#   define REPORT(retval) tokereport((I32)retval)
+#   define REPORT(retval) tokereport((I32)retval, &pl_yylval)
 #else
 #   define REPORT(retval) (retval)
 #endif
@@ -376,7 +376,7 @@ static struct debug_tokens {
 /* dump the returned token in rv, plus any optional arg in pl_yylval */
 
 STATIC int
-S_tokereport(pTHX_ I32 rv)
+S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp)
 {
     dVAR;
     if (DEBUG_T_TEST) {
@@ -405,22 +405,22 @@ S_tokereport(pTHX_ I32 rv)
 	case TOKENTYPE_GVVAL: /* doesn't appear to be used */
 	    break;
 	case TOKENTYPE_IVAL:
-	    Perl_sv_catpvf(aTHX_ report, "(ival=%"IVdf")", (IV)pl_yylval.ival);
+	    Perl_sv_catpvf(aTHX_ report, "(ival=%"IVdf")", (IV)lvalp->ival);
 	    break;
 	case TOKENTYPE_OPNUM:
 	    Perl_sv_catpvf(aTHX_ report, "(ival=op_%s)",
-				    PL_op_name[pl_yylval.ival]);
+				    PL_op_name[lvalp->ival]);
 	    break;
 	case TOKENTYPE_PVAL:
-	    Perl_sv_catpvf(aTHX_ report, "(pval=\"%s\")", pl_yylval.pval);
+	    Perl_sv_catpvf(aTHX_ report, "(pval=\"%s\")", lvalp->pval);
 	    break;
 	case TOKENTYPE_OPVAL:
-	    if (pl_yylval.opval) {
+	    if (lvalp->opval) {
 		Perl_sv_catpvf(aTHX_ report, "(opval=op_%s)",
-				    PL_op_name[pl_yylval.opval->op_type]);
-		if (pl_yylval.opval->op_type == OP_CONST) {
+				    PL_op_name[lvalp->opval->op_type]);
+		if (lvalp->opval->op_type == OP_CONST) {
 		    Perl_sv_catpvf(aTHX_ report, " %s",
-			SvPEEK(cSVOPx_sv(pl_yylval.opval)));
+			SvPEEK(cSVOPx_sv(lvalp->opval)));
 		}
 
 	    }
@@ -1320,6 +1320,12 @@ STATIC void
 S_force_next(pTHX_ I32 type)
 {
     dVAR;
+#ifdef DEBUGGING
+    if (DEBUG_T_TEST) {
+        PerlIO_printf(Perl_debug_log, "### forced token:\n");
+	tokereport(THING, &NEXTVAL_NEXTTOKE);
+    }
+#endif
 #ifdef PERL_MAD
     if (PL_curforce < 0)
 	start_force(PL_lasttoke);

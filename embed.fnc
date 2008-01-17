@@ -1590,7 +1590,7 @@ s	|I32	|cr_textfilter	|int idx|NULLOK SV *sv|int maxlen
 s	|void	|strip_return	|NN SV *sv
 #  endif
 #  if defined(DEBUGGING)
-s	|int	|tokereport	|I32 rv
+s	|int	|tokereport	|I32 rv|NN const YYSTYPE* lvalp
 s	|void	|printbuf	|NN const char* fmt|NN const char* s
 #  endif
 #endif
