@@ -3388,7 +3388,7 @@ STATIC void	S_find_beginning(pTHX_ SV* linestr_sv, PerlIO *rsfp)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC void	S_forbid_setid(pTHX_ const char flag, const int suidscript);
+STATIC void	S_forbid_setid(pTHX_ const char flag, const bool suidscript);
 STATIC void	S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep, bool canrelocate);
 STATIC void	S_init_interp(pTHX);
 STATIC void	S_init_ids(pTHX);
@@ -3402,7 +3402,7 @@ STATIC void	S_my_exit_jump(pTHX)
 			__attribute__noreturn__;
 
 STATIC void	S_nuke_stacks(pTHX);
-STATIC int	S_open_script(pTHX_ const char *scriptname, bool dosearch, int *suidscript, PerlIO **rsfpp)
+STATIC int	S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript, PerlIO **rsfpp)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3)
 			__attribute__nonnull__(pTHX_4);
@@ -3412,7 +3412,7 @@ STATIC void	S_usage(pTHX_ const char *name)
 
 #ifdef DOSUID
 #  ifdef IAMSUID
-STATIC void	S_validate_suid(pTHX_ const char *validarg, int fdscript, int suidscript, SV* linestr_sv, PerlIO *rsfp)
+STATIC void	S_validate_suid(pTHX_ const char *validarg, int fdscript, bool suidscript, SV* linestr_sv, PerlIO *rsfp)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_4)
 			__attribute__nonnull__(pTHX_5);
