@@ -3,7 +3,7 @@ package Test::Harness::Straps;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.26';
+$VERSION = '0.26_01';
 
 use Config;
 use Test::Harness::Assert;
@@ -296,7 +296,7 @@ sub analyze_file {
 
     $results->set_wait($?);
     if ( $? && $self->{_is_vms} ) {
-        eval q{use vmsish "status"; $results->set_exit($?); };
+        $results->set_exit($?);
     }
     else {
         $results->set_exit( _wait2exit($?) );
@@ -355,7 +355,8 @@ sub _command {
     my $self = shift;
 
     return $ENV{HARNESS_PERL}   if defined $ENV{HARNESS_PERL};
-    return qq["$^X"]            if $self->{_is_win32} && ($^X =~ /[^\w\.\/\\]/);
+    #return qq["$^X"]            if $self->{_is_win32} && ($^X =~ /[^\w\.\/\\]/);
+    return qq["$^X"]            if $^X =~ /\s/ and $^X !~ /^["']/;
     return $^X;
 }
 

@@ -3,7 +3,7 @@ package Test::Harness::Results;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.01';
+$VERSION = '0.01_01';
 
 =head1 NAME
 
@@ -118,7 +118,18 @@ sub ok {
     return $self->{ok} || 0;
 }
 
-sub set_exit { my $self = shift; $self->{exit} = shift }
+sub set_exit { 
+    my $self = shift; 
+    if ($^O eq 'VMS') {
+        eval {
+            use vmsish q(status);
+            $self->{exit} = shift;  # must be in same scope as pragma
+        }
+    }
+    else {
+        $self->{exit} = shift;
+    }
+}
 sub exit {
     my $self = shift;
     return $self->{exit} || 0;
