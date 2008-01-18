@@ -3767,6 +3767,24 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname,
 		int fdscript, int suidscript, SV *linestr_sv, PerlIO *rsfp)
 {
     dVAR;
+#ifdef DOSUID
+    const char *s, *s2;
+#endif
+
+#ifdef DOSUID
+#  ifdef IAMSUID
+    PERL_UNUSED_ARG(scriptname);
+#  endif
+#else
+    PERL_UNUSED_ARG(validarg);
+    PERL_UNUSED_ARG(scriptname);
+    PERL_UNUSED_ARG(linestr_sv);
+    PERL_UNUSED_ARG(fdscript);
+    PERL_UNUSED_ARG(suidscript);
+#  ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
+    PERL_UNUSED_ARG(rsfp);
+#  endif
+#endif
 
     /* do we need to emulate setuid on scripts? */
 
@@ -3796,7 +3814,6 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname,
      */
 
 #ifdef DOSUID
-    const char *s, *s2;
 
     if (PerlLIO_fstat(PerlIO_fileno(rsfp),&PL_statbuf) < 0)	/* normal stat is insecure */
 	Perl_croak(aTHX_ "Can't stat script \"%s\"",PL_origfilename);
@@ -4140,12 +4157,8 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
     Perl_croak(aTHX_ "Can't do setuid (suidperl cannot exec perl)\n");
 #  endif /* IAMSUID */
 #else /* !DOSUID */
-    PERL_UNUSED_ARG(fdscript);
-    PERL_UNUSED_ARG(suidscript);
     if (PL_euid != PL_uid || PL_egid != PL_gid) {	/* (suidperl doesn't exist, in fact) */
-#  ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
-    PERL_UNUSED_ARG(rsfp);
-#  else
+#  ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
 	PerlLIO_fstat(PerlIO_fileno(rsfp),&PL_statbuf);	/* may be either wrapped or real suid */
 	if ((PL_euid != PL_uid && PL_euid == PL_statbuf.st_uid && PL_statbuf.st_mode & S_ISUID)
 	    ||
@@ -4158,9 +4171,6 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	/* not set-id, must be wrapped */
     }
 #endif /* DOSUID */
-    PERL_UNUSED_ARG(validarg);
-    PERL_UNUSED_ARG(scriptname);
-    PERL_UNUSED_ARG(linestr_sv);
 }
 
 STATIC void
