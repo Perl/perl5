@@ -456,6 +456,10 @@ splintfiles = $(c1)
 .c.s:
 	$(CCCMDSRC) -S $*.c
 
+all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT) extra.pods $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
+	@echo " ";
+	@echo "	Everything is up to date. Type '$(MAKE) test' to run test suite."
+
 sperl$(OBJ_EXT): perl.c $(h)
 	$(RMS) sperl.c
 	$(LNS) perl.c sperl.c
@@ -464,10 +468,6 @@ sperl$(OBJ_EXT): perl.c $(h)
 
 sperl.i: perl.c $(h)
 	$(CCCMDSRC) -DIAMSUID -E perl.c > sperl.i
-
-all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT) extra.pods $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
-	@echo " ";
-	@echo "	Everything is up to date. Type '$(MAKE) test' to run test suite."
 
 .PHONY: all translators utilities
 
