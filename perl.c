@@ -4132,13 +4132,6 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
     /* PSz 11 Nov 03
      * Keep original arguments: suidperl already has fd script.
      */
-/*  for (which = 1; PL_origargv[which] && PL_origargv[which] != scriptname; which++) ;	*/
-/*  if (!PL_origargv[which]) {						*/
-/*	errno = EPERM;							*/
-/*	Perl_croak(aTHX_ "Permission denied\n");			*/
-/*  }									*/
-/*  PL_origargv[which] = savepv(Perl_form(aTHX_ "/dev/fd/%d/%s",	*/
-/*				  PerlIO_fileno(rsfp), PL_origargv[which]));	*/
 #  if defined(HAS_FCNTL) && defined(F_SETFD)
     fcntl(PerlIO_fileno(rsfp),F_SETFD,0);	/* ensure no close-on-exec */
 #  endif
