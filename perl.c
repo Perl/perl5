@@ -1677,7 +1677,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     char **argv = PL_origargv;
     const char *scriptname = NULL;
     VOL bool dosearch = FALSE;
+#ifdef DOSUID
     const char *validarg = "";
+#endif
     register SV *sv;
     register char c;
     const char *cddir = NULL;
@@ -2031,8 +2033,11 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 
     {
 	bool suidscript = FALSE;
-	const int fdscript
-	    = open_script(scriptname, dosearch, &suidscript, &rsfp);
+
+#ifdef DOSUID
+	const int fdscript =
+#endif
+	    open_script(scriptname, dosearch, &suidscript, &rsfp);
 
 	validate_suid(validarg, scriptname, fdscript, suidscript,
 		linestr_sv, rsfp);
