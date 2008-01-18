@@ -3774,6 +3774,8 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname,
 #ifdef DOSUID
 #  ifdef IAMSUID
     PERL_UNUSED_ARG(scriptname);
+#  else
+    PERL_UNUSED_ARG(suidscript);
 #  endif
 #else
     PERL_UNUSED_ARG(validarg);
