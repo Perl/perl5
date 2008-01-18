@@ -3767,9 +3767,6 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname,
 		int fdscript, int suidscript, SV *linestr_sv, PerlIO *rsfp)
 {
     dVAR;
-#ifdef IAMSUID
-    /* int which; */
-#endif /* IAMSUID */
 
     /* do we need to emulate setuid on scripts? */
 
