@@ -1277,10 +1277,23 @@ s	|void	|nuke_stacks
 s	|int	|open_script	|NN const char *scriptname|bool dosearch \
 				|NN int *suidscript|NN PerlIO **rsfpp
 s	|void	|usage		|NN const char *name
-s	|void	|validate_suid	|NN const char *validarg \
-				|NN const char *scriptname|int fdscript \
+#ifdef DOSUID
+#  ifdef IAMSUID
+so	|void	|validate_suid	|NN const char *validarg \
+				|int fdscript \
 				|int suidscript|NN SV* linestr_sv \
 				|NN PerlIO *rsfp
+#  else
+so	|void	|validate_suid	|NN const char *validarg \
+				|NN const char *scriptname|int fdscript \
+				|NN SV* linestr_sv \
+				|NN PerlIO *rsfp
+#  endif
+#else
+#  ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
+so	|void	|validate_suid	|NN PerlIO *rsfp
+#  endif
+#endif
 
 #  if defined(IAMSUID)
 s	|int	|fd_on_nosuid_fs|int fd

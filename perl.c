@@ -125,16 +125,22 @@ char *getenv (char *); /* Usually in <stdlib.h> */
 
 static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 
-#ifdef IAMSUID
-#ifndef DOSUID
-#define DOSUID
-#endif
-#endif /* IAMSUID */
-
-#ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
 #ifdef DOSUID
-#undef DOSUID
-#endif
+#  ifdef IAMSUID
+/* Drop scriptname */
+#    define validate_suid(validarg, scriptname, fdscript, suidscript, linestr_sv, rsfp) S_validate_suid(aTHX_ validarg, fdscript, suidscript, linestr_sv, rsfp)
+#  else
+/* Drop suidscript */
+#    define validate_suid(validarg, scriptname, fdscript, suidscript, linestr_sv, rsfp) S_validate_suid(aTHX_ validarg, scriptname, fdscript, linestr_sv, rsfp)
+#  endif
+#else
+#  ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
+/* Drop everything. Heck, don't even try to call it */
+#    define validate_suid(validarg, scriptname, fdscript, suidscript, linestr_sv, rsfp) NOOP
+#  else
+/* Drop almost everything */
+#    define validate_suid(validarg, scriptname, fdscript, suidscript, linestr_sv, rsfp) S_validate_suid(aTHX_ rsfp)
+#  endif
 #endif
 
 #define CALL_BODY_EVAL(myop) \
@@ -1486,12 +1492,9 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 
     PERL_UNUSED_ARG(my_perl);
 
-#ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
-#ifdef IAMSUID
-#undef IAMSUID
-    Perl_croak(aTHX_ "suidperl is no longer needed since the kernel can now execute\n\
-setuid perl scripts securely.\n");
-#endif /* IAMSUID */
+#ifdef SETUID_SCRIPTS_ARE_SECURE_NOW_AND_IAMSUID
+    Perl_croak(aTHX_ "suidperl is no longer needed since the kernel can now "
+	       "execute\nsetuid perl scripts securely.\n");
 #endif
 
 #if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT)
@@ -3762,31 +3765,20 @@ S_fd_on_nosuid_fs(pTHX_ int fd)
 }
 #endif /* IAMSUID */
 
+#ifdef DOSUID
 STATIC void
-S_validate_suid(pTHX_ const char *validarg, const char *scriptname,
-		int fdscript, int suidscript, SV *linestr_sv, PerlIO *rsfp)
+S_validate_suid(pTHX_ const char *validarg,
+#  ifndef IAMSUID
+		const char *scriptname,
+#  endif
+		int fdscript,
+#  ifdef IAMSUID
+		int suidscript,
+#  endif
+		SV *linestr_sv, PerlIO *rsfp)
 {
     dVAR;
-#ifdef DOSUID
     const char *s, *s2;
-#endif
-
-#ifdef DOSUID
-#  ifdef IAMSUID
-    PERL_UNUSED_ARG(scriptname);
-#  else
-    PERL_UNUSED_ARG(suidscript);
-#  endif
-#else
-    PERL_UNUSED_ARG(validarg);
-    PERL_UNUSED_ARG(scriptname);
-    PERL_UNUSED_ARG(linestr_sv);
-    PERL_UNUSED_ARG(fdscript);
-    PERL_UNUSED_ARG(suidscript);
-#  ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
-    PERL_UNUSED_ARG(rsfp);
-#  endif
-#endif
 
     /* do we need to emulate setuid on scripts? */
 
@@ -3814,8 +3806,6 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname,
      * be defined in suidperl only.  suidperl must be setuid root.  The
      * Configure script will set this up for you if you want it.
      */
-
-#ifdef DOSUID
 
     if (PerlLIO_fstat(PerlIO_fileno(rsfp),&PL_statbuf) < 0)	/* normal stat is insecure */
 	Perl_croak(aTHX_ "Can't stat script \"%s\"",PL_origfilename);
@@ -4158,7 +4148,16 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
     PERL_FPU_POST_EXEC
     Perl_croak(aTHX_ "Can't do setuid (suidperl cannot exec perl)\n");
 #  endif /* IAMSUID */
+}
+
 #else /* !DOSUID */
+
+#  ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
+/* Don't even need this function.  */
+#  else
+STATIC void
+S_validate_suid(pTHX_ PerlIO *rsfp)
+{
     if (PL_euid != PL_uid || PL_egid != PL_gid) {	/* (suidperl doesn't exist, in fact) */
 #  ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
 	PerlLIO_fstat(PerlIO_fileno(rsfp),&PL_statbuf);	/* may be either wrapped or real suid */
@@ -4172,8 +4171,9 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #  endif /* SETUID_SCRIPTS_ARE_SECURE_NOW */
 	/* not set-id, must be wrapped */
     }
-#endif /* DOSUID */
 }
+#  endif /* SETUID_SCRIPTS_ARE_SECURE_NOW */
+#endif /* DOSUID */
 
 STATIC void
 S_find_beginning(pTHX_ SV* linestr_sv, PerlIO *rsfp)
