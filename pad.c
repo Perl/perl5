@@ -102,6 +102,8 @@ to be generated in evals, such as
 
     { my $x = 1; sub f { eval '$x'} } f();
 
+For state vars, SVf_PADSTALE is overloaded to mean 'not yet initialised'
+
 =cut
 */
 
@@ -768,6 +770,7 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 		else {
 		    int newwarn = warn;
 		    if (!CvCOMPILED(cv) && (*out_flags & PAD_FAKELEX_MULTI)
+			 && !SvPAD_STATE(name_svp[offset])
 			 && warn && ckWARN(WARN_CLOSURE)) {
 			newwarn = 0;
 			Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
@@ -796,7 +799,9 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 			"Pad findlex cv=0x%"UVxf" found lex=0x%"UVxf"\n",
 			PTR2UV(cv), PTR2UV(*out_capture)));
 
-		    if (SvPADSTALE(*out_capture)) {
+		    if (SvPADSTALE(*out_capture)
+			&& !SvPAD_STATE(name_svp[offset]))
+		    {
 			if (ckWARN(WARN_CLOSURE))
 			    Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
 				"Variable \"%s\" is not available", name);
@@ -853,7 +858,7 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 		    ? SvSTASH(*out_name_sv) : NULL,
 	    SvOURSTASH(*out_name_sv),
 	    1,  /* fake */
-	    0   /* not a state variable */
+	    SvPAD_STATE(*out_name_sv) ? 1 : 0 /* state variable ? */
 	);
 
 	new_namesv = AvARRAY(PL_comppad_name)[new_offset];
@@ -1496,8 +1501,8 @@ Perl_cv_clone(pTHX_ CV *proto)
 		assert(sv);
 		/* formats may have an inactive parent,
 		   while my $x if $false can leave an active var marked as
-		   stale */
-		if (SvPADSTALE(sv)) {
+		   stale. And state vars are always available */
+		if (SvPADSTALE(sv) && !SvPAD_STATE(namesv)) {
 		    if (ckWARN(WARN_CLOSURE))
 			Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
 			    "Variable \"%s\" is not available", SvPVX_const(namesv));
