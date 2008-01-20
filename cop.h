@@ -364,7 +364,7 @@ struct block_format {
 		CopFILE((COP*)CvSTART((CV*)cx->blk_sub.cv)),		\
 		CopLINE((COP*)CvSTART((CV*)cx->blk_sub.cv)));		\
 									\
-	if (cx->blk_sub.hasargs) {					\
+	if (CxHASARGS(cx)) {						\
 	    POP_SAVEARRAY();						\
 	    /* abandon @_ if it got reified */				\
 	    if (AvREAL(cx->blk_sub.argarray)) {				\
@@ -488,6 +488,8 @@ struct block_loop {
 	    cx->blk_loop.itersave = NULL;
 #endif
 #define CxLABEL(c)	(0 + (c)->blk_oldcop->cop_label)
+#define CxHASARGS(c)	(0 + (c)->blk_sub.hasargs)
+#define CxLVAL(c)	(0 + (c)->blk_sub.lval)
 
 #ifdef USE_ITHREADS
 #  define PUSHLOOP_OP_NEXT		/* No need to do anything.  */
