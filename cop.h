@@ -474,6 +474,7 @@ struct block_loop {
 	else								\
 	    cx->blk_loop.itersave = NULL;
 #endif
+#define CxLABEL(c)	(0 + (c)->blk_loop.label)
 
 #ifdef USE_ITHREADS
 #  define PUSHLOOP_OP_NEXT		/* No need to do anything.  */
