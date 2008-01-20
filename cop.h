@@ -279,8 +279,9 @@ struct cop {
 
 /* subroutine context */
 struct block_sub {
-    CV *	cv;
     OP *	retop;	/* op to execute on exit from sub */
+    /* Above here is the same for sub, format and eval.  */
+    CV *	cv;
     U8		hasargs;
     U8		lval;		/* XXX merge lval and hasargs? */
     /* Above here is the same for sub and format.  */
@@ -293,8 +294,9 @@ struct block_sub {
 
 /* format context */
 struct block_format {
-    CV *	cv;
     OP *	retop;	/* op to execute on exit from sub */
+    /* Above here is the same for sub, format and eval.  */
+    CV *	cv;
     U8		hasargs;
     U8		lval;		/* XXX merge lval and hasargs? */
     /* Above here is the same for sub and format.  */
@@ -394,13 +396,14 @@ struct block_format {
 
 /* eval context */
 struct block_eval {
+    OP *	retop;	/* op to execute on exit from eval */
+    /* Above here is the same for sub, format and eval.  */
     U8		old_in_eval;
     U16		old_op_type;
     SV *	old_namesv;
     OP *	old_eval_root;
     SV *	cur_text;
     CV *	cv;
-    OP *	retop;	/* op to execute on exit from eval */
     JMPENV *	cur_top_env; /* value of PL_top_env when eval CX created */
 };
 
