@@ -1257,9 +1257,9 @@ S_dopoptolabel(pTHX_ const char *label)
 		return -1;
 	    break;
 	case CXt_LOOP:
-	    if ( !cx->blk_loop.label || strNE(label, cx->blk_loop.label) ) {
+	    if ( !CxLABEL(cx) || strNE(label, CxLABEL(cx)) ) {
 		DEBUG_l(Perl_deb(aTHX_ "(Skipping label #%ld %s)\n",
-			(long)i, cx->blk_loop.label));
+			(long)i, CxLABEL(cx)));
 		continue;
 	    }
 	    DEBUG_l( Perl_deb(aTHX_ "(Found label #%ld %s)\n", (long)i, label));

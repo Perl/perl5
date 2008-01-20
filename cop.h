@@ -427,7 +427,6 @@ struct block_eval {
 
 /* loop context */
 struct block_loop {
-    char *	label;
     I32		resetsp;
     LOOP *	my_op;	/* My op, that contains redo, next and last ops.  */
     /* (except for non_ithreads we need to modify next_op in pp_ctl.c, hence
@@ -485,7 +484,7 @@ struct block_loop {
 	else								\
 	    cx->blk_loop.itersave = NULL;
 #endif
-#define CxLABEL(c)	(0 + (c)->blk_loop.label)
+#define CxLABEL(c)	(0 + (c)->blk_oldcop->cop_label)
 
 #ifdef USE_ITHREADS
 #  define PUSHLOOP_OP_NEXT		/* No need to do anything.  */
@@ -496,7 +495,6 @@ struct block_loop {
 #endif
 
 #define PUSHLOOP(cx, dat, s)						\
-	cx->blk_loop.label = PL_curcop->cop_label;			\
 	cx->blk_loop.resetsp = s - PL_stack_base;			\
 	cx->blk_loop.my_op = cLOOP;					\
 	PUSHLOOP_OP_NEXT;						\
