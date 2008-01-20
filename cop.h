@@ -280,15 +280,26 @@ struct cop {
 /* subroutine context */
 struct block_sub {
     CV *	cv;
-    GV *	gv;
-    GV *	dfoutgv;
+    OP *	retop;	/* op to execute on exit from sub */
+    U8		hasargs;
+    U8		lval;		/* XXX merge lval and hasargs? */
+    /* Above here is the same for sub and format.  */
     AV *	savearray;
     AV *	argarray;
     I32		olddepth;
+    PAD		*oldcomppad;
+};
+
+
+/* format context */
+struct block_format {
+    CV *	cv;
+    OP *	retop;	/* op to execute on exit from sub */
     U8		hasargs;
     U8		lval;		/* XXX merge lval and hasargs? */
-    PAD		*oldcomppad;
-    OP *	retop;	/* op to execute on exit from sub */
+    /* Above here is the same for sub and format.  */
+    GV *	gv;
+    GV *	dfoutgv;
 };
 
 /* base for the next two macros. Don't use directly.
@@ -323,12 +334,12 @@ struct block_sub {
 
 
 #define PUSHFORMAT(cx, retop)						\
-	cx->blk_sub.cv = cv;						\
-	cx->blk_sub.gv = gv;						\
-	cx->blk_sub.retop = (retop);					\
-	cx->blk_sub.hasargs = 0;					\
-	cx->blk_sub.dfoutgv = PL_defoutgv;				\
-	SvREFCNT_inc_void(cx->blk_sub.dfoutgv)
+	cx->blk_format.cv = cv;						\
+	cx->blk_format.gv = gv;						\
+	cx->blk_format.retop = (retop);					\
+	cx->blk_format.hasargs = 0;					\
+	cx->blk_format.dfoutgv = PL_defoutgv;				\
+	SvREFCNT_inc_void(cx->blk_format.dfoutgv)
 
 #define POP_SAVEARRAY()						\
     STMT_START {							\
@@ -378,8 +389,8 @@ struct block_sub {
     } STMT_END
 
 #define POPFORMAT(cx)							\
-	setdefout(cx->blk_sub.dfoutgv);					\
-	SvREFCNT_dec(cx->blk_sub.dfoutgv);
+	setdefout(cx->blk_format.dfoutgv);				\
+	SvREFCNT_dec(cx->blk_format.dfoutgv);
 
 /* eval context */
 struct block_eval {
@@ -532,6 +543,7 @@ struct block {
 
     union {
 	struct block_sub	blku_sub;
+	struct block_format	blku_format;
 	struct block_eval	blku_eval;
 	struct block_loop	blku_loop;
 	struct block_givwhen	blku_givwhen;
@@ -544,6 +556,7 @@ struct block {
 #define blk_oldpm	cx_u.cx_blk.blku_oldpm
 #define blk_gimme	cx_u.cx_blk.blku_gimme
 #define blk_sub		cx_u.cx_blk.blk_u.blku_sub
+#define blk_format	cx_u.cx_blk.blk_u.blku_format
 #define blk_eval	cx_u.cx_blk.blk_u.blku_eval
 #define blk_loop	cx_u.cx_blk.blk_u.blku_loop
 #define blk_givwhen	cx_u.cx_blk.blk_u.blku_givwhen

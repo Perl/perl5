@@ -1046,16 +1046,16 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
     case CXt_BLOCK:
 	break;
     case CXt_FORMAT:
-	PerlIO_printf(Perl_debug_log, "BLK_SUB.CV = 0x%"UVxf"\n",
-		PTR2UV(cx->blk_sub.cv));
-	PerlIO_printf(Perl_debug_log, "BLK_SUB.GV = 0x%"UVxf"\n",
-		PTR2UV(cx->blk_sub.gv));
-	PerlIO_printf(Perl_debug_log, "BLK_SUB.DFOUTGV = 0x%"UVxf"\n",
-		PTR2UV(cx->blk_sub.dfoutgv));
-	PerlIO_printf(Perl_debug_log, "BLK_SUB.HASARGS = %d\n",
-		(int)cx->blk_sub.hasargs);
-	PerlIO_printf(Perl_debug_log, "BLK_SUB.RETOP = 0x%"UVxf"\n",
-		PTR2UV(cx->blk_sub.retop));
+	PerlIO_printf(Perl_debug_log, "BLK_FORMAT.CV = 0x%"UVxf"\n",
+		PTR2UV(cx->blk_format.cv));
+	PerlIO_printf(Perl_debug_log, "BLK_FORMAT.GV = 0x%"UVxf"\n",
+		PTR2UV(cx->blk_format.gv));
+	PerlIO_printf(Perl_debug_log, "BLK_FORMAT.DFOUTGV = 0x%"UVxf"\n",
+		PTR2UV(cx->blk_format.dfoutgv));
+	PerlIO_printf(Perl_debug_log, "BLK_FORMAT.HASARGS = %d\n",
+		(int)cx->blk_format.hasargs);
+	PerlIO_printf(Perl_debug_log, "BLK_FORMAT.RETOP = 0x%"UVxf"\n",
+		PTR2UV(cx->blk_format.retop));
 	break;
     case CXt_SUB:
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.CV = 0x%"UVxf"\n",

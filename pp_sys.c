@@ -1304,7 +1304,7 @@ PP(pp_enterwrite)
 PP(pp_leavewrite)
 {
     dVAR; dSP;
-    GV * const gv = cxstack[cxstack_ix].blk_sub.gv;
+    GV * const gv = cxstack[cxstack_ix].blk_format.gv;
     register IO * const io = GvIOp(gv);
     PerlIO *ofp;
     PerlIO *fp;

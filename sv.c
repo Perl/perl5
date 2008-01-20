@@ -10558,9 +10558,9 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 						     param);
 		break;
 	    case CXt_FORMAT:
-		ncx->blk_sub.cv		= cv_dup(ncx->blk_sub.cv, param);
-		ncx->blk_sub.gv		= gv_dup(ncx->blk_sub.gv, param);
-		ncx->blk_sub.dfoutgv	= gv_dup_inc(ncx->blk_sub.dfoutgv,
+		ncx->blk_format.cv	= cv_dup(ncx->blk_format.cv, param);
+		ncx->blk_format.gv	= gv_dup(ncx->blk_format.gv, param);
+		ncx->blk_format.dfoutgv	= gv_dup_inc(ncx->blk_format.dfoutgv,
 						     param);
 		break;
 	    case CXt_BLOCK:
