@@ -322,10 +322,10 @@ struct block_sub {
 	cx->blk_sub.lval = 0;
 
 
-#define PUSHFORMAT(cx)							\
+#define PUSHFORMAT(cx, retop)						\
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.gv = gv;						\
-	cx->blk_sub.retop = NULL;					\
+	cx->blk_sub.retop = (retop);					\
 	cx->blk_sub.hasargs = 0;					\
 	cx->blk_sub.dfoutgv = PL_defoutgv;				\
 	SvREFCNT_inc_void(cx->blk_sub.dfoutgv)
