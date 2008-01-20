@@ -282,7 +282,6 @@ struct block_sub {
     OP *	retop;	/* op to execute on exit from sub */
     /* Above here is the same for sub, format and eval.  */
     CV *	cv;
-    U8		hasargs;
     U8		lval;		/* XXX merge lval and hasargs? */
     /* Above here is the same for sub and format.  */
     AV *	savearray;
@@ -297,7 +296,6 @@ struct block_format {
     OP *	retop;	/* op to execute on exit from sub */
     /* Above here is the same for sub, format and eval.  */
     CV *	cv;
-    U8		hasargs;
     U8		lval;		/* XXX merge lval and hasargs? */
     /* Above here is the same for sub and format.  */
     GV *	gv;
@@ -315,7 +313,7 @@ struct block_format {
 									\
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.olddepth = CvDEPTH(cv);				\
-	cx->blk_sub.hasargs = hasargs;					\
+	cx->cx_type |= (hasargs) ? CXp_HASARGS : 0;			\
 	cx->blk_sub.retop = NULL;					\
 	if (!CvDEPTH(cv)) {						\
 	    SvREFCNT_inc_simple_void_NN(cv);				\
@@ -339,7 +337,6 @@ struct block_format {
 	cx->blk_format.cv = cv;						\
 	cx->blk_format.gv = gv;						\
 	cx->blk_format.retop = (retop);					\
-	cx->blk_format.hasargs = 0;					\
 	cx->blk_format.dfoutgv = PL_defoutgv;				\
 	SvREFCNT_inc_void(cx->blk_format.dfoutgv)
 
@@ -488,7 +485,7 @@ struct block_loop {
 	    cx->blk_loop.itersave = NULL;
 #endif
 #define CxLABEL(c)	(0 + (c)->blk_oldcop->cop_label)
-#define CxHASARGS(c)	(0 + (c)->blk_sub.hasargs)
+#define CxHASARGS(c)	(((c)->cx_type & CXp_HASARGS) == CXp_HASARGS)
 #define CxLVAL(c)	(0 + (c)->blk_sub.lval)
 
 #ifdef USE_ITHREADS
@@ -674,6 +671,9 @@ struct context {
 /* private flags for CXt_SUB and CXt_NULL */
 #define CXp_MULTICALL	0x00000400	/* part of a multicall (so don't
 					   tear down context on exit). */ 
+
+/* private flags for CXt_SUB and CXt_FORMAT */
+#define CXp_HASARGS	0x00000200
 
 /* private flags for CXt_EVAL */
 #define CXp_REAL	0x00000100	/* truly eval'', not a lookalike */

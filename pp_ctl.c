@@ -2440,7 +2440,6 @@ PP(pp_goto)
 		    PL_in_eval = cx->blk_eval.old_in_eval;
 		    PL_eval_root = cx->blk_eval.old_eval_root;
 		    cx->cx_type = CXt_SUB;
-		    cx->blk_sub.hasargs = 0;
 		}
 		cx->blk_sub.cv = cv;
 		cx->blk_sub.olddepth = CvDEPTH(cv);
