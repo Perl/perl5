@@ -2583,9 +2583,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
     myop.op_next = NULL;
     if (!(flags & G_NOARGS))
 	myop.op_flags |= OPf_STACKED;
-    myop.op_flags |= ((flags & G_VOID) ? OPf_WANT_VOID :
-		      (flags & G_ARRAY) ? OPf_WANT_LIST :
-		      OPf_WANT_SCALAR);
+    myop.op_flags |= OP_GIMME_REVERSE(flags);
     SAVEOP();
     PL_op = (OP*)&myop;
 
@@ -2715,9 +2713,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 	myop.op_flags = OPf_STACKED;
     myop.op_next = NULL;
     myop.op_type = OP_ENTEREVAL;
-    myop.op_flags |= ((flags & G_VOID) ? OPf_WANT_VOID :
-		      (flags & G_ARRAY) ? OPf_WANT_LIST :
-		      OPf_WANT_SCALAR);
+    myop.op_flags |= OP_GIMME_REVERSE(flags);
     if (flags & G_KEEPERR)
 	myop.op_flags |= OPf_SPECIAL;
 

@@ -70,6 +70,11 @@
 	 ((op)->op_flags & OPf_WANT) == OPf_WANT_LIST   ? G_ARRAY   : \
 	 dfl)
 
+#define OP_GIMME_REVERSE(flags)			\
+	((flags & G_VOID) ? OPf_WANT_VOID :	\
+	(flags & G_ARRAY) ? OPf_WANT_LIST :	\
+			    OPf_WANT_SCALAR)
+
 /*
 =head1 "Gimme" Values
 
