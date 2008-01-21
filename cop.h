@@ -282,7 +282,6 @@ struct block_sub {
     OP *	retop;	/* op to execute on exit from sub */
     /* Above here is the same for sub, format and eval.  */
     CV *	cv;
-    U8		lval;		/* XXX merge lval and hasargs? */
     /* Above here is the same for sub and format.  */
     AV *	savearray;
     AV *	argarray;
@@ -296,7 +295,6 @@ struct block_format {
     OP *	retop;	/* op to execute on exit from sub */
     /* Above here is the same for sub, format and eval.  */
     CV *	cv;
-    U8		lval;		/* XXX merge lval and hasargs? */
     /* Above here is the same for sub and format.  */
     GV *	gv;
     GV *	dfoutgv;
@@ -324,13 +322,13 @@ struct block_format {
 
 #define PUSHSUB(cx)							\
 	PUSHSUB_BASE(cx)						\
-	cx->blk_sub.lval = PL_op->op_private &                          \
+	cx->blk_u16 = PL_op->op_private &				\
 	                      (OPpLVAL_INTRO|OPpENTERSUB_INARGS);
 
 /* variant for use by OP_DBSTATE, where op_private holds hint bits */
 #define PUSHSUB_DB(cx)							\
 	PUSHSUB_BASE(cx)						\
-	cx->blk_sub.lval = 0;
+	cx->blk_u16 = 0;
 
 
 #define PUSHFORMAT(cx, retop)						\
@@ -486,7 +484,7 @@ struct block_loop {
 #endif
 #define CxLABEL(c)	(0 + (c)->blk_oldcop->cop_label)
 #define CxHASARGS(c)	(((c)->cx_type & CXp_HASARGS) == CXp_HASARGS)
-#define CxLVAL(c)	(0 + (c)->blk_sub.lval)
+#define CxLVAL(c)	(0 + (c)->blk_u16)
 
 #ifdef USE_ITHREADS
 #  define PUSHLOOP_OP_NEXT		/* No need to do anything.  */
@@ -532,9 +530,9 @@ struct block_givwhen {
 
 /* context common to subroutines, evals and loops */
 struct block {
-    U16		blku_type;	/* what kind of context this is */
+    U8		blku_type;	/* what kind of context this is */
     U8		blku_gimme;	/* is this block running in list context? */
-    U8		blku_spare;	/* Padding to match with struct subst */
+    U16		blku_u16;	/* U16 of space used by block_sub */
     I32		blku_oldsp;	/* stack pointer to copy stuff down to */
     COP *	blku_oldcop;	/* old curcop pointer */
     I32		blku_oldmarksp;	/* mark stack index */
@@ -555,6 +553,7 @@ struct block {
 #define blk_oldscopesp	cx_u.cx_blk.blku_oldscopesp
 #define blk_oldpm	cx_u.cx_blk.blku_oldpm
 #define blk_gimme	cx_u.cx_blk.blku_gimme
+#define blk_u16		cx_u.cx_blk.blku_u16
 #define blk_sub		cx_u.cx_blk.blk_u.blku_sub
 #define blk_format	cx_u.cx_blk.blk_u.blku_format
 #define blk_eval	cx_u.cx_blk.blk_u.blku_eval
@@ -595,9 +594,9 @@ struct block {
 
 /* substitution context */
 struct subst {
-    U16		sbu_type;	/* what kind of context this is */
-    U8		sbu_once;	/* Actually both booleans, but U8 to matches */
-    U8		sbu_rxtainted;	/* struct block */
+    U8		sbu_type;	/* what kind of context this is */
+    U8		sbu_once;	/* Actually both booleans, but U8/U16 */
+    U16		sbu_rxtainted;	/* matches struct block */
     I32		sbu_iters;
     I32		sbu_maxiters;
     I32		sbu_rflags;
