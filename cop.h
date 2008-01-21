@@ -650,6 +650,8 @@ struct subst {
 	rxres_save(&cx->sb_rxres, rx);					\
 	(void)ReREFCNT_inc(rx)
 
+#define CxONCE(cx)		(0 + cx->sb_once)
+
 #define POPSUBST(cx) cx = &cxstack[cxstack_ix--];			\
 	rxres_free(&cx->sb_rxres);					\
 	ReREFCNT_dec(cx->sb_rx)

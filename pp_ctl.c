@@ -234,7 +234,7 @@ PP(pp_substcont)
 	FREETMPS; /* Prevent excess tmp stack */
 
 	/* Are we done */
-	if (cx->sb_once || !CALLREGEXEC(rx, s, cx->sb_strend, orig,
+	if (CxONCE(cx) || !CALLREGEXEC(rx, s, cx->sb_strend, orig,
 				     s == m, cx->sb_targ, NULL,
 				     ((cx->sb_rflags & REXEC_COPY_STR)
 				      ? (REXEC_IGNOREPOS|REXEC_NOT_FIRST)

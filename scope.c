@@ -1112,7 +1112,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 	PerlIO_printf(Perl_debug_log, "SB_RFLAGS = %ld\n",
 		(long)cx->sb_rflags);
 	PerlIO_printf(Perl_debug_log, "SB_ONCE = %ld\n",
-		(long)cx->sb_once);
+		(long)CxONCE(cx));
 	PerlIO_printf(Perl_debug_log, "SB_ORIG = %s\n",
 		cx->sb_orig);
 	PerlIO_printf(Perl_debug_log, "SB_DSTR = 0x%"UVxf"\n",
