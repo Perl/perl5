@@ -64,6 +64,8 @@
     U8		op_private;
 #endif
 
+/* If op_type:9 is changed to :10, also change PUSHEVAL in cop.h */
+
 #define OP_GIMME(op,dfl) \
 	(((op)->op_flags & OPf_WANT) == OPf_WANT_VOID   ? G_VOID   : \
 	 ((op)->op_flags & OPf_WANT) == OPf_WANT_SCALAR ? G_SCALAR : \

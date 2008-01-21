@@ -393,8 +393,6 @@ struct block_format {
 struct block_eval {
     OP *	retop;	/* op to execute on exit from eval */
     /* Above here is the same for sub, format and eval.  */
-    U8		old_in_eval;
-    U16		old_op_type;
     SV *	old_namesv;
     OP *	old_eval_root;
     SV *	cur_text;
@@ -402,13 +400,18 @@ struct block_eval {
     JMPENV *	cur_top_env; /* value of PL_top_env when eval CX created */
 };
 
-#define CxOLD_IN_EVAL(cx)	(0 + (cx)->blk_eval.old_in_eval)
-#define CxOLD_OP_TYPE(cx)	(0 + (cx)->blk_eval.old_op_type)
+/* If we ever need more than 512 op types, change the shift from 7.
+   blku_gimme is actually also only 2 bits, so could be merged with something.
+*/
+
+#define CxOLD_IN_EVAL(cx)	(((cx)->blk_u16) & 0x7F)
+#define CxOLD_OP_TYPE(cx)	(((cx)->blk_u16) >> 7)
 
 #define PUSHEVAL(cx,n,fgv)						\
     STMT_START {							\
-	cx->blk_eval.old_in_eval = PL_in_eval;				\
-	cx->blk_eval.old_op_type = PL_op->op_type;			\
+	assert(!(PL_in_eval & ~0x7F));					\
+	assert(!(PL_op->op_type & ~0x1FF));				\
+	cx->blk_u16 = (PL_in_eval & 0x7F) | ((U16)PL_op->op_type << 7);	\
 	cx->blk_eval.old_namesv = (n ? newSVpv(n,0) : NULL);		\
 	cx->blk_eval.old_eval_root = PL_eval_root;			\
 	cx->blk_eval.cur_text = PL_parser ? PL_parser->linestr : NULL;	\
@@ -535,7 +538,7 @@ struct block_givwhen {
 struct block {
     U8		blku_type;	/* what kind of context this is */
     U8		blku_gimme;	/* is this block running in list context? */
-    U16		blku_u16;	/* U16 of space used by block_sub */
+    U16		blku_u16;	/* used by block_sub and block_eval (so far) */
     I32		blku_oldsp;	/* stack pointer to copy stuff down to */
     COP *	blku_oldcop;	/* old curcop pointer */
     I32		blku_oldmarksp;	/* mark stack index */
