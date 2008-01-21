@@ -657,7 +657,7 @@ struct context {
 };
 #define cx_type cx_u.cx_subst.sbu_type
 
-#define CXTYPEMASK	0xff
+#define CXTYPEMASK	0xf
 #define CXt_NULL	0
 #define CXt_SUB		1
 #define CXt_EVAL	2
@@ -668,22 +668,25 @@ struct context {
 #define CXt_GIVEN	7
 #define CXt_WHEN	8
 
-/* private flags for CXt_SUB and CXt_NULL */
-#define CXp_MULTICALL	0x00000400	/* part of a multicall (so don't
+/* private flags for CXt_SUB and CXt_NULL
+   However, this is checked in many places which do not check the type, so
+   this bit needs to be kept clear for most everything else. For reasons I
+   haven't investigated, it can coexist with CXp_FOR_DEF */
+#define CXp_MULTICALL	0x0000040	/* part of a multicall (so don't
 					   tear down context on exit). */ 
 
 /* private flags for CXt_SUB and CXt_FORMAT */
-#define CXp_HASARGS	0x00000200
+#define CXp_HASARGS	0x00000020
 
 /* private flags for CXt_EVAL */
-#define CXp_REAL	0x00000100	/* truly eval'', not a lookalike */
-#define CXp_TRYBLOCK	0x00000200	/* eval{}, not eval'' or similar */
+#define CXp_REAL	0x00000010	/* truly eval'', not a lookalike */
+#define CXp_TRYBLOCK	0x00000020	/* eval{}, not eval'' or similar */
 
 /* private flags for CXt_LOOP */
-#define CXp_FOREACH	0x00000200	/* a foreach loop */
-#define CXp_FOR_DEF	0x00000400	/* foreach using $_ */
+#define CXp_FOREACH	0x00000020	/* a foreach loop */
+#define CXp_FOR_DEF	0x00000040	/* foreach using $_ */
 #ifdef USE_ITHREADS
-#  define CXp_PADVAR	0x00000100	/* itervar lives on pad, iterdata
+#  define CXp_PADVAR	0x00000010	/* itervar lives on pad, iterdata
 					   has pad offset; if not set,
 					   iterdata holds GV* */
 #  define CxPADLOOP(c)	(((c)->cx_type & (CXt_LOOP|CXp_PADVAR))		\
