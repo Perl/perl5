@@ -1654,11 +1654,11 @@ PP(pp_caller)
 	    SV * const sv = newSV(0);
 	    gv_efullname3(sv, cvgv, NULL);
 	    mPUSHs(sv);
-	    mPUSHi((I32)CxHASARGS(cx));
+	    PUSHs(boolSV(CxHASARGS(cx)));
 	}
 	else {
 	    PUSHs(newSVpvs_flags("(unknown)", SVs_TEMP));
-	    mPUSHi((I32)CxHASARGS(cx));
+	    PUSHs(boolSV(CxHASARGS(cx)));
 	}
     }
     else {
