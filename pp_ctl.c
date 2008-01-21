@@ -1669,7 +1669,7 @@ PP(pp_caller)
     if (gimme == G_VOID)
 	PUSHs(&PL_sv_undef);
     else
-	mPUSHi(gimme & G_ARRAY);
+	PUSHs(boolSV((gimme & G_WANT) == G_ARRAY));
     if (CxTYPE(cx) == CXt_EVAL) {
 	/* eval STRING */
 	if (cx->blk_eval.old_op_type == OP_ENTEREVAL) {
