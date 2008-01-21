@@ -2610,7 +2610,9 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	Zero(&method_op, 1, UNOP);
 	method_op.op_next = PL_op;
 	method_op.op_ppaddr = PL_ppaddr[OP_METHOD];
+	method_op.op_type = OP_METHOD;
 	myop.op_ppaddr = PL_ppaddr[OP_ENTERSUB];
+	myop.op_type = OP_ENTERSUB;
 	PL_op = (OP*)&method_op;
     }
 
