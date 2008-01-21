@@ -601,11 +601,10 @@ struct block {
 /* substitution context */
 struct subst {
     U8		sbu_type;	/* what kind of context this is */
-    U8		sbu_once;	/* Actually both booleans, but U8/U16 */
+    U8		sbu_rflags;
     U16		sbu_rxtainted;	/* matches struct block */
     I32		sbu_iters;
     I32		sbu_maxiters;
-    I32		sbu_rflags;
     I32		sbu_oldsave;
     char *	sbu_orig;
     SV *	sbu_dstr;
@@ -636,7 +635,6 @@ struct subst {
 	cx->sb_maxiters		= maxiters,				\
 	cx->sb_rflags		= r_flags,				\
 	cx->sb_oldsave		= oldsave,				\
-	cx->sb_once		= once,					\
 	cx->sb_rxtainted	= rxtainted,				\
 	cx->sb_orig		= orig,					\
 	cx->sb_dstr		= dstr,					\
@@ -646,11 +644,11 @@ struct subst {
 	cx->sb_strend		= strend,				\
 	cx->sb_rxres		= NULL,					\
 	cx->sb_rx		= rx,					\
-	cx->cx_type		= CXt_SUBST;				\
+	cx->cx_type		= CXt_SUBST | (once ? CXp_ONCE : 0);	\
 	rxres_save(&cx->sb_rxres, rx);					\
 	(void)ReREFCNT_inc(rx)
 
-#define CxONCE(cx)		(0 + cx->sb_once)
+#define CxONCE(cx)		((cx)->cx_type & CXp_ONCE)
 
 #define POPSUBST(cx) cx = &cxstack[cxstack_ix--];			\
 	rxres_free(&cx->sb_rxres);					\
@@ -698,6 +696,8 @@ struct context {
 #  define CxPADLOOP(c)	(((c)->cx_type & (CXt_LOOP|CXp_PADVAR))		\
 			 == (CXt_LOOP|CXp_PADVAR))
 #endif
+/* private flags for CXt_SUBST */
+#define CXp_ONCE	0x10	/* What was sbu_once in struct subst */
 
 #define CxTYPE(c)	((c)->cx_type & CXTYPEMASK)
 #define CxMULTICALL(c)	(((c)->cx_type & CXp_MULTICALL)			\

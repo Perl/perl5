@@ -1227,7 +1227,7 @@ PP(pp_match)
     register const char *s;
     const char *strend;
     I32 global;
-    I32 r_flags = REXEC_CHECKED;
+    U8 r_flags = REXEC_CHECKED;
     const char *truebase;			/* Start of string  */
     register REGEXP *rx = PM_GETRE(pm);
     bool rxtainted;
@@ -2053,7 +2053,7 @@ PP(pp_subst)
     bool once;
     U8 rxtainted;
     char *orig;
-    I32 r_flags;
+    U8 r_flags;
     register REGEXP *rx = PM_GETRE(pm);
     STRLEN len;
     int force_on_match = 0;
