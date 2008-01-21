@@ -737,20 +737,20 @@ L<perlcall>.
 =cut
 */
 
-#define G_SCALAR	0
-#define G_ARRAY		1
-#define G_VOID		128	/* skip this bit when adding flags below */
-#define G_WANT		(128|1)
+#define G_SCALAR	2
+#define G_ARRAY		3
+#define G_VOID		1
+#define G_WANT		3
 
 /* extra flags for Perl_call_* routines */
-#define G_DISCARD	2	/* Call FREETMPS.
+#define G_DISCARD	4	/* Call FREETMPS.
 				   Don't change this without consulting the
 				   hash actions codes defined in hv.h */
-#define G_EVAL		4	/* Assume eval {} around subroutine call. */
-#define G_NOARGS	8	/* Don't construct a @_ array. */
-#define G_KEEPERR      16	/* Append errors to $@, don't overwrite it */
-#define G_NODEBUG      32	/* Disable debugging at toplevel.  */
-#define G_METHOD       64       /* Calling method. */
+#define G_EVAL		8	/* Assume eval {} around subroutine call. */
+#define G_NOARGS       16	/* Don't construct a @_ array. */
+#define G_KEEPERR      32	/* Append errors to $@, don't overwrite it */
+#define G_NODEBUG      64	/* Disable debugging at toplevel.  */
+#define G_METHOD      128       /* Calling method. */
 #define G_FAKINGEVAL  256	/* Faking an eval context for call_sv or
 				   fold_constants. */
 

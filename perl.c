@@ -2578,6 +2578,11 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	ENTER;
 	SAVETMPS;
     }
+    if (!(flags & G_WANT)) {
+	/* Backwards compatibility - as G_SCALAR was 0, it could be omitted.
+	 */
+	flags |= G_SCALAR;
+    }
 
     Zero(&myop, 1, LOGOP);
     myop.op_next = NULL;
