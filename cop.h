@@ -402,6 +402,9 @@ struct block_eval {
     JMPENV *	cur_top_env; /* value of PL_top_env when eval CX created */
 };
 
+#define CxOLD_IN_EVAL(cx)	(0 + (cx)->blk_eval.old_in_eval)
+#define CxOLD_OP_TYPE(cx)	(0 + (cx)->blk_eval.old_op_type)
+
 #define PUSHEVAL(cx,n,fgv)						\
     STMT_START {							\
 	cx->blk_eval.old_in_eval = PL_in_eval;				\
@@ -416,8 +419,8 @@ struct block_eval {
 
 #define POPEVAL(cx)							\
     STMT_START {							\
-	PL_in_eval = cx->blk_eval.old_in_eval;				\
-	optype = cx->blk_eval.old_op_type;				\
+	PL_in_eval = CxOLD_IN_EVAL(cx);					\
+	optype = CxOLD_OP_TYPE(cx);					\
 	PL_eval_root = cx->blk_eval.old_eval_root;			\
 	if (cx->blk_eval.old_namesv)					\
 	    sv_2mortal(cx->blk_eval.old_namesv);			\

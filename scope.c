@@ -1070,10 +1070,10 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 	break;
     case CXt_EVAL:
 	PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_IN_EVAL = %ld\n",
-		(long)cx->blk_eval.old_in_eval);
+		(long)CxOLD_IN_EVAL(cx));
 	PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_OP_TYPE = %s (%s)\n",
-		PL_op_name[cx->blk_eval.old_op_type],
-		PL_op_desc[cx->blk_eval.old_op_type]);
+		PL_op_name[CxOLD_OP_TYPE(cx)],
+		PL_op_desc[CxOLD_OP_TYPE(cx)]);
 	if (cx->blk_eval.old_namesv)
 	    PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_NAME = %s\n",
 			  SvPVX_const(cx->blk_eval.old_namesv));

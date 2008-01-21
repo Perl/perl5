@@ -1672,7 +1672,7 @@ PP(pp_caller)
 	PUSHs(boolSV((gimme & G_WANT) == G_ARRAY));
     if (CxTYPE(cx) == CXt_EVAL) {
 	/* eval STRING */
-	if (cx->blk_eval.old_op_type == OP_ENTEREVAL) {
+	if (CxOLD_OP_TYPE(cx) == OP_ENTEREVAL) {
 	    PUSHs(cx->blk_eval.cur_text);
 	    PUSHs(&PL_sv_no);
 	}
@@ -2437,7 +2437,7 @@ PP(pp_goto)
 	    else {
 		AV* const padlist = CvPADLIST(cv);
 		if (CxTYPE(cx) == CXt_EVAL) {
-		    PL_in_eval = cx->blk_eval.old_in_eval;
+		    PL_in_eval = CxOLD_IN_EVAL(cx);
 		    PL_eval_root = cx->blk_eval.old_eval_root;
 		    cx->cx_type = CXt_SUB;
 		}
