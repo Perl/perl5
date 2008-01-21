@@ -677,23 +677,22 @@ struct context {
    However, this is checked in many places which do not check the type, so
    this bit needs to be kept clear for most everything else. For reasons I
    haven't investigated, it can coexist with CXp_FOR_DEF */
-#define CXp_MULTICALL	0x0000040	/* part of a multicall (so don't
-					   tear down context on exit). */ 
+#define CXp_MULTICALL	0x10	/* part of a multicall (so don't
+				   tear down context on exit). */ 
 
 /* private flags for CXt_SUB and CXt_FORMAT */
-#define CXp_HASARGS	0x00000020
+#define CXp_HASARGS	0x20
 
 /* private flags for CXt_EVAL */
-#define CXp_REAL	0x00000010	/* truly eval'', not a lookalike */
-#define CXp_TRYBLOCK	0x00000020	/* eval{}, not eval'' or similar */
+#define CXp_REAL	0x20	/* truly eval'', not a lookalike */
+#define CXp_TRYBLOCK	0x40	/* eval{}, not eval'' or similar */
 
 /* private flags for CXt_LOOP */
-#define CXp_FOREACH	0x00000020	/* a foreach loop */
-#define CXp_FOR_DEF	0x00000040	/* foreach using $_ */
+#define CXp_FOR_DEF	0x10	/* foreach using $_ */
+#define CXp_FOREACH	0x20	/* a foreach loop */
 #ifdef USE_ITHREADS
-#  define CXp_PADVAR	0x00000010	/* itervar lives on pad, iterdata
-					   has pad offset; if not set,
-					   iterdata holds GV* */
+#  define CXp_PADVAR	0x40	/* itervar lives on pad, iterdata has pad
+				   offset; if not set, iterdata holds GV* */
 #  define CxPADLOOP(c)	(((c)->cx_type & (CXt_LOOP|CXp_PADVAR))		\
 			 == (CXt_LOOP|CXp_PADVAR))
 #endif
