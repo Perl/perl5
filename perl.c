@@ -2650,7 +2650,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 		goto redo_body;
 	    }
 	    PL_stack_sp = PL_stack_base + oldmark;
-	    if (flags & G_ARRAY)
+	    if ((flags & G_WANT) == G_ARRAY)
 		retval = 0;
 	    else {
 		retval = 1;
@@ -2749,7 +2749,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 	    goto redo_body;
 	}
 	PL_stack_sp = PL_stack_base + oldmark;
-	if (flags & G_ARRAY)
+	if ((flags & G_WANT) == G_ARRAY)
 	    retval = 0;
 	else {
 	    retval = 1;
