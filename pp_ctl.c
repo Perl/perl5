@@ -1914,7 +1914,6 @@ PP(pp_enteriter)
     }
     else {
 	cx->blk_loop.iterary = PL_curstack;
-	AvFILLp(PL_curstack) = SP - PL_stack_base;
 	if (PL_op->op_private & OPpITER_REVERSED) {
 	    cx->blk_loop.itermax = MARK - PL_stack_base + 1;
 	    cx->blk_loop.iterix = cx->blk_oldsp + 1;
