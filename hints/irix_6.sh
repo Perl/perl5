@@ -337,6 +337,18 @@ case "`$cc -version 2>&1`" in
     ;;
 esac
 
+
+# Workaround [perl #33849]: perl 5.8.6 fails to build on IRIX 6.5 due to
+# bizarre preprocessor bug:  cc -E - unfortunately goes into K&R mode, but
+# cc -E file.c doesn't.  Force a wrapper to always get the ANSI mode.
+# (We only need to do this for cc, not for gcc.  ccversion is computed above.)
+case "$ccversion" in
+'')  ;; # gcc.  Do nothing.
+*)  cppstdin=`pwd`/cppstdin
+    cpprun="$cppstdin"
+    ;;
+esac
+
 EOCCBU
 
 # End of cc.cbu callback unit. - Allen
