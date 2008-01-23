@@ -6802,14 +6802,14 @@ Perl_sv_inc(pTHX_ register SV *sv)
     }
     if (flags & SVp_NOK) {
 	const NV was = SvNVX(sv);
-	const NV now = was + 1.0;
-	if (now - was != 1.0 && ckWARN(WARN_IMPRECISION)) {
+	if (NV_OVERFLOWS_INTEGERS_AT &&
+	    was >= NV_OVERFLOWS_INTEGERS_AT && ckWARN(WARN_IMPRECISION)) {
 	    Perl_warner(aTHX_ packWARN(WARN_IMPRECISION),
 			"Lost precision when incrementing %" NVff " by 1",
 			was);
 	}
 	(void)SvNOK_only(sv);
-        SvNV_set(sv, now);
+        SvNV_set(sv, was + 1.0);
 	return;
     }
 
@@ -6968,14 +6968,14 @@ Perl_sv_dec(pTHX_ register SV *sv)
     oops_its_num:
 	{
 	    const NV was = SvNVX(sv);
-	    const NV now = was - 1.0;
-	    if (now - was != -1.0 && ckWARN(WARN_IMPRECISION)) {
+	    if (NV_OVERFLOWS_INTEGERS_AT &&
+		was <= -NV_OVERFLOWS_INTEGERS_AT && ckWARN(WARN_IMPRECISION)) {
 		Perl_warner(aTHX_ packWARN(WARN_IMPRECISION),
 			    "Lost precision when decrementing %" NVff " by 1",
 			    was);
 	    }
 	    (void)SvNOK_only(sv);
-	    SvNV_set(sv, now);
+	    SvNV_set(sv, was - 1.0);
 	    return;
 	}
     }

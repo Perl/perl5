@@ -4300,6 +4300,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol contains the number of bits a variable of type NVTYPE
  *	can preserve of a variable of type UVTYPE.
  */
+/* NV_OVERFLOWS_INTEGERS_AT
+ *	This symbol gives the largest integer value that NVs can hold. This
+ *	value + 1.0 cannot be stored accurately. It is expressed as constant
+ *	floating point expression to reduce the chance of decimale/binary
+ *	conversion issues. If it can not be determined, the value 0 is given.
+ */
 /* NV_ZERO_IS_ALLBITS_ZERO:
  *	This symbol, if defined, indicates that a variable of type NVTYPE
  *	stores 0.0 in memory as all bits zero.
@@ -4332,6 +4338,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define	NVSIZE		$nvsize		/**/
 #$d_nv_preserves_uv	NV_PRESERVES_UV
 #define	NV_PRESERVES_UV_BITS	$nv_preserves_uv_bits
+#define	NV_OVERFLOWS_INTEGERS_AT	$nv_overflows_integers_at
 #$d_nv_zero_is_allbits_zero	NV_ZERO_IS_ALLBITS_ZERO
 #if UVSIZE == 8
 #   ifdef BYTEORDER

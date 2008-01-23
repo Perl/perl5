@@ -233,25 +233,36 @@ EOC
     }
 }
 
+my $h_uv_max = 1 + (~0 >> 1);
 my $found;
 for my $n (47..113) {
     my $power_of_2 = 2**$n;
     my $plus_1 = $power_of_2 + 1;
     next if $plus_1 != $power_of_2;
-    print "# Testing for 2**$n ($power_of_2) which overflows the mantissa\n";
-    # doing int here means that for NV > IV on the first go we're in the
-    # IV upgrade to NV case, and the second go we're in the NV already case.
-    my $start = int($power_of_2 - 2);
-    my $check = $power_of_2 - 2;
-    die "Something wrong with our rounding assumptions: $check vs $start"
-	unless $start == $check;
+    my ($start_p, $start_n);
+    if ($h_uv_max > $power_of_2 / 2) {
+	my $uv_max = 1 + 2 * (~0 >> 1);
+	# UV_MAX is 2**$something - 1, so subtract 1 to get the start value
+	$start_p = $uv_max - 1;
+	# whereas IV_MIN is -(2**$something), so subtract 2
+	$start_n = -$h_uv_max + 2;
+	print "# Mantissa overflows at 2**$n ($power_of_2)\n";
+	print "# But max UV ($uv_max) is greater so testing that\n";
+    } else {
+	print "# Testing 2**$n ($power_of_2) which overflows the mantissa\n";
+	$start_p = int($power_of_2 - 2);
+	$start_n = -$start_p;
+	my $check = $power_of_2 - 2;
+	die "Something wrong with our rounding assumptions: $check vs $start_p"
+	    unless $start_p == $check;
+    }
 
     foreach my $warn (0, 1) {
 	foreach (['++$i', 'pre-inc'], ['$i++', 'post-inc']) {
-	    check_some_code($start, $warn, @$_);
+	    check_some_code($start_p, $warn, @$_);
 	}
 	foreach (['--$i', 'pre-dec'], ['$i--', 'post-dec']) {
-	    check_some_code(-$start, $warn, @$_);
+	    check_some_code($start_n, $warn, @$_);
 	}
     }
 
