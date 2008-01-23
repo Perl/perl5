@@ -632,7 +632,7 @@ Ap	|void	|call_atexit	|ATEXIT_t fn|NULLOK void *ptr
 Apd	|I32	|call_argv	|NN const char* sub_name|I32 flags|NN char** argv
 Apd	|I32	|call_method	|NN const char* methname|I32 flags
 Apd	|I32	|call_pv	|NN const char* sub_name|I32 flags
-Apd	|I32	|call_sv	|NN SV* sv|I32 flags
+Apd	|I32	|call_sv	|NN SV* sv|VOL I32 flags
 Ap	|void	|despatch_signals
 Apd	|SV*	|eval_pv	|NN const char* p|I32 croak_on_error
 Apd	|I32	|eval_sv	|NN SV* sv|I32 flags

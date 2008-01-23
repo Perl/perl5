@@ -327,8 +327,12 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 
 /* gcc (-ansi) -pedantic doesn't allow gcc statement expressions,
  * g++ allows them but seems to have problems with them
- * (insane errors ensue). */
-#if defined(PERL_GCC_PEDANTIC) || (defined(__GNUC__) && defined(__cplusplus))
+ * (insane errors ensue).
+ * g++ does not give insane errors now (RMB 2008-01-30, gcc 4.2.2).
+ */
+#if defined(PERL_GCC_PEDANTIC) || \
+    (defined(__GNUC__) && defined(__cplusplus) && \
+	((__GNUC__ < 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ < 2))))
 #  ifndef PERL_GCC_BRACE_GROUPS_FORBIDDEN
 #    define PERL_GCC_BRACE_GROUPS_FORBIDDEN
 #  endif
@@ -403,11 +407,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #endif
 
 #if defined(HASVOLATILE) || defined(STANDARD_C)
-#   ifdef __cplusplus
-#	define VOL		/* to temporarily suppress warnings */
-#   else
 #	define VOL volatile
-#   endif
 #else
 #   define VOL
 #endif
