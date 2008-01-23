@@ -4450,7 +4450,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 	 * into the existing design.  -- RAM, 17/02/2001
 	 */
 
-	sv_magic(sv, rv, mtype, Nullch, 0);
+	sv_magic(sv, rv, mtype, (char *)NULL, 0);
 	SvREFCNT_dec(rv);			/* Undo refcnt inc from sv_magic() */
 
 	return sv;
@@ -4647,7 +4647,7 @@ static SV *retrieve_tied_array(pTHX_ stcxt_t *cxt, const char *cname)
 
 	sv_upgrade(tv, SVt_PVAV);
 	AvREAL_off((AV *)tv);
-	sv_magic(tv, sv, 'P', Nullch, 0);
+	sv_magic(tv, sv, 'P', (char *)NULL, 0);
 	SvREFCNT_dec(sv);			/* Undo refcnt inc from sv_magic() */
 
 	TRACEME(("ok (retrieve_tied_array at 0x%"UVxf")", PTR2UV(tv)));
@@ -4675,7 +4675,7 @@ static SV *retrieve_tied_hash(pTHX_ stcxt_t *cxt, const char *cname)
 		return (SV *) 0;		/* Failed */
 
 	sv_upgrade(tv, SVt_PVHV);
-	sv_magic(tv, sv, 'P', Nullch, 0);
+	sv_magic(tv, sv, 'P', (char *)NULL, 0);
 	SvREFCNT_dec(sv);			/* Undo refcnt inc from sv_magic() */
 
 	TRACEME(("ok (retrieve_tied_hash at 0x%"UVxf")", PTR2UV(tv)));
@@ -4707,7 +4707,7 @@ static SV *retrieve_tied_scalar(pTHX_ stcxt_t *cxt, const char *cname)
 	}
 
 	sv_upgrade(tv, SVt_PVMG);
-	sv_magic(tv, obj, 'q', Nullch, 0);
+	sv_magic(tv, obj, 'q', (char *)NULL, 0);
 
 	if (obj) {
 		/* Undo refcnt inc from sv_magic() */
@@ -4774,7 +4774,7 @@ static SV *retrieve_tied_idx(pTHX_ stcxt_t *cxt, const char *cname)
 	RLEN(idx);					/* Retrieve <idx> */
 
 	sv_upgrade(tv, SVt_PVMG);
-	sv_magic(tv, sv, 'p', Nullch, idx);
+	sv_magic(tv, sv, 'p', (char *)NULL, idx);
 	SvREFCNT_dec(sv);			/* Undo refcnt inc from sv_magic() */
 
 	return tv;

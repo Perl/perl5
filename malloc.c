@@ -379,9 +379,6 @@
 #    ifndef UVxf
 #      define UVxf			"lx"
 #    endif
-#    ifndef Nullch
-#      define Nullch			NULL
-#    endif
 #    ifndef MEM_ALIGNBYTES
 #      define MEM_ALIGNBYTES		4
 #    endif

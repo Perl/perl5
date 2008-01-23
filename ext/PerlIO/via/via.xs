@@ -489,7 +489,7 @@ PerlIOVia_get_base(pTHX_ PerlIO * f)
 	    return (STDCHAR *) SvPVX(s->var);
 	}
     }
-    return (STDCHAR *) Nullch;
+    return (STDCHAR *) NULL;
 }
 
 STDCHAR *
@@ -502,7 +502,7 @@ PerlIOVia_get_ptr(pTHX_ PerlIO * f)
 	    return p;
 	}
     }
-    return (STDCHAR *) Nullch;
+    return (STDCHAR *) NULL;
 }
 
 SSize_t
