@@ -405,7 +405,11 @@ shmdt(addr)
   CODE:
 #ifdef HAS_SHM
     void *caddr = sv2addr(addr);
+#   ifdef __SUNPRO_CC
+    int rv = shmdt((char *)caddr);
+#   else
     int rv = shmdt(caddr);
+#   endif
     ST(0) = rv == -1 ? &PL_sv_undef : sv_2mortal(newSViv(rv));
     XSRETURN(1);
 #else
