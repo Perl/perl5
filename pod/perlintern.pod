@@ -597,6 +597,8 @@ to be generated in evals, such as
 
     { my $x = 1; sub f { eval '$x'} } f();
 
+For state vars, SVf_PADSTALE is overloaded to mean 'not yet initialised'
+
 	AV *	CvPADLIST(CV *cv)
 
 =for hackers
