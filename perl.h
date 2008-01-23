@@ -524,11 +524,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #endif
 
 #if defined(HASVOLATILE) || defined(STANDARD_C)
-#   ifdef __cplusplus
-#	define VOL		/* to temporarily suppress warnings */
-#   else
 #	define VOL volatile
-#   endif
 #else
 #   define VOL
 #endif

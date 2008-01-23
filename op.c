@@ -2341,7 +2341,7 @@ OP *
 Perl_fold_constants(pTHX_ register OP *o)
 {
     dVAR;
-    register OP *curop;
+    register OP * VOL curop;
     OP *newop;
     VOL I32 type = o->op_type;
     SV * VOL sv = NULL;
