@@ -34,6 +34,7 @@ my @CFG = (
 	   "win32/config.vc64",
 	   "win32/config.ce",
 	   "configure.com",
+	   "Porting/config.sh",
 	  );
 
 sub read_file {
