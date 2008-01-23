@@ -7,7 +7,7 @@
 #
 package B;
 
-our $VERSION = '1.18';
+our $VERSION = '1.19';
 
 use XSLoader ();
 require Exporter;
@@ -38,7 +38,7 @@ use strict;
 @B::PVIV::ISA = qw(B::PV B::IV);
 @B::PVNV::ISA = qw(B::PVIV B::NV);
 @B::PVMG::ISA = 'B::PVNV';
-@B::ORANGE::ISA = 'B::PVMG' if $] >= 5.011;
+@B::REGEXP::ISA = 'B::PVMG' if $] >= 5.011;
 # Change in the inheritance hierarchy post 5.9.0
 @B::PVLV::ISA = $] > 5.009 ? 'B::GV' : 'B::PVMG';
 # BM is eliminated post 5.9.5, but effectively is a specialisation of GV now.
@@ -577,7 +577,7 @@ B::IV, B::NV, B::RV, B::PV, B::PVIV, B::PVNV, B::PVMG, B::BM (5.9.5 and
 earlier), B::PVLV, B::AV, B::HV, B::CV, B::GV, B::FM, B::IO. These classes
 correspond in the obvious way to the underlying C structures of similar names.
 The inheritance hierarchy mimics the underlying C "inheritance". For the
-5.10, 5.10.1 I<etc> this is:
+5.10.x branch, (I<ie> 5.10.0, 5.10.1 I<etc>) this is:
 
                            B::SV
                              |
@@ -602,10 +602,6 @@ The inheritance hierarchy mimics the underlying C "inheritance". For the
                          |           |
                       B::PVLV      B::FM
 
-
-For 5.11.0 and later, B::RV is abolished, and IVs can be used to store
-references.
-
 For 5.9.0 and earlier, PVLV is a direct subclass of PVMG, and BM is still
 present as a distinct type, so the base of this diagram is
 
@@ -620,6 +616,32 @@ present as a distinct type, so the base of this diagram is
                                            |
                                            |
                                          B::FM
+
+For 5.11.0 and later, B::RV is abolished, and IVs can be used to store
+references, and a new type B::REGEXP is introduced, giving this structure:
+
+                           B::SV
+                             |
+                +------------+------------+
+                |            |            |
+              B::PV        B::IV        B::NV
+                  \         /           /
+                   \       /           /
+                    B::PVIV           /
+                         \           /
+                          \         /
+                           \       /
+                            B::PVNV
+                               |
+                               |
+                            B::PVMG
+                               |
+           +-------+-------+---+---+-------+-------+
+           |       |       |       |       |       |
+         B::AV   B::GV   B::HV   B::CV   B::IO B::REGEXP
+                   |               |
+                   |               |
+                B::PVLV          B::FM
 
 
 Access methods correspond to the underlying C macros for field access,

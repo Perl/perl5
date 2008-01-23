@@ -37,7 +37,7 @@ static const char* const svclassnames[] = {
     "B::BM",
 #endif
 #if PERL_VERSION >= 11
-    "B::ORANGE",
+    "B::REGEXP",
 #endif
 #if PERL_VERSION >= 9
     "B::GV",
@@ -569,6 +569,9 @@ typedef SV	*B__IV;
 typedef SV	*B__PV;
 typedef SV	*B__NV;
 typedef SV	*B__PVMG;
+#if PERL_VERSION >= 11
+typedef SV	*B__REGEXP;
+#endif
 typedef SV	*B__PVLV;
 typedef SV	*B__BM;
 typedef SV	*B__RV;
@@ -1502,6 +1505,31 @@ MODULE = B	PACKAGE = B::PVMG
 B::HV
 SvSTASH(sv)
 	B::PVMG	sv
+
+MODULE = B	PACKAGE = B::REGEXP
+
+#if PERL_VERSION >= 11
+
+IV
+REGEX(sv)
+	B::PVMG	sv
+    CODE:
+	RETVAL = PTR2IV(((struct xregexp *)SvANY(sv))->xrx_regexp);
+    OUTPUT:
+        RETVAL
+
+SV*
+precomp(sv)
+	B::PVMG	sv
+	REGEXP* rx = NO_INIT
+    CODE:
+	rx = ((struct xregexp *)SvANY(sv))->xrx_regexp;
+	/* FIXME - UTF-8? And the equivalent precomp methods? */
+	RETVAL = newSVpvn( rx->precomp, rx->prelen );
+    OUTPUT:
+        RETVAL
+
+#endif
 
 #define MgMOREMAGIC(mg) mg->mg_moremagic
 #define MgPRIVATE(mg) mg->mg_private

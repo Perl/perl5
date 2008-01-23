@@ -466,10 +466,6 @@ prof_mark(pTHX_ opcode ptype)
     }
 }
 
-#ifdef PL_NEEDED
-#  define defstash PL_defstash
-#endif
-
 /* Counts overhead of prof_mark and extra XS call. */
 static void
 test_time(pTHX_ clock_t *r, clock_t *u, clock_t *s)
