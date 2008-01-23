@@ -7,7 +7,7 @@
  * that running config_h.SH again will wipe out any changes you've made.
  * For a more permanent change edit uconfig.sh and rerun config_h.SH.
  *
- * $Id: Config_h.U,v 3.0.1.5 1997/02/28 14:57:43 ram Exp $
+ * $Id: Config_h.U 1 2006-08-24 12:32:52Z rmanfredi $
  */
 
 /*
@@ -927,7 +927,7 @@
 		/* If you can get stringification with catify, tell me how! */
 #endif
 #if 42 == 42
-#define PeRl_CaTiFy(a, b)	a ## b	
+#define PeRl_CaTiFy(a, b)	a ## b
 #define PeRl_StGiFy(a)	#a
 /* the additional level of indirection enables these macros to be
  * used as arguments to other macros.  See K&R 2nd ed., page 231. */
@@ -1809,8 +1809,8 @@
 
 /* HAS_POLL:
  *	This symbol, if defined, indicates that the poll routine is
- *	available to poll active file descriptors. You may safely
- *	include <poll.h> when both this symbol *and* I_POLL are defined.
+ *	available to poll active file descriptors.  Please check I_POLL and
+ *	I_SYS_POLL to know which header should be included as well.
  */
 /*#define HAS_POLL		/ **/
 
@@ -2768,12 +2768,6 @@
 /*#define	OLD_PTHREADS_API		/ **/
 /*#define	USE_REENTRANT_API	/ **/
 
-/* USE_DTRACE
- *	This symbol, if defined, indicates that Perl should
- *	be built with support for DTrace.
- */
-/*#define USE_DTRACE			/ **/
-
 /* PERL_VENDORARCH:
  *	If defined, this symbol contains the name of a private library.
  *	The library is private in the sense that it needn't be in anyone's
@@ -2961,6 +2955,7 @@
 #if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)
 #   define _GNU_SOURCE
 #endif
+
 /* HAS_ISASCII:
  *	This manifest constant lets the C program know that isascii
  *	is available.
@@ -4408,7 +4403,6 @@
 #ifndef USE_64_BIT_INT
 /*#define	USE_64_BIT_INT		/ **/
 #endif
-
 #ifndef USE_64_BIT_ALL
 /*#define	USE_64_BIT_ALL		/ **/
 #endif
