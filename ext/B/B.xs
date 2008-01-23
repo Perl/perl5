@@ -26,13 +26,18 @@ static const char* const svclassnames[] = {
 #endif
     "B::IV",
     "B::NV",
+#if PERL_VERSION <= 10
     "B::RV",
+#endif
     "B::PV",
     "B::PVIV",
     "B::PVNV",
     "B::PVMG",
 #if PERL_VERSION <= 8
     "B::BM",
+#endif
+#if PERL_VERSION >= 11
+    "B::REGEXP",
 #endif
 #if PERL_VERSION >= 9
     "B::GV",
@@ -564,6 +569,9 @@ typedef SV	*B__IV;
 typedef SV	*B__PV;
 typedef SV	*B__NV;
 typedef SV	*B__PVMG;
+#if PERL_VERSION >= 11
+typedef SV	*B__REGEXP;
+#endif
 typedef SV	*B__PVLV;
 typedef SV	*B__BM;
 typedef SV	*B__RV;
@@ -1366,6 +1374,24 @@ packiv(sv)
 	    ST(0) = sv_2mortal(newSVpvn((char *)&w, 4));
 	}
 
+
+#if PERL_VERSION >= 11
+
+B::SV
+RV(sv)
+        B::IV   sv
+    CODE:
+        if( SvROK(sv) ) {
+            RETVAL = SvRV(sv);
+        }
+        else {
+            croak( "argument is not SvROK" );
+        }
+    OUTPUT:
+        RETVAL
+
+#endif
+
 MODULE = B	PACKAGE = B::NV		PREFIX = Sv
 
 NV
@@ -1392,11 +1418,15 @@ U32
 PARENT_FAKELEX_FLAGS(sv)
 	B::NV	sv
 
+#if PERL_VERSION < 11
+
 MODULE = B	PACKAGE = B::RV		PREFIX = Sv
 
 B::SV
 SvRV(sv)
 	B::RV	sv
+
+#endif
 
 MODULE = B	PACKAGE = B::PV		PREFIX = Sv
 
@@ -1475,6 +1505,31 @@ MODULE = B	PACKAGE = B::PVMG
 B::HV
 SvSTASH(sv)
 	B::PVMG	sv
+
+MODULE = B	PACKAGE = B::REGEXP
+
+#if PERL_VERSION >= 11
+
+IV
+REGEX(sv)
+	B::PVMG	sv
+    CODE:
+	RETVAL = PTR2IV(((struct xregexp *)SvANY(sv))->xrx_regexp);
+    OUTPUT:
+        RETVAL
+
+SV*
+precomp(sv)
+	B::PVMG	sv
+	REGEXP* rx = NO_INIT
+    CODE:
+	rx = ((struct xregexp *)SvANY(sv))->xrx_regexp;
+	/* FIXME - UTF-8? And the equivalent precomp methods? */
+	RETVAL = newSVpvn( rx->precomp, rx->prelen );
+    OUTPUT:
+        RETVAL
+
+#endif
 
 #define MgMOREMAGIC(mg) mg->mg_moremagic
 #define MgPRIVATE(mg) mg->mg_private

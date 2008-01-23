@@ -21,7 +21,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED),
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : 'RXf_SKIPWHITE');
-$VERSION = 0.83;
+$VERSION = 0.84;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -1624,6 +1624,9 @@ sub pp_chr { maybe_targmy(@_, \&unop, "chr") }
 sub pp_each { unop(@_, "each") }
 sub pp_values { unop(@_, "values") }
 sub pp_keys { unop(@_, "keys") }
+sub pp_aeach { unop(@_, "each") }
+sub pp_avalues { unop(@_, "values") }
+sub pp_akeys { unop(@_, "keys") }
 sub pp_pop { unop(@_, "pop") }
 sub pp_shift { unop(@_, "shift") }
 
