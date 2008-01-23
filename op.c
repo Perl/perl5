@@ -870,6 +870,7 @@ Perl_scalar(pTHX_ OP *o)
     case OP_SORT:
 	if (ckWARN(WARN_VOID))
 	    Perl_warner(aTHX_ packWARN(WARN_VOID), "Useless use of sort in scalar context");
+	break;
     }
     return o;
 }
@@ -2339,7 +2340,7 @@ OP *
 Perl_fold_constants(pTHX_ register OP *o)
 {
     dVAR;
-    register OP *curop;
+    register OP * VOL curop;
     OP *newop;
     VOL I32 type = o->op_type;
     SV * VOL sv = NULL;
@@ -2384,6 +2385,7 @@ Perl_fold_constants(pTHX_ register OP *o)
 	/* XXX what about the numeric ops? */
 	if (PL_hints & HINT_LOCALE)
 	    goto nope;
+	break;
     }
 
     if (PL_parser && PL_parser->error_count)

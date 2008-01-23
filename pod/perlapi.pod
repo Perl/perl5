@@ -428,7 +428,7 @@ L<perlcall>.
 
 NOTE: the perl_ form of this function is deprecated.
 
-	I32	call_sv(SV* sv, I32 flags)
+	I32	call_sv(SV* sv, VOL I32 flags)
 
 =for hackers
 Found in file perl.c

@@ -1773,7 +1773,7 @@ PERL_CALLCONV I32	Perl_call_method(pTHX_ const char* methname, I32 flags)
 PERL_CALLCONV I32	Perl_call_pv(pTHX_ const char* sub_name, I32 flags)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV I32	Perl_call_sv(pTHX_ SV* sv, I32 flags)
+PERL_CALLCONV I32	Perl_call_sv(pTHX_ SV* sv, VOL I32 flags)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV void	Perl_despatch_signals(pTHX);
