@@ -165,6 +165,8 @@ is to be expected. (For information only--not to be used).
 =for apidoc AmU||Nullhv
 Null HV pointer.
 
+(deprecated - use C<(HV *)NULL> instead)
+
 =head1 Hash Manipulation Functions
 
 =for apidoc Am|char*|HvNAME|HV* stash
@@ -230,8 +232,9 @@ C<SV*>.
 /* these hash entry flags ride on hent_klen (for use only in magic/tied HVs) */
 #define HEf_SVKEY	-2	/* hent_key is an SV* */
 
-
-#define Nullhv Null(HV*)
+#ifndef PERL_CORE
+#  define Nullhv Null(HV*)
+#endif
 #define HvARRAY(hv)	((hv)->sv_u.svu_hash)
 #define HvFILL(hv)	((XPVHV*)  SvANY(hv))->xhv_fill
 #define HvMAX(hv)	((XPVHV*)  SvANY(hv))->xhv_max
@@ -300,7 +303,9 @@ C<SV*>.
 #define HvREHASH_on(hv)		(SvFLAGS(hv) |= SVphv_REHASH)
 #define HvREHASH_off(hv)	(SvFLAGS(hv) &= ~SVphv_REHASH)
 
-#define Nullhe Null(HE*)
+#ifndef PERL_CORE
+#  define Nullhe Null(HE*)
+#endif
 #define HeNEXT(he)		(he)->hent_next
 #define HeKEY_hek(he)		(he)->hent_hek
 #define HeKEY(he)		HEK_KEY(HeKEY_hek(he))
@@ -332,7 +337,9 @@ C<SV*>.
 				 &PL_sv_undef)
 #define HeSVKEY_set(he,sv)	((HeKLEN(he) = HEf_SVKEY), (HeKEY_sv(he) = sv))
 
-#define Nullhek Null(HEK*)
+#ifndef PERL_CORE
+#  define Nullhek Null(HEK*)
+#endif
 #define HEK_BASESIZE		STRUCT_OFFSET(HEK, hek_key[0])
 #define HEK_HASH(hek)		(hek)->hek_hash
 #define HEK_LEN(hek)		(hek)->hek_len

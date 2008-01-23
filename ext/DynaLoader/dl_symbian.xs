@@ -78,7 +78,7 @@ void* dlopen(const char *filename, int flags) {
         h = new PerlSymbianLibHandle;
         if (h) {
             h->error   = KErrNone;
-            h->symbols = Nullhv;
+            h->symbols = (HV *)NULL;
         } else
             error = KErrNoMemory;
     }

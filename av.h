@@ -57,6 +57,8 @@ typedef struct {
 =for apidoc AmU||Nullav
 Null AV pointer.
 
+(deprecated - use C<(AV *)NULL> instead)
+
 =head1 Array Manipulation Functions
 
 =for apidoc Am|int|AvFILL|AV* av
@@ -65,7 +67,9 @@ Same as C<av_len()>.  Deprecated, use C<av_len()> instead.
 =cut
 */
 
-#define Nullav Null(AV*)
+#ifndef PERL_CORE
+#  define Nullav Null(AV*)
+#endif
 
 #define AvARRAY(av)	((av)->sv_u.svu_array)
 #define AvALLOC(av)	(*((SV***)&((XPVAV*)  SvANY(av))->xav_alloc))

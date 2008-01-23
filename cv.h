@@ -28,6 +28,8 @@ typedef struct {
 =for apidoc AmU||Nullcv
 Null CV pointer.
 
+(deprecated - use C<(CV *)NULL> instead)
+
 =head1 CV Manipulation Functions
 
 =for apidoc Am|HV*|CvSTASH|CV* cv
@@ -36,7 +38,9 @@ Returns the stash of the CV.
 =cut
 */
 
-#define Nullcv Null(CV*)
+#ifndef PERL_CORE
+#  define Nullcv Null(CV*)
+#endif
 
 #define CvSTASH(sv)	((XPVCV*)SvANY(sv))->xcv_stash
 #define CvSTART(sv)	((XPVCV*)SvANY(sv))->xcv_start_u.xcv_start

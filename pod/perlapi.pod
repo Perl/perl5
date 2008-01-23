@@ -1399,6 +1399,8 @@ X<Nullav>
 
 Null AV pointer.
 
+(deprecated - use C<(AV *)NULL> instead)
+
 =for hackers
 Found in file av.h
 
@@ -1415,6 +1417,8 @@ X<Nullcv>
 
 Null CV pointer.
 
+(deprecated - use C<(CV *)NULL> instead)
+
 =for hackers
 Found in file cv.h
 
@@ -1422,6 +1426,8 @@ Found in file cv.h
 X<Nullhv>
 
 Null HV pointer.
+
+(deprecated - use C<(HV *)NULL> instead)
 
 =for hackers
 Found in file hv.h

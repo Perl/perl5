@@ -176,7 +176,9 @@ Return the SV from the GV.
 #undef  GV_UNIQUE_CHECK
 #endif
 
-#define Nullgv Null(GV*)
+#ifndef PERL_CORE
+#  define Nullgv Null(GV*)
+#endif
 
 #define DM_UID   0x003
 #define DM_RUID   0x001
