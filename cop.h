@@ -529,7 +529,7 @@ struct block_loop {
 		SvREFCNT_dec(cx->blk_loop.itersave);			\
 	    }								\
 	}								\
-	if (cx->blk_loop.iterary && cx->blk_loop.iterary != PL_curstack)\
+	if ((CxTYPE(cx) != CXt_LOOP_STACK) && cx->blk_loop.iterary)	\
 	    SvREFCNT_dec(cx->blk_loop.iterary);
 
 /* given/when context */
@@ -681,7 +681,8 @@ struct context {
 #define CXt_GIVEN	7
 #define CXt_LOOP_PLAIN	8
 #define CXt_LOOP_FOR	9
-#define CXt_LOOP_RES1	10
+/* Foreach on a temporary list on the stack */
+#define CXt_LOOP_STACK	10
 #define CXt_LOOP_RES2	11
 
 /* private flags for CXt_SUB and CXt_NULL

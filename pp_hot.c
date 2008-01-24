@@ -1911,7 +1911,7 @@ PP(pp_iter)
 	DIE(aTHX_ "panic: pp_iter");
 
     itersvp = CxITERVAR(cx);
-    av = cx->blk_loop.iterary;
+    av = CxTYPE(cx) == CXt_LOOP_STACK ? PL_curstack : cx->blk_loop.iterary;
     if (SvTYPE(av) != SVt_PVAV) {
 	/* iterate ($min .. $max) */
 	if (cx->blk_loop.iterlval) {
