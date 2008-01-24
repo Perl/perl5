@@ -1976,7 +1976,8 @@ PP(pp_iter)
     /* iterate array */
     if (PL_op->op_private & OPpITER_REVERSED) {
 	/* In reverse, use itermax as the min :-)  */
-	if (cx->blk_loop.iterix <= cx->blk_loop.itermax)
+	if (cx->blk_loop.iterix <= (CxTYPE(cx) == CXt_LOOP_STACK
+				    ? cx->blk_loop.itermax : 0))
 	    RETPUSHNO;
 
 	if (SvMAGICAL(av) || AvREIFY(av)) {

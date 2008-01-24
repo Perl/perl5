@@ -1918,7 +1918,7 @@ PP(pp_enteriter)
 	    }
 	}
 	else if (PL_op->op_private & OPpITER_REVERSED) {
-	    cx->blk_loop.itermax = 0;
+	    cx->blk_loop.itermax = 0xDEADBEEF;
 	    cx->blk_loop.iterix = AvFILL(cx->blk_loop.iterary) + 1;
 
 	}
