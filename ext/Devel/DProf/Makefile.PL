@@ -10,7 +10,6 @@ WriteMakefile(
 	VERSION_FROM	=> 'DProf.pm',
 	clean		=> { 'FILES' => 'tmon.out t/tmon.out t/err'},
 	XSPROTOARG	=> '-noprototypes',
-	DEFINE		=> '-DPL_NEEDED',
 	dist		=> {
 			     COMPRESS => 'gzip -9f',
 			     SUFFIX => 'gz',
