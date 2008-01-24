@@ -1097,7 +1097,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERIX = %ld\n",
 		(long)cx->blk_loop.iterix);
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERARY = 0x%"UVxf"\n",
-		PTR2UV(cx->blk_loop.iterary));
+		PTR2UV(cx->blk_loop.ary_min_u.iterary));
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERVAR = 0x%"UVxf"\n",
 		PTR2UV(CxITERVAR(cx)));
 	if (CxITERVAR(cx))

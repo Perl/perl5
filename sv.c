@@ -10544,8 +10544,8 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		break;
 	    case CXt_LOOP_LAZYIV:
 	    case CXt_LOOP_FOR:
-		ncx->blk_loop.iterary	= av_dup_inc(ncx->blk_loop.iterary,
-						     param);
+		ncx->blk_loop.ary_min_u.iterary
+		    = av_dup_inc(ncx->blk_loop.ary_min_u.iterary, param);
 	    case CXt_LOOP_STACK:
 	    case CXt_LOOP_PLAIN:
 		ncx->blk_loop.iterdata	= (CxPADLOOP(ncx)

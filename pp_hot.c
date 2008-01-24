@@ -1911,7 +1911,8 @@ PP(pp_iter)
 	DIE(aTHX_ "panic: pp_iter");
 
     itersvp = CxITERVAR(cx);
-    av = CxTYPE(cx) == CXt_LOOP_STACK ? PL_curstack : cx->blk_loop.iterary;
+    av = (CxTYPE(cx) == CXt_LOOP_STACK)
+	? PL_curstack : cx->blk_loop.ary_min_u.iterary;
     if (SvTYPE(av) != SVt_PVAV) {
 	/* iterate ($min .. $max) */
 	if (CxTYPE(cx) != CXt_LOOP_LAZYIV) {
@@ -1978,7 +1979,7 @@ PP(pp_iter)
     if (PL_op->op_private & OPpITER_REVERSED) {
 	/* In reverse, use itermax as the min :-)  */
 	if (cx->blk_loop.iterix <= (CxTYPE(cx) == CXt_LOOP_STACK
-				    ? cx->blk_loop.itermax : 0))
+				    ? cx->blk_loop.ary_min_u.itermin : 0))
 	    RETPUSHNO;
 
 	if (SvMAGICAL(av) || AvREIFY(av)) {

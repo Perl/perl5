@@ -446,11 +446,15 @@ struct block_loop {
     /* (from inspection of source code) for a .. range of strings this is the
        current string.  */
     SV *	iterlval;
+    union {
     /* (from inspection of source code) for a foreach loop this is the array
        being iterated over. For a .. range of numbers it's the current value.
        A check is often made on the SvTYPE of iterary to determine whether
        we are iterating over an array or a range. (numbers or strings)  */
-    AV *	iterary;
+	AV *	iterary;
+	/* Minimum stack index when reverse iterating as CXt_LOOP_STACK */
+	IV	itermin;
+    } ary_min_u;
     IV		iterix;
     /* (from inspection of source code) for a .. range of numbers this is the
        maximum value.  */
@@ -505,7 +509,7 @@ struct block_loop {
 	cx->blk_loop.my_op = cLOOP;					\
 	PUSHLOOP_OP_NEXT;						\
 	cx->blk_loop.iterlval = NULL;					\
-	cx->blk_loop.iterary = NULL;					\
+	cx->blk_loop.ary_min_u.iterary = NULL;				\
 	CX_ITERDATA_SET(cx,NULL);
 
 #define PUSHLOOP_FOR(cx, dat, s)					\
@@ -513,7 +517,7 @@ struct block_loop {
 	cx->blk_loop.my_op = cLOOP;					\
 	PUSHLOOP_OP_NEXT;						\
 	cx->blk_loop.iterlval = NULL;					\
-	cx->blk_loop.iterary = NULL;					\
+	cx->blk_loop.ary_min_u.iterary = NULL;				\
 	cx->blk_loop.iterix = -1;					\
 	CX_ITERDATA_SET(cx,dat);
 
@@ -531,8 +535,8 @@ struct block_loop {
 		SvREFCNT_dec(cx->blk_loop.itersave);			\
 	    }								\
 	}								\
-	if ((CxTYPE(cx) != CXt_LOOP_STACK) && cx->blk_loop.iterary)	\
-	    SvREFCNT_dec(cx->blk_loop.iterary);
+	if ((CxTYPE(cx) != CXt_LOOP_STACK) && cx->blk_loop.ary_min_u.iterary) \
+	    SvREFCNT_dec(cx->blk_loop.ary_min_u.iterary);
 
 /* given/when context */
 struct block_givwhen {

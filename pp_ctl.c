@@ -1881,10 +1881,10 @@ PP(pp_enteriter)
     PUSHLOOP_FOR(cx, svp, MARK);
 #endif
     if (PL_op->op_flags & OPf_STACKED) {
-	cx->blk_loop.iterary = (AV*)SvREFCNT_inc(POPs);
-	if (SvTYPE(cx->blk_loop.iterary) != SVt_PVAV) {
+	cx->blk_loop.ary_min_u.iterary = (AV*)SvREFCNT_inc(POPs);
+	if (SvTYPE(cx->blk_loop.ary_min_u.iterary) != SVt_PVAV) {
 	    dPOPss;
-	    SV * const right = (SV*)cx->blk_loop.iterary;
+	    SV * const right = (SV*)cx->blk_loop.ary_min_u.iterary;
 	    SvGETMAGIC(sv);
 	    SvGETMAGIC(right);
 	    if (RANGE_IS_NUMERIC(sv,right)) {
@@ -1927,14 +1927,13 @@ PP(pp_enteriter)
 	}
 	else if (PL_op->op_private & OPpITER_REVERSED) {
 	    cx->blk_loop.itermax = 0xDEADBEEF;
-	    cx->blk_loop.iterix = AvFILL(cx->blk_loop.iterary) + 1;
+	    cx->blk_loop.iterix = AvFILL(cx->blk_loop.ary_min_u.iterary) + 1;
 
 	}
     }
     else {
-	cx->blk_loop.iterary = (AV*)0xDEADBEEF;
 	if (PL_op->op_private & OPpITER_REVERSED) {
-	    cx->blk_loop.itermax = MARK - PL_stack_base + 1;
+	    cx->blk_loop.ary_min_u.itermin = MARK - PL_stack_base + 1;
 	    cx->blk_loop.iterix = cx->blk_oldsp + 1;
 	}
 	else {
