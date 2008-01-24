@@ -518,6 +518,8 @@ struct block_loop {
 	CX_ITERDATA_SET(cx,dat);
 
 #define POPLOOP(cx)							\
+	if (CxTYPE(cx) == CXt_LOOP_LAZYIV)				\
+	    assert(!cx->blk_loop.iterlval);				\
 	SvREFCNT_dec(cx->blk_loop.iterlval);				\
 	if (CxITERVAR(cx)) {						\
             if (SvPADMY(cx->blk_loop.itersave)) {			\
@@ -679,11 +681,12 @@ struct context {
 #define CXt_BLOCK	5
 #define CXt_FORMAT	6
 #define CXt_GIVEN	7
-#define CXt_LOOP_PLAIN	8
-#define CXt_LOOP_FOR	9
+/* This is first so that CXt_LOOP_FOR|CXt_LOOP_LAZYIV is CXt_LOOP_LAZYIV */
+#define CXt_LOOP_FOR	8
+#define CXt_LOOP_PLAIN	9
 /* Foreach on a temporary list on the stack */
 #define CXt_LOOP_STACK	10
-#define CXt_LOOP_RES2	11
+#define CXt_LOOP_LAZYIV	11
 
 /* private flags for CXt_SUB and CXt_NULL
    However, this is checked in many places which do not check the type, so

@@ -1256,6 +1256,7 @@ S_dopoptolabel(pTHX_ const char *label)
 	    if (CxTYPE(cx) == CXt_NULL)
 		return -1;
 	    break;
+	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_STACK:
 	case CXt_LOOP_FOR:
 	case CXt_LOOP_PLAIN:
@@ -1373,6 +1374,7 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 	    if ((CxTYPE(cx)) == CXt_NULL)
 		return -1;
 	    break;
+	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_STACK:
 	case CXt_LOOP_FOR:
 	case CXt_LOOP_PLAIN:
@@ -1399,6 +1401,7 @@ S_dopoptogiven(pTHX_ I32 startingblock)
 	case CXt_LOOP_PLAIN:
 	    assert(!CxFOREACHDEF(cx));
 	    break;
+	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_STACK:
 	case CXt_LOOP_FOR:
 	    if (CxFOREACHDEF(cx)) {
@@ -1451,6 +1454,7 @@ Perl_dounwind(pTHX_ I32 cxix)
 	case CXt_EVAL:
 	    POPEVAL(cx);
 	    break;
+	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_STACK:
 	case CXt_LOOP_FOR:
 	case CXt_LOOP_PLAIN:
@@ -1884,6 +1888,10 @@ PP(pp_enteriter)
 	    SvGETMAGIC(sv);
 	    SvGETMAGIC(right);
 	    if (RANGE_IS_NUMERIC(sv,right)) {
+		cx->cx_type |= CXt_LOOP_LAZYIV;
+		/* Make sure that no-one re-orders cop.h and breaks our
+		   assumptions */
+		assert(CxTYPE(cx) == CXt_LOOP_LAZYIV);
 #ifdef NV_PRESERVES_UV
 		if ((SvOK(sv) && ((SvNV(sv) < (NV)IV_MIN) ||
 				  (SvNV(sv) > (NV)IV_MAX)))
@@ -1924,7 +1932,7 @@ PP(pp_enteriter)
 	}
     }
     else {
-	cx->blk_loop.iterary = (SV*)0xDEADBEEF;
+	cx->blk_loop.iterary = (AV*)0xDEADBEEF;
 	if (PL_op->op_private & OPpITER_REVERSED) {
 	    cx->blk_loop.itermax = MARK - PL_stack_base + 1;
 	    cx->blk_loop.iterix = cx->blk_oldsp + 1;
@@ -2150,6 +2158,7 @@ PP(pp_last)
     cxstack_ix++; /* temporarily protect top context */
     mark = newsp;
     switch (CxTYPE(cx)) {
+    case CXt_LOOP_LAZYIV:
     case CXt_LOOP_STACK:
     case CXt_LOOP_FOR:
     case CXt_LOOP_PLAIN:
@@ -2195,6 +2204,7 @@ PP(pp_last)
     cxstack_ix--;
     /* Stack values are safe: */
     switch (pop2) {
+    case CXt_LOOP_LAZYIV:
     case CXt_LOOP_PLAIN:
     case CXt_LOOP_STACK:
     case CXt_LOOP_FOR:
@@ -2555,6 +2565,7 @@ PP(pp_goto)
 		    break;
                 }
                 /* else fall through */
+	    case CXt_LOOP_LAZYIV:
 	    case CXt_LOOP_STACK:
 	    case CXt_LOOP_FOR:
 	    case CXt_LOOP_PLAIN:

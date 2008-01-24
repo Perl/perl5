@@ -1914,7 +1914,7 @@ PP(pp_iter)
     av = CxTYPE(cx) == CXt_LOOP_STACK ? PL_curstack : cx->blk_loop.iterary;
     if (SvTYPE(av) != SVt_PVAV) {
 	/* iterate ($min .. $max) */
-	if (cx->blk_loop.iterlval) {
+	if (CxTYPE(cx) != CXt_LOOP_LAZYIV) {
 	    /* string increment */
 	    register SV* cur = cx->blk_loop.iterlval;
 	    STRLEN maxlen = 0;
@@ -1944,6 +1944,7 @@ PP(pp_iter)
 	    RETPUSHNO;
 	}
 	/* integer increment */
+	assert(!cx->blk_loop.iterlval);
 	if (cx->blk_loop.iterix > cx->blk_loop.itermax)
 	    RETPUSHNO;
 
