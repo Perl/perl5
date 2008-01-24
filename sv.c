@@ -10543,12 +10543,18 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 						      param);
 		ncx->blk_eval.cur_text	= sv_dup(ncx->blk_eval.cur_text, param);
 		break;
-	    case CXt_LOOP_LAZYIV:
+	    case CXt_LOOP_LAZYSV:
+		ncx->blk_loop.state_u.lazysv.cur
+		    = sv_dup_inc(ncx->blk_loop.state_u.lazysv.cur, param);
+		ncx->blk_loop.state_u.lazysv.end
+		    = sv_dup_inc(ncx->blk_loop.state_u.lazysv.end, param);
+		goto dup_cxt_loop;
 	    case CXt_LOOP_FOR:
-		ncx->blk_loop.ary_min_u.iterary
-		    = av_dup_inc(ncx->blk_loop.ary_min_u.iterary, param);
-	    case CXt_LOOP_STACK:
+		ncx->blk_loop.state_u.ary.ary
+		    = av_dup_inc(ncx->blk_loop.state_u.ary.ary, param);
+	    case CXt_LOOP_LAZYIV:
 	    case CXt_LOOP_PLAIN:
+	    dup_cxt_loop:
 		ncx->blk_loop.iterdata	= (CxPADLOOP(ncx)
 					   ? ncx->blk_loop.iterdata
 					   : gv_dup((GV*)ncx->blk_loop.iterdata,
@@ -10558,9 +10564,6 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 					    ncx->blk_loop.oldcomppad);
 		ncx->blk_loop.itersave	= sv_dup_inc(ncx->blk_loop.itersave,
 						     param);
-		if (CxTYPE(ncx) != CXt_LOOP_LAZYIV)
-		    ncx->blk_loop.lval_max_u.iterlval
-			= sv_dup_inc(ncx->blk_loop.lval_max_u.iterlval, param);
 		break;
 	    case CXt_FORMAT:
 		ncx->blk_format.cv	= cv_dup(ncx->blk_format.cv, param);

@@ -444,23 +444,19 @@ struct block_loop {
 #endif
     SV *	itersave;
     union {
-    /* (from inspection of source code) for a .. range of strings this is the
-       current string.  */
-	SV *	iterlval;
-    /* (from inspection of source code) for a .. range of numbers this is the
-       maximum value.  */
-	IV	itermax;
-    } lval_max_u;
-    union {
-    /* (from inspection of source code) for a foreach loop this is the array
-       being iterated over. For a .. range of numbers it's the current value.
-       A check is often made on the SvTYPE of iterary to determine whether
-       we are iterating over an array or a range. (numbers or strings)  */
-	AV *	iterary;
-	/* Minimum stack index when reverse iterating as CXt_LOOP_STACK */
-	IV	itermin;
-    } ary_min_u;
-    IV		iterix;
+	struct { /* valid if type is LOOP_FOR or LOOP_PLAIN (but {NULL,0})*/
+	    AV * ary; /* use the stack if this is NULL */
+	    IV ix;
+	} ary;
+	struct { /* valid if type is LOOP_LAZYIV */
+	    IV cur;
+	    IV end;
+	} lazyiv;
+	struct { /* valid if type if LOOP_LAZYSV */
+	    SV * cur;
+	    SV * end; /* maxiumum value (or minimum in reverse) */
+	} lazysv;
+    } state_u;
 };
 
 #ifdef USE_ITHREADS
@@ -501,22 +497,23 @@ struct block_loop {
 	cx->blk_loop.resetsp = s - PL_stack_base;			\
 	cx->blk_loop.my_op = cLOOP;					\
 	PUSHLOOP_OP_NEXT;						\
-	cx->blk_loop.lval_max_u.iterlval = NULL;			\
-	cx->blk_loop.ary_min_u.iterary = NULL;				\
+	cx->blk_loop.state_u.ary.ary = NULL;				\
+	cx->blk_loop.state_u.ary.ix = 0;				\
 	CX_ITERDATA_SET(cx,NULL);
 
 #define PUSHLOOP_FOR(cx, dat, s)					\
 	cx->blk_loop.resetsp = s - PL_stack_base;			\
 	cx->blk_loop.my_op = cLOOP;					\
 	PUSHLOOP_OP_NEXT;						\
-	cx->blk_loop.lval_max_u.iterlval = NULL;			\
-	cx->blk_loop.ary_min_u.iterary = NULL;				\
-	cx->blk_loop.iterix = -1;					\
+	cx->blk_loop.state_u.ary.ary = NULL;				\
+	cx->blk_loop.state_u.ary.ix = 0;				\
 	CX_ITERDATA_SET(cx,dat);
 
 #define POPLOOP(cx)							\
-	if (CxTYPE(cx) != CXt_LOOP_LAZYIV)				\
-	    SvREFCNT_dec(cx->blk_loop.lval_max_u.iterlval);		\
+	if (CxTYPE(cx) == CXt_LOOP_LAZYSV) {				\
+	    SvREFCNT_dec(cx->blk_loop.state_u.lazysv.cur);		\
+	    SvREFCNT_dec(cx->blk_loop.state_u.lazysv.end);		\
+	}								\
 	if (CxITERVAR(cx)) {						\
             if (SvPADMY(cx->blk_loop.itersave)) {			\
 		SV ** const s_v_p = CxITERVAR(cx);			\
@@ -527,8 +524,8 @@ struct block_loop {
 		SvREFCNT_dec(cx->blk_loop.itersave);			\
 	    }								\
 	}								\
-	if ((CxTYPE(cx) != CXt_LOOP_STACK) && cx->blk_loop.ary_min_u.iterary) \
-	    SvREFCNT_dec(cx->blk_loop.ary_min_u.iterary);
+	if (CxTYPE(cx) == CXt_LOOP_FOR)					\
+	    SvREFCNT_dec(cx->blk_loop.state_u.ary.ary);
 
 /* given/when context */
 struct block_givwhen {
@@ -680,8 +677,7 @@ struct context {
 /* This is first so that CXt_LOOP_FOR|CXt_LOOP_LAZYIV is CXt_LOOP_LAZYIV */
 #define CXt_LOOP_FOR	8
 #define CXt_LOOP_PLAIN	9
-/* Foreach on a temporary list on the stack */
-#define CXt_LOOP_STACK	10
+#define CXt_LOOP_LAZYSV	10
 #define CXt_LOOP_LAZYIV	11
 
 /* private flags for CXt_SUB and CXt_NULL

@@ -1257,7 +1257,7 @@ S_dopoptolabel(pTHX_ const char *label)
 		return -1;
 	    break;
 	case CXt_LOOP_LAZYIV:
-	case CXt_LOOP_STACK:
+	case CXt_LOOP_LAZYSV:
 	case CXt_LOOP_FOR:
 	case CXt_LOOP_PLAIN:
 	    if ( !CxLABEL(cx) || strNE(label, CxLABEL(cx)) ) {
@@ -1375,7 +1375,7 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 		return -1;
 	    break;
 	case CXt_LOOP_LAZYIV:
-	case CXt_LOOP_STACK:
+	case CXt_LOOP_LAZYSV:
 	case CXt_LOOP_FOR:
 	case CXt_LOOP_PLAIN:
 	    DEBUG_l( Perl_deb(aTHX_ "(Found loop #%ld)\n", (long)i));
@@ -1402,7 +1402,7 @@ S_dopoptogiven(pTHX_ I32 startingblock)
 	    assert(!CxFOREACHDEF(cx));
 	    break;
 	case CXt_LOOP_LAZYIV:
-	case CXt_LOOP_STACK:
+	case CXt_LOOP_LAZYSV:
 	case CXt_LOOP_FOR:
 	    if (CxFOREACHDEF(cx)) {
 		DEBUG_l( Perl_deb(aTHX_ "(Found foreach #%ld)\n", (long)i));
@@ -1455,7 +1455,7 @@ Perl_dounwind(pTHX_ I32 cxix)
 	    POPEVAL(cx);
 	    break;
 	case CXt_LOOP_LAZYIV:
-	case CXt_LOOP_STACK:
+	case CXt_LOOP_LAZYSV:
 	case CXt_LOOP_FOR:
 	case CXt_LOOP_PLAIN:
 	    POPLOOP(cx);
@@ -1873,7 +1873,7 @@ PP(pp_enteriter)
 
     ENTER;
 
-    cxtype |= (PL_op->op_flags & OPf_STACKED) ? CXt_LOOP_FOR : CXt_LOOP_STACK;
+    cxtype |= CXt_LOOP_FOR;
     PUSHBLOCK(cx, cxtype, SP);
 #ifdef USE_ITHREADS
     PUSHLOOP_FOR(cx, iterdata, MARK);
@@ -1881,13 +1881,14 @@ PP(pp_enteriter)
     PUSHLOOP_FOR(cx, svp, MARK);
 #endif
     if (PL_op->op_flags & OPf_STACKED) {
-	cx->blk_loop.ary_min_u.iterary = (AV*)SvREFCNT_inc(POPs);
-	if (SvTYPE(cx->blk_loop.ary_min_u.iterary) != SVt_PVAV) {
+	SV *maybe_ary = POPs;
+	if (SvTYPE(maybe_ary) != SVt_PVAV) {
 	    dPOPss;
-	    SV * const right = (SV*)cx->blk_loop.ary_min_u.iterary;
+	    SV * const right = maybe_ary;
 	    SvGETMAGIC(sv);
 	    SvGETMAGIC(right);
 	    if (RANGE_IS_NUMERIC(sv,right)) {
+		cx->cx_type &= ~CXTYPEMASK;
 		cx->cx_type |= CXt_LOOP_LAZYIV;
 		/* Make sure that no-one re-orders cop.h and breaks our
 		   assumptions */
@@ -1912,16 +1913,23 @@ PP(pp_enteriter)
 					 (SvNV(right) > (NV)UV_MAX))))))
 #endif
 		    DIE(aTHX_ "Range iterator outside integer range");
-		cx->blk_loop.iterix = SvIV(sv);
-		cx->blk_loop.lval_max_u.itermax = SvIV(right);
+		cx->blk_loop.state_u.lazyiv.cur = SvIV(sv);
+		cx->blk_loop.state_u.lazyiv.end = SvIV(right);
 #ifdef DEBUGGING
 		/* for correct -Dstv display */
 		cx->blk_oldsp = sp - PL_stack_base;
 #endif
 	    }
 	    else {
-		cx->blk_loop.lval_max_u.iterlval = newSVsv(sv);
-		(void) SvPV_force_nolen(cx->blk_loop.lval_max_u.iterlval);
+		cx->cx_type &= ~CXTYPEMASK;
+		cx->cx_type |= CXt_LOOP_LAZYSV;
+		/* Make sure that no-one re-orders cop.h and breaks our
+		   assumptions */
+		assert(CxTYPE(cx) == CXt_LOOP_LAZYSV);
+		cx->blk_loop.state_u.lazysv.cur = newSVsv(sv);
+		cx->blk_loop.state_u.lazysv.end = right;
+		SvREFCNT_inc(right);
+		(void) SvPV_force_nolen(cx->blk_loop.state_u.lazysv.cur);
 		/* This will do the upgrade to SVt_PV, and warn if the value
 		   is uninitialised.  */
 		(void) SvPV_nolen_const(right);
@@ -1929,22 +1937,26 @@ PP(pp_enteriter)
 		   to replace !SvOK() with a pointer to "".  */
 		if (!SvOK(right)) {
 		    SvREFCNT_dec(right);
-		    cx->blk_loop.ary_min_u.iterary = (AV*) &PL_sv_no;
+		    cx->blk_loop.state_u.lazysv.end = &PL_sv_no;
 		}
 	    }
 	}
-	else if (PL_op->op_private & OPpITER_REVERSED) {
-	    cx->blk_loop.iterix = AvFILL(cx->blk_loop.ary_min_u.iterary) + 1;
-
+	else /* SvTYPE(maybe_ary) == SVt_PVAV */ {
+	    cx->blk_loop.state_u.ary.ary = (AV*)maybe_ary;
+	    SvREFCNT_inc(maybe_ary);
+	    cx->blk_loop.state_u.ary.ix =
+		(PL_op->op_private & OPpITER_REVERSED) ?
+		AvFILL(cx->blk_loop.state_u.ary.ary) + 1 :
+		-1;
 	}
     }
-    else {
+    else { /* iterating over items on the stack */
+	cx->blk_loop.state_u.ary.ary = NULL; /* means to use the stack */
 	if (PL_op->op_private & OPpITER_REVERSED) {
-	    cx->blk_loop.ary_min_u.itermin = MARK - PL_stack_base + 1;
-	    cx->blk_loop.iterix = cx->blk_oldsp + 1;
+	    cx->blk_loop.state_u.ary.ix = cx->blk_oldsp + 1;
 	}
 	else {
-	    cx->blk_loop.iterix = MARK - PL_stack_base;
+	    cx->blk_loop.state_u.ary.ix = MARK - PL_stack_base;
 	}
     }
 
@@ -2165,7 +2177,7 @@ PP(pp_last)
     mark = newsp;
     switch (CxTYPE(cx)) {
     case CXt_LOOP_LAZYIV:
-    case CXt_LOOP_STACK:
+    case CXt_LOOP_LAZYSV:
     case CXt_LOOP_FOR:
     case CXt_LOOP_PLAIN:
 	pop2 = CxTYPE(cx);
@@ -2212,7 +2224,7 @@ PP(pp_last)
     switch (pop2) {
     case CXt_LOOP_LAZYIV:
     case CXt_LOOP_PLAIN:
-    case CXt_LOOP_STACK:
+    case CXt_LOOP_LAZYSV:
     case CXt_LOOP_FOR:
 	POPLOOP(cx);	/* release loop vars ... */
 	LEAVE;
@@ -2572,7 +2584,7 @@ PP(pp_goto)
                 }
                 /* else fall through */
 	    case CXt_LOOP_LAZYIV:
-	    case CXt_LOOP_STACK:
+	    case CXt_LOOP_LAZYSV:
 	    case CXt_LOOP_FOR:
 	    case CXt_LOOP_PLAIN:
 		gotoprobe = cx->blk_oldcop->op_sibling;

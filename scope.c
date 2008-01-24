@@ -1084,7 +1084,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 	break;
 
     case CXt_LOOP_LAZYIV:
-    case CXt_LOOP_STACK:
+    case CXt_LOOP_LAZYSV:
     case CXt_LOOP_FOR:
     case CXt_LOOP_PLAIN:
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.LABEL = %s\n", CxLABEL(cx));
@@ -1094,17 +1094,16 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 		PTR2UV(cx->blk_loop.my_op));
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.NEXT_OP = 0x%"UVxf"\n",
 		PTR2UV(CX_LOOP_NEXTOP_GET(cx)));
-	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERIX = %ld\n",
-		(long)cx->blk_loop.iterix);
+	/* XXX: not accurate for LAZYSV/IV */
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERARY = 0x%"UVxf"\n",
-		PTR2UV(cx->blk_loop.ary_min_u.iterary));
+		PTR2UV(cx->blk_loop.state_u.ary.ary));
+	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERIX = %ld\n",
+		(long)cx->blk_loop.state_u.ary.ix);
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERVAR = 0x%"UVxf"\n",
 		PTR2UV(CxITERVAR(cx)));
 	if (CxITERVAR(cx))
 	    PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERSAVE = 0x%"UVxf"\n",
 		PTR2UV(cx->blk_loop.itersave));
-	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERLVAL = 0x%"UVxf"\n",
-		PTR2UV(cx->blk_loop.lval_max_u.iterlval));
 	break;
 
     case CXt_SUBST:
