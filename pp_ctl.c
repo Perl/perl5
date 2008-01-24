@@ -1913,20 +1913,19 @@ PP(pp_enteriter)
 #endif
 		    DIE(aTHX_ "Range iterator outside integer range");
 		cx->blk_loop.iterix = SvIV(sv);
-		cx->blk_loop.itermax = SvIV(right);
+		cx->blk_loop.lval_max_u.itermax = SvIV(right);
 #ifdef DEBUGGING
 		/* for correct -Dstv display */
 		cx->blk_oldsp = sp - PL_stack_base;
 #endif
 	    }
 	    else {
-		cx->blk_loop.iterlval = newSVsv(sv);
-		(void) SvPV_force_nolen(cx->blk_loop.iterlval);
+		cx->blk_loop.lval_max_u.iterlval = newSVsv(sv);
+		(void) SvPV_force_nolen(cx->blk_loop.lval_max_u.iterlval);
 		(void) SvPV_nolen_const(right);
 	    }
 	}
 	else if (PL_op->op_private & OPpITER_REVERSED) {
-	    cx->blk_loop.itermax = 0xDEADBEEF;
 	    cx->blk_loop.iterix = AvFILL(cx->blk_loop.ary_min_u.iterary) + 1;
 
 	}

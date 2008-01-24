@@ -1104,7 +1104,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 	    PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERSAVE = 0x%"UVxf"\n",
 		PTR2UV(cx->blk_loop.itersave));
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERLVAL = 0x%"UVxf"\n",
-		PTR2UV(cx->blk_loop.iterlval));
+		PTR2UV(cx->blk_loop.lval_max_u.iterlval));
 	break;
 
     case CXt_SUBST:

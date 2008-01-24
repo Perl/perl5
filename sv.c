@@ -10557,8 +10557,9 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 					    ncx->blk_loop.oldcomppad);
 		ncx->blk_loop.itersave	= sv_dup_inc(ncx->blk_loop.itersave,
 						     param);
-		ncx->blk_loop.iterlval	= sv_dup_inc(ncx->blk_loop.iterlval,
-						     param);
+		if (CxTYPE(ncx) != CXt_LOOP_LAZYIV)
+		    ncx->blk_loop.lval_max_u.iterlval
+			= sv_dup_inc(ncx->blk_loop.lval_max_u.iterlval, param);
 		break;
 	    case CXt_FORMAT:
 		ncx->blk_format.cv	= cv_dup(ncx->blk_format.cv, param);

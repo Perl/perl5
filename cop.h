@@ -443,9 +443,14 @@ struct block_loop {
     SV **	itervar;
 #endif
     SV *	itersave;
+    union {
     /* (from inspection of source code) for a .. range of strings this is the
        current string.  */
-    SV *	iterlval;
+	SV *	iterlval;
+    /* (from inspection of source code) for a .. range of numbers this is the
+       maximum value.  */
+	IV	itermax;
+    } lval_max_u;
     union {
     /* (from inspection of source code) for a foreach loop this is the array
        being iterated over. For a .. range of numbers it's the current value.
@@ -456,19 +461,7 @@ struct block_loop {
 	IV	itermin;
     } ary_min_u;
     IV		iterix;
-    /* (from inspection of source code) for a .. range of numbers this is the
-       maximum value.  */
-    IV		itermax;
 };
-/* It might be possible to squeeze this structure further. As best I can tell
-   itermax and iterlval are never used at the same time, so it might be possible
-   to make them into a union. However, I'm not confident that there are enough
-   flag bits/NULLable pointers in this structure alone to encode which is
-   active. There is, however, U8 of space free in struct block, which could be
-   used. Right now it may not be worth squeezing this structure further, as it's
-   the largest part of struct block, and currently struct block is 64 bytes on
-   an ILP32 system, which will give good cache alignment.
-*/
 
 #ifdef USE_ITHREADS
 #  define CxITERVAR(c)							\
@@ -508,7 +501,7 @@ struct block_loop {
 	cx->blk_loop.resetsp = s - PL_stack_base;			\
 	cx->blk_loop.my_op = cLOOP;					\
 	PUSHLOOP_OP_NEXT;						\
-	cx->blk_loop.iterlval = NULL;					\
+	cx->blk_loop.lval_max_u.iterlval = NULL;			\
 	cx->blk_loop.ary_min_u.iterary = NULL;				\
 	CX_ITERDATA_SET(cx,NULL);
 
@@ -516,15 +509,14 @@ struct block_loop {
 	cx->blk_loop.resetsp = s - PL_stack_base;			\
 	cx->blk_loop.my_op = cLOOP;					\
 	PUSHLOOP_OP_NEXT;						\
-	cx->blk_loop.iterlval = NULL;					\
+	cx->blk_loop.lval_max_u.iterlval = NULL;			\
 	cx->blk_loop.ary_min_u.iterary = NULL;				\
 	cx->blk_loop.iterix = -1;					\
 	CX_ITERDATA_SET(cx,dat);
 
 #define POPLOOP(cx)							\
-	if (CxTYPE(cx) == CXt_LOOP_LAZYIV)				\
-	    assert(!cx->blk_loop.iterlval);				\
-	SvREFCNT_dec(cx->blk_loop.iterlval);				\
+	if (CxTYPE(cx) != CXt_LOOP_LAZYIV)				\
+	    SvREFCNT_dec(cx->blk_loop.lval_max_u.iterlval);		\
 	if (CxITERVAR(cx)) {						\
             if (SvPADMY(cx->blk_loop.itersave)) {			\
 		SV ** const s_v_p = CxITERVAR(cx);			\

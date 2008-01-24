@@ -1917,7 +1917,7 @@ PP(pp_iter)
 	/* iterate ($min .. $max) */
 	if (CxTYPE(cx) != CXt_LOOP_LAZYIV) {
 	    /* string increment */
-	    register SV* cur = cx->blk_loop.iterlval;
+	    register SV* cur = cx->blk_loop.lval_max_u.iterlval;
 	    STRLEN maxlen = 0;
 	    const char *max =
 	      SvOK((SV*)av) ?
@@ -1945,8 +1945,7 @@ PP(pp_iter)
 	    RETPUSHNO;
 	}
 	/* integer increment */
-	assert(!cx->blk_loop.iterlval);
-	if (cx->blk_loop.iterix > cx->blk_loop.itermax)
+	if (cx->blk_loop.iterix > cx->blk_loop.lval_max_u.itermax)
 	    RETPUSHNO;
 
 	/* don't risk potential race */
@@ -1966,10 +1965,10 @@ PP(pp_iter)
 
 	/* Handle end of range at IV_MAX */
 	if ((cx->blk_loop.iterix == IV_MIN) &&
-	    (cx->blk_loop.itermax == IV_MAX))
+	    (cx->blk_loop.lval_max_u.itermax == IV_MAX))
 	{
 	    cx->blk_loop.iterix++;
-	    cx->blk_loop.itermax++;
+	    cx->blk_loop.lval_max_u.itermax++;
 	}
 
 	RETPUSHYES;
@@ -2014,7 +2013,7 @@ PP(pp_iter)
     else
 	sv = &PL_sv_undef;
     if (av != PL_curstack && sv == &PL_sv_undef) {
-	SV *lv = cx->blk_loop.iterlval;
+	SV *lv = cx->blk_loop.lval_max_u.iterlval;
 	if (lv && SvREFCNT(lv) > 1) {
 	    SvREFCNT_dec(lv);
 	    lv = NULL;
@@ -2022,7 +2021,7 @@ PP(pp_iter)
 	if (lv)
 	    SvREFCNT_dec(LvTARG(lv));
 	else {
-	    lv = cx->blk_loop.iterlval = newSV_type(SVt_PVLV);
+	    lv = cx->blk_loop.lval_max_u.iterlval = newSV_type(SVt_PVLV);
 	    LvTYPE(lv) = 'y';
 	    sv_magic(lv, NULL, PERL_MAGIC_defelem, NULL, 0);
 	}
