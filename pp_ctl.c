@@ -1256,7 +1256,8 @@ S_dopoptolabel(pTHX_ const char *label)
 	    if (CxTYPE(cx) == CXt_NULL)
 		return -1;
 	    break;
-	case CXt_LOOP:
+	case CXt_LOOP_FOR:
+	case CXt_LOOP_PLAIN:
 	    if ( !CxLABEL(cx) || strNE(label, CxLABEL(cx)) ) {
 		DEBUG_l(Perl_deb(aTHX_ "(Skipping label #%ld %s)\n",
 			(long)i, CxLABEL(cx)));
@@ -1371,7 +1372,8 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 	    if ((CxTYPE(cx)) == CXt_NULL)
 		return -1;
 	    break;
-	case CXt_LOOP:
+	case CXt_LOOP_FOR:
+	case CXt_LOOP_PLAIN:
 	    DEBUG_l( Perl_deb(aTHX_ "(Found loop #%ld)\n", (long)i));
 	    return i;
 	}
@@ -1392,7 +1394,10 @@ S_dopoptogiven(pTHX_ I32 startingblock)
 	case CXt_GIVEN:
 	    DEBUG_l( Perl_deb(aTHX_ "(Found given #%ld)\n", (long)i));
 	    return i;
-	case CXt_LOOP:
+	case CXt_LOOP_PLAIN:
+	    assert(!CxFOREACHDEF(cx));
+	    break;
+	case CXt_LOOP_FOR:
 	    if (CxFOREACHDEF(cx)) {
 		DEBUG_l( Perl_deb(aTHX_ "(Found foreach #%ld)\n", (long)i));
 		return i;
@@ -1443,7 +1448,8 @@ Perl_dounwind(pTHX_ I32 cxix)
 	case CXt_EVAL:
 	    POPEVAL(cx);
 	    break;
-	case CXt_LOOP:
+	case CXt_LOOP_FOR:
+	case CXt_LOOP_PLAIN:
 	    POPLOOP(cx);
 	    break;
 	case CXt_NULL:
@@ -1821,7 +1827,7 @@ PP(pp_enteriter)
     register PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
     SV **svp;
-    U16 cxtype = CXt_LOOP | CXp_FOREACH;
+    U16 cxtype = CXt_LOOP_FOR;
 #ifdef USE_ITHREADS
     void *iterdata;
 #endif
@@ -1861,9 +1867,9 @@ PP(pp_enteriter)
 
     PUSHBLOCK(cx, cxtype, SP);
 #ifdef USE_ITHREADS
-    PUSHLOOP(cx, iterdata, MARK);
+    PUSHLOOP_FOR(cx, iterdata, MARK);
 #else
-    PUSHLOOP(cx, svp, MARK);
+    PUSHLOOP_FOR(cx, svp, MARK);
 #endif
     if (PL_op->op_flags & OPf_STACKED) {
 	cx->blk_loop.iterary = (AV*)SvREFCNT_inc(POPs);
@@ -1936,8 +1942,8 @@ PP(pp_enterloop)
     SAVETMPS;
     ENTER;
 
-    PUSHBLOCK(cx, CXt_LOOP, SP);
-    PUSHLOOP(cx, 0, SP);
+    PUSHBLOCK(cx, CXt_LOOP_PLAIN, SP);
+    PUSHLOOP_PLAIN(cx, SP);
 
     RETURN;
 }
@@ -1952,7 +1958,7 @@ PP(pp_leaveloop)
     SV **mark;
 
     POPBLOCK(cx,newpm);
-    assert(CxTYPE(cx) == CXt_LOOP);
+    assert(CxTYPE_is_LOOP(cx));
     mark = newsp;
     newsp = PL_stack_base + cx->blk_loop.resetsp;
 
@@ -2139,8 +2145,9 @@ PP(pp_last)
     cxstack_ix++; /* temporarily protect top context */
     mark = newsp;
     switch (CxTYPE(cx)) {
-    case CXt_LOOP:
-	pop2 = CXt_LOOP;
+    case CXt_LOOP_FOR:
+    case CXt_LOOP_PLAIN:
+	pop2 = CxTYPE(cx);
 	newsp = PL_stack_base + cx->blk_loop.resetsp;
 	nextop = cx->blk_loop.my_op->op_lastop->op_next;
 	break;
@@ -2182,7 +2189,8 @@ PP(pp_last)
     cxstack_ix--;
     /* Stack values are safe: */
     switch (pop2) {
-    case CXt_LOOP:
+    case CXt_LOOP_PLAIN:
+    case CXt_LOOP_FOR:
 	POPLOOP(cx);	/* release loop vars ... */
 	LEAVE;
 	break;
@@ -2540,7 +2548,8 @@ PP(pp_goto)
 		    break;
                 }
                 /* else fall through */
-	    case CXt_LOOP:
+	    case CXt_LOOP_FOR:
+	    case CXt_LOOP_PLAIN:
 		gotoprobe = cx->blk_oldcop->op_sibling;
 		break;
 	    case CXt_SUBST:

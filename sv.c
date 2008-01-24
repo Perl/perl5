@@ -10542,7 +10542,10 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 						      param);
 		ncx->blk_eval.cur_text	= sv_dup(ncx->blk_eval.cur_text, param);
 		break;
-	    case CXt_LOOP:
+	    case CXt_LOOP_FOR:
+		ncx->blk_loop.iterary	= av_dup_inc(ncx->blk_loop.iterary,
+						     param);
+	    case CXt_LOOP_PLAIN:
 		ncx->blk_loop.iterdata	= (CxPADLOOP(ncx)
 					   ? ncx->blk_loop.iterdata
 					   : gv_dup((GV*)ncx->blk_loop.iterdata,
@@ -10553,8 +10556,6 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		ncx->blk_loop.itersave	= sv_dup_inc(ncx->blk_loop.itersave,
 						     param);
 		ncx->blk_loop.iterlval	= sv_dup_inc(ncx->blk_loop.iterlval,
-						     param);
-		ncx->blk_loop.iterary	= av_dup_inc(ncx->blk_loop.iterary,
 						     param);
 		break;
 	    case CXt_FORMAT:

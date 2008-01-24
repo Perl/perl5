@@ -1907,7 +1907,7 @@ PP(pp_iter)
 
     EXTEND(SP, 1);
     cx = &cxstack[cxstack_ix];
-    if (CxTYPE(cx) != CXt_LOOP)
+    if (!CxTYPE_is_LOOP(cx))
 	DIE(aTHX_ "panic: pp_iter");
 
     itersvp = CxITERVAR(cx);
