@@ -1918,10 +1918,10 @@ PP(pp_iter)
 	if (CxTYPE(cx) != CXt_LOOP_LAZYIV) {
 	    /* string increment */
 	    register SV* cur = cx->blk_loop.lval_max_u.iterlval;
+	    /* If the maximum is !SvOK(), pp_enteriter substitutes PL_sv_no.
+	       It has SvPVX of "" and SvCUR of 0, which is what we want.  */
 	    STRLEN maxlen = 0;
-	    const char *max =
-	      SvOK((SV*)av) ?
-	      SvPV_const((SV*)av, maxlen) : (const char *)"";
+	    const char *max = SvPV_const((SV*)av, maxlen);
 	    if (!SvNIOK(cur) && SvCUR(cur) <= maxlen) {
 		if (SvREFCNT(*itersvp) == 1 && !SvMAGICAL(*itersvp)) {
 		    /* safe to reuse old SV */
