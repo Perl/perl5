@@ -532,38 +532,48 @@ typedef struct {
     IV		xfm_lines;
 } xpvfm_allocated;
 
+#define _XPVIO_TAIL							\
+    PerlIO *	xio_ifp;	/* ifp and ofp are normally the same */	\
+    PerlIO *	xio_ofp;	/* but sockets need separate streams */	\
+    /* Cray addresses everything by word boundaries (64 bits) and	\
+     * code and data pointers cannot be mixed (which is exactly what	\
+     * Perl_filter_add() tries to do with the dirp), hence the		\
+     *  following union trick (as suggested by Gurusamy Sarathy).	\
+     * For further information see Geir Johansen's problem report	\
+     * titled [ID 20000612.002] Perl problem on Cray system		\
+     * The any pointer (known as IoANY()) will also be a good place	\
+     * to hang any IO disciplines to.					\
+     */									\
+    union {								\
+	DIR *	xiou_dirp;	/* for opendir, readdir, etc */		\
+	void *	xiou_any;	/* for alignment */			\
+    } xio_dirpu;							\
+    IV		xio_lines;	/* $. */				\
+    IV		xio_page;	/* $% */				\
+    IV		xio_page_len;	/* $= */				\
+    IV		xio_lines_left;	/* $- */				\
+    char *	xio_top_name;	/* $^ */				\
+    GV *	xio_top_gv;	/* $^ */				\
+    char *	xio_fmt_name;	/* $~ */				\
+    GV *	xio_fmt_gv;	/* $~ */				\
+    char *	xio_bottom_name;/* $^B */				\
+    GV *	xio_bottom_gv;	/* $^B */				\
+    char	xio_type;						\
+    U8		xio_flags
+
+
 struct xpvio {
     _XPV_HEAD;
     _XPVMG_HEAD;
-
-    PerlIO *	xio_ifp;	/* ifp and ofp are normally the same */
-    PerlIO *	xio_ofp;	/* but sockets need separate streams */
-    /* Cray addresses everything by word boundaries (64 bits) and
-     * code and data pointers cannot be mixed (which is exactly what
-     * Perl_filter_add() tries to do with the dirp), hence the following
-     * union trick (as suggested by Gurusamy Sarathy).
-     * For further information see Geir Johansen's problem report titled
-       [ID 20000612.002] Perl problem on Cray system
-     * The any pointer (known as IoANY()) will also be a good place
-     * to hang any IO disciplines to.
-     */
-    union {
-	DIR *	xiou_dirp;	/* for opendir, readdir, etc */
-	void *	xiou_any;	/* for alignment */
-    } xio_dirpu;
-    IV		xio_lines;	/* $. */
-    IV		xio_page;	/* $% */
-    IV		xio_page_len;	/* $= */
-    IV		xio_lines_left;	/* $- */
-    char *	xio_top_name;	/* $^ */
-    GV *	xio_top_gv;	/* $^ */
-    char *	xio_fmt_name;	/* $~ */
-    GV *	xio_fmt_gv;	/* $~ */
-    char *	xio_bottom_name;/* $^B */
-    GV *	xio_bottom_gv;	/* $^B */
-    char	xio_type;
-    U8		xio_flags;
+    _XPVIO_TAIL;
 };
+
+typedef struct {
+    _XPV_ALLOCATED_HEAD;
+    _XPVMG_HEAD;
+    _XPVIO_TAIL;
+} xpvio_allocated;
+
 #define xio_dirp	xio_dirpu.xiou_dirp
 #define xio_any		xio_dirpu.xiou_any
 
@@ -1103,6 +1113,7 @@ the scalar's value cannot change unless written to.
 	    assert(SvTYPE(_svi) != SVt_PVHV);				\
 	    assert(SvTYPE(_svi) != SVt_PVCV);				\
 	    assert(SvTYPE(_svi) != SVt_PVFM);				\
+	    assert(SvTYPE(_svi) != SVt_PVIO);				\
 	    assert(!isGV_with_GP(_svi));				\
 	   &(((XPVNV*) SvANY(_svi))->xnv_u.xnv_nv);			\
 	 }))
@@ -1177,6 +1188,7 @@ the scalar's value cannot change unless written to.
 	STMT_START { assert(SvTYPE(sv) == SVt_NV || SvTYPE(sv) >= SVt_PVNV); \
 	    assert(SvTYPE(sv) != SVt_PVAV); assert(SvTYPE(sv) != SVt_PVHV); \
 	    assert(SvTYPE(sv) != SVt_PVCV); assert(SvTYPE(sv) != SVt_PVFM); \
+		assert(SvTYPE(sv) != SVt_PVIO);		\
 		assert(!isGV_with_GP(sv));		\
 		(((XPVNV*)SvANY(sv))->xnv_u.xnv_nv = (val)); } STMT_END
 #define SvPV_set(sv, val) \
