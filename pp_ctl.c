@@ -1837,7 +1837,7 @@ PP(pp_enteriter)
     SV **svp;
     U8 cxtype = CXt_LOOP_FOR;
 #ifdef USE_ITHREADS
-    void *iterdata;
+    PAD *iterdata;
 #endif
 
     ENTER;
@@ -1853,8 +1853,7 @@ PP(pp_enteriter)
 #ifndef USE_ITHREADS
 	svp = &PAD_SVl(PL_op->op_targ);		/* "my" variable */
 #else
-	iterdata = INT2PTR(void*, PL_op->op_targ);
-	cxtype |= CXp_PADVAR;
+	iterdata = NULL;
 #endif
     }
     else {
@@ -1863,7 +1862,7 @@ PP(pp_enteriter)
 	SAVEGENERICSV(*svp);
 	*svp = newSV(0);
 #ifdef USE_ITHREADS
-	iterdata = (void*)gv;
+	iterdata = (PAD*)gv;
 #endif
     }
 
@@ -1874,9 +1873,9 @@ PP(pp_enteriter)
 
     PUSHBLOCK(cx, cxtype, SP);
 #ifdef USE_ITHREADS
-    PUSHLOOP_FOR(cx, iterdata, MARK);
+    PUSHLOOP_FOR(cx, iterdata, MARK, PL_op->op_targ);
 #else
-    PUSHLOOP_FOR(cx, svp, MARK);
+    PUSHLOOP_FOR(cx, svp, MARK, /*Not used*/);
 #endif
     if (PL_op->op_flags & OPf_STACKED) {
 	SV *maybe_ary = POPs;

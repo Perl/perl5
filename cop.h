@@ -436,8 +436,9 @@ struct block_loop {
     /* (except for non_ithreads we need to modify next_op in pp_ctl.c, hence
 	why next_op is conditionally defined below.)  */
 #ifdef USE_ITHREADS
-    void *	iterdata;
-    PAD		*oldcomppad;
+    PAD		*oldcomppad; /* Also used for the GV, if targoffset is 0 */
+    /* This is also accesible via cx->blk_loop.my_op->op_targ */
+    PADOFFSET	targoffset;
 #else
     OP *	next_op;
     SV **	itervar;
@@ -460,18 +461,19 @@ struct block_loop {
 
 #ifdef USE_ITHREADS
 #  define CxITERVAR(c)							\
-	((c)->blk_loop.iterdata						\
-	 ? (CxPADLOOP(cx) 						\
-	    ? &CX_CURPAD_SV( (c)->blk_loop, 				\
-		    INT2PTR(PADOFFSET, (c)->blk_loop.iterdata))		\
-	    : &GvSV((GV*)(c)->blk_loop.iterdata))			\
+	((c)->blk_loop.oldcomppad					\
+	 ? (CxPADLOOP(c) 						\
+	    ? &CX_CURPAD_SV( (c)->blk_loop, (c)->blk_loop.targoffset )	\
+	    : &GvSV((GV*)(c)->blk_loop.oldcomppad))			\
 	 : (SV**)NULL)
-#  define CX_ITERDATA_SET(cx,idata)					\
-	CX_CURPAD_SAVE(cx->blk_loop);					\
-	cx->blk_loop.iterdata = (idata);
+#  define CX_ITERDATA_SET(cx,idata,o)					\
+	if ((cx->blk_loop.targoffset = (o)))				\
+	    CX_CURPAD_SAVE(cx->blk_loop);				\
+	else								\
+	    cx->blk_loop.oldcomppad = (idata);
 #else
 #  define CxITERVAR(c)		((c)->blk_loop.itervar)
-#  define CX_ITERDATA_SET(cx,ivar)					\
+#  define CX_ITERDATA_SET(cx,ivar,o)					\
 	cx->blk_loop.itervar = (SV**)(ivar);
 #endif
 #define CxLABEL(c)	(0 + (c)->blk_oldcop->cop_label)
@@ -492,15 +494,15 @@ struct block_loop {
 	PUSHLOOP_OP_NEXT;						\
 	cx->blk_loop.state_u.ary.ary = NULL;				\
 	cx->blk_loop.state_u.ary.ix = 0;				\
-	CX_ITERDATA_SET(cx,NULL);
+	CX_ITERDATA_SET(cx, NULL, 0);
 
-#define PUSHLOOP_FOR(cx, dat, s)					\
+#define PUSHLOOP_FOR(cx, dat, s, offset)				\
 	cx->blk_loop.resetsp = s - PL_stack_base;			\
 	cx->blk_loop.my_op = cLOOP;					\
 	PUSHLOOP_OP_NEXT;						\
 	cx->blk_loop.state_u.ary.ary = NULL;				\
 	cx->blk_loop.state_u.ary.ix = 0;				\
-	CX_ITERDATA_SET(cx,dat);
+	CX_ITERDATA_SET(cx, dat, offset);
 
 #define POPLOOP(cx)							\
 	if (CxTYPE(cx) == CXt_LOOP_LAZYSV) {				\
@@ -680,10 +682,9 @@ struct context {
 /* private flags for CXt_LOOP */
 #define CXp_FOR_DEF	0x10	/* foreach using $_ */
 #ifdef USE_ITHREADS
-#  define CXp_PADVAR	0x20	/* itervar lives on pad, iterdata has pad
-				   offset; if not set, iterdata holds GV* */
-#  define CxPADLOOP(c)	(CxTYPE_is_LOOP(c) && ((c)->cx_type & (CXp_PADVAR)))
+#  define CxPADLOOP(c)	((c)->blk_loop.targoffset)
 #endif
+
 /* private flags for CXt_SUBST */
 #define CXp_ONCE	0x10	/* What was sbu_once in struct subst */
 

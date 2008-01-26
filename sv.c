@@ -10557,13 +10557,14 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		    = av_dup_inc(ncx->blk_loop.state_u.ary.ary, param);
 	    case CXt_LOOP_LAZYIV:
 	    case CXt_LOOP_PLAIN:
-		ncx->blk_loop.iterdata	= (CxPADLOOP(ncx)
-					   ? ncx->blk_loop.iterdata
-					   : gv_dup((GV*)ncx->blk_loop.iterdata,
-						    param));
-		ncx->blk_loop.oldcomppad
-		    = (PAD*)ptr_table_fetch(PL_ptr_table,
-					    ncx->blk_loop.oldcomppad);
+		if (CxPADLOOP(ncx)) {
+		    ncx->blk_loop.oldcomppad
+			= (PAD*)ptr_table_fetch(PL_ptr_table,
+						ncx->blk_loop.oldcomppad);
+		} else {
+		    ncx->blk_loop.oldcomppad
+			= (PAD*)gv_dup((GV*)ncx->blk_loop.oldcomppad, param);
+		}
 		break;
 	    case CXt_FORMAT:
 		ncx->blk_format.cv	= cv_dup(ncx->blk_format.cv, param);
