@@ -242,7 +242,6 @@ Perl_pp_redo
 Perl_pp_dump
 Perl_pp_goto
 Perl_pp_exit
-Perl_pp_setstate
 Perl_pp_method_named
 Perl_pp_entergiven
 Perl_pp_leavegiven

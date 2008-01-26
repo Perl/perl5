@@ -841,7 +841,6 @@ redo		redo			ck_null		ds}
 dump		dump			ck_null		ds}	
 goto		goto			ck_null		ds}	
 exit		exit			ck_exit		ds%	S?
-setstate	set statement info	ck_null		s;
 method_named	method with known name	ck_null		d$
 
 entergiven	given()			ck_null		d|

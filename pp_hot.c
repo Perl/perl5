@@ -78,13 +78,6 @@ PP(pp_null)
     return NORMAL;
 }
 
-PP(pp_setstate)
-{
-    dVAR;
-    PL_curcop = (COP*)PL_op;
-    return NORMAL;
-}
-
 PP(pp_pushmark)
 {
     dVAR;

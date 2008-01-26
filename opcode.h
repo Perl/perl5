@@ -230,7 +230,6 @@ EXTCONST char* const PL_op_name[] = {
 	"dump",
 	"goto",
 	"exit",
-	"setstate",
 	"method_named",
 	"entergiven",
 	"leavegiven",
@@ -602,7 +601,6 @@ EXTCONST char* const PL_op_desc[] = {
 	"dump",
 	"goto",
 	"exit",
-	"set statement info",
 	"method with known name",
 	"given()",
 	"leave given block",
@@ -988,7 +986,6 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_goto),	/* Perl_pp_dump */
 	MEMBER_TO_FPTR(Perl_pp_goto),
 	MEMBER_TO_FPTR(Perl_pp_exit),
-	MEMBER_TO_FPTR(Perl_pp_setstate),
 	MEMBER_TO_FPTR(Perl_pp_method_named),
 	MEMBER_TO_FPTR(Perl_pp_entergiven),
 	MEMBER_TO_FPTR(Perl_pp_leavegiven),
@@ -1371,7 +1368,6 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* dump */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* goto */
 	MEMBER_TO_FPTR(Perl_ck_exit),	/* exit */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* setstate */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* method_named */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* entergiven */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* leavegiven */
@@ -1748,7 +1744,6 @@ EXTCONST U32 PL_opargs[] = {
 	0x00001a44,	/* dump */
 	0x00001a44,	/* goto */
 	0x00013644,	/* exit */
-	0x00001404,	/* setstate */
 	0x00000c40,	/* method_named */
 	0x00000640,	/* entergiven */
 	0x00000200,	/* leavegiven */

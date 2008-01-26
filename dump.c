@@ -1052,7 +1052,6 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	Perl_dump_indent(aTHX_ level, file, "SV = %s\n", SvPEEK(cSVOPo_sv));
 #endif
 	break;
-    case OP_SETSTATE:
     case OP_NEXTSTATE:
     case OP_DBSTATE:
 	if (CopLINE(cCOPo))
@@ -2786,7 +2785,6 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	}
 	do_op_xmldump(level+1, file, CvROOT(cSVOPo_sv));
 	break;
-    case OP_SETSTATE:
     case OP_NEXTSTATE:
     case OP_DBSTATE:
 	if (CopLINE(cCOPo))

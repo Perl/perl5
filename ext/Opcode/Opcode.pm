@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.12";
+$VERSION = "1.13";
 
 use Carp;
 use Exporter ();
@@ -332,7 +332,7 @@ invert_opset function.
 
     cond_expr flip flop andassign orassign dorassign and or dor xor
 
-    warn die lineseq nextstate scope enter leave setstate
+    warn die lineseq nextstate scope enter leave
 
     rv2cv anoncode prototype
 
