@@ -2089,7 +2089,7 @@ PERL_CALLCONV void	Perl_save_vptr(pTHX_ void* pptr)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV void	Perl_save_re_context(pTHX);
-PERL_CALLCONV void	Perl_save_padsv(pTHX_ PADOFFSET off);
+PERL_CALLCONV void	Perl_save_padsv_and_mortalize(pTHX_ PADOFFSET off);
 PERL_CALLCONV void	Perl_save_sptr(pTHX_ SV** sptr)
 			__attribute__nonnull__(pTHX_1);
 

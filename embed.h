@@ -781,7 +781,7 @@
 #define save_pptr		Perl_save_pptr
 #define save_vptr		Perl_save_vptr
 #define save_re_context		Perl_save_re_context
-#define save_padsv		Perl_save_padsv
+#define save_padsv_and_mortalize	Perl_save_padsv_and_mortalize
 #define save_sptr		Perl_save_sptr
 #define save_svref		Perl_save_svref
 #ifdef PERL_CORE
@@ -3085,7 +3085,7 @@
 #define save_pptr(a)		Perl_save_pptr(aTHX_ a)
 #define save_vptr(a)		Perl_save_vptr(aTHX_ a)
 #define save_re_context()	Perl_save_re_context(aTHX)
-#define save_padsv(a)		Perl_save_padsv(aTHX_ a)
+#define save_padsv_and_mortalize(a)	Perl_save_padsv_and_mortalize(aTHX_ a)
 #define save_sptr(a)		Perl_save_sptr(aTHX_ a)
 #define save_svref(a)		Perl_save_svref(aTHX_ a)
 #ifdef PERL_CORE

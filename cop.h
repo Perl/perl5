@@ -442,7 +442,6 @@ struct block_loop {
     OP *	next_op;
     SV **	itervar;
 #endif
-    SV *	itersave;
     union {
 	struct { /* valid if type is LOOP_FOR or LOOP_PLAIN (but {NULL,0})*/
 	    AV * ary; /* use the stack if this is NULL */
@@ -469,18 +468,11 @@ struct block_loop {
 	 : (SV**)NULL)
 #  define CX_ITERDATA_SET(cx,idata)					\
 	CX_CURPAD_SAVE(cx->blk_loop);					\
-	if ((cx->blk_loop.iterdata = (idata)) && SvPADMY(*CxITERVAR(cx))) \
-	    cx->blk_loop.itersave = SvREFCNT_inc(*CxITERVAR(cx));	\
-	else								\
-	    cx->blk_loop.itersave = NULL;
+	cx->blk_loop.iterdata = (idata);
 #else
 #  define CxITERVAR(c)		((c)->blk_loop.itervar)
 #  define CX_ITERDATA_SET(cx,ivar)					\
-	if ((cx->blk_loop.itervar = (SV**)(ivar))			\
-	    && SvPADMY(*CxITERVAR(cx)))					\
-	    cx->blk_loop.itersave = SvREFCNT_inc(*CxITERVAR(cx));	\
-	else								\
-	    cx->blk_loop.itersave = NULL;
+	cx->blk_loop.itervar = (SV**)(ivar);
 #endif
 #define CxLABEL(c)	(0 + (c)->blk_oldcop->cop_label)
 #define CxHASARGS(c)	(((c)->cx_type & CXp_HASARGS) == CXp_HASARGS)
@@ -514,12 +506,6 @@ struct block_loop {
 	if (CxTYPE(cx) == CXt_LOOP_LAZYSV) {				\
 	    SvREFCNT_dec(cx->blk_loop.state_u.lazysv.cur);		\
 	    SvREFCNT_dec(cx->blk_loop.state_u.lazysv.end);		\
-	}								\
-	if (cx->blk_loop.itersave) {					\
-	    SV ** const s_v_p = CxITERVAR(cx);				\
-	    assert(SvPADMY(cx->blk_loop.itersave));			\
-	    sv_2mortal(*s_v_p);						\
-	    *s_v_p = cx->blk_loop.itersave;				\
 	}								\
 	if (CxTYPE(cx) == CXt_LOOP_FOR)					\
 	    SvREFCNT_dec(cx->blk_loop.state_u.ary.ary);

@@ -412,15 +412,15 @@ Perl_save_sptr(pTHX_ SV **sptr)
 }
 
 void
-Perl_save_padsv(pTHX_ PADOFFSET off)
+Perl_save_padsv_and_mortalize(pTHX_ PADOFFSET off)
 {
     dVAR;
     SSCHECK(4);
     ASSERT_CURPAD_ACTIVE("save_padsv");
-    SSPUSHPTR(PL_curpad[off]);
+    SSPUSHPTR(SvREFCNT_inc_simple_NN(PL_curpad[off]));
     SSPUSHPTR(PL_comppad);
     SSPUSHLONG((long)off);
-    SSPUSHINT(SAVEt_PADSV);
+    SSPUSHINT(SAVEt_PADSV_AND_MORTALIZE);
 }
 
 void
@@ -929,12 +929,18 @@ Perl_leave_scope(pTHX_ I32 base)
 	    else
 		PL_curpad = NULL;
 	    break;
-	case SAVEt_PADSV:
+	case SAVEt_PADSV_AND_MORTALIZE:
 	    {
 		const PADOFFSET off = (PADOFFSET)SSPOPLONG;
+		SV **svp;
 		ptr = SSPOPPTR;
-		if (ptr)
-		    assert(AvARRAY((PAD*)ptr)[off] == (SV*)SSPOPPTR);
+		assert (ptr);
+		svp = AvARRAY((PAD*)ptr) + off;
+		/* This mortalizing used to be done by POPLOOP() via itersave.
+		   But as we have all the information here, we can do it here,
+		   save even having to have itersave in the struct.  */
+		sv_2mortal(*svp);
+		*svp = (SV*)SSPOPPTR;
 	    }
 	    break;
 	case SAVEt_SAVESWITCHSTACK:
@@ -1101,9 +1107,6 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 		(long)cx->blk_loop.state_u.ary.ix);
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERVAR = 0x%"UVxf"\n",
 		PTR2UV(CxITERVAR(cx)));
-	if (CxITERVAR(cx))
-	    PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERSAVE = 0x%"UVxf"\n",
-		PTR2UV(cx->blk_loop.itersave));
 	break;
 
     case CXt_SUBST:
