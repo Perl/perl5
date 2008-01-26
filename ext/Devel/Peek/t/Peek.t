@@ -14,7 +14,7 @@ BEGIN { require "./test.pl"; }
 
 use Devel::Peek;
 
-plan(48);
+plan(50);
 
 our $DEBUG = 0;
 open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
@@ -45,6 +45,9 @@ sub do_test {
 		($] < 5.009) ? "    IV = 0\n    NV = 0\n" : '';
 	    /mge;
 	    $pattern =~ s/\$RV/IV/g if $] >= 5.011;
+	    $pattern =~ s/^ *\$NV *\n/
+		($] < 5.011) ? "    NV = 0\n" : '';
+	    /mge;
 
 	    print $pattern, "\n" if $DEBUG;
 	    my ($dump, $dump2) = split m/\*\*\*\*\*\n/, scalar <IN>;
@@ -541,3 +544,28 @@ do_test(24,
   UV = \d+
   NV = 0
   PV = 0');
+
+do_test(25,
+	*STDOUT{IO},
+'SV = $RV\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(ROK\\)
+  RV = $ADDR
+  SV = PVIO\\($ADDR\\) at $ADDR
+    REFCNT = 3
+    FLAGS = \\(OBJECT\\)
+    IV = 0
+    $NV
+    STASH = $ADDR\s+"IO::Handle"
+    IFP = $ADDR
+    OFP = $ADDR
+    DIRP = 0x0
+    LINES = 0
+    PAGE = 0
+    PAGE_LEN = 60
+    LINES_LEFT = 0
+    TOP_GV = 0x0
+    FMT_GV = 0x0
+    BOTTOM_GV = 0x0
+    TYPE = \'>\'
+    FLAGS = 0x0');
