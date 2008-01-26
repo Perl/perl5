@@ -221,7 +221,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SvFLAGS(sv)	(sv)->sv_flags
 #define SvREFCNT(sv)	(sv)->sv_refcnt
 
-#if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
+#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define SvREFCNT_inc(sv)		\
     ({					\
 	SV * const _sv = (SV*)(sv);	\
@@ -264,7 +264,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SvREFCNT_inc_void_NN(sv)	(void)(++SvREFCNT((SV*)(sv)))
 #define SvREFCNT_inc_simple_void_NN(sv)	(void)(++SvREFCNT((SV*)(sv)))
 
-#if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
+#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define SvREFCNT_dec(sv)		\
     ({					\
 	SV * const _sv = (SV*)(sv);	\
