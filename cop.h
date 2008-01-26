@@ -520,6 +520,9 @@ struct block_loop {
 		sv_2mortal(*s_v_p);					\
 		*s_v_p = cx->blk_loop.itersave;				\
 	    }								\
+	    else {							\
+		SvREFCNT_dec(cx->blk_loop.itersave);			\
+	    }								\
 	}								\
 	if (CxTYPE(cx) == CXt_LOOP_FOR)					\
 	    SvREFCNT_dec(cx->blk_loop.state_u.ary.ary);
