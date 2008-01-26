@@ -934,7 +934,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		const PADOFFSET off = (PADOFFSET)SSPOPLONG;
 		ptr = SSPOPPTR;
 		if (ptr)
-		    AvARRAY((PAD*)ptr)[off] = (SV*)SSPOPPTR;
+		    assert(AvARRAY((PAD*)ptr)[off] == (SV*)SSPOPPTR);
 	    }
 	    break;
 	case SAVEt_SAVESWITCHSTACK:
