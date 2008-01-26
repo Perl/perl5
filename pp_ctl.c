@@ -1835,7 +1835,7 @@ PP(pp_enteriter)
     register PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
     SV **svp;
-    U8 cxtype = 0;
+    U8 cxtype = CXt_LOOP_FOR;
 #ifdef USE_ITHREADS
     void *iterdata;
 #endif
@@ -1873,7 +1873,6 @@ PP(pp_enteriter)
 
     ENTER;
 
-    cxtype |= CXt_LOOP_FOR;
     PUSHBLOCK(cx, cxtype, SP);
 #ifdef USE_ITHREADS
     PUSHLOOP_FOR(cx, iterdata, MARK);

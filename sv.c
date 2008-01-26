@@ -10544,17 +10544,19 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		ncx->blk_eval.cur_text	= sv_dup(ncx->blk_eval.cur_text, param);
 		break;
 	    case CXt_LOOP_LAZYSV:
-		ncx->blk_loop.state_u.lazysv.cur
-		    = sv_dup_inc(ncx->blk_loop.state_u.lazysv.cur, param);
 		ncx->blk_loop.state_u.lazysv.end
 		    = sv_dup_inc(ncx->blk_loop.state_u.lazysv.end, param);
-		goto dup_cxt_loop;
+		/* We are taking advantage of av_dup_inc and sv_dup_inc
+		   actually being the same function, and order equivalance of
+		   the two unions.
+		   We can assert the later [but only at run time :-(]  */
+		assert ((void *) &ncx->blk_loop.state_u.ary.ary ==
+			(void *) &ncx->blk_loop.state_u.lazysv.cur);
 	    case CXt_LOOP_FOR:
 		ncx->blk_loop.state_u.ary.ary
 		    = av_dup_inc(ncx->blk_loop.state_u.ary.ary, param);
 	    case CXt_LOOP_LAZYIV:
 	    case CXt_LOOP_PLAIN:
-	    dup_cxt_loop:
 		ncx->blk_loop.iterdata	= (CxPADLOOP(ncx)
 					   ? ncx->blk_loop.iterdata
 					   : gv_dup((GV*)ncx->blk_loop.iterdata,
