@@ -2267,7 +2267,6 @@
 #define pp_seq			Perl_pp_seq
 #define pp_setpgrp		Perl_pp_setpgrp
 #define pp_setpriority		Perl_pp_setpriority
-#define pp_setstate		Perl_pp_setstate
 #define pp_sge			Perl_pp_sge
 #define pp_sgrent		Perl_pp_sgrent
 #define pp_sgt			Perl_pp_sgt
@@ -4588,7 +4587,6 @@
 #define pp_seq()		Perl_pp_seq(aTHX)
 #define pp_setpgrp()		Perl_pp_setpgrp(aTHX)
 #define pp_setpriority()	Perl_pp_setpriority(aTHX)
-#define pp_setstate()		Perl_pp_setstate(aTHX)
 #define pp_sge()		Perl_pp_sge(aTHX)
 #define pp_sgrent()		Perl_pp_sgrent(aTHX)
 #define pp_sgt()		Perl_pp_sgt(aTHX)
