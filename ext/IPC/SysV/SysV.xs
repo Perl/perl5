@@ -332,8 +332,16 @@ ftok(path, id = &PL_sv_undef)
         croak("invalid project id");
       }
     }
-
-    k = ftok(path, proj_id);
+/* Including <sys/types.h> before <sys/ipc.h> makes Tru64
+ * to see the obsolete prototype of ftok() first, grumble. */
+# ifdef __osf__
+#  define Ftok_t char*
+/* Configure TODO Ftok_t */
+# endif 
+# ifndef Ftok_t
+#  define Ftok_t const char*
+# endif
+    k = ftok((Ftok_t)path, proj_id);
     ST(0) = k == (key_t) -1 ? &PL_sv_undef : sv_2mortal(newSViv(k));
     XSRETURN(1);
 #else
@@ -405,7 +413,7 @@ shmdt(addr)
   CODE:
 #ifdef HAS_SHM
     void *caddr = sv2addr(addr);
-    int rv = shmdt(caddr);
+    int rv = shmdt((Shmat_t)caddr);
     ST(0) = rv == -1 ? &PL_sv_undef : sv_2mortal(newSViv(rv));
     XSRETURN(1);
 #else

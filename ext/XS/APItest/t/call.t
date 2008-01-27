@@ -90,31 +90,33 @@ for my $test (
     ok(eq_array( [ call_method('meth', $flags, $obj, @$args) ], $expected),
 	"$description call_method('meth')");
 
+    my $returnval = ((($flags & G_WANT) == G_ARRAY) || ($flags & G_DISCARD))
+	? [0] : [ undef, 1 ];
     for my $keep (0, G_KEEPERR) {
 	my $desc = $description . ($keep ? ' G_KEEPERR' : '');
 	my $exp_err = $keep ? "before\n\t(in cleanup) its_dead_jim\n"
 			    : "its_dead_jim\n";
 	$@ = "before\n";
 	ok(eq_array( [ call_sv('d', $flags|G_EVAL|$keep, @$args) ],
-		    $flags & (G_ARRAY|G_DISCARD) ? [0] : [ undef, 1 ]),
+		    $returnval),
 		    "$desc G_EVAL call_sv('d')");
 	is($@, $exp_err, "$desc G_EVAL call_sv('d') - \$@");
 
 	$@ = "before\n";
 	ok(eq_array( [ call_pv('d', $flags|G_EVAL|$keep, @$args) ], 
-		    $flags & (G_ARRAY|G_DISCARD) ? [0] : [ undef, 1 ]),
+		    $returnval),
 		    "$desc G_EVAL call_pv('d')");
 	is($@, $exp_err, "$desc G_EVAL call_pv('d') - \$@");
 
 	$@ = "before\n";
 	ok(eq_array( [ eval_sv('d()', $flags|$keep) ],
-		    $flags & (G_ARRAY|G_DISCARD) ? [0] : [ undef, 1 ]),
+		    $returnval),
 		    "$desc eval_sv('d()')");
 	is($@, $exp_err, "$desc eval_sv('d()') - \$@");
 
 	$@ = "before\n";
 	ok(eq_array( [ call_method('d', $flags|G_EVAL|$keep, $obj, @$args) ],
-		    $flags & (G_ARRAY|G_DISCARD) ? [0] : [ undef, 1 ]),
+		    $returnval),
 		    "$desc G_EVAL call_method('d')");
 	is($@, $exp_err, "$desc G_EVAL call_method('d') - \$@");
     }
@@ -138,7 +140,7 @@ for my $test (
 	[ "its_dead_jim\n" ]), "$description eval { call_pv('d') }");
 
     ok(eq_array( [ eval { eval_sv('d', $flags), $@ }, $@ ],
-	[ ($flags & (G_ARRAY|G_DISCARD)) ? (0) : (undef, 1),
+	[ @$returnval,
 		"its_dead_jim\n", '' ]),
 	"$description eval { eval_sv('d') }");
 

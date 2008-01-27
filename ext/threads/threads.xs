@@ -452,7 +452,7 @@ S_ithread_run(void * arg)
         SPAGAIN;
         for (ii=len-1; ii >= 0; ii--) {
             SV *sv = POPs;
-            if (jmp_rc == 0 && (! (thread->gimme & G_VOID))) {
+            if (jmp_rc == 0 && (thread->gimme & G_WANT) != G_VOID) {
                 av_store(params, ii, SvREFCNT_inc(sv));
             }
         }
@@ -1122,7 +1122,7 @@ ithread_join(...)
         MUTEX_LOCK(&thread->mutex);
         /* Get the return value from the call_sv */
         /* Objects do not survive this process - FIXME */
-        if (! (thread->gimme & G_VOID)) {
+        if ((thread->gimme & G_WANT) != G_VOID) {
             AV *params_copy;
             PerlInterpreter *other_perl;
             CLONE_PARAMS clone_params;
@@ -1459,8 +1459,8 @@ ithread_wantarray(...)
     CODE:
         PERL_UNUSED_VAR(items);
         thread = S_SV_to_ithread(aTHX_ ST(0));
-        ST(0) = (thread->gimme & G_ARRAY) ? &PL_sv_yes :
-                (thread->gimme & G_VOID)  ? &PL_sv_undef
+        ST(0) = ((thread->gimme & G_WANT) == G_ARRAY) ? &PL_sv_yes :
+                ((thread->gimme & G_WANT) == G_VOID)  ? &PL_sv_undef
                                        /* G_SCALAR */ : &PL_sv_no;
         /* XSRETURN(1); - implied */
 

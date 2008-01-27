@@ -18,24 +18,13 @@ our @EXPORT = qw( print_double print_int print_long
 		  mxpushp mxpushn mxpushi mxpushu
 		  call_sv call_pv call_method eval_sv eval_pv require_pv
 		  G_SCALAR G_ARRAY G_VOID G_DISCARD G_EVAL G_NOARGS
-		  G_KEEPERR G_NODEBUG G_METHOD
+		  G_KEEPERR G_NODEBUG G_METHOD G_WANT
 		  apitest_exception mycroak strtab
 		  my_cxt_getint my_cxt_getsv my_cxt_setint my_cxt_setsv
 		  sv_setsv_cow_hashkey_core sv_setsv_cow_hashkey_notcore
 );
 
-# from cop.h 
-sub G_SCALAR()	{   0 }
-sub G_ARRAY()	{   1 }
-sub G_VOID()	{ 128 }
-sub G_DISCARD()	{   2 }
-sub G_EVAL()	{   4 }
-sub G_NOARGS()	{   8 }
-sub G_KEEPERR()	{  16 }
-sub G_NODEBUG()	{  32 }
-sub G_METHOD()	{  64 }
-
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 use vars '$WARNINGS_ON_BOOTSTRAP';
 use vars map "\$${_}_called_PP", qw(BEGIN UNITCHECK CHECK INIT END);

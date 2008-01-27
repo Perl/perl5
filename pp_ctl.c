@@ -2989,9 +2989,9 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	    && cLISTOPx(cUNOPx(PL_eval_root)->op_first)->op_last->op_type
 	    == OP_REQUIRE)
 	scalar(PL_eval_root);
-    else if (gimme & G_VOID)
+    else if ((gimme & G_WANT) == G_VOID)
 	scalarvoid(PL_eval_root);
-    else if (gimme & G_ARRAY)
+    else if ((gimme & G_WANT) == G_ARRAY)
 	list(PL_eval_root);
     else
 	scalar(PL_eval_root);
