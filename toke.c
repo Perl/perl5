@@ -435,7 +435,7 @@ S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp)
 /* print the buffer with suitable escapes */
 
 STATIC void
-S_printbuf(pTHX_ const char* fmt, const char* s)
+S_printbuf(pTHX_ const char *const fmt, const char *const s)
 {
     SV* const tmp = newSVpvs("");
     PerlIO_printf(Perl_debug_log, fmt, pv_display(tmp, s, strlen(s), 0, 60));
@@ -482,7 +482,7 @@ S_ao(pTHX_ int toketype)
  */
 
 STATIC void
-S_no_op(pTHX_ const char *what, char *s)
+S_no_op(pTHX_ const char *const what, char *s)
 {
     dVAR;
     char * const oldbp = PL_bufptr;
@@ -567,7 +567,7 @@ S_missingterm(pTHX_ char *s)
  * Check whether the named feature is enabled.
  */
 STATIC bool
-S_feature_is_enabled(pTHX_ const char *name, STRLEN namelen)
+S_feature_is_enabled(pTHX_ const char *const name, STRLEN namelen)
 {
     dVAR;
     HV * const hinthv = GvHV(PL_hintgv);
@@ -583,14 +583,14 @@ S_feature_is_enabled(pTHX_ const char *name, STRLEN namelen)
  */
 
 void
-Perl_deprecate(pTHX_ const char *s)
+Perl_deprecate(pTHX_ const char *const s)
 {
     if (ckWARN(WARN_DEPRECATED))
 	Perl_warner(aTHX_ packWARN(WARN_DEPRECATED), "Use of %s is deprecated", s);
 }
 
 void
-Perl_deprecate_old(pTHX_ const char *s)
+Perl_deprecate_old(pTHX_ const char *const s)
 {
     /* This function should NOT be called for any new deprecated warnings */
     /* Use Perl_deprecate instead                                         */
@@ -970,7 +970,7 @@ S_skipspace2(pTHX_ register char *s, SV **svp)
 #endif
 
 STATIC void
-S_update_debugger_info(pTHX_ SV *orig_sv, const char *buf, STRLEN len)
+S_update_debugger_info(pTHX_ SV *orig_sv, const char *const buf, STRLEN len)
 {
     AV *av = CopFILEAVx(PL_curcop);
     if (av) {
@@ -1348,7 +1348,7 @@ S_force_next(pTHX_ I32 type)
 }
 
 STATIC SV *
-S_newSV_maybe_utf8(pTHX_ const char *start, STRLEN len)
+S_newSV_maybe_utf8(pTHX_ const char *const start, STRLEN len)
 {
     dVAR;
     SV * const sv = newSVpvn_utf8(start, len,
@@ -10800,7 +10800,7 @@ Perl_pmflag(pTHX_ U32* pmfl, int ch)
 {
     PERL_UNUSED_CONTEXT;
     if (ch<256) {
-        char c = (char)ch;
+        const char c = (char)ch;
         switch (c) {
             CASE_STD_PMMOD_FLAGS_PARSE_SET(pmfl);
             case GLOBAL_PAT_MOD:    *pmfl |= PMf_GLOBAL; break;
@@ -12429,7 +12429,7 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
 #pragma segment Perl_yylex
 #endif
 int
-Perl_yywarn(pTHX_ const char *s)
+Perl_yywarn(pTHX_ const char *const s)
 {
     dVAR;
     PL_in_eval |= EVAL_WARNONLY;
@@ -12439,7 +12439,7 @@ Perl_yywarn(pTHX_ const char *s)
 }
 
 int
-Perl_yyerror(pTHX_ const char *s)
+Perl_yyerror(pTHX_ const char *const s)
 {
     dVAR;
     const char *where = NULL;
@@ -12719,7 +12719,7 @@ passed in, for performance reasons.
 */
 
 char *
-Perl_scan_vstring(pTHX_ const char *s, const char *e, SV *sv)
+Perl_scan_vstring(pTHX_ const char *s, const char *const e, SV *sv)
 {
     dVAR;
     const char *pos = s;

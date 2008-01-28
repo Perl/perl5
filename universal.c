@@ -91,7 +91,7 @@ normal Perl method.
 */
 
 bool
-Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
+Perl_sv_derived_from(pTHX_ SV *sv, const char *const name)
 {
     dVAR;
     HV *stash;
@@ -131,7 +131,7 @@ The SV can be a Perl object or the name of a Perl class.
 #include "XSUB.h"
 
 bool
-Perl_sv_does(pTHX_ SV *sv, const char *name)
+Perl_sv_does(pTHX_ SV *sv, const char *const name)
 {
     const char *classname;
     bool does_it;

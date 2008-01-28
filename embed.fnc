@@ -183,8 +183,8 @@ Ap	|I32	|debstackptrs
 Ap	|char*	|delimcpy	|NN char* to|NN const char* toend|NN const char* from \
 				|NN const char* fromend|int delim|NN I32* retlen
 pM	|void	|delete_eval_scope
-p	|void	|deprecate	|NN const char* s
-p	|void	|deprecate_old	|NN const char* s
+p	|void	|deprecate	|NN const char *const s
+p	|void	|deprecate_old	|NN const char *const s
 Afp	|OP*	|die		|NULLOK const char* pat|...
 p	|OP*	|vdie		|NULLOK const char* pat|NULLOK va_list* args
 p	|OP*	|die_where	|NULLOK const char* message|STRLEN msglen
@@ -604,7 +604,7 @@ Apa	|OP*	|newWHILEOP	|I32 flags|I32 debuggable|NULLOK LOOP* loop \
 				|I32 whileline|NULLOK OP* expr|NULLOK OP* block|NULLOK OP* cont \
 				|I32 has_my
 Apa	|PERL_SI*|new_stackinfo|I32 stitems|I32 cxitems
-Ap	|char*	|scan_vstring	|NN const char *vstr|NN const char *end|NN SV *sv
+Ap	|char*	|scan_vstring	|NN const char *vstr|NN const char *const end|NN SV *sv
 Apd	|const char*	|scan_version	|NN const char *vstr|NN SV *sv|bool qv
 Apd	|SV*	|new_version	|NN SV *ver
 Apd	|SV*	|upg_version	|NN SV *ver|bool qv
@@ -852,8 +852,8 @@ Ap	|OP*	|sv_compile_2op	|NN SV* sv|NN OP** startp|NN const char* code|NN PAD** p
 Apd	|int	|getcwd_sv	|NN SV* sv
 Apd	|void	|sv_dec		|NN SV* sv
 Ap	|void	|sv_dump	|NN SV* sv
-ApdR	|bool	|sv_derived_from|NN SV* sv|NN const char* name
-ApdR	|bool	|sv_does	|NN SV* sv|NN const char* name
+ApdR	|bool	|sv_derived_from|NN SV* sv|NN const char *const name
+ApdR	|bool	|sv_does	|NN SV* sv|NN const char *const name
 Apd	|I32	|sv_eq		|NULLOK SV* sv1|NULLOK SV* sv2
 Apd	|void	|sv_free	|NULLOK SV* sv
 poMX	|void	|sv_free2	|NN SV* sv
@@ -989,11 +989,11 @@ Ap	|void	|vwarner	|U32 err|NN const char* pat|NULLOK va_list* args
 p	|void	|watch		|NN char** addr
 Ap	|I32	|whichsig	|NN const char* sig
 p	|void	|write_to_stderr|NN const char* message|int msglen
-p	|int	|yyerror	|NN const char* s
+p	|int	|yyerror	|NN const char *const s
 EXp	|int	|yylex
 p	|int	|yyparse
 p	|void	|parser_free	|NN const yy_parser *
-p	|int	|yywarn		|NN const char* s
+p	|int	|yywarn		|NN const char *const s
 #if defined(MYMALLOC)
 Ap	|void	|dump_mstats	|NN char* s
 Ap	|int	|get_mstats	|NN perl_mstats_t *buf|int buflen|int level
@@ -1555,19 +1555,19 @@ sR	|char*	|scan_trans	|NN char *start
 s	|char*	|scan_word	|NN char *s|NN char *dest|STRLEN destlen \
 				|int allow_package|NN STRLEN *slp
 s	|void	|update_debugger_info|NULLOK SV *orig_sv \
-				|NULLOK const char *buf|STRLEN len
+				|NULLOK const char *const buf|STRLEN len
 sR	|char*	|skipspace	|NN char *s
 sR	|char*	|swallow_bom	|NN U8 *s
 s	|void	|checkcomma	|NN const char *s|NN const char *name \
 				|NN const char *what
-s	|bool	|feature_is_enabled|NN const char* name|STRLEN namelen
+s	|bool	|feature_is_enabled|NN const char *const name|STRLEN namelen
 s	|void	|force_ident	|NN const char *s|int kind
 s	|void	|incline	|NN const char *s
 s	|int	|intuit_method	|NN char *s|NULLOK GV *gv|NULLOK CV *cv
 s	|int	|intuit_more	|NN char *s
 s	|I32	|lop		|I32 f|int x|NN char *s
 rs	|void	|missingterm	|NULLOK char *s
-s	|void	|no_op		|NN const char *what|NULLOK char *s
+s	|void	|no_op		|NN const char *const what|NULLOK char *s
 sR	|I32	|sublex_done
 sR	|I32	|sublex_push
 sR	|I32	|sublex_start
@@ -1585,7 +1585,7 @@ s	|void	|strip_return	|NN SV *sv
 #  endif
 #  if defined(DEBUGGING)
 s	|int	|tokereport	|I32 rv|NN const YYSTYPE* lvalp
-s	|void	|printbuf	|NN const char* fmt|NN const char* s
+s	|void	|printbuf	|NN const char *const fmt|NN const char* s
 #  endif
 #endif
 

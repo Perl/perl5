@@ -394,10 +394,10 @@ PERL_CALLCONV char*	Perl_delimcpy(pTHX_ char* to, const char* toend, const char*
 			__attribute__nonnull__(pTHX_6);
 
 PERL_CALLCONV void	Perl_delete_eval_scope(pTHX);
-PERL_CALLCONV void	Perl_deprecate(pTHX_ const char* s)
+PERL_CALLCONV void	Perl_deprecate(pTHX_ const char *const s)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV void	Perl_deprecate_old(pTHX_ const char* s)
+PERL_CALLCONV void	Perl_deprecate_old(pTHX_ const char *const s)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV OP*	Perl_die(pTHX_ const char* pat, ...)
@@ -1662,7 +1662,7 @@ PERL_CALLCONV PERL_SI*	Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV char*	Perl_scan_vstring(pTHX_ const char *vstr, const char *end, SV *sv)
+PERL_CALLCONV char*	Perl_scan_vstring(pTHX_ const char *vstr, const char *const end, SV *sv)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
@@ -2290,12 +2290,12 @@ PERL_CALLCONV void	Perl_sv_dec(pTHX_ SV* sv)
 PERL_CALLCONV void	Perl_sv_dump(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV bool	Perl_sv_derived_from(pTHX_ SV* sv, const char* name)
+PERL_CALLCONV bool	Perl_sv_derived_from(pTHX_ SV* sv, const char *const name)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV bool	Perl_sv_does(pTHX_ SV* sv, const char* name)
+PERL_CALLCONV bool	Perl_sv_does(pTHX_ SV* sv, const char *const name)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
@@ -2658,7 +2658,7 @@ PERL_CALLCONV I32	Perl_whichsig(pTHX_ const char* sig)
 PERL_CALLCONV void	Perl_write_to_stderr(pTHX_ const char* message, int msglen)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV int	Perl_yyerror(pTHX_ const char* s)
+PERL_CALLCONV int	Perl_yyerror(pTHX_ const char *const s)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV int	Perl_yylex(pTHX);
@@ -2666,7 +2666,7 @@ PERL_CALLCONV int	Perl_yyparse(pTHX);
 PERL_CALLCONV void	Perl_parser_free(pTHX_ const yy_parser *)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV int	Perl_yywarn(pTHX_ const char* s)
+PERL_CALLCONV int	Perl_yywarn(pTHX_ const char *const s)
 			__attribute__nonnull__(pTHX_1);
 
 #if defined(MYMALLOC)
@@ -4096,7 +4096,7 @@ STATIC char*	S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_pa
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_5);
 
-STATIC void	S_update_debugger_info(pTHX_ SV *orig_sv, const char *buf, STRLEN len);
+STATIC void	S_update_debugger_info(pTHX_ SV *orig_sv, const char *const buf, STRLEN len);
 STATIC char*	S_skipspace(pTHX_ char *s)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -4110,7 +4110,7 @@ STATIC void	S_checkcomma(pTHX_ const char *s, const char *name, const char *what
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 
-STATIC bool	S_feature_is_enabled(pTHX_ const char* name, STRLEN namelen)
+STATIC bool	S_feature_is_enabled(pTHX_ const char *const name, STRLEN namelen)
 			__attribute__nonnull__(pTHX_1);
 
 STATIC void	S_force_ident(pTHX_ const char *s, int kind)
@@ -4131,7 +4131,7 @@ STATIC I32	S_lop(pTHX_ I32 f, int x, char *s)
 STATIC void	S_missingterm(pTHX_ char *s)
 			__attribute__noreturn__;
 
-STATIC void	S_no_op(pTHX_ const char *what, char *s)
+STATIC void	S_no_op(pTHX_ const char *const what, char *s)
 			__attribute__nonnull__(pTHX_1);
 
 STATIC I32	S_sublex_done(pTHX)
@@ -4171,7 +4171,7 @@ STATIC void	S_strip_return(pTHX_ SV *sv)
 STATIC int	S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC void	S_printbuf(pTHX_ const char* fmt, const char* s)
+STATIC void	S_printbuf(pTHX_ const char *const fmt, const char* s)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 

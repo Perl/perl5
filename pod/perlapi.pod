@@ -5047,7 +5047,7 @@ Returns a boolean indicating whether the SV is derived from the specified class
 I<at the C level>.  To check derivation at the Perl level, call C<isa()> as a
 normal Perl method.
 
-	bool	sv_derived_from(SV* sv, const char* name)
+	bool	sv_derived_from(SV* sv, const char *const name)
 
 =for hackers
 Found in file universal.c
@@ -5058,7 +5058,7 @@ X<sv_does>
 Returns a boolean indicating whether the SV performs a specific, named role.
 The SV can be a Perl object or the name of a Perl class.
 
-	bool	sv_does(SV* sv, const char* name)
+	bool	sv_does(SV* sv, const char *const name)
 
 =for hackers
 Found in file universal.c
