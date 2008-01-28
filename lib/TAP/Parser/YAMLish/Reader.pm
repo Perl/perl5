@@ -4,7 +4,7 @@ use strict;
 
 use vars qw{$VERSION};
 
-$VERSION = '3.06';
+$VERSION = '3.07';
 
 # TODO:
 #   Handle blessed object syntax
@@ -277,7 +277,7 @@ TAP::Parser::YAMLish::Reader - Read YAMLish data from iterator
 
 =head1 VERSION
 
-Version 3.06
+Version 3.07
 
 =head1 SYNOPSIS
 
@@ -326,9 +326,9 @@ L<http://use.perl.org/~Alias/journal/29427>
 
 =head1 COPYRIGHT
 
-Copyright 2007 Andy Armstrong.
+Copyright 2007-2008 Andy Armstrong.
 
-Portions copyright 2006-2007 Adam Kennedy.
+Portions copyright 2006-2008 Adam Kennedy.
 
 This program is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.
