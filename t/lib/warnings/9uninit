@@ -925,7 +925,6 @@ $v = ord $m1;
 $v = chr;
 $v = chr $m1;
 
-# XXX these functions don't warn!
 $v = ucfirst;
 $v = ucfirst $m1;
 $v = lcfirst;
@@ -944,8 +943,16 @@ Use of uninitialized value $_ in ord at - line 7.
 Use of uninitialized value $m1 in ord at - line 8.
 Use of uninitialized value $_ in chr at - line 9.
 Use of uninitialized value $m1 in chr at - line 10.
-Use of uninitialized value $_ in quotemeta at - line 22.
-Use of uninitialized value $m1 in quotemeta at - line 23.
+Use of uninitialized value $_ in ucfirst at - line 12.
+Use of uninitialized value $m1 in ucfirst at - line 13.
+Use of uninitialized value $_ in lcfirst at - line 14.
+Use of uninitialized value $m1 in lcfirst at - line 15.
+Use of uninitialized value $_ in uc at - line 16.
+Use of uninitialized value $m1 in uc at - line 17.
+Use of uninitialized value $_ in lc at - line 18.
+Use of uninitialized value $m1 in lc at - line 19.
+Use of uninitialized value $_ in quotemeta at - line 21.
+Use of uninitialized value $m1 in quotemeta at - line 22.
 ########
 use warnings 'uninitialized';
 my ($m1, $v1, $v2, $v3, $v4);
