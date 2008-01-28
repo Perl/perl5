@@ -178,12 +178,15 @@ if ($@ =~ /^Undefined subroutine/) {
 }
 
 # Try to read from the data file handle
-my $foodata = <Foo::DATA>;
-close Foo::DATA;
-if (defined $foodata) {
-    print "not ok 18 # $foodata\n";
-} else {
-    print "ok 18\n";
+{
+    local $SIG{__WARN__} = sub { my $warn = shift; };
+    my $foodata = <Foo::DATA>;
+    close Foo::DATA;
+    if (defined $foodata) {
+	print "not ok 18 # $foodata\n";
+    } else {
+	print "ok 18\n";
+    }
 }
 
 # Check that __END__ DATA is honoured

@@ -1,7 +1,7 @@
 package SelfLoader;
 use 5.008;
 use strict;
-our $VERSION = "1.13_03";
+our $VERSION = "1.15";
 
 # The following bit of eval-magic is necessary to make this work on
 # perls < 5.009005.
