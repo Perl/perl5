@@ -1410,6 +1410,7 @@ lib/Archive/Extract/t/src/double_dir.zip.packed	Archive::Extract tests
 lib/Archive/Extract/t/src/x.bz2.packed	Archive::Extract tests
 lib/Archive/Extract/t/src/x.gz.packed	Archive::Extract tests
 lib/Archive/Extract/t/src/x.jar.packed	Archive::Extract tests
+lib/Archive/Extract/t/src/x.lzma.packed	Archive::Extract tests
 lib/Archive/Extract/t/src/x.par.packed	Archive::Extract tests
 lib/Archive/Extract/t/src/x.tar.gz.packed	Archive::Extract tests
 lib/Archive/Extract/t/src/x.tar.packed	Archive::Extract tests
