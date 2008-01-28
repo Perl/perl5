@@ -857,6 +857,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'andya',
 		'FILES'		=> q[lib/App/Prove.pm lib/App/Prove/State.pm
 				     lib/Test/Harness.pm lib/Test/Harness
+				     lib/TAP
 				     t/lib/data t/lib/sample-tests 
 				     t/lib/source_tests t/lib/Dev/Null.pm
 				     t/lib/App/Prove/Plugin/Dummy.pm
