@@ -407,7 +407,7 @@ struct block_eval {
 #define CxOLD_IN_EVAL(cx)	(((cx)->blk_u16) & 0x7F)
 #define CxOLD_OP_TYPE(cx)	(((cx)->blk_u16) >> 7)
 
-#define PUSHEVAL(cx,n,fgv)						\
+#define PUSHEVAL(cx,n)							\
     STMT_START {							\
 	assert(!(PL_in_eval & ~0x7F));					\
 	assert(!(PL_op->op_type & ~0x1FF));				\

@@ -2849,7 +2849,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
     PL_op->op_type = OP_ENTEREVAL;
     PL_op->op_flags = 0;			/* Avoid uninit warning. */
     PUSHBLOCK(cx, CXt_EVAL|(IN_PERL_COMPILETIME ? 0 : CXp_REAL), SP);
-    PUSHEVAL(cx, 0, NULL);
+    PUSHEVAL(cx, 0);
 
     if (runtime)
 	(void) doeval(G_SCALAR, startop, runcv, PL_curcop->cop_seq);
@@ -3555,7 +3555,7 @@ PP(pp_require)
 
     /* switch to eval mode */
     PUSHBLOCK(cx, CXt_EVAL, SP);
-    PUSHEVAL(cx, name, NULL);
+    PUSHEVAL(cx, name);
     cx->blk_eval.retop = PL_op->op_next;
 
     SAVECOPLINE(&PL_compiling);
@@ -3654,7 +3654,7 @@ PP(pp_entereval)
     runcv = find_runcv(&seq);
 
     PUSHBLOCK(cx, (CXt_EVAL|CXp_REAL), SP);
-    PUSHEVAL(cx, 0, NULL);
+    PUSHEVAL(cx, 0);
     cx->blk_eval.retop = PL_op->op_next;
 
     /* prepare to compile string */
@@ -3771,7 +3771,7 @@ Perl_create_eval_scope(pTHX_ U32 flags)
     SAVETMPS;
 
     PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), PL_stack_sp);
-    PUSHEVAL(cx, 0, 0);
+    PUSHEVAL(cx, 0);
 
     PL_in_eval = EVAL_INEVAL;
     if (flags & G_KEEPERR)
