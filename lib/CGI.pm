@@ -1837,7 +1837,7 @@ sub startform {
     my($method,$action,$enctype,@other) = 
 	rearrange([METHOD,ACTION,ENCTYPE],@p);
 
-    $method  = $self->escapeHTML(lc($method) || 'post');
+    $method  = $self->escapeHTML(($method) ? lc($method) : 'post');
     $enctype = $self->escapeHTML($enctype || &URL_ENCODED);
     if (defined $action) {
        $action = $self->escapeHTML($action);
@@ -2200,9 +2200,11 @@ sub escapeHTML {
          else {
 	     $toencode =~ s{"}{&quot;}gso;
          }
-         my $latin = uc $self->{'.charset'} eq 'ISO-8859-1' ||
-                     uc $self->{'.charset'} eq 'WINDOWS-1252';
-         if ($latin) {  # bug in some browsers
+         # Handle bug in some browsers with Latin charsets
+         if ($self->{'.charset'} &&
+             (uc($self->{'.charset'}) eq 'ISO-8859-1' ||
+              uc($self->{'.charset'}) eq 'WINDOWS-1252'))
+         {
                 $toencode =~ s{'}{&#39;}gso;
                 $toencode =~ s{\x8b}{&#8249;}gso;
                 $toencode =~ s{\x9b}{&#8250;}gso;
