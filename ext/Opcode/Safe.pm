@@ -26,7 +26,9 @@ sub lexless_anon_sub {
 }
 
 use Carp;
-use Carp::Heavy;
+BEGIN { eval q{
+    use Carp::Heavy;
+} }
 
 use Opcode 1.01, qw(
     opset opset_to_ops opmask_add
