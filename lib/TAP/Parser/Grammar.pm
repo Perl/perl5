@@ -133,7 +133,7 @@ my %language_for;
                 }
                 return $self->_make_test_token(
                     $line,   $ok, $num, $desc,
-                    uc $dir, $explanation
+                    $dir, $explanation
                 );
             },
         },
@@ -372,7 +372,7 @@ sub _make_test_token {
         ok          => $ok,
         test_num    => $num,
         description => _trim($desc),
-        directive   => uc($dir),
+        directive   => uc($dir || ""),
         explanation => _trim($explanation),
         raw         => $line,
         type        => 'test',
