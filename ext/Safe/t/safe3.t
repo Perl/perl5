@@ -30,6 +30,7 @@ $safe->reval( qq{\$_[1] = qq/\0/ x } . $masksize );
 
 # Check that it didn't work
 $safe->reval( q{$x + $y} );
+# Written this way to keep the Test::More that comes with perl 5.6.2 happy
 ok( $@ =~ /^'?addition \(\+\)'? trapped by operation mask/,
 	    'opmask still in place with reval' );
 
@@ -43,6 +44,7 @@ EOF
 close $fh;
 $safe2->rdo('nasty.pl');
 $safe2->reval( q{$x + $y} );
+# Written this way to keep the Test::More that comes with perl 5.6.2 happy
 ok( $@ =~ /^'?addition \(\+\)'? trapped by operation mask/,
 	    'opmask still in place with rdo' );
 END { unlink 'nasty.pl' }
