@@ -47,6 +47,12 @@
 #if __CRTL_VER >= 70301000 && !defined(__VAX)
 #include <ppropdef.h>
 #endif
+#if __CRTL_VER >= 70000000 /* FIXME to earliest version */
+#include <efndef.h>
+#define NO_EFN EFN$C_ENF
+#else
+#define NO_EFN 0;
+#endif
 #include <prvdef.h>
 #include <psldef.h>
 #include <rms.h>
@@ -100,6 +106,32 @@ int lib$find_image_symbol
 	unsigned long flag);
 
 #endif
+
+#pragma member_alignment save
+#pragma nomember_alignment longword
+struct item_list_3 {
+	unsigned short len;
+	unsigned short code;
+	void * bufadr;
+	unsigned short * retadr;
+};
+#pragma member_alignment restore
+
+/* More specific prototype than in starlet_c.h makes programming errors
+   more visible.
+ */
+#ifdef sys$getdviw
+#undef sys$getdviw
+#endif
+int sys$getdviw
+       (unsigned long efn,
+	unsigned short chan,
+	const struct dsc$descriptor_s * devnam,
+	const struct item_list_3 * itmlst,
+	void * iosb,
+	void * (astadr)(unsigned long),
+	void * astprm,
+	void * nullarg);
 
 #if __CRTL_VER >= 70300000 && !defined(__VAX)
 
