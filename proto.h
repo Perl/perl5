@@ -2475,7 +2475,7 @@ PERL_CALLCONV UV	Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
 			__attribute__nonnull__(pTHX_2);
 
 PERL_CALLCONV void	Perl_taint_env(pTHX);
-PERL_CALLCONV void	Perl_taint_proper(pTHX_ const char* f, const char* s)
+PERL_CALLCONV void	Perl_taint_proper(pTHX_ const char* f, const char *const s)
 			__attribute__nonnull__(pTHX_2);
 
 PERL_CALLCONV UV	Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, const char *normal, const char *special)
