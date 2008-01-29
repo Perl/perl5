@@ -1838,6 +1838,8 @@ PP(pp_enteriter)
     U8 cxtype = CXt_LOOP_FOR;
 #ifdef USE_ITHREADS
     PAD *iterdata;
+#else
+    PADOFFSET op;
 #endif
 
     ENTER;
@@ -1875,7 +1877,8 @@ PP(pp_enteriter)
 #ifdef USE_ITHREADS
     PUSHLOOP_FOR(cx, iterdata, MARK, PL_op->op_targ);
 #else
-    PUSHLOOP_FOR(cx, svp, MARK, /*Not used*/);
+    PERL_UNUSED_VAR(op);
+    PUSHLOOP_FOR(cx, svp, MARK, op/*Not used*/);
 #endif
     if (PL_op->op_flags & OPf_STACKED) {
 	SV *maybe_ary = POPs;
