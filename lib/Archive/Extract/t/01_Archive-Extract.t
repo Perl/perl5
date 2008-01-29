@@ -58,6 +58,7 @@ use_ok($Class);
 $Archive::Extract::VERBOSE  = $Archive::Extract::VERBOSE = $Debug;
 $Archive::Extract::WARN     = $Archive::Extract::WARN    = $Debug ? 1 : 0;
 
+
 my $tmpl = {
     ### plain files
     'x.bz2' => {    programs    => [qw[bunzip2]],
@@ -105,6 +106,11 @@ my $tmpl = {
                     method      => 'is_zip',
                     outfile     => 'a',
                 },                
+    'x.lzma' => {   programs    => [qw[unlzma]],
+                    modules     => [qw[Compress::unLZMA]],
+                    method      => 'is_lzma',
+                    outfile     => 'a',
+                },
     ### with a directory
     'y.tbz'     => {    programs    => [qw[bunzip2 tar]],
                         modules     => [qw[Archive::Tar 
@@ -291,7 +297,7 @@ for my $switch (0,1) {
         ### where to extract to -- try both dir and file for gz files
         ### XXX test me!
         #my @outs = $ae->is_gz ? ($abs_path, $OutDir) : ($OutDir);
-        my @outs = $ae->is_gz || $ae->is_bz2 || $ae->is_Z 
+        my @outs = $ae->is_gz || $ae->is_bz2 || $ae->is_Z || $ae->is_lzma
                         ? ($abs_path) 
                         : ($OutDir);
 

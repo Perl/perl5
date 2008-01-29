@@ -52,7 +52,9 @@ The C<_can_do_level> method should be modified accordingly.
 
   ($fh, $filename) = tempfile( $template, DIR => $dir);
   ($fh, $filename) = tempfile( $template, SUFFIX => '.dat');
+  ($fh, $filename) = tempfile( $template, TMPDIR => 1 );
 
+  binmode( $fh, ":utf8" );
 
   $dir = tempdir( CLEANUP => 1 );
   ($fh, $filename) = tempfile( DIR => $dir );
@@ -63,13 +65,13 @@ Object interface:
   use File::Temp ();
   use File::Temp qw/ :seekable /;
 
-  $fh = new File::Temp();
+  $fh = File::Temp->new();
   $fname = $fh->filename;
 
-  $fh = new File::Temp(TEMPLATE => $template);
+  $fh = File::Temp->new(TEMPLATE => $template);
   $fname = $fh->filename;
 
-  $tmp = new File::Temp( UNLINK => 0, SUFFIX => '.dat' );
+  $tmp = File::Temp->new( UNLINK => 0, SUFFIX => '.dat' );
   print $tmp "Some data\n";
   print "Filename is $tmp\n";
   $tmp->seek( 0, SEEK_END );
@@ -130,6 +132,8 @@ but should be used with caution since they return only a filename
 that was valid when function was called, so cannot guarantee
 that the file will not exist by the time the caller opens the filename.
 
+Filehandles returned by these functions support the seekable methods.
+
 =cut
 
 # 5.6.0 gives us S_IWOTH, S_IWGRP, our and auto-vivifying filehandls
@@ -149,7 +153,7 @@ require VMS::Stdio if $^O eq 'VMS';
 # us that Carp::Heavy won't load rather than an error telling us we
 # have run out of file handles. We either preload croak() or we
 # switch the calls to croak from _gettemp() to use die.
-require Carp::Heavy;
+eval { require Carp::Heavy; };
 
 # Need the Symbol package if we are running older perl
 require Symbol if $] < 5.006;
@@ -199,7 +203,7 @@ Exporter::export_tags('POSIX','mktemp','seekable');
 
 # Version number
 
-$VERSION = '0.18';
+$VERSION = '0.20';
 
 # This is a list of characters that can be used in random filenames
 
@@ -229,9 +233,10 @@ use constant HIGH     => 2;
 # us an optimisation when many temporary files are requested
 
 my $OPENFLAGS = O_CREAT | O_EXCL | O_RDWR;
+my $LOCKFLAG;
 
 unless ($^O eq 'MacOS') {
-  for my $oflag (qw/ NOFOLLOW BINARY LARGEFILE EXLOCK NOINHERIT /) {
+  for my $oflag (qw/ NOFOLLOW BINARY LARGEFILE NOINHERIT /) {
     my ($bit, $func) = (0, "Fcntl::O_" . $oflag);
     no strict 'refs';
     $OPENFLAGS |= $bit if eval {
@@ -243,6 +248,12 @@ unless ($^O eq 'MacOS') {
       1;
     };
   }
+  # Special case O_EXLOCK
+  $LOCKFLAG = eval {
+    local $SIG{__DIE__} = sub {};
+    local $SIG{__WARN__} = sub {};
+    &Fcntl::O_EXLOCK();
+  };
 }
 
 # On some systems the O_TEMPORARY flag can be used to tell the OS
@@ -256,6 +267,7 @@ my $OPENTEMPFLAGS = $OPENFLAGS;
 unless ($^O eq 'MacOS') {
   for my $oflag (qw/ TEMPORARY /) {
     my ($bit, $func) = (0, "Fcntl::O_" . $oflag);
+    local($@);
     no strict 'refs';
     $OPENTEMPFLAGS |= $bit if eval {
       # Make sure that redefined die handlers do not cause problems
@@ -267,6 +279,9 @@ unless ($^O eq 'MacOS') {
     };
   }
 }
+
+# Private hash tracking which files have been created by each process id via the OO interface
+my %FILES_CREATED_BY_OBJECT;
 
 # INTERNAL ROUTINES - not to be used outside of package
 
@@ -292,6 +307,7 @@ unless ($^O eq 'MacOS') {
 #                        the file as soon as it is closed. Usually indicates
 #                        use of the O_TEMPORARY flag to sysopen.
 #                        Usually irrelevant on unix
+#   "use_exlock" => Indicates that O_EXLOCK should be used. Default is true.
 
 # Optionally a reference to a scalar can be passed into the function
 # On error this will be used to store the reason for the error
@@ -328,6 +344,7 @@ sub _gettemp {
 		 "mkdir" => 0,
 		 "suffixlen" => 0,
 		 "unlink_on_close" => 0,
+		 "use_exlock" => 1,
 		 "ErrStr" => \$tempErrStr,
 		);
 
@@ -437,6 +454,10 @@ sub _gettemp {
   # not a file -- no point returning a name that includes a directory
   # that does not exist or is not writable
 
+  unless (-e $parent) {
+    ${$options{ErrStr}} = "Parent directory ($parent) does not exist";
+    return ();
+  }
   unless (-d $parent) {
     ${$options{ErrStr}} = "Parent directory ($parent) is not a directory";
     return ();
@@ -493,6 +514,7 @@ sub _gettemp {
 	my $flags = ( ($options{"unlink_on_close"} && !$KEEP_ALL) ?
 		      $OPENTEMPFLAGS :
 		      $OPENFLAGS );
+	$flags |= $LOCKFLAG if (defined $LOCKFLAG && $options{use_exlock});
 	$open_success = sysopen($fh, $path, $flags, 0600);
       }
       if ( $open_success ) {
@@ -587,22 +609,6 @@ sub _gettemp {
 
 }
 
-# Internal routine to return a random character from the
-# character list. Does not do an srand() since rand()
-# will do one automatically
-
-# No arguments. Return value is the random character
-
-# No longer called since _replace_XX runs a few percent faster if
-# I inline the code. This is important if we are creating thousands of
-# temporary files.
-
-sub _randchar {
-
-  $CHARS[ int( rand( $#CHARS ) ) ];
-
-}
-
 # Internal routine to replace the XXXX... with random characters
 # This has to be done by _gettemp() every time it fails to
 # open a temp file/dir
@@ -623,11 +629,12 @@ sub _replace_XX {
   # and suffixlen=0 returns nothing if used in the substr directly
   # Alternatively, could simply set $ignore to length($path)-1
   # Don't want to always use substr when not required though.
+  my $end = ( $] >= 5.006 ? "\\z" : "\\Z" );
 
   if ($ignore) {
-    substr($path, 0, - $ignore) =~ s/X(?=X*\z)/$CHARS[ int( rand( $#CHARS ) ) ]/ge;
+    substr($path, 0, - $ignore) =~ s/X(?=X*$end)/$CHARS[ int( rand( @CHARS ) ) ]/ge;
   } else {
-    $path =~ s/X(?=X*\z)/$CHARS[ int( rand( $#CHARS ) ) ]/ge;
+    $path =~ s/X(?=X*$end)/$CHARS[ int( rand( @CHARS ) ) ]/ge;
   }
   return $path;
 }
@@ -678,7 +685,7 @@ sub _is_safe {
   # UID is in [4]
   if ($info[4] > File::Temp->top_system_uid() && $info[4] != $>) {
 
-    Carp::cluck(sprintf "uid=$info[4] topuid=%s euid=$< path='$path'",
+    Carp::cluck(sprintf "uid=$info[4] topuid=%s euid=$> path='$path'",
 		File::Temp->top_system_uid());
 
     $$err_ref = "Directory owned neither by root nor the current user"
@@ -733,6 +740,7 @@ sub _is_verysafe {
 
   # Should Get the value of _PC_CHOWN_RESTRICTED if it is defined
   # and If it is not there do the extensive test
+  local($@);
   my $chown_restricted;
   $chown_restricted = &POSIX::_PC_CHOWN_RESTRICTED()
     if eval { &POSIX::_PC_CHOWN_RESTRICTED(); 1};
@@ -974,7 +982,7 @@ available.
 
 Create a temporary file object.
 
-  my $tmp = new File::Temp();
+  my $tmp = File::Temp->new();
 
 by default the object is constructed as if C<tempfile>
 was called without options, but with the additional behaviour
@@ -982,11 +990,11 @@ that the temporary file is removed by the object destructor
 if UNLINK is set to true (the default).
 
 Supported arguments are the same as for C<tempfile>: UNLINK
-(defaulting to true), DIR and SUFFIX. Additionally, the filename
+(defaulting to true), DIR, EXLOCK and SUFFIX. Additionally, the filename
 template is specified using the TEMPLATE option. The OPEN option
 is not supported (the file is always opened).
 
- $tmp = new File::Temp( TEMPLATE => 'tempXXXXX',
+ $tmp = File::Temp->new( TEMPLATE => 'tempXXXXX',
                         DIR => 'mydir',
                         SUFFIX => '.dat');
 
@@ -1024,6 +1032,9 @@ sub new {
   # Store the filename in the scalar slot
   ${*$fh} = $path;
 
+  # Cache the filename by pid so that the destructor can decide whether to remove it
+  $FILES_CREATED_BY_OBJECT{$$}{$path} = 1;
+
   # Store unlink information in hash slot (plus other constructor info)
   %{*$fh} = %args;
 
@@ -1036,9 +1047,48 @@ sub new {
   return $fh;
 }
 
+=item B<newdir>
+
+Create a temporary directory using an object oriented interface.
+
+  $dir = File::Temp->newdir();
+
+By default the directory is deleted when the object goes out of scope.
+
+Supports the same options as the C<tempdir> function. Note that directories
+created with this method default to CLEANUP => 1.
+
+  $dir = File::Temp->newdir( $template, %options );
+
+=cut
+
+sub newdir {
+  my $self = shift;
+
+  # need to handle args as in tempdir because we have to force CLEANUP
+  # default without passing CLEANUP to tempdir
+  my $template = (scalar(@_) % 2 == 1 ? shift(@_) : undef );
+  my %options = @_;
+  my $cleanup = (exists $options{CLEANUP} ? $options{CLEANUP} : 1 );
+
+  delete $options{CLEANUP};
+
+  my $tempdir;
+  if (defined $template) {
+    $tempdir = tempdir( $template, %options );
+  } else {
+    $tempdir = tempdir( %options );
+  }
+  return bless { DIRNAME => $tempdir,
+		 CLEANUP => $cleanup,
+		 LAUNCHPID => $$,
+	       }, "File::Temp::Dir";
+}
+
 =item B<filename>
 
-Return the name of the temporary file associated with this object.
+Return the name of the temporary file associated with this object
+(if the object was created using the "new" constructor).
 
   $filename = $tmp->filename;
 
@@ -1056,6 +1106,15 @@ sub STRINGIFY {
   my $self = shift;
   return $self->filename;
 }
+
+=item B<dirname>
+
+Return the name of the temporary directory associated with this
+object (if the object was created using the "newdir" constructor).
+
+  $dirname = $tmpdir->dirname;
+
+This method is called automatically when the object is used in string context.
 
 =item B<unlink_on_destroy>
 
@@ -1085,7 +1144,15 @@ if UNLINK is not specified).
 
 No error is given if the unlink fails.
 
-If the global variable $KEEP_ALL is true, the file will not be removed.
+If the object has been passed to a child process during a fork, the
+file will be deleted when the object goes out of scope in the parent.
+
+For a temporary directory object the directory will be removed
+unless the CLEANUP argument was used in the constructor (and set to
+false) or C<unlink_on_destroy> was modified after creation.
+
+If the global variable $KEEP_ALL is true, the file or directory
+will not be removed.
 
 =cut
 
@@ -1093,6 +1160,9 @@ sub DESTROY {
   my $self = shift;
   if (${*$self}{UNLINK} && !$KEEP_ALL) {
     print "# --------->   Unlinking $self\n" if $DEBUG;
+
+    # only delete if this process created it
+    return unless exists $FILES_CREATED_BY_OBJECT{$$}{$self->filename};
 
     # The unlink1 may fail if the file has been closed
     # by the caller. This leaves us with the decision
@@ -1145,6 +1215,12 @@ But see the WARNING at the end.
 Translates the template as before except that a directory name
 is specified.
 
+  ($fh, $filename) = tempfile($template, TMPDIR => 1);
+
+Equivalent to specifying a DIR of "File::Spec->tmpdir", writing the file
+into the same temporary directory as would be used if no template was
+specified at all.
+
   ($fh, $filename) = tempfile($template, UNLINK => 1);
 
 Return the filename and filehandle as before except that the file is
@@ -1163,7 +1239,7 @@ automatically generated. This temporary file is placed in tmpdir()
 (L<File::Spec>) unless a directory is specified explicitly with the
 DIR option.
 
-  $fh = tempfile( $template, DIR => $dir );
+  $fh = tempfile( DIR => $dir );
 
 If called in scalar context, only the filehandle is returned and the
 file will automatically be deleted when closed on operating systems
@@ -1186,6 +1262,16 @@ if warnings are turned on. Consider using the tmpnam()
 and mktemp() functions described elsewhere in this document
 if opening the file is not required.
 
+If the operating system supports it (for example BSD derived systems), the 
+filehandle will be opened with O_EXLOCK (open with exclusive file lock). 
+This can sometimes cause problems if the intention is to pass the filename 
+to another system that expects to take an exclusive lock itself (such as 
+DBD::SQLite) whilst ensuring that the tempfile is not reused. In this 
+situation the "EXLOCK" option can be passed to tempfile. By default EXLOCK 
+will be true (this retains compatibility with earlier releases).
+
+  ($fh, $filename) = tempfile($template, EXLOCK => 0);
+
 Options can be combined as required.
 
 Will croak() if there is an error.
@@ -1199,11 +1285,13 @@ sub tempfile {
 
   # Default options
   my %options = (
-		 "DIR"    => undef,  # Directory prefix
+		"DIR"    => undef,  # Directory prefix
                 "SUFFIX" => '',     # Template suffix
                 "UNLINK" => 0,      # Do not unlink file on exit
                 "OPEN"   => 1,      # Open file
-		);
+		"TMPDIR" => 0,     # Place tempfile in tempdir if template specified
+		"EXLOCK" => 1,      # Open file with O_EXLOCK
+	       );
 
   # Check to see whether we have an odd or even number of arguments
   my $template = (scalar(@_) % 2 == 1 ? shift(@_) : undef);
@@ -1234,9 +1322,14 @@ sub tempfile {
   # First generate a template if not defined and prefix the directory
   # If no template must prefix the temp directory
   if (defined $template) {
+    # End up with current directory if neither DIR not TMPDIR are set
     if ($options{"DIR"}) {
 
       $template = File::Spec->catfile($options{"DIR"}, $template);
+
+    } elsif ($options{TMPDIR}) {
+
+      $template = File::Spec->catfile(File::Spec->tmpdir, $template );
 
     }
 
@@ -1278,6 +1371,7 @@ sub tempfile {
                                     "unlink_on_close" => $unlink_on_close,
 				    "suffixlen" => length($options{'SUFFIX'}),
 				    "ErrStr" => \$errstr,
+				    "use_exlock" => $options{EXLOCK},
 				   ) );
 
   # Set up an exit handler that can do whatever is right for the
@@ -1312,7 +1406,15 @@ sub tempfile {
 
 =item B<tempdir>
 
-This is the recommended interface for creation of temporary directories.
+This is the recommended interface for creation of temporary
+directories.  By default the directory will not be removed on exit
+(that is, it won't be temporary; this behaviour can not be changed
+because of issues with backwards compatibility). To enable removal
+either use the CLEANUP option which will trigger removal on program
+exit, or consider using the "newdir" method in the object interface which
+will allow the directory to be cleaned up when the object goes out of
+scope.
+
 The behaviour of the function depends on the arguments:
 
   $tempdir = tempdir();
@@ -2045,11 +2147,10 @@ Options are:
 
 =item STANDARD
 
-Do the basic security measures to ensure the directory exists and
-is writable, that the umask() is fixed before opening of the file,
-that temporary files are opened only if they do not already exist, and
-that possible race conditions are avoided.  Finally the L<unlink0|"unlink0">
-function is used to remove files safely.
+Do the basic security measures to ensure the directory exists and is
+writable, that temporary files are opened only if they do not already
+exist, and that possible race conditions are avoided.  Finally the
+L<unlink0|"unlink0"> function is used to remove files safely.
 
 =item MEDIUM
 
@@ -2237,8 +2338,11 @@ themselves to give up if they exceed the number of retry attempts.
 =head2 BINMODE
 
 The file returned by File::Temp will have been opened in binary mode
-if such a mode is available. If that is not correct, use the binmode()
+if such a mode is available. If that is not correct, use the C<binmode()>
 function to change the mode of the filehandle.
+
+Note that you can modify the encoding of a file opened by File::Temp
+also by using C<binmode()>.
 
 =head1 HISTORY
 
@@ -2256,10 +2360,14 @@ L<POSIX/tmpnam>, L<POSIX/tmpfile>, L<File::Spec>, L<File::Path>
 See L<IO::File> and L<File::MkTemp>, L<Apache::TempFile> for
 different implementations of temporary file handling.
 
+See L<File::Tempdir> for an alternative object-oriented wrapper for
+the C<tempdir> function.
+
 =head1 AUTHOR
 
 Tim Jenness E<lt>tjenness@cpan.orgE<gt>
 
+Copyright (C) 2007 Tim Jenness.
 Copyright (C) 1999-2007 Tim Jenness and the UK Particle Physics and
 Astronomy Research Council. All Rights Reserved.  This program is free
 software; you can redistribute it and/or modify it under the same
@@ -2271,5 +2379,47 @@ should be written and providing ideas for code improvements and
 security enhancements.
 
 =cut
+
+package File::Temp::Dir;
+
+use File::Path qw/ rmtree /;
+use strict;
+use overload '""' => "STRINGIFY", fallback => 1;
+
+# private class specifically to support tempdir objects
+# created by File::Temp->newdir
+
+# ostensibly the same method interface as File::Temp but without
+# inheriting all the IO::Seekable methods and other cruft
+
+# Read-only - returns the name of the temp directory
+
+sub dirname {
+  my $self = shift;
+  return $self->{DIRNAME};
+}
+
+sub STRINGIFY {
+  my $self = shift;
+  return $self->dirname;
+}
+
+sub unlink_on_destroy {
+  my $self = shift;
+  if (@_) {
+    $self->{CLEANUP} = shift;
+  }
+  return $self->{CLEANUP};
+}
+
+sub DESTROY {
+  my $self = shift;
+  if ($self->unlink_on_destroy && 
+      $$ == $self->{LAUNCHPID} && !$File::Temp::KEEP_ALL) {
+    rmtree($self->{DIRNAME}, $File::Temp::DEBUG, 0)
+      if -d $self->{DIRNAME};
+  }
+}
+
 
 1;

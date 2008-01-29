@@ -305,7 +305,7 @@ sub zit;
     eval 'use constant zit => 4; 1' or die $@;
 
     # empty prototypes are reported differently in different versions
-    my $no_proto = $] < 5.008 ? "" : ": none";
+    my $no_proto = $] < 5.008004 ? "" : ": none";
 
     is(scalar @warnings, 1, "1 warning");
     like ($warnings[0], qr/^Prototype mismatch: sub main::zit$no_proto vs \(\)/,
