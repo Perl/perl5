@@ -117,7 +117,7 @@ main(register int argc, register const char **argv, register const char **env)
 
     /* open script */
 
-    if (argv[0] == Nullch) {
+    if (argv[0] == NULL) {
 #if defined(OS2) || defined(WIN32) || defined(NETWARE)
 	if ( isatty(fileno(stdin)) )
 	    usage();
@@ -132,7 +132,7 @@ main(register int argc, register const char **argv, register const char **env)
 	rsfp = stdin;
     else
 	rsfp = fopen(argv[0],"r");
-    if (rsfp == Nullfp)
+    if (rsfp == NULL)
 	fatal("Awk script \"%s\" doesn't seem to exist.\n",filename);
 
     /* init tokener */
@@ -253,10 +253,10 @@ yylex(void)
 	if (!rsfp)
 	    RETURN(0);
 	line++;
-	if ((s = str_gets(linestr, rsfp)) == Nullch) {
+	if ((s = str_gets(linestr, rsfp)) == NULL) {
 	    if (rsfp != stdin)
 		fclose(rsfp);
-	    rsfp = Nullfp;
+	    rsfp = NULL;
 	    s = str_get(linestr);
 	    RETURN(0);
 	}

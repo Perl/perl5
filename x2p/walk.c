@@ -23,7 +23,7 @@ const char *lparen;
 const char *rparen;
 const char *limit;
 STR *subs;
-STR *curargs = Nullstr;
+STR *curargs = NULL;
 
 static void addsemi ( STR *str );
 static void emit_split ( STR *str, int level );
@@ -741,10 +741,10 @@ sub Pick {\n\
 	str_cat(curargs,",");
 	tmp2str=walk(1,level,ops[node+5].ival,&numarg,P_MIN);
 	str_free(curargs);
-	curargs = Nullstr;
+	curargs = NULL;
 	level--;
 	subretnum |= numarg;
-	s = Nullch;
+	s = NULL;
 	t = tmp2str->str_ptr;
 	while ((t = instr(t,"return ")))
 	    s = t++;
@@ -1516,7 +1516,7 @@ sub Pick {\n\
 	    }
 	}
 	else {
-	    str = Nullstr;
+	    str = NULL;
 	}
 	break;
     }

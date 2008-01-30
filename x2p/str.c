@@ -185,7 +185,7 @@ str_gets(register STR *str, register FILE *fp)
      * buffer, so we getc() it back out and stuff it in the buffer.
      */
     i = getc(fp);
-    if (i == EOF) return Nullch;
+    if (i == EOF) return NULL;
     *(--((*fp)->_ptr)) = (unsigned char) i;
     (*fp)->_cnt++;
 #endif
@@ -239,14 +239,14 @@ thats_all_folks:
 
     static char buf[4192];
 
-    if (fgets(buf, sizeof buf, fp) != Nullch)
+    if (fgets(buf, sizeof buf, fp) != NULL)
 	str_set(str, buf);
     else
 	str_set(str, No);
 
 #endif /* USE_STDIO_PTR && STDIO_PTR_LVALUE && STDIO_CNT_LVALUE */
 
-    return str->str_cur ? str->str_ptr : Nullch;
+    return str->str_cur ? str->str_ptr : NULL;
 }
 
 STR *

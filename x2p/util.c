@@ -32,7 +32,7 @@ safemalloc(MEM_SIZE size)
 	fprintf(stderr,"0x%lx: (%05d) malloc %ld bytes\n",(unsigned long)ptr,
     	    	an++,(long)size);
 #endif
-    if (ptr != Nullch)
+    if (ptr != NULL)
 	return ptr;
     else {
 	fputs(nomem,stdout) FLUSH;
@@ -57,7 +57,7 @@ saferealloc(Malloc_t where, MEM_SIZE size)
 	fprintf(stderr,"0x%lx: (%05d) realloc %ld bytes\n",(unsigned long)ptr,an++,(long)size);
     }
 #endif
-    if (ptr != Nullch)
+    if (ptr != NULL)
 	return ptr;
     else {
 	fputs(nomem,stdout) FLUSH;
@@ -127,14 +127,14 @@ instr(char *big, const char *little)
     for (t = big; *t; t++) {
 	for (x=t,s=little; *s; x++,s++) {
 	    if (!*x)
-		return Nullch;
+		return NULL;
 	    if (*s != *x)
 		break;
 	}
 	if (!*s)
 	    return t;
     }
-    return Nullch;
+    return NULL;
 }
 
 /* copy a string to a safe spot */
