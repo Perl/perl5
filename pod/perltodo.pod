@@ -365,11 +365,6 @@ Make F<pod/roffitall> be updated by F<pod/buildtoc>.
 These tasks would need a little C knowledge, but don't need any specific
 background or experience with XS, or how the Perl interpreter works
 
-=head2 Exterminate PL_na!
-
-C<PL_na> festers still in the darkest corners of various typemap files.
-It needs to be exterminated, replaced by a local variable of type C<STRLEN>.
-
 =head2 Modernize the order of directories in @INC
 
 The way @INC is laid out by default, one cannot upgrade core (dual-life)
