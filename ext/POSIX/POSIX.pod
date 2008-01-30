@@ -1648,7 +1648,7 @@ calling C<POSIX::open>.
 
 	$fd = POSIX::open( "foo", &POSIX::O_WRONLY );
 	$buf = "hello";
-	$bytes = POSIX::write( $b, $buf, 5 );
+	$bytes = POSIX::write( $fd, $buf, 5 );
 
 Returns C<undef> on failure.
 

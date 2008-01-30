@@ -306,8 +306,7 @@ ling pad (lvalue) to C<gen>.  Note that C<SvUV_set> is hijacked for this purpose
 =for apidoc m|void|PAD_DUP|PADLIST dstpad|PADLIST srcpad|CLONE_PARAMS* param
 Clone a padlist.
 
-=for apidoc m|void|PAD_CLONE_VARS|PerlInterpreter *proto_perl \
-|CLONE_PARAMS* param
+=for apidoc m|void|PAD_CLONE_VARS|PerlInterpreter *proto_perl|CLONE_PARAMS* param
 Clone the state variables associated with running and compiling pads.
 
 =cut
@@ -345,3 +344,13 @@ Clone the state variables associated with running and compiling pads.
     PL_padix_floor		= proto_perl->Ipadix_floor;		\
     PL_pad_reset_pending	= proto_perl->Ipad_reset_pending;	\
     PL_cop_seqmax		= proto_perl->Icop_seqmax;
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

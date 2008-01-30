@@ -832,6 +832,8 @@ some of the variables described below, or may have extraneous variables
 specific to that particular port.  See the port specific documentation
 in such cases.
 
+=cut
+
 ENDOFTAIL
 
 if ($Opts{glossary}) {
@@ -848,11 +850,15 @@ sub process {
       print CONFIG_POD <<EOF if $text;
 =back
 
+=cut
+
 EOF
       print CONFIG_POD <<EOF;
 =head2 $c
 
 =over 4
+
+=cut
 
 EOF
      $text = 1;

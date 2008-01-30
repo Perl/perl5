@@ -38,9 +38,6 @@
 : which is ambiguous.
 :
 : Individual flags may be separated by whitespace.
-:
-: New global functions should be added at the end for binary compatibility
-: in some configurations.
 
 START_EXTERN_C
 

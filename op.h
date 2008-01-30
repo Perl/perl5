@@ -184,7 +184,7 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpENTERSUB_DB		16	/* Debug subroutine. */
 #define OPpENTERSUB_HASTARG	32	/* Called from OP tree. */
 #define OPpENTERSUB_NOMOD	64	/* Immune to mod() for :attrlist. */
-  /* OP_RV2CV only */
+  /* OP_ENTERSUB and OP_RV2CV only */
 #define OPpENTERSUB_AMPER	8	/* Used & form to call. */
 #define OPpENTERSUB_NOPAREN	128	/* bare sub call (without parens) */
 #define OPpENTERSUB_INARGS	4	/* Lval used as arg to a sub. */
@@ -367,7 +367,8 @@ struct pmop {
 #define PMf_EVAL	0x0400		/* evaluating replacement as expr */
 
 /* The following flags have exact equivalents in regcomp.h with the prefix RXf_
- * which are stored in the regexp->extflags member.
+ * which are stored in the regexp->extflags member. If you change them here,
+ * you have to change them there, and vice versa.
  */
 #define PMf_LOCALE	0x00800		/* use locale for character types */
 #define PMf_MULTILINE	0x01000		/* assume multiple lines */

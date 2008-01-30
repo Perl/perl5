@@ -246,7 +246,9 @@ and check for NULL.
 #define RXf_WHITE		0x00000400 /* Pattern is /\s+/ */
 #define RXf_NULL		0x40000000 /* Pattern is // */
 
-/* 0x1F800 of extflags is used by (RXf_)PMf_COMPILETIME */
+/* 0x1F800 of extflags is used by (RXf_)PMf_COMPILETIME
+ * If you change these you need to change the equivalent flags in op.h, and
+ * vice versa.  */
 #define RXf_PMf_LOCALE  	0x00000800 /* use locale */
 #define RXf_PMf_MULTILINE	0x00001000 /* /m         */
 #define RXf_PMf_SINGLELINE	0x00002000 /* /s         */

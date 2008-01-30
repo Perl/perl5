@@ -60,3 +60,13 @@ struct magic {
 #define SvTIED_mg(sv,how) (SvRMAGICAL(sv) ? mg_find((sv),(how)) : NULL)
 #define SvTIED_obj(sv,mg) \
     ((mg)->mg_obj ? (mg)->mg_obj : sv_2mortal(newRV(sv)))
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */
