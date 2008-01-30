@@ -3763,8 +3763,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		
 		PL_regoffs = re->offs; /* essentially NOOP on GOSUB */
 		
-		*PL_reglastparen = 0;
-		*PL_reglastcloseparen = 0;
+		/* see regtry, specifically PL_reglast(?:close)?paren is a pointer! (i dont know why) :dmq */
+		PL_reglastparen = &re->lastparen;
+		PL_reglastcloseparen = &re->lastcloseparen;
+		re->lastparen = 0;
+		re->lastcloseparen = 0;
+
 		PL_reginput = locinput;
 		PL_regsize = 0;
 
@@ -3805,6 +3809,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    regcpblow(ST.cp);
 	    cur_eval = ST.prev_eval;
 	    cur_curlyx = ST.prev_curlyx;
+	    
+	    PL_reglastparen = &rex->lastparen;
+	    PL_reglastcloseparen = &rex->lastcloseparen;
+	    
 	    /* XXXX This is too dramatic a measure... */
 	    PL_reg_maxiter = 0;
             if ( nochange_depth )
@@ -3818,6 +3826,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    ReREFCNT_dec(rex);
 	    SETREX(rex,ST.prev_rex);
 	    rexi = RXi_GET(rex); 
+	    PL_reglastparen = &rex->lastparen;
+	    PL_reglastcloseparen = &rex->lastcloseparen;
+
 	    PL_reginput = locinput;
 	    REGCP_UNWIND(ST.lastcp);
 	    regcppop(rex);

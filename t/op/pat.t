@@ -4511,6 +4511,39 @@ sub kt
         }
     }
 }
+{
+     local $Message = "\$REGMARK in replacement -- Bug #49190";
+     my $_ = "A";
+     s/(*:B)A/$REGMARK/;
+     iseq $_, "B";
+     $_ = "CCCCBAA";
+     s/(*:X)A+|(*:Y)B+|(*:Z)C+/$REGMARK/g;
+     iseq $_, "ZYX";
+}
+{
+    our @ctl_n=();
+    our @plus=();
+    our $nested_tags;
+    $nested_tags = qr{
+        <
+           (\w+)
+           (?{
+                   push @ctl_n,$^N;
+                   push @plus,$+;
+           })
+        >
+        (??{$nested_tags})*
+        </\s* \w+ \s*>
+    }x;
+
+    my $match= '<bla><blubb></blubb></bla>' =~ m/^$nested_tags$/;
+    ok($match,'nested construct matches');
+    iseq("@ctl_n","bla blubb",'$^N inside of (?{}) works as expected');
+    iseq("@plus","bla blubb",'$+ inside of (?{}) works as expected');
+}
+
+
+
 
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
@@ -4570,6 +4603,6 @@ ok($@=~/\QSequence \k... not terminated in regex;\E/);
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 4013;
+    $::TestCount = 4018;
     print "1..$::TestCount\n";
 }
