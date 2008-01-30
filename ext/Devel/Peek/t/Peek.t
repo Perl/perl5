@@ -44,7 +44,9 @@ sub do_test {
 	    $pattern =~ s/^ *\$IVNV *\n/
 		($] < 5.009) ? "    IV = 0\n    NV = 0\n" : '';
 	    /mge;
-	    $pattern =~ s/\$RV/IV/g if $] >= 5.011;
+	    $pattern =~ s/\$RV/
+		($] < 5.011) ? 'RV' : 'IV';
+	    /mge;
 	    $pattern =~ s/^ *\$NV *\n/
 		($] < 5.011) ? "    NV = 0\n" : '';
 	    /mge;
