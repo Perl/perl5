@@ -14,7 +14,7 @@ my $torture; # torture testing?
 use Test::Harness;
 
 $Test::Harness::switches = "";    # Too much noise otherwise
-$Test::Harness::verbose = shift if @ARGV && $ARGV[0] eq '-v';
+$Test::Harness::Verbose++ while @ARGV && $ARGV[0] eq '-v' && shift;
 
 if ($ARGV[0] && $ARGV[0] eq '-torture') {
     shift;
