@@ -1195,7 +1195,7 @@ PP(pp_qr)
     SV * const pkg = CALLREG_PACKAGE(rx);
     SV * const rv = sv_newmortal();
     SV * const sv = newSVrv(rv, SvPV_nolen(pkg));
-    if (rx->extflags & RXf_TAINTED)
+    if (RX_EXTFLAGS(rx) & RXf_TAINTED)
         SvTAINTED_on(rv);
     sv_magic(sv,(SV*)ReREFCNT_inc(rx), PERL_MAGIC_qr,0,0);
     XPUSHs(rv);
@@ -1237,7 +1237,7 @@ PP(pp_match)
     if (!s)
 	DIE(aTHX_ "panic: pp_match");
     strend = s + len;
-    rxtainted = ((rx->extflags & RXf_TAINTED) ||
+    rxtainted = ((RX_EXTFLAGS(rx) & RXf_TAINTED) ||
 		 (PL_tainted && (pm->op_pmflags & PMf_RETAINT)));
     TAINT_NOT;
 
@@ -1260,32 +1260,32 @@ PP(pp_match)
 
 
     /* empty pattern special-cased to use last successful pattern if possible */
-    if (!rx->prelen && PL_curpm) {
+    if (!RX_PRELEN(rx) && PL_curpm) {
 	pm = PL_curpm;
 	rx = PM_GETRE(pm);
     }
 
-    if (rx->minlen > (I32)len)
+    if (RX_MINLEN(rx) > (I32)len)
 	goto failure;
 
     truebase = t = s;
 
     /* XXXX What part of this is needed with true \G-support? */
     if ((global = dynpm->op_pmflags & PMf_GLOBAL)) {
-	rx->offs[0].start = -1;
+	RX_OFFS(rx)[0].start = -1;
 	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
 	    MAGIC* const mg = mg_find(TARG, PERL_MAGIC_regex_global);
 	    if (mg && mg->mg_len >= 0) {
-		if (!(rx->extflags & RXf_GPOS_SEEN))
-		    rx->offs[0].end = rx->offs[0].start = mg->mg_len;
-		else if (rx->extflags & RXf_ANCH_GPOS) {
+		if (!(RX_EXTFLAGS(rx) & RXf_GPOS_SEEN))
+		    RX_OFFS(rx)[0].end = RX_OFFS(rx)[0].start = mg->mg_len;
+		else if (RX_EXTFLAGS(rx) & RXf_ANCH_GPOS) {
 		    r_flags |= REXEC_IGNOREPOS;
-		    rx->offs[0].end = rx->offs[0].start = mg->mg_len;
-		} else if (rx->extflags & RXf_GPOS_FLOAT) 
+		    RX_OFFS(rx)[0].end = RX_OFFS(rx)[0].start = mg->mg_len;
+		} else if (RX_EXTFLAGS(rx) & RXf_GPOS_FLOAT) 
 		    gpos = mg->mg_len;
 		else 
-		    rx->offs[0].end = rx->offs[0].start = mg->mg_len;
-		minmatch = (mg->mg_flags & MGf_MINMATCH) ? rx->gofs + 1 : 0;
+		    RX_OFFS(rx)[0].end = RX_OFFS(rx)[0].start = mg->mg_len;
+		minmatch = (mg->mg_flags & MGf_MINMATCH) ? RX_GOFS(rx) + 1 : 0;
 		update_minmatch = 0;
 	    }
 	}
@@ -1295,34 +1295,34 @@ PP(pp_match)
        /g matches against large strings.  So far a solution to this problem
        appears to be quite tricky.
        Test for the unsafe vars are TODO for now. */
-    if ((  !global &&  rx->nparens) 
+    if ((  !global && RX_NPARENS(rx)) 
 	    || SvTEMP(TARG) || PL_sawampersand ||
-	    (rx->extflags & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY)))
+	    (RX_EXTFLAGS(rx) & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY)))
 	r_flags |= REXEC_COPY_STR;
     if (SvSCREAM(TARG))
 	r_flags |= REXEC_SCREAM;
 
 play_it_again:
-    if (global && rx->offs[0].start != -1) {
-	t = s = rx->offs[0].end + truebase - rx->gofs;
-	if ((s + rx->minlen) > strend || s < truebase)
+    if (global && RX_OFFS(rx)[0].start != -1) {
+	t = s = RX_OFFS(rx)[0].end + truebase - RX_GOFS(rx);
+	if ((s + RX_MINLEN(rx)) > strend || s < truebase)
 	    goto nope;
 	if (update_minmatch++)
 	    minmatch = had_zerolen;
     }
-    if (rx->extflags & RXf_USE_INTUIT &&
-	DO_UTF8(TARG) == ((rx->extflags & RXf_UTF8) != 0)) {
+    if (RX_EXTFLAGS(rx) & RXf_USE_INTUIT &&
+	DO_UTF8(TARG) == ((RX_EXTFLAGS(rx) & RXf_UTF8) != 0)) {
 	/* FIXME - can PL_bostr be made const char *?  */
 	PL_bostr = (char *)truebase;
 	s = CALLREG_INTUIT_START(rx, TARG, (char *)s, (char *)strend, r_flags, NULL);
 
 	if (!s)
 	    goto nope;
-	if ( (rx->extflags & RXf_CHECK_ALL)
+	if ( (RX_EXTFLAGS(rx) & RXf_CHECK_ALL)
 	     && !PL_sawampersand
-	     && !(rx->extflags & RXf_PMf_KEEPCOPY)
-	     && ((rx->extflags & RXf_NOSCAN)
-		 || !((rx->extflags & RXf_INTUIT_TAIL)
+	     && !(RX_EXTFLAGS(rx) & RXf_PMf_KEEPCOPY)
+	     && ((RX_EXTFLAGS(rx) & RXf_NOSCAN)
+		 || !((RX_EXTFLAGS(rx) & RXf_INTUIT_TAIL)
 		      && (r_flags & REXEC_SCREAM)))
 	     && !SvROK(TARG))	/* Cannot trust since INTUIT cannot guess ^ */
 	    goto yup;
@@ -1349,7 +1349,7 @@ play_it_again:
 	RX_MATCH_TAINTED_on(rx);
     TAINT_IF(RX_MATCH_TAINTED(rx));
     if (gimme == G_ARRAY) {
-	const I32 nparens = rx->nparens;
+	const I32 nparens = RX_NPARENS(rx);
 	I32 i = (global && !nparens) ? 1 : 0;
 
 	SPAGAIN;			/* EVAL blocks could move the stack. */
@@ -1357,10 +1357,10 @@ play_it_again:
 	EXTEND_MORTAL(nparens + i);
 	for (i = !i; i <= nparens; i++) {
 	    PUSHs(sv_newmortal());
-	    if ((rx->offs[i].start != -1) && rx->offs[i].end != -1 ) {
-		const I32 len = rx->offs[i].end - rx->offs[i].start;
-		s = rx->offs[i].start + truebase;
-	        if (rx->offs[i].end < 0 || rx->offs[i].start < 0 ||
+	    if ((RX_OFFS(rx)[i].start != -1) && RX_OFFS(rx)[i].end != -1 ) {
+		const I32 len = RX_OFFS(rx)[i].end - RX_OFFS(rx)[i].start;
+		s = RX_OFFS(rx)[i].start + truebase;
+	        if (RX_OFFS(rx)[i].end < 0 || RX_OFFS(rx)[i].start < 0 ||
 		    len < 0 || len > strend - s)
 		    DIE(aTHX_ "panic: pp_match start/end pointers");
 		sv_setpvn(*SP, s, len);
@@ -1381,17 +1381,17 @@ play_it_again:
 		    mg = sv_magicext(TARG, NULL, PERL_MAGIC_regex_global,
 				     &PL_vtbl_mglob, NULL, 0);
 		}
-		if (rx->offs[0].start != -1) {
-		    mg->mg_len = rx->offs[0].end;
-		    if (rx->offs[0].start + rx->gofs == (UV)rx->offs[0].end)
+		if (RX_OFFS(rx)[0].start != -1) {
+		    mg->mg_len = RX_OFFS(rx)[0].end;
+		    if (RX_OFFS(rx)[0].start + RX_GOFS(rx) == (UV)RX_OFFS(rx)[0].end)
 			mg->mg_flags |= MGf_MINMATCH;
 		    else
 			mg->mg_flags &= ~MGf_MINMATCH;
 		}
 	    }
-	    had_zerolen = (rx->offs[0].start != -1
-			   && (rx->offs[0].start + rx->gofs
-			       == (UV)rx->offs[0].end));
+	    had_zerolen = (RX_OFFS(rx)[0].start != -1
+			   && (RX_OFFS(rx)[0].start + RX_GOFS(rx)
+			       == (UV)RX_OFFS(rx)[0].end));
 	    PUTBACK;			/* EVAL blocks may use stack */
 	    r_flags |= REXEC_IGNOREPOS | REXEC_NOT_FIRST;
 	    goto play_it_again;
@@ -1416,9 +1416,9 @@ play_it_again:
 		mg = sv_magicext(TARG, NULL, PERL_MAGIC_regex_global,
 				 &PL_vtbl_mglob, NULL, 0);
 	    }
-	    if (rx->offs[0].start != -1) {
-		mg->mg_len = rx->offs[0].end;
-		if (rx->offs[0].start + rx->gofs == (UV)rx->offs[0].end)
+	    if (RX_OFFS(rx)[0].start != -1) {
+		mg->mg_len = RX_OFFS(rx)[0].end;
+		if (RX_OFFS(rx)[0].start + RX_GOFS(rx) == (UV)RX_OFFS(rx)[0].end)
 		    mg->mg_flags |= MGf_MINMATCH;
 		else
 		    mg->mg_flags &= ~MGf_MINMATCH;
@@ -1441,24 +1441,24 @@ yup:					/* Confirmed by INTUIT */
 #endif
     }
     if (RX_MATCH_COPIED(rx))
-	Safefree(rx->subbeg);
+	Safefree(RX_SUBBEG(rx));
     RX_MATCH_COPIED_off(rx);
-    rx->subbeg = NULL;
+    RX_SUBBEG(rx) = NULL;
     if (global) {
 	/* FIXME - should rx->subbeg be const char *?  */
-	rx->subbeg = (char *) truebase;
-	rx->offs[0].start = s - truebase;
+	RX_SUBBEG(rx) = (char *) truebase;
+	RX_OFFS(rx)[0].start = s - truebase;
 	if (RX_MATCH_UTF8(rx)) {
-	    char * const t = (char*)utf8_hop((U8*)s, rx->minlenret);
-	    rx->offs[0].end = t - truebase;
+	    char * const t = (char*)utf8_hop((U8*)s, RX_MINLENRET(rx));
+	    RX_OFFS(rx)[0].end = t - truebase;
 	}
 	else {
-	    rx->offs[0].end = s - truebase + rx->minlenret;
+	    RX_OFFS(rx)[0].end = s - truebase + RX_MINLENRET(rx);
 	}
-	rx->sublen = strend - truebase;
+	RX_SUBLEN(rx) = strend - truebase;
 	goto gotcha;
     }
-    if (PL_sawampersand || rx->extflags & RXf_PMf_KEEPCOPY) {
+    if (PL_sawampersand || RX_EXTFLAGS(rx) & RXf_PMf_KEEPCOPY) {
 	I32 off;
 #ifdef PERL_OLD_COPY_ON_WRITE
 	if (SvIsCOW(TARG) || (SvFLAGS(TARG) & CAN_COW_MASK) == CAN_COW_FLAGS) {
@@ -1469,29 +1469,29 @@ yup:					/* Confirmed by INTUIT */
 			      (int)(t-truebase));
 	    }
 	    rx->saved_copy = sv_setsv_cow(rx->saved_copy, TARG);
-	    rx->subbeg = (char *) SvPVX_const(rx->saved_copy) + (t - truebase);
+	    RX_SUBBEG(rx) = (char *) SvPVX_const(rx->saved_copy) + (t - truebase);
 	    assert (SvPOKp(rx->saved_copy));
 	} else
 #endif
 	{
 
-	    rx->subbeg = savepvn(t, strend - t);
+	    RX_SUBBEG(rx) = savepvn(t, strend - t);
 #ifdef PERL_OLD_COPY_ON_WRITE
 	    rx->saved_copy = NULL;
 #endif
 	}
-	rx->sublen = strend - t;
+	RX_SUBLEN(rx) = strend - t;
 	RX_MATCH_COPIED_on(rx);
-	off = rx->offs[0].start = s - t;
-	rx->offs[0].end = off + rx->minlenret;
+	off = RX_OFFS(rx)[0].start = s - t;
+	RX_OFFS(rx)[0].end = off + RX_MINLENRET(rx);
     }
     else {			/* startp/endp are used by @- @+. */
-	rx->offs[0].start = s - truebase;
-	rx->offs[0].end = s - truebase + rx->minlenret;
+	RX_OFFS(rx)[0].start = s - truebase;
+	RX_OFFS(rx)[0].end = s - truebase + RX_MINLENRET(rx);
     }
-    /* including rx->nparens in the below code seems highly suspicious.
+    /* including RX_NPARENS(rx) in the below code seems highly suspicious.
        -dmq */
-    rx->nparens = rx->lastparen = rx->lastcloseparen = 0;	/* used by @-, @+, and $^N */
+    RX_NPARENS(rx) = RX_LASTPAREN(rx) = RX_LASTCLOSEPAREN(rx) = 0;	/* used by @-, @+, and $^N */
     LEAVE_SCOPE(oldsave);
     RETPUSHYES;
 
@@ -2072,7 +2072,7 @@ PP(pp_subst)
     s = SvPV_mutable(TARG, len);
     if (!SvPOKp(TARG) || SvTYPE(TARG) == SVt_PVGV)
 	force_on_match = 1;
-    rxtainted = ((rx->extflags & RXf_TAINTED) ||
+    rxtainted = ((RX_EXTFLAGS(rx) & RXf_TAINTED) ||
 		 (PL_tainted && (pm->op_pmflags & PMf_RETAINT)));
     if (PL_tainted)
 	rxtainted |= 2;
@@ -2090,29 +2090,29 @@ PP(pp_subst)
 				   position, once with zero-length,
 				   second time with non-zero. */
 
-    if (!rx->prelen && PL_curpm) {
+    if (!RX_PRELEN(rx) && PL_curpm) {
 	pm = PL_curpm;
 	rx = PM_GETRE(pm);
     }
-    r_flags = (rx->nparens || SvTEMP(TARG) || PL_sawampersand
-	    || (rx->extflags & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY)) )
+    r_flags = (RX_NPARENS(rx) || SvTEMP(TARG) || PL_sawampersand
+	    || (RX_EXTFLAGS(rx) & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY)) )
 	       ? REXEC_COPY_STR : 0;
     if (SvSCREAM(TARG))
 	r_flags |= REXEC_SCREAM;
 
     orig = m = s;
-    if (rx->extflags & RXf_USE_INTUIT) {
+    if (RX_EXTFLAGS(rx) & RXf_USE_INTUIT) {
 	PL_bostr = orig;
 	s = CALLREG_INTUIT_START(rx, TARG, s, strend, r_flags, NULL);
 
 	if (!s)
 	    goto nope;
 	/* How to do it in subst? */
-/*	if ( (rx->extflags & RXf_CHECK_ALL)
+/*	if ( (RX_EXTFLAGS(rx) & RXf_CHECK_ALL)
 	     && !PL_sawampersand
-	     && !(rx->extflags & RXf_KEEPCOPY)
-	     && ((rx->extflags & RXf_NOSCAN)
-		 || !((rx->extflags & RXf_INTUIT_TAIL)
+	     && !(RX_EXTFLAGS(rx) & RXf_KEEPCOPY)
+	     && ((RX_EXTFLAGS(rx) & RXf_NOSCAN)
+		 || !((RX_EXTFLAGS(rx) & RXf_INTUIT_TAIL)
 		      && (r_flags & REXEC_SCREAM))))
 	    goto yup;
 */
@@ -2149,8 +2149,8 @@ PP(pp_subst)
 #ifdef PERL_OLD_COPY_ON_WRITE
 	&& !is_cow
 #endif
-	&& (I32)clen <= rx->minlenret && (once || !(r_flags & REXEC_COPY_STR))
-	&& !(rx->extflags & RXf_LOOKBEHIND_SEEN)
+	&& (I32)clen <= RX_MINLENRET(rx) && (once || !(r_flags & REXEC_COPY_STR))
+	&& !(RX_EXTFLAGS(rx) & RXf_LOOKBEHIND_SEEN)
 	&& (!doutf8 || SvUTF8(TARG))) {
 	if (!CALLREGEXEC(rx, s, strend, orig, 0, TARG, NULL,
 			 r_flags | REXEC_CHECKED))
@@ -2176,8 +2176,8 @@ PP(pp_subst)
 	SvSCREAM_off(TARG);	/* disable possible screamer */
 	if (once) {
 	    rxtainted |= RX_MATCH_TAINTED(rx);
-	    m = orig + rx->offs[0].start;
-	    d = orig + rx->offs[0].end;
+	    m = orig + RX_OFFS(rx)[0].start;
+	    d = orig + RX_OFFS(rx)[0].end;
 	    s = orig;
 	    if (m - s > strend - d) {  /* faster to shorten from end */
 		if (clen) {
@@ -2219,7 +2219,7 @@ PP(pp_subst)
 		if (iters++ > maxiters)
 		    DIE(aTHX_ "Substitution loop");
 		rxtainted |= RX_MATCH_TAINTED(rx);
-		m = rx->offs[0].start + orig;
+		m = RX_OFFS(rx)[0].start + orig;
 		if ((i = m - s)) {
 		    if (s != d)
 			Move(s, d, i, char);
@@ -2229,7 +2229,7 @@ PP(pp_subst)
 		    Copy(c, d, clen, char);
 		    d += clen;
 		}
-		s = rx->offs[0].end + orig;
+		s = RX_OFFS(rx)[0].end + orig;
 	    } while (CALLREGEXEC(rx, s, strend, orig, s == m,
 				 TARG, NULL,
 				 /* don't match same null twice */
@@ -2285,19 +2285,19 @@ PP(pp_subst)
 	    if (iters++ > maxiters)
 		DIE(aTHX_ "Substitution loop");
 	    rxtainted |= RX_MATCH_TAINTED(rx);
-	    if (RX_MATCH_COPIED(rx) && rx->subbeg != orig) {
+	    if (RX_MATCH_COPIED(rx) && RX_SUBBEG(rx) != orig) {
 		m = s;
 		s = orig;
-		orig = rx->subbeg;
+		orig = RX_SUBBEG(rx);
 		s = orig + (m - s);
 		strend = s + (strend - m);
 	    }
-	    m = rx->offs[0].start + orig;
+	    m = RX_OFFS(rx)[0].start + orig;
 	    if (doutf8 && !SvUTF8(dstr))
 		sv_catpvn_utf8_upgrade(dstr, s, m - s, nsv);
             else
 		sv_catpvn(dstr, s, m-s);
-	    s = rx->offs[0].end + orig;
+	    s = RX_OFFS(rx)[0].end + orig;
 	    if (clen)
 		sv_catpvn(dstr, c, clen);
 	    if (once)

@@ -544,7 +544,7 @@ Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
 	ch = '/';
     if (PM_GETRE(pm))
 	Perl_dump_indent(aTHX_ level, file, "PMf_PRE %c%s%c%s\n",
-	     ch, PM_GETRE(pm)->precomp, ch,
+	     ch, RX_PRECOMP(PM_GETRE(pm)), ch,
 	     (pm->op_private & OPpRUNTIME) ? " (RUNTIME)" : "");
     else
 	Perl_dump_indent(aTHX_ level, file, "PMf_PRE (RUNTIME)\n");
@@ -552,7 +552,7 @@ Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
 	Perl_dump_indent(aTHX_ level, file, "PMf_REPL = ");
 	op_dump(pm->op_pmreplrootu.op_pmreplroot);
     }
-    if (pm->op_pmflags || (PM_GETRE(pm) && PM_GETRE(pm)->check_substr)) {
+    if (pm->op_pmflags || (PM_GETRE(pm) && RX_CHECK_SUBSTR(PM_GETRE(pm)))) {
 	SV * const tmpsv = pm_description(pm);
 	Perl_dump_indent(aTHX_ level, file, "PMFLAGS = (%s)\n", SvCUR(tmpsv) ? SvPVX_const(tmpsv) + 1 : "");
 	SvREFCNT_dec(tmpsv);
@@ -579,15 +579,15 @@ S_pm_description(pTHX_ const PMOP *pm)
 #endif
 
     if (regex) {
-        if (regex->extflags & RXf_TAINTED)
+        if (RX_EXTFLAGS(regex) & RXf_TAINTED)
             sv_catpv(desc, ",TAINTED");
-        if (regex->check_substr) {
-            if (!(regex->extflags & RXf_NOSCAN))
+        if (RX_CHECK_SUBSTR(regex)) {
+            if (!(RX_EXTFLAGS(regex) & RXf_NOSCAN))
                 sv_catpv(desc, ",SCANFIRST");
-            if (regex->extflags & RXf_CHECK_ALL)
+            if (RX_EXTFLAGS(regex) & RXf_CHECK_ALL)
                 sv_catpv(desc, ",ALL");
         }
-        if (regex->extflags & RXf_SKIPWHITE)
+        if (RX_EXTFLAGS(regex) & RXf_SKIPWHITE)
             sv_catpv(desc, ",SKIPWHITE");
     }
 
@@ -1283,16 +1283,17 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
 	    Perl_dump_indent(aTHX_ level, file, "    MG_OBJ = 0x%"UVxf"\n", 
 	        PTR2UV(mg->mg_obj));
             if (mg->mg_type == PERL_MAGIC_qr) {
-		const regexp * const re = (regexp *)mg->mg_obj;
+		REGEXP* const re = (REGEXP *)mg->mg_obj;
 		SV * const dsv = sv_newmortal();
-                const char * const s =  pv_pretty(dsv, re->wrapped, re->wraplen, 
+                const char * const s
+		    = pv_pretty(dsv, RX_WRAPPED(re), RX_WRAPLEN(re), 
                     60, NULL, NULL,
                     ( PERL_PV_PRETTY_QUOTE | PERL_PV_ESCAPE_RE | PERL_PV_PRETTY_ELLIPSES |
-                    ((re->extflags & RXf_UTF8) ? PERL_PV_ESCAPE_UNI : 0))
+                    ((RX_EXTFLAGS(re) & RXf_UTF8) ? PERL_PV_ESCAPE_UNI : 0))
                 );
 		Perl_dump_indent(aTHX_ level+1, file, "    PAT = %s\n", s);
 		Perl_dump_indent(aTHX_ level+1, file, "    REFCNT = %"IVdf"\n",
-			(IV)re->refcnt);
+			(IV)RX_REFCNT(re));
             }
             if (mg->mg_flags & MGf_REFCOUNTED)
 		do_sv_dump(level+2, file, mg->mg_obj, nest+1, maxnest, dumpops, pvlim); /* MG is already +1 */
@@ -2452,7 +2453,7 @@ Perl_do_pmop_xmldump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
     level++;
     if (PM_GETRE(pm)) {
 	const regexp *const r = PM_GETRE(pm);
-	SV * const tmpsv = newSVpvn(r->precomp,r->prelen);
+	SV * const tmpsv = newSVpvn(RX_PRECOMP(r),r->prelen);
 	SvUTF8_on(tmpsv);
 	Perl_xmldump_indent(aTHX_ level, file, "pre=\"%s\"\n",
 	     SvPVX(tmpsv));

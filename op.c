@@ -3532,7 +3532,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	if (curop == repl
 	    && !(repl_has_vars
 		 && (!PM_GETRE(pm)
-		     || PM_GETRE(pm)->extflags & RXf_EVAL_SEEN)))
+		     || RX_EXTFLAGS(PM_GETRE(pm)) & RXf_EVAL_SEEN)))
 	{
 	    pm->op_pmflags |= PMf_CONST;	/* const for long enough */
 	    prepend_elem(o->op_type, scalar(repl), o);
@@ -7570,8 +7570,8 @@ Perl_ck_join(pTHX_ OP *o)
     if (kid && kid->op_type == OP_MATCH) {
 	if (ckWARN(WARN_SYNTAX)) {
             const REGEXP *re = PM_GETRE(kPMOP);
-	    const char *pmstr = re ? re->precomp : "STRING";
-	    const STRLEN len = re ? re->prelen : 6;
+	    const char *pmstr = re ? RX_PRECOMP(re) : "STRING";
+	    const STRLEN len = re ? RX_PRELEN(re) : 6;
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 			"/%.*s/ should probably be written as \"%.*s\"",
 			(int)len, pmstr, (int)len, pmstr);

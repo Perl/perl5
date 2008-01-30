@@ -256,6 +256,7 @@ and check for NULL.
 #define RXf_PMf_EXTENDED	0x00008000 /* /x         */
 #define RXf_PMf_KEEPCOPY	0x00010000 /* /p         */
 /* these flags are transfered from the PMOP->op_pmflags member during compilation */
+#define RXf_PMf_STD_PMMOD_SHIFT	12
 #define RXf_PMf_STD_PMMOD	(RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED)
 #define RXf_PMf_COMPILETIME	(RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_LOCALE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_KEEPCOPY)
 
@@ -341,19 +342,49 @@ and check for NULL.
  */
 
 #define RX_HAS_CUTGROUP(prog) ((prog)->intflags & PREGf_CUTGROUP_SEEN)
-#define RX_MATCH_TAINTED(prog)	((prog)->extflags & RXf_TAINTED_SEEN)
-#define RX_MATCH_TAINTED_on(prog) ((prog)->extflags |= RXf_TAINTED_SEEN)
-#define RX_MATCH_TAINTED_off(prog) ((prog)->extflags &= ~RXf_TAINTED_SEEN)
+#define RXp_MATCH_TAINTED(prog)	(RXp_EXTFLAGS(prog) & RXf_TAINTED_SEEN)
+#define RX_MATCH_TAINTED(prog)	(RX_EXTFLAGS(prog) & RXf_TAINTED_SEEN)
+#define RX_MATCH_TAINTED_on(prog) (RX_EXTFLAGS(prog) |= RXf_TAINTED_SEEN)
+#define RX_MATCH_TAINTED_off(prog) (RX_EXTFLAGS(prog) &= ~RXf_TAINTED_SEEN)
 #define RX_MATCH_TAINTED_set(prog, t) ((t) \
 				       ? RX_MATCH_TAINTED_on(prog) \
 				       : RX_MATCH_TAINTED_off(prog))
 
-#define RX_MATCH_COPIED(prog)		((prog)->extflags & RXf_COPY_DONE)
-#define RX_MATCH_COPIED_on(prog)	((prog)->extflags |= RXf_COPY_DONE)
-#define RX_MATCH_COPIED_off(prog)	((prog)->extflags &= ~RXf_COPY_DONE)
+#define RXp_MATCH_COPIED(prog)		(RXp_EXTFLAGS(prog) & RXf_COPY_DONE)
+#define RX_MATCH_COPIED(prog)		(RX_EXTFLAGS(prog) & RXf_COPY_DONE)
+#define RXp_MATCH_COPIED_on(prog)	(RXp_EXTFLAGS(prog) |= RXf_COPY_DONE)
+#define RX_MATCH_COPIED_on(prog)	(RX_EXTFLAGS(prog) |= RXf_COPY_DONE)
+#define RXp_MATCH_COPIED_off(prog)	(RXp_EXTFLAGS(prog) &= ~RXf_COPY_DONE)
+#define RX_MATCH_COPIED_off(prog)	(RX_EXTFLAGS(prog) &= ~RXf_COPY_DONE)
 #define RX_MATCH_COPIED_set(prog,t)	((t) \
 					 ? RX_MATCH_COPIED_on(prog) \
 					 : RX_MATCH_COPIED_off(prog))
+
+#define RXp_PRECOMP(rx)		((rx)->precomp)
+#define RXp_PRELEN(rx)		((rx)->prelen)
+#define RXp_WRAPPED(rx)		((rx)->wrapped)
+#define RXp_WRAPLEN(rx)		((rx)->wraplen)
+#define RXp_EXTFLAGS(rx)	((rx)->extflags)
+
+#define RX_PRECOMP(prog)	((prog)->precomp)
+#define RX_PRELEN(prog)		((prog)->prelen)
+#define RX_WRAPPED(prog)	((prog)->wrapped)
+#define RX_WRAPLEN(prog)	((prog)->wraplen)
+#define RX_CHECK_SUBSTR(prog)	((prog)->check_substr)
+#define RX_EXTFLAGS(prog)	((prog)->extflags)
+#define RX_REFCNT(prog)		((prog)->refcnt)
+#define RX_ENGINE(prog)		((prog)->engine)
+#define RX_SUBBEG(prog)		((prog)->subbeg)
+#define RX_OFFS(prog)		((prog)->offs)
+#define RX_NPARENS(prog)	((prog)->nparens)
+#define RX_SUBLEN(prog)		((prog)->sublen)
+#define RX_SUBBEG(prog)		((prog)->subbeg)
+#define RX_MINLEN(prog)		((prog)->minlen)
+#define RX_MINLENRET(prog)	((prog)->minlenret)
+#define RX_GOFS(prog)		((prog)->gofs)
+#define RX_LASTPAREN(prog)	((prog)->lastparen)
+#define RX_LASTCLOSEPAREN(prog)	((prog)->lastcloseparen)
+#define RX_SEEN_EVALS(prog)	((prog)->seen_evals)
 
 #endif /* PLUGGABLE_RE_EXTENSION */
 
@@ -365,20 +396,21 @@ and check for NULL.
 	    SV_CHECK_THINKFIRST_COW_DROP(rx->saved_copy); \
 	} \
 	if (RX_MATCH_COPIED(rx)) { \
-	    Safefree(rx->subbeg); \
+	    Safefree(RX_SUBBEG(rx)); \
 	    RX_MATCH_COPIED_off(rx); \
 	}} STMT_END
 #else
 #define RX_MATCH_COPY_FREE(rx) \
 	STMT_START {if (RX_MATCH_COPIED(rx)) { \
-	    Safefree(rx->subbeg); \
+	    Safefree(RX_SUBBEG(rx)); \
 	    RX_MATCH_COPIED_off(rx); \
 	}} STMT_END
 #endif
 
-#define RX_MATCH_UTF8(prog)		((prog)->extflags & RXf_MATCH_UTF8)
-#define RX_MATCH_UTF8_on(prog)		((prog)->extflags |= RXf_MATCH_UTF8)
-#define RX_MATCH_UTF8_off(prog)		((prog)->extflags &= ~RXf_MATCH_UTF8)
+#define RXp_MATCH_UTF8(prog)		(RXp_EXTFLAGS(prog) & RXf_MATCH_UTF8)
+#define RX_MATCH_UTF8(prog)		(RX_EXTFLAGS(prog) & RXf_MATCH_UTF8)
+#define RX_MATCH_UTF8_on(prog)		(RX_EXTFLAGS(prog) |= RXf_MATCH_UTF8)
+#define RX_MATCH_UTF8_off(prog)		(RX_EXTFLAGS(prog) &= ~RXf_MATCH_UTF8)
 #define RX_MATCH_UTF8_set(prog, t)	((t) \
 			? (RX_MATCH_UTF8_on(prog), (PL_reg_match_utf8 = 1)) \
 			: (RX_MATCH_UTF8_off(prog), (PL_reg_match_utf8 = 0)))

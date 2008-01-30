@@ -501,7 +501,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const prog, SV *sv, char *strpos,
 #ifdef QDEBUGGING	/* 7/99: reports of failure (with the older version) */
     if (end_shift < 0)
 	Perl_croak(aTHX_ "panic: end_shift: %"IVdf" pattern:\n%s\n ",
-		   (IV)end_shift, prog->precomp);
+		   (IV)end_shift, RX_PRECOMP(prog));
 #endif
 
   restart:
@@ -536,7 +536,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const prog, SV *sv, char *strpos,
 	else
 	    goto fail_finish;
 	/* we may be pointing at the wrong string */
-	if (s && RX_MATCH_COPIED(prog))
+	if (s && RXp_MATCH_COPIED(prog))
 	    s = strbeg + (s - SvPVX_const(sv));
 	if (data)
 	    *data->scream_olds = s;
@@ -2009,7 +2009,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const prog, char *stringarg, register char *st
 				  (unsigned char*)strend, must,
 				  multiline ? FBMrf_MULTILINE : 0))) ) {
 	    /* we may be pointing at the wrong string */
-	    if ((flags & REXEC_SCREAM) && RX_MATCH_COPIED(prog))
+	    if ((flags & REXEC_SCREAM) && RXp_MATCH_COPIED(prog))
 		s = strbeg + (s - SvPVX_const(sv));
 	    DEBUG_EXECUTE_r( did_match = 1 );
 	    if (HOPc(s, -back_max) > last1) {
@@ -2087,7 +2087,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const prog, char *stringarg, register char *st
 		if (!last)
 		    last = scream_olds; /* Only one occurrence. */
 		/* we may be pointing at the wrong string */
-		else if (RX_MATCH_COPIED(prog))
+		else if (RXp_MATCH_COPIED(prog))
 		    s = strbeg + (s - SvPVX_const(sv));
 	    }
 	    else {
@@ -2265,7 +2265,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
 	PM_SETRE(PL_reg_curpm, prog);
 	PL_reg_oldcurpm = PL_curpm;
 	PL_curpm = PL_reg_curpm;
-	if (RX_MATCH_COPIED(prog)) {
+	if (RXp_MATCH_COPIED(prog)) {
 	    /*  Here is a serious problem: we cannot rewrite subbeg,
 		since it may be needed if this match fails.  Thus
 		$` inside (?{}) could fail... */
@@ -2274,7 +2274,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
 #ifdef PERL_OLD_COPY_ON_WRITE
 	    PL_nrs = prog->saved_copy;
 #endif
-	    RX_MATCH_COPIED_off(prog);
+	    RXp_MATCH_COPIED_off(prog);
 	}
 	else
 	    PL_reg_oldsaved = NULL;
@@ -2559,7 +2559,7 @@ S_debug_start_match(pTHX_ const regexp *prog, const bool do_utf8,
             reginitcolors();    
     {
         RE_PV_QUOTED_DECL(s0, utf8_pat, PERL_DEBUG_PAD_ZERO(0), 
-            prog->precomp, prog->prelen, 60);   
+            RXp_PRECOMP(prog), RXp_PRELEN(prog), 60);   
         
         RE_PV_QUOTED_DECL(s1, do_utf8, PERL_DEBUG_PAD_ZERO(1), 
             start, end - start, 60); 
@@ -3737,7 +3737,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			PL_regsize = osize;
 		    }
 		}
-                RX_MATCH_COPIED_off(re);
+                RXp_MATCH_COPIED_off(re);
                 re->subbeg = rex->subbeg;
                 re->sublen = rex->sublen;
 		rei = RXi_GET(re);
@@ -5855,7 +5855,7 @@ restore_pos(pTHX_ void *arg)
 #ifdef PERL_OLD_COPY_ON_WRITE
 	    rex->saved_copy = PL_nrs;
 #endif
-	    RX_MATCH_COPIED_on(rex);
+	    RXp_MATCH_COPIED_on(rex);
 	}
 	PL_reg_magic->mg_len = PL_reg_oldpos;
 	PL_reg_eval_set = 0;
