@@ -350,9 +350,9 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		SV* obj = mg->mg_obj;
 
 		if (!keysv) {
-		    keysv = sv_2mortal(newSVpvn(key, klen));
-		    if (flags & HVhek_UTF8)
-			SvUTF8_on(keysv);
+		    keysv = newSVpvn_flags(key, klen, SVs_TEMP |
+					   ((flags & HVhek_UTF8)
+					    ? SVf_UTF8 : 0));
 		}
 		
 		mg->mg_obj = keysv;         /* pass key */
@@ -391,11 +391,8 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		/* FIXME should be able to skimp on the HE/HEK here when
 		   HV_FETCH_JUST_SV is true.  */
 		if (!keysv) {
-		    keysv = newSVpvn(key, klen);
-		    if (is_utf8) {
-			SvUTF8_on(keysv);
-		    }
-		} else {
+		    keysv = newSVpvn_utf8(key, klen, is_utf8);
+  		} else {
 		    keysv = newSVsv(keysv);
 		}
                 sv = sv_newmortal();
@@ -472,8 +469,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
 		if (keysv || is_utf8) {
 		    if (!keysv) {
-			keysv = newSVpvn(key, klen);
-			SvUTF8_on(keysv);
+			keysv = newSVpvn_utf8(key, klen, TRUE);
 		    } else {
 			keysv = newSVsv(keysv);
 		    }
@@ -515,8 +511,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		const bool save_taint = PL_tainted;
 		if (keysv || is_utf8) {
 		    if (!keysv) {
-			keysv = newSVpvn(key, klen);
-			SvUTF8_on(keysv);
+			keysv = newSVpvn_utf8(key, klen, TRUE);
 		    }
 		    if (PL_tainting)
 			PL_tainted = SvTAINTED(keysv);
@@ -919,7 +914,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 #ifdef ENV_IS_CASELESS
 		else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
 		    /* XXX This code isn't UTF8 clean.  */
-		    keysv = sv_2mortal(newSVpvn(key,klen));
+		    keysv = newSVpvn_flags(key, klen, SVs_TEMP);
 		    if (k_flags & HVhek_FREEKEY) {
 			Safefree(key);
 		    }

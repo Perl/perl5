@@ -1230,10 +1230,9 @@ is the recommended Unicode-aware way of saying
         /* store the word for dumping */                        \
         SV* tmp;                                                \
         if (OP(noper) != NOTHING)                               \
-            tmp = newSVpvn(STRING(noper), STR_LEN(noper));      \
+            tmp = newSVpvn_utf8(STRING(noper), STR_LEN(noper), UTF);	\
         else                                                    \
-            tmp = newSVpvn( "", 0 );                            \
-        if ( UTF ) SvUTF8_on( tmp );                            \
+            tmp = newSVpvn_utf8( "", 0, UTF );			\
         av_push( trie_words, tmp );                             \
     });                                                         \
                                                                 \
@@ -3318,9 +3317,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			
 			l -= old;
 			/* Get the added string: */
-			last_str = newSVpvn(s  + old, l);
-			if (UTF)
-			    SvUTF8_on(last_str);
+			last_str = newSVpvn_utf8(s  + old, l, UTF);
 			if (deltanext == 0 && pos_before == b) {
 			    /* What was added is a constant string */
 			    if (mincount > 1) {
@@ -5242,10 +5239,9 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags) {
     }
 
     if ( flags ) {
-        SV* sv_name = sv_2mortal(Perl_newSVpvn(aTHX_ name_start,
-            (int)(RExC_parse - name_start)));
-	if (UTF)
-            SvUTF8_on(sv_name);
+        SV* sv_name
+	    = newSVpvn_flags(name_start, (int)(RExC_parse - name_start),
+			     SVs_TEMP | (UTF ? SVf_UTF8 : 0));
         if ( flags == REG_RSN_RETURN_NAME)
             return sv_name;
         else if (flags==REG_RSN_RETURN_DATA) {
@@ -6737,7 +6733,7 @@ STATIC UV
 S_reg_recode(pTHX_ const char value, SV **encp)
 {
     STRLEN numlen = 1;
-    SV * const sv = sv_2mortal(newSVpvn(&value, numlen));
+    SV * const sv = newSVpvn_flags(&value, numlen, SVs_TEMP);
     const char * const s = *encp ? sv_recode_to_utf8(sv, *encp) : SvPVX(sv);
     const STRLEN newlen = SvCUR(sv);
     UV uv = UNICODE_REPLACEMENT;
@@ -8179,8 +8175,8 @@ parseit:
 
 				  if (!unicode_alternate)
 				      unicode_alternate = newAV();
-				  sv = newSVpvn((char*)foldbuf, foldlen);
-				  SvUTF8_on(sv);
+				  sv = newSVpvn_utf8((char*)foldbuf, foldlen,
+						     TRUE);
 				  av_push(unicode_alternate, sv);
 			      }
 			 }

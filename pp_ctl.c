@@ -254,7 +254,7 @@ PP(pp_substcont)
 	    SvPV_set(dstr, NULL);
 
 	    TAINT_IF(cx->sb_rxtainted & 1);
-	    PUSHs(sv_2mortal(newSViv(saviters - 1)));
+	    mPUSHi(saviters - 1);
 
 	    (void)SvPOK_only_UTF8(targ);
 	    TAINT_IF(cx->sb_rxtainted);
@@ -926,7 +926,7 @@ PP(pp_grepstart)
     if (PL_stack_base + *PL_markstack_ptr == SP) {
 	(void)POPMARK;
 	if (GIMME_V == G_SCALAR)
-	    XPUSHs(sv_2mortal(newSViv(0)));
+	    mXPUSHi(0);
 	RETURNOP(PL_op->op_next->op_next);
     }
     PL_stack_sp = PL_stack_base + *PL_markstack_ptr + 1;
@@ -1629,9 +1629,9 @@ PP(pp_caller)
     if (!stashname)
 	PUSHs(&PL_sv_undef);
     else
-	PUSHs(sv_2mortal(newSVpv(stashname, 0)));
-    PUSHs(sv_2mortal(newSVpv(OutCopFILE(cx->blk_oldcop), 0)));
-    PUSHs(sv_2mortal(newSViv((I32)CopLINE(cx->blk_oldcop))));
+	mPUSHs(newSVpv(stashname, 0));
+    mPUSHs(newSVpv(OutCopFILE(cx->blk_oldcop), 0));
+    mPUSHi((I32)CopLINE(cx->blk_oldcop));
     if (!MAXARG)
 	RETURN;
     if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
@@ -1640,23 +1640,23 @@ PP(pp_caller)
 	if (isGV(cvgv)) {
 	    SV * const sv = newSV(0);
 	    gv_efullname3(sv, cvgv, NULL);
-	    PUSHs(sv_2mortal(sv));
-	    PUSHs(sv_2mortal(newSViv((I32)cx->blk_sub.hasargs)));
+	    mPUSHs(sv);
+	    mPUSHi((I32)cx->blk_sub.hasargs);
 	}
 	else {
-	    PUSHs(sv_2mortal(newSVpvs("(unknown)")));
-	    PUSHs(sv_2mortal(newSViv((I32)cx->blk_sub.hasargs)));
+	    PUSHs(newSVpvs_flags("(unknown)", SVs_TEMP));
+	    mPUSHi((I32)cx->blk_sub.hasargs);
 	}
     }
     else {
-	PUSHs(sv_2mortal(newSVpvs("(eval)")));
-	PUSHs(sv_2mortal(newSViv(0)));
+	PUSHs(newSVpvs_flags("(eval)", SVs_TEMP));
+	mPUSHi(0);
     }
     gimme = (I32)cx->blk_gimme;
     if (gimme == G_VOID)
 	PUSHs(&PL_sv_undef);
     else
-	PUSHs(sv_2mortal(newSViv(gimme & G_ARRAY)));
+	mPUSHi(gimme & G_ARRAY);
     if (CxTYPE(cx) == CXt_EVAL) {
 	/* eval STRING */
 	if (cx->blk_eval.old_op_type == OP_ENTEREVAL) {
@@ -1665,7 +1665,7 @@ PP(pp_caller)
 	}
 	/* require */
 	else if (cx->blk_eval.old_namesv) {
-	    PUSHs(sv_2mortal(newSVsv(cx->blk_eval.old_namesv)));
+	    mPUSHs(newSVsv(cx->blk_eval.old_namesv));
 	    PUSHs(&PL_sv_yes);
 	}
 	/* eval BLOCK (try blocks have old_namesv == 0) */
@@ -1699,7 +1699,7 @@ PP(pp_caller)
     /* XXX only hints propagated via op_private are currently
      * visible (others are not easily accessible, since they
      * use the global PL_hints) */
-    PUSHs(sv_2mortal(newSViv(CopHINTS_get(cx->blk_oldcop))));
+    mPUSHi(CopHINTS_get(cx->blk_oldcop));
     {
 	SV * mask ;
 	STRLEN * const old_warnings = cx->blk_oldcop->cop_warnings ;
@@ -1722,7 +1722,7 @@ PP(pp_caller)
 	}
         else
             mask = newSVpvn((char *) (old_warnings + 1), old_warnings[0]);
-        PUSHs(sv_2mortal(mask));
+        mPUSHs(mask);
     }
 
     PUSHs(cx->blk_oldcop->cop_hints_hash ?
@@ -4692,7 +4692,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 
 	DEFSV = upstream;
 	PUSHMARK(SP);
-	PUSHs(sv_2mortal(newSViv(0)));
+	mPUSHi(0);
 	if (filter_state) {
 	    PUSHs(filter_state);
 	}

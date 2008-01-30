@@ -1938,7 +1938,7 @@ Like C<sv_catsv> but doesn't process magic.
 #define sv_catpvn_utf8_upgrade(dsv, sstr, slen, nsv)	\
 	STMT_START {					\
 	    if (!(nsv))					\
-		nsv = sv_2mortal(newSVpvn(sstr, slen));	\
+		nsv = newSVpvn_flags(sstr, slen, SVs_TEMP);	\
 	    else					\
 		sv_setpvn(nsv, sstr, slen);		\
 	    SvUTF8_off(nsv);				\
@@ -2086,6 +2086,17 @@ struct clone_params {
   UV  flags;
   PerlInterpreter *proto_perl;
 };
+
+/*
+=for apidoc Am|SV*|newSVpvn_utf8|NULLOK const char* s|STRLEN len|U32 utf8
+
+Creates a new SV and copies a string into it.  If utf8 is true, calls
+C<SvUTF8_on> on the new SV.  Implemented as a wrapper around C<newSVpvn_flags>.
+
+=cut
+*/
+
+#define newSVpvn_utf8(s, len, u) newSVpvn_flags((s), (len), (u) ? SVf_UTF8 : 0)
 
 /*
  * Local variables:

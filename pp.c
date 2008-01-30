@@ -419,7 +419,7 @@ PP(pp_prototype)
 			|| code == -KEY_exec || code == -KEY_system)
 		    goto set;
 		if (code == -KEY_mkdir) {
-		    ret = sv_2mortal(newSVpvs("_;$"));
+		    ret = newSVpvs_flags("_;$", SVs_TEMP);
 		    goto set;
 		}
 		if (code == -KEY_readpipe) {
@@ -455,7 +455,7 @@ PP(pp_prototype)
 		if (defgv && str[n - 1] == '$')
 		    str[n - 1] = '_';
 		str[n++] = '\0';
-		ret = sv_2mortal(newSVpvn(str, n - 1));
+		ret = newSVpvn_flags(str, n - 1, SVs_TEMP);
 	    }
 	    else if (code)		/* Non-Overridable */
 		goto set;
@@ -467,7 +467,7 @@ PP(pp_prototype)
     }
     cv = sv_2cv(TOPs, &stash, &gv, 0);
     if (cv && SvPOK(cv))
-	ret = sv_2mortal(newSVpvn(SvPVX_const(cv), SvCUR(cv)));
+	ret = newSVpvn_flags(SvPVX_const(cv), SvCUR(cv), SVs_TEMP);
   set:
     SETs(ret);
     RETURN;
@@ -3318,9 +3318,8 @@ PP(pp_index)
 	   Otherwise I need to avoid calls to sv_pos_u2b(), which (dangerously)
 	   will trigger magic and overloading again, as will fbm_instr()
 	*/
-	big = sv_2mortal(newSVpvn(big_p, biglen));
-	if (big_utf8)
-	    SvUTF8_on(big);
+	big = newSVpvn_flags(big_p, biglen,
+			     SVs_TEMP | (big_utf8 ? SVf_UTF8 : 0));
 	big_p = SvPVX(big);
     }
     if (SvGAMAGIC(little) || (is_index && !SvOK(little))) {
@@ -3332,9 +3331,8 @@ PP(pp_index)
 	   This is all getting to messy. The API isn't quite clean enough,
 	   because data access has side effects.
 	*/
-	little = sv_2mortal(newSVpvn(little_p, llen));
-	if (little_utf8)
-	    SvUTF8_on(little);
+	little = newSVpvn_flags(little_p, llen,
+				SVs_TEMP | (little_utf8 ? SVf_UTF8 : 0));
 	little_p = SvPVX(little);
     }
 
@@ -4198,8 +4196,8 @@ PP(pp_anonlist)
     const I32 items = SP - MARK;
     SV * const av = (SV *) av_make(items, MARK+1);
     SP = ORIGMARK;		/* av_make() might realloc stack_sp */
-    XPUSHs(sv_2mortal((PL_op->op_flags & OPf_SPECIAL)
-		      ? newRV_noinc(av) : av));
+    mXPUSHs((PL_op->op_flags & OPf_SPECIAL)
+	    ? newRV_noinc(av) : av);
     RETURN;
 }
 
@@ -4218,8 +4216,8 @@ PP(pp_anonhash)
 	(void)hv_store_ent(hv,key,val,0);
     }
     SP = ORIGMARK;
-    XPUSHs(sv_2mortal((PL_op->op_flags & OPf_SPECIAL)
-		      ? newRV_noinc((SV*) hv) : (SV*)hv));
+    mXPUSHs((PL_op->op_flags & OPf_SPECIAL)
+	    ? newRV_noinc((SV*) hv) : (SV*) hv);
     RETURN;
 }
 
@@ -4700,11 +4698,9 @@ PP(pp_split)
 	    if (m >= strend)
 		break;
 
-	    dstr = newSVpvn(s, m-s);
+	    dstr = newSVpvn_utf8(s, m-s, do_utf8);
 	    if (make_mortal)
 		sv_2mortal(dstr);
-	    if (do_utf8)
-		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 
 	    /* skip the whitespace found last */
@@ -4733,11 +4729,9 @@ PP(pp_split)
 	    m++;
 	    if (m >= strend)
 		break;
-	    dstr = newSVpvn(s, m-s);
+	    dstr = newSVpvn_utf8(s, m-s, do_utf8);
 	    if (make_mortal)
 		sv_2mortal(dstr);
-	    if (do_utf8)
-		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 	    s = m;
 	}
@@ -4762,12 +4756,11 @@ PP(pp_split)
                 /* keep track of how many bytes we skip over */
                 m = s;
                 s += UTF8SKIP(s);
-                dstr = newSVpvn(m, s-m);
+                dstr = newSVpvn_utf8(m, s-m, TRUE);
 
                 if (make_mortal)
                     sv_2mortal(dstr);
 
-                (void)SvUTF8_on(dstr);
                 PUSHs(dstr);
 
                 if (s >= strend)
@@ -4804,11 +4797,9 @@ PP(pp_split)
 		    ;
 		if (m >= strend)
 		    break;
-		dstr = newSVpvn(s, m-s);
+		dstr = newSVpvn_utf8(s, m-s, do_utf8);
 		if (make_mortal)
 		    sv_2mortal(dstr);
-		if (do_utf8)
-		    (void)SvUTF8_on(dstr);
 		XPUSHs(dstr);
 		/* The rx->minlen is in characters but we want to step
 		 * s ahead by bytes. */
@@ -4823,11 +4814,9 @@ PP(pp_split)
 	      (m = fbm_instr((unsigned char*)s, (unsigned char*)strend,
 			     csv, multiline ? FBMrf_MULTILINE : 0)) )
 	    {
-		dstr = newSVpvn(s, m-s);
+		dstr = newSVpvn_utf8(s, m-s, do_utf8);
 		if (make_mortal)
 		    sv_2mortal(dstr);
-		if (do_utf8)
-		    (void)SvUTF8_on(dstr);
 		XPUSHs(dstr);
 		/* The rx->minlen is in characters but we want to step
 		 * s ahead by bytes. */
@@ -4858,11 +4847,9 @@ PP(pp_split)
 		strend = s + (strend - m);
 	    }
 	    m = RX_OFFS(rx)[0].start + orig;
-	    dstr = newSVpvn(s, m-s);
+	    dstr = newSVpvn_utf8(s, m-s, do_utf8);
 	    if (make_mortal)
 		sv_2mortal(dstr);
-	    if (do_utf8)
-		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 	    if (RX_NPARENS(rx)) {
 		I32 i;
@@ -4874,14 +4861,12 @@ PP(pp_split)
 		       parens that didn't match -- they should be set to
 		       undef, not the empty string */
 		    if (m >= orig && s >= orig) {
-			dstr = newSVpvn(s, m-s);
+			dstr = newSVpvn_utf8(s, m-s, do_utf8);
 		    }
 		    else
 			dstr = &PL_sv_undef;  /* undef, not "" */
 		    if (make_mortal)
 			sv_2mortal(dstr);
-		    if (do_utf8)
-			(void)SvUTF8_on(dstr);
 		    XPUSHs(dstr);
 		}
 	    }
@@ -4896,11 +4881,9 @@ PP(pp_split)
     /* keep field after final delim? */
     if (s < strend || (iters && origlimit)) {
         const STRLEN l = strend - s;
-	dstr = newSVpvn(s, l);
+	dstr = newSVpvn_utf8(s, l, do_utf8);
 	if (make_mortal)
 	    sv_2mortal(dstr);
-	if (do_utf8)
-	    (void)SvUTF8_on(dstr);
 	XPUSHs(dstr);
 	iters++;
     }

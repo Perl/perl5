@@ -158,10 +158,10 @@ Perl_sv_does(pTHX_ SV *sv, const char *name)
 
     PUSHMARK(SP);
     XPUSHs(sv);
-    XPUSHs(sv_2mortal(newSVpv(name, 0)));
+    mXPUSHs(newSVpv(name, 0));
     PUTBACK;
 
-    methodname = sv_2mortal(newSVpvs("isa"));
+    methodname = newSVpvs_flags("isa", SVs_TEMP);
     /* ugly hack: use the SvSCREAM flag so S_method_common
      * can figure out we're calling DOES() and not isa(),
      * and report eventual errors correctly. --rgs */
@@ -489,7 +489,7 @@ XS(XS_version_new)
 	if ( strcmp(classname,"version") != 0 ) /* inherited new() */
 	    sv_bless(rv, gv_stashpv(classname, GV_ADD));
 
-	PUSHs(sv_2mortal(rv));
+	mPUSHs(rv);
 	PUTBACK;
 	return;
     }
@@ -512,7 +512,7 @@ XS(XS_version_stringify)
 	  else
 	       Perl_croak(aTHX_ "lobj is not of type version");
 
-	  PUSHs(sv_2mortal(vstringify(lobj)));
+	  mPUSHs(vstringify(lobj));
 
 	  PUTBACK;
 	  return;
@@ -536,7 +536,7 @@ XS(XS_version_numify)
 	  else
 	       Perl_croak(aTHX_ "lobj is not of type version");
 
-	  PUSHs(sv_2mortal(vnumify(lobj)));
+	  mPUSHs(vnumify(lobj));
 
 	  PUTBACK;
 	  return;
@@ -560,7 +560,7 @@ XS(XS_version_normal)
 	  else
 	       Perl_croak(aTHX_ "lobj is not of type version");
 
-	  PUSHs(sv_2mortal(vnormal(lobj)));
+	  mPUSHs(vnormal(lobj));
 
 	  PUTBACK;
 	  return;
@@ -605,7 +605,7 @@ XS(XS_version_vcmp)
 		    rs = newSViv(vcmp(lobj,rvs));
 	       }
 
-	       PUSHs(sv_2mortal(rs));
+	       mPUSHs(rs);
 	  }
 
 	  PUTBACK;
@@ -624,7 +624,7 @@ XS(XS_version_boolean)
     if (sv_derived_from(ST(0), "version")) {
 	SV * const lobj = SvRV(ST(0));
 	SV * const rs = newSViv( vcmp(lobj,new_version(newSVpvs("0"))) );
-	PUSHs(sv_2mortal(rs));
+	mPUSHs(rs);
 	PUTBACK;
 	return;
     }
@@ -687,7 +687,7 @@ XS(XS_version_qv)
 	}
 	else
 	{
-	    PUSHs(sv_2mortal(new_version(ver)));
+	    mPUSHs(new_version(ver));
 	}
 
 	PUTBACK;
@@ -994,7 +994,7 @@ XS(XS_PerlIO_get_layers)
 			    const IV flags = SvIVX(*flgsvp);
 
 			    if (flags & PERLIO_F_UTF8) {
-				 XPUSHs(sv_2mortal(newSVpvs("utf8")));
+				 XPUSHs(newSVpvs_flags("utf8", SVs_TEMP));
 				 nitem++;
 			    }
 		       }
@@ -1426,8 +1426,8 @@ XS(XS_Tie_Hash_NamedCapture_flags)
     if (items != 0)
         Perl_croak(aTHX_ "Usage: Tie::Hash::NamedCapture::flags()");
 
-	XPUSHs(sv_2mortal(newSVuv(RXapif_ONE)));
-	XPUSHs(sv_2mortal(newSVuv(RXapif_ALL)));
+	mXPUSHu(RXapif_ONE);
+	mXPUSHu(RXapif_ALL);
 	PUTBACK;
 	return;
 }

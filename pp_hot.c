@@ -43,7 +43,7 @@ PP(pp_const)
         /* This is a const op added to hold the hints hash for
            pp_entereval. The hash can be modified by the code
            being eval'ed, so we return a copy instead. */
-        XPUSHs(sv_2mortal((SV*)Perl_hv_copy_hints_hv(aTHX_ (HV*)cSVOP_sv)));
+        mXPUSHs((SV*)Perl_hv_copy_hints_hv(aTHX_ (HV*)cSVOP_sv));
     else
         /* Normal const. */
         XPUSHs(cSVOP_sv);
@@ -248,7 +248,7 @@ PP(pp_concat)
 	/* mg_get(right) may happen here ... */
 	rpv = SvPV_const(right, rlen);
 	rbyte = !DO_UTF8(right);
-	right = sv_2mortal(newSVpvn(rpv, rlen));
+	right = newSVpvn_flags(rpv, rlen, SVs_TEMP);
 	rpv = SvPV_const(right, rlen);	/* no point setting UTF-8 here */
 	rcopied = TRUE;
     }
@@ -287,7 +287,7 @@ PP(pp_concat)
 	    sv_utf8_upgrade_nomg(TARG);
 	else {
 	    if (!rcopied)
-		right = sv_2mortal(newSVpvn(rpv, rlen));
+		right = newSVpvn_flags(rpv, rlen, SVs_TEMP);
 	    sv_utf8_upgrade_nomg(right);
 	    rpv = SvPV_const(right, rlen);
 	}
@@ -2245,7 +2245,7 @@ PP(pp_subst)
 	    }
 	    TAINT_IF(rxtainted & 1);
 	    SPAGAIN;
-	    PUSHs(sv_2mortal(newSViv((I32)iters)));
+	    mPUSHi((I32)iters);
 	}
 	(void)SvPOK_only_UTF8(TARG);
 	TAINT_IF(rxtainted);
@@ -2272,10 +2272,8 @@ PP(pp_subst)
       have_a_cow:
 #endif
 	rxtainted |= RX_MATCH_TAINTED(rx);
-	dstr = newSVpvn(m, s-m);
+	dstr = newSVpvn_utf8(m, s-m, DO_UTF8(TARG));
 	SAVEFREESV(dstr);
-	if (DO_UTF8(TARG))
-	    SvUTF8_on(dstr);
 	PL_curpm = pm;
 	if (!c) {
 	    register PERL_CONTEXT *cx;
@@ -2333,7 +2331,7 @@ PP(pp_subst)
 
 	TAINT_IF(rxtainted & 1);
 	SPAGAIN;
-	PUSHs(sv_2mortal(newSViv((I32)iters)));
+	mPUSHi((I32)iters);
 
 	(void)SvPOK_only(TARG);
 	if (doutf8)
