@@ -102,7 +102,7 @@ X</x>
 
 =head3 Metacharacters
 
-The patterns used in Perl pattern matching evolved from the ones supplied in
+The patterns used in Perl pattern matching evolved from those supplied in
 the Version 8 regex routines.  (The routines are derived
 (distantly) from Henry Spencer's freely redistributable reimplementation
 of the V8 routines.)  See L<Version 8 Regular Expressions> for
