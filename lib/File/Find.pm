@@ -84,7 +84,7 @@ described in L<The wanted function> below.
 
 Reports the name of a directory only AFTER all its entries
 have been reported.  Entry point C<finddepth()> is a shortcut for
-specifying C<<{ bydepth => 1 }>> in the first argument of C<find()>.
+specifying C<{ bydepth =E<gt> 1 }> in the first argument of C<find()>.
 
 =item C<preprocess>
 
