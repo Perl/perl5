@@ -14,7 +14,6 @@ BEGIN {
         exit 0;
     }
     require 'test.pl';		# we use runperl from 'test.pl', so can't use Test::More
-    sub diag { print "# @_\n" } # but this is still handy
 }
 
 plan tests => 156;
@@ -201,7 +200,8 @@ SKIP: {
 
 	sub defd_empty {};
 	($res,$err) = render('-basic', \&defd_empty);
-	is(scalar split(/\n/, $res), 3,
+	my @lines = split(/\n/, $res);
+	is(scalar @lines, 3,
 	   "'sub defd_empty {}' seen as 3 liner");
 
 	is(1, $res =~ /leavesub/ && $res =~ /(next|db)state/,

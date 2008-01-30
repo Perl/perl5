@@ -27,7 +27,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 54;
+use Test::More tests => 57;
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -102,8 +102,9 @@ is("{\n    (-1) ** \$a;\n}", $deparse->coderef2text(sub{(-1) ** $a }));
 
 use constant cr => ['hello'];
 my $string = "sub " . $deparse->coderef2text(\&cr);
-my $val = (eval $string)->();
-ok( ref($val) eq 'ARRAY' && $val->[0] eq 'hello');
+my $val = (eval $string)->() or diag $string;
+is(ref($val), 'ARRAY');
+is($val->[0], 'hello');
 
 my $Is_VMS = $^O eq 'VMS';
 my $Is_MacOS = $^O eq 'MacOS';
@@ -384,3 +385,13 @@ $a = sub {
     return $x++;
 }
 ;
+####
+# SKIP ?$] < 5.011 && 'each @array not implemented on this Perl version'
+# 49 each @array;
+each @ARGV;
+each @$a;
+####
+# SKIP ?$] < 5.011 && 'each @array not implemented on this Perl version'
+# 50 keys @array; values @array
+keys @$a if keys @ARGV;
+values @ARGV if values @$a;

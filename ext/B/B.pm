@@ -7,7 +7,7 @@
 #
 package B;
 
-our $VERSION = '1.17';
+our $VERSION = '1.18';
 
 use XSLoader ();
 require Exporter;
@@ -33,10 +33,12 @@ use strict;
 @B::PV::ISA = 'B::SV';
 @B::IV::ISA = 'B::SV';
 @B::NV::ISA = 'B::SV';
-@B::RV::ISA = 'B::SV';
+# RV is eliminated with 5.11.0, but effectively is a specialisation of IV now.
+@B::RV::ISA = $] >= 5.011 ? 'B::IV' : 'B::SV';
 @B::PVIV::ISA = qw(B::PV B::IV);
 @B::PVNV::ISA = qw(B::PVIV B::NV);
 @B::PVMG::ISA = 'B::PVNV';
+@B::ORANGE::ISA = 'B::PVMG' if $] >= 5.011;
 # Change in the inheritance hierarchy post 5.9.0
 @B::PVLV::ISA = $] > 5.009 ? 'B::GV' : 'B::PVMG';
 # BM is eliminated post 5.9.5, but effectively is a specialisation of GV now.
@@ -574,8 +576,8 @@ give incomprehensible results, or worse.
 B::IV, B::NV, B::RV, B::PV, B::PVIV, B::PVNV, B::PVMG, B::BM (5.9.5 and
 earlier), B::PVLV, B::AV, B::HV, B::CV, B::GV, B::FM, B::IO. These classes
 correspond in the obvious way to the underlying C structures of similar names.
-The inheritance hierarchy mimics the underlying C "inheritance". For 5.9.5
-and later this is:
+The inheritance hierarchy mimics the underlying C "inheritance". For the
+5.10, 5.10.1 I<etc> this is:
 
                            B::SV
                              |
@@ -600,6 +602,9 @@ and later this is:
                          |           |
                       B::PVLV      B::FM
 
+
+For 5.11.0 and later, B::RV is abolished, and IVs can be used to store
+references.
 
 For 5.9.0 and earlier, PVLV is a direct subclass of PVMG, and BM is still
 present as a distinct type, so the base of this diagram is

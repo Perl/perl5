@@ -44,6 +44,9 @@ sub do_test {
 	    $pattern =~ s/^ *\$IVNV *\n/
 		($] < 5.009) ? "    IV = 0\n    NV = 0\n" : '';
 	    /mge;
+	    $pattern =~ s/\$RV/
+		($] < 5.011) ? 'RV' : 'IV';
+	    /mge;
 
 	    print $pattern, "\n" if $DEBUG;
 	    my ($dump, $dump2) = split m/\*\*\*\*\*\n/, scalar <IN>;
@@ -153,7 +156,7 @@ do_test( 9,
 
 do_test(10,
         \$a,
-'SV = RV\\($ADDR\\) at $ADDR
+'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\(ROK\\)
   RV = $ADDR
@@ -182,7 +185,7 @@ if ($type eq 'N') {
 }
 do_test(11,
        [$b,$c],
-'SV = RV\\($ADDR\\) at $ADDR
+'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\(ROK\\)
   RV = $ADDR
@@ -203,7 +206,7 @@ do_test(11,
 
 do_test(12,
        {$b=>$c},
-'SV = RV\\($ADDR\\) at $ADDR
+'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\(ROK\\)
   RV = $ADDR
@@ -221,7 +224,7 @@ do_test(12,
 
 do_test(13,
         sub(){@_},
-'SV = RV\\($ADDR\\) at $ADDR
+'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\(ROK\\)
   RV = $ADDR
@@ -247,7 +250,7 @@ do_test(13,
 
 do_test(14,
         \&do_test,
-'SV = RV\\($ADDR\\) at $ADDR
+'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\(ROK\\)
   RV = $ADDR
@@ -274,9 +277,30 @@ do_test(14,
       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$dump2"
     OUTSIDE = $ADDR \\(MAIN\\)');
 
+if ($] >= 5.011) {
 do_test(15,
         qr(tic),
-'SV = RV\\($ADDR\\) at $ADDR
+'SV = $RV\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(ROK\\)
+  RV = $ADDR
+  SV = ORANGE\\($ADDR\\) at $ADDR
+    REFCNT = 1
+    FLAGS = \\(OBJECT,SMG\\)
+    IV = 0
+    NV = 0
+    PV = 0
+    MAGIC = $ADDR
+      MG_VIRTUAL = $ADDR
+      MG_TYPE = PERL_MAGIC_qr\(r\)
+      MG_OBJ = $ADDR
+        PAT = "\(\?-xism:tic\)"
+        REFCNT = 2
+    STASH = $ADDR\\t"Regexp"');
+} else {
+do_test(15,
+        qr(tic),
+'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\(ROK\\)
   RV = $ADDR
@@ -293,10 +317,11 @@ do_test(15,
         PAT = "\(\?-xism:tic\)"
         REFCNT = 2
     STASH = $ADDR\\t"Regexp"');
+}
 
 do_test(16,
         (bless {}, "Tac"),
-'SV = RV\\($ADDR\\) at $ADDR
+'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\(ROK\\)
   RV = $ADDR
@@ -356,7 +381,7 @@ do_test(18,
 if (ord('A') == 193) {
 do_test(19,
 	{chr(256)=>chr(512)},
-'SV = RV\\($ADDR\\) at $ADDR
+'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\(ROK\\)
   RV = $ADDR
@@ -380,7 +405,7 @@ do_test(19,
 } else {
 do_test(19,
 	{chr(256)=>chr(512)},
-'SV = RV\\($ADDR\\) at $ADDR
+'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\(ROK\\)
   RV = $ADDR
@@ -459,7 +484,7 @@ do_test(21,
 # blessed refs
 do_test(22,
 	bless(\\undef, 'Foobar'),
-'SV = RV\\($ADDR\\) at $ADDR
+'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\(ROK\\)
   RV = $ADDR
@@ -485,7 +510,7 @@ sub const () {
 
 do_test(23,
 	\&const,
-'SV = RV\\($ADDR\\) at $ADDR
+'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\(ROK\\)
   RV = $ADDR
