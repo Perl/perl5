@@ -8463,7 +8463,7 @@ Perl_peep(pTHX_ register OP *o)
 	    UNOP *refgen, *rv2cv;
 	    LISTOP *exlist;
 
-	    if ((o->op_flags && OPf_WANT) != OPf_WANT_VOID)
+	    if ((o->op_flags & OPf_WANT) != OPf_WANT_VOID)
 		break;
 
 	    if ((o->op_private & ~OPpASSIGN_BACKWARDS) != 2)

@@ -1223,7 +1223,8 @@ perl_destruct(pTHXx)
 			" flags=0x%"UVxf
 			" refcnt=%"UVuf pTHX__FORMAT "\n"
 			"\tallocated at %s:%d %s %s%s\n",
-			(void*)sv, sv->sv_flags, sv->sv_refcnt pTHX__VALUE,
+			(void*)sv, (UV)sv->sv_flags, (UV)sv->sv_refcnt
+			pTHX__VALUE,
 			sv->sv_debug_file ? sv->sv_debug_file : "(unknown)",
 			sv->sv_debug_line,
 			sv->sv_debug_inpad ? "for" : "by",
@@ -2620,7 +2621,9 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	Zero(&method_op, 1, UNOP);
 	method_op.op_next = PL_op;
 	method_op.op_ppaddr = PL_ppaddr[OP_METHOD];
+	method_op.op_type = OP_METHOD;
 	myop.op_ppaddr = PL_ppaddr[OP_ENTERSUB];
+	myop.op_type = OP_ENTERSUB;
 	PL_op = (OP*)&method_op;
     }
 

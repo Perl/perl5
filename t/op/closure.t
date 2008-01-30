@@ -14,7 +14,7 @@ BEGIN {
 use Config;
 require './test.pl'; # for runperl()
 
-print "1..187\n";
+print "1..188\n";
 
 my $test = 1;
 sub test (&) {
@@ -688,7 +688,22 @@ __EOF__
     test { $flag == 1 };
 }
 
+# don't copy a stale lexical; crate a fresh undef one instead
 
+sub f {
+    my $x if $_[0];
+    sub { \$x }
+}
+
+{
+    f(1);
+    my $c1= f(0);
+    my $c2= f(0);
+
+    my $r1 = $c1->();
+    my $r2 = $c2->();
+    test { $r1 != $r2 };
+}
 
 
 
