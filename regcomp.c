@@ -4288,11 +4288,11 @@ redo_first_pass:
 			    >> RXf_PMf_STD_PMMOD_SHIFT);
 	const char *fptr = STD_PAT_MODS;        /*"msix"*/
 	char *p;
-        RXp_WRAPLEN(r) = plen + has_minus + has_p + has_runon
+        RX_WRAPLEN(r) = plen + has_minus + has_p + has_runon
             + (sizeof(STD_PAT_MODS) - 1)
             + (sizeof("(?:)") - 1);
 
-        Newx(RX_WRAPPED(r), RXp_WRAPLEN(r) + 1, char );
+        Newx(RX_WRAPPED(r), RX_WRAPLEN(r) + 1, char );
         p = RX_WRAPPED(r);
         *p++='('; *p++='?';
         if (has_p)
@@ -4797,12 +4797,12 @@ reStudy:
     if (r->extflags & RXf_SPLIT && RX_PRELEN(r) == 1 && RX_PRECOMP(r)[0] == ' ')
         /* XXX: this should happen BEFORE we compile */
         r->extflags |= (RXf_SKIPWHITE|RXf_WHITE); 
-    else if (RX_PRELEN(r) == 3 && memEQ("\\s+", RXp_PRECOMP(r), 3))
+    else if (RX_PRELEN(r) == 3 && memEQ("\\s+", RX_PRECOMP(r), 3))
         r->extflags |= RXf_WHITE;
     else if (RX_PRELEN(r) == 1 && RXp_PRECOMP(r)[0] == '^')
         r->extflags |= RXf_START_ONLY;
 #else
-    if (r->extflags & RXf_SPLIT && RXp_PRELEN(r) == 1 && RX_PRECOMP(r)[0] == ' ')
+    if (r->extflags & RXf_SPLIT && RX_PRELEN(r) == 1 && RX_PRECOMP(r)[0] == ' ')
             /* XXX: this should happen BEFORE we compile */
             r->extflags |= (RXf_SKIPWHITE|RXf_WHITE); 
     else {
@@ -9241,7 +9241,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const r)
 	{
 	    SV *dsv= sv_newmortal();
             RE_PV_QUOTED_DECL(s, (r->extflags & RXf_UTF8),
-                dsv, RX_PRECOMP(r), RXp_PRELEN(r), 60);
+                dsv, RX_PRECOMP(r), RX_PRELEN(r), 60);
             PerlIO_printf(Perl_debug_log,"%sFreeing REx:%s %s\n", 
                 PL_colors[4],PL_colors[5],s);
         }
@@ -9427,7 +9427,7 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
 
     precomp_offset = RX_PRECOMP(ret) - ret->wrapped;
 
-    RX_WRAPPED(ret)     = SAVEPVN(RX_WRAPPED(ret), RXp_WRAPLEN(ret)+1);
+    RX_WRAPPED(ret)     = SAVEPVN(RX_WRAPPED(ret), RX_WRAPLEN(ret)+1);
     RX_PRECOMP(ret)     = ret->wrapped + precomp_offset;
     ret->paren_names    = hv_dup_inc(ret->paren_names, param);
 

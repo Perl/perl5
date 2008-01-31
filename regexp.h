@@ -360,8 +360,6 @@ and check for NULL.
 					 ? RX_MATCH_COPIED_on(prog) \
 					 : RX_MATCH_COPIED_off(prog))
 
-#define RXp_PRELEN(rx)		((rx)->prelen)
-#define RXp_WRAPLEN(rx)		((rx)->wraplen)
 #define RXp_EXTFLAGS(rx)	((rx)->extflags)
 
 #define RX_PRECOMP(prog)	((prog)->precomp)
