@@ -110,6 +110,8 @@ typedef struct regexp {
 	I32 refcnt;             /* Refcount of this regexp */
 } regexp;
 
+#define RXp_PAREN_NAMES(rx)	((rx)->paren_names)
+
 /* used for high speed searches */
 typedef struct re_scream_pos_data_s
 {

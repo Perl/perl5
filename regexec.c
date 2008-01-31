@@ -2148,8 +2148,8 @@ got_it:
 
     if (PL_reg_eval_set)
 	restore_pos(aTHX_ prog);
-    if (prog->paren_names) 
-        (void)hv_iterinit(prog->paren_names);
+    if (RXp_PAREN_NAMES(prog)) 
+        (void)hv_iterinit(RXp_PAREN_NAMES(prog));
 
     /* make sure $`, $&, $', and $digit will work later */
     if ( !(flags & REXEC_NOT_FIRST) ) {
