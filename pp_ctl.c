@@ -221,7 +221,7 @@ PP(pp_substcont)
 	FREETMPS; /* Prevent excess tmp stack */
 
 	/* Are we done */
-	if (cx->sb_once || !CALLREGEXEC(rx, s, cx->sb_strend, orig,
+	if (CxONCE(cx) || !CALLREGEXEC(rx, s, cx->sb_strend, orig,
 				     s == m, cx->sb_targ, NULL,
 				     ((cx->sb_rflags & REXEC_COPY_STR)
 				      ? (REXEC_IGNOREPOS|REXEC_NOT_FIRST)
@@ -1295,8 +1295,8 @@ Perl_is_lvalue_sub(pTHX)
     const I32 cxix = dopoptosub(cxstack_ix);
     assert(cxix >= 0);  /* We should only be called from inside subs */
 
-    if (cxstack[cxix].blk_sub.lval && CvLVALUE(cxstack[cxix].blk_sub.cv))
-	return cxstack[cxix].blk_sub.lval;
+    if (CxLVAL(cxstack + cxix) && CvLVALUE(cxstack[cxix].blk_sub.cv))
+	return CxLVAL(cxstack + cxix);
     else
 	return 0;
 }
@@ -1641,11 +1641,11 @@ PP(pp_caller)
 	    SV * const sv = newSV(0);
 	    gv_efullname3(sv, cvgv, NULL);
 	    mPUSHs(sv);
-	    mPUSHi((I32)cx->blk_sub.hasargs);
+	    mPUSHi((I32)CxHASARGS(cx));
 	}
 	else {
 	    PUSHs(newSVpvs_flags("(unknown)", SVs_TEMP));
-	    mPUSHi((I32)cx->blk_sub.hasargs);
+	    mPUSHi((I32)CxHASARGS(cx));
 	}
     }
     else {
@@ -1659,7 +1659,7 @@ PP(pp_caller)
 	mPUSHi(gimme & G_ARRAY);
     if (CxTYPE(cx) == CXt_EVAL) {
 	/* eval STRING */
-	if (cx->blk_eval.old_op_type == OP_ENTEREVAL) {
+	if (CxOLD_OP_TYPE(cx) == OP_ENTEREVAL) {
 	    PUSHs(cx->blk_eval.cur_text);
 	    PUSHs(&PL_sv_no);
 	}
@@ -1678,7 +1678,7 @@ PP(pp_caller)
 	PUSHs(&PL_sv_undef);
 	PUSHs(&PL_sv_undef);
     }
-    if (CxTYPE(cx) == CXt_SUB && cx->blk_sub.hasargs
+    if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)
 	&& CopSTASH_eq(PL_curcop, PL_debstash))
     {
 	AV * const ary = cx->blk_sub.argarray;
@@ -2355,7 +2355,7 @@ PP(pp_goto)
 	    }
 	    else if (CxMULTICALL(cx))
 		DIE(aTHX_ "Can't goto subroutine from a sort sub (or similar callback)");
-	    if (CxTYPE(cx) == CXt_SUB && cx->blk_sub.hasargs) {
+	    if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {
 		/* put @_ back onto stack */
 		AV* av = cx->blk_sub.argarray;
 
@@ -2414,7 +2414,7 @@ PP(pp_goto)
 	    else {
 		AV* const padlist = CvPADLIST(cv);
 		if (CxTYPE(cx) == CXt_EVAL) {
-		    PL_in_eval = cx->blk_eval.old_in_eval;
+		    PL_in_eval = CxOLD_IN_EVAL(cx);
 		    PL_eval_root = cx->blk_eval.old_eval_root;
 		    cx->cx_type = CXt_SUB;
 		    cx->blk_sub.hasargs = 0;
@@ -2432,7 +2432,7 @@ PP(pp_goto)
 		}
 		SAVECOMPPAD();
 		PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
-		if (cx->blk_sub.hasargs)
+		if (CxHASARGS(cx))
 		{
 		    AV* const av = (AV*)PAD_SVl(0);
 

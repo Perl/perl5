@@ -10385,7 +10385,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		ncx->blk_sub.cv		= (ncx->blk_sub.olddepth == 0
 					   ? cv_dup_inc(ncx->blk_sub.cv, param)
 					   : cv_dup(ncx->blk_sub.cv,param));
-		ncx->blk_sub.argarray	= (ncx->blk_sub.hasargs
+		ncx->blk_sub.argarray	= (CxHASARGS(ncx)
 					   ? av_dup_inc(ncx->blk_sub.argarray,
 							param)
 					   : NULL);

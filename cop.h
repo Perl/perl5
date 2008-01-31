@@ -342,7 +342,7 @@ struct block_sub {
 
 #define POPSUB(cx,sv)							\
     STMT_START {							\
-	if (cx->blk_sub.hasargs) {					\
+	if (CxHASARGS(cx)) {						\
 	    POP_SAVEARRAY();						\
 	    /* abandon @_ if it got reified */				\
 	    if (AvREAL(cx->blk_sub.argarray)) {				\
@@ -384,6 +384,9 @@ struct block_eval {
     JMPENV *	cur_top_env; /* value of PL_top_env when eval CX created */
 };
 
+#define CxOLD_IN_EVAL(cx)	(0 + (cx)->blk_eval.old_in_eval)
+#define CxOLD_OP_TYPE(cx)	(0 + (cx)->blk_eval.old_op_type)
+
 #define PUSHEVAL(cx,n,fgv)						\
     STMT_START {							\
 	cx->blk_eval.old_in_eval = PL_in_eval;				\
@@ -398,8 +401,8 @@ struct block_eval {
 
 #define POPEVAL(cx)							\
     STMT_START {							\
-	PL_in_eval = cx->blk_eval.old_in_eval;				\
-	optype = cx->blk_eval.old_op_type;				\
+	PL_in_eval = CxOLD_IN_EVAL(cx);					\
+	optype = CxOLD_OP_TYPE(cx);					\
 	PL_eval_root = cx->blk_eval.old_eval_root;			\
 	if (cx->blk_eval.old_namesv)					\
 	    sv_2mortal(cx->blk_eval.old_namesv);			\
@@ -465,6 +468,9 @@ struct block_loop {
 	else								\
 	    cx->blk_loop.itersave = NULL;
 #endif
+#define CxLABEL(c)	(0 + (c)->blk_loop.label)
+#define CxHASARGS(c)	(0 + (c)->blk_sub.hasargs)
+#define CxLVAL(c)	(0 + (c)->blk_sub.lval)
 
 #ifdef USE_ITHREADS
 #  define PUSHLOOP_OP_NEXT		/* No need to do anything.  */
@@ -621,6 +627,8 @@ struct subst {
 	cx->cx_type		= CXt_SUBST;				\
 	rxres_save(&cx->sb_rxres, rx);					\
 	(void)ReREFCNT_inc(rx)
+
+#define CxONCE(cx)		(0 + cx->sb_once)
 
 #define POPSUBST(cx) cx = &cxstack[cxstack_ix--];			\
 	rxres_free(&cx->sb_rxres);					\
