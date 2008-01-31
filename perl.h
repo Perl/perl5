@@ -923,6 +923,11 @@ EXTERN_C int usleep(unsigned int);
 #define PERL_ARENA_SIZE 4080
 #endif
 
+/* Maximum level of recursion */
+#ifndef PERL_SUB_DEPTH_WARN
+#define PERL_SUB_DEPTH_WARN 100
+#endif
+
 #endif /* PERL_CORE */
 
 /* We no longer default to creating a new SV for GvSV.

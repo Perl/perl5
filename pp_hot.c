@@ -2809,7 +2809,7 @@ try_autoload:
 	 * stuff so that __WARN__ handlers can safely dounwind()
 	 * if they want to
 	 */
-	if (CvDEPTH(cv) == 100 && ckWARN(WARN_RECURSION)
+	if (CvDEPTH(cv) == PERL_SUB_DEPTH_WARN && ckWARN(WARN_RECURSION)
 	    && !(PERLDB_SUB && cv == GvCV(PL_DBsub)))
 	    sub_crush_depth(cv);
 #if 0

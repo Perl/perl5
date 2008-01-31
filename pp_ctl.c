@@ -2426,7 +2426,7 @@ PP(pp_goto)
 		if (CvDEPTH(cv) < 2)
 		    SvREFCNT_inc_simple_void_NN(cv);
 		else {
-		    if (CvDEPTH(cv) == 100 && ckWARN(WARN_RECURSION))
+		    if (CvDEPTH(cv) == PERL_SUB_DEPTH_WARN && ckWARN(WARN_RECURSION))
 			sub_crush_depth(cv);
 		    pad_push(padlist, CvDEPTH(cv));
 		}
