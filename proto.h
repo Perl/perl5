@@ -3892,7 +3892,7 @@ STATIC void	S_dump_exec_pos(pTHX_ const char *locinput, const regnode *scan, con
 			__attribute__nonnull__(pTHX_4)
 			__attribute__nonnull__(pTHX_5);
 
-STATIC void	S_debug_start_match(pTHX_ const regexp *prog, const bool do_utf8, const char *start, const char *end, const char *blurb)
+STATIC void	S_debug_start_match(pTHX_ const REGEXP *prog, const bool do_utf8, const char *start, const char *end, const char *blurb)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3)
 			__attribute__nonnull__(pTHX_4)

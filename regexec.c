@@ -2551,15 +2551,15 @@ regmatch(), slabs allocated since entry are freed.
 #ifdef DEBUGGING
 
 STATIC void
-S_debug_start_match(pTHX_ const regexp *prog, const bool do_utf8, 
+S_debug_start_match(pTHX_ const REGEXP *prog, const bool do_utf8, 
     const char *start, const char *end, const char *blurb)
 {
-    const bool utf8_pat= prog->extflags & RXf_UTF8 ? 1 : 0;
+    const bool utf8_pat = RX_UTF8(prog) ? 1 : 0;
     if (!PL_colorset)   
             reginitcolors();    
     {
         RE_PV_QUOTED_DECL(s0, utf8_pat, PERL_DEBUG_PAD_ZERO(0), 
-            RXp_PRECOMP(prog), RXp_PRELEN(prog), 60);   
+            RX_PRECOMP(prog), RX_PRELEN(prog), 60);   
         
         RE_PV_QUOTED_DECL(s1, do_utf8, PERL_DEBUG_PAD_ZERO(1), 
             start, end - start, 60); 

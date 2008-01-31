@@ -360,9 +360,7 @@ and check for NULL.
 					 ? RX_MATCH_COPIED_on(prog) \
 					 : RX_MATCH_COPIED_off(prog))
 
-#define RXp_PRECOMP(rx)		((rx)->precomp)
 #define RXp_PRELEN(rx)		((rx)->prelen)
-#define RXp_WRAPPED(rx)		((rx)->wrapped)
 #define RXp_WRAPLEN(rx)		((rx)->wraplen)
 #define RXp_EXTFLAGS(rx)	((rx)->extflags)
 
@@ -414,6 +412,9 @@ and check for NULL.
 #define RX_MATCH_UTF8_set(prog, t)	((t) \
 			? (RX_MATCH_UTF8_on(prog), (PL_reg_match_utf8 = 1)) \
 			: (RX_MATCH_UTF8_off(prog), (PL_reg_match_utf8 = 0)))
+
+/* Whether the pattern stored at RX_WRAPPED is in UTF-8  */
+#define RX_UTF8(prog)			(RX_EXTFLAGS(prog) & RXf_UTF8)
     
 #define REXEC_COPY_STR	0x01		/* Need to copy the string. */
 #define REXEC_CHECKED	0x02		/* check_substr already checked. */

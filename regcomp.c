@@ -4292,8 +4292,8 @@ redo_first_pass:
             + (sizeof(STD_PAT_MODS) - 1)
             + (sizeof("(?:)") - 1);
 
-        Newx(RXp_WRAPPED(r), RXp_WRAPLEN(r) + 1, char );
-        p = RXp_WRAPPED(r);
+        Newx(RX_WRAPPED(r), RXp_WRAPLEN(r) + 1, char );
+        p = RX_WRAPPED(r);
         *p++='('; *p++='?';
         if (has_p)
             *p++ = KEEPCOPY_PAT_MOD; /*'p'*/
@@ -4794,7 +4794,7 @@ reStudy:
 #ifdef STUPID_PATTERN_CHECKS            
     if (RX_PRELEN(r) == 0)
         r->extflags |= RXf_NULL;
-    if (r->extflags & RXf_SPLIT && RX_PRELEN(r) == 1 && RXp_PRECOMP(r)[0] == ' ')
+    if (r->extflags & RXf_SPLIT && RX_PRELEN(r) == 1 && RX_PRECOMP(r)[0] == ' ')
         /* XXX: this should happen BEFORE we compile */
         r->extflags |= (RXf_SKIPWHITE|RXf_WHITE); 
     else if (RX_PRELEN(r) == 3 && memEQ("\\s+", RXp_PRECOMP(r), 3))
@@ -4802,7 +4802,7 @@ reStudy:
     else if (RX_PRELEN(r) == 1 && RXp_PRECOMP(r)[0] == '^')
         r->extflags |= RXf_START_ONLY;
 #else
-    if (r->extflags & RXf_SPLIT && RXp_PRELEN(r) == 1 && RXp_PRECOMP(r)[0] == ' ')
+    if (r->extflags & RXf_SPLIT && RXp_PRELEN(r) == 1 && RX_PRECOMP(r)[0] == ' ')
             /* XXX: this should happen BEFORE we compile */
             r->extflags |= (RXf_SKIPWHITE|RXf_WHITE); 
     else {
@@ -9143,7 +9143,7 @@ Perl_pregfree(pTHX_ struct regexp *r)
         CALLREGFREE_PVT(r); /* free the private data */
         if (r->paren_names)
             SvREFCNT_dec(r->paren_names);
-        Safefree(RXp_WRAPPED(r));
+        Safefree(RX_WRAPPED(r));
     }        
     if (r->substrs) {
         if (r->anchored_substr)
@@ -9241,7 +9241,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const r)
 	{
 	    SV *dsv= sv_newmortal();
             RE_PV_QUOTED_DECL(s, (r->extflags & RXf_UTF8),
-                dsv, RXp_PRECOMP(r), RXp_PRELEN(r), 60);
+                dsv, RX_PRECOMP(r), RXp_PRELEN(r), 60);
             PerlIO_printf(Perl_debug_log,"%sFreeing REx:%s %s\n", 
                 PL_colors[4],PL_colors[5],s);
         }
@@ -9427,7 +9427,7 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
 
     precomp_offset = RX_PRECOMP(ret) - ret->wrapped;
 
-    RXp_WRAPPED(ret)    = SAVEPVN(RXp_WRAPPED(ret), RXp_WRAPLEN(ret)+1);
+    RX_WRAPPED(ret)     = SAVEPVN(RX_WRAPPED(ret), RXp_WRAPLEN(ret)+1);
     RX_PRECOMP(ret)     = ret->wrapped + precomp_offset;
     ret->paren_names    = hv_dup_inc(ret->paren_names, param);
 
