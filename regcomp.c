@@ -9240,7 +9240,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const r)
 	    reginitcolors();
 	{
 	    SV *dsv= sv_newmortal();
-            RE_PV_QUOTED_DECL(s, (r->extflags & RXf_UTF8),
+            RE_PV_QUOTED_DECL(s, RX_UTF8(r),
                 dsv, RX_PRECOMP(r), RX_PRELEN(r), 60);
             PerlIO_printf(Perl_debug_log,"%sFreeing REx:%s %s\n", 
                 PL_colors[4],PL_colors[5],s);
@@ -9594,7 +9594,7 @@ Perl_reg_stringify(pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags, I32 *haseval ) {
     if (haseval) 
         *haseval = RX_SEEN_EVALS(re);
     if (flags)    
-	*flags = ((RX_EXTFLAGS(re) & RXf_UTF8) ? 1 : 0);
+	*flags = RX_UTF8(re) ? 1 : 0;
     if (lp)
 	*lp = RX_WRAPLEN(re);
     return RX_WRAPPED(re);
