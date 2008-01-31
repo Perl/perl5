@@ -1585,7 +1585,7 @@ s	|void	|strip_return	|NN SV *sv
 #  endif
 #  if defined(DEBUGGING)
 s	|int	|tokereport	|I32 rv|NN const YYSTYPE* lvalp
-s	|void	|printbuf	|NN const char *const fmt|NN const char* s
+s	|void	|printbuf	|NN const char *const fmt|NN const char *const s
 #  endif
 #endif
 

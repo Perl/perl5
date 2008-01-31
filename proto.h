@@ -4171,7 +4171,7 @@ STATIC void	S_strip_return(pTHX_ SV *sv)
 STATIC int	S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC void	S_printbuf(pTHX_ const char *const fmt, const char* s)
+STATIC void	S_printbuf(pTHX_ const char *const fmt, const char *const s)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
