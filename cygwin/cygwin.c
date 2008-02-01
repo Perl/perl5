@@ -292,28 +292,31 @@ XS(XS_Cygwin_mount_flags)
     char flags[260];
 
     if (items != 1)
-        Perl_croak(aTHX_ "Usage: Cygwin::mount_flags(mnt_dir)");
+        Perl_croak(aTHX_ "Usage: Cygwin::mount_flags(mnt_dir|'/cygwin')");
 
     pathname = SvPV_nolen(ST(0));
-    
-    /* TODO: check for cygdrive registry setting. use CW_GET_CYGDRIVE_INFO then
+
+    /* TODO: Check for cygdrive registry setting,
+     *       and then use CW_GET_CYGDRIVE_INFO
      */
     if (!strcmp(pathname, "/cygdrive")) {
 	char user[260];
 	char system[260];
 	char user_flags[260];
 	char system_flags[260];
+
 	cygwin_internal (CW_GET_CYGDRIVE_INFO, user, system, user_flags,
 			 system_flags);
-	if (strlen(system) > 0)
-	    strcpy (flags, system_flags);
-	if (strlen(user) > 0)
-	    strcpy(flags, user_flags);
-	if (strlen(flags) > 0)
-	    strcat(flags, ",");
-	strcat(flags, "cygdrive");
+
+        if (strlen(user) > 0) {
+            sprintf(flags, "%s,cygdrive,%s", user_flags, user);
+        } else {
+            sprintf(flags, "%s,cygdrive,%s", system_flags, system);
+        }
+
 	ST(0) = sv_2mortal(newSVpv(flags, 0));
 	XSRETURN(1);
+
     } else {
 	struct mntent *mnt;
 	setmntent (0, 0);
