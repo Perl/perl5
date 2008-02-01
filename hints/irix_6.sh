@@ -344,7 +344,9 @@ esac
 # (We only need to do this for cc, not for gcc.  ccversion is computed above.)
 case "$ccversion" in
 '')  ;; # gcc.  Do nothing.
-*)  cppstdin=`pwd`/cppstdin
+*)  # Inside this call-back unit, we are down in the UU/ subdirectory,
+    # but Configure will look for cppstdin one level up.
+    cd ..; cppstdin=`pwd`/cppstdin; cd UU
     cpprun="$cppstdin"
     ;;
 esac
