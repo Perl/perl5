@@ -170,6 +170,14 @@ struct utsname {
 
 /* Compiler-specific stuff. */
 
+#if defined(_MSC_VER) || defined(__MINGW32__)
+/* VC uses non-standard way to determine the size and alignment if bit-fields */
+/* MinGW will compiler with -mms-bitfields, so should use the same types */
+#  define PERL_BITFIELD8  unsigned char
+#  define PERL_BITFIELD16 unsigned short
+#  define PERL_BITFIELD32 unsigned int
+#endif
+
 #ifdef __BORLANDC__		/* Borland C++ */
 
 #if (__BORLANDC__ <= 0x520)

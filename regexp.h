@@ -97,9 +97,9 @@ typedef struct regexp_paren_pair {
 	I32 sublen;	/* Length of string pointed by subbeg */	\
 	/* Information about the match that isn't often used */		\
 	/* offset from wrapped to the start of precomp */		\
-	unsigned pre_prefix:4;						\
+	PERL_BITFIELD32 pre_prefix:4;					\
 	/* number of eval groups in the pattern - for security checks */\
-	unsigned seen_evals:28
+	PERL_BITFIELD32 seen_evals:28
 
 typedef struct regexp {
 	_XPV_HEAD;

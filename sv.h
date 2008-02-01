@@ -117,10 +117,10 @@ struct STRUCT_SV {		/* struct sv { */
     _SV_HEAD(void*);
     _SV_HEAD_UNION;
 #ifdef DEBUG_LEAKING_SCALARS
-    unsigned	sv_debug_optype:9;	/* the type of OP that allocated us */
-    unsigned	sv_debug_inpad:1;	/* was allocated in a pad for an OP */
-    unsigned	sv_debug_cloned:1;	/* was cloned for an ithread */
-    unsigned	sv_debug_line:16;	/* the line where we were allocated */
+    PERL_BITFIELD32 sv_debug_optype:9;	/* the type of OP that allocated us */
+    PERL_BITFIELD32 sv_debug_inpad:1;	/* was allocated in a pad for an OP */
+    PERL_BITFIELD32 sv_debug_cloned:1;	/* was cloned for an ithread */
+    PERL_BITFIELD32 sv_debug_line:16;	/* the line where we were allocated */
     char *	sv_debug_file;		/* the file where we were allocated */
 #endif
 };

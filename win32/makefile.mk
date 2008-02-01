@@ -522,7 +522,7 @@ LIBOUT_FLAG	=
 
 # NOTE: we assume that GCC uses MSVCRT.DLL
 # See comments about PERL_MSVCRT_READFIX in the "cl" compiler section below.
-BUILDOPT	+= -fno-strict-aliasing -DPERL_MSVCRT_READFIX
+BUILDOPT	+= -fno-strict-aliasing -mms-bitfields -DPERL_MSVCRT_READFIX
 
 .ELSE
 
