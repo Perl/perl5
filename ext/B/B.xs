@@ -463,6 +463,16 @@ cchar(pTHX_ SV *sv)
     return sstr;
 }
 
+#if PERL_VERSION >= 9
+#  define PMOP_pmreplstart(o)	o->op_pmstashstartu.op_pmreplstart
+#  define PMOP_pmreplroot(o)	o->op_pmreplrootu.op_pmreplroot
+#else
+#  define PMOP_pmreplstart(o)	o->op_pmreplstart
+#  define PMOP_pmreplroot(o)	o->op_pmreplroot
+#  define PMOP_pmpermflags(o)	o->op_pmpermflags
+#  define PMOP_pmdynflags(o)      o->op_pmdynflags
+#endif
+
 static void
 walkoptree(pTHX_ SV *opsv, const char *method)
 {
@@ -492,12 +502,7 @@ walkoptree(pTHX_ SV *opsv, const char *method)
 	}
     }
     if (o && (cc_opclass(aTHX_ o) == OPc_PMOP) && o->op_type != OP_PUSHRE
-#if PERL_VERSION >= 9
-	    && (kid = cPMOPo->op_pmreplrootu.op_pmreplroot)
-#else
-	    && (kid = cPMOPo->op_pmreplroot)
-#endif
-	)
+           && (kid = PMOP_pmreplroot(cPMOPo)))
     {
 	sv_setiv(newSVrv(opsv, cc_opclassname(aTHX_ kid)), PTR2IV(kid));
 	walkoptree(aTHX_ opsv, method);
@@ -523,11 +528,7 @@ oplist(pTHX_ OP *o, SV **SP)
 	XPUSHs(opsv);
         switch (o->op_type) {
 	case OP_SUBST:
-#if PERL_VERSION >= 9
-            SP = oplist(aTHX_ cPMOPo->op_pmstashstartu.op_pmreplstart, SP);
-#else
-            SP = oplist(aTHX_ cPMOPo->op_pmreplstart, SP);
-#endif
+            SP = oplist(aTHX_ PMOP_pmreplstart(cPMOPo), SP);
             continue;
 	case OP_SORT:
 	    if (o->op_flags & OPf_STACKED && o->op_flags & OPf_SPECIAL) {
@@ -988,13 +989,6 @@ LISTOP_children(o)
     OUTPUT:
         RETVAL
 
-#if PERL_VERSION >= 9
-#  define PMOP_pmreplstart(o)	o->op_pmstashstartu.op_pmreplstart
-#else
-#  define PMOP_pmreplstart(o)	o->op_pmreplstart
-#  define PMOP_pmpermflags(o)	o->op_pmpermflags
-#  define PMOP_pmdynflags(o)      o->op_pmdynflags
-#endif
 #define PMOP_pmnext(o)		o->op_pmnext
 #define PMOP_pmregexp(o)	PM_GETRE(o)
 #ifdef USE_ITHREADS
