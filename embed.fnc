@@ -1246,7 +1246,7 @@ sR	|I32	|dopoptolabel	|NN const char *label
 sR	|I32	|dopoptoloop	|I32 startingblock
 sR	|I32	|dopoptosub_at	|NN const PERL_CONTEXT* cxstk|I32 startingblock
 s	|void	|save_lines	|NULLOK AV *array|NN SV *sv
-sR	|OP*	|doeval		|int gimme|NULLOK OP** startop|NULLOK CV* outside|U32 seq
+s	|bool	|doeval		|int gimme|NULLOK OP** startop|NULLOK CV* outside|U32 seq
 sR	|PerlIO *|check_type_and_open|NN const char *name
 #ifndef PERL_DISABLE_PMC
 sR	|PerlIO *|doopen_pm	|NN const char *name|const STRLEN namelen

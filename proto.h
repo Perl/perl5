@@ -1785,9 +1785,7 @@ STATIC I32	S_dopoptosub_at(pTHX_ const PERL_CONTEXT* cxstk, I32 startingblock)
 			__attribute__warn_unused_result__;
 
 STATIC void	S_save_lines(pTHX_ AV *array, SV *sv);
-STATIC OP*	S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
-			__attribute__warn_unused_result__;
-
+STATIC bool	S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq);
 STATIC PerlIO *	S_check_type_and_open(pTHX_ const char *name)
 			__attribute__warn_unused_result__;
 
