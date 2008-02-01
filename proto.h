@@ -3393,7 +3393,7 @@ STATIC void	S_find_beginning(pTHX_ SV* linestr_sv, PerlIO *rsfp)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC void	S_forbid_setid(pTHX_ const char flag, const int suidscript);
+STATIC void	S_forbid_setid(pTHX_ const char flag, const bool suidscript);
 STATIC void	S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep, bool canrelocate);
 STATIC void	S_init_interp(pTHX);
 STATIC void	S_init_ids(pTHX);
@@ -3407,7 +3407,7 @@ STATIC void	S_my_exit_jump(pTHX)
 			__attribute__noreturn__;
 
 STATIC void	S_nuke_stacks(pTHX);
-STATIC int	S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv, int *suidscript, PerlIO **rsfpp)
+STATIC int	S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv, bool *suidscript, PerlIO **rsfpp)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3)
 			__attribute__nonnull__(pTHX_4)
@@ -3416,12 +3416,28 @@ STATIC int	S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv, in
 STATIC void	S_usage(pTHX_ const char *name)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC void	S_validate_suid(pTHX_ const char *validarg, const char *scriptname, int fdscript, int suidscript, SV* linestr_sv, PerlIO *rsfp)
+#ifdef DOSUID
+#  ifdef IAMSUID
+STATIC void	S_validate_suid(pTHX_ const char *validarg, int fdscript, bool suidscript, SV* linestr_sv, PerlIO *rsfp)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_4)
+			__attribute__nonnull__(pTHX_5);
+
+#  else
+STATIC void	S_validate_suid(pTHX_ const char *validarg, const char *scriptname, int fdscript, SV* linestr_sv, PerlIO *rsfp)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_5)
-			__attribute__nonnull__(pTHX_6);
+			__attribute__nonnull__(pTHX_4)
+			__attribute__nonnull__(pTHX_5);
 
+#  endif
+#else
+#  ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
+STATIC void	S_validate_suid(pTHX_ PerlIO *rsfp)
+			__attribute__nonnull__(pTHX_1);
+
+#  endif
+#endif
 
 #  if defined(IAMSUID)
 STATIC int	S_fd_on_nosuid_fs(pTHX_ int fd);

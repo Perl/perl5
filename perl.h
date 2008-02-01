@@ -41,6 +41,24 @@
 #   endif
 #endif
 
+/* This logic needs to come after reading config.h, but before including
+   proto.h  */
+#ifdef IAMSUID
+#  ifndef DOSUID
+#    define DOSUID
+#  endif
+#endif
+
+#ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
+#  ifdef DOSUID
+#    undef DOSUID
+#  endif
+#  ifdef IAMSUID
+#    undef IAMSUID
+#    define SETUID_SCRIPTS_ARE_SECURE_NOW_AND_IAMSUID
+#  endif
+#endif
+
 /* See L<perlguts/"The Perl API"> for detailed notes on
  * PERL_IMPLICIT_CONTEXT and PERL_IMPLICIT_SYS */
 
