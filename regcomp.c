@@ -1712,7 +1712,6 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 {
     register regexp *r;
     regnode *scan;
-    regnode *first;
     I32 flags;
     I32 minlen = 0;
     I32 sawplus = 0;
@@ -1860,21 +1859,26 @@ redo_first_pass:
 	struct regnode_charclass_class ch_class;
 	int stclass_flag;
 	I32 last_close = 0;
-
-	first = scan;
+        regnode *first= scan;
+        regnode *first_next= regnext(first);
+	
 	/* Skip introductions and multiplicators >= 1. */
 	while ((OP(first) == OPEN && (sawopen = 1)) ||
 	       /* An OR of *one* alternative - should not happen now. */
-	    (OP(first) == BRANCH && OP(regnext(first)) != BRANCH) ||
+	    (OP(first) == BRANCH && OP(first_next) != BRANCH) ||
 	    (OP(first) == PLUS) ||
 	    (OP(first) == MINMOD) ||
 	       /* An {n,m} with n>0 */
-	    (PL_regkind[(U8)OP(first)] == CURLY && ARG1(first) > 0) ) {
+	    (PL_regkind[(U8)OP(first)] == CURLY && ARG1(first) > 0) ||
+	    (OP(first) == NOTHING && PL_regkind[OP(first_next)] != END ))
+	{
+	        
 		if (OP(first) == PLUS)
 		    sawplus = 1;
 		else
 		    first += regarglen[(U8)OP(first)];
 		first = NEXTOPER(first);
+		first_next= regnext(first);
 	}
 
 	/* Starting-point info. */
@@ -3997,12 +4001,16 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		{
 		    if (isLOWER(prevvalue)) {
 			for (i = prevvalue; i <= ceilvalue; i++)
-			    if (isLOWER(i))
+			    if (isLOWER(i) && !ANYOF_BITMAP_TEST(ret,i)) {
+				stored++;
 				ANYOF_BITMAP_SET(ret, i);
+			    }
 		    } else {
 			for (i = prevvalue; i <= ceilvalue; i++)
-			    if (isUPPER(i))
+			    if (isUPPER(i) && !ANYOF_BITMAP_TEST(ret,i)) {
+				stored++;
 				ANYOF_BITMAP_SET(ret, i);
+			    }
 		    }
 		}
 		else

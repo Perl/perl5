@@ -1017,3 +1017,6 @@ X(?:ABCF[cC]x*|ABCD|ABCF):(?:DIT|DID|DIM)	XABCFCxxxxxxxxxx:DIM	y	$&	XABCFCxxxxxx
 (x|y|z[QW]){1,5}(longish|loquatious|excessive|overblown[QW]){1,5}	xyzQzWlongishoverblownW	y	$1-$2	zW-overblownW
 
 a*(?!)	aaaab	n	-	-
+
+.*\z	foo\n	y	-	-
+^(?:(\d)x)?\d$	1	y	${\(defined($1)?1:0)}	0	

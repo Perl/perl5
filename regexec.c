@@ -241,9 +241,8 @@ S_regcppop(pTHX)
      * requiring null fields (pat.t#187 and split.t#{13,14}
      * (as of patchlevel 7877)  will fail.  Then again,
      * this code seems to be necessary or otherwise
-     * building DynaLoader will fail:
-     * "Error: '*' not in typemap in DynaLoader.xs, line 164"
-     * --jhi */
+     * this erroneously leaves $1 defined: "1" =~ /^(?:(\d)x)?\d$/
+     * --jhi updated by dapm */
     for (i = *PL_reglastparen + 1; (U32)i <= PL_regnpar; i++) {
 	if (i > PL_regsize)
 	    PL_regstartp[i] = -1;
@@ -1484,7 +1483,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		    if (regtry(prog, s))
 			goto got_it;
 		  after_try:
-		    if (s >= end)
+		    if (s > end)
 			goto phooey;
 		    if (prog->reganch & RE_USE_INTUIT) {
 			s = re_intuit_start(prog, sv, s + 1, strend, flags, NULL);
@@ -1891,13 +1890,12 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
     /* Tests pat.t#187 and split.t#{13,14} seem to depend on this code.
      * Actually, the code in regcppop() (which Ilya may be meaning by
      * PL_reglastparen), is not needed at all by the test suite
-     * (op/regexp, op/pat, op/split), but that code is needed, oddly
-     * enough, for building DynaLoader, or otherwise this
-     * "Error: '*' not in typemap in DynaLoader.xs, line 164"
-     * will happen.  Meanwhile, this code *is* needed for the
+     * (op/regexp, op/pat, op/split), but that code is needed otherwise
+     * this erroneously leaves $1 defined: "1" =~ /^(?:(\d)x)?\d$/
+     * Meanwhile, this code *is* needed for the
      * above-mentioned test suite tests to succeed.  The common theme
      * on those tests seems to be returning null fields from matches.
-     * --jhi */
+     * --jhi updated by dapm */
 #if 1
     if (prog->nparens) {
 	I32 *sp = prog->startp;
