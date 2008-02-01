@@ -54,12 +54,12 @@
     OP*		(CPERLscope(*op_ppaddr))(pTHX);		\
     MADPROP_IN_BASEOP			\
     PADOFFSET	op_targ;		\
-    unsigned	op_type:9;		\
-    unsigned	op_opt:1;		\
-    unsigned	op_latefree:1;		\
-    unsigned	op_latefreed:1;		\
-    unsigned	op_attached:1;		\
-    unsigned	op_spare:3;		\
+    PERL_BITFIELD16 op_type:9;		\
+    PERL_BITFIELD16 op_opt:1;		\
+    PERL_BITFIELD16 op_latefree:1;	\
+    PERL_BITFIELD16 op_latefreed:1;	\
+    PERL_BITFIELD16 op_attached:1;	\
+    PERL_BITFIELD16 op_spare:3;		\
     U8		op_flags;		\
     U8		op_private;
 #endif

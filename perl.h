@@ -3370,6 +3370,17 @@ struct nexttoken {
 };
 #endif
 
+/* macros to define bit-fields in structs. */
+#ifndef PERL_BITFIELD8
+#  define PERL_BITFIELD8 unsigned
+#endif
+#ifndef PERL_BITFIELD16
+#  define PERL_BITFIELD16 unsigned
+#endif
+#ifndef PERL_BITFIELD32
+#  define PERL_BITFIELD32 unsigned
+#endif
+
 #include "regexp.h"
 #include "sv.h"
 #include "util.h"
