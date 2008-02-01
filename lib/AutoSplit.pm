@@ -1,9 +1,7 @@
 package AutoSplit;
 
-use 5.006_001;
 use Exporter ();
 use Config qw(%Config);
-use Carp qw(carp);
 use File::Basename ();
 use File::Path qw(mkpath);
 use File::Spec::Functions qw(curdir catfile catdir);
@@ -130,6 +128,75 @@ either the I<__END__> marker or a "package Name;"-style specification.
 C<AutoSplit> will also emit general diagnostics for inability to
 create directories or files.
 
+=head1 AUTHOR
+
+C<AutoSplit> is maintained by the perl5-porters. Please direct
+any questions to the canonical mailing list. Anything that
+is applicable to the CPAN release can be sent to its maintainer,
+though.
+
+Author and Maintainer: The Perl5-Porters <perl5-porters@perl.org>
+
+Maintainer of the CPAN release: Steffen Mueller <smueller@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+This package has been part of the perl core since the first release
+of perl5. It has been released separately to CPAN so older installations
+can benefit from bug fixes.
+
+This package has the same copyright and license as the perl core:
+
+             Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+        2000, 2001, 2002, 2003, 2004, 2005, 2006 by Larry Wall and others
+    
+			    All rights reserved.
+    
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of either:
+    
+	a) the GNU General Public License as published by the Free
+	Software Foundation; either version 1, or (at your option) any
+	later version, or
+    
+	b) the "Artistic License" which comes with this Kit.
+    
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See either
+    the GNU General Public License or the Artistic License for more details.
+    
+    You should have received a copy of the Artistic License with this
+    Kit, in the file named "Artistic".  If not, I'll be glad to provide one.
+    
+    You should also have received a copy of the GNU General Public License
+    along with this program in the file named "Copying". If not, write to the 
+    Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
+    02111-1307, USA or visit their web page on the internet at
+    http://www.gnu.org/copyleft/gpl.html.
+    
+    For those of you that choose to use the GNU General Public License,
+    my interpretation of the GNU General Public License is that no Perl
+    script falls under the terms of the GPL unless you explicitly put
+    said script under the terms of the GPL yourself.  Furthermore, any
+    object code linked with perl does not automatically fall under the
+    terms of the GPL, provided such object code only adds definitions
+    of subroutines and variables, and does not otherwise impair the
+    resulting interpreter from executing any standard Perl script.  I
+    consider linking in C subroutines in this manner to be the moral
+    equivalent of defining subroutines in the Perl language itself.  You
+    may sell such an object file as proprietary provided that you provide
+    or offer to provide the Perl source, as specified by the GNU General
+    Public License.  (This is merely an alternate way of specifying input
+    to the program.)  You may also sell a binary produced by the dumping of
+    a running Perl script that belongs to you, provided that you provide or
+    offer to provide the Perl source as specified by the GPL.  (The
+    fact that a Perl interpreter and your code are in the same binary file
+    is, in this case, a form of mere aggregation.)  This is my interpretation
+    of the GPL.  If you still have concerns or difficulties understanding
+    my intent, feel free to contact me.  Of course, the Artistic License
+    spells all this out for your protection, so you may prefer to use that.
+
 =cut
 
 # for portability warn about names longer than $maxlen
@@ -147,15 +214,35 @@ if (defined (&Dos::UseLFN)) {
 }
 my $Is_VMS = ($^O eq 'VMS');
 
-# allow checking for valid ': attrlist' attachments
-# (we use 'our' rather than 'my' here, due to the rather complex and buggy
-# behaviour of lexicals with qr// and (??{$lex}) )
-our $nested;
-$nested = qr{ \( (?: (?> [^()]+ ) | (??{ $nested }) )* \) }x;
-our $one_attr = qr{ (?> (?! \d) \w+ (?:$nested)? ) (?:\s*\:\s*|\s+(?!\:)) }x;
-our $attr_list = qr{ \s* : \s* (?: $one_attr )* }x;
+# allow checking for valid ': attrlist' attachments.
+# extra jugglery required to support both 5.8 and 5.9/5.10 features
+# (support for 5.8 required for cross-compiling environments)
 
-
+my $attr_list = 
+  $] >= 5.009005 ?
+  eval <<'__QR__'
+  qr{
+    \s* : \s*
+    (?:
+	# one attribute
+	(?> # no backtrack
+	    (?! \d) \w+
+	    (?<nested> \( (?: [^()]++ | (?&nested)++ )*+ \) ) ?
+	)
+	(?: \s* : \s* | \s+ (?! :) )
+    )*
+  }x
+__QR__
+  :
+  do {
+    # In pre-5.9.5 world we have to do dirty tricks.
+    # (we use 'our' rather than 'my' here, due to the rather complex and buggy
+    # behaviour of lexicals with qr// and (??{$lex}) )
+    our $trick1; # yes, cannot our and assign at the same time.
+    $trick1 = qr{ \( (?: (?> [^()]+ ) | (??{ $trick1 }) )* \) }x;
+    our $trick2 = qr{ (?> (?! \d) \w+ (?:$trick1)? ) (?:\s*\:\s*|\s+(?!\:)) }x;
+    qr{ \s* : \s* (?: $trick2 )* }x;
+  };
 
 sub autosplit{
     my($file, $autodir,  $keep, $ckal, $ckmt) = @_;
@@ -168,32 +255,35 @@ sub autosplit{
     autosplit_file($file, $autodir, $keep, $ckal, $ckmt);
 }
 
+sub carp{
+    require Carp;
+    goto &Carp::carp;
+}
 
 # This function is used during perl building/installation
 # ./miniperl -e 'use AutoSplit; autosplit_lib_modules(@ARGV)' ...
 
 sub autosplit_lib_modules {
     my(@modules) = @_; # list of Module names
-
-    while (defined(my $m = shift @modules)) {
-	while ($m =~ m#([^:]+)::([^:].*)#) { # in case specified as ABC::XYZ
-	    $m = catfile($1, $2);
+    local $_; # Avoid clobber.
+    while (defined($_ = shift @modules)) {
+	while (m#([^:]+)::([^:].*)#) { # in case specified as ABC::XYZ
+	    $_ = catfile($1, $2);
 	}
-	$m =~ s|\\|/|g;		# bug in ksh OS/2
-	$m =~ s#^lib/##s; # incase specified as lib/*.pm
+	s|\\|/|g;		# bug in ksh OS/2
+	s#^lib/##s; # incase specified as lib/*.pm
 	my($lib) = catfile(curdir(), "lib");
 	if ($Is_VMS) { # may need to convert VMS-style filespecs
 	    $lib =~ s#^\[\]#.\/#;
 	}
-	$m =~ s#^$lib\W+##s; # incase specified as ./lib/*.pm
-	if ($Is_VMS && $m =~ /[:>\]]/) {
-	    # may need to convert VMS-style filespecs
-	    my ($dir,$name) = $m =~ (/(.*])(.*)/s);
+	s#^$lib\W+##s; # incase specified as ./lib/*.pm
+	if ($Is_VMS && /[:>\]]/) { # may need to convert VMS-style filespecs
+	    my ($dir,$name) = (/(.*])(.*)/s);
 	    $dir =~ s/.*lib[\.\]]//s;
 	    $dir =~ s#[\.\]]#/#g;
-	    $m = $dir . $name;
+	    $_ = $dir . $name;
 	}
-	autosplit_file(catfile($lib, $m), catfile($lib, "auto"),
+	autosplit_file(catfile($lib, $_), catfile($lib, "auto"),
 		       $Keep, $CheckForAutoloader, $CheckModTime);
     }
     0;
@@ -406,14 +496,14 @@ EOT
 		print "  deleting $file\n" if ($Verbose>=2);
 		my($deleted,$thistime);  # catch all versions on VMS
 		do { $deleted += ($thistime = unlink $file) } while ($thistime);
-		carp "Unable to delete $file: $!" unless $deleted;
+		carp ("Unable to delete $file: $!") unless $deleted;
 	    }
 	    closedir($outdir);
 	}
     }
 
     open(my $ts,">$al_idx_file") or
-	carp "AutoSplit: unable to create timestamp file ($al_idx_file): $!";
+	carp ("AutoSplit: unable to create timestamp file ($al_idx_file): $!");
     print $ts "# Index created by AutoSplit for $filename\n";
     print $ts "#    (file acts as timestamp)\n";
     $last_package = '';

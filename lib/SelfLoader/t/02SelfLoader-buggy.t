@@ -1,5 +1,3 @@
-#!./perl
-
 BEGIN {
     if( $ENV{PERL_CORE} ) {
         chdir 't' if -d 't';

@@ -1,8 +1,10 @@
 #!./perl -w
 
 BEGIN {
+  if ($ENV{PERL_CORE}) {
     chdir 't' if -d 't';
-	@INC = '../lib';
+    @INC = '../lib';
+  }
 }
 
 use strict;
@@ -13,10 +15,10 @@ my $dir;
 BEGIN
 {
 	$dir = File::Spec->catdir( "auto-$$" );
-	unshift @INC, $dir;
+    unshift @INC, $dir;
 }
 
-use Test::More tests => 22;
+use Test::More tests => 17;
 
 # First we must set up some autoloader files
 my $fulldir = File::Spec->catdir( $dir, 'auto', 'Foo' );
@@ -30,15 +32,6 @@ sub foo { shift; shift || "foo" }
 1;
 EOT
 close(FOO);
-
-open(BAR, '>', File::Spec->catfile( $fulldir, 'bar.al' ))
-	or die "Can't open bar file: $!";
-print BAR <<'EOT';
-package Foo;
-sub bar { shift; shift || "bar" }
-1;
-EOT
-close(BAR);
 
 open(BAZ, '>', File::Spec->catfile( $fulldir, 'bazmarkhian.al' ))
 	or die "Can't open bazmarkhian file: $!";
@@ -85,10 +78,6 @@ ok( $result,               'can() first time' );
 is( $foo->foo, 'foo', 'autoloaded first time' );
 is( $foo->foo, 'foo', 'regular call' );
 is( $result,   \&Foo::foo, 'can() returns ref to regular installed sub' );
-$result    = $foo->can( 'bar' );
-ok( $result,               'can() should work when importing AUTOLOAD too' );
-is( $foo->bar, 'bar', 'regular call' );
-is( $result,   \&Foo::bar, '... returning ref to regular installed sub' );
 
 eval {
     $foo->will_fail;
@@ -110,9 +99,7 @@ like( $@, qr/oops/, 'indirect method call' );
 # autoloaded filename.
 'foo' =~ /(\w+)/;
 
-is( $foo->bar($1), 'foo', 'autoloaded method should not stomp match vars' );
-is( $foo->bar($1), 'foo', '(again)' );
-is( $foo->bazmarkhianish($1), 'foo', 'for any method call' );
+is( $foo->bazmarkhianish($1), 'foo', 'autoloaded method should not stomp match vars' );
 is( $foo->bazmarkhianish($1), 'foo', '(again)' );
 
 # Used to retry long subnames with shorter filenames on any old

@@ -1290,10 +1290,10 @@ lib/Attribute/Handlers.pm		Attribute::Handlers
 lib/Attribute/Handlers/README		Attribute::Handlers
 lib/Attribute/Handlers/t/multi.t	See if Attribute::Handlers works
 lib/attributes.pm		For "sub foo : attrlist"
+lib/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
+lib/AutoLoader/t/02AutoSplit.t	See if AutoSplit works
 lib/AutoLoader.pm		Autoloader base class
-lib/AutoLoader.t		See if AutoLoader works
 lib/AutoSplit.pm		Split up autoload functions
-lib/AutoSplit.t			See if AutoSplit works
 lib/autouse.pm			Load and call a function only when it's used
 lib/autouse.t			See if autouse works
 lib/base.pm			Establish IS-A relationship at compile time
@@ -1627,6 +1627,8 @@ lib/File/stat.pm		By-name interface to Perl's builtin stat
 lib/File/stat.t			See if File::stat works
 lib/File/Temp.pm		create safe temporary files and file handles
 lib/File/Temp/t/cmp.t		See if File::Temp works
+lib/File/Temp/t/fork.t		See if File::Temp works
+lib/File/Temp/t/lock.t		See if File::Temp works
 lib/File/Temp/t/mktemp.t	See if File::Temp works
 lib/File/Temp/t/object.t	See if File::Temp works
 lib/File/Temp/t/posix.t		See if File::Temp works
@@ -1989,9 +1991,9 @@ lib/Search/Dict.pm		Perform binary search on dictionaries
 lib/Search/Dict.t		See if Search::Dict works
 lib/SelectSaver.pm		Enforce proper select scoping
 lib/SelectSaver.t		See if SelectSaver works
-lib/SelfLoader-buggy.t		See if SelfLoader works
+lib/SelfLoader/t/02SelfLoader-buggy.t	See if SelfLoader works
 lib/SelfLoader.pm		Load functions only on demand
-lib/SelfLoader.t		See if SelfLoader works
+lib/SelfLoader/t/01SelfLoader.t	See if SelfLoader works
 lib/Shell.pm			Make AUTOLOADed system() calls
 lib/Shell.t			Tests for above
 lib/shellwords.pl		Perl library to split into words with shell quoting

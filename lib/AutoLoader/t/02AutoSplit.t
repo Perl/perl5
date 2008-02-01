@@ -1,5 +1,3 @@
-#!./perl -w
-
 # AutoLoader.t runs before this test, so it seems safe to assume that it will
 # work.
 
@@ -17,8 +15,8 @@ BEGIN {
 	$incdir = "auto-$$";
 	$lib = '"-I../lib"'; # ok on unix, nt, The extra \" are for VMS
     }
-    @INC = $incdir;
-    push @INC, '../lib';
+    unshift @INC, $incdir;
+    unshift @INC, '../lib';
 }
 my $runperl = "$^X $lib";
 
