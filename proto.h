@@ -387,16 +387,16 @@ PERL_CALLCONV HV*	Perl_gv_stashpvn(pTHX_ const char* name, U32 namelen, I32 flag
 PERL_CALLCONV HV*	Perl_gv_stashsv(pTHX_ SV* sv, I32 flags);
 PERL_CALLCONV void	Perl_hv_clear(pTHX_ HV* tb);
 PERL_CALLCONV void	Perl_hv_delayfree_ent(pTHX_ HV* hv, HE* entry);
-/* PERL_CALLCONV SV*	Perl_hv_delete(pTHX_ HV* tb, const char* key, I32 klen, I32 flags); */
-/* PERL_CALLCONV SV*	Perl_hv_delete_ent(pTHX_ HV* tb, SV* key, I32 flags, U32 hash); */
-/* PERL_CALLCONV bool	Perl_hv_exists(pTHX_ HV* tb, const char* key, I32 klen)
+/* PERL_CALLCONV SV*	hv_delete(pTHX_ HV* tb, const char* key, I32 klen, I32 flags); */
+/* PERL_CALLCONV SV*	hv_delete_ent(pTHX_ HV* tb, SV* key, I32 flags, U32 hash); */
+/* PERL_CALLCONV bool	hv_exists(pTHX_ HV* tb, const char* key, I32 klen)
 			__attribute__warn_unused_result__; */
 
-/* PERL_CALLCONV bool	Perl_hv_exists_ent(pTHX_ HV* tb, SV* key, U32 hash)
+/* PERL_CALLCONV bool	hv_exists_ent(pTHX_ HV* tb, SV* key, U32 hash)
 			__attribute__warn_unused_result__; */
 
-/* PERL_CALLCONV SV**	Perl_hv_fetch(pTHX_ HV* tb, const char* key, I32 klen, I32 lval); */
-/* PERL_CALLCONV HE*	Perl_hv_fetch_ent(pTHX_ HV* tb, SV* key, I32 lval, U32 hash); */
+/* PERL_CALLCONV SV**	hv_fetch(pTHX_ HV* tb, const char* key, I32 klen, I32 lval); */
+/* PERL_CALLCONV HE*	hv_fetch_ent(pTHX_ HV* tb, SV* key, I32 lval, U32 hash); */
 PERL_CALLCONV void*	Perl_hv_common(pTHX_ HV* tb, SV* keysv, const char* key, STRLEN klen, int flags, int action, SV* val, U32 hash);
 PERL_CALLCONV void*	Perl_hv_common_key_len(pTHX_ HV *hv, const char *key, I32 klen_i32, const int action, SV *val, const U32 hash);
 PERL_CALLCONV void	Perl_hv_free_ent(pTHX_ HV* hv, HE* entryK);
@@ -421,9 +421,9 @@ PERL_CALLCONV SV*	Perl_hv_iterval(pTHX_ HV* tb, HE* entry)
 
 PERL_CALLCONV void	Perl_hv_ksplit(pTHX_ HV* hv, IV newmax);
 /* PERL_CALLCONV void	Perl_hv_magic(pTHX_ HV* hv, GV* gv, int how); */
-/* PERL_CALLCONV SV**	Perl_hv_store(pTHX_ HV* tb, const char* key, I32 klen, SV* val, U32 hash); */
-/* PERL_CALLCONV HE*	Perl_hv_store_ent(pTHX_ HV* tb, SV* key, SV* val, U32 hash); */
-/* PERL_CALLCONV SV**	Perl_hv_store_flags(pTHX_ HV* tb, const char* key, I32 klen, SV* val, U32 hash, int flags); */
+/* PERL_CALLCONV SV**	hv_store(pTHX_ HV* tb, const char* key, I32 klen, SV* val, U32 hash); */
+/* PERL_CALLCONV HE*	hv_store_ent(pTHX_ HV* tb, SV* key, SV* val, U32 hash); */
+/* PERL_CALLCONV SV**	hv_store_flags(pTHX_ HV* tb, const char* key, I32 klen, SV* val, U32 hash, int flags); */
 PERL_CALLCONV void	Perl_hv_undef(pTHX_ HV* tb);
 PERL_CALLCONV I32	Perl_ibcmp(pTHX_ const char* a, const char* b, I32 len)
 			__attribute__pure__;
@@ -1676,7 +1676,7 @@ PERL_CALLCONV void	Perl_Slab_Free(pTHX_ void *op);
 
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 STATIC void	S_find_beginning(pTHX_ SV* linestr_sv);
-STATIC void	S_forbid_setid(pTHX_ const char flag, const int suidscript);
+STATIC void	S_forbid_setid(pTHX_ const char flag, const bool suidscript);
 STATIC void	S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep, bool canrelocate);
 STATIC void	S_init_interp(pTHX);
 STATIC void	S_init_ids(pTHX);
@@ -1688,9 +1688,21 @@ STATIC void	S_my_exit_jump(pTHX)
 			__attribute__noreturn__;
 
 STATIC void	S_nuke_stacks(pTHX);
-STATIC int	S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv, int *suidscript);
+STATIC int	S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv, bool *suidscript);
 STATIC void	S_usage(pTHX_ const char *name);
-STATIC void	S_validate_suid(pTHX_ const char *validarg, const char *scriptname, int fdscript, int suidscript, SV* linestr_sv);
+#ifdef DOSUID
+#  ifdef IAMSUID
+STATIC void	S_validate_suid(pTHX_ const char *validarg, int fdscript, bool suidscript, SV* linestr_sv);
+#  else
+STATIC void	S_validate_suid(pTHX_ const char *validarg, const char *scriptname, int fdscript, SV* linestr_sv);
+#  endif
+#else
+#  ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
+STATIC void	S_validate_suid(pTHX);
+
+#  endif
+#endif
+
 #  if defined(IAMSUID)
 STATIC int	S_fd_on_nosuid_fs(pTHX_ int fd);
 #  endif
@@ -2417,10 +2429,10 @@ PERL_CALLCONV int	Perl_signbit(NV f)
 			__attribute__pure__;
 
 #endif
+
 PERL_CALLCONV void	Perl_sys_init(int* argc, char*** argv);
 PERL_CALLCONV void	Perl_sys_init3(int* argc, char*** argv, char*** env);
 PERL_CALLCONV void	Perl_sys_term(void);
-
 
 END_EXTERN_C
 /*

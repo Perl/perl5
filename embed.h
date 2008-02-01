@@ -1169,7 +1169,14 @@
 #define nuke_stacks		S_nuke_stacks
 #define open_script		S_open_script
 #define usage			S_usage
-#define validate_suid		S_validate_suid
+#endif
+#ifdef DOSUID
+#  ifdef IAMSUID
+#  else
+#  endif
+#else
+#  ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
+#  endif
 #endif
 #  if defined(IAMSUID)
 #ifdef PERL_CORE
@@ -3287,7 +3294,20 @@
 #define nuke_stacks()		S_nuke_stacks(aTHX)
 #define open_script(a,b,c,d)	S_open_script(aTHX_ a,b,c,d)
 #define usage(a)		S_usage(aTHX_ a)
-#define validate_suid(a,b,c,d,e)	S_validate_suid(aTHX_ a,b,c,d,e)
+#endif
+#ifdef DOSUID
+#  ifdef IAMSUID
+#ifdef PERL_CORE
+#endif
+#  else
+#ifdef PERL_CORE
+#endif
+#  endif
+#else
+#  ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
+#ifdef PERL_CORE
+#endif
+#  endif
 #endif
 #  if defined(IAMSUID)
 #ifdef PERL_CORE

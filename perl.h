@@ -41,6 +41,24 @@
 #   endif
 #endif
 
+/* This logic needs to come after reading config.h, but before including
+   proto.h  */
+#ifdef IAMSUID
+#  ifndef DOSUID
+#    define DOSUID
+#  endif
+#endif
+
+#ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
+#  ifdef DOSUID
+#    undef DOSUID
+#  endif
+#  ifdef IAMSUID
+#    undef IAMSUID
+#    define SETUID_SCRIPTS_ARE_SECURE_NOW_AND_IAMSUID
+#  endif
+#endif
+
 #if defined(USE_ITHREADS) && defined(USE_5005THREADS)
 #  include "error: USE_ITHREADS and USE_5005THREADS are incompatible"
 #endif
