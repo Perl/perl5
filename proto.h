@@ -3978,9 +3978,15 @@ STATIC void	S_del_sv(pTHX_ SV *p)
 
 #  endif
 #  if !defined(NV_PRESERVES_UV)
+#    ifdef DEBUGGING
 STATIC int	S_sv_2iuv_non_preserve(pTHX_ SV *sv, I32 numtype)
 			__attribute__nonnull__(pTHX_1);
 
+#    else
+STATIC int	S_sv_2iuv_non_preserve(pTHX_ SV *sv)
+			__attribute__nonnull__(pTHX_1);
+
+#    endif
 #  endif
 STATIC I32	S_expect_number(pTHX_ char** pattern)
 			__attribute__warn_unused_result__
