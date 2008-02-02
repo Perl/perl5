@@ -207,7 +207,7 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
     const char *pv  = str;
     const char * const end = pv + count; /* end of string */
 
-    if (!flags & PERL_PV_ESCAPE_NOCLEAR) 
+    if (!(flags & PERL_PV_ESCAPE_NOCLEAR))
 	    sv_setpvn(dsv, "", 0);
     
     if ((flags & PERL_PV_ESCAPE_UNI_DETECT) && is_utf8_string((U8*)pv, count))
