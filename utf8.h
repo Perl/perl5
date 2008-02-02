@@ -340,3 +340,13 @@ encoded character.
 #define IS_UTF8_CHAR_FAST(n) ((n) <= 4)
 
 #endif /* IS_UTF8_CHAR() for UTF-8 */
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

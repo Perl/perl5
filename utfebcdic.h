@@ -418,4 +418,12 @@ END_EXTERN_C
 #define UTF8_EIGHT_BIT_HI(c)	UTF_TO_NATIVE((((U8)(c))>>UTF_ACCUMULATION_SHIFT)|UTF_START_MARK(2))
 #define UTF8_EIGHT_BIT_LO(c)	UTF_TO_NATIVE(((((U8)(c)))&UTF_CONTINUATION_MASK)|UTF_CONTINUATION_MARK)
 
-
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

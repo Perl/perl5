@@ -418,3 +418,13 @@ struct reg_data {
 #define check_utf8 substrs->data[2].utf8_substr
 #define check_offset_min substrs->data[2].min_offset
 #define check_offset_max substrs->data[2].max_offset
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

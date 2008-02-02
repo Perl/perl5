@@ -1385,7 +1385,7 @@ Entries are returned in an apparently random order.  The actual random
 order is subject to change in future versions of perl, but it is
 guaranteed to be in the same order as either the C<keys> or C<values>
 function would produce on the same (unmodified) hash.  Since Perl
-5.8.1 the ordering is different even between different runs of Perl
+5.8.2 the ordering can be different even between different runs of Perl
 for security reasons (see L<perlsec/"Algorithmic Complexity Attacks">).
 
 When the hash is entirely read, a null array is returned in list context
@@ -1884,11 +1884,11 @@ Here's a mailbox appender for BSD systems.
 	flock(MBOX,LOCK_UN);
     }
 
-    open(MBOX, ">>/usr/spool/mail/$ENV{'USER'}")
+    open(my $mbox, ">>", "/usr/spool/mail/$ENV{'USER'}")
 	    or die "Can't open mailbox: $!";
 
     lock();
-    print MBOX $msg,"\n\n";
+    print $mbox $msg,"\n\n";
     unlock();
 
 On systems that support a real flock(), locks are inherited across fork()
@@ -2697,7 +2697,8 @@ Wednesday.  C<$yday> is the day of the year, in the range C<0..364>
 C<$isdst> is true if the specified time occurs during Daylight Saving
 Time, false otherwise.
 
-If EXPR is omitted, C<localtime()> uses the current time (C<localtime(time)>).
+If EXPR is omitted, C<localtime()> uses the current time (as returned
+by time(3)).
 
 In scalar context, C<localtime()> returns the ctime(3) value:
 
@@ -2995,6 +2996,14 @@ X<open> X<pipe> X<file, open> X<fopen>
 Opens the file whose filename is given by EXPR, and associates it with
 FILEHANDLE.
 
+Simple examples to open a file for reading:
+
+    open(my $fh, '<', "input.txt") or die $!;
+
+and for writing:
+
+    open(my $fh, '>', "output.txt") or die $!;
+
 (The following is a comprehensive reference to open(): for a gentler
 introduction you may consider L<perlopentut>.)
 
@@ -3066,7 +3075,7 @@ You may use the three-argument form of open to specify IO "layers"
 that affect how the input and output are processed (see L<open> and
 L<PerlIO> for more details). For example
 
-  open(FH, "<:encoding(UTF-8)", "file")
+  open(my $fh, "<:encoding(UTF-8)", "file")
 
 will open the UTF-8 encoded file containing Unicode characters,
 see L<perluniintro>. Note that if layers are specified in the
@@ -3096,7 +3105,7 @@ working with an unopened filehandle is actually what you want to do.
 As a special case the 3-arg form with a read/write mode and the third
 argument being C<undef>:
 
-    open(TMP, "+>", undef) or die ...
+    open(my $tmp, "+>", undef) or die ...
 
 opens a filehandle to an anonymous temporary file.  Also using "+<"
 works for symmetry, but you really should consider writing something
@@ -3124,10 +3133,10 @@ Examples:
     open(LOG, '>>/usr/spool/news/twitlog');	# (log is reserved)
     # if the open fails, output is discarded
 
-    open(DBASE, '+<', 'dbase.mine')		# open for update
+    open(my $dbase, '+<', 'dbase.mine')		# open for update
 	or die "Can't open 'dbase.mine' for update: $!";
 
-    open(DBASE, '+<dbase.mine')			# ditto
+    open(my $dbase, '+<dbase.mine')			# ditto
 	or die "Can't open 'dbase.mine' for update: $!";
 
     open(ARTICLE, '-|', "caesar <$article")     # decrypt article
@@ -3340,7 +3349,7 @@ them, and automatically close whenever and however you leave that scope:
     #...
     sub read_myfile_munged {
 	my $ALL = shift;
-	my $handle = new IO::File;
+	my $handle = IO::File->new;
 	open($handle, "myfile") or die "myfile: $!";
 	$first = <$handle>
 	    or return ();     # Automatically closed here.
@@ -3361,6 +3370,8 @@ dirhandle, usually the real dirhandle name.  If DIRHANDLE is an undefined
 scalar variable (or array or hash element), the variable is assigned a
 reference to a new anonymous dirhandle.
 DIRHANDLEs have their own namespace separate from FILEHANDLEs.
+
+See example at C<readdir>.
 
 =item ord EXPR
 X<ord> X<encoding>
@@ -4148,9 +4159,9 @@ If you're planning to filetest the return values out of a C<readdir>, you'd
 better prepend the directory in question.  Otherwise, because we didn't
 C<chdir> there, it would have been testing the wrong file.
 
-    opendir(DIR, $some_dir) || die "can't opendir $some_dir: $!";
-    @dots = grep { /^\./ && -f "$some_dir/$_" } readdir(DIR);
-    closedir DIR;
+    opendir(my $dh, $some_dir) || die "can't opendir $some_dir: $!";
+    @dots = grep { /^\./ && -f "$some_dir/$_" } readdir($dh);
+    closedir $dh;
 
 =item readline EXPR
 X<readline> X<gets> X<fgets>

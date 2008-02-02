@@ -457,13 +457,16 @@ the hash function is randomly perturbed by a pseudorandom seed which
 makes generating such naughty hash keys harder.
 See L<perlrun/PERL_HASH_SEED> for more information.
 
-The random perturbation is done by default but if one wants for some
-reason emulate the old behaviour one can set the environment variable
-PERL_HASH_SEED to zero (or any other integer).  One possible reason
-for wanting to emulate the old behaviour is that in the new behaviour
-consecutive runs of Perl will order hash keys differently, which may
-confuse some applications (like Data::Dumper: the outputs of two
-different runs are no more identical).
+In Perl 5.8.1 the random perturbation was done by default, but as of
+5.8.2 it is only used on individual hashes if the internals detect the
+insertion of pathological data. If one wants for some reason emulate the
+old behaviour (and expose oneself to DoS attacks) one can set the
+environment variable PERL_HASH_SEED to zero to disable the protection
+(or any other integer to force a known perturbation, rather than random). 
+One possible reason for wanting to emulate the old behaviour is that in the
+new behaviour consecutive runs of Perl will order hash keys differently,
+which may confuse some applications (like Data::Dumper: the outputs of two
+different runs are no longer identical).
 
 B<Perl has never guaranteed any ordering of the hash keys>, and the
 ordering has already changed several times during the lifetime of

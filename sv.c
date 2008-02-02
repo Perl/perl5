@@ -5583,7 +5583,7 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
 
 Compares the strings in two SVs in a locale-aware manner. Is UTF-8 and
 'use bytes' aware, handles get magic, and will coerce its args to strings
-if necessary.  See also C<sv_cmp_locale>.  See also C<sv_cmp>.
+if necessary.  See also C<sv_cmp>.
 
 =cut
 */

@@ -448,10 +448,10 @@ X<-f>
 Disable executing F<$Config{sitelib}/sitecustomize.pl> at startup.
 
 Perl can be built so that it by default will try to execute
-F<$Config{sitelib}/sitecustomize.pl> at startup.  This is a hook that
-allows the sysadmin to customize how perl behaves.  It can for
-instance be used to add entries to the @INC array to make perl find
-modules in non-standard locations.
+F<$Config{sitelib}/sitecustomize.pl> at startup (in a BEGIN block).
+This is a hook that allows the sysadmin to customize how perl behaves.
+It can for instance be used to add entries to the @INC array to make perl
+find modules in non-standard locations.
 
 =item B<-F>I<pattern>
 X<-F>

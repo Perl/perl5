@@ -2025,7 +2025,7 @@ be implemented even in UNIX platforms.
 
 =item socketpair
 
-Not implemented. (Win32, S<RISC OS>, VOS, VM/ESA)
+Not implemented. (S<RISC OS>, VOS, VM/ESA)
 
 Available on 64 bit OpenVMS 8.2 and later.  (VMS)
 

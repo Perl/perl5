@@ -845,3 +845,12 @@ Malloc_t Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int li
 #define pTHX__VALUE
 #endif /* USE_ITHREADS */
 
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */
