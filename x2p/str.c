@@ -25,7 +25,7 @@ str_2ptr(register STR *str)
     register char *s;
 
     if (!str)
-	return "";
+	return (char *)"";	/* probably safe - won't be written to */
     GROWSTR(&(str->str_ptr), &(str->str_len), 24);
     s = str->str_ptr;
     if (str->str_nok) {
@@ -56,7 +56,7 @@ str_sset(STR *dstr, register STR *sstr)
 }
 
 void
-str_nset(register STR *str, register char *ptr, register int len)
+str_nset(register STR *str, register const char *ptr, register int len)
 {
     GROWSTR(&(str->str_ptr), &(str->str_len), len + 1);
     memcpy(str->str_ptr,ptr,len);
@@ -67,7 +67,7 @@ str_nset(register STR *str, register char *ptr, register int len)
 }
 
 void
-str_set(register STR *str, register char *ptr)
+str_set(register STR *str, register const char *ptr)
 {
     register int len;
 
@@ -82,7 +82,7 @@ str_set(register STR *str, register char *ptr)
 }
 
 void
-str_ncat(register STR *str, register char *ptr, register int len)
+str_ncat(register STR *str, register const char *ptr, register int len)
 {
     if (!(str->str_pok))
 	str_2ptr(str);
@@ -104,7 +104,7 @@ str_scat(STR *dstr, register STR *sstr)
 }
 
 void
-str_cat(register STR *str, register char *ptr)
+str_cat(register STR *str, register const char *ptr)
 {
     register int len;
 
@@ -250,7 +250,7 @@ thats_all_folks:
 }
 
 STR *
-str_make(char *s)
+str_make(const char *s)
 {
     register STR *str = str_new(0);
 

@@ -330,14 +330,14 @@ perl_construct(pTHXx)
     sv_setpv(&PL_sv_no,PL_No);
     /* value lookup in void context - happens to have the side effect
        of caching the numeric forms.  */
-    SvIV(&PL_sv_no);
     SvNV(&PL_sv_no);
+    SvIV(&PL_sv_no);
     SvREADONLY_on(&PL_sv_no);
     SvREFCNT(&PL_sv_no) = (~(U32)0)/2;
 
     sv_setpv(&PL_sv_yes,PL_Yes);
-    SvIV(&PL_sv_yes);
     SvNV(&PL_sv_yes);
+    SvIV(&PL_sv_yes);
     SvREADONLY_on(&PL_sv_yes);
     SvREFCNT(&PL_sv_yes) = (~(U32)0)/2;
 
@@ -1977,12 +1977,10 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 				   "\"  Built under %s\\n",OSNAME);
 #ifdef __DATE__
 #  ifdef __TIME__
-		    Perl_sv_catpvf(aTHX_ opts_prog,
-				   "  Compiled at %s %s\\n\"",__DATE__,
-				   __TIME__);
+		    sv_catpvs(opts_prog,
+			      "  Compiled at " __DATE__ " " __TIME__ "\\n\"");
 #  else
-		    Perl_sv_catpvf(aTHX_ opts_prog,"  Compiled on %s\\n\"",
-				   __DATE__);
+		    sv_catpvs(opts_prog, "  Compiled on " __DATE__ "\\n\"");
 #  endif
 #endif
 		    sv_catpvs(opts_prog, "; $\"=\"\\n    \"; "
@@ -3989,9 +3987,6 @@ S_validate_suid(pTHX_ const char *validarg,
 #  endif
 		SV *linestr_sv)
 {
-#ifdef IAMSUID
-    /* int which; */
-#endif /* IAMSUID */
     const char *s, *s2;
 
     /* do we need to emulate setuid on scripts? */
@@ -4354,13 +4349,6 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
     /* PSz 11 Nov 03
      * Keep original arguments: suidperl already has fd script.
      */
-/*  for (which = 1; PL_origargv[which] && PL_origargv[which] != scriptname; which++) ;	*/
-/*  if (!PL_origargv[which]) {						*/
-/*	errno = EPERM;							*/
-/*	Perl_croak(aTHX_ "Permission denied\n");			*/
-/*  }									*/
-/*  PL_origargv[which] = savepv(Perl_form(aTHX_ "/dev/fd/%d/%s",	*/
-/*				  PerlIO_fileno(PL_rsfp), PL_origargv[which]));	*/
 #  if defined(HAS_FCNTL) && defined(F_SETFD)
     fcntl(PerlIO_fileno(PL_rsfp),F_SETFD,0);	/* ensure no close-on-exec */
 #  endif

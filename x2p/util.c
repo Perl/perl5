@@ -119,9 +119,10 @@ cpy2(register char *to, register char *from, register int delim)
 /* return ptr to little string in big string, NULL if not found */
 
 char *
-instr(char *big, char *little)
+instr(char *big, const char *little)
 {
-    register char *t, *s, *x;
+    register char *t, *x;
+    register const char *s;
 
     for (t = big; *t; t++) {
 	for (x=t,s=little; *s; x++,s++) {
@@ -139,7 +140,7 @@ instr(char *big, char *little)
 /* copy a string to a safe spot */
 
 char *
-savestr(char *str)
+savestr(const char *str)
 {
     register char * const newaddr = (char *) safemalloc((MEM_SIZE)(strlen(str)+1));
 

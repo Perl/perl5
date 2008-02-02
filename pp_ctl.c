@@ -1737,7 +1737,6 @@ PP(pp_enteriter)
     }
     else {
 	cx->blk_loop.iterary = PL_curstack;
-	AvFILLp(PL_curstack) = SP - PL_stack_base;
 	if (PL_op->op_private & OPpITER_REVERSED) {
 	    cx->blk_loop.itermax = MARK - PL_stack_base + 1;
 	    cx->blk_loop.iterix = cx->blk_oldsp + 1;
@@ -3113,8 +3112,7 @@ PP(pp_require)
 	if ((unixname = tounixspec(name, NULL)) != NULL)
 #endif
 	{
-	    namesv = newSV(0);
-	    sv_upgrade(namesv, SVt_PV);
+	    namesv = newSV_type(SVt_PV);
 	    for (i = 0; i <= AvFILL(ar); i++) {
 		SV * const dirsv = *av_fetch(ar, i, TRUE);
 
