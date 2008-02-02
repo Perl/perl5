@@ -497,6 +497,8 @@ X<record> X<structure> X<struct>
 
 =item UNIVERSAL: The Root of All Objects
 
+=item Deeper UNIVERSAL details
+
 =back
 
 =item Alternate Object Representations
@@ -1015,7 +1017,10 @@ Alpha, BBEdit and BBEdit Lite
 
 =item How can I use curses with Perl?
 
-=item How can I use X or Tk with Perl?
+=item How can I write a GUI (X, Tk, Gtk, etc.) in Perl?
+X<GUI> X<Tk> X<Wx> X<WxWidgets> X<Gtk> X<Gtk2> X<CamelBones> X<Qt>
+
+Tk, Wx, Gtk and Gtk2, Win32::GUI, CamelBones, Qt, Athena
 
 =item How can I make my Perl program run faster?
 
@@ -1205,6 +1210,8 @@ intersection of two arrays?
 =item How do I select a random element from an array?
 
 =item How do I permute N elements of a list?
+X<List::Permuter> X<permute> X<Algorithm::Loops> X<Knuth>
+X<The Art of Computer Programming> X<Fischer-Krause>
 
 =item How do I sort an array by (anything)?
 
@@ -1291,10 +1298,6 @@ array of hashes or arrays?
 =item How do I flush/unbuffer an output filehandle?  Why must I do this?
 X<flush> X<buffer> X<unbuffer> X<autoflush>
 
-=item How do I change, delete, or insert a line in a file, or append to the
-beginning of a file?
-X<file, editing>
-
 =item How do I count the number of lines in a file?
 X<file, counting lines> X<lines> X<line>
 
@@ -1323,8 +1326,8 @@ X<footer>
 =item How can I write() into a string?
 X<write, into a string>
 
-=item How can I output my numbers with commas added?
-X<number, commify>
+=item How can I open a filehandle to a string?
+X<string>, X<open>, X<IO::Scalar>, X<filehandle>
 
 =item How can I translate tildes (~) in a filename?
 X<tilde> X<tilde expansion>
@@ -1539,6 +1542,8 @@ commas?
 
 =item How do I create a module?
 
+=item How do I adopt or take over a module already on CPAN?
+
 =item How do I create a class?
 
 =item How can I tell if a variable is tainted?
@@ -1639,8 +1644,10 @@ STDIN, STDOUT, and STDERR are shared, Signals, Zombies
 =item How do I set the time and date?
 
 =item How can I sleep() or alarm() for under a second?
+X<Time::HiRes> X<BSD::Itimer> X<sleep> X<select>
 
 =item How can I measure time under a second?
+X<Time::HiRes> X<BSD::Itimer> X<sleep> X<select>
 
 =item How can I do an atexit() or setjmp()/longjmp()? (Exception handling)
 
@@ -1693,6 +1700,7 @@ complete?
 =item How do I timeout a slow event?
 
 =item How do I set CPU limits?
+X<BSD::Resource> X<limit> X<CPU>
 
 =item How do I avoid zombies on a Unix system?
 
@@ -2759,11 +2767,11 @@ X<memory usage>
 $ARG, $_ X<$_> X<$ARG>, $a, $b X<$a> X<$b>, $<I<digits>> X<$1> X<$2> X<$3>,
 $MATCH, $& X<$&> X<$MATCH>, $PREMATCH, $` X<$`> X<$PREMATCH>, $POSTMATCH,
 $' X<$'> X<$POSTMATCH>, $LAST_PAREN_MATCH, $+ X<$+> X<$LAST_PAREN_MATCH>,
-$^N X<$^N>, @LAST_MATCH_END, @+ X<@+> X<@LAST_MATCH_END>, $*,
-HANDLE->input_line_number(EXPR), $INPUT_LINE_NUMBER, $NR, $. X<$.> X<$NR>
-X<$INPUT_LINE_NUMBER> X<line number>,
-IO::Handle->input_record_separator(EXPR), $INPUT_RECORD_SEPARATOR, $RS, $/
-X<$/> X<$RS> X<$INPUT_RECORD_SEPARATOR>, HANDLE->autoflush(EXPR),
+$LAST_SUBMATCH_RESULT, $^N X<$^N>, @LAST_MATCH_END, @+ X<@+>
+X<@LAST_MATCH_END>, $*, HANDLE->input_line_number(EXPR),
+$INPUT_LINE_NUMBER, $NR, $. X<$.> X<$NR> X<$INPUT_LINE_NUMBER> X<line
+number>, IO::Handle->input_record_separator(EXPR), $INPUT_RECORD_SEPARATOR,
+$RS, $/ X<$/> X<$RS> X<$INPUT_RECORD_SEPARATOR>, HANDLE->autoflush(EXPR),
 $OUTPUT_AUTOFLUSH, $| X<$|> X<autoflush> X<flush> X<$OUTPUT_AUTOFLUSH>,
 IO::Handle->output_field_separator EXPR, $OUTPUT_FIELD_SEPARATOR, $OFS, $,
 X<$,> X<$OFS> X<$OUTPUT_FIELD_SEPARATOR>,
@@ -2788,27 +2796,27 @@ IO::Handle->format_formfeed EXPR, $FORMAT_FORMFEED, $^L X<$^L>
 X<$FORMAT_FORMFEED>, $ACCUMULATOR, $^A X<$^A> X<$ACCUMULATOR>,
 $CHILD_ERROR, $? X<$?> X<$CHILD_ERROR>, ${^CHILD_ERROR_NATIVE}
 X<$^CHILD_ERROR_NATIVE>, ${^ENCODING} X<$^ENCODING>, $OS_ERROR, $ERRNO, $!
-X<$!> X<$ERRNO> X<$OS_ERROR>, %! X<%!>, $EXTENDED_OS_ERROR, $^E X<$^E>
-X<$EXTENDED_OS_ERROR>, $EVAL_ERROR, $@ X<$@> X<$EVAL_ERROR>, $PROCESS_ID,
-$PID, $$ X<$$> X<$PID> X<$PROCESS_ID>, $REAL_USER_ID, $UID, $< X<< $< >>
-X<$UID> X<$REAL_USER_ID>, $EFFECTIVE_USER_ID, $EUID, $> X<< $> >> X<$EUID>
-X<$EFFECTIVE_USER_ID>, $REAL_GROUP_ID, $GID, $( X<$(> X<$GID>
-X<$REAL_GROUP_ID>, $EFFECTIVE_GROUP_ID, $EGID, $) X<$)> X<$EGID>
-X<$EFFECTIVE_GROUP_ID>, $PROGRAM_NAME, $0 X<$0> X<$PROGRAM_NAME>, $[ X<$[>,
-$] X<$]>, $COMPILING, $^C X<$^C> X<$COMPILING>, $DEBUGGING, $^D X<$^D>
-X<$DEBUGGING>, $SYSTEM_FD_MAX, $^F X<$^F> X<$SYSTEM_FD_MAX>, $^H, %^H,
-$INPLACE_EDIT, $^I X<$^I> X<$INPLACE_EDIT>, $^M X<$^M>, $OSNAME, $^O X<$^O>
-X<$OSNAME>, ${^OPEN}, $PERLDB, $^P X<$^P> X<$PERLDB>, 0x01, 0x02, 0x04,
-0x08, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x400,
-$LAST_REGEXP_CODE_RESULT, $^R X<$^R> X<$LAST_REGEXP_CODE_RESULT>,
-$EXCEPTIONS_BEING_CAUGHT, $^S X<$^S> X<$EXCEPTIONS_BEING_CAUGHT>,
-$BASETIME, $^T X<$^T> X<$BASETIME>, ${^TAINT}, ${^UNICODE}, ${^UTF8CACHE},
-${^UTF8LOCALE}, $PERL_VERSION, $^V X<$^V> X<$PERL_VERSION>, $WARNING, $^W
-X<$^W> X<$WARNING>, ${^WARNING_BITS}, ${^WIN32_SLOPPY_STAT},
-$EXECUTABLE_NAME, $^X X<$^X> X<$EXECUTABLE_NAME>, ARGV X<ARGV>, $ARGV
-X<$ARGV>, @ARGV X<@ARGV>, ARGVOUT X<ARGVOUT>, @F X<@F>, @INC X<@INC>, @ARG,
-@_ X<@_> X<@ARG>, %INC X<%INC>, %ENV, $ENV{expr} X<%ENV>, %SIG, $SIG{expr}
-X<%SIG>
+X<$!> X<$ERRNO> X<$OS_ERROR>, %OS_ERROR, %ERRNO, %! X<%!>,
+$EXTENDED_OS_ERROR, $^E X<$^E> X<$EXTENDED_OS_ERROR>, $EVAL_ERROR, $@ X<$@>
+X<$EVAL_ERROR>, $PROCESS_ID, $PID, $$ X<$$> X<$PID> X<$PROCESS_ID>,
+$REAL_USER_ID, $UID, $< X<< $< >> X<$UID> X<$REAL_USER_ID>,
+$EFFECTIVE_USER_ID, $EUID, $> X<< $> >> X<$EUID> X<$EFFECTIVE_USER_ID>,
+$REAL_GROUP_ID, $GID, $( X<$(> X<$GID> X<$REAL_GROUP_ID>,
+$EFFECTIVE_GROUP_ID, $EGID, $) X<$)> X<$EGID> X<$EFFECTIVE_GROUP_ID>,
+$PROGRAM_NAME, $0 X<$0> X<$PROGRAM_NAME>, $[ X<$[>, $] X<$]>, $COMPILING,
+$^C X<$^C> X<$COMPILING>, $DEBUGGING, $^D X<$^D> X<$DEBUGGING>,
+$SYSTEM_FD_MAX, $^F X<$^F> X<$SYSTEM_FD_MAX>, $^H, %^H, $INPLACE_EDIT, $^I
+X<$^I> X<$INPLACE_EDIT>, $^M X<$^M>, $OSNAME, $^O X<$^O> X<$OSNAME>,
+${^OPEN}, $PERLDB, $^P X<$^P> X<$PERLDB>, 0x01, 0x02, 0x04, 0x08, 0x10,
+0x20, 0x40, 0x80, 0x100, 0x200, 0x400, $LAST_REGEXP_CODE_RESULT, $^R X<$^R>
+X<$LAST_REGEXP_CODE_RESULT>, $EXCEPTIONS_BEING_CAUGHT, $^S X<$^S>
+X<$EXCEPTIONS_BEING_CAUGHT>, $BASETIME, $^T X<$^T> X<$BASETIME>, ${^TAINT},
+${^UNICODE}, ${^UTF8CACHE}, ${^UTF8LOCALE}, $PERL_VERSION, $^V X<$^V>
+X<$PERL_VERSION>, $WARNING, $^W X<$^W> X<$WARNING>, ${^WARNING_BITS},
+${^WIN32_SLOPPY_STAT}, $EXECUTABLE_NAME, $^X X<$^X> X<$EXECUTABLE_NAME>,
+ARGV X<ARGV>, $ARGV X<$ARGV>, @ARGV X<@ARGV>, ARGVOUT X<ARGVOUT>, @F X<@F>,
+@INC X<@INC>, @ARG, @_ X<@_> X<@ARG>, %INC X<%INC>, %ENV, $ENV{expr}
+X<%ENV>, %SIG, $SIG{expr} X<%SIG>
 
 =item Error Indicators
 X<error> X<exception>
@@ -2881,6 +2889,65 @@ C<(?(condition)yes-pattern|no-pattern)>
 =item BUGS
 
 =item SEE ALSO
+
+=back
+
+=head2 perlrebackslash - Perl Regular Expression Backslash Sequences and
+Escapes
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item The backslash
+
+[1]
+
+=item All the sequences and escapes
+
+=item Character Escapes
+
+[1], [2]
+
+=item Modifiers
+
+=item Character classes
+
+=item Referencing
+
+=item Assertions
+
+\A, \z, \Z, \G, \b, \B
+
+=item Misc
+
+\C, \X
+
+=back
+
+=back
+
+=head2 perlrecharclass - Perl Regular Expression Character Classes
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item The dot
+
+=item Backslashed sequences
+
+=item Bracketed Character Classes
+
+cntrl, graph, print, punct
+
+=item Locale, Unicode and UTF-8
+
+=back
 
 =back
 
@@ -3343,6 +3410,8 @@ string
 =item Waiting For A Thread To Exit
 
 =item Ignoring A Thread
+
+=item Process and Thread Termination
 
 =back
 
@@ -3862,15 +3931,17 @@ classes, Use of "Is" Prefix, Blocks
 
 =over 4
 
-=item DESCRIPTION
+=item Q and A
 
 =over 4
 
 =item perlunitut isn't really a Unicode tutorial, is it?
 
-=item What about binary data, like images?
+=item What character encodings does Perl support?
 
-=item What about the UTF8 flag?
+=item Which version of perl should I use?
+
+=item What about binary data, like images?
 
 =item When should I decode or encode?
 
@@ -3880,29 +3951,42 @@ classes, Use of "Is" Prefix, Blocks
 
 =item Is there a way to automatically decode or encode?
 
-=item Cheat?! Tell me, how can I cheat?
-
 =item What if I don't know which encoding was used?
 
 =item Can I use Unicode in my Perl sources?
 
 =item Data::Dumper doesn't restore the UTF8 flag; is it broken?
 
+=item Why do regex character classes sometimes match only in the ASCII
+range?
+
+=item Why do some characters not uppercase or lowercase correctly?
+
 =item How can I determine if a string is a text string or a binary string?
 
 =item How do I convert from encoding FOO to encoding BAR?
 
+=item What are C<decode_utf8> and C<encode_utf8>?
+
+=item What is a "wide character"?
+
+=back
+
+=item INTERNALS
+
+=over 4
+
+=item What is "the UTF8 flag"?
+
 =item What about the C<use bytes> pragma?
 
-=item What are C<decode_utf8> and C<encode_utf8>?
+=item What about the C<use encoding> pragma?
+
+=item What is the difference between C<:encoding> and C<:utf8>?
 
 =item What's the difference between C<UTF-8> and C<utf8>?
 
 =item I lost track; what encoding is the internal format really?
-
-=item What character encodings does Perl support?
-
-=item Which version of perl should I use?
 
 =back
 
@@ -4189,7 +4273,7 @@ IO::Seekable, IO::Select, IO::Socket, IO::Socket::INET, IO::Socket::UNIX,
 IPC::Open2, IPC::Open3, IPC::SysV, IPC::SysV::Msg, IPC::SysV::Semaphore,
 List::Util, Locale::Constants, Locale::Country, Locale::Currency,
 Locale::Language, Locale::Maketext, Locale::Maketext::TPJ13,
-Locale::Script, MIME::Base64, MIME::Base64::QuotedPrint, Math::BigFloat,
+Locale::Script, MIME::Base64, MIME::QuotedPrint, Math::BigFloat,
 Math::BigInt, Math::BigInt::Calc, Math::BigInt::CalcEmu, Math::BigRat,
 Math::Complex, Math::Trig, Memoize, Memoize::AnyDBM_File, Memoize::Expire,
 Memoize::ExpireFile, Memoize::ExpireTest, Memoize::NDBM_File,
@@ -5486,6 +5570,10 @@ X<sv_pvn>, sv_pvutf8 X<sv_pvutf8>, sv_pvutf8n X<sv_pvutf8n>, sv_taint
 X<sv_taint>, sv_unref X<sv_unref>, sv_usepvn X<sv_usepvn>, sv_usepvn_mg
 X<sv_usepvn_mg>, sv_uv X<sv_uv>, unpack_str X<unpack_str>
 
+=item Functions in file pp_ctl.c
+
+find_runcv X<find_runcv>
+
 =item Functions in file pp_pack.c
 
 packlist X<packlist>, unpackstring X<unpackstring>
@@ -5549,7 +5637,8 @@ fbm_compile X<fbm_compile>, fbm_instr X<fbm_instr>, form X<form>, getcwd_sv
 X<getcwd_sv>, my_snprintf X<my_snprintf>, my_sprintf X<my_sprintf>,
 my_vsnprintf X<my_vsnprintf>, strEQ X<strEQ>, strGE X<strGE>, strGT
 X<strGT>, strLE X<strLE>, strLT X<strLT>, strNE X<strNE>, strnEQ X<strnEQ>,
-strnNE X<strnNE>, sv_nosharing X<sv_nosharing>
+strnNE X<strnNE>, sv_destroyable X<sv_destroyable>, sv_nosharing
+X<sv_nosharing>
 
 =item Multicall Functions
 
@@ -5746,10 +5835,6 @@ PAD_SET_CUR X<PAD_SET_CUR>, PAD_SET_CUR_NOSAVE X<PAD_SET_CUR_NOSAVE>,
 PAD_SV X<PAD_SV>, PAD_SVl X<PAD_SVl>, SAVECLEARSV X<SAVECLEARSV>,
 SAVECOMPPAD X<SAVECOMPPAD>, SAVEPADSV X<SAVEPADSV>
 
-=item Functions in file pp_ctl.c
-
-find_runcv X<find_runcv>
-
 =item Global Variables
 
 PL_DBsingle X<PL_DBsingle>, PL_DBsub X<PL_DBsub>, PL_DBtrace X<PL_DBtrace>,
@@ -5789,6 +5874,10 @@ djSP X<djSP>, LVRET X<LVRET>
 report_uninit X<report_uninit>, sv_add_arena X<sv_add_arena>, sv_clean_all
 X<sv_clean_all>, sv_clean_objs X<sv_clean_objs>, sv_free_arenas
 X<sv_free_arenas>
+
+=item SV-Body Allocation
+
+sv_2num X<sv_2num>
 
 =item AUTHORS
 
@@ -6008,7 +6097,8 @@ check.utf8, minitest.utf16 test.utf16, test_harness, test-notty test_notty
 =item Running tests by hand
 
 -v, -torture, -re=PATTERN, -re LIST OF PATTERNS, PERL_CORE=1,
-PERL_DESTRUCT_LEVEL=2, PERL, PERL_SKIP_TTY_TEST
+PERL_DESTRUCT_LEVEL=2, PERL, PERL_SKIP_TTY_TEST, PERL_TEST_Net_Ping,
+PERL_TEST_NOVREXX, PERL_TEST_NUMCONVERTS
 
 =item Common problems when patching Perl source code
 
@@ -6121,6 +6211,8 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 
 =over 4
 
+=item Remove duplication of test setup.
+
 =item merge common code in installperl and installman
 
 =item common test code for timed bail out
@@ -6128,6 +6220,8 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 =item POD -E<gt> HTML conversion in the core still sucks
 
 =item merge checkpods and podchecker
+
+=item perlmodlib.PL rewrite
 
 =item Parallel testing
 
@@ -6179,6 +6273,8 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 
 =over 4
 
+=item Exterminate PL_na!
+
 =item Modernize the order of directories in @INC
 
 =item -Duse32bit*
@@ -6193,7 +6289,9 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 
 =item Use secure CRT functions when building with VC8 on Win32
 
-=item __FUNCTION__ for MSVC-pre-7.0
+=item strcat(), strcpy(), strncat(), strncpy(), sprintf(), vsprintf()
+
+=item -D_FORTIFY_SOURCE=2, -fstack-protector
 
 =back
 
@@ -6219,8 +6317,6 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 
 =item readpipe(LIST)
 
-=item strcat(), strcpy(), strncat(), strncpy(), sprintf(), vsprintf()
-
 =item Audit the code for destruction ordering assumptions
 
 =item Extend PerlIO and PerlIO::Scalar
@@ -6229,11 +6325,20 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 
 =item Propagate const outwards from Perl_moreswitches()
 
+=item Duplicate logic in S_method_common() and
+Perl_gv_fetchmethod_autoload()
+
+=item Organize error messages
+
 =back
 
 =item Tasks that need a knowledge of the interpreter
 
 =over 4
+
+=item UTF-8 revamp
+
+=item Properly Unicode safe tokeniser and pads.
 
 =item state variable initialization in list context
 
@@ -6265,11 +6370,9 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 
 =item entersub XS vs Perl
 
-=item Self ties
+=item Self-ties
 
 =item Optimize away @_
-
-=item Properly Unicode safe tokeniser and pads.
 
 =item The yada yada yada operators
 
@@ -6428,7 +6531,7 @@ B<-V>
 
 =back
 
-=head2 perl588delta, perldelta - what is new for perl v5.8.8
+=head2 perl588delta - what is new for perl v5.8.8
 
 =over 4
 
@@ -6495,7 +6598,7 @@ pattern
 
 =back
 
-=head2 perl587delta, perldelta - what is new for perl v5.8.7
+=head2 perl587delta - what is new for perl v5.8.7
 
 =over 4
 
@@ -8978,7 +9081,7 @@ C<PATH>, I<nroff>, Permissions
 =item Optional Libraries for Perl on Cygwin
 
 C<-lcrypt>, C<-lgdbm> (C<use GDBM_File>), C<-ldb> (C<use DB_File>),
-C<-lcygipc> (C<use IPC::SysV>), C<-lutil>
+C<cygserver> (C<use IPC::SysV>), C<-lutil>
 
 =item Configure-time Options for Perl on Cygwin
 
@@ -9025,7 +9128,9 @@ C<chown()>, Miscellaneous
 
 =item Prebuilt methods:
 
-C<Cwd::cwd>, C<Cygwin::pid_to_winpid>, C<Cygwin::winpid_to_pid>
+C<Cwd::cwd>, C<Cygwin::pid_to_winpid>, C<Cygwin::winpid_to_pid>,
+C<Cygwin::win_to_posix_path>, C<Cygwin::posix_to_win_path>,
+C<Cygwin::mount_table()>, C<Cygwin::mount_flags>, C<Cygwin::is_binmount>
 
 =back
 
@@ -10213,9 +10318,9 @@ utime LIST, waitpid PID,FLAGS
 =item Setting Up Perl on Win32
 
 Make, Command Shell, Borland C++, Microsoft Visual C++, Microsoft Visual
-C++ 2005 Express Edition, Microsoft Visual C++ Toolkit 2003, Microsoft
-Platform SDK 64-bit Compiler, MinGW release 3 with gcc, MinGW release 1
-with gcc
+C++ 2008 Express Edition Beta 2, Microsoft Visual C++ 2005 Express Edition,
+Microsoft Visual C++ Toolkit 2003, Microsoft Platform SDK 64-bit Compiler,
+MinGW release 3 with gcc, MinGW release 1 with gcc
 
 =item Building
 
@@ -10455,7 +10560,8 @@ FETCH_I<type>_ATTRIBUTES, MODIFY_I<type>_ATTRIBUTES
 
 =back
 
-=head2 base - Establish IS-A relationship with base classes at compile time
+=head2 base - Establish an ISA relationship with base classes at compile
+time
 
 =over 4
 
@@ -10465,7 +10571,7 @@ FETCH_I<type>_ATTRIBUTES, MODIFY_I<type>_ATTRIBUTES
 
 =item DIAGNOSTICS
 
-Base class package "%s" is empty
+Base class package "%s" is empty, Class 'Foo' tried to inherit from itself
 
 =item HISTORY
 
@@ -10485,9 +10591,12 @@ Base class package "%s" is empty
 
 =over 4
 
+=item use integer vs. use bigint
+
 =item Options
 
-a or accuracy, p or precision, t or trace, l or lib, v or version
+a or accuracy, p or precision, t or trace, hex, oct, l, lib, try or only, v
+or version
 
 =item Math Library
 
@@ -10497,13 +10606,17 @@ a or accuracy, p or precision, t or trace, l or lib, v or version
 
 =item Methods
 
-inf(), NaN(), upgrade()
+inf(), NaN(), e, PI, bexp(), bpi(), upgrade(), in_effect()
 
 =item MATH LIBRARY
 
 =item Caveat
 
 =back
+
+=item CAVAETS
+
+in_effect(), hex()/oct()
 
 =item MODULES USED
 
@@ -10529,21 +10642,25 @@ inf(), NaN(), upgrade()
 
 =item Options
 
-a or accuracy, p or precision, t or trace, l or lib, v or version
+a or accuracy, p or precision, t or trace, l or lib, hex, oct, v or version
 
 =item Methods
 
-=item Caveat
+=item Caveats
 
-inf(), NaN(), upgrade()
+inf(), NaN(), e, PI(), bexp(), bpi(), upgrade(), in_effect()
 
-=item MATH LIBRARY
+=item Math Library
 
 =item INTERNAL FORMAT
 
 =item SIGN
 
 =back
+
+=item CAVAETS
+
+in_effect(), hex()/oct()
 
 =item MODULES USED
 
@@ -10575,17 +10692,21 @@ inf(), NaN(), upgrade()
 
 =item Methods
 
-inf(), NaN(), upgrade()
+inf(), NaN(), e, PI, bexp(), bpi(), upgrade(), in_effect()
 
 =item MATH LIBRARY
 
-=item Cavaet
+=item Caveat
 
 =item Options
 
-a or accuracy, p or precision, t or trace, l or lib, v or version
+a or accuracy, p or precision, t or trace, l or lib, hex, oct, v or version
 
 =back
+
+=item CAVAETS
+
+in_effect(), hex()/oct()
 
 =item EXAMPLES
 
@@ -10642,7 +10763,7 @@ escapes
 
 =item DESCRIPTION
 
-=item CUSTOM TRANSLATORS
+=item ALIASES
 
 =item CUSTOM ALIASES
 
@@ -10660,7 +10781,7 @@ escapes
 
 =item charnames::vianame(name)
 
-=item ALIASES
+=item CUSTOM TRANSLATORS
 
 =item ILLEGAL CHARACTERS
 
@@ -10690,9 +10811,11 @@ escapes
 
 =item TECHNICAL NOTES
 
+=item CAVEATS
+
 =item BUGS
 
-=item AUTHOR
+=item AUTHORS
 
 =item COPYRIGHT
 
@@ -10819,7 +10942,11 @@ new, phash
 
 =over 4
 
-=item subpragma access
+=item Consider this carefully
+
+=item The "access" sub-pragma
+
+=item Limitation with regard to C<_>
 
 =back
 
@@ -11231,7 +11358,7 @@ warnings::warnif($object, $message)
 
 =item DESCRIPTION
 
-[0], [1], [2], [3], [4], [5]
+[0], [1], [2], [3], [4], [5], [6], [7]
 
 =over 4
 
@@ -11293,6 +11420,10 @@ be able to apply END handler>
 
 =item SEE ALSO
 
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
+
 =back
 
 =head2 AutoSplit - split a package for autoloading
@@ -11312,6 +11443,10 @@ $keep, $check, $modtime
 =back
 
 =item DIAGNOSTICS
+
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
 
 =back
 
@@ -11796,6 +11931,14 @@ validate against older perls
 =item BUGS
 
 =item AUTHOR
+
+=back
+
+=head2 B::Lint::Debug - Adds debugging stringification to B::
+
+=over 4
+
+=item DESCRIPTION
 
 =back
 
@@ -12443,6 +12586,22 @@ FCGI_SOCKET_PATH, FCGI_LISTEN_QUEUE
 
 =back
 
+=head2 CORE - Pseudo-namespace for Perl's core routines
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item OVERRIDING CORE FUNCTIONS
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
 =head2 CPAN - query, download and build perl modules from CPAN sites
 
 =over 4
@@ -12469,9 +12628,13 @@ and the C<fforce> pragma, Lockfile, Signals
 
 =item mkmyconfig
 
+=item recent ***EXPERIMENTAL COMMAND***
+
 =item recompile
 
 =item report Bundle|Distribution|Module
+
+=item smoke ***EXPERIMENTAL COMMAND***
 
 =item upgrade [Module|/Regex/]...
 
@@ -12520,9 +12683,9 @@ cwd, getcwd, fastcwd, backtickcwd
 
 =item Language Specs
 
-comment [scalar], cpanconfig [hash], disabled [boolean], goto [string],
-install [hash], make [hash], match [hash], patches [array], pl [hash], test
-[hash]
+comment [scalar], cpanconfig [hash], depends [hash] *** EXPERIMENTAL
+FEATURE ***, disabled [boolean], goto [string], install [hash], make
+[hash], match [hash], patches [array], pl [hash], test [hash]
 
 =item Processing Instructions
 
@@ -12551,7 +12714,8 @@ CPAN::Bundle::inst_file(), CPAN::Bundle::inst_version(),
 CPAN::Bundle::uptodate(), CPAN::Bundle::install(), CPAN::Bundle::make(),
 CPAN::Bundle::readme(), CPAN::Bundle::test(),
 CPAN::Distribution::as_glimpse(), CPAN::Distribution::as_string(),
-CPAN::Distribution::author, CPAN::Distribution::clean(),
+CPAN::Distribution::author, CPAN::Distribution::pretty_id(),
+CPAN::Distribution::base_id(), CPAN::Distribution::clean(),
 CPAN::Distribution::containsmods(), CPAN::Distribution::cvs_import(),
 CPAN::Distribution::dir(), CPAN::Distribution::force($method,@args),
 CPAN::Distribution::get(), CPAN::Distribution::install(),
@@ -12629,7 +12793,7 @@ http firewall, ftp firewall, One way visibility, SOCKS, IP Masquerade
 
 =item FAQ
 
-1), 2), 3), 4), 5), 6), 7), 8), 9), 10), 11), 12), 13), 14), 15)
+1), 2), 3), 4), 5), 6), 7), 8), 9), 10), 11), 12), 13), 14), 15), 16)
 
 =item COMPATIBILITY
 
@@ -12655,6 +12819,28 @@ http firewall, ftp firewall, One way visibility, SOCKS, IP Masquerade
 
 =back
 
+=head2 CPAN::API::HOWTO - a recipe book for programming with CPAN.pm
+
+=over 4
+
+=item RECIPES
+
+=over 4
+
+=item What distribution contains a particular module?
+
+=item What modules does a particular distribution contain?
+
+=back
+
+=item SEE ALSO
+
+=item LICENSE
+
+=item AUTHOR
+
+=back
+
 =head2 CPAN::FirstTime - Utility for CPAN::Config file Initialization
 
 =over 4
@@ -12662,6 +12848,22 @@ http firewall, ftp firewall, One way visibility, SOCKS, IP Masquerade
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=back
+
+auto_commit, build_cache, build_dir, build_dir_reuse,
+build_requires_install_policy, cache_metadata, check_sigs, colorize_output,
+colorize_print, colorize_warn, colorize_debug, commandnumber_in_prompt,
+ftp_passive, getcwd, histfile, histsize, inactivity_timeout, index_expire,
+inhibit_startup_message, keep_source_where, load_module_verbosity,
+makepl_arg, make_arg, make_install_arg, make_install_make_command,
+mbuildpl_arg, mbuild_arg, mbuild_install_arg, mbuild_install_build_command,
+pager, prefer_installer, prefs_dir, prerequisites_policy,
+randomize_urllist, scan_cache, shell, show_unparsable_versions,
+show_upload_date, show_zero_versions, tar_verbosity, term_is_latin,
+term_ornaments, test_report, use_sqlite, yaml_load_code, yaml_module
+
+=over 4
 
 =item LICENSE
 
@@ -12840,11 +13042,11 @@ C<baserev>, C<bash>, C<bin>, C<binexp>, C<bison>, C<byacc>, C<byteorder>
 
 C<c>, C<castflags>, C<cat>, C<cc>, C<cccdlflags>, C<ccdlflags>, C<ccflags>,
 C<ccflags_uselargefiles>, C<ccname>, C<ccsymbols>, C<ccversion>, C<cf_by>,
-C<cf_email>, C<cf_time>, C<charsize>, C<chgrp>, C<chmod>, C<chown>,
-C<clocktype>, C<comm>, C<compress>, C<contains>, C<cp>, C<cpio>, C<cpp>,
-C<cpp_stuff>, C<cppccsymbols>, C<cppflags>, C<cpplast>, C<cppminus>,
-C<cpprun>, C<cppstdin>, C<cppsymbols>, C<crypt_r_proto>, C<cryptlib>,
-C<csh>, C<ctermid_r_proto>, C<ctime_r_proto>
+C<cf_email>, C<cf_time>, C<chgrp>, C<chmod>, C<chown>, C<clocktype>,
+C<comm>, C<compress>, C<contains>, C<cp>, C<cpio>, C<cpp>, C<cpp_stuff>,
+C<cppccsymbols>, C<cppflags>, C<cpplast>, C<cppminus>, C<cpprun>,
+C<cppstdin>, C<cppsymbols>, C<crypt_r_proto>, C<cryptlib>, C<csh>,
+C<ctermid_r_proto>, C<ctime_r_proto>
 
 =item d
 
@@ -13076,7 +13278,7 @@ C<quadkind>, C<quadtype>
 
 C<randbits>, C<randfunc>, C<random_r_proto>, C<randseedtype>, C<ranlib>,
 C<rd_nodata>, C<readdir64_r_proto>, C<readdir_r_proto>, C<revision>, C<rm>,
-C<rmail>, C<run>, C<runnm>
+C<rm_try>, C<rmail>, C<run>, C<runnm>
 
 =item s
 
@@ -14828,6 +15030,22 @@ C<use ModuleName;>, C<use ModuleName ();>, C<use ModuleName qw(...);>
 
 =back
 
+=item Good Practices
+
+=over 4
+
+=item Declaring C<@EXPORT_OK> and Friends
+
+=item Playing Safe
+
+=item What not to Export
+
+=back
+
+=item SEE ALSO
+
+=item LICENSE
+
 =back
 
 =head2 Exporter::Heavy - Exporter guts
@@ -15548,8 +15766,6 @@ maybe_command
 
 needs_linking (o)
 
-nicetext
-
 parse_abstract
 
 parse_version
@@ -15717,7 +15933,7 @@ perldepend (override)
 
 makeaperl (override)
 
-nicetext (override)
+maketext_filter (override)
 
 prefixify (override)
 
@@ -15986,7 +16202,8 @@ MakeMaker
 
 How do I install a module into my home directory?, How do I get MakeMaker
 and Module::Build to install to the same place?, How do I keep from
-installing man pages?, How do I use a module without installing it?
+installing man pages?, How do I use a module without installing it?, PREFIX
+vs INSTALL_BASE from Module::Build::Cookbook
 
 =item Philosophy and History
 
@@ -16272,7 +16489,7 @@ C<fileparse_set_fstype> X<filesystem>
 
 =back
 
-=head2 File::CheckTree, validate - run many filetest checks on a tree
+=head2 File::CheckTree - run many filetest checks on a tree
 
 =over 4
 
@@ -16413,17 +16630,58 @@ C<GLOB_NOSPACE>, C<GLOB_ABEND>
 
 =back
 
-=head2 File::Path - create or remove directory trees
+=head2 File::Path - Create or remove directory trees
 
 =over 4
+
+=item VERSION
 
 =item SYNOPSIS
 
 =item DESCRIPTION
 
+=over 4
+
+=item FUNCTIONS
+
+mode, verbose, error, verbose, safe, keep_root, result, error
+
+=item TRADITIONAL INTERFACE
+
+=item ERROR HANDLING
+
+=item NOTES
+
+=back
+
 =item DIAGNOSTICS
 
+mkdir [path]: [errmsg] (SEVERE), No root path(s) specified, No such file or
+directory, cannot fetch initial working directory: [errmsg], cannot stat
+initial working directory: [errmsg], cannot chdir to [dir]: [errmsg],
+directory [dir] changed before chdir, expected dev=[n] inode=[n], actual
+dev=[n] ino=[n], aborting. (FATAL), cannot make directory [dir]
+read+writeable: [errmsg], cannot read [dir]: [errmsg], cannot reset chmod
+[dir]: [errmsg], cannot chdir to [parent-dir] from [child-dir]: [errmsg],
+aborting. (FATAL), cannot stat prior working directory [dir]: [errmsg],
+aborting. (FATAL), previous directory [parent-dir] changed before entering
+[child-dir], expected dev=[n] inode=[n], actual dev=[n] ino=[n], aborting.
+(FATAL), cannot make directory [dir] writeable: [errmsg], cannot remove
+directory [dir]: [errmsg], cannot restore permissions of [dir] to [0nnn]:
+[errmsg], cannot make file [file] writeable: [errmsg], cannot unlink file
+[file]: [errmsg], cannot restore permissions of [file] to [0nnn]: [errmsg]
+
+=item SEE ALSO
+
+=item BUGS
+
+=item ACKNOWLEDGEMENTS
+
 =item AUTHORS
+
+=item COPYRIGHT
+
+=item LICENSE
 
 =back
 
@@ -16467,6 +16725,8 @@ canonpath
 file_name_is_absolute
 
 tmpdir (override)
+
+case_tolerant
 
 =over 4
 
@@ -16703,6 +16963,10 @@ devnull
 
 tmpdir
 
+case_tolerant
+
+file_name_is_absolute
+
 catfile
 
 canonpath
@@ -16747,9 +17011,11 @@ B<new>
 
 =back
 
+B<newdir>
+
 B<filename>
 
-B<unlink_on_destroy>
+B<dirname>, B<unlink_on_destroy>
 
 B<DESTROY>
 
@@ -18562,6 +18828,22 @@ ffround ( +$scale ), ffround ( -$scale ), ffround ( 0 ), fround  ( +$scale
 
 =item precision()
 
+=item bexp()
+
+=item bnok()
+
+=item bpi()
+
+=item bcos()
+
+=item bsin()
+
+=item batan2()
+
+=item batan()
+
+=item bmuladd()
+
 =back
 
 =item Autocreating constants
@@ -18573,6 +18855,8 @@ ffround ( +$scale ), ffround ( -$scale ), ffround ( 0 ), fround  ( +$scale
 =item Using Math::BigInt::Lite
 
 =back
+
+=item EXPORTS
 
 =item BUGS
 
@@ -18662,6 +18946,8 @@ Input, Output
 
 =item bmul()
 
+=item bmuladd()
+
 =item bdiv()
 
 =item bmod()
@@ -18676,6 +18962,18 @@ Input, Output
 
 =item bexp()
 
+=item bnok()
+
+=item bpi()
+
+=item bcos()
+
+=item bsin()
+
+=item batan2()
+
+=item batan()
+
 =item blsft()
 
 =item brsft()
@@ -18689,6 +18987,8 @@ Input, Output
 =item bnot()
 
 =item bsqrt()
+
+=item broot()
 
 =item bfac()
 
@@ -18799,10 +19099,7 @@ bsqrt(), div(), blog(), bexp()
 
 =back
 
-=item BUGS
-
-broot() does not work, Out of Memory!, Fails to load Calc on Perl prior
-5.6.0
+=item EXPORTS
 
 =item CAVEATS
 
@@ -18924,8 +19221,6 @@ the same terms as Perl itself.
 
 =item bfac()
 
-=item blog()
-
 =item bround()/round()/bfround()
 
 =item bmod()
@@ -18971,6 +19266,10 @@ the same terms as Perl itself.
 =item blsft()/brsft()
 
 =item bpow()
+
+=item bexp()
+
+=item bnok()
 
 =item config()
 
@@ -19464,11 +19763,11 @@ RECURSE ]), mkdir ( DIR [, RECURSE ]), alloc ( SIZE [, RECORD_SIZE] ), ls (
 put ( LOCAL_FILE [, REMOTE_FILE ] ), put_unique ( LOCAL_FILE [, REMOTE_FILE
 ] ), append ( LOCAL_FILE [, REMOTE_FILE ] ), unique_name (), mdtm ( FILE ),
 size ( FILE ), supported ( CMD ), hash ( [FILEHANDLE_GLOB_REF],[
-BYTES_PER_HASH_MARK] ), nlst ( [ DIR ] ), list ( [ DIR ] ), retr ( FILE ),
-stor ( FILE ), stou ( FILE ), appe ( FILE ), port ( [ PORT ] ), pasv (),
-pasv_xfer ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ), pasv_xfer_unique (
-SRC_FILE, DEST_SERVER [, DEST_FILE ] ), pasv_wait ( NON_PASV_SERVER ),
-abort (), quit ()
+BYTES_PER_HASH_MARK] ), feature ( NAME ), nlst ( [ DIR ] ), list ( [ DIR ]
+), retr ( FILE ), stor ( FILE ), stou ( FILE ), appe ( FILE ), port ( [
+PORT ] ), pasv (), pasv_xfer ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ),
+pasv_xfer_unique ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ), pasv_wait (
+NON_PASV_SERVER ), abort (), quit ()
 
 =over 4
 
@@ -19597,8 +19896,8 @@ Net::Ping->new([$proto [, $def_timeout [, $bytes [, $device [, $tos
 ]]]]]);, $p->ping($host [, $timeout]);, $p->source_verify( { 0 | 1 } );,
 $p->service_check( { 0 | 1 } );, $p->tcp_service_check( { 0 | 1 } );,
 $p->hires( { 0 | 1 } );, $p->bind($local_addr);, $p->open($host);, $p->ack(
-[ $host ] );, $p->nack( $failed_ack_host );, $p->close();, pingecho($host
-[, $timeout]);
+[ $host ] );, $p->nack( $failed_ack_host );, $p->close();,
+$p->port_number([$port_number]), pingecho($host [, $timeout]);
 
 =back
 
@@ -21658,6 +21957,10 @@ set_prototype CODEREF, PROTOTYPE, tainted EXPR, weaken REF
 
 =item Multiple packages and fully qualified subroutine names
 
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
+
 =back
 
 B<_make_cmd>
@@ -23116,8 +23419,8 @@ unexpand(1)
 =item FUNCTIONS
 
 $thread = Thread->new(\&start_sub), $thread = Thread->new(\&start_sub,
-LIST), lock VARIABLE, async BLOCK;, Thread->self, cond_wait VARIABLE,
-cond_signal VARIABLE, cond_broadcast VARIABLE, yield
+LIST), lock VARIABLE, async BLOCK;, Thread->self, Thread->list, cond_wait
+VARIABLE, cond_signal VARIABLE, cond_broadcast VARIABLE, yield
 
 =item METHODS
 
@@ -23271,8 +23574,7 @@ SHIFT this, UNSHIFT this, LIST, SPLICE this, offset, length, LIST
 
 =back
 
-=head2 Tie::Handle, Tie::StdHandle  - base class definitions for tied
-handles
+=head2 Tie::Handle - base class definitions for tied handles
 
 =over 4
 
@@ -23438,6 +23740,10 @@ $flags = 0), clock(), stat, stat FH, stat EXPR
 
 =over 4
 
+=item C<timelocal()> and C<timegm()>
+
+=item C<timelocal_nocheck()> and C<timegm_nocheck()>
+
 =item Year Value Interpretation
 
 =item Limits of time_t
@@ -23455,6 +23761,8 @@ $flags = 0), clock(), stat, stat FH, stat EXPR
 =item BUGS
 
 =item SUPPORT
+
+=item COPYRIGHT
 
 =item AUTHOR
 
@@ -23696,6 +24004,18 @@ http://www.unicode.org/review/pr-29.html, http://www.unicode.org/notes/tn5/
 =item Code Point Arguments
 
 =item charinrange
+
+=back
+
+=over 4
+
+=item general_categories
+
+=back
+
+=over 4
+
+=item bidi_types
 
 =back
 
