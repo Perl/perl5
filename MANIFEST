@@ -1288,7 +1288,10 @@ lib/Attribute/Handlers/demo/Descriptions.pm	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/MyClass.pm	Attribute::Handlers demo
 lib/Attribute/Handlers.pm		Attribute::Handlers
 lib/Attribute/Handlers/README		Attribute::Handlers
+lib/Attribute/Handlers/t/constants.t	Test constants and Attribute::Handlers
+lib/Attribute/Handlers/t/data_convert.t	Test attribute data conversion
 lib/Attribute/Handlers/t/multi.t	See if Attribute::Handlers works
+lib/Attribute/Handlers/t/linerep.t	See if Attribute::Handlers works
 lib/attributes.pm		For "sub foo : attrlist"
 lib/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
 lib/AutoLoader/t/02AutoSplit.t	See if AutoSplit works

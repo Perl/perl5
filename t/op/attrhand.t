@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 1;
+plan tests => 4;
 
 # test for bug #38475: parsing errors with multiline attributes
 
@@ -22,6 +22,26 @@ sub WrongAttr :ATTR(CODE,RAWDATA) {
     ::ok(0);
 }
 
+sub CheckData :ATTR(RAWDATA) {
+    # check that the $data element contains the given attribute parameters.
+
+    if ($_[4] eq "12, 14") {
+        ::ok(1)
+    }
+    else {
+        ::ok(0)
+    }
+}
+
+sub CheckEmptyValue :ATTR() {
+    if (not defined $_[4]) {
+        ::ok(1)
+    }
+    else {
+        ::ok(0)
+    }
+}
+
 package Deer;
 use base 'Antler';
 
@@ -35,3 +55,8 @@ sub something : TypeCheck(
 }
 
 something();
+
+sub c :CheckData(12, 14) {};
+
+sub d1 :CheckEmptyValue() {};
+sub d2 :CheckEmptyValue {};
