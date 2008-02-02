@@ -309,12 +309,15 @@ Perl_mg_length(pTHX_ SV *sv)
 	}
     }
 
-    if (DO_UTF8(sv)) {
+    {
+	/* You can't know whether it's UTF-8 until you get the string again...
+	 */
         const U8 *s = (U8*)SvPV_const(sv, len);
-	len = utf8_length((U8*)s, (U8*)s + len);
+
+	if (DO_UTF8(sv)) {
+	    len = utf8_length((U8*)s, (U8*)s + len);
+	}
     }
-    else
-        (void)SvPV_const(sv, len);
     return len;
 }
 
@@ -497,6 +500,7 @@ Perl_mg_free(pTHX_ SV *sv)
 	if (mg->mg_flags & MGf_REFCOUNTED)
 	    SvREFCNT_dec(mg->mg_obj);
 	Safefree(mg);
+	SvMAGIC_set(sv, moremagic);
     }
     SvMAGIC_set(sv, NULL);
     return 0;

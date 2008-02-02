@@ -1298,7 +1298,7 @@ perl_destruct(pTHXx)
 		    PerlIO_printf(Perl_debug_log, "leaked: sv=0x%p"
 			" flags=0x08%"UVxf
 			" refcnt=%"UVuf pTHX__FORMAT "\n",
-			sv, sv->sv_flags, sv->sv_refcnt pTHX__VALUE);
+			sv, (UV)sv->sv_flags, (UV)sv->sv_refcnt pTHX__VALUE);
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 		    Perl_dump_sv_child(aTHX_ sv);
 #endif
@@ -2699,7 +2699,9 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	Zero(&method_op, 1, UNOP);
 	method_op.op_next = PL_op;
 	method_op.op_ppaddr = PL_ppaddr[OP_METHOD];
+	method_op.op_type = OP_METHOD;
 	myop.op_ppaddr = PL_ppaddr[OP_ENTERSUB];
+	myop.op_type = OP_ENTERSUB;
 	PL_op = (OP*)&method_op;
     }
 

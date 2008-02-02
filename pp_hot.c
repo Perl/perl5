@@ -1992,7 +1992,7 @@ PP(pp_subst)
     I32 maxiters;
     register I32 i;
     bool once;
-    bool rxtainted;
+    U8 rxtainted;
     char *orig;
     I32 r_flags;
     register REGEXP *rx = PM_GETRE(pm);

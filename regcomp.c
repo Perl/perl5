@@ -4855,7 +4855,9 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 	/* Do it this way to avoid reading from *r after the StructCopy().
 	   That way, if any of the sv_dup_inc()s dislodge *r from the L1
 	   cache, it doesn't matter.  */
-	const bool anchored = r->check_substr == r->anchored_substr;
+	const bool anchored = r->check_substr
+	    ? r->check_substr == r->anchored_substr
+	    : r->check_utf8 == r->anchored_utf8;
         Newx(ret->substrs, 1, struct reg_substr_data);
 	StructCopy(r->substrs, ret->substrs, struct reg_substr_data);
 
@@ -4876,6 +4878,12 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 		assert(r->check_substr == r->float_substr);
 		assert(r->check_utf8 == r->float_utf8);
 		ret->check_substr = ret->float_substr;
+		ret->check_utf8 = ret->float_utf8;
+	    }
+	} else if (ret->check_utf8) {
+	    if (anchored) {
+		ret->check_utf8 = ret->anchored_utf8;
+	    } else {
 		ret->check_utf8 = ret->float_utf8;
 	    }
 	}
