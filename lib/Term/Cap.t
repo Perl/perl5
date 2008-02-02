@@ -159,7 +159,11 @@ SKIP: {
 }
 
 # Windows hack
+SKIP:
 {
+   skip("QNX's termcap database does not contain an entry for dumb terminals",
+        1) if $^O eq 'nto';
+
    local *^O;
    local *ENV;
    delete $ENV{TERM};
