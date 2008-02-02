@@ -50,6 +50,10 @@ sub do_test {
 	    $pattern =~ s/^ *\$NV *\n/
 		($] < 5.011) ? "    NV = 0\n" : '';
 	    /mge;
+	    $pattern =~ s/^ *\$SUBPROCESS *\n/
+		($] < 5.009) ? "    SUBPROCESS = 0\n" : '';
+	    /mge;
+
 
 	    print $pattern, "\n" if $DEBUG;
 	    my ($dump, $dump2) = split m/\*\*\*\*\*\n/, scalar <IN>;
@@ -569,5 +573,6 @@ do_test(25,
     TOP_GV = 0x0
     FMT_GV = 0x0
     BOTTOM_GV = 0x0
+    $SUBPROCESS
     TYPE = \'>\'
     FLAGS = 0x0');
