@@ -317,7 +317,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	if (SvOBJECT(ival))
 	    realpack = HvNAME_get(SvSTASH(ival));
 	else
-	    realpack = Nullch;
+	    realpack = NULL;
 
 	/* if it has a name, we need to either look it up, or keep a tab
 	 * on it so we know when we hit it later

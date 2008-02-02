@@ -2399,7 +2399,7 @@ PP(pp_leavesublv)
 
     TAINT_NOT;
 
-    if (cx->blk_sub.lval & OPpENTERSUB_INARGS) {
+    if (CxLVAL(cx) & OPpENTERSUB_INARGS) {
 	/* We are an argument to a function or grep().
 	 * This kind of lvalueness was legal before lvalue
 	 * subroutines too, so be backward compatible:
@@ -2426,7 +2426,7 @@ PP(pp_leavesublv)
 	    }
 	}
     }
-    else if (cx->blk_sub.lval) {     /* Leave it as it is if we can. */
+    else if (CxLVAL(cx)) {     /* Leave it as it is if we can. */
 	/* Here we go for robustness, not for speed, so we change all
 	 * the refcounts so the caller gets a live guy. Cannot set
 	 * TEMP, so sv_2mortal is out of question. */
@@ -2937,7 +2937,7 @@ try_autoload:
 	 * stuff so that __WARN__ handlers can safely dounwind()
 	 * if they want to
 	 */
-	if (CvDEPTH(cv) == 100 && ckWARN(WARN_RECURSION)
+	if (CvDEPTH(cv) == PERL_SUB_DEPTH_WARN && ckWARN(WARN_RECURSION)
 	    && !(PERLDB_SUB && cv == GvCV(PL_DBsub)))
 	    sub_crush_depth(cv);
 #if 0

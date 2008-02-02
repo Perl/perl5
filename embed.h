@@ -1378,9 +1378,15 @@
 #endif
 #  endif
 #  if !defined(NV_PRESERVES_UV)
+#    ifdef DEBUGGING
 #ifdef PERL_CORE
 #define sv_2iuv_non_preserve	S_sv_2iuv_non_preserve
 #endif
+#    else
+#ifdef PERL_CORE
+#define sv_2iuv_non_preserve	S_sv_2iuv_non_preserve
+#endif
+#    endif
 #  endif
 #ifdef PERL_CORE
 #define expect_number		S_expect_number
@@ -3511,9 +3517,15 @@
 #endif
 #  endif
 #  if !defined(NV_PRESERVES_UV)
+#    ifdef DEBUGGING
 #ifdef PERL_CORE
 #define sv_2iuv_non_preserve(a,b)	S_sv_2iuv_non_preserve(aTHX_ a,b)
 #endif
+#    else
+#ifdef PERL_CORE
+#define sv_2iuv_non_preserve(a)	S_sv_2iuv_non_preserve(aTHX_ a)
+#endif
+#    endif
 #  endif
 #ifdef PERL_CORE
 #define expect_number(a)	S_expect_number(aTHX_ a)

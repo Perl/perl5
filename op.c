@@ -490,20 +490,22 @@ clear_pmop:
 	    PmopSTASH_free(cPMOPo);
 	}
 	cPMOPo->op_pmreplroot = NULL;
-        /* we use the "SAFE" version of the PM_ macros here
-         * since sv_clean_all might release some PMOPs
+        /* we use the same protection as the "SAFE" version of the PM_ macros
+         * here since sv_clean_all might release some PMOPs
          * after PL_regex_padav has been cleared
          * and the clearing of PL_regex_padav needs to
          * happen before sv_clean_all
          */
-	ReREFCNT_dec(PM_GETRE_SAFE(cPMOPo));
-	PM_SETRE_SAFE(cPMOPo, NULL);
 #ifdef USE_ITHREADS
 	if(PL_regex_pad) {        /* We could be in destruction */
+	    ReREFCNT_dec(PM_GETRE(cPMOPo));
             av_push((AV*) PL_regex_pad[0],(SV*) PL_regex_pad[(cPMOPo)->op_pmoffset]);
 	    SvREPADTMP_on(PL_regex_pad[(cPMOPo)->op_pmoffset]);
-            PM_SETRE(cPMOPo, (cPMOPo)->op_pmoffset);
+            PM_SETRE_OFFSET(cPMOPo, (cPMOPo)->op_pmoffset);
         }
+#else
+	ReREFCNT_dec(PM_GETRE(cPMOPo));
+	PM_SETRE(cPMOPo, NULL);
 #endif
 
 	break;

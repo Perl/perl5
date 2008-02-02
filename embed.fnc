@@ -1357,7 +1357,11 @@ s	|void	|sv_del_backref	|NN SV *sv
 s	|void	|del_sv	|NN SV *p
 #  endif
 #  if !defined(NV_PRESERVES_UV)
+#    ifdef DEBUGGING
 s	|int	|sv_2iuv_non_preserve	|NN SV *sv|I32 numtype
+#    else
+s	|int	|sv_2iuv_non_preserve	|NN SV *sv
+#    endif
 #  endif
 sR	|I32	|expect_number	|NN char** pattern
 #

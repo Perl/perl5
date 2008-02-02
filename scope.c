@@ -1075,7 +1075,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.DFOUTGV = 0x%"UVxf"\n",
 		PTR2UV(cx->blk_sub.dfoutgv));
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.HASARGS = %d\n",
-		(int)cx->blk_sub.hasargs);
+		      (int)CxHASARGS(cx));
 	break;
     case CXt_SUB:
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.CV = 0x%"UVxf"\n",
@@ -1083,16 +1083,15 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.OLDDEPTH = %ld\n",
 		(long)cx->blk_sub.olddepth);
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.HASARGS = %d\n",
-		(int)cx->blk_sub.hasargs);
-	PerlIO_printf(Perl_debug_log, "BLK_SUB.LVAL = %d\n",
-		(int)cx->blk_sub.lval);
+		(int)CxHASARGS(cx));
+	PerlIO_printf(Perl_debug_log, "BLK_SUB.LVAL = %d\n", (int)CxLVAL(cx));
 	break;
     case CXt_EVAL:
 	PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_IN_EVAL = %ld\n",
-		(long)cx->blk_eval.old_in_eval);
+		(long)CxOLD_IN_EVAL(cx));
 	PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_OP_TYPE = %s (%s)\n",
-		PL_op_name[cx->blk_eval.old_op_type],
-		PL_op_desc[cx->blk_eval.old_op_type]);
+		PL_op_name[CxOLD_OP_TYPE(cx)],
+		PL_op_desc[CxOLD_OP_TYPE(cx)]);
 	if (cx->blk_eval.old_namesv)
 	    PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_NAME = %s\n",
 			  SvPVX_const(cx->blk_eval.old_namesv));
@@ -1101,8 +1100,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 	break;
 
     case CXt_LOOP:
-	PerlIO_printf(Perl_debug_log, "BLK_LOOP.LABEL = %s\n",
-		cx->blk_loop.label);
+	PerlIO_printf(Perl_debug_log, "BLK_LOOP.LABEL = %s\n", CxLABEL(cx));
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.RESETSP = %ld\n",
 		(long)cx->blk_loop.resetsp);
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.REDO_OP = 0x%"UVxf"\n",
@@ -1132,7 +1130,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 	PerlIO_printf(Perl_debug_log, "SB_RFLAGS = %ld\n",
 		(long)cx->sb_rflags);
 	PerlIO_printf(Perl_debug_log, "SB_ONCE = %ld\n",
-		(long)cx->sb_once);
+		(long)CxONCE(cx));
 	PerlIO_printf(Perl_debug_log, "SB_ORIG = %s\n",
 		cx->sb_orig);
 	PerlIO_printf(Perl_debug_log, "SB_DSTR = 0x%"UVxf"\n",

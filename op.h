@@ -292,17 +292,32 @@ struct pmop {
 
 #ifdef USE_ITHREADS
 #define PM_GETRE(o)     (INT2PTR(REGEXP*,SvIVX(PL_regex_pad[(o)->op_pmoffset])))
-#define PM_SETRE(o,r)   STMT_START { \
-                            SV* const sv = PL_regex_pad[(o)->op_pmoffset]; \
-                            sv_setiv(sv, PTR2IV(r)); \
+/* The assignment is just to enforce type safety (or at least get a warning).
+ */
+#define PM_SETRE(o,r)	STMT_START {					\
+                            const REGEXP *const slosh = (r);		\
+                            PM_SETRE_OFFSET((o), PTR2IV(slosh));	\
                         } STMT_END
+/* Actually you can assign any IV, not just an offset. And really should it be
+   UV? */
+#define PM_SETRE_OFFSET(o,iv) \
+			STMT_START { \
+                            SV* const sv = PL_regex_pad[(o)->op_pmoffset]; \
+                            sv_setiv(sv, (iv)); \
+                        } STMT_END
+
+#  ifndef PERL_CORE
+/* No longer used anywhere in the core.  Migrate to Devel::PPPort?  */
 #define PM_GETRE_SAFE(o) (PL_regex_pad ? PM_GETRE(o) : (REGEXP*)0)
 #define PM_SETRE_SAFE(o,r) if (PL_regex_pad) PM_SETRE(o,r)
+#  endif
 #else
 #define PM_GETRE(o)     ((o)->op_pmregexp)
 #define PM_SETRE(o,r)   ((o)->op_pmregexp = (r))
+#  ifndef PERL_CORE
 #define PM_GETRE_SAFE PM_GETRE
 #define PM_SETRE_SAFE PM_SETRE
+#  endif
 #endif
 
 #define PMdf_USED	0x01		/* pm has been used once already */

@@ -813,6 +813,11 @@ EXTERN_C int usleep(unsigned int);
 #define PERL_ARENA_SIZE 4080
 #endif
 
+/* Maximum level of recursion */
+#ifndef PERL_SUB_DEPTH_WARN
+#define PERL_SUB_DEPTH_WARN 100
+#endif
+
 #endif /* PERL_CORE */
 
 #if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC) && !defined(__SYMBIAN32__) && !defined(MACOS_TRADITIONAL)
