@@ -430,6 +430,11 @@ mark character followed by zero or more mark characters. Mark characters
 include (but are not restricted to) I<combining characters> and
 I<vowel signs>.
 
+C<\X> matches quite well what normal (non-Unicode-programmer) usage
+would consider a single character: for example a base character
+(the C<\PM> above), for example a letter, followed by zero or more
+diacritics, which are I<combining characters> (the C<\pM*> above).
+
 Mnemonic: eI<X>tended Unicode character.
 
 =back

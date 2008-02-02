@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq1 - General Questions About Perl ($Revision: 10127 $)
+perlfaq1 - General Questions About Perl ($Revision: 10427 $)
 
 =head1 DESCRIPTION
 
@@ -61,7 +61,7 @@ users the informal support will more than suffice.  See the answer to
 There is often a matter of opinion and taste, and there isn't any one
 answer that fits anyone.  In general, you want to use either the current
 stable release, or the stable release immediately prior to that one.
-Currently, those are perl5.8.x and perl5.6.x, respectively.
+Currently, those are perl5.10.x and perl5.8.x, respectively.
 
 Beyond that, you have to consider several things and decide which is best
 for you.
@@ -96,7 +96,7 @@ problems others have if you are risk averse.
 
 =item *
 
-The immediate, previous releases (i.e. perl5.6.x ) are usually maintained
+The immediate, previous releases (i.e. perl5.8.x ) are usually maintained
 for a while, although not at the same level as the current releases.
 
 =item *
@@ -107,15 +107,15 @@ as its whitewashed bones have fractured or eroded.
 
 =item *
 
-There is no Perl 6 for the next couple of years.  Stay tuned, but don't
-worry that you'll have to change major versions of Perl soon (i.e. before
-2008).
+There is no Perl 6 release scheduled, but it will be available when 
+it's ready.  Stay tuned, but don't worry that you'll have to change 
+major versions of Perl; no one is going to take Perl 5 away from you.
 
 =item *
 
 There are really two tracks of perl development: a maintenance version
 and an experimental version.  The maintenance versions are stable, and
-have an even number as the minor release (i.e. perl5.8.x, where 8 is the
+have an even number as the minor release (i.e. perl5.10.x, where 10 is the
 minor release).  The experimental versions may include features that
 don't make it into the stable versions, and have an odd number as the
 minor release (i.e. perl5.9.x, where 9 is the minor release).
@@ -400,9 +400,9 @@ You might find these links useful:
 
 =head1 REVISION
 
-Revision: $Revision: 10127 $
+Revision: $Revision: 10427 $
 
-Date: $Date: 2007-10-27 21:40:20 +0200 (Sat, 27 Oct 2007) $
+Date: $Date: 2007-12-14 00:39:01 +0100 (Fri, 14 Dec 2007) $
 
 See L<perlfaq> for source control details and availability.
 

@@ -1116,9 +1116,9 @@ X<:utf8>
 
 A pseudolayer that turns on a flag on the layer below to tell perl
 that output should be in utf8 and that input should be regarded as
-already in utf8 form.  May be useful in PERLIO environment
-variable to make UTF-8 the default. (To turn off that behaviour
-use C<:bytes> layer.)
+already in valid utf8 form. It does not check for validity and as such
+should be handled with caution for input. Generally C<:encoding(utf8)> is
+the best option when reading UTF-8 encoded data.
 
 =item :win32
 X<:win32>

@@ -888,7 +888,7 @@ retrieves the return op from it, and returns it.
 
 =item Exception handing
 
-Perl's exception handing (i.e. C<die> etc) is built on top of the low-level
+Perl's exception handing (i.e. C<die> etc.) is built on top of the low-level
 C<setjmp()>/C<longjmp()> C-library functions. These basically provide a
 way to capture the current PC and SP registers and later restore them; i.e.
 a C<longjmp()> continues at the point in code where a previous C<setjmp()>
@@ -1556,7 +1556,7 @@ C<-Wdeclaration-after-statement>
 =back
 
 The following flags would be nice to have but they would first need
-their own Stygian stablemaster:
+their own Augean stablemaster:
 
 =over 4
 
@@ -2361,6 +2361,29 @@ automatically by the Makefile, but can also be forced artificially by
 running 'make test_notty'.
 
 =back
+
+=head3 Other environment variables that may influence tests
+
+=over 4
+
+=item PERL_TEST_Net_Ping
+
+Setting this variable runs all the Net::Ping modules tests,
+otherwise some tests that interact with the outside world are skipped.
+See L<perl58delta>.
+
+=item PERL_TEST_NOVREXX
+
+Setting this variable skips the vrexx.t tests for OS2::REXX.
+
+=item PERL_TEST_NUMCONVERTS
+
+This sets a variable in op/numconvert.t.
+
+=back
+
+See also the documentation for the Test and Test::Harness modules,
+for more environment variables that affect testing.
 
 =head2 Common problems when patching Perl source code
 

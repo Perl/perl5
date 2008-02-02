@@ -468,13 +468,6 @@ warnings are also currently suppressed by adding -D_CRT_NONSTDC_NO_DEPRECATE. It
 might be nice to do as Microsoft suggest here too, although, unlike the secure
 functions issue, there is presumably little or no benefit in this case.
 
-=head2 __FUNCTION__ for MSVC-pre-7.0
-
-Jarkko notes that one can things morally equivalent to C<__FUNCTION__>
-(or C<__func__>) even in MSVC-pre-7.0, contrary to popular belief.
-See L<http://www.codeproject.com/debug/extendedtrace.asp> if you feel like
-making C<PERL_MEM_LOG> more useful on Win32.
-
 =head2 strcat(), strcpy(), strncat(), strncpy(), sprintf(), vsprintf()
 
 Maybe create a utility that checks after each libperl.a creation that
@@ -486,6 +479,14 @@ ever creep back to libperl.a.
 Note, of course, that this will only tell whether B<your> platform
 is using those naughty interfaces.
 
+=head2 -D_FORTIFY_SOURCE=2, -fstack-protector
+
+Recent glibcs support C<-D_FORTIFY_SOURCE=2> and recent gcc
+(4.1 onwards?) supports C<-fstack-protector>, both of which give
+protection against various kinds of buffer overflow problems.
+These should probably be used for compiling Perl whenever available,
+Configure and/or hints files should be adjusted to probe for the
+availability of these features and enable them as appropriate.
 
 =head1 Tasks that need a knowledge of XS
 
@@ -638,7 +639,7 @@ fixed strings such as C<ISA> and pass them in to functions.)
 =head2 Organize error messages
 
 Perl's diagnostics (error messages, see L<perldiag>) could use
-reorganizing so that each error message has its
+reorganizing and formalizing so that each error message has its
 stable-for-all-eternity unique id, categorized by severity, type, and
 subsystem.  (The error messages would be listed in a datafile outside
 of the Perl source code, and the source code would only refer to the
@@ -656,7 +657,7 @@ existing software depending on some particular error message...)
 This kind of functionality is known as I<message catalogs>.  Look for
 inspiration for example in the catgets() system, possibly even use it
 if available-- but B<only> if available, all platforms will B<not>
-catgets().
+have catgets().
 
 For the really pure at heart, consider extending this item to cover
 also the warning messages (see L<perllexwarn>, C<warnings.pl>).
@@ -666,18 +667,34 @@ also the warning messages (see L<perllexwarn>, C<warnings.pl>).
 These tasks would need C knowledge, and knowledge of how the interpreter works,
 or a willingness to learn.
 
+=head2 UTF-8 revamp
+
+The handling of Unicode is unclean in many places. For example, the regexp
+engine matches in Unicode semantics whenever the string or the pattern is
+flagged as UTF-8, but that should not be dependent on an internal storage
+detail of the string. Likewise, case folding behaviour is dependent on the
+UTF8 internal flag being on or off.
+
+=head2 Properly Unicode safe tokeniser and pads.
+
+The tokeniser isn't actually very UTF-8 clean. C<use utf8;> is a hack -
+variable names are stored in stashes as raw bytes, without the utf-8 flag
+set. The pad API only takes a C<char *> pointer, so that's all bytes too. The
+tokeniser ignores the UTF-8-ness of C<PL_rsfp>, or any SVs returned from
+source filters.  All this could be fixed.
+
 =head2 state variable initialization in list context
 
 Currently this is illegal:
 
     state ($a, $b) = foo(); 
 
-The current Perl 6 design is that C<state ($a) = foo();> and
-C<(state $a) = foo();> have different semantics, which is tricky to implement
-in Perl 5 as currently the produce the same opcode trees. It would be useful
-to clarify that the Perl 6 design is firm, and then implement the necessary
-code in Perl 5. There are comments in C<Perl_newASSIGNOP()> that show the
-code paths taken by various assignment constructions involving state variables.
+In Perl 6, C<state ($a) = foo();> and C<(state $a) = foo();> have different
+semantics, which is tricky to implement in Perl 5 as currently they produce
+the same opcode trees. The Perl 6 design is firm, so it would be good to
+implement the necessary code in Perl 5. There are comments in
+C<Perl_newASSIGNOP()> that show the code paths taken by various assignment
+constructions involving state variables.
 
 =head2 Implement $value ~~ 0 .. $range
 
@@ -765,23 +782,15 @@ perl and XS subroutines. Subroutine implementations rarely change between
 perl and XS at run time, so investigate using 2 ops to enter subs (one for
 XS, one for perl) and swap between if a sub is redefined.
 
-=head2 Self ties
+=head2 Self-ties
 
-self ties are currently illegal because they caused too many segfaults. Maybe
-the causes of these could be tracked down and self-ties on all types re-
-instated.
+Self-ties are currently illegal because they caused too many segfaults. Maybe
+the causes of these could be tracked down and self-ties on all types
+reinstated.
 
 =head2 Optimize away @_
 
 The old perltodo notes "Look at the "reification" code in C<av.c>".
-
-=head2 Properly Unicode safe tokeniser and pads.
-
-The tokeniser isn't actually very UTF-8 clean. C<use utf8;> is a hack -
-variable names are stored in stashes as raw bytes, without the utf-8 flag
-set. The pad API only takes a C<char *> pointer, so that's all bytes too. The
-tokeniser ignores the UTF-8-ness of C<PL_rsfp>, or any SVs returned from
-source filters.  All this could be fixed.
 
 =head2 The yada yada yada operators
 

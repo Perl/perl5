@@ -167,7 +167,7 @@ as a warning:
 
      Wide character in print at ...
 
-To output UTF-8, use the C<:utf8> output layer.  Prepending
+To output UTF-8, use the C<:encoding> or C<:utf8> output layer.  Prepending
 
       binmode(STDOUT, ":utf8");
 
@@ -317,7 +317,9 @@ and on already open streams, use C<binmode()>:
 The matching of encoding names is loose: case does not matter, and
 many encodings have several aliases.  Note that the C<:utf8> layer
 must always be specified exactly like that; it is I<not> subject to
-the loose matching of encoding names.
+the loose matching of encoding names. Also note that C<:utf8> is unsafe for
+input, because it accepts the data without validating that it is indeed valid
+UTF8.
 
 See L<PerlIO> for the C<:utf8> layer, L<PerlIO::encoding> and
 L<Encode::PerlIO> for the C<:encoding()> layer, and
@@ -329,7 +331,7 @@ Unicode or legacy encodings does not magically turn the data into
 Unicode in Perl's eyes.  To do that, specify the appropriate
 layer when opening files
 
-    open(my $fh,'<:utf8', 'anything');
+    open(my $fh,'<:encoding(utf8)', 'anything');
     my $line_of_unicode = <$fh>;
 
     open(my $fh,'<:encoding(Big5)', 'anything');
@@ -338,7 +340,7 @@ layer when opening files
 The I/O layers can also be specified more flexibly with
 the C<open> pragma.  See L<open>, or look at the following example.
 
-    use open ':utf8'; # input and output default layer will be UTF-8
+    use open ':encoding(utf8)'; # input/output default encoding will be UTF-8
     open X, ">file";
     print X chr(0x100), "\n";
     close X;
@@ -357,11 +359,6 @@ With the C<open> pragma you can use the C<:locale> layer
     open(I, "<koi8");
     printf "%#x\n", ord(<I>), "\n"; # this should print 0xc1
     close I;
-
-or you can also use the C<':encoding(...)'> layer
-
-    open(my $epic,'<:encoding(iso-8859-7)','iliad.greek');
-    my $line_of_unicode = <$epic>;
 
 These methods install a transparent filter on the I/O stream that
 converts data from the specified encoding when it is read in from the
@@ -411,13 +408,13 @@ by repeatedly encoding the data:
     local $/; ## read in the whole file of 8-bit characters
     $t = <F>;
     close F;
-    open F, ">:utf8", "file";
+    open F, ">:encoding(utf8)", "file";
     print F $t; ## convert to UTF-8 on output
     close F;
 
 If you run this code twice, the contents of the F<file> will be twice
-UTF-8 encoded.  A C<use open ':utf8'> would have avoided the bug, or
-explicitly opening also the F<file> for input as UTF-8.
+UTF-8 encoded.  A C<use open ':encoding(utf8)'> would have avoided the
+bug, or explicitly opening also the F<file> for input as UTF-8.
 
 B<NOTE>: the C<:utf8> and C<:encoding> features work only if your
 Perl has been built with the new PerlIO feature (which is the default

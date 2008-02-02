@@ -323,6 +323,36 @@ detach itself:
         # Do more work
     }
 
+=head2 Process and Thread Termination
+
+With threads one must be careful to make sure they all have a chance to
+run to completion, assuming that is what you want.
+
+An action that terminates a process will terminate I<all> running
+threads.  die() and exit() have this property,
+and perl does an exit when the main thread exits,
+perhaps implicitly by falling off the end of your code,
+even if that's not what you want.
+
+As an example of this case, this code prints the message
+"Perl exited with active threads: 2 running and unjoined":
+
+    use threads;
+    my $thr1 = threads->new(\&thrsub, "test1");
+    my $thr2 = threads->new(\&thrsub, "test2");
+    sub thrsub {
+       my ($message) = @_;
+       sleep 1;
+       print "thread $message\n";
+    }
+
+But when the following lines are added at the end:
+
+    $thr1->join;
+    $thr2->join;
+
+it prints two lines of output, a perhaps more useful outcome.
+
 =head1 Threads And Data
 
 Now that we've covered the basics of threads, it's time for our next

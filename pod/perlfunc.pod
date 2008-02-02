@@ -332,10 +332,12 @@ Example:
 The interpretation of the file permission operators C<-r>, C<-R>,
 C<-w>, C<-W>, C<-x>, and C<-X> is by default based solely on the mode
 of the file and the uids and gids of the user.  There may be other
-reasons you can't actually read, write, or execute the file.  Such
-reasons may be for example network filesystem access controls, ACLs
-(access control lists), read-only filesystems, and unrecognized
-executable formats.
+reasons you can't actually read, write, or execute the file: for
+example network filesystem access controls, ACLs (access control lists),
+read-only filesystems, and unrecognized executable formats.  Note
+that the use of these six specific operators to verify if some operation
+is possible is usually a mistake, because it may be open to race
+conditions.
 
 Also note that, for the superuser on the local filesystems, the C<-r>,
 C<-R>, C<-w>, and C<-W> tests always return 1, and C<-x> and C<-X> return 1
@@ -350,8 +352,11 @@ will test whether the permission can (not) be granted using the
 access() family of system calls.  Also note that the C<-x> and C<-X> may
 under this pragma return true even if there are no execute permission
 bits set (nor any extra execute permission ACLs).  This strangeness is
-due to the underlying system calls' definitions.  Read the
-documentation for the C<filetest> pragma for more information.
+due to the underlying system calls' definitions. Note also that, due to
+the implementation of C<use filetest 'access'>, the C<_> special
+filehandle won't cache the results of the file tests when this pragma is
+in effect.  Read the documentation for the C<filetest> pragma for more
+information.
 
 Note that C<-s/a/b/> does not do a negated substitution.  Saying
 C<-exp($foo)> still works as expected, however--only single letters
@@ -4220,10 +4225,10 @@ See L<perlipc/"UDP: Message Passing"> for examples.
 Note the I<characters>: depending on the status of the socket, either
 (8-bit) bytes or characters are received.  By default all sockets
 operate on bytes, but for example if the socket has been changed using
-binmode() to operate with the C<:utf8> I/O layer (see the C<open>
-pragma, L<open>), the I/O will operate on UTF-8 encoded Unicode
-characters, not bytes.  Similarly for the C<:encoding> pragma:
-in that case pretty much any characters can be read.
+binmode() to operate with the C<:encoding(utf8)> I/O layer (see the
+C<open> pragma, L<open>), the I/O will operate on UTF-8 encoded Unicode
+characters, not bytes.  Similarly for the C<:encoding> pragma: in that
+case pretty much any characters can be read.
 
 =item redo LABEL
 X<redo>
@@ -4646,7 +4651,7 @@ of the file) from the Fcntl module.  Returns C<1> upon success, C<0>
 otherwise.
 
 Note the I<in bytes>: even if the filehandle has been set to
-operate on characters (for example by using the C<:utf8> open
+operate on characters (for example by using the C<:encoding(utf8)> open
 layer), tell() will return byte offsets, not character offsets
 (because implementing that would render seek() and tell() rather slow).
 
@@ -4836,10 +4841,10 @@ L<perlipc/"UDP: Message Passing"> for examples.
 Note the I<characters>: depending on the status of the socket, either
 (8-bit) bytes or characters are sent.  By default all sockets operate
 on bytes, but for example if the socket has been changed using
-binmode() to operate with the C<:utf8> I/O layer (see L</open>, or the
-C<open> pragma, L<open>), the I/O will operate on UTF-8 encoded
-Unicode characters, not bytes.  Similarly for the C<:encoding> pragma:
-in that case pretty much any characters can be sent.
+binmode() to operate with the C<:encoding(utf8)> I/O layer (see
+L</open>, or the C<open> pragma, L<open>), the I/O will operate on UTF-8
+encoded Unicode characters, not bytes.  Similarly for the C<:encoding>
+pragma: in that case pretty much any characters can be sent.
 
 =item setpgrp PID,PGRP
 X<setpgrp> X<group>
@@ -6156,9 +6161,9 @@ POSITION, and C<2> to set it to EOF plus POSITION (typically
 negative).
 
 Note the I<in bytes>: even if the filehandle has been set to operate
-on characters (for example by using the C<:utf8> I/O layer), tell()
-will return byte offsets, not character offsets (because implementing
-that would render sysseek() very slow).
+on characters (for example by using the C<:encoding(utf8)> I/O layer),
+tell() will return byte offsets, not character offsets (because
+implementing that would render sysseek() very slow).
 
 sysseek() bypasses normal buffered IO, so mixing this with reads (other
 than C<sysread>, for example C<< <> >> or read()) C<print>, C<write>,
@@ -6283,9 +6288,9 @@ the actual filehandle.  If FILEHANDLE is omitted, assumes the file
 last read.
 
 Note the I<in bytes>: even if the filehandle has been set to
-operate on characters (for example by using the C<:utf8> open
-layer), tell() will return byte offsets, not character offsets
-(because that would render seek() and tell() rather slow).
+operate on characters (for example by using the C<:encoding(utf8)> open
+layer), tell() will return byte offsets, not character offsets (because
+that would render seek() and tell() rather slow).
 
 The return value of tell() for the standard streams like the STDIN
 depends on the operating system: it may return -1 or something else.

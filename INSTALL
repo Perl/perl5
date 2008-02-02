@@ -2079,6 +2079,83 @@ and skip installman altogether.
 See also L<"Maintaining completely separate versions"> for another
 approach.
 
+=head1 cd /usr/include; h2ph *.h sys/*.h
+
+Some perl scripts need to be able to obtain information from the
+system header files.  This command will convert the most commonly used
+header files in /usr/include into files that can be easily interpreted
+by perl.  These files will be placed in the architecture-dependent
+library ($archlib) directory you specified to Configure.
+
+Note:  Due to differences in the C and perl languages, the conversion
+of the header files is not perfect.  You will probably have to
+hand-edit some of the converted files to get them to parse correctly.
+For example, h2ph breaks spectacularly on type casting and certain
+structures.
+
+=head1 installhtml --help
+
+Some sites may wish to make perl documentation available in HTML
+format.  The installhtml utility can be used to convert pod
+documentation into linked HTML files and install them.
+
+Currently, the supplied ./installhtml script does not make use of the
+html Configure variables.  This should be fixed in a future release.
+
+The following command-line is an example of one used to convert
+perl documentation:
+
+  ./installhtml                   \
+      --podroot=.                 \
+      --podpath=lib:ext:pod:vms   \
+      --recurse                   \
+      --htmldir=/perl/nmanual     \
+      --htmlroot=/perl/nmanual    \
+      --splithead=pod/perlipc     \
+      --splititem=pod/perlfunc    \
+      --libpods=perlfunc:perlguts:perlvar:perlrun:perlop \
+      --verbose
+
+See the documentation in installhtml for more details.  It can take
+many minutes to execute a large installation and you should expect to
+see warnings like "no title", "unexpected directive" and "cannot
+resolve" as the files are processed. We are aware of these problems
+(and would welcome patches for them).
+
+You may find it helpful to run installhtml twice. That should reduce
+the number of "cannot resolve" warnings.
+
+=head1 cd pod && make tex && (process the latex files)
+
+Some sites may also wish to make the documentation in the pod/ directory
+available in TeX format.  Type
+
+	(cd pod && make tex && <process the latex files>)
+
+=head1 Starting all over again
+
+If you wish to re-build perl from the same build directory, you should
+clean it out with the command
+
+	make distclean
+
+or
+
+	make realclean
+
+The only difference between the two is that make distclean also removes
+your old config.sh and Policy.sh files.
+
+If you are upgrading from a previous version of perl, or if you
+change systems or compilers or make other significant changes, or if
+you are experiencing difficulties building perl, you should not re-use
+your old config.sh.
+
+If your reason to reuse your old config.sh is to save your particular
+installation choices, then you can probably achieve the same effect by
+using the Policy.sh file.  See the section on L<"Site-wide Policy
+settings"> above.
+
 =head1 Reporting Problems
 
 Wherever possible please use the perlbug tool supplied with this Perl
@@ -2232,83 +2309,6 @@ See your installed copy of the perllocal.pod file for a (possibly
 incomplete) list of locally installed modules.  Note that you want
 perllocal.pod, not perllocale.pod, for installed module information.
 
-=head1 cd /usr/include; h2ph *.h sys/*.h
-
-Some perl scripts need to be able to obtain information from the
-system header files.  This command will convert the most commonly used
-header files in /usr/include into files that can be easily interpreted
-by perl.  These files will be placed in the architecture-dependent
-library ($archlib) directory you specified to Configure.
-
-Note:  Due to differences in the C and perl languages, the conversion
-of the header files is not perfect.  You will probably have to
-hand-edit some of the converted files to get them to parse correctly.
-For example, h2ph breaks spectacularly on type casting and certain
-structures.
-
-=head1 installhtml --help
-
-Some sites may wish to make perl documentation available in HTML
-format.  The installhtml utility can be used to convert pod
-documentation into linked HTML files and install them.
-
-Currently, the supplied ./installhtml script does not make use of the
-html Configure variables.  This should be fixed in a future release.
-
-The following command-line is an example of one used to convert
-perl documentation:
-
-  ./installhtml                   \
-      --podroot=.                 \
-      --podpath=lib:ext:pod:vms   \
-      --recurse                   \
-      --htmldir=/perl/nmanual     \
-      --htmlroot=/perl/nmanual    \
-      --splithead=pod/perlipc     \
-      --splititem=pod/perlfunc    \
-      --libpods=perlfunc:perlguts:perlvar:perlrun:perlop \
-      --verbose
-
-See the documentation in installhtml for more details.  It can take
-many minutes to execute a large installation and you should expect to
-see warnings like "no title", "unexpected directive" and "cannot
-resolve" as the files are processed. We are aware of these problems
-(and would welcome patches for them).
-
-You may find it helpful to run installhtml twice. That should reduce
-the number of "cannot resolve" warnings.
-
-=head1 cd pod && make tex && (process the latex files)
-
-Some sites may also wish to make the documentation in the pod/ directory
-available in TeX format.  Type
-
-	(cd pod && make tex && <process the latex files>)
-
-=head1 Starting all over again
-
-If you wish to re-build perl from the same build directory, you should
-clean it out with the command
-
-	make distclean
-
-or
-
-	make realclean
-
-The only difference between the two is that make distclean also removes
-your old config.sh and Policy.sh files.
-
-If you are upgrading from a previous version of perl, or if you
-change systems or compilers or make other significant changes, or if
-you are experiencing difficulties building perl, you should not re-use
-your old config.sh.
-
-If your reason to reuse your old config.sh is to save your particular
-installation choices, then you can probably achieve the same effect by
-using the Policy.sh file.  See the section on L<"Site-wide Policy
-settings"> above.
-
 =head1 Minimizing the Perl installation
 
 The following section is meant for people worrying about squeezing the
@@ -2449,6 +2449,13 @@ use something like the below
 
 (The 'strace' is Linux-specific, other similar utilities include 'truss'
 and 'ktrace'.)
+
+=head2 C<-DNO_MATHOMS>
+
+If you configure perl with C<-Accflags=-DNO_MATHOMS>, the functions from
+F<mathoms.c> will not be compiled in. Those functions are no longer used
+by perl itself; for source compatibility reasons, though, they weren't
+completely removed.
 
 =head1 DOCUMENTATION
 

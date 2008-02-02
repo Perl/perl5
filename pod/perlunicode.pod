@@ -1524,7 +1524,7 @@ to work under 5.6, so you should be safe to try them out.
 A filehandle that should read or write UTF-8
 
   if ($] > 5.007) {
-    binmode $fh, ":utf8";
+    binmode $fh, ":encoding(utf8)";
   }
 
 =item *

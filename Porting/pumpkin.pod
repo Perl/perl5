@@ -609,6 +609,15 @@ detailed descriptions ought to be easily available somewhere.
 If you update the subversion number in F<patchlevel.h>, you may need
 to change the version number near the top of the F<Changes> file.
 
+=head2 Bumping perl's version
+
+If you bump perl's version, you will need to update a few things:
+the L<perlhist> manpage for the date of release, the version number and
+perldelta reference in the top level F<README> (and maybe the copyright
+year too), the F<META.yml> file (generated via F<Porting/makemeta>, be
+sure to run it with the current bleadperl), and the meta-info about
+dual-lived modules in Module::Corelist (F<Porting/corelist.pl> does that).
+
 =head2 Todo
 
 The F<pod/perltodo.pod> file contains a roughly-categorized unordered
