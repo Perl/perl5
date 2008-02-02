@@ -1635,12 +1635,12 @@ S_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, I32 flags, int
     if (n > 1) {
 	if (mg->mg_ptr) {
 	    if (mg->mg_len >= 0)
-		PUSHs(sv_2mortal(newSVpvn(mg->mg_ptr, mg->mg_len)));
+		mPUSHp(mg->mg_ptr, mg->mg_len);
 	    else if (mg->mg_len == HEf_SVKEY)
 		PUSHs((SV*)mg->mg_ptr);
 	}
 	else if (mg->mg_type == PERL_MAGIC_tiedelem) {
-	    PUSHs(sv_2mortal(newSViv(mg->mg_len)));
+	    mPUSHi(mg->mg_len);
 	}
     }
     if (n > 2) {

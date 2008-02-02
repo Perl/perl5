@@ -1949,8 +1949,8 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     PUSHs(lr>0? left: right);
     PUSHs( lr > 0 ? &PL_sv_yes : ( assign ? &PL_sv_undef : &PL_sv_no ));
     if (notfound) {
-      PUSHs( sv_2mortal(newSVpvn(AMG_id2name(method + assignshift),
-				 AMG_id2namelen(method + assignshift))));
+      PUSHs(newSVpvn_flags(AMG_id2name(method + assignshift),
+			   AMG_id2namelen(method + assignshift), SVs_TEMP));
     }
     PUSHs((SV*)cv);
     PUTBACK;

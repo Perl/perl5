@@ -71,7 +71,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 	PUSHMARK(SP);
 	EXTEND(SP,2);
 	PUSHs(SvTIED_obj((SV*)av, mg));
-	PUSHs(sv_2mortal(newSViv(key+1)));
+	mPUSHi(key + 1);
         PUTBACK;
 	call_method("EXTEND", G_SCALAR|G_DISCARD);
 	POPSTACK;
@@ -781,7 +781,7 @@ Perl_av_fill(pTHX_ register AV *av, I32 fill)
 	PUSHMARK(SP);
 	EXTEND(SP,2);
 	PUSHs(SvTIED_obj((SV*)av, mg));
-	PUSHs(sv_2mortal(newSViv(fill+1)));
+	mPUSHi(fill + 1);
 	PUTBACK;
 	call_method("STORESIZE", G_SCALAR|G_DISCARD);
 	POPSTACK;

@@ -951,6 +951,10 @@ PERL_CALLCONV SV*	Perl_newSVpvn(pTHX_ const char* s, STRLEN len)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV SV*	Perl_newSVpvn_flags(pTHX_ const char* s, STRLEN len, U32 flags)
+			__attribute__malloc__
+			__attribute__warn_unused_result__;
+
 PERL_CALLCONV SV*	Perl_newSVpvn_share(pTHX_ const char* s, I32 len, U32 hash)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;

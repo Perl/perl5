@@ -1563,7 +1563,11 @@ variable C<PL_na>, though this is rather less efficient than using a local
 variable.  Remember though, that hash keys in perl are free to contain
 embedded nulls, so using C<strlen()> or similar is not a good way to find
 the length of hash keys. This is very similar to the C<SvPV()> macro
-described elsewhere in this document.
+described elsewhere in this document. See also C<HeUTF8>.
+
+If you are using C<HePV> to get values to pass to C<newSVpvn()> to create a
+new SV, you should consider using C<newSVhek(HeKEY_hek(he))> as it is more
+efficient.
 
 	char*	HePV(HE* he, STRLEN len)
 
@@ -1600,6 +1604,20 @@ indicate the presence of an C<SV*> key, and returns the same
 C<SV*>.
 
 	SV*	HeSVKEY_set(HE* he, SV* sv)
+
+=for hackers
+Found in file hv.h
+
+=item HeUTF8
+X<HeUTF8>
+
+Returns whether the C<char *> value returned by C<HePV> is encoded in UTF-8,
+doing any necessary dereferencing of possibly C<SV*> keys.  The value returned
+will be 0 or non-0, not necesarily 1 (or even a value with any low bits set),
+so B<do not> blindly assign this to a C<bool> variable, as C<bool> may be a
+typedef for C<char>.
+
+	char*	HeUTF8(HE* he, STRLEN len)
 
 =for hackers
 Found in file hv.h
@@ -3044,8 +3062,7 @@ Found in file pp.h
 X<mPUSHi>
 
 Push an integer onto the stack.  The stack must have room for this element.
-Handles 'set' magic.  Does not use C<TARG>.  See also C<PUSHi>, C<mXPUSHi>
-and C<XPUSHi>.
+Does not use C<TARG>.  See also C<PUSHi>, C<mXPUSHi> and C<XPUSHi>.
 
 	void	mPUSHi(IV iv)
 
@@ -3056,8 +3073,7 @@ Found in file pp.h
 X<mPUSHn>
 
 Push a double onto the stack.  The stack must have room for this element.
-Handles 'set' magic.  Does not use C<TARG>.  See also C<PUSHn>, C<mXPUSHn>
-and C<XPUSHn>.
+Does not use C<TARG>.  See also C<PUSHn>, C<mXPUSHn> and C<XPUSHn>.
 
 	void	mPUSHn(NV nv)
 
@@ -3068,10 +3084,21 @@ Found in file pp.h
 X<mPUSHp>
 
 Push a string onto the stack.  The stack must have room for this element.
-The C<len> indicates the length of the string.  Handles 'set' magic.  Does
-not use C<TARG>.  See also C<PUSHp>, C<mXPUSHp> and C<XPUSHp>.
+The C<len> indicates the length of the string.  Does not use C<TARG>.
+See also C<PUSHp>, C<mXPUSHp> and C<XPUSHp>.
 
 	void	mPUSHp(char* str, STRLEN len)
+
+=for hackers
+Found in file pp.h
+
+=item mPUSHs
+X<mPUSHs>
+
+Push an SV onto the stack and mortalizes the SV.  The stack must have room
+for this element.  Does not use C<TARG>.  See also C<PUSHs> and C<mXPUSHs>.
+
+	void	mPUSHs(SV* sv)
 
 =for hackers
 Found in file pp.h
@@ -3080,8 +3107,7 @@ Found in file pp.h
 X<mPUSHu>
 
 Push an unsigned integer onto the stack.  The stack must have room for this
-element.  Handles 'set' magic.  Does not use C<TARG>.  See also C<PUSHu>,
-C<mXPUSHu> and C<XPUSHu>.
+element.  Does not use C<TARG>.  See also C<PUSHu>, C<mXPUSHu> and C<XPUSHu>.
 
 	void	mPUSHu(UV uv)
 
@@ -3091,9 +3117,8 @@ Found in file pp.h
 =item mXPUSHi
 X<mXPUSHi>
 
-Push an integer onto the stack, extending the stack if necessary.  Handles
-'set' magic.  Does not use C<TARG>.  See also C<XPUSHi>, C<mPUSHi> and
-C<PUSHi>.
+Push an integer onto the stack, extending the stack if necessary.
+Does not use C<TARG>.  See also C<XPUSHi>, C<mPUSHi> and C<PUSHi>.
 
 	void	mXPUSHi(IV iv)
 
@@ -3103,9 +3128,8 @@ Found in file pp.h
 =item mXPUSHn
 X<mXPUSHn>
 
-Push a double onto the stack, extending the stack if necessary.  Handles
-'set' magic.  Does not use C<TARG>.  See also C<XPUSHn>, C<mPUSHn> and
-C<PUSHn>.
+Push a double onto the stack, extending the stack if necessary.
+Does not use C<TARG>.  See also C<XPUSHn>, C<mPUSHn> and C<PUSHn>.
 
 	void	mXPUSHn(NV nv)
 
@@ -3116,10 +3140,21 @@ Found in file pp.h
 X<mXPUSHp>
 
 Push a string onto the stack, extending the stack if necessary.  The C<len>
-indicates the length of the string.  Handles 'set' magic.  Does not use
-C<TARG>.  See also C<XPUSHp>, C<mPUSHp> and C<PUSHp>.
+indicates the length of the string.  Does not use C<TARG>.  See also C<XPUSHp>,
+C<mPUSHp> and C<PUSHp>.
 
 	void	mXPUSHp(char* str, STRLEN len)
+
+=for hackers
+Found in file pp.h
+
+=item mXPUSHs
+X<mXPUSHs>
+
+Push an SV onto the stack, extending the stack if necessary and mortalizes
+the SV.  Does not use C<TARG>.  See also C<XPUSHs> and C<mPUSHs>.
+
+	void	mXPUSHs(SV* sv)
 
 =for hackers
 Found in file pp.h
@@ -3128,8 +3163,7 @@ Found in file pp.h
 X<mXPUSHu>
 
 Push an unsigned integer onto the stack, extending the stack if necessary.
-Handles 'set' magic.  Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu>
-and C<PUSHu>.
+Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 
 	void	mXPUSHu(UV uv)
 
@@ -3243,8 +3277,7 @@ Found in file pp.h
 X<PUSHmortal>
 
 Push a new mortal SV onto the stack.  The stack must have room for this
-element.  Does not handle 'set' magic.  Does not use C<TARG>.  See also
-C<PUSHs>, C<XPUSHmortal> and C<XPUSHs>.
+element.  Does not use C<TARG>.  See also C<PUSHs>, C<XPUSHmortal> and C<XPUSHs>.
 
 	void	PUSHmortal()
 
@@ -3351,9 +3384,8 @@ Found in file pp.h
 =item XPUSHmortal
 X<XPUSHmortal>
 
-Push a new mortal SV onto the stack, extending the stack if necessary.  Does
-not handle 'set' magic.  Does not use C<TARG>.  See also C<XPUSHs>,
-C<PUSHmortal> and C<PUSHs>.
+Push a new mortal SV onto the stack, extending the stack if necessary.
+Does not use C<TARG>.  See also C<XPUSHs>, C<PUSHmortal> and C<PUSHs>.
 
 	void	XPUSHmortal()
 
@@ -3670,6 +3702,17 @@ Creates an RV wrapper for an SV.  The reference count for the original SV is
 incremented.
 
 	SV*	newRV_inc(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item newSVpvn_utf8
+X<newSVpvn_utf8>
+
+Creates a new SV and copies a string into it.  If utf8 is true, calls
+C<SvUTF8_on> on the new SV.  Implemented as a wrapper around C<newSVpvn_flags>.
+
+	SV*	newSVpvn_utf8(NULLOK const char* s, STRLEN len, U32 utf8)
 
 =for hackers
 Found in file sv.h
@@ -4858,6 +4901,26 @@ C<len> bytes long.  If the C<s> argument is NULL the new SV will be undefined.
 =for hackers
 Found in file sv.c
 
+=item newSVpvn_flags
+X<newSVpvn_flags>
+
+Creates a new SV and copies a string into it.  The reference count for the
+SV is set to 1.  Note that if C<len> is zero, Perl will create a zero length
+string.  You are responsible for ensuring that the source string is at least
+C<len> bytes long.  If the C<s> argument is NULL the new SV will be undefined.
+Currently the only flag bits accepted are C<SVf_UTF8> and C<SVs_TEMP>.
+If C<SVs_TEMP> is set, then C<sv2mortal()> is called on the result before
+returning. If C<SVf_UTF8> is set, then it will be set on the new SV.
+C<newSVpvn_utf8()> is a convenience wrapper for this function, defined as
+
+    #define newSVpvn_utf8(s, len, u)			\
+	newSVpvn_flags((s), (len), (u) ? SVf_UTF8 : 0)
+
+	SV*	newSVpvn_flags(const char* s, STRLEN len, U32 flags)
+
+=for hackers
+Found in file sv.c
+
 =item newSVpvn_share
 X<newSVpvn_share>
 
@@ -4880,6 +4943,17 @@ X<newSVpvs>
 Like C<newSVpvn>, but takes a literal string instead of a string/length pair.
 
 	SV*	newSVpvs(const char* s)
+
+=for hackers
+Found in file handy.h
+
+=item newSVpvs_flags
+X<newSVpvs_flags>
+
+Like C<newSVpvn_flags>, but takes a literal string instead of a string/length
+pair.
+
+	SV*	newSVpvs_flags(const char* s, U32 flags)
 
 =for hackers
 Found in file handy.h

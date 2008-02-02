@@ -981,9 +981,9 @@ S_force_next(pTHX_ I32 type)
 STATIC SV *
 S_newSV_maybe_utf8(pTHX_ const char *start, STRLEN len)
 {
-    SV *sv = newSVpvn(start,len);
-    if (UTF && !IN_BYTES && is_utf8_string((U8*)start, len))
-	SvUTF8_on(sv);
+    SV * const sv = newSVpvn_utf8(start, len,
+				  UTF && !IN_BYTES
+				  && is_utf8_string((U8*)start, len));
     return sv;
 }
 
@@ -1168,9 +1168,7 @@ S_tokeq(pTHX_ SV *sv)
 	goto finish;
     d = s;
     if ( PL_hints & HINT_NEW_STRING ) {
-	pv = sv_2mortal(newSVpvn(SvPVX_const(pv), len));
-	if (SvUTF8(sv))
-	    SvUTF8_on(pv);
+	pv = newSVpvn_flags(SvPVX_const(pv), len, SVs_TEMP | SvUTF8(sv));
     }
     while (s < send) {
 	if (*s == '\\') {
@@ -1236,9 +1234,7 @@ S_sublex_start(pTHX)
 	    /* Overloaded constants, nothing fancy: Convert to SVt_PV: */
 	    STRLEN len;
 	    const char * const p = SvPV_const(sv, len);
-	    SV * const nsv = newSVpvn(p, len);
-	    if (SvUTF8(sv))
-		SvUTF8_on(nsv);
+	    SV * const nsv = newSVpvn_flags(p, len, SvUTF8(sv));
 	    SvREFCNT_dec(sv);
 	    sv = nsv;
 	}
@@ -5259,9 +5255,7 @@ Perl_yylex(pTHX)
 			    for (; !isSPACE(*d) && len; --len, ++d)
 				/**/;
 			}
-			sv = newSVpvn(b, d-b);
-			if (DO_UTF8(PL_lex_stuff))
-			    SvUTF8_on(sv);
+			sv = newSVpvn_utf8(b, d-b, DO_UTF8(PL_lex_stuff));
 			words = append_elem(OP_LIST, words,
 					    newSVOP(OP_CONST, 0, tokeq(sv)));
 		    }
@@ -9283,9 +9277,9 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
     sv_2mortal(sv);			/* Parent created it permanently */
     cv = *cvp;
     if (!pv && s)
-  	pv = sv_2mortal(newSVpvn(s, len));
+  	pv = newSVpvn_flags(s, len, SVs_TEMP);
     if (type && pv)
-  	typesv = sv_2mortal(newSVpvn(type, typelen));
+  	typesv = newSVpvn_flags(type, typelen, SVs_TEMP);
     else
   	typesv = &PL_sv_undef;
 
@@ -10990,7 +10984,7 @@ Perl_yyerror(pTHX_ char *s)
 	    where = "within string";
     }
     else {
-	SV * const where_sv = sv_2mortal(newSVpvs("next char "));
+	SV * const where_sv = newSVpvs_flags("next char ", SVs_TEMP);
 	if (yychar < 32)
 	    Perl_sv_catpvf(aTHX_ where_sv, "^%c", toCTRL(yychar));
 	else if (isPRINT_LC(yychar)) {

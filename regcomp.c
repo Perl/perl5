@@ -1261,9 +1261,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			
 			l -= old;
 			/* Get the added string: */
-			last_str = newSVpvn(s  + old, l);
-			if (UTF)
-			    SvUTF8_on(last_str);
+			last_str = newSVpvn_utf8(s  + old, l, UTF);
 			if (deltanext == 0 && pos_before == b) {
 			    /* What was added is a constant string */
 			    if (mincount > 1) {
@@ -2798,7 +2796,7 @@ STATIC UV
 S_reg_recode(pTHX_ const char value, SV **encp)
 {
     STRLEN numlen = 1;
-    SV * const sv = sv_2mortal(newSVpvn(&value, numlen));
+    SV * const sv = newSVpvn_flags(&value, numlen, SVs_TEMP);
     const char * const s = *encp ? sv_recode_to_utf8(sv, *encp) : SvPVX(sv);
     const STRLEN newlen = SvCUR(sv);
     UV uv = UNICODE_REPLACEMENT;
@@ -4071,8 +4069,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 
 				  if (!unicode_alternate)
 				      unicode_alternate = newAV();
-				  sv = newSVpvn((char*)foldbuf, foldlen);
-				  SvUTF8_on(sv);
+				  sv = newSVpvn_utf8((char*)foldbuf, foldlen,
+						     TRUE);
 				  av_push(unicode_alternate, sv);
 			      }
 			 }

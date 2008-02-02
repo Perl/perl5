@@ -586,6 +586,7 @@ Apda	|SV*	|newSVuv	|UV u
 Apda	|SV*	|newSVnv	|NV n
 Apda	|SV*	|newSVpv	|NULLOK const char* s|STRLEN len
 Apda	|SV*	|newSVpvn	|NULLOK const char* s|STRLEN len
+Apda	|SV*	|newSVpvn_flags	|NULLOK const char* s|STRLEN len|U32 flags
 Apda	|SV*	|newSVpvn_share	|NULLOK const char* s|I32 len|U32 hash
 Afpda	|SV*	|newSVpvf	|NN const char* pat|...
 Apa	|SV*	|vnewSVpvf	|NN const char* pat|NULLOK va_list* args

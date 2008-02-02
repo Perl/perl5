@@ -159,7 +159,18 @@ variable C<PL_na>, though this is rather less efficient than using a local
 variable.  Remember though, that hash keys in perl are free to contain
 embedded nulls, so using C<strlen()> or similar is not a good way to find
 the length of hash keys. This is very similar to the C<SvPV()> macro
-described elsewhere in this document.
+described elsewhere in this document. See also C<HeUTF8>.
+
+If you are using C<HePV> to get values to pass to C<newSVpvn()> to create a
+new SV, you should consider using C<newSVhek(HeKEY_hek(he))> as it is more
+efficient.
+
+=for apidoc Am|char*|HeUTF8|HE* he|STRLEN len
+Returns whether the C<char *> value returned by C<HePV> is encoded in UTF-8,
+doing any necessary dereferencing of possibly C<SV*> keys.  The value returned
+will be 0 or non-0, not necesarily 1 (or even a value with any low bits set),
+so B<do not> blindly assign this to a C<bool> variable, as C<bool> may be a
+typedef for C<char>.
 
 =for apidoc Am|SV*|HeSVKEY|HE* he
 Returns the key as an C<SV*>, or C<NULL> if the hash entry does not
@@ -261,6 +272,9 @@ C<SV*>.
 #define HePV(he,lp)		((HeKLEN(he) == HEf_SVKEY) ?		\
 				 SvPV(HeKEY_sv(he),lp) :		\
 				 ((lp = HeKLEN(he)), HeKEY(he)))
+#define HeUTF8(he)		((HeKLEN(he) == HEf_SVKEY) ?		\
+				 SvUTF8(HeKEY_sv(he)) :			\
+				 (U32)HeKUTF8(he))
 
 #define HeSVKEY(he)		((HeKEY(he) && 				\
 				  HeKLEN(he) == HEf_SVKEY) ?		\
@@ -269,8 +283,8 @@ C<SV*>.
 #define HeSVKEY_force(he)	(HeKEY(he) ?				\
 				 ((HeKLEN(he) == HEf_SVKEY) ?		\
 				  HeKEY_sv(he) :			\
-				  sv_2mortal(newSVpvn(HeKEY(he),	\
-						     HeKLEN(he)))) :	\
+				  newSVpvn_flags(HeKEY(he),		\
+						 HeKLEN(he), SVs_TEMP)) : \
 				 &PL_sv_undef)
 #define HeSVKEY_set(he,sv)	((HeKLEN(he) = HEf_SVKEY), (HeKEY_sv(he) = sv))
 

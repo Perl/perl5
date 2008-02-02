@@ -206,19 +206,19 @@ usage:
     case SVt_PVCV:
 	cvflags = CvFLAGS((CV*)sv);
 	if (cvflags & CVf_LOCKED)
-	    XPUSHs(sv_2mortal(newSVpvs("locked")));
+	    XPUSHs(newSVpvs_flags("locked", SVs_TEMP));
 #ifdef CVf_LVALUE
 	if (cvflags & CVf_LVALUE)
-	    XPUSHs(sv_2mortal(newSVpvs("lvalue")));
+	    XPUSHs(newSVpvs_flags("lvalue", SVs_TEMP));
 #endif
 	if (cvflags & CVf_METHOD)
-	    XPUSHs(sv_2mortal(newSVpvs("method")));
+	    XPUSHs(newSVpvs_flags("method", SVs_TEMP));
         if (GvUNIQUE(CvGV((CV*)sv)))
-	    XPUSHs(sv_2mortal(newSVpvs("unique")));
+	    XPUSHs(newSVpvs_flags("unique", SVs_TEMP));
 	break;
     case SVt_PVGV:
 	if (GvUNIQUE(sv))
-	    XPUSHs(sv_2mortal(newSVpvs("unique")));
+	    XPUSHs(newSVpvs_flags("unique", SVs_TEMP));
 	break;
     default:
 	break;

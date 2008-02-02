@@ -1204,13 +1204,13 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	/* Avoid triggering overloading again by using temporaries.
 	   Maybe there should be a variant of sv_utf8_upgrade that takes pvn
 	*/
-	right = sv_2mortal(newSVpvn(rsave, rightlen));
+	right = newSVpvn_flags(rsave, rightlen, SVs_TEMP);
 	sv_utf8_upgrade(right);
 	rsave = rc = SvPV_nomg_const(right, rightlen);
 	right_utf = TRUE;
     }
     else if (!left_utf && right_utf) {
-	left = sv_2mortal(newSVpvn(lsave, leftlen));
+	left = newSVpvn_flags(lsave, leftlen, SVs_TEMP);
 	sv_utf8_upgrade(left);
 	lsave = lc = SvPV_nomg_const(left, leftlen);
 	left_utf = TRUE;

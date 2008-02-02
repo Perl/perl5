@@ -668,7 +668,7 @@ XS(XS_PerlIO_get_layers)
 			    const IV flags = SvIVX(*flgsvp);
 
 			    if (flags & PERLIO_F_UTF8) {
-				 XPUSHs(sv_2mortal(newSVpvs("utf8")));
+				 XPUSHs(newSVpvs_flags("utf8", SVs_TEMP));
 				 nitem++;
 			    }
 		       }

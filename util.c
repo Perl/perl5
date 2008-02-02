@@ -1014,7 +1014,7 @@ S_mess_alloc(pTHX)
     XPVMG *any;
 
     if (!PL_dirty)
-	return sv_2mortal(newSVpvs(""));
+	return newSVpvs_flags("", SVs_TEMP);
 
     if (PL_mess_sv)
 	return PL_mess_sv;
@@ -1205,7 +1205,7 @@ Perl_write_to_stderr(pTHX_ const char* message, int msglen)
 	PUSHMARK(SP);
 	EXTEND(SP,2);
 	PUSHs(SvTIED_obj((SV*)io, mg));
-	PUSHs(sv_2mortal(newSVpvn(message, msglen)));
+	mPUSHp(message, msglen);
 	PUTBACK;
 	call_method("PRINT", G_SCALAR);
 
@@ -1258,8 +1258,7 @@ S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8, bool warn)
 	    *hook = NULL;
 	}
 	if (warn || message) {
-	    msg = newSVpvn(message, msglen);
-	    SvFLAGS(msg) |= utf8;
+	    msg = newSVpvn_flags(message, msglen, utf8);
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
 	}

@@ -242,6 +242,10 @@ typedef U64TYPE U64;
 =for apidoc Ama|SV*|newSVpvs|const char* s
 Like C<newSVpvn>, but takes a literal string instead of a string/length pair.
 
+=for apidoc Ama|SV*|newSVpvs_flags|const char* s|U32 flags
+Like C<newSVpvn_flags>, but takes a literal string instead of a string/length
+pair.
+
 =for apidoc Ama|SV*|newSVpvs_share|const char* s
 Like C<newSVpvn_share>, but takes a literal string instead of a string/length
 pair and omits the hash parameter.
@@ -284,6 +288,8 @@ and omits the hash parameter.
 
 /* STR_WITH_LEN() shortcuts */
 #define newSVpvs(str) Perl_newSVpvn(aTHX_ STR_WITH_LEN(str))
+#define newSVpvs_flags(str,flags)	\
+    Perl_newSVpvn_flags(aTHX_ STR_WITH_LEN(str), flags)
 #define newSVpvs_share(str) Perl_newSVpvn_share(aTHX_ STR_WITH_LEN(str), 0)
 #define sv_catpvs(sv, str) Perl_sv_catpvn_flags(aTHX_ sv, STR_WITH_LEN(str), SV_GMAGIC)
 #define sv_setpvs(sv, str) Perl_sv_setpvn(aTHX_ sv, STR_WITH_LEN(str))

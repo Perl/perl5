@@ -262,7 +262,7 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #define XST_mUV(i,v)  (ST(i) = sv_2mortal(newSVuv(v))  )
 #define XST_mNV(i,v)  (ST(i) = sv_2mortal(newSVnv(v))  )
 #define XST_mPV(i,v)  (ST(i) = sv_2mortal(newSVpv(v,0)))
-#define XST_mPVN(i,v,n)  (ST(i) = sv_2mortal(newSVpvn(v,n)))
+#define XST_mPVN(i,v,n)  (ST(i) = newSVpvn_flags(v,n, SVs_TEMP))
 #define XST_mNO(i)    (ST(i) = &PL_sv_no   )
 #define XST_mYES(i)   (ST(i) = &PL_sv_yes  )
 #define XST_mUNDEF(i) (ST(i) = &PL_sv_undef)
