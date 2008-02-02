@@ -7,7 +7,9 @@ package Maintainers;
 use strict;
 
 use lib "Porting";
-use 5.010;
+# Please don't use post 5.008 features as this module is used by
+# Porting/makemeta, and that in turn has to be run by the perl just built.
+use 5.008;
 
 require "Maintainers.pl";
 use vars qw(%Modules %Maintainers);
@@ -249,7 +251,6 @@ sub show_results {
     }
 }
 
-sub warn_maintainer(_);
 my %files;
 
 sub maintainers_files {
@@ -270,18 +271,20 @@ sub duplicated_maintainers {
     }
 }
 
+sub warn_maintainer {
+    my $name = shift;
+    warn "File $name has no maintainer\n" if not $files{$name};
+}
+
 sub missing_maintainers {
     my($check, @path) = @_;
     maintainers_files();
     my @dir;
-    for (@path) { if( -d ) { push @dir, $_ } else { warn_maintainer() } }
+    for my $d (@path) {
+	if( -d $d ) { push @dir, $d } else { warn_maintainer($d) }
+    }
     find sub { warn_maintainer($File::Find::name) if /$check/; }, @dir
 	if @dir;
-}
-
-sub warn_maintainer(_) {
-    my $name = shift;
-    warn "File $name has no maintainer\n" if not $files{$name};
 }
 
 1;
