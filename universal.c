@@ -625,7 +625,6 @@ XS(XS_PerlIO_get_layers)
 	}
 
 	if (gv && (io = GvIO(gv))) {
-	     dTARGET;
 	     AV* const av = PerlIO_get_layers(aTHX_ input ?
 					IoIFP(io) : IoOFP(io));
 	     I32 i;
@@ -643,25 +642,25 @@ XS(XS_PerlIO_get_layers)
 
 		  if (details) {
 		       XPUSHs(namok
-			      ? newSVpvn(SvPVX_const(*namsvp), SvCUR(*namsvp))
+			      ? sv_2mortal(newSVpvn(SvPVX_const(*namsvp), SvCUR(*namsvp)))
 			      : &PL_sv_undef);
 		       XPUSHs(argok
-			      ? newSVpvn(SvPVX_const(*argsvp), SvCUR(*argsvp))
+			      ? sv_2mortal(newSVpvn(SvPVX_const(*argsvp), SvCUR(*argsvp)))
 			      : &PL_sv_undef);
 		       if (flgok)
-			    XPUSHi(SvIVX(*flgsvp));
+			    mXPUSHi(SvIVX(*flgsvp));
 		       else
 			    XPUSHs(&PL_sv_undef);
 		       nitem += 3;
 		  }
 		  else {
 		       if (namok && argok)
-			    XPUSHs(Perl_newSVpvf(aTHX_ "%"SVf"(%"SVf")",
+			    XPUSHs(sv_2mortal(Perl_newSVpvf(aTHX_ "%"SVf"(%"SVf")",
 						 (void*)*namsvp,
-						 (void*)*argsvp));
+						 (void*)*argsvp)));
 		       else if (namok)
-			    XPUSHs(Perl_newSVpvf(aTHX_ "%"SVf,
-						 (void*)*namsvp));
+			    XPUSHs(sv_2mortal(Perl_newSVpvf(aTHX_ "%"SVf,
+						 (void*)*namsvp)));
 		       else
 			    XPUSHs(&PL_sv_undef);
 		       nitem++;
@@ -669,7 +668,7 @@ XS(XS_PerlIO_get_layers)
 			    const IV flags = SvIVX(*flgsvp);
 
 			    if (flags & PERLIO_F_UTF8) {
-				 XPUSHs(newSVpvs("utf8"));
+				 XPUSHs(sv_2mortal(newSVpvs("utf8")));
 				 nitem++;
 			    }
 		       }
