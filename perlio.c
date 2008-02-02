@@ -759,6 +759,11 @@ PerlIO_get_layers(pTHX_ PerlIO *f)
 	PerlIOl *l = PerlIOBase(f);
 
 	while (l) {
+	    /* There is some collusion in the implementation of
+	       XS_PerlIO_get_layers - it knows that name and flags are
+	       generated as fresh SVs here, and takes advantage of that to
+	       "copy" them by taking a reference. If it changes here, it needs
+	       to change there too.  */
 	    SV * const name = l->tab && l->tab->name ?
 	    newSVpv(l->tab->name, 0) : &PL_sv_undef;
 	    SV * const arg = l->tab && l->tab->Getarg ?

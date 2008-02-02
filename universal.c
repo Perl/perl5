@@ -969,16 +969,22 @@ XS(XS_PerlIO_get_layers)
 		  const bool flgok = flgsvp && *flgsvp && SvIOK(*flgsvp);
 
 		  if (details) {
+		      /* Indents of 5? Yuck.  */
+		      /* We know that PerlIO_get_layers creates a new SV for
+			 the name and flags, so we can just take a reference
+			 and "steal" it when we free the AV below.  */
 		       XPUSHs(namok
-			      ? sv_2mortal(newSVpvn(SvPVX_const(*namsvp), SvCUR(*namsvp)))
+			      ? sv_2mortal(SvREFCNT_inc_simple_NN(*namsvp))
 			      : &PL_sv_undef);
 		       XPUSHs(argok
-			      ? sv_2mortal(newSVpvn(SvPVX_const(*argsvp), SvCUR(*argsvp)))
+			      ? newSVpvn_flags(SvPVX_const(*argsvp),
+					       SvCUR(*argsvp),
+					       (SvUTF8(*argsvp) ? SVf_UTF8 : 0)
+					       | SVs_TEMP)
 			      : &PL_sv_undef);
-		       if (flgok)
-			    mXPUSHi(SvIVX(*flgsvp));
-		       else
-			    XPUSHs(&PL_sv_undef);
+		       XPUSHs(namok
+			      ? sv_2mortal(SvREFCNT_inc_simple_NN(*flgsvp))
+			      : &PL_sv_undef);
 		       nitem += 3;
 		  }
 		  else {
@@ -987,8 +993,7 @@ XS(XS_PerlIO_get_layers)
 						 SVfARG(*namsvp),
 						 SVfARG(*argsvp))));
 		       else if (namok)
-			    XPUSHs(sv_2mortal(Perl_newSVpvf(aTHX_ "%"SVf,
-						 SVfARG(*namsvp))));
+			   XPUSHs(sv_2mortal(SvREFCNT_inc_simple_NN(*namsvp)));
 		       else
 			    XPUSHs(&PL_sv_undef);
 		       nitem++;
