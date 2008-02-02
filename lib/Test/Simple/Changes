@@ -1,8 +1,16 @@
+0.74  Thu Nov 29 15:39:57 PST 2007
+    Misc
+    - Add abstract and author to the meta information.
+
+0.73_01  Mon Oct 15 20:35:15 EDT 2007
+    Bug fixes
+    * Put the use_ok() fix from 0.71 back.
+
 0.72  Wed Sep 19 20:08:07 PDT 2007
     Bug unfixes
     * The BEGIN { use_ok } fix for [rt.cpan.org 28345] revealed a small pile of 
-      mistakes in CPAN module test suites.  Rolling the fix back to give the authors
-      a bit of time to fix their tests.
+      mistakes in CPAN module test suites.  Rolling the fix back to give the
+      authors a bit of time to fix their tests.
 
 0.71  Thu Sep 13 20:42:36 PDT 2007
     Bug fixes
@@ -15,8 +23,8 @@
     - Removed dependency on Text::Soundex [rt.cpan.org 25022]
     - Fixed a 5.5.x failure in fail-more.t
     * Got rid of the annoying sort_bug.t test that revealed problems with some
-      threaded perls.  It was testing the deprecated eq_* functions and not worth the
-      bother.  Now it tests is_deeply().  [rt.cpan.org 17791]
+      threaded perls.  It was testing the deprecated eq_* functions and not
+      worth the bother.  Now it tests is_deeply().  [rt.cpan.org 17791]
 
     Doc fixes
     - Minor POD mistake in Test::Builder [rt.cpan.org 28869]
