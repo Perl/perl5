@@ -1236,13 +1236,12 @@ XS(XS_re_regexp_pattern)
                 match_flags >>= 1;
             }
 
-            pattern = sv_2mortal(newSVpvn(RX_PRECOMP(re),RX_PRELEN(re)));
-            if (RX_UTF8(re))
-                SvUTF8_on(pattern);
+            pattern = newSVpvn_flags(RX_PRECOMP(re),RX_PRELEN(re),
+				     (RX_UTF8(re) ? SVf_UTF8 : 0) | SVs_TEMP);
 
             /* return the pattern and the modifiers */
             XPUSHs(pattern);
-            XPUSHs(sv_2mortal(newSVpvn(reflags,left)));
+            XPUSHs(newSVpvn_flags(reflags, left, SVs_TEMP));
             XSRETURN(2);
         } else {
             /* Scalar, so use the string that Perl would return */
@@ -1250,9 +1249,8 @@ XS(XS_re_regexp_pattern)
 #if PERL_VERSION >= 11
             pattern = sv_2mortal(newSVsv((SV*)re));
 #else
-            pattern = sv_2mortal(newSVpvn(RX_WRAPPED(re),RX_WRAPLEN(re)));
-            if (RX_UTF8(re))
-                SvUTF8_on(pattern);
+            pattern = newSVpvn_flags(RX_WRAPPED(re), RX_WRAPLEN(re),
+				     (RX_UTF8(re) ? SVf_UTF8 : 0) | SVs_TEMP);
 #endif
             XPUSHs(pattern);
             XSRETURN(1);
