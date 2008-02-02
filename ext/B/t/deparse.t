@@ -27,7 +27,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 57;
+use Test::More tests => 59;
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -395,3 +395,16 @@ each @$a;
 # 50 keys @array; values @array
 keys @$a if keys @ARGV;
 values @ARGV if values @$a;
+####
+my $a = {};
+my $b = \{};
+my $c = [];
+my $d = \[];
+####
+# SKIP ?$] < 5.010 && "smartmatch and given/when not implemented on this Perl version"
+# 51 implicit smartmatch in given/when
+given ('foo') {
+    when ('bar') { continue; }
+    when ($_ ~~ 'quux') { continue; }
+    default { 0; }
+}

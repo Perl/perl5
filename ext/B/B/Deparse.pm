@@ -21,7 +21,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED),
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : 'RXf_SKIPWHITE');
-$VERSION = 0.84;
+$VERSION = 0.85;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -1826,9 +1826,7 @@ sub pp_refgen {
     my $kid = $op->first;
     if ($kid->name eq "null") {
 	$kid = $kid->first;
-	if ($kid->name eq "anonlist" || $kid->name eq "anonhash") {
-	    return $self->anon_hash_or_list($op, $cx);
-	} elsif (!null($kid->sibling) and
+	if (!null($kid->sibling) and
 		 $kid->sibling->name eq "anoncode") {
             return $self->e_anoncode({ code => $self->padval($kid->sibling->targ) });
 	} elsif ($kid->name eq "pushmark") {
@@ -2117,7 +2115,7 @@ sub pp_aassign { binop(@_, "=", 7, SWAP_CHILDREN | LIST_CONTEXT) }
 sub pp_smartmatch {
     my ($self, $op, $cx) = @_;
     if ($op->flags & OPf_SPECIAL) {
-	return $self->deparse($op->first, $cx);
+	return $self->deparse($op->last, $cx);
     }
     else {
 	binop(@_, "~~", 14);
