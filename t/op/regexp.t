@@ -77,9 +77,9 @@ my $test;
 TEST:
 foreach (@tests) {
     $test++;
-    if (!/\S/ || /^\s*#/) {
+    if (!/\S/ || /^\s*#/ || /^__END__$/) {
         print "ok $test # (Blank line or comment)\n";
-        if (/\S/) { print $_ };
+        if (/#/) { print $_ };
         next;
     }
     chomp;

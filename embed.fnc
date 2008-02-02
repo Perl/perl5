@@ -1,3 +1,5 @@
+: BEGIN {die "You meant to run embed.pl"} # Stop early if fed to perl.
+:
 : Lines are of the form:
 :    flags|return_type|function_name|arg1|arg2|...|argN
 :

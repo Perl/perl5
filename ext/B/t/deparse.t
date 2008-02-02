@@ -396,13 +396,14 @@ each @$a;
 keys @$a if keys @ARGV;
 values @ARGV if values @$a;
 ####
+# 51 Anonymous arrays and hashes, and references to them
 my $a = {};
 my $b = \{};
 my $c = [];
 my $d = \[];
 ####
 # SKIP ?$] < 5.010 && "smartmatch and given/when not implemented on this Perl version"
-# 51 implicit smartmatch in given/when
+# 52 implicit smartmatch in given/when
 given ('foo') {
     when ('bar') { continue; }
     when ($_ ~~ 'quux') { continue; }
