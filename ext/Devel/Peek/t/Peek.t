@@ -36,7 +36,7 @@ sub do_test {
 	    $pattern =~ s/^(\s*)(SV =.* at )/(?:$1ALLOCATED at .*?\n)?$1$2/mg;
 
 	    $pattern =~ s/^ *\$XSUB *\n/
-		($] < 5.009) ? "    XSUB = 0\n    XSUBANY = 0\n" : '';
+		($] < 5.009) ? "    XSUB = 0x0\n    XSUBANY = 0\n" : '';
 	    /mge;
 	    $pattern =~ s/^ *\$ROOT *\n/
 		($] < 5.009) ? "    ROOT = 0x0\n" : '';
