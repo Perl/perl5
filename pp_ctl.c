@@ -1726,7 +1726,15 @@ PP(pp_enteriter)
 	    else {
 		cx->blk_loop.iterlval = newSVsv(sv);
 		(void) SvPV_force_nolen(cx->blk_loop.iterlval);
+		/* This will do the upgrade to SVt_PV, and warn if the value
+		   is uninitialised.  */
 		(void) SvPV_nolen_const(right);
+		/* Doing this avoids a check every time in pp_iter in pp_hot.c
+		   to replace !SvOK() with a pointer to "".  */
+		if (!SvOK(right)) {
+		    SvREFCNT_dec(right);
+		    cx->blk_loop.iterary = (AV*) &PL_sv_no;
+		}
 	    }
 	}
 	else if (PL_op->op_private & OPpITER_REVERSED) {

@@ -3809,6 +3809,10 @@ Perl_sv_chop(pTHX_ register SV *sv, register char *ptr)
     if (!ptr || !SvPOKp(sv))
 	return;
     delta = ptr - SvPVX_const(sv);
+    if (!delta) {
+	/* Nothing to do.  */
+	return;
+    }
     SV_CHECK_THINKFIRST(sv);
     if (SvTYPE(sv) < SVt_PVIV)
 	sv_upgrade(sv,SVt_PVIV);
@@ -4484,10 +4488,8 @@ Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, char *little, STRLEN
     else if ((i = mid - big)) {	/* faster from front */
 	midend -= littlelen;
 	mid = midend;
+	Move(big, midend - i, i, char);
 	sv_chop(bigstr,midend-i);
-	big += i;
-	while (i--)
-	    *--midend = *--big;
 	if (littlelen)
 	    Move(little, mid, littlelen,char);
     }
@@ -9822,69 +9824,55 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 	return ncxs;
 
     /* create anew and remember what it is */
-    Newxz(ncxs, max + 1, PERL_CONTEXT);
+    Newx(ncxs, max + 1, PERL_CONTEXT);
     ptr_table_store(PL_ptr_table, cxs, ncxs);
+    Copy(cxs, ncxs, max + 1, PERL_CONTEXT);
 
     while (ix >= 0) {
-	PERL_CONTEXT * const cx = &cxs[ix];
 	PERL_CONTEXT * const ncx = &ncxs[ix];
-	ncx->cx_type	= cx->cx_type;
-	if (CxTYPE(cx) == CXt_SUBST) {
+	if (CxTYPE(ncx) == CXt_SUBST) {
 	    Perl_croak(aTHX_ "Cloning substitution context is unimplemented");
 	}
 	else {
-	    ncx->blk_oldsp	= cx->blk_oldsp;
-	    ncx->blk_oldcop	= cx->blk_oldcop;
-	    ncx->blk_oldretsp	= cx->blk_oldretsp;
-	    ncx->blk_oldmarksp	= cx->blk_oldmarksp;
-	    ncx->blk_oldscopesp	= cx->blk_oldscopesp;
-	    ncx->blk_oldpm	= cx->blk_oldpm;
-	    ncx->blk_gimme	= cx->blk_gimme;
-	    switch (CxTYPE(cx)) {
+	    switch (CxTYPE(ncx)) {
 	    case CXt_SUB:
-		ncx->blk_sub.cv		= (cx->blk_sub.olddepth == 0
-					   ? cv_dup_inc(cx->blk_sub.cv, param)
-					   : cv_dup(cx->blk_sub.cv,param));
-		ncx->blk_sub.argarray	= (cx->blk_sub.hasargs
-					   ? av_dup_inc(cx->blk_sub.argarray, param)
+		ncx->blk_sub.cv		= (ncx->blk_sub.olddepth == 0
+					   ? cv_dup_inc(ncx->blk_sub.cv, param)
+					   : cv_dup(ncx->blk_sub.cv,param));
+		ncx->blk_sub.argarray	= (ncx->blk_sub.hasargs
+					   ? av_dup_inc(ncx->blk_sub.argarray,
+							param)
 					   : NULL);
-		ncx->blk_sub.savearray	= av_dup_inc(cx->blk_sub.savearray, param);
-		ncx->blk_sub.olddepth	= cx->blk_sub.olddepth;
-		ncx->blk_sub.hasargs	= cx->blk_sub.hasargs;
-		ncx->blk_sub.lval	= cx->blk_sub.lval;
+		ncx->blk_sub.savearray	= av_dup_inc(ncx->blk_sub.savearray,
+						     param);
 		ncx->blk_sub.oldcomppad = (PAD*)ptr_table_fetch(PL_ptr_table,
-					   cx->blk_sub.oldcomppad);
+					   ncx->blk_sub.oldcomppad);
 		break;
 	    case CXt_EVAL:
-		ncx->blk_eval.old_in_eval = cx->blk_eval.old_in_eval;
-		ncx->blk_eval.old_op_type = cx->blk_eval.old_op_type;
-		ncx->blk_eval.old_namesv = sv_dup_inc(cx->blk_eval.old_namesv, param);
-		ncx->blk_eval.old_eval_root = cx->blk_eval.old_eval_root;
-		ncx->blk_eval.cur_text	= sv_dup(cx->blk_eval.cur_text, param);
+		ncx->blk_eval.old_namesv = sv_dup_inc(ncx->blk_eval.old_namesv,
+						      param);
+		ncx->blk_eval.cur_text	= sv_dup(ncx->blk_eval.cur_text, param);
 		break;
 	    case CXt_LOOP:
-		ncx->blk_loop.label	= cx->blk_loop.label;
-		ncx->blk_loop.resetsp	= cx->blk_loop.resetsp;
-		ncx->blk_loop.redo_op	= cx->blk_loop.redo_op;
-		ncx->blk_loop.next_op	= cx->blk_loop.next_op;
-		ncx->blk_loop.last_op	= cx->blk_loop.last_op;
-		ncx->blk_loop.iterdata	= (CxPADLOOP(cx)
-					   ? cx->blk_loop.iterdata
-					   : gv_dup((GV*)cx->blk_loop.iterdata, param));
+		ncx->blk_loop.iterdata	= (CxPADLOOP(ncx)
+					   ? ncx->blk_loop.iterdata
+					   : gv_dup((GV*)ncx->blk_loop.iterdata,
+						    param));
 		ncx->blk_loop.oldcomppad
 		    = (PAD*)ptr_table_fetch(PL_ptr_table,
-					    cx->blk_loop.oldcomppad);
-		ncx->blk_loop.itersave	= sv_dup_inc(cx->blk_loop.itersave, param);
-		ncx->blk_loop.iterlval	= sv_dup_inc(cx->blk_loop.iterlval, param);
-		ncx->blk_loop.iterary	= av_dup_inc(cx->blk_loop.iterary, param);
-		ncx->blk_loop.iterix	= cx->blk_loop.iterix;
-		ncx->blk_loop.itermax	= cx->blk_loop.itermax;
+					    ncx->blk_loop.oldcomppad);
+		ncx->blk_loop.itersave	= sv_dup_inc(ncx->blk_loop.itersave,
+						     param);
+		ncx->blk_loop.iterlval	= sv_dup_inc(ncx->blk_loop.iterlval,
+						     param);
+		ncx->blk_loop.iterary	= av_dup_inc(ncx->blk_loop.iterary,
+						     param);
 		break;
 	    case CXt_FORMAT:
-		ncx->blk_sub.cv		= cv_dup(cx->blk_sub.cv, param);
-		ncx->blk_sub.gv		= gv_dup(cx->blk_sub.gv, param);
-		ncx->blk_sub.dfoutgv	= gv_dup_inc(cx->blk_sub.dfoutgv, param);
-		ncx->blk_sub.hasargs	= cx->blk_sub.hasargs;
+		ncx->blk_sub.cv		= cv_dup(ncx->blk_sub.cv, param);
+		ncx->blk_sub.gv		= gv_dup(ncx->blk_sub.gv, param);
+		ncx->blk_sub.dfoutgv	= gv_dup_inc(ncx->blk_sub.dfoutgv,
+						     param);
 		break;
 	    case CXt_BLOCK:
 	    case CXt_NULL:
