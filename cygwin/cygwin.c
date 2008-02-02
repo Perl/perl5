@@ -63,7 +63,7 @@ do_aspawn (SV *really, void **mark, void **sp)
             *a++ = SvPVx((SV *)*mark, n_a);
         else
             *a++ = "";
-    *a = Nullch;
+    *a = (char*)NULL;
 
     if (argv[0][0] != '/' && argv[0][0] != '\\'
         && !(argv[0][0] && argv[0][1] == ':'
@@ -133,7 +133,7 @@ do_spawn (char *cmd)
 	if (*s)
 	    *s++='\0';
     }
-    *a=Nullch;
+    *a = (char*)NULL;
     if (!PL_Argv[0])
         return -1;
 

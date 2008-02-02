@@ -626,7 +626,7 @@ Perl_my_getenv(pTHX_ const char *lnm, bool sys)
        * for an optional name, and this "error" often shows up as the
        * (bogus) exit status for a die() call later on.  */
       if (sys && vaxc$errno == SS$_NOLOGNAM) SETERRNO(saverr,savvmserr);
-      return success ? eqv : Nullch;
+      return success ? eqv : NULL;
     }
 
 }  /* end of my_getenv() */
@@ -732,7 +732,7 @@ Perl_my_getenv_len(pTHX_ const char *lnm, unsigned long *len, bool sys)
        * for an optional name, and this "error" often shows up as the
        * (bogus) exit status for a die() call later on.  */
       if (sys && vaxc$errno == SS$_NOLOGNAM) SETERRNO(saverr,savvmserr);
-      return *len ? buf : Nullch;
+      return *len ? buf : NULL;
     }
 
 }  /* end of my_getenv_len() */
@@ -752,7 +752,7 @@ prime_env_iter(void)
   static int primed = 0;
   HV *seenhv = NULL, *envhv;
   SV *sv = NULL;
-  char cmd[LNM$C_NAMLENGTH+24], mbxnam[LNM$C_NAMLENGTH], *buf = Nullch;
+  char cmd[LNM$C_NAMLENGTH+24], mbxnam[LNM$C_NAMLENGTH], *buf = NULL;
   unsigned short int chan;
 #ifndef CLI$M_TRUSTED
 #  define CLI$M_TRUSTED 0x40  /* Missing from VAXC headers */
@@ -2844,7 +2844,7 @@ store_pipelocs(pTHX)
         x = strrchr(temp,']');
         if (x) x[1] = '\0';
 
-        if ((unixdir = tounixpath(temp, Nullch)) != Nullch) {
+        if ((unixdir = tounixpath(temp, NULL)) != NULL) {
             p = (pPLOC) PerlMem_malloc(sizeof(PLOC));
             p->next = head_PLOC;
             head_PLOC = p;
@@ -2866,7 +2866,7 @@ store_pipelocs(pTHX)
         if (SvROK(dirsv)) continue;
         dir = SvPVx(dirsv,n_a);
         if (strcmp(dir,".") == 0) continue;
-        if ((unixdir = tounixpath(dir, Nullch)) == Nullch)
+        if ((unixdir = tounixpath(dir, NULL)) == NULL)
             continue;
 
         p = (pPLOC) PerlMem_malloc(sizeof(PLOC));
@@ -2879,7 +2879,7 @@ store_pipelocs(pTHX)
 /* most likely spot (ARCHLIB) put first in the list */
 
 #ifdef ARCHLIB_EXP
-    if ((unixdir = tounixpath(ARCHLIB_EXP, Nullch)) != Nullch) {
+    if ((unixdir = tounixpath(ARCHLIB_EXP, NULL)) != NULL) {
         p = (pPLOC) PerlMem_malloc(sizeof(PLOC));
         p->next = head_PLOC;
         head_PLOC = p;
@@ -3224,7 +3224,7 @@ static PerlIO * create_forked_xterm(pTHX_ const char *cmd, const char *mode)
     info->in         = 0;
     info->out        = 0;
     info->err        = 0;
-    info->fp         = Nullfp;
+    info->fp         = NULL;
     info->useFILE    = 0;
     info->waiting    = 0;
     info->in_done    = TRUE;
@@ -3309,7 +3309,7 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
         PerlIO * xterm_fd;
 
 	xterm_fd = create_forked_xterm(aTHX_ cmd, in_mode);
-	if (xterm_fd != Nullfp)
+	if (xterm_fd != NULL)
 	    return xterm_fd;
     }
 
@@ -3353,7 +3353,7 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
             if (ckWARN(WARN_PIPE)) {
                 Perl_warner(aTHX_ packWARN(WARN_PIPE),"unable to find VMSPIPE.COM for i/o piping");
             }
-        return Nullfp;
+        return NULL;
         }
         fgetname(tpipe,tfilebuf+1,1);
     }
@@ -3385,7 +3385,7 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
         Perl_warner(aTHX_ packWARN(WARN_PIPE),"Can't pipe \"%*s\": %s", strlen(cmd), cmd, Strerror(errno));
       }
       *psts = sts;
-      return Nullfp; 
+      return NULL; 
     }
     n = sizeof(Info);
     _ckvmssts(lib$get_vm(&n, &info));
@@ -3398,7 +3398,7 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
     info->in         = 0;
     info->out        = 0;
     info->err        = 0;
-    info->fp         = Nullfp;
+    info->fp         = NULL;
     info->useFILE    = 0;
     info->waiting    = 0;
     info->in_done    = TRUE;
@@ -3453,7 +3453,7 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
             n = sizeof(Info);
             _ckvmssts(lib$free_vm(&n, &info));
             *psts = RMS$_FNF;
-            return Nullfp;
+            return NULL;
         }
 
         info->err = pipe_mbxtofd_setup(aTHX_ fileno(stderr), err);
@@ -3517,7 +3517,7 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
             n = sizeof(Info);
             _ckvmssts(lib$free_vm(&n, &info));
             *psts = RMS$_FNF;
-            return Nullfp;
+            return NULL;
         }
         
 
@@ -5885,7 +5885,7 @@ pipe_and_fork(pTHX_ char **cmargv)
     *p = '\0';
 
     fp = safe_popen(aTHX_ subcmd,"wbF",&sts);
-    if (fp == Nullfp) {
+    if (fp == NULL) {
         PerlIO_printf(Perl_debug_log,"Can't open output pipe (status %d)",sts);
 	}
 }
@@ -6613,7 +6613,7 @@ vms_execfree(struct dsc$descriptor_s *vmscmd)
 static char *
 setup_argstr(pTHX_ SV *really, SV **mark, SV **sp)
 {
-  char *junk, *tmps = Nullch;
+  char *junk, *tmps = NULL;
   register size_t cmdlen = 0;
   size_t rlen;
   register SV **idx;
@@ -8943,8 +8943,7 @@ mod2fname(pTHX_ CV *cv)
     if (counter) {
       strcat(work_name, "__");
     }
-    strcat(work_name, SvPV(*av_fetch(in_array, counter, FALSE),
-			   PL_na));
+    strcat(work_name, SvPV_nolen(*av_fetch(in_array, counter, FALSE)));
   }
 
   /* Check to see if we actually have to bother...*/

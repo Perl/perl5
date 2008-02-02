@@ -135,7 +135,7 @@ get_regstr_from(HKEY hkey, const char *valuename, SV **svp)
     HKEY handle;
     DWORD type;
     const char *subkey = "Software\\Perl";
-    char *str = Nullch;
+    char *str = NULL;
     long retval;
 
     retval = XCERegOpenKeyExA(hkey, subkey, 0, KEY_READ, &handle);
@@ -231,7 +231,7 @@ get_emd_part(SV **prev_pathp, char *trailing_path, ...)
 	return SvPVX(*prev_pathp);
     }
 
-    return Nullch;
+    return NULL;
 }
 
 char *
@@ -240,7 +240,7 @@ win32_get_privlib(const char *pl)
     dTHX;
     char *stdlib = "lib";
     char buffer[MAX_PATH+1];
-    SV *sv = Nullsv;
+    SV *sv = NULL;
 
     /* $stdlib = $HKCU{"lib-$]"} || $HKLM{"lib-$]"} || $HKCU{"lib"} || $HKLM{"lib"} || "";  */
     sprintf(buffer, "%s-%s", stdlib, pl);
@@ -248,7 +248,7 @@ win32_get_privlib(const char *pl)
 	(void)get_regstr(stdlib, &sv);
 
     /* $stdlib .= ";$EMD/../../lib" */
-    return get_emd_part(&sv, stdlib, ARCHNAME, "bin", Nullch);
+    return get_emd_part(&sv, stdlib, ARCHNAME, "bin", NULL);
 }
 
 static char *
@@ -259,8 +259,8 @@ win32_get_xlib(const char *pl, const char *xlib, const char *libname)
     char pathstr[MAX_PATH+1];
     DWORD datalen;
     int len, newsize;
-    SV *sv1 = Nullsv;
-    SV *sv2 = Nullsv;
+    SV *sv1 = NULL;
+    SV *sv2 = NULL;
 
     /* $HKCU{"$xlib-$]"} || $HKLM{"$xlib-$]"} . ---; */
     sprintf(regstr, "%s-%s", xlib, pl);
@@ -269,7 +269,7 @@ win32_get_xlib(const char *pl, const char *xlib, const char *libname)
     /* $xlib .=
      * ";$EMD/" . ((-d $EMD/../../../$]) ? "../../.." : "../.."). "/$libname/$]/lib";  */
     sprintf(pathstr, "%s/%s/lib", libname, pl);
-    (void)get_emd_part(&sv1, pathstr, ARCHNAME, "bin", pl, Nullch);
+    (void)get_emd_part(&sv1, pathstr, ARCHNAME, "bin", pl, NULL);
 
     /* $HKCU{$xlib} || $HKLM{$xlib} . ---; */
     (void)get_regstr(xlib, &sv2);
@@ -277,10 +277,10 @@ win32_get_xlib(const char *pl, const char *xlib, const char *libname)
     /* $xlib .=
      * ";$EMD/" . ((-d $EMD/../../../$]) ? "../../.." : "../.."). "/$libname/lib";  */
     sprintf(pathstr, "%s/lib", libname);
-    (void)get_emd_part(&sv2, pathstr, ARCHNAME, "bin", pl, Nullch);
+    (void)get_emd_part(&sv2, pathstr, ARCHNAME, "bin", pl, NULL);
 
     if (!sv1 && !sv2)
-	return Nullch;
+	return NULL;
     if (!sv1)
 	return SvPVX(sv2);
     if (!sv2)
@@ -406,7 +406,7 @@ win32_getpid(void)
 static long
 tokenize(const char *str, char **dest, char ***destv)
 {
-    char *retstart = Nullch;
+    char *retstart = NULL;
     char **retvstart = 0;
     int items = -1;
     if (str) {
@@ -441,7 +441,7 @@ tokenize(const char *str, char **dest, char ***destv)
 		++items;
 	    ret++;
 	}
-	retvstart[items] = Nullch;
+	retvstart[items] = NULL;
 	*ret++ = '\0';
 	*ret = '\0';
     }
@@ -551,7 +551,7 @@ do_spawn2(pTHX_ char *cmd, int exectype)
 	    if (*s)
 		*s++ = '\0';
 	}
-	*a = Nullch;
+	*a = NULL;
 	if (argv[0]) {
 	    switch (exectype) {
 	    case EXECF_SPAWN:
@@ -580,7 +580,7 @@ do_spawn2(pTHX_ char *cmd, int exectype)
 	while (++i < w32_perlshell_items)
 	    argv[i] = w32_perlshell_vec[i];
 	argv[i++] = cmd;
-	argv[i] = Nullch;
+	argv[i] = NULL;
 	switch (exectype) {
 	case EXECF_SPAWN:
 	    status = win32_spawnvp(P_WAIT, argv[0],
@@ -1248,7 +1248,7 @@ win32_crypt(const char *txt, const char *salt)
     return des_fcrypt(txt, salt, w32_crypt_buffer);
 #else
     Perl_croak(aTHX_ "The crypt() function is unimplemented due to excessive paranoia.");
-    return Nullch;
+    return NULL;
 #endif
 }
 
@@ -1814,7 +1814,7 @@ qualified_path(const char *cmd)
     int has_slash = 0;
 
     if (!cmd)
-	return Nullch;
+	return NULL;
     fullcmd = (char*)cmd;
     while (*fullcmd) {
 	if (*fullcmd == '/' || *fullcmd == '\\')
@@ -1889,7 +1889,7 @@ qualified_path(const char *cmd)
     }
 
     Safefree(fullcmd);
-    return Nullch;
+    return NULL;
 }
 
 /* The following are just place holders.
@@ -1975,7 +1975,7 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
     PROCESS_INFORMATION ProcessInformation;
     DWORD create = 0;
     char *cmd;
-    char *fullcmd = Nullch;
+    char *fullcmd = NULL;
     char *cname = (char *)cmdname;
     STRLEN clen = 0;
 
@@ -2612,7 +2612,7 @@ Perl_init_os_extras(void)
     char *file = __FILE__;
     dXSUB_SYS;
 
-    w32_perlshell_tokens = Nullch;
+    w32_perlshell_tokens = NULL;
     w32_perlshell_items = -1;
     w32_fdpid = newAV(); /* XX needs to be in Perl_win32_init()? */
     Newx(w32_children, 1, child_tab);
@@ -2781,7 +2781,7 @@ void
 Perl_sys_intern_init(pTHX)
 {
     int i;
-    w32_perlshell_tokens	= Nullch;
+    w32_perlshell_tokens	= NULL;
     w32_perlshell_vec		= (char**)NULL;
     w32_perlshell_items		= 0;
     w32_fdpid			= newAV();
@@ -2818,7 +2818,7 @@ Perl_sys_intern_clear(pTHX)
 void
 Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
 {
-    dst->perlshell_tokens	= Nullch;
+    dst->perlshell_tokens	= NULL;
     dst->perlshell_vec		= (char**)NULL;
     dst->perlshell_items	= 0;
     dst->fdpid			= newAV();

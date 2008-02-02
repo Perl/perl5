@@ -623,7 +623,7 @@ PerlStdIOGetBase(struct IPerlStdIO* piPerl, FILE* pf)
     FILE *f = pf;
     return FILE_base(f);
 #else
-    return Nullch;
+    return NULL;
 #endif
 }
 
@@ -656,7 +656,7 @@ PerlStdIOGetPtr(struct IPerlStdIO* piPerl, FILE* pf)
     FILE *f = pf;
     return FILE_ptr(f);
 #else
-    return Nullch;
+    return NULL;
 #endif
 }
 

@@ -32,7 +32,7 @@ T_BUF
 	if(  null_arg($arg)  )
 	    $var= NULL;
 	else
-	    $var= ($type) SvPV( $arg, PL_na )
+	    $var= ($type) SvPV_nolen( $arg )
 T_SBUF
 	grow_buf( $var,$arg, $type )
 T_IV

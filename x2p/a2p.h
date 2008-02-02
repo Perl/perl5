@@ -157,9 +157,6 @@ char *strcpy(), *strcat();
 #  include "../handy.h"
 #endif
 
-#undef Nullfp
-#define Nullfp Null(FILE*)
-
 #define Nullop 0
 
 #define OPROG		1
@@ -407,7 +404,7 @@ EXT FILE *rsfp;
 EXT char buf[2048];
 EXT char *bufptr INIT(buf);
 
-EXT STR *linestr INIT(Nullstr);
+EXT STR *linestr INIT(NULL);
 
 EXT char tokenbuf[2048];
 EXT int expectterm INIT(TRUE);
@@ -423,7 +420,7 @@ extern int yydebug;
 # endif
 #endif
 
-EXT STR *freestrroot INIT(Nullstr);
+EXT STR *freestrroot INIT(NULL);
 
 EXT STR str_no;
 EXT STR str_yes;
@@ -447,7 +444,7 @@ EXT bool saw_altinput INIT(FALSE);
 EXT bool nomemok INIT(FALSE);
 
 EXT char const_FS INIT(0);
-EXT char *namelist INIT(Nullch);
+EXT char *namelist INIT(NULL);
 EXT char fswitch INIT(0);
 EXT bool old_awk INIT(0);
 

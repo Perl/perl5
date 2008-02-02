@@ -2312,7 +2312,7 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
     return PerlIO_fdopen(p[This], mode);
 #else
 #  ifdef OS2	/* Same, without fork()ing and all extra overhead... */
-    return my_syspopen4(aTHX_ Nullch, mode, n, args);
+    return my_syspopen4(aTHX_ NULL, mode, n, args);
 #  else
     Perl_croak(aTHX_ "List form of piped open not implemented");
     return (PerlIO *) NULL;
