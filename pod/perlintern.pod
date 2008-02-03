@@ -998,7 +998,7 @@ X<sv_add_arena>
 Given a chunk of memory, link it to the head of the list of arenas,
 and split it into a list of free SVs.
 
-	void	sv_add_arena(char* ptr, U32 size, U32 flags)
+	void	sv_add_arena(char *const ptr, const U32 size, const U32 flags)
 
 =for hackers
 Found in file sv.c

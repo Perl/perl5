@@ -154,7 +154,7 @@ Public API:
  */
 
 void
-Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
+Perl_offer_nice_chunk(pTHX_ void *const chunk, const U32 chunk_size)
 {
     dVAR;
     void *new_chunk;
@@ -332,7 +332,7 @@ and split it into a list of free SVs.
 */
 
 void
-Perl_sv_add_arena(pTHX_ char *ptr, U32 size, U32 flags)
+Perl_sv_add_arena(pTHX_ char *const ptr, const U32 size, const U32 flags)
 {
     dVAR;
     SV* const sva = (SV*)ptr;
@@ -370,7 +370,7 @@ Perl_sv_add_arena(pTHX_ char *ptr, U32 size, U32 flags)
  * whose flags field matches the flags/mask args. */
 
 STATIC I32
-S_visit(pTHX_ SVFUNC_t f, U32 flags, U32 mask)
+S_visit(pTHX_ SVFUNC_t f, const U32 flags, const U32 mask)
 {
     dVAR;
     SV* sva;
@@ -427,7 +427,7 @@ Perl_sv_report_used(pTHX)
 /* called by sv_clean_objs() for each live SV */
 
 static void
-do_clean_objs(pTHX_ SV *ref)
+do_clean_objs(pTHX_ SV *const ref)
 {
     dVAR;
     assert (SvROK(ref));
@@ -503,7 +503,7 @@ Perl_sv_clean_objs(pTHX)
 /* called by sv_clean_all() for each live SV */
 
 static void
-do_clean_all(pTHX_ SV *sv)
+do_clean_all(pTHX_ SV *const sv)
 {
     dVAR;
     DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops: SV at 0x%"UVxf"\n", PTR2UV(sv)) ));
@@ -663,7 +663,7 @@ Perl_sv_free_arenas(pTHX)
    TBD: export properly for hv.c: S_more_he().
 */
 void*
-Perl_get_arena(pTHX_ size_t arena_size, U32 misc)
+Perl_get_arena(pTHX_ const size_t arena_size, const U32 misc)
 {
     dVAR;
     struct arena_desc* adesc;
@@ -1027,7 +1027,7 @@ static const struct body_details bodies_by_type[] = {
 	my_safecalloc((details)->body_size + (details)->offset)
 
 STATIC void *
-S_more_bodies (pTHX_ svtype sv_type)
+S_more_bodies (pTHX_ const svtype sv_type)
 {
     dVAR;
     void ** const root = &PL_body_roots[sv_type];
@@ -1090,7 +1090,7 @@ S_more_bodies (pTHX_ svtype sv_type)
 #ifndef PURIFY
 
 STATIC void *
-S_new_body(pTHX_ svtype sv_type)
+S_new_body(pTHX_ const svtype sv_type)
 {
     dVAR;
     void *xpv;

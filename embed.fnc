@@ -831,7 +831,7 @@ Apd	|char*	|sv_pvn		|NN SV *sv|NN STRLEN *len
 Apd	|char*	|sv_pvutf8n	|NN SV *sv|NN STRLEN *len
 Apd	|char*	|sv_pvbyten	|NN SV *sv|NN STRLEN *len
 Apd	|I32	|sv_true	|NULLOK SV *sv
-pd	|void	|sv_add_arena	|NN char* ptr|U32 size|U32 flags
+pd	|void	|sv_add_arena	|NN char *const ptr|const U32 size|const U32 flags
 Apd	|int	|sv_backoff	|NN SV* sv
 Apd	|SV*	|sv_bless	|NN SV* sv|NN HV* stash
 Afpd	|void	|sv_catpvf	|NN SV* sv|NN const char* pat|...
@@ -1143,7 +1143,7 @@ s	|HV*	|require_tie_mod|NN GV *gv|NN const char *varpv|NN SV* namesv \
 #endif
 
 : #if defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
-paRxo	|void*	|get_arena	|size_t svtype|U32 misc
+paRxo	|void*	|get_arena	|const size_t svtype|const U32 misc
 : #endif
 
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
@@ -1495,7 +1495,7 @@ poM	|int	|sv_kill_backrefs	|NN SV *sv|NN AV *av
 nsR	|char *	|uiv_2buf	|NN char *buf|IV iv|UV uv|int is_uv|NN char **peob
 s	|void	|sv_unglob	|NN SV* sv
 s	|void	|not_a_number	|NN SV *sv
-s	|I32	|visit		|NN SVFUNC_t f|U32 flags|U32 mask
+s	|I32	|visit		|NN SVFUNC_t f|const U32 flags|const U32 mask
 s	|void	|sv_del_backref	|NN SV *target|NN SV *ref
 sR	|SV *	|varname	|NULLOK GV *gv|const char gvtype|PADOFFSET targ \
 				|NULLOK SV *keyname|I32 aindex|int subscript_type
@@ -1527,7 +1527,7 @@ sn	|char *	|F0convert	|NV nv|NN char *endbuf|NN STRLEN *len
 sM	|void	|sv_release_COW	|NN SV *sv|NN const char *pvx|NN SV *after
 #  endif
 s	|SV *	|more_sv
-s	|void *	|more_bodies	|svtype sv_type
+s	|void *	|more_bodies	|const svtype sv_type
 s	|bool	|sv_2iuv_common	|NN SV *sv
 s	|void	|glob_assign_glob|NN SV *dstr|NN SV *sstr|const int dtype
 s	|void	|glob_assign_ref|NN SV *dstr|NN SV *sstr
@@ -1819,7 +1819,7 @@ Apo	|bool	|ckwarn_d	|U32 w
 XEopMa	|STRLEN *|new_warnings_bitfield|NULLOK STRLEN *buffer \
 				|NN const char *const bits|STRLEN size
 
-p	|void	|offer_nice_chunk	|NN void *chunk|U32 chunk_size
+p	|void	|offer_nice_chunk	|NN void *const chunk|const U32 chunk_size
 
 #ifndef SPRINTF_RETURNS_STRLEN
 Apnod	|int	|my_sprintf	|NN char *buffer|NN const char *pat|...

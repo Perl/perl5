@@ -2223,7 +2223,7 @@ PERL_CALLCONV char*	Perl_sv_pvbyten(pTHX_ SV *sv, STRLEN *len)
 			__attribute__nonnull__(pTHX_2);
 
 PERL_CALLCONV I32	Perl_sv_true(pTHX_ SV *sv);
-PERL_CALLCONV void	Perl_sv_add_arena(pTHX_ char* ptr, U32 size, U32 flags)
+PERL_CALLCONV void	Perl_sv_add_arena(pTHX_ char *const ptr, const U32 size, const U32 flags)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV int	Perl_sv_backoff(pTHX_ SV* sv)
@@ -3023,7 +3023,7 @@ STATIC HV*	S_require_tie_mod(pTHX_ GV *gv, const char *varpv, SV* namesv, const 
 
 #endif
 
-PERL_CALLCONV void*	Perl_get_arena(pTHX_ size_t svtype, U32 misc)
+PERL_CALLCONV void*	Perl_get_arena(pTHX_ const size_t svtype, const U32 misc)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
@@ -3956,7 +3956,7 @@ STATIC void	S_sv_unglob(pTHX_ SV* sv)
 STATIC void	S_not_a_number(pTHX_ SV *sv)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC I32	S_visit(pTHX_ SVFUNC_t f, U32 flags, U32 mask)
+STATIC I32	S_visit(pTHX_ SVFUNC_t f, const U32 flags, const U32 mask)
 			__attribute__nonnull__(pTHX_1);
 
 STATIC void	S_sv_del_backref(pTHX_ SV *target, SV *ref)
@@ -4022,7 +4022,7 @@ STATIC void	S_sv_release_COW(pTHX_ SV *sv, const char *pvx, SV *after)
 
 #  endif
 STATIC SV *	S_more_sv(pTHX);
-STATIC void *	S_more_bodies(pTHX_ svtype sv_type);
+STATIC void *	S_more_bodies(pTHX_ const svtype sv_type);
 STATIC bool	S_sv_2iuv_common(pTHX_ SV *sv)
 			__attribute__nonnull__(pTHX_1);
 
@@ -4556,7 +4556,7 @@ PERL_CALLCONV STRLEN *	Perl_new_warnings_bitfield(pTHX_ STRLEN *buffer, const ch
 			__attribute__nonnull__(pTHX_2);
 
 
-PERL_CALLCONV void	Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
+PERL_CALLCONV void	Perl_offer_nice_chunk(pTHX_ void *const chunk, const U32 chunk_size)
 			__attribute__nonnull__(pTHX_1);
 
 
