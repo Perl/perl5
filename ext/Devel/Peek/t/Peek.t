@@ -62,25 +62,9 @@ sub do_test {
 	    $pattern =~ s/\$PADTMP/
 		($] < 5.009) ? 'PADBUSY,PADTMP' : 'PADTMP';
 	    /mge;
-	    $pattern =~ s/^ *\$XSUB *\n/
-		($] < 5.009) ? "    XSUB = 0x0\n    XSUBANY = 0\n" : '';
-	    /mge;
-	    $pattern =~ s/^ *\$ROOT *\n/
-		($] < 5.009) ? "    ROOT = 0x0\n" : '';
-	    /mge;
-	    $pattern =~ s/^ *\$IVNV *\n/
-		($] < 5.009) ? "    IV = 0\n    NV = 0\n" : '';
-	    /mge;
 	    $pattern =~ s/\$RV/
 		($] < 5.011) ? 'RV' : 'IV';
 	    /mge;
-	    $pattern =~ s/^ *\$NV *\n/
-		($] < 5.011) ? "    NV = 0\n" : '';
-	    /mge;
-	    $pattern =~ s/^ *\$SUBPROCESS *\n/
-		($] < 5.009) ? "    SUBPROCESS = 0\n" : '';
-	    /mge;
-
 
 	    print $pattern, "\n" if $DEBUG;
 	    my ($dump, $dump2) = split m/\*\*\*\*\*\n/, scalar <IN>;
@@ -226,8 +210,8 @@ do_test(11,
   SV = PVAV\\($ADDR\\) at $ADDR
     REFCNT = 1
     FLAGS = \\(\\)
-    IV = 0		# $] < 5.009
-    NV = 0		# $] < 5.009
+    IV = 0					# $] < 5.009
+    NV = 0					# $] < 5.009
     ARRAY = $ADDR
     FILL = 1
     MAX = 1
@@ -249,8 +233,8 @@ do_test(12,
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 1
     FLAGS = \\(SHAREKEYS\\)
-    IV = 1		# $] < 5.009
-    NV = $FLOAT		# $] < 5.009
+    IV = 1					# $] < 5.009
+    NV = $FLOAT					# $] < 5.009
     ARRAY = $ADDR  \\(0:7, 1:1\\)
     hash quality = 100.0%
     KEYS = 1
@@ -271,19 +255,21 @@ do_test(13,
   SV = PVCV\\($ADDR\\) at $ADDR
     REFCNT = 2
     FLAGS = \\($PADMY,POK,pPOK,ANON,WEAKOUTSIDE\\)
-    $IVNV
+    IV = 0					# $] < 5.009
+    NV = 0					# $] < 5.009
     PROTOTYPE = ""
     COMP_STASH = $ADDR\\t"main"
     START = $ADDR ===> \\d+
     ROOT = $ADDR
-    $XSUB
+    XSUB = 0x0					# $] < 5.009
+    XSUBANY = 0					# $] < 5.009
     GVGV::GV = $ADDR\\t"main" :: "__ANON__[^"]*"
     FILE = ".*\\b(?i:peek\\.t)"
     DEPTH = 0(?:
     MUTEXP = $ADDR
     OWNER = $ADDR)?
-    FLAGS = 0x404		# $] < 5.009
-    FLAGS = 0x90		# $] >= 5.009
+    FLAGS = 0x404				# $] < 5.009
+    FLAGS = 0x90				# $] >= 5.009
     OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
@@ -298,11 +284,13 @@ do_test(14,
   SV = PVCV\\($ADDR\\) at $ADDR
     REFCNT = (3|4)
     FLAGS = \\(\\)
-    $IVNV
+    IV = 0					# $] < 5.009
+    NV = 0					# $] < 5.009
     COMP_STASH = $ADDR\\t"main"
     START = $ADDR ===> \\d+
     ROOT = $ADDR
-    $XSUB
+    XSUB = 0x0					# $] < 5.009
+    XSUBANY = 0					# $] < 5.009
     GVGV::GV = $ADDR\\t"main" :: "do_test"
     FILE = ".*\\b(?i:peek\\.t)"
     DEPTH = 1
@@ -353,8 +341,8 @@ do_test(15,
       MG_VIRTUAL = $ADDR
       MG_TYPE = PERL_MAGIC_qr\(r\)
       MG_OBJ = $ADDR
-        PAT = "\(\?-xism:tic\)"		# $] >= 5.009
-        REFCNT = 2			# $] >= 5.009
+        PAT = "\(\?-xism:tic\)"			# $] >= 5.009
+        REFCNT = 2				# $] >= 5.009
     STASH = $ADDR\\t"Regexp"');
 }
 
@@ -367,8 +355,8 @@ do_test(16,
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 1
     FLAGS = \\(OBJECT,SHAREKEYS\\)
-    IV = 0		# $] < 5.009
-    NV = 0		# $] < 5.009
+    IV = 0					# $] < 5.009
+    NV = 0					# $] < 5.009
     STASH = $ADDR\\t"Tac"
     ARRAY = 0x0
     KEYS = 0
@@ -440,8 +428,8 @@ do_test(19,
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 1
     FLAGS = \\(SHAREKEYS,HASKFLAGS\\)
-    UV = 1		# $] < 5.009
-    NV = $FLOAT		# $] < 5.009
+    UV = 1					# $] < 5.009
+    NV = $FLOAT					# $] < 5.009
     ARRAY = $ADDR  \\(0:7, 1:1\\)
     hash quality = 100.0%
     KEYS = 1
@@ -468,8 +456,8 @@ do_test(19,
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 1
     FLAGS = \\(SHAREKEYS,HASKFLAGS\\)
-    UV = 1		# $] < 5.009
-    NV = 0		# $] < 5.009
+    UV = 1					# $] < 5.009
+    NV = 0					# $] < 5.009
     ARRAY = $ADDR  \\(0:7, 1:1\\)
     hash quality = 100.0%
     KEYS = 1
@@ -577,10 +565,11 @@ do_test(23,
   SV = PVCV\\($ADDR\\) at $ADDR
     REFCNT = (2)
     FLAGS = \\(POK,pPOK,CONST\\)
-    $IVNV
+    IV = 0					# $] < 5.009
+    NV = 0					# $] < 5.009
     PROTOTYPE = ""
     COMP_STASH = 0x0
-    $ROOT
+    ROOT = 0x0					# $] < 5.009
     XSUB = $ADDR
     XSUBANY = $ADDR \\(CONST SV\\)
     SV = PV\\($ADDR\\) at $ADDR
@@ -594,8 +583,8 @@ do_test(23,
     DEPTH = 0(?:
     MUTEXP = $ADDR
     OWNER = $ADDR)?
-    FLAGS = 0x200		# $] < 5.009
-    FLAGS = 0xc00		# $] >= 5.009
+    FLAGS = 0x200				# $] < 5.009
+    FLAGS = 0xc00				# $] >= 5.009
     OUTSIDE_SEQ = 0
     PADLIST = 0x0
     OUTSIDE = 0x0 \\(null\\)');	
@@ -620,7 +609,7 @@ do_test(25,
     REFCNT = 3
     FLAGS = \\(OBJECT\\)
     IV = 0
-    $NV
+    NV = 0					# $] < 5.011
     STASH = $ADDR\s+"IO::Handle"
     IFP = $ADDR
     OFP = $ADDR
@@ -632,6 +621,6 @@ do_test(25,
     TOP_GV = 0x0
     FMT_GV = 0x0
     BOTTOM_GV = 0x0
-    $SUBPROCESS
+    SUBPROCESS = 0				# $] < 5.009
     TYPE = \'>\'
     FLAGS = 0x0');
