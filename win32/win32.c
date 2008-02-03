@@ -129,6 +129,8 @@ static long		find_pid(int pid);
 static char *		qualified_path(const char *cmd);
 static char *		win32_get_xlib(const char *pl, const char *xlib,
 				       const char *libname);
+static LRESULT  win32_process_message(HWND hwnd, UINT msg,
+                       WPARAM wParam, LPARAM lParam);
 
 #ifdef USE_ITHREADS
 static void		remove_dead_pseudo_process(long child);
@@ -2082,68 +2084,48 @@ win32_async_check(pTHX)
     MSG msg;
     HWND hwnd = w32_message_hwnd;
 
+    /* Reset w32_poll_count before doing anything else, incase we dispatch
+     * messages that end up calling back into perl */
     w32_poll_count = 0;
 
-    if (hwnd == INVALID_HANDLE_VALUE) {
-        /* Call PeekMessage() to mark all pending messages in the queue as "old".
-         * This is necessary when we are being called by win32_msgwait() to
-         * make sure MsgWaitForMultipleObjects() stops reporting the same waiting
-         * message over and over.  An example how this can happen is when
-         * Perl is calling win32_waitpid() inside a GUI application and the GUI
-         * is generating messages before the process terminated.
-         */
-        PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE|PM_NOYIELD);
-        if (PL_sig_pending)
-            despatch_signals();
-        return 1;
-    }
+    if (hwnd != INVALID_HANDLE_VALUE) {
+        /* Passing PeekMessage -1 as HWND (2nd arg) only gets PostThreadMessage() messages
+        * and ignores window messages - should co-exist better with windows apps e.g. Tk
+        */
+        if (hwnd == NULL)
+            hwnd = (HWND)-1;
 
-    /* Passing PeekMessage -1 as HWND (2nd arg) only get PostThreadMessage() messages
-     * and ignores window messages - should co-exist better with windows apps e.g. Tk
-     */
-    if (hwnd == NULL)
-        hwnd = (HWND)-1;
-
-    while (PeekMessage(&msg, hwnd, WM_TIMER,    WM_TIMER,    PM_REMOVE|PM_NOYIELD) ||
-           PeekMessage(&msg, hwnd, WM_USER_MIN, WM_USER_MAX, PM_REMOVE|PM_NOYIELD))
-    {
-	switch (msg.message) {
-#ifdef USE_ITHREADS
-        case WM_USER_MESSAGE: {
-            int child = find_pseudo_pid(msg.wParam);
-            if (child >= 0)
-                w32_pseudo_child_message_hwnds[child] = (HWND)msg.lParam;
-            break;
-        }
-#endif
-
-	case WM_USER_KILL: {
-            /* We use WM_USER to fake kill() with other signals */
-	    int sig = msg.wParam;
-	    if (do_raise(aTHX_ sig))
-                sig_terminate(aTHX_ sig);
-	    break;
-	}
-
-	case WM_TIMER: {
-	    /* alarm() is a one-shot but SetTimer() repeats so kill it */
-	    if (w32_timerid && w32_timerid==msg.wParam) {
-	    	KillTimer(w32_message_hwnd, w32_timerid);
-	    	w32_timerid=0;
-
-                /* Now fake a call to signal handler */
-                if (do_raise(aTHX_ 14))
-                    sig_terminate(aTHX_ 14);
+        while (PeekMessage(&msg, hwnd, WM_TIMER,    WM_TIMER,    PM_REMOVE|PM_NOYIELD) ||
+               PeekMessage(&msg, hwnd, WM_USER_MIN, WM_USER_MAX, PM_REMOVE|PM_NOYIELD))
+        {
+            /* re-post a WM_QUIT message (we'll mark it as read later) */
+            if(msg.message == WM_QUIT) {
+                PostQuitMessage((int)msg.wParam);
+                break;
             }
-	    break;
-	}
-        } /* switch */
+
+            if(!CallMsgFilter(&msg, MSGF_USER))
+            {
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+        }
     }
+
+    /* Call PeekMessage() to mark all pending messages in the queue as "old".
+     * This is necessary when we are being called by win32_msgwait() to
+     * make sure MsgWaitForMultipleObjects() stops reporting the same waiting
+     * message over and over.  An example how this can happen is when
+     * Perl is calling win32_waitpid() inside a GUI application and the GUI
+     * is generating messages before the process terminated.
+     */
+    while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE|PM_NOYIELD))
+        /* keep going */ ;
 
     /* Above or other stuff may have set a signal flag */
-    if (PL_sig_pending) {
-	despatch_signals();
-    }
+    if (PL_sig_pending)
+        despatch_signals();
+    
     return 1;
 }
 
@@ -4846,9 +4828,132 @@ win32_signal(int sig, Sighandler_t subcode)
     }
 }
 
+/* The PerlMessageWindowClass's WindowProc */
+LRESULT CALLBACK
+win32_message_window_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    return win32_process_message(hwnd, msg, wParam, lParam) ?
+        0 : DefWindowProc(hwnd, msg, wParam, lParam);
+}
+
+/* we use a message filter hook to process thread messages, passing any
+ * messages that we don't process on to the rest of the hook chain
+ * Anyone else writing a message loop that wants to play nicely with perl
+ * should do
+ *   CallMsgFilter(&msg, MSGF_***);
+ * between their GetMessage and DispatchMessage calls.  */
+LRESULT CALLBACK
+win32_message_filter_proc(int code, WPARAM wParam, LPARAM lParam) {
+    LPMSG pmsg = (LPMSG)lParam;
+
+    /* we'll process it if code says we're allowed, and it's a thread message */
+    if (code >= 0 && pmsg->hwnd == NULL
+            && win32_process_message(pmsg->hwnd, pmsg->message,
+                                     pmsg->wParam, pmsg->lParam))
+    {
+            return TRUE;
+    }
+
+    /* XXX: MSDN says that hhk is ignored, but we should really use the
+     * return value from SetWindowsHookEx() in win32_create_message_window().  */
+    return CallNextHookEx(NULL, code, wParam, lParam);
+}
+
+/* The real message handler. Can be called with
+ * hwnd == NULL to process our thread messages. Returns TRUE for any messages
+ * that it processes */
+static LRESULT
+win32_process_message(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    /* BEWARE. The context retrieved using dTHX; is the context of the
+     * 'parent' thread during the CreateWindow() phase - i.e. for all messages
+     * up to and including WM_CREATE.  If it ever happens that you need the
+     * 'child' context before this, then it needs to be passed into
+     * win32_create_message_window(), and passed to the WM_NCCREATE handler
+     * from the lparam of CreateWindow().  It could then be stored/retrieved
+     * using [GS]etWindowLongPtr(... GWLP_USERDATA ...), possibly eliminating
+     * the dTHX calls here. */
+    /* XXX For now it is assumed that the overhead of the dTHX; for what
+     * are relativley infrequent code-paths, is better than the added
+     * complexity of getting the correct context passed into
+     * win32_create_message_window() */
+
+    switch(msg) {
+
+#ifdef USE_ITHREADS
+        case WM_USER_MESSAGE: {
+            long child = find_pseudo_pid((int)wParam);
+            if (child >= 0) {
+                dTHX;
+                w32_pseudo_child_message_hwnds[child] = (HWND)lParam;
+                return 1;
+            }
+            break;
+        }
+#endif
+
+        case WM_USER_KILL: {
+            dTHX;
+            /* We use WM_USER_KILL to fake kill() with other signals */
+            int sig = (int)wParam;
+            if (do_raise(aTHX_ sig))
+                sig_terminate(aTHX_ sig);
+
+            return 1;
+        }
+
+        case WM_TIMER: {
+            dTHX;
+            /* alarm() is a one-shot but SetTimer() repeats so kill it */
+            if (w32_timerid && w32_timerid==(UINT)wParam) {
+                KillTimer(w32_message_hwnd, w32_timerid);
+                w32_timerid=0;
+
+                /* Now fake a call to signal handler */
+                if (do_raise(aTHX_ 14))
+                    sig_terminate(aTHX_ 14);
+
+                return 1;
+            }
+            break;
+        }
+
+        default:
+            break;
+
+    } /* switch */
+
+    /* Above or other stuff may have set a signal flag, and we may not have
+     * been called from win32_async_check() (e.g. some other GUI's message
+     * loop.  BUT DON'T dispatch signals here: If someone has set a SIGALRM
+     * handler that die's, and the message loop that calls here is wrapped
+     * in an eval, then you may well end up with orphaned windows - signals
+     * are dispatched by win32_async_check() */
+
+    return 0;
+}
+
+void
+win32_create_message_window_class()
+{
+    /* create the window class for "message only" windows */
+    WNDCLASS wc;
+
+    Zero(&wc, 1, wc);
+    wc.lpfnWndProc = win32_message_window_proc;
+    wc.hInstance = (HINSTANCE)GetModuleHandle(NULL);
+    wc.lpszClassName = "PerlMessageWindowClass";
+
+    /* second and subsequent calls will fail, but class
+     * will already be registered */
+    RegisterClass(&wc);
+}
+
 HWND
 win32_create_message_window()
 {
+    HWND hwnd = NULL;
+
     /* "message-only" windows have been implemented in Windows 2000 and later.
      * On earlier versions we'll continue to post messages to a specific
      * thread and use hwnd==NULL.  This is brittle when either an embedding
@@ -4857,10 +4962,30 @@ win32_create_message_window()
      * "right" place with DispatchMessage() anymore, as there is no WindowProc
      * if there is no window handle.
      */
-    if (!IsWin2000())
-        return NULL;
+    /* Using HWND_MESSAGE appears to work under Win98, despite MSDN
+     * documentation to the contrary, however, there is some evidence that
+     * there may be problems with the implementation on Win98. As it is not
+     * officially supported we take the cautious route and stick with thread
+     * messages (hwnd == NULL) on platforms prior to Win2k.
+     */
+    if (IsWin2000()) {
+        win32_create_message_window_class();
 
-    return CreateWindow("Static", "", 0, 0, 0, 0, 0, HWND_MESSAGE, 0, 0, NULL);
+        hwnd = CreateWindow("PerlMessageWindowClass", "PerlMessageWindow",
+                0, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, NULL);
+    }
+
+    /* If we din't create a window for any reason, then we'll use thread
+     * messages for our signalling, so we install a hook which
+     * is called by CallMsgFilter in win32_async_check(), or any other
+     * modal loop (e.g. Win32::MsgBox or any other GUI extention, or anything
+     * that use OLE, etc. */
+    if(!hwnd) {
+        SetWindowsHookEx(WH_MSGFILTER, win32_message_filter_proc,
+                NULL, GetCurrentThreadId());
+    }
+  
+    return hwnd;
 }
 
 #ifdef HAVE_INTERP_INTERN
