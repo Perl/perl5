@@ -9,7 +9,7 @@ package Math::Complex;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $Inf);
 
-$VERSION = 1.47;
+$VERSION = 1.48;
 
 BEGIN {
     # For 64-bit doubles, anyway.
@@ -41,6 +41,7 @@ BEGIN {
 	$Inf = $IEEE_DBL_MAX unless defined $Inf;  # Oh well, close enough.
 	die "Could not get Infinity" unless $Inf > 1e99;
     }
+    print "# On this machine, Inf = '$Inf'\n";
 }
 
 use strict;
@@ -1408,7 +1409,7 @@ sub _stringify_cartesian {
 	    if ($x =~ /^NaN[QS]?$/i) {
 		$re = $x;
 	    } else {
-		if ($x =~ /^-?$Inf$/oi) {
+		if ($x =~ /^-?\Q$Inf\E$/oi) {
 		    $re = $x;
 		} else {
 		    $re = defined $format ? sprintf($format, $x) : $x;
@@ -1422,7 +1423,7 @@ sub _stringify_cartesian {
 	    if ($y =~ /^(NaN[QS]?)$/i) {
 		$im = $y;
 	    } else {
-		if ($y =~ /^-?$Inf$/oi) {
+		if ($y =~ /^-?\Q$Inf\E$/oi) {
 		    $im = $y;
 		} else {
 		    $im =
@@ -1466,7 +1467,7 @@ sub _stringify_polar {
 	my %format = $z->display_format;
 	my $format = $format{format};
 
-	if ($t =~ /^NaN[QS]?$/i || $t =~ /^-?$Inf$/oi) {
+	if ($t =~ /^NaN[QS]?$/i || $t =~ /^-?\Q$Inf\E$/oi) {
 	    $theta = $t; 
 	} elsif ($t == pi) {
 	    $theta = "pi";

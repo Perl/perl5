@@ -28,8 +28,8 @@ BEGIN {
 
 plan(tests => 153);
 
-use Math::Trig 1.12;
-use Math::Trig 1.12 qw(:pi Inf);
+use Math::Trig 1.13;
+use Math::Trig 1.13 qw(:pi Inf);
 
 my $pip2 = pi / 2;
 
@@ -311,10 +311,11 @@ print "# Infinity\n";
 
 my $BigDouble = 1e40;
 
-local $SIG{FPE} = { };  # E.g. netbsd-alpha core dumps on Inf arith
+# E.g. netbsd-alpha core dumps on Inf arith without this.
+local $SIG{FPE} = { };
 
 ok(Inf() > $BigDouble);  # This passes in netbsd-alpha.
-ok(Inf() + $BigDouble > $BigDouble); # This coredumps.
+ok(Inf() + $BigDouble > $BigDouble); # This coredumps in netbsd-alpha.
 ok(Inf() + $BigDouble == Inf());
 ok(Inf() - $BigDouble > $BigDouble);
 ok(Inf() - $BigDouble == Inf());
