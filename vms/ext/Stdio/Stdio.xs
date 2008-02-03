@@ -349,7 +349,7 @@ vmsopen(spec,...)
 	        fp = fopen(spec,mode,args[0],args[1],args[2],args[3],args[4],args[5],args[6],args[7]);
 	        break;
 	    }
-           if (!fp) {
+	    if (fp != NULL) {
              pio_fp = PerlIO_fdopen(fileno(fp),mode);
              fh = newFH(pio_fp,(mode[1] ? '+' : (mode[0] == 'r' ? '<' : (mode[0] == 'a' ? 'a' : '>'))));
 	     ST(0) = (fh ? sv_2mortal(fh) : &PL_sv_undef);
