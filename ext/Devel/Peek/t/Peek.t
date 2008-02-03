@@ -20,7 +20,9 @@ our $DEBUG = 0;
 open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
 
 sub do_test {
-    my $pattern = pop;
+    my $todo = $_[3];
+    my $repeat_todo = $_[4];
+    my $pattern = $_[2];
     if (open(OUT,">peek$$")) {
 	open(STDERR, ">&OUT") or die "Can't dup OUT: $!";
 	Dump($_[1]);
@@ -35,6 +37,31 @@ sub do_test {
 	    # handle DEBUG_LEAKING_SCALARS prefix
 	    $pattern =~ s/^(\s*)(SV =.* at )/(?:$1ALLOCATED at .*?\n)?$1$2/mg;
 
+	    # Need some clear generic mechanism to eliminate (or add) lines
+	    # of dump output dependant on perl version. The (previous) use of
+	    # things like $IVNV gave the illusion that the string passed in was
+	    # a regexp into which variables were interpolated, but this wasn't
+	    # actually true as those 'variables' actually also ate the
+	    # whitspace on the line. So it seems better to mark lines that
+	    # need to be eliminated. I considered (?# ... ) and (?{ ... }),
+	    # but whilst embedded code or comment syntax would keep it as a
+	    # legitimate regexp, it still isn't true. Seems easier and clearer
+	    # things that look like comments.
+
+	    # Could do this is in a s///mge but seems clearer like this:
+	    $pattern = join '', map {
+		# If we identify the version condition, take *it* out whatever
+		s/\s*# (\$] [<>]=? 5\.\d\d\d)$//
+		    ? (eval $1 ? $_ : '')
+		    : $_ # Didn't match, so this line is in
+	    } split /^/, $pattern;
+	    
+	    $pattern =~ s/\$PADMY/
+		($] < 5.009) ? 'PADBUSY,PADMY' : 'PADMY';
+	    /mge;
+	    $pattern =~ s/\$PADTMP/
+		($] < 5.009) ? 'PADBUSY,PADTMP' : 'PADTMP';
+	    /mge;
 	    $pattern =~ s/^ *\$XSUB *\n/
 		($] < 5.009) ? "    XSUB = 0x0\n    XSUBANY = 0\n" : '';
 	    /mge;
@@ -60,7 +87,7 @@ sub do_test {
 	    print $dump, "\n"    if $DEBUG;
 	    like( $dump, qr/\A$pattern\Z/ms );
 
-            local $TODO = $dump2 =~ /OOK/ ? "The hash iterator used in dump.c sets the OOK flag" : undef;
+            local $TODO = $repeat_todo;
             is($dump2, $dump);
 
 	    close(IN);
@@ -120,7 +147,7 @@ do_test( 5,
         $c = 456,
 'SV = IV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(PADMY,IOK,pIOK\\)
+  FLAGS = \\($PADMY,IOK,pIOK\\)
   IV = 456');
 
 # If perl is built with PERL_PRESERVE_IVUV then maths is done as integers
@@ -199,6 +226,8 @@ do_test(11,
   SV = PVAV\\($ADDR\\) at $ADDR
     REFCNT = 1
     FLAGS = \\(\\)
+    IV = 0		# $] < 5.009
+    NV = 0		# $] < 5.009
     ARRAY = $ADDR
     FILL = 1
     MAX = 1
@@ -220,6 +249,8 @@ do_test(12,
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 1
     FLAGS = \\(SHAREKEYS\\)
+    IV = 1		# $] < 5.009
+    NV = $FLOAT		# $] < 5.009
     ARRAY = $ADDR  \\(0:7, 1:1\\)
     hash quality = 100.0%
     KEYS = 1
@@ -227,7 +258,9 @@ do_test(12,
     MAX = 7
     RITER = -1
     EITER = 0x0
-    Elt "123" HASH = $ADDR' . $c_pattern);
+    Elt "123" HASH = $ADDR' . $c_pattern,
+	'',
+	$] > 5.009 && 'The hash iterator used in dump.c sets the OOK flag');
 
 do_test(13,
         sub(){@_},
@@ -237,7 +270,7 @@ do_test(13,
   RV = $ADDR
   SV = PVCV\\($ADDR\\) at $ADDR
     REFCNT = 2
-    FLAGS = \\(PADMY,POK,pPOK,ANON,WEAKOUTSIDE\\)
+    FLAGS = \\($PADMY,POK,pPOK,ANON,WEAKOUTSIDE\\)
     $IVNV
     PROTOTYPE = ""
     COMP_STASH = $ADDR\\t"main"
@@ -246,10 +279,11 @@ do_test(13,
     $XSUB
     GVGV::GV = $ADDR\\t"main" :: "__ANON__[^"]*"
     FILE = ".*\\b(?i:peek\\.t)"
-    DEPTH = 0
-(?:    MUTEXP = $ADDR
-    OWNER = $ADDR
-)?    FLAGS = 0x90
+    DEPTH = 0(?:
+    MUTEXP = $ADDR
+    OWNER = $ADDR)?
+    FLAGS = 0x404		# $] < 5.009
+    FLAGS = 0x90		# $] >= 5.009
     OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
@@ -278,8 +312,11 @@ do_test(14,
     OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
+       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$todo"
+       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$repeat_todo"
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$pattern"
-      \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG" flags=0x0 index=0
+      \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG"			# $] < 5.009
+      \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG" flags=0x0 index=0	# $] >= 5.009
       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$dump"
       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$dump2"
     OUTSIDE = $ADDR \\(MAIN\\)');
@@ -316,8 +353,8 @@ do_test(15,
       MG_VIRTUAL = $ADDR
       MG_TYPE = PERL_MAGIC_qr\(r\)
       MG_OBJ = $ADDR
-        PAT = "\(\?-xism:tic\)"
-        REFCNT = 2
+        PAT = "\(\?-xism:tic\)"		# $] >= 5.009
+        REFCNT = 2			# $] >= 5.009
     STASH = $ADDR\\t"Regexp"');
 }
 
@@ -330,19 +367,31 @@ do_test(16,
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 1
     FLAGS = \\(OBJECT,SHAREKEYS\\)
+    IV = 0		# $] < 5.009
+    NV = 0		# $] < 5.009
     STASH = $ADDR\\t"Tac"
     ARRAY = 0x0
     KEYS = 0
     FILL = 0
     MAX = 7
     RITER = -1
-    EITER = 0x0');
+    EITER = 0x0', '',
+	$] > 5.009 ? 'The hash iterator used in dump.c sets the OOK flag'
+	: "Something causes the HV's array to become allocated");
 
 do_test(17,
 	*a,
 'SV = PVGV\\($ADDR\\) at $ADDR
   REFCNT = 5
-  FLAGS = \\(MULTI(?:,IN_PAD)?\\)
+  FLAGS = \\(MULTI(?:,IN_PAD)?\\)		# $] >= 5.009
+  FLAGS = \\(GMG,SMG,MULTI(?:,IN_PAD)?\\)	# $] < 5.009
+  IV = 0					# $] < 5.009
+  NV = 0					# $] < 5.009
+  PV = 0					# $] < 5.009
+  MAGIC = $ADDR					# $] < 5.009
+    MG_VIRTUAL = &PL_vtbl_glob			# $] < 5.009
+    MG_TYPE = PERL_MAGIC_glob\(\*\)		# $] < 5.009
+    MG_OBJ = $ADDR				# $] < 5.009
   NAME = "a"
   NAMELEN = 1
   GvSTASH = $ADDR\\t"main"
@@ -355,6 +404,7 @@ do_test(17,
     HV = 0x0
     CV = 0x0
     CVGEN = 0x0
+    GPFLAGS = 0x0				# $] < 5.009
     LINE = \\d+
     FILE = ".*\\b(?i:peek\\.t)"
     FLAGS = $ADDR
@@ -365,7 +415,7 @@ do_test(18,
 	chr(256).chr(0).chr(512),
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\((?:PADTMP,)?POK,READONLY,pPOK,UTF8\\)
+  FLAGS = \\((?:$PADTMP,)?POK,READONLY,pPOK,UTF8\\)
   PV = $ADDR "\\\214\\\101\\\0\\\235\\\101"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = \\d+');
@@ -374,7 +424,7 @@ do_test(18,
 	chr(256).chr(0).chr(512),
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\((?:PADTMP,)?POK,READONLY,pPOK,UTF8\\)
+  FLAGS = \\((?:$PADTMP,)?POK,READONLY,pPOK,UTF8\\)
   PV = $ADDR "\\\304\\\200\\\0\\\310\\\200"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = \\d+');
@@ -390,6 +440,8 @@ do_test(19,
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 1
     FLAGS = \\(SHAREKEYS,HASKFLAGS\\)
+    UV = 1		# $] < 5.009
+    NV = $FLOAT		# $] < 5.009
     ARRAY = $ADDR  \\(0:7, 1:1\\)
     hash quality = 100.0%
     KEYS = 1
@@ -403,7 +455,9 @@ do_test(19,
       FLAGS = \\(POK,pPOK,UTF8\\)
       PV = $ADDR "\\\235\\\101"\\\0 \[UTF8 "\\\x\{200\}"\]
       CUR = 2
-      LEN = \\d+');
+      LEN = \\d+',
+	$] > 5.009 ? 'The hash iterator used in dump.c sets the OOK flag'
+	: 'sv_length has been called on the element, and cached the result in MAGIC');
 } else {
 do_test(19,
 	{chr(256)=>chr(512)},
@@ -414,6 +468,8 @@ do_test(19,
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 1
     FLAGS = \\(SHAREKEYS,HASKFLAGS\\)
+    UV = 1		# $] < 5.009
+    NV = 0		# $] < 5.009
     ARRAY = $ADDR  \\(0:7, 1:1\\)
     hash quality = 100.0%
     KEYS = 1
@@ -427,7 +483,9 @@ do_test(19,
       FLAGS = \\(POK,pPOK,UTF8\\)
       PV = $ADDR "\\\310\\\200"\\\0 \[UTF8 "\\\x\{200\}"\]
       CUR = 2
-      LEN = \\d+');
+      LEN = \\d+', '',
+	$] > 5.009 ? 'The hash iterator used in dump.c sets the OOK flag'
+	: 'sv_length has been called on the element, and cached the result in MAGIC');
 }
 
 my $x="";
@@ -436,7 +494,7 @@ do_test(20,
         $x,
 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(PADMY,SMG,POK,pPOK\\)
+  FLAGS = \\($PADMY,SMG,POK,pPOK\\)
   IV = 0
   NV = 0
   PV = $ADDR ""\\\0
@@ -533,10 +591,11 @@ do_test(23,
       LEN = \\d+
     GVGV::GV = $ADDR\\t"main" :: "const"
     FILE = ".*\\b(?i:peek\\.t)"
-    DEPTH = 0
-(?:    MUTEXP = $ADDR
-    OWNER = $ADDR
-)?    FLAGS = 0xc00
+    DEPTH = 0(?:
+    MUTEXP = $ADDR
+    OWNER = $ADDR)?
+    FLAGS = 0x200		# $] < 5.009
+    FLAGS = 0xc00		# $] >= 5.009
     OUTSIDE_SEQ = 0
     PADLIST = 0x0
     OUTSIDE = 0x0 \\(null\\)');	
