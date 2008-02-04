@@ -650,20 +650,27 @@ struct context {
 };
 #define cx_type cx_u.cx_subst.sbu_type
 
+/* If you re-order these, there is also an array of uppercase names in perl.h
+   and a static array of context names in pp_ctl.c  */
 #define CXTYPEMASK	0xf
 #define CXt_NULL	0
-#define CXt_SUB		1
-#define CXt_EVAL	2
-#define CXt_WHEN	3
-#define CXt_SUBST	4
-#define CXt_BLOCK	5
-#define CXt_FORMAT	6
-#define CXt_GIVEN	7
+#define CXt_WHEN	1
+#define CXt_BLOCK	2
+/* When micro-optimising :-) keep GIVEN next to the LOOPs, as these 5 share a
+   jump table in pp_ctl.c
+   The first 4 don't have a 'case' in at least one switch statement in pp_ctl.c
+*/
+#define CXt_GIVEN	3
 /* This is first so that CXt_LOOP_FOR|CXt_LOOP_LAZYIV is CXt_LOOP_LAZYIV */
-#define CXt_LOOP_FOR	8
-#define CXt_LOOP_PLAIN	9
-#define CXt_LOOP_LAZYSV	10
-#define CXt_LOOP_LAZYIV	11
+#define CXt_LOOP_FOR	4
+#define CXt_LOOP_PLAIN	5
+#define CXt_LOOP_LAZYSV	6
+#define CXt_LOOP_LAZYIV	7
+#define CXt_SUB		8
+#define CXt_FORMAT      9
+#define CXt_EVAL       10
+#define CXt_SUBST      11
+/* SUBST doesn't feature in all switch statements.  */
 
 /* private flags for CXt_SUB and CXt_NULL
    However, this is checked in many places which do not check the type, so
@@ -689,7 +696,7 @@ struct context {
 #define CXp_ONCE	0x10	/* What was sbu_once in struct subst */
 
 #define CxTYPE(c)	((c)->cx_type & CXTYPEMASK)
-#define CxTYPE_is_LOOP(c)	(((c)->cx_type & 0xC) == 0x8)
+#define CxTYPE_is_LOOP(c)	(((c)->cx_type & 0xC) == 0x4)
 #define CxMULTICALL(c)	(((c)->cx_type & CXp_MULTICALL)			\
 			 == CXp_MULTICALL)
 #define CxREALEVAL(c)	(((c)->cx_type & (CXTYPEMASK|CXp_REAL))		\

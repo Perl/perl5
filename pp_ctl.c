@@ -1224,14 +1224,17 @@ PP(pp_flop)
 
 static const char * const context_name[] = {
     "pseudo-block",
-    "subroutine",
-    "eval",
-    "loop",
-    "substitution",
-    "block",
-    "format",
+    "when",
+    NULL, /* CXt_BLOCK never actually needs "block" */
     "given",
-    "when"
+    NULL, /* CXt_LOOP_FOR never actually needs "loop" */
+    NULL, /* CXt_LOOP_PLAIN never actually needs "loop" */
+    NULL, /* CXt_LOOP_LAZYSV never actually needs "loop" */
+    NULL, /* CXt_LOOP_LAZYIV never actually needs "loop" */
+    "subroutine",
+    "format",
+    "eval",
+    "substitution",
 };
 
 STATIC I32

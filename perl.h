@@ -4363,17 +4363,17 @@ EXTCONST unsigned char PL_freq[];
 #ifdef DOINIT
 EXTCONST char* const PL_block_type[] = {
 	"NULL",
-	"SUB",
-	"EVAL",
 	"WHEN",
-	"SUBST",
 	"BLOCK",
-	"FORMAT",
 	"GIVEN",
 	"LOOP_FOR",
 	"LOOP_PLAIN",
 	"LOOP_LAZYSV",
 	"LOOP_LAZYIV",
+	"SUB",
+	"FORMAT",
+	"EVAL",
+	"SUBST"
 };
 #else
 EXTCONST char* PL_block_type[];
