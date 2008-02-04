@@ -1114,7 +1114,7 @@ You generally want to use the C<SvUPGRADE> macro wrapper. See also C<svtype>.
 */
 
 void
-Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
+Perl_sv_upgrade(pTHX_ register SV *const sv, svtype new_type)
 {
     dVAR;
     void*	old_body;
@@ -1398,7 +1398,7 @@ wrapper instead.
 */
 
 int
-Perl_sv_backoff(pTHX_ register SV *sv)
+Perl_sv_backoff(pTHX_ register SV *const sv)
 {
     STRLEN delta;
     const char * const s = SvPVX_const(sv);
@@ -1427,7 +1427,7 @@ Use the C<SvGROW> wrapper instead.
 */
 
 char *
-Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
+Perl_sv_grow(pTHX_ register SV *const sv, register STRLEN newlen)
 {
     register char *s;
 
@@ -1495,7 +1495,7 @@ Does not handle 'set' magic.  See also C<sv_setiv_mg>.
 */
 
 void
-Perl_sv_setiv(pTHX_ register SV *sv, IV i)
+Perl_sv_setiv(pTHX_ register SV *const sv, const IV i)
 {
     dVAR;
     SV_CHECK_THINKFIRST_COW_DROP(sv);
@@ -1532,7 +1532,7 @@ Like C<sv_setiv>, but also handles 'set' magic.
 */
 
 void
-Perl_sv_setiv_mg(pTHX_ register SV *sv, IV i)
+Perl_sv_setiv_mg(pTHX_ register SV *const sv, const IV i)
 {
     sv_setiv(sv,i);
     SvSETMAGIC(sv);
@@ -1548,7 +1548,7 @@ Does not handle 'set' magic.  See also C<sv_setuv_mg>.
 */
 
 void
-Perl_sv_setuv(pTHX_ register SV *sv, UV u)
+Perl_sv_setuv(pTHX_ register SV *const sv, const UV u)
 {
     /* With these two if statements:
        u=1.49  s=0.52  cu=72.49  cs=10.64  scripts=270  tests=20865
@@ -1576,7 +1576,7 @@ Like C<sv_setuv>, but also handles 'set' magic.
 */
 
 void
-Perl_sv_setuv_mg(pTHX_ register SV *sv, UV u)
+Perl_sv_setuv_mg(pTHX_ register SV *const sv, const UV u)
 {
     sv_setuv(sv,u);
     SvSETMAGIC(sv);
@@ -1592,7 +1592,7 @@ Does not handle 'set' magic.  See also C<sv_setnv_mg>.
 */
 
 void
-Perl_sv_setnv(pTHX_ register SV *sv, NV num)
+Perl_sv_setnv(pTHX_ register SV *const sv, const NV num)
 {
     dVAR;
     SV_CHECK_THINKFIRST_COW_DROP(sv);
@@ -1630,7 +1630,7 @@ Like C<sv_setnv>, but also handles 'set' magic.
 */
 
 void
-Perl_sv_setnv_mg(pTHX_ register SV *sv, NV num)
+Perl_sv_setnv_mg(pTHX_ register SV *const sv, const NV num)
 {
     sv_setnv(sv,num);
     SvSETMAGIC(sv);
@@ -1641,7 +1641,7 @@ Perl_sv_setnv_mg(pTHX_ register SV *sv, NV num)
  */
 
 STATIC void
-S_not_a_number(pTHX_ SV *sv)
+S_not_a_number(pTHX_ SV *const sv)
 {
      dVAR;
      SV *dsv;
@@ -1722,7 +1722,7 @@ non-numeric warning), even if your atof() doesn't grok them.
 */
 
 I32
-Perl_looks_like_number(pTHX_ SV *sv)
+Perl_looks_like_number(pTHX_ SV *const sv)
 {
     register const char *sbegin;
     STRLEN len;

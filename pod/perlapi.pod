@@ -5097,7 +5097,7 @@ Test if the content of an SV looks like a number (or is a number).
 C<Inf> and C<Infinity> are treated as numbers (so will not issue a
 non-numeric warning), even if your atof() doesn't grok them.
 
-	I32	looks_like_number(SV* sv)
+	I32	looks_like_number(SV *const sv)
 
 =for hackers
 Found in file sv.c
@@ -5448,7 +5448,7 @@ X<sv_backoff>
 Remove any string offset. You should normally use the C<SvOOK_off> macro
 wrapper instead.
 
-	int	sv_backoff(SV* sv)
+	int	sv_backoff(SV *const sv)
 
 =for hackers
 Found in file sv.c
@@ -5735,7 +5735,7 @@ Expands the character buffer in the SV.  If necessary, uses C<sv_unref> and
 upgrades the SV to C<SVt_PV>.  Returns a pointer to the character buffer.
 Use the C<SvGROW> wrapper instead.
 
-	char*	sv_grow(SV* sv, STRLEN newlen)
+	char*	sv_grow(SV *const sv, STRLEN newlen)
 
 =for hackers
 Found in file sv.c
@@ -6013,7 +6013,7 @@ X<sv_setiv>
 Copies an integer into the given SV, upgrading first if necessary.
 Does not handle 'set' magic.  See also C<sv_setiv_mg>.
 
-	void	sv_setiv(SV* sv, IV num)
+	void	sv_setiv(SV *const sv, const IV num)
 
 =for hackers
 Found in file sv.c
@@ -6023,7 +6023,7 @@ X<sv_setiv_mg>
 
 Like C<sv_setiv>, but also handles 'set' magic.
 
-	void	sv_setiv_mg(SV *sv, IV i)
+	void	sv_setiv_mg(SV *const sv, const IV i)
 
 =for hackers
 Found in file sv.c
@@ -6034,7 +6034,7 @@ X<sv_setnv>
 Copies a double into the given SV, upgrading first if necessary.
 Does not handle 'set' magic.  See also C<sv_setnv_mg>.
 
-	void	sv_setnv(SV* sv, NV num)
+	void	sv_setnv(SV *const sv, const NV num)
 
 =for hackers
 Found in file sv.c
@@ -6044,7 +6044,7 @@ X<sv_setnv_mg>
 
 Like C<sv_setnv>, but also handles 'set' magic.
 
-	void	sv_setnv_mg(SV *sv, NV num)
+	void	sv_setnv_mg(SV *const sv, const NV num)
 
 =for hackers
 Found in file sv.c
@@ -6282,7 +6282,7 @@ X<sv_setuv>
 Copies an unsigned integer into the given SV, upgrading first if necessary.
 Does not handle 'set' magic.  See also C<sv_setuv_mg>.
 
-	void	sv_setuv(SV* sv, UV num)
+	void	sv_setuv(SV *const sv, const UV num)
 
 =for hackers
 Found in file sv.c
@@ -6292,7 +6292,7 @@ X<sv_setuv_mg>
 
 Like C<sv_setuv>, but also handles 'set' magic.
 
-	void	sv_setuv_mg(SV *sv, UV u)
+	void	sv_setuv_mg(SV *const sv, const UV u)
 
 =for hackers
 Found in file sv.c
@@ -6360,7 +6360,7 @@ Upgrade an SV to a more complex form.  Generally adds a new body type to the
 SV, then copies across as much information as possible from the old body.
 You generally want to use the C<SvUPGRADE> macro wrapper. See also C<svtype>.
 
-	void	sv_upgrade(SV* sv, svtype new_type)
+	void	sv_upgrade(SV *const sv, svtype new_type)
 
 =for hackers
 Found in file sv.c
