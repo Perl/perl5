@@ -60,6 +60,7 @@ my $default_share = [qw[
     &utf8::unicode_to_native
     $version::VERSION
     $version::CLASS
+    @version::ISA
 ], ($] >= 5.010 && qw[
     &re::is_regexp
     &re::regname
