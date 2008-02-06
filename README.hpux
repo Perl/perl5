@@ -234,9 +234,10 @@ is told to have Madison 6. As of the date of this document's last update,
 the following systems contain Itanium or Itanium 2 chips (this is likely
 to be out of date):
 
-  BL60p, BL860c, cx2600, cx2620, rx1600, rx1620, rx2600, rx2600hptc,
-  rx2620, rx2660, rx3600, rx4610, rx4640, rx5670, rx6600, rx7420,
-  rx7620, rx7640, rx8420, rx8620, rx8640, rx9610, sx1000, sx2000
+  BL60p, BL860c, BL870c, cx2600, cx2620, rx1600, rx1620, rx2600,
+  rx2600hptc, rx2620, rx2660, rx3600, rx4610, rx4640, rx5670,
+  rx6600, rx7420, rx7620, rx7640, rx8420, rx8620, rx8640, rx9610,
+  sx1000, sx2000
 
 To see all about your machine, type
 
@@ -621,6 +622,6 @@ With much assistance regarding shared libraries from Marc Sabatella.
 
 =head1 DATE
 
-Version 0.8.0: 2007-09-09
+Version 0.8.1: 2008-02-06
 
 =cut
