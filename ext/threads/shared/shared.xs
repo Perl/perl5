@@ -1035,7 +1035,7 @@ sharedsv_array_mg_free(pTHX_ SV *sv, MAGIC *mg)
  */
 int
 sharedsv_array_mg_copy(pTHX_ SV *sv, MAGIC* mg,
-                       SV *nsv, const char *name, int namlen)
+                       SV *nsv, const char *name, I32 namlen)
 {
     MAGIC *nmg = sv_magicext(nsv,mg->mg_obj,
                             toLOWER(mg->mg_type),&sharedsv_elem_vtbl,
