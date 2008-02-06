@@ -2331,6 +2331,7 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 	    }
 	}
        if ((tmpfp = PerlIO_tmpfile()) != NULL) {
+	    int found = 0;
 	    Stat_t st;
 	    if (!PerlLIO_stat(SvPVX_const(tmpglob),&st) && S_ISDIR(st.st_mode))
 		ok = ((wilddsc.dsc$a_pointer = tovmspath((char *)SvPVX_const(tmpglob),vmsspec)) != NULL);
@@ -2340,6 +2341,8 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 		if (*cp == '?') *cp = '%';  /* VMS style single-char wildcard */
 	    while (ok && ((sts = lib$find_file(&wilddsc,&rsdsc,&cxt,
 					       &dfltdsc,NULL,NULL,NULL))&1)) {
+
+		found++;
 		/* with varying string, 1st word of buffer contains result length */
 		end = rstr + *((unsigned short int*)rslt);
 		if (!hasver) while (*end != ';' && end > rstr) end--;
@@ -2357,6 +2360,14 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 		ok = (PerlIO_puts(tmpfp,begin) != EOF);
 	    }
 	    if (cxt) (void)lib$find_file_end(&cxt);
+
+	    if (!found) {
+	        /* Be POSIXish: return the input pattern when no matches */
+	        strcpy(rstr,SvPVX(tmpglob));
+	        strcat(rstr,"\n");
+	        ok = (PerlIO_puts(tmpfp,rstr) != EOF);
+	    }
+
 	    if (ok && sts != RMS$_NMF &&
 		sts != RMS$_DNF && sts != RMS_FNF) ok = 0;
 	    if (!ok) {
