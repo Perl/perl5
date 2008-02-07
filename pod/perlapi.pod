@@ -5358,7 +5358,7 @@ Return the integer value of an SV, doing any necessary string
 conversion.  If flags includes SV_GMAGIC, does an mg_get() first.
 Normally used via the C<SvIV(sv)> and C<SvIVx(sv)> macros.
 
-	IV	sv_2iv_flags(SV* sv, I32 flags)
+	IV	sv_2iv_flags(SV *const sv, const I32 flags)
 
 =for hackers
 Found in file sv.c
@@ -5384,7 +5384,7 @@ Return the num value of an SV, doing any necessary string or integer
 conversion, magic etc. Normally used via the C<SvNV(sv)> and C<SvNVx(sv)>
 macros.
 
-	NV	sv_2nv(SV* sv)
+	NV	sv_2nv(SV *const sv)
 
 =for hackers
 Found in file sv.c
@@ -5398,7 +5398,7 @@ side-effect.
 
 Usually accessed via the C<SvPVbyte> macro.
 
-	char*	sv_2pvbyte(SV* sv, STRLEN* lp)
+	char*	sv_2pvbyte(SV *const sv, STRLEN *const lp)
 
 =for hackers
 Found in file sv.c
@@ -5425,7 +5425,7 @@ if necessary.
 Normally invoked via the C<SvPV_flags> macro. C<sv_2pv()> and C<sv_2pv_nomg>
 usually end up here too.
 
-	char*	sv_2pv_flags(SV* sv, STRLEN* lp, I32 flags)
+	char*	sv_2pv_flags(SV *const sv, STRLEN *const lp, const I32 flags)
 
 =for hackers
 Found in file sv.c
@@ -5437,7 +5437,7 @@ Return the unsigned integer value of an SV, doing any necessary string
 conversion.  If flags includes SV_GMAGIC, does an mg_get() first.
 Normally used via the C<SvUV(sv)> and C<SvUVx(sv)> macros.
 
-	UV	sv_2uv_flags(SV* sv, I32 flags)
+	UV	sv_2uv_flags(SV *const sv, const I32 flags)
 
 =for hackers
 Found in file sv.c
@@ -5658,7 +5658,7 @@ sv_2pv[_flags] but operates directly on an SV instead of just the
 string.  Mostly uses sv_2pv_flags to do its work, except when that
 would lose the UTF-8'ness of the PV.
 
-	void	sv_copypv(SV* dsv, SV* ssv)
+	void	sv_copypv(SV *const dsv, SV *const ssv)
 
 =for hackers
 Found in file sv.c
