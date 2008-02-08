@@ -123,16 +123,21 @@ Perl_mg_magical(pTHX_ SV *sv)
     const MAGIC* mg;
     PERL_ARGS_ASSERT_MG_MAGICAL;
     PERL_UNUSED_CONTEXT;
-    for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
-	const MGVTBL* const vtbl = mg->mg_virtual;
-	if (vtbl) {
-	    if (vtbl->svt_get && !(mg->mg_flags & MGf_GSKIP))
-		SvGMAGICAL_on(sv);
-	    if (vtbl->svt_set)
-		SvSMAGICAL_on(sv);
-	    if (!(SvFLAGS(sv) & (SVs_GMG|SVs_SMG)) || vtbl->svt_clear)
-		SvRMAGICAL_on(sv);
-	}
+    if ((mg = SvMAGIC(sv))) {
+	SvRMAGICAL_off(sv);
+	do {
+	    const MGVTBL* const vtbl = mg->mg_virtual;
+	    if (vtbl) {
+		if (vtbl->svt_get && !(mg->mg_flags & MGf_GSKIP))
+		    SvGMAGICAL_on(sv);
+		if (vtbl->svt_set)
+		    SvSMAGICAL_on(sv);
+		if (vtbl->svt_clear)
+		    SvRMAGICAL_on(sv);
+	    }
+	} while ((mg = mg->mg_moremagic));
+	if (!(SvFLAGS(sv) & (SVs_GMG|SVs_SMG)))
+	    SvRMAGICAL_on(sv);
     }
 }
 
