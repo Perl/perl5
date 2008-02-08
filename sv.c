@@ -3027,7 +3027,7 @@ Usually accessed via the C<SvPVutf8> macro.
 */
 
 char *
-Perl_sv_2pvutf8(pTHX_ register SV *sv, STRLEN *lp)
+Perl_sv_2pvutf8(pTHX_ register SV *const sv, STRLEN *const lp)
 {
     PERL_ARGS_ASSERT_SV_2PVUTF8;
 
@@ -3046,7 +3046,7 @@ sv_true() or its macro equivalent.
 */
 
 bool
-Perl_sv_2bool(pTHX_ register SV *sv)
+Perl_sv_2bool(pTHX_ register SV *const sv)
 {
     dVAR;
 
@@ -3117,7 +3117,7 @@ use the Encode extension for that.
 */
 
 STRLEN
-Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
+Perl_sv_utf8_upgrade_flags(pTHX_ register SV *const sv, const I32 flags)
 {
     dVAR;
 
@@ -3190,7 +3190,7 @@ use the Encode extension for that.
 */
 
 bool
-Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
+Perl_sv_utf8_downgrade(pTHX_ register SV *const sv, const bool fail_ok)
 {
     dVAR;
 
@@ -3233,7 +3233,7 @@ flag off so that it looks like octets again.
 */
 
 void
-Perl_sv_utf8_encode(pTHX_ register SV *sv)
+Perl_sv_utf8_encode(pTHX_ register SV *const sv)
 {
     PERL_ARGS_ASSERT_SV_UTF8_ENCODE;
 
@@ -3260,7 +3260,7 @@ Scans PV for validity and returns false if the PV is invalid UTF-8.
 */
 
 bool
-Perl_sv_utf8_decode(pTHX_ register SV *sv)
+Perl_sv_utf8_decode(pTHX_ register SV *const sv)
 {
     PERL_ARGS_ASSERT_SV_UTF8_DECODE;
 
@@ -3328,7 +3328,7 @@ copy-ish functions and macros use this underneath.
 */
 
 static void
-S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
+S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
 {
     I32 mro_changes = 0; /* 1 = method, 2 = isa */
 
@@ -3405,7 +3405,7 @@ S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
 }
 
 static void
-S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr)
+S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 {
     SV * const sref = SvREFCNT_inc(SvRV(sstr));
     SV *dref = NULL;
@@ -3518,7 +3518,7 @@ S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr)
 }
 
 void
-Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
+Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 {
     dVAR;
     register U32 sflags;
@@ -3955,7 +3955,7 @@ Like C<sv_setsv>, but also handles 'set' magic.
 */
 
 void
-Perl_sv_setsv_mg(pTHX_ SV *dstr, register SV *sstr)
+Perl_sv_setsv_mg(pTHX_ SV *const dstr, register SV *const sstr)
 {
     PERL_ARGS_ASSERT_SV_SETSV_MG;
 

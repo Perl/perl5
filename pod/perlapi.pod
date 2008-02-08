@@ -5322,7 +5322,7 @@ X<sv_2bool>
 This function is only called on magical items, and is only used by
 sv_true() or its macro equivalent.
 
-	bool	sv_2bool(SV* sv)
+	bool	sv_2bool(SV *const sv)
 
 =for hackers
 Found in file sv.c
@@ -5411,7 +5411,7 @@ to its length.  May cause the SV to be upgraded to UTF-8 as a side-effect.
 
 Usually accessed via the C<SvPVutf8> macro.
 
-	char*	sv_2pvutf8(SV* sv, STRLEN* lp)
+	char*	sv_2pvutf8(SV *const sv, STRLEN *const lp)
 
 =for hackers
 Found in file sv.c
@@ -6261,7 +6261,7 @@ C<SvSetMagicSV_nosteal>.
 This is the primary function for copying scalars, and most other
 copy-ish functions and macros use this underneath.
 
-	void	sv_setsv_flags(SV *dstr, SV *sstr, I32 flags)
+	void	sv_setsv_flags(SV *dstr, SV *sstr, const I32 flags)
 
 =for hackers
 Found in file sv.c
@@ -6271,7 +6271,7 @@ X<sv_setsv_mg>
 
 Like C<sv_setsv>, but also handles 'set' magic.
 
-	void	sv_setsv_mg(SV *dstr, SV *sstr)
+	void	sv_setsv_mg(SV *const dstr, SV *const sstr)
 
 =for hackers
 Found in file sv.c
@@ -6399,7 +6399,7 @@ Scans PV for validity and returns false if the PV is invalid UTF-8.
 NOTE: this function is experimental and may change or be
 removed without notice.
 
-	bool	sv_utf8_decode(SV *sv)
+	bool	sv_utf8_decode(SV *const sv)
 
 =for hackers
 Found in file sv.c
@@ -6418,7 +6418,7 @@ use the Encode extension for that.
 NOTE: this function is experimental and may change or be
 removed without notice.
 
-	bool	sv_utf8_downgrade(SV *sv, bool fail_ok)
+	bool	sv_utf8_downgrade(SV *const sv, const bool fail_ok)
 
 =for hackers
 Found in file sv.c
@@ -6429,7 +6429,7 @@ X<sv_utf8_encode>
 Converts the PV of an SV to UTF-8, but then turns the C<SvUTF8>
 flag off so that it looks like octets again.
 
-	void	sv_utf8_encode(SV *sv)
+	void	sv_utf8_encode(SV *const sv)
 
 =for hackers
 Found in file sv.c
@@ -6463,7 +6463,7 @@ C<sv_utf8_upgrade_nomg> are implemented in terms of this function.
 This is not as a general purpose byte encoding to Unicode interface:
 use the Encode extension for that.
 
-	STRLEN	sv_utf8_upgrade_flags(SV *sv, I32 flags)
+	STRLEN	sv_utf8_upgrade_flags(SV *const sv, const I32 flags)
 
 =for hackers
 Found in file sv.c
