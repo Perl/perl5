@@ -1,12 +1,11 @@
 package ExtUtils::MM_Any;
 
 use strict;
-use vars qw($VERSION @ISA);
-$VERSION = '6.42';
+our $VERSION = '6.43_01';
 
 use Carp;
 use File::Spec;
-BEGIN { @ISA = qw(File::Spec); }
+BEGIN { our @ISA = qw(File::Spec); }
 
 # We need $Verbose
 use ExtUtils::MakeMaker qw($Verbose);
@@ -145,8 +144,8 @@ sub split_command {
     # newline.
     chomp $cmd;
 
-    # set aside 20% for macro expansion.
-    my $len_left = int($self->max_exec_len * 0.80);
+    # set aside 30% for macro expansion.
+    my $len_left = int($self->max_exec_len * 0.70);
     $len_left -= length $self->_expand_macros($cmd);
 
     do {

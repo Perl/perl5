@@ -1,16 +1,15 @@
 package ExtUtils::MM_Cygwin;
 
 use strict;
-use vars qw($VERSION @ISA);
 
 use ExtUtils::MakeMaker::Config;
 use File::Spec;
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
-@ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
+our @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
 
-$VERSION = '6.42';
+our $VERSION = '6.43_01';
 
 
 =head1 NAME

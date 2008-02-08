@@ -1,42 +1,36 @@
-# $Id: /mirror/svn.schwern.org/CPAN/ExtUtils-MakeMaker/trunk/lib/ExtUtils/MakeMaker.pm 41145 2007-12-08T01:01:11.051959Z schwern  $
+# $Id: /local/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker.pm 41372 2008-01-02T00:07:06.491251Z schwern  $
 package ExtUtils::MakeMaker;
 
-BEGIN {require 5.005_03;}
+use strict;
+
+BEGIN {require 5.006;}
 
 require Exporter;
 use ExtUtils::MakeMaker::Config;
 use Carp ();
 use File::Path;
 
-use vars qw(
-            @ISA @EXPORT @EXPORT_OK
-            $VERSION $Verbose %Config
-            @Prepend_parent @Parent
-            %Recognized_Att_Keys @Get_from_Config @MM_Sections @Overridable
-            $Filename
-           );
+our $Verbose = 0;       # exported
+our @Parent;            # needs to be localized
+our @Get_from_Config;   # referenced by MM_Unix
+my @MM_Sections;
+my @Overridable;
+my @Prepend_parent;
+my %Recognized_Att_Keys;
 
-# Has to be on its own line with no $ after it to avoid being noticed by
-# the version control system
-use vars qw($Revision);
-use strict;
+our $VERSION = '6.43_01';
+our ($Revision) = q$Revision: 41372 $ =~ /Revision:\s+(\S+)/;
+our $Filename = __FILE__;   # referenced outside MakeMaker
 
-$VERSION = '6.42';
-($Revision) = q$Revision: 41145 $ =~ /Revision:\s+(\S+)/;
-
-@ISA = qw(Exporter);
-@EXPORT = qw(&WriteMakefile &writeMakefile $Verbose &prompt);
-@EXPORT_OK = qw($VERSION &neatvalue &mkbootstrap &mksymlists
-                &WriteEmptyMakefile);
+our @ISA = qw(Exporter);
+our @EXPORT    = qw(&WriteMakefile &writeMakefile $Verbose &prompt);
+our @EXPORT_OK = qw($VERSION &neatvalue &mkbootstrap &mksymlists
+                    &WriteEmptyMakefile);
 
 # These will go away once the last of the Win32 & VMS specific code is 
 # purged.
 my $Is_VMS     = $^O eq 'VMS';
 my $Is_Win32   = $^O eq 'MSWin32';
-
-# Our filename for diagnostic and debugging purposes.  More reliable
-# than %INC (think caseless filesystems)
-$Filename = __FILE__;
 
 full_setup();
 
@@ -143,7 +137,7 @@ sub _format_att {
 }
 
 
-sub prompt ($;$) {
+sub prompt ($;$) {  ## no critic
     my($mess, $def) = @_;
     Carp::confess("prompt function called without an argument") 
         unless defined $mess;
@@ -454,19 +448,19 @@ END
     my $newclass = ++$PACKNAME;
     local @Parent = @Parent;    # Protect against non-local exits
     {
-        no strict 'refs';
         print "Blessing Object into class [$newclass]\n" if $Verbose>=2;
         mv_all_methods("MY",$newclass);
         bless $self, $newclass;
         push @Parent, $self;
         require ExtUtils::MY;
+
+        no strict 'refs';   ## no critic;
         @{"$newclass\:\:ISA"} = 'MM';
     }
 
     if (defined $Parent[-2]){
         $self->{PARENT} = $Parent[-2];
-        my $key;
-        for $key (@Prepend_parent) {
+        for my $key (@Prepend_parent) {
             next unless defined $self->{PARENT}{$key};
 
             # Don't stomp on WriteMakefile() args.
@@ -606,8 +600,7 @@ END
     }
 
     # turn the SKIP array into a SKIPHASH hash
-    my (%skip,$skip);
-    for $skip (@{$self->{SKIP} || []}) {
+    for my $skip (@{$self->{SKIP} || []}) {
         $self->{SKIPHASH}{$skip} = 1;
     }
     delete $self->{SKIP}; # free memory
@@ -662,8 +655,8 @@ sub WriteEmptyMakefile {
     if ( -f $new ) {
         _rename($new, $old) or warn "rename $new => $old: $!"
     }
-    open MF, '>'.$new or die "open $new for write: $!";
-    print MF <<'EOP';
+    open my $mfh, '>', $new or die "open $new for write: $!";
+    print $mfh <<'EOP';
 all :
 
 clean :
@@ -675,7 +668,7 @@ makemakerdflt :
 test :
 
 EOP
-    close MF or die "close $new for write: $!";
+    close $mfh or die "close $new for write: $!";
 }
 
 sub check_manifest {
@@ -794,7 +787,7 @@ sub check_hints {
 }
 
 sub _run_hintfile {
-    no strict 'vars';
+    our $self;
     local($self) = shift;       # make $self available to the hint file.
     my($hint_file) = shift;
 
@@ -813,8 +806,6 @@ sub _run_hintfile {
 
 sub mv_all_methods {
     my($from,$to) = @_;
-    no strict 'refs';
-    my($symtab) = \%{"${from}::"};
 
     # Here you see the *current* list of methods that are overridable
     # from Makefile.PL via MY:: subroutines. As of VERSION 5.07 I'm
@@ -837,19 +828,23 @@ sub mv_all_methods {
 
         next unless defined &{"${from}::$method"};
 
-        *{"${to}::$method"} = \&{"${from}::$method"};
+        {
+            no strict 'refs';   ## no critic
+            *{"${to}::$method"} = \&{"${from}::$method"};
 
-        # delete would do, if we were sure, nobody ever called
-        # MY->makeaperl directly
+            # If we delete a method, then it will be undefined and cannot
+            # be called.  But as long as we have Makefile.PLs that rely on
+            # %MY:: being intact, we have to fill the hole with an
+            # inheriting method:
 
-        # delete $symtab->{$method};
-
-        # If we delete a method, then it will be undefined and cannot
-        # be called.  But as long as we have Makefile.PLs that rely on
-        # %MY:: being intact, we have to fill the hole with an
-        # inheriting method:
-
-        eval "package MY; sub $method { shift->SUPER::$method(\@_); }";
+            {
+                package MY;
+                my $super = "SUPER::".$method;
+                *{$method} = sub {
+                    shift->$super(@_);
+                };
+            }
+        }
     }
 
     # We have to clean out %INC also, because the current directory is
@@ -898,20 +893,19 @@ sub skipcheck {
 
 sub flush {
     my $self = shift;
-    my($chunk);
-    local *FH;
 
     my $finalname = $self->{MAKEFILE};
     print STDOUT "Writing $finalname for $self->{NAME}\n";
 
     unlink($finalname, "MakeMaker.tmp", $Is_VMS ? 'Descrip.MMS' : ());
-    open(FH,">MakeMaker.tmp") or die "Unable to open MakeMaker.tmp: $!";
+    open(my $fh,">", "MakeMaker.tmp")
+        or die "Unable to open MakeMaker.tmp: $!";
 
-    for $chunk (@{$self->{RESULT}}) {
-        print FH "$chunk\n";
+    for my $chunk (@{$self->{RESULT}}) {
+        print $fh "$chunk\n";
     }
 
-    close FH;
+    close $fh;
     _rename("MakeMaker.tmp", $finalname) or
       warn "rename MakeMaker.tmp => $finalname: $!";
     chmod 0644, $finalname unless $Is_VMS;
@@ -1756,7 +1750,7 @@ MakeMaker will turn it into an array with one element.
 The licensing terms of your distribution.  Generally its "perl" for the
 same license as Perl itself.
 
-See L<Module::Build::Authoring> for the list of options.
+See L<Module::Build::API> for the list of options.
 
 Defaults to "unknown".
 
@@ -2190,26 +2184,29 @@ will be evaluated with eval() and the value of the named variable
 B<after> the eval() will be assigned to the VERSION attribute of the
 MakeMaker object. The following lines will be parsed o.k.:
 
-    $VERSION = '1.00';
-    *VERSION = \'1.01';
-    ($VERSION) = q$Revision: 41145 $ =~ /(\d+)/g;
+    $VERSION   = '1.00';
+    *VERSION   = \'1.01';
+    ($VERSION) = q$Revision: 41372 $ =~ /(\d+)/g;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
-    our $VERSION = 1.2.3;       # new for perl5.6.0
 
 but these will fail:
 
-    my $VERSION = '1.01';
-    local $VERSION = '1.02';
+    # Bad
+    my $VERSION         = '1.01';
+    local $VERSION      = '1.02';
     local $FOO::VERSION = '1.30';
 
-L<version> will be loaded, if available, so this will work.
+"Version strings" are incompatible should not be used.
 
-    our $VERSION = qv(1.2.3);   # version.pm will be loaded if available
+    # Bad
+    $VERSION = 1.2.3;
+    $VERSION = v1.2.3;
 
-Its up to you to declare a dependency on C<version>.  Also note that this
-feature was introduced in MakeMaker 6.35.  Earlier versions of MakeMaker
-require this:
+L<version> objects are fine.  As of MakeMaker 6.35 version.pm will be
+automatically loaded, but you must declare the dependency on version.pm.
+For compatibility with older MakeMaker you should load on the same line 
+as $VERSION is declared.
 
     # All on one line
     use version; our $VERSION = qv(1.2.3);

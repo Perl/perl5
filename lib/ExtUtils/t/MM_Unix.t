@@ -31,10 +31,10 @@ my $class = 'ExtUtils::MM_Unix';
 
 # only one of the following can be true
 # test should be removed if MM_Unix ever stops handling other OS than Unix
-my $os =  ($ExtUtils::MM_Unix::Is_OS2 	|| 0)
-	+ ($ExtUtils::MM_Unix::Is_Win32 || 0) 
-	+ ($ExtUtils::MM_Unix::Is_Dos 	|| 0)
-	+ ($ExtUtils::MM_Unix::Is_VMS   || 0); 
+my $os =  ($ExtUtils::MM_Unix::Is{OS2}   || 0)
+        + ($ExtUtils::MM_Unix::Is{Win32} || 0) 
+        + ($ExtUtils::MM_Unix::Is{Dos}   || 0)
+        + ($ExtUtils::MM_Unix::Is{VMS}   || 0); 
 ok ( $os <= 1,  'There can be only one (or none)');
 
 cmp_ok ($ExtUtils::MM_Unix::VERSION, '>=', '1.12606', 'Should be at least version 1.12606');

@@ -31,10 +31,11 @@ close MANIFEST;
 chdir 'lib';
 plan tests => scalar @modules * 2;
 foreach my $file (@modules) {
-    # 5.8.0 has a bug about require alone in an eval.  Thus the extra
-    # statement.
-    eval { require($file); 1 };
-    is( $@, '', "require $file" );
+    # Make sure we look at the local files and do not reload them if
+    # they're already loaded.  This avoids recompilation warnings.
+    local @INC = @INC;
+    unshift @INC, ".";
+    ok eval { require($file); 1 } or diag "require $file failed.\n$@";
 
     SKIP: {
         skip "Test::Pod not installed", 1 unless $Has_Test_Pod;

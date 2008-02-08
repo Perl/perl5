@@ -2,13 +2,12 @@ package ExtUtils::MM;
 
 use strict;
 use ExtUtils::MakeMaker::Config;
-use vars qw(@ISA $VERSION);
-$VERSION = '6.42';
+
+our $VERSION = '6.43_01';
 
 require ExtUtils::Liblist;
 require ExtUtils::MakeMaker;
-
-@ISA = qw(ExtUtils::Liblist ExtUtils::MakeMaker);
+our @ISA = qw(ExtUtils::Liblist ExtUtils::MakeMaker);
 
 =head1 NAME
 
@@ -38,8 +37,7 @@ away.
 {
     # Convenient alias.
     package MM;
-    use vars qw(@ISA);
-    @ISA = qw(ExtUtils::MM);
+    our @ISA = qw(ExtUtils::MM);
     sub DESTROY {}
 }
 
@@ -69,6 +67,7 @@ if( $Is{NW5} ) {
 $Is{VOS}    = $^O eq 'vos';
 $Is{QNX}    = $^O eq 'qnx';
 $Is{AIX}    = $^O eq 'aix';
+$Is{Darwin} = $^O eq 'darwin';
 
 $Is{Unix}   = !grep { $_ } values %Is;
 
@@ -78,7 +77,7 @@ my($OS) = keys %Is;
 
 
 my $class = "ExtUtils::MM_$OS";
-eval "require $class" unless $INC{"ExtUtils/MM_$OS.pm"};
+eval "require $class" unless $INC{"ExtUtils/MM_$OS.pm"}; ## no critic
 die $@ if $@;
 unshift @ISA, $class;
 

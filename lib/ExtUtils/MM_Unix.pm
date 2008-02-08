@@ -1,6 +1,6 @@
 package ExtUtils::MM_Unix;
 
-require 5.005_03;  # Maybe further back, dunno
+require 5.006;
 
 use strict;
 
@@ -9,40 +9,37 @@ use ExtUtils::MakeMaker::Config;
 use File::Basename qw(basename dirname);
 use DirHandle;
 
-use vars qw($VERSION @ISA
-            $Is_OS2 $Is_VMS $Is_Win32 $Is_Dos
-            $Is_OSF $Is_IRIX  $Is_NetBSD $Is_BSD
-            $Is_SunOS4 $Is_Solaris $Is_SunOS $Is_Interix
-            %Config_Override
-           );
+our %Config_Override;
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '6.42_03';
-$VERSION = eval $VERSION;
+# If we make $VERSION an our variable parse_version() breaks
+use vars qw($VERSION);
+$VERSION = '6.43_01';
 
 require ExtUtils::MM_Any;
-@ISA = qw(ExtUtils::MM_Any);
+our @ISA = qw(ExtUtils::MM_Any);
 
+my %Is;
 BEGIN { 
-    $Is_OS2     = $^O eq 'os2';
-    $Is_Win32   = $^O eq 'MSWin32' || $Config{osname} eq 'NetWare';
-    $Is_Dos     = $^O eq 'dos';
-    $Is_VMS     = $^O eq 'VMS';
-    $Is_OSF     = $^O eq 'dec_osf';
-    $Is_IRIX    = $^O eq 'irix';
-    $Is_NetBSD  = $^O eq 'netbsd';
-    $Is_Interix = $^O eq 'interix';
-    $Is_SunOS4  = $^O eq 'sunos';
-    $Is_Solaris = $^O eq 'solaris';
-    $Is_SunOS   = $Is_SunOS4 || $Is_Solaris;
-    $Is_BSD     = ($^O =~ /^(?:free|net|open)bsd$/ or
+    $Is{OS2}     = $^O eq 'os2';
+    $Is{Win32}   = $^O eq 'MSWin32' || $Config{osname} eq 'NetWare';
+    $Is{Dos}     = $^O eq 'dos';
+    $Is{VMS}     = $^O eq 'VMS';
+    $Is{OSF}     = $^O eq 'dec_osf';
+    $Is{IRIX}    = $^O eq 'irix';
+    $Is{NetBSD}  = $^O eq 'netbsd';
+    $Is{Interix} = $^O eq 'interix';
+    $Is{SunOS4}  = $^O eq 'sunos';
+    $Is{Solaris} = $^O eq 'solaris';
+    $Is{SunOS}   = $Is{SunOS4} || $Is{Solaris};
+    $Is{BSD}     = ($^O =~ /^(?:free|net|open)bsd$/ or
                    grep( $^O eq $_, qw(bsdos interix dragonfly) )
                   );
 }
 
 BEGIN {
-    if( $Is_VMS ) {
+    if( $Is{VMS} ) {
         # For things like vmsify()
         require VMS::Filespec;
         VMS::Filespec->import;
@@ -164,7 +161,7 @@ sub c_o {
     push @m, qq{
 .C\$(OBJ_EXT):
 	$command \$*.C
-} if !$Is_OS2 and !$Is_Win32 and !$Is_Dos; #Case-specific
+} if !$Is{OS2} and !$Is{Win32} and !$Is{Dos}; #Case-specific
 
     return join "", @m;
 }
@@ -232,8 +229,7 @@ sub cflags {
 	  echo perltype=\$perltype
 	  echo optdebug=\$optdebug
 	  `;
-	my($line);
-	foreach $line (@o){
+	foreach my $line (@o){
 	    chomp $line;
 	    if ($line =~ /(.*?)=\s*(.*)\s*$/){
 		$cflags{$1} = $2;
@@ -309,16 +305,19 @@ sub const_config {
 # --- Constants Sections ---
 
     my($self) = shift;
-    my(@m,$m);
-    push(@m,"\n# These definitions are from config.sh (via $INC{'Config.pm'})\n");
-    push(@m,"\n# They may have been overridden via Makefile.PL or on the command line\n");
+    my @m = <<"END";
+
+# These definitions are from config.sh (via $INC{'Config.pm'}).
+# They may have been overridden via Makefile.PL or on the command line.
+END
+
     my(%once_only);
-    foreach $m (@{$self->{CONFIG}}){
-	# SITE*EXP macros are defined in &constants; avoid duplicates here
-	next if $once_only{$m};
-	$self->{uc $m} = quote_paren($self->{uc $m});
-	push @m, uc($m) , ' = ' , $self->{uc $m}, "\n";
-	$once_only{$m} = 1;
+    foreach my $key (@{$self->{CONFIG}}){
+        # SITE*EXP macros are defined in &constants; avoid duplicates here
+        next if $once_only{$key};
+        $self->{uc $key} = quote_paren($self->{uc $key});
+        push @m, uc($key) , ' = ' , $self->{uc $key}, "\n";
+        $once_only{$key} = 1;
     }
     join('', @m);
 }
@@ -339,19 +338,18 @@ sub const_loadlibs {
 # See ExtUtils::Liblist for details
 #
 };
-    my($tmp);
-    for $tmp (qw/
-	 EXTRALIBS LDLOADLIBS BSLOADLIBS
-	 /) {
-	next unless defined $self->{$tmp};
-	push @m, "$tmp = $self->{$tmp}\n";
+    for my $tmp (qw/
+         EXTRALIBS LDLOADLIBS BSLOADLIBS
+         /) {
+        next unless defined $self->{$tmp};
+        push @m, "$tmp = $self->{$tmp}\n";
     }
     # don't set LD_RUN_PATH if empty
-    for $tmp (qw/
-	 LD_RUN_PATH
-	 /) {
-	next unless $self->{$tmp};
-	push @m, "$tmp = $self->{$tmp}\n";
+    for my $tmp (qw/
+         LD_RUN_PATH
+         /) {
+        next unless $self->{$tmp};
+        push @m, "$tmp = $self->{$tmp}\n";
     }
     return join "", @m;
 }
@@ -859,7 +857,7 @@ sub dynamic_bs {
 BOOTSTRAP =
 ' unless $self->has_link_code();
 
-    my $target = $Is_VMS ? '$(MMS$TARGET)' : '$@';
+    my $target = $Is{VMS} ? '$(MMS$TARGET)' : '$@';
 
     return sprintf <<'MAKE_FRAG', ($target) x 5;
 BOOTSTRAP = $(BASEEXT).bs
@@ -898,10 +896,10 @@ sub dynamic_lib {
     my($inst_dynamic_dep) = $attribs{INST_DYNAMIC_DEP} || "";
     my($armaybe) = $attribs{ARMAYBE} || $self->{ARMAYBE} || ":";
     my($ldfrom) = '$(LDFROM)';
-    $armaybe = 'ar' if ($Is_OSF and $armaybe eq ':');
+    $armaybe = 'ar' if ($Is{OSF} and $armaybe eq ':');
     my(@m);
-    my $ld_opt = $Is_OS2 ? '$(OPTIMIZE) ' : '';	# Useful on other systems too?
-    my $ld_fix = $Is_OS2 ? '|| ( $(RM_F) $@ && sh -c false )' : '';
+    my $ld_opt = $Is{OS2} ? '$(OPTIMIZE) ' : '';	# Useful on other systems too?
+    my $ld_fix = $Is{OS2} ? '|| ( $(RM_F) $@ && sh -c false )' : '';
     push(@m,'
 # This section creates the dynamically loadable $(INST_DYNAMIC)
 # from $(OBJECT) and possibly $(MYEXTLIB).
@@ -917,10 +915,10 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)$(DFSEP).
 	push(@m,'	$(ARMAYBE) cr '.$ldfrom.' $(OBJECT)'."\n");
 	push(@m,'	$(RANLIB) '."$ldfrom\n");
     }
-    $ldfrom = "-all $ldfrom -none" if $Is_OSF;
+    $ldfrom = "-all $ldfrom -none" if $Is{OSF};
 
     # The IRIX linker doesn't use LD_RUN_PATH
-    my $ldrun = $Is_IRIX && $self->{LD_RUN_PATH} ?         
+    my $ldrun = $Is{IRIX} && $self->{LD_RUN_PATH} ?         
                        qq{-rpath "$self->{LD_RUN_PATH}"} : '';
 
     # For example in AIX the shared objects/libraries from previous builds
@@ -933,7 +931,7 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)$(DFSEP).
 
     my $libs = '$(LDLOADLIBS)';
 
-    if (($Is_NetBSD || $Is_Interix) && $Config{'useshrplib'} eq 'true') {
+    if (($Is{NetBSD} || $Is{Interix}) && $Config{'useshrplib'} eq 'true') {
 	# Use nothing on static perl platforms, and to the flags needed
 	# to link against the shared libperl library on shared perl
 	# platforms.  We peek at lddlflags to see if we need -Wl,-R
@@ -995,7 +993,7 @@ Finds the executables PERL and FULLPERL
 
 sub find_perl {
     my($self, $ver, $names, $dirs, $trace) = @_;
-    my($name, $dir);
+
     if ($trace >= 2){
         print "Looking for perl $ver by these names:
 @$names
@@ -1006,8 +1004,10 @@ in these dirs:
 
     my $stderr_duped = 0;
     local *STDERR_COPY;
-    unless ($Is_BSD) {
-        if( open(STDERR_COPY, '>&STDERR') ) {
+
+    unless ($Is{BSD}) {
+        # >& and lexical filehandles together give 5.6.2 indigestion
+        if( open(STDERR_COPY, '>&STDERR') ) {  ## no critic
             $stderr_duped = 1;
         }
         else {
@@ -1018,8 +1018,8 @@ WARNING
         }
     }
 
-    foreach $name (@$names){
-        foreach $dir (@$dirs){
+    foreach my $name (@$names){
+        foreach my $dir (@$dirs){
             next unless defined $dir; # $self->{PERL_SRC} may be undefined
             my ($abs, $val);
             if ($self->file_name_is_absolute($name)) {     # /foo/bar
@@ -1044,12 +1044,15 @@ WARNING
             # ( http://www.freebsd.org/cgi/query-pr.cgi?pr=51535 )
             # we cannot use the fancier more portable way in here
             # but instead need to use the traditional 2>&1 construct.
-            if ($Is_BSD) {
+            if ($Is{BSD}) {
                 $val = `$version_check 2>&1`;
             } else {
                 close STDERR if $stderr_duped;
                 $val = `$version_check`;
-                open STDERR, '>&STDERR_COPY' if $stderr_duped;
+
+                # 5.6.2's 3-arg open doesn't work with >&
+                open STDERR, ">&STDERR_COPY"  ## no critic
+                        if $stderr_duped;
             }
 
             if ($val =~ /^VER_OK/m) {
@@ -1081,11 +1084,9 @@ sub fixin {    # stolen from the pink Camel book, more or less
         my $file_new = "$file.new";
         my $file_bak = "$file.bak";
 
-        local (*FIXIN);
-        local (*FIXOUT);
-        open( FIXIN, $file ) or croak "Can't process '$file': $!";
+        open( my $fixin, '<', $file ) or croak "Can't process '$file': $!";
         local $/ = "\n";
-        chomp( my $line = <FIXIN> );
+        chomp( my $line = <$fixin> );
         next unless $line =~ s/^\s*\#!\s*//;    # Not a shbang file.
         # Now figure out the interpreter name.
         my ( $cmd, $arg ) = split ' ', $line, 2;
@@ -1106,8 +1107,8 @@ sub fixin {    # stolen from the pink Camel book, more or less
             my (@absdirs)
                 = reverse grep { $self->file_name_is_absolute } $self->path;
             $interpreter = '';
-            my ($dir);
-            foreach $dir (@absdirs) {
+
+            foreach my $dir (@absdirs) {
                 if ( $self->maybe_command($cmd) ) {
                     warn "Ignoring $interpreter in $file\n"
                         if $Verbose && $interpreter;
@@ -1132,7 +1133,7 @@ sub fixin {    # stolen from the pink Camel book, more or less
             $shb .= qq{
 eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
     if 0; # not running under some shell
-} unless $Is_Win32;    # this won't work on win32, so don't
+} unless $Is{Win32};    # this won't work on win32, so don't
         }
         else {
             warn "Can't find $cmd in PATH, $file unchanged"
@@ -1140,17 +1141,17 @@ eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
             next;
         }
 
-        unless ( open( FIXOUT, ">$file_new" ) ) {
+        open( my $fixout, ">", "$file_new" ) or do {
             warn "Can't create new $file: $!\n";
             next;
-        }
+        };
 
         # Print out the new #! line (or equivalent).
         local $\;
         local $/;
-        print FIXOUT $shb, <FIXIN>;
-        close FIXIN;
-        close FIXOUT;
+        print $fixout $shb, <$fixin>;
+        close $fixin;
+        close $fixout;
 
         chmod 0666, $file_bak;
         unlink $file_bak;
@@ -1169,7 +1170,6 @@ eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
         unlink $file_bak;
     }
     continue {
-        close(FIXIN) if fileno(FIXIN);
         system("$Config{'eunicefix'} $file") if $Config{'eunicefix'} ne ':';
     }
 }
@@ -1179,7 +1179,7 @@ sub _rename {
     my($old, $new) = @_;
 
     foreach my $file ($old, $new) {
-        if( $Is_VMS and basename($file) !~ /\./ ) {
+        if( $Is{VMS} and basename($file) !~ /\./ ) {
             # rename() in 5.8.0 on VMS will not rename a file if it
             # does not contain a dot yet it returns success.
             $file = "$file.";
@@ -1255,17 +1255,17 @@ Called by init_main.
 
 sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
     my($self) = @_;
-    my($name, %dir, %xs, %c, %h, %pl_files, %pm);
+    my(%dir, %xs, %c, %h, %pl_files, %pm);
 
     my %ignore = map {( $_ => 1 )} qw(Makefile.PL Build.PL test.pl t);
 
     # ignore the distdir
-    $Is_VMS ? $ignore{"$self->{DISTVNAME}.dir"} = 1
+    $Is{VMS} ? $ignore{"$self->{DISTVNAME}.dir"} = 1
             : $ignore{$self->{DISTVNAME}} = 1;
 
-    @ignore{map lc, keys %ignore} = values %ignore if $Is_VMS;
+    @ignore{map lc, keys %ignore} = values %ignore if $Is{VMS};
 
-    foreach $name ($self->lsdir($Curdir)){
+    foreach my $name ($self->lsdir($Curdir)){
 	next if $name =~ /\#/;
 	next if $name eq $Curdir or $name eq $Updir or $ignore{$name};
 	next unless $self->libscan($name);
@@ -1284,10 +1284,10 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 	    $h{$name} = 1;
 	} elsif ($name =~ /\.PL\z/) {
 	    ($pl_files{$name} = $name) =~ s/\.PL\z// ;
-	} elsif (($Is_VMS || $Is_Dos) && $name =~ /[._]pl$/i) {
+	} elsif (($Is{VMS} || $Is{Dos}) && $name =~ /[._]pl$/i) {
 	    # case-insensitive filesystem, one dot per name, so foo.h.PL
 	    # under Unix appears as foo.h_pl under VMS or fooh.pl on Dos
-	    local($/); open(PL,$name); my $txt = <PL>; close PL;
+	    local($/); open(my $pl, '<', $name); my $txt = <$pl>; close $pl;
 	    if ($txt =~ /Extracting \S+ \(with variable substitutions/) {
 		($pl_files{$name} = $name) =~ s/[._]pl\z//i ;
 	    }
@@ -1339,19 +1339,18 @@ sub init_MANPODS {
 sub _has_pod {
     my($self, $file) = @_;
 
-    local *FH;
     my($ispod)=0;
-    if (open(FH,"<$file")) {
-	while (<FH>) {
-	    if (/^=(?:head\d+|item|pod)\b/) {
-		$ispod=1;
-		last;
-	    }
-	}
-	close FH;
+    if (open( my $fh, '<', $file )) {
+        while (<$fh>) {
+            if (/^=(?:head\d+|item|pod)\b/) {
+                $ispod=1;
+                last;
+            }
+        }
+        close $fh;
     } else {
-	# If it doesn't exist yet, we assume, it has pods in it
-	$ispod = 1;
+        # If it doesn't exist yet, we assume, it has pods in it
+        $ispod = 1;
     }
 
     return $ispod;
@@ -1462,7 +1461,7 @@ sub init_PM {
     # that's important for nested modules.
 
     unless( $self->{PMLIBDIRS} ) {
-        if( $Is_VMS ) {
+        if( $Is{VMS} ) {
             # Avoid logical name vs directory collisions
             $self->{PMLIBDIRS} = ['./lib', "./$self->{BASEEXT}"];
         }
@@ -1597,7 +1596,7 @@ sub init_main {
 
             if (-f $self->catfile($dir,"config_h.SH")   &&
                 -f $self->catfile($dir,"perl.h")        &&
-                -f $self->catfile($dir,"lib","Exporter.pm")
+                -f $self->catfile($dir,"lib","strict.pm")
             ) {
                 $self->{PERL_SRC}=$dir ;
                 last;
@@ -1616,11 +1615,11 @@ sub init_main {
               $self->catdir("$self->{PERL_SRC}","xlib",$Cross::platform);
             $self->{PERL_INC}     = 
               $self->catdir("$self->{PERL_SRC}","xlib",$Cross::platform, 
-                                 $Is_Win32?("CORE"):());
+                                 $Is{Win32}?("CORE"):());
         }
         else {
             $self->{PERL_ARCHLIB} = $self->{PERL_LIB};
-            $self->{PERL_INC}     = ($Is_Win32) ? 
+            $self->{PERL_INC}     = ($Is{Win32}) ? 
               $self->catdir($self->{PERL_LIB},"CORE") : $self->{PERL_SRC};
         }
 
@@ -1628,11 +1627,11 @@ sub init_main {
 	unless (
 		-s $self->catfile($self->{PERL_SRC},'cflags')
 		or
-		$Is_VMS
+		$Is{VMS}
 		&&
 		-s $self->catfile($self->{PERL_SRC},'perlshr_attr.opt')
 		or
-		$Is_Win32
+		$Is{Win32}
 	       ){
 	    warn qq{
 You cannot build extensions below the perl source tree after executing
@@ -1667,7 +1666,7 @@ from the perl source tree.
 	    if ($lib) {
               # Win32 puts its header files in /perl/src/lib/CORE.
               # Unix leaves them in /perl/src.
-	      my $inc = $Is_Win32 ? $self->catdir($lib, "CORE" )
+	      my $inc = $Is{Win32} ? $self->catdir($lib, "CORE" )
                                   : dirname $lib;
 	      if (-e $self->catdir($inc, "perl.h")) {
 		$self->{PERL_LIB}	   = $lib;
@@ -1694,17 +1693,17 @@ EOP
 
     # Get some stuff out of %Config if we haven't yet done so
     print STDOUT "CONFIG must be an array ref\n"
-	if ($self->{CONFIG} and ref $self->{CONFIG} ne 'ARRAY');
+        if ($self->{CONFIG} and ref $self->{CONFIG} ne 'ARRAY');
     $self->{CONFIG} = [] unless (ref $self->{CONFIG});
     push(@{$self->{CONFIG}}, @ExtUtils::MakeMaker::Get_from_Config);
     push(@{$self->{CONFIG}}, 'shellflags') if $Config{shellflags};
     my(%once_only);
     foreach my $m (@{$self->{CONFIG}}){
-	next if $once_only{$m};
-	print STDOUT "CONFIG key '$m' does not exist in Config.pm\n"
-		unless exists $Config{$m};
-	$self->{uc $m} ||= $Config{$m};
-	$once_only{$m} = 1;
+        next if $once_only{$m};
+        print STDOUT "CONFIG key '$m' does not exist in Config.pm\n"
+                unless exists $Config{$m};
+        $self->{uc $m} ||= $Config{$m};
+        $once_only{$m} = 1;
     }
 
 # This is too dangerous:
@@ -1724,11 +1723,11 @@ EOP
 
     $self->{LIBPERL_A} ||= "libperl$self->{LIB_EXT}";
 
-    # make a simple check if we find Exporter
+    # make a simple check if we find strict
     warn "Warning: PERL_LIB ($self->{PERL_LIB}) seems not to be a perl library directory
-        (Exporter.pm not found)"
-	unless -f $self->catfile("$self->{PERL_LIB}","Exporter.pm") ||
-        $self->{NAME} eq "ExtUtils::MakeMaker";
+        (strict.pm not found)"
+        unless -f $self->catfile("$self->{PERL_LIB}","strict.pm") ||
+               $self->{NAME} eq "ExtUtils::MakeMaker";
 }
 
 =item init_others
@@ -1754,8 +1753,8 @@ sub init_others {	# --- Initialize Other Attributes
 
     $self->{LIBS} = [''] unless @{$self->{LIBS}} && defined $self->{LIBS}[0];
     $self->{LD_RUN_PATH} = "";
-    my($libs);
-    foreach $libs ( @{$self->{LIBS}} ){
+
+    foreach my $libs ( @{$self->{LIBS}} ){
 	$libs =~ s/^\s*(.*\S)\s*$/$1/; # remove leading and trailing whitespace
 	my(@libs) = $self->extliblist($libs);
 	if ($libs[0] or $libs[1] or $libs[2]){
@@ -1932,7 +1931,7 @@ sub init_PERL {
     my $thisperl = $self->canonpath($^X);
     $thisperl .= $Config{exe_ext} unless 
                 # VMS might have a file version # at the end
-      $Is_VMS ? $thisperl =~ m/$Config{exe_ext}(;\d+)?$/i
+      $Is{VMS} ? $thisperl =~ m/$Config{exe_ext}(;\d+)?$/i
               : $thisperl =~ m/$Config{exe_ext}$/i;
 
     # We need a relative path to perl when in the core.
@@ -1959,7 +1958,7 @@ sub init_PERL {
 
     # When built for debugging, VMS doesn't create perl.exe but ndbgperl.exe.
     my $perl_name = 'perl';
-    $perl_name = 'ndbgperl' if $Is_VMS && 
+    $perl_name = 'ndbgperl' if $Is{VMS} && 
       defined $Config{usevmsdebug} && $Config{usevmsdebug} eq 'define';
 
     # XXX This logic is flawed.  If "miniperl" is anywhere in the path
@@ -1979,9 +1978,6 @@ sub init_PERL {
         $self->{ABSPERL} = $self->rel2abs($self->{ABSPERL});
         $self->{ABSPERL} = 'MCR '.$self->{ABSPERL} if $has_mcr;
     }
-
-    $self->{ABSPERL} = qq{"$self->{ABSPERL}"}
-        if ($self->{ABSPERL} =~ /\s/) && ! $has_mcr;
 
     # Are we building the core?
     $self->{PERL_CORE} = $ENV{PERL_CORE} unless exists $self->{PERL_CORE};
@@ -2219,7 +2215,7 @@ sub installbin {
     my @exefiles = @{$self->{EXE_FILES}};
     return "" unless @exefiles;
 
-    @exefiles = map vmsify($_), @exefiles if $Is_VMS;
+    @exefiles = map vmsify($_), @exefiles if $Is{VMS};
 
     my %fromto;
     for my $from (@exefiles) {
@@ -2229,7 +2225,7 @@ sub installbin {
 	my $to = $self->libscan($path);
 	print "libscan($from) => '$to'\n" if ($Verbose >=2);
 
-        $to = vmsify($to) if $Is_VMS;
+        $to = vmsify($to) if $Is{VMS};
 	$fromto{$from} = $to;
     }
     my @to   = values %fromto;
@@ -2403,16 +2399,14 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE) pm_to_blib
 
 	if( exists $self->{INCLUDE_EXT} ){
 		my $found = 0;
-		my $incl;
-		my $xx;
 
-		($xx = $File::Find::name) =~ s,.*?/auto/,,s;
+		(my $xx = $File::Find::name) =~ s,.*?/auto/,,s;
 		$xx =~ s,/?$_,,;
 		$xx =~ s,/,::,g;
 
 		# Throw away anything not explicitly marked for inclusion.
 		# DynaLoader is implied.
-		foreach $incl ((@{$self->{INCLUDE_EXT}},'DynaLoader')){
+		foreach my $incl ((@{$self->{INCLUDE_EXT}},'DynaLoader')){
 			if( $xx eq $incl ){
 				$found++;
 				last;
@@ -2421,15 +2415,12 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE) pm_to_blib
 		return unless $found;
 	}
 	elsif( exists $self->{EXCLUDE_EXT} ){
-		my $excl;
-		my $xx;
-
-		($xx = $File::Find::name) =~ s,.*?/auto/,,s;
+		(my $xx = $File::Find::name) =~ s,.*?/auto/,,s;
 		$xx =~ s,/?$_,,;
 		$xx =~ s,/,::,g;
 
 		# Throw away anything explicitly marked for exclusion
-		foreach $excl (@{$self->{EXCLUDE_EXT}}){
+		foreach my $excl (@{$self->{EXCLUDE_EXT}}){
 			return if( $xx eq $excl );
 		}
 	}
@@ -2457,7 +2448,7 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE) pm_to_blib
 	push @$extra, $_;
     }
 
-    map(s/^(.*)/"-I$1"/, @{$perlinc || []});
+    grep(s/^(.*)/"-I$1"/, @{$perlinc || []});
 
     $target ||= "perl";
     $tmp    ||= ".";
@@ -2487,10 +2478,10 @@ MAP_PRELIBS   = $Config{perllibs} $Config{cryptlib}
 
         if (! -f $libperl and ! -f $lperl) {
           # We did not find a static libperl. Maybe there is a shared one?
-          if ($Is_SunOS) {
+          if ($Is{SunOS}) {
             $lperl  = $libperl = "$dir/$Config{libperl}";
             # SUNOS ld does not take the full path to a shared library
-            $libperl = '' if $Is_SunOS4;
+            $libperl = '' if $Is{SunOS4};
           }
         }
 
@@ -2514,8 +2505,7 @@ $(INST_ARCHAUTODIR)/extralibs.all : $(INST_ARCHAUTODIR)$(DFSEP).exists '.join(" 
 	$(NOECHO) $(TOUCH) $@
 ';
 
-    my $catfile;
-    foreach $catfile (@$extra){
+    foreach my $catfile (@$extra){
 	push @m, "\tcat $catfile >> \$\@\n";
     }
 
@@ -2587,7 +2577,7 @@ $(OBJECT) : $(FIRST_MAKEFILE)
 
 ' if $self->{OBJECT};
 
-    my $newer_than_target = $Is_VMS ? '$(MMS$SOURCE_LIST)' : '$?';
+    my $newer_than_target = $Is{VMS} ? '$(MMS$SOURCE_LIST)' : '$?';
     my $mpl_args = join " ", map qq["$_"], @ARGV;
 
     $m .= sprintf <<'MAKE_FRAG', $newer_than_target, $mpl_args;
@@ -2632,8 +2622,8 @@ also has_link_code())
 
 sub needs_linking {
     my($self) = shift;
-    my($child,$caller);
-    $caller = (caller(0))[3];
+
+    my $caller = (caller(0))[3];
     confess("needs_linking called too early") if 
       $caller =~ /^ExtUtils::MakeMaker::/;
     return $self->{NEEDS_LINKING} if defined $self->{NEEDS_LINKING};
@@ -2641,7 +2631,7 @@ sub needs_linking {
 	$self->{NEEDS_LINKING} = 1;
 	return 1;
     }
-    foreach $child (keys %{$self->{CHILDREN}}) {
+    foreach my $child (keys %{$self->{CHILDREN}}) {
 	if ($self->{CHILDREN}->{$child}->needs_linking) {
 	    $self->{NEEDS_LINKING} = 1;
 	    return 1;
@@ -2660,13 +2650,13 @@ parse a file and return what you think is the ABSTRACT
 sub parse_abstract {
     my($self,$parsefile) = @_;
     my $result;
-    local *FH;
+
     local $/ = "\n";
-    open(FH,$parsefile) or die "Could not open '$parsefile': $!";
+    open(my $fh, '<', $parsefile) or die "Could not open '$parsefile': $!";
     my $inpod = 0;
     my $package = $self->{DISTNAME};
     $package =~ s/-/::/g;
-    while (<FH>) {
+    while (<$fh>) {
         $inpod = /^=(?!cut)/ ? 1 : /^=cut/ ? 0 : $inpod;
         next if !$inpod;
         chop;
@@ -2674,7 +2664,8 @@ sub parse_abstract {
         $result = $2;
         last;
     }
-    close FH;
+    close $fh;
+
     return $result;
 }
 
@@ -2696,12 +2687,12 @@ parse_version() will try to C<use version> before checking for C<$VERSION> so th
 sub parse_version {
     my($self,$parsefile) = @_;
     my $result;
-    local *FH;
+
     local $/ = "\n";
     local $_;
-    open(FH,$parsefile) or die "Could not open '$parsefile': $!";
+    open(my $fh, '<', $parsefile) or die "Could not open '$parsefile': $!";
     my $inpod = 0;
-    while (<FH>) {
+    while (<$fh>) {
         $inpod = /^=(?!cut)/ ? 1 : /^=cut/ ? 0 : $inpod;
         next if $inpod || /^\s*#/;
         chop;
@@ -2722,14 +2713,15 @@ sub parse_version {
             \$$2=undef;
             do {
                 $_
-            }; \$$2
+            };
+            \$$2;
         };
         local $^W = 0;
-        $result = eval($eval);
+        $result = eval($eval);  ## no critic
         warn "Could not eval '$eval' in $parsefile: $@" if $@;
         last;
     }
-    close FH;
+    close $fh;
 
     $result = "undef" unless defined $result;
     return $result;
@@ -2745,13 +2737,13 @@ subdirectories.
 
 sub pasthru {
     my($self) = shift;
-    my(@m,$key);
+    my(@m);
 
     my(@pasthru);
-    my($sep) = $Is_VMS ? ',' : '';
+    my($sep) = $Is{VMS} ? ',' : '';
     $sep .= "\\\n\t";
 
-    foreach $key (qw(LIB LIBPERL_A LINKTYPE OPTIMIZE
+    foreach my $key (qw(LIB LIBPERL_A LINKTYPE OPTIMIZE
                      PREFIX INSTALL_BASE)
                  ) 
     {
@@ -2759,7 +2751,7 @@ sub pasthru {
 	push @pasthru, "$key=\"\$($key)\"";
     }
 
-    foreach $key (qw(DEFINE INC)) {
+    foreach my $key (qw(DEFINE INC)) {
         next unless defined $self->{$key};
 	push @pasthru, "PASTHRU_$key=\"\$(PASTHRU_$key)\"";
     }
@@ -3103,7 +3095,7 @@ sub processPL {
 		     : [$pl_files->{$plfile}];
 
 	foreach my $target (@$list) {
-            if( $Is_VMS ) {
+            if( $Is{VMS} ) {
                 $plfile = vmsify($self->eliminate_macros($plfile));
                 $target = vmsify($self->eliminate_macros($target));
             }
@@ -3392,11 +3384,11 @@ Defines targets to process subdirectories.
 sub subdirs {
 # --- Sub-directory Sections ---
     my($self) = shift;
-    my(@m,$dir);
+    my(@m);
     # This method provides a mechanism to automatically deal with
     # subdirectories containing further Makefile.PL scripts.
     # It calls the subdir_x() method for each subdirectory.
-    foreach $dir (@{$self->{DIR}}){
+    foreach my $dir (@{$self->{DIR}}){
 	push(@m, $self->subdir_x($dir));
 ####	print "Including $dir subdirectory\n";
     }
@@ -3572,23 +3564,22 @@ sub tool_xsubpp {
     my $tmdir   = File::Spec->catdir($self->{PERL_LIB},"ExtUtils");
     my(@tmdeps) = $self->catfile($tmdir,'typemap');
     if( $self->{TYPEMAPS} ){
-	my $typemap;
-	foreach $typemap (@{$self->{TYPEMAPS}}){
-		if( ! -f  $typemap ){
-			warn "Typemap $typemap not found.\n";
-		}
-		else{
-			push(@tmdeps,  $typemap);
-		}
-	}
+        foreach my $typemap (@{$self->{TYPEMAPS}}){
+            if( ! -f  $typemap ) {
+                warn "Typemap $typemap not found.\n";
+            }
+            else {
+                push(@tmdeps,  $typemap);
+            }
+        }
     }
     push(@tmdeps, "typemap") if -f "typemap";
     my(@tmargs) = map("-typemap $_", @tmdeps);
     if( exists $self->{XSOPT} ){
- 	unshift( @tmargs, $self->{XSOPT} );
+        unshift( @tmargs, $self->{XSOPT} );
     }
 
-    if ($Is_VMS                          &&
+    if ($Is{VMS}                          &&
         $Config{'ldflags'}               && 
         $Config{'ldflags'} =~ m!/Debug!i &&
         (!exists($self->{XSOPT}) || $self->{XSOPT} !~ /linenumbers/)
