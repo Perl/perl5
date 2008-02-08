@@ -3400,9 +3400,7 @@ PerlIOStdio_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 #ifdef STDIO_PTR_LVALUE
 	PerlSIO_set_ptr(stdio, ptr); /* LHS STDCHAR* cast non-portable */
 #ifdef STDIO_PTR_LVAL_SETS_CNT
-	if (PerlSIO_get_cnt(stdio) != (cnt)) {
-	    assert(PerlSIO_get_cnt(stdio) == (cnt));
-	}
+	assert(PerlSIO_get_cnt(stdio) == (cnt));
 #endif
 #if (!defined(STDIO_PTR_LVAL_NOCHANGE_CNT))
 	/*
