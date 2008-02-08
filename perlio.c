@@ -4102,10 +4102,8 @@ PerlIOBuf_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
     if (!b->buf)
 	PerlIO_get_base(f);
     b->ptr = ptr;
-    if (PerlIO_get_cnt(f) != cnt || b->ptr < b->buf) {
-	assert(PerlIO_get_cnt(f) == cnt);
-	assert(b->ptr >= b->buf);
-    }
+    assert(PerlIO_get_cnt(f) == cnt);
+    assert(b->ptr >= b->buf);
     PerlIOBase(f)->flags |= PERLIO_F_RDBUF;
 }
 
