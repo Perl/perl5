@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '6.43_01';
+$VERSION = '6.43_02';
 
 require ExtUtils::MM_Any;
 our @ISA = qw(ExtUtils::MM_Any);
@@ -1979,6 +1979,9 @@ sub init_PERL {
         $self->{ABSPERL} = 'MCR '.$self->{ABSPERL} if $has_mcr;
     }
 
+    $self->{ABSPERL} = qq{"$self->{ABSPERL}"}
+        if ($self->{ABSPERL} =~ /\s/) && ! $has_mcr;
+
     # Are we building the core?
     $self->{PERL_CORE} = $ENV{PERL_CORE} unless exists $self->{PERL_CORE};
     $self->{PERL_CORE} = 0               unless defined $self->{PERL_CORE};
@@ -2448,7 +2451,7 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE) pm_to_blib
 	push @$extra, $_;
     }
 
-    grep(s/^(.*)/"-I$1"/, @{$perlinc || []});
+    map(s/^(.*)/"-I$1"/, @{$perlinc || []});
 
     $target ||= "perl";
     $tmp    ||= ".";
