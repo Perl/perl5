@@ -9,11 +9,12 @@ package Math::Complex;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $Inf);
 
-$VERSION = 1.48;
+$VERSION = 1.49;
 
 BEGIN {
     # For 64-bit doubles, anyway.
     my $IEEE_DBL_MAX = eval "1.7976931348623157e+308";
+    my $BIGGER_THAN_THIS = 1e99;  # Must find something bigger than this.
     if ($^O eq 'unicosmk') {
 	$Inf = $IEEE_DBL_MAX;
     } else {
@@ -22,26 +23,26 @@ BEGIN {
 	for my $t (
 	    'exp(999)',
 	    '9**9**9',
-	    '1e999',
 	    'inf',
 	    'Inf',
 	    'INF',
 	    'infinity',
 	    'Infinity',
 	    'INFINITY',
+	    '1e999',
 	    ) {
 	    local $SIG{FPE} = { };
 	    local $^W = 0;
 	    my $i = eval "$t+1.0";
-	    if ($i =~ /inf/i && $i > 1e+99) {
+	    if (defined $i && $i > $BIGGER_THAN_THIS) {
 		$Inf = $i;
 		last;
 	    }
 	}
 	$Inf = $IEEE_DBL_MAX unless defined $Inf;  # Oh well, close enough.
-	die "Could not get Infinity" unless $Inf > 1e99;
+	die "Could not get Infinity" unless $Inf > $BIGGER_THAN_THIS;
     }
-    print "# On this machine, Inf = '$Inf'\n";
+    # print "# On this machine, Inf = '$Inf'\n";
 }
 
 use strict;
