@@ -265,7 +265,7 @@ use IO ();	# Load the XS module
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = "1.27";
+$VERSION = "1.27_01";
 $VERSION = eval $VERSION;
 
 @EXPORT_OK = qw(
@@ -412,6 +412,7 @@ sub printf {
 sub say {
     @_ or croak 'usage: $io->say(ARGS)';
     my $this = shift;
+    local $\ = "";
     print $this @_, "\n";
 }
 
