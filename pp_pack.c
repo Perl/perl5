@@ -3064,11 +3064,14 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		   any OS that needs it, or removed if and when VOS implements
 		   posix-976 (suggestion to support mapping to infinity).
 		   Paul.Green@stratus.com 02-04-02.  */
+{
+extern const float _float_constants[];
 		if (anv > FLT_MAX)
 		    afloat = _float_constants[0];   /* single prec. inf. */
 		else if (anv < -FLT_MAX)
 		    afloat = _float_constants[0];   /* single prec. inf. */
 		else afloat = (float) anv;
+}
 #else /* __VOS__ */
 # if defined(VMS) && !defined(__IEEE_FP)
 		/* IEEE fp overflow shenanigans are unavailable on VAX and optional
@@ -3100,11 +3103,14 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		   for any OS that needs it, or removed if and when VOS
 		   implements posix-976 (suggestion to support mapping to
 		   infinity).  Paul.Green@stratus.com 02-04-02.  */
+{
+extern const double _double_constants[];
 		if (anv > DBL_MAX)
 		    adouble = _double_constants[0];   /* double prec. inf. */
 		else if (anv < -DBL_MAX)
 		    adouble = _double_constants[0];   /* double prec. inf. */
 		else adouble = (double) anv;
+}
 #else /* __VOS__ */
 # if defined(VMS) && !defined(__IEEE_FP)
 		/* IEEE fp overflow shenanigans are unavailable on VAX and optional
