@@ -22,9 +22,14 @@ ftp://ftp.stratus.com/pub/vos/posix/ga/ga.html  Instructions for
 unbundling the Perl distribution file are at
 ftp://ftp.stratus.com/pub/vos/utility/utility.html
 
-If you are running VOS Release 14.4.1 or later, you can obtain a
-pre-compiled, supported copy of perl by purchasing Release 2.0.1
-(or later) of the VOS GNU C++ and GNU Tools product from Stratus
+If you own a Stratus VOS Continuum machine and are running VOS
+Release 14.4.1 or later, you can obtain a supported copy of perl
+by purchasing Release 2.0.1 (or later) of the VOS GNU C++ and
+GNU Tools product from Stratus Technologies.
+
+If you own a Stratus VOS V Series machine, you can obtain a
+supported copy of perl by purchasing any version of the VOS GNU
+C++ and GNU Tools product for the V Series from Stratus
 Technologies.
 
 =head2 Multiple methods to build perl for VOS
@@ -109,6 +114,23 @@ platform.
 You must build full perl with the compile_full_perl.cm command
 macro found in the vos subdirectory.
 
+=item 6
+
+If you have a Stratus V Series (IA32-based) platform, you must
+build "full perl", which contains the complete functionality of
+perl.  You must use the generally-available version of VOS POSIX
+support.  You must use the VOS GNU C compiler and the VOS GNU
+C/C++ and GNU Tools Release 3.1 (or later) product.  You must
+build full perl on VOS Release 15.0.0 (or later) on a V Series
+platform.  These procedures have been testing using VOS GNU
+C/C++ and GNU Tools Release 3.3 and VOS Release 15.3.0.
+
+You must build full perl with the compile_full_perl.cm command
+macro found in the vos subdirectory.
+
+The other, older methods of building perl or miniperl are no
+longer tested or supported on the V Series architecture.
+
 =back
 
 =head2 Stratus POSIX Support
@@ -153,10 +175,11 @@ standard Stratus products.
 =item 2
 
 Either the VOS OS TCP/IP or STCP product set.  If you are
-building with the alpha version of POSIX you need the OS
-TCP/IP product set.  If you are building with the
-generally-available version of POSIX you need the STCP
-product set.  These are standard Stratus products.
+building with the alpha version of POSIX you need the OS TCP/IP
+product set.  If you are building with the generally-available
+version of POSIX you need the STCP product set.  Note that the
+STCP product is bundled with VOS on the V Series architecture.
+These are standard Stratus products.
 
 =item 3
 
@@ -236,7 +259,8 @@ will configure, build, and test perl.
 =item 1
 
 If you have built perl using the Configure script, ensure that
-you have modify permission to C<< >system>ported >> and type
+you have modify and default write permission to C<<
+>system>ported >> and all subdirectories.  Then type
 
      gmake install
 
@@ -263,6 +287,7 @@ directories can be used to hold such files:
      >system>ported>lib>perl5>5.8.0>860
      >system>ported>lib>perl5>5.8.0>7100
      >system>ported>lib>perl5>5.8.0>8000
+     >system>ported>lib>perl5>5.8.0>i786
 
 =item 4
 
@@ -278,6 +303,7 @@ following directories:
      >system>ported>lib>perl5>site_perl>5.8.0>860
      >system>ported>lib>perl5>site_perl>5.8.0>7100
      >system>ported>lib>perl5>site_perl>5.8.0>8000
+     >system>ported>lib>perl5>site_perl>5.8.0>i786
 
 =item 5
 
@@ -327,24 +353,38 @@ other floating-point computations that underflow or overflow
 will probably result in SIGFPE.  Don't push your luck.
 
 As of VOS Release 14.7.0, the VOS POSIX runtime sets up the
-PA-RISC hardware floating-point status register so that the
-overflow and underflow exceptions do not trap, but instead
-automatically convert the result to infinity or zero, as
+PA-RISC and IA32 hardware floating-point status registers so
+that the overflow and underflow exceptions do not trap, but
+instead automatically convert the result to infinity or zero, as
 appropriate.  As of this writing, there are still floating-point
 operations that can trap, for example, subtracting two infinite
-values.  This is recorded as suggestion posix-1022, which is not
-yet fixed.
+values.  This is recorded as suggestion posix-1022, which has
+been fixed in VOS Release 15.2 and higher.
 
 =head1 TEST STATUS
 
-When Perl 5.8.3 is built using the native build process on VOS
-Release 14.7.0 and GNU C++/GNU Tools 2.0.2a, all but three
-attempted tests either pass or result in TODO (ignored)
-failures.  The tests that fail are:
+When Perl 5.8.9 is built using the native build process on VOS
+Release 15.3.0 and GNU C/C++ and GNU Tools 3.3.0, all but the
+following tests pass.  The tests that fail are:
 
-t/io/tell.t, test 28
-t/op/pack.t, test 39
-lib/Net/ing/t/450_service.t, test 8
+t/io/fs.t, test 191                    (hits bug posix-1524)
+t/io/tell.t, test 28                   (assumes file at EOF when opened)
+t/op/kill0.t, test 2                   (hits bug posix-1535)
+t/op/magic.t, test 26                  (makes assumptions about path of executable)
+t/op/sprintf.t, test 208               (hits bug posix-1536)
+ext/B/t/concise.t, test 155            (no dynamic loading)
+ext/DynaLoader/t/DynaLoader.t, test 4  (no dynamic loading)
+ext/DynaLoader/t/XSLoader.t, test 5    (no dynamic loading)
+ext/IO/t/io_pipe.t, test 9 & 10        (SIGPIPE is signalled twice)
+ext/POSIX/t/time.t, test 5             (ctime and strftime differ)
+ext/Socket/t/socketpair.t, line 38     (test hangs, no AF_UNIX sockets)
+lib/ExtUtils/t/prompt.t                (unknown)
+lib/File/Compare.t, test 13            (unknown)
+lib/Net/Ping/t/450_service.t, test 8   (unknown)
+lib/Net/Ping/t/510_ping_udp.t, line 383 (unknown)
+lib/Time/Local.t, test 97              (test goes outside VOS Epoch)
+t/Module_Pluggable/20dodgy_files.t, test 3  (file name starts with
+                                        with "-"; not ok on VOS)
 
 =head1 SUPPORT STATUS
 
@@ -354,7 +394,7 @@ excellent books available on the Perl language; consult a book
 seller.
 
 If you want a supported version of perl for VOS, purchase the
-VOS GNU C++ and GNU Tools Release 2.0.1 (or later) product from
+VOS GNU C/C++ and GNU Tools Release 2.0.1 (or later) product from
 Stratus Technologies, along with a support contract (or from
 anyone else who will sell you support).
 
@@ -364,6 +404,6 @@ Paul Green (Paul.Green@stratus.com)
 
 =head1 LAST UPDATE
 
-January 15, 2004
+February 7, 2008
 
 =cut
