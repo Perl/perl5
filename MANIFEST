@@ -1784,6 +1784,7 @@ lib/ExtUtils/MM_AIX.pm		MakeMaker methods for AIX
 lib/ExtUtils/MM_Any.pm		MakeMaker methods for Any OS
 lib/ExtUtils/MM_BeOS.pm		MakeMaker methods for BeOS
 lib/ExtUtils/MM_Cygwin.pm	MakeMaker methods for Cygwin
+lib/ExtUtils/MM_Darwin.pm	MakeMaker methods for Darwin
 lib/ExtUtils/MM_DOS.pm		MakeMaker methods for DOS
 lib/ExtUtils/MM_MacOS.pm	MakeMaker methods for MacOS
 lib/ExtUtils/MM_NW5.pm		MakeMaker methods for NetWare
