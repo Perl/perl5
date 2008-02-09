@@ -273,8 +273,6 @@ Perl_pp_sysopen
 Perl_pp_sysseek
 Perl_pp_sysread
 Perl_pp_syswrite
-Perl_pp_send
-Perl_pp_recv
 Perl_pp_eof
 Perl_pp_tell
 Perl_pp_seek
@@ -282,6 +280,8 @@ Perl_pp_truncate
 Perl_pp_fcntl
 Perl_pp_ioctl
 Perl_pp_flock
+Perl_pp_send
+Perl_pp_recv
 Perl_pp_socket
 Perl_pp_sockpair
 Perl_pp_bind

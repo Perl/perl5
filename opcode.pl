@@ -17,7 +17,7 @@ select OC;
 # Read data.
 
 my %seen;
-my (@ops, %desc, %check, %ckname, %flags, %args);
+my (@ops, %desc, %check, %ckname, %flags, %args, %opnum);
 
 while (<DATA>) {
     chop;
@@ -32,6 +32,7 @@ while (<DATA>) {
     $seen{$key} = qq[opcode "$key"];
 
     push(@ops, $key);
+    $opnum{$key} = $#ops;
     $desc{$key} = $desc;
     $check{$key} = $check;
     $ckname{$check}++;
@@ -149,7 +150,8 @@ END
 
 my $i = 0;
 for (@ops) {
-    print ON "\t", &tab(3,"OP_\U$_,"), "/* ", $i++, " */\n";
+    # print ON "\t", &tab(3,"OP_\U$_,"), "/* ", $i++, " */\n";
+      print ON "\t", &tab(3,"OP_\U$_"), " = ", $i++, ",\n";
 }
 print ON "\t", &tab(3,"OP_max"), "\n";
 print ON "} opcode;\n";
@@ -361,8 +363,9 @@ for my $op (@ops) {
     my $argshift = $OASHIFT;
     for my $arg (split(' ',$args{$op})) {
 	if ($arg =~ /^F/) {
-           $OP_IS_SOCKET{$op}   = 1 if $arg =~ s/s//;
-           $OP_IS_FILETEST{$op} = 1 if $arg =~ s/-//;
+	    # record opnums of these opnames
+	    $OP_IS_SOCKET{$op}   = $opnum{$op} if $arg =~ s/s//;
+	    $OP_IS_FILETEST{$op} = $opnum{$op} if $arg =~ s/-//;
         }
 	my $argnum = ($arg =~ s/\?//) ? 8 : 0;
         die "op = $op, arg = $arg\n"
@@ -388,18 +391,46 @@ END_EXTERN_C
 
 END
 
-if (keys %OP_IS_SOCKET) {
-    print ON "\n#define OP_IS_SOCKET(op)	\\\n\t(";
-    print ON join(" || \\\n\t ",
-               map { "(op) == OP_" . uc() } sort keys %OP_IS_SOCKET);
-    print ON ")\n\n";
-}
+# Emit OP_IS_* macros
 
-if (keys %OP_IS_FILETEST) {
-    print ON "\n#define OP_IS_FILETEST(op)	\\\n\t(";
-    print ON join(" || \\\n\t ",
-               map { "(op) == OP_" . uc() } sort keys %OP_IS_FILETEST);
-    print ON ")\n\n";
+print ON <<EO_OP_IS_COMMENT;
+
+/* the OP_IS_(SOCKET|FILETEST) macros are optimized to a simple range
+    check because all the member OPs are contiguous in opcode.pl
+    <DATA> table.  opcode.pl verifies the range contiguity.  */
+
+EO_OP_IS_COMMENT
+
+gen_op_is_macro( \%OP_IS_SOCKET, 'OP_IS_SOCKET');
+gen_op_is_macro( \%OP_IS_FILETEST, 'OP_IS_FILETEST');
+
+sub gen_op_is_macro {
+    my ($op_is, $macname) = @_;
+    if (keys %$op_is) {
+	
+	# get opnames whose numbers are lowest and highest
+	my ($first, @rest) = sort {
+	    $op_is->{$a} <=> $op_is->{$b}
+	} keys %$op_is;
+	
+	my $last = pop @rest;	# @rest slurped, get its last
+	
+	# verify that op-ct matches 1st..last range (and fencepost)
+	# (we know there are no dups)
+	if ( $op_is->{$last} - $op_is->{$first} == scalar @rest + 1) {
+	    
+	    # contiguous ops -> optimized version
+	    print ON "#define $macname(op)	\\\n\t(";
+	    print ON "(op) >= OP_" . uc($first) . " && (op) <= OP_" . uc($last);
+	    print ON ")\n\n";
+	}
+	else {
+	    print ON "\n#define $macname(op)	\\\n\t(";
+	    print ON join(" || \\\n\t ",
+			  map { "(op) == OP_" . uc() } sort keys %OP_IS_SOCKET);
+	    print ON ")\n\n";
+	}
+    }
 }
 
 print OC "/* ex: set ro: */\n";
@@ -883,9 +914,6 @@ sysseek		sysseek			ck_fun		s@	F S S
 sysread		sysread			ck_fun		imst@	F R S S?
 syswrite	syswrite		ck_fun		imst@	F S S? S?
 
-send		send			ck_fun		imst@	Fs S S S?
-recv		recv			ck_fun		imst@	Fs R S S
-
 eof		eof			ck_eof		is%	F?
 tell		tell			ck_fun		st%	F?
 seek		seek			ck_fun		s@	F S S
@@ -896,7 +924,10 @@ fcntl		fcntl			ck_fun		st@	F S S
 ioctl		ioctl			ck_fun		st@	F S S
 flock		flock			ck_fun		isT@	F S
 
-# Sockets.
+# Sockets.  OP_IS_SOCKET wants them consecutive (so moved 1st 2)
+
+send		send			ck_fun		imst@	Fs S S S?
+recv		recv			ck_fun		imst@	Fs R S S
 
 socket		socket			ck_fun		is@	Fs S S S
 sockpair	socketpair		ck_fun		is@	Fs Fs S S S
@@ -913,7 +944,7 @@ ssockopt	setsockopt		ck_fun		is@	Fs S S S
 getsockname	getsockname		ck_fun		is%	Fs
 getpeername	getpeername		ck_fun		is%	Fs
 
-# Stat calls.
+# Stat calls.  OP_IS_FILETEST wants them consecutive.
 
 lstat		lstat			ck_ftst		u-	F
 stat		stat			ck_ftst		u-	F
