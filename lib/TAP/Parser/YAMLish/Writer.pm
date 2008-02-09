@@ -4,9 +4,10 @@ use strict;
 
 use vars qw{$VERSION};
 
-$VERSION = '3.07';
+$VERSION = '3.08';
 
 my $ESCAPE_CHAR = qr{ [ \x00-\x1f \" ] }x;
+my $ESCAPE_KEY  = qr{ (?: ^\W ) | $ESCAPE_CHAR }x;
 
 my @UNPRINTABLE = qw(
   z    x01  x02  x03  x04  x05  x06  a
@@ -71,10 +72,11 @@ sub _put {
 sub _enc_scalar {
     my $self = shift;
     my $val  = shift;
+    my $rule = shift;
 
     return '~' unless defined $val;
 
-    if ( $val =~ /$ESCAPE_CHAR/ ) {
+    if ( $val =~ /$rule/ ) {
         $val =~ s/\\/\\\\/g;
         $val =~ s/"/\\"/g;
         $val =~ s/ ( [\x00-\x1f] ) / '\\' . $UNPRINTABLE[ ord($1) ] /gex;
@@ -103,7 +105,7 @@ sub _write_obj {
                 for my $key ( sort keys %$obj ) {
                     my $value = $obj->{$key};
                     $self->_write_obj(
-                        $pad . $self->_enc_scalar($key) . ':',
+                        $pad . $self->_enc_scalar( $key, $ESCAPE_KEY ) . ':',
                         $value, $indent + 1
                     );
                 }
@@ -131,7 +133,7 @@ sub _write_obj {
         }
     }
     else {
-        $self->_put( $prefix, ' ', $self->_enc_scalar($obj) );
+        $self->_put( $prefix, ' ', $self->_enc_scalar( $obj, $ESCAPE_CHAR ) );
     }
 }
 
@@ -147,7 +149,7 @@ TAP::Parser::YAMLish::Writer - Write YAMLish data
 
 =head1 VERSION
 
-Version 3.07
+Version 3.08
 
 =head1 SYNOPSIS
 

@@ -41,11 +41,11 @@ Test::Harness - Run Perl standard test scripts with statistics
 
 =head1 VERSION
 
-Version 3.07
+Version 3.08
 
 =cut
 
-$VERSION = '3.07';
+$VERSION = '3.08';
 
 # Backwards compatibility for exportable variable names.
 *verbose  = *Verbose;
@@ -219,6 +219,7 @@ sub _canon {
 }
 
 sub _new_harness {
+    my $sub_args = shift || {};
 
     if ( defined( my $env_sw = $ENV{HARNESS_PERL_SWITCHES} ) ) {
         $Switches .= ' ' . $env_sw if ( length($env_sw) );
@@ -250,6 +251,9 @@ sub _new_harness {
         color      => $Color,
         verbosity  => $verbosity,
     };
+
+    $args->{stdout} = $sub_args->{out}
+      if exists $sub_args->{out};
 
     if ( defined( my $env_opt = $ENV{HARNESS_OPTIONS} ) ) {
         for my $opt ( split /:/, $env_opt ) {
@@ -336,9 +340,7 @@ sub _check_sequence {
 sub execute_tests {
     my %args = @_;
 
-    # TODO: Handle out option
-
-    my $harness   = _new_harness();
+    my $harness   = _new_harness( \%args );
     my $aggregate = TAP::Parser::Aggregator->new();
 
     my %tot = (

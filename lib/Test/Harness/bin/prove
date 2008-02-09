@@ -27,6 +27,7 @@ Boolean options:
  -s,  --shuffle     Run the tests in random order.
  -c,  --color       Colored test output (default).
       --nocolor     Do not color test output.
+ -D   --dry         Dry run. Show test that would have run.
  -f,  --failures    Only show failed tests.
       --fork        Fork to run harness in multiple processes
  -m,  --merge       Merge test scripts' STDERR with their STDOUT.
