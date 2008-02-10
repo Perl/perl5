@@ -998,7 +998,7 @@ p	|void	|write_to_stderr|NN const char* message|int msglen
 p	|int	|yyerror	|NN const char* s
 EXp	|int	|yylex
 p	|int	|yyparse
-p	|void	|parser_free	|NN const yy_parser *
+p	|void	|parser_free	|NN const yy_parser *parser
 p	|int	|yywarn		|NN const char* s
 #if defined(MYMALLOC)
 Ap	|void	|dump_mstats	|NN char* s
@@ -1392,7 +1392,7 @@ Es	|regnode*|regatom	|NN struct RExC_state_t *state|NN I32 *flagp|U32 depth
 Es	|regnode*|regbranch	|NN struct RExC_state_t *state|NN I32 *flagp|I32 first|U32 depth
 Es	|STRLEN	|reguni		|NN const struct RExC_state_t *state|UV uv|NN char *s
 Es	|regnode*|regclass	|NN struct RExC_state_t *state|U32 depth
-ERsn	|I32	|regcurly	|NN const char *
+ERsn	|I32	|regcurly	|NN const char *s
 Es	|regnode*|reg_node	|NN struct RExC_state_t *state|U8 op
 Es	|UV	|reg_recode	|const char value|NN SV **encp
 Es	|regnode*|regpiece	|NN struct RExC_state_t *state|NN I32 *flagp|U32 depth
