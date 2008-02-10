@@ -21,7 +21,7 @@ BEGIN {
         local $!;
 	# We do want an arithmetic overflow, Inf INF inf Infinity:.
 	for my $t (
-	    'exp(999)',
+	    'exp(99999)', # even 9999 isn't big enough for long doubles
 	    '9**9**9',
 	    'inf',
 	    'Inf',
