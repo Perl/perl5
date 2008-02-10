@@ -297,7 +297,7 @@ Ap	|void	|gv_init	|NN GV* gv|NULLOK HV* stash|NN const char* name|STRLEN len|int
 Ap	|void	|gv_name_set	|NN GV* gv|NN const char *name|U32 len|U32 flags
 Apd	|HV*	|gv_stashpv	|NN const char* name|I32 flags
 Apd	|HV*	|gv_stashpvn	|NN const char* name|U32 namelen|I32 flags
-Apd	|HV*	|gv_stashsv	|NULLOK SV* sv|I32 flags
+Apd	|HV*	|gv_stashsv	|NN SV* sv|I32 flags
 Apd	|void	|hv_clear	|NULLOK HV* tb
 poM	|HV *	|hv_copy_hints_hv|NN HV *const ohv
 Ap	|void	|hv_delayfree_ent|NN HV* hv|NULLOK HE* entry
