@@ -344,6 +344,7 @@ my %opflags = (
 
 my %OP_IS_SOCKET;
 my %OP_IS_FILETEST;
+my %OP_IS_FT_ACCESS;
 my $OCSHIFT = 9;
 my $OASHIFT = 13;
 
@@ -366,6 +367,7 @@ for my $op (@ops) {
 	    # record opnums of these opnames
 	    $OP_IS_SOCKET{$op}   = $opnum{$op} if $arg =~ s/s//;
 	    $OP_IS_FILETEST{$op} = $opnum{$op} if $arg =~ s/-//;
+	    $OP_IS_FT_ACCESS{$op} = $opnum{$op} if $arg =~ s/\+//;
         }
 	my $argnum = ($arg =~ s/\?//) ? 8 : 0;
         die "op = $op, arg = $arg\n"
@@ -403,6 +405,7 @@ EO_OP_IS_COMMENT
 
 gen_op_is_macro( \%OP_IS_SOCKET, 'OP_IS_SOCKET');
 gen_op_is_macro( \%OP_IS_FILETEST, 'OP_IS_FILETEST');
+gen_op_is_macro( \%OP_IS_FT_ACCESS, 'OP_IS_FILETEST_ACCESS');
 
 sub gen_op_is_macro {
     my ($op_is, $macname) = @_;
@@ -414,20 +417,21 @@ sub gen_op_is_macro {
 	} keys %$op_is;
 	
 	my $last = pop @rest;	# @rest slurped, get its last
-	
+	die "invalid range of ops: $first .. $last" unless $last;
+
+	print ON "#define $macname(op)	\\\n\t(";
+
 	# verify that op-ct matches 1st..last range (and fencepost)
 	# (we know there are no dups)
 	if ( $op_is->{$last} - $op_is->{$first} == scalar @rest + 1) {
 	    
 	    # contiguous ops -> optimized version
-	    print ON "#define $macname(op)	\\\n\t(";
 	    print ON "(op) >= OP_" . uc($first) . " && (op) <= OP_" . uc($last);
 	    print ON ")\n\n";
 	}
 	else {
-	    print ON "\n#define $macname(op)	\\\n\t(";
 	    print ON join(" || \\\n\t ",
-			  map { "(op) == OP_" . uc() } sort keys %OP_IS_SOCKET);
+			  map { "(op) == OP_" . uc() } sort keys %$op_is);
 	    print ON ")\n\n";
 	}
     }
@@ -602,7 +606,9 @@ __END__
 # Values for the operands are:
 # scalar      - S            list     - L            array     - A
 # hash        - H            sub (CV) - C            file      - F
-# socket      - Fs           filetest - F-           reference - R
+# socket      - Fs           filetest - F-           filetest_access - F-+
+
+# reference - R
 # "?" denotes an optional operand.
 
 # Nothing.
@@ -948,12 +954,12 @@ getpeername	getpeername		ck_fun		is%	Fs
 
 lstat		lstat			ck_ftst		u-	F
 stat		stat			ck_ftst		u-	F
-ftrread		-R			ck_ftst		isu-	F-
-ftrwrite	-W			ck_ftst		isu-	F-
-ftrexec		-X			ck_ftst		isu-	F-
-fteread		-r			ck_ftst		isu-	F-
-ftewrite	-w			ck_ftst		isu-	F-
-fteexec		-x			ck_ftst		isu-	F-
+ftrread		-R			ck_ftst		isu-	F-+
+ftrwrite	-W			ck_ftst		isu-	F-+
+ftrexec		-X			ck_ftst		isu-	F-+
+fteread		-r			ck_ftst		isu-	F-+
+ftewrite	-w			ck_ftst		isu-	F-+
+fteexec		-x			ck_ftst		isu-	F-+
 ftis		-e			ck_ftst		isu-	F-
 ftsize		-s			ck_ftst		istu-	F-
 ftmtime		-M			ck_ftst		stu-	F-

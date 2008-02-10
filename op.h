@@ -266,13 +266,6 @@ Deprecated.  Use C<GIMME_V> instead.
 /* Private for OP_FTXXX */
 #define OPpFT_ACCESS		2	/* use filetest 'access' */
 #define OPpFT_STACKED		4	/* stacked filetest, as in "-f -x $f" */
-#define OP_IS_FILETEST_ACCESS(op) 		\
-	(((op)->op_type) == OP_FTRREAD  ||	\
-	 ((op)->op_type) == OP_FTRWRITE ||	\
-	 ((op)->op_type) == OP_FTREXEC  ||	\
-	 ((op)->op_type) == OP_FTEREAD  ||	\
-	 ((op)->op_type) == OP_FTEWRITE ||	\
-	 ((op)->op_type) == OP_FTEEXEC)
 
 /* Private for OP_(MAP|GREP)(WHILE|START) */
 #define OPpGREP_LEX		2	/* iterate over lexical $_ */

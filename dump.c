@@ -982,7 +982,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 		sv_catpv(tmpsv, ",HUSH_VMSISH");
 	}
 	else if (PL_check[optype] != MEMBER_TO_FPTR(Perl_ck_ftst)) {
-	    if (OP_IS_FILETEST_ACCESS(o) && o->op_private & OPpFT_ACCESS)
+	    if (OP_IS_FILETEST_ACCESS(o->op_type) && o->op_private & OPpFT_ACCESS)
 		sv_catpv(tmpsv, ",FT_ACCESS");
 	    if (o->op_private & OPpFT_STACKED)
 		sv_catpv(tmpsv, ",FT_STACKED");
@@ -2800,7 +2800,7 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 		sv_catpv(tmpsv, ",HUSH_VMSISH");
 	}
 	else if (PL_check[o->op_type] != MEMBER_TO_FPTR(Perl_ck_ftst)) {
-	    if (OP_IS_FILETEST_ACCESS(o) && o->op_private & OPpFT_ACCESS)
+	    if (OP_IS_FILETEST_ACCESS(o->op_type) && o->op_private & OPpFT_ACCESS)
 		sv_catpv(tmpsv, ",FT_ACCESS");
 	    if (o->op_private & OPpFT_STACKED)
 		sv_catpv(tmpsv, ",FT_STACKED");

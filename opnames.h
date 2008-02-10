@@ -398,4 +398,7 @@ typedef enum opcode {
 #define OP_IS_FILETEST(op)	\
 	((op) >= OP_FTRREAD && (op) <= OP_FTBINARY)
 
+#define OP_IS_FILETEST_ACCESS(op)	\
+	((op) >= OP_FTRREAD && (op) <= OP_FTEEXEC)
+
 /* ex: set ro: */

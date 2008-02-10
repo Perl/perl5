@@ -6683,7 +6683,7 @@ Perl_ck_ftst(pTHX_ OP *o)
 #endif
 	    return newop;
 	}
-	if ((PL_hints & HINT_FILETEST_ACCESS) && OP_IS_FILETEST_ACCESS(o))
+	if ((PL_hints & HINT_FILETEST_ACCESS) && OP_IS_FILETEST_ACCESS(o->op_type))
 	    o->op_private |= OPpFT_ACCESS;
 	if (PL_check[kidtype] == MEMBER_TO_FPTR(Perl_ck_ftst)
 		&& kidtype != OP_STAT && kidtype != OP_LSTAT)
