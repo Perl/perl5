@@ -527,7 +527,9 @@ struct loop {
 #define cSVOPo_sv		cSVOPx_sv(o)
 #define kSVOP_sv		cSVOPx_sv(kid)
 
-#define Nullop Null(OP*)
+#ifndef PERL_CORE
+#  define Nullop ((OP*)NULL)
+#endif
 
 /* Lowest byte-and-a-bit of PL_opargs */
 #define OA_MARK 1

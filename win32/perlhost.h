@@ -1782,7 +1782,7 @@ restart:
 	    if (PL_restartop) {
 		POPSTACK_TO(PL_mainstack);
 		PL_op = PL_restartop;
-		PL_restartop = Nullop;
+		PL_restartop = (OP*)NULL;
 		goto restart;
 	    }
 	    PerlIO_printf(Perl_error_log, "panic: restartop\n");
@@ -1794,7 +1794,7 @@ restart:
 
 	/* XXX hack to avoid perl_destruct() freeing optree */
         win32_checkTLS(my_perl);
-	PL_main_root = Nullop;
+	PL_main_root = (OP*)NULL;
     }
 
     win32_checkTLS(my_perl);
