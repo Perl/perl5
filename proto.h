@@ -2663,7 +2663,7 @@ PERL_CALLCONV int	Perl_yyerror(pTHX_ const char *const s)
 
 PERL_CALLCONV int	Perl_yylex(pTHX);
 PERL_CALLCONV int	Perl_yyparse(pTHX);
-PERL_CALLCONV void	Perl_parser_free(pTHX_ const yy_parser *)
+PERL_CALLCONV void	Perl_parser_free(pTHX_ const yy_parser *parser)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV int	Perl_yywarn(pTHX_ const char *const s)
@@ -3689,7 +3689,7 @@ STATIC STRLEN	S_reguni(pTHX_ const struct RExC_state_t *state, UV uv, char *s)
 STATIC regnode*	S_regclass(pTHX_ struct RExC_state_t *state, U32 depth)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC I32	S_regcurly(const char *)
+STATIC I32	S_regcurly(const char *s)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1);
 
