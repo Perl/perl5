@@ -81,7 +81,7 @@ npR	|MEM_SIZE|malloced_size	|NN void *p
 #endif
 
 AnpR	|void*	|get_context
-Anp	|void	|set_context	|NN void *thx
+Anp	|void	|set_context	|NN void *t
 
 END_EXTERN_C
 
@@ -258,7 +258,7 @@ Ap	|void	|dump_packsubs	|NN const HV* stash
 Ap	|void	|dump_sub	|NN const GV* gv
 Apd	|void	|fbm_compile	|NN SV* sv|U32 flags
 ApdR	|char*	|fbm_instr	|NN unsigned char* big|NN unsigned char* bigend \
-				|NN SV* littlesv|U32 flags
+				|NN SV* littlestr|U32 flags
 p	|char*	|find_script	|NN const char *scriptname|bool dosearch \
 				|NULLOK const char *const *const search_ext|I32 flags
 p	|OP*	|force_list	|NULLOK OP* arg
@@ -268,7 +268,7 @@ Ap	|char*	|vform		|NN const char* pat|NULLOK va_list* args
 Ap	|void	|free_tmps
 p	|OP*	|gen_constant_list|NULLOK OP* o
 #if !defined(HAS_GETENV_LEN)
-p	|char*	|getenv_len	|NN const char* key|NN unsigned long *len
+p	|char*	|getenv_len	|NN const char *env_elem|NN unsigned long *len
 #endif
 pox	|void	|get_db_sub	|NULLOK SV **svp|NN CV *cv
 Ap	|void	|gp_free	|NULLOK GV* gv
@@ -498,7 +498,7 @@ Apd	|U32	|mg_length	|NN SV* sv
 Apd	|void	|mg_magical	|NN SV* sv
 Apd	|int	|mg_set		|NN SV* sv
 Ap	|I32	|mg_size	|NN SV* sv
-Ap	|void	|mini_mktime	|NN struct tm *pm
+Ap	|void	|mini_mktime	|NN struct tm *ptm
 EXp	|OP*	|mod		|NULLOK OP* o|I32 type
 p	|int	|mode_from_discipline|NULLOK SV* discp
 Ap	|const char*	|moreswitches	|NN const char* s
@@ -605,14 +605,14 @@ Apa	|OP*	|newWHILEOP	|I32 flags|I32 debuggable|NULLOK LOOP* loop \
 				|I32 has_my
 Apa	|PERL_SI*|new_stackinfo|I32 stitems|I32 cxitems
 Ap	|char*	|scan_vstring	|NN const char *vstr|NN const char *const end|NN SV *sv
-Apd	|const char*	|scan_version	|NN const char *vstr|NN SV *sv|bool qv
+Apd	|const char*	|scan_version	|NN const char *s|NN SV *rv|bool qv
 Apd	|SV*	|new_version	|NN SV *ver
 Apd	|SV*	|upg_version	|NN SV *ver|bool qv
 Apd	|bool	|vverify	|NN SV *vs
 Apd	|SV*	|vnumify	|NN SV *vs
 Apd	|SV*	|vnormal	|NN SV *vs
 Apd	|SV*	|vstringify	|NN SV *vs
-Apd	|int	|vcmp		|NN SV *lvs|NN SV *rvs
+Apd	|int	|vcmp		|NN SV *lhv|NN SV *rhv
 p	|PerlIO*|nextargv	|NN GV* gv
 ApP	|char*	|ninstr		|NN const char* big|NN const char* bigend \
 				|NN const char* little|NN const char* lend
@@ -726,7 +726,7 @@ ApP	|char*	|rninstr	|NN const char* big|NN const char* bigend \
 				|NN const char* little|NN const char* lend
 Ap	|Sighandler_t|rsignal	|int i|Sighandler_t t
 p	|int	|rsignal_restore|int i|NULLOK Sigsave_t* t
-p	|int	|rsignal_save	|int i|Sighandler_t t1|NN Sigsave_t* t2
+p	|int	|rsignal_save	|int i|Sighandler_t t1|NN Sigsave_t* save
 Ap	|Sighandler_t|rsignal_state|int i
 p	|void	|rxres_free	|NN void** rsp
 p	|void	|rxres_restore	|NN void** rsp|NN REGEXP* prx
@@ -789,7 +789,7 @@ Ap	|char*	|scan_num	|NN const char* s|NN YYSTYPE *lvalp
 Apd	|NV	|scan_oct	|NN const char* start|STRLEN len|NN STRLEN* retlen
 p	|OP*	|scope		|NULLOK OP* o
 Ap	|char*	|screaminstr	|NN SV *bigstr|NN SV *littlestr|I32 start_shift \
-				|I32 end_shift|NN I32 *oldposp|I32 last
+				|I32 end_shift|NN I32 *old_posp|I32 last
 #if !defined(VMS)
 p	|I32	|setenv_getix	|NN const char* nam
 #endif
@@ -1805,7 +1805,7 @@ Ap	|GV*	|gv_fetchpvn_flags|NN const char* name|STRLEN len|I32 flags|I32 sv_type
 Ap	|GV*	|gv_fetchsv|NN SV *name|I32 flags|I32 sv_type
 dpR	|bool	|is_gv_magical_sv|NN SV *name|U32 flags
 
-ApR	|bool	|stashpv_hvname_match|NN const COP *cop|NN const HV *hv
+ApR	|bool	|stashpv_hvname_match|NN const COP *c|NN const HV *hv
 
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 p	|void	|dump_sv_child	|NN SV *sv
