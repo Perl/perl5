@@ -9,27 +9,37 @@ package Math::Complex;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $Inf);
 
-$VERSION = 1.49;
+$VERSION = 1.51;
+
+use Config;
 
 BEGIN {
-    # For 64-bit doubles, anyway.
-    my $IEEE_DBL_MAX = eval "1.7976931348623157e+308";
-    my $BIGGER_THAN_THIS = 1e99;  # Must find something bigger than this.
+    my %DBL_MAX =
+	(
+	  4  => '1.70141183460469229e+38',
+	  8  => '1.7976931348623157e+308',
+	 10 => '1.1897314953572317650857593266280070162E+4932',
+	 12 => '1.1897314953572317650857593266280070162E+4932',  # AFAICT.
+	);
+    my $nvsize = $Config{nvsize} || ($Config{uselongdouble} && $Config{longdblsize}) || $Config{doublesize};
+    die "Math::Complex: Could not figure out nvsize\n" unless defined $nvsize;
+    my $DBL_MAX = eval $DBL_MAX{$nvsize};
+    die "Math::Complex: Could not figure out max nv\n" unless defined $DBL_MAX;
+    my $BIGGER_THAN_THIS = 1e30;  # Must find something bigger than this.
     if ($^O eq 'unicosmk') {
-	$Inf = $IEEE_DBL_MAX;
+	$Inf = $DBL_MAX;
     } else {
         local $!;
-	# We do want an arithmetic overflow, Inf INF inf Infinity:.
+	# We do want an arithmetic overflow, Inf INF inf Infinity.
 	for my $t (
-	    'exp(99999)', # even 9999 isn't big enough for long doubles
-	    '9**9**9',
+	    'exp(99999)',  # Enough even with 128-bit long doubles.
 	    'inf',
 	    'Inf',
 	    'INF',
 	    'infinity',
 	    'Infinity',
 	    'INFINITY',
-	    '1e999',
+	    '1e99999',
 	    ) {
 	    local $SIG{FPE} = { };
 	    local $^W = 0;
@@ -39,8 +49,9 @@ BEGIN {
 		last;
 	    }
 	}
-	$Inf = $IEEE_DBL_MAX unless defined $Inf;  # Oh well, close enough.
-	die "Could not get Infinity" unless $Inf > $BIGGER_THAN_THIS;
+	$Inf = $DBL_MAX unless defined $Inf;  # Oh well, close enough.
+	die "Math::Complex: Could not get Infinity"
+	    unless $Inf > $BIGGER_THAN_THIS;
     }
     # print "# On this machine, Inf = '$Inf'\n";
 }
