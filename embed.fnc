@@ -842,7 +842,7 @@ Apd	|int	|sv_backoff	|NN SV* sv
 Apd	|SV*	|sv_bless	|NN SV* sv|NN HV* stash
 Afpd	|void	|sv_catpvf	|NN SV* sv|NN const char* pat|...
 Apd	|void	|sv_vcatpvf	|NN SV* sv|NN const char* pat|NULLOK va_list* args
-Apd	|void	|sv_catpv	|NN SV* sv|NN const char* ptr
+Apd	|void	|sv_catpv	|NN SV* sv|NULLOK const char* ptr
 Amdb	|void	|sv_catpvn	|NN SV* sv|NN const char* ptr|STRLEN len
 Amdb	|void	|sv_catsv	|NN SV* dsv|NULLOK SV* ssv
 Apd	|void	|sv_chop	|NN SV* sv|NULLOK const char* ptr
@@ -856,7 +856,7 @@ Apd	|char*	|sv_collxfrm	|NN SV* sv|NN STRLEN* nxp
 #endif
 Ap	|OP*	|sv_compile_2op	|NN SV* sv|NN OP** startp|NN const char* code|NN PAD** padp
 Apd	|int	|getcwd_sv	|NN SV* sv
-Apd	|void	|sv_dec		|NN SV* sv
+Apd	|void	|sv_dec		|NULLOK SV* sv
 Ap	|void	|sv_dump	|NN SV* sv
 ApdR	|bool	|sv_derived_from|NN SV* sv|NN const char* name
 ApdR	|bool	|sv_does	|NN SV* sv|NN const char* name
@@ -866,7 +866,7 @@ poMX	|void	|sv_free2	|NN SV* sv
 pd	|void	|sv_free_arenas
 Apd	|char*	|sv_gets	|NN SV* sv|NN PerlIO* fp|I32 append
 Apd	|char*	|sv_grow	|NN SV* sv|STRLEN newlen
-Apd	|void	|sv_inc		|NN SV* sv
+Apd	|void	|sv_inc		|NULLOK SV* sv
 Apd	|void	|sv_insert	|NN SV* bigsv|STRLEN offset|STRLEN len \
 				|NN const char* little|STRLEN littlelen
 Apd	|int	|sv_isa		|NULLOK SV* sv|NN const char* name
@@ -1017,7 +1017,7 @@ Ap	|int	|runops_standard
 Ap	|int	|runops_debug
 Afpd	|void	|sv_catpvf_mg	|NN SV *sv|NN const char* pat|...
 Apd	|void	|sv_vcatpvf_mg	|NN SV* sv|NN const char* pat|NULLOK va_list* args
-Apd	|void	|sv_catpv_mg	|NN SV *sv|NN const char *ptr
+Apd	|void	|sv_catpv_mg	|NN SV *sv|NULLOK const char *ptr
 Apdbm	|void	|sv_catpvn_mg	|NN SV *sv|NN const char *ptr|STRLEN len
 Apdbm	|void	|sv_catsv_mg	|NN SV *dstr|NULLOK SV *sstr
 Afpd	|void	|sv_setpvf_mg	|NN SV *sv|NN const char* pat|...
@@ -1099,7 +1099,7 @@ ApR	|GP*	|gp_dup		|NULLOK GP* gp|NN CLONE_PARAMS* param
 ApR	|MAGIC*	|mg_dup		|NULLOK MAGIC* mg|NN CLONE_PARAMS* param
 ApR	|SV*	|sv_dup		|NULLOK const SV* sstr|NN CLONE_PARAMS* param
 Ap	|void	|rvpv_dup	|NN SV* dstr|NN const SV *sstr|NN CLONE_PARAMS* param
-Ap	|yy_parser*|parser_dup	|NN const yy_parser *proto|NN CLONE_PARAMS* param
+Ap	|yy_parser*|parser_dup	|NULLOK const yy_parser *proto|NN CLONE_PARAMS* param
 #endif
 Apa	|PTR_TBL_t*|ptr_table_new
 ApR	|void*	|ptr_table_fetch|NN PTR_TBL_t *tbl|NN const void *sv
@@ -1536,7 +1536,7 @@ s	|void *	|more_bodies	|svtype sv_type
 s	|bool	|sv_2iuv_common	|NN SV *sv
 s	|void	|glob_assign_glob|NN SV *dstr|NN SV *sstr|const int dtype
 s	|void	|glob_assign_ref|NN SV *dstr|NN SV *sstr
-sRn	|PTR_TBL_ENT_t *|ptr_table_find|NN PTR_TBL_t *tbl|NN const void *sv
+sRn	|PTR_TBL_ENT_t *|ptr_table_find|NN PTR_TBL_t *tbl|NULLOK const void *sv
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
@@ -1711,7 +1711,7 @@ p	|void	|free_tied_hv_pool
 #if defined(DEBUGGING)
 pR	|int	|get_debug_opts	|NN const char **s|bool givehelp
 #endif
-Ap	|void	|save_set_svflags|NULLOK SV* sv|U32 mask|U32 val
+Ap	|void	|save_set_svflags|NN SV* sv|U32 mask|U32 val
 Apod	|void	|hv_assert	|NN HV* tb
 
 ApdR	|SV*	|hv_scalar	|NN HV* hv
