@@ -692,7 +692,7 @@ Ap	|I32	|pregexec	|NN REGEXP * const prog|NN char* stringarg \
 				|NN SV* screamer|U32 nosave
 Ap	|void	|pregfree	|NULLOK REGEXP* r
 EXp	|REGEXP*|reg_temp_copy	|NN REGEXP* r
-Ap	|void	|regfree_internal|NULLOK REGEXP * const r
+Ap	|void	|regfree_internal|NN REGEXP * const rx
 Ap	|char *	|reg_stringify  |NN MAGIC *mg|NULLOK STRLEN *lp|NULLOK U32 *flags|NULLOK I32 *haseval
 #if defined(USE_ITHREADS)
 Ap	|void*	|regdupe_internal|NN REGEXP * const r|NN CLONE_PARAMS* param
@@ -706,7 +706,7 @@ Ap	|SV*	|re_intuit_string|NN REGEXP * const rx
 Ap	|I32	|regexec_flags	|NN REGEXP * const rx|NN char* stringarg \
 				|NN char* strend|NN char* strbeg|I32 minend \
 				|NN SV* screamer|NULLOK void* data|U32 flags
-ApR	|regnode*|regnext	|NN regnode* p
+ApR	|regnode*|regnext	|NULLOK regnode* p
 
 EXp |SV*|reg_named_buff          |NN REGEXP * const rx|NULLOK SV * const key \
                                  |NULLOK SV * const value|const U32 flags
