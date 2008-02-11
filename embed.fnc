@@ -818,18 +818,18 @@ Apd	|IO*	|sv_2io		|NN SV* sv
 s	|bool	|glob_2number	|NN GV* const gv
 s	|char*	|glob_2pv	|NN GV* const gv|NULLOK STRLEN * const len
 #endif
-Amb	|IV	|sv_2iv		|NN SV* sv
-Apd	|IV	|sv_2iv_flags	|NN SV* sv|I32 flags
+Amb	|IV	|sv_2iv		|NULLOK SV* sv
+Apd	|IV	|sv_2iv_flags	|NULLOK SV* sv|I32 flags
 Apd	|SV*	|sv_2mortal	|NULLOK SV* sv
-Apd	|NV	|sv_2nv		|NN SV* sv
+Apd	|NV	|sv_2nv		|NULLOK SV* sv
 pMd	|SV*	|sv_2num	|NN SV* sv
-Amb	|char*	|sv_2pv		|NN SV* sv|NULLOK STRLEN* lp
-Apd	|char*	|sv_2pv_flags	|NN SV* sv|NULLOK STRLEN* lp|I32 flags
+Amb	|char*	|sv_2pv		|NULLOK SV* sv|NULLOK STRLEN* lp
+Apd	|char*	|sv_2pv_flags	|NULLOK SV* sv|NULLOK STRLEN* lp|I32 flags
 Apd	|char*	|sv_2pvutf8	|NN SV* sv|NULLOK STRLEN* lp
 Apd	|char*	|sv_2pvbyte	|NN SV* sv|NULLOK STRLEN* lp
 Ap	|char*	|sv_pvn_nomg	|NN SV* sv|NULLOK STRLEN* lp
-Amb	|UV	|sv_2uv		|NN SV* sv
-Apd	|UV	|sv_2uv_flags	|NN SV* sv|I32 flags
+Amb	|UV	|sv_2uv		|NULLOK SV* sv
+Apd	|UV	|sv_2uv_flags	|NULLOK SV* sv|I32 flags
 Apd	|IV	|sv_iv		|NN SV* sv
 Apd	|UV	|sv_uv		|NN SV* sv
 Apd	|NV	|sv_nv		|NN SV* sv
