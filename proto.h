@@ -1863,7 +1863,9 @@ PERL_CALLCONV void	Perl_pregfree2(pTHX_ REGEXP* prog)
 PERL_CALLCONV REGEXP*	Perl_reg_temp_copy(pTHX_ REGEXP* r)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV void	Perl_regfree_internal(pTHX_ REGEXP * const r);
+PERL_CALLCONV void	Perl_regfree_internal(pTHX_ REGEXP * const rx)
+			__attribute__nonnull__(pTHX_1);
+
 #if defined(USE_ITHREADS)
 PERL_CALLCONV void*	Perl_regdupe_internal(pTHX_ REGEXP * const r, CLONE_PARAMS* param)
 			__attribute__nonnull__(pTHX_1)
@@ -1892,8 +1894,7 @@ PERL_CALLCONV I32	Perl_regexec_flags(pTHX_ REGEXP * const rx, char* stringarg, c
 			__attribute__nonnull__(pTHX_6);
 
 PERL_CALLCONV regnode*	Perl_regnext(pTHX_ regnode* p)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
+			__attribute__warn_unused_result__;
 
 
 PERL_CALLCONV SV*	Perl_reg_named_buff(pTHX_ REGEXP * const rx, SV * const key, SV * const value, const U32 flags)
