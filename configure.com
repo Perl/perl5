@@ -3183,9 +3183,8 @@ $! perllibs should be libs with all non-core libs (such as gdbm) removed.
 $!
 $ perllibs=libs
 $!
-$! Are we 64 bit?
 $!
-$ IF use64bitint .OR. use64bitint .EQS. "define"
+$ IF archname .NES. "VMS_VAX"
 $ THEN
 $   d_PRId64 = "define"
 $   d_PRIu64 = "define"
@@ -3201,7 +3200,11 @@ $   sPRIx64 = """Lx"""
 $   d_quad = "define"
 $   quadtype = "long long"
 $   uquadtype = "unsigned long long"
-$   quadkind  = "QUAD_IS_LONG_LONG"
+$   quadkind  = "3"
+$!
+$   d_frexpl = "define"
+$   d_modfl = "define"
+$   d_modflproto = "define"
 $ ELSE
 $   d_PRId64 = "undef"
 $   d_PRIXU64 = "undef"
@@ -3215,17 +3218,10 @@ $   sPRIo64 = ""
 $   sPRIu64 = ""
 $   sPRIx64 = ""
 $   d_quad = "undef"
-$   quadtype = "long"
-$   uquadtype = "unsigned long"
-$   quadkind  = "QUAD_IS_LONG"
-$ ENDIF
+$   quadtype = "undef"
+$   uquadtype = "undef"
+$   quadkind  = "undef"
 $!
-$ IF archname .NES. "VMS_VAX"
-$ THEN
-$   d_frexpl = "define"
-$   d_modfl = "define"
-$   d_modflproto = "define"
-$ ELSE
 $   d_frexpl = "undef"
 $   d_modfl = "undef"
 $   d_modflproto = "undef"
