@@ -87,13 +87,15 @@ open(FH,'>a') || die "Can't create a";
 close(FH);
 
 my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
-    $blksize,$blocks);
+    $blksize,$blocks,$a_mode);
 
 SKIP: {
     skip("no link", 4) unless $has_link;
 
     ok(link('a','b'), "link a b");
     ok(link('b','c'), "link b c");
+
+    $a_mode = (stat('a'))[2];
 
     ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
      $blksize,$blocks) = stat('c');
@@ -111,7 +113,9 @@ SKIP: {
 #      if ($^O eq 'cygwin') { # new files on cygwin get rwx instead of rw-
 #          is($mode & 0777, 0777, "mode of triply-linked file");
 #      } else {
-            is($mode & 0777, 0666, "mode of triply-linked file");
+            is(sprintf("0%o", $mode & 0777), 
+               sprintf("0%o", $a_mode & 0777), 
+               "mode of triply-linked file");
 #      }
     }
 }
