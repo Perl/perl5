@@ -2622,6 +2622,7 @@ lib/TAP/Parser/Result/Version.pm	A parser for Test Anything Protocol
 lib/TAP/Parser/Result/YAML.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Source.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Source/Perl.pm		A parser for Test Anything Protocol
+lib/TAP/Parser/Utils.pm			A parser for Test Anything Protocol
 lib/TAP/Parser/YAMLish/Reader.pm	A parser for Test Anything Protocol
 lib/TAP/Parser/YAMLish/Writer.pm	A parser for Test Anything Protocol
 lib/Term/ANSIColor/ChangeLog	Term::ANSIColor
@@ -2683,6 +2684,7 @@ lib/Test/Harness/t/streams.t		Test::Harness test
 lib/Test/Harness/t/taint.t		Test::Harness test
 lib/Test/Harness/t/testargs.t		Test::Harness test
 lib/Test/Harness/t/unicode.t		Test::Harness test
+lib/Test/Harness/t/utils.t		Test::Harness test
 lib/Test/Harness/t/yamlish-output.t	Test::Harness test
 lib/Test/Harness/t/yamlish-writer.t	Test::Harness test
 lib/Test/Harness/t/yamlish.t		Test::Harness test

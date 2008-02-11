@@ -16,11 +16,11 @@ TAP::Parser::Source::Perl - Stream Perl output
 
 =head1 VERSION
 
-Version 3.08
+Version 3.09
 
 =cut
 
-$VERSION = '3.08';
+$VERSION = '3.09';
 
 =head1 DESCRIPTION
 
@@ -262,11 +262,6 @@ sub _switches {
         $_ = qq["$_"] if ( ( /\s/ || IS_VMS ) && !/^".*"$/ );
     }
 
-    my %found_switch = map { $_ => 0 } @switches;
-
-    # remove duplicate switches
-    @switches
-      = grep { defined $_ && $_ ne '' && !$found_switch{$_}++ } @switches;
     return @switches;
 }
 

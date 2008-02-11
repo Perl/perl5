@@ -22,11 +22,11 @@ TAP::Harness - Run test scripts with statistics
 
 =head1 VERSION
 
-Version 3.08
+Version 3.09
 
 =cut
 
-$VERSION = '3.08';
+$VERSION = '3.09';
 
 $ENV{HARNESS_ACTIVE}  = 1;
 $ENV{HARNESS_VERSION} = $VERSION;
@@ -484,7 +484,7 @@ Each elements of the @tests array is either
 When you supply a separate display name it becomes possible to run a
 test more than once; the display name is effectively the alias by which
 the test is known inside the harness. The harness doesn't care if it
-runs the same script more than once along as each invocation uses a
+runs the same script more than once when each invocation uses a
 different name.
 
 =cut
@@ -495,6 +495,10 @@ sub aggregate_tests {
     my $jobs = $self->jobs;
 
     my @expanded = map { 'ARRAY' eq ref $_ ? $_ : [ $_, $_ ] } @tests;
+
+    # #12458
+    local $ENV{HARNESS_IS_VERBOSE} = 1
+      if $self->formatter->verbosity > 0;
 
     # Formatter gets only names
     $self->formatter->prepare( map { $_->[1] } @expanded );

@@ -19,11 +19,11 @@ TAP::Parser - Parse L<TAP|Test::Harness::TAP> output
 
 =head1 VERSION
 
-Version 3.08
+Version 3.09
 
 =cut
 
-$VERSION = '3.08';
+$VERSION = '3.09';
 
 my $DEFAULT_TAP_VERSION = 12;
 my $MAX_TAP_VERSION     = 13;
@@ -505,13 +505,6 @@ C<$result> object.
   }
 
 This is merely a synonym for C<as_string>.
-
-=head3 C<tests_planned>
-
-  my $planned = $result->tests_planned;
-
-Returns the number of tests planned.  For example, a plan of C<1..17> will
-cause this method to return '17'.
 
 =head3 C<directive>
 
