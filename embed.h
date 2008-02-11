@@ -1186,7 +1186,6 @@
 #define ck_readline		Perl_ck_readline
 #define ck_repeat		Perl_ck_repeat
 #define ck_require		Perl_ck_require
-#define ck_retarget		Perl_ck_retarget
 #define ck_return		Perl_ck_return
 #define ck_rfun			Perl_ck_rfun
 #define ck_rvconst		Perl_ck_rvconst
@@ -3485,7 +3484,6 @@
 #define ck_readline(a)		Perl_ck_readline(aTHX_ a)
 #define ck_repeat(a)		Perl_ck_repeat(aTHX_ a)
 #define ck_require(a)		Perl_ck_require(aTHX_ a)
-#define ck_retarget(a)		Perl_ck_retarget(aTHX_ a)
 #define ck_return(a)		Perl_ck_return(aTHX_ a)
 #define ck_rfun(a)		Perl_ck_rfun(aTHX_ a)
 #define ck_rvconst(a)		Perl_ck_rvconst(aTHX_ a)
