@@ -386,6 +386,14 @@ macro used can be changed.
 
 =back
 
+=head2
+
+C<Perl_ck_lengthconst> does nothing, but has the comment
+
+    /* XXX length optimization goes here */
+
+It predates 5.003. Investigate what it's about, and then implement it.
+
 =head2 Modernize the order of directories in @INC
 
 The way @INC is laid out by default, one cannot upgrade core (dual-life)
