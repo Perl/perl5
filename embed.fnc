@@ -1173,7 +1173,7 @@ s	|void	|save_magic	|I32 mgs_ix|NN SV *sv
 s	|int	|magic_methpack	|NN SV *sv|NN const MAGIC *mg|NN const char *meth
 s	|int	|magic_methcall	|NN SV *sv|NN const MAGIC *mg|NN const char *meth|I32 f \
 				|int n|NULLOK SV *val
-s	|void	|restore_magic	|NN const void *p
+s	|void	|restore_magic	|NULLOK const void *p
 s	|void	|unwind_handler_stack|NN const void *p
 
 #endif
