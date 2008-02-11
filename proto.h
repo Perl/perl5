@@ -3086,9 +3086,7 @@ STATIC int	S_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, I32
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 
-STATIC void	S_restore_magic(pTHX_ const void *p)
-			__attribute__nonnull__(pTHX_1);
-
+STATIC void	S_restore_magic(pTHX_ const void *p);
 STATIC void	S_unwind_handler_stack(pTHX_ const void *p)
 			__attribute__nonnull__(pTHX_1);
 
