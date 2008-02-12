@@ -152,7 +152,7 @@ X<av_clear>
 Clears an array, making it empty.  Does not free the memory used by the
 array itself.
 
-	void	av_clear(AV* ar)
+	void	av_clear(AV *av)
 
 =for hackers
 Found in file av.c
@@ -193,7 +193,7 @@ Deletes the element indexed by C<key> from the array.  Returns the
 deleted element. If C<flags> equals C<G_DISCARD>, the element is freed
 and null is returned.
 
-	SV*	av_delete(AV* ar, I32 key, I32 flags)
+	SV*	av_delete(AV *av, I32 key, I32 flags)
 
 =for hackers
 Found in file av.c
@@ -206,7 +206,7 @@ Returns true if the element indexed by C<key> has been initialized.
 This relies on the fact that uninitialized array elements are set to
 C<&PL_sv_undef>.
 
-	bool	av_exists(AV* ar, I32 key)
+	bool	av_exists(AV *av, I32 key)
 
 =for hackers
 Found in file av.c
@@ -217,7 +217,7 @@ X<av_extend>
 Pre-extend an array.  The C<key> is the index to which the array should be
 extended.
 
-	void	av_extend(AV* ar, I32 key)
+	void	av_extend(AV *av, I32 key)
 
 =for hackers
 Found in file av.c
@@ -232,7 +232,7 @@ that the return value is non-null before dereferencing it to a C<SV*>.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for
 more information on how to use this function on tied arrays. 
 
-	SV**	av_fetch(AV* ar, I32 key, I32 lval)
+	SV**	av_fetch(AV *av, I32 key, I32 lval)
 
 =for hackers
 Found in file av.c
@@ -249,7 +249,7 @@ additional elements appended are set to C<PL_sv_undef>.  If the array
 was longer, then the excess elements are freed.  C<av_fill(av, -1)> is
 the same as C<av_clear(av)>.
 
-	void	av_fill(AV* ar, I32 fill)
+	void	av_fill(AV *av, I32 fill)
 
 =for hackers
 Found in file av.c
@@ -260,7 +260,7 @@ X<av_len>
 Returns the highest index in the array.  The number of elements in the
 array is C<av_len(av) + 1>.  Returns -1 if the array is empty.
 
-	I32	av_len(const AV* ar)
+	I32	av_len(const AV *av)
 
 =for hackers
 Found in file av.c
@@ -272,7 +272,7 @@ Creates a new AV and populates it with a list of SVs.  The SVs are copied
 into the array, so they may be freed after the call to av_make.  The new AV
 will have a reference count of 1.
 
-	AV*	av_make(I32 size, SV** svp)
+	AV*	av_make(I32 size, SV **strp)
 
 =for hackers
 Found in file av.c
@@ -283,7 +283,7 @@ X<av_pop>
 Pops an SV off the end of the array.  Returns C<&PL_sv_undef> if the array
 is empty.
 
-	SV*	av_pop(AV* ar)
+	SV*	av_pop(AV *av)
 
 =for hackers
 Found in file av.c
@@ -294,7 +294,7 @@ X<av_push>
 Pushes an SV onto the end of the array.  The array will grow automatically
 to accommodate the addition.
 
-	void	av_push(AV* ar, SV* val)
+	void	av_push(AV *av, SV *val)
 
 =for hackers
 Found in file av.c
@@ -305,7 +305,7 @@ X<av_shift>
 Shifts an SV off the beginning of the array. Returns C<&PL_sv_undef> if the 
 array is empty.
 
-	SV*	av_shift(AV* ar)
+	SV*	av_shift(AV *av)
 
 =for hackers
 Found in file av.c
@@ -324,7 +324,7 @@ returned NULL.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for
 more information on how to use this function on tied arrays.
 
-	SV**	av_store(AV* ar, I32 key, SV* val)
+	SV**	av_store(AV *av, I32 key, SV *val)
 
 =for hackers
 Found in file av.c
@@ -334,7 +334,7 @@ X<av_undef>
 
 Undefines the array.  Frees the memory used by the array itself.
 
-	void	av_undef(AV* ar)
+	void	av_undef(AV *av)
 
 =for hackers
 Found in file av.c
@@ -346,7 +346,7 @@ Unshift the given number of C<undef> values onto the beginning of the
 array.  The array will grow automatically to accommodate the addition.  You
 must then use C<av_store> to assign values to these new elements.
 
-	void	av_unshift(AV* ar, I32 num)
+	void	av_unshift(AV *av, I32 num)
 
 =for hackers
 Found in file av.c
@@ -659,7 +659,7 @@ if you just want to do some stuff in a separate perl interpreter
 and then throw it away and return to the original one,
 you don't need to do anything.
 
-	PerlInterpreter*	perl_clone(PerlInterpreter* interp, UV flags)
+	PerlInterpreter*	perl_clone(PerlInterpreter *proto_perl, UV flags)
 
 =for hackers
 Found in file sv.c
@@ -772,7 +772,7 @@ X<perl_construct>
 
 Initializes a new Perl interpreter.  See L<perlembed>.
 
-	void	perl_construct(PerlInterpreter* interp)
+	void	perl_construct(PerlInterpreter *my_perl)
 
 =for hackers
 Found in file perl.c
@@ -782,7 +782,7 @@ X<perl_destruct>
 
 Shuts down a Perl interpreter.  See L<perlembed>.
 
-	int	perl_destruct(PerlInterpreter* interp)
+	int	perl_destruct(PerlInterpreter *my_perl)
 
 =for hackers
 Found in file perl.c
@@ -792,7 +792,7 @@ X<perl_free>
 
 Releases a Perl interpreter.  See L<perlembed>.
 
-	void	perl_free(PerlInterpreter* interp)
+	void	perl_free(PerlInterpreter *my_perl)
 
 =for hackers
 Found in file perl.c
@@ -802,7 +802,7 @@ X<perl_parse>
 
 Tells a Perl interpreter to parse a Perl script.  See L<perlembed>.
 
-	int	perl_parse(PerlInterpreter* interp, XSINIT_t xsinit, int argc, char** argv, char** env)
+	int	perl_parse(PerlInterpreter *my_perl, XSINIT_t xsinit, int argc, char** argv, char** env)
 
 =for hackers
 Found in file perl.c
@@ -812,7 +812,7 @@ X<perl_run>
 
 Tells a Perl interpreter to run.  See L<perlembed>.
 
-	int	perl_run(PerlInterpreter* interp)
+	int	perl_run(PerlInterpreter *my_perl)
 
 =for hackers
 Found in file perl.c
@@ -1005,7 +1005,7 @@ X<sv_catsv_mg>
 
 Like C<sv_catsv>, but also handles 'set' magic.
 
-	void	sv_catsv_mg(SV *dstr, SV *sstr)
+	void	sv_catsv_mg(SV *dsv, SV *ssv)
 
 =for hackers
 Found in file mathoms.c
@@ -1099,7 +1099,7 @@ A private implementation of the C<SvPVbyte> macro for compilers
 which can't cope with complex macro expressions. Always use the macro
 instead.
 
-	char*	sv_pvbyten(SV *sv, STRLEN *len)
+	char*	sv_pvbyten(SV *sv, STRLEN *lp)
 
 =for hackers
 Found in file mathoms.c
@@ -1110,7 +1110,7 @@ X<sv_pvn>
 A private implementation of the C<SvPV> macro for compilers which can't
 cope with complex macro expressions. Always use the macro instead.
 
-	char*	sv_pvn(SV *sv, STRLEN *len)
+	char*	sv_pvn(SV *sv, STRLEN *lp)
 
 =for hackers
 Found in file mathoms.c
@@ -1132,7 +1132,7 @@ A private implementation of the C<SvPVutf8> macro for compilers
 which can't cope with complex macro expressions. Always use the macro
 instead.
 
-	char*	sv_pvutf8n(SV *sv, STRLEN *len)
+	char*	sv_pvutf8n(SV *sv, STRLEN *lp)
 
 =for hackers
 Found in file mathoms.c
@@ -1610,7 +1610,7 @@ X<hv_assert>
 
 Check that a hash is in an internally consistent state.
 
-	void	hv_assert(HV* tb)
+	void	hv_assert(HV *hv)
 
 =for hackers
 Found in file hv.c
@@ -1620,7 +1620,7 @@ X<hv_clear>
 
 Clears a hash, making it empty.
 
-	void	hv_clear(HV* tb)
+	void	hv_clear(HV *hv)
 
 =for hackers
 Found in file hv.c
@@ -1636,7 +1636,7 @@ but will still allow the hash to have a value reassigned to the key at some
 future point.  This function clears any such placeholder keys from the hash.
 See Hash::Util::lock_keys() for an example of its use.
 
-	void	hv_clear_placeholders(HV* hb)
+	void	hv_clear_placeholders(HV *hv)
 
 =for hackers
 Found in file hv.c
@@ -1649,7 +1649,7 @@ hash and returned to the caller.  The C<klen> is the length of the key.
 The C<flags> value will normally be zero; if set to G_DISCARD then NULL
 will be returned.
 
-	SV*	hv_delete(HV* tb, const char* key, I32 klen, I32 flags)
+	SV*	hv_delete(HV *hv, const char *key, I32 klen, I32 flags)
 
 =for hackers
 Found in file hv.c
@@ -1662,7 +1662,7 @@ hash and returned to the caller.  The C<flags> value will normally be zero;
 if set to G_DISCARD then NULL will be returned.  C<hash> can be a valid
 precomputed hash value, or 0 to ask for it to be computed.
 
-	SV*	hv_delete_ent(HV* tb, SV* key, I32 flags, U32 hash)
+	SV*	hv_delete_ent(HV *hv, SV *keysv, I32 flags, U32 hash)
 
 =for hackers
 Found in file hv.c
@@ -1673,7 +1673,7 @@ X<hv_exists>
 Returns a boolean indicating whether the specified hash key exists.  The
 C<klen> is the length of the key.
 
-	bool	hv_exists(HV* tb, const char* key, I32 klen)
+	bool	hv_exists(HV *hv, const char *key, I32 klen)
 
 =for hackers
 Found in file hv.c
@@ -1685,7 +1685,7 @@ Returns a boolean indicating whether the specified hash key exists. C<hash>
 can be a valid precomputed hash value, or 0 to ask for it to be
 computed.
 
-	bool	hv_exists_ent(HV* tb, SV* key, U32 hash)
+	bool	hv_exists_ent(HV *hv, SV *keysv, U32 hash)
 
 =for hackers
 Found in file hv.c
@@ -1701,7 +1701,7 @@ dereferencing it to an C<SV*>.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
-	SV**	hv_fetch(HV* tb, const char* key, I32 klen, I32 lval)
+	SV**	hv_fetch(HV *hv, const char *key, I32 klen, I32 lval)
 
 =for hackers
 Found in file hv.c
@@ -1730,7 +1730,7 @@ store it somewhere.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
-	HE*	hv_fetch_ent(HV* tb, SV* key, I32 lval, U32 hash)
+	HE*	hv_fetch_ent(HV *hv, SV *keysv, I32 lval, U32 hash)
 
 =for hackers
 Found in file hv.c
@@ -1747,7 +1747,7 @@ hash buckets that happen to be in use.  If you still need that esoteric
 value, you can get it through the macro C<HvFILL(tb)>.
 
 
-	I32	hv_iterinit(HV* tb)
+	I32	hv_iterinit(HV *hv)
 
 =for hackers
 Found in file hv.c
@@ -1788,7 +1788,7 @@ to free the entry on the next call to C<hv_iternext>, so you must not discard
 your iterator immediately else the entry will leak - call C<hv_iternext> to
 trigger the resource deallocation.
 
-	HE*	hv_iternext(HV* tb)
+	HE*	hv_iternext(HV *hv)
 
 =for hackers
 Found in file hv.c
@@ -1799,7 +1799,7 @@ X<hv_iternextsv>
 Performs an C<hv_iternext>, C<hv_iterkey>, and C<hv_iterval> in one
 operation.
 
-	SV*	hv_iternextsv(HV* hv, char** key, I32* retlen)
+	SV*	hv_iternextsv(HV *hv, char **key, I32 *retlen)
 
 =for hackers
 Found in file hv.c
@@ -1819,7 +1819,7 @@ insufficiently abstracted for any change to be tidy.
 NOTE: this function is experimental and may change or be
 removed without notice.
 
-	HE*	hv_iternext_flags(HV* tb, I32 flags)
+	HE*	hv_iternext_flags(HV *hv, I32 flags)
 
 =for hackers
 Found in file hv.c
@@ -1830,7 +1830,7 @@ X<hv_iterval>
 Returns the value from the current position of the hash iterator.  See
 C<hv_iterkey>.
 
-	SV*	hv_iterval(HV* tb, HE* entry)
+	SV*	hv_iterval(HV *hv, HE *entry)
 
 =for hackers
 Found in file hv.c
@@ -1840,7 +1840,7 @@ X<hv_magic>
 
 Adds magic to a hash.  See C<sv_magic>.
 
-	void	hv_magic(HV* hv, GV* gv, int how)
+	void	hv_magic(HV *hv, GV *gv, int how)
 
 =for hackers
 Found in file hv.c
@@ -1850,7 +1850,7 @@ X<hv_scalar>
 
 Evaluates the hash in scalar context and returns the result. Handles magic when the hash is tied.
 
-	SV*	hv_scalar(HV* hv)
+	SV*	hv_scalar(HV *hv)
 
 =for hackers
 Found in file hv.c
@@ -1878,7 +1878,7 @@ hv_store_ent.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
-	SV**	hv_store(HV* tb, const char* key, I32 klen, SV* val, U32 hash)
+	SV**	hv_store(HV *hv, const char *key, I32 klen, SV *val, U32 hash)
 
 =for hackers
 Found in file hv.c
@@ -1920,7 +1920,7 @@ hv_store in preference to hv_store_ent.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
-	HE*	hv_store_ent(HV* tb, SV* key, SV* val, U32 hash)
+	HE*	hv_store_ent(HV *hv, SV *key, SV *val, U32 hash)
 
 =for hackers
 Found in file hv.c
@@ -1930,7 +1930,7 @@ X<hv_undef>
 
 Undefines the hash.
 
-	void	hv_undef(HV* tb)
+	void	hv_undef(HV *hv)
 
 =for hackers
 Found in file hv.c
@@ -1967,7 +1967,7 @@ X<mg_copy>
 
 Copies the magic from one SV to another.  See C<sv_magic>.
 
-	int	mg_copy(SV* sv, SV* nsv, const char* key, I32 klen)
+	int	mg_copy(SV *sv, SV *nsv, const char *key, I32 klen)
 
 =for hackers
 Found in file mg.c
@@ -5512,7 +5512,7 @@ C<len> indicates number of bytes to copy.  If the SV has the UTF-8
 status set, then the bytes appended should be valid UTF-8.
 Handles 'get' magic, but not 'set' magic.  See C<sv_catpvn_mg>.
 
-	void	sv_catpvn(SV* sv, const char* ptr, STRLEN len)
+	void	sv_catpvn(SV *dsv, const char *sstr, STRLEN len)
 
 =for hackers
 Found in file sv.c
@@ -5527,7 +5527,7 @@ If C<flags> has C<SV_GMAGIC> bit set, will C<mg_get> on C<dsv> if
 appropriate, else not. C<sv_catpvn> and C<sv_catpvn_nomg> are implemented
 in terms of this function.
 
-	void	sv_catpvn_flags(SV* sv, const char* ptr, STRLEN len, I32 flags)
+	void	sv_catpvn_flags(SV *dstr, const char *sstr, STRLEN len, I32 flags)
 
 =for hackers
 Found in file sv.c
@@ -5559,7 +5559,7 @@ Concatenates the string from SV C<ssv> onto the end of the string in
 SV C<dsv>.  Modifies C<dsv> but not C<ssv>.  Handles 'get' magic, but
 not 'set' magic.  See C<sv_catsv_mg>.
 
-	void	sv_catsv(SV* dsv, SV* ssv)
+	void	sv_catsv(SV *dstr, SV *sstr)
 
 =for hackers
 Found in file sv.c
@@ -5758,7 +5758,7 @@ X<sv_insert>
 Inserts a string at the specified offset/length within the SV. Similar to
 the Perl substr() function.
 
-	void	sv_insert(SV* bigsv, STRLEN offset, STRLEN len, const char* little, STRLEN littlelen)
+	void	sv_insert(SV *bigstr, STRLEN offset, STRLEN len, const char *little, STRLEN littlelen)
 
 =for hackers
 Found in file sv.c
@@ -6237,7 +6237,7 @@ You probably want to use one of the assortment of wrappers, such as
 C<SvSetSV>, C<SvSetSV_nosteal>, C<SvSetMagicSV> and
 C<SvSetMagicSV_nosteal>.
 
-	void	sv_setsv(SV* dsv, SV* ssv)
+	void	sv_setsv(SV *dstr, SV *sstr)
 
 =for hackers
 Found in file sv.c
@@ -6262,7 +6262,7 @@ C<SvSetMagicSV_nosteal>.
 This is the primary function for copying scalars, and most other
 copy-ish functions and macros use this underneath.
 
-	void	sv_setsv_flags(SV* dsv, SV* ssv, I32 flags)
+	void	sv_setsv_flags(SV *dstr, SV *sstr, I32 flags)
 
 =for hackers
 Found in file sv.c
@@ -6340,7 +6340,7 @@ C<SV_IMMEDIATE_UNREF> to force the reference count to be decremented
 different from one or the reference being a readonly SV).
 See C<SvROK_off>.
 
-	void	sv_unref_flags(SV* sv, U32 flags)
+	void	sv_unref_flags(SV *ref, U32 flags)
 
 =for hackers
 Found in file sv.c
@@ -6634,7 +6634,7 @@ For case-insensitiveness, the "casefolding" of Unicode is used
 instead of upper/lowercasing both the characters, see
 http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
 
-	I32	ibcmp_utf8(const char* a, char **pe1, UV l1, bool u1, const char* b, char **pe2, UV l2, bool u2)
+	I32	ibcmp_utf8(const char *s1, char **pe1, UV l1, bool u1, const char *s2, char **pe2, UV l2, bool u2)
 
 =for hackers
 Found in file utf8.c
@@ -6647,7 +6647,7 @@ character.  Note that an INVARIANT (i.e. ASCII on non-EBCDIC machines)
 character is a valid UTF-8 character.  The actual number of bytes in the UTF-8
 character will be returned if it is valid, otherwise 0.
 
-	STRLEN	is_utf8_char(const U8 *p)
+	STRLEN	is_utf8_char(const U8 *s)
 
 =for hackers
 Found in file utf8.c

@@ -421,7 +421,7 @@ perl on VMS). This code used to be inline, but now perl uses C<File::Glob>
 this glob starter is only used by miniperl during the build process.
 Moving it away shrinks pp_hot.c; shrinking pp_hot.c helps speed perl up.
 
-	PerlIO*	start_glob(SV* pattern, IO *io)
+	PerlIO*	start_glob(SV *tmpglob, IO *io)
 
 =for hackers
 Found in file doio.c
