@@ -1620,7 +1620,7 @@ X<hv_clear>
 
 Clears a hash, making it empty.
 
-	void	hv_clear(HV *hv)
+	void	hv_clear(HV* hv)
 
 =for hackers
 Found in file hv.c

@@ -74,6 +74,7 @@ void
 Perl_dump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
 {
     va_list args;
+    PERL_ARGS_ASSERT_DUMP_INDENT;
     va_start(args, pat);
     dump_vindent(level, file, pat, &args);
     va_end(args);
@@ -83,6 +84,7 @@ void
 Perl_dump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args)
 {
     dVAR;
+    PERL_ARGS_ASSERT_DUMP_VINDENT;
     PerlIO_printf(file, "%*s", (int)(level*PL_dumpindent), "");
     PerlIO_vprintf(file, pat, *args);
 }
@@ -102,6 +104,8 @@ Perl_dump_packsubs(pTHX_ const HV *stash)
 {
     dVAR;
     I32	i;
+
+    PERL_ARGS_ASSERT_DUMP_PACKSUBS;
 
     if (!HvARRAY(stash))
 	return;
@@ -129,6 +133,8 @@ Perl_dump_sub(pTHX_ const GV *gv)
 {
     SV * const sv = sv_newmortal();
 
+    PERL_ARGS_ASSERT_DUMP_SUB;
+
     gv_fullname3(sv, gv, NULL);
     Perl_dump_indent(aTHX_ 0, Perl_debug_log, "\nSUB %s = ", SvPVX_const(sv));
     if (CvISXSUB(GvCV(gv)))
@@ -145,6 +151,8 @@ void
 Perl_dump_form(pTHX_ const GV *gv)
 {
     SV * const sv = sv_newmortal();
+
+    PERL_ARGS_ASSERT_DUMP_FORM;
 
     gv_fullname3(sv, gv, NULL);
     Perl_dump_indent(aTHX_ 0, Perl_debug_log, "\nFORMAT %s = ", SvPVX_const(sv));
@@ -218,6 +226,8 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
     const char *pv  = str;
     const char * const end = pv + count; /* end of string */
     octbuf[0] = esc;
+
+    PERL_ARGS_ASSERT_PV_ESCAPE;
 
     if (!(flags & PERL_PV_ESCAPE_NOCLEAR)) {
 	    /* This won't alter the UTF-8 flag */
@@ -329,7 +339,9 @@ Perl_pv_pretty( pTHX_ SV *dsv, char const * const str, const STRLEN count,
 {
     const U8 dq = (flags & PERL_PV_PRETTY_QUOTE) ? '"' : '%';
     STRLEN escaped;
-    
+ 
+    PERL_ARGS_ASSERT_PV_PRETTY;
+   
     if (!(flags & PERL_PV_PRETTY_NOCLEAR)) {
 	    /* This won't alter the UTF-8 flag */
 	    sv_setpvs(dsv, "");
@@ -377,6 +389,8 @@ Note that the final string may be up to 7 chars longer than pvlim.
 char *
 Perl_pv_display(pTHX_ SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
 {
+    PERL_ARGS_ASSERT_PV_DISPLAY;
+
     pv_pretty( dsv, pv, cur, pvlim, NULL, NULL, PERL_PV_PRETTY_DUMP);
     if (len > cur && pv[cur] == '\0')
             sv_catpvs( dsv, "\\0");
@@ -528,6 +542,8 @@ Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
 {
     char ch;
 
+    PERL_ARGS_ASSERT_DO_PMOP_DUMP;
+
     if (!pm) {
 	Perl_dump_indent(aTHX_ level, file, "{}\n");
 	return;
@@ -563,6 +579,8 @@ S_pm_description(pTHX_ const PMOP *pm)
     SV * const desc = newSVpvs("");
     const REGEXP * const regex = PM_GETRE(pm);
     const U32 pmflags = pm->op_pmflags;
+
+    PERL_ARGS_ASSERT_PM_DESCRIPTION;
 
     if (pmflags & PMf_ONCE)
 	sv_catpv(desc, ",ONCE");
@@ -728,6 +746,8 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
     dVAR;
     UV      seq;
     const OPCODE optype = o->op_type;
+
+    PERL_ARGS_ASSERT_DO_OP_DUMP;
 
     sequence(o);
     Perl_dump_indent(aTHX_ level, file, "{\n");
@@ -1119,6 +1139,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 void
 Perl_op_dump(pTHX_ const OP *o)
 {
+    PERL_ARGS_ASSERT_OP_DUMP;
     do_op_dump(0, Perl_debug_log, o);
 }
 
@@ -1126,6 +1147,8 @@ void
 Perl_gv_dump(pTHX_ GV *gv)
 {
     SV *sv;
+
+    PERL_ARGS_ASSERT_GV_DUMP;
 
     if (!gv) {
 	PerlIO_printf(Perl_debug_log, "{}\n");
@@ -1198,6 +1221,8 @@ static const struct { const char type; const char *name; } magic_names[] = {
 void
 Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim)
 {
+    PERL_ARGS_ASSERT_DO_MAGIC_DUMP;
+
     for (; mg; mg = mg->mg_moremagic) {
  	Perl_dump_indent(aTHX_ level, file,
 			 "  MAGIC = 0x%"UVxf"\n", PTR2UV(mg));
@@ -1339,6 +1364,9 @@ void
 Perl_do_hv_dump(pTHX_ I32 level, PerlIO *file, const char *name, HV *sv)
 {
     const char *hvname;
+
+    PERL_ARGS_ASSERT_DO_HV_DUMP;
+
     Perl_dump_indent(aTHX_ level, file, "%s = 0x%"UVxf, name, PTR2UV(sv));
     if (sv && (hvname = HvNAME_get(sv)))
 	PerlIO_printf(file, "\t\"%s\"\n", hvname);
@@ -1349,6 +1377,8 @@ Perl_do_hv_dump(pTHX_ I32 level, PerlIO *file, const char *name, HV *sv)
 void
 Perl_do_gv_dump(pTHX_ I32 level, PerlIO *file, const char *name, GV *sv)
 {
+    PERL_ARGS_ASSERT_DO_GV_DUMP;
+
     Perl_dump_indent(aTHX_ level, file, "%s = 0x%"UVxf, name, PTR2UV(sv));
     if (sv && GvNAME(sv))
 	PerlIO_printf(file, "\t\"%s\"\n", GvNAME(sv));
@@ -1359,6 +1389,8 @@ Perl_do_gv_dump(pTHX_ I32 level, PerlIO *file, const char *name, GV *sv)
 void
 Perl_do_gvgv_dump(pTHX_ I32 level, PerlIO *file, const char *name, GV *sv)
 {
+    PERL_ARGS_ASSERT_DO_GVGV_DUMP;
+
     Perl_dump_indent(aTHX_ level, file, "%s = 0x%"UVxf, name, PTR2UV(sv));
     if (sv && GvNAME(sv)) {
 	const char *hvname;
@@ -1379,6 +1411,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     const char *s;
     U32 flags;
     U32 type;
+
+    PERL_ARGS_ASSERT_DO_SV_DUMP;
 
     if (!sv) {
 	Perl_dump_indent(aTHX_ level, file, "SV = 0\n");
@@ -1888,6 +1922,9 @@ void
 Perl_sv_dump(pTHX_ SV *sv)
 {
     dVAR;
+
+    PERL_ARGS_ASSERT_SV_DUMP;
+
     if (SvROK(sv))
 	do_sv_dump(0, Perl_debug_log, sv, 0, 4, 0, 0);
     else
@@ -1937,6 +1974,9 @@ I32
 Perl_debop(pTHX_ const OP *o)
 {
     dVAR;
+
+    PERL_ARGS_ASSERT_DEBOP;
+
     if (CopSTASH_eq(PL_curcop, PL_debstash) && !DEBUG_J_TEST_)
 	return 0;
 
@@ -2015,6 +2055,9 @@ void
 Perl_watch(pTHX_ char **addr)
 {
     dVAR;
+
+    PERL_ARGS_ASSERT_WATCH;
+
     PL_watchaddr = addr;
     PL_watchok = *addr;
     PerlIO_printf(Perl_debug_log, "WATCHING, %"UVxf" is currently %"UVxf"\n",
@@ -2025,6 +2068,9 @@ STATIC void
 S_debprof(pTHX_ const OP *o)
 {
     dVAR;
+
+    PERL_ARGS_ASSERT_DEBPROF;
+
     if (!DEBUG_J_TEST_ && CopSTASH_eq(PL_curcop, PL_debstash))
 	return;
     if (!PL_profiledata)
@@ -2056,6 +2102,9 @@ STATIC void
 S_xmldump_attr(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
 {
     va_list args;
+
+    PERL_ARGS_ASSERT_XMLDUMP_ATTR;
+
     PerlIO_printf(file, "\n    ");
     va_start(args, pat);
     xmldump_vindent(level, file, pat, &args);
@@ -2067,6 +2116,7 @@ void
 Perl_xmldump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
 {
     va_list args;
+    PERL_ARGS_ASSERT_XMLDUMP_INDENT;
     va_start(args, pat);
     xmldump_vindent(level, file, pat, &args);
     va_end(args);
@@ -2075,6 +2125,8 @@ Perl_xmldump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
 void
 Perl_xmldump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args)
 {
+    PERL_ARGS_ASSERT_XMLDUMP_VINDENT;
+
     PerlIO_printf(file, "%*s", (int)(level*PL_dumpindent), "");
     PerlIO_vprintf(file, pat, *args);
 }
@@ -2095,6 +2147,8 @@ Perl_xmldump_packsubs(pTHX_ const HV *stash)
 {
     I32	i;
     HE	*entry;
+
+    PERL_ARGS_ASSERT_XMLDUMP_PACKSUBS;
 
     if (!HvARRAY(stash))
 	return;
@@ -2120,6 +2174,8 @@ Perl_xmldump_sub(pTHX_ const GV *gv)
 {
     SV * const sv = sv_newmortal();
 
+    PERL_ARGS_ASSERT_XMLDUMP_SUB;
+
     gv_fullname3(sv, gv, NULL);
     Perl_xmldump_indent(aTHX_ 0, PL_xmlfp, "\nSUB %s = ", SvPVX(sv));
     if (CvXSUB(GvCV(gv)))
@@ -2136,6 +2192,8 @@ void
 Perl_xmldump_form(pTHX_ const GV *gv)
 {
     SV * const sv = sv_newmortal();
+
+    PERL_ARGS_ASSERT_XMLDUMP_FORM;
 
     gv_fullname3(sv, gv, NULL);
     Perl_xmldump_indent(aTHX_ 0, PL_xmlfp, "\nFORMAT %s = ", SvPVX(sv));
@@ -2154,6 +2212,7 @@ Perl_xmldump_eval(pTHX)
 char *
 Perl_sv_catxmlsv(pTHX_ SV *dsv, SV *ssv)
 {
+    PERL_ARGS_ASSERT_SV_CATXMLSV;
     return sv_catxmlpvn(dsv, SvPVX(ssv), SvCUR(ssv), SvUTF8(ssv));
 }
 
@@ -2165,6 +2224,8 @@ Perl_sv_catxmlpvn(pTHX_ SV *dsv, const char *pv, STRLEN len, int utf8)
     const char * const start = pv;
     STRLEN dsvcur;
     STRLEN cl;
+
+    PERL_ARGS_ASSERT_SV_CATXMLPVN;
 
     sv_catpvs(dsv,"");
     dsvcur = SvCUR(dsv);	/* in case we have to restart */
@@ -2288,6 +2349,8 @@ Perl_sv_xmlpeek(pTHX_ SV *sv)
     SV * const t = sv_newmortal();
     STRLEN n_a;
     int unref = 0;
+
+    PERL_ARGS_ASSERT_SV_XMLPEEK;
 
     sv_utf8_upgrade(t);
     sv_setpvs(t, "");
@@ -2449,6 +2512,8 @@ Perl_sv_xmlpeek(pTHX_ SV *sv)
 void
 Perl_do_pmop_xmldump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
 {
+    PERL_ARGS_ASSERT_DO_PMOP_XMLDUMP;
+
     if (!pm) {
 	Perl_xmldump_indent(aTHX_ level, file, "<pmop/>\n");
 	return;
@@ -2497,6 +2562,9 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 {
     UV      seq;
     int     contents = 0;
+
+    PERL_ARGS_ASSERT_DO_OP_XMLDUMP;
+
     if (!o)
 	return;
     sequence(o);
@@ -2922,6 +2990,8 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 void
 Perl_op_xmldump(pTHX_ const OP *o)
 {
+    PERL_ARGS_ASSERT_OP_XMLDUMP;
+
     do_op_xmldump(0, PL_xmlfp, o);
 }
 #endif

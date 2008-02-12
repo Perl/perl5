@@ -309,6 +309,8 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
 {
     UV *p = (UV*)*rsp;
     U32 i;
+
+    PERL_ARGS_ASSERT_RXRES_SAVE;
     PERL_UNUSED_CONTEXT;
 
     if (!p || p[1] < RX_NPARENS(rx)) {
@@ -347,6 +349,8 @@ Perl_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
 {
     UV *p = (UV*)*rsp;
     U32 i;
+
+    PERL_ARGS_ASSERT_RXRES_RESTORE;
     PERL_UNUSED_CONTEXT;
 
     RX_MATCH_COPY_FREE(rx);
@@ -374,6 +378,8 @@ void
 Perl_rxres_free(pTHX_ void **rsp)
 {
     UV * const p = (UV*)*rsp;
+
+    PERL_ARGS_ASSERT_RXRES_FREE;
     PERL_UNUSED_CONTEXT;
 
     if (p) {
@@ -1249,6 +1255,8 @@ S_dopoptolabel(pTHX_ const char *label)
     dVAR;
     register I32 i;
 
+    PERL_ARGS_ASSERT_DOPOPTOLABEL;
+
     for (i = cxstack_ix; i >= 0; i--) {
 	register const PERL_CONTEXT * const cx = &cxstack[i];
 	switch (CxTYPE(cx)) {
@@ -1328,6 +1336,9 @@ S_dopoptosub_at(pTHX_ const PERL_CONTEXT *cxstk, I32 startingblock)
 {
     dVAR;
     I32 i;
+
+    PERL_ARGS_ASSERT_DOPOPTOSUB_AT;
+
     for (i = startingblock; i >= 0; i--) {
 	register const PERL_CONTEXT * const cx = &cxstk[i];
 	switch (CxTYPE(cx)) {
@@ -1470,6 +1481,9 @@ void
 Perl_qerror(pTHX_ SV *err)
 {
     dVAR;
+
+    PERL_ARGS_ASSERT_QERROR;
+
     if (PL_in_eval)
 	sv_catsv(ERRSV, err);
     else if (PL_errors)
@@ -2290,6 +2304,8 @@ S_dofindlabel(pTHX_ OP *o, const char *label, OP **opstack, OP **oplimit)
     OP **ops = opstack;
     static const char too_deep[] = "Target of goto is too deeply nested";
 
+    PERL_ARGS_ASSERT_DOFINDLABEL;
+
     if (ops >= oplimit)
 	Perl_croak(aTHX_ too_deep);
     if (o->op_type == OP_LEAVE ||
@@ -2691,6 +2707,8 @@ S_save_lines(pTHX_ AV *array, SV *sv)
     const char * const send = SvPVX_const(sv) + SvCUR(sv);
     I32 line = 1;
 
+    PERL_ARGS_ASSERT_SAVE_LINES;
+
     while (s && s < send) {
 	const char *t;
 	SV * const tmpstr = newSV_type(SVt_PVMG);
@@ -2777,6 +2795,8 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
     int runtime;
     CV* runcv = NULL;	/* initialise to avoid compiler warnings */
     STRLEN len;
+
+    PERL_ARGS_ASSERT_SV_COMPILE_2OP;
 
     ENTER;
     lex_start(sv, NULL, FALSE);
@@ -3058,6 +3078,8 @@ S_check_type_and_open(pTHX_ const char *name)
     Stat_t st;
     const int st_rc = PerlLIO_stat(name, &st);
 
+    PERL_ARGS_ASSERT_CHECK_TYPE_AND_OPEN;
+
     if (st_rc < 0 || S_ISDIR(st.st_mode) || S_ISBLK(st.st_mode)) {
 	return NULL;
     }
@@ -3070,6 +3092,8 @@ STATIC PerlIO *
 S_doopen_pm(pTHX_ const char *name, const STRLEN namelen)
 {
     PerlIO *fp;
+
+    PERL_ARGS_ASSERT_DOOPEN_PM;
 
     if (namelen > 3 && memEQs(name + namelen - 3, 3, ".pm")) {
 	SV *const pmcsv = newSV(namelen + 2);
@@ -3884,8 +3908,11 @@ S_make_matcher(pTHX_ REGEXP *re)
 {
     dVAR;
     PMOP *matcher = (PMOP *) newPMOP(OP_MATCH, OPf_WANT_SCALAR | OPf_STACKED);
+
+    PERL_ARGS_ASSERT_MAKE_MATCHER;
+
     PM_SETRE(matcher, ReREFCNT_inc(re));
-    
+
     SAVEFREEOP((OP *) matcher);
     ENTER; SAVETMPS;
     SAVEOP();
@@ -3897,6 +3924,8 @@ S_matcher_matches_sv(pTHX_ PMOP *matcher, SV *sv)
 {
     dVAR;
     dSP;
+
+    PERL_ARGS_ASSERT_MATCHER_MATCHES_SV;
     
     PL_op = (OP *) matcher;
     XPUSHs(sv);
@@ -3910,7 +3939,10 @@ STATIC void
 S_destroy_matcher(pTHX_ PMOP *matcher)
 {
     dVAR;
+
+    PERL_ARGS_ASSERT_DESTROY_MATCHER;
     PERL_UNUSED_ARG(matcher);
+
     FREETMPS;
     LEAVE;
 }
@@ -4427,6 +4459,8 @@ S_doparseform(pTHX_ SV *sv)
     bool unchopnum = FALSE;
     int maxops = 12; /* FF_LINEMARK + FF_END + 10 (\0 without preceding \n) */
 
+    PERL_ARGS_ASSERT_DOPARSEFORM;
+
     if (len == 0)
 	Perl_croak(aTHX_ "Null picture in formline");
 
@@ -4669,6 +4703,8 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
     bool read_from_cache = FALSE;
     STRLEN umaxlen;
 
+    PERL_ARGS_ASSERT_RUN_USER_FILTER;
+
     assert(maxlen >= 0);
     umaxlen = maxlen;
 
@@ -4835,6 +4871,8 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 static bool
 S_path_is_absolute(const char *name)
 {
+    PERL_ARGS_ASSERT_PATH_IS_ABSOLUTE;
+
     if (PERL_FILE_IS_ABSOLUTE(name)
 #ifdef MACOS_TRADITIONAL
 	|| (*name == ':')

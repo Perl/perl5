@@ -198,6 +198,9 @@ void
 Perl_sys_init(int* argc, char*** argv)
 {
     dVAR;
+
+    PERL_ARGS_ASSERT_SYS_INIT;
+
     PERL_UNUSED_ARG(argc); /* may not be used depending on _BODY macro */
     PERL_UNUSED_ARG(argv);
     PERL_SYS_INIT_BODY(argc, argv);
@@ -207,6 +210,9 @@ void
 Perl_sys_init3(int* argc, char*** argv, char*** env)
 {
     dVAR;
+
+    PERL_ARGS_ASSERT_SYS_INIT3;
+
     PERL_UNUSED_ARG(argc); /* may not be used depending on _BODY macro */
     PERL_UNUSED_ARG(argv);
     PERL_UNUSED_ARG(env);
@@ -232,6 +238,9 @@ perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
 		 struct IPerlProc* ipP)
 {
     PerlInterpreter *my_perl;
+
+    PERL_ARGS_ASSERT_PERL_ALLOC_USING;
+
     /* Newx() needs interpreter, so call malloc() instead */
     my_perl = (PerlInterpreter*)(*ipM->pMalloc)(ipM, sizeof(PerlInterpreter));
     S_init_tls_and_interp(my_perl);
@@ -292,11 +301,14 @@ void
 perl_construct(pTHXx)
 {
     dVAR;
-    PERL_UNUSED_ARG(my_perl);
+
+    PERL_ARGS_ASSERT_PERL_CONSTRUCT;
+
 #ifdef MULTIPLICITY
     init_interp();
     PL_perl_destruct_level = 1;
 #else
+    PERL_UNUSED_ARG(my_perl);
    if (PL_perl_destruct_level > 0)
        init_interp();
 #endif
@@ -481,6 +493,8 @@ Perl_dump_sv_child(pTHX_ SV *sv)
     int returned_errno;
     unsigned char buffer[256];
 
+    PERL_ARGS_ASSERT_DUMP_SV_CHILD;
+
     if(sock == -1 || debug_fd == -1)
 	return;
 
@@ -583,7 +597,10 @@ perl_destruct(pTHXx)
     pid_t child;
 #endif
 
+    PERL_ARGS_ASSERT_PERL_DESTRUCT;
+#ifndef MULTIPLICITY
     PERL_UNUSED_ARG(my_perl);
+#endif
 
     /* wait for all pseudo-forked children to finish */
     PERL_WAIT_FOR_CHILDREN;
@@ -1359,6 +1376,8 @@ perl_free(pTHXx)
 {
     dVAR;
 
+    PERL_ARGS_ASSERT_PERL_FREE;
+
     if (PL_veto_cleanup)
 	return;
 
@@ -1510,7 +1529,10 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
     int ret;
     dJMPENV;
 
+    PERL_ARGS_ASSERT_PERL_PARSE;
+#ifndef MULTIPLICITY
     PERL_UNUSED_ARG(my_perl);
+#endif
 
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW_AND_IAMSUID
     Perl_croak(aTHX_ "suidperl is no longer needed since the kernel can now "
@@ -2312,7 +2334,10 @@ perl_run(pTHXx)
     int ret = 0;
     dJMPENV;
 
+    PERL_ARGS_ASSERT_PERL_RUN;
+#ifndef MULTIPLICITY
     PERL_UNUSED_ARG(my_perl);
+#endif
 
     oldscope = PL_scopestack_ix;
 #ifdef VMS
@@ -2430,6 +2455,9 @@ SV*
 Perl_get_sv(pTHX_ const char *name, I32 create)
 {
     GV *gv;
+
+    PERL_ARGS_ASSERT_GET_SV;
+
     gv = gv_fetchpv(name, create, SVt_PV);
     if (gv)
 	return GvSV(gv);
@@ -2452,6 +2480,9 @@ AV*
 Perl_get_av(pTHX_ const char *name, I32 create)
 {
     GV* const gv = gv_fetchpv(name, create, SVt_PVAV);
+
+    PERL_ARGS_ASSERT_GET_AV;
+
     if (create)
     	return GvAVn(gv);
     if (gv)
@@ -2475,6 +2506,9 @@ HV*
 Perl_get_hv(pTHX_ const char *name, I32 create)
 {
     GV* const gv = gv_fetchpv(name, create, SVt_PVHV);
+
+    PERL_ARGS_ASSERT_GET_HV;
+
     if (create)
     	return GvHVn(gv);
     if (gv)
@@ -2507,6 +2541,9 @@ Perl_get_cvn_flags(pTHX_ const char *name, STRLEN len, I32 flags)
     /* XXX this is probably not what they think they're getting.
      * It has the same effect as "sub name;", i.e. just a forward
      * declaration! */
+
+    PERL_ARGS_ASSERT_GET_CVN_FLAGS;
+
     if ((flags & ~GV_NOADD_MASK) && !GvCVu(gv)) {
 	SV *const sv = newSVpvn_flags(name, len, flags & SVf_UTF8);
     	return newSUB(start_subparse(FALSE, 0),
@@ -2521,6 +2558,8 @@ Perl_get_cvn_flags(pTHX_ const char *name, STRLEN len, I32 flags)
 CV*
 Perl_get_cv(pTHX_ const char *name, I32 flags)
 {
+    PERL_ARGS_ASSERT_GET_CV;
+
     return get_cvn_flags(name, strlen(name), flags);
 }
 
@@ -2546,6 +2585,8 @@ Perl_call_argv(pTHX_ const char *sub_name, I32 flags, register char **argv)
     dVAR;
     dSP;
 
+    PERL_ARGS_ASSERT_CALL_ARGV;
+
     PUSHMARK(SP);
     if (argv) {
 	while (*argv) {
@@ -2570,6 +2611,8 @@ Perl_call_pv(pTHX_ const char *sub_name, I32 flags)
               		/* name of the subroutine */
           		/* See G_* flags in cop.h */
 {
+    PERL_ARGS_ASSERT_CALL_PV;
+
     return call_sv((SV*)get_cv(sub_name, TRUE), flags);
 }
 
@@ -2587,6 +2630,8 @@ Perl_call_method(pTHX_ const char *methname, I32 flags)
                		/* name of the subroutine */
           		/* See G_* flags in cop.h */
 {
+    PERL_ARGS_ASSERT_CALL_METHOD;
+
     return call_sv(sv_2mortal(newSVpv(methname,0)), flags | G_METHOD);
 }
 
@@ -2614,6 +2659,8 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
     int ret;
     OP* const oldop = PL_op;
     dJMPENV;
+
+    PERL_ARGS_ASSERT_CALL_SV;
 
     if (flags & G_DISCARD) {
 	ENTER;
@@ -2742,6 +2789,8 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     OP* const oldop = PL_op;
     dJMPENV;
 
+    PERL_ARGS_ASSERT_EVAL_SV;
+
     if (flags & G_DISCARD) {
 	ENTER;
 	SAVETMPS;
@@ -2829,6 +2878,8 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
     dSP;
     SV* sv = newSVpv(p, 0);
 
+    PERL_ARGS_ASSERT_EVAL_PV;
+
     eval_sv(sv, G_SCALAR);
     SvREFCNT_dec(sv);
 
@@ -2862,6 +2913,9 @@ Perl_require_pv(pTHX_ const char *pv)
     dVAR;
     dSP;
     SV* sv;
+
+    PERL_ARGS_ASSERT_REQUIRE_PV;
+
     PUSHSTACKi(PERLSI_REQUIRE);
     PUTBACK;
     sv = Perl_newSVpvf(aTHX_ "require q%c%s%c", 0, pv, 0);
@@ -2874,6 +2928,8 @@ void
 Perl_magicname(pTHX_ const char *sym, const char *name, I32 namlen)
 {
     register GV * const gv = gv_fetchpv(sym, GV_ADD, SVt_PV);
+
+    PERL_ARGS_ASSERT_MAGICNAME;
 
     if (gv)
 	sv_magic(GvSV(gv), (SV*)gv, PERL_MAGIC_sv, name, namlen);
@@ -2920,6 +2976,8 @@ NULL
 };
     const char * const *p = usage_msg;
 
+    PERL_ARGS_ASSERT_USAGE;
+
     PerlIO_printf(PerlIO_stdout(),
 		  "\nUsage: %s [switches] [--] [programfile] [arguments]",
 		  name);
@@ -2962,6 +3020,9 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
       NULL
     };
     int i = 0;
+
+    PERL_ARGS_ASSERT_GET_DEBUG_OPTS;
+
     if (isALPHA(**s)) {
 	/* if adding extra options, remember to update DEBUG_MASK */
 	static const char debopts[] = "psltocPmfrxuUHXDSTRJvCAq";
@@ -3000,6 +3061,8 @@ Perl_moreswitches(pTHX_ const char *s)
     dVAR;
     UV rschar;
     const char option = *s; /* used to remember option in -m/-M code */
+
+    PERL_ARGS_ASSERT_MORESWITCHES;
 
     switch (*s) {
     case '0':
@@ -3567,6 +3630,8 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv,
     int fdscript = -1;
     dVAR;
 
+    PERL_ARGS_ASSERT_OPEN_SCRIPT;
+
     if (PL_e_script) {
 	PL_origfilename = savepvs("-e");
     }
@@ -3914,6 +3979,8 @@ S_validate_suid(pTHX_ const char *validarg,
 {
     dVAR;
     const char *s, *s2;
+
+    PERL_ARGS_ASSERT_VALIDATE_SUID;
 
     /* do we need to emulate setuid on scripts? */
 
@@ -4295,6 +4362,8 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 STATIC void
 S_validate_suid(pTHX_ PerlIO *rsfp)
 {
+    PERL_ARGS_ASSERT_VALIDATE_SUID;
+
     if (PL_euid != PL_uid || PL_egid != PL_gid) {	/* (suidperl doesn't exist, in fact) */
 #  ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
 	dVAR;
@@ -4323,6 +4392,8 @@ S_find_beginning(pTHX_ SV* linestr_sv, PerlIO *rsfp)
 #ifdef MACOS_TRADITIONAL
     int maclines = 0;
 #endif
+
+    PERL_ARGS_ASSERT_FIND_BEGINNING;
 
     /* skip forward in input to the real script? */
 
@@ -4629,6 +4700,9 @@ void
 Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
 {
     dVAR;
+
+    PERL_ARGS_ASSERT_INIT_ARGV_SYMBOLS;
+
     argc--,argv++;	/* skip name of script */
     if (PL_doswitches) {
 	for (; argc > 0 && **argv == '-'; argc--,argv++) {
@@ -4670,6 +4744,8 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 {
     dVAR;
     GV* tmpgv;
+
+    PERL_ARGS_ASSERT_INIT_POSTDUMP_SYMBOLS;
 
     PL_toptarget = newSV_type(SVt_PVFM);
     sv_setpvs(PL_toptarget, "");
@@ -4904,6 +4980,9 @@ S_incpush_if_exists(pTHX_ SV *dir)
 {
     dVAR;
     Stat_t tmpstatbuf;
+
+    PERL_ARGS_ASSERT_INCPUSH_IF_EXISTS;
+
     if (PerlLIO_stat(SvPVX_const(dir), &tmpstatbuf) >= 0 &&
 	S_ISDIR(tmpstatbuf.st_mode)) {
 	av_push(GvAVn(PL_incgv), dir);
@@ -5146,6 +5225,8 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
     STRLEN len;
     int ret;
     dJMPENV;
+
+    PERL_ARGS_ASSERT_CALL_LIST;
 
     while (av_len(paramList) >= 0) {
 	cv = (CV*)av_shift(paramList);

@@ -58,6 +58,8 @@ S_stdize_locale(pTHX_ char *locs)
     const char * const s = strchr(locs, '=');
     bool okay = TRUE;
 
+    PERL_ARGS_ASSERT_STDIZE_LOCALE;
+
     if (s) {
 	const char * const t = strchr(s, '.');
 	okay = FALSE;
@@ -176,6 +178,8 @@ Perl_new_ctype(pTHX_ const char *newctype)
     dVAR;
     int i;
 
+    PERL_ARGS_ASSERT_NEW_CTYPE;
+
     for (i = 0; i < 256; i++) {
 	if (isUPPER_LC(i))
 	    PL_fold_locale[i] = toLOWER_LC(i);
@@ -186,6 +190,7 @@ Perl_new_ctype(pTHX_ const char *newctype)
     }
 
 #endif /* USE_LOCALE_CTYPE */
+    PERL_ARGS_ASSERT_NEW_CTYPE;
     PERL_UNUSED_ARG(newctype);
     PERL_UNUSED_CONTEXT;
 }
@@ -578,6 +583,8 @@ Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
     dVAR;
     char *xbuf;
     STRLEN xAlloc, xin, xout; /* xalloc is a reserved word in VC */
+
+    PERL_ARGS_ASSERT_MEM_COLLXFRM;
 
     /* the first sizeof(collationix) bytes are used by sv_collxfrm(). */
     /* the +1 is for the terminating NUL. */

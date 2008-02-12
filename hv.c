@@ -98,6 +98,8 @@ S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
     char *k;
     register HEK *hek;
 
+    PERL_ARGS_ASSERT_SAVE_HEK_FLAGS;
+
     Newx(k, HEK_BASESIZE + len + 2, char);
     hek = (HEK*)k;
     Copy(str, HEK_KEY(hek), len, char);
@@ -134,6 +136,7 @@ Perl_hek_dup(pTHX_ HEK *source, CLONE_PARAMS* param)
 {
     HEK *shared = (HEK*)ptr_table_fetch(PL_ptr_table, source);
 
+    PERL_ARGS_ASSERT_HEK_DUP;
     PERL_UNUSED_ARG(param);
 
     if (shared) {
@@ -153,6 +156,8 @@ HE *
 Perl_he_dup(pTHX_ const HE *e, bool shared, CLONE_PARAMS* param)
 {
     HE *ret;
+
+    PERL_ARGS_ASSERT_HE_DUP;
 
     if (!e)
 	return NULL;
@@ -203,6 +208,9 @@ S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
 		const char *msg)
 {
     SV * const sv = sv_newmortal();
+
+    PERL_ARGS_ASSERT_HV_NOTALLOWED;
+
     if (!(flags & HVhek_FREEKEY)) {
 	sv_setpvn(sv, key, klen);
     }
@@ -318,6 +326,8 @@ Perl_hv_common_key_len(pTHX_ HV *hv, const char *key, I32 klen_i32,
 {
     STRLEN klen;
     int flags;
+
+    PERL_ARGS_ASSERT_HV_COMMON_KEY_LEN;
 
     if (klen_i32 < 0) {
 	klen = -klen_i32;
@@ -830,6 +840,9 @@ STATIC void
 S_hv_magic_check(HV *hv, bool *needs_copy, bool *needs_store)
 {
     const MAGIC *mg = SvMAGIC(hv);
+
+    PERL_ARGS_ASSERT_HV_MAGIC_CHECK;
+
     *needs_copy = FALSE;
     *needs_store = TRUE;
     while (mg) {
@@ -856,6 +869,8 @@ SV *
 Perl_hv_scalar(pTHX_ HV *hv)
 {
     SV *sv;
+
+    PERL_ARGS_ASSERT_HV_SCALAR;
 
     if (SvRMAGICAL(hv)) {
 	MAGIC * const mg = mg_find((SV*)hv, PERL_MAGIC_tied);
@@ -1070,6 +1085,8 @@ S_hsplit(pTHX_ HV *hv)
     int longest_chain = 0;
     int was_shared;
 
+    PERL_ARGS_ASSERT_HSPLIT;
+
     /*PerlIO_printf(PerlIO_stderr(), "hsplit called for %p which had %d\n",
       (void*)hv, (int) oldsize);*/
 
@@ -1238,6 +1255,8 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
     register HE **aep;
     register HE *entry;
     register HE **oentry;
+
+    PERL_ARGS_ASSERT_HV_KSPLIT;
 
     newsize = (I32) newmax;			/* possible truncation here */
     if (newsize != newmax || newmax <= oldsize)
@@ -1434,6 +1453,8 @@ Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
     dVAR;
     SV *val;
 
+    PERL_ARGS_ASSERT_HV_FREE_ENT;
+
     if (!entry)
 	return;
     val = HeVAL(entry);
@@ -1455,6 +1476,9 @@ void
 Perl_hv_delayfree_ent(pTHX_ HV *hv, register HE *entry)
 {
     dVAR;
+
+    PERL_ARGS_ASSERT_HV_DELAYFREE_ENT;
+
     if (!entry)
 	return;
     /* SvREFCNT_inc to counter the SvREFCNT_dec in hv_free_ent  */
@@ -1546,6 +1570,8 @@ Perl_hv_clear_placeholders(pTHX_ HV *hv)
     dVAR;
     const U32 items = (U32)HvPLACEHOLDERS_get(hv);
 
+    PERL_ARGS_ASSERT_HV_CLEAR_PLACEHOLDERS;
+
     if (items)
 	clear_placeholders(hv, items);
 }
@@ -1555,6 +1581,8 @@ S_clear_placeholders(pTHX_ HV *hv, U32 items)
 {
     dVAR;
     I32 i;
+
+    PERL_ARGS_ASSERT_CLEAR_PLACEHOLDERS;
 
     if (items == 0)
 	return;
@@ -1602,6 +1630,8 @@ S_hfreeentries(pTHX_ HV *hv)
     HE **const orig_array = HvARRAY(hv);
     HEK *name;
     int attempts = 100;
+
+    PERL_ARGS_ASSERT_HFREEENTRIES;
 
     if (!orig_array)
 	return;
@@ -1783,6 +1813,8 @@ S_hv_auxinit(HV *hv) {
     struct xpvhv_aux *iter;
     char *array;
 
+    PERL_ARGS_ASSERT_HV_AUXINIT;
+
     if (!HvARRAY(hv)) {
 	Newxz(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1)
 	    + sizeof(struct xpvhv_aux), char);
@@ -1822,6 +1854,10 @@ value, you can get it through the macro C<HvFILL(tb)>.
 I32
 Perl_hv_iterinit(pTHX_ HV *hv)
 {
+    PERL_ARGS_ASSERT_HV_ITERINIT;
+
+    /* FIXME: Are we not NULL, or do we croak? Place bets now! */
+
     if (!hv)
 	Perl_croak(aTHX_ "Bad hash");
 
@@ -1846,6 +1882,8 @@ I32 *
 Perl_hv_riter_p(pTHX_ HV *hv) {
     struct xpvhv_aux *iter;
 
+    PERL_ARGS_ASSERT_HV_RITER_P;
+
     if (!hv)
 	Perl_croak(aTHX_ "Bad hash");
 
@@ -1857,6 +1895,8 @@ HE **
 Perl_hv_eiter_p(pTHX_ HV *hv) {
     struct xpvhv_aux *iter;
 
+    PERL_ARGS_ASSERT_HV_EITER_P;
+
     if (!hv)
 	Perl_croak(aTHX_ "Bad hash");
 
@@ -1867,6 +1907,8 @@ Perl_hv_eiter_p(pTHX_ HV *hv) {
 void
 Perl_hv_riter_set(pTHX_ HV *hv, I32 riter) {
     struct xpvhv_aux *iter;
+
+    PERL_ARGS_ASSERT_HV_RITER_SET;
 
     if (!hv)
 	Perl_croak(aTHX_ "Bad hash");
@@ -1885,6 +1927,8 @@ Perl_hv_riter_set(pTHX_ HV *hv, I32 riter) {
 void
 Perl_hv_eiter_set(pTHX_ HV *hv, HE *eiter) {
     struct xpvhv_aux *iter;
+
+    PERL_ARGS_ASSERT_HV_EITER_SET;
 
     if (!hv)
 	Perl_croak(aTHX_ "Bad hash");
@@ -1909,6 +1953,7 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
     struct xpvhv_aux *iter;
     U32 hash;
 
+    PERL_ARGS_ASSERT_HV_NAME_SET;
     PERL_UNUSED_ARG(flags);
 
     if (len > I32_MAX)
@@ -1932,13 +1977,18 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 AV **
 Perl_hv_backreferences_p(pTHX_ HV *hv) {
     struct xpvhv_aux * const iter = SvOOK(hv) ? HvAUX(hv) : hv_auxinit(hv);
+
+    PERL_ARGS_ASSERT_HV_BACKREFERENCES_P;
     PERL_UNUSED_CONTEXT;
+
     return &(iter->xhv_backreferences);
 }
 
 void
 Perl_hv_kill_backrefs(pTHX_ HV *hv) {
     AV *av;
+
+    PERL_ARGS_ASSERT_HV_KILL_BACKREFS;
 
     if (!SvOOK(hv))
 	return;
@@ -1990,6 +2040,8 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
     HE *oldentry;
     MAGIC* mg;
     struct xpvhv_aux *iter;
+
+    PERL_ARGS_ASSERT_HV_ITERNEXT_FLAGS;
 
     if (!hv)
 	Perl_croak(aTHX_ "Bad hash");
@@ -2115,6 +2167,8 @@ C<hv_iterinit>.
 char *
 Perl_hv_iterkey(pTHX_ register HE *entry, I32 *retlen)
 {
+    PERL_ARGS_ASSERT_HV_ITERKEY;
+
     if (HeKLEN(entry) == HEf_SVKEY) {
 	STRLEN len;
 	char * const p = SvPV(HeKEY_sv(entry), len);
@@ -2141,6 +2195,8 @@ see C<hv_iterinit>.
 SV *
 Perl_hv_iterkeysv(pTHX_ register HE *entry)
 {
+    PERL_ARGS_ASSERT_HV_ITERKEYSV;
+
     return sv_2mortal(newSVhek(HeKEY_hek(entry)));
 }
 
@@ -2156,6 +2212,8 @@ C<hv_iterkey>.
 SV *
 Perl_hv_iterval(pTHX_ HV *hv, register HE *entry)
 {
+    PERL_ARGS_ASSERT_HV_ITERVAL;
+
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv, PERL_MAGIC_tied)) {
 	    SV* const sv = sv_newmortal();
@@ -2182,6 +2240,8 @@ SV *
 Perl_hv_iternextsv(pTHX_ HV *hv, char **key, I32 *retlen)
 {
     HE * const he = hv_iternext_flags(hv, 0);
+
+    PERL_ARGS_ASSERT_HV_ITERNEXTSV;
 
     if (!he)
 	return NULL;
@@ -2329,6 +2389,8 @@ Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
     int flags = 0;
     const char * const save = str;
 
+    PERL_ARGS_ASSERT_SHARE_HEK;
+
     if (len < 0) {
       STRLEN tmplen = -len;
       is_utf8 = TRUE;
@@ -2356,6 +2418,9 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
     register HE *entry;
     const int flags_masked = flags & HVhek_MASK;
     const U32 hindex = hash & (I32) HvMAX(PL_strtab);
+    register XPVHV * const xhv = (XPVHV*)SvANY(PL_strtab);
+
+    PERL_ARGS_ASSERT_SHARE_HEK_FLAGS;
 
     /* what follows is the moral equivalent of:
 
@@ -2365,7 +2430,7 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 	Can't rehash the shared string table, so not sure if it's worth
 	counting the number of entries in the linked list
     */
-    register XPVHV * const xhv = (XPVHV*)SvANY(PL_strtab);
+
     /* assert(xhv_array != 0) */
     LOCK_STRTAB_MUTEX;
     entry = (HvARRAY(PL_strtab))[hindex];
@@ -2439,6 +2504,8 @@ Perl_hv_placeholders_p(pTHX_ HV *hv)
     dVAR;
     MAGIC *mg = mg_find((SV*)hv, PERL_MAGIC_rhash);
 
+    PERL_ARGS_ASSERT_HV_PLACEHOLDERS_P;
+
     if (!mg) {
 	mg = sv_magicext((SV*)hv, 0, PERL_MAGIC_rhash, 0, 0, 0);
 
@@ -2456,6 +2523,8 @@ Perl_hv_placeholders_get(pTHX_ HV *hv)
     dVAR;
     MAGIC * const mg = mg_find((SV*)hv, PERL_MAGIC_rhash);
 
+    PERL_ARGS_ASSERT_HV_PLACEHOLDERS_GET;
+
     return mg ? mg->mg_len : 0;
 }
 
@@ -2464,6 +2533,8 @@ Perl_hv_placeholders_set(pTHX_ HV *hv, I32 ph)
 {
     dVAR;
     MAGIC * const mg = mg_find((SV*)hv, PERL_MAGIC_rhash);
+
+    PERL_ARGS_ASSERT_HV_PLACEHOLDERS_SET;
 
     if (mg) {
 	mg->mg_len = ph;
@@ -2479,6 +2550,9 @@ S_refcounted_he_value(pTHX_ const struct refcounted_he *he)
 {
     dVAR;
     SV *value;
+
+    PERL_ARGS_ASSERT_REFCOUNTED_HE_VALUE;
+
     switch(he->refcounted_he_data[0] & HVrhek_typemask) {
     case HVrhek_undef:
 	value = newSV(0);
@@ -2843,6 +2917,8 @@ Perl_hv_assert(pTHX_ HV *hv)
     int bad = 0;
     const I32 riter = HvRITER_get(hv);
     HE *eiter = HvEITER_get(hv);
+
+    PERL_ARGS_ASSERT_HV_ASSERT;
 
     (void)hv_iterinit(hv);
 

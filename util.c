@@ -374,6 +374,8 @@ Perl_delimcpy(pTHX_ register char *to, register const char *toend, register cons
     register I32 tolen;
     PERL_UNUSED_CONTEXT;
 
+    PERL_ARGS_ASSERT_DELIMCPY;
+
     for (tolen = 0; from < fromend; from++, tolen++) {
 	if (*from == '\\') {
 	    if (from[1] != delim) {
@@ -402,6 +404,8 @@ Perl_instr(pTHX_ register const char *big, register const char *little)
 {
     register I32 first;
     PERL_UNUSED_CONTEXT;
+
+    PERL_ARGS_ASSERT_INSTR;
 
     if (!little)
 	return (char*)big;
@@ -433,6 +437,7 @@ Perl_instr(pTHX_ register const char *big, register const char *little)
 char *
 Perl_ninstr(pTHX_ const char *big, const char *bigend, const char *little, const char *lend)
 {
+    PERL_ARGS_ASSERT_NINSTR;
     PERL_UNUSED_CONTEXT;
     if (little >= lend)
         return (char*)big;
@@ -463,6 +468,8 @@ Perl_rninstr(pTHX_ register const char *big, const char *bigend, const char *lit
     register const I32 first = *little;
     register const char * const littleend = lend;
     PERL_UNUSED_CONTEXT;
+
+    PERL_ARGS_ASSERT_RNINSTR;
 
     if (little >= littleend)
 	return (char*)bigend;
@@ -512,6 +519,8 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
     STRLEN len;
     U32 rarest = 0;
     U32 frequency = 256;
+
+    PERL_ARGS_ASSERT_FBM_COMPILE;
 
     if (flags & FBMcf_TAIL) {
 	MAGIC * const mg = SvUTF8(sv) && SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : NULL;
@@ -589,6 +598,8 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	= (const unsigned char *)SvPV_const(littlestr,l);
     register STRLEN littlelen = l;
     register const I32 multiline = flags & FBMrf_MULTILINE;
+
+    PERL_ARGS_ASSERT_FBM_INSTR;
 
     if ((STRLEN)(bigend - big) < littlelen) {
 	if ( SvTAIL(littlestr)
@@ -793,6 +804,8 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
     register const unsigned char *littleend;
     I32 found = 0;
 
+    PERL_ARGS_ASSERT_SCREAMINSTR;
+
     assert(SvTYPE(littlestr) == SVt_PVGV);
     assert(SvVALID(littlestr));
 
@@ -876,6 +889,8 @@ Perl_ibcmp(pTHX_ const char *s1, const char *s2, register I32 len)
     register const U8 *b = (const U8 *)s2;
     PERL_UNUSED_CONTEXT;
 
+    PERL_ARGS_ASSERT_IBCMP;
+
     while (len--) {
 	if (*a != *b && *a != PL_fold[*b])
 	    return 1;
@@ -891,6 +906,8 @@ Perl_ibcmp_locale(pTHX_ const char *s1, const char *s2, register I32 len)
     register const U8 *a = (const U8 *)s1;
     register const U8 *b = (const U8 *)s2;
     PERL_UNUSED_CONTEXT;
+
+    PERL_ARGS_ASSERT_IBCMP_LOCALE;
 
     while (len--) {
 	if (*a != *b && *a != PL_fold_locale[*b])
@@ -997,7 +1014,9 @@ char *
 Perl_savesharedpvn(pTHX_ const char *const pv, const STRLEN len)
 {
     char *const newaddr = (char*)PerlMemShared_malloc(len + 1);
-    assert(pv);
+
+    PERL_ARGS_ASSERT_SAVESHAREDPVN;
+
     if (!newaddr) {
 	return write_no_mem();
     }
@@ -1020,6 +1039,8 @@ Perl_savesvpv(pTHX_ SV *sv)
     STRLEN len;
     const char * const pv = SvPV_const(sv, len);
     register char *newaddr;
+
+    PERL_ARGS_ASSERT_SAVESVPV;
 
     ++len;
     Newx(newaddr,len,char);
@@ -1060,6 +1081,7 @@ Perl_form_nocontext(const char* pat, ...)
     dTHX;
     char *retval;
     va_list args;
+    PERL_ARGS_ASSERT_FORM_NOCONTEXT;
     va_start(args, pat);
     retval = vform(pat, &args);
     va_end(args);
@@ -1092,6 +1114,7 @@ Perl_form(pTHX_ const char* pat, ...)
 {
     char *retval;
     va_list args;
+    PERL_ARGS_ASSERT_FORM;
     va_start(args, pat);
     retval = vform(pat, &args);
     va_end(args);
@@ -1102,6 +1125,7 @@ char *
 Perl_vform(pTHX_ const char *pat, va_list *args)
 {
     SV * const sv = mess_alloc();
+    PERL_ARGS_ASSERT_VFORM;
     sv_vsetpvfn(sv, pat, strlen(pat), args, NULL, 0, NULL);
     return SvPVX(sv);
 }
@@ -1113,6 +1137,7 @@ Perl_mess_nocontext(const char *pat, ...)
     dTHX;
     SV *retval;
     va_list args;
+    PERL_ARGS_ASSERT_MESS_NOCONTEXT;
     va_start(args, pat);
     retval = vmess(pat, &args);
     va_end(args);
@@ -1125,6 +1150,7 @@ Perl_mess(pTHX_ const char *pat, ...)
 {
     SV *retval;
     va_list args;
+    PERL_ARGS_ASSERT_MESS;
     va_start(args, pat);
     retval = vmess(pat, &args);
     va_end(args);
@@ -1136,6 +1162,8 @@ S_closest_cop(pTHX_ const COP *cop, const OP *o)
 {
     dVAR;
     /* Look for PL_op starting from o.  cop is the last COP we've seen. */
+
+    PERL_ARGS_ASSERT_CLOSEST_COP;
 
     if (!o || o == PL_op)
 	return cop;
@@ -1169,6 +1197,8 @@ Perl_vmess(pTHX_ const char *pat, va_list *args)
 {
     dVAR;
     SV * const sv = mess_alloc();
+
+    PERL_ARGS_ASSERT_VMESS;
 
     sv_vsetpvfn(sv, pat, strlen(pat), args, NULL, 0, NULL);
     if (!SvCUR(sv) || *(SvEND(sv) - 1) != '\n') {
@@ -1210,6 +1240,8 @@ Perl_write_to_stderr(pTHX_ const char* message, int msglen)
     dVAR;
     IO *io;
     MAGIC *mg;
+
+    PERL_ARGS_ASSERT_WRITE_TO_STDERR;
 
     if (PL_stderrgv && SvREFCNT(PL_stderrgv) 
 	&& (io = GvIO(PL_stderrgv))
@@ -1365,6 +1397,7 @@ Perl_die_nocontext(const char* pat, ...)
     dTHX;
     OP *o;
     va_list args;
+    PERL_ARGS_ASSERT_DIE_NOCONTEXT;
     va_start(args, pat);
     o = vdie(pat, &args);
     va_end(args);
@@ -1411,6 +1444,7 @@ Perl_croak_nocontext(const char *pat, ...)
 {
     dTHX;
     va_list args;
+    PERL_ARGS_ASSERT_CROAK_NOCONTEXT;
     va_start(args, pat);
     vcroak(pat, &args);
     /* NOTREACHED */
@@ -1457,6 +1491,8 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
     const I32 utf8 = SvUTF8(msv);
     const char * const message = SvPV_const(msv, msglen);
 
+    PERL_ARGS_ASSERT_VWARN;
+
     if (PL_warnhook) {
 	if (vdie_common(message, msglen, utf8, TRUE))
 	    return;
@@ -1471,6 +1507,7 @@ Perl_warn_nocontext(const char *pat, ...)
 {
     dTHX;
     va_list args;
+    PERL_ARGS_ASSERT_WARN_NOCONTEXT;
     va_start(args, pat);
     vwarn(pat, &args);
     va_end(args);
@@ -1490,6 +1527,7 @@ void
 Perl_warn(pTHX_ const char *pat, ...)
 {
     va_list args;
+    PERL_ARGS_ASSERT_WARN;
     va_start(args, pat);
     vwarn(pat, &args);
     va_end(args);
@@ -1501,6 +1539,7 @@ Perl_warner_nocontext(U32 err, const char *pat, ...)
 {
     dTHX; 
     va_list args;
+    PERL_ARGS_ASSERT_WARNER_NOCONTEXT;
     va_start(args, pat);
     vwarner(err, pat, &args);
     va_end(args);
@@ -1511,6 +1550,7 @@ void
 Perl_warner(pTHX_ U32  err, const char* pat,...)
 {
     va_list args;
+    PERL_ARGS_ASSERT_WARNER;
     va_start(args, pat);
     vwarner(err, pat, &args);
     va_end(args);
@@ -1520,6 +1560,7 @@ void
 Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 {
     dVAR;
+    PERL_ARGS_ASSERT_VWARNER;
     if (PL_warnhook == PERL_WARNHOOK_FATAL || ckDEAD(err)) {
 	SV * const msv = vmess(pat, args);
 	STRLEN msglen;
@@ -1601,6 +1642,7 @@ Perl_new_warnings_bitfield(pTHX_ STRLEN *buffer, const char *const bits,
 			   STRLEN size) {
     const MEM_SIZE len_wanted = sizeof(STRLEN) + size;
     PERL_UNUSED_CONTEXT;
+    PERL_ARGS_ASSERT_NEW_WARNINGS_BITFIELD;
 
     buffer = (STRLEN*)
 	(specialWARN(buffer) ?
@@ -1748,6 +1790,8 @@ Perl_setenv_getix(pTHX_ const char *nam)
 {
     register I32 i;
     register const I32 len = strlen(nam);
+
+    PERL_ARGS_ASSERT_SETENV_GETIX;
     PERL_UNUSED_CONTEXT;
 
     for (i = 0; environ[i]; i++) {
@@ -1772,6 +1816,8 @@ Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
 {
     I32 retries = 0;
 
+    PERL_ARGS_ASSERT_UNLNK;
+
     while (PerlLIO_unlink(f) >= 0)
 	retries++;
     return retries ? 0 : -1;
@@ -1784,6 +1830,8 @@ char *
 Perl_my_bcopy(register const char *from,register char *to,register I32 len)
 {
     char * const retval = to;
+
+    PERL_ARGS_ASSERT_MY_BCOPY;
 
     if (from - to >= 0) {
 	while (len--)
@@ -1806,6 +1854,8 @@ Perl_my_memset(register char *loc, register I32 ch, register I32 len)
 {
     char * const retval = loc;
 
+    PERL_ARGS_ASSERT_MY_MEMSET;
+
     while (len--)
 	*loc++ = ch;
     return retval;
@@ -1818,6 +1868,8 @@ char *
 Perl_my_bzero(register char *loc, register I32 len)
 {
     char * const retval = loc;
+
+    PERL_ARGS_ASSERT_MY_BZERO;
 
     while (len--)
 	*loc++ = 0;
@@ -1833,6 +1885,8 @@ Perl_my_memcmp(const char *s1, const char *s2, register I32 len)
     register const U8 *a = (const U8 *)s1;
     register const U8 *b = (const U8 *)s2;
     register I32 tmp;
+
+    PERL_ARGS_ASSERT_MY_MEMCMP;
 
     while (len--) {
         if ((tmp = *a++ - *b++))
@@ -2217,6 +2271,8 @@ Perl_my_swabn(void *ptr, int n)
     register char *e = s + (n-1);
     register char tc;
 
+    PERL_ARGS_ASSERT_MY_SWABN;
+
     for (n /= 2; n > 0; s++, e--, n--) {
       tc = *s;
       *s = *e;
@@ -2235,6 +2291,8 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
     SV *sv;
     I32 did_pipes = 0;
     int pp[2];
+
+    PERL_ARGS_ASSERT_MY_POPEN_LIST;
 
     PERL_FLUSHALL_FOR_CHILD;
     This = (*mode == 'w');
@@ -2375,6 +2433,8 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
     const I32 doexec = !(*cmd == '-' && cmd[1] == '\0');
     I32 did_pipes = 0;
     int pp[2];
+
+    PERL_ARGS_ASSERT_MY_POPEN;
 
     PERL_FLUSHALL_FOR_CHILD;
 #ifdef OS2
@@ -2524,6 +2584,7 @@ FILE *popen();
 PerlIO *
 Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 {
+    PERL_ARGS_ASSERT_MY_POPEN;
     PERL_FLUSHALL_FOR_CHILD;
     /* Call system's popen() to get a FILE *, then import it.
        used 0 for 2nd parameter to PerlIO_importFILE;
@@ -2613,6 +2674,8 @@ Perl_dump_fds(pTHX_ char *s)
 {
     int fd;
     Stat_t tmpstatbuf;
+
+    PERL_ARGS_ASSERT_DUMP_FDS;
 
     PerlIO_printf(Perl_debug_log,"%s", s);
     for (fd = 0; fd < 32; fd++) {
@@ -2712,6 +2775,8 @@ Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 {
     dVAR;
     struct sigaction act;
+
+    PERL_ARGS_ASSERT_RSIGNAL_SAVE;
 
 #ifdef USE_ITHREADS
     /* only "parent" interpreter can diddle signals */
@@ -2878,6 +2943,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 {
     dVAR;
     I32 result = 0;
+    PERL_ARGS_ASSERT_WAIT4PID;
     if (!pid)
 	return -1;
 #ifdef PERL_USES_PL_PIDSTATUS
@@ -3009,6 +3075,8 @@ Perl_repeatcpy(pTHX_ register char *to, register const char *from, I32 len, regi
     register const char * const frombase = from;
     PERL_UNUSED_CONTEXT;
 
+    PERL_ARGS_ASSERT_REPEATCPY;
+
     if (len == 1) {
 	register const char c = *from;
 	while (count-- > 0)
@@ -3032,6 +3100,8 @@ Perl_same_dirent(pTHX_ const char *a, const char *b)
     Stat_t tmpstatbuf1;
     Stat_t tmpstatbuf2;
     SV * const tmpsv = sv_newmortal();
+
+    PERL_ARGS_ASSERT_SAME_DIRENT;
 
     if (fa)
 	fa++;
@@ -3094,6 +3164,8 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
     PERL_UNUSED_ARG(search_ext);
 #  define MAX_EXT_LEN 0
 #endif
+
+    PERL_ARGS_ASSERT_FIND_SCRIPT;
 
     /*
      * If dosearch is true and if scriptname does not contain path
@@ -3323,6 +3395,7 @@ void
 Perl_set_context(void *t)
 {
     dVAR;
+    PERL_ARGS_ASSERT_SET_CONTEXT;
 #if defined(USE_ITHREADS)
 #  ifdef I_MACH_CTHREADS
     cthread_set_data(cthread_self(), t);
@@ -3387,6 +3460,7 @@ Perl_getenv_len(pTHX_ const char *env_elem, unsigned long *len)
 {
     char * const env_trans = PerlEnv_getenv(env_elem);
     PERL_UNUSED_CONTEXT;
+    PERL_ARGS_ASSERT_GETENV_LEN;
     if (env_trans)
 	*len = strlen(env_trans);
     return env_trans;
@@ -3684,11 +3758,13 @@ Perl_init_tm(pTHX_ struct tm *ptm)	/* see mktime, strftime and asctime */
 #ifdef HAS_TM_TM_ZONE
     Time_t now;
     const struct tm* my_tm;
+    PERL_ARGS_ASSERT_INIT_TM;
     (void)time(&now);
     my_tm = localtime(&now);
     if (my_tm)
         Copy(my_tm, ptm, 1, struct tm);
 #else
+    PERL_ARGS_ASSERT_INIT_TM;
     PERL_UNUSED_ARG(ptm);
 #endif
 }
@@ -3705,6 +3781,8 @@ Perl_mini_mktime(pTHX_ struct tm *ptm)
     int month, mday, year, jday;
     int odd_cent, odd_year;
     PERL_UNUSED_CONTEXT;
+
+    PERL_ARGS_ASSERT_MINI_MKTIME;
 
 #define	DAYS_PER_YEAR	365
 #define	DAYS_PER_QYEAR	(4*DAYS_PER_YEAR+1)
@@ -3900,6 +3978,8 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, in
   struct tm mytm;
   int len;
 
+  PERL_ARGS_ASSERT_MY_STRFTIME;
+
   init_tm(&mytm);	/* XXX workaround - see init_tm() above */
   mytm.tm_sec = sec;
   mytm.tm_min = min;
@@ -4006,6 +4086,8 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
 #ifndef INCOMPLETE_TAINTS
     SvTAINTED_on(sv);
 #endif
+
+    PERL_ARGS_ASSERT_GETCWD_SV;
 
 #ifdef HAS_GETCWD
     {
@@ -4179,6 +4261,9 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
     bool vinf = FALSE;
     AV * const av = newAV();
     SV * const hv = newSVrv(rv, "version"); /* create an SV and upgrade the RV */
+
+    PERL_ARGS_ASSERT_SCAN_VERSION;
+
     (void)sv_upgrade(hv, SVt_PVHV); /* needs to be an HV type */
 
     while (isSPACE(*s)) /* leading whitespace is OK */
@@ -4379,6 +4464,7 @@ Perl_new_version(pTHX_ SV *ver)
 {
     dVAR;
     SV * const rv = newSV(0);
+    PERL_ARGS_ASSERT_NEW_VERSION;
     if ( sv_derived_from(ver,"version") ) /* can just copy directly */
     {
 	I32 key;
@@ -4463,6 +4549,8 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 #ifdef SvVOK
     const MAGIC *mg;
 #endif
+
+    PERL_ARGS_ASSERT_UPG_VERSION;
 
     if ( SvNOK(ver) && !( SvPOK(ver) && sv_len(ver) == 3 ) )
     {
@@ -4556,6 +4644,9 @@ bool
 Perl_vverify(pTHX_ SV *vs)
 {
     SV *sv;
+
+    PERL_ARGS_ASSERT_VVERIFY;
+
     if ( SvROK(vs) )
 	vs = SvRV(vs);
 
@@ -4591,6 +4682,9 @@ Perl_vnumify(pTHX_ SV *vs)
     bool alpha = FALSE;
     SV * const sv = newSV(0);
     AV *av;
+
+    PERL_ARGS_ASSERT_VNUMIFY;
+
     if ( SvROK(vs) )
 	vs = SvRV(vs);
 
@@ -4669,6 +4763,9 @@ Perl_vnormal(pTHX_ SV *vs)
     bool alpha = FALSE;
     SV * const sv = newSV(0);
     AV *av;
+
+    PERL_ARGS_ASSERT_VNORMAL;
+
     if ( SvROK(vs) )
 	vs = SvRV(vs);
 
@@ -4723,6 +4820,9 @@ the original version contained 1 or more dots, respectively
 SV *
 Perl_vstringify(pTHX_ SV *vs)
 {
+
+    PERL_ARGS_ASSERT_VSTRINGIFY;
+
     if ( SvROK(vs) )
 	vs = SvRV(vs);
 
@@ -4763,6 +4863,9 @@ Perl_vcmp(pTHX_ SV *lhv, SV *rhv)
     I32 left = 0;
     I32 right = 0;
     AV *lav, *rav;
+
+    PERL_ARGS_ASSERT_VCMP;
+
     if ( SvROK(lhv) )
 	lhv = SvRV(lhv);
     if ( SvROK(rhv) )
@@ -5144,6 +5247,8 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
   const char *p = *popt;
   U32 opt = 0;
 
+  PERL_ARGS_ASSERT_PARSE_UNICODE_OPTS;
+
   if (*p) {
        if (isDIGIT(*p)) {
 	    opt = (U32) atoi(p);
@@ -5323,6 +5428,7 @@ Perl_stashpv_hvname_match(pTHX_ const COP *c, const HV *hv)
     const char * const stashpv = CopSTASHPV(c);
     const char * const name = HvNAME_get(hv);
     PERL_UNUSED_CONTEXT;
+    PERL_ARGS_ASSERT_STASHPV_HVNAME_MATCH;
 
     if (stashpv == name)
 	return TRUE;
@@ -5399,6 +5505,7 @@ Perl_init_global_struct(pTHX)
 void
 Perl_free_global_struct(pTHX_ struct perl_vars *plvarsp)
 {
+    PERL_ARGS_ASSERT_FREE_GLOBAL_STRUCT;
 # ifdef PERL_GLOBAL_STRUCT
 #  ifdef PERL_UNSET_VARS
     PERL_UNSET_VARS(plvarsp);
@@ -5600,6 +5707,7 @@ int
 Perl_my_sprintf(char *buffer, const char* pat, ...)
 {
     va_list args;
+    PERL_ARGS_ASSERT_MY_SPRINTF;
     va_start(args, pat);
     vsprintf(buffer, pat, args);
     va_end(args);
@@ -5625,6 +5733,7 @@ Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
     dTHX;
     int retval;
     va_list ap;
+    PERL_ARGS_ASSERT_MY_SNPRINTF;
     va_start(ap, format);
 #ifdef HAS_VSNPRINTF
     retval = vsnprintf(buffer, len, format, ap);
@@ -5656,6 +5765,9 @@ Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap
     int retval;
 #ifdef NEED_VA_COPY
     va_list apc;
+
+    PERL_ARGS_ASSERT_MY_VSNPRINTF;
+
     Perl_va_copy(ap, apc);
 # ifdef HAS_VSNPRINTF
     retval = vsnprintf(buffer, len, format, apc);
@@ -5745,6 +5857,7 @@ Perl_my_cxt_init(pTHX_ int *index, size_t size)
 {
     dVAR;
     void *p;
+    PERL_ARGS_ASSERT_MY_CXT_INIT;
     if (*index == -1) {
 	/* this module hasn't been allocated an index yet */
 	MUTEX_LOCK(&PL_my_ctx_mutex);
@@ -5779,6 +5892,8 @@ Perl_my_cxt_index(pTHX_ const char *my_cxt_key)
     dVAR;
     int index;
 
+    PERL_ARGS_ASSERT_MY_CXT_INDEX;
+
     for (index = 0; index < PL_my_cxt_index; index++) {
 	const char *key = PL_my_cxt_keys[index];
 	/* try direct pointer compare first - there are chances to success,
@@ -5796,6 +5911,8 @@ Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
     dVAR;
     void *p;
     int index;
+
+    PERL_ARGS_ASSERT_MY_CXT_INIT;
 
     index = Perl_my_cxt_index(aTHX_ my_cxt_key);
     if (index == -1) {
@@ -5882,6 +5999,8 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
     /* We do not care about using sv to call CV;
      * it's for informational purposes only.
      */
+
+    PERL_ARGS_ASSERT_GET_DB_SUB;
 
     save_item(dbsv);
     if (!PERLDB_SUB_NN) {

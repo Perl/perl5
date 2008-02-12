@@ -2376,6 +2376,9 @@ Perl_malloced_size(void *p)
     union overhead * const ovp = (union overhead *)
 	((caddr_t)p - sizeof (union overhead) * CHUNK_SHIFT);
     const int bucket = OV_INDEX(ovp);
+
+    PERL_ARGS_ASSERT_MALLOCED_SIZE;
+
 #ifdef RCHECK
     /* The caller wants to have a complete control over the chunk,
        disable the memory checking inside the chunk.  */
@@ -2408,6 +2411,8 @@ Perl_get_mstats(pTHX_ perl_mstats_t *buf, int buflen, int level)
   	register int i, j;
   	register union overhead *p;
 	struct chunk_chain_s* nextchain;
+
+	PERL_ARGS_ASSERT_GET_MSTATS;
 
   	buf->topbucket = buf->topbucket_ev = buf->topbucket_odd 
 	    = buf->totfree = buf->total = buf->total_chain = 0;
@@ -2469,6 +2474,8 @@ Perl_dump_mstats(pTHX_ char *s)
 	perl_mstats_t buffer;
 	UV nf[NBUCKETS];
 	UV nt[NBUCKETS];
+
+	PERL_ARGS_ASSERT_DUMP_MSTATS;
 
 	buffer.nfree  = nf;
 	buffer.ntotal = nt;

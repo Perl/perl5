@@ -943,6 +943,9 @@ STATIC void
 S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
 {
     dVAR;
+
+    PERL_ARGS_ASSERT_DO_ODDBALL;
+
     if (*relem) {
 	SV *tmpstr;
         const HE *didstore;
@@ -2899,6 +2902,8 @@ try_autoload:
 void
 Perl_sub_crush_depth(pTHX_ CV *cv)
 {
+    PERL_ARGS_ASSERT_SUB_CRUSH_DEPTH;
+
     if (CvANON(cv))
 	Perl_warner(aTHX_ packWARN(WARN_RECURSION), "Deep recursion on anonymous subroutine");
     else {
@@ -2972,6 +2977,8 @@ PP(pp_aelem)
 void
 Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
 {
+    PERL_ARGS_ASSERT_VIVIFY_REF;
+
     SvGETMAGIC(sv);
     if (!SvOK(sv)) {
 	if (SvREADONLY(sv))
@@ -3033,6 +3040,8 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     STRLEN packlen;
     const char * const name = SvPV_const(meth, namelen);
     SV * const sv = *(PL_stack_base + TOPMARK + 1);
+
+    PERL_ARGS_ASSERT_METHOD_COMMON;
 
     if (!sv)
 	Perl_croak(aTHX_ "Can't call method \"%s\" on an undefined value", name);

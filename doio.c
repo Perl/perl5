@@ -81,6 +81,8 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
     char mode[PERL_MODE_MAX];	/* file mode ("r\0", "rb\0", "ab\0" etc.) */
     SV *namesv;
 
+    PERL_ARGS_ASSERT_DO_OPENN;
+
     Zero(mode,sizeof(mode),char);
     PL_forkprocess = 1;		/* assume true if no fork */
 
@@ -707,6 +709,8 @@ Perl_nextargv(pTHX_ register GV *gv)
     Gid_t filegid;
     IO * const io = GvIOp(gv);
 
+    PERL_ARGS_ASSERT_NEXTARGV;
+
     if (!PL_argvoutgv)
 	PL_argvoutgv = gv_fetchpvs("ARGVOUT", GV_ADD|GV_NOTQUAL, SVt_PVIO);
     if (io && (IoFLAGS(io) & IOf_ARGV) && (IoFLAGS(io) & IOf_START)) {
@@ -951,6 +955,8 @@ Perl_io_close(pTHX_ IO *io, bool not_implicit)
     dVAR;
     bool retval = FALSE;
 
+    PERL_ARGS_ASSERT_IO_CLOSE;
+
     if (IoIFP(io)) {
 	if (IoTYPE(io) == IoTYPE_PIPE) {
 	    const int status = PerlProc_pclose(IoIFP(io));
@@ -989,6 +995,8 @@ Perl_do_eof(pTHX_ GV *gv)
 {
     dVAR;
     register IO * const io = GvIO(gv);
+
+    PERL_ARGS_ASSERT_DO_EOF;
 
     if (!io)
 	return TRUE;
@@ -1034,6 +1042,8 @@ Perl_do_tell(pTHX_ GV *gv)
     register IO *io = NULL;
     register PerlIO *fp;
 
+    PERL_ARGS_ASSERT_DO_TELL;
+
     if (gv && (io = GvIO(gv)) && (fp = IoIFP(io))) {
 #ifdef ULTRIX_STDIO_BOTCH
 	if (PerlIO_eof(fp))
@@ -1073,6 +1083,8 @@ Perl_do_sysseek(pTHX_ GV *gv, Off_t pos, int whence)
     dVAR;
     register IO *io = NULL;
     register PerlIO *fp;
+
+    PERL_ARGS_ASSERT_DO_SYSSEEK;
 
     if (gv && (io = GvIO(gv)) && (fp = IoIFP(io)))
 	return PerlLIO_lseek(PerlIO_fileno(fp), pos, whence);
@@ -1195,6 +1207,9 @@ bool
 Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 {
     dVAR;
+
+    PERL_ARGS_ASSERT_DO_PRINT;
+
     /* assuming fp is checked earlier */
     if (!sv)
 	return TRUE;
@@ -1365,6 +1380,7 @@ static void
 S_exec_failed(pTHX_ const char *cmd, int fd, int do_report)
 {
     const int e = errno;
+    PERL_ARGS_ASSERT_EXEC_FAILED;
     if (ckWARN(WARN_EXEC))
 	Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
 		    cmd, Strerror(e));
@@ -1379,6 +1395,7 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 	       int fd, int do_report)
 {
     dVAR;
+    PERL_ARGS_ASSERT_DO_AEXEC5;
 #if defined(MACOS_TRADITIONAL) || defined(__SYMBIAN32__) || defined(__LIBCATAMOUNT__)
     Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
 #else
@@ -1433,9 +1450,11 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
     register char *s;
     char *buf;
     char *cmd;
-
     /* Make a copy so we can change it */
     const Size_t cmdlen = strlen(incmd) + 1;
+
+    PERL_ARGS_ASSERT_DO_EXEC3;
+
     Newx(buf, cmdlen, char);
     cmd = buf;
     memcpy(cmd, incmd, cmdlen);
@@ -1565,6 +1584,8 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
     const char *const what = PL_op_name[type];
     const char *s;
     SV ** const oldmark = mark;
+
+    PERL_ARGS_ASSERT_APPLY;
 
     /* Doing this ahead of the switch statement preserves the old behaviour,
        where attempting to use kill as a taint test test would fail on
@@ -1868,6 +1889,9 @@ Perl_cando(pTHX_ Mode_t mode, bool effective, register const Stat_t *statbufp)
  */
 {
     dVAR;
+
+    PERL_ARGS_ASSERT_CANDO;
+
 #ifdef DOSISH
     /* [Comments and code from Len Reed]
      * MS-DOS "user" is similar to UNIX's "superuser," but can't write
@@ -1961,6 +1985,7 @@ Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
     const I32 n = (optype == OP_MSGGET) ? 0 : SvIVx(*++mark);
     const I32 flags = SvIVx(*++mark);
 
+    PERL_ARGS_ASSERT_DO_IPCGET;
     PERL_UNUSED_ARG(sp);
 
     SETERRNO(0,0);
@@ -2001,6 +2026,7 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
     STRLEN infosize = 0;
     I32 getinfo = (cmd == IPC_STAT);
 
+    PERL_ARGS_ASSERT_DO_IPCCTL;
     PERL_UNUSED_ARG(sp);
 
     switch (optype)
@@ -2123,6 +2149,7 @@ Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
     const char * const mbuf = SvPV_const(mstr, len);
     const I32 msize = len - sizeof(long);
 
+    PERL_ARGS_ASSERT_DO_MSGSND;
     PERL_UNUSED_ARG(sp);
 
     if (msize < 0)
@@ -2146,6 +2173,8 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
     I32 msize, flags, ret;
     const I32 id = SvIVx(*++mark);
     SV * const mstr = *++mark;
+
+    PERL_ARGS_ASSERT_DO_MSGRCV;
     PERL_UNUSED_ARG(sp);
 
     /* suppress warning when reading into undef var --jhi */
@@ -2184,6 +2213,8 @@ Perl_do_semop(pTHX_ SV **mark, SV **sp)
     const I32 id = SvIVx(*++mark);
     SV * const opstr = *++mark;
     const char * const opbuf = SvPV_const(opstr, opsize);
+
+    PERL_ARGS_ASSERT_DO_SEMOP;
     PERL_UNUSED_ARG(sp);
 
     if (opsize < 3 * SHORTSIZE
@@ -2238,6 +2269,8 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
     SV * const mstr = *++mark;
     const I32 mpos = SvIVx(*++mark);
     const I32 msize = SvIVx(*++mark);
+
+    PERL_ARGS_ASSERT_DO_SHMIO;
     PERL_UNUSED_ARG(sp);
 
     SETERRNO(0,0);
@@ -2304,6 +2337,9 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
     dVAR;
     SV * const tmpcmd = newSV(0);
     PerlIO *fp;
+
+    PERL_ARGS_ASSERT_START_GLOB;
+
     ENTER;
     SAVEFREESV(tmpcmd);
 #ifdef VMS /* expand the wildcards right here, rather than opening a pipe, */

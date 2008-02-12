@@ -31,6 +31,7 @@ Perl_deb_nocontext(const char *pat, ...)
 #ifdef DEBUGGING
     dTHX;
     va_list args;
+    PERL_ARGS_ASSERT_DEB_NOCONTEXT;
     va_start(args, pat);
     vdeb(pat, &args);
     va_end(args);
@@ -44,6 +45,7 @@ void
 Perl_deb(pTHX_ const char *pat, ...)
 {
     va_list args;
+    PERL_ARGS_ASSERT_DEB;
     va_start(args, pat);
 #ifdef DEBUGGING
     vdeb(pat, &args);
@@ -61,6 +63,8 @@ Perl_vdeb(pTHX_ const char *pat, va_list *args)
     const char* const file = PL_curcop ? OutCopFILE(PL_curcop) : "<null>";
     const char* const display_file = file ? file : "<free>";
     const long line = PL_curcop ? (long)CopLINE(PL_curcop) : 0;
+
+    PERL_ARGS_ASSERT_VDEB;
 
     if (DEBUG_v_TEST)
 	PerlIO_printf(Perl_debug_log, "(%ld:%s:%ld)\t",
@@ -112,6 +116,9 @@ S_deb_stack_n(pTHX_ SV** stack_base, I32 stack_min, I32 stack_max,
     dVAR;
     register I32 i = stack_max - 30;
     const I32 *markscan = PL_markstack + mark_min;
+
+    PERL_ARGS_ASSERT_DEB_STACK_N;
+
     if (i < stack_min)
 	i = stack_min;
     

@@ -100,6 +100,8 @@ being zero.  See C<SvROK_off>.
 void
 Perl_sv_unref(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_SV_UNREF;
+
     sv_unref_flags(sv, 0);
 }
 
@@ -113,6 +115,8 @@ Taint an SV. Use C<SvTAINTED_on> instead.
 void
 Perl_sv_taint(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_SV_TAINT;
+
     sv_magic((sv), NULL, PERL_MAGIC_taint, NULL, 0);
 }
 
@@ -174,6 +178,8 @@ Usually accessed via the C<SvPVbyte_nolen> macro.
 char *
 Perl_sv_2pvbyte_nolen(pTHX_ register SV *sv)
 {
+    PERL_ARGS_ASSERT_SV_2PVBYTE_NOLEN;
+
     return sv_2pvbyte(sv, NULL);
 }
 
@@ -191,6 +197,8 @@ Usually accessed via the C<SvPVutf8_nolen> macro.
 char *
 Perl_sv_2pvutf8_nolen(pTHX_ register SV *sv)
 {
+    PERL_ARGS_ASSERT_SV_2PVUTF8_NOLEN;
+
     return sv_2pvutf8(sv, NULL);
 }
 
@@ -207,6 +215,8 @@ an xpvmg. See also C<sv_force_normal_flags>.
 void
 Perl_sv_force_normal(pTHX_ register SV *sv)
 {
+    PERL_ARGS_ASSERT_SV_FORCE_NORMAL;
+
     sv_force_normal_flags(sv, 0);
 }
 
@@ -217,6 +227,8 @@ Perl_sv_force_normal(pTHX_ register SV *sv)
 void
 Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 {
+    PERL_ARGS_ASSERT_SV_SETSV;
+
     sv_setsv_flags(dstr, sstr, SV_GMAGIC);
 }
 
@@ -227,6 +239,8 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 void
 Perl_sv_catpvn(pTHX_ SV *dsv, const char* sstr, STRLEN slen)
 {
+    PERL_ARGS_ASSERT_SV_CATPVN;
+
     sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC);
 }
 
@@ -241,6 +255,8 @@ Like C<sv_catpvn>, but also handles 'set' magic.
 void
 Perl_sv_catpvn_mg(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
 {
+    PERL_ARGS_ASSERT_SV_CATPVN_MG;
+
     sv_catpvn_flags(sv,ptr,len,SV_GMAGIC|SV_SMAGIC);
 }
 
@@ -251,6 +267,8 @@ Perl_sv_catpvn_mg(pTHX_ register SV *sv, register const char *ptr, register STRL
 void
 Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr)
 {
+    PERL_ARGS_ASSERT_SV_CATSV;
+
     sv_catsv_flags(dstr, sstr, SV_GMAGIC);
 }
 
@@ -265,6 +283,8 @@ Like C<sv_catsv>, but also handles 'set' magic.
 void
 Perl_sv_catsv_mg(pTHX_ SV *dsv, register SV *ssv)
 {
+    PERL_ARGS_ASSERT_SV_CATSV_MG;
+
     sv_catsv_flags(dsv,ssv,SV_GMAGIC|SV_SMAGIC);
 }
 
@@ -280,6 +300,8 @@ cope with complex macro expressions. Always use the macro instead.
 IV
 Perl_sv_iv(pTHX_ register SV *sv)
 {
+    PERL_ARGS_ASSERT_SV_IV;
+
     if (SvIOK(sv)) {
 	if (SvIsUV(sv))
 	    return (IV)SvUVX(sv);
@@ -300,6 +322,8 @@ cope with complex macro expressions. Always use the macro instead.
 UV
 Perl_sv_uv(pTHX_ register SV *sv)
 {
+    PERL_ARGS_ASSERT_SV_UV;
+
     if (SvIOK(sv)) {
 	if (SvIsUV(sv))
 	    return SvUVX(sv);
@@ -320,6 +344,8 @@ cope with complex macro expressions. Always use the macro instead.
 NV
 Perl_sv_nv(pTHX_ register SV *sv)
 {
+    PERL_ARGS_ASSERT_SV_NV;
+
     if (SvNOK(sv))
 	return SvNVX(sv);
     return sv_2nv(sv);
@@ -341,6 +367,8 @@ cope with complex macro expressions. Always use the macro instead.
 char *
 Perl_sv_pvn(pTHX_ SV *sv, STRLEN *lp)
 {
+    PERL_ARGS_ASSERT_SV_PVN;
+
     if (SvPOK(sv)) {
 	*lp = SvCUR(sv);
 	return SvPVX(sv);
@@ -352,6 +380,8 @@ Perl_sv_pvn(pTHX_ SV *sv, STRLEN *lp)
 char *
 Perl_sv_pvn_nomg(pTHX_ register SV *sv, STRLEN *lp)
 {
+    PERL_ARGS_ASSERT_SV_PVN_NOMG;
+
     if (SvPOK(sv)) {
 	*lp = SvCUR(sv);
 	return SvPVX(sv);
@@ -366,6 +396,8 @@ Perl_sv_pvn_nomg(pTHX_ register SV *sv, STRLEN *lp)
 char *
 Perl_sv_pv(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_SV_PV;
+
     if (SvPOK(sv))
         return SvPVX(sv);
 
@@ -379,6 +411,8 @@ Perl_sv_pv(pTHX_ SV *sv)
 char *
 Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp)
 {
+    PERL_ARGS_ASSERT_SV_PVN_FORCE;
+
     return sv_pvn_force_flags(sv, lp, SV_GMAGIC);
 }
 
@@ -389,6 +423,8 @@ Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp)
 char *
 Perl_sv_pvbyte(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_SV_PVBYTE;
+
     sv_utf8_downgrade(sv, FALSE);
     return sv_pv(sv);
 }
@@ -410,6 +446,8 @@ instead.
 char *
 Perl_sv_pvbyten(pTHX_ SV *sv, STRLEN *lp)
 {
+    PERL_ARGS_ASSERT_SV_PVBYTEN;
+
     sv_utf8_downgrade(sv, FALSE);
     return sv_pvn(sv,lp);
 }
@@ -421,6 +459,8 @@ Perl_sv_pvbyten(pTHX_ SV *sv, STRLEN *lp)
 char *
 Perl_sv_pvutf8(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_SV_PVUTF8;
+
     sv_utf8_upgrade(sv);
     return sv_pv(sv);
 }
@@ -442,6 +482,8 @@ instead.
 char *
 Perl_sv_pvutf8n(pTHX_ SV *sv, STRLEN *lp)
 {
+    PERL_ARGS_ASSERT_SV_PVUTF8N;
+
     sv_utf8_upgrade(sv);
     return sv_pvn(sv,lp);
 }
@@ -453,6 +495,8 @@ Perl_sv_pvutf8n(pTHX_ SV *sv, STRLEN *lp)
 STRLEN
 Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 {
+    PERL_ARGS_ASSERT_SV_UTF8_UPGRADE;
+
     return sv_utf8_upgrade_flags(sv, SV_GMAGIC);
 }
 
@@ -461,6 +505,13 @@ Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...)
 {
     dTHXs;
     va_list(arglist);
+
+    /* Easier to special case this here than in embed.pl. (Look at what it
+       generates for proto.h) */
+#ifdef PERL_IMPLICIT_CONTEXT
+    PERL_ARGS_ASSERT_FPRINTF_NOCONTEXT;
+#endif
+
     va_start(arglist, format);
     return PerlIO_vprintf(stream, format, arglist);
 }
@@ -470,6 +521,11 @@ Perl_printf_nocontext(const char *format, ...)
 {
     dTHX;
     va_list(arglist);
+
+#ifdef PERL_IMPLICIT_CONTEXT
+    PERL_ARGS_ASSERT_PRINTF_NOCONTEXT;
+#endif
+
     va_start(arglist, format);
     return PerlIO_vprintf(PerlIO_stdout(), format, arglist);
 }
@@ -495,6 +551,8 @@ Perl_huge(void)
 void
 Perl_gv_fullname(pTHX_ SV *sv, const GV *gv)
 {
+    PERL_ARGS_ASSERT_GV_FULLNAME;
+
     gv_fullname3(sv, gv, sv == (const SV*)gv ? "*" : "");
 }
 
@@ -502,18 +560,24 @@ Perl_gv_fullname(pTHX_ SV *sv, const GV *gv)
 void
 Perl_gv_efullname(pTHX_ SV *sv, const GV *gv)
 {
+    PERL_ARGS_ASSERT_GV_EFULLNAME;
+
     gv_efullname3(sv, gv, sv == (const SV*)gv ? "*" : "");
 }
 
 void
 Perl_gv_fullname3(pTHX_ SV *sv, const GV *gv, const char *prefix)
 {
+    PERL_ARGS_ASSERT_GV_FULLNAME3;
+
     gv_fullname4(sv, gv, prefix, TRUE);
 }
 
 void
 Perl_gv_efullname3(pTHX_ SV *sv, const GV *gv, const char *prefix)
 {
+    PERL_ARGS_ASSERT_GV_EFULLNAME3;
+
     gv_efullname4(sv, gv, prefix, TRUE);
 }
 
@@ -528,18 +592,24 @@ See L<gv_fetchmethod_autoload>.
 GV *
 Perl_gv_fetchmethod(pTHX_ HV *stash, const char *name)
 {
+    PERL_ARGS_ASSERT_GV_FETCHMETHOD;
+
     return gv_fetchmethod_autoload(stash, name, TRUE);
 }
 
 HE *
 Perl_hv_iternext(pTHX_ HV *hv)
 {
+    PERL_ARGS_ASSERT_HV_ITERNEXT;
+
     return hv_iternext_flags(hv, 0);
 }
 
 void
 Perl_hv_magic(pTHX_ HV *hv, GV *gv, int how)
 {
+    PERL_ARGS_ASSERT_HV_MAGIC;
+
     sv_magic((SV*)hv, (SV*)gv, how, NULL, 0);
 }
 
@@ -548,6 +618,9 @@ Perl_av_fake(pTHX_ register I32 size, register SV **strp)
 {
     register SV** ary;
     register AV * const av = (AV*)newSV_type(SVt_PVAV);
+
+    PERL_ARGS_ASSERT_AV_FAKE;
+
     Newx(ary,size+1,SV*);
     AvALLOC(av) = ary;
     Copy(strp,ary,size,SV*);
@@ -567,6 +640,8 @@ bool
 Perl_do_open(pTHX_ GV *gv, register const char *name, I32 len, int as_raw,
 	     int rawmode, int rawperm, PerlIO *supplied_fp)
 {
+    PERL_ARGS_ASSERT_DO_OPEN;
+
     return do_openn(gv, name, len, as_raw, rawmode, rawperm,
 		    supplied_fp, (SV **) NULL, 0);
 }
@@ -577,6 +652,8 @@ as_raw,
               int rawmode, int rawperm, PerlIO *supplied_fp, SV *svs,
               I32 num_svs)
 {
+    PERL_ARGS_ASSERT_DO_OPEN9;
+
     PERL_UNUSED_ARG(num_svs);
     return do_openn(gv, name, len, as_raw, rawmode, rawperm,
                     supplied_fp, &svs, 1);
@@ -589,6 +666,9 @@ Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode)
   * This is a stub for any XS code which might have been calling it.
   */
  const char *name = ":raw";
+
+ PERL_ARGS_ASSERT_DO_BINMODE;
+
 #ifdef PERLIO_USING_CRLF
  if (!(mode & O_BINARY))
      name = ":crlf";
@@ -600,6 +680,8 @@ Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode)
 bool
 Perl_do_aexec(pTHX_ SV *really, register SV **mark, register SV **sp)
 {
+    PERL_ARGS_ASSERT_DO_AEXEC;
+
     return do_aexec5(really, mark, sp, 0, 0);
 }
 #endif
@@ -608,6 +690,8 @@ Perl_do_aexec(pTHX_ SV *really, register SV **mark, register SV **sp)
 bool
 Perl_do_exec(pTHX_ const char *cmd)
 {
+    PERL_ARGS_ASSERT_DO_EXEC;
+
     return do_exec3(cmd,0,0);
 }
 #endif
@@ -622,6 +706,8 @@ Perl_init_i18nl14n(pTHX_ int printwarn)
 OP *
 Perl_oopsCV(pTHX_ OP *o)
 {
+    PERL_ARGS_ASSERT_OOPSCV;
+
     Perl_croak(aTHX_ "NOT IMPL LINE %d",__LINE__);
     /* STUB */
     PERL_UNUSED_ARG(o);
@@ -1054,12 +1140,16 @@ PP(pp_rv2hv)
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {
+    PERL_ARGS_ASSERT_UVUNI_TO_UTF8;
+
     return Perl_uvuni_to_utf8_flags(aTHX_ d, uv, 0);
 }
 
 bool
 Perl_is_utf8_string_loc(pTHX_ const U8 *s, STRLEN len, const U8 **ep)
 {
+    PERL_ARGS_ASSERT_IS_UTF8_STRING_LOC;
+
     return is_utf8_string_loclen(s, len, ep, 0);
 }
 
@@ -1106,6 +1196,9 @@ void
 Perl_save_long(pTHX_ long int *longp)
 {
     dVAR;
+
+    PERL_ARGS_ASSERT_SAVE_LONG;
+
     SSCHECK(3);
     SSPUSHLONG(*longp);
     SSPUSHPTR(longp);
@@ -1116,6 +1209,9 @@ void
 Perl_save_iv(pTHX_ IV *ivp)
 {
     dVAR;
+
+    PERL_ARGS_ASSERT_SAVE_IV;
+
     SSCHECK(3);
     SSPUSHIV(*ivp);
     SSPUSHPTR(ivp);
@@ -1126,6 +1222,9 @@ void
 Perl_save_nogv(pTHX_ GV *gv)
 {
     dVAR;
+
+    PERL_ARGS_ASSERT_SAVE_NOGV;
+
     SSCHECK(2);
     SSPUSHPTR(gv);
     SSPUSHINT(SAVEt_NSTAB);
@@ -1136,6 +1235,8 @@ Perl_save_list(pTHX_ register SV **sarg, I32 maxsarg)
 {
     dVAR;
     register I32 i;
+
+    PERL_ARGS_ASSERT_SAVE_LIST;
 
     for (i = 1; i <= maxsarg; i++) {
 	register SV * const sv = newSV(0);
@@ -1158,6 +1259,8 @@ Like C<sv_usepvn>, but also handles 'set' magic.
 void
 Perl_sv_usepvn_mg(pTHX_ SV *sv, char *ptr, STRLEN len)
 {
+    PERL_ARGS_ASSERT_SV_USEPVN_MG;
+
     sv_usepvn_flags(sv,ptr,len, SV_SMAGIC);
 }
 
@@ -1174,12 +1277,16 @@ magic. See C<sv_usepvn_flags>.
 void
 Perl_sv_usepvn(pTHX_ SV *sv, char *ptr, STRLEN len)
 {
+    PERL_ARGS_ASSERT_SV_USEPVN;
+
     sv_usepvn_flags(sv,ptr,len, 0);
 }
 
 void
 Perl_cv_ckproto(pTHX_ const CV *cv, const GV *gv, const char *p)
 {
+    PERL_ARGS_ASSERT_CV_CKPROTO;
+
     cv_ckproto_len(cv, gv, p, p ? strlen(p) : 0);
 }
 
@@ -1196,6 +1303,8 @@ Perl_unpack_str(pTHX_ const char *pat, const char *patend, const char *s,
 		const char *strbeg, const char *strend, char **new_s, I32 ocnt,
 		U32 flags)
 {
+    PERL_ARGS_ASSERT_UNPACK_STR;
+
     PERL_UNUSED_ARG(strbeg);
     PERL_UNUSED_ARG(new_s);
     PERL_UNUSED_ARG(ocnt);
@@ -1215,6 +1324,8 @@ flags are not used. This call should not be used; use packlist instead.
 void
 Perl_pack_cat(pTHX_ SV *cat, const char *pat, const char *patend, register SV **beglist, SV **endlist, SV ***next_in_list, U32 flags)
 {
+    PERL_ARGS_ASSERT_PACK_CAT;
+
     PERL_UNUSED_ARG(next_in_list);
     PERL_UNUSED_ARG(flags);
 
@@ -1230,6 +1341,8 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, U32 hash)
 bool
 Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 {
+    PERL_ARGS_ASSERT_HV_EXISTS_ENT;
+
     return hv_common(hv, keysv, NULL, 0, 0, HV_FETCH_ISEXISTS, 0, hash)
 	? TRUE : FALSE;
 }
@@ -1237,6 +1350,8 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 HE *
 Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, U32 hash)
 {
+    PERL_ARGS_ASSERT_HV_FETCH_ENT;
+
     return (HE *)hv_common(hv, keysv, NULL, 0, 0, 
 		     (lval ? HV_FETCH_LVALUE : 0), NULL, hash);
 }
@@ -1244,6 +1359,8 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, U32 hash)
 SV *
 Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 {
+    PERL_ARGS_ASSERT_HV_DELETE_ENT;
+
     return (SV *) hv_common(hv, keysv, NULL, 0, 0, flags | HV_DELETE, NULL,
 			    hash);
 }
@@ -1279,6 +1396,8 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen_i32)
     STRLEN klen;
     int flags;
 
+    PERL_ARGS_ASSERT_HV_EXISTS;
+
     if (klen_i32 < 0) {
 	klen = -klen_i32;
 	flags = HVhek_UTF8;
@@ -1295,6 +1414,8 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 lval)
 {
     STRLEN klen;
     int flags;
+
+    PERL_ARGS_ASSERT_HV_FETCH;
 
     if (klen_i32 < 0) {
 	klen = -klen_i32;
@@ -1313,6 +1434,8 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 flags)
 {
     STRLEN klen;
     int k_flags;
+
+    PERL_ARGS_ASSERT_HV_DELETE;
 
     if (klen_i32 < 0) {
 	klen = -klen_i32;

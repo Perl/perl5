@@ -496,6 +496,8 @@ get_shell(void)
 int
 Perl_do_aspawn(pTHX_ SV *really, SV **mark, SV **sp)
 {
+  PERL_ARGS_ASSERT_DO_ASPAWN;
+
   Perl_croak(aTHX_ PL_no_func, "aspawn");
   return -1;
 }
@@ -619,18 +621,24 @@ do_spawn2(pTHX_ char *cmd, int exectype)
 int
 Perl_do_spawn(pTHX_ char *cmd)
 {
+    PERL_ARGS_ASSERT_DO_SPAWN;
+
     return do_spawn2(aTHX_ cmd, EXECF_SPAWN);
 }
 
 int
 Perl_do_spawn_nowait(pTHX_ char *cmd)
 {
+    PERL_ARGS_ASSERT_DO_SPAWN_NOWAIT;
+
     return do_spawn2(aTHX_ cmd, EXECF_SPAWN_NOWAIT);
 }
 
 bool
 Perl_do_exec(pTHX_ const char *cmd)
 {
+    PERL_ARGS_ASSERT_DO_EXEC;
+
     do_spawn2(aTHX_ cmd, EXECF_EXEC);
     return FALSE;
 }
