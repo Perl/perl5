@@ -27,7 +27,7 @@ Perl_av_reify(pTHX_ AV *av)
     dVAR;
     I32 key;
 
-    assert(av);
+    PERL_ARGS_ASSERT_AV_REIFY;
 
     if (AvREAL(av))
 	return;
@@ -66,7 +66,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
     dVAR;
     MAGIC *mg;
 
-    assert(av);
+    PERL_ARGS_ASSERT_AV_EXTEND;
 
     mg = SvTIED_mg((SV*)av, PERL_MAGIC_tied);
     if (mg) {
@@ -195,7 +195,7 @@ Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
 {
     dVAR;
 
-    assert(av);
+    PERL_ARGS_ASSERT_AV_FETCH;
 
     if (SvRMAGICAL(av)) {
         const MAGIC * const tied_magic = mg_find((SV*)av, PERL_MAGIC_tied);
@@ -278,7 +278,7 @@ Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
     dVAR;
     SV** ary;
 
-    assert(av);
+    PERL_ARGS_ASSERT_AV_STORE;
 
     /* S_regclass relies on being able to pass in a NULL sv
        (unicode_alternate may be NULL).
@@ -369,6 +369,7 @@ Perl_av_make(pTHX_ register I32 size, register SV **strp)
 {
     register AV * const av = (AV*)newSV_type(SVt_PVAV);
     /* sv_upgrade does AvREAL_only()  */
+    PERL_ARGS_ASSERT_AV_MAKE;
     if (size) {		/* "defined" was returning undef for size==0 anyway. */
         register SV** ary;
         register I32 i;
@@ -401,7 +402,7 @@ Perl_av_clear(pTHX_ register AV *av)
     dVAR;
     I32 extra;
 
-    assert(av);
+    PERL_ARGS_ASSERT_AV_CLEAR;
 #ifdef DEBUGGING
     if (SvREFCNT(av) == 0 && ckWARN_d(WARN_DEBUGGING)) {
 	Perl_warner(aTHX_ packWARN(WARN_DEBUGGING), "Attempt to clear deleted array");
@@ -454,7 +455,7 @@ Undefines the array.  Frees the memory used by the array itself.
 void
 Perl_av_undef(pTHX_ register AV *av)
 {
-    assert(av);
+    PERL_ARGS_ASSERT_AV_UNDEF;
 
     /* Give any tie a chance to cleanup first */
     if (SvTIED_mg((SV*)av, PERL_MAGIC_tied)) 
@@ -487,6 +488,7 @@ A small internal helper function to remove a commonly duplicated idiom.
 void
 Perl_av_create_and_push(pTHX_ AV **const avp, SV *const val)
 {
+    PERL_ARGS_ASSERT_AV_CREATE_AND_PUSH;
     if (!*avp)
 	*avp = newAV();
     av_push(*avp, val);
@@ -506,7 +508,8 @@ Perl_av_push(pTHX_ register AV *av, SV *val)
 {             
     dVAR;
     MAGIC *mg;
-    assert(av);
+
+    PERL_ARGS_ASSERT_AV_PUSH;
 
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
@@ -544,7 +547,7 @@ Perl_av_pop(pTHX_ register AV *av)
     SV *retval;
     MAGIC* mg;
 
-    assert(av);
+    PERL_ARGS_ASSERT_AV_POP;
 
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
@@ -587,6 +590,7 @@ A small internal helper function to remove a commonly duplicated idiom.
 SV **
 Perl_av_create_and_unshift_one(pTHX_ AV **const avp, SV *const val)
 {
+    PERL_ARGS_ASSERT_AV_CREATE_AND_UNSHIFT_ONE;
     if (!*avp)
 	*avp = newAV();
     av_unshift(*avp, 1);
@@ -610,7 +614,7 @@ Perl_av_unshift(pTHX_ register AV *av, register I32 num)
     register I32 i;
     MAGIC* mg;
 
-    assert(av);
+    PERL_ARGS_ASSERT_AV_UNSHIFT;
 
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
@@ -681,7 +685,7 @@ Perl_av_shift(pTHX_ register AV *av)
     SV *retval;
     MAGIC* mg;
 
-    assert(av);
+    PERL_ARGS_ASSERT_AV_SHIFT;
 
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
@@ -726,7 +730,7 @@ array is C<av_len(av) + 1>.  Returns -1 if the array is empty.
 I32
 Perl_av_len(pTHX_ register const AV *av)
 {
-    assert(av);
+    PERL_ARGS_ASSERT_AV_LEN;
     return AvFILL(av);
 }
 
@@ -750,7 +754,7 @@ Perl_av_fill(pTHX_ register AV *av, I32 fill)
     dVAR;
     MAGIC *mg;
 
-    assert(av);
+    PERL_ARGS_ASSERT_AV_FILL;
 
     if (fill < 0)
 	fill = -1;
@@ -808,7 +812,7 @@ Perl_av_delete(pTHX_ AV *av, I32 key, I32 flags)
     dVAR;
     SV *sv;
 
-    assert(av);
+    PERL_ARGS_ASSERT_AV_DELETE;
 
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
@@ -894,7 +898,7 @@ bool
 Perl_av_exists(pTHX_ AV *av, I32 key)
 {
     dVAR;
-    assert(av);
+    PERL_ARGS_ASSERT_AV_EXISTS;
 
     if (SvRMAGICAL(av)) {
         const MAGIC * const tied_magic = mg_find((SV*)av, PERL_MAGIC_tied);
@@ -950,7 +954,7 @@ S_get_aux_mg(pTHX_ AV *av) {
     dVAR;
     MAGIC *mg;
 
-    assert(av);
+    PERL_ARGS_ASSERT_GET_AUX_MG;
 
     mg = mg_find((SV*)av, PERL_MAGIC_arylen_p);
 
@@ -967,12 +971,18 @@ S_get_aux_mg(pTHX_ AV *av) {
 SV **
 Perl_av_arylen_p(pTHX_ AV *av) {
     MAGIC *const mg = get_aux_mg(av);
+
+    PERL_ARGS_ASSERT_AV_ARYLEN_P;
+
     return &(mg->mg_obj);
 }
 
 IV *
 Perl_av_iter_p(pTHX_ AV *av) {
     MAGIC *const mg = get_aux_mg(av);
+
+    PERL_ARGS_ASSERT_AV_ITER_P;
+
 #if IVSIZE == I32SIZE
     return (IV *)&(mg->mg_len);
 #else

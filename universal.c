@@ -45,6 +45,8 @@ S_isa_lookup(pTHX_ HV *stash, const char * const name, const HV* const name_stas
     const char *hvname;
     I32 items;
 
+    PERL_ARGS_ASSERT_ISA_LOOKUP;
+
     /* A stash/class can go by many names (ie. User == main::User), so 
        we compare the stash itself just in case */
     if (name_stash && ((const HV *)stash == name_stash))
@@ -96,6 +98,8 @@ Perl_sv_derived_from(pTHX_ SV *sv, const char *const name)
     dVAR;
     HV *stash;
 
+    PERL_ARGS_ASSERT_SV_DERIVED_FROM;
+
     SvGETMAGIC(sv);
 
     if (SvROK(sv)) {
@@ -136,8 +140,10 @@ Perl_sv_does(pTHX_ SV *sv, const char *const name)
     const char *classname;
     bool does_it;
     SV *methodname;
-
     dSP;
+
+    PERL_ARGS_ASSERT_SV_DOES;
+
     ENTER;
     SAVETMPS;
 

@@ -156,13 +156,15 @@ sub write_protos {
 	$ret .= "$arg\n";
     }
     else {
-	my ($flags,$retval,$func,@args) = @_;
+	my ($flags,$retval,$plain_func,@args) = @_;
 	my @nonnull;
 	my $has_context = ( $flags !~ /n/ );
 	my $never_returns = ( $flags =~ /r/ );
 	my $commented_out = ( $flags =~ /m/ );
 	my $is_malloc = ( $flags =~ /a/ );
 	my $can_ignore = ( $flags !~ /R/ ) && !$is_malloc;
+	my @names_of_nn;
+	my $func;
 
 	my $splint_flags = "";
 	if ( $SPLINT && !$commented_out ) {
@@ -174,12 +176,14 @@ sub write_protos {
 
 	if ($flags =~ /s/) {
 	    $retval = "STATIC $splint_flags$retval";
-	    $func = "S_$func";
+	    $func = "S_$plain_func";
 	}
 	else {
 	    $retval = "PERL_CALLCONV $splint_flags$retval";
 	    if ($flags =~ /[bp]/) {
-		$func = "Perl_$func";
+		$func = "Perl_$plain_func";
+	    } else {
+		$func = $plain_func;
 	    }
 	}
 	$ret .= "$retval\t$func(";
@@ -205,11 +209,15 @@ sub write_protos {
 		my $temp_arg = $arg;
 		$temp_arg =~ s/\*//g;
 		$temp_arg =~ s/\s*\bstruct\b\s*/ /g;
-		if ( ($temp_arg ne "...") && ($temp_arg !~ /\w+\s+\w+/) ) {
-		    warn "$func: $arg doesn't have a name\n";
+		if ( ($temp_arg ne "...")
+		     && ($temp_arg !~ /\w+\s+(\w+)(?:\[\d+\])?\s*$/) ) {
+		    warn "$func: $arg ($n) doesn't have a name\n";
 		}
 		if ( $SPLINT && $nullok && !$commented_out ) {
 		    $arg = '/*@null@*/ ' . $arg;
+		}
+		if (defined $1 && $nn) {
+		    push @names_of_nn, $1;
 		}
 	    }
 	    $ret .= join ", ", @args;
@@ -251,6 +259,10 @@ sub write_protos {
 	}
 	$ret .= ";";
 	$ret = "/* $ret */" if $commented_out;
+	if (@names_of_nn) {
+	    $ret .= "\n#define PERL_ARGS_ASSERT_\U$plain_func\E\t\\\n\t"
+		. join '; ', map "assert($_)", @names_of_nn;
+	}
 	$ret .= @attrs ? "\n\n" : "\n";
     }
     $ret;

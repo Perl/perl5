@@ -843,7 +843,7 @@ sys_intern_clear(pTHX)
 void
 sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
 {
-
+    PERL_ARGS_ASSERT_SYS_INTERN_DUP;
 }
 #endif	/* HAVE_INTERP_INTERN */
 

@@ -762,16 +762,16 @@ STATIC void /* the standard unstable (u) quicksort (qsort) */
 S_qsortsvu(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
 {
    register SV * temp;
-
    struct partition_stack_entry partition_stack[QSORT_MAX_STACK];
    int next_stack_entry = 0;
-
    int part_left;
    int part_right;
 #ifdef QSORT_ORDER_GUESS
    int qsort_break_even;
    int swapped;
 #endif
+
+    PERL_ARGS_ASSERT_QSORTSVU;
 
    /* Make sure we actually have work to do.
    */
@@ -1441,6 +1441,8 @@ flexible routine.
 void
 Perl_sortsv(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
 {
+    PERL_ARGS_ASSERT_SORTSV;
+
     sortsv_flags(array, nmemb, cmp, 0);
 }
 
@@ -1454,6 +1456,8 @@ Sort an array, with various options.
 void
 Perl_sortsv_flags(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 {
+    PERL_ARGS_ASSERT_SORTSV_FLAGS;
+
     if (flags & SORTf_QSORT)
 	S_qsortsv(aTHX_ array, nmemb, cmp, flags);
     else
@@ -1740,6 +1744,9 @@ S_sortcv(pTHX_ SV *a, SV *b)
     const I32 oldsaveix = PL_savestack_ix;
     const I32 oldscopeix = PL_scopestack_ix;
     I32 result;
+ 
+    PERL_ARGS_ASSERT_SORTCV;
+
     GvSV(PL_firstgv) = a;
     GvSV(PL_secondgv) = b;
     PL_stack_sp = PL_stack_base;
@@ -1765,6 +1772,8 @@ S_sortcv_stacked(pTHX_ SV *a, SV *b)
     const I32 oldscopeix = PL_scopestack_ix;
     I32 result;
     AV * const av = GvAV(PL_defgv);
+
+    PERL_ARGS_ASSERT_SORTCV_STACKED;
 
     if (AvMAX(av) < 1) {
 	SV** ary = AvALLOC(av);
@@ -1806,6 +1815,8 @@ S_sortcv_xsub(pTHX_ SV *a, SV *b)
     CV * const cv=(CV*)PL_sortcop;
     I32 result;
 
+    PERL_ARGS_ASSERT_SORTCV_XSUB;
+
     SP = PL_stack_base;
     PUSHMARK(SP);
     EXTEND(SP, 2);
@@ -1831,6 +1842,9 @@ S_sv_ncmp(pTHX_ SV *a, SV *b)
 {
     const NV nv1 = SvNSIV(a);
     const NV nv2 = SvNSIV(b);
+
+    PERL_ARGS_ASSERT_SV_NCMP;
+
     return nv1 < nv2 ? -1 : nv1 > nv2 ? 1 : 0;
 }
 
@@ -1839,6 +1853,9 @@ S_sv_i_ncmp(pTHX_ SV *a, SV *b)
 {
     const IV iv1 = SvIV(a);
     const IV iv2 = SvIV(b);
+
+    PERL_ARGS_ASSERT_SV_I_NCMP;
+
     return iv1 < iv2 ? -1 : iv1 > iv2 ? 1 : 0;
 }
 
@@ -1854,6 +1871,9 @@ S_amagic_ncmp(pTHX_ register SV *a, register SV *b)
 {
     dVAR;
     SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp);
+
+    PERL_ARGS_ASSERT_AMAGIC_NCMP;
+
     if (tmpsv) {
         if (SvIOK(tmpsv)) {
             const I32 i = SvIVX(tmpsv);
@@ -1872,6 +1892,9 @@ S_amagic_i_ncmp(pTHX_ register SV *a, register SV *b)
 {
     dVAR;
     SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp);
+
+    PERL_ARGS_ASSERT_AMAGIC_I_NCMP;
+
     if (tmpsv) {
         if (SvIOK(tmpsv)) {
             const I32 i = SvIVX(tmpsv);
@@ -1890,6 +1913,9 @@ S_amagic_cmp(pTHX_ register SV *str1, register SV *str2)
 {
     dVAR;
     SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp);
+
+    PERL_ARGS_ASSERT_AMAGIC_CMP;
+
     if (tmpsv) {
         if (SvIOK(tmpsv)) {
             const I32 i = SvIVX(tmpsv);
@@ -1908,6 +1934,9 @@ S_amagic_cmp_locale(pTHX_ register SV *str1, register SV *str2)
 {
     dVAR;
     SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp);
+
+    PERL_ARGS_ASSERT_AMAGIC_CMP_LOCALE;
+
     if (tmpsv) {
         if (SvIOK(tmpsv)) {
             const I32 i = SvIVX(tmpsv);

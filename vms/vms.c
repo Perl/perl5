@@ -10257,6 +10257,8 @@ int flags = 0;
 unsigned long int
 Perl_do_spawn(pTHX_ const char *cmd)
 {
+    PERL_ARGS_ASSERT_DO_SPAWN;
+
     return do_spawn2(aTHX_ cmd, 0);
 }
 /*}}}*/
@@ -12999,6 +13001,8 @@ void
 Perl_sys_intern_dup(pTHX_ struct interp_intern *src, 
                           struct interp_intern *dst)
 {
+    PERL_ARGS_ASSERT_SYS_INTERN_DUP;
+
     memcpy(dst,src,sizeof(struct interp_intern));
 }
 
