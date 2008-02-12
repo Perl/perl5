@@ -4614,7 +4614,7 @@ PERL_CALLCONV void	Perl_pmop_xmldump(pTHX_ const PMOP* pm);
 PERL_CALLCONV void	Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV void	Perl_op_xmldump(pTHX_ const OP* arg)
+PERL_CALLCONV void	Perl_op_xmldump(pTHX_ const OP *o)
 			__attribute__nonnull__(pTHX_1);
 
 

@@ -1913,7 +1913,7 @@ Mp	|void	|do_pmop_xmldump|I32 level|NN PerlIO *file \
 				|NULLOK const PMOP *pm
 Mp	|void	|pmop_xmldump	|NULLOK const PMOP* pm
 Mp	|void	|do_op_xmldump	|I32 level|NN PerlIO *file|NULLOK const OP *o
-Mp	|void	|op_xmldump	|NN const OP* arg
+Mp	|void	|op_xmldump	|NN const OP *o
 
 Mp	|TOKEN*	|newTOKEN	|I32 optype|YYSTYPE lval \
 				|NULLOK MADPROP* madprop
