@@ -9,7 +9,7 @@ package Math::Complex;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $Inf);
 
-$VERSION = 1.51;
+$VERSION = 1.51_01;
 
 use Config;
 
@@ -20,6 +20,8 @@ BEGIN {
 	  8  => '1.7976931348623157e+308',
 	 10 => '1.1897314953572317650857593266280070162E+4932',
 	 12 => '1.1897314953572317650857593266280070162E+4932',  # AFAICT.
+	 # Tested on x86_64. What does Sparc give?
+	 16 => '1.1897314953572317650857593266280070162E+4932',
 	);
     my $nvsize = $Config{nvsize} || ($Config{uselongdouble} && $Config{longdblsize}) || $Config{doublesize};
     die "Math::Complex: Could not figure out nvsize\n" unless defined $nvsize;
