@@ -113,6 +113,15 @@ case "$cc" in
     *gcc*) ;;
     *) ccflags="$ccflags -qmaxmem=-1 -qnoansialias" ;;
     esac
+
+# since change #28654, _XOPEN_SOURCE symbol needs to be defined on aix 4.2
+# to avoid the following build error in perlio.c :
+# 1506-294 (S) Syntax error in expression on #if directive.
+#
+case "$osvers" in
+    4.2.1.0) ccflags="$ccflags -D_XOPEN_SOURCE" ;;
+    *) ;;
+    esac
 nm_opt='-B'
 
 # These functions don't work like Perl expects them to.
