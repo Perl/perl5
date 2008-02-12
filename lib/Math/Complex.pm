@@ -9,7 +9,7 @@ package Math::Complex;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $Inf);
 
-$VERSION = 1.51_01;
+$VERSION = 1.52;
 
 use Config;
 
@@ -18,15 +18,22 @@ BEGIN {
 	(
 	  4  => '1.70141183460469229e+38',
 	  8  => '1.7976931348623157e+308',
+	 # AFAICT the 10, 12, and 16-byte long doubles
+	 # all have the same maximum.
 	 10 => '1.1897314953572317650857593266280070162E+4932',
-	 12 => '1.1897314953572317650857593266280070162E+4932',  # AFAICT.
-	 # Tested on x86_64. What does Sparc give?
+	 12 => '1.1897314953572317650857593266280070162E+4932',
 	 16 => '1.1897314953572317650857593266280070162E+4932',
 	);
-    my $nvsize = $Config{nvsize} || ($Config{uselongdouble} && $Config{longdblsize}) || $Config{doublesize};
-    die "Math::Complex: Could not figure out nvsize\n" unless defined $nvsize;
+    my $nvsize = $Config{nvsize} ||
+	        ($Config{uselongdouble} && $Config{longdblsize}) ||
+                 $Config{doublesize};
+    die "Math::Complex: Could not figure out nvsize\n"
+	unless defined $nvsize;
+    die "Math::Complex: Cannot not figure out max nv (nvsize = $nvsize)\n"
+	unless defined $DBL_MAX{$nvsize};
     my $DBL_MAX = eval $DBL_MAX{$nvsize};
-    die "Math::Complex: Could not figure out max nv\n" unless defined $DBL_MAX;
+    die "Math::Complex: Could not figure out max nv (nvsize = $nvsize)\n"
+	unless defined $DBL_MAX;
     my $BIGGER_THAN_THIS = 1e30;  # Must find something bigger than this.
     if ($^O eq 'unicosmk') {
 	$Inf = $DBL_MAX;
