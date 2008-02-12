@@ -207,6 +207,7 @@ if ($^O eq 'MacOS') {
 [ "Win32->catdir('A:/')",                   'A:\\'               ],
 [ "Win32->catdir('\\', 'foo')",             '\\foo'              ],
 [ "Win32->catdir('','','..')",              '\\'                 ],
+[ "Win32->catdir('A:', 'foo')",             'A:\\foo'            ],
 
 [ "Win32->catfile('a','b','c')",        'a\\b\\c' ],
 [ "Win32->catfile('a','b','.\\c')",      'a\\b\\c'  ],
@@ -214,6 +215,7 @@ if ($^O eq 'MacOS') {
 [ "Win32->catfile('c')",                'c' ],
 [ "Win32->catfile('.\\c')",              'c' ],
 [ "Win32->catfile('a/..','../b')",       '..\\b' ],
+[ "Win32->catfile('A:', 'foo')",         'A:\\foo'            ],
 
 
 [ "Win32->canonpath('')",               ''                    ],
