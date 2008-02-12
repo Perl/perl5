@@ -143,7 +143,7 @@ Afnrp	|void	|croak_nocontext|NN const char* pat|...
 Afnp	|OP*	|die_nocontext	|NN const char* pat|...
 Afnp	|void	|deb_nocontext	|NN const char* pat|...
 Afnp	|char*	|form_nocontext	|NN const char* pat|...
-Anp	|void	|load_module_nocontext|U32 flags|NN SV* name|NN SV* ver|...
+Anp	|void	|load_module_nocontext|U32 flags|NN SV* name|NULLOK SV* ver|...
 Afnp	|SV*	|mess_nocontext	|NN const char* pat|...
 Afnp	|void	|warn_nocontext	|NN const char* pat|...
 Afnp	|void	|warner_nocontext|U32 err|NN const char* pat|...
@@ -299,7 +299,7 @@ Apd	|HV*	|gv_stashpv	|NN const char* name|I32 flags
 Apd	|HV*	|gv_stashpvn	|NN const char* name|U32 namelen|I32 flags
 Apd	|HV*	|gv_stashsv	|NN SV* sv|I32 flags
 Apd	|void	|hv_clear	|NULLOK HV* tb
-poM	|HV *	|hv_copy_hints_hv|NN HV *const ohv
+poM	|HV *	|hv_copy_hints_hv|NULLOK HV *const ohv
 Ap	|void	|hv_delayfree_ent|NN HV* hv|NULLOK HE* entry
 Abmd	|SV*	|hv_delete	|NULLOK HV* tb|NN const char* key|I32 klen \
 				|I32 flags
@@ -486,8 +486,8 @@ p	|char*	|mem_collxfrm	|NN const char* s|STRLEN len|NN STRLEN* xlen
 Afp	|SV*	|mess		|NN const char* pat|...
 Ap	|SV*	|vmess		|NN const char* pat|NULLOK va_list* args
 EXp	|void	|qerror		|NN SV* err
-Apd	|void	|sortsv		|NN SV** array|size_t num_elts|NN SVCOMPARE_t cmp
-Apd	|void	|sortsv_flags	|NN SV** array|size_t num_elts|NN SVCOMPARE_t cmp|U32 flags
+Apd	|void	|sortsv		|NULLOK SV** array|size_t num_elts|NN SVCOMPARE_t cmp
+Apd	|void	|sortsv_flags	|NULLOK SV** array|size_t num_elts|NN SVCOMPARE_t cmp|U32 flags
 Apd	|int	|mg_clear	|NN SV* sv
 Apd	|int	|mg_copy	|NN SV* sv|NN SV* nsv|NULLOK const char* key|I32 klen
 pd	|void	|mg_localize	|NN SV* sv|NN SV* nsv
@@ -769,7 +769,7 @@ Ap	|void	|save_iv	|NN IV* iv
 Ap	|void	|save_list	|NN SV** sarg|I32 maxsarg
 Ap	|void	|save_long	|NN long* longp
 Ap	|void	|save_mortalizesv|NN SV* sv
-Ap	|void	|save_nogv	|NULLOK GV* gv
+Ap	|void	|save_nogv	|NN GV* gv
 p	|void	|save_op
 Ap	|SV*	|save_scalar	|NN GV* gv
 Ap	|void	|save_pptr	|NN char** pptr
@@ -843,8 +843,8 @@ Apd	|void	|sv_chop	|NN SV* sv|NULLOK const char* ptr
 pd	|I32	|sv_clean_all
 pd	|void	|sv_clean_objs
 Apd	|void	|sv_clear	|NN SV* sv
-Apd	|I32	|sv_cmp		|NN SV* sv1|NN SV* sv2
-Apd	|I32	|sv_cmp_locale	|NN SV* sv1|NN SV* sv2
+Apd	|I32	|sv_cmp		|NULLOK SV* sv1|NULLOK SV* sv2
+Apd	|I32	|sv_cmp_locale	|NULLOK SV* sv1|NULLOK SV* sv2
 #if defined(USE_LOCALE_COLLATE)
 Apd	|char*	|sv_collxfrm	|NN SV* sv|NN STRLEN* nxp
 #endif
@@ -1096,7 +1096,7 @@ Ap	|void	|rvpv_dup	|NN SV* dstr|NN const SV *sstr|NN CLONE_PARAMS* param
 Ap	|yy_parser*|parser_dup	|NULLOK const yy_parser *proto|NN CLONE_PARAMS* param
 #endif
 Apa	|PTR_TBL_t*|ptr_table_new
-ApR	|void*	|ptr_table_fetch|NN PTR_TBL_t *tbl|NN const void *sv
+ApR	|void*	|ptr_table_fetch|NN PTR_TBL_t *tbl|NULLOK const void *sv
 Ap	|void	|ptr_table_store|NN PTR_TBL_t *tbl|NULLOK const void *oldsv|NN void *newsv
 Ap	|void	|ptr_table_split|NN PTR_TBL_t *tbl
 Ap	|void	|ptr_table_clear|NULLOK PTR_TBL_t *tbl
@@ -1367,7 +1367,7 @@ s	|I32	|amagic_cmp_locale|NN SV *a|NN SV *b
 s	|I32	|sortcv		|NN SV *a|NN SV *b
 s	|I32	|sortcv_xsub	|NN SV *a|NN SV *b
 s	|I32	|sortcv_stacked	|NN SV *a|NN SV *b
-s	|void	|qsortsvu	|NN SV** array|size_t num_elts|NN SVCOMPARE_t compare
+s	|void	|qsortsvu	|NULLOK SV** array|size_t num_elts|NN SVCOMPARE_t compare
 #endif
 
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
@@ -1644,7 +1644,8 @@ Ap	|int	|PerlIO_error		|NULLOK PerlIO *f
 Ap	|int	|PerlIO_flush		|NULLOK PerlIO *f
 Ap	|void	|PerlIO_clearerr	|NULLOK PerlIO *f
 Ap	|void	|PerlIO_set_cnt		|NULLOK PerlIO *f|int cnt
-Ap	|void	|PerlIO_set_ptrcnt	|NULLOK PerlIO *f|NN STDCHAR *ptr|int cnt
+Ap	|void	|PerlIO_set_ptrcnt	|NULLOK PerlIO *f|NULLOK STDCHAR *ptr \
+					|int cnt
 Ap	|void	|PerlIO_setlinebuf	|NULLOK PerlIO *f
 Ap	|SSize_t|PerlIO_read		|NULLOK PerlIO *f|NN void *buf|Size_t count
 Ap	|SSize_t|PerlIO_write		|NULLOK PerlIO *f|NN const void *buf|Size_t count

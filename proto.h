@@ -267,8 +267,7 @@ PERL_CALLCONV char*	Perl_form_nocontext(const char* pat, ...)
 			__attribute__nonnull__(1);
 
 PERL_CALLCONV void	Perl_load_module_nocontext(U32 flags, SV* name, SV* ver, ...)
-			__attribute__nonnull__(2)
-			__attribute__nonnull__(3);
+			__attribute__nonnull__(2);
 
 PERL_CALLCONV SV*	Perl_mess_nocontext(const char* pat, ...)
 			__attribute__format__(__printf__,1,2)
@@ -687,9 +686,7 @@ PERL_CALLCONV HV*	Perl_gv_stashsv(pTHX_ SV* sv, I32 flags)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV void	Perl_hv_clear(pTHX_ HV* tb);
-PERL_CALLCONV HV *	Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
-			__attribute__nonnull__(pTHX_1);
-
+PERL_CALLCONV HV *	Perl_hv_copy_hints_hv(pTHX_ HV *const ohv);
 PERL_CALLCONV void	Perl_hv_delayfree_ent(pTHX_ HV* hv, HE* entry)
 			__attribute__nonnull__(pTHX_1);
 
@@ -1300,11 +1297,9 @@ PERL_CALLCONV void	Perl_qerror(pTHX_ SV* err)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV void	Perl_sortsv(pTHX_ SV** array, size_t num_elts, SVCOMPARE_t cmp)
-			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
 
 PERL_CALLCONV void	Perl_sortsv_flags(pTHX_ SV** array, size_t num_elts, SVCOMPARE_t cmp, U32 flags)
-			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
 
 PERL_CALLCONV int	Perl_mg_clear(pTHX_ SV* sv)
@@ -2079,7 +2074,9 @@ PERL_CALLCONV void	Perl_save_long(pTHX_ long* longp)
 PERL_CALLCONV void	Perl_save_mortalizesv(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV void	Perl_save_nogv(pTHX_ GV* gv);
+PERL_CALLCONV void	Perl_save_nogv(pTHX_ GV* gv)
+			__attribute__nonnull__(pTHX_1);
+
 PERL_CALLCONV void	Perl_save_op(pTHX);
 PERL_CALLCONV SV*	Perl_save_scalar(pTHX_ GV* gv)
 			__attribute__nonnull__(pTHX_1);
@@ -2248,14 +2245,8 @@ PERL_CALLCONV void	Perl_sv_clean_objs(pTHX);
 PERL_CALLCONV void	Perl_sv_clear(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV I32	Perl_sv_cmp(pTHX_ SV* sv1, SV* sv2)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-
-PERL_CALLCONV I32	Perl_sv_cmp_locale(pTHX_ SV* sv1, SV* sv2)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-
+PERL_CALLCONV I32	Perl_sv_cmp(pTHX_ SV* sv1, SV* sv2);
+PERL_CALLCONV I32	Perl_sv_cmp_locale(pTHX_ SV* sv1, SV* sv2);
 #if defined(USE_LOCALE_COLLATE)
 PERL_CALLCONV char*	Perl_sv_collxfrm(pTHX_ SV* sv, STRLEN* nxp)
 			__attribute__nonnull__(pTHX_1)
@@ -2916,8 +2907,7 @@ PERL_CALLCONV PTR_TBL_t*	Perl_ptr_table_new(pTHX)
 
 PERL_CALLCONV void*	Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, const void *sv)
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV void	Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, const void *oldsv, void *newsv)
 			__attribute__nonnull__(pTHX_1)
@@ -3618,7 +3608,6 @@ STATIC I32	S_sortcv_stacked(pTHX_ SV *a, SV *b)
 			__attribute__nonnull__(pTHX_2);
 
 STATIC void	S_qsortsvu(pTHX_ SV** array, size_t num_elts, SVCOMPARE_t compare)
-			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
 
 #endif
@@ -4245,9 +4234,7 @@ PERL_CALLCONV int	Perl_PerlIO_error(pTHX_ PerlIO *f);
 PERL_CALLCONV int	Perl_PerlIO_flush(pTHX_ PerlIO *f);
 PERL_CALLCONV void	Perl_PerlIO_clearerr(pTHX_ PerlIO *f);
 PERL_CALLCONV void	Perl_PerlIO_set_cnt(pTHX_ PerlIO *f, int cnt);
-PERL_CALLCONV void	Perl_PerlIO_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR *ptr, int cnt)
-			__attribute__nonnull__(pTHX_2);
-
+PERL_CALLCONV void	Perl_PerlIO_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR *ptr, int cnt);
 PERL_CALLCONV void	Perl_PerlIO_setlinebuf(pTHX_ PerlIO *f);
 PERL_CALLCONV SSize_t	Perl_PerlIO_read(pTHX_ PerlIO *f, void *buf, Size_t count)
 			__attribute__nonnull__(pTHX_2);
