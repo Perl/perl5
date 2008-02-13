@@ -67,12 +67,17 @@ AnpR	|bool	|doing_taint	|int argc|NULLOK char** argv|NULLOK char** env
 Anod	|PerlInterpreter*|perl_clone|NN PerlInterpreter *proto_perl|UV flags
 #  if defined(PERL_IMPLICIT_SYS)
 Ano	|PerlInterpreter*|perl_clone_using \
-				|NN PerlInterpreter *proto_perl|UV flags \
-				|NN struct IPerlMem* m|NN struct IPerlMem* ms \
-				|NN struct IPerlMem* mp|NN struct IPerlEnv* e \
-				|NN struct IPerlStdIO* io|NN struct IPerlLIO* lio \
-				|NN struct IPerlDir* d|NN struct IPerlSock* s \
-				|NN struct IPerlProc* p
+				|NN PerlInterpreter *proto_perl \
+				|UV flags \
+				|NN struct IPerlMem* ipM \
+				|NN struct IPerlMem* ipMS \
+				|NN struct IPerlMem* ipMP \
+				|NN struct IPerlEnv* ipE \
+				|NN struct IPerlStdIO* ipStd \
+				|NN struct IPerlLIO* ipLIO \
+				|NN struct IPerlDir* ipD \
+				|NN struct IPerlSock* ipS \
+				|NN struct IPerlProc* ipP
 #  endif
 #endif
 

@@ -69,7 +69,7 @@ PERL_CALLCONV PerlInterpreter*	perl_clone(PerlInterpreter *proto_perl, UV flags)
 	assert(proto_perl)
 
 #  if defined(PERL_IMPLICIT_SYS)
-PERL_CALLCONV PerlInterpreter*	perl_clone_using(PerlInterpreter *proto_perl, UV flags, struct IPerlMem* m, struct IPerlMem* ms, struct IPerlMem* mp, struct IPerlEnv* e, struct IPerlStdIO* io, struct IPerlLIO* lio, struct IPerlDir* d, struct IPerlSock* s, struct IPerlProc* p)
+PERL_CALLCONV PerlInterpreter*	perl_clone_using(PerlInterpreter *proto_perl, UV flags, struct IPerlMem* ipM, struct IPerlMem* ipMS, struct IPerlMem* ipMP, struct IPerlEnv* ipE, struct IPerlStdIO* ipStd, struct IPerlLIO* ipLIO, struct IPerlDir* ipD, struct IPerlSock* ipS, struct IPerlProc* ipP)
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(3)
 			__attribute__nonnull__(4)
@@ -81,7 +81,7 @@ PERL_CALLCONV PerlInterpreter*	perl_clone_using(PerlInterpreter *proto_perl, UV 
 			__attribute__nonnull__(10)
 			__attribute__nonnull__(11);
 #define PERL_ARGS_ASSERT_PERL_CLONE_USING	\
-	assert(proto_perl); assert(m); assert(ms); assert(mp); assert(e); assert(io); assert(lio); assert(d); assert(s); assert(p)
+	assert(proto_perl); assert(ipM); assert(ipMS); assert(ipMP); assert(ipE); assert(ipStd); assert(ipLIO); assert(ipD); assert(ipS); assert(ipP)
 
 #  endif
 #endif
