@@ -584,11 +584,10 @@ PERL_CALLCONV bool	Perl_do_exec(pTHX_ const char* cmd)
 
 #if defined(WIN32) || defined(__SYMBIAN32__)
 PERL_CALLCONV int	Perl_do_aspawn(pTHX_ SV* really, SV** mark, SV** sp)
-			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_DO_ASPAWN	\
-	assert(really); assert(mark); assert(sp)
+	assert(mark); assert(sp)
 
 PERL_CALLCONV int	Perl_do_spawn(pTHX_ char* cmd)
 			__attribute__nonnull__(pTHX_1);
