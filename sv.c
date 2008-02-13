@@ -7581,7 +7581,7 @@ is set to 1.
 */
 
 SV *
-Perl_newSV_type(pTHX_ svtype type)
+Perl_newSV_type(pTHX_ const svtype type)
 {
     register SV *sv;
 

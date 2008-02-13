@@ -304,7 +304,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 }
 
 STATIC void
-S_gv_init_sv(pTHX_ GV *gv, I32 sv_type)
+S_gv_init_sv(pTHX_ GV *gv, const svtype sv_type)
 {
     PERL_ARGS_ASSERT_GV_INIT_SV;
 
@@ -895,13 +895,13 @@ Perl_gv_stashsv(pTHX_ SV *sv, I32 flags)
 
 
 GV *
-Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type) {
+Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, const svtype sv_type) {
     PERL_ARGS_ASSERT_GV_FETCHPV;
     return gv_fetchpvn_flags(nambeg, strlen(nambeg), add, sv_type);
 }
 
 GV *
-Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, I32 sv_type) {
+Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, const svtype sv_type) {
     STRLEN len;
     const char * const nambeg = SvPV_const(name, len);
     PERL_ARGS_ASSERT_GV_FETCHSV;
@@ -910,7 +910,7 @@ Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, I32 sv_type) {
 
 GV *
 Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
-		       I32 sv_type)
+		       const svtype sv_type)
 {
     dVAR;
     register const char *name = nambeg;

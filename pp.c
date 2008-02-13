@@ -218,8 +218,8 @@ PP(pp_rv2gv)
 
 /* Helper function for pp_rv2sv and pp_rv2av  */
 GV *
-Perl_softref2xv(pTHX_ SV *const sv, const char *const what, const U32 type,
-		SV ***spp)
+Perl_softref2xv(pTHX_ SV *const sv, const char *const what,
+		const svtype type, SV ***spp)
 {
     dVAR;
     GV *gv;

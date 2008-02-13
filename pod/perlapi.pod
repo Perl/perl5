@@ -5311,7 +5311,7 @@ X<newSV_type>
 Creates a new SV, of the type specified.  The reference count for the new SV
 is set to 1.
 
-	SV*	newSV_type(svtype type)
+	SV*	newSV_type(const svtype type)
 
 =for hackers
 Found in file sv.c
