@@ -19,7 +19,7 @@
 START_EXTERN_C
 
 #if defined(PERL_IMPLICIT_SYS)
-PERL_CALLCONV PerlInterpreter*	perl_alloc_using(struct IPerlMem *ipM, struct IPerlMem *ipMS, struct IPerlMem *ipMP, struct IPerlEnv *ipE, struct IPerlStdIO *ipStd, struct IPerlLIO *ipLio, struct IPerlDir *ipD, struct IPerlSock *ipS, struct IPerlProc *ipP)
+PERL_CALLCONV PerlInterpreter*	perl_alloc_using(struct IPerlMem *ipM, struct IPerlMem *ipMS, struct IPerlMem *ipMP, struct IPerlEnv *ipE, struct IPerlStdIO *ipStd, struct IPerlLIO *ipLIO, struct IPerlDir *ipD, struct IPerlSock *ipS, struct IPerlProc *ipP)
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(2)
 			__attribute__nonnull__(3)
@@ -30,7 +30,7 @@ PERL_CALLCONV PerlInterpreter*	perl_alloc_using(struct IPerlMem *ipM, struct IPe
 			__attribute__nonnull__(8)
 			__attribute__nonnull__(9);
 #define PERL_ARGS_ASSERT_PERL_ALLOC_USING	\
-	assert(ipM); assert(ipMS); assert(ipMP); assert(ipE); assert(ipStd); assert(ipLio); assert(ipD); assert(ipS); assert(ipP)
+	assert(ipM); assert(ipMS); assert(ipMP); assert(ipE); assert(ipStd); assert(ipLIO); assert(ipD); assert(ipS); assert(ipP)
 
 #endif
 PERL_CALLCONV PerlInterpreter*	perl_alloc(void);

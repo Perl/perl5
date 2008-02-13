@@ -50,7 +50,7 @@ Ano	|PerlInterpreter*|perl_alloc_using \
 				|NN struct IPerlMem *ipMP \
 				|NN struct IPerlEnv *ipE \
 				|NN struct IPerlStdIO *ipStd \
-				|NN struct IPerlLIO *ipLio \
+				|NN struct IPerlLIO *ipLIO \
 				|NN struct IPerlDir *ipD \
 				|NN struct IPerlSock *ipS \
 				|NN struct IPerlProc *ipP
