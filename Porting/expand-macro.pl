@@ -24,7 +24,7 @@ if (!@ARGV) {
 my $args = '';
 
 while (<>) {
-    next unless /^#\s*define\s+$macro/;
+    next unless /^#\s*define\s+$macro\b/;
     my ($def_args) = /^#\s*define\s+$macro\(([^)]*)\)/;
     if (defined $def_args) {
 	my @args = split ',', $def_args;
