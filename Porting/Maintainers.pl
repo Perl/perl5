@@ -932,6 +932,13 @@ package Maintainers;
                 'CPAN'          => 1,
                 },
 
+        'Thread::Semaphore' =>
+                {
+                'MAINTAINER'    => 'jdhedden',
+                'FILES'         => q[lib/Thread/Semaphore.pm lib/Thread/Semaphore.t],
+                'CPAN'          => 1,
+                },
+
 	'Unicode::Collate' =>
 		{
 		'MAINTAINER'	=> 'sadahiro',
