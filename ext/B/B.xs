@@ -916,7 +916,7 @@ OP_type(o)
 
 #if PERL_VERSION >= 9
 
-U8
+U16
 OP_opt(o)
 	B::OP		o
 
@@ -938,7 +938,7 @@ OP_private(o)
 
 #if PERL_VERSION >= 9
 
-U8
+U16
 OP_spare(o)
 	B::OP		o
 

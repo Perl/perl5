@@ -555,7 +555,7 @@ Perl_op_clear(pTHX_ OP *o)
     switch (o->op_type) {
     case OP_NULL:	/* Was holding old type, if any. */
 	if (PL_madskills && o->op_targ != OP_NULL) {
-	    o->op_type = o->op_targ;
+	    o->op_type = (optype)o->op_targ;
 	    o->op_targ = 0;
 	    goto retry;
 	}
@@ -5086,7 +5086,7 @@ S_newGIVWHENOP(pTHX_ OP *cond, OP *block,
     PERL_ARGS_ASSERT_NEWGIVWHENOP;
 
     NewOp(1101, enterop, 1, LOGOP);
-    enterop->op_type = enter_opcode;
+    enterop->op_type = (optype)enter_opcode;
     enterop->op_ppaddr = PL_ppaddr[enter_opcode];
     enterop->op_flags =  (U8) OPf_KIDS;
     enterop->op_targ = ((entertarg == NOT_IN_PAD) ? 0 : entertarg);
