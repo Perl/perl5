@@ -1075,8 +1075,13 @@ Perl_scalarvoid(pTHX_ OP *o)
 	    no_bareword_allowed(o);
 	else {
 	    if (ckWARN(WARN_VOID)) {
-		SV* msv = sv_2mortal(Perl_newSVpvf(aTHX_ "a constant (%"SVf")", sv));
-		useless = SvPV_nolen(msv);
+		if (SvOK(sv)) {
+		    SV* msv = sv_2mortal(Perl_newSVpvf(aTHX_
+				"a constant (%"SVf")", sv));
+		    useless = SvPV_nolen(msv);
+		}
+		else
+		    useless = "a constant (undef)";
 		if (o->op_private & OPpCONST_ARYBASE)
 		    useless = NULL;
 		/* don't warn on optimised away booleans, eg 
