@@ -1342,6 +1342,7 @@ Perl_my_lstat(pTHX)
     static const char no_prev_lstat[] = "The stat preceding -l _ wasn't an lstat";
     dSP;
     SV *sv;
+    const char *file;
     if (PL_op->op_flags & OPf_REF) {
 	EXTEND(SP,1);
 	if (cGVOP_gv == PL_defgv) {
@@ -1368,10 +1369,10 @@ Perl_my_lstat(pTHX)
 		GvENAME((GV*) SvRV(sv)));
 	return (PL_laststatval = -1);
     }
-    /* XXX Do really need to be calling SvPV() all these times? */
-    sv_setpv(PL_statname,SvPV_nolen_const(sv));
-    PL_laststatval = PerlLIO_lstat(SvPV_nolen_const(sv),&PL_statcache);
-    if (PL_laststatval < 0 && ckWARN(WARN_NEWLINE) && strchr(SvPV_nolen_const(sv), '\n'))
+    file = SvPV_nolen_const(sv);
+    sv_setpv(PL_statname,file);
+    PL_laststatval = PerlLIO_lstat(file,&PL_statcache);
+    if (PL_laststatval < 0 && ckWARN(WARN_NEWLINE) && strchr(file, '\n'))
 	Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "lstat");
     return PL_laststatval;
 }
