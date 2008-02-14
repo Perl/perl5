@@ -3641,6 +3641,7 @@ t/lib/sample-tests/version_late		Test data for Test::Harness
 t/lib/sample-tests/version_old		Test data for Test::Harness
 t/lib/sample-tests/vms_nit		Test data for Test::Harness
 t/lib/sample-tests/with_comments	Test data for Test::Harness
+t/lib/Sans_mypragma.pm			Test module for t/lib/mypragma.t
 t/lib/source_tests/harness		Test data for Test::Harness
 t/lib/source_tests/harness_badtap	Test data for Test::Harness
 t/lib/source_tests/harness_complain	Test data for Test::Harness
