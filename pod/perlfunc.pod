@@ -5596,8 +5596,8 @@ to take the arguments out of order, e.g.:
 
 one or more of:
 
-   space   prefix positive number with a space
-   +       prefix positive number with a plus sign
+   space   prefix non-negative number with a space
+   +       prefix non-negative number with a plus sign
    -       left-justify within the field
    0       use zeros, not spaces, to right-justify
    #       ensure the leading "0" for any octal,
