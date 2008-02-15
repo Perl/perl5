@@ -876,6 +876,13 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'Thread::Queue' =>
+		{
+		'MAINTAINER'	=> 'jdhedden',
+		'FILES'		=> q[lib/Thread/Queue.pm lib/Thread/Queue],
+		'CPAN'		=> 1,
+		},
+
 	'Thread::Semaphore' =>
 		{
 		'MAINTAINER'	=> 'jdhedden',
