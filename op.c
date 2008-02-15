@@ -580,6 +580,7 @@ Perl_op_clear(pTHX_ OP *o)
 	break;
     case OP_METHOD_NAMED:
     case OP_CONST:
+    case OP_HINTSEVAL:
 	SvREFCNT_dec(cSVOPo->op_sv);
 	cSVOPo->op_sv = NULL;
 #ifdef USE_ITHREADS
@@ -6468,11 +6469,8 @@ Perl_ck_eval(pTHX_ OP *o)
     }
     o->op_targ = (PADOFFSET)PL_hints;
     if ((PL_hints & HINT_LOCALIZE_HH) != 0 && GvHV(PL_hintgv)) {
-	/* Store a copy of %^H that pp_entereval can pick up.
-	   OPf_SPECIAL flags the opcode as being for this purpose,
-	   so that it in turn will return a copy at every
-	   eval.*/
-	OP *hhop = newSVOP(OP_CONST, OPf_SPECIAL,
+	/* Store a copy of %^H that pp_entereval can pick up. */
+	OP *hhop = newSVOP(OP_HINTSEVAL, 0,
 			   (SV*)Perl_hv_copy_hints_hv(aTHX_ GvHV(PL_hintgv)));
 	cUNOPo->op_first->op_sibling = hhop;
 	o->op_private |= OPpEVAL_HAS_HH;
@@ -8225,20 +8223,21 @@ Perl_peep(pTHX_ register OP *o)
 	    if (cSVOPo->op_private & OPpCONST_STRICT)
 		no_bareword_allowed(o);
 #ifdef USE_ITHREADS
+	case OP_HINTSEVAL:
 	case OP_METHOD_NAMED:
 	    /* Relocate sv to the pad for thread safety.
 	     * Despite being a "constant", the SV is written to,
 	     * for reference counts, sv_upgrade() etc. */
 	    if (cSVOP->op_sv) {
 		const PADOFFSET ix = pad_alloc(OP_CONST, SVs_PADTMP);
-		if (o->op_type == OP_CONST && SvPADTMP(cSVOPo->op_sv)) {
+		if (o->op_type != OP_METHOD_NAMED && SvPADTMP(cSVOPo->op_sv)) {
 		    /* If op_sv is already a PADTMP then it is being used by
 		     * some pad, so make a copy. */
 		    sv_setsv(PAD_SVl(ix),cSVOPo->op_sv);
 		    SvREADONLY_on(PAD_SVl(ix));
 		    SvREFCNT_dec(cSVOPo->op_sv);
 		}
-		else if (o->op_type == OP_CONST
+		else if (o->op_type != OP_METHOD_NAMED
 			 && cSVOPo->op_sv == &PL_sv_undef) {
 		    /* PL_sv_undef is hack - it's unsafe to store it in the
 		       AV that is the pad, because av_fetch treats values of

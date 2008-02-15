@@ -39,14 +39,7 @@ PP(pp_const)
 {
     dVAR;
     dSP;
-    if ( PL_op->op_flags & OPf_SPECIAL )
-        /* This is a const op added to hold the hints hash for
-           pp_entereval. The hash can be modified by the code
-           being eval'ed, so we return a copy instead. */
-        mXPUSHs((SV*)Perl_hv_copy_hints_hv(aTHX_ (HV*)cSVOP_sv));
-    else
-        /* Normal const. */
-        XPUSHs(cSVOP_sv);
+    XPUSHs(cSVOP_sv);
     RETURN;
 }
 

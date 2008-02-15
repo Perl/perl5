@@ -557,6 +557,8 @@ about calling environment and args.
     tied -- can be used to access object implementing a tie
     pack unpack -- can be used to create/use memory pointers
 
+    hintseval -- constant op holding eval hints
+
     entereval -- can be used to hide code from initial compile
 
     reset

@@ -369,6 +369,7 @@ Perl_pp_semget
 Perl_pp_semctl
 Perl_pp_require
 Perl_pp_dofile
+Perl_pp_hintseval
 Perl_pp_entereval
 Perl_pp_leaveeval
 Perl_pp_entertry

@@ -1052,6 +1052,7 @@ semctl		semctl			ck_fun		imst@	S S S S
 
 require		require			ck_require	du%	S?
 dofile		do "file"		ck_fun		d1	S
+hintseval	eval hints		ck_svconst	s$
 entereval	eval "string"		ck_eval		d%	S
 leaveeval	eval "string" exit	ck_null		1	S
 #evalonce	eval constant string	ck_null		d1	S

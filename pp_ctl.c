@@ -3610,6 +3610,19 @@ PP(pp_require)
     return op;
 }
 
+/* This is a op added to hold the hints hash for
+   pp_entereval. The hash can be modified by the code
+   being eval'ed, so we return a copy instead. */
+
+PP(pp_hintseval)
+{
+    dVAR;
+    dSP;
+    mXPUSHs((SV*)Perl_hv_copy_hints_hv(aTHX_ (HV*)cSVOP_sv));
+    RETURN;
+}
+
+
 PP(pp_entereval)
 {
     dVAR; dSP;
