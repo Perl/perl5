@@ -957,19 +957,16 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #if $cpp_stuff == 1
 #define CAT2(a,b)	a/**/b
 #define STRINGIFY(a)	"a"
-		/* If you can get stringification with catify, tell me how! */
 #endif
 #if $cpp_stuff == 42
 #define PeRl_CaTiFy(a, b)	a ## b
 #define PeRl_StGiFy(a)	#a
-/* the additional level of indirection enables these macros to be
- * used as arguments to other macros.  See K&R 2nd ed., page 231. */
 #define CAT2(a,b)	PeRl_CaTiFy(a,b)
 #define StGiFy(a)	PeRl_StGiFy(a)
 #define STRINGIFY(a)	PeRl_StGiFy(a)
 #endif
 #if $cpp_stuff != 1 && $cpp_stuff != 42
-#   include "Bletch: How does this C preprocessor concatenate tokens?"
+#include "Bletch: How does this C preprocessor concatenate tokens?"
 #endif
 
 /* CPPSTDIN:
@@ -4300,7 +4297,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol contains the number of bits a variable of type NVTYPE
  *	can preserve of a variable of type UVTYPE.
  */
-/* NV_OVERFLOWS_INTEGERS_AT
+/* NV_OVERFLOWS_INTEGERS_AT:
  *	This symbol gives the largest integer value that NVs can hold. This
  *	value + 1.0 cannot be stored accurately. It is expressed as constant
  *	floating point expression to reduce the chance of decimale/binary
@@ -4420,7 +4417,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	Usual values include _iob, __iob, and __sF.
  */
 #$d_stdio_stream_array	HAS_STDIO_STREAM_ARRAY	/**/
+#ifdef HAS_STDIO_STREAM_ARRAY
 #define STDIO_STREAM_ARRAY	$stdio_stream_array
+#endif
 
 /* USE_64_BIT_INT:
  *	This symbol, if defined, indicates that 64-bit integers should

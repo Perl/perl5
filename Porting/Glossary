@@ -3795,14 +3795,14 @@ nroff (Loc.U):
 	full pathname (if any) of the nroff program.  After Configure runs,
 	the value is reset to a plain "nroff" and is not useful.
 
-nv_preserves_uv_bits (perlxv.U):
-	This variable indicates how many of bits type uvtype
-	a variable nvtype can preserve.
-
 nv_overflows_integers_at (perlxv.U):
 	This variable gives the largest integer value that NVs can hold
 	as a constant floating point expression.
 	If it could not be determined, it holds the value 0.
+
+nv_preserves_uv_bits (perlxv.U):
+	This variable indicates how many of bits type uvtype
+	a variable nvtype can preserve.
 
 nveformat (perlxvf.U):
 	This variable contains the format string used for printing

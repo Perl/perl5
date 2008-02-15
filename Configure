@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Tue Jan 22 17:46:32 CET 2008 [metaconfig 3.0 PL70]
+# Generated on Fri Feb 15 17:37:37 CET 2008 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1057,8 +1057,8 @@ i8size=''
 i8type=''
 ivsize=''
 ivtype=''
-nv_preserves_uv_bits=''
 nv_overflows_integers_at=''
+nv_preserves_uv_bits=''
 nvsize=''
 nvtype=''
 u16size=''
@@ -3592,7 +3592,7 @@ case "\$1" in
  \~/*|\~)
 	echo \$1 | $sed "s|~|\${HOME-\$LOGDIR}|"
 	;;
- ~*)
+ \~*)
 	if $test -f /bin/csh; then
 		/bin/csh -f -c "glob \$1"
 		failed=\$?
