@@ -3589,7 +3589,7 @@ cat >filexp <<EOSS
 $startsh
 : expand filename
 case "\$1" in
- ~/*|~)
+ \~/*|\~)
 	echo \$1 | $sed "s|~|\${HOME-\$LOGDIR}|"
 	;;
  ~*)
