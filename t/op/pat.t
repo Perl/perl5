@@ -3769,7 +3769,7 @@ sub iseq($$;$) {
     my (@k,@v,@fetch,$res);
     my $count = 0;
     my @names = qw($+{A} $+{B} $+{C} $+{D});
-    if ($s = ~/(?<D>(?<A>foo)\s+(?<B>bar)?\s+(?<C>baz))/) {
+    if ($s =~ /(?<D>(?<A>foo)\s+(?<B>bar)?\s+(?<C>baz))/) {
 	while (my ($k,$v) = each(%+)) {
 	    $count++;
 	}
@@ -3785,7 +3785,6 @@ sub iseq($$;$) {
     }
     foreach (0..3) {
 	if ($fetch[$_]) {
-	    local $TODO = $_ == 3;
 	    iseq($fetch[$_][0],$fetch[$_][1],$names[$_]);
 	} else {
 	    ok(0, $names[$_]);
