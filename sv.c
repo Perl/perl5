@@ -6494,11 +6494,6 @@ Perl_sv_collxfrm(pTHX_ SV *sv, STRLEN *nxp)
 	    Safefree(mg->mg_ptr);
 	s = SvPV_const(sv, len);
 	if ((xf = mem_collxfrm(s, len, &xlen))) {
-	    if (SvREADONLY(sv)) {
-		SAVEFREEPV(xf);
-		*nxp = xlen;
-		return xf + sizeof(PL_collation_ix);
-	    }
 	    if (! mg) {
 #ifdef PERL_OLD_COPY_ON_WRITE
 		if (SvIsCOW(sv))
