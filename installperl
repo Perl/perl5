@@ -819,6 +819,12 @@ sub installlib {
     return if $name =~ m{^(?:SIGNATURE|PAUSE200\d\.pub)$}; # CPAN files
     return if $name =~ m{^(?:NOTES|PATCHING)$}; # ExtUtils files
 
+    # If not a threaded Perl, then ignore files that support threads
+    if (! $Config{'useithreads'}) {
+        return if $dir =~ m{Thread};
+        return if $name =~ m{Thread};
+    }
+
     # if using a shared perl library then ignore:
     # - static library files [of statically linked extensions];
     # - import library files and export library files (only present on Win32
