@@ -90,7 +90,7 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
    magic type 'H'. This magic (itself) does nothing, but its presence causes
    the values to gain magic type 'h', which has entries for set and clear.
    C<Perl_magic_sethint> updates C<PL_compiling.cop_hints_hash> with a store
-   record, with deletes written by C<Perl_magic_clearhint>. C<SAVE_HINTS>
+   record, with deletes written by C<Perl_magic_clearhint>. C<SAVEHINTS>
    saves the current C<PL_compiling.cop_hints_hash> on the save stack, so that
    it will be correctly restored when any inner compiling scope is exited.
 */
