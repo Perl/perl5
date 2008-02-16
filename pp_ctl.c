@@ -3564,7 +3564,10 @@ PP(pp_require)
 
     SAVEHINTS();
     PL_hints = 0;
-    PL_compiling.cop_hints_hash = NULL;
+    if (PL_compiling.cop_hints_hash) {
+	Perl_refcounted_he_free(aTHX_ PL_compiling.cop_hints_hash);
+	PL_compiling.cop_hints_hash = NULL;
+    }
 
     SAVECOMPILEWARNINGS();
     if (PL_dowarn & G_WARN_ALL_ON)
