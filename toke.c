@@ -6670,7 +6670,7 @@ Perl_yylex(pTHX)
 		    (*s == ':' && s[1] == ':'))
 		{
 #ifdef PERL_MAD
-		    SV *nametoke;
+		    SV *nametoke = NULL;
 #endif
 
 		    PL_expect = XBLOCK;
@@ -12372,8 +12372,8 @@ S_scan_formline(pTHX_ register char *s)
     bool eofmt = FALSE;
 #ifdef PERL_MAD
     char *tokenstart = s;
-    SV* savewhite;
-    
+    SV* savewhite = NULL;
+
     if (PL_madskills) {
 	savewhite = PL_thiswhite;
 	PL_thiswhite = 0;
