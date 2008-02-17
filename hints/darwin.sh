@@ -224,9 +224,19 @@ EOM
 ***    ext/threads/shared/t/wait (threaded builds only)
 
 EOM
+    case `uname -p` in 
+    powerpc) arch=ppc64 ;;
+    i386) arch=x86_64 ;;
+    *) cat <<EOM >&4
+
+*** Don't recognize processor, can't specify 64 bit compilation.
+
+EOM
+    ;;
+    esac
     for var in ccflags cppflags ld ldflags
     do
-       eval $var="\$${var}\ -arch\ ppc64"
+       eval $var="\$${var}\ -arch\ $arch"
     done
 
     [ "$d_msgctl" ] || d_msgctl='undef'
