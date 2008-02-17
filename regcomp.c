@@ -5042,6 +5042,7 @@ SV*
 Perl_reg_named_buff_nextkey(pTHX_ REGEXP * const r, const U32 flags)
 {
     struct regexp *const rx = (struct regexp *)SvANY(r);
+    GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_REG_NAMED_BUFF_NEXTKEY;
 
@@ -5054,7 +5055,7 @@ Perl_reg_named_buff_nextkey(pTHX_ REGEXP * const r, const U32 flags)
             SV* sv_dat = HeVAL(temphe);
             I32 *nums = (I32*)SvPVX(sv_dat);
             for ( i = 0; i < SvIVX(sv_dat); i++ ) {
-                if ((I32)(rx->lastcloseparen) >= nums[i] &&
+                if ((I32)(rx->lastparen) >= nums[i] &&
                     rx->offs[nums[i]].start != -1 &&
                     rx->offs[nums[i]].end != -1)
                 {
@@ -5114,7 +5115,7 @@ Perl_reg_named_buff_all(pTHX_ REGEXP * const r, const U32 flags)
             SV* sv_dat = HeVAL(temphe);
             I32 *nums = (I32*)SvPVX(sv_dat);
             for ( i = 0; i < SvIVX(sv_dat); i++ ) {
-                if ((I32)(rx->lastcloseparen) >= nums[i] &&
+                if ((I32)(rx->lastparen) >= nums[i] &&
                     rx->offs[nums[i]].start != -1 &&
                     rx->offs[nums[i]].end != -1)
                 {

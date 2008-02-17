@@ -3791,10 +3791,10 @@ sub iseq($$;$) {
 	}
     }
     iseq($res,1,"$s~=/(?<D>(?<A>foo)\s+(?<B>bar)?\s+(?<C>baz))/");
-    iseq($count,4,"Got 4 keys in %+ via each # TODO bug 50496");
-    iseq(0+@k, 4, 'Got 4 keys in %+ via keys # TODO bug 50496');
-    iseq("@k","A B C D", "Got expected keys # TODO bug 50496");
-    iseq("@v","bar baz foo foo bar baz", "Got expected values # TODO bug = 50496");
+    iseq($count,4,"Got 4 keys in %+ via each -- bug 50496");
+    iseq(0+@k, 4, 'Got 4 keys in %+ via keys -- bug 50496');
+    iseq("@k","A B C D", "Got expected keys -- bug 50496");
+    iseq("@v","bar baz foo foo bar baz", "Got expected values -- bug = 50496");
     eval'
 	print for $+{this_key_doesnt_exist};
     ';
