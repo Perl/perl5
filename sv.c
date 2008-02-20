@@ -464,7 +464,7 @@ do_clean_objs(pTHX_ SV *const ref)
 
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
 static void
-do_clean_named_objs(pTHX_ SV *sv)
+do_clean_named_objs(pTHX_ SV *const sv)
 {
     dVAR;
     assert(SvTYPE(sv) == SVt_PVGV);
@@ -11255,7 +11255,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
  * so we know which stashes want their objects cloned */
 
 static void
-do_mark_cloneable_stash(pTHX_ SV *sv)
+do_mark_cloneable_stash(pTHX_ SV *const sv)
 {
     const HEK * const hvname = HvNAME_HEK((HV*)sv);
     if (hvname) {
