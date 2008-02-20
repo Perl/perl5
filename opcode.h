@@ -1282,7 +1282,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* hex */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* oct */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* abs */
-	MEMBER_TO_FPTR(Perl_ck_lengthconst),	/* length */
+	MEMBER_TO_FPTR(Perl_ck_fun),	/* length */
 	MEMBER_TO_FPTR(Perl_ck_substr),	/* substr */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* vec */
 	MEMBER_TO_FPTR(Perl_ck_index),	/* index */

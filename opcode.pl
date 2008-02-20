@@ -760,7 +760,7 @@ abs		abs			ck_fun		fsTu%	S?
 
 # String stuff.
 
-length		length			ck_lengthconst	ifsTu%	S?
+length		length			ck_fun		ifsTu%	S?
 substr		substr			ck_substr	st@	S S S? S?
 vec		vec			ck_fun		ist@	S S S
 

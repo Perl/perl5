@@ -7124,15 +7124,6 @@ Perl_ck_index(pTHX_ OP *o)
 }
 
 OP *
-Perl_ck_lengthconst(pTHX_ OP *o)
-{
-    PERL_ARGS_ASSERT_CK_LENGTHCONST;
-
-    /* XXX length optimization goes here */
-    return ck_fun(o);
-}
-
-OP *
 Perl_ck_lfun(pTHX_ OP *o)
 {
     const OPCODE type = o->op_type;
