@@ -53,6 +53,13 @@ for ($source_file, $object_file, $lib_file) {
 }
 
 my @words = $b->split_like_shell(' foo bar');
-ok @words, 2;
-ok $words[0], 'foo';
-ok $words[1], 'bar';
+if ($^O eq 'MSWin32') {
+  ok @words, 1;
+  ok $words[0], ' foo bar';
+  skip 'No splitting in split_like_shell() on Win32';
+}
+else {
+  ok @words, 2;
+  ok $words[0], 'foo';
+  ok $words[1], 'bar';
+}
