@@ -127,7 +127,7 @@ filter_call(pTHX_ int idx, SV *buf_sv, int maxlen)
 
 	    SAVESPTR(DEFSV) ;	/* save $_ */
 	    /* make $_ use our buffer */
-	    DEFSV = sv_2mortal(newSVpv("", 0)) ; 
+	    DEFSV = newSVpv("", 0) ; 
 
     	    PUSHMARK(sp) ;
 
@@ -156,6 +156,8 @@ filter_call(pTHX_ int idx, SV *buf_sv, int maxlen)
 		     n, SvCUR(DEFSV), SvPVX(DEFSV) ) ;
 	    if (SvCUR(DEFSV))
 	        sv_setpvn(my_sv, SvPVX(DEFSV), SvCUR(DEFSV)) ; 
+
+    	    sv_2mortal(DEFSV);
 
     	    PUTBACK ;
     	    FREETMPS ;
