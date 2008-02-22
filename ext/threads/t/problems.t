@@ -95,7 +95,7 @@ if ($] != 5.008)
         my $not = eval { Config::myconfig() } ? '' : 'not ';
         print "${not}ok $test - Are we able to call Config::myconfig after clone\n";
     } else {
-        print "ok $test # Skip Are we able to call Config::myconfig after clone\n";
+        print "ok $test # skip: Are we able to call Config::myconfig after clone\n";
     }
     $test++;
 }
@@ -123,7 +123,7 @@ threads->create(sub {
             print $@ =~ /disallowed/
               ? '' : 'not ', "ok $test # TODO $TODO - unique_hash\n";
         } else {
-            print("ok $test # Skip $TODO - unique_hash\n");
+            print("ok $test # skip: $TODO - unique_hash\n");
         }
         $test++;
     })->join;
@@ -138,7 +138,7 @@ for my $decl ('my $x : unique', 'sub foo : unique') {
             print $@ =~ /^The 'unique' attribute may only be applied to 'our' variables/
                     ? '' : 'not ', "ok $test - $decl\n";
         } else {
-            print("ok $test # Skip $decl\n");
+            print("ok $test # skip: $decl\n");
         }
         $test++;
     }
