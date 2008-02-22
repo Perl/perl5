@@ -12545,6 +12545,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 	goto do_op2;
 
 
+    case OP_ENTEREVAL: /* could be eval $undef or $x='$undef'; eval $x */
     case OP_RV2SV:
     case OP_CUSTOM:
 	match = 1; /* XS or custom code could trigger random warnings */
