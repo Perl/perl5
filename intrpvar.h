@@ -124,7 +124,7 @@ PERLVAR(Idefstash,	HV *)		/* main symbol table */
 PERLVAR(Icurstash,	HV *)		/* symbol table for current package */
 
 PERLVAR(Irestartop,	OP *)		/* propagating an error from croak? */
-PERLVAR(Icurcop,	COP * VOL)
+PERLVAR(Icurcop,	COP *)
 PERLVAR(Icurstack,	AV *)		/* THE STACK */
 PERLVAR(Icurstackinfo,	PERL_SI *)	/* current stack + context */
 PERLVAR(Imainstack,	AV *)		/* the stack when nothing funny is
@@ -189,7 +189,7 @@ PERLVAR(Ilocalizing,	U8)		/* are we processing a local() list? */
 PERLVAR(Icolorset,	bool)		/* from regcomp.c */
 PERLVARI(Idirty,	bool, FALSE)	/* in the middle of tearing things
 					   down? */
-PERLVAR(Iin_eval,	VOL U8)		/* trap "fatal" errors? */
+PERLVAR(Iin_eval,	U8)		/* trap "fatal" errors? */
 PERLVAR(Itainted,	bool)		/* using variables controlled by $< */
 
 /* This value may be set when embedding for full cleanup  */
