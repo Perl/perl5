@@ -10215,12 +10215,10 @@ Perl_vms_do_exec(pTHX_ const char *cmd)
 }  /* end of vms_do_exec() */
 /*}}}*/
 
-unsigned long int Perl_do_spawn(pTHX_ const char *);
-unsigned long int do_spawn2(pTHX_ const char *, int);
+int do_spawn2(pTHX_ const char *, int);
 
-/* {{{ unsigned long int do_aspawn(void *really,void **mark,void **sp) */
-unsigned long int
-Perl_do_aspawn(pTHX_ void *really,void **mark,void **sp)
+int
+Perl_do_aspawn(pTHX_ SV* really, SV** mark, SV** sp)
 {
 unsigned long int sts;
 char * cmd;
@@ -10233,9 +10231,9 @@ int flags = 0;
      * through do_aspawn is a value of 1, which means spawn without
      * waiting for completion -- other values are ignored.
      */
-    if (SvNIOKp(*((SV**)mark+1)) && !SvPOKp(*((SV**)mark+1))) {
+    if (SvNIOKp(*(mark+1)) && !SvPOKp(*(mark+1))) {
 	++mark;
-	flags = SvIVx(*(SV**)mark);
+	flags = SvIVx(*mark);
     }
 
     if (flags && flags == 1)     /* the Win32 P_NOWAIT value */
@@ -10243,7 +10241,7 @@ int flags = 0;
     else
         flags = 0;
 
-    cmd = setup_argstr(aTHX_ (SV *)really,(SV **)mark,(SV **)sp);
+    cmd = setup_argstr(aTHX_ really, mark, sp);
     sts = do_spawn2(aTHX_ cmd, flags);
     /* pp_sys will clean up cmd */
     return sts;
@@ -10253,9 +10251,9 @@ int flags = 0;
 /*}}}*/
 
 
-/* {{{unsigned long int do_spawn(char *cmd) */
-unsigned long int
-Perl_do_spawn(pTHX_ const char *cmd)
+/* {{{int do_spawn(char* cmd) */
+int
+Perl_do_spawn(pTHX_ char* cmd)
 {
     PERL_ARGS_ASSERT_DO_SPAWN;
 
@@ -10263,8 +10261,18 @@ Perl_do_spawn(pTHX_ const char *cmd)
 }
 /*}}}*/
 
-/* {{{unsigned long int do_spawn2(char *cmd) */
-unsigned long int
+/* {{{int do_spawn_nowait(char* cmd) */
+int
+Perl_do_spawn_nowait(pTHX_ char* cmd)
+{
+    PERL_ARGS_ASSERT_DO_SPAWN_NOWAIT;
+
+    return do_spawn2(aTHX_ cmd, CLI$M_NOWAIT);
+}
+/*}}}*/
+
+/* {{{int do_spawn2(char *cmd) */
+int
 do_spawn2(pTHX_ const char *cmd, int flags)
 {
   unsigned long int sts, substs;
@@ -12997,6 +13005,8 @@ case_tolerant_process_fromperl(pTHX_ CV *cv)
   XSRETURN(1);
 }
 
+#ifdef USE_ITHREADS
+
 void  
 Perl_sys_intern_dup(pTHX_ struct interp_intern *src, 
                           struct interp_intern *dst)
@@ -13005,6 +13015,8 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src,
 
     memcpy(dst,src,sizeof(struct interp_intern));
 }
+
+#endif
 
 void  
 Perl_sys_intern_clear(pTHX)

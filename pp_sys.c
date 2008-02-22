@@ -4165,14 +4165,14 @@ PP(pp_system)
     result = 0;
     if (PL_op->op_flags & OPf_STACKED) {
 	SV * const really = *++MARK;
-#  if defined(WIN32) || defined(OS2) || defined(__SYMBIAN32__)
+#  if defined(WIN32) || defined(OS2) || defined(__SYMBIAN32__) || defined(__VMS)
 	value = (I32)do_aspawn(really, MARK, SP);
 #  else
 	value = (I32)do_aspawn(really, (void **)MARK, (void **)SP);
 #  endif
     }
     else if (SP - MARK != 1) {
-#  if defined(WIN32) || defined(OS2) || defined(__SYMBIAN32__)
+#  if defined(WIN32) || defined(OS2) || defined(__SYMBIAN32__) || defined(__VMS)
 	value = (I32)do_aspawn(NULL, MARK, SP);
 #  else
 	value = (I32)do_aspawn(NULL, (void **)MARK, (void **)SP);
