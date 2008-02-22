@@ -1033,9 +1033,15 @@ sharedsv_array_mg_free(pTHX_ SV *sv, MAGIC *mg)
  * This is called when perl is about to access an element of
  * the array -
  */
+#if PERL_VERSION >= 11
+int
+sharedsv_array_mg_copy(pTHX_ SV *sv, MAGIC* mg,
+                       SV *nsv, const char *name, I32 namlen)
+#else
 int
 sharedsv_array_mg_copy(pTHX_ SV *sv, MAGIC* mg,
                        SV *nsv, const char *name, int namlen)
+#endif
 {
     MAGIC *nmg = sv_magicext(nsv,mg->mg_obj,
                             toLOWER(mg->mg_type),&sharedsv_elem_vtbl,
