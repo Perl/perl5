@@ -3739,13 +3739,9 @@
 /* Off_t_size:
  *	This symbol holds the number of bytes used by the Off_t.
  */
-#ifndef _MSC_VER
-#   define Off_t long long		/* <offset> type */
-#else
-#   define Off_t __int64		/* <offset> type */
-#endif
-#define LSEEKSIZE 8		/* <offset> size */
-#define Off_t_size 8	/* <offset> size */
+#define Off_t long		/* <offset> type */
+#define LSEEKSIZE 4		/* <offset> size */
+#define Off_t_size 4	/* <offset> size */
 
 /* PERL_MAD:
  *	This symbol, if defined, indicates that the Misc Attribution

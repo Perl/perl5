@@ -117,9 +117,18 @@ unless (defined $ENV{SYSTEMROOT}) { # SystemRoot has been introduced by WinNT
     $opt{d_link} = 'undef';
 }
 
-if ($opt{uselargefiles} ne 'define') {
-    $opt{lseeksize} = 4;
-    $opt{lseektype} = 'off_t';
+# change the lseeksize and lseektype from their canned default values (which
+# are set-up for a non-uselargefiles build) if we are building with
+# uselargefiles. don't do this for bcc32: the code contains special handling
+# for bcc32 and the lseeksize and lseektype should not be changed.
+if ($opt{uselargefiles} eq 'define' and $opt{cc} ne 'bcc32') {
+    $opt{lseeksize} = 8;
+    if ($opt{cc} eq 'cl') {
+	$opt{lseektype} = '__int64';
+    }
+    elsif ($opt{cc} eq 'gcc') {
+	$opt{lseektype} = 'long long';
+    }
 }
 
 if ($opt{useithreads} eq 'define' && $opt{ccflags} =~ /-DPERL_IMPLICIT_SYS\b/) {
