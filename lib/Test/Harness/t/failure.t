@@ -1,6 +1,13 @@
 #!/usr/bin/perl -w
 
 BEGIN {
+    if ($^O eq 'VMS') {
+        print '1..0 # Child test output confuses parent test counter';
+        exit;
+    }
+}
+
+BEGIN {
     if ( $ENV{PERL_CORE} ) {
         chdir 't';
         @INC = ('../lib', 'lib');
