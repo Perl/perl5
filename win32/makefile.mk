@@ -1130,18 +1130,20 @@ config.w32 : $(CFGSH_TMPL)
 	$(MINIPERL) -I..\lib config_sh.PL --cfgsh-option-file \
 	    $(mktmp $(CFG_VARS)) config.w32 > ..\config.sh
 
-# this target is for when changes to the main config.sh happen
-# edit config.{b,v,g}c and make this target once for each supported
-# compiler (e.g. `dmake CCTYPE=BORLAND regen_config_h`)
+# this target is for when changes to the main config.sh happen.
+# edit config.gc, then make perl using GCC in a minimal configuration (i.e.
+# with MULTI, ITHREADS, IMP_SYS, LARGE_FILES, PERLIO and CRYPT off), then make
+# this target to regenerate config_H.gc.
+# unfortunately, some further manual editing is also then required to restore all
+# the special _MSC_VER handling that is otherwise lost.
+# repeat for config.bc and config_H.bc (using BORLAND), except that there is no
+# _MSC_VER stuff in that case.
 regen_config_h:
-	perl config_sh.PL --cfgsh-option-file $(mktmp $(CFG_VARS)) \
+	$(MINIPERL) -I..\lib config_sh.PL --cfgsh-option-file $(mktmp $(CFG_VARS)) \
 	    $(CFGSH_TMPL) > ..\config.sh
-	-cd .. && del /f perl.exe
-	-cd .. && del /f perl*.dll
-	cd .. && perl configpm
+	cd .. && miniperl configpm
 	-del /f $(CFGH_TMPL)
-	-mkdir $(COREDIR)
-	-perl config_h.PL "INST_VER=$(INST_VER)"
+	-$(MINIPERL) -I..\lib config_h.PL "INST_VER=$(INST_VER)"
 	rename config.h $(CFGH_TMPL)
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
