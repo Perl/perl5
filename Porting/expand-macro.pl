@@ -74,14 +74,30 @@ print "doing: make $tryout\n" if $opt{v};
 system "make $tryout" and die;
 
 # if user wants 'indent' formatting ..
-$opt{I} //= '';
-system "indent $opt{I} $tryout" and die if $opt{f};
-system "$opt{F} $opt{I} $tryout" and die if $opt{F};
+my $out_fh;
+
+if ($opt{f} || $opt{F}) {
+    # a: indent is a well behaved filter when given 0 arguments, reading from
+    #    stdin and writing to stdout
+    # b: all our braces should be balanced, indented back to column 0, in the
+    #    headers, hence everything before our #line directive can be ignored
+    #
+    # We can take advantage of this to reduce the work to indent.
+
+    my $indent_command = $opt{f} ? 'indent' : $opt{F};
+
+    if (defined $opt{I}) {
+	$indent_command .= " $opt{I}";
+    }
+    open $out_fh, '|-', $indent_command or die $?;
+} else {
+    $out_fh = \*STDOUT;
+}
 
 open my $fh, '<', $tryout or die "Can't open $tryout: $!";
 
 while (<$fh>) {
-    print if /$sentinel/o .. 1;
+    print $out_fh $_ if /$sentinel/o .. 1;
 }
 
 unless ($opt{k}) {
