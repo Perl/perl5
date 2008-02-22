@@ -578,7 +578,7 @@ PERL_CALLCONV bool	Perl_do_exec(pTHX_ const char* cmd)
 
 #endif
 
-#if defined(WIN32) || defined(__SYMBIAN32__)
+#if defined(WIN32) || defined(__SYMBIAN32__) || defined(VMS)
 PERL_CALLCONV int	Perl_do_aspawn(pTHX_ SV* really, SV** mark, SV** sp)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);

@@ -966,8 +966,6 @@ int	Perl_flex_lstat (pTHX_ const char *, Stat_t *);
 int	Perl_flex_stat (pTHX_ const char *, Stat_t *);
 int	my_vfork (void);
 bool	Perl_vms_do_exec (pTHX_ const char *);
-unsigned long int	Perl_do_aspawn (pTHX_ void *, void **, void **);
-unsigned long int	Perl_do_spawn (pTHX_ const char *);
 FILE *  my_fdopen (int, const char *);
 int     my_fclose (FILE *);
 int     my_fwrite (const void *, size_t, size_t, FILE *);
