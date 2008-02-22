@@ -1461,7 +1461,7 @@ ithread_wantarray(...)
         thread = S_SV_to_ithread(aTHX_ ST(0));
         ST(0) = (thread->gimme & G_ARRAY) ? &PL_sv_yes :
                 (thread->gimme & G_VOID)  ? &PL_sv_undef
-                           /* G_SCALAR */ : &PL_sv_no;
+                                       /* G_SCALAR */ : &PL_sv_no;
         /* XSRETURN(1); - implied */
 
 

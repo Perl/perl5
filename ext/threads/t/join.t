@@ -57,7 +57,7 @@ sub ok {
 }
 
 sub skip {
-    ok(1, '# Skipped: ' . $_[0]);
+    ok(1, '# skip: ' . $_[0]);
 }
 
 
