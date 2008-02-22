@@ -2816,6 +2816,7 @@ lib/Thread/Queue/t/07_lock.t	Thread::Queue tests
 lib/Thread/Semaphore.pm		Thread-safe semaphores
 lib/Thread/Semaphore/t/01_basic.t	Thread::Semaphore tests
 lib/Thread/Semaphore/t/02_errs.t	Thread::Semaphore tests
+lib/Thread/Semaphore/t/03_nothreads.t	Thread::Semaphore tests
 lib/Thread.t			Thread extensions frontend tests
 lib/Tie/Array.pm		Base class for tied arrays
 lib/Tie/Array/push.t		Test for Tie::Array

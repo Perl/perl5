@@ -6,11 +6,6 @@ BEGIN {
         chdir('t');
         unshift(@INC, '../lib');
     }
-    use Config;
-    if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
-        exit(0);
-    }
 }
 
 use Thread::Semaphore;

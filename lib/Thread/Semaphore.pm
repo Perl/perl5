@@ -3,7 +3,7 @@ package Thread::Semaphore;
 use strict;
 use warnings;
 
-our $VERSION = '2.04';
+our $VERSION = '2.07';
 
 use threads::shared;
 use Scalar::Util 1.10 qw(looks_like_number);
@@ -55,7 +55,7 @@ Thread::Semaphore - Thread-safe semaphores
 
 =head1 VERSION
 
-This document describes Thread::Semaphore version 2.04
+This document describes Thread::Semaphore version 2.07
 
 =head1 SYNOPSIS
 
@@ -127,13 +127,23 @@ word "vrij", which means "release").
 
 =back
 
+=head1 NOTES
+
+Semaphores created by L<Thread::Semaphore> can be used in both threaded and
+non-threaded applications.  This allows you to write modules and packages
+that potentially make use of semaphores, and that will function in either
+environment.
+
 =head1 SEE ALSO
 
 Thread::Semaphore Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/Thread-Semaphore>
 
 Annotated POD for Thread::Semaphore:
-L<http://annocpan.org/~JDHEDDEN/Thread-Semaphore-2.04/lib/Thread/Semaphore.pm>
+L<http://annocpan.org/~JDHEDDEN/Thread-Semaphore-2.07/lib/Thread/Semaphore.pm>
+
+Source repository:
+L<http://code.google.com/p/thread-semaphore/>
 
 L<threads>, L<threads::shared>
 
