@@ -1952,7 +1952,6 @@
 #define ck_grep			Perl_ck_grep
 #define ck_index		Perl_ck_index
 #define ck_join			Perl_ck_join
-#define ck_lengthconst		Perl_ck_lengthconst
 #define ck_lfun			Perl_ck_lfun
 #define ck_listiob		Perl_ck_listiob
 #define ck_match		Perl_ck_match
@@ -4270,7 +4269,6 @@
 #define ck_grep(a)		Perl_ck_grep(aTHX_ a)
 #define ck_index(a)		Perl_ck_index(aTHX_ a)
 #define ck_join(a)		Perl_ck_join(aTHX_ a)
-#define ck_lengthconst(a)	Perl_ck_lengthconst(aTHX_ a)
 #define ck_lfun(a)		Perl_ck_lfun(aTHX_ a)
 #define ck_listiob(a)		Perl_ck_listiob(aTHX_ a)
 #define ck_match(a)		Perl_ck_match(aTHX_ a)
