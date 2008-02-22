@@ -3,7 +3,7 @@ package Thread::Queue;
 use strict;
 use warnings;
 
-our $VERSION = '2.03';
+our $VERSION = '2.06';
 
 use threads::shared 0.96;
 use Scalar::Util 1.10 qw(looks_like_number);
@@ -165,8 +165,10 @@ sub extract
 $make_shared = sub {
     my $item = shift;
 
-    # If already thread-shared, then just return the input item
-    return $item if (threads::shared::is_shared($item));
+    # If not running 'threads' or already thread-shared,
+    #   then just return the input item
+    return $item if (! $threads::threads ||
+                     threads::shared::is_shared($item));
 
     # Make copies of array, hash and scalar refs
     my $copy;
@@ -263,7 +265,7 @@ Thread::Queue - Thread-safe queues
 
 =head1 VERSION
 
-This document describes Thread::Queue version 2.03
+This document describes Thread::Queue version 2.06
 
 =head1 SYNOPSIS
 
@@ -497,6 +499,11 @@ greater than zero):
 
 =back
 
+=head1 NOTES
+
+Queues created by L<Thread::Queue> can be used in both threaded and
+non-threaded applications.
+
 =head1 LIMITATIONS
 
 Passing objects on queues may not work if the objects' classes do not support
@@ -511,7 +518,10 @@ Thread::Queue Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/Thread-Queue>
 
 Annotated POD for Thread::Queue:
-L<http://annocpan.org/~JDHEDDEN/Thread-Queue-2.03/lib/Thread/Queue.pm>
+L<http://annocpan.org/~JDHEDDEN/Thread-Queue-2.06/lib/Thread/Queue.pm>
+
+Source repository:
+L<http://code.google.com/p/thread-queue/>
 
 L<threads>, L<threads::shared>
 
