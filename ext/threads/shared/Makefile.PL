@@ -55,14 +55,13 @@ if (grep { $_ eq 'PERL_CORE=1' } @ARGV) {
 
     # Verify that a 'C' compiler is available
     if (! have_cc()) {
-        die("No 'C' compiler found to build 'threads'\n");
+        die("OS unsupported:  ERROR: No 'C' compiler found to build 'threads::shared'\n");
     }
 
     push(@conditional_params, 'DEFINE' => '-DHAS_PPPORT_H',
                               'PREREQ_PM' => {
                                     'strict'            => 0,
                                     'warnings'          => 0,
-                                    'threads'           => 0,
                                     'Config'            => 0,
                                     'Carp'              => 0,
                                     'XSLoader'          => 0,
@@ -92,5 +91,23 @@ WriteMakefile(
 
     @conditional_params
 );
+
+# Additional 'make' targets
+sub MY::postamble
+{
+    return <<'_EXTRAS_';
+fixfiles:
+	@dos2unix `cat MANIFEST`
+	@$(CHMOD) 644 `cat MANIFEST`
+	@$(CHMOD) 755 examples/*.pl
+
+ppport:
+	@( cd /tmp; perl -e 'use Devel::PPPort; Devel::PPPort::WriteFile("ppport.h");' )
+	@if ! cmp -s ppport.h /tmp/ppport.h; then \
+	    ( tkdiff ppport.h /tmp/ppport.h & ); \
+	    perl /tmp/ppport.h; \
+	fi
+_EXTRAS_
+}
 
 # EOF

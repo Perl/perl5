@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.15';
+our $VERSION = '1.18';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -73,7 +73,7 @@ threads::shared - Perl extension for sharing data structures between threads
 
 =head1 VERSION
 
-This document describes threads::shared version 1.15
+This document describes threads::shared version 1.18
 
 =head1 SYNOPSIS
 
@@ -315,8 +315,11 @@ works on shared objects such that I<blessings> propagate across threads.
 
 =head1 NOTES
 
-threads::shared is designed to disable itself silently if threads are not
-available. If you want access to threads, you must C<use threads> before you
+L<threads::shared> is designed to disable itself silently if threads are not
+available.  This allows you to write modules and packages that can be used
+in both threaded and non-threaded applications.
+
+If you want access to threads, you must C<use threads> before you
 C<use threads::shared>.  L<threads> will emit a warning if you use it after
 L<threads::shared>.
 
@@ -368,7 +371,7 @@ L<threads::shared> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads-shared>
 
 Annotated POD for L<threads::shared>:
-L<http://annocpan.org/~JDHEDDEN/threads-shared-1.15/shared.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-shared-1.18/shared.pm>
 
 Source repository:
 L<http://code.google.com/p/threads-shared/>

@@ -271,19 +271,6 @@ unless (   defined &Time::HiRes::gettimeofday
 	# Perl's deferred signals may be too wimpy to break through
 	# a restartable select(), so use POSIX::sigaction if available.
 
-	sub tick {
-	    $i--;
-	    my $ival = Time::HiRes::tv_interval ($r);
-	    print "# Tick! $i $ival\n";
-	    my $exp = 0.3 * (5 - $i);
-	    # This test is more sensitive, so impose a softer limit.
-	    if (abs($ival/$exp - 1) > 4*$limit) {
-		my $ratio = abs($ival/$exp);
-		$not = "tick: $exp sleep took $ival ratio $ratio";
-		$i = 0;
-	    }
-	}
-
 	POSIX::sigaction(&POSIX::SIGALRM,
 			 POSIX::SigAction->new("tick"),
 			 $oldaction)
@@ -315,12 +302,25 @@ unless (   defined &Time::HiRes::gettimeofday
 	    }
 	    my $exp = 0.3 * (5 - $i);
 	    # This test is more sensitive, so impose a softer limit.
-	    if (abs($ival/$exp - 1) > 3*$limit) {
+	    if (abs($ival/$exp - 1) > 4*$limit) {
 		my $ratio = abs($ival/$exp);
 		$not = "while: $exp sleep took $ival ratio $ratio";
 		last;
 	    }
 	    $ok = $i;
+	}
+    }
+
+    sub tick {
+	$i--;
+	my $ival = Time::HiRes::tv_interval ($r);
+	print "# Tick! $i $ival\n";
+	my $exp = 0.3 * (5 - $i);
+	# This test is more sensitive, so impose a softer limit.
+	if (abs($ival/$exp - 1) > 4*$limit) {
+	    my $ratio = abs($ival/$exp);
+	    $not = "tick: $exp sleep took $ival ratio $ratio";
+	    $i = 0;
 	}
     }
 
