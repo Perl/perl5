@@ -1,20 +1,36 @@
 package B::Debug;
 
-our $VERSION = '1.05';
+our $VERSION = '1.05_02';
 
 use strict;
 use B qw(peekop class walkoptree walkoptree_exec
          main_start main_root cstring sv_undef @specialsv_name);
+# <=5.008 had @specialsv_name exported from B::Asmdata
+BEGIN {
+    use Config;
+    my $ithreads = $Config{'useithreads'} eq 'define';
+    eval qq{
+	sub ITHREADS() { $ithreads }
+	sub VERSION() { $] }
+    }; die $@ if $@;
+}
 
 my %done_gv;
 
+sub _printop {
+  my $op = shift;
+  my $addr = ${$op} ? $op->ppaddr : '';
+  $addr =~ s/^PL_ppaddr// if $addr;
+  return sprintf "0x%x %s %s", ${$op}, ${$op} ? class($op) : '', $addr;
+}
+
 sub B::OP::debug {
     my ($op) = @_;
-    printf <<'EOT', class($op), $$op, ${$op->next}, ${$op->sibling}, $op->ppaddr, $op->targ, $op->type;
+    printf <<'EOT', class($op), $$op, $op->ppaddr, _printop($op->next), _printop($op->sibling), $op->targ, $op->type;
 %s (0x%lx)
-	op_next		0x%x
-	op_sibling	0x%x
 	op_ppaddr	%s
+	op_next		%s
+	op_sibling	%s
 	op_targ		%d
 	op_type		%d
 EOT
@@ -36,29 +52,29 @@ EOT
 sub B::UNOP::debug {
     my ($op) = @_;
     $op->B::OP::debug();
-    printf "\top_first\t0x%x\n", ${$op->first};
+    printf "\top_first\t%s\n", _printop($op->first);
 }
 
 sub B::BINOP::debug {
     my ($op) = @_;
     $op->B::UNOP::debug();
-    printf "\top_last\t\t0x%x\n", ${$op->last};
+    printf "\top_last \t%s\n", _printop($op->last);
 }
 
 sub B::LOOP::debug {
     my ($op) = @_;
     $op->B::BINOP::debug();
-    printf <<'EOT', ${$op->redoop}, ${$op->nextop}, ${$op->lastop};
-	op_redoop	0x%x
-	op_nextop	0x%x
-	op_lastop	0x%x
+    printf <<'EOT', _printop($op->redoop), _printop($op->nextop), _printop($op->lastop);
+	op_redoop	%s
+	op_nextop	%s
+	op_lastop	%s
 EOT
 }
 
 sub B::LOGOP::debug {
     my ($op) = @_;
     $op->B::UNOP::debug();
-    printf "\top_other\t0x%x\n", ${$op->other};
+    printf "\top_other\t%s\n", _printop($op->other);
 }
 
 sub B::LISTOP::debug {
@@ -73,8 +89,17 @@ sub B::PMOP::debug {
     printf "\top_pmreplroot\t0x%x\n", ${$op->pmreplroot};
     printf "\top_pmreplstart\t0x%x\n", ${$op->pmreplstart};
     printf "\top_pmnext\t0x%x\n", ${$op->pmnext} if $] < 5.009005;
-    printf "\top_pmregexp->precomp\t%s\n", cstring($op->precomp);
+    if (ITHREADS) {
+      printf "\top_pmstashpv\t%s\n", cstring($op->pmstashpv);
+      printf "\top_pmoffset\t%d\n", $op->pmoffset;
+    } else {
+      printf "\top_pmstash\t%s\n", cstring($op->pmstash);
+    }
+    printf "\top_precomp->precomp\t%s\n", cstring($op->precomp);
     printf "\top_pmflags\t0x%x\n", $op->pmflags;
+    printf "\top_reflags\t0x%x\n", $op->reflags if $] >= 5.009;
+    printf "\top_pmpermflags\t0x%x\n", $op->pmpermflags if $] < 5.009;
+    printf "\top_pmdynflags\t0x%x\n", $op->pmdynflags if $] < 5.009;
     $op->pmreplroot->debug;
 }
 
@@ -83,9 +108,9 @@ sub B::COP::debug {
     $op->B::OP::debug();
     my $cop_io = class($op->io) eq 'SPECIAL' ? '' : $op->io->as_string;
     printf <<'EOT', $op->label, $op->stashpv, $op->file, $op->cop_seq, $op->arybase, $op->line, ${$op->warnings}, cstring($cop_io);
-	cop_label	%s
-	cop_stashpv	%s
-	cop_file	%s
+	cop_label	"%s"
+	cop_stashpv	"%s"
+	cop_file	"%s"
 	cop_seq		%d
 	cop_arybase	%d
 	cop_line	%d
@@ -110,7 +135,7 @@ sub B::PVOP::debug {
 sub B::PADOP::debug {
     my ($op) = @_;
     $op->B::OP::debug();
-    printf "\top_padix\t\t%ld\n", $op->padix;
+    printf "\top_padix\t%ld\n", $op->padix;
 }
 
 sub B::NULL::debug {
@@ -294,7 +319,12 @@ B::Debug - Walk Perl syntax tree, printing debug info about ops
 
 =head1 DESCRIPTION
 
-See F<ext/B/README>.
+See F<ext/B/README> and the newer L<B::Concise>, L<B::Terse>.
+
+=head1 OPTIONS
+
+With option -exec, walks tree in execute order,
+otherwise in basic order.
 
 =head1 AUTHOR
 
