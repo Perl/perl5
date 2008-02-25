@@ -4417,7 +4417,10 @@ reStudy:
     Zero(r->substrs, 1, struct reg_substr_data);
 
 #ifdef TRIE_STUDY_OPT
-    if ( restudied ) {
+    if (!restudied) {
+        StructCopy(&zero_scan_data, &data, scan_data_t);
+        copyRExC_state = RExC_state;
+    } else {
         U32 seen=RExC_seen;
         DEBUG_OPTIMISE_r(PerlIO_printf(Perl_debug_log,"Restudying\n"));
         
@@ -4432,9 +4435,6 @@ reStudy:
 	    SvREFCNT_dec(data.last_found);
 	}
 	StructCopy(&zero_scan_data, &data, scan_data_t);
-    } else {
-        StructCopy(&zero_scan_data, &data, scan_data_t);
-        copyRExC_state = RExC_state;
     }
 #else
     StructCopy(&zero_scan_data, &data, scan_data_t);

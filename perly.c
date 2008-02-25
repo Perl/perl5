@@ -193,7 +193,7 @@ static void
 S_clear_yystack(pTHX_  const yy_parser *parser)
 {
     yy_stack_frame *ps     = parser->ps;
-    int i;
+    int i = 0;
 
     if (!parser->stack || ps == parser->stack)
 	return;

@@ -170,7 +170,7 @@ PERL_EXPORT_C void PerlIO_list_free(pTHX_ PerlIO_list_t *list);
 
 /* PerlIO_teardown doesn't need exporting, but the EXTERN_C is needed
  * for compiling as C++.  Must also match with what perl.h says. */
-EXTERN_C void PerlIO_teardown();
+EXTERN_C void PerlIO_teardown(void);
 
 /*--------------------------------------------------------------------------------------*/
 /* Generic, or stub layer functions */
