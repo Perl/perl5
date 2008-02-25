@@ -2125,6 +2125,7 @@
 #define pp_gvsv			Perl_pp_gvsv
 #define pp_helem		Perl_pp_helem
 #define pp_hex			Perl_pp_hex
+#define pp_hintseval		Perl_pp_hintseval
 #define pp_hslice		Perl_pp_hslice
 #define pp_i_add		Perl_pp_i_add
 #define pp_i_divide		Perl_pp_i_divide
@@ -4442,6 +4443,7 @@
 #define pp_gvsv()		Perl_pp_gvsv(aTHX)
 #define pp_helem()		Perl_pp_helem(aTHX)
 #define pp_hex()		Perl_pp_hex(aTHX)
+#define pp_hintseval()		Perl_pp_hintseval(aTHX)
 #define pp_hslice()		Perl_pp_hslice(aTHX)
 #define pp_i_add()		Perl_pp_i_add(aTHX)
 #define pp_i_divide()		Perl_pp_i_divide(aTHX)
