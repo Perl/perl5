@@ -245,7 +245,11 @@ my_mini_mktime(struct tm *ptm)
 #define strncasecmp(x,y,n) strnicmp(x,y,n)
 
 #if defined(WIN32)
+#if defined(__BORLANDC__)
+void * __cdecl _EXPFUNC alloca(_SIZE_T __size);
+#else
 #define alloca _alloca
+#endif
 #endif
 
 #include <time.h>
