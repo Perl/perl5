@@ -3011,6 +3011,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 #endif
     if (result < 0 && errno == EINTR) {
 	PERL_ASYNC_CHECK();
+	errno = EINTR; /* reset in case a signal handler changed $! */
     }
     return result;
 }
