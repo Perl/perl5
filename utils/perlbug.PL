@@ -81,10 +81,11 @@ my \@patches = (
 
 print OUT <<'!NO!SUBS!';
 
+use strict;
 use Config;
 use File::Spec;		# keep perlbug Perl 5.005 compatible
 use Getopt::Std;
-use strict;
+use File::Basename 'basename';
 
 sub paraprint;
 
@@ -147,10 +148,10 @@ my $Version = "1.36";
 #       accounted for.
 #       - Test -b option
 
-my( $file, $usefile, $cc, $address, $perlbug, $testaddress, $filename, $messageid, $domain,
-    $subject, $from, $verbose, $ed, $outfile, $Is_MacOS, $category, $severity,
-    $fh, $me, $Is_MSWin32, $Is_Linux, $Is_VMS, $msg, $body, $andcc, %REP, $ok,
-    $Is_OpenBSD);
+my( $file, $usefile, $cc, $address, $bugaddress, $testaddress, $thanksaddress,
+    $filename, $messageid, $domain, $subject, $from, $verbose, $ed, $outfile,
+    $Is_MacOS, $category, $severity, $fh, $me, $Is_MSWin32, $Is_Linux, $Is_VMS,
+    $msg, $body, $andcc, %REP, $ok, $thanks, $Is_OpenBSD, $progname);
 
 my $perl_version = $^V ? sprintf("%vd", $^V) : $];
 
@@ -161,8 +162,8 @@ Init();
 if ($::opt_h) { Help(); exit; }
 if ($::opt_d) { Dump(*STDOUT); exit; }
 if (!-t STDIN && !($ok and not $::opt_n)) {
-    paraprint <<EOF;
-Please use perlbug interactively. If you want to
+    paraprint <<"EOF";
+Please use $progname interactively. If you want to
 include a file, you can use the -f switch.
 EOF
     die "\n";
@@ -181,18 +182,22 @@ sub ask_for_alternatives { # (category|severity)
 	'category' => {
 	    'default' => 'core',
 	    'ok'      => 'install',
+	    # Inevitably some of these will end up in RT whatever we do:
+	    'thanks'  => 'thanks',
 	    'opts'    => [qw(core docs install library utilities)], # patch, notabug
 	},
 	'severity' => {
 	    'default' => 'low',
 	    'ok'      => 'none',
+	    'thanks'  => 'none',
 	    'opts'    => [qw(critical high medium low wishlist none)], # zero
 	},
     );
     die "Invalid alternative($name) requested\n" unless grep(/^$name$/, keys %alts);
     my $alt = "";
-    if ($ok) {
-	$alt = $alts{$name}{'ok'};
+    my $what = $ok || $thanks;
+    if ($what) {
+	$alt = $alts{$name}{$what};
     } else {
  	my @alts = @{$alts{$name}{'opts'}};
 	paraprint <<EOF;
@@ -230,7 +235,7 @@ sub Init {
         MacPerl::Ask('Provide command-line args here (-h for help):')
         if $Is_MacOS && $MacPerl::Version =~ /App/;
 
-    if (!getopts("Adhva:s:b:f:F:r:e:SCc:to:n:")) { Help(); exit; };
+    if (!getopts("Adhva:s:b:f:F:r:e:SCc:to:n:T")) { Help(); exit; };
 
     # This comment is needed to notify metaconfig that we are
     # using the $perladmin, $cf_by, and $cf_time definitions.
@@ -238,13 +243,28 @@ sub Init {
     # -------- Configuration ---------
 
     # perlbug address
-    $perlbug = 'perlbug@perl.org';
+    $bugaddress = 'perlbug@perl.org';
 
     # Test address
     $testaddress = 'perlbug-test@perl.org';
 
+    # Thanks address
+    $thanksaddress = 'perl-thanks@perl.org';
+
+    if (basename ($0) =~ /^perlthanks/i) {
+	# invoked as perlthanks
+	$::opt_T = 1;
+	$::opt_C = 1; # don't send a copy to the local admin
+    }
+
+    if ($::opt_T) {
+	$thanks = 'thanks';
+    }
+    
+    $progname = $thanks ? 'perlthanks' : 'perlbug';
     # Target address
-    $address = $::opt_a || ($::opt_t ? $testaddress : $perlbug);
+    $address = $::opt_a || ($::opt_t ? $testaddress
+			    : $thanks ? $thanksaddress : $bugaddress);
 
     # Users address, used in message and in Reply-To header
     $from = $::opt_r || "";
@@ -285,7 +305,7 @@ sub Init {
     }
 
     # OK - send "OK" report for build on this system
-    $ok = 0;
+    $ok = '';
     if ($::opt_o) {
 	if ($::opt_o eq 'k' or $::opt_o eq 'kay') {
 	    my $age = time - $patchlevel_date;
@@ -310,7 +330,7 @@ EOF
 	    $subject = ($::opt_n ? 'Not ' : '')
 		    . "OK: perl $perl_version ${patch_tags}on"
 		    ." $::Config{'archname'} $::Config{'osvers'} $subject";
-	    $ok = 1;
+	    $ok = 'ok';
 	} else {
 	    Help();
 	    exit();
@@ -354,7 +374,16 @@ EOF
 sub Query {
     # Explain what perlbug is
     unless ($ok) {
-	paraprint <<EOF;
+	if ($thanks) {
+	    paraprint <<'EOF';
+This program provides an easy way to send a thank-you message back to the
+authors and maintainers of perl.
+
+If you wish to submit a bug report, please run it without the -T flag
+(or run the program perlbug rather than perlthanks)
+EOF
+	} else {
+	    paraprint <<"EOF";
 This program provides an easy way to create a message reporting a bug
 in perl, and e-mail it to $address.  It is *NOT* intended for
 sending test messages or simply verifying that perl works, *NOR* is it
@@ -365,7 +394,11 @@ and any solutions to such problems, to the people who maintain perl.
 If you're just looking for help with perl, try posting to the Usenet
 newsgroup comp.lang.perl.misc.  If you're looking for help with using
 perl with CGI, try posting to comp.infosystems.www.programming.cgi.
+
+When invoked as perlthanks (or with the -T option) it can be used to
+send a thank-you message to $thanksaddress.
 EOF
+	}
     }
 
     # Prompt for subject of message, if needed
@@ -375,12 +408,16 @@ EOF
     }
 
     unless ($subject) {
-	paraprint <<EOF;
+	if ($thanks) {
+	    paraprint "First of all, please provide a subject for the message.\n";
+	} else {
+	    paraprint <<EOF;
 First of all, please provide a subject for the
 message. It should be a concise description of
 the bug or problem. "perl bug" or "perl problem"
 is not a concise description.
 EOF
+	}
 
 	my $err = 0;
 	do {
@@ -388,7 +425,11 @@ EOF
 	    $subject = <>;
 	    chomp $subject;
 	    if ($err++ == 5) {
-		die "Aborting.\n";
+		if ($thanks) {
+		    $subject = 'Thanks for Perl';
+		} else {
+		    die "Aborting.\n";
+		}
 	    }
 	} while (TrivialSubject($subject));
     }
@@ -472,7 +513,30 @@ EOF
     # Prompt for editor, if no override is given
 editor:
     unless ($::opt_e || $::opt_f || $::opt_b) {
-	paraprint <<EOF;
+	chomp (my $common_end = <<"EOF");
+
+You will probably want to use an editor to enter
+the report. If "$ed" is the editor you want
+to use, then just press Enter, otherwise type in
+the name of the editor you would like to use.
+
+If you would like to use a prepared file, type
+"file", and you will be asked for the filename.
+EOF
+
+	if ($thanks) {
+	    paraprint <<"EOF";
+Now you need to supply your thank-you message.
+
+Some information about your local perl configuration
+will automatically be included at the end of the message,
+because we're curious about the different ways that people
+build perl, but you're welcome to delete it if you wish.
+
+$common_end
+EOF
+	} else {
+	    paraprint <<"EOF";
 Now you need to supply the bug report. Try to make
 the report concise but descriptive. Include any
 relevant detail. If you are reporting something
@@ -486,14 +550,10 @@ at the end of the report. If you are using any
 unusual version of perl, please try and confirm
 exactly which versions are relevant.
 
-You will probably want to use an editor to enter
-the report. If "$ed" is the editor you want
-to use, then just press Enter, otherwise type in
-the name of the editor you would like to use.
-
-If you would like to use a prepared file, type
-"file", and you will be asked for the filename.
+$common_end
 EOF
+	}
+
 	print "Editor [$ed]: ";
 	my $entry =scalar <>;
 	chomp $entry;
@@ -506,7 +566,7 @@ EOF
 	}
     }
     my $report_about_module = '';
-    if ($::HaveCoreList && !$ok) {
+    if ($::HaveCoreList && !$ok && !$thanks) {
 	paraprint <<EOF;
 Is your report about a Perl module? If yes, enter its name. If not, skip.
 EOF
@@ -557,7 +617,7 @@ EOF
 
 	unless (-f $entry and -r $entry) {
 	    paraprint <<EOF;
-I'm sorry, but I can't read from `$entry'. Maybe you mistyped the name of
+I'm sorry, but I can't read from '$entry'. Maybe you mistyped the name of
 the file? If you don't want to send a file, just enter a blank line and you
 can get back to the editor selection.
 EOF
@@ -567,8 +627,9 @@ EOF
     }
 
     # Generate report
-    open(REP,">$filename") or die "Unable to create report file `$filename': $!\n";
-    my $reptype = !$ok ? "bug" : $::opt_n ? "build failure" : "success";
+    open(REP,">$filename") or die "Unable to create report file '$filename': $!\n";
+    my $reptype = !$ok ? ($thanks ? 'thank-you' : 'bug')
+	: $::opt_n ? "build failure" : "success";
 
     print REP <<EOF;
 This is a $reptype report for perl from $from,
@@ -580,13 +641,25 @@ EOF
 	print REP $body;
     } elsif ($usefile) {
 	open(F, "<$file")
-		or die "Unable to read report file from `$file': $!\n";
+		or die "Unable to read report file from '$file': $!\n";
 	while (<F>) {
 	    print REP $_
 	}
-	close(F) or die "Error closing `$file': $!";
+	close(F) or die "Error closing '$file': $!";
     } else {
-	print REP <<EOF;
+	if ($thanks) {
+	    print REP <<'EOF';
+
+-----------------------------------------------------------------
+[Please enter your thank you message here]
+
+
+
+[You're welcome to delete anything below this line if you prefer]
+-----------------------------------------------------------------
+EOF
+	} else {
+	    print REP <<'EOF';
 
 -----------------------------------------------------------------
 [Please enter your report here]
@@ -596,6 +669,7 @@ EOF
 [Please do not change anything below this line]
 -----------------------------------------------------------------
 EOF
+	}
     }
     Dump(*REP);
     close(REP) or die "Error closing report file: $!";
@@ -603,12 +677,12 @@ EOF
     # read in the report template once so that
     # we can track whether the user does any editing.
     # yes, *all* whitespace is ignored.
-    open(REP, "<$filename") or die "Unable to open report file `$filename': $!\n";
+    open(REP, "<$filename") or die "Unable to open report file '$filename': $!\n";
     while (<REP>) {
 	s/\s+//g;
 	$REP{$_}++;
     }
-    close(REP) or die "Error closing report file `$filename': $!";
+    close(REP) or die "Error closing report file '$filename': $!";
 } # sub Query
 
 sub Dump {
@@ -707,7 +781,7 @@ EOF
     }
     if ($sts) {
 	paraprint <<EOF;
-The editor you chose (`$ed') could apparently not be run!
+The editor you chose ('$ed') could apparently not be run!
 Did you mistype the name of your editor? If so, please
 correct it here, otherwise just press Enter.
 EOF
@@ -730,7 +804,7 @@ EOF
     # Check that we have a report that has some, eh, report in it.
     my $unseen = 0;
 
-    open(REP, "<$filename") or die "Couldn't open `$filename': $!\n";
+    open(REP, "<$filename") or die "Couldn't open '$filename': $!\n";
     # a strange way to check whether any significant editing
     # have been done: check whether any new non-empty lines
     # have been added. Yes, the below code ignores *any* space
@@ -777,7 +851,7 @@ EOF
 	    chomp $action;
 
 	    if ($action =~ /^(f|sa)/i) { # <F>ile/<Sa>ve
-		my $file_save = $outfile || "perlbug.rep";
+		my $file_save = $outfile || "$progname.rep";
 		print "\n\nName of file to save message in [$file_save]: ";
 		my $file = scalar <>;
 		chomp $file;
@@ -787,23 +861,23 @@ EOF
 		    print "\nError opening $file: $!\n\n";
 		    goto retry;
 		}
-		open(REP, "<$filename") or die "Couldn't open file `$filename': $!\n";
+		open(REP, "<$filename") or die "Couldn't open file '$filename': $!\n";
 		print FILE "To: $address\nSubject: $subject\n";
 		print FILE "Cc: $cc\n" if $cc;
 		print FILE "Reply-To: $from\n" if $from;
 		print FILE "Message-Id: $messageid\n" if $messageid;
 		print FILE "\n";
 		while (<REP>) { print FILE }
-		close(REP) or die "Error closing report file `$filename': $!";
+		close(REP) or die "Error closing report file '$filename': $!";
 		close(FILE) or die "Error closing $file: $!";
 
-		print "\nMessage saved in `$file'.\n";
+		print "\nMessage saved in '$file'.\n";
 		exit;
 	    } elsif ($action =~ /^(d|l|sh)/i ) { # <D>isplay, <L>ist, <Sh>ow
 		# Display the message
-		open(REP, "<$filename") or die "Couldn't open file `$filename': $!\n";
+		open(REP, "<$filename") or die "Couldn't open file '$filename': $!\n";
 		while (<REP>) { print $_ }
-		close(REP) or die "Error closing report file `$filename': $!";
+		close(REP) or die "Error closing report file '$filename': $!";
 	    } elsif ($action =~ /^su/i) { # <Su>bject
 		print "Subject: $subject\n";
 		print "If the above subject is fine, just press Enter.\n";
@@ -875,7 +949,7 @@ sub Send {
 	$msg->add("Reply-To",$from) if $from;
 
 	$fh = $msg->open;
-	open(REP, "<$filename") or die "Couldn't open `$filename': $!\n";
+	open(REP, "<$filename") or die "Couldn't open '$filename': $!\n";
 	while (<REP>) { print $fh $_ }
 	close(REP) or die "Error closing $filename: $!";
 	$fh->close;
@@ -920,7 +994,7 @@ the perl package Mail::Send has not been installed, so I can't send your bug
 report. We apologize for the inconvenience.
 
 So you may attempt to find some way of sending your message, it has
-been left in the file `$filename'.
+been left in the file '$filename'.
 EOF
 	open(SENDMAIL, "|$sendmail -t -oi") || die "'|$sendmail -t -oi' failed: $!";
 sendout:
@@ -930,7 +1004,7 @@ sendout:
 	print SENDMAIL "Reply-To: $from\n" if $from;
 	print SENDMAIL "Message-Id: $messageid\n" if $messageid;
 	print SENDMAIL "\n\n";
-	open(REP, "<$filename") or die "Couldn't open `$filename': $!\n";
+	open(REP, "<$filename") or die "Couldn't open '$filename': $!\n";
 	while (<REP>) { print SENDMAIL $_ }
 	close(REP) or die "Error closing $filename: $!";
 
@@ -964,8 +1038,8 @@ Options:
         quickly send a prepared message.
   -F    File to output the resulting mail message to, instead of mailing.
   -S    Send without asking for confirmation.
-  -a    Address to send the report to. Defaults to `$address'.
-  -c    Address to send copy of report to. Defaults to `$cc'.
+  -a    Address to send the report to. Defaults to '$address'.
+  -c    Address to send copy of report to. Defaults to '$cc'.
   -C    Don't send copy to administrator.
   -s    Subject to include with the message. You will be prompted
         if you don't supply one on the command line.
@@ -974,7 +1048,8 @@ Options:
   -r    Your return address. The program will ask you to confirm
         this if you don't give it here.
   -e    Editor to use.
-  -t    Test mode. The target address defaults to `$testaddress'.
+  -t    Test mode. The target address defaults to '$testaddress'.
+  -T    Thank-you mode. The target address defaults to '$thanksaddress'.
   -d    Data mode.  This prints out your configuration data, without mailing
         anything. You can use this with -v to get more complete data.
   -A    Don't send a bug received acknowledgement to the return address.
