@@ -189,7 +189,7 @@ sub ask_for_alternatives { # (category|severity)
 	'severity' => {
 	    'default' => 'low',
 	    'ok'      => 'none',
-	    'ok'      => 'none',
+	    'thanks'  => 'none',
 	    'opts'    => [qw(critical high medium low wishlist none)], # zero
 	},
     );
