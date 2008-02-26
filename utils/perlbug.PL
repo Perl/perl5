@@ -1049,7 +1049,7 @@ Options:
         this if you don't give it here.
   -e    Editor to use.
   -t    Test mode. The target address defaults to `$testaddress'.
-  -T    Thank-you mode. The target address defaults to 
+  -T    Thank-you mode. The target address defaults to `$thanksaddress'.
   -d    Data mode.  This prints out your configuration data, without mailing
         anything. You can use this with -v to get more complete data.
   -A    Don't send a bug received acknowledgement to the return address.
