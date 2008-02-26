@@ -347,12 +347,12 @@ for my $op (@ops) {
     my $flags = $flags{$op};
     for my $flag (keys %opflags) {
 	if ($flags =~ s/$flag//) {
-	    die "Flag collision for '$op' ($flags{$op}, $flag)"
+	    die "Flag collision for '$op' ($flags{$op}, $flag)\n"
 		if $argsum & $opflags{$flag};
 	    $argsum |= $opflags{$flag};
 	}
     }
-    die qq[Opcode '$op' has no class indicator ($flags{$op} => $flags)]
+    die qq[Opcode '$op' has no class indicator ($flags{$op} => $flags)\n]
 	unless exists $opclass{$flags};
     $argsum |= $opclass{$flags} << $OCSHIFT;
     my $argshift = $OASHIFT;
