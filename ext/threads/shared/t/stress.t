@@ -88,27 +88,30 @@ use threads::shared;
             $okay++;
         } else {
             $unknown++;
-            print("# Unknown error: $rc\n");
+            print(STDERR "# Unknown error: $rc\n");
         }
     }
 
     if ($failures || $unknown || (($okay + $timeouts) != $cnt)) {
-        print('not ok 1');
+        print("not ok 1\n");
         my $too_few = $cnt - ($okay + $failures + $timeouts + $unknown);
-        print(" - $too_few too few threads reported") if $too_few;
-        print(" - $failures threads failed")          if $failures;
-        print(" - $unknown unknown errors")           if $unknown;
-        print(" - $timeouts threads timed out")       if $timeouts;
-        print("\n");
+        print(STDERR "# Test failed:\n");
+        print(STDERR "#\t$too_few too few threads reported\n") if $too_few;
+        print(STDERR "#\t$failures threads failed\n")          if $failures;
+        print(STDERR "#\t$unknown unknown errors\n")           if $unknown;
+        print(STDERR "#\t$timeouts threads timed out\n")       if $timeouts;
 
     } elsif ($timeouts) {
         # Frequently fails under MSWin32 due to deadlocking bug in Windows
         # hence test is TODO under MSWin32
         #   http://rt.perl.org/rt3/Public/Bug/Display.html?id=41574
         #   http://support.microsoft.com/kb/175332
-        print('not ok 1');
-        print(' # TODO - not reliable under MSWin32') if ($^O eq 'MSWin32');
-        print(" - $timeouts threads timed out\n");
+        if ($^O eq 'MSWin32') {
+            print("not ok 1 # TODO - not reliable under MSWin32\n")
+        } else {
+            print("not ok 1\n");
+            print(STDERR "# Test failed: $timeouts threads timed out\n");
+        }
 
     } else {
         print('ok 1');
