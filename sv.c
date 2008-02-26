@@ -1479,15 +1479,10 @@ Perl_sv_grow(pTHX_ register SV *const sv, register STRLEN newlen)
 	s = SvPVX_mutable(sv);
 
     if (newlen > SvLEN(sv)) {		/* need more room? */
+#ifndef MYMALLOC
 	newlen = PERL_STRLEN_ROUNDUP(newlen);
-	if (SvLEN(sv) && s) {
-#ifdef MYMALLOC
-	    const STRLEN l = malloced_size((void*)SvPVX_const(sv));
-	    if (newlen <= l) {
-		SvLEN_set(sv, l);
-		return s;
-	    } else
 #endif
+	if (SvLEN(sv) && s) {
 	    s = (char*)saferealloc(s, newlen);
 	}
 	else {
@@ -1497,7 +1492,14 @@ Perl_sv_grow(pTHX_ register SV *const sv, register STRLEN newlen)
 	    }
 	}
 	SvPV_set(sv, s);
+#ifdef MYMALLOC
+	/* Do this here, do it once, do it right, and then we will never get
+	   called back into sv_grow() unless there really is some growing
+	   needed.  */
+	SvLEN_set(sv, malloced_size(s));
+#else
         SvLEN_set(sv, newlen);
+#endif
     }
     return s;
 }
