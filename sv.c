@@ -1492,11 +1492,11 @@ Perl_sv_grow(pTHX_ register SV *const sv, register STRLEN newlen)
 	    }
 	}
 	SvPV_set(sv, s);
-#ifdef MYMALLOC
+#ifdef Perl_safesysmalloc_size
 	/* Do this here, do it once, do it right, and then we will never get
 	   called back into sv_grow() unless there really is some growing
 	   needed.  */
-	SvLEN_set(sv, malloced_size(s));
+	SvLEN_set(sv, Perl_safesysmalloc_size(s));
 #else
         SvLEN_set(sv, newlen);
 #endif
@@ -4176,7 +4176,7 @@ Perl_sv_usepvn_flags(pTHX_ SV *sv, char *ptr, STRLEN len, U32 flags)
 
     allocate = (flags & SV_HAS_TRAILING_NUL)
 	? len + 1 :
-#ifdef MYMALLOC
+#ifdef Perl_safesysmalloc_size
 	len + 1;
 #else 
 	PERL_STRLEN_ROUNDUP(len + 1);
@@ -4196,8 +4196,8 @@ Perl_sv_usepvn_flags(pTHX_ SV *sv, char *ptr, STRLEN len, U32 flags)
 	ptr = (char*) saferealloc (ptr, allocate);
 #endif
     }
-#ifdef MYMALLOC
-    SvLEN_set(sv, malloced_size(ptr));
+#ifdef Perl_safesysmalloc_size
+    SvLEN_set(sv, Perl_safesysmalloc_size(ptr));
 #else
     SvLEN_set(sv, allocate);
 #endif

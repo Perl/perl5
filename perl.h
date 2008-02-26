@@ -4071,6 +4071,12 @@ struct perl_memory_debug_header {
 #  define INIT_TRACK_MEMPOOL(header, interp)
 #endif
 
+#ifdef MYMALLOC
+#  define Perl_safesysmalloc_size(where)	Perl_malloced_size(where)
+#else if defined(HAS_MALLOC_SIZE)
+#  define Perl_safesysmalloc_size(where)			\
+	(malloc_size(((char *)(where)) - sTHX) - sTHX)
+#endif
 
 typedef int (CPERLscope(*runops_proc_t)) (pTHX);
 typedef void (CPERLscope(*share_proc_t)) (pTHX_ SV *sv);
