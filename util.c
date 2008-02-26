@@ -1344,9 +1344,6 @@ S_vdie_croak_common(pTHX_ const char* pat, va_list* args, STRLEN* msglen,
 	message = NULL;
     }
 
-    DEBUG_S(PerlIO_printf(Perl_debug_log,
-			  "%p: die/croak: message = %s\ndiehook = %p\n",
-			  (void*)thr, message, (void*)PL_diehook));
     if (PL_diehook) {
 	S_vdie_common(aTHX_ message, *msglen, *utf8, FALSE);
     }
@@ -1362,17 +1359,10 @@ Perl_vdie(pTHX_ const char* pat, va_list *args)
     STRLEN msglen;
     I32 utf8 = 0;
 
-    DEBUG_S(PerlIO_printf(Perl_debug_log,
-			  "%p: die: curstack = %p, mainstack = %p\n",
-			  (void*)thr, (void*)PL_curstack, (void*)PL_mainstack));
-
     message = vdie_croak_common(pat, args, &msglen, &utf8);
 
     PL_restartop = die_where(message, msglen);
     SvFLAGS(ERRSV) |= utf8;
-    DEBUG_S(PerlIO_printf(Perl_debug_log,
-	  "%p: die: restartop = %p, was_in_eval = %d, top_env = %p\n",
-	  (void*)thr, (void*)PL_restartop, was_in_eval, (void*)PL_top_env));
     if ((!PL_restartop && was_in_eval) || PL_top_env->je_prev)
 	JMPENV_JUMP(3);
     return PL_restartop;

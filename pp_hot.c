@@ -2821,10 +2821,6 @@ try_autoload:
 	if (CvDEPTH(cv) == PERL_SUB_DEPTH_WARN && ckWARN(WARN_RECURSION)
 	    && !(PERLDB_SUB && cv == GvCV(PL_DBsub)))
 	    sub_crush_depth(cv);
-#if 0
-	DEBUG_S(PerlIO_printf(Perl_debug_log,
-			      "%p entersub returning %p\n", (void*)thr, (void*)CvSTART(cv)));
-#endif
 	RETURNOP(CvSTART(cv));
     }
     else {

@@ -2360,8 +2360,6 @@ S_run_body(pTHX_ I32 oldscope)
 	if (!DEBUG_q_TEST)
 	  PERL_DEBUG(PerlIO_printf(Perl_debug_log, "\nEXECUTING...\n\n"));
 #endif
-	DEBUG_S(PerlIO_printf(Perl_debug_log, "main thread is 0x%"UVxf"\n",
-			      PTR2UV(thr)));
 
 	if (PL_minus_c) {
 #ifdef MACOS_TRADITIONAL
@@ -2970,7 +2968,6 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
       "  H  Hash dump -- usurps values()",
       "  X  Scratchpad allocation",
       "  D  Cleaning up",
-      "  S  Thread synchronization",
       "  T  Tokenising",
       "  R  Include reference counts of dumped variables (eg when using -Ds)",
       "  J  Do not s,t,P-debug (Jump over) opcodes within package DB",
@@ -5185,8 +5182,6 @@ void
 Perl_my_exit(pTHX_ U32 status)
 {
     dVAR;
-    DEBUG_S(PerlIO_printf(Perl_debug_log, "my_exit: thread %p, status %lu\n",
-			  (void*)thr, (unsigned long) status));
     switch (status) {
     case 0:
 	STATUS_ALL_SUCCESS;
