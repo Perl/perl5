@@ -353,12 +353,12 @@ for my $op (@ops) {
     my $flags = $flags{$op};
     for my $flag (keys %opflags) {
 	if ($flags =~ s/$flag//) {
-	    die "Flag collision for '$op' ($flags{$op}, $flag)"
+	    die "Flag collision for '$op' ($flags{$op}, $flag)\n"
 		if $argsum & $opflags{$flag};
 	    $argsum |= $opflags{$flag};
 	}
     }
-    die qq[Opcode '$op' has no class indicator ($flags{$op} => $flags)]
+    die qq[Opcode '$op' has no class indicator ($flags{$op} => $flags)\n]
 	unless exists $opclass{$flags};
     $argsum |= $opclass{$flags} << $OCSHIFT;
     my $argshift = $OASHIFT;
@@ -417,7 +417,7 @@ sub gen_op_is_macro {
 	} keys %$op_is;
 	
 	my $last = pop @rest;	# @rest slurped, get its last
-	die "invalid range of ops: $first .. $last" unless $last;
+	die "Invalid range of ops: $first .. $last\n" unless $last;
 
 	print ON "#define $macname(op)	\\\n\t(";
 
@@ -440,8 +440,8 @@ sub gen_op_is_macro {
 print OC "/* ex: set ro: */\n";
 print ON "/* ex: set ro: */\n";
 
-close OC or die "Error closing opcode.h: $!";
-close ON or die "Error closing opnames.h: $!";
+close OC or die "Error closing opcode.h: $!\n";
+close ON or die "Error closing opnames.h: $!\n";
 
 foreach ('opcode.h', 'opnames.h') {
     safer_rename_silent $_, "$_-old";
@@ -452,9 +452,9 @@ safer_rename $opname_new, 'opnames.h';
 my $pp_proto_new = 'pp_proto.h-new';
 my $pp_sym_new  = 'pp.sym-new';
 
-open PP, ">$pp_proto_new" or die "Error creating $pp_proto_new: $!";
+open PP, ">$pp_proto_new" or die "Error creating $pp_proto_new: $!\n";
 binmode PP;
-open PPSYM, ">$pp_sym_new" or die "Error creating $pp_sym_new: $!";
+open PPSYM, ">$pp_sym_new" or die "Error creating $pp_sym_new: $!\n";
 binmode PPSYM;
 
 print PP <<"END";
@@ -494,8 +494,8 @@ for (@ops) {
 print PP "\n/* ex: set ro: */\n";
 print PPSYM "\n# ex: set ro:\n";
 
-close PP or die "Error closing pp_proto.h: $!";
-close PPSYM or die "Error closing pp.sym: $!";
+close PP or die "Error closing pp_proto.h: $!\n";
+close PPSYM or die "Error closing pp.sym: $!\n";
 
 foreach ('pp_proto.h', 'pp.sym') {
     safer_rename_silent $_, "$_-old";
