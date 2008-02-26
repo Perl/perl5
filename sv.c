@@ -4175,7 +4175,12 @@ Perl_sv_usepvn_flags(pTHX_ SV *sv, char *ptr, STRLEN len, U32 flags)
 #endif
 
     allocate = (flags & SV_HAS_TRAILING_NUL)
-	? len + 1: PERL_STRLEN_ROUNDUP(len + 1);
+	? len + 1 :
+#ifdef MYMALLOC
+	len + 1;
+#else 
+	PERL_STRLEN_ROUNDUP(len + 1);
+#endif
     if (flags & SV_HAS_TRAILING_NUL) {
 	/* It's long enough - do nothing.
 	   Specfically Perl_newCONSTSUB is relying on this.  */
@@ -4191,9 +4196,13 @@ Perl_sv_usepvn_flags(pTHX_ SV *sv, char *ptr, STRLEN len, U32 flags)
 	ptr = (char*) saferealloc (ptr, allocate);
 #endif
     }
-    SvPV_set(sv, ptr);
-    SvCUR_set(sv, len);
+#ifdef MYMALLOC
+    SvLEN_set(sv, malloced_size(ptr));
+#else
     SvLEN_set(sv, allocate);
+#endif
+    SvCUR_set(sv, len);
+    SvPV_set(sv, ptr);
     if (!(flags & SV_HAS_TRAILING_NUL)) {
 	ptr[len] = '\0';
     }
