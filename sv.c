@@ -407,7 +407,7 @@ S_visit(pTHX_ SVFUNC_t f, const U32 flags, const U32 mask)
 /* called by sv_report_used() for each live SV */
 
 static void
-do_report_used(pTHX_ SV *sv)
+do_report_used(pTHX_ SV *const sv)
 {
     if (SvTYPE(sv) != SVTYPEMASK) {
 	PerlIO_printf(Perl_debug_log, "****\n");
