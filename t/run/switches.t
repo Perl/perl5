@@ -11,7 +11,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan(tests => 62);
+plan(tests => 68);
 
 use Config;
 
@@ -194,6 +194,34 @@ SWTESTPM
     );
     is( $r, '<swtest><foo><bar>', '-m with import parameters' );
     push @tmpfiles, $filename;
+
+    is( runperl( switches => [ '-MTie::Hash' ], stderr => 1, prog => 1 ),
+	  '', "-MFoo::Bar allowed" );
+
+    like( runperl( switches => [ '-M:swtest' ], stderr => 1,
+		   prog => 'die "oops"' ),
+	  qr/Invalid module name [\w:]+ with -M option\b/,
+          "-M:Foo not allowed" );
+
+    like( runperl( switches => [ '-mA:B:C' ], stderr => 1,
+		   prog => 'die "oops"' ),
+	  qr/Invalid module name [\w:]+ with -m option\b/,
+          "-mFoo:Bar not allowed" );
+
+    like( runperl( switches => [ '-m-A:B:C' ], stderr => 1,
+		   prog => 'die "oops"' ),
+	  qr/Invalid module name [\w:]+ with -m option\b/,
+          "-m-Foo:Bar not allowed" );
+
+    like( runperl( switches => [ '-m-' ], stderr => 1,
+		   prog => 'die "oops"' ),
+	  qr/Module name required with -m option\b/,
+  	  "-m- not allowed" );
+
+    like( runperl( switches => [ '-M-=' ], stderr => 1,
+		   prog => 'die "oops"' ),
+	  qr/Module name required with -M option\b/,
+  	  "-M- not allowed" );
 }
 
 # Tests for -V

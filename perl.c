@@ -3025,6 +3025,7 @@ Perl_moreswitches(pTHX_ const char *s)
 {
     dVAR;
     UV rschar;
+    const char option = *s; /* used to remember option in -m/-M code */
 
     PERL_ARGS_ASSERT_MORESWITCHES;
 
@@ -3224,6 +3225,7 @@ Perl_moreswitches(pTHX_ const char *s)
 	    const char *end;
 	    SV *sv;
 	    const char *use = "use ";
+	    bool colon = FALSE;
 	    /* -M-foo == 'no foo'	*/
 	    /* Leading space on " no " is deliberate, to make both
 	       possibilities the same length.  */
@@ -3231,19 +3233,30 @@ Perl_moreswitches(pTHX_ const char *s)
 	    sv = newSVpvn(use,4);
 	    start = s;
 	    /* We allow -M'Module qw(Foo Bar)'	*/
-	    while(isALNUM(*s) || *s==':') ++s;
+	    while(isALNUM(*s) || *s==':') {
+		if( *s++ == ':' ) {
+		    if( *s == ':' ) 
+			s++;
+		    else
+			colon = TRUE;
+		}
+	    }
+	    if (s == start)
+		Perl_croak(aTHX_ "Module name required with -%c option",
+				    option);
+	    if (colon) 
+		Perl_croak(aTHX_ "Invalid module name %.*s with -%c option: "
+				    "contains single ':'",
+				    s - start, start, option);
 	    end = s + strlen(s);
 	    if (*s != '=') {
 		sv_catpvn(sv, start, end - start);
-		if (*(start-1) == 'm') {
+		if (option == 'm') {
 		    if (*s != '\0')
 			Perl_croak(aTHX_ "Can't use '%c' after -mname", *s);
 		    sv_catpvs( sv, " ()");
 		}
 	    } else {
-                if (s == start)
-                    Perl_croak(aTHX_ "Module name required with -%c option",
-			       s[-1]);
 		sv_catpvn(sv, start, s-start);
 		/* Use NUL as q''-delimiter.  */
 		sv_catpvs(sv, " split(/,/,q\0");
@@ -3255,7 +3268,7 @@ Perl_moreswitches(pTHX_ const char *s)
 	    Perl_av_create_and_push(aTHX_ &PL_preambleav, sv);
 	}
 	else
-	    Perl_croak(aTHX_ "Missing argument to -%c", *(s-1));
+	    Perl_croak(aTHX_ "Missing argument to -%c", option);
 	return s;
     case 'n':
 	PL_minus_n = TRUE;
