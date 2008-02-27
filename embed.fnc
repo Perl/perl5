@@ -87,6 +87,7 @@ Aanop	|Malloc_t|realloc	|Malloc_t where|MEM_SIZE nbytes
 Anop	|Free_t	|mfree		|Malloc_t where
 #if defined(MYMALLOC)
 npR	|MEM_SIZE|malloced_size	|NN void *p
+npR	|MEM_SIZE|malloc_good_size	|size_t nbytes
 #endif
 
 AnpR	|void*	|get_context

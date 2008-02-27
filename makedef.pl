@@ -667,6 +667,7 @@ else {
 		    Perl_dump_mstats
 		    Perl_get_mstats
 		    Perl_malloced_size
+		    Perl_malloc_good_size
 		    MallocCfg_ptr
 		    MallocCfgP_ptr
 		    )];

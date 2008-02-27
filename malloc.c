@@ -1404,23 +1404,12 @@ cmp_pat_4bytes(unsigned char *s, size_t nbytes, const unsigned char *fill)
 #  define FILLCHECK_DEADBEEF(s, n)	((void)0)
 #endif
 
-Malloc_t
-Perl_malloc(register size_t nbytes)
+int
+S_ajust_size_and_find_bucket(size_t *nbytes_p)
 {
-        dVAR;
-  	register union overhead *p;
-  	register int bucket;
-  	register MEM_SIZE shiftr;
-
-#if defined(DEBUGGING) || defined(RCHECK)
-	MEM_SIZE size = nbytes;
-#endif
-
-	BARK_64K_LIMIT("Allocation",nbytes,nbytes);
-#ifdef DEBUGGING
-	if ((long)nbytes < 0)
-	    croak("%s", "panic: malloc");
-#endif
+  	MEM_SIZE shiftr;
+	int bucket;
+	size_t nbytes = *nbytes_p;
 
 	/*
 	 * Convert amount of memory requested into
@@ -1455,6 +1444,28 @@ Perl_malloc(register size_t nbytes)
 	    while (shiftr >>= 1)
   		bucket += BUCKETS_PER_POW2;
 	}
+	*nbytes_p = nbytes;
+	return bucket;
+}
+
+Malloc_t
+Perl_malloc(size_t nbytes)
+{
+        dVAR;
+  	register union overhead *p;
+  	register int bucket;
+
+#if defined(DEBUGGING) || defined(RCHECK)
+	MEM_SIZE size = nbytes;
+#endif
+
+	BARK_64K_LIMIT("Allocation",nbytes,nbytes);
+#ifdef DEBUGGING
+	if ((long)nbytes < 0)
+	    croak("%s", "panic: malloc");
+#endif
+
+	bucket = S_ajust_size_and_find_bucket(&nbytes);
 	MALLOC_LOCK;
 	/*
 	 * If nothing in hash bucket right now,
@@ -2374,6 +2385,13 @@ Perl_malloced_size(void *p)
     }
 #endif
     return BUCKET_SIZE_REAL(bucket);
+}
+
+
+MEM_SIZE
+Perl_malloc_good_size(size_t wanted)
+{
+    return BUCKET_SIZE_REAL(S_ajust_size_and_find_bucket(&wanted));
 }
 
 #  ifdef BUCKETS_ROOT2
