@@ -5963,11 +5963,11 @@ PERL_CALLCONV char*	Perl_my_atof2(pTHX_ const char *s, NV* value)
 PERL_CALLCONV int	Perl_my_socketpair(int family, int type, int protocol, int fd[2]);
 PERL_CALLCONV int	Perl_my_dirfd(pTHX_ DIR* dir);
 #ifdef PERL_OLD_COPY_ON_WRITE
-PERL_CALLCONV SV*	Perl_sv_setsv_cow(pTHX_ SV* dsv, SV* ssv)
+PERL_CALLCONV SV*	Perl_sv_setsv_cow(pTHX_ SV* dstr, SV* sstr)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SV_SETSV_COW	\
-	assert(dsv); assert(ssv)
+	assert(dstr); assert(sstr)
 
 #endif
 
