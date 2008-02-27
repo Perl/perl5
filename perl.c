@@ -1376,10 +1376,17 @@ perl_free(pTHXx)
 	 */
 	const char * const s = PerlEnv_getenv("PERL_DESTRUCT_LEVEL");
 	if (!s || atoi(s) == 0) {
+	    const U32 old_debug = PL_debug;
 	    /* Emulate the PerlHost behaviour of free()ing all memory allocated in this
 	       thread at thread exit.  */
+	    if (DEBUG_m_TEST) {
+		PerlIO_puts(Perl_debug_log, "Disabling memory debugging as we "
+			    "free this thread's memory\n");
+		PL_debug &= ~ DEBUG_m_FLAG;
+	    }
 	    while(aTHXx->Imemory_debug_header.next != &(aTHXx->Imemory_debug_header))
 		safesysfree(sTHX + (char *)(aTHXx->Imemory_debug_header.next));
+	    PL_debug = old_debug;
 	}
     }
 #endif

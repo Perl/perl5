@@ -178,11 +178,11 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
     ptr = (Malloc_t)PerlMem_realloc(where,size);
     PERL_ALLOC_CHECK(ptr);
 
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) rfree\n",PTR2UV(where),(long)PL_an++));
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) realloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
-
-    if (ptr != NULL) {
+    /* MUST do this fixup first, before doing ANYTHING else, as anything else
+       might allocate memory/free/move memory, and until we do the fixup, it
+       may well be chasing (and writing to) free memory.  */
 #ifdef PERL_TRACK_MEMPOOL
+    if (ptr != NULL) {
 	struct perl_memory_debug_header *const header
 	    = (struct perl_memory_debug_header *)ptr;
 
@@ -198,7 +198,17 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 	header->prev->next = header;
 
         ptr = (Malloc_t)((char*)ptr+sTHX);
+    }
 #endif
+
+    /* In particular, must do that fixup above before logging anything via
+     *printf(), as it can reallocate memory, which can cause SEGVs.  */
+
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) rfree\n",PTR2UV(where),(long)PL_an++));
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) realloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
+
+
+    if (ptr != NULL) {
 	return ptr;
     }
     else if (PL_nomemok)
