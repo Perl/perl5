@@ -4073,9 +4073,11 @@ struct perl_memory_debug_header {
 
 #ifdef MYMALLOC
 #  define Perl_safesysmalloc_size(where)	Perl_malloced_size(where)
-#else if defined(HAS_MALLOC_SIZE)
-#  define Perl_safesysmalloc_size(where)			\
-	(malloc_size(((char *)(where)) - sTHX) - sTHX)
+#else
+#   ifdef HAS_MALLOC_SIZE
+#	define Perl_safesysmalloc_size(where)			\
+	    (malloc_size(((char *)(where)) - sTHX) - sTHX)
+#   endif
 #endif
 
 typedef int (CPERLscope(*runops_proc_t)) (pTHX);
