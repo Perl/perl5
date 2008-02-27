@@ -1045,6 +1045,7 @@ S_more_bodies (pTHX_ const svtype sv_type)
     const size_t body_size = bdp->body_size;
     char *start;
     const char *end;
+    const size_t arena_size = Perl_malloc_good_size(bdp->arena_size);
 #if defined(DEBUGGING) && !defined(PERL_GLOBAL_STRUCT_PRIVATE)
     static bool done_sanity_check;
 
@@ -1062,20 +1063,28 @@ S_more_bodies (pTHX_ const svtype sv_type)
 
     assert(bdp->arena_size);
 
-    start = (char*) Perl_get_arena(aTHX_ bdp->arena_size, sv_type);
+    start = (char*) Perl_get_arena(aTHX_ arena_size, sv_type);
 
-    end = start + bdp->arena_size - body_size;
+    end = start + arena_size - 2 * body_size;
 
     /* computed count doesnt reflect the 1st slot reservation */
+#if defined(MYMALLOC) || defined(HAS_MALLOC_GOOD_SIZE)
+    DEBUG_m(PerlIO_printf(Perl_debug_log,
+			  "arena %p end %p arena-size %d (from %d) type %d "
+			  "size %d ct %d\n",
+			  (void*)start, (void*)end, (int)arena_size,
+			  (int)bdp->arena_size, sv_type, (int)body_size,
+			  (int)arena_size / (int)body_size));
+#else
     DEBUG_m(PerlIO_printf(Perl_debug_log,
 			  "arena %p end %p arena-size %d type %d size %d ct %d\n",
 			  (void*)start, (void*)end,
 			  (int)bdp->arena_size, sv_type, (int)body_size,
 			  (int)bdp->arena_size / (int)body_size));
-
+#endif
     *root = (void *)start;
 
-    while (start < end) {
+    while (start <= end) {
 	char * const next = start + body_size;
 	*(void**) start = (void *)next;
 	start = next;

@@ -4059,6 +4059,8 @@ struct perl_memory_debug_header {
 	(MEM_ALIGNBYTES - sizeof(struct perl_memory_debug_header) \
 	 %MEM_ALIGNBYTES) % MEM_ALIGNBYTES)
 
+#else
+#  define sTHX	0
 #endif
 
 #ifdef PERL_TRACK_MEMPOOL
@@ -4077,6 +4079,13 @@ struct perl_memory_debug_header {
 #   ifdef HAS_MALLOC_SIZE
 #	define Perl_safesysmalloc_size(where)			\
 	    (malloc_size(((char *)(where)) - sTHX) - sTHX)
+#   endif
+#   ifdef HAS_MALLOC_GOOD_SIZE
+#	define Perl_malloc_good_size(how_much)			\
+	    (malloc_good_size((how_much) + sTHX) - sTHX)
+#   else
+/* Having this as the identity operation makes some code simpler.  */
+#	define Perl_malloc_good_size(how_much)	(how_much)
 #   endif
 #endif
 
