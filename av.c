@@ -118,6 +118,19 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 #endif
 
 #ifdef Perl_safesysmalloc_size
+		/* Whilst it would be quite possible to move this logic around
+		   (as I did in the SV code), so as to set AvMAX(av) early,
+		   based on calling Perl_safesysmalloc_size() immediately after
+		   allocation, I'm not convinced that it is a great idea here.
+		   In an array we have to loop round setting everything to
+		   &PL_sv_undef, which means writing to memory, potentially lots
+		   of it, whereas for the SV buffer case we don't touch the
+		   "bonus" memory. So there there is no cost in telling the
+		   world about it, whereas here we have to do work before we can
+		   tell the world about it, and that work involves writing to
+		   memory that might never be read. So, I feel, better to keep
+		   the current lazy system of only writing to it if our caller
+		   has a need for more space. NWC  */
 		newmax = Perl_safesysmalloc_size((void*)AvALLOC(av)) /
 		    sizeof(SV*) - 1;
 
