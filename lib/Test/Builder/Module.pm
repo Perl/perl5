@@ -1,13 +1,13 @@
 package Test::Builder::Module;
 
+use strict;
+
 use Test::Builder;
 
 require Exporter;
-@ISA = qw(Exporter);
+our @ISA = qw(Exporter);
 
-$VERSION = '0.74';
-
-use strict;
+our $VERSION = '0.75';
 
 # 5.004's Exporter doesn't have export_to_level.
 my $_export_to_level = sub {
