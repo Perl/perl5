@@ -12,11 +12,11 @@ TAP::Parser::Grammar - A grammar for the Test Anything Protocol.
 
 =head1 VERSION
 
-Version 3.09
+Version 3.10
 
 =cut
 
-$VERSION = '3.09';
+$VERSION = '3.10';
 
 =head1 DESCRIPTION
 
@@ -182,6 +182,15 @@ my %language_for;
                 my ( $self, $line ) = @_;
                 my ( $pad, $marker ) = ( $1, $2 );
                 return $self->_make_yaml_token( $pad, $marker );
+            },
+        },
+        pragma => {
+            syntax =>
+              qr/^ pragma \s+ ( [-+] \w+ \s* (?: , \s* [-+] \w+ \s* )* ) $/x,
+            handler => sub {
+                my ( $self, $line ) = @_;
+                my $pragmas = $1;
+                return $self->_make_pragma_token( $line, $pragmas );
             },
         },
     );
@@ -372,7 +381,7 @@ sub _make_test_token {
         ok          => $ok,
         test_num    => $num,
         description => _trim($desc),
-        directive   => uc($dir || ""),
+        directive   => uc( defined $dir ? $dir : '' ),
         explanation => _trim($explanation),
         raw         => $line,
         type        => 'test',
@@ -436,6 +445,15 @@ sub _make_yaml_token {
         type => 'yaml',
         raw  => $raw,
         data => $data
+    };
+}
+
+sub _make_pragma_token {
+    my ( $self, $line, $pragmas ) = @_;
+    return {
+        type    => 'pragma',
+        raw     => $line,
+        pragmas => [ split /\s*,\s*/, _trim($pragmas) ],
     };
 }
 
