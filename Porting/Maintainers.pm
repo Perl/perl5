@@ -14,11 +14,12 @@ use 5.008;
 require "Maintainers.pl";
 use vars qw(%Modules %Maintainers);
 
-use vars qw(@ISA @EXPORT_OK);
+use vars qw(@ISA @EXPORT_OK $VERSION);
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(%Modules %Maintainers
 		get_module_files get_module_pat
 		show_results process_options);
+$VERSION = 0.02;
 require Exporter;
 
 use File::Find;
@@ -107,9 +108,12 @@ sub process_options {
     my @Files;
    
     if ($Opened) {
-	my @raw = `p4 opened`;
+	@Files = `p4 opened`;
 	die if $?;
-	@Files =  map {s!#.*!!s; s!^//depot/.*?/perl/!!; $_} @raw;
+	foreach (@Files) {
+	    s!#.*!!s;
+	    s!^//depot/(?:perl|.*?/perl)/!!;
+	}
     } else {
 	@Files = @ARGV;
     }
