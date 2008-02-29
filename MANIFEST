@@ -2708,6 +2708,7 @@ lib/Test/Simple/t/create.t	Test::Simple test
 lib/Test/Simple/t/curr_test.t	Test::Builder->curr_test tests
 lib/Test/Simple/t/details.t	Test::Builder tests
 lib/Test/Simple/t/diag.t	Test::More diag() test
+lib/Test/Simple/t/dont_overwrite_die_handler.t	Test::More tests
 lib/Test/Simple/t/eq_set.t	Test::Simple test
 lib/Test/Simple/t/exit.t	Test::Simple test, exit codes
 lib/Test/Simple/t/extra_one.t	Test::Simple test
@@ -2751,6 +2752,7 @@ lib/Test/Simple/t/reset.t	Test::Simple test
 lib/Test/Simple/t/simple.t	Test::Simple test, basic stuff
 lib/Test/Simple/t/skipall.t	Test::More test, skip all tests
 lib/Test/Simple/t/skip.t	Test::More test, SKIP tests
+lib/Test/Simple/t/tbm_doesnt_set_exported_to.t	Test::Builder::Module test
 lib/Test/Simple/t/tbt_01basic.t	Test::Builder::Tester test
 lib/Test/Simple/t/tbt_02fhrestore.t	Test::Builder::Tester test
 lib/Test/Simple/t/tbt_03die.t	Test::Builder::Tester test
@@ -2765,6 +2767,7 @@ lib/Test/Simple/t/try.t		Test::More test
 lib/Test/Simple/t/undef.t	Test::More test, undefs don't cause warnings
 lib/Test/Simple/t/useing.t	Test::More test, compile test
 lib/Test/Simple/t/use_ok.t	Test::More test, use_ok()
+lib/Test/Simple/t/utf8.t	Test::More test
 lib/Test/t/05_about_verbose.t	See if Test works
 lib/Test/t/fail.t		See if Test works
 lib/Test/t/mix.t		See if Test works
@@ -3665,6 +3668,7 @@ t/lib/strict/subs		Tests of "use strict 'subs'" for strict.t
 t/lib/strict/vars		Tests of "use strict 'vars'" for strict.t
 t/lib/Test/Simple/Catch.pm	Utility module for testing Test::Simple
 t/lib/Test/Simple/sample_tests/death_in_eval.plx	for exit.t
+t/lib/Test/Simple/sample_tests/death_with_handler.plx	for exit.t
 t/lib/Test/Simple/sample_tests/death.plx		for exit.t
 t/lib/Test/Simple/sample_tests/exit.plx			for exit.t
 t/lib/Test/Simple/sample_tests/extras.plx		for exit.t

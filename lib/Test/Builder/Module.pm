@@ -7,7 +7,7 @@ use Test::Builder;
 require Exporter;
 our @ISA = qw(Exporter);
 
-our $VERSION = '0.75';
+our $VERSION = '0.78';
 
 # 5.004's Exporter doesn't have export_to_level.
 my $_export_to_level = sub {
@@ -83,6 +83,9 @@ import_extra().
 
 sub import {
     my($class) = shift;
+    
+    # Don't run all this when loading ourself.
+    return 1 if $class eq 'Test::Builder::Module';
 
     my $test = $class->builder;
 

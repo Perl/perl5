@@ -24,7 +24,7 @@ BEGIN {
     }
     
     unless ( $ENV{AUTHOR_TESTING} ) {
-        print "1..0 # Skip: many perls have broken threads\n";
+        print "1..0 # Skip: many perls have broken threads.  Enable with AUTHOR_TESTING.\n";
         exit 0;
     }
 }
