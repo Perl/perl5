@@ -9,7 +9,7 @@ use strict;
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, $Verbose, $Keep, $Maxlen,
     $CheckForAutoloader, $CheckModTime);
 
-$VERSION = "1.05";
+$VERSION = "1.05_01";
 @ISA = qw(Exporter);
 @EXPORT = qw(&autosplit &autosplit_lib_modules);
 @EXPORT_OK = qw($Verbose $Keep $Maxlen $CheckForAutoloader $CheckModTime);
@@ -148,7 +148,8 @@ can benefit from bug fixes.
 This package has the same copyright and license as the perl core:
 
              Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-        2000, 2001, 2002, 2003, 2004, 2005, 2006 by Larry Wall and others
+        2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
+        by Larry Wall and others
     
 			    All rights reserved.
     

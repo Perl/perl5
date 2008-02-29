@@ -4,7 +4,9 @@ use warnings;
 
 our(@ISA, %EXPORT_TAGS, @EXPORT_OK, @EXPORT, $AUTOLOAD, %SIGRT) = ();
 
-our $VERSION = "1.12";
+# Note that 5.8.x isn't carrying change 30590 from 5.10, so there might need to
+# be a version number dance to reflect this.
+our $VERSION = "1.14";
 
 use AutoLoader;
 
