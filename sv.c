@@ -4045,7 +4045,7 @@ undefined.  Does not handle 'set' magic.  See C<sv_setpvn_mg>.
 */
 
 void
-Perl_sv_setpvn(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
+Perl_sv_setpvn(pTHX_ register SV *const sv, register const char *const ptr, register const STRLEN len)
 {
     dVAR;
     register char *dptr;
@@ -4082,7 +4082,7 @@ Like C<sv_setpvn>, but also handles 'set' magic.
 */
 
 void
-Perl_sv_setpvn_mg(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
+Perl_sv_setpvn_mg(pTHX_ register SV *const sv, register const char *const ptr, register const STRLEN len)
 {
     PERL_ARGS_ASSERT_SV_SETPVN_MG;
 
@@ -4100,7 +4100,7 @@ handle 'set' magic.  See C<sv_setpv_mg>.
 */
 
 void
-Perl_sv_setpv(pTHX_ register SV *sv, register const char *ptr)
+Perl_sv_setpv(pTHX_ register SV *const sv, register const char *const ptr)
 {
     dVAR;
     register STRLEN len;
@@ -4131,7 +4131,7 @@ Like C<sv_setpv>, but also handles 'set' magic.
 */
 
 void
-Perl_sv_setpv_mg(pTHX_ register SV *sv, register const char *ptr)
+Perl_sv_setpv_mg(pTHX_ register SV *const sv, register const char *const ptr)
 {
     PERL_ARGS_ASSERT_SV_SETPV_MG;
 
@@ -4160,7 +4160,7 @@ C<len>, and already meets the requirements for storing in C<SvPVX>)
 */
 
 void
-Perl_sv_usepvn_flags(pTHX_ SV *sv, char *ptr, STRLEN len, U32 flags)
+Perl_sv_usepvn_flags(pTHX_ SV *const sv, char *ptr, const STRLEN len, const U32 flags)
 {
     dVAR;
     STRLEN allocate;
@@ -4276,7 +4276,7 @@ with flags set to 0.
 */
 
 void
-Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
+Perl_sv_force_normal_flags(pTHX_ register SV *const sv, const U32 flags)
 {
     dVAR;
 
@@ -4365,7 +4365,7 @@ refer to the same chunk of data.
 */
 
 void
-Perl_sv_chop(pTHX_ register SV *sv, register const char *ptr)
+Perl_sv_chop(pTHX_ register SV *const sv, register const char *const ptr)
 {
     STRLEN delta;
     STRLEN old_delta;
@@ -4451,7 +4451,7 @@ in terms of this function.
 */
 
 void
-Perl_sv_catpvn_flags(pTHX_ register SV *dsv, register const char *sstr, register STRLEN slen, I32 flags)
+Perl_sv_catpvn_flags(pTHX_ register SV *const dsv, register const char *sstr, register const STRLEN slen, const I32 flags)
 {
     dVAR;
     STRLEN dlen;
@@ -4488,7 +4488,7 @@ and C<sv_catsv_nomg> are implemented in terms of this function.
 =cut */
 
 void
-Perl_sv_catsv_flags(pTHX_ SV *dsv, register SV *ssv, I32 flags)
+Perl_sv_catsv_flags(pTHX_ SV *const dsv, register SV *const ssv, const I32 flags)
 {
     dVAR;
  

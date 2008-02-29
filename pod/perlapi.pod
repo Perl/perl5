@@ -5526,7 +5526,7 @@ If C<flags> has C<SV_GMAGIC> bit set, will C<mg_get> on C<dsv> if
 appropriate, else not. C<sv_catpvn> and C<sv_catpvn_nomg> are implemented
 in terms of this function.
 
-	void	sv_catpvn_flags(SV *dstr, const char *sstr, STRLEN len, I32 flags)
+	void	sv_catpvn_flags(SV *const dstr, const char *sstr, const STRLEN len, const I32 flags)
 
 =for hackers
 Found in file sv.c
@@ -5571,7 +5571,7 @@ SV C<dsv>.  Modifies C<dsv> but not C<ssv>.  If C<flags> has C<SV_GMAGIC>
 bit set, will C<mg_get> on the SVs if appropriate, else not. C<sv_catsv>
 and C<sv_catsv_nomg> are implemented in terms of this function.
 
-	void	sv_catsv_flags(SV* dsv, SV* ssv, I32 flags)
+	void	sv_catsv_flags(SV *const dsv, SV *const ssv, const I32 flags)
 
 =for hackers
 Found in file sv.c
@@ -5586,7 +5586,7 @@ string. Uses the "OOK hack".
 Beware: after this function returns, C<ptr> and SvPVX_const(sv) may no longer
 refer to the same chunk of data.
 
-	void	sv_chop(SV* sv, const char* ptr)
+	void	sv_chop(SV *const sv, const char *const ptr)
 
 =for hackers
 Found in file sv.c
@@ -5699,7 +5699,7 @@ set to some other value.) In addition, the C<flags> parameter gets passed to
 C<sv_unref_flags()> when unrefing. C<sv_force_normal> calls this function
 with flags set to 0.
 
-	void	sv_force_normal_flags(SV *sv, U32 flags)
+	void	sv_force_normal_flags(SV *const sv, const U32 flags)
 
 =for hackers
 Found in file sv.c
@@ -6055,7 +6055,7 @@ X<sv_setpv>
 Copies a string into an SV.  The string must be null-terminated.  Does not
 handle 'set' magic.  See C<sv_setpv_mg>.
 
-	void	sv_setpv(SV* sv, const char* ptr)
+	void	sv_setpv(SV *const sv, const char *const ptr)
 
 =for hackers
 Found in file sv.c
@@ -6109,7 +6109,7 @@ Copies a string into an SV.  The C<len> parameter indicates the number of
 bytes to be copied.  If the C<ptr> argument is NULL the SV will become
 undefined.  Does not handle 'set' magic.  See C<sv_setpvn_mg>.
 
-	void	sv_setpvn(SV* sv, const char* ptr, STRLEN len)
+	void	sv_setpvn(SV *const sv, const char *const ptr, const STRLEN len)
 
 =for hackers
 Found in file sv.c
@@ -6119,7 +6119,7 @@ X<sv_setpvn_mg>
 
 Like C<sv_setpvn>, but also handles 'set' magic.
 
-	void	sv_setpvn_mg(SV *sv, const char *ptr, STRLEN len)
+	void	sv_setpvn_mg(SV *const sv, const char *const ptr, const STRLEN len)
 
 =for hackers
 Found in file sv.c
@@ -6139,7 +6139,7 @@ X<sv_setpv_mg>
 
 Like C<sv_setpv>, but also handles 'set' magic.
 
-	void	sv_setpv_mg(SV *sv, const char *ptr)
+	void	sv_setpv_mg(SV *const sv, const char *const ptr)
 
 =for hackers
 Found in file sv.c
@@ -6382,7 +6382,7 @@ SV_HAS_TRAILING_NUL is true, then C<ptr[len]> must be NUL, and the realloc
 will be skipped. (i.e. the buffer is actually at least 1 byte longer than
 C<len>, and already meets the requirements for storing in C<SvPVX>)
 
-	void	sv_usepvn_flags(SV* sv, char* ptr, STRLEN len, U32 flags)
+	void	sv_usepvn_flags(SV *const sv, char* ptr, const STRLEN len, const U32 flags)
 
 =for hackers
 Found in file sv.c

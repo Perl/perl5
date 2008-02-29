@@ -857,7 +857,7 @@ Apd	|void	|sv_vcatpvf	|NN SV* sv|NN const char* pat|NULLOK va_list* args
 Apd	|void	|sv_catpv	|NN SV* sv|NULLOK const char* ptr
 Amdb	|void	|sv_catpvn	|NN SV *dsv|NN const char *sstr|STRLEN len
 Amdb	|void	|sv_catsv	|NN SV *dstr|NULLOK SV *sstr
-Apd	|void	|sv_chop	|NN SV* sv|NULLOK const char* ptr
+Apd	|void	|sv_chop	|NN SV *const sv|NULLOK const char *const ptr
 pd	|I32	|sv_clean_all
 pd	|void	|sv_clean_objs
 Apd	|void	|sv_clear	|NN SV* sv
@@ -917,8 +917,8 @@ Apd	|SV*	|sv_setref_uv	|NN SV* rv|NULLOK const char* classname|UV uv
 Apd	|SV*	|sv_setref_nv	|NN SV* rv|NULLOK const char* classname|NV nv
 Apd	|SV*	|sv_setref_pv	|NN SV* rv|NULLOK const char* classname|NULLOK void* pv
 Apd	|SV*	|sv_setref_pvn	|NN SV* rv|NULLOK const char* classname|NN const char* pv|STRLEN n
-Apd	|void	|sv_setpv	|NN SV* sv|NULLOK const char* ptr
-Apd	|void	|sv_setpvn	|NN SV* sv|NULLOK const char* ptr|STRLEN len
+Apd	|void	|sv_setpv	|NN SV *const sv|NULLOK const char *const ptr
+Apd	|void	|sv_setpvn	|NN SV *const sv|NULLOK const char *const ptr|const STRLEN len
 Amdb	|void	|sv_setsv	|NN SV *dstr|NULLOK SV *sstr
 Amdb	|void	|sv_taint	|NN SV* sv
 ApdR	|bool	|sv_tainted	|NN SV* sv
@@ -928,8 +928,8 @@ Apd	|void	|sv_unref_flags	|NN SV *ref|U32 flags
 Apd	|void	|sv_untaint	|NN SV* sv
 Apd	|void	|sv_upgrade	|NN SV *const sv|svtype new_type
 Apdmb	|void	|sv_usepvn	|NN SV* sv|NULLOK char* ptr|STRLEN len
-Apd	|void	|sv_usepvn_flags|NN SV* sv|NULLOK char* ptr|STRLEN len\
-				|U32 flags
+Apd	|void	|sv_usepvn_flags|NN SV *const sv|NULLOK char* ptr|const STRLEN len\
+				|const U32 flags
 Apd	|void	|sv_vcatpvfn	|NN SV* sv|NN const char* pat|STRLEN patlen \
 				|NULLOK va_list* args|NULLOK SV** svargs|I32 svmax \
 				|NULLOK bool *maybe_tainted
@@ -1039,8 +1039,8 @@ Apd	|void	|sv_setiv_mg	|NN SV *const sv|const IV i
 Apdb	|void	|sv_setpviv_mg	|NN SV *sv|IV iv
 Apd	|void	|sv_setuv_mg	|NN SV *const sv|const UV u
 Apd	|void	|sv_setnv_mg	|NN SV *const sv|const NV num
-Apd	|void	|sv_setpv_mg	|NN SV *sv|NULLOK const char *ptr
-Apd	|void	|sv_setpvn_mg	|NN SV *sv|NN const char *ptr|STRLEN len
+Apd	|void	|sv_setpv_mg	|NN SV *const sv|NULLOK const char *const ptr
+Apd	|void	|sv_setpvn_mg	|NN SV *const sv|NN const char *const ptr|const STRLEN len
 Apd	|void	|sv_setsv_mg	|NN SV *const dstr|NULLOK SV *const sstr
 Apdbm	|void	|sv_usepvn_mg	|NN SV *sv|NULLOK char *ptr|STRLEN len
 ApR	|MGVTBL*|get_vtbl	|int vtbl_id
@@ -1083,7 +1083,7 @@ ApdM	|bool	|sv_utf8_downgrade|NN SV *const sv|const bool fail_ok
 Apd	|void	|sv_utf8_encode |NN SV *const sv
 ApdM	|bool	|sv_utf8_decode |NN SV *const sv
 Apdmb	|void	|sv_force_normal|NN SV *sv
-Apd	|void	|sv_force_normal_flags|NN SV *sv|U32 flags
+Apd	|void	|sv_force_normal_flags|NN SV *const sv|const U32 flags
 Ap	|void	|tmps_grow	|I32 n
 Apd	|SV*	|sv_rvweaken	|NN SV *sv
 p	|int	|magic_killbackrefs|NN SV *sv|NN MAGIC *mg
@@ -1667,9 +1667,9 @@ sR	|SV*	|swash_get	|NN SV* swash|UV start|UV span
 START_EXTERN_C
 
 Apd	|void	|sv_setsv_flags	|NN SV *dstr|NULLOK SV *sstr|const I32 flags
-Apd	|void	|sv_catpvn_flags|NN SV *dstr|NN const char *sstr|STRLEN len \
-				|I32 flags
-Apd	|void	|sv_catsv_flags	|NN SV* dsv|NULLOK SV* ssv|I32 flags
+Apd	|void	|sv_catpvn_flags|NN SV *const dstr|NN const char *sstr|const STRLEN len \
+				|const I32 flags
+Apd	|void	|sv_catsv_flags	|NN SV *const dsv|NULLOK SV *const ssv|const I32 flags
 Apd	|STRLEN	|sv_utf8_upgrade_flags|NN SV *const sv|const I32 flags
 Apd	|char*	|sv_pvn_force_flags|NN SV* sv|NULLOK STRLEN* lp|I32 flags
 Apd	|void	|sv_copypv	|NN SV *const dsv|NN SV *const ssv
