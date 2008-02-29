@@ -1,15 +1,10 @@
 package Test::Builder;
 
-use 5.004;
-
-# $^C was only introduced in 5.005-ish.  We do this to prevent
-# use of uninitialized value warnings in older perls.
-$^C ||= 0;
-
+use 5.006;
 use strict;
-use vars qw($VERSION);
-$VERSION = '0.74_1';
-$VERSION = eval $VERSION;    # make the alpha version come out as a number
+
+our $VERSION = '0.78';
+$VERSION = eval { $VERSION }; # make the alpha version come out as a number
 
 # Make Test::Builder thread-safe for ithreads.
 BEGIN {
@@ -925,11 +920,7 @@ sub maybe_regex {
     my($re, $opts);
 
     # Check for qr/foo/
-    if (   $] >= 5.009004 
-              ? re::is_regexp($regex) 
-              : ref $regex eq 'Regexp'
-       ) 
-    {
+    if( _is_qr($regex) ) {
         $usable_regex = $regex;
     }
     # Check for '/foo/' or 'm,foo,'
