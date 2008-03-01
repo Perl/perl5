@@ -5127,7 +5127,7 @@ This aid has been superseded by a new build option, PERL_MEM_LOG (see
 L<perlhack/PERL_MEM_LOG>).  The older API is still there for use in XS
 modules supporting older perls.
 
-	SV*	newSV(STRLEN len)
+	SV*	newSV(const STRLEN len)
 
 =for hackers
 Found in file sv.c
@@ -5472,7 +5472,7 @@ Concatenates the string onto the end of the string which is in the SV.
 If the SV has the UTF-8 status set, then the bytes appended should be
 valid UTF-8.  Handles 'get' magic, but not 'set' magic.  See C<sv_catpv_mg>.
 
-	void	sv_catpv(SV* sv, const char* ptr)
+	void	sv_catpv(SV *const sv, const char* ptr)
 
 =for hackers
 Found in file sv.c
@@ -5546,7 +5546,7 @@ X<sv_catpv_mg>
 
 Like C<sv_catpv>, but also handles 'set' magic.
 
-	void	sv_catpv_mg(SV *sv, const char *ptr)
+	void	sv_catpv_mg(SV *const sv, const char *const ptr)
 
 =for hackers
 Found in file sv.c
@@ -5757,7 +5757,7 @@ X<sv_insert>
 Inserts a string at the specified offset/length within the SV. Similar to
 the Perl substr() function.
 
-	void	sv_insert(SV *bigstr, STRLEN offset, STRLEN len, const char *little, STRLEN littlelen)
+	void	sv_insert(SV *const bigstr, const STRLEN offset, const STRLEN len, const char *const little, const STRLEN littlelen)
 
 =for hackers
 Found in file sv.c
@@ -5820,7 +5820,7 @@ handling of the C<name> and C<namlen> arguments.
 You need to use C<sv_magicext> to add magic to SvREADONLY SVs and also
 to add more than one instance of the same 'how'.
 
-	void	sv_magic(SV* sv, SV* obj, int how, const char* name, I32 namlen)
+	void	sv_magic(SV *const sv, SV *const obj, const int how, const char *const name, I32 namlen)
 
 =for hackers
 Found in file sv.c
@@ -5842,7 +5842,7 @@ to contain an C<SV*> and is stored as-is with its REFCNT incremented.
 
 (This is now used as a subroutine by C<sv_magic>.)
 
-	MAGIC *	sv_magicext(SV* sv, SV* obj, int how, const MGVTBL *vtbl, const char* name, I32 namlen)
+	MAGIC *	sv_magicext(SV *const sv, SV *const obj, const int how, const MGVTBL *const vtbl, const char *const name, const I32 namlen)
 
 =for hackers
 Found in file sv.c
@@ -6002,7 +6002,7 @@ push a back-reference to this RV onto the array of backreferences
 associated with that magic. If the RV is magical, set magic will be
 called after the RV is cleared.
 
-	SV*	sv_rvweaken(SV *sv)
+	SV*	sv_rvweaken(SV *const sv)
 
 =for hackers
 Found in file sv.c
@@ -6323,7 +6323,7 @@ X<sv_unmagic>
 
 Removes all magic of type C<type> from an SV.
 
-	int	sv_unmagic(SV* sv, int type)
+	int	sv_unmagic(SV *const sv, const int type)
 
 =for hackers
 Found in file sv.c
