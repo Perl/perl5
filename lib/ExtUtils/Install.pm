@@ -3,7 +3,7 @@ use 5.00503;
 use strict;
 
 use vars qw(@ISA @EXPORT $VERSION $MUST_REBOOT %Config);
-$VERSION = '1.45';
+$VERSION = '1.46';
 $VERSION = eval $VERSION;
 
 use AutoSplit;
@@ -395,7 +395,7 @@ Abstract a -w check that tries to use POSIX::access() if possible.
     sub _have_write_access {
         my $dir=shift;
         if (!defined $has_posix) {
-            $has_posix=eval "local $^W; require POSIX; 1" || 0;
+            $has_posix=eval 'local $^W; require POSIX; 1' || 0;
         }
         if ($has_posix) {
             return POSIX::access($dir, POSIX::W_OK());
@@ -431,8 +431,11 @@ sub _can_write_dir {
     return
         unless defined $dir and length $dir;
 
-    my ($vol, $dirs, $file) = File::Spec->splitpath(File::Spec->rel2abs($dir),1);
+    my ($vol, $dirs, $file) = File::Spec->splitpath($dir,1);
     my @dirs = File::Spec->splitdir($dirs);
+    unshift @dirs, File::Spec->curdir
+        unless File::Spec->file_name_is_absolute($dir);
+
     my $path='';
     my @make;
     while (@dirs) {
@@ -769,7 +772,7 @@ reboot. A wrapper for _unlink_or_rename().
 
 sub forceunlink {
     my ( $file, $tryhard )= @_; #XXX OS-SPECIFIC
-    _unlink_or_rename( $file, $tryhard );
+    _unlink_or_rename( $file, $tryhard, not("installing") );
 }
 
 =begin _undocumented
@@ -886,6 +889,9 @@ Remove shadowed files. If $ignore is true then it is assumed to hold
 a filename to ignore. This is used to prevent spurious warnings from
 occuring when doing an install at reboot.
 
+We now only die when failing to remove a file that has precedence over
+our own, when our install has precedence we only warn.
+
 =end _undocumented
 
 =cut
@@ -899,11 +905,17 @@ sub inc_uninstall {
 
     my @PERL_ENV_LIB = split $Config{path_sep}, defined $ENV{'PERL5LIB'}
       ? $ENV{'PERL5LIB'} : $ENV{'PERLLIB'} || '';
-
-    foreach $dir (@INC, @PERL_ENV_LIB, @Config{qw(archlibexp
-                                                  privlibexp
-                                                  sitearchexp
-                                                  sitelibexp)}) {
+        
+    my @dirs=( @PERL_ENV_LIB, 
+               @INC, 
+               @Config{qw(archlibexp
+                          privlibexp
+                          sitearchexp
+                          sitelibexp)});        
+    
+    #warn join "\n","---",@dirs,"---";
+    my $seen_ours;
+    foreach $dir ( @dirs ) {
         my $canonpath = File::Spec->canonpath($dir);
         next if $canonpath eq $Curdir;
         next if $seen_dir{$canonpath}++;
@@ -922,7 +934,10 @@ sub inc_uninstall {
         }
         print "#$file and $targetfile differ\n" if $diff && $verbose > 1;
 
-        next if !$diff or $targetfile eq $ignore;
+        if (!$diff or $targetfile eq $ignore) {
+            $seen_ours = 1;
+            next;
+        }
         if ($nonono) {
             if ($verbose) {
                 $Inc_uninstall_warn_handler ||= ExtUtils::Install::Warn->new();
@@ -935,7 +950,19 @@ sub inc_uninstall {
             # if not verbose, we just say nothing
         } else {
             print "Unlinking $targetfile (shadowing?)\n" if $verbose;
-            forceunlink($targetfile,'tryhard');
+            eval {
+                die "Fake die for testing" 
+                    if $ExtUtils::Install::Testing and
+                       File::Spec->canonpath($ExtUtils::Install::Testing) eq $targetfile;
+                forceunlink($targetfile,'tryhard');
+                1;
+            } or do {
+                if ($seen_ours) { 
+                    warn "Failed to remove probably harmless shadow file '$targetfile'\n";
+                } else {
+                    die "$@\n";
+                }
+            };
         }
     }
 }
@@ -1131,7 +1158,8 @@ can be used to provide a default.
 
 Original author lost in the mists of time.  Probably the same as Makemaker.
 
-Production release currently maintained by demerphq C<yves at cpan.org>
+Production release currently maintained by demerphq C<yves at cpan.org>,
+extensive changes by Michael Schwern.
 
 Send bug reports via http://rt.cpan.org/.  Please send your
 generated Makefile along with your report.
