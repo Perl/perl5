@@ -861,15 +861,15 @@ Apd	|void	|sv_chop	|NN SV *const sv|NULLOK const char *const ptr
 pd	|I32	|sv_clean_all
 pd	|void	|sv_clean_objs
 Apd	|void	|sv_clear	|NN SV *const sv
-Apd	|I32	|sv_cmp		|NULLOK SV* sv1|NULLOK SV* sv2
-Apd	|I32	|sv_cmp_locale	|NULLOK SV* sv1|NULLOK SV* sv2
+Apd	|I32	|sv_cmp		|NULLOK SV *const sv1|NULLOK SV *const sv2
+Apd	|I32	|sv_cmp_locale	|NULLOK SV *const sv1|NULLOK SV *const sv2
 #if defined(USE_LOCALE_COLLATE)
-Apd	|char*	|sv_collxfrm	|NN SV* sv|NN STRLEN* nxp
+Apd	|char*	|sv_collxfrm	|NN SV *const sv|NN STRLEN *const nxp
 #endif
 Ap	|OP*	|sv_compile_2op	|NN SV *sv|NN OP **startop \
 				|NN const char *code|NN PAD **padp
 Apd	|int	|getcwd_sv	|NN SV* sv
-Apd	|void	|sv_dec		|NULLOK SV* sv
+Apd	|void	|sv_dec		|NULLOK SV *const sv
 Ap	|void	|sv_dump	|NN SV* sv
 ApdR	|bool	|sv_derived_from|NN SV* sv|NN const char *const name
 ApdR	|bool	|sv_does	|NN SV* sv|NN const char *const name
@@ -877,9 +877,9 @@ Apd	|I32	|sv_eq		|NULLOK SV* sv1|NULLOK SV* sv2
 Apd	|void	|sv_free	|NULLOK SV *const sv
 poMX	|void	|sv_free2	|NN SV *const sv
 pd	|void	|sv_free_arenas
-Apd	|char*	|sv_gets	|NN SV* sv|NN PerlIO* fp|I32 append
+Apd	|char*	|sv_gets	|NN SV *const sv|NN PerlIO *const fp|I32 append
 Apd	|char*	|sv_grow	|NN SV *const sv|STRLEN newlen
-Apd	|void	|sv_inc		|NULLOK SV* sv
+Apd	|void	|sv_inc		|NULLOK SV *const sv
 Apd	|void	|sv_insert	|NN SV *const bigstr|const STRLEN offset|const STRLEN len \
 				|NN const char *const little|const STRLEN littlelen
 Apd	|int	|sv_isa		|NULLOK SV* sv|NN const char* name
@@ -887,16 +887,16 @@ Apd	|int	|sv_isobject	|NULLOK SV* sv
 Apd	|STRLEN	|sv_len		|NULLOK SV *const sv
 Apd	|STRLEN	|sv_len_utf8	|NULLOK SV *const sv
 Apd	|void	|sv_magic	|NN SV *const sv|NULLOK SV *const obj|const int how \
-				|NULLOK const char *const name|I32 namlen
+				|NULLOK const char *const name|const I32 namlen
 Apd	|MAGIC *|sv_magicext	|NN SV *const sv|NULLOK SV *const obj|const int how \
 				|NULLOK const MGVTBL *const vtbl|NULLOK const char *const name \
 				|const I32 namlen
-ApdaR	|SV*	|sv_mortalcopy	|NULLOK SV* oldsv
+ApdaR	|SV*	|sv_mortalcopy	|NULLOK SV *const oldsv
 ApdR	|SV*	|sv_newmortal
 Apd	|SV*	|sv_newref	|NULLOK SV *const sv
 Ap	|char*	|sv_peek	|NULLOK SV* sv
 Apd	|void	|sv_pos_u2b	|NULLOK SV *const sv|NN I32 *const offsetp|NULLOK I32 *const lenp
-Apd	|void	|sv_pos_b2u	|NULLOK SV* sv|NN I32* offsetp
+Apd	|void	|sv_pos_b2u	|NULLOK SV *const sv|NN I32 *const offsetp
 Amdb	|char*	|sv_pvn_force	|NN SV* sv|NULLOK STRLEN* lp
 Apd	|char*	|sv_pvutf8n_force|NN SV* sv|NULLOK STRLEN* lp
 Apd	|char*	|sv_pvbyten_force|NN SV* sv|NULLOK STRLEN* lp
@@ -1563,9 +1563,9 @@ sn	|STRLEN	|sv_pos_u2b_midway|NN const U8 *const start \
 s	|STRLEN	|sv_pos_u2b_cached|NN SV *const sv|NN MAGIC **const mgp \
 		|NN const U8 *const start|NN const U8 *const send \
 		|const STRLEN uoffset|STRLEN uoffset0|STRLEN boffset0
-s	|void	|utf8_mg_pos_cache_update|NN SV *sv|NN MAGIC **mgp \
-		|STRLEN byte|STRLEN utf8|STRLEN blen
-s	|STRLEN	|sv_pos_b2u_midway|NN const U8 *s|NN const U8 *const target \
+s	|void	|utf8_mg_pos_cache_update|NN SV *const sv|NN MAGIC **const mgp \
+		|const STRLEN byte|const STRLEN utf8|const STRLEN blen
+s	|STRLEN	|sv_pos_b2u_midway|NN const U8 *const s|NN const U8 *const target \
 		|NN const U8 *end|STRLEN endu
 sn	|char *	|F0convert	|NV nv|NN char *endbuf|NN STRLEN *len
 #  if defined(PERL_OLD_COPY_ON_WRITE)
