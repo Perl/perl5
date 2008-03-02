@@ -7265,7 +7265,7 @@ C<newSVpvn_utf8()> is a convenience wrapper for this function, defined as
 */
 
 SV *
-Perl_newSVpvn_flags(pTHX_ const char *s, STRLEN len, U32 flags)
+Perl_newSVpvn_flags(pTHX_ const char *const s, const STRLEN len, const U32 flags)
 {
     dVAR;
     register SV *sv;
@@ -7292,7 +7292,7 @@ and C<sv_mortalcopy>.
 */
 
 SV *
-Perl_sv_2mortal(pTHX_ register SV *sv)
+Perl_sv_2mortal(pTHX_ register SV *const sv)
 {
     dVAR;
     if (!sv)
@@ -7316,7 +7316,7 @@ strlen().  For efficiency, consider using C<newSVpvn> instead.
 */
 
 SV *
-Perl_newSVpv(pTHX_ const char *s, STRLEN len)
+Perl_newSVpv(pTHX_ const char *const s, const STRLEN len)
 {
     dVAR;
     register SV *sv;
@@ -7338,7 +7338,7 @@ C<len> bytes long.  If the C<s> argument is NULL the new SV will be undefined.
 */
 
 SV *
-Perl_newSVpvn(pTHX_ const char *s, STRLEN len)
+Perl_newSVpvn(pTHX_ const char *const s, const STRLEN len)
 {
     dVAR;
     register SV *sv;
@@ -7359,7 +7359,7 @@ SV if the hek is NULL.
 */
 
 SV *
-Perl_newSVhek(pTHX_ const HEK *hek)
+Perl_newSVhek(pTHX_ const HEK *const hek)
 {
     dVAR;
     if (!hek) {
@@ -7475,7 +7475,7 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
  */
 
 SV *
-Perl_newSVpvf_nocontext(const char* pat, ...)
+Perl_newSVpvf_nocontext(const char *const pat, ...)
 {
     dTHX;
     register SV *sv;
@@ -7500,7 +7500,7 @@ C<sprintf>.
 */
 
 SV *
-Perl_newSVpvf(pTHX_ const char* pat, ...)
+Perl_newSVpvf(pTHX_ const char *const pat, ...)
 {
     register SV *sv;
     va_list args;
@@ -7516,7 +7516,7 @@ Perl_newSVpvf(pTHX_ const char* pat, ...)
 /* backend for newSVpvf() and newSVpvf_nocontext() */
 
 SV *
-Perl_vnewSVpvf(pTHX_ const char* pat, va_list* args)
+Perl_vnewSVpvf(pTHX_ const char *const pat, va_list *const args)
 {
     dVAR;
     register SV *sv;
@@ -7538,7 +7538,7 @@ The reference count for the SV is set to 1.
 */
 
 SV *
-Perl_newSVnv(pTHX_ NV n)
+Perl_newSVnv(pTHX_ const NV n)
 {
     dVAR;
     register SV *sv;
@@ -7558,7 +7558,7 @@ SV is set to 1.
 */
 
 SV *
-Perl_newSViv(pTHX_ IV i)
+Perl_newSViv(pTHX_ const IV i)
 {
     dVAR;
     register SV *sv;
@@ -7578,7 +7578,7 @@ The reference count for the SV is set to 1.
 */
 
 SV *
-Perl_newSVuv(pTHX_ UV u)
+Perl_newSVuv(pTHX_ const UV u)
 {
     dVAR;
     register SV *sv;
@@ -7617,7 +7617,7 @@ SV is B<not> incremented.
 */
 
 SV *
-Perl_newRV_noinc(pTHX_ SV *tmpRef)
+Perl_newRV_noinc(pTHX_ SV *const tmpRef)
 {
     dVAR;
     register SV *sv = newSV_type(SVt_IV);
@@ -7635,7 +7635,7 @@ Perl_newRV_noinc(pTHX_ SV *tmpRef)
  */
 
 SV *
-Perl_newRV(pTHX_ SV *sv)
+Perl_newRV(pTHX_ SV *const sv)
 {
     dVAR;
 
@@ -7654,7 +7654,7 @@ Creates a new SV which is an exact duplicate of the original SV.
 */
 
 SV *
-Perl_newSVsv(pTHX_ register SV *old)
+Perl_newSVsv(pTHX_ register SV *const old)
 {
     dVAR;
     register SV *sv;
@@ -7684,7 +7684,7 @@ Note that the perl-level function is vaguely deprecated.
 */
 
 void
-Perl_sv_reset(pTHX_ register const char *s, HV *stash)
+Perl_sv_reset(pTHX_ register const char *s, HV *const stash)
 {
     dVAR;
     char todo[PERL_UCHAR_MAX+1];
@@ -7788,7 +7788,7 @@ named after the PV if we're a string.
 */
 
 IO*
-Perl_sv_2io(pTHX_ SV *sv)
+Perl_sv_2io(pTHX_ SV *const sv)
 {
     IO* io;
     GV* gv;
@@ -7833,7 +7833,7 @@ The flags in C<lref> are passed to sv_fetchsv.
 */
 
 CV *
-Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
+Perl_sv_2cv(pTHX_ SV *sv, HV **const st, GV **const gvp, const I32 lref)
 {
     dVAR;
     GV *gv = NULL;
@@ -7927,7 +7927,7 @@ instead use an in-line version.
 */
 
 I32
-Perl_sv_true(pTHX_ register SV *sv)
+Perl_sv_true(pTHX_ register SV *const sv)
 {
     if (!sv)
 	return 0;

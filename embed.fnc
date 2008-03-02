@@ -157,7 +157,7 @@ Anp	|void	|load_module_nocontext|U32 flags|NN SV* name|NULLOK SV* ver|...
 Afnp	|SV*	|mess_nocontext	|NN const char* pat|...
 Afnp	|void	|warn_nocontext	|NN const char* pat|...
 Afnp	|void	|warner_nocontext|U32 err|NN const char* pat|...
-Afnp	|SV*	|newSVpvf_nocontext|NN const char* pat|...
+Afnp	|SV*	|newSVpvf_nocontext|NN const char *const pat|...
 Afnp	|void	|sv_catpvf_nocontext|NN SV* sv|NN const char* pat|...
 Afnp	|void	|sv_setpvf_nocontext|NN SV* sv|NN const char* pat|...
 Afnp	|void	|sv_catpvf_mg_nocontext|NN SV* sv|NN const char* pat|...
@@ -595,23 +595,23 @@ Apa	|OP*	|newPADOP	|I32 type|I32 flags|NN SV* sv
 #endif
 Apa	|OP*	|newPMOP	|I32 type|I32 flags
 Apa	|OP*	|newPVOP	|I32 type|I32 flags|NULLOK char* pv
-Apa	|SV*	|newRV		|NN SV* sv
-Apda	|SV*	|newRV_noinc	|NN SV* sv
+Apa	|SV*	|newRV		|NN SV *const sv
+Apda	|SV*	|newRV_noinc	|NN SV *const sv
 Apda	|SV*	|newSV		|const STRLEN len
 Apa	|OP*	|newSVREF	|NN OP* o
 Apa	|OP*	|newSVOP	|I32 type|I32 flags|NN SV* sv
-Apda	|SV*	|newSViv	|IV i
-Apda	|SV*	|newSVuv	|UV u
-Apda	|SV*	|newSVnv	|NV n
-Apda	|SV*	|newSVpv	|NULLOK const char* s|STRLEN len
-Apda	|SV*	|newSVpvn	|NULLOK const char* s|STRLEN len
-Apda	|SV*	|newSVpvn_flags	|NULLOK const char* s|STRLEN len|U32 flags
-Apda	|SV*	|newSVhek	|NULLOK const HEK *hek
+Apda	|SV*	|newSViv	|const IV i
+Apda	|SV*	|newSVuv	|const UV u
+Apda	|SV*	|newSVnv	|const NV n
+Apda	|SV*	|newSVpv	|NULLOK const char *const s|const STRLEN len
+Apda	|SV*	|newSVpvn	|NULLOK const char *const s|const STRLEN len
+Apda	|SV*	|newSVpvn_flags	|NULLOK const char *const s|const STRLEN len|const U32 flags
+Apda	|SV*	|newSVhek	|NULLOK const HEK *const hek
 Apda	|SV*	|newSVpvn_share	|NULLOK const char* s|I32 len|U32 hash
-Afpda	|SV*	|newSVpvf	|NN const char* pat|...
-Apa	|SV*	|vnewSVpvf	|NN const char* pat|NULLOK va_list* args
+Afpda	|SV*	|newSVpvf	|NN const char *const pat|...
+Apa	|SV*	|vnewSVpvf	|NN const char *const pat|NULLOK va_list *const args
 Apd	|SV*	|newSVrv	|NN SV* rv|NULLOK const char* classname
-Apda	|SV*	|newSVsv	|NULLOK SV* old
+Apda	|SV*	|newSVsv	|NULLOK SV *const old
 Apda	|SV*	|newSV_type	|const svtype type
 Apa	|OP*	|newUNOP	|I32 type|I32 flags|NULLOK OP* first
 Apa	|OP*	|newWHENOP	|NULLOK OP* cond|NN OP* block
@@ -824,15 +824,16 @@ Ap	|SV**	|stack_grow	|NN SV** sp|NN SV** p|int n
 Ap	|I32	|start_subparse	|I32 is_format|U32 flags
 p	|void	|sub_crush_depth|NN CV* cv
 Apd	|bool	|sv_2bool	|NN SV *const sv
-Apd	|CV*	|sv_2cv		|NULLOK SV* sv|NN HV** st|NN GV** gvp|I32 lref
-Apd	|IO*	|sv_2io		|NN SV* sv
+Apd	|CV*	|sv_2cv		|NULLOK SV* sv|NN HV **const st|NN GV **const gvp \
+				|const I32 lref
+Apd	|IO*	|sv_2io		|NN SV *const sv
 #ifdef PERL_IN_SV_C
 s	|bool	|glob_2number	|NN GV* const gv
 s	|char*	|glob_2pv	|NN GV* const gv|NULLOK STRLEN * const len
 #endif
 Amb	|IV	|sv_2iv		|NULLOK SV *sv
 Apd	|IV	|sv_2iv_flags	|NULLOK SV *const sv|const I32 flags
-Apd	|SV*	|sv_2mortal	|NULLOK SV* sv
+Apd	|SV*	|sv_2mortal	|NULLOK SV *const sv
 Apd	|NV	|sv_2nv		|NULLOK SV *const sv
 pMd	|SV*	|sv_2num	|NN SV *const sv
 Amb	|char*	|sv_2pv		|NULLOK SV *sv|NULLOK STRLEN *lp
@@ -848,7 +849,7 @@ Apd	|NV	|sv_nv		|NN SV* sv
 Apd	|char*	|sv_pvn		|NN SV *sv|NN STRLEN *lp
 Apd	|char*	|sv_pvutf8n	|NN SV *sv|NN STRLEN *lp
 Apd	|char*	|sv_pvbyten	|NN SV *sv|NN STRLEN *lp
-Apd	|I32	|sv_true	|NULLOK SV *sv
+Apd	|I32	|sv_true	|NULLOK SV *const sv
 pd	|void	|sv_add_arena	|NN char *const ptr|const U32 size|const U32 flags
 Apd	|int	|sv_backoff	|NN SV *const sv
 Apd	|SV*	|sv_bless	|NN SV* sv|NN HV* stash
@@ -906,7 +907,7 @@ Apd	|bool	|sv_cat_decode	|NN SV* dsv|NN SV *encoding|NN SV *ssv|NN int *offset \
 ApdR	|const char*	|sv_reftype	|NN const SV* sv|int ob
 Apd	|void	|sv_replace	|NN SV *const sv|NN SV *const nsv
 Apd	|void	|sv_report_used
-Apd	|void	|sv_reset	|NN const char* s|NULLOK HV* stash
+Apd	|void	|sv_reset	|NN const char* s|NULLOK HV *const stash
 Afpd	|void	|sv_setpvf	|NN SV* sv|NN const char* pat|...
 Apd	|void	|sv_vsetpvf	|NN SV* sv|NN const char* pat|NULLOK va_list* args
 Apd	|void	|sv_setiv	|NN SV *const sv|const IV num

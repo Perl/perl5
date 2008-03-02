@@ -5108,7 +5108,7 @@ X<newRV_noinc>
 Creates an RV wrapper for an SV.  The reference count for the original
 SV is B<not> incremented.
 
-	SV*	newRV_noinc(SV* sv)
+	SV*	newRV_noinc(SV *const sv)
 
 =for hackers
 Found in file sv.c
@@ -5139,7 +5139,7 @@ Creates a new SV from the hash key structure.  It will generate scalars that
 point to the shared string table where possible. Returns a new (undefined)
 SV if the hek is NULL.
 
-	SV*	newSVhek(const HEK *hek)
+	SV*	newSVhek(const HEK *const hek)
 
 =for hackers
 Found in file sv.c
@@ -5150,7 +5150,7 @@ X<newSViv>
 Creates a new SV and copies an integer into it.  The reference count for the
 SV is set to 1.
 
-	SV*	newSViv(IV i)
+	SV*	newSViv(const IV i)
 
 =for hackers
 Found in file sv.c
@@ -5161,7 +5161,7 @@ X<newSVnv>
 Creates a new SV and copies a floating point value into it.
 The reference count for the SV is set to 1.
 
-	SV*	newSVnv(NV n)
+	SV*	newSVnv(const NV n)
 
 =for hackers
 Found in file sv.c
@@ -5173,7 +5173,7 @@ Creates a new SV and copies a string into it.  The reference count for the
 SV is set to 1.  If C<len> is zero, Perl will compute the length using
 strlen().  For efficiency, consider using C<newSVpvn> instead.
 
-	SV*	newSVpv(const char* s, STRLEN len)
+	SV*	newSVpv(const char *const s, const STRLEN len)
 
 =for hackers
 Found in file sv.c
@@ -5184,7 +5184,7 @@ X<newSVpvf>
 Creates a new SV and initializes it with the string formatted like
 C<sprintf>.
 
-	SV*	newSVpvf(const char* pat, ...)
+	SV*	newSVpvf(const char *const pat, ...)
 
 =for hackers
 Found in file sv.c
@@ -5197,7 +5197,7 @@ SV is set to 1.  Note that if C<len> is zero, Perl will create a zero length
 string.  You are responsible for ensuring that the source string is at least
 C<len> bytes long.  If the C<s> argument is NULL the new SV will be undefined.
 
-	SV*	newSVpvn(const char* s, STRLEN len)
+	SV*	newSVpvn(const char *const s, const STRLEN len)
 
 =for hackers
 Found in file sv.c
@@ -5217,7 +5217,7 @@ C<newSVpvn_utf8()> is a convenience wrapper for this function, defined as
     #define newSVpvn_utf8(s, len, u)			\
 	newSVpvn_flags((s), (len), (u) ? SVf_UTF8 : 0)
 
-	SV*	newSVpvn_flags(const char* s, STRLEN len, U32 flags)
+	SV*	newSVpvn_flags(const char *const s, const STRLEN len, const U32 flags)
 
 =for hackers
 Found in file sv.c
@@ -5289,7 +5289,7 @@ X<newSVsv>
 Creates a new SV which is an exact duplicate of the original SV.
 (Uses C<sv_setsv>).
 
-	SV*	newSVsv(SV* old)
+	SV*	newSVsv(SV *const old)
 
 =for hackers
 Found in file sv.c
@@ -5300,7 +5300,7 @@ X<newSVuv>
 Creates a new SV and copies an unsigned integer into it.
 The reference count for the SV is set to 1.
 
-	SV*	newSVuv(UV u)
+	SV*	newSVuv(const UV u)
 
 =for hackers
 Found in file sv.c
@@ -5334,7 +5334,7 @@ Using various gambits, try to get a CV from an SV; in addition, try if
 possible to set C<*st> and C<*gvp> to the stash and GV associated with it.
 The flags in C<lref> are passed to sv_fetchsv.
 
-	CV*	sv_2cv(SV* sv, HV** st, GV** gvp, I32 lref)
+	CV*	sv_2cv(SV* sv, HV **const st, GV **const gvp, const I32 lref)
 
 =for hackers
 Found in file sv.c
@@ -5346,7 +5346,7 @@ Using various gambits, try to get an IO from an SV: the IO slot if its a
 GV; or the recursive result if we're an RV; or the IO slot of the symbol
 named after the PV if we're a string.
 
-	IO*	sv_2io(SV* sv)
+	IO*	sv_2io(SV *const sv)
 
 =for hackers
 Found in file sv.c
@@ -5372,7 +5372,7 @@ statement boundaries.  SvTEMP() is turned on which means that the SV's
 string buffer can be "stolen" if this SV is copied. See also C<sv_newmortal>
 and C<sv_mortalcopy>.
 
-	SV*	sv_2mortal(SV* sv)
+	SV*	sv_2mortal(SV *const sv)
 
 =for hackers
 Found in file sv.c
@@ -5988,7 +5988,7 @@ X<sv_reset>
 Underlying implementation for the C<reset> Perl function.
 Note that the perl-level function is vaguely deprecated.
 
-	void	sv_reset(const char* s, HV* stash)
+	void	sv_reset(const char* s, HV *const stash)
 
 =for hackers
 Found in file sv.c
@@ -6313,7 +6313,7 @@ Returns true if the SV has a true value by Perl's rules.
 Use the C<SvTRUE> macro instead, which may call C<sv_true()> or may
 instead use an in-line version.
 
-	I32	sv_true(SV *sv)
+	I32	sv_true(SV *const sv)
 
 =for hackers
 Found in file sv.c
