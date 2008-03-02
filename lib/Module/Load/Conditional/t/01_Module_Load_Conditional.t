@@ -64,8 +64,12 @@ use_ok( 'Module::Load::Conditional' );
         ### and return it    
         @path;
     };
-    
-    is( $INC{'Module/Load/Conditional.pm'},            
+    my $inc_path = $INC{'Module/Load/Conditional.pm'};
+    if ( $^O eq 'MSWin32' ) {
+        $inc_path = File::Spec->canonpath( $inc_path );
+        $inc_path =~ s{\\}{/}g; # to meet with unix path
+    }
+    is( $inc_path,
             File::Spec::Unix->catfile(@rv_path),
                             q[  Found proper file]
     );
