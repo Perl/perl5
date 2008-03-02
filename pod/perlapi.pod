@@ -5602,7 +5602,7 @@ This function should only be called when REFCNT is zero. Most of the time
 you'll want to call C<sv_free()> (or its macro wrapper C<SvREFCNT_dec>)
 instead.
 
-	void	sv_clear(SV* sv)
+	void	sv_clear(SV *const sv)
 
 =for hackers
 Found in file sv.c
@@ -5712,7 +5712,7 @@ C<sv_clear> to invoke destructors and free up any memory used by
 the body; finally, deallocate the SV's head itself.
 Normally called via a wrapper macro C<SvREFCNT_dec>.
 
-	void	sv_free(SV* sv)
+	void	sv_free(SV *const sv)
 
 =for hackers
 Found in file sv.c
@@ -5792,7 +5792,7 @@ X<sv_len>
 Returns the length of the string in the SV. Handles magic and type
 coercion.  See also C<SvCUR>, which gives raw access to the xpv_cur slot.
 
-	STRLEN	sv_len(SV* sv)
+	STRLEN	sv_len(SV *const sv)
 
 =for hackers
 Found in file sv.c
@@ -5803,7 +5803,7 @@ X<sv_len_utf8>
 Returns the number of characters in the string in an SV, counting wide
 UTF-8 bytes as a single character. Handles magic and type coercion.
 
-	STRLEN	sv_len_utf8(SV* sv)
+	STRLEN	sv_len_utf8(SV *const sv)
 
 =for hackers
 Found in file sv.c
@@ -5879,7 +5879,7 @@ X<sv_newref>
 Increment an SV's reference count. Use the C<SvREFCNT_inc()> wrapper
 instead.
 
-	SV*	sv_newref(SV* sv)
+	SV*	sv_newref(SV *const sv)
 
 =for hackers
 Found in file sv.c
@@ -5905,7 +5905,7 @@ lenp is non-zero, it does the same to lenp, but this time starting from
 the offset, rather than from the start of the string. Handles magic and
 type coercion.
 
-	void	sv_pos_u2b(SV* sv, I32* offsetp, I32* lenp)
+	void	sv_pos_u2b(SV *const sv, I32 *const offsetp, I32 *const lenp)
 
 =for hackers
 Found in file sv.c
@@ -5977,7 +5977,7 @@ and any magic in the source is discarded.
 Note that this is a rather specialist SV copying operation; most of the
 time you'll want to use C<sv_setsv> or one of its many macro front-ends.
 
-	void	sv_replace(SV* sv, SV* nsv)
+	void	sv_replace(SV *const sv, SV *const nsv)
 
 =for hackers
 Found in file sv.c
