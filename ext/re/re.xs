@@ -19,12 +19,12 @@ extern char*	my_re_intuit_start (pTHX_ regexp *prog, SV *sv, char *strpos,
 				    struct re_scream_pos_data_s *data);
 extern SV*	my_re_intuit_string (pTHX_ regexp *prog);
 
-extern regexp*	my_regdupe (pTHX_ regexp *r, CLONE_PARAMS *param);
+extern regexp*	my_regdupe (pTHX_ const regexp *r, CLONE_PARAMS *param);
 
 
 END_EXTERN_C
 
-/* engine details need to be paired - non debugging, debuggin  */
+/* engine details need to be paired - non debugging, debugging  */
 #define NEEDS_DEBUGGING 0x01
 struct regexp_engine {
     regexp*	(*regcomp) (pTHX_ char* exp, char* xend, PMOP* pm);
@@ -37,7 +37,7 @@ struct regexp_engine {
     SV*		(*re_intuit_string) (pTHX_ regexp *prog);
     void	(*regfree) (pTHX_ struct regexp* r);
 #if defined(USE_ITHREADS)
-    regexp*	(*regdupe) (pTHX_ regexp *r, CLONE_PARAMS *param);
+    regexp*	(*regdupe) (pTHX_ const regexp *r, CLONE_PARAMS *param);
 #endif
 };
 
