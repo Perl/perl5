@@ -227,7 +227,7 @@ S_regcppop(pTHX)
 	);
     }
     DEBUG_r(
-	if (*PL_reglastparen + 1 <= PL_regnpar) {
+	if ((I32)*PL_reglastparen + 1 <= PL_regnpar) {
 	    PerlIO_printf(Perl_debug_log,
 			  "     restoring \\%"IVdf"..\\%"IVdf" to undef\n",
 			  (IV)(*PL_reglastparen + 1), (IV)PL_regnpar);
@@ -243,7 +243,7 @@ S_regcppop(pTHX)
      * this code seems to be necessary or otherwise
      * this erroneously leaves $1 defined: "1" =~ /^(?:(\d)x)?\d$/
      * --jhi updated by dapm */
-    for (i = *PL_reglastparen + 1; (U32)i <= PL_regnpar; i++) {
+    for (i = *PL_reglastparen + 1; i <= PL_regnpar; i++) {
 	if (i > PL_regsize)
 	    PL_regstartp[i] = -1;
 	PL_regendp[i] = -1;
