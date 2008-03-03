@@ -1136,11 +1136,6 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 #endif /* VMS */
 	if (s && klen == 4 && strEQ(ptr,"PATH")) {
 	    const char * const strend = s + len;
-#ifdef VMS  /* Hmm.  How do we get $Config{path_sep} from C? */
-	    const char path_sep = '|';
-#else
-	    const char path_sep = ':';
-#endif
 
 	    while (s < strend) {
 		char tmpbuf[256];
