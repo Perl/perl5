@@ -2306,6 +2306,7 @@ lib/NEXT/README			NEXT
 lib/NEXT/t/actual.t		NEXT
 lib/NEXT/t/actuns.t		NEXT
 lib/NEXT/t/next.t		NEXT
+lib/NEXT/t/stringify.t	NEXT
 lib/NEXT/t/unseen.t		NEXT
 lib/Object/Accessor.pm	Object::Accessor
 lib/Object/Accessor/t/00_Object-Accessor.t	Object::Accessor tests

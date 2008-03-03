@@ -2,6 +2,7 @@ package NEXT;
 $VERSION = '0.60_01';
 use Carp;
 use strict;
+use overload ();
 
 sub NEXT::ELSEWHERE::ancestors
 {
@@ -42,11 +43,13 @@ sub AUTOLOAD
 	croak "Can't call $wanted from $caller"
 		unless $caller_method eq $wanted_method;
 
-	local ($NEXT::NEXT{$self,$wanted_method}, $NEXT::SEEN) =
-	      ($NEXT::NEXT{$self,$wanted_method}, $NEXT::SEEN);
+	my $key = ref $self && overload::Overloaded($self)
+	    ? overload::StrVal($self) : $self;
 
+	local ($NEXT::NEXT{$key,$wanted_method}, $NEXT::SEEN) =
+	      ($NEXT::NEXT{$key,$wanted_method}, $NEXT::SEEN);
 
-	unless ($NEXT::NEXT{$self,$wanted_method}) {
+	unless ($NEXT::NEXT{$key,$wanted_method}) {
 		my @forebears =
 			NEXT::ELSEWHERE::ancestors ref $self || $self,
 						   $wanted_class;
@@ -54,19 +57,19 @@ sub AUTOLOAD
 			last if shift @forebears eq $caller_class
 		}
 		no strict 'refs';
-		@{$NEXT::NEXT{$self,$wanted_method}} = 
+		@{$NEXT::NEXT{$key,$wanted_method}} = 
 			map { *{"${_}::$caller_method"}{CODE}||() } @forebears
 				unless $wanted_method eq 'AUTOLOAD';
-		@{$NEXT::NEXT{$self,$wanted_method}} = 
+		@{$NEXT::NEXT{$key,$wanted_method}} = 
 			map { (*{"${_}::AUTOLOAD"}{CODE}) ? "${_}::AUTOLOAD" : ()} @forebears
-				unless @{$NEXT::NEXT{$self,$wanted_method}||[]};
-		$NEXT::SEEN->{$self,*{$caller}{CODE}}++;
+				unless @{$NEXT::NEXT{$key,$wanted_method}||[]};
+		$NEXT::SEEN->{$key,*{$caller}{CODE}}++;
 	}
-	my $call_method = shift @{$NEXT::NEXT{$self,$wanted_method}};
+	my $call_method = shift @{$NEXT::NEXT{$key,$wanted_method}};
 	while ($wanted_class =~ /^NEXT\b.*\b(UNSEEN|DISTINCT)\b/
 	       && defined $call_method
-	       && $NEXT::SEEN->{$self,$call_method}++) {
-		$call_method = shift @{$NEXT::NEXT{$self,$wanted_method}};
+	       && $NEXT::SEEN->{$key,$call_method}++) {
+		$call_method = shift @{$NEXT::NEXT{$key,$wanted_method}};
 	}
 	unless (defined $call_method) {
 		return unless $wanted_class =~ /^NEXT:.*:ACTUAL/;
@@ -103,11 +106,14 @@ sub AUTOLOAD
 	undef $EVERY::AUTOLOAD;
 	my ($wanted_class, $wanted_method) = $wanted =~ m{(.*)::(.*)}g;
 
-	local $NEXT::ALREADY_IN_EVERY{$self,$wanted_method} =
-	      $NEXT::ALREADY_IN_EVERY{$self,$wanted_method};
+	my $key = ref($self) && overload::Overloaded($self)
+	    ? overload::StrVal($self) : $self;
 
-	return if $NEXT::ALREADY_IN_EVERY{$self,$wanted_method}++;
-	
+	local $NEXT::ALREADY_IN_EVERY{$key,$wanted_method} =
+	      $NEXT::ALREADY_IN_EVERY{$key,$wanted_method};
+
+	return if $NEXT::ALREADY_IN_EVERY{$key,$wanted_method}++;
+
 	my @forebears = NEXT::ELSEWHERE::ordered_ancestors ref $self || $self,
 					                   $wanted_class;
 	@forebears = reverse @forebears if $wanted_class =~ /\bLAST\b/;
