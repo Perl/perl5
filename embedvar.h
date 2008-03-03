@@ -247,6 +247,7 @@
 #define PL_debug_pad		(PERL_GET_INTERP->Idebug_pad)
 #define PL_def_layerlist	(PERL_GET_INTERP->Idef_layerlist)
 #define PL_defgv		(PERL_GET_INTERP->Idefgv)
+#define PL_destroyhook		(PERL_GET_INTERP->Idestroyhook)
 #define PL_diehook		(PERL_GET_INTERP->Idiehook)
 #define PL_doextract		(PERL_GET_INTERP->Idoextract)
 #define PL_doswitches		(PERL_GET_INTERP->Idoswitches)

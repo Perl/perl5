@@ -1698,13 +1698,11 @@ STATIC void	S_usage(pTHX_ const char *name);
 #ifdef DOSUID
 #  ifdef IAMSUID
 STATIC void	S_validate_suid(pTHX_ const char *validarg, int fdscript, bool suidscript, SV* linestr_sv);
-#  else
 STATIC void	S_validate_suid(pTHX_ const char *validarg, const char *scriptname, int fdscript, SV* linestr_sv);
 #  endif
 #else
 #  ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
 STATIC void	S_validate_suid(pTHX);
-
 #  endif
 #endif
 
@@ -1936,9 +1934,7 @@ STATIC void	S_del_sv(pTHX_ SV *p);
 #    ifdef DEBUGGING
 STATIC int	S_sv_2iuv_non_preserve(pTHX_ SV *sv, I32 numtype);
 #    else
-STATIC int	S_sv_2iuv_non_preserve(pTHX_ SV *sv)
-			__attribute__nonnull__(pTHX_1);
-
+STATIC int	S_sv_2iuv_non_preserve(pTHX_ SV *sv);
 #    endif
 #  endif
 STATIC I32	S_expect_number(pTHX_ char** pattern)
