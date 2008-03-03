@@ -649,7 +649,7 @@ uni_to_byte(pTHX_ const char **s, const char *end, I32 datumtype)
 	val &= 0xff;
     }
     *s += retlen;
-    return val;
+    return (U8)val;
 }
 
 #define SHIFT_BYTE(utf8, s, strend, datumtype) ((utf8) ? \
@@ -676,7 +676,7 @@ uni_to_bytes(pTHX_ const char **s, const char *end, const char *buf, int buf_len
 	    bad |= 2;
 	    val &= 0xff;
 	}
-	*(U8 *)buf++ = val;
+	*(U8 *)buf++ = (U8)val;
     }
     /* We have enough characters for the buffer. Did we have problems ? */
     if (bad) {
@@ -3121,7 +3121,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 			GROWING(0, cat, start, cur, len+1);
 			end = start+SvLEN(cat)-1;
 		    }
-		    *(U8 *) cur++ = auv;
+		    *(U8 *) cur++ = (U8)auv;
 		}
 	    }
 	    break;
