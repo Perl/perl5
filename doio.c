@@ -1835,7 +1835,11 @@ nothing in the core.
 #ifdef HAS_FUTIMES
 		    if (utimes(name, (struct timeval *)utbufp))
 #else
-		    if (PerlLIO_utime(name, utbufp))
+		    /* For the benefit of paranoid hysterical raisins, I'd
+		       prefer to keep the paramters of all existing perl
+		       functions the same, rather than adding the const.
+		       Hence the need to cast away const.  */
+		    if (PerlLIO_utime((char *)name, utbufp))
 #endif
 			tot--;
 		}
