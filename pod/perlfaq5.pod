@@ -60,7 +60,7 @@ C<autoflush>. Call the C<flush> method to flush the buffer yourself:
 	open my( $printer ), ">", "/dev/printer"); 
 	$printer->flush; # one time flush
 
-	
+
 =head2 How do I change, delete, or insert a line in a file, or append to the beginning of a file?
 X<file, editing>
 
@@ -541,7 +541,7 @@ a string:
 
 With older versions of Perl, the C<IO::String> module provides similar
 functionality.
-    
+
 =head2 How can I output my numbers with commas added?
 X<number, commify>
 
