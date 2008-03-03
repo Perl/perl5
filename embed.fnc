@@ -1044,7 +1044,7 @@ Apa	|ANY*	|ss_dup		|NN PerlInterpreter* proto_perl|NN CLONE_PARAMS* param
 ApR	|void*	|any_dup	|NULLOK void* v|NN PerlInterpreter* proto_perl
 ApR	|HE*	|he_dup		|NULLOK HE* e|bool shared|NN CLONE_PARAMS* param
 Apa	|REGEXP*|re_dup		|NULLOK REGEXP* r|NN CLONE_PARAMS* param
-ApR	|PerlIO*|fp_dup		|NULLOK PerlIO* fp|char type|NN CLONE_PARAMS* param
+Ap	|PerlIO*|fp_dup		|NULLOK PerlIO* fp|char type|NN CLONE_PARAMS* param
 ApR	|DIR*	|dirp_dup	|NULLOK DIR* dp
 ApR	|GP*	|gp_dup		|NULLOK GP* gp|NN CLONE_PARAMS* param
 ApR	|MAGIC*	|mg_dup		|NULLOK MAGIC* mg|NN CLONE_PARAMS* param

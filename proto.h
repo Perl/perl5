@@ -1506,9 +1506,7 @@ PERL_CALLCONV REGEXP*	Perl_re_dup(pTHX_ REGEXP* r, CLONE_PARAMS* param)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV PerlIO*	Perl_fp_dup(pTHX_ PerlIO* fp, char type, CLONE_PARAMS* param)
-			__attribute__warn_unused_result__;
-
+PERL_CALLCONV PerlIO*	Perl_fp_dup(pTHX_ PerlIO* fp, char type, CLONE_PARAMS* param);
 PERL_CALLCONV DIR*	Perl_dirp_dup(pTHX_ DIR* dp)
 			__attribute__warn_unused_result__;
 
