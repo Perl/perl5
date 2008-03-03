@@ -1379,6 +1379,9 @@ bool
    may have linked against it.  */
 S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8)
 {
+    PERL_UNUSED_ARG(message);
+    PERL_UNUSED_ARG(msglen);
+    PERL_UNUSED_ARG(utf8);
     return FALSE;
 }
 #endif /* NO_MATHOMS */
