@@ -83,8 +83,7 @@ int
 do_spawn (char *cmd)
 {
     dTHX;
-    char const **a;
-    char *s,*metachars = "$&*(){}[]'\";\\?>|<~`\n";
+    char **a,*s,*metachars = "$&*(){}[]'\";\\?>|<~`\n";
     const char *command[4];
 
     while (*cmd && isSPACE(*cmd))
@@ -122,7 +121,7 @@ do_spawn (char *cmd)
 	    return do_spawnvp("sh",command);
 	}
 
-    Newx (PL_Argv,(s-cmd)/2+2,const char*);
+    Newx (PL_Argv,(s-cmd)/2+2,char*);
     PL_Cmd=savepvn (cmd,s-cmd);
     a=PL_Argv;
     for (s=PL_Cmd; *s;) {
