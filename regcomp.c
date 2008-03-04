@@ -1034,7 +1034,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		if (OP(scan) == CURLYX) {
 		    I32 lp = (data ? *(data->last_closep) : 0);
 
-		    scan->flags = ((lp <= U8_MAX) ? lp : U8_MAX);
+		    scan->flags = ((lp <= U8_MAX) ? (U8)lp : U8_MAX);
 		}
 		scan = NEXTOPER(scan) + EXTRA_STEP_2ARGS;
 		next_is_eval = (OP(scan) == EVAL);

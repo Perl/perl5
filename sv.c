@@ -3458,7 +3458,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	if (stype == SVt_PVLV)
 	    (void)SvUPGRADE(dstr, SVt_PVNV);
 	else
-	    (void)SvUPGRADE(dstr, (U32)stype);
+	    (void)SvUPGRADE(dstr, (svtype)stype);
     }
 
     /* dstr may have been upgraded.  */
