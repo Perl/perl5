@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 117;
+plan tests => 118;
 
 my $Is_EBCDIC = (ord('i') == 0x89 & ord('J') == 0xd1);
 
@@ -461,3 +461,10 @@ is($s, "AxBC", "utf8, DELETE");
     is($c, "\x20\x30\x40\x50\x60", "tr/\\x00-\\x1f//d");
 }
 
+($s) = keys %{{pie => 3}};
+my $wasro = Internals::SvREADONLY($s);
+{
+    $wasro or local $TODO = "didn't have a COW";
+    $s =~ tr/i//;
+    ok( Internals::SvREADONLY($s), "count-only tr doesn't deCOW COWs" );
+}
