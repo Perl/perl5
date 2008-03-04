@@ -13,103 +13,89 @@ BEGIN {
         print "1..0\n";
         exit 0;
     }
-    print "1..13\n";
 }
-END {
-    print "not ok 1\n" unless $loaded;
-}
-use File::Glob ':glob';
+use strict;
+use Test::More tests => 14;
+BEGIN {use_ok('File::Glob', ':glob')};
 use Cwd ();
-$loaded = 1;
-print "ok 1\n";
-
-sub array {
-    return '(', join(", ", map {defined $_ ? "\"$_\"" : "undef"} @a), ")\n";
-}
 
 # look for the contents of the current directory
 $ENV{PATH} = "/bin";
-delete @ENV{BASH_ENV, CDPATH, ENV, IFS};
-@correct = ();
+delete @ENV{qw(BASH_ENV CDPATH ENV IFS)};
+my @correct = ();
 if (opendir(D, $^O eq "MacOS" ? ":" : ".")) {
    @correct = grep { !/^\./ } sort readdir(D);
    closedir D;
 }
-@a = File::Glob::glob("*", 0);
+my @a = File::Glob::glob("*", 0);
 @a = sort @a;
-if ("@a" ne "@correct" || GLOB_ERROR) {
-    print "# |@a| ne |@correct|\nnot ";
+if (GLOB_ERROR) {
+    fail(GLOB_ERROR);
+} else {
+    is_deeply(\@a, \@correct);
 }
-print "ok 2\n";
 
 # look up the user's home directory
 # should return a list with one item, and not set ERROR
-if ($^O ne 'MSWin32' && $^O ne 'NetWare' && $^O ne 'VMS' && $^O ne 'os2'
-    && $^O ne 'beos') {
-  eval {
-    ($name, $home) = (getpwuid($>))[0,7];
-    1;
-  } and do {
-    if (defined $home && defined $name && -d $home) {
-	@a = bsd_glob("~$name", GLOB_TILDE);
-	if ((scalar(@a) != 1 || $a[0] ne $home || GLOB_ERROR)) {
-	    print "not ";
-	}
+SKIP: {
+    my ($name, $home);
+    skip $^O if $^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS'
+	|| $^O eq 'os2' || $^O eq 'beos';
+    skip "Can't find user for $>: $@" unless eval {
+	($name, $home) = (getpwuid($>))[0,7];
+	1;
+    };
+    skip "$> has no home directory"
+	unless defined $home && defined $name && -d $home;
+
+    @a = bsd_glob("~$name", GLOB_TILDE);
+
+    if (GLOB_ERROR) {
+	fail(GLOB_ERROR);
+    } else {
+	is_deeply (\@a, [$home]);
     }
-  };
 }
-print "ok 3\n";
 
 # check backslashing
 # should return a list with one item, and not set ERROR
 @a = bsd_glob('TEST', GLOB_QUOTE);
-if (scalar @a != 1 || $a[0] ne 'TEST' || GLOB_ERROR) {
-    local $/ = "][";
-    print "# [@a]\n";
-    print "not ";
+if (GLOB_ERROR) {
+    fail(GLOB_ERROR);
+} else {
+    is_deeply(\@a, ['TEST']);
 }
-print "ok 4\n";
 
 # check nonexistent checks
 # should return an empty list
 # XXX since errfunc is NULL on win32, this test is not valid there
 @a = bsd_glob("asdfasdf", 0);
-if (($^O ne 'MSWin32' && $^O ne 'NetWare') and scalar @a != 0) {
-    print "# |@a|\nnot ";
+SKIP: {
+    skip $^O if $^O eq 'MSWin32' || $^O eq 'NetWare';
+    is_deeply(\@a, []);
 }
-print "ok 5\n";
 
 # check bad protections
 # should return an empty list, and set ERROR
-if ($^O eq 'mpeix' or $^O eq 'MSWin32' or $^O eq 'NetWare' or $^O eq 'os2' or $^O eq 'VMS'
-    or $^O eq 'cygwin' or Cwd::cwd() =~ m#^$Config{'afsroot'}#s or not $>)
-{
-    print "ok 6 # skipped\n";
-}
-else {
-    $dir = "pteerslo";
+SKIP: {
+    skip $^O if $^O eq 'mpeix' or $^O eq 'MSWin32' or $^O eq 'NetWare'
+	or $^O eq 'os2' or $^O eq 'VMS' or $^O eq 'cygwin';
+    skip "AFS" if Cwd::cwd() =~ m#^$Config{'afsroot'}#s;
+    skip "running as root" if not $>;
+
+    my $dir = "pteerslo";
     mkdir $dir, 0;
     @a = bsd_glob("$dir/*", GLOB_ERR);
-    #print "\@a = ", array(@a);
     rmdir $dir;
-    if (scalar(@a) != 0 || GLOB_ERROR == 0) {
-	if ($^O eq 'vos') {
-	    print "not ok 6 # TODO hit VOS bug posix-956\n";
-	} else {
-	    print "not ok 6\n";
-	}
-    }
-    else {
-	print "ok 6\n";
-    }
+    local $TODO = 'hit VOS bug posix-956' if $^O eq 'vos';
+
+    isnt(GLOB_ERROR, 0);
+    is_deeply(\@a, []);
 }
 
 # check for csh style globbing
 @a = bsd_glob('{a,b}', GLOB_BRACE | GLOB_NOMAGIC);
-unless (@a == 2 and $a[0] eq 'a' and $a[1] eq 'b') {
-    print "not ";
-}
-print "ok 7\n";
+is_deeply(\@a, ['a', 'b']);
 
 @a = bsd_glob(
     '{TES*,doesntexist*,a,b}',
@@ -123,30 +109,22 @@ print "ok 7\n";
 
 print "# @a\n";
 
-unless (@a == 3
-        and $a[0] eq ($^O eq 'VMS'? 'test.' : 'TEST')
-        and $a[1] eq 'a'
-        and $a[2] eq 'b')
-{
-    print "not ok 8 # @a\n";
-} else {
-    print "ok 8\n";
-}
+is_deeply(\@a, [($^O eq 'VMS'? 'test.' : 'TEST'), 'a', 'b']);
 
 # "~" should expand to $ENV{HOME}
 $ENV{HOME} = "sweet home";
 @a = bsd_glob('~', GLOB_TILDE | GLOB_NOMAGIC);
-unless ($^O eq "MacOS" || (@a == 1 and $a[0] eq $ENV{HOME})) {
-    print "not ";
+SKIP: {
+    skip $^O if $^O eq "MacOS";
+    is_deeply(\@a, [$ENV{HOME}]);
 }
-print "ok 9\n";
 
 # GLOB_ALPHASORT (default) should sort alphabetically regardless of case
 mkdir "pteerslo", 0777;
 chdir "pteerslo";
 
-@f_names = qw(Ax.pl Bx.pl Cx.pl aY.pl bY.pl cY.pl);
-@f_alpha = qw(Ax.pl aY.pl Bx.pl bY.pl Cx.pl cY.pl);
+my @f_names = qw(Ax.pl Bx.pl Cx.pl aY.pl bY.pl cY.pl);
+my @f_alpha = qw(Ax.pl aY.pl Bx.pl bY.pl Cx.pl cY.pl);
 if ('a' lt 'A') { # EBCDIC char sets sort lower case before UPPER
     @f_names = sort(@f_names);
 }
@@ -160,25 +138,17 @@ for (@f_names) {
     close T;
 }
 
-$pat = "*.pl";
+my $pat = "*.pl";
 
-$ok = 1;
-@g_names = bsd_glob($pat, 0);
+my @g_names = bsd_glob($pat, 0);
 print "# f_names = @f_names\n";
 print "# g_names = @g_names\n";
-for (@f_names) {
-    $ok = 0 unless $_ eq shift @g_names;
-}
-print $ok ? "ok 10\n" : "not ok 10\n";
+is_deeply(\@g_names, \@f_names);
 
-$ok = 1;
-@g_alpha = bsd_glob($pat);
+my @g_alpha = bsd_glob($pat);
 print "# f_alpha = @f_alpha\n";
 print "# g_alpha = @g_alpha\n";
-for (@f_alpha) {
-    $ok = 0 unless $_ eq shift @g_alpha;
-}
-print $ok ? "ok 11\n" : "not ok 11\n";
+is_deeply(\@g_alpha, \@f_alpha);
 
 unlink @f_names;
 chdir "..";
@@ -186,7 +156,7 @@ rmdir "pteerslo";
 
 # this can panic if PL_glob_index gets passed as flags to bsd_glob
 <*>; <*>;
-print "ok 12\n";
+pass("Don't panic");
 
 {
     use File::Temp qw(tempdir);
@@ -203,11 +173,8 @@ print "ok 12\n";
     chdir $dir
 	or die "Could not chdir to $dir: $!";
     my(@glob_files) = glob("a*{d[e]}j");
-    if (!(@glob_files == 1 && "@glob_files" eq "a_dej")) {
-	print "not ";
-    }
-    my $todo = $^O ne 'VMS' ? '' : " # TODO home-made glob doesn't do regexes";
-    print "ok 13$todo\n";
+    local $TODO = "home-made glob doesn't do regexes" if $^O eq 'VMS';
+    is_deeply(\@glob_files, ['a_dej']);
     chdir $cwd
 	or die "Could not chdir back to $cwd: $!";
 }
