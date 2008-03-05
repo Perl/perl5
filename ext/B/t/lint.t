@@ -29,6 +29,7 @@ sub runlint ($$$;$) {
         stderr   => 1,
     );
     $res =~ s/-e syntax OK\n$//;
+    local $Level = $Level + 1;
     is( $res, $result, $testname || $opts );
 }
 
