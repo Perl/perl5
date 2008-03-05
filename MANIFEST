@@ -2329,6 +2329,19 @@ lib/Package/Constants.pm	Package::Constants
 lib/Package/Constants/t/01_list.t	Package::Constants tests
 lib/Params/Check.pm	Params::Check
 lib/Params/Check/t/01_Params-Check.t	Params::Check tests
+lib/parent.pm	Establish an ISA relationship with base classes at compile time
+lib/parent/t/compile-time-file.t	tests for parent.pm
+lib/parent/t/compile-time.t	tests for parent.pm
+lib/parent/t/lib/Dummy2.plugin	test files for parent.pm
+lib/parent/t/lib/Dummy.pm	test files for parent.pm
+lib/parent/t/lib/Dummy/Outside.pm	test files for parent.pm
+lib/parent/t/lib/FileThatOnlyExistsAsPMC.pmc	test files for parent.pm
+lib/parent/t/lib/ReturnsFalse.pm	test files for parent.pm
+lib/parent/t/parent-classfromclassfile.t	tests for parent.pm
+lib/parent/t/parent-classfromfile.t	tests for parent.pm
+lib/parent/t/parent-pmc.t	tests for parent.pm
+lib/parent/t/parent-returns-false.t	tests for parent.pm
+lib/parent/t/parent.t	tests for parent.pm
 lib/perl5db.pl			Perl debugging routines
 lib/perl5db.t			Tests for the Perl debugger
 lib/perl5db/t/eval-line-bug	Tests for the Perl debugger
