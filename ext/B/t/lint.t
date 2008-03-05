@@ -16,6 +16,8 @@ BEGIN {
     }
     require 'test.pl';
 }
+use strict;
+use warnings;
 
 plan tests => 29;
 
@@ -29,7 +31,7 @@ sub runlint ($$$;$) {
         stderr   => 1,
     );
     $res =~ s/-e syntax OK\n$//;
-    local $Level = $Level + 1;
+    local $::Level = $::Level + 1;
     is( $res, $result, $testname || $opts );
 }
 
