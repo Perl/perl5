@@ -28,6 +28,207 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.9		Maintenance release working toward v5.8.9
 --------------
 ____________________________________________________________________________
+[ 33444] By: nicholas				   on 2008/03/05  15:30:36
+	Log: Integrate:
+	     [ 33443]
+	     Integrate:
+	     [ 33437]
+	     Three variables in S_scan_trans only hold flags for op_private, so can
+	     be U8.
+     Branch: maint-5.8/perl
+	  !> toke.c
+____________________________________________________________________________
+[ 33441] By: nicholas				   on 2008/03/05  09:39:26
+	Log: Silence a "possible loss of data" warning from a Win32 compiler.
+     Branch: maint-5.8/perl
+	   ! hv.h
+____________________________________________________________________________
+[ 33436] By: nicholas				   on 2008/03/04  19:54:13
+	Log: Integrate:
+	     [ 28863]
+	     Fix one genuine unitialised code path spotted by gcc, and a signed/
+	     unsigned warning.
+	     
+	     [the "genuine unitialised code path" somehow was not integrated by
+	     change 30040. I suspect a conflict in the other hunk forced a hand
+	     edit, and I made a mistake.]
+     Branch: maint-5.8/perl
+	  !> doio.c
+____________________________________________________________________________
+[ 33435] By: nicholas				   on 2008/03/04  19:15:14
+	Log: Subject: RE: Perl @ 33218
+	     From: "Steve Hay" <SteveHay@planit.com>
+	     Message-ID: <1B32FF956ABF414C9BCE5E487A1497E701680811@ukmail02.planit.group>
+	     Date: Tue, 4 Mar 2008 18:04:09 -0000
+     Branch: maint-5.8/perl
+	   ! regcomp.c sv.c
+____________________________________________________________________________
+[ 33432] By: nicholas				   on 2008/03/04  15:39:10
+	Log: Revert change 32689 (integrated as 33202) which is causing compiler
+	     warnings in maint-5.8.
+     Branch: maint-5.8/perl
+	   ! cygwin/cygwin.c
+____________________________________________________________________________
+[ 33430] By: nicholas				   on 2008/03/04  00:14:47
+	Log: Effectively re-integrate a hunk of 28626, identified by Steve Hay as
+	     being missing. (Changes 28626 and 28786 were integrated out of order
+	     as 30040 and 30051, and it seems that I made a mistake in resolving
+	     the conflicts)
+     Branch: maint-5.8/perl
+	   ! pp.c
+____________________________________________________________________________
+[ 33429] By: nicholas				   on 2008/03/03  23:14:19
+	Log: Integrate:
+	     [ 24096]
+	     Clean-up some warnings when compiling on Win32 with VC++
+     Branch: maint-5.8/perl
+	  !> pp_pack.c
+____________________________________________________________________________
+[ 33428] By: nicholas				   on 2008/03/03  21:34:54
+	Log: Restore the cast accidentally removed by change 30141.
+     Branch: maint-5.8/perl
+	   ! util.c
+____________________________________________________________________________
+[ 33427] By: nicholas				   on 2008/03/03  21:11:06
+	Log: Cast away const for the argument to PerlLIOUtime(), as I'd prefer to do
+	     this than change the prototype of a visible and linked-to symbol.
+     Branch: maint-5.8/perl
+	   ! doio.c
+____________________________________________________________________________
+[ 33426] By: nicholas				   on 2008/03/03  21:04:03
+	Log: Reverse change 30326. (Steve Hay says that it's safe to go back in now)
+     Branch: maint-5.8/perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[ 33425] By: nicholas				   on 2008/03/03  20:18:22
+	Log: Subject: RE: Perl @ 33218 (Stratus VOS patches)
+	     From: "Green, Paul" <Paul.Green@stratus.com>
+	     Message-ID: <F5F42E77A43DD944B6D664B00A5401CB037149FF@EXNA.corp.stratus.com>
+	     Date: Fri, 8 Feb 2008 12:36:03 -0500
+	     
+	     [the 5.8.x specific patch]
+     Branch: maint-5.8/perl
+	   ! README.vos
+____________________________________________________________________________
+[ 33424] By: nicholas				   on 2008/03/03  19:47:15
+	Log: When integrating changes 28351 and 28469 out of order as changes 30004
+	     and 30163, a hunk of code that 28351 introduced and 28469 moved became
+	     duplicated. Remove the duplication, which is just a variable
+	     declaration.
+     Branch: maint-5.8/perl
+	   ! mg.c
+____________________________________________________________________________
+[ 33422] By: nicholas				   on 2008/03/03  19:18:36
+	Log: Correct mistake made in change 30230 - fp_dup is not 'R'
+     Branch: maint-5.8/perl
+	   ! embed.fnc proto.h
+____________________________________________________________________________
+[ 33421] By: nicholas				   on 2008/03/03  18:51:59
+	Log: Re-run regen.pl, which picked up a few things that I missed.
+     Branch: maint-5.8/perl
+	   ! embed.h embedvar.h proto.h
+____________________________________________________________________________
+[ 33420] By: nicholas				   on 2008/03/03  18:29:06
+	Log: Silience all warnings about unused arguments in the stub
+	     S_vdie_common().
+     Branch: maint-5.8/perl
+	   ! mathoms.c
+____________________________________________________________________________
+[ 33419] By: nicholas				   on 2008/03/03  18:06:56
+	Log: Integrate:
+	     [ 28536]
+	     Restoring change #28523 accidentilly reverted with change #28528.
+     Branch: maint-5.8/perl
+	  !> doio.c
+____________________________________________________________________________
+[ 33418] By: nicholas				   on 2008/03/03  18:03:36
+	Log: Reverse two cast changes mistakenly integrated as part of change 29962.
+     Branch: maint-5.8/perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 33417] By: nicholas				   on 2008/03/03  15:53:24
+	Log: Fix compiler warnings about signed/unsigned in conditionals in sv.c
+	     Two are due to integer promotion of U8 in CopHINTS_get(); the
+	     equivalent structure member in blead is U32.
+	     The other two were effectively eliminated on the way to 5.10 by change
+	     24802 (Shrink shared hash scalars from PVIV to PV).
+     Branch: maint-5.8/perl
+	   ! cop.h sv.c
+____________________________________________________________________________
+[ 33415] By: nicholas				   on 2008/03/03  14:58:37
+	Log: Add missing const to the regdupe entry of struct regexp_engine.
+	     (Which the gcc I was using then didn't pick up on)
+	     Fix a typo in a comment.
+     Branch: maint-5.8/perl
+	   ! ext/re/re.xs
+____________________________________________________________________________
+[ 33413] By: nicholas				   on 2008/03/03  11:12:18
+	Log: Integrate:
+	     [ 33412]
+	     Integrate:
+	     [ 33401]
+	     Make ext/POSIX/t/sysconf.t use File::Spec->tmpdir() for pathconf/
+	     fpathconf testing rather than ->curdir(), as the latter can be on
+	     networked storage that fails the syscall (and the tests).
+     Branch: maint-5.8/perl
+	  !> ext/POSIX/t/sysconf.t
+____________________________________________________________________________
+[ 33351] By: nicholas				   on 2008/02/22  18:34:25
+	Log: Integrate:
+	     [ 32353]
+	     Silence ill-behaved Test::Harness test on VMS.
+	     
+	     [ 33348]
+	     Integrate:
+	     [ 33274]
+	     Make fs.t compare the permissions of a link with those
+	     of the linked file rather than guessing at system defaults.
+     Branch: maint-5.8/perl
+	  !> lib/Test/Harness/t/failure.t t/io/fs.t
+____________________________________________________________________________
+[ 33243] By: nicholas				   on 2008/02/06  23:52:16
+	Log: Restore the regex positive super-linear cache, as it turns out that
+	     some patterns do actually benefit from it. (See
+	     http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2008-01/msg01314.html )
+	     
+	     Reverses the code change of 30620 (the tests it added still pass):
+	     
+	     Integrate:
+	     [ 28571]
+	     remove regex postive super-linear cache code
+	     (it wasn't actually achieving anything)
+     Branch: maint-5.8/perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 33240] By: craigb				   on 2008/02/06  03:21:15
+	Log: VMS glob() fix-ups adapted for maint-5.8 from 30813 and 32329.
+     Branch: maint-5.8/perl
+	   ! doio.c
+____________________________________________________________________________
+[ 33225] By: nicholas				   on 2008/02/03  13:56:33
+	Log: Integrate:
+	     [ 33224]
+	     Integrate:
+	     [ 33222]
+	     Upgrade to Math::Complex 1.48 and Math::Trig 1.13
+     Branch: maint-5.8/perl
+	  !> lib/Math/Complex.pm lib/Math/Complex.t lib/Math/Trig.pm
+	  !> lib/Math/Trig.t
+____________________________________________________________________________
+[ 33221] By: nicholas				   on 2008/02/03  00:56:15
+	Log: Integrate:
+	     [ 33220]
+	     Integrate:
+	     [ 32791]
+	     Fix VMS::Stdio bug introduced in 32713.
+     Branch: maint-5.8/perl
+	  !> vms/ext/Stdio/Stdio.xs
+____________________________________________________________________________
+[ 33219] By: nicholas				   on 2008/02/02  23:07:14
+	Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 33218] By: nicholas				   on 2008/02/02  22:49:10
 	Log: Naff orf, stowaway.
      Branch: maint-5.8/perl
