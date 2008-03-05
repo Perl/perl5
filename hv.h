@@ -228,7 +228,7 @@ C<SV*>.
 #define HvUSEDKEYS(hv)		XHvUSEDKEYS((XPVHV*)  SvANY(hv))
 #define HvTOTALKEYS(hv)		XHvTOTALKEYS((XPVHV*)  SvANY(hv))
 #define HvPLACEHOLDERS(hv)	(XHvPLACEHOLDERS((XPVHV*)  SvANY(hv)))
-#define HvPLACEHOLDERS_get(hv)	(0 + XHvPLACEHOLDERS((XPVHV*)  SvANY(hv)))
+#define HvPLACEHOLDERS_get(hv)	(0 + (I32)XHvPLACEHOLDERS((XPVHV*) SvANY(hv)))
 #define HvPLACEHOLDERS_set(hv, p)	\
 	(XHvPLACEHOLDERS((XPVHV*)  SvANY(hv)) = (p))
 
