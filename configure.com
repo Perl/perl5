@@ -5528,6 +5528,73 @@ $   GOSUB compile
 $   nv_preserves_uv_bits = tmp
 $ ENDIF
 $!
+$ nv_overflows_integers_at = "0"
+$ echo4 "Checking to find the largest integer value your NVs can hold..."
+$ OS
+$ WS "#include <stdio.h>"
+$ WS ""
+$ WS "typedef ''nvtype' NV;"
+$ WS ""
+$ WS "int"
+$ WS "main() {"
+$ WS "  NV value = 2;"
+$ WS "  int count = 1;"
+$ WS ""
+$ WS "  while(count < 256) {"
+$ WS "    volatile NV up = value + 1.0;"
+$ WS "    volatile NV negated = -value;"
+$ WS "    volatile NV down = negated - 1.0;"
+$ WS "    volatile NV got_up = up - value;"
+$ WS "    int up_good = got_up == 1.0;"
+$ WS "    int got_down = down - negated;"
+$ WS "    int down_good = got_down == -1.0;"
+$ WS ""
+$ WS "    if (down_good != up_good) {"
+$ WS "      fprintf(stderr,"
+$ WS "              ""Inconsistency - up %d %f; down %d %f; for 2**%d (%.20f)\n"","
+$ WS "              up_good, (double) got_up, down_good, (double) got_down,"
+$ WS "              count, (double) value);"
+$ WS "      return 1;"
+$ WS "    }"
+$ WS "    if (!up_good) {"
+$ WS "      while (1) {"
+$ WS "        if (count > 8) {"
+$ WS "          count -= 8;"
+$ WS "          fputs(""256.0"", stdout);"
+$ WS "        } else {"
+$ WS "          count--;"
+$ WS "          fputs(""2.0"", stdout);"
+$ WS "        }"
+$ WS "        if (!count) {"
+$ WS "          puts("""");"
+$ WS "          return 0;"
+$ WS "        }"
+$ WS "        fputs(""*"", stdout);"
+$ WS "      }"
+$ WS "    }"
+$ WS "    value *= 2;"
+$ WS "    ++count;"
+$ WS "  }"
+$ WS "  fprintf(stderr, ""Cannot overflow integer range, even at 2**%d (%.20f)\n"","
+$ WS "          count, (double) value);"
+$ WS "  return 1;"
+$ WS "}"
+$ CS
+$ GOSUB compile
+$ IF F$LENGTH(tmp) .GT. 0
+$ THEN
+$   IF F$EXTRACT(0,1,tmp) .EQS. "2"
+$   THEN
+$     echo "The largest integer your NVs can preserve is equal to ''tmp'"
+$     nv_overflows_integers_at = tmp
+$   ELSE
+$     echo "Cannot determine the largest integer value your NVs can hold, unexpected output"
+$     echo "''tmp'"
+$   ENDIF
+$ ELSE
+$   echo "Cannot determine the largest integer value your NVs can hold"
+$ ENDIF
+$!
 $! Check for signbit (must already know nvtype)
 $!
 $ echo4 "Checking to see if you have signbit() available to work on ''nvtype'..."
@@ -5935,8 +6002,7 @@ $ WC "d_nanosleep='" + d_nanosleep + "'"
 $ WC "d_nice='define'"
 $ WC "d_nl_langinfo='" + d_nl_langinfo + "'"
 $ WC "d_nv_preserves_uv='" + d_nv_preserves_uv + "'"
-$! Pending integrating the probe test
-$ WC "nv_overflows_integers_at='0'"
+$ WC "nv_overflows_integers_at='" + nv_overflows_integers_at + "'"
 $ WC "nv_preserves_uv_bits='" + nv_preserves_uv_bits + "'"
 $ WC "d_nv_zero_is_allbits_zero='define'"
 $ WC "d_off64_t='" + d_off64_t + "'"
