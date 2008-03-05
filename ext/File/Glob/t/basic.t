@@ -39,13 +39,13 @@ if (GLOB_ERROR) {
 # should return a list with one item, and not set ERROR
 SKIP: {
     my ($name, $home);
-    skip $^O if $^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS'
+    skip $^O, 1 if $^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS'
 	|| $^O eq 'os2' || $^O eq 'beos';
-    skip "Can't find user for $>: $@" unless eval {
+    skip "Can't find user for $>: $@", 1 unless eval {
 	($name, $home) = (getpwuid($>))[0,7];
 	1;
     };
-    skip "$> has no home directory"
+    skip "$> has no home directory", 1
 	unless defined $home && defined $name && -d $home;
 
     @a = bsd_glob("~$name", GLOB_TILDE);
@@ -71,17 +71,17 @@ if (GLOB_ERROR) {
 # XXX since errfunc is NULL on win32, this test is not valid there
 @a = bsd_glob("asdfasdf", 0);
 SKIP: {
-    skip $^O if $^O eq 'MSWin32' || $^O eq 'NetWare';
+    skip $^O, 1 if $^O eq 'MSWin32' || $^O eq 'NetWare';
     is_deeply(\@a, []);
 }
 
 # check bad protections
 # should return an empty list, and set ERROR
 SKIP: {
-    skip $^O if $^O eq 'mpeix' or $^O eq 'MSWin32' or $^O eq 'NetWare'
+    skip $^O, 2 if $^O eq 'mpeix' or $^O eq 'MSWin32' or $^O eq 'NetWare'
 	or $^O eq 'os2' or $^O eq 'VMS' or $^O eq 'cygwin';
-    skip "AFS" if Cwd::cwd() =~ m#^$Config{'afsroot'}#s;
-    skip "running as root" if not $>;
+    skip "AFS", 2 if Cwd::cwd() =~ m#^$Config{'afsroot'}#s;
+    skip "running as root", 2 if not $>;
 
     my $dir = "pteerslo";
     mkdir $dir, 0;
@@ -115,7 +115,7 @@ is_deeply(\@a, [($^O eq 'VMS'? 'test.' : 'TEST'), 'a', 'b']);
 $ENV{HOME} = "sweet home";
 @a = bsd_glob('~', GLOB_TILDE | GLOB_NOMAGIC);
 SKIP: {
-    skip $^O if $^O eq "MacOS";
+    skip $^O, 1 if $^O eq "MacOS";
     is_deeply(\@a, [$ENV{HOME}]);
 }
 
