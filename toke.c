@@ -11000,9 +11000,9 @@ S_scan_trans(pTHX_ char *start)
     register char* s;
     OP *o;
     short *tbl;
-    I32 squash;
-    I32 del;
-    I32 complement;
+    U8 squash;
+    U8 del;
+    U8 complement;
 #ifdef PERL_MAD
     char *modstart;
 #endif
