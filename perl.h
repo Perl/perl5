@@ -4649,7 +4649,7 @@ typedef regexp*(CPERLscope(*regdupe_t)) (pTHX_ const regexp* r, CLONE_PARAMS *pa
 typedef void (*DESTRUCTORFUNC_NOCONTEXT_t) (void*);
 typedef void (*DESTRUCTORFUNC_t) (pTHX_ void*);
 typedef void (*SVFUNC_t) (pTHX_ SV* const);
-typedef I32  (*SVCOMPARE_t) (pTHX_ SV*, SV*);
+typedef I32  (*SVCOMPARE_t) (pTHX_ SV* const, SV* const);
 typedef void (*XSINIT_t) (pTHX);
 typedef void (*ATEXIT_t) (pTHX_ void*);
 typedef void (*XSUBADDR_t) (pTHX_ CV *);

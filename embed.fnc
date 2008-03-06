@@ -1379,15 +1379,15 @@ sR	|SV*	|method_common	|NN SV* meth|NULLOK U32* hashp
 #endif
 
 #if defined(PERL_IN_PP_SORT_C) || defined(PERL_DECL_PROT)
-s	|I32	|sv_ncmp	|NN SV *a|NN SV *b
-s	|I32	|sv_i_ncmp	|NN SV *a|NN SV *b
-s	|I32	|amagic_ncmp	|NN SV *a|NN SV *b
-s	|I32	|amagic_i_ncmp	|NN SV *a|NN SV *b
-s	|I32	|amagic_cmp	|NN SV *str1|NN SV *str2
-s	|I32	|amagic_cmp_locale|NN SV *str1|NN SV *str2
-s	|I32	|sortcv		|NN SV *a|NN SV *b
-s	|I32	|sortcv_xsub	|NN SV *a|NN SV *b
-s	|I32	|sortcv_stacked	|NN SV *a|NN SV *b
+s	|I32	|sv_ncmp	|NN SV *const a|NN SV *const b
+s	|I32	|sv_i_ncmp	|NN SV *const a|NN SV *const b
+s	|I32	|amagic_ncmp	|NN SV *const a|NN SV *const b
+s	|I32	|amagic_i_ncmp	|NN SV *const a|NN SV *const b
+s	|I32	|amagic_cmp	|NN SV *const str1|NN SV *const str2
+s	|I32	|amagic_cmp_locale|NN SV *const str1|NN SV *const str2
+s	|I32	|sortcv		|NN SV *const a|NN SV *const b
+s	|I32	|sortcv_xsub	|NN SV *const a|NN SV *const b
+s	|I32	|sortcv_stacked	|NN SV *const a|NN SV *const b
 s	|void	|qsortsvu	|NULLOK SV** array|size_t num_elts|NN SVCOMPARE_t compare
 #endif
 
