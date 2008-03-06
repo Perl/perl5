@@ -170,16 +170,35 @@ Perl_newGP(pTHX_ GV *const gv)
     GP *gp;
     const char *const file
 	= (PL_curcop && CopFILE(PL_curcop)) ? CopFILE(PL_curcop) : "";
-    Newxz(gp, 1, GP);
+
+#ifdef USE_ITHREADS
+    if (PL_curcop && PL_curcop->op_flags & OPf_COP_TEMP) {
+	/* The COP's CopFILE is likely to go away soon, so we can't simply point
+	   to it. There is no provision to free memory at GP destruction, so we
+	   cheat wholesale and store it within the same memory as is allocated
+	   for the GP itself. This hack isn't needed in 5.10 and later, where
+	   the char *gp_file has been replaced by a (reference counted) pointer
+	   to a shared hash key.  */
+	const STRLEN len = strlen(file) +  1;
+
+	Newxc(gp, sizeof(GP) + len, char, GP);
+	Zero(gp, 1, GP);
+	gp->gp_file = (char *) gp + 1;
+	Copy(file, gp + 1, len, char);
+    } else
+#endif
+    {
+	Newxz(gp, 1, GP);
+	/* XXX Ideally this cast would be replaced with a change to const char*
+	   in the struct.  */
+	gp->gp_file = (char *) file;
+    }
 
 #ifndef PERL_DONT_CREATE_GVSV
     gp->gp_sv = newSV(0);
 #endif
 
     gp->gp_line = PL_curcop ? CopLINE(PL_curcop) : 0;
-    /* XXX Ideally this cast would be replaced with a change to const char*
-       in the struct.  */
-    gp->gp_file = (char *) file;
     gp->gp_egv = gv;
     gp->gp_refcnt = 1;
 

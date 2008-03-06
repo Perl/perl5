@@ -79,6 +79,10 @@ Deprecated.  Use C<GIMME_V> instead.
 				/*  (Or block needs explicit scope entry.) */
 #define OPf_REF		16	/* Certified reference. */
 				/*  (Return container, not containee). */
+#define OPf_COP_TEMP	16	/* COP is likely to get freed soon.
+				   This is only used with ithreads, but isn't a
+				   conditional compile, else ext/B/defsubs.h
+				   gets confused. */
 #define OPf_MOD		32	/* Will modify (lvalue). */
 #define OPf_STACKED	64	/* Some arg is arriving on the stack. */
 #define OPf_SPECIAL	128	/* Do something weird for this op: */

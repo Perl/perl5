@@ -1404,7 +1404,8 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	}
     }
     else if (type != OP_GREPSTART && type != OP_ENTERSUB
-             && type != OP_LEAVESUBLV)
+             && type != OP_LEAVESUBLV && type != OP_NEXTSTATE
+	     && type != OP_SETSTATE && type != OP_DBSTATE)
 	o->op_flags |= OPf_REF;
     return o;
 }

@@ -204,7 +204,11 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 #  define SAVECOPSTASH(c)	SAVEPPTR(CopSTASHPV(c))
 #  define SAVECOPSTASH_FREE(c)	SAVESHAREDPV(CopSTASHPV(c))
 #  define SAVECOPFILE(c)	SAVEPPTR(CopFILE(c))
-#  define SAVECOPFILE_FREE(c)	SAVESHAREDPV(CopFILE(c))
+#  define SAVECOPFILE_FREE(c)	STMT_START {	\
+	SAVESHAREDPV(CopFILE(c));		\
+	SAVEI8((c)->op_flags);			\
+	(c)->op_flags |= OPf_COP_TEMP;		\
+    } STMT_END
 #else
 #  define SAVECOPSTASH(c)	SAVESPTR(CopSTASH(c))
 #  define SAVECOPSTASH_FREE(c)	SAVECOPSTASH(c)	/* XXX not refcounted */
