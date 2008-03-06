@@ -801,8 +801,6 @@ PP(pp_rv2av)
 {
     dVAR; dSP; dTOPss;
     const I32 gimme = GIMME_V;
-    static const char return_array_to_lvalue_scalar[] = "Can't return array to lvalue scalar context";
-    static const char return_hash_to_lvalue_scalar[] = "Can't return hash to lvalue scalar context";
     static const char an_array[] = "an ARRAY";
     static const char a_hash[] = "a HASH";
     const bool is_pp_rv2av = PL_op->op_type == OP_RV2AV;
@@ -821,8 +819,7 @@ PP(pp_rv2av)
 	}
 	else if (LVRET) {
 	    if (gimme != G_ARRAY)
-		Perl_croak(aTHX_ is_pp_rv2av ? return_array_to_lvalue_scalar
-			   : return_hash_to_lvalue_scalar);
+		goto croak_cant_return;
 	    SETs(sv);
 	    RETURN;
 	}
@@ -838,9 +835,7 @@ PP(pp_rv2av)
 	    }
 	    else if (LVRET) {
 		if (gimme != G_ARRAY)
-		    Perl_croak(aTHX_
-			       is_pp_rv2av ? return_array_to_lvalue_scalar
-			       : return_hash_to_lvalue_scalar);
+		    goto croak_cant_return;
 		SETs(sv);
 		RETURN;
 	    }
@@ -871,9 +866,7 @@ PP(pp_rv2av)
 	    }
 	    else if (LVRET) {
 		if (gimme != G_ARRAY)
-		    Perl_croak(aTHX_
-			       is_pp_rv2av ? return_array_to_lvalue_scalar
-			       : return_hash_to_lvalue_scalar);
+		    goto croak_cant_return;
 		SETs(sv);
 		RETURN;
 	    }
@@ -923,6 +916,10 @@ PP(pp_rv2av)
     }
     }
     RETURN;
+
+ croak_cant_return:
+    Perl_croak(aTHX_ "Can't return %s to lvalue scalar context",
+	       is_pp_rv2av ? "array" : "hash");
 }
 
 STATIC void
