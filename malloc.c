@@ -2463,7 +2463,7 @@ Perl_get_mstats(pTHX_ perl_mstats_t *buf, int buflen, int level)
  * frees for each size category.
  */
 void
-Perl_dump_mstats(pTHX_ char *s)
+Perl_dump_mstats(pTHX_ const char *s)
 {
 #ifdef DEBUGGING_MSTATS
   	register int i;

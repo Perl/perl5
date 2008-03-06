@@ -1015,7 +1015,7 @@ p	|int	|yyparse
 p	|void	|parser_free	|NN const yy_parser *parser
 p	|int	|yywarn		|NN const char *const s
 #if defined(MYMALLOC)
-Ap	|void	|dump_mstats	|NN char* s
+Ap	|void	|dump_mstats	|NN const char* s
 Ap	|int	|get_mstats	|NN perl_mstats_t *buf|int buflen|int level
 #endif
 Anpa	|Malloc_t|safesysmalloc	|MEM_SIZE nbytes

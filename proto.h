@@ -3710,7 +3710,7 @@ PERL_CALLCONV int	Perl_yywarn(pTHX_ const char *const s)
 	assert(s)
 
 #if defined(MYMALLOC)
-PERL_CALLCONV void	Perl_dump_mstats(pTHX_ char* s)
+PERL_CALLCONV void	Perl_dump_mstats(pTHX_ const char* s)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_DUMP_MSTATS	\
 	assert(s)
