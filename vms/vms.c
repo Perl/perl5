@@ -10433,7 +10433,7 @@ Perl_my_flush(pTHX_ FILE *fp)
     if ((res = fflush(fp)) == 0 && fp) {
 #ifdef VMS_DO_SOCKETS
 	Stat_t s;
-	if (Fstat(fileno(fp), &s) == 0 && !S_ISSOCK(s.st_mode))
+	if (fstat(fileno(fp), (stat_t *)&s) == 0 && !S_ISSOCK(s.st_mode))
 #endif
 	    res = fsync(fileno(fp));
     }
