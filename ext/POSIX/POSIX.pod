@@ -1131,35 +1131,6 @@ Returns C<undef> on failure.  The C<signal> must be a number (like
 SIGHUP), not a string (like "SIGHUP"), though Perl does try hard
 to understand you.
 
-If you use the SA_SIGINFO flag, the signal handler will in addition to
-the first argument, the signal name, also receive a second argument, a
-hash reference, inside which are the following keys with the following
-semantics, as defined by POSIX/SUSv3:
-
-    signo       the signal number
-    errno       the error number
-    code        if this is zero or less, the signal was sent by
-                a user process and the uid and pid make sense,
-                otherwise the signal was sent by the kernel
-
-The following are also defined by POSIX/SUSv3, but unfortunately
-not very widely implemented:
-
-    pid         the process id generating the signal
-    uid         the uid of the process id generating the signal
-    status      exit value or signal for SIGCHLD
-    band        band event for SIGPOLL
-
-A third argument is also passed to the handler, which contains a copy
-of the raw binary contents of the siginfo structure: if a system has
-some non-POSIX fields, this third argument is where to unpack() them
-from.
-
-Note that not all siginfo values make sense simultaneously (some are
-valid only for certain signals, for example), and not all values make
-sense from Perl perspective, you should to consult your system's
-C<sigaction> and possibly also C<siginfo> documentation.
-
 =item siglongjmp
 
 siglongjmp() is C-specific: use L<perlfunc/die> instead.

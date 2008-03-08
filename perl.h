@@ -2498,18 +2498,6 @@ typedef struct clone_params CLONE_PARAMS;
 #endif
 /* <-- NSIG logic from Configure */
 
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-#  ifdef PERL_CORE
-#    define sighandler		Perl_sighandler_va
-#  endif
-#  define csighandler		Perl_csighandler_va
-#else
-#  ifdef PERL_CORE
-#    define sighandler		Perl_sighandler
-#  endif
-#  define csighandler		Perl_csighandler
-#endif
-
 #ifndef NO_ENVIRON_ARRAY
 #  define USE_ENVIRON_ARRAY
 #endif

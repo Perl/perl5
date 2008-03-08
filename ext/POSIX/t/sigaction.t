@@ -16,7 +16,7 @@ BEGIN{
 	}
 }
 
-use Test::More tests => 31;
+use Test::More tests => 30;
 
 use strict;
 use vars qw/$bad $bad7 $ok10 $bad18 $ok/;
@@ -192,17 +192,6 @@ SKIP: {
     is($SIGRT{SIGRTMIN}, $h, "handler set & get");
     kill 'SIGRTMIN', $$;
     is($sigrtmin, 1, "SIGRTMIN handler works");
-}
-
-SKIP: {
-    eval 'use POSIX qw(SA_SIGINFO); SA_SIGINFO';
-    skip("no SA_SIGINFO", 1) if $@;
-    sub hiphup {
-	is($_[1]->{signo}, SIGHUP, "SA_SIGINFO got right signal");
-    }
-    my $act = POSIX::SigAction->new('hiphup', 0, SA_SIGINFO);
-    sigaction(SIGHUP, $act);
-    kill 'HUP', $$;
 }
 
 eval { sigaction(-999, "foo"); };

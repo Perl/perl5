@@ -51,11 +51,7 @@
 #include "perlio.h"
 
 #ifndef Sighandler_t
-#  if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-typedef Signal_t (*Sighandler_t) (int, ...);
-#  else
 typedef Signal_t (*Sighandler_t) (int);
-#  endif
 #endif
 
 #if defined(PERL_IMPLICIT_SYS)

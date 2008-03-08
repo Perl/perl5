@@ -55,9 +55,6 @@ tie.
 #  include <sys/pstat.h>
 #endif
 
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-Signal_t Perl_csighandler_va(int sig, ...);
-#endif
 Signal_t Perl_csighandler(int sig);
 
 /* if you only have signal() and it resets on each signal, FAKE_PERSISTENT_SIGNAL_HANDLERS fixes */
@@ -1351,25 +1348,12 @@ S_raise_signal(pTHX_ int sig)
 }
 
 Signal_t
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 Perl_csighandler(int sig)
-{
-    Perl_csighandler_va(sig);
-}
-
-Signal_t
-Perl_csighandler_va(int sig, ...)
-#else
-Perl_csighandler(int sig)
-#endif
 {
 #ifdef PERL_GET_SIG_CONTEXT
     dTHXa(PERL_GET_SIG_CONTEXT);
 #else
     dTHX;
-#endif
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-   va_list args;
 #endif
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
     (void) rsignal(sig, PL_csighandlerp);
@@ -1382,9 +1366,6 @@ Perl_csighandler(int sig)
 #else
             exit(1);
 #endif
-#endif
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-   va_start(args, sig);
 #endif
    if (
 #ifdef SIGILL
@@ -1402,9 +1383,6 @@ Perl_csighandler(int sig)
 	(*PL_sighandlerp)(sig);
    else
 	S_raise_signal(aTHX_ sig);
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-   va_end(args);
-#endif
 }
 
 #if defined(FAKE_PERSISTENT_SIGNAL_HANDLERS) || defined(FAKE_DEFAULT_SIGNAL_HANDLERS)
@@ -2773,17 +2751,7 @@ static SV* PL_sig_sv;
 #endif
 
 Signal_t
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 Perl_sighandler(int sig)
-{
-    Perl_sighandler_va(sig);
-}
-
-Signal_t
-Perl_sighandler_va(int sig, ...)
-#else
-Perl_sighandler(int sig)
-#endif
 {
 #ifdef PERL_GET_SIG_CONTEXT
     dTHXa(PERL_GET_SIG_CONTEXT);
@@ -2859,40 +2827,6 @@ Perl_sighandler(int sig)
     PUSHSTACKi(PERLSI_SIGNAL);
     PUSHMARK(SP);
     PUSHs(sv);
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-    {
-	 struct sigaction oact;
-
-	 if (sigaction(sig, 0, &oact) == 0 && oact.sa_flags & SA_SIGINFO) {
-	      siginfo_t *sip;
-	      va_list args;
-
-	      va_start(args, sig);
-	      sip = (siginfo_t*)va_arg(args, siginfo_t*);
-	      if (sip) {
-		   HV *sih = newHV();
-		   SV *rv  = newRV_noinc((SV*)sih);
-		   /* The siginfo fields signo, code, errno, pid, uid,
-		    * addr, status, and band are defined by POSIX/SUSv3. */
-		   (void)hv_stores(sih, "signo", newSViv(sip->si_signo));
-		   (void)hv_stores(sih, "code", newSViv(sip->si_code));
-#if 0 /* XXX TODO: Configure scan for the existence of these, but even that does not help if the SA_SIGINFO is not implemented according to the spec. */
-		   hv_stores(sih, "errno",      newSViv(sip->si_errno));
-		   hv_stores(sih, "status",     newSViv(sip->si_status));
-		   hv_stores(sih, "uid",        newSViv(sip->si_uid));
-		   hv_stores(sih, "pid",        newSViv(sip->si_pid));
-		   hv_stores(sih, "addr",       newSVuv(PTR2UV(sip->si_addr)));
-		   hv_stores(sih, "band",       newSViv(sip->si_band));
-#endif
-		   EXTEND(SP, 2);
-		   PUSHs((SV*)rv);
-		   PUSHs(newSVpvn((char *)sip, sizeof(*sip)));
-	      }
-
-              va_end(args);
-	 }
-    }
-#endif
     PUTBACK;
 
     call_sv((SV*)cv, G_DISCARD|G_EVAL);

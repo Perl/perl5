@@ -71,11 +71,7 @@ PERLVAR(Gsigfpe_saved,	Sighandler_t)
 PERLVAR(Gsv_placeholder, SV)
 
 #ifndef PERL_MICRO
-#  if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-PERLVARI(Gcsighandlerp,	Sighandler_t, Perl_csighandler_va)	/* Pointer to C-level sighandler */
-#else
 PERLVARI(Gcsighandlerp,	Sighandler_t, Perl_csighandler)	/* Pointer to C-level sighandler */
-#  endif
 #endif
 
 #ifndef PERL_USE_SAFE_PUTENV

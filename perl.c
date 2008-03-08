@@ -344,11 +344,7 @@ perl_construct(pTHXx)
     SvREADONLY_on(&PL_sv_placeholder);
     SvREFCNT(&PL_sv_placeholder) = (~(U32)0)/2;
 
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-	PL_sighandlerp = (Sighandler_t) Perl_sighandler_va;
-#else
-    PL_sighandlerp = (Sighandler_t) Perl_sighandler;
-#endif
+    PL_sighandlerp = Perl_sighandler;
     PL_pidstatus = newHV();
 
     PL_rs = newSVpvs("\n");
