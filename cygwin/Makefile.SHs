@@ -34,7 +34,15 @@ cygwin.c: cygwin/cygwin.c
 libperl=`echo $libperl|sed -e s,\\\..*,,`
 linklibperl=-l`echo $libperl|sed -e s,^lib,,`
 vers=`echo $version|tr '.' '_'`
-dllname=`echo $libperl|sed -e s,^lib,cyg,`$vers
+dllname=`echo $libperl|sed -e s,^lib,cyg,``echo $vers|sed -e s,_[0-9]$,,`
+# append "d" suffix to -DDEBUGGING build: cygperl5_10d.dll
+case $config_args in
+  *DEBUGGING*)
+      dllname="${dllname}"d
+      ;;
+esac
+# added -mms-bitfields to be able to link to MSVC win32 bitfields libs 
+# (4 byte instead of 2 byte alignment)
 
 $spitshell >>Makefile <<!GROK!THIS!
 LIBPERL = $libperl
@@ -42,6 +50,7 @@ LLIBPERL= $linklibperl
 DLLNAME= $dllname
 CLDFLAGS= -L$addtopath $ldflags
 LDDLFLAGS = --shared -L$addtopath $ldflags
+CCFLAGS=$ccflags -mms-bitfields 
 PLDLFLAGS = 
 CAT = $cat
 AWK = $awk
