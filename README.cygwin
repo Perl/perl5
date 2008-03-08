@@ -31,8 +31,7 @@ about this project can be found at:
 
 A recent net or commercial release of Cygwin is required.
 
-At the time this document was last updated, Cygwin 1.5.24 was current.
-
+At the time this document was last updated, Cygwin 1.5.25 was current.
 
 =head2 Cygwin Configuration
 
@@ -42,7 +41,7 @@ Perl usage.
 
 B<NOTE:> The binaries that are built will run on all Win32 versions.
 They do not depend on your host system (Win9x/WinME, WinNT/Win2K)
-or your Cygwin configuration (I<ntea>, I<ntsec>, binary/text mounts).
+or your Cygwin configuration (I<ntsec>, binary/text mounts).
 The only dependencies come from hard-coded pathnames like C</usr/local>.
 However, your host system and Cygwin configuration will affect Perl's
 runtime behavior (see L</"TEST">).
@@ -62,18 +61,18 @@ Configure will B<not> prompt you to install I<man> pages.
 
 =item * Permissions
 
-On WinNT with either the I<ntea> or I<ntsec> C<CYGWIN> settings, directory
+On WinNT with the default I<ntsec> C<CYGWIN> settings, directory
 and file permissions may not be set correctly.  Since the build process
 creates directories and files, to be safe you may want to run a
-C<chmod -R +w *> on the entire Perl source tree.
+C<chmod -R u+w *> on the entire Perl source tree.
 
 Also, it is a well known WinNT "feature" that files created by a login
 that is a member of the I<Administrators> group will be owned by the
 I<Administrators> group.  Depending on your umask, you may find that you
 can not write to files that you just created (because you are no longer
-the owner).  When using the I<ntsec> C<CYGWIN> setting, this is not an
-issue because it "corrects" the ownership to what you would expect on
-a UNIX system.
+the owner).  When using the default I<ntsec> C<CYGWIN> setting, this is 
+not an issue because it "corrects" the ownership to what you would expect 
+on a UNIX system.
 
 =back
 
@@ -81,7 +80,8 @@ a UNIX system.
 
 The default options gathered by Configure with the assistance of
 F<hints/cygwin.sh> will build a Perl that supports dynamic loading
-(which requires a shared F<libperl.dll>).
+which requires a shared F<cygperl5_8_x.dll> and the import library 
+libperl.dll.a.
 
 This will run Configure and keep a record:
 
@@ -93,7 +93,7 @@ However, several useful customizations are available.
 =head2 Stripping Perl Binaries on Cygwin
 
 It is possible to strip the EXEs and DLLs created by the build process.
-The resulting binaries will be significantly smaller.  If you want the
+The resulting binaries will be significantly smaller. If you want the
 binaries to be stripped, you can either add a B<-s> option when Configure
 prompts you,
 
@@ -156,6 +156,8 @@ and on Win9x the I<shm*()> functions seem to hang.  It also creates
 a compile time dependency because F<perl.h> includes F<<sys/ipc.h>>
 and F<<sys/sem.h>> (which will be required in the future when compiling
 CPAN modules). CURRENTLY NOT SUPPORTED!
+As with all C<cygserver> functions this requires the environment variable 
+CYGWIN to contain the magic string server.
 
 =item * C<-lutil>
 
@@ -195,7 +197,7 @@ more than one interpreter instance.  This works with the Cygwin port.
 =item * C<-Duse64bitint>
 
 By default Perl uses 32 bit integers.  If you want to use larger 64
-bit integers, define this symbol.
+bit integers, define this symbol. This is now the default.
 
 =item * C<-Duselongdouble>
 
@@ -228,19 +230,6 @@ way to build perl from sources.
 You may see some messages during Configure that seem suspicious.
 
 =over 4
-
-=item * I<dlsym()>
-
-I<ld2> is needed to build dynamic libraries, but it does not exist
-when C<dlsym()> checking occurs (it is not created until C<make> runs).
-You will see the following message:
-
-  Checking whether your C<dlsym()> needs a leading underscore ...
-  ld2: not found
-  I can't compile and run the test program.
-  I'm guessing that dlsym doesn't need a leading underscore.
-
-Since the guess is correct, this is not a problem.
 
 =item * Win9x and C<d_eofnblk>
 
@@ -286,18 +275,6 @@ Errors like these are normal:
   ...
   make: [extras.make] Error 1 (ignored)
 
-=head2 ld2 on Cygwin
-
-During C<make>, I<ld2> will be created and installed in your $installbin
-directory (where you said to put public executables).  It does not
-wait until the C<make install> process to install the I<ld2> script,
-this is because the remainder of the C<make> refers to I<ld2> without
-fully specifying its path and does this from multiple subdirectories.
-The assumption is that I<$installbin> is in your current C<PATH>. If this
-is not the case C<make> will fail at some point.  If this happens,
-just manually copy I<ld2> from the source directory to somewhere in
-your C<PATH>.
-
 =head1 TEST ON CYGWIN
 
 There are two steps to running the test suite:
@@ -315,6 +292,8 @@ attempted and explainable test failures are documented.  It is possible
 for Perl to pass all the tests, but it is more likely that some tests
 will fail for one of the reasons listed below.
 
+It is recommended to run the tests with CYGWIN=server PERLIO=perlio.
+
 =head2 File Permissions on Cygwin
 
 UNIX file permissions are based on sets of mode bits for
@@ -322,8 +301,9 @@ UNIX file permissions are based on sets of mode bits for
 only tracks the Win32 read-only attribute represented as the UNIX file
 user write bit (files are always readable, files are executable if they
 have a F<.{com,bat,exe}> extension or begin with C<#!>, directories are
-always readable and executable).  On WinNT with the I<ntea> C<CYGWIN>
-setting, the additional mode bits are stored as extended file attributes.
+always readable and executable).  On Win95 on FAT with the default 
+I<ntea> C<CYGWIN> setting, the additional mode bits are stored as 
+extended file attributes.
 On WinNT with the default I<ntsec> C<CYGWIN> setting, permissions use the 
 standard WinNT security descriptors and access control lists. Without one of
 these options, these tests will fail (listing not updated yet):
@@ -400,9 +380,8 @@ For conversion we have C<Cygwin::win_to_posix_path()> and
 C<Cygwin::posix_to_win_path()>.
 
 Pathnames may not contain Unicode characters. C<Cygwin> still uses the
-ANSI API calls and no Unicode calls because of newlib deficiencies.
-There's an unofficial unicode patch for cygwin at 
-F<http://www.okisoft.co.jp/esc/utf8-cygwin/>
+ANSI API calls and no Wide API calls because of newlib deficiencies.
+Cygwin 1.7 will support wide characters in pathnames.
 
 =item * Text/Binary
 
@@ -595,8 +574,6 @@ be kept as clean as possible (listing not updated yet).
 =item Build, Configure, Make, Install
 
   cygwin/Makefile.SHs
-  cygwin/ld2.in
-  cygwin/perlld.in
   ext/IPC/SysV/hints/cygwin.pl
   ext/NDBM_File/hints/cygwin.pl
   ext/ODBM_File/hints/cygwin.pl
@@ -676,4 +653,4 @@ Jan Dubois <jand@activestate.com>.
 
 =head1 HISTORY
 
-Last updated: 2007-08-12
+Last updated: 2008-03-08
