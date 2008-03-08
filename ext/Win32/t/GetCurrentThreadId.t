@@ -3,11 +3,6 @@ use Config qw(%Config);
 use Test;
 use Win32;
 
-unless ($Config{ccflags} =~ /PERL_IMPLICIT_SYS/) {
-    print "1..0 # Skip: Test requires fork emulation\n";
-    exit 0;
-}
-
 plan tests => 1;
 
 if (my $pid = fork) {
@@ -17,4 +12,9 @@ if (my $pid = fork) {
 
 # This test relies on the implementation detail that the fork() emulation
 # uses the negative value of the thread id as a pseudo process id.
-ok(-$$, Win32::GetCurrentThreadId());
+if ($Config{ccflags} =~ /PERL_IMPLICIT_SYS/) {
+    ok(-$$, Win32::GetCurrentThreadId());
+} else {
+# here we just want to see something.
+    ok(Win32::GetCurrentThreadId() > 0);
+}
