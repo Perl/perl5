@@ -283,7 +283,7 @@ if (($Is_W32 and ! $Is_NetWare) or $Is_Cygwin) {
 
     if ($Is_Cygwin) {
 	$perldll = $libperl;
-	my $v_e_r_s = $ver; $v_e_r_s =~ tr/./_/;
+	my $v_e_r_s = substr($ver,0,-2); $v_e_r_s =~ tr/./_/;
 	$perldll =~ s/(\..*)?$/$v_e_r_s.$dlext/;
 	$perldll =~ s/^lib/cyg/;
     } else {
@@ -368,6 +368,7 @@ if ($d_dosuid) {
 # Install library files.
 
 my ($do_installarchlib, $do_installprivlib) = (0, 0);
+my $vershort = $Is_Cygwin ? substr($ver,0,-2) : $ver;
 
 mkpath($installprivlib, $verbose, 0777);
 mkpath($installarchlib, $verbose, 0777);
@@ -377,7 +378,7 @@ mkpath($installsitearch, $verbose, 0777) if ($installsitearch);
 if (chdir "lib") {
     $do_installarchlib = ! samepath($installarchlib, '.');
     $do_installprivlib = ! samepath($installprivlib, '.');
-    $do_installprivlib = 0 if $versiononly && !($installprivlib =~ m/\Q$ver/);
+    $do_installprivlib = 0 if $versiononly && !($installprivlib =~ m/\Q$vershort/);
 
     if ($do_installarchlib || $do_installprivlib) {
 	find(\&installlib, '.');
@@ -570,7 +571,7 @@ if ($versiononly) {
 # ($installprivlib/pods for cygwin).
 
 my $pod = ($Is_Cygwin || $Is_Darwin || $Is_VMS || $Is_W32) ? 'pods' : 'pod';
-if ( !$versiononly || ($installprivlib =~ m/\Q$ver/)) {
+if ( !$versiononly || ($installprivlib =~ m/\Q$vershort/)) {
     mkpath("${installprivlib}/$pod", $verbose, 0777);
 
     # If Perl 5.003's perldiag.pod is there, rename it.

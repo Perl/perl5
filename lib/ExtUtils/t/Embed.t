@@ -106,7 +106,7 @@ if ($^O eq 'VMS') {
     }
    }
    elsif ($^O eq 'cygwin') { # Cygwin needs the shared libperl copied
-     my $v_e_r_s = $Config{version};
+     my $v_e_r_s = substr($Config{version},0,-2);
      $v_e_r_s =~ tr/./_/;
      system("cp ../cygperl$v_e_r_s.dll ./");    # for test 1
    }
