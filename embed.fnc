@@ -1174,6 +1174,7 @@ s	|void	|usage		|NN const char *name
 so	|void	|validate_suid	|NN const char *validarg \
 				|int fdscript \
 				|bool suidscript|NN SV* linestr_sv
+#else
 so	|void	|validate_suid	|NN const char *validarg \
 				|NN const char *scriptname|int fdscript \
 				|NN SV* linestr_sv

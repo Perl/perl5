@@ -1692,6 +1692,7 @@ STATIC void	S_usage(pTHX_ const char *name);
 #ifdef DOSUID
 #  ifdef IAMSUID
 STATIC void	S_validate_suid(pTHX_ const char *validarg, int fdscript, bool suidscript, SV* linestr_sv);
+#else
 STATIC void	S_validate_suid(pTHX_ const char *validarg, const char *scriptname, int fdscript, SV* linestr_sv);
 #  endif
 #else

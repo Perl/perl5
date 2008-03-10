@@ -1176,6 +1176,7 @@
 #endif
 #ifdef DOSUID
 #  ifdef IAMSUID
+#else
 #  endif
 #else
 #  ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
@@ -3306,6 +3307,9 @@
 #endif
 #ifdef DOSUID
 #  ifdef IAMSUID
+#ifdef PERL_CORE
+#endif
+#else
 #ifdef PERL_CORE
 #endif
 #  endif
