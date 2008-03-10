@@ -1,4 +1,4 @@
-# $Id: Seconds.pm 69 2006-09-07 17:41:05Z matt $
+# $Id: Seconds.pm 44 2002-09-08 20:51:38Z matt $
 
 package Time::Seconds;
 use strict;

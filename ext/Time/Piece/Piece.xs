@@ -60,7 +60,9 @@ my_init_tm(struct tm *ptm)        /* see mktime, strftime and asctime    */
 
 /*
  * my_mini_mktime - normalise struct tm values without the localtime()
- * semantics (and overhead) of mktime().
+ * semantics (and overhead) of mktime(). Stolen shamelessly from Perl's
+ * Perl_mini_mktime() in util.c - for details on the algorithm, see that
+ * file.
  */
 static void
 my_mini_mktime(struct tm *ptm)
@@ -69,66 +71,6 @@ my_mini_mktime(struct tm *ptm)
     int secs;
     int month, mday, year, jday;
     int odd_cent, odd_year;
-
-/*
- * Year/day algorithm notes:
- *
- * With a suitable offset for numeric value of the month, one can find
- * an offset into the year by considering months to have 30.6 (153/5) days,
- * using integer arithmetic (i.e., with truncation).  To avoid too much
- * messing about with leap days, we consider January and February to be
- * the 13th and 14th month of the previous year.  After that transformation,
- * we need the month index we use to be high by 1 from 'normal human' usage,
- * so the month index values we use run from 4 through 15.
- *
- * Given that, and the rules for the Gregorian calendar (leap years are those
- * divisible by 4 unless also divisible by 100, when they must be divisible
- * by 400 instead), we can simply calculate the number of days since some
- * arbitrary 'beginning of time' by futzing with the (adjusted) year number,
- * the days we derive from our month index, and adding in the day of the
- * month.  The value used here is not adjusted for the actual origin which
- * it normally would use (1 January A.D. 1), since we're not exposing it.
- * We're only building the value so we can turn around and get the
- * normalised values for the year, month, day-of-month, and day-of-year.
- *
- * For going backward, we need to bias the value we're using so that we find
- * the right year value.  (Basically, we don't want the contribution of
- * March 1st to the number to apply while deriving the year).  Having done
- * that, we 'count up' the contribution to the year number by accounting for
- * full quadracenturies (400-year periods) with their extra leap days, plus
- * the contribution from full centuries (to avoid counting in the lost leap
- * days), plus the contribution from full quad-years (to count in the normal
- * leap days), plus the leftover contribution from any non-leap years.
- * At this point, if we were working with an actual leap day, we'll have 0
- * days left over.  This is also true for March 1st, however.  So, we have
- * to special-case that result, and (earlier) keep track of the 'odd'
- * century and year contributions.  If we got 4 extra centuries in a qcent,
- * or 4 extra years in a qyear, then it's a leap day and we call it 29 Feb.
- * Otherwise, we add back in the earlier bias we removed (the 123 from
- * figuring in March 1st), find the month index (integer division by 30.6),
- * and the remainder is the day-of-month.  We then have to convert back to
- * 'real' months (including fixing January and February from being 14/15 in
- * the previous year to being in the proper year).  After that, to get
- * tm_yday, we work with the normalised year and get a new yearday value for
- * January 1st, which we subtract from the yearday value we had earlier,
- * representing the date we've re-built.  This is done from January 1
- * because tm_yday is 0-origin.
- *
- * Since POSIX time routines are only guaranteed to work for times since the
- * UNIX epoch (00:00:00 1 Jan 1970 UTC), the fact that this algorithm
- * applies Gregorian calendar rules even to dates before the 16th century
- * doesn't bother me.  Besides, you'd need cultural context for a given
- * date to know whether it was Julian or Gregorian calendar, and that's
- * outside the scope for this routine.  Since we convert back based on the
- * same rules we used to build the yearday, you'll only get strange results
- * for input which needed normalising, or for the 'odd' century years which
- * were leap years in the Julian calander but not in the Gregorian one.
- * I can live with that.
- *
- * This algorithm also fails to handle years before A.D. 1 gracefully, but
- * that's still outside the scope for POSIX time manipulation, so I don't
- * care.
- */
 
     year = 1900 + ptm->tm_year;
     month = ptm->tm_mon;
@@ -241,16 +183,54 @@ my_mini_mktime(struct tm *ptm)
     ptm->tm_wday = (jday + WEEKDAY_BIAS) % 7;
 }
 
-#if defined(WIN32) || (defined(__QNX__) && defined(__WATCOMC__)) /* No strptime on Win32 or QNX4 */
+/* No strptime on Win32 or QNX4 */
+#if defined(WIN32) || (defined(__QNX__) && defined(__WATCOMC__))
 #define strncasecmp(x,y,n) strnicmp(x,y,n)
 
 #if defined(WIN32)
-#if defined(__BORLANDC__)
-void * __cdecl _EXPFUNC alloca(_SIZE_T __size);
-#else
 #define alloca _alloca
 #endif
-#endif
+
+/* strptime copied from freebsd with the following copyright: */
+/*
+ * Copyright (c) 1994 Powerdog Industries.  All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer
+ *    in the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. All advertising materials mentioning features or use of this
+ *    software must display the following acknowledgement:
+ *      This product includes software developed by Powerdog Industries.
+ * 4. The name of Powerdog Industries may not be used to endorse or
+ *    promote products derived from this software without specific prior
+ *    written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY POWERDOG INDUSTRIES ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE POWERDOG INDUSTRIES BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+ * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+ 
+#ifndef lint
+#ifndef NOID
+static char copyright[] =
+"@(#) Copyright (c) 1994 Powerdog Industries.  All rights reserved.";
+static char sccsid[] = "@(#)strptime.c	0.1 (Powerdog) 94/03/27";
+#endif /* !defined NOID */
+#endif /* not lint */
 
 #include <time.h>
 #include <ctype.h>

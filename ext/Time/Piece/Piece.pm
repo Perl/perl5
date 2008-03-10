@@ -1,4 +1,4 @@
-# $Id: Piece.pm 72 2007-11-19 01:26:10Z matt $
+# $Id: Piece.pm 76 2008-03-02 20:15:09Z matt $
 
 package Time::Piece;
 
@@ -22,7 +22,7 @@ our %EXPORT_TAGS = (
     ':override' => 'internal',
     );
 
-our $VERSION = '1.12_01';
+our $VERSION = '1.13';
 
 bootstrap Time::Piece $VERSION;
 
@@ -591,6 +591,37 @@ sub compare {
     return $lhs <=> $rhs;
 }
 
+sub add_months {
+    my ($time, $num_months) = @_;
+    
+    croak("add_months requires a number of months") unless defined($num_months);
+    
+    my $final_month = $time->_mon + $num_months;
+    my $num_years = 0;
+    if ($final_month > 11 || $final_month < 0) {
+        # these two ops required because we have no POSIX::floor and don't
+        # want to load POSIX.pm
+        $num_years = int($final_month / 12);
+        $num_years-- if ($final_month < 0);
+        
+        $final_month = $final_month % 12;
+    }
+    
+    my $string = ($time->year + $num_years) . "-" .
+                 ($final_month + 1) . "-" .
+                 ($time->mday) . " " . $time->hms;
+    my $format = "%Y-%m-%d %H:%M:%S";
+    #warn("Parsing string: $string\n");
+    my @vals = _strptime($string, $format);
+#    warn(sprintf("got vals: %d-%d-%d %d:%d:%d\n", reverse(@vals)));
+    return scalar $time->_mktime(\@vals, $time->[c_islocal]);
+}
+
+sub add_years {
+    my ($time, $years) = @_;
+    $time->add_months($years * 12);
+}
+
 1;
 __END__
 
@@ -731,6 +762,20 @@ Note that the first of the above returns a Time::Seconds object, so
 while examining the object will print the number of seconds (because
 of the overloading), you can also get the number of minutes, hours,
 days, weeks and years in that delta, using the Time::Seconds API.
+
+In addition to adding seconds, there are two APIs for adding months and
+years:
+
+    $t->add_months(6);
+    $t->add_years(5);
+
+The months and years can be negative for subtractions. Note that there
+is some "strange" behaviour when adding and subtracting months at the
+ends of months. Generally when the resulting month is shorter than the
+starting month then the number of overlap days is added. For example
+subtracting a month from 2008-03-31 will not result in 2008-02-31 as this
+is an impossible date. Instead you will get 2008-03-02. This appears to
+be consistent with other date manipulation tools.
 
 =head2 Date Comparisons
 
