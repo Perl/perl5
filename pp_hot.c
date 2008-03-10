@@ -920,6 +920,7 @@ PP(pp_rv2av)
  croak_cant_return:
     Perl_croak(aTHX_ "Can't return %s to lvalue scalar context",
 	       is_pp_rv2av ? "array" : "hash");
+    RETURN;
 }
 
 STATIC void
