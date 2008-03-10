@@ -22,6 +22,9 @@ use Test::More tests => 52;
 use MakeMaker::Test::Setup::BFD;
 
 BEGIN { use_ok('ExtUtils::Install') }
+# ensure the env doesnt pollute our tests
+local $ENV{EU_INSTALL_ALWAYS_COPY};
+local $ENV{EU_ALWAYS_COPY};    
 
 # Check exports.
 foreach my $func (qw(install uninstall pm_to_blib install_default)) {

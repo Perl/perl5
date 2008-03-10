@@ -34,7 +34,10 @@ END {
     ok( chdir File::Spec->updir );
     ok( teardown_recurs(), 'teardown' );
 }
-
+# ensure the env doesnt pollute our tests
+local $ENV{EU_INSTALL_ALWAYS_COPY};
+local $ENV{EU_ALWAYS_COPY};    
+    
 chdir 'Big-Dummy';
 
 my $stdout = tie *STDOUT, 'TieOut';
@@ -191,7 +194,7 @@ close DUMMY;
 {
   local @INC = ('install-test/lib/perl');
   local $ENV{PERL5LIB} = '';
-  local $ENV{EU_ALWAYS_COPY}=1;
+  local $ENV{EU_INSTALL_ALWAYS_COPY}=1;
   my $tfile='install-test/other_lib/perl/Big/Dummy.pm';
   my $sfile='blib/lib/Big/Dummy.pm';
   ok(-r $tfile,"install file already exists");
@@ -212,7 +215,7 @@ close DUMMY;
 {
   local @INC = ('install-test/lib/perl');
   local $ENV{PERL5LIB} = '';
-  local $ENV{EU_ALWAYS_COPY}=0;
+  local $ENV{EU_INSTALL_ALWAYS_COPY}=0;
   my $tfile='install-test/other_lib/perl/Big/Dummy.pm';
   my $sfile='blib/lib/Big/Dummy.pm';
   ok(-r $tfile,"install file already exists");

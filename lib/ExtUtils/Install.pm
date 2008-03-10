@@ -2,8 +2,6 @@ package ExtUtils::Install;
 use strict;
 
 use vars qw(@ISA @EXPORT $VERSION $MUST_REBOOT %Config);
-$VERSION = '1.47';
-$VERSION = eval $VERSION;
 
 use AutoSplit;
 use Carp ();
@@ -22,6 +20,8 @@ use File::Spec;
 @ISA = ('Exporter');
 @EXPORT = ('install','uninstall','pm_to_blib', 'install_default');
 
+=pod 
+
 =head1 NAME
 
 ExtUtils::Install - install files from here to there
@@ -35,6 +35,17 @@ ExtUtils::Install - install files from here to there
   uninstall($packlist);
 
   pm_to_blib({ 'lib/Foo/Bar.pm' => 'blib/lib/Foo/Bar.pm' });
+    
+=head1 VERSION
+
+1.50
+
+=cut
+
+$VERSION = '1.50';
+$VERSION = eval $VERSION;
+
+=pod
 
 =head1 DESCRIPTION
 
@@ -271,6 +282,7 @@ sub _unlink_or_rename { #XXX OS-SPECIFIC
 }
 
 
+=pod
 
 =head2 Functions
 
@@ -333,19 +345,20 @@ sub _get_install_skip {
     return $skip
 }
 
+=pod
+
 =item _have_write_access
 
 Abstract a -w check that tries to use POSIX::access() if possible.
 
 =cut
 
-
 {
     my  $has_posix;
     sub _have_write_access {
         my $dir=shift;
-        if (!defined $has_posix) {
-            $has_posix=eval 'local $^W; require POSIX; 1' || 0;
+        unless (defined $has_posix) {
+            $has_posix= (!$Is_cygwin && eval 'local $^W; require POSIX; 1') || 0; 
         }
         if ($has_posix) {
             return POSIX::access($dir, POSIX::W_OK());
@@ -355,6 +368,7 @@ Abstract a -w check that tries to use POSIX::access() if possible.
     }
 }
 
+=pod
 
 =item _can_write_dir(C<$dir>)
 
@@ -408,6 +422,8 @@ sub _can_write_dir {
     return 0;
 }
 
+=pod
+
 =item _mkpath($dir,$show,$mode,$verbose,$dry_run)
 
 Wrapper around File::Path::mkpath() to handle errors.
@@ -454,6 +470,8 @@ sub _mkpath {
     
 }
 
+=pod
+
 =item _copy($from,$to,$verbose,$dry_run)
 
 Wrapper around File::Copy::copy to handle errors.
@@ -478,6 +496,8 @@ sub _copy {
     }
 }
 
+=pod
+
 =item _chdir($from)
 
 Wrapper around chdir to catch errors.
@@ -498,6 +518,8 @@ sub _chdir {
         or _choke("Couldn't chdir to '$dir': $!");
     return $ret;
 }
+
+=pod
 
 =end _private
 
@@ -569,7 +591,7 @@ Note that the new argument style and use of the %result hash is recommended.
 The $always_copy parameter which when true causes files to be updated 
 regardles as to whether they have changed, if it is defined but false then 
 copies are made only if the files have changed, if it is undefined then the 
-value of the environment variable EU_ALWAYS_COPY is used as default.
+value of the environment variable EU_INSTALL_ALWAYS_COPY is used as default.
 
 The %result hash will be populated with the various keys/subhashes reflecting 
 the install. Currently these keys and their structure are:
@@ -636,7 +658,9 @@ sub install { #XXX OS-SPECIFIC
     $dry_run  ||= 0;
 
     $skip= _get_install_skip($skip,$verbose);
-    $always_copy = $ENV{EU_ALWAYS_COPY}||0 
+    $always_copy =  $ENV{EU_INSTALL_ALWAYS_COPY}
+                 || $ENV{EU_ALWAYS_COPY} 
+                 || 0
         unless defined $always_copy;
 
     my(%from_to) = %$from_to;
@@ -893,6 +917,7 @@ sub directory_not_empty ($) {
   return $files;
 }
 
+=pod
 
 =item B<install_default> I<DISCOURAGED>
 
@@ -1092,6 +1117,7 @@ sub run_filter {
     close CMD or die "Filter command '$cmd' failed for $src";
 }
 
+=pod
 
 =item B<pm_to_blib>
 
@@ -1233,6 +1259,7 @@ sub _invokant {
     return $builder;
 }
 
+=pod
 
 =back
 
@@ -1253,10 +1280,14 @@ Will prevent the automatic use of INSTALL.SKIP as the install skip file.
 If there is no INSTALL.SKIP file in the make directory then this value
 can be used to provide a default.
 
-=item B<EU_ALWAYS_COPY>
+=item B<EU_INSTALL_ALWAYS_COPY>
 
 If this environment variable is true then normal install processes will
 always overwrite older identical files during the install process.
+
+Note that the alias EU_ALWAYS_COPY will be supported if EU_INSTALL_ALWAYS_COPY
+is not defined until at least the 1.50 release. Please ensure you use the
+correct EU_INSTALL_ALWAYS_COPY. 
 
 =back
 
