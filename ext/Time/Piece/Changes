@@ -1,6 +1,15 @@
 
 Time::Piece Changes
 
+1.13
+    - More QNX fixes (kraai@ftbfs.org)
+    - Restore freebsd copyright on strptime.
+    - Added add_months and add_years methods.
+
+1.12
+    - QNX fixes
+    - Merge with perl core version
+
 1.11
     - Skip %V test on Win32
 
