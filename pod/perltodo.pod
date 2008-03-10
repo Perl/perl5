@@ -504,6 +504,18 @@ These should probably be used for compiling Perl whenever available,
 Configure and/or hints files should be adjusted to probe for the
 availability of these features and enable them as appropriate.
 
+=head2 Arenas for GPs? For MAGIC?
+
+C<struct gp> and C<struct magic> are both currently allocated by C<malloc>.
+It might be a speed or memory saving to change to using arenas. Or it might
+not. It would need some suitable benchmarking first. In particular, C<GP>s
+can probably be changed with minimal compatibility impact (probably nothing
+outside of the core, or even outside of F<gv.c> allocates them), but they
+probably aren't allocated/deallocated often enough for a speed saving. Whereas
+C<MAGIC> is allocated/deallocated more often, but in turn, is also something
+more externally visible, so changing the rules here may bite external code.
+
+
 =head1 Tasks that need a knowledge of XS
 
 These tasks would need C knowledge, and roughly the level of knowledge of
