@@ -610,7 +610,7 @@ Apda	|SV*	|newSVhek	|NULLOK const HEK *const hek
 Apda	|SV*	|newSVpvn_share	|NULLOK const char* s|I32 len|U32 hash
 Afpda	|SV*	|newSVpvf	|NN const char *const pat|...
 Apa	|SV*	|vnewSVpvf	|NN const char *const pat|NULLOK va_list *const args
-Apd	|SV*	|newSVrv	|NN SV* rv|NULLOK const char* classname
+Apd	|SV*	|newSVrv	|NN SV *const rv|NULLOK const char *const classname
 Apda	|SV*	|newSVsv	|NULLOK SV *const old
 Apda	|SV*	|newSV_type	|const svtype type
 Apa	|OP*	|newUNOP	|I32 type|I32 flags|NULLOK OP* first
@@ -852,7 +852,7 @@ Apd	|char*	|sv_pvbyten	|NN SV *sv|NN STRLEN *lp
 Apd	|I32	|sv_true	|NULLOK SV *const sv
 pd	|void	|sv_add_arena	|NN char *const ptr|const U32 size|const U32 flags
 Apd	|int	|sv_backoff	|NN SV *const sv
-Apd	|SV*	|sv_bless	|NN SV* sv|NN HV* stash
+Apd	|SV*	|sv_bless	|NN SV *const sv|NN HV *const stash
 Afpd	|void	|sv_catpvf	|NN SV* sv|NN const char* pat|...
 Apd	|void	|sv_vcatpvf	|NN SV* sv|NN const char* pat|NULLOK va_list* args
 Apd	|void	|sv_catpv	|NN SV *const sv|NULLOK const char* ptr
@@ -883,7 +883,7 @@ Apd	|char*	|sv_grow	|NN SV *const sv|STRLEN newlen
 Apd	|void	|sv_inc		|NULLOK SV *const sv
 Apd	|void	|sv_insert	|NN SV *const bigstr|const STRLEN offset|const STRLEN len \
 				|NN const char *const little|const STRLEN littlelen
-Apd	|int	|sv_isa		|NULLOK SV* sv|NN const char* name
+Apd	|int	|sv_isa		|NULLOK SV* sv|NN const char *const name
 Apd	|int	|sv_isobject	|NULLOK SV* sv
 Apd	|STRLEN	|sv_len		|NULLOK SV *const sv
 Apd	|STRLEN	|sv_len_utf8	|NULLOK SV *const sv
@@ -899,12 +899,12 @@ Ap	|char*	|sv_peek	|NULLOK SV* sv
 Apd	|void	|sv_pos_u2b	|NULLOK SV *const sv|NN I32 *const offsetp|NULLOK I32 *const lenp
 Apd	|void	|sv_pos_b2u	|NULLOK SV *const sv|NN I32 *const offsetp
 Amdb	|char*	|sv_pvn_force	|NN SV* sv|NULLOK STRLEN* lp
-Apd	|char*	|sv_pvutf8n_force|NN SV* sv|NULLOK STRLEN* lp
-Apd	|char*	|sv_pvbyten_force|NN SV* sv|NULLOK STRLEN* lp
+Apd	|char*	|sv_pvutf8n_force|NN SV *const sv|NULLOK STRLEN *const lp
+Apd	|char*	|sv_pvbyten_force|NN SV *const sv|NULLOK STRLEN *const lp
 Apd	|char*	|sv_recode_to_utf8	|NN SV* sv|NN SV *encoding
 Apd	|bool	|sv_cat_decode	|NN SV* dsv|NN SV *encoding|NN SV *ssv|NN int *offset \
 				|NN char* tstr|int tlen
-ApdR	|const char*	|sv_reftype	|NN const SV* sv|int ob
+ApdR	|const char*	|sv_reftype	|NN const SV *const sv|const int ob
 Apd	|void	|sv_replace	|NN SV *const sv|NN SV *const nsv
 Apd	|void	|sv_report_used
 Apd	|void	|sv_reset	|NN const char* s|NULLOK HV *const stash
@@ -914,11 +914,13 @@ Apd	|void	|sv_setiv	|NN SV *const sv|const IV num
 Apdb	|void	|sv_setpviv	|NN SV* sv|IV num
 Apd	|void	|sv_setuv	|NN SV *const sv|const UV num
 Apd	|void	|sv_setnv	|NN SV *const sv|const NV num
-Apd	|SV*	|sv_setref_iv	|NN SV* rv|NULLOK const char* classname|IV iv
-Apd	|SV*	|sv_setref_uv	|NN SV* rv|NULLOK const char* classname|UV uv
-Apd	|SV*	|sv_setref_nv	|NN SV* rv|NULLOK const char* classname|NV nv
-Apd	|SV*	|sv_setref_pv	|NN SV* rv|NULLOK const char* classname|NULLOK void* pv
-Apd	|SV*	|sv_setref_pvn	|NN SV* rv|NULLOK const char* classname|NN const char* pv|STRLEN n
+Apd	|SV*	|sv_setref_iv	|NN SV *const rv|NULLOK const char *const classname|const IV iv
+Apd	|SV*	|sv_setref_uv	|NN SV *const rv|NULLOK const char *const classname|const UV uv
+Apd	|SV*	|sv_setref_nv	|NN SV *const rv|NULLOK const char *const classname|const NV nv
+Apd	|SV*	|sv_setref_pv	|NN SV *const rv|NULLOK const char *const classname \
+				|NULLOK void *const pv
+Apd	|SV*	|sv_setref_pvn	|NN SV *const rv|NULLOK const char *const classname \
+				|NN const char *const pv|const STRLEN n
 Apd	|void	|sv_setpv	|NN SV *const sv|NULLOK const char *const ptr
 Apd	|void	|sv_setpvn	|NN SV *const sv|NULLOK const char *const ptr|const STRLEN len
 Amdb	|void	|sv_setsv	|NN SV *dstr|NULLOK SV *sstr
@@ -1673,7 +1675,7 @@ Apd	|void	|sv_catpvn_flags|NN SV *const dstr|NN const char *sstr|const STRLEN le
 				|const I32 flags
 Apd	|void	|sv_catsv_flags	|NN SV *const dsv|NULLOK SV *const ssv|const I32 flags
 Apd	|STRLEN	|sv_utf8_upgrade_flags|NN SV *const sv|const I32 flags
-Apd	|char*	|sv_pvn_force_flags|NN SV* sv|NULLOK STRLEN* lp|I32 flags
+Apd	|char*	|sv_pvn_force_flags|NN SV *const sv|NULLOK STRLEN *const lp|const I32 flags
 Apd	|void	|sv_copypv	|NN SV *const dsv|NN SV *const ssv
 Ap	|char*	|my_atof2	|NN const char *s|NN NV* value
 Apn	|int	|my_socketpair	|int family|int type|int protocol|int fd[2]

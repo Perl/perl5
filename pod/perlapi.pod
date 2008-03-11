@@ -5278,7 +5278,7 @@ it will be upgraded to one.  If C<classname> is non-null then the new SV will
 be blessed in the specified package.  The new SV is returned and its
 reference count is 1.
 
-	SV*	newSVrv(SV* rv, const char* classname)
+	SV*	newSVrv(SV *const rv, const char *const classname)
 
 =for hackers
 Found in file sv.c
@@ -5460,7 +5460,7 @@ Blesses an SV into a specified package.  The SV must be an RV.  The package
 must be designated by its stash (see C<gv_stashpv()>).  The reference count
 of the SV is unaffected.
 
-	SV*	sv_bless(SV* sv, HV* stash)
+	SV*	sv_bless(SV *const sv, HV *const stash)
 
 =for hackers
 Found in file sv.c
@@ -5769,7 +5769,7 @@ Returns a boolean indicating whether the SV is blessed into the specified
 class.  This does not check for subtypes; use C<sv_derived_from> to verify
 an inheritance relationship.
 
-	int	sv_isa(SV* sv, const char* name)
+	int	sv_isa(SV* sv, const char *const name)
 
 =for hackers
 Found in file sv.c
@@ -5915,7 +5915,7 @@ X<sv_pvbyten_force>
 
 The backend for the C<SvPVbytex_force> macro. Always use the macro instead.
 
-	char*	sv_pvbyten_force(SV* sv, STRLEN* lp)
+	char*	sv_pvbyten_force(SV *const sv, STRLEN *const lp)
 
 =for hackers
 Found in file sv.c
@@ -5942,7 +5942,7 @@ implemented in terms of this function.
 You normally want to use the various wrapper macros instead: see
 C<SvPV_force> and C<SvPV_force_nomg>
 
-	char*	sv_pvn_force_flags(SV* sv, STRLEN* lp, I32 flags)
+	char*	sv_pvn_force_flags(SV *const sv, STRLEN *const lp, const I32 flags)
 
 =for hackers
 Found in file sv.c
@@ -5952,7 +5952,7 @@ X<sv_pvutf8n_force>
 
 The backend for the C<SvPVutf8x_force> macro. Always use the macro instead.
 
-	char*	sv_pvutf8n_force(SV* sv, STRLEN* lp)
+	char*	sv_pvutf8n_force(SV *const sv, STRLEN *const lp)
 
 =for hackers
 Found in file sv.c
@@ -5962,7 +5962,7 @@ X<sv_reftype>
 
 Returns a string describing what the SV is a reference to.
 
-	const char*	sv_reftype(const SV* sv, int ob)
+	const char*	sv_reftype(const SV *const sv, const int ob)
 
 =for hackers
 Found in file sv.c
@@ -6153,7 +6153,7 @@ the new SV.  The C<classname> argument indicates the package for the
 blessing.  Set C<classname> to C<NULL> to avoid the blessing.  The new SV
 will have a reference count of 1, and the RV will be returned.
 
-	SV*	sv_setref_iv(SV* rv, const char* classname, IV iv)
+	SV*	sv_setref_iv(SV *const rv, const char *const classname, const IV iv)
 
 =for hackers
 Found in file sv.c
@@ -6167,7 +6167,7 @@ the new SV.  The C<classname> argument indicates the package for the
 blessing.  Set C<classname> to C<NULL> to avoid the blessing.  The new SV
 will have a reference count of 1, and the RV will be returned.
 
-	SV*	sv_setref_nv(SV* rv, const char* classname, NV nv)
+	SV*	sv_setref_nv(SV *const rv, const char *const classname, const NV nv)
 
 =for hackers
 Found in file sv.c
@@ -6187,7 +6187,7 @@ objects will become corrupted by the pointer copy process.
 
 Note that C<sv_setref_pvn> copies the string while this copies the pointer.
 
-	SV*	sv_setref_pv(SV* rv, const char* classname, void* pv)
+	SV*	sv_setref_pv(SV *const rv, const char *const classname, void *const pv)
 
 =for hackers
 Found in file sv.c
@@ -6204,7 +6204,7 @@ of 1, and the RV will be returned.
 
 Note that C<sv_setref_pv> copies the pointer while this copies the string.
 
-	SV*	sv_setref_pvn(SV* rv, const char* classname, const char* pv, STRLEN n)
+	SV*	sv_setref_pvn(SV *const rv, const char *const classname, const char *const pv, const STRLEN n)
 
 =for hackers
 Found in file sv.c
@@ -6218,7 +6218,7 @@ the new SV.  The C<classname> argument indicates the package for the
 blessing.  Set C<classname> to C<NULL> to avoid the blessing.  The new SV
 will have a reference count of 1, and the RV will be returned.
 
-	SV*	sv_setref_uv(SV* rv, const char* classname, UV uv)
+	SV*	sv_setref_uv(SV *const rv, const char *const classname, const UV uv)
 
 =for hackers
 Found in file sv.c

@@ -7972,7 +7972,7 @@ C<SvPV_force> and C<SvPV_force_nomg>
 */
 
 char *
-Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
+Perl_sv_pvn_force_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 {
     dVAR;
 
@@ -8033,7 +8033,7 @@ The backend for the C<SvPVbytex_force> macro. Always use the macro instead.
 */
 
 char *
-Perl_sv_pvbyten_force(pTHX_ SV *sv, STRLEN *lp)
+Perl_sv_pvbyten_force(pTHX_ SV *const sv, STRLEN *const lp)
 {
     PERL_ARGS_ASSERT_SV_PVBYTEN_FORCE;
 
@@ -8052,7 +8052,7 @@ The backend for the C<SvPVutf8x_force> macro. Always use the macro instead.
 */
 
 char *
-Perl_sv_pvutf8n_force(pTHX_ SV *sv, STRLEN *lp)
+Perl_sv_pvutf8n_force(pTHX_ SV *const sv, STRLEN *const lp)
 {
     PERL_ARGS_ASSERT_SV_PVUTF8N_FORCE;
 
@@ -8071,7 +8071,7 @@ Returns a string describing what the SV is a reference to.
 */
 
 const char *
-Perl_sv_reftype(pTHX_ const SV *sv, int ob)
+Perl_sv_reftype(pTHX_ const SV *const sv, const int ob)
 {
     PERL_ARGS_ASSERT_SV_REFTYPE;
 
@@ -8150,7 +8150,7 @@ an inheritance relationship.
 */
 
 int
-Perl_sv_isa(pTHX_ SV *sv, const char *name)
+Perl_sv_isa(pTHX_ SV *sv, const char *const name)
 {
     const char *hvname;
 
@@ -8183,7 +8183,7 @@ reference count is 1.
 */
 
 SV*
-Perl_newSVrv(pTHX_ SV *rv, const char *classname)
+Perl_newSVrv(pTHX_ SV *const rv, const char *const classname)
 {
     dVAR;
     SV *sv;
@@ -8239,7 +8239,7 @@ Note that C<sv_setref_pvn> copies the string while this copies the pointer.
 */
 
 SV*
-Perl_sv_setref_pv(pTHX_ SV *rv, const char *classname, void *pv)
+Perl_sv_setref_pv(pTHX_ SV *const rv, const char *const classname, void *const pv)
 {
     dVAR;
 
@@ -8267,7 +8267,7 @@ will have a reference count of 1, and the RV will be returned.
 */
 
 SV*
-Perl_sv_setref_iv(pTHX_ SV *rv, const char *classname, IV iv)
+Perl_sv_setref_iv(pTHX_ SV *const rv, const char *const classname, const IV iv)
 {
     PERL_ARGS_ASSERT_SV_SETREF_IV;
 
@@ -8288,7 +8288,7 @@ will have a reference count of 1, and the RV will be returned.
 */
 
 SV*
-Perl_sv_setref_uv(pTHX_ SV *rv, const char *classname, UV uv)
+Perl_sv_setref_uv(pTHX_ SV *const rv, const char *const classname, const UV uv)
 {
     PERL_ARGS_ASSERT_SV_SETREF_UV;
 
@@ -8309,7 +8309,7 @@ will have a reference count of 1, and the RV will be returned.
 */
 
 SV*
-Perl_sv_setref_nv(pTHX_ SV *rv, const char *classname, NV nv)
+Perl_sv_setref_nv(pTHX_ SV *const rv, const char *const classname, const NV nv)
 {
     PERL_ARGS_ASSERT_SV_SETREF_NV;
 
@@ -8333,7 +8333,8 @@ Note that C<sv_setref_pv> copies the pointer while this copies the string.
 */
 
 SV*
-Perl_sv_setref_pvn(pTHX_ SV *rv, const char *classname, const char *pv, STRLEN n)
+Perl_sv_setref_pvn(pTHX_ SV *const rv, const char *const classname,
+                   const char *const pv, const STRLEN n)
 {
     PERL_ARGS_ASSERT_SV_SETREF_PVN;
 
@@ -8352,7 +8353,7 @@ of the SV is unaffected.
 */
 
 SV*
-Perl_sv_bless(pTHX_ SV *sv, HV *stash)
+Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
 {
     dVAR;
     SV *tmpRef;

@@ -2221,7 +2221,7 @@ PERL_CALLCONV SV*	Perl_vnewSVpvf(pTHX_ const char *const pat, va_list *const arg
 #define PERL_ARGS_ASSERT_VNEWSVPVF	\
 	assert(pat)
 
-PERL_CALLCONV SV*	Perl_newSVrv(pTHX_ SV* rv, const char* classname)
+PERL_CALLCONV SV*	Perl_newSVrv(pTHX_ SV *const rv, const char *const classname)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_NEWSVRV	\
 	assert(rv)
@@ -3069,7 +3069,7 @@ PERL_CALLCONV int	Perl_sv_backoff(pTHX_ SV *const sv)
 #define PERL_ARGS_ASSERT_SV_BACKOFF	\
 	assert(sv)
 
-PERL_CALLCONV SV*	Perl_sv_bless(pTHX_ SV* sv, HV* stash)
+PERL_CALLCONV SV*	Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SV_BLESS	\
@@ -3185,7 +3185,7 @@ PERL_CALLCONV void	Perl_sv_insert(pTHX_ SV *const bigstr, const STRLEN offset, c
 #define PERL_ARGS_ASSERT_SV_INSERT	\
 	assert(bigstr); assert(little)
 
-PERL_CALLCONV int	Perl_sv_isa(pTHX_ SV* sv, const char* name)
+PERL_CALLCONV int	Perl_sv_isa(pTHX_ SV* sv, const char *const name)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SV_ISA	\
 	assert(name)
@@ -3227,12 +3227,12 @@ PERL_CALLCONV void	Perl_sv_pos_b2u(pTHX_ SV *const sv, I32 *const offsetp)
 #define PERL_ARGS_ASSERT_SV_PVN_FORCE	\
 	assert(sv)
 
-PERL_CALLCONV char*	Perl_sv_pvutf8n_force(pTHX_ SV* sv, STRLEN* lp)
+PERL_CALLCONV char*	Perl_sv_pvutf8n_force(pTHX_ SV *const sv, STRLEN *const lp)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_PVUTF8N_FORCE	\
 	assert(sv)
 
-PERL_CALLCONV char*	Perl_sv_pvbyten_force(pTHX_ SV* sv, STRLEN* lp)
+PERL_CALLCONV char*	Perl_sv_pvbyten_force(pTHX_ SV *const sv, STRLEN *const lp)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_PVBYTEN_FORCE	\
 	assert(sv)
@@ -3252,7 +3252,7 @@ PERL_CALLCONV bool	Perl_sv_cat_decode(pTHX_ SV* dsv, SV *encoding, SV *ssv, int 
 #define PERL_ARGS_ASSERT_SV_CAT_DECODE	\
 	assert(dsv); assert(encoding); assert(ssv); assert(offset); assert(tstr)
 
-PERL_CALLCONV const char*	Perl_sv_reftype(pTHX_ const SV* sv, int ob)
+PERL_CALLCONV const char*	Perl_sv_reftype(pTHX_ const SV *const sv, const int ob)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_REFTYPE	\
@@ -3303,27 +3303,27 @@ PERL_CALLCONV void	Perl_sv_setnv(pTHX_ SV *const sv, const NV num)
 #define PERL_ARGS_ASSERT_SV_SETNV	\
 	assert(sv)
 
-PERL_CALLCONV SV*	Perl_sv_setref_iv(pTHX_ SV* rv, const char* classname, IV iv)
+PERL_CALLCONV SV*	Perl_sv_setref_iv(pTHX_ SV *const rv, const char *const classname, const IV iv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_SETREF_IV	\
 	assert(rv)
 
-PERL_CALLCONV SV*	Perl_sv_setref_uv(pTHX_ SV* rv, const char* classname, UV uv)
+PERL_CALLCONV SV*	Perl_sv_setref_uv(pTHX_ SV *const rv, const char *const classname, const UV uv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_SETREF_UV	\
 	assert(rv)
 
-PERL_CALLCONV SV*	Perl_sv_setref_nv(pTHX_ SV* rv, const char* classname, NV nv)
+PERL_CALLCONV SV*	Perl_sv_setref_nv(pTHX_ SV *const rv, const char *const classname, const NV nv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_SETREF_NV	\
 	assert(rv)
 
-PERL_CALLCONV SV*	Perl_sv_setref_pv(pTHX_ SV* rv, const char* classname, void* pv)
+PERL_CALLCONV SV*	Perl_sv_setref_pv(pTHX_ SV *const rv, const char *const classname, void *const pv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_SETREF_PV	\
 	assert(rv)
 
-PERL_CALLCONV SV*	Perl_sv_setref_pvn(pTHX_ SV* rv, const char* classname, const char* pv, STRLEN n)
+PERL_CALLCONV SV*	Perl_sv_setref_pvn(pTHX_ SV *const rv, const char *const classname, const char *const pv, const STRLEN n)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_SV_SETREF_PVN	\
@@ -5902,7 +5902,7 @@ PERL_CALLCONV STRLEN	Perl_sv_utf8_upgrade_flags(pTHX_ SV *const sv, const I32 fl
 #define PERL_ARGS_ASSERT_SV_UTF8_UPGRADE_FLAGS	\
 	assert(sv)
 
-PERL_CALLCONV char*	Perl_sv_pvn_force_flags(pTHX_ SV* sv, STRLEN* lp, I32 flags)
+PERL_CALLCONV char*	Perl_sv_pvn_force_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_PVN_FORCE_FLAGS	\
 	assert(sv)
