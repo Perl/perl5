@@ -3633,12 +3633,9 @@ Gid_t getegid (void);
 
 #define YYMAXDEPTH 300
 
-#ifndef assert  /* <assert.h> might have been included somehow */
-#define assert(what)	PERL_DEB( 					\
-	((what) ? ((void) 0) :						\
-	    (Perl_croak_nocontext("Assertion %s failed: file \"" __FILE__ \
-			"\", line %d", STRINGIFY(what), __LINE__),	\
-	    (void) 0)))
+
+#if defined(DEBUGGING)
+#  include <assert.h>
 #endif
 
 struct ufuncs {
