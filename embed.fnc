@@ -158,10 +158,10 @@ Afnp	|SV*	|mess_nocontext	|NN const char* pat|...
 Afnp	|void	|warn_nocontext	|NN const char* pat|...
 Afnp	|void	|warner_nocontext|U32 err|NN const char* pat|...
 Afnp	|SV*	|newSVpvf_nocontext|NN const char *const pat|...
-Afnp	|void	|sv_catpvf_nocontext|NN SV* sv|NN const char* pat|...
-Afnp	|void	|sv_setpvf_nocontext|NN SV* sv|NN const char* pat|...
-Afnp	|void	|sv_catpvf_mg_nocontext|NN SV* sv|NN const char* pat|...
-Afnp	|void	|sv_setpvf_mg_nocontext|NN SV* sv|NN const char* pat|...
+Afnp	|void	|sv_catpvf_nocontext|NN SV *const sv|NN const char *const pat|...
+Afnp	|void	|sv_setpvf_nocontext|NN SV *const sv|NN const char *const pat|...
+Afnp	|void	|sv_catpvf_mg_nocontext|NN SV *const sv|NN const char *const pat|...
+Afnp	|void	|sv_setpvf_mg_nocontext|NN SV *const sv|NN const char *const pat|...
 Afnp	|int	|fprintf_nocontext|NN PerlIO *stream|NN const char *format|...
 Afnp	|int	|printf_nocontext|NN const char *format|...
 #endif
@@ -908,10 +908,10 @@ ApdR	|const char*	|sv_reftype	|NN const SV *const sv|const int ob
 Apd	|void	|sv_replace	|NN SV *const sv|NN SV *const nsv
 Apd	|void	|sv_report_used
 Apd	|void	|sv_reset	|NN const char* s|NULLOK HV *const stash
-Afpd	|void	|sv_setpvf	|NN SV* sv|NN const char* pat|...
-Apd	|void	|sv_vsetpvf	|NN SV* sv|NN const char* pat|NULLOK va_list* args
+Afpd	|void	|sv_setpvf	|NN SV *const sv|NN const char *const pat|...
+Apd	|void	|sv_vsetpvf	|NN SV *const sv|NN const char *const pat|NULLOK va_list *const args
 Apd	|void	|sv_setiv	|NN SV *const sv|const IV num
-Apdb	|void	|sv_setpviv	|NN SV* sv|IV num
+Apdb	|void	|sv_setpviv	|NN SV *const sv|const IV num
 Apd	|void	|sv_setuv	|NN SV *const sv|const UV num
 Apd	|void	|sv_setnv	|NN SV *const sv|const NV num
 Apd	|SV*	|sv_setref_iv	|NN SV *const rv|NULLOK const char *const classname|const IV iv
@@ -925,11 +925,11 @@ Apd	|void	|sv_setpv	|NN SV *const sv|NULLOK const char *const ptr
 Apd	|void	|sv_setpvn	|NN SV *const sv|NULLOK const char *const ptr|const STRLEN len
 Amdb	|void	|sv_setsv	|NN SV *dstr|NULLOK SV *sstr
 Amdb	|void	|sv_taint	|NN SV* sv
-ApdR	|bool	|sv_tainted	|NN SV* sv
+ApdR	|bool	|sv_tainted	|NN SV *const sv
 Apd	|int	|sv_unmagic	|NN SV *const sv|const int type
 Apdmb	|void	|sv_unref	|NN SV* sv
-Apd	|void	|sv_unref_flags	|NN SV *ref|U32 flags
-Apd	|void	|sv_untaint	|NN SV* sv
+Apd	|void	|sv_unref_flags	|NN SV *const ref|const U32 flags
+Apd	|void	|sv_untaint	|NN SV *const sv
 Apd	|void	|sv_upgrade	|NN SV *const sv|svtype new_type
 Apdmb	|void	|sv_usepvn	|NN SV* sv|NULLOK char* ptr|STRLEN len
 Apd	|void	|sv_usepvn_flags|NN SV *const sv|NULLOK char* ptr|const STRLEN len\
@@ -1037,10 +1037,11 @@ Apd	|void	|sv_vcatpvf_mg	|NN SV* sv|NN const char* pat|NULLOK va_list* args
 Apd	|void	|sv_catpv_mg	|NN SV *const sv|NULLOK const char *const ptr
 Apdbm	|void	|sv_catpvn_mg	|NN SV *sv|NN const char *ptr|STRLEN len
 Apdbm	|void	|sv_catsv_mg	|NN SV *dsv|NULLOK SV *ssv
-Afpd	|void	|sv_setpvf_mg	|NN SV *sv|NN const char* pat|...
-Apd	|void	|sv_vsetpvf_mg	|NN SV* sv|NN const char* pat|NULLOK va_list* args
+Afpd	|void	|sv_setpvf_mg	|NN SV *const sv|NN const char *const pat|...
+Apd	|void	|sv_vsetpvf_mg	|NN SV *const sv|NN const char *const pat \
+				|NULLOK va_list *const args
 Apd	|void	|sv_setiv_mg	|NN SV *const sv|const IV i
-Apdb	|void	|sv_setpviv_mg	|NN SV *sv|IV iv
+Apdb	|void	|sv_setpviv_mg	|NN SV *const sv|const IV iv
 Apd	|void	|sv_setuv_mg	|NN SV *const sv|const UV u
 Apd	|void	|sv_setnv_mg	|NN SV *const sv|const NV num
 Apd	|void	|sv_setpv_mg	|NN SV *const sv|NULLOK const char *const ptr
@@ -1541,7 +1542,7 @@ poM	|int	|sv_kill_backrefs	|NN SV *const sv|NN AV *const av
 
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 nsR	|char *	|uiv_2buf	|NN char *const buf|const IV iv|UV uv|const int is_uv|NN char **const peob
-s	|void	|sv_unglob	|NN SV* sv
+s	|void	|sv_unglob	|NN SV *const sv
 s	|void	|not_a_number	|NN SV *const sv
 s	|I32	|visit		|NN SVFUNC_t f|const U32 flags|const U32 mask
 s	|void	|sv_del_backref	|NN SV *const tsv|NN SV *const sv

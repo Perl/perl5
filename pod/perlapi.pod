@@ -6066,7 +6066,7 @@ X<sv_setpvf>
 Works like C<sv_catpvf> but copies the text into the SV instead of
 appending it.  Does not handle 'set' magic.  See C<sv_setpvf_mg>.
 
-	void	sv_setpvf(SV* sv, const char* pat, ...)
+	void	sv_setpvf(SV *const sv, const char *const pat, ...)
 
 =for hackers
 Found in file sv.c
@@ -6076,7 +6076,7 @@ X<sv_setpvf_mg>
 
 Like C<sv_setpvf>, but also handles 'set' magic.
 
-	void	sv_setpvf_mg(SV *sv, const char* pat, ...)
+	void	sv_setpvf_mg(SV *const sv, const char *const pat, ...)
 
 =for hackers
 Found in file sv.c
@@ -6087,7 +6087,7 @@ X<sv_setpviv>
 Copies an integer into the given SV, also updating its string value.
 Does not handle 'set' magic.  See C<sv_setpviv_mg>.
 
-	void	sv_setpviv(SV* sv, IV num)
+	void	sv_setpviv(SV *const sv, const IV num)
 
 =for hackers
 Found in file sv.c
@@ -6097,7 +6097,7 @@ X<sv_setpviv_mg>
 
 Like C<sv_setpviv>, but also handles 'set' magic.
 
-	void	sv_setpviv_mg(SV *sv, IV iv)
+	void	sv_setpviv_mg(SV *const sv, const IV iv)
 
 =for hackers
 Found in file sv.c
@@ -6301,7 +6301,7 @@ Found in file sv.c
 X<sv_tainted>
 
 Test an SV for taintedness. Use C<SvTAINTED> instead.
-	bool	sv_tainted(SV* sv)
+	bool	sv_tainted(SV *const sv)
 
 =for hackers
 Found in file sv.c
@@ -6339,7 +6339,7 @@ C<SV_IMMEDIATE_UNREF> to force the reference count to be decremented
 different from one or the reference being a readonly SV).
 See C<SvROK_off>.
 
-	void	sv_unref_flags(SV *ref, U32 flags)
+	void	sv_unref_flags(SV *const ref, const U32 flags)
 
 =for hackers
 Found in file sv.c
@@ -6348,7 +6348,7 @@ Found in file sv.c
 X<sv_untaint>
 
 Untaint an SV. Use C<SvTAINTED_off> instead.
-	void	sv_untaint(SV* sv)
+	void	sv_untaint(SV *const sv)
 
 =for hackers
 Found in file sv.c
@@ -6517,7 +6517,7 @@ appending it.  Does not handle 'set' magic.  See C<sv_vsetpvf_mg>.
 
 Usually used via its frontend C<sv_setpvf>.
 
-	void	sv_vsetpvf(SV* sv, const char* pat, va_list* args)
+	void	sv_vsetpvf(SV *const sv, const char *const pat, va_list *const args)
 
 =for hackers
 Found in file sv.c
@@ -6542,7 +6542,7 @@ Like C<sv_vsetpvf>, but also handles 'set' magic.
 
 Usually used via its frontend C<sv_setpvf_mg>.
 
-	void	sv_vsetpvf_mg(SV* sv, const char* pat, va_list* args)
+	void	sv_vsetpvf_mg(SV *const sv, const char *const pat, va_list *const args)
 
 =for hackers
 Found in file sv.c
