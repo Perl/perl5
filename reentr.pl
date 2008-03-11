@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 use Getopt::Std;
 my %opts;
-getopts('U', \%opts);
+getopts('Uv', \%opts);
 
 my %map = (
 	   V => "void",
@@ -40,8 +40,8 @@ my %map = (
 # Example #3: S_CBI   means type func_r(const char*, char*, int)
 
 
-safer_unlink 'reentr.h';
-die "reentr.h: $!" unless open(H, ">reentr.h");
+# safer_unlink 'reentr.h';
+die "reentr.pl: $!" unless open(H, ">reentr.h-new");
 binmode H;
 select H;
 print <<EOF;
@@ -789,11 +789,12 @@ typedef struct {
 EOF
 
 close(H);
+safer_rename('reentr.h-new', 'reentr.h');
 
 # Prepare to write the reentr.c.
 
-safer_unlink 'reentr.c';
-die "reentr.c: $!" unless open(C, ">reentr.c");
+# safer_unlink 'reentr.c';
+die "reentr.c: $!" unless open(C, ">reentr.c-new");
 binmode C;
 select C;
 print <<EOF;
@@ -1089,6 +1090,9 @@ Perl_reentrant_retry(const char *f, ...)
 
 /* ex: set ro: */
 EOF
+
+close(C);
+safer_rename('reentr.c-new', 'reentr.c');
 
 __DATA__
 asctime S	|time	|const struct tm|B_SB|B_SBI|I_SB|I_SBI

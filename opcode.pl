@@ -443,9 +443,6 @@ print ON "/* ex: set ro: */\n";
 close OC or die "Error closing opcode.h: $!\n";
 close ON or die "Error closing opnames.h: $!\n";
 
-foreach ('opcode.h', 'opnames.h') {
-    safer_rename_silent $_, "$_-old";
-}
 safer_rename $opcode_new, 'opcode.h';
 safer_rename $opname_new, 'opnames.h';
 
@@ -497,9 +494,6 @@ print PPSYM "\n# ex: set ro:\n";
 close PP or die "Error closing pp_proto.h: $!\n";
 close PPSYM or die "Error closing pp.sym: $!\n";
 
-foreach ('pp_proto.h', 'pp.sym') {
-    safer_rename_silent $_, "$_-old";
-}
 safer_rename $pp_proto_new, 'pp_proto.h';
 safer_rename $pp_sym_new, 'pp.sym';
 

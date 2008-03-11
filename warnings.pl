@@ -3,7 +3,8 @@
 $VERSION = '1.02_02';
 
 BEGIN {
-  push @INC, './lib';
+    require 'regen_lib.pl';
+    push @INC, './lib';
 }
 use strict ;
 
@@ -249,11 +250,9 @@ if (@ARGV && $ARGV[0] eq "tree")
     exit ;
 }
 
-unlink "warnings.h";
-unlink "lib/warnings.pm";
-open(WARN, ">warnings.h") || die "Can't create warnings.h: $!\n";
+open(WARN, ">warnings.h-new") || die "Can't create warnings.h: $!\n";
+open(PM, ">lib/warnings.pm-new") || die "Can't create lib/warnings.pm: $!\n";
 binmode WARN;
-open(PM, ">lib/warnings.pm") || die "Can't create lib/warnings.pm: $!\n";
 binmode PM;
 
 print WARN <<'EOM' ;
@@ -366,6 +365,7 @@ print WARN <<'EOM';
 EOM
 
 close WARN ;
+safer_rename("warnings.h-new", "warnings.h");
 
 while (<DATA>) {
     last if /^KEYWORDS$/ ;
@@ -427,6 +427,7 @@ while (<DATA>) {
 
 print PM "# ex: set ro:\n";
 close PM ;
+safer_rename("lib/warnings.pm-new", "lib/warnings.pm");
 
 __END__
 # -*- buffer-read-only: t -*-

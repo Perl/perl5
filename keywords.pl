@@ -2,8 +2,8 @@
 use strict;
 
 require 'regen_lib.pl';
-safer_unlink ("keywords.h");
-open(KW, ">keywords.h") || die "Can't create keywords.h: $!\n";
+
+open(KW, ">keywords.h-new") || die "Can't create keywords.h: $!\n";
 binmode KW;
 select KW;
 
@@ -38,6 +38,8 @@ while (<DATA>) {
 print KW "\n/* ex: set ro: */\n";
 
 close KW or die "Error closing keywords.h: $!";
+
+safer_rename("keywords.h-new", "keywords.h");
 
 ###########################################################################
 sub tab {

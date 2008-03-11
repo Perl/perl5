@@ -84,8 +84,8 @@ sub walk_table (&@) {
 	$F = $filename;
     }
     else {
-	safer_unlink $filename if $filename ne '/dev/null';
-	open F, ">$filename" or die "Can't open $filename: $!";
+	# safer_unlink $filename if $filename ne '/dev/null';
+	open F, ">$filename-new" or die "Can't open $filename: $!";
 	binmode F;
 	$F = \*F;
     }
@@ -112,6 +112,7 @@ sub walk_table (&@) {
     print $F $trailer if $trailer;
     unless (ref $filename) {
 	close $F or die "Error closing $filename: $!";
+	safer_rename("$filename-new", $filename);
     }
 }
 
@@ -388,8 +389,7 @@ sub multoff ($$) {
     return hide("PL_$pre$sym", "PL_$sym");
 }
 
-safer_unlink 'embed.h';
-open(EM, '> embed.h') or die "Can't create embed.h: $!\n";
+open(EM, '> embed.h-new') or die "Can't create embed.h: $!\n";
 binmode EM;
 
 print EM do_not_edit ("embed.h"), <<'END';
@@ -642,9 +642,9 @@ print EM <<'END';
 END
 
 close(EM) or die "Error closing EM: $!";
+safer_rename('embed.h-new', 'embed.h');
 
-safer_unlink 'embedvar.h';
-open(EM, '> embedvar.h')
+open(EM, '> embedvar.h-new')
     or die "Can't create embedvar.h: $!\n";
 binmode EM;
 
@@ -739,12 +739,11 @@ print EM <<'END';
 END
 
 close(EM) or die "Error closing EM: $!";
+safer_rename('embedvar.h-new', 'embedvar.h');
 
-safer_unlink 'perlapi.h';
-safer_unlink 'perlapi.c';
-open(CAPI, '> perlapi.c') or die "Can't create perlapi.c: $!\n";
+open(CAPI, '> perlapi.c-new') or die "Can't create perlapi.c: $!\n";
 binmode CAPI;
-open(CAPIH, '> perlapi.h') or die "Can't create perlapi.h: $!\n";
+open(CAPIH, '> perlapi.h-new') or die "Can't create perlapi.h: $!\n";
 binmode CAPIH;
 
 print CAPIH do_not_edit ("perlapi.h"), <<'EOT';
@@ -869,6 +868,7 @@ print CAPIH <<'EOT';
 /* ex: set ro: */
 EOT
 close CAPIH or die "Error closing CAPIH: $!";
+safer_rename('perlapi.h-new', 'perlapi.h');
 
 print CAPI do_not_edit ("perlapi.c"), <<'EOT';
 
@@ -950,6 +950,7 @@ END_EXTERN_C
 EOT
 
 close(CAPI) or die "Error closing CAPI: $!";
+safer_rename('perlapi.c-new', 'perlapi.c');
 
 # functions that take va_list* for implementing vararg functions
 # NOTE: makedef.pl must be updated if you add symbols to %vfuncs

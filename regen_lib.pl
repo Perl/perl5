@@ -15,6 +15,24 @@ if ($Is_NetWare) {
 
 $Needs_Write = $Is_OS2 || $Is_W32 || $Is_Cygwin || $Is_NetWare;
 
+eval "use Digest::MD5 'md5'; 1;"
+    or warn "Digest::MD5 unavailable, doing unconditional regen\n";
+
+sub cksum {
+    my $pl = shift;
+    my ($buf, $cksum);
+    local *FH;
+    if (open(FH, $pl)) {
+	local $/;
+	$buf = <FH>;
+	$cksum = defined &md5 ? md5($buf) : 0;
+	close FH;
+    } else {
+	warn "$0: $pl: $!\n";
+    }
+    return $cksum;
+}
+
 sub safer_unlink {
   my @names = @_;
   my $cnt = 0;
@@ -38,8 +56,23 @@ sub safer_rename_silent {
   rename $from, $to;
 }
 
+sub safer_rename_always {
+  my ($from, $to) = @_;
+  safer_rename_silent($from, $to) or die "renaming $from to $to: $!";
+}
+
 sub safer_rename {
   my ($from, $to) = @_;
+
+  my $fc = cksum($from);
+  my $tc = cksum($to);
+  
+  if ($fc and $fc eq $tc) {
+      warn "no changes between '$from' & '$to'\n";
+      safer_unlink($from);
+      return;
+  }
+  warn "changed '$from' to '$to'\n";
   safer_rename_silent($from, $to) or die "renaming $from to $to: $!";
 }
 1;
