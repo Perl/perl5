@@ -869,6 +869,7 @@ i_limits=''
 i_locale=''
 i_machcthr=''
 i_malloc=''
+i_mallocmalloc=''
 i_math=''
 i_memory=''
 i_mntent=''
@@ -6550,6 +6551,10 @@ case "$inc_version_list" in
 esac
 $rm -f getverlist
 
+: see if malloc/malloc.h has to be included
+set malloc/malloc.h i_mallocmalloc
+eval $inhdr
+
 : see if this is a malloc.h system
 : we want a real compile instead of Inhdr because some systems have a
 : malloc.h that just gives a compile error saying to use stdlib.h instead
@@ -6557,6 +6562,11 @@ echo " "
 $cat >try.c <<EOCP
 #include <stdlib.h>
 #include <malloc.h>
+$i_mallocmalloc I_MALLOCMALLOC
+#ifdef I_MALLOCMALLOC
+# include <malloc/malloc.h>
+#endif
+
 int main () { return 0; }
 EOCP
 set try
@@ -22353,6 +22363,7 @@ i_limits='$i_limits'
 i_locale='$i_locale'
 i_machcthr='$i_machcthr'
 i_malloc='$i_malloc'
+i_mallocmalloc='$i_mallocmalloc'
 i_math='$i_math'
 i_memory='$i_memory'
 i_mntent='$i_mntent'

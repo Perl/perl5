@@ -2923,6 +2923,10 @@ i_malloc (i_malloc.U):
 	This variable conditionally defines the I_MALLOC symbol, and indicates
 	whether a C program should include <malloc.h>.
 
+i_mallocmalloc (i_mallocmalloc.U):
+	This variable conditionally defines the I_MALLOCMALLOC symbol,
+	and indicates whether a C program should include <malloc/malloc.h>.
+
 i_math (i_math.U):
 	This variable conditionally defines the I_MATH symbol, and indicates
 	whether a C program may include <math.h>.

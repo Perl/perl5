@@ -4073,6 +4073,11 @@ struct perl_memory_debug_header {
 #  define INIT_TRACK_MEMPOOL(header, interp)
 #endif
 
+#ifdef I_MALLOCMALLOC
+/* Needed for malloc_size(), malloc_good_size() on some systems */
+#  include <malloc/malloc.h>
+#endif
+
 #ifdef MYMALLOC
 #  define Perl_safesysmalloc_size(where)	Perl_malloced_size(where)
 #else
