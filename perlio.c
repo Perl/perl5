@@ -3130,7 +3130,7 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	int invalidate = 0;
 	IV result = 0;
 	int saveerr = 0;
-	int dupfd = 0;
+	int dupfd = -1;
 #ifdef SOCKS5_VERSION_NAME
     	/* Socks lib overrides close() but stdio isn't linked to
 	   that library (though we are) - so we must call close()
@@ -3171,7 +3171,7 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	/* in SOCKS' case, let close() determine return value */
 	result = close(fd);
 #endif
-	if (dupfd) {
+	if (dupfd >= 0) {
 	    PerlLIO_dup2(dupfd,fd);
 	    PerlLIO_close(dupfd);
 	}
