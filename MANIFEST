@@ -908,6 +908,9 @@ ext/MIME/Base64/t/base64.t	See whether MIME::Base64 works
 ext/MIME/Base64/t/quoted-print.t	See whether MIME::QuotedPrint works
 ext/MIME/Base64/t/unicode.t	See whether MIME::Base64 works
 ext/MIME/Base64/t/warn.t	See whether MIME::Base64 works
+ext/Module/Pluggable/lib/Devel/InnerPackage.pm		Find inner packages
+ext/Module/Pluggable/lib/Module/Pluggable/Object.pm	Module::Pluggable
+ext/Module/Pluggable/lib/Module/Pluggable.pm		Module::Pluggable
 ext/NDBM_File/hints/cygwin.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dec_osf.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dynixptx.pl	Hint for NDBM_File for named architecture
@@ -1712,7 +1715,6 @@ lib/DBM_Filter/utf8.pm		DBM Filter for UTF-8 Encoding
 lib/dbm_filter_util.pl		Utility functions used by DBM Filter tests
 lib/DB.pm			Debugger API (draft)
 lib/DB.t			See if DB works
-lib/Devel/InnerPackage.pm	Find inner packages
 lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 lib/Devel/SelfStubber.t		See if Devel::SelfStubber works
 lib/diagnostics.pm		Print verbose diagnostics
@@ -2237,8 +2239,6 @@ lib/Module/Load/t/to_load/LoadMe.pl	Module::Load tests
 lib/Module/Load/t/to_load/Must/Be/Loaded.pm	Module::Load tests
 lib/Module/Load/t/to_load/TestModule.pm	Module::Load tests
 lib/Module/Load/t/to_load/ToBeLoaded	Module::Load tests
-lib/Module/Pluggable/Object.pm	Module::Pluggable
-lib/Module/Pluggable.pm	Module::Pluggable
 lib/mro.pm			mro extension
 lib/Net/Changes			libnet
 lib/Net/Cmd.pm			libnet
