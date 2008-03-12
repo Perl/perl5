@@ -3156,8 +3156,26 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	    result = PerlIO_flush(f);
 	    saveerr = errno;
 	    invalidate = PerlIOStdio_invalidate_fileno(aTHX_ stdio);
-	    if (!invalidate)
+	    if (!invalidate) {
 		dupfd = PerlLIO_dup(fd);
+#ifdef USE_ITHREADS
+		if (dupfd >= 0) {
+		    /* Right. We need a mutex here because for a brief while we
+		       will have the situation that fd is actually closed.
+		       Hence if a second thread were to get into this block,
+		       its dup() would likely return our fd as its dupfd.
+		       (after all, it is closed). Then if we get to the dup2()
+		       first, we blat the fd back (messing up its temporary as
+		       a side effect) only for it to then close its dupfd
+		       (== our fd) in its close(dupfd) */
+		    MUTEX_LOCK(&PL_perlio_mutex);
+		} else {
+		    /* Oh cXap. This isn't going to go well. Not sure if we can
+		       recover from here, or if closing this particular FILE *
+		       is a good idea now.  */
+		}
+#endif
+	    }
 	}
         result = PerlSIO_fclose(stdio);
 	/* We treat error from stdio as success if we invalidated
@@ -3173,6 +3191,9 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 #endif
 	if (dupfd >= 0) {
 	    PerlLIO_dup2(dupfd,fd);
+#ifdef USE_ITHREADS
+	MUTEX_UNLOCK(&PL_perlio_mutex);
+#endif
 	    PerlLIO_close(dupfd);
 	}
 	return result;
