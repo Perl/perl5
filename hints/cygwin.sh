@@ -36,6 +36,8 @@ test -z "$use64bitint" && use64bitint='define'
 test -z "$usethreads" && usethreads='define'
 test -z "$usemymalloc" && usemymalloc='define'
 ccflags="$ccflags -DPERL_USE_SAFE_PUTENV -U__STRICT_ANSI__"
+# - otherwise i686-cygwin
+archname='cygwin'
 
 # dynamic loading
 # - otherwise -fpic
