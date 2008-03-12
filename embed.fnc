@@ -853,8 +853,9 @@ Apd	|I32	|sv_true	|NULLOK SV *const sv
 pd	|void	|sv_add_arena	|NN char *const ptr|const U32 size|const U32 flags
 Apd	|int	|sv_backoff	|NN SV *const sv
 Apd	|SV*	|sv_bless	|NN SV *const sv|NN HV *const stash
-Afpd	|void	|sv_catpvf	|NN SV* sv|NN const char* pat|...
-Apd	|void	|sv_vcatpvf	|NN SV* sv|NN const char* pat|NULLOK va_list* args
+Afpd	|void	|sv_catpvf	|NN SV *const sv|NN const char *const pat|...
+Apd	|void	|sv_vcatpvf	|NN SV *const sv|NN const char *const pat \
+				|NULLOK va_list *const args
 Apd	|void	|sv_catpv	|NN SV *const sv|NULLOK const char* ptr
 Amdb	|void	|sv_catpvn	|NN SV *dsv|NN const char *sstr|STRLEN len
 Amdb	|void	|sv_catsv	|NN SV *dstr|NULLOK SV *sstr
@@ -934,12 +935,12 @@ Apd	|void	|sv_upgrade	|NN SV *const sv|svtype new_type
 Apdmb	|void	|sv_usepvn	|NN SV* sv|NULLOK char* ptr|STRLEN len
 Apd	|void	|sv_usepvn_flags|NN SV *const sv|NULLOK char* ptr|const STRLEN len\
 				|const U32 flags
-Apd	|void	|sv_vcatpvfn	|NN SV* sv|NN const char* pat|STRLEN patlen \
-				|NULLOK va_list* args|NULLOK SV** svargs|I32 svmax \
-				|NULLOK bool *maybe_tainted
-Apd	|void	|sv_vsetpvfn	|NN SV* sv|NN const char* pat|STRLEN patlen \
-				|NULLOK va_list* args|NULLOK SV** svargs|I32 svmax \
-				|NULLOK bool *maybe_tainted
+Apd	|void	|sv_vcatpvfn	|NN SV *const sv|NN const char *const pat|const STRLEN patlen \
+				|NULLOK va_list *const args|NULLOK SV **const svargs|const I32 svmax \
+				|NULLOK bool *const maybe_tainted
+Apd	|void	|sv_vsetpvfn	|NN SV *const sv|NN const char *const pat|const STRLEN patlen \
+				|NULLOK va_list *const args|NULLOK SV **const svargs \
+				|const I32 svmax|NULLOK bool *const maybe_tainted
 ApR	|NV	|str_to_version	|NN SV *sv
 Ap	|SV*	|swash_init	|NN const char* pkg|NN const char* name|NN SV* listsv|I32 minbits|I32 none
 Ap	|UV	|swash_fetch	|NN SV *swash|NN const U8 *ptr|bool do_utf8
@@ -1032,8 +1033,9 @@ Ap	|void	|free_global_struct|NN struct perl_vars *plvarsp
 #endif
 Ap	|int	|runops_standard
 Ap	|int	|runops_debug
-Afpd	|void	|sv_catpvf_mg	|NN SV *sv|NN const char* pat|...
-Apd	|void	|sv_vcatpvf_mg	|NN SV* sv|NN const char* pat|NULLOK va_list* args
+Afpd	|void	|sv_catpvf_mg	|NN SV *const sv|NN const char *const pat|...
+Apd	|void	|sv_vcatpvf_mg	|NN SV *const sv|NN const char *const pat \
+				|NULLOK va_list *const args
 Apd	|void	|sv_catpv_mg	|NN SV *const sv|NULLOK const char *const ptr
 Apdbm	|void	|sv_catpvn_mg	|NN SV *sv|NN const char *ptr|STRLEN len
 Apdbm	|void	|sv_catsv_mg	|NN SV *dsv|NULLOK SV *ssv
@@ -1111,13 +1113,13 @@ ApR	|HE*	|he_dup		|NULLOK const HE* e|bool shared|NN CLONE_PARAMS* param
 ApR	|HEK*	|hek_dup	|NULLOK HEK* e|NN CLONE_PARAMS* param
 Ap	|void	|re_dup_guts	|NN const REGEXP *sstr|NN REGEXP *dstr \
 				|NN CLONE_PARAMS* param
-Ap	|PerlIO*|fp_dup		|NULLOK PerlIO* fp|char type|NN CLONE_PARAMS* param
-ApR	|DIR*	|dirp_dup	|NULLOK DIR* dp
-ApR	|GP*	|gp_dup		|NULLOK GP* gp|NN CLONE_PARAMS* param
-ApR	|MAGIC*	|mg_dup		|NULLOK MAGIC* mg|NN CLONE_PARAMS* param
+Ap	|PerlIO*|fp_dup		|NULLOK PerlIO *const fp|const char type|NN CLONE_PARAMS *const param
+ApR	|DIR*	|dirp_dup	|NULLOK DIR *const dp
+ApR	|GP*	|gp_dup		|NULLOK GP *const gp|NN CLONE_PARAMS *const param
+ApR	|MAGIC*	|mg_dup		|NULLOK MAGIC *const mg|NN CLONE_PARAMS *const param
 ApR	|SV*	|sv_dup		|NULLOK const SV* sstr|NN CLONE_PARAMS* param
 Ap	|void	|rvpv_dup	|NN SV* dstr|NN const SV *sstr|NN CLONE_PARAMS* param
-Ap	|yy_parser*|parser_dup	|NULLOK const yy_parser *proto|NN CLONE_PARAMS* param
+Ap	|yy_parser*|parser_dup	|NULLOK const yy_parser *const proto|NN CLONE_PARAMS *const param
 #endif
 Apa	|PTR_TBL_t*|ptr_table_new
 ApR	|void*	|ptr_table_fetch|NN PTR_TBL_t *tbl|NULLOK const void *sv
@@ -1558,7 +1560,7 @@ s	|int	|sv_2iuv_non_preserve	|NN SV *const sv|I32 numtype
 s	|int	|sv_2iuv_non_preserve	|NN SV *const sv
 #    endif
 #  endif
-sR	|I32	|expect_number	|NN char** pattern
+sR	|I32	|expect_number	|NN char **const pattern
 #
 sn	|STRLEN	|sv_pos_u2b_forwards|NN const U8 *const start \
 		|NN const U8 *const send|STRLEN uoffset
@@ -1571,7 +1573,7 @@ s	|void	|utf8_mg_pos_cache_update|NN SV *const sv|NN MAGIC **const mgp \
 		|const STRLEN byte|const STRLEN utf8|const STRLEN blen
 s	|STRLEN	|sv_pos_b2u_midway|NN const U8 *const s|NN const U8 *const target \
 		|NN const U8 *end|STRLEN endu
-sn	|char *	|F0convert	|NV nv|NN char *endbuf|NN STRLEN *len
+sn	|char *	|F0convert	|NV nv|NN char *const endbuf|NN STRLEN *const len
 #  if defined(PERL_OLD_COPY_ON_WRITE)
 sM	|void	|sv_release_COW	|NN SV *sv|NN const char *pvx|NN SV *after
 #  endif

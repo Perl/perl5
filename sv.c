@@ -8725,7 +8725,7 @@ valid UTF-8; if the original SV was bytes, the pattern should be too.
 =cut */
 
 void
-Perl_sv_catpvf(pTHX_ SV *sv, const char* pat, ...)
+Perl_sv_catpvf(pTHX_ SV *const sv, const char *const pat, ...)
 {
     va_list args;
 
@@ -8748,7 +8748,7 @@ Usually used via its frontend C<sv_catpvf>.
 */
 
 void
-Perl_sv_vcatpvf(pTHX_ SV *sv, const char* pat, va_list* args)
+Perl_sv_vcatpvf(pTHX_ SV *const sv, const char *const pat, va_list *const args)
 {
     PERL_ARGS_ASSERT_SV_VCATPVF;
 
@@ -8764,7 +8764,7 @@ Like C<sv_catpvf>, but also handles 'set' magic.
 */
 
 void
-Perl_sv_catpvf_mg(pTHX_ SV *sv, const char* pat, ...)
+Perl_sv_catpvf_mg(pTHX_ SV *const sv, const char *const pat, ...)
 {
     va_list args;
 
@@ -8786,7 +8786,7 @@ Usually used via its frontend C<sv_catpvf_mg>.
 */
 
 void
-Perl_sv_vcatpvf_mg(pTHX_ SV *sv, const char* pat, va_list* args)
+Perl_sv_vcatpvf_mg(pTHX_ SV *const sv, const char *const pat, va_list *const args)
 {
     PERL_ARGS_ASSERT_SV_VCATPVF_MG;
 
@@ -8806,7 +8806,8 @@ Usually used via one of its frontends C<sv_vsetpvf> and C<sv_vsetpvf_mg>.
 */
 
 void
-Perl_sv_vsetpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *maybe_tainted)
+Perl_sv_vsetpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
+                 va_list *const args, SV **const svargs, const I32 svmax, bool *const maybe_tainted)
 {
     PERL_ARGS_ASSERT_SV_VSETPVFN;
 
@@ -8815,7 +8816,7 @@ Perl_sv_vsetpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 }
 
 STATIC I32
-S_expect_number(pTHX_ char** pattern)
+S_expect_number(pTHX_ char **const pattern)
 {
     dVAR;
     I32 var = 0;
@@ -8838,7 +8839,7 @@ S_expect_number(pTHX_ char** pattern)
 }
 
 STATIC char *
-S_F0convert(NV nv, char *endbuf, STRLEN *len)
+S_F0convert(NV nv, char *const endbuf, STRLEN *const len)
 {
     const int neg = nv < 0;
     UV uv;
@@ -8888,7 +8889,8 @@ Usually used via one of its frontends C<sv_vcatpvf> and C<sv_vcatpvf_mg>.
 /* XXX maybe_tainted is never assigned to, so the doc above is lying. */
 
 void
-Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *maybe_tainted)
+Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
+                 va_list *const args, SV **const svargs, const I32 svmax, bool *const maybe_tainted)
 {
     dVAR;
     char *p;
@@ -9997,7 +9999,7 @@ ptr_table_* functions.
 /* clone a parser */
 
 yy_parser *
-Perl_parser_dup(pTHX_ const yy_parser *proto, CLONE_PARAMS* param)
+Perl_parser_dup(pTHX_ const yy_parser *const proto, CLONE_PARAMS *const param)
 {
     yy_parser *parser;
 
@@ -10140,7 +10142,7 @@ Perl_fp_dup(pTHX_ PerlIO *fp, char type, CLONE_PARAMS *param)
 /* duplicate a directory handle */
 
 DIR *
-Perl_dirp_dup(pTHX_ DIR *dp)
+Perl_dirp_dup(pTHX_ DIR *const dp)
 {
     PERL_UNUSED_CONTEXT;
     if (!dp)
@@ -10152,7 +10154,7 @@ Perl_dirp_dup(pTHX_ DIR *dp)
 /* duplicate a typeglob */
 
 GP *
-Perl_gp_dup(pTHX_ GP *gp, CLONE_PARAMS* param)
+Perl_gp_dup(pTHX_ GP *const gp, CLONE_PARAMS *const param)
 {
     GP *ret;
 
@@ -10187,7 +10189,7 @@ Perl_gp_dup(pTHX_ GP *gp, CLONE_PARAMS* param)
 /* duplicate a chain of magic */
 
 MAGIC *
-Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS* param)
+Perl_mg_dup(pTHX_ MAGIC *const mg, CLONE_PARAMS *const param)
 {
     MAGIC *mgprev = (MAGIC*)NULL;
     MAGIC *mgret;

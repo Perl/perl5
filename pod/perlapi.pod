@@ -5488,7 +5488,7 @@ upgraded to UTF-8.  Handles 'get' magic, but not 'set' magic.  See
 C<sv_catpvf_mg>. If the original SV was UTF-8, the pattern should be
 valid UTF-8; if the original SV was bytes, the pattern should be too.
 
-	void	sv_catpvf(SV* sv, const char* pat, ...)
+	void	sv_catpvf(SV *const sv, const char *const pat, ...)
 
 =for hackers
 Found in file sv.c
@@ -5498,7 +5498,7 @@ X<sv_catpvf_mg>
 
 Like C<sv_catpvf>, but also handles 'set' magic.
 
-	void	sv_catpvf_mg(SV *sv, const char* pat, ...)
+	void	sv_catpvf_mg(SV *const sv, const char *const pat, ...)
 
 =for hackers
 Found in file sv.c
@@ -6476,7 +6476,7 @@ to an SV.  Does not handle 'set' magic.  See C<sv_vcatpvf_mg>.
 
 Usually used via its frontend C<sv_catpvf>.
 
-	void	sv_vcatpvf(SV* sv, const char* pat, va_list* args)
+	void	sv_vcatpvf(SV *const sv, const char *const pat, va_list *const args)
 
 =for hackers
 Found in file sv.c
@@ -6492,7 +6492,7 @@ locales).
 
 Usually used via one of its frontends C<sv_vcatpvf> and C<sv_vcatpvf_mg>.
 
-	void	sv_vcatpvfn(SV* sv, const char* pat, STRLEN patlen, va_list* args, SV** svargs, I32 svmax, bool *maybe_tainted)
+	void	sv_vcatpvfn(SV *const sv, const char *const pat, const STRLEN patlen, va_list *const args, SV **const svargs, const I32 svmax, bool *const maybe_tainted)
 
 =for hackers
 Found in file sv.c
@@ -6504,7 +6504,7 @@ Like C<sv_vcatpvf>, but also handles 'set' magic.
 
 Usually used via its frontend C<sv_catpvf_mg>.
 
-	void	sv_vcatpvf_mg(SV* sv, const char* pat, va_list* args)
+	void	sv_vcatpvf_mg(SV *const sv, const char *const pat, va_list *const args)
 
 =for hackers
 Found in file sv.c
@@ -6530,7 +6530,7 @@ appending it.
 
 Usually used via one of its frontends C<sv_vsetpvf> and C<sv_vsetpvf_mg>.
 
-	void	sv_vsetpvfn(SV* sv, const char* pat, STRLEN patlen, va_list* args, SV** svargs, I32 svmax, bool *maybe_tainted)
+	void	sv_vsetpvfn(SV *const sv, const char *const pat, const STRLEN patlen, va_list *const args, SV **const svargs, const I32 svmax, bool *const maybe_tainted)
 
 =for hackers
 Found in file sv.c

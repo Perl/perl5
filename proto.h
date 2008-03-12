@@ -3075,14 +3075,14 @@ PERL_CALLCONV SV*	Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
 #define PERL_ARGS_ASSERT_SV_BLESS	\
 	assert(sv); assert(stash)
 
-PERL_CALLCONV void	Perl_sv_catpvf(pTHX_ SV* sv, const char* pat, ...)
+PERL_CALLCONV void	Perl_sv_catpvf(pTHX_ SV *const sv, const char *const pat, ...)
 			__attribute__format__(__printf__,pTHX_2,pTHX_3)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SV_CATPVF	\
 	assert(sv); assert(pat)
 
-PERL_CALLCONV void	Perl_sv_vcatpvf(pTHX_ SV* sv, const char* pat, va_list* args)
+PERL_CALLCONV void	Perl_sv_vcatpvf(pTHX_ SV *const sv, const char *const pat, va_list *const args)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SV_VCATPVF	\
@@ -3390,13 +3390,13 @@ PERL_CALLCONV void	Perl_sv_usepvn_flags(pTHX_ SV *const sv, char* ptr, const STR
 #define PERL_ARGS_ASSERT_SV_USEPVN_FLAGS	\
 	assert(sv)
 
-PERL_CALLCONV void	Perl_sv_vcatpvfn(pTHX_ SV* sv, const char* pat, STRLEN patlen, va_list* args, SV** svargs, I32 svmax, bool *maybe_tainted)
+PERL_CALLCONV void	Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen, va_list *const args, SV **const svargs, const I32 svmax, bool *const maybe_tainted)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SV_VCATPVFN	\
 	assert(sv); assert(pat)
 
-PERL_CALLCONV void	Perl_sv_vsetpvfn(pTHX_ SV* sv, const char* pat, STRLEN patlen, va_list* args, SV** svargs, I32 svmax, bool *maybe_tainted)
+PERL_CALLCONV void	Perl_sv_vsetpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen, va_list *const args, SV **const svargs, const I32 svmax, bool *const maybe_tainted)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SV_VSETPVFN	\
@@ -3742,14 +3742,14 @@ PERL_CALLCONV void	Perl_free_global_struct(pTHX_ struct perl_vars *plvarsp)
 #endif
 PERL_CALLCONV int	Perl_runops_standard(pTHX);
 PERL_CALLCONV int	Perl_runops_debug(pTHX);
-PERL_CALLCONV void	Perl_sv_catpvf_mg(pTHX_ SV *sv, const char* pat, ...)
+PERL_CALLCONV void	Perl_sv_catpvf_mg(pTHX_ SV *const sv, const char *const pat, ...)
 			__attribute__format__(__printf__,pTHX_2,pTHX_3)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SV_CATPVF_MG	\
 	assert(sv); assert(pat)
 
-PERL_CALLCONV void	Perl_sv_vcatpvf_mg(pTHX_ SV* sv, const char* pat, va_list* args)
+PERL_CALLCONV void	Perl_sv_vcatpvf_mg(pTHX_ SV *const sv, const char *const pat, va_list *const args)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SV_VCATPVF_MG	\
@@ -4041,21 +4041,21 @@ PERL_CALLCONV void	Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLON
 #define PERL_ARGS_ASSERT_RE_DUP_GUTS	\
 	assert(sstr); assert(dstr); assert(param)
 
-PERL_CALLCONV PerlIO*	Perl_fp_dup(pTHX_ PerlIO* fp, char type, CLONE_PARAMS* param)
+PERL_CALLCONV PerlIO*	Perl_fp_dup(pTHX_ PerlIO *const fp, const char type, CLONE_PARAMS *const param)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_FP_DUP	\
 	assert(param)
 
-PERL_CALLCONV DIR*	Perl_dirp_dup(pTHX_ DIR* dp)
+PERL_CALLCONV DIR*	Perl_dirp_dup(pTHX_ DIR *const dp)
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV GP*	Perl_gp_dup(pTHX_ GP* gp, CLONE_PARAMS* param)
+PERL_CALLCONV GP*	Perl_gp_dup(pTHX_ GP *const gp, CLONE_PARAMS *const param)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_GP_DUP	\
 	assert(param)
 
-PERL_CALLCONV MAGIC*	Perl_mg_dup(pTHX_ MAGIC* mg, CLONE_PARAMS* param)
+PERL_CALLCONV MAGIC*	Perl_mg_dup(pTHX_ MAGIC *const mg, CLONE_PARAMS *const param)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_MG_DUP	\
@@ -4074,7 +4074,7 @@ PERL_CALLCONV void	Perl_rvpv_dup(pTHX_ SV* dstr, const SV *sstr, CLONE_PARAMS* p
 #define PERL_ARGS_ASSERT_RVPV_DUP	\
 	assert(dstr); assert(sstr); assert(param)
 
-PERL_CALLCONV yy_parser*	Perl_parser_dup(pTHX_ const yy_parser *proto, CLONE_PARAMS* param)
+PERL_CALLCONV yy_parser*	Perl_parser_dup(pTHX_ const yy_parser *const proto, CLONE_PARAMS *const param)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_PARSER_DUP	\
 	assert(param)
@@ -5541,7 +5541,7 @@ STATIC int	S_sv_2iuv_non_preserve(pTHX_ SV *const sv)
 
 #    endif
 #  endif
-STATIC I32	S_expect_number(pTHX_ char** pattern)
+STATIC I32	S_expect_number(pTHX_ char **const pattern)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_EXPECT_NUMBER	\
@@ -5581,7 +5581,7 @@ STATIC STRLEN	S_sv_pos_b2u_midway(pTHX_ const U8 *const s, const U8 *const targe
 #define PERL_ARGS_ASSERT_SV_POS_B2U_MIDWAY	\
 	assert(s); assert(target); assert(end)
 
-STATIC char *	S_F0convert(NV nv, char *endbuf, STRLEN *len)
+STATIC char *	S_F0convert(NV nv, char *const endbuf, STRLEN *const len)
 			__attribute__nonnull__(2)
 			__attribute__nonnull__(3);
 #define PERL_ARGS_ASSERT_F0CONVERT	\
