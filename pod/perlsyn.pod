@@ -634,7 +634,7 @@ case to the next:
     given($foo) {
 	when (/x/) { say '$foo contains an x'; continue }
 	when (/y/) { say '$foo contains a y' }
-	default    { say '$foo contains neither an x nor a y' }
+	default    { say '$foo does not contain a y' }
     }
 
 =head3 Switching in a loop
