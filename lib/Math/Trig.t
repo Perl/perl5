@@ -28,8 +28,8 @@ BEGIN {
 
 plan(tests => 153);
 
-use Math::Trig 1.13;
-use Math::Trig 1.13 qw(:pi Inf);
+use Math::Trig 1.16;
+use Math::Trig 1.16 qw(:pi Inf);
 
 my $pip2 = pi / 2;
 
