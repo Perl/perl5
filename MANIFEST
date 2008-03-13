@@ -3742,6 +3742,7 @@ t/Module_Pluggable/09require.t	Module::Pluggable tests
 t/Module_Pluggable/10innerpack_inner.t	Module::Pluggable tests
 t/Module_Pluggable/10innerpack_noinner.t	Module::Pluggable tests
 t/Module_Pluggable/10innerpack_override.t	Module::Pluggable tests
+t/Module_Pluggable/10innerpack_super.t		Module::Pluggable tests
 t/Module_Pluggable/10innerpack.t	Module::Pluggable tests
 t/Module_Pluggable/11usetwice.t	Module::Pluggable tests
 t/Module_Pluggable/12onlyarray.t	Module::Pluggable tests
@@ -3757,8 +3758,14 @@ t/Module_Pluggable/17devel_inner_package.t	Module::Pluggable tests
 t/Module_Pluggable/18skipped_package.t	Module::Pluggable tests
 t/Module_Pluggable/19can_ok_clobber.t	Module::Pluggable tests
 t/Module_Pluggable/20dodgy_files.t	Module::Pluggable tests
+t/Module_Pluggable/21editor_junk.t			Module::Pluggable tests
 t/Module_Pluggable/acme/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
+t/Module_Pluggable/lib/EditorJunk/Plugin/Foo.pm		Module::Pluggable tests
+t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm~	Module::Pluggable tests
+t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm.swp	Module::Pluggable tests
+t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm		Module::Pluggable tests
+t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm.swo	Module::Pluggable tests
 t/Module_Pluggable/lib/ExtTest/Plugin/Bar.plugin	Module::Pluggable tests
 t/Module_Pluggable/lib/ExtTest/Plugin/Foo.plugin	Module::Pluggable tests
 t/Module_Pluggable/lib/ExtTest/Plugin/Quux/Foo.plugin	Module::Pluggable tests
@@ -3772,7 +3779,6 @@ t/Module_Pluggable/lib/MyTest/Plugin/Bar.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/MyTest/Plugin/Foo.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/MyTest/Plugin/Quux/Foo.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/No/Middle.pm	Module::Pluggable tests
-t/Module_Pluggable/lib/OddTest/Plugin/-Dodgy.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/OddTest/Plugin/Foo.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/TA/C/A/I.pm	Module::Pluggable tests
 t/mro/basic_01_c3.t		mro tests
