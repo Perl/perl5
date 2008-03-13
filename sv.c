@@ -10189,7 +10189,7 @@ Perl_gp_dup(pTHX_ GP *const gp, CLONE_PARAMS *const param)
 /* duplicate a chain of magic */
 
 MAGIC *
-Perl_mg_dup(pTHX_ MAGIC *const mg, CLONE_PARAMS *const param)
+Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *const param)
 {
     MAGIC *mgprev = (MAGIC*)NULL;
     MAGIC *mgret;
