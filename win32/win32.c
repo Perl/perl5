@@ -2127,8 +2127,7 @@ win32_async_check(pTHX)
      * Perl is calling win32_waitpid() inside a GUI application and the GUI
      * is generating messages before the process terminated.
      */
-    while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE|PM_NOYIELD))
-        /* keep going */ ;
+    PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE|PM_NOYIELD);
 
     /* Above or other stuff may have set a signal flag */
     if (PL_sig_pending)
