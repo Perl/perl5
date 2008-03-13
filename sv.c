@@ -10189,7 +10189,7 @@ Perl_gp_dup(pTHX_ GP *const gp, CLONE_PARAMS *const param)
 /* duplicate a chain of magic */
 
 MAGIC *
-Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *const param)
+Perl_mg_dup(pTHX_ MAGIC *const mg, CLONE_PARAMS *const param)
 {
     MAGIC *mgprev = (MAGIC*)NULL;
     MAGIC *mgret;
@@ -10288,7 +10288,7 @@ Perl_ptr_table_new(pTHX)
 /* map an existing pointer using a table */
 
 STATIC PTR_TBL_ENT_t *
-S_ptr_table_find(PTR_TBL_t *tbl, const void *sv)
+S_ptr_table_find(PTR_TBL_t *const tbl, const void *const sv)
 {
     PTR_TBL_ENT_t *tblent;
     const UV hash = PTR_TABLE_HASH(sv);
@@ -10304,7 +10304,7 @@ S_ptr_table_find(PTR_TBL_t *tbl, const void *sv)
 }
 
 void *
-Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, const void *sv)
+Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *const tbl, const void *const sv)
 {
     PTR_TBL_ENT_t const *const tblent = ptr_table_find(tbl, sv);
 
@@ -10317,7 +10317,7 @@ Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, const void *sv)
 /* add a new entry to a pointer-mapping table */
 
 void
-Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, const void *oldsv, void *newsv)
+Perl_ptr_table_store(pTHX_ PTR_TBL_t *const tbl, const void *const oldsv, void *const newsv)
 {
     PTR_TBL_ENT_t *tblent = ptr_table_find(tbl, oldsv);
 
@@ -10344,7 +10344,7 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, const void *oldsv, void *newsv)
 /* double the hash bucket size of an existing ptr table */
 
 void
-Perl_ptr_table_split(pTHX_ PTR_TBL_t *tbl)
+Perl_ptr_table_split(pTHX_ PTR_TBL_t *const tbl)
 {
     PTR_TBL_ENT_t **ary = tbl->tbl_ary;
     const UV oldsize = tbl->tbl_max + 1;
@@ -10379,7 +10379,7 @@ Perl_ptr_table_split(pTHX_ PTR_TBL_t *tbl)
 /* remove all the entries from a ptr table */
 
 void
-Perl_ptr_table_clear(pTHX_ PTR_TBL_t *tbl)
+Perl_ptr_table_clear(pTHX_ PTR_TBL_t *const tbl)
 {
     if (tbl && tbl->tbl_items) {
 	register PTR_TBL_ENT_t * const * const array = tbl->tbl_ary;
@@ -10402,7 +10402,7 @@ Perl_ptr_table_clear(pTHX_ PTR_TBL_t *tbl)
 /* clear and free a ptr table */
 
 void
-Perl_ptr_table_free(pTHX_ PTR_TBL_t *tbl)
+Perl_ptr_table_free(pTHX_ PTR_TBL_t *const tbl)
 {
     if (!tbl) {
         return;
@@ -10415,7 +10415,7 @@ Perl_ptr_table_free(pTHX_ PTR_TBL_t *tbl)
 #if defined(USE_ITHREADS)
 
 void
-Perl_rvpv_dup(pTHX_ SV *dstr, const SV *sstr, CLONE_PARAMS* param)
+Perl_rvpv_dup(pTHX_ SV *const dstr, const SV *const sstr, CLONE_PARAMS *const param)
 {
     PERL_ARGS_ASSERT_RVPV_DUP;
 
@@ -10463,7 +10463,7 @@ Perl_rvpv_dup(pTHX_ SV *dstr, const SV *sstr, CLONE_PARAMS* param)
 /* duplicate an SV of any type (including AV, HV etc) */
 
 SV *
-Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
+Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 {
     dVAR;
     SV *dstr;
