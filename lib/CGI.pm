@@ -18,8 +18,8 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.234 2007/04/16 16:58:46 lstein Exp $';
-$CGI::VERSION='3.29';
+$CGI::revision = '$Id: CGI.pm,v 1.240 2007/11/30 18:58:27 lstein Exp $';
+$CGI::VERSION='3.33';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -110,6 +110,9 @@ sub initialize_globals {
     # Do not include undefined params parsed from query string
     # use CGI qw(-no_undef_params);
     $NO_UNDEF_PARAMS = 0;
+
+    # return everything as utf-8
+    $PARAM_UTF8      = 0;
 
     # Other globals that you shouldn't worry about.
     undef $Q;
@@ -445,15 +448,14 @@ sub param {
 
     return unless defined($name) && $self->{$name};
 
-    my $charset = $self->charset || '';
-    my $utf8    = $charset eq 'utf-8';
-    if ($utf8) {
-      eval "require Encode; 1;" if $utf8 && !Encode->can('decode'); # bring in these functions
-      return wantarray ? map {Encode::decode(utf8=>$_) } @{$self->{$name}} 
-                       : Encode::decode(utf8=>$self->{$name}->[0]);
-    } else {
-      return wantarray ? @{$self->{$name}} : $self->{$name}->[0];
+    my @result = @{$self->{$name}};
+
+    if ($PARAM_UTF8) {
+      eval "require Encode; 1;" unless Encode->can('decode'); # bring in these functions
+      @result = map {ref $_ ? $_ : Encode::decode(utf8=>$_) } @result;
     }
+
+    return wantarray ?  @result : $result[0];
 }
 
 sub self_or_default {
@@ -641,7 +643,7 @@ sub init {
 	  last METHOD;
       }
 
-      if ($meth eq 'POST') {
+      if ($meth eq 'POST' || $meth eq 'PUT') {
 	  $self->read_from_client(\$query_string,$content_length,0)
 	      if $content_length > 0;
 	  # Some people want to have their cake and eat it too!
@@ -667,11 +669,11 @@ sub init {
   }
 
 # YL: Begin Change for XML handler 10/19/2001
-    if (!$is_xforms && $meth eq 'POST'
+    if (!$is_xforms && ($meth eq 'POST' || $meth eq 'PUT')
         && defined($ENV{'CONTENT_TYPE'})
         && $ENV{'CONTENT_TYPE'} !~ m|^application/x-www-form-urlencoded|
 	&& $ENV{'CONTENT_TYPE'} !~ m|^multipart/form-data| ) {
-        my($param) = 'POSTDATA' ;
+        my($param) = $meth . 'DATA' ;
         $self->add_parameter($param) ;
       push (@{$self->{$param}},$query_string);
       undef $query_string ;
@@ -904,6 +906,7 @@ sub _setup_symbols {
 	$DEBUG=0,                next if /^[:-]no_?[Dd]ebug$/;
 	$DEBUG=2,                next if /^[:-][Dd]ebug$/;
 	$USE_PARAM_SEMICOLONS++, next if /^[:-]newstyle_urls$/;
+	$PARAM_UTF8++,           next if /^[:-]utf8$/;
 	$XHTML++,                next if /^[:-]xhtml$/;
 	$XHTML=0,                next if /^[:-]no_?xhtml$/;
 	$USE_PARAM_SEMICOLONS=0, next if /^[:-]oldstyle_urls$/;
@@ -1519,7 +1522,7 @@ sub header {
     push(@header,map {ucfirst $_} @other);
     push(@header,"Content-Type: $type") if $type ne '';
     my $header = join($CRLF,@header)."${CRLF}${CRLF}";
-    if ($MOD_PERL and not $nph) {
+    if (($MOD_PERL >= 1) && !$nph) {
         $self->r->send_cgi_header($header);
         return '';
     }
@@ -1699,6 +1702,7 @@ sub _style {
     my $cdata_end   = $XHTML ? "\n/* ]]> */-->\n" : " -->\n";
 
     my @s = ref($style) eq 'ARRAY' ? @$style : $style;
+    my $other = '';
 
     for my $s (@s) {
       if (ref($s)) {
@@ -1708,7 +1712,7 @@ sub _style {
                        ref($s) eq 'ARRAY' ? @$s : %$s));
        my $type = defined $stype ? $stype : 'text/css';
        my $rel  = $alternate ? 'alternate stylesheet' : 'stylesheet';
-       my $other = @other ? join ' ',@other : '';
+       $other = "@other" if @other;
 
        if (ref($src) eq "ARRAY") # Check to see if the $src variable is an array reference
        { # If it is, push a LINK tag for each one
@@ -2147,8 +2151,9 @@ END_OF_FUNC
 sub checkbox {
     my($self,@p) = self_or_default(@_);
 
-    my($name,$checked,$value,$label,$override,$tabindex,@other) = 
-	rearrange([NAME,[CHECKED,SELECTED,ON],VALUE,LABEL,[OVERRIDE,FORCE],TABINDEX],@p);
+    my($name,$checked,$value,$label,$labelattributes,$override,$tabindex,@other) =
+       rearrange([NAME,[CHECKED,SELECTED,ON],VALUE,LABEL,LABELATTRIBUTES,
+                   [OVERRIDE,FORCE],TABINDEX],@p);
 
     $value = defined $value ? $value : 'on';
 
@@ -2165,7 +2170,8 @@ sub checkbox {
     my($other) = @other ? "@other " : '';
     $tabindex = $self->element_tab($tabindex);
     $self->register_parameter($name);
-    return $XHTML ? CGI::label(qq{<input type="checkbox" name="$name" value="$value" $tabindex$checked$other/>$the_label})
+    return $XHTML ? CGI::label($labelattributes,
+                    qq{<input type="checkbox" name="$name" value="$value" $tabindex$checked$other/>$the_label})
                   : qq{<input type="checkbox" name="$name" value="$value"$checked$other>$the_label};
 }
 END_OF_FUNC
@@ -2327,13 +2333,14 @@ sub _box_group {
     my $self     = shift;
     my $box_type = shift;
 
-    my($name,$values,$defaults,$linebreak,$labels,$attributes,
-       $rows,$columns,$rowheaders,$colheaders,
+    my($name,$values,$defaults,$linebreak,$labels,$labelattributes,
+       $attributes,$rows,$columns,$rowheaders,$colheaders,
        $override,$nolabels,$tabindex,$disabled,@other) =
-       rearrange([      NAME,[VALUES,VALUE],[DEFAULT,DEFAULTS],LINEBREAK,LABELS,ATTRIBUTES,
-		        ROWS,[COLUMNS,COLS],[ROWHEADERS,ROWHEADER],[COLHEADERS,COLHEADER],
-			[OVERRIDE,FORCE],NOLABELS,TABINDEX,DISABLED
-                 ],@_);
+        rearrange([NAME,[VALUES,VALUE],[DEFAULT,DEFAULTS],LINEBREAK,LABELS,LABELATTRIBUTES,
+                       ATTRIBUTES,ROWS,[COLUMNS,COLS],[ROWHEADERS,ROWHEADER],[COLHEADERS,COLHEADER],
+                       [OVERRIDE,FORCE],NOLABELS,TABINDEX,DISABLED
+                  ],@_);
+
 
     my($result,$checked,@elements,@values);
 
@@ -2393,7 +2400,7 @@ sub _box_group {
 
         if ($XHTML) {
            push @elements,
-              CGI::label(
+              CGI::label($labelattributes,
                    qq(<input type="$box_type" name="$name" value="$_" $checkit$other$tab$attribs$disable/>$label)).${break};
         } else {
             push(@elements,qq/<input type="$box_type" name="$name" value="$_"$checkit$other$tab$attribs$disable>${label}${break}/);
@@ -2723,6 +2730,7 @@ sub url {
 
     $url .= $path         if $path_info and defined $path;
     $url .= "?$query_str" if $query     and $query_str ne '';
+    $url ||= '';
     $url =~ s/([^a-zA-Z0-9_.%;&?\/\\:+=~-])/sprintf("%%%02X",ord($1))/eg;
     return $url;
 }
@@ -3431,7 +3439,7 @@ sub read_multipart {
 
 	  my ($data);
 	  local($\) = '';
-          my $totalbytes;
+          my $totalbytes = 0;
           while (defined($data = $buffer->read)) {
               if (defined $self->{'.upload_hook'})
                {
@@ -3696,7 +3704,7 @@ sub new {
     (my $safename = $name) =~ s/([':%])/ sprintf '%%%02X', ord $1 /eg;
     my $fv = ++$FH . $safename;
     my $ref = \*{"Fh::$fv"};
-    $file =~ m!^([a-zA-Z0-9_ \'\":/.\$\\-]+)$! || return;
+    $file =~ m!^([a-zA-Z0-9_\+ \'\":/.\$\\-]+)$! || return;
     my $safe = $1;
     sysopen($ref,$safe,Fcntl::O_RDWR()|Fcntl::O_CREAT()|Fcntl::O_EXCL(),0600) || return;
     unlink($safe) if $delete;
@@ -4035,7 +4043,7 @@ sub new {
 	last if ! -f ($filename = sprintf("${TMPDIRECTORY}${SL}CGItemp%d",$sequence++));
     }
     # check that it is a more-or-less valid filename
-    return unless $filename =~ m!^([a-zA-Z0-9_ \'\":/.\$\\-]+)$!;
+    return unless $filename =~ m!^([a-zA-Z0-9_\+ \'\":/.\$\\-]+)$!;
     # this used to untaint, now it doesn't
     # $filename = $1;
     return bless \$filename;
@@ -4477,6 +4485,10 @@ it, use code like this:
 
    my $data = $query->param('POSTDATA');
 
+Likewise if PUTed data can be retrieved with code like this:
+
+   my $data = $query->param('PUTDATA');
+
 (If you don't know what the preceding means, don't worry about it.  It
 only affects people trying to use CGI for XML processing and other
 specialized tasks.)
@@ -4811,6 +4823,16 @@ feature.
 If start_html()'s -dtd parameter specifies an HTML 2.0 or 3.2 DTD, 
 XHTML will automatically be disabled without needing to use this 
 pragma.
+
+=item -utf8
+
+This makes CGI.pm treat all parameters as UTF-8 strings. Use this with
+care, as it will interfere with the processing of binary uploads. It
+is better to manually select which fields are expected to return utf-8
+strings and convert them using code like this:
+
+ use Encode;
+ my $arg = decode utf8=>param('foo');
 
 =item -nph
 
@@ -6389,6 +6411,9 @@ are the tab indexes of each button.  Examples:
   -tabindex => ['moe','minie','eenie','meenie']  # tab in this order
   -tabindex => {meenie=>100,moe=>101,minie=>102,eenie=>200} # tab in this order
 
+The optional B<-labelattributes> argument will contain attributes
+attached to the <label> element that surrounds each button.
+
 When the form is processed, all checked boxes will be returned as
 a list under the parameter name 'group_name'.  The values of the
 "on" checkboxes can be retrieved with:
@@ -6545,6 +6570,9 @@ common HTML attributes to an individual menu item. It's a pointer to
 an associative array relating menu values to another associative array
 with the attribute's name as the key and the attribute's value as the
 value.
+
+The optional B<-labelattributes> argument will contain attributes
+attached to the <label> element that surrounds each button.
 
 When the form is processed, the selected radio button can
 be retrieved using:
