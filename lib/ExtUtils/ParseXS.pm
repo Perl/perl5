@@ -18,7 +18,7 @@ my(@XSStack);	# Stack of conditionals and INCLUDEs
 my($XSS_work_idx, $cpp_next_tmp);
 
 use vars qw($VERSION);
-$VERSION = '2.18';
+$VERSION = '2.19';
 
 use vars qw(%input_expr %output_expr $ProtoUsed @InitFileCode $FH $proto_re $Overload $errors $Fallback
 	    $cplusplus $hiertype $WantPrototypes $WantVersionChk $except $WantLineNumbers
@@ -76,7 +76,7 @@ sub process_file {
   $proto_re = "[" . quotemeta('\$%&*@;[]') . "]" ;
   $Overload = 0;
   $errors = 0;
-  $Fallback = 'PL_sv_undef';
+  $Fallback = '&PL_sv_undef';
 
   # Most of the 1500 lines below uses these globals.  We'll have to
   # clean this up sometime, probably.  For now, we just pull them out
@@ -896,6 +896,7 @@ EOF
 #XS(XS_${Packid}_nil); /* prototype to pass -Wmissing-prototypes */
 #XS(XS_${Packid}_nil)
 #{
+#   dXSARGS;
 #   XSRETURN_EMPTY;
 #}
 #
@@ -1318,9 +1319,9 @@ sub FALLBACK_handler()
   
   TrimWhitespace($_) ;
   my %map = (
-	     TRUE => "PL_sv_yes", 1 => "PL_sv_yes",
-	     FALSE => "PL_sv_no", 0 => "PL_sv_no",
-	     UNDEF => "PL_sv_undef",
+	     TRUE => "&PL_sv_yes", 1 => "&PL_sv_yes",
+	     FALSE => "&PL_sv_no", 0 => "&PL_sv_no",
+	     UNDEF => "&PL_sv_undef",
 	    ) ;
   
   # check for valid FALLBACK value

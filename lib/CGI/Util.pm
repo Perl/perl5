@@ -201,7 +201,8 @@ sub escape {
   my $toencode = shift;
   return undef unless defined($toencode);
   # force bytes while preserving backward compatibility -- dankogai
-  $toencode = pack("C*", unpack("C*", $toencode));
+#  $toencode = eval { pack("C*", unpack("U0C*", $toencode))} || pack("C*", unpack("C*", $toencode));
+  $toencode = eval { pack("U*", unpack("U0C*", $toencode))} || pack("C*", unpack("C*", $toencode));
     if ($EBCDIC) {
       $toencode=~s/([^a-zA-Z0-9_.~-])/uc sprintf("%%%02x",$E2A[ord($1)])/eg;
     } else {
