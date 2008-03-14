@@ -3148,20 +3148,20 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	    if (!invalidate) {
 #ifdef USE_ITHREADS
 		MUTEX_LOCK(&PL_perlio_mutex);
-		/* Right. We need a mutex here because for a brief while we will
-		   have the situation that fd is actually closed. Hence if a
-		   second thread were to get into this block, its dup() would
-		   likely return our fd as its dupfd. (after all, it is closed).
+		/* Right. We need a mutex here because for a brief while we
+		   will have the situation that fd is actually closed. Hence if
+		   a second thread were to get into this block, its dup() would
+		   likely return our fd as its dupfd. (after all, it is closed)
 		   Then if we get to the dup2() first, we blat the fd back
 		   (messing up its temporary as a side effect) only for it to
 		   then close its dupfd (== our fd) in its close(dupfd) */
 
 		/* There is, of course, a race condition, that any other thread
 		   trying to input/output/whatever on this fd will be stuffed
-		   for the duraction of this little manoeuver. Perhaps we should
-		   hold an IO mutex for the duration of every IO operation if
-		   we know that invalidate doesn't work on this platform, but
-		   that would suck, and could kill performance.
+		   for the duration of this little manoeuvrer. Perhaps we
+		   should hold an IO mutex for the duration of every IO
+		   operation if we know that invalidate doesn't work on this
+		   platform, but that would suck, and could kill performance.
 
 		   Except that correctness trumps speed.
 		   Advice from klortho #11912. */
