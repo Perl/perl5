@@ -58,39 +58,39 @@ __DATA__
 <p><a href="#section1">section1</a></p>
 <p><a href="#section_2">section 2</a></p>
 <p><a href="#section_three">section three</a></p>
-<p><a href="#item_item1">item1</a></p>
-<p><a href="#item_item_2">item 2</a></p>
-<p><a href="#item_item_three">item three</a></p>
+<p><a href="#item1">item1</a></p>
+<p><a href="#item_2">item 2</a></p>
+<p><a href="#item_three">item three</a></p>
 <p><a href="#section1">section1</a></p>
 <p><a href="#section_2">section 2</a></p>
 <p><a href="#section_three">section three</a></p>
-<p><a href="#item_item1">item1</a></p>
-<p><a href="#item_item_2">item 2</a></p>
-<p><a href="#item_item_three">item three</a></p>
+<p><a href="#item1">item1</a></p>
+<p><a href="#item_2">item 2</a></p>
+<p><a href="#item_three">item three</a></p>
 <p><a href="#section1">section1</a></p>
 <p><a href="#section_2">section 2</a></p>
 <p><a href="#section_three">section three</a></p>
-<p><a href="#item_item1">item1</a></p>
-<p><a href="#item_item_2">item 2</a></p>
-<p><a href="#item_item_three">item three</a></p>
+<p><a href="#item1">item1</a></p>
+<p><a href="#item_2">item 2</a></p>
+<p><a href="#item_three">item three</a></p>
 <p><a href="#section1">text</a></p>
 <p><a href="#section_2">text</a></p>
 <p><a href="#section_three">text</a></p>
-<p><a href="#item_item1">text</a></p>
-<p><a href="#item_item_2">text</a></p>
-<p><a href="#item_item_three">text</a></p>
+<p><a href="#item1">text</a></p>
+<p><a href="#item_2">text</a></p>
+<p><a href="#item_three">text</a></p>
 <p><a href="#section1">text</a></p>
 <p><a href="#section_2">text</a></p>
 <p><a href="#section_three">text</a></p>
-<p><a href="#item_item1">text</a></p>
-<p><a href="#item_item_2">text</a></p>
-<p><a href="#item_item_three">text</a></p>
+<p><a href="#item1">text</a></p>
+<p><a href="#item_2">text</a></p>
+<p><a href="#item_three">text</a></p>
 <p><a href="#section1">text</a></p>
 <p><a href="#section_2">text</a></p>
 <p><a href="#section_three">text</a></p>
-<p><a href="#item_item1">text</a></p>
-<p><a href="#item_item_2">text</a></p>
-<p><a href="#item_item_three">text</a></p>
+<p><a href="#item1">text</a></p>
+<p><a href="#item_2">text</a></p>
+<p><a href="#item_three">text</a></p>
 <p>
 </p>
 <hr />
@@ -108,24 +108,21 @@ __DATA__
 <h2><a name="section_three">section three</a></h2>
 <p>This is section three.</p>
 <dl>
-<dt><strong><a name="item1" class="item">item1</a></strong>
+<dt><strong><a name="item1" class="item">item1</a></strong></dt>
 
 <dd>
 <p>This is item one.</p>
 </dd>
-</li>
-<dt><strong><a name="item_2" class="item">item 2</a></strong>
+<dt><strong><a name="item_2" class="item">item 2</a></strong></dt>
 
 <dd>
 <p>This is item two.</p>
 </dd>
-</li>
-<dt><strong><a name="item_three" class="item">item three</a></strong>
+<dt><strong><a name="item_three" class="item">item three</a></strong></dt>
 
 <dd>
 <p>This is item three.</p>
 </dd>
-</li>
 </dl>
 
 </body>
