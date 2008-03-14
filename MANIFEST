@@ -733,6 +733,7 @@ ext/MIME/Base64/t/warn.t	See whether MIME::Base64 works
 ext/Module/Pluggable/lib/Devel/InnerPackage.pm		Find inner packages
 ext/Module/Pluggable/lib/Module/Pluggable/Object.pm	Module::Pluggable
 ext/Module/Pluggable/lib/Module/Pluggable.pm		Module::Pluggable
+ext/Module/Pluggable/Makefile.PL			Module::Pluggable
 ext/NDBM_File/hints/cygwin.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dec_osf.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dynixptx.pl	Hint for NDBM_File for named architecture
