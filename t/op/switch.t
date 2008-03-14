@@ -802,98 +802,101 @@ sub contains_x {
     is($ok2, 1, "Calling sub indirectly (false)");
 }
 
-# Test overloading
-{ package OverloadTest;
+SKIP: {
+    skip "Scalar/Util.pm not yet available", 20
+	unless -r "$INC[0]/Scalar/Util.pm";
+    # Test overloading
+    { package OverloadTest;
 
-    use overload '""' => sub{"string value of obj"};
+      use overload '""' => sub{"string value of obj"};
 
-    use overload "~~" => sub {
-        my ($self, $other, $reversed) = @_;
-        if ($reversed) {
-	    $self->{left}  = $other;
-	    $self->{right} = $self;
-	    $self->{reversed} = 1;
-        } else {
-	    $self->{left}  = $self;
-	    $self->{right} = $other;
-	    $self->{reversed} = 0;
-        }
-	$self->{called} = 1;
-	return $self->{retval};
-    };
+      use overload "~~" => sub {
+	  my ($self, $other, $reversed) = @_;
+	  if ($reversed) {
+	      $self->{left}  = $other;
+	      $self->{right} = $self;
+	      $self->{reversed} = 1;
+	  } else {
+	      $self->{left}  = $self;
+	      $self->{right} = $other;
+	      $self->{reversed} = 0;
+	  }
+	  $self->{called} = 1;
+	  return $self->{retval};
+      };
     
-    sub new {
-	my ($pkg, $retval) = @_;
-	bless {
-	    called => 0,
-	    retval => $retval,
-	}, $pkg;
+      sub new {
+	  my ($pkg, $retval) = @_;
+	  bless {
+		 called => 0,
+		 retval => $retval,
+		}, $pkg;
+      }
+  }
+
+    {
+	my $test = "Overloaded obj in given (true)";
+	my $obj = OverloadTest->new(1);
+	my $matched;
+	given($obj) {
+	    when ("other arg") {$matched = 1}
+	    default {$matched = 0}
+	}
+    
+	is($obj->{called},  1, "$test: called");
+	ok($matched, "$test: matched");
+	is($obj->{left}, "string value of obj", "$test: left");
+	is($obj->{right}, "other arg", "$test: right");
+	ok(!$obj->{reversed}, "$test: not reversed");
+    }
+
+    {
+	my $test = "Overloaded obj in given (false)";
+	my $obj = OverloadTest->new(0);
+	my $matched;
+	given($obj) {
+	    when ("other arg") {$matched = 1}
+	}
+    
+	is($obj->{called},  1, "$test: called");
+	ok(!$matched, "$test: not matched");
+	is($obj->{left}, "string value of obj", "$test: left");
+	is($obj->{right}, "other arg", "$test: right");
+	ok(!$obj->{reversed}, "$test: not reversed");
+    }
+
+    {
+	my $test = "Overloaded obj in when (true)";
+	my $obj = OverloadTest->new(1);
+	my $matched;
+	given("topic") {
+	    when ($obj) {$matched = 1}
+	    default {$matched = 0}
+	}
+    
+	is($obj->{called},  1, "$test: called");
+	ok($matched, "$test: matched");
+	is($obj->{left}, "topic", "$test: left");
+	is($obj->{right}, "string value of obj", "$test: right");
+	ok($obj->{reversed}, "$test: reversed");
+    }
+
+    {
+	my $test = "Overloaded obj in when (false)";
+	my $obj = OverloadTest->new(0);
+	my $matched;
+	given("topic") {
+	    when ($obj) {$matched = 1}
+	    default {$matched = 0}
+	}
+    
+	is($obj->{called}, 1, "$test: called");
+	ok(!$matched, "$test: not matched");
+	is($obj->{left}, "topic", "$test: left");
+	is($obj->{right}, "string value of obj", "$test: right");
+	ok($obj->{reversed}, "$test: reversed");
     }
 }
-
-{
-    my $test = "Overloaded obj in given (true)";
-    my $obj = OverloadTest->new(1);
-    my $matched;
-    given($obj) {
-	when ("other arg") {$matched = 1}
-	default {$matched = 0}
-    }
-    
-    is($obj->{called},  1, "$test: called");
-    ok($matched, "$test: matched");
-    is($obj->{left}, "string value of obj", "$test: left");
-    is($obj->{right}, "other arg", "$test: right");
-    ok(!$obj->{reversed}, "$test: not reversed");
-}
-
-{
-    my $test = "Overloaded obj in given (false)";
-    my $obj = OverloadTest->new(0);
-    my $matched;
-    given($obj) {
-	when ("other arg") {$matched = 1}
-    }
-    
-    is($obj->{called},  1, "$test: called");
-    ok(!$matched, "$test: not matched");
-    is($obj->{left}, "string value of obj", "$test: left");
-    is($obj->{right}, "other arg", "$test: right");
-    ok(!$obj->{reversed}, "$test: not reversed");
-}
-
-{
-    my $test = "Overloaded obj in when (true)";
-    my $obj = OverloadTest->new(1);
-    my $matched;
-    given("topic") {
-	when ($obj) {$matched = 1}
-	default {$matched = 0}
-    }
-    
-    is($obj->{called},  1, "$test: called");
-    ok($matched, "$test: matched");
-    is($obj->{left}, "topic", "$test: left");
-    is($obj->{right}, "string value of obj", "$test: right");
-    ok($obj->{reversed}, "$test: reversed");
-}
-
-{
-    my $test = "Overloaded obj in when (false)";
-    my $obj = OverloadTest->new(0);
-    my $matched;
-    given("topic") {
-	when ($obj) {$matched = 1}
-	default {$matched = 0}
-    }
-    
-    is($obj->{called}, 1, "$test: called");
-    ok(!$matched, "$test: not matched");
-    is($obj->{left}, "topic", "$test: left");
-    is($obj->{right}, "string value of obj", "$test: right");
-    ok($obj->{reversed}, "$test: reversed");
-}
-
 # Okay, that'll do for now. The intricacies of the smartmatch
 # semantics are tested in t/op/smartmatch.t
 __END__
