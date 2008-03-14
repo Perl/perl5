@@ -3,7 +3,7 @@ use Test::More tests => 3;
 
 use Devel::InnerPackage qw(list_packages);
 use FindBin;
-use lib "$FindBin::Bin/lib";
+use lib (($FindBin::Bin."/lib")=~/^(.*)$/);
 
 my @packages;
 

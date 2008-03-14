@@ -2,7 +2,7 @@
 
 use strict;
 use FindBin;
-use lib "$FindBin::Bin/lib";
+use lib (($FindBin::Bin."/lib")=~/^(.*)$/);
 use Test::More tests => 2;
 
 my $t = MyTest->new();

@@ -9,7 +9,7 @@ use Module::Pluggable::Object;
 # Peter Gibbons: I wouldn't say I've been missing it, Bob! 
 
 
-$VERSION = '3.6';
+$VERSION = '3.7';
 
 sub import {
     my $class        = shift;
@@ -60,8 +60,9 @@ sub import {
 
 
     no strict 'refs';
-    no warnings 'redefine';
-    *{"$package\::$sub"}    = $subroutine;
+    no warnings qw(redefine prototype);
+    
+    *{"$package\::$sub"}        = $subroutine;
     *{"$package\::search_path"} = $searchsub;
     *{"$package\::only"}        = $onlysub;
     *{"$package\::except"}      = $exceptsub;
@@ -297,6 +298,14 @@ By supplying a new C<file_regex> then you can change this behaviour e.g
 
     file_regex => qr/\.plugin$/
 
+=head2 include_editor_junk
+
+By default C<Module::Pluggable> ignores files that look like they were
+left behind by editors. Currently this means files ending in F<~> (~),
+the extensions F<.swp> or F<.swo>, or files beginning with F<.#>.
+
+Setting C<include_editor_junk> changes C<Module::Pluggable> so it does
+not ignore any files it finds.
 
 
 =head1 METHODs

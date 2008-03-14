@@ -20,6 +20,10 @@ sub new {
 
 }
 
+### Eugggh, this code smells 
+### This is what happens when you keep adding patches
+### *sigh*
+
 
 sub plugins {
         my $self = shift;
@@ -46,7 +50,7 @@ sub plugins {
 
 
         # check to see if we're running under test
-        my @SEARCHDIR = exists $INC{"blib.pm"} && $filename =~ m!(^|/)blib/! ? grep {/blib/} @INC : @INC;
+        my @SEARCHDIR = exists $INC{"blib.pm"} && defined $filename && $filename =~ m!(^|/)blib/! ? grep {/blib/} @INC : @INC;
 
         # add any search_dir params
         unshift @SEARCHDIR, @{$self->{'search_dirs'}} if defined $self->{'search_dirs'};
@@ -151,6 +155,8 @@ sub search_paths {
             # parse the file to get the name
             my ($name, $directory, $suffix) = fileparse($file, $file_regex);
 
+            next if (!$self->{include_editor_junk} && $self->_is_editor_junk($name));
+
             $directory = abs2rel($directory, $sp);
 
             # If we have a mixed-case package name, assume case has been preserved
@@ -207,6 +213,22 @@ sub search_paths {
     } # foreach $searchpath
 
     return @plugins;
+}
+
+sub _is_editor_junk {
+    my $self = shift;
+    my $name = shift;
+
+    # Emacs (and other Unix-y editors) leave temp files ending in a
+    # tilde as a backup.
+    return 1 if $name =~ /~$/;
+    # Emacs makes these files while a buffer is edited but not yet
+    # saved.
+    return 1 if $name =~ /^\.#/;
+    # Vim can leave these files behind if it crashes.
+    return 1 if $name =~ /\.sw[po]$/;
+
+    return 0;
 }
 
 sub handle_finding_plugin {
@@ -298,6 +320,14 @@ Essentially all it does is export a method into your namespace that
 looks through a search path for .pm files and turn those into class names. 
 
 Optionally it instantiates those classes for you.
+
+This object is wrapped by C<Module::Pluggable>. If you want to do something
+odd or add non-general special features you're probably best to wrap this
+and produce your own subclass.
+
+=head1 OPTIONS
+
+See the C<Module::Pluggable> docs.
 
 =head1 AUTHOR
 

@@ -526,8 +526,7 @@ package Maintainers;
 	'Module::Pluggable' =>
 		{
 		'MAINTAINER'	=> 'simonw',
-		'FILES'		=> q[lib/Module/Pluggable lib/Module/Pluggable.pm
-				     lib/Devel/InnerPackage.pm t/Module_Pluggable],
+		'FILES'		=> q[ext/Module/Pluggable t/Module_Pluggable],
 		'CPAN'		=> 1,
 		},
 

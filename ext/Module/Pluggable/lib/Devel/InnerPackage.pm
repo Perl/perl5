@@ -17,7 +17,7 @@ Devel::InnerPackage - find all the inner packages of a package
 =head1 SYNOPSIS
 
     use Foo::Bar;
-    use Devel::innerPackage qw(list_packages);
+    use Devel::InnerPackage qw(list_packages);
 
     my @inner_packages = list_packages('Foo::Bar');
 
@@ -75,7 +75,7 @@ sub list_packages {
                     !__PACKAGE__->_loaded($pack.$cand); # or @children;
                 push @packs, @children;
             }
-            return grep {$_ !~ /::::ISA::CACHE/} @packs;
+            return grep {$_ !~ /::(::ISA::CACHE|SUPER)/} @packs;
 }
 
 ### XXX this is an inlining of the Class-Inspector->loaded()
