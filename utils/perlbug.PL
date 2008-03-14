@@ -617,7 +617,7 @@ EOF
 
 	unless (-f $entry and -r $entry) {
 	    paraprint <<EOF;
-I'm sorry, but I can't read from `$entry'. Maybe you mistyped the name of
+I'm sorry, but I can't read from '$entry'. Maybe you mistyped the name of
 the file? If you don't want to send a file, just enter a blank line and you
 can get back to the editor selection.
 EOF
@@ -627,7 +627,7 @@ EOF
     }
 
     # Generate report
-    open(REP,">$filename") or die "Unable to create report file `$filename': $!\n";
+    open(REP,">$filename") or die "Unable to create report file '$filename': $!\n";
     my $reptype = !$ok ? ($thanks ? 'thank-you' : 'bug')
 	: $::opt_n ? "build failure" : "success";
 
@@ -641,11 +641,11 @@ EOF
 	print REP $body;
     } elsif ($usefile) {
 	open(F, "<$file")
-		or die "Unable to read report file from `$file': $!\n";
+		or die "Unable to read report file from '$file': $!\n";
 	while (<F>) {
 	    print REP $_
 	}
-	close(F) or die "Error closing `$file': $!";
+	close(F) or die "Error closing '$file': $!";
     } else {
 	if ($thanks) {
 	    print REP <<'EOF';
@@ -677,12 +677,12 @@ EOF
     # read in the report template once so that
     # we can track whether the user does any editing.
     # yes, *all* whitespace is ignored.
-    open(REP, "<$filename") or die "Unable to open report file `$filename': $!\n";
+    open(REP, "<$filename") or die "Unable to open report file '$filename': $!\n";
     while (<REP>) {
 	s/\s+//g;
 	$REP{$_}++;
     }
-    close(REP) or die "Error closing report file `$filename': $!";
+    close(REP) or die "Error closing report file '$filename': $!";
 } # sub Query
 
 sub Dump {
@@ -781,7 +781,7 @@ EOF
     }
     if ($sts) {
 	paraprint <<EOF;
-The editor you chose (`$ed') could apparently not be run!
+The editor you chose ('$ed') could apparently not be run!
 Did you mistype the name of your editor? If so, please
 correct it here, otherwise just press Enter.
 EOF
@@ -804,7 +804,7 @@ EOF
     # Check that we have a report that has some, eh, report in it.
     my $unseen = 0;
 
-    open(REP, "<$filename") or die "Couldn't open `$filename': $!\n";
+    open(REP, "<$filename") or die "Couldn't open '$filename': $!\n";
     # a strange way to check whether any significant editing
     # have been done: check whether any new non-empty lines
     # have been added. Yes, the below code ignores *any* space
@@ -861,23 +861,23 @@ EOF
 		    print "\nError opening $file: $!\n\n";
 		    goto retry;
 		}
-		open(REP, "<$filename") or die "Couldn't open file `$filename': $!\n";
+		open(REP, "<$filename") or die "Couldn't open file '$filename': $!\n";
 		print FILE "To: $address\nSubject: $subject\n";
 		print FILE "Cc: $cc\n" if $cc;
 		print FILE "Reply-To: $from\n" if $from;
 		print FILE "Message-Id: $messageid\n" if $messageid;
 		print FILE "\n";
 		while (<REP>) { print FILE }
-		close(REP) or die "Error closing report file `$filename': $!";
+		close(REP) or die "Error closing report file '$filename': $!";
 		close(FILE) or die "Error closing $file: $!";
 
-		print "\nMessage saved in `$file'.\n";
+		print "\nMessage saved in '$file'.\n";
 		exit;
 	    } elsif ($action =~ /^(d|l|sh)/i ) { # <D>isplay, <L>ist, <Sh>ow
 		# Display the message
-		open(REP, "<$filename") or die "Couldn't open file `$filename': $!\n";
+		open(REP, "<$filename") or die "Couldn't open file '$filename': $!\n";
 		while (<REP>) { print $_ }
-		close(REP) or die "Error closing report file `$filename': $!";
+		close(REP) or die "Error closing report file '$filename': $!";
 	    } elsif ($action =~ /^su/i) { # <Su>bject
 		print "Subject: $subject\n";
 		print "If the above subject is fine, just press Enter.\n";
@@ -949,7 +949,7 @@ sub Send {
 	$msg->add("Reply-To",$from) if $from;
 
 	$fh = $msg->open;
-	open(REP, "<$filename") or die "Couldn't open `$filename': $!\n";
+	open(REP, "<$filename") or die "Couldn't open '$filename': $!\n";
 	while (<REP>) { print $fh $_ }
 	close(REP) or die "Error closing $filename: $!";
 	$fh->close;
@@ -994,7 +994,7 @@ the perl package Mail::Send has not been installed, so I can't send your bug
 report. We apologize for the inconvenience.
 
 So you may attempt to find some way of sending your message, it has
-been left in the file `$filename'.
+been left in the file '$filename'.
 EOF
 	open(SENDMAIL, "|$sendmail -t -oi") || die "'|$sendmail -t -oi' failed: $!";
 sendout:
@@ -1004,7 +1004,7 @@ sendout:
 	print SENDMAIL "Reply-To: $from\n" if $from;
 	print SENDMAIL "Message-Id: $messageid\n" if $messageid;
 	print SENDMAIL "\n\n";
-	open(REP, "<$filename") or die "Couldn't open `$filename': $!\n";
+	open(REP, "<$filename") or die "Couldn't open '$filename': $!\n";
 	while (<REP>) { print SENDMAIL $_ }
 	close(REP) or die "Error closing $filename: $!";
 
@@ -1038,8 +1038,8 @@ Options:
         quickly send a prepared message.
   -F    File to output the resulting mail message to, instead of mailing.
   -S    Send without asking for confirmation.
-  -a    Address to send the report to. Defaults to `$address'.
-  -c    Address to send copy of report to. Defaults to `$cc'.
+  -a    Address to send the report to. Defaults to '$address'.
+  -c    Address to send copy of report to. Defaults to '$cc'.
   -C    Don't send copy to administrator.
   -s    Subject to include with the message. You will be prompted
         if you don't supply one on the command line.
@@ -1048,8 +1048,8 @@ Options:
   -r    Your return address. The program will ask you to confirm
         this if you don't give it here.
   -e    Editor to use.
-  -t    Test mode. The target address defaults to `$testaddress'.
-  -T    Thank-you mode. The target address defaults to `$thanksaddress'.
+  -t    Test mode. The target address defaults to '$testaddress'.
+  -T    Thank-you mode. The target address defaults to '$thanksaddress'.
   -d    Data mode.  This prints out your configuration data, without mailing
         anything. You can use this with -v to get more complete data.
   -A    Don't send a bug received acknowledgement to the return address.
