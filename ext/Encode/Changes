@@ -1,8 +1,28 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.23 2007/05/29 18:15:32 dankogai Exp dankogai $
+# $Id: Changes,v 2.24 2008/03/12 09:51:11 dankogai Exp $
 #
-$Revision: 2.23 $ $Date: 2007/05/29 18:15:32 $
+$Revision: 2.24 $ $Date: 2008/03/12 09:51:11 $
+! lib/Encode/Config.pm
+  adds and  fixes also adds cp858 support.
+! Encode.pm encoding.pm lib/Encode/Alias.pm ucm/cp858.ucm
+  Merged perl@33486.
+  > Change 33486 by rgs@scipion on 2008/03/12 08:50:11
+    An unfortunate side-effect of Encode and Encode::Alias use'ing each
+    other, and Encode::Alias exporting functions into Encode for it to use
+    as methods, broke the loading of the find_alias() Encode method in some
+    cases since 5.10. Breaking the recursive inheritance fixes it.
+  Message-Id: <b77c1dce0803120151o4166c3a0gfcfd14681ab7e10d@mail.gmail.com>
+! Encode.pm
+  POD fix by tels
+  Message-Id: <200711281835.36125@bloodgate.com>
+! bin/ucmlint
+  Fix by MIYAGAWA via CodeRepos
+  http://coderepos.org/share/changeset/1791
+! encoding.pm t/mime_header_iso2022jp.t
+  ported back from Perl 5.10-RC1
+
+2.23 2007/05/29 18:15:32
 ! Encode.xs
   got rid of global fallback_cb; encode_method() now takes one more
   argument which is a coderef to fallback.  This should make
