@@ -894,6 +894,9 @@ ext/MIME/Base64/t/base64.t	See whether MIME::Base64 works
 ext/MIME/Base64/t/quoted-print.t	See whether MIME::QuotedPrint works
 ext/MIME/Base64/t/unicode.t	See whether MIME::Base64 works
 ext/MIME/Base64/t/warn.t	See whether MIME::Base64 works
+ext/Module/Pluggable/lib/Devel/InnerPackage.pm		Find inner packages
+ext/Module/Pluggable/lib/Module/Pluggable/Object.pm	Module::Pluggable
+ext/Module/Pluggable/lib/Module/Pluggable.pm		Module::Pluggable
 ext/NDBM_File/hints/cygwin.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dec_osf.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dynixptx.pl	Hint for NDBM_File for named architecture
@@ -1693,7 +1696,6 @@ lib/DBM_Filter/utf8.pm		DBM Filter for UTF-8 Encoding
 lib/dbm_filter_util.pl		Utility functions used by DBM Filter tests
 lib/DB.pm			Debugger API (draft)
 lib/DB.t			See if DB works
-lib/Devel/InnerPackage.pm	Find inner packages
 lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 lib/Devel/SelfStubber.t		See if Devel::SelfStubber works
 lib/diagnostics.pm		Print verbose diagnostics
@@ -2215,8 +2217,6 @@ lib/Module/Load/t/to_load/LoadMe.pl	Module::Load tests
 lib/Module/Load/t/to_load/Must/Be/Loaded.pm	Module::Load tests
 lib/Module/Load/t/to_load/TestModule.pm	Module::Load tests
 lib/Module/Load/t/to_load/ToBeLoaded	Module::Load tests
-lib/Module/Pluggable/Object.pm	Module::Pluggable
-lib/Module/Pluggable.pm	Module::Pluggable
 lib/mro.pm			mro extension
 lib/Net/Changes			libnet
 lib/Net/Cmd.pm			libnet
@@ -3633,6 +3633,7 @@ t/Module_Pluggable/09require.t	Module::Pluggable tests
 t/Module_Pluggable/10innerpack_inner.t	Module::Pluggable tests
 t/Module_Pluggable/10innerpack_noinner.t	Module::Pluggable tests
 t/Module_Pluggable/10innerpack_override.t	Module::Pluggable tests
+t/Module_Pluggable/10innerpack_super.t		Module::Pluggable tests
 t/Module_Pluggable/10innerpack.t	Module::Pluggable tests
 t/Module_Pluggable/11usetwice.t	Module::Pluggable tests
 t/Module_Pluggable/12onlyarray.t	Module::Pluggable tests
@@ -3648,8 +3649,14 @@ t/Module_Pluggable/17devel_inner_package.t	Module::Pluggable tests
 t/Module_Pluggable/18skipped_package.t	Module::Pluggable tests
 t/Module_Pluggable/19can_ok_clobber.t	Module::Pluggable tests
 t/Module_Pluggable/20dodgy_files.t	Module::Pluggable tests
+t/Module_Pluggable/21editor_junk.t			Module::Pluggable tests
 t/Module_Pluggable/acme/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
+t/Module_Pluggable/lib/EditorJunk/Plugin/Foo.pm		Module::Pluggable tests
+t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm~	Module::Pluggable tests
+t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm.swp	Module::Pluggable tests
+t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm		Module::Pluggable tests
+t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm.swo	Module::Pluggable tests
 t/Module_Pluggable/lib/ExtTest/Plugin/Bar.plugin	Module::Pluggable tests
 t/Module_Pluggable/lib/ExtTest/Plugin/Foo.plugin	Module::Pluggable tests
 t/Module_Pluggable/lib/ExtTest/Plugin/Quux/Foo.plugin	Module::Pluggable tests
@@ -3663,7 +3670,6 @@ t/Module_Pluggable/lib/MyTest/Plugin/Bar.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/MyTest/Plugin/Foo.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/MyTest/Plugin/Quux/Foo.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/No/Middle.pm	Module::Pluggable tests
-t/Module_Pluggable/lib/OddTest/Plugin/-Dodgy.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/OddTest/Plugin/Foo.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/TA/C/A/I.pm	Module::Pluggable tests
 t/mro/basic_01_c3.t		mro tests

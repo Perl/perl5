@@ -2,7 +2,7 @@
 
 use strict;
 use FindBin;
-use lib "$FindBin::Bin/lib";
+use lib (($FindBin::Bin."/lib")=~/^(.*)$/);
 use Test::More tests => 6;
 
 my $foo;
@@ -26,7 +26,7 @@ package MyTest;
 use File::Spec::Functions qw(catdir);
 use strict;
 use FindBin;
-use lib "$FindBin::Bin/lib";
+use lib (($FindBin::Bin."/lib")=~/^(.*)$/);
 use Module::Pluggable (search_path => ["MyTest::Extend::Plugin"], sub_name => 'booga', instantiate => 'new');
 use Module::Pluggable (search_path => ["MyTest::Extend::Plugin"], sub_name => 'wooga', instantiate => 'nosomuchmethod');
 
