@@ -1,4 +1,4 @@
-# $Id: encoding.pm,v 2.6 2007/04/22 14:56:12 dankogai Exp $
+# $Id: encoding.pm,v 2.7 2008/03/12 09:51:11 dankogai Exp $
 package encoding;
 our $VERSION = do { my @r = ( q$Revision: 2.6 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
@@ -619,6 +619,11 @@ At any rate, the very use of format is questionable when it comes to
 unicode characters since you have to consider such things as character
 width (i.e. double-width for ideographs) and directions (i.e. BIDI for
 Arabic and Hebrew).
+
+=item Thread safety
+
+C<use encoding ...> is not thread-safe (i.e., do not use in threaded
+applications).
 
 =back
 

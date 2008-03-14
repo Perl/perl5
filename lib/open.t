@@ -7,7 +7,7 @@ BEGIN {
 	require Config; import Config;
 }
 
-use Test::More tests => 24;
+use Test::More tests => 25;
 
 # open::import expects 'open' as its first argument, but it clashes with open()
 sub import {
@@ -185,6 +185,11 @@ EOE
 	ok($ok == @a,
 	   "checking syswrite() output on :utf8 streams by reading it back in");
     }
+}
+
+{
+    eval q[use Encode::Alias;use open ":std", ":locale"];
+    is($@, '', 'can use :std and :locale');
 }
 
 SKIP: {

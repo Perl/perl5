@@ -2,8 +2,7 @@ package Encode::Alias;
 use strict;
 use warnings;
 no warnings 'redefine';
-use Encode;
-our $VERSION = do { my @r = ( q$Revision: 2.7 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.8 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 sub DEBUG () { 0 }
 
 use base qw(Exporter);
@@ -20,6 +19,7 @@ our @Alias;    # ordered matching list
 our %Alias;    # cached known aliases
 
 sub find_alias {
+    require Encode;
     my $class = shift;
     my $find  = shift;
     unless ( exists $Alias{$find} ) {
@@ -128,6 +128,7 @@ sub undef_aliases {
 }
 
 sub init_aliases {
+    require Encode;
     undef_aliases();
 
     # Try all-lower-case version should all else fails
