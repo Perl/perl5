@@ -1,3 +1,8 @@
+#
+# $Id: cp858.ucm,v 1.1 2008/03/12 09:51:11 dankogai Exp $
+#
+# cf. http://en.wikipedia.org/wiki/Code_page_858
+#
 <code_set_name> "cp858"
 <mb_cur_min> 1
 <mb_cur_max> 1
