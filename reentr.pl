@@ -41,9 +41,8 @@ my %map = (
 
 
 # safer_unlink 'reentr.h';
-die "reentr.pl: $!" unless open(H, ">reentr.h-new");
-binmode H;
-select H;
+my $h = safer_open("reentr.h-new");
+select $h;
 print <<EOF;
 /* -*- buffer-read-only: t -*-
  *
@@ -332,7 +331,7 @@ close DATA;
 
 # Prepare to continue writing the reentr.h.
 
-select H;
+select $h;
 
 {
     # Write out all the known prototype signatures.
@@ -788,15 +787,14 @@ typedef struct {
 /* ex: set ro: */
 EOF
 
-close(H);
-safer_rename('reentr.h-new', 'reentr.h');
+close($h);
+rename_if_different('reentr.h-new', 'reentr.h');
 
 # Prepare to write the reentr.c.
 
 # safer_unlink 'reentr.c';
-die "reentr.c: $!" unless open(C, ">reentr.c-new");
-binmode C;
-select C;
+my $c = safer_open("reentr.c-new");
+select $c;
 print <<EOF;
 /* -*- buffer-read-only: t -*-
  *
@@ -1091,8 +1089,8 @@ Perl_reentrant_retry(const char *f, ...)
 /* ex: set ro: */
 EOF
 
-close(C);
-safer_rename('reentr.c-new', 'reentr.c');
+close($c);
+rename_if_different('reentr.c-new', 'reentr.c');
 
 __DATA__
 asctime S	|time	|const struct tm|B_SB|B_SBI|I_SB|I_SBI

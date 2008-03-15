@@ -2,6 +2,8 @@
 use strict;
 use vars qw($Is_W32 $Is_OS2 $Is_Cygwin $Is_NetWare $Needs_Write);
 use Config; # Remember, this is running using an existing perl
+use File::Compare;
+use Symbol;
 
 # Common functions needed by the regen scripts
 
@@ -14,24 +16,6 @@ if ($Is_NetWare) {
 }
 
 $Needs_Write = $Is_OS2 || $Is_W32 || $Is_Cygwin || $Is_NetWare;
-
-eval "use Digest::MD5 'md5'; 1;"
-    or warn "Digest::MD5 unavailable, doing unconditional regen\n";
-
-sub cksum {
-    my $pl = shift;
-    my ($buf, $cksum);
-    local *FH;
-    if (open(FH, $pl)) {
-	local $/;
-	$buf = <FH>;
-	$cksum = defined &md5 ? md5($buf) : 0;
-	close FH;
-    } else {
-	warn "$0: $pl: $!\n";
-    }
-    return $cksum;
-}
 
 sub safer_unlink {
   my @names = @_;
@@ -56,18 +40,10 @@ sub safer_rename_silent {
   rename $from, $to;
 }
 
-sub safer_rename_always {
-  my ($from, $to) = @_;
-  safer_rename_silent($from, $to) or die "renaming $from to $to: $!";
-}
-
-sub safer_rename {
+sub rename_if_different {
   my ($from, $to) = @_;
 
-  my $fc = cksum($from);
-  my $tc = cksum($to);
-  
-  if ($fc and $fc eq $tc) {
+  if (compare($from, $to) == 0) {
       warn "no changes between '$from' & '$to'\n";
       safer_unlink($from);
       return;
@@ -75,4 +51,14 @@ sub safer_rename {
   warn "changed '$from' to '$to'\n";
   safer_rename_silent($from, $to) or die "renaming $from to $to: $!";
 }
+
+# Saf*er*, but not totally safe. And assumes always open for output.
+sub safer_open {
+    my $name = shift;
+    my $fh = gensym;
+    open $fh, ">$name" or die "Can't create $name: $!";
+    binmode $fh;
+    $fh;
+}
+
 1;
