@@ -223,6 +223,6 @@ print $out <<EOP;
 
 /* ex: set ro: */
 EOP
-close $out or die "close $tmp_h: $!";
+safer_close($out);
 
 rename_if_different $tmp_h, 'regnodes.h';

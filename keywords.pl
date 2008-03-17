@@ -36,7 +36,7 @@ while (<DATA>) {
 
 print $kw "\n/* ex: set ro: */\n";
 
-close $kw or die "Error closing keywords.h-new: $!";
+safer_close($kw);
 
 rename_if_different("keywords.h-new", "keywords.h");
 

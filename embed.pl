@@ -108,7 +108,7 @@ sub walk_table (&@) {
     }
     print $F $trailer if $trailer;
     unless (ref $filename) {
-	close $F or die "Error closing $filename: $!";
+	safer_close($F);
 	rename_if_different("$filename-new", $filename);
     }
 }
@@ -637,7 +637,7 @@ print $em <<'END';
 /* ex: set ro: */
 END
 
-close($em) or die "Error closing EM: $!";
+safer_close($em);
 rename_if_different('embed.h-new', 'embed.h');
 
 $em = safer_open('embedvar.h-new');
@@ -732,7 +732,7 @@ print $em <<'END';
 /* ex: set ro: */
 END
 
-close($em) or die "Error closing EM: $!";
+safer_close($em);
 rename_if_different('embedvar.h-new', 'embedvar.h');
 
 my $capi = safer_open('perlapi.c-new');
@@ -859,7 +859,7 @@ print $capih <<'EOT';
 
 /* ex: set ro: */
 EOT
-close $capih or die "Error closing CAPIH: $!";
+safer_close($capih);
 rename_if_different('perlapi.h-new', 'perlapi.h');
 
 print $capi do_not_edit ("perlapi.c"), <<'EOT';
@@ -941,7 +941,7 @@ END_EXTERN_C
 /* ex: set ro: */
 EOT
 
-close($capi) or die "Error closing CAPI: $!";
+safer_close($capi);
 rename_if_different('perlapi.c-new', 'perlapi.c');
 
 # functions that take va_list* for implementing vararg functions

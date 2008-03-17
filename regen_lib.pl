@@ -57,8 +57,14 @@ sub safer_open {
     my $name = shift;
     my $fh = gensym;
     open $fh, ">$name" or die "Can't create $name: $!";
+    *{$fh}->{SCALAR} = $name;
     binmode $fh;
     $fh;
+}
+
+sub safer_close {
+    my $fh = shift;
+    close $fh or die 'Error closing ' . *{$fh}->{SCALAR} . ": $!";
 }
 
 1;

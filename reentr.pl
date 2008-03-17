@@ -787,7 +787,7 @@ typedef struct {
 /* ex: set ro: */
 EOF
 
-close($h);
+safer_close($h);
 rename_if_different('reentr.h-new', 'reentr.h');
 
 # Prepare to write the reentr.c.
@@ -1089,7 +1089,7 @@ Perl_reentrant_retry(const char *f, ...)
 /* ex: set ro: */
 EOF
 
-close($c);
+safer_close($c);
 rename_if_different('reentr.c-new', 'reentr.c');
 
 __DATA__

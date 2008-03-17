@@ -362,7 +362,7 @@ print $warn <<'EOM';
 /* ex: set ro: */
 EOM
 
-close $warn;
+safer_close $warn;
 rename_if_different("warnings.h-new", "warnings.h");
 
 while (<DATA>) {
@@ -424,7 +424,7 @@ while (<DATA>) {
 }
 
 print $pm "# ex: set ro:\n";
-close $pm;
+safer_close $pm;
 rename_if_different("lib/warnings.pm-new", "lib/warnings.pm");
 
 __END__

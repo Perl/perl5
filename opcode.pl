@@ -438,8 +438,8 @@ sub gen_op_is_macro {
 print $oc "/* ex: set ro: */\n";
 print $on "/* ex: set ro: */\n";
 
-close $oc or die "Error closing $opcode_new: $!\n";
-close $on or die "Error closing $opname_new: $!\n";
+safer_close($oc);
+safer_close($on);
 
 rename_if_different $opcode_new, 'opcode.h';
 rename_if_different $opname_new, 'opnames.h';
@@ -487,8 +487,8 @@ for (@ops) {
 print $pp "\n/* ex: set ro: */\n";
 print $ppsym "\n# ex: set ro:\n";
 
-close $pp or die "Error closing pp_proto.h-new: $!\n";
-close $ppsym or die "Error closing pp.sym-new: $!\n";
+safer_close($pp);
+safer_close($ppsym);
 
 rename_if_different $pp_proto_new, 'pp_proto.h';
 rename_if_different $pp_sym_new, 'pp.sym';
