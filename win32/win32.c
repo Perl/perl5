@@ -1510,9 +1510,22 @@ win32_stat(const char *path, Stat_t *sbuf)
             errno = ENOTDIR;
             return -1;
         }
+	if (S_ISDIR(sbuf->st_mode)) {
+	    /* Ensure the "write" bit is switched off in the mode for
+	     * directories with the read-only attribute set. Borland (at least)
+	     * switches it on for directories, which is technically correct
+	     * (directories are indeed always writable unless denied by DACLs),
+	     * but we want stat() and -w to reflect the state of the read-only
+	     * attribute for symmetry with chmod(). */
+	    DWORD r = GetFileAttributesA(path);
+	    if (r != 0xffffffff && (r & FILE_ATTRIBUTE_READONLY)) {
+		sbuf->st_mode &= ~S_IWRITE;
+	    }
+	}
 #ifdef __BORLANDC__
-	if (S_ISDIR(sbuf->st_mode))
-	    sbuf->st_mode |= S_IWRITE | S_IEXEC;
+	if (S_ISDIR(sbuf->st_mode)) {
+	    sbuf->st_mode |= S_IEXEC;
+	}
 	else if (S_ISREG(sbuf->st_mode)) {
 	    int perms;
 	    if (l >= 4 && path[l-4] == '.') {

@@ -38,11 +38,11 @@ ExtUtils::Install - install files from here to there
     
 =head1 VERSION
 
-1.50
+1.50_01
 
 =cut
 
-$VERSION = '1.50';
+$VERSION = '1.50_01';
 $VERSION = eval $VERSION;
 
 =pod
@@ -358,7 +358,8 @@ Abstract a -w check that tries to use POSIX::access() if possible.
     sub _have_write_access {
         my $dir=shift;
         unless (defined $has_posix) {
-            $has_posix= (!$Is_cygwin && eval 'local $^W; require POSIX; 1') || 0; 
+            $has_posix= (!$Is_cygwin && !$Is_Win32
+			 && eval 'local $^W; require POSIX; 1') || 0;
         }
         if ($has_posix) {
             return POSIX::access($dir, POSIX::W_OK());
