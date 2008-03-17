@@ -28,6 +28,575 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.9		Maintenance release working toward v5.8.9
 --------------
 ____________________________________________________________________________
+[ 33536] By: nicholas				   on 2008/03/14  21:24:44
+	Log: Integrate:
+	     [ 32079]
+	     Subject: [perl #45823] [PATCH] v5.8.8. pod2html: <a name="example"> anchor, but <a href="item_example"> link 
+	     From: Axel Kollmorgen (via RT) <perlbug-followup@perl.org>
+	     Date: Thu, 27 Sep 2007 16:03:38 -0700
+	     Message-ID: <rt-3.6.HEAD-10743-1190934218-322.45823-75-0@perl.org>
+	     
+	     [ 33535]
+	     Integrate:
+	     [ 32727]
+	     Subject: [PATCH] Pod::Html: fix markup errors with (nested) definition lists
+	     From: Brendan O'Dea <bod@debian.org>
+	     Date: Sat, 1 Dec 2007 11:59:12 +1100
+	     Message-ID: <20071201005912.GA14441@londo.c47.org>
+	     
+	     [ 33534]
+	     ++$Pod::Html::VERSION
+     Branch: maint-5.8/perl
+	  !> lib/Pod/Html.pm lib/Pod/t/htmllink.t lib/Pod/t/htmlview.pod
+	  !> lib/Pod/t/htmlview.t
+____________________________________________________________________________
+[ 33533] By: nicholas				   on 2008/03/14  16:52:44
+	Log: Integrate:
+	     [ 33532]
+	     Integrate:
+	     [ 33371]
+	     Also install perlbug as perlthanks, to make it easy for people to send
+	     their appreciation to perl-thanks@perl.org.
+	     It would be nice to get feedback other than bug reports.
+	     
+	     [ 33372]
+	     Document perlthanks
+	     
+	     [ 33373]
+	     Subject: Re: making it easier not to get feedback
+	     From: "Vincent Pit" <perl@profvince.com>
+	     Date: Tue, 26 Feb 2008 09:56:59 +0100 (CET)
+	     Message-ID: <1232.90.46.219.25.1204016219.squirrel@90.46.219.25>
+	     
+	     [ 33375]
+	     Typo found by Roland Giersig
+	     
+	     [ 33531]
+	     Update the use of single quotes to be consistent with the advice in
+	     http://www.cl.cam.ac.uk/~mgk25/ucs/quotes.html
+     Branch: maint-5.8/perl
+	  !> pod/perlutil.pod utils.lst utils/perlbug.PL
+____________________________________________________________________________
+[ 33530] By: nicholas				   on 2008/03/14  12:06:34
+	Log: Integrate:
+	     [ 33529]
+	     Integrate:
+	     [ 33500]
+	     Oops. Change 33499 forgot to add the new Makefile.PL to the MANIFEST.
+	     
+	     [ 33504]
+	     Correct two spelling mistakes, and reformat some comments.
+     Branch: maint-5.8/perl
+	  !> MANIFEST perlio.c
+____________________________________________________________________________
+[ 33528] By: nicholas				   on 2008/03/14  11:28:45
+	Log: Integrate:
+	     [ 31648]
+	     Various fixes for EBCDIC platforms.
+	     
+	     [ 31649]
+	     Need to run the plan() at BEGIN time, else the use_ok() will fail.
+	     However, it doesn't actually produce any output due to a known core
+	     bug: http://rt.cpan.org/Ticket/Display.html?id=28345
+	     (But the test count in the plan saves our bacon by alerting us)
+	     
+	     [ 32146]
+	     Document that encoding.pm isn't thread-safe, by Jerry D. Hedden
+	     
+	     [ 33525]
+	     Integrate:
+	     [ 32782]
+	     Add file to MANIFEST that hitched a ride with change #32750.  It
+	     hopefully will fix RT #44357.
+	     
+	     [ 33486]
+	     An unfortunate side-effect of Encode and Encode::Alias use'ing each
+	     other, and Encode::Alias exporting functions into Encode for it to use
+	     as methods, broke the loading of the find_alias() Encode method in some
+	     cases since 5.10. Breaking the recursive inheritance fixes it.
+	     
+	     [ 33493]
+	     Upgrade to Encode-2.24
+	     
+	     [ 33523]
+	     Fix a couple of minor differences between the Encode 2.14 CPAN tarball
+	     and blead.
+     Branch: maint-5.8/perl
+	  +> ext/Encode/ucm/cp858.ucm
+	  !> MANIFEST ext/Encode/Changes ext/Encode/Encode.pm
+	  !> ext/Encode/Encode.xs ext/Encode/Makefile.PL
+	  !> ext/Encode/bin/ucmlint ext/Encode/encoding.pm
+	  !> ext/Encode/lib/Encode/Alias.pm ext/Encode/lib/Encode/Config.pm
+	  !> ext/Encode/t/mime_header_iso2022jp.t
+	  !> ext/Encode/ucm/macJapanese.ucm lib/open.t t/io/layers.t
+____________________________________________________________________________
+[ 33527] By: nicholas				   on 2008/03/14  10:46:20
+	Log: Integrate:
+	     [ 33524]
+	     Integrate:
+	     [ 33499]
+	     Move Module::Pluggable into ext/ as the next version has actions in its
+	     Makefile.PL that we will need to run as part of a core build.
+	     
+	     [ 33505]
+	     Upgrade to Module::Pluggable 3.7
+	     
+	     [ 33526]
+	     Integrate:
+	     [ 33242]
+	     Cope with differing prototypes for ECONNREFUSED etc on Win32 between
+	     5.8.x and 5.10.x
+     Branch: maint-5.8/perl
+	  +> ext/Module/Pluggable/Makefile.PL
+	  +> ext/Module/Pluggable/lib/Devel/InnerPackage.pm
+	  +> ext/Module/Pluggable/lib/Module/Pluggable.pm
+	  +> ext/Module/Pluggable/lib/Module/Pluggable/Object.pm
+	  +> t/Module_Pluggable/10innerpack_super.t
+	  +> t/Module_Pluggable/21editor_junk.t
+	  +> t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm
+	  +> t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm.swo
+	  +> t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm.swp
+	  +> t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm~
+	  +> t/Module_Pluggable/lib/EditorJunk/Plugin/Foo.pm
+	   - lib/Devel/InnerPackage.pm lib/Module/Pluggable.pm
+	   - lib/Module/Pluggable/Object.pm
+	   - t/Module_Pluggable/lib/OddTest/Plugin/-Dodgy.pm
+	  !> (integrate 33 files)
+____________________________________________________________________________
+[ 33522] By: nicholas				   on 2008/03/14  00:11:24
+	Log: Integrate:
+	     [ 33517]
+	     Integrate:
+	     [ 33359]
+	     Subject: [PATCH] threads 1.69
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Fri, 22 Feb 2008 16:26:21 -0500
+	     Message-ID: <1ff86f510802221326ib73c7e5kf26ad87086ee113d@mail.gmail.com>
+	     
+	     [ 33518]
+	     Integrate:
+	     [ 33266]
+	     Upgrade to Time-HiRes-1.9712
+	     
+	     [ 33520]
+	     Integrate:
+	     [ 33360]
+	     Subject: [PATCH] threads::shared 1.17
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Fri, 22 Feb 2008 16:31:02 -0500
+	     Message-ID: <1ff86f510802221331u48f85e8cg884c02a145dbee10@mail.gmail.com>
+	     
+	     [ 33521]
+	     Integrate:
+	     [ 33154]
+	     Subject: [PATCH] threads::shared TODO test for outstanding bug
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Wed, 30 Jan 2008 09:15:25 -0500
+	     Message-ID: <1ff86f510801300615t1f9e8c68u5ff8caaeffb1a835@mail.gmail.com>
+	     
+	     [ 33387]
+	     Subject: [PATCH] threads::shared 1.18
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Tue, 26 Feb 2008 11:29:54 -0500
+	     Message-ID: <1ff86f510802260829h306ea16by990af232dac22a82@mail.gmail.com>
+     Branch: maint-5.8/perl
+	  !> ext/Time/HiRes/HiRes.pm ext/Time/HiRes/Makefile.PL
+	  !> ext/Time/HiRes/t/HiRes.t ext/threads/Makefile.PL
+	  !> ext/threads/shared/Makefile.PL ext/threads/shared/shared.pm
+	  !> ext/threads/shared/shared.xs ext/threads/shared/t/0nothread.t
+	  !> ext/threads/shared/t/disabled.t ext/threads/shared/t/object.t
+	  !> ext/threads/shared/t/stress.t ext/threads/t/exit.t
+	  !> ext/threads/t/join.t ext/threads/t/problems.t
+	  !> ext/threads/t/thread.t ext/threads/threads.pm
+	  !> ext/threads/threads.xs
+____________________________________________________________________________
+[ 33519] By: nicholas				   on 2008/03/13  22:10:34
+	Log: Integrate:
+	     [ 32005]
+	     Subject: use base problem
+	     From: Shawn <svicalifornia@gmail.com>
+	     Date: Mon, 01 Oct 2007 12:45:32 -0700
+	     Message-ID: <1191267932.150186.12570@d55g2000hsg.googlegroups.com>
+	     
+	     (This patch is actually not needed for 5.10, but useful for earlier perls)
+     Branch: maint-5.8/perl
+	  !> lib/base.pm
+____________________________________________________________________________
+[ 33516] By: nicholas				   on 2008/03/13  19:37:42
+	Log: Integrate:
+	     [ 31194]
+	     Subject: Re: Compress::Zlib, pack "C" and utf-8 [PATCH]
+	     From: Marc Lehmann <schmorp@schmorp.de>
+	     Date: Thu, 12 Apr 2007 08:41:53 +0200
+	     Message-ID: <20070412064153.GA22475@schmorp.de>
+	     
+	     [the lib/CGI/Carp.pm part]
+	     
+	     [ 31195]
+	     Replace a call to utf8::encode by a pack/unpack combination,
+	     so that code runs under 5.6 too
+	     
+	     [ 33501]
+	     Integrate:
+	     [ 33491]
+	     Correct logic error in PerlIOStdio_close() - 0 is an acceptable value
+	     from dup(), so it can't also be the "don't do anything later" value.
+	     
+	     [ 33492]
+	     We need mutex protection in PerlIOStdio_close() for the duration of
+	     holding our true love file handle open, to stop anything else
+	     temporarily using it for a quick dup() fling, and then closing the
+	     file handle underneath us.
+	     I suspect that the lack of this protection was the cause of the threads
+	     free.t and blocks.t failures on OS X on 5.8.x, where usefaststdio is
+	     the default, and PerlIO is unable to "invalidate" the FILE *.
+	     
+	     [ 33498]
+	     Change 33492 did not spread the protection wide enough. There were
+	     still two more races to be lost.
+	     1: The close() could still happen after the (premature) mutex release
+	     allowed another thread to dup() to that file descriptor.
+	     2: The initial dup() could happen whilst another thread was in the
+	     mutex protected region, and had temporarily closed the file
+	     descriptor.
+	     Race conditions remain with any other thread that actually does I/O
+	     during the execution of the mutex protected region (as noted in a
+	     comment), and dup() failure is not handled gracefully (also noted).
+	     
+	     [ 33509]
+	     Integrate:
+	     [ 32661]
+	     Upgrade to CGI.pm-3.31.  Includes version bump to CGI::Carp due to a Pod fix.
+	     
+	     [ 32798]
+	     Upgrade to CGI.pm-3.32.  Retain the version bump since bug fixes 
+	     have not yet been integrated.
+	     
+	     [ 32826]
+	     Upgrade to CGI.pm-3.33.  There are still differences between the
+	     core version and CPAN version, so, the version bump continues.
+	     
+	     [ 33511]
+	     Integrate:
+	     [ 33392]
+	     Upgrade to ExtUtils-ParseXS-2.19.	There are several patches not
+	     in the CPAN version, so a version bump to 2.19_01 is in the core.
+	     
+	     [ 33512]
+	     Integrate:
+	     [ 33253]
+	     Update to Math::Complex 1.49
+	     
+	     [ 33268]
+	     exp(999) isn't "infinity". Even exp(9999) can still be represented on
+	     80 bit long doubles. exp(99999) can't.
+	     
+	     [ 33282]
+	     Upgrade to Math-Complex-1.51
+	     
+	     [ 33286]
+	     Teach Math::Complex the maximum NV for a 16 byte float. (At least, a
+	     16 byte float on x86_64. This feels fragile.)
+	     
+	     [ 33293]
+	     Upgrade to Math-Complex-1.52
+	     
+	     [ 33513]
+	     Integrate:
+	     [ 33329]
+	     Subject: [PATCH] Thread::Semaphore 2.04
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Fri, 15 Feb 2008 11:12:07 -0500
+	     Message-ID: <1ff86f510802150812r3facd53cs1913dd82c3070ac0@mail.gmail.com>
+	     
+	     [ 33361]
+	     Subject: [PATCH] Thread::Semaphore 2.07
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Fri, 22 Feb 2008 17:05:55 -0500
+	     Message-ID: <1ff86f510802221405w15277004u53e7e0a2d2603049@mail.gmail.com>
+	     
+	     [ 33514]
+	     Integrate:
+	     [ 33331]
+	     Subject: [PATCH] Thread::Queue 2.03
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Fri, 15 Feb 2008 14:02:14 -0500
+	     Message-ID: <1ff86f510802151102s41bebc4xab19aa6e464dbf04@mail.gmail.com>
+	     
+	     [ 33362]
+	     Subject: [PATCH] Thread::Queue 2.06
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Fri, 22 Feb 2008 17:10:35 -0500
+	     Message-ID: <1ff86f510802221410r2ceda3deg6cd503f0037b0805@mail.gmail.com>
+     Branch: maint-5.8/perl
+	  +> lib/Thread/Queue/t/01_basic.t lib/Thread/Queue/t/02_refs.t
+	  +> lib/Thread/Queue/t/03_peek.t lib/Thread/Queue/t/04_errs.t
+	  +> lib/Thread/Queue/t/05_extract.t lib/Thread/Queue/t/06_insert.t
+	  +> lib/Thread/Queue/t/07_lock.t lib/Thread/Queue/t/08_nothreads.t
+	  +> lib/Thread/Semaphore/t/01_basic.t
+	  +> lib/Thread/Semaphore/t/02_errs.t
+	  +> lib/Thread/Semaphore/t/03_nothreads.t
+	   - lib/Thread/Queue.t lib/Thread/Semaphore.t
+	  !> MANIFEST Porting/Maintainers.pl lib/CGI.pm lib/CGI/Carp.pm
+	  !> lib/CGI/Util.pm lib/ExtUtils/ParseXS.pm lib/Math/Complex.pm
+	  !> lib/Math/Complex.t lib/Math/Trig.pm lib/Math/Trig.t
+	  !> lib/Thread/Queue.pm lib/Thread/Semaphore.pm
+____________________________________________________________________________
+[ 33515] By: nicholas				   on 2008/03/13  18:33:26
+	Log: Subject: [PATCH] [maint] Trivial MANIFEST patch
+	     From: Andy Dougherty <doughera@lafayette.edu>
+	     Message-ID: <Pine.LNX.4.64.0803131351540.27293@fractal.phys.lafayette.edu>
+	     Date: Thu, 13 Mar 2008 13:53:00 -0400 (EDT)
+     Branch: maint-5.8/perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 33510] By: nicholas				   on 2008/03/13  17:04:21
+	Log: Integrate:
+	     [ 33483]
+	     Integrate:
+	     [ 33481]
+	     Subject: Re: Perl @ http://www.ccl4.org/~nick/P/perl-33444.tar.bz2
+	     From: Reini Urban <rurban@x-ray.at>
+	     Message-ID: <47D2EF38.10503@x-ray.at>
+	     Date: Sat, 08 Mar 2008 20:55:36 +0100
+	     
+	     * CYG04 At least on cygwin strip the last number
+	     from the dll. This is in the cygwin.com build since years.
+	     
+	     
+	     [except the -mms-bitfields in CFLAGS, as Jan states that it would break
+	     binary compatibilty on 5.10.1 too]
+     Branch: maint-5.8/perl
+	  !> cygwin/Makefile.SHs installperl lib/ExtUtils/t/Embed.t
+____________________________________________________________________________
+[ 33502] By: nicholas				   on 2008/03/12  22:03:57
+	Log: Integrate:
+	     [ 33501]
+	     Integrate:
+	     [ 33491]
+	     Correct logic error in PerlIOStdio_close() - 0 is an acceptable value
+	     from dup(), so it can't also be the "don't do anything later" value.
+	     
+	     [ 33492]
+	     We need mutex protection in PerlIOStdio_close() for the duration of
+	     holding our true love file handle open, to stop anything else
+	     temporarily using it for a quick dup() fling, and then closing the
+	     file handle underneath us.
+	     I suspect that the lack of this protection was the cause of the threads
+	     free.t and blocks.t failures on OS X on 5.8.x, where usefaststdio is
+	     the default, and PerlIO is unable to "invalidate" the FILE *.
+	     
+	     [ 33498]
+	     Change 33492 did not spread the protection wide enough. There were
+	     still two more races to be lost.
+	     1: The close() could still happen after the (premature) mutex release
+	     allowed another thread to dup() to that file descriptor.
+	     2: The initial dup() could happen whilst another thread was in the
+	     mutex protected region, and had temporarily closed the file
+	     descriptor.
+	     Race conditions remain with any other thread that actually does I/O
+	     during the execution of the mutex protected region (as noted in a
+	     comment), and dup() failure is not handled gracefully (also noted).
+     Branch: maint-5.8/perl
+	  !> perlio.c
+____________________________________________________________________________
+[ 33497] By: nicholas				   on 2008/03/12  18:44:49
+	Log: Integrate:
+	     [ 33496]
+	     Integrate:
+	     [ 33259]
+	     Subject: RE: Perl @ 33218 (Stratus VOS patches)
+	     From: "Green, Paul" <Paul.Green@stratus.com>
+	     Date: Fri, 8 Feb 2008 12:36:03 -0500
+	     Message-ID: <F5F42E77A43DD944B6D664B00A5401CB037149FF@EXNA.corp.stratus.com>
+	     
+	     Includes a fix to the patch to ext/Time/HiRes/Makefile.PL
+     Branch: maint-5.8/perl
+	  !> ext/Time/HiRes/Makefile.PL hints/vos.sh
+	  !> lib/ExtUtils/t/MM_Unix.t lib/ExtUtils/t/eu_command.t
+	  !> makedepend.SH pp_pack.c t/TEST vos/Changes vos/vos.c
+	  !> vos/vosish.h
+____________________________________________________________________________
+[ 33494] By: nicholas				   on 2008/03/12  16:26:30
+	Log: Integrate:
+	     [ 33490]
+	     Integrate:
+	     [ 33487]
+	     Subject: [PATCH] cygwin hints back to old
+	     From: "Reini Urban" <rurban@x-ray.at>
+	     Message-ID: <6910a60803120011y4ff1d1f0x5654906570dc19ab@mail.gmail.com>
+	     Date: Wed, 12 Mar 2008 08:11:17 +0100
+	     
+	     Revert a part of blead patch #33357
+	     * no cpu. revert the archname part of patch #33357
+	     to the old behaviour.
+     Branch: maint-5.8/perl
+	  !> hints/cygwin.sh
+____________________________________________________________________________
+[ 33484] By: nicholas				   on 2008/03/11  21:31:27
+	Log: Subject: Re: Perl @ http://www.ccl4.org/~nick/P/perl-33444.tar.bz2
+	     From: Reini Urban <rurban@x-ray.at>
+	     Message-ID: <47D2EF38.10503@x-ray.at>
+	     Date: Sat, 08 Mar 2008 20:55:36 +0100
+	     
+	     * Update README for the ld2 axe, and a bit more.
+     Branch: maint-5.8/perl
+	   ! README.cygwin
+____________________________________________________________________________
+[ 33479] By: nicholas				   on 2008/03/11  18:08:11
+	Log: Integrate:
+	     [ 33288]
+	     Integrate:
+	     [ 33040]
+	     Subject: [PATCH] Re: Perl @ 32984 (also relevant to [perl #33849])
+	     From: Andrew Dougherty <doughera@lafayette.edu>
+	     Date: Tue, 22 Jan 2008 11:59:47 -0500 (EST)
+	     Message-ID: <Pine.LNX.4.64.0801221111410.31664@fractal.phys.lafayette.edu>
+	     
+	     [ 33246]
+	     Subject: Re: [PATCH] Re: Perl @ 32984 (also relevant to [perl #33849])
+	     From: Andy Dougherty <doughera@lafayette.edu>
+	     Date: Fri, 1 Feb 2008 12:39:39 -0500 (EST)
+	     Message-ID: <Pine.LNX.4.64.0802011239170.1831@fractal.phys.lafayette.edu>
+	     
+	     [ 33262]
+	     Subject: [PATCH] hints/aix_4.sh to allow build on aix 4.2
+	     From: AUGUSTE-ETIENNE Jose <jose.auguste-etienne@cgss-guyane.fr>
+	     Date: Fri, 08 Feb 2008 17:10:26 -0300
+	     Message-Id: <1202501426.15175.10.camel@sinf009w.d81970300.cgss-guyane.fr>
+	     
+	     [ 33275]
+	     Correct quad-related %Config variables on VMS.
+     Branch: maint-5.8/perl
+	  !> configure.com hints/aix_4.sh hints/irix_6.sh
+____________________________________________________________________________
+[ 33478] By: nicholas				   on 2008/03/11  17:49:23
+	Log: Integrate:
+	     [ 33477]
+	     Integrate:
+	     [ 33451]
+	     On VMS, don't call flex_stat from my_flush as the latter may be
+	     called during global destruction and the former checks hints flags
+	     that depend on the interpreter's still existing.
+     Branch: maint-5.8/perl
+	  !> vms/vms.c
+____________________________________________________________________________
+[ 33476] By: nicholas				   on 2008/03/11  17:24:08
+	Log: Integrate:
+	     [ 31546]
+	     Subject: [PATCH] Fix commented out function names in proto.h
+	     From: "Jan Dubois" <jand@activestate.com>
+	     Date: Fri, 6 Jul 2007 17:59:38 -0700
+	     Message-ID: <058b01c7c032$18a6a260$49f3e720$@com>
+     Branch: maint-5.8/perl
+	  !> embed.h embed.pl proto.h
+____________________________________________________________________________
+[ 33475] By: nicholas				   on 2008/03/11  17:06:04
+	Log: Integrate:
+	     [ 31505]
+	     Removes the code that is supposed to restore magic on leaving the
+	     localization of an array or a hash. This fixes some memory leaks.
+	     Basically we were overwriting the magic of the outer value (value
+	     from the outer scope) by the magic of the inner value (therefore making
+	     that outer magic leaking in memory). But that inner magic was created
+	     by mg_localize() by copying *some* of the outer magic. Consequently the
+	     outer value already has that magic. So just keep it and don't bother.
+	     
+	     That change might introduce obscure bugs. On the other hand, it might
+	     also cure obscure bugs, related to the inner value acquiring container
+	     magic during its lifetime, or to the outer value loosing non-container
+	     magic. No test in the test suite seems to test that.
+	     
+	     [ 31511]
+	     test that localised tieing of a hash or array remains local
+	     (tests for change #31505)
+     Branch: maint-5.8/perl
+	  !> scope.c t/op/tie.t
+____________________________________________________________________________
+[ 33474] By: nicholas				   on 2008/03/11  16:58:39
+	Log: Reverse accidental change to perl.h in 33472.
+     Branch: maint-5.8/perl
+	   ! perl.h
+____________________________________________________________________________
+[ 33472] By: nicholas				   on 2008/03/11  15:56:33
+	Log: Integrate:
+	     [ 33464]
+	     Integrate:
+	     [ 32966]
+	     Subject: [PATCH] tru64: poison stack, write protect string constants
+	     From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+	     Date: Sat, 12 Jan 2008 03:27:10 +0200 (EET)
+	     Message-Id: <200801120127.m0C1RAZ6088857@kosh.hut.fi>
+	     
+	     [ 33330]
+	     Subject: [perl #50946] modified hints for Darwin x86  64bit 
+	     From: "Daniel M. Quinlan" (via RT) <perlbug-followup@perl.org>
+	     Date: Sun, 17 Feb 2008 14:20:58 -0800
+	     Message-ID: <rt-3.6.HEAD-24181-1203286856-952.50946-75-0@perl.org>
+	     
+	     [ 33357]
+	     Subject: [PATCH] cygwin hints
+	     From: "Reini Urban" <rurban@x-ray.at>
+	     Date: Thu, 21 Feb 2008 14:38:33 +0100
+	     Message-ID: <6910a60802210538p4fdb84abwf5128e87399dddf4@mail.gmail.com>
+     Branch: maint-5.8/perl
+	   ! perl.h
+	  !> hints/cygwin.sh hints/darwin.sh hints/dec_osf.sh
+____________________________________________________________________________
+[ 33465] By: nicholas				   on 2008/03/10  21:18:14
+	Log: Integrate:
+	     [ 31588]
+	     Subject: [PATCH] dump.c: do not use sv_len_utf8 because it modified the scalar
+	     From: Gerard Goossen <gerard@tty.nl>
+	     Date: Wed, 11 Jul 2007 19:19:11 +0200
+	     Message-ID: <20070711171911.GD8177@ostwald>
+	     
+	     do not use sv_len_utf8 because it modified the scalar.
+	     Add a test to Peek.t to check that dumping doesn't modify anything;
+	     the test is still TODO because hashiteration in dump.c set the OOK flag.
+	     
+	     
+	     [the dump.c part. The test will need to be intergrated with the rest of
+	     the Devel::Peek test change backlog]
+     Branch: maint-5.8/perl
+	  !> dump.c
+____________________________________________________________________________
+[ 33461] By: nicholas				   on 2008/03/10  14:40:32
+	Log: #else missing, spotted by Alexey Tourbin.
+     Branch: maint-5.8/perl
+	   ! embed.fnc embed.h proto.h
+____________________________________________________________________________
+[ 33459] By: nicholas				   on 2008/03/10  13:10:44
+	Log: We're one function attribute out of sync with make regen, so fix it.
+     Branch: maint-5.8/perl
+	   ! proto.h
+____________________________________________________________________________
+[ 33454] By: nicholas				   on 2008/03/08  23:09:00
+	Log: Revert all of the changes in 28115 related to changing the signal
+	     handler take variable arguments (so as to support POSIX SA_SIGINFO)
+	     as for some reason it causes nasal daemon leakage on some 64 bit
+	     platforms, and I conclude that integrating the fix (change 32012) isn't
+	     viable on maint, as it involves changing (or at least fudging) too
+	     many types, variables, pointers, and pointers to functions.
+	     I infer that the changes rolled back are 25200, 25203, 25207, 25240,
+	     25976, 25977 and 25980. (although some of the casts remain).
+     Branch: maint-5.8/perl
+	   ! embed.fnc embed.h ext/POSIX/POSIX.pod ext/POSIX/t/sigaction.t
+	   ! global.sym iperlsys.h mg.c perl.c perl.h perlvars.h proto.h
+____________________________________________________________________________
+[ 33449] By: nicholas				   on 2008/03/06  14:14:52
+	Log: Arrange for newGP to know when it needs to copy the filename of the
+	     current COP, because that COP is likely to be freed before the GV.
+	     Not perfect (valgrind still spots a couple not caught) but gets most,
+	     and gets ext/B/t/lint.t passing.
+     Branch: maint-5.8/perl
+	   ! gv.c op.c op.h scope.h
+____________________________________________________________________________
+[ 33446] By: nicholas				   on 2008/03/05  19:16:42
+	Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 33444] By: nicholas				   on 2008/03/05  15:30:36
 	Log: Integrate:
 	     [ 33443]
