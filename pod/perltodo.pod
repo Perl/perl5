@@ -4,10 +4,11 @@ perltodo - Perl TO-DO List
 
 =head1 DESCRIPTION
 
-This is a list of wishes for Perl. The tasks we think are smaller or easier
-are listed first. Anyone is welcome to work on any of these, but it's a good
-idea to first contact I<perl5-porters@perl.org> to avoid duplication of
-effort. By all means contact a pumpking privately first if you prefer.
+This is a list of wishes for Perl. The tasks we think are smaller or
+easier are listed first. Anyone is welcome to work on any of these,
+but it's a good idea to first contact I<perl5-porters@perl.org> to
+avoid duplication of effort, and to learn from any previous attempts.
+By all means contact a pumpking privately first if you prefer.
 
 Whilst patches to make the list shorter are most welcome, ideas to add to
 the list are also encouraged. Check the perl5-porters archives for past
@@ -910,6 +911,32 @@ See also L</"Extend PerlIO and PerlIO::Scalar">.
 The peephole optimier converts constants used for hash key lookups to shared
 hash key scalars. Under ithreads, something is undoing this work. See
 See http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-09/msg00793.html
+
+=head2 repack the optree
+
+Repacking the optree after execution order is determined could allow
+removal of NULL ops, and optimal ordering of OPs wrt cache-line
+filling.  The slab allocator could be reused for this purpose.
+
+http://www.nntp.perl.org/group/perl.perl5.porters/2007/12/msg131975.html
+
+=head2 optimize tail-calls
+
+Tail-calls present an opportunity for broadly applicable optimization;
+anywhere that C<< return foo(...) >> is called, the outer return can
+be replaced by a goto, and foo will return directly to the outer
+caller, saving (conservatively) 25% of perl's call&return cost, which
+is relatively higher than in C.  The scheme language is known to do
+this heavily.  B::Concise provides good insight into where this
+optimization is possible, ie anywhere entersub,leavesub op-sequence
+occurs.
+
+ perl -MO=Concise,-exec,a,b,-main -e 'sub a{ 1 }; sub b {a()}; b(2)'
+
+Bottom line on this is probably a new pp_tailcall function which
+combines the code in pp_entersub, pp_leavesub.  This should probably
+be done 1st in XS, and using B::Generate to patch the new OP into the
+optrees.
 
 =head1 Big projects
 
