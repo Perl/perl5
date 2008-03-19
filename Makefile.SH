@@ -1033,8 +1033,11 @@ AUTOGEN_FILES = keywords.h opcode.h opnames.h pp_proto.h pp.sym proto.h \
 
 .PHONY: regen_headers regen_pods regen_all
 
-regen regen_headers:	FORCE
+regen:	FORCE
 	-perl regen.pl
+
+regen_headers:	FORCE
+	-perl regen.pl -v
 
 regen_pods:	FORCE
 	-cd pod; $(LDLIBPTH) $(MAKE) regen_pods

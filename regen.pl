@@ -11,7 +11,6 @@ require 5.003;	# keep this compatible, an old perl is all we may have before
 use strict;
 my $perl = $^X;
 
-require 'regen_lib.pl';
 # keep warnings.pl in sync with the CPAN distribution by not requiring core
 # changes.  Um, what ?
 # safer_unlink ("warnings.h", "lib/warnings.pm");
@@ -46,10 +45,11 @@ sub do_cksum {
 
 foreach my $pl (qw (keywords.pl opcode.pl embed.pl
 		    regcomp.pl warnings.pl autodoc.pl reentr.pl)) {
-  print "$^X $pl\n";
+  my @command =  ($^X, $pl, @ARGV);
+  print "@command\n";
   my %cksum0;
   %cksum0 = do_cksum($pl) unless $pl eq 'warnings.pl'; # the files were removed
-  system "$^X $pl";
+  system @command;
   next if $pl eq 'warnings.pl'; # the files were removed
   my %cksum1 = do_cksum($pl);
   my @chg;
