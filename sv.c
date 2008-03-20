@@ -7910,7 +7910,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **const st, GV **const gvp, const I32 lref)
 	    LEAVE;
 	    if (!GvCVu(gv))
 		Perl_croak(aTHX_ "Unable to create sub named \"%"SVf"\"",
-			   SVfARG(sv));
+			   SVfARG(SvOK(sv) ? sv : &PL_sv_no));
 	}
 	return GvCVu(gv);
     }

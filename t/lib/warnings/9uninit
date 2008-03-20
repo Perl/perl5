@@ -1070,8 +1070,6 @@ reset $m1;
 reset $g1;
 EXPECT
 Use of uninitialized value $m1 in subroutine dereference at - line 5.
-Use of uninitialized value $m1 in subroutine dereference at - line 5.
-Use of uninitialized value $g1 in subroutine dereference at - line 6.
 Use of uninitialized value $g1 in subroutine dereference at - line 6.
 Use of uninitialized value $m1 in splice at - line 9.
 Use of uninitialized value $g1 in splice at - line 9.
