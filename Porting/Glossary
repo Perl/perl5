@@ -3070,6 +3070,10 @@ i_sysparam (i_sysparam.U):
 	This variable conditionally defines the I_SYS_PARAM symbol, and indicates
 	whether a C program should include <sys/param.h>.
 
+i_syspoll (i_syspoll.U):
+	This variable conditionally defines the I_SYS_POLL symbol, which
+	indicates to the C program that it should include <sys/poll.h>.
+
 i_sysresrc (i_sysresrc.U):
 	This variable conditionally defines the I_SYS_RESOURCE symbol,
 	and indicates whether a C program should include <sys/resource.h>.
