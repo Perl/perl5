@@ -1570,6 +1570,52 @@ ____________________________________________________________________________
      Branch: maint-5.10/perl
 	  !> ext/Opcode/Safe.pm ext/Safe/t/safe3.t
 ____________________________________________________________________________
+[ 33111] By: nicholas				   on 2008/01/29 19:03:04
+
+	     Integrate:
+	     [ 32651]
+	     Upgrade to B-Lint-1.11
+	     
+	     [ 32654]
+	     Upgrade to Sys-Syslog-0.23
+	     
+	     [ 32656]
+	     Add new Sys::Syslog file to MANIFEST
+	     
+	     [ 32658]
+	     Subject: [PATCH] threads::shared 1.15
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Wed, 19 Dec 2007 10:17:46 -0500
+	     Message-ID: <1ff86f510712190717r379ffdbt9ed19b8a607b8931@mail.gmail.com>
+	     
+	     [ 32799]
+	     Upgrade to Sys-Syslog-0.24
+	     
+	     [ 33093]
+	     In Safe, load Carp::Heavy only if it exists (to remain
+	     compatible with older perls)
+	     
+	     [ 33096]
+	     Bump the version of Safe
+	     
+	     [ 33102]
+	     Make this test pass with the Test::More that comes with perl 5.6.2
+	     
+	     [ 33105]
+	     Document why ok() is being used instead of like(), to stop someone
+	     undoing it.
+     Branch: maint-5.10/perl
+	  !> MANIFEST
+	  !> ext/B/B/Lint.pm
+	  +> ext/B/B/Lint/Debug.pm
+	  !> ext/Sys/Syslog/Makefile.PL
+	  !> ext/Sys/Syslog/Syslog.pm
+	  +> ext/Sys/Syslog/fallback/syslog.h
+	  !> ext/Sys/Syslog/t/syslog.t
+	  !> ext/threads/shared/shared.pm
+	  !> ext/threads/shared/shared.xs
+	  +> ext/threads/shared/t/object.t
+____________________________________________________________________________
 [ 33110] By: nicholas				   on 2008/01/29  18:29:08
 	Log: Integrate:
 	     [ 32891]
