@@ -873,7 +873,6 @@ Use of uninitialized value $g2 in substr at - line 7.
 Use of uninitialized value $m2 in substr at - line 7.
 Use of uninitialized value $g1 in substr at - line 7.
 Use of uninitialized value $m1 in substr at - line 7.
-Use of uninitialized value $m1 in substr at - line 7.
 Use of uninitialized value $g1 in substr at - line 8.
 Use of uninitialized value $m1 in substr at - line 8.
 Use of uninitialized value in scalar assignment at - line 8.
