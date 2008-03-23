@@ -3948,6 +3948,12 @@ $ tmp = "sys/mode.h"
 $ GOSUB inhdr
 $ i_sysmode = tmp
 $!
+$! Check for poll.h
+$!
+$ tmp = "sys/poll.h"
+$ gosub inhdr
+$ i_syspoll = tmp
+$!
 $! Check for sys/access.h
 $!
 $ tmp = "sys/access.h"
@@ -6285,6 +6291,7 @@ $ WC "i_sysmode='" + i_sysmode + "'"
 $ WC "i_sysmount='undef'"
 $ WC "i_sysndir='undef'"
 $ WC "i_sysparam='undef'"
+$ WC "i_syspoll='" + i_syspoll + "'"
 $ WC "i_sysresrc='undef'"
 $ WC "i_syssecrt='" + i_syssecrt + "'"
 $ WC "i_sysselct='undef'"
