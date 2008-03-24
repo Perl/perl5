@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Fri Mar 21 11:25:23 CET 2008 [metaconfig 3.5 PL0]
+# Generated on Sun Mar 30 11:17:56 CEST 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -5382,6 +5382,11 @@ $rm_try gcctest gcctest.out
 compile='
 mc_file=$1;
 shift;
+case "$usedevel" in $define|true|[yY]*) if $test ! -f "${mc_file}.c"; then
+echo "Internal Configure script bug - compiler test file ${mc_file}.c is missing. Please report this to perlbug@perl.org" >&4;
+exit 1;
+fi;
+esac;
 $cc -o ${mc_file} $optimize $ccflags $ldflags $* ${mc_file}.c $libs > /dev/null 2>&1;'
 : define a shorthand compile call for compilations that should be ok.
 compile_ok='
