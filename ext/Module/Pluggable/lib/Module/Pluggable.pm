@@ -9,7 +9,7 @@ use Module::Pluggable::Object;
 # Peter Gibbons: I wouldn't say I've been missing it, Bob! 
 
 
-$VERSION = '3.7';
+$VERSION = '3.8';
 
 sub import {
     my $class        = shift;
