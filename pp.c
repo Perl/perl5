@@ -3199,7 +3199,7 @@ PP(pp_substr)
 		else if (SvOK(sv))	/* is it defined ? */
 		    (void)SvPOK_only_UTF8(sv);
 		else
-		    sv_setpvn(sv,"",0);	/* avoid lexical reincarnation */
+		    sv_setpvs(sv, ""); /* avoid lexical reincarnation */
 	    }
 
 	    if (SvTYPE(TARG) < SVt_PVLV) {
