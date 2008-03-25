@@ -38,7 +38,7 @@ ExtUtils::Install - install files from here to there
     
 =head1 VERSION
 
-1.50_01
+1.51
 
 =cut
 
@@ -248,8 +248,9 @@ sub _unlink_or_rename { #XXX OS-SPECIFIC
     my ( $file, $tryhard, $installing )= @_;
 
     _chmod( 0666, $file );
-    unlink $file
-        and return $file;
+    my $unlink_count = 0;
+    while (unlink $file) { $unlink_count++; }
+    return $file if $unlink_count > 0;
     my $error="$!";
 
     _choke("Cannot unlink '$file': $!")
@@ -404,9 +405,14 @@ sub _can_write_dir {
     my $path='';
     my @make;
     while (@dirs) {
-        $dir = File::Spec->catdir(@dirs);
-        $dir = File::Spec->catpath($vol,$dir,'') 
-                if defined $vol and length $vol;
+        if ($Is_VMS) {
+            $dir = File::Spec->catdir($vol,@dirs);
+        }
+        else {
+            $dir = File::Spec->catdir(@dirs);
+            $dir = File::Spec->catpath($vol,$dir,'')
+                    if defined $vol and length $vol;
+        }
         next if ( $dir eq $path );
         if ( ! -e $dir ) {
             unshift @make,$dir;
@@ -1040,7 +1046,7 @@ sub inc_uninstall {
     #warn join "\n","---",@dirs,"---";
     my $seen_ours;
     foreach $dir ( @dirs ) {
-        my $canonpath = File::Spec->canonpath($dir);
+        my $canonpath = $Is_VMS ? $dir : File::Spec->canonpath($dir);
         next if $canonpath eq $Curdir;
         next if $seen_dir{$canonpath}++;
         my $targetfile = File::Spec->catfile($canonpath,$libdir,$file);
@@ -1078,7 +1084,7 @@ sub inc_uninstall {
             eval {
                 die "Fake die for testing" 
                     if $ExtUtils::Install::Testing and
-                       File::Spec->canonpath($ExtUtils::Install::Testing) eq $targetfile;
+                       ucase(File::Spec->canonpath($ExtUtils::Install::Testing)) eq ucase($targetfile);
                 forceunlink($targetfile,'tryhard');
                 $results->{uninstall}{$targetfile} = $filepath;
                 1;
@@ -1225,7 +1231,8 @@ sub DESTROY {
         }
         $plural = $i>1 ? "all those files" : "this file";
         my $inst = (_invokant() eq 'ExtUtils::MakeMaker')
-                 ? ( $Config::Config{make} || 'make' ).' install UNINST=1'
+                 ? ( $Config::Config{make} || 'make' ).' install'
+                     . ( $Is_VMS ? '/MACRO="UNINST"=1' : ' UNINST=1' )
                  : './Build install uninst=1';
         print "## Running '$inst' will unlink $plural for you.\n";
     }

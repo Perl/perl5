@@ -208,7 +208,10 @@ close DUMMY;
   ok( -d 'install-test/other_lib/perl',        'install made other dir' );
   ok( -r 'install-test/other_lib/perl/Big/Dummy.pm', '  .pm file installed' );
   ok( -r 'install-test/packlist',              '  packlist exists' );
-  ok( (stat $tfile)[9]==(stat$sfile)[9],'  Times are same');
+SKIP: {
+  skip "Times not preserved during copy by default", 1 if $^O eq 'VMS';
+  ok( (stat $tfile)[9]==(stat $sfile)[9],'  Times are same');
+}
   ok( !$result{install_unchanged},'  $result{install_unchanged} should be empty');
 }
 # Test nothing is copied.
