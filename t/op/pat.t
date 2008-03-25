@@ -3708,6 +3708,7 @@ sub iseq($$;$) {
     printf "%sok %d - %s$todo\n", ($ok ? "" : "not "), $test,
         ($name||$Message)."\tLine ".((caller)[2]);
 
+    no warnings 'utf8';
     printf "# Failed test at line %d\n".
            "# expected: %s\n". 
            "#   result: %s\n", 
