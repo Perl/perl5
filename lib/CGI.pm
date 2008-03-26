@@ -18,8 +18,8 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.247 2008/03/14 14:29:36 lstein Exp $';
-$CGI::VERSION='3.34_01';
+$CGI::revision = '$Id: CGI.pm,v 1.249 2008/03/25 15:17:55 lstein Exp $';
+$CGI::VERSION='3.35';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -2569,6 +2569,7 @@ sub scrolling_list {
     $size = $size || scalar(@values);
 
     my(%selected) = $self->previous_or_default($name,$defaults,$override);
+
     my($is_multiple) = $multiple ? qq/ multiple="multiple"/ : '';
     my($has_size) = $size ? qq/ size="$size"/: '';
     my($other) = @other ? " @other" : '';
@@ -3381,12 +3382,12 @@ sub read_multipart {
 	my($param)= $header{'Content-Disposition'}=~/ name="([^"]*)"/;
         $param .= $TAINTED;
 
-	# Bug:  Netscape doesn't escape quotation marks in file names!!!
-	# See RFC 1867, 2183, 2045
-	# NB: File content will be loaded into memory should
-	# content-disposition parsing fail.
-	my ($filename) = $header{'Content-Disposition'}=~/ filename=(("[^"]*")|([a-z\d!\#'\*\+,\.^_\`\{\}\|\~]*))/i;
-	$filename =~ s/^"([^"]*)"$/$1/;
+        # See RFC 1867, 2183, 2045
+        # NB: File content will be loaded into memory should
+        # content-disposition parsing fail.
+        my ($filename) = $header{'Content-Disposition'}
+	               =~/ filename=(("[^"]*")|([a-z\d!\#'\*\+,\.^_\`\{\}\|\~]*))/i;
+        $filename =~ s/^"([^"]*)"$/$1/;
 	# Test for Opera's multiple upload feature
 	my($multipart) = ( defined( $header{'Content-Type'} ) &&
 		$header{'Content-Type'} =~ /multipart\/mixed/ ) ?
