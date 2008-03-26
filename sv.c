@@ -516,6 +516,8 @@ static void
 do_clean_all(pTHX_ SV *const sv)
 {
     dVAR;
+    if (sv == PL_fdpid || sv == PL_strtab) /* don't clean pid table and strtab */
+	return;
     DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops: SV at 0x%"UVxf"\n", PTR2UV(sv)) ));
     SvFLAGS(sv) |= SVf_BREAK;
     SvREFCNT_dec(sv);
