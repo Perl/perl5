@@ -1590,6 +1590,11 @@ C<-r>, C<-w>, and C<-x> have a limited meaning only; directories
 and applications are executable, and there are no uid/gid
 considerations.  C<-o> is not supported.  (S<Mac OS>)
 
+C<-w> only inspects the read-only file attribute (FILE_ATTRIBUTE_READONLY),
+which determines whether the directory can be deleted, not whether it can
+be written to. Directories always have read and write access unless denied
+by discretionary access control lists (DACLs).  (S<Win32>)
+
 C<-r>, C<-w>, C<-x>, and C<-o> tell whether the file is accessible,
 which may not reflect UIC-based file protections.  (VMS)
 

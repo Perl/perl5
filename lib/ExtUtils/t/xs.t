@@ -19,7 +19,7 @@ use File::Spec;
 use File::Path;
 
 if( have_compiler() ) {
-    plan tests => 7;
+    plan tests => 5;
 }
 else {
     plan skip_all => "ExtUtils::CBuilder not installed or couldn't find a compiler";
@@ -39,8 +39,8 @@ $| = 1;
 
 ok( setup_xs(), 'setup' );
 END {
-    ok( chdir File::Spec->updir );
-    ok( teardown_xs(), 'teardown' );
+    chdir File::Spec->updir or die;
+    teardown_xs(), 'teardown' or die;
 }
 
 ok( chdir('XS-Test'), "chdir'd to XS-Test" ) ||

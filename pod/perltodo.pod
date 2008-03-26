@@ -484,6 +484,31 @@ warnings are also currently suppressed by adding -D_CRT_NONSTDC_NO_DEPRECATE. It
 might be nice to do as Microsoft suggest here too, although, unlike the secure
 functions issue, there is presumably little or no benefit in this case.
 
+=head2 Fix POSIX::access() and chdir() on Win32
+
+These functions currently take no account of DACLs and therefore do not behave
+correctly in situations where access is restricted by DACLs (as opposed to the
+read-only attribute).
+
+Furthermore, POSIX::access() behaves differently for directories having the
+read-only attribute set depending on what CRT library is being used. For
+example, the _access() function in the VC6 and VC7 CRTs (wrongly) claim that
+such directories are not writable, whereas in fact all directories are writable
+unless access is denied by DACLs. (In the case of directories, the read-only
+attribute actually only means that the directory cannot be deleted.) This CRT
+bug is fixed in the VC8 and VC9 CRTs (but, of course, the directory may still
+not actually be writable if access is indeed denied by DACLs).
+
+For the chdir() issue, see ActiveState bug #74552:
+http://bugs.activestate.com/show_bug.cgi?id=74552
+
+Therefore, DACLs should be checked both for consistency across CRTs and for
+the correct answer.
+
+(Note that perl's -w operator should not be modified to check DACLs. It has
+been written so that it reflects the state of the read-only attribute, even
+for directories (whatever CRT is being used), for symmetry with chmod().)
+
 =head2 strcat(), strcpy(), strncat(), strncpy(), sprintf(), vsprintf()
 
 Maybe create a utility that checks after each libperl.a creation that
