@@ -22,6 +22,7 @@ private:
     - ext/List/Util
     - ext/Math/BigInt/FastCalc
     - ext/MIME/Base64
+    - ext/Module/Pluggable
     - ext/Safe
     - ext/Storable
     - ext/Sys/Syslog
@@ -37,6 +38,7 @@ private:
     - lib/Archive/Extract
     - lib/Archive/Tar
     - lib/Attribute/Handlers
+    - lib/AutoLoader
     - lib/base
     - lib/bignum
     - lib/CGI
@@ -76,7 +78,6 @@ private:
     - lib/Module/Load/Conditional
     - lib/Module/Load/t
     - lib/Module/Loaded
-    - lib/Module/Pluggable
     - lib/Net/FTP
     - lib/Net/Ping
     - lib/Net/t
@@ -84,10 +85,13 @@ private:
     - lib/Object/Accessor
     - lib/Package/Constants
     - lib/Params/Check
+    - lib/parent
     - lib/Pod/Escapes
     - lib/Pod/Perldoc
     - lib/Pod/Simple
+    - lib/SelfLoader
     - lib/Switch
+    - lib/TAP
     - lib/Term/ANSIColor
     - lib/Term/UI
     - lib/Test/Builder
@@ -96,13 +100,17 @@ private:
     - lib/Test/t
     - lib/Text/Balanced
     - lib/Text/TabsWrap
+    - lib/Thread/Queue
+    - lib/Thread/Semaphore
     - lib/Tie/File
     - lib/Tie/RefHash
     - lib/Unicode/Collate
+    - t/lib/data
     - t/lib/Filter/Simple
     - t/lib/MakeMaker
     - t/lib/Math
     - t/lib/sample-tests
+    - t/lib/source_tests
     - t/lib/Test/Simple
     - t/Module_Pluggable
 
@@ -116,11 +124,13 @@ private:
     - ext/Opcode/Safe.pm
     - ext/threads/threads.pm
     - ext/threads/threads.xs
+    - lib/App/Prove.pm
+    - lib/App/Prove/State.pm
     - lib/Archive/Extract.pm
     - lib/Archive/Tar.pm
     - lib/Attribute/Handlers.pm
     - lib/AutoLoader.pm
-    - lib/AutoLoader.t
+    - lib/AutoSplit.pm
     - lib/base.pm
     - lib/bigint.pm
     - lib/bignum.pm
@@ -148,7 +158,6 @@ private:
     - lib/CPANPLUS/Selfupdate.pm
     - lib/CPANPLUS/Shell.pm
     - lib/Cwd.pm
-    - lib/Devel/InnerPackage.pm
     - lib/Digest.pm
     - lib/encoding/warnings.pm
     - lib/Exporter.pm
@@ -173,6 +182,7 @@ private:
     - lib/ExtUtils/MM_Any.pm
     - lib/ExtUtils/MM_BeOS.pm
     - lib/ExtUtils/MM_Cygwin.pm
+    - lib/ExtUtils/MM_Darwin.pm
     - lib/ExtUtils/MM_DOS.pm
     - lib/ExtUtils/MM_MacOS.pm
     - lib/ExtUtils/MM_NW5.pm
@@ -192,6 +202,7 @@ private:
     - lib/ExtUtils/t/basic.t
     - lib/ExtUtils/t/build_man.t
     - lib/ExtUtils/t/bytes.t
+    - lib/ExtUtils/t/can_write_dir.t
     - lib/ExtUtils/t/cd.t
     - lib/ExtUtils/t/config.t
     - lib/ExtUtils/t/Constant.t
@@ -205,6 +216,7 @@ private:
     - lib/ExtUtils/t/INST_PREFIX.t
     - lib/ExtUtils/t/Install.t
     - lib/ExtUtils/t/INSTALL_BASE.t
+    - lib/ExtUtils/t/Installapi2.t
     - lib/ExtUtils/t/Installed.t
     - lib/ExtUtils/t/Liblist.t
     - lib/ExtUtils/t/make.t
@@ -288,7 +300,6 @@ private:
     - lib/Module/Load.pm
     - lib/Module/Load/Conditional.pm
     - lib/Module/Loaded.pm
-    - lib/Module/Pluggable.pm
     - lib/Net/ChangeLog
     - lib/Net/Cmd.pm
     - lib/Net/Config.eg
@@ -308,6 +319,7 @@ private:
     - lib/Object/Accessor.pm
     - lib/Package/Constants.pm
     - lib/Params/Check.pm
+    - lib/parent.pm
     - lib/PerlIO/via/QuotedPrint.pm
     - lib/PerlIO/via/t/QuotedPrint.t
     - lib/Pod/Checker.pm
@@ -341,6 +353,7 @@ private:
     - lib/Pod/Text/Overstrike.pm
     - lib/Pod/Text/Termcap.pm
     - lib/Pod/Usage.pm
+    - lib/SelfLoader.pm
     - lib/Shell.pm
     - lib/Shell.t
     - lib/Switch.pm
@@ -356,6 +369,8 @@ private:
     - lib/Text/Balanced.pm
     - lib/Text/Tabs.pm
     - lib/Text/Wrap.pm
+    - lib/Thread/Queue.pm
+    - lib/Thread/Semaphore.pm
     - lib/Tie/File.pm
     - lib/Tie/RefHash.pm
     - lib/Time/Local.pm
@@ -369,7 +384,11 @@ private:
     - pod/pod2usage.PL
     - pod/podchecker.PL
     - pod/podselect.PL
+    - t/lib/App/Prove/Plugin/Dummy.pm
+    - t/lib/Dev/Null.pm
     - t/lib/filter-util.pl
+    - t/lib/IO/c55Capture.pm
+    - t/lib/NoFork.pm
     - t/lib/TieIn.pm
     - t/lib/TieOut.pm
     - t/pod/emptycmd.t
