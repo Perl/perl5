@@ -19,7 +19,7 @@ my @path = $core ? (File::Spec->updir, File::Spec->updir, File::Spec->updir,
 my @files;
 if ($^O ne 'VMS' && $^O ne 'VOS') {
     foreach my $test (keys %dodgy_files) {
-        my ($file) = (catfile($FindBin::Bin,"t","lib", $test)=~/^(.*)$/);
+        my ($file) = (catfile(@path, "lib", $test)=~/^(.*)$/);
         if (open(my $fh, ">", $file)) {
             my $name = $dodgy_files{$test};
             print $fh "package $name;\nsub new {}\n1;";
