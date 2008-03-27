@@ -22,6 +22,7 @@ WriteMakefile(
 	XSPROTOARG	=> '-noprototypes',
 	DEFINE		=> $OS2 || "",
 	INC		=> ($^O eq "MacOS" ? "-i ::::db:include" : ""),
+        XS_VERSION      => eval MM->parse_version('DB_File.pm'),
     ((ExtUtils::MakeMaker->VERSION() gt '6.30')
             ?  ('LICENSE'  => 'perl')
             : ()
