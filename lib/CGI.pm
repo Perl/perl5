@@ -18,8 +18,8 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.240 2007/11/30 18:58:27 lstein Exp $';
-$CGI::VERSION='3.33';
+$CGI::revision = '$Id: CGI.pm,v 1.249 2008/03/25 15:17:55 lstein Exp $';
+$CGI::VERSION='3.35';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -1835,7 +1835,7 @@ sub startform {
     my($method,$action,$enctype,@other) = 
 	rearrange([METHOD,ACTION,ENCTYPE],@p);
 
-    $method  = $self->escapeHTML(lc($method) || 'post');
+    $method  = $self->escapeHTML(lc($method || 'post'));
     $enctype = $self->escapeHTML($enctype || &URL_ENCODED);
     if (defined $action) {
        $action = $self->escapeHTML($action);
@@ -2198,9 +2198,11 @@ sub escapeHTML {
          else {
 	     $toencode =~ s{"}{&quot;}gso;
          }
-         my $latin = uc $self->{'.charset'} eq 'ISO-8859-1' ||
-                     uc $self->{'.charset'} eq 'WINDOWS-1252';
-         if ($latin) {  # bug in some browsers
+         # Handle bug in some browsers with Latin charsets
+         if ($self->{'.charset'} &&
+             (uc($self->{'.charset'}) eq 'ISO-8859-1' ||
+              uc($self->{'.charset'}) eq 'WINDOWS-1252'))
+         {
                 $toencode =~ s{'}{&#39;}gso;
                 $toencode =~ s{\x8b}{&#8249;}gso;
                 $toencode =~ s{\x9b}{&#8250;}gso;
@@ -2567,6 +2569,7 @@ sub scrolling_list {
     $size = $size || scalar(@values);
 
     my(%selected) = $self->previous_or_default($name,$defaults,$override);
+
     my($is_multiple) = $multiple ? qq/ multiple="multiple"/ : '';
     my($has_size) = $size ? qq/ size="$size"/: '';
     my($other) = @other ? " @other" : '';
@@ -2699,7 +2702,7 @@ sub url {
     my $request_uri =  unescape($self->request_uri) || '';
     my $query_str   =  $self->query_string;
 
-    my $rewrite_in_use = $request_uri && $request_uri !~ /^$script_name/;
+    my $rewrite_in_use = $request_uri && $request_uri !~ /^\Q$script_name/;
     undef $path if $rewrite_in_use && $rewrite;  # path not valid when rewriting active
 
     my $uri         =  $rewrite && $request_uri ? $request_uri : $script_name;
@@ -3292,10 +3295,10 @@ sub previous_or_default {
 
     if (!$override && ($self->{'.fieldnames'}->{$name} || 
 		       defined($self->param($name)) ) ) {
-	grep($selected{$_}++,$self->param($name));
+	$selected{$_}++ for $self->param($name);
     } elsif (defined($defaults) && ref($defaults) && 
 	     (ref($defaults) eq 'ARRAY')) {
-	grep($selected{$_}++,@{$defaults});
+	$selected{$_}++ for @{$defaults};
     } else {
 	$selected{$defaults}++ if defined($defaults);
     }
@@ -3379,8 +3382,12 @@ sub read_multipart {
 	my($param)= $header{'Content-Disposition'}=~/ name="([^"]*)"/;
         $param .= $TAINTED;
 
-	# Bug:  Netscape doesn't escape quotation marks in file names!!!
-	my($filename) = $header{'Content-Disposition'}=~/ filename="([^"]*)"/;
+        # See RFC 1867, 2183, 2045
+        # NB: File content will be loaded into memory should
+        # content-disposition parsing fail.
+        my ($filename) = $header{'Content-Disposition'}
+	               =~/ filename=(("[^"]*")|([a-z\d!\#'\*\+,\.^_\`\{\}\|\~]*))/i;
+        $filename =~ s/^"([^"]*)"$/$1/;
 	# Test for Opera's multiple upload feature
 	my($multipart) = ( defined( $header{'Content-Type'} ) &&
 		$header{'Content-Type'} =~ /multipart\/mixed/ ) ?
@@ -4040,7 +4047,7 @@ sub new {
     my $filename;
     find_tempdir() unless -w $TMPDIRECTORY;
     for (my $i = 0; $i < $MAXTRIES; $i++) {
-	last if ! -f ($filename = sprintf("${TMPDIRECTORY}${SL}CGItemp%d",$sequence++));
+	last if ! -f ($filename = sprintf("\%s${SL}CGItemp%d", $TMPDIRECTORY, $sequence++));
     }
     # check that it is a more-or-less valid filename
     return unless $filename =~ m!^([a-zA-Z0-9_\+ \'\":/.\$\\-]+)$!;
@@ -4116,6 +4123,8 @@ CGI - Simple Common Gateway Interface Class
 	     "Your favorite color is ",em(escapeHTML($color)),
 	     hr;
    }
+
+   print end_html;
 
 =head1 ABSTRACT
 
@@ -5410,7 +5419,7 @@ Generate just the protocol and net location, as in http://www.foo.com:8000
 If Apache's mod_rewrite is turned on, then the script name and path
 info probably won't match the request that the user sent. Set
 -rewrite=>1 (default) to return URLs that match what the user sent
-(the original request URI). Set -rewrite->0 to return URLs that match
+(the original request URI). Set -rewrite=>0 to return URLs that match
 the URL after mod_rewrite's rules have run. Because the additional
 path information only makes sense in the context of the rewritten URL,
 -rewrite is set to false when you request path info in the URL.
@@ -7686,10 +7695,8 @@ of CGI.pm without rewriting your old scripts from scratch.
 
 =head1 AUTHOR INFORMATION
 
-Copyright 1995-1998, Lincoln D. Stein.  All rights reserved.  
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
+The GD.pm interface is copyright 1995-2007, Lincoln D. Stein.  It is
+distributed under GPL and the Artistic License 2.0.
 
 Address bug reports and comments to: lstein@cshl.org.  When sending
 bug reports, please provide the version of CGI.pm, the version of

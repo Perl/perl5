@@ -1,3 +1,27 @@
+  Version 3.35
+  1. Resync with bleadperl, primarily fixing a bug in parsing semicolons in uploaded filenames.
+
+  Version 3.34
+  1. Handle Unicode %uXXXX  escapes properly -- patch from DANKOGAI@cpan.org
+  2. Fix url() method to not choke on path names that contain regex characters.
+
+  Version 3.33
+  1. Remove uninit variable warning when calling url(-relative=>1)
+  2. Fix uninit variable warnings for two lc calls
+  3. Fixed failure of tempfile upload due to sprintf() taint failure in perl 5.10
+
+  Version 3.32
+  1. Patch from Miguel Santinho to prevent sending premature headers under mod_perl 2.0
+
+  Version 3.31
+  1. Patch from Xavier Robin so that CGI::Carp issues a 500 Status code rather than a 200 status code.
+  2. Patch from Alexander Klink to select correct temporary directory in OSX Leopard so that upload works.
+  3. Possibly fixed "wrapped pack" error on 5.10 and higher.
+
+  Version 3.30
+  1. Patch from Mike Barry to handle POSTDATA in the same way as PUT.
+  2. Patch from Rafael Garcia-Suarez to correctly reencode unicode values as byte values.
+
   Version 3.29
   1. The position of file handles is now reset to zero when CGI->new is called.
     (Mark Stosberg)
