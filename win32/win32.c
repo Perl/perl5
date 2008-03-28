@@ -1618,7 +1618,7 @@ win32_longpath(char *path)
 }
 
 static void
-out_of_memory()
+out_of_memory(void)
 {
     if (PL_curinterp) {
         dTHX;
@@ -2537,7 +2537,7 @@ win32_stdin(void)
 }
 
 DllExport FILE *
-win32_stdout()
+win32_stdout(void)
 {
     return (stdout);
 }
@@ -2919,7 +2919,7 @@ win32_fstat(int fd, Stat_t *sbufptr)
 
     if (GetFileInformationByHandle((HANDLE)_get_osfhandle(fd), &bhfi)) {
 #if defined(WIN64) || defined(USE_LARGE_FILES)    
-        sbufptr->st_size = (bhfi.nFileSizeHigh << 32) + bhfi.nFileSizeLow ;
+        sbufptr->st_size = ((__int64)bhfi.nFileSizeHigh << 32) | bhfi.nFileSizeLow ;
 #endif
         sbufptr->st_mode &= 0xFE00;
         if (bhfi.dwFileAttributes & FILE_ATTRIBUTE_READONLY)

@@ -69,10 +69,10 @@ typedef int		(*LPEof)(struct IPerlStdIO*, FILE*);
 typedef int		(*LPError)(struct IPerlStdIO*, FILE*);
 typedef void		(*LPClearerr)(struct IPerlStdIO*, FILE*);
 typedef int		(*LPGetc)(struct IPerlStdIO*, FILE*);
-typedef char*		(*LPGetBase)(struct IPerlStdIO*, FILE*);
+typedef STDCHAR*	(*LPGetBase)(struct IPerlStdIO*, FILE*);
 typedef int		(*LPGetBufsiz)(struct IPerlStdIO*, FILE*);
 typedef int		(*LPGetCnt)(struct IPerlStdIO*, FILE*);
-typedef char*		(*LPGetPtr)(struct IPerlStdIO*, FILE*);
+typedef STDCHAR*	(*LPGetPtr)(struct IPerlStdIO*, FILE*);
 typedef char*		(*LPGets)(struct IPerlStdIO*, FILE*, char*, int);
 typedef int		(*LPPutc)(struct IPerlStdIO*, FILE*, int);
 typedef int		(*LPPuts)(struct IPerlStdIO*, FILE*, const char*);
@@ -90,9 +90,9 @@ typedef int		(*LPSetVBuf)(struct IPerlStdIO*, FILE*, char*, int,
 typedef void		(*LPSetCnt)(struct IPerlStdIO*, FILE*, int);
 
 #ifndef NETWARE
-typedef void		(*LPSetPtr)(struct IPerlStdIO*, FILE*, char*);
+typedef void		(*LPSetPtr)(struct IPerlStdIO*, FILE*, STDCHAR*);
 #elif defined(NETWARE)
-typedef void		(*LPSetPtr)(struct IPerlStdIO*, FILE*, char*, int);
+typedef void		(*LPSetPtr)(struct IPerlStdIO*, FILE*, STDCHAR*, int);
 #endif
 
 typedef void		(*LPSetlinebuf)(struct IPerlStdIO*, FILE*);

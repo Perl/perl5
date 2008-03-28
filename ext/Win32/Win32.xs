@@ -37,7 +37,7 @@ typedef BOOL (__stdcall *PFNAllocateAndInitializeSid)(PSID_IDENTIFIER_AUTHORITY,
                                                       DWORD, DWORD, DWORD, DWORD, DWORD, DWORD, PSID*);
 typedef BOOL (__stdcall *PFNEqualSid)(PSID, PSID);
 typedef void* (__stdcall *PFNFreeSid)(PSID);
-typedef BOOL (__stdcall *PFNIsUserAnAdmin)();
+typedef BOOL (__stdcall *PFNIsUserAnAdmin)(void);
 
 #ifndef CSIDL_MYMUSIC
 #   define CSIDL_MYMUSIC              0x000D
