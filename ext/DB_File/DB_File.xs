@@ -4,11 +4,11 @@
 
  written by Paul Marquess <pmqs@cpan.org>
  last modified 4th February 2007
- version 1.815
+ version 1.817
 
  All comments/suggestions/problems are welcome
 
-     Copyright (c) 1995-2005 Paul Marquess. All rights reserved.
+     Copyright (c) 1995-2008 Paul Marquess. All rights reserved.
      This program is free software; you can redistribute it and/or
      modify it under the same terms as Perl itself.
 
@@ -1192,7 +1192,7 @@ SV *   sv ;
             Flags |= DB_TRUNCATE ;
 #endif
 
-        status = db_open(name, RETVAL->type, Flags, mode, NULL, openinfo, &RETVAL->dbp) ; 
+        status = db_open(name, RETVAL->type, Flags, mode, NULL, (DB_INFO*)openinfo, &RETVAL->dbp) ; 
         if (status == 0)
 #if DB_VERSION_MAJOR == 2 && DB_VERSION_MINOR < 6
             status = (RETVAL->dbp->cursor)(RETVAL->dbp, NULL, &RETVAL->cursor) ;

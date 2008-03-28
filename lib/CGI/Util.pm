@@ -7,7 +7,7 @@ require Exporter;
 @EXPORT_OK = qw(rearrange make_attributes unescape escape 
 		expires ebcdic2ascii ascii2ebcdic);
 
-$VERSION = '1.5';
+$VERSION = '1.5_01';
 
 $EBCDIC = "\t" ne "\011";
 # (ord('^') == 95) for codepage 1047 as on os390, vmesa
@@ -141,8 +141,12 @@ sub simple_escape {
 
 sub utf8_chr {
         my $c = shift(@_);
-	return chr($c) if $] >= 5.006;
-
+	if ($] >= 5.006){
+	    require utf8;
+	    my $u = chr($c);
+	    utf8::encode($u); # drop utf8 flag
+	    return $u;
+	}
         if ($c < 0x80) {
                 return sprintf("%c", $c);
         } elsif ($c < 0x800) {
@@ -189,6 +193,17 @@ sub unescape {
     if ($EBCDIC) {
       $todecode =~ s/%([0-9a-fA-F]{2})/chr $A2E[hex($1)]/ge;
     } else {
+	# handle surrogate pairs first -- dankogai
+	$todecode =~ s{
+			%u([Dd][89a-bA-B][0-9a-fA-F]{2}) # hi
+		        %u([Dd][c-fC-F][0-9a-fA-F]{2})   # lo
+		      }{
+			  utf8_chr(
+				   0x10000 
+				   + (hex($1) - 0xD800) * 0x400 
+				   + (hex($2) - 0xDC00)
+				  )
+		      }gex;
       $todecode =~ s/%(?:([0-9a-fA-F]{2})|u([0-9a-fA-F]{4}))/
 	defined($1)? chr hex($1) : utf8_chr(hex($2))/ge;
     }
@@ -200,9 +215,12 @@ sub escape {
   shift() if @_ > 1 and ( ref($_[0]) || (defined $_[1] && $_[0] eq $CGI::DefaultClass));
   my $toencode = shift;
   return undef unless defined($toencode);
+  $toencode = eval { pack("C*", unpack("U0C*", $toencode))} || pack("C*", unpack("C*", $toencode));
+
   # force bytes while preserving backward compatibility -- dankogai
-#  $toencode = eval { pack("C*", unpack("U0C*", $toencode))} || pack("C*", unpack("C*", $toencode));
-  $toencode = eval { pack("U*", unpack("U0C*", $toencode))} || pack("C*", unpack("C*", $toencode));
+  # but commented out because it was breaking CGI::Compress -- lstein
+  # $toencode = eval { pack("U*", unpack("U0C*", $toencode))} || pack("C*", unpack("C*", $toencode));
+
     if ($EBCDIC) {
       $toencode=~s/([^a-zA-Z0-9_.~-])/uc sprintf("%%%02x",$E2A[ord($1)])/eg;
     } else {
