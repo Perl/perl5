@@ -464,14 +464,15 @@ $(DBG)perl$(E) : perlmain$(O), $(DBG)perlshr$(E), $(MINIPERL_EXE)
 $(DBG)perlshr$(E) : $(DBG)libperl$(OLB) $(extobj) $(DBG)perlshr_xtras.ts
 	Link $(LINKFLAGS)/Share=$(MMS$TARGET) $(extobj) []$(DBG)perlshr_bld.opt/Option, perlshr_attr.opt/Option
 
-globals$(O) : uudmap.h
-
 uudmap.h : generate_uudmap$(E)
 	DEFINE/USER_MODE SYS$OUTPUT uudmap.h
 	MCR SYS$DISK:[]generate_uudmap$(E)
 
 generate_uudmap$(E) : generate_uudmap$(O) $(CRTL)
 	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoFull/NoCross/Exe=$(MMS$TARGET) generate_uudmap$(O) $(CRTLOPTS)
+
+generate_uudmap$(O) : generate_uudmap.c
+        $(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
 # The following files are built in one go by gen_shrfls.pl:
 #  perlshr_attr.opt, $(DBG)perlshr_bld.opt - VAX and AXP
@@ -1643,8 +1644,8 @@ doop$(O) : doop.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 dump$(O) : dump.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
-globals$(O) : globals.c $(h)
-	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
+globals$(O) : globals.c uudmap.h $(h)
+        $(CC) $(CORECFLAGS) $(MMS$SOURCE)
 gv$(O) : gv.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 mro$(O) : mro.c $(h)
