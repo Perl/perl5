@@ -1572,6 +1572,9 @@ lib/CGI/t/start_end_asterisk.t	See if CGI.pm works
 lib/CGI/t/start_end_end.t	See if CGI.pm works
 lib/CGI/t/start_end_start.t	See if CGI.pm works
 lib/CGI/t/switch.t		See if CGI::Switch still loads
+lib/CGI/t/uploadInfo.t		See if CGI.pm works
+lib/CGI/t/upload.t		See if CGI.pm works
+lib/CGI/t/upload_post_text.txt	Test data for CGI.pm
 lib/CGI/t/util-58.t		See if 5.8-dependent features work
 lib/CGI/t/util.t		See if CGI.pm works
 lib/CGI/Util.pm			Utility functions
