@@ -2413,7 +2413,7 @@ PerlIO_cleanup(pTHX)
     }
 }
 
-void PerlIO_teardown() /* Call only from PERL_SYS_TERM(). */
+void PerlIO_teardown(void) /* Call only from PERL_SYS_TERM(). */
 {
     dVAR;
 #if 0
