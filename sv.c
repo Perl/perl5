@@ -5612,7 +5612,8 @@ S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const start,
 	boffset = real_boffset;
     }
 
-    S_utf8_mg_pos_cache_update(aTHX_ sv, mgp, boffset, uoffset, send - start);
+    if (PL_utf8cache)
+	utf8_mg_pos_cache_update(sv, mgp, boffset, uoffset, send - start);
     return boffset;
 }
 
@@ -5958,7 +5959,8 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
     }
     *offsetp = len;
 
-    S_utf8_mg_pos_cache_update(aTHX_ sv, &mg, byte, len, blen);
+    if (PL_utf8cache)
+	utf8_mg_pos_cache_update(sv, &mg, byte, len, blen);
 }
 
 /*

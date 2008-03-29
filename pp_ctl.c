@@ -285,7 +285,6 @@ PP(pp_substcont)
     { /* Update the pos() information. */
 	SV * const sv = cx->sb_targ;
 	MAGIC *mg;
-	I32 i;
 	SvUPGRADE(sv, SVt_PVMG);
 	if (!(mg = mg_find(sv, PERL_MAGIC_regex_global))) {
 #ifdef PERL_OLD_COPY_ON_WRITE
@@ -295,10 +294,7 @@ PP(pp_substcont)
 	    mg = sv_magicext(sv, NULL, PERL_MAGIC_regex_global, &PL_vtbl_mglob,
 			     NULL, 0);
 	}
-	i = m - orig;
-	if (DO_UTF8(sv))
-	    sv_pos_b2u(sv, &i);
-	mg->mg_len = i;
+	mg->mg_len = m - orig;
     }
     if (old != rx)
 	(void)ReREFCNT_inc(rx);
