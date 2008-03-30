@@ -85,7 +85,7 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    $VERSION = '1.0801';
+    $VERSION = '1.09';
 }
 
 require AutoLoader;
