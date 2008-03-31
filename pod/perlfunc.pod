@@ -5114,6 +5114,10 @@ It's also a more insistent form of close because it also
 disables the file descriptor in any forked copies in other
 processes.
 
+Returns C<1> for success. In the case of error, returns C<undef> if
+the first argument is not a valid filehandle, or returns C<0> and sets
+C<$!> for any other failure.
+
 =item sin EXPR
 X<sin> X<sine> X<asin> X<arcsine>
 
