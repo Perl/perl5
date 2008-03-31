@@ -107,9 +107,12 @@ sub process_options {
     my @Files;
    
     if ($Opened) {
-	my @raw = `p4 opened`;
+	@Files = `p4 opened`;
 	die if $?;
-	@Files =  map {s!#.*!!s; s!^//depot/.*?/perl/!!; $_} @raw;
+	foreach (@Files) {
+	    s!#.*!!s;
+	    s!^//depot/(?:perl|.*?/perl)/!!;
+	}
     } else {
 	@Files = @ARGV;
     }
