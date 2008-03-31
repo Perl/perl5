@@ -5140,7 +5140,7 @@ Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
 =for apidoc sv_insert
 
 Inserts a string at the specified offset/length within the SV. Similar to
-the Perl substr() function.
+the Perl substr() function. Handles get magic.
 
 =cut
 */
@@ -5148,6 +5148,20 @@ the Perl substr() function.
 void
 Perl_sv_insert(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN len, 
               const char *const little, const STRLEN littlelen)
+{
+    sv_insert_flags(bigstr, offset, len, little, littlelen, SV_GMAGIC);
+}
+
+/*
+=for apidoc sv_insert_flags
+
+Same as C<sv_insert>, but the extra C<flags> are passed the C<SvPV_force_flags> that applies to C<bigstr>.
+
+=cut
+*/
+
+void
+Perl_sv_insert_flags(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN len, const char *const little, const STRLEN littlelen, const U32 flags)
 {
     dVAR;
     register char *big;
@@ -5161,7 +5175,7 @@ Perl_sv_insert(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN len,
 
     if (!bigstr)
 	Perl_croak(aTHX_ "Can't modify non-existent substring");
-    SvPV_force(bigstr, curlen);
+    SvPV_force_flags(bigstr, curlen, flags);
     (void)SvPOK_only_UTF8(bigstr);
     if (offset + len > curlen) {
 	SvGROW(bigstr, offset+len+1);

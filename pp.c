@@ -3180,7 +3180,7 @@ PP(pp_substr)
 	    }
 	    if (!SvOK(sv))
 		sv_setpvs(sv, "");
-	    sv_insert(sv, pos, rem, repl, repl_len);
+	    sv_insert_flags(sv, pos, rem, repl, repl_len, 0);
 	    if (repl_is_utf8)
 		SvUTF8_on(sv);
 	    if (repl_sv_copy)

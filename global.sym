@@ -523,6 +523,7 @@ Perl_sv_gets
 Perl_sv_grow
 Perl_sv_inc
 Perl_sv_insert
+Perl_sv_insert_flags
 Perl_sv_isa
 Perl_sv_isobject
 Perl_sv_len
