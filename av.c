@@ -433,7 +433,7 @@ Perl_av_clear(pTHX_ register AV *av)
     /* Give any tie a chance to cleanup first */
     if (SvRMAGICAL(av)) {
 	const MAGIC* const mg = SvMAGIC(av);
-	if (PL_delaymagic && mg->mg_type == PERL_MAGIC_isa)
+	if (PL_delaymagic && mg && mg->mg_type == PERL_MAGIC_isa)
 	    PL_delaymagic |= DM_ARRAY;
         else
 	    mg_clear((SV*)av); 

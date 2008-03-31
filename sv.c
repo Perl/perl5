@@ -506,6 +506,10 @@ static void
 do_clean_all(pTHX_ SV *sv)
 {
     dVAR;
+    if (sv == (SV*) PL_fdpid || sv == (SV *)PL_strtab) {
+	/* don't clean pid table and strtab */
+	return;
+    }
     DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops: SV at 0x%"UVxf"\n", PTR2UV(sv)) ));
     SvFLAGS(sv) |= SVf_BREAK;
     SvREFCNT_dec(sv);
@@ -6237,11 +6241,6 @@ Perl_sv_collxfrm(pTHX_ SV *sv, STRLEN *nxp)
 	    Safefree(mg->mg_ptr);
 	s = SvPV_const(sv, len);
 	if ((xf = mem_collxfrm(s, len, &xlen))) {
-	    if (SvREADONLY(sv)) {
-		SAVEFREEPV(xf);
-		*nxp = xlen;
-		return xf + sizeof(PL_collation_ix);
-	    }
 	    if (! mg) {
 #ifdef PERL_OLD_COPY_ON_WRITE
 		if (SvIsCOW(sv))

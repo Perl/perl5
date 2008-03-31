@@ -4126,6 +4126,9 @@ void
 PerlIOBuf_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 {
     PerlIOBuf * const b = PerlIOSelf(f, PerlIOBuf);
+#ifndef DEBUGGING
+    PERL_UNUSED_ARG(cnt);
+#endif
     if (!b->buf)
 	PerlIO_get_base(f);
     b->ptr = ptr;
