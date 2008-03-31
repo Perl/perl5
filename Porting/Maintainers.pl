@@ -17,7 +17,6 @@ package Maintainers;
 	'arandal'       => 'Allison Randal <allison@perl.org>',
 	'audreyt'	=> 'Audrey Tang <cpan@audreyt.org>',
 	'avar'		=> 'Ævar Arnfjörð Bjarmason <avar@cpan.org>',
-	'bbb'		=> 'Rob Brown <bbb@cpan.org>',
 	'craig'		=> 'Craig Berry <craigberry@mac.com>',
 	'dankogai'	=> 'Dan Kogai <dankogai@cpan.org>',
 	'dconway'	=> 'Damian Conway <dconway@cpan.org>',
@@ -70,6 +69,7 @@ package Maintainers;
 	'sburke'	=> 'Sean Burke <sburke@cpan.org>',
 	'mschwern'	=> 'Michael Schwern <mschwern@cpan.org>',
 	'smccam'	=> 'Stephen McCamant <smccam@cpan.org>',
+	'smpeters'	=> 'Steve Peters <steve@fisharerojo.org>',
 	'smueller'	=> 'Steffen Mueller <smueller@cpan.org>',
 	'tels'		=> 'Tels <nospam-abuse@bloodgate.com>',
 	'tomhughes'	=> 'Tom Hughes <tomhughes@cpan.org>',
@@ -618,7 +618,7 @@ package Maintainers;
 
 	'Net::Ping' =>
 		{
-		'MAINTAINER'	=> 'bbb',
+		'MAINTAINER'	=> 'smpeters',
 		'FILES'		=> q[lib/Net/Ping.pm lib/Net/Ping],
 		'CPAN'		=> 1,
 		},
