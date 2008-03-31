@@ -5756,9 +5756,19 @@ Found in file sv.c
 X<sv_insert>
 
 Inserts a string at the specified offset/length within the SV. Similar to
-the Perl substr() function.
+the Perl substr() function. Handles get magic.
 
 	void	sv_insert(SV *bigstr, STRLEN offset, STRLEN len, const char *little, STRLEN littlelen)
+
+=for hackers
+Found in file sv.c
+
+=item sv_insert_flags
+X<sv_insert_flags>
+
+Same as C<sv_insert>, but the extra C<flags> are passed the C<SvPV_force_flags> that applies to C<bigstr>.
+
+	void	sv_insert_flags(SV *const bigstr, const STRLEN offset, const STRLEN len, const char *const little, const STRLEN littlelen, const U32 flags)
 
 =for hackers
 Found in file sv.c
