@@ -230,7 +230,7 @@ sub DB {
 
 use XSLoader ();
 
-$Devel::DProf::VERSION = '20050603.00';  # this version not authorized by
+$Devel::DProf::VERSION = '20080331.00';  # this version not authorized by
 				         # Dean Roehrich. See "Changes" file.
 
 XSLoader::load 'Devel::DProf', $Devel::DProf::VERSION;
