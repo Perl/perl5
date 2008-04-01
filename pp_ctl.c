@@ -218,7 +218,6 @@ PP(pp_substcont)
 	if (!(cx->sb_rxtainted & 2) && SvTAINTED(TOPs))
 	    cx->sb_rxtainted |= 2;
 	sv_catsv(dstr, POPs);
-	FREETMPS; /* Prevent excess tmp stack */
 
 	/* Are we done */
 	if (CxONCE(cx) || !CALLREGEXEC(rx, s, cx->sb_strend, orig,

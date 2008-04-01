@@ -4543,6 +4543,14 @@ sub kt
     iseq("@plus","bla blubb",'$+ inside of (?{}) works as expected');
 }
 
+# test for bug #52658
+{
+    my $reg = '../xxx/';
+    my @te = ($reg =~ m{^(/?(?:\.\./)*)}, $reg =~ s/(x)/'b'/eg > 1 ? '##' : '++');
+    #print "with bug:     (0)=$te[0]  (1)=$te[1]  reg=$reg\n";
+    iseq($reg, '../bbb/');
+    iseq($te[0], '../');
+}
 
 
 
@@ -4604,6 +4612,6 @@ ok($@=~/\QSequence \k... not terminated in regex;\E/);
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 4018;
+    $::TestCount = 4020;
     print "1..$::TestCount\n";
 }
