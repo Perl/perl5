@@ -5213,6 +5213,7 @@ the Perl substr() function. Handles get magic.
 void
 Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, const char *little, STRLEN littlelen)
 {
+    PERL_ARGS_ASSERT_SV_INSERT;
     sv_insert_flags(bigstr, offset, len, little, littlelen, SV_GMAGIC);
 }
 
@@ -5235,7 +5236,7 @@ Perl_sv_insert_flags(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN l
     register I32 i;
     STRLEN curlen;
 
-    PERL_ARGS_ASSERT_SV_INSERT;
+    PERL_ARGS_ASSERT_SV_INSERT_FLAGS;
 
     if (!bigstr)
 	Perl_croak(aTHX_ "Can't modify non-existent substring");
