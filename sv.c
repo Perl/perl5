@@ -7872,8 +7872,8 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **const st, GV **const gvp, const I32 lref)
 	goto fix_gv;
 
     default:
-	SvGETMAGIC(sv);
 	if (SvROK(sv)) {
+	    SvGETMAGIC(sv);
 	    SV * const *sp = &sv;	/* Used in tryAMAGICunDEREF macro. */
 	    tryAMAGICunDEREF(to_cv);
 
@@ -7889,10 +7889,12 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **const st, GV **const gvp, const I32 lref)
 	    else
 		Perl_croak(aTHX_ "Not a subroutine reference");
 	}
-	else if (isGV(sv))
+	else if (isGV(sv)) {
+	    SvGETMAGIC(sv);
 	    gv = (GV*)sv;
+	}
 	else
-	    gv = gv_fetchsv(sv, lref, SVt_PVCV);
+	    gv = gv_fetchsv(sv, lref, SVt_PVCV); /* Calls get magic */
 	*gvp = gv;
 	if (!gv) {
 	    *st = NULL;
