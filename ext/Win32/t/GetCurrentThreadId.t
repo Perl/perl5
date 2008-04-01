@@ -13,7 +13,8 @@ if ($Config{ccflags} =~ /PERL_IMPLICIT_SYS/) {
 	exit 0;
     }
     ok(-$$, Win32::GetCurrentThreadId());
-} else {
-# here we just want to see something.
+}
+else {
+    # here we just want to see something.
     ok(Win32::GetCurrentThreadId() > 0);
 }
