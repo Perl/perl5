@@ -1953,6 +1953,9 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>
 #define sv_utf8_upgrade(sv) sv_utf8_upgrade_flags(sv, SV_GMAGIC)
 #define sv_2iv(sv) sv_2iv_flags(sv, SV_GMAGIC)
 #define sv_2uv(sv) sv_2uv_flags(sv, SV_GMAGIC)
+#define sv_insert(bigstr, offset, len, little, littlelen)		\
+	Perl_sv_insert_flags(aTHX_ (bigstr),(offset), (len), (little),	\
+			     (littlelen), SV_GMAGIC)
 
 /* Should be named SvCatPVN_utf8_upgrade? */
 #define sv_catpvn_utf8_upgrade(dsv, sstr, slen, nsv)	\

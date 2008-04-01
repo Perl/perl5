@@ -5207,17 +5207,6 @@ Perl_sv_kill_backrefs(pTHX_ SV *sv, AV *av)
 Inserts a string at the specified offset/length within the SV. Similar to
 the Perl substr() function. Handles get magic.
 
-=cut
-*/
-
-void
-Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, const char *little, STRLEN littlelen)
-{
-    PERL_ARGS_ASSERT_SV_INSERT;
-    sv_insert_flags(bigstr, offset, len, little, littlelen, SV_GMAGIC);
-}
-
-/*
 =for apidoc sv_insert_flags
 
 Same as C<sv_insert>, but the extra C<flags> are passed the C<SvPV_force_flags> that applies to C<bigstr>.
@@ -12398,8 +12387,10 @@ S_varname(pTHX_ GV *gv, const char gvtype, PADOFFSET targ,
 	*SvPVX(name) = '$';
 	Perl_sv_catpvf(aTHX_ name, "[%"IVdf"]", (IV)aindex);
     }
-    else if (subscript_type == FUV_SUBSCRIPT_WITHIN)
-	Perl_sv_insert(aTHX_ name, 0, 0,  STR_WITH_LEN("within "));
+    else if (subscript_type == FUV_SUBSCRIPT_WITHIN) {
+	/* We know that name has no magic, so can use 0 instead of SV_GMAGIC */
+	Perl_sv_insert_flags(aTHX_ name, 0, 0,  STR_WITH_LEN("within "), 0);
+    }
 
     return name;
 }

@@ -897,7 +897,6 @@
 #define sv_gets			Perl_sv_gets
 #define sv_grow			Perl_sv_grow
 #define sv_inc			Perl_sv_inc
-#define sv_insert		Perl_sv_insert
 #define sv_insert_flags		Perl_sv_insert_flags
 #define sv_isa			Perl_sv_isa
 #define sv_isobject		Perl_sv_isobject
@@ -3215,7 +3214,6 @@
 #define sv_gets(a,b,c)		Perl_sv_gets(aTHX_ a,b,c)
 #define sv_grow(a,b)		Perl_sv_grow(aTHX_ a,b)
 #define sv_inc(a)		Perl_sv_inc(aTHX_ a)
-#define sv_insert(a,b,c,d,e)	Perl_sv_insert(aTHX_ a,b,c,d,e)
 #define sv_insert_flags(a,b,c,d,e,f)	Perl_sv_insert_flags(aTHX_ a,b,c,d,e,f)
 #define sv_isa(a,b)		Perl_sv_isa(aTHX_ a,b)
 #define sv_isobject(a)		Perl_sv_isobject(aTHX_ a)

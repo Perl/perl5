@@ -1491,6 +1491,13 @@ Perl_magic_setfm(pTHX_ SV *sv, MAGIC *mg)
     return Perl_magic_setregexp(aTHX_ sv, mg);
 }
 
+void
+Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, const char *little, STRLEN littlelen)
+{
+    PERL_ARGS_ASSERT_SV_INSERT;
+    sv_insert_flags(bigstr, offset, len, little, littlelen, SV_GMAGIC);
+}
+
 #endif /* NO_MATHOMS */
 
 /*
