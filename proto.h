@@ -3179,9 +3179,9 @@ PERL_CALLCONV char*	Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
 	assert(sv)
 
 PERL_CALLCONV void	Perl_sv_inc(pTHX_ SV *const sv);
-PERL_CALLCONV void	Perl_sv_insert(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN len, const char *const little, const STRLEN littlelen)
+/* PERL_CALLCONV void	Perl_sv_insert(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN len, const char *const little, const STRLEN littlelen)
 			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_4);
+			__attribute__nonnull__(pTHX_4); */
 #define PERL_ARGS_ASSERT_SV_INSERT	\
 	assert(bigstr); assert(little)
 

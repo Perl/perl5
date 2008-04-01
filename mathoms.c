@@ -1461,6 +1461,14 @@ Perl_newHV(pTHX)
     return hv;
 }
 
+void
+Perl_sv_insert(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN len, 
+              const char *const little, const STRLEN littlelen)
+{
+    PERL_ARGS_ASSERT_SV_INSERT;
+    sv_insert_flags(bigstr, offset, len, little, littlelen, SV_GMAGIC);
+}
+
 #endif /* NO_MATHOMS */
 
 /*

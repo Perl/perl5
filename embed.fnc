@@ -882,8 +882,9 @@ pd	|void	|sv_free_arenas
 Apd	|char*	|sv_gets	|NN SV *const sv|NN PerlIO *const fp|I32 append
 Apd	|char*	|sv_grow	|NN SV *const sv|STRLEN newlen
 Apd	|void	|sv_inc		|NULLOK SV *const sv
-Apd	|void	|sv_insert	|NN SV *const bigstr|const STRLEN offset|const STRLEN len \
-				|NN const char *const little|const STRLEN littlelen
+Amdb	|void	|sv_insert	|NN SV *const bigstr|const STRLEN offset \
+				|const STRLEN len|NN const char *const little \
+				|const STRLEN littlelen
 Apd	|void	|sv_insert_flags|NN SV *const bigstr|const STRLEN offset|const STRLEN len \
 				|NN const char *const little|const STRLEN littlelen|const U32 flags
 Apd	|int	|sv_isa		|NULLOK SV* sv|NN const char *const name
