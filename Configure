@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Sun Mar 30 11:17:56 CEST 2008 [metaconfig 3.5 PL0]
+# Generated on Wed Apr  2 20:45:31 CEST 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -6567,7 +6567,7 @@ echo " "
 $cat >try.c <<EOCP
 #include <stdlib.h>
 #include <malloc.h>
-$i_mallocmalloc I_MALLOCMALLOC
+#$i_mallocmalloc I_MALLOCMALLOC
 #ifdef I_MALLOCMALLOC
 # include <malloc/malloc.h>
 #endif
