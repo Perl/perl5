@@ -4,6 +4,7 @@
 # *** Usual globals initialized at runtime should be added in *var*.h.
 
 AMG_names
+bincompat_options
 block_type
 check
 fold
