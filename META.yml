@@ -16,6 +16,7 @@ private:
     - ext/IO
     - ext/List/Util
     - ext/MIME/Base64
+    - ext/Module/Pluggable
     - ext/Safe
     - ext/Storable
     - ext/Sys/Syslog
@@ -28,6 +29,7 @@ private:
     - ext/Win32
     - ext/Win32API/File
     - lib/Attribute/Handlers
+    - lib/AutoLoader
     - lib/base
     - lib/bignum
     - lib/CGI
@@ -46,12 +48,12 @@ private:
     - lib/Math/BigRat
     - lib/Memoize
     - lib/Module/CoreList
-    - lib/Module/Pluggable
     - lib/Net/FTP
     - lib/Net/Ping
     - lib/Net/t
     - lib/NEXT
     - lib/Pod/Perldoc
+    - lib/SelfLoader
     - lib/Switch
     - lib/Term/ANSIColor
     - lib/Test/Builder
@@ -60,6 +62,8 @@ private:
     - lib/Test/t
     - lib/Text/Balanced
     - lib/Text/TabsWrap
+    - lib/Thread/Queue
+    - lib/Thread/Semaphore
     - lib/Tie/File
     - lib/Tie/RefHash
     - lib/Unicode/Collate
@@ -90,7 +94,7 @@ private:
     - lib/Archive/Tar.pm
     - lib/Attribute/Handlers.pm
     - lib/AutoLoader.pm
-    - lib/AutoLoader.t
+    - lib/AutoSplit.pm
     - lib/base.pm
     - lib/bigint.pm
     - lib/bignum.pm
@@ -101,7 +105,6 @@ private:
     - lib/constant.t
     - lib/CPAN.pm
     - lib/Cwd.pm
-    - lib/Devel/InnerPackage.pm
     - lib/Digest.pm
     - lib/encoding/warnings
     - lib/encoding/warnings.pm
@@ -128,6 +131,7 @@ private:
     - lib/ExtUtils/MM_Any.pm
     - lib/ExtUtils/MM_BeOS.pm
     - lib/ExtUtils/MM_Cygwin.pm
+    - lib/ExtUtils/MM_Darwin.pm
     - lib/ExtUtils/MM_DOS.pm
     - lib/ExtUtils/MM_MacOS.pm
     - lib/ExtUtils/MM_NW5.pm
@@ -148,6 +152,7 @@ private:
     - lib/ExtUtils/t/basic.t
     - lib/ExtUtils/t/build_man.t
     - lib/ExtUtils/t/bytes.t
+    - lib/ExtUtils/t/can_write_dir.t
     - lib/ExtUtils/t/cd.t
     - lib/ExtUtils/t/config.t
     - lib/ExtUtils/t/Constant.t
@@ -161,6 +166,7 @@ private:
     - lib/ExtUtils/t/INST_PREFIX.t
     - lib/ExtUtils/t/Install.t
     - lib/ExtUtils/t/INSTALL_BASE.t
+    - lib/ExtUtils/t/Installapi2.t
     - lib/ExtUtils/t/Installed.t
     - lib/ExtUtils/t/Liblist.t
     - lib/ExtUtils/t/make.t
@@ -245,7 +251,6 @@ private:
     - lib/Module/Load/t
     - lib/Module/Loaded
     - lib/Module/Loaded.pm
-    - lib/Module/Pluggable.pm
     - lib/Net/ChangeLog
     - lib/Net/Cmd.pm
     - lib/Net/Config.eg
@@ -304,6 +309,7 @@ private:
     - lib/Pod/Text/Overstrike.pm
     - lib/Pod/Text/Termcap.pm
     - lib/Pod/Usage.pm
+    - lib/SelfLoader.pm
     - lib/Shell.pm
     - lib/Shell.t
     - lib/Switch.pm
@@ -320,6 +326,8 @@ private:
     - lib/Text/Balanced.pm
     - lib/Text/Tabs.pm
     - lib/Text/Wrap.pm
+    - lib/Thread/Queue.pm
+    - lib/Thread/Semaphore.pm
     - lib/Tie/File.pm
     - lib/Tie/RefHash.pm
     - lib/Time/Local.pm
