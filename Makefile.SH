@@ -1117,7 +1117,7 @@ _mopup:
 	-rm -f cygwin.c libperl*.def libperl*.dll cygperl*.dll *.exe.stackdump
 	-rm -f perl$(EXE_EXT) suidperl$(EXE_EXT) miniperl$(EXE_EXT) $(LIBPERL) libperl.* microperl
 	-rm -f opcode.h-old opnames.h-old pp.sym-old pp_proto.h-old
-	-rm -f config.over
+	-rm -f config.arch config.over
 
 # Do not 'make _tidy' directly.
 _tidy:
