@@ -3,6 +3,10 @@ version: 5.010000
 abstract: Practical Extraction and Report Language
 author: perl5-porters@perl.org
 license: perl
+resources:
+  homepage: http://www.perl.org/
+  bugtracker: http://rt.perl.org/perlbug/
+  license: http://dev.perl.org/licenses/
 distribution_type: core
 private:
   directory:
