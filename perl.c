@@ -3240,7 +3240,7 @@ Perl_moreswitches(pTHX_ const char *s)
 	    if (colon) 
 		Perl_croak(aTHX_ "Invalid module name %.*s with -%c option: "
 				    "contains single ':'",
-				    s - start, start, option);
+				    (int)(s - start), start, option);
 	    end = s + strlen(s);
 	    if (*s != '=') {
 		sv_catpvn(sv, start, end - start);

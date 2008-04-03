@@ -4939,7 +4939,7 @@ PP(pp_snetent)
 {
 #ifdef HAS_SETNETENT
     dVAR; dSP;
-    PerlSock_setnetent(TOPi);
+    (void)PerlSock_setnetent(TOPi);
     RETSETYES;
 #else
     DIE(aTHX_ PL_no_sock_func, "setnetent");
@@ -4950,7 +4950,7 @@ PP(pp_sprotoent)
 {
 #ifdef HAS_SETPROTOENT
     dVAR; dSP;
-    PerlSock_setprotoent(TOPi);
+    (void)PerlSock_setprotoent(TOPi);
     RETSETYES;
 #else
     DIE(aTHX_ PL_no_sock_func, "setprotoent");
@@ -4961,7 +4961,7 @@ PP(pp_sservent)
 {
 #ifdef HAS_SETSERVENT
     dVAR; dSP;
-    PerlSock_setservent(TOPi);
+    (void)PerlSock_setservent(TOPi);
     RETSETYES;
 #else
     DIE(aTHX_ PL_no_sock_func, "setservent");
