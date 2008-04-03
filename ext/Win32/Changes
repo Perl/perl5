@@ -1,5 +1,11 @@
 Revision history for the Perl extension Win32.
 
+0.35	[2008-03-31]
+	Integrate changes from bleadperl:
+	- Silence Borland compiler warning (Steve Hay)
+	- Fix memory leak in Win32::GetOSVersion (Vincent Pit)
+	- Test Win32::GetCurrentThreadId on cygwin (Reini Urban, Steve Hay)
+
 0.34	[2007-11-21]
 	- Document "WinVista" return value for Win32::GetOSName()
 	  (Steve Hay).
