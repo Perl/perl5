@@ -290,7 +290,7 @@ esac
 
 # we want dynamic fp rounding mode, and we want ieee exception semantics
 case "$isgcc" in
-gcc)	;;
+gcc)	ccflags="$ccflags -mfp-rounding-mode=d -mieee" ;;
 *)	case "$_DEC_cc_style" in
 	new)	ccflags="$ccflags -fprm d -ieee"	;;
 	esac
