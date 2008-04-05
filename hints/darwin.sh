@@ -196,8 +196,8 @@ esac
 EOCBU
 
 # 64-bit addressing support. Currently strictly experimental. DFD 2005-06-06
-if [ "$use64bitall" ]
-then
+case "$use64bitall" in
+$define|true|[yY]*)
 case "$osvers" in
 [1-7].*)
      cat <<EOM >&4
@@ -206,13 +206,15 @@ case "$osvers" in
 
 *** 64-bit addressing is not supported for Mac OS X versions
 *** below 10.4 ("Tiger") or Darwin versions below 8. Please try
-*** again without -D64bitall. (-D64bitint will work, however.)
+*** again without -Duse64bitall. (-Duse64bitint will work, however.)
 
 EOM
      exit 1
   ;;
 *)
-    cat <<EOM >&4
+    case "$osvers" in
+    8.*)
+        cat <<EOM >&4
 
 
 
@@ -224,6 +226,13 @@ EOM
 ***    ext/threads/shared/t/wait (threaded builds only)
 
 EOM
+
+        [ "$d_msgctl" ] || d_msgctl='undef'
+        [ "$d_semctl" ] || d_semctl='undef'
+        [ "$d_shmctl" ] || d_shmctl='undef'
+    ;;
+    esac
+
     case `uname -p` in 
     powerpc) arch=ppc64 ;;
     i386) arch=x86_64 ;;
@@ -239,12 +248,10 @@ EOM
        eval $var="\$${var}\ -arch\ $arch"
     done
 
-    [ "$d_msgctl" ] || d_msgctl='undef'
-    [ "$d_semctl" ] || d_semctl='undef'
-    [ "$d_shmctl" ] || d_shmctl='undef'
     ;;
 esac
-fi
+;;
+esac
 
 ##
 # System libraries
