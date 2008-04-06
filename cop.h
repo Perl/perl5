@@ -476,7 +476,7 @@ struct block_loop {
 #  define CX_ITERDATA_SET(cx,ivar,o)					\
 	cx->blk_loop.itervar = (SV**)(ivar);
 #endif
-#define CxLABEL(c)	(0 + (c)->blk_oldcop->cop_label)
+#define CxLABEL(c)	(0 + CopLABEL((c)->blk_oldcop))
 #define CxHASARGS(c)	(((c)->cx_type & CXp_HASARGS) == CXp_HASARGS)
 #define CxLVAL(c)	(0 + (c)->blk_u16)
 
