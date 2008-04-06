@@ -779,9 +779,9 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 		if (CopSTASHPV(cCOPo))
 		    Perl_dump_indent(aTHX_ level, file, "PACKAGE = \"%s\"\n",
 				     CopSTASHPV(cCOPo));
-		if (cCOPo->cop_label)
+		if (CopLABEL(cCOPo))
 		    Perl_dump_indent(aTHX_ level, file, "LABEL = \"%s\"\n",
-				     cCOPo->cop_label);
+				     CopLABEL(cCOPo));
 	    }
 	}
 	else
@@ -1081,9 +1081,9 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	if (CopSTASHPV(cCOPo))
 	    Perl_dump_indent(aTHX_ level, file, "PACKAGE = \"%s\"\n",
 			     CopSTASHPV(cCOPo));
-	if (cCOPo->cop_label)
+	if (CopLABEL(cCOPo))
 	    Perl_dump_indent(aTHX_ level, file, "LABEL = \"%s\"\n",
-			     cCOPo->cop_label);
+			     CopLABEL(cCOPo));
 	break;
     case OP_ENTERLOOP:
 	Perl_dump_indent(aTHX_ level, file, "REDO ===> ");
@@ -2603,9 +2603,9 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 		if (CopSTASHPV(cCOPo))
 		    PerlIO_printf(file, " package=\"%s\"",
 				     CopSTASHPV(cCOPo));
-		if (cCOPo->cop_label)
+		if (CopLABEL(cCOPo))
 		    PerlIO_printf(file, " label=\"%s\"",
-				     cCOPo->cop_label);
+				     CopLABEL(cCOPo));
 	    }
 	}
 	else
@@ -2864,9 +2864,9 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	if (CopSTASHPV(cCOPo))
 	    S_xmldump_attr(aTHX_ level, file, "package=\"%s\"",
 			     CopSTASHPV(cCOPo));
-	if (cCOPo->cop_label)
+	if (CopLABEL(cCOPo))
 	    S_xmldump_attr(aTHX_ level, file, "label=\"%s\"",
-			     cCOPo->cop_label);
+			     CopLABEL(cCOPo));
 	break;
     case OP_ENTERLOOP:
 	S_xmldump_attr(aTHX_ level, file, "redo=\"");

@@ -1195,7 +1195,7 @@ B::OP
 LOOP_lastop(o)
 	B::LOOP	o
 
-#define COP_label(o)	o->cop_label
+#define COP_label(o)	CopLABEL(o)
 #define COP_stashpv(o)	CopSTASHPV(o)
 #define COP_stash(o)	CopSTASH(o)
 #define COP_file(o)	CopFILE(o)

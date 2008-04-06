@@ -2345,7 +2345,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, OP **opstack, OP **oplimit)
 	/* First try all the kids at this level, since that's likeliest. */
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
 	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) &&
-		    kCOP->cop_label && strEQ(kCOP->cop_label, label))
+		    CopLABEL(kCOP) && strEQ(CopLABEL(kCOP), label))
 		return kid;
 	}
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
