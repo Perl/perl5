@@ -196,7 +196,7 @@ struct cop {
 #  ifdef NETWARE
 #    define CopSTASH_free(c) SAVECOPSTASH_FREE(c)
 #    define CopFILE_free(c) SAVECOPFILE_FREE(c)
-#    define CopLABEL_free(c) SAVECOPLABEL_FREE(c)
+#    define CopLABEL_free(c) SAVESHAREDPV(CopLABEL(c))
 #    define CopLABEL_alloc(pv)	((pv)?savepv(pv):NULL)
 #  else
 #    define CopSTASH_free(c)	PerlMemShared_free(CopSTASHPV(c))
