@@ -672,7 +672,6 @@ S_cop_free(pTHX_ COP* cop)
 {
     PERL_ARGS_ASSERT_COP_FREE;
 
-    CopLABEL_free(cop);
     CopFILE_free(cop);
     CopSTASH_free(cop);
     if (! specialWARN(cop->cop_warnings))
@@ -4369,10 +4368,6 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
     CopHINTS_set(&PL_compiling, CopHINTS_get(cop));
     cop->op_next = (OP*)cop;
 
-    if (label) {
-	CopLABEL_set(cop, label);
-	PL_hints |= HINT_BLOCK_SCOPE;
-    }
     cop->cop_seq = seq;
     /* CopARYBASE is now "virtual", in that it's stored as a flag bit in
        CopHINTS and a possible value in cop_hints_hash, so no need to copy it.
@@ -4383,6 +4378,22 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 	HINTS_REFCNT_LOCK;
 	cop->cop_hints_hash->refcounted_he_refcnt++;
 	HINTS_REFCNT_UNLOCK;
+    }
+    if (label) {
+	/* Proof of concept for now - for efficiency reasons these are likely
+	   to end up being replaced by a custom function in hv.c  */
+	SV *const key = newSVpvs(":");
+	SV *const value = newSVpv(label, 0);
+	cop->cop_hints_hash
+	    = Perl_refcounted_he_new(aTHX_ cop->cop_hints_hash, key, value);
+						     
+	PL_hints |= HINT_BLOCK_SCOPE;
+	/* It seems that we need to defer freeing this pointer, as other parts
+	   of the grammar end up wanting to copy it after this op has been
+	   created. */
+	SAVEFREEPV(label);
+	SvREFCNT_dec(key);
+	SvREFCNT_dec(value);
     }
 
     if (PL_parser && PL_parser->copline == NOLINE)

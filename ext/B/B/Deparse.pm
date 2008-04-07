@@ -21,7 +21,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED),
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : 'RXf_SKIPWHITE');
-$VERSION = 0.86;
+$VERSION = 0.87;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -1456,6 +1456,7 @@ sub declare_hints {
 my %ignored_hints = (
     'open<' => 1,
     'open>' => 1,
+    ':'     => 1,
 );
 
 sub declare_hinthash {

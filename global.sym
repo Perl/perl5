@@ -770,4 +770,5 @@ Perl_mro_method_changed_in
 Perl_sys_init
 Perl_sys_init3
 Perl_sys_term
+Perl_fetch_cop_label
 # ex: set ro:

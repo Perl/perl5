@@ -6566,7 +6566,7 @@ PERL_CALLCONV void	Perl_sys_init3(int* argc, char*** argv, char*** env)
 	assert(argc); assert(argv); assert(env)
 
 PERL_CALLCONV void	Perl_sys_term(void);
-
+PERL_CALLCONV const char *	Perl_fetch_cop_label(pTHX_ struct refcounted_he *const chain, STRLEN *len, U32 *flags);
 
 END_EXTERN_C
 /*
