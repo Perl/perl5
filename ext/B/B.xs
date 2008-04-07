@@ -1211,9 +1211,19 @@ LOOP_lastop(o)
 
 MODULE = B	PACKAGE = B::COP		PREFIX = COP_
 
+#if PERL_VERSION >= 11
+
+const char *
+COP_label(o)
+	B::COP	o
+
+#else
+
 char *
 COP_label(o)
 	B::COP	o
+
+#endif
 
 char *
 COP_stashpv(o)
