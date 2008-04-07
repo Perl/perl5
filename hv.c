@@ -2825,9 +2825,9 @@ S_refcounted_he_new_common(pTHX_ struct refcounted_he *const parent,
 	Copy((char *)value, he->refcounted_he_data + 1, value_len + 1, char);
 	he->refcounted_he_val.refcounted_he_u_len = value_len;
     } else if (value_type == HVrhek_IV) {
-	he->refcounted_he_val.refcounted_he_u_iv = SvIVX(value);
+	he->refcounted_he_val.refcounted_he_u_iv = SvIVX((SV *)value);
     } else if (value_type == HVrhek_UV) {
-	he->refcounted_he_val.refcounted_he_u_uv = SvUVX(value);
+	he->refcounted_he_val.refcounted_he_u_uv = SvUVX((SV *)value);
     }
 
     PERL_HASH(hash, key_p, key_len);
