@@ -2751,21 +2751,18 @@ struct refcounted_he *
 Perl_refcounted_he_new(pTHX_ struct refcounted_he *const parent,
 		       SV *const key, SV *const value) {
     dVAR;
-    struct refcounted_he *he;
     STRLEN key_len;
     const char *key_p = SvPV_const(key, key_len);
     STRLEN value_len = 0;
     const char *value_p = NULL;
     char value_type;
     char flags;
-    STRLEN key_offset;
-    U32 hash;
     bool is_utf8 = SvUTF8(key) ? TRUE : FALSE;
 
     if (SvPOK(value)) {
 	value_type = HVrhek_PV;
     } else if (SvIOK(value)) {
-	value_type = HVrhek_IV;
+	value_type = SvUOK((SV*)value) ? HVrhek_UV : HVrhek_IV;
     } else if (value == &PL_sv_placeholder) {
 	value_type = HVrhek_delete;
     } else if (!SvOK(value)) {
@@ -2775,12 +2772,41 @@ Perl_refcounted_he_new(pTHX_ struct refcounted_he *const parent,
     }
 
     if (value_type == HVrhek_PV) {
+	/* Do it this way so that the SvUTF8() test is after the SvPV, in case
+	   the value is overloaded, and doesn't yet have the UTF-8flag set.  */
 	value_p = SvPV_const(value, value_len);
-	key_offset = value_len + 2;
-    } else {
-	value_len = 0;
-	key_offset = 1;
+	if (SvUTF8(value))
+	    value_type = HVrhek_PV_UTF8;
     }
+    flags = value_type;
+
+    if (is_utf8) {
+	/* Hash keys are always stored normalised to (yes) ISO-8859-1.
+	   As we're going to be building hash keys from this value in future,
+	   normalise it now.  */
+	key_p = (char*)bytes_from_utf8((const U8*)key_p, &key_len, &is_utf8);
+	flags |= is_utf8 ? HVhek_UTF8 : HVhek_WASUTF8;
+    }
+
+    return refcounted_he_new_common(parent, key_p, key_len, flags, value_type,
+				    ((value_type == HVrhek_PV
+				      || value_type == HVrhek_PV_UTF8) ?
+				     (void *)value_p : (void *)value),
+				    value_len);
+}
+
+struct refcounted_he *
+S_refcounted_he_new_common(pTHX_ struct refcounted_he *const parent,
+			   const char *const key_p, const STRLEN key_len,
+			   const char flags, char value_type,
+			   const void *value, const STRLEN value_len) {
+    dVAR;
+    struct refcounted_he *he;
+    U32 hash;
+    const bool is_pv = value_type == HVrhek_PV || value_type == HVrhek_PV_UTF8;
+    STRLEN key_offset = is_pv ? value_len + 2 : 1;
+
+    PERL_ARGS_ASSERT_REFCOUNTED_HE_NEW_COMMON;
 
 #ifdef USE_ITHREADS
     he = (struct refcounted_he*)
@@ -2793,33 +2819,17 @@ Perl_refcounted_he_new(pTHX_ struct refcounted_he *const parent,
 			     + key_offset);
 #endif
 
-
     he->refcounted_he_next = parent;
 
-    if (value_type == HVrhek_PV) {
-	Copy(value_p, he->refcounted_he_data + 1, value_len + 1, char);
+    if (is_pv) {
+	Copy((char *)value, he->refcounted_he_data + 1, value_len + 1, char);
 	he->refcounted_he_val.refcounted_he_u_len = value_len;
-	/* Do it this way so that the SvUTF8() test is after the SvPV, in case
-	   the value is overloaded, and doesn't yet have the UTF-8flag set.  */
-	if (SvUTF8(value))
-	    value_type = HVrhek_PV_UTF8;
     } else if (value_type == HVrhek_IV) {
-	if (SvUOK(value)) {
-	    he->refcounted_he_val.refcounted_he_u_uv = SvUVX(value);
-	    value_type = HVrhek_UV;
-	} else {
-	    he->refcounted_he_val.refcounted_he_u_iv = SvIVX(value);
-	}
+	he->refcounted_he_val.refcounted_he_u_iv = SvIVX(value);
+    } else if (value_type == HVrhek_UV) {
+	he->refcounted_he_val.refcounted_he_u_uv = SvUVX(value);
     }
-    flags = value_type;
 
-    if (is_utf8) {
-	/* Hash keys are always stored normalised to (yes) ISO-8859-1.
-	   As we're going to be building hash keys from this value in future,
-	   normalise it now.  */
-	key_p = (char*)bytes_from_utf8((const U8*)key_p, &key_len, &is_utf8);
-	flags |= is_utf8 ? HVhek_UTF8 : HVhek_WASUTF8;
-    }
     PERL_HASH(hash, key_p, key_len);
 
 #ifdef USE_ITHREADS
@@ -2894,6 +2904,12 @@ Perl_fetch_cop_label(pTHX_ struct refcounted_he *const chain, STRLEN *len,
     if (*HEK_KEY(chain->refcounted_he_hek) != ':')
 	return NULL;
 #endif
+    /* Stop anyone trying to really mess us up by adding their own value for
+       ':' into %^H  */
+    if ((chain->refcounted_he_data[0] & HVrhek_typemask) != HVrhek_PV
+	&& (chain->refcounted_he_data[0] & HVrhek_typemask) != HVrhek_PV_UTF8)
+	return NULL;
+
     if (len)
 	*len = chain->refcounted_he_val.refcounted_he_u_len;
     if (flags) {
@@ -2901,6 +2917,16 @@ Perl_fetch_cop_label(pTHX_ struct refcounted_he *const chain, STRLEN *len,
 		  == HVrhek_PV_UTF8) ? SVf_UTF8 : 0;
     }
     return chain->refcounted_he_data + 1;
+}
+
+/* As newSTATEOP currently gets passed plain char* labels, we will only provide
+   that interface. Once it works out how to pass in length and UTF-8 ness, this
+   function will need superseding.  */
+struct refcounted_he *
+Perl_store_cop_label(pTHX_ struct refcounted_he *const chain, const char *label)
+{
+    return refcounted_he_new_common(chain, ":", 1, HVrhek_PV, HVrhek_PV,
+				    label, strlen(label));
 }
 
 /*

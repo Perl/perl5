@@ -295,6 +295,11 @@
 #define hv_iternext_flags	Perl_hv_iternext_flags
 #define hv_iterval		Perl_hv_iterval
 #define hv_ksplit		Perl_hv_ksplit
+#if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define refcounted_he_new_common	S_refcounted_he_new_common
+#endif
+#endif
 #define hv_undef		Perl_hv_undef
 #define ibcmp			Perl_ibcmp
 #define ibcmp_locale		Perl_ibcmp_locale
@@ -1934,7 +1939,6 @@
 #ifdef PERL_CORE
 #define boot_core_mro		Perl_boot_core_mro
 #endif
-#define fetch_cop_label		Perl_fetch_cop_label
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_chdir		Perl_ck_chdir
@@ -2602,6 +2606,11 @@
 #ifdef PERL_CORE
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
+#endif
+#if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define refcounted_he_new_common(a,b,c,d,e,f,g)	S_refcounted_he_new_common(aTHX_ a,b,c,d,e,f,g)
+#endif
 #endif
 #define hv_undef(a)		Perl_hv_undef(aTHX_ a)
 #define ibcmp(a,b,c)		Perl_ibcmp(aTHX_ a,b,c)
@@ -4254,7 +4263,6 @@
 #ifdef PERL_CORE
 #define boot_core_mro()		Perl_boot_core_mro(aTHX)
 #endif
-#define fetch_cop_label(a,b,c)	Perl_fetch_cop_label(aTHX_ a,b,c)
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
 #define ck_chdir(a)		Perl_ck_chdir(aTHX_ a)

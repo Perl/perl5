@@ -344,6 +344,14 @@ dpoM	|void	|refcounted_he_free|NULLOK struct refcounted_he *he
 XEdpoM	|struct refcounted_he *|refcounted_he_new \
 				|NULLOK struct refcounted_he *const parent \
 				|NULLOK SV *const key|NULLOK SV *const value
+#if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
+s	|struct refcounted_he *	|refcounted_he_new_common \
+				|NULLOK struct refcounted_he *const parent \
+				|NN const char *const key_p \
+				|const STRLEN key_len|const char flags \
+				|char value_type|NN const void *value \
+				|const STRLEN value_len
+#endif
 Abmd	|SV**	|hv_store	|NULLOK HV *hv|NULLOK const char *key \
 				|I32 klen|NULLOK SV *val|U32 hash
 Abmd	|HE*	|hv_store_ent	|NULLOK HV *hv|NULLOK SV *key|NULLOK SV *val\
@@ -1979,8 +1987,10 @@ p	|void   |boot_core_mro
 Apon	|void	|sys_init	|NN int* argc|NN char*** argv
 Apon	|void	|sys_init3	|NN int* argc|NN char*** argv|NN char*** env
 Apon	|void	|sys_term
-ApM	|const char *|fetch_cop_label|NULLOK struct refcounted_he *const chain \
+ApoM	|const char *|fetch_cop_label|NULLOK struct refcounted_he *const chain \
 		|NULLOK STRLEN *len|NULLOK U32 *flags
+ApoM	|struct refcounted_he *|store_cop_label \
+		|NULLOK struct refcounted_he *const chain|NN const char *label
 
 END_EXTERN_C
 /*

@@ -720,28 +720,6 @@ also the warning messages (see L<perllexwarn>, C<warnings.pl>).
 These tasks would need C knowledge, and knowledge of how the interpreter works,
 or a willingness to learn.
 
-=head2 Abolish cop_label?
-
-C<struct cop> contains
-
-    char *	cop_label;	/* label for this construct */
-
-Most statements don't have labels. It might be possible to eliminate this
-member and instead store the label, if present, in
-
-    struct refcounted_he * cop_hints_hash;
-
-(with a hint bit, similar to
-
-    #define HINT_ARYBASE	0x00000010 /* $[ is non-zero */
-    #define HINT_LEXICAL_IO_IN	0x00040000 /* ${^OPEN} is set for input */
-    #define HINT_LEXICAL_IO_OUT	0x00080000 /* ${^OPEN} is set for output */
-
-). The trick would be ensuring that this faked lexical hint doesn't get
-propagated to nested scopes. It might be as simple as moving the setting of
-"cop_label" in C<Perl_newSTATEOP> after the code to set up
-C<cop->cop_hints_hash>.
-
 =head2 lexicals used only once
 
 This warns:

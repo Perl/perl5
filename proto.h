@@ -1067,6 +1067,14 @@ PERL_CALLCONV HV *	Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he
 PERL_CALLCONV SV *	Perl_refcounted_he_fetch(pTHX_ const struct refcounted_he *chain, SV *keysv, const char *key, STRLEN klen, int flags, U32 hash);
 PERL_CALLCONV void	Perl_refcounted_he_free(pTHX_ struct refcounted_he *he);
 PERL_CALLCONV struct refcounted_he *	Perl_refcounted_he_new(pTHX_ struct refcounted_he *const parent, SV *const key, SV *const value);
+#if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
+STATIC struct refcounted_he *	S_refcounted_he_new_common(pTHX_ struct refcounted_he *const parent, const char *const key_p, const STRLEN key_len, const char flags, char value_type, const void *value, const STRLEN value_len)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_6);
+#define PERL_ARGS_ASSERT_REFCOUNTED_HE_NEW_COMMON	\
+	assert(key_p); assert(value)
+
+#endif
 /* PERL_CALLCONV SV**	Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, U32 hash); */
 /* PERL_CALLCONV HE*	Perl_hv_store_ent(pTHX_ HV *hv, SV *key, SV *val, U32 hash); */
 /* PERL_CALLCONV SV**	Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val, U32 hash, int flags); */
@@ -6567,6 +6575,11 @@ PERL_CALLCONV void	Perl_sys_init3(int* argc, char*** argv, char*** env)
 
 PERL_CALLCONV void	Perl_sys_term(void);
 PERL_CALLCONV const char *	Perl_fetch_cop_label(pTHX_ struct refcounted_he *const chain, STRLEN *len, U32 *flags);
+PERL_CALLCONV struct refcounted_he *	Perl_store_cop_label(pTHX_ struct refcounted_he *const chain, const char *label)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_STORE_COP_LABEL	\
+	assert(label)
+
 
 END_EXTERN_C
 /*

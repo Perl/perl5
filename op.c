@@ -4380,20 +4380,14 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 	HINTS_REFCNT_UNLOCK;
     }
     if (label) {
-	/* Proof of concept for now - for efficiency reasons these are likely
-	   to end up being replaced by a custom function in hv.c  */
-	SV *const key = newSVpvs(":");
-	SV *const value = newSVpv(label, 0);
 	cop->cop_hints_hash
-	    = Perl_refcounted_he_new(aTHX_ cop->cop_hints_hash, key, value);
+	    = Perl_store_cop_label(aTHX_ cop->cop_hints_hash, label);
 						     
 	PL_hints |= HINT_BLOCK_SCOPE;
 	/* It seems that we need to defer freeing this pointer, as other parts
 	   of the grammar end up wanting to copy it after this op has been
 	   created. */
 	SAVEFREEPV(label);
-	SvREFCNT_dec(key);
-	SvREFCNT_dec(value);
     }
 
     if (PL_parser && PL_parser->copline == NOLINE)
