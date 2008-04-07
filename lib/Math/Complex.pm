@@ -7,9 +7,9 @@
 
 package Math::Complex;
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $Inf);
+use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $Inf $ExpInf);
 
-$VERSION = 1.52;
+$VERSION = 1.54;
 
 use Config;
 
@@ -38,6 +38,7 @@ BEGIN {
     if ($^O eq 'unicosmk') {
 	$Inf = $DBL_MAX;
     } else {
+	local $SIG{FPE} = { };
         local $!;
 	# We do want an arithmetic overflow, Inf INF inf Infinity.
 	for my $t (
@@ -50,7 +51,6 @@ BEGIN {
 	    'INFINITY',
 	    '1e99999',
 	    ) {
-	    local $SIG{FPE} = { };
 	    local $^W = 0;
 	    my $i = eval "$t+1.0";
 	    if (defined $i && $i > $BIGGER_THAN_THIS) {
@@ -61,6 +61,7 @@ BEGIN {
 	$Inf = $DBL_MAX unless defined $Inf;  # Oh well, close enough.
 	die "Math::Complex: Could not get Infinity"
 	    unless $Inf > $BIGGER_THAN_THIS;
+	$ExpInf = exp(99999);
     }
     # print "# On this machine, Inf = '$Inf'\n";
 }
@@ -1101,7 +1102,7 @@ sub cosh {
 	my $ex;
 	unless (ref $z) {
 	    $ex = CORE::exp($z);
-	    return $ex ? ($ex + 1/$ex)/2 : Inf();
+            return $ex ? ($ex == $ExpInf ? Inf() : ($ex + 1/$ex)/2) : Inf();
 	}
 	my ($x, $y) = @{$z->_cartesian};
 	$ex = CORE::exp($x);
@@ -1121,7 +1122,7 @@ sub sinh {
 	unless (ref $z) {
 	    return 0 if $z == 0;
 	    $ex = CORE::exp($z);
-	    return $ex ? ($ex - 1/$ex)/2 : -Inf();
+            return $ex ? ($ex == $ExpInf ? Inf() : ($ex - 1/$ex)/2) : -Inf();
 	}
 	my ($x, $y) = @{$z->_cartesian};
 	my $cy = CORE::cos($y);
@@ -1203,7 +1204,7 @@ sub cotanh { Math::Complex::coth(@_) }
 #
 # acosh
 #
-# Computes the arc hyperbolic cosine acosh(z) = log(z + sqrt(z*z-1)).
+# Computes the area/inverse hyperbolic cosine acosh(z) = log(z + sqrt(z*z-1)).
 #
 sub acosh {
 	my ($z) = @_;
@@ -1231,7 +1232,7 @@ sub acosh {
 #
 # asinh
 #
-# Computes the arc hyperbolic sine asinh(z) = log(z + sqrt(z*z+1))
+# Computes the area/inverse hyperbolic sine asinh(z) = log(z + sqrt(z*z+1))
 #
 sub asinh {
 	my ($z) = @_;
@@ -1251,7 +1252,7 @@ sub asinh {
 #
 # atanh
 #
-# Computes the arc hyperbolic tangent atanh(z) = 1/2 log((1+z) / (1-z)).
+# Computes the area/inverse hyperbolic tangent atanh(z) = 1/2 log((1+z) / (1-z)).
 #
 sub atanh {
 	my ($z) = @_;
@@ -1267,7 +1268,7 @@ sub atanh {
 #
 # asech
 #
-# Computes the hyperbolic arc secant asech(z) = acosh(1 / z).
+# Computes the area/inverse hyperbolic secant asech(z) = acosh(1 / z).
 #
 sub asech {
 	my ($z) = @_;
@@ -1278,7 +1279,7 @@ sub asech {
 #
 # acsch
 #
-# Computes the hyperbolic arc cosecant acsch(z) = asinh(1 / z).
+# Computes the area/inverse hyperbolic cosecant acsch(z) = asinh(1 / z).
 #
 sub acsch {
 	my ($z) = @_;
@@ -1296,7 +1297,7 @@ sub acosech { Math::Complex::acsch(@_) }
 #
 # acoth
 #
-# Computes the arc hyperbolic cotangent acoth(z) = 1/2 log((1+z) / (z-1)).
+# Computes the area/inverse hyperbolic cotangent acoth(z) = 1/2 log((1+z) / (z-1)).
 #
 sub acoth {
 	my ($z) = @_;
