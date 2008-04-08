@@ -4596,9 +4596,7 @@ programs.
 Create an object to store the state of a deparsing operation and any
 options. The options are the same as those that can be given on the
 command line (see L</OPTIONS>); options that are separated by commas
-after B<-MO=Deparse> should be given as separate strings. Some
-options, like B<-u>, don't make sense for a single subroutine, so
-don't pass them.
+after B<-MO=Deparse> should be given as separate strings.
 
 =head2 ambient_pragmas
 
