@@ -14,7 +14,7 @@
 
 #define AMG_id2namelen(id) (PL_AMG_namelens[id]-1)
 
-const U8 PL_AMG_namelens[NofAMmeth] = {
+static const U8 PL_AMG_namelens[NofAMmeth] = {
     2,
     4,
     5,
