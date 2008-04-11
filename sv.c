@@ -7873,8 +7873,8 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **const st, GV **const gvp, const I32 lref)
 
     default:
 	if (SvROK(sv)) {
-	    SvGETMAGIC(sv);
 	    SV * const *sp = &sv;	/* Used in tryAMAGICunDEREF macro. */
+	    SvGETMAGIC(sv);
 	    tryAMAGICunDEREF(to_cv);
 
 	    sv = SvRV(sv);
