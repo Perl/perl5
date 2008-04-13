@@ -659,7 +659,7 @@ to database integration to graphics.  A categorized list of modules is
 also available from CPAN.
 
 To learn how to install modules you download from CPAN, read
-L<perlmodinstall>
+L<perlmodinstall>.
 
 To learn how to use a particular module, use C<perldoc I<Module::Name>>.
 Typically you will want to C<use I<Module::Name>>, which will then give
