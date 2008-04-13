@@ -2,7 +2,8 @@
  * 
  * Copyright (c) 1996-2002 Douglas E. Wegscheid.  All rights reserved.
  * 
- * Copyright (c) 2002,2003,2004,2005,2006,2007 Jarkko Hietaniemi.  All rights reserved.
+ * Copyright (c) 2002,2003,2004,2005,2006,2007,2008 Jarkko Hietaniemi.
+ * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the same terms as Perl itself.
@@ -35,6 +36,13 @@ extern "C" {
 #endif
 #ifdef __cplusplus
 }
+#endif
+
+/* At least ppport.h 3.13 gets this wrong: one really cannot
+ * have NVgf as anything else than "g" under Perl 5.6.x. */
+#if PERL_REVISION == 5 && PERL_VERSION == 6
+# undef NVgf
+# define NVgf "g"
 #endif
 
 #define IV_1E6 1000000
@@ -71,9 +79,13 @@ extern "C" {
 /* HP-UX has CLOCK_XXX values but as enums, not as defines.
  * The only way to detect these would be to test compile for each. */
 # ifdef __hpux
-#  define CLOCK_REALTIME CLOCK_REALTIME
-#  define CLOCK_VIRTUAL  CLOCK_VIRTUAL
-#  define CLOCK_PROFILE  CLOCK_PROFILE
+/* However, it seems that at least in HP-UX 11.31 ia64 there *are*
+ * defines for these, so let's try detecting them. */
+#  ifndef CLOCK_REALTIME
+#    define CLOCK_REALTIME CLOCK_REALTIME
+#    define CLOCK_VIRTUAL  CLOCK_VIRTUAL
+#    define CLOCK_PROFILE  CLOCK_PROFILE
+#  endif
 # endif /* # ifdef __hpux */
 
 #endif /* #if defined(TIME_HIRES_CLOCK_GETTIME) && defined(_STRUCT_ITIMERSPEC) */
@@ -462,16 +474,24 @@ hrt_usleep(unsigned long usec)
 #endif /* #if !defined(HAS_USLEEP) && defined(HAS_POLL) */
 
 #if defined(HAS_SETITIMER) && defined(ITIMER_REAL)
-int
-hrt_ualarm_itimer(int usec, int interval)
+
+static int
+hrt_ualarm_itimero(struct itimerval* itv, int usec, int uinterval)
 {
-   struct itimerval itv;
-   itv.it_value.tv_sec = usec / IV_1E6;
-   itv.it_value.tv_usec = usec % IV_1E6;
-   itv.it_interval.tv_sec = interval / IV_1E6;
-   itv.it_interval.tv_usec = interval % IV_1E6;
-   return setitimer(ITIMER_REAL, &itv, 0);
+   itv->it_value.tv_sec = usec / IV_1E6;
+   itv->it_value.tv_usec = usec % IV_1E6;
+   itv->it_interval.tv_sec = uinterval / IV_1E6;
+   itv->it_interval.tv_usec = uinterval % IV_1E6;
+   return setitimer(ITIMER_REAL, itv, 0);
 }
+
+int
+hrt_ualarm_itimer(int usec, int uinterval)
+{
+  struct itimerval itv;
+  return hrt_ualarm_itimero(&itv, usec, uinterval);
+}
+
 #ifdef HAS_UALARM
 int
 hrt_ualarm(int usec, int interval) /* for binary compat before 1.91 */
@@ -898,21 +918,28 @@ usleep(useconds)
 
 #ifdef HAS_UALARM
 
-int
-ualarm(useconds,interval=0)
+IV
+ualarm(useconds,uinterval=0)
 	int useconds
-	int interval
+	int uinterval
 	CODE:
-	if (useconds < 0 || interval < 0)
-	    croak("Time::HiRes::ualarm(%d, %d): negative time not invented yet", useconds, interval);
-	if (useconds >= IV_1E6 || interval >= IV_1E6)
+	if (useconds < 0 || uinterval < 0)
+	    croak("Time::HiRes::ualarm(%d, %d): negative time not invented yet", useconds, uinterval);
+	if (useconds >= IV_1E6 || uinterval >= IV_1E6) 
 #if defined(HAS_SETITIMER) && defined(ITIMER_REAL)
-		RETVAL = hrt_ualarm_itimer(useconds, interval);
+	  {
+	        struct itimerval itv;
+	        if (hrt_ualarm_itimero(&itv, useconds, uinterval)) {
+		  RETVAL = itv.it_value.tv_sec + IV_1E6 * itv.it_value.tv_usec;
+		} else {
+		  RETVAL = 0;
+		}
+	  }
 #else
-		croak("Time::HiRes::ualarm(%d, %d): useconds or interval equal or more than %"IVdf, useconds, interval, IV_1E6);
+		croak("Time::HiRes::ualarm(%d, %d): useconds or uinterval equal to or more than %"IVdf, useconds, uinterval, IV_1E6);
 #endif
 	else
-		RETVAL = ualarm(useconds, interval);
+		RETVAL = ualarm(useconds, uinterval);
 
 	OUTPUT:
 	RETVAL
@@ -924,8 +951,24 @@ alarm(seconds,interval=0)
 	CODE:
 	if (seconds < 0.0 || interval < 0.0)
 	    croak("Time::HiRes::alarm(%"NVgf", %"NVgf"): negative time not invented yet", seconds, interval);
-	RETVAL = (NV)ualarm((IV)(seconds  * IV_1E6),
-			    (IV)(interval * IV_1E6)) / NV_1E6;
+	{
+	  IV useconds     = IV_1E6 * seconds;
+	  IV uinterval    = IV_1E6 * interval;
+	  if (seconds >= IV_1E6 || interval >= IV_1E6)
+#if defined(HAS_SETITIMER) && defined(ITIMER_REAL)
+	  {
+	        struct itimerval itv;
+	        if (hrt_ualarm_itimero(&itv, useconds, uinterval)) {
+		  RETVAL = (NV)itv.it_value.tv_sec + (NV)itv.it_value.tv_usec / NV_1E6;
+		} else {
+		  RETVAL = 0;
+		}
+	  }
+#else
+	    RETVAL = (NV)ualarm((IV)(seconds  * IV_1E6),
+				(IV)(interval * IV_1E6)) / NV_1E6;
+#endif
+	}
 
 	OUTPUT:
 	RETVAL

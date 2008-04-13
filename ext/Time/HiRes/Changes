@@ -1,5 +1,42 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9715	[2008-04-08]
+	- Silly me: Makefile.PL does need to accept arguments other than mine.
+	  Some testing frameworks obviously do this.
+	- Add retrying for tests 34..37, which are the most commonly
+	  failing tests.  If this helps, consider extending the retry
+	  framework to all the tests.  [Inspired by Slaven Rezic,
+	  [rt.cpan.org #34711] Occasional failures of test 35 or 36 (FreeBSD)]
+
+1.9714	[2008-04-07]
+	- Under Perl 5.6.* NVgf needs to be "g", reported by Zefram,
+	  it seems that ppport.h 3.13 gets this wrong.
+	- remove the check in Makefile.PL for 5.7.2, shouldn't be
+	  (a) necessary (b) relevant
+	- add logic to Makefile.PL to skip configure/write Makefile
+	  step if the "xdefine" file already exists, indicating that
+	  the configure step has already been done, one can still
+	  force (re)configure by "perl Makefile.PL configure",
+	  or of course by "make clean && perl Makefile.PL".
+
+1.9713	[2008-04-04]
+	- for alarm() and ualarm() [Perl] prefer setitimer() [C]
+	  instead of ualarm() [C] since ualarm() [C] cannot portably
+	  (and standards-compliantly) be used for more than 999_999
+	  microseconds (rt.cpan.org #34655)
+	- it seems that HP-UX has started (at least in 11.31 ia64)
+	  #defining the CLOCK_REALTIME et alia (instead of having
+	  them just as enums)
+	- document all the diagnostics 
+
+1.9712	[2008-02-09]
+	- move the sub tick in the test file back to where it used to be
+	- in the "consider upgrading" message recommend at least Perl 5.8.8
+	  and make the message to appear only for 5.8.0 since 5.8.1 and
+	  later have the problem fixed
+	- VOS tweak for Makefile (core perl change #33259)
+	- since the test #17 seems to fail often, relax its limits a bit
+
 1.9711	[2007-11-29]
 	- lost VMS test skippage from Craig Berry
 	- reformat the test code a little
