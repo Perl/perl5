@@ -337,6 +337,7 @@ ext/Devel/PPPort/soak		Devel::PPPort Test Harness to run under various Perls
 ext/Devel/PPPort/t/call.t	Devel::PPPort test file
 ext/Devel/PPPort/t/cop.t	Devel::PPPort test file
 ext/Devel/PPPort/t/exception.t	Devel::PPPort test file
+ext/Devel/PPPort/t/format.t	Devel::PPPort test file
 ext/Devel/PPPort/t/grok.t	Devel::PPPort test file
 ext/Devel/PPPort/t/limits.t	Devel::PPPort test file
 ext/Devel/PPPort/t/magic.t	Devel::PPPort test file

@@ -1,3 +1,10 @@
+3.13_02 - 2008-04-13
+
+    * fix NV[efg]f format string macros for perl-5.6.0 built
+      using -Duselongdouble (thanks to Zefram for figuring this
+      out and to Jarkko Hietaniemi for keeping me in sync)
+    * add --patch and --oneshot options to devel/buildperl.pl
+
 3.13_01 - 2008-01-04
 
     * fix dependency detection algorithm for functions

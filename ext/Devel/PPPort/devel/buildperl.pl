@@ -5,9 +5,9 @@
 #
 ################################################################################
 #
-#  $Revision: 13 $
+#  $Revision: 14 $
 #  $Author: mhx $
-#  $Date: 2008/01/04 10:47:39 +0100 $
+#  $Date: 2008/04/13 13:49:37 +0200 $
 #
 ################################################################################
 #
@@ -27,7 +27,6 @@ use File::Find;
 use File::Path;
 use Data::Dumper;
 use IO::File;
-use Archive::Tar;
 use Cwd;
 
 # TODO: - extra arguments to Configure
@@ -39,12 +38,14 @@ use Cwd;
 #
 
 my %opt = (
-  prefix  => '/tmp/perl/install/<config>/<perl>',
-  build   => '/tmp/perl/build/<config>',
-  source  => '/tmp/perl/source',
-  force   => 0,
-  test    => 0,
-  install => 1,
+  prefix    => '/tmp/perl/install/<config>/<perl>',
+  build     => '/tmp/perl/build/<config>',
+  source    => '/tmp/perl/source',
+  force     => 0,
+  test      => 0,
+  install   => 1,
+  oneshot   => 0,
+  configure => 0,
   'test-archives' => 0,
 );
 
@@ -145,7 +146,25 @@ GetOptions(\%opt, qw(
   test
   install!
   test-archives=i
+  patch!
+  oneshot
 )) or pod2usage(2);
+
+my %current;
+
+if ($opt{patch} || $opt{oneshot}) {
+  @{$opt{perl}} == 1 or die "Exactly one --perl must be given with --patch or --oneshot\n";
+  my $perl = $opt{perl}[0];
+  patch_source($perl) if !exists $opt{patch} || $opt{patch};
+  if (exists $opt{oneshot}) {
+    eval { require String::ShellQuote };
+    die "--oneshot requires String::ShellQuote to be installed\n" if $@;
+    %current = (config => 'oneshot', version => $perl);
+    $config{oneshot} = { config_args => String::ShellQuote::shell_quote(@ARGV) };
+    build_and_install($perl{$perl});
+  }
+  exit 0;
+}
 
 if (exists $opt{config}) {
   for my $cfg (@{$opt{config}}) {
@@ -197,8 +216,6 @@ if ($opt{'test-archives'}) {
   rmtree($test);
   exit 0;
 }
-
-my %current;
 
 for my $cfg (@{$opt{config}}) {
   for my $perl (@perls) {
@@ -268,6 +285,9 @@ sub buildperl
 
 sub extract_source
 {
+  eval { require Archive::Tar };
+  die "Archive processing requires Archive::Tar to be installed\n" if $@;
+
   my $perl = shift;
 
   my $what = $opt{'test-archives'} ? 'test' : 'read';
@@ -467,6 +487,11 @@ buildperl.pl - build/install perl distributions
 
   --noinstall                 don't install after building
 
+  --patch                     only patch the perl source in the current directory
+
+  --oneshot                   build from the perl source in the current directory
+                              (extra arguments are passed to Configure)
+
   options tagged with [MULTI] can be given multiple times
 
   options tagged with [EXPAND] expand the following items
@@ -495,6 +520,11 @@ To build all configurations for perl-5.8.5 and perl-5.8.6, test them
 and don't install them, run:
 
   buildperl.pl --perl=5.8.5 --perl=5.8.6 --test --noinstall
+
+To build and install a single version of perl with special configuration
+options, use:
+
+  buildperl.pl --perl=5.6.0 --prefix=/opt/p560ld --oneshot -- -des -Duselongdouble
 
 =head1 COPYRIGHT
 
