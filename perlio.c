@@ -3131,6 +3131,9 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	IV result = 0;
 	int saveerr = 0;
 	int dupfd = -1;
+#ifdef USE_ITHREADS
+	dVAR;
+#endif
 #ifdef SOCKS5_VERSION_NAME
     	/* Socks lib overrides close() but stdio isn't linked to
 	   that library (though we are) - so we must call close()

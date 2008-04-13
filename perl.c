@@ -4245,6 +4245,8 @@ S_validate_suid(pTHX_ PerlIO *rsfp)
 
     if (PL_euid != PL_uid || PL_egid != PL_gid) {	/* (suidperl doesn't exist, in fact) */
 #  ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
+	dVAR;
+
 	PerlLIO_fstat(PerlIO_fileno(rsfp),&PL_statbuf);	/* may be either wrapped or real suid */
 	if ((PL_euid != PL_uid && PL_euid == PL_statbuf.st_uid && PL_statbuf.st_mode & S_ISUID)
 	    ||
