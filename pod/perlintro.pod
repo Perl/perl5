@@ -302,7 +302,7 @@ are defined.
 Using C<my> in combination with a C<use strict;> at the top of
 your Perl scripts means that the interpreter will pick up certain common
 programming errors.  For instance, in the example above, the final
-C<print $b> would cause a compile-time error and prevent you from
+C<print $y> would cause a compile-time error and prevent you from
 running the program.  Using C<strict> is highly recommended.
 
 =head2 Conditional and looping constructs
