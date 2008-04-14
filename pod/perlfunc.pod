@@ -492,7 +492,8 @@ function, or use the familiar relation:
 
     sub tan { sin($_[0]) / cos($_[0])  }
 
-Perl returns C<undef> for C<atan(0,0)>.
+The return value for C<atan2(0,0)> is implementation-defined; consult
+your atan2(3) manpage for more information.
 
 =item bind SOCKET,NAME
 X<bind>

@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 17;
+plan tests => 16;
 
 # compile time evaluation
 
@@ -57,7 +57,3 @@ cmp_ok(round(cos(-1 * $pi_2)), '==', 0.0);
 # atan2() tests were removed due to differing results from calls to
 # atan2() on various OS's and architectures.  See perlport.pod for
 # more information.
-
-# Just test that atan2(0,0) is undef, because that's implemented
-# from within perl.
-ok(!defined(atan2(0,0)), 'atan2(0,0) returns undef');
