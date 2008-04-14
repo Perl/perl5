@@ -2004,9 +2004,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		while (++s && *s) {
 		    if (isSPACE(*s)) {
 			if (!popt_copy) {
-			    popt_copy = SvPVX(sv_2mortal(newSVpv(popt,0)));
-			    s = popt_copy + (s - popt);
-			    d = popt_copy + (d - popt);
+			    popt_copy = SvPVX(sv_2mortal(newSVpv(d,0)));
+			    s = popt_copy + (s - d);
+			    d = popt_copy;
 			}
 		        *s++ = '\0';
 			break;
