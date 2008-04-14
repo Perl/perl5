@@ -1989,7 +1989,7 @@ Apon	|void	|sys_init3	|NN int* argc|NN char*** argv|NN char*** env
 Apon	|void	|sys_term
 ApoM	|const char *|fetch_cop_label|NULLOK struct refcounted_he *const chain \
 		|NULLOK STRLEN *len|NULLOK U32 *flags
-ApoM	|struct refcounted_he *|store_cop_label \
+xpoM	|struct refcounted_he *|store_cop_label \
 		|NULLOK struct refcounted_he *const chain|NN const char *label
 
 END_EXTERN_C
