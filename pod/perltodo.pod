@@ -664,13 +664,6 @@ only the interpretation of non-ASCII characters, and not for the script file
 handle. To make it work needs some investigation of the ordering of function
 calls during startup, and (by implication) a bit of tweaking of that order.
 
-=head2 Propagate const outwards from Perl_moreswitches()
-
-Change 32057 changed the parameter and return value of C<Perl_moreswitches()>
-from <char *> to <const char *>. It should now be possible to propagate
-const-correctness outwards to C<S_parse_body()>, C<Perl_moreswitches()>
-and C<Perl_yylex()>.
-
 =head2 Duplicate logic in S_method_common() and Perl_gv_fetchmethod_autoload()
 
 A comment in C<S_method_common> notes
