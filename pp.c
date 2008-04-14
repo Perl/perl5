@@ -2798,7 +2798,10 @@ PP(pp_atan2)
     dVAR; dSP; dTARGET; tryAMAGICbin(atan2,0);
     {
       dPOPTOPnnrl;
-      SETn(Perl_atan2(left, right));
+      if (left == 0.0 && right == 0.0)
+	  SETs(&PL_sv_undef);
+      else
+	  SETn(Perl_atan2(left, right));
       RETURN;
     }
 }
