@@ -2028,7 +2028,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	else {
 	    char *popt_copy = NULL;
 	    while (s && *s) {
-	        char *d;
+	        const char *d;
 		while (isSPACE(*s))
 		    s++;
 		if (*s == '-') {
