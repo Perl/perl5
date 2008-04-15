@@ -6570,7 +6570,7 @@ ____________________________________________________________________________
 	     
 	     [ 31960]
 	     Subject: [patch] Dual-lifing constant.pm
-	     From: =?ISO-8859-1?Q?S=E9bastien_Aperghis-Tramoni?= <maddingue@free.fr>
+	     From: Sébastien Aperghis-Tramoni <maddingue@free.fr>
 	     Date: Tue, 25 Sep 2007 02:11:46 +0200
 	     Message-Id: <454B4D1C-48EE-4CA3-834A-A0F872C9E5FC@free.fr>
 	     
@@ -7303,7 +7303,7 @@ ____________________________________________________________________________
 	     
 	     [ 32144]
 	     Subject: Re: [Diff] perlxstut.pod
-	     From: =?ISO-8859-1?Q?Ren=E9e_B=E4cker?= <renee.baecker@smart-websolutions.de>
+	     From: Renée Bäcker <renee.baecker@smart-websolutions.de>
 	     Date: Fri, 12 Oct 2007 10:29:50 +0200
 	     Message-ID: <470F307E.1030804@smart-websolutions.de>
 	     
@@ -7662,7 +7662,7 @@ ____________________________________________________________________________
 	     
 	     [ 31410]
 	     Subject: [PATCH] POD Alignment for the magic table in perlapi.pod
-	     From: "=?UTF-8?Q?=C3=86var_Arnfj=C3=B6r=C3=B0_Bjarmason?=" <avarab@gmail.com>
+	     From: "Ævar Arnfjörð Bjarmason" <avarab@gmail.com>
 	     Date: Sun, 17 Jun 2007 18:41:29 +0000
 	     Message-ID: <51dd1af80706171141w48cb717fr71ce7f214daebe36@mail.gmail.com>
 	     
