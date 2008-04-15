@@ -495,8 +495,6 @@ Perl_op_free(pTHX_ OP *o)
 	    op_free(kid);
 	}
     }
-    if (type == OP_NULL)
-	type = (OPCODE)o->op_targ;
 
 #ifdef PERL_DEBUG_READONLY_OPS
     Slab_to_rw(o);
@@ -507,6 +505,9 @@ Perl_op_free(pTHX_ OP *o)
     if (type == OP_NEXTSTATE || type == OP_DBSTATE) {
 	cop_free((COP*)o);
     }
+
+    if (type == OP_NULL)
+	type = (OPCODE)o->op_targ;
 
     op_clear(o);
     if (o->op_latefree) {
