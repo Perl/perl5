@@ -1483,6 +1483,7 @@ lib/base/t/base.t		See if base works
 lib/base/t/fields-base.t	See if fields work
 lib/base/t/fields.t		See if fields work
 lib/base/t/isa.t		See if base's behaviour doesn't change
+lib/base/t/lib/Dummy.pm		Test module for base.pm
 lib/base/t/sigdie.t		See if base works with SIGDIE
 lib/base/t/version.t		See if base works with versions
 lib/base/t/warnings.t		See if base works with warnings
@@ -3589,7 +3590,6 @@ t/lib/dprof/test7_v		Perl code profiler tests
 t/lib/dprof/test8_t		Perl code profiler tests
 t/lib/dprof/test8_v		Perl code profiler tests
 t/lib/dprof/V.pm		Perl code profiler tests
-t/lib/Dummy.pm			Module for testing base.pm
 t/lib/feature/bundle		Tests for feature bundles
 t/lib/feature/implicit		Tests for implicit loading of feature.pm
 t/lib/feature/nonesuch		Tests for enabling/disabling nonexistent feature
