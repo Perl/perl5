@@ -520,7 +520,7 @@ Perl_gv_fetchmeth_autoload(pTHX_ HV *stash, const char *name, STRLEN len, I32 le
 
 	if (!stash)
 	    return NULL;	/* UNIVERSAL::AUTOLOAD could cause trouble */
-	if (len == S_autolen && strnEQ(name, S_autoload, S_autolen))
+	if (len == S_autolen && memEQ(name, S_autoload, S_autolen))
 	    return NULL;
 	if (!(gv = gv_fetchmeth(stash, S_autoload, S_autolen, FALSE)))
 	    return NULL;
@@ -635,7 +635,7 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 	name = nsplit + 1;
 	if (*nsplit == ':')
 	    --nsplit;
-	if ((nsplit - origname) == 5 && strnEQ(origname, "SUPER", 5)) {
+	if ((nsplit - origname) == 5 && memEQ(origname, "SUPER", 5)) {
 	    /* ->SUPER::method should really be looked up in original stash */
 	    SV * const tmpstr = sv_2mortal(Perl_newSVpvf(aTHX_ "%s::SUPER",
 						  CopSTASHPV(PL_curcop)));
@@ -702,7 +702,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 
     PERL_ARGS_ASSERT_GV_AUTOLOAD4;
 
-    if (len == S_autolen && strnEQ(name, S_autoload, S_autolen))
+    if (len == S_autolen && memEQ(name, S_autoload, S_autolen))
 	return NULL;
     if (stash) {
 	if (SvTYPE(stash) < SVt_PVHV) {
