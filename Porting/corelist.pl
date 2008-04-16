@@ -36,6 +36,8 @@ find(sub {
     $lines{sprintf "\t%-24s=> $version,\n", "'$module'"}++;
 }, 'lib', 'ext', 'vms/ext', 'symbian/ext');
 
+-e 'configpm' and $lines{sprintf "\t%-24s=> undef,\n", "'Config'"}++;
+
 if (open my $ucdv, "<", "lib/unicore/version") {
     chomp (my $ucd = <$ucdv>);
     $lines{sprintf "\t%-24s=> '$ucd',\n", "'Unicode'"}++;

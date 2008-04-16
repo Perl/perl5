@@ -64,12 +64,6 @@ implements a very basic check for pod files, but the errors it discovers
 aren't found by podchecker. Add this check to podchecker, get rid of
 checkpods and have C<make check> use podchecker.
 
-=head2 perlmodlib.PL rewrite
-
-Currently perlmodlib.PL needs to be run from a source directory where perl
-has been built, or some modules won't be found, and others will be
-skipped. Make it run from a clean perl source tree (so it's reproducible).
-
 =head2 Parallel testing
 
 (This probably impacts much more than the core: also the Test::Harness
