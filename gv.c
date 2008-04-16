@@ -618,6 +618,7 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
     const char *nsplit = NULL;
     GV* gv;
     HV* ostash = stash;
+    const char * const origname = name;
 
     PERL_ARGS_ASSERT_GV_FETCHMETHOD_AUTOLOAD;
 
@@ -625,16 +626,16 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 	stash = NULL;
 
     for (nend = name; *nend; nend++) {
-	if (*nend == '\'')
+	if (*nend == '\'') {
 	    nsplit = nend;
-	else if (*nend == ':' && *(nend + 1) == ':')
-	    nsplit = ++nend;
+	    name = nend + 1;
+	}
+	else if (*nend == ':' && *(nend + 1) == ':') {
+	    nsplit = nend++;
+	    name = nend + 1;
+	}
     }
     if (nsplit) {
-	const char * const origname = name;
-	name = nsplit + 1;
-	if (*nsplit == ':')
-	    --nsplit;
 	if ((nsplit - origname) == 5 && memEQ(origname, "SUPER", 5)) {
 	    /* ->SUPER::method should really be looked up in original stash */
 	    SV * const tmpstr = sv_2mortal(Perl_newSVpvf(aTHX_ "%s::SUPER",
