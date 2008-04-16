@@ -10,14 +10,14 @@ package Math::Trig;
 use 5.005;
 use strict;
 
-use Math::Complex 1.51;
+use Math::Complex 1.54;
 use Math::Complex qw(:trig :pi);
 
 use vars qw($VERSION $PACKAGE @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
 @ISA = qw(Exporter);
 
-$VERSION = 1.16;
+$VERSION = 1.18;
 
 my @angcnv = qw(rad2deg rad2grad
 		deg2rad deg2grad
@@ -181,7 +181,7 @@ sub great_circle_direction {
     return rad2rad($direction);
 }
 
-*great_circle_bearing = \&great_circle_direction;
+*great_circle_bearing         = \&great_circle_direction;
 
 sub great_circle_waypoint {
     my ( $theta0, $phi0, $theta1, $phi1, $point ) = @_;
@@ -208,7 +208,7 @@ sub great_circle_waypoint {
 
     my $theta = atan2($y, $x);
     my $phi   = acos_real($z);
-    
+
     return ($theta, $phi);
 }
 
@@ -221,8 +221,9 @@ sub great_circle_destination {
 
     my $lat0 = pip2 - $phi0;
 
-    my $phi1   = asin_real(sin($lat0)*cos($dst) + 
+    my $phi1   = asin_real(sin($lat0)*cos($dst) +
 			   cos($lat0)*sin($dst)*cos($dir0));
+
     my $theta1 = $theta0 + atan2(sin($dir0)*sin($dst)*cos($lat0),
 				 cos($dst)-sin($lat0)*sin($phi1));
 
@@ -308,12 +309,12 @@ and cotanh/coth are aliases)
 
 B<csch>, B<cosech>, B<sech>, B<coth>, B<cotanh>
 
-The arcus (also known as the inverse) functions of the hyperbolic
+The area (also known as the inverse) functions of the hyperbolic
 sine, cosine, and tangent
 
 B<asinh>, B<acosh>, B<atanh>
 
-The arcus cofunctions of the hyperbolic sine, cosine, and tangent
+The area cofunctions of the hyperbolic sine, cosine, and tangent
 (acsch/acosech and acoth/acotanh are aliases)
 
 B<acsch>, B<acosech>, B<asech>, B<acoth>, B<acotanh>
@@ -589,18 +590,22 @@ The result of great_circle_direction is in radians, zero indicating
 straight north, pi or -pi straight south, pi/2 straight west, and
 -pi/2 straight east.
 
+=head2 great_circle_destination
+
 You can inversely compute the destination if you know the
 starting point, direction, and distance:
 
-=head2 great_circle_destination
-
   use Math::Trig 'great_circle_destination';
 
-  # thetad and phid are the destination coordinates,
-  # dird is the final direction at the destination.
+  # $diro is the original direction,
+  # for example from great_circle_bearing().
+  # $distance is the angular distance in radians,
+  # for example from great_circle_distance().
+  # $thetad and $phid are the destination coordinates,
+  # $dird is the final direction at the destination.
 
   ($thetad, $phid, $dird) =
-    great_circle_destination($theta, $phi, $direction, $distance);
+    great_circle_destination($theta, $phi, $diro, $distance);
 
 or the midpoint if you know the end points:
 
@@ -668,7 +673,18 @@ The midpoint between London and Tokyo being
 
     my @M = great_circle_midpoint(@L, @T);
 
-or about 68.93N 89.16E, in the frozen wastes of Siberia.
+or about 69 N 89 E, in the frozen wastes of Siberia.
+
+B<NOTE>: you B<cannot> get from A to B like this:
+
+   Dist = great_circle_distance(A, B)
+   Dir  = great_circle_direction(A, B)
+   C    = great_circle_destination(A, Dist, Dir)
+
+and expect C to be B, because the bearing constantly changes when
+going from A to B (except in some special case like the meridians or
+the circles of latitudes) and in great_circle_destination() one gives
+a constant bearing to follow.
 
 =head2 CAVEAT FOR GREAT CIRCLE FORMULAS
 
