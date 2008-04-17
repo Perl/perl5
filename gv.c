@@ -671,7 +671,7 @@ Perl_gv_fetchmethod_flags(pTHX_ HV *stash, const char *name, U32 flags)
 	    if (stash) {
 		Perl_croak(aTHX_
 			   "Can't locate object method \"%s\" via package \"%.*s\"",
-			   name, (STRLEN)HvNAMELEN_get(stash), HvNAME_get(stash));
+			   name, (int)HvNAMELEN_get(stash), HvNAME_get(stash));
 	    }
 	    else {
 		STRLEN packlen;
