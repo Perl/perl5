@@ -297,9 +297,10 @@ Ap	|GV*	|gv_fetchfile_flags|NN const char *const name|const STRLEN len\
 				|const U32 flags
 Apd	|GV*	|gv_fetchmeth	|NULLOK HV* stash|NN const char* name|STRLEN len|I32 level
 Apd	|GV*	|gv_fetchmeth_autoload	|NULLOK HV* stash|NN const char* name|STRLEN len|I32 level
-Apdmb	|GV*	|gv_fetchmethod	|NULLOK HV* stash|NN const char* name
-Apd	|GV*	|gv_fetchmethod_autoload|NULLOK HV* stash|NN const char* name|I32 autoload
-ApdM	|GV*	|gv_fetchmethod_flags|NULLOK HV* stash|NN const char* name \
+Apdmb	|GV*	|gv_fetchmethod	|NN HV* stash|NN const char* name
+Apd	|GV*	|gv_fetchmethod_autoload|NN HV* stash|NN const char* name \
+				|I32 autoload
+ApdM	|GV*	|gv_fetchmethod_flags|NN HV* stash|NN const char* name \
 				|U32 flags
 Ap	|GV*	|gv_fetchpv	|NN const char *nambeg|I32 add|const svtype sv_type
 Ap	|void	|gv_fullname	|NN SV* sv|NN const GV* gv

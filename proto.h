@@ -894,19 +894,22 @@ PERL_CALLCONV GV*	Perl_gv_fetchmeth_autoload(pTHX_ HV* stash, const char* name, 
 	assert(name)
 
 /* PERL_CALLCONV GV*	Perl_gv_fetchmethod(pTHX_ HV* stash, const char* name)
+			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2); */
 #define PERL_ARGS_ASSERT_GV_FETCHMETHOD	\
-	assert(name)
+	assert(stash); assert(name)
 
 PERL_CALLCONV GV*	Perl_gv_fetchmethod_autoload(pTHX_ HV* stash, const char* name, I32 autoload)
+			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_GV_FETCHMETHOD_AUTOLOAD	\
-	assert(name)
+	assert(stash); assert(name)
 
 PERL_CALLCONV GV*	Perl_gv_fetchmethod_flags(pTHX_ HV* stash, const char* name, U32 flags)
+			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_GV_FETCHMETHOD_FLAGS	\
-	assert(name)
+	assert(stash); assert(name)
 
 PERL_CALLCONV GV*	Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, const svtype sv_type)
 			__attribute__nonnull__(pTHX_1);

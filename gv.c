@@ -622,7 +622,7 @@ Perl_gv_fetchmethod_flags(pTHX_ HV *stash, const char *name, U32 flags)
 
     PERL_ARGS_ASSERT_GV_FETCHMETHOD_AUTOLOAD;
 
-    if (stash && SvTYPE(stash) < SVt_PVHV)
+    if (SvTYPE(stash) < SVt_PVHV)
 	stash = NULL;
 
     for (nend = name; *nend; nend++) {

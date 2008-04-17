@@ -942,7 +942,7 @@ PP(pp_dbmopen)
 	PUTBACK;
 	require_pv("AnyDBM_File.pm");
 	SPAGAIN;
-	if (!(gv = gv_fetchmethod(stash, "TIEHASH")))
+	if (!stash || !(gv = gv_fetchmethod(stash, "TIEHASH")))
 	    DIE(aTHX_ "No dbm on this machine");
     }
 
