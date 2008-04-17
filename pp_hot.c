@@ -3084,81 +3084,11 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	}
     }
 
-    gv = gv_fetchmethod(stash ? stash : (HV*)packsv, name);
+    gv = gv_fetchmethod_flags(stash ? stash : (HV*)packsv, name,
+			      GV_AUTOLOAD | GV_CROAK);
 
-    if (!gv) {
-	/* This code tries to figure out just what went wrong with
-	   gv_fetchmethod.  It therefore needs to duplicate a lot of
-	   the internals of that function.  We can't move it inside
-	   Perl_gv_fetchmethod_autoload(), however, since that would
-	   cause UNIVERSAL->can("NoSuchPackage::foo") to croak, and we
-	   don't want that.
-	*/
-	const char* leaf = name;
-	const char* sep = NULL;
-	const char* p;
+    assert(gv);
 
-	for (p = name; *p; p++) {
-	    if (*p == '\'')
-		sep = p, leaf = p + 1;
-	    else if (*p == ':' && *(p + 1) == ':')
-		sep = p, leaf = p + 2;
-	}
-	if (!sep || ((sep - name) == 5 && strnEQ(name, "SUPER", 5))) {
-	    /* the method name is unqualified or starts with SUPER:: */
-#ifndef USE_ITHREADS
-	    if (sep)
-		stash = CopSTASH(PL_curcop);
-#else
-	    bool need_strlen = 1;
-	    if (sep) {
-		packname = CopSTASHPV(PL_curcop);
-	    }
-	    else
-#endif
-	    if (stash) {
-		HEK * const packhek = HvNAME_HEK(stash);
-		if (packhek) {
-		    packname = HEK_KEY(packhek);
-		    packlen = HEK_LEN(packhek);
-#ifdef USE_ITHREADS
-		    need_strlen = 0;
-#endif
-		} else {
-		    goto croak;
-		}
-	    }
-
-	    if (!packname) {
-	    croak:
-		Perl_croak(aTHX_
-			   "Can't use anonymous symbol table for method lookup");
-	    }
-#ifdef USE_ITHREADS
-	    if (need_strlen)
-		packlen = strlen(packname);
-#endif
-
-	}
-	else {
-	    /* the method name is qualified */
-	    packname = name;
-	    packlen = sep - name;
-	}
-	
-	/* we're relying on gv_fetchmethod not autovivifying the stash */
-	if (gv_stashpvn(packname, packlen, 0)) {
-	    Perl_croak(aTHX_
-		       "Can't locate object method \"%s\" via package \"%.*s\"",
-		       leaf, (int)packlen, packname);
-	}
-	else {
-	    Perl_croak(aTHX_
-		       "Can't locate object method \"%s\" via package \"%.*s\""
-		       " (perhaps you forgot to load \"%.*s\"?)",
-		       leaf, (int)packlen, packname, (int)packlen, packname);
-	}
-    }
     return isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv;
 }
 

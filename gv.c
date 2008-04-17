@@ -599,19 +599,16 @@ S_gv_get_super_pkg(pTHX_ const char* name, I32 namelen)
     return stash;
 }
 
-/* FIXME. If changing this function note the comment in pp_hot's
-   S_method_common:
-
-   This code tries to figure out just what went wrong with
-   gv_fetchmethod.  It therefore needs to duplicate a lot of
-   the internals of that function. ...
-
-   I'd guess that with one more flag bit that could all be moved inside
-   here.
-*/
-
 GV *
 Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
+{
+    return gv_fetchmethod_flags(stash, name, autoload ? GV_AUTOLOAD : 0);
+}
+
+/* Don't merge this yet, as it's likely to get a len parameter, and possibly
+   even a U32 hash */
+GV *
+Perl_gv_fetchmethod_flags(pTHX_ HV *stash, const char *name, U32 flags)
 {
     dVAR;
     register const char *nend;
@@ -619,6 +616,9 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
     GV* gv;
     HV* ostash = stash;
     const char * const origname = name;
+    SV *const error_report = (SV *)stash;
+    const U32 autoload = flags & GV_AUTOLOAD;
+    const U32 do_croak = flags & GV_CROAK;
 
     PERL_ARGS_ASSERT_GV_FETCHMETHOD_AUTOLOAD;
 
@@ -665,6 +665,36 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 	    gv = (GV*)&PL_sv_yes;
 	else if (autoload)
 	    gv = gv_autoload4(ostash, name, nend - name, TRUE);
+	if (!gv && do_croak) {
+	    /* Right now this is exclusively for the benefit of S_method_common
+	       in pp_hot.c  */
+	    if (stash) {
+		Perl_croak(aTHX_
+			   "Can't locate object method \"%s\" via package \"%.*s\"",
+			   name, HvNAMELEN_get(stash), HvNAME_get(stash));
+	    }
+	    else {
+		STRLEN packlen;
+		const char *packname;
+
+		assert(error_report);
+
+		if (nsplit) {
+		    packlen = nsplit - origname;
+		    packname = origname;
+		} else if (SvTYPE(error_report) == SVt_PVHV) {
+		    packlen = HvNAMELEN_get(error_report);
+		    packname = HvNAME_get(error_report);
+		} else {
+		    packname = SvPV_const(error_report, packlen);
+		}
+
+		Perl_croak(aTHX_
+			   "Can't locate object method \"%s\" via package \"%.*s\""
+			   " (perhaps you forgot to load \"%.*s\"?)",
+			   name, (int)packlen, packname, (int)packlen, packname);
+	    }
+	}
     }
     else if (autoload) {
 	CV* const cv = GvCV(gv);

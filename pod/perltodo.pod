@@ -664,25 +664,6 @@ only the interpretation of non-ASCII characters, and not for the script file
 handle. To make it work needs some investigation of the ordering of function
 calls during startup, and (by implication) a bit of tweaking of that order.
 
-=head2 Duplicate logic in S_method_common() and Perl_gv_fetchmethod_autoload()
-
-A comment in C<S_method_common> notes
-
-	/* This code tries to figure out just what went wrong with
-	   gv_fetchmethod.  It therefore needs to duplicate a lot of
-	   the internals of that function.  We can't move it inside
-	   Perl_gv_fetchmethod_autoload(), however, since that would
-	   cause UNIVERSAL->can("NoSuchPackage::foo") to croak, and we
-	   don't want that.
-	*/
-
-If C<Perl_gv_fetchmethod_autoload> gets rewritten to take (more) flag bits,
-then it ought to be possible to move the logic from C<S_method_common> to
-the "right" place. When making this change it would probably be good to also
-pass in at least the method name length, if not also pre-computed hash values
-when known. (I'm contemplating a plan to pre-compute hash values for common
-fixed strings such as C<ISA> and pass them in to functions.)
-
 =head2 Organize error messages
 
 Perl's diagnostics (error messages, see L<perldiag>) could use
