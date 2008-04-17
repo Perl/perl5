@@ -883,16 +883,41 @@ See also L</"Extend PerlIO and PerlIO::Scalar">.
 =head2 Investigate PADTMP hash pessimisation
 
 The peephole optimier converts constants used for hash key lookups to shared
-hash key scalars. Under ithreads, something is undoing this work. See
+hash key scalars. Under ithreads, something is undoing this work.
 See http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-09/msg00793.html
+
+=head2 Store the current pad in the OP slab allocator
+
+=for clarification
+I hope that I got that "current pad" part correct
+
+Currently we leak ops in various cases of parse failure. I suggested that we
+could solve this by always using the op slab allocator, and walking it to
+free ops. Dave comments that as some ops are already freed during optree
+creation one would have to mark which ops are freed, and not double free them
+when walking the slab. He notes that one problem with this is that for some ops
+you have to know which pad was current at the time of allocation, which does
+change. I suggested storing a pointer to the current pad in the memory allocated
+for the slab, and swapping to a new slab each time the pad changes. Dave thinks
+that this would work.
 
 =head2 repack the optree
 
 Repacking the optree after execution order is determined could allow
-removal of NULL ops, and optimal ordering of OPs wrt cache-line
-filling.  The slab allocator could be reused for this purpose.
+removal of NULL ops, and optimal ordering of OPs with respect to cache-line
+filling.  The slab allocator could be reused for this purpose.  I think that
+the best way to do this is to make it an optional step just before the
+completed optree is attached to anything else, and to use the slab allocator
+unchanged, so that freeing ops is identical whether or not this step runs.
+Note that the slab allocator allocates ops downwards in memory, so one would
+have to actually "allocate" the ops in reverse-execution order to get them
+contiguous in memory in execution order.
 
-http://www.nntp.perl.org/group/perl.perl5.porters/2007/12/msg131975.html
+See http://www.nntp.perl.org/group/perl.perl5.porters/2007/12/msg131975.html
+
+Note that running this copy, and then freeing all the old location ops would
+cause their slabs to be freed, which would eliminate possible memory wastage if
+the previous suggestion is implemented, and we swap slabs more frequently.
 
 =head2 optimize tail-calls
 
