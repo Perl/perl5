@@ -1321,3 +1321,26 @@ my ($m1);
 exit $m1;
 EXPECT
 Use of uninitialized value $m1 in exit at - line 4.
+########
+# TODO long standing bug - PL_curcop is not updated before the elsif
+use warnings 'uninitialized';
+my $undef;
+
+if ($undef == 3) {
+} elsif ($undef == 0) {
+}
+EXPECT
+Use of uninitialized value $undef in numeric eq (==) at - line 4.
+Use of uninitialized value $undef in numeric eq (==) at - line 5.
+########
+# TODO long standing bug - more general variant of the above problem
+use warnings;
+my $undef;
+
+my $a = $undef + 1;
+my $b
+  = $undef
+  + 1;
+EXPECT
+Use of uninitialized value $undef in addition (+) at - line 4.
+Use of uninitialized value $undef in addition (+) at - line 7.

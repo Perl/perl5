@@ -919,6 +919,61 @@ Note that running this copy, and then freeing all the old location ops would
 cause their slabs to be freed, which would eliminate possible memory wastage if
 the previous suggestion is implemented, and we swap slabs more frequently.
 
+=head2 eliminate incorrect line numbers in warnings
+
+This code
+
+    use warnings;
+    my $undef;
+    
+    if ($undef == 3) {
+    } elsif ($undef == 0) {
+    }
+
+produces this output
+
+    Use of uninitialized value in numeric eq (==) at wrong.pl line 4.
+    Use of uninitialized value in numeric eq (==) at wrong.pl line 4.
+
+Clearly the line of the second warning is misreported - it should be line 5.
+
+The problem arises because there is no nextstate op between the execution of
+the C<if> and the C<elsif>, hence C<PL_curcop> still reports that the currently
+executing line is line 4. The solution might be to inject (somehow) more
+nextstate ops, one for each C<elsif>.
+
+The problem is more general than C<elsif> (although the C<elsif> case is the
+most common and the most confusing). Ideally this code
+
+    use warnings;
+    my $undef;
+    
+    my $a = $undef + 1;
+    my $b
+      = $undef
+      + 1;
+
+would produce this output
+
+    Use of uninitialized value $undef in addition (+) at wrong.pl line 4.
+    Use of uninitialized value $undef in addition (+) at wrong.pl line 7.
+
+(rather than lines 4 and 5), but this would seem to require every OP to carry
+(at least) line number information.
+
+What might work is to have an optional line number in memory just before the
+BASEOP structure, with a flag bit in the op to say whether it's present.
+Initially during compile every OP would carry its line number. Then add a late
+pass to the optimiser (potentially combined with L</repack the optree>) which
+looks at the two ops on every edge of the graph of the execution path. If
+the line number changes, flags the destination OP with this information.
+Once all paths are traced, replace every op with the flag with a
+nextstate-light op (that just updates C<PL_curcop>), which in turn then passes
+control on to the true op. All ops would then be replaced by variants that
+do not store the line number. (Which, logically, why it would work best in
+conjunction with L</repack the optree>, as that is already copying/reallocating
+all the OPs)
+
 =head2 optimize tail-calls
 
 Tail-calls present an opportunity for broadly applicable optimization;
