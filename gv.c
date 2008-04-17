@@ -624,6 +624,11 @@ Perl_gv_fetchmethod_flags(pTHX_ HV *stash, const char *name, U32 flags)
 
     if (SvTYPE(stash) < SVt_PVHV)
 	stash = NULL;
+    else {
+	/* The only way stash can become NULL later on is if nsplit is set,
+	   which in turn means that there is no need for a SVt_PVHV case
+	   the error reporting code.  */
+    }
 
     for (nend = name; *nend; nend++) {
 	if (*nend == '\'') {
@@ -677,14 +682,9 @@ Perl_gv_fetchmethod_flags(pTHX_ HV *stash, const char *name, U32 flags)
 		STRLEN packlen;
 		const char *packname;
 
-		assert(error_report);
-
 		if (nsplit) {
 		    packlen = nsplit - origname;
 		    packname = origname;
-		} else if (SvTYPE(error_report) == SVt_PVHV) {
-		    packlen = HvNAMELEN_get(error_report);
-		    packname = HvNAME_get(error_report);
 		} else {
 		    packname = SvPV_const(error_report, packlen);
 		}
