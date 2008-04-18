@@ -186,7 +186,7 @@ case 2:
   case 27:
 #line 277 "perly.y"
     { PL_parser->copline = (line_t)IVAL((ps[(1) - (6)].val.i_tkval));
-			    (yyval.opval) = newCONDOP(0, (ps[(3) - (6)].val.opval), scope((ps[(5) - (6)].val.opval)), (ps[(6) - (6)].val.opval));
+			    (yyval.opval) = newCONDOP(0, newSTATEOP(OPf_SPECIAL,NULL,(ps[(3) - (6)].val.opval)), scope((ps[(5) - (6)].val.opval)), (ps[(6) - (6)].val.opval));
 			    PL_hints |= HINT_BLOCK_SCOPE;
 			  TOKEN_GETMAD((ps[(1) - (6)].val.i_tkval),(yyval.opval),'I');
 			  TOKEN_GETMAD((ps[(2) - (6)].val.i_tkval),(yyval.opval),'(');

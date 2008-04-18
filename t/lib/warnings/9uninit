@@ -1322,7 +1322,6 @@ exit $m1;
 EXPECT
 Use of uninitialized value $m1 in exit at - line 4.
 ########
-# TODO long standing bug - PL_curcop is not updated before the elsif
 use warnings 'uninitialized';
 my $undef;
 
