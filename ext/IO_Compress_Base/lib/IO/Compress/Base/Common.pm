@@ -11,7 +11,7 @@ use File::GlobMapper;
 require Exporter;
 our ($VERSION, @ISA, @EXPORT, %EXPORT_TAGS, $HAS_ENCODE);
 @ISA = qw(Exporter);
-$VERSION = '2.008';
+$VERSION = '2.009';
 
 @EXPORT = qw( isaFilehandle isaFilename whatIsInput whatIsOutput 
               isaFileGlobString cleanFileGlobString oneTarget
@@ -545,6 +545,9 @@ sub IO::Compress::Base::Parameters::parse
     }
     elsif (@_ == 1) {
         my $href = $_[0] ;    
+        return $_[0] 
+            if UNIVERSAL::isa($_[0], "IO::Compress::Base::Parameters");
+    
         return $self->setError("Expected even number of parameters, got 1")
             if ! defined $href or ! ref $href or ref $href ne "HASH" ;
  

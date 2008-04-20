@@ -228,7 +228,8 @@ typedef di_stream * Compress__Raw__Zlib__inflateScanStream ;
 #define adlerInitial adler32(0L, Z_NULL, 0)
 #define crcInitial crc32(0L, Z_NULL, 0)
 
-static const char * const my_z_errmsg[] = {
+//static const char * const my_z_errmsg[] = {
+static const char my_z_errmsg[][32] = {
     "need dictionary",     /* Z_NEED_DICT     2 */
     "stream end",          /* Z_STREAM_END    1 */
     "",                    /* Z_OK            0 */

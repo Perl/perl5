@@ -1,6 +1,11 @@
 CHANGES
 -------
 
+  2.009 20 April 2008
+
+      * Minor documentation issue with flush.
+        [rt.cpan.org #31446]
+
   2.008 2 November 2007
 
       * Minor documentation changes in README

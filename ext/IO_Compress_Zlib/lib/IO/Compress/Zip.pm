@@ -4,21 +4,21 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.008 qw(:Status createSelfTiedObject);
-use IO::Compress::RawDeflate 2.008 ;
-use IO::Compress::Adapter::Deflate 2.008 ;
-use IO::Compress::Adapter::Identity 2.008 ;
-use IO::Compress::Zlib::Extra 2.008 ;
-use IO::Compress::Zip::Constants 2.008 ;
+use IO::Compress::Base::Common  2.009 qw(:Status createSelfTiedObject);
+use IO::Compress::RawDeflate 2.009 ;
+use IO::Compress::Adapter::Deflate 2.009 ;
+use IO::Compress::Adapter::Identity 2.009 ;
+use IO::Compress::Zlib::Extra 2.009 ;
+use IO::Compress::Zip::Constants 2.009 ;
 
 
-use Compress::Raw::Zlib  2.008 qw(crc32) ;
+use Compress::Raw::Zlib  2.009 qw(crc32) ;
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.008 ; 
+           import  IO::Compress::Adapter::Bzip2 2.009 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.008 ; 
+           import  IO::Compress::Bzip2 2.009 ; 
          } ;
 }
 
@@ -27,7 +27,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $ZipError);
 
-$VERSION = '2.008';
+$VERSION = '2.009';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -141,6 +141,10 @@ sub mkHeader
     my $empty = 0;
     my $osCode = $param->value('OS_Code') ;
     my $extFileAttr = 0 ;
+    
+    # This code assumes Unix.
+    $extFileAttr = 0666 << 16 
+        if $osCode == ZIP_OS_CODE_UNIX ;
 
     if (*$self->{ZipData}{Zip64}) {
         $empty = 0xFFFF;
@@ -171,10 +175,6 @@ sub mkHeader
             $extra    .= mkUnix2Extra( $param->value('UID'), $param->value('GID'));
             $ctlExtra .= mkUnix2Extra();
         }
-
-        # TODO - this code assumes Unix.
-        #$extFileAttr = 0666 << 16 
-        #    if $osCode == ZIP_OS_CODE_UNIX ;
 
         $extFileAttr = $param->value('ExtAttr') 
             if defined $param->value('ExtAttr') ;
@@ -392,6 +392,18 @@ sub ckParams
         $got->value("ATime", $timeRef->[0]);
         $got->value("CTime", $timeRef->[2]);
     }
+    
+    # Unix2 Extended Attribute
+    if (! $got->parsed('exUnix2') ) {
+        my $timeRef = $got->value('exUnix2');
+        if ( defined $timeRef) {
+            return $self->saveErrorString(undef, "exUnix2 not a 2-element array ref")   
+                if ref $timeRef ne 'ARRAY' || @$timeRef != 2;
+        }
+
+        $got->value("UID", $timeRef->[0]);
+        $got->value("GID", $timeRef->[1]);
+    }
 
     *$self->{ZipData}{Zip64} = $got->value('Zip64');
     *$self->{ZipData}{Stream} = $got->value('Stream');
@@ -441,8 +453,8 @@ sub getExtraParams
 {
     my $self = shift ;
 
-    use IO::Compress::Base::Common  2.008 qw(:Parse);
-    use Compress::Raw::Zlib  2.008 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+    use IO::Compress::Base::Common  2.009 qw(:Parse);
+    use Compress::Raw::Zlib  2.009 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 
     my @Bzip2 = ();
     
@@ -465,6 +477,7 @@ sub getExtraParams
             'Name'      => [0, 1, Parse_any,       ''],
             'Time'      => [0, 1, Parse_any,       undef],
             'exTime'    => [0, 1, Parse_any,       undef],
+            'exUnix2'   => [0, 1, Parse_any,       undef], 
             'ExtAttr'   => [0, 1, Parse_any,       0],
             'OS_Code'   => [0, 1, Parse_unsigned,  $Compress::Raw::Zlib::gzip_os_code],
             
@@ -504,6 +517,7 @@ sub getFileInfo
         $params->value('CTime' => undef) ; # No Creation time
     }
 
+    # NOTE - Unix specific code alert
     $params->value('ExtAttr' => $mode << 16) 
         if ! $params->parsed('ExtAttr');
 
@@ -570,8 +584,6 @@ __END__
 
 =head1 NAME
 
-
-
 IO::Compress::Zip - Write zip files/buffers
  
  
@@ -579,7 +591,6 @@ IO::Compress::Zip - Write zip files/buffers
 =head1 SYNOPSIS
 
     use IO::Compress::Zip qw(zip $ZipError) ;
-
 
     my $status = zip $input => $output [,OPTS] 
         or die "zip failed: $ZipError\n";
@@ -622,17 +633,8 @@ IO::Compress::Zip - Write zip files/buffers
 
 =head1 DESCRIPTION
 
-
 This module provides a Perl interface that allows writing zip 
 compressed data to files or buffer.
-
-
-
-
-
-
-
-
 
 The primary purpose of this module is to provide streaming write access to
 zip files and buffers. It is not a general-purpose file archiver. If that
@@ -644,12 +646,8 @@ namely Store (no compression at all), Deflate and Bzip2.
 Note that to create Bzip2 content, the module C<IO::Compress::Bzip2> must
 be installed.
 
-
-
-
 For reading zip files/buffers, see the companion module 
 L<IO::Uncompress::Unzip|IO::Uncompress::Unzip>.
-
 
 =head1 Functional Interface
 
@@ -663,13 +661,9 @@ section.
     zip $input => $output [,OPTS] 
         or die "zip failed: $ZipError\n";
 
-
-
 The functional interface needs Perl5.005 or better.
 
-
 =head2 zip $input => $output [, OPTS]
-
 
 C<zip> expects at least two parameters, C<$input> and C<$output>.
 
@@ -709,8 +703,6 @@ The input data will be read from each file in turn.
 The complete array will be walked to ensure that it only
 contains valid filenames before any data is compressed.
 
-
-
 =item An Input FileGlob string
 
 If C<$input> is a string that is delimited by the characters "<" and ">"
@@ -721,11 +713,9 @@ If the fileglob does not match any files ...
 
 See L<File::GlobMapper|File::GlobMapper> for more details.
 
-
 =back
 
 If the C<$input> parameter is any other type, C<undef> will be returned.
-
 
 In addition, if C<$input> is a simple filename, the default values for
 the C<Name>, C<Time>, C<ExtAttr> and C<exTime> options will be sourced from that file.
@@ -733,8 +723,6 @@ the C<Name>, C<Time>, C<ExtAttr> and C<exTime> options will be sourced from that
 If you do not want to use these defaults they can be overridden by
 explicitly setting the C<Name>, C<Time>, C<ExtAttr> and C<exTime> options or by setting the
 C<Minimal> parameter.
-
-
 
 =head3 The C<$output> parameter
 
@@ -755,13 +743,10 @@ If the C<$output> parameter is a filehandle, the compressed data
 will be written to it.
 The string '-' can be used as an alias for standard output.
 
-
 =item A scalar reference 
 
 If C<$output> is a scalar reference, the compressed data will be
 stored in C<$$output>.
-
-
 
 =item An Array Reference
 
@@ -781,20 +766,11 @@ string. Anything else is an error.
 
 If the C<$output> parameter is any other type, C<undef> will be returned.
 
-
-
 =head2 Notes
-
-
 
 When C<$input> maps to multiple files/buffers and C<$output> is a single
 file/buffer the input files/buffers will each be stored
 in C<$output> as a distinct entry.
-
-
-
-
-
 
 =head2 Optional Parameters
 
@@ -815,26 +791,17 @@ completed.
 
 This parameter defaults to 0.
 
-
 =item C<< BinModeIn => 0|1 >>
 
 When reading from a file or filehandle, set C<binmode> before reading.
 
 Defaults to 0.
 
-
-
-
-
 =item C<< Append => 0|1 >>
 
 TODO
 
-
-
 =back
-
-
 
 =head2 Examples
 
@@ -848,7 +815,6 @@ data to the file C<file1.txt.zip>.
     my $input = "file1.txt";
     zip $input => "$input.zip"
         or die "zip failed: $ZipError\n";
-
 
 To read from an existing Perl filehandle, C<$input>, and write the
 compressed data to a buffer, C<$buffer>.
@@ -886,7 +852,6 @@ and if you want to compress each file one at a time, this will do the trick
         zip $input => $output 
             or die "Error compressing '$input': $ZipError\n";
     }
-
 
 =head1 OO Interface
 
@@ -926,7 +891,6 @@ will be written to it.
 If the C<$output> parameter is a filehandle, the compressed data will be
 written to it.
 The string '-' can be used as an alias for standard output.
-
 
 =item A scalar reference 
 
@@ -983,8 +947,6 @@ to it.  Otherwise the file pointer will not be moved.
 
 This parameter defaults to 0.
 
-
-
 =item C<< Name => $string >>
 
 Stores the contents of C<$string> in the zip filename header field. If
@@ -1002,7 +964,14 @@ if this option is not specified.
 This option controls the "external file attributes" field in the central
 header of the zip file. This is a 4 byte field.
 
-This option defaults to 0.
+If you are running a Unix derivative this value defaults to 
+
+    0666 << 16
+
+This should allow read/write access to any files that are extracted from
+the zip file/buffer.
+
+For all other systems it defaults to 0.
 
 =item C<< exTime => [$atime, $mtime, $ctime] >>
 
@@ -1010,9 +979,10 @@ This option expects an array reference with exactly three elements:
 C<$atime>, C<mtime> and C<$ctime>. These correspond to the last access
 time, last modification time and creation time respectively.
 
-It uses these values to set the extended timestamp field in the local zip
-header to the three values, $atime, $mtime, $ctime and sets the extended
-timestamp field in the central zip header to C<$mtime>.
+It uses these values to set the extended timestamp field (ID is "UT") in
+the local zip header using the three values, $atime, $mtime, $ctime. In
+addition it sets the extended timestamp field in the central zip header
+using C<$mtime>.
 
 If any of the three values is C<undef> that time value will not be used.
 So, for example, to set only the C<$mtime> you would use this
@@ -1022,6 +992,21 @@ So, for example, to set only the C<$mtime> you would use this
 If the C<Minimal> option is set to true, this option will be ignored.
 
 By default no extended time field is created.
+
+=item C<< exUnix2 => [$uid, $gid] >>
+
+This option expects an array reference with exactly two elements: C<$uid>
+and C<$gid>. These values correspond to the numeric user ID and group ID
+of the owner of the files respectively.
+
+When the C<exUnix2> option is present it will trigger the creation of a
+Unix2 extra field (ID is "Ux") in the local zip. This will be populated
+with C<$uid> and C<$gid>. In addition an empty Unix2 extra field will also
+be created in the central zip header
+
+If the C<Minimal> option is set to true, this option will be ignored.
+
+By default no Unix2 extra field is created.
 
 =item C<< Comment => $comment >>
 
@@ -1096,8 +1081,9 @@ The default is 0.
 =item C<< ExtraFieldLocal => $data >>
 =item C<< ExtraFieldCentral => $data >>
 
-These options allows additional metadata to be stored in the local and
-central headers in the zip file/buffer.
+The C<ExtraFieldLocal> option is used to store additional metadata in the
+local header for the zip file/buffer. The C<ExtraFieldCentral> does the
+same for the matching central header.
 
 An extra field consists of zero or more subfields. Each subfield consists
 of a two byte header followed by the subfield data.
@@ -1129,10 +1115,9 @@ Alternatively the list of subfields can by supplied as a scalar, thus
 
     ExtraField => $rawdata
 
-The Extended Time field, set using the C<exTime> option, is an example of
-an extended field.
-
-
+The Extended Time field (ID "UT"), set using the C<exTime> option, and the
+Unix2 extra field (ID "Ux), set using the C<exUnix2> option, are examples
+of extra fields.
 
 If the C<Minimal> option is set to true, this option will be ignored.
 
@@ -1140,9 +1125,9 @@ The maximum size of an extra field 65535 bytes.
 
 =item C<< Minimal => 1|0 >>
 
-If specified, this option will disable the creation of all extended fields
-in the zip local and central headers. So the C<exTime>, C<ExtraFieldLocal>
-and C<ExtraFieldCentral> options will be ignored.
+If specified, this option will disable the creation of all extra fields
+in the zip local and central headers. So the C<exTime>, C<exUnix2>,
+C<ExtraFieldLocal> and C<ExtraFieldCentral> options will be ignored.
 
 This parameter defaults to 0.
 
@@ -1168,9 +1153,6 @@ This option is only valid if the C<Method> is ZIP_CM_BZIP2. It is ignored
 otherwise.
 
 The default is 0.
-
-
-
 
 =item -Level 
 
@@ -1204,18 +1186,9 @@ constants defined below.
 
 The default is Z_DEFAULT_STRATEGY.
 
-
-
-
-
-
 =item C<< Strict => 0|1 >>
 
-
-
 This is a placeholder option.
-
-
 
 =back
 
@@ -1278,13 +1251,10 @@ unsuccessful.
 
 Usage is
 
-
     $z->flush;
     $z->flush($flush_type);
 
-
 Flushes any pending compressed data to the output file/buffer.
-
 
 This method takes an optional parameter, C<$flush_type>, that controls
 how the flushing will be carried out. By default the C<$flush_type>
@@ -1295,9 +1265,7 @@ you fully understand the implications of what it does - overuse of C<flush>
 can seriously degrade the level of compression achieved. See the C<zlib>
 documentation for details.
 
-
 Returns true on success.
-
 
 =head2 tell
 
@@ -1315,27 +1283,18 @@ Usage is
     $z->eof();
     eof($z);
 
-
-
 Returns true if the C<close> method has been called.
-
-
 
 =head2 seek
 
     $z->seek($position, $whence);
     seek($z, $position, $whence);
 
-
-
-
 Provides a sub-set of the C<seek> functionality, with the restriction
 that it is only legal to seek forward in the output file/buffer.
 It is a fatal error to attempt to seek backward.
 
 Empty parts of the file/buffer will have NULL (0x00) bytes written to them.
-
-
 
 The C<$whence> parameter takes one the usual values, namely SEEK_SET,
 SEEK_CUR or SEEK_END.
@@ -1378,32 +1337,26 @@ retrieve the autoflush setting.
     $z->input_line_number()
     $z->input_line_number(EXPR)
 
-
 This method always returns C<undef> when compressing. 
-
-
 
 =head2 fileno
 
     $z->fileno()
     fileno($z)
 
-If the C<$z> object is associated with a file or a filehandle, this method
-will return the underlying file descriptor.
+If the C<$z> object is associated with a file or a filehandle, C<fileno>
+will return the underlying file descriptor. Once the C<close> method is
+called C<fileno> will return C<undef>.
 
-If the C<$z> object is is associated with a buffer, this method will
-return undef.
+If the C<$z> object is is associated with a buffer, this method will return
+C<undef>.
 
 =head2 close
 
     $z->close() ;
     close $z ;
 
-
-
 Flushes any pending compressed data and then closes the output file/buffer. 
-
-
 
 For most versions of Perl this method will be automatically invoked if
 the IO::Compress::Zip object is destroyed (either explicitly or by the
@@ -1423,9 +1376,6 @@ If the C<AutoClose> option has been enabled when the IO::Compress::Zip
 object was created, and the object is associated with a file, the
 underlying file will also be closed.
 
-
-
-
 =head2 newStream([OPTS])
 
 Usage is
@@ -1439,7 +1389,6 @@ the C<$z> object.
 
 See the L</"Constructor Options"> section for more details.
 
-
 =head2 deflateParams
 
 Usage is
@@ -1448,19 +1397,14 @@ Usage is
 
 TODO
 
-
 =head1 Importing 
-
 
 A number of symbolic constants are required by some methods in 
 C<IO::Compress::Zip>. None are imported by default.
 
-
-
 =over 5
 
 =item :all
-
 
 Imports C<zip>, C<$ZipError> and all symbolic
 constants that can be used by C<IO::Compress::Zip>. Same as doing this
@@ -1471,9 +1415,7 @@ constants that can be used by C<IO::Compress::Zip>. Same as doing this
 
 Import all symbolic constants. Same as doing this
 
-
     use IO::Compress::Zip qw(:flush :level :strategy :zip_method) ;
-
 
 =item :flush
 
@@ -1495,7 +1437,6 @@ These symbolic constants are used by the C<Level> option in the constructor.
     Z_BEST_COMPRESSION
     Z_DEFAULT_COMPRESSION
 
-
 =item :strategy
 
 These symbolic constants are used by the C<Strategy> option in the constructor.
@@ -1505,7 +1446,6 @@ These symbolic constants are used by the C<Strategy> option in the constructor.
     Z_RLE
     Z_FIXED
     Z_DEFAULT_STRATEGY
-
 
 =item :zip_method
 
@@ -1521,21 +1461,17 @@ constructor.
 
 =back
 
-For 
-
 =head1 EXAMPLES
 
-TODO
+=head2 Apache::GZip Revisited
 
+See L<IO::Compress::Zlib::FAQ|IO::Compress::Zlib::FAQ/"Apache::GZip Revisited">
 
+    
 
+=head2 Working with Net::FTP
 
-
-
-
-
-
-
+See L<IO::Compress::Zlib::FAQ|IO::Compress::Zlib::FAQ/"Compressed files and Net::FTP">
 
 =head1 SEE ALSO
 
@@ -1546,7 +1482,6 @@ L<Compress::Zlib::FAQ|Compress::Zlib::FAQ>
 L<File::GlobMapper|File::GlobMapper>, L<Archive::Zip|Archive::Zip>,
 L<Archive::Tar|Archive::Tar>,
 L<IO::Zlib|IO::Zlib>
-
 
 For RFC 1950, 1951 and 1952 see 
 F<http://www.faqs.org/rfcs/rfc1950.html>,
@@ -1561,14 +1496,9 @@ F<http://www.zlib.org>.
 
 The primary site for gzip is F<http://www.gzip.org>.
 
-
-
-
 =head1 AUTHOR
 
 This module was written by Paul Marquess, F<pmqs@cpan.org>. 
-
-
 
 =head1 MODIFICATION HISTORY
 
@@ -1576,9 +1506,8 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2007 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2008 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
-
 

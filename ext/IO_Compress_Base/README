@@ -1,28 +1,19 @@
 
                              IO-Compress-Base
 
-                             Version 2.008
+                             Version 2.009
 
-                             2nd November 2007
+                              20th April 2008
 
-
-       Copyright (c) 2005-2007 Paul Marquess. All rights reserved.
+       Copyright (c) 2005-2008 Paul Marquess. All rights reserved.
           This program is free software; you can redistribute it
            and/or modify it under the same terms as Perl itself.
-
-
-
 
 DESCRIPTION
 -----------
 
-
 This module is the base class for all IO::Compress and IO::Uncompress
 modules.
-
-
-
-
 
 PREREQUISITES
 -------------
@@ -30,12 +21,7 @@ PREREQUISITES
 Before you can build IO-Compress-Base you need to have the following
 installed on your system:
 
-
     * Perl 5.004 or better. 
-
-
-
-
 
 BUILDING THE MODULE
 -------------------
@@ -47,8 +33,6 @@ using this sequence of commands:
     make
     make test
 
-
-
 INSTALLATION
 ------------
 
@@ -56,23 +40,8 @@ To install IO-Compress-Base, run the command below:
 
     make install
 
-
-
-
-
 TROUBLESHOOTING
 ---------------
-
-
-
-
-
-
-
-
-
-
-
 
 FEEDBACK
 --------
@@ -107,9 +76,7 @@ To help me help you, I need all of the following information:
         If you haven't installed IO-Compress-Base then search IO::Compress::Base.pm
         for a line like this:
 
-          $VERSION = "2.008" ;
-
-
+          $VERSION = "2.009" ;
 
  2. If you are having problems building IO-Compress-Base, send me a
     complete log of what happened. Start by unpacking the IO-Compress-Base
@@ -119,6 +86,5 @@ To help me help you, I need all of the following information:
         perl Makefile.PL
         make
         make test TEST_VERBOSE=1          
-
 
 Paul Marquess <pmqs@cpan.org>

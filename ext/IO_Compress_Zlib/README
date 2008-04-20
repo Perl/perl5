@@ -1,28 +1,19 @@
 
                              IO-Compress-Zlib
 
-                             Version 2.008
+                             Version 2.009
 
-                             2nd November 2007
+                              20th April 2008
 
-
-       Copyright (c) 2005-2007 Paul Marquess. All rights reserved.
+       Copyright (c) 2005-2008 Paul Marquess. All rights reserved.
           This program is free software; you can redistribute it
            and/or modify it under the same terms as Perl itself.
-
-
-
 
 DESCRIPTION
 -----------
 
-
 This module provides a Perl interface to allow reading and writing of RFC
 1950, 1951, 1952 (i.e. gzip) and zip files/buffers.
-
-
-
-
 
 PREREQUISITES
 -------------
@@ -30,14 +21,9 @@ PREREQUISITES
 Before you can build IO-Compress-Zlib you need to have the following
 installed on your system:
 
-
     * Perl 5.004 or better. 
     * Compress::Raw::Zlib
     * IO::Compress::Base
-
-
-
-
 
 BUILDING THE MODULE
 -------------------
@@ -49,8 +35,6 @@ using this sequence of commands:
     make
     make test
 
-
-
 INSTALLATION
 ------------
 
@@ -58,20 +42,8 @@ To install IO-Compress-Zlib, run the command below:
 
     make install
 
-
-
-
-
 TROUBLESHOOTING
 ---------------
-
-
-
-
-
-
-
-
 
 The t/020isize Test Suite
 ------------------------
@@ -79,7 +51,7 @@ The t/020isize Test Suite
 This test suite checks that IO-Compress-Zlib can cope with gzip files
 that are larger than 2^32 bytes.
 
-By default these test are NOT run when you do a "make test". If you
+By default these tests are NOT run when you do a "make test". If you
 really want to run them, you need to execute "make longtest".
 
 Be warned though -- this test suite can take hours to run on a slow box.
@@ -87,9 +59,6 @@ Be warned though -- this test suite can take hours to run on a slow box.
 Also, due to the way the tests are constructed, some architectures will
 run out of memory during this test. This should not be considered a bug
 in the IO-Compress-Zlib module.
-
-
-
 
 FEEDBACK
 --------
@@ -124,9 +93,7 @@ To help me help you, I need all of the following information:
         If you haven't installed IO-Compress-Zlib then search IO::Compress::Gzip.pm
         for a line like this:
 
-          $VERSION = "2.008" ;
-
-
+          $VERSION = "2.009" ;
 
  2. If you are having problems building IO-Compress-Zlib, send me a
     complete log of what happened. Start by unpacking the IO-Compress-Zlib
@@ -136,6 +103,5 @@ To help me help you, I need all of the following information:
         perl Makefile.PL
         make
         make test TEST_VERBOSE=1          
-
 
 Paul Marquess <pmqs@cpan.org>

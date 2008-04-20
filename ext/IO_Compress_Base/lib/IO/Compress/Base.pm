@@ -6,7 +6,7 @@ require 5.004 ;
 use strict ;
 use warnings;
 
-use IO::Compress::Base::Common 2.008 ;
+use IO::Compress::Base::Common 2.009 ;
 
 use IO::File ;
 use Scalar::Util qw(blessed readonly);
@@ -20,7 +20,7 @@ use bytes;
 our (@ISA, $VERSION);
 @ISA    = qw(Exporter IO::File);
 
-$VERSION = '2.008';
+$VERSION = '2.009';
 
 #Can't locate object method "SWASHNEW" via package "utf8" (perhaps you forgot to load "utf8"?) at .../ext/Compress-Zlib/Gzip/blib/lib/Compress/Zlib/Common.pm line 16.
 
@@ -120,12 +120,14 @@ sub output
         &{ *$self->{FilterEnvelope} }();
     }
 
-    if ( defined *$self->{FH} ) {
-        defined *$self->{FH}->write( $data, length $data )
-          or return $self->saveErrorString(0, $!, $!); 
-    }
-    else {
-        ${ *$self->{Buffer} } .= $data ;
+    if (length $data) {
+        if ( defined *$self->{FH} ) {
+                defined *$self->{FH}->write( $data, length $data )
+                or return $self->saveErrorString(0, $!, $!); 
+        }
+        else {
+                ${ *$self->{Buffer} } .= $data ;
+        }
     }
 
     return 1;
@@ -939,9 +941,7 @@ __END__
 
 =head1 NAME
 
-
 IO::Compress::Base - Base Class for IO::Compress modules 
-
 
 =head1 SYNOPSIS
 
@@ -949,12 +949,8 @@ IO::Compress::Base - Base Class for IO::Compress modules
 
 =head1 DESCRIPTION
 
-
 This module is not intended for direct use in application code. Its sole
 purpose if to to be sub-classed by IO::Compress modules.
-
-
-
 
 =head1 SEE ALSO
 
@@ -966,15 +962,9 @@ L<File::GlobMapper|File::GlobMapper>, L<Archive::Zip|Archive::Zip>,
 L<Archive::Tar|Archive::Tar>,
 L<IO::Zlib|IO::Zlib>
 
-
-
-
-
 =head1 AUTHOR
 
 This module was written by Paul Marquess, F<pmqs@cpan.org>. 
-
-
 
 =head1 MODIFICATION HISTORY
 
@@ -982,9 +972,8 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2007 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2008 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
-
 

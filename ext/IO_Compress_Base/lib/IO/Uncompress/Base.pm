@@ -9,12 +9,12 @@ our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS);
 @ISA    = qw(Exporter IO::File);
 
 
-$VERSION = '2.008';
+$VERSION = '2.009';
 
 use constant G_EOF => 0 ;
 use constant G_ERR => -1 ;
 
-use IO::Compress::Base::Common 2.008 ;
+use IO::Compress::Base::Common 2.009 ;
 #use Parse::Parameters ;
 
 use IO::File ;
@@ -26,6 +26,7 @@ use Carp ;
 %EXPORT_TAGS = ( );
 push @{ $EXPORT_TAGS{all} }, @EXPORT_OK ;
 #Exporter::export_ok_tags('all') ;
+
 
 
 sub smartRead
@@ -59,12 +60,21 @@ sub smartRead
 
     my $get_size = $size - $offset ;
 
-    #if ( defined *$self->{InputLength} ) {
-    #    $get_size = min($get_size, *$self->{InputLengthRemaining});
-    #}
-
-    if (defined *$self->{FH})
-      { *$self->{FH}->read($$out, $get_size, $offset) }
+    if (defined *$self->{FH}) {
+        if ($offset) {
+            # Not using this 
+            #
+            #  *$self->{FH}->read($$out, $get_size, $offset);
+            #
+            # because the filehandle may not support the offset parameter
+            # An example is Net::FTP
+            my $tmp = '';
+            *$self->{FH}->read($tmp, $get_size) > 0 &&
+                (substr($$out, $offset) = $tmp);
+        }
+        else
+          { *$self->{FH}->read($$out, $get_size) }
+    }
     elsif (defined *$self->{InputEvent}) {
         my $got = 1 ;
         while (length $$out < $size) {
@@ -174,7 +184,24 @@ sub smartEof
     return 0 if length *$self->{Prime} || *$self->{PushMode};
 
     if (defined *$self->{FH})
-     { *$self->{FH}->eof() }
+    {
+        # Could use
+        #
+        #  *$self->{FH}->eof() 
+        #
+        # here, but this can cause trouble if
+        # the filehandle is itself a tied handle, but it uses sysread.
+        # Then we get into mixing buffered & non-buffered IO, which will cause trouble
+
+        my $info = $self->getErrInfo();
+        
+        my $buffer = '';
+        my $status = $self->smartRead(\$buffer, 1);
+        $self->pushBack($buffer) if length $buffer;
+        $self->setErrInfo($info);
+        
+        return $status == 0 ;
+    }
     elsif (defined *$self->{InputEvent})
      { *$self->{EventEof} }
     else 
@@ -187,6 +214,22 @@ sub clearError
 
     *$self->{ErrorNo}  =  0 ;
     ${ *$self->{Error} } = '' ;
+}
+
+sub getErrInfo
+{
+    my $self   = shift ;
+
+    return [ *$self->{ErrorNo}, ${ *$self->{Error} } ] ;
+}
+
+sub setErrInfo
+{
+    my $self   = shift ;
+    my $ref    = shift;
+
+    *$self->{ErrorNo}  =  $ref->[0] ;
+    ${ *$self->{Error} } = $ref->[1] ;
 }
 
 sub saveStatus
@@ -929,7 +972,7 @@ sub gotoNextStream
     my $magic = $self->ckMagic();
     #*$self->{EndStream} = 0 ;
 
-    if ( ! $magic) {
+    if ( ! defined $magic) {
         if (! *$self->{Transparent} )
         {
             *$self->{EndStream} = 1 ;
@@ -1372,9 +1415,7 @@ __END__
 
 =head1 NAME
 
-
 IO::Uncompress::Base - Base Class for IO::Uncompress modules 
-
 
 =head1 SYNOPSIS
 
@@ -1382,12 +1423,8 @@ IO::Uncompress::Base - Base Class for IO::Uncompress modules
 
 =head1 DESCRIPTION
 
-
 This module is not intended for direct use in application code. Its sole
 purpose if to to be sub-classed by IO::Unompress modules.
-
-
-
 
 =head1 SEE ALSO
 
@@ -1399,15 +1436,9 @@ L<File::GlobMapper|File::GlobMapper>, L<Archive::Zip|Archive::Zip>,
 L<Archive::Tar|Archive::Tar>,
 L<IO::Zlib|IO::Zlib>
 
-
-
-
-
 =head1 AUTHOR
 
 This module was written by Paul Marquess, F<pmqs@cpan.org>. 
-
-
 
 =head1 MODIFICATION HISTORY
 
@@ -1415,9 +1446,8 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2007 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2008 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
-
 

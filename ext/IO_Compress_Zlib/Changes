@@ -1,6 +1,15 @@
 CHANGES
 -------
 
+  2.009 20 April 2008
+
+      * IO::Compress::Zip 
+
+        - Added exUnix2 option to allow storing of UID & GID.
+        - When running on a Unix derivative the ExtAttr option now defaults
+          to the equivalent of 0666. For all other systems the default
+          remains 0.
+
   2.008 2 November 2007
 
       * Minor documentation changes in README

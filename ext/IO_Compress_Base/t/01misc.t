@@ -19,7 +19,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 78 + $extra ;
+    plan tests => 80 + $extra ;
 
     use_ok('Scalar::Util');
     use_ok('IO::Compress::Base::Common');
@@ -120,6 +120,11 @@ undef) ;
     $$xx_ref = 666 ;
     is $xx, 666;
 
+    my $got1 = ParseParameters(1, {'Fred' => [1, 1, Parse_writable_scalar, undef]}, $got) ;
+    ok $got->parsed('Fred'), "parsed" ;
+    $xx_ref = $got->value('Fred');
+    $$xx_ref = 666 ;
+    is $xx, 666;
 }
 
 My::testParseParameters();
