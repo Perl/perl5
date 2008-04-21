@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2007 Mark Shelor, All Rights Reserved
  *
- * Version: 5.45
- * Tue Jun 26 02:36:00 MST 2007
+ * Version: 5.46
+ * Wed Apr  9 05:04:00 MST 2008
  *
  */
 
@@ -560,7 +560,7 @@ static char *getval(char *line, char **pprest)
 /* ldvals: checks next line in dump file against tag, and loads values */
 static int ldvals(
 	SHA_FILE *f,
-	char *tag,
+	const char *tag,
 	int type,
 	void *pval,
 	int reps,

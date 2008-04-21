@@ -6,7 +6,7 @@ use strict;
 use integer;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 
-$VERSION = '5.45';
+$VERSION = '5.46';
 
 require Exporter;
 require DynaLoader;
@@ -114,7 +114,10 @@ sub Addfile {
 	my $text = -T $file;
 
 	local *FH;
-	open(FH, "<$file") or _bail("Open failed");
+		# protect any leading or trailing whitespace in $file;
+		# otherwise, 2-arg "open" will ignore them
+	$file =~ s#^(\s)#./$1#;
+	open(FH, "< $file\0") or _bail("Open failed");
 	binmode(FH) if $binary || $portable;
 
 	unless ($portable && $text) {
@@ -655,7 +658,7 @@ for their valuable comments and suggestions.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2003-2007 Mark Shelor
+Copyright (C) 2003-2008 Mark Shelor
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

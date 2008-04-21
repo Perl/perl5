@@ -1,5 +1,12 @@
 Revision history for Perl extension Digest::SHA.
 
+5.46  Wed Apr  9 05:04:00 MST 2008
+	- modified Addfile to recognize leading and trailing
+		whitespace in filenames (ref. rt.cpan.org #34690)
+	- minor C source code modification (ref. hmac.c)
+	- use const in sha.c for clean builds with -Wwrite-strings
+		-- thanks to Robin Barker for patch
+
 5.45  Tue Jun 26 02:36:00 MST 2007
 	- extended portability to earlier Perls
 		-- works on Perl 5.003 and later

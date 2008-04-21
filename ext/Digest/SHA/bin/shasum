@@ -2,10 +2,10 @@
 
 	# shasum: filter for computing SHA digests (analogous to sha1sum)
 	#
-	# Copyright (C) 2003-2007 Mark Shelor, All Rights Reserved
+	# Copyright (C) 2003-2008 Mark Shelor, All Rights Reserved
 	#
-	# Version: 5.45
-	# Tue Jun 26 02:36:00 MST 2007
+	# Version: 5.46
+	# Wed Apr  9 05:04:00 MST 2008
 
 =head1 NAME
 
@@ -61,7 +61,7 @@ you can install this script as a convenient drop-in replacement.
 
 =head1 AUTHOR
 
-Copyright (c) 2003-2007 Mark Shelor <mshelor@cpan.org>.
+Copyright (c) 2003-2008 Mark Shelor <mshelor@cpan.org>.
 
 =head1 SEE ALSO
 
@@ -74,7 +74,7 @@ use strict;
 use FileHandle;
 use Getopt::Long;
 
-my $VERSION = "5.45";
+my $VERSION = "5.46";
 
 
 	# Try to use Digest::SHA, since it's faster.  If not installed,

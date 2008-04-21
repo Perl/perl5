@@ -22,8 +22,8 @@ require DynaLoader;
 		 d_clock d_clock_nanosleep
 		 stat
 		);
-	
-$VERSION = '1.9712';
+
+$VERSION = '1.9715';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -209,6 +209,9 @@ Getting even accuracy of one thousand nanoseconds is good.
 Issues a C<ualarm> call; the C<$interval_useconds> is optional and
 will be zero if unspecified, resulting in C<alarm>-like behaviour.
 
+Returns the remaining time in the alarm in microseconds, or C<undef>
+if an error occurred.
+
 ualarm(0) will cancel an outstanding ualarm().
 
 Note that the interaction between alarms and sleeps is unspecified.
@@ -260,10 +263,14 @@ Note that the interaction between alarms and sleeps is unspecified.
 =item alarm ( $floating_seconds [, $interval_floating_seconds ] )
 
 The C<SIGALRM> signal is sent after the specified number of seconds.
-Implemented using C<ualarm()>.  The C<$interval_floating_seconds> argument
-is optional and will be zero if unspecified, resulting in C<alarm()>-like
-behaviour.  This function can be imported, resulting in a nice drop-in
-replacement for the C<alarm> provided with perl, see the L</EXAMPLES> below.
+Implemented using C<setitimer()> if available, C<ualarm()> if not.
+The C<$interval_floating_seconds> argument is optional and will be
+zero if unspecified, resulting in C<alarm()>-like behaviour.  This
+function can be imported, resulting in a nice drop-in replacement for
+the C<alarm> provided with perl, see the L</EXAMPLES> below.
+
+Returns the remaining time in the alarm in seconds, or C<undef>
+if an error occurred.
 
 B<NOTE 1>: With some combinations of operating systems and Perl
 releases C<SIGALRM> restarts C<select()>, instead of interrupting it.
@@ -528,6 +535,15 @@ You tried to use a negative time argument.
 Something went horribly wrong-- the number of microseconds that cannot
 become negative just became negative.  Maybe your compiler is broken?
 
+=head2 useconds or uinterval equal to or more than 1000000
+
+In some platforms it is not possible to get an alarm with subsecond
+resolution and later than one second.
+
+=head2 unimplemented in this platform
+
+Some calls simply aren't available, real or emulated, on every platform.
+
 =head1 CAVEATS
 
 Notice that the core C<time()> maybe rounding rather than truncating.
@@ -563,7 +579,8 @@ G. Aas <gisle@aas.no>
 
 Copyright (c) 1996-2002 Douglas E. Wegscheid.  All rights reserved.
 
-Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007 Jarkko Hietaniemi.  All rights reserved.
+Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008 Jarkko Hietaniemi.
+All rights reserved.
 
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
