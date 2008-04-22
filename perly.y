@@ -275,7 +275,7 @@ else	:	/* NULL */
 			}
 	|	ELSIF '(' mexpr ')' mblock else
 			{ PL_parser->copline = (line_t)IVAL($1);
-			    $$ = newCONDOP(0, $3, scope($5), $6);
+			    $$ = newCONDOP(0, newSTATEOP(OPf_SPECIAL,NULL,$3), scope($5), $6);
 			    PL_hints |= HINT_BLOCK_SCOPE;
 			  TOKEN_GETMAD($1,$$,'I');
 			  TOKEN_GETMAD($2,$$,'(');
