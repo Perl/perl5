@@ -4,7 +4,7 @@ BEGIN {
     require "test.pl";
 }
 
-plan tests => 4784;
+plan tests => 4876;
 
 sub MyUniClass {
   <<END;
