@@ -7,9 +7,10 @@ use File::Basename;
 use File::Spec;
 
 use ExtUtils::CBuilder::Base;
+use IO::File;
 
 use vars qw($VERSION @ISA);
-$VERSION = '0.22';
+$VERSION = '0.23';
 @ISA = qw(ExtUtils::CBuilder::Base);
 
 sub new {
@@ -41,6 +42,16 @@ sub split_like_shell {
   return @$_ if defined() && UNIVERSAL::isa($_, 'ARRAY');
   return unless defined() && length();
   return ($_);
+}
+
+sub do_system {
+  # See above
+  my $self = shift;
+  my $cmd = join(" ",
+		 grep length,
+		 map {$a=$_;$a=~s/\t/ /g;$a=~s/^\s+|\s+$//;$a}
+		 grep defined, @_);
+  return $self->SUPER::do_system($cmd);
 }
 
 sub arg_defines {
@@ -282,17 +293,15 @@ sub write_compiler_script {
   $self->add_to_cleanup($script);
   print "Generating script '$script'\n" if !$self->{quiet};
 
-  open( SCRIPT, ">$script" )
+  my $SCRIPT = IO::File->new( ">$script" )
     or die( "Could not create script '$script': $!" );
 
-  print SCRIPT join( "\n",
+  print $SCRIPT join( "\n",
     map { ref $_ ? @{$_} : $_ }
     grep defined,
     delete(
       @spec{ qw(includes cflags optimize defines perlinc) } )
   );
-
-  close SCRIPT;
 
   push @{$spec{includes}}, '@"' . $script . '"';
 
@@ -355,10 +364,10 @@ sub write_linker_script {
 
   print "Generating script '$script'\n" if !$self->{quiet};
 
-  open( SCRIPT, ">$script" )
+  my $SCRIPT = IO::File->new( ">$script" )
     or die( "Could not create script '$script': $!" );
 
-  print SCRIPT join( "\n",
+  print $SCRIPT join( "\n",
     map { ref $_ ? @{$_} : $_ }
     grep defined,
     delete(
@@ -366,8 +375,6 @@ sub write_linker_script {
                 startup objects libperl perllibs
                 def_file implib map_file)            } )
   );
-
-  close SCRIPT;
 
   push @{$spec{lddlflags}}, '@"' . $script . '"';
 
@@ -412,7 +419,7 @@ sub write_compiler_script {
 
   print "Generating script '$script'\n" if !$self->{quiet};
 
-  open( SCRIPT, ">$script" )
+  my $SCRIPT = IO::File->new( ">$script" )
     or die( "Could not create script '$script': $!" );
 
   # XXX Borland "response files" seem to be unable to accept macro
@@ -420,14 +427,12 @@ sub write_compiler_script {
   # backslash doesn't work, and any level of quotes are stripped. The
   # result is is a floating point number in the source file where a
   # string is expected. So we leave the macros on the command line.
-  print SCRIPT join( "\n",
+  print $SCRIPT join( "\n",
     map { ref $_ ? @{$_} : $_ }
     grep defined,
     delete(
       @spec{ qw(includes cflags optimize perlinc) } )
   );
-
-  close SCRIPT;
 
   push @{$spec{includes}}, '@"' . $script . '"';
 
@@ -478,28 +483,24 @@ sub write_linker_script {
   print "Generating scripts '$ld_script' and '$ld_libs'.\n" if !$self->{quiet};
 
   # Script 1: contains options & names of object files.
-  open( LD_SCRIPT, ">$ld_script" )
+  my $LD_SCRIPT = IO::File->new( ">$ld_script" )
     or die( "Could not create linker script '$ld_script': $!" );
 
-  print LD_SCRIPT join( " +\n",
+  print $LD_SCRIPT join( " +\n",
     map { @{$_} }
     grep defined,
     delete(
       @spec{ qw(lddlflags libpath other_ldflags startup objects) } )
   );
 
-  close LD_SCRIPT;
-
   # Script 2: contains name of libs to link against.
-  open( LD_LIBS, ">$ld_libs" )
+  my $LD_LIBS = IO::File->new( ">$ld_libs" )
     or die( "Could not create linker script '$ld_libs': $!" );
 
-  print LD_LIBS join( " +\n",
+  print $LD_LIBS join( " +\n",
      (delete $spec{libperl}  || ''),
     @{delete $spec{perllibs} || []},
   );
-
-  close LD_LIBS;
 
   push @{$spec{lddlflags}}, '@"' . $ld_script  . '"';
   push @{$spec{perllibs}},  '@"' . $ld_libs    . '"';
@@ -622,31 +623,29 @@ sub write_linker_script {
 
   print "Generating script '$script'\n" if !$self->{quiet};
 
-  open( SCRIPT, ">$script" )
+  my $SCRIPT = IO::File->new( ">$script" )
     or die( "Could not create script '$script': $!" );
 
-  print( SCRIPT 'SEARCH_DIR(' . $_ . ")\n" )
+  print $SCRIPT ( 'SEARCH_DIR(' . $_ . ")\n" )
     for @{delete $spec{libpath} || []};
 
   # gcc takes only one startup file, so the first object in startup is
   # specified as the startup file and any others are shifted into the
   # beginning of the list of objects.
   if ( $spec{startup} && @{$spec{startup}} ) {
-    print SCRIPT 'STARTUP(' . shift( @{$spec{startup}} ) . ")\n";
+    print $SCRIPT 'STARTUP(' . shift( @{$spec{startup}} ) . ")\n";
     unshift @{$spec{objects}},
       @{delete $spec{startup} || []};
   }
 
-  print SCRIPT 'INPUT(' . join( ',',
+  print $SCRIPT 'INPUT(' . join( ',',
     @{delete $spec{objects}  || []}
   ) . ")\n";
 
-  print SCRIPT 'INPUT(' . join( ' ',
+  print $SCRIPT 'INPUT(' . join( ' ',
      (delete $spec{libperl}  || ''),
     @{delete $spec{perllibs} || []},
   ) . ")\n";
-
-  close SCRIPT;
 
   push @{$spec{other_ldflags}}, '"' . $script . '"';
 
