@@ -151,10 +151,6 @@ Restrict unsafe operations when compiling
 
 Package for overloading Perl operations
 
-=item parent
-
-Establish an ISA relationship with base classes at compile time
-
 =item re
 
 Alter regular expression behaviour
@@ -224,14 +220,6 @@ don't have the gdbm library.
 =item AnyDBM_File
 
 Provide framework for multiple DBMs
-
-=item App::Prove
-
-Implements the C<prove> command.
-
-=item App::Prove::State
-
-State storage for the C<prove> command.
 
 =item Archive::Extract
 
@@ -1669,118 +1657,6 @@ Perl interface to the UNIX syslog(3) calls
 
 Win32 support for Sys::Syslog
 
-=item TAP::Base
-
-Base class that provides common functionality to L<TAP::Parser> and L<TAP::Harness>
-
-=item TAP::Formatter::Color
-
-Run Perl test scripts with color
-
-=item TAP::Formatter::Console
-
-Harness output delegate for default console output
-
-=item TAP::Formatter::Console::ParallelSession
-
-Harness output delegate for parallel console output
-
-=item TAP::Formatter::Console::Session
-
-Harness output delegate for default console output
-
-=item TAP::Harness
-
-Run test scripts with statistics
-
-=item TAP::Parser
-
-Parse L<TAP|Test::Harness::TAP> output
-
-=item TAP::Parser::Aggregator
-
-Aggregate TAP::Parser results
-
-=item TAP::Parser::Grammar
-
-A grammar for the Test Anything Protocol.
-
-=item TAP::Parser::Iterator
-
-Internal TAP::Parser Iterator
-
-=item TAP::Parser::Iterator::Array
-
-Internal TAP::Parser Iterator
-
-=item TAP::Parser::Iterator::Process
-
-Internal TAP::Parser Iterator
-
-=item TAP::Parser::Iterator::Stream
-
-Internal TAP::Parser Iterator
-
-=item TAP::Parser::Multiplexer
-
-Multiplex multiple TAP::Parsers
-
-=item TAP::Parser::Result
-
-TAP::Parser output
-
-=item TAP::Parser::Result::Bailout
-
-Bailout result token.
-
-=item TAP::Parser::Result::Comment
-
-Comment result token.
-
-=item TAP::Parser::Result::Plan
-
-Plan result token.
-
-=item TAP::Parser::Result::Pragma
-
-TAP pragma token.
-
-=item TAP::Parser::Result::Test
-
-Test result token.
-
-=item TAP::Parser::Result::Unknown
-
-Unknown result token.
-
-=item TAP::Parser::Result::Version
-
-TAP syntax version token.
-
-=item TAP::Parser::Result::YAML
-
-YAML result token.
-
-=item TAP::Parser::Source
-
-Stream output from some source
-
-=item TAP::Parser::Source::Perl
-
-Stream Perl output
-
-=item TAP::Parser::Utils
-
-Internal TAP::Parser utilities
-
-=item TAP::Parser::YAMLish::Reader
-
-Read YAMLish data from iterator
-
-=item TAP::Parser::YAMLish::Writer
-
-Write YAMLish data
-
 =item Term::ANSIColor
 
 Color screen output using ANSI escape sequences
@@ -1824,6 +1700,34 @@ Turn on colour in Test::Builder::Tester
 =item Test::Harness
 
 Run Perl standard test scripts with statistics
+
+=item Test::Harness::Assert
+
+Simple assert
+
+=item Test::Harness::Iterator
+
+Internal Test::Harness Iterator
+
+=item Test::Harness::Point
+
+Object for tracking a single test point
+
+=item Test::Harness::Results
+
+Object for tracking results from a single test file
+
+=item Test::Harness::Straps
+
+Detailed analysis of test results
+
+=item Test::Harness::TAP
+
+Documentation for the TAP format
+
+=item Test::Harness::Util
+
+Utility functions for Test::Harness::*
 
 =item Test::More
 
