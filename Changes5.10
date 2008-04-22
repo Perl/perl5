@@ -2508,7 +2508,7 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 32144] By: rgs				   on 2007/10/19  10:32:39
 	Log: Subject: Re: [Diff] perlxstut.pod
-	     From: =?ISO-8859-1?Q?Ren=E9e_B=E4cker?= <renee.baecker@smart-websolutions.de>
+	     From: Renée Bäcker <renee.baecker@smart-websolutions.de>
 	     Date: Fri, 12 Oct 2007 10:29:50 +0200
 	     Message-ID: <470F307E.1030804@smart-websolutions.de>
      Branch: perl
@@ -3802,7 +3802,7 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 31960] By: rgs				   on 2007/09/25  08:37:13
 	Log: Subject: [patch] Dual-lifing constant.pm
-	     From: =?ISO-8859-1?Q?S=E9bastien_Aperghis-Tramoni?= <maddingue@free.fr>
+	     From: Sébastien Aperghis-Tramoni <maddingue@free.fr>
 	     Date: Tue, 25 Sep 2007 02:11:46 +0200
 	     Message-Id: <454B4D1C-48EE-4CA3-834A-A0F872C9E5FC@free.fr>
      Branch: perl
@@ -78943,7 +78943,7 @@ ____________________________________________________________________________
 [ 18750] By: hv					   on 2003/02/19  00:53:03
 	Log: more complex assertions activation:
 	     Subject: Re: Did the assertion patch/feature submission get overlooked?
-	     From: =?ISO-8859-1?Q?Salvador_Fandi=F1o?= <sfandino@yahoo.com>
+	     From: Salvador Fandiño <sfandino@yahoo.com>
 	     Date: Tue, 18 Feb 2003 19:24:13 +0000
 	     Message-ID: <3E52885D.5060903@yahoo.com>
      Branch: perl
@@ -79003,7 +79003,7 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 18739] By: hv					   on 2003/02/18  01:04:01
 	Log: Subject: Re: Did the assertion patch/feature submission get overlooked?
-	     From: =?ISO-8859-1?Q?Salvador_Fandi=F1o?= <sfandino@yahoo.com>
+	     From: Salvador Fandiño <sfandino@yahoo.com>
 	     Date: Mon, 17 Feb 2003 23:38:05 +0000
 	     Message-ID: <3E51725D.5060303@yahoo.com>
      Branch: perl
@@ -79082,7 +79082,7 @@ ____________________________________________________________________________
 [ 18727] By: hv					   on 2003/02/16  13:55:10
 	Log: add support for assertions. Updated form of:
 	     Subject: Re: Did the assertion patch/feature submission get overlooked?
-	     From: Salvador =?ISO-8859-1?Q?Fandi=F1o?= <sfandino@yahoo.com>
+	     From: Salvador Fandiño <sfandino@yahoo.com>
 	     Date: Sat, 30 Nov 2002 17:24:09 +0000
 	     Message-ID: <3DE8F439.50402@yahoo.com>
      Branch: perl
@@ -83784,7 +83784,7 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 17838] By: hv					   on 2002/09/04  13:41:27
 	Log: Subject: [PATCHes] Still no working Berkeley DB in OS X 10.2
-	     From: =?ISO-8859-1?Q?Kay_R=F6pke?= <kay@dolphin-services.de>
+	     From: Kay Röpke <kay@dolphin-services.de>
 	     Date: Tue, 3 Sep 2002 13:46:18 +0200
 	     Message-Id: <C287A20E-BF32-11D6-A454-000393414688@dolphin-services.de>
      Branch: perl

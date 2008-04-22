@@ -420,11 +420,11 @@ code, but none can definitively conceal it (this is true of every
 language, not just Perl).
 
 If you're concerned about people profiting from your code, then the
-bottom line is that nothing but a restrictive licence will give you
+bottom line is that nothing but a restrictive license will give you
 legal security.  License your software and pepper it with threatening
 statements like "This is unpublished proprietary software of XYZ Corp.
 Your access to it does not give you permission to use it blah blah
-blah."  You should see a lawyer to be sure your licence's wording will
+blah."  You should see a lawyer to be sure your license's wording will
 stand up in court.
 
 =head2 Unicode
@@ -496,15 +496,14 @@ Perl running out of memory.
 
 Sorting - the quicksort algorithm used in Perls before 5.8.0 to
 implement the sort() function is very easy to trick into misbehaving
-so that it consumes a lot of time.  Nothing more is required than
-resorting a list already sorted.  Starting from Perl 5.8.0 a different
-sorting algorithm, mergesort, is used.  Mergesort is insensitive to
-its input data, so it cannot be similarly fooled.
+so that it consumes a lot of time.  Starting from Perl 5.8.0 a different
+sorting algorithm, mergesort, is used by default.  Mergesort cannot
+misbehave on any input.
 
 =back
 
 See L<http://www.cs.rice.edu/~scrosby/hash/> for more information,
-and any computer science textbook on the algorithmic complexity.
+and any computer science textbook on algorithmic complexity.
 
 =head1 SEE ALSO
 

@@ -1620,6 +1620,22 @@ normally you I<would> like to use double quotes, except that in this
 particular situation, you can just use symbolic references instead, as
 in case 6.
 
+The assignment to C<$@> occurs before restoration of localised variables,
+which means a temporary is required if you want to mask some but not all
+errors:
+
+    # alter $@ on nefarious repugnancy only
+    {
+       my $e;
+       {
+          local $@; # protect existing $@
+          eval { test_repugnancy() };
+          # $@ =~ /nefarious/ and die $@; # DOES NOT WORK
+          $@ =~ /nefarious/ and $e = $@;
+       }
+       die $e if defined $e
+    }
+
 C<eval BLOCK> does I<not> count as a loop, so the loop control statements
 C<next>, C<last>, or C<redo> cannot be used to leave or restart the block.
 
@@ -5088,6 +5104,10 @@ It's also a more insistent form of close because it also
 disables the file descriptor in any forked copies in other
 processes.
 
+Returns C<1> for success. In the case of error, returns C<undef> if
+the first argument is not a valid filehandle, or returns C<0> and sets
+C<$!> for any other failure.
+
 =item sin EXPR
 X<sin> X<sine> X<asin> X<arcsine>
 
@@ -5587,8 +5607,8 @@ to take the arguments out of order, e.g.:
 
 one or more of:
 
-   space   prefix positive number with a space
-   +       prefix positive number with a plus sign
+   space   prefix non-negative number with a space
+   +       prefix non-negative number with a plus sign
    -       left-justify within the field
    0       use zeros, not spaces, to right-justify
    #       ensure the leading "0" for any octal,

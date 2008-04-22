@@ -408,7 +408,7 @@ Recommended books on (or mostly on) Perl follow.
 	by Richard Foley with Andy Lester
 	ISBN 1-59059-454-1 [1st edition July 2005]
 	http://www.apress.com/book/view/1590594541
-	
+
 =back
 
 =head2 Which magazines have Perl content?

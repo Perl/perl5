@@ -12,7 +12,7 @@ into nine major sections outlined in this document.
 
 The perlfaq comes with the standard Perl distribution, so if you have Perl
 you should have the perlfaq. You should also have the C<perldoc> tool
-that let's you read the L<perlfaq>:
+that lets you read the L<perlfaq>:
 
 	$ perldoc perlfaq
 

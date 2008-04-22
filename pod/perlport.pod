@@ -1259,7 +1259,8 @@ names, because the VOS port of Perl interprets it as a pathname
 delimiting character, VOS files, directories, or links whose names
 contain a slash character cannot be processed.  Such files must be
 renamed before they can be processed by Perl.  Note that VOS limits
-file names to 32 or fewer characters.
+file names to 32 or fewer characters, file names cannot start with a
+C<-> character, or contain any character matching C<< tr/ !%&'()*+;<>?// >>
 
 The value of C<$^O> on VOS is "VOS".  To determine the architecture that
 you are running on without resorting to loading all of C<%Config> you
