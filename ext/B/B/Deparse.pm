@@ -21,7 +21,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED),
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : 'RXf_SKIPWHITE');
-$VERSION = 0.85;
+$VERSION = 0.87;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -1456,6 +1456,7 @@ sub declare_hints {
 my %ignored_hints = (
     'open<' => 1,
     'open>' => 1,
+    ':'     => 1,
     'v_string' => 1,
     );
 
@@ -4596,9 +4597,7 @@ programs.
 Create an object to store the state of a deparsing operation and any
 options. The options are the same as those that can be given on the
 command line (see L</OPTIONS>); options that are separated by commas
-after B<-MO=Deparse> should be given as separate strings. Some
-options, like B<-u>, don't make sense for a single subroutine, so
-don't pass them.
+after B<-MO=Deparse> should be given as separate strings.
 
 =head2 ambient_pragmas
 
