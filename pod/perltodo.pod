@@ -924,17 +924,18 @@ This code
     } elsif ($undef == 0) {
     }
 
-produces this output
+used to produce this output:
 
     Use of uninitialized value in numeric eq (==) at wrong.pl line 4.
     Use of uninitialized value in numeric eq (==) at wrong.pl line 4.
 
-Clearly the line of the second warning is misreported - it should be line 5.
-
-The problem arises because there is no nextstate op between the execution of
-the C<if> and the C<elsif>, hence C<PL_curcop> still reports that the currently
-executing line is line 4. The solution might be to inject (somehow) more
-nextstate ops, one for each C<elsif>.
+where the line of the second warning was misreported - it should be line 5.
+Rafael fixed this - the problem arose because there was no nextstate OP
+between the execution of the C<if> and the C<elsif>, hence C<PL_curcop> still
+reports that the currently executing line is line 4. The solution was to inject
+a nextstate OPs for each C<elsif>, although it turned out that the nextstate
+OP needed to be a nulled OP, rather than a live nextstate OP, else other line
+numbers became misreported. (Jenga!)
 
 The problem is more general than C<elsif> (although the C<elsif> case is the
 most common and the most confusing). Ideally this code
@@ -967,6 +968,9 @@ control on to the true op. All ops would then be replaced by variants that
 do not store the line number. (Which, logically, why it would work best in
 conjunction with L</repack the optree>, as that is already copying/reallocating
 all the OPs)
+
+(Although I should note that we're not certain that doing this for the general
+case is worth it)
 
 =head2 optimize tail-calls
 
