@@ -1771,7 +1771,7 @@ break;
 case 23:
 #line 229 "perly.y"
 { PL_copline = (line_t)yyvsp[-5].ival;
-			    yyval.opval = newCONDOP(0, yyvsp[-3].opval, scope(yyvsp[-1].opval), yyvsp[0].opval);
+			    yyval.opval = newCONDOP(0, newSTATEOP(OPf_SPECIAL,NULL,yyvsp[-3].opval), scope(yyvsp[-1].opval), yyvsp[0].opval);
 			    PL_hints |= HINT_BLOCK_SCOPE; }
 break;
 case 24:

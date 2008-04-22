@@ -227,7 +227,7 @@ else	:	/* NULL */
 			{ ($2)->op_flags |= OPf_PARENS; $$ = scope($2); }
 	|	ELSIF '(' mexpr ')' mblock else
 			{ PL_copline = (line_t)$1;
-			    $$ = newCONDOP(0, $3, scope($5), $6);
+			    $$ = newCONDOP(0, newSTATEOP(OPf_SPECIAL,NULL,$3), scope($5), $6);
 			    PL_hints |= HINT_BLOCK_SCOPE; }
 	;
 

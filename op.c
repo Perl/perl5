@@ -3712,6 +3712,8 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 	}
     }
 
+    if (flags & OPf_SPECIAL)
+	op_null((OP*)cop);
     return prepend_elem(OP_LINESEQ, (OP*)cop, o);
 }
 
