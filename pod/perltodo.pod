@@ -542,6 +542,81 @@ These tasks would need C knowledge, and roughly the level of knowledge of
 the perl API that comes from writing modules that use XS to interface to
 C.
 
+=head2 safely supporting POSIX SA_SIGINFO
+
+Some years ago Jarkko supplied patches to provide support for the POSIX
+SA_SIGINFO feature in Perl, passing the extra data to the Perl signal handler.
+
+Unfortunately, it only works with "unsafe" signals, because under safe
+signals, by the time Perl gets to run the signal handler, the extra
+information has been lost. Moreover, it's not easy to store it somewhere,
+as you can't call mutexs, or do anything else fancy, from inside a signal
+handler.
+
+So it strikes me that we could provide safe SA_SIGINFO support
+
+=over 4
+
+=item 1
+
+Provide global variables for two file descriptors
+
+=item 2
+
+When the first request is made via C<sigaction> for C<SA_SIGINFO>, create a
+pipe, store the reader in one, the writer in the other
+
+=item 3
+
+In the "safe" signal handler (C<Perl_csighandler()>/C<S_raise_signal()>), if
+the C<siginfo_t> pointer non-C<NULL>, and the writer file handle is open,
+
+=over 8
+
+=item 1
+
+serialise signal number, C<struct siginfo_t> (or at least the parts we care
+about) into a small auto char buff
+
+=item 2
+
+C<write()> that (non-blocking) to the writer fd
+
+=over 12
+
+=item 1
+
+if it writes 100%, flag the signal in a counter of "signals on the pipe" akin
+to the current per-signal-number counts
+
+=item 2
+
+if it writes 0%, assume the pipe is full. Flag the data as lost?
+
+=item 3
+
+if it writes partially, croak a panic, as your OS is broken.
+
+=back
+
+=back
+
+=item 4
+
+in the regular C<PERL_ASYNC_CHECK()> processing, if there are "signals on
+the pipe", read the data out, deserialise, build the Perl structures on
+the stack (code in C<Perl_sighandler()>, the "unsafe" handler), and call as
+usual.
+
+=back
+
+I think that this gets us decent C<SA_SIGINFO> support, without the current risk
+of running Perl code inside the signal handler context. (With all the dangers
+of things like C<malloc> corruption that that currently offers us)
+
+For more information see the thread starting with this message:
+http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2008-03/msg00305.html
+
 =head2 autovivification
 
 Make all autovivification consistent w.r.t LVALUE/RVALUE and strict/no strict;
