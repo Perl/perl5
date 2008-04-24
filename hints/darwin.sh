@@ -212,7 +212,9 @@ EOM
      exit 1
   ;;
 *)
-    cat <<EOM >&4
+    case "$osvers" in
+    8.*)
+        cat <<EOM >&4
 
 
 
@@ -224,6 +226,13 @@ EOM
 ***    ext/threads/shared/t/wait (threaded builds only)
 
 EOM
+
+        [ "$d_msgctl" ] || d_msgctl='undef'
+        [ "$d_semctl" ] || d_semctl='undef'
+        [ "$d_shmctl" ] || d_shmctl='undef'
+    ;;
+    esac
+
     case `uname -p` in 
     powerpc) arch=ppc64 ;;
     i386) arch=x86_64 ;;
@@ -239,9 +248,6 @@ EOM
        eval $var="\$${var}\ -arch\ $arch"
     done
 
-    [ "$d_msgctl" ] || d_msgctl='undef'
-    [ "$d_semctl" ] || d_semctl='undef'
-    [ "$d_shmctl" ] || d_shmctl='undef'
     ;;
 esac
 ;;
