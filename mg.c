@@ -1294,8 +1294,6 @@ Perl_csighandler(int sig)
 #else
     dTHX;
 #endif
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-#endif
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
     (void) rsignal(sig, PL_csighandlerp);
     if (PL_sig_ignoring[sig]) return;
@@ -1307,8 +1305,6 @@ Perl_csighandler(int sig)
 #else
             exit(1);
 #endif
-#endif
-#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 #endif
     if (
 #ifdef SIGILL

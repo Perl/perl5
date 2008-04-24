@@ -14,8 +14,10 @@ BEGIN {
 	print "1..0 # Skip: no /dev/null\n";
 	exit 0;
     }
-    if (!-c "/dev/tty") {
-	print "1..0 # Skip: no /dev/tty\n";
+my $dev_tty = '/dev/tty';
+   $dev_tty = 'TT:' if ($^O eq 'VMS');
+    if (!-c $dev_tty) {
+	print "1..0 # Skip: no $dev_tty\n";
 	exit 0;
     }
 }
