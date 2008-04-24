@@ -196,8 +196,8 @@ esac
 EOCBU
 
 # 64-bit addressing support. Currently strictly experimental. DFD 2005-06-06
-if [ "$use64bitall" ]
-then
+case "$use64bitall" in
+$define|true|[yY]*)
 case "$osvers" in
 [1-7].*)
      cat <<EOM >&4
@@ -206,7 +206,7 @@ case "$osvers" in
 
 *** 64-bit addressing is not supported for Mac OS X versions
 *** below 10.4 ("Tiger") or Darwin versions below 8. Please try
-*** again without -D64bitall. (-D64bitint will work, however.)
+*** again without -Duse64bitall. (-Duse64bitint will work, however.)
 
 EOM
      exit 1
@@ -244,7 +244,8 @@ EOM
     [ "$d_shmctl" ] || d_shmctl='undef'
     ;;
 esac
-fi
+;;
+esac
 
 ##
 # System libraries
