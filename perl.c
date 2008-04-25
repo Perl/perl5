@@ -1257,6 +1257,10 @@ perl_destruct(pTHXx)
     }
 #endif
 #endif
+#ifdef DEBUG_LEAKING_SCALARS_ABORT
+    if (PL_sv_count)
+	abort();
+#endif
     PL_sv_count = 0;
 
 #ifdef PERL_DEBUG_READONLY_OPS

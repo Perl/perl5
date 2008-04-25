@@ -5351,6 +5351,9 @@ Perl_sv_free(pTHX_ SV *sv)
   #endif
 #endif
 	}
+#ifdef DEBUG_LEAKING_SCALARS_ABORT
+	abort();
+#endif
 	return;
     }
     if (--(SvREFCNT(sv)) > 0)

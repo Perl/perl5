@@ -4935,18 +4935,6 @@ the version number.
 (W misc) The version string contains invalid characters at the end, which
 are being ignored.
 
-=item v-string in use/require is non-portable
-
-(W portable) The use of v-strings is non-portable to older, pre-5.6, Perls.
-If you want your scripts to be backward portable, use the floating
-point version number: for example, instead of C<use 5.6.1> say
-C<use 5.006_001>. This of course won't make older Perls suddenly start
-understanding newer features, but at least they will show a sensible
-error message indicating the required minimum version.
-
-This warning is suppressed if the C<use 5.x.y> is preceded by a
-C<use 5.006> (see C<use VERSION> in L<perlfunc/use>).
-
 =item Warning: something's wrong
 
 (W) You passed warn() an empty string (the equivalent of C<warn "">) or
