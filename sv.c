@@ -11772,7 +11772,7 @@ S_find_hash_subscript(pTHX_ HV *hv, SV* val)
 		return NULL;
 	    if (HeKLEN(entry) == HEf_SVKEY)
 		return sv_mortalcopy(HeKEY_sv(entry));
-	    return sv_2mortal(newSVpvn(HeKEY(entry), HeKLEN(entry)));
+	    return sv_2mortal(newSVhek(HeKEY_hek(entry)));
 	}
     }
     return NULL;

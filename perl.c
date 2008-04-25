@@ -4971,7 +4971,8 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
 		   SvPOK() won't be true.  */
 		assert(caret_X);
 		assert(SvPOKp(caret_X));
-		prefix_sv = newSVpvn(SvPVX(caret_X), SvCUR(caret_X));
+		prefix_sv = newSVpvn_flags(SvPVX(caret_X), SvCUR(caret_X),
+					   SvUTF8(caret_X));
 		/* Firstly take off the leading .../
 		   If all else fail we'll do the paths relative to the current
 		   directory.  */

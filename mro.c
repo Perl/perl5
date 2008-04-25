@@ -554,19 +554,12 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
         HE *he = hv_fetch_ent(PL_isarev, sv, TRUE, 0);
 
 	/* That fetch should not fail.  But if it had to create a new SV for
-	   us, then we can detect it, because it will not be the correct type.
-	   Probably faster and cleaner for us to free that scalar [very little
-	   code actually executed to free it] and create a new HV than to
-	   copy&paste [SIN!] the code from newHV() to allow us to upgrade the
-	   new SV from SVt_NULL.  */
+	   us, then will need to upgrade it to an HV (which sv_upgrade() can
+	   now do for us. */
 
         mroisarev = (HV*)HeVAL(he);
 
-	if(SvTYPE(mroisarev) != SVt_PVHV) {
-	    SvREFCNT_dec(mroisarev);
-	    mroisarev = newHV();
-	    HeVAL(he) = (SV *)mroisarev;
-        }
+	SvUPGRADE((SV*)mroisarev, SVt_PVHV);
 
 	/* This hash only ever contains PL_sv_yes. Storing it over itself is
 	   almost as cheap as calling hv_exists, so on aggregate we expect to
