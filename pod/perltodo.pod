@@ -157,6 +157,15 @@ do so. Test it with older perl releases, and fix the problems you find.
 To make a minimal perl distribution, it's useful to look at
 F<t/lib/commonsense.t>.
 
+=head2 Bundle dual life modules in ext/
+
+For maintenance (and branch merging) reasons, it would be useful to move
+some architecture-independent dual-life modules from lib/ to ext/, if this
+has no negative impact on the build of perl itself.
+
+However, we need to make sure that they are still installed in
+architecture-independent directories by C<make install>.
+
 =head2 Improving C<threads::shared>
 
 Investigate whether C<threads::shared> could share aggregates properly with
