@@ -1348,6 +1348,49 @@ EXPECT
 Use of uninitialized value $c in numeric eq (==) at - line 5.
 Use of uninitialized value $c in numeric eq (==) at - line 5.
 ########
+# TODO long standing bug - conditions of until loops
+use warnings;
+
+my $c;
+my $d;
+until ($c == 1) {
+  # a
+  # few
+  # blank
+  # lines
+  $c = 1 if ++$d == 2;
+}
+EXPECT
+Use of uninitialized value $c in numeric eq (==) at - line 5.
+Use of uninitialized value $c in numeric eq (==) at - line 5.
+########
+# TODO long standing bug - conditions of for loops
+use warnings;
+
+my $c;
+my $d;
+for ($d = 1; $c == 0 && $d; ) {
+  # a
+  # few
+  # blank
+  # lines
+  undef $d;
+}
+
+my $e;
+for ($d = 2; $d > 0; $e = !($c == 0)) {
+  # a
+  # few
+  # blank
+  # lines
+  --$d;
+}
+EXPECT
+Use of uninitialized value $c in numeric eq (==) at - line 5.
+Use of uninitialized value $c in numeric eq (==) at - line 5.
+Use of uninitialized value $c in numeric eq (==) at - line 14.
+Use of uninitialized value $c in numeric eq (==) at - line 14.
+########
 # TODO long standing bug - more general variant of the above problem
 use warnings;
 my $undef;
