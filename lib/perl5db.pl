@@ -6766,9 +6766,10 @@ we go ahead and set C<$console> and C<$tty> to the file indicated.
 
 sub TTY {
 
-    # We can get here with $term undefined, which means that the new
-    # terminal has been created, but we can not switch to it.
-    if ( @_ and !defined($term)) {
+    # With VMS we can get here with $term undefined, so we do not
+    # switch to this terminal.  There may be a better place to make
+    # sure that $term is defined on VMS
+    if ( @_ and ($^O eq 'VMS') and !defined($term) ) {
 	eval { require Term::ReadLine } or die $@;
         if ( !$rl ) {
 	    $term = new Term::ReadLine::Stub 'perldb', $IN, $OUT;
