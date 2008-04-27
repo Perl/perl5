@@ -1,5 +1,8 @@
 Revision history for the Perl extension Win32.
 
+0.36	[2008-04-17]
+	- Add typecasts for Win64 compilation
+
 0.35	[2008-03-31]
 	Integrate changes from bleadperl:
 	- Silence Borland compiler warning (Steve Hay)
