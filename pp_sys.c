@@ -762,8 +762,12 @@ PP(pp_binmode)
 
     PUTBACK;
     {
-	const int mode = mode_from_discipline(discp);
-	const char *const d = (discp ? SvPV_nolen_const(discp) : NULL);
+	STRLEN len = 0;
+	const char *d = NULL;
+	int mode;
+	if (discp)
+	    d = SvPV_const(discp, len);
+	mode = mode_from_discipline(d, len);
 	if (PerlIO_binmode(aTHX_ fp, IoTYPE(io), mode, d)) {
 	    if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {
 		if (!PerlIO_binmode(aTHX_ IoOFP(io), IoTYPE(io), mode, d)) {

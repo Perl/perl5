@@ -1125,7 +1125,6 @@ Use of uninitialized value $m1 in sysopen at - line 16.
 Use of uninitialized value $m1 in umask at - line 19.
 Use of uninitialized value $g1 in umask at - line 20.
 Use of uninitialized value $m1 in binmode at - line 23.
-Use of uninitialized value $m1 in binmode at - line 23.
 ########
 use warnings 'uninitialized';
 my ($m1);

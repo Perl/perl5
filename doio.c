@@ -1096,12 +1096,10 @@ Perl_do_sysseek(pTHX_ GV *gv, Off_t pos, int whence)
 }
 
 int
-Perl_mode_from_discipline(pTHX_ SV *discp)
+Perl_mode_from_discipline(pTHX_ const char *s, STRLEN len)
 {
     int mode = O_BINARY;
-    if (discp) {
-	STRLEN len;
-	const char *s = SvPV_const(discp,len);
+    if (s) {
 	while (*s) {
 	    if (*s == ':') {
 		switch (s[1]) {

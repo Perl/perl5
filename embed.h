@@ -2801,7 +2801,7 @@
 #define mod(a,b)		Perl_mod(aTHX_ a,b)
 #endif
 #ifdef PERL_CORE
-#define mode_from_discipline(a)	Perl_mode_from_discipline(aTHX_ a)
+#define mode_from_discipline(a,b)	Perl_mode_from_discipline(aTHX_ a,b)
 #endif
 #define moreswitches(a)		Perl_moreswitches(aTHX_ a)
 #ifdef PERL_CORE

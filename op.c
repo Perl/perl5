@@ -7415,7 +7415,9 @@ Perl_ck_open(pTHX_ OP *o)
     if (table) {
 	SV **svp = hv_fetchs(table, "open_IN", FALSE);
 	if (svp && *svp) {
-	    const I32 mode = mode_from_discipline(*svp);
+	    STRLEN len = 0;
+	    const char *d = SvPV_const(*svp, len);
+	    const I32 mode = mode_from_discipline(d, len);
 	    if (mode & O_BINARY)
 		o->op_private |= OPpOPEN_IN_RAW;
 	    else if (mode & O_TEXT)
@@ -7424,7 +7426,9 @@ Perl_ck_open(pTHX_ OP *o)
 
 	svp = hv_fetchs(table, "open_OUT", FALSE);
 	if (svp && *svp) {
-	    const I32 mode = mode_from_discipline(*svp);
+	    STRLEN len = 0;
+	    const char *d = SvPV_const(*svp, len);
+	    const I32 mode = mode_from_discipline(d, len);
 	    if (mode & O_BINARY)
 		o->op_private |= OPpOPEN_OUT_RAW;
 	    else if (mode & O_TEXT)
