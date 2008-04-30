@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 
     eval { require AnyDBM_File }; # not all places have dbm* functions
-      skip_all("No dbm functions: $@") if $@;
+    skip_all("No dbm functions") if $@;
 }
 
 plan tests => 4;

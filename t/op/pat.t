@@ -2054,6 +2054,7 @@ sub ok ($;$) {
 
 sub skip {
     my $why = shift;
+    $why =~ s/\n.*//s;
     my $n    = @_ ? shift : 1;
     for (1..$n) {
         print "ok $test # skip: $why\n";
