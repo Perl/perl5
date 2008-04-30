@@ -18,8 +18,8 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.249 2008/03/25 15:17:55 lstein Exp $';
-$CGI::VERSION='3.35';
+$CGI::revision = '$Id: CGI.pm,v 1.251 2008/04/23 13:08:23 lstein Exp $';
+$CGI::VERSION='3.37';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -37,7 +37,12 @@ use constant XHTML_DTD => ['-//W3C//DTD XHTML 1.0 Transitional//EN',
   $TAINTED = substr("$0$^X",0,0);
 }
 
-$MOD_PERL = 0; # no mod_perl by default
+$MOD_PERL            = 0; # no mod_perl by default
+
+#global settings
+$POST_MAX            = -1; # no limit to uploaded files
+$DISABLE_UPLOADS     = 0;
+
 @SAVED_SYMBOLS = ();
 
 
@@ -90,13 +95,6 @@ sub initialize_globals {
     # Also, for performance, since the file is already on disk,
     # it can just be renamed, instead of read and written.
     $CLOSE_UPLOAD_FILES = 0;
-
-    # Set this to a positive value to limit the size of a POSTing
-    # to a certain number of bytes:
-    $POST_MAX = -1;
-
-    # Change this to 1 to disable uploads entirely:
-    $DISABLE_UPLOADS = 0;
 
     # Automatically determined -- don't change
     $EBCDIC = 0;
@@ -355,6 +353,7 @@ sub new {
       $self->r(Apache->request) unless $self->r;
       my $r = $self->r;
       $r->register_cleanup(\&CGI::_reset_globals);
+      $self->_setup_symbols(@SAVED_SYMBOLS) if @SAVED_SYMBOLS;
     }
     else {
       # XXX: once we have the new API
@@ -363,6 +362,7 @@ sub new {
       my $r = $self->r;
       $r->subprocess_env unless exists $ENV{REQUEST_METHOD};
       $r->pool->cleanup_register(\&CGI::_reset_globals);
+      $self->_setup_symbols(@SAVED_SYMBOLS) if @SAVED_SYMBOLS;
     }
     undef $NPH;
   }
@@ -3783,7 +3783,7 @@ sub new {
     }
 
     my $self = {LENGTH=>$length,
-		CHUNKED=>!defined $length,
+		CHUNKED=>!$length,
 		BOUNDARY=>$boundary,
 		INTERFACE=>$interface,
 		BUFFER=>'',
