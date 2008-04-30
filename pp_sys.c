@@ -825,7 +825,7 @@ PP(pp_tie)
 	    break;
     }
     items = SP - MARK++;
-    if (sv_isobject(*MARK)) {
+    if (sv_isobject(*MARK)) { /* Calls GET magic. */
 	ENTER;
 	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
@@ -839,10 +839,12 @@ PP(pp_tie)
 	/* Not clear why we don't call call_method here too.
 	 * perhaps to get different error message ?
 	 */
-	stash = gv_stashsv(*MARK, 0);
+	STRLEN len;
+	const char *name = SvPV_nomg_const(*MARK, len);
+	stash = gv_stashpvn(name, len, 0);
 	if (!stash || !(gv = gv_fetchmethod(stash, methname))) {
 	    DIE(aTHX_ "Can't locate object method \"%s\" via package \"%"SVf"\"",
-		 methname, SVfARG(*MARK));
+		 methname, SVfARG(SvOK(*MARK) ? *MARK : &PL_sv_no));
 	}
 	ENTER;
 	PUSHSTACKi(PERLSI_MAGIC);

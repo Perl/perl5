@@ -1138,7 +1138,6 @@ eval { my $x; sysread $m1, $x, $g1 };
 eval { my $x; sysread $m1, $x, $g1, $g2 };
 EXPECT
 Use of uninitialized value $m1 in tie at - line 5.
-Use of uninitialized value $m1 in tie at - line 5.
 Use of uninitialized value $m1 in ref-to-glob cast at - line 7.
 Use of uninitialized value $g1 in read at - line 7.
 Use of uninitialized value $m1 in ref-to-glob cast at - line 8.
