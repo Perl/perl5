@@ -78,6 +78,7 @@ package Maintainers;
 	'tjenness'	=> 'Tim Jenness <tjenness@cpan.org>',
 	'tyemq'		=> 'Tye McQueen <tyemq@cpan.org>',
 	'yves'		=> 'Yves Orton <yves@cpan.org>',
+	'zefram'	=> 'Andrew Main <zefram@cpan.org>',
 	);
 
 # The FILES is either filenames, or glob patterns, or directory
@@ -554,7 +555,7 @@ package Maintainers;
 
         'Math::Complex' =>
                 {
-                'MAINTAINER'    => 'jhi',
+                'MAINTAINER'    => 'zefram',
                 'FILES'         => q[lib/Math/Complex.pm lib/Math/Trig.pm],
                 'CPAN'          => 1,
                 },
@@ -934,7 +935,7 @@ package Maintainers;
 
 	'Time::HiRes' =>
 		{
-		'MAINTAINER'	=> 'jhi',
+		'MAINTAINER'	=> 'zefram',
 		'FILES'		=> q[ext/Time/HiRes],
 		'CPAN'		=> 1,
 		},
