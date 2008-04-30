@@ -2038,7 +2038,7 @@ print "ok 683\n" if @a == 9 && "@a" eq "f o o \n $a $b b a r";
 
 $test = 687;
 
-# Force scalar context on the patern match
+# Force scalar context on the pattern match
 sub ok ($;$) {
     my($ok, $name) = @_;
     my $todo = $TODO ? " # TODO $TODO" : '';
@@ -2050,6 +2050,17 @@ sub ok ($;$) {
 
     $test++;
     return $ok;
+}
+
+sub skip {
+    my $why = shift;
+    my $n    = @_ ? shift : 1;
+    for (1..$n) {
+        print "ok $test # skip: $why\n";
+        $test++;
+    }
+    local $^W = 0;
+    last SKIP;
 }
 
 {
