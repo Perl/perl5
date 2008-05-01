@@ -4617,7 +4617,7 @@ sub kt
 }
 
 SKIP: {
-    if (ordA == 193) { skip("Assumes ASCII", 4) }
+    unless ($ordA == 65) { skip("Assumes ASCII", 4) }
 
     my @notIsPunct = grep {/[[:punct:]]/ and not /\p{IsPunct}/}
 			map {chr} 0x20..0x7f;
