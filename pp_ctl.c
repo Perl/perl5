@@ -3898,6 +3898,13 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	&& (Other = d))	)
 	
 
+#   define SM_OBJECT ( \
+	   (sv_isobject(d) && (!SvMAGICAL(This = SvRV(d))		\
+			    || !mg_find(This, PERL_MAGIC_qr)))		\
+    ||									\
+	   (sv_isobject(e) && (!SvMAGICAL(This = SvRV(e))		\
+			    || !mg_find(This, PERL_MAGIC_qr))) )
+
 #   define SM_OTHER_REF(type) \
 	(SvROK(Other) && SvTYPE(SvRV(Other)) == SVt_##type)
 
@@ -3928,6 +3935,9 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     assert(e);
     if (SvGMAGICAL(e))
 	e = sv_mortalcopy(e);
+
+    if (SM_OBJECT)
+	Perl_croak(aTHX_ "Smart matching a non-overloaded object breaks encapsulation");
 
     if (SM_CV_NEP) {
 	I32 c;
