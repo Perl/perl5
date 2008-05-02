@@ -6,6 +6,9 @@ use Config;
 
 my $PM = 'lib/Digest/SHA.pm';
 
+my $PERL_CORE = 0;
+$PERL_CORE = 1 if grep { $_ eq 'PERL_CORE=1' } @ARGV;
+
 my %opts;
 getopts('tx', \%opts);
 
@@ -31,8 +34,10 @@ my %att = (
 	'LIBS'		=> [''],
 	'DEFINE'	=> $define,
 	'INC'		=> '-I.',
-	'EXE_FILES'	=> [ 'shasum' ],
-	'INSTALLDIRS'	=> ($] >= 5.010) ? 'perl' : 'site',
+	$PERL_CORE ? () : (
+	    'EXE_FILES'		=> [ 'shasum' ],
+	    'INSTALLDIRS'	=> ($] >= 5.010) ? 'perl' : 'site',
+	),
 );
 
 my $MMversion = $ExtUtils::MakeMaker::VERSION || 0;
