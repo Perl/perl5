@@ -4,8 +4,8 @@
 	#
 	# Copyright (C) 2003-2008 Mark Shelor, All Rights Reserved
 	#
-	# Version: 5.46
-	# Wed Apr  9 05:04:00 MST 2008
+	# Version: 5.47
+	# Wed Apr 30 04:00:54 MST 2008
 
 =head1 NAME
 
@@ -74,7 +74,7 @@ use strict;
 use FileHandle;
 use Getopt::Long;
 
-my $VERSION = "5.46";
+my $VERSION = "5.47";
 
 
 	# Try to use Digest::SHA, since it's faster.  If not installed,

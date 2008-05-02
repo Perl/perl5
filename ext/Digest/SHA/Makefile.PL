@@ -1,14 +1,16 @@
-require 5.006000;
+require 5.003000;
 
 use ExtUtils::MakeMaker;
 use Getopt::Std;
 use Config;
 
+my $PM = 'lib/Digest/SHA.pm';
+
 my %opts;
 getopts('tx', \%opts);
 
-my @defines = ('-DSHA_PERL_MODULE');
-
+my @defines;
+push(@defines, '-DSHA_PERL_MODULE') if $] >= 5.004;
 push(@defines, '-DSHA_THREAD_SAFE') if $opts{'t'};
 push(@defines, '-DNO_SHA_384_512')  if $opts{'x'};
 
@@ -23,14 +25,17 @@ if ($Config{archname} =~ /^i[3456]86/) {
 
 my $define = join(' ', @defines);
 
-WriteMakefile(
+my %att = (
 	'NAME'		=> 'Digest::SHA',
-	'VERSION_FROM'	=> 'SHA.pm',
-	'PREREQ_PM'	=> {},
-	'AUTHOR'	=> 'Mark Shelor <mshelor@cpan.org>',
+	'VERSION_FROM'	=> $PM,
 	'LIBS'		=> [''],
-        MAN3PODS        => {},      # Pods will be built by installman.
 	'DEFINE'	=> $define,
 	'INC'		=> '-I.',
-	'NO_META'	=> 1,
+	'EXE_FILES'	=> [ 'shasum' ],
+	'INSTALLDIRS'	=> ($] >= 5.010) ? 'perl' : 'site',
 );
+
+my $MMversion = $ExtUtils::MakeMaker::VERSION || 0;
+$att{NO_META} = 1 unless $MMversion < 6.10_03;
+
+WriteMakefile(%att);
