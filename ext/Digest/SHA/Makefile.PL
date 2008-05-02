@@ -34,10 +34,19 @@ my %att = (
 	'LIBS'		=> [''],
 	'DEFINE'	=> $define,
 	'INC'		=> '-I.',
+>>>> ORIGINAL Makefile.PL#3
+	'EXE_FILES'	=> [ 'shasum' ],
+	'INSTALLDIRS'	=> ($] >= 5.010) ? 'perl' : 'site',
+==== THEIRS Makefile.PL#4
 	$PERL_CORE ? () : (
 	    'EXE_FILES'		=> [ 'shasum' ],
 	    'INSTALLDIRS'	=> ($] >= 5.010) ? 'perl' : 'site',
 	),
+==== YOURS Makefile.PL
+	'MAN3PODS'	=> {},      # Pods will be built by installman.
+	'NO_META'	=> 1,
+	'INSTALLDIRS'	=> ($] >= 5.010) ? 'perl' : 'site',
+<<<<
 );
 
 my $MMversion = $ExtUtils::MakeMaker::VERSION || 0;
