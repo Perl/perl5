@@ -28,7 +28,7 @@ my @more_exe_files = qw(
             );
 my @pmlibdirs = qw(lib Encode);
 
-$ARGV{MORE_SCRIOPTS} and push @exe_files, @more_exe_files;
+$ARGV{MORE_SCRIPTS} and push @exe_files, @more_exe_files;
 $ARGV{INSTALL_UCM}   and push @pmlibdirs, "ucm";
 my @man =  ();
 @man = ( MAN1PODS => {}, MAN3PODS => {} ) if $ENV{PERL_CORE};
