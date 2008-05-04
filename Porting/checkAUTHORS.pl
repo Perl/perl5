@@ -51,6 +51,7 @@ $map {$_} = "?" for
     "ammon\100rhythm.com",
     "bah\100longitude.com",
     "bbucklan\100jpl-devvax.jpl.nasa.gov",
+    "ben\100linuxgazette.net",
     "bilbo\100ua.fm",
     "bob\100starlabs.net",
     "bonefish\100cs.tu-berlin.de",
@@ -66,10 +67,12 @@ $map {$_} = "?" for
     "ilya\100juil.nonet",
     "info\100lingo.kiev.ua",
     "jms\100mathras.comcast.net",
+    "johnh\100isi.edu",
     "kan\100dcit.cz",
     "kaminsky\100math.huji.ac.il",
     "knew-p5p\100pimb.org",
     "kvr\100centrum.cz",
+    "lemkemch\100t-online.de",
     "mauzo\100csv.warwick.ac.uk",
     "merijnb\100ms.com",
     "mlelstv\100serpens.de",
@@ -268,8 +271,10 @@ craigb                                  craig.berry\100psinetcs.com
 +                                       craig.berry\100metamorgs.com
 +                                       craig.berry\100signaltreesolutions.com
 +                                       craigberry\100mac.com
++                                       craig.a.berry\100gmail.com
 davem                                   davem\100fdgroup.com
 +                                       davem\100iabyn.nospamdeletethisbit.com
++                                       davem\100iabyn.com
 +                                       davem\100fdgroup.co.uk
 +                                       davem\100fdisolutions.com
 +                                       davem\100iabyn.com
@@ -320,12 +325,16 @@ stevep                                  steve\100fisharerojo.org
 +                                       dtr8sin02\100sneakemail.com
 +                                       rt8363b02\100sneakemail.com
 +                                       o6hhmk002\100sneakemail.com
++                                       smueller\100cpan.org
++                                       l2ot9pa02\100sneakemail.com
++                                       wyp3rlx02\100sneakemail.com
 
 abe\100ztreet.demon.nl                  abeltje\100cpan.org
 abigail\100abigail.be                   abigail\100foad.org
 +                                       abigail\100abigail.nl
 ajohnson\100nvidia.com                  ajohnson\100wischip.com
 alexm\100netli.com                      alexm\100w-m.ru
+alex-p5p\100earth.li                    alex\100rcon.rog
 alian\100cpan.org                       alian\100alianwebserver.com
 allens\100cpan.org                      easmith\100beatrice.rutgers.edu
 andreas.koenig\100anima.de        andreas.koenig.gmwojprw\100franz.ak.mind.de
@@ -399,9 +408,8 @@ mjtg\100cam.ac.uk                       mjtg\100cus.cam.ac.uk
 
 nospam-abuse\100bloodgate.com           tels\100bloodgate.com
 +                                       perl_dummy\100bloodgate.com
-nospam-abuse\100ilyaz.org               ilya\100math.ohio-state.edu
-+                                       ilya\100math.berkeley.edu
-+                                       ilya\100math.berkeley.edu
+ilya\100math.berkeley.edu               ilya\100math.ohio-state.edu
++                                       nospam-abuse\100ilyaz.org
 
 p5-authors\100crystalflame.net          perl\100crystalflame.net
 +                                       rs\100crystalflame.net
@@ -425,12 +433,13 @@ richard.foley\100ubsw.com               richard.foley\100t-online.de
 +                                       richard.foley\100rfi.net
 rick\100consumercontact.com             rick\100bort.ca
 +                                       rick.delaney\100rogers.com
++                                       rick\100bort.ca
 rjbs\100cpan.org                        rjbs-perl-p5p\100lists.manxome.org
 rjk\100linguist.dartmouth.edu           rjk\100linguist.thayer.dartmouth.edu
 +                                       rjk-perl-p5p\100tamias.net
 rmgiroux\100acm.org                     rmgiroux\100hotmail.com
-robin.barker\100npl.co.uk               rmb1\100cise.npl.co.uk
-+                                       rmbarker\100cpan.org
+rmbarker\100cpan.org                    rmb1\100cise.npl.co.uk
++                                       robin.barker\100npl.co.uk
 rootbeer\100teleport.com                rootbeer\100redcat.com
 
 schubiger\100cpan.org                   steven\100accognoscere.org
@@ -447,7 +456,7 @@ simon\100simon-cozens.org               simon\100pembro4.pmb.ox.ac.uk
 +                                       simon\100cozens.net
 +                                       simon\100netthink.co.uk
 slaven\100rezic.de                      slaven.rezic\100berlin.de
-+                                       (srezic\100iconmobile.com)
++                                       srezic\100iconmobile.com
 smcc\100mit.edu                         smcc\100ocf.berkeley.edu
 +                                       smcc\100csua.berkeley.edu
 spider\100orb.nashua.nh.us              spider\100web.zk3.dec.com
