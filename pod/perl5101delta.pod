@@ -29,9 +29,9 @@ See L<"Modules and Pragmata"> for more information.
 
 =over
 
-=item *
+=item C<feature>
 
-C<feature> the meaning of the C<:5.10> and C<:5.10.X> bundles has
+The meaning of the C<:5.10> and C<:5.10.X> feature bundles has
 changed slightly. The last component, if any (ie C<X>) is simply ignored.
 This is predicated on the assumption that new features will not, in
 general, be added to maintenance releases. So  C<:5.10> and C<:5.10.X>
