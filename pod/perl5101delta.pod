@@ -20,6 +20,13 @@ the L<perl5100delta>, which describes differences between 5.8.8 and
 The semantics of C<use feature :5.10*> have changes slightly.
 See L<"Modules and Pragmata"> for more information.
 
+=item *
+
+It is now a run-time error to use the smart match operator C<~~>
+with an object that has no overload defined for it. (This way
+C<~~> will not break encapsulation by matching against the
+object's internal representation as a reference.)
+
 =back
 
 
