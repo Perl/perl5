@@ -6636,6 +6636,9 @@ Perl_sv_gets(pTHX_ register SV *const sv, register PerlIO *const fp, I32 append)
       I32 bytesread;
       char *buffer;
       U32 recsize;
+#ifdef VMS
+      int fd;
+#endif
 
       /* Grab the size of the record we're getting */
       recsize = SvUV(SvRV(PL_rs)); /* RsRECORD() guarantees > 0. */
@@ -6647,7 +6650,13 @@ Perl_sv_gets(pTHX_ register SV *const sv, register PerlIO *const fp, I32 append)
       /* doing, but we've got no other real choice - except avoid stdio
          as implementation - perhaps write a :vms layer ?
        */
-      bytesread = PerlLIO_read(PerlIO_fileno(fp), buffer, recsize);
+      fd = PerlIO_fileno(fp);
+      if (fd == -1) { /* in-memory file from PerlIO::Scalar */
+          bytesread = PerlIO_read(fp, buffer, recsize);
+      }
+      else {
+          bytesread = PerlLIO_read(fd, buffer, recsize);
+      }
 #else
       bytesread = PerlIO_read(fp, buffer, recsize);
 #endif
