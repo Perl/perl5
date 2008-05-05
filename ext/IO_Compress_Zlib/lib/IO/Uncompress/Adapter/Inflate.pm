@@ -4,11 +4,11 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.009 qw(:Status);
-use Compress::Raw::Zlib  2.009 qw(Z_OK Z_DATA_ERROR Z_STREAM_END Z_FINISH MAX_WBITS);
+use IO::Compress::Base::Common  2.010 qw(:Status);
+use Compress::Raw::Zlib  2.010 qw(Z_OK Z_DATA_ERROR Z_STREAM_END Z_FINISH MAX_WBITS);
 
 our ($VERSION);
-$VERSION = '2.009';
+$VERSION = '2.010';
 
 
 

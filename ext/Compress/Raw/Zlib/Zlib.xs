@@ -64,6 +64,11 @@
 #  include "ppport.h"
 #endif
 
+#if PERL_REVISION == 5 && PERL_VERSION == 9
+    /* For Andreas */
+#   define sv_pvbyte_force(sv,lp) sv_pvbyten_force(sv,lp)
+#endif
+
 #if PERL_REVISION == 5 && (PERL_VERSION < 8 || (PERL_VERSION == 8 && PERL_SUBVERSION < 4 ))
 
 #    ifdef SvPVbyte_force

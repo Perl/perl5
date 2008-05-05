@@ -1,6 +1,11 @@
 CHANGES
 -------
 
+  2.010 5 May 2008
+
+      * Fixed problem that meant Perl 5.10 could not upgrade this module.
+        [RT #35341]
+
   2.009 20 April 2008
 
       * Minor documentation issue with flush.

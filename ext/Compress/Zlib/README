@@ -1,9 +1,9 @@
 
                              Compress-Zlib
 
-                             Version 2.009
+                             Version 2.010
 
-                              20th April 2008
+                               5th May 2008
 
        Copyright (c) 1995-2008 Paul Marquess. All rights reserved.
           This program is free software; you can redistribute it
@@ -106,7 +106,7 @@ To help me help you, I need all of the following information:
         If you haven't installed Compress-Zlib then search Compress::Zlib.pm
         for a line like this:
 
-          $VERSION = "2.009" ;
+          $VERSION = "2.010" ;
 
  2. If you are having problems building Compress-Zlib, send me a
     complete log of what happened. Start by unpacking the Compress-Zlib
