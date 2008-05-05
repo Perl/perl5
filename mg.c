@@ -500,6 +500,7 @@ Perl_mg_free(pTHX_ SV *sv)
 	SvMAGIC_set(sv, moremagic);
     }
     SvMAGIC_set(sv, NULL);
+    SvMAGICAL_off(sv);
     return 0;
 }
 
