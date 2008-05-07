@@ -7,11 +7,14 @@ BEGIN {
     }
 }
 
+use strict;
+use warnings;
+
 use Test::More;
 
 my $TB = Test::More->builder;
 
-plan tests => 70;
+plan tests => 91;
 
 # We're going to override rename() later on but Perl has to see an override
 # at compile time to honor it.
@@ -48,7 +51,7 @@ for my $cross_partition_test (0..1) {
   copy "file-$$", "copy-$$";
 
   open(F, "copy-$$") or die $!;
-  $foo = <F>;
+  my $foo = <F>;
   close(F);
 
   is -s "file-$$", -s "copy-$$", 'copy(fn, fn): files of the same size';
@@ -76,7 +79,7 @@ for my $cross_partition_test (0..1) {
   unlink "copy-$$" or die "unlink: $!";
 
   require IO::File;
-  $fh = IO::File->new(">copy-$$") or die "Cannot open copy-$$:$!";
+  my $fh = IO::File->new(">copy-$$") or die "Cannot open copy-$$:$!";
   binmode $fh or die $!;
   copy("file-$$",$fh);
   $fh->close or die "close: $!";
@@ -85,7 +88,7 @@ for my $cross_partition_test (0..1) {
   unlink "copy-$$" or die "unlink: $!";
 
   require FileHandle;
-  my $fh = FileHandle->new(">copy-$$") or die "Cannot open copy-$$:$!";
+  $fh = FileHandle->new(">copy-$$") or die "Cannot open copy-$$:$!";
   binmode $fh or die $!;
   copy("file-$$",$fh);
   $fh->close;
@@ -220,6 +223,63 @@ for my $cross_partition_test (0..1) {
 
   unlink "file-$$" or die $!;
   unlink "copy-$$" or die $!;
+}
+
+
+{
+    # Just a sub to get better failure messages.
+    sub __ ($) {
+        join "" => map {(qw [--- --x -w- -wx r-- r-x rw- rwx]) [$_]} 
+                   split // => sprintf "%03o" => shift
+    }
+    # Testing permission bits.
+    my $src   = "file-$$";
+    my $copy1 = "copy1-$$";
+    my $copy2 = "copy2-$$";
+    my $copy3 = "copy3-$$";
+
+    open my $fh => ">", $src   or die $!;
+    close   $fh                or die $!;
+
+    open    $fh => ">", $copy3 or die $!;
+    close   $fh                or die $!;
+
+    my @tests = (
+        [0000,  0777,  0777,  0777],
+        [0000,  0751,  0751,  0644],
+        [0022,  0777,  0755,  0206],
+        [0022,  0415,  0415,  0666],
+        [0077,  0777,  0700,  0333],
+        [0027,  0755,  0750,  0251],
+        [0777,  0751,  0000,  0215],
+    );
+    my $old_mask = umask;
+    foreach my $test (@tests) {
+        my ($umask, $s_perm, $c_perm1, $c_perm3) = @$test;
+        # Make sure the copies doesn't exist.
+        ! -e $_ or unlink $_ or die $! for $copy1, $copy2;
+
+       (umask $umask) // die $!;
+        chmod $s_perm  => $src   or die $!;
+        chmod $c_perm3 => $copy3 or die $!;
+
+        open my $fh => "<", $src or die $!;
+
+        copy ($src, $copy1);
+        copy ($fh,  $copy2);
+        copy ($src, $copy3);
+
+        my $perm1 = (stat $copy1) [2] & 0xFFF;
+        my $perm2 = (stat $copy2) [2] & 0xFFF;
+        my $perm3 = (stat $copy3) [2] & 0xFFF;
+        is (__$perm1, __$c_perm1, "Permission bits set correctly");
+        is (__$perm2, __$c_perm1, "Permission bits set correctly");
+        is (__$perm3, __$c_perm3, "Permission bits not modified");
+    }
+    umask $old_mask or die $!;
+
+    # Clean up.
+    ! -e $_ or unlink $_ or die $! for $src, $copy1, $copy2, $copy3;
 }
 
 

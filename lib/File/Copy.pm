@@ -12,6 +12,7 @@ use strict;
 use warnings;
 use File::Spec;
 use Config;
+use Fcntl qw [O_CREAT O_WRONLY O_TRUNC];
 our(@ISA, @EXPORT, @EXPORT_OK, $VERSION, $Too_Big, $Syscopy_is_copy);
 sub copy;
 sub syscopy;
@@ -161,8 +162,6 @@ sub copy {
     if ($from_a_handle) {
        $from_h = $from;
     } else {
-	$from = _protect($from) if $from =~ /^\s/s;
-       $from_h = \do { local *FH };
        open $from_h, "<", $from or goto fail_open1;
        binmode $from_h or die "($!,$^E)";
 	$closefrom = 1;
@@ -181,8 +180,9 @@ sub copy {
        $to_h = $to;
     } else {
 	$to = _protect($to) if $to =~ /^\s/s;
-       $to_h = \do { local *FH };
-       open $to_h, ">", $to or goto fail_open2;
+       my $perm = (stat $from_h) [2] & 0xFFF;
+       sysopen $to_h, $to, O_CREAT | O_TRUNC | O_WRONLY, $perm
+            or goto fail_open2;
        binmode $to_h or die "($!,$^E)";
 	$closeto = 1;
     }
@@ -294,13 +294,6 @@ sub move {
 
 *cp = \&copy;
 *mv = \&move;
-
-
-if ($^O eq 'MacOS') {
-    *_protect = sub { MacPerl::MakeFSSpec($_[0]) };
-} else {
-    *_protect = sub { "./$_[0]" };
-}
 
 # &syscopy is an XSUB under OS/2
 unless (defined &syscopy) {
