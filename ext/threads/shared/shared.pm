@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.18';
+our $VERSION = '1.19';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -73,7 +73,7 @@ threads::shared - Perl extension for sharing data structures between threads
 
 =head1 VERSION
 
-This document describes threads::shared version 1.18
+This document describes threads::shared version 1.19
 
 =head1 SYNOPSIS
 
@@ -362,6 +362,23 @@ error message.  But the C<< $hashref->{key} >> is B<not> shared, causing the
 error "locking can only be used on shared values" to occur when you attempt to
 C<< lock($hasref->{key}) >>.
 
+Using L<refaddr()|Scalar::Util/"refaddr EXPR">) is unreliable for testing
+whether or not two shared references are equivalent (e.g., when testing for
+circular references).  Use L<is_shared()/"is_shared VARIABLE">, instead:
+
+    use threads;
+    use threads::shared;
+    use Scalar::Util qw(refaddr);
+
+    # If ref is shared, use threads::shared's internal ID.
+    # Otherwise, use refaddr().
+    my $addr1 = is_shared($ref1) || refaddr($ref1);
+    my $addr2 = is_shared($ref2) || refaddr($ref2);
+
+    if ($addr1 == $addr2) {
+        # The refs are equivalent
+    }
+
 View existing bug reports at, and submit any new bugs, problems, patches, etc.
 to: L<http://rt.cpan.org/Public/Dist/Display.html?Name=threads-shared>
 
@@ -371,7 +388,7 @@ L<threads::shared> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads-shared>
 
 Annotated POD for L<threads::shared>:
-L<http://annocpan.org/~JDHEDDEN/threads-shared-1.18/shared.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-shared-1.19/shared.pm>
 
 Source repository:
 L<http://code.google.com/p/threads-shared/>
