@@ -712,6 +712,11 @@ sharedsv_scalar_mg_get(pTHX_ SV *sv, MAGIC *mg)
     ENTER_LOCK;
     if (SvROK(ssv)) {
         S_get_RV(aTHX_ sv, ssv);
+        /* Look ahead for refs of refs */
+        if (SvROK(SvRV(ssv))) {
+            SvROK_on(SvRV(sv));
+            S_get_RV(aTHX_ SvRV(sv), SvRV(ssv));
+        }
     } else {
         sv_setsv_nomg(sv, ssv);
     }
@@ -880,9 +885,13 @@ sharedsv_elem_mg_FETCH(pTHX_ SV *sv, MAGIC *mg)
         /* Exists in the array */
         if (SvROK(*svp)) {
             S_get_RV(aTHX_ sv, *svp);
+            /* Look ahead for refs of refs */
+            if (SvROK(SvRV(*svp))) {
+                SvROK_on(SvRV(sv));
+                S_get_RV(aTHX_ SvRV(sv), SvRV(*svp));
+            }
         } else {
-            /* XXX Can this branch ever happen? DAPM */
-            /* XXX assert("no such branch"); */
+            /* $ary->[elem] or $ary->{elem} is a scalar */
             Perl_sharedsv_associate(aTHX_ sv, *svp);
             sv_setsv(sv, *svp);
         }
@@ -1336,6 +1345,8 @@ _id(SV *myref)
         SV *ssv;
     CODE:
         myref = SvRV(myref);
+        if (SvMAGICAL(myref))
+            mg_get(myref);
         if (SvROK(myref))
             myref = SvRV(myref);
         ssv = Perl_sharedsv_find(aTHX_ myref);

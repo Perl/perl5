@@ -79,25 +79,34 @@ use threads::shared;
     # Gather thread results
     my ($okay, $failures, $timeouts, $unknown) = (0, 0, 0, 0);
     for (1..$cnt) {
-        my $rc = $threads[$_]->join();
-        if (! $rc) {
+        if (! $threads[$_]) {
             $failures++;
-        } elsif ($rc =~ /^timed out/) {
-            $timeouts++;
-        } elsif ($rc eq 'okay') {
-            $okay++;
         } else {
-            $unknown++;
-            print(STDERR "# Unknown error: $rc\n");
+            my $rc = $threads[$_]->join();
+            if (! $rc) {
+                $failures++;
+            } elsif ($rc =~ /^timed out/) {
+                $timeouts++;
+            } elsif ($rc eq 'okay') {
+                $okay++;
+            } else {
+                $unknown++;
+                print(STDERR "# Unknown error: $rc\n");
+            }
         }
     }
+    if ($failures) {
+        # Most likely due to running out of memory
+        print(STDERR "# Warning: $failures threads failed\n");
+        print(STDERR "# Note: errno 12 = ENOMEM\n");
+        $cnt -= $failures;
+    }
 
-    if ($failures || $unknown || (($okay + $timeouts) != $cnt)) {
+    if ($unknown || (($okay + $timeouts) != $cnt)) {
         print("not ok 1\n");
-        my $too_few = $cnt - ($okay + $failures + $timeouts + $unknown);
+        my $too_few = $cnt - ($okay + $timeouts + $unknown);
         print(STDERR "# Test failed:\n");
         print(STDERR "#\t$too_few too few threads reported\n") if $too_few;
-        print(STDERR "#\t$failures threads failed\n")          if $failures;
         print(STDERR "#\t$unknown unknown errors\n")           if $unknown;
         print(STDERR "#\t$timeouts threads timed out\n")       if $timeouts;
 

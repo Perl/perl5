@@ -31,7 +31,7 @@ sub ok {
 
 BEGIN {
     $| = 1;
-    print("1..11\n");   ### Number of tests that will be run ###
+    print("1..21\n");   ### Number of tests that will be run ###
 };
 
 use threads;
@@ -73,5 +73,31 @@ threads->create(sub { $t1 = "bar" })->join();
 ok(10,$t1 eq 'bar',"Check that assign to a ROK works");
 
 ok(11, is_shared($foo), "Check for sharing");
+
+{
+    # Circular references with 3 shared scalars
+    my $x : shared;
+    my $y : shared;
+    my $z : shared;
+
+    $x = \$y;
+    $y = \$z;
+    $z = \$x;
+    ok(12, ref($x) eq 'REF', '$x ref type');
+    ok(13, ref($y) eq 'REF', '$y ref type');
+    ok(14, ref($z) eq 'REF', '$z ref type');
+
+    my @q :shared = ($x);
+    ok(15, ref($q[0]) eq 'REF', '$q[0] ref type');
+
+    my $w = $q[0];
+    ok(16, ref($w) eq 'REF', '$w ref type');
+    ok(17, ref($$w) eq 'REF', '$$w ref type');
+    ok(18, ref($$$w) eq 'REF', '$$$w ref type');
+    ok(19, ref($$$$w) eq 'REF', '$$$$w ref type');
+
+    ok(20, is_shared($x) == is_shared($w), '_id($x) == _id($w)');
+    ok(21, is_shared($w) == is_shared($$$$w), '_id($w) == _id($$$$w)');
+}
 
 # EOF
