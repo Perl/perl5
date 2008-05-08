@@ -19,12 +19,7 @@ sub syscopy;
 sub cp;
 sub mv;
 
-# Note that this module implements only *part* of the API defined by
-# the File/Copy.pm module of the File-Tools-2.0 package.  However, that
-# package has not yet been updated to work with Perl 5.004, and so it
-# would be a Bad Thing for the CPAN module to grab it and replace this
-# module.  Therefore, we set this module's version higher than 2.0.
-$VERSION = '2.12';
+$VERSION = '2.13';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -391,6 +386,9 @@ upon the file, but will generally be the whole file (up to 2MB), or
 
 You may use the syntax C<use File::Copy "cp"> to get at the
 "cp" alias for this function. The syntax is I<exactly> the same.
+
+As of version 2.13, on UNIX systems, "copy" will preserve permission
+bits like the shell utility C<cp> would do.
 
 =item move
 X<move> X<mv> X<rename>
