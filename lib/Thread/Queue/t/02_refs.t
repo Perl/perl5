@@ -23,7 +23,7 @@ if ($] == 5.008) {
     require Test::More;
 }
 Test::More->import();
-plan('tests' => 39);
+plan('tests' => 45);
 
 # Regular array
 my @ary1 = qw/foo bar baz/;
@@ -62,6 +62,20 @@ my $baz = \$bar;
 my $qux = \$baz;
 is_deeply($$$$qux, $foo, 'Ref of ref');
 
+# Circular refs
+my $cir1;
+$cir1 = \$cir1;
+
+my $cir1s : shared;
+$cir1s = \$cir1s;
+
+my $cir2;
+$cir2 = [ \$cir2, { 'ref' => \$cir2 } ];
+
+my $cir3 :shared = &share({});
+$cir3->{'self'} = \$cir3;
+bless($cir3, 'Circular');
+
 # Queue up items
 my $q = Thread::Queue->new(\@ary1, \@ary2);
 ok($q, 'New queue');
@@ -70,10 +84,12 @@ $q->enqueue($obj1, $obj2);
 is($q->pending(), 4, 'Queue count');
 $q->enqueue($sref1, $sref2, $qux);
 is($q->pending(), 7, 'Queue count');
+$q->enqueue($cir1, $cir1s, $cir2, $cir3);
+is($q->pending(), 11, 'Queue count');
 
 # Process items in thread
 threads->create(sub {
-    is($q->pending(), 7, 'Queue count in thread');
+    is($q->pending(), 11, 'Queue count in thread');
 
     my $tary1 = $q->dequeue();
     ok($tary1, 'Thread got item');
@@ -118,6 +134,32 @@ threads->create(sub {
 
     my $qux = $q->dequeue();
     is_deeply($$$$qux, $foo, 'Ref of ref');
+
+    my ($c1, $c1s, $c2, $c3) = $q->dequeue(4);
+    SKIP: {
+        skip("Needs threads::shared >= 1.19", 5)
+            if ($threads::shared::VERSION < 1.19);
+
+        is(threads::shared::_id($$c1),
+           threads::shared::_id($c1),
+                'Circular ref - scalar');
+
+        is(threads::shared::_id($$c1s),
+           threads::shared::_id($c1s),
+                'Circular ref - shared scalar');
+
+        is(threads::shared::_id(${$c2->[0]}),
+           threads::shared::_id($c2),
+                'Circular ref - array');
+
+        is(threads::shared::_id(${$c2->[1]->{'ref'}}),
+           threads::shared::_id($c2),
+                'Circular ref - mixed');
+
+        is(threads::shared::_id(${$c3->{'self'}}),
+           threads::shared::_id($c3),
+                'Circular ref - hash');
+    }
 
     is($q->pending(), 0, 'Empty queue');
     my $nothing = $q->dequeue_nb();
