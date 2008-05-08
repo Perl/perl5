@@ -3,6 +3,7 @@
 #include "perl.h"
 #include "XSUB.h"
 #ifdef USE_PPPORT_H
+#  define NEED_my_snprintf
 #  include "ppport.h"
 #endif
 
@@ -191,7 +192,13 @@ esc_q_utf8(pTHX_ SV* sv, register const char *src, register STRLEN slen)
 #endif
                 *r++ = (char)k;
             else {
+#if PERL_VERSION < 10
+                sprintf(r, "\\x{%"UVxf"}", k);
+                r += strlen(r);
+                #my_sprintf is not supported by ppport.h
+#else
                 r = r + my_sprintf(r, "\\x{%"UVxf"}", k);
+#endif
             }
         }
         *r++ = '"';
@@ -552,7 +559,12 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		
 		ilen = inamelen;
 		sv_setiv(ixsv, ix);
+#if PERL_VERSION < 10
+                (void) sprintf(iname+ilen, "%"IVdf, (IV)ix);
+		ilen = strlen(iname);
+#else
                 ilen = ilen + my_sprintf(iname+ilen, "%"IVdf, (IV)ix);
+#endif
 		iname[ilen++] = ']'; iname[ilen] = '\0';
 		if (indent >= 3) {
 		    sv_catsv(retval, totpad);
