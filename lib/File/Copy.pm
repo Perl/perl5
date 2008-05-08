@@ -12,7 +12,8 @@ use strict;
 use warnings;
 use File::Spec;
 use Config;
-use Fcntl qw [O_CREAT O_WRONLY O_TRUNC];
+# During perl build, we need File::Copy but Fcntl might not be built yet
+my $Fcntl_loaded = eval q{ use Fcntl qw [O_CREAT O_WRONLY O_TRUNC]; 1 };
 our(@ISA, @EXPORT, @EXPORT_OK, $VERSION, $Too_Big, $Syscopy_is_copy);
 sub copy;
 sub syscopy;
@@ -175,10 +176,16 @@ sub copy {
        $to_h = $to;
     } else {
 	$to = _protect($to) if $to =~ /^\s/s;
-       my $perm = (stat $from_h) [2] & 0xFFF;
-       sysopen $to_h, $to, O_CREAT | O_TRUNC | O_WRONLY, $perm
-            or goto fail_open2;
-       binmode $to_h or die "($!,$^E)";
+	if ($Fcntl_loaded) {
+	    my $perm = (stat $from_h) [2] & 0xFFF;
+	    sysopen $to_h, $to, O_CREAT() | O_TRUNC() | O_WRONLY(), $perm
+		or goto fail_open2;
+	}
+	else {
+	    $to_h = \do { local *FH };
+	    open $to_h, ">", $to or goto fail_open2;
+	}
+	binmode $to_h or die "($!,$^E)";
 	$closeto = 1;
     }
 
