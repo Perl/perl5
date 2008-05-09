@@ -274,7 +274,10 @@ for my $cross_partition_test (0..1) {
         my $perm3 = (stat $copy3) [2] & 0xFFF;
         is (__$perm1, __$c_perm1, "Permission bits set correctly");
         is (__$perm2, __$c_perm1, "Permission bits set correctly");
-        is (__$perm3, __$c_perm3, "Permission bits not modified");
+        TODO: {
+            local $TODO = 'Permission bits inconsistent under cygwin' if $^O eq 'cygwin';
+            is (__$perm3, __$c_perm3, "Permission bits not modified");
+        }
     }
     umask $old_mask or die $!;
 
