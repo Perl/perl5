@@ -81,7 +81,8 @@ is( $q->param('300x300_gif')       , '300x300.gif'       , 'filename_4' );
 { 
     my $test = "multiple file names are handled right with same-named upload fields";
     my @hello_names = $q->param('hello_world');
-    is_deeply(\@hello_names, [ 'goodbye_world.txt','hello_world.txt' ], $test);
+    is ($hello_names[0],'goodbye_world.txt',$test. "...first file");
+    is ($hello_names[1],'hello_world.txt',$test. "...second file");
 }
 
 #-----------------------------------------------------------------------------

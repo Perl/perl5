@@ -55,6 +55,7 @@ sub new {
      }
      }
      CGI->_reset_globals;
+     $self->_setup_symbols(@SAVED_SYMBOLS) if @CGI::SAVED_SYMBOLS;
      return $CGI::Q = $self->SUPER::new($initializer, @param);
 }
 
