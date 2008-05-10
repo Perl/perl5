@@ -368,6 +368,7 @@ static struct debug_tokens {
     { WHEN,		TOKENTYPE_IVAL,		"WHEN" },
     { WHILE,		TOKENTYPE_IVAL,		"WHILE" },
     { WORD,		TOKENTYPE_OPVAL,	"WORD" },
+    { YADAYADA,		TOKENTYPE_IVAL,		"YADAYADA" },
     { 0,		TOKENTYPE_NONE,		NULL }
 };
 
@@ -4774,6 +4775,10 @@ Perl_yylex(pTHX)
 	pl_yylval.ival = 0;
 	OPERATOR(ASSIGNOP);
     case '!':
+	if (PL_expect == XSTATE && s[1] == '!' && s[2] == '!') {
+	    s += 3;
+	    LOP(OP_DIE,XTERM);
+	}
 	s++;
 	{
 	    const char tmp = *s++;
@@ -5025,10 +5030,14 @@ Perl_yylex(pTHX)
 	    AOPERATOR(DORDOR);
 	}
      case '?':			/* may either be conditional or pattern */
-	 if(PL_expect == XOPERATOR) {
+	if (PL_expect == XSTATE && s[1] == '?' && s[2] == '?') {
+	    s += 3;
+	    LOP(OP_WARN,XTERM);
+	}
+	if (PL_expect == XOPERATOR) {
 	     char tmp = *s++;
 	     if(tmp == '?') {
-    	          OPERATOR('?');
+		OPERATOR('?');
 	     }
              else {
 	         tmp = *s++;
@@ -5066,6 +5075,10 @@ Perl_yylex(pTHX)
 	    PL_lex_formbrack = 0;
 	    PL_expect = XSTATE;
 	    goto rightbracket;
+	}
+	if (PL_expect == XSTATE && s[1] == '.' && s[2] == '.') {
+	    s += 3;
+	    OPERATOR(YADAYADA);
 	}
 	if (PL_expect == XOPERATOR || !isDIGIT(s[1])) {
 	    char tmp = *s++;

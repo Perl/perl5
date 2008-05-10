@@ -925,16 +925,6 @@ reinstated.
 
 The old perltodo notes "Look at the "reification" code in C<av.c>".
 
-=head2 The yada yada yada operators
-
-Perl 6's Synopsis 3 says:
-
-I<The ... operator is the "yada, yada, yada" list operator, which is used as
-the body in function prototypes. It complains bitterly (by calling fail)
-if it is ever executed. Variant ??? calls warn, and !!! calls die.>
-
-Those would be nice to add to Perl 5. That could be done without new ops.
-
 =head2 Virtualize operating system access
 
 Implement a set of "vtables" that virtualizes operating system access

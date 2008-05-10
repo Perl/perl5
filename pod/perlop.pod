@@ -568,7 +568,7 @@ right operand is true, I<AFTER> which the range operator becomes false
 again.  It doesn't become false till the next time the range operator is
 evaluated.  It can test the right operand and become false on the same
 evaluation it became true (as in B<awk>), but it still returns true once.
-If you don't want it to test the right operand till the next
+If you don't want it to test the right operand until the next
 evaluation, as in B<sed>, just use three dots ("...") instead of
 two.  In all other regards, "..." behaves just like ".." does.
 
@@ -808,6 +808,39 @@ between keys and values in hashes, and other paired elements in lists.
 
         %hash = ( $key => $value );
         login( $username => $password );
+
+=head2 Yada Yada Operators
+X<...> X<... operator> X<!!!> X<!!! operator> X<???> X<??? operator>
+X<yada yada operator>
+
+The yada yada operators are placeholders for code.  They parse without error,
+but when executed either throw an exception or a warning.
+
+The C<...> operator takes no arguments.  When executed, it throws an exception
+with the text C<Unimplemented>:
+
+    sub foo { ... }
+    foo();
+
+    Unimplemented at <file> line <line number>.
+
+The C<!!!> operator is similar, but it takes one argument, a string to use as
+the text of the exception:
+
+    sub bar { !!! "Don't call me, Ishmael!" }
+    bar();
+
+    Don't call me, Ishmael! at <file> line <line number>.
+
+The C<???> operator also takes one argument, but it emits a warning instead of
+throwing an exception:
+
+    sub baz { ??? "Who are you?  Wnat do you want?" }
+    baz();
+    say "Why are you here?";
+
+    Who are you?  What do you want? at <file> line <line number>.
+    Why are you here?
 
 =head2 List Operators (Rightward)
 X<operator, list, rightward> X<list operator>
