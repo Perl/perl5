@@ -2925,6 +2925,8 @@ Perl_fetch_cop_label(pTHX_ struct refcounted_he *const chain, STRLEN *len,
 struct refcounted_he *
 Perl_store_cop_label(pTHX_ struct refcounted_he *const chain, const char *label)
 {
+    PERL_ARGS_ASSERT_STORE_COP_LABEL;
+
     return refcounted_he_new_common(chain, ":", 1, HVrhek_PV, HVrhek_PV,
 				    label, strlen(label));
 }

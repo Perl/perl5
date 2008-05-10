@@ -602,6 +602,8 @@ S_gv_get_super_pkg(pTHX_ const char* name, I32 namelen)
 GV *
 Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 {
+    PERL_ARGS_ASSERT_GV_FETCHMETHOD_AUTOLOAD;
+
     return gv_fetchmethod_flags(stash, name, autoload ? GV_AUTOLOAD : 0);
 }
 
@@ -620,7 +622,7 @@ Perl_gv_fetchmethod_flags(pTHX_ HV *stash, const char *name, U32 flags)
     const U32 autoload = flags & GV_AUTOLOAD;
     const U32 do_croak = flags & GV_CROAK;
 
-    PERL_ARGS_ASSERT_GV_FETCHMETHOD_AUTOLOAD;
+    PERL_ARGS_ASSERT_GV_FETCHMETHOD_FLAGS;
 
     if (SvTYPE(stash) < SVt_PVHV)
 	stash = NULL;
