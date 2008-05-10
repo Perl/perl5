@@ -253,6 +253,11 @@ The easiest is to just spell the package name out:
 
     @Cow::ISA = qw(Animal);
 
+Or declare it as package global variable:
+
+    package Cow;
+    our @ISA = qw(Animal);
+
 Or allow it as an implicitly named package variable:
 
     package Cow;

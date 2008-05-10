@@ -11,8 +11,8 @@ implement the Unicode standard or the accompanying technical reports
 from cover to cover, Perl does support many Unicode features.
 
 People who want to learn to use Unicode in Perl, should probably read
-L<the Perl Unicode tutorial|perlunitut> before reading this reference
-document.
+L<the Perl Unicode tutorial, perlunitut|perlunitut>, before reading
+this reference document.
 
 =over 4
 
@@ -184,7 +184,7 @@ The special pattern C<\X> matches any extended Unicode
 sequence--"a combining character sequence" in Standardese--where the
 first character is a base character and subsequent characters are mark
 characters that apply to the base character.  C<\X> is equivalent to
-C<(?:\PM\pM*)>.
+C<< (?>\PM\pM*) >>.
 
 =item *
 

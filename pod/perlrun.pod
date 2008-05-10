@@ -962,6 +962,14 @@ tells Perl that the program is embedded in a larger chunk of unrelated
 ASCII text, such as in a mail message.  Leading garbage will be
 discarded until the first line that starts with #! and contains the
 string "perl".  Any meaningful switches on that line will be applied.
+
+All references to line numbers by the program (warnings, errors, ...)
+will treat the #! line as the first line.
+Thus a warning on the 2nd line of the program (which is on the 100th
+line in the file) will be reported as line 2, and not as line 100.
+This can be overridden by using the #line directive.
+(See L<perlsyn/"Plain-Old-Comments-(Not!)">)
+
 If a directory name is specified, Perl will switch to that directory
 before running the program.  The B<-x> switch controls only the
 disposal of leading garbage.  The program must be terminated with

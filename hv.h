@@ -1,7 +1,7 @@
 /*    hv.h
  *
  *    Copyright (C) 1991, 1992, 1993, 1996, 1997, 1998, 1999,
- *    2000, 2001, 2002, 2003, 2005, 2006, 2007, by Larry Wall and others
+ *    2000, 2001, 2002, 2003, 2005, 2006, 2007, 2008, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -168,7 +168,7 @@ efficient.
 =for apidoc Am|char*|HeUTF8|HE* he|STRLEN len
 Returns whether the C<char *> value returned by C<HePV> is encoded in UTF-8,
 doing any necessary dereferencing of possibly C<SV*> keys.  The value returned
-will be 0 or non-0, not necesarily 1 (or even a value with any low bits set),
+will be 0 or non-0, not necessarily 1 (or even a value with any low bits set),
 so B<do not> blindly assign this to a C<bool> variable, as C<bool> may be a
 typedef for C<char>.
 

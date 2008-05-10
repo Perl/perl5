@@ -84,7 +84,7 @@ described in L<The wanted function> below.
 
 Reports the name of a directory only AFTER all its entries
 have been reported.  Entry point C<finddepth()> is a shortcut for
-specifying C<{ bydepth =E<gt> 1 }> in the first argument of C<find()>.
+specifying C<< { bydepth => 1 } >> in the first argument of C<find()>.
 
 =item C<preprocess>
 
@@ -241,7 +241,7 @@ table below summarizes all variants:
               /etc/x             /etc              /etc/x
 
 
-When <follow> or <follow_fast> are in effect, there is
+When C<follow> or C<follow_fast> are in effect, there is
 also a C<$File::Find::fullname>.  The function may set
 C<$File::Find::prune> to prune the tree unless C<bydepth> was
 specified.  Unless C<follow> or C<follow_fast> is specified, for

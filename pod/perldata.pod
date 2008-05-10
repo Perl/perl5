@@ -416,7 +416,7 @@ The two control characters ^D and ^Z, and the tokens __END__ and __DATA__
 may be used to indicate the logical end of the script before the actual
 end of file.  Any following text is ignored.
 
-Text after __DATA__ but may be read via the filehandle C<PACKNAME::DATA>,
+Text after __DATA__ may be read via the filehandle C<PACKNAME::DATA>,
 where C<PACKNAME> is the package that was current when the __DATA__
 token was encountered.  The filehandle is left open pointing to the
 contents after __DATA__.  It is the program's responsibility to

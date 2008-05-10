@@ -307,7 +307,7 @@ One of the more interesting applications is to change files of a certain
 name into pipes.  For example, to autoprocess gzipped or compressed
 files by decompressing them with I<gzip>:
 
-    @ARGV = map { /^\.(gz|Z)$/ ? "gzip -dc $_ |" : $_  } @ARGV;
+    @ARGV = map { /\.(gz|Z)$/ ? "gzip -dc $_ |" : $_  } @ARGV;
 
 Or, if you have the I<GET> program installed from LWP,
 you can fetch URLs before processing them:
