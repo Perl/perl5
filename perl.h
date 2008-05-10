@@ -2654,7 +2654,11 @@ typedef struct clone_params CLONE_PARAMS;
 #    if HAS_FLOATINGPOINT_H
 #      include <floatingpoint.h>
 #    endif
-#    define PERL_FPU_INIT fpsetmask(0)
+/* Some operating systems have this as a macro, which in turn expands to a comma
+   expression, and the last sub-expression is something that gets calculated,
+   and then they have the gall to warn that a value computed is not used. Hence
+   cast to void.  */
+#    define PERL_FPU_INIT (void)fpsetmask(0)
 #  else
 #    if defined(SIGFPE) && defined(SIG_IGN) && !defined(PERL_MICRO)
 #      define PERL_FPU_INIT       PL_sigfpe_saved = (Sighandler_t) signal(SIGFPE, SIG_IGN)
