@@ -5435,7 +5435,7 @@ a null pattern C<//>, which is just one member of the set of patterns
 matching a null string) will split the value of EXPR into separate
 characters at each point it matches that way.  For example:
 
-    print join(':', split(/ */, 'hi there'));
+    print join(':', split(/ */, 'hi there')), "\n";
 
 produces the output 'h:i:t:h:e:r:e'.
 
@@ -5444,7 +5444,7 @@ matches only the null string, and is not be confused with the regular use
 of C<//> to mean "the last successful pattern match".  So, for C<split>,
 the following:
 
-    print join(':', split(//, 'hi there'));
+    print join(':', split(//, 'hi there')), "\n";
 
 produces the output 'h:i: :t:h:e:r:e'.
 
@@ -5459,8 +5459,8 @@ hand, are produced when there is a match at the end of the string (and
 when LIMIT is given and is not 0), regardless of the length of the match.
 For example:
 
-   print join(':', split(//,   'hi there!', -1));
-   print join(':', split(/\W/, 'hi there!', -1));
+   print join(':', split(//,   'hi there!', -1)), "\n";
+   print join(':', split(/\W/, 'hi there!', -1)), "\n";
 
 produce the output 'h:i: :t:h:e:r:e:!:' and 'hi:there:', respectively,
 both with an empty trailing field.

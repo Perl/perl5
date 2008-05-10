@@ -338,7 +338,7 @@ This command, which should occur early in the document (at least
 before any non-US-ASCII data!), declares that this document is
 encoded in the encoding I<encodingname>, which must be
 an encoding name that L<Encoding> recognizes.  (Encoding's list
-of supported encodings, in L<Encoding::Supported>, is useful here.)
+of supported encodings, in L<Encode::Supported>, is useful here.)
 If the Pod parser cannot decode the declared encoding, it 
 should emit a warning and may abort parsing the document
 altogether.
