@@ -14,7 +14,7 @@ my $no_signedness = $] > 5.009 ? '' :
   "Signed/unsigned pack modifiers not available on this perl";
 
 my $only510 = 414;
-plan tests => 14283 + ($] > 5.009 ? $only510 : 0);
+plan tests => 14284 + ($] > 5.009 ? $only510 : 0);
 
 use strict;
 # use warnings qw(FATAL all);
@@ -2030,4 +2030,9 @@ if ($] > 5.009) {
        'Test basic utf8 @');
     is(unpack('@!4 a*', "\x{301}\x{302}\x{303}\x{304}\x{305}"),
        "\x{303}\x{304}\x{305}", 'Test basic utf8 @!');
+}
+{
+    #50256
+    my ($v) = split //, unpack ('(B)*', 'ab');
+    is($v, 0); # Doesn't SEGV :-)
 }

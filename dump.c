@@ -981,7 +981,7 @@ static const struct { const char type; const char *name; } magic_names[] = {
 	{ PERL_MAGIC_qr,             "qr(r)" },
 	{ PERL_MAGIC_sigelem,        "sigelem(s)" },
 	{ PERL_MAGIC_taint,          "taint(t)" },
-	{ PERL_MAGIC_uvar_elem,      "uvar_elem(v)" },
+	{ PERL_MAGIC_uvar_elem,      "uvar_elem(u)" },
 	{ PERL_MAGIC_vec,            "vec(v)" },
 	{ PERL_MAGIC_vstring,        "v-string(V)" },
 	{ PERL_MAGIC_utf8,           "utf8(w)" },

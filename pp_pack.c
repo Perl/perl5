@@ -1288,6 +1288,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    symptr->previous = &savsym;
             symptr->level++;
 	    PUTBACK;
+	    if (len && unpack_only_one) len = 1;
 	    while (len--) {
   	        symptr->patptr = savsym.grpbeg;
 		if (utf8) symptr->flags |=  FLAG_PARSE_UTF8;
