@@ -3688,6 +3688,9 @@ Perl_yylex(pTHX)
 		sv_free((SV*)PL_preambleav);
 		PL_preambleav = NULL;
 	    }
+	    if (PL_minus_E)
+		sv_catpvs(PL_linestr,
+			  "use feature ':5." STRINGIFY(PERL_VERSION) "';");
 	    if (PL_minus_n || PL_minus_p) {
 		sv_catpvs(PL_linestr, "LINE: while (<>) {");
 		if (PL_minus_l)
@@ -3719,9 +3722,6 @@ Perl_yylex(pTHX)
 		        sv_catpvs(PL_linestr,"our @F=split(' ');");
 		}
 	    }
-	    if (PL_minus_E)
-		sv_catpvs(PL_linestr,
-			  "use feature ':5." STRINGIFY(PERL_VERSION) "';");
 	    sv_catpvs(PL_linestr, "\n");
 	    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
