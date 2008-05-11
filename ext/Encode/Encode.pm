@@ -1,10 +1,10 @@
 #
-# $Id: Encode.pm,v 2.24 2008/03/12 09:58:12 dankogai Exp dankogai $
+# $Id: Encode.pm,v 2.25 2008/05/07 20:56:05 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.24 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.25 $ =~ /(\d+)/g;
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -36,7 +36,8 @@ our @EXPORT_OK = (
 
 our %EXPORT_TAGS = (
     all          => [ @EXPORT,    @EXPORT_OK ],
-    fallbacks    => [@FB_CONSTS],
+    default      => [ @EXPORT ],
+    fallbacks    => [ @FB_CONSTS ],
     fallback_all => [ @FB_CONSTS, @FB_FLAGS ],
 );
 

@@ -1,5 +1,5 @@
 #
-# $Id: Makefile.PL,v 2.5 2007/05/29 18:15:32 dankogai Exp $
+# $Id: Makefile.PL,v 2.6 2008/05/07 20:56:05 dankogai Exp dankogai $
 #
 use 5.007003;
 use strict;
@@ -28,7 +28,7 @@ my @more_exe_files = qw(
             );
 my @pmlibdirs = qw(lib Encode);
 
-$ARGV{MORE_SCRIOPTS} and push @exe_files, @more_exe_files;
+$ARGV{MORE_SCRIPTS} and push @exe_files, @more_exe_files;
 $ARGV{INSTALL_UCM}   and push @pmlibdirs, "ucm";
 my @man =  ();
 @man = ( MAN1PODS => {}, MAN3PODS => {} ) if $ENV{PERL_CORE};
