@@ -375,19 +375,59 @@ X<character class> X<\p> X<\p{}>
     digit       IsDigit        \d
     graph       IsGraph
     lower       IsLower
-    print       IsPrint
-    punct       IsPunct
+    print       IsPrint		(but see [2] below)
+    punct       IsPunct		(but see [3] below)
     space       IsSpace
                 IsSpacePerl    \s
     upper       IsUpper
-    word        IsWord
+    word        IsWord         \w
     xdigit      IsXDigit
 
 For example C<[[:lower:]]> and C<\p{IsLower}> are equivalent.
 
+However, the equivalence between C<[[:xxxxx:]]> and C<\p{IsXxxxx}>
+is not exact.
+
+=over 4
+
+=item [1]
+
 If the C<utf8> pragma is not used but the C<locale> pragma is, the
 classes correlate with the usual isalpha(3) interface (except for
 "word" and "blank").
+
+But if the C<locale> or C<encoding> pragmas are not used and
+the string is not C<utf8>, then C<[[:xxxxx:]]> (and C<\w>, etc.)
+will not match characters 0x80-0xff; whereas C<\p{IsXxxxx}> will
+force the string to C<utf8> and can match these characters
+(as Unicode).
+
+=item [2]
+
+C<\p{IsPrint}> matches characters 0x09-0x0d but C<[[:print:]]> does not.
+
+=item [3]
+
+C<[[:punct::]]> matches the following but C<\p{IsPunct}> does not,
+because they are classed as symbols (not punctuation) in Unicode.
+
+=over 4
+
+=item C<$>
+
+Currency symbol
+
+=item C<+> C<< < >> C<=> C<< > >> C<|> C<~>
+
+Mathematical symbols
+
+=item C<^> C<`>
+
+Modifier symbols (accents)
+
+=back
+
+=back
 
 The other named classes are:
 

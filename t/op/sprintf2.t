@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }   
 
-plan tests => 1292;
+plan tests => 1295;
 
 is(
     sprintf("%.40g ",0.01),
@@ -134,3 +134,8 @@ for my $num (0, -1, 1) {
     }
 }
 
+# test that %f doesn't panic with +Inf, -Inf, NaN [perl #45383]
+foreach my $n (2**1e100, -2**1e100, 2**1e100/2**1e100) { # +Inf, -Inf, NaN
+    eval { my $f = sprintf("%f", $n); };
+    is $@, "", "sprintf(\"%f\", $n)";
+}

@@ -3753,6 +3753,7 @@ t/op/cond.t			See if conditional expressions work
 t/op/context.t			See if context propagation works
 t/op/cproto.t			Check builtin prototypes
 t/op/crypt.t			See if crypt works
+t/op/dbm.t			See if dbmopen/dbmclose work
 t/op/defins.t			See if auto-insert of defined() works
 t/op/delete.t			See if delete works
 t/op/die_exit.t			See if die and exit status interaction works

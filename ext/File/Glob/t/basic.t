@@ -173,8 +173,8 @@ pass("Don't panic");
     chdir $dir
 	or die "Could not chdir to $dir: $!";
     my(@glob_files) = glob("a*{d[e]}j");
-    local $TODO = "home-made glob doesn't do regexes" if $^O eq 'VMS';
-    is_deeply(\@glob_files, ['a_dej']);
     chdir $cwd
 	or die "Could not chdir back to $cwd: $!";
+    local $TODO = "home-made glob doesn't do regexes" if $^O eq 'VMS';
+    is_deeply(\@glob_files, ['a_dej']);
 }
