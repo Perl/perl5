@@ -1,7 +1,13 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#if defined(I_GDBM_NDBM)
+#  include <gdbm-ndbm.h> /* Debian compatibility version */
+#elif defined(I_GDBMNDBM)
+#  include <gdbm/ndbm.h> /* RedHat compatibility version */
+#elif defined(I_NDBM)
 #include <ndbm.h>
+#endif
 
 typedef struct {
 	DBM * 	dbp ;

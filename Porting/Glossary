@@ -1429,6 +1429,14 @@ d_mymalloc (mallocsrc.U):
 	of the source want to take special action if MYMALLOC is used.
 	This may include different sorts of profiling or error detection.
 
+d_ndbm (i_ndbm.U):
+	This variable conditionally defines the HAS_NDBM symbol, which
+	indicates that both the ndbm.h include file and an appropriate ndbm
+	library exist.  Consult the different i_*ndbm variables
+	to find out the actual include location.  Sometimes, a system has the
+	header file but not the library.  This variable will only be set if
+	the system has both.
+
 d_nice (d_nice.U):
 	This variable conditionally defines the HAS_NICE symbol, which
 	indicates to the C program that the nice() routine is available.
@@ -2885,6 +2893,18 @@ i_gdbm (i_gdbm.U):
 	This variable conditionally defines the I_GDBM symbol, which
 	indicates to the C program that <gdbm.h> exists and should
 	be included.
+
+i_gdbm_ndbm (i_ndbm.U):
+	This variable conditionally defines the I_GDBM_NDBM symbol, which
+	indicates to the C program that <gdbm-ndbm.h> exists and should
+	be included.  This is the location of the ndbm.h compatibility file
+	in Debian 4.0.
+
+i_gdbmndbm (i_ndbm.U):
+	This variable conditionally defines the I_GDBMNDBM symbol, which
+	indicates to the C program that <gdbm/ndbm.h> exists and should
+	be included.  This was the location of the ndbm.h compatibility file
+	in RedHat 7.1.
 
 i_grp (i_grp.U):
 	This variable conditionally defines the I_GRP symbol, and indicates

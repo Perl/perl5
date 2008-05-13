@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Sat May 17 15:55:21 CEST 2008 [metaconfig 3.5 PL0]
+# Generated on Sat May 17 16:03:30 CEST 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -873,6 +873,9 @@ i_mallocmalloc=''
 i_math=''
 i_memory=''
 i_mntent=''
+d_ndbm=''
+i_gdbm_ndbm=''
+i_gdbmndbm=''
 i_ndbm=''
 i_netdb=''
 i_neterrno=''
@@ -20818,37 +20821,32 @@ set mntent.h i_mntent
 eval $inhdr
 
 : see if ndbm.h is available
-set ndbm.h t_ndbm
+set ndbm.h i_ndbm
+eval $inhdr
+: Compatibility location for RedHat 7.1
+set gdbm/ndbm.h i_gdbmndbm
+eval $inhdr
+: Compatibility location for Debian 4.0
+set gdbm-ndbm.h i_gdbm_ndbm
 eval $inhdr
 
-case "$t_ndbm" in
-$undef)
-    # Some Linux distributions such as RedHat 7.1 put the
-    # ndbm.h header in /usr/include/gdbm/ndbm.h.
-    if $test -f /usr/include/gdbm/ndbm.h; then
-	echo '<gdbm/ndbm.h> found.'
-        ccflags="$ccflags -I/usr/include/gdbm"
-        cppflags="$cppflags -I/usr/include/gdbm"
-        t_ndbm=$define
-    fi
-    ;;
-esac
-
-case "$t_ndbm" in
-$define)
+if $test "$i_ndbm" = "$define" -o "$i_gdbmndbm" = "$define" -o "$i_gdbm_ndbm" = "$define"; then
 	: see if dbm_open exists
 	set dbm_open d_dbm_open
 	eval $inlibc
 	case "$d_dbm_open" in
 	$undef)
-		t_ndbm="$undef"
+		i_ndbm="$undef"
+		i_gdbmndbm="$undef"
+		i_gdbm_ndbm="$undef"
 		echo "We won't be including <ndbm.h>"
+	    val="$undef"
 		;;
+	*) val="$define"
+	   ;;
 	esac
-	;;
-esac
-val="$t_ndbm"
-set i_ndbm
+fi
+set d_ndbm
 eval $setvar
 
 : see if net/errno.h is available
@@ -21674,7 +21672,7 @@ sunos*X4*)
     ;;
 *) case "$usedl" in
     $define|true|[yY]*)
-	    set X `echo " $libs " | sed -e 's@ -lndbm @ @' -e 's@ -lgdbm @ @' -e 's@ -ldbm @ @' -e 's@ -ldb @ @'` 
+	    set X `echo " $libs " | sed -e 's@ -lndbm @ @' -e 's@ -lgdbm @ @' -e 's@ -lgdbm_compat @ @' -e 's@ -ldbm @ @' -e 's@ -ldb @ @'` 
 	    shift
 	    perllibs="$*"
 	    ;;
@@ -22074,6 +22072,7 @@ d_msgsnd='$d_msgsnd'
 d_msync='$d_msync'
 d_munmap='$d_munmap'
 d_mymalloc='$d_mymalloc'
+d_ndbm='$d_ndbm'
 d_nice='$d_nice'
 d_nl_langinfo='$d_nl_langinfo'
 d_nv_preserves_uv='$d_nv_preserves_uv'
@@ -22373,6 +22372,8 @@ i_float='$i_float'
 i_fp='$i_fp'
 i_fp_class='$i_fp_class'
 i_gdbm='$i_gdbm'
+i_gdbm_ndbm='$i_gdbm_ndbm'
+i_gdbmndbm='$i_gdbmndbm'
 i_grp='$i_grp'
 i_ieeefp='$i_ieeefp'
 i_inttypes='$i_inttypes'
