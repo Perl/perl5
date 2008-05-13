@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (20) {
+  if (39) {
     load();
-    plan(tests => 20);
+    plan(tests => 39);
   }
 }
 
@@ -76,4 +76,27 @@ ok(&Devel::PPPort::SvPV_nolen_const($mhx), $i++);
 ok(&Devel::PPPort::SvPV_nomg($mhx), $i++);
 ok(&Devel::PPPort::SvPV_nomg_const($mhx), $i++);
 ok(&Devel::PPPort::SvPV_nomg_const_nolen($mhx), $i++);
+
+$mhx = 42; ok(&Devel::PPPort::SvPV_nolen($mhx), 0);
+$mhx = 42; ok(&Devel::PPPort::SvPV_const($mhx), 2);
+$mhx = 42; ok(&Devel::PPPort::SvPV_mutable($mhx), 2);
+$mhx = 42; ok(&Devel::PPPort::SvPV_flags($mhx), 2);
+$mhx = 42; ok(&Devel::PPPort::SvPV_flags_const($mhx), 2);
+
+$mhx = 42; ok(&Devel::PPPort::SvPV_flags_const_nolen($mhx), 0);
+$mhx = 42; ok(&Devel::PPPort::SvPV_flags_mutable($mhx), 2);
+$mhx = 42; ok(&Devel::PPPort::SvPV_force($mhx), 2);
+$mhx = 42; ok(&Devel::PPPort::SvPV_force_nolen($mhx), 0);
+$mhx = 42; ok(&Devel::PPPort::SvPV_force_mutable($mhx), 2);
+
+$mhx = 42; ok(&Devel::PPPort::SvPV_force_nomg($mhx), 2);
+$mhx = 42; ok(&Devel::PPPort::SvPV_force_nomg_nolen($mhx), 0);
+$mhx = 42; ok(&Devel::PPPort::SvPV_force_flags($mhx), 2);
+$mhx = 42; ok(&Devel::PPPort::SvPV_force_flags_nolen($mhx), 0);
+$mhx = 42; ok(&Devel::PPPort::SvPV_force_flags_mutable($mhx), 2);
+
+$mhx = 42; ok(&Devel::PPPort::SvPV_nolen_const($mhx), 0);
+$mhx = 42; ok(&Devel::PPPort::SvPV_nomg($mhx), 2);
+$mhx = 42; ok(&Devel::PPPort::SvPV_nomg_const($mhx), 2);
+$mhx = 42; ok(&Devel::PPPort::SvPV_nomg_const_nolen($mhx), 0);
 

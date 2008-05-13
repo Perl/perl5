@@ -1,3 +1,8 @@
+3.13_03 - 2008-05-13
+
+    * fix CPAN #35835: SvPV_flags_const_nolen segfaults prior
+      to perl 5.8.8
+
 3.13_02 - 2008-04-13
 
     * fix NV[efg]f format string macros for perl-5.6.0 built
