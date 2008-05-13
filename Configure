@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Wed Apr  2 20:45:31 CEST 2008 [metaconfig 3.5 PL0]
+# Generated on Sat May 17 15:55:21 CEST 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -5119,7 +5119,7 @@ default|recommended)
 	# as that way the compiler can do the right implementation dependant
 	# thing. (NWC)
 	case "$gccversion" in
-	?*)	set stack-protector -fstack-protector 'ldflags="$ldflags -fstack-protector"'
+	?*)	set stack-protector -fstack-protector
 		eval $checkccflag
 		;;
 	esac
@@ -5257,6 +5257,10 @@ case "$ldflags" in
 	fi
 	case "$ccflags" in
 	*-posix*) dflt="$dflt -posix" ;;
+	esac
+	# See note above about -fstack-protector
+	case "$ccflags" in
+	*-fstack-protector*) dflt="$dflt -fstack-protector" ;;
 	esac
 	;;
 *) dflt="$ldflags";;
@@ -8022,6 +8026,16 @@ EOM
 	case "$dflt" in
 	''|' ') dflt='none' ;;
 	esac
+
+	case "$ldflags" in
+	*-fstack-protector*)
+	    case "$dflt" in
+			*-fstack-protector*) ;; # Don't add it again
+			*) dflt="$dflt -fstack-protector" ;; 
+		esac
+		;;
+	esac
+
 
     rp="Any special flags to pass to $ld to create a dynamically loaded library?"
     . ./myread
