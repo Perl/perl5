@@ -3,19 +3,22 @@ package Thread::Queue;
 use strict;
 use warnings;
 
-our $VERSION = '2.07';
+our $VERSION = '2.08';
 
-use threads::shared 0.96;
+use threads::shared 1.21;
 use Scalar::Util 1.10 qw(looks_like_number blessed reftype refaddr);
 
+# Carp errors from threads::shared calls should complain about caller
+our @CARP_NOT = ("threads::shared");
+
 # Predeclarations for internal functions
-my ($make_shared, $validate_count, $validate_index);
+my ($validate_count, $validate_index);
 
 # Create a new queue possibly pre-populated with items
 sub new
 {
     my $class = shift;
-    my @queue :shared = map { $make_shared->($_, {}) } @_;
+    my @queue :shared = map { shared_clone($_) } @_;
     return bless(\@queue, $class);
 }
 
@@ -24,7 +27,7 @@ sub enqueue
 {
     my $queue = shift;
     lock(@$queue);
-    push(@$queue, map { $make_shared->($_, {}) } @_)
+    push(@$queue, map { shared_clone($_) } @_)
         and cond_signal(@$queue);
 }
 
@@ -111,7 +114,7 @@ sub insert
     }
 
     # Add new items to the queue
-    push(@$queue, map { $make_shared->($_, {}) } @_);
+    push(@$queue, map { shared_clone($_) } @_);
 
     # Add previous items back onto the queue
     push(@$queue, @tmp);
@@ -161,98 +164,6 @@ sub extract
 
 ### Internal Functions ###
 
-# Create a thread-shared version of a complex data structure or object
-$make_shared = sub {
-    my ($item, $cloned) = @_;
-
-    # If not running 'threads' or already thread-shared,
-    #   then just return the input item
-    return $item if (! $threads::threads ||
-                     threads::shared::is_shared($item));
-
-    # Make copies of array, hash and scalar refs
-    my $copy;
-    if (my $ref_type = reftype($item)) {
-        # Check for previously cloned references
-        #   (this takes care of circular refs as well)
-        my $addr = refaddr($item);
-        if (defined($addr) && exists($cloned->{$addr})) {
-            # Return the already existing clone
-            return $cloned->{$addr};
-        }
-
-        # Copy an array ref
-        if ($ref_type eq 'ARRAY') {
-            # Make empty shared array ref
-            $copy = &share([]);
-            # Add to clone checking hash
-            $cloned->{$addr} = $copy;
-            # Recursively copy and add contents
-            push(@$copy, map { $make_shared->($_, $cloned) } @$item);
-        }
-
-        # Copy a hash ref
-        elsif ($ref_type eq 'HASH') {
-            # Make empty shared hash ref
-            $copy = &share({});
-            # Add to clone checking hash
-            $cloned->{$addr} = $copy;
-            # Recursively copy and add contents
-            foreach my $key (keys(%{$item})) {
-                $copy->{$key} = $make_shared->($item->{$key}, $cloned);
-            }
-        }
-
-        # Copy a scalar ref
-        elsif ($ref_type eq 'SCALAR') {
-            $copy = \do{ my $scalar = $$item; };
-            share($copy);
-            # Clone READONLY flag
-            if (Internals::SvREADONLY($$item)) {
-                Internals::SvREADONLY($$copy, 1);
-            }
-            # Add to clone checking hash
-            $cloned->{$addr} = $copy;
-        }
-
-        # Copy of a ref of a ref
-        elsif ($ref_type eq 'REF') {
-            # Special handling for $x = \$x
-            my $addr2 = refaddr($$item);
-            if ($addr2 == $addr) {
-                $copy = \$copy;
-                share($copy);
-                $cloned->{$addr} = $copy;
-            } else {
-                my $tmp;
-                $copy = \$tmp;
-                share($copy);
-                # Add to clone checking hash
-                $cloned->{$addr} = $copy;
-                # Recursively copy and add contents
-                $tmp = $make_shared->($$item, $cloned);
-            }
-        }
-    }
-
-    # If no copy is created above, then just return the input item
-    # NOTE:  This will end up generating an error for anything
-    #        other than an ordinary scalar
-    return $item if (! defined($copy));
-
-    # If input item is an object, then bless the copy into the same class
-    if (my $class = blessed($item)) {
-        bless($copy, $class);
-    }
-
-    # Clone READONLY flag
-    if (Internals::SvREADONLY($item)) {
-        Internals::SvREADONLY($copy, 1);
-    }
-
-    return $copy;
-};
-
 # Check value of the requested index
 $validate_index = sub {
     my $index = shift;
@@ -291,7 +202,7 @@ Thread::Queue - Thread-safe queues
 
 =head1 VERSION
 
-This document describes Thread::Queue version 2.07
+This document describes Thread::Queue version 2.08
 
 =head1 SYNOPSIS
 
@@ -544,7 +455,7 @@ Thread::Queue Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/Thread-Queue>
 
 Annotated POD for Thread::Queue:
-L<http://annocpan.org/~JDHEDDEN/Thread-Queue-2.07/lib/Thread/Queue.pm>
+L<http://annocpan.org/~JDHEDDEN/Thread-Queue-2.08/lib/Thread/Queue.pm>
 
 Source repository:
 L<http://code.google.com/p/thread-queue/>

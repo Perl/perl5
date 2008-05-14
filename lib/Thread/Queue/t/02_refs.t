@@ -23,7 +23,7 @@ if ($] == 5.008) {
     require Test::More;
 }
 Test::More->import();
-plan('tests' => 45);
+plan('tests' => 46);
 
 # Regular array
 my @ary1 = qw/foo bar baz/;
@@ -82,14 +82,14 @@ ok($q, 'New queue');
 is($q->pending(), 2, 'Queue count');
 $q->enqueue($obj1, $obj2);
 is($q->pending(), 4, 'Queue count');
-$q->enqueue($sref1, $sref2, $qux);
-is($q->pending(), 7, 'Queue count');
+$q->enqueue($sref1, $sref2, $foo, $qux);
+is($q->pending(), 8, 'Queue count');
 $q->enqueue($cir1, $cir1s, $cir2, $cir3);
-is($q->pending(), 11, 'Queue count');
+is($q->pending(), 12, 'Queue count');
 
 # Process items in thread
 threads->create(sub {
-    is($q->pending(), 11, 'Queue count in thread');
+    is($q->pending(), 12, 'Queue count in thread');
 
     my $tary1 = $q->dequeue();
     ok($tary1, 'Thread got item');
@@ -131,6 +131,9 @@ threads->create(sub {
     is(ref($tsref2), 'Baz', 'Item is object');
     is($$tsref2, 69, 'Shared scalar ref contents');
     $$tsref2 = 'zzz';
+
+    my $myfoo = $q->dequeue();
+    is_deeply($myfoo, $foo, 'Array ref');
 
     my $qux = $q->dequeue();
     is_deeply($$$$qux, $foo, 'Ref of ref');
