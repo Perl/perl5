@@ -4211,13 +4211,15 @@ the completed C<push>.
 
 =item qq/STRING/
 
-=item qr/STRING/
-
 =item qx/STRING/
 
 =item qw/STRING/
 
-Generalized quotes.  See L<perlop/"Regexp Quote-Like Operators">.
+Generalized quotes.  See L<perlop/"Quote-Like Operators">.
+
+=item qr/STRING/
+
+Regexp-like quote.  See L<perlop/"Regexp Quote-Like Operators">.
 
 =item quotemeta EXPR
 X<quotemeta> X<metacharacter>
