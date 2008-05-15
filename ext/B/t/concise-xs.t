@@ -178,7 +178,7 @@ my $testpkgs = {
 
     POSIX => { dflt => 'constant',			# all but 252/589
 	       skip => [qw/ _POSIX_JOB_CONTROL /,	# platform varying
-			# Might be XS or imported from Fctnl, depending on your
+			# Might be XS or imported from Fcntl, depending on your
 			# perl version:
 			qw / S_ISBLK S_ISCHR S_ISDIR S_ISFIFO S_ISREG /],
 	       perl => [qw/ import croak AUTOLOAD /],
