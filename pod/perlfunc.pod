@@ -4718,12 +4718,15 @@ of LIST in the opposite order.  In scalar context, concatenates the
 elements of LIST and returns a string value with all characters
 in the opposite order.
 
-    print reverse <>;		# line tac, last line first
+    print join(", ", reverse "world", "Hello"); # Hello, world
 
-    undef $/;			# for efficiency of <>
-    print scalar reverse <>;	# character tac, last line tsrif
+    print scalar reverse "dlrow ,", "olleH";    # Hello, world
 
 Used without arguments in scalar context, reverse() reverses C<$_>.
+
+    $_ = "dlrow ,olleH";
+    print reverse;                              # No output, list context
+    print scalar reverse;                       # Hello, world
 
 This operator is also handy for inverting a hash, although there are some
 caveats.  If a value is duplicated in the original hash, only one of those
