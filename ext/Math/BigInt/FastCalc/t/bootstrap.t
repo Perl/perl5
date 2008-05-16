@@ -6,6 +6,7 @@ BEGIN
   $| = 1;
   unshift @INC, '../blib/lib';
   unshift @INC, '../blib/arch';
+  unshift @INC, '../lib';
   chdir 't' if -d 't';
   plan tests => 1;
   };
