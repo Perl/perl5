@@ -1359,7 +1359,7 @@ S_force_next(pTHX_ I32 type)
 #ifdef DEBUGGING
     if (DEBUG_T_TEST) {
         PerlIO_printf(Perl_debug_log, "### forced token:\n");
-	tokereport(THING, &NEXTVAL_NEXTTOKE);
+	tokereport(type, &NEXTVAL_NEXTTOKE);
     }
 #endif
 #ifdef PERL_MAD
