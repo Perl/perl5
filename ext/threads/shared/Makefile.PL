@@ -65,6 +65,7 @@ if (grep { $_ eq 'PERL_CORE=1' } @ARGV) {
                                     'Config'            => 0,
                                     'Carp'              => 0,
                                     'XSLoader'          => 0,
+                                    'Scalar::Util'      => 0,
 
                                     'Test'              => 0,
                                     'Test::More'        => 0,

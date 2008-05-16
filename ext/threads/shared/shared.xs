@@ -891,8 +891,7 @@ sharedsv_elem_mg_FETCH(pTHX_ SV *sv, MAGIC *mg)
                 S_get_RV(aTHX_ SvRV(sv), SvRV(*svp));
             }
         } else {
-            /* XXX Can this branch ever happen? DAPM */
-            /* XXX assert("no such branch"); */
+            /* $ary->[elem] or $ary->{elem} is a scalar */
             Perl_sharedsv_associate(aTHX_ sv, *svp);
             sv_setsv(sv, *svp);
         }
@@ -1346,6 +1345,8 @@ _id(SV *myref)
         SV *ssv;
     CODE:
         myref = SvRV(myref);
+        if (SvMAGICAL(myref))
+            mg_get(myref);
         if (SvROK(myref))
             myref = SvRV(myref);
         ssv = Perl_sharedsv_find(aTHX_ myref);
