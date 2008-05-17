@@ -1562,6 +1562,10 @@ determining whether a particular feature (such as C<socket> or C<symlink>)
 is implemented.  It is also Perl's exception trapping mechanism, where
 the die operator is used to raise exceptions.
 
+If you want to trap errors when loading an XS module, some problems with
+the binary interface (such as Perl version skew) may be fatal even with
+C<eval> unless C<$ENV{PERL_DL_NONLAZY}> is set. See L<perlrun>.
+
 If the code to be executed doesn't vary, you may use the eval-BLOCK
 form to trap run-time errors without incurring the penalty of
 recompiling each time.  The error, if any, is still returned in C<$@>.
