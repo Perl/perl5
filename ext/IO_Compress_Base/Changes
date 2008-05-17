@@ -1,6 +1,18 @@
 CHANGES
 -------
 
+  2.011 17 May 2008
+
+      * IO::Compress::Base
+        - Fixed problem that prevented the creation of a zip file that
+          contained more than one compression method.
+
+      * IO::Compress::Base::Common
+        - The private Validator class in this module clashes with another
+          CPAN module. Moved Validator into the IO::Compress::Base::Common
+          namespace.
+          [RT #35954]
+
   2.010 5 May 2008
 
       * Fixed problem that meant Perl 5.10 could not upgrade this module.

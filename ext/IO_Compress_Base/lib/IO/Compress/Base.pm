@@ -6,7 +6,7 @@ require 5.004 ;
 use strict ;
 use warnings;
 
-use IO::Compress::Base::Common 2.010 ;
+use IO::Compress::Base::Common 2.011 ;
 
 use IO::File ;
 use Scalar::Util qw(blessed readonly);
@@ -20,7 +20,7 @@ use bytes;
 our (@ISA, $VERSION);
 @ISA    = qw(Exporter IO::File);
 
-$VERSION = '2.010';
+$VERSION = '2.011';
 
 #Can't locate object method "SWASHNEW" via package "utf8" (perhaps you forgot to load "utf8"?) at .../ext/Compress-Zlib/Gzip/blib/lib/Compress/Zlib/Common.pm line 16.
 
@@ -236,7 +236,7 @@ sub _create
     my $status ;
     if (! $merge)
     {
-        *$obj->{Compress} = $obj->mkComp($class, $got)
+        *$obj->{Compress} = $obj->mkComp($got)
             or return undef;
         
         *$obj->{UnCompSize} = new U64 ;
@@ -323,7 +323,7 @@ sub _def
     my $haveOut = @_ ;
     my $output = shift ;
 
-    my $x = new Validator($class, *$obj->{Error}, $name, $input, $output)
+    my $x = new IO::Compress::Base::Validator($class, *$obj->{Error}, $name, $input, $output)
         or return undef ;
 
     push @_, $output if $haveOut && $x->{Hash};
@@ -699,15 +699,13 @@ sub newStream
     $self->ckParams($got)
         or $self->croakError("newStream: $self->{Error}");
 
+    *$self->{Compress} = $self->mkComp($got)
+        or return 0;
+
     *$self->{Header} = $self->mkHeader($got) ;
     $self->output(*$self->{Header} )
         or return 0;
     
-    my $status = $self->reset() ;
-    return $self->saveErrorString(0, *$self->{Compress}{Error}, 
-                                  *$self->{Compress}{ErrorNo})
-        if $status == STATUS_ERROR;
-
     *$self->{UnCompSize}->reset();
     *$self->{CompSize}->reset();
 
@@ -976,4 +974,5 @@ Copyright (c) 2005-2008 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
+
 

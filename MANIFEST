@@ -750,6 +750,7 @@ ext/IO_Compress_Zlib/t/002any-transparent.t	IO::Compress::Zlib
 ext/IO_Compress_Zlib/t/002any-zip.t	IO::Compress::Zlib
 ext/IO_Compress_Zlib/t/004gziphdr.t	IO::Compress::Zlib
 ext/IO_Compress_Zlib/t/005defhdr.t	IO::Compress::Zlib
+ext/IO_Compress_Zlib/t/006zip.t	IO::Compress::Zlib
 ext/IO_Compress_Zlib/t/010examples.t	IO::Compress::Zlib
 ext/IO_Compress_Zlib/t/020isize.t	IO::Compress::Zlib
 ext/IO_Compress_Zlib/t/050interop-gzip.t	IO::Compress::Zlib

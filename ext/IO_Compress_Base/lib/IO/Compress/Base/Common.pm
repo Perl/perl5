@@ -11,7 +11,7 @@ use File::GlobMapper;
 require Exporter;
 our ($VERSION, @ISA, @EXPORT, %EXPORT_TAGS, $HAS_ENCODE);
 @ISA = qw(Exporter);
-$VERSION = '2.010';
+$VERSION = '2.011';
 
 @EXPORT = qw( isaFilehandle isaFilename whatIsInput whatIsOutput 
               isaFileGlobString cleanFileGlobString oneTarget
@@ -192,7 +192,7 @@ sub oneTarget
     return $_[0] =~ /^(code|handle|buffer|filename)$/;
 }
 
-sub Validator::new
+sub IO::Compress::Base::Validator::new
 {
     my $class = shift ;
 
@@ -320,7 +320,7 @@ sub Validator::new
     return $obj ;
 }
 
-sub Validator::saveErrorString
+sub IO::Compress::Base::Validator::saveErrorString
 {
     my $self   = shift ;
     ${ $self->{Error} } = shift ;
@@ -328,7 +328,7 @@ sub Validator::saveErrorString
     
 }
 
-sub Validator::croakError
+sub IO::Compress::Base::Validator::croakError
 {
     my $self   = shift ;
     $self->saveErrorString($_[0]);
@@ -337,7 +337,7 @@ sub Validator::croakError
 
 
 
-sub Validator::validateInputFilenames
+sub IO::Compress::Base::Validator::validateInputFilenames
 {
     my $self = shift ;
 
@@ -367,7 +367,7 @@ sub Validator::validateInputFilenames
     return 1 ;
 }
 
-sub Validator::validateInputArray
+sub IO::Compress::Base::Validator::validateInputArray
 {
     my $self = shift ;
 
@@ -398,7 +398,7 @@ sub Validator::validateInputArray
     return 1 ;
 }
 
-#sub Validator::validateHash
+#sub IO::Compress::Base::Validator::validateHash
 #{
 #    my $self = shift ;
 #    my $href = shift ;

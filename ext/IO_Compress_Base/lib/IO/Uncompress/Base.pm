@@ -9,12 +9,12 @@ our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS);
 @ISA    = qw(Exporter IO::File);
 
 
-$VERSION = '2.010';
+$VERSION = '2.011';
 
 use constant G_EOF => 0 ;
 use constant G_ERR => -1 ;
 
-use IO::Compress::Base::Common 2.010 ;
+use IO::Compress::Base::Common 2.011 ;
 #use Parse::Parameters ;
 
 use IO::File ;
@@ -468,7 +468,7 @@ sub _create
         return $obj
     }
 
-    my $status = $obj->mkUncomp($class, $got);
+    my $status = $obj->mkUncomp($got);
 
     return undef
         unless defined $status;
@@ -533,7 +533,7 @@ sub _inf
     my $output = shift ;
 
 
-    my $x = new Validator($class, *$obj->{Error}, $name, $input, $output)
+    my $x = new IO::Compress::Base::Validator($class, *$obj->{Error}, $name, $input, $output)
         or return undef ;
     
     push @_, $output if $haveOut && $x->{Hash};
@@ -1450,4 +1450,5 @@ Copyright (c) 2005-2008 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
+
 

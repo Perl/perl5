@@ -4,13 +4,13 @@ use warnings;
 use strict;
 use bytes;
 
-use IO::Compress::Base::Common  2.010 qw(:Status);
+use IO::Compress::Base::Common  2.011 qw(:Status);
 
 our ($VERSION);
 
-$VERSION = '2.010';
+$VERSION = '2.011';
 
-use Compress::Raw::Zlib  2.010 ();
+use Compress::Raw::Zlib  2.011 ();
 
 sub mkUncompObject
 {

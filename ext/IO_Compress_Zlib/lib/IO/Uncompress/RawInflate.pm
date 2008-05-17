@@ -5,11 +5,11 @@ use strict ;
 use warnings;
 use bytes;
 
-use Compress::Raw::Zlib  2.010 ;
-use IO::Compress::Base::Common  2.010 qw(:Status createSelfTiedObject);
+use Compress::Raw::Zlib  2.011 ;
+use IO::Compress::Base::Common  2.011 qw(:Status createSelfTiedObject);
 
-use IO::Uncompress::Base  2.010 ;
-use IO::Uncompress::Adapter::Inflate  2.010 ;
+use IO::Uncompress::Base  2.011 ;
+use IO::Uncompress::Adapter::Inflate  2.011 ;
 
 
 
@@ -17,7 +17,7 @@ use IO::Uncompress::Adapter::Inflate  2.010 ;
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $RawInflateError);
 
-$VERSION = '2.010';
+$VERSION = '2.011';
 $RawInflateError = '';
 
 @ISA    = qw( Exporter IO::Uncompress::Base );
@@ -58,7 +58,6 @@ sub ckParams
 sub mkUncomp
 {
     my $self = shift ;
-    my $class = shift ;
     my $got = shift ;
 
     my ($obj, $errstr, $errno) = IO::Uncompress::Adapter::Inflate::mkUncompObject(
