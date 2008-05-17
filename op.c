@@ -6339,7 +6339,7 @@ Perl_ck_exists(pTHX_ OP *o)
 	else if (kid->op_type == OP_AELEM)
 	    o->op_flags |= OPf_SPECIAL;
 	else if (kid->op_type != OP_HELEM)
-	    Perl_croak(aTHX_ "%s argument is not a HASH or ARRAY element",
+	    Perl_croak(aTHX_ "%s argument is not a HASH or ARRAY element or a subroutine",
 		        OP_DESC(o));
 	op_null(kid);
     }
