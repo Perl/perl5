@@ -881,13 +881,7 @@ perl_destruct(pTHXx)
         while (i) {
             SV * const resv = ary[--i];
 
-            if (SvFLAGS(resv) & SVf_BREAK) {
-                /* this is PL_reg_curpm, already freed
-                 * flag is set in regexec.c:S_regtry
-                 */
-                SvFLAGS(resv) &= ~SVf_BREAK;
-            }
-	    else if(SvREPADTMP(resv)) {
+	    if(SvREPADTMP(resv)) {
 	      SvREPADTMP_off(resv);
 	    }
             else if(SvIOKp(resv)) {

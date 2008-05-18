@@ -9440,7 +9440,6 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
 
     ret->mother_re      = NULL;
     ret->gofs = 0;
-    ret->seen_evals = 0;
     
     ptr_table_store(PL_ptr_table, r, ret);
     return ret;
