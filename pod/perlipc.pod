@@ -581,7 +581,7 @@ you opened whatever your kid writes to his STDOUT.
 	open (FILE, "> /safe/file")
 	    || die "can't open /safe/file: $!";
 	while (<STDIN>) {
-	    print FILE; # child's STDIN is parent's KID
+	    print FILE; # child's STDIN is parent's KID_TO_WRITE
 	}
 	exit;  # don't forget this
     }
