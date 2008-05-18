@@ -27,7 +27,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 60;
+use Test::More tests => 61;
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -416,3 +416,7 @@ elsif ($b) { x(); }
 elsif ($a and $b) { x(); }
 elsif ($a or $b) { x(); }
 else { x(); }
+####
+# 54 interpolation in regexps
+my($y, $t);
+/x${y}z$t/;

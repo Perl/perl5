@@ -4062,6 +4062,16 @@ sub pp_trans {
     return "tr" . double_delim($from, $to) . $flags;
 }
 
+sub re_dq_disambiguate {
+    my ($first, $last) = @_;
+    # Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]"
+    ($last =~ /^[A-Z\\\^\[\]_?]/ &&
+	$first =~ s/([\$@])\^$/${1}{^}/)  # "${^}W" etc
+	|| ($last =~ /^[{\[\w_]/ &&
+	    $first =~ s/([\$@])([A-Za-z_]\w*)$/${1}{$2}/);
+    return $first . $last;
+}
+
 # Like dq(), but different
 sub re_dq {
     my $self = shift;
@@ -4077,14 +4087,7 @@ sub re_dq {
     } elsif ($type eq "concat") {
 	my $first = $self->re_dq($op->first, $extended);
 	my $last  = $self->re_dq($op->last,  $extended);
-
-	# Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]"
-	($last =~ /^[A-Z\\\^\[\]_?]/ &&
-	    $first =~ s/([\$@])\^$/${1}{^}/)  # "${^}W" etc
-	    || ($last =~ /^[{\[\w_]/ &&
-		$first =~ s/([\$@])([A-Za-z_]\w*)$/${1}{$2}/);
-
-	return $first . $last;
+	return re_dq_disambiguate($first, $last);
     } elsif ($type eq "uc") {
 	return '\U' . $self->re_dq($op->first->sibling, $extended) . '\E';
     } elsif ($type eq "lc") {
@@ -4156,7 +4159,9 @@ sub regcomp {
 	my $str = '';
 	$kid = $kid->first->sibling;
 	while (!null($kid)) {
-	    $str .= $self->re_dq($kid, $extended);
+	    my $first = $str;
+	    my $last = $self->re_dq($kid, $extended);
+	    $str = re_dq_disambiguate($first, $last);
 	    $kid = $kid->sibling;
 	}
 	return $str, 1;
