@@ -36,6 +36,16 @@ use ExtUtils::Packlist;
 use Pod::Man;
 use subs qw(unlink chmod rename link);
 use vars qw($packlist);
+use vars qw($Is_VMS $Is_W32 $Is_OS2 $Is_Cygwin $Is_Darwin $Is_NetWare);
+
+BEGIN {
+    $Is_VMS = $^O eq 'VMS';
+    $Is_W32 = $^O eq 'MSWin32';
+    $Is_OS2 = $^O eq 'os2';
+    $Is_Cygwin = $^O eq 'cygwin';
+    $Is_Darwin = $^O eq 'darwin';
+    if ($Is_VMS) { eval 'use VMS::Filespec;' }
+}
 
 if ($Config{d_umask}) {
     umask(022); # umasks like 077 aren't that useful for installations
@@ -241,6 +251,8 @@ sub unlink {
     my(@names) = @_;
     my $cnt = 0;
 
+    return scalar(@names) if $Is_VMS;
+
     foreach my $name (@names) {
 	next unless -e $name;
 	chmod 0777, $name if $^O eq 'os2';
@@ -261,7 +273,7 @@ sub link {
             ? $success++
             : ($from =~ m#^/afs/# || $to =~ m#^/afs/#)
               ? die "AFS"  # okay inside eval {}
-              : warn "Couldn't link $from to $to: $!\n"
+              : die "Couldn't link $from to $to: $!\n"
           unless $opts{notify};
     };
     if ($@) {
@@ -298,6 +310,8 @@ sub chmod {
 sub samepath {
     my($p1, $p2) = @_;
     my($dev1, $ino1, $dev2, $ino2);
+
+    return (lc($p1) eq lc($p2)) if ($Is_W32 || $Is_NetWare);
 
     if ($p1 ne $p2) {
 	($dev1, $ino1) = stat($p1);
