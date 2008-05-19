@@ -1,4 +1,4 @@
-#!./perl
+#!./perl -w
 
 BEGIN {
     require 5.004;
@@ -6,7 +6,7 @@ BEGIN {
     @INC = 'lib';
     $ENV{PERL5LIB} = 'lib';
 
-    # This needs to be at BEGIN time, before the use Config; below.
+    # This needs to be at BEGIN time, before any use of Config
     require './install_lib.pl';
 }
 
@@ -15,6 +15,8 @@ use vars qw($Is_VMS $Is_W32 $Is_OS2 $Is_Cygwin $Is_Darwin $Is_NetWare
 	    %opts $packlist);
 my ($dostrip, $versiononly, $force,
     $otherperls, $archname, $nwinstall, $nopods);
+# Not sure how easy it would be to refactor to remove the need for local $depth
+# below
 use vars qw /$depth/;
 
 BEGIN {
@@ -43,7 +45,7 @@ sub mkpath {
 my $mainperldir = "/usr/bin";
 my $exe_ext = $Config{exe_ext};
 
-# Allow ``make install PERLNAME=something_besides_perl'':
+# Allow "make install PERLNAME=something_besides_perl":
 my $perl = defined($ENV{PERLNAME}) ? $ENV{PERLNAME} : 'perl';
 
 # This is the base used for versioned names, like "perl5.6.0".
@@ -65,6 +67,8 @@ if ( $Is_VMS ) {
 }
 
 $otherperls = 1;
+# Consider refactoring this to use Getopt::Long once Getopt::Long's planned
+# feature is implemented, to distinguish + and - options.
 while (@ARGV) {
     $opts{notify} = 1 if $ARGV[0] eq '-n';
     $dostrip = 1 if $ARGV[0] eq '-s';
