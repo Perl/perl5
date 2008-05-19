@@ -700,12 +700,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_memory I_MEMORY		/**/
 
-/* I_NET_ERRNO:
- *	This symbol, if defined, indicates that <net/errno.h> exists and 
- *	should be included.
- */
-#$i_neterrno I_NET_ERRNO		/**/
-
 /* I_NETINET_IN:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <netinet/in.h>. Otherwise, you may try <sys/in.h>.
@@ -1784,7 +1778,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	doubles.
  */
 /* LONG_DOUBLESIZE:
- *	This symbol contains the size of a long double, so that the 
+ *	This symbol contains the size of a long double, so that the
  *	C preprocessor can make decisions based on it.  It is only
  *	defined if the system supports long doubles.
  */
@@ -1797,7 +1791,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol will be defined if the C compiler supports long long.
  */
 /* LONGLONGSIZE:
- *	This symbol contains the size of a long long, so that the 
+ *	This symbol contains the size of a long long, so that the
  *	C preprocessor can make decisions based on it.  It is only
  *	defined if the system supports long long.
  */
@@ -1869,7 +1863,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_pthread_atfork HAS_PTHREAD_ATFORK		/**/
 
 /* HAS_PTHREAD_YIELD:
- *	This symbol, if defined, indicates that the pthread_yield 
+ *	This symbol, if defined, indicates that the pthread_yield
  *	routine is available to yield the execution of the current
  *	thread.	 sched_yield is preferable to pthread_yield.
  */
@@ -2361,8 +2355,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol holds the type used for the second argument to
  *	getgroups() and setgroups().  Usually, this is the same as
  *	gidtype (gid_t) , but sometimes it isn't.
- *	It can be int, ushort, gid_t, etc... 
- *	It may be necessary to include <sys/types.h> to get any 
+ *	It can be int, ushort, gid_t, etc...
+ *	It may be necessary to include <sys/types.h> to get any
  *	typedef'ed information.  This is only required if you have
  *	getgroups() or setgroups()..
  */
@@ -2418,6 +2412,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	should be included.
  */
 #$i_netdb I_NETDB		/**/
+
+/* I_NET_ERRNO:
+ *	This symbol, if defined, indicates that <net/errno.h> exists and
+ *	should be included.
+ */
+#$i_neterrno I_NET_ERRNO		/**/
 
 /* I_PTHREAD:
  *     This symbol, if defined, indicates to the C program that it should
@@ -2551,7 +2551,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_mymalloc MYMALLOC			/**/
 
 /* Mode_t:
- *	This symbol holds the type used to declare file modes 
+ *	This symbol holds the type used to declare file modes
  *	for systems calls.  It is usually mode_t, but may be
  *	int or unsigned short.  It may be necessary to include <sys/types.h>
  *	to get any typedef'ed information.
@@ -2630,7 +2630,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* Select_fd_set_t:
  *	This symbol holds the type used for the 2nd, 3rd, and 4th
  *	arguments to select.  Usually, this is 'fd_set *', if HAS_FD_SET
- *	is defined, and 'int *' otherwise.  This is only useful if you 
+ *	is defined, and 'int *' otherwise.  This is only useful if you
  *	have select(), of course.
  */
 #define Select_fd_set_t 	$selecttype	/**/
@@ -2667,10 +2667,10 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	The signals in the list are separated with commas, and the indices
  *	within that list and the SIG_NAME list match, so it's easy to compute
  *	the signal name from a number or vice versa at the price of a small
- *	dynamic linear lookup. 
+ *	dynamic linear lookup.
  *	Duplicates are allowed, but are moved to the end of the list.
  *	The signal number corresponding to sig_name[i] is sig_number[i].
- *	if (i < NSIG) then sig_number[i] == i.  
+ *	if (i < NSIG) then sig_number[i] == i.
  *	The last element is 0, corresponding to the 0 at the end of
  *	the sig_name_init list.
  *	Note that this variable is initialized from the sig_num_init,
@@ -2887,11 +2887,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	On NeXT 3.2 (and greater), you can build "Fat" Multiple Architecture
  *	Binaries (MAB) on either big endian or little endian machines.
  *	The endian-ness is available at compile-time.  This only matters
- *	for perl, where the config.h can be generated and installed on 
+ *	for perl, where the config.h can be generated and installed on
  *	one system, and used by a different architecture to build an
  *	extension.  Older versions of NeXT that might not have
  *	defined either *_ENDIAN__ were all on Motorola 680x0 series,
- *	so the default case (for NeXT) is big endian to catch them. 
+ *	so the default case (for NeXT) is big endian to catch them.
  *	This might matter for NeXT 3.0.
  */
 #if defined(USE_CROSS_COMPILE) || defined(MULTIARCH)
@@ -2979,7 +2979,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_getpagsz HAS_GETPAGESIZE		/**/
 
 /* HAS_GNULIBC:
- *	This symbol, if defined, indicates to the C program that 
+ *	This symbol, if defined, indicates to the C program that
  *	the GNU C library is being used.  A better check is to use
  *	the __GLIBC__ and __GLIBC_MINOR__ symbols supplied with glibc.
  */
@@ -2988,7 +2988,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #   define _GNU_SOURCE
 #endif
 /* HAS_ISASCII:
- *	This manifest constant lets the C program know that isascii 
+ *	This manifest constant lets the C program know that isascii
  *	is available.
  */
 #$d_isascii HAS_ISASCII		/**/
@@ -4018,6 +4018,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$fflushNULL	FFLUSH_NULL 		/**/
 #$fflushall	FFLUSH_ALL 		/**/
+
+/* I_ASSERT:
+ *	This symbol, if defined, indicates that <assert.h> exists and
+ *	could be included by the C program to get the assert() macro.
+ */
+#$i_assert	I_ASSERT		/**/
 
 /* I_CRYPT:
  *	This symbol, if defined, indicates that <crypt.h> exists and
