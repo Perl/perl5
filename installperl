@@ -98,7 +98,6 @@ if ( $Is_VMS ) {
 }
 
 $otherperls = 1;
-my $destdir = '';
 while (@ARGV) {
     $opts{notify} = 1 if $ARGV[0] eq '-n';
     $dostrip = 1 if $ARGV[0] eq '-s';
@@ -111,7 +110,7 @@ while (@ARGV) {
     $archname = 1 if $ARGV[0] eq '-A';
     $nwinstall = 1 if $ARGV[0] eq '-netware';
     $nopods = 1 if $ARGV[0] eq '-p';
-    $destdir = $1 if $ARGV[0] =~ /^-?-destdir=(.*)$/;
+    $opts{destdir} = $1 if $ARGV[0] =~ /^-?-destdir=(.*)$/;
     if ($ARGV[0] eq '-?' or $ARGV[0] =~ /^-?-h/) {
 	print <<"EOT";
 Usage $0: [switches]
@@ -206,13 +205,13 @@ die "Patchlevel of perl ($patchlevel)",
 	if $patchlevel != $Config{'PERL_VERSION'};
 
 # Fetch some frequently-used items from %Config
-my $installbin = "$destdir$Config{installbin}";
-my $installscript = "$destdir$Config{installscript}";
-my $installprivlib = "$destdir$Config{installprivlib}";
-my $installarchlib = "$destdir$Config{installarchlib}";
-my $installsitelib = "$destdir$Config{installsitelib}";
-my $installsitearch = "$destdir$Config{installsitearch}";
-my $installman1dir = "$destdir$Config{installman1dir}";
+my $installbin = "$opts{destdir}$Config{installbin}";
+my $installscript = "$opts{destdir}$Config{installscript}";
+my $installprivlib = "$opts{destdir}$Config{installprivlib}";
+my $installarchlib = "$opts{destdir}$Config{installarchlib}";
+my $installsitelib = "$opts{destdir}$Config{installsitelib}";
+my $installsitearch = "$opts{destdir}$Config{installsitearch}";
+my $installman1dir = "$opts{destdir}$Config{installman1dir}";
 my $man1ext = $Config{man1ext};
 my $libperl = $Config{libperl};
 # Shared library and dynamic loading suffixes.
@@ -709,9 +708,9 @@ sub link {
     my($success) = 0;
 
     my $xfrom = $from;
-    $xfrom =~ s/^\Q$destdir\E// if $destdir;
+    $xfrom =~ s/^\Q$opts{destdir}\E// if $opts{destdir};
     my $xto = $to;
-    $xto =~ s/^\Q$destdir\E// if $destdir;
+    $xto =~ s/^\Q$opts{destdir}\E// if $opts{destdir};
     print $opts{verbose} ? "  ln $xfrom $xto\n" : "  $xto\n"
 	unless $opts{silent};
     eval {
@@ -754,7 +753,7 @@ sub copy {
     my($from,$to) = @_;
 
     my $xto = $to;
-    $xto =~ s/^\Q$destdir\E// if $destdir;
+    $xto =~ s/^\Q$opts{destdir}\E// if $opts{destdir};
     print $opts{verbose} ? "  cp $from $xto\n" : "  $xto\n"
 	unless $opts{silent};
     print "  creating new version of $xto\n"
@@ -855,7 +854,7 @@ sub installlib {
 	    unlink("$installarchlib/$name");
 	}
 	my $xname = "$installlib/$name";
-	$xname =~ s/^\Q$destdir\E// if $destdir;
+	$xname =~ s/^\Q$opts{destdir}\E// if $opts{destdir};
 	$packlist->{$xname} = { type => 'file' };
 	if ($force || compare($_, "$installlib/$name") || $opts{notify}) {
 	    unlink("$installlib/$name");
@@ -902,7 +901,7 @@ sub copy_if_diff {
     my($from,$to)=@_;
     return 1 if (($^O eq 'VMS') && (-d $from));
     my $xto = $to;
-    $xto =~ s/^\Q$destdir\E// if $destdir;
+    $xto =~ s/^\Q$opts{destdir}\E// if $opts{destdir};
     my $perlpodbadsymlink;
     if ($from =~ m!^pod/perl[\w-]+\.pod$! &&
 	-l $from &&
