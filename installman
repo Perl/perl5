@@ -18,8 +18,6 @@ use vars qw($Is_VMS $Is_W32 $Is_OS2 $Is_Cygwin $Is_Darwin $Is_NetWare
 
 $ENV{SHELL} = 'sh' if $^O eq 'os2';
 
-my $ver = $Config{version};     # Not used presently.
-my $release = substr($],0,3);   # Not used presently.
 my $patchlevel = substr($],3,2);
 die "Patchlevel of perl ($patchlevel)",
     "and patchlevel of config.sh ($Config{'PERL_VERSION'}) don't match\n"
@@ -46,14 +44,10 @@ GetOptions( \%opts,
 die $usage if $opts{help};
 $opts{destdir} //= '';
 
-$opts{man1dir} = "$opts{destdir}$Config{'installman1dir'}"
-    unless defined($opts{man1dir}); 
-$opts{man1ext} = $Config{'man1ext'}
-    unless defined($opts{man1ext}); 
-$opts{man3dir} = "$opts{destdir}$Config{'installman3dir'}"
-    unless defined($opts{man3dir}); 
-$opts{man3ext} = $Config{'man3ext'}
-    unless defined($opts{man3ext}); 
+foreach my $pre (qw(man1 man3)) {
+    $opts{"${pre}dir"} //= $opts{destdir} . $Config{"install${pre}dir"};
+    $opts{"${pre}ext"} //= $Config{"${pre}ext"};
+}
 $opts{silent} ||= $opts{S};
 $opts{notify} ||= $opts{n};
 $opts{verbose} ||= $opts{V} || $opts{notify};
