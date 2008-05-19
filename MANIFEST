@@ -1406,6 +1406,7 @@ hv.c				Hash value code
 hv.h				Hash value header
 INSTALL				Detailed installation instructions
 installhtml			Perl script to install html files for pods
+install_lib.pl			functions shared between install* scripts
 installman			Perl script to install man pages for pods
 installperl			Perl script to do "make install" dirty work
 INTERN.h			Included before domestic .h files
