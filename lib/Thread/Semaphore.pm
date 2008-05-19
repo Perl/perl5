@@ -3,7 +3,7 @@ package Thread::Semaphore;
 use strict;
 use warnings;
 
-our $VERSION = '2.07';
+our $VERSION = '2.08';
 
 use threads::shared;
 use Scalar::Util 1.10 qw(looks_like_number);
@@ -12,7 +12,10 @@ use Scalar::Util 1.10 qw(looks_like_number);
 sub new {
     my $class = shift;
     my $val :shared = @_ ? shift : 1;
-    if (! looks_like_number($val) || (int($val) != $val)) {
+    if (!defined($val) ||
+        ! looks_like_number($val) ||
+        (int($val) != $val))
+    {
         require Carp;
         $val = 'undef' if (! defined($val));
         Carp::croak("Semaphore initializer is not an integer: $val");
@@ -25,7 +28,11 @@ sub down {
     my $sema = shift;
     lock($$sema);
     my $dec = @_ ? shift : 1;
-    if (! looks_like_number($dec) || (int($dec) != $dec) || ($dec < 1)) {
+    if (! defined($dec) ||
+        ! looks_like_number($dec) ||
+        (int($dec) != $dec) ||
+        ($dec < 1))
+    {
         require Carp;
         $dec = 'undef' if (! defined($dec));
         Carp::croak("Semaphore decrement is not a positive integer: $dec");
@@ -39,7 +46,11 @@ sub up {
     my $sema = shift;
     lock($$sema);
     my $inc = @_ ? shift : 1;
-    if (! looks_like_number($inc) || (int($inc) != $inc) || ($inc < 1)) {
+    if (! defined($inc) ||
+        ! looks_like_number($inc) ||
+        (int($inc) != $inc) ||
+        ($inc < 1))
+    {
         require Carp;
         $inc = 'undef' if (! defined($inc));
         Carp::croak("Semaphore increment is not a positive integer: $inc");
@@ -55,7 +66,7 @@ Thread::Semaphore - Thread-safe semaphores
 
 =head1 VERSION
 
-This document describes Thread::Semaphore version 2.07
+This document describes Thread::Semaphore version 2.08
 
 =head1 SYNOPSIS
 
@@ -140,7 +151,7 @@ Thread::Semaphore Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/Thread-Semaphore>
 
 Annotated POD for Thread::Semaphore:
-L<http://annocpan.org/~JDHEDDEN/Thread-Semaphore-2.07/lib/Thread/Semaphore.pm>
+L<http://annocpan.org/~JDHEDDEN/Thread-Semaphore-2.08/lib/Thread/Semaphore.pm>
 
 Source repository:
 L<http://code.google.com/p/thread-semaphore/>
