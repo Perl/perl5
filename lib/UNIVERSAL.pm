@@ -117,8 +117,9 @@ invocant performs the operations, merely that it does.  (C<isa> of course
 mandates an inheritance relationship.  Other relationships include aggregation,
 delegation, and mocking.)
 
-By default, classes in Perl only perform the C<UNIVERSAL> role.  To mark that
-your own classes perform other roles, override C<DOES> appropriately.
+By default, classes in Perl only perform the C<UNIVERSAL> role, as well as the
+role of all classes in their inheritance.  In other words, by default C<DOES>
+responds identically to C<isa>.
 
 There is a relationship between roles and classes, as each class implies the
 existence of a role of the same name.  There is also a relationship between
