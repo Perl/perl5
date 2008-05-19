@@ -34,7 +34,7 @@ OS
 
 use strict;
 my ($Is_VMS, $Is_W32, $Is_OS2, $Is_Cygwin, $Is_Darwin,
-    $nonono, $dostrip, $versiononly, $silent, $verbose, $force,
+    %opts, $dostrip, $versiononly, $force,
     $otherperls, $archname, $Is_NetWare, $nwinstall, $nopods);
 use vars qw /$depth/;
 
@@ -70,7 +70,7 @@ if ($Is_NetWare) {
 
 # override the ones in the rest of the script
 sub mkpath {
-    File::Path::mkpath(@_) unless $nonono;
+    File::Path::mkpath(@_) unless $opts{notify};
 }
 
 my $mainperldir = "/usr/bin";
@@ -100,14 +100,14 @@ if ( $Is_VMS ) {
 $otherperls = 1;
 my $destdir = '';
 while (@ARGV) {
-    $nonono = 1 if $ARGV[0] eq '-n';
+    $opts{notify} = 1 if $ARGV[0] eq '-n';
     $dostrip = 1 if $ARGV[0] eq '-s';
     $versiononly = 1 if $ARGV[0] eq '-v';
     $versiononly = 0 if $ARGV[0] eq '+v';
-    $silent = 1 if $ARGV[0] eq '-S';
+    $opts{silent} = 1 if $ARGV[0] eq '-S';
     $otherperls = 0 if $ARGV[0] eq '-o';
     $force = 1 if $ARGV[0] eq '-f';
-    $verbose = 1 if $ARGV[0] eq '-V' || $ARGV [0] eq '-n';
+    $opts{verbose} = 1 if $ARGV[0] eq '-V' || $ARGV [0] eq '-n';
     $archname = 1 if $ARGV[0] eq '-A';
     $nwinstall = 1 if $ARGV[0] eq '-netware';
     $nopods = 1 if $ARGV[0] eq '-p';
@@ -250,13 +250,13 @@ if ($Is_VMS) {  # Hang in there until File::Spec hits the big time
 
 # Do some quick sanity checks.
 
-if (!$nonono && $d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
+if (!$opts{notify} && $d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
 
    $installbin		|| die "No installbin directory in config.sh\n";
--d $installbin		|| mkpath($installbin, $verbose, 0777);
--d $installbin		|| $nonono || die "$installbin is not a directory\n";
--w $installbin		|| $nonono || die "$installbin is not writable by you\n"
-	unless $installbin =~ m#^/afs/# || $nonono;
+-d $installbin		|| mkpath($installbin, $opts{verbose}, 0777);
+-d $installbin		|| $opts{notify} || die "$installbin is not a directory\n";
+-w $installbin		|| $opts{notify} || die "$installbin is not writable by you\n"
+	unless $installbin =~ m#^/afs/# || $opts{notify};
 
 if (!$Is_NetWare) {
 if (!$Is_VMS) {
@@ -370,10 +370,10 @@ if ($d_dosuid) {
 my ($do_installarchlib, $do_installprivlib) = (0, 0);
 my $vershort = $Is_Cygwin ? substr($ver,0,-2) : $ver;
 
-mkpath($installprivlib, $verbose, 0777);
-mkpath($installarchlib, $verbose, 0777);
-mkpath($installsitelib, $verbose, 0777) if ($installsitelib);
-mkpath($installsitearch, $verbose, 0777) if ($installsitearch);
+mkpath($installprivlib, $opts{verbose}, 0777);
+mkpath($installarchlib, $opts{verbose}, 0777);
+mkpath($installsitelib, $opts{verbose}, 0777) if ($installsitelib);
+mkpath($installsitearch, $opts{verbose}, 0777) if ($installsitearch);
 
 if (chdir "lib") {
     $do_installarchlib = ! samepath($installarchlib, '.');
@@ -390,7 +390,7 @@ else {
 }
 
 # Install header files and libraries.
-mkpath("$installarchlib/CORE", $verbose, 0777);
+mkpath("$installarchlib/CORE", $opts{verbose}, 0777);
 my @corefiles;
 if ($Is_VMS) {  # We did core file selection during build
     my $coredir = "lib/$Config{archname}/$ver/CORE";
@@ -405,7 +405,7 @@ else {
     push(@corefiles,'perl.exp') if $^O eq 'aix';
     if ($^O eq 'mpeix') {
 	# MPE needs mpeixish.h installed as well.
-	mkpath("$installarchlib/CORE/mpeix", $verbose, 0777);
+	mkpath("$installarchlib/CORE/mpeix", $opts{verbose}, 0777);
 	push(@corefiles,'mpeix/mpeixish.h');
     }
     # If they have built sperl.o...
@@ -469,7 +469,7 @@ if ($archname && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VMS) {
 my $mainperl_is_instperl = 0;
 
 if ($Config{installusrbinperl} && $Config{installusrbinperl} eq 'define' &&
-    !$versiononly && !$nonono && !$Is_W32 && !$Is_NetWare && !$Is_VMS && -t STDIN && -t STDERR
+    !$versiononly && !$opts{notify} && !$Is_W32 && !$Is_NetWare && !$Is_VMS && -t STDIN && -t STDERR
 	&& -w $mainperldir && ! samepath($mainperldir, $installbin)) {
     my($usrbinperl)	= "$mainperldir/$perl$exe_ext";
     my($instperl)	= "$installbin/$perl$exe_ext";
@@ -537,7 +537,7 @@ sub script_alias {
 }
 
 # Install scripts.
-mkpath($installscript, $verbose, 0777);
+mkpath($installscript, $opts{verbose}, 0777);
 if ($versiononly) {
     for (@scripts) {
 	(my $base = $_) =~ s#.*/##;
@@ -572,7 +572,7 @@ if ($versiononly) {
 
 my $pod = ($Is_Cygwin || $Is_Darwin || $Is_VMS || $Is_W32) ? 'pods' : 'pod';
 if ( !$versiononly || ($installprivlib =~ m/\Q$vershort/)) {
-    mkpath("${installprivlib}/$pod", $verbose, 0777);
+    mkpath("${installprivlib}/$pod", $opts{verbose}, 0777);
 
     # If Perl 5.003's perldiag.pod is there, rename it.
     if (open POD, "${installprivlib}/$pod/perldiag.pod") {
@@ -585,7 +585,7 @@ if ( !$versiononly || ($installprivlib =~ m/\Q$vershort/)) {
 	    print "  rename $from $to";
 	    rename($from, $to)
 		or warn "Couldn't rename $from to $to: $!\n"
-		unless $nonono;
+		unless $opts{notify};
 	}
     }
 
@@ -640,8 +640,8 @@ if (!$versiononly && $otherperls) {
 
 }
 
-$packlist->write() unless $nonono;
-print "  Installation complete\n" if $verbose;
+$packlist->write() unless $opts{notify};
+print "  Installation complete\n" if $opts{verbose};
 
 exit 0;
 
@@ -666,24 +666,24 @@ sub unlink {
     foreach my $name (@names) {
 	next unless -e $name;
 	chmod 0777, $name if ($Is_OS2 || $Is_W32 || $Is_Cygwin || $Is_NetWare);
-	print "  unlink $name\n" if $verbose;
+	print "  unlink $name\n" if $opts{verbose};
 	( CORE::unlink($name) and ++$cnt
-	  or warn "Couldn't unlink $name: $!\n" ) unless $nonono;
+	  or warn "Couldn't unlink $name: $!\n" ) unless $opts{notify};
     }
     return $cnt;
 }
 
 sub safe_unlink {
-    return if $nonono or $Is_VMS;
+    return if $opts{notify} or $Is_VMS;
     my @names = @_;
     foreach my $name (@names) {
 	next unless -e $name;
 	chmod 0777, $name if ($Is_OS2 || $Is_W32 || $Is_NetWare);
-	print "  unlink $name\n" if $verbose;
+	print "  unlink $name\n" if $opts{verbose};
 	next if CORE::unlink($name);
 	warn "Couldn't unlink $name: $!\n";
 	if ($! =~ /busy/i) {
-	    print "  mv $name $name.old\n" if $verbose;
+	    print "  mv $name $name.old\n" if $opts{verbose};
 	    safe_rename($name, "$name.old")
 		or warn "Couldn't rename $name: $!\n";
 	}
@@ -712,22 +712,24 @@ sub link {
     $xfrom =~ s/^\Q$destdir\E// if $destdir;
     my $xto = $to;
     $xto =~ s/^\Q$destdir\E// if $destdir;
-    print $verbose ? "  ln $xfrom $xto\n" : "  $xto\n" unless $silent;
+    print $opts{verbose} ? "  ln $xfrom $xto\n" : "  $xto\n"
+	unless $opts{silent};
     eval {
 	CORE::link($from, $to)
 	    ? $success++
 	    : ($from =~ m#^/afs/# || $to =~ m#^/afs/#)
 	      ? die "AFS"  # okay inside eval {}
 	      : die "Couldn't link $from to $to: $!\n"
-	  unless $nonono;
+	  unless $opts{notify};
 	$packlist->{$xto} = { from => $xfrom, type => 'link' };
     };
     if ($@) {
 	warn "Replacing link() with File::Copy::copy(): $@";
-	print $verbose ? "  cp $from $xto\n" : "  $xto\n" unless $silent;
+	print $opts{verbose} ? "  cp $from $xto\n" : "  $xto\n"
+	    unless $opts{silent};
 	print "  creating new version of $xto\n"
-		 if $Is_VMS and -e $to and !$silent;
-	unless ($nonono or File::Copy::copy($from, $to) and ++$success) {
+		 if $Is_VMS and -e $to and !$opts{silent};
+	unless ($opts{notify} or File::Copy::copy($from, $to) and ++$success) {
 	    # Might have been that F::C::c can't overwrite the target
 	    warn "Couldn't copy $from to $to: $!\n"
 		unless -f $to and (chmod(0666, $to), unlink $to)
@@ -742,10 +744,10 @@ sub chmod {
     my($mode,$name) = @_;
 
     return if ($^O eq 'dos');
-    printf "  chmod %o %s\n", $mode, $name if $verbose;
+    printf "  chmod %o %s\n", $mode, $name if $opts{verbose};
     CORE::chmod($mode,$name)
 	|| warn sprintf("Couldn't chmod %o %s: $!\n", $mode, $name)
-      unless $nonono;
+      unless $opts{notify};
 }
 
 sub copy {
@@ -753,9 +755,11 @@ sub copy {
 
     my $xto = $to;
     $xto =~ s/^\Q$destdir\E// if $destdir;
-    print $verbose ? "  cp $from $xto\n" : "  $xto\n" unless $silent;
-    print "  creating new version of $xto\n" if $Is_VMS and -e $to and !$silent;
-    unless ($nonono or File::Copy::copy($from, $to)) {
+    print $opts{verbose} ? "  cp $from $xto\n" : "  $xto\n"
+	unless $opts{silent};
+    print "  creating new version of $xto\n"
+	if $Is_VMS and -e $to and !$opts{silent};
+    unless ($opts{notify} or File::Copy::copy($from, $to)) {
 	# Might have been that F::C::c can't overwrite the target
 	warn "Couldn't copy $from to $to: $!\n"
 	    unless -f $to and (chmod(0666, $to), unlink $to)
@@ -853,9 +857,9 @@ sub installlib {
 	my $xname = "$installlib/$name";
 	$xname =~ s/^\Q$destdir\E// if $destdir;
 	$packlist->{$xname} = { type => 'file' };
-	if ($force || compare($_, "$installlib/$name") || $nonono) {
+	if ($force || compare($_, "$installlib/$name") || $opts{notify}) {
 	    unlink("$installlib/$name");
-	    mkpath("$installlib/$dir", $verbose, 0777);
+	    mkpath("$installlib/$dir", $opts{verbose}, 0777);
 	    # HP-UX (at least) needs to maintain execute permissions
 	    # on dynamically-loaded libraries.
 	    if ($Is_NetWare && !$nwinstall) {
@@ -912,9 +916,9 @@ sub copy_if_diff {
     }
     -f $from || $perlpodbadsymlink || warn "$0: $from not found";
     $packlist->{$xto} = { type => 'file' };
-    if ($force || compare($from, $to) || $nonono) {
+    if ($force || compare($from, $to) || $opts{notify}) {
 	safe_unlink($to);   # In case we don't have write permissions.
-	if ($nonono) {
+	if ($opts{notify}) {
 	    $from = $depth . "/" . $from if $depth;
 	}
 	if ($perlpodbadsymlink && $from =~ m!^pod/perl(.+)\.pod$!) {
@@ -922,7 +926,7 @@ sub copy_if_diff {
 	}
 	copy($from, $to);
 	# Restore timestamps if it's a .a library or for OS/2.
-	if (!$nonono && ($Is_OS2 || $to =~ /\.a$/)) {
+	if (!$opts{notify} && ($Is_OS2 || $to =~ /\.a$/)) {
 	    my ($atime, $mtime) = (stat $from)[8,9];
 	    utime $atime, $mtime, $to;
 	}
@@ -943,14 +947,14 @@ sub strip
 
     foreach my $file (@args) {
 	if (-f $file) {
-	    if ($verbose) {
+	    if ($opts{verbose}) {
 		print "  strip " . join(' ', @opts);
 		print " " if (@opts);
 		print "$file\n";
 	    }
 	    system("strip", @opts, $file);
 	} else {
-	    print "# file '$file' skipped\n" if $verbose;
+	    print "# file '$file' skipped\n" if $opts{verbose};
 	}
     }
 }
