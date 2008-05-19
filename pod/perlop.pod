@@ -835,7 +835,7 @@ the text of the exception:
 The C<???> operator also takes one argument, but it emits a warning instead of
 throwing an exception:
 
-    sub baz { ??? "Who are you?  Wnat do you want?" }
+    sub baz { ??? "Who are you?  What do you want?" }
     baz();
     say "Why are you here?";
 
