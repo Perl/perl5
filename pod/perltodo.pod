@@ -199,6 +199,13 @@ in force at the __END__ block to be in force within each autoloaded subroutine.
 
 There's a similar problem with SelfLoader.
 
+=head2 profile installman
+
+The F<installman> script is slow. All it is doing text processing, which we're
+told is something Perl is good at. So it would be nice to know what it is doing
+that is taking so much CPU, and where possible address it.
+
+
 =head1 Tasks that need a little sysadmin-type knowledge
 
 Or if you prefer, tasks that you would learn from, and broaden your skills
@@ -436,6 +443,8 @@ Except that it's not clear if these really are the most commonly used ops. So
 as part of exercising your skills with coverage and profiling tools you might
 want to determine what ops I<really> are the most commonly used. And in turn
 suggest evictions and promotions to achieve a better F<pp_hot.c>.
+
+One piece of Perl code that might make a good testbed is F<installman>.
 
 =head2 Allocate OPs from arenas
 
