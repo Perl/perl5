@@ -4060,6 +4060,11 @@ struct perl_memory_debug_header {
 #  define INIT_TRACK_MEMPOOL(header, interp)
 #endif
 
+#ifdef I_MALLOCMALLOC
+/* Needed for malloc_size(), malloc_good_size() on some systems */
+#  include <malloc/malloc.h>
+#endif
+
 
 typedef int (CPERLscope(*runops_proc_t)) (pTHX);
 typedef void (CPERLscope(*share_proc_t)) (pTHX_ SV *sv);

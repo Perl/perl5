@@ -689,6 +689,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_locale	I_LOCALE		/**/
 
+/* I_MALLOCMALLOC:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <malloc/malloc.h>.
+ */
+#$i_mallocmalloc	I_MALLOCMALLOC		/**/
+
 /* I_MATH:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <math.h>.
@@ -765,6 +771,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	include <sys/param.h>.
  */
 #$i_sysparam I_SYS_PARAM		/**/
+
+/* I_SYS_POLL:
+ *	This symbol, if defined, indicates that the program may include
+ *	<sys/poll.h>.  When I_POLL is also defined, it's probably safest
+ *	to only include <poll.h>.
+ */
+#$i_syspoll I_SYS_POLL	/**/
 
 /* I_SYS_RESOURCE:
  *	This symbol, if defined, indicates to the C program that it should
