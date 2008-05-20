@@ -881,18 +881,22 @@ config.w32 : $(CFGSH_TMPL)
 ..\config.sh : config.w32 $(MINIPERL) config_sh.PL
 	$(MINIPERL) -I..\lib config_sh.PL $(CFG_VARS) config.w32 > ..\config.sh
 
-# this target is for when changes to the main config.sh happen
-# edit config.{b,v,g}c and make this target once for each supported
-# compiler (e.g. `nmake CCTYPE=BORLAND regen_config_h`)
+# this target is for when changes to the main config.sh happen.
+# edit config.vc, then make perl in a minimal configuration (i.e. with MULTI,
+# ITHREADS, IMP_SYS, LARGE_FILES, PERLIO and CRYPT off), then make this target
+# to regenerate config_H.vc.
+# repeat for config.vc64 and config_H.vc64 if you have a suitable build
+# environment, otherwise hand-edit them to maintain the same differences with
+# config.vc and config_H.vc as before.
+# unfortunately, some further manual editing is also then required to restore all
+# the special __GNUC__ handling that is otherwise lost.
 regen_config_h:
-	perl config_sh.PL $(CFG_VARS) $(CFGSH_TMPL) > ..\config.sh
+	$(MINIPERL) -I..\lib config_sh.PL $(CFG_VARS) $(CFGSH_TMPL) > ..\config.sh
 	cd ..
-	-del /f perl.exe perl*.dll
-	perl configpm
+	miniperl configpm
 	cd win32
 	-del /f $(CFGH_TMPL)
-	-mkdir $(COREDIR)
-	-perl config_h.PL "INST_VER=$(INST_VER)"
+	-$(MINIPERL) -I..\lib config_h.PL "INST_VER=$(INST_VER)"
 	rename config.h $(CFGH_TMPL)
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
