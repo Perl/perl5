@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Sat May 17 16:03:30 CEST 2008 [metaconfig 3.5 PL0]
+# Generated on Tue May 20 17:29:22 CEST 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -5261,12 +5261,17 @@ case "$ldflags" in
 	case "$ccflags" in
 	*-posix*) dflt="$dflt -posix" ;;
 	esac
-	# See note above about -fstack-protector
-	case "$ccflags" in
-	*-fstack-protector*) dflt="$dflt -fstack-protector" ;;
-	esac
 	;;
 *) dflt="$ldflags";;
+esac
+# See note above about -fstack-protector
+case "$ccflags" in
+*-fstack-protector*) 
+	case "$dflt" in
+	*-fstack-protector*) ;; # Don't add it again
+	*) dflt="$dflt -fstack-protector" ;; 
+	esac
+	;;
 esac
 
 : Try to guess additional flags to pick up local libraries.
@@ -20797,29 +20802,6 @@ val="$t_gdbm"
 set i_gdbm
 eval $setvar
 
-: see if this is a ieeefp.h system
-case "$i_ieeefp" in
-'' ) set ieeefp.h i_ieeefp
-     eval $inhdr
-     ;;
-esac
-
-: see if this is a libutil.h system
-set libutil.h i_libutil
-eval $inhdr
-
-: see if mach cthreads are available
-if test "X$usethreads" = "X$define"; then
-	set mach/cthreads.h i_machcthr
-	eval $inhdr
-else
-	i_machcthr="$undef"
-fi
-
-: see if this is a mntent.h system
-set mntent.h i_mntent
-eval $inhdr
-
 : see if ndbm.h is available
 set ndbm.h i_ndbm
 eval $inhdr
@@ -20848,6 +20830,29 @@ if $test "$i_ndbm" = "$define" -o "$i_gdbmndbm" = "$define" -o "$i_gdbm_ndbm" = 
 fi
 set d_ndbm
 eval $setvar
+
+: see if this is a ieeefp.h system
+case "$i_ieeefp" in
+'' ) set ieeefp.h i_ieeefp
+     eval $inhdr
+     ;;
+esac
+
+: see if this is a libutil.h system
+set libutil.h i_libutil
+eval $inhdr
+
+: see if mach cthreads are available
+if test "X$usethreads" = "X$define"; then
+	set mach/cthreads.h i_machcthr
+	eval $inhdr
+else
+	i_machcthr="$undef"
+fi
+
+: see if this is a mntent.h system
+set mntent.h i_mntent
+eval $inhdr
 
 : see if net/errno.h is available
 val=''
