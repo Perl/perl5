@@ -5,10 +5,10 @@
 
 : Set up for generating config_h.SH
 case "$CONFIG_SH" in
-'') CONFIG_SH=config.sh ;;
+'') CONFIG_SH=config.sh;;
 esac
 case "$CONFIG_H" in
-'') CONFIG_H=config.h ;;
+'') CONFIG_H=config.h;;
 esac
 case $PERL_CONFIG_SH in
 '')
@@ -40,7 +40,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  * that running config_h.SH again will wipe out any changes you've made.
  * For a more permanent change edit $CONFIG_SH and rerun config_h.SH.
  *
- * \$Id: Config_h.U,v 3.0.1.5 1997/02/28 14:57:43 ram Exp $
+ * \$Id: Config_h.U 1 2006-08-24 12:32:52Z rmanfredi $
  */
 
 /*
@@ -1842,8 +1842,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* HAS_POLL:
  *	This symbol, if defined, indicates that the poll routine is
- *	available to poll active file descriptors. You may safely
- *	include <poll.h> when both this symbol *and* I_POLL are defined.
+ *	available to poll active file descriptors.  Please check I_POLL and
+ *	I_SYS_POLL to know which header should be included as well.
  */
 #$d_poll HAS_POLL		/**/
 
@@ -4439,6 +4439,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #ifndef USE_64_BIT_ALL
 #$use64bitall	USE_64_BIT_ALL		/**/
 #endif
+
+/* USE_DTRACE:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built with support for DTrace.
+ */
+#$usedtrace USE_DTRACE		/**/
 
 /* USE_FAST_STDIO:
  *	This symbol, if defined, indicates that Perl should

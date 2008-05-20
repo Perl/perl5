@@ -34,7 +34,7 @@ afsroot (afs.U):
 	This variable is by default set to '/afs'. In the unlikely case
 	this is not the correct root, it is possible to override this with
 	a hint value or command line option.  This will be used in subsequent
-	tests for AFSness in the Perl configure and test process.
+	tests for AFSness in the configure and test process.
 
 alignbytes (alignbytes.U):
 	This variable holds the number of bytes required to align a
@@ -3671,11 +3671,6 @@ man3ext (man3dir.U):
 	This variable contains the extension that the manual page should
 	have: one of 'n', 'l', or '3'.  The Makefile must supply the '.'.
 	See man3dir.
-
-Mcc (Loc.U):
-	This variable is used internally by Configure to determine the
-	full pathname (if any) of the Mcc program.  After Configure runs,
-	the value is reset to a plain "Mcc" and is not useful.
 
 mips_type (usrinc.U):
 	This variable holds the environment type for the mips system.

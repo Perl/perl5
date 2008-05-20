@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Mon Jan 14 17:33:05 CET 2008 [metaconfig 3.0 PL70]
+# Generated on Tue Jan 22 17:46:32 CET 2008 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -221,7 +221,6 @@ d_bsd=''
 d_eunice=''
 d_xenix=''
 eunicefix=''
-Mcc=''
 ar=''
 awk=''
 bash=''
@@ -1296,9 +1295,6 @@ plibpth=''
 libswanted=''
 : some systems want to use only the non-versioned libso:s
 ignore_versioned_solibs=''
-siteman1dir=''
-siteman3dir=''
-sitescript=''
 : set usethreads on the Configure command line to enable threads.
 usereentrant='undef'
 : full support for void wanted by default
@@ -1937,11 +1933,13 @@ rm -f .echotmp
 echo " "
 if test -f "$rsrc/MANIFEST"; then
 	echo "First let's make sure your kit is complete.  Checking..." >&4
-	awk '$1 !~ /PACK[A-Z]+/ {print $1}' "$rsrc/MANIFEST" | (split -l 50 2>/dev/null || split -50)
+	awk '$1 !~ /PACK[A-Z]+/ {print $1}' "$rsrc/MANIFEST" |\
+		(split -l 50 2>/dev/null || split -50)
 	rm -f missing
 	tmppwd=`pwd`
 	for filelist in x??; do
-		(cd "$rsrc"; ls `cat "$tmppwd/$filelist"` >/dev/null 2>>"$tmppwd/missing")
+		(cd "$rsrc"; ls `cat "$tmppwd/$filelist"` \
+			>/dev/null 2>>"$tmppwd/missing")
 	done
 	if test -s missing; then
 		cat missing >&4
@@ -2281,14 +2279,13 @@ for dir in \$*; do
 		exit 0
 	elif test "X$_exe" != X -a -f \$thisthing$_exe; then
 		echo \$thisthing
-        	exit 0
+		exit 0
 	elif test -f \$dir/\$thing.exe; then
 		if test -n "$DJGPP"; then
 			echo \$dir/\$thing.exe
 		elif test "$eunicefix" != ":"; then
 			: on Eunice apparently
 			echo \$dir/\$thing
-			exit 0
 		fi
 		exit 0
 	fi
@@ -2319,7 +2316,6 @@ tr
 uniq
 "
 trylist="
-Mcc
 ar
 bison
 byacc
@@ -3902,17 +3898,18 @@ esac
 prefix="$ans"
 prefixexp="$ansexp"
 
-: is AFS running?
+: allow them to override the AFS root
 case "$afsroot" in
 '')	afsroot=/afs ;;
 *)	afsroot=$afsroot ;;
 esac
 
+: is AFS running?
 echo " "
 case "$afs" in
 $define|true)	afs=true ;;
 $undef|false)	afs=false ;;
-*)	if test -d $afsroot; then
+*)	if $test -d $afsroot; then
 		afs=true
 	else
 		afs=false
@@ -4341,6 +4338,23 @@ case "$usemorebits" in
 	;;
 esac
 
+: Determine the C compiler to be used
+echo " "
+case "$cc" in
+'') dflt=cc;;
+*) dflt="$cc";;
+esac
+rp="Use which C compiler?"
+. ./myread
+cc="$ans"
+
+: See whether they have no cc but they do have gcc
+. ./trygcc
+if $test -f cc.cbu; then
+    . ./cc.cbu
+fi
+. ./checkcc
+
 : make some quick guesses about what we are up against
 echo " "
 $echo $n "Hmm...  $c"
@@ -4435,25 +4449,6 @@ fi
 chmod +x bsd usg v7 osf1 eunice xenix venix os2
 $eunicefix bsd usg v7 osf1 eunice xenix venix os2
 $rm -f foo
-
-: Checking the C compiler
-case "$cc" in
-'') dflt=cc;;
-*) dflt="$cc";;
-esac
-rp="Use which C compiler?"
-. ./myread
-cc="$ans"
-
-: See if they have not cc but they do have gcc
-. ./trygcc
-: Look for a hint-file generated 'call-back-unit'.  Now that the
-: user has specified the compiler, we may need to set or change some
-: other defaults.
-if $test -f cc.cbu; then
-    . ./cc.cbu
-fi
-. ./checkcc
 
 : Check if we are using GNU gcc and what its version is
 echo " "
@@ -8379,7 +8374,7 @@ You can't have filenames longer than 14 chars.
 You can't even think about them!
 EOM
 	val="$undef"
-fi 
+fi
 set d_flexfnam
 eval $setvar
 $rm -rf 123456789abcde*
@@ -8737,7 +8732,7 @@ case "$phostname" in
 	;;
 esac
 
-: Ask for e-mail
+: determine the e-mail address of the user who is running us
 $cat <<EOM
 
 I need to get your e-mail address in Internet format if possible, i.e.
@@ -20024,11 +20019,6 @@ EOM
 esac
 
 : Trace out the files included by signal.h, then look for SIGxxx names.
-: Remove SIGARRAYSIZE used by HPUX.
-: Remove SIGSTKSIZE used by Linux.
-: Remove SIGSTKSZ used by Posix.
-: Remove SIGTYP void lines used by OS2.
-: Some cpps, like os390, dont give the file name anywhere
 if [ "X$fieldn" = X ]; then
 	: Just make some guesses.  We check them later.
 	xxx='/usr/include/signal.h /usr/include/sys/signal.h'
@@ -20036,16 +20026,13 @@ else
 	xxx=`echo '#include <signal.h>' |
 	$cppstdin $cppminus $cppflags 2>/dev/null |
 	$grep '^[ 	]*#.*include' |
-	$awk "{print \\$$fieldn}" | $sed 's!"!!g' | $sed 's!\\\\\\\\!/!g' | $sort | $uniq`
+	$awk "{print \\$$fieldn}" | $sed 's!"!!g' |\
+		$sed 's!\\\\\\\\!/!g' | $sort | $uniq`
 fi
-: Check this list of files to be sure we have parsed the cpp output ok.
-: This will also avoid potentially non-existent files, such
-: as ../foo/bar.h
 xxxfiles=''
 for xx in $xxx /dev/null ; do
 	$test -f "$xx" && xxxfiles="$xxxfiles $xx"
 done
-: If we have found no files, at least try signal.h
 case "$xxxfiles" in
 '')	xxxfiles=`./findhdr signal.h` ;;
 esac
@@ -20193,7 +20180,8 @@ $cat >>signal_cmd <<'EOS'
 
 set signal
 if eval $compile_ok; then
-	$run ./signal$_exe | ($sort -n -k 2 2>/dev/null || $sort -n +1) | $uniq | $awk -f signal.awk >signal.lst
+	$run ./signal$_exe | ($sort -n -k 2 2>/dev/null || $sort -n +1) |\
+		$uniq | $awk -f signal.awk >signal.lst
 else
 	echo "(I can't seem be able to compile the whole test program)" >&4
 	echo "(I'll try it in little pieces.)" >&4
@@ -21582,9 +21570,9 @@ if test -d ../UU; then
 	cd ..
 fi
 
-: configuration may be patched via a 'config.arch' file
+: configuration may be unconditionally patched via a 'config.arch' file
 if $test -f config.arch; then
-	echo "I see a config.arch file, loading it."
+	echo "I see a config.arch file, loading it." >&4
 	. ./config.arch
 fi
 
@@ -21632,13 +21620,16 @@ $startsh
 # Configured by     : $cf_by
 # Target system     : $myuname
 
+EOT
+$test -f UU/cmdline.opt && $cat UU/cmdline.opt >> config.sh
+$spitshell <<EOT >>config.sh
+
 Author='$Author'
 Date='$Date'
 Header='$Header'
 Id='$Id'
 Locker='$Locker'
 Log='$Log'
-Mcc='$Mcc'
 RCSfile='$RCSfile'
 Revision='$Revision'
 Source='$Source'
@@ -22684,8 +22675,9 @@ echo "PERL_CONFIG_SH=true" >>config.sh
 : propagate old symbols
 if $test -f UU/config.sh; then
 	<UU/config.sh $sort | $uniq >UU/oldconfig.sh
-	sed -n 's/^\([a-zA-Z_0-9]*\)=.*/\1/p' config.sh config.sh UU/oldconfig.sh |\
-	$sort | $uniq -u >UU/oldsyms
+	$sed -n 's/^\([a-zA-Z_0-9]*\)=.*/\1/p' \
+		config.sh config.sh UU/oldconfig.sh |\
+		$sort | $uniq -u >UU/oldsyms
 	set X `cat UU/oldsyms`
 	shift
 	case $# in
@@ -22694,7 +22686,7 @@ if $test -f UU/config.sh; then
 		cat <<EOM
 Hmm...You had some extra variables I don't know about...I'll try to keep 'em...
 EOM
-		echo "# Variables propagated from previous config.sh file." >>config.sh
+		echo ": Variables propagated from previous config.sh file." >>config.sh
 		for sym in `cat UU/oldsyms`; do
 			echo "    Propagating $hint variable "'$'"$sym..."
 			eval 'tmp="$'"${sym}"'"'
