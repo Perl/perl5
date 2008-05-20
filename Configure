@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Tue Jan 22 17:46:32 CET 2008 [metaconfig 3.0 PL70]
+# Generated on Fri Feb 15 17:37:37 CET 2008 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1057,6 +1057,7 @@ i8size=''
 i8type=''
 ivsize=''
 ivtype=''
+nv_overflows_integers_at=''
 nv_preserves_uv_bits=''
 nvsize=''
 nvtype=''
@@ -3591,7 +3592,7 @@ case "\$1" in
  \~/*|\~)
 	echo \$1 | $sed "s|~|\${HOME-\$LOGDIR}|"
 	;;
- ~*)
+ \~*)
 	if $test -f /bin/csh; then
 		/bin/csh -f -c "glob \$1"
 		failed=\$?
@@ -15470,6 +15471,89 @@ case "$nv_preserves_uv_bits" in
 esac
 $rm_try
 
+$echo "Checking to find the largest integer value your NVs can hold..." >&4
+: volatile so that the compiler has to store it out to memory.
+if test X"$d_volatile" = X"$define"; then
+	volatile=volatile
+fi
+$cat <<EOP >try.c
+#include <stdio.h>
+
+typedef $nvtype NV;
+
+int
+main() {
+  NV value = 2;
+  int count = 1;
+
+  while(count < 256) {
+    $volatile NV up = value + 1.0;
+    $volatile NV negated = -value;
+    $volatile NV down = negated - 1.0;
+    $volatile NV got_up = up - value;
+    int up_good = got_up == 1.0;
+    int got_down = down - negated;
+    int down_good = got_down == -1.0;
+
+    if (down_good != up_good) {
+      fprintf(stderr,
+	      "Inconsistency - up %d %f; down %d %f; for 2**%d (%.20f)\n",
+	      up_good, (double) got_up, down_good, (double) got_down,
+	      count, (double) value);
+      return 1;
+    }
+    if (!up_good) {
+      while (1) {
+	if (count > 8) {
+	  count -= 8;
+	  fputs("256.0", stdout);
+	} else {
+	  count--;
+	  fputs("2.0", stdout);
+	}
+	if (!count) {
+	  puts("");
+	  return 0;
+	}
+	fputs("*", stdout);
+      }
+    }
+    value *= 2;
+    ++count;
+  }
+  fprintf(stderr, "Cannot overflow integer range, even at 2**%d (%.20f)\n",
+	  count, (double) value);
+  return 1;
+}
+EOP
+set try
+
+nv_overflows_integers_at='0'
+if eval $compile; then
+    xxx="`$run ./try`"
+    case "$?" in
+	0)
+	    case "$xxx" in
+		2*)  cat >&4 <<EOM
+The largest integer your NVs can preserve is equal to $xxx
+EOM
+		    nv_overflows_integers_at="$xxx"
+		    ;;
+		*)  cat >&4 <<EOM
+Cannot determine the largest integer value your NVs can hold, unexpected output
+'$xxx'
+EOM
+		    ;;
+	    esac
+	    ;;
+	*)  cat >&4 <<EOM
+Cannot determine the largest integer value your NVs can hold
+EOM
+	    ;;
+    esac
+fi
+$rm_try
+
 $echo "Checking whether NV 0.0 is all bits zero in memory..." >&4
 : volatile so that the compiler has to store it out to memory.
 if test X"$d_volatile" = X"$define"; then
@@ -22422,6 +22506,7 @@ nroff='$nroff'
 nvEUformat='$nvEUformat'
 nvFUformat='$nvFUformat'
 nvGUformat='$nvGUformat'
+nv_overflows_integers_at='$nv_overflows_integers_at'
 nv_preserves_uv_bits='$nv_preserves_uv_bits'
 nveformat='$nveformat'
 nvfformat='$nvfformat'

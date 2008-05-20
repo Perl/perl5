@@ -5917,6 +5917,8 @@ $ WC "d_nanosleep='" + d_nanosleep + "'"
 $ WC "d_nice='define'"
 $ WC "d_nl_langinfo='" + d_nl_langinfo + "'"
 $ WC "d_nv_preserves_uv='" + d_nv_preserves_uv + "'"
+$! Pending integrating the probe test
+$ WC "nv_overflows_integers_at='0'"
 $ WC "nv_preserves_uv_bits='" + nv_preserves_uv_bits + "'"
 $ WC "d_nv_zero_is_allbits_zero='define'"
 $ WC "d_off64_t='" + d_off64_t + "'"
