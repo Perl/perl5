@@ -9346,8 +9346,8 @@ Perl_regfree_internal(pTHX_ REGEXP * const r)
 /* 
    re_dup - duplicate a regexp. 
    
-   This routine is expected to clone a given regexp structure. It is not
-   compiler under USE_ITHREADS.
+   This routine is expected to clone a given regexp structure. It is only
+   compiled under USE_ITHREADS.
 
    After all of the core data stored in struct regexp is duplicated
    the regexp_engine.dupe method is used to copy any private data

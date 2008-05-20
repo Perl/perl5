@@ -1886,6 +1886,13 @@ test, it does not necessarily mean you have a broken perl.  This test
 tries to exercise the regular expression subsystem quite thoroughly,
 and may well be far more demanding than your normal usage.
 
+=item libgcc_s.so.1: cannot open shared object file
+
+This message has been reported on gcc-3.2.3 and earlier installed with
+a non-standard prefix.  Setting the LD_LIBRARY_PATH environment variable
+(or equivalent) to include gcc's lib/ directory with the libgcc_s.so.1
+shared library should fix the problem.
+
 =item Failures from lib/File/Temp/t/security saying "system possibly insecure"
 
 First, such warnings are not necessarily serious or indicative of a
