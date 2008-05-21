@@ -144,6 +144,9 @@ pM	|PERL_CONTEXT*	|create_eval_scope|U32 flags
 : croak()'s first parm can be NULL.  Otherwise, mod_perl breaks.
 Afprd	|void	|croak		|NULLOK const char* pat|...
 Apr	|void	|vcroak		|NULLOK const char* pat|NULLOK va_list* args
+Aprd	|void	|croak_xs_usage	|NN const CV *const cv \
+				|NN const char *const params
+
 #if defined(PERL_IMPLICIT_CONTEXT)
 Afnrp	|void	|croak_nocontext|NULLOK const char* pat|...
 Afnp	|OP*	|die_nocontext	|NN const char* pat|...

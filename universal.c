@@ -294,15 +294,50 @@ Perl_boot_core_UNIVERSAL(pTHX)
     newXS("Tie::Hash::NamedCapture::flags", XS_Tie_Hash_NamedCapture_flags, file);
 }
 
+/*
+=for apidoc croak_xs_usage
+
+A specialised variant of C<croak()> for emitting the usage message for xsubs
+
+    croak_xs_usage(cv, "eee_yow");
+
+works out the package name and subroutine name from C<cv>, and then calls
+C<croak()>. Hence if C<cv> is C<&ouch::awk>, it would call C<croak> as:
+
+    Perl_croak(aTHX_ "Usage %s::%s(%s)", "ouch" "awk", "eee_yow");
+
+=cut
+*/
+
+void
+Perl_croak_xs_usage(pTHX_ const CV *const cv, const char *const params)
+{
+    const GV *const gv = CvGV(cv);
+
+    PERL_ARGS_ASSERT_CROAK_XS_USAGE;
+
+    if (gv) {
+	const char *const gvname = GvNAME(gv);
+	const HV *const stash = GvSTASH(gv);
+	const char *const hvname = stash ? HvNAME_get(stash) : NULL;
+
+	if (hvname)
+	    Perl_croak(aTHX_ "Usage: %s::%s(%s)", hvname, gvname, params);
+	else
+	    Perl_croak(aTHX_ "Usage: %s(%s)", gvname, params);
+    } else {
+	/* Pants. I don't think that it should be possible to get here. */
+	Perl_croak(aTHX_ "Usage: CODE(%"UVXf")(%s)", (UV)cv, params);
+    }
+}
 
 XS(XS_UNIVERSAL_isa)
 {
     dVAR;
     dXSARGS;
-    PERL_UNUSED_ARG(cv);
 
     if (items != 2)
-	Perl_croak(aTHX_ "Usage: UNIVERSAL::isa(reference, kind)");
+	croak_xs_usage(cv, "reference, kind");
     else {
 	SV * const sv = ST(0);
 	const char *name;
@@ -328,10 +363,9 @@ XS(XS_UNIVERSAL_can)
     const char *name;
     SV   *rv;
     HV   *pkg = NULL;
-    PERL_UNUSED_ARG(cv);
 
     if (items != 2)
-	Perl_croak(aTHX_ "Usage: UNIVERSAL::can(object-ref, method)");
+	croak_xs_usage(cv, "object-ref, method");
 
     sv = ST(0);
 
@@ -469,9 +503,8 @@ XS(XS_version_new)
 {
     dVAR;
     dXSARGS;
-    PERL_UNUSED_ARG(cv);
     if (items > 3)
-	Perl_croak(aTHX_ "Usage: version::new(class, version)");
+	croak_xs_usage(cv, "class, version");
     SP -= items;
     {
         SV *vs = ST(1);
@@ -505,9 +538,8 @@ XS(XS_version_stringify)
 {
      dVAR;
      dXSARGS;
-     PERL_UNUSED_ARG(cv);
      if (items < 1)
-	  Perl_croak(aTHX_ "Usage: version::stringify(lobj, ...)");
+	 croak_xs_usage(cv, "lobj, ...");
      SP -= items;
      {
 	  SV *	lobj;
@@ -529,9 +561,8 @@ XS(XS_version_numify)
 {
      dVAR;
      dXSARGS;
-     PERL_UNUSED_ARG(cv);
      if (items < 1)
-	  Perl_croak(aTHX_ "Usage: version::numify(lobj, ...)");
+	 croak_xs_usage(cv, "lobj, ...");
      SP -= items;
      {
 	  SV *	lobj;
@@ -553,9 +584,8 @@ XS(XS_version_normal)
 {
      dVAR;
      dXSARGS;
-     PERL_UNUSED_ARG(cv);
      if (items < 1)
-	  Perl_croak(aTHX_ "Usage: version::normal(lobj, ...)");
+	 croak_xs_usage(cv, "lobj, ...");
      SP -= items;
      {
 	  SV *	lobj;
@@ -577,9 +607,8 @@ XS(XS_version_vcmp)
 {
      dVAR;
      dXSARGS;
-     PERL_UNUSED_ARG(cv);
      if (items < 1)
-	  Perl_croak(aTHX_ "Usage: version::vcmp(lobj, ...)");
+	 croak_xs_usage(cv, "lobj, ...");
      SP -= items;
      {
 	  SV *	lobj;
@@ -623,9 +652,8 @@ XS(XS_version_boolean)
 {
     dVAR;
     dXSARGS;
-    PERL_UNUSED_ARG(cv);
     if (items < 1)
-	Perl_croak(aTHX_ "Usage: version::boolean(lobj, ...)");
+	croak_xs_usage(cv, "lobj, ...");
     SP -= items;
     if (sv_derived_from(ST(0), "version")) {
 	SV * const lobj = SvRV(ST(0));
@@ -642,9 +670,8 @@ XS(XS_version_noop)
 {
     dVAR;
     dXSARGS;
-    PERL_UNUSED_ARG(cv);
     if (items < 1)
-	Perl_croak(aTHX_ "Usage: version::noop(lobj, ...)");
+	croak_xs_usage(cv, "lobj, ...");
     if (sv_derived_from(ST(0), "version"))
 	Perl_croak(aTHX_ "operation not supported with version object");
     else
@@ -658,9 +685,8 @@ XS(XS_version_is_alpha)
 {
     dVAR;
     dXSARGS;
-    PERL_UNUSED_ARG(cv);
     if (items != 1)
-	Perl_croak(aTHX_ "Usage: version::is_alpha(lobj)");
+	croak_xs_usage(cv, "lobj");
     SP -= items;
     if (sv_derived_from(ST(0), "version")) {
 	SV * const lobj = ST(0);
@@ -679,9 +705,8 @@ XS(XS_version_qv)
 {
     dVAR;
     dXSARGS;
-    PERL_UNUSED_ARG(cv);
     if (items != 1)
-	Perl_croak(aTHX_ "Usage: version::qv(ver)");
+	croak_xs_usage(cv, "ver");
     SP -= items;
     {
 	SV *	ver = ST(0);
@@ -705,9 +730,8 @@ XS(XS_utf8_is_utf8)
 {
      dVAR;
      dXSARGS;
-     PERL_UNUSED_ARG(cv);
      if (items != 1)
-	  Perl_croak(aTHX_ "Usage: utf8::is_utf8(sv)");
+	 croak_xs_usage(cv, "sv");
      else {
 	const SV * const sv = ST(0);
 	    if (SvUTF8(sv))
@@ -722,9 +746,8 @@ XS(XS_utf8_valid)
 {
      dVAR;
      dXSARGS;
-     PERL_UNUSED_ARG(cv);
      if (items != 1)
-	  Perl_croak(aTHX_ "Usage: utf8::valid(sv)");
+	 croak_xs_usage(cv, "sv");
     else {
 	SV * const sv = ST(0);
 	STRLEN len;
@@ -741,9 +764,8 @@ XS(XS_utf8_encode)
 {
     dVAR;
     dXSARGS;
-    PERL_UNUSED_ARG(cv);
     if (items != 1)
-	Perl_croak(aTHX_ "Usage: utf8::encode(sv)");
+	croak_xs_usage(cv, "sv");
     sv_utf8_encode(ST(0));
     XSRETURN_EMPTY;
 }
@@ -752,9 +774,8 @@ XS(XS_utf8_decode)
 {
     dVAR;
     dXSARGS;
-    PERL_UNUSED_ARG(cv);
     if (items != 1)
-	Perl_croak(aTHX_ "Usage: utf8::decode(sv)");
+	croak_xs_usage(cv, "sv");
     else {
 	SV * const sv = ST(0);
 	const bool RETVAL = sv_utf8_decode(sv);
@@ -768,9 +789,8 @@ XS(XS_utf8_upgrade)
 {
     dVAR;
     dXSARGS;
-    PERL_UNUSED_ARG(cv);
     if (items != 1)
-	Perl_croak(aTHX_ "Usage: utf8::upgrade(sv)");
+	croak_xs_usage(cv, "sv");
     else {
 	SV * const sv = ST(0);
 	STRLEN	RETVAL;
@@ -786,9 +806,8 @@ XS(XS_utf8_downgrade)
 {
     dVAR;
     dXSARGS;
-    PERL_UNUSED_ARG(cv);
     if (items < 1 || items > 2)
-	Perl_croak(aTHX_ "Usage: utf8::downgrade(sv, failok=0)");
+	croak_xs_usage(cv, "sv, failok=0");
     else {
 	SV * const sv = ST(0);
         const bool failok = (items < 2) ? 0 : (int)SvIV(ST(1));
@@ -805,10 +824,9 @@ XS(XS_utf8_native_to_unicode)
  dVAR;
  dXSARGS;
  const UV uv = SvUV(ST(0));
- PERL_UNUSED_ARG(cv);
 
  if (items > 1)
-     Perl_croak(aTHX_ "Usage: utf8::native_to_unicode(sv)");
+     croak_xs_usage(cv, "sv");
 
  ST(0) = sv_2mortal(newSViv(NATIVE_TO_UNI(uv)));
  XSRETURN(1);
@@ -819,10 +837,9 @@ XS(XS_utf8_unicode_to_native)
  dVAR;
  dXSARGS;
  const UV uv = SvUV(ST(0));
- PERL_UNUSED_ARG(cv);
 
  if (items > 1)
-     Perl_croak(aTHX_ "Usage: utf8::unicode_to_native(sv)");
+     croak_xs_usage(cv, "sv");
 
  ST(0) = sv_2mortal(newSViv(UNI_TO_NATIVE(uv)));
  XSRETURN(1);
@@ -876,10 +893,9 @@ XS(XS_Internals_hv_clear_placehold)
 {
     dVAR;
     dXSARGS;
-    PERL_UNUSED_ARG(cv);
 
     if (items != 1)
-	Perl_croak(aTHX_ "Usage: UNIVERSAL::hv_clear_placeholders(hv)");
+	croak_xs_usage(cv, "hv");
     else {
 	HV * const hv = (HV *) SvRV(ST(0));
 	hv_clear_placeholders(hv);
@@ -897,9 +913,8 @@ XS(XS_PerlIO_get_layers)
 {
     dVAR;
     dXSARGS;
-    PERL_UNUSED_ARG(cv);
     if (items < 1 || items % 2 == 0)
-	Perl_croak(aTHX_ "Usage: PerlIO_get_layers(filehandle[,args])");
+	croak_xs_usage(cv, "filehandle[,args]");
 #ifdef USE_PERLIO
     {
 	SV *	sv;
@@ -1043,7 +1058,6 @@ XS(XS_Internals_HvREHASH)	/* Subject to change  */
 {
     dVAR;
     dXSARGS;
-    PERL_UNUSED_ARG(cv);
     if (SvROK(ST(0))) {
 	const HV * const hv = (HV *) SvRV(ST(0));
 	if (items == 1 && SvTYPE(hv) == SVt_PVHV) {
@@ -1063,7 +1077,7 @@ XS(XS_re_is_regexp)
     PERL_UNUSED_VAR(cv);
 
     if (items != 1)
-       Perl_croak(aTHX_ "Usage: %s(%s)", "re::is_regexp", "sv");
+	croak_xs_usage(cv, "sv");
 
     SP -= items;
 
@@ -1080,10 +1094,9 @@ XS(XS_re_regnames_count)
     SV * ret;
     dVAR; 
     dXSARGS;
-    PERL_UNUSED_ARG(cv);
 
     if (items != 0)
-       Perl_croak(aTHX_ "Usage: %s(%s)", "re::regnames_count", "");
+	croak_xs_usage(cv, "");
 
     SP -= items;
 
@@ -1110,10 +1123,9 @@ XS(XS_re_regname)
     REGEXP * rx;
     U32 flags;
     SV * ret;
-    PERL_UNUSED_ARG(cv);
 
     if (items < 1 || items > 2)
-        Perl_croak(aTHX_ "Usage: %s(%s)", "re::regname", "name[, all ]");
+	croak_xs_usage(cv, "name[, all ]");
 
     SP -= items;
 
@@ -1148,10 +1160,9 @@ XS(XS_re_regnames)
     I32 length;
     I32 i;
     SV **entry;
-    PERL_UNUSED_ARG(cv);
 
     if (items > 1)
-        Perl_croak(aTHX_ "Usage: %s(%s)", "re::regnames", "[all]");
+	croak_xs_usage(cv, "[all]");
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
@@ -1198,10 +1209,9 @@ XS(XS_re_regexp_pattern)
     dVAR;
     dXSARGS;
     REGEXP *re;
-    PERL_UNUSED_ARG(cv);
 
     if (items != 1)
-       Perl_croak(aTHX_ "Usage: %s(%s)", "re::regexp_pattern", "sv");
+	croak_xs_usage(cv, "sv");
 
     SP -= items;
 
@@ -1291,10 +1301,9 @@ XS(XS_Tie_Hash_NamedCapture_FETCH)
     REGEXP * rx;
     U32 flags;
     SV * ret;
-    PERL_UNUSED_ARG(cv);
 
     if (items != 2)
-        Perl_croak(aTHX_ "Usage: Tie::Hash::NamedCapture::STORE($key, $flags)");
+	croak_xs_usage(cv, "$key, $flags");
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
@@ -1322,10 +1331,9 @@ XS(XS_Tie_Hash_NamedCapture_STORE)
     dXSARGS;
     REGEXP * rx;
     U32 flags;
-    PERL_UNUSED_ARG(cv);
 
     if (items != 3)
-        Perl_croak(aTHX_ "Usage: Tie::Hash::NamedCapture::STORE($key, $value, $flags)");
+	croak_xs_usage(cv, "$key, $value, $flags");
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
@@ -1348,10 +1356,9 @@ XS(XS_Tie_Hash_NamedCapture_DELETE)
     dXSARGS;
     REGEXP * rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
     U32 flags;
-    PERL_UNUSED_ARG(cv);
 
     if (items != 2)
-        Perl_croak(aTHX_ "Usage: Tie::Hash::NamedCapture::DELETE($key, $flags)");
+	croak_xs_usage(cv, "$key, $flags");
 
     if (!rx)
         Perl_croak(aTHX_ "%s", PL_no_modify);
@@ -1368,10 +1375,9 @@ XS(XS_Tie_Hash_NamedCapture_CLEAR)
     dXSARGS;
     REGEXP * rx;
     U32 flags;
-    PERL_UNUSED_ARG(cv);
 
     if (items != 1)
-        Perl_croak(aTHX_ "Usage: Tie::Hash::NamedCapture::CLEAR($flags)");
+	croak_xs_usage(cv, "$flags");
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
@@ -1391,10 +1397,9 @@ XS(XS_Tie_Hash_NamedCapture_EXISTS)
     REGEXP * rx;
     U32 flags;
     SV * ret;
-    PERL_UNUSED_ARG(cv);
 
     if (items != 2)
-        Perl_croak(aTHX_ "Usage: Tie::Hash::NamedCapture::EXISTS($key, $flags)");
+	croak_xs_usage(cv, "$key, $flags");
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
@@ -1420,10 +1425,9 @@ XS(XS_Tie_Hash_NamedCapture_FIRSTK)
     REGEXP * rx;
     U32 flags;
     SV * ret;
-    PERL_UNUSED_ARG(cv);
 
     if (items != 1)
-        Perl_croak(aTHX_ "Usage: Tie::Hash::NamedCapture::FIRSTKEY()");
+	croak_xs_usage(cv, "");
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
@@ -1453,10 +1457,9 @@ XS(XS_Tie_Hash_NamedCapture_NEXTK)
     REGEXP * rx;
     U32 flags;
     SV * ret;
-    PERL_UNUSED_ARG(cv);
 
     if (items != 2)
-        Perl_croak(aTHX_ "Usage: Tie::Hash::NamedCapture::NEXTKEY($lastkey)");
+	croak_xs_usage(cv, "$lastkey");
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
@@ -1485,10 +1488,9 @@ XS(XS_Tie_Hash_NamedCapture_SCALAR)
     REGEXP * rx;
     U32 flags;
     SV * ret;
-    PERL_UNUSED_ARG(cv);
 
     if (items != 1)
-        Perl_croak(aTHX_ "Usage: Tie::Hash::NamedCapture::SCALAR()");
+	croak_xs_usage(cv, "");
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
@@ -1515,10 +1517,9 @@ XS(XS_Tie_Hash_NamedCapture_flags)
 {
     dVAR;
     dXSARGS;
-    PERL_UNUSED_ARG(cv);
 
     if (items != 0)
-        Perl_croak(aTHX_ "Usage: Tie::Hash::NamedCapture::flags()");
+	croak_xs_usage(cv, "");
 
 	mXPUSHu(RXapif_ONE);
 	mXPUSHu(RXapif_ALL);

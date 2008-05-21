@@ -99,6 +99,7 @@
 #endif
 #define croak			Perl_croak
 #define vcroak			Perl_vcroak
+#define croak_xs_usage		Perl_croak_xs_usage
 #if defined(PERL_IMPLICIT_CONTEXT)
 #define croak_nocontext		Perl_croak_nocontext
 #define die_nocontext		Perl_die_nocontext
@@ -2425,6 +2426,7 @@
 #define create_eval_scope(a)	Perl_create_eval_scope(aTHX_ a)
 #endif
 #define vcroak(a,b)		Perl_vcroak(aTHX_ a,b)
+#define croak_xs_usage(a,b)	Perl_croak_xs_usage(aTHX_ a,b)
 #if defined(PERL_IMPLICIT_CONTEXT)
 #endif
 #ifdef PERL_CORE
