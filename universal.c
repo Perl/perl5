@@ -327,7 +327,7 @@ Perl_croak_xs_usage(pTHX_ const CV *const cv, const char *const params)
 	    Perl_croak(aTHX_ "Usage: %s(%s)", gvname, params);
     } else {
 	/* Pants. I don't think that it should be possible to get here. */
-	Perl_croak(aTHX_ "Usage: CODE(0x%"UVxf")(%s)", (UV)cv, params);
+	Perl_croak(aTHX_ "Usage: CODE(0x%"UVxf")(%s)", PTR2UV(cv), params);
     }
 }
 
@@ -1058,6 +1058,7 @@ XS(XS_Internals_HvREHASH)	/* Subject to change  */
 {
     dVAR;
     dXSARGS;
+    PERL_UNUSED_ARG(cv);
     if (SvROK(ST(0))) {
 	const HV * const hv = (HV *) SvRV(ST(0));
 	if (items == 1 && SvTYPE(hv) == SVt_PVHV) {
