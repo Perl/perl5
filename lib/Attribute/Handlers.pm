@@ -686,7 +686,7 @@ module, then the following code:
 
         sub fn :Ugly(sister) :Omni('po',tent()) {...}
         my @arr :Good :Omni(s/cie/nt/);
-        my %hsh :Good(q/bye) :Omni(q/bus/);
+        my %hsh :Good(q/bye/) :Omni(q/bus/);
 
 
 would cause the following handlers to be invoked:
