@@ -1583,7 +1583,7 @@ Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)
     stash = GvSTASH(
         SvTYPE(mg->mg_obj) == SVt_PVGV
             ? (GV*)mg->mg_obj
-            : (GV*)SvMAGIC(mg->mg_obj)->mg_obj
+            : (GV*)mg_find(mg->mg_obj, PERL_MAGIC_isa)->mg_obj
     );
 
     if (stash)
@@ -1609,7 +1609,7 @@ Perl_magic_clearisa(pTHX_ SV *sv, MAGIC *mg)
     stash = GvSTASH(
         SvTYPE(mg->mg_obj) == SVt_PVGV
             ? (GV*)mg->mg_obj
-            : (GV*)SvMAGIC(mg->mg_obj)->mg_obj
+            : (GV*)mg_find(mg->mg_obj, PERL_MAGIC_isa)->mg_obj
     );
 
     if (stash)
