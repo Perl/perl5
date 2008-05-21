@@ -108,10 +108,10 @@ package Maintainers;
 
 	'Attribute::Handlers' =>
 		{
-		'MAINTAINER'	=> 'abergman',
+		'MAINTAINER'	=> 'rgarcia',
 		'FILES'		=> q[lib/Attribute/Handlers.pm
 				     lib/Attribute/Handlers],
-		'CPAN'		=> 1,
+		'CPAN'		=> 0,
 		},
 
 	'B::Concise' =>

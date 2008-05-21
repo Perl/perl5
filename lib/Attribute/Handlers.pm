@@ -4,7 +4,7 @@ use Carp;
 use warnings;
 use strict;
 use vars qw($VERSION $AUTOLOAD);
-$VERSION = '0.79';
+$VERSION = '0.80';
 # $DB::single=1;
 
 my %symcache;
@@ -686,7 +686,7 @@ module, then the following code:
 
         sub fn :Ugly(sister) :Omni('po',tent()) {...}
         my @arr :Good :Omni(s/cie/nt/);
-        my %hsh :Good(q/bye) :Omni(q/bus/);
+        my %hsh :Good(q/bye/) :Omni(q/bus/);
 
 
 would cause the following handlers to be invoked:
@@ -864,7 +864,8 @@ this won't happen.
 
 =head1 AUTHOR
 
-Damian Conway (damian@conway.org)
+Damian Conway (damian@conway.org). The maintainer of this module is now Rafael
+Garcia-Suarez (rgarciasuarez@gmail.com).
 
 =head1 BUGS
 
