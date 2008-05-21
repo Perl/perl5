@@ -327,7 +327,7 @@ Perl_croak_xs_usage(pTHX_ const CV *const cv, const char *const params)
 	    Perl_croak(aTHX_ "Usage: %s(%s)", gvname, params);
     } else {
 	/* Pants. I don't think that it should be possible to get here. */
-	Perl_croak(aTHX_ "Usage: CODE(%"UVXf")(%s)", (UV)cv, params);
+	Perl_croak(aTHX_ "Usage: CODE(0x%"UVxf")(%s)", (UV)cv, params);
     }
 }
 
