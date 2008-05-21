@@ -54,6 +54,9 @@ set `echo X "$libswanted "| sed -e 's/ bsd / /' -e 's/ net / /' -e 's/ bind / /'
 shift
 libswanted="$*"
 
+# Debian 4.0 puts ndbm in the -lgdbm_compat library.
+libswanted="$libswanted gdbm_compat"
+
 # If you have glibc, then report the version for ./myconfig bug reporting.
 # (Configure doesn't need to know the specific version since it just uses
 # gcc to load the library for all tests.)

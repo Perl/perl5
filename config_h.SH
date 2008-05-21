@@ -689,12 +689,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_locale	I_LOCALE		/**/
 
-/* I_MALLOCMALLOC:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <malloc/malloc.h>.
- */
-#$i_mallocmalloc	I_MALLOCMALLOC		/**/
-
 /* I_MATH:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <math.h>.
@@ -4108,6 +4102,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	should be included.
  */
 #$i_libutil	I_LIBUTIL		/**/
+
+/* I_MALLOCMALLOC:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <malloc/malloc.h>.
+ */
+#$i_mallocmalloc I_MALLOCMALLOC		/**/
 
 /* I_MNTENT:
  *	This symbol, if defined, indicates that <mntent.h> exists and
