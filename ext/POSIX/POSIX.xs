@@ -649,26 +649,37 @@ INCLUDE: const-xs.inc
 int
 WEXITSTATUS(status)
 	int status
-
-int
-WIFEXITED(status)
-	int status
-
-int
-WIFSIGNALED(status)
-	int status
-
-int
-WIFSTOPPED(status)
-	int status
-
-int
-WSTOPSIG(status)
-	int status
-
-int
-WTERMSIG(status)
-	int status
+    ALIAS:
+	POSIX::WIFEXITED = 1
+	POSIX::WIFSIGNALED = 2
+	POSIX::WIFSTOPPED = 3
+	POSIX::WSTOPSIG = 4
+	POSIX::WTERMSIG = 5
+    CODE:
+	switch(ix) {
+	case 0:
+	    RETVAL = WEXITSTATUS(status);
+	    break;
+	case 1:
+	    RETVAL = WIFEXITED(status);
+	    break;
+	case 2:
+	    RETVAL = WIFSIGNALED(status);
+	    break;
+	case 3:
+	    RETVAL = WIFSTOPPED(status);
+	    break;
+	case 4:
+	    RETVAL = WSTOPSIG(status);
+	    break;
+	case 5:
+	    RETVAL = WTERMSIG(status);
+	    break;
+	default:
+	    Perl_croak(aTHX_ "Illegal alias %d for POSIX::W*", ix);
+	}
+    OUTPUT:
+	RETVAL
 
 int
 isalnum(charstring)
