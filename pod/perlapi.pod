@@ -3931,6 +3931,23 @@ Found in file sv.h
 
 =over 8
 
+=item croak_xs_usage
+X<croak_xs_usage>
+
+A specialised variant of C<croak()> for emitting the usage message for xsubs
+
+    croak_xs_usage(cv, "eee_yow");
+
+works out the package name and subroutine name from C<cv>, and then calls
+C<croak()>. Hence if C<cv> is C<&ouch::awk>, it would call C<croak> as:
+
+    Perl_croak(aTHX_ "Usage %s::%s(%s)", "ouch" "awk", "eee_yow");
+
+	void	croak_xs_usage(CV *const cv, const char *const params)
+
+=for hackers
+Found in file universal.c
+
 =item get_sv
 X<get_sv>
 

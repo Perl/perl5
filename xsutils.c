@@ -150,10 +150,9 @@ XS(XS_attributes_bootstrap)
 {
     dVAR;
     dXSARGS;
-    PERL_UNUSED_ARG(cv);
 
     if( items > 1 )
-        Perl_croak(aTHX_ "Usage: attributes::bootstrap $module");
+	croak_xs_usage(cv, "$module");
 
     newXS("attributes::_modify_attrs",	XS_attributes__modify_attrs,	file);
     newXSproto("attributes::_guess_stash", XS_attributes__guess_stash, file, "$");
@@ -168,12 +167,10 @@ XS(XS_attributes__modify_attrs)
     dVAR;
     dXSARGS;
     SV *rv, *sv;
-    PERL_UNUSED_ARG(cv);
 
     if (items < 1) {
 usage:
-	Perl_croak(aTHX_
-		   "Usage: attributes::_modify_attrs $reference, @attributes");
+	croak_xs_usage(cv, "@attributes");
     }
 
     rv = ST(0);
@@ -192,12 +189,10 @@ XS(XS_attributes__fetch_attrs)
     dXSARGS;
     SV *rv, *sv;
     cv_flags_t cvflags;
-    PERL_UNUSED_ARG(cv);
 
     if (items != 1) {
 usage:
-	Perl_croak(aTHX_
-		   "Usage: attributes::_fetch_attrs $reference");
+	croak_xs_usage(cv, "$reference");
     }
 
     rv = ST(0);
@@ -237,12 +232,10 @@ XS(XS_attributes__guess_stash)
     dXSARGS;
     SV *rv, *sv;
     dXSTARG;
-    PERL_UNUSED_ARG(cv);
 
     if (items != 1) {
 usage:
-	Perl_croak(aTHX_
-		   "Usage: attributes::_guess_stash $reference");
+	croak_xs_usage(cv, "$reference");
     }
 
     rv = ST(0);
@@ -287,12 +280,10 @@ XS(XS_attributes_reftype)
     dXSARGS;
     SV *rv, *sv;
     dXSTARG;
-    PERL_UNUSED_ARG(cv);
 
     if (items != 1) {
 usage:
-	Perl_croak(aTHX_
-		   "Usage: attributes::reftype $reference");
+	croak_xs_usage(cv, "$reference");
     }
 
     rv = ST(0);
