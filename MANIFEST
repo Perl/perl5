@@ -2331,6 +2331,7 @@ lib/Object/Accessor/t/02_Object-Accessor-allow.t	Object::Accessor tests
 lib/Object/Accessor/t/03_Object-Accessor-local.t	Object::Accessor tests
 lib/Object/Accessor/t/04_Object-Accessor-lvalue.t	Object::Accessor tests
 lib/Object/Accessor/t/05_Object-Accessor-callback.t	Object::Accessor tests
+lib/Object/Accessor/t/06_Object-Accessor-alias.t	Object::Accessor tests
 lib/open2.pl			Open a two-ended pipe (uses IPC::Open2)
 lib/open3.pl			Open a three-ended pipe (uses IPC::Open3)
 lib/open.pm			Pragma to specify default I/O layers
