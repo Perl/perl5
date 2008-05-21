@@ -4,7 +4,7 @@ use warnings;
 
 our(@ISA, %EXPORT_TAGS, @EXPORT_OK, @EXPORT, $AUTOLOAD, %SIGRT) = ();
 
-our $VERSION = "1.15";
+our $VERSION = "1.16";
 
 use AutoLoader;
 
@@ -35,10 +35,6 @@ sub usage;
 
 XSLoader::load 'POSIX', $VERSION;
 
-my %NON_CONSTS
-  = (map {($_,1)} qw(WEXITSTATUS WIFEXITED WIFSIGNALED WIFSTOPPED WSTOPSIG
-		     WTERMSIG));
-
 sub AUTOLOAD {
     no strict;
     no warnings 'uninitialized';
@@ -50,15 +46,9 @@ sub AUTOLOAD {
     local $! = 0;
     my $constname = $AUTOLOAD;
     $constname =~ s/.*:://;
-    if ($NON_CONSTS{$constname}) {
-        my ($val, $error) = &int_macro_int($constname, $_[0]);
-        croak $error if $error;
-        *$AUTOLOAD = sub { &int_macro_int($constname, $_[0]) };
-    } else {
-        my ($error, $val) = constant($constname);
-        croak $error if $error;
-	*$AUTOLOAD = sub { $val };
-    }
+    my ($error, $val) = constant($constname);
+    croak $error if $error;
+    *$AUTOLOAD = sub { $val };
 
     goto &$AUTOLOAD;
 }

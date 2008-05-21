@@ -551,18 +551,6 @@ These tasks would need C knowledge, and roughly the level of knowledge of
 the perl API that comes from writing modules that use XS to interface to
 C.
 
-=head2 investigate removing int_macro_int from POSIX.xs
-
-As a hang over from the original C<constant> implementation, F<POSIX.xs>
-contains a function C<int_macro_int> which in conjunction with C<AUTOLOAD> is
-used to wrap the C functions C<WEXITSTATUS>, C<WIFEXITED>, C<WIFSIGNALED>,
-C<WIFSTOPPED>, C<WSTOPSIG> and C<WTERMSIG>. It's probably worth replacing
-this complexity with 5 simple direct wrappings of those 5 functions.
-
-However, it would be interesting if someone could measure the memory usage
-before and after, both for the case of C<use POSIX();> and the case of
-actually calling the Perl space functions.
-
 =head2 safely supporting POSIX SA_SIGINFO
 
 Some years ago Jarkko supplied patches to provide support for the POSIX
