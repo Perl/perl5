@@ -108,6 +108,14 @@ package Maintainers;
 		'CPAN'		=> 1,
 	},
 
+	'Attribute::Handlers' =>
+		{
+		'MAINTAINER'	=> 'rgarcia',
+		'FILES'		=> q[lib/Attribute/Handlers.pm
+				     lib/Attribute/Handlers],
+		'CPAN'		=> 0,
+		},
+
 	'B::Concise' =>
 		{
 		'MAINTAINER'	=> 'smccam',
