@@ -58,7 +58,7 @@ my \@inc_version_list = $Config_inc_version_list;
 print OUT <<'!NO!SUBS!';
 
 our @ORIG_INC = @INC;	# take a handy copy of 'original' value
-our $VERSION = '0.5565';
+our $VERSION = '0.56';
 my $Is_MacOS = $^O eq 'MacOS';
 my $Mac_FS;
 if ($Is_MacOS) {
@@ -79,7 +79,7 @@ sub import {
 
 	$path = _nativize($path);
 
-	if (-e $path && ! -d _) {
+	if ($path !~ /\.par$/i && -e $path && ! -d _) {
 	    require Carp;
 	    Carp::carp("Parameter to use lib must be directory, not file");
 	}
