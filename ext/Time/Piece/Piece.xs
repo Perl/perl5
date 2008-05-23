@@ -914,3 +914,37 @@ _strptime ( string, format )
        PUSHs(sv_2mortal(newSViv(0)));
        /* islocal */
        PUSHs(sv_2mortal(newSViv(0)));
+
+void
+_mini_mktime(int sec, int min, int hour, int mday, int mon, int year)
+  PREINIT:
+       struct tm mytm;
+       time_t t;
+  PPCODE:
+       t = 0;
+       mytm = *gmtime(&t);
+
+       mytm.tm_sec = sec;
+       mytm.tm_min = min;
+       mytm.tm_hour = hour;
+       mytm.tm_mday = mday;
+       mytm.tm_mon = mon;
+       mytm.tm_year = year;
+       
+       my_mini_mktime(&mytm);
+
+       EXTEND(SP, 11);
+       PUSHs(sv_2mortal(newSViv(mytm.tm_sec)));
+       PUSHs(sv_2mortal(newSViv(mytm.tm_min)));
+       PUSHs(sv_2mortal(newSViv(mytm.tm_hour)));
+       PUSHs(sv_2mortal(newSViv(mytm.tm_mday)));
+       PUSHs(sv_2mortal(newSViv(mytm.tm_mon)));
+       PUSHs(sv_2mortal(newSViv(mytm.tm_year)));
+       PUSHs(sv_2mortal(newSViv(mytm.tm_wday)));
+       PUSHs(sv_2mortal(newSViv(mytm.tm_yday)));
+       /* isdst */
+       PUSHs(sv_2mortal(newSViv(0)));
+       /* epoch */
+       PUSHs(sv_2mortal(newSViv(0)));
+       /* islocal */
+       PUSHs(sv_2mortal(newSViv(0)));

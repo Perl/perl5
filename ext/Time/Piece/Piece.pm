@@ -22,7 +22,7 @@ our %EXPORT_TAGS = (
     ':override' => 'internal',
     );
 
-our $VERSION = '1.13_01';
+our $VERSION = '1.13_02';
 
 bootstrap Time::Piece $VERSION;
 
@@ -607,12 +607,8 @@ sub add_months {
         $final_month = $final_month % 12;
     }
     
-    my $string = ($time->year + $num_years) . "-" .
-                 ($final_month + 1) . "-" .
-                 ($time->mday) . " " . $time->hms;
-    my $format = "%Y-%m-%d %H:%M:%S";
-    #warn("Parsing string: $string\n");
-    my @vals = _strptime($string, $format);
+    my @vals = _mini_mktime($time->sec, $time->min, $time->hour,
+                            $time->mday, $final_month, $time->year - 1900 + $num_years);
 #    warn(sprintf("got vals: %d-%d-%d %d:%d:%d\n", reverse(@vals)));
     return scalar $time->_mktime(\@vals, $time->[c_islocal]);
 }
