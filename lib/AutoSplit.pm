@@ -9,7 +9,7 @@ use strict;
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, $Verbose, $Keep, $Maxlen,
     $CheckForAutoloader, $CheckModTime);
 
-$VERSION = "1.05";
+$VERSION = "1.05_01";
 @ISA = qw(Exporter);
 @EXPORT = qw(&autosplit &autosplit_lib_modules);
 @EXPORT_OK = qw($Verbose $Keep $Maxlen $CheckForAutoloader $CheckModTime);
