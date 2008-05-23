@@ -226,7 +226,10 @@ for my $cross_partition_test (0..1) {
 }
 
 
-{
+SKIP: {
+
+    skip "-- Copy preserves RMS defaults, not source file permissions.", 21 if $^O eq 'VMS';
+
     # Just a sub to get better failure messages.
     sub __ ($) {
         join "" => map {(qw [--- --x -w- -wx r-- r-x rw- rwx]) [$_]} 
