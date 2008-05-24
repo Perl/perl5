@@ -173,7 +173,7 @@ EOFCODE
 	    next TEST;
 	}
 	elsif ( $todo ) {
-	    print "not ok $test # todo", length($reason) ? " - $reason" : '', "\n";
+	    print "not ok $test # TODO", length($reason) ? " - $reason" : '', "\n";
 	    next TEST;
 	}
 	elsif ($@) {
