@@ -16,6 +16,10 @@ our $Message = "Noname test";
 
 eval 'use Config';          #  Defaults assumed if this fails
 
+run_tests() unless caller;
+
+sub run_tests {
+
 $x = "abc\ndef\n";
 
 if ($x =~ /^abc/) {print "ok 1\n";} else {print "not ok 1\n";}
@@ -533,25 +537,32 @@ print "not " unless $1 and /$1/;
 print "ok $test\n";
 $test++;
 
+if ($::running_as_thread) {
+    print "not ok $test # TODO & SKIP: croaks in 5.10 when threaded\n";
+    $test++;
+} else {
 $a=qr/(?{++$b})/;
 $b = 7;
 /$a$a/;
 print "not " unless $b eq '9';
 print "ok $test\n";
 $test++;
+}
 
-$c="$a";
-/$a$a/;
-print "not " unless $b eq '11';
-print "ok $test\n";
-$test++;
+{
+    local $TODO = $::running_as_thread;
+    $c="$a";
+    /$a$a/;
+    iseq($b, '11');
+}
 
 {
   use re "eval";
   /$a$c$a/;
-  print "not " unless $b eq '14';
-  print "ok $test\n";
-  $test++;
+  {
+      local $TODO = $::running_as_thread;
+      iseq($b, '14');
+  }
 
   local $lex_a = 2;
   my $lex_a = 43;
@@ -571,10 +582,10 @@ $test++;
 
   no re "eval";
   $match = eval { /$a$c$a/ };
-  print "not "
-    unless $b eq '14' and $@ =~ /Eval-group not allowed/ and not $match;
-  print "ok $test\n";
-  $test++;
+  # FIXME - split this one. That would require removing a lot of hard coded
+  # test numbers.
+  local $TODO = $::running_as_thread;
+  ok($b eq '14' and $@ =~ /Eval-group not allowed/ and not $match);
 }
 
 {
@@ -789,9 +800,10 @@ print "not " if $str =~ /^...\G/;
 print "ok $test\n";
 $test++;
 
-print "not " unless $str =~ /.\G./ and $& eq 'bc';
-print "ok $test\n";
-$test++;
+{
+    local $TODO = $::running_as_thread;
+    ok($str =~ /.\G./ and $& eq 'bc');
+}
 
 print "not " unless $str =~ /\G../ and $& eq 'cd';
 print "ok $test\n";
@@ -875,23 +887,29 @@ $foo='aabbccddeeffgg';
 pos($foo)=1;
 
 $foo=~/.\G(..)/g;
-iseq($1,'ab');
+{
+    local $TODO = $::running_as_thread;
+    iseq($1,'ab');
+}
 
 pos($foo) += 1;
 $foo=~/.\G(..)/g;
-print "not " unless($1 eq 'cc');
-print "ok $test\n";
-$test++;
+{
+    local $TODO = $::running_as_thread;
+    iseq($1, 'cc');
+}
 
 pos($foo) += 1;
 $foo=~/.\G(..)/g;
-print "not " unless($1 eq 'de');
-print "ok $test\n";
-$test++;
+{
+    local $TODO = $::running_as_thread;
+    iseq($1, 'de');
+}
 
-print "not " unless $foo =~ /\Gef/g;
-print "ok $test\n";
-$test++;
+{
+    local $TODO = $::running_as_thread;
+    ok($foo =~ /\Gef/g);
+}
 
 undef pos $foo;
 
@@ -1279,7 +1297,10 @@ print "ok 246\n";
 print "not " unless "\x{abcd}" =~ /\x{abcd}/;
 print "ok 247\n";
 
-{
+if ($::running_as_thread) {
+    print "not ok 248 # TODO & SKIP: SEGVs in 5.10 when threaded\n";
+    print "not ok 249 # TODO & SKIP: SEGVs in 5.10 when threaded\n";
+} else {
     # bug id 20001008.001
 
     $test = 248;
@@ -4533,7 +4554,12 @@ sub kt
      s/(*:X)A+|(*:Y)B+|(*:Z)C+/$REGMARK/g;
      iseq $_, "ZYX";
 }
-{
+if ($::running_as_thread) {
+    for (1..3) {
+	print "not ok $test # TODO & SKIP: croaks when threaded\n";
+	$test++;
+    }
+} else {
     our @ctl_n=();
     our @plus=();
     our $nested_tags;
@@ -4648,8 +4674,13 @@ ok($@=~/\QSequence \k... not terminated in regex;\E/);
 
 # Put new tests above the dotted line about a page above this comment
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
+
+} # end of sub pat_tests
+
 # Don't forget to update this!
 BEGIN {
     $::TestCount = 4024;
     print "1..$::TestCount\n";
 }
+
+"Truth";
