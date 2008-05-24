@@ -1097,11 +1097,15 @@ This returns the op description from the global C PL_op_desc array
 
 =item pmnext
 
+Only up to Perl 5.9.4
+
 =item pmregexp
 
 =item pmflags
 
 =item extflags
+
+Since Perl 5.9.5
 
 =item precomp
 

@@ -4599,7 +4599,7 @@ PP(pp_split)
     I32 base;
     const I32 gimme = GIMME_V;
     const I32 oldsave = PL_savestack_ix;
-    I32 make_mortal = 1;
+    U32 make_mortal = SVs_TEMP;
     bool multiline = 0;
     MAGIC *mg = NULL;
 
@@ -4698,9 +4698,8 @@ PP(pp_split)
 	    if (m >= strend)
 		break;
 
-	    dstr = newSVpvn_utf8(s, m-s, do_utf8);
-	    if (make_mortal)
-		sv_2mortal(dstr);
+	    dstr = newSVpvn_flags(s, m-s,
+				  (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
 	    XPUSHs(dstr);
 
 	    /* skip the whitespace found last */
@@ -4729,9 +4728,8 @@ PP(pp_split)
 	    m++;
 	    if (m >= strend)
 		break;
-	    dstr = newSVpvn_utf8(s, m-s, do_utf8);
-	    if (make_mortal)
-		sv_2mortal(dstr);
+	    dstr = newSVpvn_flags(s, m-s,
+				  (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
 	    XPUSHs(dstr);
 	    s = m;
 	}
@@ -4756,10 +4754,7 @@ PP(pp_split)
                 /* keep track of how many bytes we skip over */
                 m = s;
                 s += UTF8SKIP(s);
-                dstr = newSVpvn_utf8(m, s-m, TRUE);
-
-                if (make_mortal)
-                    sv_2mortal(dstr);
+                dstr = newSVpvn_flags(m, s-m, SVf_UTF8 | make_mortal);
 
                 PUSHs(dstr);
 
@@ -4797,9 +4792,8 @@ PP(pp_split)
 		    ;
 		if (m >= strend)
 		    break;
-		dstr = newSVpvn_utf8(s, m-s, do_utf8);
-		if (make_mortal)
-		    sv_2mortal(dstr);
+		dstr = newSVpvn_flags(s, m-s,
+				      (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
 		XPUSHs(dstr);
 		/* The rx->minlen is in characters but we want to step
 		 * s ahead by bytes. */
@@ -4814,9 +4808,8 @@ PP(pp_split)
 	      (m = fbm_instr((unsigned char*)s, (unsigned char*)strend,
 			     csv, multiline ? FBMrf_MULTILINE : 0)) )
 	    {
-		dstr = newSVpvn_utf8(s, m-s, do_utf8);
-		if (make_mortal)
-		    sv_2mortal(dstr);
+		dstr = newSVpvn_flags(s, m-s,
+				      (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
 		XPUSHs(dstr);
 		/* The rx->minlen is in characters but we want to step
 		 * s ahead by bytes. */
@@ -4847,9 +4840,8 @@ PP(pp_split)
 		strend = s + (strend - m);
 	    }
 	    m = RX_OFFS(rx)[0].start + orig;
-	    dstr = newSVpvn_utf8(s, m-s, do_utf8);
-	    if (make_mortal)
-		sv_2mortal(dstr);
+	    dstr = newSVpvn_flags(s, m-s,
+				  (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
 	    XPUSHs(dstr);
 	    if (RX_NPARENS(rx)) {
 		I32 i;
@@ -4861,12 +4853,12 @@ PP(pp_split)
 		       parens that didn't match -- they should be set to
 		       undef, not the empty string */
 		    if (m >= orig && s >= orig) {
-			dstr = newSVpvn_utf8(s, m-s, do_utf8);
+			dstr = newSVpvn_flags(s, m-s,
+					     (do_utf8 ? SVf_UTF8 : 0)
+					      | make_mortal);
 		    }
 		    else
 			dstr = &PL_sv_undef;  /* undef, not "" */
-		    if (make_mortal)
-			sv_2mortal(dstr);
 		    XPUSHs(dstr);
 		}
 	    }
@@ -4881,9 +4873,7 @@ PP(pp_split)
     /* keep field after final delim? */
     if (s < strend || (iters && origlimit)) {
         const STRLEN l = strend - s;
-	dstr = newSVpvn_utf8(s, l, do_utf8);
-	if (make_mortal)
-	    sv_2mortal(dstr);
+	dstr = newSVpvn_flags(s, l, (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
 	XPUSHs(dstr);
 	iters++;
     }

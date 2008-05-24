@@ -57,6 +57,9 @@ my $default_share = [qw[
     &utf8::downgrade
     &utf8::native_to_unicode
     &utf8::unicode_to_native
+    $version::VERSION
+    $version::CLASS
+    @version::ISA
 ], ($] >= 5.008001 && qw[
     &Regexp::DESTROY
 ]), ($] >= 5.010 && qw[

@@ -72,7 +72,7 @@ sub B::PMOP::debug {
     $op->B::LISTOP::debug();
     printf "\top_pmreplroot\t0x%x\n", ${$op->pmreplroot};
     printf "\top_pmreplstart\t0x%x\n", ${$op->pmreplstart};
-    printf "\top_pmnext\t0x%x\n", ${$op->pmnext};
+    printf "\top_pmnext\t0x%x\n", ${$op->pmnext} if $] < 5.009005;
     printf "\top_pmregexp->precomp\t%s\n", cstring($op->precomp);
     printf "\top_pmflags\t0x%x\n", $op->pmflags;
     $op->pmreplroot->debug;

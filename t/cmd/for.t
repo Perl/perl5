@@ -169,7 +169,7 @@ $r = '';
 for (reverse 'A' .. 'C') {
     $r .= $_;
 }
-is ($r, 'CBA', 'Reverse orwards for list via ..');
+is ($r, 'CBA', 'Reverse for list via ..');
 
 $r = '';
 for my $i (@array) {

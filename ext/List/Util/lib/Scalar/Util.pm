@@ -331,11 +331,4 @@ Copyright (c) 1999 Tuomas J. Lukka <lukka@iki.fi>. All rights reserved.
 This program is free software; you can redistribute it and/or modify it
 under the same terms as perl itself.
 
-=head1 BLATANT PLUG
-
-The weaken and isweak subroutines in this module and the patch to the core Perl
-were written in connection  with the APress book `Tuomas J. Lukka's Definitive
-Guide to Object-Oriented Programming in Perl', to avoid explaining why certain
-things would have to be done in cumbersome ways.
-
 =cut
