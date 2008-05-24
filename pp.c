@@ -4604,13 +4604,18 @@ PP(pp_reverse)
 	SvUTF8_off(TARG);				/* decontaminate */
 	if (SP - MARK > 1)
 	    do_join(TARG, &PL_sv_no, MARK, SP);
-	else
+	else {
 	    sv_setsv(TARG, (SP > MARK)
 		    ? *SP
 		    : (padoff_du = find_rundefsvoffset(),
 			(padoff_du == NOT_IN_PAD
 			 || PAD_COMPNAME_FLAGS_isOUR(padoff_du))
 			? DEFSV : PAD_SVl(padoff_du)));
+
+	    if (! SvOK(TARG) && ckWARN(WARN_UNINITIALIZED))
+		report_uninit(TARG);
+	}
+
 	up = SvPV_force(TARG, len);
 	if (len > 1) {
 	    if (DO_UTF8(TARG)) {	/* first reverse each character */

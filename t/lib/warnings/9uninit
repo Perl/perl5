@@ -1400,3 +1400,14 @@ my $b
 EXPECT
 Use of uninitialized value $undef in addition (+) at - line 4.
 Use of uninitialized value $undef in addition (+) at - line 7.
+########
+use warnings 'uninitialized';
+my ($r1, $r2);
+$_ = undef;
+$v = reverse;
+$v = reverse $r1;
+$v = reverse "abc", $r2, "def";
+EXPECT
+Use of uninitialized value in reverse at - line 4.
+Use of uninitialized value $r1 in reverse at - line 5.
+Use of uninitialized value $r2 in reverse at - line 6.
