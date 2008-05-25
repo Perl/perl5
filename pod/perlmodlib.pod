@@ -161,7 +161,7 @@ Predeclare sub names
 
 =item threads
 
-Perl extension allowing use of interpreter based threads from perl
+Perl interpreter-based threads
 
 =item threads::shared
 
@@ -265,6 +265,10 @@ Disassemble Perl bytecode
 
 Perl lint
 
+=item B::Lint::Debug
+
+Adds debugging stringification to B::
+
 =item B::Showlex
 
 Show lexical variables used in functions or files
@@ -345,6 +349,10 @@ A recipe book for programming with CPAN.pm
 
 Utility for CPAN::Config file Initialization
 
+=item CPAN::Kwalify
+
+Interface between CPAN.pm and Kwalify.pm
+
 =item CPAN::Nox
 
 Wrapper around CPAN.pm without using any XS module
@@ -379,11 +387,31 @@ Get pathname of current working directory
 
 =item DB
 
-Programmatic interface to the Perl debugging API
+Programmatic interface to the Perl debugging API (draft, subject to
 
 =item DBM_Filter
 
 Filter DBM keys/values 
+
+=item DBM_Filter::compress
+
+Filter for DBM_Filter
+
+=item DBM_Filter::encode
+
+Filter for DBM_Filter
+
+=item DBM_Filter::int32
+
+Filter for DBM_Filter
+
+=item DBM_Filter::null
+
+Filter for DBM_Filter
+
+=item DBM_Filter::utf8
+
+Filter for DBM_Filter
 
 =item DB_File
 
@@ -397,9 +425,9 @@ Stringified perl data structures, suitable for both printing and C<eval>
 
 A Perl code profiler
 
-=item Devel::PPPort
+=item Devel::InnerPackage
 
-Perl/Pollution/Portability
+Find all the inner packages of a package
 
 =item Devel::Peek
 
@@ -477,6 +505,10 @@ Object Oriented Encoder
 
 Encode Implementation Base Class
 
+=item Encode::GSM0338
+
+ESTI GSM 03.38 Encoding
+
 =item Encode::Guess
 
 Guesses encoding from data
@@ -504,6 +536,10 @@ Internally used by Encode::KR
 =item Encode::MIME::Header
 
 MIME 'B' and 'Q' header encoding
+
+=item Encode::MIME::Name
+
+Internally used by Encode
 
 =item Encode::PerlIO
 
@@ -613,6 +649,10 @@ Methods to override UN*X behaviour in ExtUtils::MakeMaker
 
 DOS specific subclass of ExtUtils::MM_Unix
 
+=item ExtUtils::MM_Darwin
+
+Special behaviors for OS X
+
 =item ExtUtils::MM_MacOS
 
 Once produced Makefiles for MacOS Classic
@@ -696,6 +736,10 @@ Write linker options files for dynamic extension
 =item ExtUtils::Packlist
 
 Manage .packlist files
+
+=item ExtUtils::ParseXS
+
+Converts Perl XS code into C code
 
 =item ExtUtils::testlib
 
@@ -1004,6 +1048,18 @@ Glue to provide EXISTS for SDBM_File for Storable use
 =item Memoize::Storable
 
 Store Memoized data in Storable database
+
+=item Module::CoreList
+
+What modules shipped with versions of perl
+
+=item Module::Pluggable
+
+Automatically give your module the ability to have plugins
+
+=item Module::Pluggable::Object
+
+Automatically give your module the ability to have plugins
 
 =item NDBM_File
 
@@ -1321,6 +1377,10 @@ Internal Test::Harness Iterator
 
 Object for tracking a single test point
 
+=item Test::Harness::Results
+
+Object for tracking results from a single test file
+
 =item Test::Harness::Straps
 
 Detailed analysis of test results
@@ -1328,6 +1388,10 @@ Detailed analysis of test results
 =item Test::Harness::TAP
 
 Documentation for the TAP format
+
+=item Test::Harness::Util
+
+Utility functions for Test::Harness::*
 
 =item Test::More
 
@@ -1460,6 +1524,14 @@ By-name interface to Perl's built-in getgr*() functions
 =item User::pwent
 
 By-name interface to Perl's built-in getpw*() functions
+
+=item Win32
+
+Interfaces to some Win32 API Functions
+
+=item Win32API::File
+
+Low-level access to Win32 system API calls for files/dirs.
 
 =item Win32CORE
 
@@ -2404,8 +2476,8 @@ the module after __END__ either using AutoSplit or by saying:
 Does your module pass the 'empty subclass' test? If you say
 C<@SUBCLASS::ISA = qw(YOURCLASS);> your applications should be able
 to use SUBCLASS in exactly the same way as YOURCLASS.  For example,
-does your application still work if you change:  C<$obj = new YOURCLASS;>
-into: C<$obj = new SUBCLASS;> ?
+does your application still work if you change:  C<< $obj = YOURCLASS->new(); >>
+into: C<< $obj = SUBCLASS->new(); >> ?
 
 Avoid keeping any state information in your packages. It makes it
 difficult for multiple other packages to use yours. Keep state
