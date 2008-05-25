@@ -28,7 +28,7 @@ my %gen = (
 	   'regcomp.pl'  => [qw[regnodes.h]],
 	   'warnings.pl' => [qw[warnings.h lib/warnings.pm]],
 	   'reentr.pl'   => [qw[reentr.c reentr.h]],
-	   'overload.pl' => [qw[overload.h]],
+	   'overload.pl' => [qw[overload.c overload.h]],
 	   );
 
 sub do_cksum {
@@ -47,8 +47,7 @@ sub do_cksum {
     return %cksum;
 }
 
-foreach my $pl (qw (keywords.pl opcode.pl embed.pl bytecode.pl
-		    regcomp.pl warnings.pl autodoc.pl reentr.pl)) {
+foreach my $pl (keys %gen) {
   print "$^X $pl\n";
   my %cksum0;
   %cksum0 = do_cksum($pl) unless $pl eq 'warnings.pl'; # the files were removed
