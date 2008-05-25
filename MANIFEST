@@ -1402,8 +1402,8 @@ lib/CGI/t/start_end_end.t	See if CGI.pm works
 lib/CGI/t/start_end_start.t	See if CGI.pm works
 lib/CGI/t/switch.t		See if CGI::Switch still loads
 lib/CGI/t/uploadInfo.t		See if CGI.pm works
-lib/CGI/t/upload.t		See if CGI.pm works
 lib/CGI/t/upload_post_text.txt.packed	Test data for CGI.pm
+lib/CGI/t/upload.t		See if CGI.pm works
 lib/CGI/t/util-58.t		See if 5.8-dependent features work
 lib/CGI/t/util.t		See if CGI.pm works
 lib/CGI/Util.pm			Utility functions
@@ -1552,10 +1552,10 @@ lib/ExtUtils/t/eu_command.t	See if ExtUtils::Command works
 lib/ExtUtils/t/FIRST_MAKEFILE.t		See if FIRST_MAKEFILE works
 lib/ExtUtils/t/fixin.t		See if ExtUtils::MakeMaker works
 lib/ExtUtils/t/hints.t		See if hint files are honored.
+lib/ExtUtils/t/Installapi2.t	See if new api for ExtUtils::Install::install() works
 lib/ExtUtils/t/INSTALL_BASE.t	Test INSTALL_BASE in MakeMaker
 lib/ExtUtils/t/Installed.t	See if ExtUtils::Installed works
 lib/ExtUtils/t/Install.t	See if ExtUtils::Install works
-lib/ExtUtils/t/Installapi2.t	See if new api for ExtUtils::Install::install() works
 lib/ExtUtils/t/INST_PREFIX.t	See if MakeMaker can apply PREFIXs
 lib/ExtUtils/t/INST.t		Check MakeMaker INST_* macros
 lib/ExtUtils/t/Liblist.t	See if ExtUtils::Liblist works
@@ -2996,11 +2996,11 @@ t/Module_Pluggable/20dodgy_files.t	Module::Pluggable tests
 t/Module_Pluggable/21editor_junk.t			Module::Pluggable tests
 t/Module_Pluggable/acme/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
-t/Module_Pluggable/lib/EditorJunk/Plugin/Foo.pm		Module::Pluggable tests
-t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm~	Module::Pluggable tests
-t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm.swp	Module::Pluggable tests
 t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm		Module::Pluggable tests
+t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm~	Module::Pluggable tests
 t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm.swo	Module::Pluggable tests
+t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm.swp	Module::Pluggable tests
+t/Module_Pluggable/lib/EditorJunk/Plugin/Foo.pm		Module::Pluggable tests
 t/Module_Pluggable/lib/ExtTest/Plugin/Bar.plugin	Module::Pluggable tests
 t/Module_Pluggable/lib/ExtTest/Plugin/Foo.plugin	Module::Pluggable tests
 t/Module_Pluggable/lib/ExtTest/Plugin/Quux/Foo.plugin	Module::Pluggable tests
@@ -3244,6 +3244,7 @@ t/uni/latin2.t			See if Unicode in latin2 works
 t/uni/lower.t			See if Unicode casing works
 t/uni/overload.t		See if Unicode overloading works
 t/uni/sprintf.t			See if Unicode sprintf works
+t/uni/tie.t			See if Unicode tie works
 t/uni/title.t			See if Unicode casing works
 t/uni/tr_7jis.t			See if Unicode tr/// in 7jis works
 t/uni/tr_eucjp.t		See if Unicode tr/// in eucjp works
@@ -3253,7 +3254,6 @@ t/uni/upper.t			See if Unicode casing works
 t/uni/write.t			See if Unicode formats work
 t/win32/system.t		See if system works in Win*
 t/win32/system_tests		Test runner for system.t
-t/uni/tie.t			See if Unicode tie works
 t/x2p/s2p.t			See if s2p/psed work
 uconfig.h			Configuration header for microperl
 uconfig.sh			Configuration script for microperl
