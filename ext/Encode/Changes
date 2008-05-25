@@ -1,8 +1,21 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.24 2008/03/12 09:51:11 dankogai Exp $
+# $Id: Changes,v 2.25 2008/05/07 20:56:05 dankogai Exp dankogai $
 #
-$Revision: 2.24 $ $Date: 2008/03/12 09:51:11 $
+$Revision: 2.25 $ $Date: 2008/05/07 20:56:05 $
+! Encode.pm
+  added ':default' to Exporter option.
+! lib/Encode/GSM0338.pm
+  GSM0338 now handles coderef in CHECK
+  http://rt.cpan.org/Ticket/Display.html?id=31335
+! Makefile.PL
+  Perl 5.10/Encode 2.24: Tiny typo in Encode's Makefile.PL arg processing
+  Message-Id: <961C2A4F-92B3-416D-A9F9-E7B0ADA9F134@fsck.com>
+! lib/Encode/Alias.pm
+  "This fix for Encode::Alias should make Solaris happy:"
+  Message-ID: <47D886D9.6060001@iki.fi>
+
+$Revision: 2.25 $ $Date: 2008/05/07 20:56:05 $
 ! lib/Encode/Config.pm
   adds and  fixes also adds cp858 support.
 ! Encode.pm encoding.pm lib/Encode/Alias.pm ucm/cp858.ucm
