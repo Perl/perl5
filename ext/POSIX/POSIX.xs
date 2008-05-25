@@ -658,22 +658,46 @@ WEXITSTATUS(status)
     CODE:
 	switch(ix) {
 	case 0:
+#ifdef WEXITSTATUS
 	    RETVAL = WEXITSTATUS(status);
+#else
+	    not_here("WEXITSTATUS");
+#endif
 	    break;
 	case 1:
+#ifdef WIFEXITED
 	    RETVAL = WIFEXITED(status);
+#else
+	    not_here("WIFEXITED");
+#endif
 	    break;
 	case 2:
+#ifdef WIFSIGNALED
 	    RETVAL = WIFSIGNALED(status);
+#else
+	    not_here("WIFSIGNALED");
+#endif
 	    break;
 	case 3:
+#ifdef WIFSTOPPED
 	    RETVAL = WIFSTOPPED(status);
+#else
+	    not_here("WIFSTOPPED");
+#endif
 	    break;
 	case 4:
+#ifdef WSTOPSIG
 	    RETVAL = WSTOPSIG(status);
+#else
+	    not_here("WSTOPSIG");
+#endif
 	    break;
 	case 5:
+#ifdef WTERMSIG
 	    RETVAL = WTERMSIG(status);
+#else
+	    not_here("WTERMSIG");
+#endif
 	    break;
 	default:
 	    Perl_croak(aTHX_ "Illegal alias %d for POSIX::W*", ix);
