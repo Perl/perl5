@@ -28,6 +28,580 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.9		Maintenance release working toward v5.8.9
 --------------
 ____________________________________________________________________________
+[ 33934] By: nicholas				   on 2008/05/25  23:16:13
+	Log: Run buildtoc. (With the side effect of sorting MANIFEST.)
+     Branch: maint-5.8/perl
+	   ! MANIFEST pod/perltoc.pod
+____________________________________________________________________________
+[ 33933] By: nicholas				   on 2008/05/25  23:13:54
+	Log: Integrate:
+	     [ 33878]
+	     Integrate:
+	     [ 33740]
+	     Stop File::Copy truncating destination files if passed 3 named
+	     arguments by accident. In Copy.t, ensure that all file system calls
+	     die with $! if they fail.
+	     
+	     [ 33793]
+	     Subject: [PATCH lib/File/Copy.pm]	Use 3-arg open.
+	     From: Abigail <abigail@abigail.be>
+	     Date: Tue, 6 May 2008 17:38:28 +0200
+	     Message-ID: <20080506153828.GA27662@abigail.be>
+	     
+	     [ 33881]
+	     Integrate:
+	     [ 33825]
+	     It transpires that POSIX.xs also duplicated several constants defined
+	     by Fcntl but only conditionally exported by Fcntl. The most obvious
+	     were SEEK_CUR, SEEK_END and SEEK_SET, as reported in bug #54186.
+	     So add them to the list of constants that POSIX imports from Fcntl.
+	     
+	     [ 33826]
+	     Remove POSIX's internal implementation of S_ISBLK, S_ISCHR, S_ISDIR,
+	     S_ISFIFO and S_ISREG, and pull them in from Fcntl. Spotted as a result
+	     of bug #54186, but there has been a redefined subroutine warning for
+	     ages if you elected to import all of POSIX and Fcntl's exports.
+	     
+	     [ 33829]
+	     Fix my typo.
+	     
+	     [ 33885]
+	     Integrate:
+	     [ 33835]
+	     Subject: [PATCH] h2ph: allow the quote mark delimiter when chasing #include directives with "-a"
+	     From: Niko Tyni <ntyni@debian.org>
+	     Date: Thu, 15 May 2008 23:15:35 +0300
+	     Message-Id: <1210882535-11072-1-git-send-email-ntyni@debian.org>
+	     
+	     [ 33917]
+	     Integrate:
+	     [ 33911]
+	     Subject: [PATCH] Re: [perl #41555] Bug in File::Find on Windows when target
+	     From: Bram <p5p@perl.wizbit.be>
+	     Date: Mon, 12 May 2008 22:13:33 +0200
+	     Message-ID: <20080512221333.mq0283dlessws4wk@horde.wizbit.be>
+     Branch: maint-5.8/perl
+	  !> ext/B/t/concise-xs.t ext/POSIX/Makefile.PL ext/POSIX/POSIX.pm
+	  !> ext/POSIX/POSIX.xs lib/File/Copy.pm lib/File/Copy.t
+	  !> lib/File/Find.pm lib/File/Find/t/find.t
+	  !> t/lib/proxy_constant_subs.t utils/h2ph.PL
+____________________________________________________________________________
+[ 33932] By: nicholas				   on 2008/05/25  23:00:21
+	Log: Integrate:
+	     [ 33884]
+	     Integrate:
+	     [ 33827]
+	     Subject: [PATCH] fix typo in a Tie::Hash documentation link
+	     From: Niko Tyni <ntyni@debian.org>
+	     Date: Wed, 14 May 2008 23:09:27 +0300
+	     Message-Id: <1210795767-21221-1-git-send-email-ntyni@debian.org>
+	     
+	     [ 33830]
+	     Add investigating eliminating POSIX::int_macro_int() to perltodo.
+	     
+	     [ 33832]
+	     HP 9000 End of Sale Announcements
+	     
+	     [ 33834]
+	     Subject: Make perlfunc link to the correct section of perlop for q//, qq//, qx//, and qw//
+	     From: Matt Kraai <kraai@ftbfs.org>
+	     Date: Thu, 15 May 2008 15:45:17 -0700
+	     Message-ID: <20080515224517.GA11692@ftbfs.org>
+	     
+	     [ 33840]
+	     Subject: [perl #39187] [DOC-PATCH]: perldoc -f reverse: examples (was: RE: Perlfunc needs to be made more clear regarding reverse in scalar context.) 
+	     From: "Bram via RT" <perlbug-followup@perl.org>
+	     Date: Fri, 16 May 2008 14:44:07 -0700
+	     Message-ID: <rt-3.6.HEAD-9880-1210974244-1717.39187-15-0@perl.org>
+	     
+	     [ 33841]
+	     Subject: [PATCH] Re: Compiling perl (5.10.x) with gcc <= 3.2.3
+	     From: Andy Dougherty <doughera@lafayette.edu>
+	     Date: Fri, 16 May 2008 13:59:41 -0400 (EDT)
+	     Message-ID: <Pine.LNX.4.64.0805161344570.10409@fractal.phys.lafayette.edu>
+	     
+	     [ 33848]
+	     Subject: Re: eval "require Foo" with binary-incompatible XS modules
+	     From: Niko Tyni <ntyni@debian.org>
+	     Date: Sat, 17 May 2008 21:37:30 +0300
+	     Message-ID: <20080517183730.GA4440@rebekka>
+	     
+	     [ 33852]
+	     New separations for the pattern match operator documentation,
+	     suggested by David Nicol:
+	     
+	     Subject: It's wafer thin!
+	     From: "David Nicol" <davidnicol@gmail.com>
+	     Date: Fri, 9 May 2008 18:14:29 +0000
+	     Message-ID: <934f64a20805091114y40595f9ap9d355b39f20779c1@mail.gmail.com>
+	     
+	     [ 33853]
+	     fix misleading comment about Perl_re_dup_guts
+	     
+	     [ 33865]
+	     Add "profile installman" to the TODO.
+	     
+	     [ 33895]
+	     Integrate:
+	     [ 33849]
+	     Subject: [perl #38955] exists(): error message on wrong argument type is incorrect (5.8.7 cygwin) 
+	     From: "Bram via RT" <perlbug-followup@perl.org>
+	     Date: Sat, 17 May 2008 04:14:11 -0700
+	     Message-ID: <rt-3.6.HEAD-11257-1211022849-1634.38955-15-0@perl.org>
+	     
+	     [ 33891]
+	     metabatman fails the "this patch is self-documenting" test. Restore
+	     (roughly) the original parameter names.
+     Branch: maint-5.8/perl
+	  !> INSTALL README.hpux hv.h lib/Tie/Hash.pm op.c pod/perldiag.pod
+	  !> pod/perlfunc.pod pod/perlop.pod pod/perltodo.pod regcomp.c
+____________________________________________________________________________
+[ 33931] By: nicholas				   on 2008/05/25  22:45:48
+	Log: Integrate:
+	     [ 33882]
+	     Integrate:
+	     [ 33809]
+	     Subject: [PATCH - revised^2] threads::shared 1.19
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Wed, 7 May 2008 16:36:28 -0400
+	     Message-ID: <1ff86f510805071336y50db0a35t740fbe9a8192be64@mail.gmail.com>
+	     
+	     [ 33811]
+	     Remove C++ comments
+	     
+	     [ 33836]
+	     Subject: [PATCH - revised] threads::shared 1.21
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Fri, 16 May 2008 09:52:24 -0400
+	     Message-ID: <1ff86f510805160652l73e7d5a9hdc675e8efbbf1479@mail.gmail.com>
+	     
+	     [ 33883]
+	     Integrate:
+	     [ 33808]
+	     Subject: [PATCH - revised] Thread::Queue 2.07
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Thu, 8 May 2008 10:05:51 -0400
+	     Message-ID: <1ff86f510805080705p3cc8f657i7a1441da5b0a273b@mail.gmail.com>
+	     
+	     [ 33847]
+	     Subject: [PATCH] Thread::Queue 2.08
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Wed, 14 May 2008 12:47:04 -0400
+	     Message-ID: <1ff86f510805140947h707fe273j5adec649b5cc4238@mail.gmail.com>
+	     
+	     [ 33871]
+	     Subject: [PATCH] Thread::Semaphore 2.08
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Mon, 19 May 2008 13:06:20 -0400
+	     Message-ID: <1ff86f510805191006yc870892r28ea38cfd128eb37@mail.gmail.com>
+     Branch: maint-5.8/perl
+	  +> ext/threads/shared/t/clone.t
+	  !> MANIFEST ext/threads/shared/Makefile.PL
+	  !> ext/threads/shared/shared.pm ext/threads/shared/shared.xs
+	  !> ext/threads/shared/t/stress.t ext/threads/shared/t/sv_refs.t
+	  !> lib/Thread/Queue.pm lib/Thread/Queue/t/02_refs.t
+	  !> lib/Thread/Semaphore.pm
+____________________________________________________________________________
+[ 33930] By: nicholas				   on 2008/05/25  22:33:32
+	Log: Integrate:
+	     [ 33821]
+	     Integrate:
+	     [ 33666]
+	     Subject: [PATCH] Math::BigRat 0.22
+	     From: Tels <nospam-abuse@bloodgate.com>
+	     Date: Mon, 7 Apr 2008 21:27:30 +0200
+	     Message-Id: <200804072127.38258@bloodgate.com>
+	     
+	     [ 33698]
+	     Upgrade to Math::Complex 1.54
+	     
+	     [ 33715]
+	     Upgrade to Math::BigInt v1.89
+	     
+	     [ 33772]
+	     Upgrade to bignum-0.23
+	     
+	     [ 33915]
+	     Integrate:
+	     [ 33905]
+	     Subject: [PATCH] Documentation typo fix for Attribute::Handlers.
+	     From: Florian Ragwitz <rafl@debian.org>
+	     Date: Wed, 21 May 2008 22:42:40 +0200
+	     Message-Id: <1211402560-12949-1-git-send-email-rafl@debian.org>
+	     
+	     [ 33906]
+	     Following a conversation on IRC, Artur thinks it best if we consider
+	     the core version of Attribute::Handlers official from now on, and
+	     hence remove it from Porting/Maintainers.pl
+	     
+	     [ 33907]
+	     Rafael will take over Attribute::Handlers
+	     
+	     [ 33914]
+	     Bump the version number following change 33905 (and for any other
+	     changes that might come between 5.10's release and 5.8.9's). Note that
+	     Rafael has kindly volunteered to take over maintainer.
+     Branch: maint-5.8/perl
+	  +> lib/Math/BigRat/t/hang.t
+	  !> (integrate 29 files)
+____________________________________________________________________________
+[ 33929] By: nicholas				   on 2008/05/25  22:17:41
+	Log: Integrate:
+	     [ 33820]
+	     Integrate:
+	     [ 32977]
+	     When parsing LC_ALL or LANG to get the locale's encoding, ignore
+	     whatever is after the @, since that's a modifier, not an encoding.
+	     
+	     [ 32980]
+	     Boolean priority bug, found by Mashrab Kuvatov:
+	     
+	     Subject: Re: [perl #49646] perlbug AutoReply: open ':locale' does not work under locale with the modifier
+	     From: Mashrab Kuvatov <kmashrab@uni-bremen.de>
+	     Date: Tue, 15 Jan 2008 15:17:42 +0100
+	     Message-Id: <200801151517.46296.kmashrab@uni-bremen.de>
+	     
+	     [ 33234]
+	     Subject: [PATCH] Remove duplication from encoding.pm POD
+	     From: "Robert May" <robertmay@cpan.org>
+	     Date: Fri, 1 Feb 2008 01:06:07 +0530
+	     Message-ID: <54bdc7510801311136p7ee53dbet2afd5239e1ad03eb@mail.gmail.com>
+	     
+	     [ 33562]
+	     Subject: "646"
+	     From: Jarkko Hietaniemi <jhi@iki.fi>
+	     Date: Wed, 12 Mar 2008 21:43:53 -0400
+	     Message-ID: <47D886D9.6060001@iki.fi>
+	     
+	     Encode::Alias fix for encoding "646" (aka ASCII) on Solaris
+	     
+	     [ 33783]
+	     Subject: Perl 5.10/Encode 2.24: Tiny typo in Encode's Makefile.PL arg processing
+	     From: Jesse Vincent <jesse@fsck.com>
+	     Date: Sat, 3 May 2008 13:41:45 -0400
+	     Message-Id: <961C2A4F-92B3-416D-A9F9-E7B0ADA9F134@fsck.com>
+	     
+	     [ 33800]
+	     Upgrade to Encode 2.25
+     Branch: maint-5.8/perl
+	  !> ext/Encode/Changes ext/Encode/Encode.pm ext/Encode/Makefile.PL
+	  !> ext/Encode/encoding.pm ext/Encode/lib/Encode/Alias.pm
+	  !> ext/Encode/lib/Encode/CN/HZ.pm
+	  !> ext/Encode/lib/Encode/GSM0338.pm ext/Encode/ucm/cp850.ucm
+	  !> ext/Encode/ucm/cp852.ucm ext/Encode/ucm/cp855.ucm
+	  !> ext/Encode/ucm/cp856.ucm ext/Encode/ucm/cp857.ucm
+	  !> ext/Encode/ucm/cp858.ucm ext/Encode/ucm/cp860.ucm
+	  !> ext/Encode/ucm/cp861.ucm ext/Encode/ucm/cp862.ucm
+	  !> ext/Encode/ucm/cp863.ucm ext/Encode/ucm/cp864.ucm
+	  !> ext/Encode/ucm/cp865.ucm ext/Encode/ucm/cp866.ucm
+	  !> ext/Encode/ucm/cp869.ucm ext/Encode/ucm/cp874.ucm
+	  !> ext/Encode/ucm/cp875.ucm
+____________________________________________________________________________
+[ 33928] By: nicholas				   on 2008/05/25  21:26:27
+	Log: Integrate:
+	     [ 33754]
+	     Integrate:
+	     [ 33647]
+	     Subject: [PATCH] Tru64: align fp policies of gcc and cc
+	     From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+	     Date: Sat, 5 Apr 2008 04:16:17 +0300 (EEST)
+	     Message-Id: <200804050116.m351GH5P042062@kosh.hut.fi>
+	     
+	     [ 33737]
+	     On Darwin, -Uuse64bitall shouldn't mean -Duse64bitall  :-/
+	     Plus fix a pair of typos in a diagnostic output.
+	     
+	     [ 33738]
+	     Looks like we can do System V IPC 64 bit on Leopard. Lets see whether
+	     the magic smoke escapes from other testers.
+     Branch: maint-5.8/perl
+	  !> hints/darwin.sh hints/dec_osf.sh
+____________________________________________________________________________
+[ 33926] By: nicholas				   on 2008/05/25  21:12:26
+	Log: Integrate:
+	     [ 33732]
+	     Integrate:
+	     [ 33668]
+	     Subject: [PATCH] Double magic with '\&$x'
+	     From: "Vincent Pit" <perl@profvince.com>
+	     Date: Tue, 1 Apr 2008 10:48:17 +0200 (CEST)
+	     Message-ID: <34395.147.210.17.175.1207039697.squirrel@147.210.17.175>
+	     
+	     [ 33669]
+	     Fix C portability nit found by Jerry D. Hedden.
+	     
+	     [ 33685]
+	     Revert change #26334, which was introducing too many bugs
+	     
+	     [ 33686]
+	     Add a regression test for bug #52658 (fixed by change #33685)
+	     based on code by Wolf-Dietrich Moeller
+	     
+	     [ 33802]
+	     Integrate:
+	     [ 33665]
+	     Subject: [PATCH] is_gv_magical correctly check "ISA"
+	     From: Gerard Goossen <gerard@tty.nl>
+	     Date: Wed, 9 Apr 2008 12:12:44 +0200
+	     Message-ID: <20080409101244.GA11209@ostwald>
+	     
+	     [ 33741]
+	     Inline the trivial S_raise_signal function in the perl signal handler.
+	     
+	     This makes the code more readable and avoids the need for excuses
+	     for why the function is (still) named this way.
+	     
+	     It also effectively avoids segfaults observed with gcc-3.3 when
+	     the sibling-call optimization is used for invoking S_raise_signal()
+	     just before the signal handler returns.
+	     
+	     [ 33762]
+	     Cast the result of fpsetmask(0) to (void), as some implementations
+	     expand it via a macro, with a comma expression to calculate the return
+	     value, at which point gcc has the gall to warn that an expression
+	     calcualted is not used.
+	     Blame SCO for having to have fpsetmask(0) in the code to start with.
+	     
+	     [ 33763]
+	     Subject: [PATCH] Win32 process ids can have more than 16 bits
+	     From: "Jan Dubois" <jand@activestate.com>
+	     Date: Tue, 29 Apr 2008 01:14:39 -0700
+	     Message-ID: <01be01c8a9d1$12b32b10$38198130$@com>
+	     
+	     [ 33788]
+	     Record-style reads in Perl_sv_gets have to be done with read(), not
+	     fread() on VMS, and have been for some time.  Except that ain't gonna
+	     work with PerlIO::Scalar's in-memory files.  Old bug exposed by new 
+	     test in #33769.
+	     
+	     [ 33889]
+	     Integrate:
+	     [ 33778]
+	     Subject: Re: [perl #51636] segmentation fault with array ties
+	     From: "Vincent Pit" <perl@profvince.com>
+	     Date: Wed, 12 Mar 2008 17:37:40 +0100 (CET)
+	     Message-ID: <56287.147.210.17.175.1205339860.squirrel@147.210.17.175>
+     Branch: maint-5.8/perl
+	  !> gv.c mg.c perl.h pp_ctl.c pp_hot.c sv.c t/op/pat.t
+	  !> win32/win32.c
+____________________________________________________________________________
+[ 33925] By: nicholas				   on 2008/05/25  20:50:26
+	Log: Integrate:
+	     [ 33640]
+	     Integrate:
+	     [ 33399]
+	     Subject: [PATCH] More diagnostics for Fatal.pm
+	     From: slaven@rezic.de
+	     Date: Fri, 29 Feb 2008 11:29:31 +0100 (CET)
+	     Message-ID: <49601.89.247.126.95.1204280971.squirrel@mail.rezic.de>
+	     
+	     plus version bump
+	     
+	     [ 33621]
+	     $VERSION++ for all the non-dual life modules in ext/ that
+	     Porting/cmpVERSION.pl reports differ from the 5.10.0 release.
+	     
+	     [ 33622]
+	     Fix bug in the code for --opened - it was not working on blead.
+	     
+	     [ 33623]
+	     $VERSION++ for all the non-dual life modules outside ext/ that
+	     Porting/cmpVERSION.pl reports differ from the 5.10.0 release.
+	     
+	     All the rest of the differences would seem to be dual-life. :-(
+	     
+	     [ 33624]
+	     Module::CoreList wasn't listing Config.pm everywhere.
+	     
+	     [ 33913]
+	     Integrate:
+	     [ 33838]
+	     Upgrade to ExtUtils-Command-1.14
+	     
+	     [ 33900]
+	     Upgrade to AutoLoader-5.66
+	     
+	     [ 33912]
+	     Bump AutoSplit to a dev version number to reflect the small change in
+	     the __DATA__ section made in the AutoLoader 5.66 release. All will get
+	     back in sync with the next AutoLoader release.
+     Branch: maint-5.8/perl
+	  !> Porting/Maintainers.pm ext/B/B/Concise.pm
+	  !> ext/Devel/DProf/DProf.pm ext/Devel/Peek/Peek.pm
+	  !> ext/POSIX/POSIX.pm ext/PerlIO/encoding/encoding.pm
+	  !> ext/PerlIO/scalar/scalar.pm ext/PerlIO/via/via.pm
+	  !> ext/Socket/Socket.pm lib/AutoLoader.pm lib/AutoSplit.pm
+	  !> lib/ExtUtils/Command.pm lib/ExtUtils/Embed.pm lib/Fatal.pm
+	  !> lib/Fatal.t lib/File/Basename.pm lib/File/Find.pm
+	  !> lib/Module/CoreList.pm os2/OS2/REXX/REXX.pm
+____________________________________________________________________________
+[ 33924] By: nicholas				   on 2008/05/25  20:44:14
+	Log: Regenerate pod/perlmodlib.pod
+     Branch: maint-5.8/perl
+	   ! pod/perlmodlib.pod
+____________________________________________________________________________
+[ 33923] By: nicholas				   on 2008/05/25  20:30:46
+	Log: Integrate:
+	     [ 33628]
+	     Integrate:
+	     [ 33316]
+	     Avoid utf8 warnings when printing diagnostics
+	     
+	     [ 33433]
+	     use strict; and use Test::More; to give decent failure diagnostics.
+	     (And less code)
+	     
+	     [ 33440]
+	     Fix skip counts introduced in #33433
+	     
+	     [ 33565]
+	     Subject: Re: Change 33556: [PATCH] borg parent.pm
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Tue, 25 Mar 2008 11:51:00 -0400
+	     Message-ID: <1ff86f510803250851w52ea0c84n9876834d8e8b79e3@mail.gmail.com>
+	     
+	     [ 33823]
+	     Integrate:
+	     [ 33674]
+	     Test::More::is_deeply may do overloading (at least for TODOs), and
+	     overloading may require Scalar::Util, which it won't find if all
+	     the paths in @INC are relative to somewhere other than where we are.
+	     
+	     [ 33705]
+	     Test dbmopen more thoroughly, including closing the coverage hole for
+	     the code that automatically requires AnyDBM_File.pm in pp_dbmopen.
+	     
+	     [ 33749]
+	     Subject: [perl #53238] Patch to stop t/op/fork.t relying on rand 
+	     From: David Dick (via RT) <perlbug-followup@perl.org>
+	     Date: Wed, 23 Apr 2008 04:12:42 -0700
+	     Message-ID: <rt-3.6.HEAD-23612-1208949161-1511.53238-75-0@perl.org>
+	     
+	     [ 33752]
+	     Subject: [PATCH] another go; was RE: [perl #49302] [[:print:]] v \p{Print} 
+	     From: "Robin Barker" <Robin.Barker@npl.co.uk>
+	     Date: Fri, 25 Apr 2008 14:21:06 +0100
+	     Message-ID: <46A0F33545E63740BC7563DE59CA9C6D093B12@exchsvr2.npl.ad.local>
+	     
+	     [ 33765]
+	     Subject: [PATCH] extra tests for t/op/sprintf2.t (was Re: [perl #45383] RE:
+	     From: Bram <p5p@perl.wizbit.be>
+	     Date: Tue, 29 Apr 2008 22:27:21 +0200
+	     Message-ID: <20080429222721.rwupydwjk00okwc0@horde.wizbit.be>
+	     
+	     [ 33767]
+	     A skip() function is missing, to get this test pass with miniperl
+	     
+	     [ 33768]
+	     Avoid garbage in test output when running make minitest.
+	     This makes all minitests pass on my machine.
+	     
+	     [ 33769]
+	     Subject: Re: [PATCH] testing $/ with in memory files
+	     From: Bram <p5p@perl.wizbit.be>
+	     Date: Wed, 30 Apr 2008 11:55:30 +0200
+	     Message-ID: <20080430115530.a09bjj6tic480c80@horde.wizbit.be>
+	     
+	     [ 33774]
+	     Subject: [perl #53560] Patch for linux LDAP groups 
+	     From: David Dick (via RT) <perlbug-followup@perl.org>
+	     Date: Wed, 30 Apr 2008 05:17:54 -0700
+	     Message-ID: <rt-3.6.HEAD-20841-1209557873-1645.53560-75-0@perl.org>
+	     
+	     [ 33775]
+	     Add a test for "lc(LATIN CAPITAL LETTER SHARP S)"
+	     
+	     [ 33776]
+	     Subject: [PATCH] t/op/pat.t
+	     From: "Robin Barker" <Robin.Barker@npl.co.uk>
+	     Date: Thu, 1 May 2008 19:12:28 +0100
+	     Message-ID: <46A0F33545E63740BC7563DE59CA9C6D093B34@exchsvr2.npl.ad.local>
+	     
+	     [ 33888]
+	     Integrate:
+	     [ 33850]
+	     Subject: [perl #53500] op/pwent.t should use the DirectoryService on OS X 
+	     From: "Tom Wyant via RT" <perlbug-followup@perl.org>
+	     Date: Sun, 11 May 2008 14:40:04 -0700
+	     Message-ID: <rt-3.6.HEAD-20841-1210542001-412.53500-15-0@perl.org>
+     Branch: maint-5.8/perl
+	  +> t/op/dbm.t
+	  !> MANIFEST ext/File/Glob/t/basic.t lib/Devel/SelfStubber.t
+	  !> pod/perlre.pod t/base/rs.t t/op/fork.t t/op/groups.t t/op/lc.t
+	  !> t/op/pat.t t/op/pwent.t t/op/sprintf2.t t/run/fresh_perl.t
+____________________________________________________________________________
+[ 33922] By: nicholas				   on 2008/05/25  19:51:20
+	Log: Integrate:
+	     [ 33617]
+	     Integrate:
+	     [ 33260]
+	     I've been maintaining Net::Ping for a while now.
+	     
+	     [ 33295]
+	     Make sure we only find the macro we were looking for,
+	     not something that only starts with the same string.
+	     
+	     [ 33303]
+	     Jerry D. Hedden now maintains Thread::Semaphore on CPAN
+	     
+	     [ 33352]
+	     Subject: [patch] Porting/expand-macros.pl gets 'indent'ing
+	     From: Jim Cromie <jim.cromie@gmail.com>
+	     Message-ID: <47AB9C4A.3080107@gmail.com>
+	     Date: Thu, 07 Feb 2008 17:03:22 -0700
+	     
+	     [ 33353]
+	     Take advantage of the fact that we can use indent as a stdin/stdout
+	     filter to reduce its workload (and ours) by only sending it the 3 or
+	     so lines that we are interested in printing, not the preceding
+	     bucket loads.
+	     
+	     [ 33456]
+	     Subject: checkAUTHORS.pl update for me
+	     From: Michael G Schwern <schwern@pobox.com>
+	     Date: Sun, 09 Mar 2008 00:35:48 +0100
+	     Message-ID: <47D322D4.8090508@pobox.com>
+	     
+	     [ 33731]
+	     Integrate:
+	     [ 33374]
+	     Tidy up error messages
+	     
+	     [ 33612]
+	     Config.pm needs to be listed in Module::CoreList, too
+	     
+	     [ 33646]
+	     Run overload.pl from regen.pl, and check overload.c as well as overload.h
+	     
+	     [ 33711]
+	     Subject: [perl #53000] Patch for featured TODO: make a reproducible perlmodlib.PL 
+	     From: "James Bence" (via RT) <perlbug-followup@perl.org>
+	     Date: Wed, 16 Apr 2008 22:22:12 -0700
+	     Message-ID: <rt-3.6.HEAD-23612-1208409731-470.53000-75-0@perl.org>
+	     
+	     plus regen perlmodlib (from a clean source tree)
+	     and remove perltodo note
+	     
+	     [ 33879]
+	     Integrate:
+	     [ 33764]
+	     Change of maintainer.
+	     
+	     [ 33799]
+	     Subject: Re: helping 5.8.9
+	     From: Steffen Mueller <wyp3rlx02@sneakemail.com>
+	     Message-ID: <20080504193835.6906.qmail@lists.develooper.com>
+	     Date: Sun, 04 May 2008 21:38:38 +0200
+     Branch: maint-5.8/perl
+	  !> AUTHORS Porting/Maintainers.pl Porting/checkAUTHORS.pl
+	  !> Porting/corelist.pl Porting/expand-macro.pl pod/perlmodlib.PL
+	  !> pod/perltodo.pod regen.pl
+____________________________________________________________________________
+[ 33903] By: nicholas				   on 2008/05/21  16:21:07
+	Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 33868] By: nicholas				   on 2008/05/19  15:43:18
 	Log: Integrate:
 	     [ 33114]
