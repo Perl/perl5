@@ -5789,6 +5789,9 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
       I32 bytesread;
       char *buffer;
       U32 recsize;
+#ifdef VMS
+      int fd;
+#endif
 
       /* Grab the size of the record we're getting */
       recsize = SvUV(SvRV(PL_rs)); /* RsRECORD() guarantees > 0. */
@@ -5800,7 +5803,13 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
       /* doing, but we've got no other real choice - except avoid stdio
          as implementation - perhaps write a :vms layer ?
        */
-      bytesread = PerlLIO_read(PerlIO_fileno(fp), buffer, recsize);
+      fd = PerlIO_fileno(fp);
+      if (fd == -1) { /* in-memory file from PerlIO::Scalar */
+          bytesread = PerlIO_read(fp, buffer, recsize);
+      }
+      else {
+          bytesread = PerlLIO_read(fd, buffer, recsize);
+      }
 #else
       bytesread = PerlIO_read(fp, buffer, recsize);
 #endif
@@ -6942,9 +6951,9 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 	goto fix_gv;
 
     default:
-	SvGETMAGIC(sv);
 	if (SvROK(sv)) {
 	    SV * const *sp = &sv;	/* Used in tryAMAGICunDEREF macro. */
+	    SvGETMAGIC(sv);
 	    tryAMAGICunDEREF(to_cv);
 
 	    sv = SvRV(sv);
@@ -6959,10 +6968,12 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 	    else
 		Perl_croak(aTHX_ "Not a subroutine reference");
 	}
-	else if (isGV(sv))
+	else if (isGV(sv)) {
+	    SvGETMAGIC(sv);
 	    gv = (GV*)sv;
+	}
 	else
-	    gv = gv_fetchsv(sv, lref, SVt_PVCV);
+	    gv = gv_fetchsv(sv, lref, SVt_PVCV); /* Calls get magic */
 	*gvp = gv;
 	if (!gv) {
 	    *st = NULL;

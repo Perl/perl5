@@ -3834,6 +3834,15 @@ sub iseq($$;$) {
     iseq($count,1,"Optimiser should have prevented more than one match");
 }
 
+# test for bug #52658
+{
+    my $reg = '../xxx/';
+    my @te = ($reg =~ m{^(/?(?:\.\./)*)}, $reg =~ s/(x)/'b'/eg > 1 ? '##' : '++');
+    #print "with bug:     (0)=$te[0]  (1)=$te[1]  reg=$reg\n";
+    iseq($reg, '../bbb/');
+    iseq($te[0], '../');
+}
+
 SKIP: {
     unless ($ordA == 65) { skip("Assumes ASCII", 4) }
 
@@ -3861,7 +3870,6 @@ SKIP: {
 	'IsPunct agrees with [:punct:] with explicit Latin1');
 } 
 
-
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
 # Keep the following tests last -- they may crash perl
@@ -3877,4 +3885,4 @@ SKIP: {
 
 # Put new tests above the dotted line about a page above this comment
 
-BEGIN{print "1..1274\n"};
+BEGIN{print "1..1276\n"};

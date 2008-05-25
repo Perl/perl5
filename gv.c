@@ -2067,7 +2067,7 @@ Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags)
 	const char * const name1 = name + 1;
 	switch (*name) {
 	case 'I':
-	    if (len == 3 && name1[1] == 'S' && name[2] == 'A')
+	    if (len == 3 && name[1] == 'S' && name[2] == 'A')
 		goto yes;
 	    break;
 	case 'O':

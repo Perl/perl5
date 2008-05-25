@@ -656,8 +656,7 @@ Perl_do_aspawn(pTHX_ SV *really, SV **mark, SV **sp)
     }
 
     if (flag == P_NOWAIT) {
-	if (IsWin95())
-	    PL_statusvalue = -1;	/* >16bits hint for pp_system() */
+	PL_statusvalue = -1;	/* >16bits hint for pp_system() */
     }
     else {
 	if (status < 0) {
@@ -770,8 +769,7 @@ do_spawn2(pTHX_ const char *cmd, int exectype)
 	Safefree(argv);
     }
     if (exectype == EXECF_SPAWN_NOWAIT) {
-	if (IsWin95())
-	    PL_statusvalue = -1;	/* >16bits hint for pp_system() */
+	PL_statusvalue = -1;	/* >16bits hint for pp_system() */
     }
     else {
 	if (status < 0) {
