@@ -131,7 +131,7 @@ for example, turn C<-w -U> into C<-wU>.
 
 (F) msgsnd() requires a string at least as long as sizeof(long).
 
-=item %s argument is not a HASH or ARRAY element
+=item %s argument is not a HASH or ARRAY element or a subroutine
 
 (F) The argument to exists() must be a hash or array element, such as:
 

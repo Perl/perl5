@@ -87,11 +87,11 @@ chips, but any machine with this chip in it is quite obsolete and this
 document will not attempt to address issues for compiling Perl on the
 Motorola chipset.
 
-The most recent version of PA-RISC at the time of this document's last
-update is 2.0. HP PA-RISC systems are usually refered to with model
-description "HP 9000". The last CPU in this series is the PA-8900.
-Support for PA-RISC architectured machines officially ends as shown
-in the following table:
+The version of PA-RISC at the time of this document's last update is 2.0,
+which is also the last there will be. HP PA-RISC systems are usually
+refered to with model description "HP 9000". The last CPU in this series
+is the PA-8900.  Support for PA-RISC architectured machines officially
+ends as shown in the following table:
 
    PA-RISC End-of-Life Roadmap
  +--------+----------------+----------------+-----------------+
@@ -113,6 +113,13 @@ in the following table:
  | 1-4    |                | PA-8800/rp34x0 | 2012            |
  | cores  |                | PA-8900/rp34x0 | 2014            |
  +--------+----------------+----------------+-----------------+
+
+From http://www.hp.com/products1/evolution/9000/eol_announcement.html:
+
+ The last order date for HP9000 PA-RISC systems is planned for
+ December 31, 2008 and ship date of April 1, 2009. Operating system
+ releases for HP-UX will continue shipping past the HP9000 systems
+ last order date.
 
 A complete list of models at the time the OS was built is in the file
 /usr/sam/lib/mo/sched.models. The first column corresponds to the last
@@ -641,6 +648,6 @@ With much assistance regarding shared libraries from Marc Sabatella.
 
 =head1 DATE
 
-Version 0.8.1: 2008-02-06
+Version 0.8.2: 2008-05-16
 
 =cut

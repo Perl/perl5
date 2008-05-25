@@ -1514,6 +1514,10 @@ determining whether a particular feature (such as C<socket> or C<symlink>)
 is implemented.  It is also Perl's exception trapping mechanism, where
 the die operator is used to raise exceptions.
 
+If you want to trap errors when loading an XS module, some problems with
+the binary interface (such as Perl version skew) may be fatal even with
+C<eval> unless C<$ENV{PERL_DL_NONLAZY}> is set. See L<perlrun>.
+
 If the code to be executed doesn't vary, you may use the eval-BLOCK
 form to trap run-time errors without incurring the penalty of
 recompiling each time.  The error, if any, is still returned in C<$@>.
@@ -4088,13 +4092,15 @@ the completed C<push>.
 
 =item qq/STRING/
 
-=item qr/STRING/
-
 =item qx/STRING/
 
 =item qw/STRING/
 
-Generalized quotes.  See L<perlop/"Regexp Quote-Like Operators">.
+Generalized quotes.  See L<perlop/"Quote-Like Operators">.
+
+=item qr/STRING/
+
+Regexp-like quote.  See L<perlop/"Regexp Quote-Like Operators">.
 
 =item quotemeta EXPR
 X<quotemeta> X<metacharacter>
@@ -4588,12 +4594,15 @@ of LIST in the opposite order.  In scalar context, concatenates the
 elements of LIST and returns a string value with all characters
 in the opposite order.
 
-    print reverse <>;		# line tac, last line first
+    print join(", ", reverse "world", "Hello"); # Hello, world
 
-    undef $/;			# for efficiency of <>
-    print scalar reverse <>;	# character tac, last line tsrif
+    print scalar reverse "dlrow ,", "olleH";    # Hello, world
 
 Used without arguments in scalar context, reverse() reverses C<$_>.
+
+    $_ = "dlrow ,olleH";
+    print reverse;                              # No output, list context
+    print scalar reverse;                       # Hello, world
 
 This operator is also handy for inverting a hash, although there are some
 caveats.  If a value is duplicated in the original hash, only one of those

@@ -351,42 +351,42 @@ C<SV*>.
 /* These don't exist for 5.8.x, but there will be fewer merge conflicts in
    various *ish.h headers if they are defined as no-ops.  */
 
-#define hv_store_ent(zlonk, awk, touche, zgruppp)			\
-    ((HE *) hv_common((zlonk), (awk), NULL, 0, 0, HV_FETCH_ISSTORE,	\
-		      (touche), (zgruppp)))
+#define hv_store_ent(hv, keysv, val, hash)				\
+    ((HE *) hv_common((hv), (keysv), NULL, 0, 0, HV_FETCH_ISSTORE,	\
+		      (val), (hash)))
 
-#define hv_exists_ent(zlonk, awk, zgruppp)				\
-    (hv_common((zlonk), (awk), NULL, 0, 0, HV_FETCH_ISEXISTS, 0, (zgruppp))\
+#define hv_exists_ent(hv, keysv, hash)					\
+    (hv_common((hv), (keysv), NULL, 0, 0, HV_FETCH_ISEXISTS, 0, (hash))	\
      ? TRUE : FALSE)
-#define hv_fetch_ent(zlonk, awk, touche, zgruppp)			\
-    ((HE *) hv_common((zlonk), (awk), NULL, 0, 0,			\
-		      ((touche) ? HV_FETCH_LVALUE : 0), NULL, (zgruppp)))
-#define hv_delete_ent(zlonk, awk, touche, zgruppp)			\
-    ((SV *) hv_common((zlonk), (awk), NULL, 0, 0, (touche) | HV_DELETE,	\
-		      NULL, (zgruppp)))
+#define hv_fetch_ent(hv, keysv, lval, hash)				\
+    ((HE *) hv_common((hv), (keysv), NULL, 0, 0,			\
+		      ((lval) ? HV_FETCH_LVALUE : 0), NULL, (hash)))
+#define hv_delete_ent(hv, key, flags, hash)				\
+    ((SV *) hv_common((hv), (key), NULL, 0, 0, (flags) | HV_DELETE,	\
+		      NULL, (hash)))
 
-#define hv_store_flags(urkk, zamm, clunk, thwape, sploosh, eee_yow)	\
-    ((SV**) hv_common((urkk), NULL, (zamm), (clunk), (eee_yow),		\
-		      (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV), (thwape),	\
-		      (sploosh)))
+#define hv_store_flags(hv, key, klen, val, hash, flags)			\
+    ((SV**) hv_common((hv), NULL, (key), (klen), (flags),		\
+		      (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV), (val),	\
+		      (hash)))
 
-#define hv_store(urkk, zamm, clunk, thwape, sploosh)			\
-    ((SV**) hv_common_key_len((urkk), (zamm), (clunk),			\
+#define hv_store(hv, key, klen, val, hash)				\
+    ((SV**) hv_common_key_len((hv), (key), (klen),			\
 			      (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV),	\
-			      (thwape), (sploosh)))
+			      (val), (hash)))
 
-#define hv_exists(urkk, zamm, clunk)					\
-    (hv_common_key_len((urkk), (zamm), (clunk), HV_FETCH_ISEXISTS, NULL, 0) \
+#define hv_exists(hv, key, klen)					\
+    (hv_common_key_len((hv), (key), (klen), HV_FETCH_ISEXISTS, NULL, 0) \
      ? TRUE : FALSE)
 
-#define hv_fetch(urkk, zamm, clunk, pam)				\
-    ((SV**) hv_common_key_len((urkk), (zamm), (clunk), (pam)		\
+#define hv_fetch(hv, key, klen, lval)					\
+    ((SV**) hv_common_key_len((hv), (key), (klen), (lval)		\
 			      ? (HV_FETCH_JUST_SV | HV_FETCH_LVALUE)	\
 			      : HV_FETCH_JUST_SV, NULL, 0))
 
-#define hv_delete(urkk, zamm, clunk, pam)				\
-    ((SV*) hv_common_key_len((urkk), (zamm), (clunk),			\
-			     (pam) | HV_DELETE, NULL, 0))
+#define hv_delete(hv, key, klen, flags)					\
+    ((SV*) hv_common_key_len((hv), (key), (klen),			\
+			     (flags) | HV_DELETE, NULL, 0))
 
 #define HINTS_REFCNT_INIT            NOOP
 #define HINTS_REFCNT_TERM            NOOP
