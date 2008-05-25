@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 92;
+plan tests => 93;
 
 is(lc(undef),	   "", "lc(undef) is ''");
 is(lcfirst(undef), "", "lcfirst(undef) is ''");
@@ -217,3 +217,6 @@ for ("$temp") {
     lc $_;
     is($_, "Hello");
 }
+
+# new in Unicode 5.1.0
+is(lc("\x{1E9E}"), "\x{df}", "lc(LATIN CAPITAL LETTER SHARP S)");

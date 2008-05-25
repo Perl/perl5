@@ -2034,7 +2034,7 @@ print "ok 683\n" if @a == 9 && "@a" eq "f o o \n $a $b b a r";
 
 my $test = 687;
 
-# Force scalar context on the patern match
+# Force scalar context on the pattern match
 sub ok ($;$) {
     my($ok, $name) = @_;
     my $todo = $TODO ? " # TODO $TODO" : '';
@@ -2046,6 +2046,18 @@ sub ok ($;$) {
 
     $test++;
     return $ok;
+}
+
+sub skip {
+    my $why = shift;
+    $why =~ s/\n.*//s;
+    my $n    = @_ ? shift : 1;
+    for (1..$n) {
+        print "ok $test # skip: $why\n";
+        $test++;
+    }
+    local $^W = 0;
+    last SKIP;
 }
 
 {
@@ -3585,6 +3597,7 @@ sub iseq($$;$) {
     printf "%sok %d - %s$todo\n", ($ok ? "" : "not "), $test,
         $name||"$Message:".((caller)[2]);
 
+    no warnings 'utf8';
     printf "# Failed test at line %d\n".
            "# expected: %s\n". 
            "#   result: %s\n", 
@@ -3821,6 +3834,34 @@ sub iseq($$;$) {
     iseq($count,1,"Optimiser should have prevented more than one match");
 }
 
+SKIP: {
+    unless ($ordA == 65) { skip("Assumes ASCII", 4) }
+
+    my @notIsPunct = grep {/[[:punct:]]/ and not /\p{IsPunct}/}
+			map {chr} 0x20..0x7f;
+    iseq( join('', @notIsPunct), '$+<=>^`|~',
+	'[:punct:] disagress with IsPunct on Symbols');
+
+    my @isPrint = grep {not/[[:print:]]/ and /\p{IsPrint}/}
+			map {chr} 0..0x1f, 0x7f..0x9f;
+    iseq( join('', @isPrint), "\x09\x0a\x0b\x0c\x0d\x85",
+	'IsPrint disagrees with [:print:] on control characters');
+
+    my @isPunct = grep {/[[:punct:]]/ != /\p{IsPunct}/}
+			map {chr} 0x80..0xff;
+    iseq( join('', @isPunct), "\xa1\xab\xb7\xbb\xbf",		# ¡ « · » ¿
+	'IsPunct disagrees with [:punct:] outside ASCII');
+
+    my @isPunctLatin1 = eval q{
+	use encoding 'latin1';
+	grep {/[[:punct:]]/ != /\p{IsPunct}/} map {chr} 0x80..0xff;
+    };
+    if( $@ ){ skip( $@, 1); }
+    iseq( join('', @isPunctLatin1), '', 
+	'IsPunct agrees with [:punct:] with explicit Latin1');
+} 
+
+
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
 # Keep the following tests last -- they may crash perl
@@ -3836,4 +3877,4 @@ sub iseq($$;$) {
 
 # Put new tests above the dotted line about a page above this comment
 
-BEGIN{print "1..1270\n"};
+BEGIN{print "1..1274\n"};
