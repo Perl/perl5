@@ -404,7 +404,7 @@ int_macro_int (const char *name, STRLEN len, IV *arg_result) {
 use ExtUtils::Constant qw (constant_types C_constant XS_constant);
 
 my $types = {map {($_, 1)} qw(IV)};
-my @names = (qw(S_ISBLK S_ISCHR S_ISDIR S_ISFIFO S_ISREG WEXITSTATUS WIFEXITED
+my @names = (qw(WEXITSTATUS WIFEXITED
 	       WIFSIGNALED WIFSTOPPED WSTOPSIG WTERMSIG));
 
 print constant_types(); # macro defs
@@ -416,65 +416,14 @@ print XS_constant ("POSIX", $types);
    */
 
   switch (len) {
-  case 7:
-    /* Names all of length 7.  */
-    /* S_ISBLK S_ISCHR S_ISDIR S_ISREG */
-    /* Offset 5 gives the best switch position.  */
-    switch (name[5]) {
-    case 'E':
-      if (memEQ(name, "S_ISREG", 7)) {
-      /*                    ^       */
-#ifdef S_ISREG
-        *arg_result = S_ISREG(*arg_result);
-        return PERL_constant_ISIV;
-#else
-        return PERL_constant_NOTDEF;
-#endif
-      }
-      break;
-    case 'H':
-      if (memEQ(name, "S_ISCHR", 7)) {
-      /*                    ^       */
-#ifdef S_ISCHR
-        *arg_result = S_ISCHR(*arg_result);
-        return PERL_constant_ISIV;
-#else
-        return PERL_constant_NOTDEF;
-#endif
-      }
-      break;
-    case 'I':
-      if (memEQ(name, "S_ISDIR", 7)) {
-      /*                    ^       */
-#ifdef S_ISDIR
-        *arg_result = S_ISDIR(*arg_result);
-        return PERL_constant_ISIV;
-#else
-        return PERL_constant_NOTDEF;
-#endif
-      }
-      break;
-    case 'L':
-      if (memEQ(name, "S_ISBLK", 7)) {
-      /*                    ^       */
-#ifdef S_ISBLK
-        *arg_result = S_ISBLK(*arg_result);
-        return PERL_constant_ISIV;
-#else
-        return PERL_constant_NOTDEF;
-#endif
-      }
-      break;
-    }
-    break;
   case 8:
     /* Names all of length 8.  */
-    /* S_ISFIFO WSTOPSIG WTERMSIG */
-    /* Offset 3 gives the best switch position.  */
-    switch (name[3]) {
-    case 'O':
+    /* WSTOPSIG WTERMSIG */
+    /* Offset 1 gives the best switch position.  */
+    switch (name[1]) {
+    case 'S':
       if (memEQ(name, "WSTOPSIG", 8)) {
-      /*                  ^          */
+      /*                ^            */
 #ifdef WSTOPSIG
         int i = *arg_result;
         *arg_result = WSTOPSIG(WMUNGE(i));
@@ -484,23 +433,12 @@ print XS_constant ("POSIX", $types);
 #endif
       }
       break;
-    case 'R':
+    case 'T':
       if (memEQ(name, "WTERMSIG", 8)) {
-      /*                  ^          */
+      /*                ^            */
 #ifdef WTERMSIG
         int i = *arg_result;
         *arg_result = WTERMSIG(WMUNGE(i));
-        return PERL_constant_ISIV;
-#else
-        return PERL_constant_NOTDEF;
-#endif
-      }
-      break;
-    case 'S':
-      if (memEQ(name, "S_ISFIFO", 8)) {
-      /*                  ^          */
-#ifdef S_ISFIFO
-        *arg_result = S_ISFIFO(*arg_result);
         return PERL_constant_ISIV;
 #else
         return PERL_constant_NOTDEF;

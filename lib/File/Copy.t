@@ -1,4 +1,4 @@
-#!./perl
+#!./perl -w
 
 BEGIN {
    if( $ENV{PERL_CORE} ) {
@@ -11,7 +11,7 @@ use Test::More;
 
 my $TB = Test::More->builder;
 
-plan tests => 60;
+plan tests => 70;
 
 # We're going to override rename() later on but Perl has to see an override
 # at compile time to honor it.
@@ -40,14 +40,14 @@ for my $cross_partition_test (0..1) {
   }
 
   # First we create a file
-  open(F, ">file-$$") or die;
+  open(F, ">file-$$") or die $!;
   binmode F; # for DOSISH platforms, because test 3 copies to stdout
   printf F "ok\n";
   close F;
 
   copy "file-$$", "copy-$$";
 
-  open(F, "copy-$$") or die;
+  open(F, "copy-$$") or die $!;
   $foo = <F>;
   close(F);
 
@@ -77,7 +77,7 @@ for my $cross_partition_test (0..1) {
 
   require IO::File;
   $fh = IO::File->new(">copy-$$") or die "Cannot open copy-$$:$!";
-  binmode $fh or die;
+  binmode $fh or die $!;
   copy("file-$$",$fh);
   $fh->close or die "close: $!";
   open(R, "copy-$$") or die; $foo = <R>; close(R);
@@ -86,10 +86,10 @@ for my $cross_partition_test (0..1) {
 
   require FileHandle;
   my $fh = FileHandle->new(">copy-$$") or die "Cannot open copy-$$:$!";
-  binmode $fh or die;
+  binmode $fh or die $!;
   copy("file-$$",$fh);
   $fh->close;
-  open(R, "copy-$$") or die; $foo = <R>; close(R);
+  open(R, "copy-$$") or die $!; $foo = <R>; close(R);
   is $foo, "ok\n", 'copy(fn, fh): same contents';
   unlink "file-$$" or die "unlink: $!";
 
@@ -108,7 +108,7 @@ for my $cross_partition_test (0..1) {
   ok move("copy-$$", "file-$$"), 'move';
   ok -e "file-$$",              '  destination exists';
   ok !-e "copy-$$",              '  source does not';
-  open(R, "file-$$") or die; $foo = <R>; close(R);
+  open(R, "file-$$") or die $!; $foo = <R>; close(R);
   is $foo, "ok\n", 'contents preserved';
 
   TODO: {
@@ -121,7 +121,7 @@ for my $cross_partition_test (0..1) {
   }
 
   # trick: create lib/ if not exists - not needed in Perl core
-  unless (-d 'lib') { mkdir 'lib' or die; }
+  unless (-d 'lib') { mkdir 'lib' or die $!; }
   copy "file-$$", "lib";
   open(R, "lib/file-$$") or die $!; $foo = <R>; close(R);
   is $foo, "ok\n", 'copy(fn, dir): same contents';
@@ -129,7 +129,7 @@ for my $cross_partition_test (0..1) {
 
   # Do it twice to ensure copying over the same file works.
   copy "file-$$", "lib";
-  open(R, "lib/file-$$") or die; $foo = <R>; close(R);
+  open(R, "lib/file-$$") or die $!; $foo = <R>; close(R);
   is $foo, "ok\n", 'copy over the same file works';
   unlink "lib/file-$$" or die "unlink: $!";
 
@@ -164,8 +164,8 @@ for my $cross_partition_test (0..1) {
     ok !-z "file-$$", 
       'rt.perl.org 5196: copying to itself would truncate the file';
 
-    unlink "symlink-$$";
-    unlink "file-$$";
+    unlink "symlink-$$" or die $!;
+    unlink "file-$$" or die $!;
   }
 
   SKIP: {
@@ -185,9 +185,41 @@ for my $cross_partition_test (0..1) {
     ok ! -z "file-$$",
       'rt.perl.org 5196: copying to itself would truncate the file';
 
-    unlink "hardlink-$$";
-    unlink "file-$$";
+    unlink "hardlink-$$" or die $!;
+    unlink "file-$$" or die $!;
   }
+
+  open(F, ">file-$$") or die $!;
+  binmode F;
+  print F "this is file\n";
+  close F;
+
+  my $copy_msg = "this is copy\n";
+  open(F, ">copy-$$") or die $!;
+  binmode F;
+  print F $copy_msg;
+  close F;
+
+  my @warnings;
+  local $SIG{__WARN__} = sub { push @warnings, join '', @_ };
+
+  # pie-$$ so that we force a non-constant, else the numeric conversion (of 0)
+  # is cached and we don't get a warning the second time round
+  is eval { copy("file-$$", "copy-$$", "pie-$$"); 1 }, undef,
+    "a bad buffer size fails to copy";
+  like $@, qr/Bad buffer size for copy/, "with a helpful error message";
+  unless (is scalar @warnings, 1, "There is 1 warning") {
+    diag $_ foreach @warnings;
+  }
+
+  is -s "copy-$$", length $copy_msg, "but does not truncate the destination";
+  open(F, "copy-$$") or die $!;
+  $foo = <F>;
+  close(F);
+  is $foo, $copy_msg, "nor change the destination's contents";
+
+  unlink "file-$$" or die $!;
+  unlink "copy-$$" or die $!;
 }
 
 

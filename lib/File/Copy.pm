@@ -24,7 +24,7 @@ sub mv;
 # package has not yet been updated to work with Perl 5.004, and so it
 # would be a Bad Thing for the CPAN module to grab it and replace this
 # module.  Therefore, we set this module's version higher than 2.0.
-$VERSION = '2.11';
+$VERSION = '2.12';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -69,6 +69,12 @@ sub copy {
 
     my $from = shift;
     my $to = shift;
+
+    my $size;
+    if (@_) {
+	$size = shift(@_) + 0;
+	croak("Bad buffer size for copy: $size\n") unless ($size > 0);
+    }
 
     my $from_a_handle = (ref($from)
 			 ? (ref($from) eq 'GLOB'
@@ -139,7 +145,7 @@ sub copy {
 
     my $closefrom = 0;
     my $closeto = 0;
-    my ($size, $status, $r, $buf);
+    my ($status, $r, $buf);
     local($\) = '';
 
     my $from_h;
@@ -148,9 +154,17 @@ sub copy {
     } else {
 	$from = _protect($from) if $from =~ /^\s/s;
        $from_h = \do { local *FH };
-       open($from_h, "< $from\0") or goto fail_open1;
+       open $from_h, "<", $from or goto fail_open1;
        binmode $from_h or die "($!,$^E)";
 	$closefrom = 1;
+    }
+
+    # Seems most logical to do this here, in case future changes would want to
+    # make this croak for some reason.
+    unless (defined $size) {
+	$size = tied(*$from_h) ? 0 : -s $from_h || 0;
+	$size = 1024 if ($size < 512);
+	$size = $Too_Big if ($size > $Too_Big);
     }
 
     my $to_h;
@@ -159,18 +173,9 @@ sub copy {
     } else {
 	$to = _protect($to) if $to =~ /^\s/s;
        $to_h = \do { local *FH };
-       open($to_h,"> $to\0") or goto fail_open2;
+       open $to_h, ">", $to or goto fail_open2;
        binmode $to_h or die "($!,$^E)";
 	$closeto = 1;
-    }
-
-    if (@_) {
-	$size = shift(@_) + 0;
-	croak("Bad buffer size for copy: $size\n") unless ($size > 0);
-    } else {
-	$size = tied(*$from_h) ? 0 : -s $from_h || 0;
-	$size = 1024 if ($size < 512);
-	$size = $Too_Big if ($size > $Too_Big);
     }
 
     $! = 0;

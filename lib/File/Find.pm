@@ -779,7 +779,7 @@ sub _find_dir($$$) {
     if ($Is_MacOS) {
 	$dir_pref= ($p_dir =~ /:$/) ? $p_dir : "$p_dir:"; # preface
     } elsif ($^O eq 'MSWin32') {
-	$dir_pref = ($p_dir =~ m|\w:/$| ? $p_dir : "$p_dir/" );
+	$dir_pref = ($p_dir =~ m|\w:/?$| ? $p_dir : "$p_dir/" );
     } elsif ($^O eq 'VMS') {
 	$dir_pref = ($p_dir =~ m/[\]>]+$/ ? $p_dir : "$p_dir/" );
     }
@@ -955,7 +955,7 @@ sub _find_dir($$$) {
 		$dir_pref = "$dir_name:";
 	    }
 	    elsif ($^O eq 'MSWin32') {
-		$dir_name = ($p_dir =~ m|\w:/$| ? "$p_dir$dir_rel" : "$p_dir/$dir_rel");
+		$dir_name = ($p_dir =~ m|\w:/?$| ? "$p_dir$dir_rel" : "$p_dir/$dir_rel");
 		$dir_pref = "$dir_name/";
 	    }
 	    elsif ($^O eq 'VMS') {
