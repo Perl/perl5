@@ -4640,9 +4640,7 @@ PerlIOCrlf_binmode(pTHX_ PerlIO *f)
 	PerlIOBase(f)->flags &= ~PERLIO_F_CRLF;
 #ifndef PERLIO_USING_CRLF
 	/* CRLF is unusual case - if this is just the :crlf layer pop it */
-	if (PerlIOBase(f)->tab == &PerlIO_crlf) {
-		PerlIO_pop(aTHX_ f);
-	}
+	PerlIO_pop(aTHX_ f);
 #endif
     }
     return 0;
