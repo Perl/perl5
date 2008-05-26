@@ -6744,6 +6744,11 @@ Perl_yylex(pTHX)
 		if (*s == '(') {
 		    char *p;
 		    bool bad_proto = FALSE;
+		    bool in_brackets = FALSE;
+		    char greedy_proto = ' ';
+		    bool proto_after_greedy_proto = FALSE;
+		    bool must_be_last = FALSE;
+		    bool underscore = FALSE;
 		    const bool warnsyntax = ckWARN(WARN_SYNTAX);
 
 		    s = scan_str(s,!!PL_madskills,FALSE);
@@ -6755,11 +6760,43 @@ Perl_yylex(pTHX)
 		    for (p = d; *p; ++p) {
 			if (!isSPACE(*p)) {
 			    d[tmp++] = *p;
-			    if (warnsyntax && !strchr("$@%*;[]&\\_", *p))
-				bad_proto = TRUE;
+
+			    if (warnsyntax) {
+				if (must_be_last)
+				    proto_after_greedy_proto = TRUE;
+				if (!strchr("$@%*;[]&\\_", *p)) {
+				    bad_proto = TRUE;
+				}
+				else {
+				    if ( underscore ) {
+					if ( *p != ';' )
+					    bad_proto = TRUE;
+					underscore = FALSE;
+				    }
+				    if ( *p == '[' ) {
+					in_brackets = TRUE;
+				    }
+				    else if ( *p == ']' ) {
+					in_brackets = FALSE;
+				    }
+				    else if ( (*p == '@' || *p == '%') &&
+					 ( tmp < 2 || d[tmp-2] != '\\' ) &&
+					 !in_brackets ) {
+					must_be_last = TRUE;
+					greedy_proto = *p;
+				    }
+				    else if ( *p == '_' ) {
+					underscore = TRUE;
+				    }
+				}
+			    }
 			}
 		    }
 		    d[tmp] = '\0';
+		    if (proto_after_greedy_proto)
+			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+				    "Prototype after '%c' for %"SVf" : %s",
+				    greedy_proto, SVfARG(PL_subname), d);
 		    if (bad_proto)
 			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 				    "Illegal character in prototype for %"SVf" : %s",

@@ -852,3 +852,26 @@ use warnings 'deprecated';
 our $bar :unique;
 EXPECT
 Use of :unique is deprecated at - line 4.
+########
+# toke.c
+use warnings "syntax";
+sub proto_after_array(@$);
+sub proto_after_arref(\@$);
+sub proto_after_arref2(\[@$]);
+sub proto_after_arref3(\[@$]_);
+sub proto_after_hash(%$);
+sub proto_after_hashref(\%$);
+sub proto_after_hashref2(\[%$]);
+sub underscore_last_pos($_);
+sub underscore2($_;$);
+sub underscore_fail($_$);
+sub underscore_after_at(@_);
+no warnings "syntax";
+sub proto_after_array(@$);
+sub proto_after_hash(%$);
+sub underscore_fail($_$);
+EXPECT
+Prototype after '@' for main::proto_after_array : @$ at - line 3.
+Prototype after '%' for main::proto_after_hash : %$ at - line 7.
+Illegal character in prototype for main::underscore_fail : $_$ at - line 12.
+Prototype after '@' for main::underscore_after_at : @_ at - line 13.
