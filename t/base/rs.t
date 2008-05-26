@@ -115,13 +115,13 @@ $/ = "\n";
 }
 
 
-if ($ENV{PERL_CORE_MINITEST} or $ENV{_} =~ m/miniperl/) {
+if (not eval q/use PerlIO::scalar; 1/) {
   # In-memory files necessitate PerlIO::via::scalar, thus a perl with
   # perlio and dynaloading enabled. miniperl won't be able to run this
   # test, so skip it
 
   for $test ($test_count .. $test_count + ($test_count_end - $test_count_start - 1)) {
-    print "ok $test # skipped - Can't test in memory file with miniperl\n";
+    print "ok $test # skipped - Can't test in memory file with miniperl/without PerlIO::Scalar\n";
     $test_count++;
   }
 }
