@@ -18,7 +18,7 @@ use Fcntl qw(SEEK_SET SEEK_CUR SEEK_END); # Not 0, 1, 2 everywhere.
 
 $| = 1;
 
-use Test::More tests => 51;
+use Test::More tests => 55;
 
 my $fh;
 my $var = "aaa\n";
@@ -111,6 +111,47 @@ is(<$fh>, "shazam", "reading from magic scalars");
     print $fh "foo";
     close $fh;
     is($warn, 0, "no warnings when writing to an undefined scalar");
+}
+
+{
+    use warnings;
+    my $warn = 0;
+    local $SIG{__WARN__} = sub { $warn++ };
+    for (1..2) {
+        open my $fh, '>', \my $scalar;
+        close $fh;
+    }
+    is($warn, 0, "no warnings when reusing a lexical");
+}
+
+{
+    use warnings;
+    my $warn = 0;
+    local $SIG{__WARN__} = sub { $warn++ };
+
+    my $fetch = 0;
+    {
+        package MgUndef;
+        sub TIESCALAR { bless [] }
+        sub FETCH { $fetch++; return undef }
+    }
+    tie my $scalar, MgUndef;
+
+    open my $fh, '<', \$scalar;
+    close $fh;
+    is($warn, 0, "no warnings reading a magical undef scalar");
+    is($fetch, 1, "FETCH only called once");
+}
+
+{
+    use warnings;
+    my $warn = 0;
+    local $SIG{__WARN__} = sub { $warn++ };
+    my $scalar = 3;
+    undef $scalar;
+    open my $fh, '<', \$scalar;
+    close $fh;
+    is($warn, 0, "no warnings reading an undef, allocated scalar");
 }
 
 my $data = "a non-empty PV";
