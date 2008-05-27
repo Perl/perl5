@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Tue May 20 17:29:22 CEST 2008 [metaconfig 3.5 PL0]
+# Generated on Tue May 27 17:17:47 CEST 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -19093,7 +19093,7 @@ EOM
 			fi
 		fi
 	fi
-	$rm_try
+	$rm -f core try.core core.try.*
 	case "$fflushNULL" in
 	x)	$cat >&4 <<EOM
 Your fflush(NULL) works okay for output streams.
