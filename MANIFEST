@@ -3582,6 +3582,7 @@ t/lib/sample-tests/todo_inline		Test data for Test::Harness
 t/lib/sample-tests/too_many		Test data for Test::Harness
 t/lib/sample-tests/vms_nit		Test data for Test::Harness
 t/lib/sample-tests/with_comments	Test data for Test::Harness
+t/lib/Sans_mypragma.pm			Test module for t/lib/mypragma.t
 t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t
 t/lib/strict/subs		Tests of "use strict 'subs'" for strict.t
 t/lib/strict/vars		Tests of "use strict 'vars'" for strict.t

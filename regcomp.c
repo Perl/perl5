@@ -4422,7 +4422,17 @@ reStudy:
         regnode *first= scan;
         regnode *first_next= regnext(first);
 	
-	/* Skip introductions and multiplicators >= 1. */
+	/*
+	 * Skip introductions and multiplicators >= 1
+	 * so that we can extract the 'meat' of the pattern that must 
+	 * match in the large if() sequence following.
+	 * NOTE that EXACT is NOT covered here, as it is normally
+	 * picked up by the optimiser separately. 
+	 *
+	 * This is unfortunate as the optimiser isnt handling lookahead
+	 * properly currently.
+	 *
+	 */
 	while ((OP(first) == OPEN && (sawopen = 1)) ||
 	       /* An OR of *one* alternative - should not happen now. */
 	    (OP(first) == BRANCH && OP(first_next) != BRANCH) ||
@@ -4434,16 +4444,17 @@ reStudy:
 	    (PL_regkind[OP(first)] == CURLY && ARG1(first) > 0) ||
 	    (OP(first) == NOTHING && PL_regkind[OP(first_next)] != END ))
 	{
-	        
+		/* 
+		 * the only op that could be a regnode is PLUS, all the rest
+		 * will be regnode_1 or regnode_2.
+		 *
+		 */
 		if (OP(first) == PLUS)
 		    sawplus = 1;
 		else
 		    first += regarglen[OP(first)];
-		if (OP(first) == IFMATCH) {
-		    first = NEXTOPER(first);
-		    first += EXTRA_STEP_2ARGS;
-		} else  /* XXX possible optimisation for /(?=)/  */
-		    first = NEXTOPER(first);
+		
+		first = NEXTOPER(first);
 		first_next= regnext(first);
 	}
 
@@ -4974,6 +4985,8 @@ Perl_reg_named_buff_firstkey(pTHX_ REGEXP * const rx, const U32 flags)
 SV*
 Perl_reg_named_buff_nextkey(pTHX_ REGEXP * const rx, const U32 flags)
 {
+    GET_RE_DEBUG_FLAGS_DECL;
+
     if (rx && RXp_PAREN_NAMES(rx)) {
         HV *hv = RXp_PAREN_NAMES(rx);
         HE *temphe;
@@ -4983,7 +4996,7 @@ Perl_reg_named_buff_nextkey(pTHX_ REGEXP * const rx, const U32 flags)
             SV* sv_dat = HeVAL(temphe);
             I32 *nums = (I32*)SvPVX(sv_dat);
             for ( i = 0; i < SvIVX(sv_dat); i++ ) {
-                if ((I32)(rx->lastcloseparen) >= nums[i] &&
+                if ((I32)(rx->lastparen) >= nums[i] &&
                     rx->offs[nums[i]].start != -1 &&
                     rx->offs[nums[i]].end != -1)
                 {
@@ -5037,7 +5050,7 @@ Perl_reg_named_buff_all(pTHX_ REGEXP * const rx, const U32 flags)
             SV* sv_dat = HeVAL(temphe);
             I32 *nums = (I32*)SvPVX(sv_dat);
             for ( i = 0; i < SvIVX(sv_dat); i++ ) {
-                if ((I32)(rx->lastcloseparen) >= nums[i] &&
+                if ((I32)(rx->lastparen) >= nums[i] &&
                     rx->offs[nums[i]].start != -1 &&
                     rx->offs[nums[i]].end != -1)
                 {
