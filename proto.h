@@ -88,6 +88,9 @@ PERL_CALLCONV MEM_SIZE	Perl_malloced_size(void *p)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1);
 
+PERL_CALLCONV MEM_SIZE	Perl_malloc_good_size(size_t nbytes)
+			__attribute__warn_unused_result__;
+
 #endif
 
 PERL_CALLCONV void*	Perl_get_context(void)

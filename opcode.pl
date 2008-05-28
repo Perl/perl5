@@ -728,14 +728,14 @@ abs		abs			ck_fun		fsTu%	S?
 
 # String stuff.
 
-length		length			ck_lengthconst	isTu%	S?
+length		length			ck_lengthconst	ifsTu%	S?
 substr		substr			ck_substr	st@	S S S? S?
 vec		vec			ck_fun		ist@	S S S
 
 index		index			ck_index	isT@	S S S?
 rindex		rindex			ck_index	isT@	S S S?
 
-sprintf		sprintf			ck_fun		mst@	S L
+sprintf		sprintf			ck_fun		fmst@	S L
 formline	formline		ck_fun		ms@	S L
 ord		ord			ck_fun		ifsTu%	S?
 chr		chr			ck_fun		fsTu%	S?

@@ -38,6 +38,7 @@
 #if defined(MYMALLOC)
 #ifdef PERL_CORE
 #define malloced_size		Perl_malloced_size
+#define malloc_good_size	Perl_malloc_good_size
 #endif
 #endif
 #define get_context		Perl_get_context
@@ -2348,6 +2349,7 @@
 #if defined(MYMALLOC)
 #ifdef PERL_CORE
 #define malloced_size		Perl_malloced_size
+#define malloc_good_size	Perl_malloc_good_size
 #endif
 #endif
 #define get_context		Perl_get_context

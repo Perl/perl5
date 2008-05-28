@@ -40,8 +40,11 @@ STATIC void
 S_more_he(pTHX)
 {
     dVAR;
-    HE* he = (HE*) Perl_get_arena(aTHX_ PERL_ARENA_SIZE, HE_SVSLOT);
-    HE * const heend = &he[PERL_ARENA_SIZE / sizeof(HE) - 1];
+    /* We could generate this at compile time via (another) auxiliary C
+       program?  */
+    const size_t arena_size = Perl_malloc_good_size(PERL_ARENA_SIZE);
+    HE* he = (HE*) Perl_get_arena(aTHX_ arena_size, HE_SVSLOT);
+    HE * const heend = &he[arena_size / sizeof(HE) - 1];
 
     PL_body_roots[HE_SVSLOT] = he;
     while (he < heend) {

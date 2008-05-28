@@ -957,7 +957,7 @@ XS(XS_mro_nextcan)
     if(sv_isobject(self))
         selfstash = SvSTASH(SvRV(self));
     else
-        selfstash = gv_stashsv(self, 0);
+        selfstash = gv_stashsv(self, GV_ADD);
 
     assert(selfstash);
 

@@ -2351,6 +2351,7 @@ Perl_fold_constants(pTHX_ register OP *o)
     OP *old_next;
     SV * const oldwarnhook = PL_warnhook;
     SV * const olddiehook  = PL_diehook;
+    COP not_compiling;
     dJMPENV;
 
     if (PL_opargs[type] & OA_RETSCALAR)
@@ -2413,6 +2414,13 @@ Perl_fold_constants(pTHX_ register OP *o)
     oldscope = PL_scopestack_ix;
     create_eval_scope(G_FAKINGEVAL);
 
+    /* Verify that we don't need to save it:  */
+    assert(PL_curcop == &PL_compiling);
+    StructCopy(&PL_compiling, &not_compiling, COP);
+    PL_curcop = &not_compiling;
+    /* The above ensures that we run with all the correct hints of the
+       currently compiling COP, but that IN_PERL_RUNTIME is not true. */
+    assert(IN_PERL_RUNTIME);
     PL_warnhook = PERL_WARNHOOK_FATAL;
     PL_diehook  = NULL;
     JMPENV_PUSH(ret);
@@ -2446,6 +2454,7 @@ Perl_fold_constants(pTHX_ register OP *o)
     JMPENV_POP;
     PL_warnhook = oldwarnhook;
     PL_diehook  = olddiehook;
+    PL_curcop = &PL_compiling;
 
     if (PL_scopestack_ix > oldscope)
 	delete_eval_scope();

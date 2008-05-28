@@ -669,6 +669,9 @@ $foo =~ s/$m1/z/;
 $foo =~ s//$g1/;
 $foo =~ s/$m1/$g1/;
 $foo =~ s/./$m1/e;
+undef $g1;
+$m1 = '$g1';
+$foo =~ s//$m1/ee;
 EXPECT
 Use of uninitialized value $_ in pattern match (m//) at - line 5.
 Use of uninitialized value $m1 in regexp compilation at - line 6.
@@ -731,6 +734,7 @@ Use of uninitialized value $g1 in substitution (s///) at - line 39.
 Use of uninitialized value $m1 in regexp compilation at - line 40.
 Use of uninitialized value $g1 in substitution iterator at - line 40.
 Use of uninitialized value $m1 in substitution iterator at - line 41.
+Use of uninitialized value in substitution iterator at - line 44.
 ########
 use warnings 'uninitialized';
 my ($m1);
@@ -1298,13 +1302,15 @@ Use of uninitialized value $m1 in localtime at - line 5.
 Use of uninitialized value $g1 in gmtime at - line 6.
 ########
 use warnings 'uninitialized';
-my ($m1, $v);
+my ($m1, $m2, $v);
 
 $v = eval;
 $v = eval $m1;
+$m2 = q($m1); $v = 1 + eval $m2;
 EXPECT
 Use of uninitialized value $_ in eval "string" at - line 4.
 Use of uninitialized value $m1 in eval "string" at - line 5.
+Use of uninitialized value in addition (+) at - line 6.
 ########
 use warnings 'uninitialized';
 my ($m1);
