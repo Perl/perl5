@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 use Getopt::Std;
 my %opts;
-getopts('U', \%opts);
+getopts('Uv', \%opts);
 
 my %map = (
 	   V => "void",
@@ -40,10 +40,9 @@ my %map = (
 # Example #3: S_CBI   means type func_r(const char*, char*, int)
 
 
-safer_unlink 'reentr.h';
-die "reentr.h: $!" unless open(H, ">reentr.h");
-binmode H;
-select H;
+# safer_unlink 'reentr.h';
+my $h = safer_open("reentr.h-new");
+select $h;
 print <<EOF;
 /* -*- buffer-read-only: t -*-
  *
@@ -332,7 +331,7 @@ close DATA;
 
 # Prepare to continue writing the reentr.h.
 
-select H;
+select $h;
 
 {
     # Write out all the known prototype signatures.
@@ -788,14 +787,14 @@ typedef struct {
 /* ex: set ro: */
 EOF
 
-close(H);
+safer_close($h);
+rename_if_different('reentr.h-new', 'reentr.h');
 
 # Prepare to write the reentr.c.
 
-safer_unlink 'reentr.c';
-die "reentr.c: $!" unless open(C, ">reentr.c");
-binmode C;
-select C;
+# safer_unlink 'reentr.c';
+my $c = safer_open("reentr.c-new");
+select $c;
 print <<EOF;
 /* -*- buffer-read-only: t -*-
  *
@@ -1084,6 +1083,9 @@ Perl_reentrant_retry(const char *f, ...)
 
 /* ex: set ro: */
 EOF
+
+safer_close($c);
+rename_if_different('reentr.c-new', 'reentr.c');
 
 __DATA__
 asctime S	|time	|const struct tm|B_SB|B_SBI|I_SB|I_SBI

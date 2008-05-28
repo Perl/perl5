@@ -22,10 +22,8 @@ while (<DATA>) {
 }
 
 safer_unlink ('overload.h', 'overload.c');
-die "overload.h: $!" unless open(C, ">overload.c");
-binmode C;
-die "overload.h: $!" unless open(H, ">overload.h");
-binmode H;
+my $c = safer_open("overload.c");
+my $h = safer_open("overload.h");
 
 sub print_header {
   my $file = shift;
@@ -46,10 +44,10 @@ sub print_header {
 EOF
 }
 
-select C;
+select $c;
 print_header('overload.c');
 
-select H;
+select $h;
 print_header('overload.h');
 print <<'EOF';
 
@@ -67,7 +65,7 @@ print <<'EOF';
 
 EOF
 
-print C <<'EOF';
+print $c <<'EOF';
 
 #define AMG_id2name(id) (PL_AMG_names[id]+1)
 #define AMG_id2namelen(id) (PL_AMG_namelens[id]-1)
@@ -77,10 +75,10 @@ EOF
 
 my $last = pop @names;
 
-print C "    $_,\n" foreach map { length $_ } @names;
+print $c "    $_,\n" foreach map { length $_ } @names;
 
 my $lastlen = length $last;
-print C <<"EOT";
+print $c <<"EOT";
     $lastlen
 };
 
@@ -92,15 +90,15 @@ char * const PL_AMG_names[NofAMmeth] = {
      overload.pm.  */
 EOT
 
-print C "    \"$_\",\n" foreach map { s/(["\\"])/\\$1/g; $_ } @names;
+print $c "    \"$_\",\n" foreach map { s/(["\\"])/\\$1/g; $_ } @names;
 
-print C <<"EOT";
+print $c <<"EOT";
     "$last"
 };
 EOT
 
-close H or die $!;
-close C or die $!;
+safer_close($h);
+safer_close($c);
 
 __DATA__
 # Fallback should be the first

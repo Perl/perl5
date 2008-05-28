@@ -2,6 +2,8 @@
 use strict;
 use vars qw($Is_W32 $Is_OS2 $Is_Cygwin $Is_NetWare $Needs_Write);
 use Config; # Remember, this is running using an existing perl
+use File::Compare;
+use Symbol;
 
 # Common functions needed by the regen scripts
 
@@ -38,8 +40,31 @@ sub safer_rename_silent {
   rename $from, $to;
 }
 
-sub safer_rename {
+sub rename_if_different {
   my ($from, $to) = @_;
+
+  if (compare($from, $to) == 0) {
+      warn "no changes between '$from' & '$to'\n";
+      safer_unlink($from);
+      return;
+  }
+  warn "changed '$from' to '$to'\n";
   safer_rename_silent($from, $to) or die "renaming $from to $to: $!";
 }
+
+# Saf*er*, but not totally safe. And assumes always open for output.
+sub safer_open {
+    my $name = shift;
+    my $fh = gensym;
+    open $fh, ">$name" or die "Can't create $name: $!";
+    *{$fh}->{SCALAR} = $name;
+    binmode $fh;
+    $fh;
+}
+
+sub safer_close {
+    my $fh = shift;
+    close $fh or die 'Error closing ' . *{$fh}->{SCALAR} . ": $!";
+}
+
 1;

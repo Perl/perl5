@@ -13,8 +13,8 @@ my $perl = $^X;
 
 require 'regen_lib.pl';
 # keep warnings.pl in sync with the CPAN distribution by not requiring core
-# changes
-safer_unlink ("warnings.h", "lib/warnings.pm");
+# changes.  Um, what ?
+# safer_unlink ("warnings.h", "lib/warnings.pm");
 
 my %gen = (
 	   'autodoc.pl'  => [qw[pod/perlapi.pod pod/perlintern.pod]],
