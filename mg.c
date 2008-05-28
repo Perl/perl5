@@ -3039,7 +3039,7 @@ Perl_magic_sethint(pTHX_ SV *sv, MAGIC *mg)
 }
 
 /*
-=for apidoc magic_sethint
+=for apidoc magic_clearhint
 
 Triggered by a delete from %^H, records the key to
 C<PL_compiling.cop_hints_hash>.

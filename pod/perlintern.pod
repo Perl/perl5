@@ -433,11 +433,24 @@ Found in file doio.c
 
 =over 8
 
-=item magic_sethint
-X<magic_sethint>
+=item magic_clearhint
+X<magic_clearhint>
 
 Triggered by a delete from %^H, records the key to
 C<PL_compiling.cop_hints_hash>.
+
+	int	magic_clearhint(SV* sv, MAGIC* mg)
+
+=for hackers
+Found in file mg.c
+
+=item magic_sethint
+X<magic_sethint>
+
+Triggered by a store to %^H, records the key/value pair to
+C<PL_compiling.cop_hints_hash>.  It is assumed that hints aren't storing
+anything that would need a deep copy.  Maybe we should warn if we find a
+reference.
 
 	int	magic_sethint(SV* sv, MAGIC* mg)
 

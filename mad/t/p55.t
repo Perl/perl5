@@ -75,30 +75,10 @@ our %failing = map { $_, 1 } qw|
 ../t/op/exec.t
 ../t/io/say.t
 
-../t/io/open.t
-../t/op/gv.t
-../t/op/re.t
-../t/op/tr.t
-../t/op/die.t
-../t/op/pat.t
-../t/op/reg_namedcapture.t
-../t/op/reg_email.t
-../t/op/reg_nc_tie.t
-../t/op/utf8decode.t
 ../t/op/state.t
-../t/op/subst.t
-../t/op/goto.t
 ../t/op/tiehandle.t
-../t/op/pack.t
 ../t/op/each_array.t
-../t/op/sprintf.t
-../t/op/attrs.t
-../t/op/universal.t
-../t/op/regexp.t
 ../t/lib/cygwin.t
-../t/run/switchd.t
-../t/comp/proto.t
-../t/win32/system.t
 |;
 
 my @files;

@@ -3172,6 +3172,8 @@ PP(pp_substr)
 		repl = SvPV_const(repl_sv_copy, repl_len);
 		repl_is_utf8 = DO_UTF8(repl_sv_copy) && SvCUR(sv);
 	    }
+	    if (!SvOK(sv))
+		sv_setpvs(sv, "");
 	    sv_insert(sv, pos, rem, repl, repl_len);
 	    if (repl_is_utf8)
 		SvUTF8_on(sv);
@@ -3191,7 +3193,7 @@ PP(pp_substr)
 		else if (SvOK(sv))	/* is it defined ? */
 		    (void)SvPOK_only_UTF8(sv);
 		else
-		    sv_setpvn(sv,"",0);	/* avoid lexical reincarnation */
+		    sv_setpvs(sv, ""); /* avoid lexical reincarnation */
 	    }
 
 	    if (SvTYPE(TARG) < SVt_PVLV) {

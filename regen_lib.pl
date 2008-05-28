@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 use strict;
-use vars qw($Is_W32 $Is_OS2 $Is_Cygwin $Is_NetWare $Needs_Write);
+use vars qw($Is_W32 $Is_OS2 $Is_Cygwin $Is_NetWare $Needs_Write $Verbose);
 use Config; # Remember, this is running using an existing perl
 use File::Compare;
 use Symbol;
@@ -16,6 +16,8 @@ if ($Is_NetWare) {
 }
 
 $Needs_Write = $Is_OS2 || $Is_W32 || $Is_Cygwin || $Is_NetWare;
+
+@ARGV = grep { not($_ eq '-v' and $Verbose = 1) } @ARGV;
 
 sub safer_unlink {
   my @names = @_;
@@ -44,7 +46,7 @@ sub rename_if_different {
   my ($from, $to) = @_;
 
   if (compare($from, $to) == 0) {
-      warn "no changes between '$from' & '$to'\n";
+      warn "no changes between '$from' & '$to'\n" if $Verbose;
       safer_unlink($from);
       return;
   }
