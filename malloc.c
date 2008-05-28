@@ -2445,6 +2445,8 @@ Perl_get_mstats(pTHX_ perl_mstats_t *buf, int buflen, int level)
 		buf->bucket_available_size[i] = BUCKET_SIZE_REAL(i);
 	    }
 	}
+#else /* defined DEBUGGING_MSTATS */
+	PerlIO_printf(Perl_error_log, "perl not compiled with DEBUGGING_MSTATS\n");
 #endif	/* defined DEBUGGING_MSTATS */
 	return 0;		/* XXX unused */
 }
@@ -2516,6 +2518,8 @@ Perl_dump_mstats(pTHX_ char *s)
 		      buffer.total_sbrk, buffer.sbrks, buffer.sbrk_good,
 		      buffer.sbrk_slack, buffer.start_slack,
 		      buffer.total_chain, buffer.sbrked_remains);
+#else /* DEBUGGING_MSTATS */
+	PerlIO_printf(Perl_error_log, "%s: perl not compiled with DEBUGGING_MSTATS\n",s);
 #endif /* DEBUGGING_MSTATS */
 }
 

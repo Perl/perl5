@@ -233,6 +233,13 @@ rot13_key(pTHX_ IV action, SV *field) {
     return 0;
 }
 
+STATIC I32
+rmagical_a_dummy(pTHX_ IV idx, SV *sv) {
+    return 0;
+}
+
+STATIC MGVTBL rmagical_b = { 0 };
+
 #include "const-c.inc"
 
 MODULE = XS::APItest:Hash		PACKAGE = XS::APItest::Hash
@@ -811,6 +818,38 @@ sv_setsv_cow_hashkey_core()
 
 bool
 sv_setsv_cow_hashkey_notcore()
+
+void
+rmagical_cast(sv, type)
+    SV *sv;
+    SV *type;
+    PREINIT:
+	struct ufuncs uf;
+    PPCODE:
+	if (!SvOK(sv) || !SvROK(sv) || !SvOK(type)) { XSRETURN_UNDEF; }
+	sv = SvRV(sv);
+	if (SvTYPE(sv) != SVt_PVHV) { XSRETURN_UNDEF; }
+	uf.uf_val = rmagical_a_dummy;
+	uf.uf_set = NULL;
+	uf.uf_index = 0;
+	if (SvTRUE(type)) { /* b */
+	    sv_magicext(sv, NULL, PERL_MAGIC_ext, &rmagical_b, NULL, 0);
+	} else { /* a */
+	    sv_magic(sv, NULL, PERL_MAGIC_uvar, (char *) &uf, sizeof(uf));
+	}
+	XSRETURN_YES;
+
+void
+rmagical_flags(sv)
+    SV *sv;
+    PPCODE:
+	if (!SvOK(sv) || !SvROK(sv)) { XSRETURN_UNDEF; }
+	sv = SvRV(sv);
+        EXTEND(SP, 3); 
+	mXPUSHu(SvFLAGS(sv) & SVs_GMG);
+	mXPUSHu(SvFLAGS(sv) & SVs_SMG);
+	mXPUSHu(SvFLAGS(sv) & SVs_RMG);
+        XSRETURN(3);
 
 void
 BEGIN()

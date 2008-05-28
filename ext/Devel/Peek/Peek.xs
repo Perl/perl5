@@ -127,16 +127,14 @@ DeadCode(pTHX)
 #endif /* !PURIFY */
 }
 
-#if (defined(PERL_DEBUGGING_MSTATS) || defined(DEBUGGING_MSTATS)) \
-	&& (defined(MYMALLOC) && !defined(PLAIN_MALLOC))
+#if defined(MYMALLOC)
 #   define mstat(str) dump_mstats(str)
 #else
 #   define mstat(str) \
-	PerlIO_printf(Perl_debug_log, "%s: perl not compiled with DEBUGGING_MSTATS\n",str);
+	PerlIO_printf(Perl_debug_log, "%s: perl not compiled with MYMALLOC\n",str);
 #endif
 
-#if (defined(PERL_DEBUGGING_MSTATS) || defined(DEBUGGING_MSTATS)) \
-	&& (defined(MYMALLOC) && !defined(PLAIN_MALLOC))
+#if defined(MYMALLOC)
 
 /* Very coarse overestimate, 2-per-power-of-2, one more to determine NBUCKETS. */
 #  define _NBUCKETS (2*8*IVSIZE+1)
@@ -293,7 +291,7 @@ mstats2hash(SV *sv, SV *rv, int level)
 	croak("Wrong size for a value with a mstats buffer");
     _mstats_to_hv((HV *)SvRV(rv), (struct mstats_buffer*)SvPVX(sv), level);
 }
-#else	/* !( defined(PERL_DEBUGGING_MSTATS) || defined(DEBUGGING_MSTATS) \ ) */ 
+#else	/* defined(MYMALLOC) */ 
 static void
 fill_mstats(SV *sv, int level)
 {
@@ -311,7 +309,7 @@ mstats2hash(SV *sv, SV *rv, int level)
 {
     croak("Cannot report mstats without Perl malloc");
 }
-#endif	/* defined(PERL_DEBUGGING_MSTATS) || defined(DEBUGGING_MSTATS)... */ 
+#endif	/* defined(MYMALLOC) */ 
 
 #define _CvGV(cv)					\
 	(SvROK(cv) && (SvTYPE(SvRV(cv))==SVt_PVCV)	\

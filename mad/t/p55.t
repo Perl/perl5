@@ -64,10 +64,6 @@ use Test::Differences;
 our %failing = map { $_, 1 } qw|
 ../t/comp/require.t
 
-../t/op/array.t
-../t/op/local.t
-../t/op/substr.t
-
 ../t/comp/parser.t
 
 ../t/op/switch.t
@@ -76,10 +72,33 @@ our %failing = map { $_, 1 } qw|
 
 ../t/op/symbolcache.t
 
-../t/op/threads.t
-
 ../t/op/exec.t
 ../t/io/say.t
+
+../t/io/open.t
+../t/op/gv.t
+../t/op/re.t
+../t/op/tr.t
+../t/op/die.t
+../t/op/pat.t
+../t/op/reg_namedcapture.t
+../t/op/reg_email.t
+../t/op/reg_nc_tie.t
+../t/op/utf8decode.t
+../t/op/state.t
+../t/op/subst.t
+../t/op/goto.t
+../t/op/tiehandle.t
+../t/op/pack.t
+../t/op/each_array.t
+../t/op/sprintf.t
+../t/op/attrs.t
+../t/op/universal.t
+../t/op/regexp.t
+../t/lib/cygwin.t
+../t/run/switchd.t
+../t/comp/proto.t
+../t/win32/system.t
 |;
 
 my @files;
@@ -149,10 +168,10 @@ eval { require 5.005 }
 sub PerlIO::F_UTF8 () { 0x00008000 } # from perliol.h
 BEGIN { PerlIO::Layer->find("encoding",1);}
 ########
-# TODO from ../t/op/array.t
+# from ../t/op/array.t
 $[ = 1
 ########
-# TODO from t/comp/parser.t
+# from t/comp/parser.t
 $x = 1 for ($[) = 0;
 ########
 # from t/op/getppid.t

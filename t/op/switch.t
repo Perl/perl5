@@ -8,7 +8,7 @@ BEGIN {
 use strict;
 use warnings;
 
-use Test::More tests => 108;
+use Test::More tests => 111;
 
 # The behaviour of the feature pragma should be tested by lib/switch.t
 # using the tests in t/lib/switch/*. This file tests the behaviour of
@@ -519,6 +519,68 @@ sub bar {"bar"}
     ok($ok, '((1 == $ok) || "foo") smartmatched');
 }
 
+TODO: {
+    local $TODO = "RT #50538: when( \@n && \%n ) fails to smart match";
+    { # this should smart match on each side of &&
+ 	my @n = qw(fred barney betty);
+	my @m = @n;
+	
+	my $ok = 0;
+	given( "fred" ) {
+	when( @n ) {
+		$ok++; continue;
+	}
+	when( @m ) {
+		$ok++; continue;
+	}
+	when( @m && @n ) {
+		$ok++;
+	}
+	}
+
+	is($ok, 3, '(@n && @m) smart-matched');	
+    }
+
+    { # this should smart match on each side of &&
+	my @n = qw(fred barney betty);
+	my %n = map { $_, 1 } @n;
+	
+	my $ok = 0;
+	given( "fred" ) {
+	when( @n ) {
+		$ok++; continue;
+	}
+	when( %n ) {
+		$ok++; continue;
+	}
+	when( @n && %n ) {
+		$ok++;
+	}
+	}
+
+	is($ok, 3, '(@n && %n) smart-matched');	
+    }
+
+    { # this should smart match on each side of &&
+	my %n = map { $_, 1 } qw(fred barney betty);
+	my %m = %n;
+	
+	my $ok = 0;
+	given( "fred" ) {
+	when( %m ) {
+		$ok++; continue;
+	}
+	when( %n ) {
+		$ok++; continue;
+	}
+	when( %m && %n ) {
+		$ok++;
+	}
+	}
+
+	is($ok, 3, '(%m && %n) smart-matched');	
+    }
+}
 
 # Make sure we aren't invoking the get-magic more than once
 
@@ -689,7 +751,7 @@ my $f = tie my $v, "FetchCounter";
 	    	q{Can't "break" in a loop topicalizer});
 	}
 	when (1) {
-	    is($first, 1, "Lecical loop: first");
+	    is($first, 1, "Lexical loop: first");
 	    $first = 0;
 	    # Implicit break is okay
 	}
