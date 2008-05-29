@@ -27,7 +27,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 59;
+use Test::More tests => 60;
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -409,3 +409,10 @@ given ('foo') {
     when ($_ ~~ 'quux') { continue; }
     default { 0; }
 }
+####
+# 53 conditions in elsifs (regression in change #33710 which fixed bug #37302)
+if ($a) { x(); }
+elsif ($b) { x(); }
+elsif ($a and $b) { x(); }
+elsif ($a or $b) { x(); }
+else { x(); }

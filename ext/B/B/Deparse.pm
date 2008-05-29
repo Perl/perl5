@@ -2589,6 +2589,12 @@ sub pp_cond_expr {
 	my $newcond = $newop->first;
 	my $newtrue = $newcond->sibling;
 	$false = $newtrue->sibling; # last in chain is OP_AND => no else
+	if ($newcond->name eq "lineseq")
+	{
+	    # lineseq to ensure correct line numbers in elsif()
+	    # Bug #37302 fixed by change #33710.
+	    $newcond = $newcond->first->sibling;
+	}
 	$newcond = $self->deparse($newcond, 1);
 	$newtrue = $self->deparse($newtrue, 0);
 	push @elsifs, "elsif ($newcond) {\n\t$newtrue\n\b}";

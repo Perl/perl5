@@ -414,6 +414,7 @@ a[-]?c	ac	y	$&	ac
 '(abc)\1'i	ABCABC	y	$1	ABC
 '([a-c]*)\1'i	ABCABC	y	$1	ABC
 a(?!b).	abad	y	$&	ad
+(?=)a	a	y	$&	a
 a(?=d).	abad	y	$&	ad
 a(?=c|d).	abad	y	$&	ad
 a(?:b|c|d)(.)	ace	y	$1	e

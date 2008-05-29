@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
-use vars qw($Is_W32 $Is_OS2 $Is_Cygwin $Is_NetWare $Needs_Write $Verbose);
+use vars qw($Is_W32 $Is_OS2 $Is_Cygwin $Is_NetWare $Needs_Write $Verbose
+	    @Changed);
 use Config; # Remember, this is running using an existing perl
 use File::Compare;
 use Symbol;
@@ -17,7 +18,13 @@ if ($Is_NetWare) {
 
 $Needs_Write = $Is_OS2 || $Is_W32 || $Is_Cygwin || $Is_NetWare;
 
-@ARGV = grep { not($_ eq '-v' and $Verbose = 1) } @ARGV;
+$Verbose = 0;
+@ARGV = grep { not($_ eq '-q' and $Verbose = -1) }
+  grep { not($_ eq '-v' and $Verbose = 1) } @ARGV;
+
+END {
+  print STDOUT "Changed: @Changed\n" if @Changed;
+}
 
 sub safer_unlink {
   my @names = @_;
@@ -46,11 +53,12 @@ sub rename_if_different {
   my ($from, $to) = @_;
 
   if (compare($from, $to) == 0) {
-      warn "no changes between '$from' & '$to'\n" if $Verbose;
+      warn "no changes between '$from' & '$to'\n" if $Verbose > 0;
       safer_unlink($from);
       return;
   }
-  warn "changed '$from' to '$to'\n";
+  warn "changed '$from' to '$to'\n" if $Verbose > 0;
+  push @Changed, $to unless $Verbose < 0;
   safer_rename_silent($from, $to) or die "renaming $from to $to: $!";
 }
 

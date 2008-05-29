@@ -1537,7 +1537,8 @@ Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)
             : (GV*)SvMAGIC(mg->mg_obj)->mg_obj
     );
 
-    mro_isa_changed_in(stash);
+    if (stash)
+	mro_isa_changed_in(stash);
 
     return 0;
 }
@@ -1560,7 +1561,8 @@ Perl_magic_clearisa(pTHX_ SV *sv, MAGIC *mg)
             : (GV*)SvMAGIC(mg->mg_obj)->mg_obj
     );
 
-    mro_isa_changed_in(stash);
+    if (stash)
+	mro_isa_changed_in(stash);
 
     return 0;
 }

@@ -5608,6 +5608,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 RExC_seen |= REG_SEEN_LOOKBEHIND;
 		RExC_parse++;
 	    case '=':           /* (?=...) */
+		RExC_seen_zerolen++;
+			break;
 	    case '!':           /* (?!...) */
 		RExC_seen_zerolen++;
 	        if (*RExC_parse == ')') {
