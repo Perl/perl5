@@ -491,7 +491,7 @@ package Maintainers;
 
 	'Locale::Maketext' =>
 		{
-		'MAINTAINER'	=> 'petdance',
+		'MAINTAINER'	=> 'ferreira',
 		'FILES'		=> q[lib/Locale/Maketext.pm lib/Locale/Maketext.pod lib/Locale/Maketext/ChangeLog lib/Locale/Maketext/{Guts,GutsLoader}.pm lib/Locale/Maketext/README lib/Locale/Maketext/TPJ13.pod lib/Locale/Maketext/t],
 		'CPAN'		=> 1,
 		},
