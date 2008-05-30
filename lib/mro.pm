@@ -310,7 +310,7 @@ exist.
 
 In simple cases, it is equivalent to:
 
-   $self->next::method(@_) if $self->next_can;
+   $self->next::method(@_) if $self->next::can;
 
 But there are some cases where only this solution
 works (like C<goto &maybe::next::method>);
