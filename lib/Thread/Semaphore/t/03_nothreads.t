@@ -21,4 +21,6 @@ is($$s, 2, 'Non-threaded semaphore');
 $s->down();
 is($$s, 1, 'Non-threaded semaphore');
 
+exit(0);
+
 # EOF

@@ -109,4 +109,6 @@ is($q->pending(), 7, 'Queue count');
 # Check results of thread's activities
 is($q->pending(), 0, 'Empty queue');
 
+exit(0);
+
 # EOF

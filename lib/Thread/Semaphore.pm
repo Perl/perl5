@@ -3,7 +3,7 @@ package Thread::Semaphore;
 use strict;
 use warnings;
 
-our $VERSION = '2.08';
+our $VERSION = '2.09';
 
 use threads::shared;
 use Scalar::Util 1.10 qw(looks_like_number);
@@ -66,7 +66,7 @@ Thread::Semaphore - Thread-safe semaphores
 
 =head1 VERSION
 
-This document describes Thread::Semaphore version 2.08
+This document describes Thread::Semaphore version 2.09
 
 =head1 SYNOPSIS
 
@@ -151,7 +151,7 @@ Thread::Semaphore Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/Thread-Semaphore>
 
 Annotated POD for Thread::Semaphore:
-L<http://annocpan.org/~JDHEDDEN/Thread-Semaphore-2.08/lib/Thread/Semaphore.pm>
+L<http://annocpan.org/~JDHEDDEN/Thread-Semaphore-2.09/lib/Thread/Semaphore.pm>
 
 Source repository:
 L<http://code.google.com/p/thread-semaphore/>

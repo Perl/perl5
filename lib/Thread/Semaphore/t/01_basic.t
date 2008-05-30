@@ -8,7 +8,7 @@ BEGIN {
     }
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
 }
@@ -72,5 +72,7 @@ $sm->down(2);
 $st->down();
 ok(1, 'Main done');
 threads::yield();
+
+exit(0);
 
 # EOF

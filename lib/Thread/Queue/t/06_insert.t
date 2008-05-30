@@ -8,7 +8,7 @@ BEGIN {
     }
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
 }
@@ -100,5 +100,7 @@ threads->create(sub {
 })->join();
 @x = $q->dequeue_nb(100);
 is_deeply(\@x, [1,'foo',2,3], 'Empty queue insert');
+
+exit(0);
 
 # EOF
