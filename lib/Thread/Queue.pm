@@ -3,7 +3,7 @@ package Thread::Queue;
 use strict;
 use warnings;
 
-our $VERSION = '2.08';
+our $VERSION = '2.09';
 
 use threads::shared 1.21;
 use Scalar::Util 1.10 qw(looks_like_number blessed reftype refaddr);
@@ -168,7 +168,10 @@ sub extract
 $validate_index = sub {
     my $index = shift;
 
-    if (! looks_like_number($index) || (int($index) != $index)) {
+    if (! defined($index) ||
+        ! looks_like_number($index) ||
+        (int($index) != $index))
+    {
         require Carp;
         my ($method) = (caller(1))[3];
         $method =~ s/Thread::Queue:://;
@@ -183,7 +186,11 @@ $validate_index = sub {
 $validate_count = sub {
     my $count = shift;
 
-    if ((! looks_like_number($count)) || (int($count) != $count) || ($count < 1)) {
+    if (! defined($count) ||
+        ! looks_like_number($count) ||
+        (int($count) != $count) ||
+        ($count < 1))
+    {
         require Carp;
         my ($method) = (caller(1))[3];
         $method =~ s/Thread::Queue:://;
@@ -202,7 +209,7 @@ Thread::Queue - Thread-safe queues
 
 =head1 VERSION
 
-This document describes Thread::Queue version 2.08
+This document describes Thread::Queue version 2.09
 
 =head1 SYNOPSIS
 
@@ -455,7 +462,7 @@ Thread::Queue Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/Thread-Queue>
 
 Annotated POD for Thread::Queue:
-L<http://annocpan.org/~JDHEDDEN/Thread-Queue-2.08/lib/Thread/Queue.pm>
+L<http://annocpan.org/~JDHEDDEN/Thread-Queue-2.09/lib/Thread/Queue.pm>
 
 Source repository:
 L<http://code.google.com/p/thread-queue/>
