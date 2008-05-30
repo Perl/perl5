@@ -181,7 +181,6 @@ SKIP: {
             my $res = $$test [$l];
 
             {
-                local $::TODO = ($l == 3 && $i == 7 ? "Bug #53746" : "");
                 is (index ($str, $q), $res, "Find NUL character(s)");
             }
 
