@@ -180,7 +180,13 @@ my $testpkgs = {
 	       skip => [qw/ _POSIX_JOB_CONTROL /,	# platform varying
 			# Might be XS or imported from Fcntl, depending on your
 			# perl version:
-			qw / S_ISBLK S_ISCHR S_ISDIR S_ISFIFO S_ISREG /],
+			qw / S_ISBLK S_ISCHR S_ISDIR S_ISFIFO S_ISREG /,
+			# Might be XS or AUTOLOADed, depending on your perl
+			# version:
+			qw /WEXITSTATUS WIFEXITED WIFSIGNALED WIFSTOPPED
+			    WSTOPSIG WTERMSIG/,
+		       'int_macro_int', # Removed in POSIX 1.16
+		       ],
 	       perl => [qw/ import croak AUTOLOAD /],
 
 	       XS => [qw/ write wctomb wcstombs uname tzset tzname
@@ -194,7 +200,7 @@ my $testpkgs = {
 		      mblen lseek log10 localeconv ldexp lchown
 		      isxdigit isupper isspace ispunct isprint
 		      islower isgraph isdigit iscntrl isalpha
-		      isalnum int_macro_int getcwd frexp fpathconf
+		      isalnum getcwd frexp fpathconf
 		      fmod floor dup2 dup difftime cuserid ctime
 		      ctermid cosh constant close clock ceil
 		      bootstrap atan asin asctime acos access abort

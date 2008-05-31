@@ -435,9 +435,9 @@ Perl_ninstr(pTHX_ const char *big, const char *bigend, const char *little, const
     if (little >= lend)
         return (char*)big;
     {
-        char first = *little++;
+        char first = *little;
         const char *s, *x;
-        bigend -= lend - little;
+        bigend -= lend - little++;
     OUTER:
         while (big <= bigend) {
             if (*big++ == first) {

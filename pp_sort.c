@@ -1553,11 +1553,12 @@ PP(pp_sort)
 	max = AvFILL(av) + 1;
 	if (SvMAGICAL(av)) {
 	    MEXTEND(SP, max);
-	    p2 = SP;
 	    for (i=0; i < max; i++) {
 		SV **svp = av_fetch(av, i, FALSE);
 		*SP++ = (svp) ? *svp : NULL;
 	    }
+	    SP--;
+	    p1 = p2 = SP - (max-1);
 	}
 	else {
 	    if (SvREADONLY(av))
@@ -1713,7 +1714,7 @@ PP(pp_sort)
 	SvREADONLY_off(av);
     else if (av && !sorting_av) {
 	/* simulate pp_aassign of tied AV */
-	SV** const base = ORIGMARK+1;
+	SV** const base = MARK+1;
 	for (i=0; i < max; i++) {
 	    base[i] = newSVsv(base[i]);
 	}

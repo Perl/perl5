@@ -407,6 +407,13 @@ X<invocant> X<blessed>
 C<blessed> returns the name of the package the argument has been
 blessed into, or C<undef>.
 
+=item DOES(ROLE)
+
+C<DOES> returns I<true> if its object claims to perform the role C<ROLE>.
+
+By default, the response to C<DOES> is the same as the response to ISA.  For
+more information on C<DOES> and other universal methods, see L<UNIVERSAL>.
+
 =item can(METHOD)
 X<can>
 
