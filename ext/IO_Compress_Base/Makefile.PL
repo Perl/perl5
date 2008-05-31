@@ -37,6 +37,12 @@ WriteMakefile(
 
     INSTALLDIRS => ($] >= 5.009 ? 'perl' : 'site'),
 
+    (
+    $] >= 5.009 && ! $ENV{PERL_CORE}
+        ? (INST_LIB    => 'blib/arch')
+        : ()
+    ),
+
     ((ExtUtils::MakeMaker->VERSION() gt '6.30') ?
         ('LICENSE'  => 'perl')         : ()),
     

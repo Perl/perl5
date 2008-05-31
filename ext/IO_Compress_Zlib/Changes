@@ -1,6 +1,30 @@
 CHANGES
 -------
 
+  2.011 17 May 2008
+
+      * IO::Uncompress::Unzip 
+        - Print an error message if the zip file contains a
+          member compressed with bzip2 and IO::Uncompress::Bunzip2 is 
+          not available.
+        - Could not cope with mixed compression zip files. For example a
+          zip file that contains both STORED and DEFLATED content.
+          [RT #35573]
+
+  2.010 5 May 2008
+
+      * Fixed problem that meant Perl 5.10 could not upgrade this module.
+        [RT #35343]
+
+  2.009 20 April 2008
+
+      * IO::Compress::Zip 
+
+        - Added exUnix2 option to allow storing of UID & GID.
+        - When running on a Unix derivative the ExtAttr option now defaults
+          to the equivalent of 0666. For all other systems the default
+          remains 0.
+
   2.008 2 November 2007
 
       * Minor documentation changes in README

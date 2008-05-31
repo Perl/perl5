@@ -1,6 +1,19 @@
 CHANGES
 -------
 
+  2.011 5 May 2008
+
+      * A C++-style comment sneaked in with the last update. Fixed.
+        [core patch #33828]
+
+  2.010 5 May 2008
+
+      * No Changes
+
+  2.009 20 April 2008
+
+      * No Changes
+
   2.008 2 November 2007
 
       * Minor documentation changes in README

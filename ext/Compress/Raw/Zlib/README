@@ -1,15 +1,13 @@
 
                              Compress-Raw-Zlib
 
-                             Version 2.008
+                             Version 2.011
 
-                             2nd November 2007
+                               17th May 2008
 
-
-       Copyright (c) 2005-2007 Paul Marquess. All rights reserved.
+       Copyright (c) 2005-2008 Paul Marquess. All rights reserved.
           This program is free software; you can redistribute it
            and/or modify it under the same terms as Perl itself.
-
 
               The directory zlib-src contains a subset of the 
              source files copied directly from zlib version 1.2.3.
@@ -18,17 +16,10 @@
              Full source for the zlib library is available at
                             http://www.zlib.org
 
-
-
 DESCRIPTION
 -----------
 
-
 This module provides a Perl interface to the zlib compression library.  
-
-
-
-
 
 PREREQUISITES
 -------------
@@ -36,20 +27,15 @@ PREREQUISITES
 Before you can build Compress-Raw-Zlib you need to have the following
 installed on your system:
 
-
     * A C compiler
 
     * Perl 5.004 or better. 
-
-
 
 By default, Compress-Raw-Zlib will build its own private copy of the 
 zlib library. If you want to use a different version of 
 zlib, follow the instructions in the section called 
 "Controlling the version of zlib used by Compress-Raw-Zlib" 
 later in this document.
-
-
 
 BUILDING THE MODULE
 -------------------
@@ -61,17 +47,12 @@ using this sequence of commands:
     make
     make test
 
-
-
 INSTALLATION
 ------------
 
 To install Compress-Raw-Zlib, run the command below:
 
     make install
-
-
-
 
 Controlling the version of zlib used by Compress-Raw-Zlib 
 ----------------------------------------------------------
@@ -92,7 +73,6 @@ zlib library is used:
 Note that if you intend to use either Option 2 or 3, you need to have
 zlib version 1.0.5 or better.
 
-
 The contents of the file config.in are used to control which of the
 three options is actually used. This file is read during the
 
@@ -100,8 +80,6 @@ three options is actually used. This file is read during the
 
 step of the build, so remember to make any required changes to config.in
 before building this module.
-
-
 
   Option 1
   --------
@@ -169,10 +147,9 @@ Setting the Gzip OS Code
 ------------------------
 
 Every gzip stream stores a byte in its header to identify the Operating
-System that was used to create the gzip stream. When you build
-Compress-Raw-Zlib it will attempt to determine the value that is correct for
-your Operating System. This will then be used by IO::Gzip as the default
-value for the OS byte in all gzip headers it creates. 
+System that was used to create the gzip stream. When you build Compress-Raw-Zlib it will attempt to determine the value that is correct for
+your Operating System. This will then be used by IO::Compress::Gzip as the
+default value for the OS byte in all gzip headers it creates. 
  
 The variable GZIP_OS_CODE in the config.in file controls the setting of
 this value when building Compress-Raw-Zlib. If GZIP_OS_CODE is set to
@@ -197,16 +174,8 @@ If you find you have to change this value, because you think the value auto
 detected is incorrect, please take a few moments to contact the author of
 this module.
 
-
-
 TROUBLESHOOTING
 ---------------
-
-
-
-
-
-
 
 Solaris build fails with "language optional software package not installed"
 ---------------------------------------------------------------------------
@@ -245,9 +214,6 @@ may vary.
 If that doesn't work for you, it's time to make changes to the Makefile
 by hand. Good luck!
 
-
-
-
 Solaris build fails with "gcc: unrecognized option `-KPIC'"
 -----------------------------------------------------------
 
@@ -285,10 +251,6 @@ I've had a report that when building Compress-Raw-Zlib under HP-UX that it
 is necessary to have first built the zlib library with the -fpic
 option.
 
-
-
-
-
 Linux Notes
 -----------
 
@@ -307,9 +269,6 @@ This usually means that you have not installed the development RPM
 for zlib. Check for an RPM that start with "zlib-devel" in your Linux
 distribution.
 
-
-
-
 Win32 Notes
 -----------
 
@@ -320,12 +279,8 @@ prompt
 
     C:\> ppm verify -upgrade Compress-Zlib
 
-
 If you are not running Activestate Perl and you don't have access
 to a C compiler, you will not be able to build and install this module.
-
-
-
 
 Win32 & Cygwin Notes
 --------------------
@@ -337,7 +292,6 @@ Windows.
 
 The workaround is to install Compress-Raw-Zlib manually using the
 instructions given at the start of this file.
-
 
 FEEDBACK
 --------
@@ -372,8 +326,7 @@ To help me help you, I need all of the following information:
         If you haven't installed Compress-Raw-Zlib then search Compress::Raw::Zlib.pm
         for a line like this:
 
-          $VERSION = "2.008" ;
-
+          $VERSION = "2.011" ;
 
      c. The version of zlib you have used.
         If you have successfully installed Compress-Raw-Zlib, this one-liner
@@ -381,9 +334,7 @@ To help me help you, I need all of the following information:
 
           perl -MCompress::Raw::Zlib -e "print q[zlib ver ]. Compress::Raw::Zlib::ZLIB_VERSION.qq[\n]" 
 
-
         If not, look at the beginning of the file zlib.h. 
-
 
  2. If you are having problems building Compress-Raw-Zlib, send me a
     complete log of what happened. Start by unpacking the Compress-Raw-Zlib
@@ -393,6 +344,5 @@ To help me help you, I need all of the following information:
         perl Makefile.PL
         make
         make test TEST_VERBOSE=1          
-
 
 Paul Marquess <pmqs@cpan.org>

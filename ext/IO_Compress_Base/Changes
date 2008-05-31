@@ -1,6 +1,49 @@
 CHANGES
 -------
 
+  2.011 17 May 2008
+
+      * IO::Compress::Base
+        - Fixed problem that prevented the creation of a zip file that
+          contained more than one compression method.
+
+      * IO::Compress::Base::Common
+        - The private Validator class in this module clashes with another
+          CPAN module. Moved Validator into the IO::Compress::Base::Common
+          namespace.
+          [RT #35954]
+
+  2.010 5 May 2008
+
+      * Fixed problem that meant Perl 5.10 could not upgrade this module.
+        [RT #35342]
+
+  2.009 20 April 2008
+
+      * Removed the alpha status from File::GlobMapper
+      
+      * IO::Compress::Base 
+        When writing output never output a zero length buffer.
+        Done to improve interoperability with other tied filenandle
+        modules.
+
+      * Changed IO::Uncompress::Base to not use the offset parameter of
+        the read method when reading from a filehandle. 
+
+        The object returned from Net::FTP::retr implements a non-standard
+        read method. The third parameter is used for a timeout value
+        rather than an offset.  
+        [rt.cpan#33231]
+        
+      * Changed IO::Uncompress::Base to not use the eof method when
+        reading from a filehandle. 
+
+        The object returned from Net::FTP::retr implements both the read
+        method and the eof method. Unfortunately the implementation of
+        the read method uses non-buffered IO (by using sysread) while
+        the eof method uses buffered IO. Mixing buffered and non-buffered
+        IO results in data corruption.
+
   2.008 2 November 2007
 
       * Minor documentation changes in README

@@ -3,7 +3,7 @@
 use strict ;
 require 5.004 ;
 
-$::VERSION = '2.008' ;
+$::VERSION = '2.011' ;
 
 use private::MakeUtil;
 use ExtUtils::MakeMaker 5.16 ;
@@ -50,6 +50,13 @@ WriteMakefile(
     ),
 
     INSTALLDIRS => ($] >= 5.009 ? 'perl' : 'site'),
+
+    (
+    $] >= 5.009 && ! $ENV{PERL_CORE}
+        ? (INST_LIB    => 'blib/arch')
+        : ()
+    ),
+
 
     ((ExtUtils::MakeMaker->VERSION() gt '6.30') ?
         ('LICENSE'  => 'perl')         : ()),    

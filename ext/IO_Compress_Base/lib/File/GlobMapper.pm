@@ -26,7 +26,7 @@ BEGIN
 our ($Error);
 
 our ($VERSION, @EXPORT_OK);
-$VERSION = '0.000_02';
+$VERSION = '1.000';
 @EXPORT_OK = qw( globmap );
 
 
@@ -388,24 +388,6 @@ File::GlobMapper - Extend File Glob to Allow Input and Output Files
 
 
 =head1 DESCRIPTION
-
-B<WARNING Alpha Release Alert!> 
-
-=over 5
-
-=item * This code is a work in progress. 
-
-=item * There are known bugs. 
-
-=item * The interface defined here is tentative. 
-
-=item * There are portability issues. 
-
-=item * Do not use in production code.
-
-=item * Consider yourself warned!
-
-=back
 
 This module needs Perl5.005 or better.
 

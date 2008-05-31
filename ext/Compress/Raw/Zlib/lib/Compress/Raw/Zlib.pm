@@ -13,7 +13,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.008';
+$VERSION = '2.011';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -568,15 +568,12 @@ The I<Compress::Raw::Zlib> module provides a Perl interface to the I<zlib>
 compression library (see L</AUTHOR> for details about where to get
 I<zlib>). 
 
-
-
 =head1 Compress::Raw::Zlib::Deflate
 
 This section defines an interface that allows in-memory compression using
 the I<deflate> interface provided by zlib.
 
 Here is a definition of the interface available:
-
 
 =head2 B<($d, $status) = new Compress::Raw::Zlib::Deflate( [OPT] ) >
 
@@ -678,14 +675,12 @@ calculated. Use the C<$d-E<gt>crc32> method to retrieve this value.
 
 This option defaults to false.
 
-
 =item B<-ADLER32>
 
 If set to true, an adler32 checksum of the uncompressed data will be
 calculated. Use the C<$d-E<gt>adler32> method to retrieve this value.
 
 This option defaults to false.
-
 
 =back
 
@@ -695,7 +690,6 @@ level. All other options will take their default values.
 
     my $d = new Compress::Raw::Zlib::Deflate ( -Bufsize => 300, 
                                                -Level   => Z_BEST_SPEED ) ;
-
 
 =head2 B<$status = $d-E<gt>deflate($input, $output)>
 
@@ -751,7 +745,6 @@ Change settings for the deflate object C<$d>.
 The list of the valid options is shown below. Options not specified
 will remain unchanged.
 
-
 =over 5
 
 =item B<-Level>
@@ -771,7 +764,6 @@ Sets the initial size for the output buffer used by the C<$d-E<gt>deflate>
 and C<$d-E<gt>flush> methods. If the buffer has to be
 reallocated to increase the size, it will grow in increments of
 C<Bufsize>.
-
 
 =back
 
@@ -815,7 +807,6 @@ Returns the total number of compressed bytes output from deflate.
 Returns the deflation strategy currently used. Valid values are
 C<Z_DEFAULT_STRATEGY>, C<Z_FILTERED> and C<Z_HUFFMAN_ONLY>. 
 
-
 =head2 B<$d-E<gt>get_Level()>
 
 Returns the compression level being used. 
@@ -825,7 +816,6 @@ Returns the compression level being used.
 Returns the buffer size used to carry out the compression.
 
 =head2 Example
-
 
 Here is a trivial example of using C<deflate>. It simply reads standard
 input, deflates it and writes it to standard output.
@@ -864,7 +854,6 @@ This section defines an interface that allows in-memory uncompression using
 the I<inflate> interface provided by zlib.
 
 Here is a definition of the interface:
-
 
 =head2 B< ($i, $status) = new Compress::Raw::Zlib::Inflate( [OPT] ) >
 
@@ -927,7 +916,6 @@ If the option is set to true, uncompressed data will be appended to the
 output buffer by the C<$i-E<gt>inflate> method.
 
 This option defaults to false.
-
 
 =item B<-CRC32>
 
@@ -1048,7 +1036,6 @@ Note I<full flush points> are not present by default in compressed
 data streams. They must have been added explicitly when the data stream
 was created by calling C<Compress::Deflate::flush>  with C<Z_FULL_FLUSH>.
 
-
 =head2 B<$i-E<gt>dict_adler()>
 
 Returns the adler32 value for the dictionary.
@@ -1143,12 +1130,10 @@ the hard work for you. Check out the C<Archive::Zip> module on CPAN at
 
     http://www.cpan.org/modules/by-module/Archive/Archive-Zip-*.tar.gz    
 
-
 =head1 CONSTANTS
 
 All the I<zlib> constants are automatically imported when you make use
 of I<Compress::Raw::Zlib>.
-
 
 =head1 SEE ALSO
 
@@ -1159,7 +1144,6 @@ L<Compress::Zlib::FAQ|Compress::Zlib::FAQ>
 L<File::GlobMapper|File::GlobMapper>, L<Archive::Zip|Archive::Zip>,
 L<Archive::Tar|Archive::Tar>,
 L<IO::Zlib|IO::Zlib>
-
 
 For RFC 1950, 1951 and 1952 see 
 F<http://www.faqs.org/rfcs/rfc1950.html>,
@@ -1174,14 +1158,9 @@ F<http://www.zlib.org>.
 
 The primary site for gzip is F<http://www.gzip.org>.
 
-
-
-
 =head1 AUTHOR
 
 This module was written by Paul Marquess, F<pmqs@cpan.org>. 
-
-
 
 =head1 MODIFICATION HISTORY
 
@@ -1189,10 +1168,8 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2007 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2008 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
-
-
 

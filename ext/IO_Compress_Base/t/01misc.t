@@ -120,6 +120,11 @@ undef) ;
     $$xx_ref = 666 ;
     is $xx, 666;
 
+#    my $got1 = ParseParameters(1, {'Fred' => [1, 1, Parse_writable_scalar, undef]}, $got) ;
+#    ok $got->parsed('Fred'), "parsed" ;
+#    $xx_ref = $got->value('Fred');
+#    $$xx_ref = 666 ;
+#    is $xx, 666;
 }
 
 My::testParseParameters();
