@@ -30,15 +30,6 @@ some variation on the big block of C<$Is_Foo> checks.  We can safely put this
 into a file, change it to build an C<%Is> hash and require it.  Maybe just put
 it into F<test.pl>. Throw in the handy tainting subroutines.
 
-=head2 merge common code in installperl and installman
-
-There are some common subroutines and a common C<BEGIN> block in F<installperl>
-and F<installman>. These should probably be merged. It would also be good to
-check for duplication in all the utility scripts supplied in the source
-tarball. It might be good to move them all to a subdirectory, but this would
-require careful checking to find all places that call them, and change those
-correctly.
-
 =head2 common test code for timed bail out
 
 Write portable self destruct code for tests to stop them burning CPU in
