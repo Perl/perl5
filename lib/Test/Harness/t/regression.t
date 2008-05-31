@@ -2245,6 +2245,48 @@ my %samples = (
         wait          => 0,
         version       => 13,
     },
+    strict => {
+        results => [
+            {   is_version => TRUE,
+                raw        => 'TAP version 13',
+            },
+            {   is_plan => TRUE,
+                raw     => '1..1',
+            },
+            {   is_pragma => TRUE,
+                raw       => 'pragma +strict',
+                pragmas   => ['+strict'],
+            },
+            {   is_unknown => TRUE, raw => 'Nonsense!',
+            },
+            {   is_pragma => TRUE,
+                raw       => 'pragma -strict',
+                pragmas   => ['-strict'],
+            },
+            {   is_unknown => TRUE,
+                raw        => "Doesn't matter.",
+            },
+            {   is_test => TRUE,
+                raw     => 'ok 1 All OK',
+            }
+        ],
+        plan          => '1..1',
+        passed        => [1],
+        actual_passed => [1],
+        failed        => [],
+        actual_failed => [],
+        todo          => [],
+        todo_passed   => [],
+        skipped       => [],
+        good_plan     => TRUE,
+        is_good_plan  => TRUE,
+        tests_planned => 1,
+        tests_run     => 1,
+        parse_errors  => ['Unknown TAP token: "Nonsense!"'],
+        'exit'  => 0,    # TODO: Is this right???
+        wait    => 0,
+        version => 13,
+    },
     skipall_nomsg => {
         results => [
             {   is_plan       => TRUE,
@@ -2803,7 +2845,7 @@ my %samples = (
         tests_planned => 5,
         tests_run     => 5,
         parse_errors =>
-          [ 'Explicit TAP version must be at least 13. Got version 12' ],
+          ['Explicit TAP version must be at least 13. Got version 12'],
         'exit'  => 0,
         wait    => 0,
         version => 12,
@@ -2883,7 +2925,7 @@ my %samples = (
         tests_planned => 5,
         tests_run     => 5,
         parse_errors =>
-          [ 'If TAP version is present it must be the first line of output' ],
+          ['If TAP version is present it must be the first line of output'],
         'exit'  => 0,
         wait    => 0,
         version => 12,
@@ -3121,7 +3163,7 @@ sub analyze_test {
                   "... and $method should return a reasonable value ($test/$count)";
             }
             elsif ( ref $answer ) {
-                is_deeply $result->$method(), $answer,
+                is_deeply scalar( $result->$method() ), $answer,
                   "... and $method should return the correct structure ($test/$count)";
             }
             else {

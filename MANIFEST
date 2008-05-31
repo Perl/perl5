@@ -2642,6 +2642,7 @@ lib/TAP/Parser/Result.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Result/Bailout.pm	A parser for Test Anything Protocol
 lib/TAP/Parser/Result/Comment.pm	A parser for Test Anything Protocol
 lib/TAP/Parser/Result/Plan.pm		A parser for Test Anything Protocol
+lib/TAP/Parser/Result/Pragma.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Result/Test.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Result/Unknown.pm	A parser for Test Anything Protocol
 lib/TAP/Parser/Result/Version.pm	A parser for Test Anything Protocol
@@ -3663,6 +3664,7 @@ t/lib/sample-tests/skipall_nomsg	Test data for Test::Harness
 t/lib/sample-tests/skipall_v13		Test data for Test::Harness
 t/lib/sample-tests/space_after_plan	Test data for Test::Harness
 t/lib/sample-tests/stdout_stderr	Test data for Test::Harness
+t/lib/sample-tests/strict		Test data for Test::Harness
 t/lib/sample-tests/switches		Test data for Test::Harness
 t/lib/sample-tests/taint		Test data for Test::Harness
 t/lib/sample-tests/taint_warn		Test data for Test::Harness

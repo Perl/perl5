@@ -3,7 +3,7 @@
 use strict;
 use lib 't/lib';
 
-use Test::More tests => 81;
+use Test::More tests => 94;
 
 use TAP::Parser::Grammar;
 use TAP::Parser::Iterator::Array;
@@ -41,8 +41,8 @@ isa_ok $grammar, $GRAMMAR, '... and the object it returns';
 # why.  We'll still use the instance because that should be forward
 # compatible.
 
-my @V12 = qw(bailout comment plan simple_test test version);
-my @V13 = ( @V12, 'yaml' );
+my @V12 = sort qw(bailout comment plan simple_test test version);
+my @V13 = sort ( @V12, 'pragma', 'yaml' );
 
 can_ok $grammar, 'token_types';
 ok my @types = sort( $grammar->token_types ),
@@ -268,6 +268,56 @@ $expected = {
 is_deeply $token, $expected,
   '... and the token should contain the correct data';
 
+# pragmas
+
+my $pragma = 'pragma +strict';
+like $pragma, $syntax_for{'pragma'}, 'Pragmas should match the pragma syntax';
+
+$stream->put($pragma);
+ok $token = $grammar->tokenize,
+  '... and calling it with data should return a token';
+
+$expected = {
+    'type'    => 'pragma',
+    'raw'     => $pragma,
+    'pragmas' => ['+strict'],
+};
+
+is_deeply $token, $expected,
+  '... and the token should contain the correct data';
+
+$pragma = 'pragma +strict,-foo';
+like $pragma, $syntax_for{'pragma'}, 'Pragmas should match the pragma syntax';
+
+$stream->put($pragma);
+ok $token = $grammar->tokenize,
+  '... and calling it with data should return a token';
+
+$expected = {
+    'type'    => 'pragma',
+    'raw'     => $pragma,
+    'pragmas' => [ '+strict', '-foo' ],
+};
+
+is_deeply $token, $expected,
+  '... and the token should contain the correct data';
+
+$pragma = 'pragma  +strict  ,  -foo ';
+like $pragma, $syntax_for{'pragma'}, 'Pragmas should match the pragma syntax';
+
+$stream->put($pragma);
+ok $token = $grammar->tokenize,
+  '... and calling it with data should return a token';
+
+$expected = {
+    'type'    => 'pragma',
+    'raw'     => $pragma,
+    'pragmas' => [ '+strict', '-foo' ],
+};
+
+is_deeply $token, $expected,
+  '... and the token should contain the correct data';
+
 # coverage tests
 
 # set_version
@@ -281,7 +331,7 @@ is_deeply $token, $expected,
         $grammar->set_version('no_such_version');
     };
 
-    unless (is @die, 1, 'set_version with bad version') {
+    unless ( is @die, 1, 'set_version with bad version' ) {
         diag " >>> $_ <<<\n" for @die;
     }
 

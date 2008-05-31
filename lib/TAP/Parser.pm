@@ -9,7 +9,8 @@ use TAP::Parser::Result       ();
 use TAP::Parser::Source       ();
 use TAP::Parser::Source::Perl ();
 use TAP::Parser::Iterator     ();
-use Carp                      ();
+
+use Carp qw( confess );
 
 @ISA = qw(TAP::Base);
 
@@ -19,11 +20,11 @@ TAP::Parser - Parse L<TAP|Test::Harness::TAP> output
 
 =head1 VERSION
 
-Version 3.09
+Version 3.10
 
 =cut
 
-$VERSION = '3.09';
+$VERSION = '3.10';
 
 my $DEFAULT_TAP_VERSION = 12;
 my $MAX_TAP_VERSION     = 13;
@@ -411,6 +412,10 @@ examples of each, are as follows:
 
  1..42
 
+=item * Pragma
+
+ pragma +strict
+
 =item * Test
 
  ok 3 - We should start with some foobar!
@@ -521,6 +526,18 @@ If a SKIP directive is included with the plan, this method will return it.
 If a SKIP directive was included with the plan, this method will return the
 explanation, if any.
 
+=head2 C<pragma> methods
+
+ if ( $result->is_pragma ) { ... }
+
+If the above evaluates as true, the following methods will be available on the
+C<$result> object.
+
+=head3 C<pragmas>
+
+Returns a list of pragmas each of which is a + or - followed by the
+pragma name.
+ 
 =head2 C<commment> methods
 
  if ( $result->is_comment ) { ... }
@@ -782,6 +799,47 @@ This method lets you know which (or how many) tests had SKIP directives.
 
 sub skipped { @{ shift->{skipped} } }
 
+=head2 Pragmas
+
+=head3 C<pragma>
+
+Get or set a pragma. To get the state of a pragma:
+
+  if ( $p->pragma('strict') ) {
+      # be strict
+  }
+
+To set the state of a pragma:
+
+  $p->pragma('strict', 1); # enable strict mode
+
+=cut
+
+sub pragma {
+    my ( $self, $pragma ) = splice @_, 0, 2;
+
+    return $self->{pragma}->{$pragma} unless @_;
+
+    if ( my $state = shift ) {
+        $self->{pragma}->{$pragma} = 1;
+    }
+    else {
+        delete $self->{pragma}->{$pragma};
+    }
+
+    return;
+}
+
+=head3 C<pragmas>
+
+Get a list of all the currently enabled pragmas:
+
+  my @pragmas_enabled = $p->pragmas;
+
+=cut
+
+sub pragmas { sort keys %{ shift->{pragma} || {} } }
+
 =head2 Summary Results
 
 These results are "meta" information about the total results of an individual
@@ -965,12 +1023,31 @@ sub _make_state_table {
     my %state_globals = (
         comment => {},
         bailout => {},
+        yaml    => {},
         version => {
             act => sub {
-                my ($version) = @_;
                 $self->_add_error(
                     'If TAP version is present it must be the first line of output'
                 );
+            },
+        },
+        unknown => {
+            act => sub {
+                my $unk = shift;
+                if ( $self->pragma('strict') ) {
+                    $self->_add_error(
+                        'Unknown TAP token: "' . $unk->raw . '"' );
+                }
+            },
+        },
+        pragma => {
+            act => sub {
+                my ($pragma) = @_;
+                for my $pr ( $pragma->pragmas ) {
+                    if ( $pr =~ /^ ([-+])(\w+) $/x ) {
+                        $self->pragma( $2, $1 eq '+' );
+                    }
+                }
             },
         },
     );
@@ -1039,9 +1116,7 @@ sub _make_state_table {
                   } => $number;
             },
         },
-        yaml => {
-            act => sub { },
-        },
+        yaml => { act => sub { }, },
     );
 
     # Each state contains a hash the keys of which match a token type. For
@@ -1125,7 +1200,7 @@ sub _make_state_table {
     );
 
     # Apply globals and defaults to state table
-    for my $name ( sort keys %states ) {
+    for my $name ( keys %states ) {
 
         # Merge with globals
         my $st = { %state_globals, %{ $states{$name} } };
@@ -1167,7 +1242,6 @@ sub _iter {
     my $next_state = sub {
         my $token = shift;
         my $type  = $token->type;
-        my $count = 1;
         TRANS: {
             my $state_spec = $state_table->{$state}
               or die "Illegal state: $state";
@@ -1183,6 +1257,9 @@ sub _iter {
                 elsif ( my $goto = $next->{goto} ) {
                     $state = $goto;
                 }
+            }
+            else {
+                confess("Unhandled token type: $type\n");
             }
         }
         return $token;

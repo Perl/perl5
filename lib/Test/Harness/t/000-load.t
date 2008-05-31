@@ -3,7 +3,7 @@
 use strict;
 use lib 't/lib';
 
-use Test::More tests => 60;
+use Test::More tests => 62;
 
 BEGIN {
 
@@ -28,6 +28,7 @@ BEGIN {
       TAP::Parser::Result::Bailout
       TAP::Parser::Result::Comment
       TAP::Parser::Result::Plan
+      TAP::Parser::Result::Pragma
       TAP::Parser::Result::Test
       TAP::Parser::Result::Unknown
       TAP::Parser::Result::Version

@@ -1,4 +1,4 @@
-package TAP::Parser::Result::Comment;
+package TAP::Parser::Result::Pragma;
 
 use strict;
 
@@ -8,7 +8,7 @@ use TAP::Parser::Result;
 
 =head1 NAME
 
-TAP::Parser::Result::Comment - Comment result token.
+TAP::Parser::Result::Pragma - TAP pragma token.
 
 =head1 VERSION
 
@@ -21,11 +21,12 @@ $VERSION = '3.10';
 =head1 DESCRIPTION
 
 This is a subclass of L<TAP::Parser::Result>.  A token of this class will be
-returned if a comment line is encountered.
+returned if a pragma is encountered.
 
- 1..1
- ok 1 - woo hooo!
- # this is a comment
+ TAP version 13
+ pragma +strict, -foo
+
+Pragmas are only supported from TAP version 13 onwards.
 
 =head1 OVERRIDDEN METHODS
 
@@ -36,7 +37,7 @@ They keep me awake at night.
 
 =item * C<as_string>
 
-Note that this method merely returns the comment preceded by a '# '.
+=item * C<raw>
 
 =back
 
@@ -46,16 +47,17 @@ Note that this method merely returns the comment preceded by a '# '.
 
 =head2 Instance Methods
 
-=head3 C<comment> 
+=head3 C<pragmas> 
 
-  if ( $result->is_comment ) {
-      my $comment = $result->comment;
-      print "I have something to say:  $comment";
-  }
+if ( $result->is_pragma ) {
+    @pragmas = $result->pragmas;
+}
 
 =cut
 
-sub comment   { shift->{comment} }
-sub as_string { shift->{raw} }
+sub pragmas {
+    my @pragmas = @{ shift->{pragmas} };
+    return wantarray ? @pragmas : \@pragmas;
+}
 
 1;
