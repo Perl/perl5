@@ -2,6 +2,11 @@
 #include "perl.h"
 #include "XSUB.h"
 
+/* for Perl prior to v5.7.1 */
+#ifndef SvUOK
+#  define SvUOK(sv) SvIOK_UV(sv)
+#endif
+
 double XS_BASE = 0;
 double XS_BASE_LEN = 0;
 
@@ -61,7 +66,7 @@ _new(class, x)
     /* create the array */
     RETVAL = newAV();
     sv_2mortal((SV*)RETVAL);
-    if (SvIOK(x) && SvUV(x) < XS_BASE)
+    if (SvUOK(x) && SvUV(x) < XS_BASE)
       {
       /* shortcut for integer arguments */
       av_push (RETVAL, newSVuv( SvUV(x) ));
@@ -112,7 +117,7 @@ _copy(class, x)
     a = (AV*)SvRV(x);			/* ref to aray, don't check ref */
     elems = av_len(a);			/* number of elems in array */
     a2 = (AV*)sv_2mortal((SV*)newAV());
-    av_extend (a2, elems);		/* prepadd */
+    av_extend (a2, elems);		/* pre-padd */
     while (elems >= 0)
       {
       /* av_store( a2,  elems, newSVsv( (SV*)*av_fetch(a, elems, 0) ) ); */
@@ -201,7 +206,7 @@ _dec(class,x)
     while (index <= elems)
       {
       temp = *av_fetch(a, index, 0);	/* fetch ptr to current element */
-      sv_setnv (temp, SvNV(temp)-1);
+      sv_setnv (temp, SvNV(temp)-1);	/* decrement */
       if (SvNV(temp) >= 0)
         {
         break;				/* early out */
