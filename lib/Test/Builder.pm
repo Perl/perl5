@@ -8,7 +8,7 @@ $^C ||= 0;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.74';
+$VERSION = '0.74_1';
 $VERSION = eval $VERSION;    # make the alpha version come out as a number
 
 # Make Test::Builder thread-safe for ithreads.
@@ -925,7 +925,11 @@ sub maybe_regex {
     my($re, $opts);
 
     # Check for qr/foo/
-    if( ref $regex eq 'Regexp' ) {
+    if (   $] >= 5.009004 
+              ? re::is_regexp($regex) 
+              : ref $regex eq 'Regexp'
+       ) 
+    {
         $usable_regex = $regex;
     }
     # Check for '/foo/' or 'm,foo,'
