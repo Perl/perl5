@@ -15,11 +15,11 @@ App::Prove - Implements the C<prove> command.
 
 =head1 VERSION
 
-Version 3.06
+Version 3.07
 
 =cut
 
-$VERSION = '3.06';
+$VERSION = '3.07';
 
 =head1 DESCRIPTION
 
@@ -190,6 +190,7 @@ sub process_args {
             'b|blib'      => \$self->{blib},
             's|shuffle'   => \$self->{shuffle},
             'color!'      => \$self->{color},
+            'colour!'     => \$self->{color},
             'c'           => \$self->{color},
             'harness=s'   => \$self->{harness},
             'formatter=s' => \$self->{formatter},
@@ -407,6 +408,7 @@ sub run {
 
         $self->_shuffle(@tests) if $self->shuffle;
         @tests = reverse @tests if $self->backwards;
+        local $ENV{TEST_VERBOSE} = 1 if $self->verbose;
 
         $self->_runtests( $self->_get_args, @tests );
     }
@@ -447,6 +449,10 @@ sub _get_switches {
     }
     elsif ( $self->warnings_warn ) {
         push @switches, '-w';
+    }
+
+    if ( defined( my $hps = $ENV{HARNESS_PERL_SWITCHES} ) ) {
+        push @switches, $hps;
     }
 
     return @switches ? \@switches : ();

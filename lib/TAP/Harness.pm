@@ -22,11 +22,11 @@ TAP::Harness - Run test scripts with statistics
 
 =head1 VERSION
 
-Version 3.06
+Version 3.07
 
 =cut
 
-$VERSION = '3.06';
+$VERSION = '3.07';
 
 $ENV{HARNESS_ACTIVE}  = 1;
 $ENV{HARNESS_VERSION} = $VERSION;
@@ -330,20 +330,14 @@ sub runtests {
     my $aggregate = TAP::Parser::Aggregator->new;
 
     $self->_make_callback( 'before_runtests', $aggregate );
+    $aggregate->start;
     $self->aggregate_tests( $aggregate, @tests );
+    $aggregate->stop;
     $self->formatter->summary($aggregate);
     $self->_make_callback( 'after_runtests', $aggregate );
 
     return $aggregate;
 }
-
-=head3 C<aggregate_tests>
-
-  $harness->aggregate_tests( $aggregate, @tests );
-
-Tests will be run in the order found.
-
-=cut
 
 sub _after_test {
     my ( $self, $aggregate, $test, $parser ) = @_;
@@ -447,6 +441,54 @@ sub _aggregate_single {
     return;
 }
 
+=head3 C<aggregate_tests>
+
+  $harness->aggregate_tests( $aggregate, @tests );
+
+Run the named tests and display a summary of result. Tests will be run
+in the order found. 
+
+Test results will be added to the supplied L<TAP::Parser::Aggregator>.
+C<aggregate_tests> may be called multiple times to run several sets of
+tests. Multiple C<Test::Harness> instances may be used to pass results
+to a single aggregator so that different parts of a complex test suite
+may be run using different C<TAP::Harness> settings. This is useful, for
+example, in the case where some tests should run in parallel but others
+are unsuitable for parallel execution.
+
+    my $formatter = TAP::Formatter::Console->new;
+    my $ser_harness = TAP::Harness->new( { formatter => $formatter } );
+    my $par_harness = TAP::Harness->new( { formatter => $formatter,
+                                           jobs => 9 } );
+    my $aggregator = TAP::Parser::Aggregator->new;
+    
+    $aggregator->start();
+    $ser_harness->aggregate_tests( $aggregator, @ser_tests );
+    $par_harness->aggregate_tests( $aggregator, @par_tests );
+    $aggregator->stop();
+    $formatter->summary( $aggregator );
+
+Note that for simpler testing requirements it will often be possible to
+replace the above code with a single call to C<runtests>.
+
+Each elements of the @tests array is either
+
+=over
+
+=item * the file name of a test script to run
+
+=item * a reference to a [ file name, display name ]
+
+=back
+
+When you supply a separate display name it becomes possible to run a
+test more than once; the display name is effectively the alias by which
+the test is known inside the harness. The harness doesn't care if it
+runs the same script more than once along as each invocation uses a
+different name.
+
+=cut
+
 sub aggregate_tests {
     my ( $self, $aggregate, @tests ) = @_;
 
@@ -456,7 +498,6 @@ sub aggregate_tests {
 
     # Formatter gets only names
     $self->formatter->prepare( map { $_->[1] } @expanded );
-    $aggregate->start;
 
     if ( $self->jobs > 1 ) {
         if ( $self->fork ) {
@@ -469,8 +510,6 @@ sub aggregate_tests {
     else {
         $self->_aggregate_single( $aggregate, @expanded );
     }
-
-    $aggregate->stop;
 
     return;
 }

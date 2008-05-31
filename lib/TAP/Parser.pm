@@ -19,11 +19,11 @@ TAP::Parser - Parse L<TAP|Test::Harness::TAP> output
 
 =head1 VERSION
 
-Version 3.06
+Version 3.07
 
 =cut
 
-$VERSION = '3.06';
+$VERSION = '3.07';
 
 my $DEFAULT_TAP_VERSION = 12;
 my $MAX_TAP_VERSION     = 13;
@@ -1542,7 +1542,7 @@ patch against bleed by via anonymous checkout of the latest version:
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2006-2007 Curtis "Ovid" Poe, all rights reserved.
+Copyright 2006-2008 Curtis "Ovid" Poe, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

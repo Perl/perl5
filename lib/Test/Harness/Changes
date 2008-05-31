@@ -1,12 +1,17 @@
 Revision history for Test-Harness
 
-3.06
+3.07	2008-01-13
+        - prove now supports HARNESS_PERL_SWITCHES.
+        - restored TEST_VERBOSE to prove.
+
+3.06    2008-01-01
         - Skip t/unicode.t if PERL_UNICODE set. Fixes #31731.
           Thanks Lukas.
         - App::Prove::State no longer complains about tests that
           are deleted.
         - --state=new and --state=old now consider the modification time
           of test scripts.
+        - Made test suite core-compatible.
 
 3.05    2007-12-09
         - Skip unicode.t if Encode unavailable

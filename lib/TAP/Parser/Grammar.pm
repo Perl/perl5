@@ -12,11 +12,11 @@ TAP::Parser::Grammar - A grammar for the Test Anything Protocol.
 
 =head1 VERSION
 
-Version 3.06
+Version 3.07
 
 =cut
 
-$VERSION = '3.06';
+$VERSION = '3.07';
 
 =head1 DESCRIPTION
 
@@ -133,7 +133,7 @@ my %language_for;
                 }
                 return $self->_make_test_token(
                     $line,   $ok, $num, $desc,
-                    uc $dir, $explanation
+                    $dir, $explanation
                 );
             },
         },
@@ -372,7 +372,7 @@ sub _make_test_token {
         ok          => $ok,
         test_num    => $num,
         description => _trim($desc),
-        directive   => uc($dir),
+        directive   => uc($dir || ""),
         explanation => _trim($explanation),
         raw         => $line,
         type        => 'test',
