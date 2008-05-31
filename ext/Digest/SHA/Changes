@@ -1,5 +1,14 @@
 Revision history for Perl extension Digest::SHA.
 
+5.47  Wed Apr 30 04:00:54 MST 2008
+	- modified Makefile.PL to install in core for Perls >= 5.10
+		-- thanks to Jerry Hedden for patch
+	- changed from #include <> to #include "" in SHA.xs
+		-- some platforms not able to find SHA source files
+			-- thanks to Alexandr Ciornii for testing
+	- moved .pm file to appropriate lib directory
+	- minor addition to META.yml
+
 5.46  Wed Apr  9 05:04:00 MST 2008
 	- modified Addfile to recognize leading and trailing
 		whitespace in filenames (ref. rt.cpan.org #34690)
