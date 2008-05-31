@@ -22,12 +22,17 @@ BEGIN {
         print "1..0 # Skip: no working threads\n";
         exit 0;
     }
+    
+    unless ( $ENV{AUTHOR_TESTING} ) {
+        print "1..0 # Skip: many perls have broken threads.  Enable with AUTHOR_TESTING.\n";
+        exit 0;
+    }
 }
 use Test::More;
 
 my $Num_Threads = 5;
 
-plan tests => $Num_Threads * 100 + 5;
+plan tests => $Num_Threads * 100 + 6;
 
 
 sub do_one_thread {
@@ -56,3 +61,5 @@ for my $t (@kids) {
     my $rc = $t->join();
     cmp_ok( $rc, '==', 42, "threads exit status is $rc" );
 }
+
+pass("End of test");

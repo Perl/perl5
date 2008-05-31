@@ -174,7 +174,8 @@ ok $mb, "Module::Build->new_from_context";
   $output = stdout_of( sub { $ran_ok = $mb->do_system(@make, 'test', 'TEST_VERBOSE=0') } );
   ok $ran_ok, "make test without verbose ran ok";
   $output =~ s/^/# /gm;  # Don't confuse our own test output
-  like $output, qr/(?:# .+basic\.+ok\s+(?:[\d.]+\s*m?s\s*)?)# All tests/,
+  like $output,
+       qr/(?:# .+basic\.+ok\s+(?:[\d.]+\s*m?s\s*)?(?:# \[[\d:]+\]\s*)?)# All tests/,
       'Should be non-verbose';
 
   $mb->delete_filetree($libdir);
