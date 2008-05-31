@@ -1,727 +1,568 @@
-Revision history for Perl extension Test::Harness
-
-NEXT
-    [FIXES]
-    * prove's --perl=/path/to/file wasn't taking a value.
-    * prove's version number was not getting incremented.  From now on,
-      prove's $VERSION will match Test::Harness's $VERSION, and I added
-      a test to make sure this is the case.
-
-    [ENHANCEMENTS]
-    * Added test straps overload via HARNESS_STRAP_OVERLOAD environment
-      variable.  prove now takes a --strap=class parameter.  Thanks,
-      Adam Kennedy.
-
-2.63_01 Fri Jun 30 16:59:50 CDT 2006
-    [ENHANCEMENTS]
-    * Failed tests used to say "NOK x", and now say "NOK x/y".
-      Thanks to Will Coleda.
-
-    * Added the Test::Harness::Results object, so we have a well-defined
-      object, and not just a hash that we pass around.  Thanks to YAPC::NA
-      2006 Hackathon!
-
-2.62 Thu Jun  8 14:11:57 CDT 2006
-    [FIXES]
-    * Restored the behavior of dying if any subtests failed.  This is a
-      pretty crucial bug that I should have fixed long ago.  Not having this
-      means that CPANPLUS will install modules even if their tests fail. :-(
-
-2.60 Wed May 24 14:48:44 CDT 2006
-    [FIXES]
-    * Fixed the headers in the summary failure table.
-
-2.58 Sat May 13 22:53:53 CDT 2006
-    No changes.  Released to the world with a non-beta number.
-
-2.57_06 Sun Apr 23 00:55:43 CDT 2006
-    [THINGS THAT MIGHT BREAK YOUR CODE]
-    * Anything that displays a percentage of tests passed has been
-      removed.  Output at the end of failing runs is now different.
-
-    [FIXES]
-    * Fixed the TODO-passing patch from 2.57_05.
-
-    [ENHANCEMENTS]
-    * The unnecessary display of percentages of tests passing and failing
-      have been removed.  Tests are not a percentage game.
-
-    * Caches the results of _default_inc(), which is expensive because
-      of shelling out to get the pathnames.  Benchmarking was showing that
-      15% of Test::Harness's time was spent in this function.  For test
-      suites with many test files, this can be significant.  With this
-      speedup, the "make test" for the Perl core speeds up 2.5%.
-      Thanks to Nicholas Clark for finding this.
-
-    [DOCUMENTATION]
-    * Fixed HARNESS_PERL_SWITCHES typo.  Thanks, Andreas Koenig.
-
-    * Added docs on HARNESS_TIMER and --timer.  Thanks, Mike O'Regan.
-
-2.57_05 Wed Apr 19 00:31:10 CDT 2006
-    [ENHANCEMENTS]
-    * Now shows details of the tests that unexpectedly pass, instead of
-      just giving a number.  Thanks, demerphq!
-
-    [INTERNALS]
-    * Fixed globbing to work under Perls before 5.6.0.  Before Perl 5.6.0,
-      prove just uses the internal glob() function.
-
-2.57_04 Mon Apr 17 13:35:10 CDT 2006
-    [ENHANCEMENTS]
-    * prove's globbing is now done with File::Glob::bsd_glob().
-      Otherwise, "prove c:\program files\svk\t\*" fails because glob()
-      considers it to be two patterns, splitting on whitespace.  Thanks to
-      Audrey Tang.
-
-    [DOCUMENTATION]
-    * Added information about other TAP implementations in other languages.
-
-2.57_03 Dec 31 2005
-
-    [THINGS THAT MAY BREAK YOUR CODE]
-    * Internal functions _run_all_tests() and _show_results() no longer
-      exist.  You shouldn't have been using them anyway since they're
-      prepended with underscores.
-
-    [INTERNALS]
-    * Added the ability to send test output to a filehandle of
-      one's choosing.  Two internal functions are now exposed:
-      execute_tests() and get_results() (formerly _run_all_tests() and
-      _show_results()).  This should allow CPANPLUS to work properly
-      with Module::Build.  Thanks to Ken Williams.
-
-    [DOCUMENTATION]
-    * Hid the documentation for the private methods in Test::Harness::Straps.
-
-2.57_02 Fri Dec 30 23:51:17 CST 2005
-    [THINGS THAT MAY BREAK YOUR CODE]
-    * prove's --ext option has been removed.  I'm betting that nobody used it.
-
-    [ENHANCEMENTS]
-    * prove can now take -w and -W switches, analogous to those in perl.
-      This means that "prove -wlb t/*.t" is exactly the same as "make test".
-      Thanks to Rob Kinyon.
-    * Started a Test::Harness::Util module for code that may be reused
-      by other Harness-using modules.
-
-    [INTERNALS]
-    * The t/prove*.t tests now use $^X to call prove.  Thanks to Yves Orton.
-    * Test::Harness::Straps no longer uses Win32::GetShortPathName().
-      Thanks to Gisle Aas.
-
-2.57_01 Mon Dec 26 01:39:07 CST 2005
-    [FIXES]
-    * Removed code and docs mentioning HARNESS_IGNORE_EXITCODE, which
-      is not used anywhere.
-
-    [ENHANCEMENTS]
-    * If we have hi-res timings, then they're shown in integer
-      milliseconds, rather than fractional seconds.
-
-    * Added the --perl switch to prove.
-
-    [DOCUMENTATION]
-    * Added links to CPAN support sites.
-
-2.56 Wed Sep 28 16:04:00 CDT 2005
-    [FIXES]
-    * Incorporate bleadperl patch to fix Test::Harness on VMS.
-
-2.54 Wed Sep 28 09:52:19 CDT 2005
-    [FIXES]
-    * Test counts were wrong, so wouldn't install on Perls < 5.8.0.
-
-2.53_02 Thu Aug 25 21:37:01 CDT 2005
-    [FIXES]
-    * File order in prove is now sorted within the directory.  It's not
-      the sorting that's important as much as the deterministic results.
-      Thanks to Adam Kennedy and Casey West for pointing this out,
-      independently of each other, with 12 hours of the other.
-
-    [INTERNALS]
-    * Fix calls to podusage() to not use the DATA typeglob.  Thanks sungo.
-
-2.53_01 Sun Jul 10 10:45:27 CDT 2005
-    [FIXES]
-    * If we go over 100,000 tests, it used to print out a warning for
-      every test over 100,000.  Now, we stop after the first.  Thanks to
-      Sebastien Aperghis-Tramoni.
-
-2.52 Sun Jun 26 23:05:19 CDT 2005
-    No changes
-
-2.51_02
-    [ENHANCEMENTS]
-    * The Test::Harness timer is now off by default.  Set HARNESS_TIMER
-      true if you want it.  Added --timer flag to prove.
-
-2.50_01
-    [FIXES]
-    * Call CORE::time() to figure out if we should print when we're
-      printing once per second.  Otherwise, we're using Time::HiRes'
-      version of it.  Thanks, Nicholas Clark.
-
-2.50 Tue Jun 21 14:32:12 CDT 2005
-    [FIXES]
-    * Added some includes in t/strap-analyze.t to make Cygwin happy.
-
-2.49_02 Tue Jun 21 09:54:44 CDT 2005
-    [FIXES]
-    * Added some includes in t/test_harness.t to make Cygwin happy.
-
-2.49_01 Fri Jun 10 15:37:31 CDT 2005
-    [ENHANCEMENTS]
-    * Now shows elapsed time in 1000ths of a second if Time::HiRes
-      is available.
-
-    [FIXES]
-    * Test::Harness::Iterator didn't have a 1; at the end.  Thanks to
-      Steve Peters for finding it.
-
-2.48    Fri Apr 22 22:41:46 CDT 2005
-    Released after weeks of non-complaint.
-
-2.47_03 Wed Mar  2 16:52:55 CST 2005
-    [THINGS THAT MIGHT BREAK YOUR CODE]
-    * Test::Harness now requires Perl 5.005_03 or above.
-
-    [FIXES]
-    * Fixed incorrect "confused by tests in wrong order" error in 2.47_02.
-
-2.47_02 Tue Mar  1 23:15:47 CST 2005
-    [THINGS THAT MIGHT BREAK YOUR CODE]
-    * Test directives for skip tests used to be anything that matches
-      /^skip/i, like the word "skipped", but now it must match
-      /^skip\s+/i.
-
-    [ENHANCEMENTS]
-    * T::H now sets environment variable HARNESS_VERSION, in case a test
-      program wants to know what version of T::H it's running under.
-
-2.47_01 Mon Feb 21 01:14:13 CST 2005
-    [FIXES]
-    * Fixed a problem submitted by Craig Berry:
-
-        Several of the Test::Harness tests now fail on VMS with the
-        following warning:
-
-        Can't find string terminator "]" anywhere before EOF at -e line 1.
-
-        The problem is that when a command is piped to the shell and that
-        command has a newline character embedded in it, the part after
-        the newline is invisible to the shell. The patch below corrects
-        that by escaping the newline so it is not subject to variable
-        interpolation until it gets to the child's Perl one-liner.
-
-    [ENHANCEMENTS]
-    * Test::Harness::Straps now has diagnostic gathering without changing
-      how tests are run.  It also adds these messages by default.
-      Note that the new method, _is_diagnostic(), is for internal
-      use only.  It may change soon.  Thanks to chromatic.
-
-    [DOCUMENTATION]
-    * Expanded Test::Harness::TAP.pod, and added examples.
-
-    * Fixed a crucial documentation typo in Test::Harness::Straps.
-
-2.46    Thu Jan 20 11:50:59 CST 2005
-    Released.
-
-2.45_02 Fri Dec 31 14:57:33 CST 2004
-    [ENHANCEMENTS]
-    * Turns off buffering on both STDERR and STDOUT, so that the two
-      output handles don't get out of sync with each other.  Thanks to
-      David Wheeler.
-
-    * No longer requires, or supports, the HARNESS_OK_SLOW environment
-      variable.  Test counts are only updated once per second, which
-      used to require having HARNESS_OK_SLOW set.
-
-2.45_01 Fri Dec 17 22:39:17 CST 2004
-    [THINGS THAT MIGHT BREAK YOUR CODE]
-    * Test::Harness now requires Perl 5.004_05.
-
-    * We no longer try to print a stack if a coredump is detected.
-
-    [FIXES]
-    * Reverted Test::Harness::Iterator::next()'s use of readline, since
-      it fails under Perl 5.5.4.
-
-    * We no longer try to print a stack if a coredump is detected.
-      This means that the external problems we've had with wait.ph
-      now disappear.  This resolves a number of problems that various
-      Linux distros have, and closes a couple of RT tickets like #2729
-      and #7716.
-
-    [ENHANCEMENTS]
-    * Added Test::Harness->strap() method to access the internal strap.
-
-    [DOCUMENTATION]
-    * Obfuscated the rt.cpan.org email address.  The damage is already
-      done, but at least we'll have it hidden going forward.
-
-2.44 Tue Nov 30 18:38:17 CST 2004
-    [INTERNALS]
-    * De-anonymized the callbacks and handlers in Test::Harness, mostly
-      so I can profile better.
-
-    * Checks _is_header() only if _is_line() fails first.  No point
-      in checking every line of the input for something that can only
-      occur once.
-
-    * Inline the _detailize() function, which was getting called once
-      per line of input.  Reduced execution time about 5-7%.
-
-    * Removed unnecessary temporary variables in Test::Harness::Straps
-      and in Test::Harness::Iterator.
-
-2.43_02 Thu Nov 25 00:20:36 CST 2004
-    [ENHANCEMENTS]
-    * Added more debug output if $Test::Harness::Debug is on.
-
-    [FIXES]
-    * Test::Harness now removes default paths from the paths that it
-      sets in PERL5LIB.  This fixes RT #5649.  Thanks, Schwern.
-
-    [THINGS THAT MIGHT BREAK YOUR CODE]
-    * Test::Harness::Straps' constructor no longer will work as an
-      object method.  You can't say $strap->new any more, but that's
-      OK because you never really wanted to anyway.
-
-2.43_01
-    [FIXES]
-    * Added workaround for local $ENV{} bug on Cygwin to
-    t/prove-switches.t.  See the following RT tickets for details.
-
-    https://rt.cpan.org/Ticket/Display.html?id=6452
-    http://rt.perl.org/rt3/Ticket/Display.html?id=30952
-
-
-2.42        Wed Apr 28 22:13:11 CDT 2004
-    [ENHANCEMENTS]
-    * prove -v now sets TEST_VERBOSE in case your tests rely on them.
-    * prove globs the command line, since Win32's shell doesn't.
-
-    [FIXES]
-    * Cross-platform test fixes on t/prove-globbing.t
-
-
-2.40        Tue Dec 30 20:38:59 CST 2003
-    [FIXES]
-    * Test::Harness::Straps should now properly quote on VMS.
-
-    [ENHANCEMENTS]
-    * prove now takes a -l option to add lib/ to @INC.  Now when you're
-      building a module, you don't have to do a make before you run
-      the prove.  Thanks to David Wheeler for the idea.
-
-    [INTERNALS]
-    * Internal functions corestatus() and canonfailed() prepended with
-      underscores, to indicate such.
-
-    * Gratuitous text-only changes in Test::Harness::Iterator.
-
-    * All tests now do their use_ok() in a BEGIN block.  Some of the
-      use_ok() calls were too much of a hassle to put into a BEGIN block,
-      so I changed them to regular use calls.
-
-
-2.38        Mon Nov 24 22:36:18 CST 2003
-    Released.  See changes below.
-
-2.37_03     Tue Nov 18 23:51:38 CST 2003
-    [ENHANCEMENTS]
-    * prove -V now shows the Perl version being used.
-    * Now there's a HARNESS_DEBUG flag that shows diagnostics as the
-      harness runs the tests.  This is different from HARNESS_VERBOSE,
-      which shows test output, but not information about the harness
+Revision history for Test-Harness
+
+3.05    2007-12-09
+        - Skip unicode.t if Encode unavailable
+        - Support for .proverc files.
+        - Clarified prove documentation.
+
+3.04    2007-12-02
+        - Fixed output leakage with really_quiet set.
+        - Progress reports for tests without plans now show
+          "143/?" instead of "143/0".
+        - Made TAP::Harness::runtests support aliases for test names.
+        - Made it possible to pass command line args to test programs
+          from prove, TAP::Harness, TAP::Parser.
+        - Added --state switch to prove.
+
+3.03    2007-11-17
+        - Fixed some little bugs-waiting-to-happen inside
+          TAP::Parser::Grammar.
+        - Added parser_args callback to TAP::Harness.
+        - Made @INC propagation even more compatible with 2.64 so that
+          parrot still works *and* #30796 is fixed.
+
+3.02    2007-11-15
+        - Process I/O now unbuffered, uses sysread, plays better with
+          select. Fixes #30740.
+        - Made Test::Harness @INC propagation more compatible with 2.64.
+          Was breaking Parrot's test suite.
+        - Added HARNESS_OPTIONS (#30676)
+
+3.01    2007-11-12
+        - Fix for RHEL incpush.patch related failure.
+        - Output real time of test completion with --timer
+        - prove -b adds blib/auto to @INC
+        - made SKIP plan parsing even more liberal for pre-v13 TAP
+
+3.00    2007-11-06
+        - Non-dev release. No changes since 2.99_09.
+
+2.99_09 2007-11-05
+        - Implemented TODO-in-PLAN syntax for TAP version 12 and earlier.
+
+2.99_08 2007-11-04
+        - Tiny changes. New version pushed to get some smoke coverage.
+
+2.99_07 2007-11-01
+        - Fix for #21938: Unable to handle circular links
+        - Fix for #24926: prove -b and -l should use absolute paths
+        - Fixed prove switches. Big oops. How the hell did we miss that?
+        - Consolidated quiet, really_quiet, verbose into verbosity.
+        - Various VMS related fixes to tests
+
+2.99_06 2007-10-30
+        - Added skip_all method to TAP::Parser.
+        - Display reason for skipped tests.
+        - make test now self tests.
+
+2.99_05 2007-10-30
+        - Fix for occasional rogue -1 exit code on Windows.
+        - Fix for @INC handling under CPANPLUS.
+        - Added real time to prove --timer output
+        - Improved prove error message in case where 't' not found and
+          no tests named.
+
+2.99_04 2007-10-11
+        - Fixed bug where 'All tests successful' would not be printed if bonus
+          tests are seen.
+        - Fixed bug where 'Result: FAIL' would be printed at the end of a test
+          run if there were unexpectedly succeeding tests.
+        - Added -M, -P switches to allow arbitrary modules to be loaded
+          by prove. We haven't yet defined what they'll do once they
+          load but it's a start...
+        - Added testing under simulated non-forking platforms.
+
+2.99_03 2007-10-06
+        - Refactored all display specific code out of TAP::Harness.
+        - Relaxed strict parsing of skip plan for pre v13 TAP.
+        - Elapsed hi-res time is now displayed in integer milliseconds
+          instead of fractional seconds.
+        - prove stops running if any command-line switches are invalid.
+        - prove -v would try to print an undef.
+        - Added support for multiplexed and forked parallel tests. Use
+          prove -j 9 to run tests in parallel and prove -j 9 --fork to
+          fork. These features are experimental and currently
+          unavailable on Windows.
+        - Rationalized the management of the environment that we give to
+          test scripts (PERL5LIB, PERL5OPT, switches).
+        - Fixed handling of STDIN (we no longer close it) for test
+          scripts.
+        - Performance enhancements. Parser is now 30% - 40% faster.
+
+2.99_02 2007-09-07
+        - Ensure prove (and App::Prove) sort any recursively
+          discovered tests
+        - It is now possible to register multiple callback handlers for
+          a particular event.
+        - Added before_runtests, after_runtests callbacks to
+          TAP::Harness.
+        - Moved logic of prove program into App::Prove.
+        - Added simple machine readable summary.
+        - Performance improvement: The processing pipeline within
+          TAP::Parser is now a closure which speeds up access to the
+          various attribtes it needs.
+        - Performance improvement: Test count spinner now updates
+          exponentially less frequently as the count increases which
+          saves a lot of I/O on big tests.
+        - More improvements in test coverage from Leif.
+        - Fixes to TAP spooling - now captures YAML blocks correctly.
+        - Fix YAMLish handling of empty arrays, hashes.
+        - Renamed TAP::Harness::Compatible to Test::Harness,
+          runtests to prove.
+        - Fixes to @INC handling. We didn't always pass the correct path
+          to subprocesses.
+        - We now observe any switches in HARNESS_PERL_SWITCHES.
+        - Changes to output formatting for greater compatibility with
+          Test::Harness 2.64.
+        - Added unicode test coverage and fixed a couple of
+          unicode issues.
+        - Additions to documentation.
+        - Added support for non-forking Perls. If forking isn't
+          available we fall back to open and disable stream merging.
+        - Added support for simulating non-forking Perls to improve our
+          test coverage.
+
+========================================================================
+Version numbers below this point relate to TAP::Parser - which was the
+name of this version of Test::Harness during its development.
+========================================================================
+
+0.54
+    - Optimized I/O for common case of 'runtests -l'
+    - Croak if supplied an empty (0 lines) Perl script.
+    - Made T::P::Result::YAML return literal input YAML correctly.
+    - Merged speed-ups from speedy branch.
+
+0.53  18 August 2007
+    - Fixed a few docs nits.
+    - Added -V (--version) switch to runtests. Suggested by markjugg on
+      Perlmonks.
+    - Fixed failing t/030-grammer.t under 5.9.5. Exact cause still
+      unknown; something to do with localisation of $1 et all I think.
+    - Fixed use of three arg open in t/compat/test-harness-compat; was
+      failing on 5.6.2.
+    - Fixed runtests --exec option. T::H wasn't passing the exec option
+      to T::P.
+    - Merged Leif Eriksen's coverage enhancing changes to 
+      t/080-aggregator.t, t/030-grammar.t
+    - Made various changes so that we test cleanly on 5.0.5.
+    - Many more coverage enhancements by Leif.
+    - Applied Michael Peters' patch to add an EOF callback to
+      TAP::Parser.
+    - Added --reverse option to runtests to run tests in reverse order.
+    - Made runtests exit with non-zero status if the test run had
+      problems.
+    - Stopped TAP::Parser::Iterator::Process from trampling on STDIN.
+
+0.52  14 July 2007
+    - Incorporate Schwern's investigations into TAP versions.
+      Unversioned TAP is now TAP v12. The lowest explicit version number
+      that can be specified is 13.
+    - Renumbered tests to eliminate gaps.
+    - Killed execrc.  The '--exec' switch to runtests handles all of this for
+      us.
+    - Refactored T::P::Iterator into
+      T::P::Iterator::(Array|Process|Stream) so that we have a
+      process specific iterator with which to experiment with
+      STDOUT/STDERR merging.
+    - Removed vestigial exit status handling from T::P::I::Stream.
+    - Removed unused pid interface from T::P::I::Process.
+    - Fixed infinite recursion in T::P::I::Stream and added regression
+      coverage for same.
+    - Added tests for T::P::I::Process.
+    - TAP::Harness now displays the first five TAP syntax errors and
+      explains how to pass the -p flag to runtests to see them all.
+    - Added merge option to TAP::Parser::Iterator::Process,
+      TAP::Parser::Source, TAP::Parser and TAP::Harness.
+    - Added --merge option to runtests to enable STDOUT/STDERR merging.
+      This behaviour used to be the default.
+    - Made T::P::I::Process use open3 for both merged and non-merged
+      streams so that it works on Windows.
+    - Implemented Eric Wilhelm's IO::Select based multiple stream
+      handler so that STDERR is piped to us even if stream merging is
+      turned off. This tends to reduce the temporal skew between the
+      two streams so that error messages appear closer to their
+      correct location.
+    - Altered the T::P::Grammar interface so that it gets a stream
+      rather than the next line from the stream in preparation for
+      making it handle YAML diagnostics.
+    - Implemented YAML syntax. Currently YAML may only follow a
+      test result. The first line of YAML is '---' and the last
+      line is '...'.
+    - Made grammar version-aware. Different grammars may now be selected
+      depending on the TAP version being parsed.
+    - Added formatter delegate mechanism for test results.
+    - Added prototype stream based YAML(ish) parser.
+    - Added more tests for T::P::YAMLish
+    - Altered T::P::Grammar to use T::P::YAMLish
+    - Removed T::P::YAML
+    - Added raw source capture to T::P::YAMLish
+    - Added support for double quoted hash keys
+    - Added TAP::Parser::YAMLish::Writer and renamed T::P::YAMLish as
+      T::P::YAMLish::Reader.
+    - Added extra TAP::Parser::YAMLish::Writer output options
+    - Inline YAML documents must now be indented by at least one space
+    - Fixed broken dependencies in bin/prove
+    - Make library paths absolute before running tests in case tests
+      chdir before loading modules.
+    - Added libs and switches handling to T::H::Compatible. This and the
+      previous change fix [24926]
+    - Added PERLLIB to libraries stripped in _default_inc [12030]
+    - Our version of prove now handles directories containing circular
+      links correctly [21938]
+    - Set TAP_VERSION env var in Parser [11595]
+    - Added setup, teardown hooks to T::P::I::Process to facilitate the
+      setup and cleanup of the test script's environment
+    - Any additional libs added to the command line are also added to
+      PERL5LIB for the duration of a test run so that any Perl children
+      of the test script inherit the same library paths.
+    - Fixed handling of single quoted hash keys in T::P::Y::Reader
+    - Made runtests return the TAP::Parser::Aggregator
+    - Fixed t/120-harness.t has failures if TAP::Harness::Color cannot
+      load optional modules [27125] - thanks DROLSKY
+    - Fixed parsing of \# in test description  
+0.51 12 March 2007
+    - 'execrc' file now allows 'regex' matches for tests.
+    - rename 'TAPx' --> 'TAP'
+    - Reimplemented the parse logic of TAP::Parser as a state machine.
+    - Removed various ad-hoc state variables from TAP::Parser and moved
+      their logic into the state machine.
+    - Removed now-unused is_first / is_last methods from Iterator and
+      simplified remaining logic to suit.
+    - Removed now-redundant t/140-varsource.t.
+    - Implemented TAP version syntax.
+    - Tidied TAP::Harness::Compatible documentation
+    - Removed redundant modules below TAP::Harness::Compatible
+    - Removed unused compatibility tests
+
+0.50_07 5 March 2007
+    - Fixed bug where we erroneously checked the test number instead of number
+      of tests run to determine if we've run more tests than we planned.
+    - Add a --directives switch to 'runtests' which only shows test results
+      with directives (such as 'TODO' or 'SKIP').
+    - Removed some dead code from TAPx::Parser.
+    - Added color support for Windows using Win32::Console.
+    - Made Color::failure_output reset colors before printing
+      the trailing newline.
+    - Corrected some issues with the 'runtests' docs and removed some
+      performance notes which no longer seem accurate.
+    - Fixed bug whereby if tests without file extensions were included then
+      the spacing of the result leaders would be off.
+    - execrc file is now a YAML file.
+    - Removed white background on the test failures.  It was too garish for
+      me.  Just more proof that we need better ways of overriding color
+      support.
+    - Started work on TAPx::Harness::Compatible. Right now it's mainly just
+      a direct lift of Test::Harness to make sure the tests work.
+    - Commented out use Data::Dumper::Simple in T::Harness.pm - it's not
+      a core module.
+    - Added next_raw to TAPx::Parser::Iterator which skips any fixes for
+      quirky TAP that are implemented by next. Used to support
+      TAPx::Harness::Compatible::Iterator
+    - Applied our version number to all T::H::Compatible modules
+    - Removed T::H::C::Assert. It's documented as being private to
+      Test::Harness and we're not going to need it.
+    - Refactored runtests to call aggregate_tests to expose the
+      interface we need for the compatibility layer.
+    - Make it possible to pass an end time to summary so that it needn't
+      be called immediately after the tests complete.
+    - Moved callback handling into TAPx::Base and altered TAPx::Parser
+      to use it.
+    - Made TAPx::Harness into a subclass of TAPx::Base and implemented
+      made_parser callback.
+    - Moved the dispatch of callbacks out of run and into next so that
+      they're called when TAPx::Harness iterates through the results.
+    - Implemented PERL_TEST_HARNESS_DUMP_TAP which names a directory
+      into which the raw TAP of any tests run via TAPx::Harness will
+      be written.
+    - Rewrote the TAPx::Grammar->tokenize method to return a
+      TAPx::Parser::Result object.  Code is much cleaner now.
+    - Moved the official grammar from TAPx::Parser to TAPx::Parser::Grammar,
+      provided a link and updated the grammar.
+    - Fixed bug where a properly escaped '# TODO' line in a test description
+      would still be reported as a TODO test.
+    - Added patches/ExtUtils-MakeMaker-6.31.patch - a patch against EUMM
+      that makes test_harness use TAPx::Harness instead of Test::Harness
+      if PERL_EUMM_USE_TAPX is true and TAPx::Harness is installed. In
+      other words cause 'make test' for EUMM based models to use
+      TAPx::Harness.
+    - Added support for timer option to TAPx::Harness which causes the
+      elapsed time for each test to be displayed.
+    - Setup tapx-dev@hexten.net mailing list.
+    - Fixed accumulating @$exec bug in TAPx::Harness.
+    - Made runtests pass '--exec' option as an array.
+    - (#24679) TAPx::Harness now reports failure for tests that die
+      after completing all subtests.
+    - Added in_todo attribute on TAPx::Parser which is true while the
+      most recently seen test was a TODO.
+    - (#24728) TAPx::Harness now supresses diagnostics from failed
+      TODOs. Not sure if the semantics of this are correct yet.
+      
+0.50_06 18 January 2007
+    - Fixed doc typo in examples/README [rt.cpan.org #24409]
+    - Colored test output is now the default for 'runtests' unless
+      you're running under windows or -t STDOUT is false.
+      [rt.cpan.org #24310]
+    - Removed the .t extension from t/source_tests/*.t since those are
+      'test tests' which caused false negatives when running recursive
+      tests. [Adrian Howard]
+    - Somewhere along the way, the exit status started working again.
+      Go figure.
+    - Factored color output so that disabling it under Windows is
+      cleaner.
+    - Added explicit switch to :crlf layer after open3 under Windows.
+      open3 defaults to raw mode resulting in spurious \r characters input
+      parsed input.
+    - Made Iterator do an explicit wait for subprocess termination.
+      Needed to get process status correctly on Windows.
+    - Fixed bug which didn't allow t/010-regression.t to be run directly
+      via Perl unless you specified Perl's full path.
+    - Removed SIG{CHLD} handler (which we shouldn't need I think because
+      we explicitly waitpid) and made binmode ':crlf' conditional on
+      IS_WIN32. On Mac OS these two things combined to expose a problem
+      which meant that output from test scripts was sometimes lost.
+    - Made t/110-source.t use File::Spec->catfile to build path to
+      test script.
+    - Made Iterator::FH init is_first, is_last to 0 rather than undef
+      for consistency with array iterator.
+    - Added t/120-varsource.t to test is_first and is_last semantics
+      over files with small numbers of lines.
+    - Added check for valid callback keys.
+    - Added t/130-results.t for Result classes.
+
+0.50_05 15 January 2007
+    - Removed debugging code accidentally left in bin/runtests.
+    - Removed 'local $/ = ...' from the iterator.  Hopefully that will fix the
+      line ending bug, but I don't know about the wstat problem.
+
+0.50_04 14 January 2007
+    - BACKWARDS IMCOMPATIBLE:  Renamed all '::Results' classes to '::Result'
+      because they represent a single result.
+    - Fixed bug where piping would break verbose output.
+    - IPC::Open3::open3 now takes a @command list rather than a $command
+      string.  This should make it work under Windows.
+    - Added 'stdout_sterr' sample test back to regression tests.  IPC::Open3
+      appears to make it work.
+    - Bug fix:  don't print 'All tests successful' if no tests are run.
+    - Refactored 'runtests' to make it a bit easier to follow.
+    - Bug fix:  Junk and comments now allowed before a leading plan.
+    - HARNESS_ACTIVE and HARNESS_VERSION environment variables now set.
+    - Renamed 'problems' in TAPx::Parser and TAPx::Aggregator to
+      'has_problems'.
+
+0.50_03 08 January 2007
+
+    - Fixed bug where '-q' or '-Q' with colored tests weren't suppressing all
+      information.
+    - Fixed an annoying MANIFEST nit.
+    - Made '-h' for runtests now report help.  Using a new harness requires
+      the full --harness switch.
+    - Added 'problems' method to TAPx::Parser and TAPx::Parser::Aggregator.
+    - Deprecatd 'todo_failed' in favor of 'todo_passed'
+    - Add -I switch to runtests.
+    - Fixed runtests doc nit (smylers)
+    - Removed TAPx::Parser::Builder.
+    - A few more POD nits taken care of.
+    - Completely removed all traces of C<--merge> as IPC::Open3 seems to be
+      working.
+    - Moved the tprove* examples to examples/bin in hopes of them no longer
+      showing up in CPAN's docs.
+    - Made the 'unexpectedly succeeded' message clearer (Adam Kennedy)
+
+0.50_02 06 January 2007
+    - Added some files I left out of the manifest (reported by Florian
+      Ragwitz).
+    - Added strict to Makefile.PL and changed @PROGRAM to @program (reported
+      Florian Ragwitz).
+
+0.50_01 06 January 2007
+    - Added a new example which shows to how test Perl, Ruby, and URLs all at
+      the same time using 'execrc' files.
+    - Fixed the diagnostic format mangling bug.
+    - We no longer override Test::Builder to merge streams.  Instead, we go
+      ahead and use IPC::Open3.  It remains to be seen whether or not this is
+      a good idea.
+    - Fixed vms nit:  for failing tests, vms often has the 'not' on a line by
       itself.
-    * Added _command_line() to the Strap API.
+    - Fixed bugs where unplanned tests were not reporting as a failure (test
+      number greater than tests planned).
+    - TAPx::Parser constructor can now take an 'exec' option to tell it what
+      to execute to create the stream (huge performance boost).
+    - Added TAPx::Parser::Source.  This allows us to run tests in just about
+      any programming language.
+    - Renamed the filename() method to source() in TAPx::Parser::Source::Perl.
+    - We now cache the @INC values found for TAPx::Parser::Source::Perl.
+    - Added two test harnesses, TAPx::Harness and TAPx::Harness::Color.
+    - Removed references to manual stream construction from TAPx::Parser
+      documentation.  Users should not (usually) need to worry about streams.
+    - Added bin/runtests utility.  This is very similar to 'prove'.
+    - Renumbered tests to make it easier to add new ones.
+    - Corrected some minor documentation nits.
+    - Makefile.PL is no longer auto-generated (it's built by hand).
+    - Fixed regression test bug where driving tests through the harness I'm
+      testing caused things to break.
+    - BUG:  exit() values are now broken.  I don't know how to capture them
+      with IPC::Open3.  However, since no one appears to be using them, this
+      might not be an issue.
 
-    [FIXES]
-    * Bad interaction with Module::Build:  The strap was only checking
-      $ENV{HARNESS_PERL_SWITCHES} for definedness, but not emptiness.
-      It now also strips any leading or trailing whitesapce from the
-      switches.
-    * Test::Harness and prove only quote those parms that actually need
-      to be quoted: Have some whitespace and aren't already quoted.
+0.41  12 December 2006
+    - Fixed (?) 10-regression.t test which failed on Windows.  Removed the
+      segfault test as it has no meaning on Windows.  Reported by PSINNOTT
+      <link@redbrick.dcu.ie> and fix recommended by Schwern based on his
+      Test::Harness experience.
+      http://rt.cpan.org/Ticket/Display.html?id=21624
 
-2.36        Fri Nov 14 09:24:44 CST 2003
-    [FIXES]
-    * t/prove-includes.t properly ignores PROVE_SWITCHES that you may
-      already have set.
+0.40  05 December 2006
+    - Removed TAPx::Parser::Streamed and folded its functionality into
+      TAPx::Parser.
+    - Fixed bug where sometimes is_good_plan() would return a false positive
+      (exposed by refactoring).
+    - A number of tiny performance enhancements.
 
-2.35_02     Thu Nov 13 09:57:36 CST 2003
-    [ENHANCEMENTS]
-    * prove's --blib now works just like the blib pragma.
+0.33  22 September 2006
+    - OK, I'm getting ticked off by some of the comments on Perl-QA so I
+      rushed this out the door and broke it :(  I'm backing out one test and
+      slowing down a bit.
 
-2.35_01     Wed Nov 12 23:08:45 CST 2003
-    [FIXES]
-    * Fixed taint-handling and path preservation under MacOS.  Thanks to
-      Schwern for the patch and the tests.
+0.32  22 September 2006
+    - Applied patch from Schwern which fixed the Builder package name (TAPx::
+      instead of TAPX:: -- stupid case-insensitive package names!).
+      [rt.cpan.org #21605]
 
-    * Preserves case of -t or -T in the shebang line of the test.
+0.31  21 September 2006
+    - Fixed bug where Carp::croak without parens could cause Perl to fail to
+      compile on some platforms. [Andreas J. Koenig]
+    - Eliminated the non-portable redirect of STDERR to STDOUT (2>&1) and
+      fixed the synchronization issue.  This involves overridding
+      Test::Builder::failure_output() in a very sneaky way.  I may have to
+      back this out.
+    - Renamed boolean methods to begin with 'is_'.  The methods they replace
+      are documented, deprecated, and will not be removed prior to version
+      1.00.
 
-    [ENHANCEMENTS]
-    * Added -t to prove analogous to Perl's -t.  Removed the --taint
-      switch.
+0.30  17 September 2006
+    - Fixed bug where no output would still claim to have a good plan.
+    - Fixed bug where no output would cause parser to die.
+    - Fixed bug where failing to specify a plan would be two parse errors
+      instead of one.
+    - Fixed bug where a correct plan count in an incorrect place would still
+      report as a 'good_plan'.
+    - Fixed bug where comments could accidently be misparsed as directives.
+    - Eliminated testing of internal structure of result objects.  The other
+      tests cover this.
+    - Allow hash marks in descriptions.  This was causing a problem because
+      many test suites (Regexp::Common and Perl core) allowed them to exist.
+    - Added support for SKIP directives in plans.
+    - Did some work simplifying &TAPx::Parser::_initialize.  It's not great,
+      but it's better than it was.
+    - TODO tests now always pass, regardless of actual_passed status.
+    - Removed 'use warnings' and now use -w
+    - 'switches' may now be passed to the TAPx::Parser constructor.
+    - Added 'exit' status.
+    - Added 'wait' status.
+    - Eliminated 'use base'.  This is part of the plan to make TAPx::Parser
+      compatible with older versions of Perl.
+    - Added 'source' key to the TAPx::Parser constructor.  Making new parsers
+      is now much easier.
+    - Renamed iterator first() and last() methods to is_first() and is_last().
+      Credit:  Aristotle.
+    - Planned tests != tests run is now a parse error.  It was really stupid
+      of me not to do that in the first place.
+    - Added massive regression test suite in t/100-regression.t
+    - Updated the grammar to show that comments are allowed.
+    - Comments are now permitted after an ending plan.
 
-    * prove can take default options from the PROVE_SWITCHES variable.
+0.22  13 September 2006
+    - Removed buggy support for multi-line chunks from streams.  If your
+      streams or iterators return anything but single lines, this is a bug.
+    - Fixed bug whereby blank lines in TAP would confuse the parser.  Reported
+      by Torsten Schoenfeld.
+    - Added first() and last() methods to the iterator.
+    - TAPx::Parser::Source::Perl now has a 'switches' method which allows
+      switches to be passed to the perl executable running the test file.
+      This allows tprove to accept a '-l' argument to force lib/ to be
+      included in Perl's @INC.
 
-    * Added HARNESS_PERL to allow you to specify the Perl interpreter
-      to run the tests as.
+0.21  8 September 2006
+    - Included experimental GTK interface written by Torsten Schoenfeld.
+    - Fixed bad docs in examples/tprove_color
+    - Applied patch from Shlomi Fish fixing bug where runs from one stream
+      could leak into another when bailing out.  [rt.cpan.org #21379] 
+    - Fixed some typos in the POD.
+    - Corrected the grammar to allow for a plan of "1..0" (infinite stream).
+    - Started to add proper acknowledgements.
 
-    * prove's --perl switch sets the HARNESS_PERL on the fly for you.
-
-    * Quotes the switches and filename in the subprogram.  This helps
-      with filenames with spaces that are subject to shell mangling.
-
-
-2.34        Sat Nov  8 22:09:15 CST 2003
-    [FIXES]
-    * Allowed prove to run on Perl versions < 5.6.0.
-
-    [ENHANCEMENTS]
-    * Command-line switches to prove may now be stacked.
-    * Added check for proper Pod::Usage version.
-    * "make clean" does a better job of cleaning up after itself.
-
-
-2.32        Fri Nov  7 09:41:21 CST 2003
-    Test::Harness now includes a powerful development tool to help
-    programmers work with automated tests.  The prove utility runs
-    test files against the harness, like a "make test", but with many
-    advantages:
-
-    * prove is designed as a development tool
-        Perl users typically run the test harness through a makefile via
-        "make test". That's fine for module distributions, but it's
-        suboptimal for a test/code/debug development cycle.
-
-    * prove is granular
-        prove lets your run against only the files you want to check.
-        Running "prove t/live/ t/master.t" checks every *.t in t/live, plus
-        t/master.t.
-
-    * prove has an easy verbose mode
-        To get full test program output from "make test", you must set
-        "HARNESS_VERBOSE" in the environment. prove has a "-v" option.
-
-    * prove can run under taint mode
-        prove's "-T" runs your tests under "perl -T".
-
-    * prove can shuffle tests
-        You can use prove's "--shuffle" option to try to excite problems
-        that don't show up when tests are run in the same order every time.
-
-    * Not everything is a module
-        More and more users are using Perl's testing tools outside the
-        context of a module distribution, and may not even use a makefile at
-        all.
-
-    Prove requires Pod::Usage, which is standard after Perl 5.004.
-
-    I'm very excited about prove, and hope that developers will begin
-    adopting it to their coding cycles.  I welcome your comments at
-    andy@petdance.com.
-
-    There are also some minor bug fixes in Test::Harness itself, listed
-    below in the 2.31_* notes.
-     
-
-2.31_05     Thu Nov  6 14:56:22 CST 2003
-    [FIXES]
-    - If a MacPerl script had a shebang with -T, the -T wouldn't get
-      passed as a switch.
-    - Removed the -T on three *.t files, which didn't need them, and 
-      which were causing problems.
-    - Conditionally installs bin/prove, depending on whether Pod::Usage
-      is available, which prove needs.
-    - Removed old leftover code from Makefile.PL.
-
-2.31_04     Mon Nov  3 23:36:06 CST 2003
-    Minor tweaks here and there, almost ready to release.
-
-2.31_03     Mon Nov  3 08:50:36 CST 2003
-    [FEATURES]
-    - prove is almost feature-complete.  Removed the handling of
-      --exclude for excluding certain tests.  It may go back in the
-      future.
-    - prove -d is now debug.  Dry is prove -D.
-
-2.31_02     Fri Oct 31 23:46:03 CST 2003
-    [FEATURES]
-    - Added many more switches to prove: -d for dry run, and -b for
-      blib.
-
-    [FIXES]
-    - T:H:Straps now recognizes MSWin32 in $^0.
-    - RT#3811: Could do regex matching on garbage in _is_test().
-      Fixed by Yves Orton
-    - RT#3827: Strips backslashes from and normalizes @INC entries
-      for Win32.  Fixed by Yves Orton.
-
-    [INTERNALS]
-    - Added $self->{_is_macos} to the T:H:Strap object.
-    - t/test-harness.t sorts its test results, rather than relying on
-      internal key order.
-
-2.31_01
-    [FEATURES]
-    - Added "prove" script to run a test or set of tests through the
-      harness.  Thanks to Curtis Poe for the foundation.
-
-    [DOCUMENTATION]
-    - Fixed POD problem in Test::Harness::Assert
-
-2.30        Thu Aug 14 20:04:00 CDT 2003
-    No functional changes in this version.  It's only to make some doc
-    tweaks, and bump up the version number in T:H:Straps.
-
-    [DOCUMENTATION]
-    - Changed Schwern to Andy as the maintainer.
-    - Incorporated the TODO file into Harness.pm proper.
-    - Cleaned up formatting in Test::Harness::Straps.
-
-2.29        Wed Jul 17 14:08:00 CDT 2003
-    - Released as 2.29.
-
-2.28_91     Sun Jul 13 00:10:00 CDT 2003
-    [ENHANCEMENTS]
-    - Added support for HARNESS_OK_SLOW.  This will make a significant
-      speedup for slower connections.
-    - Folded in some changes from bleadperl that spiff up the
-      failure reports.
-
-    [INTERNALS]
-    - Added some isa_ok() checks to the tests.
-    - All Test::Harness* modules are used by use_ok()
-    - Fixed the prototype for the canonfailed() function, not that
-      it matters since it's never called without parens.
-
-2.28_90     Sat Jul 05 20:21:00 CDT 2003
-    [ENHANCEMENTS]
-    - Now, when you run a test harnessed, the numbers don't fly by one
-      at a time, one update per second.  This significantly speeds
-      up the run time for running thousands of tests.  *COUGH*
-      Regexp::Common *COUGH*
-
-2.28     Thu Apr 24 14:39:00 CDT 2003
-    - No functional changes.
-
-2.27_05  Mon Apr 21 15:55:00 CDT 2003
-    - No functional changes.
-    - Fixed circular depency in the test suite.  Thanks, Rob Brown.
-
-2.27_04  Sat Apr 12 21:42:00 CDT 2003
-    - Added test for $Test::Harness::Switches patch below.
-
-2.27_03  Thu Apr 03 10:47:00 CDT 2003
-    - Fixed straps not respecting $Test::Harness::Switches.  Thanks
-      to Miyagawa for the patch.
-    - Added t/pod.t to test POD validity.
-
-2.27_02  Mon Mar 24 13:17:00 CDT 2003
-2.27_01  Sun Mar 23 19:46:00 CDT 2003
-    - Handed over to Andy Lester for further maintenance.
-    - Fixed when the path to perl contains spaces on Windows
-    * Stas Bekman noticed that tests with no output at all were
-      interpreted as passing
-    - MacPerl test tweak for busted exit codes (bleadperl 17345)
-    - Abigail and Nick Clark both hit the 100000 "huge test that will
-      suck up all your memory" limit with legit tests.  Made the check
-      smarter to allow large, planned tests to work.
-    - Partial fix of stats display when a test fails only because there's
-      too many tests.
-    - Made wait.ph and WCOREDUMP anti-vommit protection more robust in
-      cases where wait.ph loads but WCOREDUMP() pukes when run.
-    - Added a LICENSE.
-    - Ilya noticed the per test skip reason was accumlating between tests.
-
-2.26  Wed Jun 19 16:58:02 EDT 2002
-    - Workaround for MacPerl's lack of a working putenv.  It will never 
-      see the PERL5LIB environment variable (perl@16942).
-
-2.25  Sun Jun 16 03:00:33 EDT 2002
-    - $Strap is now a global to allow Test::Harness::Straps
-      experimentation.
-    - Little spelling nit in a diagnostic.
-    - Chris Richmond noted that the runtests() docs were wrong.  It will
-      die, not return false, when any tests fail.  This is silly, but
-      historically necessary for 'make test'.  Docs corrected.
-    - MacPerl test fixes from Pudge. (mutation of bleadperl@16989)
-    - Undef warning introduced in 2.24 on skipped tests with no reasons 
-      fixed.
-    * Test::Harness now depends on File::Spec
-
-2.24  Wed May 29 19:02:18 EDT 2002
-    * Nikola Knezevic found a bug when tests are completely skipped
-      but no reason is given it was considered a failure.
-    * Made Test::Harness::Straps->analyze_file & Test::Harness a bit
-      more graceful when the test doesn't exist.
-
-2.23  Wed May 22 12:59:47 EDT 2002
-    - reason for all skip wasn't being displayed.  Broken in 2.20.
-    - Changed the wait status tests to conform with POSIX standards.
-    - Quieted some SYSTEM$ABORT noise leaking out from dying test tests
-      on VMS.
-
-2.22  Fri May 17 19:01:35 EDT 2002
-    - Fixed parsing of #!/usr/bin/perl-current to not see a -t.
-      (RT #574)
-    - Fixed exit codes on MPE/iX
-
-2.21  Mon May  6 00:43:22 EDT 2002
-    - removed a bunch of dead code left over after 2.20's gutting.
-    - The fix for the $^X "bug" added in 2.02 has been removed.  It
-      caused more trouble than the old bug (I'd never seen a problem
-      before anyway)
-    - 2.20 broke $verbose
-
-2.20  Sat May  4 22:31:20 EDT 2002
-    * An almost complete conversion of the Test::Harness test parsing
-      to use Test::Harness::Straps.
-
-2.04  Tue Apr 30 00:54:49 EDT 2002
-    * Changing the output format of skips
-    - Taking into account VMS's special exit codes in the tests.
-
-2.03  Thu Apr 25 01:01:34 EDT 2002
-    * $^X fix made safer.
-    - Noise from loading wait.ph to analyze core files supressed
-    - MJD found a situation where a test could run Test::Harness
-      out of memory.  Protecting against that specific case.
-    - Made the 1..M docs a bit clearer.
-    - Fixed TODO tests so Test::Harness does not display a NOK for
+0.20  2 September 2006
+    - Fixed bug reported by GEOFFR.  When no tap output was found, an
+      "Unitialized value" warning occurred.  [rt.cpan.org #21205]
+    - Updated tprove to now report a test failure when no tap output found.
+    - Removed examples/tprove_color2 as tprove_color now works.
+    - Vastly improved callback system and updated the docs for how to use
       them.
-    - Test::Harness::Straps->analyze_file() docs were not clear as to
-      its effects
+    - Changed TAPx::Parser::Source::Perl to use Symbol::gensym() instead of a
+      hard-to-guess filehandle name.
 
-2.02  Thu Mar 14 18:06:04 EST 2002
-    * Ken Williams fixed the long standing $^X bug.
-    * Added HARNESS_VERBOSE
-    * Fixed a bug where Test::Harness::Straps was considering a test that 
-      is ok but died as passing.
-    - Added the exit and wait codes of the test to the 
-      analyze_file() results.
+0.12  30 July 2006
+    - Added a test colorization script
+    - Callback support added.
+    - Added TAPx::Parser::Source::Perl.
+    - Added TAPx::Parser::Aggregator. 
+    - Added version numbers to all classes.
+    - Added 'todo_failed' test result and parser.
+    - 00-load.t now loads all classes instead of having individual tests load
+      their supporting classes.
+    - Changed $parser->results to $parser->next
 
-2.01  Thu Dec 27 18:54:36 EST 2001
-    * Added 'passing' to the results to tell you if the test passed
-    * Added Test::Harness::Straps example (examples/mini_harness.plx)
-    * Header-at-end tests were being interpreted as failing sometimes
-    - The 'skip_all' results from analyze* was not being set
-    - analyze_fh() and analyze_file() now work more efficiently, reading
-      line-by-line instead of slurping as before.
+0.11  25 July, 2006
+    - Renamed is_skip and is_todo to has_skip and has_todo.  Much less
+      confusing since a result responding true to those also responded true to
+      is_test.
+    - Added simplistic bin/tprove to run tests.  Much harder than I thought
+      and much code stolen from Test::Harness.
+    - Modified stolen iterator to fix a bug with stream handling when extra
+      newlines were encountered.
+    - Added TAPx::Parser::Iterator (stolen from Test::Harness::Iterator)
+    - Normalized internal structure of result objects.
+    - All tokens now have a 'type' key.  This greatly simplifies internals.
+    - Copied much result POD info into the main docs.
+    - Corrected the bug report URLs.
+    - Minor updates to the grammar listed in the POD.
 
-2.00  Sun Dec 23 19:13:57 EST 2001
-    - Fixed a warning on VMS.
-    - Removed a little unnecessary code from analyze_file()
-    - Made sure filehandles are getting closed
-    - analyze() now considers "not \nok" to be a failure (VMSism)
-      but Test::Harness still doesn't.
+0.10  23 July, 2006
+    - Oh my Larry, we gots docs!
+    - _parse and _tap are now private methods.
+    - Stream support has been added.
+    - Moved the grammar into its own class.
+    - Pulled remaining parser functionality out of lexer.
+    - Added type() method to Results().
+    - Parse errors no longer croak().  Instead, they are available through the
+      parse_errors() method.
+    - Added good_plan() method.
+    - tests_planned != tests_run is no longer a parse error.
+    - Renamed test_count() to tests_run().
+    - Renamed num_tests() to tests_planned().
 
-2.00_05 Mon Dec 17 22:08:02 EST 2001
-    * Wasn't filtering @INC properly when a test is run with -T, caused the 
-      command line to be too long on VMS.  VMS should be 100% now.
-    - Little bug in the skip 'various reasons' logic.
-    - Minor POD nit in 5.004_04
-    - Little speling mistak
+0.03  17 July, 2006
+    - 'Bail out!' is now handled.
+    - The parser is now data driven, thus skipping a huge if/else chain
+    - We now track all TODOs, SKIPs, passes and fails by test number.
+    - Removed all non-core modules.
+    - Store original line for each TAP line.  Available through
+      $result->raw().
+    - Renamed test is_ok() to passed() and added actual_passed().  The former
+      method takes into account TODO tests and the latter returns the actual
+      pass/fail status.
+    - Fixed a bug where SKIP tests would not be identified correctly.
 
-2.00_04 Sun Dec 16 00:33:32 EST 2001
-    * Major Test::Harness::Straps doc bug.
+0.02  8 July, 2006
+    - Moved some lexer responsibility to the parser.  This will allow us to
+      eventually parse streams.
+    - Properly track passed/failed tests, even accounting for TODO.
+    - Added support for comments and unknown lines.
+    - Allow explicit and inferred test numbers to be mixed.
+    - Allow escaped hashes in the test description.
+    - Renamed to TAPx::Parser.  Will probably rename it again.
 
-2.00_03 Sat Dec 15 23:52:17 EST 2001
-    * First release candidate
-    * 'summary' is now 'details'
-    * Test #1 is now element 0 on the details array.  It works out better
-      that way.
-    * analyze_file() is more portable, but no longer taint clean
-    * analyze_file() properly preserves @INC and handles -T switches
-    - minor mistake in the test header line parsing
-
-1.26  Mon Nov 12 15:44:01 EST 2001
-    * An excuse to upload a new version to CPAN to get Test::Harness
-      back on the index.
-
-2.00_00  Sat Sep 29 00:12:03 EDT 2001
-    * Partial gutting of the internals
-    * Added Test::Harness::Straps
-
-1.25  Tue Aug  7 08:51:09 EDT 2001
-    * Fixed a bug with tests failing if they're all skipped
-      reported by Stas Bekman.
-    - Fixed a very minor warning in 5.004_04
-    - Fixed displaying filenames not from @ARGV
-    - Merging with bleadperl
-    -  minor fixes to the filename in the report
-    -  '[no reason given]' skip reason
-
-1.24  Tue Aug  7 08:51:09 EDT 2001
-    - Added internal information about number of todo tests
-
-1.23  Tue Jul 31 15:06:47 EDT 2001
-    - Merged in Ilya's "various reasons" patch
-    * Fixed "not ok 23 - some name # TODO" style tests
-
-1.22  Mon Jun 25 02:00:02 EDT 2001
-    * Fixed bug with failing tests using header at end.
-    - Documented how Test::Harness deals with garbage input
-    - Turned on test counter mismatch warning
-
-1.21  Wed May 23 19:22:53 BST 2001
-    * No longer considered unstable.  Merging back with the perl core.
-    - Fixed minor nit about the report summary
-    - Added docs on the meaning of the failure report
-    - Minor POD nits fixed mirroring perl change 9176
-    - TODO and SEE ALSO expanded
-
-1.20  Wed Mar 14 23:09:20 GMT 2001 by Michael G Schwern    *UNSTABLE*
-    * Fixed and tested with 5.004!
-    - Added EXAMPLE docs
-    - Added TODO docs
-    - Now uneffected by -l, $\ or $,
-
-1.19  Sat Mar 10 00:43:29 GMT 2001 by Michael G Schwern    *UNSTABLE*
-    - More internal reworking
-    * Removed use of experimental /(?>...)/ feature for backwards compat
-    * Removed use of open(my $fh, $file) for backwards compatibility
-    * Removed use of Tie::StdHandle in tests for backwards compat
-    * Added dire warning that this is unstable.
-    - Added some tests from the old CPAN release
-
-1.18  Mon Mar  5 17:35:11 GMT 2001 by Michael G Schwern
-    * Under new management!
-    * Test::Harness is now being concurrently shipped on CPAN as well
-      as in the core.
-    - Switched "our" for "use vars" and moved the minimum version back
-      to 5.004.  This may be optimistic.
-
-
-*** Missing version history to be extracted from Perl changes ***
-
-
-1.07  Fri Feb 23 1996 by Andreas Koenig
-    - Gisle sent me a documentation patch that showed me, that the
-      unless(/^#/) is unnessessary. Applied the patch and deleted the block
-      checking for "comment" lines. -- All lines are comment lines that do
-      not match /^1\.\.([0-9]+)/ or /^(not\s+)?ok\b/.
-    - Ilyaz request to print "ok (empty test case)" whenever we say 1..0
-      implemented.
-    - Harness now doesn't abort anymore if we received confused test output,
-      just warns instead.
-
-1.05  Wed Jan 31 1996 by Andreas Koenig
-    - More updates on docu and introduced the liberality that the script
-      output may omit the test numbers.
-
-1.03  Mon January 28 1996 by Andreas Koenig
-    - Added the statistics for subtests. Updated the documentation.
-
-1.02  by Andreas Koenig
-    - This version reports a list of the tests that failed accompanied by
-      some trivial statistics. The older (unnumbered) version stopped
-      processing after the first failed test.
-    - Additionally it reports the exit status if there is one.
-
-
+0.01  Date/time
+    - First version, unreleased on an unsuspecting world.
+    - No, you'll never know when ...

@@ -14,6 +14,7 @@ package Maintainers;
 	'abigail'	=> 'Abigail <abigail@abigail.be>',
 	'ams'		=> 'Abhijit Menon-Sen <ams@cpan.org>',
 	'andk'		=> 'Andreas J. Koenig <andk@cpan.org>',
+	'andya'		=> 'Andy Armstrong <andya@cpan.org>',
 	'arandal'       => 'Allison Randal <allison@perl.org>',
 	'audreyt'	=> 'Audrey Tang <cpan@audreyt.org>',
 	'avar'		=> 'Ævar Arnfjörð Bjarmason <avar@cpan.org>',
@@ -861,9 +862,13 @@ package Maintainers;
 
 	'Test::Harness' =>
 		{
-		'MAINTAINER'	=> 'petdance',
-		'FILES'		=> q[lib/Test/Harness.pm lib/Test/Harness
-				     t/lib/sample-tests],
+		'MAINTAINER'	=> 'andya',
+		'FILES'		=> q[lib/App/Prove.pm lib/App/Prove/State.pm
+				     lib/Test/Harness.pm lib/Test/Harness
+				     t/lib/data t/lib/sample-tests 
+				     t/lib/source_tests t/lib/Dev/Null.pm
+				     t/lib/App/Prove/Plugin/Dummy.pm
+				     t/lib/IO/c55Capture.pm t/lib/NoFork.pm],
 		'CPAN'		=> 1,
 		},
 

@@ -6,5 +6,5 @@ ok 4
 1..4
 DUMMY_TEST
 
-use if $^O eq 'VMS', vmsish => 'hushed';
+eval "use vmsish 'hushed'" if ($^O eq 'VMS');
 exit 1;

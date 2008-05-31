@@ -1,5 +1,5 @@
 print <<DUMMY_TEST;
-1..5 todo 3   2;
+1..5 todo 3 2;
 ok 1
 ok 2
 not ok 3
