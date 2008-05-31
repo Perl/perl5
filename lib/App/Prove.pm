@@ -2,6 +2,7 @@ package App::Prove;
 
 use strict;
 use TAP::Harness;
+use TAP::Parser::Utils qw( split_shell );
 use File::Spec;
 use Getopt::Long;
 use App::Prove::State;
@@ -15,11 +16,11 @@ App::Prove - Implements the C<prove> command.
 
 =head1 VERSION
 
-Version 3.08
+Version 3.09
 
 =cut
 
-$VERSION = '3.08';
+$VERSION = '3.09';
 
 =head1 DESCRIPTION
 
@@ -462,9 +463,7 @@ sub _get_switches {
         push @switches, '-w';
     }
 
-    if ( defined( my $hps = $ENV{HARNESS_PERL_SWITCHES} ) ) {
-        push @switches, $hps;
-    }
+    push @switches, split_shell( $ENV{HARNESS_PERL_SWITCHES} );
 
     return @switches ? \@switches : ();
 }

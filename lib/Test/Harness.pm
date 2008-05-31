@@ -11,6 +11,8 @@ use TAP::Harness              ();
 use TAP::Parser::Aggregator   ();
 use TAP::Parser::Source::Perl ();
 
+use TAP::Parser::Utils qw( split_shell );
+
 use Config;
 use Exporter;
 
@@ -41,11 +43,11 @@ Test::Harness - Run Perl standard test scripts with statistics
 
 =head1 VERSION
 
-Version 3.08
+Version 3.09
 
 =cut
 
-$VERSION = '3.08';
+$VERSION = '3.09';
 
 # Backwards compatibility for exportable variable names.
 *verbose  = *Verbose;
@@ -93,7 +95,8 @@ pluggable 'Straps' interface that previous versions of L<Test::Harness>
 supported is not reproduced here. Straps is now available as a stand
 alone module: L<Test::Harness::Straps>.
 
-See L<TAP::Parser> for the main documentation for this distribution.
+See L<TAP::Parser>, L<TAP::Harness> for the main documentation for this
+distribution.
 
 =head1 FUNCTIONS
 
@@ -221,14 +224,10 @@ sub _canon {
 sub _new_harness {
     my $sub_args = shift || {};
 
-    if ( defined( my $env_sw = $ENV{HARNESS_PERL_SWITCHES} ) ) {
-        $Switches .= ' ' . $env_sw if ( length($env_sw) );
-    }
-
-    # This is a bit crufty. The switches have all been joined into a
-    # single string so we have to try and recover them.
     my ( @lib, @switches );
-    for my $opt ( split( /\s+(?=-)/, $Switches ) ) {
+    for my $opt (
+        split_shell( $Switches, $ENV{HARNESS_PERL_SWITCHES} ) )
+    {
         if ( $opt =~ /^ -I (.*) $ /x ) {
             push @lib, $1;
         }
@@ -556,6 +555,17 @@ Multiple options may be separated by colons:
 
 =back
 
+=head1 Taint Mode
+
+Normally when a Perl program is run in taint mode the contents of the
+C<PERL5LIB> environment variable do not appear in C<@INC>.
+
+Because C<PERL5LIB> is often used during testing to add build
+directories to C<@INC> C<Test::Harness> (actually
+L<TAP::Parser::Source::Perl>) passes the names of any directories found
+in C<PERL5LIB> as -I switches. The net effect of this is that
+C<PERL5LIB> is honoured even in taint mode.
+
 =head1 SEE ALSO
 
 L<TAP::Harness>
@@ -572,7 +582,8 @@ as I make changes.
 
 Andy Armstrong  C<< <andy@hexten.net> >>
 
-L<Test::Harness> (on which this module is based) has this attribution:
+L<Test::Harness> 2.64 (maintained by Andy Lester and on which this
+module is based) has this attribution:
 
     Either Tim Bunce or Andreas Koenig, we don't know. What we know for
     sure is, that it was inspired by Larry Wall's F<TEST> script that came

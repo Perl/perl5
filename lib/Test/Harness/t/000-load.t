@@ -3,7 +3,7 @@
 use strict;
 use lib 't/lib';
 
-use Test::More tests => 58;
+use Test::More tests => 60;
 
 BEGIN {
 
@@ -37,6 +37,7 @@ BEGIN {
       TAP::Parser::Source
       TAP::Parser::YAMLish::Reader
       TAP::Parser::YAMLish::Writer
+      TAP::Parser::Utils
       Test::Harness
     );
 
