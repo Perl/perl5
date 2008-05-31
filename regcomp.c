@@ -4149,7 +4149,7 @@ Perl_pregcomp(pTHX_ const SV * const pattern, const U32 flags)
 #endif
 
 REGEXP *
-Perl_re_compile(pTHX_ const SV * const pattern, const U32 pm_flags)
+Perl_re_compile(pTHX_ const SV * const pattern, U32 pm_flags)
 {
     dVAR;
     register REGEXP *r;
@@ -4172,7 +4172,10 @@ Perl_re_compile(pTHX_ const SV * const pattern, const U32 pm_flags)
     GET_RE_DEBUG_FLAGS_DECL;
     DEBUG_r(if (!PL_colorset) reginitcolors());
 
-    RExC_utf8 = RExC_orig_utf8 = pm_flags & RXf_UTF8;
+    RExC_utf8 = RExC_orig_utf8 = SvUTF8(pattern);
+    assert(!(pm_flags & RXf_UTF8));
+    if (RExC_utf8)
+	pm_flags |= RXf_UTF8;
 
     DEBUG_COMPILE_r({
         SV *dsv= sv_newmortal();

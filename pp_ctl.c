@@ -149,8 +149,18 @@ PP(pp_regcomp)
 	    if (PL_op->op_flags & OPf_SPECIAL)
 		PL_reginterp_cnt = I32_MAX; /* Mark as safe.  */
 
-	    if (DO_UTF8(tmpstr))
-		pm_flags |= RXf_UTF8;
+	    if (DO_UTF8(tmpstr)) {
+		assert (SvUTF8(tmpstr));
+	    } else if (SvUTF8(tmpstr)) {
+		/* Not doing UTF-8, despite what the SV says. Is this only if
+		   we're trapped in use 'bytes'?  */
+		/* Make a copy of the octet sequence, but without the flag on,
+		   as the compiler now honours the SvUTF8 flag on tmpstr.  */
+		STRLEN len;
+		const char *const p = SvPV(tmpstr, len);
+		tmpstr = newSVpvn_flags(p, len, SVs_TEMP);
+	    }
+	    assert(!(pm_flags & RXf_UTF8));
 
  		if (eng) 
 	        PM_SETRE(pm, CALLREGCOMP_ENG(eng, tmpstr, pm_flags));

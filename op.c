@@ -3452,14 +3452,24 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
     pm = (PMOP*)o;
 
     if (expr->op_type == OP_CONST) {
-	SV * const pat = ((SVOP*)expr)->op_sv;
+	SV *pat = ((SVOP*)expr)->op_sv;
 	U32 pm_flags = pm->op_pmflags & PMf_COMPILETIME;
 
 	if (o->op_flags & OPf_SPECIAL)
 	    pm_flags |= RXf_SPLIT;
 
-	if (DO_UTF8(pat))
-	    pm_flags |= RXf_UTF8;
+	if (DO_UTF8(pat)) {
+	    assert (SvUTF8(pat));
+	} else if (SvUTF8(pat)) {
+	    /* Not doing UTF-8, despite what the SV says. Is this only if we're
+	       trapped in use 'bytes'?  */
+	    /* Make a copy of the octet sequence, but without the flag on, as
+	       the compiler now honours the SvUTF8 flag on pat.  */
+	    STRLEN len;
+	    const char *const p = SvPV(pat, len);
+	    pat = newSVpvn_flags(p, len, SVs_TEMP);
+	}
+	assert(!(pm_flags & RXf_UTF8));
 
 	PM_SETRE(pm, CALLREGCOMP(pat, pm_flags));
 
