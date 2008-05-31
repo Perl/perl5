@@ -151,6 +151,14 @@ BEGIN {
                 '...',
             ],
         },
+        {   name => 'Funky hash key',
+            in   => { './frob' => 'is_frob' },
+            out  => [
+                '---',
+                '"./frob": is_frob',
+                '...',
+            ]
+        },
         {   name => 'Complex',
             in   => {
                 'bill-to' => {
@@ -256,7 +264,7 @@ for my $test (@SCHEDULE) {
         my $yr = TAP::Parser::YAMLish::Reader->new;
 
         # Now try parsing it
-        my $reader = sub  { shift @$got };
+        my $reader = sub { shift @$got };
         my $parsed = eval { $yr->read($reader) };
         ok !$@, "$name: no error" or diag "$@";
 

@@ -20,11 +20,11 @@ App::Prove::State - State storage for the C<prove> command.
 
 =head1 VERSION
 
-Version 3.07
+Version 3.08
 
 =cut
 
-$VERSION = '3.07';
+$VERSION = '3.08';
 
 =head1 DESCRIPTION
 

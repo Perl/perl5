@@ -15,11 +15,11 @@ App::Prove - Implements the C<prove> command.
 
 =head1 VERSION
 
-Version 3.07
+Version 3.08
 
 =cut
 
-$VERSION = '3.07';
+$VERSION = '3.08';
 
 =head1 DESCRIPTION
 
@@ -54,7 +54,7 @@ BEGIN {
       harness includes modules plugins jobs lib merge parse quiet
       really_quiet recurse backwards shuffle taint_fail taint_warn timer
       verbose warnings_fail warnings_warn show_help show_man
-      show_version test_args state
+      show_version test_args state dry
     );
     for my $attr (@ATTR) {
         no strict 'refs';
@@ -192,6 +192,7 @@ sub process_args {
             'color!'      => \$self->{color},
             'colour!'     => \$self->{color},
             'c'           => \$self->{color},
+            'D|dry'       => \$self->{dry},
             'harness=s'   => \$self->{harness},
             'formatter=s' => \$self->{formatter},
             'r|recurse'   => \$self->{recurse},
@@ -394,26 +395,36 @@ sub run {
     elsif ( $self->show_version ) {
         $self->print_version;
     }
+    elsif ( $self->dry ) {
+        print "$_\n" for $self->_get_tests;
+    }
     else {
 
         $self->_load_extensions( $self->modules );
         $self->_load_extensions( $self->plugins, PLUGINS );
 
-        my $state = $self->{_state};
-        if ( defined( my $state_switch = $self->state ) ) {
-            $state->apply_switch(@$state_switch);
-        }
-
-        my @tests = $state->get_tests( $self->recurse, @{ $self->argv } );
-
-        $self->_shuffle(@tests) if $self->shuffle;
-        @tests = reverse @tests if $self->backwards;
         local $ENV{TEST_VERBOSE} = 1 if $self->verbose;
 
-        $self->_runtests( $self->_get_args, @tests );
+        $self->_runtests( $self->_get_args, $self->_get_tests );
     }
 
     return;
+}
+
+sub _get_tests {
+    my $self = shift;
+
+    my $state = $self->{_state};
+    if ( defined( my $state_switch = $self->state ) ) {
+        $state->apply_switch(@$state_switch);
+    }
+
+    my @tests = $state->get_tests( $self->recurse, @{ $self->argv } );
+
+    $self->_shuffle(@tests) if $self->shuffle;
+    @tests = reverse @tests if $self->backwards;
+
+    return @tests;
 }
 
 sub _runtests {
@@ -551,6 +562,8 @@ calling C<run>.
 =item C<color>
 
 =item C<directives>
+
+=item C<dry>
 
 =item C<exec>
 
