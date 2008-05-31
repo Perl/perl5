@@ -1,3 +1,72 @@
+0.80  Sun Apr  6 17:25:01 CEST 2008
+    Test fixes
+    - Completely disable the utf8 test.  It was causing perl to panic on some OS's.
+
+
+0.79_01  Wed Feb 27 03:04:54 PST 2008
+    Bug fixes
+    - Let's try the IO layer copying again, this time with the test
+      fixed for 5.10.
+
+
+0.78  Wed Feb 27 01:59:09 PST 2008
+    Bug fixes
+    * Whoops, the version of Test::Builder::Tester got moved backwards.
+
+
+0.77  Wed Feb 27 01:55:55 PST 2008
+    Bug fixes
+    - "use Test::Builder::Module" no longer sets exported_to() or does
+      any other importing.
+    - Fix the $TODO finding code so it can find $TODO without the benefit
+      of exported_to(), which is often wrong.
+    - Turn off the filehandle locale stuff for the moment, there's a 
+      problem on 5.10.  We'll try it again next release.
+      
+    Doc improvements
+    - Improve the Test::Builder SYNOPSIS to use Test::Builder::Module
+      rather than write it's own import().
+
+
+0.76_02  Sun Feb 24 13:12:55 PST 2008
+    Bug fixes
+    * The default test output filehandles will NOT use utf8.
+      They will now copy the IO layers from STDOUT and STDERR.
+      This means if :utf8 is on then it will honor it and not
+      warn about wide characters.
+
+
+0.76_01  Sat Feb 23 20:44:32 PST 2008
+    Bug fixes
+    * Test::Builder no longer uses a __DIE__ handler.  This resolves a number
+      of problems with exit codes being swallowed or other module's handlers
+      being interfered with.  [rt.cpan.org 25294]
+    - Allow maybe_regex() to detect blessed regexes.  [bleadperl @32880]
+    - The default test output filehandles will now use utf8.
+      [rt.cpan.org 21091]
+
+    Test fixes
+    - Remove the signature test.  Adds no security and just generates
+      failures.
+
+
+0.75  Sat Feb 23 19:03:38 PST 2008
+    Incompatibilities
+    * The minimum version is now 5.6.0.
+
+    Bug fixes
+    - Turns out require_ok() had the same bug as use_ok() in a BEGIN block.
+    - ok() was not honoring exported_to() when looking for $TODO as it
+      should be.
+    
+    Test fixes
+    * is_deeply_with_threads.t will not run unless AUTHOR_TESTING is set.
+      This is because it tickles intermittent threading bugs in many perls
+      and causes a lot of bug reports about which I can do nothing.
+    
+    Misc
+    - Ran through perlcritic and did some cleaning.
+
 0.74  Thu Nov 29 15:39:57 PST 2007
     Misc
     - Add abstract and author to the meta information.

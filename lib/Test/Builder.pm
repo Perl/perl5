@@ -3,7 +3,7 @@ package Test::Builder;
 use 5.006;
 use strict;
 
-our $VERSION = '0.78_01';
+our $VERSION = '0.80';
 $VERSION = eval { $VERSION }; # make the alpha version come out as a number
 
 # Make Test::Builder thread-safe for ithreads.
@@ -920,11 +920,7 @@ sub maybe_regex {
     my($re, $opts);
 
     # Check for qr/foo/
-    if (   $] >= 5.009004 
-              ? re::is_regexp($regex) 
-              : ref $regex eq 'Regexp'
-       ) 
-    {
+    if( _is_qr($regex) ) {
         $usable_regex = $regex;
     }
     # Check for '/foo/' or 'm,foo,'
@@ -1400,13 +1396,13 @@ sub _open_testhandles {
 
 
 sub _copy_io_layers {
-    my($self, $src, $dest) = @_;
+    my($self, $src, $dst) = @_;
     
     $self->_try(sub {
         require PerlIO;
-        my @layers = PerlIO::get_layers($src);
-        
-        binmode $dest, join " ", map ":$_", @layers if @layers;
+        my @src_layers = PerlIO::get_layers($src);
+
+        binmode $dst, join " ", map ":$_", @src_layers if @src_layers;
     });
 }
 

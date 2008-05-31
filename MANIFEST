@@ -1484,6 +1484,7 @@ lib/base/t/base.t		See if base works
 lib/base/t/fields-base.t	See if fields work
 lib/base/t/fields.t		See if fields work
 lib/base/t/isa.t		See if base's behaviour doesn't change
+lib/base/t/lib/Dummy.pm		Test module for base.pm
 lib/base/t/sigdie.t		See if base works with SIGDIE
 lib/base/t/version.t		See if base works with versions
 lib/base/t/warnings.t		See if base works with warnings
@@ -2754,7 +2755,8 @@ lib/Test/Simple/t/is_deeply_fail.t	Test::More test, is_deeply()
 lib/Test/Simple/t/is_deeply_with_threads.t	Test::More test
 lib/Test/Simple/t/is_fh.t	Test::Builder test, _is_fh()
 lib/Test/Simple/t/lib/Dummy.pm	Test::More test module
-lib/Test/Simple/t/lib/MyOverload.pm	Test::More test module 
+lib/Test/Simple/t/lib/MyOverload.pm	Test::More test module
+lib/Test/Simple/t/lib/NoExporter.pm	Test::Simple test module
 lib/Test/Simple/t/maybe_regex.t	Test::Builder->maybe_regex() tests
 lib/Test/Simple/t/missing.t	Test::Simple test, missing tests
 lib/Test/Simple/t/More.t	Test::More test, basic stuff
@@ -3590,7 +3592,6 @@ t/lib/dprof/test7_v		Perl code profiler tests
 t/lib/dprof/test8_t		Perl code profiler tests
 t/lib/dprof/test8_v		Perl code profiler tests
 t/lib/dprof/V.pm		Perl code profiler tests
-t/lib/Dummy.pm			Module for testing base.pm
 t/lib/feature/bundle		Tests for feature bundles
 t/lib/feature/implicit		Tests for implicit loading of feature.pm
 t/lib/feature/nonesuch		Tests for enabling/disabling nonexistent feature
@@ -3620,7 +3621,6 @@ t/lib/Math/BigInt/Subclass.pm	Empty subclass of BigInt for test
 t/lib/Math/BigRat/Test.pm		Math::BigRat test helper
 t/lib/mypragma.pm		An example user pragma
 t/lib/mypragma.t		Test the example user pragma
-t/lib/NoExporter.pm			Part of Test-Simple
 t/lib/NoFork.pm			Module for testing Test::Harness
 t/lib/no_load.t			Test that some modules don't load others
 t/lib/proxy_constant_subs.t	Test that Proxy Constant Subs behave correctly
