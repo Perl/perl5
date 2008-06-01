@@ -6,7 +6,7 @@ use Cwd;
 my $origdir = cwd;
 chdir dirname($0);
 my $file = basename($0, '.PL');
-$file =~ s!_(pm)$!.$1!i;
+$file =~ s/_(pm)$/.$1/i;
 
 my $useConfig;
 my $Config_archname;
@@ -31,14 +31,15 @@ else {
   open my $fh, '<', $lib_file
     or die "Could not open file '$lib_file' for reading: $!";
   my $ConfigRegex = qr/(?:use|require)\s+Config(?:\s+|;)/;
+  my $found_config = 0;
   while (defined($_ = <$fh>)) {
     # crude heuristics to check that we were using Config
     if (/^\s*$ConfigRegex/ || /^\s*eval.*$ConfigRegex/) {
-      $expand_config_vars = 0;
+      $found_config = 1;
       last;
     }
   }
-  $expand_config_vars = 1;
+  $expand_config_vars = $found_config ? 0 : 1;
 HERE
   $expand_config_vars = 0 if $@;
 }
@@ -51,7 +52,7 @@ if ($expand_config_vars) {
 	reverse split / /, $Config{inc_version_list};
     $Config_inc_version_list =
 	@Config_inc_version_list ?
-	    qq(@Config_inc_version_list) : q(());
+	    qq(qw(@Config_inc_version_list)) : q(());
 } else {
     $useConfig = 'use Config;';
     $Config_archname = q($Config{archname});
