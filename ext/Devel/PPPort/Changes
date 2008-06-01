@@ -1,3 +1,8 @@
+3.14 - 2008-06-01
+
+    * fix CPAN #36197: filename nit in parse_partspec
+      (thanks to Craig A. Berry for providing a patch)
+
 3.13_03 - 2008-05-13
 
     * fix CPAN #35835: SvPV_flags_const_nolen segfaults prior
