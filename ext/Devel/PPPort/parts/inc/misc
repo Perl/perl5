@@ -1,12 +1,12 @@
 ################################################################################
 ##
-##  $Revision: 41 $
+##  $Revision: 45 $
 ##  $Author: mhx $
-##  $Date: 2007/08/20 18:33:10 +0200 $
+##  $Date: 2008/01/04 15:50:58 +0100 $
 ##
 ################################################################################
 ##
-##  Version 3.x, Copyright (C) 2004-2007, Marcus Holland-Moritz.
+##  Version 3.x, Copyright (C) 2004-2008, Marcus Holland-Moritz.
 ##  Version 2.x, Copyright (C) 2001, Paul Marquess.
 ##  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 ##
@@ -166,10 +166,6 @@ __UNDEFINED__  AvFILLp      AvFILL
 
 __UNDEFINED__  ERRSV        get_sv("@",FALSE)
 
-__UNDEFINED__  newSVpvn(data,len)  ((data)                                              \
-                                    ? ((len) ? newSVpv((data), (len)) : newSVpv("", 0)) \
-                                    : newSV(0))
-
 /* Hint: gv_stashpvn
  * This function's backport doesn't support the length parameter, but
  * rather ignores it. Portability can only be ensured if the length
@@ -250,7 +246,7 @@ XS(XS_Devel__PPPort_dAXMARK)
   IV iv;
   SP -= items;
   iv = SvIV(ST(0)) - 1;
-  PUSHs(sv_2mortal(newSViv(iv)));
+  mPUSHi(iv);
   XSRETURN(1);
 }
 
@@ -307,22 +303,12 @@ get_cv(name, create)
 		RETVAL
 
 void
-newSVpvn()
-	PPCODE:
-		XPUSHs(newSVpvn("test", 4));
-		XPUSHs(newSVpvn("test", 2));
-		XPUSHs(newSVpvn("test", 0));
-		XPUSHs(newSVpvn(NULL, 2));
-		XPUSHs(newSVpvn(NULL, 0));
-		XSRETURN(5);
-
-void
 xsreturn(two)
 	int two
 	PPCODE:
-		XPUSHs(newSVpvn("test1", 5));
+		mXPUSHp("test1", 5);
 		if (two)
-		  XPUSHs(newSVpvn("test2", 5));
+		  mXPUSHp("test2", 5);
 		if (two)
 		  XSRETURN(2);
 		else
@@ -379,22 +365,14 @@ SVf(x)
 	SV *x
 	PPCODE:
 #if { VERSION >= 5.004 }
-		x = newSVpvf("[%"SVf"]", x);
+		x = sv_2mortal(newSVpvf("[%"SVf"]", x));
 #endif
 		XPUSHs(x);
 		XSRETURN(1);
 
-=tests plan => 38
+=tests plan => 32
 
 use vars qw($my_sv @my_av %my_hv);
-
-my @s = &Devel::PPPort::newSVpvn();
-ok(@s == 5);
-ok($s[0], "test");
-ok($s[1], "te");
-ok($s[2], "");
-ok(!defined($s[3]));
-ok(!defined($s[4]));
 
 ok(&Devel::PPPort::boolSV(1));
 ok(!&Devel::PPPort::boolSV(0));

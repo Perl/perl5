@@ -1,3 +1,34 @@
+3.14 - 2008-06-01
+
+    * fix CPAN #36197: filename nit in parse_partspec
+      (thanks to Craig A. Berry for providing a patch)
+
+3.13_03 - 2008-05-13
+
+    * fix CPAN #35835: SvPV_flags_const_nolen segfaults prior
+      to perl 5.8.8
+
+3.13_02 - 2008-04-13
+
+    * fix NV[efg]f format string macros for perl-5.6.0 built
+      using -Duselongdouble (thanks to Zefram for figuring this
+      out and to Jarkko Hietaniemi for keeping me in sync)
+    * add --patch and --oneshot options to devel/buildperl.pl
+
+3.13_01 - 2008-01-04
+
+    * fix dependency detection algorithm for functions
+    * fix some potential memory leaks in the test suite
+    * no need to use *_mg functions for mX?PUSH macros
+    * added support for the following API
+        mPUSHs
+        mXPUSHs
+        newSVpvn_flags
+        newSVpvn_utf8
+        newSVpvs_flags
+        SVf_UTF8
+    * make sure soak works with cromfs
+
 3.13 - 2007-10-04
 
     * fix cpan #29748: ppport.h problems with perl5.005_05

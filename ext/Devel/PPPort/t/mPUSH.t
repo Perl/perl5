@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (8) {
+  if (10) {
     load();
-    plan(tests => 8);
+    plan(tests => 10);
   }
 }
 
@@ -48,11 +48,13 @@ bootstrap Devel::PPPort;
 
 package main;
 
+ok(join(':', &Devel::PPPort::mPUSHs()), "foo:bar:42");
 ok(join(':', &Devel::PPPort::mPUSHp()), "one:two:three");
 ok(join(':', &Devel::PPPort::mPUSHn()), "0.5:-0.25:0.125");
 ok(join(':', &Devel::PPPort::mPUSHi()), "-1:2:-3");
 ok(join(':', &Devel::PPPort::mPUSHu()), "1:2:3");
 
+ok(join(':', &Devel::PPPort::mXPUSHs()), "foo:bar:42");
 ok(join(':', &Devel::PPPort::mXPUSHp()), "one:two:three");
 ok(join(':', &Devel::PPPort::mXPUSHn()), "0.5:-0.25:0.125");
 ok(join(':', &Devel::PPPort::mXPUSHi()), "-1:2:-3");

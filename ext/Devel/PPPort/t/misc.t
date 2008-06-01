@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (38) {
+  if (32) {
     load();
-    plan(tests => 38);
+    plan(tests => 32);
   }
 }
 
@@ -49,14 +49,6 @@ bootstrap Devel::PPPort;
 package main;
 
 use vars qw($my_sv @my_av %my_hv);
-
-my @s = &Devel::PPPort::newSVpvn();
-ok(@s == 5);
-ok($s[0], "test");
-ok($s[1], "te");
-ok($s[2], "");
-ok(!defined($s[3]));
-ok(!defined($s[4]));
 
 ok(&Devel::PPPort::boolSV(1));
 ok(!&Devel::PPPort::boolSV(0));

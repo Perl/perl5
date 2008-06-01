@@ -1,0 +1,11 @@
+5.011000
+HeUTF8                         # U
+MULTICALL                      # E
+POP_MULTICALL                  # E
+PUSH_MULTICALL                 # E
+av_iter_p                      # U
+hv_assert                      # U
+pad_sv                         # U
+pregfree2                      # U
+ref                            # U (Perl_ref)
+stashpv_hvname_match           # U
