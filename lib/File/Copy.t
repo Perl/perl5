@@ -229,6 +229,7 @@ for my $cross_partition_test (0..1) {
 SKIP: {
 
     skip "-- Copy preserves RMS defaults, not source file permissions.", 21 if $^O eq 'VMS';
+    skip "Copy doesn't set file permissions correctly on Win32.", 21 if $^O eq "MSWin32";
 
     # Just a sub to get better failure messages.
     sub __ ($) {
