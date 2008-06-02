@@ -1,8 +1,8 @@
 #!/usr/bin/perl -w
 #
-# color.t -- Additional specialized tests for Pod::Text::Color.
+# man-options.t -- Additional tests for Pod::Man options.
 #
-# Copyright 2002, 2004, 2006 by Russ Allbery <rra@stanford.edu>
+# Copyright 2002, 2004, 2006, 2008 Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -23,33 +23,32 @@ END {
     print "not ok 1\n" unless $loaded;
 }
 
-eval { require Term::ANSIColor };
-if ($@) {
-    for (1..2) {
-        print "ok $_ # skip\n";
-    }
-    $loaded = 1;
-    exit;
-}
-require Pod::Text::Color;
+use Pod::Man;
 
 $loaded = 1;
 print "ok 1\n";
 
-my $parser = Pod::Text::Color->new or die "Cannot create parser\n";
 my $n = 2;
 while (<DATA>) {
+    my %options;
     next until $_ eq "###\n";
+    while (<DATA>) {
+        last if $_ eq "###\n";
+        my ($option, $value) = split;
+        $options{$option} = $value;
+    }
     open (TMP, '> tmp.pod') or die "Cannot create tmp.pod: $!\n";
     while (<DATA>) {
         last if $_ eq "###\n";
         print TMP $_;
     }
     close TMP;
+    my $parser = Pod::Man->new (%options) or die "Cannot create parser\n";
     open (OUT, '> out.tmp') or die "Cannot create out.tmp: $!\n";
     $parser->parse_from_file ('tmp.pod', \*OUT);
     close OUT;
     open (TMP, 'out.tmp') or die "Cannot open out.tmp: $!\n";
+    while (<TMP>) { last if /^\.nh/ }
     my $output;
     {
         local $/;
@@ -71,18 +70,34 @@ while (<DATA>) {
     $n++;
 }
 
-# Below the marker are bits of POD and corresponding expected output.  This is
-# used to test specific features or problems with Pod::Text::Termcap.  The
+# Below the marker are bits of POD and corresponding expected text output.
+# This is used to test specific features or problems with Pod::Man.  The
 # input and output are separated by lines containing only ###.
 
 __DATA__
 
 ###
-=head1 WRAPPING
-
-B<I<Do>> I<B<not>> B<I<include>> B<I<formatting codes when>> B<I<wrapping>>.
+utf8 1
 ###
-[1mWRAPPING[0m
-    [1m[33mDo[0m[0m [33m[1mnot[0m[0m [1m[33minclude[0m[0m [1m[33mformatting codes when[0m[0m [1m[33mwrapping[0m[0m.
+=head1 BEYONCÉ
 
+Beyoncé!  Beyoncé!  Beyoncé!!
+
+    Beyoncé!  Beyoncé!
+      Beyoncé!  Beyoncé!
+        Beyoncé!  Beyoncé!
+
+Older versions did not convert Beyoncé in verbatim.
+###
+.SH "BEYONCÉ"
+.IX Header "BEYONCÉ"
+Beyoncé!  Beyoncé!  Beyoncé!!
+.PP
+.Vb 3
+\&    Beyoncé!  Beyoncé!
+\&      Beyoncé!  Beyoncé!
+\&        Beyoncé!  Beyoncé!
+.Ve
+.PP
+Older versions did not convert Beyoncé in verbatim.
 ###

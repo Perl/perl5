@@ -1,5 +1,4 @@
 #!/usr/bin/perl -w
-# $Id: pod-parser.t,v 1.2 2006-09-16 21:09:57 eagle Exp $
 #
 # pod-parser.t -- Tests for backward compatibility with Pod::Parser.
 #

@@ -1,5 +1,4 @@
 # Pod::Text -- Convert POD data to formatted ASCII text.
-# $Id: Text.pm,v 3.8 2006-09-16 20:55:41 eagle Exp $
 #
 # Copyright 1999, 2000, 2001, 2002, 2004, 2006
 #     by Russ Allbery <rra@stanford.edu>

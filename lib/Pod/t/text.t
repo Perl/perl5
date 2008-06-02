@@ -1,5 +1,4 @@
 #!/usr/bin/perl -w
-# $Id: text.t,v 1.6 2007-09-12 00:20:08 eagle Exp $
 #
 # text.t -- Additional specialized tests for Pod::Text.
 #
