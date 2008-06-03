@@ -12768,6 +12768,11 @@ Perl_vms_start_glob
     unsigned long int lff_flags = 0;
     int rms_sts;
 
+    if (!SvOK(tmpglob)) {
+        SETERRNO(ENOENT,RMS$_FNF);
+        return NULL;
+    }
+
 #ifdef VMS_LONGNAME_SUPPORT
     lff_flags = LIB$M_FIL_LONG_NAMES;
 #endif
