@@ -2566,6 +2566,9 @@ lib/Pod/Simple/t/tiedfh.t	Pod::Simple test file
 lib/Pod/Simple/t/verbatim.t		Pod::Simple test file
 lib/Pod/Simple/t/verb_fmt.t	Pod::Simple test file
 lib/Pod/Simple/t/x_nixer.t		Pod::Simple test file
+lib/Pod/Simple/t/xhtml01.t	Pod::Simple test file
+lib/Pod/Simple/t/xhtml05.t	Pod::Simple test file
+lib/Pod/Simple/XHTML.pm		turn Pod into XHTML
 lib/Pod/Simple/XMLOutStream.pm	turn Pod into XML
 lib/Pod/t/basic.cap		podlators test
 lib/Pod/t/basic.clr		podlators test
