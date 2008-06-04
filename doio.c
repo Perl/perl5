@@ -2314,6 +2314,11 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 	    = {sizeof rslt, DSC$K_DTYPE_VT, DSC$K_CLASS_VS, rslt};
 	unsigned long int cxt = 0, sts = 0, ok = 1, hasdir = 0, hasver = 0, isunix = 0;
 
+	if (!SvOK(tmpglob)) {
+	    SETERRNO(ENOENT,RMS$_FNF);
+	    return NULL;
+	}
+
 	/* We could find out if there's an explicit dev/dir or version
 	   by peeking into lib$find_file's internal context at
 	   ((struct NAM *)((struct FAB *)cxt)->fab$l_nam)->nam$l_fnb
