@@ -75,8 +75,8 @@ ext/attrs/t/attrs.t		See if attrs works with C<sub : attrs>
 ext/B/B/Concise.pm	Compiler Concise backend
 ext/B/B/Debug.pm	Compiler Debug backend
 ext/B/B/Deparse.pm	Compiler Deparse backend
-ext/B/B/Lint.pm		Compiler Lint backend
 ext/B/B/Lint/Debug.pm	Adds debugging stringification to B::
+ext/B/B/Lint.pm		Compiler Lint backend
 ext/B/B.pm		Compiler backend support functions and methods
 ext/B/B/Showlex.pm	Compiler Showlex backend
 ext/B/B/Terse.pm	Compiler Terse backend
@@ -350,6 +350,7 @@ ext/Devel/PPPort/t/MY_CXT.t	Devel::PPPort test file
 ext/Devel/PPPort/t/newCONSTSUB.t	Devel::PPPort test file
 ext/Devel/PPPort/t/newRV.t	Devel::PPPort test file
 ext/Devel/PPPort/t/newSVpv.t	Devel::PPPort test file
+ext/Devel/PPPort/TODO		Devel::PPPort Todo
 ext/Devel/PPPort/t/podtest.t	Devel::PPPort test file
 ext/Devel/PPPort/t/ppphtest.t	Devel::PPPort test file
 ext/Devel/PPPort/t/pvs.t	Devel::PPPort test file
@@ -365,7 +366,6 @@ ext/Devel/PPPort/t/threads.t	Devel::PPPort test file
 ext/Devel/PPPort/t/uv.t		Devel::PPPort test file
 ext/Devel/PPPort/t/variables.t	Devel::PPPort test file
 ext/Devel/PPPort/t/warn.t	Devel::PPPort test file
-ext/Devel/PPPort/TODO		Devel::PPPort Todo
 ext/Devel/PPPort/typemap	Devel::PPPort Typemap
 ext/Digest/MD5/Changes		Digest::MD5 extension changes
 ext/Digest/MD5/hints/dec_osf.pl	Hints for named architecture
@@ -693,6 +693,71 @@ ext/Hash/Util/lib/Hash/Util.pm	Hash::Util
 ext/Hash/Util/Makefile.PL	Makefile for Hash::Util
 ext/Hash/Util/t/Util.t		See if Hash::Util works
 ext/Hash/Util/Util.xs		XS bits of Hash::Util
+ext/HTML/Parser/hints/solaris.pl	files for HTML::Parser
+ext/HTML/Parser/hparser.c	files for HTML::Parser
+ext/HTML/Parser/hparser.h	files for HTML::Parser
+ext/HTML/Parser/lib/HTML/Entities.pm	file for HTML::Entities
+ext/HTML/Parser/lib/HTML/Filter.pm	file for HTML::Filter
+ext/HTML/Parser/lib/HTML/HeadParser.pm	file for HTML::HeadParser
+ext/HTML/Parser/lib/HTML/LinkExtor.pm	file for HTML::LinkExtor
+ext/HTML/Parser/lib/HTML/PullParser.pm	file for HTML::PullParser
+ext/HTML/Parser/lib/HTML/TokeParser.pm	file for HTML::TokeParser
+ext/HTML/Parser/Makefile.PL	files for HTML::Parser
+ext/HTML/Parser/mkhctype	files for HTML::Parser
+ext/HTML/Parser/mkpfunc		files for HTML::Parser
+ext/HTML/Parser/Parser.pm	files for HTML::Parser
+ext/HTML/Parser/Parser.xs	files for HTML::Parser
+ext/HTML/Parser/t/api_version.t	test for HTML::Parser
+ext/HTML/Parser/t/argspec2.t	test for HTML::Parser
+ext/HTML/Parser/t/argspec-bad.t	test for HTML::Parser
+ext/HTML/Parser/t/argspec.t	test for HTML::Parser
+ext/HTML/Parser/t/attr-encoded.t	test for HTML::Parser
+ext/HTML/Parser/t/callback.t	test for HTML::Parser
+ext/HTML/Parser/t/case-sensitive.t	test for HTML::Parser
+ext/HTML/Parser/t/cases.t	test for HTML::Parser
+ext/HTML/Parser/t/comment.t	test for HTML::Parser
+ext/HTML/Parser/t/crashme.t	test for HTML::Parser
+ext/HTML/Parser/t/declaration.t	test for HTML::Parser
+ext/HTML/Parser/t/default.t	test for HTML::Parser
+ext/HTML/Parser/t/document.t	test for HTML::Parser	
+ext/HTML/Parser/t/dtext.t	test for HTML::Parser
+ext/HTML/Parser/t/entities2.t	test for HTML::Parser
+ext/HTML/Parser/t/entities.t	test for HTML::Parser
+ext/HTML/Parser/t/filter-methods.t	test for HTML::Parser
+ext/HTML/Parser/t/filter.t	test for HTML::Parser
+ext/HTML/Parser/t/handler-eof.t	test for HTML::Parser
+ext/HTML/Parser/t/handler.t	test for HTML::Parser
+ext/HTML/Parser/t/headparser-http.t	test for HTML::Parser
+ext/HTML/Parser/t/headparser.t	test for HTML::Parser
+ext/HTML/Parser/t/ignore.t	test for HTML::Parser
+ext/HTML/Parser/t/largetags.t	test for HTML::Parser
+ext/HTML/Parser/t/linkextor-base.t	test for HTML::Parser
+ext/HTML/Parser/t/linkextor-rel.t	test for HTML::Parser
+ext/HTML/Parser/t/magic.t	test for HTML::Parser
+ext/HTML/Parser/t/marked-sect.t	test for HTML::Parser
+ext/HTML/Parser/t/msie-compat.t	test for HTML::Parser
+ext/HTML/Parser/t/offset.t	test for HTML::Parser
+ext/HTML/Parser/tokenpos.h	files for HTML::Parser
+ext/HTML/Parser/t/options.t	test for HTML::Parser
+ext/HTML/Parser/t/parsefile.t	test for HTML::Parser
+ext/HTML/Parser/t/parser.t	test for HTML::Parser
+ext/HTML/Parser/t/plaintext.t	test for HTML::Parser
+ext/HTML/Parser/t/pod.t		test for HTML::Parser
+ext/HTML/Parser/t/process.t	test for HTML::Parser
+ext/HTML/Parser/t/pullparser.t	test for HTML::Parser
+ext/HTML/Parser/t/script.t	test for HTML::Parser
+ext/HTML/Parser/t/skipped-text.t	test for HTML::Parser
+ext/HTML/Parser/t/stack-realloc.t	test for HTML::Parser
+ext/HTML/Parser/t/textarea.t	test for HTML::Parser
+ext/HTML/Parser/t/threads.t	test for HTML::Parser
+ext/HTML/Parser/t/tokeparser.t	test for HTML::Parser
+ext/HTML/Parser/t/uentities.t	test for HTML::Parser
+ext/HTML/Parser/t/unbroken-text.t	test for HTML::Parser
+ext/HTML/Parser/t/unicode-bom.t	test for HTML::Parser
+ext/HTML/Parser/t/unicode.t	test for HTML::Parser
+ext/HTML/Parser/t/xml-mode.t	test for HTML::Parser
+ext/HTML/Parser/typemap		files for HTML::Parser
+ext/HTML/Parser/util.c		files for HTML::Parser
 ext/I18N/Langinfo/fallback/const-c.inc	I18N::Langinfo
 ext/I18N/Langinfo/fallback/const-xs.inc	I18N::Langinfo
 ext/I18N/Langinfo/Langinfo.pm	I18N::Langinfo
@@ -848,12 +913,12 @@ ext/IPC/SysV/README		IPC::SysV README
 ext/IPC/SysV/regen.pl	IPC::SysV file regeneration script
 ext/IPC/SysV/SysV.xs		IPC::SysV extension Perl module
 ext/IPC/SysV/t/ipcsysv.t		IPC::SysV test file
-ext/IPC/SysV/t/pod.t	IPC::SysV test file
-ext/IPC/SysV/t/podcov.t	IPC::SysV test file
 ext/IPC/SysV/t/msg.t		IPC::SysV test file
+ext/IPC/SysV/TODO	IPC::SysV todo file
+ext/IPC/SysV/t/podcov.t	IPC::SysV test file
+ext/IPC/SysV/t/pod.t	IPC::SysV test file
 ext/IPC/SysV/t/sem.t		IPC::SysV test file
 ext/IPC/SysV/t/shm.t	IPC::SysV test file
-ext/IPC/SysV/TODO	IPC::SysV todo file
 ext/IPC/SysV/typemap	IPC::SysV typemap
 ext/List/Util/Changes		Util extension
 ext/List/Util/lib/List/Util.pm	List::Util
@@ -1478,9 +1543,9 @@ lib/Attribute/Handlers/t/data_convert.t	Test attribute data conversion
 lib/Attribute/Handlers/t/linerep.t	See if Attribute::Handlers works
 lib/Attribute/Handlers/t/multi.t	See if Attribute::Handlers works
 lib/attributes.pm		For "sub foo : attrlist"
+lib/AutoLoader.pm		Autoloader base class
 lib/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
 lib/AutoLoader/t/02AutoSplit.t	See if AutoSplit works
-lib/AutoLoader.pm		Autoloader base class
 lib/AutoSplit.pm		Split up autoload functions
 lib/autouse.pm			Load and call a function only when it's used
 lib/autouse.t			See if autouse works
@@ -1582,8 +1647,8 @@ lib/CGI/t/start_end_end.t	See if CGI.pm works
 lib/CGI/t/start_end_start.t	See if CGI.pm works
 lib/CGI/t/switch.t		See if CGI::Switch still loads
 lib/CGI/t/uploadInfo.t		See if CGI.pm works
-lib/CGI/t/upload.t		See if CGI.pm works
 lib/CGI/t/upload_post_text.txt.packed	Test data for CGI.pm
+lib/CGI/t/upload.t		See if CGI.pm works
 lib/CGI/t/util-58.t		See if 5.8-dependent features work
 lib/CGI/t/util.t		See if CGI.pm works
 lib/CGI/Util.pm			Utility functions
@@ -1839,10 +1904,10 @@ lib/ExtUtils/t/eu_command.t	See if ExtUtils::Command works
 lib/ExtUtils/t/FIRST_MAKEFILE.t		See if FIRST_MAKEFILE works
 lib/ExtUtils/t/fixin.t		See if ExtUtils::MakeMaker works
 lib/ExtUtils/t/hints.t		See if hint files are honored.
+lib/ExtUtils/t/Installapi2.t	See if new api for ExtUtils::Install::install() works
 lib/ExtUtils/t/INSTALL_BASE.t	Test INSTALL_BASE in MakeMaker
 lib/ExtUtils/t/Installed.t	See if ExtUtils::Installed works
 lib/ExtUtils/t/Install.t	See if ExtUtils::Install works
-lib/ExtUtils/t/Installapi2.t	See if new api for ExtUtils::Install::install() works
 lib/ExtUtils/t/INST_PREFIX.t	See if MakeMaker can apply PREFIXs
 lib/ExtUtils/t/INST.t		Check MakeMaker INST_* macros
 lib/ExtUtils/t/Liblist.t	See if ExtUtils::Liblist works
@@ -1972,6 +2037,9 @@ lib/Getopt/Std.t		See if Getopt::Std and Getopt::Long work
 lib/h2ph.t			See if h2ph works like it should
 lib/h2xs.t			See if h2xs produces expected lists of files
 lib/hostname.pl			Old hostname code
+lib/HTML/Tagset.pm	HTML::Tagset
+lib/HTML/Tagset/t/00_about_verbose.t	HTML::Tagset
+lib/HTML/Tagset/t/01_old_junk.t	HTML::Tagset
 lib/I18N/Collate.pm		Routines to do strxfrm-based collation
 lib/I18N/Collate.t		See if I18N::Collate works
 lib/I18N/LangTags/ChangeLog	I18N::LangTags
@@ -2347,8 +2415,8 @@ lib/parent.pm	Establish an ISA relationship with base classes at compile time
 lib/parent/t/compile-time-file.t	tests for parent.pm
 lib/parent/t/compile-time.t	tests for parent.pm
 lib/parent/t/lib/Dummy2.plugin	test files for parent.pm
-lib/parent/t/lib/Dummy.pm	test files for parent.pm
 lib/parent/t/lib/Dummy/Outside.pm	test files for parent.pm
+lib/parent/t/lib/Dummy.pm	test files for parent.pm
 lib/parent/t/lib/FileThatOnlyExistsAsPMC.pmc	test files for parent.pm
 lib/parent/t/lib/ReturnsFalse.pm	test files for parent.pm
 lib/parent/t/parent-classfromclassfile.t	tests for parent.pm
@@ -2565,9 +2633,9 @@ lib/Pod/Simple/t/testlib3/squaa/Vliff.pm	Pod::Simple test file
 lib/Pod/Simple/t/tiedfh.t	Pod::Simple test file
 lib/Pod/Simple/t/verbatim.t		Pod::Simple test file
 lib/Pod/Simple/t/verb_fmt.t	Pod::Simple test file
-lib/Pod/Simple/t/x_nixer.t		Pod::Simple test file
 lib/Pod/Simple/t/xhtml01.t	Pod::Simple test file
 lib/Pod/Simple/t/xhtml05.t	Pod::Simple test file
+lib/Pod/Simple/t/x_nixer.t		Pod::Simple test file
 lib/Pod/Simple/XHTML.pm		turn Pod into XHTML
 lib/Pod/Simple/XMLOutStream.pm	turn Pod into XML
 lib/Pod/t/basic.cap		podlators test
@@ -2593,8 +2661,8 @@ lib/Pod/t/htmllink.t		pod2html link test
 lib/Pod/t/htmlview.pod		pod2html render test input data
 lib/Pod/t/htmlview.t		pod2html render test
 lib/Pod/t/InputObjects.t	See if Pod::InputObjects works
-lib/Pod/t/man.t			podlators test
 lib/Pod/t/man-options.t		podlators test
+lib/Pod/t/man.t			podlators test
 lib/Pod/t/parselink.t		podlators test
 lib/Pod/t/pod2html-lib.pl	pod2html testing library
 lib/Pod/t/pod2latex.t		See if Pod::LaTeX works
@@ -2612,9 +2680,9 @@ lib/Search/Dict.pm		Perform binary search on dictionaries
 lib/Search/Dict.t		See if Search::Dict works
 lib/SelectSaver.pm		Enforce proper select scoping
 lib/SelectSaver.t		See if SelectSaver works
-lib/SelfLoader/t/02SelfLoader-buggy.t	See if SelfLoader works
 lib/SelfLoader.pm		Load functions only on demand
 lib/SelfLoader/t/01SelfLoader.t	See if SelfLoader works
+lib/SelfLoader/t/02SelfLoader-buggy.t	See if SelfLoader works
 lib/Shell.pm			Make AUTOLOADed system() calls
 lib/Shell.t			Tests for above
 lib/shellwords.pl		Perl library to split into words with shell quoting
@@ -2637,29 +2705,29 @@ lib/syslog.pl			Perl library supporting syslogging
 lib/tainted.pl			Old code for tainting
 lib/TAP/Base.pm				A parser for Test Anything Protocol
 lib/TAP/Formatter/Color.pm		A parser for Test Anything Protocol
-lib/TAP/Formatter/Console.pm		A parser for Test Anything Protocol
 lib/TAP/Formatter/Console/ParallelSession.pm	A parser for Test Anything Protocol
+lib/TAP/Formatter/Console.pm		A parser for Test Anything Protocol
 lib/TAP/Formatter/Console/Session.pm	A parser for Test Anything Protocol
 lib/TAP/Harness.pm			A parser for Test Anything Protocol
-lib/TAP/Parser.pm			A parser for Test Anything Protocol
 lib/TAP/Parser/Aggregator.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Grammar.pm		A parser for Test Anything Protocol
-lib/TAP/Parser/Iterator.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Iterator/Array.pm	A parser for Test Anything Protocol
+lib/TAP/Parser/Iterator.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Iterator/Process.pm	A parser for Test Anything Protocol
 lib/TAP/Parser/Iterator/Stream.pm	A parser for Test Anything Protocol
 lib/TAP/Parser/Multiplexer.pm		A parser for Test Anything Protocol
-lib/TAP/Parser/Result.pm		A parser for Test Anything Protocol
+lib/TAP/Parser.pm			A parser for Test Anything Protocol
 lib/TAP/Parser/Result/Bailout.pm	A parser for Test Anything Protocol
 lib/TAP/Parser/Result/Comment.pm	A parser for Test Anything Protocol
 lib/TAP/Parser/Result/Plan.pm		A parser for Test Anything Protocol
+lib/TAP/Parser/Result.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Result/Pragma.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Result/Test.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Result/Unknown.pm	A parser for Test Anything Protocol
 lib/TAP/Parser/Result/Version.pm	A parser for Test Anything Protocol
 lib/TAP/Parser/Result/YAML.pm		A parser for Test Anything Protocol
-lib/TAP/Parser/Source.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Source/Perl.pm		A parser for Test Anything Protocol
+lib/TAP/Parser/Source.pm		A parser for Test Anything Protocol
 lib/TAP/Parser/Utils.pm			A parser for Test Anything Protocol
 lib/TAP/Parser/YAMLish/Reader.pm	A parser for Test Anything Protocol
 lib/TAP/Parser/YAMLish/Writer.pm	A parser for Test Anything Protocol
@@ -2710,9 +2778,9 @@ lib/Test/Harness/t/nofork.t		Test::Harness test
 lib/Test/Harness/t/parse.t		Test::Harness test
 lib/Test/Harness/t/premature-bailout.t	Test::Harness test
 lib/Test/Harness/t/process.t		Test::Harness test
-lib/Test/Harness/t/prove.t		Test::Harness test
 lib/Test/Harness/t/proverc.t		Test::Harness test
 lib/Test/Harness/t/proverun.t		Test::Harness test
+lib/Test/Harness/t/prove.t		Test::Harness test
 lib/Test/Harness/t/regression.t		Test::Harness test
 lib/Test/Harness/t/results.t		Test::Harness test
 lib/Test/Harness/t/source.t		Test::Harness test
@@ -2724,8 +2792,8 @@ lib/Test/Harness/t/testargs.t		Test::Harness test
 lib/Test/Harness/t/unicode.t		Test::Harness test
 lib/Test/Harness/t/utils.t		Test::Harness test
 lib/Test/Harness/t/yamlish-output.t	Test::Harness test
-lib/Test/Harness/t/yamlish-writer.t	Test::Harness test
 lib/Test/Harness/t/yamlish.t		Test::Harness test
+lib/Test/Harness/t/yamlish-writer.t	Test::Harness test
 lib/Test/More.pm		More utilities for writing tests
 lib/Test.pm			A simple framework for writing test scripts
 lib/Test/Simple/Changes		Test::Simple changes
@@ -3173,8 +3241,8 @@ parser.h			parser object header
 patchlevel.h			The current patch level of perl
 perlapi.c			Perl API functions
 perlapi.h			Perl API function declarations
-perldtrace.d			D script for Perl probes
 perl.c				main()
+perldtrace.d			D script for Perl probes
 perl.h				Global declarations
 perlio.c			C code for PerlIO abstraction
 perlio.h			PerlIO abstraction
@@ -3563,6 +3631,7 @@ t/io/through.t			See if pipe passes data intact
 t/io/utf8.t			See if file seeking works
 t/japh/abigail.t		Obscure tests
 t/lib/1_compile.t		See if the various libraries and extensions compile
+t/lib/App/Prove/Plugin/Dummy.pm	Module for testing Test::Harness
 t/lib/Cname.pm			Test charnames in regexes (op/pat.t)
 t/lib/common.pl			Helper for lib/{warnings,feature}.t
 t/lib/commonsense.t		See if configuration meets basic needs
@@ -3583,7 +3652,9 @@ t/lib/compress/truncate.pl	Compress::Zlib
 t/lib/compress/zlib-generic.pl	Compress::Zlib
 t/lib/contains_pod.xr		Pod-Parser test file
 t/lib/cygwin.t			Builtin cygwin function tests
-t/lib/App/Prove/Plugin/Dummy.pm	Module for testing Test::Harness
+t/lib/data/catme.1			Test data for Test::Harness
+t/lib/data/proverc			Test data for Test::Harness
+t/lib/data/sample.yml			Test data for Test::Harness
 t/lib/Devel/switchd.pm		Module for t/run/switchd.t
 t/lib/Dev/Null.pm		Module for testing Test::Harness
 t/lib/dprof/test1_t		Perl code profiler tests
@@ -3635,9 +3706,6 @@ t/lib/mypragma.t		Test the example user pragma
 t/lib/NoFork.pm			Module for testing Test::Harness
 t/lib/no_load.t			Test that some modules don't load others
 t/lib/proxy_constant_subs.t	Test that Proxy Constant Subs behave correctly
-t/lib/data/catme.1			Test data for Test::Harness
-t/lib/data/proverc			Test data for Test::Harness
-t/lib/data/sample.yml			Test data for Test::Harness
 t/lib/sample-tests/bailout		Test data for Test::Harness
 t/lib/sample-tests/bignum		Test data for Test::Harness
 t/lib/sample-tests/bignum_many		Test data for Test::Harness
@@ -3673,10 +3741,10 @@ t/lib/sample-tests/simple		Test data for Test::Harness
 t/lib/sample-tests/simple_fail		Test data for Test::Harness
 t/lib/sample-tests/simple_yaml		Test data for Test::Harness
 t/lib/sample-tests/skip			Test data for Test::Harness
-t/lib/sample-tests/skip_nomsg		Test data for Test::Harness
 t/lib/sample-tests/skipall		Test data for Test::Harness
 t/lib/sample-tests/skipall_nomsg	Test data for Test::Harness
 t/lib/sample-tests/skipall_v13		Test data for Test::Harness
+t/lib/sample-tests/skip_nomsg		Test data for Test::Harness
 t/lib/sample-tests/space_after_plan	Test data for Test::Harness
 t/lib/sample-tests/stdout_stderr	Test data for Test::Harness
 t/lib/sample-tests/strict		Test data for Test::Harness
@@ -3704,8 +3772,8 @@ t/lib/strict/subs		Tests of "use strict 'subs'" for strict.t
 t/lib/strict/vars		Tests of "use strict 'vars'" for strict.t
 t/lib/Test/Simple/Catch.pm	Utility module for testing Test::Simple
 t/lib/Test/Simple/sample_tests/death_in_eval.plx	for exit.t
-t/lib/Test/Simple/sample_tests/death_with_handler.plx	for exit.t
 t/lib/Test/Simple/sample_tests/death.plx		for exit.t
+t/lib/Test/Simple/sample_tests/death_with_handler.plx	for exit.t
 t/lib/Test/Simple/sample_tests/exit.plx			for exit.t
 t/lib/Test/Simple/sample_tests/extras.plx		for exit.t
 t/lib/Test/Simple/sample_tests/five_fail.plx		for exit.t
@@ -3791,11 +3859,11 @@ t/Module_Pluggable/20dodgy_files.t	Module::Pluggable tests
 t/Module_Pluggable/21editor_junk.t			Module::Pluggable tests
 t/Module_Pluggable/acme/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
 t/Module_Pluggable/lib/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
-t/Module_Pluggable/lib/EditorJunk/Plugin/Foo.pm		Module::Pluggable tests
-t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm~	Module::Pluggable tests
-t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm.swp	Module::Pluggable tests
 t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm		Module::Pluggable tests
+t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm~	Module::Pluggable tests
 t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm.swo	Module::Pluggable tests
+t/Module_Pluggable/lib/EditorJunk/Plugin/Bar.pm.swp	Module::Pluggable tests
+t/Module_Pluggable/lib/EditorJunk/Plugin/Foo.pm		Module::Pluggable tests
 t/Module_Pluggable/lib/ExtTest/Plugin/Bar.plugin	Module::Pluggable tests
 t/Module_Pluggable/lib/ExtTest/Plugin/Foo.plugin	Module::Pluggable tests
 t/Module_Pluggable/lib/ExtTest/Plugin/Quux/Foo.plugin	Module::Pluggable tests
@@ -3880,8 +3948,8 @@ t/op/die_exit.t			See if die and exit status interaction works
 t/op/die.t			See if die works
 t/op/dor.t			See if defined-or (//) works
 t/op/do.t			See if subroutines work
-t/op/each.t			See if hash iterators work
 t/op/each_array.t		See if array iterators work
+t/op/each.t			See if hash iterators work
 t/op/eval.t			See if eval operator works
 t/op/exec.t			See if exec, system and qx work
 t/op/exists_sub.t		See if exists(&sub) works
@@ -4095,6 +4163,7 @@ t/uni/latin2.t			See if Unicode in latin2 works
 t/uni/lower.t			See if Unicode casing works
 t/uni/overload.t		See if Unicode overloading works
 t/uni/sprintf.t			See if Unicode sprintf works
+t/uni/tie.t			See if Unicode tie works
 t/uni/title.t			See if Unicode casing works
 t/uni/tr_7jis.t			See if Unicode tr/// in 7jis works
 t/uni/tr_eucjp.t		See if Unicode tr/// in eucjp works
@@ -4104,7 +4173,6 @@ t/uni/upper.t			See if Unicode casing works
 t/uni/write.t			See if Unicode formats work
 t/win32/system.t		See if system works in Win*
 t/win32/system_tests		Test runner for system.t
-t/uni/tie.t			See if Unicode tie works
 t/x2p/s2p.t			See if s2p/psed work
 uconfig.h			Configuration header for microperl
 uconfig.sh			Configuration script for microperl

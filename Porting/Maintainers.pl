@@ -418,6 +418,20 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+        'HTML::Parser' =>
+                {
+                'MAINTAINER'    => 'gaas',
+                'FILES'         => q[ext/HTML/Parser],
+                'CPAN'          => 1,
+                },
+
+        'HTML::Tagset' =>
+                {
+                'MAINTAINER'    => 'petdance',
+                'FILES'         => q[lib/HTML/Tagset.pm lib/HTML/Tagset],
+                'CPAN'          => 1,
+                },
+
 	'I18N::LangTags' =>
 		{
 		'MAINTAINER'	=> 'sburke',
