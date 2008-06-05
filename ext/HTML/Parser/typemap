@@ -1,5 +1,0 @@
-PSTATE*	T_PSTATE
-
-INPUT
-T_PSTATE
-	$var = get_pstate_hv(aTHX_ $arg)

@@ -693,71 +693,6 @@ ext/Hash/Util/lib/Hash/Util.pm	Hash::Util
 ext/Hash/Util/Makefile.PL	Makefile for Hash::Util
 ext/Hash/Util/t/Util.t		See if Hash::Util works
 ext/Hash/Util/Util.xs		XS bits of Hash::Util
-ext/HTML/Parser/hints/solaris.pl	files for HTML::Parser
-ext/HTML/Parser/hparser.c	files for HTML::Parser
-ext/HTML/Parser/hparser.h	files for HTML::Parser
-ext/HTML/Parser/lib/HTML/Entities.pm	file for HTML::Entities
-ext/HTML/Parser/lib/HTML/Filter.pm	file for HTML::Filter
-ext/HTML/Parser/lib/HTML/HeadParser.pm	file for HTML::HeadParser
-ext/HTML/Parser/lib/HTML/LinkExtor.pm	file for HTML::LinkExtor
-ext/HTML/Parser/lib/HTML/PullParser.pm	file for HTML::PullParser
-ext/HTML/Parser/lib/HTML/TokeParser.pm	file for HTML::TokeParser
-ext/HTML/Parser/Makefile.PL	files for HTML::Parser
-ext/HTML/Parser/mkhctype	files for HTML::Parser
-ext/HTML/Parser/mkpfunc		files for HTML::Parser
-ext/HTML/Parser/Parser.pm	files for HTML::Parser
-ext/HTML/Parser/Parser.xs	files for HTML::Parser
-ext/HTML/Parser/t/api_version.t	test for HTML::Parser
-ext/HTML/Parser/t/argspec2.t	test for HTML::Parser
-ext/HTML/Parser/t/argspec-bad.t	test for HTML::Parser
-ext/HTML/Parser/t/argspec.t	test for HTML::Parser
-ext/HTML/Parser/t/attr-encoded.t	test for HTML::Parser
-ext/HTML/Parser/t/callback.t	test for HTML::Parser
-ext/HTML/Parser/t/case-sensitive.t	test for HTML::Parser
-ext/HTML/Parser/t/cases.t	test for HTML::Parser
-ext/HTML/Parser/t/comment.t	test for HTML::Parser
-ext/HTML/Parser/t/crashme.t	test for HTML::Parser
-ext/HTML/Parser/t/declaration.t	test for HTML::Parser
-ext/HTML/Parser/t/default.t	test for HTML::Parser
-ext/HTML/Parser/t/document.t	test for HTML::Parser	
-ext/HTML/Parser/t/dtext.t	test for HTML::Parser
-ext/HTML/Parser/t/entities2.t	test for HTML::Parser
-ext/HTML/Parser/t/entities.t	test for HTML::Parser
-ext/HTML/Parser/t/filter-methods.t	test for HTML::Parser
-ext/HTML/Parser/t/filter.t	test for HTML::Parser
-ext/HTML/Parser/t/handler-eof.t	test for HTML::Parser
-ext/HTML/Parser/t/handler.t	test for HTML::Parser
-ext/HTML/Parser/t/headparser-http.t	test for HTML::Parser
-ext/HTML/Parser/t/headparser.t	test for HTML::Parser
-ext/HTML/Parser/t/ignore.t	test for HTML::Parser
-ext/HTML/Parser/t/largetags.t	test for HTML::Parser
-ext/HTML/Parser/t/linkextor-base.t	test for HTML::Parser
-ext/HTML/Parser/t/linkextor-rel.t	test for HTML::Parser
-ext/HTML/Parser/t/magic.t	test for HTML::Parser
-ext/HTML/Parser/t/marked-sect.t	test for HTML::Parser
-ext/HTML/Parser/t/msie-compat.t	test for HTML::Parser
-ext/HTML/Parser/t/offset.t	test for HTML::Parser
-ext/HTML/Parser/tokenpos.h	files for HTML::Parser
-ext/HTML/Parser/t/options.t	test for HTML::Parser
-ext/HTML/Parser/t/parsefile.t	test for HTML::Parser
-ext/HTML/Parser/t/parser.t	test for HTML::Parser
-ext/HTML/Parser/t/plaintext.t	test for HTML::Parser
-ext/HTML/Parser/t/pod.t		test for HTML::Parser
-ext/HTML/Parser/t/process.t	test for HTML::Parser
-ext/HTML/Parser/t/pullparser.t	test for HTML::Parser
-ext/HTML/Parser/t/script.t	test for HTML::Parser
-ext/HTML/Parser/t/skipped-text.t	test for HTML::Parser
-ext/HTML/Parser/t/stack-realloc.t	test for HTML::Parser
-ext/HTML/Parser/t/textarea.t	test for HTML::Parser
-ext/HTML/Parser/t/threads.t	test for HTML::Parser
-ext/HTML/Parser/t/tokeparser.t	test for HTML::Parser
-ext/HTML/Parser/t/uentities.t	test for HTML::Parser
-ext/HTML/Parser/t/unbroken-text.t	test for HTML::Parser
-ext/HTML/Parser/t/unicode-bom.t	test for HTML::Parser
-ext/HTML/Parser/t/unicode.t	test for HTML::Parser
-ext/HTML/Parser/t/xml-mode.t	test for HTML::Parser
-ext/HTML/Parser/typemap		files for HTML::Parser
-ext/HTML/Parser/util.c		files for HTML::Parser
 ext/I18N/Langinfo/fallback/const-c.inc	I18N::Langinfo
 ext/I18N/Langinfo/fallback/const-xs.inc	I18N::Langinfo
 ext/I18N/Langinfo/Langinfo.pm	I18N::Langinfo
@@ -2037,9 +1972,6 @@ lib/Getopt/Std.t		See if Getopt::Std and Getopt::Long work
 lib/h2ph.t			See if h2ph works like it should
 lib/h2xs.t			See if h2xs produces expected lists of files
 lib/hostname.pl			Old hostname code
-lib/HTML/Tagset.pm	HTML::Tagset
-lib/HTML/Tagset/t/00_about_verbose.t	HTML::Tagset
-lib/HTML/Tagset/t/01_old_junk.t	HTML::Tagset
 lib/I18N/Collate.pm		Routines to do strxfrm-based collation
 lib/I18N/Collate.t		See if I18N::Collate works
 lib/I18N/LangTags/ChangeLog	I18N::LangTags
