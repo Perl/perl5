@@ -27,13 +27,31 @@ L<Pod::Simple::HTML>, but it largely preserves the same interface.
 
 package Pod::Simple::XHTML;
 use strict;
-use vars qw( $VERSION @ISA );
+use vars qw( $VERSION @ISA $HAS_HTML_ENTITIES );
 $VERSION = '3.04';
 use Carp ();
 use Pod::Simple::Methody ();
 @ISA = ('Pod::Simple::Methody');
 
-use HTML::Entities 'encode_entities';
+BEGIN {
+  $HAS_HTML_ENTITIES = eval "require HTML::Entities; 1";
+}
+
+my %entities = (
+  q{>} => 'gt',
+  q{<} => 'lt',
+  q{'} => '#39',
+  q{"} => 'quot',
+  q{&} => 'amp',
+);
+
+sub encode_entities {
+  return HTML::Entities::encode_entities( $_[0] ) if $HAS_HTML_ENTITIES;
+  my $str = $_[0];
+  my $ents = join '', keys %entities;
+  $str =~ s/([$ents])/'&' . $entities{$1} . ';'/ge;
+  return $str;
+}
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

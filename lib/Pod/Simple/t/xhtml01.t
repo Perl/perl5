@@ -8,7 +8,7 @@ BEGIN {
 
 use strict;
 use lib '../lib';
-use Test::More tests => 25;
+use Test::More tests => 26;
 
 use_ok('Pod::Simple::XHTML') or exit;
 
@@ -318,8 +318,13 @@ is($results, <<"EOHTML", "Verbatim text with encodable entities");
 
 EOHTML
 
-initialize($parser, $results);
-$parser->parse_string_document(<<'EOPOD');
+SKIP: for my $use_html_entities (0, 1) {
+  if ($use_html_entities and not $Pod::Simple::XHTML::HAS_HTML_ENTITIES) {
+    skip("HTML::Entities not installed", 1);
+  }
+  local $Pod::Simple::XHTML::HAS_HTML_ENTITIES = $use_html_entities;
+  initialize($parser, $results);
+  $parser->parse_string_document(<<'EOPOD');
 =pod
 
   # this header is very important & don't you forget it
@@ -332,6 +337,7 @@ is($results, <<"EOHTML", "Verbatim text with markup and embedded formatting");
   my \$text = &quot;File is: &quot; . &lt;FILE&gt;;</code></pre>
 
 EOHTML
+}
 
 ######################################
 
