@@ -1924,6 +1924,7 @@ lib/NEXT/README			NEXT
 lib/NEXT/t/actual.t		NEXT
 lib/NEXT/t/actuns.t		NEXT
 lib/NEXT/t/next.t		NEXT
+lib/NEXT/t/stringify.t		NEXT
 lib/NEXT/t/unseen.t		NEXT
 lib/open2.pl			Open a two-ended pipe (uses IPC::Open2)
 lib/open3.pl			Open a three-ended pipe (uses IPC::Open3)
