@@ -1,6 +1,6 @@
 package Carp;
 
-our $VERSION = '1.08';
+our $VERSION = '1.09';
 # this file is an utra-lightweight stub. The first time a function is
 # called, Carp::Heavy is loaded, and the real short/longmessmess_jmp
 # subs are installed
@@ -143,7 +143,7 @@ This feature is enabled by 'importing' the non-existent symbol
 
     perl -MCarp=verbose script.pl
 
-or by including the string C<MCarp=verbose> in the PERL5OPT
+or by including the string C<-MCarp=verbose> in the PERL5OPT
 environment variable.
 
 Alternately, you can set the global variable C<$Carp::Verbose> to true.
