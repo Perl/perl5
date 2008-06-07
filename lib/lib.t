@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir 't';
-    @INC = '../lib';
+    unshift @INC, '../lib';
     @OrigINC = @INC;
 }
 
