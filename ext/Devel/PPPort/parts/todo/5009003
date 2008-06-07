@@ -22,7 +22,6 @@ newSVhek                       # U
 newSVpvs_share                 # U
 newWHENOP                      # U
 newWHILEOP                     # E (Perl_newWHILEOP)
-ref                            # U (Perl_ref)
 savepvs                        # U
 sortsv_flags                   # U
 vverify                        # U

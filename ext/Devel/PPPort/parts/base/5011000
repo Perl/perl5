@@ -1,0 +1,26 @@
+5.011000
+HeUTF8                         # U
+MULTICALL                      # E
+POP_MULTICALL                  # E
+PUSH_MULTICALL                 # E
+av_iter_p                      # U
+hv_assert                      # U
+mPUSHs                         # U
+mXPUSHs                        # U
+newSVpvn_flags                 # U
+newSVpvn_utf8                  # U
+newSVpvs_flags                 # U
+pad_sv                         # U
+pregfree2                      # U
+ref                            # U (Perl_ref)
+stashpv_hvname_match           # U
+sv_magic_portable              # U
+PERL_BCDVERSION                # added by devel/scanprov
+PERL_MAGIC_glob                # added by devel/scanprov
+PERL_MAGIC_mutex               # added by devel/scanprov
+PL_copline                     # added by devel/scanprov
+PL_expect                      # added by devel/scanprov
+WARN_ASSERTIONS                # added by devel/scanprov
+aTHXR                          # added by devel/scanprov
+aTHXR_                         # added by devel/scanprov
+dTHXR                          # added by devel/scanprov
