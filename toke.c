@@ -6749,6 +6749,7 @@ Perl_yylex(pTHX)
 		    bool proto_after_greedy_proto = FALSE;
 		    bool must_be_last = FALSE;
 		    bool underscore = FALSE;
+		    bool seen_underscore = FALSE;
 		    const bool warnsyntax = ckWARN(WARN_SYNTAX);
 
 		    s = scan_str(s,!!PL_madskills,FALSE);
@@ -6786,7 +6787,7 @@ Perl_yylex(pTHX)
 					greedy_proto = *p;
 				    }
 				    else if ( *p == '_' ) {
-					underscore = TRUE;
+					underscore = seen_underscore = TRUE;
 				    }
 				}
 			    }
@@ -6799,7 +6800,8 @@ Perl_yylex(pTHX)
 				    greedy_proto, SVfARG(PL_subname), d);
 		    if (bad_proto)
 			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-				    "Illegal character in prototype for %"SVf" : %s",
+				    "Illegal character %sin prototype for %"SVf" : %s",
+				    seen_underscore ? "after '_' " : "",
 				    SVfARG(PL_subname), d);
 		    SvCUR_set(PL_lex_stuff, tmp);
 		    have_proto = TRUE;
