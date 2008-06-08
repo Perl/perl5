@@ -3469,6 +3469,11 @@ port.  One can easily disable this by appropriate sighandlers, see
 L<perlipc/"Signals">.  See also "Process terminated by SIGTERM/SIGINT"
 in L<perlos2>.
 
+=item Prototype after '%c' for %s : %s
+
+(W syntax) A character follows % or @ in a prototype. This is useless,
+since % and @ gobble the rest of the subroutine arguments.
+
 =item Prototype mismatch: %s vs %s
 
 (S prototype) The subroutine being declared or defined had previously been
