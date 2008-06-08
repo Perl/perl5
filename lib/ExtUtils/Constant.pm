@@ -1,6 +1,6 @@
 package ExtUtils::Constant;
 use vars qw (@ISA $VERSION @EXPORT_OK %EXPORT_TAGS);
-$VERSION = 0.20;
+$VERSION = 0.21;
 
 =head1 NAME
 
@@ -437,6 +437,10 @@ for each group with this number or more names in.
 
 An array of constants' names, either scalars containing names, or hashrefs
 as detailed in L<"C_constant">.
+
+=item PROXYSUBS
+
+If true, uses proxy subs. See L<ExtUtils::Constant::ProxySubs>.
 
 =item C_FH
 
