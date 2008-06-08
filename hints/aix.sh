@@ -295,10 +295,10 @@ ldflags_uselargefiles="`getconf XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
 	    fi
 	if test X"$use64bitint:$quadtype" = X"$define:long" -o X"$use64bitall" = Xdefine; then
 # Keep this at the left margin.
-libswanted_uselargefiles="`getconf XBS5_LP64_OFF64_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+libswanted_uselargefiles="`getconf XBS5_LP64_OFF64_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g'`"
 	else
 # Keep this at the left margin.
-libswanted_uselargefiles="`getconf XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+libswanted_uselargefiles="`getconf XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g'`"
 	    fi
 
 	case "$ccflags_uselargefiles$ldflags_uselargefiles$libs_uselargefiles" in
@@ -419,7 +419,7 @@ EOM
 	# string is simply not detectable by any means.  Since it doesn't
 	# do any harm, I didn't pursue it. -- sh
 	qaldflags="`echo $qaldflags`"
-	qalibs="`getconf XBS5_LP64_OFF64_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+	qalibs="`getconf XBS5_LP64_OFF64_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g'`"
 	# -q32 and -b32 may have been set by uselargefiles or user.
 	# Remove them.
 	ccflags="`echo $ccflags | sed -e 's@-q32@@'`"
