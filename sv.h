@@ -966,23 +966,23 @@ the scalar's value cannot change unless written to.
 #define SvEVALED_off(sv)	(SvFLAGS(sv) &= ~SVrepl_EVAL)
 
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
-#  define SvVALID(sv)		({ SV *const thwacke = (SV *) (sv);	\
-				   if (SvFLAGS(thwacke) & SVpbm_VALID)	\
-				       assert(!isGV_with_GP(thwacke));	\
-				   (SvFLAGS(thwacke) & SVpbm_VALID);	\
+#  define SvVALID(sv)		({ SV *const _svvalid = (SV *) (sv);	\
+				   if (SvFLAGS(_svvalid) & SVpbm_VALID)	\
+				       assert(!isGV_with_GP(_svvalid));	\
+				   (SvFLAGS(_svvalid) & SVpbm_VALID);	\
 				})
-#  define SvVALID_on(sv)	({ SV *const thwacke = (SV *) (sv);	\
-				   assert(!isGV_with_GP(thwacke));	\
-				   (SvFLAGS(thwacke) |= SVpbm_VALID);	\
+#  define SvVALID_on(sv)	({ SV *const _svvalid = (SV *) (sv);	\
+				   assert(!isGV_with_GP(_svvalid));	\
+				   (SvFLAGS(_svvalid) |= SVpbm_VALID);	\
 				})
-#  define SvVALID_off(sv)	({ SV *const thwacke = (SV *) (sv);	\
-				   assert(!isGV_with_GP(thwacke));	\
-				   (SvFLAGS(thwacke) &= ~SVpbm_VALID);	\
+#  define SvVALID_off(sv)	({ SV *const _svvalid = (SV *) (sv);	\
+				   assert(!isGV_with_GP(_svvalid));	\
+				   (SvFLAGS(_svvalid) &= ~SVpbm_VALID);	\
 				})
 
-#  define SvTAIL(sv)	({ SV *const _svi = (SV *) (sv);		\
-			    assert(SvTYPE(_svi) != SVt_PVAV);		\
-			    assert(SvTYPE(_svi) != SVt_PVHV);		\
+#  define SvTAIL(sv)	({ SV *const _svtail = (SV *) (sv);		\
+			    assert(SvTYPE(_svtail) != SVt_PVAV);		\
+			    assert(SvTYPE(_svtail) != SVt_PVHV);		\
 			    (SvFLAGS(sv) & (SVpbm_TAIL|SVpbm_VALID))	\
 				== (SVpbm_TAIL|SVpbm_VALID);		\
 			})
@@ -1009,19 +1009,19 @@ the scalar's value cannot change unless written to.
 
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define SvPAD_TYPED_on(sv)	({					\
-	    SV *const whap = (SV *) (sv);				\
-	    assert(SvTYPE(whap) == SVt_PVMG);				\
-	    (SvFLAGS(whap) |= SVpad_NAME|SVpad_TYPED);			\
+	    SV *const _svpad = (SV *) (sv);				\
+	    assert(SvTYPE(_svpad) == SVt_PVMG);				\
+	    (SvFLAGS(_svpad) |= SVpad_NAME|SVpad_TYPED);		\
 	})
 #define SvPAD_OUR_on(sv)	({					\
-	    SV *const whap = (SV *) (sv);				\
-	    assert(SvTYPE(whap) == SVt_PVMG);				\
-	    (SvFLAGS(whap) |= SVpad_NAME|SVpad_OUR);			\
+	    SV *const _svpad = (SV *) (sv);				\
+	    assert(SvTYPE(_svpad) == SVt_PVMG);				\
+	    (SvFLAGS(_svpad) |= SVpad_NAME|SVpad_OUR);			\
 	})
 #define SvPAD_STATE_on(sv)	({					\
-	    SV *const whap = (SV *) (sv);				\
-	    assert(SvTYPE(whap) == SVt_PVNV || SvTYPE(whap) == SVt_PVMG); \
-	    (SvFLAGS(whap) |= SVpad_NAME|SVpad_STATE);			\
+	    SV *const _svpad = (SV *) (sv);				\
+	    assert(SvTYPE(_svpad) == SVt_PVNV || SvTYPE(_svpad) == SVt_PVMG); \
+	    (SvFLAGS(_svpad) |= SVpad_NAME|SVpad_STATE);		\
 	})
 #else
 #  define SvPAD_TYPED_on(sv)	(SvFLAGS(sv) |= SVpad_NAME|SVpad_TYPED)
@@ -1073,71 +1073,71 @@ the scalar's value cannot change unless written to.
 #  if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 /* These get expanded inside other macros that already use a variable _sv  */
 #    define SvPVX(sv)							\
-	(*({ SV *const _svi = (SV *) (sv);				\
-	    assert(SvTYPE(_svi) >= SVt_PV);				\
-	    assert(SvTYPE(_svi) != SVt_PVAV);				\
-	    assert(SvTYPE(_svi) != SVt_PVHV);				\
-	    assert(!isGV_with_GP(_svi));				\
-	    &((_svi)->sv_u.svu_pv);					\
+	(*({ SV *const _svpvx = (SV *) (sv);				\
+	    assert(SvTYPE(_svpvx) >= SVt_PV);				\
+	    assert(SvTYPE(_svpvx) != SVt_PVAV);				\
+	    assert(SvTYPE(_svpvx) != SVt_PVHV);				\
+	    assert(!isGV_with_GP(_svpvx));				\
+	    &((_svpvx)->sv_u.svu_pv);					\
 	 }))
 #    define SvCUR(sv)							\
-	(*({ SV *const _svi = (SV *) (sv);				\
-	    assert(SvTYPE(_svi) >= SVt_PV);				\
-	    assert(SvTYPE(_svi) != SVt_PVAV);				\
-	    assert(SvTYPE(_svi) != SVt_PVHV);				\
-	    assert(!isGV_with_GP(_svi));				\
-	    &(((XPV*) SvANY(_svi))->xpv_cur);				\
+	(*({ SV *const _svcur = (SV *) (sv);				\
+	    assert(SvTYPE(_svcur) >= SVt_PV);				\
+	    assert(SvTYPE(_svcur) != SVt_PVAV);				\
+	    assert(SvTYPE(_svcur) != SVt_PVHV);				\
+	    assert(!isGV_with_GP(_svcur));				\
+	    &(((XPV*) SvANY(_svcur))->xpv_cur);				\
 	 }))
 #    define SvIVX(sv)							\
-	(*({ SV *const _svi = (SV *) (sv);				\
-	    assert(SvTYPE(_svi) == SVt_IV || SvTYPE(_svi) >= SVt_PVIV);	\
-	    assert(SvTYPE(_svi) != SVt_PVAV);				\
-	    assert(SvTYPE(_svi) != SVt_PVHV);				\
-	    assert(SvTYPE(_svi) != SVt_PVCV);				\
-	    assert(!isGV_with_GP(_svi));				\
-	    &(((XPVIV*) SvANY(_svi))->xiv_iv);				\
+	(*({ SV *const _svivx = (SV *) (sv);				\
+	    assert(SvTYPE(_svivx) == SVt_IV || SvTYPE(_svivx) >= SVt_PVIV); \
+	    assert(SvTYPE(_svivx) != SVt_PVAV);				\
+	    assert(SvTYPE(_svivx) != SVt_PVHV);				\
+	    assert(SvTYPE(_svivx) != SVt_PVCV);				\
+	    assert(!isGV_with_GP(_svivx));				\
+	    &(((XPVIV*) SvANY(_svivx))->xiv_iv);			\
 	 }))
 #    define SvUVX(sv)							\
-	(*({ SV *const _svi = (SV *) (sv);				\
-	    assert(SvTYPE(_svi) == SVt_IV || SvTYPE(_svi) >= SVt_PVIV);	\
-	    assert(SvTYPE(_svi) != SVt_PVAV);				\
-	    assert(SvTYPE(_svi) != SVt_PVHV);				\
-	    assert(SvTYPE(_svi) != SVt_PVCV);				\
-	    assert(!isGV_with_GP(_svi));				\
-	    &(((XPVUV*) SvANY(_svi))->xuv_uv);				\
+	(*({ SV *const _svuvx = (SV *) (sv);				\
+	    assert(SvTYPE(_svuvx) == SVt_IV || SvTYPE(_svuvx) >= SVt_PVIV); \
+	    assert(SvTYPE(_svuvx) != SVt_PVAV);				\
+	    assert(SvTYPE(_svuvx) != SVt_PVHV);				\
+	    assert(SvTYPE(_svuvx) != SVt_PVCV);				\
+	    assert(!isGV_with_GP(_svuvx));				\
+	    &(((XPVUV*) SvANY(_svuvx))->xuv_uv);			\
 	 }))
 #    define SvNVX(sv)							\
-	(*({ SV *const _svi = (SV *) (sv);				\
-	    assert(SvTYPE(_svi) == SVt_NV || SvTYPE(_svi) >= SVt_PVNV);	\
-	    assert(SvTYPE(_svi) != SVt_PVAV);				\
-	    assert(SvTYPE(_svi) != SVt_PVHV);				\
-	    assert(SvTYPE(_svi) != SVt_PVCV);				\
-	    assert(SvTYPE(_svi) != SVt_PVFM);				\
-	    assert(SvTYPE(_svi) != SVt_PVIO);				\
-	    assert(!isGV_with_GP(_svi));				\
-	   &(((XPVNV*) SvANY(_svi))->xnv_u.xnv_nv);			\
+	(*({ SV *const _svnvx = (SV *) (sv);				\
+	    assert(SvTYPE(_svnvx) == SVt_NV || SvTYPE(_svnvx) >= SVt_PVNV); \
+	    assert(SvTYPE(_svnvx) != SVt_PVAV);				\
+	    assert(SvTYPE(_svnvx) != SVt_PVHV);				\
+	    assert(SvTYPE(_svnvx) != SVt_PVCV);				\
+	    assert(SvTYPE(_svnvx) != SVt_PVFM);				\
+	    assert(SvTYPE(_svnvx) != SVt_PVIO);				\
+	    assert(!isGV_with_GP(_svnvx));				\
+	   &(((XPVNV*) SvANY(_svnvx))->xnv_u.xnv_nv);			\
 	 }))
 #    define SvRV(sv)							\
-	(*({ SV *const _svi = (SV *) (sv);				\
-	    assert(SvTYPE(_svi) >= SVt_PV || SvTYPE(_svi) == SVt_IV);	\
-	    assert(SvTYPE(_svi) != SVt_PVAV);				\
-	    assert(SvTYPE(_svi) != SVt_PVHV);				\
-	    assert(SvTYPE(_svi) != SVt_PVCV);				\
-	    assert(SvTYPE(_svi) != SVt_PVFM);				\
-	    assert(!isGV_with_GP(_svi));				\
-	    &((_svi)->sv_u.svu_rv);					\
+	(*({ SV *const _svrv = (SV *) (sv);				\
+	    assert(SvTYPE(_svrv) >= SVt_PV || SvTYPE(_svrv) == SVt_IV);	\
+	    assert(SvTYPE(_svrv) != SVt_PVAV);				\
+	    assert(SvTYPE(_svrv) != SVt_PVHV);				\
+	    assert(SvTYPE(_svrv) != SVt_PVCV);				\
+	    assert(SvTYPE(_svrv) != SVt_PVFM);				\
+	    assert(!isGV_with_GP(_svrv));				\
+	    &((_svrv)->sv_u.svu_rv);					\
 	 }))
 #    define SvMAGIC(sv)							\
-	(*({ SV *const _svi = (SV *) (sv);				\
-	    assert(SvTYPE(_svi) >= SVt_PVMG);				\
-	    if(SvTYPE(_svi) == SVt_PVMG)				\
-		assert(!SvPAD_OUR(_svi));				\
-	    &(((XPVMG*) SvANY(_svi))->xmg_u.xmg_magic);			\
+	(*({ SV *const _svmagic = (SV *) (sv);				\
+	    assert(SvTYPE(_svmagic) >= SVt_PVMG);			\
+	    if(SvTYPE(_svmagic) == SVt_PVMG)				\
+		assert(!SvPAD_OUR(_svmagic));				\
+	    &(((XPVMG*) SvANY(_svmagic))->xmg_u.xmg_magic);		\
 	  }))
 #    define SvSTASH(sv)							\
-	(*({ SV *const _svi = (SV *) (sv);				\
-	    assert(SvTYPE(_svi) >= SVt_PVMG);				\
-	    &(((XPVMG*) SvANY(_svi))->xmg_stash);			\
+	(*({ SV *const _svstash = (SV *) (sv);				\
+	    assert(SvTYPE(_svstash) >= SVt_PVMG);			\
+	    &(((XPVMG*) SvANY(_svstash))->xmg_stash);			\
 	  }))
 #  else
 #    define SvPVX(sv) ((sv)->sv_u.svu_pv)
@@ -1283,29 +1283,29 @@ the scalar's value cannot change unless written to.
 */
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define BmFLAGS(sv)							\
-	(*({ SV *const uggh = (SV *) (sv);				\
-		assert(SvTYPE(uggh) == SVt_PVGV);			\
-		assert(SvVALID(uggh));					\
-	    &(((XPVGV*) SvANY(uggh))->xnv_u.xbm_s.xbm_flags);		\
+	(*({ SV *const _bmflags = (SV *) (sv);				\
+		assert(SvTYPE(_bmflags) == SVt_PVGV);			\
+		assert(SvVALID(_bmflags));				\
+	    &(((XPVGV*) SvANY(_bmflags))->xnv_u.xbm_s.xbm_flags);	\
 	 }))
 #  define BmRARE(sv)							\
-	(*({ SV *const uggh = (SV *) (sv);				\
-		assert(SvTYPE(uggh) == SVt_PVGV);			\
-		assert(SvVALID(uggh));					\
-	    &(((XPVGV*) SvANY(uggh))->xnv_u.xbm_s.xbm_rare);		\
+	(*({ SV *const _bmrare = (SV *) (sv);				\
+		assert(SvTYPE(_bmrare) == SVt_PVGV);			\
+		assert(SvVALID(_bmrare));				\
+	    &(((XPVGV*) SvANY(_bmrare))->xnv_u.xbm_s.xbm_rare);		\
 	 }))
 #  define BmUSEFUL(sv)							\
-	(*({ SV *const uggh = (SV *) (sv);				\
-	    assert(SvTYPE(uggh) == SVt_PVGV);				\
-	    assert(SvVALID(uggh));					\
-	    assert(!SvIOK(uggh));					\
-	    &(((XPVGV*) SvANY(uggh))->xiv_u.xivu_i32);			\
+	(*({ SV *const _bmuseful = (SV *) (sv);				\
+	    assert(SvTYPE(_bmuseful) == SVt_PVGV);			\
+	    assert(SvVALID(_bmuseful));					\
+	    assert(!SvIOK(_bmuseful));					\
+	    &(((XPVGV*) SvANY(_bmuseful))->xiv_u.xivu_i32);		\
 	 }))
 #  define BmPREVIOUS(sv)						\
-	(*({ SV *const uggh = (SV *) (sv);				\
-		assert(SvTYPE(uggh) == SVt_PVGV);			\
-		assert(SvVALID(uggh));					\
-	    &(((XPVGV*) SvANY(uggh))->xnv_u.xbm_s.xbm_previous);	\
+    (*({ SV *const _bmprevious = (SV *) (sv);				\
+		assert(SvTYPE(_bmprevious) == SVt_PVGV);		\
+		assert(SvVALID(_bmprevious));				\
+	    &(((XPVGV*) SvANY(_bmprevious))->xnv_u.xbm_s.xbm_previous);	\
 	 }))
 #else
 #  define BmFLAGS(sv)		((XPVGV*) SvANY(sv))->xnv_u.xbm_s.xbm_flags
