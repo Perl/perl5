@@ -340,9 +340,9 @@ struct pmop {
 /* BEWARE - something that calls this macro passes (r) which has a side
    effect.  */
 #define PM_SETRE(o,r)	STMT_START {					\
-                            const REGEXP *const whap = (r);		\
-                            assert(whap);				\
-			    PL_regex_pad[(o)->op_pmoffset] = (SV*)whap;	\
+                            const REGEXP *const _pm_setre = (r);	\
+                            assert(_pm_setre);				\
+			    PL_regex_pad[(o)->op_pmoffset] = (SV*)_pm_setre; \
                         } STMT_END
 #else
 #define PM_GETRE(o)     ((o)->op_pmregexp)

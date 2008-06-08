@@ -187,7 +187,7 @@ typedef struct regexp_engine {
 /* Whether this is being called from a re:: function */
 #define RXapif_REGNAME         0x0400
 #define RXapif_REGNAMES        0x0800
-#define RXapif_REGNAMES_COUNT  0x1000 
+#define RXapif_REGNAMES_COUNT  0x1000
 
 /*
 =head1 REGEXP Functions
@@ -224,7 +224,7 @@ and check for NULL.
 #define SvRXOK(sv) (Perl_get_re_arg(aTHX_ sv) ? TRUE : FALSE)
 
 
-/* Flags stored in regexp->extflags 
+/* Flags stored in regexp->extflags
  * These are used by code external to the regexp engine
  *
  * Note that flags starting with RXf_PMf_ have exact equivalents
@@ -232,7 +232,7 @@ and check for NULL.
  * numerically here only for clarity.
  *
  * NOTE: if you modify any RXf flags you should run regen.pl or regcomp.pl
- * so that regnodes.h is updated with the changes. 
+ * so that regnodes.h is updated with the changes.
  *
  */
 
@@ -289,7 +289,7 @@ and check for NULL.
 
 /*
  * NOTE: if you modify any RXf flags you should run regen.pl or regcomp.pl
- * so that regnodes.h is updated with the changes. 
+ * so that regnodes.h is updated with the changes.
  *
  */
 
@@ -344,7 +344,7 @@ and check for NULL.
 
 /*
  * NOTE: if you modify any RXf flags you should run regen.pl or regcomp.pl
- * so that regnodes.h is updated with the changes. 
+ * so that regnodes.h is updated with the changes.
  *
  */
 
@@ -382,33 +382,33 @@ and check for NULL.
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define RX_EXTFLAGS(prog)						\
     (*({								\
-	const REGEXP *const thwape = (prog);				\
-	assert(SvTYPE(thwape) == SVt_REGEXP);				\
-	&RXp_EXTFLAGS(SvANY(thwape));					\
+	const REGEXP *const _rx_extflags = (prog);			\
+	assert(SvTYPE(_rx_extflags) == SVt_REGEXP);			\
+	&RXp_EXTFLAGS(SvANY(_rx_extflags));				\
     }))
 #  define RX_ENGINE(prog)						\
     (*({								\
-	const REGEXP *const thwape = (prog);				\
-	assert(SvTYPE(thwape) == SVt_REGEXP);				\
-	&SvANY(thwape)->engine;						\
+	const REGEXP *const _rx_engine = (prog);			\
+	assert(SvTYPE(_rx_engine) == SVt_REGEXP);			\
+	&SvANY(_rx_engine)->engine;					\
     }))
 #  define RX_SUBBEG(prog)						\
     (*({								\
-	const REGEXP *const thwape = (prog);				\
-	assert(SvTYPE(thwape) == SVt_REGEXP);				\
-	&SvANY(thwape)->subbeg;						\
+	const REGEXP *const _rx_subbeg = (prog);			\
+	assert(SvTYPE(_rx_subbeg) == SVt_REGEXP);			\
+	&SvANY(_rx_subbeg)->subbeg;					\
     }))
 #  define RX_OFFS(prog)							\
     (*({								\
-	const REGEXP *const thwape = (prog);				\
-	assert(SvTYPE(thwape) == SVt_REGEXP);				\
-	&SvANY(thwape)->offs;						\
+	const REGEXP *const _rx_offs = (prog);				\
+	assert(SvTYPE(_rx_offs) == SVt_REGEXP);				\
+	&SvANY(_rx_offs)->offs;						\
     }))
 #  define RX_NPARENS(prog)						\
     (*({								\
-	const REGEXP *const thwape = (prog);				\
-	assert(SvTYPE(thwape) == SVt_REGEXP);				\
-	&SvANY(thwape)->nparens;					\
+	const REGEXP *const _rx_nparens = (prog);			\
+	assert(SvTYPE(_rx_nparens) == SVt_REGEXP);			\
+	&SvANY(_rx_nparens)->nparens;					\
     }))
 #else
 #  define RX_EXTFLAGS(prog)	RXp_EXTFLAGS((struct regexp *)SvANY(prog))
@@ -457,7 +457,7 @@ and check for NULL.
 
 /* Whether the pattern stored at RX_WRAPPED is in UTF-8  */
 #define RX_UTF8(prog)			SvUTF8(prog)
-    
+
 #define REXEC_COPY_STR	0x01		/* Need to copy the string. */
 #define REXEC_CHECKED	0x02		/* check_substr already checked. */
 #define REXEC_SCREAM	0x04		/* use scream table. */
@@ -468,16 +468,16 @@ and check for NULL.
 #  define ReREFCNT_inc(re)						\
     ({									\
 	/* This is here to generate a casting warning if incorrect.  */	\
-	REGEXP *const zwapp = (re);					\
-	assert(SvTYPE(zwapp) == SVt_REGEXP);				\
-	SvREFCNT_inc(zwapp);						\
-	zwapp;								\
+	REGEXP *const _rerefcnt_inc = (re);				\
+	assert(SvTYPE(_rerefcnt_inc) == SVt_REGEXP);			\
+	SvREFCNT_inc(_rerefcnt_inc);					\
+	_rerefcnt_inc;							\
     })
 #  define ReREFCNT_dec(re)						\
     ({									\
 	/* This is here to generate a casting warning if incorrect.  */	\
-	REGEXP *const boff = (re);					\
-	SvREFCNT_dec(boff);						\
+	REGEXP *const _rerefcnt_dec = (re);				\
+	SvREFCNT_dec(_rerefcnt_dec);					\
     })
 #else
 #  define ReREFCNT_dec(re)	SvREFCNT_dec(re)
