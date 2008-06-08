@@ -916,7 +916,7 @@ package Maintainers;
 
 	'Pod::Perldoc' =>
 		{
-		'MAINTAINER'	=> 'osfameron',
+		'MAINTAINER'	=> 'ferreira',
 		'FILES'		=> q[lib/Pod/Perldoc.pm lib/Pod/Perldoc],
 		'CPAN'		=> 1,
 		'UPSTREAM'	=> undef,
