@@ -181,7 +181,7 @@ typedef struct regexp_engine {
 /* Whether this is being called from a re:: function */
 #define RXapif_REGNAME         0x0400
 #define RXapif_REGNAMES        0x0800
-#define RXapif_REGNAMES_COUNT  0x1000 
+#define RXapif_REGNAMES_COUNT  0x1000
 
 /*
 =head1 REGEXP Functions
@@ -218,7 +218,7 @@ and check for NULL.
 #define SvRXOK(sv) (Perl_get_re_arg(aTHX_ sv) ? TRUE : FALSE)
 
 
-/* Flags stored in regexp->extflags 
+/* Flags stored in regexp->extflags
  * These are used by code external to the regexp engine
  *
  * Note that flags starting with RXf_PMf_ have exact equivalents
@@ -226,7 +226,7 @@ and check for NULL.
  * numerically here only for clarity.
  *
  * NOTE: if you modify any RXf flags you should run regen.pl or regcomp.pl
- * so that regnodes.h is updated with the changes. 
+ * so that regnodes.h is updated with the changes.
  *
  */
 
@@ -301,7 +301,7 @@ and check for NULL.
 
 /*
  * NOTE: if you modify any RXf flags you should run regen.pl or regcomp.pl
- * so that regnodes.h is updated with the changes. 
+ * so that regnodes.h is updated with the changes.
  *
  */
 
@@ -339,7 +339,7 @@ and check for NULL.
 
 /*
  * NOTE: if you modify any RXf flags you should run regen.pl or regcomp.pl
- * so that regnodes.h is updated with the changes. 
+ * so that regnodes.h is updated with the changes.
  *
  */
 
@@ -415,7 +415,7 @@ and check for NULL.
 
 /* Whether the pattern stored at RX_WRAPPED is in UTF-8  */
 #define RX_UTF8(prog)			(RX_EXTFLAGS(prog) & RXf_UTF8)
-    
+
 #define REXEC_COPY_STR	0x01		/* Need to copy the string. */
 #define REXEC_CHECKED	0x02		/* check_substr already checked. */
 #define REXEC_SCREAM	0x04		/* use scream table. */
