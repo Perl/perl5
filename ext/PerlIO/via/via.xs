@@ -89,7 +89,7 @@ PerlIOVia_method(pTHX_ PerlIO * f, const char *method, CV ** save, int flags,
 	    if (!s->fh) {
 		GV *gv = newGVgen(HvNAME_get(s->stash));
 		GvIOp(gv) = newIO();
-		s->fh = newRV_noinc((SV *) gv);
+		s->fh = newRV((SV *) gv);
 		s->io = GvIOp(gv);
 	    }
 	    IoIFP(s->io) = PerlIONext(f);
