@@ -1275,7 +1275,7 @@ PerlIORaw_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 	while (t && (l = *t)) {
 	    if (l->tab->Binmode) {
 		/* Has a handler - normal case */
-		if ((*l->tab->Binmode)(aTHX_ f) == 0) {
+		if ((*l->tab->Binmode)(aTHX_ t) == 0) {
 		    if (*t == l) {
 			/* Layer still there - move down a layer */
 			t = PerlIONext(t);
