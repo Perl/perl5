@@ -1232,7 +1232,7 @@ the scalar's value cannot change unless written to.
 		(((XPV*)  SvANY(sv))->xpv_len = (val)); } STMT_END
 #define SvEND_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
-		(SvCUR(sv) = (val) - SvPVX(sv)); } STMT_END
+		SvCUR_set(sv, (val) - SvPVX(sv)); } STMT_END
 
 #define SvPV_renew(sv,n) \
 	STMT_START { SvLEN_set(sv, n); \

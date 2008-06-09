@@ -5669,13 +5669,17 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                                 pv = (I32*)SvGROW(sv_dat, SvCUR(sv_dat) + sizeof(I32)+1);
                                 SvCUR_set(sv_dat, SvCUR(sv_dat) + sizeof(I32));
                                 pv[count] = RExC_npar;
-                                SvIVX(sv_dat)++;
+#ifdef PERL_DEBUG_COW
+				((XPVIV*) SvANY(sv_dat))->xiv_iv++;
+#else
+				SvIVX(sv_dat)++;
+#endif
                             }
                         } else {
                             (void)SvUPGRADE(sv_dat,SVt_PVNV);
                             sv_setpvn(sv_dat, (char *)&(RExC_npar), sizeof(I32));
                             SvIOK_on(sv_dat);
-                            SvIVX(sv_dat)= 1;
+                            SvIV_set(sv_dat, 1);
                         }
 #ifdef DEBUGGING
                         if (!av_store(RExC_paren_name_list, RExC_npar, SvREFCNT_inc(svname)))
