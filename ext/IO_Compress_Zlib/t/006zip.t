@@ -193,8 +193,7 @@ SKIP:
 {
     title "Create a simple zip - Deflate + STORE";
 
-    #my $lex = new LexFile my $file1;
-    my $file1 = "tryout.zip";
+    my $lex = new LexFile my $file1;
 
     my @content = qw(
                    hello 
