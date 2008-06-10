@@ -348,7 +348,7 @@ $r = runperl(
 is( $r, "Hello, world!\n", "-E given" );
 
 $r = runperl(
-    switches    => [ '-nE', q('} END { say q/affe/') ],
+    switches    => [ '-nE', q("} END { say q/affe/") ],
     stdin       => 'zomtek',
 );
 is( $r, "affe\n", '-E works outside of the block created by -n' );
