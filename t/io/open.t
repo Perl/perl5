@@ -9,7 +9,6 @@ BEGIN {
 $|  = 1;
 use warnings;
 use Config;
-$Is_VMS = $^O eq 'VMS';
 $Is_MacOS = $^O eq 'MacOS';
 
 plan tests => 108;
@@ -75,10 +74,7 @@ my $Perl = which_perl();
 
     unlink("afile");
 }
-
-SKIP: {
-    skip "open -| busted and noisy on VMS", 3 if $Is_VMS;
-
+{
     ok( open(my $f, '-|', <<EOC),     'open -|' );
     $Perl -e "print qq(a row\\n); print qq(another row\\n)"
 EOC
@@ -87,7 +83,6 @@ EOC
     is( scalar @rows, 2,                '       readline, list context' );
     ok( close($f),                      '       close' );
 }
-
 SKIP: {
     skip "Output for |- doesn't go to shell on MacOS", 5 if $Is_MacOS;
 
@@ -171,9 +166,7 @@ ok( -s 'afile' < 20,                '       -s' );
     unlink("afile");
 }
 
-SKIP: {
-    skip "open -| busted and noisy on VMS", 3 if $Is_VMS;
-
+{
     ok( open(local $f, '-|', <<EOC),  'open local $f, "-|", ...' );
     $Perl -e "print qq(a row\\n); print qq(another row\\n)"
 EOC
