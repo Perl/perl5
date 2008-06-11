@@ -1,6 +1,7 @@
 #!./perl
 
 BEGIN {
+    delete $ENV{PERL_DL_NONLAZY} if $] < 5.005_58; #Perl_byterun problem
     if ($ENV{PERL_CORE}){
 	chdir('t') if -d 't';
 	if ($^O eq 'MacOS') {
@@ -23,7 +24,9 @@ $|  = 1;
 use warnings;
 use strict;
 use Config;
-use Test::More tests=>3;
+use Test::More tests => 7;
+use B;
+use B::Debug;
 
 my $a;
 my $Is_VMS = $^O eq 'VMS';
@@ -66,3 +69,10 @@ $b=~s/\n/ /g;$b=~s/\s+/ /g;
 $b =~ s/\s+$//;
 is($a, $b);
 
+like(B::Debug::_printop(B::main_root),  qr/LISTOP\s+\[OP_LEAVE\]/);
+like(B::Debug::_printop(B::main_start), qr/OP\s+\[OP_ENTER\]/);
+
+$a = `$^X $path "-MO=Debug" -e 'B::main_root->debug' $redir`;
+like($a, qr/op_next\s+0x0/m);
+$a = `$^X $path "-MO=Debug" -e 'B::main_start->debug' $redir`;
+like($a, qr/PL_ppaddr\[OP_ENTER\]/m);
