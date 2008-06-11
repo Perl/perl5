@@ -1,11 +1,20 @@
 package B::Debug;
 
-our $VERSION = '1.05_02';
+our $VERSION = '1.06';
 
 use strict;
 use B qw(peekop class walkoptree walkoptree_exec
-         main_start main_root cstring sv_undef @specialsv_name);
-# <=5.008 had @specialsv_name exported from B::Asmdata
+         main_start main_root cstring sv_undef);
+our (@optype, @specialsv_name);
+require B;
+if ($] < 5.009) {
+  require B::Asmdata;
+  B::Asmdata->import qw(@optype @specialsv_name);
+} else {
+  B->import qw(@optype @specialsv_name);
+}
+my $have_B_Flags;
+eval { require B::Flags and $have_B_Flags++ };
 BEGIN {
     use Config;
     my $ithreads = $Config{'useithreads'} eq 'define';
@@ -34,7 +43,7 @@ sub B::OP::debug {
 	op_targ		%d
 	op_type		%d
 EOT
-    if ($] > 5.009) {
+    if (VERSION > 5.009) {
 	printf <<'EOT', $op->opt;
 	op_opt		%d
 EOT
@@ -43,10 +52,17 @@ EOT
 	op_seq		%d
 EOT
     }
-    printf <<'EOT', $op->flags, $op->private;
+    if ($have_B_Flags) {
+        printf <<'EOT', $op->flags, $op->flagspv, $op->private, $op->privatepv;
+	op_flags	%d	%s
+	op_private	%d	%s
+EOT
+    } else {
+        printf <<'EOT', $op->flags, $op->private;
 	op_flags	%d
 	op_private	%d
 EOT
+    }
 }
 
 sub B::UNOP::debug {
@@ -86,21 +102,21 @@ sub B::LISTOP::debug {
 sub B::PMOP::debug {
     my ($op) = @_;
     $op->B::LISTOP::debug();
-    printf "\top_pmreplroot\t0x%x\n", ${$op->pmreplroot};
+    printf "\top_pmreplroot\t0x%x\n", VERSION < 5.008 ? ${$op->pmreplroot} : $op->pmreplroot;
     printf "\top_pmreplstart\t0x%x\n", ${$op->pmreplstart};
-    printf "\top_pmnext\t0x%x\n", ${$op->pmnext} if $] < 5.009005;
+    printf "\top_pmnext\t0x%x\n", ${$op->pmnext} if VERSION < 5.009005;
     if (ITHREADS) {
       printf "\top_pmstashpv\t%s\n", cstring($op->pmstashpv);
       printf "\top_pmoffset\t%d\n", $op->pmoffset;
     } else {
       printf "\top_pmstash\t%s\n", cstring($op->pmstash);
     }
-    printf "\top_precomp->precomp\t%s\n", cstring($op->precomp);
+    printf "\top_precomp\t%s\n", cstring($op->precomp);
     printf "\top_pmflags\t0x%x\n", $op->pmflags;
-    printf "\top_reflags\t0x%x\n", $op->reflags if $] >= 5.009;
-    printf "\top_pmpermflags\t0x%x\n", $op->pmpermflags if $] < 5.009;
-    printf "\top_pmdynflags\t0x%x\n", $op->pmdynflags if $] < 5.009;
-    $op->pmreplroot->debug;
+    printf "\top_reflags\t0x%x\n", $op->reflags if VERSION >= 5.009;
+    printf "\top_pmpermflags\t0x%x\n", $op->pmpermflags if VERSION < 5.009;
+    printf "\top_pmdynflags\t0x%x\n", $op->pmdynflags if VERSION < 5.009;
+    $op->pmreplroot->debug if VERSION < 5.008;
 }
 
 sub B::COP::debug {
@@ -248,14 +264,23 @@ EOT
 sub B::AV::debug {
     my ($av) = @_;
     $av->B::SV::debug;
-    my(@array) = $av->ARRAY;
+    # tied arrays may leave out FETCHSIZE
+    my (@array) = eval { $av->ARRAY; };
     print "\tARRAY\t\t(", join(", ", map("0x" . $$_, @array)), ")\n";
-    printf <<'EOT', scalar(@array), $av->MAX, $av->OFF;
+    my $fill = eval { scalar(@array) };
+    if (ITHREADS) {
+      printf <<'EOT', $fill, $av->MAX, $av->OFF;
 	FILL		%d
 	MAX		%d
 	OFF		%d
 EOT
-    printf <<'EOT', $av->AvFLAGS if $] < 5.009;
+    } else {
+      printf <<'EOT', $fill, $av->MAX;
+	FILL		%d
+	MAX		%d
+EOT
+    }
+    printf <<'EOT', $av->AvFLAGS if VERSION < 5.009;
 	AvFLAGS		%d
 EOT
 }
@@ -326,8 +351,31 @@ See F<ext/B/README> and the newer L<B::Concise>, L<B::Terse>.
 With option -exec, walks tree in execute order,
 otherwise in basic order.
 
+=head1 Changes
+
+  1.06  2008-06-11 rurban
+	added B::Flags output
+	dual-life CPAN as B-Debug-1.06 and CORE
+	protect scalar(@array) if tied arrays leave out FETCHSIZE
+
+  1.05_03 2008-04-16 rurban
+	ithread fixes in B::AV
+	B-C-1.04_??
+
+  B-C-1.04_09 2008-02-24 rurban
+	support 5.8 (import Asmdata)
+
+  1.05_02 2008-02-21 rurban
+	added _printop
+	B-C-1.04_08 and CORE
+
+  1.05_01 2008-02-05 rurban
+	5.10 fix for op->seq
+	B-C-1.04_04
+
 =head1 AUTHOR
 
 Malcolm Beattie, C<mbeattie@sable.ox.ac.uk>
+Reini Urban C<rurban@cpan.org>
 
 =cut

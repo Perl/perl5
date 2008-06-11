@@ -66,6 +66,7 @@ package Maintainers;
 	'rkobes'	=> 'Randy Kobes <rkobes@cpan.org>',
 	'rmbarker'	=> 'Robin Barker <rmbarker@cpan.org>',
 	'rra'		=> 'Russ Allbery <rra@cpan.org>',
+	'rurban'	=> 'Reini Urban <rurban@cpan.org>',
 	'sadahiro'	=> 'SADAHIRO Tomoyuki <SADAHIRO@cpan.org>',
 	'salva'		=> 'Salvador Fandiño García <salva@cpan.org>',
 	'saper'		=> 'Sébastien Aperghis-Tramoni <saper@cpan.org>',
@@ -122,6 +123,13 @@ package Maintainers;
 		'MAINTAINER'	=> 'smccam',
 		'FILES'		=> q[ext/B/B/Concise.pm ext/B/t/concise.t],
 		'CPAN'		=> 0,
+		},
+
+	'B::Debug' =>
+		{
+		'MAINTAINER'	=> 'rurban',
+		'FILES'		=> q[ext/B/B/Debug.pm ext/B/t/debug.t],
+		'CPAN'		=> 1,
 		},
 
 	'B::Deparse' =>
