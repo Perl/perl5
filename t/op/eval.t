@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..95\n";
+print "1..98\n";
 
 eval 'print "ok 1\n";';
 
@@ -485,4 +485,63 @@ print "ok $test - eval and last\n"; $test++;
 }
 
 
+# [perl #51370] eval { die "\x{a10d}" } followed by eval { 1 } did not reset
+# length $@ 
+$@ = "";
+eval { die "\x{a10d}"; };
+$_ = length $@;
+eval { 1 };
+
+print "not " if ($@ ne "");
+print "ok $test # length of \$@ after eval\n"; $test++;
+
+print "not " if (length $@ != 0);
+print "ok $test # length of \$@ after eval\n"; $test++;
+
+# Check if eval { 1 }; compeltly resets $@
+if (eval "use Devel::Peek; 1;") {
+  
+  open PROG, ">", "peek_eval_$$.t" or die "Can't create test file";
+  print PROG <<'END_EVAL_TEST';
+    use Devel::Peek;
+    $! = 0;
+    $@ = $!;
+    my $ok = 0;
+    open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
+    if (open(OUT,">peek_eval$$")) {
+      open(STDERR, ">&OUT") or die "Can't dup OUT: $!";
+      Dump($@);
+      print STDERR "******\n";
+      eval { die "\x{a10d}"; };
+      $_ = length $@;
+      eval { 1 };
+      Dump($@);
+      open(STDERR, ">&SAVERR") or die "Can't restore STDERR: $!";
+      close(OUT);
+      if (open(IN, "peek_eval$$")) {
+        local $/;
+        my $in = <IN>;
+        my ($first, $second) = split (/\*\*\*\*\*\*\n/, $in, 2);
+        $first =~ s/,pNOK//;
+        $ok = 1 if ($first eq $second);
+      }
+    }
+
+    print $ok;
+    END {
+      1 while unlink("peek_eval$$");
+    }
+END_EVAL_TEST
+   close PROG;
+
+   my $ok = runperl(progfile => "peek_eval_$$.t");
+   print "not " unless $ok;
+   print "ok $test # eval { 1 } completly resets \$@\n";
+
+   $test++;
+   1 while unlink("peek_eval_$$.t");
+}
+else {
+  print "ok $test # skipped - eval { 1 } completly resets \$@";
+}
 
