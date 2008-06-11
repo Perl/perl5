@@ -5985,6 +5985,8 @@ extern void moncontrol(int);
 
 #endif /* Include guard */
 
+#define CLEAR_ERRSV() STMT_START { sv_setpvn(ERRSV,"",0); if (SvMAGICAL(ERRSV)) { mg_free(ERRSV); } SvPOK_only(ERRSV); } STMT_END
+
 /*
  * Local variables:
  * c-indentation-style: bsd

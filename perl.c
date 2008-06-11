@@ -2653,8 +2653,9 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
  redo_body:
 	    CALL_BODY_SUB((OP*)&myop);
 	    retval = PL_stack_sp - (PL_stack_base + oldmark);
-	    if (!(flags & G_KEEPERR))
-		sv_setpvn(ERRSV,"",0);
+	    if (!(flags & G_KEEPERR)) {
+		CLEAR_ERRSV();
+	    }
 	    break;
 	case 1:
 	    STATUS_ALL_FAILURE;
@@ -2752,8 +2753,9 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
  redo_body:
 	CALL_BODY_EVAL((OP*)&myop);
 	retval = PL_stack_sp - (PL_stack_base + oldmark);
-	if (!(flags & G_KEEPERR))
-	    sv_setpvn(ERRSV,"",0);
+	if (!(flags & G_KEEPERR)) {
+	    CLEAR_ERRSV();
+	}
 	break;
     case 1:
 	STATUS_ALL_FAILURE;
@@ -3525,7 +3527,7 @@ S_init_main_stash(pTHX)
     gv_SVadd(PL_errgv);
 #endif
     sv_grow(ERRSV, 240);	/* Preallocate - for immediate signals. */
-    sv_setpvn(ERRSV, "", 0);
+    CLEAR_ERRSV();
     PL_curstash = PL_defstash;
     CopSTASH_set(&PL_compiling, PL_defstash);
     PL_debstash = GvHV(gv_fetchpvs("DB::", GV_ADDMULTI, SVt_PVHV));
