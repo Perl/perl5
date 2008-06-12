@@ -8,7 +8,7 @@ BEGIN {
     }
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
 }
@@ -183,5 +183,7 @@ is($$obj2{'frowny'}, ':(', 'Shared object changed');
 
 is($$sref1, 'foo', 'Scalar ref unchanged');
 is($$sref2, 'zzz', 'Shared scalar ref changed');
+
+exit(0);
 
 # EOF

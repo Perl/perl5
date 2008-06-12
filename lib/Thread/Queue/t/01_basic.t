@@ -8,7 +8,7 @@ BEGIN {
     }
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
 }
@@ -128,5 +128,7 @@ threads->create(sub {
 is($q->pending(), 1, 'Queue count after thread');
 is($q->dequeue(), 'done', 'Thread reported done');
 is($q->pending(), 0, 'Empty queue');
+
+exit(0);
 
 # EOF

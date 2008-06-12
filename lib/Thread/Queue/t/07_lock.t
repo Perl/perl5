@@ -8,7 +8,7 @@ BEGIN {
     }
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
 }
@@ -50,5 +50,7 @@ $st->up();
 my @x = $q->dequeue_nb(100);
 is_deeply(\@x, [1..5,8..10], 'Main dequeues');
 threads::yield();
+
+exit(0);
 
 # EOF

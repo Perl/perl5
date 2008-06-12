@@ -70,4 +70,6 @@ like($@, qr/Invalid 'count'/, $@);
 eval { $q->extract(0, 'foo'); };
 like($@, qr/Invalid 'count'/, $@);
 
+exit(0);
+
 # EOF
