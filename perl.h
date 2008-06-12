@@ -2937,9 +2937,9 @@ typedef pthread_key_t	perl_key;
 		  PL_statusvalue_vms == SS$_NORMAL;	\
 		else					\
 		  if (MY_POSIX_EXIT)			\
-		    PL_statusvalue_vms =	\
-		       (C_FAC_POSIX | (evalue << 3 ) | (evalue == 1)? \
-		        (STS$K_ERROR | STS$M_INHIB_MSG) : 1); \
+		    PL_statusvalue_vms =		\
+		       (C_FAC_POSIX | (evalue << 3 ) |	\
+		       ((evalue == 1) ? (STS$K_ERROR | STS$M_INHIB_MSG) : 1)); \
 		  else					\
 		    PL_statusvalue_vms = SS$_ABORT; \
 	      } else { /* forgive them Perl, for they have sinned */ \
@@ -2965,6 +2965,9 @@ typedef pthread_key_t	perl_key;
    * actual exit code will can be retrieved by the calling program or
    * shell.
    *
+   * A POSIX exit code is from 0 to 255.  If the exit code is higher
+   * than this, it needs to be assumed that it is a VMS exit code and
+   * passed through.
    */
 
 #   define STATUS_EXIT_SET(n)				\
@@ -2972,9 +2975,10 @@ typedef pthread_key_t	perl_key;
 	    I32 evalue = (I32)n;			\
 	    PL_statusvalue = evalue;			\
 	    if (MY_POSIX_EXIT)				\
-		PL_statusvalue_vms =			\
-		  (C_FAC_POSIX | (evalue << 3 ) | (evalue == 1)? \
-		   (STS$K_ERROR | STS$M_INHIB_MSG) : 1); \
+		if (evalue > 255) PL_statusvalue_vms = evalue; else {	\
+		  PL_statusvalue_vms = \
+		    (C_FAC_POSIX | (evalue << 3 ) |	\
+		     ((evalue == 1) ? (STS$K_ERROR | STS$M_INHIB_MSG) : 1));} \
 	    else					\
 		PL_statusvalue_vms = evalue ? evalue : SS$_NORMAL; \
 	    set_vaxc_errno(PL_statusvalue_vms);		\

@@ -352,6 +352,7 @@ static int vms_process_case_tolerant = 1;
 int vms_vtf7_filenames = 0;
 int gnv_unix_shell = 0;
 static int vms_unlink_all_versions = 0;
+static int vms_posix_exit = 0;
 
 /* bug workarounds if needed */
 int decc_bug_readdir_efs1 = 0;
@@ -9629,11 +9630,32 @@ Perl_readdir(pTHX_ DIR *dd)
 	&vs_spec,
 	&vs_len);
 
-    /* Drop NULL extensions on UNIX file specification */
-    if ((dd->flags & PERL_VMSDIR_M_UNIXSPECS &&
-	(e_len == 1) && decc_readdir_dropdotnotype)) {
-	e_len = 0;
-	e_spec[0] = '\0';
+    if (dd->flags & PERL_VMSDIR_M_UNIXSPECS) {
+
+        /* In Unix report mode, remove the ".dir;1" from the name */
+        /* if it is a real directory. */
+        if (decc_filename_unix_report || decc_efs_charset) {
+            if ((e_len == 4) && (vs_len == 2) && (vs_spec[1] == '1')) {
+                if ((toupper(e_spec[1]) == 'D') &&
+                    (toupper(e_spec[2]) == 'I') &&
+                    (toupper(e_spec[3]) == 'R')) {
+                    Stat_t statbuf;
+                    int ret_sts;
+
+                    ret_sts = stat(buff, (stat_t *)&statbuf);
+                    if ((ret_sts == 0) && S_ISDIR(statbuf.st_mode)) {
+                        e_len = 0;
+                        e_spec[0] = 0;
+                    }
+                }
+            }
+        }
+
+        /* Drop NULL extensions on UNIX file specification */
+	if ((e_len == 1) && decc_readdir_dropdotnotype) {
+	    e_len = 0;
+	    e_spec[0] = '\0';
+        }
     }
 
     strncpy(dd->entry.d_name, n_spec, n_len + e_len);
@@ -9892,6 +9914,19 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
     *cp2 = '\0';
     if (do_tovmsspec(resspec,cp,0,NULL)) { 
       s = vmsspec;
+
+      /* When a UNIX spec with no file type is translated to VMS, */
+      /* A trailing '.' is appended under ODS-5 rules.            */
+      /* Here we do not want that trailing "." as it prevents     */
+      /* Looking for a implied ".exe" type. */
+      if (decc_efs_charset) {
+          int i;
+          i = strlen(vmsspec);
+          if (vmsspec[i-1] == '.') {
+              vmsspec[i-1] = '\0';
+          }
+      }
+
       if (*rest) {
         for (cp2 = vmsspec + strlen(vmsspec);
              *rest && cp2 - vmsspec < sizeof vmsspec;
@@ -12758,6 +12793,11 @@ Perl_vms_start_glob
     unsigned long int lff_flags = 0;
     int rms_sts;
 
+    if (!SvOK(tmpglob)) {
+        SETERRNO(ENOENT,RMS$_FNF);
+        return NULL;
+    }
+
 #ifdef VMS_LONGNAME_SUPPORT
     lff_flags = LIB$M_FIL_LONG_NAMES;
 #endif
@@ -12975,14 +13015,41 @@ vmsrealpath_fromperl(pTHX_ CV *cv)
 /*
  * A thin wrapper around decc$symlink to make sure we follow the 
  * standard and do not create a symlink with a zero-length name.
+ *
+ * Also in ODS-2 mode, existing tests assume that the link target
+ * will be converted to UNIX format.
  */
-/*{{{ int my_symlink(const char *path1, const char *path2)*/
-int my_symlink(const char *path1, const char *path2) {
-  if (!path2 || !*path2) {
+/*{{{ int my_symlink(pTHX_ const char *contents, const char *link_name)*/
+int Perl_my_symlink(pTHX_ const char *contents, const char *link_name) {
+  if (!link_name || !*link_name) {
     SETERRNO(ENOENT, SS$_NOSUCHFILE);
     return -1;
   }
-  return symlink(path1, path2);
+
+  if (decc_efs_charset) {
+      return symlink(contents, link_name);
+  } else {
+      int sts;
+      char * utarget;
+
+      /* Unless we are in ODS-5 mode, convert the symlink target to UNIX */
+      /* because in order to work, the symlink target must be in UNIX format */
+
+      /* As symbolic links can hold things other than files, we will only do */
+      /* the conversion in in ODS-2 mode */
+
+      Newx(utarget, VMS_MAXRSS + 1, char);
+      if (do_tounixspec(contents, utarget, 0, NULL) == NULL) {
+
+          /* This should not fail, as an untranslatable filename */
+          /* should be passed through */
+          utarget = (char *)contents;
+      }
+      sts = symlink(utarget, link_name);
+      Safefree(utarget);
+      return sts;
+  }
+
 }
 /*}}}*/
 
@@ -13018,9 +13085,7 @@ Perl_sys_intern_init(pTHX)
 
     VMSISH_HUSHED = 0;
 
-    /* fix me later to track running under GNV */
-    /* this allows some limited testing */
-    MY_POSIX_EXIT = decc_filename_unix_report;
+    MY_POSIX_EXIT = vms_posix_exit;
 
     x = (float)ix;
     MY_INV_RAND_MAX = 1./x;
@@ -13182,8 +13247,101 @@ mp_do_vms_realpath(pTHX_ const char *filespec, char *outbuf,
 	                if (haslower) __mystrtolower(rslt);
 	            }
 	        }
-	}
+	} else {
 
+	    /* Now for some hacks to deal with backwards and forward */
+	    /* compatibilty */
+	    if (!decc_efs_charset) {
+
+		/* 1. ODS-2 mode wants to do a syntax only translation */
+		rslt = do_rmsexpand(filespec, outbuf,
+				    0, NULL, 0, NULL, utf8_fl);
+
+	    } else {
+		if (decc_filename_unix_report) {
+		    char * dir_name;
+		    char * vms_dir_name;
+		    char * file_name;
+
+		    /* 2. ODS-5 / UNIX report mode should return a failure */
+		    /*    if the parent directory also does not exist */
+		    /*    Otherwise, get the real path for the parent */
+		    /*    and add the child to it.
+
+		    /* basename / dirname only available for VMS 7.0+ */
+		    /* So we may need to implement them as common routines */
+
+		    Newx(dir_name, VMS_MAXRSS + 1, char);
+		    Newx(vms_dir_name, VMS_MAXRSS + 1, char);
+		    dir_name[0] = '\0';
+		    file_name = NULL;
+
+		    /* First try a VMS parse */
+		    sts = vms_split_path
+			  (filespec,
+			   &v_spec,
+			   &v_len,
+			   &r_spec,
+			   &r_len,
+			   &d_spec,
+			   &d_len,
+			   &n_spec,
+			   &n_len,
+			   &e_spec,
+			   &e_len,
+			   &vs_spec,
+			   &vs_len);
+
+		    if (sts == 0) {
+			/* This is VMS */
+
+			int dir_len = v_len + r_len + d_len + n_len;
+			if (dir_len > 0) {
+			   strncpy(dir_name, filespec, dir_len);
+			   dir_name[dir_len] = '\0';
+			   file_name = (char *)&filespec[dir_len + 1];
+			}
+		    } else {
+			/* This must be UNIX */
+			char * tchar;
+
+			tchar = strrchr(filespec, '/');
+
+			if (tchar != NULL) {
+			    int dir_len = tchar - filespec;
+			    strncpy(dir_name, filespec, dir_len);
+			    dir_name[dir_len] = '\0';
+			    file_name = (char *) &filespec[dir_len + 1];
+			}
+		    }
+
+		    /* Dir name is defaulted */
+		    if (dir_name[0] == 0) {
+			dir_name[0] = '.';
+			dir_name[1] = '\0';
+		    }
+
+		    /* Need realpath for the directory */
+		    sts = vms_fid_to_name(vms_dir_name,
+					  VMS_MAXRSS + 1,
+					  dir_name);
+
+		    if (sts == 0) {
+		        /* Now need to pathify it.
+		        char *tdir = do_pathify_dirspec(vms_dir_name,
+							outbuf, utf8_fl);
+
+			/* And now add the original filespec to it */
+			if (file_name != NULL) {
+			    strcat(outbuf, file_name);
+			}
+			return outbuf;
+		    }
+		    Safefree(vms_dir_name);
+		    Safefree(dir_name);
+		}
+            }
+        }
         Safefree(vms_spec);
     }
     return rslt;
@@ -13401,7 +13559,6 @@ static int set_features
     gnv_unix_shell = 0;
     status = sys_trnlnm("GNV$UNIX_SHELL", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
-       if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T')) {
 	 gnv_unix_shell = 1;
 	 set_feature_default("DECC$EFS_CASE_PRESERVE", 1);
 	 set_feature_default("DECC$EFS_CHARSET", 1);
@@ -13410,9 +13567,7 @@ static int set_features
 	 set_feature_default("DECC$READDIR_DROPDOTNOTYPE", 1);
 	 set_feature_default("DECC$DISABLE_POSIX_ROOT", 0);
 	 vms_unlink_all_versions = 1;
-       }
-       else
-	 gnv_unix_shell = 0;
+	 vms_posix_exit = 1;
     }
 #endif
 
@@ -13483,8 +13638,10 @@ static int set_features
     s = decc$feature_get_index("DECC$FILENAME_UNIX_REPORT");
     if (s >= 0) {
 	decc_filename_unix_report = decc$feature_get_value(s, 1);
-	if (decc_filename_unix_report > 0)
+	if (decc_filename_unix_report > 0) {
 	    decc_filename_unix_report = 1;
+	    vms_posix_exit = 1;
+	}
 	else
 	    decc_filename_unix_report = 0;
     }
@@ -13596,7 +13753,7 @@ static int set_features
     }
 #endif
 
-#if defined(JPI$_CASE_LOOKUP_PERM) && !defined(__VAX)
+#if defined(JPI$_CASE_LOOKUP_PERM) && defined(PPROP$K_CASE_BLIND) && !defined(__VAX)
 
      /* Report true case tolerance */
     /*----------------------------*/
@@ -13611,6 +13768,17 @@ static int set_features
 	vms_process_case_tolerant = 0;
 
 #endif
+
+    /* USE POSIX/DCL Exit codes - Recommended, but needs to default to  */
+    /* for strict backward compatibilty */
+    status = sys_trnlnm
+	("PERL_VMS_POSIX_EXIT", val_str, sizeof(val_str));
+    if ($VMS_STATUS_SUCCESS(status)) {
+       if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
+	 vms_posix_exit = 1;
+       else
+	 vms_posix_exit = 0;
+    }
 
 
     /* CRTL can be initialized past this point, but not before. */
