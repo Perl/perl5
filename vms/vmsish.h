@@ -449,7 +449,11 @@ struct interp_intern {
  *	getgrgid() routines are available to get group entries.
  *	The getgrent() has a separate definition, HAS_GETGRENT.
  */
+#if __CRTL_VER >= 70302000
+#define HAS_GROUP		/**/
+#else
 #undef HAS_GROUP		/**/
+#endif
 
 /* HAS_PASSWD
  *	This symbol, if defined, indicates that the getpwnam() and
