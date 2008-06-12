@@ -8,7 +8,7 @@ BEGIN {
     }
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
 }
@@ -133,5 +133,7 @@ ok(37, !defined delete($foo[0]), "Check that delete works from a thread");
 }
 
 ok(44, is_shared(@foo), "Check for sharing");
+
+exit(0);
 
 # EOF

@@ -8,7 +8,7 @@ BEGIN {
     }
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
 }
@@ -155,5 +155,7 @@ ok($test++, 1, 'Loaded');
     ok($test++, is_shared($hsh->{'foo'}), 'Shared hash ref elem');
     ok($test++, $$hsh{'foo'}[1] eq 'bar', 'Cloned structure');
 }
+
+exit(0);
 
 # EOF

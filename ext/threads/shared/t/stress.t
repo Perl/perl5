@@ -8,11 +8,11 @@ BEGIN {
     }
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
     if ($^O eq 'hpux' && $Config{osvers} <= 10.20) {
-        print("1..0 # Skip: Broken under HP-UX 10.20\n");
+        print("1..0 # SKIP Broken under HP-UX 10.20\n");
         exit(0);
     }
 }
@@ -128,5 +128,7 @@ use threads::shared;
         print("\n");
     }
 }
+
+exit(0);
 
 # EOF

@@ -54,4 +54,6 @@ foreach my $func (qw(cond_wait cond_signal cond_broadcast)) {
     ok( "@array", "1 2 3 4" );
 }
 
+exit(0);
+
 # EOF
