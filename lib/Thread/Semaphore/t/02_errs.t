@@ -42,4 +42,6 @@ like($@, $err, $@);
 eval { $s->up('foo'); };
 like($@, $err, $@);
 
+exit(0);
+
 # EOF
