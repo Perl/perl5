@@ -57,7 +57,7 @@ my $rc = $thr->join();
 ok(! defined($rc), 'Exited: threads->exit()');
 
 
-run_perl(prog => 'use threads 1.69;' .
+run_perl(prog => 'use threads 1.71;' .
                  'threads->exit(86);' .
                  'exit(99);',
          nolib => ($ENV{PERL_CORE}) ? 0 : 1,
@@ -107,7 +107,7 @@ $rc = $thr->join();
 ok(! defined($rc), 'Exited: $thr->set_thread_exit_only');
 
 
-run_perl(prog => 'use threads 1.69 qw(exit thread_only);' .
+run_perl(prog => 'use threads 1.71 qw(exit thread_only);' .
                  'threads->create(sub { exit(99); })->join();' .
                  'exit(86);',
          nolib => ($ENV{PERL_CORE}) ? 0 : 1,
@@ -117,7 +117,7 @@ run_perl(prog => 'use threads 1.69 qw(exit thread_only);' .
     is($?>>8, 86, "'use threads 'exit' => 'thread_only'");
 }
 
-my $out = run_perl(prog => 'use threads 1.69;' .
+my $out = run_perl(prog => 'use threads 1.71;' .
                            'threads->create(sub {' .
                            '    exit(99);' .
                            '});' .
@@ -133,7 +133,7 @@ my $out = run_perl(prog => 'use threads 1.69;' .
 like($out, '1 finished and unjoined', "exit(status) in thread");
 
 
-$out = run_perl(prog => 'use threads 1.69 qw(exit thread_only);' .
+$out = run_perl(prog => 'use threads 1.71 qw(exit thread_only);' .
                         'threads->create(sub {' .
                         '   threads->set_thread_exit_only(0);' .
                         '   exit(99);' .
@@ -150,7 +150,7 @@ $out = run_perl(prog => 'use threads 1.69 qw(exit thread_only);' .
 like($out, '1 finished and unjoined', "set_thread_exit_only(0)");
 
 
-run_perl(prog => 'use threads 1.69;' .
+run_perl(prog => 'use threads 1.71;' .
                  'threads->create(sub {' .
                  '   $SIG{__WARN__} = sub { exit(99); };' .
                  '   die();' .
@@ -171,5 +171,7 @@ $thr = threads->create(sub {
 ok($thr, 'Created: threads->exit() in thread warn handler');
 $rc = $thr->join();
 ok(! defined($rc), 'Exited: threads->exit() in thread warn handler');
+
+exit(0);
 
 # EOF

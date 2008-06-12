@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.69';
+our $VERSION = '1.71';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -134,7 +134,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.69
+This document describes threads version 1.71
 
 =head1 SYNOPSIS
 
@@ -967,6 +967,21 @@ reconstituting it in the joining thread.  If you're using Perl 5.10.0 or
 later, and if the class supports L<shared objects|threads::shared/"OBJECTS">,
 you can pass them via L<shared queues| Thread::Queue>.
 
+=item END blocks in threads
+
+It is possible to add L<END blocks|perlmod/"BEGIN, UNITCHECK, CHECK, INIT and
+END"> to threads by using L<require|perlfunc/"require VERSION"> or
+L<eval|perlfunc/"eval EXPR"> with the appropriate code.  These C<END> blocks
+will then be executed when the thread's interpreter is destroyed (i.e., either
+during a C<-E<gt>join()> call, or at program termination).
+
+However, calling any L<threads> methods in such an C<END> block will most
+likely I<fail> (e.g., the application may hang, or generate an error) due to
+mutexes that are needed to control functionality within the L<threads> module.
+
+For this reason, the use of C<END> blocks in threads is B<strongly>
+discouraged.
+
 =item Perl Bugs and the CPAN Version of L<threads>
 
 Support for threads extends beyond the code in this module (i.e.,
@@ -996,7 +1011,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.69/threads.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.71/threads.pm>
 
 Source repository:
 L<http://code.google.com/p/threads-shared/>
@@ -1016,9 +1031,11 @@ L<http://www.perlmonks.org/?node_id=532956>
 
 Artur Bergman E<lt>sky AT crucially DOT netE<gt>
 
-threads is released under the same license as Perl.
-
 CPAN version produced by Jerry D. Hedden <jdhedden AT cpan DOT org>
+
+=head1 LICENSE
+
+threads is released under the same license as Perl.
 
 =head1 ACKNOWLEDGEMENTS
 

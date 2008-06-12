@@ -8,7 +8,7 @@ BEGIN {
     }
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
 }
@@ -23,7 +23,7 @@ BEGIN {
         threads::shared->import();
     };
     if ($@ || ! $threads::shared::threads_shared) {
-        print("1..0 # Skip: threads::shared not available\n");
+        print("1..0 # SKIP threads::shared not available\n");
         exit(0);
     }
 
@@ -95,7 +95,7 @@ if ($] != 5.008)
         my $not = eval { Config::myconfig() } ? '' : 'not ';
         print "${not}ok $test - Are we able to call Config::myconfig after clone\n";
     } else {
-        print "ok $test # skip: Are we able to call Config::myconfig after clone\n";
+        print "ok $test # SKIP Are we able to call Config::myconfig after clone\n";
     }
     $test++;
 }
@@ -123,7 +123,7 @@ threads->create(sub {
             print $@ =~ /disallowed/
               ? '' : 'not ', "ok $test # TODO $TODO - unique_hash\n";
         } else {
-            print("ok $test # skip: $TODO - unique_hash\n");
+            print("ok $test # SKIP $TODO - unique_hash\n");
         }
         $test++;
     })->join;
@@ -138,7 +138,7 @@ for my $decl ('my $x : unique', 'sub foo : unique') {
             print $@ =~ /^The 'unique' attribute may only be applied to 'our' variables/
                     ? '' : 'not ', "ok $test - $decl\n";
         } else {
-            print("ok $test # skip: $decl\n");
+            print("ok $test # SKIP $decl\n");
         }
         $test++;
     }
@@ -177,5 +177,7 @@ is(keys(%h), 1, "keys correct in parent with restricted hash");
 
 $child = threads->create(sub { return (scalar(keys(%h))); })->join;
 is($child, 1, "keys correct in child with restricted hash");
+
+exit(0);
 
 # EOF

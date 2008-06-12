@@ -8,7 +8,7 @@ BEGIN {
     }
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
 }
@@ -23,12 +23,12 @@ BEGIN {
         threads::shared->import();
     };
     if ($@ || ! $threads::shared::threads_shared) {
-        print("1..0 # Skip: threads::shared not available\n");
+        print("1..0 # SKIP threads::shared not available\n");
         exit(0);
     }
 
     if (($] < 5.008002) && ($threads::shared::VERSION < 0.92)) {
-        print("1..0 # Skip: Needs threads::shared 0.92 or later\n");
+        print("1..0 # SKIP Needs threads::shared 0.92 or later\n");
         exit(0);
     }
 
@@ -335,5 +335,7 @@ TEST_STARTS_HERE:
     sleep(1);
 }
 ok($COUNT == 17, "Done - $COUNT threads");
+
+exit(0);
 
 # EOF

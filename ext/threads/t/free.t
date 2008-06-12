@@ -8,7 +8,7 @@ BEGIN {
     }
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
 }
@@ -23,7 +23,7 @@ BEGIN {
         threads::shared->import();
     };
     if ($@ || ! $threads::shared::threads_shared) {
-        print("1..0 # Skip: threads::shared not available\n");
+        print("1..0 # SKIP threads::shared not available\n");
         exit(0);
     }
 
@@ -211,5 +211,7 @@ sub threading_3 {
     sleep(1);
 }
 ok($COUNT == 2, "Done - $COUNT threads");
+
+exit(0);
 
 # EOF
