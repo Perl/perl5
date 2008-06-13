@@ -49,11 +49,6 @@
 #include "perl.h"
 #include "XSUB.h"
 
-/* N.B.:
- * dl_debug and dl_last_error are static vars; you'll need to deal
- * with them appropriately if you need context independence
- */
-
 #include <descrip.h>
 #include <fscndef.h>
 #include <lib$routines.h>
@@ -119,6 +114,7 @@ copy_errmsg(msg,unused)
       strncat(dl_last_error, msg->dsc$a_pointer, msg->dsc$w_length);
       dl_last_error[errlen+msg->dsc$w_length+1] = '\0';
     }
+    DLDEBUG(2,PerlIO_printf(Perl_debug_log, "Saved error message: %s\n", dl_last_error));
     return 0;
 }
 
@@ -136,19 +132,6 @@ dl_set_error(sts,stv)
     _ckvmssts(sys$putmsg(vec,copy_errmsg,0,0));
 }
 
-static unsigned int
-findsym_handler(void *sig, void *mech)
-{
-    dTHX;
-    unsigned long int myvec[8],args, *usig = (unsigned long int *) sig;
-    /* Be paranoid and assume signal vector passed in might be readonly */
-    myvec[0] = args = usig[0] > 10 ? 9 : usig[0] - 1;
-    while (--args) myvec[args] = usig[args];
-    _ckvmssts(sys$putmsg(myvec,copy_errmsg,0,0));
-    DLDEBUG(2,PerlIO_printf(Perl_debug_log, "findsym_handler: received\n\t%s\n",dl_last_error));
-    return SS$_CONTINUE;
-}
-
 /* wrapper for lib$find_image_symbol, so signalled errors can be saved
  * for dl_error and then returned */
 static unsigned long int
@@ -158,7 +141,7 @@ my_find_image_symbol(struct dsc$descriptor_s *imgname,
                      struct dsc$descriptor_s *defspec)
 {
   unsigned long int retsts;
-  VAXC$ESTABLISH(findsym_handler);
+  VAXC$ESTABLISH(lib$sig_to_ret);
   retsts = lib$find_image_symbol(imgname,symname,entry,defspec,DL_CASE_SENSITIVE);
   return retsts;
 }
@@ -350,7 +333,7 @@ dl_find_symbol(librefptr,symname)
     DLDEBUG(2,PerlIO_printf(Perl_debug_log, "\tentry point is %d\n",
                       (unsigned long int) entry));
     if (!(sts & 1)) {
-      /* error message already saved by findsym_handler */
+      dl_set_error(sts,0);
       ST(0) = &PL_sv_undef;
     }
     else ST(0) = sv_2mortal(newSViv(PTR2IV(entry)));
