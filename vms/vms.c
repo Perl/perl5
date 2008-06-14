@@ -10374,7 +10374,7 @@ int my_fclose(FILE *fp) {
     unsigned int fd = fileno(fp);
     unsigned int fdoff = fd / sizeof(unsigned int);
 
-    if (sockflagsize && fdoff <= sockflagsize)
+    if (sockflagsize && fdoff < sockflagsize)
       sockflags[fdoff] &= ~(1 << fd % sizeof(unsigned int));
   }
   return fclose(fp);
