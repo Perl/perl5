@@ -47,7 +47,7 @@ sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 package main;
 
 $| = 1;
-use Test::More tests => 556;
+use Test::More tests => 558;
 
 
 $a = new Oscalar "087";
@@ -1425,6 +1425,22 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     is($aref/1, $num_val, 'division of ref');
     is($aref%100, $num_val%100, 'modulo of ref');
     is($aref**1, $num_val, 'exponentiation of ref');
+}
+
+{
+    package CopyConstructorFallback;
+    use overload
+        '++'        => sub { "$_[0]"; $_[0] },
+        fallback    => 1;
+    sub new { bless {} => shift }
+
+    package main;
+
+    my $o = CopyConstructorFallback->new;
+    my $x = $o++; # would segfault
+    my $y = ++$o;
+    is($x, $o, "copy constructor falls back to assignment (postinc)");
+    is($y, $o, "copy constructor falls back to assignment (preinc)");
 }
 
 # EOF
