@@ -115,10 +115,13 @@ $/ = "\n";
 }
 
 
-if (not eval q/use PerlIO::scalar; 1/) {
+if (not eval q/use PerlIO::scalar; use PerlIO::via::scalar; 1/) {
   # In-memory files necessitate PerlIO::via::scalar, thus a perl with
   # perlio and dynaloading enabled. miniperl won't be able to run this
   # test, so skip it
+
+  # PerlIO::via::scalar has to be tested as well.
+  # use PerlIO::scalar succeeds with ./TEST and with ./perl harness but not with ./perl
 
   for $test ($test_count .. $test_count + ($test_count_end - $test_count_start - 1)) {
     print "ok $test # skipped - Can't test in memory file with miniperl/without PerlIO::Scalar\n";
