@@ -1,0 +1,20 @@
+#!/usr/bin/perl
+
+die "usage: $0 [git-log-options] num" unless @ARGV;
+
+my $num = 1;
+
+for (@ARGV) {
+	m{^\d+$} && (($change,$_) = ($_,undef));
+	m{^-\d+$} && (($num,$_) = (-$_,undef));
+}
+
+my $grep = "--grep=^p4raw-id:.*\@$change\$";
+@ARGV = grep { defined } @ARGV;
+
+if ( -t STDOUT or @ARGV ) {
+	system(qw(git log), $grep, "-$num", "--all", @ARGV);
+}
+else {
+	system(qw(git rev-list -1 --all), $grep);
+}
