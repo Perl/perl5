@@ -186,14 +186,12 @@ EOE
 	   "checking syswrite() output on :utf8 streams by reading it back in");
     }
 }
+SKIP: {
+    skip("no perlio", 2) unless (find PerlIO::Layer 'perlio');
 
-{
     eval q[use Encode::Alias;use open ":std", ":locale"];
     is($@, '', 'can use :std and :locale');
-}
 
-SKIP: {
-    skip("no perlio", 1) unless (find PerlIO::Layer 'perlio');
     use open IN => ':non-existent';
     eval {
 	require Symbol; # Anything that exists but we havn't loaded

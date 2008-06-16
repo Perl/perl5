@@ -50,6 +50,10 @@ open(FOO, ">$tmpfile") || DIE("Can't open temp test file: $!");
 
 my($nlink, $mtime, $ctime) = (stat(FOO))[$NLINK, $MTIME, $CTIME];
 
+# The clock on a network filesystem might be different from the
+# system clock.
+my $Filesystem_Time_Offset = abs($mtime - time); 
+
 #nlink should if link support configured in Perl.
 SKIP: {
     skip "No link count - Hard link support not built in.", 1
@@ -453,20 +457,24 @@ SKIP: {
     unlink $linkname or print "# unlink $linkname failed: $!\n";
 }
 
-print "# Zzz...\n";
-sleep(3);
-my $f = 'tstamp.tmp';
-unlink $f;
-ok (open(S, "> $f"), 'can create tmp file');
-close S or die;
-my @a = stat $f;
-print "# time=$^T, stat=(@a)\n";
-my @b = (-M _, -A _, -C _);
-print "# -MAC=(@b)\n";
-ok( (-M _) < 0, 'negative -M works');
-ok( (-A _) < 0, 'negative -A works');
-ok( (-C _) < 0, 'negative -C works');
-ok(unlink($f), 'unlink tmp file');
+SKIP: {
+    skip "Too much clock skew between system and filesystem", 5
+	if ($Filesystem_Time_Offset > 5);
+    print "# Zzz...\n";
+    sleep($Filesystem_Time_Offset+1);
+    my $f = 'tstamp.tmp';
+    unlink $f;
+    ok (open(S, "> $f"), 'can create tmp file');
+    close S or die;
+    my @a = stat $f;
+    print "# time=$^T, stat=(@a)\n";
+    my @b = (-M _, -A _, -C _);
+    print "# -MAC=(@b)\n";
+    ok( (-M _) < 0, 'negative -M works');
+    ok( (-A _) < 0, 'negative -A works');
+    ok( (-C _) < 0, 'negative -C works');
+    ok(unlink($f), 'unlink tmp file');
+}
 
 {
     ok(open(F, ">", $tmpfile), 'can create temp file');
