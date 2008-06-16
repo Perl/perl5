@@ -1,5 +1,10 @@
 Revision history for Sys-Syslog
 
+0.26 -- 2008.06.16 -- Sebastien Aperghis-Tramoni (SAPER)
+        [BUGFIX] Make Sys::Syslog works with Perl 5.10.0 (because of 
+        ExtUtils::Constant::ProxySubs).
+        [CODE] setlogsock() is now a little more strict about its arguments.
+
 0.25 -- 2008.05.17 -- Sebastien Aperghis-Tramoni (SAPER)
         [BUGFIX] CPAN-RT#34691: Fixed an incorrect call to sysopen() which
         prevented Sys::Syslog from working on some Solaris systems. 
@@ -7,6 +12,7 @@ Revision history for Sys-Syslog
         [BUGFIX] CPAN-RT#34753: Fixed a slowness introduced in v0.19 (which 
         was to work around OSX syslog own slowness). Thanks to Alex Efros.
         [BUGFIX] CPAN-RT#35952: Fixed a bug with the "nofatal" option.
+        [BUGFIX] CPAN-RT#35189: Fixed a bug in xlate().
         [BUGFIX] Fixed build on Win32, thanks to Adam Kennedy.
         [FEATURE] setlogsock() now interprets the second argument as the 
         hostname for network mechanisms.

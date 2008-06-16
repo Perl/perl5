@@ -11,7 +11,7 @@ use Socket ':all';
 require 5.005;
 
 {   no strict 'vars';
-    $VERSION = '0.25';
+    $VERSION = '0.26';
     @ISA = qw(Exporter);
 
     %EXPORT_TAGS = (
@@ -190,6 +190,13 @@ sub setlogmask {
 sub setlogsock {
     my ($setsock, $setpath, $settime) = @_;
 
+    # check arguments
+    my $diag_invalid_arg
+        = "Invalid argument passed to setlogsock; must be 'stream', 'pipe', "
+        . "'unix', 'native', 'eventlog', 'tcp', 'udp' or 'inet'";
+    croak $diag_invalid_arg unless defined $setsock;
+    croak "Invalid number of arguments" unless @_ >= 1 and @_ <= 3;
+
     $syslog_path  = $setpath if defined $setpath;
     $sock_timeout = $settime if defined $settime;
 
@@ -289,8 +296,7 @@ sub setlogsock {
 	@connectMethods = qw(console);
 
     } else {
-        croak "Invalid argument passed to setlogsock; must be 'stream', 'pipe', ",
-              "'unix', 'native', 'eventlog', 'tcp', 'udp' or 'inet'"
+        croak $diag_invalid_arg
     }
 
     return 1;
@@ -494,8 +500,22 @@ sub xlate {
     return $name+0 if $name =~ /^\s*\d+\s*$/;
     $name = uc $name;
     $name = "LOG_$name" unless $name =~ /^LOG_/;
+
+    # ExtUtils::Constant 0.20 introduced a new way to implement
+    # constants, called ProxySubs.  When it was used to generate
+    # the C code, the constant() function no longer returns the 
+    # correct value.  Therefore, we first try a direct call to 
+    # constant(), and if the value is an error we try to call the 
+    # constant by its full name. 
     my $value = constant($name);
-    $value = -1 if $value =~ /not a valid/;
+
+    if (index($value, "not a valid") >= 0) {
+        $name = "Sys::Syslog::$name";
+        $value = eval { no strict "refs"; &$name };
+        $value = $@ unless defined $value;
+    }
+
+    $value = -1 if index($value, "not a valid") >= 0;
 
     return defined $value ? $value : -1;
 }
@@ -790,7 +810,7 @@ sub disconnect_log {
 #
 sub silent_eval (&) {
     local($SIG{__DIE__}, $SIG{__WARN__}, $@);
-    return eval $_[0]
+    return eval { $_[0]->() }
 }
 
 sub can_load {
@@ -809,7 +829,7 @@ Sys::Syslog - Perl interface to the UNIX syslog(3) calls
 
 =head1 VERSION
 
-Version 0.25
+Version 0.26
 
 =head1 SYNOPSIS
 

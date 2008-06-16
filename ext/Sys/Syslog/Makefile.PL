@@ -99,6 +99,7 @@ WriteMakefile(
         # build/test prereqs
         'Test::More'        => 0,
     },
+    PL_FILES        => {},
     dist            => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean           => { FILES => 'Sys-Syslog-*' }, 
     realclean       => { FILES => 'lib const-c.inc const-xs.inc macros.all '
@@ -178,9 +179,9 @@ if(eval {require ExtUtils::Constant; 1}) {
     );
 
     ExtUtils::Constant::WriteConstants(
-        ($] > 5.009002 ? (PROXYSUBS => 1) : ()),
         NAME => 'Sys::Syslog',
         NAMES => [ @levels, @facilities, @options, @others_macros ],
+        ($] > 5.009002 ? (PROXYSUBS => 1) : ()),
     );
 
     my @names = map { ref $_ ? $_->{name} : $_ } @levels, @facilities, @options;
