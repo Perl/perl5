@@ -37,7 +37,8 @@ is( ${^CHILD_ERROR_NATIVE}, $native_success,  'Normal exit ${^CHILD_ERROR_NATIVE
 if ($^O ne 'VMS') {
   my $posix_ok = eval { require POSIX; };
   my $wait_macros_ok = defined &POSIX::WIFEXITED;
-
+  eval { POSIX::WIFEXITED() };
+  $wait_macros_ok = 0 if $@;
   $exit = run('exit 42');
   is( $exit >> 8, 42,             'Non-zero exit' );
   is( $exit, $?,                  'Non-zero exit $?' );
