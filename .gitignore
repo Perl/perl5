@@ -1,0 +1,44 @@
+.config
+
+# files produced by './configure.gnu' on a Linux machine
+/Makefile
+/Policy.sh
+/cflags
+/config.h
+/config.sh
+/makeaperl
+/makedepend
+/makedir
+/makefile
+/makefile.old
+/myconfig
+/opmini.c
+/perlmain.c
+/pod/Makefile
+/writemain
+/x2p/Makefile
+/x2p/cflags
+/x2p/makefile
+/x2p/makefile.old
+
+# general build products
+*.o *.a
+
+# ?
+ext.libs
+
+# these are scattered everywhere, ignore them
+.exists
+
+/miniperl
+/perl
+
+/extra.pods
+/generate_uudmap
+/uni.data
+/uudmap.h
+
+x2p/a2p
+x2p/find2perl
+x2p/psed
+x2p/s2p
