@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Tue May 27 17:17:47 CEST 2008 [metaconfig 3.5 PL0]
+# Generated on Mon Jun 16 16:07:02 CEST 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1272,12 +1272,12 @@ elif test -d c:/. -o -n "$is_os2" ; then
     _exe=".exe"
 fi
 
+groupstype=''
 i_whoami=''
 : Trailing extension.  Override this in a hint file, if needed.
 : Extra object files, if any, needed on this platform.
 archobjs=''
 archname=''
-groupstype=''
 libnames=''
 : change the next line if compiling for Xenix/286 on Xenix/386
 xlibpth='/usr/lib/386 /lib/386'
@@ -1408,14 +1408,14 @@ if `$sh -c '#' >/dev/null 2>&1`; then
 	echo "#!$xcat" >sharp
 	$eunicefix sharp
 	chmod +x sharp
-	./sharp > today
+	./sharp > today 2>/dev/null
 	if test -s today; then
 		sharpbang='#!'
 	else
 		echo "#! $xcat" > sharp
 		$eunicefix sharp
 		chmod +x sharp
-		./sharp > today
+		./sharp > today 2>/dev/null
 		if test -s today; then
 			sharpbang='#! '
 		else
@@ -1939,7 +1939,7 @@ rm -f .echotmp
 echo " "
 if test -f "$rsrc/MANIFEST"; then
 	echo "First let's make sure your kit is complete.  Checking..." >&4
-	awk '$1 !~ /PACK[A-Z]+/ {print $1}' "$rsrc/MANIFEST" |\
+	awk '$1 !~ /PACK[A-Z]+/ {print $1}' "$rsrc/MANIFEST" | \
 		(split -l 50 2>/dev/null || split -50)
 	rm -f missing
 	tmppwd=`pwd`
@@ -7444,9 +7444,10 @@ case "$nm_so_opt" in
 	;;
 esac
 
-: get list of predefined functions in a handy place
+: Figure out where the libc is located
 case "$runnm" in
 true)
+: get list of predefined functions in a handy place
 echo " "
 case "$libc" in
 '') libc=unknown
@@ -7673,31 +7674,31 @@ else
 		echo " "
 		echo "$nm didn't seem to work right. Trying $ar instead..." >&4
 		com=''
-		if $ar t $libc > libc.tmp && $contains '^fprintf$' libc.tmp >/dev/null 2>&1; then
+		if $ar t $libc > libc.tmp && \
+			$contains '^fprintf$' libc.tmp >/dev/null 2>&1
+		then
 			for thisname in $libnames $libc; do
 				$ar t $thisname >>libc.tmp
 			done
 			$sed -e "s/\\$_o\$//" < libc.tmp > libc.list
 			echo "Ok." >&4
 		elif test "X$osname" = "Xos2" && $ar tv $libc > libc.tmp; then
-			# Repeat libc to extract forwarders to DLL entries too
 			for thisname in $libnames $libc; do
 				$ar tv $thisname >>libc.tmp
-				# Revision 50 of EMX has bug in $ar.
-				# it will not extract forwarders to DLL entries
-				# Use emximp which will extract exactly them.
 				emximp -o tmp.imp $thisname \
 				    2>/dev/null && \
 				    $sed -e 's/^\([_a-zA-Z0-9]*\) .*$/\1/p' \
 				    < tmp.imp >>libc.tmp
-				$rm tmp.imp
+				$rm -f tmp.imp
 			done
 			$sed -e "s/\\$_o\$//" -e 's/^ \+//' < libc.tmp > libc.list
 			echo "Ok." >&4
 		else
 			echo "$ar didn't seem to work right." >&4
 			echo "Maybe this is a Cray...trying bld instead..." >&4
-			if bld t $libc | $sed -e 's/.*\///' -e "s/\\$_o:.*\$//" > libc.list
+			if  bld t $libc | \
+				$sed -e 's/.*\///' -e "s/\\$_o:.*\$//" > libc.list &&
+				$test -s libc.list
 			then
 				for thisname in $libnames; do
 					bld t $libnames | \
@@ -7722,7 +7723,8 @@ define)
 *)  if $test -f /lib/syscalls.exp; then
 	echo " "
 	echo "Also extracting names from /lib/syscalls.exp for good ole AIX..." >&4
-	$sed -n 's/^\([^ 	]*\)[ 	]*syscall[0-9]*[ 	]*$/\1/p' /lib/syscalls.exp >>libc.list
+	$sed -n 's/^\([^ 	]*\)[ 	]*syscall[0-9]*[ 	]*$/\1/p' \
+		/lib/syscalls.exp >>libc.list
     fi
     ;;
 esac
@@ -19931,9 +19933,6 @@ case "$pager" in
 	esac
 	;;
 *)	dflt="$pager"
-	: Instruct ./getfile to trust the hinted or previous pager value,
-	: even if it does not begin with a slash.  For example, on os2,
-	: pager might be cmd /c more.  See comments in UU/getfile.
 	fn="f/($pager)"
 	;;
 esac
@@ -20582,8 +20581,7 @@ $rm_try
 
 : see what type of char stdio uses.
 echo " "
-echo '#include <stdio.h>' > stdio.c
-$cppstdin $cppminus < stdio.c > stdioh
+echo '#include <stdio.h>' | $cppstdin $cppminus > stdioh
 if $contains 'unsigned.*char.*_ptr;' stdioh >/dev/null 2>&1 ; then
 	echo "Your stdio uses unsigned chars." >&4
 	stdchar="unsigned char"
@@ -20591,7 +20589,7 @@ else
 	echo "Your stdio uses signed chars." >&4
 	stdchar="char"
 fi
-$rm -f stdio.* stdioh
+$rm -f stdioh
 
 : see what type uids are declared as in the kernel
 echo " "
