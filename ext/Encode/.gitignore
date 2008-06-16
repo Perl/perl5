@@ -1,0 +1,6 @@
+!/encengine.c
+/Byte/Byte.xs
+*.exh
+*.h
+!/Encode/encode.h
+*.fnm
