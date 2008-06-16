@@ -27,7 +27,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 61;
+use Test::More tests => 64;
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -420,3 +420,15 @@ else { x(); }
 # 54 interpolation in regexps
 my($y, $t);
 /x${y}z$t/;
+####
+# SKIP ?$B::Deparse::VERSION <= 0.87 && "TODO new undocumented cpan-bug #33708"
+# 55  (cpan-bug #33708)
+%{$_ || {}}
+####
+# SKIP ?$B::Deparse::VERSION <= 0.87 && "TODO hash constants not yet fixed"
+# 56  (cpan-bug #33708)
+use constant H => { "#" => 1 }; H->{"#"}
+####
+# SKIP ?$B::Deparse::VERSION <= 0.87 && "TODO optimized away 0 not yet fixed"
+# 57  (cpan-bug #33708)
+foreach my $i (@_) { 0 }
