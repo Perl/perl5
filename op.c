@@ -2521,7 +2521,7 @@ Perl_fold_constants(pTHX_ register OP *o)
     case 3:
 	/* Something tried to die.  Abandon constant folding.  */
 	/* Pretend the error never happened.  */
-        clear_errsv();
+	CLEAR_ERRSV();
 	o->op_next = old_next;
 	break;
     default:

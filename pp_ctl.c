@@ -2149,7 +2149,7 @@ PP(pp_return)
 
     LEAVESUB(sv);
     if (clear_errsv) {
-	clear_errsv();
+	CLEAR_ERRSV();
     }
     return retop;
 }
@@ -3001,9 +3001,8 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     CopARYBASE_set(PL_curcop, 0);
     if (saveop && (saveop->op_type != OP_REQUIRE) && (saveop->op_flags & OPf_SPECIAL))
 	PL_in_eval |= EVAL_KEEPERR;
-    else {
-	clear_errsv();
-    }
+    else
+	CLEAR_ERRSV();
     if (yyparse() || PL_parser->error_count || !PL_eval_root) {
 	SV **newsp;			/* Used by POPBLOCK. */
 	PERL_CONTEXT *cx = &cxstack[cxstack_ix];
@@ -3775,7 +3774,7 @@ PP(pp_leaveeval)
     else {
 	LEAVE;
 	if (!(save_flags & OPf_SPECIAL)) {
-	    clear_errsv();
+	    CLEAR_ERRSV();
 	}
     }
 
@@ -3819,9 +3818,8 @@ Perl_create_eval_scope(pTHX_ U32 flags)
     PL_in_eval = EVAL_INEVAL;
     if (flags & G_KEEPERR)
 	PL_in_eval |= EVAL_KEEPERR;
-    else {
-	clear_errsv();
-    }
+    else
+	CLEAR_ERRSV();
     if (flags & G_FAKINGEVAL) {
 	PL_eval_root = PL_op; /* Only needed so that goto works right. */
     }
@@ -3880,7 +3878,7 @@ PP(pp_leavetry)
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
     LEAVE;
-    clear_errsv();
+    CLEAR_ERRSV();
     RETURN;
 }
 
