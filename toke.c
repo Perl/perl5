@@ -761,8 +761,8 @@ Perl_parser_free(pTHX_  const yy_parser *parser)
 
     if (parser->rsfp == PerlIO_stdin())
 	PerlIO_clearerr(parser->rsfp);
-    else if (parser->rsfp && parser->old_parser
-			  && parser->rsfp != parser->old_parser->rsfp)
+    else if (parser->rsfp && (!parser->old_parser ||
+		(parser->old_parser && parser->rsfp != parser->old_parser->rsfp)))
 	PerlIO_close(parser->rsfp);
     SvREFCNT_dec(parser->rsfp_filters);
 
