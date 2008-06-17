@@ -72,7 +72,7 @@ is($a, $b);
 like(B::Debug::_printop(B::main_root),  qr/LISTOP\s+\[OP_LEAVE\]/);
 like(B::Debug::_printop(B::main_start), qr/OP\s+\[OP_ENTER\]/);
 
-$a = `$^X $path "-MO=Debug" -e 'B::main_root->debug' $redir`;
+$a = `$^X $path "-MO=Debug" -e "B::main_root->debug" $redir`;
 like($a, qr/op_next\s+0x0/m);
-$a = `$^X $path "-MO=Debug" -e 'B::main_start->debug' $redir`;
+$a = `$^X $path "-MO=Debug" -e "B::main_start->debug" $redir`;
 like($a, qr/PL_ppaddr\[OP_ENTER\]/m);
