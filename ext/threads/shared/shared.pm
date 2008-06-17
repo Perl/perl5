@@ -7,7 +7,7 @@ use warnings;
 
 use Scalar::Util qw(reftype refaddr blessed);
 
-our $VERSION = '1.22';
+our $VERSION = '1.23';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -186,7 +186,7 @@ threads::shared - Perl extension for sharing data structures between threads
 
 =head1 VERSION
 
-This document describes threads::shared version 1.22
+This document describes threads::shared version 1.23
 
 =head1 SYNOPSIS
 
@@ -540,7 +540,7 @@ L<threads::shared> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads-shared>
 
 Annotated POD for L<threads::shared>:
-L<http://annocpan.org/~JDHEDDEN/threads-shared-1.22/shared.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-shared-1.23/shared.pm>
 
 Source repository:
 L<http://code.google.com/p/threads-shared/>

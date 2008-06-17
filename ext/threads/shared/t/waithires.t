@@ -1,12 +1,12 @@
 use strict;
 use warnings;
 
+use Config;
 BEGIN {
     if ($ENV{'PERL_CORE'}){
         chdir 't';
         unshift @INC, '../lib';
     }
-    use Config;
     if (! $Config{'useithreads'}) {
         print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
@@ -23,10 +23,30 @@ BEGIN {
 
 use ExtUtils::testlib;
 
-my $Base = 0;
+### Self-destruct timer child process
+my $TIMEOUT = 60;
+my $timer_pid;
+
+if ($Config{'d_fork'}) {
+    $timer_pid = fork();
+    if (defined($timer_pid) && ($timer_pid == 0)) {
+        # Child process
+        my $ppid = getppid();
+
+        # Sleep for timeout period
+        sleep($TIMEOUT - 2);   # Workaround for perlbug #49073
+        sleep(2);              # Wait for parent to exit
+
+        # Kill parent if it still exists
+        kill('KILL', $ppid) if (kill(0, $ppid));
+        exit(0);
+    }
+    # Parent will kill this process if tests finish on time
+}
+
+
 sub ok {
     my ($id, $ok, $name) = @_;
-    $id += $Base;
 
     # You have to do it this way or VMS will get confused.
     if ($ok) {
@@ -47,8 +67,9 @@ BEGIN {
 use threads;
 use threads::shared;
 
-ok(1, 1, 'Loaded');
-$Base++;
+my $TEST = 1;
+ok($TEST++, 1, 'Loaded');
+
 
 ### Start of Testing ###
 
@@ -65,149 +86,110 @@ $Base++;
 # and consider upgrading their glibc.
 
 
-sub forko (&$$); # To prevent deadlock from underlying pthread_* bugs (as in
-                 # stock RH9 glibc/NPTL) or from our own errors, we run tests
-                 # in separately forked and alarmed processes.
-
-*forko = ($^O =~ /^dos|os2|mswin32|netware|vms$/i)
-? sub (&$$) { my $code = shift; goto &$code; }
-: sub (&$$) {
-  my ($code, $expected, $patience) = @_;
-  my ($test_num, $pid);
-  local *CHLD;
-
-  my $bump = $expected;
-
-  unless (defined($pid = open(CHLD, "-|"))) {
-    die "fork: $!\n";
-  }
-  if (! $pid) {   # Child -- run the test
-    alarm($patience || 60);
-    &$code;
-    exit;
-  }
-
-  while (<CHLD>) {
-    $expected--, $test_num=$1 if /^(?:not )?ok (\d+)/;
-    #print "#forko: ($expected, $1) $_";
-    print;
-  }
-
-  close(CHLD);
-
-  while ($expected--) {
-    ok(++$test_num, 0, "missing test result: child status $?");
-  }
-
-  $Base += $bump;
-};
-
-
 # - TEST basics
 
 my @wait_how = (
-   "simple",  # cond var == lock var; implicit lock; e.g.: cond_wait($c)
-   "repeat",  # cond var == lock var; explicit lock; e.g.: cond_wait($c, $c)
-   "twain"    # cond var != lock var; explicit lock; e.g.: cond_wait($c, $l)
+    "simple",  # cond var == lock var; implicit lock; e.g.: cond_wait($c)
+    "repeat",  # cond var == lock var; explicit lock; e.g.: cond_wait($c, $c)
+    "twain"    # cond var != lock var; explicit lock; e.g.: cond_wait($c, $l)
 );
 
+
 SYNC_SHARED: {
-  my $test : shared;  # simple|repeat|twain
-  my $cond : shared;
-  my $lock : shared;
+    my $test_type :shared;   # simple|repeat|twain
 
-  ok(1, 1, "Shared synchronization tests preparation");
-  $Base += 1;
+    my $cond :shared;
+    my $lock :shared;
 
-  sub signaller {
-    ok(2,1,"$test: child before lock");
-    $test =~ /twain/ ? lock($lock) : lock($cond);
-    ok(3,1,"$test: child obtained lock");
-    if ($test =~ 'twain') {
-      no warnings 'threads';   # lock var != cond var, so disable warnings
-      cond_signal($cond);
-    } else {
-      cond_signal($cond);
-    }
-    ok(4,1,"$test: child signalled condition");
-  }
+    ok($TEST++, 1, "Shared synchronization tests preparation");
 
-  # - TEST cond_timedwait success
+    # - TEST cond_timedwait success
 
-  forko( sub {
-    foreach (@wait_how) {
-      $test = "cond_timedwait [$_]";
-      threads->create(\&ctw, 0.05)->join;
-      $Base += 5;
-    }
-  }, 5*@wait_how, 5);
+    sub signaller
+    {
+        my $testno = $_[0];
 
-  sub ctw($) {
-      my $to = shift;
+        ok($testno++, 1, "$test_type: child before lock");
+        $test_type =~ /twain/ ? lock($lock) : lock($cond);
+        ok($testno++, 1, "$test_type: child obtained lock");
 
-      # which lock to obtain?
-      $test =~ /twain/ ? lock($lock) : lock($cond);
-      ok(1,1, "$test: obtained initial lock");
-
-      my $thr = threads->create(\&signaller);
-      my $ok = 0;
-      for ($test) {
-        $ok=cond_timedwait($cond, time() + $to), last        if    /simple/;
-        $ok=cond_timedwait($cond, time() + $to, $cond), last if    /repeat/;
-        $ok=cond_timedwait($cond, time() + $to, $lock), last if    /twain/;
-        die "$test: unknown test\n";
-      }
-      $thr->join;
-      ok(5,$ok, "$test: condition obtained");
-  }
-
-  # - TEST cond_timedwait timeout
-
-  forko( sub {
-    foreach (@wait_how) {
-      $test = "cond_timedwait pause, timeout [$_]";
-      threads->create(\&ctw_fail, 0.3)->join;
-      $Base += 2;
-    }
-  }, 2*@wait_how, 5);
-
-  forko( sub {
-    foreach (@wait_how) {
-      $test = "cond_timedwait instant timeout [$_]";
-      threads->create(\&ctw_fail, -0.60)->join;
-      $Base += 2;
-    }
-  }, 2*@wait_how, 5);
-
-  # cond_timedwait timeout (relative timeout)
-  sub ctw_fail {
-    my $to = shift;
-    if ($^O eq "hpux" && $Config{osvers} <= 10.20) {
-      # The lock obtaining would pass, but the wait will not.
-      ok(1,1, "$test: obtained initial lock");
-      ok(2,0, "# SKIP see perl583delta");
-    } else {
-      $test =~ /twain/ ? lock($lock) : lock($cond);
-      ok(1,1, "$test: obtained initial lock");
-      my $ok;
-      my $delta = time();
-      for ($test) {
-        $ok=cond_timedwait($cond, time() + $to), last        if    /simple/;
-        $ok=cond_timedwait($cond, time() + $to, $cond), last if    /repeat/;
-        $ok=cond_timedwait($cond, time() + $to, $lock), last if    /twain/;
-        die "$test: unknown test\n";
-      }
-      $delta = time() - $delta;
-      ok(2, ! defined($ok), "$test: timeout");
-
-      if (($to > 0) && ($^O ne 'os2')) {
-        # Timing tests can be problematic
-        if (($delta < (0.9 * $to)) || ($delta > (1.0 + $to))) {
-          print(STDERR "# Timeout: specified=$to  actual=$delta secs.\n");
+        if ($test_type =~ 'twain') {
+            no warnings 'threads';   # lock var != cond var, so disable warnings
+            cond_signal($cond);
+        } else {
+            cond_signal($cond);
         }
-      }
+        ok($testno++, 1, "$test_type: child signalled condition");
+
+        return($testno);
     }
-  }
+
+    sub ctw_ok
+    {
+        my ($testnum, $to) = @_;
+
+        # Which lock to obtain?
+        $test_type =~ /twain/ ? lock($lock) : lock($cond);
+        ok($testnum++, 1, "$test_type: obtained initial lock");
+
+        my $thr = threads->create(\&signaller, $testnum);
+        my $ok = 0;
+        for ($test_type) {
+            $ok = cond_timedwait($cond, time() + $to), last        if /simple/;
+            $ok = cond_timedwait($cond, time() + $to, $cond), last if /repeat/;
+            $ok = cond_timedwait($cond, time() + $to, $lock), last if /twain/;
+            die "$test_type: unknown test\n";
+        }
+        $testnum = $thr->join();
+        ok($testnum++, $ok, "$test_type: condition obtained");
+
+        return ($testnum);
+    }
+
+    foreach (@wait_how) {
+        $test_type = "cond_timedwait [$_]";
+        my $thr = threads->create(\&ctw_ok, $TEST, 0.05);
+        $TEST = $thr->join();
+    }
+
+    # - TEST cond_timedwait timeout
+
+    sub ctw_fail
+    {
+        my ($testnum, $to) = @_;
+
+        if ($^O eq "hpux" && $Config{osvers} <= 10.20) {
+            # The lock obtaining would pass, but the wait will not.
+            ok($testnum++, 1, "$test_type: obtained initial lock");
+            ok($testnum++, 0, "# SKIP see perl583delta");
+
+        } else {
+            $test_type =~ /twain/ ? lock($lock) : lock($cond);
+            ok($testnum++, 1, "$test_type: obtained initial lock");
+            my $ok;
+            for ($test_type) {
+                $ok = cond_timedwait($cond, time() + $to), last        if /simple/;
+                $ok = cond_timedwait($cond, time() + $to, $cond), last if /repeat/;
+                $ok = cond_timedwait($cond, time() + $to, $lock), last if /twain/;
+                die "$test_type: unknown test\n";
+            }
+            ok($testnum++, ! defined($ok), "$test_type: timeout");
+        }
+
+        return ($testnum);
+    }
+
+    foreach (@wait_how) {
+        $test_type = "cond_timedwait pause, timeout [$_]";
+        my $thr = threads->create(\&ctw_fail, $TEST, 0.3);
+        $TEST = $thr->join();
+    }
+
+    foreach (@wait_how) {
+        $test_type = "cond_timedwait instant timeout [$_]";
+        my $thr = threads->create(\&ctw_fail, $TEST, -0.60);
+        $TEST = $thr->join();
+    }
 
 } # -- SYNCH_SHARED block
 
@@ -215,109 +197,112 @@ SYNC_SHARED: {
 # same as above, but with references to lock and cond vars
 
 SYNCH_REFS: {
-  my $test : shared;  # simple|repeat|twain
+    my $test_type :shared;   # simple|repeat|twain
 
-  my $true_cond; share($true_cond);
-  my $true_lock; share($true_lock);
+    my $true_cond :shared;
+    my $true_lock :shared;
 
-  my $cond = \$true_cond;
-  my $lock = \$true_lock;
+    my $cond = \$true_cond;
+    my $lock = \$true_lock;
 
-  ok(1, 1, "Synchronization reference tests preparation");
-  $Base += 1;
+    ok($TEST++, 1, "Synchronization reference tests preparation");
 
-  sub signaller2 {
-    ok(2,1,"$test: child before lock");
-    $test =~ /twain/ ? lock($lock) : lock($cond);
-    ok(3,1,"$test: child obtained lock");
-    if ($test =~ 'twain') {
-      no warnings 'threads';   # lock var != cond var, so disable warnings
-      cond_signal($cond);
-    } else {
-      cond_signal($cond);
-    }
-    ok(4,1,"$test: child signalled condition");
-  }
+    # - TEST cond_timedwait success
 
-  # - TEST cond_timedwait success
+    sub signaller2
+    {
+        my $testno = $_[0];
 
-  forko( sub {
-    foreach (@wait_how) {
-      $test = "cond_timedwait [$_]";
-      threads->create(\&ctw2, 0.05)->join;
-      $Base += 5;
-    }
-  }, 5*@wait_how, 5);
+        ok($testno++, 1, "$test_type: child before lock");
+        $test_type =~ /twain/ ? lock($lock) : lock($cond);
+        ok($testno++, 1, "$test_type: child obtained lock");
 
-  sub ctw2($) {
-      my $to = shift;
-
-      # which lock to obtain?
-      $test =~ /twain/ ? lock($lock) : lock($cond);
-      ok(1,1, "$test: obtained initial lock");
-
-      my $thr = threads->create(\&signaller2);
-      my $ok = 0;
-      for ($test) {
-        $ok=cond_timedwait($cond, time() + $to), last        if    /simple/;
-        $ok=cond_timedwait($cond, time() + $to, $cond), last if    /repeat/;
-        $ok=cond_timedwait($cond, time() + $to, $lock), last if    /twain/;
-        die "$test: unknown test\n";
-      }
-      $thr->join;
-      ok(5,$ok, "$test: condition obtained");
-  }
-
-  # - TEST cond_timedwait timeout
-
-  forko( sub {
-    foreach (@wait_how) {
-      $test = "cond_timedwait pause, timeout [$_]";
-      threads->create(\&ctw_fail2, 0.3)->join;
-      $Base += 2;
-    }
-  }, 2*@wait_how, 5);
-
-  forko( sub {
-    foreach (@wait_how) {
-      $test = "cond_timedwait instant timeout [$_]";
-      threads->create(\&ctw_fail2, -0.60)->join;
-      $Base += 2;
-    }
-  }, 2*@wait_how, 5);
-
-  sub ctw_fail2 {
-    my $to = shift;
-
-    if ($^O eq "hpux" && $Config{osvers} <= 10.20) {
-      # The lock obtaining would pass, but the wait will not.
-      ok(1,1, "$test: obtained initial lock");
-      ok(2,0, "# SKIP see perl583delta");
-    } else {
-      $test =~ /twain/ ? lock($lock) : lock($cond);
-      ok(1,1, "$test: obtained initial lock");
-      my $ok;
-      my $delta = time();
-      for ($test) {
-        $ok=cond_timedwait($cond, time() + $to), last        if    /simple/;
-        $ok=cond_timedwait($cond, time() + $to, $cond), last if    /repeat/;
-        $ok=cond_timedwait($cond, time() + $to, $lock), last if    /twain/;
-        die "$test: unknown test\n";
-      }
-      $delta = time() - $delta;
-      ok(2, ! $ok, "$test: timeout");
-
-      if (($to > 0) && ($^O ne 'os2')) {
-        # Timing tests can be problematic
-        if (($delta < (0.9 * $to)) || ($delta > (1.0 + $to))) {
-          print(STDERR "# Timeout: specified=$to  actual=$delta secs.\n");
+        if ($test_type =~ 'twain') {
+            no warnings 'threads';   # lock var != cond var, so disable warnings
+            cond_signal($cond);
+        } else {
+            cond_signal($cond);
         }
-      }
+        ok($testno++, 1, "$test_type: child signalled condition");
+
+        return($testno);
     }
-  }
+
+    sub ctw_ok2
+    {
+        my ($testnum, $to) = @_;
+
+        # Which lock to obtain?
+        $test_type =~ /twain/ ? lock($lock) : lock($cond);
+        ok($testnum++, 1, "$test_type: obtained initial lock");
+
+        my $thr = threads->create(\&signaller2, $testnum);
+        my $ok = 0;
+        for ($test_type) {
+            $ok = cond_timedwait($cond, time() + $to), last        if /simple/;
+            $ok = cond_timedwait($cond, time() + $to, $cond), last if /repeat/;
+            $ok = cond_timedwait($cond, time() + $to, $lock), last if /twain/;
+            die "$test_type: unknown test\n";
+        }
+        $testnum = $thr->join();
+        ok($testnum++, $ok, "$test_type: condition obtained");
+
+        return ($testnum);
+    }
+
+    foreach (@wait_how) {
+        $test_type = "cond_timedwait [$_]";
+        my $thr = threads->create(\&ctw_ok2, $TEST, 0.05);
+        $TEST = $thr->join();
+    }
+
+    # - TEST cond_timedwait timeout
+
+    sub ctw_fail2
+    {
+        my ($testnum, $to) = @_;
+
+        if ($^O eq "hpux" && $Config{osvers} <= 10.20) {
+            # The lock obtaining would pass, but the wait will not.
+            ok($testnum++, 1, "$test_type: obtained initial lock");
+            ok($testnum++, 0, "# SKIP see perl583delta");
+
+        } else {
+            $test_type =~ /twain/ ? lock($lock) : lock($cond);
+            ok($testnum++, 1, "$test_type: obtained initial lock");
+            my $ok;
+            for ($test_type) {
+                $ok = cond_timedwait($cond, time() + $to), last        if /simple/;
+                $ok = cond_timedwait($cond, time() + $to, $cond), last if /repeat/;
+                $ok = cond_timedwait($cond, time() + $to, $lock), last if /twain/;
+                die "$test_type: unknown test\n";
+            }
+            ok($testnum++, ! defined($ok), "$test_type: timeout");
+        }
+
+        return ($testnum);
+    }
+
+    foreach (@wait_how) {
+        $test_type = "cond_timedwait pause, timeout [$_]";
+        my $thr = threads->create(\&ctw_fail2, $TEST, 0.3);
+        $TEST = $thr->join();
+    }
+
+    foreach (@wait_how) {
+        $test_type = "cond_timedwait instant timeout [$_]";
+        my $thr = threads->create(\&ctw_fail2, $TEST, -0.60);
+        $TEST = $thr->join();
+    }
 
 } # -- SYNCH_REFS block
 
+# Kill timer process
+if ($timer_pid && kill(0, $timer_pid)) {
+    kill('KILL', $timer_pid);
+}
+
+# Done
 exit(0);
 
 # EOF
