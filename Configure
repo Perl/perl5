@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Tue Jul  8 22:01:30 CEST 2008 [metaconfig 3.5 PL0]
+# Generated on Thu Jul 10 17:14:53 CEST 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -17462,7 +17462,6 @@ int main(int argc, char **argv) {
 EOP
 set try
 
-d_sprintf_returns_strlen="$undef"
 if eval $compile; then
     xxx="`$run ./try`"
     case "$?" in
@@ -17477,6 +17476,9 @@ EOM
 	d_sprintf_returns_strlen="$undef"
         ;;
     esac
+lse
+    echo "(I can't seem to compile the test program--assuming it doesn't)" >&4
+    d_sprintf_returns_strlen="$undef"
 fi
 $rm_try
 
