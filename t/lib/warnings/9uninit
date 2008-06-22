@@ -1411,3 +1411,130 @@ EXPECT
 Use of uninitialized value in reverse at - line 4.
 Use of uninitialized value $r1 in reverse at - line 5.
 Use of uninitialized value $r2 in reverse at - line 6.
+########
+use warnings 'uninitialized';
+#
+# ops that can return undef for defined args
+#
+my $nofile = '/no/such/file';
+my $nocmd  = '/no/such/command';
+my $v;
+$v = 1 + `$nocmd`;
+$v = 1 + qx($nocmd);
+my $f = "";
+$v = 1 + open($f, $nofile);
+# *** pipe() not tested
+$v = 1 + fileno($nofile);
+$v = 1 + binmode($nofile);
+$v = 1 + tied($nofile);
+$v = 1 + getc($nofile);
+$v = 1 + sysread($nofile, my $buf,1);
+$v = 1 + eval { send($nofile, $buf,0) };
+# *** ioctl not tested
+# *** socket not tested
+# *** socketpair not tested
+# *** bind not tested
+# *** connect not tested
+# *** listen not tested
+$v = 1 + eval { accept($fh, $nofile) };
+# *** shutdown not tested
+# *** setsockopt not tested
+# *** getpeername not tested
+$v = 1 + (-r $nofile);
+$v = 1 + (-w $nofile);
+$v = 1 + (-x $nofile);
+$v = 1 + (-o $nofile);
+$v = 1 + (-R $nofile);
+$v = 1 + (-W $nofile);
+$v = 1 + (-X $nofile);
+$v = 1 + (-O $nofile);
+$v = 1 + (-e $nofile);
+$v = 1 + (-z $nofile);
+$v = 1 + (-s $nofile);
+$v = 1 + (-f $nofile);
+$v = 1 + (-d $nofile);
+$v = 1 + (-l $nofile);
+$v = 1 + (-p $nofile);
+$v = 1 + (-S $nofile);
+$v = 1 + (-b $nofile);
+$v = 1 + (-c $nofile);
+$v = 1 + (-t $nofile);
+$v = 1 + (-u $nofile);
+$v = 1 + (-g $nofile);
+$v = 1 + (-k $nofile);
+$v = 1 + (-T $nofile);
+$v = 1 + (-B $nofile);
+$v = 1 + (-M $nofile);
+$v = 1 + (-A $nofile);
+$v = 1 + (-C $nofile);
+$v = 1 + eval { readlink $nofile };
+$v = 1 + opendir($f, $nofile);
+# *** readdir not tested
+# *** telldir not tested
+# *** seekdir not tested
+# *** rewinddir not tested
+# *** closedir not tested
+# *** gmtime not tested
+# *** alarm not tested
+# *** semget not tested
+# *** getlogin not tested
+$v = 1 + undef;
+my $x = 1; $v = 1 + undef($x);
+my $emptys = "";
+$v = 1 + substr($emptys,2,1);
+my @emptya;
+$v = 1 + each @emptya;
+my @emptyh;
+$v = 1 + each %emptyh;
+$v = 1 + sort @emptya;
+my $zero = 0; $v = 1 + caller($zero);
+$v = 1 + do $nofile;
+
+EXPECT
+Use of uninitialized value in addition (+) at - line 8.
+Use of uninitialized value in addition (+) at - line 9.
+Use of uninitialized value in addition (+) at - line 11.
+Use of uninitialized value in addition (+) at - line 13.
+Use of uninitialized value in addition (+) at - line 14.
+Use of uninitialized value in addition (+) at - line 15.
+Use of uninitialized value in addition (+) at - line 16.
+Use of uninitialized value in addition (+) at - line 17.
+Use of uninitialized value in addition (+) at - line 18.
+Use of uninitialized value in addition (+) at - line 25.
+Use of uninitialized value in addition (+) at - line 29.
+Use of uninitialized value in addition (+) at - line 30.
+Use of uninitialized value in addition (+) at - line 31.
+Use of uninitialized value in addition (+) at - line 32.
+Use of uninitialized value in addition (+) at - line 33.
+Use of uninitialized value in addition (+) at - line 34.
+Use of uninitialized value in addition (+) at - line 35.
+Use of uninitialized value in addition (+) at - line 36.
+Use of uninitialized value in addition (+) at - line 37.
+Use of uninitialized value in addition (+) at - line 38.
+Use of uninitialized value in addition (+) at - line 39.
+Use of uninitialized value in addition (+) at - line 40.
+Use of uninitialized value in addition (+) at - line 41.
+Use of uninitialized value in addition (+) at - line 42.
+Use of uninitialized value in addition (+) at - line 43.
+Use of uninitialized value in addition (+) at - line 44.
+Use of uninitialized value in addition (+) at - line 45.
+Use of uninitialized value in addition (+) at - line 46.
+Use of uninitialized value in addition (+) at - line 47.
+Use of uninitialized value in addition (+) at - line 48.
+Use of uninitialized value in addition (+) at - line 49.
+Use of uninitialized value in addition (+) at - line 50.
+Use of uninitialized value in addition (+) at - line 51.
+Use of uninitialized value in addition (+) at - line 52.
+Use of uninitialized value in addition (+) at - line 53.
+Use of uninitialized value in addition (+) at - line 54.
+Use of uninitialized value in addition (+) at - line 55.
+Use of uninitialized value in addition (+) at - line 56.
+Use of uninitialized value in addition (+) at - line 57.
+Use of uninitialized value in addition (+) at - line 67.
+Use of uninitialized value in addition (+) at - line 68.
+Use of uninitialized value in addition (+) at - line 70.
+Use of uninitialized value in addition (+) at - line 72.
+Use of uninitialized value in addition (+) at - line 74.
+Use of uninitialized value in addition (+) at - line 75.
+Use of uninitialized value in addition (+) at - line 76.
+Use of uninitialized value in addition (+) at - line 77.
