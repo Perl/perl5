@@ -2002,7 +2002,12 @@ Perl_debop(pTHX_ const OP *o)
     switch (o->op_type) {
     case OP_CONST:
     case OP_HINTSEVAL:
-	PerlIO_printf(Perl_debug_log, "(%s)", SvPEEK(cSVOPo_sv));
+	/* with ITHREADS, consts are stored in the pad, and the right pad
+	 * may not be active here, so check.
+	 * (((SVOP*)o)->op_sv ? ((SVOP*)o)->op_sv : ((my_perl->Icurpad)[(o)->op_targ])) 
+	 */
+	if (((SVOP*)o)->op_sv)
+	    PerlIO_printf(Perl_debug_log, "(%s)", SvPEEK(cSVOPo_sv));
 	break;
     case OP_GVSV:
     case OP_GV:
