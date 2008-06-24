@@ -12585,6 +12585,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
     case OP_PRTF:
     case OP_PRINT:
     case OP_SAY:
+	match = 1; /* print etc can return undef on defined args */
 	/* skip filehandle as it can't produce 'undef' warning  */
 	o = cUNOPx(obase)->op_first;
 	if ((obase->op_flags & OPf_STACKED) && o->op_type == OP_PUSHMARK)
@@ -12662,6 +12663,12 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
     case OP_SORT:
     case OP_CALLER:
     case OP_DOFILE:
+    case OP_PROTOTYPE:
+    case OP_NCMP:
+    case OP_SMARTMATCH:
+    case OP_UNPACK:
+    case OP_SYSOPEN:
+    case OP_SYSSEEK:
 	match = 1;
 	goto do_op;
 
