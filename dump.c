@@ -1660,7 +1660,14 @@ Perl_debop(pTHX_ OP *o)
     Perl_deb(aTHX_ "%s", OP_NAME(o));
     switch (o->op_type) {
     case OP_CONST:
-	PerlIO_printf(Perl_debug_log, "(%s)", SvPEEK(cSVOPo_sv));
+	/* With ITHREADS, consts are stored in the pad, and the right pad
+	 * may not be active here, so check.
+	 * Looks like only during compiling the pads are illegal.
+	 */
+#ifdef USE_ITHREADS
+	if ((((SVOP*)o)->op_sv) || !IN_PERL_COMPILETIME)
+#endif
+	    PerlIO_printf(Perl_debug_log, "(%s)", SvPEEK(cSVOPo_sv));
 	break;
     case OP_GVSV:
     case OP_GV:
