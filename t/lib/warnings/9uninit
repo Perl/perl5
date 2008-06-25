@@ -1419,8 +1419,8 @@ use warnings 'uninitialized';
 my $nofile = '/no/such/file';
 my $nocmd  = '/no/such/command';
 my $v;
-$v = 1 + `$nocmd`;
-$v = 1 + qx($nocmd);
+# *** `` not tested: Windows produces and error on STDERR
+# *** ditto qx()
 my $f = "";
 $v = 1 + open($f, $nofile);
 # *** pipe() not tested
@@ -1502,8 +1502,6 @@ $v = 1 + sysopen($f, $nofile, 0);
 { my $x = -1; $v = 1 + sysseek(STDIN, $x, 0); }
 
 EXPECT
-Use of uninitialized value in addition (+) at - line 8.
-Use of uninitialized value in addition (+) at - line 9.
 Use of uninitialized value in addition (+) at - line 11.
 Use of uninitialized value in addition (+) at - line 13.
 Use of uninitialized value in addition (+) at - line 14.
