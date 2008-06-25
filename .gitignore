@@ -22,7 +22,8 @@
 /x2p/makefile.old
 
 # general build products
-*.o *.a
+*.o
+*.a
 
 # ?
 ext.libs

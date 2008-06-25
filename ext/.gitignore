@@ -1,5 +1,6 @@
 # ignore generated .c files, and other module build traces
-*.c *.bs
+*.c
+*.bs
 blib
 pm_to_blib
 Makefile

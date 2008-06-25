@@ -21,6 +21,7 @@
 /File/Glob.pm
 /File/GlobMapper.pm
 /Filter/Util
+/GDBM_File.pm
 /Hash
 /I18N/Langinfo.pm
 /IO.pm
@@ -45,6 +46,7 @@
 /Module/Pluggable.pm
 /Module/Pluggable
 /O.pm
+/ODBM_File.pm
 /Opcode.pm
 /POSIX.pm
 /POSIX.pod
