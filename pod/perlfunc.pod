@@ -2348,8 +2348,14 @@ implementing the C<< <*.c> >> operator, but you can use it directly. If
 EXPR is omitted, C<$_> is used.  The C<< <*.c> >> operator is discussed in
 more detail in L<perlop/"I/O Operators">.
 
+Note that C<glob> will split its arguments on whitespace, treating
+each segment as separate pattern.  As such, C<glob('*.c *.h')> would
+match all files with a F<.c> or F<.h> extension.  The expression
+C<glob('.* *')> would match all files in the current working directory.
+
 Beginning with v5.6.0, this operator is implemented using the standard
-C<File::Glob> extension.  See L<File::Glob> for details.
+C<File::Glob> extension.  See L<File::Glob> for details, including
+C<bsd_glob> which does not treat whitespace as a pattern separator.
 
 =item gmtime EXPR
 X<gmtime> X<UTC> X<Greenwich>
