@@ -1,5 +1,8 @@
 Revision history for the Perl extension Win32.
 
+0.37	[2008-06-26]
+	- Add Win32::GetCurrentProcessId() function
+
 0.36	[2008-04-17]
 	- Add typecasts for Win64 compilation
 

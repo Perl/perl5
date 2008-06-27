@@ -1590,6 +1590,13 @@ XS(w32_OutputDebugString)
     XSRETURN_EMPTY;
 }
 
+XS(w32_GetCurrentProcessId)
+{
+    dXSARGS;
+    EXTEND(SP,1);
+    XSRETURN_IV(GetCurrentProcessId());
+}
+
 XS(w32_GetCurrentThreadId)
 {
     dXSARGS;
@@ -1701,6 +1708,7 @@ BOOT:
     newXS("Win32::CopyFile", w32_CopyFile, file);
     newXS("Win32::Sleep", w32_Sleep, file);
     newXS("Win32::OutputDebugString", w32_OutputDebugString, file);
+    newXS("Win32::GetCurrentProcessId", w32_GetCurrentProcessId, file);
     newXS("Win32::GetCurrentThreadId", w32_GetCurrentThreadId, file);
     newXS("Win32::CreateDirectory", w32_CreateDirectory, file);
     newXS("Win32::CreateFile", w32_CreateFile, file);

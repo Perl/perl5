@@ -8,7 +8,7 @@ BEGIN {
     require DynaLoader;
 
     @ISA = qw|Exporter DynaLoader|;
-    $VERSION = '0.36';
+    $VERSION = '0.37';
     $XS_VERSION = $VERSION;
     $VERSION = eval $VERSION;
 
@@ -403,14 +403,24 @@ If supported by the core Perl version, this function will return an
 ANSI path name for the current directory if the long pathname cannot
 be represented in the system codepage.
 
+=item Win32::GetCurrentProcessId()
+
+Returns the process identifier of the current process.  Until the
+process terminates, the process identifier uniquely identifies the
+process throughout the system.
+
+The current process identifier is normally also available via the
+predefined $$ variable.  Under fork() emulation however $$ may contain
+a pseudo-process identifier that is only meaningful to the Perl
+kill(), wait() and waitpid() functions.  The
+Win32::GetCurrentProcessId() function will always return the regular
+Windows process id, even when called from inside a pseudo-process.
+
 =item Win32::GetCurrentThreadId()
 
 Returns the thread identifier of the calling thread.  Until the thread
 terminates, the thread identifier uniquely identifies the thread
 throughout the system.
-
-Note: the current process identifier is available via the predefined
-$$ variable.
 
 =item Win32::GetFileVersion(FILENAME)
 
