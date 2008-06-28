@@ -39,12 +39,6 @@ tarball. It might be good to move them all to a subdirectory, but this would
 require careful checking to find all places that call them, and change those
 correctly.
 
-=head2 common test code for timed bail out
-
-Write portable self destruct code for tests to stop them burning CPU in
-infinite loops. This needs to avoid using alarm, as some of the tests are
-testing alarm/sleep or timers.
-
 =head2 POD -E<gt> HTML conversion in the core still sucks
 
 Which is crazy given just how simple POD purports to be, and how simple HTML
