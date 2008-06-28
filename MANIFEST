@@ -4115,7 +4115,6 @@ t/op/runlevel.t			See if die() works from perl_call_*()
 t/op/rxcode.t			See if /(?{ code })/ works
 t/op/sleep.t			See if sleep works
 t/op/smartmatch.t		See if the ~~ operator works
-t/op/smobj.t			See how the ~~ operator works with overloading
 t/op/sort.t			See if sort works
 t/op/splice.t			See if splice works
 t/op/split.t			See if split works
