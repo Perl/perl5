@@ -177,3 +177,18 @@ __DATA__
 	@nums		{  1, '',  2, '' }
 	@nums		{  1, '', 12, '' }
 !	@nums		{ 11, '', 12, '' }
+
+# UNDEF
+!	3		undef
+!	1		undef
+!	[]		undef
+!	{}		undef
+!	\%::main	undef
+!	[1,2]		undef
+!	%hash		undef
+!	@nums		undef
+!	"foo"		undef
+!	""		undef
+!	!1		undef
+!	\&foo		undef
+!	sub { }		undef
