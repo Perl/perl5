@@ -43,15 +43,24 @@ sub match_test {
     my ($yn, $left, $right) = @_;
 
     die "Bad test spec: ($yn, $left, $right)"
-	unless $yn eq "" || $yn eq "!";
+	unless $yn eq "" || $yn eq "!" || $yn eq '@';
     
     my $tstr = "$left ~~ $right";
     
     my $res;
     $res = eval $tstr // "";	#/ <- fix syntax colouring
 
-    die $@ if $@ ne "";
-    ok( ($yn =~ /!/ xor $res), "$tstr: $res");
+    chomp $@;
+
+    if ( $yn eq '@' ) {
+	ok( $@ ne '', sprintf "%s%s: %s", $tstr, $@ ? ( ', $@', $@ ) : ( '', $res ) );
+    } else {
+	if ( $@ ne '' ) {
+	    fail("$tstr, \$\@: $@");
+	} else {
+	    ok( ($yn eq '!' xor $res), "$tstr: $res");
+	}
+    }
 }
 
 
