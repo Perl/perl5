@@ -20,6 +20,7 @@ $Level = 1;
 my $test = 1;
 my $planned;
 my $noplan;
+my $Perl;       # Safer version of $^X set by which_perl()
 
 $TODO = 0;
 $NO_ENDING = 0;
@@ -423,7 +424,10 @@ sub _quote_args {
 
 sub _create_runperl { # Create the string to qx in runperl().
     my %args = @_;
-    my $runperl = $^X =~ m/\s/ ? qq{"$^X"} : $^X;
+    my $runperl = which_perl();
+    if ($runperl =~ m/\s/) {
+        $runperl = qq{"$runperl"};
+    }
     #- this allows, for example, to set PERL_RUNPERL_DEBUG=/usr/bin/valgrind
     if ($ENV{PERL_RUNPERL_DEBUG}) {
 	$runperl = "$ENV{PERL_RUNPERL_DEBUG} $runperl";
@@ -476,14 +480,14 @@ sub _create_runperl { # Create the string to qx in runperl().
 	$args{stdin} =~ s/\r/\\r/g;
 
 	if ($is_mswin || $is_netware || $is_vms) {
-	    $runperl = qq{$^X -e "print qq(} .
+	    $runperl = qq{$Perl -e "print qq(} .
 		$args{stdin} . q{)" | } . $runperl;
 	}
 	elsif ($is_macos) {
 	    # MacOS can only do two processes under MPW at once;
 	    # the test itself is one; we can't do two more, so
 	    # write to temp file
-	    my $stdin = qq{$^X -e 'print qq(} . $args{stdin} . qq{)' > teststdin; };
+	    my $stdin = qq{$Perl -e 'print qq(} . $args{stdin} . qq{)' > teststdin; };
 	    if ($args{verbose}) {
 		my $stdindisplay = $stdin;
 		$stdindisplay =~ s/\n/\n\#/g;
@@ -493,7 +497,7 @@ sub _create_runperl { # Create the string to qx in runperl().
 	    $runperl .= q{ < teststdin };
 	}
 	else {
-	    $runperl = qq{$^X -e 'print qq(} .
+	    $runperl = qq{$Perl -e 'print qq(} .
 		$args{stdin} . q{)' | } . $runperl;
 	}
     }
@@ -563,7 +567,6 @@ sub DIE {
 }
 
 # A somewhat safer version of the sometimes wrong $^X.
-my $Perl;
 sub which_perl {
     unless (defined $Perl) {
 	$Perl = $^X;
@@ -779,6 +782,131 @@ WHOA
     }
 
     _ok( !$diag, _where(), $name );
+}
+
+# Set a watchdog to timeout the entire test file
+# NOTE:  If the test file uses 'threads', then call the watchdog() function
+#        _AFTER_ the 'threads' module is loaded.
+sub watchdog ($)
+{
+    my $timeout = shift;
+    my $timeout_msg = 'Test process timed out - terminating';
+
+    my $pid_to_kill = $$;   # PID for this process
+
+    # Don't use a watchdog process if 'threads' is loaded -
+    #   use a watchdog thread instead
+    if (! $threads::threads) {
+
+        # On Windows and VMS, try launching a watchdog process
+        #   using system(1, ...) (see perlport.pod)
+        if (($^O eq 'MSWin32') || ($^O eq 'VMS')) {
+            # On Windows, try to get the 'real' PID
+            if ($^O eq 'MSWin32') {
+                eval { require Win32; };
+                if (defined(&Win32::GetCurrentProcessId)) {
+                    $pid_to_kill = Win32::GetCurrentProcessId();
+                }
+            }
+
+            # If we still have a fake PID, we can't use this method at all
+            return if ($pid_to_kill <= 0);
+
+            # Launch watchdog process
+            my $watchdog;
+            eval {
+                local $SIG{'__WARN__'} = sub {
+                    _diag("Watchdog warning: $_[0]");
+                };
+                $watchdog = system(1, which_perl(), '-e',
+                                                    "sleep($timeout);" .
+                                                    "warn('# $timeout_msg\n');" .
+                                                    "kill('KILL', $pid_to_kill);");
+            };
+            if ($@ || ($watchdog <= 0)) {
+                _diag('Failed to start watchdog');
+                _diag($@) if $@;
+                undef($watchdog);
+                return;
+            }
+
+            # Add END block to parent to terminate and
+            #   clean up watchdog process
+            eval "END { local \$! = 0; local \$? = 0;
+                        wait() if kill('KILL', $watchdog); };";
+            return;
+        }
+
+        # Try using fork() to generate a watchdog process
+        my $watchdog;
+        eval { $watchdog = fork() };
+        if (defined($watchdog)) {
+            if ($watchdog) {   # Parent process
+                # Add END block to parent to terminate and
+                #   clean up watchdog process
+                eval "END { local \$! = 0; local \$? = 0;
+                            wait() if kill('KILL', $watchdog); };";
+                return;
+            }
+
+            ### Watchdog process code
+
+            # Load POSIX if available
+            eval { require POSIX; };
+
+            # Execute the timeout
+            sleep($timeout - 2) if ($timeout > 2);   # Workaround for perlbug #49073
+            sleep(2);
+
+            # Kill test process if still running
+            if (kill(0, $pid_to_kill)) {
+                _diag($timeout_msg);
+                kill('KILL', $pid_to_kill);
+            }
+
+            # Don't execute END block (added at beginning of this file)
+            $NO_ENDING = 1;
+
+            # Terminate ourself (i.e., the watchdog)
+            POSIX::_exit(1) if (defined(&POSIX::_exit));
+            exit(1);
+        }
+
+        # fork() failed - fall through and try using a thread
+    }
+
+    # Use a watchdog thread because either 'threads' is loaded,
+    #   or fork() failed
+    if (eval { require threads; }) {
+        threads->create(sub {
+                # Load POSIX if available
+                eval { require POSIX; };
+
+                # Execute the timeout
+                sleep($timeout);
+
+                # Kill the parent (and ourself)
+                select(STDERR); $| = 1;
+                _diag($timeout_msg);
+                POSIX::_exit(1) if (defined(&POSIX::_exit));
+                kill('KILL', $pid_to_kill);
+            })->detach();
+        return;
+    }
+
+    # If everything above fails, then just use an alarm timeout
+    if (eval { alarm($timeout); 1; }) {
+        # Load POSIX if available
+        eval { require POSIX; };
+
+        # Alarm handler will do the actual 'killing'
+        $SIG{'ALRM'} = sub {
+            select(STDERR); $| = 1;
+            _diag($timeout_msg);
+            POSIX::_exit(1) if (defined(&POSIX::_exit));
+            kill('KILL', $pid_to_kill);
+        };
+    }
 }
 
 1;
