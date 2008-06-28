@@ -28,6 +28,29 @@ my %hash = (foo => 17, bar => 23);
 tie my %tied_hash, 'Tie::StdHash';
 %tied_hash = %hash;
 
+{
+    package Test::Object::NoOverload;
+    sub new { bless { key => 1 } }
+}
+
+{
+    package Test::Object::CopyOverload;
+    sub new { bless { key => 1 } }
+    use overload '~~' => sub { my %hash = %{ $_[0] }; %hash ~~ $_[1] };
+}
+
+{
+    package Test::Object::OverloadCodeRef;
+    sub new { bless $_[1] }
+    use overload '~~' => sub { shift->($_[1]) };
+}
+
+our $ov_obj = Test::Object::CopyOverload->new;
+our $obj = Test::Object::NoOverload->new;
+our $false_obj = Test::Object::OverloadCodeRef->new(sub { 0 });
+our $true_obj = Test::Object::OverloadCodeRef->new(sub { 1 });
+
+
 # Load and run the tests
 my @tests = map [chomp and split /\t+/, $_, 3], grep !/^#/ && /\S/, <DATA>;
 plan tests => 2 * @tests;
@@ -67,30 +90,72 @@ sub match_test {
 
 sub foo {}
 sub bar {2}
-sub fatal {die}
+sub gorch {2}
+sub fatal {die "fatal sub\n"}
 
-sub a_const() {die if @_; "a constant"}
-sub b_const() {die if @_; "a constant"}
+sub a_const() {die "const\n" if @_; "a constant"}
+sub b_const() {die "const\n" if @_; "a constant"}
 
 __DATA__
+# OBJECT
+# - overloaded
+	$ov_obj		"key"
+	$ov_obj		{"key" => 1}
+!	$ov_obj		"foo"
+!	$ov_obj		\&foo
+@	$ov_obj		\&fatal
+
+# regular object
+@	$obj	"key"
+@	$obj	{"key" => 1}
+@	$obj	"foo"
+@	$obj	$obj
+@	$obj	sub { 1 }
+@	$obj	sub { 0 }
+@	$obj	\&foo
+@	$obj	\&fatal
+
 # CODE ref against argument
 #  - arg is code ref
 	\&foo		\&foo
 !	\&foo		sub {}
 !	\&foo		\&bar
+	\&fatal		\&fatal
+!	\&foo		\&fatal
 
 # - arg is not code ref
-	1		sub{shift}
-!	0		sub{shift}
-	1		sub{scalar @_}
-	[]		\&bar
-	{}		\&bar
-	qr//		\&bar
+	1	sub{shift}
+!	0	sub{shift}
+!	undef	sub{shift}
+	undef	sub{not shift}
+	1	sub{scalar @_}
+	[]	\&bar
+	{}	\&bar
+	qr//	\&bar
+!	[]	\&foo
+!	{}	\&foo
+!	qr//	\&foo
+!	undef	\&foo
+	undef	\&bar
+@	undef	\&fatal
+@	1	\&fatal
+@	[]	\&fatal
+@	"foo"	\&fatal
+@	qr//	\&fatal
+@	$obj	\&bar
+	$ov_obj	\&bar
 
 # - null-prototyped subs
 	a_const		"a constant"
 	a_const		a_const
 	a_const		b_const
+	\&a_const	\&a_const
+!	\&a_const	\&b_const
+
+# - non-null-prototyped subs
+!	\&bar		\&gorch
+	bar		gorch
+@	fatal		bar
 
 # HASH ref against:
 #   - another hash ref
@@ -127,15 +192,15 @@ __DATA__
 
 # ARRAY ref against:
 #  - another array ref
-	[]		[]
-!	[]		[1]
+	[]			[]
+!	[]			[1]
 	[["foo"], ["bar"]]	[qr/o/, qr/a/]
 	["foo", "bar"]		[qr/o/, qr/a/]
 !	["foo", "bar"]		[qr/o/, "foo"]
-	$deep1		$deep1
-!	$deep1		$deep2
+	$deep1			$deep1
+!	$deep1			$deep2
 
-	\@nums		\@tied_nums
+	\@nums			\@tied_nums
 
 #  - a regex
 	[qw(foo bar baz quux)]	qr/x/
