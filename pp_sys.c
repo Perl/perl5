@@ -607,7 +607,7 @@ PP(pp_pipe_op)
     if (!rgv || !wgv)
 	goto badexit;
 
-    if (SvTYPE(rgv) != SVt_PVGV || SvTYPE(wgv) != SVt_PVGV)
+    if (!isGV_with_GP(rgv) || !isGV_with_GP(wgv))
 	DIE(aTHX_ PL_no_usym, "filehandle");
     rstio = GvIOn(rgv);
     wstio = GvIOn(wgv);
@@ -806,19 +806,22 @@ PP(pp_tie)
 	    methname = "TIEARRAY";
 	    break;
 	case SVt_PVGV:
+	    if (isGV_with_GP(varsv)) {
 #ifdef GV_UNIQUE_CHECK
-	    if (GvUNIQUE((GV*)varsv)) {
-                Perl_croak(aTHX_ "Attempt to tie unique GV");
-	    }
+		if (GvUNIQUE((GV*)varsv)) {
+		    Perl_croak(aTHX_ "Attempt to tie unique GV");
+		}
 #endif
-	    methname = "TIEHANDLE";
-	    how = PERL_MAGIC_tiedscalar;
-	    /* For tied filehandles, we apply tiedscalar magic to the IO
-	       slot of the GP rather than the GV itself. AMS 20010812 */
-	    if (!GvIOp(varsv))
-		GvIOp(varsv) = newIO();
-	    varsv = (SV *)GvIOp(varsv);
-	    break;
+		methname = "TIEHANDLE";
+		how = PERL_MAGIC_tiedscalar;
+		/* For tied filehandles, we apply tiedscalar magic to the IO
+		   slot of the GP rather than the GV itself. AMS 20010812 */
+		if (!GvIOp(varsv))
+		    GvIOp(varsv) = newIO();
+		varsv = (SV *)GvIOp(varsv);
+		break;
+	    }
+	    /* FALL THROUGH */
 	default:
 	    methname = "TIESCALAR";
 	    how = PERL_MAGIC_tiedscalar;
@@ -883,7 +886,7 @@ PP(pp_untie)
     const char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
 		? PERL_MAGIC_tied : PERL_MAGIC_tiedscalar;
 
-    if (SvTYPE(sv) == SVt_PVGV && !(sv = (SV *)GvIOp(sv)))
+    if (isGV_with_GP(sv) && !(sv = (SV *)GvIOp(sv)))
 	RETPUSHYES;
 
     if ((mg = SvTIED_mg(sv, how))) {
@@ -921,7 +924,7 @@ PP(pp_tied)
     const char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
 		? PERL_MAGIC_tied : PERL_MAGIC_tiedscalar;
 
-    if (SvTYPE(sv) == SVt_PVGV && !(sv = (SV *)GvIOp(sv)))
+    if (isGV_with_GP(sv) && !(sv = (SV *)GvIOp(sv)))
 	RETPUSHUNDEF;
 
     if ((mg = SvTIED_mg(sv, how))) {
@@ -2195,11 +2198,11 @@ PP(pp_truncate)
 	    SV * const sv = POPs;
 	    const char *name;
 
-	    if (SvTYPE(sv) == SVt_PVGV) {
+	    if (isGV_with_GP(sv)) {
 	        tmpgv = (GV*)sv;		/* *main::FRED for example */
 		goto do_ftruncate_gv;
 	    }
-	    else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
+	    else if (SvROK(sv) && isGV_with_GP(SvRV(sv))) {
 	        tmpgv = (GV*) SvRV(sv);	/* \*main::FRED for example */
 		goto do_ftruncate_gv;
 	    }
@@ -2842,10 +2845,10 @@ PP(pp_stat)
     }
     else {
 	SV* const sv = POPs;
-	if (SvTYPE(sv) == SVt_PVGV) {
+	if (isGV_with_GP(sv)) {
 	    gv = (GV*)sv;
 	    goto do_fstat;
-	} else if(SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
+	} else if(SvROK(sv) && isGV_with_GP(SvRV(sv))) {
             gv = (GV*)SvRV(sv);
             if (PL_op->op_type == OP_LSTAT)
                 goto do_fstat_warning_check;
@@ -3401,10 +3404,10 @@ PP(pp_chdir)
 	if (PL_op->op_flags & OPf_SPECIAL) {
 	    gv = gv_fetchsv(sv, 0, SVt_PVIO);
 	}
-        else if (SvTYPE(sv) == SVt_PVGV) {
+        else if (isGV_with_GP(sv)) {
 	    gv = (GV*)sv;
         }
-	else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
+	else if (SvROK(sv) && isGV_with_GP(SvRV(sv))) {
             gv = (GV*)SvRV(sv);
         }
         else {

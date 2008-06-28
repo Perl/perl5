@@ -10,7 +10,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan 'no_plan';
+plan 90;
 
 $SIG{__WARN__} = sub { die @_ };
 
@@ -185,3 +185,10 @@ foreach my $value (\&foo, \$scalar, \@array, \%hash) {
 	}
     }
 }
+
+# this will segfault if it fails
+sub PVBM () { 'foo' }
+{ my $dummy = index 'foo', PVBM }
+
+ok !defined(attributes::get(\PVBM)), 
+    'PVBMs don\'t segfault attributes::get';

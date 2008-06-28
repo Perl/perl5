@@ -3353,11 +3353,11 @@ PP(pp_require)
 			    }
 			}
 
-			if (SvROK(arg) && SvTYPE(SvRV(arg)) == SVt_PVGV) {
+			if (SvROK(arg) && isGV_with_GP(SvRV(arg))) {
 			    arg = SvRV(arg);
 			}
 
-			if (SvTYPE(arg) == SVt_PVGV) {
+			if (isGV_with_GP(arg)) {
 			    IO * const io = GvIO((GV *)arg);
 
 			    ++filter_has_file;

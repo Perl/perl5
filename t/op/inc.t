@@ -2,7 +2,7 @@
 
 # use strict;
 
-print "1..50\n";
+print "1..54\n";
 
 my $test = 1;
 
@@ -270,3 +270,14 @@ for my $n (47..113) {
     last;
 }
 die "Could not find a value which overflows the mantissa" unless $found;
+
+# these will segfault if they fail
+
+sub PVBM () { 'foo' }
+{ my $dummy = index 'foo', PVBM }
+
+ok (scalar eval { my $pvbm = PVBM; $pvbm++ });
+ok (scalar eval { my $pvbm = PVBM; $pvbm-- });
+ok (scalar eval { my $pvbm = PVBM; ++$pvbm });
+ok (scalar eval { my $pvbm = PVBM; --$pvbm });
+

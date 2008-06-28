@@ -1543,6 +1543,8 @@ Perl_sv_setiv(pTHX_ register SV *const sv, const IV i)
 	break;
 
     case SVt_PVGV:
+	if (!isGV_with_GP(sv))
+	    break;
     case SVt_PVAV:
     case SVt_PVHV:
     case SVt_PVCV:
@@ -1650,6 +1652,8 @@ Perl_sv_setnv(pTHX_ register SV *const sv, const NV num)
 	break;
 
     case SVt_PVGV:
+	if (!isGV_with_GP(sv))
+	    break;
     case SVt_PVAV:
     case SVt_PVHV:
     case SVt_PVCV:
@@ -7818,11 +7822,14 @@ Perl_sv_2io(pTHX_ SV *const sv)
 	io = (IO*)sv;
 	break;
     case SVt_PVGV:
-	gv = (GV*)sv;
-	io = GvIO(gv);
-	if (!io)
-	    Perl_croak(aTHX_ "Bad filehandle: %s", GvNAME(gv));
-	break;
+	if (isGV_with_GP(sv)) {
+	    gv = (GV*)sv;
+	    io = GvIO(gv);
+	    if (!io)
+		Perl_croak(aTHX_ "Bad filehandle: %s", GvNAME(gv));
+	    break;
+	}
+	/* FALL THROUGH */
     default:
 	if (!SvOK(sv))
 	    Perl_croak(aTHX_ PL_no_usym, "filehandle");
@@ -7875,10 +7882,13 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **const st, GV **const gvp, const I32 lref)
 	*gvp = NULL;
 	return NULL;
     case SVt_PVGV:
-	gv = (GV*)sv;
-	*gvp = gv;
-	*st = GvESTASH(gv);
-	goto fix_gv;
+	if (isGV_with_GP(sv)) {
+	    gv = (GV*)sv;
+	    *gvp = gv;
+	    *st = GvESTASH(gv);
+	    goto fix_gv;
+	}
+	/* FALL THROUGH */
 
     default:
 	if (SvROK(sv)) {
@@ -7893,12 +7903,12 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **const st, GV **const gvp, const I32 lref)
 		*st = CvSTASH(cv);
 		return cv;
 	    }
-	    else if(isGV(sv))
+	    else if(isGV_with_GP(sv))
 		gv = (GV*)sv;
 	    else
 		Perl_croak(aTHX_ "Not a subroutine reference");
 	}
-	else if (isGV(sv)) {
+	else if (isGV_with_GP(sv)) {
 	    SvGETMAGIC(sv);
 	    gv = (GV*)sv;
 	}
@@ -7910,7 +7920,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **const st, GV **const gvp, const I32 lref)
 	    return NULL;
 	}
 	/* Some flags to gv_fetchsv mean don't really create the GV  */
-	if (SvTYPE(gv) != SVt_PVGV) {
+	if (!isGV_with_GP(gv)) {
 	    *st = NULL;
 	    return NULL;
 	}
@@ -8125,7 +8135,8 @@ Perl_sv_reftype(pTHX_ const SV *const sv, const int ob)
 	case SVt_PVAV:		return "ARRAY";
 	case SVt_PVHV:		return "HASH";
 	case SVt_PVCV:		return "CODE";
-	case SVt_PVGV:		return "GLOB";
+	case SVt_PVGV:		return (char *) (isGV_with_GP(sv)
+				    ? "GLOB" : "SCALAR");
 	case SVt_PVFM:		return "FORMAT";
 	case SVt_PVIO:		return "IO";
 	case SVt_BIND:		return "BIND";

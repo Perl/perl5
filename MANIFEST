@@ -3556,6 +3556,7 @@ t/io/openpid.t			See if open works for subprocesses
 t/io/open.t			See if open works
 t/io/pipe.t			See if secure pipes work
 t/io/print.t			See if print commands work
+t/io/pvbm.t			See if PVBMs break IO commands
 t/io/read.t			See if read works
 t/io/say.t			See if say works
 t/io/tell.t			See if file seeking works

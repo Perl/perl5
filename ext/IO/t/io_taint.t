@@ -18,7 +18,7 @@ BEGIN {
 
 END { unlink "./__taint__$$" }
 
-print "1..3\n";
+print "1..5\n";
 use IO::File;
 $x = new IO::File "> ./__taint__$$" || die("Cannot open ./__taint__$$\n");
 print $x "$$\n";
@@ -42,5 +42,16 @@ eval { kill 0 * $unsafe };
 print "not " if ($@ =~ /^Insecure/o);
 print "ok 3\n"; # No Insecure message from using the data
 $x->close;
+
+# this will segfault if it fails
+
+sub PVBM () { 'foo' }
+{ my $dummy = index 'foo', PVBM }
+
+eval { IO::Handle::untaint(PVBM) };
+print "ok 4\n";
+
+eval { IO::Handle::untaint(\PVBM) };
+print "ok 5\n";
 
 exit 0;

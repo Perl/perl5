@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..36\n";
+print "1..37\n";
 
 print defined($a) ? "not ok 1\n" : "ok 1\n";
 
@@ -102,3 +102,13 @@ sub X::DESTROY {
     print "not " if each   %hash; print "ok $test\n"; $test++;
     print "not " if defined delete $hash{'key2'}; print "ok $test\n"; $test++;
 }
+
+# this will segfault if it fails
+
+sub PVBM () { 'foo' }
+{ my $dummy = index 'foo', PVBM }
+
+my $pvbm = PVBM;
+undef $pvbm;
+print 'not ' if defined $pvbm;
+print "ok $test\n"; $test++;

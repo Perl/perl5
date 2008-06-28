@@ -120,7 +120,7 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 		    break;
 		case 'e':
 		    if (memEQ(name, "uniqu", 5)) {
-			if (SvTYPE(sv) == SVt_PVGV) {
+			if (isGV_with_GP(sv)) {
 			    if (negated) {
 				GvUNIQUE_off(sv);
 			    } else {
@@ -216,7 +216,7 @@ usage:
 	    XPUSHs(newSVpvs_flags("unique", SVs_TEMP));
 	break;
     case SVt_PVGV:
-	if (GvUNIQUE(sv))
+	if (isGV_with_GP(sv) && GvUNIQUE(sv))
 	    XPUSHs(newSVpvs_flags("unique", SVs_TEMP));
 	break;
     default:
@@ -260,7 +260,7 @@ usage:
 		stash = CvSTASH(sv);
 	    break;
 	case SVt_PVGV:
-	    if (GvGP(sv) && GvESTASH((GV*)sv))
+	    if (isGV_with_GP(sv) && GvGP(sv) && GvESTASH((GV*)sv))
 		stash = GvESTASH((GV*)sv);
 	    break;
 	default:
