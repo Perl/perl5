@@ -324,8 +324,8 @@ PP(pp_readline)
 {
     tryAMAGICunTARGET(iter, 0);
     PL_last_in_gv = (GV*)(*PL_stack_sp--);
-    if (SvTYPE(PL_last_in_gv) != SVt_PVGV) {
-	if (SvROK(PL_last_in_gv) && SvTYPE(SvRV(PL_last_in_gv)) == SVt_PVGV)
+    if (!isGV_with_GP(PL_last_in_gv)) {
+	if (SvROK(PL_last_in_gv) && isGV_with_GP(SvRV(PL_last_in_gv)))
 	    PL_last_in_gv = (GV*)SvRV(PL_last_in_gv);
 	else {
 	    dSP;
@@ -799,7 +799,7 @@ PP(pp_rv2av)
 	else {
 	    GV *gv;
 	
-	    if (SvTYPE(sv) != SVt_PVGV) {
+	    if (!isGV_with_GP(sv)) {
 		if (SvGMAGICAL(sv)) {
 		    mg_get(sv);
 		    if (SvROK(sv))
@@ -2571,6 +2571,8 @@ PP(pp_entersub)
     switch (SvTYPE(sv)) {
 	/* This is overwhelming the most common case:  */
     case SVt_PVGV:
+	if (!isGV_with_GP(sv))
+	    DIE(aTHX_ "Not a CODE reference");
 	if (!(cv = GvCVu((GV*)sv))) {
 	    HV *stash;
 	    cv = sv_2cv(sv, &stash, &gv, 0);
@@ -3155,7 +3157,9 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 
     /* if we got here, ob should be a reference or a glob */
     if (!ob || !(SvOBJECT(ob)
-		 || (SvTYPE(ob) == SVt_PVGV && (ob = (SV*)GvIO((GV*)ob))
+		 || (SvTYPE(ob) == SVt_PVGV 
+		     && isGV_with_GP(ob)
+		     && (ob = (SV*)GvIO((GV*)ob))
 		     && SvOBJECT(ob))))
     {
 	Perl_croak(aTHX_ "Can't call method \"%s\" on unblessed reference",

@@ -140,11 +140,11 @@ PP(pp_rv2gv)
 	    SvREFCNT_inc_void_NN(sv);
 	    sv = (SV*) gv;
 	}
-	else if (SvTYPE(sv) != SVt_PVGV)
+	else if (!isGV_with_GP(sv))
 	    DIE(aTHX_ "Not a GLOB reference");
     }
     else {
-	if (SvTYPE(sv) != SVt_PVGV) {
+	if (!isGV_with_GP(sv)) {
 	    char *sym;
 	    STRLEN len;
 
@@ -288,7 +288,7 @@ PP(pp_rv2sv)
     else {
 	gv = (GV*)sv;
 
-	if (SvTYPE(gv) != SVt_PVGV) {
+	if (!isGV_with_GP(gv)) {
 	    if (SvGMAGICAL(sv)) {
 		mg_get(sv);
 		if (SvROK(sv))
@@ -848,9 +848,11 @@ PP(pp_undef)
 	}
 	break;
     case SVt_PVGV:
-	if (SvFAKE(sv))
+	if (SvFAKE(sv)) {
 	    SvSetMagicSV(sv, &PL_sv_undef);
-	else {
+	    break;
+	}
+	else if (isGV_with_GP(sv)) {
 	    GP *gp;
 	    gp_free((GV*)sv);
 	    Newxz(gp, 1, GP);
@@ -859,8 +861,9 @@ PP(pp_undef)
 	    GvLINE(sv) = CopLINE(PL_curcop);
 	    GvEGV(sv) = (GV*)sv;
 	    GvMULTI_on(sv);
+	    break;
 	}
-	break;
+	/* FALL THROUGH */
     default:
 	if (SvTYPE(sv) >= SVt_PV && SvPVX_const(sv) && SvLEN(sv)) {
 	    SvPV_free(sv);

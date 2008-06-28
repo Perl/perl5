@@ -23,7 +23,7 @@ use strict;
 use File::Spec;
 
 require "test.pl";
-plan(tests => 45 + !$minitest * (3 + 14 * $can_fork));
+plan(tests => 49 + !$minitest * (3 + 14 * $can_fork));
 
 my @tempfiles = ();
 
@@ -210,6 +210,29 @@ is( $ret, 'abc', 'do "abc.pl" sees return value' );
     is( $filename, 'seen', 'the coderef sees fully-qualified pathnames' );
     @INC = @old_INC;
 }
+
+# this will segfault if it fails
+
+sub PVBM () { 'foo' }
+{ my $dummy = index 'foo', PVBM }
+
+# I don't know whether these requires should succeed or fail. 5.8 failed
+# all of them; 5.10 with an ordinary constant in place of PVBM lets the
+# latter two succeed. For now I don't care, as long as they don't
+# segfault :).
+
+unshift @INC, sub { PVBM };
+eval 'require foo';
+ok( 1, 'returning PVBM doesn\'t segfault require' );
+eval 'use foo';
+ok( 1, 'returning PVBM doesn\'t segfault use' );
+shift @INC;
+unshift @INC, sub { \PVBM };
+eval 'require foo';
+ok( 1, 'returning PVBM ref doesn\'t segfault require' );
+eval 'use foo';
+ok( 1, 'returning PVBM ref doesn\'t segfault use' );
+shift @INC;
 
 exit if $minitest;
 

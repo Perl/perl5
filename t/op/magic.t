@@ -36,7 +36,7 @@ sub skip {
     return 1;
 }
 
-print "1..58\n";
+print "1..59\n";
 
 $Is_MSWin32  = $^O eq 'MSWin32';
 $Is_NetWare  = $^O eq 'NetWare';
@@ -70,7 +70,7 @@ ok $!, $!;
 close FOO; # just mention it, squelch used-only-once
 
 if ($Is_MSWin32 || $Is_NetWare || $Is_Dos || $Is_MPE || $Is_MacOS) {
-    skip('SIGINT not safe on this platform') for 1..4;
+    skip('SIGINT not safe on this platform') for 1..5;
 }
 else {
   # the next tests are done in a subprocess because sh spits out a
@@ -131,7 +131,23 @@ END
     my $todo = ($^O eq 'os2' ? ' # TODO: EMX v0.9d_fix4 bug: wrong nibble? ' : '');
     print $? & 0xFF ? "ok 6$todo\n" : "not ok 6$todo\n";
 
-    $test += 4;
+    open(CMDPIPE, "| $PERL");
+    print CMDPIPE <<'END';
+
+    sub PVBM () { 'foo' }
+    index 'foo', PVBM;
+    my $pvbm = PVBM;
+
+    sub foo { exit 0 }
+
+    $SIG{"INT"} = $pvbm;
+    kill "INT", $$; sleep 1;
+END
+    close CMDPIPE;
+    $? >>= 8 if $^O eq 'VMS';
+    print $? ? "not ok 7\n" : "ok 7\n";
+
+    $test += 5;
 }
 
 # can we slice ENV?

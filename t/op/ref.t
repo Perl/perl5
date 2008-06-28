@@ -8,7 +8,7 @@ BEGIN {
 require 'test.pl';
 use strict qw(refs subs);
 
-plan(129);
+plan(175);
 
 # Test glob operations.
 
@@ -126,9 +126,49 @@ sub mysub2 { lc shift }
 
 # Test the ref operator.
 
-is (ref $subref, 'CODE');
-is (ref $ref, 'ARRAY');
-is (ref $refref, 'HASH');
+sub PVBM () { 'foo' }
+{ my $dummy = index 'foo', PVBM }
+
+my $pviv = 1; "$pviv";
+my $pvnv = 1.0; "$pvnv";
+my $x;
+
+# we don't test
+#   tied lvalue => SCALAR, as we haven't tested tie yet
+#   BIND, 'cos we can't create them yet
+#   REGEXP, 'cos that requires overload or Scalar::Util
+#   LVALUE ref, 'cos I can't work out how to create one :)
+
+for (
+    [ 'undef',          SCALAR  => \undef               ],
+    [ 'constant IV',    SCALAR  => \1                   ],
+    [ 'constant NV',    SCALAR  => \1.0                 ],
+    [ 'constant PV',    SCALAR  => \'f'                 ],
+    [ 'scalar',         SCALAR  => \$x                  ],
+    [ 'PVIV',           SCALAR  => \$pviv               ],
+    [ 'PVNV',           SCALAR  => \$pvnv               ],
+    [ 'PVMG',           SCALAR  => \$0                  ],
+    [ 'PVBM',           SCALAR  => \PVBM                ],
+    [ 'vstring',        SCALAR  => \v1                  ],
+    [ 'ref',            REF     => \\1                  ],
+    [ 'lvalue',         LVALUE  => \substr($x, 0, 0)    ],
+    [ 'named array',    ARRAY   => \@ary                ],
+    [ 'anon array',     ARRAY   => [ 1 ]                ],
+    [ 'named hash',     HASH    => \%whatever           ],
+    [ 'anon hash',      HASH    => { a => 1 }           ],
+    [ 'named sub',      CODE    => \&mysub,             ],
+    [ 'anon sub',       CODE    => sub { 1; }           ],
+    [ 'glob',           GLOB    => \*foo                ],
+    [ 'format',         FORMAT  => *STDERR{FORMAT}      ],
+) {
+    my ($desc, $type, $ref) = @$_;
+    is (ref $ref, $type, "ref() for ref to $desc");
+    like ("$ref", qr/^$type\(0x[0-9a-f]+\)$/, "stringify for ref to $desc");
+}
+
+is (ref *STDOUT{IO}, 'IO::Handle', 'IO refs are blessed into IO::Handle');
+like (*STDOUT{IO}, qr/^IO::Handle=IO\(0x[0-9a-f]+\)$/,
+    'stringify for IO refs');
 
 # Test anonymous hash syntax.
 
@@ -517,6 +557,19 @@ TODO: {
 
     is($ref, *{$ref}{IO}, "IO slot of the temporary glob is set correctly");
 }
+
+# these will segfault if they fail
+
+my $pvbm = PVBM;
+my $rpvbm = \$pvbm;
+
+ok (!eval { *$rpvbm }, 'PVBM ref is not a GLOB ref');
+ok (!eval { *$pvbm }, 'PVBM is not a GLOB ref');
+ok (!eval { $$pvbm }, 'PVBM is not a SCALAR ref');
+ok (!eval { @$pvbm }, 'PVBM is not an ARRAY ref');
+ok (!eval { %$pvbm }, 'PVBM is not a HASH ref');
+ok (!eval { $pvbm->() }, 'PVBM is not a CODE ref');
+ok (!eval { $rpvbm->foo }, 'PVBM is not an object');
 
 # Bit of a hack to make test.pl happy. There are 3 more tests after it leaves.
 $test = curr_test();
