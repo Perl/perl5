@@ -30,12 +30,6 @@ some variation on the big block of C<$Is_Foo> checks.  We can safely put this
 into a file, change it to build an C<%Is> hash and require it.  Maybe just put
 it into F<test.pl>. Throw in the handy tainting subroutines.
 
-=head2 common test code for timed bail out
-
-Write portable self destruct code for tests to stop them burning CPU in
-infinite loops. This needs to avoid using alarm, as some of the tests are
-testing alarm/sleep or timers.
-
 =head2 POD -E<gt> HTML conversion in the core still sucks
 
 Which is crazy given just how simple POD purports to be, and how simple HTML

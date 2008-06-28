@@ -781,4 +781,106 @@ WHOA
     _ok( !$diag, _where(), $name );
 }
 
+# Set a watchdog to timeout the entire test file
+sub watchdog ($)
+{
+    my $timeout = shift;
+    my $timeout_msg = 'Test process timed out - terminating';
+
+    my $pid_to_kill = $$;   # PID for this process
+
+    # On Windows and VMS, try launching a watchdog process
+    #   using system(1, ...) (see perlport.pod)
+    if (($^O eq 'MSWin32') || ($^O eq 'VMS')) {
+        # On Windows, try to get the 'real' PID
+        if ($^O eq 'MSWin32') {
+            eval { require Win32; };
+            if (defined(&Win32::GetCurrentProcessId)) {
+                $pid_to_kill = Win32::GetCurrentProcessId();
+            }
+        }
+
+        # If we still have a fake PID, we can't use this method at all
+        return if ($pid_to_kill <= 0);
+
+        # Launch watchdog process
+        my $watchdog;
+        eval {
+            local $SIG{'__WARN__'} = sub {};
+            $watchdog = system(1, $^X, '-e', "sleep($timeout);" .
+                                             "kill('KILL', $pid_to_kill);");
+        };
+
+        # If the above worked, add END block to parent
+        #   to clean up watchdog process
+        if (! $@ && ($watchdog > 0)) {
+            eval "END { kill('KILL', $watchdog); }";
+        }
+        return;
+    }
+
+
+    # Try using fork() to generate a watchdog process
+    my $watchdog;
+    eval { $watchdog = fork() };
+    if (defined($watchdog)) {
+        if ($watchdog) {   # Parent process
+            # Add END block to parent to clean up watchdog process
+            eval "END { kill('KILL', $watchdog); }";
+            return;
+        }
+
+        ### Watchdog process code
+
+        # Load POSIX if available
+        eval { require POSIX; };
+
+        # Execute the timeout
+        sleep($timeout - 2) if ($timeout > 2);   # Workaround for perlbug #49073
+        sleep(2);
+
+        # Kill test process if still running
+        if (kill(0, $pid_to_kill)) {
+            _diag($timeout_msg);
+            kill('KILL', $pid_to_kill);
+        }
+
+        # Terminate ourself (i.e., the watchdog)
+        POSIX::_exit(1) if (defined(&POSIX::_exit));
+        exit(1);
+    }
+
+    # fork() failed - try a thread
+    if (eval { require threads; }) {
+        threads->create(sub {
+                # Load POSIX if available
+                eval { require POSIX; };
+
+                # Execute the timeout
+                sleep($timeout);
+
+                # Kill the parent (and ourself)
+                _diag($timeout_msg);
+                POSIX::_exit(1) if (defined(&POSIX::_exit));
+                kill('KILL', $pid_to_kill);
+            })->detach();
+        return;
+    }
+
+    # Threads failed, too - try use alarm()
+
+    # Try to set the timeout
+    if (eval { alarm($timeout); 1; }) {
+        # Load POSIX if available
+        eval { require POSIX; };
+
+        # Alarm handler will do the actual 'killing'
+        $SIG{'ALRM'} = sub {
+            _diag($timeout_msg);
+            POSIX::_exit(1) if (defined(&POSIX::_exit));
+            kill('KILL', $pid_to_kill);
+        };
+    }
+}
+
 1;
