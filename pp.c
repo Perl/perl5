@@ -143,11 +143,11 @@ PP(pp_rv2gv)
 	    SvREFCNT_inc_void_NN(sv);
 	    sv = (SV*) gv;
 	}
-	else if (SvTYPE(sv) != SVt_PVGV)
+	else if (!isGV_with_GP(sv))
 	    DIE(aTHX_ "Not a GLOB reference");
     }
     else {
-	if (SvTYPE(sv) != SVt_PVGV) {
+	if (!isGV_with_GP(sv)) {
 	    if (SvGMAGICAL(sv)) {
 		mg_get(sv);
 		if (SvROK(sv))
@@ -289,7 +289,7 @@ PP(pp_rv2sv)
     else {
 	gv = (GV*)sv;
 
-	if (SvTYPE(gv) != SVt_PVGV) {
+	if (!isGV_with_GP(gv)) {
 	    if (SvGMAGICAL(sv)) {
 		mg_get(sv);
 		if (SvROK(sv))
@@ -824,9 +824,11 @@ PP(pp_undef)
 	}
 	break;
     case SVt_PVGV:
-	if (SvFAKE(sv))
+	if (SvFAKE(sv)) {
 	    SvSetMagicSV(sv, &PL_sv_undef);
-	else {
+	    break;
+	}
+	else if (isGV_with_GP(sv)) {
 	    GP *gp;
             HV *stash;
 
@@ -844,8 +846,9 @@ PP(pp_undef)
 	    GvLINE(sv) = CopLINE(PL_curcop);
 	    GvEGV(sv) = (GV*)sv;
 	    GvMULTI_on(sv);
+	    break;
 	}
-	break;
+	/* FALL THROUGH */
     default:
 	if (SvTYPE(sv) >= SVt_PV && SvPVX_const(sv) && SvLEN(sv)) {
 	    SvPV_free(sv);
@@ -862,7 +865,7 @@ PP(pp_undef)
 PP(pp_predec)
 {
     dVAR; dSP;
-    if (SvTYPE(TOPs) >= SVt_PVGV && SvTYPE(TOPs) != SVt_PVLV)
+    if (SvTYPE(TOPs) >= SVt_PVAV || isGV_with_GP(TOPs))
 	DIE(aTHX_ PL_no_modify);
     if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
         && SvIVX(TOPs) != IV_MIN)
@@ -879,7 +882,7 @@ PP(pp_predec)
 PP(pp_postinc)
 {
     dVAR; dSP; dTARGET;
-    if (SvTYPE(TOPs) >= SVt_PVGV && SvTYPE(TOPs) != SVt_PVLV)
+    if (SvTYPE(TOPs) >= SVt_PVAV || isGV_with_GP(TOPs))
 	DIE(aTHX_ PL_no_modify);
     sv_setsv(TARG, TOPs);
     if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
@@ -901,7 +904,7 @@ PP(pp_postinc)
 PP(pp_postdec)
 {
     dVAR; dSP; dTARGET;
-    if (SvTYPE(TOPs) >= SVt_PVGV && SvTYPE(TOPs) != SVt_PVLV)
+    if (SvTYPE(TOPs) >= SVt_PVAV || isGV_with_GP(TOPs))
 	DIE(aTHX_ PL_no_modify);
     sv_setsv(TARG, TOPs);
     if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)

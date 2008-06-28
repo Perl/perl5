@@ -1448,7 +1448,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	PL_psig_name[i] = newSVpvn(s, len);
 	SvREADONLY_on(PL_psig_name[i]);
     }
-    if (SvTYPE(sv) == SVt_PVGV || SvROK(sv)) {
+    if (isGV_with_GP(sv) || SvROK(sv)) {
 	if (i) {
 	    (void)rsignal(i, PL_csighandlerp);
 #ifdef HAS_SIGPROCMASK

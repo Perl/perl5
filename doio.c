@@ -922,7 +922,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 
     if (!gv)
 	gv = PL_argvgv;
-    if (!gv || SvTYPE(gv) != SVt_PVGV) {
+    if (!gv || !isGV_with_GP(gv)) {
 	if (not_implicit)
 	    SETERRNO(EBADF,SS_IVCHAN);
 	return FALSE;
@@ -1294,11 +1294,11 @@ Perl_my_stat(pTHX)
 	const char *s;
 	STRLEN len;
 	PUTBACK;
-	if (SvTYPE(sv) == SVt_PVGV) {
+	if (isGV_with_GP(sv)) {
 	    gv = (GV*)sv;
 	    goto do_fstat;
 	}
-	else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
+	else if (SvROK(sv) && isGV_with_GP(SvRV(sv))) {
 	    gv = (GV*)SvRV(sv);
 	    goto do_fstat;
 	}
@@ -1349,7 +1349,7 @@ Perl_my_lstat(pTHX)
     PL_statgv = NULL;
     sv = POPs;
     PUTBACK;
-    if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV && ckWARN(WARN_IO)) {
+    if (SvROK(sv) && isGV_with_GP(SvRV(sv)) && ckWARN(WARN_IO)) {
 	Perl_warner(aTHX_ packWARN(WARN_IO), "Use of -l on filehandle %s",
 		GvENAME((GV*) SvRV(sv)));
 	return (PL_laststatval = -1);
@@ -1604,7 +1604,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 	    tot = sp - mark;
 	    while (++mark <= sp) {
                 GV* gv;
-                if (SvTYPE(*mark) == SVt_PVGV) {
+                if (isGV_with_GP(*mark)) {
                     gv = (GV*)*mark;
 		do_fchmod:
 		    if (GvIO(gv) && IoIFP(GvIOp(gv))) {
@@ -1620,7 +1620,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 			tot--;
 		    }
 		}
-		else if (SvROK(*mark) && SvTYPE(SvRV(*mark)) == SVt_PVGV) {
+		else if (SvROK(*mark) && isGV_with_GP(SvRV(*mark))) {
 		    gv = (GV*)SvRV(*mark);
 		    goto do_fchmod;
 		}
@@ -1644,7 +1644,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 	    tot = sp - mark;
 	    while (++mark <= sp) {
                 GV* gv;
-                if (SvTYPE(*mark) == SVt_PVGV) {
+                if (isGV_with_GP(*mark)) {
                     gv = (GV*)*mark;
 		do_fchown:
 		    if (GvIO(gv) && IoIFP(GvIOp(gv))) {
@@ -1660,7 +1660,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 			tot--;
 		    }
 		}
-		else if (SvROK(*mark) && SvTYPE(SvRV(*mark)) == SVt_PVGV) {
+		else if (SvROK(*mark) && isGV_with_GP(SvRV(*mark))) {
 		    gv = (GV*)SvRV(*mark);
 		    goto do_fchown;
 		}
@@ -1816,7 +1816,7 @@ nothing in the core.
 	    tot = sp - mark;
 	    while (++mark <= sp) {
                 GV* gv;
-                if (SvTYPE(*mark) == SVt_PVGV) {
+                if (isGV_with_GP(*mark)) {
                     gv = (GV*)*mark;
 		do_futimes:
 		    if (GvIO(gv) && IoIFP(GvIOp(gv))) {
@@ -1833,7 +1833,7 @@ nothing in the core.
 			tot--;
 		    }
 		}
-		else if (SvROK(*mark) && SvTYPE(SvRV(*mark)) == SVt_PVGV) {
+		else if (SvROK(*mark) && isGV_with_GP(SvRV(*mark))) {
 		    gv = (GV*)SvRV(*mark);
 		    goto do_futimes;
 		}
