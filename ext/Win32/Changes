@@ -1,5 +1,9 @@
 Revision history for the Perl extension Win32.
 
+0.38	[2008-06-27]
+	- Fix Cygwin releated problems in t/GetCurrentThreadId.t
+	  (Jerry D. Hedden).
+
 0.37	[2008-06-26]
 	- Add Win32::GetCurrentProcessId() function
 
