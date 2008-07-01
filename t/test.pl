@@ -69,9 +69,7 @@ sub _diag {
     return unless @_;
     my @mess = map { /^#/ ? "$_\n" : "# $_\n" }
                map { split /\n/ } @_;
-    my $func = $TODO ? \&_print : \&_print_stderr;
-    $func->(@mess);
-
+    $TODO ? _print(@mess) : _print_stderr(@mess);
 }
 
 sub diag {
