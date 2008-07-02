@@ -618,6 +618,7 @@ $(?<=^(a))	a	y	$1	a
 ((?>[^()]+)|\([^()]*\))+	((abc(ade)ufh()()x	y	$&	abc(ade)ufh()()x
 (?<=x+)y	-	c	-	Variable length lookbehind not implemented
 a{37,17}	-	c	-	Can't do {n,m} with n > m
+a{37,0}	-	c	-	Can't do {n,m} with n > m
 \Z	a\nb\n	y	$-[0]	3
 \z	a\nb\n	y	$-[0]	4
 $	a\nb\n	y	$-[0]	3
