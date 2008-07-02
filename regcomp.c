@@ -6368,7 +6368,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		*flagp = WORST;
 	    if (max > 0)
 		*flagp |= HASWIDTH;
-	    if (max && max < min)
+	    if (max < min)
 		vFAIL("Can't do {n,m} with n > m");
 	    if (!SIZE_ONLY) {
 		ARG1_SET(ret, (U16)min);
