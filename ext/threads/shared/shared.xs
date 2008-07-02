@@ -123,6 +123,7 @@
 #  define NEED_sv_2pv_flags
 #  define NEED_vnewSVpvf
 #  define NEED_warner
+#  define NEED_newSVpvn_flags
 #  include "ppport.h"
 #  include "shared.h"
 #endif
@@ -875,7 +876,7 @@ sharedsv_elem_mg_FETCH(pTHX_ SV *sv, MAGIC *mg)
         STRLEN len = mg->mg_len;
         assert ( mg->mg_ptr != 0 );
         if (mg->mg_len == HEf_SVKEY) {
-           key = SvPV((SV *) mg->mg_ptr, len);
+           key = SvPVutf8((SV *)mg->mg_ptr, len);
         }
         SHARED_CONTEXT;
         svp = hv_fetch((HV*) saggregate, key, len, 0);
@@ -926,7 +927,7 @@ sharedsv_elem_mg_STORE(pTHX_ SV *sv, MAGIC *mg)
         STRLEN len = mg->mg_len;
         assert ( mg->mg_ptr != 0 );
         if (mg->mg_len == HEf_SVKEY)
-           key = SvPV((SV *) mg->mg_ptr, len);
+           key = SvPVutf8((SV *)mg->mg_ptr, len);
         SHARED_CONTEXT;
         svp = hv_fetch((HV*) saggregate, key, len, 1);
     }
@@ -957,7 +958,7 @@ sharedsv_elem_mg_DELETE(pTHX_ SV *sv, MAGIC *mg)
         STRLEN len = mg->mg_len;
         assert ( mg->mg_ptr != 0 );
         if (mg->mg_len == HEf_SVKEY)
-           key = SvPV((SV *) mg->mg_ptr, len);
+           key = SvPVutf8((SV *)mg->mg_ptr, len);
         SHARED_CONTEXT;
         hv_delete((HV*) saggregate, key, len, G_DISCARD);
     }
@@ -1275,7 +1276,7 @@ EXISTS(SV *obj, SV *index)
             exists = av_exists((AV*) sobj, SvIV(index));
         } else {
             STRLEN len;
-            char *key = SvPV(index,len);
+            char *key = SvPVutf8(index, len);
             SHARED_EDIT;
             exists = hv_exists((HV*) sobj, key, len);
         }
@@ -1299,7 +1300,7 @@ FIRSTKEY(SV *obj)
         if (entry) {
             key = hv_iterkey(entry,&len);
             CALLER_CONTEXT;
-            ST(0) = sv_2mortal(newSVpv(key, len));
+            ST(0) = sv_2mortal(newSVpvn_utf8(key, len, 1));
         } else {
             CALLER_CONTEXT;
             ST(0) = &PL_sv_undef;
@@ -1325,7 +1326,7 @@ NEXTKEY(SV *obj, SV *oldkey)
         if (entry) {
             key = hv_iterkey(entry,&len);
             CALLER_CONTEXT;
-            ST(0) = sv_2mortal(newSVpv(key, len));
+            ST(0) = sv_2mortal(newSVpvn_utf8(key, len, 1));
         } else {
             CALLER_CONTEXT;
             ST(0) = &PL_sv_undef;
