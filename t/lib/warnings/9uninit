@@ -1419,7 +1419,7 @@ use warnings 'uninitialized';
 my $nofile = '/no/such/file';
 my $nocmd  = '/no/such/command';
 my $v;
-# *** `` not tested: Windows produces and error on STDERR
+# *** `` not tested: Windows produces an error on STDERR
 # *** ditto qx()
 my $f = "";
 $v = 1 + open($f, $nofile);
@@ -1461,7 +1461,7 @@ $v = 1 + (-c $nofile);
 $v = 1 + (-t $nofile);
 $v = 1 + (-u $nofile);
 $v = 1 + (-g $nofile);
-$v = 1 + (-k $nofile);
+# *** -k not tested: Produces no warning on Windows
 $v = 1 + (-T $nofile);
 $v = 1 + (-B $nofile);
 $v = 1 + (-M $nofile);
@@ -1492,7 +1492,7 @@ $v = 1 + do $nofile;
 my $fn = sub {};
 $v = 1 + prototype $fn;
 my $nan = "NaN";
-$v = 1 + ($nan <=> 1);
+# *** ($nan <=> 1) not tested: NaN not supported on Windows
 $v = 1 + ($fn ~~ 1);
 $v = 1 + (print STDIN $f); # print to STDIN returns undef
 $v = 1 + (printf STDIN "%s", $f);
@@ -1531,7 +1531,6 @@ Use of uninitialized value in addition (+) at - line 46.
 Use of uninitialized value in addition (+) at - line 47.
 Use of uninitialized value in addition (+) at - line 48.
 Use of uninitialized value in addition (+) at - line 49.
-Use of uninitialized value in addition (+) at - line 50.
 Use of uninitialized value in addition (+) at - line 51.
 Use of uninitialized value in addition (+) at - line 52.
 Use of uninitialized value in addition (+) at - line 53.
@@ -1548,7 +1547,6 @@ Use of uninitialized value in addition (+) at - line 75.
 Use of uninitialized value in addition (+) at - line 76.
 Use of uninitialized value in addition (+) at - line 77.
 Use of uninitialized value in addition (+) at - line 79.
-Use of uninitialized value in addition (+) at - line 81.
 Use of uninitialized value in addition (+) at - line 82.
 Use of uninitialized value in addition (+) at - line 83.
 Use of uninitialized value in addition (+) at - line 84.
