@@ -1959,7 +1959,7 @@ sanctioned for use in extensions) begins like this:
   void
   Perl_sv_setiv(pTHX_ SV* dsv, IV num)
 
-C<pTHX_> is one of a number of macros (in perl.h) that hide the
+C<pTHX_> is one of a number of macros (in F<perl.h>) that hide the
 details of the interpreter's context.  THX stands for "thread", "this",
 or "thingy", as the case may be.  (And no, George Lucas is not involved. :-)
 The first character could be 'p' for a B<p>rototype, 'a' for B<a>rgument,
@@ -2028,7 +2028,7 @@ built with PERL_IMPLICIT_CONTEXT enabled.
 
 There are three ways to do this.  First, the easy but inefficient way,
 which is also the default, in order to maintain source compatibility
-with extensions: whenever XSUB.h is #included, it redefines the aTHX
+with extensions: whenever F<XSUB.h> is #included, it redefines the aTHX
 and aTHX_ macros to call a function that will return the context.
 Thus, something like:
 
@@ -2165,7 +2165,7 @@ This allows the ability to provide an extra pointer (called the "host"
 environment) for all the system calls.  This makes it possible for
 all the system stuff to maintain their own state, broken down into
 seven C structures.  These are thin wrappers around the usual system
-calls (see win32/perllib.c) for the default perl executable, but for a
+calls (see F<win32/perllib.c>) for the default perl executable, but for a
 more ambitious host (like the one that would do fork() emulation) all
 the extra work needed to pretend that different interpreters are
 actually different "processes", would be done here.
