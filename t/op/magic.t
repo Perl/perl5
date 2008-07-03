@@ -70,7 +70,7 @@ ok $!, $!;
 close FOO; # just mention it, squelch used-only-once
 
 if ($Is_MSWin32 || $Is_NetWare || $Is_Dos || $Is_MPE || $Is_MacOS) {
-    skip('SIGINT not safe on this platform') for 1..4;
+    skip('SIGINT not safe on this platform') for 1..5;
 }
 else {
   # the next tests are done in a subprocess because sh spits out a
