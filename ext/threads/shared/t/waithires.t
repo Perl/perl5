@@ -2,25 +2,20 @@ use strict;
 use warnings;
 
 BEGIN {
-    # Import test.pl into its own package
-
     if ($ENV{'PERL_CORE'}){
         chdir 't';
         unshift @INC, '../lib';
-        {
-            package Test;
-            require 'test.pl';
-        }
-    } else {
-        {
-            package Test;
-            require 't/test.pl';
-        }
     }
 
     use Config;
     if (! $Config{'useithreads'}) {
         Test::skip_all(q/Perl not compiled with 'useithreads'/);
+    }
+
+    # Import test.pl into its own package
+    {
+        package Test;
+        require($ENV{PERL_CORE} ? 'test.pl' : 't/test.pl');
     }
 
     eval {

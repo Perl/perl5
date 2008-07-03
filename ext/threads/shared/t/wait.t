@@ -2,25 +2,20 @@ use strict;
 use warnings;
 
 BEGIN {
-    # Import test.pl into its own package
-
     if ($ENV{'PERL_CORE'}){
         chdir 't';
         unshift @INC, '../lib';
-        {
-            package Test;
-            require 'test.pl';
-        }
-    } else {
-        {
-            package Test;
-            require 't/test.pl';
-        }
     }
 
     use Config;
     if (! $Config{'useithreads'}) {
         Test::skip_all(q/Perl not compiled with 'useithreads'/);
+    }
+
+    # Import test.pl into its own package
+    {
+        package Test;
+        require($ENV{PERL_CORE} ? 'test.pl' : 't/test.pl');
     }
 }
 
@@ -51,7 +46,7 @@ use threads::shared;
 my $TEST = 1;
 ok($TEST++, 1, 'Loaded');
 
-Test::watchdog(600);   # In case we get stuck
+Test::watchdog(60);   # In case we get stuck
 
 ### Start of Testing ###
 

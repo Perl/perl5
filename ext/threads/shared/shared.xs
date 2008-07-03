@@ -876,7 +876,10 @@ sharedsv_elem_mg_FETCH(pTHX_ SV *sv, MAGIC *mg)
         STRLEN len = mg->mg_len;
         assert ( mg->mg_ptr != 0 );
         if (mg->mg_len == HEf_SVKEY) {
-           key = SvPVutf8((SV *)mg->mg_ptr, len);
+            key = SvPV((SV *)mg->mg_ptr, len);
+            if (SvUTF8((SV *)mg->mg_ptr)) {
+                len = -len;
+            }
         }
         SHARED_CONTEXT;
         svp = hv_fetch((HV*) saggregate, key, len, 0);
@@ -926,8 +929,12 @@ sharedsv_elem_mg_STORE(pTHX_ SV *sv, MAGIC *mg)
         char *key = mg->mg_ptr;
         STRLEN len = mg->mg_len;
         assert ( mg->mg_ptr != 0 );
-        if (mg->mg_len == HEf_SVKEY)
-           key = SvPVutf8((SV *)mg->mg_ptr, len);
+        if (mg->mg_len == HEf_SVKEY) {
+            key = SvPV((SV *)mg->mg_ptr, len);
+            if (SvUTF8((SV *)mg->mg_ptr)) {
+                len = -len;
+            }
+        }
         SHARED_CONTEXT;
         svp = hv_fetch((HV*) saggregate, key, len, 1);
     }
@@ -957,8 +964,12 @@ sharedsv_elem_mg_DELETE(pTHX_ SV *sv, MAGIC *mg)
         char *key = mg->mg_ptr;
         STRLEN len = mg->mg_len;
         assert ( mg->mg_ptr != 0 );
-        if (mg->mg_len == HEf_SVKEY)
-           key = SvPVutf8((SV *)mg->mg_ptr, len);
+        if (mg->mg_len == HEf_SVKEY) {
+            key = SvPV((SV *)mg->mg_ptr, len);
+            if (SvUTF8((SV *)mg->mg_ptr)) {
+                len = -len;
+            }
+        }
         SHARED_CONTEXT;
         hv_delete((HV*) saggregate, key, len, G_DISCARD);
     }
@@ -1277,6 +1288,9 @@ EXISTS(SV *obj, SV *index)
         } else {
             STRLEN len;
             char *key = SvPVutf8(index, len);
+            if (SvUTF8(index)) {
+                len = -len;
+            }
             SHARED_EDIT;
             exists = hv_exists((HV*) sobj, key, len);
         }
@@ -1298,9 +1312,10 @@ FIRSTKEY(SV *obj)
         hv_iterinit((HV*) sobj);
         entry = hv_iternext((HV*) sobj);
         if (entry) {
+            I32 utf8 = HeKUTF8(entry);
             key = hv_iterkey(entry,&len);
             CALLER_CONTEXT;
-            ST(0) = sv_2mortal(newSVpvn_utf8(key, len, 1));
+            ST(0) = sv_2mortal(newSVpvn_utf8(key, len, utf8));
         } else {
             CALLER_CONTEXT;
             ST(0) = &PL_sv_undef;
@@ -1324,9 +1339,10 @@ NEXTKEY(SV *obj, SV *oldkey)
         SHARED_CONTEXT;
         entry = hv_iternext((HV*) sobj);
         if (entry) {
+            I32 utf8 = HeKUTF8(entry);
             key = hv_iterkey(entry,&len);
             CALLER_CONTEXT;
-            ST(0) = sv_2mortal(newSVpvn_utf8(key, len, 1));
+            ST(0) = sv_2mortal(newSVpvn_utf8(key, len, utf8));
         } else {
             CALLER_CONTEXT;
             ST(0) = &PL_sv_undef;
