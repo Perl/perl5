@@ -66,8 +66,11 @@ sub PVBM () { 'foo' }
     ok (!eval { chmod 0600, $pvbm }, 'chmod(PVBM) fails');
     ok (!eval { chmod 0600, \$pvbm }, 'chmod(PVBM ref) fails');
 
-    ok (!eval { chown 0, 0, $pvbm }, 'chown(PVBM) fails');
-    ok (!eval { chown 0, 0, \$pvbm }, 'chown(PVBM ref) fails');
+    SKIP: {
+        skip('chown() not implemented on Win32', 2) if $^O eq 'MSWin32';
+        ok (!eval { chown 0, 0, $pvbm }, 'chown(PVBM) fails');
+        ok (!eval { chown 0, 0, \$pvbm }, 'chown(PVBM ref) fails');
+    }
 
     ok (!eval { utime 0, 0, $pvbm }, 'utime(PVBM) fails');
     ok (!eval { utime 0, 0, \$pvbm }, 'utime(PVBM ref) fails');
