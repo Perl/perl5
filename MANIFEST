@@ -517,6 +517,7 @@ ext/Encode/t/gb2312.utf		test data
 ext/Encode/t/grow.t		test script
 ext/Encode/t/gsm0338.t		test script
 ext/Encode/t/guess.t		test script
+ext/Encode/t/jis7-fallback.t	test script
 ext/Encode/t/jisx0201.enc	test data
 ext/Encode/t/jisx0201.utf	test data
 ext/Encode/t/jisx0208.enc	test data
@@ -603,7 +604,6 @@ ext/Encode/ucm/euc-jp.ucm	Unicode Character Map
 ext/Encode/ucm/euc-kr.ucm	Unicode Character Map
 ext/Encode/ucm/gb12345.ucm	Unicode Character Map
 ext/Encode/ucm/gb2312.ucm	Unicode Character Map
-ext/Encode/ucm/gsm0338.ucm	Unicode Character Map
 ext/Encode/ucm/hp-roman8.ucm	Unicode Character Map
 ext/Encode/ucm/ir-165.ucm	Unicode Character Map
 ext/Encode/ucm/jis0201.ucm	Unicode Character Map
