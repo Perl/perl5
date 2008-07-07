@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Mon Jun 16 16:07:02 CEST 2008 [metaconfig 3.5 PL0]
+# Generated on Mon Jul  7 21:59:59 CEST 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1171,6 +1171,8 @@ stdchar=''
 d_stdio_stream_array=''
 stdio_stream_array=''
 sysman=''
+sGMTIME_max=''
+sGMTIME_min=''
 trnl=''
 uidformat=''
 uidsign=''
@@ -20001,6 +20003,77 @@ else
 fi
 $rm -f foo* bar*
 
+: Check the max offset that gmtime accepts
+echo "Checking max offset that gmtime () accepts"
+
+$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+#include <time.h>
+int main () {
+  struct tm *tmp;
+  int i, y = 0;
+  time_t pt = 0;
+
+  for (i = 0; i < 78; i++) {
+    time_t t = (1 << i) - 1;
+    tmp = gmtime (&t);
+    if (tmp == NULL || tmp->tm_year < y) {
+      i--;
+      printf ("%d\n", pt);
+      return (i);
+      }
+
+    y = tmp->tm_year;
+    pt = t;
+    }
+  printf ("%d\n", pt);
+  return (0);
+  }
+EOCP
+set try
+if eval $compile; then
+    sGMTIME_max=`$run ./try`
+else
+    echo "Cannot determine sGMTIME_max"
+    fi
+$rm_try
+
+echo "Checking min offset that gmtime () accepts"
+
+$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+#include <time.h>
+int main () {
+  struct tm *tmp;
+  int i, y = 70;
+  time_t pt = 0;
+
+  for (i = 0; i < 78; i++) {
+    time_t t = - (1 << i);
+    tmp = gmtime (&t);
+    if (tmp == NULL || tmp->tm_year > y) {
+      i--;
+      printf ("%d\n", pt);
+      return (i);
+      }
+
+    y = tmp->tm_year;
+    pt = t;
+    }
+  printf ("%d\n", pt);
+  return (0);
+  }
+EOCP
+set try
+if eval $compile; then
+    sGMTIME_min=`$run ./try`
+else
+    echo "Cannot determine sGMTIME_min"
+    fi
+$rm_try
+
 : check for type of arguments to select.
 case "$selecttype" in
 '') case "$d_select" in
@@ -22620,6 +22693,8 @@ rm_try='$rm_try'
 rmail='$rmail'
 run='$run'
 runnm='$runnm'
+sGMTIME_max='$sGMTIME_max'
+sGMTIME_min='$sGMTIME_min'
 sPRIEUldbl='$sPRIEUldbl'
 sPRIFUldbl='$sPRIFUldbl'
 sPRIGUldbl='$sPRIGUldbl'

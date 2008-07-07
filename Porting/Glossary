@@ -4240,6 +4240,14 @@ setservent_r_proto (d_setservent_r.U):
 	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setservent_r
 	is defined.
 
+sGMTIME_max (time_size.U):
+	This variable defines the maximum value of the time_t offset that
+	the system function gmtime () accepts
+
+sGMTIME_min (time_size.U):
+	This variable defines the minimum value of the time_t offset that
+	the system function gmtime () accepts
+
 sh (sh.U):
 	This variable contains the full pathname of the shell used
 	on this system to execute Bourne shell scripts.  Usually, this will be
