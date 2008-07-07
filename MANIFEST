@@ -969,6 +969,7 @@ ext/PerlIO/scalar/t/scalar_ungetc.t	Tests for PerlIO layer for scalars
 ext/PerlIO/t/encoding.t		See if PerlIO encoding conversion works
 ext/PerlIO/t/fail.t		See if bad layers fail
 ext/PerlIO/t/fallback.t		See if PerlIO fallbacks work
+ext/PerlIO/t/ioleaks.t		See if PerlIO layers are leaking
 ext/PerlIO/t/open.t		See if PerlIO certain special opens work
 ext/PerlIO/t/PerlIO.t		See if PerlIO works
 ext/PerlIO/t/scalar.t		See if PerlIO::scalar works
