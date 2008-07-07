@@ -3970,6 +3970,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_telldirproto	HAS_TELLDIR_PROTO	/**/
 
+/* HAS_TIMEGM:
+ *	This symbol, if defined, indicates that the timegm routine is
+ *	available to do the opposite of gmtime ()
+ */
+#$d_timegm HAS_TIMEGM		/**/
+
 /* U32_ALIGNMENT_REQUIRED:
  *	This symbol, if defined, indicates that you must access
  *	character data through U32-aligned pointers.

@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Mon Jul  7 21:59:59 CEST 2008 [metaconfig 3.5 PL0]
+# Generated on Mon Jul  7 22:34:20 CEST 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -777,6 +777,7 @@ d_tcsetpgrp=''
 d_telldirproto=''
 d_time=''
 timetype=''
+d_timegm=''
 clocktype=''
 d_times=''
 d_tmpnam_r=''
@@ -18105,6 +18106,10 @@ if test "X$d_time" = X -o X"$timetype" = X; then
     eval $setvar
 fi
 
+: see if timegm exists
+set timegm d_timegm
+eval $inlibc
+
 : see if this is a sys/times.h system
 set sys/times.h i_systimes
 eval $inhdr
@@ -22306,6 +22311,7 @@ d_tcsetpgrp='$d_tcsetpgrp'
 d_telldir='$d_telldir'
 d_telldirproto='$d_telldirproto'
 d_time='$d_time'
+d_timegm='$d_timegm'
 d_times='$d_times'
 d_tm_tm_gmtoff='$d_tm_tm_gmtoff'
 d_tm_tm_zone='$d_tm_tm_zone'

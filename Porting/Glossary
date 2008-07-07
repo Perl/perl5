@@ -2213,6 +2213,10 @@ d_time (d_time.U):
 	that the time() routine exists.  The time() routine is normaly
 	provided on UNIX systems.
 
+d_timegm (d_timegm.U):
+	This variable conditionally defines the HAS_TIMEGM symbol, which
+	indicates to the C program that the timegm () routine is available.
+
 d_times (d_times.U):
 	This variable conditionally defines the HAS_TIMES symbol, which indicates
 	that the times() routine exists.  The times() routine is normaly
