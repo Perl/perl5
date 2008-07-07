@@ -101,6 +101,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_chsize	HAS_CHSIZE		/**/
 
+/* HAS_CRYPT:
+ *	This symbol, if defined, indicates that the crypt routine is available
+ *	to encrypt passwords and the like.
+ */
+#$d_crypt HAS_CRYPT		/**/
+
 /* HAS_CTERMID:
  *	This symbol, if defined, indicates that the ctermid routine is
  *	available to generate filename for terminal.
@@ -133,6 +139,26 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	occurred from a call to dlopen(), dlclose() or dlsym().
  */
 #$d_dlerror HAS_DLERROR	/**/
+
+/* SETUID_SCRIPTS_ARE_SECURE_NOW:
+ *	This symbol, if defined, indicates that the bug that prevents
+ *	setuid scripts from being secure is not present in this kernel.
+ */
+/* DOSUID:
+ *	This symbol, if defined, indicates that the C program should
+ *	check the script that it is executing for setuid/setgid bits, and
+ *	attempt to emulate setuid/setgid on systems that have disabled
+ *	setuid #! scripts because the kernel can't do it securely.
+ *	It is up to the package designer to make sure that this emulation
+ *	is done securely.  Among other things, it should do an fstat on
+ *	the script it just opened to make sure it really is a setuid/setgid
+ *	script, it should make sure the arguments passed correspond exactly
+ *	to the argument on the #! line, and it should not trust any
+ *	subprocesses to which it must pass the filename rather than the
+ *	file descriptor of the script to be executed.
+ */
+#$d_suidsafe SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
+#$d_dosuid DOSUID		/**/
 
 /* HAS_DUP2:
  *	This symbol, if defined, indicates that the dup2 routine is
@@ -377,6 +403,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_pipe HAS_PIPE		/**/
 
+/* HAS_POLL:
+ *	This symbol, if defined, indicates that the poll routine is
+ *	available to poll active file descriptors.  Please check I_POLL and
+ *	I_SYS_POLL to know which header should be included as well.
+ */
+#$d_poll HAS_POLL		/**/
+
 /* HAS_READDIR:
  *	This symbol, if defined, indicates that the readdir routine is
  *	available to read directory entries. You may have to include
@@ -440,6 +473,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	to change the effective uid of the current program.
  */
 #$d_seteuid HAS_SETEUID		/**/
+
+/* HAS_SETGROUPS:
+ *	This symbol, if defined, indicates that the setgroups() routine is
+ *	available to set the list of process groups.  If unavailable, multiple
+ *	groups are probably not supported.
+ */
+#$d_setgrps HAS_SETGROUPS		/**/
 
 /* HAS_SETLINEBUF:
  *	This symbol, if defined, indicates that the setlinebuf routine is
@@ -634,6 +674,19 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	to covert a wide character to a multibyte.
  */
 #$d_wctomb HAS_WCTOMB		/**/
+
+/* Groups_t:
+ *	This symbol holds the type used for the second argument to
+ *	getgroups() and setgroups().  Usually, this is the same as
+ *	gidtype (gid_t) , but sometimes it isn't.
+ *	It can be int, ushort, gid_t, etc... 
+ *	It may be necessary to include <sys/types.h> to get any 
+ *	typedef'ed information.  This is only required if you have
+ *	getgroups() or setgroups()..
+ */
+#if defined(HAS_GETGROUPS) || defined(HAS_SETGROUPS)
+#define Groups_t $groupstype	/* Type for 2nd arg to [sg]etgroups() */
+#endif
 
 /* I_ARPA_INET:
  *	This symbol, if defined, indicates to the C program that it should
@@ -1076,12 +1129,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define const
 #endif
 
-/* HAS_CRYPT:
- *	This symbol, if defined, indicates that the crypt routine is available
- *	to encrypt passwords and the like.
- */
-#$d_crypt HAS_CRYPT		/**/
-
 /* HAS_CRYPT_R:
  *	This symbol, if defined, indicates that the crypt_r routine
  *	is available to crypt re-entrantly.
@@ -1131,26 +1178,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_ctime_r HAS_CTIME_R	   /**/
 #define CTIME_R_PROTO $ctime_r_proto	   /**/
-
-/* SETUID_SCRIPTS_ARE_SECURE_NOW:
- *	This symbol, if defined, indicates that the bug that prevents
- *	setuid scripts from being secure is not present in this kernel.
- */
-/* DOSUID:
- *	This symbol, if defined, indicates that the C program should
- *	check the script that it is executing for setuid/setgid bits, and
- *	attempt to emulate setuid/setgid on systems that have disabled
- *	setuid #! scripts because the kernel can't do it securely.
- *	It is up to the package designer to make sure that this emulation
- *	is done securely.  Among other things, it should do an fstat on
- *	the script it just opened to make sure it really is a setuid/setgid
- *	script, it should make sure the arguments passed correspond exactly
- *	to the argument on the #! line, and it should not trust any
- *	subprocesses to which it must pass the filename rather than the
- *	file descriptor of the script to be executed.
- */
-#$d_suidsafe SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
-#$d_dosuid DOSUID		/**/
 
 /* HAS_DRAND48_R:
  *	This symbol, if defined, indicates that the drand48_r routine
@@ -1844,13 +1871,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_msg HAS_MSG		/**/
 
-/* HAS_POLL:
- *	This symbol, if defined, indicates that the poll routine is
- *	available to poll active file descriptors.  Please check I_POLL and
- *	I_SYS_POLL to know which header should be included as well.
- */
-#$d_poll HAS_POLL		/**/
-
 /* OLD_PTHREAD_CREATE_JOINABLE:
  *	This symbol, if defined, indicates how to create pthread
  *	in joinable (aka undetached) state.  NOTE: not defined
@@ -1949,13 +1969,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_setgrent_r HAS_SETGRENT_R	   /**/
 #define SETGRENT_R_PROTO $setgrent_r_proto	   /**/
-
-/* HAS_SETGROUPS:
- *	This symbol, if defined, indicates that the setgroups() routine is
- *	available to set the list of process groups.  If unavailable, multiple
- *	groups are probably not supported.
- */
-#$d_setgrps HAS_SETGROUPS		/**/
 
 /* HAS_SETHOSTENT:
  *	This symbol, if defined, indicates that the sethostent() routine is
@@ -2356,19 +2369,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #define Gid_t $gidtype		/* Type for getgid(), etc... */
 
-/* Groups_t:
- *	This symbol holds the type used for the second argument to
- *	getgroups() and setgroups().  Usually, this is the same as
- *	gidtype (gid_t) , but sometimes it isn't.
- *	It can be int, ushort, gid_t, etc...
- *	It may be necessary to include <sys/types.h> to get any
- *	typedef'ed information.  This is only required if you have
- *	getgroups() or setgroups()..
- */
-#if defined(HAS_GETGROUPS) || defined(HAS_SETGROUPS)
-#define Groups_t $groupstype	/* Type for 2nd arg to [sg]etgroups() */
-#endif
-
 /* I_DIRENT:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <dirent.h>. Using this symbol also triggers the definition
@@ -2410,7 +2410,19 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that <ndbm.h> exists and should
  *	be included.
  */
+/* I_GDBMNDBM:
+ *	This symbol, if defined, indicates that <gdbm/ndbm.h> exists and should
+ *	be included.  This was the location of the ndbm.h compatibility file
+ *	in RedHat 7.1.
+ */
+/* I_GDBM_NDBM:
+ *	This symbol, if defined, indicates that <gdbm-ndbm.h> exists and should
+ *	be included.  This is the location of the ndbm.h compatibility file
+ *	in Debian 4.0.
+ */
 #$i_ndbm I_NDBM	/**/
+#$i_gdbmndbm I_GDBMNDBM	/**/
+#$i_gdbm_ndbm I_GDBM_NDBM	/**/
 
 /* I_NETDB:
  *	This symbol, if defined, indicates that <netdb.h> exists and
@@ -2749,12 +2761,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	various socket calls (just the base type, not the pointer-to).
  */
 #define Sock_size_t		$socksizetype /**/
-
-/* STDCHAR:
- *	This symbol is defined to be the type of char used in stdio.h.
- *	It has the values "unsigned char" or "char".
- */
-#define STDCHAR $stdchar	/**/
 
 /* Uid_t_f:
  *	This symbol defines the format string used for printing a Uid_t.
@@ -3263,6 +3269,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	EBCDIC encoding.
  */
 #$ebcdic	EBCDIC 		/**/
+
+/* STDCHAR:
+ *	This symbol is defined to be the type of char used in stdio.h.
+ *	It has the values "unsigned char" or "char".
+ */
+#define STDCHAR $stdchar	/**/
 
 /* HAS_ATOLF:
  *	This symbol, if defined, indicates that the atolf routine is
@@ -3958,6 +3970,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_telldirproto	HAS_TELLDIR_PROTO	/**/
 
+/* HAS_TIMEGM:
+ *	This symbol, if defined, indicates that the timegm routine is
+ *	available to do the opposite of gmtime ()
+ */
+#$d_timegm HAS_TIMEGM		/**/
+
 /* U32_ALIGNMENT_REQUIRED:
  *	This symbol, if defined, indicates that you must access
  *	character data through U32-aligned pointers.
@@ -4433,6 +4451,17 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #ifdef HAS_STDIO_STREAM_ARRAY
 #define STDIO_STREAM_ARRAY	$stdio_stream_array
 #endif
+
+/* GMTIME_MAX:
+ *	This symbol contains the maximum value for the time_t offset that
+ *	the system function gmtime () accepts, and defaults to 0
+ */
+/* GMTIME_MIN:
+ *	This symbol contains the minimum value for the time_t offset that
+ *	the system function gmtime () accepts, and defaults to 0
+ */
+#define GMTIME_MAX	$sGMTIME_max	/**/
+#define GMTIME_MIN	$sGMTIME_min	/**/
 
 /* USE_64_BIT_INT:
  *	This symbol, if defined, indicates that 64-bit integers should

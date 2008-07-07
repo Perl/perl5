@@ -131,6 +131,20 @@ if ($opt{uselargefiles} eq 'define' and $opt{cc} ne 'bcc32') {
     }
 }
 
+# change the sGMTIME_min and sGMTIME_max for VS2005 (aka VC 8) and
+# VS2008 (aka VC 9) or higher (presuming that later versions will have
+# at least the range of that).
+if ($opt{cc} eq 'cl' and $opt{ccversion} =~ /^(\d+)/) {
+    my $ccversion = $1;
+    if ($ccversion == 14) {
+	$opt{sGMTIME_max} = 32535244799;
+    }
+    elsif ($ccversion >= 15) {
+	$opt{sGMTIME_min} = -43200;
+	$opt{sGMTIME_max} = 32535291599;
+    }
+}
+
 if ($opt{useithreads} eq 'define' && $opt{ccflags} =~ /-DPERL_IMPLICIT_SYS\b/) {
     $opt{d_pseudofork} = 'define';
 }

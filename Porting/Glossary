@@ -2213,6 +2213,10 @@ d_time (d_time.U):
 	that the time() routine exists.  The time() routine is normaly
 	provided on UNIX systems.
 
+d_timegm (d_timegm.U):
+	This variable conditionally defines the HAS_TIMEGM symbol, which
+	indicates to the C program that the timegm () routine is available.
+
 d_times (d_times.U):
 	This variable conditionally defines the HAS_TIMES symbol, which indicates
 	that the times() routine exists.  The times() routine is normaly
@@ -3655,7 +3659,7 @@ make_set_make (make.U):
 
 	make_set_make="MAKE=$make"	# if it doesn't.
 
-	This uses a comment character to distinguish a
+	This uses a comment character so that we can distinguish a
 	'set' value (from a previous config.sh or Configure '-D' option)
 	from an uncomputed value.
 
@@ -4243,6 +4247,14 @@ setservent_r_proto (d_setservent_r.U):
 	It is zero if d_setservent_r is undef, and one of the
 	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setservent_r
 	is defined.
+
+sGMTIME_max (time_size.U):
+	This variable defines the maximum value of the time_t offset that
+	the system function gmtime () accepts
+
+sGMTIME_min (time_size.U):
+	This variable defines the minimum value of the time_t offset that
+	the system function gmtime () accepts
 
 sh (sh.U):
 	This variable contains the full pathname of the shell used

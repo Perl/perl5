@@ -175,7 +175,7 @@ typedef U64TYPE U64;
 #endif
 
 /* HMB H.Merijn Brand - a placeholder for preparing Configure patches */
-#if defined(LOCALTIME_R_NEEDS_TZSET) && defined(HAS_PSEUDOFORK) && defined(USE_DTRACE)
+#if defined(LOCALTIME_R_NEEDS_TZSET) && defined(HAS_PSEUDOFORK) && defined(USE_DTRACE) && defined(GMTIME_MAX) && defined(GMTIME_MIN) && defined(HAS_TIMEGM)
 /* Not (yet) used at top level, but mention them for metaconfig */
 #endif
 
