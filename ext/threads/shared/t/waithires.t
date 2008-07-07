@@ -7,15 +7,15 @@ BEGIN {
         unshift @INC, '../lib';
     }
 
-    use Config;
-    if (! $Config{'useithreads'}) {
-        Test::skip_all(q/Perl not compiled with 'useithreads'/);
-    }
-
     # Import test.pl into its own package
     {
         package Test;
-        require($ENV{PERL_CORE} ? 'test.pl' : 't/test.pl');
+        require($ENV{PERL_CORE} ? './test.pl' : './t/test.pl');
+    }
+
+    use Config;
+    if (! $Config{'useithreads'}) {
+        Test::skip_all(q/Perl not compiled with 'useithreads'/);
     }
 
     eval {
@@ -49,10 +49,10 @@ BEGIN {
 use threads;
 use threads::shared;
 
+Test::watchdog(60);   # In case we get stuck
+
 my $TEST = 1;
 ok($TEST++, 1, 'Loaded');
-
-Test::watchdog(60);   # In case we get stuck
 
 ### Start of Testing ###
 
@@ -131,7 +131,7 @@ SYNC_SHARED: {
 
     foreach (@wait_how) {
         $test_type = "cond_timedwait [$_]";
-        my $thr = threads->create(\&ctw_ok, $TEST, 0.05);
+        my $thr = threads->create(\&ctw_ok, $TEST, 0.1);
         $TEST = $thr->join();
     }
 
