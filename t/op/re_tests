@@ -1344,6 +1344,9 @@ foo(\h)bar	foo\tbar	y	$1	\t
 .*?(?:(\w)|(\w))x	abx	y	$1-$2	b-
 
 0{50}	000000000000000000000000000000000000000000000000000	y	-	-
+# Bug #56690
+^a?(?=b)b	ab	B	$&	ab
+^a*(?=b)b	ab	B	$&	ab
 
 
 # Two regressions in 5.8.x (only) introduced by change 30638

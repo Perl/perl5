@@ -6135,6 +6135,7 @@ $ WC "d_tcsetpgrp='undef'"
 $ WC "d_telldir='define'"
 $ WC "d_telldirproto='define'"
 $ WC "d_time='define'"
+$ WC "d_timegm='undef'"
 $ WC "d_times='define'"
 $ IF ("''F$EXTRACT(1,3, F$GETSYI(""VERSION""))'".GES."7.0")
 $ THEN
