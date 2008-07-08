@@ -3655,7 +3655,7 @@ make_set_make (make.U):
 
 	make_set_make="MAKE=$make"	# if it doesn't.
 
-	This uses a comment character to distinguish a
+	This uses a comment character so that we can distinguish a
 	'set' value (from a previous config.sh or Configure '-D' option)
 	from an uncomputed value.
 

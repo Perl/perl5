@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Mon Jul  7 22:34:20 CEST 2008 [metaconfig 3.5 PL0]
+# Generated on Tue Jul  8 13:24:59 CEST 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -20021,18 +20021,18 @@ int main () {
   time_t pt = 0;
 
   for (i = 0; i < 78; i++) {
-    time_t t = (1 << i) - 1;
+    time_t t = ((time_t)1 << i) - 1;
     tmp = gmtime (&t);
     if (tmp == NULL || tmp->tm_year < y) {
       i--;
-      printf ("%d\n", pt);
+      printf ("%ld\n", pt);
       return (i);
       }
 
     y = tmp->tm_year;
     pt = t;
     }
-  printf ("%d\n", pt);
+  printf ("%ld\n", pt);
   return (0);
   }
 EOCP
@@ -20056,18 +20056,18 @@ int main () {
   time_t pt = 0;
 
   for (i = 0; i < 78; i++) {
-    time_t t = - (1 << i);
+    time_t t = - ((time_t)1 << i);
     tmp = gmtime (&t);
     if (tmp == NULL || tmp->tm_year > y) {
       i--;
-      printf ("%d\n", pt);
+      printf ("%ld\n", pt);
       return (i);
       }
 
     y = tmp->tm_year;
     pt = t;
     }
-  printf ("%d\n", pt);
+  printf ("%ld\n", pt);
   return (0);
   }
 EOCP
