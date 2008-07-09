@@ -157,6 +157,7 @@ sub load_pad {
 	for ($ix = 1; $ix < @vallist; $ix++) {
 	    my $valsv = $vallist[$ix];
 	    next unless class($valsv) eq "GV";
+            next if class($valsv->STASH) eq 'SPECIAL';
 	    # these pad GVs don't have corresponding names, so same @pad
 	    # array can be used without collisions
 	    $pad[$ix] = [$valsv->STASH->NAME, "*", $valsv->NAME];
