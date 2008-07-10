@@ -876,7 +876,9 @@ sharedsv_elem_mg_FETCH(pTHX_ SV *sv, MAGIC *mg)
         I32 len = mg->mg_len;
         assert ( mg->mg_ptr != 0 );
         if (mg->mg_len == HEf_SVKEY) {
-            key = SvPV((SV *)mg->mg_ptr, len);
+            STRLEN slen;
+            key = SvPV((SV *)mg->mg_ptr, slen);
+            len = slen;
             if (SvUTF8((SV *)mg->mg_ptr)) {
                 len = -len;
             }
@@ -930,7 +932,9 @@ sharedsv_elem_mg_STORE(pTHX_ SV *sv, MAGIC *mg)
         I32 len = mg->mg_len;
         assert ( mg->mg_ptr != 0 );
         if (mg->mg_len == HEf_SVKEY) {
-            key = SvPV((SV *)mg->mg_ptr, len);
+            STRLEN slen;
+            key = SvPV((SV *)mg->mg_ptr, slen);
+            len = slen;
             if (SvUTF8((SV *)mg->mg_ptr)) {
                 len = -len;
             }
@@ -965,7 +969,9 @@ sharedsv_elem_mg_DELETE(pTHX_ SV *sv, MAGIC *mg)
         I32 len = mg->mg_len;
         assert ( mg->mg_ptr != 0 );
         if (mg->mg_len == HEf_SVKEY) {
-            key = SvPV((SV *)mg->mg_ptr, len);
+            STRLEN slen;
+            key = SvPV((SV *)mg->mg_ptr, slen);
+            len = slen;
             if (SvUTF8((SV *)mg->mg_ptr)) {
                 len = -len;
             }
@@ -1287,7 +1293,9 @@ EXISTS(SV *obj, SV *index)
             exists = av_exists((AV*) sobj, SvIV(index));
         } else {
             I32 len;
-            char *key = SvPVutf8(index, len);
+            STRLEN slen;
+            char *key = SvPVutf8(index, slen);
+            len = slen;
             if (SvUTF8(index)) {
                 len = -len;
             }
