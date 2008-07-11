@@ -1608,7 +1608,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	SvREFCNT_dec(d);
 	return;
     }
-    if (type <= SVt_PVLV && !isGV_with_GP(sv)) {
+    if ((type <= SVt_PVLV && !isGV_with_GP(sv)) || type == SVt_PVFM) {
 	if (SvPVX_const(sv)) {
 	    STRLEN delta;
 	    if (SvOOK(sv)) {
