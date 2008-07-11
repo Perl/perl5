@@ -242,6 +242,7 @@ Am|void|SvNOK_off|SV* sv
 Am|void|SvNOK_only|SV* sv
 Am|void|SvNOK_on|SV* sv
 Am|void|SvNV_set|SV* sv|NV val
+Am|void|SvOOK_offset|NN SV*sv|STRLEN len
 Am|void|SvPOK_off|SV* sv
 Am|void|SvPOK_only|SV* sv
 Am|void|SvPOK_only_UTF8|SV* sv
@@ -313,7 +314,7 @@ m|SV *|PAD_SVl	|PADOFFSET po
 m|U32|PAD_COMPNAME_FLAGS|PADOFFSET po
 mU||LVRET
 m|void|CX_CURPAD_SAVE|struct context
-m|void|PAD_CLONE_VARS|PerlInterpreter *proto_perl \
+m|void|PAD_CLONE_VARS|PerlInterpreter *proto_perl|CLONE_PARAMS* param
 m|void|PAD_DUP|PADLIST dstpad|PADLIST srcpad|CLONE_PARAMS* param
 m|void|PAD_RESTORE_LOCAL|PAD *opad
 m|void|PAD_SAVE_LOCAL|PAD *opad|PAD *npad

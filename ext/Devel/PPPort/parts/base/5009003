@@ -36,6 +36,8 @@ savepvs                        # U
 sortsv_flags                   # U
 sv_catpvs                      # U
 vverify                        # U
+PERLIO_FUNCS_CAST              # added by devel/scanprov
+PERLIO_FUNCS_DECL              # added by devel/scanprov
 PERL_UNUSED_ARG                # added by devel/scanprov
 STR_WITH_LEN                   # added by devel/scanprov
 SV_CONST_RETURN                # added by devel/scanprov

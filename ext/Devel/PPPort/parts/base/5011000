@@ -3,7 +3,11 @@ HeUTF8                         # U
 MULTICALL                      # E
 POP_MULTICALL                  # E
 PUSH_MULTICALL                 # E
+SvOOK_offset                   # U
 av_iter_p                      # U
+croak_xs_usage                 # U
+fetch_cop_label                # U
+gv_fetchmethod_flags           # U
 hv_assert                      # U
 mPUSHs                         # U
 mXPUSHs                        # U
@@ -13,7 +17,9 @@ newSVpvs_flags                 # U
 pad_sv                         # U
 pregfree2                      # U
 ref                            # U (Perl_ref)
+save_padsv_and_mortalize       # U
 stashpv_hvname_match           # U
+sv_insert_flags                # U
 sv_magic_portable              # U
 PERL_BCDVERSION                # added by devel/scanprov
 PERL_MAGIC_glob                # added by devel/scanprov

@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 45 $
+##  $Revision: 46 $
 ##  $Author: mhx $
-##  $Date: 2008/01/04 15:50:58 +0100 $
+##  $Date: 2008/07/11 14:00:05 +0200 $
 ##
 ################################################################################
 ##
@@ -24,6 +24,8 @@ PERL_UNUSED_VAR
 PERL_UNUSED_CONTEXT
 PERL_GCC_BRACE_GROUPS_FORBIDDEN
 PERL_USE_GCC_BRACE_GROUPS
+PERLIO_FUNCS_DECL
+PERLIO_FUNCS_CAST
 NVTYPE
 INT2PTR
 PTRV
@@ -222,6 +224,16 @@ __UNDEFINED__  PERL_HASH(hash,str,len) \
 	    hash_PeRlHaSh = hash_PeRlHaSh * 33 + *s_PeRlHaSh++; \
 	(hash) = hash_PeRlHaSh; \
     } STMT_END
+
+#ifndef PERLIO_FUNCS_DECL
+# ifdef PERLIO_FUNCS_CONST
+#  define PERLIO_FUNCS_DECL(funcs) const PerlIO_funcs funcs
+#  define PERLIO_FUNCS_CAST(funcs) (PerlIO_funcs*)(funcs)
+# else
+#  define PERLIO_FUNCS_DECL(funcs) PerlIO_funcs funcs
+#  define PERLIO_FUNCS_CAST(funcs) (funcs)
+# endif
+#endif
 
 =xsmisc
 
