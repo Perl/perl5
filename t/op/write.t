@@ -3,6 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
 }
 
 # read in a file
@@ -60,7 +61,9 @@ my $bas_tests = 20;
 # number of tests in section 3
 my $hmb_tests = 39;
 
-printf "1..%d\n", $bas_tests + $num_tests + $hmb_tests;
+my $tests = $bas_tests + $num_tests + $hmb_tests;
+
+plan $tests;
 
 ############
 ## Section 1
@@ -513,12 +516,12 @@ for my $tref ( @NumTests ){
 # scary format testing from H.Merijn Brand
 
 my $test = $bas_tests + $num_tests + 1;
-my $tests = $bas_tests + $num_tests + $hmb_tests;
+curr_test($test);
 
 if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'MacOS' ||
     ($^O eq 'os2' and not eval '$OS2::can_fork')) {
-  foreach ($test..$tests) {
-      print "ok $_ # skipped: '|-' and '-|' not supported\n";
+ SKIP: {
+      skip "'|-' and '-|' not supported", $tests - $test + 1;
   }
   exit(0);
 }
@@ -531,15 +534,11 @@ use strict;	# Amazed that this hackery can be made strict ...
 {
     local $~ = '';
     eval { write };
-    print "not " unless $@ and $@ =~ /Not a format reference/;
-    print "ok $test - Not a format reference\n";
-    $test++;
+    like $@, qr/Not a format reference/, 'format reference';
 
     $~ = "NOSUCHFORMAT";
     eval { write };
-    print "not " unless $@ and $@ =~ /Undefined format/;
-    print "ok $test - Undefined format\n";
-    $test++;
+    like $@, qr/Undefined format/, 'no such format';
 }
 
 # Just a complete test for format, including top-, left- and bottom marging
@@ -547,6 +546,8 @@ use strict;	# Amazed that this hackery can be made strict ...
 
 format EMPTY =
 .
+
+$test = curr_test();
 
 format Comment =
 ok @<<<<<
@@ -559,15 +560,15 @@ $test
 open STDOUT_DUP, ">&STDOUT";
 my $oldfh = select STDOUT_DUP;
 $= = 10;
-{   local $~ = "Comment";
-    write;
-    $test++;
-    print $- == 9
-	? "ok $test # TODO\n" : "not ok $test # TODO \$- = $- instead of 9\n";
-    $test++;
-    print $^ eq "STDOUT_DUP_TOP"
-	? "ok $test\n" : "not ok $test\n# \$^ = $^ instead of 'STDOUT_DUP_TOP'\n";
-    $test++;
+{
+  local $~ = "Comment";
+  write;
+  curr_test($test + 1);
+  {
+    local $::TODO = '[ID 20020227.005] format bug with undefined _TOP';
+    is $-, 9;
+  }
+  is $^, "STDOUT_DUP_TOP";
 }
 select $oldfh;
 close STDOUT_DUP;
@@ -591,33 +592,31 @@ select ((select (STDOUT), $| = 1)[0]); # flush STDOUT
 
 my $opened = open FROM_CHILD, "-|";
 unless (defined $opened) {
-    print "not ok $test - open gave $!\n"; exit 0;
+    fail "open gave $!";
+    exit 0;
 }
 
 if ($opened) {
     # in parent here
 
-    print "ok $test - open\n"; $test++;
+    pass 'open';
     my $s = " " x $lm;
     while (<FROM_CHILD>) {
 	unless (@data) {
-	    print "not ok $test - too much output\n";
+	    fail 'too much output';
 	    exit;
 	}
 	s/^/$s/;
 	my $exp = shift @data;
-	print + ($_ eq $exp ? "" : "not "), "ok ", $test++, " \n";
-	if ($_ ne $exp) {
-	    s/\n/\\n/g for $_, $exp;
-	    print "#expected: $exp\n#got:      $_\n";
-	}
+	is $_, $exp;
     }
     close FROM_CHILD;
-    print + (@data?"not ":""), "ok ", $test++, " - too little output\n";
+    is "@data", "", "correct length of output";
     exit;
 }
 
 # in child here
+$::NO_ENDING = 1;
 
     select ((select (STDOUT), $| = 1)[0]);
 $tm = "\n" x $tm;
