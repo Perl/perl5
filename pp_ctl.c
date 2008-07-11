@@ -438,7 +438,6 @@ PP(pp_formline)
     SV * nsv = NULL;
     OP * parseres = NULL;
     const char *fmt;
-    bool oneline;
 
     if (!SvMAGICAL(tmpForm) || !SvCOMPILED(tmpForm)) {
 	if (SvREADONLY(tmpForm)) {
@@ -764,12 +763,9 @@ PP(pp_formline)
 
 	case FF_LINESNGL:
 	    chopspace = 0;
-	    oneline = TRUE;
-	    goto ff_line;
 	case FF_LINEGLOB:
-	    oneline = FALSE;
-	ff_line:
 	    {
+		const bool oneline = fpc[-1] == FF_LINESNGL;
 		const char *s = item = SvPV_const(sv, len);
 		itemsize = len;
 		if ((item_is_utf8 = DO_UTF8(sv)))
