@@ -6,6 +6,8 @@ BEGIN {
     require './test.pl';
 }
 
+use strict;	# Amazed that this hackery can be made strict ...
+
 # read in a file
 sub cat {
     my $file = shift;
@@ -72,6 +74,8 @@ plan $tests;
 ## Section 1
 ############
 
+use vars qw($fox $multiline $foo $good);
+
 format OUT =
 the quick brown @<<
 $fox
@@ -100,7 +104,7 @@ $foo = 'when in the course of human events it becomes necessary';
 write(OUT);
 close OUT or die "Could not close: $!";
 
-$right =
+my $right =
 "the quick brown fox
 jumped
 forescore
@@ -195,7 +199,7 @@ is cat('Op_write.tmp'), $right and do { 1 while unlink 'Op_write.tmp' };
 
 # formline tests
 
-$mustbe = <<EOT;
+$right = <<EOT;
 @ a
 @> ab
 @>> abc
@@ -209,7 +213,8 @@ $mustbe = <<EOT;
 @>>>>>>>>>>         abc
 EOT
 
-$was1 = $was2 = '';
+my $was1 = my $was2 = '';
+use vars '$format2';
 for (0..10) {           
   # lexical picture
   $^A = '';
@@ -222,8 +227,8 @@ for (0..10) {
   formline $format2, 'abc';
   $was2 .= "$format2 $^A\n";
 }
-is $was1, $mustbe;
-is $was2, $mustbe;
+is $was1, $right;
+is $was2, $right;
 
 $^A = '';
 
@@ -282,6 +287,7 @@ EOFORMAT
 
 open(OUT10, '>Op_write.tmp') || die "Can't create Op_write.tmp";
 
+use vars '$test1';
 $test1 = 12.95;
 write(OUT10);
 close OUT10 or die "Could not close: $!";
@@ -492,8 +498,6 @@ for my $tref ( @NumTests ){
 ## Section 3
 ## Easiest to add new tests just here
 #####################################
-
-use strict;	# Amazed that this hackery can be made strict ...
 
 # DAPM. Exercise a couple of error codepaths
 
