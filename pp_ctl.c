@@ -503,6 +503,7 @@ PP(pp_formline)
 		*t = '\0';
 		sv_catpvn_utf8_upgrade(PL_formtarget, f, arg, nsv);
 		t = SvEND(PL_formtarget);
+		f += arg;
 		break;
 	    }
 	    if (!targ_is_utf8 && DO_UTF8(tmpForm)) {
@@ -767,9 +768,8 @@ PP(pp_formline)
 	    {
 		const bool oneline = fpc[-1] == FF_LINESNGL;
 		const char *s = item = SvPV_const(sv, len);
+		item_is_utf8 = DO_UTF8(sv);
 		itemsize = len;
-		if ((item_is_utf8 = DO_UTF8(sv)))
-		    itemsize = sv_len_utf8(sv);
 		if (itemsize) {
 		    bool chopped = FALSE;
 		    const char *const send = s + len;
@@ -791,8 +791,6 @@ PP(pp_formline)
 			}
 		    }
 		    SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
-		    if (targ_is_utf8)
-			SvUTF8_on(PL_formtarget);
 		    if (oneline) {
 			SvCUR_set(sv, chophere - item);
 			sv_catsv(PL_formtarget, sv);
@@ -803,8 +801,10 @@ PP(pp_formline)
 			SvCUR_set(PL_formtarget, SvCUR(PL_formtarget) - 1);
 		    SvGROW(PL_formtarget, SvCUR(PL_formtarget) + fudge + 1);
 		    t = SvPVX(PL_formtarget) + SvCUR(PL_formtarget);
-		    if (item_is_utf8)
+		    if (item_is_utf8) {
 			targ_is_utf8 = TRUE;
+			sv_pos_b2u(sv, &itemsize);
+		    }
 		}
 		break;
 	    }

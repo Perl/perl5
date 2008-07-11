@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 20;
 
 # number of tests in section 3
-my $bug_tests = 4;
+my $bug_tests = 4 + 3 * 3 * 3;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -511,6 +511,27 @@ for my $tref ( @NumTests ){
     like $@, qr/Undefined format/, 'no such format';
 }
 
+{
+  my ($pound_utf8, $pm_utf8) = map { my $a = "$_\x{100}"; chop $a; $a} 
+    my ($pound, $pm) = ("\xA3", "\xB1");
+
+  foreach my $first ('N', $pound, $pound_utf8) {
+    foreach my $base ('N', $pm, $pm_utf8) {
+      foreach my $second ($base, "$base\n", "$base\nMoo!") {
+	my $name = "$first, $second";
+	$name =~ s/\n/\\n/;
+
+	my ($copy1, $copy2) = ($first, $second);
+	$first =~ /(.+)/ or die $first;
+	my $expect = "1${1}2";
+	$second =~ /(.+)/ or die $second;
+	$expect .= " 3${1}4";
+
+	is swrite('1^*2 3^*4', $copy1, $copy2), $expect, $name;
+      }
+    }
+  }
+}
 
 format EMPTY =
 .
