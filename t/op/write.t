@@ -59,9 +59,12 @@ for my $tref ( @NumTests ){
 my $bas_tests = 20;
 
 # number of tests in section 3
-my $hmb_tests = 39;
+my $bug_tests = 4;
 
-my $tests = $bas_tests + $num_tests + $hmb_tests;
+# number of tests in section 4
+my $hmb_tests = 35;
+
+my $tests = $bas_tests + $num_tests + $bug_tests + $hmb_tests;
 
 plan $tests;
 
@@ -510,22 +513,10 @@ for my $tref ( @NumTests ){
 
 #####################################
 ## Section 3
-## Easiest to add new tests above here
+## Easiest to add new tests just here
 #######################################
 
-# scary format testing from H.Merijn Brand
-
-my $test = $bas_tests + $num_tests + 1;
-curr_test($test);
-
-if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'MacOS' ||
-    ($^O eq 'os2' and not eval '$OS2::can_fork')) {
- SKIP: {
-      skip "'|-' and '-|' not supported", $tests - $test + 1;
-  }
-  exit(0);
-}
-
+curr_test($bas_tests + $num_tests + 1);
 
 use strict;	# Amazed that this hackery can be made strict ...
 
@@ -541,13 +532,11 @@ use strict;	# Amazed that this hackery can be made strict ...
     like $@, qr/Undefined format/, 'no such format';
 }
 
-# Just a complete test for format, including top-, left- and bottom marging
-# and format detection through glob entries
 
 format EMPTY =
 .
 
-$test = curr_test();
+my $test = curr_test();
 
 format Comment =
 ok @<<<<<
@@ -572,6 +561,21 @@ $= = 10;
 }
 select $oldfh;
 close STDOUT_DUP;
+
+# scary format testing from H.Merijn Brand
+
+# Just a complete test for format, including top-, left- and bottom marging
+# and format detection through glob entries
+
+if (1 || $^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'MacOS' ||
+    ($^O eq 'os2' and not eval '$OS2::can_fork')) {
+  $test = curr_test();
+ SKIP: {
+      skip "'|-' and '-|' not supported", $tests - $test + 1;
+  }
+  exit(0);
+}
+
 
 $^  = "STDOUT_TOP";
 $=  =  7;		# Page length
