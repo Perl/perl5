@@ -829,8 +829,8 @@ sub watchdog ($)
 
             # Add END block to parent to terminate and
             #   clean up watchdog process
-            eval "END { local \$!; local \$?;
-                        wait() if kill('KILL', $watchdog); }";
+            eval "END { local \$! = 0; local \$? = 0;
+                        wait() if kill('KILL', $watchdog); };";
             return;
         }
 
@@ -841,8 +841,8 @@ sub watchdog ($)
             if ($watchdog) {   # Parent process
                 # Add END block to parent to terminate and
                 #   clean up watchdog process
-                eval "END { local \$!; local \$?;
-                            wait() if kill('KILL', $watchdog); }";
+                eval "END { local \$! = 0; local \$? = 0;
+                            wait() if kill('KILL', $watchdog); };";
                 return;
             }
 
