@@ -1541,11 +1541,9 @@ the extension passes its tests anyway (see L<"make test"> below),
 then don't worry about the warning message.  The extension
 Makefile.PL goes looking for various libraries needed on various
 systems; few systems will need all the possible libraries listed.
-For example, a system may have -lcposix or -lposix, but it's
-unlikely to have both, so most users will see warnings for the one
-they don't have.  The phrase 'probably harmless' is intended to
-reassure you that nothing unusual is happening, and the build
-process is continuing.
+Most users will see warnings for the ones they don't have.  The
+phrase 'probably harmless' is intended to reassure you that nothing
+unusual is happening, and the build process is continuing.
 
 On the other hand, if you are building GDBM_File and you get the
 message
