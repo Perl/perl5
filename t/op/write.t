@@ -111,10 +111,7 @@ the course
 of huma...
 now is the time for all good men to come to\n";
 
-if (cat('Op_write.tmp') eq $right)
-    { print "ok 1\n"; 1 while unlink 'Op_write.tmp'; }
-else
-    { print "not ok 1\n"; }
+is cat('Op_write.tmp'), $right and do { 1 while unlink 'Op_write.tmp'; };
 
 $fox = 'wolfishness';
 my $fox = 'foxiness';		# Test a lexical variable.
@@ -153,10 +150,7 @@ becomes
 necessary
 now is the time for all good men to come to\n";
 
-if (cat('Op_write.tmp') eq $right)
-    { print "ok 2\n"; 1 while unlink 'Op_write.tmp'; }
-else
-    { print "not ok 2\n"; }
+is cat('Op_write.tmp'), $right and do { 1 while unlink 'Op_write.tmp'; };
 
 eval <<'EOFORMAT';
 format OUT2 =
@@ -197,10 +191,7 @@ becomes
 necessary
 now is the time for all good men to come to\n";
 
-if (cat('Op_write.tmp') eq $right)
-    { print "ok 3\n"; 1 while unlink 'Op_write.tmp'; }
-else
-    { print "not ok 3\n"; }
+is cat('Op_write.tmp'), $right and do { 1 while unlink 'Op_write.tmp' };
 
 # formline tests
 
@@ -231,8 +222,8 @@ for (0..10) {
   formline $format2, 'abc';
   $was2 .= "$format2 $^A\n";
 }
-print $was1 eq $mustbe ? "ok 4\n" : "not ok 4\n";
-print $was2 eq $mustbe ? "ok 5\n" : "not ok 5\n";
+is $was1, $mustbe;
+is $was2, $mustbe;
 
 $^A = '';
 
@@ -252,24 +243,24 @@ close OUT3 or die "Could not close: $!";
 $right =
 "fit\n";
 
-if (cat('Op_write.tmp') eq $right)
-    { print "ok 6\n"; 1 while unlink 'Op_write.tmp'; }
-else
-    { print "not ok 6\n"; }
+is cat('Op_write.tmp'), $right and do { 1 while unlink 'Op_write.tmp' };
+
 
 # test lexicals and globals
 {
+    my $test = curr_test();
     my $this = "ok";
-    our $that = 7;
+    our $that = $test;
     format LEX =
 @<<@|
 $this,$that
 .
     open(LEX, ">&STDOUT") or die;
     write LEX;
-    $that = 8;
+    $that = ++$test;
     write LEX;
     close LEX or die "Could not close: $!";
+    curr_test($test + 1);
 }
 # LEX_INTERPNORMAL test
 my %e = ( a => 1 );
@@ -280,13 +271,7 @@ format OUT4 =
 open   OUT4, ">Op_write.tmp" or die "Can't create Op_write.tmp";
 write (OUT4);
 close  OUT4 or die "Could not close: $!";
-if (cat('Op_write.tmp') eq "1\n") {
-    print "ok 9\n";
-    1 while unlink "Op_write.tmp";
-    }
-else {
-    print "not ok 9\n";
-    }
+is cat('Op_write.tmp'), "1\n" and do { 1 while unlink "Op_write.tmp" };
 
 eval <<'EOFORMAT';
 format OUT10 =
@@ -302,10 +287,7 @@ write(OUT10);
 close OUT10 or die "Could not close: $!";
 
 $right = "   12.95 00012.95\n";
-if (cat('Op_write.tmp') eq $right)
-    { print "ok 10\n"; 1 while unlink 'Op_write.tmp'; }
-else
-    { print "not ok 10\n"; }
+is cat('Op_write.tmp'), $right and do { 1 while unlink 'Op_write.tmp' };
 
 eval <<'EOFORMAT';
 format OUT11 =
@@ -328,18 +310,16 @@ $right =
 "00012.95
 1 0#
 10 #\n";
-if (cat('Op_write.tmp') eq $right)
-    { print "ok 11\n"; 1 while unlink 'Op_write.tmp'; }
-else
-    { print "not ok 11\n"; }
+is cat('Op_write.tmp'), $right and do { 1 while unlink 'Op_write.tmp' };
 
 {
+    my $test = curr_test();
     my $el;
     format OUT12 =
 ok ^<<<<<<<<<<<<<<~~ # sv_chop() naze
 $el
 .
-    my %hash = (12 => 3);
+    my %hash = ($test => 3);
     open(OUT12, '>Op_write.tmp') || die "Can't create Op_write.tmp";
 
     for $el (keys %hash) {
@@ -347,15 +327,16 @@ $el
     }
     close OUT12 or die "Could not close: $!";
     print cat('Op_write.tmp');
-
+    curr_test($test + 1);
 }
 
 {
+    my $test = curr_test();
     # Bug report and testcase by Alexey Tourbin
     use Tie::Scalar;
     my $v;
     tie $v, 'Tie::StdScalar';
-    $v = 13;
+    $v = $test;
     format OUT13 =
 ok ^<<<<<<<<< ~~
 $v
@@ -364,6 +345,7 @@ $v
     write(OUT13);
     close OUT13 or die "Could not close: $!";
     print cat('Op_write.tmp');
+    curr_test($test + 1);
 }
 
 {   # test 14
@@ -371,9 +353,7 @@ $v
     # must fail since we have a trailing ; in the eval'ed string (WL)
     my @v = ('k');
     eval "format OUT14 = \n@\n\@v";
-    print +($@ && $@ =~ /Format not terminated/)
-      ? "ok 14\n" : "not ok 14 $@\n";
-
+    like $@, qr/Format not terminated/;
 }
 
 {   # test 15
@@ -389,7 +369,7 @@ $txt
     write(OUT15);
     close OUT15 or die "Could not close: $!";
     my $res = cat('Op_write.tmp');
-    print $res eq "line 1\nline 2\n" ? "ok 15\n" : "not ok 15\n";
+    is $res, "line 1\nline 2\n";
 }
 
 {   # test 16: multiple use of a variable in same line with ^<
@@ -404,7 +384,7 @@ $txt,             $txt
     write(OUT16);
     close OUT16 or die "Could not close: $!";
     my $res = cat('Op_write.tmp');
-    print $res eq <<EOD ? "ok 16\n" : "not ok 16\n";
+    is $res, <<EOD;
 this_is_block_1   this_is_block_2
 this_is_block_3   this_is_block_4
 EOD
@@ -426,7 +406,7 @@ Here we go: @* That's all, folks!
     my $exp = <<EOD;
 Here we go: $txt That's all, folks!
 EOD
-    print $res eq $exp ? "ok 17\n" : "not ok 17\n";
+    is $res, $exp;
 }
 
 {   # test 18: @# and ~~ would cause runaway format, but we now
@@ -438,8 +418,7 @@ EOD
 .
     open(OUT18, '>Op_write.tmp') || die "Can't create Op_write.tmp";
     eval { write(OUT18); };
-    print +($@ && $@ =~ /Repeated format line will never terminate/)
-      ? "ok 18\n" : "not ok 18: $@\n";
+    like $@,  qr/Repeated format line will never terminate/;
     close OUT18 or die "Could not close: $!";
 }
 
@@ -454,7 +433,7 @@ EOD
     write(OUT19);
     close OUT19 or die "Could not close: $!";
     my $res = cat('Op_write.tmp');
-    print $res eq <<EOD ? "ok 19\n" : "not ok 19\n";
+    is $res, <<EOD;
 gaga\0
 gaga\0
 EOD
@@ -483,7 +462,7 @@ $h{xkey}, $h{ykey}
     write(OUT20);
     close OUT20 or die "Could not close: $!";
     my $res = cat('Op_write.tmp');
-    print $res eq $exp ? "ok 20\n" : "not ok 20 res=[$res]exp=[$exp]\n";
+    is $res, $exp;
 }
 
 
@@ -492,21 +471,19 @@ $h{xkey}, $h{ykey}
 ## numeric formatting
 #####################
 
-my $nt = $bas_tests;
+curr_test($bas_tests + 1);
+
 for my $tref ( @NumTests ){
     my $writefmt = shift( @$tref );
     while (@$tref) {
 	my $val      = shift @$tref;
 	my $expected = shift @$tref;
         my $writeres = swrite( $writefmt, $val );
-        $nt++;
-	my $ok = ref($expected)
-		 ? $writeres =~ $expected
-		 : $writeres eq $expected;
-	
-        print $ok
-	    ? "ok $nt - $writefmt\n"
-	    : "not ok $nt\n# f=[$writefmt] exp=[$expected] got=[$writeres]\n";
+	if (ref $expected) {
+	    like $writeres, $expected, $writefmt;
+	} else {
+	    is $writeres, $expected, $writefmt;
+	}	
     }
 }
 
@@ -514,9 +491,7 @@ for my $tref ( @NumTests ){
 #####################################
 ## Section 3
 ## Easiest to add new tests just here
-#######################################
-
-curr_test($bas_tests + $num_tests + 1);
+#####################################
 
 use strict;	# Amazed that this hackery can be made strict ...
 
@@ -562,12 +537,17 @@ $= = 10;
 select $oldfh;
 close STDOUT_DUP;
 
+#############################
+## Section 4
+## Add new tests *above* here
+#############################
+
 # scary format testing from H.Merijn Brand
 
 # Just a complete test for format, including top-, left- and bottom marging
 # and format detection through glob entries
 
-if (1 || $^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'MacOS' ||
+if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'MacOS' ||
     ($^O eq 'os2' and not eval '$OS2::can_fork')) {
   $test = curr_test();
  SKIP: {
