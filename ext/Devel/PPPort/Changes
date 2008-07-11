@@ -1,3 +1,9 @@
+3.14_01 - 2008-07-11
+
+    * resolve CPAN #37451: add PERLIO_FUNCS_DECL and
+      PERLIO_FUNCS_CAST
+    * update API info
+
 3.14 - 2008-06-01
 
     * fix CPAN #36197: filename nit in parse_partspec

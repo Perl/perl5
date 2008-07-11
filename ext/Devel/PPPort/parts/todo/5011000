@@ -3,9 +3,15 @@ HeUTF8                         # U
 MULTICALL                      # E
 POP_MULTICALL                  # E
 PUSH_MULTICALL                 # E
+SvOOK_offset                   # U
 av_iter_p                      # U
+croak_xs_usage                 # U
+fetch_cop_label                # U
+gv_fetchmethod_flags           # U
 hv_assert                      # U
 pad_sv                         # U
 pregfree2                      # U
 ref                            # U (Perl_ref)
+save_padsv_and_mortalize       # U
 stashpv_hvname_match           # U
+sv_insert_flags                # U

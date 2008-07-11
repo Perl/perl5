@@ -25,7 +25,6 @@ reg_named_buff_fetch           # U
 reg_named_buff_firstkey        # U
 reg_named_buff_nextkey         # U
 reg_named_buff_scalar          # U
-reg_stringify                  # U
 regfree_internal               # U
 savesharedpvn                  # U
 scan_vstring                   # E (Perl_scan_vstring)
