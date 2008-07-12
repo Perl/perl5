@@ -14,10 +14,20 @@ BEGIN { require "./test.pl"; }
 
 use Devel::Peek;
 
-plan(50);
+plan(52);
 
 our $DEBUG = 0;
 open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
+
+# If I reference any lexicals in this, I get the entire outer subroutine (or
+# MAIN) dumped too, which isn't really what I want, as it's a lot of faff to
+# maintain that.
+format PIE =
+Pie     @<<<<<
+$::type
+Good    @>>>>>
+$::mmmm
+.
 
 sub do_test {
     my $todo = $_[3];
@@ -624,3 +634,32 @@ do_test(25,
     SUBPROCESS = 0				# $] < 5.009
     TYPE = \'>\'
     FLAGS = 0x0');
+
+do_test(26,
+	*PIE{FORMAT},
+'SV = $RV\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(ROK\\)
+  RV = $ADDR
+  SV = PVFM\\($ADDR\\) at $ADDR
+    REFCNT = 2
+    FLAGS = \\(\\)
+    IV = 0
+    NV = 0					# $] < 5.009
+    PV = 0					# $] >= 5.011
+    COMP_STASH = 0x0
+    START = $ADDR ===> \\d+
+    ROOT = $ADDR
+    XSUB = 0x0					# $] < 5.009
+    XSUBANY = 0					# $] < 5.009
+    GVGV::GV = $ADDR\\t"main" :: "PIE"
+    FILE = ".*\\b(?i:peek\\.t)"
+    DEPTH = 0
+(?:    MUTEXP = $ADDR
+    OWNER = $ADDR
+)?    FLAGS = 0x0
+    OUTSIDE_SEQ = \\d+
+    LINES = 0
+    PADLIST = $ADDR
+    PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
+    OUTSIDE = $ADDR \\(MAIN\\)');
