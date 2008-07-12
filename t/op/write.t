@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 20;
 
 # number of tests in section 3
-my $bug_tests = 4 + 3 * 3 * 3;
+my $bug_tests = 4 + 3 * 3 * 5 * 2;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -517,17 +517,21 @@ for my $tref ( @NumTests ){
 
   foreach my $first ('N', $pound, $pound_utf8) {
     foreach my $base ('N', $pm, $pm_utf8) {
-      foreach my $second ($base, "$base\n", "$base\nMoo!") {
-	my $name = "$first, $second";
-	$name =~ s/\n/\\n/;
+      foreach my $second ($base, "$base\n", "$base\nMoo!", "$base\nMoo!\n",
+			  "$base\nMoo!\n",) {
+	foreach (['^*', qr/(.+)/], ['@*', qr/(.*?)$/s]) {
+	  my ($format, $re) = @$_;
+	  my $name = "$first, $second $format";
+	  $name =~ s/\n/\\n/g;
 
-	my ($copy1, $copy2) = ($first, $second);
-	$first =~ /(.+)/ or die $first;
-	my $expect = "1${1}2";
-	$second =~ /(.+)/ or die $second;
-	$expect .= " 3${1}4";
+	  my ($copy1, $copy2) = ($first, $second);
+	  $first =~ /(.+)/ or die $first;
+	  my $expect = "1${1}2";
+	  $second =~ $re or die $second;
+	  $expect .= " 3${1}4";
 
-	is swrite('1^*2 3^*4', $copy1, $copy2), $expect, $name;
+	  is swrite("1^*2 3${format}4", $copy1, $copy2), $expect, $name;
+	}
       }
     }
   }
