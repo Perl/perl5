@@ -421,7 +421,7 @@ union _xnvu {
 
 union _xivu {
     IV	    xivu_iv;		/* integer value */
-				/* xpvfm: pv offset */
+				/* xpvfm: lines */
     UV	    xivu_uv;
     void *  xivu_p1;
     I32	    xivu_i32;
@@ -522,14 +522,12 @@ struct xpvfm {
     _XPV_HEAD;
     _XPVMG_HEAD;
     _XPVCV_COMMON;
-    IV		xfm_lines;
 };
 
 typedef struct {
     _XPV_ALLOCATED_HEAD;
     _XPVMG_HEAD;
     _XPVCV_COMMON;
-    IV		xfm_lines;
 } xpvfm_allocated;
 
 #define _XPVIO_TAIL							\
@@ -1317,7 +1315,7 @@ the scalar's value cannot change unless written to.
 
 #endif
 
-#define FmLINES(sv)	((XPVFM*)  SvANY(sv))->xfm_lines
+#define FmLINES(sv)	((XPVFM*)  SvANY(sv))->xiv_u.xivu_iv
 
 #define LvTYPE(sv)	((XPVLV*)  SvANY(sv))->xlv_type
 #define LvTARG(sv)	((XPVLV*)  SvANY(sv))->xlv_targ
