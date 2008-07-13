@@ -4401,6 +4401,10 @@ Perl_sv_chop(pTHX_ register SV *const sv, register const char *const ptr)
     }
     assert(ptr > SvPVX_const(sv));
     SV_CHECK_THINKFIRST(sv);
+    if (SvLEN(sv))
+	assert(delta <= SvLEN(sv));
+    else
+	assert(delta <= SvCUR(sv));
 
     if (!SvOOK(sv)) {
 	if (!SvLEN(sv)) { /* make copy of shared string */
