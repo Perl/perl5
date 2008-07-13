@@ -3189,6 +3189,11 @@ then discovered it wasn't a subroutine or eval context.
 
 (P) scan_num() got called on something that wasn't a number.
 
+=item panic: sv_chop %s
+
+(P) The sv_chop() routine was passed a position that is not within the
+scalar's string buffer.
+
 =item panic: sv_insert
 
 (P) The sv_insert() routine was told to remove more string than there

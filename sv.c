@@ -4389,6 +4389,7 @@ Perl_sv_chop(pTHX_ register SV *const sv, register const char *const ptr)
 #ifdef DEBUGGING
     const U8 *real_start;
 #endif
+    STRLEN max_delta;
 
     PERL_ARGS_ASSERT_SV_CHOP;
 
@@ -4399,12 +4400,17 @@ Perl_sv_chop(pTHX_ register SV *const sv, register const char *const ptr)
 	/* Nothing to do.  */
 	return;
     }
-    assert(ptr > SvPVX_const(sv));
+    /* SvPVX(sv) may move in SV_CHECK_THINKFIRST(sv), but after this line,
+       nothing uses the value of ptr any more.  */
+    if (ptr <= SvPVX_const(sv))
+	Perl_croak(aTHX_ "panic: sv_chop ptr=%p, start=%p, end=%p",
+		   ptr, SvPVX_const(sv), SvPVX_const(sv) + max_delta);
     SV_CHECK_THINKFIRST(sv);
-    if (SvLEN(sv))
-	assert(delta <= SvLEN(sv));
-    else
-	assert(delta <= SvCUR(sv));
+    max_delta = SvLEN(sv) ? SvLEN(sv) : SvCUR(sv);
+    if (delta > max_delta)
+	Perl_croak(aTHX_ "panic: sv_chop ptr=%p (was %p), start=%p, end=%p",
+		   SvPVX_const(sv) + delta, ptr, SvPVX_const(sv),
+		   SvPVX_const(sv) + max_delta);
 
     if (!SvOOK(sv)) {
 	if (!SvLEN(sv)) { /* make copy of shared string */
