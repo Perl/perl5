@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 20;
 
 # number of tests in section 3
-my $bug_tests = 4 + 3 * 3 * 5 * 2;
+my $bug_tests = 4 + 3 * 3 * 5 * 2 * 3;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -512,7 +512,28 @@ for my $tref ( @NumTests ){
 }
 
 {
-  my ($pound_utf8, $pm_utf8) = map { my $a = "$_\x{100}"; chop $a; $a} 
+  package Count;
+
+  sub TIESCALAR {
+    my $class = shift;
+    bless [shift, 0, 0], $class;
+  }
+
+  sub FETCH {
+    my $self = shift;
+    ++$self->[1];
+    $self->[0];
+  }
+
+  sub STORE {
+    my $self = shift;
+    ++$self->[2];
+    $self->[0] = shift;
+  }
+}
+
+{
+  my ($pound_utf8, $pm_utf8) = map { my $a = "$_\x{100}"; chop $a; $a}
     my ($pound, $pm) = ("\xA3", "\xB1");
 
   foreach my $first ('N', $pound, $pound_utf8) {
@@ -521,16 +542,27 @@ for my $tref ( @NumTests ){
 			  "$base\nMoo!\n",) {
 	foreach (['^*', qr/(.+)/], ['@*', qr/(.*?)$/s]) {
 	  my ($format, $re) = @$_;
-	  my $name = "$first, $second $format";
-	  $name =~ s/\n/\\n/g;
+	  foreach my $class ('', 'Count') {
+	    my $name = "$first, $second $format $class";
+	    $name =~ s/\n/\\n/g;
 
-	  my ($copy1, $copy2) = ($first, $second);
-	  $first =~ /(.+)/ or die $first;
-	  my $expect = "1${1}2";
-	  $second =~ $re or die $second;
-	  $expect .= " 3${1}4";
+	    $first =~ /(.+)/ or die $first;
+	    my $expect = "1${1}2";
+	    $second =~ $re or die $second;
+	    $expect .= " 3${1}4";
 
-	  is swrite("1^*2 3${format}4", $copy1, $copy2), $expect, $name;
+	    if ($class) {
+	      my $copy1 = $first;
+	      my $copy2;
+	      tie $copy2, $class, $second;
+	      is swrite("1^*2 3${format}4", $copy1, $copy2), $expect, $name;
+	      my $obj = tied $copy2;
+	      is $obj->[1], 1, 'value read exactly once';
+	    } else {
+	      my ($copy1, $copy2) = ($first, $second);
+	      is swrite("1^*2 3${format}4", $copy1, $copy2), $expect, $name;
+	    }
+	  }
 	}
       }
     }

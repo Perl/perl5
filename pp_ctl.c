@@ -771,39 +771,69 @@ PP(pp_formline)
 		item_is_utf8 = DO_UTF8(sv);
 		itemsize = len;
 		if (itemsize) {
-		    bool chopped = FALSE;
+		    STRLEN to_copy = itemsize;
 		    const char *const send = s + len;
+		    const U8 *source;
+		    U8 *tmp = NULL;
+
 		    gotsome = TRUE;
 		    chophere = s + itemsize;
 		    while (s < send) {
 			if (*s++ == '\n') {
 			    if (oneline) {
-				chopped = TRUE;
+				to_copy = s - SvPVX_const(sv) - 1;
 				chophere = s;
 				break;
 			    } else {
 				if (s == send) {
 				    itemsize--;
-				    chopped = TRUE;
+				    to_copy--;
 				} else
 				    lines++;
 			    }
 			}
 		    }
-		    SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
-		    if (oneline) {
-			SvCUR_set(sv, chophere - item);
-			sv_catsv(PL_formtarget, sv);
-			SvCUR_set(sv, itemsize);
-		    } else
-			sv_catsv(PL_formtarget, sv);
-		    if (chopped)
-			SvCUR_set(PL_formtarget, SvCUR(PL_formtarget) - 1);
-		    SvGROW(PL_formtarget, SvCUR(PL_formtarget) + fudge + 1);
+		    if (targ_is_utf8 && !item_is_utf8) {
+			source = tmp = bytes_to_utf8((U8*)SvPVX(sv), &to_copy);
+			SvCUR_set(PL_formtarget,
+				  t - SvPVX_const(PL_formtarget));
+		    } else {
+			if (item_is_utf8 && !targ_is_utf8) {
+			    /* Upgrade targ to UTF8, and then we reduce it to
+			       a problem we have a simple solution for.  */
+			    SvCUR_set(PL_formtarget,
+				      t - SvPVX_const(PL_formtarget));
+			    targ_is_utf8 = TRUE;
+			    /* Don't need get magic.  */
+			    sv_utf8_upgrade_flags(PL_formtarget, 0);
+			} else {
+			    SvCUR_set(PL_formtarget,
+				      t - SvPVX_const(PL_formtarget));
+			}
+			source = (U8 *) SvPVX(sv);
+
+			/* Easy. They agree.  */
+			assert (item_is_utf8 == targ_is_utf8);
+		    }
+		    SvGROW(PL_formtarget,
+			   SvCUR(PL_formtarget) + to_copy + fudge + 1);
 		    t = SvPVX(PL_formtarget) + SvCUR(PL_formtarget);
+
+		    Copy(source, t, to_copy, char);
+		    t += to_copy;
+		    SvCUR_set(PL_formtarget, SvCUR(PL_formtarget) + to_copy);
 		    if (item_is_utf8) {
-			targ_is_utf8 = TRUE;
-			sv_pos_b2u(sv, &itemsize);
+			if (SvGMAGICAL(sv)) {
+			    /* Mustn't call sv_pos_b2u() as it does a second
+			       mg_get(). Is this a bug? Do we need a _flags()
+			       variant? */
+			    itemsize = utf8_length(source, source + itemsize);
+			} else {
+			    sv_pos_b2u(sv, &itemsize);
+			}
+			assert(!tmp);
+		    } else if (tmp) {
+			Safefree(tmp);
 		    }
 		}
 		break;
