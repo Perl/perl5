@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 20;
 
 # number of tests in section 3
-my $bug_tests = 4 + 3 * 3 * 5 * 2 * 3;
+my $bug_tests = 4 + 3 * 3 * 5 * 2 * 3 + 2;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -567,6 +567,15 @@ for my $tref ( @NumTests ){
       }
     }
   }
+}
+
+{
+  # This will fail an assertion in 5.10.0 built with -DDEBUGGING (because
+  # pp_formline attempts to set SvCUR() on an SVt_RV). I suspect that it will
+  # be doing something similarly out of bounds on everything from 5.000
+  my $ref = [];
+  is swrite('>^*<', $ref), ">$ref<";
+  is swrite('>@*<', $ref), ">$ref<";
 }
 
 format EMPTY =

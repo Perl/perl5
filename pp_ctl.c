@@ -773,7 +773,7 @@ PP(pp_formline)
 		if (itemsize) {
 		    STRLEN to_copy = itemsize;
 		    const char *const send = s + len;
-		    const U8 *source;
+		    const U8 *source = (const U8 *) s;
 		    U8 *tmp = NULL;
 
 		    gotsome = TRUE;
@@ -794,7 +794,7 @@ PP(pp_formline)
 			}
 		    }
 		    if (targ_is_utf8 && !item_is_utf8) {
-			source = tmp = bytes_to_utf8((U8*)SvPVX(sv), &to_copy);
+			source = tmp = bytes_to_utf8(source, &to_copy);
 			SvCUR_set(PL_formtarget,
 				  t - SvPVX_const(PL_formtarget));
 		    } else {
@@ -810,7 +810,6 @@ PP(pp_formline)
 			    SvCUR_set(PL_formtarget,
 				      t - SvPVX_const(PL_formtarget));
 			}
-			source = (U8 *) SvPVX(sv);
 
 			/* Easy. They agree.  */
 			assert (item_is_utf8 == targ_is_utf8);
