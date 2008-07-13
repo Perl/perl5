@@ -1094,8 +1094,8 @@ return value, should the need arise.
           time_t  timep;
           bool_t x;
         CODE:
-          ST(0) = sv_newmortal();
           if( rpcb_gettime( host, &timep ) ){
+               ST(0) = sv_newmortal();
                sv_setnv( ST(0), (double)timep);
           }
           else{
