@@ -4402,11 +4402,11 @@ Perl_sv_chop(pTHX_ register SV *const sv, register const char *const ptr)
     }
     /* SvPVX(sv) may move in SV_CHECK_THINKFIRST(sv), but after this line,
        nothing uses the value of ptr any more.  */
+    max_delta = SvLEN(sv) ? SvLEN(sv) : SvCUR(sv);
     if (ptr <= SvPVX_const(sv))
 	Perl_croak(aTHX_ "panic: sv_chop ptr=%p, start=%p, end=%p",
 		   ptr, SvPVX_const(sv), SvPVX_const(sv) + max_delta);
     SV_CHECK_THINKFIRST(sv);
-    max_delta = SvLEN(sv) ? SvLEN(sv) : SvCUR(sv);
     if (delta > max_delta)
 	Perl_croak(aTHX_ "panic: sv_chop ptr=%p (was %p), start=%p, end=%p",
 		   SvPVX_const(sv) + delta, ptr, SvPVX_const(sv),
