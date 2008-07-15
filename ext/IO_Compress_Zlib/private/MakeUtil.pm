@@ -49,6 +49,11 @@ sub MY::postamble
 
     my @files = getPerlFiles('MANIFEST');
 
+    # Note: Once you remove all the layers of shell/makefile escaping 
+    # the regular expression below reads
+    #
+    #    /^\s*local\s*\(\s*\$^W\s*\)/
+    #
     my $postamble = '
 
 MyTrebleCheck:

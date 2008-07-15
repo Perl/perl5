@@ -24,13 +24,13 @@ BEGIN
 
     my $count = 0 ;
     if ($] < 5.005) {
-        $count = 189 ;
+        $count = 229 ;
     }
     elsif ($] >= 5.006) {
-        $count = 243 ;
+        $count = 283 ;
     }
     else {
-        $count = 201 ;
+        $count = 241 ;
     }
 
     plan tests => $count + $extra;
@@ -724,6 +724,142 @@ if ($] >= 5.005)
     # pointer.
     Compress::Raw::Zlib::InflateScan->new->resetLastBlockByte(undef);
     ok 1, "resetLastBlockByte(undef) is ok" ;
+}
+
+{
+
+    title "gzip mode";
+    # ================
+
+    my $hello = "I am a HAL 9000 computer" ;
+    my @hello = split('', $hello) ;
+    my ($err, $x, $X, $status); 
+ 
+    ok( ($x, $err) = new Compress::Raw::Zlib::Deflate ( 
+            WindowBits => WANT_GZIP ,
+            AppendOutput => 1
+        ), "Create deflate object" );
+    ok $x, "Compress::Raw::Zlib::Deflate ok" ;
+    cmp_ok $err, '==', Z_OK, "status is Z_OK" ;
+ 
+    $status = $x->deflate($hello, $X) ;
+    cmp_ok $status, '==', Z_OK, "deflate returned Z_OK" ;
+    
+    cmp_ok  $x->flush($X), '==', Z_OK, "flush returned Z_OK" ;
+     
+    my ($k, $GOT); 
+    ($k, $err) = new Compress::Raw::Zlib::Inflate( 
+            WindowBits => WANT_GZIP ,
+            ConsumeInput => 0 ,
+            AppendOutput => 1);
+    ok $k, "Compress::Raw::Zlib::Inflate WANT_GZIP ok" ;
+    cmp_ok $err, '==', Z_OK, "status is Z_OK" ;
+ 
+    $status = $k->inflate($X, $GOT) ;
+    cmp_ok $status, '==', Z_STREAM_END, "Got Z_STREAM_END" ;
+    is $GOT, $hello, "uncompressed data matches ok" ;
+
+    $GOT = '';
+    ($k, $err) = new Compress::Raw::Zlib::Inflate( 
+            WindowBits => WANT_GZIP_OR_ZLIB ,
+            AppendOutput => 1);
+    ok $k, "Compress::Raw::Zlib::Inflate WANT_GZIP_OR_ZLIB ok" ;
+    cmp_ok $err, '==', Z_OK, "status is Z_OK" ;
+ 
+    $status = $k->inflate($X, $GOT) ;
+    cmp_ok $status, '==', Z_STREAM_END, "Got Z_STREAM_END" ;
+    is $GOT, $hello, "uncompressed data matches ok" ;
+}
+
+{
+
+    title "gzip error mode";
+    # Create gzip -
+    # read with no special windowbits setting - this will fail
+    # then read with WANT_GZIP_OR_ZLIB - thi swill work
+    # ================
+
+    my $hello = "I am a HAL 9000 computer" ;
+    my ($err, $x, $X, $status); 
+ 
+    ok( ($x, $err) = new Compress::Raw::Zlib::Deflate ( 
+            WindowBits => WANT_GZIP ,
+            AppendOutput => 1
+        ), "Create deflate object" );
+    ok $x, "Compress::Raw::Zlib::Deflate ok" ;
+    cmp_ok $err, '==', Z_OK, "status is Z_OK" ;
+ 
+    $status = $x->deflate($hello, $X) ;
+    cmp_ok $status, '==', Z_OK, "deflate returned Z_OK" ;
+    
+    cmp_ok  $x->flush($X), '==', Z_OK, "flush returned Z_OK" ;
+     
+    my ($k, $GOT); 
+    ($k, $err) = new Compress::Raw::Zlib::Inflate( 
+            WindowBits => MAX_WBITS ,
+            ConsumeInput => 0 ,
+            AppendOutput => 1);
+    ok $k, "Compress::Raw::Zlib::Inflate WANT_GZIP ok" ;
+    cmp_ok $err, '==', Z_OK, "status is Z_OK" ;
+ 
+    $status = $k->inflate($X, $GOT) ;
+    cmp_ok $status, '==', Z_DATA_ERROR, "Got Z_DATA_ERROR" ;
+
+    $GOT = '';
+    ($k, $err) = new Compress::Raw::Zlib::Inflate( 
+            WindowBits => WANT_GZIP_OR_ZLIB ,
+            AppendOutput => 1);
+    ok $k, "Compress::Raw::Zlib::Inflate WANT_GZIP_OR_ZLIB ok" ;
+    cmp_ok $err, '==', Z_OK, "status is Z_OK" ;
+ 
+    $status = $k->inflate($X, $GOT) ;
+    cmp_ok $status, '==', Z_STREAM_END, "Got Z_STREAM_END" ;
+    is $GOT, $hello, "uncompressed data matches ok" ;
+}
+
+{
+
+    title "gzip/zlib error mode";
+    # Create zlib -
+    # read with no WANT_GZIP windowbits setting - this will fail
+    # then read with WANT_GZIP_OR_ZLIB - thi swill work
+    # ================
+
+    my $hello = "I am a HAL 9000 computer" ;
+    my ($err, $x, $X, $status); 
+ 
+    ok( ($x, $err) = new Compress::Raw::Zlib::Deflate ( 
+            AppendOutput => 1
+        ), "Create deflate object" );
+    ok $x, "Compress::Raw::Zlib::Deflate ok" ;
+    cmp_ok $err, '==', Z_OK, "status is Z_OK" ;
+ 
+    $status = $x->deflate($hello, $X) ;
+    cmp_ok $status, '==', Z_OK, "deflate returned Z_OK" ;
+    
+    cmp_ok  $x->flush($X), '==', Z_OK, "flush returned Z_OK" ;
+     
+    my ($k, $GOT); 
+    ($k, $err) = new Compress::Raw::Zlib::Inflate( 
+            WindowBits => WANT_GZIP ,
+            ConsumeInput => 0 ,
+            AppendOutput => 1);
+    ok $k, "Compress::Raw::Zlib::Inflate WANT_GZIP ok" ;
+    cmp_ok $err, '==', Z_OK, "status is Z_OK" ;
+ 
+    $status = $k->inflate($X, $GOT) ;
+    cmp_ok $status, '==', Z_DATA_ERROR, "Got Z_DATA_ERROR" ;
+
+    $GOT = '';
+    ($k, $err) = new Compress::Raw::Zlib::Inflate( 
+            WindowBits => WANT_GZIP_OR_ZLIB ,
+            AppendOutput => 1);
+    ok $k, "Compress::Raw::Zlib::Inflate WANT_GZIP_OR_ZLIB ok" ;
+    cmp_ok $err, '==', Z_OK, "status is Z_OK" ;
+ 
+    $status = $k->inflate($X, $GOT) ;
+    cmp_ok $status, '==', Z_STREAM_END, "Got Z_STREAM_END" ;
+    is $GOT, $hello, "uncompressed data matches ok" ;
 }
 
 exit if $] < 5.006 ;

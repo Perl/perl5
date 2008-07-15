@@ -1,6 +1,17 @@
 CHANGES
 -------
 
+
+  2.012 15 July 2008
+
+      * IO::Compress::Base 
+        - Silenced an uninitialised value warning when reading a line
+          at a time from a zip file where the content uses ZIP_CM_STORE. 
+          [Problem spotted & fixed by Jeff Holt]
+
+      * IO::Compress::Base & IO::Uncompress::Base
+        - local-ise $!, $? et al in the DESTROY methods.
+          
   2.011 17 May 2008
 
       * IO::Compress::Base

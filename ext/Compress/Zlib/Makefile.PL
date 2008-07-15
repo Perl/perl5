@@ -3,7 +3,7 @@
 use strict ;
 require 5.004 ;
 
-$::VERSION = '2.011' ;
+$::VERSION = '2.012' ;
 
 use private::MakeUtil;
 use ExtUtils::MakeMaker 5.16 ;
