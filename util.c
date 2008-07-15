@@ -4814,21 +4814,28 @@ the original version contained 1 or more dots, respectively
 SV *
 Perl_vstringify(pTHX_ SV *vs)
 {
-    SV *pv;
-
     PERL_ARGS_ASSERT_VSTRINGIFY;
 
     if ( SvROK(vs) )
 	vs = SvRV(vs);
-    
+
     if ( !vverify(vs) )
 	Perl_croak(aTHX_ "Invalid version object");
 
-    pv = *hv_fetchs((HV*)vs, "original", FALSE);
-    if ( SvPOK(pv) ) 
-	return newSVsv(pv);
-    else
-	return &PL_sv_undef;
+    if (hv_exists((HV*)vs, "original",  sizeof("original") - 1)) {
+	SV *pv;
+	pv = *hv_fetchs((HV*)vs, "original", FALSE);
+	if ( SvPOK(pv) )
+	    return newSVsv(pv);
+	else
+	    return &PL_sv_undef;
+    }
+    else {
+	if ( hv_exists((HV *)vs, "qv", 2) )
+	    return vnormal(vs);
+	else
+	    return vnumify(vs);
+    }
 }
 
 /*
