@@ -50,6 +50,10 @@
 #  define AT_LEAST_ZLIB_1_2_2_1
 #endif
 
+#if  defined(ZLIB_VERNUM) && ZLIB_VERNUM >= 0x1222
+#  define AT_LEAST_ZLIB_1_2_2_2
+#endif
+
 #if  defined(ZLIB_VERNUM) && ZLIB_VERNUM >= 0x1223
 #  define AT_LEAST_ZLIB_1_2_2_3
 #endif
@@ -808,6 +812,19 @@ _inflateInit(flags, windowBits, bufsize, dictionary)
             s = NULL ;
 	}
 	else if (SvCUR(dictionary)) {
+#ifdef AT_LEAST_ZLIB_1_2_2_1
+        /* Zlib 1.2.2.1 or better allows a dictionary with raw inflate */
+        if (s->WindowBits < 0) {
+            err = inflateSetDictionary(&(s->stream), 
+                (const Bytef*)SvPVbyte_nolen(dictionary),
+                SvCUR(dictionary));
+            if (err != Z_OK) {
+                Safefree(s) ;
+                s = NULL ;
+            }
+        }
+        else
+#endif   
             /* Dictionary specified - take a copy for use in inflate */
 	    s->dictionary = newSVsv(dictionary) ;
 	}
@@ -1297,8 +1314,9 @@ inflate (s, buf, output, eof=FALSE)
     }
     s->bytesInflated = 0;
     
-    while (1) {
+    RETVAL = Z_OK;
 
+    while (RETVAL == Z_OK) {
         if (s->stream.avail_out == 0 ) {
 	    /* out of space in the output buffer so make it bigger */
             Sv_Grow(output, SvLEN(output) + bufinc) ;
@@ -1331,8 +1349,6 @@ inflate (s, buf, output, eof=FALSE)
             SvCUR(s->dictionary));
         }
 
-        if (RETVAL != Z_OK) 
-            break;
     }
 #ifdef NEED_DUMMY_BYTE_AT_END 
     if (eof && RETVAL == Z_OK) {

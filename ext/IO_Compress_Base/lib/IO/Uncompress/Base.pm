@@ -9,12 +9,12 @@ our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS);
 @ISA    = qw(Exporter IO::File);
 
 
-$VERSION = '2.011';
+$VERSION = '2.012';
 
 use constant G_EOF => 0 ;
 use constant G_ERR => -1 ;
 
-use IO::Compress::Base::Common 2.011 ;
+use IO::Compress::Base::Common 2.012 ;
 #use Parse::Parameters ;
 
 use IO::File ;
@@ -856,7 +856,7 @@ sub _raw_read
         $self->postBlockChk($buffer, $before_len) == STATUS_OK
             or return G_ERR;
 
-        $buf_len = length($$buffer) - $before_len;
+        $buf_len = defined $$buffer ? length($$buffer) - $before_len : 0;
     
         *$self->{CompSize}->add($beforeC_len - length $temp_buf) ;
 
@@ -1290,6 +1290,8 @@ sub close
 sub DESTROY
 {
     my $self = shift ;
+    local ($., $@, $!, $^E, $?);
+
     $self->close() ;
 }
 
@@ -1450,5 +1452,4 @@ Copyright (c) 2005-2008 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
-
 

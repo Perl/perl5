@@ -1,6 +1,14 @@
 CHANGES
 -------
 
+  2.012 15 July 2008
+
+      * Document the gzip flags that WindowBits can take.
+
+      * Allow a dictionary to be used with a raw inflate. 
+        Needs zlib 1.2.2.1 or better.
+        [RT #36046]
+      
   2.011 5 May 2008
 
       * A C++-style comment sneaked in with the last update. Fixed.

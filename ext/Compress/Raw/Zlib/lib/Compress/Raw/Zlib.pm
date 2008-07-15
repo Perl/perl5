@@ -13,7 +13,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.011';
+$VERSION = '2.012';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -62,8 +62,13 @@ $VERSION = eval $VERSION;
         Z_SYNC_FLUSH
         Z_UNKNOWN
         Z_VERSION_ERROR
+
+        WANT_GZIP
+        WANT_GZIP_OR_ZLIB
 );
 
+use constant WANT_GZIP           => 16;
+use constant WANT_GZIP_OR_ZLIB   => 32;
 
 sub AUTOLOAD {
     my($constname);
@@ -361,10 +366,14 @@ sub Compress::Raw::Zlib::Deflate::new
     $flags |= FLAG_CRC    if $got->value('CRC32') ;
     $flags |= FLAG_ADLER  if $got->value('ADLER32') ;
 
+    my $windowBits =  $got->value('WindowBits');
+    $windowBits += MAX_WBITS()
+        if ($windowBits & MAX_WBITS()) == 0 ;
+
     _deflateInit($flags,
                 $got->value('Level'), 
                 $got->value('Method'), 
-                $got->value('WindowBits'), 
+                $windowBits, 
                 $got->value('MemLevel'), 
                 $got->value('Strategy'), 
                 $got->value('Bufsize'),
@@ -398,7 +407,11 @@ sub Compress::Raw::Zlib::Inflate::new
     $flags |= FLAG_ADLER  if $got->value('ADLER32') ;
     $flags |= FLAG_CONSUME_INPUT if $got->value('ConsumeInput') ;
 
-    _inflateInit($flags, $got->value('WindowBits'), $got->value('Bufsize'), 
+    my $windowBits =  $got->value('WindowBits');
+    $windowBits += MAX_WBITS()
+        if ($windowBits & MAX_WBITS()) == 0 ;
+
+    _inflateInit($flags, $windowBits, $got->value('Bufsize'), 
                  $got->value('Dictionary')) ;
 }
 
@@ -607,7 +620,7 @@ Defines the compression level. Valid values are 0 through 9,
 C<Z_NO_COMPRESSION>, C<Z_BEST_SPEED>, C<Z_BEST_COMPRESSION>, and
 C<Z_DEFAULT_COMPRESSION>.
 
-The default is Z_DEFAULT_COMPRESSION.
+The default is C<Z_DEFAULT_COMPRESSION>.
 
 =item B<-Method>
 
@@ -616,10 +629,18 @@ the default) is Z_DEFLATED.
 
 =item B<-WindowBits>
 
+To compress an RFC 1950 data stream, set C<WindowBits> to a positive
+number between 8 and 15.
+
+To compress an RFC 1951 data stream, set C<WindowBits> to C<-MAX_WBITS>.
+
+To compress an RFC 1952 data stream (i.e. gzip), set C<WindowBits> to
+C<WANT_GZIP>.
+
 For a definition of the meaning and valid values for C<WindowBits>
 refer to the I<zlib> documentation for I<deflateInit2>.
 
-Defaults to MAX_WBITS.
+Defaults to C<MAX_WBITS>.
 
 =item B<-MemLevel>
 
@@ -883,14 +904,20 @@ Here is a list of the valid options:
 =item B<-WindowBits>
 
 To uncompress an RFC 1950 data stream, set C<WindowBits> to a positive
-number.
+number between 8 and 15.
 
 To uncompress an RFC 1951 data stream, set C<WindowBits> to C<-MAX_WBITS>.
+
+To uncompress an RFC 1952 data stream (i.e. gzip), set C<WindowBits> to
+C<WANT_GZIP>.
+
+To auto-detect and uncompress an RFC 1950 or RFC 1952 data stream (i.e.
+gzip), set C<WindowBits> to C<WANT_GZIP_OR_ZLIB>.
 
 For a full definition of the meaning and valid values for C<WindowBits>
 refer to the I<zlib> documentation for I<inflateInit2>.
 
-Defaults to MAX_WBITS.
+Defaults to C<MAX_WBITS>.
 
 =item B<-Bufsize>
 
