@@ -38,16 +38,17 @@ use threads::shared;
 {
     my $cnt = 50;
 
-    my $TIMEOUT = 30;
+    my $TIMEOUT = 60;
 
     my $mutex = 1;
     share($mutex);
 
     my @threads;
-    for (1..$cnt) {
+    for (reverse(1..$cnt)) {
         $threads[$_] = threads->create(sub {
                             my $tnum = shift;
                             my $timeout = time() + $TIMEOUT;
+                            threads->yield();
 
                             # Randomize the amount of work the thread does
                             my $sum;
@@ -123,9 +124,7 @@ use threads::shared;
         }
 
     } else {
-        print('ok 1');
-        print(' # TODO - not reliable under MSWin32') if ($^O eq 'MSWin32');
-        print("\n");
+        print("ok 1\n");
     }
 }
 

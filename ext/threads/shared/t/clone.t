@@ -31,7 +31,7 @@ sub ok {
 
 BEGIN {
     $| = 1;
-    print("1..28\n");   ### Number of tests that will be run ###
+    print("1..34\n");   ### Number of tests that will be run ###
 };
 
 my $test = 1;
@@ -43,7 +43,6 @@ ok($test++, 1, 'Loaded');
 ### Start of Testing ###
 
 {
-    # Scalar
     my $x = shared_clone(14);
     ok($test++, $x == 14, 'number');
 
@@ -119,6 +118,32 @@ ok($test++, 1, 'Loaded');
 }
 
 {
+    my $hsh :shared = shared_clone({'foo' => [qw/foo bar baz/]});
+    ok($test++, is_shared($hsh), 'Shared hash ref');
+    ok($test++, is_shared($hsh->{'foo'}), 'Shared hash ref elem');
+    ok($test++, $$hsh{'foo'}[1] eq 'bar', 'Cloned structure');
+}
+
+{
+    my $obj = \do { my $bork = 99; };
+    bless($obj, 'Bork');
+    Internals::SvREADONLY($$obj, 1) if ($] >= 5.008003);
+
+    my $bork = shared_clone($obj);
+    ok($test++, $$bork == 99, 'cloned scalar ref object');
+    ok($test++, Internals::SvREADONLY($$bork), 'read-only');
+    ok($test++, ref($bork) eq 'Bork', 'Object class');
+
+    threads->create(sub {
+        ok($test++, $$bork == 99, 'cloned scalar ref object in thread');
+        ok($test++, Internals::SvREADONLY($$bork), 'read-only');
+        ok($test++, ref($bork) eq 'Bork', 'Object class');
+    })->join();
+
+    $test += 3;
+}
+
+{
     my $scalar = 'zip';
 
     my $obj = {
@@ -147,13 +172,6 @@ ok($test++, 1, 'Loaded');
     ok($test++, threads::shared::_id($copy) == threads::shared::_id($copy->{'self'}), 'Circular ref in cloned obj');
     ok($test++, $copy->{'ary'}->[3]->{'bar'}->[0] eq 'baz', 'Deeply cloned');
     ok($test++, ref($copy) eq 'Foo', 'Cloned object class');
-}
-
-{
-    my $hsh :shared = shared_clone({'foo' => [qw/foo bar baz/]});
-    ok($test++, is_shared($hsh), 'Shared hash ref');
-    ok($test++, is_shared($hsh->{'foo'}), 'Shared hash ref elem');
-    ok($test++, $$hsh{'foo'}[1] eq 'bar', 'Cloned structure');
 }
 
 exit(0);
