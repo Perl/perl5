@@ -1,11 +1,13 @@
 package B::Debug;
 
-our $VERSION = '1.06';
+our $VERSION = '1.11';
 
 use strict;
+require 5.006;
 use B qw(peekop class walkoptree walkoptree_exec
          main_start main_root cstring sv_undef);
-our (@optype, @specialsv_name);
+use Config;
+my (@optype, @specialsv_name);
 require B;
 if ($] < 5.009) {
   require B::Asmdata;
@@ -14,16 +16,9 @@ if ($] < 5.009) {
   B->import qw(@optype @specialsv_name);
 }
 my $have_B_Flags;
-eval { require B::Flags and $have_B_Flags++ };
-BEGIN {
-    use Config;
-    my $ithreads = $Config{'useithreads'} eq 'define';
-    eval qq{
-	sub ITHREADS() { $ithreads }
-	sub VERSION() { $] }
-    }; die $@ if $@;
+if (!$ENV{PERL_CORE}){ # avoid CORE test crashes
+  eval { require B::Flags and $have_B_Flags++ };
 }
-
 my %done_gv;
 
 sub _printop {
@@ -43,7 +38,7 @@ sub B::OP::debug {
 	op_targ		%d
 	op_type		%d
 EOT
-    if (VERSION > 5.009) {
+    if ($] > 5.009) {
 	printf <<'EOT', $op->opt;
 	op_opt		%d
 EOT
@@ -102,10 +97,10 @@ sub B::LISTOP::debug {
 sub B::PMOP::debug {
     my ($op) = @_;
     $op->B::LISTOP::debug();
-    printf "\top_pmreplroot\t0x%x\n", VERSION < 5.008 ? ${$op->pmreplroot} : $op->pmreplroot;
+    printf "\top_pmreplroot\t0x%x\n", $] < 5.008 ? ${$op->pmreplroot} : $op->pmreplroot;
     printf "\top_pmreplstart\t0x%x\n", ${$op->pmreplstart};
-    printf "\top_pmnext\t0x%x\n", ${$op->pmnext} if VERSION < 5.009005;
-    if (ITHREADS) {
+    printf "\top_pmnext\t0x%x\n", ${$op->pmnext} if $] < 5.009005;
+    if ($Config{'useithreads'}) {
       printf "\top_pmstashpv\t%s\n", cstring($op->pmstashpv);
       printf "\top_pmoffset\t%d\n", $op->pmoffset;
     } else {
@@ -113,10 +108,10 @@ sub B::PMOP::debug {
     }
     printf "\top_precomp\t%s\n", cstring($op->precomp);
     printf "\top_pmflags\t0x%x\n", $op->pmflags;
-    printf "\top_reflags\t0x%x\n", $op->reflags if VERSION >= 5.009;
-    printf "\top_pmpermflags\t0x%x\n", $op->pmpermflags if VERSION < 5.009;
-    printf "\top_pmdynflags\t0x%x\n", $op->pmdynflags if VERSION < 5.009;
-    $op->pmreplroot->debug if VERSION < 5.008;
+    printf "\top_reflags\t0x%x\n", $op->reflags if $] >= 5.009;
+    printf "\top_pmpermflags\t0x%x\n", $op->pmpermflags if $] < 5.009;
+    printf "\top_pmdynflags\t0x%x\n", $op->pmdynflags if $] < 5.009;
+    $op->pmreplroot->debug if $] < 5.008;
 }
 
 sub B::COP::debug {
@@ -268,7 +263,7 @@ sub B::AV::debug {
     my (@array) = eval { $av->ARRAY; };
     print "\tARRAY\t\t(", join(", ", map("0x" . $$_, @array)), ")\n";
     my $fill = eval { scalar(@array) };
-    if (ITHREADS) {
+    if ($Config{'useithreads'}) {
       printf <<'EOT', $fill, $av->MAX, $av->OFF;
 	FILL		%d
 	MAX		%d
@@ -280,7 +275,7 @@ EOT
 	MAX		%d
 EOT
     }
-    printf <<'EOT', $av->AvFLAGS if VERSION < 5.009;
+    printf <<'EOT', $av->AvFLAGS if $] < 5.009;
 	AvFLAGS		%d
 EOT
 }
@@ -353,7 +348,25 @@ otherwise in basic order.
 
 =head1 Changes
 
-  1.06  2008-06-11 rurban
+  1.11 2008-07-14 rurban
+	avoid B::Flags in CORE tests not to crash on old XS in @INC
+
+  1.10 2008-06-28 rurban
+	require 5.006; Test::More not possible in 5.00505
+	our => my
+
+  1.09 2008-06-18 rurban
+	minor META.yml syntax fix
+	5.8.0 ending nextstate test failure: be more tolerant
+	PREREQ_PM Test::More
+
+  1.08 2008-06-17 rurban
+	support 5.00558 - 5.6.2
+
+  1.07 2008-06-16 rurban
+	debug.t: fix strawberry perl quoting issue
+
+  1.06 2008-06-11 rurban
 	added B::Flags output
 	dual-life CPAN as B-Debug-1.06 and CORE
 	protect scalar(@array) if tied arrays leave out FETCHSIZE
@@ -377,5 +390,31 @@ otherwise in basic order.
 
 Malcolm Beattie, C<mbeattie@sable.ox.ac.uk>
 Reini Urban C<rurban@cpan.org>
+
+=head1 LICENSE
+
+Copyright (c) 1996, 1997 Malcolm Beattie
+Copyright (c) 2008 Reini Urban
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of either:
+
+	a) the GNU General Public License as published by the Free
+	Software Foundation; either version 1, or (at your option) any
+	later version, or
+
+	b) the "Artistic License" which comes with this kit.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See either
+    the GNU General Public License or the Artistic License for more details.
+
+    You should have received a copy of the Artistic License with this kit,
+    in the file named "Artistic".  If not, you can get one from the Perl
+    distribution. You should also have received a copy of the GNU General
+    Public License, in the file named "Copying". If not, you can get one
+    from the Perl distribution or else write to the Free Software Foundation,
+    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 =cut
