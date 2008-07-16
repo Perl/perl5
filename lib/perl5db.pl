@@ -7735,6 +7735,8 @@ sub warnLevel {
         }
         elsif ($prevwarn) {
             $SIG{__WARN__} = $prevwarn;
+        } else {
+            undef $SIG{__WARN__};
         }
     } ## end if (@_)
     $warnLevel;
@@ -7776,6 +7778,9 @@ sub dieLevel {
         elsif ($prevdie) {
             $SIG{__DIE__} = $prevdie;
             print $OUT "Default die handler restored.\n";
+        } else {
+            undef $SIG{__DIE__};
+            print $OUT "Die handler removed.\n";
         }
     } ## end if (@_)
     $dieLevel;
