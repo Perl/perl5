@@ -131,12 +131,12 @@ ok($test++, 1, 'Loaded');
 
     my $bork = shared_clone($obj);
     ok($test++, $$bork == 99, 'cloned scalar ref object');
-    ok($test++, Internals::SvREADONLY($$bork), 'read-only');
+    ok($test++, ($] < 5.008003) || Internals::SvREADONLY($$bork), 'read-only');
     ok($test++, ref($bork) eq 'Bork', 'Object class');
 
     threads->create(sub {
         ok($test++, $$bork == 99, 'cloned scalar ref object in thread');
-        ok($test++, Internals::SvREADONLY($$bork), 'read-only');
+        ok($test++, ($] < 5.008003) || Internals::SvREADONLY($$bork), 'read-only');
         ok($test++, ref($bork) eq 'Bork', 'Object class');
     })->join();
 
