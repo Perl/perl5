@@ -79,7 +79,7 @@ sub diag {
 
 sub skip_all {
     if (@_) {
-	_print "1..0 # Skipped: @_\n";
+        _print "1..0 # Skip @_\n";
     } else {
 	_print "1..0\n";
     }
@@ -316,7 +316,7 @@ sub skip {
     my $why = shift;
     my $n    = @_ ? shift : 1;
     for (1..$n) {
-        _print "ok $test # skip: $why\n";
+        _print "ok $test # skip $why\n";
         $test = $test + 1;
     }
     local $^W = 0;
@@ -328,7 +328,7 @@ sub todo_skip {
     my $n   = @_ ? shift : 1;
 
     for (1..$n) {
-        _print "not ok $test # TODO & SKIP: $why\n";
+        _print "not ok $test # TODO & SKIP $why\n";
         $test = $test + 1;
     }
     local $^W = 0;
