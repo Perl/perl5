@@ -70,9 +70,7 @@ sub _diag {
     return unless @_;
     my @mess = map { /^#/ ? "$_\n" : "# $_\n" }
                map { split /\n/ } @_;
-    my $func = $TODO ? \&_print : \&_print_stderr;
-    $func->(@mess);
-
+    $TODO ? _print(@mess) : _print_stderr(@mess);
 }
 
 sub diag {
@@ -81,7 +79,7 @@ sub diag {
 
 sub skip_all {
     if (@_) {
-	_print "1..0 # Skipped: @_\n";
+        _print "1..0 # Skip @_\n";
     } else {
 	_print "1..0\n";
     }
@@ -318,7 +316,7 @@ sub skip {
     my $why = shift;
     my $n    = @_ ? shift : 1;
     for (1..$n) {
-        _print "ok $test # skip: $why\n";
+        _print "ok $test # skip $why\n";
         $test = $test + 1;
     }
     local $^W = 0;
@@ -330,7 +328,7 @@ sub todo_skip {
     my $n   = @_ ? shift : 1;
 
     for (1..$n) {
-        _print "not ok $test # TODO & SKIP: $why\n";
+        _print "not ok $test # TODO & SKIP $why\n";
         $test = $test + 1;
     }
     local $^W = 0;
@@ -621,10 +619,37 @@ sub unlink_all {
     }
 }
 
+my %tmpfiles;
+END { unlink_all keys %tmpfiles }
 
-my $tmpfile = "misctmp000";
-1 while -f ++$tmpfile;
-END { unlink_all $tmpfile }
+# A regexp that matches the tempfile names
+$::tempfile_regexp = 'tmp\d+[A-Z][A-Z]?';
+
+# Avoid ++, avoid ranges, avoid split //
+my @letters = qw(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z);
+sub tempfile {
+    my $count = 0;
+    do {
+	my $temp = $count;
+	my $try = "tmp$$";
+	do {
+	    $try .= $letters[$temp % 26];
+	    $temp = int ($temp / 26);
+	} while $temp;
+	# Need to note all the file names we allocated, as a second request may
+	# come before the first is created.
+	if (!-e $try && !$tmpfiles{$try}) {
+	    # We have a winner
+	    $tmpfiles{$try}++;
+	    return $try;
+	}
+	$count = $count + 1;
+    } while $count < 26 * 26;
+    die "Can't find temporary file name starting 'tmp$$'";
+}
+
+# This is the temporary file for _fresh_perl
+my $tmpfile = tempfile();
 
 #
 # _fresh_perl
@@ -660,8 +685,8 @@ sub _fresh_perl {
 
     # Clean up the results into something a bit more predictable.
     $results =~ s/\n+$//;
-    $results =~ s/at\s+misctmp\d+\s+line/at - line/g;
-    $results =~ s/of\s+misctmp\d+\s+aborted/of - aborted/g;
+    $results =~ s/at\s+$::tempfile_regexp\s+line/at - line/g;
+    $results =~ s/of\s+$::tempfile_regexp\s+aborted/of - aborted/g;
 
     # bison says 'parse error' instead of 'syntax error',
     # various yaccs may or may not capitalize 'syntax'.
