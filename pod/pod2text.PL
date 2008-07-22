@@ -37,7 +37,7 @@ print OUT <<'!NO!SUBS!';
 
 # pod2text -- Convert POD data to formatted ASCII text.
 #
-# Copyright 1999, 2000, 2001, 2004, 2006 by Russ Allbery <rra@stanford.edu>
+# Copyright 1999, 2000, 2001, 2004, 2006, 2008 Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -111,10 +111,13 @@ __END__
 
 pod2text - Convert POD data to formatted ASCII text
 
+=for stopwords
+-aclost --alt Allbery
+
 =head1 SYNOPSIS
 
 pod2text [B<-aclost>] [B<--code>] [B<-i> I<indent>] S<[B<-q> I<quotes>]>
-S<[B<-w> I<width>]> [I<input> [I<output> ...]]
+    S<[B<-w> I<width>]> [I<input> [I<output> ...]]
 
 pod2text B<-h>
 
@@ -125,12 +128,12 @@ to generate formatted ASCII text from POD source.  It can optionally use
 either termcap sequences or ANSI color escape sequences to format the text.
 
 I<input> is the file to read for POD source (the POD can be embedded in
-code).  If I<input> isn't given, it defaults to STDIN.  I<output>, if given,
-is the file to which to write the formatted output.  If I<output> isn't
-given, the formatted output is written to STDOUT.  Several POD files can be
-processed in the same B<pod2text> invocation (saving module load and compile
-times) by providing multiple pairs of I<input> and I<output> files on the
-command line.
+code).  If I<input> isn't given, it defaults to C<STDIN>.  I<output>, if
+given, is the file to which to write the formatted output.  If I<output>
+isn't given, the formatted output is written to C<STDOUT>.  Several POD
+files can be processed in the same B<pod2text> invocation (saving module
+load and compile times) by providing multiple pairs of I<input> and
+I<output> files on the command line.
 
 =head1 OPTIONS
 
@@ -176,7 +179,7 @@ indented; for the latter, see B<-i> option.
 
 =item B<-o>, B<--overstrike>
 
-Format the output with overstruck printing.  Bold text is rendered as
+Format the output with overstrike printing.  Bold text is rendered as
 character, backspace, character.  Italics and file names are rendered as
 underscore, backspace, character.  Many pagers, such as B<less>, know how
 to convert this to bold or underlined text.
@@ -272,7 +275,8 @@ Russ Allbery <rra@stanford.edu>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999, 2000, 2001, 2004, 2006 by Russ Allbery <rra@stanford.edu>.
+Copyright 1999, 2000, 2001, 2004, 2006, 2008 Russ Allbery
+<rra@stanford.edu>.
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.

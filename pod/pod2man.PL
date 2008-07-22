@@ -37,8 +37,7 @@ print OUT <<'!NO!SUBS!';
 
 # pod2man -- Convert POD data to formatted *roff input.
 #
-# Copyright 1999, 2000, 2001, 2004, 2006, 2008
-#     Russ Allbery <rra@stanford.edu>
+# Copyright 1999, 2000, 2001, 2004, 2006, 2008 Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -98,14 +97,17 @@ __END__
 
 pod2man - Convert POD data to formatted *roff input
 
+=for stopwords
+en em --utf8 UTF-8 overdo markup MT-LEVEL Allbery
+
 =head1 SYNOPSIS
 
 pod2man [B<--section>=I<manext>] [B<--release>[=I<version>]]
-[B<--center>=I<string>] [B<--date>=I<string>] [B<--fixed>=I<font>]
-[B<--fixedbold>=I<font>] [B<--fixeditalic>=I<font>]
-[B<--fixedbolditalic>=I<font>] [B<--name>=I<name>] [B<--official>]
-[B<--lax>] [B<--quotes>=I<quotes>] [B<--verbose>]
-[I<input> [I<output>] ...]
+    [B<--center>=I<string>] [B<--date>=I<string>] [B<--fixed>=I<font>]
+    [B<--fixedbold>=I<font>] [B<--fixeditalic>=I<font>]
+    [B<--fixedbolditalic>=I<font>] [B<--name>=I<name>] [B<--official>]
+    [B<--lax>] [B<--quotes>=I<quotes>] [B<--verbose>]
+    [I<input> [I<output>] ...]
 
 pod2man B<--help>
 
@@ -116,22 +118,22 @@ from POD source.  The resulting *roff code is suitable for display on a
 terminal using nroff(1), normally via man(1), or printing using troff(1).
 
 I<input> is the file to read for POD source (the POD can be embedded in
-code).  If I<input> isn't given, it defaults to STDIN.  I<output>, if given,
-is the file to which to write the formatted output.  If I<output> isn't
-given, the formatted output is written to STDOUT.  Several POD files can be
-processed in the same B<pod2man> invocation (saving module load and compile
-times) by providing multiple pairs of I<input> and I<output> files on the
-command line.
+code).  If I<input> isn't given, it defaults to C<STDIN>.  I<output>, if
+given, is the file to which to write the formatted output.  If I<output>
+isn't given, the formatted output is written to C<STDOUT>.  Several POD
+files can be processed in the same B<pod2man> invocation (saving module
+load and compile times) by providing multiple pairs of I<input> and
+I<output> files on the command line.
 
 B<--section>, B<--release>, B<--center>, B<--date>, and B<--official> can be
 used to set the headers and footers to use; if not given, Pod::Man will
 assume various defaults.  See below or L<Pod::Man> for details.
 
-B<pod2man> assumes that your *roff formatters have a fixed-width font named
-CW.  If yours is called something else (like CR), use B<--fixed> to specify
-it.  This generally only matters for troff output for printing.  Similarly,
-you can set the fonts used for bold, italic, and bold italic fixed-width
-output.
+B<pod2man> assumes that your *roff formatters have a fixed-width font
+named C<CW>.  If yours is called something else (like C<CR>), use
+B<--fixed> to specify it.  This generally only matters for troff output
+for printing.  Similarly, you can set the fonts used for bold, italic, and
+bold italic fixed-width output.
 
 Besides the obvious pod conversions, Pod::Man, and therefore pod2man also
 takes care of formatting func(), func(n), and simple variable references
@@ -155,30 +157,31 @@ Contributed Perl Documentation", but also see B<--official> below.
 
 Set the left-hand footer string to this value.  By default, the modification
 date of the input file will be used, or the current date if input comes from
-STDIN.
+C<STDIN>.
 
 =item B<--fixed>=I<font>
 
-The fixed-width font to use for vertabim text and code.  Defaults to CW.
-Some systems may want CR instead.  Only matters for troff(1) output.
+The fixed-width font to use for verbatim text and code.  Defaults to
+C<CW>.  Some systems may want C<CR> instead.  Only matters for troff(1)
+output.
 
 =item B<--fixedbold>=I<font>
 
-Bold version of the fixed-width font.  Defaults to CB.  Only matters for
-troff(1) output.
+Bold version of the fixed-width font.  Defaults to C<CB>.  Only matters
+for troff(1) output.
 
 =item B<--fixeditalic>=I<font>
 
 Italic version of the fixed-width font (actually, something of a misnomer,
 since most fixed-width fonts only have an oblique version, not an italic
-version).  Defaults to CI.  Only matters for troff(1) output.
+version).  Defaults to C<CI>.  Only matters for troff(1) output.
 
 =item B<--fixedbolditalic>=I<font>
 
 Bold italic (probably actually oblique) version of the fixed-width font.
-Pod::Man doesn't assume you have this, and defaults to CB.  Some systems
-(such as Solaris) have this font available as CX.  Only matters for troff(1)
-output.
+Pod::Man doesn't assume you have this, and defaults to C<CB>.  Some
+systems (such as Solaris) have this font available as C<CX>.  Only matters
+for troff(1) output.
 
 =item B<-h>, B<--help>
 
@@ -240,8 +243,8 @@ formats, 5 for miscellaneous information, and 7 for devices.  Still others
 use 1m instead of 8, or some mix of both.  About the only section numbers
 that are reliably consistent are 1, 2, and 3.
 
-By default, section 1 will be used unless the file ends in .pm in which case
-section 3 will be selected.
+By default, section 1 will be used unless the file ends in C<.pm>, in
+which case section 3 will be selected.
 
 =item B<-u>, B<--utf8>
 
@@ -282,7 +285,7 @@ even/odd paging, at least on some versions of man(7).
 
     troff -man -rC1 -rD1 perl.1 perldata.1 perlsyn.1 ...
 
-To get index entries on stderr, turn on the F register, as in:
+To get index entries on C<STDERR>, turn on the F register, as in:
 
     troff -man -rF1 perl.1
 
@@ -326,7 +329,7 @@ The standard sections of a manual page are:
 =item NAME
 
 Mandatory section; should be a comma-separated list of programs or functions
-documented by this podpage, such as:
+documented by this POD page, such as:
 
     foo, bar - programs to do something
 
@@ -392,10 +395,11 @@ functions.
 Exceptions, error return codes, exit statuses, and errno settings.
 Typically used for function documentation; program documentation uses
 DIAGNOSTICS instead.  The general rule of thumb is that errors printed to
-STDOUT or STDERR and intended for the end user are documented in DIAGNOSTICS
-while errors passed internal to the calling program and intended for other
-programmers are documented in ERRORS.  When documenting a function that sets
-errno, a full list of the possible errno values should be given here.
+C<STDOUT> or C<STDERR> and intended for the end user are documented in
+DIAGNOSTICS while errors passed internal to the calling program and
+intended for other programmers are documented in ERRORS.  When documenting
+a function that sets errno, a full list of the possible errno values
+should be given here.
 
 =item DIAGNOSTICS
 
