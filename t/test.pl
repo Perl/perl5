@@ -818,6 +818,7 @@ sub watchdog ($)
                 };
                 $watchdog = system(1, which_perl(), '-e',
                                                     "sleep($timeout);" .
+                                                    "warn('# $timeout_msg\n');" .
                                                     "kill('KILL', $pid_to_kill);");
             };
             if ($@ || ($watchdog <= 0)) {
