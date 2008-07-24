@@ -3419,6 +3419,20 @@ but there was no array C<@foo> in scope at the time. If you wanted a
 literal @foo, then write it as \@foo; otherwise find out what happened
 to the array you apparently lost track of.
 
+=item Possible unintended interpolation of $\ in regex
+
+(W ambiguous) You said something like C<m/$\/> in a regex.
+The regex C<m/foo$\s+bar/m> translates to: match the word 'foo', the output
+record separartor (see L<perlvar/$\>) and the letter 's' (one time or more)
+followed by the word 'bar'.
+
+If this is what you intended then you can silence the warning by using 
+C<m/${\}/> (for example: C<m/foo${\}s+bar/>).
+
+If instead you intended to match the word 'foo' at the end of the line
+followed by whitespace and the word 'bar' on the next line then you can use
+C<m/$(?)\/> (for example: C<m/foo$(?)\s+bar/>).
+
 =item pragma "attrs" is deprecated, use "sub NAME : ATTRS" instead
 
 (D deprecated) You have written something like this:
