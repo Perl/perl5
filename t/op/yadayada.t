@@ -1,30 +1,34 @@
 #!./perl
 
-print "1..5\n";
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+    require './test.pl';
+}
 
-$err = "Unimplemented at $0 line " . ( __LINE__ + 2 ) . ".\n";
+use strict;
+
+plan 5;
+
+my $err = "Unimplemented at $0 line " . ( __LINE__ + 2 ) . ".\n";
 
 eval { ... };
 
-print "not " unless $@ eq $err;
-print "ok 1\n";
-print "# expected: '$err'\n# received: '$@'\n" unless $@ eq $err;
+is $@, $err;
 
 $err = "foo at $0 line " . ( __LINE__ + 2 ) . ".\n";
 
 eval { !!! "foo" };
 
-print "not " unless $@ eq $err;
-print "ok 2\n";
-print "# expected: '$err'\n# received: '$@'\n" unless $@ eq $err;
+is $@, $err;
 
 $err = "Died at $0 line " . ( __LINE__ + 2 ) . ".\n";
 
 eval { !!! };
 
-print "not " unless $@ eq $err;
-print "ok 3\n";
-print "# expected: '$err'\n# received: '$@'\n" unless $@ eq $err;
+is $@, $err;
+
+my $warning;
 
 local $SIG{__WARN__} = sub { $warning = shift };
 
@@ -32,14 +36,10 @@ $err = "bar at $0 line " . ( __LINE__ + 2 ) . ".\n";
 
 eval { ??? "bar" };
 
-print "not " unless $warning eq $err;
-print "ok 4\n";
-print "# expected: '$warning'\n# received: '$warningn" unless $warning eq $err;
+is $warning, $err;
 
 $err = "Warning: something's wrong at $0 line " . ( __LINE__ + 2 ) . ".\n";
 
 eval { ??? };
 
-print "not " unless $warning eq $err;
-print "ok 5\n";
-print "# expected: '$warning'\n# received: '$warningn" unless $warning eq $err;
+is $warning, $err;
