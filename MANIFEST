@@ -965,6 +965,7 @@ ext/PerlIO/encoding/t/nolooping.t	Tests for PerlIO::encoding
 ext/PerlIO/scalar/Makefile.PL	PerlIO layer for scalars
 ext/PerlIO/scalar/scalar.pm	PerlIO layer for scalars
 ext/PerlIO/scalar/scalar.xs	PerlIO layer for scalars
+ext/PerlIO/scalar/t/scalar_ungetc.t	Tests for PerlIO layer for scalars
 ext/PerlIO/t/encoding.t		See if PerlIO encoding conversion works
 ext/PerlIO/t/fail.t		See if bad layers fail
 ext/PerlIO/t/fallback.t		See if PerlIO fallbacks work
