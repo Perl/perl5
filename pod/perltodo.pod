@@ -538,6 +538,14 @@ probably aren't allocated/deallocated often enough for a speed saving. Whereas
 C<MAGIC> is allocated/deallocated more often, but in turn, is also something
 more externally visible, so changing the rules here may bite external code.
 
+=head2 Shared arenas
+
+Several SV body structs are now the same size, notably PVMG and PVGV, PVAV and
+PVHV, and PVCV and PVFM. It should be possible to allocate and return same
+sized bodies from the same actual arena, rather than maintaining one arena for
+each. This could save 4-6K per thread, of memory no longer tied up in the
+not-yet-allocated part of an arena.
+
 
 =head1 Tasks that need a knowledge of XS
 
