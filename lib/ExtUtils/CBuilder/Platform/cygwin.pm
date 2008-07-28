@@ -10,17 +10,16 @@ $VERSION = '0.24';
 
 sub link_executable {
   my $self = shift;
-  # $Config{ld} is set up as a special script for building
-  # perl-linkable libraries.  We don't want that here.
-  local $self->{config}{ld} = 'gcc';
+  # $Config{ld} is okay. revert the stupid Unix cc=ld override
+  local $self->{config}{cc} = $self->{config}{ld};
   return $self->SUPER::link_executable(@_);
 }
 
 sub link {
   my ($self, %args) = @_;
-
+  # libperl.dll.a fails with -Uusedl. -L../CORE -lperl is better
   $args{extra_linker_flags} = [
-    File::Spec->catdir($self->perl_inc(), 'libperl.dll.a'),
+    '-L'.$self->perl_inc().' -lperl',
     $self->split_like_shell($args{extra_linker_flags})
   ];
 

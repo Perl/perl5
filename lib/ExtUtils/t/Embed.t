@@ -105,11 +105,6 @@ if ($^O eq 'VMS') {
         s!-bE:(\S+)!-bE:$perl_exp!;
     }
    }
-   elsif ($^O eq 'cygwin') { # Cygwin needs the shared libperl copied
-     my $v_e_r_s = substr($Config{version},0,-2);
-     $v_e_r_s =~ tr/./_/;
-     system("cp ../cygperl$v_e_r_s.dll ./");    # for test 1
-   }
    elsif ($Config{'libperl'} !~ /\Alibperl\./) {
      # Everyone needs libperl copied if it's not found by '-lperl'.
      $testlib = $Config{'libperl'};
@@ -137,7 +132,7 @@ print "# $_\n" foreach @out;
 
 if ($^O eq 'VMS' && !$status) {
   print "# @cmd2\n";
-  $status = system(join(' ',@cmd2)); 
+  $status = system(join(' ',@cmd2));
 }
 print (($status? 'not ': '')."ok 1\n");
 
