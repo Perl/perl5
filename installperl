@@ -253,11 +253,8 @@ if (($Is_W32 and ! $Is_NetWare) or $Is_Cygwin) {
 
     if ($Is_Cygwin) {
 	$perldll = $libperl;
-	my $v_e_r_s = substr($ver,0,-2); $v_e_r_s =~ tr/./_/;
-	$perldll =~ s/(\..*)?$/$v_e_r_s.$dlext/;
-	$perldll =~ s/^lib/cyg/;
     } else {
-	$perldll = 'perl511.' . $dlext;
+	$perldll = 'perl5'.$Config{patchlevel}.'.'.$dlext;
     }
 
     if ($dlsrc ne "dl_none.xs") {
@@ -338,7 +335,7 @@ if ($d_dosuid) {
 # Install library files.
 
 my ($do_installarchlib, $do_installprivlib) = (0, 0);
-my $vershort = $Is_Cygwin ? substr($ver,0,-2) : $ver;
+my $vershort = ($Is_Cygwin and !$Config{usedevel}) ? substr($ver,0,-2) : $ver;
 
 mkpath($installprivlib, $opts{verbose}, 0777);
 mkpath($installarchlib, $opts{verbose}, 0777);
