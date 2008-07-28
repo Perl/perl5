@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Fri Aug  8 16:16:43 CEST 2008 [metaconfig 3.5 PL0]
+# Generated on Fri Aug 22 17:08:28 CEST 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -8151,9 +8151,9 @@ true)
 		# a version-specific architecture-dependent library, the version
 		# number isn't really that important, except for making cc/ld happy.
 		#
-		# A name such as libperl.so.3.1
+		# A name such as libperl.so.10.1
 		majmin="libperl.$so.$patchlevel.$subversion"
-		# A name such as libperl.so.301
+		# A name such as libperl.so.100
 		majonly=`echo $patchlevel $subversion |
 			$awk '{printf "%d%02d", $1, $2}'`
 		majonly=libperl.$so.$majonly
@@ -8167,8 +8167,12 @@ true)
 		linux*|gnu*)  # ld won't link with a bare -lperl otherwise.
 			dflt=libperl.$so
 			;;
-		cygwin*) # ld links against an importlib
-			dflt=libperl$lib_ext
+		cygwin*) # ld links now against the dll directly
+			majmin="cygperl5_${patchlevel}_${subversion}.${so}"
+			majonly=`echo $patchlevel $subversion |
+				$awk '{printf "%03d%03d", $1, $2}'`
+			majonly=cygperl5.$majonly.$so
+			dflt=$majmin
 			;;
 		*)	# Try to guess based on whether libc has major.minor.
 			case "$libc" in
@@ -8263,6 +8267,9 @@ if "$useshrplib"; then
 	hpux*)
 		# hpux doesn't like the default, either.
 		tmp_shrpenv="env LDOPTS=\"+s +b${shrpdir}\""
+		;;
+	cygwin)
+		# cygwin needs only ldlibpth
 		;;
 	*)
 		tmp_shrpenv="env LD_RUN_PATH=$shrpdir"
