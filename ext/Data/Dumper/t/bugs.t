@@ -16,7 +16,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 3;
+use Test::More tests => 4;
 use Data::Dumper;
 
 {
@@ -59,3 +59,14 @@ ok(1, "[perl #38612]"); # Still no core dump? We are fine.
     eval $txt;
     is_deeply($VAR1, \%h, '[perl #40668] Reset hash iterator');
 }
+
+# [perl #56766] Segfaults on bad syntax - fixed with version 2.121_17
+sub doh
+{
+    # 2nd arg is supposed to be an arrayref
+    my $doh = Data::Dumper->Dump([\@_],'@_');
+}
+doh('fixed');
+ok(1, "[perl #56766]"); # Still no core dump? We are fine.
+
+# EOF
