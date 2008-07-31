@@ -1,10 +1,20 @@
 #!/usr/bin/perl -w
 
 use strict;
-use lib 't/lib';
+
+BEGIN {
+    if ( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = ( '../lib', 'lib' );
+    }
+    else {
+        unshift @INC, 't/lib';
+    }
+}
 
 use Test::More tests => 94;
 
+use EmptyParser;
 use TAP::Parser::Grammar;
 use TAP::Parser::Iterator::Array;
 
@@ -33,8 +43,9 @@ sub handle_unicode { }
 package main;
 
 my $stream = SS->new;
+my $parser = EmptyParser->new;
 can_ok $GRAMMAR, 'new';
-my $grammar = $GRAMMAR->new($stream);
+my $grammar = $GRAMMAR->new( { stream => $stream, parser => $parser } );
 isa_ok $grammar, $GRAMMAR, '... and the object it returns';
 
 # Note:  all methods are actually class methods.  See the docs for the reason
@@ -341,9 +352,9 @@ is_deeply $token, $expected,
 
 # tokenize
 {
-    my $stream = SS->new;
-
-    my $grammar = $GRAMMAR->new($stream);
+    my $stream  = SS->new;
+    my $parser  = EmptyParser->new;
+    my $grammar = $GRAMMAR->new( { stream => $stream, parser => $parser } );
 
     my $plan = '';
 
@@ -357,7 +368,8 @@ is_deeply $token, $expected,
 # _make_plan_token
 
 {
-    my $grammar = $GRAMMAR->new;
+    my $parser = EmptyParser->new;
+    my $grammar = $GRAMMAR->new( { parser => $parser } );
 
     my $plan
       = '1..1 # SKIP with explanation';  # trigger warning in _make_plan_token
@@ -384,9 +396,9 @@ is_deeply $token, $expected,
 # _make_yaml_token
 
 {
-    my $stream = SS->new;
-
-    my $grammar = $GRAMMAR->new($stream);
+    my $stream  = SS->new;
+    my $parser  = EmptyParser->new;
+    my $grammar = $GRAMMAR->new( { stream => $stream, parser => $parser } );
 
     $grammar->set_version(13);
 

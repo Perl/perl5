@@ -1,10 +1,12 @@
 package TAP::Parser::YAMLish::Writer;
 
 use strict;
+use vars qw($VERSION @ISA);
 
-use vars qw{$VERSION};
+use TAP::Object ();
 
-$VERSION = '3.10';
+@ISA     = 'TAP::Object';
+$VERSION = '3.13';
 
 my $ESCAPE_CHAR = qr{ [ \x00-\x1f \" ] }x;
 my $ESCAPE_KEY  = qr{ (?: ^\W ) | $ESCAPE_CHAR }x;
@@ -16,11 +18,7 @@ my @UNPRINTABLE = qw(
   x18  x19  x1a  e    x1c  x1d  x1e  x1f
 );
 
-# Create an empty TAP::Parser::YAMLish::Writer object
-sub new {
-    my $class = shift;
-    bless {}, $class;
-}
+# new() implementation supplied by TAP::Object
 
 sub write {
     my $self = shift;
@@ -149,7 +147,7 @@ TAP::Parser::YAMLish::Writer - Write YAMLish data
 
 =head1 VERSION
 
-Version 3.10
+Version 3.13
 
 =head1 SYNOPSIS
 

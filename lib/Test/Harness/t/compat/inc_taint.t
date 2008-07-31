@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-    if( $ENV{PERL_CORE} ) {
+    if ( $ENV{PERL_CORE} ) {
         chdir 't';
-        @INC = ('../lib', 'lib');
+        @INC = ( '../lib', 'lib' );
     }
     else {
-	use lib 't/lib';
+        use lib 't/lib';
     }
 }
 

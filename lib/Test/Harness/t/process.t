@@ -9,9 +9,11 @@ BEGIN {
     $hires = eval 'use Time::HiRes qw(sleep); 1';
 }
 
-use Test::More ( $^O eq 'VMS' ? ( skip_all => 'VMS' )
-    : $hires ? ( tests    => 9 * 3 )
-    :          ( skip_all => 'Need Time::HiRes' ) );
+use Test::More (
+      $^O eq 'VMS' ? ( skip_all => 'VMS' )
+    : $hires ? ( tests => 9 * 3 )
+    : ( skip_all => 'Need Time::HiRes' )
+);
 
 use File::Spec;
 use TAP::Parser::Iterator::Process;
@@ -25,8 +27,10 @@ my @expect = (
     'ok 5 00000',
 );
 
-my $source = File::Spec->catfile( ($ENV{PERL_CORE} ? 'lib' : 't'),
-				  'sample-tests', 'delayed' );
+my $source = File::Spec->catfile(
+    ( $ENV{PERL_CORE} ? 'lib' : 't' ),
+    'sample-tests', 'delayed'
+);
 
 for my $chunk_size ( 1, 4, 65536 ) {
     for my $where ( 0 .. 8 ) {

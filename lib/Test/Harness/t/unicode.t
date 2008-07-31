@@ -9,6 +9,7 @@ my @schedule;
 my %make_test;
 
 BEGIN {
+
     # TODO: Investigate failure on 5.8.0
     plan skip_all => "unicode on Perl <= 5.8.0"
       unless $] > 5.008;

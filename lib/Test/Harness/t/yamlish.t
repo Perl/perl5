@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!perl -w
 
 use strict;
 use lib 't/lib';
@@ -47,6 +47,15 @@ BEGIN {
                 '...',
             ],
             out => "Hello, World\n",
+        },
+        {   name => 'Hello World Block',
+            in   => [
+                '--- |',
+                '   Hello,',
+                '      World',
+                '...',
+            ],
+            out => "Hello,\n   World\n",
         },
         {   name => 'Hello World 5',
             in   => [
@@ -128,7 +137,10 @@ BEGIN {
                 six => '6'
             },
         },
-
+        {   name => 'Space after colon',
+            in   => [ '---', 'spog: ', ' - 1', ' - 2', '...' ],
+            out => { spog => [ 1, 2 ] },
+        },
         {   name => 'Original YAML::Tiny test',
             in   => [
                 '---',
@@ -470,6 +482,10 @@ BEGIN {
                 quoted => 'Magic!',
                 "\n\t" => 'newline, tab',
             },
+        },
+        {   name => 'Empty',
+            in   => [],
+            out  => undef,
         },
     );
 

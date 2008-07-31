@@ -1,13 +1,12 @@
 #!/usr/bin/perl -wT
 
-
 use strict;
 use lib 't/lib';
 
 use Test::More tests => 79;
 
 use TAP::Parser;
-use TAP::Parser::Iterator;
+use TAP::Parser::IteratorFactory;
 use TAP::Parser::Aggregator;
 
 my $tap = <<'END_TAP';
@@ -21,7 +20,8 @@ not ok 4 - this is a real failure
 ok 5 # skip we have no description
 END_TAP
 
-my $stream = TAP::Parser::Iterator->new( [ split /\n/ => $tap ] );
+my $factory = TAP::Parser::IteratorFactory->new;
+my $stream = $factory->make_iterator( [ split /\n/ => $tap ] );
 isa_ok $stream, 'TAP::Parser::Iterator';
 
 my $parser1 = TAP::Parser->new( { stream => $stream } );
@@ -207,12 +207,9 @@ is $agg->todo_passed, 1,
   '... and the correct number of unexpectedly succeeded tests';
 ok $agg->has_problems,
   '... and it should report true that there are problems';
-is $agg->get_status, 'PASS',
-  '... and the status should be passing';
-ok !$agg->has_errors,
-  '.... but it should not report any errors';
-ok $agg->all_passed,
-  '... bonus tests should be passing tests, too';
+is $agg->get_status, 'PASS', '... and the status should be passing';
+ok !$agg->has_errors, '.... but it should not report any errors';
+ok $agg->all_passed, '... bonus tests should be passing tests, too';
 
 # 2. !failed && !todo_passed && parse_errors
 

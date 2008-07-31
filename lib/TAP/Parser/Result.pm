@@ -1,35 +1,18 @@
 package TAP::Parser::Result;
 
 use strict;
-use vars qw($VERSION);
+use vars qw($VERSION @ISA);
 
-use TAP::Parser::Result::Bailout ();
-use TAP::Parser::Result::Comment ();
-use TAP::Parser::Result::Plan    ();
-use TAP::Parser::Result::Pragma  ();
-use TAP::Parser::Result::Test    ();
-use TAP::Parser::Result::Unknown ();
-use TAP::Parser::Result::Version ();
-use TAP::Parser::Result::YAML    ();
+use TAP::Object ();
 
-# note that this is bad.  Makes it very difficult to subclass, but then, it
-# would be a lot of work to subclass this system.
-my %class_for;
+@ISA = 'TAP::Object';
 
 BEGIN {
-    %class_for = (
-        plan    => 'TAP::Parser::Result::Plan',
-        pragma  => 'TAP::Parser::Result::Pragma',
-        test    => 'TAP::Parser::Result::Test',
-        comment => 'TAP::Parser::Result::Comment',
-        bailout => 'TAP::Parser::Result::Bailout',
-        version => 'TAP::Parser::Result::Version',
-        unknown => 'TAP::Parser::Result::Unknown',
-        yaml    => 'TAP::Parser::Result::YAML',
-    );
 
+    # make is_* methods
+    my @attrs = qw( plan pragma test comment bailout version unknown yaml );
     no strict 'refs';
-    for my $token ( keys %class_for ) {
+    for my $token (@attrs) {
         my $method = "is_$token";
         *$method = sub { return $token eq shift->type };
     }
@@ -39,46 +22,59 @@ BEGIN {
 
 =head1 NAME
 
-TAP::Parser::Result - TAP::Parser output
+TAP::Parser::Result - Base class for TAP::Parser output objects
 
 =head1 VERSION
 
-Version 3.10
+Version 3.13
 
 =cut
 
-$VERSION = '3.10';
+$VERSION = '3.13';
+
+=head1 SYNOPSIS
+
+  # abstract class - not meany to be used directly
+  # see TAP::Parser::ResultFactory for preferred usage
+
+  # directly:
+  use TAP::Parser::Result;
+  my $token  = {...};
+  my $result = TAP::Parser::Result->new( $token );
 
 =head2 DESCRIPTION
 
-This is merely a factory class which returns an object representing the
-current bit of test data from TAP (usually a line).  It's for internal use
-only and should not be relied upon.
-
-=cut
-
-##############################################################################
+This is a simple base class used by L<TAP::Parser> to store objects that
+represent the current bit of test output data from TAP (usually a single
+line).  Unless you're subclassing, you probably won't need to use this module
+directly.
 
 =head2 METHODS
 
 =head3 C<new>
 
+  # see TAP::Parser::ResultFactory for preferred usage
+
+  # to use directly:
   my $result = TAP::Parser::Result->new($token);
 
 Returns an instance the appropriate class for the test token passed in.
 
 =cut
 
-sub new {
-    my ( $class, $token ) = @_;
-    my $type = $token->{type};
-    return bless $token => $class_for{$type}
-      if exists $class_for{$type};
-    require Carp;
+# new() implementation provided by TAP::Object
 
-    # this should never happen!
-    Carp::croak("Could not determine class for\n$token->{type}");
+sub _initialize {
+    my ( $self, $token ) = @_;
+    if ($token) {
+
+        # make a shallow copy of the token:
+        $self->{$_} = $token->{$_} for ( keys %$token );
+    }
+    return $self;
 }
+
+##############################################################################
 
 =head2 Boolean methods
 
@@ -260,3 +256,43 @@ sub set_directive {
 }
 
 1;
+
+=head1 SUBCLASSING
+
+Please see L<TAP::Parser/SUBCLASSING> for a subclassing overview.
+
+Remember: if you want your subclass to be automatically used by the parser,
+you'll have to register it with L<TAP::Parser::ResultFactory/register_type>.
+
+If you're creating a completely new result I<type>, you'll probably need to
+subclass L<TAP::Parser::Grammar> too, or else it'll never get used.
+
+=head2 Example
+
+  package MyResult;
+
+  use strict;
+  use vars '@ISA';
+
+  @ISA = 'TAP::Parser::Result';
+
+  # register with the factory:
+  TAP::Parser::ResultFactory->register_type( 'my_type' => __PACKAGE__ );
+
+  sub as_string { 'My results all look the same' }
+
+=head1 SEE ALSO
+
+L<TAP::Object>,
+L<TAP::Parser>,
+L<TAP::Parser::ResultFactory>,
+L<TAP::Parser::Result::Bailout>,
+L<TAP::Parser::Result::Comment>,
+L<TAP::Parser::Result::Plan>,
+L<TAP::Parser::Result::Pragma>,
+L<TAP::Parser::Result::Test>,
+L<TAP::Parser::Result::Unknown>,
+L<TAP::Parser::Result::Version>,
+L<TAP::PARSER::RESULT::YAML>,
+
+=cut

@@ -6,7 +6,7 @@ use lib 't/lib';
 use Test::More tests => 14;
 
 use TAP::Parser;
-use TAP::Parser::Iterator;
+use TAP::Parser::IteratorFactory;
 
 sub tap_to_lines {
     my $string = shift;
@@ -26,8 +26,9 @@ Bail out!  We ran out of foobar.
 not ok 5
 END_TAP
 
-my $parser = TAP::Parser->new(
-    {   stream => TAP::Parser::Iterator->new( tap_to_lines($tap) ),
+my $factory = TAP::Parser::IteratorFactory->new;
+my $parser  = TAP::Parser->new(
+    {   stream => $factory->make_iterator( tap_to_lines($tap) ),
     }
 );
 
@@ -105,7 +106,7 @@ is( $bailout->explanation, 'We ran out of foobar.',
 my $more_tap = "1..1\nok 1 - input file opened\n";
 
 my $second_parser = TAP::Parser->new(
-    {   stream => TAP::Parser::Iterator->new( [ split( /\n/, $more_tap ) ] ),
+    {   stream => $factory->make_iterator( [ split( /\n/, $more_tap ) ] ),
     }
 );
 

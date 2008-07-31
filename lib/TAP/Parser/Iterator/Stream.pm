@@ -1,8 +1,10 @@
 package TAP::Parser::Iterator::Stream;
 
 use strict;
-use TAP::Parser::Iterator ();
 use vars qw($VERSION @ISA);
+
+use TAP::Parser::Iterator ();
+
 @ISA = 'TAP::Parser::Iterator';
 
 =head1 NAME
@@ -11,32 +13,45 @@ TAP::Parser::Iterator::Stream - Internal TAP::Parser Iterator
 
 =head1 VERSION
 
-Version 3.10
+Version 3.13
 
 =cut
 
-$VERSION = '3.10';
+$VERSION = '3.13';
 
 =head1 SYNOPSIS
 
-  use TAP::Parser::Iterator;
-  my $it = TAP::Parser::Iterator::Stream->new(\*TEST);
+  # see TAP::Parser::IteratorFactory for preferred usage
 
+  # to use directly:
+  use TAP::Parser::Iterator::Stream;
+  open( TEST, 'test.tap' );
+  my $it   = TAP::Parser::Iterator::Stream->new(\*TEST);
   my $line = $it->next;
-
-Originally ripped off from L<Test::Harness>.
 
 =head1 DESCRIPTION
 
-B<FOR INTERNAL USE ONLY!>
+This is a simple iterator wrapper for reading from filehandles, used by
+L<TAP::Parser>.  Unless you're subclassing, you probably won't need to use
+this module directly.
 
-This is a simple iterator wrapper for filehandles.
+=head1 METHODS
 
 =head2 Class Methods
 
 =head3 C<new>
 
-Create an iterator.
+Create an iterator.  Expects one argument containing a filehandle.
+
+=cut
+
+# new() implementation supplied by TAP::Object
+
+sub _initialize {
+    my ( $self, $thing ) = @_;
+    $self->{fh} = $thing;
+    return $self;
+}
 
 =head2 Instance Methods
 
@@ -57,15 +72,6 @@ Get the wait status for this iterator. Always returns zero.
 Get the exit status for this iterator. Always returns zero.
 
 =cut
-
-sub new {
-    my ( $class, $thing ) = @_;
-    bless {
-        fh => $thing,
-    }, $class;
-}
-
-##############################################################################
 
 sub wait { shift->exit }
 sub exit { shift->{fh} ? () : 0 }
@@ -90,3 +96,17 @@ sub _finish {
 }
 
 1;
+
+=head1 ATTRIBUTION
+
+Originally ripped off from L<Test::Harness>.
+
+=head1 SEE ALSO
+
+L<TAP::Object>,
+L<TAP::Parser>,
+L<TAP::Parser::Iterator>,
+L<TAP::Parser::IteratorFactory>,
+
+=cut
+

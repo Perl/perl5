@@ -1,6 +1,65 @@
 Revision history for Test-Harness
 
-3.07	2008-01-13
+3.13    2008-07-27
+        - fixed various closure related leaks
+        - made prove honour HARNESS_TIMER
+        - Applied patches supplied by Alex Vandiver
+          - add 'rules' switch to prove: allows parallel execution rules
+            to be specified on the command line.
+          - allow '**' (any path) wildcard in parallel rules
+          - fix bug report address
+          - make tprove_gtk example work again.
+
+3.12    2008-06-22
+        - applied Steve Purkis' huge refactoring patch which adds
+          configurable factories for most of the major internal classes.
+        - applied David Wheeler's patch to allow exec to be a code
+          reference.
+        - made tests more robust in the presence of -MFoo in PERL5OPT.
+
+3.11    2008-06-09
+        - applied Jim Keenan's patch that makes App::Prove::run return a
+          rather than exit (#33609)
+        - prove -r now recurses cwd rather than 't' by default (#33007)
+        - restored --ext switch to prove (#33848)
+        - added ignore_exit option to TAP::Parser and corresponding
+          interfaces to TAP::Harness and Test::Harness. Requested for
+          Parrot.
+        - Implemented rule based parallel scheduler.
+        - Moved filename -> display name mapping out of formatter. This
+          prevents the formatter's strip-extensions logic from stripping
+          extensions from supplied descriptions.
+        - Only strip extensions from test names if all tests have the
+          same extension. Previously we stripped extensions if all names
+          had /any/ extension making it impossible to distinguish tests
+          whose name differed only in the extension.
+        - Removed privacy test that made it impossible to subclass
+          TAP::Parser.
+        - Delayed initialisation of grammar making it easier to replace
+          the TAP::Parser stream after instantiation.
+        - Make it possible to supply import parameters to a replacement
+          harness with prove.
+        - Make it possible to replace either _grammar /or/ _stream
+          before reading from a TAP::Parser.
+
+3.10    2008-02-26
+        - fix undefined value warnings with bleadperl.
+        - added pragma support.
+        - fault unknown TAP tokens under strict pragma.
+
+3.09    2008-02-10
+        - support for HARNESS_PERL_SWITCHES containing things like 
+          '-e "system(shift)"'.
+        - set HARNESS_IS_VERBOSE during verbose testing.
+        - documentation fixes.
+
+3.08    2008-02-08
+        - added support for 'out' option to
+          Test::Harness::execute_tests. See #32476. Thanks RENEEB.
+        - Fixed YAMLish handling of non-alphanumeric hash keys.
+        - Added --dry option to prove for 2.64 compatibility.
+
+3.07    2008-01-13
         - prove now supports HARNESS_PERL_SWITCHES.
         - restored TEST_VERBOSE to prove.
 

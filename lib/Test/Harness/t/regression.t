@@ -2198,7 +2198,7 @@ my %samples = (
                 passed        => TRUE,
                 is_ok         => TRUE,
                 directive     => 'SKIP',
-                explanation   => 'rope'
+                explanation   => ''
             },
         ],
         plan          => '1..0',
@@ -2217,7 +2217,7 @@ my %samples = (
         'exit'        => 0,
         wait          => 0,
         version       => 12,
-        skip_all      => 'rope',
+        skip_all      => '(no reason given)',
     },
     skipall_v13 => {
         results => [

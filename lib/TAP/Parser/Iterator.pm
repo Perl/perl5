@@ -1,48 +1,49 @@
 package TAP::Parser::Iterator;
 
 use strict;
-use vars qw($VERSION);
+use vars qw($VERSION @ISA);
 
-use TAP::Parser::Iterator::Array   ();
-use TAP::Parser::Iterator::Stream  ();
-use TAP::Parser::Iterator::Process ();
+use TAP::Object ();
+
+@ISA = qw(TAP::Object);
 
 =head1 NAME
 
-TAP::Parser::Iterator - Internal TAP::Parser Iterator
+TAP::Parser::Iterator - Internal base class for TAP::Parser Iterators
 
 =head1 VERSION
 
-Version 3.10
+Version 3.13
 
 =cut
 
-$VERSION = '3.10';
+$VERSION = '3.13';
 
 =head1 SYNOPSIS
 
-  use TAP::Parser::Iterator;
-  my $it = TAP::Parser::Iterator->new(\*TEST);
-  my $it = TAP::Parser::Iterator->new(\@array);
+  # see TAP::Parser::IteratorFactory for general usage
 
-  my $line = $it->next;
-
-Originally ripped off from L<Test::Harness>.
+  # to subclass:
+  use vars qw(@ISA);
+  use TAP::Parser::Iterator ();
+  @ISA = qw(TAP::Parser::Iterator);
+  sub _initialize {
+    # see TAP::Object...
+  }
 
 =head1 DESCRIPTION
 
-B<FOR INTERNAL USE ONLY!>
+This is a simple iterator base class that defines L<TAP::Parser>'s iterator
+API.  See C<TAP::Parser::IteratorFactory> for the preferred way of creating
+iterators.
 
-This is a simple iterator wrapper for arrays and filehandles.
+=head1 METHODS
 
 =head2 Class Methods
 
 =head3 C<new>
 
- my $iter = TAP::Parser::Iterator->new( $array_reference );
- my $iter = TAP::Parser::Iterator->new( $filehandle );
-
-Create an iterator.
+Create an iterator.  Provided by L<TAP::Object>.
 
 =head2 Instance Methods
 
@@ -54,29 +55,13 @@ Iterate through it, of course.
 
 =head3 C<next_raw>
 
+B<Note:> this method is abstract and should be overridden.
+
  while ( my $item = $iter->next_raw ) { ... }
 
 Iterate raw input without applying any fixes for quirky input syntax.
 
 =cut
-
-sub new {
-    my ( $proto, $thing ) = @_;
-
-    my $ref = ref $thing;
-    if ( $ref eq 'GLOB' || $ref eq 'IO::Handle' ) {
-        return TAP::Parser::Iterator::Stream->new($thing);
-    }
-    elsif ( $ref eq 'ARRAY' ) {
-        return TAP::Parser::Iterator::Array->new($thing);
-    }
-    elsif ( $ref eq 'HASH' ) {
-        return TAP::Parser::Iterator::Process->new($thing);
-    }
-    else {
-        die "Can't iterate with a $ref";
-    }
-}
 
 sub next {
     my $self = shift;
@@ -93,10 +78,18 @@ sub next {
     return $line;
 }
 
+sub next_raw {
+    require Carp;
+    my $msg = Carp::longmess('abstract method called directly!');
+    $_[0]->_croak($msg);
+}
+
 =head3 C<handle_unicode>
 
 If necessary switch the input stream to handle unicode. This only has
 any effect for I/O handle based streams.
+
+The default implementation does nothing.
 
 =cut
 
@@ -106,10 +99,67 @@ sub handle_unicode { }
 
 Return a list of filehandles that may be used upstream in a select()
 call to signal that this Iterator is ready. Iterators that are not
-handle based should return an empty list.
+handle-based should return an empty list.
+
+The default implementation does nothing.
 
 =cut
 
-sub get_select_handles {return}
+sub get_select_handles {
+    return;
+}
+
+=head3 C<wait>
+
+B<Note:> this method is abstract and should be overridden.
+
+ my $wait_status = $iter->wait;
+
+Return the C<wait> status for this iterator.
+
+=head3 C<exit>
+
+B<Note:> this method is abstract and should be overridden.
+
+ my $wait_status = $iter->exit;
+
+Return the C<exit> status for this iterator.
+
+=cut
+
+sub wait {
+    require Carp;
+    my $msg = Carp::longmess('abstract method called directly!');
+    $_[0]->_croak($msg);
+}
+
+sub exit {
+    require Carp;
+    my $msg = Carp::longmess('abstract method called directly!');
+    $_[0]->_croak($msg);
+}
 
 1;
+
+=head1 SUBCLASSING
+
+Please see L<TAP::Parser/SUBCLASSING> for a subclassing overview.
+
+You must override the abstract methods as noted above.
+
+=head2 Example
+
+L<TAP::Parser::Iterator::Array> is probably the easiest example to follow.
+There's not much point repeating it here.
+
+=head1 SEE ALSO
+
+L<TAP::Object>,
+L<TAP::Parser>,
+L<TAP::Parser::IteratorFactory>,
+L<TAP::Parser::Iterator::Array>,
+L<TAP::Parser::Iterator::Stream>,
+L<TAP::Parser::Iterator::Process>,
+
+=cut
+

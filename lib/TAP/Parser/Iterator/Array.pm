@@ -1,42 +1,47 @@
 package TAP::Parser::Iterator::Array;
 
 use strict;
-use TAP::Parser::Iterator ();
 use vars qw($VERSION @ISA);
+
+use TAP::Parser::Iterator ();
+
 @ISA = 'TAP::Parser::Iterator';
 
 =head1 NAME
 
-TAP::Parser::Iterator::Array - Internal TAP::Parser Iterator
+TAP::Parser::Iterator::Array - Internal TAP::Parser array Iterator
 
 =head1 VERSION
 
-Version 3.10
+Version 3.13
 
 =cut
 
-$VERSION = '3.10';
+$VERSION = '3.13';
 
 =head1 SYNOPSIS
 
+  # see TAP::Parser::IteratorFactory for preferred usage
+
+  # to use directly:
   use TAP::Parser::Iterator::Array;
-  my $it = TAP::Parser::Iterator->new(\@array);
-
+  my @data = ('foo', 'bar', baz');
+  my $it   = TAP::Parser::Iterator::Array->new(\@data);
   my $line = $it->next;
-
-Originally ripped off from L<Test::Harness>.
 
 =head1 DESCRIPTION
 
-B<FOR INTERNAL USE ONLY!>
+This is a simple iterator wrapper for arrays of scalar content, used by
+L<TAP::Parser>.  Unless you're subclassing, you probably won't need to use
+this module directly.
 
-This is a simple iterator wrapper for arrays.
+=head1 METHODS
 
 =head2 Class Methods
 
 =head3 C<new>
 
-Create an iterator.
+Create an iterator.  Takes one argument: an C<$array_ref>
 
 =head2 Instance Methods
 
@@ -60,14 +65,15 @@ be zero.
 
 =cut
 
-sub new {
-    my ( $class, $thing ) = @_;
+# new() implementation supplied by TAP::Object
+
+sub _initialize {
+    my ( $self, $thing ) = @_;
     chomp @$thing;
-    bless {
-        idx   => 0,
-        array => $thing,
-        exit  => undef,
-    }, $class;
+    $self->{idx}   = 0;
+    $self->{array} = $thing;
+    $self->{exit}  = undef;
+    return $self;
 }
 
 sub wait { shift->exit }
@@ -84,3 +90,17 @@ sub next_raw {
 }
 
 1;
+
+=head1 ATTRIBUTION
+
+Originally ripped off from L<Test::Harness>.
+
+=head1 SEE ALSO
+
+L<TAP::Object>,
+L<TAP::Parser>,
+L<TAP::Parser::Iterator>,
+L<TAP::Parser::IteratorFactory>,
+
+=cut
+

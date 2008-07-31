@@ -7,7 +7,7 @@ use Test::More tests => 76;
 
 use File::Spec;
 use TAP::Parser;
-use TAP::Parser::Iterator;
+use TAP::Parser::IteratorFactory;
 use Config;
 
 sub array_ref_from {
@@ -41,8 +41,10 @@ my @schedule = (
         source   => {
             command => [
                 $^X,
-                File::Spec->catfile( ($ENV{PERL_CORE} ? 'lib' : 't'),
-				     'sample-tests', 'out_err_mix' )
+                File::Spec->catfile(
+                    ( $ENV{PERL_CORE} ? 'lib' : 't' ),
+                    'sample-tests', 'out_err_mix'
+                )
             ],
             merge    => 1,
             setup    => $setup,
@@ -79,6 +81,7 @@ sub _can_open3 {
     return $^O eq 'MSWin32' || $Config{d_fork};
 }
 
+my $factory = TAP::Parser::IteratorFactory->new;
 for my $test (@schedule) {
     SKIP: {
         my $name       = $test->{name};
@@ -86,9 +89,12 @@ for my $test (@schedule) {
         skip "No open3", $need_open3 if $need_open3 && !_can_open3();
         my $subclass = $test->{subclass};
         my $source   = $test->{source};
-        my $class    = $test->{class} || 'TAP::Parser::Iterator';
-        ok my $iter = $class->new($source),
-          "$name: We should be able to create a new iterator";
+        my $class    = $test->{class};
+        my $iter
+          = $class
+          ? $class->new($source)
+          : $factory->make_iterator($source);
+        ok $iter,     "$name: We should be able to create a new iterator";
         isa_ok $iter, 'TAP::Parser::Iterator',
           '... and the object it returns';
         isa_ok $iter, $subclass, '... and the object it returns';
@@ -126,7 +132,7 @@ for my $test (@schedule) {
 
     # coverage tests for the ctor
 
-    my $stream = TAP::Parser::Iterator->new( IO::Handle->new );
+    my $stream = $factory->make_iterator( IO::Handle->new );
 
     isa_ok $stream, 'TAP::Parser::Iterator::Stream';
 
@@ -135,7 +141,7 @@ for my $test (@schedule) {
     eval {
         local $SIG{__DIE__} = sub { push @die, @_ };
 
-        TAP::Parser::Iterator->new( \1 );    # a ref to a scalar
+        $factory->make_iterator( \1 );    # a ref to a scalar
     };
 
     is @die, 1, 'coverage of error case';
@@ -148,7 +154,7 @@ for my $test (@schedule) {
 
     # coverage test for VMS case
 
-    my $stream = TAP::Parser::Iterator->new(
+    my $stream = $factory->make_iterator(
         [   'not ',
             'ok 1 - I hate VMS',
         ]
@@ -159,7 +165,7 @@ for my $test (@schedule) {
 
     # coverage test for VMS case - nothing after 'not'
 
-    $stream = TAP::Parser::Iterator->new(
+    $stream = $factory->make_iterator(
         [   'not ',
         ]
     );
@@ -177,7 +183,7 @@ SKIP: {
     eval {
         local $SIG{__DIE__} = sub { push @die, @_ };
 
-        TAP::Parser::Iterator->new( {} );
+        $factory->make_iterator( {} );
     };
 
     is @die, 1, 'coverage testing for TPI::Process';
@@ -185,7 +191,7 @@ SKIP: {
     like pop @die, qr/Must supply a command to execute/,
       '...and we died as expected';
 
-    my $parser = TAP::Parser::Iterator->new(
+    my $parser = $factory->make_iterator(
         {   command => [
                 $^X,
                 File::Spec->catfile( 't', 'sample-tests', 'out_err_mix' )
@@ -194,7 +200,7 @@ SKIP: {
         }
     );
 
-    is $parser->{err}, '', 'confirm we set err to empty string';
+    is $parser->{err}, '',    'confirm we set err to empty string';
     is $parser->{sel}, undef, '...and selector to undef';
 
     # And then we read from the parser to sidestep the Mac OS / open3

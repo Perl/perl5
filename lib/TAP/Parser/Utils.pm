@@ -13,11 +13,11 @@ TAP::Parser::Utils - Internal TAP::Parser utilities
 
 =head1 VERSION
 
-Version 3.10
+Version 3.13
 
 =cut
 
-$VERSION = '3.10';
+$VERSION = '3.13';
 
 =head1 SYNOPSIS
 

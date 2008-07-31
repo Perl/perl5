@@ -75,9 +75,10 @@ BEGIN {    # START PLAN
 
     # list of attributes
     @ATTR = qw(
-      archive argv blib color directives exec failures formatter harness
-      includes lib merge parse quiet really_quiet recurse backwards
-      shuffle taint_fail taint_warn verbose warnings_fail warnings_warn
+      archive argv blib color directives exec extension failures
+      formatter harness includes lib merge parse quiet really_quiet
+      recurse backwards shuffle taint_fail taint_warn verbose
+      warnings_fail warnings_warn
     );
 
     # what we expect if the 'expect' hash does not define it

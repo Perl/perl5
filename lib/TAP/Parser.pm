@@ -3,12 +3,14 @@ package TAP::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-use TAP::Base                 ();
-use TAP::Parser::Grammar      ();
-use TAP::Parser::Result       ();
-use TAP::Parser::Source       ();
-use TAP::Parser::Source::Perl ();
-use TAP::Parser::Iterator     ();
+use TAP::Base                    ();
+use TAP::Parser::Grammar         ();
+use TAP::Parser::Result          ();
+use TAP::Parser::ResultFactory   ();
+use TAP::Parser::Source          ();
+use TAP::Parser::Source::Perl    ();
+use TAP::Parser::Iterator        ();
+use TAP::Parser::IteratorFactory ();
 
 use Carp qw( confess );
 
@@ -20,11 +22,11 @@ TAP::Parser - Parse L<TAP|Test::Harness::TAP> output
 
 =head1 VERSION
 
-Version 3.10
+Version 3.13
 
 =cut
 
-$VERSION = '3.10';
+$VERSION = '3.13';
 
 my $DEFAULT_TAP_VERSION = 12;
 my $MAX_TAP_VERSION     = 13;
@@ -42,7 +44,6 @@ BEGIN {    # making accessors
         qw(
         _stream
         _spool
-        _grammar
         exec
         exit
         is_good_plan
@@ -55,32 +56,20 @@ BEGIN {    # making accessors
         start_time
         end_time
         skip_all
+        source_class
+        perl_source_class
+        grammar_class
+        iterator_factory_class
+        result_factory_class
         )
       )
     {
         no strict 'refs';
-
-        # another tiny performance hack
-        if ( $method =~ /^_/ ) {
-            *$method = sub {
-                my $self = shift;
-                return $self->{$method} unless @_;
-
-                # Trusted methods
-                unless ( ( ref $self ) =~ /^TAP::Parser/ ) {
-                    Carp::croak("$method() may not be set externally");
-                }
-
-                $self->{$method} = shift;
-            };
-        }
-        else {
-            *$method = sub {
-                my $self = shift;
-                return $self->{$method} unless @_;
-                $self->{$method} = shift;
-            };
-        }
+        *$method = sub {
+            my $self = shift;
+            return $self->{$method} unless @_;
+            $self->{$method} = shift;
+        };
     }
 }    # done making accessors
 
@@ -220,11 +209,55 @@ allow exact synchronization.
 Subtleties of this behavior may be platform-dependent and may change in
 the future.
 
+=item * C<source_class>
+
+This option was introduced to let you easily customize which I<source> class
+the parser should use.  It defaults to L<TAP::Parser::Source>.
+
+See also L</make_source>.
+
+=item * C<perl_source_class>
+
+This option was introduced to let you easily customize which I<perl source>
+class the parser should use.  It defaults to L<TAP::Parser::Source::Perl>.
+
+See also L</make_perl_source>.
+
+=item * C<grammar_class>
+
+This option was introduced to let you easily customize which I<grammar> class
+the parser should use.  It defaults to L<TAP::Parser::Grammar>.
+
+See also L</make_grammar>.
+
+=item * C<iterator_factory_class>
+
+This option was introduced to let you easily customize which I<iterator>
+factory class the parser should use.  It defaults to
+L<TAP::Parser::IteratorFactory>.
+
+See also L</make_iterator>.
+
+=item * C<result_factory_class>
+
+This option was introduced to let you easily customize which I<result>
+factory class the parser should use.  It defaults to
+L<TAP::Parser::ResultFactory>.
+
+See also L</make_result>.
+
 =back
 
 =cut
 
-# new implementation supplied by TAP::Base
+# new() implementation supplied by TAP::Base
+
+# This should make overriding behaviour of the Parser in subclasses easier:
+sub _default_source_class           {'TAP::Parser::Source'}
+sub _default_perl_source_class      {'TAP::Parser::Source::Perl'}
+sub _default_grammar_class          {'TAP::Parser::Grammar'}
+sub _default_iterator_factory_class {'TAP::Parser::IteratorFactory'}
+sub _default_result_factory_class   {'TAP::Parser::ResultFactory'}
 
 ##############################################################################
 
@@ -270,6 +303,68 @@ sub run {
     }
 }
 
+##############################################################################
+
+=head3 C<make_source>
+
+Make a new L<TAP::Parser::Source> object and return it.  Passes through any
+arguments given.
+
+The C<source_class> can be customized, as described in L</new>.
+
+=head3 C<make_perl_source>
+
+Make a new L<TAP::Parser::Source::Perl> object and return it.  Passes through
+any arguments given.
+
+The C<perl_source_class> can be customized, as described in L</new>.
+
+=head3 C<make_grammar>
+
+Make a new L<TAP::Parser::Grammar> object and return it.  Passes through any
+arguments given.
+
+The C<grammar_class> can be customized, as described in L</new>.
+
+=head3 C<make_iterator>
+
+Make a new L<TAP::Parser::Iterator> object using the parser's
+L<TAP::Parser::IteratorFactory>, and return it.  Passes through any arguments
+given.
+
+The C<iterator_factory_class> can be customized, as described in L</new>.
+
+=head3 C<make_result>
+
+Make a new L<TAP::Parser::Result> object using the parser's
+L<TAP::Parser::ResultFactory>, and return it.  Passes through any arguments
+given.
+
+The C<result_factory_class> can be customized, as described in L</new>.
+
+=cut
+
+# This should make overriding behaviour of the Parser in subclasses easier:
+sub make_source      { shift->source_class->new(@_); }
+sub make_perl_source { shift->perl_source_class->new(@_); }
+sub make_grammar     { shift->grammar_class->new(@_); }
+sub make_iterator    { shift->iterator_factory_class->make_iterator(@_); }
+sub make_result      { shift->result_factory_class->make_result(@_); }
+
+sub _iterator_for_source {
+    my ( $self, $source ) = @_;
+
+    # If the source has a get_stream method then use it. This makes it
+    # possible to pass a pre-existing source object to the parser's
+    # constructor.
+    if ( UNIVERSAL::can( $source, 'can' ) && $source->can('get_stream') ) {
+        return $source->get_stream($self);
+    }
+    else {
+        return $self->iterator_factory_class->make_iterator($source);
+    }
+}
+
 {
 
     # of the following, anything beginning with an underscore is strictly
@@ -305,6 +400,14 @@ sub run {
       EOF
     );
 
+    my @class_overrides = qw(
+      source_class
+      perl_source_class
+      grammar_class
+      iterator_factory_class
+      result_factory_class
+    );
+
     sub _initialize {
         my ( $self, $arg_for ) = @_;
 
@@ -316,14 +419,22 @@ sub run {
 
         $self->SUPER::_initialize( \%args, \@legal_callback );
 
-        my $stream    = delete $args{stream};
-        my $tap       = delete $args{tap};
-        my $source    = delete $args{source};
-        my $exec      = delete $args{exec};
-        my $merge     = delete $args{merge};
-        my $spool     = delete $args{spool};
-        my $switches  = delete $args{switches};
-        my @test_args = @{ delete $args{test_args} || [] };
+        # get any class overrides out first:
+        for my $key (@class_overrides) {
+            my $default_method = "_default_$key";
+            my $val = delete $args{$key} || $self->$default_method();
+            $self->$key($val);
+        }
+
+        my $stream      = delete $args{stream};
+        my $tap         = delete $args{tap};
+        my $source      = delete $args{source};
+        my $exec        = delete $args{exec};
+        my $merge       = delete $args{merge};
+        my $spool       = delete $args{spool};
+        my $switches    = delete $args{switches};
+        my $ignore_exit = delete $args{ignore_exit};
+        my @test_args   = @{ delete $args{test_args} || [] };
 
         if ( 1 < grep {defined} $stream, $tap, $source, $exec ) {
             $self->_croak(
@@ -336,30 +447,27 @@ sub run {
         }
 
         if ($tap) {
-            $stream = TAP::Parser::Iterator->new( [ split "\n" => $tap ] );
+            $stream = $self->_iterator_for_source( [ split "\n" => $tap ] );
         }
         elsif ($exec) {
-            my $source = TAP::Parser::Source->new;
+            my $source = $self->make_source;
             $source->source( [ @$exec, @test_args ] );
             $source->merge($merge);    # XXX should just be arguments?
-            $stream = $source->get_stream;
+            $stream = $source->get_stream($self);
         }
         elsif ($source) {
-            if ( my $ref = ref $source ) {
-                $stream = TAP::Parser::Iterator->new($source);
+            if ( ref $source ) {
+                $stream = $self->_iterator_for_source($source);
             }
             elsif ( -e $source ) {
-
-                my $perl = TAP::Parser::Source::Perl->new;
+                my $perl = $self->make_perl_source;
 
                 $perl->switches($switches)
                   if $switches;
 
                 $perl->merge($merge);    # XXX args to new()?
-
                 $perl->source( [ $source, @test_args ] );
-
-                $stream = $perl->get_stream;
+                $stream = $perl->get_stream($self);
             }
             else {
                 $self->_croak("Cannot determine source for $source");
@@ -375,12 +483,8 @@ sub run {
         }
 
         $self->_stream($stream);
-        my $grammar = TAP::Parser::Grammar->new($stream);
-        $grammar->set_version( $self->version );
-        $self->_grammar($grammar);
         $self->_spool($spool);
-
-        $self->start_time( $self->get_time );
+        $self->ignore_exit($ignore_exit);
 
         return $self;
     }
@@ -919,8 +1023,7 @@ sub has_problems {
     return
          $self->failed
       || $self->parse_errors
-      || $self->wait
-      || $self->exit;
+      || ( !$self->ignore_exit && ( $self->wait || $self->exit ) );
 }
 
 =head3 C<version>
@@ -945,6 +1048,20 @@ an executable, it returns the exit status of the executable.
 Once the parser is done, this will return the wait status.  If the parser ran
 an executable, it returns the wait status of the executable.  Otherwise, this
 mererely returns the C<exit> status.
+
+=head2 C<ignore_exit>
+
+  $parser->ignore_exit(1);
+
+Tell the parser to ignore the exit status from the test when determining
+whether the test passed. Normally tests with non-zero exit status are
+considered to have failed even if all individual tests passed. In cases
+where it is not possible to control the exit value of the test script
+use this option to ignore it.
+
+=cut
+
+sub ignore_exit { shift->pragma( 'ignore_exit', @_ ) }
 
 =head3 C<parse_errors>
 
@@ -1230,13 +1347,27 @@ determine the readiness of this parser.
 
 sub get_select_handles { shift->_stream->get_select_handles }
 
+sub _grammar {
+    my $self = shift;
+    return $self->{_grammar} = shift if @_;
+
+    return $self->{_grammar} ||= $self->make_grammar(
+        {   stream  => $self->_stream,
+            parser  => $self,
+            version => $self->version
+        }
+    );
+}
+
 sub _iter {
     my $self        = shift;
     my $stream      = $self->_stream;
-    my $spool       = $self->_spool;
     my $grammar     = $self->_grammar;
+    my $spool       = $self->_spool;
     my $state       = 'INIT';
     my $state_table = $self->_make_state_table;
+
+    $self->start_time( $self->get_time );
 
     # Make next_state closure
     my $next_state = sub {
@@ -1329,6 +1460,18 @@ sub _finish {
     my $self = shift;
 
     $self->end_time( $self->get_time );
+
+    # Avoid leaks
+    $self->_stream(undef);
+    $self->_grammar(undef);
+
+    # If we just delete the iter we won't get a fault if it's recreated.
+    # Instead we set it to a sub that returns an infinite
+    # stream of undef. This segfaults on 5.5.4, presumably because
+    # we're still executing the closure that gets replaced and it hasn't
+    # been protected with a refcount.
+    $self->{_iter} = sub {return}
+      if $] >= 5.006;
 
     # sanity checks
     if ( !$self->plan ) {
@@ -1542,6 +1685,110 @@ never run. They're reported as parse failures (tests out of sequence).
 
 =back
 
+=head1 SUBCLASSING
+
+If you find you need to provide custom functionality (as you would have using
+L<Test::Harness::Straps>), you're in luck: C<TAP::Parser> and friends are
+designed to be easily subclassed.
+
+Before you start, it's important to know a few things:
+
+=over 2
+
+=item 1
+
+All C<TAP::*> objects inherit from L<TAP::Object>.
+
+=item 2
+
+Most C<TAP::*> classes have a I<SUBCLASSING> section to guide you.
+
+=item 3
+
+Note that C<TAP::Parser> is designed to be the central 'maker' - ie: it is
+responsible for creating new objects in the C<TAP::Parser::*> namespace.
+
+This makes it possible for you to have a single point of configuring what
+subclasses should be used, which in turn means that in many cases you'll find
+you only need to sub-class one of the parser's components.
+
+=item 4
+
+By subclassing, you may end up overriding undocumented methods.  That's not
+a bad thing per se, but be forewarned that undocumented methods may change
+without warning from one release to the next - we cannot guarantee backwards
+compatability.  If any I<documented> method needs changing, it will be
+deprecated first, and changed in a later release.
+
+=back
+
+=head2 Parser Components
+
+=head3 Sources
+
+A TAP parser consumes input from a I<source>.  There are currently two types
+of sources: L<TAP::Parser::Source> for general non-perl commands, and
+L<TAP::Parser::Source::Perl>.  You can subclass both of them.  You'll need to
+customize your parser by setting the C<source_class> & C<perl_source_class>
+parameters.  See L</new> for more details.
+
+If you need to customize the objects on creation, subclass L<TAP::Parser> and
+override L</make_source> or L</make_perl_source>.
+
+=head3 Iterators
+
+A TAP parser uses I<iterators> to loop through the I<stream> provided by the
+parser's I<source>.  There are quite a few types of Iterators available.
+Choosing which class to use is the responsibility of the I<iterator factory>.
+
+To create your own iterators you'll have to subclass
+L<TAP::Parser::IteratorFactory> and L<TAP::Parser::Iterator>.  Then you'll
+need to customize the class used by your parser by setting the
+C<iterator_factory_class> parameter.  See L</new> for more details.
+
+If you need to customize the objects on creation, subclass L<TAP::Parser> and
+override L</make_iterator>.
+
+=head3 Results
+
+A TAP parser creates L<TAP::Parser::Result>s as it iterates through the
+input I<stream>.  There are quite a few result types available; choosing
+which class to use is the responsibility of the I<result factory>.
+
+To create your own result types you have two options:
+
+=over 2
+
+=item option 1
+
+Subclass L<TAP::Parser::Result> and register your new result type/class with
+the default L<TAP::Parser::ResultFactory>.
+
+=item option 2
+
+Subclass L<TAP::Parser::ResultFactory> itself and implement your own
+L<TAP::Parser::Result> creation logic.  Then you'll need to customize the
+class used by your parser by setting the C<result_factory_class> parameter.
+See L</new> for more details.
+
+=back
+
+If you need to customize the objects on creation, subclass L<TAP::Parser> and
+override L</make_result>.
+
+=head3 Grammar
+
+L<TAP::Parser::Grammar> is the heart of the parser - it tokenizes the TAP
+input I<stream> and produces results.  If you need to customize its behaviour
+you should probably familiarize yourself with the source first.  Enough
+lecturing.
+
+Subclass L<TAP::Parser::Grammar> and customize your parser by setting the
+C<grammar_class> parameter.  See L</new> for more details.
+
+If you need to customize the objects on creation, subclass L<TAP::Parser> and
+override L</make_grammar>
+
 =head1 ACKNOWLEDGEMENTS
 
 All of the following have helped. Bug reports, patches, (im)moral
@@ -1583,6 +1830,10 @@ support, or just words of encouragement have all been forthcoming.
 
 =item * Matt Kraai
 
+=item * David Wheeler
+
+=item * Alex Vandiver
+
 =back
 
 =head1 AUTHORS
@@ -1597,11 +1848,13 @@ Michael Peters <mpeters at plusthree dot com>
 
 Leif Eriksen <leif dot eriksen at bigpond dot com>
 
+Steve Purkis <spurkis@cpan.org>
+
 =head1 BUGS
 
 Please report any bugs or feature requests to
-C<bug-tapx-parser@rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=TAP-Parser>.
+C<bug-test-harness@rt.cpan.org>, or through the web interface at
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Test-Harness>.
 We will be notified, and then you'll automatically be notified of
 progress on your bug as we make changes.
 

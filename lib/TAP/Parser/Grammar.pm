@@ -1,10 +1,13 @@
 package TAP::Parser::Grammar;
 
 use strict;
-use vars qw($VERSION);
+use vars qw($VERSION @ISA);
 
-use TAP::Parser::Result          ();
+use TAP::Object                  ();
+use TAP::Parser::ResultFactory   ();
 use TAP::Parser::YAMLish::Reader ();
+
+@ISA = qw(TAP::Object);
 
 =head1 NAME
 
@@ -12,11 +15,22 @@ TAP::Parser::Grammar - A grammar for the Test Anything Protocol.
 
 =head1 VERSION
 
-Version 3.10
+Version 3.13
 
 =cut
 
-$VERSION = '3.10';
+$VERSION = '3.13';
+
+=head1 SYNOPSIS
+
+  use TAP::Parser::Grammar;
+  my $grammar = $self->make_grammar({
+    stream  => $tap_parser_stream,
+    parser  => $tap_parser,
+    version => 12,
+  });
+
+  my $result = $grammar->tokenize;
 
 =head1 DESCRIPTION
 
@@ -28,25 +42,30 @@ here to ensure that we will be able to have pluggable grammars when TAP is
 expanded at some future date (plus, this stuff was really cluttering the
 parser).
 
-=cut
-
-##############################################################################
+=head1 METHODS
 
 =head2 Class Methods
 
-
 =head3 C<new>
 
-  my $grammar = TAP::Grammar->new($stream);
+  my $grammar = TAP::Parser::Grammar->new({
+      stream  => $stream,
+      parser  => $parser,
+      version => $version,
+  });
 
-Returns TAP grammar object that will parse the specified stream.
+Returns L<TAP::Parser> grammar object that will parse the specified stream.
+Both C<stream> and C<parser> are required arguments.  If C<version> is not set
+it defaults to C<12> (see L</set_version> for more details).
 
 =cut
 
-sub new {
-    my ( $class, $stream ) = @_;
-    my $self = bless { stream => $stream }, $class;
-    $self->set_version(12);
+# new() implementation supplied by TAP::Object
+sub _initialize {
+    my ( $self, $args ) = @_;
+    $self->{stream} = $args->{stream};    # TODO: accessor
+    $self->{parser} = $args->{parser};    # TODO: accessor
+    $self->set_version( $args->{version} || 12 );
     return $self;
 }
 
@@ -83,13 +102,10 @@ my %language_for;
                     );
                 }
                 elsif ( 0 == $tests_planned ) {
-                    $skip        = 'SKIP';
-                    $explanation = $tail;
+                    $skip = 'SKIP';
 
-                    # Trim valid SKIP directive without being strict
-                    # about its presence.
-                    $explanation =~ s/^#\s*//;
-                    $explanation =~ s/^skip\S*\s+//i;
+                    # If we can't match # SKIP the directive should be undef.
+                    ($explanation) = $tail =~ /^#\s*SKIP\s+(.*)/i;
                 }
                 elsif ( $tail !~ /^\s*$/ ) {
                     return $self->_make_unknown_token($line);
@@ -227,7 +243,8 @@ sub set_version {
     my $version = shift;
 
     if ( my $language = $language_for{$version} ) {
-        $self->{tokens} = $language->{tokens};
+        $self->{version} = $version;
+        $self->{tokens}  = $language->{tokens};
 
         if ( my $setup = $language->{setup} ) {
             $self->$setup();
@@ -268,7 +285,10 @@ sub tokenize {
     my $self = shift;
 
     my $line = $self->{stream}->next;
-    return unless defined $line;
+    unless ( defined $line ) {
+        delete $self->{parser};    # break circular ref
+        return;
+    }
 
     my $token;
 
@@ -282,7 +302,7 @@ sub tokenize {
 
     $token = $self->_make_unknown_token($line) unless $token;
 
-    return TAP::Parser::Result->new($token);
+    return $self->{parser}->make_result($token);
 }
 
 ##############################################################################
@@ -361,10 +381,14 @@ sub _make_version_token {
 sub _make_plan_token {
     my ( $self, $line, $tests_planned, $directive, $explanation, $todo ) = @_;
 
-    if ( $directive eq 'SKIP' && 0 != $tests_planned ) {
+    if (   $directive eq 'SKIP'
+        && 0 != $tests_planned
+        && $self->{version} < 13 )
+    {
         warn
           "Specified SKIP directive in plan but more than 0 tests ($line)\n";
     }
+
     return {
         type          => 'plan',
         raw           => $line,
@@ -467,6 +491,8 @@ sub _trim {
     return $data;
 }
 
+1;
+
 =head1 TAP GRAMMAR
 
 B<NOTE:>  This grammar is slightly out of date.  There's still some discussion
@@ -538,7 +564,18 @@ A formal grammar would look similar to the following:
  positiveInteger    ::= ( digit - '0' ) {digit}
  nonNegativeInteger ::= digit {digit}
 
+=head1 SUBCLASSING
+
+Please see L<TAP::Parser/SUBCLASSING> for a subclassing overview.
+
+If you I<really> want to subclass L<TAP::Parser>'s grammar the best thing to
+do is read through the code.  There's no easy way of summarizing it here.
+
+=head1 SEE ALSO
+
+L<TAP::Object>,
+L<TAP::Parser>,
+L<TAP::Parser::Iterator>,
+L<TAP::Parser::Result>,
 
 =cut
-
-1;

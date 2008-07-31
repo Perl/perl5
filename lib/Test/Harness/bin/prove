@@ -5,7 +5,7 @@ use App::Prove;
 
 my $app = App::Prove->new;
 $app->process_args(@ARGV);
-$app->run;
+exit( $app->run ? 0 : 1 );
 
 __END__
 
@@ -23,13 +23,15 @@ Boolean options:
 
  -v,  --verbose     Print all test lines.
  -l,  --lib         Add 'lib' to the path for your tests (-Ilib).
- -b,  --blib        Add 'blib/lib' to the path for your tests (-Iblib/lib).
+ -b,  --blib        Add 'blib/lib' and 'blib/arch' to the path for your tests
  -s,  --shuffle     Run the tests in random order.
  -c,  --color       Colored test output (default).
       --nocolor     Do not color test output.
  -D   --dry         Dry run. Show test that would have run.
+      --ext         Set the extension for tests (default '.t')
  -f,  --failures    Only show failed tests.
-      --fork        Fork to run harness in multiple processes
+      --fork        Fork to run harness in multiple processes.
+      --ignore-exit Ignore exit status from test scripts.
  -m,  --merge       Merge test scripts' STDERR with their STDOUT.
  -r,  --recurse     Recursively descend into directories.
       --reverse     Run the tests in reverse order.
