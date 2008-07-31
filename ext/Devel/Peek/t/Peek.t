@@ -654,7 +654,7 @@ do_test(26,
     XSUBANY = 0					# $] < 5.009
     GVGV::GV = $ADDR\\t"main" :: "PIE"
     FILE = ".*\\b(?i:peek\\.t)"
-    DEPTH = 0
+    DEPTH = 0					# $] <= 5.010
 (?:    MUTEXP = $ADDR
     OWNER = $ADDR
 )?    FLAGS = 0x0
