@@ -1344,10 +1344,13 @@ foo(\h)bar	foo\tbar	y	$1	\t
 .*?(?:(\w)|(\w))x	abx	y	$1-$2	b-
 
 0{50}	000000000000000000000000000000000000000000000000000	y	-	-
-# Bug #56690
-^a?(?=b)b	ab	B	$&	ab
-^a*(?=b)b	ab	B	$&	ab
-
+^a?(?=b)b	ab	B	$&	ab	# Bug #56690
+^a*(?=b)b	ab	B	$&	ab	# Bug #56690
+/>\d+$ \n/ix	>10\n	y	$&	>10
+/>\d+$ \n/ix	>1\n	y	$&	>1
+/\d+$ \n/ix	>10\n	y	$&	10
+/>\d\d$ \n/ix	>10\n	y	$&	>10
+/>\d+$ \n/x	>10\n	y	$&	>10
 
 # Two regressions in 5.8.x (only) introduced by change 30638
 # Simplification of the test failure in XML::LibXML::Simple:
