@@ -619,9 +619,24 @@ sub unlink_all {
     }
 }
 
+# Avoid ++, avoid ranges, avoid split //
+my @letters = qw(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z);
+sub tempfile {
+    my $count = 0;
+    do {
+	my $temp = $count;
+	my $try = "tmp$$";
+	do {
+	    $try .= $letters[$temp % 26];
+	    $count = int ($temp / 26);
+	} while $temp;
+	return $try unless -e $try;
+	$count = $count + 1;
+    } while $count < 26 * 26;
+    die "Can't find temporary file name starting 'tmp$$'";
+}
 
-my $tmpfile = "misctmp000";
-1 while -f ++$tmpfile;
+my $tmpfile = tempfile();
 END { unlink_all $tmpfile }
 
 #
@@ -658,8 +673,8 @@ sub _fresh_perl {
 
     # Clean up the results into something a bit more predictable.
     $results =~ s/\n+$//;
-    $results =~ s/at\s+misctmp\d+\s+line/at - line/g;
-    $results =~ s/of\s+misctmp\d+\s+aborted/of - aborted/g;
+    $results =~ s/at\s+tmp\d+[A-Z][A-Z]?\s+line/at - line/g;
+    $results =~ s/of\s+tmp\d+[A-Z][A-Z]?\s+aborted/of - aborted/g;
 
     # bison says 'parse error' instead of 'syntax error',
     # various yaccs may or may not capitalize 'syntax'.
