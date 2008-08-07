@@ -619,8 +619,11 @@ sub unlink_all {
     }
 }
 
-my @tmpfiles;
-END { unlink_all @tmpfiles }
+my %tmpfiles;
+END { unlink_all keys %tmpfiles }
+
+# A regexp that matches the tempfile names
+$::tempfile_regexp = 'tmp\d+[A-Z][A-Z]?';
 
 # Avoid ++, avoid ranges, avoid split //
 my @letters = qw(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z);
@@ -631,11 +634,13 @@ sub tempfile {
 	my $try = "tmp$$";
 	do {
 	    $try .= $letters[$temp % 26];
-	    $count = int ($temp / 26);
+	    $temp = int ($temp / 26);
 	} while $temp;
-	if (!-e $try) {
+	# Need to note all the file names we allocated, as a second request may
+	# come before the first is created.
+	if (!-e $try && !$tmpfiles{$try}) {
 	    # We have a winner
-	    push @tmpfiles, $try;
+	    $tmpfiles{$try}++;
 	    return $try;
 	}
 	$count = $count + 1;
@@ -680,8 +685,8 @@ sub _fresh_perl {
 
     # Clean up the results into something a bit more predictable.
     $results =~ s/\n+$//;
-    $results =~ s/at\s+tmp\d+[A-Z][A-Z]?\s+line/at - line/g;
-    $results =~ s/of\s+tmp\d+[A-Z][A-Z]?\s+aborted/of - aborted/g;
+    $results =~ s/at\s+$::tempfile_regexp\s+line/at - line/g;
+    $results =~ s/of\s+$::tempfile_regexp\s+aborted/of - aborted/g;
 
     # bison says 'parse error' instead of 'syntax error',
     # various yaccs may or may not capitalize 'syntax'.
