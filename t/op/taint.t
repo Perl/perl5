@@ -285,7 +285,7 @@ my $TEST = catfile(curdir(), 'TEST');
 # How about command-line arguments? The problem is that we don't
 # always get some, so we'll run another process with some.
 SKIP: {
-    my $arg = catfile(curdir(), "arg$$");
+    my $arg = catfile(curdir(), tempfile());
     open PROG, "> $arg" or die "Can't create $arg: $!";
     print PROG q{
 	eval { join('', @ARGV), kill 0 };
@@ -418,8 +418,7 @@ SKIP: {
     test !eval { require $foo }, 'require';
     test $@ =~ /^Insecure dependency/, $@;
 
-    my $filename = "./taintB$$";	# NB: $filename isn't tainted!
-    END { unlink $filename if defined $filename }
+    my $filename = tempfile();	# NB: $filename isn't tainted!
     $foo = $filename . $TAINT;
     unlink $filename;	# in any case
 
@@ -506,8 +505,7 @@ SKIP: {
 	my $foo = "x" x 979;
 	taint_these $foo;
 	local *FOO;
-	my $temp = "./taintC$$";
-	END { unlink $temp }
+	my $temp = tempfile();
 	test open(FOO, "> $temp"), "Couldn't open $temp for write: $!";
 
 	test !eval { ioctl FOO, $TAINT0, $foo }, 'ioctl';

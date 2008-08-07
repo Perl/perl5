@@ -11,6 +11,7 @@ BEGIN {
 	exit 0;
     }
     $ENV{PERL5LIB} = "../lib";
+    require './test.pl';
 }
 
 if ($^O eq 'mpeix') {
@@ -24,9 +25,8 @@ undef $/;
 @prgs = split "\n########\n", <DATA>;
 print "1..", scalar @prgs, "\n";
 
-$tmpfile = "forktmp000";
-1 while -f ++$tmpfile;
-END { close TEST; unlink $tmpfile if $tmpfile; }
+$tmpfile = tempfile();
+END { close TEST }
 
 $CAT = (($^O eq 'MSWin32') ? '.\perl -e "print <>"' : (($^O eq 'NetWare') ? 'perl -e "print <>"' : 'cat'));
 
@@ -54,8 +54,8 @@ for (@prgs){
     }
     $status = $?;
     $results =~ s/\n+$//;
-    $results =~ s/at\s+forktmp\d+\s+line/at - line/g;
-    $results =~ s/of\s+forktmp\d+\s+aborted/of - aborted/g;
+    $results =~ s/at\s+$::tempfile_regexp\s+line/at - line/g;
+    $results =~ s/of\s+$::tempfile_regexp\s+aborted/of - aborted/g;
 # bison says 'parse error' instead of 'syntax error',
 # various yaccs may or may not capitalize 'syntax'.
     $results =~ s/^(syntax|parse) error/syntax error/mig;

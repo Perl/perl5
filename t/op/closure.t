@@ -463,9 +463,8 @@ END
 	    }
 	  } else {
 	    # No fork().  Do it the hard way.
-	    my $cmdfile = "tcmd$$";  $cmdfile++ while -e $cmdfile;
-	    my $errfile = "terr$$";  $errfile++ while -e $errfile;
-	    my @tmpfiles = ($cmdfile, $errfile);
+	    my $cmdfile = tempfile();
+	    my $errfile = tempfile();
 	    open CMD, ">$cmdfile"; print CMD $code; close CMD;
 	    my $cmd = which_perl();
 	    $cmd .= " -w $cmdfile 2>$errfile";
@@ -477,18 +476,15 @@ END
 	      { local $/; $output = join '', <PERL> }
 	      close PERL;
 	    } else {
-	      my $outfile = "tout$$";  $outfile++ while -e $outfile;
-	      push @tmpfiles, $outfile;
+	      my $outfile = tempfile();
 	      system "$cmd >$outfile";
 	      { local $/; open IN, $outfile; $output = <IN>; close IN }
 	    }
 	    if ($?) {
 	      printf "not ok: exited with error code %04X\n", $?;
-	      $debugging or do { 1 while unlink @tmpfiles };
 	      exit;
 	    }
 	    { local $/; open IN, $errfile; $errors = <IN>; close IN }
-	    1 while unlink @tmpfiles;
 	  }
 	  print $output;
 	  print STDERR $errors;
