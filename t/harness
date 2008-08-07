@@ -60,7 +60,7 @@ sub _glob_and_parallelise {
     # Run the tests in each of these directories in sequence, but the
     # directories themselves can be parallelised.
     foreach (@_) {
-	push @dirs, { seq => [ glob "$_/*.t" ] };
+	push @dirs, { seq => "$_/*.t" };
     }
     { par =>  \@dirs };
 }
@@ -94,7 +94,7 @@ sub _extract_tests {
 		die "Unknown reference type $ref";
 	    }
 	} else {
-	    push @results, $_;
+	    push @results, glob $_;
 	}
     }
     @results;
