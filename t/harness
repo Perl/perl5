@@ -137,11 +137,10 @@ if (@ARGV) {
 	push @seq, <base/*.t>;
 
 	push @seq, _glob_and_parallelise qw(comp cmd run io);
-	my @next = qw(uni mro lib);
+	my @next = qw(op uni mro lib);
 	push @next, 'japh' if $torture;
 	push @next, 'win32' if $^O eq 'MSWin32';
 	push @seq, { par => [
-			     {seq => [ glob "op/*.t" ]},
 			     map { glob "$_/*.t" } @next
 			    ] };
 
