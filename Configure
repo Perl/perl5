@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Thu Jul 10 17:14:53 CEST 2008 [metaconfig 3.5 PL0]
+# Generated on Fri Aug  8 16:16:43 CEST 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -8703,11 +8703,11 @@ case "$myhostname" in
 				echo "(Attempting domain name extraction from $tans)"
 				dflt=.`$sed -n -e 's/	/ /g' \
 				  -e 's/^search  *\([^ ]*\).*/\1/p' $tans \
-				  | ./tr '[A-Z]' '[a-z]' 2>/dev/null`
+				  -e 1q 2>/dev/null`
 				case "$dflt" in
 				.) dflt=.`$sed -n -e 's/	/ /g' \
 				     -e 's/^domain  *\([^ ]*\).*/\1/p' $tans \
-				     | ./tr '[A-Z]' '[a-z]' 2>/dev/null`
+				     -e 1q 2>/dev/null`
   					;;
 				esac
 			fi
