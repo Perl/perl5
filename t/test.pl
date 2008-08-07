@@ -619,6 +619,9 @@ sub unlink_all {
     }
 }
 
+my @tmpfiles;
+END { unlink_all @tmpfiles }
+
 # Avoid ++, avoid ranges, avoid split //
 my @letters = qw(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z);
 sub tempfile {
@@ -630,14 +633,18 @@ sub tempfile {
 	    $try .= $letters[$temp % 26];
 	    $count = int ($temp / 26);
 	} while $temp;
-	return $try unless -e $try;
+	if (!-e $try) {
+	    # We have a winner
+	    push @tmpfiles, $try;
+	    return $try;
+	}
 	$count = $count + 1;
     } while $count < 26 * 26;
     die "Can't find temporary file name starting 'tmp$$'";
 }
 
+# This is the temporary file for _fresh_perl
 my $tmpfile = tempfile();
-END { unlink_all $tmpfile }
 
 #
 # _fresh_perl
