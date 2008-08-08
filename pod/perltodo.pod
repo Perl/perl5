@@ -54,31 +54,12 @@ checkpods and have C<make check> use podchecker.
 (This probably impacts much more than the core: also the Test::Harness
 and TAP::* modules on CPAN.)
 
-The core regression test suite is getting ever more comprehensive, which has
-the side effect that it takes longer to run. This isn't so good. Investigate
-whether it would be feasible to give the harness script the B<option> of
-running sets of tests in parallel. This would be useful for tests in
-F<t/op/*.t> and F<t/uni/*.t> and maybe some sets of tests in F<lib/>.
-
-Questions to answer
-
-=over 4
-
-=item 1
-
-How does screen layout work when you're running more than one test?
-
-=item 2
-
-How does the caller of test specify how many tests to run in parallel?
-
-=item 3
-
-How do setup/teardown tests identify themselves?
-
-=back
-
-Pugs already does parallel testing - can their approach be re-used?
+All of the tests in F<t/> can now be run in parallel, if C<$ENV{TEST_JOBS}>
+is set. However, tests within each directory in F<ext> and F<lib> are still
+run in series, with directories run in parallel. This is an adequate
+heuristic, but it might be possible to relax it further, and get more
+throughput. Specifically, it would be good to audit all of F<lib/*.t>, and
+make them use C<File::Temp>.
 
 =head2 Make Schwern poorer
 
