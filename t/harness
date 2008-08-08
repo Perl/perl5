@@ -55,16 +55,6 @@ sub _populate_hash {
     return map {$_, 1} split /\s+/, $_[0];
 }
 
-sub _glob_and_parallelise {
-    my @dirs;
-    # Run the tests in each of these directories in sequence, but the
-    # directories themselves can be parallelised.
-    foreach (@_) {
-	push @dirs, { seq => "$_/*.t" };
-    }
-    { par =>  \@dirs };
-}
-
 # Generate T::H schedule rules that run the contents of each directory
 # sequentially.
 sub _seq_dir_rules {
@@ -136,8 +126,7 @@ if (@ARGV) {
 	my @seq;
 	push @seq, <base/*.t>;
 
-	push @seq, _glob_and_parallelise qw(comp cmd run io);
-	my @next = qw(op uni mro lib);
+	my @next = qw(comp cmd run io op uni mro lib);
 	push @next, 'japh' if $torture;
 	push @next, 'win32' if $^O eq 'MSWin32';
 	push @seq, { par => [
