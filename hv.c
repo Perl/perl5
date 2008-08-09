@@ -2686,49 +2686,53 @@ Perl_refcounted_he_fetch(pTHX_ const struct refcounted_he *chain, SV *keysv,
     /* Just to be awkward, if you're using this interface the UTF-8-or-not-ness
        of your key has to exactly match that which is stored.  */
     SV *value = &PL_sv_placeholder;
-    bool is_utf8;
 
-    if (keysv) {
-	if (flags & HVhek_FREEKEY)
-	    Safefree(key);
-	key = SvPV_const(keysv, klen);
-	flags = 0;
-	is_utf8 = (SvUTF8(keysv) != 0);
-    } else {
-	is_utf8 = ((flags & HVhek_UTF8) ? TRUE : FALSE);
-    }
+    if (chain) {
+	/* No point in doing any of this if there's nothing to find.  */
+	bool is_utf8;
 
-    if (!hash) {
-	if (keysv && (SvIsCOW_shared_hash(keysv))) {
-            hash = SvSHARED_HASH(keysv);
-        } else {
-            PERL_HASH(hash, key, klen);
-        }
-    }
+	if (keysv) {
+	    if (flags & HVhek_FREEKEY)
+		Safefree(key);
+	    key = SvPV_const(keysv, klen);
+	    flags = 0;
+	    is_utf8 = (SvUTF8(keysv) != 0);
+	} else {
+	    is_utf8 = ((flags & HVhek_UTF8) ? TRUE : FALSE);
+	}
 
-    for (; chain; chain = chain->refcounted_he_next) {
+	if (!hash) {
+	    if (keysv && (SvIsCOW_shared_hash(keysv))) {
+		hash = SvSHARED_HASH(keysv);
+	    } else {
+		PERL_HASH(hash, key, klen);
+	    }
+	}
+
+	for (; chain; chain = chain->refcounted_he_next) {
 #ifdef USE_ITHREADS
-	if (hash != chain->refcounted_he_hash)
-	    continue;
-	if (klen != chain->refcounted_he_keylen)
-	    continue;
-	if (memNE(REF_HE_KEY(chain),key,klen))
-	    continue;
-	if (!!is_utf8 != !!(chain->refcounted_he_data[0] & HVhek_UTF8))
-	    continue;
+	    if (hash != chain->refcounted_he_hash)
+		continue;
+	    if (klen != chain->refcounted_he_keylen)
+		continue;
+	    if (memNE(REF_HE_KEY(chain),key,klen))
+		continue;
+	    if (!!is_utf8 != !!(chain->refcounted_he_data[0] & HVhek_UTF8))
+		continue;
 #else
-	if (hash != HEK_HASH(chain->refcounted_he_hek))
-	    continue;
-	if (klen != (STRLEN)HEK_LEN(chain->refcounted_he_hek))
-	    continue;
-	if (memNE(HEK_KEY(chain->refcounted_he_hek),key,klen))
-	    continue;
-	if (!!is_utf8 != !!HEK_UTF8(chain->refcounted_he_hek))
-	    continue;
+	    if (hash != HEK_HASH(chain->refcounted_he_hek))
+		continue;
+	    if (klen != (STRLEN)HEK_LEN(chain->refcounted_he_hek))
+		continue;
+	    if (memNE(HEK_KEY(chain->refcounted_he_hek),key,klen))
+		continue;
+	    if (!!is_utf8 != !!HEK_UTF8(chain->refcounted_he_hek))
+		continue;
 #endif
 
-	value = sv_2mortal(refcounted_he_value(chain));
-	break;
+	    value = sv_2mortal(refcounted_he_value(chain));
+	    break;
+	}
     }
 
     if (flags & HVhek_FREEKEY)
