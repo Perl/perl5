@@ -701,7 +701,8 @@ Perl_av_unshift(pTHX_ register AV *av, register I32 num)
 /*
 =for apidoc av_shift
 
-Shifts an SV off the beginning of the array.
+Shifts an SV off the beginning of the array. Returns C<&PL_sv_undef> if the 
+array is empty.
 
 =cut
 */
