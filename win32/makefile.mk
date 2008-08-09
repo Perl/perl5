@@ -1549,6 +1549,7 @@ distclean: realclean
 	-if exist pod2htmd.tmp del pod2htmd.tmp
 	-if exist pod2htmi.tmp del pod2htmi.tmp
 	-if exist $(HTMLDIR) rmdir /s /q $(HTMLDIR)
+	-del /f ..\t\test_state
 
 install : all installbare installhtml
 
