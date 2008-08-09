@@ -130,7 +130,7 @@ if (@ARGV) {
 	push @next, 'japh' if $torture;
 	push @next, 'win32' if $^O eq 'MSWin32';
 	push @seq, { par => [
-			     map { glob "$_/*.t" } @next
+			     map { "$_/*.t" } @next
 			    ] };
 
 	my @last;
