@@ -950,10 +950,9 @@ The XS code, with ellipsis, follows.
           time_t timep = NO_INIT
 	PREINIT:
           char *host = "localhost";
-	  STRLEN n_a;
         CODE:
 	  if( items > 1 )
-	       host = (char *)SvPV(ST(1), n_a);
+	       host = (char *)SvPV_nolen(ST(1));
 	  RETVAL = rpcb_gettime( host, &timep );
         OUTPUT:
           timep
@@ -1242,10 +1241,9 @@ prototypes.
 	PROTOTYPE: $;$
 	PREINIT:
           char *host = "localhost";
-	  STRLEN n_a;
         CODE:
 		  if( items > 1 )
-		       host = (char *)SvPV(ST(1), n_a);
+		       host = (char *)SvPV_nolen(ST(1));
 		  RETVAL = rpcb_gettime( host, &timep );
         OUTPUT:
           timep

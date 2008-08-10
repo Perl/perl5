@@ -313,7 +313,6 @@ the first, a C<float> from the second, and a C<char *> from the third.
 
    main (int argc, char **argv, char **env)
    {
-       STRLEN n_a;
        char *embedding[] = { "", "-e", "0" };
 
        PERL_SYS_INIT3(&argc,&argv,&env);
@@ -334,7 +333,7 @@ the first, a C<float> from the second, and a C<char *> from the third.
 
        /** Treat $a as a string **/
        eval_pv("$a = 'rekcaH lreP rehtonA tsuJ'; $a = reverse($a);", TRUE);
-       printf("a = %s\n", SvPV(get_sv("a", FALSE), n_a));
+       printf("a = %s\n", SvPV_nolen(get_sv("a", FALSE)));
 
        perl_destruct(my_perl);
        perl_free(my_perl);
@@ -357,9 +356,8 @@ possible and in most cases a better strategy to fetch the return value
 from I<eval_pv()> instead.  Example:
 
    ...
-   STRLEN n_a;
    SV *val = eval_pv("reverse 'rekcaH lreP rehtonA tsuJ'", TRUE);
-   printf("%s\n", SvPV(val,n_a));
+   printf("%s\n", SvPV_nolen(val));
    ...
 
 This way, we avoid namespace pollution by not creating global
@@ -406,7 +404,7 @@ been wrapped here):
  {
      dSP;
      SV* retval;
-     STRLEN n_a;
+
 
      PUSHMARK(SP);
      eval_sv(sv, G_SCALAR);
@@ -416,7 +414,7 @@ been wrapped here):
      PUTBACK;
 
      if (croak_on_error && SvTRUE(ERRSV))
- 	croak(SvPVx(ERRSV, n_a));
+ 	croak(SvPVx_nolen(ERRSV));
 
      return retval;
  }
@@ -431,10 +429,9 @@ been wrapped here):
  I32 match(SV *string, char *pattern)
  {
      SV *command = newSV(0), *retval;
-     STRLEN n_a;
 
      sv_setpvf(command, "my $string = '%s'; $string =~ %s",
- 	      SvPV(string,n_a), pattern);
+ 	      SvPV_nolen(string), pattern);
 
      retval = my_eval_sv(command, TRUE);
      SvREFCNT_dec(command);
@@ -453,10 +450,9 @@ been wrapped here):
  I32 substitute(SV **string, char *pattern)
  {
      SV *command = newSV(0), *retval;
-     STRLEN n_a;
 
      sv_setpvf(command, "$string = '%s'; ($string =~ %s)",
- 	      SvPV(*string,n_a), pattern);
+ 	      SvPV_nolen(*string), pattern);
 
      retval = my_eval_sv(command, TRUE);
      SvREFCNT_dec(command);
@@ -477,10 +473,9 @@ been wrapped here):
  {
      SV *command = newSV(0);
      I32 num_matches;
-     STRLEN n_a;
 
      sv_setpvf(command, "my $string = '%s'; @array = ($string =~ %s)",
- 	      SvPV(string,n_a), pattern);
+ 	      SvPV_nolen(string), pattern);
 
      my_eval_sv(command, TRUE);
      SvREFCNT_dec(command);
@@ -497,7 +492,6 @@ been wrapped here):
      AV *match_list;
      I32 num_matches, i;
      SV *text;
-     STRLEN n_a;
 
      PERL_SYS_INIT3(&argc,&argv,&env);
      my_perl = perl_alloc();
@@ -532,7 +526,7 @@ been wrapped here):
      printf("matches: m/(wi..)/g found %d matches...\n", num_matches);
 
      for (i = 0; i < num_matches; i++)
- 	printf("match: %s\n", SvPV(*av_fetch(match_list, i, FALSE),n_a));
+ 	printf("match: %s\n", SvPV_nolen(*av_fetch(match_list, i, FALSE)));
      printf("\n");
 
      /** Remove all vowels from text **/
@@ -540,7 +534,7 @@ been wrapped here):
      if (num_matches) {
  	printf("substitute: s/[aeiou]//gi...%d substitutions made.\n",
  	       num_matches);
- 	printf("Now text is: %s\n\n", SvPV(text,n_a));
+ 	printf("Now text is: %s\n\n", SvPV_nolen(text));
      }
 
      /** Attempt a substitution **/
@@ -784,7 +778,6 @@ with L<perlfunc/my> whenever possible.
      char *args[] = { "", DO_CLEAN, NULL };
      char filename[BUFFER_SIZE];
      int exitstatus = 0;
-     STRLEN n_a;
 
      PERL_SYS_INIT3(&argc,&argv,&env);
      if((my_perl = perl_alloc()) == NULL) {
@@ -810,7 +803,7 @@ with L<perlfunc/my> whenever possible.
 
             /* check $@ */
             if(SvTRUE(ERRSV))
-                fprintf(stderr, "eval error: %s\n", SvPV(ERRSV,n_a));
+                fprintf(stderr, "eval error: %s\n", SvPV_nolen(ERRSV));
         }
      }
 
