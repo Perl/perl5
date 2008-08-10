@@ -76,7 +76,7 @@ is( $r, "(\066)[\066]", '$/ set at compile-time' );
 
 # Tests for -c
 
-my $filename = 'swctest.tmp';
+my $filename = tempfile();
 SKIP: {
     local $TODO = '';   # this one works on VMS
 
@@ -105,7 +105,6 @@ SWTEST
 	&& $r !~ /\bblock 5\b/,
 	'-c'
     );
-    push @tmpfiles, $filename;
 }
 
 # Tests for -l
@@ -125,7 +124,7 @@ $r = runperl(
 );
 is( $r, '21-', '-s switch parsing' );
 
-$filename = 'swstest.tmp';
+$filename = tempfile();
 SKIP: {
     open my $f, ">$filename" or skip( "Can't write temp file $filename: $!" );
     print $f <<'SWTEST';
@@ -138,11 +137,10 @@ SWTEST
 	args	    => [ '-x=foo -y' ],
     );
     is( $r, 'foo1', '-s on the shebang line' );
-    push @tmpfiles, $filename;
 }
 
 # Bug ID 20011106.084
-$filename = 'swsntest.tmp';
+$filename = tempfile();
 SKIP: {
     open my $f, ">$filename" or skip( "Can't write temp file $filename: $!" );
     print $f <<'SWTEST';
@@ -155,32 +153,32 @@ SWTEST
 	args	    => [ '-x=foo' ],
     );
     is( $r, 'foo', '-sn on the shebang line' );
-    push @tmpfiles, $filename;
 }
 
 # Tests for -m and -M
 
-$filename = 'swtest.pm';
+my $package = tempfile();
+$filename = "$package.pm";
 SKIP: {
     open my $f, ">$filename" or skip( "Can't write temp file $filename: $!",4 );
-    print $f <<'SWTESTPM';
-package swtest;
-sub import { print map "<$_>", @_ }
+    print $f <<"SWTESTPM";
+package $package;
+sub import { print map "<\$_>", \@_ }
 1;
 SWTESTPM
     close $f or die "Could not close: $!";
     $r = runperl(
-	switches    => [ '-Mswtest' ],
+	switches    => [ "-M$package" ],
 	prog	    => '1',
     );
-    is( $r, '<swtest>', '-M' );
+    is( $r, "<$package>", '-M' );
     $r = runperl(
-	switches    => [ '-Mswtest=foo' ],
+	switches    => [ "-M$package=foo" ],
 	prog	    => '1',
     );
-    is( $r, '<swtest><foo>', '-M with import parameter' );
+    is( $r, "<$package><foo>", '-M with import parameter' );
     $r = runperl(
-	switches    => [ '-mswtest' ],
+	switches    => [ "-m$package" ],
 	prog	    => '1',
     );
 
@@ -189,16 +187,16 @@ SWTESTPM
         is( $r, '', '-m' );
     }
     $r = runperl(
-	switches    => [ '-mswtest=foo,bar' ],
+	switches    => [ "-m$package=foo,bar" ],
 	prog	    => '1',
     );
-    is( $r, '<swtest><foo><bar>', '-m with import parameters' );
+    is( $r, "<$package><foo><bar>", '-m with import parameters' );
     push @tmpfiles, $filename;
 
     is( runperl( switches => [ '-MTie::Hash' ], stderr => 1, prog => 1 ),
 	  '', "-MFoo::Bar allowed" );
 
-    like( runperl( switches => [ '-M:swtest' ], stderr => 1,
+    like( runperl( switches => [ "-M:$package" ], stderr => 1,
 		   prog => 'die "oops"' ),
 	  qr/Invalid module name [\w:]+ with -M option\b/,
           "-M:Foo not allowed" );

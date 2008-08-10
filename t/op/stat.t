@@ -38,8 +38,8 @@ my($DEV, $INO, $MODE, $NLINK, $UID, $GID, $RDEV, $SIZE,
 my $Curdir = File::Spec->curdir;
 
 
-my $tmpfile = 'Op_stat.tmp';
-my $tmpfile_link = $tmpfile.'2';
+my $tmpfile = tempfile();
+my $tmpfile_link = tempfile();
 
 chmod 0666, $tmpfile;
 1 while unlink $tmpfile;
