@@ -1865,6 +1865,7 @@ realclean : clean
 	- If F$Search("[...]*$(E)").nes."" Then Delete/NoConfirm/Log [...]*$(E);*
 	- If F$Search("[.vms]Perl_Setup.Com").nes."" Then Delete/NoConfirm/Log [.vms]Perl_Setup.Com;*
 	- If F$Search("[.t]rantests.").nes."" Then Delete/NoConfirm/Log [.t]rantests.;*
+	- If F$Search("[.t]test_state.").nes."" Then Delete/NoConfirm/Log [.t]test_state.;*
 	- If F$Search("[.t.lib]vmsfspec.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vmsfspec.t;*
 	- If F$Search("[.t.lib]vmsish.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vmsish.t;*
 	- If F$Search("[.t.lib]vms_dclsym.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vms_dclsym.t;*

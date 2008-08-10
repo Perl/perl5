@@ -55,6 +55,41 @@ sub _populate_hash {
     return map {$_, 1} split /\s+/, $_[0];
 }
 
+# Generate T::H schedule rules that run the contents of each directory
+# sequentially.
+sub _seq_dir_rules {
+    my @tests = @_;
+    my %dir;
+    for (@tests) {
+        s{[^/]+$}{\*};
+        $dir{$_}++;
+    }
+
+    return { par => [ map { { seq => $_ } } sort keys %dir ] };
+}
+
+sub _extract_tests;
+sub _extract_tests {
+    # This can probably be done more tersely with a map, but I doubt that it
+    # would be as clear
+    my @results;
+    foreach (@_) {
+	my $ref = ref $_;
+	if ($ref) {
+	    if ($ref eq 'ARRAY') {
+		push @results, _extract_tests @$_;
+	    } elsif ($ref eq 'HASH') {
+		push @results, _extract_tests values %$_;
+	    } else {
+		die "Unknown reference type $ref";
+	    }
+	} else {
+	    push @results, glob $_;
+	}
+    }
+    @results;
+}
+
 if ($ARGV[0] && $ARGV[0]=~/^-re/) {
     if ($ARGV[0]!~/=/) {
         shift;
@@ -65,7 +100,11 @@ if ($ARGV[0] && $ARGV[0]=~/^-re/) {
     }
 }
 
+my $jobs = $ENV{TEST_JOBS};
+my ($rules, $state);
+
 if (@ARGV) {
+    # If you want these run in speed order, just use prove
     if ($^O eq 'MSWin32') {
 	@tests = map(glob($_),@ARGV);
     }
@@ -73,18 +112,52 @@ if (@ARGV) {
 	@tests = @ARGV;
     }
 } else {
+    # Ideally we'd get somewhere close to Tux's Oslo rules
+    # my $rules = {
+    #     par => [
+    #         { seq => '../ext/DB_File/t/*' },
+    #         { seq => '../ext/IO_Compress_Zlib/t/*' },
+    #         { seq => '../lib/CPANPLUS/*' },
+    #         { seq => '../lib/ExtUtils/t/*' },
+    #         '*'
+    #     ]
+    # };
+
+    # but for now, run all directories in sequence. In particular, it would be
+    # nice to get the tests in t/op/*.t able to run in parallel.
+
     unless (@tests) {
-	push @tests, <base/*.t>;
-        push @tests, <comp/*.t>;
-        push @tests, <cmd/*.t>;
-        push @tests, <run/*.t>;
-        push @tests, <io/*.t>;
-        push @tests, <op/*.t>;
-        push @tests, <uni/*.t>;
-        push @tests, <mro/*.t>;
-        push @tests, <lib/*.t>;
-        push @tests, <japh/*.t> if $torture;
-	push @tests, <win32/*.t> if $^O eq 'MSWin32';
+	my @seq = <base/*.t>;
+
+	my @next = qw(comp cmd run io op uni mro lib);
+	push @next, 'japh' if $torture;
+	push @next, 'win32' if $^O eq 'MSWin32';
+	# Hopefully TAP::Parser::Scheduler will support this syntax soon.
+	# my $next = { par => '{' . join (',', @next) . '}/*.t' };
+	my $next = { par => [
+			     map { "$_/*.t" } @next
+			    ] };
+	@tests = _extract_tests ($next);
+
+	# This is a bit of a game, because we only want to sort these tests in
+	# speed order. base/*.t wants to run first, and ext,lib etc last and in
+	# MANIFEST order
+	if ($jobs) {
+	    require App::Prove::State;
+	    $state = App::Prove::State->new({ store => 'test_state' });
+	    $state->apply_switch('slow', 'save');
+	    # For some reason get_tests returns *all* the tests previously run,
+	    # (in the right order), not simply the selection in @tests
+	    # (in the right order). Not sure if this is a bug or a feature.
+	    # Whatever, *we* are only interested in the ones that are in @tests
+	    my %seen;
+	    @seen{@tests} = ();
+	    @tests = grep {exists $seen{$_} } $state->get_tests(0, @tests);
+	}
+	@tests = (@seq, @tests);
+	push @seq, $next;
+
+	my @last;
 	use Config;
 	my %skip;
 	{
@@ -114,13 +187,19 @@ if (@ARGV) {
 	    close MANI;
 	    # Sort the list of test files read from MANIFEST into a sensible
 	    # order instead of using the order in which they are listed there
-	    push @tests, sort { lc $a cmp lc $b } @manitests;
+	    push @last, sort { lc $a cmp lc $b } @manitests;
 	} else {
 	    warn "$0: cannot open $mani: $!\n";
 	}
-	push @tests, <Module_Pluggable/*.t>;
-	push @tests, <pod/*.t>;
-	push @tests, <x2p/*.t>;
+	push @last, <Module_Pluggable/*.t>;
+	push @last, <pod/*.t>;
+	push @last, <x2p/*.t>;
+
+	push @tests, @last;
+
+	push @seq, _seq_dir_rules @last;
+
+	$rules = { seq => \@seq };
     }
 }
 if ($^O eq 'MSWin32') {
@@ -128,5 +207,19 @@ if ($^O eq 'MSWin32') {
 }
 @tests=grep /$re/, @tests 
     if $re;
-Test::Harness::runtests @tests;
+
+if ($jobs) {
+    eval 'use TAP::Harness 3.13; 1' or die $@;
+    my $h = TAP::Harness->new({ jobs => $jobs, rules => $rules});
+    if ($state) {
+	$h->callback(
+		     after_test => sub {
+			 $state->observe_test(@_);
+		     }
+		    );
+    }
+    $h->runtests(@tests);
+} else {
+    Test::Harness::runtests @tests;
+}
 exit(0);

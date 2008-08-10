@@ -779,6 +779,7 @@ clean:
 	-rm -f $(MACHINE)/*.lib
 	-rm -f ../config.sh ../lib/Config.pm
 	-rm -f config.h xconfig.h perl.res
+	-rm -f ../t/test_state
 
 XDLLOBJS = \
 $(DLLDIR)\av.obj \
