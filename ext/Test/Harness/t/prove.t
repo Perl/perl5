@@ -1316,6 +1316,8 @@ for my $test (@SCHEDULE) {
     my $name = $test->{name};
     my $class = $test->{class} || 'FakeProve';
 
+    local $ENV{HARNESS_TIMER};
+
     ok my $app = $class->new( exists $test->{args} ? $test->{args} : () ),
       "$name: App::Prove created OK";
 
