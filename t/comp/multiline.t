@@ -42,7 +42,7 @@ is($z, $y,  'basic multiline reading');
 is($count, 7,   '    line count');
 is($., 7,       '    $.' );
 
-$out = (($^O eq 'MSWin32') || $^O eq 'NetWare' || $^O eq 'VMS') ? `type Comp.try`
+$out = (($^O eq 'MSWin32') || $^O eq 'NetWare' || $^O eq 'VMS') ? `type $filename`
     : ($^O eq 'MacOS') ? `catenate $filename`
     : `cat $filename`;
 
