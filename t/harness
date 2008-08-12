@@ -101,7 +101,23 @@ if ($ARGV[0] && $ARGV[0]=~/^-re/) {
 }
 
 my $jobs = $ENV{TEST_JOBS};
-my ($rules, $state);
+my ($fork, $rules, $state);
+if ($ENV{HARNESS_OPTIONS}) {
+    for my $opt ( split /:/, $ENV{HARNESS_OPTIONS} ) {
+        if ( $opt =~ /^j(\d*)$/ ) {
+            $jobs ||= $1 || 9;
+        }
+        elsif ( $opt eq 'f' ) {
+            $fork = 1;
+        }
+        elsif ( $opt eq 'c' ) {
+#            $args->{color} = 1;
+        }
+        else {
+            die "Unknown HARNESS_OPTIONS item: $opt\n";
+        }
+    }
+}
 
 if (@ARGV) {
     # If you want these run in speed order, just use prove
@@ -210,7 +226,10 @@ if ($^O eq 'MSWin32') {
 
 if ($jobs) {
     eval 'use TAP::Harness 3.13; 1' or die $@;
-    my $h = TAP::Harness->new({ jobs => $jobs, rules => $rules});
+
+    # Test::Harness parses $ENV{HARNESS_OPTIONS}, TAP::Harness does not
+    local $ENV{HARNESS_OPTIONS};
+    my $h = TAP::Harness->new({ jobs => $jobs, rules => $rules, ($fork ? (fork => $fork) : ())});
     if ($state) {
 	$h->callback(
 		     after_test => sub {
