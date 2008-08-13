@@ -44,7 +44,7 @@ for (@prgs){
     my $status = $?;
     $results =~ s/\n+$//;
     # allow expected output to be written as if $prog is on STDIN
-    $results =~ s/$::tempfile_regexp/-/g;
+    $results =~ s/$::tempfile_regexp/-/ig;
     $results =~ s/\n%[A-Z]+-[SIWEF]-.*$// if $Is_VMS;  # clip off DCL status msg
     $expected =~ s/\n+$//;
     if ($results ne $expected) {

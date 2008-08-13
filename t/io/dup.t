@@ -38,19 +38,12 @@ $cmd = sprintf "$echo 1>&2", 5;
 $cmd = sprintf $echo, 5 if $^O eq 'MacOS';  # don't know if we can do this ...
 print `$cmd`;
 
-# KNOWN BUG system() does not honor STDOUT redirections on VMS.
-if( $^O eq 'VMS' ) {
-    print "not ok $_ # TODO system() not honoring STDOUT redirect on VMS\n"
-      for 6..7;
+system sprintf $echo, 6;
+if ($^O eq 'MacOS') {
+    system sprintf $echo, 7;
 }
 else {
-    system sprintf $echo, 6;
-    if ($^O eq 'MacOS') {
-        system sprintf $echo, 7;
-    }
-    else {
-        system sprintf "$echo 1>&2", 7;
-    }
+    system sprintf "$echo 1>&2", 7;
 }
 
 close(STDOUT) or die "Could not close: $!";
@@ -59,7 +52,8 @@ close(STDERR) or die "Could not close: $!";
 open(STDOUT,">&DUPOUT") or die "Could not open: $!";
 open(STDERR,">&DUPERR") or die "Could not open: $!";
 
-if (($^O eq 'MSWin32') || ($^O eq 'NetWare') || ($^O eq 'VMS')) { print `type $tempfile` }
+if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) { print `type $tempfile` }
+elsif ($^O eq 'VMS')   { system "type $tempfile.;" } # TYPE defaults to .LIS when there is no extension
 elsif ($^O eq 'MacOS') { system "catenate $tempfile" }
 else                   { system "cat $tempfile" }
 

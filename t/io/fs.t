@@ -437,7 +437,7 @@ SKIP: {
 if ($^O eq 'VMS') {
     # must have delete access to rename a directory
     `set file $tmpdir.dir/protection=o:d`;
-    ok(rename('$tmpdir.dir', '$tmpdir1.dir'), "rename on directories") ||
+    ok(rename("$tmpdir.dir", "$tmpdir1.dir"), "rename on directories") ||
       print "# errno: $!\n";
 }
 else {
