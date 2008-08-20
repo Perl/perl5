@@ -19,7 +19,7 @@ use Carp 'croak';
 #   http://stein.cshl.org/WWW/software/CGI/
 
 $CGI::revision = '$Id: CGI.pm,v 1.257 2008/08/06 14:01:06 lstein Exp $';
-$CGI::VERSION='3.40';
+$CGI::VERSION='3.40_01';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -4050,6 +4050,14 @@ sub find_tempdir {
 	   "${vol}${SL}Temporary Items",
            "${SL}WWW_ROOT", "${SL}SYS\$SCRATCH",
 	   "C:${SL}system${SL}temp");
+    
+    if( $CGI::OS eq 'WINDOWS' ){
+       unshift @TEMP,
+           $ENV{TEMP},
+           $ENV{TMP},
+           $ENV{WINDIR} . $SL . 'TEMP';
+    }
+
     unshift(@TEMP,$ENV{'TMPDIR'}) if defined $ENV{'TMPDIR'};
 
     # this feature was supposed to provide per-user tmpfiles, but
