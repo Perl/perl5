@@ -18,13 +18,13 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.257 2008/08/06 14:01:06 lstein Exp $';
-$CGI::VERSION='3.40';
+$CGI::revision = '$Id: CGI.pm,v 1.260 2008/09/08 14:13:23 lstein Exp $';
+$CGI::VERSION='3.42';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
 # $CGITempFile::TMPDIRECTORY = '/usr/tmp';
-use CGI::Util qw(rearrange make_attributes unescape escape expires ebcdic2ascii ascii2ebcdic);
+use CGI::Util qw(rearrange rearrange_header make_attributes unescape escape expires ebcdic2ascii ascii2ebcdic);
 
 #use constant XHTML_DTD => ['-//W3C//DTD XHTML Basic 1.0//EN',
 #                           'http://www.w3.org/TR/xhtml-basic/xhtml-basic10.dtd'];
@@ -1381,7 +1381,7 @@ END_OF_FUNC
 'multipart_init' => <<'END_OF_FUNC',
 sub multipart_init {
     my($self,@p) = self_or_default(@_);
-    my($boundary,@other) = rearrange([BOUNDARY],@p);
+    my($boundary,@other) = rearrange_header([BOUNDARY],@p);
     $boundary = $boundary || '------- =_aaaaaaaaaa0';
     $self->{'separator'} = "$CRLF--$boundary$CRLF";
     $self->{'final_separator'} = "$CRLF--$boundary--$CRLF";
@@ -2720,8 +2720,9 @@ sub url {
     undef $path if $rewrite_in_use && $rewrite;  # path not valid when rewriting active
 
     my $uri         =  $rewrite && $request_uri ? $request_uri : $script_name;
-    $uri            =~ s/\?.*$//;                                 # remove query string
-    $uri            =~ s/\Q$path\E$//      if defined $path;      # remove path
+    $uri            =~ s/\?.*$//s;                                # remove query string
+    $uri            =~ s/\Q$ENV{PATH_INFO}\E$// if defined $ENV{PATH_INFO};
+#    $uri            =~ s/\Q$path\E$//      if defined $path;      # remove path
 
     if ($full) {
 	my $protocol = $self->protocol();
@@ -3709,6 +3710,7 @@ END_OF_AUTOLOAD
 
 ################### Fh -- lightweight filehandle ###############
 package Fh;
+
 use overload 
     '""'  => \&asString,
     'cmp' => \&compare,
@@ -3760,12 +3762,20 @@ sub new {
     (my $safename = $name) =~ s/([':%])/ sprintf '%%%02X', ord $1 /eg;
     my $fv = ++$FH . $safename;
     my $ref = \*{"Fh::$fv"};
-    $file =~ m!^([a-zA-Z0-9_\+ \'\":/.\$\\-]+)$! || return;
+    $file =~ m!^([a-zA-Z0-9_\+ \'\":/.\$\\~-]+)$! || return;
     my $safe = $1;
     sysopen($ref,$safe,Fcntl::O_RDWR()|Fcntl::O_CREAT()|Fcntl::O_EXCL(),0600) || return;
     unlink($safe) if $delete;
     CORE::delete $Fh::{$fv};
     return bless $ref,$pack;
+}
+END_OF_FUNC
+
+'handle' => <<'END_OF_FUNC',
+sub handle {
+  my $self = shift;
+  eval "require IO::Handle" unless IO::Handle->can('new_from_fd');
+  return IO::Handle->new_from_fd(fileno $self,"<");
 }
 END_OF_FUNC
 
@@ -4050,6 +4060,14 @@ sub find_tempdir {
 	   "${vol}${SL}Temporary Items",
            "${SL}WWW_ROOT", "${SL}SYS\$SCRATCH",
 	   "C:${SL}system${SL}temp");
+    
+    if( $CGI::OS eq 'WINDOWS' ){
+       unshift @TEMP,
+           $ENV{TEMP},
+           $ENV{TMP},
+           $ENV{WINDIR} . $SL . 'TEMP';
+    }
+
     unshift(@TEMP,$ENV{'TMPDIR'}) if defined $ENV{'TMPDIR'};
 
     # this feature was supposed to provide per-user tmpfiles, but
@@ -4078,7 +4096,7 @@ $MAXTRIES = 5000;
 
 sub DESTROY {
     my($self) = @_;
-    $$self =~ m!^([a-zA-Z0-9_ \'\":/.\$\\-]+)$! || return;
+    $$self =~ m!^([a-zA-Z0-9_ \'\":/.\$\\~-]+)$! || return;
     my $safe = $1;             # untaint operation
     unlink $safe;              # get rid of the file
 }
@@ -4099,7 +4117,7 @@ sub new {
 	last if ! -f ($filename = sprintf("\%s${SL}CGItemp%d", $TMPDIRECTORY, $sequence++));
     }
     # check that it is a more-or-less valid filename
-    return unless $filename =~ m!^([a-zA-Z0-9_\+ \'\":/.\$\\-]+)$!;
+    return unless $filename =~ m!^([a-zA-Z0-9_\+ \'\":/.\$\\~-]+)$!;
     # this used to untaint, now it doesn't
     # $filename = $1;
     return bless \$filename;
@@ -6066,24 +6084,27 @@ filehandle at all, but a string.
 
 To be safe, use the I<upload()> function (new in version 2.47).  When
 called with the name of an upload field, I<upload()> returns a
-filehandle, or undef if the parameter is not a valid filehandle.
+filehandle-like object, or undef if the parameter is not a valid
+filehandle.
 
      $fh = upload('uploaded_file');
      while (<$fh>) {
 	   print;
      }
 
-In an list context, upload() will return an array of filehandles.
+In a list context, upload() will return an array of filehandles.
 This makes it possible to create forms that use the same name for
 multiple upload fields.
 
 This is the recommended idiom.
 
-For robust code, consider reseting the file handle position to beginning of the
-file. Inside of larger frameworks, other code may have already used the query
-object and changed the filehandle postion:
+The lightweight filehandle returned by CGI.pm is not compatible with
+IO::Handle; for example, it does not have read() or getline()
+functions, but instead must be manipulated using read($fh) or
+<$fh>. To get a compatible IO::Handle object, call the handle's
+handle() method:
 
-  seek($fh,0,0); # reset postion to beginning of file.
+  my $real_io_handle = upload('uploaded_file')->handle;
 
 When a file is uploaded the browser usually sends along some
 information along with it in the format of headers.  The information
