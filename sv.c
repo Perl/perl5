@@ -5086,14 +5086,11 @@ S_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
 	if (mg)
 	    av = (AV *)mg->mg_obj;
     }
-    if (!av) {
-	if (PL_in_clean_all)
-	    return;
-	Perl_croak(aTHX_ "panic: del_backref");
-    }
 
-    if (SvIS_FREED(av))
-	return;
+    if (!av)
+	Perl_croak(aTHX_ "panic: del_backref");
+
+    assert(!SvIS_FREED(av));
 
     svp = AvARRAY(av);
     /* We shouldn't be in here more than once, but for paranoia reasons lets
@@ -5123,9 +5120,8 @@ Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
     PERL_ARGS_ASSERT_SV_KILL_BACKREFS;
     PERL_UNUSED_ARG(sv);
 
-    /* Not sure why the av can get freed ahead of its sv, but somehow it does
-       in ext/B/t/bytecode.t test 15 (involving print <DATA>)  */
-    if (svp && !SvIS_FREED(av)) {
+    assert(!svp || !SvIS_FREED(av));
+    if (svp) {
 	SV *const *const last = svp + AvFILLp(av);
 
 	while (svp <= last) {
