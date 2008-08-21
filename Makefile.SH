@@ -165,7 +165,7 @@ for f in $dynamic_ext; do
 
     : Parallel makes reveal that we have some interdependencies
     case $f in
-	Math/BigInt/FastCalc) extra_dep="$extra_dep
+	Math/BigInt/FastCalc|Devel/NYTProf) extra_dep="$extra_dep
 $this_target: lib/auto/List/Util/Util.$dlext" ;;
 	Unicode/Normalize) extra_dep="$extra_dep
 $this_target: uni.data" ;;
