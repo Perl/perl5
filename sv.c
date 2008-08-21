@@ -3717,7 +3717,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 	    Perl_croak(aTHX_ "Cannot copy to %s", type);
     } else if (sflags & SVf_ROK) {
 	if (isGV_with_GP(dstr) && dtype == SVt_PVGV
-	    && SvTYPE(SvRV(sstr)) == SVt_PVGV) {
+	    && SvTYPE(SvRV(sstr)) == SVt_PVGV && isGV_with_GP(SvRV(sstr))) {
 	    sstr = SvRV(sstr);
 	    if (sstr == dstr) {
 		if (GvIMPORTED(dstr) != GVf_IMPORTED
@@ -3728,10 +3728,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 		GvMULTI_on(dstr);
 		return;
 	    }
-	    if (isGV_with_GP(sstr)) {
-		glob_assign_glob(dstr, sstr, dtype);
-		return;
-	    }
+	    glob_assign_glob(dstr, sstr, dtype);
+	    return;
 	}
 
 	if (dtype >= SVt_PV) {
