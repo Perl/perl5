@@ -67,6 +67,8 @@ S_isa_lookup(pTHX_ HV *stash, const char * const name, const HV* const name_stas
 	SV* const basename_sv = *svp++;
         HV* const basestash = gv_stashsv(basename_sv, 0);
 	if (!basestash) {
+	    /* We have no test coverage for this block, as of 2008/08.  */
+	    abort();
 	    if (ckWARN(WARN_SYNTAX))
 		Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 			    "Can't locate package %"SVf" for the parents of %s",
