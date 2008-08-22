@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.13';
+our $VERSION = '1.14';
 require Exporter;
 require Cwd;
 
@@ -78,7 +78,8 @@ Here are the possible keys for the hash:
 =item C<wanted>
 
 The value should be a code reference.  This code reference is
-described in L<The wanted function> below.
+described in L<The wanted function> below. The C<&wanted> subroutine is
+mandatory.
 
 =item C<bydepth>
 
@@ -1266,6 +1267,9 @@ sub _find_dir_symlnk($$$) {
 sub wrap_wanted {
     my $wanted = shift;
     if ( ref($wanted) eq 'HASH' ) {
+        unless( exists $wanted->{wanted} and ref( $wanted->{wanted} ) eq 'CODE' ) {
+            die 'no &wanted subroutine given';
+        }
 	if ( $wanted->{follow} || $wanted->{follow_fast}) {
 	    $wanted->{follow_skip} = 1 unless defined $wanted->{follow_skip};
 	}
@@ -1276,8 +1280,11 @@ sub wrap_wanted {
 	}
 	return $wanted;
     }
-    else {
+    elsif( ref( $wanted ) eq 'CODE' ) {
 	return { wanted => $wanted };
+    }
+    else {
+       die 'no &wanted subroutine given';
     }
 }
 
