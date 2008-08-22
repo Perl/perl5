@@ -185,9 +185,18 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
 	    }
 	    while(subrv_items--) {
 		SV *const subsv = *subrv_p++;
-		if(!hv_exists_ent(stored, subsv, 0)) {
-		    (void)hv_store_ent(stored, subsv, &PL_sv_undef, 0);
-		    av_push(retval, newSVsv(subsv));
+		/* LVALUE fetch will create a new undefined SV if necessary
+		 */
+		HE *const he = hv_fetch_ent(stored, subsv, 1, 0);
+		assert(he);
+		if(HeVAL(he) != &PL_sv_undef) {
+		    /* It was newly created.  Steal it for our new SV, and
+		       replace it in the hash with the "real" thing.  */
+		    SV *const val = HeVAL(he);
+
+		    HeVAL(he) = &PL_sv_undef;
+		    sv_setsv(val, subsv);
+		    av_push(retval, val);
 		}
             }
         }
