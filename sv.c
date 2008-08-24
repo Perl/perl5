@@ -192,13 +192,23 @@ Perl_offer_nice_chunk(pTHX_ void *const chunk, const U32 chunk_size)
 #  define POSION_SV_HEAD(sv)
 #endif
 
+/* Mark an SV head as unused, and add to free list.
+ *
+ * If SVf_BREAK is set, skip adding it to the free list, as this SV had
+ * its refcount artificially decremented during global destruction, so
+ * there may be dangling pointers to it. The last thing we want in that
+ * case is for it to be reused. */
+
 #define plant_SV(p) \
     STMT_START {					\
+	const U32 old_flags = SvFLAGS(p);			\
 	FREE_SV_DEBUG_FILE(p);				\
 	POSION_SV_HEAD(p);				\
-	SvARENA_CHAIN(p) = (void *)PL_sv_root;		\
 	SvFLAGS(p) = SVTYPEMASK;			\
-	PL_sv_root = (p);				\
+	if (!(old_flags & SVf_BREAK)) {		\
+	    SvARENA_CHAIN(p) = (void *)PL_sv_root;	\
+	    PL_sv_root = (p);				\
+	}						\
 	--PL_sv_count;					\
     } STMT_END
 
