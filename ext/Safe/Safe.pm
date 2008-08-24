@@ -3,7 +3,7 @@ package Safe;
 use 5.003_11;
 use strict;
 
-$Safe::VERSION = "2.16";
+$Safe::VERSION = "2.16_01";
 
 # *** Don't declare any lexicals above this point ***
 #
@@ -486,7 +486,7 @@ variable without any leading type marker. For example,
     ${$cpt->varglob('foo')} = "Hello world";
 
 
-=item reval (STRING)
+=item reval (STRING, STRICT)
 
 This evaluates STRING as perl code inside the compartment.
 
@@ -512,6 +512,10 @@ by the caller as usual.
 This behaviour differs from the beta distribution of the Safe extension
 where earlier versions of perl made it hard to mimic the return
 behaviour of the eval() command and the context was always scalar.
+
+The formerly undocumented STRICT argument sets strictness: if true
+'use strict;' is used, otherwise it uses 'no strict;'. B<Note>: if
+STRICT is omitted 'no strict;' is the default.
 
 Some points to note:
 
