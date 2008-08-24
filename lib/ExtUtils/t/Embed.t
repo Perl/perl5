@@ -105,6 +105,9 @@ if ($^O eq 'VMS') {
         s!-bE:(\S+)!-bE:$perl_exp!;
     }
    }
+   elsif ($^O eq 'cygwin') { # Cygwin needs no special treatment like below
+       ;
+   }
    elsif ($Config{'libperl'} !~ /\Alibperl\./) {
      # Everyone needs libperl copied if it's not found by '-lperl'.
      $testlib = $Config{'libperl'};

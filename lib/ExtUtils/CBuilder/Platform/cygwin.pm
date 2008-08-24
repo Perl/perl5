@@ -17,9 +17,8 @@ sub link_executable {
 
 sub link {
   my ($self, %args) = @_;
-  # libperl.dll.a fails with -Uusedl. -L../CORE -lperl is better
   $args{extra_linker_flags} = [
-    '-L'.$self->perl_inc().' -lperl',
+    $self->perl_inc().'/'.($self->{config}{useshrplib} ? 'libperl.dll.a' : 'libperl.a'),
     $self->split_like_shell($args{extra_linker_flags})
   ];
 

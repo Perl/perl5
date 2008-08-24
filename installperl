@@ -364,7 +364,14 @@ if ($Is_VMS) {  # We did core file selection during build
     $coredir =~ tr/./_/;
     map { s|^$coredir/||i; } @corefiles = <$coredir/*.*>;
 }
-else {
+elsif ($Is_Cygwin) { # On Cygwin symlink it to CORE to make Makefile happy
+    my $coredll = "$installarchlib/CORE/$libperl";
+    ( $Config{'d_link'} eq 'define' &&
+      eval { CORE::link "$installbin/$libperl", $coredll } ) ||
+    eval { symlink "$installbin/$libperl", $coredll }	||
+    copy("$installbin/$libperl", $coredll);
+    @corefiles = <*.h libperl*.* perl*$Config{lib_ext}>;
+} else {
     # [als] hard-coded 'libperl' name... not good!
     @corefiles = <*.h libperl*.* perl*$Config{lib_ext}>;
 
