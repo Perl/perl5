@@ -35,7 +35,7 @@ sub _all_ok {
     my ( $tot, $failed ) = Test::Harness::execute_tests(
         tests => [
             $ENV{PERL_CORE}
-            ? 'lib/sample-tests/inc_taint'
+            ? '../ext/Test/Harness/t/sample-tests/inc_taint'
             : 't/sample-tests/inc_taint'
         ]
     );

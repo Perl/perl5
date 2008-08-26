@@ -58,7 +58,7 @@ my $mod = 'TAP::Parser::Iterator::Process';
         }
     );
     $harness->runtests(
-        ( $ENV{PERL_CORE} ? 'lib' : 't' ) . '/sample-tests/simple' );
+        ( $ENV{PERL_CORE} ? '../ext/Test/Harness/' : '' ) . 't/sample-tests/simple' );
     my @output = tied($$capture)->dump;
     is pop @output, "Result: PASS\n", 'status OK';
     pop @output;    # get rid of summary line

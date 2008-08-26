@@ -1175,6 +1175,9 @@ ext/Test/Harness/t/compat/regression.t			Test::Harness test
 ext/Test/Harness/t/compat/test-harness-compat.t		Test::Harness test
 ext/Test/Harness/t/compat/version.t			Test::Harness test
 ext/Test/Harness/t/console.t				Test::Harness test
+ext/Test/Harness/t/data/catme.1				Test data for Test::Harness
+ext/Test/Harness/t/data/proverc				Test data for Test::Harness
+ext/Test/Harness/t/data/sample.yml			Test data for Test::Harness
 ext/Test/Harness/t/errors.t				Test::Harness test
 ext/Test/Harness/t/grammar.t				Test::Harness test
 ext/Test/Harness/t/harness.t				Test::Harness test
@@ -1194,11 +1197,73 @@ ext/Test/Harness/t/proverun.t				Test::Harness test
 ext/Test/Harness/t/prove.t				Test::Harness test
 ext/Test/Harness/t/regression.t				Test::Harness test
 ext/Test/Harness/t/results.t				Test::Harness test
+ext/Test/Harness/t/sample-tests/bailout			Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/bignum			Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/bignum_many		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/combined		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/combined_compat		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/delayed			Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/descriptive		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/descriptive_trailing	Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/die			Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/die_head_end		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/die_last_minute		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/die_unfinished		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/duplicates		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/echo			Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/empty			Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/escape_eol		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/escape_hash		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/head_end		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/head_fail		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/inc_taint		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/junk_before_plan	Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/lone_not_bug		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/no_nums			Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/no_output		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/out_err_mix		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/out_of_order		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/schwern			Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/schwern-todo-quiet	Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/segfault		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/sequence_misparse	Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/shbang_misparse		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/simple			Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/simple_fail		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/simple_yaml		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/skip			Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/skipall			Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/skipall_nomsg		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/skipall_v13		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/skip_nomsg		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/space_after_plan	Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/stdout_stderr		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/strict			Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/switches		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/taint			Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/taint_warn		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/todo			Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/todo_inline		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/todo_misparse		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/too_many		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/version_good		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/version_late		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/version_old		Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/vms_nit			Test data for Test::Harness
+ext/Test/Harness/t/sample-tests/with_comments		Test data for Test::Harness
 ext/Test/Harness/t/scheduler.t				Test::Harness test
 ext/Test/Harness/t/source.t				Test::Harness test
+ext/Test/Harness/t/source_tests/harness			Test data for Test::Harness
+ext/Test/Harness/t/source_tests/harness_badtap		Test data for Test::Harness
+ext/Test/Harness/t/source_tests/harness_complain	Test data for Test::Harness
+ext/Test/Harness/t/source_tests/harness_directives	Test data for Test::Harness
+ext/Test/Harness/t/source_tests/harness_failure		Test data for Test::Harness
+ext/Test/Harness/t/source_tests/source			Test data for Test::Harness
 ext/Test/Harness/t/spool.t				Test::Harness test
 ext/Test/Harness/t/state.t				Test::Harness test
 ext/Test/Harness/t/streams.t				Test::Harness test
+ext/Test/Harness/t/subclass_tests/non_perl_source	Test data for Test::Harness
+ext/Test/Harness/t/subclass_tests/perl_source		Test data for Test::Harness
 ext/Test/Harness/t/taint.t				Test::Harness test
 ext/Test/Harness/t/testargs.t				Test::Harness test
 ext/Test/Harness/t/unicode.t				Test::Harness test
@@ -3599,9 +3664,6 @@ t/lib/compress/truncate.pl	Compress::Zlib
 t/lib/compress/zlib-generic.pl	Compress::Zlib
 t/lib/contains_pod.xr		Pod-Parser test file
 t/lib/cygwin.t			Builtin cygwin function tests
-t/lib/data/catme.1			Test data for Test::Harness
-t/lib/data/proverc			Test data for Test::Harness
-t/lib/data/sample.yml			Test data for Test::Harness
 t/lib/Devel/switchd.pm		Module for t/run/switchd.t
 t/lib/Dev/Null.pm		Module for testing Test::Harness
 t/lib/dprof/test1_t		Perl code profiler tests
@@ -3662,72 +3724,10 @@ t/lib/MySource.pm		Module for testing Test::Harness
 t/lib/NoFork.pm			Module for testing Test::Harness
 t/lib/no_load.t			Test that some modules don't load others
 t/lib/proxy_constant_subs.t	Test that Proxy Constant Subs behave correctly
-t/lib/sample-tests/bailout		Test data for Test::Harness
-t/lib/sample-tests/bignum		Test data for Test::Harness
-t/lib/sample-tests/bignum_many		Test data for Test::Harness
-t/lib/sample-tests/combined		Test data for Test::Harness
-t/lib/sample-tests/combined_compat	Test data for Test::Harness
-t/lib/sample-tests/delayed		Test data for Test::Harness
-t/lib/sample-tests/descriptive		Test data for Test::Harness
-t/lib/sample-tests/descriptive_trailing	Test data for Test::Harness
-t/lib/sample-tests/die			Test data for Test::Harness
-t/lib/sample-tests/die_head_end		Test data for Test::Harness
-t/lib/sample-tests/die_last_minute	Test data for Test::Harness
-t/lib/sample-tests/die_unfinished	Test data for Test::Harness
-t/lib/sample-tests/duplicates		Test data for Test::Harness
-t/lib/sample-tests/echo			Test data for Test::Harness
-t/lib/sample-tests/empty		Test data for Test::Harness
-t/lib/sample-tests/escape_eol		Test data for Test::Harness
-t/lib/sample-tests/escape_hash		Test data for Test::Harness
-t/lib/sample-tests/head_end		Test data for Test::Harness
-t/lib/sample-tests/head_fail		Test data for Test::Harness
-t/lib/sample-tests/inc_taint		Test data for Test::Harness
-t/lib/sample-tests/junk_before_plan	Test data for Test::Harness
-t/lib/sample-tests/lone_not_bug		Test data for Test::Harness
-t/lib/sample-tests/no_nums		Test data for Test::Harness
-t/lib/sample-tests/no_output		Test data for Test::Harness
-t/lib/sample-tests/out_err_mix		Test data for Test::Harness
-t/lib/sample-tests/out_of_order		Test data for Test::Harness
-t/lib/sample-tests/schwern		Test data for Test::Harness
-t/lib/sample-tests/schwern-todo-quiet	Test data for Test::Harness
-t/lib/sample-tests/segfault		Test data for Test::Harness
-t/lib/sample-tests/sequence_misparse	Test data for Test::Harness
-t/lib/sample-tests/shbang_misparse	Test data for Test::Harness
-t/lib/sample-tests/simple		Test data for Test::Harness
-t/lib/sample-tests/simple_fail		Test data for Test::Harness
-t/lib/sample-tests/simple_yaml		Test data for Test::Harness
-t/lib/sample-tests/skip			Test data for Test::Harness
-t/lib/sample-tests/skipall		Test data for Test::Harness
-t/lib/sample-tests/skipall_nomsg	Test data for Test::Harness
-t/lib/sample-tests/skipall_v13		Test data for Test::Harness
-t/lib/sample-tests/skip_nomsg		Test data for Test::Harness
-t/lib/sample-tests/space_after_plan	Test data for Test::Harness
-t/lib/sample-tests/stdout_stderr	Test data for Test::Harness
-t/lib/sample-tests/strict		Test data for Test::Harness
-t/lib/sample-tests/switches		Test data for Test::Harness
-t/lib/sample-tests/taint		Test data for Test::Harness
-t/lib/sample-tests/taint_warn		Test data for Test::Harness
-t/lib/sample-tests/todo			Test data for Test::Harness
-t/lib/sample-tests/todo_inline		Test data for Test::Harness
-t/lib/sample-tests/todo_misparse	Test data for Test::Harness
-t/lib/sample-tests/too_many		Test data for Test::Harness
-t/lib/sample-tests/version_good		Test data for Test::Harness
-t/lib/sample-tests/version_late		Test data for Test::Harness
-t/lib/sample-tests/version_old		Test data for Test::Harness
-t/lib/sample-tests/vms_nit		Test data for Test::Harness
-t/lib/sample-tests/with_comments	Test data for Test::Harness
 t/lib/Sans_mypragma.pm			Test module for t/lib/mypragma.t
-t/lib/source_tests/harness		Test data for Test::Harness
-t/lib/source_tests/harness_badtap	Test data for Test::Harness
-t/lib/source_tests/harness_complain	Test data for Test::Harness
-t/lib/source_tests/harness_directives	Test data for Test::Harness
-t/lib/source_tests/harness_failure	Test data for Test::Harness
-t/lib/source_tests/source		Test data for Test::Harness
 t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t
 t/lib/strict/subs		Tests of "use strict 'subs'" for strict.t
 t/lib/strict/vars		Tests of "use strict 'vars'" for strict.t
-t/lib/subclass_tests/non_perl_source	Test data for Test::Harness
-t/lib/subclass_tests/perl_source	Test data for Test::Harness
 t/lib/TAP/Parser/SubclassTest.pm	Module for testing Test::Harness
 t/lib/Test/Simple/Catch.pm	Utility module for testing Test::Simple
 t/lib/Test/Simple/sample_tests/death_in_eval.plx	for exit.t

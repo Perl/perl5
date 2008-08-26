@@ -20,8 +20,8 @@ my @SCHEDULE;
 BEGIN {
 
     my $sample_test = File::Spec->catfile(
-        split /\//,
-        ( $ENV{PERL_CORE} ? 'lib' : 't' ) . '/sample-tests/simple'
+        ( $ENV{PERL_CORE} ? ( File::Spec->updir(), 'ext', 'Test', 'Harness' ) : () ), 
+        't', 'sample-tests', 'simple'
     );
 
     @SCHEDULE = (
