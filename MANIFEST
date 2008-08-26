@@ -1183,7 +1183,6 @@ ext/Test/Harness/t/grammar.t				Test::Harness test
 ext/Test/Harness/t/harness.t				Test::Harness test
 ext/Test/Harness/t/iterators.t				Test::Harness test
 ext/Test/Harness/t/lib/App/Prove/Plugin/Dummy.pm	Module for testing Test::Harness
-ext/Test/Harness/t/lib/Dev/Null.pm			Module for testing Test::Harness
 ext/Test/Harness/t/lib/EmptyParser.pm			Module for testing Test::Harness
 ext/Test/Harness/t/lib/IO/c55Capture.pm			Module for testing Test::Harness
 ext/Test/Harness/t/lib/MyCustom.pm			Module for testing Test::Harness
@@ -2857,7 +2856,6 @@ lib/Test/Simple/t/is_deeply_dne_bug.t	Test::More test
 lib/Test/Simple/t/is_deeply_fail.t	Test::More test, is_deeply()
 lib/Test/Simple/t/is_deeply_with_threads.t	Test::More test
 lib/Test/Simple/t/is_fh.t	Test::Builder test, _is_fh()
-lib/Test/Simple/t/lib/Dev/Null.pm	Test::More test module
 lib/Test/Simple/t/lib/Dummy.pm	Test::More test module
 lib/Test/Simple/t/lib/MyOverload.pm	Test::More test module
 lib/Test/Simple/t/lib/NoExporter.pm	Test::Simple test module
@@ -3679,6 +3677,7 @@ t/lib/compress/zlib-generic.pl	Compress::Zlib
 t/lib/contains_pod.xr		Pod-Parser test file
 t/lib/cygwin.t			Builtin cygwin function tests
 t/lib/Devel/switchd.pm		Module for t/run/switchd.t
+t/lib/Dev/Null.pm		Test::More test module
 t/lib/dprof/test1_t		Perl code profiler tests
 t/lib/dprof/test1_v		Perl code profiler tests
 t/lib/dprof/test2_t		Perl code profiler tests
