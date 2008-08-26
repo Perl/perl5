@@ -1735,8 +1735,7 @@ X<exists> X<autovivification>
 
 Given an expression that specifies a hash element or array element,
 returns true if the specified element in the hash or array has ever
-been initialized, even if the corresponding value is undefined.  The
-element is not autovivified if it doesn't exist.
+been initialized, even if the corresponding value is undefined.
 
     print "Exists\n" 	if exists $hash{$key};
     print "Defined\n" 	if defined $hash{$key};
