@@ -1183,7 +1183,7 @@ ext/Test/Harness/t/grammar.t				Test::Harness test
 ext/Test/Harness/t/harness.t				Test::Harness test
 ext/Test/Harness/t/iterators.t				Test::Harness test
 ext/Test/Harness/t/lib/App/Prove/Plugin/Dummy.pm	Module for testing Test::Harness
--ext/Test/Harness/t/lib/Dev/Null.pm			Module for testing Test::Harness
+ext/Test/Harness/t/lib/Dev/Null.pm			Module for testing Test::Harness
 ext/Test/Harness/t/lib/EmptyParser.pm			Module for testing Test::Harness
 ext/Test/Harness/t/lib/IO/c55Capture.pm			Module for testing Test::Harness
 ext/Test/Harness/t/lib/MyCustom.pm			Module for testing Test::Harness
