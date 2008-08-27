@@ -129,14 +129,6 @@ For maintenance (and branch merging) reasons, it would be useful to move
 some architecture-independent dual-life modules from lib/ to ext/, if this
 has no negative impact on the build of perl itself.
 
-However, we need to make sure that they are still installed in
-architecture-independent directories by C<make install>.
-
-=head2 Improving C<threads::shared>
-
-Investigate whether C<threads::shared> could share aggregates properly with
-only Perl level changes to shared.pm
-
 =head2 POSIX memory footprint
 
 Ilya observed that use POSIX; eats memory like there's no tomorrow, and at
