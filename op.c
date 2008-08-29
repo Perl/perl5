@@ -1138,6 +1138,20 @@ Perl_scalarvoid(pTHX_ OP *o)
 
     case OP_OR:
     case OP_AND:
+	kid = cLOGOPo->op_first;
+	if (kid->op_type == OP_NOT
+	    && (kid->op_flags & OPf_KIDS)
+	    && !PL_madskills) {
+	    if (o->op_type == OP_AND) {
+		o->op_type = OP_OR;
+		o->op_ppaddr = PL_ppaddr[OP_OR];
+	    } else {
+		o->op_type = OP_AND;
+		o->op_ppaddr = PL_ppaddr[OP_AND];
+	    }
+	    op_null(kid);
+	}
+
     case OP_DOR:
     case OP_COND_EXPR:
     case OP_ENTERGIVEN:
@@ -4442,7 +4456,8 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
     LOGOP *logop;
     OP *o;
     OP *first = *firstp;
-    OP * const other = *otherp;
+    OP *other = *otherp;
+    int prepend_not = 0;
 
     PERL_ARGS_ASSERT_NEW_LOGOP;
 
@@ -4450,10 +4465,11 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	return newBINOP(type, flags, scalar(first), scalar(other));
 
     scalarboolean(first);
-    /* optimize "!a && b" to "a || b", and "!a || b" to "a && b" */
+    /* optimize AND and OR ops that have NOTs as children */
     if (first->op_type == OP_NOT
-	&& (first->op_flags & OPf_SPECIAL)
 	&& (first->op_flags & OPf_KIDS)
+	&& ((first->op_flags & OPf_SPECIAL) /* unless ($x) { } */
+	    || (other->op_type == OP_NOT))  /* if (!$x && !$y) { } */
 	&& !PL_madskills) {
 	if (type == OP_AND || type == OP_OR) {
 	    if (type == OP_AND)
@@ -4466,6 +4482,15 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 		first->op_next = o->op_next;
 	    cUNOPo->op_first = NULL;
 	    op_free(o);
+	    if (other->op_type == OP_NOT) { /* !a AND|OR !b => !(a OR|AND b) */
+		o = other;
+		other = *otherp = cUNOPo->op_first;
+		if (o->op_next)
+		    other->op_next = o->op_next;
+		cUNOPo->op_first = NULL;
+		op_free(o);
+		prepend_not = 1; /* prepend a NOT op later */
+	    }
 	}
     }
     if (first->op_type == OP_CONST) {
@@ -4582,7 +4607,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 
     CHECKOP(type,logop);
 
-    o = newUNOP(OP_NULL, 0, (OP*)logop);
+    o = newUNOP(prepend_not ? OP_NOT : OP_NULL, 0, (OP*)logop);
     other->op_next = o;
 
     return o;

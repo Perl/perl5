@@ -29,7 +29,7 @@ sub ok {
     return $ok;
 }
 
-print "1..22\n";
+print "1..26\n";
 
 # Test do &sub and proper @_ handling.
 $_[0] = 0;
@@ -91,6 +91,18 @@ ok( (!defined do 6) && $!, "'do 6' : $!" );
 # [perl #19545]
 push @t, ($u = (do {} . "This should be pushed."));
 ok( $#t == 0, "empty do result value" );
+
+$zok = '';
+$owww = do { 1 if $zok };
+ok( $owww eq '', 'last is unless' );
+$owww = do { 2 unless not $zok };
+ok( $owww == 1, 'last is if not' );
+
+$zok = 'swish';
+$owww = do { 3 unless $zok };
+ok( $owww eq 'swish', 'last is unless' );
+$owww = do { 4 if not $zok };
+ok( $owww eq '', 'last is if not' );
 
 END {
     1 while unlink("$$.16", "$$.17", "$$.18");

@@ -27,7 +27,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 64;
+use Test::More tests => 66;
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -432,3 +432,29 @@ use constant H => { "#" => 1 }; H->{"#"}
 # SKIP ?$B::Deparse::VERSION <= 0.87 && "TODO optimized away 0 not yet fixed"
 # 57  (cpan-bug #33708)
 foreach my $i (@_) { 0 }
+####
+# 58 tests with not, not optimized
+x() unless $a;
+x() if not $a and $b;
+x() if $a and not $b;
+x() unless not $a and $b;
+x() unless $a and not $b;
+x() if not $a or $b;
+x() if $a or not $b;
+x() unless not $a or $b;
+x() unless $a or not $b;
+####
+# 59 tests with not, optimized
+x() if not $a;
+x() unless not $a;
+x() if not $a and not $b;
+x() unless not $a and not $b;
+x() if not $a or not $b;
+x() unless not $a or not $b;
+>>>>
+x() unless $a;
+x() if $a;
+x() unless $a or $b;
+x() if $a or $b;
+x() unless $a and $b;
+x() unless not $a && $b;

@@ -47,7 +47,7 @@ sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 package main;
 
 $| = 1;
-use Test::More tests => 558;
+use Test::More tests => 574;
 
 
 $a = new Oscalar "087";
@@ -1225,6 +1225,46 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     ok(!$b, "Expect overloaded boolean");
     ok(!$a, "Expect overloaded boolean");
 }
+
+{
+    package Flrbbbbb;
+    use overload
+	bool	 => sub { shift->{truth} eq 'yes' },
+	'0+'	 => sub { shift->{truth} eq 'yes' ? '1' : '0' },
+	'!'	 => sub { shift->{truth} eq 'no' },
+	fallback => 1;
+
+    sub new { my $class = shift; bless { truth => shift }, $class }
+
+    package main;
+
+    my $yes = Flrbbbbb->new('yes');
+    my $x;
+    $x = 1 if $yes;			is($x, 1);
+    $x = 2 unless $yes;			is($x, 1);
+    $x = 3 if !$yes;			is($x, 1);
+    $x = 4 unless !$yes;		is($x, 4);
+
+    my $no = Flrbbbbb->new('no');
+    $x = 0;
+    $x = 1 if $no;			is($x, 0);
+    $x = 2 unless $no;			is($x, 2);
+    $x = 3 if !$no;			is($x, 3);
+    $x = 4 unless !$no;			is($x, 3);
+
+    $x = 0;
+    $x = 1 if !$no && $yes;		is($x, 1);
+    $x = 2 unless !$no && $yes;		is($x, 1);
+    $x = 3 if $no || !$yes;		is($x, 1);
+    $x = 4 unless $no || !$yes;		is($x, 4);
+
+    $x = 0;
+    $x = 1 if !$no || !$yes;		is($x, 1);
+    $x = 2 unless !$no || !$yes;	is($x, 1);
+    $x = 3 if !$no && !$yes;		is($x, 1);
+    $x = 4 unless !$no && !$yes;	is($x, 4);
+}
+
 {
     use Scalar::Util 'weaken';
 
