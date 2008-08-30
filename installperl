@@ -67,6 +67,11 @@ if ( $Is_VMS ) {
 }
 
 $otherperls = 1;
+# This little hack simplifies making the code after the comment "Fetch some
+# frequently-used items from %Config" warning free. With $opts{destdir} always
+# defined, it's also possible to make the s/\Q$opts{destdir}\E unconditional.
+
+$opts{destdir} = '';
 # Consider refactoring this to use Getopt::Long once Getopt::Long's planned
 # feature is implemented, to distinguish + and - options.
 while (@ARGV) {
@@ -681,7 +686,7 @@ sub copy {
     my($from,$to) = @_;
 
     my $xto = $to;
-    $xto =~ s/^\Q$opts{destdir}\E// if $opts{destdir};
+    $xto =~ s/^\Q$opts{destdir}\E//;
     print $opts{verbose} ? "  cp $from $xto\n" : "  $xto\n"
 	unless $opts{silent};
     print "  creating new version of $xto\n"
@@ -766,7 +771,7 @@ sub installlib {
 	    unlink("$installarchlib/$name");
 	}
 	my $xname = "$installlib/$name";
-	$xname =~ s/^\Q$opts{destdir}\E// if $opts{destdir};
+	$xname =~ s/^\Q$opts{destdir}\E//;
 	$packlist->{$xname} = { type => 'file' };
 	if ($force || compare($_, "$installlib/$name") || $opts{notify}) {
 	    unlink("$installlib/$name");
@@ -813,7 +818,7 @@ sub copy_if_diff {
     my($from,$to)=@_;
     return 1 if (($^O eq 'VMS') && (-d $from));
     my $xto = $to;
-    $xto =~ s/^\Q$opts{destdir}\E// if $opts{destdir};
+    $xto =~ s/^\Q$opts{destdir}\E//;
     my $perlpodbadsymlink;
     if ($from =~ m!^pod/perl[\w-]+\.pod$! &&
 	-l $from &&
