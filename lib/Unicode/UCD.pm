@@ -3,7 +3,7 @@ package Unicode::UCD;
 use strict;
 use warnings;
 
-our $VERSION = '0.25';
+our $VERSION = '0.26';
 
 use Storable qw(dclone);
 
@@ -174,13 +174,41 @@ sub han_charname { # internal: called from charinfo
     return sprintf("CJK UNIFIED IDEOGRAPH-%04X", shift);
 }
 
+my %first_last = (
+   'CJK Ideograph Extension A' => [ 0x3400,   0x4DB5   ],
+   'CJK Ideograph'             => [ 0x4E00,   0x9FA5   ],
+   'CJK Ideograph Extension B' => [ 0x20000,  0x2A6D6  ],
+);
+
+get_charinfo_ranges();
+
+sub get_charinfo_ranges {
+   my @blocks = keys %first_last;
+   
+   my $fh;
+   openunicode( \$fh, 'UnicodeData.txt' );
+   if( defined $fh ){
+      while( my $line = <$fh> ){
+         next unless $line =~ /(?:First|Last)/;
+         if( grep{ $line =~ /[^;]+;<$_\s*,\s*(?:First|Last)>/ }@blocks ){
+            my ($number,$block,$type);
+            ($number,$block) = split /;/, $line;
+            $block =~ s/<|>//g;
+            ($block,$type) = split /, /, $block;
+            my $index = $type eq 'First' ? 0 : 1;
+            $first_last{ $block }->[$index] = hex $number;
+         }
+      }
+   }
+}
+
 my @CharinfoRanges = (
 # block name
 # [ first, last, coderef to name, coderef to decompose ],
 # CJK Ideographs Extension A
-  [ 0x3400,   0x4DB5,   \&han_charname,   undef  ],
+  [ @{ $first_last{'CJK Ideograph Extension A'} },        \&han_charname,   undef  ],
 # CJK Ideographs
-  [ 0x4E00,   0x9FA5,   \&han_charname,   undef  ],
+  [ @{ $first_last{'CJK Ideograph'} },                    \&han_charname,   undef  ],
 # Hangul Syllables
   [ 0xAC00,   0xD7A3,   $hasHangulUtil ? \&getHangulName : \&hangul_charname,  \&hangul_decomp ],
 # Non-Private Use High Surrogates
@@ -192,7 +220,7 @@ my @CharinfoRanges = (
 # The Private Use Area
   [ 0xE000,   0xF8FF,   undef,   undef  ],
 # CJK Ideographs Extension B
-  [ 0x20000,  0x2A6D6,  \&han_charname,   undef  ],
+  [ @{ $first_last{'CJK Ideograph Extension B'} },        \&han_charname,   undef  ],
 # Plane 15 Private Use Area
   [ 0xF0000,  0xFFFFD,  undef,   undef  ],
 # Plane 16 Private Use Area
