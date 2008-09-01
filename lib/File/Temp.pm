@@ -1022,7 +1022,7 @@ sub new {
   my $unlink = (exists $args{UNLINK} ? $args{UNLINK} : 1 );
   delete $args{UNLINK};
 
-  # template (store it in an error so that it will
+  # template (store it in an array so that it will
   # disappear from the arg list of tempfile
   my @template = ( exists $args{TEMPLATE} ? $args{TEMPLATE} : () );
   delete $args{TEMPLATE};
