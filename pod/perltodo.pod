@@ -398,29 +398,31 @@ the hint file setting.
 
 =back
 
-There is an implicit historical assumption, probably from Perl 1, that C<$cc>
-is also the correct command for linking object files together to make an
-executable. This may be true on Unix, but it's not true on other platforms,
-and there are a maze of work arounds in other places (such as F<Makefile.SH>)
-to cope with this.
+There is an implicit historical assumption from around Perl5.000alpha
+something, that C<$cc> is also the correct command for linking object files
+together to make an executable. This may be true on Unix, but it's not true
+on other platforms, and there are a maze of work arounds in other places (such
+as F<Makefile.SH>) to cope with this.
 
 Ideally, we should create a new variable to hold the name of the executable
 linker program, probe for it in F<Configure>, and centralise all the special
 case logic there or in hints files.
 
 A small bikeshed issue remains - what to call it, given that C<$ld> is already
-taken (arguably for the wrong thing) and C<$link> could be confused with the
-Unix command line executable of the same name, which does something completely
-different. Andy Dougherty makes the counter argument "In parrot, I tried to
-call the command used to link object files and  libraries into an executable
-F<link>, since that's what my vaguely-remembered DOS and VMS experience
-suggested.  I don't think any real confusion has ensued, so it's probably a
-reasonable name for perl5 to use."
+taken (arguably for the wrong thing now, but on SunOS 4.1 it is the command
+for creating dynamically-loadable modules) and C<$link> could be confused with
+the Unix command line executable of the same name, which does something
+completely different. Andy Dougherty makes the counter argument "In parrot, I
+tried to call the command used to link object files and  libraries into an
+executable F<link>, since that's what my vaguely-remembered DOS and VMS
+experience suggested. I don't think any real confusion has ensued, so it's
+probably a reasonable name for perl5 to use."
 
 "Alas, I've always worried that introducing it would make things worse, 
 since now the module building utilities would have to look for 
 C<$Config{link}> and institute a fall-back plan if it weren't found."
-
+Although I can see that as confusing, given that C<$Config{d_link}> is true
+when (hard) links are available.
 
 =head1 Tasks that need a little C knowledge
 
