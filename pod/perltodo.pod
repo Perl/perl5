@@ -36,9 +36,11 @@ Since then the Perl 6 target moved, but the Perl 5 implementation did not.
 So it would be useful for someone to compare the Perl 6 smartmatch table
 as of February 2006 L<http://svn.perl.org/viewvc/perl6/doc/trunk/design/syn/S03.pod?view=markup&pathrev=7615>
 and the current table L<http://svn.perl.org/viewvc/perl6/doc/trunk/design/syn/S03.pod?revision=14556&view=markup>
-and tabulate the differences in Perl 6. The diff is
+and tabulate the differences in Perl 6. The annotated view of changes is
+L<http://svn.perl.org/viewvc/perl6/doc/trunk/design/syn/S03.pod?view=annotate> and the diff is
 C<svn diff -r7615:14556 http://svn.perl.org/perl6/doc/trunk/design/syn/S03.pod>
--- search for C<=head1 Smart matching>
+-- search for C<=head1 Smart matching>. (In theory F<viewvc> can generate that,
+but in practice when I tried it hung forever, I assume "thinking")
 
 With that done and published, someone (else) can then map any changed Perl 6
 semantics back to Perl 5, based on how the existing semantics map to Perl 5:
