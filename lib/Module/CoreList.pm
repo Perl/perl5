@@ -1,7 +1,7 @@
 package Module::CoreList;
 use strict;
 use vars qw/$VERSION %released %patchlevel %version %families/;
-$VERSION = '2.15';
+$VERSION = '2.16';
 
 =head1 NAME
 
@@ -148,7 +148,7 @@ sub find_version {
 %released = (
     5.000    => '1994-10-17',
     5.001    => '1995-03-14',
-    5.002    => '1996-02-96',
+    5.002    => '1996-02-29',
     5.00307  => '1996-10-10',
     5.004    => '1997-05-15',
     5.005    => '1998-07-22',
