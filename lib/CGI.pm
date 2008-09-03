@@ -18,8 +18,8 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.251 2008/04/23 13:08:23 lstein Exp $';
-$CGI::VERSION='3.37';
+$CGI::revision = '$Id: CGI.pm,v 1.257 2008/08/06 14:01:06 lstein Exp $';
+$CGI::VERSION='3.40';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -227,7 +227,7 @@ if ($needs_binmode) {
 			   tt u i b blockquote pre img a address cite samp dfn html head
 			   base body Link nextid title meta kbd start_html end_html
 			   input Select option comment charset escapeHTML/],
-		':html3'=>[qw/div table caption th td TR Tr sup Sub strike applet Param 
+		':html3'=>[qw/div table caption th td TR Tr sup Sub strike applet Param nobr
 			   embed basefont style span layer ilayer font frameset frame script small big Area Map/],
                 ':html4'=>[qw/abbr acronym bdo col colgroup del fieldset iframe
                             ins label legend noframes noscript object optgroup Q 
@@ -440,15 +440,15 @@ sub param {
 	# If values is provided, then we set it.
 	if (@values or defined $value) {
 	    $self->add_parameter($name);
-	    $self->{$name}=[@values];
+	    $self->{param}{$name}=[@values];
 	}
     } else {
 	$name = $p[0];
     }
 
-    return unless defined($name) && $self->{$name};
+    return unless defined($name) && $self->{param}{$name};
 
-    my @result = @{$self->{$name}};
+    my @result = @{$self->{param}{$name}};
 
     if ($PARAM_UTF8) {
       eval "require Encode; 1;" unless Encode->can('decode'); # bring in these functions
@@ -576,14 +576,14 @@ sub init {
                       $self->add_parameter($param);
                       $self->read_from_client(\$value,$content_length,0)
                         if $content_length > 0;
-                      push (@{$self->{$param}},$value);
+                      push (@{$self->{param}{$param}},$value);
                       $is_xforms = 1;
               } elsif ($ENV{'CONTENT_TYPE'} =~ /multipart\/related.+boundary=\"?([^\";,]+)\"?.+start=\"?\<?([^\"\>]+)\>?\"?/) {
                       my($boundary,$start) = ($1,$2);
                       my($param) = 'XForms:Model';
                       $self->add_parameter($param);
                       my($value) = $self->read_multipart_related($start,$boundary,$content_length,0);
-                      push (@{$self->{$param}},$value);
+                      push (@{$self->{param}{$param}},$value);
                       if ($MOD_PERL) {
                               $query_string = $self->r->args;
                       } else {
@@ -675,7 +675,7 @@ sub init {
 	&& $ENV{'CONTENT_TYPE'} !~ m|^multipart/form-data| ) {
         my($param) = $meth . 'DATA' ;
         $self->add_parameter($param) ;
-      push (@{$self->{$param}},$query_string);
+      push (@{$self->{param}{$param}},$query_string);
       undef $query_string ;
     }
 # YL: End Change for XML handler 10/19/2001
@@ -687,7 +687,7 @@ sub init {
 	    $self->parse_params($query_string);
 	} else {
 	    $self->add_parameter('keywords');
-	    $self->{'keywords'} = [$self->parse_keywordlist($query_string)];
+	    $self->{param}{'keywords'} = [$self->parse_keywordlist($query_string)];
 	}
     }
 
@@ -754,7 +754,7 @@ sub save_request {
     @QUERY_PARAM = $self->param; # save list of parameters
     foreach (@QUERY_PARAM) {
       next unless defined $_;
-      $QUERY_PARAM{$_}=$self->{$_};
+      $QUERY_PARAM{$_}=$self->{param}{$_};
     }
     $QUERY_CHARSET = $self->charset;
     %QUERY_FIELDNAMES = %{$self->{'.fieldnames'}};
@@ -773,7 +773,7 @@ sub parse_params {
 	$param = unescape($param);
 	$value = unescape($value);
 	$self->add_parameter($param);
-	push (@{$self->{$param}},$value);
+	push (@{$self->{param}{$param}},$value);
     }
 }
 
@@ -781,7 +781,7 @@ sub add_parameter {
     my($self,$param)=@_;
     return unless defined $param;
     push (@{$self->{'.parameters'}},$param) 
-	unless defined($self->{$param});
+	unless defined($self->{param}{$param});
 }
 
 sub all_parameters {
@@ -1008,7 +1008,7 @@ sub delete {
     my %to_delete;
     foreach my $name (@to_delete)
     {
-        CORE::delete $self->{$name};
+        CORE::delete $self->{param}{$name};
         CORE::delete $self->{'.fieldnames'}->{$name};
         $to_delete{$name}++;
     }
@@ -1057,8 +1057,8 @@ END_OF_FUNC
 sub keywords {
     my($self,@values) = self_or_default(@_);
     # If values is provided, then we set it.
-    $self->{'keywords'}=[@values] if @values;
-    my(@result) = defined($self->{'keywords'}) ? @{$self->{'keywords'}} : ();
+    $self->{param}{'keywords'}=[@values] if @values;
+    my(@result) = defined($self->{param}{'keywords'}) ? @{$self->{param}{'keywords'}} : ();
     @result;
 }
 END_OF_FUNC
@@ -1176,7 +1176,7 @@ END_OF_FUNC
 
 'EXISTS' => <<'END_OF_FUNC',
 sub EXISTS {
-    exists $_[0]->{$_[1]};
+    exists $_[0]->{param}{$_[1]};
 }
 END_OF_FUNC
 
@@ -1203,7 +1203,7 @@ sub append {
     my(@values) = defined($value) ? (ref($value) ? @{$value} : $value) : ();
     if (@values) {
 	$self->add_parameter($name);
-	push(@{$self->{$name}},@values);
+	push(@{$self->{param}{$name}},@values);
     }
     return $self->param($name);
 }
@@ -1666,12 +1666,22 @@ sub start_html {
 			: qq(<meta name="$_" content="$meta->{$_}">)); }
     }
 
-    push(@result,ref($head) ? @$head : $head) if $head;
+    my $meta_bits_set = 0;
+    if( $head ) {
+        if( ref $head ) {
+            push @result, @$head;
+            $meta_bits_set = 1 if grep { /http-equiv=["']Content-Type/i }@$head;
+        }
+        else {
+            push @result, $head;
+            $meta_bits_set = 1 if $head =~ /http-equiv=["']Content-Type/i;
+        }
+    }
 
     # handle the infrequently-used -style and -script parameters
     push(@result,$self->_style($style))   if defined $style;
     push(@result,$self->_script($script)) if defined $script;
-    push(@result,$meta_bits)              if defined $meta_bits;
+    push(@result,$meta_bits)              if defined $meta_bits and !$meta_bits_set;
 
     # handle -noscript parameter
     push(@result,<<END) if $noscript;
@@ -2437,12 +2447,14 @@ sub popup_menu {
     my($name,$values,$default,$labels,$attributes,$override,$tabindex,@other) =
        rearrange([NAME,[VALUES,VALUE],[DEFAULT,DEFAULTS],LABELS,
        ATTRIBUTES,[OVERRIDE,FORCE],TABINDEX],@p);
-    my($result,$selected);
+    my($result,%selected);
 
     if (!$override && defined($self->param($name))) {
-	$selected = $self->param($name);
-    } else {
-	$selected = $default;
+	$selected{$self->param($name)}++;
+    } elsif ($default) {
+	%selected = map {$_=>1} ref($default) eq 'ARRAY' 
+                                ? @$default 
+                                : $default;
     }
     $name=$self->escapeHTML($name);
     my($other) = @other ? " @other" : '';
@@ -2453,20 +2465,22 @@ sub popup_menu {
     $result = qq/<select name="$name" $tabindex$other>\n/;
     foreach (@values) {
         if (/<optgroup/) {
-            foreach (split(/\n/)) {
+            for my $v (split(/\n/)) {
                 my $selectit = $XHTML ? 'selected="selected"' : 'selected';
-                s/(value="$selected")/$selectit $1/ if defined $selected;
-                $result .= "$_\n";
+		for my $selected (keys %selected) {
+		    $v =~ s/(value="$selected")/$selectit $1/;
+		}
+                $result .= "$v\n";
             }
         }
         else {
-          my $attribs = $self->_set_attributes($_, $attributes);
-	  my($selectit) = defined($selected) ? $self->_selected($selected eq $_) : '';
-	  my($label) = $_;
-	  $label = $labels->{$_} if defined($labels) && defined($labels->{$_});
-	  my($value) = $self->escapeHTML($_);
-	  $label=$self->escapeHTML($label,1);
-          $result .= "<option${attribs} ${selectit}value=\"$value\">$label</option>\n";
+          my $attribs   = $self->_set_attributes($_, $attributes);
+	  my($selectit) = $self->_selected($selected{$_});
+	  my($label)    = $_;
+	  $label        = $labels->{$_} if defined($labels) && defined($labels->{$_});
+	  my($value)    = $self->escapeHTML($_);
+	  $label        = $self->escapeHTML($label,1);
+          $result      .= "<option${attribs} ${selectit}value=\"$value\">$label</option>\n";
         }
     }
 
@@ -2804,12 +2818,12 @@ END_OF_FUNC
 sub param_fetch {
     my($self,@p) = self_or_default(@_);
     my($name) = rearrange([NAME],@p);
-    unless (exists($self->{$name})) {
+    unless (exists($self->{param}{$name})) {
 	$self->add_parameter($name);
-	$self->{$name} = [];
+	$self->{param}{$name} = [];
     }
     
-    return $self->{$name};
+    return $self->{param}{$name};
 }
 END_OF_FUNC
 
@@ -2835,30 +2849,58 @@ sub path_info {
 }
 END_OF_FUNC
 
-# WE USE THIS TO COMPENSATE FOR A BUG IN APACHE 2 PRESENT AT LEAST UP THROUGH 2.0.54
+# This function returns a potentially modified version of SCRIPT_NAME
+# and PATH_INFO. Some HTTP servers do sanitise the paths in those
+# variables. It is the case of at least Apache 2. If for instance the
+# user requests: /path/./to/script.cgi/x//y/z/../x?y, Apache will set:
+# REQUEST_URI=/path/./to/script.cgi/x//y/z/../x?y
+# SCRIPT_NAME=/path/to/env.cgi
+# PATH_INFO=/x/y/x
+#
+# This is all fine except that some bogus CGI scripts expect
+# PATH_INFO=/http://foo when the user requests
+# http://xxx/script.cgi/http://foo
+#
+# Old versions of this module used to accomodate with those scripts, so
+# this is why we do this here to keep those scripts backward compatible.
+# Basically, we accomodate with those scripts but within limits, that is
+# we only try to preserve the number of / that were provided by the user
+# if $REQUEST_URI and "$SCRIPT_NAME$PATH_INFO" only differ by the number
+# of consecutive /.
+#
+# So for instance, in: http://foo/x//y/script.cgi/a//b, we'll return a
+# script_name of /x//y/script.cgi and a path_info of /a//b, but in:
+# http://foo/./x//z/script.cgi/a/../b//c, we'll return the versions
+# possibly sanitised by the HTTP server, so in the case of Apache 2:
+# script_name == /foo/x/z/script.cgi and path_info == /b/c.
+#
+# Future versions of this module may no longer do that, so one should
+# avoid relying on the browser, proxy, server, and CGI.pm preserving the
+# number of consecutive slashes as no guarantee can be made there.
 '_name_and_path_from_env' => <<'END_OF_FUNC',
 sub _name_and_path_from_env {
-   my $self = shift;
-   my $raw_script_name = $ENV{SCRIPT_NAME} || '';
-   my $raw_path_info   = $ENV{PATH_INFO}   || '';
-   my $uri             = unescape($self->request_uri) || '';
+    my $self = shift;
+    my $script_name = $ENV{SCRIPT_NAME}  || '';
+    my $path_info   = $ENV{PATH_INFO}    || '';
+    my $uri         = $self->request_uri || '';
 
-   my $protected    = quotemeta($raw_path_info);
-   $raw_script_name =~ s/$protected$//;
+    $uri =~ s/\?.*//s;
+    $uri = unescape($uri);
 
-   my @uri_double_slashes  = $uri =~ m^(/{2,}?)^g;
-   my @path_double_slashes = "$raw_script_name $raw_path_info" =~ m^(/{2,}?)^g;
+    if ($uri ne "$script_name$path_info") {
+        my $script_name_pattern = quotemeta($script_name);
+        my $path_info_pattern = quotemeta($path_info);
+        $script_name_pattern =~ s{(?:\\/)+}{/+}g;
+        $path_info_pattern =~ s{(?:\\/)+}{/+}g;
 
-   my $apache_bug      = @uri_double_slashes != @path_double_slashes;
-   return ($raw_script_name,$raw_path_info) unless $apache_bug;
-
-   my $path_info_search = quotemeta($raw_path_info);
-   $path_info_search    =~ s!/!/+!g;
-   if ($uri =~ m/^(.+)($path_info_search)/) {
-       return ($1,$2);
-   } else {
-       return ($raw_script_name,$raw_path_info);
-   }
+        if ($uri =~ /^($script_name_pattern)($path_info_pattern)$/s) {
+            # REQUEST_URI and SCRIPT_NAME . PATH_INFO only differ by the
+            # numer of consecutive slashes, so we can extract the info from
+            # REQUEST_URI:
+            ($script_name, $path_info) = ($1, $2);
+        }
+    }
+    return ($script_name,$path_info);
 }
 END_OF_FUNC
 
@@ -2942,7 +2984,9 @@ sub Accept {
     my($self,$search) = self_or_CGI(@_);
     my(%prefs,$type,$pref,$pat);
     
-    my(@accept) = split(',',$self->http('accept'));
+    my(@accept) = defined $self->http('accept') 
+                ? split(',',$self->http('accept'))
+                : ();
 
     foreach (@accept) {
 	($pref) = /q=(\d\.\d+|\d+)/;
@@ -3379,6 +3423,8 @@ sub read_multipart {
 	    return;
 	}
 
+	$header{'Content-Disposition'} ||= ''; # quench uninit variable warning
+
 	my($param)= $header{'Content-Disposition'}=~/ name="([^"]*)"/;
         $param .= $TAINTED;
 
@@ -3387,6 +3433,9 @@ sub read_multipart {
         # content-disposition parsing fail.
         my ($filename) = $header{'Content-Disposition'}
 	               =~/ filename=(("[^"]*")|([a-z\d!\#'\*\+,\.^_\`\{\}\|\~]*))/i;
+
+	$filename ||= ''; # quench uninit variable warning
+
         $filename =~ s/^"([^"]*)"$/$1/;
 	# Test for Opera's multiple upload feature
 	my($multipart) = ( defined( $header{'Content-Type'} ) &&
@@ -3401,7 +3450,7 @@ sub read_multipart {
 	if ( ( !defined($filename) || $filename eq '' ) && !$multipart ) {
 	    my($value) = $buffer->readBody;
             $value .= $TAINTED;
-	    push(@{$self->{$param}},$value);
+	    push(@{$self->{param}{$param}},$value);
 	    next;
 	}
 
@@ -3477,7 +3526,7 @@ sub read_multipart {
 	      name => $tmpfile,
 	      info => {%header},
 	  };
-	  push(@{$self->{$param}},$filehandle);
+	  push(@{$self->{param}{$param}},$filehandle);
       }
     }
 }
@@ -3579,7 +3628,7 @@ sub read_multipart_related {
 	      name => $tmpfile,
 	      info => {%header},
 	  };
-	  push(@{$self->{$param}},$filehandle);
+	  push(@{$self->{param}{$param}},$filehandle);
       }
     }
     return $returnvalue;
@@ -4409,8 +4458,7 @@ selections in a scrolling list), you can ask to receive an array.  Otherwise
 the method will return a single value.
 
 If a value is not given in the query string, as in the queries
-"name1=&name2=" or "name1&name2", it will be returned as an empty
-string.  This feature is new in 2.63.
+"name1=&name2=", it will be returned as an empty string.
 
 
 If the parameter does not exist at all, then param() will return undef
@@ -6133,7 +6181,7 @@ recognized.  See textfield() for details.
 
    print popup_menu(-name=>'menu_name',
 			    -values=>['eenie','meenie','minie'],
-			    -default=>'meenie',
+			    -default=>['meenie','minie'],
           -labels=>\%labels,
           -attributes=>\%attributes);
 
@@ -6156,7 +6204,8 @@ a named array, such as "\@foo".
 
 The optional third parameter (-default) is the name of the default
 menu choice.  If not specified, the first item will be the default.
-The values of the previous choice will be maintained across queries.
+The values of the previous choice will be maintained across
+queries. Pass an array reference to select multiple defaults.
 
 =item 4.
 

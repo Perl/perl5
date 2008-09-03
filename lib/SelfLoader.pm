@@ -1,7 +1,7 @@
 package SelfLoader;
 use 5.008;
 use strict;
-our $VERSION = "1.15";
+our $VERSION = "1.16";
 
 # The following bit of eval-magic is necessary to make this work on
 # perls < 5.009005.
@@ -163,7 +163,8 @@ sub _add_to_cache {
     return () unless $fullname;
     carp("Redefining sub $fullname")
       if exists $Cache{$fullname};
-    $Cache{$fullname} = join('', "package $pack; ",@$lines);
+    $Cache{$fullname} = join('', "\n\#line 1 \"sub $fullname\"\npackage $pack; ", @$lines);
+    #$Cache{$fullname} = join('', "package $pack; ",@$lines);
     print STDERR "SelfLoader cached $fullname: $Cache{$fullname}" if DEBUG;
     # return stub to be eval'd
     defined($protoype) ? "sub $fullname $protoype;" : "sub $fullname;"
