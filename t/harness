@@ -12,6 +12,7 @@ BEGIN {
 my $torture; # torture testing?
 
 use Test::Harness;
+use strict;
 
 $Test::Harness::switches = "";    # Too much noise otherwise
 $Test::Harness::Verbose++ while @ARGV && $ARGV[0] eq '-v' && shift;
@@ -26,7 +27,7 @@ if ($ARGV[0] && $ARGV[0] eq '-torture') {
 $ENV{PERL_CORE} = 1;
 
 #fudge DATA for now.
-%datahandle = qw(
+my %datahandle = qw(
 		lib/bigint.t		1
 		lib/bigintpm.t		1
 		lib/bigfloat.t	 	1
@@ -45,7 +46,7 @@ foreach (keys %datahandle) {
      unlink "$_.t";
 }
 
-my @tests = ();
+my (@tests, $re);
 
 # [.VMS]TEST.COM calls harness with empty arguments, so clean-up @ARGV
 @ARGV = grep $_ && length( $_ ) => @ARGV;

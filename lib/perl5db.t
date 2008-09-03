@@ -20,6 +20,10 @@ my $dev_tty = '/dev/tty';
 	print "1..0 # Skip: no $dev_tty\n";
 	exit 0;
     }
+    if ($ENV{PERL5DB}) {
+	print "1..0 # Skip: \$ENV{PERL5DB} is already set to '$ENV{PERL5DB}'\n";
+	exit 0;
+    }
 }
 
 plan(1);
