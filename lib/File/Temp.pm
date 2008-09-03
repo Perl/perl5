@@ -203,7 +203,7 @@ Exporter::export_tags('POSIX','mktemp','seekable');
 
 # Version number
 
-$VERSION = '0.20_01';
+$VERSION = '0.20_02';
 
 # This is a list of characters that can be used in random filenames
 
