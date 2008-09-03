@@ -9,7 +9,7 @@
 
 package Data::Dumper;
 
-$VERSION = '2.121_14';
+$VERSION = '2.121_17';
 
 #$| = 1;
 
@@ -65,7 +65,7 @@ sub new {
 
   croak "Usage:  PACKAGE->new(ARRAYREF, [ARRAYREF])" 
     unless (defined($v) && (ref($v) eq 'ARRAY'));
-  $n = [] unless (defined($n) && (ref($v) eq 'ARRAY'));
+  $n = [] unless (defined($n) && (ref($n) eq 'ARRAY'));
 
   my($s) = { 
              level      => 0,           # current recursive depth
