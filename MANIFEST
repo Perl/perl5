@@ -1152,6 +1152,7 @@ ext/threads/shared/t/shared_attr.t	Test :shared attribute
 ext/threads/shared/t/stress.t	Stress test
 ext/threads/shared/t/sv_refs.t	thread shared variables
 ext/threads/shared/t/sv_simple.t	thread shared variables
+ext/threads/shared/t/utf8.t	Test UTF-8 keys in shared hashes
 ext/threads/shared/t/waithires.t	Test sub-second cond_timedwait
 ext/threads/shared/t/wait.t	Test cond_wait and cond_timedwait
 ext/threads/t/basic.t		ithreads

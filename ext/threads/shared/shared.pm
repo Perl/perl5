@@ -7,7 +7,7 @@ use warnings;
 
 use Scalar::Util qw(reftype refaddr blessed);
 
-our $VERSION = '1.21';
+our $VERSION = '1.26';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -133,10 +133,6 @@ $make_shared = sub {
     elsif ($ref_type eq 'SCALAR') {
         $copy = \do{ my $scalar = $$item; };
         share($copy);
-        # Clone READONLY flag
-        if (Internals::SvREADONLY($$item)) {
-            Internals::SvREADONLY($$copy, 1);
-        }
         # Add to clone checking hash
         $cloned->{$addr} = $copy;
     }
@@ -169,8 +165,13 @@ $make_shared = sub {
     }
 
     # Clone READONLY flag
+    if ($ref_type eq 'SCALAR') {
+        if (Internals::SvREADONLY($$item)) {
+            Internals::SvREADONLY($$copy, 1) if ($] >= 5.008003);
+        }
+    }
     if (Internals::SvREADONLY($item)) {
-        Internals::SvREADONLY($copy, 1);
+        Internals::SvREADONLY($copy, 1) if ($] >= 5.008003);
     }
 
     return $copy;
@@ -186,7 +187,7 @@ threads::shared - Perl extension for sharing data structures between threads
 
 =head1 VERSION
 
-This document describes threads::shared version 1.21
+This document describes threads::shared version 1.26
 
 =head1 SYNOPSIS
 
@@ -540,7 +541,7 @@ L<threads::shared> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads-shared>
 
 Annotated POD for L<threads::shared>:
-L<http://annocpan.org/~JDHEDDEN/threads-shared-1.21/shared.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-shared-1.26/shared.pm>
 
 Source repository:
 L<http://code.google.com/p/threads-shared/>
@@ -557,10 +558,12 @@ L<http://lists.cpan.org/showlist.cgi?name=iThreads>
 
 Artur Bergman E<lt>sky AT crucially DOT netE<gt>
 
-threads::shared is released under the same license as Perl.
-
 Documentation borrowed from the old Thread.pm.
 
 CPAN version produced by Jerry D. Hedden E<lt>jdhedden AT cpan DOT orgE<gt>.
+
+=head1 LICENSE
+
+threads::shared is released under the same license as Perl.
 
 =cut

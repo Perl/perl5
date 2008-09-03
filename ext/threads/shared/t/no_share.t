@@ -8,7 +8,7 @@ BEGIN {
     }
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
 }
@@ -60,5 +60,7 @@ threads->create(sub {
 ok(5, $test eq "bar" || $test eq 'baz', "Test that value is an expected one");
 
 ok(6, ! is_shared($test), "Check for sharing");
+
+exit(0);
 
 # EOF

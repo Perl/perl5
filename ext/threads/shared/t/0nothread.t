@@ -80,4 +80,6 @@ array(24, 42, 'Thing');
 share(\%hash);
 hash(24, 42, 'Thing');
 
+exit(0);
+
 # EOF

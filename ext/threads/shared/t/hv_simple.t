@@ -8,7 +8,7 @@ BEGIN {
     }
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
 }
@@ -76,5 +76,7 @@ threads->create(sub { %hash = () })->join();
 ok(15, keys %hash == 0, "Check clear");
 
 ok(16, is_shared(%hash), "Check for sharing");
+
+exit(0);
 
 # EOF
