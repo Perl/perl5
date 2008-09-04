@@ -23,6 +23,55 @@ programming languages offer you 1 line of immortality?
 
 =head1 Tasks that only need Perl knowledge
 
+=head2 Smartmatch design issues
+
+In 5.10.0 the smartmatch operator C<~~> isn't working quite "right". But
+before we can fix the implementation, we need to define what "right" is.
+The first problem is that Robin Houston implemented the Perl 6 smart match
+spec as of February 2006, when smart match was axiomatically symmetrical:
+L<http://groups.google.com/group/perl.perl6.language/msg/bf2b486f089ad021>
+
+Since then the Perl 6 target moved, but the Perl 5 implementation did not.
+
+So it would be useful for someone to compare the Perl 6 smartmatch table
+as of February 2006 L<http://svn.perl.org/viewvc/perl6/doc/trunk/design/syn/S03.pod?view=markup&pathrev=7615>
+and the current table L<http://svn.perl.org/viewvc/perl6/doc/trunk/design/syn/S03.pod?revision=14556&view=markup>
+and tabulate the differences in Perl 6. The annotated view of changes is
+L<http://svn.perl.org/viewvc/perl6/doc/trunk/design/syn/S03.pod?view=annotate> and the diff is
+C<svn diff -r7615:14556 http://svn.perl.org/perl6/doc/trunk/design/syn/S03.pod>
+-- search for C<=head1 Smart matching>. (In theory F<viewvc> can generate that,
+but in practice when I tried it hung forever, I assume "thinking")
+
+With that done and published, someone (else) can then map any changed Perl 6
+semantics back to Perl 5, based on how the existing semantics map to Perl 5:
+L<http://search.cpan.org/~rgarcia/perl-5.10.0/pod/perlsyn.pod#Smart_matching_in_detail>
+
+
+There are also some questions that need answering:
+
+=over 4
+
+=item *
+
+How do you negate one?  (documentation issue)
+http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2008-01/msg00071.html
+
+=item *
+
+Array behaviors
+http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-12/msg00799.html
+
+* Should smart matches be symmetrical? (Perl 6 says no)
+
+* Other differences between Perl 5 and Perl 6 smart match?
+
+=item *
+
+Objects and smart match
+http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-12/msg00865.html
+
+=back
+
 =head2 Remove duplication of test setup.
 
 Schwern notes, that there's duplication of code - lots and lots of tests have
@@ -54,31 +103,12 @@ checkpods and have C<make check> use podchecker.
 (This probably impacts much more than the core: also the Test::Harness
 and TAP::* modules on CPAN.)
 
-The core regression test suite is getting ever more comprehensive, which has
-the side effect that it takes longer to run. This isn't so good. Investigate
-whether it would be feasible to give the harness script the B<option> of
-running sets of tests in parallel. This would be useful for tests in
-F<t/op/*.t> and F<t/uni/*.t> and maybe some sets of tests in F<lib/>.
-
-Questions to answer
-
-=over 4
-
-=item 1
-
-How does screen layout work when you're running more than one test?
-
-=item 2
-
-How does the caller of test specify how many tests to run in parallel?
-
-=item 3
-
-How do setup/teardown tests identify themselves?
-
-=back
-
-Pugs already does parallel testing - can their approach be re-used?
+All of the tests in F<t/> can now be run in parallel, if C<$ENV{TEST_JOBS}>
+is set. However, tests within each directory in F<ext> and F<lib> are still
+run in series, with directories run in parallel. This is an adequate
+heuristic, but it might be possible to relax it further, and get more
+throughput. Specifically, it would be good to audit all of F<lib/*.t>, and
+make them use C<File::Temp>.
 
 =head2 Make Schwern poorer
 
@@ -147,14 +177,6 @@ F<t/lib/commonsense.t>.
 For maintenance (and branch merging) reasons, it would be useful to move
 some architecture-independent dual-life modules from lib/ to ext/, if this
 has no negative impact on the build of perl itself.
-
-However, we need to make sure that they are still installed in
-architecture-independent directories by C<make install>.
-
-=head2 Improving C<threads::shared>
-
-Investigate whether C<threads::shared> could share aggregates properly with
-only Perl level changes to shared.pm
 
 =head2 POSIX memory footprint
 
@@ -356,6 +378,54 @@ file/directory copying back and forth.
 
 Make F<pod/roffitall> be updated by F<pod/buildtoc>.
 
+=head2 Split "linker" from "compiler"
+
+Right now, Configure probes for two commands, and sets two variables:
+
+=over 4
+
+=item * C<cc (cc.U)>
+
+This variable holds the name of a command to execute a C compiler which
+can resolve multiple global references that happen to have the same
+name.  Usual values are F<cc> and F<gcc>.
+Fervent ANSI compilers may be called F<c89>.  AIX has F<xlc>.
+
+=item * ld (dlsrc.U)
+
+This variable indicates the program to be used to link
+libraries for dynamic loading.  On some systems, it is F<ld>.
+On ELF systems, it should be C<$cc>.  Mostly, we'll try to respect
+the hint file setting.
+
+=back
+
+There is an implicit historical assumption from around Perl5.000alpha
+something, that C<$cc> is also the correct command for linking object files
+together to make an executable. This may be true on Unix, but it's not true
+on other platforms, and there are a maze of work arounds in other places (such
+as F<Makefile.SH>) to cope with this.
+
+Ideally, we should create a new variable to hold the name of the executable
+linker program, probe for it in F<Configure>, and centralise all the special
+case logic there or in hints files.
+
+A small bikeshed issue remains - what to call it, given that C<$ld> is already
+taken (arguably for the wrong thing now, but on SunOS 4.1 it is the command
+for creating dynamically-loadable modules) and C<$link> could be confused with
+the Unix command line executable of the same name, which does something
+completely different. Andy Dougherty makes the counter argument "In parrot, I
+tried to call the command used to link object files and  libraries into an
+executable F<link>, since that's what my vaguely-remembered DOS and VMS
+experience suggested. I don't think any real confusion has ensued, so it's
+probably a reasonable name for perl5 to use."
+
+"Alas, I've always worried that introducing it would make things worse, 
+since now the module building utilities would have to look for 
+C<$Config{link}> and institute a fall-back plan if it weren't found."
+Although I can see that as confusing, given that C<$Config{d_link}> is true
+when (hard) links are available.
+
 =head1 Tasks that need a little C knowledge
 
 These tasks would need a little C knowledge, but don't need any specific
@@ -537,6 +607,14 @@ outside of the core, or even outside of F<gv.c> allocates them), but they
 probably aren't allocated/deallocated often enough for a speed saving. Whereas
 C<MAGIC> is allocated/deallocated more often, but in turn, is also something
 more externally visible, so changing the rules here may bite external code.
+
+=head2 Shared arenas
+
+Several SV body structs are now the same size, notably PVMG and PVGV, PVAV and
+PVHV, and PVCV and PVFM. It should be possible to allocate and return same
+sized bodies from the same actual arena, rather than maintaining one arena for
+each. This could save 4-6K per thread, of memory no longer tied up in the
+not-yet-allocated part of an arena.
 
 
 =head1 Tasks that need a knowledge of XS

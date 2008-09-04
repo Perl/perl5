@@ -1164,6 +1164,9 @@ compiler's numeric file descriptor routines. There is an experimental native
 C<win32> layer which is expected to be enhanced and should eventually be
 the default under Win32.
 
+The PERLIO environment variable is completely ignored when perl
+is run in taint mode.
+
 =item PERLIO_DEBUG
 X<PERLIO_DEBUG>
 
@@ -1188,12 +1191,18 @@ A list of directories in which to look for Perl library
 files before looking in the standard library and the current directory.
 If PERL5LIB is defined, PERLLIB is not used.
 
+The PERLLIB environment variable is completely ignored when perl
+is run in taint mode.
+
 =item PERL5DB
 X<PERL5DB>
 
 The command used to load the debugger code.  The default is:
 
 	BEGIN { require 'perl5db.pl' }
+
+The PERL5DB environment variable only used when perl is started with
+a bare B<-d> switch.
 
 =item PERL5DB_THREADED
 X<PERL5DB_THREADED>
@@ -1216,6 +1225,11 @@ portability concerns.  Besides, perl can use a shell that may not be
 fit for interactive use, and setting COMSPEC to such a shell may
 interfere with the proper functioning of other programs (which usually
 look in COMSPEC to find a shell fit for interactive use).
+
+Before Perl 5.10.0 and 5.8.8, PERL5SHELL was not taint checked
+when running external commands.  It is recommended that
+you explicitly set (or delete) C<$ENV{PERL5SHELL}> when running
+in taint mode under Windows.
 
 =item PERL_ALLOW_NON_IFS_LSP (specific to the Win32 port)
 X<PERL_ALLOW_NON_IFS_LSP>
