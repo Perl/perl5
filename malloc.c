@@ -2293,6 +2293,8 @@ Perl_realloc(void *mp, size_t nbytes)
 		nmalloc[bucket]--;
 		nmalloc[pow * BUCKETS_PER_POW2]++;
 #endif 	    
+		if (pow * BUCKETS_PER_POW2 > (MEM_SIZE)max_bucket)
+		    max_bucket = pow * BUCKETS_PER_POW2;
 		*(cp - M_OVERHEAD) = pow * BUCKETS_PER_POW2; /* Fill index. */
 		MALLOC_UNLOCK;
 		goto inplace_label;
