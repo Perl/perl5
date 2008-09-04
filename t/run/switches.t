@@ -11,7 +11,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan(tests => 68);
+plan(tests => 69);
 
 use Config;
 
@@ -352,3 +352,19 @@ $r = runperl(
     stdin       => 'zomtek',
 );
 is( $r, "affe\n", '-E works outside of the block created by -n' );
+
+# RT #30660
+
+$filename = tempfile();
+SKIP: {
+    open my $f, ">$filename" or skip( "Can't write temp file $filename: $!" );
+    print $f <<'SWTEST';
+#!perl -w    -iok
+print "$^I\n";
+SWTEST
+    close $f or die "Could not close: $!";
+    $r = runperl(
+	progfile    => $filename,
+    );
+    like( $r, qr/ok/, 'Spaces on the #! line (#30660)' );
+}

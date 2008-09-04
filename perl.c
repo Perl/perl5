@@ -3389,8 +3389,10 @@ Internet, point your browser at http://www.perl.org/, the Perl Home Page.\n\n");
 	return s;
     case '*':
     case ' ':
-	if (s[1] == '-')	/* Additional switches on #! line. */
-	    return s+2;
+        while( *s == ' ' )
+          ++s;
+	if (s[0] == '-')	/* Additional switches on #! line. */
+	    return s+1;
 	break;
     case '-':
     case 0:

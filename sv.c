@@ -3059,13 +3059,21 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
 	    const U8 ch = *t++;
 	    /* Check for hi bit */
 	    if (!NATIVE_IS_INVARIANT(ch)) {
-		STRLEN len = SvCUR(sv) + 1; /* Plus the \0 */
+		STRLEN len = SvCUR(sv);
+		/* *Currently* bytes_to_utf8() adds a '\0' after every string
+		   it converts. This isn't documented. It's not clear if it's
+		   a bad thing to be doing, and should be changed to do exactly
+		   what the documentation says. If so, this code will have to
+		   be changed.
+		   As is, we mustn't rely on our incoming SV being well formed
+		   and having a trailing '\0', as certain code in pp_formline
+		   can send us partially built SVs. */
 		U8 * const recoded = bytes_to_utf8((U8*)s, &len);
 
 		SvPV_free(sv); /* No longer using what was there before. */
 		SvPV_set(sv, (char*)recoded);
-		SvCUR_set(sv, len - 1);
-		SvLEN_set(sv, len); /* No longer know the real size. */
+		SvCUR_set(sv, len);
+		SvLEN_set(sv, len + 1); /* No longer know the real size. */
 		break;
 	    }
 	}
