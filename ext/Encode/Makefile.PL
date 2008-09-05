@@ -1,10 +1,11 @@
 #
-# $Id: Makefile.PL,v 2.6 2008/05/07 20:56:05 dankogai Exp dankogai $
+# $Id: Makefile.PL,v 2.7 2008/07/01 20:56:17 dankogai Exp dankogai $
 #
 use 5.007003;
 use strict;
 use warnings;
 use ExtUtils::MakeMaker;
+use File::Spec;
 
 # Just for sure :)
 my %ARGV = map { my @r = split /=/,$_; defined $r[1] or $r[1]=1; @r } @ARGV;
@@ -34,20 +35,20 @@ my @man =  ();
 @man = ( MAN1PODS => {}, MAN3PODS => {} ) if $ENV{PERL_CORE};
 
 WriteMakefile(
-          NAME		=> "Encode",
-          EXE_FILES         => \@exe_files,
-          VERSION_FROM	=> 'Encode.pm',
-          OBJECT		=> '$(O_FILES)',
-          'dist'		=> {
-          COMPRESS	=> 'gzip -9f',
-          SUFFIX	=> 'gz',
-          DIST_DEFAULT => 'all tardist',
-          },
-	  @man,
-          INC       => "-I./Encode",
-          PMLIBDIRS => \@pmlibdirs,
-          INSTALLDIRS => 'perl',
-          );
+    NAME         => "Encode",
+    EXE_FILES    => \@exe_files,
+    VERSION_FROM => 'Encode.pm',
+    OBJECT       => '$(O_FILES)',
+    'dist'       => {
+        COMPRESS     => 'gzip -9f',
+        SUFFIX       => 'gz',
+        DIST_DEFAULT => 'all tardist',
+    },
+    @man,
+    INC         => '-I' . File::Spec->catfile( '.', 'Encode' ),
+    PMLIBDIRS   => \@pmlibdirs,
+    INSTALLDIRS => 'perl',
+);
 
 package MY;
 

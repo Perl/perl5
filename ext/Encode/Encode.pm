@@ -1,10 +1,10 @@
 #
-# $Id: Encode.pm,v 2.25 2008/05/07 20:56:05 dankogai Exp dankogai $
+# $Id: Encode.pm,v 2.26 2008/07/01 20:56:17 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.25 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.26 $ =~ /(\d+)/g;
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -51,7 +51,14 @@ use Encode::Alias;
 our %Encoding;
 our %ExtModule;
 require Encode::Config;
-eval { require Encode::ConfigLocal };
+#  See
+#  https://bugzilla.redhat.com/show_bug.cgi?id=435505#c2
+#  to find why sig handers inside eval{} are disabled.
+eval {
+    local $SIG{__DIE__};
+    local $SIG{__WARN__};
+    require Encode::ConfigLocal;
+};
 
 sub encodings {
     my $class = shift;

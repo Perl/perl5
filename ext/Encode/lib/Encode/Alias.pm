@@ -2,7 +2,7 @@ package Encode::Alias;
 use strict;
 use warnings;
 no warnings 'redefine';
-our $VERSION = do { my @r = ( q$Revision: 2.9 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.10 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 sub DEBUG () { 0 }
 
 use base qw(Exporter);
@@ -207,6 +207,8 @@ sub init_aliases {
     # predefined in *.ucm; unneeded
     # define_alias( qr/\bmacIcelandic$/i => '"macIceland"');
     define_alias( qr/^mac_(.*)$/i => '"mac$1"' );
+    # http://rt.cpan.org/Ticket/Display.html?id=36326
+    define_alias( qr/^macintosh$/i => '"MacRoman"' );
 
     # Ououououou. gone.  They are differente!
     # define_alias( qr/\bmacRomanian$/i => '"macRumanian"');

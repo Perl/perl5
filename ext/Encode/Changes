@@ -1,8 +1,27 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.25 2008/05/07 20:56:05 dankogai Exp dankogai $
+# $Id: Changes,v 2.26 2008/07/01 20:56:17 dankogai Exp dankogai $
 #
-$Revision: 2.25 $ $Date: 2008/05/07 20:56:05 $
+$Revision: 2.26 $ $Date: 2008/07/01 20:56:17 $
+! Encode.pm
+  Absense of Encode::ConfigLocal no longer carps no matter what.
+  https://bugzilla.redhat.com/show_bug.cgi?id=435505#c2
+  https://rt.cpan.org/Ticket/Display.html?id=28638
+  https://rt.cpan.org/Ticket/Display.html?id=11511
+! lib/Encode/JIS7.pm
+  use encoding 'utf8' and 'iso-2022-jp' glitches on perl 5.10
+  Thanks, MIYAGAWA
+  Message-Id: <693254b90807011224h3ab50d76v50c6fea87baf223c@mail.gmail.com>
+! lib/Encode/Alias.pm t/Aliases.t
+  macintosh' not recognize as MacRoman
+  http://rt.cpan.org/Ticket/Display.html?id=36326
+! Makefile.PL
+  s{INC => "-I./Encode"}
+   {INC         => '-I' . File::Spec->catfile( '.', 'Encode' )}
+  To prevent some platforms from forgetting to include Encode/encode.h.  
+  http://rt.cpan.org/Ticket/Display.html?id=36348
+
+2.25 2008/05/07 20:56:05
 ! Encode.pm
   added ':default' to Exporter option.
 ! lib/Encode/GSM0338.pm
@@ -15,7 +34,7 @@ $Revision: 2.25 $ $Date: 2008/05/07 20:56:05 $
   "This fix for Encode::Alias should make Solaris happy:"
   Message-ID: <47D886D9.6060001@iki.fi>
 
-$Revision: 2.25 $ $Date: 2008/05/07 20:56:05 $
+2.24 2008/03/12 09:51:11
 ! lib/Encode/Config.pm
   adds and  fixes also adds cp858 support.
 ! Encode.pm encoding.pm lib/Encode/Alias.pm ucm/cp858.ucm
