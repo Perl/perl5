@@ -6,10 +6,16 @@ BEGIN {
         chdir 't';
         unshift @INC, '../lib';
     }
+
+    # Import test.pl into its own package
+    {
+        package Test;
+        require($ENV{PERL_CORE} ? './test.pl' : './t/test.pl');
+    }
+
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
-        exit(0);
+        Test::skip_all(q/Perl not compiled with 'useithreads'/);
     }
 }
 
@@ -23,8 +29,7 @@ BEGIN {
         threads::shared->import();
     };
     if ($@ || ! $threads::shared::threads_shared) {
-        print("1..0 # Skip: threads::shared not available\n");
-        exit(0);
+        Test::skip_all(q/threads::shared not available/);
     }
 
     require Thread::Queue;
@@ -33,6 +38,7 @@ BEGIN {
     print("1..29\n");   ### Number of tests that will be run ###
 }
 
+Test::watchdog(120);   # In case we get stuck
 
 my $q = Thread::Queue->new();
 my $TEST = 1;
@@ -211,5 +217,7 @@ sub threading_3 {
     sleep(1);
 }
 ok($COUNT == 2, "Done - $COUNT threads");
+
+exit(0);
 
 # EOF

@@ -8,7 +8,7 @@ BEGIN {
     }
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
 }
@@ -109,5 +109,7 @@ ok(10, keys %foo == 0, "And make sure we realy have deleted the values");
 
 ok(19, is_shared($foo), "Check for sharing");
 ok(20, is_shared(%foo), "Check for sharing");
+
+exit(0);
 
 # EOF

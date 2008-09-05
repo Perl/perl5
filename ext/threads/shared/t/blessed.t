@@ -8,7 +8,7 @@ BEGIN {
     }
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
 }
@@ -137,5 +137,7 @@ ok(34, ref($$hobj{'hash'}) eq 'niy', "reblessed hash in hash");
 ok(35, ref($$hobj{'array'}) eq 'gnay', "reblessed array in hash");
 ok(36, ref($$hobj{'scalar'}) eq 'zab', "reblessed scalar in hash");
 ok(37, ${$$hobj{'scalar'}} eq 'test', "reblessed scalar in hash contents");
+
+exit(0);
 
 # EOF

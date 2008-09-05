@@ -8,7 +8,7 @@ BEGIN {
     }
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
 }
@@ -77,5 +77,7 @@ for(1..10) {
   $str2 = $$shared{'foo'};
   ok($test_count++, $str1 eq $str2, 'contents');
 }
+
+exit(0);
 
 # EOF

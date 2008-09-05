@@ -8,7 +8,7 @@ BEGIN {
     }
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
 }
@@ -93,5 +93,7 @@ ok(13, is_shared(@av), "Check for sharing");
 
 my $x :shared;
 ok(14, is_shared($x), "Check for sharing");
+
+exit(0);
 
 # EOF

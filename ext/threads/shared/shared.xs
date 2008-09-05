@@ -123,6 +123,7 @@
 #  define NEED_sv_2pv_flags
 #  define NEED_vnewSVpvf
 #  define NEED_warner
+#  define NEED_newSVpvn_flags
 #  include "ppport.h"
 #  include "shared.h"
 #endif
@@ -872,10 +873,15 @@ sharedsv_elem_mg_FETCH(pTHX_ SV *sv, MAGIC *mg)
         svp = av_fetch((AV*) saggregate, mg->mg_len, 0);
     } else {
         char *key = mg->mg_ptr;
-        STRLEN len = mg->mg_len;
+        I32 len = mg->mg_len;
         assert ( mg->mg_ptr != 0 );
         if (mg->mg_len == HEf_SVKEY) {
-           key = SvPV((SV *) mg->mg_ptr, len);
+            STRLEN slen;
+            key = SvPV((SV *)mg->mg_ptr, slen);
+            len = slen;
+            if (SvUTF8((SV *)mg->mg_ptr)) {
+                len = -len;
+            }
         }
         SHARED_CONTEXT;
         svp = hv_fetch((HV*) saggregate, key, len, 0);
@@ -923,10 +929,16 @@ sharedsv_elem_mg_STORE(pTHX_ SV *sv, MAGIC *mg)
         svp = av_fetch((AV*) saggregate, mg->mg_len, 1);
     } else {
         char *key = mg->mg_ptr;
-        STRLEN len = mg->mg_len;
+        I32 len = mg->mg_len;
         assert ( mg->mg_ptr != 0 );
-        if (mg->mg_len == HEf_SVKEY)
-           key = SvPV((SV *) mg->mg_ptr, len);
+        if (mg->mg_len == HEf_SVKEY) {
+            STRLEN slen;
+            key = SvPV((SV *)mg->mg_ptr, slen);
+            len = slen;
+            if (SvUTF8((SV *)mg->mg_ptr)) {
+                len = -len;
+            }
+        }
         SHARED_CONTEXT;
         svp = hv_fetch((HV*) saggregate, key, len, 1);
     }
@@ -954,10 +966,16 @@ sharedsv_elem_mg_DELETE(pTHX_ SV *sv, MAGIC *mg)
         av_delete((AV*) saggregate, mg->mg_len, G_DISCARD);
     } else {
         char *key = mg->mg_ptr;
-        STRLEN len = mg->mg_len;
+        I32 len = mg->mg_len;
         assert ( mg->mg_ptr != 0 );
-        if (mg->mg_len == HEf_SVKEY)
-           key = SvPV((SV *) mg->mg_ptr, len);
+        if (mg->mg_len == HEf_SVKEY) {
+            STRLEN slen;
+            key = SvPV((SV *)mg->mg_ptr, slen);
+            len = slen;
+            if (SvUTF8((SV *)mg->mg_ptr)) {
+                len = -len;
+            }
+        }
         SHARED_CONTEXT;
         hv_delete((HV*) saggregate, key, len, G_DISCARD);
     }
@@ -1274,8 +1292,13 @@ EXISTS(SV *obj, SV *index)
             SHARED_EDIT;
             exists = av_exists((AV*) sobj, SvIV(index));
         } else {
-            STRLEN len;
-            char *key = SvPV(index,len);
+            I32 len;
+            STRLEN slen;
+            char *key = SvPVutf8(index, slen);
+            len = slen;
+            if (SvUTF8(index)) {
+                len = -len;
+            }
             SHARED_EDIT;
             exists = hv_exists((HV*) sobj, key, len);
         }
@@ -1297,9 +1320,10 @@ FIRSTKEY(SV *obj)
         hv_iterinit((HV*) sobj);
         entry = hv_iternext((HV*) sobj);
         if (entry) {
+            I32 utf8 = HeKUTF8(entry);
             key = hv_iterkey(entry,&len);
             CALLER_CONTEXT;
-            ST(0) = sv_2mortal(newSVpv(key, len));
+            ST(0) = sv_2mortal(newSVpvn_utf8(key, len, utf8));
         } else {
             CALLER_CONTEXT;
             ST(0) = &PL_sv_undef;
@@ -1323,9 +1347,10 @@ NEXTKEY(SV *obj, SV *oldkey)
         SHARED_CONTEXT;
         entry = hv_iternext((HV*) sobj);
         if (entry) {
+            I32 utf8 = HeKUTF8(entry);
             key = hv_iterkey(entry,&len);
             CALLER_CONTEXT;
-            ST(0) = sv_2mortal(newSVpv(key, len));
+            ST(0) = sv_2mortal(newSVpvn_utf8(key, len, utf8));
         } else {
             CALLER_CONTEXT;
             ST(0) = &PL_sv_undef;

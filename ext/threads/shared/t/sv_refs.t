@@ -8,7 +8,7 @@ BEGIN {
     }
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
 }
@@ -99,5 +99,7 @@ ok(11, is_shared($foo), "Check for sharing");
     ok(20, is_shared($x) == is_shared($w), '_id($x) == _id($w)');
     ok(21, is_shared($w) == is_shared($$$$w), '_id($w) == _id($$$$w)');
 }
+
+exit(0);
 
 # EOF

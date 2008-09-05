@@ -55,7 +55,7 @@ if (grep { $_ eq 'PERL_CORE=1' } @ARGV) {
 
     # Verify that a 'C' compiler is available
     if (! have_cc()) {
-        die("No 'C' compiler found to build 'threads'\n");
+        die("OS unsupported:  ERROR: No 'C' compiler found to build 'threads'\n");
     }
 
     push(@conditional_params, 'DEFINE' => '-DHAS_PPPORT_H',

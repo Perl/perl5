@@ -8,11 +8,11 @@ BEGIN {
     }
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
     if ($] < 5.010) {
-        print("1..0 # Skip: Needs Perl 5.10.0 or later\n");
+        print("1..0 # SKIP Needs Perl 5.10.0 or later\n");
         exit(0);
     }
 }
@@ -177,5 +177,7 @@ threads->create( sub {
     } )->join();
 
 ok($$obj == 2, "Main: New object ID $$obj  # TODO - should be 2");
+
+exit(0);
 
 # EOF

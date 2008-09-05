@@ -8,7 +8,7 @@ BEGIN {
     }
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
 }
@@ -62,5 +62,7 @@ threads->create(sub { undef($test)})->join();
 ok(10, !defined($test), "Check undef value");
 
 ok(11, is_shared($test), "Check for sharing");
+
+exit(0);
 
 # EOF
