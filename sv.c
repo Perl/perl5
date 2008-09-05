@@ -4250,6 +4250,8 @@ void
 Perl_sv_chop(pTHX_ register SV *sv, register const char *ptr)
 {
     register STRLEN delta;
+    STRLEN max_delta;
+
     if (!ptr || !SvPOKp(sv))
 	return;
     delta = ptr - SvPVX_const(sv);
@@ -4257,9 +4259,22 @@ Perl_sv_chop(pTHX_ register SV *sv, register const char *ptr)
 	/* Nothing to do.  */
 	return;
     }
+    /* SvPVX(sv) may move in SV_CHECK_THINKFIRST(sv), but after this line,
+       nothing uses the value of ptr any more.  */
+    max_delta = SvLEN(sv) ? SvLEN(sv) : SvCUR(sv);
+    if (ptr <= SvPVX_const(sv))
+	Perl_croak(aTHX_ "panic: sv_chop ptr=%p, start=%p, end=%p",
+		   ptr, SvPVX_const(sv), SvPVX_const(sv) + max_delta);
     SV_CHECK_THINKFIRST(sv);
+
     if (SvTYPE(sv) < SVt_PVIV)
 	sv_upgrade(sv,SVt_PVIV);
+
+    if (delta > max_delta)
+	Perl_croak(aTHX_ "panic: sv_chop ptr=%p (was %p), start=%p, end=%p",
+		   SvPVX_const(sv) + delta, ptr, SvPVX_const(sv),
+		   SvPVX_const(sv) + max_delta);
+
 
     if (!SvOOK(sv)) {
 	if (!SvLEN(sv)) { /* make copy of shared string */
