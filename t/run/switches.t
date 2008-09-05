@@ -11,7 +11,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan(tests => 65);
+plan(tests => 66);
 
 use Config;
 
@@ -327,4 +327,20 @@ __EOF__
     is(join(":", @bak),
        "foo yada dada:bada foo bing:king kong foo",
        "-i backup file");
+}
+
+# RT #30660
+
+$filename = tempfile();
+SKIP: {
+    open my $f, ">$filename" or skip( "Can't write temp file $filename: $!" );
+    print $f <<'SWTEST';
+#!perl -w    -iok
+print "$^I\n";
+SWTEST
+    close $f or die "Could not close: $!";
+    $r = runperl(
+	progfile    => $filename,
+    );
+    like( $r, qr/ok/, 'Spaces on the #! line (#30660)' );
 }

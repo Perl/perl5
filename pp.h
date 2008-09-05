@@ -502,9 +502,9 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 
 /* SV* ref causes confusion with the member variable
    changed SV* ref to SV* tmpRef */
-#define RvDEEPCP(rv) STMT_START { SV* tmpRef=SvRV(rv);      \
-  if (SvREFCNT(tmpRef)>1) {                 \
-    SvRV_set(rv, AMG_CALLun(rv,copy));	\
+#define RvDEEPCP(rv) STMT_START { SV* tmpRef=SvRV(rv); SV* rv_copy;     \
+  if (SvREFCNT(tmpRef)>1 && (rv_copy = AMG_CALLun(rv,copy))) {          \
+    SvRV_set(rv, rv_copy);		    \
     SvREFCNT_dec(tmpRef);                   \
   } } STMT_END
 

@@ -3490,8 +3490,10 @@ Internet, point your browser at http://www.perl.org/, the Perl Home Page.\n\n");
 	return s;
     case '*':
     case ' ':
-	if (s[1] == '-')	/* Additional switches on #! line. */
-	    return s+2;
+        while( *s == ' ' )
+          ++s;
+	if (s[0] == '-')	/* Additional switches on #! line. */
+	    return s+1;
 	break;
     case '-':
     case 0:
@@ -4793,18 +4795,21 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    environ[0] = NULL;
 	}
 	if (env) {
-	  char *s;
+	  char *s, *old_var;
 	  SV *sv;
 	  for (; *env; env++) {
-	    if (!(s = strchr(*env,'=')) || s == *env)
+	    old_var = *env;
+
+	    if (!(s = strchr(old_var,'=')) || s == old_var)
 		continue;
+
 #if defined(MSDOS) && !defined(DJGPP)
 	    *s = '\0';
-	    (void)strupr(*env);
+	    (void)strupr(old_var);
 	    *s = '=';
 #endif
 	    sv = newSVpv(s+1, 0);
-	    (void)hv_store(hv, *env, s - *env, sv, 0);
+	    (void)hv_store(hv, old_var, s - old_var, sv, 0);
 	    if (env_is_not_environ)
 	        mg_set(sv);
 	  }
