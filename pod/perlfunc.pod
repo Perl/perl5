@@ -1687,8 +1687,7 @@ X<exists> X<autovivification>
 
 Given an expression that specifies a hash element or array element,
 returns true if the specified element in the hash or array has ever
-been initialized, even if the corresponding value is undefined.  The
-element is not autovivified if it doesn't exist.
+been initialized, even if the corresponding value is undefined.
 
     print "Exists\n" 	if exists $hash{$key};
     print "Defined\n" 	if defined $hash{$key};
@@ -2303,8 +2302,14 @@ implementing the C<< <*.c> >> operator, but you can use it directly. If
 EXPR is omitted, C<$_> is used.  The C<< <*.c> >> operator is discussed in
 more detail in L<perlop/"I/O Operators">.
 
+Note that C<glob> will split its arguments on whitespace, treating
+each segment as separate pattern.  As such, C<glob('*.c *.h')> would
+match all files with a F<.c> or F<.h> extension.  The expression
+C<glob('.* *')> would match all files in the current working directory.
+
 Beginning with v5.6.0, this operator is implemented using the standard
-C<File::Glob> extension.  See L<File::Glob> for details.
+C<File::Glob> extension.  See L<File::Glob> for details, including
+C<bsd_glob> which does not treat whitespace as a pattern separator.
 
 =item gmtime EXPR
 X<gmtime> X<UTC> X<Greenwich>
@@ -5004,10 +5009,18 @@ X<sleep> X<pause>
 =item sleep
 
 Causes the script to sleep for EXPR seconds, or forever if no EXPR.
+Returns the number of seconds actually slept.  
+
 May be interrupted if the process receives a signal such as C<SIGALRM>.
-Returns the number of seconds actually slept.  You probably cannot
-mix C<alarm> and C<sleep> calls, because C<sleep> is often implemented
-using C<alarm>.
+
+    eval {
+        local $SIG{ALARM} = sub { die "Alarm!\n" };
+        sleep;
+    };
+    die $@ unless $@ eq "Alarm!\n";
+
+You probably cannot mix C<alarm> and C<sleep> calls, because C<sleep>
+is often implemented using C<alarm>.
 
 On some older systems, it may sleep up to a full second less than what
 you requested, depending on how it counts seconds.  Most modern systems

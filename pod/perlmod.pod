@@ -94,18 +94,9 @@ C<%main::>, or C<%::> for short.  Likewise the symbol table for the nested
 package mentioned earlier is named C<%OUTER::INNER::>.
 
 The value in each entry of the hash is what you are referring to when you
-use the C<*name> typeglob notation.  In fact, the following have the same
-effect, though the first is more efficient because it does the symbol
-table lookups at compile time:
+use the C<*name> typeglob notation.
 
     local *main::foo    = *main::bar;
-    local $main::{foo}  = $main::{bar};
-
-(Be sure to note the B<vast> difference between the second line above
-and C<local $main::foo = $main::bar>. The former is accessing the hash
-C<%main::>, which is the symbol table of package C<main>. The latter is
-simply assigning scalar C<$bar> in package C<main> to scalar C<$foo> of
-the same package.)
 
 You can use this to print out all the variables in a package, for
 instance.  The standard but antiquated F<dumpvar.pl> library and
