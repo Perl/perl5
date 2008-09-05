@@ -3513,6 +3513,7 @@ Porting/fixCORE		Find and fix modules that generate warnings
 Porting/fixvars		Find undeclared variables with C compiler and fix em
 Porting/genlog		Generate formatted changelogs by querying p4d
 Porting/git-find-p4-change	Find the change for a p4 change number
+Porting/git-make-p4-refs	Output git refs for each p4 change number, suitable for appending to .git/packed-refs
 Porting/Glossary	Glossary of config.sh variables
 Porting/Maintainers	Program to pretty print info in Maintainers.pl
 Porting/Maintainers.pl	Information about maintainers
