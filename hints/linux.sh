@@ -94,7 +94,7 @@ case "`${cc:-cc} -V 2>&1`" in
     esac
     ;;
 *"Sun C"*)
-    optimize='-xO2'
+    test "$optimize" || optimize='-xO2'
     cccdlflags='-KPIC'
     lddlflags='-G -Bdynamic'
     # Sun C doesn't support gcc attributes, but, in many cases, doesn't

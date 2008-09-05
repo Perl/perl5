@@ -80,6 +80,12 @@ EOF
 	;;
     esac
 
+ s=`lslpp -lc bos.adt.libm >/dev/null`
+if [ $? != 0 ]; then
+    echo "You cannot build perl without the bos.adt.libm package installed" >&4
+    exit
+    fi
+
 # uname -m output is too specific and not appropriate here
 case "$archname" in
     '') archname="$osname" ;;
