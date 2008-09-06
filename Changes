@@ -28,6 +28,1167 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.9		Maintenance release working toward v5.8.9
 --------------
 ____________________________________________________________________________
+[ 34300] By: nicholas				   on 2008/09/06  15:33:22
+	Log: Integrate:
+	     [ 34265]
+	     Integrate:
+	     [ 34085]
+	     Subject: [PATCH] fix debop with pad const
+	     From: Reini Urban <rurban@x-ray.at>
+	     Date: Tue, 24 Jun 2008 12:07:01 +0200
+	     Message-ID: <4860C745.2020307@x-ray.at>
+	     
+	     [ 34086]
+	     Skip one test that was failing with DEBUGGING and threads,
+	     because after change #34085 the IV value of the OP_CONST
+	     isn't dumped anymore.
+	     
+	     [ 34087]
+	     Subject: [PATCH] Re: split smoke for threaded -DDEBUGGING builds
+	     From: Reini Urban <rurban@x-ray.at>
+	     Date: Wed, 25 Jun 2008 17:30:08 +0200
+	     Message-ID: <48626480.7030602@x-ray.at>
+	     
+	     Plus revert #34086
+     Branch: maint-5.8/perl
+	  !> dump.c t/op/split.t
+____________________________________________________________________________
+[ 34299] By: nicholas				   on 2008/09/06  15:27:08
+	Log: Integrate:
+	     [ 34271]
+	     Integrate:
+	     [ 34159]
+	     Convert undef.t to use test.pl and strict.
+	     
+	     [ 34198]
+	     Subject: [perl #52740] [PATCH-tests] crash when localizing a symtab entry 
+	     From: "Bram via RT" <perlbug-followup@perl.org>
+	     Date: Sun, 10 Aug 2008 10:59:16 -0700
+	     Message-ID: <rt-3.6.HEAD-29759-1218391153-38.52740-15-0@perl.org>
+	     
+	     [ 34228]
+	     Fix new test added by #34198, which failed on Win32
+	     
+	     [ 34273]
+	     Integrate:
+	     [ 34180]
+	     Use test.pl's tempfile().
+	     
+	     [ 34182]
+	     Convert all unimaginative (ie race condition) temporary file names to
+	     use test.pl's tempfile().
+	     
+	     [ 34184]
+	     Convert all unimaginative (ie race condition) temporary file names to   
+	     use test.pl's tempfile().
+	     
+	     [ 34196]
+	     Subject: Avoid a potential testing race condition in lib/Dirhandle.ttest.
+	     From: Bram <p5p@perl.wizbit.be>
+	     Message-ID: <20080810203627.vj786wb688skc44w@horde.wizbit.be>
+	     Date: Sun, 10 Aug 2008 20:36:27 +0200
+	     
+	     [ 34203]
+	     VMS-specific follow-up to tempfile name changes in 34182, plus
+	     a TODO in dup.t that's long since to-done.
+	     
+	     [ 34205]
+	     Subject: [PATCH] Re: Change 34184: Convert all unimaginative (ie race condition) temporary file names to
+	     From: Bram <p5p@perl.wizbit.be>
+	     Date: Tue, 12 Aug 2008 19:05:00 +0200
+	     Message-ID: <20080812190500.3ns5yf7ibocgo0w0@horde.wizbit.be>
+	     
+	     (Change 34184 missed one Comp.try in the MSWin32 case, which caused this
+	     test to fail on Win32)
+	     
+	     
+	     plus 1 line for t/io/fs.t from
+	     
+	     [ 27239]
+	     Subject: patch@27236 vms glob/readdir/chdir EFS/long filename support
+	     From: John E. Malmberg <wb8tyw@qsl.net>
+	     Date: Feb 20, 2006 3:43 AM
+	     Message-ID: <43F92CE6.5040704@qsl.net>
+     Branch: maint-5.8/perl
+	  !> (integrate 39 files)
+____________________________________________________________________________
+[ 34298] By: nicholas				   on 2008/09/06  14:47:42
+	Log: Integrate:
+	     [ 34262]
+	     Integrate:
+	     [ 34068]
+	     Subject: [perl #51370] length($@)>0 for empty $@ if utf8 is in use 
+	     From: "Bram via RT" <perlbug-followup@perl.org>
+	     Date: Wed, 11 Jun 2008 03:26:26 -0700
+	     Message-ID: <rt-3.6.HEAD-18229-1213179984-1708.51370-15-0@perl.org>
+	     
+	     (The first patch)
+	     
+	     [ 34069]
+	     Rename the new macro clear_errsv() from last patch to CLEAR_ERRSV()
+     Branch: maint-5.8/perl
+	  !> op.c perl.c perl.h pp_ctl.c t/op/eval.t
+____________________________________________________________________________
+[ 34297] By: nicholas				   on 2008/09/06  14:23:34
+	Log: Integrate:
+	     [ 33815]
+	     Subject: [PATCH] Call SvMAGICAL_off in mg_free
+	     From: Bram <p5p@perl.wizbit.be>
+	     Date: Mon, 05 May 2008 16:18:56 +0200
+	     Message-ID: <20080505161856.pgz4pjga1w44ksk4@horde.wizbit.be>
+     Branch: maint-5.8/perl
+	  !> mg.c sv.c
+____________________________________________________________________________
+[ 34296] By: nicholas				   on 2008/09/06  13:17:00
+	Log: Integrate:
+	     [ 33807]
+	     Fix [perl #52740] crash when localizing a symtab entry
+	     
+	     [ 34295]
+	     Integrate:
+	     [ 34213]
+	     Change 33807 to fix bug #52740 wasn't quite right, as it ended up with
+	     unitialised reads (and sometimes even SEGVs).
+	     
+	     plus 1 line of 29544 in Perl_sv_setsv_flags().
+     Branch: maint-5.8/perl
+	  !> sv.c
+____________________________________________________________________________
+[ 34294] By: nicholas				   on 2008/09/06  09:22:28
+	Log: Change 28130 didn't get the semantically correct 5.8.x definition for
+	     isGV_with_GP(). PVLVs can't act as PVGVs in 5.8.x.
+     Branch: maint-5.8/perl
+	   ! sv.h
+____________________________________________________________________________
+[ 34293] By: nicholas				   on 2008/09/06  08:58:18
+	Log: Integrate:
+	     [ 34266]
+	     Integrate:
+	     [ 34092]
+	     Subject: Some more missing isGV_with_GP()s
+	     From: Ben Morrow <ben@morrow.me.uk>
+	     Date: Sat, 28 Jun 2008 17:00:17 +0100
+	     Message-ID: <20080628160017.GA81579@osiris.mauzo.dyndns.org>
+	     
+	     [ 34100]
+	     Fix test count that was missed in #34092
+	     
+	     [ 34101]
+	     Skip chown() tests added by #34092 on Win32
+     Branch: maint-5.8/perl
+	  +> t/io/pvbm.t
+	  !> MANIFEST doio.c ext/IO/t/io_taint.t mg.c pp.c pp_ctl.c
+	  !> pp_hot.c pp_sys.c sv.c t/op/attrs.t t/op/inc.t t/op/inccode.t
+	  !> t/op/magic.t t/op/ref.t t/op/undef.t xsutils.c
+____________________________________________________________________________
+[ 34292] By: nicholas				   on 2008/09/06  07:17:39
+	Log: Integrate:
+	     [ 34268]
+	     Integrate:
+	     [ 34125]
+	     Simplify code in pp_formline, removing a goto and localising and
+	     consting a variable.
+	     
+	     [ 34129]
+	     Regression tests for, and fix quite a lot of bugs in, cases FF_LINESNGL
+	     and FF_LINEGLOB in pp_formline. (While investigating RT #55668)
+	     Sometimes I wonder if this is actually fun.
+	     
+	     [ 34135]
+	     Format tests for @* too.
+	     
+	     [ 34270]
+	     Integrate:
+	     [ 34139]
+	     For cases FF_LINESNGL and FF_LINEGLOB in pp_formline, take great care
+	     to call get magic exactly once. This doesn't just avoid logical errors
+	     with tied variables, it actually avoids panics (or worse) because a
+	     pointer is retained to the string returned by the (first) call to
+	     SvPV_const() for a future sv_chop(), and any future call to get magic
+	     can invalidate the buffer that that pointer points to.
+	     Also this removes the original crazy code that would set then reset the
+	     length of a scalar, so as to only copy an initial portion of it, and
+	     also copy the entire scalar including trailing newline (which might
+	     require allocating more memory), only to immediately remove the newline
+	     from the copy by reducing the length by one.
+	     
+	     [ 34140]
+	     Make format items @* and ^* work with references (safely). Note no-one
+	     said anything about sanely.
+     Branch: maint-5.8/perl
+	  !> pp_ctl.c t/op/write.t
+____________________________________________________________________________
+[ 34291] By: nicholas				   on 2008/09/06  06:54:40
+	Log: Integrate:
+	     [ 34255]
+	     Integrate:
+	     [ 34121]
+	     Start converting t/op/write.t to test.pl
+	     
+	     [ 34122]
+	     Reduce the -| skip back to just the tests that use it, and re-align the
+	     comments with the test code they refer to.
+	     
+	     [ 34123]
+	     Complete the conversion of t/op/write.t to test.pl, and remove my
+	     (accidentally committed) skip testing '1'.
+	     
+	     [ 34124]
+	     Bring the joy of strict to the rest of write.t
+	     
+	     [ 34157]
+	     Convert wantarray.t to use strict and test.pl
+	     
+	     [ 34172]
+	     Bring the joy of strict to t/harness.
+	     
+	     [ 34183]
+	     Use test.pl, not Test.pm, in t/run/*.t
+	     
+	     [ 34204]
+	     Skip the Perl debugger test if the harness itself is already running
+	     under some kind of debugger (such as a profiler) to avoid confusing
+	     things. (such as trashing the profiler output file from the harness.)
+     Branch: maint-5.8/perl
+	  !> lib/perl5db.t t/harness t/op/wantarray.t t/op/write.t
+	  !> t/run/runenv.t
+____________________________________________________________________________
+[ 34290] By: nicholas				   on 2008/09/06  06:35:49
+	Log: Remove the vestigal variable %infinite, which dates from change 963,
+	     was commented out of use in 8955, and removed in change 28790,
+	     "Remove perlcc and the byteloader", which isn't to be merged.
+     Branch: maint-5.8/perl
+	   ! t/harness
+____________________________________________________________________________
+[ 34289] By: nicholas				   on 2008/09/05  23:04:00
+	Log: Integrate:
+	     [ 33954]
+	     Integrate:
+	     [ 33859]
+	     $nonono  => $opts{notify}
+	     $verbose => $opts{verbose}
+	     $silent  => $opts{silent}
+	     to align the code with forked code in installman
+	     
+	     [ 33860]
+	     Converge some changes from installperl into installman. I have a
+	     suspicion that installman is only run on *nix and OS/2, not Win32 or
+	     VMS. Specifically
+	     sub unlink   - return scalar(@names) if $Is_VMS # from change 854
+	     sub link	  - change warn to die		     # from change 4774
+	     sub samepath - case insensitive name comparison # from change 311
+	     (in the ansiperl branch, merged via the win32 branch)
+	     
+	     [ 33861]
+	     Change 33859 missed $destdir => $opts{destdir}
+	     
+	     [ 33862]
+	     Merge common code from installperl and installman into install_lib.pl
+	     
+	     [ 33863]
+	     A couple more installman tidy ups.
+	     
+	     [ 33864]
+	     Add -w, tweak some comments.
+	     
+	     [ 34259]
+	     Integrate:
+	     [ 34073]
+	     AIX might miss libm
+	     Subject: Re: Closing tickets in RT
+	     From: "H.Merijn Brand" <h.m.brand@xs4all.nl>
+	     Date: Tue, 29 Apr 2008 17:49:35 +0200
+	     Message-ID: <20080429174935.0cb5763b@pc09.procura.nl>
+	     
+	     [ 34075]
+	     Make the version string more consistent between Windows and other platforms.
+	     Noticed and reported by Dave Golden.
+	     
+	     [ 34162]
+	     Subject: [PATCH] Minor hints/linux.sh patch to allow setting -Doptimize
+	     From: Andrew Dougherty <doughera@lafayette.edu>
+	     Date: Tue, 29 Jul 2008 12:00:52 -0400 (EDT)
+	     Message-ID: <Pine.LNX.4.64.0807291159410.23060@fractal.phys.lafayette.edu>
+	     
+	     [ 34168]
+	     Add d_timegm to uconfig.sh to fix the generated uconfig.h.
+	     
+	     [ 34274]
+	     Integrate:
+	     [ 34120]
+	     Subject: [PATCH] Configure - d_sprintf_returns_strlen
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Thu, 19 Jun 2008 11:22:58 -0400
+	     Message-ID: <1ff86f510806190822l34a3ea7eudb7b75f60ff0635d@mail.gmail.com>
+	     
+	     [ 34126]
+	     Subject: [PATCH] Fix to Change 34120
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Fri, 11 Jul 2008 08:59:24 -0400
+	     Message-ID: <1ff86f510807110559tdc38deas3042e3e8ec234168@mail.gmail.com>
+	     
+	     [ 34188]
+	     Subject: [perl #24198] Bad default-domainname extraction in Configure-Script may cause infinite loops in perl-tests
+	     From: "Bram via RT" <perlbug-followup@perl.org>
+	     Date: Thu, 07 Aug 2008 06:00:47 -0700
+	     Message-ID: <rt-3.6.HEAD-29759-1218114045-1803.24198-15-0@perl.org>
+	     
+	     [ 34212]
+	     If I want to build Devel::NYTProf under the core tree, then the
+	     Makefile needs to know to build List::Util first.
+	     
+	     [ 34276]
+	     Integrate:
+	     [ 34235]
+	     Silence warnings when -destdir isn't set.
+	     
+	     [ 34236]
+	     Subject: [PATCH] Architecture-Independent Non-XS extenstions
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Message-ID: <1ff86f510808280530ue0e3140q7e4ce71d5f395cc9@mail.gmail.com>
+	     Date: Thu, 28 Aug 2008 08:30:38 -0400
+     Branch: maint-5.8/perl
+	  +> install_lib.pl
+	  !> Configure MANIFEST Makefile.SH hints/aix.sh hints/linux.sh
+	  !> installman installperl pod/perltodo.pod uconfig.sh
+	  !> win32/config_sh.PL
+____________________________________________________________________________
+[ 34288] By: nicholas				   on 2008/09/05  22:58:40
+	Log: Integrate:
+	     [ 34264]
+	     Integrate:
+	     [ 34057]
+	     Subject: Re: Patches / git
+	     From: Andy Armstrong <andy@hexten.net>
+	     Date: Mon, 16 Jun 2008 01:13:25 +0100
+	     Message-Id: <1162EDA1-C865-4CBB-8DA0-3C83F89E826E@hexten.net>
+	     
+	     [ 34080]
+	     Subject: Re: [perl #24174] perl-5.8.0-55 exit bug
+	     From: Michael G Schwern <schwern@pobox.com>
+	     Date: Mon, 13 Oct 2003 05:13:48 -0700
+	     Message-ID: <20031013121348.GB21103@windhund.schwern.org>
+	     
+	     [ 34081]
+	     Subject: [PATCH] Documentation on taint/environment interactions for perlrun.pod
+	     From: Paul Fenwick <pjf@perltraining.com.au>
+	     Date: Tue, 24 Jun 2008 13:53:19 +1000
+	     Message-ID: <48606FAF.4040604@perltraining.com.au>
+	     
+	     [ 34083]
+	     URL for End-Of-Life and OS/Arch documentation
+	     Small enhancements
+	     
+	     [ 34089]
+	     Subject: Re: [perl #56348] [PATCH] glob() with spaces - documentation unclear
+	     From: Paul Fenwick <pjf@perltraining.com.au>
+	     Date: Thu, 26 Jun 2008 11:41:45 +1000
+	     Message-ID: <4862F3D9.5010105@perltraining.com.au>
+	     
+	     [ 34137]
+	     Fix for #56874: maybe small error in perlxs.pod example
+	     
+	     [ 34160]
+	     Note the possibility of sharing arenas between types.
+	     
+	     [ 34166]
+	     Small typo fix
+	     
+	     [ 34189]
+	     Note that I TODID most of parallel testing in the core.
+	     
+	     [ 34197]
+	     Purge C<n_a> thoughtcrime from the pods.
+	     
+	     [ 34221]
+	     Subject: [perl #57646] Weird non-equivalence between $::{'a'} = sub {} and *::a = sub {} 
+	     From: "Bram via RT" <perlbug-followup@perl.org>
+	     Date: Wed, 06 Aug 2008 01:24:22 -0700
+	     Message-ID: <rt-3.6.HEAD-29759-1218011060-645.57646-15-0@perl.org>
+	     
+	     [ 34223]
+	     Subject: Re: [perl #58218] backwards logic in perluniintro (5.10.0) 
+	     From: "Dr.Ruud" <rvtol+news@isolution.nl>
+	     Date: Sat, 23 Aug 2008 10:07:45 +0200
+	     Message-ID: <20080823081032.32162.qmail@lists.develooper.com>
+	     
+	     [ 34237]
+	     Subject: [PATCH] Perl TODO related to threads::shared done
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Message-ID: <1ff86f510808271149n28fdd43dg2acd71355e959366@mail.gmail.com>
+	     Date: Wed, 27 Aug 2008 14:49:55 -0400
+	     
+	     Message-ID: <1ff86f510808280540i5aa077adk55a1e64336866458@mail.gmail.com>
+	     
+	     Subject: [PATCH] perltodo.pod cleanup for nonxs installation
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Thu, 28 Aug 2008 08:40:15 -0400
+	     Message-ID: <1ff86f510808280540i5aa077adk55a1e64336866458@mail.gmail.com>
+	     
+	     [ 34239]
+	     Subject: [PATCH] clear docs on exists wrt autovivification
+	     From: Moritz Lenz
+	     Date: August 26, 2008 11:23
+	     
+	     [ 34240]
+	     Note the task TODO of splitting the linker from the compiler.
+	     
+	     [ 34241]
+	     The tasks needed to get smart match fixing underway for 5.10.1
+	     
+	     [ 34242]
+	     Tweaks and reflowing for the cc/linker split.
+	     
+	     [ 34243]
+	     Add the URL for annotated svn of S03.
+	     
+	     [ 34258]
+	     Subject: Re: Change 34166: Small typo fix
+	     From: Paul Johnson <paul@pjcj.net>
+	     Message-ID: <20080731164510.GH15114@pjcj.net>
+	     Date: Thu, 31 Jul 2008 18:45:10 +0200
+     Branch: maint-5.8/perl
+	  !> README.hpux pod/perlcall.pod pod/perlembed.pod
+	  !> pod/perlform.pod pod/perlfunc.pod pod/perlmod.pod
+	  !> pod/perlrun.pod pod/perlsub.pod pod/perltodo.pod
+	  !> pod/perluniintro.pod pod/perlxs.pod
+____________________________________________________________________________
+[ 34287] By: nicholas				   on 2008/09/05  22:36:23
+	Log: Integrate:
+	     [ 34257]
+	     Integrate:
+	     [ 34164]
+	     Subject: [PATCH] update Exporter to version 5.63
+	     From: "Adriano Ferreira" <a.r.ferreira@gmail.com>
+	     Date: Tue, 29 Jul 2008 17:37:12 -0300
+	     Message-ID: <73ddeb6c0807291337k150d5172pd671a5df980b7faf@mail.gmail.com>
+	     
+	     [ 34170]
+	     Subject: [PATCH] Tiny SelfLoader patch for better warnings
+	     From: Steffen Mueller <wyp3rlx02@sneakemail.com>
+	     Message-ID: <20080802153839.9538.qmail@lists.develooper.com>
+	     Date: Sat, 02 Aug 2008 17:38:39 +0200
+	     
+	     [ 34193]
+	     Upgrade to ExtUtils-Manifest-1.54
+	     
+	     [ 34194]
+	     Upgrade to CGI.pm-3.40
+     Branch: maint-5.8/perl
+	  !> lib/CGI.pm lib/CGI/Fast.pm lib/CGI/t/request.t lib/Exporter.pm
+	  !> lib/Exporter.t lib/Exporter/Heavy.pm
+	  !> lib/ExtUtils/MANIFEST.SKIP lib/ExtUtils/Manifest.pm
+	  !> lib/ExtUtils/t/Manifest.t lib/SelfLoader.pm
+____________________________________________________________________________
+[ 34286] By: nicholas				   on 2008/09/05  22:15:17
+	Log: Integrate:
+	     [ 34269]
+	     Integrate:
+	     [ 34136]
+	     assert() that the pointer passed to Perl_sv_chop() lies within the
+	     buffer of the SV.
+	     
+	     [ 34138]
+	     The assert()ions in sv_chop() that the passed in pointer is within the
+	     SV's buffer should be full-on panics, as bogus values passed in can
+	     cause later heap corruption, which is a bad thing (TM).
+	     
+	     [ 34144]
+	     Fix use of a variable before it is initialised, introduced by change
+	     34138, spotted by Jerry D. Hedden. I assume that he's compiling with
+	     options that enable trace flow analysis from the C compiler.
+     Branch: maint-5.8/perl
+	  !> pod/perldiag.pod sv.c
+____________________________________________________________________________
+[ 34285] By: nicholas				   on 2008/09/05  21:54:24
+	Log: Integrate:
+	     [ 34251]
+	     Integrate:
+	     [ 34019]
+	     Subject: [PATCH] perlbug prose patch (and some evals, too)
+	     From: Jesse Vincent <jesse@fsck.com>
+	     Date: Sat, 7 Jun 2008 17:10:28 -0400
+	     Message-Id: <89557793-48C2-4962-BE7A-24DC2EAFAF15@fsck.com>
+	     
+	     (applied to perlbug.PL instead of the generated perlbug)
+	     
+	     [ 34020]
+	     Revert #34019.
+	     
+	     [ 34061]
+	     Subject: [perl #55844] [PATCH] perlbug refactoring and prose cleanup 
+	     From: Jesse (via RT) <perlbug-followup@perl.org>
+	     Date: Sun, 15 Jun 2008 08:31:50 -0700
+	     Message-ID: <rt-3.6.HEAD-18229-1213543909-1580.55844-75-0@perl.org>
+     Branch: maint-5.8/perl
+	  !> utils/perlbug.PL
+____________________________________________________________________________
+[ 34284] By: nicholas				   on 2008/09/05  21:32:45
+	Log: Integrate:
+	     [ 34245]
+	     Integrate:
+	     [ 33974]
+	     Subject: [PATCH] Thread::Queue 2.09
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Fri, 30 May 2008 12:41:41 -0400
+	     Message-ID: <1ff86f510805300941o68c1967bw31dee3e40ffa28a7@mail.gmail.com>
+	     
+	     Explicitly check for undef in args because some versions of
+	     looks_like_number(undef) return true.
+	     
+	     [ 34049]
+	     Subject: [PATCH] Thread::Semaphore 2.09
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Thu, 12 Jun 2008 09:41:24 -0400
+	     Message-ID: <1ff86f510806120641jbbb984cn1f505c24d520cdbf@mail.gmail.com>
+	     
+	     [ 34050]
+	     Subject: [PATCH] Thread::Queue 2.11
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Thu, 12 Jun 2008 09:42:42 -0400
+	     Message-ID: <1ff86f510806120642g5a707382l76aaaa80797443c8@mail.gmail.com>
+	     
+	     [ 34051]
+	     Subject: [PATCH] Thread::Queue 2.11
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Thu, 12 Jun 2008 09:42:42 -0400
+	     Message-ID: <1ff86f510806120642g5a707382l76aaaa80797443c8@mail.gmail.com>
+	     
+	     This time, not empty.
+     Branch: maint-5.8/perl
+	  !> lib/Thread/Queue.pm lib/Thread/Queue/t/01_basic.t
+	  !> lib/Thread/Queue/t/02_refs.t lib/Thread/Queue/t/03_peek.t
+	  !> lib/Thread/Queue/t/04_errs.t lib/Thread/Queue/t/05_extract.t
+	  !> lib/Thread/Queue/t/06_insert.t lib/Thread/Queue/t/07_lock.t
+	  !> lib/Thread/Queue/t/08_nothreads.t lib/Thread/Semaphore.pm
+	  !> lib/Thread/Semaphore/t/01_basic.t
+	  !> lib/Thread/Semaphore/t/02_errs.t
+	  !> lib/Thread/Semaphore/t/03_nothreads.t
+____________________________________________________________________________
+[ 34283] By: nicholas				   on 2008/09/05  21:10:58
+	Log: Integrate:
+	     [ 34253]
+	     Integrate:
+	     [ 34043]
+	     Subject: Re: Change 34005: Re: CPAN Upload: S/SA/SAPER/Sys-Syslog-0.25.tar.gz
+	     From: Sébastien Aperghis-Tramoni <maddingue@free.fr>
+	     Message-Id: <B44DBB66-1AFE-4C93-BE5F-C41CF69166D2@free.fr>
+	     Date: Sun, 8 Jun 2008 02:55:21 +0200
+	     
+	     [applied manually, plus $VERSION bump]
+	     
+	     [ 34044]
+	     Patch from MHX to change the WriteConstant()'s documentation to note
+	     that to change the constant subroutine's name one needs XS_SUBNAME
+	     not SUBNAME, and then make C_SUBNAME default to XS_SUBNAME to be
+	     consistent with the revised documentation.
+	     http://rt.cpan.org/Public/Bug/Display.html?id=29968
+	     
+	     [ 34072]
+	     Fix release date for 5.002
+	     (noticed by Grant McLean)
+	     
+	     [ 34093]
+	     Subject: [perl #34339][PATCH] "perldoc lib" doesn't describe actual behavior
+	     From: Renée Bäcker <renee.baecker@smart-websolutions.de>
+	     Date: Wed, 25 Jun 2008 16:40:57 +0200
+	     Message-ID: <486258F9.4020505@smart-websolutions.de>
+     Branch: maint-5.8/perl
+	  !> lib/ExtUtils/Constant.pm lib/Module/CoreList.pm lib/lib_pm.PL
+____________________________________________________________________________
+[ 34281] By: nicholas				   on 2008/09/05  20:42:50
+	Log: Integrate:
+	     [ 34248]
+	     Integrate:
+	     [ 34047]
+	     Subject: [PATCH - revised] threads::shared 1.22
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Thu, 12 Jun 2008 08:44:12 -0400
+	     Message-ID: <1ff86f510806120544q76b18460l435fe9f3b1d77b2f@mail.gmail.com>
+	     
+	     [ 34048]
+	     Subject: [PATCH - revised] threads 1.71
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Thu, 12 Jun 2008 08:42:19 -0400
+	     Message-ID: <1ff86f510806120542v7f55b0aetac69642e5072654e@mail.gmail.com>
+	     
+	     [ 34074]
+	     Subject: [PATCH] threads::shared 1.23
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Tue, 17 Jun 2008 16:28:45 -0400
+	     Message-ID: <1ff86f510806171328y54650760u12c8148830a60a63@mail.gmail.com>
+	     
+	     [ 34098]
+	     Subject: [PATCH] threads::shared 1.24
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Wed, 2 Jul 2008 10:01:59 -0400
+	     Message-ID: <1ff86f510807020701v78a14d06g1e0e5f098c6131ed@mail.gmail.com>
+	     
+	     ...plus some adjustments to the test headers to prevent failures
+	     in the Perl core.
+	     
+	     [ 34102]
+	     Subject: [PATCH] threads::shared 1.24 (phase 2)
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Thu, 3 Jul 2008 10:02:30 -0400
+	     Message-ID: <1ff86f510807030702q74132e14ne6434876a7138f17@mail.gmail.com>
+	     
+	     Additional changes to threads::shared for UTF-8 hash keys.
+	     
+	     [ 34110]
+	     Subject: [PATCH] threads::shared 1.24 (phase 3)
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Mon, 7 Jul 2008 13:33:22 -0400
+	     Message-ID: <1ff86f510807071033j5136e337lab0f3d27575e9113@mail.gmail.com>
+	     
+	     [ 34117]
+	     Subject: [PATCH] threads::shared 1.24 (more)
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Thu, 10 Jul 2008 09:05:42 -0400
+	     Message-ID: <1ff86f510807100605u4f80a1b6u2595fbd030bd5660@mail.gmail.com>
+	     
+	     Fixes "unary minus operator applied to unsigned type" warnings on Win32
+	     
+	     [ 34118]
+	     Subject: [PATCH] threads::shared 1.24 (still more)
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Thu, 10 Jul 2008 10:29:14 -0400
+	     Message-ID: <1ff86f510807100729k4b620d3dl3fa079b89360f5ee@mail.gmail.com>
+	     
+	     Fixes warnings introduced by previous patch.
+	     
+	     [ 34141]
+	     Upgrade to threads::shared 1.25 by Jerry D. Hedden
+	     Fix for cloning read-only objects.
+	     
+	     [ 34149]
+	     Subject: [PATCH] threads::shared 1.26
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Wed, 16 Jul 2008 09:47:57 -0400
+	     Message-ID: <1ff86f510807160647q777f0eefj388b342f57c8f49f@mail.gmail.com>
+	     
+	     Conditionalize read-only tests for Perl < 5.8.3
+	     
+	     [ 34150]
+	     Subject: [PATCH] watchdog() for threads tests
+	     From: "Jerry D. Hedden" <jdhedden@gmail.com>
+	     Date: Wed, 16 Jul 2008 11:10:35 -0400
+	     Message-ID: <1ff86f510807160810ib0a01adg4f54cca69a96b623@mail.gmail.com>
+     Branch: maint-5.8/perl
+	  +> ext/threads/shared/t/utf8.t
+	  !> (integrate 42 files)
+____________________________________________________________________________
+[ 34280] By: nicholas				   on 2008/09/05  20:20:35
+	Log: Integrate:
+	     [ 34246]
+	     Integrate:
+	     [ 34005]
+	     Subject: Re: CPAN Upload: S/SA/SAPER/Sys-Syslog-0.25.tar.gz
+	     From: Sébastien Aperghis-Tramoni <maddingue@free.fr>
+	     Date: Fri, 6 Jun 2008 01:23:30 +0200
+	     Message-Id: <A5901BA3-6972-4C7D-8D91-F6E942B85AE5@free.fr>
+	     
+	     [ 34058]
+	     Subject: Fwd: CPAN Upload: S/SA/SAPER/Sys-Syslog-0.26.tar.gz
+	     From: Sébastien Aperghis-Tramoni <maddingue@free.fr>
+	     Date: Mon, 16 Jun 2008 01:57:33 +0200
+	     Message-Id: <A9FDE5F5-5285-454C-AE15-3EBF6AEBDFC8@free.fr>
+	     
+	     [ 34103]
+	     Upgrade to Encode-2.26
+	     
+	     [ 34256]
+	     Integrate:
+	     [ 34046]
+	     For dynamic loading on VMS, simplify and robustify things by using
+	     the system-supplied exception handler rather than the home-rolled one.
+	     This eliminates an access violation sometimes seen with heavy loading
+	     under threads.
+	     
+	     [ 34163]
+	     Subject: [perl #56766] [PATCH]
+	     From: Vincent Pit <perl@profvince.com>
+	     Date: Thu, 10 Jul 2008 18:10:10 +0200
+	     Message-ID: <48763462.7020506@profvince.com>
+	     
+	     [ 34165]
+	     Subject: [PATCH] Version bump for Data::Dumper
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Wed, 30 Jul 2008 12:54:34 -0400
+	     Message-ID: <1ff86f510807300954y5451ce9eq3181169e83bc3a10@mail.gmail.com>
+     Branch: maint-5.8/perl
+	  +> ext/Encode/t/jis7-fallback.t
+	   - ext/Encode/ucm/gsm0338.ucm
+	  !> (integrate 35 files)
+____________________________________________________________________________
+[ 34279] By: nicholas				   on 2008/09/05  19:03:34
+	Log: Integrate:
+	     [ 34260]
+	     Integrate:
+	     [ 34128]
+	     In Perl_sv_utf8_upgrade_flags(), don't assume that the SV is well
+	     formed with a trailing '\0'. And do assume that bytes_to_utf8() does.
+	     
+	     [ 34234]
+	     Fix #30660: Repeated spaces on shebang line stops option parsing
+	     From a patch and test sent by Renée Bäcker in
+	     <48B271A3.80808@smart-websolutions.de>
+	     
+	     [ 34261]
+	     Integrate:
+	     [ 34055]
+	     Subject: [perl #55786] [PATCH blead] Re: Overload Segfaulting 
+	     From: Rick Delaney (via RT) <perlbug-followup@perl.org>
+	     Date: Sat, 14 Jun 2008 11:51:01 -0700
+	     Message-ID: <rt-3.6.HEAD-22068-1213469460-652.55786-75-0@perl.org>
+	     
+	     [ 34067]
+	     Subject: [perl #46309] Buffer overflow in win32_select() (PATCH included) 
+	     From: Risto Kankkunen (via RT) <perlbug-followup@perl.org>
+	     Date: Wed, 10 Oct 2007 02:44:13 -0700
+	     Message-ID: <rt-3.6.HEAD-10743-1192009453-1788.46309-75-0@perl.org>
+	     
+	     [ 34263]
+	     Integrate:
+	     [ 34076]
+	     Subject: Re: [perl #46381] "Out of memory ... sbrk()" on FreeBSD-6.x for v.5.8.x but not v.5.6.x
+	     From: Slaven Rezic <slaven@rezic.de>
+	     Date: 26 Oct 2007 16:58:55 +0200
+	     Message-ID: <874pgd6hxs.fsf@biokovo-amd64.herceg.de>
+	     
+	     [ 34078]
+	     Subject: [PATCH] Fix malloc.c warning
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Mon, 23 Jun 2008 09:41:11 -0400
+	     Message-ID: <1ff86f510806230641x37afed4bla697e381b3ba9d6d@mail.gmail.com>
+	     
+	     [ 34267]
+	     Integrate:
+	     [ 34225]
+	     Subject: [PATCH] Safer environ iteration
+	     From: "Milosz Tanski" <mtanski@gridapp.com>
+	     Date: Tue, 5 Aug 2008 18:33:02 -0400
+	     Message-ID: <C0A5E31718FC064A91E9FD7BE2F081B1018A21D7@exchange.gridapp.com>
+	     
+	     [ 34275]
+	     Integrate:
+	     [ 34220]
+	     Don't add freed SVF_BREAK scalars to the freed list.
+	     This may still be referenced, so don't reuse.
+     Branch: maint-5.8/perl
+	  !> lib/overload.pm lib/overload.t malloc.c perl.c pp.h sv.c
+	  !> t/run/switches.t win32/win32sck.c
+____________________________________________________________________________
+[ 34277] By: nicholas				   on 2008/09/05  16:34:16
+	Log: Integrate:
+	     [ 34247]
+	     Integrate:
+	     [ 34091]
+	     Subject: [PATCH-revised^6] common test code for timed bail
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Sat, 28 Jun 2008 15:18:48 -0400
+	     Message-ID: <1ff86f510806281218i65d32061w27a4431b9b357107@mail.gmail.com>
+	     
+	     [ 34109]
+	     Subject: [PATCH - revised^4] test.pl fix
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Mon, 7 Jul 2008 13:29:14 -0400
+	     Message-ID: <1ff86f510807071029q5931f03ud506f06b7d1f72af@mail.gmail.com>
+	     
+	     [ 34147]
+	     Subject: [PATCH] test.pl
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Fri, 11 Jul 2008 11:07:07 -0400
+	     Message-ID: <1ff86f510807110807hb3e3727la161367a63da607f@mail.gmail.com>
+	     
+	     Jerry found that localizing $? doesn't shield the effects of wait()
+	     unless you actually assign something to $?
+	     
+	     [ 34154]
+	     Subject: [PATCH] watchdog() fix for MSWin32
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Wed, 23 Jul 2008 12:19:36 -0400
+	     Message-ID: <1ff86f510807230919p355ea37ci3fde2c1f84df6d5f@mail.gmail.com>
+	     
+	     Adds a needed diag message to the watchdog() function for MSWin32.
+	     
+	     [ 34250]
+	     Integrate:
+	     [ 34097]
+	     Avoid using -> function call notation within test.pl, which is supposed
+	     to keep to simple constructions to facilitate accurately testing the
+	     core interpreter, which might be buggy.
+	     
+	     [ 34152]
+	     Subject: [PATCH] Fix skips in test.pl
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Fri, 18 Jul 2008 09:09:41 -0400
+	     Message-ID: <1ff86f510807180609l7ca8a8d8i653dfd687ed9f36d@mail.gmail.com>
+	     
+	     Changes skip messages to be consistent with Test::Builder.
+	     
+	     [ 34173]
+	     Better temporary file name generation. (Avoid using ++, avoid file
+	     names clashing between different scripts, which may now be executing
+	     in parallel)
+	     
+	     [ 34178]
+	     A proper tempfile function that can be used multiple times.
+	     
+	     [ 34179]
+	     Fix bug in counting in tempfile().
+	     Also we need to note file names we give out, as some callers don't
+	     create them before calling us a second time.
+	     Add a regexp that matches the tempfile() names, for tests that want to
+	     munge output.
+     Branch: maint-5.8/perl
+	  !> pod/perltodo.pod t/test.pl
+____________________________________________________________________________
+[ 34244] By: nicholas				   on 2008/09/02  20:21:51
+	Log: Integrate:
+	     [ 33719]
+	     Integrate:
+	     [ 32780]
+	     Upgrade to IPC::SysV 2.00
+     Branch: maint-5.8/perl
+	  !> ext/IPC/SysV/Changes ext/IPC/SysV/lib/IPC/Msg.pm
+	  !> ext/IPC/SysV/lib/IPC/Semaphore.pm
+	  !> ext/IPC/SysV/lib/IPC/SharedMem.pm ext/IPC/SysV/lib/IPC/SysV.pm
+____________________________________________________________________________
+[ 34096] By: nicholas				   on 2008/06/30  20:44:32
+	Log: Integrate:
+	     [ 34095]
+	     Integrate:
+	     [ 34090]
+	     Upgrade to Win32-0.37
+	     
+	     [ 34094]
+	     Upgrade to Win32-0.38
+	     (including changes to GetCurrentThreadId.t which should have gone into
+	     the 0.37 upgrade, but which I missed then)
+     Branch: maint-5.8/perl
+	  !> ext/Win32/Changes ext/Win32/Win32.pm ext/Win32/Win32.xs
+	  !> ext/Win32/t/GetCurrentThreadId.t
+____________________________________________________________________________
+[ 34082] By: nicholas				   on 2008/06/24  10:30:46
+	Log: Integrate:
+	     [ 33718]
+	     Integrate:
+	     (only the ext/IPC/SysV/SysV.xs part of) 
+	     
+	     [ 32703]
+	     Subject: [PATCH] ext/ consting
+	     From: "Robin Barker" <Robin.Barker@npl.co.uk>
+	     Message-ID: <46A0F33545E63740BC7563DE59CA9C6D09399D@exchsvr2.npl.ad.local>
+	     
+	     Date: Sat, 22 Dec 2007 00:39:47 -0000
+	     
+	     [ 32709]
+	     Upgrade to IPC::SysV 1.99_07
+	     
+	     [ 33719]
+	     Integrate:
+	     [ 32780]
+	     Upgrade to IPC::SysV 2.00
+     Branch: maint-5.8/perl
+	  +> ext/IPC/SysV/Changes ext/IPC/SysV/MANIFEST.SKIP
+	  +> ext/IPC/SysV/TODO ext/IPC/SysV/const-c.inc
+	  +> ext/IPC/SysV/const-xs.inc ext/IPC/SysV/lib/IPC/Msg.pm
+	  +> ext/IPC/SysV/lib/IPC/Semaphore.pm
+	  +> ext/IPC/SysV/lib/IPC/SharedMem.pm ext/IPC/SysV/lib/IPC/SysV.pm
+	  +> ext/IPC/SysV/regen.pl ext/IPC/SysV/t/pod.t
+	  +> ext/IPC/SysV/t/podcov.t ext/IPC/SysV/t/shm.t
+	  +> ext/IPC/SysV/typemap
+	   - ext/IPC/SysV/ChangeLog ext/IPC/SysV/MANIFEST
+	   - ext/IPC/SysV/Msg.pm ext/IPC/SysV/Semaphore.pm
+	   - ext/IPC/SysV/SysV.pm
+	  !> MANIFEST ext/IPC/SysV/Makefile.PL ext/IPC/SysV/README
+	  !> ext/IPC/SysV/SysV.xs ext/IPC/SysV/t/ipcsysv.t
+	  !> ext/IPC/SysV/t/msg.t ext/IPC/SysV/t/sem.t mkppport.lst
+____________________________________________________________________________
+[ 34066] By: nicholas				   on 2008/06/16  17:12:59
+	Log: Integrate:
+	     [ 34065]
+	     Integrate:
+	     [ 33979]
+	     Probably starting with the changes in change #33897,
+	     t/run/exit.t has been failing on Win32.  Update the skipping
+	     mechanism to do more that check for the definition of
+	     POSIX::WIFEXITED.
+	     
+	     [ 33982]
+	     Subject: Re: [perl #55160] perlbug AutoReply: Fix cygwin mount test
+	     From: "Reini Urban" <rurban@x-ray.at>
+	     Date: Sun, 1 Jun 2008 14:51:59 +0200
+	     Message-ID: <6910a60806010551u30199befr43761fe53d5d896@mail.gmail.com>
+	     
+	     [ 34024]
+	     Subject: Fwd: [PATCH-2] Re: testing $/ with in memory files
+	     From: Bram <p5p@perl.wizbit.be>
+	     Date: Mon, 26 May 2008 09:12:58 +0200
+	     Message-ID: <20080526091258.vbcecy2dc00gwg08@horde.wizbit.be>
+	     
+	     [ 34054]
+	     Subject: [PATCH] Re: testing $/ with in memory files
+	     From: Bram <p5p@perl.wizbit.be>
+	     Date: Sat, 14 Jun 2008 18:20:05 +0200
+	     Message-ID: <20080614182005.yxuyk1mntwkog0o0@horde.wizbit.be>
+	     
+	     [ 34056]
+	     Subject: [perl #47746] Not OK: perl 5.10.0 +RC1 on ia64-linux 2.4.21-sgi302r24
+	     From: "John P. Linderman" <jpl@research.att.com>
+	     Date: Tue, 27 Nov 2007 13:50:14 -0500 (EST)
+	     Message-Id: <200711271850.lARIoEfN14794612@raptor.research.att.com>
+	     
+	     [ 34060]
+	     Make lib/open.t under -Duseperlio
+     Branch: maint-5.8/perl
+	  !> lib/open.t t/base/rs.t t/lib/cygwin.t t/op/stat.t t/run/exit.t
+____________________________________________________________________________
+[ 34037] By: nicholas				   on 2008/06/09  18:17:41
+	Log: Integrate:
+	     [ 34033]
+	     Integrate:
+	     [ 33978]
+	     Subject: [perl #54828] perlio.c has a problem (both 5.8 and 5.10) 
+	     From: "Goro Fuji" (via RT) <perlbug-followup@perl.org>
+	     Date: Sun, 25 May 2008 23:10:42 -0700
+	     Message-ID: <rt-3.6.HEAD-11257-1211782242-1590.54828-75-0@perl.org>
+	     
+	     First chunk of the patch only
+	     
+	     [ 34002]
+	     Subject: [perl #55302] cc_runtime syntax error
+	     From: "Reini Urban via RT" <perlbug-followup@perl.org>
+	     Date: Wed, 04 Jun 2008 14:07:05 -0700
+	     Message-ID: <rt-3.6.HEAD-11257-1212613625-313.55302-15-0@perl.org>
+     Branch: maint-5.8/perl
+	  !> cc_runtime.h perlio.c
+____________________________________________________________________________
+[ 34036] By: nicholas				   on 2008/06/09  17:51:09
+	Log: Integrate:
+	     [ 34032]
+	     Integrate:
+	     [ 33988]
+	     Embarrassing errors to find: missing quotes in sed commands
+	     
+	     [ 33990]
+	     #33988 for AIX 3 and AIX 4: missing quotes in sed commands
+     Branch: maint-5.8/perl
+	  !> hints/aix.sh hints/aix_3.sh hints/aix_4.sh
+____________________________________________________________________________
+[ 34035] By: nicholas				   on 2008/06/08  22:20:43
+	Log: Integrate:
+	     [ 34034]
+	     Integrate:
+	     [ 33989]
+	     Subject: AW: IO::Dir destructor
+	     From: "Dintelmann, Peter" <Peter.Dintelmann@dresdner-bank.com>
+	     Date: Mon, 2 Jun 2008 14:48:35 +0200
+	     Message-ID: <3852726AFA94DE4F87E616F13F416A5F0216D9BE@naimucu1.ffz00k.rootdom.net>
+	     
+	     [ 33996]
+	     Forgot to update version in DirHandle.pm after updating.
+	     No cookie for me.
+     Branch: maint-5.8/perl
+	  !> lib/DirHandle.pm
+____________________________________________________________________________
+[ 34018] By: nicholas				   on 2008/06/07  17:06:39
+	Log: Integrate:
+	     [ 34017]
+	     Integrate:
+	     [ 33977]
+	     Subject: [perl #54424] perlipc mistype 
+	     From: andrew@sundale.net (via RT) <perlbug-followup@perl.org>
+	     Date: Sun, 18 May 2008 22:20:06 -0700
+	     Message-ID: <rt-3.6.HEAD-11257-1211174406-1790.54424-75-0@perl.org>
+	     
+	     [ 33985]
+	     Subject: [perl #36516] attributes.pm documentation is recursive and incomplete 
+	     From: "reneeb via RT" <perlbug-followup@perl.org>
+	     Date: Sun, 25 May 2008 07:30:37 -0700
+	     Message-ID: <rt-3.6.HEAD-19826-1211725834-911.36516-15-0@perl.org>
+	     
+	     with some spelling nits
+	     
+	     [ 33992]
+	     Small typo fix in Carp.pm
+	     
+	     [ 34014]
+	     $Carp::VERSION++ following change 33992.
+	     
+	     [ 34016]
+	     $attributes::VERSION++ following change 33985.
+     Branch: maint-5.8/perl
+	  !> lib/Carp.pm lib/attributes.pm pod/perlipc.pod
+____________________________________________________________________________
+[ 34015] By: nicholas				   on 2008/06/07  16:16:05
+	Log: Integrate:
+	     [ 33955]
+	     Integrate:
+	     ...
+	     
+	     [ 33951]
+	     Add index() tests for embedded nulls
+	     
+	     Subject:  Re: [perl #53746] bug with index() matching beyond end of string when \0 bytes (00000000) are involved
+	     From:  Abigail <abigail@abigail.be>
+	     Date:  Tue, 6 May 2008 14:57:36 +0200
+	     Message-Id:  <20080506125736.GC17310@abigail.be>
+	     
+	     [ 33952]
+	     [perl #53746] bug with index() matching beyond end of string
+	     An off-by-one error meant that index($str,...)
+	     was effectively being executed as index("$str\0", ...).
+	     Probably introduced by change #26511.
+     Branch: maint-5.8/perl
+	  !> t/op/index.t util.c
+____________________________________________________________________________
+[ 34013] By: nicholas				   on 2008/06/07  15:12:43
+	Log: Integrate:
+	     [ 33955]
+	     Integrate:
+	     ...
+	     
+	     [ 33927]
+	     Subject: [PATCH] lib.pm should not warn about loading .par files
+	     From: Paul Fenwick <pjf@perltraining.com.au>
+	     Date: Thu, 22 May 2008 23:24:34 +1000
+	     Message-ID: <48357412.5020703@perltraining.com.au>
+	     
+	     ...
+	     
+	     [ 34011]
+	     Integrate:
+	     [ 33973]
+	     Subject: [PATCH] Re: recent 'lib.pm' change => dual-life lib.pm
+	     From: Steffen Mueller <wyp3rlx02@sneakemail.com>
+	     Date: Tue, 27 May 2008 13:50:05 +0200
+	     Message-ID: <483BF56D.2020803@sneakemail.com>
+	     
+	     [ 33980]
+	     Subject: [PATCH] Fix for lib.pm Config detection
+	     From: Steffen Mueller <wyp3rlx02@sneakemail.com>
+	     Date: Sun, 01 Jun 2008 17:36:55 +0200
+	     Message-ID: <20080601153657.26607.qmail@lists.develooper.com>
+     Branch: maint-5.8/perl
+	  !> lib/lib.t lib/lib_pm.PL
+____________________________________________________________________________
+[ 34012] By: nicholas				   on 2008/06/07  15:02:39
+	Log: Integrate:
+	     [ 33955]
+	     Integrate:
+	     ...
+	     
+	     [ 33937]
+	     [perl #54758] Perl 5.10 memory corruption
+	     When @a = sort @a is pessimised if @a has magic,
+	     growing the stack requires various pointers to be reset in case
+	     the stack gets reallocated.
+	     
+	     ...
+     Branch: maint-5.8/perl
+	  !> pp_sort.c
+____________________________________________________________________________
+[ 34010] By: nicholas				   on 2008/06/07  14:27:04
+	Log: Integrate:
+	     [ 33976]
+	     Integrate:
+	     [ 32827]
+	     Upgrade to Devel::PPPort 3.13_01
+	     
+	     [ 33672]
+	     Upgrade to Devel::PPPort 3.13_02
+	     
+	     [ 33824]
+	     Upgrade to Devel::PPPort 3.13_03
+	     
+	     [ 33975]
+	     Upgrade to Devel::PPPort 3.14
+     Branch: maint-5.8/perl
+	  +> ext/Devel/PPPort/parts/base/5010000
+	  +> ext/Devel/PPPort/parts/base/5011000
+	  +> ext/Devel/PPPort/parts/inc/newSVpv
+	  +> ext/Devel/PPPort/parts/todo/5010000
+	  +> ext/Devel/PPPort/parts/todo/5011000
+	  +> ext/Devel/PPPort/t/format.t ext/Devel/PPPort/t/newSVpv.t
+	  !> (integrate 71 files)
+____________________________________________________________________________
+[ 34009] By: nicholas				   on 2008/06/07  14:01:05
+	Log: Integrate:
+	     [ 33960]
+	     Integrate:
+	     ...
+	     
+	     [ 33948]
+	     Upgrade to Locale-Maketext-1.13
+     Branch: maint-5.8/perl
+	  !> Porting/Maintainers.pl lib/Locale/Maketext.pm
+	  !> lib/Locale/Maketext/Guts.pm lib/Locale/Maketext/GutsLoader.pm
+____________________________________________________________________________
+[ 34008] By: nicholas				   on 2008/06/07  12:29:04
+	Log: Fix up MANIFEST after 34007.
+     Branch: maint-5.8/perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 34007] By: nicholas				   on 2008/06/07  12:11:34
+	Log: Integrate:
+	     [ 23075]
+	     Subject: Bug with NEXT when called from an eval block
+	     From: Dave Rolsky <autarch@urth.org>
+	     Date: Fri, 9 Jul 2004 17:06:07 -0500 (CDT)
+	     Message-ID: <Pine.LNX.4.58.0407091703010.4578@urth.org>
+	     
+	     [ 25261]
+	     Subject: [PATCH] Typos in *.p[lm]
+	     From: "Piotr Fusik" <pfusik@op.pl>
+	     Date: Sun, 31 Jul 2005 12:50:04 +0200
+	     Message-ID: <001401c595bd$dccb5d80$0bd34dd5@piec>
+	     
+	     [ 33943]
+	     Integrate:
+	     ...
+	     
+	     [ 33416]
+	     Subject: Re: [PATCH] NEXT.pm bug within overloaded stringification
+	     From: Marcel GrÃ¼nauer <gr@univie.ac.at>
+	     Message-Id: <511B0A54-AB2D-4A65-A02E-E2E07C043EAB@univie.ac.at>
+	     Date: Mon, 3 Mar 2008 16:08:48 +0100
+	     
+	     (a resend of <7BBCFD93-91CF-4656-A97F-ED5E749F7B2E@univie.ac.at>)
+	     
+	     ...
+	     
+	     [ 33439]
+	     Bump VERSION after change #33416
+	     (so we don't end up with different code but same version in
+	     5.10.0 and, say, 5.10.1)
+	     
+	     ...
+	     
+	     [ 34006]
+	     Integrate:
+	     [ 33991]
+	     Update to NEXT by Damian.
+	     This fixes the working of NEXT with AUTOLOAD.
+	     
+	     [ 33995]
+	     Bump NEXT version to 0.61 for CPAN release
+     Branch: maint-5.8/perl
+	  +> lib/NEXT/t/stringify.t
+	  !> lib/NEXT.pm lib/NEXT/t/next.t
+____________________________________________________________________________
+[ 33994] By: craigb				   on 2008/06/04  03:05:26
+	Log: Perl_start_glob VMS fix adapted from change #33993 for 5.8.x since
+	     other dependencies prevent integration.
+     Branch: maint-5.8/perl
+	   ! doio.c
+____________________________________________________________________________
+[ 33935] By: nicholas				   on 2008/05/25  23:43:03
+	Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 33934] By: nicholas				   on 2008/05/25  23:16:13
 	Log: Run buildtoc. (With the side effect of sorting MANIFEST.)
      Branch: maint-5.8/perl
