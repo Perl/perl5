@@ -356,7 +356,6 @@ PP(pp_formline)
     SV * nsv = NULL;
     OP * parseres = NULL;
     const char *fmt;
-    bool oneline;
 
     if (!SvMAGICAL(tmpForm) || !SvCOMPILED(tmpForm)) {
 	if (SvREADONLY(tmpForm)) {
@@ -422,6 +421,7 @@ PP(pp_formline)
 		*t = '\0';
 		sv_catpvn_utf8_upgrade(PL_formtarget, f, arg, nsv);
 		t = SvEND(PL_formtarget);
+		f += arg;
 		break;
 	    }
 	    if (!targ_is_utf8 && DO_UTF8(tmpForm)) {
@@ -682,51 +682,76 @@ PP(pp_formline)
 
 	case FF_LINESNGL:
 	    chopspace = 0;
-	    oneline = TRUE;
-	    goto ff_line;
 	case FF_LINEGLOB:
-	    oneline = FALSE;
-	ff_line:
 	    {
+		const bool oneline = fpc[-1] == FF_LINESNGL;
 		const char *s = item = SvPV_const(sv, len);
+		item_is_utf8 = DO_UTF8(sv);
 		itemsize = len;
-		if ((item_is_utf8 = DO_UTF8(sv)))
-		    itemsize = sv_len_utf8(sv);
 		if (itemsize) {
-		    bool chopped = FALSE;
+		    STRLEN to_copy = itemsize;
 		    const char *const send = s + len;
+		    const U8 *source = (const U8 *) s;
+		    U8 *tmp = NULL;
+
 		    gotsome = TRUE;
 		    chophere = s + itemsize;
 		    while (s < send) {
 			if (*s++ == '\n') {
 			    if (oneline) {
-				chopped = TRUE;
+				to_copy = s - SvPVX_const(sv) - 1;
 				chophere = s;
 				break;
 			    } else {
 				if (s == send) {
 				    itemsize--;
-				    chopped = TRUE;
+				    to_copy--;
 				} else
 				    lines++;
 			    }
 			}
 		    }
-		    SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
-		    if (targ_is_utf8)
-			SvUTF8_on(PL_formtarget);
-		    if (oneline) {
-			SvCUR_set(sv, chophere - item);
-			sv_catsv(PL_formtarget, sv);
-			SvCUR_set(sv, itemsize);
-		    } else
-			sv_catsv(PL_formtarget, sv);
-		    if (chopped)
-			SvCUR_set(PL_formtarget, SvCUR(PL_formtarget) - 1);
-		    SvGROW(PL_formtarget, SvCUR(PL_formtarget) + fudge + 1);
+		    if (targ_is_utf8 && !item_is_utf8) {
+			source = tmp = bytes_to_utf8(source, &to_copy);
+			SvCUR_set(PL_formtarget,
+				  t - SvPVX_const(PL_formtarget));
+		    } else {
+			if (item_is_utf8 && !targ_is_utf8) {
+			    /* Upgrade targ to UTF8, and then we reduce it to
+			       a problem we have a simple solution for.  */
+			    SvCUR_set(PL_formtarget,
+				      t - SvPVX_const(PL_formtarget));
+			    targ_is_utf8 = TRUE;
+			    /* Don't need get magic.  */
+			    sv_utf8_upgrade_flags(PL_formtarget, 0);
+			} else {
+			    SvCUR_set(PL_formtarget,
+				      t - SvPVX_const(PL_formtarget));
+			}
+
+			/* Easy. They agree.  */
+			assert (item_is_utf8 == targ_is_utf8);
+		    }
+		    SvGROW(PL_formtarget,
+			   SvCUR(PL_formtarget) + to_copy + fudge + 1);
 		    t = SvPVX(PL_formtarget) + SvCUR(PL_formtarget);
-		    if (item_is_utf8)
-			targ_is_utf8 = TRUE;
+
+		    Copy(source, t, to_copy, char);
+		    t += to_copy;
+		    SvCUR_set(PL_formtarget, SvCUR(PL_formtarget) + to_copy);
+		    if (item_is_utf8) {
+			if (SvGMAGICAL(sv)) {
+			    /* Mustn't call sv_pos_b2u() as it does a second
+			       mg_get(). Is this a bug? Do we need a _flags()
+			       variant? */
+			    itemsize = utf8_length(source, source + itemsize);
+			} else {
+			    sv_pos_b2u(sv, &itemsize);
+			}
+			assert(!tmp);
+		    } else if (tmp) {
+			Safefree(tmp);
+		    }
 		}
 		break;
 	    }
