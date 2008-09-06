@@ -129,19 +129,11 @@ if ($^O eq 'MSWin32') {
 Test::Harness::runtests @tests;
 exit(0) unless -e "../testcompile";
 
-# %infinite =  qw (
-#        op/bop.t	1
-#        lib/hostname.t	1
-#	 op/lex_assign.t	1
-#	 lib/ph.t	1
-#        );
-
 my $dhwrapper = <<'EOT';
 open DATA,"<".__FILE__;
 until (($_=<DATA>) =~ /^__END__/) {};
 EOT
 
-@tests = grep (!$infinite{$_}, @tests);
 @tests = map {
          my $new = $_;
 	 if ($datahandle{$_} && !( -f "$new.t") ) {
@@ -155,9 +147,6 @@ EOT
          }
          $new;
          } @tests;
-
-print "The tests ", join(' ', keys(%infinite)),
-    " generate infinite loops! Skipping!\n";
 
 $ENV{'HARNESS_COMPILE_TEST'} = 1;
 $ENV{'PERLCC_TIMEOUT'} = 120 unless $ENV{'PERLCC_TIMEOUT'};
