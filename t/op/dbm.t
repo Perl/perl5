@@ -13,38 +13,43 @@ plan tests => 4;
 
 # This is [20020104.007] "coredump on dbmclose"
 
+my $filename = tempfile();
+
 my $prog = <<'EOC';
 package Foo;
+$filename = '@@@@';
 sub new {
         my $proto = shift;
         my $class = ref($proto) || $proto;
         my $self  = {};
         bless($self,$class);
         my %LT;
-        dbmopen(%LT, "dbmtest", 0666) ||
-	    die "Can't open dbmtest because of $!\n";
+        dbmopen(%LT, $filename, 0666) ||
+	    die "Can't open $filename because of $!\n";
         $self->{'LT'} = \%LT;
         return $self;
 }
 sub DESTROY {
         my $self = shift;
 	dbmclose(%{$self->{'LT'}});
-	1 while unlink 'dbmtest';
-	1 while unlink <dbmtest.*>;
+	1 while unlink $filename;
+	1 while unlink glob "$filename.*";
 	print "ok\n";
 }
 package main;
 $test = Foo->new(); # must be package var
 EOC
 
+$prog =~ s/\@\@\@\@/$filename/;
+
 fresh_perl_is("require AnyDBM_File;\n$prog", 'ok', {}, 'explict require');
 fresh_perl_is($prog, 'ok', {}, 'implicit require');
 
 $prog = <<'EOC';
 @INC = ();
-dbmopen(%LT, "dbmtest", 0666);
-1 while unlink 'dbmtest';
-1 while unlink <dbmtest.*>;
+dbmopen(%LT, $filename, 0666);
+1 while unlink $filename;
+1 while unlink glob "$filename.*";
 die "Failed to fail!";
 EOC
 

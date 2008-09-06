@@ -3,6 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
 }
 
 print "1..98\n";
@@ -38,11 +39,12 @@ $fact = 'local($foo)=$foo; $foo <= 1 ? 1 : $foo-- * (eval $fact);';
 $ans = eval $fact;
 if ($ans == 120) {print "ok 9\n";} else {print "not ok 9 $ans\n";}
 
-open(try,'>Op.eval');
-print try 'print "ok 10\n"; unlink "Op.eval";',"\n";
+my $tempfile = tempfile();
+open(try,'>',$tempfile);
+print try 'print "ok 10\n";',"\n";
 close try;
 
-do './Op.eval'; print $@;
+do "./$tempfile"; print $@;
 
 # Test the singlequoted eval optimizer
 
@@ -500,15 +502,16 @@ print "ok $test # length of \$@ after eval\n"; $test++;
 
 # Check if eval { 1 }; compeltly resets $@
 if (eval "use Devel::Peek; 1;") {
-  
-  open PROG, ">", "peek_eval_$$.t" or die "Can't create test file";
-  print PROG <<'END_EVAL_TEST';
+  $tempfile = tempfile();
+  $outfile = tempfile();
+  open PROG, ">", $tempfile or die "Can't create test file";
+  my $prog = <<'END_EVAL_TEST';
     use Devel::Peek;
     $! = 0;
     $@ = $!;
     my $ok = 0;
     open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
-    if (open(OUT,">peek_eval$$")) {
+    if (open(OUT, '>', '@@@@')) {
       open(STDERR, ">&OUT") or die "Can't dup OUT: $!";
       Dump($@);
       print STDERR "******\n";
@@ -518,7 +521,7 @@ if (eval "use Devel::Peek; 1;") {
       Dump($@);
       open(STDERR, ">&SAVERR") or die "Can't restore STDERR: $!";
       close(OUT);
-      if (open(IN, "peek_eval$$")) {
+      if (open(IN, '<', '@@@@')) {
         local $/;
         my $in = <IN>;
         my ($first, $second) = split (/\*\*\*\*\*\*\n/, $in, 2);
@@ -528,18 +531,16 @@ if (eval "use Devel::Peek; 1;") {
     }
 
     print $ok;
-    END {
-      1 while unlink("peek_eval$$");
-    }
 END_EVAL_TEST
+    $prog =~ s/\@\@\@\@/$outfile/g;
+    print PROG $prog;
    close PROG;
 
-   my $ok = runperl(progfile => "peek_eval_$$.t");
+   my $ok = runperl(progfile => $tempfile);
    print "not " unless $ok;
    print "ok $test # eval { 1 } completly resets \$@\n";
 
    $test++;
-   1 while unlink("peek_eval_$$.t");
 }
 else {
   print "ok $test # skipped - eval { 1 } completly resets \$@";

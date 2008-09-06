@@ -25,12 +25,8 @@ use File::Spec;
 require "test.pl";
 plan(tests => 49 + !$minitest * (3 + 14 * $can_fork));
 
-my @tempfiles = ();
-
 sub get_temp_fh {
-    my $f = "DummyModule0000";
-    1 while -e ++$f;
-    push @tempfiles, $f;
+    my $f = tempfile();
     open my $fh, ">$f" or die "Can't create $f: $!";
     print $fh "package ".substr($_[0],0,-3).";\n1;\n";
     print $fh $_[1] if @_ > 1;
@@ -38,8 +34,6 @@ sub get_temp_fh {
     open $fh, $f or die "Can't open $f: $!";
     return $fh;
 }
-
-END { 1 while unlink @tempfiles }
 
 sub fooinc {
     my ($self, $filename) = @_;
