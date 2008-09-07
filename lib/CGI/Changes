@@ -1,3 +1,38 @@
+  Version 3.41
+  1. Fix url() returning incorrect path when query string contains escaped newline.
+  2. Added additional windows temporary directories and environment variables, courtesy patch from Renee Baecker
+  3. Added a handle() method to the lightweight upload
+  filehandles. This method returns a real IO::Handle object.
+  4. Added patch from Tony Vanlingen to fix deep recursion warnings in CGI::Pretty.
+
+  Version 3.40
+  1. Fixed CGI::Fast docs to eliminate references to a "special"
+  version of Perl.
+  2. Makefile.PL now depends on FCGI so that CGI::Fast installs properly.
+  3. Fix script_name() call from Stephane Chazelas.
+
+  Version 3.39
+  1. Fixed regression in "exists" function when using tied interface to CGI via $q->Vars.
+
+  Version 3.38
+  1. Fix annoying warning in http://rt.cpan.org/Ticket/Display.html?id=34551
+  2. Added nobr() function http://rt.cpan.org/Ticket/Display.html?id=35377
+  3. popup_menu() allows multiple items to be selected by default, satisfying
+   http://rt.cpan.org/Ticket/Display.html?id=35376
+  4. Patch from Renee Backer to avoid doubled <http-equiv> headers.
+  5. Fixed documentation bug that describes what happens when a
+  parameter is empty (e.g. "?test1=").
+  6. Fixed minor warning described at http://rt.cpan.org/Public/Bug/Display.html?id=36435
+  7. Fixed overlap of attribute and parameter space described in http://rt.perl.org/rt3//Ticket/Display.html?id=24294
+
+  Version 3.37
+  1. Fix pragmas so that they persist over modperl invocations (e.g. RT 34761)
+  2. Fixed handling of chunked multipart uploads; thanks to Michael Bernhardt
+     who reported and fixed the problem.
+
+  Version 3.36
+  1. Fix CGI::Cookie to support cookies that are separated by "," instead of ";".
+
   Version 3.35
   1. Resync with bleadperl, primarily fixing a bug in parsing semicolons in uploaded filenames.
 
