@@ -1782,6 +1782,7 @@
  *	defined if the system supports long doubles.
  */
 #define HAS_LONG_DOUBLE		/**/
+#ifdef HAS_LONG_DOUBLE
 #define LONG_DOUBLESIZE 10		/**/
 #endif
 
