@@ -712,7 +712,7 @@ PP(pp_formline)
 			}
 		    }
 		    if (targ_is_utf8 && !item_is_utf8) {
-			source = tmp = bytes_to_utf8(source, &to_copy);
+			source = tmp = bytes_to_utf8((U8 *)source, &to_copy);
 			SvCUR_set(PL_formtarget,
 				  t - SvPVX_const(PL_formtarget));
 		    } else {
@@ -744,7 +744,8 @@ PP(pp_formline)
 			    /* Mustn't call sv_pos_b2u() as it does a second
 			       mg_get(). Is this a bug? Do we need a _flags()
 			       variant? */
-			    itemsize = utf8_length(source, source + itemsize);
+			    itemsize = utf8_length((U8 *)source,
+						   (U8 *)source + itemsize);
 			} else {
 			    sv_pos_b2u(sv, &itemsize);
 			}
