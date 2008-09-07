@@ -4,7 +4,7 @@ use strict;
 use ExtUtils::CBuilder::Platform::Unix;
 
 use vars qw($VERSION @ISA);
-$VERSION = '0.23';
+$VERSION = '0.24';
 @ISA = qw(ExtUtils::CBuilder::Platform::Unix);
 
 sub need_prelink { 1 }
