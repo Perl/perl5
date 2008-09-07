@@ -1415,60 +1415,24 @@ Use of uninitialized value $r2 in reverse at - line 6.
 use warnings 'uninitialized';
 #
 # ops that can return undef for defined args
+# split into separate tests to diagnose the cause of daily build smoke
 #
-my $nofile = '/no/such/file';
 my $nocmd  = '/no/such/command';
-my $v;
 # *** `` not tested: Windows produces an error on STDERR
 # *** ditto qx()
-my $f = "";
-$v = 1 + open($f, $nofile);
+# *** -k not tested: Produces no warning on Windows
+my $nan = "NaN";
+# *** ($nan <=> 1) not tested: NaN not supported on Windows
 # *** pipe() not tested
-$v = 1 + fileno($nofile);
-$v = 1 + binmode($nofile);
-$v = 1 + tied($nofile);
-$v = 1 + getc($nofile);
-$v = 1 + sysread($nofile, my $buf,1);
-$v = 1 + eval { send($nofile, $buf,0) };
 # *** ioctl not tested
 # *** socket not tested
 # *** socketpair not tested
 # *** bind not tested
 # *** connect not tested
 # *** listen not tested
-$v = 1 + eval { accept($fh, $nofile) };
 # *** shutdown not tested
 # *** setsockopt not tested
 # *** getpeername not tested
-$v = 1 + (-r $nofile);
-$v = 1 + (-w $nofile);
-$v = 1 + (-x $nofile);
-$v = 1 + (-o $nofile);
-$v = 1 + (-R $nofile);
-$v = 1 + (-W $nofile);
-$v = 1 + (-X $nofile);
-$v = 1 + (-O $nofile);
-$v = 1 + (-e $nofile);
-$v = 1 + (-z $nofile);
-$v = 1 + (-s $nofile);
-$v = 1 + (-f $nofile);
-$v = 1 + (-d $nofile);
-$v = 1 + (-l $nofile);
-$v = 1 + (-p $nofile);
-$v = 1 + (-S $nofile);
-$v = 1 + (-b $nofile);
-$v = 1 + (-c $nofile);
-$v = 1 + (-t $nofile);
-$v = 1 + (-u $nofile);
-$v = 1 + (-g $nofile);
-# *** -k not tested: Produces no warning on Windows
-$v = 1 + (-T $nofile);
-$v = 1 + (-B $nofile);
-$v = 1 + (-M $nofile);
-$v = 1 + (-A $nofile);
-$v = 1 + (-C $nofile);
-$v = 1 + eval { readlink $nofile };
-$v = 1 + opendir($f, $nofile);
 # *** readdir not tested
 # *** telldir not tested
 # *** seekdir not tested
@@ -1478,79 +1442,369 @@ $v = 1 + opendir($f, $nofile);
 # *** alarm not tested
 # *** semget not tested
 # *** getlogin not tested
+EXPECT
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+my $f = "";
+$v = 1 + open($f, $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 5.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + fileno($nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + binmode($nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + tied($nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + getc($nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + sysread($nofile, my $buf,1);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + eval { send($nofile, $buf,0) };
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+my $fh = "";
+$v = 1 + eval { accept($fh, $nofile) };
+EXPECT
+Use of uninitialized value in addition (+) at - line 5.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-r $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-w $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-x $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-o $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-R $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-W $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-X $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-O $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-e $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-z $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-s $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-f $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-d $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-l $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-p $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-S $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-b $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-c $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-t $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-u $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-g $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-T $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-B $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-M $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-A $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + (-C $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + eval { readlink $nofile };
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+$v = 1 + opendir($f, $nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
 $v = 1 + undef;
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
 my $x = 1; $v = 1 + undef($x);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $v;
 my $emptys = "";
 $v = 1 + substr($emptys,2,1);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $v;
 my @emptya;
 $v = 1 + each @emptya;
-my @emptyh;
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $v;
+my %emptyh;
 $v = 1 + each %emptyh;
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $v;
+my @emptya;
 $v = 1 + sort @emptya;
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $v;
 my $zero = 0; $v = 1 + caller($zero);
+EXPECT
+Use of uninitialized value in addition (+) at - line 3.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
 $v = 1 + do $nofile;
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $v;
 my $fn = sub {};
 $v = 1 + prototype $fn;
-my $nan = "NaN";
-# *** ($nan <=> 1) not tested: NaN not supported on Windows
-$v = 1 + ($fn ~~ 1);
-$v = 1 + (print STDIN $f); # print to STDIN returns undef
-$v = 1 + (printf STDIN "%s", $f);
-{ use feature 'say'; $v = 1 + (say STDIN "%s", $f); }
-$v = 1 + (unpack("",$f));
-$v = 1 + sysopen($f, $nofile, 0);
-{ my $x = -1; $v = 1 + sysseek(STDIN, $x, 0); }
-
 EXPECT
-Use of uninitialized value in addition (+) at - line 11.
-Use of uninitialized value in addition (+) at - line 13.
-Use of uninitialized value in addition (+) at - line 14.
-Use of uninitialized value in addition (+) at - line 15.
-Use of uninitialized value in addition (+) at - line 16.
-Use of uninitialized value in addition (+) at - line 17.
-Use of uninitialized value in addition (+) at - line 18.
-Use of uninitialized value in addition (+) at - line 25.
-Use of uninitialized value in addition (+) at - line 29.
-Use of uninitialized value in addition (+) at - line 30.
-Use of uninitialized value in addition (+) at - line 31.
-Use of uninitialized value in addition (+) at - line 32.
-Use of uninitialized value in addition (+) at - line 33.
-Use of uninitialized value in addition (+) at - line 34.
-Use of uninitialized value in addition (+) at - line 35.
-Use of uninitialized value in addition (+) at - line 36.
-Use of uninitialized value in addition (+) at - line 37.
-Use of uninitialized value in addition (+) at - line 38.
-Use of uninitialized value in addition (+) at - line 39.
-Use of uninitialized value in addition (+) at - line 40.
-Use of uninitialized value in addition (+) at - line 41.
-Use of uninitialized value in addition (+) at - line 42.
-Use of uninitialized value in addition (+) at - line 43.
-Use of uninitialized value in addition (+) at - line 44.
-Use of uninitialized value in addition (+) at - line 45.
-Use of uninitialized value in addition (+) at - line 46.
-Use of uninitialized value in addition (+) at - line 47.
-Use of uninitialized value in addition (+) at - line 48.
-Use of uninitialized value in addition (+) at - line 49.
-Use of uninitialized value in addition (+) at - line 51.
-Use of uninitialized value in addition (+) at - line 52.
-Use of uninitialized value in addition (+) at - line 53.
-Use of uninitialized value in addition (+) at - line 54.
-Use of uninitialized value in addition (+) at - line 55.
-Use of uninitialized value in addition (+) at - line 56.
-Use of uninitialized value in addition (+) at - line 57.
-Use of uninitialized value in addition (+) at - line 67.
-Use of uninitialized value in addition (+) at - line 68.
-Use of uninitialized value in addition (+) at - line 70.
-Use of uninitialized value in addition (+) at - line 72.
-Use of uninitialized value in addition (+) at - line 74.
-Use of uninitialized value in addition (+) at - line 75.
-Use of uninitialized value in addition (+) at - line 76.
-Use of uninitialized value in addition (+) at - line 77.
-Use of uninitialized value in addition (+) at - line 79.
-Use of uninitialized value in addition (+) at - line 82.
-Use of uninitialized value in addition (+) at - line 83.
-Use of uninitialized value in addition (+) at - line 84.
-Use of uninitialized value in addition (+) at - line 85.
-Use of uninitialized value in addition (+) at - line 86.
-Use of uninitialized value in addition (+) at - line 87.
-Use of uninitialized value in addition (+) at - line 88.
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $v;
+my $fn = sub {};
+$v = 1 + ($fn ~~ 1);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $v;
+my $f = "";
+$v = 1 + (print STDIN $f); # print to STDIN returns undef
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $v;
+my $f = "";
+$v = 1 + (printf STDIN "%s", $f);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $v;
+my $f = "";
+{ use feature 'say'; $v = 1 + (say STDIN "%s", $f); }
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $v;
+my $f = "";
+$v = 1 + (unpack("",$f));
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
+my $f = "";
+$v = 1 + sysopen($f, $nofile, 0);
+EXPECT
+Use of uninitialized value in addition (+) at - line 5.
+########
+use warnings 'uninitialized';
+my $v;
+{ my $x = -1; $v = 1 + sysseek(STDIN, $x, 0); }
+EXPECT
+Use of uninitialized value in addition (+) at - line 3.
