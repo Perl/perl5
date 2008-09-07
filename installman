@@ -44,8 +44,10 @@ GetOptions( \%opts,
 die $usage if $opts{help};
 
 foreach my $pre (qw(man1 man3)) {
-    $opts{"${pre}dir"} //= $opts{destdir} . $Config{"install${pre}dir"};
-    $opts{"${pre}ext"} //= $Config{"${pre}ext"};
+    $opts{"${pre}dir"} = $opts{destdir} . $Config{"install${pre}dir"}
+	unless defined $opts{"${pre}dir"};
+    $opts{"${pre}ext"} = $Config{"${pre}ext"}
+	unless defined $opts{"${pre}ext"};
 }
 $opts{silent} ||= $opts{S};
 $opts{notify} ||= $opts{n};
