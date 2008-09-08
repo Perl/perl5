@@ -82,6 +82,12 @@ if test ! -d "ext/$pname"; then
     exit 0 # not an error ?
 fi
 
+case "$osname" in
+catamount) # Snowball's chance of building extensions.
+  echo "This is $osname, not building $mname, sorry."
+  exit 0
+  ;;
+esac
 
 echo "	Making $mname ($target)"
 
@@ -121,7 +127,7 @@ nonxs)      makeargs="";
 esac
 
 if test ! -f $makefile ; then
-	test -f Makefile.PL && ../$depth/miniperl -I../$depth/lib -MCross Makefile.PL INSTALLDIRS=perl PERL_CORE=1 $passthru
+	test -f Makefile.PL && $run ../$depth/miniperl -I../$depth/lib -MCross Makefile.PL INSTALLDIRS=perl INSTALLMAN3DIR=none PERL_CORE=1 $passthru
 fi
 if test ! -f $makefile ; then
 	echo "Warning: No Makefile!"
