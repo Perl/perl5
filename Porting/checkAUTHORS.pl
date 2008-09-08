@@ -369,7 +369,8 @@ epeschko\100den-mdev1                   esp5\100pge.com
 
 fugazi\100zyx.net                       larrysh\100cpan.org
 
-gellyfish\100gellyfish.com              jns\100gellyfish.com
+jns\100integration-house.com            jns\100gellyfish.com
++                                       gellyfish\100gellyfish.com
 gp\100familiehaase.de                   gerrit\100familiehaase.de
 grazz\100pobox.com                      grazz\100nyc.rr.com
 
