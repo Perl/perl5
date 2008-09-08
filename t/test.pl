@@ -843,10 +843,11 @@ sub watchdog ($)
                 local $SIG{'__WARN__'} = sub {
                     _diag("Watchdog warning: $_[0]");
                 };
+                my $sig = $^O eq 'VMS' ? 'TERM' : 'KILL';
                 $watchdog = system(1, which_perl(), '-e',
                                                     "sleep($timeout);" .
                                                     "warn('# $timeout_msg\n');" .
-                                                    "kill('KILL', $pid_to_kill);");
+                                                    "kill($sig, $pid_to_kill);");
             };
             if ($@ || ($watchdog <= 0)) {
                 _diag('Failed to start watchdog');
@@ -908,13 +909,19 @@ sub watchdog ($)
                 eval { require POSIX; };
 
                 # Execute the timeout
-                sleep($timeout);
+                my $time_elapsed = 0;
+                my $time_left = $timeout;
+                while ($time_elapsed < $timeout) { 
+                    $time_elapsed += sleep($time_left);
+                    $time_left = $timeout - $time_elapsed;
+                }
 
                 # Kill the parent (and ourself)
                 select(STDERR); $| = 1;
                 _diag($timeout_msg);
                 POSIX::_exit(1) if (defined(&POSIX::_exit));
-                kill('KILL', $pid_to_kill);
+                my $sig = $^O eq 'VMS' ? 'TERM' : 'KILL';
+                kill($sig, $pid_to_kill);
             })->detach();
         return;
     }
@@ -929,7 +936,8 @@ sub watchdog ($)
             select(STDERR); $| = 1;
             _diag($timeout_msg);
             POSIX::_exit(1) if (defined(&POSIX::_exit));
-            kill('KILL', $pid_to_kill);
+            my $sig = $^O eq 'VMS' ? 'TERM' : 'KILL';
+            kill($sig, $pid_to_kill);
         };
     }
 }
