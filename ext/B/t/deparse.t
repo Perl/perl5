@@ -434,6 +434,7 @@ use constant H => { "#" => 1 }; H->{"#"}
 foreach my $i (@_) { 0 }
 ####
 # 58 tests with not, not optimized
+my $c;
 x() unless $a;
 x() if not $a and $b;
 x() if $a and not $b;
@@ -443,18 +444,46 @@ x() if not $a or $b;
 x() if $a or not $b;
 x() unless not $a or $b;
 x() unless $a or not $b;
+x() if $a and not $b and $c;
+x() if not $a and $b and not $c;
+x() unless $a and not $b and $c;
+x() unless not $a and $b and not $c;
+x() if $a or not $b or $c;
+x() if not $a or $b or not $c;
+x() unless $a or not $b or $c;
+x() unless not $a or $b or not $c;
 ####
 # 59 tests with not, optimized
+my $c;
 x() if not $a;
 x() unless not $a;
 x() if not $a and not $b;
 x() unless not $a and not $b;
 x() if not $a or not $b;
 x() unless not $a or not $b;
+x() if not $a and not $b and $c;
+x() unless not $a and not $b and $c;
+x() if not $a or not $b or $c;
+x() unless not $a or not $b or $c;
+x() if not $a and not $b and not $c;
+x() unless not $a and not $b and not $c;
+x() if not $a or not $b or not $c;
+x() unless not $a or not $b or not $c;
+x() unless not $a or not $b or not $c;
 >>>>
+my $c;
 x() unless $a;
 x() if $a;
 x() unless $a or $b;
 x() if $a or $b;
 x() unless $a and $b;
-x() unless not $a && $b;
+x() if $a and $b;
+x() if not $a || $b and $c;
+x() unless not $a || $b and $c;
+x() if not $a && $b or $c;
+x() unless not $a && $b or $c;
+x() unless $a or $b or $c;
+x() if $a or $b or $c;
+x() unless $a and $b and $c;
+x() if $a and $b and $c;
+x() unless not $a && $b && $c;

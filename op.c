@@ -4476,19 +4476,9 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 		type = OP_OR;
 	    else
 		type = OP_AND;
-	    o = first;
-	    first = *firstp = cUNOPo->op_first;
-	    if (o->op_next)
-		first->op_next = o->op_next;
-	    cUNOPo->op_first = NULL;
-	    op_free(o);
+	    op_null(first);
 	    if (other->op_type == OP_NOT) { /* !a AND|OR !b => !(a OR|AND b) */
-		o = other;
-		other = *otherp = cUNOPo->op_first;
-		if (o->op_next)
-		    other->op_next = o->op_next;
-		cUNOPo->op_first = NULL;
-		op_free(o);
+		op_null(other);
 		prepend_not = 1; /* prepend a NOT op later */
 	    }
 	}

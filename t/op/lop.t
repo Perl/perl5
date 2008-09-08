@@ -9,7 +9,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..9\n";
+print "1..11\n";
 
 my $test = 0;
 for my $i (undef, 0 .. 2, "", "0 but true") {
@@ -48,7 +48,18 @@ $i = !$x || $y;
 print "not " unless $i == 8;
 print "ok ", ++$test, "\n";
 
-($x, $y) = (0, 9);
-$i = !$x && $y;
+++$y;
+$i = !$x || !$x || !$x || $y;
 print "not " unless $i == 9;
+print "ok ", ++$test, "\n";
+
+$x = 0;
+++$y;
+$i = !$x && $y;
+print "not " unless $i == 10;
+print "ok ", ++$test, "\n";
+
+++$y;
+$i = !$x && !$x && !$x && $y;
+print "not " unless $i == 11;
 print "ok ", ++$test, "\n";
