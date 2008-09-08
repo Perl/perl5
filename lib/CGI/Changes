@@ -1,3 +1,11 @@
+
+  Version 3.42
+  1. Added patch from Renee Baecker that makes it possible to subclass
+  CGI::Pretty.
+  2. Added patch from Nicholas Clark to allow ~ characters in temporary directories.
+  3. Added patch from Renee Baecker that fixes the inappropriate escaping of fields
+     in multipart headers.
+
   Version 3.41
   1. Fix url() returning incorrect path when query string contains escaped newline.
   2. Added additional windows temporary directories and environment variables, courtesy patch from Renee Baecker
