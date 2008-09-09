@@ -5789,7 +5789,37 @@ ____________________________________________________________________________
 	  !> MANIFEST lib/Thread.pm
 ____________________________________________________________________________
 [ 32469] By: nicholas				   on 2007/11/23  20:37:18
-	Log:	  Branch: maint-5.8/perl
+	Log: Integrate:
+	     [ 25261]
+	     Subject: [PATCH] Typos in *.p[lm]
+	     From: "Piotr Fusik" <pfusik@op.pl>
+	     Date: Sun, 31 Jul 2005 12:50:04 +0200
+	     Message-ID: <001401c595bd$dccb5d80$0bd34dd5@piec>
+	     
+	     [the base.pm parts]
+	     
+	     [ 31540]
+	     Upgrade to base and fields 2.12, mostly by Michael G Schwern
+	     
+	     [ 31851]
+	     Subject: Re: mro "PERFORMANCE CONSIDERATIONS" still true?
+	     From: Rick Delaney <rick@bort.ca>
+	     Date: Mon, 10 Sep 2007 10:45:41 -0400
+	     Message-ID: <20070910144541.GI9260@bort.ca>
+	     
+	     plus update Changes file for base.pm
+	     
+	     [ 31853]
+	     Make @INC available in base.pm's error message when
+	     a module can't be found. See CPAN bug #28582.
+	     
+	     [ 31895]
+	     Subject: Re: [PATCH] Re: Unintentional base.pm behavior change
+	     From: Michael G Schwern <schwern@pobox.com>
+	     Date: Wed, 19 Sep 2007 00:39:40 -0700
+	     Message-ID: <46F0D23C.6020105@pobox.com>
+
+     Branch: maint-5.8/perl
 	  +> lib/base/Changes lib/base/t/isa.t lib/base/t/sigdie.t
 	  +> lib/base/t/version.t lib/base/t/warnings.t t/lib/HasSigDie.pm
 	  !> MANIFEST lib/base.pm lib/base/t/base.t
