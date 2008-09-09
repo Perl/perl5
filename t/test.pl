@@ -909,12 +909,10 @@ sub watchdog ($)
                 eval { require POSIX; };
 
                 # Execute the timeout
-                my $time_elapsed = 0;
                 my $time_left = $timeout;
-                while ($time_elapsed < $timeout) { 
-                    $time_elapsed += sleep($time_left);
-                    $time_left = $timeout - $time_elapsed;
-                }
+                do {
+                    $time_left -= sleep($time_left);
+                } while ($time_left > 0);
 
                 # Kill the parent (and ourself)
                 select(STDERR); $| = 1;
