@@ -4,6 +4,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     $ENV{PERL5LIB} = '../lib';
+    require './test.pl';
 }
 
 $| = 1;
@@ -15,9 +16,8 @@ my $Is_VMS = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
 my $Is_NetWare = $^O eq 'NetWare';
 my $Is_MacOS = $^O eq 'MacOS';
-my $tmpfile = "tmp0000";
+my $tmpfile = tempfile();
 my $i = 0 ;
-1 while -e ++$tmpfile;
 END {  if ($tmpfile) { 1 while unlink $tmpfile} }
 
 for (@prgs){
@@ -59,7 +59,7 @@ for (@prgs){
     my $status = $?;
     $results =~ s/\n+$//;
     # allow expected output to be written as if $prog is on STDIN
-    $results =~ s/tmp\d+/-/g;
+    $results =~ s/tmp\d+[A-Z][A-Z]?/-/g;
     $results =~ s/\n%[A-Z]+-[SIWEF]-.*$// if $Is_VMS;  # clip off DCL status msg
 # bison says 'parse error' instead of 'syntax error',
 # various yaccs may or may not capitalize 'syntax'.
