@@ -42,7 +42,7 @@ If you have problems, corrections, or questions, please see
 L<"Reporting Problems"> below.
 
 For information on what's new in this release, see the
-pod/perl5100delta.pod file.  For more detailed information about specific
+pod/perl589delta.pod file.  For more detailed information about specific
 changes, see the Changes file.
 
 =head1 DESCRIPTION
@@ -75,10 +75,10 @@ directory.
 
 =head2 Changes and Incompatibilities
 
-Please see pod/perl5100delta.pod for a description of the changes and
+Please see pod/perl589delta.pod for a description of the changes and
 potential incompatibilities introduced with this release.  A few of
 the most important issues are listed below, but you should refer
-to pod/perl5100delta.pod for more detailed information.
+to pod/perl589delta.pod for more detailed information.
 
 =head3 WARNING:  This version is not binary compatible with releases of
 Perl prior to 5.8.0.
@@ -94,7 +94,7 @@ The standard extensions supplied with Perl will be handled automatically.
 
 On a related issue, old modules may possibly be affected by the changes
 in the Perl language in the current release.  Please see
-pod/perl5100delta.pod for a description of what's changed.  See your
+pod/perl589delta.pod for a description of what's changed.  See your
 installed copy of the perllocal.pod file for a (possibly incomplete)
 list of locally installed modules.  Also see CPAN::autobundle for one
 way to make a "bundle" of your currently installed modules.
@@ -417,7 +417,7 @@ Your system and typical applications may well give quite different
 results.
 
 The default name for the shared library is typically something like
-libperl.so.5.8.8 (for Perl 5.8.8), or libperl.so.588, or simply
+libperl.so.5.8.9 (for Perl 5.8.9), or libperl.so.589, or simply
 libperl.so.  Configure tries to guess a sensible naming convention
 based on your C library name.  Since the library gets installed in a
 version-specific architecture-dependent directory, the exact name
@@ -471,8 +471,8 @@ for example:
 There is also an potential problem with the shared perl library if you
 want to have more than one "flavor" of the same version of perl (e.g.
 with and without -DDEBUGGING).  For example, suppose you build and
-install a standard Perl 5.8.8 with a shared library.  Then, suppose you
-try to build Perl 5.8.8 with -DDEBUGGING enabled, but everything else
+install a standard Perl 5.8.9 with a shared library.  Then, suppose you
+try to build Perl 5.8.9 with -DDEBUGGING enabled, but everything else
 the same, including all the installation directories.  How can you
 ensure that your newly built perl will link with your newly built
 libperl.so.8 rather with the installed libperl.so.8?  The answer is
@@ -1981,7 +1981,7 @@ You can separately change the base used for versioned names (like
 
 This can be useful if you have to install perl as "perl5" (e.g. to
 avoid conflicts with an ancient version in /usr/bin supplied by your vendor).
-Without this the versioned binary would be called "perl55.8.8".
+Without this the versioned binary would be called "perl55.8.9".
 
 =head2 Installing perl under a different directory
 
@@ -2225,34 +2225,34 @@ Usually, most extensions will probably not need to be recompiled to be
 used with a newer version of Perl.  Here is how it is supposed to work.
 (These examples assume you accept all the Configure defaults.)
 
-Suppose you already have version 5.8.7 installed.  The directories
-searched by 5.8.7 are typically like:
-
-	/usr/local/lib/perl5/5.8.7/$archname
-	/usr/local/lib/perl5/5.8.7
-	/usr/local/lib/perl5/site_perl/5.8.7/$archname
-	/usr/local/lib/perl5/site_perl/5.8.7
-
-Now, suppose you install version 5.8.8.  The directories
-searched by version 5.8.8 will be:
+Suppose you already have version 5.8.8 installed.  The directories
+searched by 5.8.8 are typically like:
 
 	/usr/local/lib/perl5/5.8.8/$archname
 	/usr/local/lib/perl5/5.8.8
 	/usr/local/lib/perl5/site_perl/5.8.8/$archname
 	/usr/local/lib/perl5/site_perl/5.8.8
 
-	/usr/local/lib/perl5/site_perl/5.8.7/$archname
-	/usr/local/lib/perl5/site_perl/5.8.7
+Now, suppose you install version 5.8.9.  The directories
+searched by version 5.8.9 will be:
+
+	/usr/local/lib/perl5/5.8.9/$archname
+	/usr/local/lib/perl5/5.8.9
+	/usr/local/lib/perl5/site_perl/5.8.9/$archname
+	/usr/local/lib/perl5/site_perl/5.8.9
+
+	/usr/local/lib/perl5/site_perl/5.8.8/$archname
+	/usr/local/lib/perl5/site_perl/5.8.8
 	/usr/local/lib/perl5/site_perl/
 
 Notice the last three entries -- Perl understands the default structure
 of the $sitelib directories and will look back in older, compatible
-directories.  This way, modules installed under 5.8.7 will continue
-to be usable by 5.8.7 but will also accessible to 5.8.8.  Further,
+directories.  This way, modules installed under 5.8.8 will continue
+to be usable by 5.8.8 but will also accessible to 5.8.9.  Further,
 suppose that you upgrade a module to one which requires features
-present only in 5.8.8.  That new module will get installed into
-/usr/local/lib/perl5/site_perl/5.8.8 and will be available to 5.8.8,
-but will not interfere with the 5.8.7 version.
+present only in 5.8.9.  That new module will get installed into
+/usr/local/lib/perl5/site_perl/5.8.9 and will be available to 5.8.9,
+but will not interfere with the 5.8.8 version.
 
 The last entry, /usr/local/lib/perl5/site_perl/, is there so that
 5.6.0 and above will look for 5.004-era pure perl modules.
@@ -2266,9 +2266,9 @@ Configure defaults) will be:
 	/usr/local/lib/perl5/site_perl/5.10.0/$archname
 	/usr/local/lib/perl5/site_perl/5.10.0
 
-	/usr/local/lib/perl5/site_perl/5.8.8
+	/usr/local/lib/perl5/site_perl/5.8.9
 
-	/usr/local/lib/perl5/site_perl/5.8.7
+	/usr/local/lib/perl5/site_perl/5.8.8
 
 	/usr/local/lib/perl5/site_perl/
 
@@ -2287,9 +2287,9 @@ won't interfere with another version.  (The defaults guarantee this for
 libraries after 5.6.0, but not for executables. TODO?)  One convenient
 way to do this is by using a separate prefix for each version, such as
 
-	sh Configure -Dprefix=/opt/perl5.8.8
+	sh Configure -Dprefix=/opt/perl5.8.9
 
-and adding /opt/perl5.8.8/bin to the shell PATH variable.  Such users
+and adding /opt/perl5.8.9/bin to the shell PATH variable.  Such users
 may also wish to add a symbolic link /usr/local/bin/perl so that
 scripts can still start with #!/usr/local/bin/perl.
 
@@ -2302,13 +2302,13 @@ seriously consider using a separate directory, since development
 subversions may not have all the compatibility wrinkles ironed out
 yet.
 
-=head2 Upgrading from 5.005 or 5.6 to 5.8.8
+=head2 Upgrading from 5.005 or 5.6 to 5.8.9
 
-B<Perl 5.8.8 is binary incompatible with Perl 5.6.x, 5.005,
+B<Perl 5.8.9 is binary incompatible with Perl 5.6.x, 5.005,
 and any earlier Perl release.>  Perl modules having binary parts
 (meaning that a C compiler is used) will have to be recompiled to be
-used with 5.8.8.  If you find you do need to rebuild an extension with
-5.8.8, you may safely do so without disturbing the older
+used with 5.8.9.  If you find you do need to rebuild an extension with
+5.8.9, you may safely do so without disturbing the older
 installations.  (See L<"Coexistence with earlier versions of perl 5">
 above.)
 
