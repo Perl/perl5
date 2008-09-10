@@ -1094,7 +1094,7 @@ S_hsplit(pTHX_ HV *hv)
       return;
     }
     if (SvOOK(hv)) {
-	Copy(&a[oldsize * sizeof(HE*)], &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
+	Move(&a[oldsize * sizeof(HE*)], &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
     }
 #else
     Newx(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
