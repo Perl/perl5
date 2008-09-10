@@ -1,5 +1,31 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
+ - Added 'gnu' and 'gnukfreebsd' as Unix variants. [Niko Tyni]
+
+ - Brought in some VMS fixes from bleadperl: "Correct and complete
+   CBuilder's handling of external libraries when linking on VMS."
+   [Craig Berry]
+
+0.23 - Sat Apr 19 22:28:03 2008
+
+ - Fixed some problems (some old, some new) with Strawberry Perl on
+   Windows. [Alberto Simo~es]
+
+ - Will now install in the core perl lib directory when the user's
+   perl is new enough to have us in core. [Yi Ma Mao]
+
+0.22 - Fri Feb  8 21:52:21 2008
+
+ - Replaced the split_like_shell() method on Windows with a
+   near-no-op, which is probably more correct and has the benefit of
+   not messing up UNC paths. [John R. LoVerso, see
+   http://rt.cpan.org/Ticket/Display.html?id=26545]
+
+ - Fixed extra_compiler_flags on Windows, they were being
+   ignored. [Robert May]
+
+0.21 - Tue Oct 30 06:46:01 2007
+
  - Clean up perl_src path using Cwd::realpath().  Only affects usage
    as part of the perl core.
 

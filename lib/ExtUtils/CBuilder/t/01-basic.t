@@ -53,6 +53,16 @@ for ($source_file, $object_file, $lib_file) {
 }
 
 my @words = $b->split_like_shell(' foo bar');
-ok @words, 2;
-ok $words[0], 'foo';
-ok $words[1], 'bar';
+
+skip(
+    $^O =~ m/MSWin/ ? "Skip under MSWindows" : 0,  # whether to skip
+    @words, 2
+  );
+skip(
+    $^O =~ m/MSWin/ ? "Skip under MSWindows" : 0,  # whether to skip
+    $words[0], 'foo'
+);
+skip(
+    $^O =~ m/MSWin/ ? "Skip under MSWindows" : 0,  # whether to skip
+    $words[1], 'bar'
+);
