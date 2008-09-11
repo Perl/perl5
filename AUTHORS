@@ -65,6 +65,7 @@ Andrew Savige                   <ajsavige@yahoo.com.au>
 Andrew Vignaux			<ajv@nz.sangacorp.com>
 Andrew Wilcox			<awilcox@maine.com>
 Andrey Sapozhnikov		<sapa@icb.chel.su>
+Andy Armstrong			<andy@hexten.net>
 Andy Bussey			<andybussey@yahoo.co.uk>
 Andy Dougherty			<doughera@lafayette.edu>
 Andy Lester			<andy@petdance.com>
@@ -338,6 +339,7 @@ Hal Pomeranz			<pomeranz@netcom.com>
 Hallvard B Furuseth		<h.b.furuseth@usit.uio.no>
 Hannu Napari			<Hannu.Napari@hut.fi>
 Hans de Graaff			<J.J.deGraaff@twi.tudelft.nl>
+Hans Dieter Pearcey		<hdp@pobox.com>
 Hans Ginzel			<hans@kolej.mff.cuni.cz>
 Hans Mulder			<hansmu@xs4all.nl>
 Hans Ranke			<Hans.Ranke@ei.tum.de>
@@ -392,6 +394,7 @@ Jari Aalto			<jari.aalto@poboxes.com>
 Jarkko Hietaniemi		<jhi@iki.fi>
 Jason A. Smith			<smithj4@rpi.edu>
 Jason E. Stewart		<jason@openinformatics.com>
+Jason Hord			<pravus@cpan.org>
 Jason Shirk
 Jason Stewart			<jasons@cs.unm.edu>
 Jason Varsoke			<jjv@caesun10.msd.ray.com>
@@ -468,7 +471,7 @@ Jonathan D Johnston		<jdjohnston2@juno.com>
 Jonathan Fine			<jfine@borders.com>
 Jonathan I. Kamens		<jik@kamens.brookline.ma.us>
 Jonathan Roy			<roy@idle.com>
-Jonathan Stowe			<gellyfish@gellyfish.com>
+Jonathan Stowe			<jns@integration-house.com>
 Jos I. Boumans			<kane@dwim.org>
 Jose Auguste-Etienne		<Jose.auguste-etienne@cgss-guyane.fr>
 Joseph N. Hall			<joseph@cscaper.com>
@@ -547,10 +550,10 @@ Malcolm Beattie			<mbeattie@sable.ox.ac.uk>
 Manuel Valente			<mvalente@idealx.com>
 Marc Lehmann			<pcg@goof.com>
 Marc Paquette			<Marc.Paquette@Softimage.COM>
-Marcel Grunauer			<marcel@codewerk.com>
+Marcel Grünauer			<marcel@codewerk.com>
+Marcus Holland-Moritz		<mhx-perl@gmx.net>
 Marek Rouchal			<marek.rouchal@infineon.com>
 Mark A Biggar			<mab@wdl.loral.com>
-Marcus Holland-Moritz		<mhx-perl@gmx.net>
 Mark A. Hershberger		<mah@everybody.org>
 Mark Bixby			<mark@bixby.org>
 Mark Dickinson			<dickins3@fas.harvard.edu>
@@ -574,6 +577,7 @@ Mark Pizzolato			<mark@infocomm.com>
 Mark R. Levinson		<mrl@isc.upenn.edu>
 Mark Stosberg                   <mark@summersault.com>
 Mark-Jason Dominus		<mjd@plover.com>
+Marko Asplund			<aspa@merlot.kronodoc.fi>
 Martien Verbruggen		<mgjv@comdyn.com.au>
 Martijn Koster			<mak@excitecorp.com>
 Martin Hasch                    <mhasch@cpan.org>
@@ -589,6 +593,7 @@ Marty Pauley			<marty+p5p@kasei.com>
 Martyn Pearce			<martyn@inpharmatica.co.uk>
 Marvin Humphrey                 <marvin@rectangular.com>
 Masahiro KAJIURA		<masahiro.kajiura@toshiba.co.jp>
+Mashrab Kuvatov			<kmashrab@uni-bremen.de>
 Mathias Koerber			<mathias@dnssec1.singnet.com.sg>
 Mathieu Arnold			<m@absolight.fr>
 Mats Peterson			<mats@sm6sxl.net>
@@ -634,7 +639,9 @@ Mike Schilli			<m@perlmeister.com>
 Mike Stok			<mike@stok.co.uk>
 Mike W Ellwood			<mwe@rl.ac.uk>
 Mikhail Zabaluev		<mhz@alt-linux.org>
+Milosz Tanski			<mtanski@gridapp.com>
 Milton L. Hankins		<mlh@swl.msd.ray.com>
+Moritz Lenz			<moritz@casella.verplant.org>
 Mr. Nobody			<mrnobo1024@yahoo.com>
 Murray Nesbitt			<murray@nesbitt.ca>
 Nathan Kurz			<nate@valleytel.net>
@@ -649,6 +656,7 @@ Nick Gianniotis
 Nick Ing-Simmons
 Nick Williams			<Nick.Williams@morganstanley.com>
 Nigel Sandever			<njsandever@hotmail.com>
+Niko Tyni			<ntyni@debian.org>
 Nikola Knezevic			<indy@tesla.rcub.bg.ac.yu>
 Nikola Milutinovic
 Nikolai Eipel			<eipel@web.de>
@@ -787,6 +795,7 @@ Sebastian Wittmeier		<Sebastian.Wittmeier@ginko.de>
 Sébastien Aperghis-Tramoni	<sebastien@aperghis.net>
 Sebastien Barre			<Sebastien.Barre@utc.fr>
 Sebastian Steinlechner          <steinlechner@gmx.net>
+Sérgio Durigan Júnior		<sergiodj@linux.vnet.ibm.com>
 Shawn				<svicalifornia@gmail.com>
 Sherm Pendley			<sherm@dot-app.org>
 Shigeya Suzuki			<shigeya@foretune.co.jp>
@@ -918,4 +927,5 @@ Yutao Feng
 Yuval Kogman
 Yves Orton			<demerphq@gmail.com>
 Zachary Miller			<zcmiller@simon.er.usgs.gov>
+Zefram				<zefram@fysh.org>
 Ævar Arnfjörð Bjarmason		<avar@cpan.org>

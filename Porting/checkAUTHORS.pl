@@ -36,6 +36,7 @@ while (<DATA>) {
     s/\\100/\@/g;
     $_ = lc;
     if (my ($correct, $alias) = /^\s*([^#\s]\S*)\s+(.*\S)/) {
+        $correct =~ s/^\\043/#/;
         if ($correct eq '+') {$correct = $prev} else {$prev = $correct}
         $map {$alias} = $correct;
     }
@@ -49,10 +50,12 @@ $map {$_} = "?" for
     "alexander_bluhm\100genua.de",
     "alexander_gernler\100genua.de",
     "ammon\100rhythm.com",
+    "andrew\100sundale.net",
     "bah\100longitude.com",
     "bbucklan\100jpl-devvax.jpl.nasa.gov",
     "ben\100linuxgazette.net",
     "bilbo\100ua.fm",
+    "blino\100mandriva.com",
     "bob\100starlabs.net",
     "bonefish\100cs.tu-berlin.de",
     "bstrand\100switchmanagement.com",
@@ -64,6 +67,7 @@ $map {$_} = "?" for
     "glasser\100tang-eleven-seventy-nine.mit.edu",
     "gml4410\100ggr.co.uk",
     "grommel\100sears.com",
+    "ilmari\100vesla.ilmari.org",
     "ilya\100juil.nonet",
     "info\100lingo.kiev.ua",
     "jms\100mathras.comcast.net",
@@ -78,6 +82,7 @@ $map {$_} = "?" for
     "mlelstv\100serpens.de",
     "p.boven\100sara.nl",
     "padre\100elte.hu",
+    "pancho\100pancho.name",
     "perlbug\100veggiechinese.net",
     "pm\100capmon.dk",
     "premchai21\100yahoo.com",
@@ -321,6 +326,8 @@ stevep                                  steve\100fisharerojo.org
 #
 # Mere mortals.
 #
+\043####\100juerd.nl			juerd\100cpan.org
++					juerd\100convolution.nl
 7k8lrvf02\100sneakemail.com             kjx9zthh3001\100sneakemail.com
 +                                       dtr8sin02\100sneakemail.com
 +                                       rt8363b02\100sneakemail.com
@@ -329,6 +336,7 @@ stevep                                  steve\100fisharerojo.org
 +                                       l2ot9pa02\100sneakemail.com
 +                                       wyp3rlx02\100sneakemail.com
 
+a.r.ferreira\100gmail.com		aferreira\100shopzilla.com
 abe\100ztreet.demon.nl                  abeltje\100cpan.org
 abigail\100abigail.be                   abigail\100foad.org
 +                                       abigail\100abigail.nl
@@ -337,8 +345,8 @@ alexm\100netli.com                      alexm\100w-m.ru
 alex-p5p\100earth.li                    alex\100rcon.rog
 alian\100cpan.org                       alian\100alianwebserver.com
 allens\100cpan.org                      easmith\100beatrice.rutgers.edu
-andreas.koenig\100anima.de        andreas.koenig.gmwojprw\100franz.ak.mind.de
-+                                 andreas.koenig.7os6vvqr\100franz.ak.mind.de
+andreas.koenig\100anima.de        	andreas.koenig.gmwojprw\100franz.ak.mind.de
++                                 	andreas.koenig.7os6vvqr\100franz.ak.mind.de
 +                                       a.koenig\100mind.de
 anno4000\100lublin.zrz.tu-berlin.de     anno4000\100mailbox.tu-berlin.de
 +                                       siegel\100zrz.tu-berlin.de
@@ -346,11 +354,12 @@ ash\100cpan.org                         ash_cpan\100firemirror.com
 avarab\100gmail.com                     avar\100cpan.org
 
 bah\100ecnvantage.com                   bholzman\100longitude.com
-bcarter@gumdrop.flyinganvil.org         q.eibcartereio.=~m-b.{6}-cgimosx@gumdrop.flyinganvil.org
+bcarter\100gumdrop.flyinganvil.org	q.eibcartereio.=~m-b.{6}-cgimosx\100gumdrop.flyinganvil.org
 ben_tilly\100operamail.com              btilly\100gmail.com
 
 chromatic\100wgz.org                    chromatic\100rmci.net
 clkao\100clkao.org                      clkao\100bestpractical.com
+corion\100corion.net			corion\100cpan.org
 cp\100onsitetech.com                    publiustemp-p5p\100yahoo.com
 +                                       publiustemp-p5p3\100yahoo.com
 cpan\100audreyt.org                     autrijus\100egb.elixus.org
@@ -369,7 +378,8 @@ epeschko\100den-mdev1                   esp5\100pge.com
 
 fugazi\100zyx.net                       larrysh\100cpan.org
 
-gellyfish\100gellyfish.com              jns\100gellyfish.com
+jns\100integration-house.com            jns\100gellyfish.com
++                                       gellyfish\100gellyfish.com
 gp\100familiehaase.de                   gerrit\100familiehaase.de
 grazz\100pobox.com                      grazz\100nyc.rr.com
 
@@ -387,16 +397,18 @@ jdhedden\100cpan.org                    jerry\100hedden.us
 +                                       jdhedden\100yahoo.com
 jfriedl\100yahoo.com                    jfriedl\100yahoo-inc.com
 jjore\100cpan.org                       twists\100gmail.com
-juerd\100cpan.org                       juerd\100convolution.nl
 
 kane\100dwim.org                        kane\100xs4all.net
 +                                       kane\100cpan.org
 +                                       kane\100xs4all.nl
 +                                       jos\100dwim.org
 +                                       jib\100ripe.net
+ken\100mathforum.org			kenahoo\100gmail.com
 kroepke\100dolphin-services.de          kay\100dolphin-services.de
 kstar\100wolfetech.com                  kstar\100cpan.org
++					kurt_starsinic\100ml.com
 
+marcel\100codewerk.com			gr\100univie.ac.at
 mats\100sm6sxl.net                      mats\100sm5sxl.net
 mbarbon\100dsi.unive.it                 mattia.barbon\100libero.it
 mcmahon\100ibiblio.org                  mcmahon\100metalab.unc.edu
@@ -418,6 +430,7 @@ paul.marquess\100btinternet.com         paul_marquess\100yahoo.co.uk
 +                                       paul.marquess\100ntlworld.com
 +                                       paul.marquess\100openwave.com
 pcg\100goof.com                         schmorp\100schmorp.de
+perl-rt\100wizbit.be			p5p\100perl.wizbit.be
 # Maybe we should special case this to get real names out?
 perlbug\100perl.org                     perlbug-followup\100perl.org
 +                                       bugs-perl5\100bugs6.perl.org
@@ -435,15 +448,18 @@ rick\100consumercontact.com             rick\100bort.ca
 +                                       rick.delaney\100rogers.com
 +                                       rick\100bort.ca
 rjbs\100cpan.org                        rjbs-perl-p5p\100lists.manxome.org
++					perl.p5p\100rjbs.manxome.org
 rjk\100linguist.dartmouth.edu           rjk\100linguist.thayer.dartmouth.edu
 +                                       rjk-perl-p5p\100tamias.net
 rmgiroux\100acm.org                     rmgiroux\100hotmail.com
 rmbarker\100cpan.org                    rmb1\100cise.npl.co.uk
 +                                       robin.barker\100npl.co.uk
+robertmay\100cpan.org			rob\100themayfamily.me.uk
 rootbeer\100teleport.com                rootbeer\100redcat.com
 
 schubiger\100cpan.org                   steven\100accognoscere.org
 +                                       sts\100accognoscere.org
++					schubiger\100gmail.com
 schwern\100pobox.com                    schwern\100gmail.com
 +                                       schwern\100athens.arena-i.com
 +                                       schwern\100blackrider.aocn.com
@@ -457,6 +473,7 @@ simon\100simon-cozens.org               simon\100pembro4.pmb.ox.ac.uk
 +                                       simon\100netthink.co.uk
 slaven\100rezic.de                      slaven.rezic\100berlin.de
 +                                       srezic\100iconmobile.com
++					srezic\100cpan.org
 smcc\100mit.edu                         smcc\100ocf.berkeley.edu
 +                                       smcc\100csua.berkeley.edu
 spider\100orb.nashua.nh.us              spider\100web.zk3.dec.com
