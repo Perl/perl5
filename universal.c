@@ -37,13 +37,14 @@
  */
 
 STATIC bool
-S_isa_lookup(pTHX_ HV *stash, const char * const name, const HV* const name_stash)
+S_isa_lookup(pTHX_ HV *stash, const char * const name)
 {
     dVAR;
     AV* stash_linear_isa;
     SV** svp;
     const char *hvname;
     I32 items;
+    const HV *const name_stash = gv_stashpv(name, 0);
 
     PERL_ARGS_ASSERT_ISA_LOOKUP;
 
@@ -116,8 +117,7 @@ Perl_sv_derived_from(pTHX_ SV *sv, const char *const name)
     }
 
     if (stash) {
-	HV * const name_stash = gv_stashpv(name, 0);
-	return isa_lookup(stash, name, name_stash);
+	return isa_lookup(stash, name);
     }
     else
 	return FALSE;
