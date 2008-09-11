@@ -506,7 +506,7 @@ like for example images.
 
 If LAYER is present it is a single string, but may contain multiple
 directives. The directives alter the behaviour of the file handle.
-When LAYER is present using binmode on text file makes sense.
+When LAYER is present using binmode on a text file makes sense.
 
 If LAYER is omitted or specified as C<:raw> the filehandle is made
 suitable for passing binary data. This includes turning off possible CRLF

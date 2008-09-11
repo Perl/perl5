@@ -384,14 +384,14 @@ Right now, Configure probes for two commands, and sets two variables:
 
 =over 4
 
-=item * C<cc (cc.U)>
+=item * C<cc> (in F<cc.U>)
 
 This variable holds the name of a command to execute a C compiler which
 can resolve multiple global references that happen to have the same
 name.  Usual values are F<cc> and F<gcc>.
 Fervent ANSI compilers may be called F<c89>.  AIX has F<xlc>.
 
-=item * ld (dlsrc.U)
+=item * C<ld> (in F<dlsrc.U>)
 
 This variable indicates the program to be used to link
 libraries for dynamic loading.  On some systems, it is F<ld>.
