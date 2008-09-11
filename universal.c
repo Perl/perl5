@@ -116,12 +116,7 @@ Perl_sv_derived_from(pTHX_ SV *sv, const char *const name)
         stash = gv_stashsv(sv, 0);
     }
 
-    if (stash) {
-	return isa_lookup(stash, name);
-    }
-    else
-	return FALSE;
-
+    return stash ? isa_lookup(stash, name) : FALSE;
 }
 
 /*
