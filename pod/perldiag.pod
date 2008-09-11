@@ -902,13 +902,6 @@ method, nor does any of its base classes.  See L<perlobj>.
 (W syntax) The @ISA array contained the name of another package that
 doesn't seem to exist.
 
-=item Can't locate package %s for the parents of %s
-
-(W syntax) You did not define (or require/use) the first package,
-which is named as a (possibly indirect) parent of the second by
-C<@ISA> inheritance.  Perl will treat this as if the undefined
-package had an empty C<@ISA>.
-
 =item Can't locate PerlIO%s
 
 (F) You tried to use in open() a PerlIO layer that does not exist,
