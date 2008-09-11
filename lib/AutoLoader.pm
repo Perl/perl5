@@ -15,7 +15,7 @@ BEGIN {
     $is_epoc = $^O eq 'epoc';
     $is_vms = $^O eq 'VMS';
     $is_macos = $^O eq 'MacOS';
-    $VERSION = '5.66';
+    $VERSION = '5.67';
 }
 
 AUTOLOAD {
@@ -155,17 +155,20 @@ sub import {
     (my $calldir = $callpkg) =~ s#::#/#g;
     my $path = $INC{$calldir . '.pm'};
     if (defined($path)) {
-	# Try absolute path name.
+	# Try absolute path name, but only eval it if the
+        # transformation from module path to autosplit.ix path
+        # succeeded!
+	my $replaced_okay;
 	if ($is_macos) {
 	    (my $malldir = $calldir) =~ tr#/#:#;
-	    $path =~ s#^(.*)$malldir\.pm\z#$1auto:$malldir:autosplit.ix#s;
+	    $replaced_okay = ($path =~ s#^(.*)$malldir\.pm\z#$1auto:$malldir:autosplit.ix#s);
 	} else {
-	    $path =~ s#^(.*)$calldir\.pm\z#$1auto/$calldir/autosplit.ix#;
+	    $replaced_okay = ($path =~ s#^(.*)$calldir\.pm\z#$1auto/$calldir/autosplit.ix#);
 	}
 
-	eval { require $path; };
+	eval { require $path; } if $replaced_okay;
 	# If that failed, try relative path with normal @INC searching.
-	if ($@) {
+	if (!$replaced_okay or $@) {
 	    $path ="auto/$calldir/autosplit.ix";
 	    eval { require $path; };
 	}

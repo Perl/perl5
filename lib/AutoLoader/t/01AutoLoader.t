@@ -14,51 +14,44 @@ use File::Path;
 my $dir;
 BEGIN
 {
-	$dir = File::Spec->catdir( "auto-$$" );
+    $dir = File::Spec->catdir( "auto-$$" );
     unshift @INC, $dir;
 }
 
-use Test::More tests => 17;
+use Test::More tests => 18;
+
+sub write_file {
+    my ($file, $text) = @_;
+    open my $fh, '>', $file
+      or die "Could not open file '$file' for writing: $!";
+    print $fh $text;
+    close $fh;
+}
 
 # First we must set up some autoloader files
 my $fulldir = File::Spec->catdir( $dir, 'auto', 'Foo' );
 mkpath( $fulldir ) or die "Can't mkdir '$fulldir': $!";
 
-open(FOO, '>', File::Spec->catfile( $fulldir, 'foo.al' ))
-	or die "Can't open foo file: $!";
-print FOO <<'EOT';
+write_file( File::Spec->catfile( $fulldir, 'foo.al' ), <<'EOT' );
 package Foo;
 sub foo { shift; shift || "foo" }
 1;
 EOT
-close(FOO);
 
-open(BAZ, '>', File::Spec->catfile( $fulldir, 'bazmarkhian.al' ))
-	or die "Can't open bazmarkhian file: $!";
-print BAZ <<'EOT';
+write_file( File::Spec->catfile( $fulldir, 'bazmarkhian.al' ), <<'EOT' );
 package Foo;
 sub bazmarkhianish { shift; shift || "baz" }
 1;
 EOT
-close(BAZ);
 
-open(BLECH, '>', File::Spec->catfile( $fulldir, 'blechanawilla.al' ))
-       or die "Can't open blech file: $!";
-print BLECH <<'EOT';
+my $blechanawilla_text = <<'EOT';
 package Foo;
 sub blechanawilla { compilation error (
 EOT
-close(BLECH);
-
+write_file( File::Spec->catfile( $fulldir, 'blechanawilla.al' ), $blechanawilla_text );
 # This is just to keep the old SVR3 systems happy; they may fail
 # to find the above file so we duplicate it where they should find it.
-open(BLECH, '>', File::Spec->catfile( $fulldir, 'blechanawil.al' ))
-       or die "Can't open blech file: $!";
-print BLECH <<'EOT';
-package Foo;
-sub blechanawilla { compilation error (
-EOT
-close(BLECH);
+write_file( File::Spec->catfile( $fulldir, 'blechanawil.al' ), $blechanawilla_text );
 
 # Let's define the package
 package Foo;
@@ -111,24 +104,18 @@ eval {
 like( $@, qr/syntax error/i, 'require error propagates' );
 
 # test recursive autoloads
-open(F, '>', File::Spec->catfile( $fulldir, 'a.al'))
-	or die "Cannot make 'a' file: $!";
-print F <<'EOT';
+write_file( File::Spec->catfile( $fulldir, 'a.al' ), <<'EOT' );
 package Foo;
 BEGIN { b() }
 sub a { ::ok( 1, 'adding a new autoloaded method' ); }
 1;
 EOT
-close(F);
-
-open(F, '>', File::Spec->catfile( $fulldir, 'b.al'))
-	or die "Cannot make 'b' file: $!";
-print F <<'EOT';
+write_file( File::Spec->catfile( $fulldir, 'b.al' ), <<'EOT' );
 package Foo;
 sub b { ::ok( 1, 'adding a new autoloaded method' ) }
 1;
 EOT
-close(F);
+
 Foo::a();
 
 package Bar;
@@ -140,7 +127,7 @@ package Foo;
 AutoLoader->unimport();
 eval { Foo->baz() };
 ::like( $@, qr/locate object method "baz"/,
-	'unimport() should remove imported AUTOLOAD()' );
+        'unimport() should remove imported AUTOLOAD()' );
 
 package Baz;
 
@@ -166,8 +153,70 @@ $INC{"SomeClass.pm"} = $0; # Prepare possible recursion
 } # <-- deep recursion in AUTOLOAD looking for SomeClass::DESTROY?
 ::ok(1, "AutoLoader shouldn't loop forever if \%INC is modified");
 
+# Now test the bug that lead to AutoLoader 0.67:
+# If the module is loaded from a file name different than normal,
+# we could formerly have trouble finding autosplit.ix
+# Contributed by Christoph Lamprecht.
+# Recreate the following file structure:
+# auto/MyAddon/autosplit.ix
+# auto/MyAddon/testsub.al
+# MyModule.pm
+SCOPE: {
+    my $autopath = File::Spec->catdir( $dir, 'auto', 'MyAddon' );
+    mkpath( $autopath ) or die "Can't mkdir '$autopath': $!";
+    my $autosplit_text = <<'EOT';
+# Index created by AutoSplit for MyModule.pm
+#    (file acts as timestamp)
+package MyAddon;
+sub testsub ;
+1;
+EOT
+    write_file( File::Spec->catfile( $autopath, 'autosplit.ix' ), $autosplit_text );
+
+    my $testsub_text = <<'EOT';
+# NOTE: Derived from MyModule.pm.
+# Changes made here will be lost when autosplit is run again.
+# See AutoSplit.pm.
+package MyAddon;
+
+#line 13 "MyModule.pm (autosplit into auto/MyAddon/testsub.al)"
+sub testsub{
+    return "MyAddon";
+}
+
+1;
+# end of MyAddon::testsub
+EOT
+    write_file( File::Spec->catfile( $autopath, 'testsub.al' ), $testsub_text);
+
+    my $mymodule_text = <<'EOT';
+use strict;
+use warnings;
+package MyModule;
+sub testsub{return 'MyModule';}
+
+package MyAddon;
+our @ISA = ('MyModule');
+BEGIN{$INC{'MyAddon.pm'} = __FILE__}
+use AutoLoader 'AUTOLOAD';
+1;
+__END__
+
+sub testsub{
+    return "MyAddon";
+}
+EOT
+    write_file( File::Spec->catfile( $dir, 'MyModule.pm' ), $mymodule_text);
+
+    require MyModule;
+
+    my $res = MyAddon->testsub();
+    ::is ($res , 'MyAddon', 'invoke MyAddon::testsub');
+}
+
 # cleanup
 END {
-	return unless $dir && -d $dir;
-	rmtree $dir;
+    return unless $dir && -d $dir;
+    rmtree $dir;
 }
+

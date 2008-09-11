@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION @EXPORT_OK @ISA $EBCDIC @A2E @E2A);
 require Exporter;
 @ISA = qw(Exporter);
-@EXPORT_OK = qw(rearrange make_attributes unescape escape 
+@EXPORT_OK = qw(rearrange rearrange_header make_attributes unescape escape 
 		expires ebcdic2ascii ascii2ebcdic);
 
 $VERSION = '1.5_01';
@@ -70,16 +70,34 @@ elsif ($EBCDIC && ord('^') == 176) { # as in codepage 037 on os400
 }
 
 # Smart rearrangement of parameters to allow named parameter
-# calling.  We do the rearangement if:
+# calling.  We do the rearrangement if:
 # the first parameter begins with a -
+
 sub rearrange {
+    my ($order,@param) = @_;
+    my ($result, $leftover) = _rearrange_params( $order, @param );
+    push @$result, make_attributes( $leftover, defined $CGI::Q ? $CGI::Q->{escape} : 1 ) 
+	if keys %$leftover;
+    @$result;
+}
+
+sub rearrange_header {
+    my ($order,@param) = @_;
+
+    my ($result,$leftover) = _rearrange_params( $order, @param );
+    push @$result, make_attributes( $leftover, 0, 1 ) if keys %$leftover;
+
+    @$result;
+}
+
+sub _rearrange_params {
     my($order,@param) = @_;
-    return () unless @param;
+    return [] unless @param;
 
     if (ref($param[0]) eq 'HASH') {
 	@param = %{$param[0]};
     } else {
-	return @param 
+	return \@param 
 	    unless (defined($param[0]) && substr($param[0],0,1) eq '-');
     }
 
@@ -103,14 +121,17 @@ sub rearrange {
 	}
     }
 
-    push (@result,make_attributes(\%leftover,defined $CGI::Q ? $CGI::Q->{escape} : 1)) if %leftover;
-    @result;
+    return \@result, \%leftover;
 }
 
 sub make_attributes {
     my $attr = shift;
     return () unless $attr && ref($attr) && ref($attr) eq 'HASH';
     my $escape =  shift || 0;
+    my $do_not_quote = shift;
+
+    my $quote = $do_not_quote ? '' : '"';
+
     my(@att);
     foreach (keys %{$attr}) {
 	my($key) = $_;
@@ -122,7 +143,7 @@ sub make_attributes {
 	($key="\L$key") =~ tr/_/-/; # parameters are lower case, use dashes
 
 	my $value = $escape ? simple_escape($attr->{$_}) : $attr->{$_};
-	push(@att,defined($attr->{$_}) ? qq/$key="$value"/ : qq/$key/);
+	push(@att,defined($attr->{$_}) ? qq/$key=$quote$value$quote/ : qq/$key/);
     }
     return @att;
 }
