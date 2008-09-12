@@ -88,11 +88,28 @@ Perl_mro_meta_dup(pTHX_ struct mro_meta* smeta, CLONE_PARAMS* param)
     if (newmeta->mro_nextmethod)
 	newmeta->mro_nextmethod
 	    = (HV*) SvREFCNT_inc(sv_dup((SV*)newmeta->mro_nextmethod, param));
+    if (newmeta->isa)
+	newmeta->isa
+	    = (HV*) SvREFCNT_inc(sv_dup((SV*)newmeta->isa, param));
 
     return newmeta;
 }
 
 #endif /* USE_ITHREADS */
+
+HV *
+Perl_get_isa_hash(pTHX_ HV *const stash)
+{
+    dVAR;
+    struct mro_meta *const meta = HvMROMETA(stash);
+
+    PERL_ARGS_ASSERT_GET_ISA_HASH;
+
+    if (!meta->isa)
+	mro_get_linear_isa_dfs(stash, 0);
+    assert(meta->isa);
+    return meta->isa;
+}
 
 /*
 =for apidoc mro_get_linear_isa_dfs
@@ -119,6 +136,8 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
     AV* av;
     const HEK* stashhek;
     struct mro_meta* meta;
+    SV *our_name;
+    HV *stored;
 
     PERL_ARGS_ASSERT_MRO_GET_LINEAR_ISA_DFS;
     assert(HvAUX(stash));
@@ -141,20 +160,25 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
     /* not in cache, make a new one */
 
     retval = (AV*)sv_2mortal((SV *)newAV());
-    av_push(retval, newSVhek(stashhek)); /* add ourselves at the top */
+    /* We use this later in this function, but don't need a reference to it
+       beyond the end of this function, so reference count is fine.  */
+    our_name = newSVhek(stashhek);
+    av_push(retval, our_name); /* add ourselves at the top */
 
     /* fetch our @ISA */
     gvp = (GV**)hv_fetchs(stash, "ISA", FALSE);
     av = (gvp && (gv = *gvp) && isGV_with_GP(gv)) ? GvAV(gv) : NULL;
 
+    /* "stored" is used to keep track of all of the classnames we have added to
+       the MRO so far, so we can do a quick exists check and avoid adding
+       duplicate classnames to the MRO as we go.
+       It's then retained to be re-used as a fast lookup for ->isa(), by adding
+       our own name and "UNIVERSAL" to it.  */
+
+    stored = (HV*)sv_2mortal((SV*)newHV());
+
     if(av && AvFILLp(av) >= 0) {
 
-        /* "stored" is used to keep track of all of the classnames
-           we have added to the MRO so far, so we can do a quick
-           exists check and avoid adding duplicate classnames to
-           the MRO as we go. */
-
-        HV* const stored = (HV*)sv_2mortal((SV*)newHV());
         SV **svp = AvARRAY(av);
         I32 items = AvFILLp(av) + 1;
 
@@ -221,12 +245,19 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
        mortals' stack will be released soon, so everything will balance.  */
     SvREFCNT_inc_simple_void_NN(retval);
     SvTEMP_off(retval);
+    SvREFCNT_inc_simple_void_NN(stored);
+    SvTEMP_off(stored);
+
+    hv_store_ent(stored, our_name, &PL_sv_undef, 0);
+    hv_store(stored, "UNIVERSAL", 9, &PL_sv_undef, 0);
 
     /* we don't want anyone modifying the cache entry but us,
        and we do so by replacing it completely */
     SvREADONLY_on(retval);
+    SvREADONLY_on(stored);
 
     meta->mro_linear_dfs = retval;
+    meta->isa = stored;
     return retval;
 }
 
