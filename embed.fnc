@@ -1986,7 +1986,7 @@ p	|void   |boot_core_mro
 Apon	|void	|sys_init	|NN int* argc|NN char*** argv
 Apon	|void	|sys_init3	|NN int* argc|NN char*** argv|NN char*** env
 Apon	|void	|sys_term
-
+poM	|HV *	|get_isa_hash	|NN HV *const stash
 
 END_EXTERN_C
 /*

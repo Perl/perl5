@@ -6613,6 +6613,11 @@ PERL_CALLCONV void	Perl_sys_init3(int* argc, char*** argv, char*** env)
 
 PERL_CALLCONV void	Perl_sys_term(void);
 
+PERL_CALLCONV HV *	Perl_get_isa_hash(pTHX_ HV *const stash)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_GET_ISA_HASH	\
+	assert(stash)
+
 
 END_EXTERN_C
 /*

@@ -42,35 +42,32 @@ STATIC bool
 S_isa_lookup(pTHX_ HV *stash, const char * const name)
 {
     dVAR;
-    AV* stash_linear_isa;
-    SV** svp;
-    const char *hvname;
-    I32 items;
-    const HV *const name_stash = gv_stashpv(name, 0);
+    const struct mro_meta *const meta = HvMROMETA(stash);
+    HV *const isa = meta->isa ? meta->isa : Perl_get_isa_hash(aTHX_ stash);
+    STRLEN len = strlen(name);
+    const HV *our_stash;
 
     PERL_ARGS_ASSERT_ISA_LOOKUP;
 
+    if (hv_common(isa, NULL, name, len, 0 /* No "UTF-8" flag possible with only
+					     a char * argument*/,
+		  HV_FETCH_ISEXISTS, NULL, 0)) {
+	/* Direct name lookup worked.  */
+	return TRUE;
+    }
+
     /* A stash/class can go by many names (ie. User == main::User), so 
-       we compare the stash itself just in case */
-    if ((const HV *)stash == name_stash)
-        return TRUE;
+       we use the name in the stash itself, which is canonical.  */
+    our_stash = gv_stashpvn(name, len, 0);
 
-    hvname = HvNAME_get(stash);
+    if (our_stash) {
+	HEK *const canon_name = HvNAME_HEK(our_stash);
 
-    if (strEQ(hvname, name))
-	return TRUE;
-
-    if (strEQ(name, "UNIVERSAL"))
-	return TRUE;
-
-    stash_linear_isa = mro_get_linear_isa(stash);
-    svp = AvARRAY(stash_linear_isa) + 1;
-    items = AvFILLp(stash_linear_isa);
-    while (items--) {
-	SV* const basename_sv = *svp++;
-        HV* const basestash = gv_stashsv(basename_sv, 0);
-        if(name_stash == basestash || strEQ(name, SvPVX(basename_sv)))
+	if (hv_common(isa, NULL, HEK_KEY(canon_name), HEK_LEN(canon_name),
+		      HEK_FLAGS(canon_name),
+		      HV_FETCH_ISEXISTS, NULL, HEK_HASH(canon_name))) {
 	    return TRUE;
+	}
     }
 
     return FALSE;
