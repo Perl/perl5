@@ -549,6 +549,10 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
     SvREFCNT_dec((SV*)meta->mro_linear_c3);
     meta->mro_linear_dfs = NULL;
     meta->mro_linear_c3 = NULL;
+    if (meta->isa) {
+	SvREFCNT_dec(meta->isa);
+	meta->isa = NULL;
+    }
 
     /* Inc the package generation, since our @ISA changed */
     meta->pkg_gen++;
