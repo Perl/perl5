@@ -127,6 +127,8 @@ Perl_get_isa_hash(pTHX_ HV *const stash)
 			     HEK_HASH(canon_name));
 	    (void) hv_store(isa_hash, "UNIVERSAL", 9, &PL_sv_undef, 0);
 
+	    SvREADONLY_on(isa_hash);
+
 	    meta->isa = isa_hash;
 	}
     }
@@ -262,24 +264,26 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
         }
     }
 
+    (void) hv_store_ent(stored, our_name, &PL_sv_undef, 0);
+    (void) hv_store(stored, "UNIVERSAL", 9, &PL_sv_undef, 0);
+
+    SvREFCNT_inc_simple_void_NN(stored);
+    SvTEMP_off(stored);
+    SvREADONLY_on(stored);
+
+    meta->isa = stored;
+
     /* now that we're past the exception dangers, grab our own reference to
        the AV we're about to use for the result. The reference owned by the
        mortals' stack will be released soon, so everything will balance.  */
     SvREFCNT_inc_simple_void_NN(retval);
     SvTEMP_off(retval);
-    SvREFCNT_inc_simple_void_NN(stored);
-    SvTEMP_off(stored);
-
-    hv_store_ent(stored, our_name, &PL_sv_undef, 0);
-    hv_store(stored, "UNIVERSAL", 9, &PL_sv_undef, 0);
 
     /* we don't want anyone modifying the cache entry but us,
        and we do so by replacing it completely */
     SvREADONLY_on(retval);
-    SvREADONLY_on(stored);
 
     meta->mro_linear_dfs = retval;
-    meta->isa = stored;
     return retval;
 }
 
