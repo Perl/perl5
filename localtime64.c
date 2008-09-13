@@ -39,6 +39,8 @@ gmtime64_r() is a 64-bit equivalent of gmtime_r().
 
 */
 
+#include "localtime64.h"
+
 static const int days_in_month[2][12] = {
     {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
     {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
@@ -141,27 +143,20 @@ time_t _my_timegm(struct tm *date) {
 }
 
 
-#ifdef NDEBUG
-#define     CHECK_TM(a)
-#else
-#define     CHECK_TM(a)         _check_tm(a);
-
-void _check_tm(struct tm *tm)
+int _check_tm(struct tm *tm)
 {
-    int is_leap = IS_LEAP(tm->tm_year);
-
     /* Don't forget leap seconds */
-    assert(tm->tm_sec  >= 0);
+    assert(tm->tm_sec >= 0);
     assert(tm->tm_sec <= 61);
 
-    assert(tm->tm_min  >= 0);
+    assert(tm->tm_min >= 0);
     assert(tm->tm_min <= 59);
 
     assert(tm->tm_hour >= 0);
     assert(tm->tm_hour <= 23);
 
     assert(tm->tm_mday >= 1);
-    assert(tm->tm_mday <= days_in_month[is_leap][tm->tm_mon]);
+    assert(tm->tm_mday <= days_in_month[IS_LEAP(tm->tm_year)][tm->tm_mon]);
 
     assert(tm->tm_mon  >= 0);
     assert(tm->tm_mon  <= 11);
@@ -170,14 +165,15 @@ void _check_tm(struct tm *tm)
     assert(tm->tm_wday <= 6);
 
     assert(tm->tm_yday >= 0);
-    assert(tm->tm_yday <= length_of_year[is_leap]);
+    assert(tm->tm_yday <= length_of_year[IS_LEAP(tm->tm_year)]);
 
 #ifdef HAS_TM_TM_GMTOFF
     assert(tm->tm_gmtoff >= -24 * 60 * 60);
     assert(tm->tm_gmtoff <=  24 * 60 * 60);
 #endif
+
+    return 1;
 }
-#endif
 
 
 /* The exceptional centuries without leap years cause the cycle to
@@ -237,7 +233,7 @@ struct tm *gmtime64_r (const Time64_T *in_time, struct tm *p)
     if( SHOULD_USE_SYSTEM_GMTIME(*in_time) ) {
         time_t safe_time = *in_time;
         localtime_r(&safe_time, p);
-        CHECK_TM(p)
+        assert(_check_tm(p));
         return p;
     }
 
@@ -329,7 +325,7 @@ struct tm *gmtime64_r (const Time64_T *in_time, struct tm *p)
     p->tm_sec = v_tm_sec, p->tm_min = v_tm_min, p->tm_hour = v_tm_hour,
         p->tm_mon = v_tm_mon, p->tm_wday = v_tm_wday;
 
-    CHECK_TM(p)
+    assert(_check_tm(p));
 
     return p;
 }
@@ -346,7 +342,7 @@ struct tm *localtime64_r (const Time64_T *time, struct tm *local_tm)
     if( SHOULD_USE_SYSTEM_LOCALTIME(*time) ) {
         safe_time = *time;
         localtime_r(&safe_time, local_tm);
-        CHECK_TM(local_tm)
+        assert(_check_tm(local_tm));
         return local_tm;
     }
 
@@ -385,7 +381,7 @@ struct tm *localtime64_r (const Time64_T *time, struct tm *local_tm)
     if( !IS_LEAP(local_tm->tm_year) && local_tm->tm_yday == 365 )
         local_tm->tm_yday--;
 
-    CHECK_TM(local_tm)
+    assert(_check_tm(local_tm));
 
     return local_tm;
 }
