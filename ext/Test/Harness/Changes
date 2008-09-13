@@ -1,5 +1,15 @@
 Revision history for Test-Harness
 
+
+3.14
+        - Created a proper (ha!) API for prove state results and tests.
+        - Added --count and --nocount options to prove to control X/Y display
+          while running tests.
+        - Added 'fresh' state option to run test scripts that have been
+          touched since the test run.
+        - fixed bug where PERL5OPT was not properly split  
+        - fixed regex in _filtered_inc. Fixes #39248. Thanks Slaven.
+
 3.13    2008-07-27
         - fixed various closure related leaks
         - made prove honour HARNESS_TIMER

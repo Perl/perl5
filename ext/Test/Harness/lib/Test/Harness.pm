@@ -44,11 +44,11 @@ Test::Harness - Run Perl standard test scripts with statistics
 
 =head1 VERSION
 
-Version 3.13
+Version 3.14
 
 =cut
 
-$VERSION = '3.13';
+$VERSION = '3.14';
 
 # Backwards compatibility for exportable variable names.
 *verbose  = *Verbose;
@@ -290,7 +290,7 @@ sub _filtered_inc {
     elsif (IS_WIN32) {
 
         # Lose any trailing backslashes in the Win32 paths
-        s/[\\\/+]$// foreach @inc;
+        s/[\\\/]+$// foreach @inc;
     }
 
     my @default_inc = _default_inc();

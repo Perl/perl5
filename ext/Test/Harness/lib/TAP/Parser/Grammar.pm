@@ -15,11 +15,11 @@ TAP::Parser::Grammar - A grammar for the Test Anything Protocol.
 
 =head1 VERSION
 
-Version 3.13
+Version 3.14
 
 =cut
 
-$VERSION = '3.13';
+$VERSION = '3.14';
 
 =head1 SYNOPSIS
 
@@ -148,8 +148,8 @@ my %language_for;
                     ( $desc, $dir, $explanation ) = ( $1, $2, $3 );
                 }
                 return $self->_make_test_token(
-                    $line,   $ok, $num, $desc,
-                    $dir, $explanation
+                    $line, $ok, $num, $desc,
+                    $dir,  $explanation
                 );
             },
         },
@@ -401,16 +401,15 @@ sub _make_plan_token {
 
 sub _make_test_token {
     my ( $self, $line, $ok, $num, $desc, $dir, $explanation ) = @_;
-    my %test = (
+    return {
         ok          => $ok,
         test_num    => $num,
         description => _trim($desc),
-        directive   => uc( defined $dir ? $dir : '' ),
+        directive   => ( defined $dir ? uc $dir : '' ),
         explanation => _trim($explanation),
         raw         => $line,
         type        => 'test',
-    );
-    return \%test;
+    };
 }
 
 sub _make_unknown_token {

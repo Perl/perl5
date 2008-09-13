@@ -22,11 +22,11 @@ TAP::Parser - Parse L<TAP|Test::Harness::TAP> output
 
 =head1 VERSION
 
-Version 3.13
+Version 3.14
 
 =cut
 
-$VERSION = '3.13';
+$VERSION = '3.14';
 
 my $DEFAULT_TAP_VERSION = 12;
 my $MAX_TAP_VERSION     = 13;
@@ -1849,6 +1849,8 @@ Michael Peters <mpeters at plusthree dot com>
 Leif Eriksen <leif dot eriksen at bigpond dot com>
 
 Steve Purkis <spurkis@cpan.org>
+
+Nicholas Clark <nick@ccl4.org>
 
 =head1 BUGS
 

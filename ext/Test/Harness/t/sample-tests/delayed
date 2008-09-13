@@ -1,11 +1,5 @@
 # Used to test Process.pm
 
-BEGIN {
-    if ( $ENV{PERL_CORE} ) {
-        unshift @INC, '../lib';
-    }
-}
-
 use Time::HiRes qw(sleep);
 
 my $delay = 0.01;

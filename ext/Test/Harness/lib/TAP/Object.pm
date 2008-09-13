@@ -9,11 +9,11 @@ TAP::Object - Base class that provides common functionality to all C<TAP::*> mod
 
 =head1 VERSION
 
-Version 3.13
+Version 3.14
 
 =cut
 
-$VERSION = '3.13';
+$VERSION = '3.14';
 
 =head1 SYNOPSIS
 
@@ -91,6 +91,27 @@ sub _croak {
     require Carp;
     Carp::croak(@_);
     return;
+}
+
+=head3 C<_construct>
+
+Create a new instance of the specified class.
+
+=cut
+
+sub _construct {
+    my ( $self, $class, @args ) = @_;
+
+    $self->_croak("Bad module name $class")
+      unless $class =~ /^ \w+ (?: :: \w+ ) *$/x;
+
+    unless ( $class->can('new') ) {
+        local $@;
+        eval "require $class";
+        $self->_croak("Can't load $class") if $@;
+    }
+
+    return $class->new(@args);
 }
 
 1;

@@ -11,14 +11,14 @@ my @ACCESSOR;
 
 BEGIN {
 
-    @ACCESSOR = qw( name formatter parser );
+    @ACCESSOR = qw( name formatter parser show_count );
 
     for my $method (@ACCESSOR) {
         no strict 'refs';
         *$method = sub { shift->{$method} };
     }
 
-    my @CLOSURE_BINDING = qw( header result close_test );
+    my @CLOSURE_BINDING = qw( header result clear_for_close close_test );
 
     for my $method (@CLOSURE_BINDING) {
         no strict 'refs';
@@ -36,11 +36,11 @@ TAP::Formatter::Console::Session - Harness output delegate for default console o
 
 =head1 VERSION
 
-Version 3.13
+Version 3.14
 
 =cut
 
-$VERSION = '3.13';
+$VERSION = '3.14';
 
 =head1 DESCRIPTION
 
@@ -71,6 +71,8 @@ The constructor returns a new C<TAP::Formatter::Console::Session> object.
 
 =item * C<name>
 
+=item * C<show_count>
+
 =back
 
 =cut
@@ -84,6 +86,13 @@ sub _initialize {
 
     for my $name (@ACCESSOR) {
         $self->{$name} = delete $arg_for{$name};
+    }
+
+    if ( !defined $self->show_count ) {
+        $self->{show_count} = 1;    # defaults to true
+    }
+    if ( $self->show_count ) {      # but may be a damned lie!
+        $self->{show_count} = $self->_should_show_count;
     }
 
     if ( my @props = sort keys %arg_for ) {
@@ -104,6 +113,11 @@ Called by the harness for each line of TAP it receives.
 =head3 C<close_test>
 
 Called to close a test session.
+
+=head3 C<clear_for_close>
+
+Called by C<close_test> to clear the line showing test progress, or the parallel
+test ruler, prior to printing the final test result.
 
 =cut
 
@@ -151,8 +165,8 @@ sub _closures {
 
     my $parser     = $self->parser;
     my $formatter  = $self->formatter;
-    my $show_count = $self->_should_show_count;
     my $pretty     = $formatter->_format_name( $self->name );
+    my $show_count = $self->show_count;
 
     my $really_quiet = $formatter->really_quiet;
     my $quiet        = $formatter->quiet;
@@ -202,10 +216,11 @@ sub _closures {
                 my $number = $result->number;
                 my $now    = CORE::time;
 
-                # Print status on first number, and roughly once per second
-                if (   ( $number == 1 )
-                    || ( $last_status_printed != $now ) )
-                {
+                # Print status roughly once per second.
+		# We will always get the first number as a side effect of
+		# $last_status_printed starting with the value 0, which $now
+		# will never be. (Unless someone sets their clock to 1970)
+                if ( $last_status_printed != $now ) {
                     $formatter->$output("\r$pretty$number$plan");
                     $last_status_printed = $now;
                 }
@@ -226,19 +241,23 @@ sub _closures {
             }
         },
 
+        clear_for_close => sub {
+            my $spaces = ' ' x
+              length( '.' . $pretty . $plan . $parser->tests_run );
+            $formatter->$output("\r$spaces");
+        },
+            
         close_test => sub {
+            if ($show_count && !$really_quiet) {
+                $self->clear_for_close;
+                $formatter->$output("\r$pretty");
+            }
 
             # Avoid circular references
             $self->parser(undef);
             $self->{_closures} = {};
 
             return if $really_quiet;
-
-            if ($show_count) {
-                my $spaces = ' ' x
-                  length( '.' . $pretty . $plan . $parser->tests_run );
-                $formatter->$output("\r$spaces\r$pretty");
-            }
 
             if ( my $skip_all = $parser->skip_all ) {
                 $formatter->_output("skipped: $skip_all\n");

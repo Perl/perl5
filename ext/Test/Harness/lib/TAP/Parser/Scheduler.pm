@@ -12,11 +12,11 @@ TAP::Parser::Scheduler - Schedule tests during parallel testing
 
 =head1 VERSION
 
-Version 3.13
+Version 3.14
 
 =cut
 
-$VERSION = '3.13';
+$VERSION = '3.14';
 
 =head1 SYNOPSIS
 
@@ -110,18 +110,70 @@ sub _rule_clause {
     );
 }
 
+sub _glob_to_regexp {
+    my ( $self, $glob ) = @_;
+    my $nesting;
+    my $pattern;
+
+    while (1) {
+        if ( $glob =~ /\G\*\*/gc ) {
+
+            # ** is any number of characters, including /, within a pathname
+            $pattern .= '.*?';
+        }
+        elsif ( $glob =~ /\G\*/gc ) {
+
+            # * is zero or more characters within a filename/directory name
+            $pattern .= '[^/]*';
+        }
+        elsif ( $glob =~ /\G\?/gc ) {
+
+            # ? is exactly one character within a filename/directory name
+            $pattern .= '[^/]';
+        }
+        elsif ( $glob =~ /\G\{/gc ) {
+
+            # {foo,bar,baz} is any of foo, bar or baz.
+            $pattern .= '(?:';
+            ++$nesting;
+        }
+        elsif ( $nesting and $glob =~ /\G,/gc ) {
+
+            # , is only special inside {}
+            $pattern .= '|';
+        }
+        elsif ( $nesting and $glob =~ /\G\}/gc ) {
+
+            # } that matches { is special. But unbalanced } are not.
+            $pattern .= ')';
+            --$nesting;
+        }
+        elsif ( $glob =~ /\G(\\.)/gc ) {
+
+            # A quoted literal
+            $pattern .= $1;
+        }
+        elsif ( $glob =~ /\G([\},])/gc ) {
+
+            # Sometimes meta characters
+            $pattern .= '\\' . $1;
+        }
+        else {
+
+            # Eat everything that is not a meta character.
+            $glob =~ /\G([^{?*\\\},]*)/gc;
+            $pattern .= quotemeta $1;
+        }
+        return $pattern if pos $glob == length $glob;
+    }
+}
+
 sub _expand {
     my ( $self, $name, $tests ) = @_;
 
-    $name =~ s{(\?|\*\*?|.)}{
-        $1 eq '?'  ? '[^/]'
-      : $1 eq '*'  ? '[^/]*'
-      : $1 eq '**' ? '.*?'
-      :             quotemeta($1);
-    }gex;
-
-    my $pattern = qr{^$name$};
-    my @match   = ();
+    my $pattern = $self->_glob_to_regexp($name);
+    $pattern = qr/^ $pattern $/x;
+    my @match = ();
 
     for ( my $ti = 0; $ti < @$tests; $ti++ ) {
         if ( $tests->[$ti]->filename =~ $pattern ) {
@@ -141,14 +193,16 @@ Get a list of all remaining tests.
 
 sub get_all {
     my $self = shift;
-    $self->_gather( $self->{schedule} );
+    my @all = $self->_gather( $self->{schedule} );
+    $self->{count} = @all;
+    @all;
 }
 
 sub _gather {
     my ( $self, $rule ) = @_;
     return unless defined $rule;
     return $rule unless 'ARRAY' eq ref $rule;
-    return map { $self->_gather($_) } grep {defined} map {@$_} @$rule;
+    return map { defined () ? $self->_gather($_) : () } map {@$_} @$rule;
 }
 
 =head3 C<get_job>
@@ -161,20 +215,25 @@ jobs but none are available to run right now.
 
 sub get_job {
     my $self = shift;
+    $self->{count} ||= $self->get_all;
     my @jobs = $self->_find_next_job( $self->{schedule} );
-    return $jobs[0] if @jobs;
+    if (@jobs) {
+	--$self->{count};
+	return $jobs[0];
+    }
 
-    # TODO: This isn't very efficient...
     return TAP::Parser::Scheduler::Spinner->new
-      if $self->get_all;
+      if $self->{count};
 
     return;
 }
 
 sub _not_empty {
     my $ar = shift;
-    return 1 unless defined $ar && 'ARRAY' eq ref $ar;
-    return 1 if grep { _not_empty($_) } @$ar;
+    return 1 unless 'ARRAY' eq ref $ar;
+    foreach (@$ar) {
+        return 1 if _not_empty($_);
+    }
     return;
 }
 
@@ -184,19 +243,27 @@ sub _find_next_job {
     my ( $self, $rule ) = @_;
 
     my @queue = ();
-    for my $seq (@$rule) {
-
+    my $index = 0;
+    while ($index < @$rule) {
+        my $seq = $rule->[$index];
         # Prune any exhausted items.
         shift @$seq while @$seq && _is_empty( $seq->[0] );
-        if ( @$seq && defined $seq->[0] ) {
-            if ( 'ARRAY' eq ref $seq->[0] ) {
-                push @queue, $seq;
+        if ( @$seq ) {
+            if ( defined $seq->[0] ) {
+                if ( 'ARRAY' eq ref $seq->[0] ) {
+                    push @queue, $seq;
+                }
+                else {
+                    my $job = splice @$seq, 0, 1, undef;
+                    $job->on_finish( sub { shift @$seq } );
+                    return $job;
+                }
             }
-            else {
-                my $job = splice @$seq, 0, 1, undef;
-                $job->on_finish( sub { shift @$seq } );
-                return $job;
-            }
+            ++$index;
+        }
+        else {
+            # Remove the empty sub-array from the array
+            splice @$rule, $index, 1;
         }
     }
 

@@ -22,8 +22,13 @@ use TAP::Parser::Source::Perl;
 
 my $parser = EmptyParser->new;
 my $test   = File::Spec->catfile(
-    ( $ENV{PERL_CORE} ?  ( File::Spec->updir(), 'ext', 'Test', 'Harness' ) : () ),
-    't', 'source_tests', 'source'
+    (   $ENV{PERL_CORE}
+        ? ( File::Spec->updir(), 'ext', 'Test', 'Harness' )
+        : ()
+    ),
+    't',
+    'source_tests',
+    'source'
 );
 
 my $perl = $^X;

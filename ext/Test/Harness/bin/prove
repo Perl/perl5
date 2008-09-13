@@ -27,6 +27,8 @@ Boolean options:
  -s,  --shuffle     Run the tests in random order.
  -c,  --color       Colored test output (default).
       --nocolor     Do not color test output.
+      --count       Show the X/Y test count when not verbose (default)
+      --nocount     Disable the X/Y test count.
  -D   --dry         Dry run. Show test that would have run.
       --ext         Set the extension for tests (default '.t')
  -f,  --failures    Only show failed tests.
@@ -143,8 +145,7 @@ and can live with the risk.
 =head2 C<--state>
 
 You can ask C<prove> to remember the state of previous test runs and
-select and/or order the tests to be run this time based on that
-saved state.
+select and/or order the tests to be run based on that saved state.
 
 The C<--state> switch requires an argument which must be a comma
 separated list of one or more of the following options.
@@ -225,11 +226,16 @@ Run test tests in fastest to slowest order.
 
 =item C<new>
 
-Run the tests in newest to oldest order.
+Run the tests in newest to oldest order based on the modification times
+of the test scripts.
 
 =item C<old>
 
 Run the tests in oldest to newest order.
+
+=item C<fresh>
+
+Run those test scripts that have been modified since the last test run.
 
 =item C<save>
 

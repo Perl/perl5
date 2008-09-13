@@ -36,27 +36,22 @@ sub _create_shared_context {
     };
 }
 
-sub _need_refresh {
-    my $self      = shift;
-    my $formatter = $self->formatter;
-    $shared{$formatter}->{need_refresh}++;
-}
-
 =head1 NAME
 
 TAP::Formatter::Console::ParallelSession - Harness output delegate for parallel console output
 
 =head1 VERSION
 
-Version 3.13
+Version 3.14
 
 =cut
 
-$VERSION = '3.13';
+$VERSION = '3.14';
 
 =head1 DESCRIPTION
 
-This provides console orientated output formatting for L<TAP::Harness::Parallel>.
+This provides console orientated output formatting for L<TAP::Harness>
+when run with multiple L<TAP::Harness/jobs>.
 
 =head1 SYNOPSIS
 
@@ -73,28 +68,49 @@ Output test preamble
 =cut
 
 sub header {
-    my $self = shift;
-    $self->_need_refresh;
 }
 
-sub _refresh {
-}
-
-sub _clear_line {
+sub _clear_ruler {
     my $self = shift;
     $self->formatter->_output( "\r" . ( ' ' x WIDTH ) . "\r" );
 }
 
+my $now = 0;
+my $start;
+
+my $trailer = '... )===';
+my $chop_length = WIDTH - length $trailer;
+
 sub _output_ruler {
-    my $self      = shift;
+    my ($self, $refresh) = @_;
+    my $new_now = time;
+    return if $new_now == $now and !$refresh;
+    $now = $new_now;
+    $start ||= $now;
     my $formatter = $self->formatter;
     return if $formatter->really_quiet;
 
     my $context = $shared{$formatter};
 
-    my $ruler = sprintf( "===( %7d )", $context->{tests} );
-    $ruler .= ( '=' x ( WIDTH - length $ruler ) );
-    $formatter->_output("\r$ruler");
+    my $ruler = sprintf '===( %7d;%d  ', $context->{tests}, $now - $start;
+
+    foreach my $active ( @{$context->{active}} ) {
+	my $parser = $active->parser;
+	my $tests = $parser->tests_run;
+	my $planned = $parser->tests_planned || '?';
+
+	$ruler .= sprintf '%' . length ($planned) . "d/$planned  ", $tests;
+    }
+    chop $ruler; # Remove a trailing space
+    $ruler .= ')===';
+
+    if ( length $ruler > WIDTH ) {
+	$ruler =~ s/(.{$chop_length}).*/$1$trailer/o;
+    }
+    else {
+	$ruler .= '=' x ( WIDTH - length( $ruler ) );
+    }
+    $formatter->_output( "\r$ruler");
 }
 
 =head3 C<result>
@@ -105,33 +121,45 @@ sub _output_ruler {
 
 sub result {
     my ( $self, $result ) = @_;
-    my $parser    = $self->parser;
     my $formatter = $self->formatter;
-    my $context   = $shared{$formatter};
-
-    $self->_refresh;
 
     # my $really_quiet = $formatter->really_quiet;
     # my $show_count   = $self->_should_show_count;
-    my $planned = $parser->tests_planned;
 
-    if ( $result->is_bailout ) {
+    if ( $result->is_test ) {
+        my $context = $shared{$formatter};
+        $context->{tests}++;
+
+	my $active = $context->{active};
+	if ( @$active == 1 ) {
+            # There is only one test, so use the serial output format.
+            return $self->SUPER::result( $result );
+        }
+
+	$self->_output_ruler( $self->parser->tests_run == 1 );
+    }
+    elsif ( $result->is_bailout ) {
         $formatter->_failure_output(
                 "Bailout called.  Further testing stopped:  "
               . $result->explanation
               . "\n" );
     }
+}
 
-    if ( $result->is_test ) {
-        $context->{tests}++;
+=head3 C<clear_for_close>
 
-        my $test_print_modulus = 1;
-        my $ceiling            = $context->{tests} / 5;
-        $test_print_modulus *= 2 while $test_print_modulus < $ceiling;
+=cut
 
-        unless ( $context->{tests} % $test_print_modulus ) {
-            $self->_output_ruler;
-        }
+sub clear_for_close {
+    my $self      = shift;
+    my $formatter = $self->formatter;
+    return if $formatter->really_quiet;
+    my $context   = $shared{$formatter};
+    if ( @{ $context->{active} } == 1 ) {
+	$self->SUPER::clear_for_close;
+    }
+    else {
+	$self->_clear_ruler;
     }
 }
 
@@ -146,27 +174,8 @@ sub close_test {
     my $formatter = $self->formatter;
     my $context   = $shared{$formatter};
 
-    unless ( $formatter->really_quiet ) {
-        $self->_clear_line;
+    $self->SUPER::close_test;
 
-        # my $output = $self->_output_method;
-        $formatter->_output(
-            $formatter->_format_name( $self->name ),
-            ' '
-        );
-    }
-
-    if ( $parser->has_problems ) {
-        $self->_output_test_failure($parser);
-    }
-    else {
-        $formatter->_output("ok\n")
-          unless $formatter->really_quiet;
-    }
-
-    $self->_output_ruler;
-
-    # $self->SUPER::close_test;
     my $active = $context->{active};
 
     my @pos = grep { $active->[$_]->name eq $name } 0 .. $#$active;
@@ -174,10 +183,14 @@ sub close_test {
     die "Can't find myself" unless @pos;
     splice @$active, $pos[0], 1;
 
-    $self->_need_refresh;
-
-    unless (@$active) {
-
+    if (@$active > 1) {
+        $self->_output_ruler( 1 );
+    }
+    elsif (@$active == 1) {
+        # Print out "test/name.t ...."
+        $active->[0]->SUPER::header;
+    }
+    else {
         # $self->formatter->_output("\n");
         delete $shared{$formatter};
     }

@@ -1125,6 +1125,8 @@ ext/Test/Harness/bin/prove		The prove harness utility
 ext/Test/Harness/Changes		Test::Harness change log
 ext/Test/Harness/lib/App/Prove.pm	Gubbins for the prove utility
 ext/Test/Harness/lib/App/Prove/State.pm	Gubbins for the prove utility
+ext/Test/Harness/lib/App/Prove/State/Result.pm	Gubbins for the prove utility
+ext/Test/Harness/lib/App/Prove/State/Result/Test.pm	Gubbins for the prove utility
 ext/Test/Harness/lib/TAP/Base.pm			A parser for Test Anything Protocol
 ext/Test/Harness/lib/TAP/Formatter/Color.pm		A parser for Test Anything Protocol
 ext/Test/Harness/lib/TAP/Formatter/Console/ParallelSession.pm	A parser for Test Anything Protocol
@@ -1179,7 +1181,9 @@ ext/Test/Harness/t/data/catme.1				Test data for Test::Harness
 ext/Test/Harness/t/data/proverc				Test data for Test::Harness
 ext/Test/Harness/t/data/sample.yml			Test data for Test::Harness
 ext/Test/Harness/t/errors.t				Test::Harness test
+ext/Test/Harness/t/glob-to-regexp.t			Test::Harness test
 ext/Test/Harness/t/grammar.t				Test::Harness test
+ext/Test/Harness/t/harness-subclass.t			Test::Harness test
 ext/Test/Harness/t/harness.t				Test::Harness test
 ext/Test/Harness/t/iterators.t				Test::Harness test
 ext/Test/Harness/t/lib/App/Prove/Plugin/Dummy.pm	Module for testing Test::Harness
@@ -1195,6 +1199,7 @@ ext/Test/Harness/t/lib/MyResultFactory.pm		Module for testing Test::Harness
 ext/Test/Harness/t/lib/MyResult.pm			Module for testing Test::Harness
 ext/Test/Harness/t/lib/MySource.pm			Module for testing Test::Harness
 ext/Test/Harness/t/lib/NoFork.pm			Module for testing Test::Harness
+ext/Test/Harness/t/lib/NOP.pm				Module for testing Test::Harness
 ext/Test/Harness/t/lib/TAP/Parser/SubclassTest.pm	Module for testing Test::Harness
 ext/Test/Harness/t/multiplexer.t			Test::Harness test
 ext/Test/Harness/t/nofork-mux.t				Test::Harness test
@@ -1274,6 +1279,7 @@ ext/Test/Harness/t/source_tests/harness_directives	Test data for Test::Harness
 ext/Test/Harness/t/source_tests/harness_failure		Test data for Test::Harness
 ext/Test/Harness/t/source_tests/source			Test data for Test::Harness
 ext/Test/Harness/t/spool.t				Test::Harness test
+ext/Test/Harness/t/state_results.t			Test::Harness test
 ext/Test/Harness/t/state.t				Test::Harness test
 ext/Test/Harness/t/streams.t				Test::Harness test
 ext/Test/Harness/t/subclass_tests/non_perl_source	Test data for Test::Harness

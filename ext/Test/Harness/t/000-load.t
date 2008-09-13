@@ -3,7 +3,7 @@
 use strict;
 use lib 't/lib';
 
-use Test::More tests => 74;
+use Test::More tests => 78;
 
 BEGIN {
 
@@ -12,6 +12,8 @@ BEGIN {
       TAP::Parser
       App::Prove
       App::Prove::State
+      App::Prove::State::Result
+      App::Prove::State::Result::Test
       TAP::Base
       TAP::Formatter::Color
       TAP::Formatter::Console::ParallelSession

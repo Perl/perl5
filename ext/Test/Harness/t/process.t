@@ -28,8 +28,13 @@ my @expect = (
 );
 
 my $source = File::Spec->catfile(
-    ( $ENV{PERL_CORE} ? ( File::Spec->updir(), 'ext', 'Test', 'Harness' ) : () ),
-    't', 'sample-tests', 'delayed'
+    (   $ENV{PERL_CORE}
+        ? ( File::Spec->updir(), 'ext', 'Test', 'Harness' )
+        : ()
+    ),
+    't',
+    'sample-tests',
+    'delayed'
 );
 
 for my $chunk_size ( 1, 4, 65536 ) {

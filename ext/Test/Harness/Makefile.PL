@@ -18,12 +18,12 @@ my %mm_args = (
     'INSTALLDIRS' => 'perl',
     'PL_FILES'    => {},
     'test'        => { 'TESTS' => 't/*.t t/compat/*.t' },
+
     # In the core pods will be built by installman, and prove found by
     # utils/prove.PL
-    $core ? (
-    'MAN3PODS'    => {}
-    ) : (
-    'EXE_FILES'   => ['bin/prove'],
+    $core
+    ? ( 'MAN3PODS' => {} )
+    : ( 'EXE_FILES' => ['bin/prove'],
     ),
 );
 
