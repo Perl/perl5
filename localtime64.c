@@ -94,6 +94,10 @@ static const int dow_year_start[28] = {
 #define IS_LEAP(n)	((!(((n) + 1900) % 400) || (!(((n) + 1900) % 4) && (((n) + 1900) % 100))) != 0)
 #define WRAP(a,b,m)	((a) = ((a) <  0  ) ? ((b)--, (a) + (m)) : (a))
 
+#define SHOULD_USE_SYSTEM_LOCALTIME(a)  ( USE_SYSTEM_LOCALTIME && (a) <= SYSTEM_LOCALTIME_MAX )
+#define SHOULD_USE_SYSTEM_GMTIME(a)     ( USE_SYSTEM_GMTIME &&    (a) <= SYSTEM_GMTIME_MAX )
+
+
 int _is_exception_century(Int64 year)
 {
     int is_exception = ((year % 100 == 0) && !(year % 400 == 0));
@@ -144,6 +148,11 @@ time_t _my_timegm(struct tm *date) {
 }
 
 
+#ifdef NDEBUG
+#define     CHECK_TM(a)
+#else
+#define     CHECK_TM(a)         _check_tm(a);
+
 void _check_tm(struct tm *tm)
 {
     int is_leap = IS_LEAP(tm->tm_year);
@@ -175,6 +184,8 @@ void _check_tm(struct tm *tm)
     assert(tm->tm_gmtoff <=  24 * 60 * 60);
 #endif
 }
+#endif
+
 
 /* The exceptional centuries without leap years cause the cycle to
    shift by 16
@@ -228,6 +239,14 @@ struct tm *gmtime64_r (const Time64_T *in_time, struct tm *p)
     Int64 m;
     Time64_T time = *in_time;
     Int64 year = 70;
+
+    /* Use the system gmtime() if time_t is small enough */
+    if( SHOULD_USE_SYSTEM_GMTIME(*in_time) ) {
+        time_t safe_time = *in_time;
+        localtime_r(&safe_time, p);
+        CHECK_TM(p)
+        return p;
+    }
 
 #ifdef HAS_TM_TM_GMTOFF
     p->tm_gmtoff = 0;
@@ -317,7 +336,7 @@ struct tm *gmtime64_r (const Time64_T *in_time, struct tm *p)
     p->tm_sec = v_tm_sec, p->tm_min = v_tm_min, p->tm_hour = v_tm_hour,
         p->tm_mon = v_tm_mon, p->tm_wday = v_tm_wday;
 
-    _check_tm(p);
+    CHECK_TM(p)
 
     return p;
 }
@@ -329,6 +348,14 @@ struct tm *localtime64_r (const Time64_T *time, struct tm *local_tm)
     struct tm gm_tm;
     Int64 orig_year;
     int month_diff;
+
+    /* Use the system localtime() if time_t is small enough */
+    if( SHOULD_USE_SYSTEM_LOCALTIME(*time) ) {
+        safe_time = *time;
+        localtime_r(&safe_time, local_tm);
+        CHECK_TM(local_tm)
+        return local_tm;
+    }
 
     gmtime64_r(time, &gm_tm);
     orig_year = gm_tm.tm_year;
@@ -365,7 +392,7 @@ struct tm *localtime64_r (const Time64_T *time, struct tm *local_tm)
     if( !IS_LEAP(local_tm->tm_year) && local_tm->tm_yday == 365 )
         local_tm->tm_yday--;
 
-    _check_tm(local_tm);
+    CHECK_TM(local_tm)
 
     return local_tm;
 }
