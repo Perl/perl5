@@ -27,6 +27,8 @@
 #include "EXTERN.h"
 #define PERL_IN_PP_SYS_C
 #include "perl.h"
+#include "localtime64.h"
+#include "localtime64.c"
 
 #ifdef I_SHADOW
 /* Shadow password support for solaris - pdo@cs.umd.edu
@@ -4446,60 +4448,64 @@ PP(pp_gmtime)
 {
     dVAR;
     dSP;
-    Time_t when;
-    const struct tm *tmbuf;
+    Time64_T when;
+    struct tm tmbuf;
+    struct tm *err;
     static const char * const dayname[] =
 	{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
     static const char * const monname[] =
 	{"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 	 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
-    if (MAXARG < 1)
-	(void)time(&when);
+    if (MAXARG < 1) {
+	time_t now;
+	(void)time(&now);
+	when = (Time64_T)now;
+    }
     else
-#ifdef BIG_TIME
-	when = (Time_t)SvNVx(POPs);
-#else
-	when = (Time_t)SvIVx(POPs);
-#endif
+	when = (Time64_T)SvNVx(POPs);
 
     if (PL_op->op_type == OP_LOCALTIME)
-#ifdef LOCALTIME_EDGECASE_BROKEN
-	tmbuf = S_my_localtime(aTHX_ &when);
-#else
-	tmbuf = localtime(&when);
-#endif
+        err = localtime64_r(&when, &tmbuf);
     else
-	tmbuf = gmtime(&when);
+	err = gmtime64_r(&when, &tmbuf);
 
-    if (GIMME != G_ARRAY) {
+    if( (tmbuf.tm_year + 1900) < 0 )
+	Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
+		    "local/gmtime under/overflowed the year");
+
+    if (GIMME != G_ARRAY) {	/* scalar context */
 	SV *tsv;
         EXTEND(SP, 1);
         EXTEND_MORTAL(1);
-	if (!tmbuf)
+	if (err == NULL)
 	    RETPUSHUNDEF;
+
 	tsv = Perl_newSVpvf(aTHX_ "%s %s %2d %02d:%02d:%02d %d",
-			    dayname[tmbuf->tm_wday],
-			    monname[tmbuf->tm_mon],
-			    tmbuf->tm_mday,
-			    tmbuf->tm_hour,
-			    tmbuf->tm_min,
-			    tmbuf->tm_sec,
-			    tmbuf->tm_year + 1900);
+			    dayname[tmbuf.tm_wday],
+			    monname[tmbuf.tm_mon],
+			    tmbuf.tm_mday,
+			    tmbuf.tm_hour,
+			    tmbuf.tm_min,
+			    tmbuf.tm_sec,
+			    tmbuf.tm_year + 1900);
 	mPUSHs(tsv);
     }
-    else if (tmbuf) {
+    else {			/* list context */
+	if ( err == NULL )
+	    RETURN;
+
         EXTEND(SP, 9);
         EXTEND_MORTAL(9);
-        mPUSHi(tmbuf->tm_sec);
-	mPUSHi(tmbuf->tm_min);
-	mPUSHi(tmbuf->tm_hour);
-	mPUSHi(tmbuf->tm_mday);
-	mPUSHi(tmbuf->tm_mon);
-	mPUSHi(tmbuf->tm_year);
-	mPUSHi(tmbuf->tm_wday);
-	mPUSHi(tmbuf->tm_yday);
-	mPUSHi(tmbuf->tm_isdst);
+        mPUSHi(tmbuf.tm_sec);
+	mPUSHi(tmbuf.tm_min);
+	mPUSHi(tmbuf.tm_hour);
+	mPUSHi(tmbuf.tm_mday);
+	mPUSHi(tmbuf.tm_mon);
+	mPUSHi(tmbuf.tm_year);
+	mPUSHi(tmbuf.tm_wday);
+	mPUSHi(tmbuf.tm_yday);
+	mPUSHi(tmbuf.tm_isdst);
     }
     RETURN;
 }

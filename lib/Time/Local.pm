@@ -4,7 +4,6 @@ require Exporter;
 use Carp;
 use Config;
 use strict;
-use integer;
 
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK );
 $VERSION   = '1.18_01';
@@ -29,13 +28,8 @@ use constant SECS_PER_MINUTE => 60;
 use constant SECS_PER_HOUR   => 3600;
 use constant SECS_PER_DAY    => 86400;
 
-my $MaxInt = ( ( 1 << ( 8 * $Config{ivsize} - 2 ) ) - 1 ) * 2 + 1;
-my $MaxDay = int( ( $MaxInt - ( SECS_PER_DAY / 2 ) ) / SECS_PER_DAY ) - 1;
-
-if ( $^O eq 'MacOS' ) {
-    # time_t is unsigned...
-    $MaxInt = ( 1 << ( 8 * $Config{ivsize} ) ) - 1;
-}
+# localtime()'s limit is the year 2**31
+my $MaxDay = 365 * (2**31);
 
 # Determine the EPOC day for this machine
 my $Epoc = 0;
@@ -65,13 +59,13 @@ sub _daygm {
     return $_[3] + (
         $Cheat{ pack( 'ss', @_[ 4, 5 ] ) } ||= do {
             my $month = ( $_[4] + 10 ) % 12;
-            my $year  = $_[5] + 1900 - $month / 10;
+            my $year  = $_[5] + 1900 - int($month / 10);
 
             ( ( 365 * $year )
-              + ( $year / 4 )
-              - ( $year / 100 )
-              + ( $year / 400 )
-              + ( ( ( $month * 306 ) + 5 ) / 10 )
+              + int( $year / 4 )
+              - int( $year / 100 )
+              + int( $year / 400 )
+              + int( ( ( $month * 306 ) + 5 ) / 10 )
             )
             - $Epoc;
         }
