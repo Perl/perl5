@@ -39,13 +39,6 @@ gmtime64_r() is a 64-bit equivalent of gmtime_r().
 
 */
 
-#include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
-#include <errno.h>
-#include "localtime64.h"
-
 static const int days_in_month[2][12] = {
     {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
     {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
