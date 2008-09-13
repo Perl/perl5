@@ -358,8 +358,8 @@ Perl_pad_add_name(pTHX_ char *name, HV* typestash, HV* ourstash, bool fake)
     }
     if (ourstash) {
 	SvPAD_OUR_on(namesv);
-	(HV*)SvREFCNT_inc_simple_NN((SV*) ourstash);
 	SvOURSTASH_set(namesv, ourstash);
+	SvREFCNT_inc_simple_void_NN(ourstash);
     }
 
     av_store(PL_comppad_name, offset, namesv);
