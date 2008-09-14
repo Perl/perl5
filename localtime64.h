@@ -1,5 +1,3 @@
-#include <time.h>
-
 #ifndef LOCALTIME64_H
 #    define LOCALTIME64_H
 
@@ -26,8 +24,8 @@
    USE_SYSTEM_GMTIME
    Should we use the system functions if the time is inside their range?
 */
-#define SYSTEM_LOCALTIME_MAX    2147483647   /* XXX Replace with LOCALTIME_MAX */
-#define SYSTEM_LOCALTIME_MIN    -2147483648  /* XXX Replace with LOCALTIME_MIN */
+#define SYSTEM_LOCALTIME_MAX     2147483647   /* XXX Replace with LOCALTIME_MAX */
+#define SYSTEM_LOCALTIME_MIN    -2147483647  /* XXX Replace with LOCALTIME_MIN */
 #define SYSTEM_GMTIME_MAX       GMTIME_MAX
 #define SYSTEM_GMTIME_MIN       GMTIME_MIN
 

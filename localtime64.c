@@ -89,8 +89,16 @@ static const int dow_year_start[28] = {
 #define IS_LEAP(n)	((!(((n) + 1900) % 400) || (!(((n) + 1900) % 4) && (((n) + 1900) % 100))) != 0)
 #define WRAP(a,b,m)	((a) = ((a) <  0  ) ? ((b)--, (a) + (m)) : (a))
 
-#define SHOULD_USE_SYSTEM_LOCALTIME(a)  ( USE_SYSTEM_LOCALTIME && (a) <= SYSTEM_LOCALTIME_MAX )
-#define SHOULD_USE_SYSTEM_GMTIME(a)     ( USE_SYSTEM_GMTIME &&    (a) <= SYSTEM_GMTIME_MAX )
+#define SHOULD_USE_SYSTEM_LOCALTIME(a)  (       \
+    USE_SYSTEM_LOCALTIME        &&              \
+    (a) <= SYSTEM_LOCALTIME_MAX &&              \
+    (a) >= SYSTEM_LOCALTIME_MIN                 \
+)
+#define SHOULD_USE_SYSTEM_GMTIME(a)     (       \
+    USE_SYSTEM_GMTIME           &&              \
+    (a) <= SYSTEM_GMTIME_MAX    &&              \
+    (a) >= SYSTEM_GMTIME_MIN                    \
+)
 
 
 int _is_exception_century(Int64 year)
