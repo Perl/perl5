@@ -11,7 +11,8 @@ BEGIN { plan tests => 37; }
 
 BEGIN { use_ok Time::gmtime; }
 
-for my $time (0, 2**31-1, 2**33, time) {
+# Perl has its own gmtime() so it's safe to do negative times.
+for my $time (-2**33, -2**31-1, 0, 2**31-1, 2**33, time) {
     my $gmtime = gmtime $time;          # This is the OO gmtime.
     my @gmtime = CORE::gmtime $time;    # This is the gmtime function
 

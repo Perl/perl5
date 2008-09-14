@@ -25,6 +25,8 @@ BEGIN { plan tests => 37; }
 
 BEGIN { use_ok Time::localtime; }
 
+# Since Perl's localtime() still uses the system localtime, don't try
+# to do negative times.  The system might not support it.
 for my $time (0, 2**31-1, 2**33, time) {
     my $localtime = localtime $time;          # This is the OO localtime.
     my @localtime = CORE::localtime $time;    # This is the localtime function
