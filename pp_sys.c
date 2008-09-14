@@ -4470,9 +4470,11 @@ PP(pp_gmtime)
     else
 	err = gmtime64_r(&when, &tmbuf);
 
-    if( (tmbuf.tm_year + 1900) < 0 )
+    if( err == NULL ) {
+	char *opname = PL_op->op_type == OP_LOCALTIME ? "localtime" : "gmtime";
 	Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
-		    "local/gmtime under/overflowed the year");
+		    "%s under/overflowed the year", opname);
+    }
 
     if (GIMME != G_ARRAY) {	/* scalar context */
 	SV *tsv;
