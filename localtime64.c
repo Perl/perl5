@@ -354,16 +354,27 @@ struct tm *localtime64_r (const Time64_T *time, struct tm *local_tm)
         return local_tm;
     }
 
-    gmtime64_r(time, &gm_tm);
+    if( gmtime64_r(time, &gm_tm) == NULL )
+        return NULL;
+
     orig_year = gm_tm.tm_year;
 
     if (gm_tm.tm_year > (2037 - 1900))
         gm_tm.tm_year = _safe_year(gm_tm.tm_year + 1900) - 1900;
 
     safe_time = TIMEGM(&gm_tm);
-    localtime_r(&safe_time, local_tm);
+    if( localtime_r(&safe_time, local_tm) == NULL )
+        return NULL;
 
     local_tm->tm_year = orig_year;
+    if( local_tm->tm_year != orig_year ) {
+#ifdef EOVERFLOW
+        errno = EOVERFLOW;
+#endif
+        return NULL;
+    }
+
+
     month_diff = local_tm->tm_mon - gm_tm.tm_mon;
 
     /*  When localtime is Dec 31st previous year and
