@@ -42,5 +42,6 @@ typedef Quad_t               Int64;
 
 struct tm *gmtime64_r    (const Time64_T *, struct tm *);
 struct tm *localtime64_r (const Time64_T *, struct tm *);
+Time64_T   timegm64      (struct tm *);
 
 #endif

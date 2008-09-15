@@ -68,7 +68,8 @@ static const int safe_years[28] = {
     2012, 2013, 2014, 2015
 };
 
-static const int dow_year_start[28] = {
+#define SOLAR_CYCLE_LENGTH 28
+static const int dow_year_start[SOLAR_CYCLE_LENGTH] = {
     5, 0, 1, 2,     /* 2016 - 2019 */
     3, 5, 6, 0,
     1, 3, 4, 5,
@@ -114,14 +115,13 @@ int _is_exception_century(Int64 year)
 #ifdef HAS_TIMEGM
 #    define TIMEGM(n) timegm(n);
 #else
-#    define TIMEGM(n) _my_timegm(n);
+#    define TIMEGM(n) ((time_t)timegm64(n));
 #endif
 
-time_t _my_timegm(struct tm *date) {
-    int days    = 0;
-    int seconds = 0;
-    time_t time;
-    int year;
+Time64_T timegm64(struct tm *date) {
+    int   days    = 0;
+    Int64 seconds = 0;
+    Int64 year;
 
     if( date->tm_year > 70 ) {
         year = 70;
@@ -141,13 +141,15 @@ time_t _my_timegm(struct tm *date) {
     days += julian_days_by_month[IS_LEAP(date->tm_year)][date->tm_mon];
     days += date->tm_mday - 1;
 
+    /* Avoid overflowing the days integer */
+    seconds = days;
+    seconds = seconds * 60 * 60 * 24;
+
     seconds += date->tm_hour * 60 * 60;
     seconds += date->tm_min * 60;
     seconds += date->tm_sec;
 
-    time = (time_t)(days * 60 * 60 * 24) + seconds;
-
-    return(time);
+    return((Time64_T)seconds);
 }
 
 
@@ -201,8 +203,16 @@ int _cycle_offset(Int64 year)
 
 /* For a given year after 2038, pick the latest possible matching
    year in the 28 year calendar cycle.
+
+   A matching year...
+   1) Starts on the same day of the week.
+   2) Has the same leap year status.
+
+   This is so the calendars match up.
+
+   Also the previous year must match.  When doing Jan 1st you might
+   wind up on Dec 31st the previous year when doing a -UTC time zone.
 */
-#define SOLAR_CYCLE_LENGTH 28
 int _safe_year(Int64 year)
 {
     int safe_year;
@@ -213,6 +223,8 @@ int _safe_year(Int64 year)
         year_cycle += 11;
 
     year_cycle %= SOLAR_CYCLE_LENGTH;
+    if( year_cycle < 0 )
+        year_cycle = SOLAR_CYCLE_LENGTH + year_cycle;
 
     safe_year = safe_years[year_cycle];
 
