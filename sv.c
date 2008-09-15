@@ -6704,7 +6704,7 @@ Perl_sv_gets(pTHX_ register SV *const sv, register PerlIO *const fp, I32 append)
 #endif
       if (bytesread < 0)
 	  bytesread = 0;
-      SvCUR_set(sv, bytesread += append);
+      SvCUR_set(sv, bytesread + append);
       buffer[bytesread] = '\0';
       goto return_string_or_null;
     }
