@@ -9,7 +9,7 @@ require Exporter;
 use Carp;
 use Symbol qw(gensym qualify);
 
-$VERSION	= 1.02;
+$VERSION	= 1.03;
 @ISA		= qw(Exporter);
 @EXPORT		= qw(open3);
 

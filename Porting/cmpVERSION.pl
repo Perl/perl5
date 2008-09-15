@@ -29,10 +29,12 @@ my %skip;
     './lib/Carp/Heavy.pm',
     './lib/Exporter/Heavy.pm'
 } = ();
+my $skip_dirs = qr|^\./t/lib|;
 
 my @wanted;
 find(
      sub { /\.pm$/ &&
+	       $File::Find::dir !~ $skip_dirs &&
 	       ! exists $skip{$File::Find::name}
 	       &&
 	       do { my $file2 =
