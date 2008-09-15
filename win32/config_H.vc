@@ -4455,6 +4455,17 @@
 #define GMTIME_MAX	2147483647	/**/
 #define GMTIME_MIN	0	/**/
 
+/* LOCALTIME_MAX:
+ *	This symbol contains the maximum value for the time_t offset that
+ *	the system function localtime () accepts, and defaults to 0
+ */
+/* LOCALTIME_MIN:
+ *	This symbol contains the minimum value for the time_t offset that
+ *	the system function localtime () accepts, and defaults to 0
+ */
+#define LOCALTIME_MAX	2147483647	/**/
+#define LOCALTIME_MIN	0	/**/
+
 /* USE_64_BIT_INT:
  *	This symbol, if defined, indicates that 64-bit integers should
  *	be used when available.  If not defined, the native integers
