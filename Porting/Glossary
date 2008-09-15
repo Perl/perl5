@@ -4480,6 +4480,14 @@ sleep (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
 
+sLOCALTIME_max (time_size.U):
+	This variable defines the maximum value of the time_t offset that
+	the system function localtime () accepts
+
+sLOCALTIME_min (time_size.U):
+	This variable defines the minimum value of the time_t offset that
+	the system function localtime () accepts
+
 smail (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.

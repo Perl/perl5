@@ -2762,6 +2762,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #define Sock_size_t		$socksizetype /**/
 
+/* STDCHAR:
+ *	This symbol is defined to be the type of char used in stdio.h.
+ *	It has the values "unsigned char" or "char".
+ */
+#define STDCHAR $stdchar	/**/
+
 /* Uid_t_f:
  *	This symbol defines the format string used for printing a Uid_t.
  */
@@ -3269,12 +3275,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	EBCDIC encoding.
  */
 #$ebcdic	EBCDIC 		/**/
-
-/* STDCHAR:
- *	This symbol is defined to be the type of char used in stdio.h.
- *	It has the values "unsigned char" or "char".
- */
-#define STDCHAR $stdchar	/**/
 
 /* HAS_ATOLF:
  *	This symbol, if defined, indicates that the atolf routine is
@@ -4460,8 +4460,18 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol contains the minimum value for the time_t offset that
  *	the system function gmtime () accepts, and defaults to 0
  */
-#define GMTIME_MAX	$sGMTIME_max	/**/
-#define GMTIME_MIN	$sGMTIME_min	/**/
+/* LOCALTIME_MAX:
+ *	This symbol contains the maximum value for the time_t offset that
+ *	the system function localtime () accepts, and defaults to 0
+ */
+/* LOCALTIME_MIN:
+ *	This symbol contains the minimum value for the time_t offset that
+ *	the system function localtime () accepts, and defaults to 0
+ */
+#define GMTIME_MAX		$sGMTIME_max	/**/
+#define GMTIME_MIN		$sGMTIME_min	/**/
+#define LOCALTIME_MAX	$sLOCALTIME_max	/**/
+#define LOCALTIME_MIN	$sLOCALTIME_min	/**/
 
 /* USE_64_BIT_INT:
  *	This symbol, if defined, indicates that 64-bit integers should

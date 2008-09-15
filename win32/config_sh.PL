@@ -138,10 +138,13 @@ if ($opt{cc} eq 'cl' and $opt{ccversion} =~ /^(\d+)/) {
     my $ccversion = $1;
     if ($ccversion == 14) {
 	$opt{sGMTIME_max} = 32535244799;
+	$opt{sLOCALTIME_max} = 32535244799;
     }
     elsif ($ccversion >= 15) {
 	$opt{sGMTIME_min} = -43200;
 	$opt{sGMTIME_max} = 32535291599;
+	$opt{sLOCALTIME_min} = -43200;
+	$opt{sLOCALTIME_max} = 32535291599;
     }
 }
 
