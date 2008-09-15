@@ -194,8 +194,6 @@ int _cycle_offset(Int64 year)
     Int64 exceptions  = year_diff / 100;
     exceptions     -= year_diff / 400;
 
-    assert( year >= 2001 );
-
     /* printf("year: %d, exceptions: %d\n", year, exceptions); */
 
     return exceptions * 16;
@@ -359,8 +357,12 @@ struct tm *localtime64_r (const Time64_T *time, struct tm *local_tm)
 
     orig_year = gm_tm.tm_year;
 
-    if (gm_tm.tm_year > (2037 - 1900))
+    if (gm_tm.tm_year > (2037 - 1900) ||
+        gm_tm.tm_year < (1902 - 1900)
+       )
+    {
         gm_tm.tm_year = _safe_year(gm_tm.tm_year + 1900) - 1900;
+    }
 
     safe_time = TIMEGM(&gm_tm);
     if( localtime_r(&safe_time, local_tm) == NULL )
