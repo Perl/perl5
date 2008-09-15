@@ -36,7 +36,7 @@ use POSIX qw(strftime);
 
 @ISA = qw(Pod::Simple);
 
-$VERSION = '2.18';
+$VERSION = '2.19';
 
 # Set the debugging level.  If someone has inserted a debug function into this
 # class already, use that.  Otherwise, use any Pod::Simple debug function
@@ -70,8 +70,6 @@ sub new {
     my $self = $class->SUPER::new;
 
     # Tell Pod::Simple not to handle S<> by automatically inserting &nbsp;.
-    # Note that this messes up Unicode output by embedding explicit ISO 8859-1
-    # non-breaking spaces that we have to clean up later.
     $self->nbsp_for_S (1);
 
     # Tell Pod::Simple to keep whitespace whenever possible.
@@ -93,6 +91,13 @@ sub new {
     # problems if we ever clash with Pod::Simple's own internal class
     # variables.
     %$self = (%$self, @_);
+
+    # Send errors to stderr if requested.
+    if ($$self{stderr}) {
+        $self->no_errata_section (1);
+        $self->complain_stderr (1);
+        delete $$self{stderr};
+    }
 
     # Initialize various other internal constants based on our arguments.
     $self->init_fonts;
@@ -360,13 +365,6 @@ sub format_text {
     # <Data> blocks or if UTF-8 output is desired.
     if ($convert && !$$self{utf8} && ASCII) {
         $text =~ s/([^\x00-\x7F])/$ESCAPES{ord ($1)} || "X"/eg;
-    }
-
-    # For Unicode output, unconditionally remap ISO 8859-1 non-breaking spaces
-    # to the correct code point.  This is really a bug in Pod::Simple to be
-    # embedding ISO 8859-1 characters in the output stream that we see.
-    if ($$self{utf8} && ASCII) {
-        $text =~ s/\xA0/\xC2\xA0/g;
     }
 
     # Ensure that *roff doesn't convert literal quotes to UTF-8 single quotes,
@@ -1451,8 +1449,8 @@ __END__
 Pod::Man - Convert POD data to formatted *roff input
 
 =for stopwords
-en em ALLCAPS teeny fixedbold fixeditalic fixedbolditalic utf8 UTF-8
-Allbery Sean Burke Ossanna
+en em ALLCAPS teeny fixedbold fixeditalic fixedbolditalic stderr utf8
+UTF-8 Allbery Sean Burke Ossanna Solaris
 
 =head1 SYNOPSIS
 
@@ -1587,6 +1585,11 @@ that are reliably consistent are 1, 2, and 3.
 
 By default, section 1 will be used unless the file ends in C<.pm> in which
 case section 3 will be selected.
+
+=item stderr
+
+Send error messages about invalid POD to standard error instead of
+appending a POD ERRORS section to the generated *roff output.
 
 =item utf8
 

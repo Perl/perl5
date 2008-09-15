@@ -30,7 +30,7 @@ use Exporter;
 @ISA    = qw(Exporter);
 @EXPORT = qw(parselink);
 
-$VERSION = 1.07;
+$VERSION = 1.08;
 
 ##############################################################################
 # Implementation
@@ -108,7 +108,7 @@ __END__
 Pod::ParseLink - Parse an LE<lt>E<gt> formatting code in POD text
 
 =for stopwords
-markup Allbery
+markup Allbery URL
 
 =head1 SYNOPSIS
 

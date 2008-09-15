@@ -79,7 +79,8 @@ $options{sentence} = 0;
 Getopt::Long::config ('bundling');
 GetOptions (\%options, 'alt|a', 'code', 'color|c', 'help|h', 'indent|i=i',
             'loose|l', 'margin|left-margin|m=i', 'overstrike|o',
-            'quotes|q=s', 'sentence|s', 'termcap|t', 'width|w=i') or exit 1;
+            'quotes|q=s', 'sentence|s', 'stderr', 'termcap|t', 'width|w=i')
+    or exit 1;
 pod2usage (1) if $options{help};
 
 # Figure out what formatter we're going to use.  -c overrides -t.
@@ -112,12 +113,12 @@ __END__
 pod2text - Convert POD data to formatted ASCII text
 
 =for stopwords
--aclost --alt Allbery
+-aclost --alt --stderr Allbery
 
 =head1 SYNOPSIS
 
 pod2text [B<-aclost>] [B<--code>] [B<-i> I<indent>] S<[B<-q> I<quotes>]>
-    S<[B<-w> I<width>]> [I<input> [I<output> ...]]
+    [B<--stderr>] S<[B<-w> I<width>]> [I<input> [I<output> ...]]
 
 pod2text B<-h>
 
@@ -201,6 +202,13 @@ quote marks are added around CE<lt>> text.
 Assume each sentence ends with two spaces and try to preserve that spacing.
 Without this option, all consecutive whitespace in non-verbatim paragraphs
 is compressed into a single space.
+
+=item B<--stderr>
+
+By default, B<pod2text> puts any errors detected in the POD input in a POD
+ERRORS section in the output manual page.  If B<--stderr> is given, errors
+are sent to standard error instead and the POD ERRORS section is
+suppressed.
 
 =item B<-t>, B<--termcap>
 

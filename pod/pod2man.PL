@@ -61,11 +61,12 @@ my $stdin;
 # Parse our options, trying to retain backwards compatibility with pod2man but
 # allowing short forms as well.  --lax is currently ignored.
 my %options;
+$options{errors} = 'pod';
 Getopt::Long::config ('bundling_override');
-GetOptions (\%options, 'section|s=s', 'release|r:s', 'center|c=s',
-            'date|d=s', 'fixed=s', 'fixedbold=s', 'fixeditalic=s',
-            'fixedbolditalic=s', 'name|n=s', 'official|o', 'quotes|q=s',
-            'lax|l', 'help|h', 'verbose|v', 'utf8|u') or exit 1;
+GetOptions (\%options, 'center|c=s', 'date|d=s', 'fixed=s', 'fixedbold=s',
+            'fixeditalic=s', 'fixedbolditalic=s', 'help|h', 'lax|l',
+            'name|n=s', 'official|o', 'quotes|q=s', 'release|r:s',
+            'section|s=s', 'stderr', 'verbose|v', 'utf8|u') or exit 1;
 pod2usage (0) if $options{help};
 
 # Official sets --center, but don't override things explicitly set.
@@ -98,15 +99,16 @@ __END__
 pod2man - Convert POD data to formatted *roff input
 
 =for stopwords
-en em --utf8 UTF-8 overdo markup MT-LEVEL Allbery
+en em --stderr stderr --utf8 UTF-8 overdo markup MT-LEVEL Allbery Solaris
+URL
 
 =head1 SYNOPSIS
 
-pod2man [B<--section>=I<manext>] [B<--release>[=I<version>]]
-    [B<--center>=I<string>] [B<--date>=I<string>] [B<--fixed>=I<font>]
-    [B<--fixedbold>=I<font>] [B<--fixeditalic>=I<font>]
+pod2man [B<--center>=I<string>] [B<--date>=I<string>]
+    [B<--fixed>=I<font>] [B<--fixedbold>=I<font>] [B<--fixeditalic>=I<font>]
     [B<--fixedbolditalic>=I<font>] [B<--name>=I<name>] [B<--official>]
-    [B<--lax>] [B<--quotes>=I<quotes>] [B<--verbose>]
+    [B<--quotes>=I<quotes>] [B<--release>[=I<version>]]
+    [B<--section>=I<manext>] [B<--stderr>] [B<--utf8>] [B<--verbose>]
     [I<input> [I<output>] ...]
 
 pod2man B<--help>
@@ -125,8 +127,8 @@ files can be processed in the same B<pod2man> invocation (saving module
 load and compile times) by providing multiple pairs of I<input> and
 I<output> files on the command line.
 
-B<--section>, B<--release>, B<--center>, B<--date>, and B<--official> can be
-used to set the headers and footers to use; if not given, Pod::Man will
+B<--section>, B<--release>, B<--center>, B<--date>, and B<--official> can
+be used to set the headers and footers to use; if not given, Pod::Man will
 assume various defaults.  See below or L<Pod::Man> for details.
 
 B<pod2man> assumes that your *roff formatters have a fixed-width font
@@ -245,6 +247,13 @@ that are reliably consistent are 1, 2, and 3.
 
 By default, section 1 will be used unless the file ends in C<.pm>, in
 which case section 3 will be selected.
+
+=item B<--stderr>
+
+By default, B<pod2man> puts any errors detected in the POD input in a POD
+ERRORS section in the output manual page.  If B<--stderr> is given, errors
+are sent to standard error instead and the POD ERRORS section is
+suppressed.
 
 =item B<-u>, B<--utf8>
 

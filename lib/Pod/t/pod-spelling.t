@@ -18,7 +18,7 @@ skip_all "Pod::Spell required to test POD spelling" if $@;
 my @spell;
 for my $dir (split ':', $ENV{PATH}) {
     if (-x "$dir/ispell") {
-        @spell = ("$dir/ispell", '-d', 'american', '-l');
+        @spell = ("$dir/ispell", '-d', 'american', '-l', '-p', '/dev/null');
     }
     last if @spell;
 }
