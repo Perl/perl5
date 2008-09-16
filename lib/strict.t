@@ -12,9 +12,7 @@ $| = 1;
 my $Is_VMS = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
 my $Is_NetWare = $^O eq 'NetWare';
-my $tmpfile = tempfile();
 my $i = 0 ;
-END { if ($tmpfile) { 1 while unlink $tmpfile; } }
 
 my @prgs = () ;
 
@@ -65,6 +63,7 @@ for (@prgs){
 	$prog = shift @files ;
 	$prog =~ s|\./abc|:abc|g if $^O eq 'MacOS';
     }
+    my $tmpfile = tempfile();
     open TEST, ">$tmpfile" or die "Could not open: $!";
     print TEST $prog,"\n";
     close TEST or die "Could not close: $!";

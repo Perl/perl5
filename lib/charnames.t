@@ -271,10 +271,8 @@ print "ok 46\n";
 
 # ---- Alias extensions
 
-my $tmpfile = tempfile();
 my $alifile = File::Spec->catfile(File::Spec->updir, qw(lib unicore xyzzy_alias.pl));
 my $i = 0;
-END { if ($tmpfile) { 1 while unlink $tmpfile; } }
 
 my @prgs;
 {   local $/ = undef;
@@ -285,6 +283,7 @@ my $i = 46;
 for (@prgs) {
     my ($code, $exp) = ((split m/\nEXPECT\n/), '$');
     my ($prog, $fil) = ((split m/\nFILE\n/, $code), "");
+    my $tmpfile = tempfile();
     open my $tmp, "> $tmpfile" or die "Could not open $tmpfile: $!";
     print $tmp $prog, "\n";
     close $tmp or die "Could not close $tmpfile: $!";
@@ -322,7 +321,6 @@ for (@prgs) {
         print "not ";
 	}
     print "ok ", ++$i, "\n";
-    1 while unlink $tmpfile;
     $fil or next;
     1 while unlink $alifile;
     }
