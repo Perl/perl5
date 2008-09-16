@@ -70,13 +70,13 @@ static const int safe_years[28] = {
 
 #define SOLAR_CYCLE_LENGTH 28
 static const int dow_year_start[SOLAR_CYCLE_LENGTH] = {
-    5, 0, 1, 2,     /* 2016 - 2019 */
-    3, 5, 6, 0,
-    1, 3, 4, 5,
-    6, 1, 2, 3,
-    4, 6, 0, 1,
-    2, 4, 5, 6,     /* 2036, 2037, 2010, 2011 */
-    0, 2, 3, 4      /* 2012, 2013, 2014, 2015 */
+    5, 0, 1, 2,     /* 0       2016 - 2019 */
+    3, 5, 6, 0,     /* 4  */
+    1, 3, 4, 5,     /* 8  */
+    6, 1, 2, 3,     /* 12 */
+    4, 6, 0, 1,     /* 16 */
+    2, 4, 5, 6,     /* 20      2036, 2037, 2010, 2011 */
+    0, 2, 3, 4      /* 24      2012, 2013, 2014, 2015 */
 };
 
 /* Let's assume people are going to be looking for dates in the future.
@@ -192,11 +192,18 @@ int _check_tm(struct tm *tm)
 int _cycle_offset(Int64 year)
 {
     const Int64 start_year = 2000;
-    Int64 year_diff  = year - start_year - 1;
-    Int64 exceptions  = year_diff / 100;
-    exceptions     -= year_diff / 400;
+    Int64 year_diff  = year - start_year;
 
-    /* printf("year: %d, exceptions: %d\n", year, exceptions); */
+    if( year > start_year )
+        year_diff--;
+
+    Int64 exceptions  = year_diff / 100;
+    exceptions       -= year_diff / 400;
+
+    /*
+    fprintf(stderr, "# year: %lld, exceptions: %lld, year_diff: %lld\n",
+            year, exceptions, year_diff);
+    */
 
     return exceptions * 16;
 }
@@ -212,6 +219,11 @@ int _cycle_offset(Int64 year)
 
    Also the previous year must match.  When doing Jan 1st you might
    wind up on Dec 31st the previous year when doing a -UTC time zone.
+
+   Finally, the next year must have the same start day of week.  This
+   is for Dec 31st with a +UTC time zone.
+   It doesn't need the same leap year status since we only care about
+   January 1st.
 */
 int _safe_year(Int64 year)
 {
@@ -222,10 +234,16 @@ int _safe_year(Int64 year)
     if( _is_exception_century(year) )
         year_cycle += 11;
 
+    /* Also xx01 years, since the previous year will be wrong */
+    if( _is_exception_century(year - 1) )
+        year_cycle += 17;
+
     year_cycle %= SOLAR_CYCLE_LENGTH;
     if( year_cycle < 0 )
         year_cycle = SOLAR_CYCLE_LENGTH + year_cycle;
 
+    assert( year_cycle >= 0 );
+    assert( year_cycle < SOLAR_CYCLE_LENGTH );
     safe_year = safe_years[year_cycle];
 
     assert(safe_year <= 2037 && safe_year >= 2010);
