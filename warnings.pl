@@ -435,7 +435,7 @@ __END__
 
 package warnings;
 
-our $VERSION = '1.05';
+our $VERSION = '1.05_01';
 
 =head1 NAME
 
