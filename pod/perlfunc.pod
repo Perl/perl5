@@ -1935,25 +1935,27 @@ perl.
 
 Here's a mailbox appender for BSD systems.
 
-    use Fcntl ':flock'; # import LOCK_* constants
+    use Fcntl qw(:flock SEEK_END); # import LOCK_* and SEEK_END constants
 
     sub lock {
-	flock(MBOX,LOCK_EX);
-	# and, in case someone appended
-	# while we were waiting...
-	seek(MBOX, 0, 2);
+	my ($fh) = @_;
+	flock($fh, LOCK_EX) or die "Cannot lock mailbox - $!\n";
+
+	# and, in case someone appended while we were waiting...
+	seek($fh, 0, SEEK_END) or die "Cannot seek - $!\n";
     }
 
     sub unlock {
-	flock(MBOX,LOCK_UN);
+	my ($fh) = @_;
+	flock($fh, LOCK_UN) or die "Cannot unlock mailbox - $!\n";
     }
 
     open(my $mbox, ">>", "/usr/spool/mail/$ENV{'USER'}")
 	    or die "Can't open mailbox: $!";
 
-    lock();
+    lock($mbox);
     print $mbox $msg,"\n\n";
-    unlock();
+    unlock($mbox);
 
 On systems that support a real flock(), locks are inherited across fork()
 calls, whereas those that must resort to the more capricious fcntl()
