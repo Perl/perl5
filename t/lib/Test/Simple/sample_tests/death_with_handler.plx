@@ -4,12 +4,15 @@ push @INC, 't/lib';
 require Test::Simple::Catch;
 my($out, $err) = Test::Simple::Catch::caught();
 
-require Dev::Null;
+Test::Simple->import(tests => 2);
 
-Test::Simple->import(tests => 5);
+# Test we still get the right exit code despite having a die
+# handler.
+$SIG{__DIE__} = sub {};
+
+require Dev::Null;
 tie *STDERR, 'Dev::Null';
 
-ok(1);
 ok(1);
 ok(1);
 die "This is a test";

@@ -22,12 +22,17 @@ BEGIN {
         print "1..0 # Skip: no working threads\n";
         exit 0;
     }
+    
+    unless ( $ENV{AUTHOR_TESTING} ) {
+        print "1..0 # Skip: many perls have broken threads.  Enable with AUTHOR_TESTING.\n";
+        exit 0;
+    }
 }
 use Test::More;
 
 my $Num_Threads = 5;
 
-plan tests => $Num_Threads * 100 + 5;
+plan tests => $Num_Threads * 100 + 6;
 
 
 sub do_one_thread {
@@ -36,7 +41,7 @@ sub do_one_thread {
                  'hello', 's', 'thisisalongname', '1', '2', '3',
                  'abc', 'xyz', '1234567890', 'm', 'n', 'p' );
     my @list2 = @list;
-    print "# kid $kid before eq_set\n";
+    print "# kid $kid before is_deeply\n";
 
     for my $j (1..100) {
         is_deeply(\@list, \@list2);
@@ -56,3 +61,5 @@ for my $t (@kids) {
     my $rc = $t->join();
     cmp_ok( $rc, '==', 42, "threads exit status is $rc" );
 }
+
+pass("End of test");
