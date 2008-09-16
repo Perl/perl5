@@ -16,9 +16,7 @@ my $Is_VMS = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
 my $Is_NetWare = $^O eq 'NetWare';
 my $Is_MacOS = $^O eq 'MacOS';
-my $tmpfile = tempfile();
 my $i = 0 ;
-END {  if ($tmpfile) { 1 while unlink $tmpfile} }
 
 for (@prgs){
     my $switch = "";
@@ -44,6 +42,7 @@ for (@prgs){
 	shift @files ;
 	$prog = shift @files ;
     }
+    my $tmpfile = tempfile();
     open TEST, ">$tmpfile";
     print TEST $prog,"\n";
     close TEST;
