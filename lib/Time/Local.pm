@@ -272,16 +272,6 @@ absolute four digit year instead.
 The scheme above allows interpretation of a wide range of dates,
 particularly if 4-digit years are used.
 
-=head2 Limits of time_t
-
-The range of dates that can be actually be handled depends on the size
-of C<time_t> (usually a signed integer) on the given
-platform. Currently, this is 32 bits for most systems, yielding an
-approximate range from Dec 1901 to Jan 2038.
-
-Both C<timelocal()> and C<timegm()> croak if given dates outside the
-supported range.
-
 =head2 Ambiguous Local Times (DST)
 
 Because of DST changes, there are many time zones where the same local
@@ -303,17 +293,6 @@ for the "Europe/Paris" time zone, the local clock jumped from
 
 If the C<timelocal()> function is given a non-existent local time, it
 will simply return an epoch value for the time one hour later.
-
-=head2 Negative Epoch Values
-
-Negative epoch (C<time_t>) values are not officially supported by the
-POSIX standards, so this module's tests do not test them. On some
-systems, they are known not to work. These include MacOS (pre-OSX) and
-Win32.
-
-On systems which do support negative epoch values, this module should
-be able to cope with dates before the start of the epoch, down the
-minimum value of time_t for the system.
 
 =head1 IMPLEMENTATION
 
