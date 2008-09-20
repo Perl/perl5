@@ -412,8 +412,8 @@ sub printf {
 sub say {
     @_ or croak 'usage: $io->say(ARGS)';
     my $this = shift;
-    local $\ = "";
-    print $this @_, "\n";
+    local $\ = "\n";
+    print $this @_;
 }
 
 sub getline {
