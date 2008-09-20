@@ -2801,7 +2801,7 @@ Perl_refcounted_he_new(pTHX_ struct refcounted_he *const parent,
 				    value_len);
 }
 
-struct refcounted_he *
+static struct refcounted_he *
 S_refcounted_he_new_common(pTHX_ struct refcounted_he *const parent,
 			   const char *const key_p, const STRLEN key_len,
 			   const char flags, char value_type,
