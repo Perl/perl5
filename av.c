@@ -984,7 +984,7 @@ Perl_av_exists(pTHX_ AV *av, I32 key)
 	return FALSE;
 }
 
-MAGIC *
+static MAGIC *
 S_get_aux_mg(pTHX_ AV *av) {
     dVAR;
     MAGIC *mg;

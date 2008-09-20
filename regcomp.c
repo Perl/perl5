@@ -8841,7 +8841,7 @@ S_regcurly(register const char *s)
  - regdump - dump a regexp onto Perl_debug_log in vaguely comprehensible form
  */
 #ifdef DEBUGGING
-void 
+static void 
 S_regdump_extflags(pTHX_ const char *lead, const U32 flags)
 {
     int bit;
