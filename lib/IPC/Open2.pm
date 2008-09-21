@@ -28,6 +28,9 @@ IPC::Open2, open2 - open a process for both reading and writing
       # or without using the shell
     $pid = open2($chld_out, $chld_in, 'some', 'cmd', 'and', 'args');
 
+    waitpid( $pid, 0 );
+    my $child_exit_status = $? >> 8;
+
 =head1 DESCRIPTION
 
 The open2() function runs the given $cmd and connects $chld_out for

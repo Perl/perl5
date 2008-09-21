@@ -26,6 +26,9 @@ IPC::Open3, open3 - open a process for reading, writing, and error handling
     $pid = open3($wtr, $rdr, $err,
 		    'some cmd and args', 'optarg', ...);
 
+    waitpid( $pid, 0 );
+    my $child_exit_status = $? >> 8;
+
 =head1 DESCRIPTION
 
 Extremely similar to open2(), open3() spawns the given $cmd and
