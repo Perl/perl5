@@ -1,4 +1,4 @@
-#!/usr/bin/perl -T
+#!perl -T
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {
@@ -37,7 +37,7 @@ my %modules = (
     'Time::HiRes'=> q| ::can_ok( 'Time::HiRes' => 'usleep'  ) |,  # 5.7.3
 );
 
-plan tests => keys(%modules) * 3 + 5;
+plan tests => keys(%modules) * 4 + 5;
 
 # Try to load the module
 use_ok( 'XSLoader' );
@@ -60,12 +60,17 @@ my $extensions = $Config{'extensions'};
 $extensions =~ s|/|::|g;
 
 for my $module (sort keys %modules) {
+    my $warnings = "";
+    local $SIG{__WARN__} = sub { $warnings = $_[0] };
+
     SKIP: {
-        skip "$module not available", 3 if $extensions !~ /\b$module\b/;
+        skip "$module not available", 4 if $extensions !~ /\b$module\b/;
 
         eval qq{ package $module; XSLoader::load('$module', "qunckkk"); };
         like( $@, "/^$module object version \\S+ does not match bootstrap parameter (?:qunckkk|0)/",  
                 "calling XSLoader::load() with a XS module and an incorrect version" );
+        like( $warnings, "/^\$|^Version string 'qunckkk' contains invalid data; ignoring: 'qunckkk'/", 
+                "in Perl 5.10, DynaLoader warns about the incorrect version string" );
 
         eval qq{ package $module; XSLoader::load('$module'); };
         is( $@, '',  "XSLoader::load($module)");
