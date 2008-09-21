@@ -76,7 +76,7 @@ File::stat - by-name interface to Perl's built-in stat() functions
 
  use File::stat qw(:FIELDS);
  stat($file) or die "No $file: $!";
- if ( ($st_mode & 0111) && $st_nlink > 1) ) {
+ if ( ($st_mode & 0111) && ($st_nlink > 1) ) {
      print "$file is executable with lotsa links\n";
  } 
 
