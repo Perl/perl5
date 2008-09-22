@@ -406,7 +406,7 @@ elsif ($PLATFORM eq 'aix') {
 		     )]);
     emit_symbols([qw(
 		     boot_DynaLoader
-		     )]);}
+		     )]);
 }
 elsif ($PLATFORM eq 'os2') {
     emit_symbols([qw(
