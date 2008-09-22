@@ -15,7 +15,7 @@ print OUT <<'EOT';
 
 package XSLoader;
 
-$VERSION = "0.09";
+$VERSION = "0.09_1";
 
 #use strict;
 
@@ -82,7 +82,6 @@ print OUT <<'EOT';
     $bs =~ s/(\.\w+)?(;\d*)?$/\.bs/; # look for .bs 'beside' the library
 
     if (-s $bs) { # only read file if it's not empty
-        print STDERR "BS: $bs ($^O, $dlsrc)\n" if $dl_debug;
         eval { do $bs; };
         warn "$bs: $@\n" if $@;
     }
