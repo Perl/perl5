@@ -11,6 +11,17 @@ BEGIN {
     if( !$Config{d_alarm} ) {
         skip_all("alarm() not implemented on this platform");
     }
+    if ($^O eq "MSWin32") {
+	require Win32;
+	my(undef,$major,$minor,undef,$id) = Win32::GetOSVersion();
+	if ($id == 2 && (($major == 5 && $minor == 2) || $major >= 6)) {
+	    # alarm() in 5.8.x is broken on Windows 2003 Server and Vista
+	    # The problem is fixed by change 26379, but cannot be integrated
+	    # into 5.8.x because it includes structure layout changes
+	    # http://public.activestate.com/cgi-bin/perlbrowse/p/26379
+	    skip_all("alarm() known to be broken on this platform");
+	}
+    }
 }
 
 plan tests => 5;
