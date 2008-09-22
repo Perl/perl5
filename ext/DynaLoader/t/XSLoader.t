@@ -52,8 +52,14 @@ like( $@, '/^XSLoader::load\(\'Your::Module\', \$Your::Module::VERSION\)/',
         "calling XSLoader::load() with no argument" );
 
 eval q{ package Thwack; XSLoader::load('Thwack'); };
-like( $@, q{/^Can't locate loadable object for module Thwack in @INC/},
-        "calling XSLoader::load() under a package with no XS part" );
+if ($Config{usedl}) {
+ like( $@, q{/^Can't locate loadable object for module Thwack in @INC/},
+ "calling XSLoader::load() under a package with no XS part" );
+}
+else {
+ like( $@, q{/^Can't load module Thwack, dynamic loading not available in this perl./},
+ "calling XSLoader::load() under a package with no XS part" );
+}
 
 # Now try to load well known XS modules
 my $extensions = $Config{'extensions'};
