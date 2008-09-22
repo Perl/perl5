@@ -944,8 +944,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-/*#define ARCHLIB "/usr/local/lib/perl5/5.9/unknown"		/ **/
-/*#define ARCHLIB_EXP "/usr/local/lib/perl5/5.9/unknown"		/ **/
+/*#define ARCHLIB "/usr/local/lib/perl5/5.8/unknown"		/ **/
+/*#define ARCHLIB_EXP "/usr/local/lib/perl5/5.8/unknown"		/ **/
 
 /* ARCHNAME:
  *	This symbol holds a string representing the architecture name.
@@ -4005,8 +4005,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/usr/local/lib/perl5/5.9"		/**/
-#define PRIVLIB_EXP "/usr/local/lib/perl5/5.9"		/**/
+#define PRIVLIB "/usr/local/lib/perl5/5.8"		/**/
+#define PRIVLIB_EXP "/usr/local/lib/perl5/5.8"		/**/
 
 /* CAN_PROTOTYPE:
  *	If defined, this macro indicates that the C compiler can handle
