@@ -1351,3 +1351,9 @@ foo(\h)bar	foo\tbar	y	$1	\t
 /\d+$ \n/ix	>10\n	y	$&	10
 />\d\d$ \n/ix	>10\n	y	$&	>10
 />\d+$ \n/x	>10\n	y	$&	>10
+
+# Two regressions in 5.8.x (only) introduced by change 30638
+# Simplification of the test failure in XML::LibXML::Simple:
+/^\s*i.*?o\s*$/s	io\n io	y	-	-
+# As reported in #59168 by Father Chrysostomos:
+/(.*?)a(?!(a+)b\2c)/	baaabaac	y	$&-$1	baa-ba
