@@ -27,7 +27,8 @@ chdir $ARGV[0] or die "$0: chdir '$ARGV[0]' failed: $!\n";
 my %skip;
 @skip{
     './lib/Carp/Heavy.pm',
-    './lib/Exporter/Heavy.pm'
+    './lib/Exporter/Heavy.pm',
+    './win32/FindExt.pm'
 } = ();
 my $skip_dirs = qr|^\./t/lib|;
 
