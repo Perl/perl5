@@ -527,8 +527,7 @@ sub runperl {
 	# run a fresh perl, so we'll brute force launder everything for you
 	my $sep;
 
-	eval "require Config; Config->import";
-	if ($@) {
+	if (! eval 'use Config; 1') {
 	    warn "test.pl had problems loading Config: $@";
 	    $sep = ':';
 	} else {
@@ -573,8 +572,7 @@ sub which_perl {
 	return $Perl if $^O eq 'VMS';
 
 	my $exe;
-	eval "require Config; Config->import";
-	if ($@) {
+	if (! eval 'use Config; 1') {
 	    warn "test.pl had problems loading Config: $@";
 	    $exe = '';
 	} else {
@@ -588,8 +586,7 @@ sub which_perl {
 
 	if ($Perl =~ /^perl\Q$exe\E$/i) {
 	    my $perl = "perl$exe";
-	    eval "require File::Spec";
-	    if ($@) {
+	    if (! eval 'use File::Spec; 1') {
 		warn "test.pl had problems loading File::Spec: $@";
 		$Perl = "./$perl";
 	    } else {
@@ -903,7 +900,7 @@ sub watchdog ($)
 
     # Use a watchdog thread because either 'threads' is loaded,
     #   or fork() failed
-    if (eval { require threads; }) {
+    if (eval 'use threads; 1') {
         threads->create(sub {
                 # Load POSIX if available
                 eval { require POSIX; };
