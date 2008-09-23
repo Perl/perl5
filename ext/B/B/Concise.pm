@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.75";
+our $VERSION   = "0.76";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -299,7 +299,18 @@ sub compileOpts {
 	elsif ($o =~ /^-stash=(.*)/) {
 	    my $pkg = $1;
 	    no strict 'refs';
-	    eval "require $pkg" unless defined %{$pkg.'::'};
+	    if (!defined %{$pkg.'::'}) {
+		eval "require $pkg";
+	    } else {
+		require Config;
+		if (!$Config::Config{usedl}
+		    && keys %{$pkg.'::'} == 1
+		    && $pkg->can('bootstrap')) {
+		    # It is something that we're staticly linked to, but hasn't
+		    # yet been used.
+		    eval "require $pkg";
+		}
+	    }
 	    push @render_packs, $pkg;
 	}
 	# line-style options

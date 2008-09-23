@@ -416,11 +416,8 @@ like($out, qr/FUNC: \*ExtUtils::Mksymlists::_write_vms/,
 $out = runperl ( switches => ["-MO=Concise,-stash=Data::Dumper,-src,-exec"],
 		 prog => '-e 1', stderr => 1 );
 
-{
-    local $TODO = q(require $package unless ${$package.'::'}; doesn't do what you want under static linking) unless $Config{usedl};
-    like($out, qr/FUNC: \*Data::Dumper::format_refaddr/,
-         "stash rendering loads package as needed");
-}
+like($out, qr/FUNC: \*Data::Dumper::format_refaddr/,
+     "stash rendering loads package as needed");
 
 my $prog = q{package FOO; sub bar { print "bar" } package main; FOO::bar(); };
 
