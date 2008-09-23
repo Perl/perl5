@@ -16,7 +16,7 @@ BEGIN {
     require 'test.pl';		# we use runperl from 'test.pl', so can't use Test::More
 }
 
-plan tests => 156;
+plan tests => 157;
 
 require_ok("B::Concise");
 
@@ -407,11 +407,20 @@ like($out, qr/PAD_FAKELEX_MULTI is a constant sub, optimized to a IV/,
 like($out, qr/\# 4\d\d: \s+ \$l->concise\(\$level\);/,
      "src-line rendering works");
 
+$out = runperl ( switches => ["-MO=Concise,-stash=ExtUtils::Mksymlists,-src,-exec"],
+		 prog => '-e 1', stderr => 1 );
+
+like($out, qr/FUNC: \*ExtUtils::Mksymlists::_write_vms/,
+     "stash rendering loads package as needed");
+
 $out = runperl ( switches => ["-MO=Concise,-stash=Data::Dumper,-src,-exec"],
 		 prog => '-e 1', stderr => 1 );
 
-like($out, qr/FUNC: \*Data::Dumper::format_refaddr/,
-     "stash rendering loads package as needed");
+{
+    local $TODO = q(require $package unless ${$package.'::'}; doesn't do what you want under static linking) unless $Config{usedl};
+    like($out, qr/FUNC: \*Data::Dumper::format_refaddr/,
+         "stash rendering loads package as needed");
+}
 
 my $prog = q{package FOO; sub bar { print "bar" } package main; FOO::bar(); };
 
