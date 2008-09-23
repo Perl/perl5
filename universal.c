@@ -37,13 +37,14 @@
  */
 
 STATIC bool
-S_isa_lookup(pTHX_ HV *stash, const char * const name, const HV* const name_stash)
+S_isa_lookup(pTHX_ HV *stash, const char * const name)
 {
     dVAR;
     AV* stash_linear_isa;
     SV** svp;
     const char *hvname;
     I32 items;
+    const HV *const name_stash = gv_stashpv(name, 0);
 
     /* A stash/class can go by many names (ie. User == main::User), so 
        we compare the stash itself just in case */
@@ -110,13 +111,7 @@ Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
         stash = gv_stashsv(sv, 0);
     }
 
-    if (stash) {
-	HV * const name_stash = gv_stashpv(name, 0);
-	return isa_lookup(stash, name, name_stash);
-    }
-    else
-	return FALSE;
-
+    return stash ? isa_lookup(stash, name) : FALSE;
 }
 
 /*

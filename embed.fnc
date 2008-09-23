@@ -1589,7 +1589,7 @@ s	|void	|printbuf	|NN const char* fmt|NN const char* s
 #endif
 
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
-s	|bool|isa_lookup	|NULLOK HV *stash|NN const char * const name|NULLOK const HV * const name_stash
+s	|bool|isa_lookup	|NULLOK HV *stash|NN const char * const name
 #endif
 
 #if defined(PERL_IN_LOCALE_C) || defined(PERL_DECL_PROT)
