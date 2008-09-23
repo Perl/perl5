@@ -4187,6 +4187,7 @@ STATIC void	S_printbuf(pTHX_ const char* fmt, const char* s)
 
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
 STATIC bool	S_isa_lookup(pTHX_ HV *stash, const char * const name)
+			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
 #endif

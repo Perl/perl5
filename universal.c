@@ -48,7 +48,7 @@ S_isa_lookup(pTHX_ HV *stash, const char * const name)
 
     /* A stash/class can go by many names (ie. User == main::User), so 
        we compare the stash itself just in case */
-    if (name_stash && ((const HV *)stash == name_stash))
+    if ((const HV *)stash == name_stash)
         return TRUE;
 
     hvname = HvNAME_get(stash);
