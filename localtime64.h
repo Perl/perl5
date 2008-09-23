@@ -24,16 +24,14 @@
    USE_SYSTEM_GMTIME
    Should we use the system functions if the time is inside their range?
 */
-#define SYSTEM_LOCALTIME_MAX     2147483647   /* XXX Replace with LOCALTIME_MAX */
-#define SYSTEM_LOCALTIME_MIN    -2147483647  /* XXX Replace with LOCALTIME_MIN */
+#define SYSTEM_LOCALTIME_MAX    LOCALTIME_MAX
+#define SYSTEM_LOCALTIME_MIN    LOCALTIME_MIN
 #define SYSTEM_GMTIME_MAX       GMTIME_MAX
 #define SYSTEM_GMTIME_MIN       GMTIME_MIN
 
-/* It'll be faster */
+/* The system localtime will be faster and more correct inside its range */
 #define USE_SYSTEM_LOCALTIME    1
-
-/* No point risking system bugs, ours works fine */
-#define USE_SYSTEM_GMTIME       0
+#define USE_SYSTEM_GMTIME       1
 
 
 /* 64 bit types.  Set as appropriate for your system. */
