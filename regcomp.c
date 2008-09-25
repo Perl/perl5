@@ -4840,7 +4840,7 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
     len = r->offsets[0];
     npar = r->nparens+1;
 
-    size = sizeof(regexp) + (len+1)*sizeof(regnode);
+    size = sizeof(regexp) + len*sizeof(regnode);
     Newxc(ret, size, char, regexp);
     Copy(r, ret, size, char);
 
