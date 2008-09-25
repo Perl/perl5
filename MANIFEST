@@ -1357,6 +1357,7 @@ hints/machten.sh		Hints for named architecture
 hints/midnightbsd.sh		Hints for named architecture
 hints/mint.sh			Hints for named architecture
 hints/mips.sh			Hints for named architecture
+hints/mirbsd.sh			Hints for named architecture
 hints/mpc.sh			Hints for named architecture
 hints/mpeix.sh			Hints for named architecture
 hints/ncr_tower.sh		Hints for named architecture
