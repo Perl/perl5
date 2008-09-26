@@ -12,7 +12,7 @@ BEGIN {
 use strict;
 use warnings;
 
-use Test::More tests => 49;
+use Test::More tests => 50;
 
 BEGIN { use_ok('XS::APItest') };
 
@@ -29,12 +29,12 @@ $| = 1;
   is (DPeek ($^),    'PVMG()',			'$^');
   is (DPeek ($=),    'PVMG()',			'$=');
   is (DPeek ($-),    'PVMG()',			'$-');
-  is (DPeek ($!),    'PVMG(""\0)',		'$!');
+like (DPeek ($!), qr'^PVMG\("',			'$!');
   is (DPeek ($?),    'PVMG()',			'$?');
   is (DPeek ($|),    'PVMG(1)',			'$|');
 
   "abc" =~ m/(b)/;	# Don't know why these magic vars have this content
-# is (DPeek ($1),    'PVMG("$"\0)',		' $1');
+like (DPeek ($1), qr'^PVMG\("',			' $1');
   is (DPeek ($`),    'PVMG()',			' $`');
   is (DPeek ($&),    'PVMG()',			' $&');
   is (DPeek ($'),    'PVMG()',			" \$'");
