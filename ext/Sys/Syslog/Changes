@@ -1,5 +1,10 @@
 Revision history for Sys-Syslog
 
+0.27 -- 2008.09.21 -- Sebastien Aperghis-Tramoni (SAPER)
+        [BUGFIX] Fixed compilation on Win32, thanks to Serguei Trouchelle.
+        Also added stubs so calling the XS functions will never fail.
+        [TESTS] t/pod.t now also uses Pod::Checker.
+
 0.26 -- 2008.06.16 -- Sebastien Aperghis-Tramoni (SAPER)
         [BUGFIX] Make Sys::Syslog works with Perl 5.10.0 (because of 
         ExtUtils::Constant::ProxySubs).

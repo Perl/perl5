@@ -74,7 +74,7 @@ else {
 }
 
 # on pre-5.6 Perls, add warnings::compat to the prereq modules
-push @extra_prereqs, "warnings::compat"  if $] < 5.006;
+push @extra_prereqs, "warnings::compat" => "0.06"  if $] < 5.006;
 
 WriteMakefile(
     NAME            => 'Sys::Syslog',
@@ -104,7 +104,6 @@ WriteMakefile(
     clean           => { FILES => 'Sys-Syslog-*' }, 
     realclean       => { FILES => 'lib const-c.inc const-xs.inc macros.all '
         .'PerlLog.h typemap *.bak *.bin *.rc win32/PerlLog_dll' },
-    NO_META         => 1,
     @extra_params
 );
 
