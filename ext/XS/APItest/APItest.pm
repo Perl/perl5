@@ -23,9 +23,10 @@ our @EXPORT = qw( print_double print_int print_long
 		  my_cxt_getint my_cxt_getsv my_cxt_setint my_cxt_setsv
 		  sv_setsv_cow_hashkey_core sv_setsv_cow_hashkey_notcore
 		  rmagical_cast rmagical_flags
+		  DPeek
 );
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 use vars '$WARNINGS_ON_BOOTSTRAP';
 use vars map "\$${_}_called_PP", qw(BEGIN UNITCHECK CHECK INIT END);

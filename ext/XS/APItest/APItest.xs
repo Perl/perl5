@@ -852,6 +852,14 @@ rmagical_flags(sv)
         XSRETURN(3);
 
 void
+DPeek (sv)
+    SV   *sv
+
+  PPCODE:
+    ST (0) = newSVpv (Perl_sv_peek (aTHX_ sv), 0);
+    XSRETURN (1);
+
+void
 BEGIN()
     CODE:
 	sv_inc(get_sv("XS::APItest::BEGIN_called", GV_ADD|GV_ADDMULTI));
