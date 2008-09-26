@@ -1,6 +1,16 @@
 CHANGES
 -------
 
+  2.015 3 September 2008
+
+      * Makefile.PL
+        Backout changes made in 2.014
+
+  2.014 2 September 2008
+
+      * Makefile.PL
+        Updated to check for indirect dependencies.
+
   2.012 15 July 2008
 
       * Document the gzip flags that WindowBits can take.

@@ -1,9 +1,9 @@
 
                              IO-Compress-Zlib
 
-                             Version 2.012
+                             Version 2.015
 
-                              15th July 2008
+                            2nd September 2008
 
        Copyright (c) 2005-2008 Paul Marquess. All rights reserved.
           This program is free software; you can redistribute it
@@ -93,7 +93,7 @@ To help me help you, I need all of the following information:
         If you haven't installed IO-Compress-Zlib then search IO::Compress::Gzip.pm
         for a line like this:
 
-          $VERSION = "2.012" ;
+          $VERSION = "2.015" ;
 
  2. If you are having problems building IO-Compress-Zlib, send me a
     complete log of what happened. Start by unpacking the IO-Compress-Zlib

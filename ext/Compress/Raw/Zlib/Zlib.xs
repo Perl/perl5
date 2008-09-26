@@ -112,6 +112,7 @@ typedef struct di_stream {
 #define FLAG_CRC32              2
 #define FLAG_ADLER32            4
 #define FLAG_CONSUME_INPUT      8
+#define FLAG_LIMIT_OUTPUT       16
     uLong    crc32 ;
     uLong    adler32 ;
     z_stream stream;
@@ -470,6 +471,8 @@ DispStream(s, message)
         printf("           CRC32     %s\n",   EnDis(FLAG_CRC32));
         printf("           ADLER32   %s\n",   EnDis(FLAG_ADLER32));
         printf("           CONSUME   %s\n",   EnDis(FLAG_CONSUME_INPUT));
+        printf("           LIMIT     %s\n",   EnDis(FLAG_LIMIT_OUTPUT));
+
 
 #ifdef MAGIC_APPEND
         printf("    window           0x%p\n", s->window);
@@ -1329,7 +1332,16 @@ inflate (s, buf, output, eof=FALSE)
 
         RETVAL = inflate(&(s->stream), Z_SYNC_FLUSH);
 
-        if (RETVAL == Z_STREAM_ERROR || RETVAL == Z_MEM_ERROR ||
+    
+        if (RETVAL == Z_NEED_DICT && s->dictionary) {
+            s->dict_adler = s->stream.adler ;
+            RETVAL = inflateSetDictionary(&(s->stream), 
+            (const Bytef*)SvPVbyte_nolen(s->dictionary),
+            SvCUR(s->dictionary));
+        }
+        
+        if (s->flags & FLAG_LIMIT_OUTPUT ||
+            RETVAL == Z_STREAM_ERROR || RETVAL == Z_MEM_ERROR ||
             RETVAL == Z_DATA_ERROR  || RETVAL == Z_STREAM_END )
             break ;
 
@@ -1341,17 +1353,9 @@ inflate (s, buf, output, eof=FALSE)
                 break ;
             }
         }
-	
-        if (RETVAL == Z_NEED_DICT && s->dictionary) {
-            s->dict_adler = s->stream.adler ;
-            RETVAL = inflateSetDictionary(&(s->stream), 
-            (const Bytef*)SvPVbyte_nolen(s->dictionary),
-            SvCUR(s->dictionary));
-        }
-
     }
 #ifdef NEED_DUMMY_BYTE_AT_END 
-    if (eof && RETVAL == Z_OK) {
+    if (eof && RETVAL == Z_OK && s->flags & FLAG_LIMIT_OUTPUT == 0) {
         Bytef* nextIn =  s->stream.next_in;
         uInt availIn =  s->stream.avail_in;
         s->stream.next_in = (Bytef*) " ";
@@ -1399,7 +1403,7 @@ inflate (s, buf, output, eof=FALSE)
             			SvCUR(output)-prefix_length) ;
 
 	/* fix the input buffer */
-	if (s->flags & FLAG_CONSUME_INPUT) {
+	if (s->flags & FLAG_CONSUME_INPUT || s->flags & FLAG_LIMIT_OUTPUT) {
 	    in = s->stream.avail_in ;
 	    SvCUR_set(buf, in) ;
 	    if (in)
