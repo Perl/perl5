@@ -11,7 +11,7 @@ use File::GlobMapper;
 require Exporter;
 our ($VERSION, @ISA, @EXPORT, %EXPORT_TAGS, $HAS_ENCODE);
 @ISA = qw(Exporter);
-$VERSION = '2.012';
+$VERSION = '2.015';
 
 @EXPORT = qw( isaFilehandle isaFilename whatIsInput whatIsOutput 
               isaFileGlobString cleanFileGlobString oneTarget
@@ -485,7 +485,11 @@ sub ParseParameters
 
     my $sub = (caller($level + 1))[3] ;
     local $Carp::CarpLevel = 1 ;
-    my $p = new IO::Compress::Base::Parameters() ;
+    
+    return $_[1]
+        if @_ == 2 && defined $_[1] && UNIVERSAL::isa($_[1], "IO::Compress::Base::Parameters");
+    
+    my $p = new IO::Compress::Base::Parameters() ;            
     $p->parse(@_)
         or croak "$sub: $p->{Error}" ;
 
@@ -534,6 +538,7 @@ sub IO::Compress::Base::Parameters::parse
 
     my $got = $self->{Got} ;
     my $firstTime = keys %{ $got } == 0 ;
+    my $other;
 
     my (@Bad) ;
     my @entered = () ;
@@ -544,9 +549,7 @@ sub IO::Compress::Base::Parameters::parse
         @entered = () ;
     }
     elsif (@_ == 1) {
-        my $href = $_[0] ;    
-        return $_[0] 
-            if UNIVERSAL::isa($_[0], "IO::Compress::Base::Parameters");
+        my $href = $_[0] ;
     
         return $self->setError("Expected even number of parameters, got 1")
             if ! defined $href or ! ref $href or ref $href ne "HASH" ;
@@ -562,8 +565,13 @@ sub IO::Compress::Base::Parameters::parse
             if $count % 2 != 0 ;
         
         for my $i (0.. $count / 2 - 1) {
-            push @entered, $_[2* $i] ;
-            push @entered, \$_[2* $i+1] ;
+            if ($_[2 * $i] eq '__xxx__') {
+                $other = $_[2 * $i + 1] ;
+            }
+            else {
+                push @entered, $_[2 * $i] ;
+                push @entered, \$_[2 * $i + 1] ;
+            }
         }
     }
 
@@ -591,6 +599,24 @@ sub IO::Compress::Base::Parameters::parse
     }
 
     my %parsed = ();
+    
+    if ($other) 
+    {
+        for my $key (keys %$default)  
+        {
+            my $canonkey = lc $key;
+            if ($other->parsed($canonkey))
+            {
+                my $value = $other->value($canonkey);
+#print "SET '$canonkey' to $value [$$value]\n";
+                ++ $parsed{$canonkey};
+                $got->{$canonkey}[OFF_PARSED]  = 1;
+                $got->{$canonkey}[OFF_DEFAULT] = $value;
+                $got->{$canonkey}[OFF_FIXED]   = $value;
+            }
+        }
+    }
+    
     for my $i (0.. @entered / 2 - 1) {
         my $key = $entered[2* $i] ;
         my $value = $entered[2* $i+1] ;

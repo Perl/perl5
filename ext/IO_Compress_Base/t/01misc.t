@@ -19,7 +19,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 78 + $extra ;
+    plan tests => 88 + $extra ;
 
     use_ok('Scalar::Util');
     use_ok('IO::Compress::Base::Common');
@@ -95,13 +95,11 @@ sub My::testParseParameters()
     my $got = ParseParameters(1, {'Fred' => [1, 1, 0x1000000, 0]}, Fred => 'abc') ;
     is $got->value('Fred'), "abc", "other" ;
 
-    $got = ParseParameters(1, {'Fred' => [0, 1, Parse_any, undef]}, Fred =>
-undef) ;
+    $got = ParseParameters(1, {'Fred' => [0, 1, Parse_any, undef]}, Fred => undef) ;
     ok $got->parsed('Fred'), "undef" ;
     ok ! defined $got->value('Fred'), "undef" ;
 
-    $got = ParseParameters(1, {'Fred' => [0, 1, Parse_string, undef]}, Fred =>
-undef) ;
+    $got = ParseParameters(1, {'Fred' => [0, 1, Parse_string, undef]}, Fred => undef) ;
     ok $got->parsed('Fred'), "undef" ;
     is $got->value('Fred'), "", "empty string" ;
 
@@ -117,15 +115,40 @@ undef) ;
 
     ok $got->parsed('Fred'), "parsed" ;
     $xx_ref = $got->value('Fred');
+
     $$xx_ref = 666 ;
     is $xx, 666;
 
-#    my $got1 = ParseParameters(1, {'Fred' => [1, 1, Parse_writable_scalar, undef]}, $got) ;
-#    ok $got->parsed('Fred'), "parsed" ;
-#    $xx_ref = $got->value('Fred');
-#    $$xx_ref = 666 ;
-#    is $xx, 666;
+    {
+        my $got1 = ParseParameters(1, {'Fred' => [1, 1, Parse_writable_scalar, undef]}, $got) ;
+        is $got1, $got, "Same object";
+    
+        ok $got1->parsed('Fred'), "parsed" ;
+        $xx_ref = $got1->value('Fred');
+        
+        $$xx_ref = 777 ;
+        is $xx, 777;
+    }
+    
+    my $got2 = ParseParameters(1, {'Fred' => [1, 1, Parse_writable_scalar, undef]}, '__xxx__' => $got) ;
+    isnt $got2, $got, "not the Same object";
+
+    ok $got2->parsed('Fred'), "parsed" ;
+    $xx_ref = $got2->value('Fred');
+    $$xx_ref = 888 ;
+    is $xx, 888;  
+      
+    my $other;
+    my $got3 = ParseParameters(1, {'Fred' => [1, 1, Parse_writable_scalar, undef]}, '__xxx__' => $got, Fred => \$other) ;
+    isnt $got3, $got, "not the Same object";
+
+    ok $got3->parsed('Fred'), "parsed" ;
+    $xx_ref = $got3->value('Fred');
+    $$xx_ref = 999 ;
+    is $other, 999;  
+    is $xx, 888;  
 }
+
 
 My::testParseParameters();
 

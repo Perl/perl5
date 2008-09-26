@@ -13,7 +13,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.012';
+$VERSION = '2.015';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -84,6 +84,7 @@ use constant FLAG_APPEND             => 1 ;
 use constant FLAG_CRC                => 2 ;
 use constant FLAG_ADLER              => 4 ;
 use constant FLAG_CONSUME_INPUT      => 8 ;
+use constant FLAG_LIMIT_OUTPUT       => 16 ;
 
 eval {
     require XSLoader;
@@ -387,6 +388,7 @@ sub Compress::Raw::Zlib::Inflate::new
     my ($got) = ParseParameters(0,
                     {
                         'AppendOutput'  => [1, 1, Parse_boolean,  0],
+                        'LimitOutput'   => [1, 1, Parse_boolean,  0],
                         'CRC32'         => [1, 1, Parse_boolean,  0],
                         'ADLER32'       => [1, 1, Parse_boolean,  0],
                         'ConsumeInput'  => [1, 1, Parse_boolean,  1],
@@ -406,6 +408,8 @@ sub Compress::Raw::Zlib::Inflate::new
     $flags |= FLAG_CRC    if $got->value('CRC32') ;
     $flags |= FLAG_ADLER  if $got->value('ADLER32') ;
     $flags |= FLAG_CONSUME_INPUT if $got->value('ConsumeInput') ;
+    $flags |= FLAG_LIMIT_OUTPUT if $got->value('LimitOutput') ;
+
 
     my $windowBits =  $got->value('WindowBits');
     $windowBits += MAX_WBITS()

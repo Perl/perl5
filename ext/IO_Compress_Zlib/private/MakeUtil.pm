@@ -297,6 +297,83 @@ sub doUpDownViaCopy
     }
 }
 
+
+sub FindBrokenDependencies
+{
+    my $version = shift ;
+    my %thisModule = map { $_ => 1} @_;
+
+    my @modules = qw(
+                    IO::Compress::Base
+                    IO::Compress::Base::Common
+                    IO::Uncompress::Base
+
+                    Compress::Raw::Zlib
+                    Compress::Raw::Bzip2
+
+                    IO::Compress::RawDeflate
+                    IO::Uncompress::RawInflate
+                    IO::Compress::Deflate
+                    IO::Uncompress::Inflate
+                    IO::Compress::Gzip
+                    IO::Compress::Gzip::Constants
+                    IO::Uncompress::Gunzip
+                    IO::Compress::Zip
+                    IO::Uncompress::Unzip
+
+                    IO::Compress::Bzip2
+                    IO::Uncompress::Bunzip2
+
+                    IO::Compress::Lzf
+                    IO::Uncompress::UnLzf
+
+                    IO::Compress::Lzop
+                    IO::Uncompress::UnLzop
+
+                    Compress::Zlib
+                    );
+    
+    my @broken = ();
+
+    foreach my $module ( grep { ! $thisModule{$_} } @modules)
+    {
+        my $hasVersion = getInstalledVersion($module);
+
+        # No need to upgrade if the module isn't installed at all
+        next 
+            if ! defined $hasVersion;
+
+        # If already have C::Z version 1, then an upgrade to any of the
+        # IO::Compress modules will not break it.
+        next 
+            if $module eq 'Compress::Zlib' && $hasVersion < 2;
+
+        if ($hasVersion < $version)
+        {
+            push @broken, $module
+        }
+    }
+
+    return @broken;
+}
+
+sub getInstalledVersion
+{
+    my $module = shift;
+    my $version;
+
+    eval " require $module; ";
+
+    if ($@ eq '')
+    {
+        no strict 'refs';
+        $version = ${ $module . "::VERSION" };
+        $version = 0 
+    }
+    
+    return $version;
+}
+
 package MakeUtil ;
 
 1;
