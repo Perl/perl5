@@ -36,7 +36,7 @@ use POSIX qw(strftime);
 
 @ISA = qw(Pod::Simple);
 
-$VERSION = '2.19';
+$VERSION = '2.20';
 
 # Set the debugging level.  If someone has inserted a debug function into this
 # class already, use that.  Otherwise, use any Pod::Simple debug function
@@ -1450,7 +1450,8 @@ Pod::Man - Convert POD data to formatted *roff input
 
 =for stopwords
 en em ALLCAPS teeny fixedbold fixeditalic fixedbolditalic stderr utf8
-UTF-8 Allbery Sean Burke Ossanna Solaris
+UTF-8 Allbery Sean Burke Ossanna Solaris formatters troff uppercased
+Christiansen
 
 =head1 SYNOPSIS
 

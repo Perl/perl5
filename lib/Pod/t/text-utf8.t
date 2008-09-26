@@ -17,6 +17,15 @@ BEGIN {
     unshift (@INC, '../blib/lib');
     $| = 1;
     print "1..3\n";
+
+    # UTF-8 support requires Perl 5.8 or later.
+    if ($] < 5.008) {
+        my $n;
+        for $n (1..3) {
+            print "ok $n # skip -- Perl 5.8 required for UTF-8 support\n";
+        }
+        exit;
+    }
 }
 
 END {

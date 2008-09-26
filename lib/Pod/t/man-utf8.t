@@ -16,7 +16,16 @@ BEGIN {
     }
     unshift (@INC, '../blib/lib');
     $| = 1;
-    print "1..7\n";
+    print "1..5\n";
+
+    # UTF-8 support requires Perl 5.8 or later.
+    if ($] < 5.008) {
+        my $n;
+        for $n (1..5) {
+            print "ok $n # skip -- Perl 5.8 required for UTF-8 support\n";
+        }
+        exit;
+    }
 }
 
 END {
@@ -25,23 +34,11 @@ END {
 
 use Pod::Man;
 
-# Redirect stderr to a file.
-sub stderr_save {
-    open (OLDERR, '>&STDERR') or die "Can't dup STDERR: $!\n";
-    open (STDERR, '> out.err') or die "Can't redirect STDERR: $!\n";
-}
-
-# Restore stderr.
-sub stderr_restore {
-    close STDERR;
-    open (STDERR, '>&OLDERR') or die "Can't dup STDERR: $!\n";
-    close OLDERR;
-}
-
 $loaded = 1;
 print "ok 1\n";
 
 my $n = 2;
+eval { binmode (\*DATA, ':encoding(utf-8)') };
 while (<DATA>) {
     my %options;
     next until $_ eq "###\n";
@@ -51,6 +48,8 @@ while (<DATA>) {
         $options{$option} = $value;
     }
     open (TMP, '> tmp.pod') or die "Cannot create tmp.pod: $!\n";
+    eval { binmode (\*TMP, ':encoding(utf-8)') };
+    print TMP "=encoding utf-8\n\n";
     while (<DATA>) {
         last if $_ eq "###\n";
         print TMP $_;
@@ -58,13 +57,14 @@ while (<DATA>) {
     close TMP;
     my $parser = Pod::Man->new (%options) or die "Cannot create parser\n";
     open (OUT, '> out.tmp') or die "Cannot create out.tmp: $!\n";
-    stderr_save;
+    eval { binmode (\*OUT, ':encoding(utf-8)') };
     $parser->parse_from_file ('tmp.pod', \*OUT);
-    stderr_restore;
     close OUT;
     my $accents = 0;
     open (TMP, 'out.tmp') or die "Cannot open out.tmp: $!\n";
+    eval { binmode (\*TMP, ':encoding(utf-8)') };
     while (<TMP>) {
+        $accents = 1 if /Accent mark definitions/;
         last if /^\.nh/;
     }
     my $output;
@@ -74,6 +74,14 @@ while (<DATA>) {
     }
     close TMP;
     unlink ('tmp.pod', 'out.tmp');
+    if (($options{utf8} && !$accents) || (!$options{utf8} && $accents)) {
+        print "ok $n\n";
+    } else {
+        print "not ok $n\n";
+        print ($accents ? "Saw accents\n" : "Saw no accents\n");
+        print ($options{utf8} ? "Wanted no accents\n" : "Wanted accents\n");
+    }
+    $n++;
     my $expected = '';
     while (<DATA>) {
         last if $_ eq "###\n";
@@ -86,26 +94,6 @@ while (<DATA>) {
         print "Expected\n========\n$expected\nOutput\n======\n$output\n";
     }
     $n++;
-    open (ERR, 'out.err') or die "Cannot open out.err: $!\n";
-    my $errors;
-    {
-        local $/;
-        $errors = <ERR>;
-    }
-    close ERR;
-    unlink ('out.err');
-    $expected = '';
-    while (<DATA>) {
-        last if $_ eq "###\n";
-        $expected .= $_;
-    }
-    if ($errors eq $expected) {
-        print "ok $n\n";
-    } else {
-        print "not ok $n\n";
-        print "Expected errors:\n    ${expected}Errors:\n    $errors";
-    }
-    $n++;
 }
 
 # Below the marker are bits of POD and corresponding expected text output.
@@ -115,61 +103,39 @@ while (<DATA>) {
 __DATA__
 
 ###
-fixed CR
-fixedbold CY
-fixeditalic CW
-fixedbolditalic CX
+utf8 1
 ###
-=head1 FIXED FONTS
+=head1 BEYONCÉ
 
-C<foo B<bar I<baz>> I<bay>>
-###
-.SH "FIXED FONTS"
-.IX Header "FIXED FONTS"
-\&\f(CR\*(C`foo \f(CYbar \f(CXbaz\f(CY\f(CR \f(CWbay\f(CR\*(C'\fR
-###
-###
+Beyoncé!  Beyoncé!  Beyoncé!!
 
-###
-###
-=over 4
+    Beyoncé!  Beyoncé!
+      Beyoncé!  Beyoncé!
+        Beyoncé!  Beyoncé!
 
-=item Foo
-
-Bar.
-
-=head1 NEXT
+Older versions did not convert Beyoncé in verbatim.
 ###
-.IP "Foo" 4
-.IX Item "Foo"
-Bar.
-.SH "NEXT"
-.IX Header "NEXT"
-.SH "POD ERRORS"
-.IX Header "POD ERRORS"
-Hey! \fBThe above document had some coding errors, which are explained below:\fR
-.IP "Around line 7:" 4
-.IX Item "Around line 7:"
-You forgot a '=back' before '=head1'
-###
+.SH "BEYONCÉ"
+.IX Header "BEYONCÉ"
+Beyoncé!  Beyoncé!  Beyoncé!!
+.PP
+.Vb 3
+\&    Beyoncé!  Beyoncé!
+\&      Beyoncé!  Beyoncé!
+\&        Beyoncé!  Beyoncé!
+.Ve
+.PP
+Older versions did not convert Beyoncé in verbatim.
 ###
 
 ###
-stderr 1
+utf8 1
 ###
-=over 4
+=head1 SE<lt>E<gt> output with UTF-8
 
-=item Foo
-
-Bar.
-
-=head1 NEXT
+This is S<non-breaking output>.
 ###
-.IP "Foo" 4
-.IX Item "Foo"
-Bar.
-.SH "NEXT"
-.IX Header "NEXT"
-###
-tmp.pod around line 7: You forgot a '=back' before '=head1'
+.SH "S<> output with UTF\-8"
+.IX Header "S<> output with UTF-8"
+This is non-breaking output.
 ###

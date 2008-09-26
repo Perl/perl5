@@ -34,7 +34,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA = qw(Pod::Text);
 
-$VERSION = 2.01;
+$VERSION = 2.02;
 
 ##############################################################################
 # Overrides
@@ -146,10 +146,13 @@ __END__
 
 =head1 NAME
 
+=for stopwords
+overstrike
+
 Pod::Text::Overstrike - Convert POD data to formatted overstrike text
 
 =for stopwords
-overstruck Overstruck Allbery
+overstruck Overstruck Allbery terminal's
 
 =head1 SYNOPSIS
 

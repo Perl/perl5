@@ -100,7 +100,7 @@ pod2man - Convert POD data to formatted *roff input
 
 =for stopwords
 en em --stderr stderr --utf8 UTF-8 overdo markup MT-LEVEL Allbery Solaris
-URL
+URL troff troff-specific formatters uppercased Christiansen
 
 =head1 SYNOPSIS
 
