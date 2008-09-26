@@ -15,7 +15,7 @@ print OUT <<'EOT';
 
 package XSLoader;
 
-$VERSION = "0.09_1";
+$VERSION = "0.10";
 
 #use strict;
 
@@ -82,6 +82,7 @@ print OUT <<'EOT';
     $bs =~ s/(\.\w+)?(;\d*)?$/\.bs/; # look for .bs 'beside' the library
 
     if (-s $bs) { # only read file if it's not empty
+#       print STDERR "BS: $bs ($^O, $dlsrc)\n" if $dl_debug;
         eval { do $bs; };
         warn "$bs: $@\n" if $@;
     }
@@ -167,7 +168,7 @@ XSLoader - Dynamically load C libraries into Perl code
 
 =head1 VERSION
 
-Version 0.09
+Version 0.10
 
 =head1 SYNOPSIS
 
