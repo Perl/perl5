@@ -29,7 +29,7 @@
 #define SYSTEM_GMTIME_MAX       GMTIME_MAX
 #define SYSTEM_GMTIME_MIN       GMTIME_MIN
 
-/* The system localtime will be faster and more correct inside its range */
+/* It'll be faster */
 #define USE_SYSTEM_LOCALTIME    1
 #define USE_SYSTEM_GMTIME       1
 
@@ -37,6 +37,7 @@
 /* 64 bit types.  Set as appropriate for your system. */
 typedef Quad_t               Time64_T;
 typedef Quad_t               Int64;
+typedef Int64                Year;
 
 struct tm *gmtime64_r    (const Time64_T *, struct tm *);
 struct tm *localtime64_r (const Time64_T *, struct tm *);
