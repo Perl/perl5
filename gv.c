@@ -1186,7 +1186,9 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    goto magicalize;
 
 	case '?':
+#ifdef COMPLEX_STATUS
 	    (void)SvUPGRADE(GvSVn(gv), SVt_PVLV);
+#endif
 	    goto magicalize;
 
 	case '!':
