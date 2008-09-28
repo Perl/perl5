@@ -30,7 +30,12 @@ $| = 1;
   is (DPeek ($=),    'PVMG()',			'$=');
   is (DPeek ($-),    'PVMG()',			'$-');
 like (DPeek ($!), qr'^PVMG\("',			'$!');
+if ($^O eq 'VMS') {
+  # VMS defines COMPLEX_STATUS and upgrades $? to PVLV
+  is (DPeek ($?),    'PVLV()',			'$?');
+} else {
   is (DPeek ($?),    'PVMG()',			'$?');
+}
   is (DPeek ($|),    'PVMG(1)',			'$|');
 
   "abc" =~ m/(b)/;	# Don't know why these magic vars have this content
