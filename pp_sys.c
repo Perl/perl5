@@ -27,8 +27,8 @@
 #include "EXTERN.h"
 #define PERL_IN_PP_SYS_C
 #include "perl.h"
-#include "localtime64.h"
-#include "localtime64.c"
+#include "time64.h"
+#include "time64.c"
 
 #ifdef I_SHADOW
 /* Shadow password support for solaris - pdo@cs.umd.edu
