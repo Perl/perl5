@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Mon Sep 29 18:14:44 CEST 2008 [metaconfig 3.5 PL0]
+# Generated on Mon Sep 29 18:55:08 CEST 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -20122,7 +20122,10 @@ time_t pt;
 
 void local_check (time_t t)
 {
-    tmp = localtime (&t);
+    if (sizeof (time_t) > 4 && t > 0x7ffffffffffff000LL)
+	tmp = NULL;
+    else
+	tmp = localtime (&t);
     if (tmp == NULL || tmp->tm_year < -1900)
 	tmp = NULL;
     else
