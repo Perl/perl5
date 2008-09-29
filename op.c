@@ -7644,14 +7644,28 @@ OP *
 Perl_ck_return(pTHX_ OP *o)
 {
     dVAR;
+    OP *kid;
 
     PERL_ARGS_ASSERT_CK_RETURN;
 
+    kid = cLISTOPo->op_first->op_sibling;
     if (CvLVALUE(PL_compcv)) {
-        OP *kid;
-	for (kid = cLISTOPo->op_first->op_sibling; kid; kid = kid->op_sibling)
+	for (; kid; kid = kid->op_sibling)
 	    mod(kid, OP_LEAVESUBLV);
+    } else {
+	for (; kid; kid = kid->op_sibling)
+	    if ((kid->op_type == OP_NULL)
+		&& (kid->op_flags & OPf_SPECIAL)) {
+		/* This is a do block */
+		OP *op = cUNOPx(kid)->op_first;
+		assert(op && (op->op_type == OP_LEAVE) && (op->op_flags & OPf_KIDS));
+		op = cUNOPx(op)->op_first;
+		assert(op->op_type == OP_ENTER && !(op->op_flags & OPf_SPECIAL));
+		/* Force the use of the caller's context */
+		op->op_flags |= OPf_SPECIAL;
+	    }
     }
+
     return o;
 }
 

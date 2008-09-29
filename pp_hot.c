@@ -1754,9 +1754,13 @@ PP(pp_enter)
     I32 gimme = OP_GIMME(PL_op, -1);
 
     if (gimme == -1) {
-	if (cxstack_ix >= 0)
-	    gimme = cxstack[cxstack_ix].blk_gimme;
-	else
+	if (cxstack_ix >= 0) {
+	    /* If this flag is set, we're just inside a return, so we should
+	     * store the caller's context */
+	    gimme = (PL_op->op_flags & OPf_SPECIAL)
+		? block_gimme()
+		: cxstack[cxstack_ix].blk_gimme;
+	} else
 	    gimme = G_SCALAR;
     }
 
@@ -1865,13 +1869,7 @@ PP(pp_leave)
 
     POPBLOCK(cx,newpm);
 
-    gimme = OP_GIMME(PL_op, -1);
-    if (gimme == -1) {
-	if (cxstack_ix >= 0)
-	    gimme = cxstack[cxstack_ix].blk_gimme;
-	else
-	    gimme = G_SCALAR;
-    }
+    gimme = OP_GIMME(PL_op, (cxstack_ix >= 0) ? gimme : G_SCALAR);
 
     TAINT_NOT;
     if (gimme == G_VOID)

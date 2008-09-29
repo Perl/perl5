@@ -137,6 +137,7 @@ Deprecated.  Use C<GIMME_V> instead.
 				/*  On OP_SMARTMATCH, an implicit smartmatch */
 				/*  On OP_ANONHASH and OP_ANONLIST, create a
 				    reference to the new anon hash or array */
+				/*  On OP_ENTER, store caller context */
 				/*  On OP_HELEM and OP_HSLICE, localization will be followed
 				    by assignment, so do not wipe the target if it is special
 				    (e.g. a glob or a magic SV) */

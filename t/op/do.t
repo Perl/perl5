@@ -29,7 +29,7 @@ sub ok {
     return $ok;
 }
 
-print "1..26\n";
+print "1..32\n";
 
 # Test do &sub and proper @_ handling.
 $_[0] = 0;
@@ -103,6 +103,23 @@ $owww = do { 3 unless $zok };
 ok( $owww eq 'swish', 'last is unless' );
 $owww = do { 4 if not $zok };
 ok( $owww eq '', 'last is if not' );
+
+# [perl #38809]
+@a = (7, 8);
+$x = sub { do { return do { 1; @a } }; 3 }->();
+ok(defined $x && $x == 2, 'return do { } receives caller scalar context');
+@x = sub { do { return do { 1; @a } }; 3 }->();
+ok("@x" eq "7 8", 'return do { } receives caller list context');
+@a = (7, 8, 9);
+$x = sub { do { do { 1; return @a } }; 4 }->();
+ok(defined $x && $x == 3, 'do { return } receives caller scalar context');
+@x = sub { do { do { 1; return @a } }; 4 }->();
+ok("@x" eq "7 8 9", 'do { return } receives caller list context');
+@a = (7, 8, 9, 10);
+$x = sub { do { return do { 1; do { 2; @a } } }; 5 }->();
+ok(defined $x && $x == 4, 'return do { do { } } receives caller scalar context');
+@x = sub { do { return do { 1; do { 2; @a } } }; 5 }->();
+ok("@x" eq "7 8 9 10", 'return do { do { } } receives caller list context');
 
 END {
     1 while unlink("$$.16", "$$.17", "$$.18");
