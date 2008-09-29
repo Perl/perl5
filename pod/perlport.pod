@@ -641,9 +641,6 @@ The value for C<$offset> in Unix will be C<0>, but in Mac OS will be
 some large number.  C<$offset> can then be added to a Unix time value
 to get what should be the proper value on any system.
 
-On Windows (at least), you shouldn't pass a negative value to C<gmtime> or
-C<localtime>.
-
 =head2 Character sets and character encoding
 
 Assume very little about character sets.
@@ -1863,7 +1860,7 @@ platforms.  See L<File::Glob> for portability information.
 
 =item gmtime
 
-Same portability caveats as L<localtime>.
+gmtime() has a range of about 2 billion years before and after 1970.
 
 =item ioctl FILEHANDLE,FUNCTION,SCALAR
 
@@ -1914,10 +1911,9 @@ Available on 64 bit OpenVMS 8.2 and later.  (VMS)
 
 =item localtime
 
-Because Perl currently relies on the native standard C localtime()
-function, it is only safe to use times between 0 and (2**31)-1.  Times
-outside this range may result in unexpected behavior depending on your
-operating system's implementation of localtime().
+localtime() has the same range as L<gmtime>, but because time zone
+rules change its accuracy for historical and future times may degrade
+but usually by no more than an hour.
 
 =item lstat
 
