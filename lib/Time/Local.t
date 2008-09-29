@@ -62,17 +62,6 @@ my @years =
      [ 2100 => 0 ],
     );
 
-# Use 3 days before the start of the epoch because with Borland on
-# Win32 it will work for -3600 _if_ your time zone is +01:00 (or
-# greater).
-my $neg_epoch_ok = defined ((localtime(-259200))[0]) ? 1 : 0;
-
-# use vmsish 'time' makes for oddness around the Unix epoch
-if ($^O eq 'VMS') {
-    $time[0][2]++;
-    $neg_epoch_ok = 0; # time_t is unsigned
-}
-
 my $tests = (@time * 12);
 $tests += @neg_time * 12;
 $tests += @bad_time;
@@ -88,28 +77,23 @@ for (@time, @neg_time) {
     $year -= 1900;
     $mon--;
 
-    SKIP: {
-        skip '1970 test on VOS fails.', 12
-            if $^O eq 'vos' && $year == 70;
-        skip 'this platform does not support negative epochs.', 12
-            if $year < 70 && ! $neg_epoch_ok;
+    # Test timelocal()
+    {
+        my $year_in = $year < 70 ? $year + 1900 : $year;
+        my $time = timelocal($sec,$min,$hour,$mday,$mon,$year_in);
 
-        {
-            my $year_in = $year < 70 ? $year + 1900 : $year;
-            my $time = timelocal($sec,$min,$hour,$mday,$mon,$year_in);
+        my($s,$m,$h,$D,$M,$Y) = localtime($time);
 
-            my($s,$m,$h,$D,$M,$Y) = localtime($time);
-
-            is($s, $sec, "timelocal second for @$_");
-            is($m, $min, "timelocal minute for @$_");
-            is($h, $hour, "timelocal hour for @$_");
-            is($D, $mday, "timelocal day for @$_");
-            is($M, $mon, "timelocal month for @$_");
-            is($Y, $year, "timelocal year for @$_");
-        }
+        is($s, $sec, "timelocal second for @$_");
+        is($m, $min, "timelocal minute for @$_");
+        is($h, $hour, "timelocal hour for @$_");
+        is($D, $mday, "timelocal day for @$_");
+        is($M, $mon, "timelocal month for @$_");
+        is($Y, $year, "timelocal year for @$_");
     }
 
-    # Perl has its own gmtime()
+
+    # Test timegm()
     {
         my $year_in = $year < 70 ? $year + 1900 : $year;
         my $time = timegm($sec,$min,$hour,$mday,$mon,$year_in);
@@ -124,6 +108,7 @@ for (@time, @neg_time) {
         is($Y, $year, "timegm year for @$_");
     }
 }
+
 
 for (@bad_time) {
     my($year, $mon, $mday, $hour, $min, $sec) = @$_;

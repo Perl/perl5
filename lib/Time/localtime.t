@@ -8,30 +8,21 @@ BEGIN {
 }
 
 BEGIN {
-    my $haslocal;
-    eval { my $n = localtime 0 };
-    $haslocal = 1 unless $@ && $@ =~ /unimplemented/;
+    @times   = (-2**33, -2**31-1, 0, 2**31-1, 2**33, time);
+    @methods = qw(sec min hour mday mon year wday yday isdst);
 
-    skip_all("no localtime") unless $haslocal;
+    plan tests => (@times * @methods) + 1;
+
+    use_ok Time::localtime;
 }
-
-BEGIN {
-    my @localtime = CORE::localtime 0; # This is the function localtime.
-
-    skip_all("localtime failed") unless @localtime;
-}
-
-BEGIN { plan tests => 37; }
-
-BEGIN { use_ok Time::localtime; }
 
 # Since Perl's localtime() still uses the system localtime, don't try
 # to do negative times.  The system might not support it.
-for my $time (0, 2**31-1, 2**33, time) {
+for my $time (@times) {
     my $localtime = localtime $time;          # This is the OO localtime.
     my @localtime = CORE::localtime $time;    # This is the localtime function
 
-    for my $method (qw(sec min hour mday mon year wday yday isdst)) {
+    for my $method (@methods) {
         is $localtime->$method, shift @localtime, "localtime($time)->$method";
     }
 }

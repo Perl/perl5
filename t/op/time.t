@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 32;
+plan tests => 34;
 
 ($beguser,$begsys) = times;
 
@@ -110,15 +110,18 @@ ok(gmtime() =~ /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)[ ]
     # the same regardless of the time zone.
     my %tests = (
         # time_t           month, year,  scalar
-        5000000000      => [5,  228,     qr/Jun \d+ .* 2128$/],
-        1163500000      => [10, 106,     qr/Nov \d+ .* 2006$/],
+        -8589934592     => [9,    -203,  qr/Oct \d+ .* 1697$/],
+        5000000000      => [5,    228,   qr/Jun \d+ .* 2128$/],
+        1163500000      => [10,   106,   qr/Nov \d+ .* 2006$/],
     );
 
     for my $time (keys %tests) {
         my @expected  = @{$tests{$time}};
         my $scalar    = pop @expected;
 
-        ok eq_array([(localtime($time))[4,5]], \@expected),  "localtime($time) list context";
+        my @time = (localtime($time))[4,5];
+        ok( eq_array(\@time, \@expected),  "localtime($time) list context" )
+          or diag("@time");
         like scalar localtime($time), $scalar,       "  scalar";
     }
 }
