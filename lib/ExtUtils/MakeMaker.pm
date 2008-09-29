@@ -1,4 +1,4 @@
-# $Id: /local/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker.pm 54639 2008-02-29T00:06:55.056100Z schwern  $
+# $Id: /local/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker.pm 66493 2008-09-27T21:35:25.560547Z schwern  $
 package ExtUtils::MakeMaker;
 
 use strict;
@@ -13,13 +13,13 @@ use File::Path;
 our $Verbose = 0;       # exported
 our @Parent;            # needs to be localized
 our @Get_from_Config;   # referenced by MM_Unix
-my @MM_Sections;
-my @Overridable;
+our @MM_Sections;
+our @Overridable;
 my @Prepend_parent;
 my %Recognized_Att_Keys;
 
-our $VERSION = '6.44';
-our ($Revision) = q$Revision: 54639 $ =~ /Revision:\s+(\S+)/;
+our $VERSION = '6.46';
+our ($Revision) = q$Revision: 66493 $ =~ /Revision:\s+(\S+)/;
 our $Filename = __FILE__;   # referenced outside MakeMaker
 
 our @ISA = qw(Exporter);
@@ -39,7 +39,7 @@ require ExtUtils::MM;  # Things like CPAN assume loading ExtUtils::MakeMaker
 
 require ExtUtils::MY;  # XXX pre-5.8 versions of ExtUtils::Embed expect
                        # loading ExtUtils::MakeMaker will give them MY.
-                       # This will go when Embed is it's own CPAN module.
+                       # This will go when Embed is its own CPAN module.
 
 
 sub WriteMakefile {
@@ -77,6 +77,8 @@ my %Special_Sigs = (
  LIBS               => ['ARRAY',''],
  MAN1PODS           => 'HASH',
  MAN3PODS           => 'HASH',
+ META_ADD           => 'HASH',
+ META_MERGE         => 'HASH',
  PL_FILES           => 'HASH',
  PM                 => 'HASH',
  PMLIBDIRS          => 'ARRAY',
@@ -214,7 +216,7 @@ sub full_setup {
 
     AUTHOR ABSTRACT ABSTRACT_FROM BINARY_LOCATION
     C CAPI CCFLAGS CONFIG CONFIGURE DEFINE DIR DISTNAME DL_FUNCS DL_VARS
-    EXCLUDE_EXT EXE_FILES EXTRA_META FIRST_MAKEFILE
+    EXCLUDE_EXT EXE_FILES FIRST_MAKEFILE
     FULLPERL FULLPERLRUN FULLPERLRUNINST
     FUNCLIST H IMPORTS
 
@@ -233,7 +235,8 @@ sub full_setup {
     SITELIBEXP      SITEARCHEXP 
 
     INC INCLUDE_EXT LDFROM LIB LIBPERL_A LIBS LICENSE
-    LINKTYPE MAKE MAKEAPERL MAKEFILE MAKEFILE_OLD MAN1PODS MAN3PODS MAP_TARGET 
+    LINKTYPE MAKE MAKEAPERL MAKEFILE MAKEFILE_OLD MAN1PODS MAN3PODS MAP_TARGET
+    META_ADD META_MERGE
     MYEXTLIB NAME NEEDS_LINKING NOECHO NO_META NORECURS NO_VC OBJECT OPTIMIZE 
     PERL_MALLOC_OK PERL PERLMAINCC PERLRUN PERLRUNINST PERL_CORE
     PERL_SRC PERM_RW PERM_RWX
@@ -1807,6 +1810,19 @@ C<make> and will be installed during C<make install>.
 If it is intended, that a new perl binary be produced, this variable
 may hold a name for that binary. Defaults to perl
 
+=item META_ADD
+
+=item META_MERGE
+
+A hashrefs of items to add to the F<META.yml>.
+
+They differ in how they behave if they have the same key as the
+default metadata.  META_ADD will override the default value with it's
+own.  META_MERGE will merge its value with the default.
+
+Unless you want to override the defaults, prefer META_MERGE so as to
+get the advantage of any future defaults.
+
 =item MYEXTLIB
 
 If the extension links to a library that it builds set this to the
@@ -2186,7 +2202,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION   = '1.00';
     *VERSION   = \'1.01';
-    ($VERSION) = q$Revision: 54639 $ =~ /(\d+)/g;
+    ($VERSION) = q$Revision: 66493 $ =~ /(\d+)/g;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
 

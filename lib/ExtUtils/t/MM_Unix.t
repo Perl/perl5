@@ -35,17 +35,16 @@ my $os =  ($ExtUtils::MM_Unix::Is{OS2}   || 0)
         + ($ExtUtils::MM_Unix::Is{Win32} || 0) 
         + ($ExtUtils::MM_Unix::Is{Dos}   || 0)
         + ($ExtUtils::MM_Unix::Is{VMS}   || 0); 
-ok ( $os <= 1,  'There can be only one (or none)');
+cmp_ok ( $os, '<=', 1,  'There can be only one (or none)');
 
-cmp_ok ($ExtUtils::MM_Unix::VERSION, '>=', '1.12606', 'Should be at least version 1.12606');
+is($ExtUtils::MM_Unix::VERSION, $ExtUtils::MakeMaker::VERSION, 'MM_Unix has a $VERSION');
 
 # when the following calls like canonpath, catdir etc are replaced by
 # File::Spec calls, the test's become a bit pointless
 
-foreach ( qw( xx/ ./xx/ xx/././xx xx///xx) )
-  {
-  is ($class->canonpath($_), File::Spec->canonpath($_), "canonpath $_");
-  }
+foreach ( qw( xx/ ./xx/ xx/././xx xx///xx) ) {
+    is ($class->canonpath($_), File::Spec->canonpath($_), "canonpath $_");
+}
 
 is ($class->catdir('xx','xx'), File::Spec->catdir('xx','xx'),
      'catdir(xx, xx) => xx/xx');
@@ -198,10 +197,9 @@ is ($t->perm_rwx(),'755', 'perm_rwx() is 755');
 ###############################################################################
 # post_constants, postamble, post_initialize
 
-foreach (qw/ post_constants postamble post_initialize/)
-  {
+foreach (qw/ post_constants postamble post_initialize/) {
   is ($t->$_(),'', "$_() is an empty string");
-  }
+}
 
 ###############################################################################
 # replace_manpage_separator 
