@@ -594,7 +594,6 @@ unless ($define{'DEBUGGING'}) {
 		    Perl_debprofdump
 		    Perl_debstack
 		    Perl_debstackptrs
-		    Perl_sv_peek
 		    Perl_hv_assert
 		    PL_block_type
 		    PL_watchaddr

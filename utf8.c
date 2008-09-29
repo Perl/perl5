@@ -2151,6 +2151,7 @@ Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
 		 }
 		 if (ok) {
 		     const char string = ok;
+		     sv_catpvn(dsv, "\\",    1);
 		     sv_catpvn(dsv, &string, 1);
 		 }
 	     }

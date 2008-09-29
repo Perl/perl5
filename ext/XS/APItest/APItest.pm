@@ -22,6 +22,7 @@ our @EXPORT = qw( print_double print_int print_long
 		  apitest_exception mycroak strtab
 		  my_cxt_getint my_cxt_getsv my_cxt_setint my_cxt_setsv
 		  sv_setsv_cow_hashkey_core sv_setsv_cow_hashkey_notcore
+		  DPeek
 );
 
 # from cop.h 
@@ -35,7 +36,7 @@ sub G_KEEPERR()	{  16 }
 sub G_NODEBUG()	{  32 }
 sub G_METHOD()	{  64 }
 
-our $VERSION = '0.12';
+our $VERSION = '0.15';
 
 use vars '$WARNINGS_ON_BOOTSTRAP';
 use vars map "\$${_}_called_PP", qw(BEGIN UNITCHECK CHECK INIT END);
