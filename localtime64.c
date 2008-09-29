@@ -258,6 +258,40 @@ int _safe_year(Year year)
 }
 
 
+/* Simulate localtime_r() to the best of our ability */
+struct tm * fake_localtime_r(const time_t *clock, struct tm *result) {
+    const struct tm *static_result = localtime(clock);
+
+    assert(result != NULL);
+
+    if( static_result == NULL ) {
+        memset(result, 0, sizeof(*result));
+        return NULL;
+    }
+    else {
+        memcpy(result, static_result, sizeof(*result));
+        return result;
+    }
+}
+
+
+/* Simulate gmtime_r() to the best of our ability */
+struct tm * fake_gmtime_r(const time_t *clock, struct tm *result) {
+    const struct tm *static_result = gmtime(clock);
+
+    assert(result != NULL);
+
+    if( static_result == NULL ) {
+        memset(result, 0, sizeof(*result));
+        return NULL;
+    }
+    else {
+        memcpy(result, static_result, sizeof(*result));
+        return result;
+    }
+}
+
+
 struct tm *gmtime64_r (const Time64_T *in_time, struct tm *p)
 {
     int v_tm_sec, v_tm_min, v_tm_hour, v_tm_mon, v_tm_wday;
@@ -267,10 +301,12 @@ struct tm *gmtime64_r (const Time64_T *in_time, struct tm *p)
     Time64_T time = *in_time;
     Year year = 70;
 
+    assert(p != NULL);
+
     /* Use the system gmtime() if time_t is small enough */
     if( SHOULD_USE_SYSTEM_GMTIME(*in_time) ) {
         time_t safe_time = *in_time;
-        gmtime_r(&safe_time, p);
+        GMTIME_R(&safe_time, p);
         assert(_check_tm(p));
         return p;
     }
@@ -379,10 +415,12 @@ struct tm *localtime64_r (const Time64_T *time, struct tm *local_tm)
     Year orig_year;
     int month_diff;
 
+    assert(local_tm != NULL);
+
     /* Use the system localtime() if time_t is small enough */
     if( SHOULD_USE_SYSTEM_LOCALTIME(*time) ) {
         safe_time = *time;
-        localtime_r(&safe_time, local_tm);
+        LOCALTIME_R(&safe_time, local_tm);
         assert(_check_tm(local_tm));
         return local_tm;
     }
@@ -400,7 +438,7 @@ struct tm *localtime64_r (const Time64_T *time, struct tm *local_tm)
     }
 
     safe_time = TIMEGM(&gm_tm);
-    if( localtime_r(&safe_time, local_tm) == NULL )
+    if( LOCALTIME_R(&safe_time, local_tm) == NULL )
         return NULL;
 
     local_tm->tm_year = orig_year;

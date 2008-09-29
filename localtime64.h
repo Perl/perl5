@@ -4,6 +4,12 @@
 /* Configuration. */
 /* Define as appropriate for your system */
 /*
+   HAS_GMTIME_R
+   Defined if your system has gmtime_r()
+
+   HAS_LOCALTIME_R
+   Defined if your system has localtime_r()
+
    HAS_TIMEGM
    Defined if your system has timegm()
 
@@ -42,5 +48,18 @@ typedef Int64                Year;
 struct tm *gmtime64_r    (const Time64_T *, struct tm *);
 struct tm *localtime64_r (const Time64_T *, struct tm *);
 Time64_T   timegm64      (struct tm *);
+
+
+/* Not everyone has gm/localtime_r() */
+#ifdef HAS_LOCALTIME_R
+#    define LOCALTIME_R(clock, result) localtime_r(clock, result)
+#else
+#    define LOCALTIME_R(clock, result) fake_localtime_r(clock, result)
+#endif
+#ifdef HAS_GMTIME_R
+#    define GMTIME_R(clock, result)    gmtime_r(clock, result)
+#else
+#    define GMTIME_R(clock, result)    fake_gmtime_r(clock, result)
+#endif
 
 #endif
