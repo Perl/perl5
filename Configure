@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Mon Sep 15 10:06:16 CEST 2008 [metaconfig 3.5 PL0]
+# Generated on Mon Sep 29 18:14:44 CEST 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -20031,7 +20031,9 @@ case $i_values in
     *)      yyy="" ;;
     esac
 
-$cat >try.c <<EOCP
+case "$sGMTIME_min/$sGMTIME_max" in
+    0/0|/)
+	$cat >try.c <<EOCP
 #include <sys/types.h>
 #include <stdio.h>
 #include <time.h>
@@ -20094,17 +20096,21 @@ int main (int argc, char *argv[])
     return (0);
     } /* main */
 EOCP
-set try
-if eval $compile; then
-    eval `$run ./try`
-else
-    echo "Cannot determine sGMTIME_max and sGMTIME_min." >&4
-    fi
-$rm_try
+	set try
+	if eval $compile; then
+	    eval `$run ./try`
+	else
+	    echo "Cannot determine sGMTIME_max and sGMTIME_min." >&4
+	    fi
+	$rm_try
+	;;
+    esac
 
 echo "Checking max offsets that localtime () accepts"
 
-$cat >try.c <<EOCP
+case "$sLOCALTIME_min/$sLOCALTIME_max" in
+    0/0|/)
+	$cat >try.c <<EOCP
 #include <sys/types.h>
 #include <stdio.h>
 #include <time.h>
@@ -20166,13 +20172,15 @@ int main (int argc, char *argv[])
     return (0);
     } /* main */
 EOCP
-set try
-if eval $compile; then
-    eval `$run ./try`
-else
-    echo "Cannot determine sLOCALTIME_max and sLOCALTIME_min." >&4
-    fi
-$rm_try
+	set try
+	if eval $compile; then
+	    eval `$run ./try`
+	else
+	    echo "Cannot determine sLOCALTIME_max and sLOCALTIME_min." >&4
+	    fi
+	$rm_try
+	;;
+    esac
 
 : check for type of arguments to select.
 case "$selecttype" in
