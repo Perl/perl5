@@ -1,3 +1,5 @@
+# -*- mode: cperl; tab-width: 8; indent-tabs-mode: nil; basic-offset: 2 -*-
+# vim:ts=8:sw=2:et:sta:sts=2
 package Module::Build::ModuleInfo;
 
 # This module provides routines to gather information about
@@ -6,7 +8,7 @@ package Module::Build::ModuleInfo;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.2808_01';
+$VERSION = '0.30';
 $VERSION = eval $VERSION;
 
 use File::Spec;
@@ -14,16 +16,16 @@ use IO::File;
 use Module::Build::Version;
 
 
-my $PKG_REGEXP  = qr/   # match a package declaration
+my $PKG_REGEXP  = qr{   # match a package declaration
   ^[\s\{;]*             # intro chars on a line
   package               # the word 'package'
   \s+                   # whitespace
   ([\w:]+)              # a package name
   \s*                   # optional whitespace
   ;                     # semicolon line terminator
-/x;
+}x;
 
-my $VARNAME_REGEXP = qr/ # match fully-qualified VERSION name
+my $VARNAME_REGEXP = qr{ # match fully-qualified VERSION name
   ([\$*])         # sigil - $ or *
   (
     (             # optional leading package name
@@ -32,9 +34,9 @@ my $VARNAME_REGEXP = qr/ # match fully-qualified VERSION name
     )?
     VERSION
   )\b
-/x;
+}x;
 
-my $VERS_REGEXP = qr/ # match a VERSION definition
+my $VERS_REGEXP = qr{ # match a VERSION definition
   (?:
     \(\s*$VARNAME_REGEXP\s*\) # with parens
   |
@@ -42,43 +44,45 @@ my $VERS_REGEXP = qr/ # match a VERSION definition
   )
   \s*
   =[^=~]  # = but not ==, nor =~
-/x;
+}x;
 
 
 sub new_from_file {
-  my $package  = shift;
+  my $class    = shift;
   my $filename = File::Spec->rel2abs( shift );
+
   return undef unless defined( $filename ) && -f $filename;
-  return $package->_init( undef, $filename, @_ );
+  return $class->_init(undef, $filename, @_);
 }
 
 sub new_from_module {
-  my $package = shift;
+  my $class   = shift;
   my $module  = shift;
   my %props   = @_;
+
   $props{inc} ||= \@INC;
-  my $filename = $package->find_module_by_name( $module, $props{inc} );
+  my $filename = $class->find_module_by_name( $module, $props{inc} );
   return undef unless defined( $filename ) && -f $filename;
-  return $package->_init( $module, $filename, %props );
+  return $class->_init($module, $filename, %props);
 }
 
 sub _init {
-  my $package  = shift;
+  my $class    = shift;
   my $module   = shift;
   my $filename = shift;
-
   my %props = @_;
+
   my( %valid_props, @valid_props );
   @valid_props = qw( collect_pod inc );
   @valid_props{@valid_props} = delete( @props{@valid_props} );
   warn "Unknown properties: @{[keys %props]}\n" if scalar( %props );
 
   my %data = (
-    module   => $module,
-    filename => $filename,
-    version  => undef,
-    packages => [],
-    versions => {},
+    module       => $module,
+    filename     => $filename,
+    version      => undef,
+    packages     => [],
+    versions     => {},
     pod          => {},
     pod_headings => [],
     collect_pod  => 0,
@@ -86,20 +90,22 @@ sub _init {
     %valid_props,
   );
 
-  my $self = bless( \%data, $package );
+  my $self = bless(\%data, $class);
 
   $self->_parse_file();
 
-  unless ( $self->{module} && length( $self->{module} ) ) {
-    my( $v, $d, $f ) = File::Spec->splitpath( $self->{filename} );
-    if ( $f =~ /\.pm$/ ) {
+  unless($self->{module} and length($self->{module})) {
+    my ($v, $d, $f) = File::Spec->splitpath($self->{filename});
+    if($f =~ /\.pm$/) {
       $f =~ s/\..+$//;
       my @candidates = grep /$f$/, @{$self->{packages}};
-      $self->{module} = shift( @candidates ); # punt
-    } else {
-      if ( grep /main/, @{$self->{packages}} ) {
-	$self->{module} = 'main';
-      } else {
+      $self->{module} = shift(@candidates); # punt
+    }
+    else {
+      if(grep /main/, @{$self->{packages}}) {
+        $self->{module} = 'main';
+      }
+      else {
         $self->{module} = $self->{packages}[0] || '';
       }
     }
@@ -113,7 +119,7 @@ sub _init {
 
 # class method
 sub _do_find_module {
-  my $package = shift;
+  my $class   = shift;
   my $module  = shift || die 'find_module_by_name() requires a package name';
   my $dirs    = shift || \@INC;
 
@@ -179,6 +185,7 @@ sub _parse_fh {
   my $pod_data = '';
 
   while (defined( my $line = <$fh> )) {
+    my $line_num = $.;
 
     chomp( $line );
     next if $line =~ /^\s*#/;
@@ -233,7 +240,7 @@ sub _parse_fh {
 	  # that we should watch out for...)
 	  warn <<"EOM" unless $line =~ /=\s*eval/;
 Package '$vers_pkg' already declared with version '$vers{$vers_pkg}',
-ignoring subsequent declaration.
+ignoring subsequent declaration on line $line_num.
 EOM
 	}
 
@@ -263,7 +270,7 @@ EOM
 	} else {
 	  warn <<"EOM";
 Package '$pkg' already declared with version '$vers{$pkg}'
-ignoring new version '$v'.
+ignoring new version '$v' on line $line_num.
 EOM
 	}
 
@@ -283,6 +290,8 @@ EOM
   $self->{pod_headings} = \@pod;
 }
 
+{
+my $pn = 0;
 sub _evaluate_version_line {
   my $self = shift;
   my( $sigil, $var, $line ) = @_;
@@ -292,8 +301,10 @@ sub _evaluate_version_line {
   # We compile into $vsub because 'use version' would cause
   # compiletime/runtime issues with local()
   my $vsub;
+  $pn++; # everybody gets their own package
   my $eval = qq{BEGIN { q#  Hide from _packages_inside()
-    #; package Module::Build::ModuleInfo::_version;
+    #; package Module::Build::ModuleInfo::_version::p$pn;
+    use Module::Build::Version;
     no strict;
 
     local $sigil$var;
@@ -311,12 +322,15 @@ sub _evaluate_version_line {
     if $@;
   (ref($vsub) eq 'CODE') or
     die "failed to build version sub for $self->{filename}";
-  my $result = $vsub->();
+  my $result = eval { $vsub->() };
+
+  die "Could not get version from $self->{filename} by executing:\n$eval\n\nThe fatal error was: $@\n" if $@;
 
   # Bless it into our own version class
   $result = Module::Build::Version->new($result);
 
   return $result;
+}
 }
 
 

@@ -2,23 +2,22 @@
 
 use strict;
 use lib $ENV{PERL_CORE} ? '../lib/Module/Build/t/lib' : 't/lib';
-use MBTest tests => 6;
+use MBTest tests => 8;
 
-use Cwd ();
-my $cwd = Cwd::cwd;
+use_ok 'Module::Build';
+ensure_blib('Module::Build');
+
+use IO::File;
 my $tmp = MBTest->tmpdir;
 
 use DistGen;
 my $dist = DistGen->new( dir => $tmp );
 $dist->regen;
 
-chdir( $dist->dirname ) or die "Can't chdir to '@{[$dist->dirname]}': $!";
+$dist->chdir_in;
 
 
-use IO::File;
 
-
-use Module::Build;
 my $mb = Module::Build->new_from_context;
 my @files;
 
@@ -60,8 +59,4 @@ my @files;
 }
 
 # cleanup
-chdir( $cwd ) or die "Can''t chdir to '$cwd': $!";
 $dist->remove;
-
-use File::Path;
-rmtree( $tmp );

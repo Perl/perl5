@@ -2,7 +2,7 @@ package Module::Build::Compat;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.2808_01';
+$VERSION = '0.30';
 
 use File::Spec;
 use IO::File;
@@ -11,19 +11,50 @@ use Module::Build;
 use Module::Build::ModuleInfo;
 use Data::Dumper;
 
+my %convert_installdirs = (
+    PERL        => 'core',
+    SITE        => 'site',
+    VENDOR      => 'vendor',
+);
+
 my %makefile_to_build = 
   (
    TEST_VERBOSE => 'verbose',
    VERBINST     => 'verbose',
-   INC     => sub { map {('--extra_compiler_flags', $_)} Module::Build->split_like_shell(shift) },
-   POLLUTE => sub { ('--extra_compiler_flags', '-DPERL_POLLUTE') },
-   INSTALLDIRS => sub {local $_ = shift; 'installdirs=' . (/^perl$/ ? 'core' : $_) },
-   LIB => sub { ('--install_path', 'lib='.shift()) },
+   INC          => sub { map {(extra_compiler_flags => $_)} Module::Build->split_like_shell(shift) },
+   POLLUTE      => sub { (extra_compiler_flags => '-DPERL_POLLUTE') },
+   INSTALLDIRS  => sub { (installdirs => $convert_installdirs{uc shift()}) },
+   LIB          => sub {
+       my $lib = shift;
+       my %config = (
+           installprivlib  => $lib,
+           installsitelib  => $lib,
+           installarchlib  => "$lib/$Config{archname}",
+           installsitearch => "$lib/$Config{archname}"
+       );
+       return map { (config => "$_=$config{$_}") } keys %config;
+   },
+
+   # Convert INSTALLVENDORLIB and friends.
+   (
+       map {
+           my $name = "INSTALL".$_."LIB";
+           $name => sub {
+                 my @ret = (config => { lc $name => shift });
+                 print STDERR "# Converted to @ret\n";
+
+                 return @ret;
+           }
+       } keys %convert_installdirs
+   ),
 
    # Some names they have in common
    map {$_, lc($_)} qw(DESTDIR PREFIX INSTALL_BASE UNINST),
   );
 
+my %macro_to_build = %makefile_to_build;
+# "LIB=foo make" is not the same as "perl Makefile.PL LIB=foo"
+delete $macro_to_build{LIB};
 
 
 sub create_makefile_pl {
@@ -37,6 +68,8 @@ sub create_makefile_pl {
     $fh = $args{fh};
   } else {
     $args{file} ||= 'Makefile.PL';
+    local $build->{properties}{quiet} = 1;
+    $build->delete_filetree($args{file});
     $fh = IO::File->new("> $args{file}") or die "Can't write $args{file}: $!";
   }
 
@@ -50,7 +83,7 @@ sub create_makefile_pl {
   }
 
   # If a *bundled* custom subclass is being used, make sure we add its
-  # directory to @INC.
+  # directory to @INC.  Also, lib.pm always needs paths in Unix format.
   my $subclass_load = '';
   if (ref($build) ne "Module::Build") {
     my $subclass_dir = $package->subclass_dir($build);
@@ -60,10 +93,13 @@ sub create_makefile_pl {
 
       if ($build->dir_contains($base_dir, $subclass_dir)) {
 	$subclass_dir = File::Spec->abs2rel($subclass_dir, $base_dir);
+	$subclass_dir = $package->unixify_dir($subclass_dir);
         $subclass_load = "use lib '$subclass_dir';";
       }
+      # Otherwise, leave it the empty string
 
     } else {
+      $subclass_dir = $package->unixify_dir($subclass_dir);
       $subclass_load = "use lib '$subclass_dir';";
     }
   }
@@ -161,8 +197,13 @@ sub subclass_dir {
 	  || File::Spec->catdir($build->config_dir, 'lib'));
 }
 
+sub unixify_dir {
+  my ($self, $path) = @_;
+  return join '/', File::Spec->splitdir($path);
+}
+
 sub makefile_to_build_args {
-  shift;
+  my $class = shift;
   my @out;
   foreach my $arg (@_) {
     next if $arg eq '';
@@ -171,24 +212,34 @@ sub makefile_to_build_args {
 		       die "Malformed argument '$arg'");
 
     # Do tilde-expansion if it looks like a tilde prefixed path
-    ( $val ) = glob( $val ) if $val =~ /^~/;
+    ( $val ) = Module::Build->_detildefy( $val ) if $val =~ /^~/;
 
     if (exists $makefile_to_build{$key}) {
       my $trans = $makefile_to_build{$key};
-      push @out, ref($trans) ? $trans->($val) : ("--$trans", $val);
+      push @out, $class->_argvify( ref($trans) ? $trans->($val) : ($trans => $val) );
     } elsif (exists $Config{lc($key)}) {
-      push @out, '--config', lc($key) . "=$val";
+      push @out, $class->_argvify( config => lc($key) . "=$val" );
     } else {
       # Assume M::B can handle it in lowercase form
-      push @out, "--\L$key", $val;
+      push @out, $class->_argvify("\L$key" => $val);
     }
+  }
+  return @out;
+}
+
+sub _argvify {
+  my ($self, @pairs) = @_;
+  my @out;
+  while (@pairs) {
+    my ($k, $v) = splice @pairs, 0, 2;
+    push @out, ("--$k", $v);
   }
   return @out;
 }
 
 sub makefile_to_build_macros {
   my @out;
-  while (my ($macro, $trans) = each %makefile_to_build) {
+  while (my ($macro, $trans) = each %macro_to_build) {
     # On some platforms (e.g. Cygwin with 'make'), the mere presence
     # of "EXPORT: FOO" in the Makefile will make $ENV{FOO} defined.
     # Therefore we check length() too.
@@ -216,18 +267,26 @@ sub fake_makefile {
   my $class = $args{build_class};
 
   my $perl = $class->find_perl_interpreter;
-  my $noop = ($class->is_windowsish ? 'rem>nul'  :
-	      $class->is_vmsish     ? 'Continue' :
-	      'true');
-  my $Build = 'Build --makefile_env_macros 1';
 
-  # Start with a couple special actions
+  # VMS MMS/MMK need to use MCR to run the Perl image.
+  $perl = 'MCR ' . $perl if $self->_is_vms_mms;
+
+  my $noop = ($class->is_windowsish ? 'rem>nul'  :
+	      $self->_is_vms_mms    ? 'Continue' :
+	      'true');
+
+  my $filetype = $class->is_vmsish ? '.COM' : '';
+
+  my $Build = 'Build' . $filetype . ' --makefile_env_macros 1';
+  my $unlink = $class->oneliner('1 while unlink $ARGV[0]', [], [$args{makefile}]);
+  $unlink =~ s/\$/\$\$/g;
+
   my $maketext = <<"EOF";
 all : force_do_it
 	$perl $Build
 realclean : force_do_it
 	$perl $Build realclean
-	$perl -e unlink -e shift $args{makefile}
+	$unlink
 
 force_do_it :
 	@ $noop
@@ -241,7 +300,17 @@ $action : force_do_it
 EOF
   }
   
-  $maketext .= "\n.EXPORT : " . join(' ', keys %makefile_to_build) . "\n\n";
+  if ($self->_is_vms_mms) {
+    # Roll our own .EXPORT as MMS/MMK don't honor that directive.
+    $maketext .= "\n.FIRST\n\t\@ $noop\n"; 
+    for my $macro (keys %macro_to_build) {
+      $maketext .= ".IFDEF $macro\n\tDEFINE $macro \"\$($macro)\"\n.ENDIF\n";
+    }
+    $maketext .= "\n"; 
+  }
+  else {
+    $maketext .= "\n.EXPORT : " . join(' ', keys %macro_to_build) . "\n\n";
+  }
   
   return $maketext;
 }
@@ -267,11 +336,22 @@ sub fake_prereqs {
 
 sub write_makefile {
   my ($pack, %in) = @_;
-  $in{makefile} ||= 'Makefile';
+
+  unless (exists $in{build_class}) {
+    warn "Unknown 'build_class', defaulting to 'Module::Build'\n";
+    $in{build_class} = 'Module::Build';
+  }
+  my $class = $in{build_class};
+  $in{makefile} ||= $pack->_is_vms_mms ? 'Descrip.MMS' : 'Makefile';
+
   open  MAKE, "> $in{makefile}" or die "Cannot write $in{makefile}: $!";
   print MAKE $pack->fake_prereqs;
   print MAKE $pack->fake_makefile(%in);
   close MAKE;
+}
+
+sub _is_vms_mms {
+  return Module::Build->is_vmsish && ($Config{make} =~ m/MM[SK]/i);
 }
 
 1;

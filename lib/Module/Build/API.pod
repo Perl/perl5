@@ -502,16 +502,16 @@ choose to provide this field, you should make sure that you keep it in
 sync with your written documentation if you ever change your licensing
 terms.
 
+You may also use a license type of C<unknown> if you don't wish to
+specify your terms in the metadata.
+
 It is a fatal error to use a license other than the ones mentioned
 above.  This is not because I wish to impose licensing terms on you -
 please let me know if you would like another license option to be
-added to the list.  You may also use a license type of C<unknown> if
-you don't wish to specify your terms (but this is usually not a good
-idea for you to do!).
-
-I just started out with a small set of licenses to keep things simple,
-figuring I'd let people with actual working knowledge in this area
-tell me what to do.  So if that's you, drop me a line.
+added to the list.  I just started out with a small set of licenses to
+keep things simple, figuring I'd let people with actual working
+knowledge in this area tell me what to do.  So if that's you, drop me
+a line.
 
 =item meta_add
 
@@ -683,13 +683,13 @@ for the details of how requirements can be specified.
 
 An optional parameter specifying a set of files that should be
 installed as executable Perl scripts when the module is installed.
-May be given as an array reference of the files, or as a hash
-reference whose keys are the files (and whose values will currently be
-ignored).
+May be given as an array reference of the files, as a hash reference
+whose keys are the files (and whose values will currently be ignored),
+as a string giving the name of a directory in which to find scripts,
+or as a string giving the name of a single script file.
 
-The default is to install no script files - in other words, there is
-no default location where Module::Build will look for script files to
-install.
+The default is to install any scripts found in a F<bin> directory at
+the top level of the distribution.
 
 For backward compatibility, you may use the parameter C<scripts>
 instead of C<script_files>.  Please consider this usage deprecated,
@@ -725,6 +725,26 @@ C<*.t> in the F<t/> subdirectory.  If the C<recursive_test_files>
 property is true, then the C<t/> directory will be scanned recursively
 for C<*.t> files.
 
+=item use_tap_harness
+
+[version 0.2808_03]
+
+An optional parameter indicating whether or not to use TAP::Harness for
+testing rather than Test::Harness. Defaults to false. If set to true, you must
+therefore be sure to add TAP::Harness as a requirement for your module in
+L</build_requires>. Implicitly set to a true value if C<tap_harness_args> is
+specified.
+
+=item tap_harness_args
+
+[version 0.2808_03]
+
+An optional parameter specifying parameters to be passed to TAP::Harness when
+running tests. Must be given as a hash reference of parameters; see the
+L<TAP::Harness|TAP::Harness> documentation for details. Note that specifying
+this parameter will implicitly set C<use_tap_harness> to a true value. You
+must therefore be sure to add TAP::Harness as a requirement for your module in
+L</build_requires>.
 
 =item xs_files
 
@@ -854,6 +874,15 @@ soon as it begins execution.
 
 Returns a hash reference indicating the C<build_requires>
 prerequisites that were passed to the C<new()> method.
+
+=item cbuilder()
+
+[version 0.2809]
+
+Returns the internal ExtUtils::CBuilder object that can be used for
+compiling & linking C code.  If no such object is available (e.g. if
+the system has no compiler installed) an exception will be thrown.
+
 
 =item check_installed_status($module, $version)
 
@@ -1165,6 +1194,19 @@ C<< ...::ConfigData->feature($name) >>.
 The C<feature()> and C<config_data()> methods represent
 Module::Build's main support for configuration of installed modules.
 See also L<Module::Build::Authoring/"SAVING CONFIGURATION INFORMATION">.
+
+=item fix_shebang_line(@files)
+
+[version 0.??]
+
+Modify any "shebang" line in the specified files to use the path to the
+perl executable being used for the current build.  Files are modified
+in-place.  The existing shebang line must have a command that contains
+"C<perl>"; arguments to the command do not count.  In particular, this
+means that the use of C<#!/usr/bin/env perl> will not be changed.
+
+For an explanation of shebang lines, see
+L<http://en.wikipedia.org/wiki/Shebang_%28Unix%29>.
 
 =item have_c_compiler()
 
@@ -1660,6 +1702,8 @@ accessor methods for the following properties:
 
 =item prereq_action_types()
 
+=item program_name()
+
 =item quiet()
 
 =item recommends()
@@ -1672,7 +1716,15 @@ accessor methods for the following properties:
 
 =item scripts()
 
+=item sign()
+
+=item tap_harness_args()
+
+=item test_file_exts()
+
 =item use_rcfile()
+
+=item use_tap_harness()
 
 =item verbose()
 
