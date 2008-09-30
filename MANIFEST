@@ -878,6 +878,7 @@ ext/Socket/t/Socket.t		See if Socket works
 ext/Storable/ChangeLog		Storable extension
 ext/Storable/hints/gnukfreebsd.pl	Hint for Storable for named architecture
 ext/Storable/hints/gnuknetbsd.pl	Hint for Storable for named architecture
+ext/Storable/hints/hpux.pl	Hint for Storable for named architecture
 ext/Storable/hints/linux.pl	Hint for Storable for named architecture
 ext/Storable/Makefile.PL	Storable extension
 ext/Storable/MANIFEST		Storable extension
