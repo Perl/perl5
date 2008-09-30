@@ -193,6 +193,7 @@ ok $mb, "Module::Build->new_from_context";
   }
 
   $output = stdout_of( sub {
+    local $ENV{HARNESS_TIMER} = 0;
     $ran_ok = $mb->do_system(@make, 'test', $make_macro)
   } );
 
