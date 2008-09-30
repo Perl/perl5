@@ -1,12 +1,15 @@
+# -*- mode: cperl; tab-width: 8; indent-tabs-mode: nil; basic-offset: 2 -*-
+# vim:ts=8:sw=2:et:sta:sts=2
 package Module::Build::Base;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.2808_01';
+$VERSION = '0.30';
 $VERSION = eval $VERSION;
 BEGIN { require 5.00503 }
 
 use Carp;
+use Cwd ();
 use File::Copy ();
 use File::Find ();
 use File::Path ();
@@ -82,6 +85,8 @@ sub resume {
   }
   
   $self->{invoked_action} = $self->{action} ||= 'build';
+
+  $self->_set_install_paths;
   
   return $self;
 }
@@ -319,7 +324,6 @@ sub _find_nested_builds {
 }
 
 sub cwd {
-  require Cwd;
   return Cwd::cwd();
 }
 
@@ -328,18 +332,17 @@ sub _quote_args {
   # proper quoting so that the subprocess sees this same list of args.
   my ($self, @args) = @_;
 
-  my $return_args = '';
   my @quoted;
 
   for (@args) {
-    if ( /^[^\s*?!$<>;\\|'"\[\]\{\}]+$/ ) {
+    if ( /^[^\s*?!\$<>;\\|'"\[\]\{\}]+$/ ) {
       # Looks pretty safe
       push @quoted, $_;
     } else {
       # XXX this will obviously have to improve - is there already a
       # core module lying around that does proper quoting?
-      s/"/"'"'"/g;
-      push @quoted, qq("$_");
+      s/('+)/'"$1"'/g;
+      push @quoted, qq('$_');
     }
   }
 
@@ -363,6 +366,8 @@ sub _backticks {
   }
 }
 
+# Tells us whether the construct open($fh, '-|', @command) is
+# supported.  It would probably be better to dynamically sense this.
 sub have_forkpipe { 1 }
 
 # Determine whether a given binary is the same as the perl
@@ -435,7 +440,7 @@ sub _discover_perl_interpreter {
 
     # CBuilder is also in the core, so it should be available here
     require ExtUtils::CBuilder;
-    my $perl_src = ExtUtils::CBuilder->perl_src;
+    my $perl_src = Cwd::realpath( ExtUtils::CBuilder->perl_src );
     if ( defined($perl_src) && length($perl_src) ) {
       my $uninstperl =
         File::Spec->rel2abs(File::Spec->catfile( $perl_src, $perl_basename ));
@@ -694,6 +699,7 @@ sub ACTION_config_data {
         no strict 'refs';
 	if ( $type eq 'HASH' ) {
           *{"$class\::$property"} = sub {
+            # XXX this needs 'use strict' again
 	    my $self = shift;
 	    my $x = $self->{properties};
 	    return $x->{$property} unless @_;
@@ -717,6 +723,7 @@ sub ACTION_config_data {
 
         } else {
           *{"$class\::$property"} = sub {
+            # XXX this needs 'use strict' again
 	    my $self = shift;
 	    $self->{properties}{$property} = shift if @_;
 	    return $self->{properties}{$property};
@@ -772,6 +779,9 @@ __PACKAGE__->add_property(use_rcfile => 1);
 __PACKAGE__->add_property(create_packlist => 1);
 __PACKAGE__->add_property(allow_mb_mismatch => 0);
 __PACKAGE__->add_property(config => undef);
+__PACKAGE__->add_property(test_file_exts => ['.t']);
+__PACKAGE__->add_property(use_tap_harness => 0);
+__PACKAGE__->add_property(tap_harness_args => {});
 
 {
   my $Is_ActivePerl = eval {require ActivePerl::DocTools};
@@ -828,10 +838,12 @@ __PACKAGE__->add_property($_) for qw(
   pod_files
   pollute
   prefix
+  program_name
   quiet
   recursive_test_files
   script_files
   scripts
+  sign
   test_files
   verbose
   xs_files
@@ -1072,7 +1084,7 @@ sub check_autofeatures {
 
   $self->log_info("Checking features:\n");
 
-  my $max_name_len;
+  my $max_name_len = 0;
   $max_name_len = ( length($_) > $max_name_len ) ?
                     length($_) : $max_name_len
     for keys %$features;
@@ -1285,7 +1297,7 @@ sub check_installed_version {
   my $status = $self->check_installed_status($modname, $spec);
   
   if ($status->{ok}) {
-    return $status->{have} if $status->{have} and $status->{have} ne '<none>';
+    return $status->{have} if $status->{have} and "$status->{have}" ne '<none>';
     return '0 but true';
   }
   
@@ -1501,9 +1513,14 @@ sub _call_action {
   return $self->$method();
 }
 
+# cuts the user-specified options out of the command-line args
 sub cull_options {
     my $self = shift;
-    my $specs = $self->get_options or return ({}, @_);
+    my (@argv) = @_;
+
+    my $specs = $self->get_options;
+    return({}, @argv) unless($specs and %$specs); # no user options
+
     require Getopt::Long;
     # XXX Should we let Getopt::Long handle M::B's options? That would
     # be easy-ish to add to @specs right here, but wouldn't handle options
@@ -1522,7 +1539,7 @@ sub cull_options {
         $args->{$k} = $v->{default} if exists $v->{default};
     }
 
-    local @ARGV = @_; # No other way to dupe Getopt::Long
+    local @ARGV = @argv; # No other way to dupe Getopt::Long
 
     # Get the options values and return them.
     # XXX Add option to allow users to set options?
@@ -1553,6 +1570,8 @@ sub args {
     return $self->{args}{$key};
 }
 
+# allows select parameters (with underscores) to be spoken with dashes
+# when used as command-line options
 sub _translate_option {
   my $self = shift;
   my $opt  = shift;
@@ -1571,6 +1590,8 @@ sub _translate_option {
     meta_merge
     test_files
     use_rcfile
+    use_tap_harness
+    tap_harness_args
   ); # normalize only selected option names
 
   return $opt;
@@ -1589,6 +1610,7 @@ sub _read_arg {
   }
 }
 
+# decide whether or not an option requires/has an opterand
 sub _optional_arg {
   my $self = shift;
   my $opt  = shift;
@@ -1604,6 +1626,8 @@ sub _optional_arg {
     uninst
     use_rcfile
     verbose
+    sign
+    use_tap_harness
   );
 
   # inverted boolean options; eg --noverbose or --no-verbose
@@ -1618,7 +1642,7 @@ sub _optional_arg {
 
   # we're punting a bit here, if an option appears followed by a digit
   # we take the digit as the argument for the option. If there is
-  # nothing that looks like a digit, we pretent the option is a flag
+  # nothing that looks like a digit, we pretend the option is a flag
   # that is being set and has no argument.
   my $arg = 1;
   $arg = shift(@$argv) if @$argv && $argv->[0] =~ /^\d+$/;
@@ -1628,12 +1652,13 @@ sub _optional_arg {
 
 sub read_args {
   my $self = shift;
-  my ($action, @argv);
+
   (my $args, @_) = $self->cull_options(@_);
   my %args = %$args;
 
   my $opt_re = qr/[\w\-]+/;
 
+  my ($action, @argv);
   while (@_) {
     local $_ = shift;
     if ( /^(?:--)?($opt_re)=(.*)$/ ) {
@@ -1828,9 +1853,9 @@ sub merge_args {
     if ($key eq 'config') {
       $self->config($_ => $val->{$_}) foreach keys %$val;
     } else {
-      my $add_to = ( $additive{$key} ? $self->{properties}{$key}
-		     : $self->valid_property($key) ? $self->{properties}
-		     : $self->{args});
+      my $add_to = $additive{$key}             ? $self->{properties}{$key} :
+                   $self->valid_property($key) ? $self->{properties}       :
+                   $self->{args}               ;
 
       if ($additive{$key}) {
 	$add_to->{$_} = $val->{$_} foreach keys %$val;
@@ -2094,7 +2119,7 @@ sub generic_test {
   @types or croak "need some types of tests to check";
 
   my %test_types = (
-    default => '.t',
+    default => $p->{test_file_exts},
     (defined($p->{test_types}) ? %{$p->{test_types}} : ()),
   );
 
@@ -2104,7 +2129,7 @@ sub generic_test {
   }
 
   # we use local here because it ends up two method calls deep
-  local $p->{test_file_exts} = [ @test_types{@types} ];
+  local $p->{test_file_exts} = [ map { ref $_ ? @$_ : $_ } @test_types{@types} ];
   $self->depends_on('code');
 
   # Protect others against our @INC changes
@@ -2123,40 +2148,77 @@ sub generic_test {
 
 sub do_tests {
   my $self = shift;
-  my $p = $self->{properties};
-  require Test::Harness;
-
-  # Do everything in our power to work with all versions of Test::Harness
-  my @harness_switches = $p->{debugger} ? qw(-w -d) : ();
-  local $Test::Harness::switches    = join ' ', grep defined, $Test::Harness::switches, @harness_switches;
-  local $Test::Harness::Switches    = join ' ', grep defined, $Test::Harness::Switches, @harness_switches;
-  local $ENV{HARNESS_PERL_SWITCHES} = join ' ', grep defined, $ENV{HARNESS_PERL_SWITCHES}, @harness_switches;
-  
-  $Test::Harness::switches = undef   unless length $Test::Harness::switches;
-  $Test::Harness::Switches = undef   unless length $Test::Harness::Switches;
-  delete $ENV{HARNESS_PERL_SWITCHES} unless length $ENV{HARNESS_PERL_SWITCHES};
-  
-  local ($Test::Harness::verbose,
-	 $Test::Harness::Verbose,
-	 $ENV{TEST_VERBOSE},
-         $ENV{HARNESS_VERBOSE}) = ($p->{verbose} || 0) x 4;
 
   my $tests = $self->find_test_files;
 
-  if (@$tests) {
-    # Work around a Test::Harness bug that loses the particular perl
-    # we're running under.  $self->perl is trustworthy, but $^X isn't.
-    local $^X = $self->perl;
-    Test::Harness::runtests(@$tests);
-  } else {
+  if(@$tests) {
+    my $args = $self->tap_harness_args;
+    if($self->use_tap_harness or ($args and %$args)) {
+      $self->run_tap_harness($tests);
+    }
+    else {
+      $self->run_test_harness($tests);
+    }
+  }
+  else {
     $self->log_info("No tests defined.\n");
   }
 
-  # This will get run and the user will see the output.  It doesn't
-  # emit Test::Harness-style output.
-  if (-e 'visual.pl') {
-    $self->run_perl_script('visual.pl', '-Mblib='.$self->blib);
-  }
+  $self->run_visual_script;
+}
+
+sub run_tap_harness {
+  my ($self, $tests) = @_;
+
+  require TAP::Harness;
+
+  # TODO allow the test @INC to be set via our API?
+
+  TAP::Harness->new({
+    lib => [@INC],
+    verbosity => $self->{properties}{verbose},
+    switches  => [ $self->harness_switches ],
+    %{ $self->tap_harness_args },
+  })->runtests(@$tests);
+}
+
+sub run_test_harness {
+    my ($self, $tests) = @_;
+    require Test::Harness;
+    my $p = $self->{properties};
+    my @harness_switches = $self->harness_switches;
+
+    # Work around a Test::Harness bug that loses the particular perl
+    # we're running under.  $self->perl is trustworthy, but $^X isn't.
+    local $^X = $self->perl;
+
+    # Do everything in our power to work with all versions of Test::Harness
+    local $Test::Harness::switches    = join ' ', grep defined, $Test::Harness::switches, @harness_switches;
+    local $Test::Harness::Switches    = join ' ', grep defined, $Test::Harness::Switches, @harness_switches;
+    local $ENV{HARNESS_PERL_SWITCHES} = join ' ', grep defined, $ENV{HARNESS_PERL_SWITCHES}, @harness_switches;
+
+    $Test::Harness::switches = undef   unless length $Test::Harness::switches;
+    $Test::Harness::Switches = undef   unless length $Test::Harness::Switches;
+    delete $ENV{HARNESS_PERL_SWITCHES} unless length $ENV{HARNESS_PERL_SWITCHES};
+
+    local ($Test::Harness::verbose,
+           $Test::Harness::Verbose,
+           $ENV{TEST_VERBOSE},
+           $ENV{HARNESS_VERBOSE}) = ($p->{verbose} || 0) x 4;
+
+    Test::Harness::runtests(@$tests);
+}
+
+sub run_visual_script {
+    my $self = shift;
+    # This will get run and the user will see the output.  It doesn't
+    # emit Test::Harness-style output.
+    $self->run_perl_script('visual.pl', '-Mblib='.$self->blib)
+        if -e 'visual.pl';
+}
+
+sub harness_switches {
+    shift->{properties}{debugger} ? qw(-w -d) : ();
 }
 
 sub test_files {
@@ -2170,7 +2232,7 @@ sub test_files {
 
 sub expand_test_dir {
   my ($self, $dir) = @_;
-  my $exts = $self->{properties}{test_file_exts} || ['.t'];
+  my $exts = $self->{properties}{test_file_exts};
 
   return sort map { @{$self->rscan_dir($dir, qr{^[^.].*\Q$_\E$})} } @$exts
     if $self->recursive_test_files;
@@ -2392,7 +2454,6 @@ sub _find_file_by_type {
 
 sub localize_file_path {
   my ($self, $path) = @_;
-  $path =~ s/\.\z// if $self->is_vmsish;
   return File::Spec->catfile( split m{/}, $path );
 }
 
@@ -2879,7 +2940,7 @@ sub ACTION_ppmdist {
 	File::Spec->abs2rel( File::Spec->rel2abs( $file ),
 			     File::Spec->rel2abs( $dir  ) );
       my $to_file  =
-	File::Spec->catdir( $ppm, 'blib',
+	File::Spec->catfile( $ppm, 'blib',
 			    exists( $types{$type} ) ? $types{$type} : $type,
 			    $rel_file );
       $self->copy_if_modified( from => $file, to => $to_file );
@@ -3034,7 +3095,6 @@ sub ACTION_distclean {
 sub do_create_makefile_pl {
   my $self = shift;
   require Module::Build::Compat;
-  $self->delete_filetree('Makefile.PL');
   $self->log_info("Creating Makefile.PL\n");
   Module::Build::Compat->create_makefile_pl($self->create_makefile_pl, $self, @_);
   $self->_add_to_manifest('MANIFEST', 'Makefile.PL');
@@ -3179,10 +3239,18 @@ sub _write_default_maniskip {
 \bblibdirs$
 ^MANIFEST\.SKIP$
 
+# Avoid VMS specific Makmaker generated files
+\bDescrip.MMS$
+\bDESCRIP.MMS$
+\bdescrip.mms$
+
 # Avoid Module::Build generated and utility files.
 \bBuild$
 \bBuild.bat$
 \b_build
+\bBuild.COM$
+\bBUILD.COM$
+\bbuild.com$
 
 # Avoid Devel::Cover generated files
 \bcover_db
@@ -3285,6 +3353,8 @@ BEGIN { *scripts = \&script_files; }
     lgpl         => 'http://opensource.org/licenses/lgpl-license.php',
     bsd          => 'http://opensource.org/licenses/bsd-license.php',
     gpl          => 'http://opensource.org/licenses/gpl-license.php',
+    gpl2         => 'http://opensource.org/licenses/gpl-2.0.php',
+    gpl3         => 'http://opensource.org/licenses/gpl-3.0.html',
     mit          => 'http://opensource.org/licenses/mit-license.php',
     mozilla      => 'http://opensource.org/licenses/mozilla1.1.php',
     open_source  => undef,
@@ -3902,16 +3972,20 @@ sub autosplit_file {
   AutoSplit::autosplit($file, $dir);
 }
 
-sub _cbuilder {
+sub cbuilder {
   # Returns a CBuilder object
 
   my $self = shift;
   my $p = $self->{properties};
   return $p->{_cbuilder} if $p->{_cbuilder};
-  return unless $self->_mb_feature('C_support');
+  die "Module::Build is not configured with C_support"
+	  unless $self->_mb_feature('C_support');
 
   require ExtUtils::CBuilder;
-  return $p->{_cbuilder} = ExtUtils::CBuilder->new(config => $self->config);
+  return $p->{_cbuilder} = ExtUtils::CBuilder->new(
+    config => $self->config,
+    ($self->quiet ? (quiet => 1 ) : ()),
+  );
 }
 
 sub have_c_compiler {
@@ -3921,7 +3995,7 @@ sub have_c_compiler {
   return $p->{have_compiler} if defined $p->{have_compiler};
   
   $self->log_verbose("Checking if compiler tools configured... ");
-  my $b = $self->_cbuilder;
+  my $b = eval { $self->cbuilder };
   my $have = $b && $b->have_compiler;
   $self->log_verbose($have ? "ok.\n" : "failed.\n");
   return $p->{have_compiler} = $have;
@@ -3929,8 +4003,7 @@ sub have_c_compiler {
 
 sub compile_c {
   my ($self, $file, %args) = @_;
-  my $b = $self->_cbuilder
-    or die "Module::Build is not configured with C_support";
+  my $b = $self->cbuilder;
 
   my $obj_file = $b->object_file($file);
   $self->add_to_cleanup($obj_file);
@@ -3963,9 +4036,7 @@ sub link_c {
   my $module_name = $self->module_name;
   $module_name  ||= $spec->{module_name};
 
-  my $b = $self->_cbuilder
-    or die "Module::Build is not configured with C_support";
-  $b->link(
+  $self->cbuilder->link(
     module_name => $module_name,
     objects     => [$spec->{obj_file}, @$objects],
     lib_file    => $spec->{lib_file},
@@ -3993,11 +4064,13 @@ sub compile_xs {
       or die "Can't find ExtUtils::xsubpp in INC (@INC)";
     
     my @typemaps;
-    push @typemaps, Module::Build::ModuleInfo->find_module_by_name('ExtUtils::typemap', \@INC);
-    my $lib_typemap = Module::Build::ModuleInfo->find_module_by_name('typemap', ['lib']);
-    if (defined $lib_typemap and -e $lib_typemap) {
-      push @typemaps, 'typemap';
-    }
+    push @typemaps, Module::Build::ModuleInfo->find_module_by_name(
+        'ExtUtils::typemap', \@INC
+    );
+    my $lib_typemap = Module::Build::ModuleInfo->find_module_by_name(
+        'typemap', [File::Basename::dirname($file)]
+    );
+    push @typemaps, $lib_typemap if $lib_typemap;
     @typemaps = map {+'-typemap', $_} @typemaps;
 
     my $cf = $self->{config};
@@ -4022,6 +4095,26 @@ sub split_like_shell {
   return () unless length($string);
   
   return Text::ParseWords::shellwords($string);
+}
+
+sub oneliner {
+  # Returns a string that the shell can evaluate as a perl command.
+  # This should be avoided whenever possible, since "the shell" really
+  # means zillions of shells on zillions of platforms and it's really
+  # hard to get it right all the time.
+
+  # Some of this code is stolen with permission from ExtUtils::MakeMaker.
+
+  my($self, $cmd, $switches, $args) = @_;
+  $switches = [] unless defined $switches;
+  $args = [] unless defined $args;
+
+  # Strip leading and trailing newlines
+  $cmd =~ s{^\n+}{};
+  $cmd =~ s{\n+$}{};
+
+  my $perl = ref($self) ? $self->perl : $self->find_perl_interpreter;
+  return $self->_quote_args($perl, @$switches, '-e', $cmd, @$args);
 }
 
 sub run_perl_script {
@@ -4282,5 +4375,3 @@ modify it under the same terms as Perl itself.
 perl(1), Module::Build(3)
 
 =cut
-
-# vim:ts=8:sw=2:et:sta:sts=2

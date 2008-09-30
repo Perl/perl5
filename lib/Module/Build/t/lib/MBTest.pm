@@ -9,9 +9,8 @@ BEGIN {
   # Make sure none of our tests load the users ~/.modulebuildrc file
   $ENV{MODULEBUILDRC} = 'NONE';
 
-  # In case the test wants to use Test::More or our other bundled
-  # modules, make sure they can be loaded.  They'll still do "use
-  # Test::More" in the test script.
+  # In case the test wants to use our other bundled
+  # modules, make sure they can be loaded.
   my $t_lib = File::Spec->catdir('t', 'bundled');
 
   unless ($ENV{PERL_CORE}) {
@@ -54,6 +53,7 @@ my @extra_exports = qw(
   find_in_path
   check_compiler
   have_module
+  ensure_blib
 );
 push @EXPORT, @extra_exports;
 __PACKAGE__->export(scalar caller, @extra_exports);
@@ -68,7 +68,9 @@ __PACKAGE__->export(scalar caller, @extra_exports);
   sub tmpdir { $tmp }
   END {
     if(-d $tmp) {
-      File::Path::rmtree($tmp) or warn "cannot clean dir '$tmp'";
+      # Go back to where you came from!
+      chdir $cwd or die "Couldn't chdir to $cwd";
+      File::Path::rmtree($tmp) or diag "cannot clean dir '$tmp'";
     }
   }
 }
@@ -161,6 +163,17 @@ sub check_compiler {
 sub have_module {
   my $module = shift;
   return eval "use $module; 1";
+}
+
+sub ensure_blib {
+  # Make sure the given module was loaded from blib/, not the larger system
+  my $mod = shift;
+  (my $path = $mod) =~ s{::}{/}g;
+  
+ SKIP: {
+    skip "no blib in core", 1 if $ENV{PERL_CORE};
+    like $INC{"$path.pm"}, qr/\bblib\b/, "Make sure $mod was loaded from blib/";
+  }
 }
 
 1;

@@ -4,20 +4,19 @@
 
 use strict;
 use lib $ENV{PERL_CORE} ? '../lib/Module/Build/t/lib' : 't/lib';
-use MBTest tests => 15;
+use MBTest tests => 17;
 
-use Cwd ();
-my $cwd = Cwd::cwd;
+use_ok 'Module::Build';
+ensure_blib('Module::Build');
+
 my $tmp = MBTest->tmpdir;
 
 use DistGen;
 my $dist = DistGen->new( dir => $tmp );
 $dist->regen;
 
-chdir( $dist->dirname ) or die "Can't chdir to '@{[$dist->dirname]}': $!";
+$dist->chdir_in;
 
-
-use Module::Build;
 
 sub run_sample {
     my @args = @_;
@@ -39,7 +38,13 @@ my $p = 'install_base';
 
 SKIP: {
     my $home = $ENV{HOME} ? $ENV{HOME} : undef;
-    skip "Needs case and syntax tweaks for VMS", 14 if $^O eq 'VMS';
+
+    if ($^O eq 'VMS') {
+        # Convert the path to UNIX format, trim off the trailing slash
+        $home = VMS::Filespec::unixify($home);
+        $home =~ s#/$##;
+    }
+
     unless (defined $home) {
       my @info = eval { getpwuid $> };
       skip "No home directory for tilde-expansion tests", 14 if $@;
@@ -83,18 +88,22 @@ SKIP: {
 
 # Again, with named users
 SKIP: {
-    skip "Needs case and syntax tweaks for VMS", 1 if $^O eq 'VMS';
     my @info = eval { getpwuid $> };
     skip "No home directory for tilde-expansion tests", 1 if $@;
     my ($me, $home) = @info[0,7];
     
-    is( run_sample( $p => "~$me/foo")->$p(),  "$home/foo" );
+    my $expected = "$home/foo";
+
+    if ($^O eq 'VMS') {
+        # Convert the path to UNIX format and trim off the trailing slash
+        $home = VMS::Filespec::unixify($home);
+        $home =~ s#/$##;
+        $expected = $home . '/../[^/]+' . '/foo';
+    }
+
+    like( run_sample( $p => "~$me/foo")->$p(),  qr($expected)i );
 }
 
 
 # cleanup
-chdir( $cwd ) or die "Can''t chdir to '$cwd': $!";
 $dist->remove;
-
-use File::Path;
-rmtree( $tmp );

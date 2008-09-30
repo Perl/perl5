@@ -8,6 +8,8 @@ $VERSION = '0.01';
 $VERBOSE = 0;
 
 
+use Carp;
+
 use Cwd ();
 use File::Basename ();
 use File::Find ();
@@ -18,11 +20,11 @@ use Tie::CPHash;
 use Data::Dumper;
 
 BEGIN {
-    if( $^O eq 'VMS' ) {
-        # For things like vmsify()
-        require VMS::Filespec;
-        VMS::Filespec->import;
-    }
+  if( $^O eq 'VMS' ) {
+    # For things like vmsify()
+    require VMS::Filespec;
+    VMS::Filespec->import;
+  }
 }
 BEGIN {
   require Exporter;
@@ -31,6 +33,16 @@ BEGIN {
     undent
   );
 }
+
+sub undent {
+  my ($string) = @_;
+
+  my ($space) = $string =~ m/^(\s+)/;
+  $string =~ s/^$space//gm;
+
+  return($string);
+}
+########################################################################
 
 sub new {
   my $package = shift;
@@ -46,6 +58,9 @@ sub new {
   );
   my $self = bless( \%data, $package );
 
+  # So we can clean up later even if the caller chdir()s
+  $self->{dir} = File::Spec->rel2abs($self->{dir});
+
   tie %{$self->{filedata}}, 'Tie::CPHash';
 
   tie %{$self->{pending}{change}}, 'Tie::CPHash';
@@ -58,16 +73,6 @@ sub new {
   $self->_gen_default_filedata();
 
   return $self;
-}
-
-# not a method
-sub undent {
-  my ($string) = @_;
-
-  my ($space) = $string =~ m/^(\s+)/;
-  $string =~ s/^$space//gm;
-
-  return($string);
 }
 
 sub _gen_default_filedata {
@@ -193,6 +198,11 @@ sub _gen_default_filedata {
         RETVAL = VERSION;
           OUTPUT:
         RETVAL
+      ---
+
+  # 5.6 is missing const char * in its typemap
+  $self->$add_unless('typemap', undent(<<"      ---"));
+      const char *              T_PV
       ---
 
   $self->$add_unless('t/basic.t', undent(<<"    ---"));
@@ -358,7 +368,11 @@ sub clean {
 
 sub remove {
   my $self = shift;
-  File::Path::rmtree( File::Spec->canonpath($self->dirname) );
+  croak("invalid usage -- remove()") if(@_);
+  $self->chdir_original if($self->did_chdir);
+  File::Path::rmtree( $self->dirname );
+  # might as well check
+  croak("\nthis test should have used chdir_in()") unless(Cwd::getcwd);
 }
 
 sub revert {
@@ -404,6 +418,31 @@ sub change_file {
   $self->{filedata}{$file} = $data;
   $self->{pending}{change}{$file} = 1;
 }
+
+sub chdir_in {
+  my $self = shift;
+
+  $self->{original_dir} ||= Cwd::cwd; # only once
+  my $dir = $self->dirname;
+  chdir($dir) or die "Can't chdir to '$dir': $!";
+}
+########################################################################
+
+sub did_chdir {
+  my $self = shift;
+
+  return exists($self->{original_dir});
+}
+########################################################################
+
+sub chdir_original {
+  my $self = shift;
+
+  croak("never called chdir_in()") unless($self->{original_dir});
+  my $dir = $self->{original_dir};
+  chdir($dir) or die "Can't chdir to '$dir': $!";
+}
+########################################################################
 
 1;
 
@@ -481,6 +520,19 @@ Regenerate all missing or changed files.
 
 If the optional C<clean> argument is given, it also removes any
 extraneous files that do not belong to the distribution.
+
+=head2 chdir_in
+
+Change directory into the dist root.
+
+  $dist->chdir_in;
+
+=head2 chdir_original
+
+Returns to whatever directory you were in before chdir_in() (regardless
+of the cwd.)
+
+  $dist->chdir_original;
 
 =head3 clean()
 

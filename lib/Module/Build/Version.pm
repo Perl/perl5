@@ -2,7 +2,7 @@ package Module::Build::Version;
 use strict;
 
 use vars qw($VERSION);
-$VERSION = 0.7203;
+$VERSION = 0.74;
 
 eval "use version $VERSION";
 if ($@) { # can't locate version files, use our own
@@ -69,13 +69,12 @@ sub import {
 
 1;
 # replace everything from here to the end with the current version/vpp.pm
-
 package version::vpp;
 use strict;
 
 use locale;
 use vars qw ($VERSION @ISA @REGEXS);
-$VERSION = 0.7203;
+$VERSION = 0.74;
 
 push @REGEXS, qr/
 	^v?	# optional leading 'v'
@@ -92,6 +91,17 @@ use overload (
     'bool'     => \&vbool,
     'nomethod' => \&vnoop,
 );
+
+my $VERSION_MAX = 0x7FFFFFFF;
+
+eval "use warnings";
+if ($@) {
+    eval '
+	package warnings;
+	sub enabled {return $^W;}
+	1;
+    ';
+}
 
 sub new
 {
@@ -145,6 +155,7 @@ sub new
 	my $alpha = 0;
 	my $width = 3;
 	my $saw_period = 0;
+	my $vinf = 0;
 	my ($start, $last, $pos, $s);
 	$s = 0;
 
@@ -163,9 +174,8 @@ sub new
 	while ( substr($value,$pos,1) =~ /[._\d]/ ) {
 	    if ( substr($value,$pos,1) eq '.' ) {
 		if ($alpha) {
-		    require Carp;
 		    Carp::croak("Invalid version format ".
-		    	"(underscores before decimal)");
+		      "(underscores before decimal)");
 		}
 		$saw_period++;
 		$last = $pos;
@@ -174,7 +184,7 @@ sub new
 		if ($alpha) {
 		    require Carp;
 		    Carp::croak("Invalid version format ".
-		    	"(multiple underscores)");
+			"(multiple underscores)");
 		}
 		$alpha = 1;
 		$width = $pos - $last - 1; # natural width of sub-version
@@ -184,18 +194,21 @@ sub new
 
 	if ( $alpha && !$saw_period ) {
 	    require Carp;
-	    Carp::croak("Invalid version format (alpha without decimal)");
+	    Carp::croak("Invalid version format ".
+		"(alpha without decimal)");
 	}
 
 	if ( $alpha && $saw_period && $width == 0 ) {
 	    require Carp;
-	    Carp::croak("Invalid version format (misplaced _ in number)");
+	    Carp::croak("Invalid version format ".
+		"(misplaced _ in number)");
 	}
 
 	if ( $saw_period > 1 ) {
 	    $qv = 1; # force quoted version processing
 	}
 
+	$last = $pos;
 	$pos = $s;
 
 	if ( $qv ) {
@@ -235,9 +248,14 @@ sub new
 			    $orev = $rev;
 			    $rev += substr($value,$s,1) * $mult;
 			    $mult /= 10;
-			    if ( abs($orev) > abs($rev) ) {
-				require Carp;
-				Carp::croak("Integer overflow in version");
+			    if (   abs($orev) > abs($rev) 
+				|| abs($rev) > abs($VERSION_MAX) ) {
+				if ( warnings::enabled("overflow") ) {
+				    require Carp;
+				    Carp::carp("Integer overflow in version");
+				}
+				$s = $end - 1;
+				$rev = $VERSION_MAX;
 			    }
 			    $s++;
 			    if ( substr($value,$s,1) eq '_' ) {
@@ -250,9 +268,14 @@ sub new
 			    $orev = $rev;
 			    $rev += substr($value,$end,1) * $mult;
 			    $mult *= 10;
-			    if ( abs($orev) > abs($rev) ) {
-				require Carp;
-				Carp::croak("Integer overflow in version");
+			    if (   abs($orev) > abs($rev) 
+				|| abs($rev) > abs($VERSION_MAX) ) {
+				if ( warnings::enabled("overflow") ) {
+				    require Carp;
+				    Carp::carp("Integer overflow in version");
+				}
+				$end = $s - 1;
+				$rev = $VERSION_MAX;
 			    }
 			}
 		    }
@@ -300,12 +323,21 @@ sub new
 	}
 
 	if ( substr($value,$pos) ) { # any remaining text
-	    warn "Version string '$value' contains invalid data; ".
-	         "ignoring: '".substr($value,$pos)."'";
+	    if ( warnings::enabled("misc") ) {
+		require Carp;
+		Carp::carp("Version string '$value' contains invalid data; ".
+		     "ignoring: '".substr($value,$pos)."'");
+	    }
 	}
 
 	# cache the original value for use when stringification
-	$self->{original} = substr($value,0,$pos);
+	if ( $vinf ) {
+	    $self->{vinf} = 1;
+	    $self->{original} = 'v.Inf';
+	}
+	else {
+	    $self->{original} = substr($value,0,$pos);
+	}
 
 	return ($self);
 }

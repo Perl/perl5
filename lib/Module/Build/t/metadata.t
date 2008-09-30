@@ -2,14 +2,13 @@
 
 use strict;
 use lib $ENV{PERL_CORE} ? '../lib/Module/Build/t/lib' : 't/lib';
-use MBTest tests => 49;
+use MBTest tests => 51;
 
-use Cwd ();
-my $cwd = Cwd::cwd;
+use_ok 'Module::Build';
+ensure_blib('Module::Build');
+
 my $tmp = MBTest->tmpdir;
 
-
-use Module::Build;
 use Module::Build::ConfigData;
 
 my %metadata = 
@@ -45,7 +44,7 @@ my $simple2_file = 'lib/Simple2.pm';
    }
 
 
-chdir( $dist->dirname ) or die "Can't chdir to '@{[$dist->dirname]}': $!";
+$dist->chdir_in;
 
 use Module::Build;
 my $mb = Module::Build->new_from_context;
@@ -582,8 +581,4 @@ is_deeply($mb->find_dist_packages, {});
 
 ############################################################
 # cleanup
-chdir( $cwd ) or die "Can't chdir to '$cwd': $!";
 $dist->remove;
-
-use File::Path;
-rmtree( $tmp );

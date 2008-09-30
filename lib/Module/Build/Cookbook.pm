@@ -1,4 +1,7 @@
 package Module::Build::Cookbook;
+use strict;
+use vars qw($VERSION);
+$VERSION = '0.30';
 
 
 =head1 NAME
@@ -245,7 +248,7 @@ change the order of the entries in that property:
 
   # Process pod files first
   my @e = @{$build->build_elements};
-  my $i = grep {$e[$_] eq 'pod'} 0..$#e;
+  my ($i) = grep {$e[$_] eq 'pod'} 0..$#e;
   unshift @e, splice @e, $i, 1;
 
 Currently, C<build_elements> has the following default value:

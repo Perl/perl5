@@ -2,7 +2,7 @@ package Module::Build::Platform::Unix;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.2808_01';
+$VERSION = '0.30';
 $VERSION = eval $VERSION;
 use Module::Build::Base;
 
@@ -44,7 +44,7 @@ sub _construct {
 
 sub _detildefy {
   my ($self, $value) = @_;
-  $value =~ s[^~(\w*)(?=/|$)]   # tilde with optional username
+  $value =~ s[^~(\w[-\w]*)?(?=/|$)]   # tilde with optional username
     [$1 ?
      ((getpwnam $1)[7] || "~$1") :
      (getpwuid $>)[7]

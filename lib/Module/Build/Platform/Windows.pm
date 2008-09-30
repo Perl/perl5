@@ -2,7 +2,7 @@ package Module::Build::Platform::Windows;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.2808_01';
+$VERSION = '0.30';
 $VERSION = eval $VERSION;
 
 use Config;
@@ -175,6 +175,29 @@ EOT
 }
 
 
+sub _quote_args {
+  # Returns a string that can become [part of] a command line with
+  # proper quoting so that the subprocess sees this same list of args.
+  my ($self, @args) = @_;
+
+  my @quoted;
+
+  for (@args) {
+    if ( /^[^\s*?!\$<>;|'"\[\]\{\}]+$/ ) {
+      # Looks pretty safe
+      push @quoted, $_;
+    } else {
+      # XXX this will obviously have to improve - is there already a
+      # core module lying around that does proper quoting?
+      s/"/\\"/g;
+      push @quoted, qq("$_");
+    }
+  }
+
+  return join " ", @quoted;
+}
+
+
 sub split_like_shell {
   # As it turns out, Windows command-parsing is very different from
   # Unix command-parsing.  Double-quotes mean different things,
@@ -232,6 +255,23 @@ sub split_like_shell {
   push( @argv, $arg ) if defined( $arg ) && length( $arg );
   return @argv;
 }
+
+
+# system(@cmd) does not like having double-quotes in it on Windows.
+# So we quote them and run it as a single command.
+sub do_system {
+  my ($self, @cmd) = @_;
+
+  my $cmd = $self->_quote_args(@cmd);
+  my $status = system($cmd);
+  if ($status and $! =~ /Argument list too long/i) {
+    my $env_entries = '';
+    foreach (sort keys %ENV) { $env_entries .= "$_=>".length($ENV{$_})."; " }
+    warn "'Argument list' was 'too long', env lengths are $env_entries";
+  }
+  return !$status;
+}
+
 
 1;
 

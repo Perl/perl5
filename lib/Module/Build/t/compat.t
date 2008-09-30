@@ -13,19 +13,24 @@ local  @ENV{@makefile_keys};
 delete @ENV{@makefile_keys};
 
 my @makefile_types = qw(small passthrough traditional);
-my $tests_per_type = 14;
-if ( $Config{make} && find_in_path($Config{make}) ) {
-    plan tests => 38 + @makefile_types*$tests_per_type*2;
+my $tests_per_type = 15;
+
+#find_in_path does not understand VMS.
+
+if ( $Config{make} && $^O ne 'VMS' ? find_in_path($Config{make}) : 1 ) {
+    plan tests => 34 + @makefile_types*$tests_per_type*2;
 } else {
     plan skip_all => "Don't know how to invoke 'make'";
 }
-ok 1, "Loaded";
+
+my $is_vms_mms = ($^O eq 'VMS') && ($Config{make} =~ /MM[SK]/i);
+
+use_ok 'Module::Build';
+ensure_blib('Module::Build');
 
 
 #########################
 
-use Cwd ();
-my $cwd = Cwd::cwd;
 my $tmp = MBTest->tmpdir;
 
 # Create test distribution; set requires and build_requires
@@ -33,7 +38,7 @@ use DistGen;
 my $dist = DistGen->new( dir => $tmp );
 $dist->regen;
 
-chdir( $dist->dirname ) or die "Can't chdir to '@{[$dist->dirname]}': $!";
+$dist->chdir_in;
 
 
 #########################
@@ -44,6 +49,14 @@ use Module::Build::Compat;
 use Carp;  $SIG{__WARN__} = \&Carp::cluck;
 
 my @make = $Config{make} eq 'nmake' ? ('nmake', '-nologo') : ($Config{make});
+
+my $makefile = 'Makefile';
+
+# VMS MMK/MMS by convention use Descrip.MMS
+if ($is_vms_mms) {
+    $makefile = 'Descrip.MMS';
+}
+
 
 #########################
 
@@ -95,7 +108,8 @@ ok $mb, "Module::Build->new_from_context";
   # in older-generated Makefile.PLs
   my $warning = '';
   local $SIG{__WARN__} = sub { $warning = shift; };
-  my $maketext = eval { Module::Build::Compat->fake_makefile(makefile => 'Makefile') };
+
+  my $maketext = eval { Module::Build::Compat->fake_makefile(makefile => $makefile) };
   is $@, '', "fake_makefile lived";
   like $maketext, qr/^realclean/m, "found 'realclean' in fake_makefile output";
   like $warning, qr/build_class/, "saw warning about 'build_class'";
@@ -142,7 +156,7 @@ ok $mb, "Module::Build->new_from_context";
   # Make sure various Makefile.PL arguments are supported
   Module::Build::Compat->create_makefile_pl('passthrough', $mb);
 
-  my $libdir = File::Spec->catdir( $cwd, 't', 'libdir' );
+  my $libdir = File::Spec->catdir( $tmp, 'libdir' );
   my $result;
   stdout_of( sub {
     $result = $mb->run_perl_script('Makefile.PL', [],
@@ -171,21 +185,49 @@ ok $mb, "Module::Build->new_from_context";
   like $output, qr/(?:# ok \d+\s+)+/, 'Should be verbose';
 
   # Make sure various Makefile arguments are supported
-  $output = stdout_of( sub { $ran_ok = $mb->do_system(@make, 'test', 'TEST_VERBOSE=0') } );
+  my $make_macro = 'TEST_VERBOSE=0';
+
+  # VMS MMK/MMS macros use different syntax.
+  if ($is_vms_mms) {
+    $make_macro = '/macro=("' . $make_macro . '")';
+  }
+
+  $output = stdout_of( sub {
+    $ran_ok = $mb->do_system(@make, 'test', $make_macro)
+  } );
+
   ok $ran_ok, "make test without verbose ran ok";
   $output =~ s/^/# /gm;  # Don't confuse our own test output
   like $output,
-       qr/(?:# .+basic\.+ok\s+(?:[\d.]+\s*m?s\s*)?(?:# \[[\d:]+\]\s*)?)# All tests/,
-      'Should be non-verbose';
+       qr/# .+basic(\.t)?[.\s#]+ok[.\s#]+All tests successful/,
+       'Should be non-verbose';
 
-  $mb->delete_filetree($libdir);
-  ok ! -e $libdir, "Sample installation directory should be cleaned up";
+  (my $libdir2 = $libdir) =~ s/libdir/lbiidr/;
+  my @make_args = ('INSTALLDIRS=vendor', "INSTALLVENDORLIB=$libdir2");
+
+  if ($is_vms_mms) { # VMS MMK/MMS macros use different syntax.
+    $make_args[0] = '/macro=("' . join('","',@make_args) . '")';
+    pop @make_args while scalar(@make_args) > 1;
+  }
+  ($output) = stdout_stderr_of(
+    sub {
+      $ran_ok = $mb->do_system(@make, 'fakeinstall', @make_args);
+    }
+  );
+
+  ok $ran_ok, "make fakeinstall with INSTALLDIRS=vendor ran ok";
+  $output =~ s/^/# /gm;  # Don't confuse our own test output
+  like $output,
+       qr/\Q$libdir2\E .* Simple\.pm/x,
+       'Should have installdirs=vendor';
 
   stdout_of( sub { $mb->do_system(@make, 'realclean'); } );
-  ok ! -e 'Makefile', "Makefile shouldn't exist";
+  ok ! -e $makefile, "$makefile shouldn't exist";
 
   1 while unlink 'Makefile.PL';
   ok ! -e 'Makefile.PL', "Makefile.PL cleaned up";
+
+  1 while unlink $libdir, $libdir2;
 }
 
 { # Make sure tilde-expansion works
@@ -203,11 +245,14 @@ ok $mb, "Module::Build->new_from_context";
   unlike $b2->install_base, qr/^~/, "Tildes should be expanded";
   
   stdout_of( sub { $mb->do_system(@make, 'realclean'); } );
-  ok ! -e 'Makefile', "Makefile shouldn't exist";
+  ok ! -e $makefile, "$makefile shouldn't exist";
 
   1 while unlink 'Makefile.PL';
   ok ! -e 'Makefile.PL', "Makefile.PL cleaned up";
 }
+
+# cleanup
+$dist->remove;
 
 #########################################################
 
@@ -270,13 +315,13 @@ sub test_makefile_creation {
     $label .= " (postargs: $postargs)";
   }
   ok $result, $label;
-  ok -e 'Makefile', "Makefile exists";
+  ok -e $makefile, "$makefile exists";
   
   if ($cleanup) {
     $output = stdout_of( sub {
       $build->do_system(@make, 'realclean');
     });
-    ok ! -e 'Makefile', "Makefile cleaned up";
+    ok ! -e '$makefile', "$makefile cleaned up";
   }
   else {
     pass '(skipping cleanup)'; # keep test count constant
@@ -287,10 +332,10 @@ sub test_makefile_prereq_pm {
   my %requires = %{ $_[0] };
   delete $requires{perl}; # until EU::MM supports this
   SKIP: {
-    skip 'Makefile not found', 1 unless -e 'Makefile';
+    skip "$makefile not found", 1 unless -e $makefile;
     my $prereq_pm = find_makefile_prereq_pm();
     is_deeply $prereq_pm, \%requires,
-      "Makefile has correct PREREQ_PM line";
+      "$makefile has correct PREREQ_PM line";
   }
 }
 
@@ -313,8 +358,8 @@ sub test_makefile_pl_requires_perl {
 # Following subroutine adapted from code in CPAN.pm 
 # by Andreas Koenig and A. Speer.
 sub find_makefile_prereq_pm {
-  my $fh = IO::File->new( 'Makefile', 'r' ) 
-    or die "Can't read Makefile: $!";
+  my $fh = IO::File->new( $makefile, 'r' ) 
+    or die "Can't read $makefile: $!";
   my $req = {};
   local($/) = "\n";
   while (<$fh>) {
@@ -337,10 +382,3 @@ sub find_makefile_prereq_pm {
   }
   return $req;
 }
-
-# cleanup
-chdir( $cwd ) or die "Can''t chdir to '$cwd': $!";
-$dist->remove;
-
-use File::Path;
-rmtree( $tmp );

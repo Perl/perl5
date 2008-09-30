@@ -15,22 +15,23 @@ use Module::Build;
   } elsif ( $^O eq 'VMS' ) {
     plan skip_all => 'Child test output confuses harness';
   } else {
-    plan tests => 22;
+    plan tests => 23;
   }
 }
+
+ensure_blib('Module::Build');
+
 
 #########################
 
 
-use Cwd ();
-my $cwd = Cwd::cwd;
 my $tmp = MBTest->tmpdir;
 
 use DistGen;
 my $dist = DistGen->new( dir => $tmp, xs => 1 );
 $dist->regen;
 
-chdir( $dist->dirname ) or die "Can't chdir to '@{[$dist->dirname]}': $!";
+$dist->chdir_in;
 my $mb = Module::Build->new_from_context;
 
 
@@ -103,7 +104,6 @@ ok ! -e 'blib';
 
 
 # cleanup
-chdir( $cwd ) or die "Can''t chdir to '$cwd': $!";
 $dist->remove;
 
 
@@ -114,7 +114,7 @@ $dist->remove;
 $dist = DistGen->new( name => 'Simple::With::Deep::Name',
 		      dir => $tmp, xs => 1 );
 $dist->regen;
-chdir( $dist->dirname ) or die "Can't chdir to '@{[$dist->dirname]}': $!";
+$dist->chdir_in;
 
 $mb = Module::Build->new_from_context;
 is $@, '';
@@ -129,7 +129,6 @@ $mb->dispatch('realclean');
 is $@, '';
 
 # cleanup
-chdir( $cwd ) or die "Can''t chdir to '$cwd': $!";
 $dist->remove;
 
 
@@ -208,7 +207,7 @@ ok( Simple::okay() eq 'ok' );
 ---
 
 $dist->regen;
-chdir( $dist->dirname ) or die "Can't chdir to '@{[$dist->dirname]}': $!";
+$dist->chdir_in;
 
 
 $mb = Module::Build->new_from_context;
@@ -224,8 +223,4 @@ $mb->dispatch('realclean');
 is $@, '';
 
 # cleanup
-chdir( $cwd ) or die "Can''t chdir to '$cwd': $!";
 $dist->remove;
-
-use File::Path;
-rmtree( $tmp );

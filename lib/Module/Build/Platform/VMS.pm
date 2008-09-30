@@ -2,7 +2,7 @@ package Module::Build::Platform::VMS;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.2808_01';
+$VERSION = '0.30';
 $VERSION = eval $VERSION;
 use Module::Build::Base;
 
@@ -136,10 +136,15 @@ sub _quote_args {
                    ? 1 
                    : 0;
 
-  map { $_ = q(").$_.q(") if !/^\"/ && length($_) > 0 }
-     ($got_arrayref ? @{$args[0]} 
-                    : @args
-     );
+  # Do not quote qualifiers that begin with '/'.
+  map { if (!/^\//) { 
+          $_ =~ s/\"/""/g;     # escape C<"> by doubling
+          $_ = q(").$_.q(");
+        }
+  }
+    ($got_arrayref ? @{$args[0]} 
+                   : @args
+    );
 
   return $got_arrayref ? $args[0] 
                        : join(' ', @args);
@@ -356,6 +361,29 @@ lossy.
 =cut
 
 sub find_perl_interpreter { return $^X; }
+
+=item localize_file_path
+
+Convert the file path to the local syntax
+
+=cut
+
+sub localize_file_path {
+  my ($self, $path) = @_;
+  $path =~ s/\.\z//;
+  return VMS::Filespec::vmsify($path);
+}
+
+=item localize_dir_path
+
+Convert the directory path to the local syntax
+
+=cut
+
+sub localize_dir_path {
+  my ($self, $path) = @_;
+  return VMS::Filespec::vmspath($path);
+}
 
 =back
 

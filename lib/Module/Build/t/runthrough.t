@@ -3,15 +3,15 @@
 use strict;
 use lib $ENV{PERL_CORE} ? '../lib/Module/Build/t/lib' : 't/lib';
 use MBTest tests => 32;
-use Module::Build;
-use Module::Build::ConfigData;
 
+use_ok 'Module::Build';
+ensure_blib('Module::Build');
+
+use Module::Build::ConfigData;
 my $have_yaml = Module::Build::ConfigData->feature('YAML_support');
 
 #########################
 
-use Cwd ();
-my $cwd = Cwd::cwd;
 my $tmp = MBTest->tmpdir;
 
 use DistGen;
@@ -55,17 +55,8 @@ close FH;
 ---
 $dist->regen;
 
-chdir( $dist->dirname ) or die "Can't chdir to '@{[$dist->dirname]}': $!";
+$dist->chdir_in;
 
-#########################
-
-use Module::Build;
-ok(1);
-
-SKIP: {
-  skip "no blib in core", 1 if $ENV{PERL_CORE};
-  like $INC{'Module/Build.pm'}, qr/\bblib\b/, "Make sure version from blib/ is loaded";
-}
 
 #########################
 
@@ -149,7 +140,7 @@ SKIP: {
 
   SKIP: {
     skip( "not sure if we can create a tarball on this platform", 1 )
-      unless $mb->check_installed_status('Archive::Tar', 0) ||
+      unless $mb->check_installed_version('Archive::Tar', 0) ||
 	     $mb->isa('Module::Build::Platform::Unix');
 
     $mb->add_to_cleanup($mb->dist_dir . ".tar.gz");
@@ -206,7 +197,6 @@ ok ! -e $mb->build_script;
 ok ! -e $mb->config_dir;
 ok ! -e $mb->dist_dir;
 
-chdir( $cwd ) or die "Can''t chdir to '$cwd': $!";
 $dist->remove;
 
 SKIP: {
@@ -227,7 +217,7 @@ echo Hello, World!
   $dist->add_file( 'bin/script.bat', $script_data );
 
   $dist->regen;
-  chdir( $dist->dirname ) or die "Can't chdir to '@{[$dist->dirname]}': $!";
+  $dist->chdir_in;
 
   $mb = Module::Build->new_from_context;
   ok $mb;
@@ -241,13 +231,8 @@ echo Hello, World!
   my $out = slurp( $script_file );
   is $out, $script_data, '  unmodified by pl2bat';
 
-  chdir( $cwd ) or die "Can''t chdir to '$cwd': $!";
   $dist->remove;
 }
 
 # cleanup
-chdir( $cwd ) or die "Can''t chdir to '$cwd': $!";
 $dist->remove;
-
-use File::Path;
-rmtree( $tmp );

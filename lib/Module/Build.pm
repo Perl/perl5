@@ -15,7 +15,7 @@ use Module::Build::Base;
 
 use vars qw($VERSION @ISA);
 @ISA = qw(Module::Build::Base);
-$VERSION = '0.2808_02';
+$VERSION = '0.30';
 $VERSION = eval $VERSION;
 
 # Okay, this is the brute-force method of finding out what kind of
@@ -39,6 +39,7 @@ my %OSTYPES = qw(
 		 openbsd   Unix
 		 netbsd    Unix
 		 dec_osf   Unix
+		 nto       Unix
 		 svr4      Unix
 		 svr5      Unix
 		 sco_sv    Unix
@@ -49,7 +50,9 @@ my %OSTYPES = qw(
 		 cygwin    Unix
 		 os2       Unix
 		 interix   Unix
-		 
+		 gnu       Unix
+		 gnukfreebsd Unix
+
 		 dos       Windows
 		 MSWin32   Windows
 
@@ -557,16 +560,24 @@ F<MANIFEST.SKIP> file (See L<manifest> for details)
 
 [version 0.01]
 
-This will use C<Test::Harness> to run any regression tests and report
-their results.  Tests can be defined in the standard places: a file
-called C<test.pl> in the top-level directory, or several files ending
-with C<.t> in a C<t/> directory.
+This will use C<Test::Harness> or C<TAP::Harness> to run any regression
+tests and report their results. Tests can be defined in the standard
+places: a file called C<test.pl> in the top-level directory, or several
+files ending with C<.t> in a C<t/> directory.
 
 If you want tests to be 'verbose', i.e. show details of test execution
 rather than just summary information, pass the argument C<verbose=1>.
 
 If you want to run tests under the perl debugger, pass the argument
 C<debugger=1>.
+
+If you want to have Module::Build find test files with different file
+name extensions, pass the C<test_file_exts> argument with an array
+of extensions, such as C<[qw( .t .s .z )]>.
+
+If you want test to be run by C<TAP::Harness>, rather than C<Test::Harness>,
+pass the argument C<tap_harness_args> as an array reference of arguments to
+pass to the TAP::Harness constructor.
 
 In addition, if a file called C<visual.pl> exists in the top-level
 directory, this file will be executed as a Perl script and its output
@@ -611,7 +622,7 @@ enumerate them in the test_types parameter.
     ...
     test_types  => {
       special => '.st',
-      author  => '.at',
+      author  => ['.at', '.pt' ],
     },
     ...
 
