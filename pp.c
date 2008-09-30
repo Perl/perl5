@@ -4523,7 +4523,9 @@ PP(pp_push)
 	LEAVE;
 	SPAGAIN;
 	SP = ORIGMARK;
-	PUSHi( AvFILL(ary) + 1 );
+	if (GIMME_V != G_VOID) {
+	    PUSHi( AvFILL(ary) + 1 );
+	}
     }
     else {
 	PL_delaymagic = DM_DELAY;
@@ -4581,7 +4583,9 @@ PP(pp_unshift)
 	}
     }
     SP = ORIGMARK;
-    PUSHi( AvFILL(ary) + 1 );
+    if (GIMME_V != G_VOID) {
+	PUSHi( AvFILL(ary) + 1 );
+    }
     RETURN;
 }
 
