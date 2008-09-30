@@ -4441,7 +4441,7 @@
  *	the system function localtime () accepts, and defaults to 0
  */
 #define LOCALTIME_MAX	2147483647	/**/
-#define LOCALTIME_MIN	-2147483648	/**/
+#define LOCALTIME_MIN	0	/**/
 
 /* USE_64_BIT_INT:
  *	This symbol, if defined, indicates that 64-bit integers should
