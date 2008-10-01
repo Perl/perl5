@@ -170,7 +170,7 @@ based on its command line arguments without relying on the shell. (Similar
 to the C<system(@LIST)> notation.) This is safer and faster than executing
 a single argument pipe-command, but does not allow special shell
 constructs. (It is also not supported on Microsoft Windows, Mac OS Classic
-or RiscOS.)
+or RISC OS.)
 
 Here's an example of C<open '-|'>, which prints a random Unix
 fortune cookie as uppercase:
