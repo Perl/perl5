@@ -74,6 +74,9 @@ if ($TOO_LONG) {
 my @ROOT        = grep { length }   'src', $TOO_LONG ? 'short' : 'long';
 
 my $ZLIB        = eval { require IO::Zlib; 1 } ? 1 : 0;
+my $BZIP        = eval { require IO::Uncompress::Bunzip2;
+                         require IO::Compress::Bzip2; 1 } ? 1 : 0;
+
 my $NO_UNLINK   = $ARGV[0] ? 1 : 0;
 
 ### enable debugging?
@@ -86,8 +89,10 @@ my $TARX        = Archive::Tar->new;
 ### paths to a .tar and .tgz file to use for tests
 my $TAR_FILE        = File::Spec->catfile( @ROOT, 'bar.tar' );
 my $TGZ_FILE        = File::Spec->catfile( @ROOT, 'foo.tgz' );
+my $TBZ_FILE        = File::Spec->catfile( @ROOT, 'foo.tbz' );
 my $OUT_TAR_FILE    = File::Spec->catfile( @ROOT, 'out.tar' );
 my $OUT_TGZ_FILE    = File::Spec->catfile( @ROOT, 'out.tgz' );
+my $OUT_TBZ_FILE    = File::Spec->catfile( @ROOT, 'out.tbz' );
 
 my $COMPRESS_FILE = 'copy';
 $^O eq 'VMS' and $COMPRESS_FILE .= '.';
@@ -149,82 +154,70 @@ chmod 0644, $COMPRESS_FILE;
 }
 
 ### read tests ###
-{   ### normal tar + gz compressed file
-    my $archive         = $TAR_FILE;
-    my $compressed      = $TGZ_FILE;
-    my $tar             = Archive::Tar->new;
-    my $gzip            = 0;
+{   my @to_try = ($TAR_FILE);
+    push @to_try, $TGZ_FILE if $ZLIB;
+    push @to_try, $TBZ_FILE if $BZIP;
 
-    ### check we got the object
-    ok( $tar,                       "Object created" );
-    isa_ok( $tar,                   'Archive::Tar');
+    for my $type( @to_try ) {
 
-    for my $type( $archive, $compressed ) {
-        my $state = $gzip ? 'compressed' : 'uncompressed';
+        ### normal tar + gz compressed file
+        my $tar             = Archive::Tar->new;
 
-        SKIP: {
+        ### check we got the object
+        ok( $tar,                       "Object created" );
+        isa_ok( $tar,                   'Archive::Tar');
 
-            ### skip gz compressed archives wihtout IO::Zlib
-            skip(   "No IO::Zlib - cannot read compressed archives",
-                    4 + 2 * (scalar @EXPECT_NORMAL)
-            ) if( $gzip and !$ZLIB);
+        ### ->read test
+        my @list    = $tar->read( $type );
+        my $cnt     = scalar @list;
+        my $expect  = scalar __PACKAGE__->get_expect();
 
-            ### ->read test
-            {   my @list    = $tar->read( $type );
-                my $cnt     = scalar @list;
-                my $expect  = scalar __PACKAGE__->get_expect();
+        ok( $cnt,           "Reading '$type' using 'read()'" );
+        is( $cnt, $expect,  "   All files accounted for" );
 
-                ok( $cnt,           "Reading $state file using 'read()'" );
-                is( $cnt, $expect,  "   All files accounted for" );
+        for my $file ( @list ) {
+            ok( $file,      "Got File object" );
+            isa_ok( $file,  "Archive::Tar::File" );
 
-                for my $file ( @list ) {
-                    ok( $file,      "Got File object" );
-                    isa_ok( $file,  "Archive::Tar::File" );
-
-                    ### whitebox test -- make sure find_entry gets the
-                    ### right files
-                    for my $test ( $file->full_path, $file ) {
-                        is( $tar->_find_entry( $test ), $file,
-                                    "   Found proper object" );
-                    }
-                    
-                    next unless $file->is_file;
-
-                    my $name = $file->full_path;
-                    my($expect_name, $expect_content) =
-                        get_expect_name_and_contents( $name, \@EXPECT_NORMAL );
-
-                    ### ->fullname!
-                    ok($expect_name,"   Found expected file '$name'" );
-
-                    like($tar->get_content($name), $expect_content,
-                                    "   Content OK" );
-                }
+            ### whitebox test -- make sure find_entry gets the
+            ### right files
+            for my $test ( $file->full_path, $file ) {
+                is( $tar->_find_entry( $test ), $file,
+                            "   Found proper object" );
             }
+            
+            next unless $file->is_file;
 
+            my $name = $file->full_path;
+            my($expect_name, $expect_content) =
+                get_expect_name_and_contents( $name, \@EXPECT_NORMAL );
 
-            ### list_archive test
-            {   my @list    = Archive::Tar->list_archive( $archive );
-                my $cnt     = scalar @list;
-                my $expect  = scalar __PACKAGE__->get_expect();
+            ### ->fullname!
+            ok($expect_name,"   Found expected file '$name'" );
 
-                ok( $cnt,           "Reading $state file using 'list_archive'");
-                is( $cnt, $expect,  "   All files accounted for" );
-
-                for my $file ( @list ) {
-                    next if __PACKAGE__->is_dir( $file ); # directories
-
-                    my($expect_name, $expect_content) =
-                        get_expect_name_and_contents( $file, \@EXPECT_NORMAL );
-
-                    ok( $expect_name,
-                                    "   Found expected file '$file'" );
-                }
-            }
+            like($tar->get_content($name), $expect_content,
+                            "   Content OK" );
         }
 
-        ### now we try gz compressed archives
-        $gzip++;
+
+        ### list_archive test
+        {   my @list    = Archive::Tar->list_archive( $type );
+            my $cnt     = scalar @list;
+            my $expect  = scalar __PACKAGE__->get_expect();
+
+            ok( $cnt,           "Reading '$type' using 'list_archive'");
+            is( $cnt, $expect,  "   All files accounted for" );
+
+            for my $file ( @list ) {
+                next if __PACKAGE__->is_dir( $file ); # directories
+
+                my($expect_name, $expect_content) =
+                    get_expect_name_and_contents( $file, \@EXPECT_NORMAL );
+
+                ok( $expect_name,
+                                "   Found expected file '$file'" );
+            }
+        }
     }
 }
 
@@ -433,28 +426,19 @@ SKIP: {
         }
 
         ## write tgz tests
-        {   my $out = $OUT_TGZ_FILE;
+        {   my @out;
+            push @out, [ $OUT_TGZ_FILE => 1             ] if $ZLIB;
+            push @out, [ $OUT_TBZ_FILE => COMPRESS_BZIP ] if $BZIP;
+        
+            for my $entry ( @out ) {
 
-            SKIP: {
-
-                ### weird errors from scalar(@x,@y,@z), dot it this way...
-                my $file_cnt;
-                map { $file_cnt += scalar @$_ } \@EXPECT_NORMAL, \@EXPECTBIN,
-                                                \@EXPECTX;
-
-                my $cnt =   5 +                 # the tests below
-                            (5*3*2) +           # check_tgz_file
-                                                # check_tar_object fixed tests
-                            (3 * 2 * (2 + $file_cnt)) +
-                            ((4*$file_cnt) + 1);# check_tar_extract tests
-
-                skip( "No IO::Zlib - cannot write compressed archives", $cnt )
-                    unless $ZLIB;
+                my( $out, $compression ) = @$entry;
 
                 {   ### write()
-                    ok($obj->write($out, 1),
-                                    "Writing compressed file using 'write'" );
-                    check_tgz_file( $out );
+                    ok($obj->write($out, $compression),
+                                    "Writing compressed file '$out' using 'write'" );
+                    check_compressed_file( $out );
+
                     check_tar_object( $obj, $struct );
 
                     ### now read it in again
@@ -471,12 +455,12 @@ SKIP: {
                 }
 
                 {   ### create_archive()
-                    ok( Archive::Tar->create_archive( $out, 1, $COMPRESS_FILE ),
-                                    "Wrote gzip file using 'create_archive'" );
-                    check_tgz_file( $out );
+                    ok( Archive::Tar->create_archive( $out, $compression, $COMPRESS_FILE ),
+                                    "Wrote '$out' using 'create_archive'" );
+                    check_compressed_file( $out );
 
                     ### now extract it again
-                    ok( Archive::Tar->extract_archive( $out, 1 ),
+                    ok( Archive::Tar->extract_archive( $out, $compression ),
                                     "Extracted file using 'extract_archive'");
                     rm( $out ) unless $NO_UNLINK;
                 }
@@ -645,10 +629,10 @@ sub check_tar_file {
     return $contents;
 }
 
-sub check_tgz_file {
+sub check_compressed_file {
     my $file                = shift;
     my $filesize            = -s $file;
-    my $contents            = slurp_gzfile( $file );
+    my $contents            = slurp_compressed_file( $file );
     my $uncompressedsize    = length $contents;
 
     ok( defined( $contents ),   "   File read and uncompressed" );
@@ -762,18 +746,29 @@ sub slurp_binfile {
     return <$fh>;
 }
 
-sub slurp_gzfile {
+sub slurp_compressed_file {
     my $file = shift;
+    my $fh;
+    
+    ### bzip2
+    if( $file =~ /.tbz$/ ) {
+        require IO::Uncompress::Bunzip2;
+        $fh = IO::Uncompress::Bunzip2->new( $file )    
+            or warn( "Error opening '$file' with IO::Uncompress::Bunzip2" ), return
+
+    ### gzip
+    } else {
+        require IO::Zlib;
+        $fh = new IO::Zlib;
+        $fh->open( $file, READ_ONLY->(1) )
+            or warn( "Error opening '$file' with IO::Zlib" ), return
+    }        
+
     my $str;
     my $buff;
-
-    require IO::Zlib;
-    my $fh = new IO::Zlib;
-    $fh->open( $file, READ_ONLY->(1) )
-        or warn( "Error opening '$file' with IO::Zlib" ), return undef;
-
     $str .= $buff while $fh->read( $buff, 4096 ) > 0;
     $fh->close();
+
     return $str;
 }
 

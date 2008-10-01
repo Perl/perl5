@@ -1,0 +1,19 @@
+#########################################################################
+This is a binary file that was packed with the 'uupacktool.pl' which
+is included in the Perl distribution.
+
+To unpack this file use the following command:
+
+     uupacktool.pl -u foo.tbz.packed foo.tbz
+
+To recreate it use the following command:
+
+     uupacktool.pl -p foo.tbz foo.tbz.packed
+
+Created at Wed Oct  1 17:24:13 2008
+#########################################################################
+__UU__
+M0EIH.3%!62936>GH,8X``)O[A.90`D!``'^```#O*1X```%`""``E(*JGDA#
+M1H#0Q&F@)%1J8C3$Q,T3`U)1(QL-#P5L`'2A)$,<1C&7N<@%XQ(2UAGTYV56
+MM$I>-BHHJN(9*$J286."<%>*U,.3%6B$*2E6R+DH-6B&?[5DZ(J7DG#H_$@<
+/AE%`D'\7<D4X4)#IZ#&.
