@@ -73,7 +73,8 @@ if ($TOO_LONG) {
 
 my @ROOT        = grep { length }   'src', $TOO_LONG ? 'short' : 'long';
 
-my $ZLIB        = eval { require IO::Zlib; 1 } ? 1 : 0;
+my $ZLIB        = eval { require IO::Zlib;
+                         require IO::Compress::Bzip2; 1 } ? 1 : 0;
 my $BZIP        = eval { require IO::Uncompress::Bunzip2;
                          require IO::Compress::Bzip2; 1 } ? 1 : 0;
 
