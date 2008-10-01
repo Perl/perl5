@@ -1620,11 +1620,17 @@ lib/Archive/Tar/t/01_use.t	Archive::Tar tests
 lib/Archive/Tar/t/02_methods.t	Archive::Tar tests
 lib/Archive/Tar/t/03_file.t	Archive::Tar tests
 lib/Archive/Tar/t/04_resolved_issues.t	Archive::Tar tests
+lib/Archive/Tar/t/05_iter.t	Archive::Tar tests
+lib/Archive/Tar/t/90_symlink.t	Archive::Tar tests
+lib/Archive/Tar/t/src/linktest/linktest_missing_dir.tar.packed	Archive::Tar tests
+lib/Archive/Tar/t/src/linktest/linktest_with_dir.tar.packed	Archive::Tar tests
 lib/Archive/Tar/t/src/long/b	Archive::Tar tests
 lib/Archive/Tar/t/src/long/bar.tar.packed	Archive::Tar tests
+lib/Archive/Tar/t/src/long/foo.tbz.packed	Archive::Tar tests
 lib/Archive/Tar/t/src/long/foo.tgz.packed	Archive::Tar tests
 lib/Archive/Tar/t/src/short/b	Archive::Tar tests
 lib/Archive/Tar/t/src/short/bar.tar.packed	Archive::Tar tests
+lib/Archive/Tar/t/src/short/foo.tbz.packed	Archive::Tar tests
 lib/Archive/Tar/t/src/short/foo.tgz.packed	Archive::Tar tests
 lib/assert.pl			assertion and panic with stack trace
 lib/Attribute/Handlers/Changes	Attribute::Handlers
