@@ -4402,6 +4402,7 @@ PP(pp_gmtime)
     Time64_T when;
     struct TM tmbuf;
     struct TM *err;
+    char *opname = PL_op->op_type == OP_LOCALTIME ? "localtime" : "gmtime";
     static const char * const dayname[] =
 	{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
     static const char * const monname[] =
@@ -4413,8 +4414,14 @@ PP(pp_gmtime)
 	(void)time(&now);
 	when = (Time64_T)now;
     }
-    else
-	when = (Time64_T)SvNVx(POPs);
+    else {
+	double now = POPn;
+	when = (Time64_T)now;
+	if( when != now ) {
+	    Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
+			"%.0f too large for %s", now, opname);
+	}
+    }
 
     if (PL_op->op_type == OP_LOCALTIME)
         err = localtime64_r(&when, &tmbuf);
@@ -4422,7 +4429,6 @@ PP(pp_gmtime)
 	err = gmtime64_r(&when, &tmbuf);
 
     if( err == NULL ) {
-	char *opname = PL_op->op_type == OP_LOCALTIME ? "localtime" : "gmtime";
 	Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
 		    "%s under/overflowed the year", opname);
     }
@@ -4455,7 +4461,7 @@ PP(pp_gmtime)
 	mPUSHi(tmbuf.tm_hour);
 	mPUSHi(tmbuf.tm_mday);
 	mPUSHi(tmbuf.tm_mon);
-	mPUSHi(tmbuf.tm_year);
+	mPUSHn(tmbuf.tm_year);
 	mPUSHi(tmbuf.tm_wday);
 	mPUSHi(tmbuf.tm_yday);
 	mPUSHi(tmbuf.tm_isdst);
