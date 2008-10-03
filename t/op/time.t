@@ -81,7 +81,7 @@ ok(gmtime() =~ /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)[ ]
 
 # Test gmtime over a range of times.
 {
-    # gm/localtime is limited by the size of tm_year which might be as small as 16 bits
+    # gm/localtime should go all the way from -2**63 to 2**63-1
     my %tests = (
         # time_t         gmtime list                          scalar
         -2**35        => [52, 13, 20, 7, 2, -1019, 5, 65, 0, "Fri Mar  7 20:13:52 881"],
