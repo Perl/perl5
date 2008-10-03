@@ -3970,6 +3970,37 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_telldirproto	HAS_TELLDIR_PROTO	/**/
 
+/* HAS_CTIME64:
+ *	This symbol, if defined, indicates that the ctime64 () routine is
+ *	available to do the 64bit variant of ctime ()
+ */
+/* HAS_LOCALTIME64:
+ *	This symbol, if defined, indicates that the localtime64 () routine is
+ *	available to do the 64bit variant of localtime ()
+ */
+/* HAS_GMTIME64:
+ *	This symbol, if defined, indicates that the gmtime64 () routine is
+ *	available to do the 64bit variant of gmtime ()
+ */
+/* HAS_MKTIME64:
+ *	This symbol, if defined, indicates that the mktime64 () routine is
+ *	available to do the 64bit variant of mktime ()
+ */
+/* HAS_DIFFTIME64:
+ *	This symbol, if defined, indicates that the difftime64 () routine is
+ *	available to do the 64bit variant of difftime ()
+ */
+/* HAS_ASCTIME64:
+ *	This symbol, if defined, indicates that the asctime64 () routine is
+ *	available to do the 64bit variant of asctime ()
+ */
+#$d_ctime64	HAS_CTIME64		/**/
+#$d_localtime64	HAS_LOCALTIME64		/**/
+#$d_gmtime64	HAS_GMTIME64		/**/
+#$d_mktime64	HAS_MKTIME64		/**/
+#$d_difftime64	HAS_DIFFTIME64		/**/
+#$d_asctime64	HAS_ASCTIME64		/**/
+
 /* HAS_TIMEGM:
  *	This symbol, if defined, indicates that the timegm routine is
  *	available to do the opposite of gmtime ()
