@@ -389,6 +389,10 @@ d_archlib (archlib.U):
 	of architecture-dependent library files for $package.  If
 	$archlib is the same as $privlib, then this is set to undef.
 
+d_asctime64 (d_timefuncs64.U):
+	This variable conditionally defines the HAS_ASCTIME64 symbol, which
+	indicates to the C program that the asctime64 () routine is available.
+
 d_asctime_r (d_asctime_r.U):
 	This variable conditionally defines the HAS_ASCTIME_R symbol,
 	which indicates to the C program that the asctime_r()
@@ -563,6 +567,10 @@ d_ctermid_r (d_ctermid_r.U):
 	which indicates to the C program that the ctermid_r()
 	routine is available.
 
+d_ctime64 (d_timefuncs64.U):
+	This variable conditionally defines the HAS_CTIME64 symbol, which
+	indicates to the C program that the ctime64 () routine is available.
+
 d_ctime_r (d_ctime_r.U):
 	This variable conditionally defines the HAS_CTIME_R symbol,
 	which indicates to the C program that the ctime_r()
@@ -587,6 +595,10 @@ d_dbminitproto (d_dbminitproto.U):
 d_difftime (d_difftime.U):
 	This variable conditionally defines the HAS_DIFFTIME symbol, which
 	indicates to the C program that the difftime() routine is available.
+
+d_difftime64 (d_timefuncs64.U):
+	This variable conditionally defines the HAS_DIFFTIME64 symbol, which
+	indicates to the C program that the difftime64 () routine is available.
 
 d_dir_dd_fd (d_dir_dd_fd.U):
 	This variable conditionally defines the HAS_DIR_DD_FD symbol, which
@@ -1140,6 +1152,10 @@ d_gettimeod (d_ftime.U):
 	indicates that the gettimeofday() system call exists (to obtain a
 	sub-second accuracy clock). You should probably include <sys/resource.h>.
 
+d_gmtime64 (d_timefuncs64.U):
+	This variable conditionally defines the HAS_GMTIME64 symbol, which
+	indicates to the C program that the gmtime64 () routine is available.
+
 d_gmtime_r (d_gmtime_r.U):
 	This variable conditionally defines the HAS_GMTIME_R symbol,
 	which indicates to the C program that the gmtime_r()
@@ -1225,6 +1241,10 @@ d_libm_lib_version (d_libm_lib_version.U):
 d_link (d_link.U):
 	This variable conditionally defines HAS_LINK if link() is
 	available to create hard links.
+
+d_localtime64 (d_timefuncs64.U):
+	This variable conditionally defines the HAS_LOCALTIME64 symbol, which
+	indicates to the C program that the localtime64 () routine is available.
 
 d_localtime_r (d_localtime_r.U):
 	This variable conditionally defines the HAS_LOCALTIME_R symbol,
@@ -1341,6 +1361,10 @@ d_mkstemps (d_mkstemps.U):
 d_mktime (d_mktime.U):
 	This variable conditionally defines the HAS_MKTIME symbol, which
 	indicates to the C program that the mktime() routine is available.
+
+d_mktime64 (d_timefuncs64.U):
+	This variable conditionally defines the HAS_MKTIME64 symbol, which
+	indicates to the C program that the mktime64 () routine is available.
 
 d_mmap (d_mmap.U):
 	This variable conditionally defines HAS_MMAP if mmap() is

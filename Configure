@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Mon Sep 29 18:55:08 CEST 2008 [metaconfig 3.5 PL0]
+# Generated on Fri Oct  3 17:54:11 CEST 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -778,6 +778,12 @@ d_tcsetpgrp=''
 d_telldirproto=''
 d_time=''
 timetype=''
+d_asctime64=''
+d_ctime64=''
+d_difftime64=''
+d_gmtime64=''
+d_localtime64=''
+d_mktime64=''
 d_timegm=''
 clocktype=''
 d_times=''
@@ -9959,6 +9965,26 @@ eval $inlibc
 
 : see if alarm exists
 set alarm d_alarm
+eval $inlibc
+
+: see if 64bit time functions exists
+
+set ctime64 d_ctime64
+eval $inlibc
+
+set localtime64 d_localtime64
+eval $inlibc
+
+set gmtime64 d_gmtime64
+eval $inlibc
+
+set mktime64 d_mktime64
+eval $inlibc
+
+set difftime64 d_difftime64
+eval $inlibc
+
+set asctime64 d_asctime64
 eval $inlibc
 
 : see if POSIX threads are available
@@ -22062,6 +22088,7 @@ d_accessx='$d_accessx'
 d_aintl='$d_aintl'
 d_alarm='$d_alarm'
 d_archlib='$d_archlib'
+d_asctime64='$d_asctime64'
 d_asctime_r='$d_asctime_r'
 d_atolf='$d_atolf'
 d_atoll='$d_atoll'
@@ -22099,10 +22126,12 @@ d_crypt_r='$d_crypt_r'
 d_csh='$d_csh'
 d_ctermid='$d_ctermid'
 d_ctermid_r='$d_ctermid_r'
+d_ctime64='$d_ctime64'
 d_ctime_r='$d_ctime_r'
 d_cuserid='$d_cuserid'
 d_dbl_dig='$d_dbl_dig'
 d_dbminitproto='$d_dbminitproto'
+d_difftime64='$d_difftime64'
 d_difftime='$d_difftime'
 d_dir_dd_fd='$d_dir_dd_fd'
 d_dirfd='$d_dirfd'
@@ -22217,6 +22246,7 @@ d_getservprotos='$d_getservprotos'
 d_getspnam='$d_getspnam'
 d_getspnam_r='$d_getspnam_r'
 d_gettimeod='$d_gettimeod'
+d_gmtime64='$d_gmtime64'
 d_gmtime_r='$d_gmtime_r'
 d_gnulibc='$d_gnulibc'
 d_grpasswd='$d_grpasswd'
@@ -22237,6 +22267,7 @@ d_lchown='$d_lchown'
 d_ldbl_dig='$d_ldbl_dig'
 d_libm_lib_version='$d_libm_lib_version'
 d_link='$d_link'
+d_localtime64='$d_localtime64'
 d_localtime_r='$d_localtime_r'
 d_localtime_r_needs_tzset='$d_localtime_r_needs_tzset'
 d_locconv='$d_locconv'
@@ -22261,6 +22292,7 @@ d_mkdtemp='$d_mkdtemp'
 d_mkfifo='$d_mkfifo'
 d_mkstemp='$d_mkstemp'
 d_mkstemps='$d_mkstemps'
+d_mktime64='$d_mktime64'
 d_mktime='$d_mktime'
 d_mmap='$d_mmap'
 d_modfl='$d_modfl'
