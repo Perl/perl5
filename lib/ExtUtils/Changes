@@ -1,3 +1,44 @@
+6.46  Sat Sep 27 17:34:03 EDT 2008
+    Bug Fixes
+    - Fix META_MERGE for more than one level of hashes.  [rt.cpan.org 39348]
+
+
+6.45_02  Sun Sep  7 13:59:14 PDT 2008
+    Bug Fixes
+    - Updated bundled ExtUtils::Command to 1.14, ExtUtils::Install to
+      1.50 and ExtUtils::Manifest to 1.54
+
+    Test Fixes
+    - t/writemakefile_args.t had the wrong skip amoung causing failures
+      when run without version.pm (mostly 5.6 users)
+
+
+6.45_01  Sat Sep  6 03:19:03 PDT 2008
+    New Features
+    * META_ADD and META_MERGE have been added to manipulate the META.yml.
+      Thanks to Adriano Ferreira.                       [rt.cpan.org 21282]
+    - META.yml now includes configure_requires ExtUtils::MakeMaker by
+      default.                                          [rt.cpan.org 32337]
+    - META.yml now excludes t/ and inc/ from indexing by default.
+    - META.yml license is now "unknown" instead of undef if a LICENSE is not
+      given.
+    - META.yml now conforms to version 1.4 of the spec.
+
+    Bug Fixes
+    - Make @MM_Sections and @Overridable global again.  It's an undocumented
+      but used way to manipulate MakeMaker behavior. [rt.cpan.org 36047]
+
+    Portability
+    * Changed the name/dmake test in MM_Win32.pm to use regexs to that
+      they are able to handle Perl on a Stick absolute paths.
+
+
+6.44  Thu Feb 28 16:06:04 PST 2008
+    Bug Fixes
+    * Updated bundled ExtUtils::Install to 1.45 which should fix some
+      Cygwin issues. [rt.cpan.org 33291]
+
+
 6.43_01  Tue Jan  1 16:06:47 PST 2008
     Bug Fixes
     * Change the "is this really a Perl core library directory" checks to

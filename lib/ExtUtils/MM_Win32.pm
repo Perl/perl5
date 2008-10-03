@@ -27,7 +27,7 @@ use ExtUtils::MakeMaker qw( neatvalue );
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 our @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
-our $VERSION = '6.44';
+our $VERSION = '6.46';
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 
@@ -129,9 +129,9 @@ sub init_DIRFILESEP {
     my $make = $self->make;
 
     # The ^ makes sure its not interpreted as an escape in nmake
-    $self->{DIRFILESEP} = $make eq 'nmake' ? '^\\' :
-                          $make eq 'dmake' ? '\\\\'
-                                           : '\\';
+    $self->{DIRFILESEP} = $self->is_make_type('nmake') ? '^\\' :
+                          $self->is_make_type('dmake') ? '\\\\'
+                                                       : '\\';
 }
 
 =item B<init_others>
@@ -234,7 +234,7 @@ sub special_targets {
 
     my $make_frag = $self->SUPER::special_targets;
 
-    $make_frag .= <<'MAKE_FRAG' if $self->make eq 'dmake';
+    $make_frag .= <<'MAKE_FRAG' if $self->is_make_type('dmake');
 .USESHELL :
 MAKE_FRAG
 
@@ -329,7 +329,7 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)$(DFSEP).
     } elsif ($BORLAND) {
       push(@m,
        q{	$(LD) $(LDDLFLAGS) $(OTHERLDFLAGS) }.$ldfrom.q{,$@,,}
-       .($self->make eq 'dmake' 
+       .($self->is_make_type('dmake')
                 ? q{$(PERL_ARCHIVE:s,/,\,) $(LDLOADLIBS:s,/,\,) }
 		 .q{$(MYEXTLIB:s,/,\,),$(EXPORT_LIST:s,/,\,)}
 		: q{$(subst /,\,$(PERL_ARCHIVE)) $(subst /,\,$(LDLOADLIBS)) }
@@ -417,7 +417,7 @@ banner.
 
 sub pasthru {
     my($self) = shift;
-    return "PASTHRU = " . ($self->make eq 'nmake' ? "-nologo" : "");
+    return "PASTHRU = " . ($self->is_make_type('nmake') ? "-nologo" : "");
 }
 
 
@@ -456,7 +456,7 @@ sub quote_literal {
     # quotes; however it transforms {{ into { either inside and outside double
     # quotes.  It also translates }} into }.  The escaping below is not
     # 100% correct.
-    if( $self->make eq 'dmake' ) {
+    if( $self->is_make_type('dmake') ) {
         $text =~ s/{/{{/g;
         $text =~ s/}}/}}}/g;
     }
@@ -492,7 +492,7 @@ NOTE: This only works with simple relative directories.  Throw it an absolute di
 sub cd {
     my($self, $dir, @cmds) = @_;
 
-    return $self->SUPER::cd($dir, @cmds) unless $self->make eq 'nmake';
+    return $self->SUPER::cd($dir, @cmds) unless $self->is_make_type('nmake');
 
     my $cmd = join "\n\t", map "$_", @cmds;
 
@@ -560,6 +560,11 @@ OPTIMIZE = $self->{OPTIMIZE}
 PERLTYPE = $self->{PERLTYPE}
 };
 
+}
+
+sub is_make_type {
+    my($self, $type) = @_;
+    return !! ($self->make =~ /\b$type(?:\.exe)?$/);
 }
 
 1;

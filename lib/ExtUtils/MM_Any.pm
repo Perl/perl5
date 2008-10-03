@@ -1,7 +1,7 @@
 package ExtUtils::MM_Any;
 
 use strict;
-our $VERSION = '6.44';
+our $VERSION = '6.46';
 
 use Carp;
 use File::Spec;
@@ -732,47 +732,11 @@ metafile :
 	$(NOECHO) $(NOOP)
 MAKE_FRAG
 
-    my $prereq_pm = '';
-    foreach my $mod ( sort { lc $a cmp lc $b } keys %{$self->{PREREQ_PM}} ) {
-        my $ver = $self->{PREREQ_PM}{$mod};
-        $prereq_pm .= sprintf "\n    %-30s %s", "$mod:", $ver;
-    }
-
-    my $author_value = defined $self->{AUTHOR}
-        ? "\n    - $self->{AUTHOR}"
-        : undef;
-
-    # Use a list to preserve order.
-    my @meta_to_mm = (
-        name         => $self->{DISTNAME},
-        version      => $self->{VERSION},
-        abstract     => $self->{ABSTRACT},
-        license      => $self->{LICENSE},
-        author       => $author_value,
-        generated_by => 
-                "ExtUtils::MakeMaker version $ExtUtils::MakeMaker::VERSION",
-        distribution_type => $self->{PM} ? 'module' : 'script',
+    my @metadata   = $self->metafile_data(
+        $self->{META_ADD}   || {},
+        $self->{META_MERGE} || {},
     );
-
-    my $meta = "--- #YAML:1.0\n";
-
-    while( @meta_to_mm ) {
-        my($key, $val) = splice @meta_to_mm, 0, 2;
-
-        $val = '~' unless defined $val;
-
-        $meta .= sprintf "%-20s %s\n", "$key:", $val;
-    };
-
-    $meta .= <<"YAML";
-requires:     $prereq_pm
-meta-spec:
-    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
-    version: 1.3
-YAML
-
-    $meta .= $self->{EXTRA_META} if $self->{EXTRA_META};
-
+    my $meta       = $self->metafile_file(@metadata);
     my @write_meta = $self->echo($meta, 'META_new.yml');
 
     return sprintf <<'MAKE_FRAG', join("\n\t", @write_meta);
@@ -781,6 +745,274 @@ metafile : create_distdir
 	%s
 	-$(NOECHO) $(MV) META_new.yml $(DISTVNAME)/META.yml
 MAKE_FRAG
+
+}
+
+
+=begin private
+
+=head3 _sort_pairs
+
+    my @pairs = _sort_pairs($sort_sub, \%hash);
+
+Sorts the pairs of a hash based on keys ordered according 
+to C<$sort_sub>.
+
+=end private
+
+=cut
+
+sub _sort_pairs {
+    my $sort  = shift;
+    my $pairs = shift;
+    return map  { $_ => $pairs->{$_} }
+           sort $sort
+           keys %$pairs;
+}
+
+
+# Taken from Module::Build::Base
+sub _hash_merge {
+    my ($self, $h, $k, $v) = @_;
+    if (ref $h->{$k} eq 'ARRAY') {
+        push @{$h->{$k}}, ref $v ? @$v : $v;
+    } elsif (ref $h->{$k} eq 'HASH') {
+        $self->_hash_merge($h->{$k}, $_, $v->{$_}) foreach keys %$v;
+    } else {
+        $h->{$k} = $v;
+    }
+}
+
+
+=head3 metafile_data
+
+    my @metadata_pairs = $mm->metafile_data(\%meta_add, \%meta_merge);
+
+Returns the data which MakeMaker turns into the META.yml file.
+
+Values of %meta_add will overwrite any existing metadata in those
+keys.  %meta_merge will be merged with them.
+
+=cut
+
+sub metafile_data {
+    my $self = shift;
+    my($meta_add, $meta_merge) = @_;
+
+    # The order in which standard meta keys should be written.
+    my @meta_order = qw(
+        name
+        version
+        abstract
+        author
+        license
+        distribution_type
+
+        configure_requires
+        build_requires
+        requires
+
+        resources
+
+        provides
+        no_index
+
+        generated_by
+        meta-spec
+    );
+
+    my %meta = (
+        name         => $self->{DISTNAME},
+        version      => $self->{VERSION},
+        abstract     => $self->{ABSTRACT},
+        license      => $self->{LICENSE} || 'unknown',
+        distribution_type => $self->{PM} ? 'module' : 'script',
+
+        configure_requires => {
+            'ExtUtils::MakeMaker'       => 0
+        },
+
+        no_index     => {
+            directory   => [qw(t inc)]
+        },
+
+        generated_by => "ExtUtils::MakeMaker version $ExtUtils::MakeMaker::VERSION",
+        'meta-spec'  => {
+            url         => 'http://module-build.sourceforge.net/META-spec-v1.4.html', 
+            version     => 1.4
+        },
+    );
+    $meta{author}   = defined $self->{AUTHOR}    ? [$self->{AUTHOR}] : [];
+    $meta{requires} = $self->{PREREQ_PM} if defined $self->{PREREQ_PM};
+
+    while( my($key, $val) = each %$meta_add ) {
+        $meta{$key} = $val;
+    }
+
+    while( my($key, $val) = each %$meta_merge ) {
+        $self->_hash_merge(\%meta, $key, $val);
+    }
+
+    my @meta_pairs;
+
+    # Put the standard keys first in the proper order.
+    for my $key (@meta_order) {
+        next unless exists $meta{$key};
+
+        push @meta_pairs, $key, delete $meta{$key};
+    }
+
+    # Then tack everything else onto the end, alpha sorted.
+    for my $key (sort {lc $a cmp lc $b} keys %meta) {
+        push @meta_pairs, $key, $meta{$key};
+    }
+
+    return @meta_pairs
+}
+
+=begin private
+
+=head3 _dump_hash
+
+    $yaml = _dump_hash(\%options, %hash);
+
+Implements a fake YAML dumper for a hash given
+as a list of pairs. No quoting/escaping is done. Keys
+are supposed to be strings. Values are undef, strings, 
+hash refs or array refs of strings.
+
+Supported options are:
+
+    delta => STR - indentation delta
+    use_header => BOOL - whether to include a YAML header
+    indent => STR - a string of spaces 
+          default: ''
+
+    max_key_length => INT - maximum key length used to align
+        keys and values of the same hash
+        default: 20
+    key_sort => CODE - a sort sub 
+            It may be undef, which means no sorting by keys
+        default: sub { lc $a cmp lc $b }
+
+    customs => HASH - special options for certain keys 
+           (whose values are hashes themselves)
+        may contain: max_key_length, key_sort, customs
+
+=end private
+
+=cut
+
+sub _dump_hash {
+    croak "first argument should be a hash ref" unless ref $_[0] eq 'HASH';
+    my $options = shift;
+    my %hash = @_;
+
+    # Use a list to preserve order.
+    my @pairs;
+
+    my $k_sort 
+        = exists $options->{key_sort} ? $options->{key_sort} 
+                                      : sub { lc $a cmp lc $b };
+    if ($k_sort) {
+        croak "'key_sort' should be a coderef" unless ref $k_sort eq 'CODE';
+        @pairs = _sort_pairs($k_sort, \%hash);
+    } else { # list of pairs, no sorting
+        @pairs = @_;
+    }
+
+    my $yaml     = $options->{use_header} ? "--- #YAML:1.0\n" : '';
+    my $indent   = $options->{indent} || '';
+    my $k_length = min(
+        ($options->{max_key_length} || 20),
+        max(map { length($_) + 1 } grep { !ref $hash{$_} } keys %hash)
+    );
+    my $customs  = $options->{customs} || {};
+
+    # printf format for key
+    my $k_format = "%-${k_length}s";
+
+    while( @pairs ) {
+        my($key, $val) = splice @pairs, 0, 2;
+        $val = '~' unless defined $val;
+        if(ref $val eq 'HASH') {
+            if ( keys %$val ) {
+                my %k_options = ( # options for recursive call
+                    delta => $options->{delta},
+                    use_header => 0,
+                    indent => $indent . $options->{delta},
+                );
+                if (exists $customs->{$key}) {
+                    my %k_custom = %{$customs->{$key}};
+                    foreach my $k qw(key_sort max_key_length customs) {
+                        $k_options{$k} = $k_custom{$k} if exists $k_custom{$k};
+                    }
+                }
+                $yaml .= $indent . "$key:\n" 
+                  . _dump_hash(\%k_options, %$val);
+            }
+            else {
+                $yaml .= $indent . "$key:  {}\n";
+            }
+        }
+        elsif (ref $val eq 'ARRAY') {
+            if( @$val ) {
+                $yaml .= $indent . "$key:\n";
+
+                for (@$val) {
+                    croak "only nested arrays of non-refs are supported" if ref $_;
+                    $yaml .= $indent . $options->{delta} . "- $_\n";
+                }
+            }
+            else {
+                $yaml .= $indent . "$key:  []\n";
+            }
+        }
+        elsif( ref $val and !blessed($val) ) {
+            croak "only nested hashes, arrays and objects are supported";
+        }
+        else {  # if it's an object, just stringify it
+            $yaml .= $indent . sprintf "$k_format  %s\n", "$key:", $val;
+        }
+    };
+
+    return $yaml;
+
+}
+
+sub blessed {
+    return eval { $_[0]->isa("UNIVERSAL"); };
+}
+
+sub max {
+    return (sort { $b <=> $a } @_)[0];
+}
+
+sub min {
+    return (sort { $a <=> $b } @_)[0];
+}
+
+=head3 metafile_file
+
+    my $meta_yml = $mm->metafile_file(@metadata_pairs);
+
+Turns the @metadata_pairs into YAML.
+
+This method does not implement a complete YAML dumper, being limited
+to dump a hash with values which are strings, undef's or nested hashes
+and arrays of strings. No quoting/escaping is done.
+
+=cut
+
+sub metafile_file {
+    my $self = shift;
+
+    my %dump_options = (
+        use_header => 1, 
+        delta      => ' ' x 4, 
+        key_sort   => undef,
+    );
+    return _dump_hash(\%dump_options, @_);
 
 }
 
