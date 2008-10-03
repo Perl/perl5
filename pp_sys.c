@@ -4415,11 +4415,15 @@ PP(pp_gmtime)
 	when = (Time64_T)now;
     }
     else {
-	double now = POPn;
-	when = (Time64_T)now;
-	if( when != now ) {
+	/* XXX POPq uses an SvIV so it won't work with 32 bit integer scalars
+	   using a double causes an unfortunate loss of accuracy on high numbers.
+	   What we really need is an SvQV.
+	*/
+	double input = POPn;
+	when = (Time64_T)input;
+	if( when != input ) {
 	    Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
-			"%.0f too large for %s", now, opname);
+			"%s(%.0f) too large", opname, input);
 	}
     }
 
@@ -4429,25 +4433,29 @@ PP(pp_gmtime)
 	err = gmtime64_r(&when, &tmbuf);
 
     if( err == NULL ) {
+	/* XXX %lld broken for quads */
 	Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
-		    "%s under/overflowed the year", opname);
+		    "%s(%.0f) failed", opname, (double)when);
     }
 
     if (GIMME != G_ARRAY) {	/* scalar context */
 	SV *tsv;
+	/* XXX newSVpvf()'s %lld type is broken, so cheat with a double */
+	double year = (double)tmbuf.tm_year + 1900;
+
         EXTEND(SP, 1);
         EXTEND_MORTAL(1);
 	if (err == NULL)
 	    RETPUSHUNDEF;
 
-	tsv = Perl_newSVpvf(aTHX_ "%s %s %2d %02d:%02d:%02d %lld",
+	tsv = Perl_newSVpvf(aTHX_ "%s %s %2d %02d:%02d:%02d %.0f",
 			    dayname[tmbuf.tm_wday],
 			    monname[tmbuf.tm_mon],
 			    tmbuf.tm_mday,
 			    tmbuf.tm_hour,
 			    tmbuf.tm_min,
 			    tmbuf.tm_sec,
-			    tmbuf.tm_year + 1900);
+			    year);
 	mPUSHs(tsv);
     }
     else {			/* list context */
