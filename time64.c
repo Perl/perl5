@@ -90,19 +90,26 @@ static const int dow_year_start[SOLAR_CYCLE_LENGTH] = {
 #define IS_LEAP(n)	((!(((n) + 1900) % 400) || (!(((n) + 1900) % 4) && (((n) + 1900) % 100))) != 0)
 #define WRAP(a,b,m)	((a) = ((a) <  0  ) ? ((b)--, (a) + (m)) : (a))
 
-#define SHOULD_USE_SYSTEM_LOCALTIME(a)  (       \
-    USE_SYSTEM_LOCALTIME        &&              \
+#ifdef USE_SYSTEM_LOCALTIME
+#    define SHOULD_USE_SYSTEM_LOCALTIME(a)  (       \
     (a) <= SYSTEM_LOCALTIME_MAX &&              \
     (a) >= SYSTEM_LOCALTIME_MIN                 \
 )
-#define SHOULD_USE_SYSTEM_GMTIME(a)     (       \
-    USE_SYSTEM_GMTIME           &&              \
+#else
+#    define SHOULD_USE_SYSTEM_LOCALTIME(a)      (0)
+#endif
+
+#ifdef USE_SYSTEM_GMTIME
+#    define SHOULD_USE_SYSTEM_GMTIME(a)     (       \
     (a) <= SYSTEM_GMTIME_MAX    &&              \
     (a) >= SYSTEM_GMTIME_MIN                    \
 )
+#else
+#    define SHOULD_USE_SYSTEM_GMTIME(a)         (0)
+#endif
 
 
-static int is_exception_century(Int64 year)
+static int is_exception_century(Year year)
 {
     int is_exception = ((year % 100 == 0) && !(year % 400 == 0));
     /* printf("is_exception_century: %s\n", is_exception ? "yes" : "no"); */
@@ -112,9 +119,9 @@ static int is_exception_century(Int64 year)
 
 
 Time64_T timegm64(struct TM *date) {
-    int   days    = 0;
-    Int64 seconds = 0;
-    Int64 year;
+    int      days    = 0;
+    Time64_T seconds = 0;
+    Year     year;
 
     if( date->tm_year > 70 ) {
         year = 70;
@@ -142,7 +149,7 @@ Time64_T timegm64(struct TM *date) {
     seconds += date->tm_min * 60;
     seconds += date->tm_sec;
 
-    return((Time64_T)seconds);
+    return(seconds);
 }
 
 
@@ -352,9 +359,9 @@ struct tm * fake_gmtime_r(const time_t *clock, struct tm *result) {
 struct TM *gmtime64_r (const Time64_T *in_time, struct TM *p)
 {
     int v_tm_sec, v_tm_min, v_tm_hour, v_tm_mon, v_tm_wday;
-    Int64 v_tm_tday;
+    Time64_T v_tm_tday;
     int leap;
-    Int64 m;
+    Time64_T m;
     Time64_T time = *in_time;
     Year year = 70;
     int cycles = 0;
@@ -406,7 +413,7 @@ struct TM *gmtime64_r (const Time64_T *in_time, struct TM *p)
 
     if (m >= 0) {
         /* Gregorian cycles, this is huge optimization for distant times */
-        cycles = floor(m / (Time64_T) days_in_gregorian_cycle);
+        cycles = m / (Time64_T) days_in_gregorian_cycle;
         if( cycles ) {
             m -= (cycles * (Time64_T) days_in_gregorian_cycle);
             year += (cycles * years_in_gregorian_cycle);
@@ -430,7 +437,7 @@ struct TM *gmtime64_r (const Time64_T *in_time, struct TM *p)
         year--;
 
         /* Gregorian cycles */
-        cycles = ceil(m / (Time64_T) days_in_gregorian_cycle) + 1;
+        cycles = (m / (Time64_T) days_in_gregorian_cycle) + 1;
         if( cycles ) {
             m -= (cycles * (Time64_T) days_in_gregorian_cycle);
             year += (cycles * years_in_gregorian_cycle);
@@ -461,10 +468,14 @@ struct TM *gmtime64_r (const Time64_T *in_time, struct TM *p)
         return NULL;
     }
 
+    /* At this point m is less than a year so casting to an int is safe */
     p->tm_mday = (int) m + 1;
-    p->tm_yday = (int) julian_days_by_month[leap][v_tm_mon] + m;
-    p->tm_sec = v_tm_sec, p->tm_min = v_tm_min, p->tm_hour = v_tm_hour,
-        p->tm_mon = v_tm_mon, p->tm_wday = v_tm_wday;
+    p->tm_yday = julian_days_by_month[leap][v_tm_mon] + (int)m;
+    p->tm_sec  = v_tm_sec;
+    p->tm_min  = v_tm_min;
+    p->tm_hour = v_tm_hour;
+    p->tm_mon  = v_tm_mon;
+    p->tm_wday = v_tm_wday;
 
     assert(check_tm(p));
 
@@ -503,7 +514,7 @@ struct TM *localtime64_r (const Time64_T *time, struct TM *local_tm)
         gm_tm.tm_year < (1902 - 1900)
        )
     {
-        gm_tm.tm_year = safe_year(gm_tm.tm_year + 1900) - 1900;
+        gm_tm.tm_year = safe_year((Year)(gm_tm.tm_year + 1900)) - 1900;
     }
 
     safe_time = timegm64(&gm_tm);
