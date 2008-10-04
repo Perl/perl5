@@ -1860,7 +1860,10 @@ platforms.  See L<File::Glob> for portability information.
 
 =item gmtime
 
-gmtime() has a range of about 2 billion years before and after 1970.
+In theory, gmtime() is reliable from -2**63 to 2**63-1.  However,
+because work arounds in the implementation use floating point numbers,
+it will become inaccurate as the time gets larger.  This is a bug and
+will be fixed in the future.
 
 =item ioctl FILEHANDLE,FUNCTION,SCALAR
 

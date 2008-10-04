@@ -7,6 +7,13 @@
    Sensible defaults provided.
 */
 
+/* Debugging
+   TIME_64_DEBUG
+   Define if you want debugging messages
+*/
+/* #define TIME_64_DEBUG */
+
+
 /* INT_64_T
    A 64 bit integer type to use to store time and others.
    Must be defined.

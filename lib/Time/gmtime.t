@@ -9,7 +9,7 @@ BEGIN {
 
 my(@times, @methods);
 BEGIN {
-    @times   = (-2**33, -2**31-1, 0, 2**31-1, 2**33, time);
+    @times   = (-2**62, -2**50, -2**33, -2**31-1, -1, 0, 1, 2**31-1, 2**33, 2**50, 2**62, time);
     @methods = qw(sec min hour mday mon year wday yday isdst);
 
     plan tests => (@times * @methods) + 1;
@@ -17,7 +17,6 @@ BEGIN {
     use_ok Time::gmtime;
 }
 
-# Perl has its own gmtime() so it's safe to do negative times.
 for my $time (@times) {
     my $gmtime = gmtime $time;          # This is the OO gmtime.
     my @gmtime = CORE::gmtime $time;    # This is the gmtime function
