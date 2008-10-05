@@ -9625,7 +9625,7 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
     npar = r->nparens+1;
     len = ProgLen(ri);
     
-    Newxc(reti, sizeof(regexp_internal) + (len+1)*sizeof(regnode), char, regexp_internal);
+    Newxc(reti, sizeof(regexp_internal) + len*sizeof(regnode), char, regexp_internal);
     Copy(ri->program, reti->program, len+1, regnode);
     
 
