@@ -9,7 +9,7 @@ use 5.006;
 # Broken out of MakeMaker from version 4.11
 
 use strict;
-our $VERSION = 6.44;
+our $VERSION = 6.46;
 
 use Config;
 use Cwd 'cwd';
@@ -127,7 +127,7 @@ sub _unix_os2_ext {
 	    } elsif (-f ($fullname="$thispth/lib$thislib.$so")
 		 && (($Config{'dlsrc'} ne "dl_dld.xs") || ($thislib eq "m"))){
 	    } elsif (-f ($fullname="$thispth/lib${thislib}_s$Config_libext")
-                 && (! $Config{'archname'} =~ /RM\d\d\d-svr4/)
+                 && ($Config{'archname'} !~ /RM\d\d\d-svr4/)
 		 && ($thislib .= "_s") ){ # we must explicitly use _s version
 	    } elsif (-f ($fullname="$thispth/lib$thislib$Config_libext")){
 	    } elsif (-f ($fullname="$thispth/$thislib$Config_libext")){

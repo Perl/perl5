@@ -2,7 +2,7 @@ package ExtUtils::MakeMaker::vmsish;
 
 use strict;
 
-our $VERSION = 6.44;
+our $VERSION = 6.46;
 
 my $IsVMS = $^O eq 'VMS';
 

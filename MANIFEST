@@ -1581,6 +1581,8 @@ lib/ExtUtils/t/INST.t		Check MakeMaker INST_* macros
 lib/ExtUtils/t/Liblist.t	See if ExtUtils::Liblist works
 lib/ExtUtils/t/make.t		See if make detection works
 lib/ExtUtils/t/maketext_filter.t	See if maketext_filter works
+lib/ExtUtils/t/metafile_data.t	See if META.yml handling works
+lib/ExtUtils/t/metafile_file.t	See if META.yml handling works
 lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
 lib/ExtUtils/t/Mkbootstrap.t	See if ExtUtils::Mkbootstrap works
 lib/ExtUtils/t/MM_Any.t		See if ExtUtils::MM_Any works
