@@ -13,6 +13,10 @@ use warnings;
 use Carp;
 use File::Spec;
 use Config;
+# Similarly Scalar::Util
+# And then we need these games to avoid loading overload, as that will
+# confuse miniperl during the bootstrap of perl.
+my $Scalar_Util_loaded = eval q{ require Scalar::Util; require overload; 1 };
 our(@ISA, @EXPORT, @EXPORT_OK, $VERSION, $Too_Big, $Syscopy_is_copy);
 sub copy;
 sub syscopy;
@@ -24,7 +28,7 @@ sub mv;
 # package has not yet been updated to work with Perl 5.004, and so it
 # would be a Bad Thing for the CPAN module to grab it and replace this
 # module.  Therefore, we set this module's version higher than 2.0.
-$VERSION = '2.12';
+$VERSION = '2.13';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -56,11 +60,16 @@ sub _catname {
 }
 
 # _eq($from, $to) tells whether $from and $to are identical
-# works for strings and references
 sub _eq {
-    return $_[0] == $_[1] if ref $_[0] && ref $_[1];
-    return $_[0] eq $_[1] if !ref $_[0] && !ref $_[1];
-    return "";
+    my ($from, $to) = map {
+        $Scalar_Util_loaded && Scalar::Util::blessed($_)
+	    && overload::Method($_, q{""})
+            ? "$_"
+            : $_
+    } (@_);
+    return '' if ( (ref $from) xor (ref $to) );
+    return $from == $to if ref $from;
+    return $from eq $to;
 }
 
 sub copy {
