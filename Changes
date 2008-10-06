@@ -28,6 +28,603 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.9		Maintenance release working toward v5.8.9
 --------------
 ____________________________________________________________________________
+[ 34467] By: nicholas				   on 2008/10/06  16:31:35
+	Log: Subject: [PATCH] Invalid read in regdupe in maint-5.8
+	     From: Vincent Pit <perl@profvince.com>
+	     Message-ID: <48DBB3EA.7030305@profvince.com>
+	     Date: Thu, 25 Sep 2008 17:53:14 +0200
+	     
+	     which is the logical equivalent to:
+	     
+	     Integrate:
+	     [ 34465]
+	     Integrate:
+	     [ 34464]
+	     Avoid allocating 1 extra regnode when duplicating a regexp.
+	     
+	     See http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2008-09/msg00590.html
+	     and http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2008-10/msg00163.html
+     Branch: maint-5.8/perl
+	  !> regcomp.c
+____________________________________________________________________________
+[ 34462] By: nicholas				   on 2008/10/05  16:38:51
+	Log: Fix RT #59264, where Hans Ginzel notes a reference to VSTRING.
+     Branch: maint-5.8/perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 34461] By: nicholas				   on 2008/10/05  16:28:33
+	Log: Integrate:
+	     [ 34455]
+	     Integrate:
+	     [ 34440]
+	     Upgrade to ExtUtils-MakeMaker-6.46
+	     
+	     Local changes 32905 and 32964 in MM_Unix.pm and 33259 in MM_Unix.t
+	     remain
+	     
+	     [only 33259 in 5.8.x]
+     Branch: maint-5.8/perl
+	  +> lib/ExtUtils/t/metafile_data.t lib/ExtUtils/t/metafile_file.t
+	  !> (integrate 33 files)
+____________________________________________________________________________
+[ 34459] By: nicholas				   on 2008/10/05  15:51:29
+	Log: Integrate:
+	     [ 28936]
+	     Change to sv_reftype return value caused compile for Digest::MD5
+	     with g++ to fail.
+	     
+	     [ 28937]
+	     Change md5sum of MD5.xs after change 28936 (on UNIX, might
+	     need adjustments on other platforms)
+	     
+	     [ 31577]
+	     How this got I got ext/Digest/MD5/t/files.t wrong for EBCDIC, I
+	     do not know.
+     Branch: maint-5.8/perl
+	  !> ext/Digest/MD5/MD5.xs ext/Digest/MD5/t/files.t
+____________________________________________________________________________
+[ 34450] By: nicholas				   on 2008/09/30  17:23:16
+	Log: Integrate:
+	     [ 34445]
+	     Integrate:
+	     [ 34441]
+	     Storable and HP-UX Optimizer don't like eachother on 5.8.x
+	     Dropping optimization level for HP C-ANSI-C to +O1 won't
+	     do too much harm to all other builds, so keep it simple
+	     
+	     [ 34442]
+	     Version up for adding hints/hpux.pl
+     Branch: maint-5.8/perl
+	  +> ext/Storable/hints/hpux.pl
+	  !> MANIFEST ext/Storable/Storable.pm
+____________________________________________________________________________
+[ 34439] By: nicholas				   on 2008/09/29  07:38:35
+	Log: Integrate:
+	     [ 34426]
+	     Integrate:
+	     [ 34416]
+	     pv_uni_display () omitted backslash in output string
+	     
+	     [ 34417]
+	     New XS::APItest's for sv_peek based on my DDumper work
+	     
+	     [ 34418]
+	     Add new test file to MANIFEST. Fix tests for threaded builds.
+	     
+	     [ 34419]
+	     Don't skip exporting Perl_sv_peek in non-DEBUGGING builds since it
+	     is now used in XS::APItest (as of #34417)
+	     
+	     [ 34420]
+	     $! and $1 are PVMG(), but their content is undefined when peeking
+	     
+	     [ 34437]
+	     Integrate:
+	     [ 34433]
+	     $? is PVLV on VMS (and actually, anywhere else where COMPLEX_STATUS is
+	     defined).
+     Branch: maint-5.8/perl
+	  +> ext/XS/APItest/t/svpeek.t
+	  !> MANIFEST ext/XS/APItest/APItest.pm ext/XS/APItest/APItest.xs
+	  !> makedef.pl utf8.c
+____________________________________________________________________________
+[ 34438] By: nicholas				   on 2008/09/28  18:17:03
+	Log: Integrate:
+	     [ 34428]
+	     Integrate:
+	     [ 34423]
+	     Subject: Hints file for MirOS BSD
+	     From: "Chris 'BinGOs' Williams" <chris@bingosnet.co.uk>
+	     Message-ID: <20080925150310.GA30736@klanker.bingosnet.co.uk>
+	     Date: Thu, 25 Sep 2008 16:03:10 +0100
+     Branch: maint-5.8/perl
+	  +> hints/mirbsd.sh
+	  !> MANIFEST
+____________________________________________________________________________
+[ 34436] By: nicholas				   on 2008/09/28  17:54:37
+	Log: Integrate:
+	     [ 34427]
+	     Integrate:
+	     [ 34377]
+	     Subject: [PATCH] Don't reuse temp files in tests
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Message-ID: <1ff86f510809161335j73312da3v90fa6ef0cb8ac7c@mail.gmail.com>
+	     Date: Tue, 16 Sep 2008 16:35:11 -0400
+	     
+	     [ 34400]
+	     Change 30638 to 5.8.x inadvertently introduced (at lest) two
+	     regressions into the regexp engine. Add tests for the constructions
+	     that regressed, to prevent any future change falling foul of the same
+	     problem.
+     Branch: maint-5.8/perl
+	  !> lib/charnames.t lib/strict.t lib/subs.t t/op/re_tests
+____________________________________________________________________________
+[ 34432] By: nicholas				   on 2008/09/27  09:27:08
+	Log: $? is only supposed to be upgraded to PVLV when COMPLEX_STATUS is set.
+	     Revert the conditional accidentally removed with change 25564.
+     Branch: maint-5.8/perl
+	   ! gv.c
+____________________________________________________________________________
+[ 34431] By: nicholas				   on 2008/09/27  08:16:41
+	Log: Integrate:
+	     [ 34401]
+	     Integrate:
+	     [ 34385]
+	     Subject: Fwd: CPAN Upload: S/SA/SAPER/constant-1.16.tar.gz
+	     From: Sébastien Aperghis-Tramoni <maddingue@free.fr>
+	     Date: Sun, 21 Sep 2008 16:13:36 +0200
+	     Message-Id: <5B1668F5-06FA-4104-9966-9727E880C533@free.fr>
+	     
+	     [ 34430]
+	     Integrate:
+	     [ 34373]
+	     "Upgrade" AutoSplit to 1.06.
+     Branch: maint-5.8/perl
+	  !> lib/AutoSplit.pm lib/constant.pm
+____________________________________________________________________________
+[ 34429] By: nicholas				   on 2008/09/26  21:40:27
+	Log: Integrate:
+	     [ 34399]
+	     Integrate:
+	     [ 34387]
+	     Subject: Fwd: CPAN Upload: S/SA/SAPER/Sys-Syslog-0.27.tar.gz
+	     From: Sébastien Aperghis-Tramoni <maddingue@free.fr>
+	     Date: Sun, 21 Sep 2008 19:07:47 +0200
+	     Message-Id: <E10A395B-92A8-4803-8E75-383F7CE8A624@free.fr>
+	     
+	     [ 34424]
+	     Integrate:
+	     [ 34388]
+	     Subject: Fwd: CPAN Upload: S/SA/SAPER/XSLoader-0.09.tar.gz
+	     From: Sébastien Aperghis-Tramoni <maddingue@free.fr>
+	     Date: Sun, 21 Sep 2008 18:31:48 +0200
+	     Message-Id: <D065A3BF-289B-43D4-9F30-D316414C1923@free.fr>
+	     
+	     [ 34392]
+	     Avoid uninitialized warnings from XSLoader
+	     
+	     [ 34402]
+	     Subject:  [perl #59208][PATCH 5.8.x] ext/DynaLoader/t/XSLoader.t assumes dynamic loading
+	     From:  Andy Dougherty <doughera@lafayette.edu>
+	     Date:  Mon, 22 Sep 2008 13:36:57 -0400 (EDT)
+	     Message-ID:  <Pine.LNX.4.64.0809221334120.11020@fractal.phys.lafayette.edu>
+	     
+	     [ 34404]
+	     Fix tests for the case of -Du_usedl
+	     
+	     [ 34422]
+	     Upgrade to XSLoader 0.10.
+     Branch: maint-5.8/perl
+	  !> ext/DynaLoader/XSLoader_pm.PL ext/DynaLoader/t/DynaLoader.t
+	  !> ext/DynaLoader/t/XSLoader.t ext/Sys/Syslog/Changes
+	  !> ext/Sys/Syslog/Makefile.PL ext/Sys/Syslog/Syslog.pm
+	  !> ext/Sys/Syslog/Syslog.xs
+____________________________________________________________________________
+[ 34415] By: nicholas				   on 2008/09/24  14:00:17
+	Log: Integrate:
+	     [ 34413]
+	     Integrate:
+	     [ 34406]
+	     The tests for the -ostash option to B::Concise will have been failing
+	     for -Uusedl since they were added. For now, test with a non-XS module,
+	     and TODO the test with the XS module when usedl is undefined.
+	     
+	     [ 34409]
+	     defined %{$package.'::'} isn't good enough to tell whether a module is
+	     loaded when it's XS and staticly linked to perl.
+     Branch: maint-5.8/perl
+	  !> ext/B/B/Concise.pm ext/B/t/concise.t
+____________________________________________________________________________
+[ 34412] By: nicholas				   on 2008/09/23  20:16:51
+	Log: Integrate:
+	     [ 34411]
+	     Integrate:
+	     [ 34351]
+	     The stash argument to S_isa_lookup() actually never is NULL.
+	     
+	     [ 34352]
+	     As stash can't be NULL, no need to check name_stash is not NULL before
+	     comparing the two, as a NULL == NULL comparison can't happen.
+     Branch: maint-5.8/perl
+	  !> embed.fnc proto.h universal.c
+____________________________________________________________________________
+[ 34407] By: nicholas				   on 2008/09/23  13:31:36
+	Log: Integrate:
+	     [ 34405]
+	     Integrate:
+	     [ 34379]
+	     RE: [perl #58858] Building Perl 5.10.0 in AIX 5.3 using "-Duseshrplib" option --> "ERROR: Undefined symbol: boot_DynaLoader"
+	     From: "Jan Dubois" <jand@activestate.com>
+	     Date: Mon, 15 Sep 2008 17:43:34 -0700
+	     Message-ID: <043301c91795$3fe15df0$bfa419d0$@com>
+	     
+	     [ 34390]
+	     Fix syntax error in makedef.pl introduced by #34379
+     Branch: maint-5.8/perl
+	  !> makedef.pl
+____________________________________________________________________________
+[ 34403] By: nicholas				   on 2008/09/23  09:24:34
+	Log: Subject: [PATCH 5.8.x] Skip t/op/alarm.t on 2003 and Vista
+	     From: "Jan Dubois" <jand@activestate.com>
+	     Message-ID: <007b01c91d19$cf34ed30$6d9ec790$@com>
+	     Date: Mon, 22 Sep 2008 18:15:04 -0700
+     Branch: maint-5.8/perl
+	   ! t/op/alarm.t
+____________________________________________________________________________
+[ 34398] By: nicholas				   on 2008/09/22  13:59:43
+	Log: OK. Right. So HATEFUL PERFORCE can't actually integrate file type
+	     metainformation changes. At least, it FAILs for those which are not
+	     accompanied by file content changes. So I have to duplicate it by
+	     hand here. Pants.
+     Branch: maint-5.8/perl
+	   ! uconfig.h
+____________________________________________________________________________
+[ 34397] By: nicholas				   on 2008/09/22  13:57:21
+	Log: Righto. Let's try 34393 *again* with the most current client...
+	     
+	     Integrate:
+	     [ 32558]
+	     Change uconfig.h to read/write inside the perforce repository.
+     Branch: maint-5.8/perl
+	  !> uconfig.h
+____________________________________________________________________________
+[ 34396] By: nicholas				   on 2008/09/22  13:52:27
+	Log: Revert change 30638, as it introduces subtle bugs in 5.8.x. It was:
+	     
+	     Integrate:
+	     [ 28417]
+	     Subject: [PATCH]: fix: [perl #39583] Pattern Match fails for specific length string
+	     From: demerphq <demerphq@gmail.com>
+	     Date: Fri, 23 Jun 2006 11:54:19 +0200
+	     Message-ID: <9b18b3110606230254m6afd620bjde6322aefda6f199@mail.gmail.com>
+	     
+	     [ 28462]
+	     
+	     From: demerphq <demerphq@gmail.com>
+	     Date: Sun, 2 Jul 2006 15:13:20 +0200
+	     Subject: Re: [PATCH]: fix: [perl #39583] Pattern Match fails for specific length string
+	     Message-ID: <9b18b3110607020613u1ab782dam2c425da61deb1876@mail.gmail.com>
+	     
+	     add test for patch #28417
+     Branch: maint-5.8/perl
+	   ! regexec.c t/op/pat.t
+____________________________________________________________________________
+[ 34395] By: nicholas				   on 2008/09/22  10:08:11
+	Log: microperl should consider itself to be 5.8, not 5.9 or 5.10.
+     Branch: maint-5.8/perl
+	   ! uconfig.h uconfig.sh
+____________________________________________________________________________
+[ 34394] By: nicholas				   on 2008/09/22  09:53:47
+	Log: Subject: no uudmap gen in 5.8.x
+	     From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+	     Message-Id: <200809211238.m8LCcgWr331992@kosh.hut.fi>
+	     Date: Sun, 21 Sep 2008 15:38:42 +0300 (EEST)
+     Branch: maint-5.8/perl
+	   ! Makefile.micro
+____________________________________________________________________________
+[ 34393] By: nicholas				   on 2008/09/22  09:47:52
+	Log: I shouldn't have to integrate this twice. This is a DATA LOSS BUG and
+	     does not make me happy.
+	     
+	     Integrate:
+	     [ 32558]
+	     Change uconfig.h to read/write inside the perforce repository.
+     Branch: maint-5.8/perl
+	  !> uconfig.h
+____________________________________________________________________________
+[ 34382] By: nicholas				   on 2008/09/20  12:33:15
+	Log: Revert the code and test changes of 33727 [integration of 33726 to
+	     maint-5.10, which integrated 33709, 33710, 33724:
+	     
+	     Fix the line-number-in-elsif longstanding bug.
+	     This patch does two things :
+	     - newSTATEOP now nullifies the state op it
+	     just created if OPf_SPECIAL is passed to it
+	     in flags
+	     - the parser now inserts a nullified stateop
+	     in the expression block of an elsif
+	     
+	     ]. Leave perltodo as is - the TODO is done in blead, where it matters.
+     Branch: maint-5.8/perl
+	   ! op.c perly.c perly.y vms/perly_c.vms
+____________________________________________________________________________
+[ 34376] By: nicholas				   on 2008/09/16  16:02:43
+	Log: Integrate:
+	     [ 31966]
+	     Upgrade to Test::Simple 0.72
+	     
+	     [perforce "already opened for branch" caused a change to be missed
+	     from lib/Test/Simple/t/is_deeply_with_threads.t ]
+	     
+	     
+	     [ 33968]
+	     
+	     Just the Test::Builder changes from:
+	     
+	     Integrate:
+	     [ 32880]
+	     Make new regex type be 'REGEXP' and make all core qr//'s be in class Regexp (and related changes)
+	     
+	     [ 33969]
+	     
+	     Integrate:
+	     [ 33340]
+	     Fix Module-Build test that has been failing on Win32
+	     since the upgrade of Test-Harness at #32659
+	     
+	     [ 33391]
+	     Upgrade to Test-Simple-0.75
+	     
+	     [ 33394]
+	     Upgrade to Test-Simple-0.78
+	     
+	     [ 33395]
+	     Hmmm...lib/Test/Builder.pm didn't get updated corectly.  Unfortunately,
+	     the tests didn't seem to catch this.
+	     
+	     [ 33397]
+	     Re-apply change #32880
+	     
+	     [ 33398]
+	     Context fix to make the test pass
+	     
+	     [ 33688]
+	     Sync with CPAN's version of the More.t test in Test::Simple
+	     and delete duplicated test module Dummy.pm. (test now
+	     expected to fail)
+	     
+	     [ 33689]
+	     Adapt properly More.t to run in the core
+	     (like Module::Build does, for example)
+	     
+	     [ 33970]
+	     Integrate:
+	     [ 33690]
+	     Upgrade to Test::Simple 0.80, but keep locally modified More.t
+	     
+	     [ 33691]
+	     Add Dummy.pm from the base CPAN distribution,
+	     and adjust tests accordingly
+	     
+	     [ 33692]
+	     Move the NoExporter test module under Test::Simple
+	     (part of a plan to have modules self contained, and removing test modules from t/lib)
+     Branch: maint-5.8/perl
+	  +> lib/Test/Simple/t/BEGIN_require_ok.t
+	  +> lib/Test/Simple/t/dont_overwrite_die_handler.t
+	  +> lib/Test/Simple/t/lib/NoExporter.pm
+	  +> lib/Test/Simple/t/tbm_doesnt_set_exported_to.t
+	  +> lib/Test/Simple/t/utf8.t lib/base/t/lib/Dummy.pm
+	  +> t/lib/Test/Simple/sample_tests/death_with_handler.plx
+	   - t/lib/Dummy.pm t/lib/NoExporter.pm
+	  !> MANIFEST lib/Test/Builder.pm lib/Test/Builder/Module.pm
+	  !> lib/Test/Builder/Tester.pm lib/Test/More.pm lib/Test/Simple.pm
+	  !> lib/Test/Simple/Changes lib/Test/Simple/t/More.t
+	  !> lib/Test/Simple/t/exit.t lib/Test/Simple/t/filehandles.t
+	  !> lib/Test/Simple/t/is_deeply_with_threads.t
+	  !> lib/Test/Simple/t/maybe_regex.t lib/Test/Simple/t/reset.t
+	  !> lib/Test/Simple/t/todo.t lib/Test/Simple/t/use_ok.t
+	  !> lib/base/t/version.t t/lib/Test/Simple/sample_tests/death.plx
+	  !> t/lib/Test/Simple/sample_tests/last_minute_death.plx
+____________________________________________________________________________
+[ 34375] By: nicholas				   on 2008/09/16  12:41:16
+	Log: Integrate:
+	     [ 34372]
+	     Integrate:
+	     [ 34371]
+	     SEGV in readline with $/ set to a reference, discovered by theorbtwo.
+	     The bug turns out to have been introduced in 2003, with change 18580.
+     Branch: maint-5.8/perl
+	  !> sv.c
+____________________________________________________________________________
+[ 34374] By: nicholas				   on 2008/09/16  11:14:10
+	Log: Bump $warnings::VERSION to 1.05_01 to reflect change 30176.
+     Branch: maint-5.8/perl
+	   ! lib/warnings.pm warnings.pl
+____________________________________________________________________________
+[ 34368] By: nicholas				   on 2008/09/15  19:18:00
+	Log: Bump $B::Assembler::VERSION.
+     Branch: maint-5.8/perl
+	   ! ext/B/B/Assembler.pm
+____________________________________________________________________________
+[ 34367] By: nicholas				   on 2008/09/15  19:10:23
+	Log: Revert change 28337 for B::Bytecode, because it's not correct for 5.8.x.
+     Branch: maint-5.8/perl
+	   ! ext/B/B/Bytecode.pm
+____________________________________________________________________________
+[ 34366] By: nicholas				   on 2008/09/15  18:56:58
+	Log: Bump $Opcode::VERSION by _01 as discussed on the list.
+     Branch: maint-5.8/perl
+	   ! ext/Opcode/Opcode.pm
+____________________________________________________________________________
+[ 34360] By: nicholas				   on 2008/09/13  22:17:33
+	Log: In Perl_pad_add_name(), tidy up some slightly code that became
+	     suboptimally pretty as a result of various merges.
+	     (No less (dis)functional).
+     Branch: maint-5.8/perl
+	   ! pad.c
+____________________________________________________________________________
+[ 34347] By: nicholas				   on 2008/09/11  15:17:43
+	Log: Integrate:
+	     [ 34336]
+	     Integrate:
+	     [ 34318]
+	     Update gellyfish's e-mail.
+	     
+	     [ 34324]
+	     Update AUTHORS
+     Branch: maint-5.8/perl
+	  !> AUTHORS Porting/checkAUTHORS.pl
+____________________________________________________________________________
+[ 34346] By: nicholas				   on 2008/09/11  15:16:28
+	Log: Integrate:
+	     [ 34335]
+	     Integrate:
+	     [ 34272]
+	     Subject: Add missing "a" to binmode documentation in perlfunc.pod
+	     From: Matt Kraai <kraai@ftbfs.org>
+	     Date: Thu, 4 Sep 2008 21:16:54 -0700
+	     Message-ID: <20080905041654.GA4380@ftbfs.org>
+	     
+	     [ 34306]
+	     Two missed s/Autrijus/Audrey/g
+	     
+	     [ 34307]
+	     Fix an inconsistency spotted by David Landgren. (Although this is not
+	     his proffered patch)
+	     
+	     [ 34311]
+	     Subject: [DOC PATCH] av.c - clearify that av_shift returns &PL_sv_undef if array is empty
+	     From: Claes Jakobsson <claes@surfar.nu>
+	     Date: Sat, 9 Aug 2008 11:22:18 +0200
+	     Message-Id: <0726E7A8-C29F-409C-81E6-B464EE6A3DDD@surfar.nu>
+	     
+	     [ 34334]
+	     Correct Audrey's name in traditional and simplified Chinese (with a lot
+	     of help from CL).
+     Branch: maint-5.8/perl
+	  !> README.cn README.tw av.c pod/perlfunc.pod pod/perltodo.pod
+____________________________________________________________________________
+[ 34345] By: nicholas				   on 2008/09/11  15:13:21
+	Log: Integrate:
+	     [ 34340]
+	     Integrate:
+	     [ 34312]
+	     Subject: [perl #57016] debugger: o warn=0 die=0 ignored 
+	     From: "Tye McQueen" (via RT) <perlbug-followup@perl.org>
+	     Date: Wed, 16 Jul 2008 13:02:27 -0700
+	     Message-ID: <rt-3.6.HEAD-9960-1216238547-448.57016-75-0@perl.org>
+     Branch: maint-5.8/perl
+	  !> lib/perl5db.pl
+____________________________________________________________________________
+[ 34344] By: nicholas				   on 2008/09/11  14:36:19
+	Log: Integrate:
+	     [ 34341]
+	     Integrate:
+	     [ 34315]
+	     Make sure temp file has an extension on VMS to work with the new
+	     temp file name generator in t/test.pl
+	     
+	     [ 34316]
+	     Make sure the watchdog requeues itself when sleep() wakes up early
+	     (such as when an alarm fires).  Also, bail out with SIGTERM rather
+	     than SIGKILL on VMS since the latter kills the shell from which
+	     Perl was started.
+	     
+	     [ 34328]
+	     Subject: [PATCH] Fix parallel testing temp filenames
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Message-ID: <1ff86f510809090852radb1044k43ff848c2d1e11fa@mail.gmail.com>
+	     Date: Tue, 9 Sep 2008 11:52:45 -0400
+	     
+	     [ 34337]
+	     Subject: [PATCH] Watchdog re-queue
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Message-ID: <1ff86f510809090654v2de48f1r37499d573f452cdb@mail.gmail.com>
+	     Date: Tue, 9 Sep 2008 09:54:41 -0400
+     Branch: maint-5.8/perl
+	  !> lib/charnames.t lib/strict.t lib/subs.t t/comp/multiline.t
+	  !> t/test.pl
+____________________________________________________________________________
+[ 34343] By: nicholas				   on 2008/09/11  14:14:37
+	Log: Integrate:
+	     [ 34331]
+	     Integrate:
+	     [ 34208]
+	     Subject: Re: Re: [perl #30524] [PATCH] CGI.pm has poor list of temp directories on Windows
+	     From: renee.baecker@smart-websolutions.de
+	     Date: Wed, 20 Aug 2008 11:26:02 +0200 (CEST)
+	     Message-Id: <20080820092602.A87A612001D@rserv16.sitepush.net>
+	     
+	     [ 34278]
+	     Fix a couple of failing CGI.pm tests on Win32
+	     
+	     (My temporary directory is C:\DOCUME~1\shay\LOCALS~1\Temp, so we need
+	     to allow ~ characters.)
+	     
+	     [ 34302]
+	     Upgrade to CGI.pm 3.41
+	     Local change 34208, 34278 remain.
+	     
+	     [ 34320]
+	     Upgrade to CGI.pm 3.42
+	     
+	     [ 34332]
+	     Integrate:
+	     [ 34282]
+	     Subject: [PATCH] bugfix, AutoLoader 0.67
+	     From: Steffen Mueller <wyp3rlx02@sneakemail.com>
+	     Message-ID: <20080905115602.23307.qmail@lists.develooper.com>
+	     Date: Fri, 05 Sep 2008 13:56:01 +0200
+     Branch: maint-5.8/perl
+	  !> lib/AutoLoader.pm lib/AutoLoader/t/01AutoLoader.t lib/CGI.pm
+	  !> lib/CGI/Changes lib/CGI/Pretty.pm lib/CGI/Util.pm
+	  !> lib/CGI/t/upload.t lib/CGI/t/uploadInfo.t
+____________________________________________________________________________
+[ 34327] By: nicholas				   on 2008/09/09  16:08:44
+	Log: Rebuild the change 32469 changelog entry, with a lot of grovelling
+	     using perlbrowse, patch and perforce versions from the time.
+     Branch: maint-5.8/perl
+	   ! Changes
+____________________________________________________________________________
+[ 34326] By: nicholas				   on 2008/09/09  15:19:03
+	Log: Integrate:
+	     [ 34325]
+	     Integrate:
+	     [ 32846]
+	     Build const-(c|xs).inc in IPC::SysV on the fly.
+	     
+	     [ 32847]
+	     Remove IPC::SysV constant files from the MANIFEST.
+     Branch: maint-5.8/perl
+	   - ext/IPC/SysV/const-c.inc ext/IPC/SysV/const-xs.inc
+	  !> MANIFEST ext/IPC/SysV/Makefile.PL
+____________________________________________________________________________
+[ 34323] By: nicholas				   on 2008/09/09  13:56:51
+	Log: Subject: [PATCH] Trivial 5.8.n -> 5.8.n+1 patch for INSTALL
+	     From: Andrew Dougherty <doughera@lafayette.edu>
+	     Message-ID: <Pine.LNX.4.64.0809090902440.14841@fractal.phys.lafayette.edu>
+	     Date: Tue, 9 Sep 2008 09:05:17 -0400 (EDT)
+     Branch: maint-5.8/perl
+	   ! INSTALL
+____________________________________________________________________________
+[ 34313] By: nicholas				   on 2008/09/07  22:03:35
+	Log: Add 3 casts to keep the compiler happy with the Bowdlerised 5.8.x API.
+	     (no adding of 'const')
+     Branch: maint-5.8/perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[ 34304] By: nicholas				   on 2008/09/07  11:59:05
+	Log: "Can't modify division (/) in division (/)"...
+	     Oh, that will be a // operator, then. Oops.
+     Branch: maint-5.8/perl
+	   ! installman
+____________________________________________________________________________
+[ 34301] By: nicholas				   on 2008/09/06  15:50:46
+	Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 34300] By: nicholas				   on 2008/09/06  15:33:22
 	Log: Integrate:
 	     [ 34265]
