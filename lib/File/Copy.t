@@ -14,7 +14,7 @@ use Test::More;
 
 my $TB = Test::More->builder;
 
-plan tests => 91;
+plan tests => 136;
 
 # We're going to override rename() later on but Perl has to see an override
 # at compile time to honor it.
@@ -289,6 +289,52 @@ SKIP: {
     ! -e $_ or unlink $_ or die $! for $src, $copy1, $copy2, $copy3;
 }
 
+{
+    package Crash;
+    # a package overloaded suspiciously like IO::Scalar
+    use overload '""' => sub { ${$_[0]} };
+    use overload 'bool' => sub { 1 };
+    sub new {
+	my ($class, $name) = @_;
+	bless \$name, $class;
+    }
+
+    package Zowie;
+    # a different package overloaded suspiciously like IO::Scalar
+    use overload '""' => sub { ${$_[0]} };
+    use overload 'bool' => sub { 1 };
+    sub new {
+	my ($class, $name) = @_;
+	bless \$name, $class;
+    }
+}
+{
+    my $object = Crash->new('whack_eth');
+    my %what = (plain => "$object",
+		object1 => $object,
+		object2 => Zowie->new('whack_eth'),
+		object2 => Zowie->new('whack_eth'),
+	       );
+
+    my @warnings;
+    local $SIG{__WARN__} = sub {
+	push @warnings, @_;
+    };
+
+    foreach my $left (qw(plain object1 object2)) {
+	foreach my $right (qw(plain object1 object2)) {
+	    @warnings = ();
+	    $! = 0;
+	    is eval {copy $what{$left}, $what{$right}}, 1, "copy $left $right";
+	    is $@, '', 'No croaking';
+	    is $!, '', 'No system call errors';
+	    is @warnings, 1, 'Exactly 1 warning';
+	    like $warnings[0],
+		qr/'$object' and '$object' are identical \(not copied\)/,
+		    'with the text we expect';
+	}
+    }
+}
 
 END {
     1 while unlink "file-$$";
