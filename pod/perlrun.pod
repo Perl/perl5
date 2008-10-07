@@ -341,6 +341,11 @@ that enabled the use of Unicode-aware "wide system call" Win32 APIs.
 This feature was practically unused, however, and the command line
 switch was therefore "recycled".)
 
+B<Note:> Since perl 5.10.0, the -C option can no longer be used
+on the #! line. It wasn't working there anyway, since the standard streams
+are already set up at this point in the execution of the perl interpreter.
+You can use binmode() instead to get the desired behaviour.
+
 =item B<-c>
 X<-c>
 
