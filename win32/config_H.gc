@@ -909,22 +909,25 @@
 /* HAS_QUAD:
  *	This symbol, if defined, tells that there's a 64-bit integer type,
  *	Quad_t, and its unsigned counterpar, Uquad_t. QUADKIND will be one
- *	of QUAD_IS_INT, QUAD_IS_LONG, QUAD_IS_LONG_LONG, or QUAD_IS_INT64_T.
+ *	of QUAD_IS_INT, QUAD_IS_LONG, QUAD_IS_LONG_LONG, QUAD_IS_INT64_T,
+ *	or QUAD_IS___INT64.
  */
-/*#define HAS_QUAD	/**/
+#define HAS_QUAD	/**/
 #ifdef HAS_QUAD
 #   ifndef _MSC_VER
 #	define Quad_t long long	/**/
 #	define Uquad_t unsigned long long	/**/
+#	define QUADKIND 3	/**/
 #   else
 #	define Quad_t __int64	/**/
 #	define Uquad_t unsigned __int64	/**/
+#	define QUADKIND 5	/**/
 #   endif
-#   define QUADKIND 5	/**/
 #   define QUAD_IS_INT	1
 #   define QUAD_IS_LONG	2
 #   define QUAD_IS_LONG_LONG	3
 #   define QUAD_IS_INT64_T	4
+#   define QUAD_IS___INT64	5
 #endif
 
 /* OSNAME:
