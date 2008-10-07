@@ -79,4 +79,4 @@
 #define SYSTEM_GMTIME_MAX       GMTIME_MAX
 #define SYSTEM_GMTIME_MIN       GMTIME_MIN
 
-#endif TIME64_CONFIG_H
+#endif /* TIME64_CONFIG_H */
