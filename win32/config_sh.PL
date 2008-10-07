@@ -136,12 +136,7 @@ if ($opt{uselargefiles} eq 'define' and $opt{cc} ne 'bcc32') {
 # at least the range of that).
 if ($opt{cc} eq 'cl' and $opt{ccversion} =~ /^(\d+)/) {
     my $ccversion = $1;
-    if ($ccversion == 14) {
-	$opt{sGMTIME_max} = 32535244799;
-	$opt{sLOCALTIME_max} = 32535244799;
-    }
-    elsif ($ccversion >= 15) {
-	$opt{sGMTIME_min} = -43200;
+    if ($ccversion >= 14) {
 	$opt{sGMTIME_max} = 32535291599;
 	$opt{sLOCALTIME_max} = 32535244799;
     }
