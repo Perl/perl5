@@ -4430,7 +4430,7 @@
  *	the system function gmtime () accepts, and defaults to 0
  */
 #define GMTIME_MAX	2147483647	/**/
-#define GMTIME_MIN	-2147483648	/**/
+#define GMTIME_MIN	0	/**/
 
 /* LOCALTIME_MAX:
  *	This symbol contains the maximum value for the time_t offset that
