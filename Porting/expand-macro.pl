@@ -44,7 +44,7 @@ if (!@ARGV) {
 
 my $args = '';
 
-my $found_macro;
+my $header;
 while (<>) {
     next unless /^#\s*define\s+$macro\b/;
     my ($def_args) = /^#\s*define\s+$macro\(([^)]*)\)/;
@@ -54,17 +54,18 @@ while (<>) {
 	my $argname = "A0";
 	$args = '(' . join (', ', map {$argname++} 1..@args) . ')';
     }
-    $found_macro++;
+    $header = $ARGV;
     last;
 }
-die "$macro not found\n" unless $found_macro;
+die "$macro not found\n" unless defined $header;
 
 open my $out, '>', $trysource or die "Can't open $trysource: $!";
 
 print $out <<"EOF";
 #include "EXTERN.h"
 #include "perl.h"
-#line 3 "$sentinel"
+#include "$header"
+#line 4 "$sentinel"
 $macro$args
 EOF
 
