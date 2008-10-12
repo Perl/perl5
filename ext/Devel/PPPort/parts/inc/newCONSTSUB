@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 13 $
+##  $Revision: 14 $
 ##  $Author: mhx $
-##  $Date: 2008/01/04 10:47:43 +0100 $
+##  $Date: 2008/10/12 19:02:04 +0200 $
 ##
 ################################################################################
 ##
@@ -30,6 +30,10 @@ newCONSTSUB
 #if { VERSION < 5.004_63 } && { VERSION != 5.004_05 }
 #if { NEED newCONSTSUB }
 
+/* This is just a trick to avoid a dependency of newCONSTSUB on PL_parser */
+/* (There's no PL_parser in perl < 5.005, so this is completely safe)     */
+#define D_PPP_PL_copline PL_copline
+
 void
 newCONSTSUB(HV *stash, const char *name, SV *sv)
 {
@@ -37,7 +41,7 @@ newCONSTSUB(HV *stash, const char *name, SV *sv)
 	HV *old_cop_stash = PL_curcop->cop_stash;
 	HV *old_curstash = PL_curstash;
 	line_t oldline = PL_curcop->cop_line;
-	PL_curcop->cop_line = PL_copline;
+	PL_curcop->cop_line = D_PPP_PL_copline;
 
 	PL_hints &= ~HINT_BLOCK_SCOPE;
 	if (stash)

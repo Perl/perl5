@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 15 $
+##  $Revision: 17 $
 ##  $Author: mhx $
-##  $Date: 2008/01/04 14:54:44 +0100 $
+##  $Date: 2008/10/12 20:53:47 +0200 $
 ##
 ################################################################################
 ##
@@ -24,6 +24,8 @@ PL_DBsingle
 PL_DBsub
 PL_DBtrace
 PL_Sv
+PL_bufend
+PL_bufptr
 PL_compiling
 PL_copline
 PL_curcop
@@ -38,7 +40,11 @@ PL_expect
 PL_hexdigit
 PL_hints
 PL_laststatval
+PL_lex_state
+PL_lex_stuff
+PL_linestr
 PL_na
+PL_parser
 PL_perl_destruct_level
 PL_perldb
 PL_rsfp_filters
@@ -53,12 +59,9 @@ PL_sv_undef
 PL_sv_yes
 PL_tainted
 PL_tainting
+PL_tokenbuf
 PL_signals
 PERL_SIGNALS_UNSAFE_FLAG
-
-=dontwarn
-
-D_PPP_PERL_SIGNALS_INIT
 
 =implementation
 
@@ -97,6 +100,8 @@ __NEED_VAR__ U32 PL_signals = D_PPP_PERL_SIGNALS_INIT;
 #  define PL_DBsub                  DBsub
 #  define PL_DBtrace                DBtrace
 #  define PL_Sv                     Sv
+#  define PL_bufend                 bufend
+#  define PL_bufptr                 bufptr
 #  define PL_compiling              compiling
 #  define PL_copline                copline
 #  define PL_curcop                 curcop
@@ -111,6 +116,9 @@ __NEED_VAR__ U32 PL_signals = D_PPP_PERL_SIGNALS_INIT;
 #  define PL_hexdigit               hexdigit
 #  define PL_hints                  hints
 #  define PL_laststatval            laststatval
+#  define PL_lex_state              lex_state
+#  define PL_lex_stuff              lex_stuff
+#  define PL_linestr                linestr
 #  define PL_na                     na
 #  define PL_perl_destruct_level    perl_destruct_level
 #  define PL_perldb                 perldb
@@ -126,26 +134,75 @@ __NEED_VAR__ U32 PL_signals = D_PPP_PERL_SIGNALS_INIT;
 #  define PL_sv_yes                 sv_yes
 #  define PL_tainted                tainted
 #  define PL_tainting               tainting
+#  define PL_tokenbuf               tokenbuf
 /* Replace: 0 */
 #endif
 
-/* Warning: PL_expect, PL_copline, PL_rsfp, PL_rsfp_filters
- * Do not use this variable. It is internal to the perl parser
- * and may change or even be removed in the future. Note that
- * as of perl 5.9.5 you cannot assign to this variable anymore.
+/* Warning: PL_parser
+ * For perl versions earlier than 5.9.5, this is an always
+ * non-NULL dummy. Also, it cannot be dereferenced. Don't
+ * use it if you can avoid is and unless you absolutely know
+ * what you're doing.
+ * If you always check that PL_parser is non-NULL, you can
+ * define DPPP_PL_parser_NO_DUMMY to avoid the creation of
+ * a dummy parser structure.
  */
 
-/* TODO: cannot assign to these vars; is it worth fixing? */
 #if { VERSION >= 5.9.5 }
-#  define PL_expect         (PL_parser ? PL_parser->expect : 0)
-#  define PL_copline        (PL_parser ? PL_parser->copline : 0)
-#  define PL_rsfp           (PL_parser ? PL_parser->rsfp : (PerlIO *) 0)
-#  define PL_rsfp_filters   (PL_parser ? PL_parser->rsfp_filters : (AV *) 0)
+# ifdef DPPP_PL_parser_NO_DUMMY
+#  define D_PPP_my_PL_parser_var(var) ((PL_parser ? PL_parser : \
+                (croak("panic: PL_parser == NULL in %s:%d", \
+                       __FILE__, __LINE__), (yy_parser *) NULL))->var)
+# else
+#  ifdef DPPP_PL_parser_NO_DUMMY_WARNING
+#   define D_PPP_parser_dummy_warning(var)
+#  else
+#   define D_PPP_parser_dummy_warning(var) \
+             warn("warning: dummy PL_" #var " used in %s:%d", __FILE__, __LINE__),
+#  endif
+#  define D_PPP_my_PL_parser_var(var) ((PL_parser ? PL_parser : \
+                (D_PPP_parser_dummy_warning(var) &DPPP_(dummy_PL_parser)))->var)
+__NEED_DUMMY_VAR__ yy_parser PL_parser;
+# endif
+
+/* PL_expect, PL_copline, PL_rsfp, PL_rsfp_filters, PL_linestr, PL_bufptr, PL_bufend, PL_lex_state, PL_lex_stuff, PL_tokenbuf depends on PL_parser */
+/* Warning: PL_expect, PL_copline, PL_rsfp, PL_rsfp_filters, PL_linestr, PL_bufptr, PL_bufend, PL_lex_state, PL_lex_stuff, PL_tokenbuf
+ * Do not use this variable unless you know exactly what you're
+ * doint. It is internal to the perl parser and may change or even
+ * be removed in the future. As of perl 5.9.5, you have to check
+ * for (PL_parser != NULL) for this variable to have any effect.
+ * An always non-NULL PL_parser dummy is provided for earlier
+ * perl versions.
+ * If PL_parser is NULL when you try to access this variable, a
+ * dummy is being accessed instead and a warning is issued unless
+ * you define DPPP_PL_parser_NO_DUMMY_WARNING.
+ * If DPPP_PL_parser_NO_DUMMY is defined, the code trying to access
+ * this variable will croak with a panic message.
+ */
+
+# define PL_expect         D_PPP_my_PL_parser_var(expect)
+# define PL_copline        D_PPP_my_PL_parser_var(copline)
+# define PL_rsfp           D_PPP_my_PL_parser_var(rsfp)
+# define PL_rsfp_filters   D_PPP_my_PL_parser_var(rsfp_filters)
+# define PL_linestr        D_PPP_my_PL_parser_var(linestr)
+# define PL_bufptr         D_PPP_my_PL_parser_var(bufptr)
+# define PL_bufend         D_PPP_my_PL_parser_var(bufend)
+# define PL_lex_state      D_PPP_my_PL_parser_var(lex_state)
+# define PL_lex_stuff      D_PPP_my_PL_parser_var(lex_stuff)
+# define PL_tokenbuf       D_PPP_my_PL_parser_var(tokenbuf)
+
+#else
+
+/* ensure that PL_parser != NULL and cannot be dereferenced */
+# define PL_parser         ((void *) 1)
+
 #endif
 
 =xsinit
 
 #define NEED_PL_signals
+#define NEED_PL_parser
+#define DPPP_PL_parser_NO_DUMMY_WARNING
 
 =xsmisc
 
@@ -156,8 +213,35 @@ U32 get_PL_signals_1(void)
 
 extern U32 get_PL_signals_2(void);
 extern U32 get_PL_signals_3(void);
+int no_dummy_parser_vars(int);
+int dummy_parser_warning(void);
 
-#define ppp_TESTVAR(var)   STMT_START { mXPUSHi(&var != NULL); count++; } STMT_END
+#define ppp_TESTVAR(var)          STMT_START { mXPUSHi(&var != NULL); count++; } STMT_END
+
+#define ppp_PARSERVAR(type, var)  STMT_START {                   \
+                                    type volatile my_ ## var;    \
+                                    type volatile *my_p_ ## var; \
+                                    my_ ## var = var;            \
+                                    my_p_ ## var = &var;         \
+                                    var = my_ ## var;            \
+                                    var = *my_p_ ## var;         \
+                                    mXPUSHi(&var != NULL);       \
+                                    count++;                     \
+                                  } STMT_END
+
+#if PERL_BCDVERSION < 0x5006000
+# define ppp_expect_t expectation
+#elif PERL_BCDVERSION < 0x5009005
+# define ppp_expect_t int
+#else
+# define ppp_expect_t U8
+#endif
+
+#if PERL_BCDVERSION < 0x5009005
+# define ppp_lex_state_t U32
+#else
+# define ppp_lex_state_t U8
+#endif
 
 =xsubs
 
@@ -210,30 +294,28 @@ PL_Sv()
 		RETVAL
 
 SV *
-PL_copline()
-	CODE:
-		RETVAL = newSViv((IV) PL_copline);
-	OUTPUT:
-		RETVAL
-
-SV *
-PL_expect()
-	CODE:
-		RETVAL = newSViv((IV) PL_expect);
-	OUTPUT:
-		RETVAL
-
-SV *
 PL_rsfp()
+        PREINIT:
+                void * volatile my_rsfp;
+		/* no pointer test, as we don't know the exact type */
 	CODE:
+                my_rsfp = PL_rsfp;
 		RETVAL = newSViv(PL_rsfp != 0);
+                PL_rsfp = my_rsfp;
 	OUTPUT:
 		RETVAL
 
 SV *
-PL_rsfp_filters()
+PL_tokenbuf()
 	CODE:
-		RETVAL = newSViv(PL_rsfp_filters != 0);
+		RETVAL = newSViv(PL_tokenbuf[0]);
+	OUTPUT:
+		RETVAL
+
+SV *
+PL_parser()
+	CODE:
+		RETVAL = newSViv(PL_parser != NULL);
 	OUTPUT:
 		RETVAL
 
@@ -293,9 +375,26 @@ other_variables()
 		ppp_TESTVAR(PL_sv_arenaroot);
 		ppp_TESTVAR(PL_tainted);
 		ppp_TESTVAR(PL_tainting);
+
+		ppp_PARSERVAR(ppp_expect_t, PL_expect);
+		ppp_PARSERVAR(line_t, PL_copline);
+		ppp_PARSERVAR(AV *, PL_rsfp_filters);
+		ppp_PARSERVAR(SV *, PL_linestr);
+		ppp_PARSERVAR(char *, PL_bufptr);
+		ppp_PARSERVAR(char *, PL_bufend);
+		ppp_PARSERVAR(ppp_lex_state_t, PL_lex_state);
+		ppp_PARSERVAR(SV *, PL_lex_stuff);
+
 		XSRETURN(count);
 
-=tests plan => 37
+int
+no_dummy_parser_vars(check)
+	int check
+
+int
+dummy_parser_warning()
+
+=tests plan => 49
 
 ok(Devel::PPPort::compare_PL_signals());
 
@@ -304,14 +403,53 @@ ok(&Devel::PPPort::PL_sv_yes());
 ok(!&Devel::PPPort::PL_sv_no());
 ok(&Devel::PPPort::PL_na("abcd"), 4);
 ok(&Devel::PPPort::PL_Sv(), "mhx");
-ok(defined &Devel::PPPort::PL_copline());
-ok(defined &Devel::PPPort::PL_expect());
 ok(defined &Devel::PPPort::PL_rsfp());
-ok(defined &Devel::PPPort::PL_rsfp_filters());
+ok(defined &Devel::PPPort::PL_tokenbuf());
+ok($] >= 5.009005 || &Devel::PPPort::PL_parser());
 ok(&Devel::PPPort::PL_hexdigit() =~ /^[0-9a-zA-Z]+$/);
 ok(defined &Devel::PPPort::PL_hints());
 ok(&Devel::PPPort::PL_ppaddr("mhx"), "MHX");
 
 for (&Devel::PPPort::other_variables()) {
   ok($_ != 0);
+}
+
+{
+  my @w;
+  my $fail = 0;
+  {
+    local $SIG{'__WARN__'} = sub { push @w, @_ };
+    ok(&Devel::PPPort::dummy_parser_warning());
+  }
+  if ($] >= 5.009005) {
+    ok(@w >= 0);
+    for (@w) {
+      print "# $_";
+      unless (/^warning: dummy PL_bufptr used in.*module3.*:\d+/i) {
+        warn $_;
+        $fail++;
+      }
+    }
+  }
+  else {
+    ok(@w == 0);
+  }
+  ok($fail, 0);
+}
+
+ok(&Devel::PPPort::no_dummy_parser_vars(1) >= ($] < 5.009005 ? 1 : 0));
+
+eval { &Devel::PPPort::no_dummy_parser_vars(0) };
+
+if ($] < 5.009005) {
+  ok($@, '');
+}
+else {
+  if ($@) {
+    print "# $@";
+    ok($@ =~ /^panic: PL_parser == NULL in.*module2.*:\d+/i);
+  }
+  else {
+    ok(1);
+  }
 }

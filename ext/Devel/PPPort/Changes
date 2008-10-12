@@ -1,3 +1,23 @@
+3.14_02 - 2008-10-12
+
+    * added support for the following API
+        my_sprintf
+        PL_linestr
+        PL_bufptr
+        PL_bufend
+        PL_lex_state
+        PL_lex_stuff
+        PL_tokenbuf
+        SvPV_renew
+      (fixes CPAN #39809 and CPAN #39808)
+    * add read/write support for
+        PL_expect
+        PL_copline
+        PL_rsfp
+        PL_rsfp_filters
+      (fixes CPAN #39802)
+    * sync my_snprintf implementation with bleadperl
+
 3.14_01 - 2008-07-11
 
     * resolve CPAN #37451: add PERLIO_FUNCS_DECL and

@@ -4,9 +4,9 @@
 *
 ********************************************************************************
 *
-*  $Revision: 10 $
+*  $Revision: 11 $
 *  $Author: mhx $
-*  $Date: 2008/01/04 10:47:38 +0100 $
+*  $Date: 2008/10/12 20:53:51 +0200 $
 *
 ********************************************************************************
 *
@@ -22,6 +22,7 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+#define NEED_PL_parser
 #define NO_XSLOCKS
 #include "XSUB.h"
 
@@ -62,4 +63,15 @@ void call_newCONSTSUB_3(void)
 U32 get_PL_signals_3(void)
 {
   return PL_signals;
+}
+
+int dummy_parser_warning(void)
+{
+  char * volatile my_bufptr;
+  char * volatile *my_p_bufptr;
+  my_bufptr = PL_bufptr;
+  my_p_bufptr = &PL_bufptr;
+  PL_bufptr = my_bufptr;
+  PL_bufptr = *my_p_bufptr;
+  return &PL_bufptr != NULL;
 }

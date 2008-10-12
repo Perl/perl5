@@ -4,9 +4,9 @@
 *
 ********************************************************************************
 *
-*  $Revision: 10 $
+*  $Revision: 11 $
 *  $Author: mhx $
-*  $Date: 2008/01/04 10:47:38 +0100 $
+*  $Date: 2008/10/12 20:53:51 +0200 $
 *
 ********************************************************************************
 *
@@ -29,6 +29,8 @@
 
 #define NEED_newCONSTSUB_GLOBAL
 #define NEED_PL_signals_GLOBAL
+#define NEED_PL_parser
+#define DPPP_PL_parser_NO_DUMMY
 #include "ppport.h"
 
 void call_newCONSTSUB_2(void)
@@ -39,4 +41,20 @@ void call_newCONSTSUB_2(void)
 U32 get_PL_signals_2(void)
 {
   return PL_signals;
+}
+
+int no_dummy_parser_vars(int check)
+{
+  if (check == 0 || PL_parser)
+  {
+    line_t volatile my_copline;
+    line_t volatile *my_p_copline;
+    my_copline = PL_copline;
+    my_p_copline = &PL_copline;
+    PL_copline = my_copline;
+    PL_copline = *my_p_copline;
+    return 1;
+  }
+
+  return 0;
 }
