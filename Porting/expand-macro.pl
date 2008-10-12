@@ -1,54 +1,44 @@
 #!perl -w
 use strict;
 
+use Pod::Usage;
 use Getopt::Std;
+$Getopt::Std::STANDARD_HELP_VERSION = 1;
 
-use vars qw($trysource $tryout $sentinel);
-$trysource = "try.c";
-$tryout = "try.i";
+my $trysource = "try.c";
+my $tryout = "try.i";
 
-getopts('fF:ekvI:', \my %opt) or usage();
+getopts('fF:ekvI:', \my %opt) or pod2usage();
 
-sub usage {
-    die<<EO_HELP;
-@_;
-usage: $0 [options] <macro-name> [headers]
-options:
-    -f		use 'indent' to format output
-    -F	<tool>	use <tool> to format output  (instead of -f)
-    -e		erase try.[ic] instead of failing when theyre present (errdetect)
-    -k		keep them after generating (for handy inspection)
-    -v		verbose
-    -I <indent-opts>	passed into indent
-EO_HELP
-}
+my($expr, @headers) = @ARGV ? splice @ARGV : "-";
 
-my $macro = shift;
-usage "missing <macro-name>" unless defined $macro;
-
-$sentinel = "$macro expands to";
-
-usage "-f and -F <tool> are exclusive\n" if $opt{f} and $opt{F};
+pod2usage "-f and -F <tool> are exclusive\n" if $opt{f} and $opt{F};
 
 foreach($trysource, $tryout) {
     unlink $_ if $opt{e};
     die "You already have a $_" if -e $_;
 }
 
-if (!@ARGV) {
+if ($expr eq '-') {
+    warn "reading from stdin...\n";
+    $expr = do { local $/; <> };
+}
+
+my($macro, $args) = $expr =~ /^\s*(\w+)((?:\s*\(.*\))?)\s*;?\s*$/s
+    or pod2usage "$expr doesn't look like a macro-name or macro-expression to me";
+
+if (!(@ARGV = @headers)) {
     open my $fh, '<', 'MANIFEST' or die "Can't open MANIFEST: $!";
     while (<$fh>) {
 	push @ARGV, $1 if m!^([^/]+\.h)\t!;
     }
 }
 
-my $args = '';
-
 my $header;
 while (<>) {
     next unless /^#\s*define\s+$macro\b/;
     my ($def_args) = /^#\s*define\s+$macro\(([^)]*)\)/;
-    if (defined $def_args) {
+    if (defined $def_args && !$args) {
 	my @args = split ',', $def_args;
 	print "# macro: $macro args: @args in $_\n" if $opt{v};
 	my $argname = "A0";
@@ -60,6 +50,8 @@ while (<>) {
 die "$macro not found\n" unless defined $header;
 
 open my $out, '>', $trysource or die "Can't open $trysource: $!";
+
+my $sentinel = "$macro expands to";
 
 print $out <<"EOF";
 #include "EXTERN.h"
@@ -106,3 +98,23 @@ unless ($opt{k}) {
 	die "Can't unlink $_" unless unlink $_;
     }
 }
+
+__END__
+
+=head1 NAME
+
+expand-macro.pl - expand C macros using the C preprocessor
+
+=head1 SYNOPSIS
+
+  expand-macro.pl [options] [ < macro-name | macro-expression | - > [headers] ]
+
+  options:
+    -f		use 'indent' to format output
+    -F	<tool>	use <tool> to format output  (instead of -f)
+    -e		erase try.[ic] instead of failing when they're present (errdetect)
+    -k		keep them after generating (for handy inspection)
+    -v		verbose
+    -I <indent-opts>	passed into indent
+
+=cut
