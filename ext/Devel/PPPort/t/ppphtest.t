@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (229) {
+  if (235) {
     load();
-    plan(tests => 229);
+    plan(tests => 235);
   }
 }
 
@@ -50,7 +50,7 @@ package main;
 
 BEGIN {
   if ($ENV{'SKIP_SLOW_TESTS'}) {
-    for (1 .. 229) {
+    for (1 .. 235) {
       skip("skip: SKIP_SLOW_TESTS", 0);
     }
     exit 0;
@@ -307,9 +307,11 @@ ok($o =~ /^Scanning.*file1\.xs/mi);
 ok($o =~ /Analyzing.*file1\.xs/mi);
 ok($o !~ /^Scanning.*file2\.xs/mi);
 ok($o =~ /^Uses newCONSTSUB/m);
+ok($o =~ /^Uses PL_expect/m);
 ok($o =~ /^Uses SvPV_nolen.*depends.*sv_2pv_flags/m);
 ok($o =~ /WARNING: PL_expect/m);
 ok($o =~ /hint for newCONSTSUB/m);
+ok($o =~ /^Analysis completed \(1 warning\)/m);
 ok($o =~ /^Looks good/m);
 
 $o = ppport(qw(--nochanges --nohints file1.xs));
@@ -317,9 +319,11 @@ ok($o =~ /^Scanning.*file1\.xs/mi);
 ok($o =~ /Analyzing.*file1\.xs/mi);
 ok($o !~ /^Scanning.*file2\.xs/mi);
 ok($o =~ /^Uses newCONSTSUB/m);
+ok($o =~ /^Uses PL_expect/m);
 ok($o =~ /^Uses SvPV_nolen.*depends.*sv_2pv_flags/m);
 ok($o =~ /WARNING: PL_expect/m);
 ok($o !~ /hint for newCONSTSUB/m);
+ok($o =~ /^Analysis completed \(1 warning\)/m);
 ok($o =~ /^Looks good/m);
 
 $o = ppport(qw(--nochanges --nohints --nodiag file1.xs));
@@ -327,9 +331,11 @@ ok($o =~ /^Scanning.*file1\.xs/mi);
 ok($o =~ /Analyzing.*file1\.xs/mi);
 ok($o !~ /^Scanning.*file2\.xs/mi);
 ok($o !~ /^Uses newCONSTSUB/m);
+ok($o !~ /^Uses PL_expect/m);
 ok($o !~ /^Uses SvPV_nolen/m);
 ok($o =~ /WARNING: PL_expect/m);
 ok($o !~ /hint for newCONSTSUB/m);
+ok($o =~ /^Analysis completed \(1 warning\)/m);
 ok($o =~ /^Looks good/m);
 
 $o = ppport(qw(--nochanges --quiet file1.xs));
@@ -369,6 +375,7 @@ ok($o =~ /^\s*$/);
 
 #define NEED_newCONSTSUB
 #define NEED_sv_2pv_flags
+#define NEED_PL_parser
 #include "ppport.h"
 
 newCONSTSUB();
@@ -839,6 +846,7 @@ ok($o =~ /^Looks good/m);
 
 ---------------------------- file.xs -----------------------------------------
 
+#define NEED_PL_parser
 #include "ppport.h"
 SvUOK
 PL_copline

@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (37) {
+  if (49) {
     load();
-    plan(tests => 37);
+    plan(tests => 49);
   }
 }
 
@@ -55,15 +55,54 @@ ok(&Devel::PPPort::PL_sv_yes());
 ok(!&Devel::PPPort::PL_sv_no());
 ok(&Devel::PPPort::PL_na("abcd"), 4);
 ok(&Devel::PPPort::PL_Sv(), "mhx");
-ok(defined &Devel::PPPort::PL_copline());
-ok(defined &Devel::PPPort::PL_expect());
 ok(defined &Devel::PPPort::PL_rsfp());
-ok(defined &Devel::PPPort::PL_rsfp_filters());
+ok(defined &Devel::PPPort::PL_tokenbuf());
+ok($] >= 5.009005 || &Devel::PPPort::PL_parser());
 ok(&Devel::PPPort::PL_hexdigit() =~ /^[0-9a-zA-Z]+$/);
 ok(defined &Devel::PPPort::PL_hints());
 ok(&Devel::PPPort::PL_ppaddr("mhx"), "MHX");
 
 for (&Devel::PPPort::other_variables()) {
   ok($_ != 0);
+}
+
+{
+  my @w;
+  my $fail = 0;
+  {
+    local $SIG{'__WARN__'} = sub { push @w, @_ };
+    ok(&Devel::PPPort::dummy_parser_warning());
+  }
+  if ($] >= 5.009005) {
+    ok(@w >= 0);
+    for (@w) {
+      print "# $_";
+      unless (/^warning: dummy PL_bufptr used in.*module3.*:\d+/i) {
+        warn $_;
+        $fail++;
+      }
+    }
+  }
+  else {
+    ok(@w == 0);
+  }
+  ok($fail, 0);
+}
+
+ok(&Devel::PPPort::no_dummy_parser_vars(1) >= ($] < 5.009005 ? 1 : 0));
+
+eval { &Devel::PPPort::no_dummy_parser_vars(0) };
+
+if ($] < 5.009005) {
+  ok($@, '');
+}
+else {
+  if ($@) {
+    print "# $@";
+    ok($@ =~ /^panic: PL_parser == NULL in.*module2.*:\d+/i);
+  }
+  else {
+    ok(1);
+  }
 }
 

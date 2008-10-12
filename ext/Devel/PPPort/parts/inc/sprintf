@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 5 $
+##  $Revision: 1 $
 ##  $Author: mhx $
-##  $Date: 2008/08/01 23:26:01 +0200 $
+##  $Date: 2008/07/13 19:13:58 +0200 $
 ##
 ################################################################################
 ##
@@ -17,29 +17,21 @@
 
 =provides
 
-my_snprintf
+my_sprintf
 
 =implementation
 
-#if !defined(my_snprintf)
-#if { NEED my_snprintf }
+#if !defined(my_sprintf)
+#if { NEED my_sprintf }
 
 int
-my_snprintf(char *buffer, const Size_t len, const char *format, ...)
+my_sprintf(char *buffer, const char* pat, ...)
 {
-    dTHX;
-    int retval;
-    va_list ap;
-    va_start(ap, format);
-#ifdef HAS_VSNPRINTF
-    retval = vsnprintf(buffer, len, format, ap);
-#else
-    retval = vsprintf(buffer, format, ap);
-#endif
-    va_end(ap);
-    if (retval < 0 || (len > 0 && (Size_t)retval >= len))
-	Perl_croak(aTHX_ "panic: my_snprintf buffer overflow");
-    return retval;
+    va_list args;
+    va_start(args, pat);
+    vsprintf(buffer, pat, args);
+    va_end(args);
+    return strlen(buffer);
 }
 
 #endif
@@ -47,24 +39,24 @@ my_snprintf(char *buffer, const Size_t len, const char *format, ...)
 
 =xsinit
 
-#define NEED_my_snprintf
+#define NEED_my_sprintf
 
 =xsubs
 
 void
-my_snprintf()
+my_sprintf()
 	PREINIT:
 		char buf[128];
 		int len;
 	PPCODE:
-		len = my_snprintf(buf, sizeof buf, "foo%s%d", "bar", 42);
+		len = my_sprintf(buf, "foo%s%d", "bar", 42);
 		mXPUSHi(len);
 		mXPUSHs(newSVpv(buf, 0));
 		XSRETURN(2);
 
 =tests plan => 2
 
-my($l, $s) = Devel::PPPort::my_snprintf();
+my($l, $s) = Devel::PPPort::my_sprintf();
 ok($l, 8);
 ok($s, "foobar42");
 

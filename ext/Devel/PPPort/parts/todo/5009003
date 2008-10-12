@@ -16,7 +16,6 @@ hv_placeholders_set            # U
 hv_riter_p                     # U
 hv_riter_set                   # U
 is_utf8_string_loclen          # U
-my_sprintf                     # U
 newGIVENOP                     # U
 newSVhek                       # U
 newSVpvs_share                 # U

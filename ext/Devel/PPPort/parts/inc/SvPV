@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 20 $
+##  $Revision: 21 $
 ##  $Author: mhx $
-##  $Date: 2008/05/13 21:05:51 +0200 $
+##  $Date: 2008/10/12 20:51:06 +0200 $
 ##
 ################################################################################
 ##
@@ -190,6 +190,11 @@ __UNDEFINED__  SvPV_nolen_const(sv) \
 __UNDEFINED__  SvPV_nomg(sv, lp) SvPV_flags(sv, lp, 0)
 __UNDEFINED__  SvPV_nomg_const(sv, lp) SvPV_flags_const(sv, lp, 0)
 __UNDEFINED__  SvPV_nomg_const_nolen(sv) SvPV_flags_const_nolen(sv, 0)
+
+__UNDEFINED__  SvPV_renew(sv,n) STMT_START { SvLEN_set(sv, n); \
+                 SvPV_set((sv), (char *) saferealloc(          \
+                       (Malloc_t)SvPVX(sv), (MEM_SIZE)((n)))); \
+               } STMT_END
 
 =xsinit
 
@@ -432,8 +437,25 @@ SvPV_nomg_const_nolen(sv)
 	OUTPUT:
 		RETVAL
 
+void
+SvPV_renew(sv, nlen, insv)
+	SV *sv
+	IV nlen
+	SV *insv
+	PREINIT:
+		STRLEN slen;
+		const char *str;
+	PPCODE:
+		str = SvPV_const(insv, slen);
+		XPUSHs(sv);
+		mXPUSHi(SvLEN(sv));
+		SvPV_renew(sv, nlen);
+		Copy(str, SvPVX(sv), slen + 1, char);
+		SvCUR_set(sv, slen);
+		mXPUSHi(SvLEN(sv));
 
-=tests plan => 39
+
+=tests plan => 47
 
 my $mhx = "mhx";
 
@@ -487,3 +509,16 @@ $mhx = 42; ok(&Devel::PPPort::SvPV_nomg($mhx), 2);
 $mhx = 42; ok(&Devel::PPPort::SvPV_nomg_const($mhx), 2);
 $mhx = 42; ok(&Devel::PPPort::SvPV_nomg_const_nolen($mhx), 0);
 
+my $str = "";
+my($s2, $before, $after) = &Devel::PPPort::SvPV_renew($str, 81, "x"x80);
+ok($str, "x"x80);
+ok($s2, "x"x80);
+ok($before < 81);
+ok($after, 81);
+
+$str = "x"x400;
+($s2, $before, $after) = &Devel::PPPort::SvPV_renew($str, 41, "x"x40);
+ok($str, "x"x40);
+ok($s2, "x"x40);
+ok($before > 41);
+ok($after, 41);

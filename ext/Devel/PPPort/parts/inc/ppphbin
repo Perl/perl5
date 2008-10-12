@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 47 $
+##  $Revision: 48 $
 ##  $Author: mhx $
-##  $Date: 2008/01/04 12:03:30 +0100 $
+##  $Date: 2008/10/12 19:02:39 +0200 $
 ##
 ################################################################################
 ##
@@ -169,8 +169,12 @@ while (<DATA>) {
   $replace{$2} = $1 if m{^\s*#\s*define\s+(\w+)(?:\([^)]*\))?\s+(\w+).*$rccs\s+Replace\s+$rcce};
   $replace{$1} = $2 if m{^\s*$rccs\s+Replace (\w+) with (\w+)\s+$rcce\s*$};
 
-  if (m{^\s*$rccs\s+(\w+)\s+depends\s+on\s+(\w+(\s*,\s*\w+)*)\s+$rcce\s*$}) {
-    push @{$depends{$1}}, map { s/\s+//g; $_ } split /,/, $2;
+  if (m{^\s*$rccs\s+(\w+(\s*,\s*\w+)*)\s+depends\s+on\s+(\w+(\s*,\s*\w+)*)\s+$rcce\s*$}) {
+    my @deps = map { s/\s+//g; $_ } split /,/, $3;
+    my $d;
+    for $d (map { s/\s+//g; $_ } split /,/, $1) {
+      push @{$depends{$d}}, @deps;
+    }
   }
 
   $need{$1} = 1 if m{^#if\s+defined\(NEED_(\w+)(?:_GLOBAL)?\)};

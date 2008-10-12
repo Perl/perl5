@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 59 $
+#  $Revision: 61 $
 #  $Author: mhx $
-#  $Date: 2008/01/04 10:47:38 +0100 $
+#  $Date: 2008/10/12 13:54:21 +0200 $
 #
 ################################################################################
 #
@@ -189,8 +189,10 @@ sub expand
               )
             \s*$}
             {expand_undefined($2, $1, $3)}gemx;
-  $code =~ s{^([^\S\r\n]*)__NEED_VAR__\s+(.*?)\s+(\w+)(?:\s*=\s*([^;]+?)\s*;\s*)?$}
+  $code =~ s{^([^\S\r\n]*)__NEED_VAR__\s+(.*?)\s+(\w+)(?:\s*=\s*([^;]+?))?\s*;\s*$}
             {expand_need_var($1, $3, $2, $4)}gem;
+  $code =~ s{^([^\S\r\n]*)__NEED_DUMMY_VAR__\s+(.*?)\s+(\w+)(?:\s*=\s*([^;]+?))?\s*;\s*$}
+            {expand_need_dummy_var($1, $3, $2, $4)}gem;
   return $code;
 }
 
@@ -201,16 +203,41 @@ sub expand_need_var
   $explicit{$var} = 'var';
 
   my $myvar = "$DPPP(my_$var)";
+  $init = defined $init ? " = $init" : "";
 
   my $code = <<ENDCODE;
 #if defined(NEED_$var)
-static $type $myvar = $init;
+static $type $myvar$init;
 #elif defined(NEED_${var}_GLOBAL)
-$type $myvar = $init;
+$type $myvar$init;
 #else
 extern $type $myvar;
 #endif
 #define $var $myvar
+ENDCODE
+
+  $code =~ s/^/$indent/mg;
+
+  return $code;
+}
+
+sub expand_need_dummy_var
+{
+  my($indent, $var, $type, $init) = @_;
+
+  $explicit{$var} = 'var';
+
+  my $myvar = "$DPPP(dummy_$var)";
+  $init = defined $init ? " = $init" : "";
+
+  my $code = <<ENDCODE;
+#if defined(NEED_$var)
+static $type $myvar$init;
+#elif defined(NEED_${var}_GLOBAL)
+$type $myvar$init;
+#else
+extern $type $myvar;
+#endif
 ENDCODE
 
   $code =~ s/^/$indent/mg;
@@ -345,9 +372,9 @@ __DATA__
 #
 ################################################################################
 #
-#  $Revision: 59 $
+#  $Revision: 61 $
 #  $Author: mhx $
-#  $Date: 2008/01/04 10:47:38 +0100 $
+#  $Date: 2008/10/12 13:54:21 +0200 $
 #
 ################################################################################
 #
@@ -508,7 +535,7 @@ package Devel::PPPort;
 use strict;
 use vars qw($VERSION $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.14_01 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.14_02 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 sub _init_data
 {
@@ -622,6 +649,8 @@ __DATA__
 %include grok
 
 %include snprintf
+
+%include sprintf
 
 %include exception
 
