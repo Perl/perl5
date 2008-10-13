@@ -113,7 +113,7 @@ use_ok( $FileClass );
     ### absolute paths are already taken care of. Only relative paths
     ### matter
     my $in_file     = basename($0);
-    my $out_file    = '../' . $in_file . ".$$";
+    my $out_file    = '../' . $in_file . "_$$";
     
     ok( $tar->add_files( $in_file ), 
                                 "       Added '$in_file'" );
@@ -121,7 +121,6 @@ use_ok( $FileClass );
                                 "       Renamed to '$out_file'" );
     
     ### first, test with strict extract permissions on
-TODO:
     {   local $Archive::Tar::INSECURE_EXTRACT_MODE = 0;
 
         ### we quell the error on STDERR
@@ -135,20 +134,14 @@ TODO:
         ok( ! -e $out_file,     "       File '$out_file' does not exist" );
     
         ok( $tar->error,        "       Error message stored" );
-
-        local $TODO = 'Exposed unrelated filespec handling bugs on VMS' if $^O eq 'VMS';
-
         like( $tar->error, qr/attempting to leave/,
                                 "           Proper violation detected" );
     }
     
     ### now disable those
-TODO:
     {   local $Archive::Tar::INSECURE_EXTRACT_MODE = 1;
         ok( 1,                  "   Extracting in insecure mode" );
     
-        local $TODO = 'Exposed unrelated filespec handling bugs on VMS' if $^O eq 'VMS';
-
         ok( $tar->extract_file( $out_file ),
                                 "       File extracted" );
         ok( -e $out_file,       "       File '$out_file' exists" );

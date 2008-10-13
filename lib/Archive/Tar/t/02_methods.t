@@ -21,8 +21,13 @@ use File::Spec::Unix    ();
 use File::Basename      ();
 use Data::Dumper;
 
-use Archive::Tar;
+### need the constants at compile time;
 use Archive::Tar::Constant;
+
+my $Class   = 'Archive::Tar';
+use_ok( $Class );
+
+
 
 ### XXX TODO:
 ### * change to fullname
@@ -72,20 +77,15 @@ if ($TOO_LONG) {
 }
 
 my @ROOT        = grep { length }   'src', $TOO_LONG ? 'short' : 'long';
-
-my $ZLIB        = eval { require IO::Zlib;
-                         require IO::Compress::Bzip2; 1 } ? 1 : 0;
-my $BZIP        = eval { require IO::Uncompress::Bunzip2;
-                         require IO::Compress::Bzip2; 1 } ? 1 : 0;
-
 my $NO_UNLINK   = $ARGV[0] ? 1 : 0;
 
-### enable debugging?
-$Archive::Tar::DEBUG = 1 if $ARGV[1];
+### enable debugging? 
+### pesky warnings
+$Archive::Tar::DEBUG = $Archive::Tar::DEBUG = 1 if $ARGV[1];
 
 ### tests for binary and x/x files
-my $TARBIN      = Archive::Tar->new;
-my $TARX        = Archive::Tar->new;
+my $TARBIN      = $Class->new;
+my $TARX        = $Class->new;
 
 ### paths to a .tar and .tgz file to use for tests
 my $TAR_FILE        = File::Spec->catfile( @ROOT, 'bar.tar' );
@@ -102,15 +102,16 @@ chmod 0644, $COMPRESS_FILE;
 
 ### done setting up environment ###
 
+### check for zlib/bzip2 support
+{   for my $meth ( qw[has_zlib_support has_bzip2_support] ) {
+        can_ok( $Class, $meth );
+    }
+}    
 
-### did we probe IO::Zlib support ok? ###
-{   is( Archive::Tar->can_handle_compressed_files, $ZLIB,
-                                    "Proper IO::Zlib support detected" );
-}
 
 
 ### tar error tests
-{   my $tar     = Archive::Tar->new;
+{   my $tar     = $Class->new;
 
     ok( $tar,                       "Object created" );
     isa_ok( $tar,                   'Archive::Tar');
@@ -139,7 +140,7 @@ chmod 0644, $COMPRESS_FILE;
 
     ### check if ->error eq $error
     is( $tar->error, $Archive::Tar::error,
-                                    '$error matches error() method' );
+                                    "Error '$Archive::Tar::error' matches $Class->error method" );
                      
     ### check that 'contains_file' doesn't warn about missing files.                     
     {   ### turn on warnings in general!
@@ -156,13 +157,13 @@ chmod 0644, $COMPRESS_FILE;
 
 ### read tests ###
 {   my @to_try = ($TAR_FILE);
-    push @to_try, $TGZ_FILE if $ZLIB;
-    push @to_try, $TBZ_FILE if $BZIP;
+    push @to_try, $TGZ_FILE if $Class->has_zlib_support;
+    push @to_try, $TBZ_FILE if $Class->has_bzip2_support;
 
     for my $type( @to_try ) {
 
         ### normal tar + gz compressed file
-        my $tar             = Archive::Tar->new;
+        my $tar             = $Class->new;
 
         ### check we got the object
         ok( $tar,                       "Object created" );
@@ -202,7 +203,7 @@ chmod 0644, $COMPRESS_FILE;
 
 
         ### list_archive test
-        {   my @list    = Archive::Tar->list_archive( $type );
+        {   my @list    = $Class->list_archive( $type );
             my $cnt     = scalar @list;
             my $expect  = scalar __PACKAGE__->get_expect();
 
@@ -225,7 +226,7 @@ chmod 0644, $COMPRESS_FILE;
 ### add files tests ###
 {   my @add     = map { File::Spec->catfile( @ROOT, @$_ ) } ['b'];
     my @addunix = map { File::Spec::Unix->catfile( @ROOT, @$_ ) } ['b'];
-    my $tar     = Archive::Tar->new;
+    my $tar     = $Class->new;
 
     ### check we got the object
     ok( $tar,                       "Object created" );
@@ -258,7 +259,7 @@ chmod 0644, $COMPRESS_FILE;
 
     ### check adding files doesn't conflict with a secondary archive
     ### old A::T bug, we should keep testing for it
-    {   my $tar2    = Archive::Tar->new;
+    {   my $tar2    = $Class->new;
         my @added   = $tar2->add_files( $COMPRESS_FILE );
         my @count   = $tar2->list_files;
 
@@ -279,7 +280,7 @@ chmod 0644, $COMPRESS_FILE;
 {
     {   ### standard data ###
         my @to_add  = ( 'a', 'aaaaa' );
-        my $tar     = Archive::Tar->new;
+        my $tar     = $Class->new;
 
         ### check we got the object
         ok( $tar,                   "Object created" );
@@ -324,7 +325,7 @@ chmod 0644, $COMPRESS_FILE;
 }
 
 ### rename/replace_content tests ###
-{   my $tar     = Archive::Tar->new;
+{   my $tar     = $Class->new;
     my $from    = 'c';
     my $to      = 'e';
 
@@ -356,7 +357,7 @@ chmod 0644, $COMPRESS_FILE;
 
 ### remove tests ###
 {   my $remove  = 'c';
-    my $tar     = Archive::Tar->new;
+    my $tar     = $Class->new;
 
     ok( $tar->read( $TAR_FILE ),    "Read in '$TAR_FILE'" );
 
@@ -370,12 +371,14 @@ chmod 0644, $COMPRESS_FILE;
 }
 
 ### write + read + extract tests ###
-SKIP: {
+SKIP: {                             ### pesky warnings
     skip('no IO::String', 326) if   !$Archive::Tar::HAS_PERLIO && 
+                                    !$Archive::Tar::HAS_PERLIO && 
+                                    !$Archive::Tar::HAS_IO_STRING &&
                                     !$Archive::Tar::HAS_IO_STRING;
                                     
-    my $tar = Archive::Tar->new;
-    my $new = Archive::Tar->new;
+    my $tar = $Class->new;
+    my $new = $Class->new;
     ok( $tar->read( $TAR_FILE ),    "Read in '$TAR_FILE'" );
 
     for my $aref (  [$tar,    \@EXPECT_NORMAL],
@@ -415,12 +418,12 @@ SKIP: {
 
 
             {   ### create_archive()
-                ok( Archive::Tar->create_archive( $out, 0, $COMPRESS_FILE ),
+                ok( $Class->create_archive( $out, 0, $COMPRESS_FILE ),
                                     "Wrote tarfile using 'create_archive'" );
                 check_tar_file( $out );
 
                 ### now extract it again
-                ok( Archive::Tar->extract_archive( $out ),
+                ok( $Class->extract_archive( $out ),
                                     "Extracted file using 'extract_archive'");
                 rm( $out ) unless $NO_UNLINK;
             }
@@ -428,8 +431,8 @@ SKIP: {
 
         ## write tgz tests
         {   my @out;
-            push @out, [ $OUT_TGZ_FILE => 1             ] if $ZLIB;
-            push @out, [ $OUT_TBZ_FILE => COMPRESS_BZIP ] if $BZIP;
+            push @out, [ $OUT_TGZ_FILE => 1             ] if $Class->has_zlib_support;
+            push @out, [ $OUT_TBZ_FILE => COMPRESS_BZIP ] if $Class->has_bzip2_support;
         
             for my $entry ( @out ) {
 
@@ -456,12 +459,12 @@ SKIP: {
                 }
 
                 {   ### create_archive()
-                    ok( Archive::Tar->create_archive( $out, $compression, $COMPRESS_FILE ),
+                    ok( $Class->create_archive( $out, $compression, $COMPRESS_FILE ),
                                     "Wrote '$out' using 'create_archive'" );
                     check_compressed_file( $out );
 
                     ### now extract it again
-                    ok( Archive::Tar->extract_archive( $out, $compression ),
+                    ok( $Class->extract_archive( $out, $compression ),
                                     "Extracted file using 'extract_archive'");
                     rm( $out ) unless $NO_UNLINK;
                 }
@@ -472,7 +475,7 @@ SKIP: {
 
 
 ### limited read + extract tests ###
-{   my $tar     = Archive::Tar->new;
+{   my $tar     = $Class->new;
     my @files   = $tar->read( $TAR_FILE, 0, { limit => 1 } );
     my $obj     = $files[0];
 
@@ -513,7 +516,7 @@ SKIP: {
 
 
 ### clear tests ###
-{   my $tar     = Archive::Tar->new;
+{   my $tar     = $Class->new;
     my @files   = $tar->read( $TAR_FILE );
 
     my $cnt = $tar->list_files();
@@ -525,7 +528,7 @@ SKIP: {
 }
 
 ### $DO_NOT_USE_PREFIX tests
-{   my $tar     = Archive::Tar->new;
+{   my $tar     = $Class->new;
 
 
     ### first write a tar file without prefix
@@ -541,7 +544,10 @@ SKIP: {
         is( $obj->prefix, $dir,     "   Prefix set to '$dir'" );
 
         ### write the tar file without a prefix in it
+        ### pesky warnings
         local $Archive::Tar::DO_NOT_USE_PREFIX = 1;
+        local $Archive::Tar::DO_NOT_USE_PREFIX = 1;
+
         ok( $tar->write( $OUT_TAR_FILE ),
                                     "   Tar file written" );
 

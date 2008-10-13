@@ -393,6 +393,9 @@ sub _prefix_and_file {
     ### if it's a directory, then $file might be empty
     $file = pop @dirs if $self->is_dir and not length $file;
 
+    ### splitting ../ gives you the relative path in native syntax
+    map { $_ = '..' if $_  eq '-' } @dirs if ON_VMS;
+
     my $prefix = File::Spec::Unix->catdir(
                         grep { length } $vol, @dirs
                     );
