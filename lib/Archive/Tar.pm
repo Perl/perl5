@@ -31,7 +31,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "1.39_04";
+$VERSION                = "1.40";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $DO_NOT_USE_PREFIX      = 0;
@@ -1471,37 +1471,6 @@ sub setcwd {
     $self->{cwd} = $cwd;
 }
 
-=head2 $bool = $tar->has_io_string
-
-Returns true if we currently have C<IO::String> support loaded.
-
-Either C<IO::String> or C<perlio> support is needed to support writing 
-stringified archives. Currently, C<perlio> is the preferred method, if
-available.
-
-See the C<GLOBAL VARIABLES> section to see how to change this preference.
-
-=cut
-
-sub has_io_string { return $HAS_IO_STRING; }
-
-=head2 $bool = $tar->has_perlio
-
-Returns true if we currently have C<perlio> support loaded.
-
-This requires C<perl-5.8> or higher, compiled with C<perlio> 
-
-Either C<IO::String> or C<perlio> support is needed to support writing 
-stringified archives. Currently, C<perlio> is the preferred method, if
-available.
-
-See the C<GLOBAL VARIABLES> section to see how to change this preference.
-
-=cut
-
-sub has_perlio { return $HAS_PERLIO; }
-
-
 =head1 Class Methods
 
 =head2 Archive::Tar->create_archive($file, $compressed, @filelist)
@@ -1666,6 +1635,52 @@ sub extract_archive {
 
     return $tar->read( $file, $gzip, { extract => 1 } );
 }
+
+=head2 $bool = Archive::Tar->has_io_string
+
+Returns true if we currently have C<IO::String> support loaded.
+
+Either C<IO::String> or C<perlio> support is needed to support writing 
+stringified archives. Currently, C<perlio> is the preferred method, if
+available.
+
+See the C<GLOBAL VARIABLES> section to see how to change this preference.
+
+=cut
+
+sub has_io_string { return $HAS_IO_STRING; }
+
+=head2 $bool = Archive::Tar->has_perlio
+
+Returns true if we currently have C<perlio> support loaded.
+
+This requires C<perl-5.8> or higher, compiled with C<perlio> 
+
+Either C<IO::String> or C<perlio> support is needed to support writing 
+stringified archives. Currently, C<perlio> is the preferred method, if
+available.
+
+See the C<GLOBAL VARIABLES> section to see how to change this preference.
+
+=cut
+
+sub has_perlio { return $HAS_PERLIO; }
+
+=head2 $bool = Archive::Tar->has_zlib_support
+
+Returns true if C<Archive::Tar> can extract C<zlib> compressed archives
+
+=cut
+
+sub has_zlib_support { return ZLIB }
+
+=head2 $bool = Archive::Tar->has_bzip2_support
+
+Returns true if C<Archive::Tar> can extract C<bzip2> compressed archives
+
+=cut
+
+sub has_bzip2_support { return BZIP }
 
 =head2 Archive::Tar->can_handle_compressed_files
 
@@ -2045,7 +2060,7 @@ and especially Andrew Savige for their help and suggestions.
 
 =head1 COPYRIGHT
 
-This module is copyright (c) 2002 - 2007 Jos Boumans 
+This module is copyright (c) 2002 - 2008 Jos Boumans 
 E<lt>kane@cpan.orgE<gt>. All rights reserved.
 
 This library is free software; you may redistribute and/or modify 
