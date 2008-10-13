@@ -693,9 +693,7 @@ PoisonWith(0xEF) for catching access to freed memory.
 =cut */
 
 /* Maintained for backwards-compatibility only. Use newSV() instead. */
-#ifndef PERL_CORE
 #define NEWSV(x,len)	newSV(len)
-#endif
 
 #define MEM_SIZE_MAX ((MEM_SIZE)~0)
 
