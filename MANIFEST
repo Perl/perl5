@@ -2867,17 +2867,30 @@ lib/Test/Simple/t/bail_out.t	Test::Builder BAIL_OUT test
 lib/Test/Simple/t/BEGIN_require_ok.t	Test::More require_ok() testing
 lib/Test/Simple/t/BEGIN_use_ok.t	Test::More use_ok() testing
 lib/Test/Simple/t/buffer.t	Test::Builder buffering test
-lib/Test/Simple/t/Builder.t	Test::Builder tests
-lib/Test/Simple/t/carp.t	Test::Builder test
+lib/Test/Simple/t/Builder/Builder.t	Test::Builder tests
+lib/Test/Simple/t/Builder/carp.t	Test::Builder test
+lib/Test/Simple/t/Builder/create.t	Test::Builder test 
+lib/Test/Simple/t/Builder/curr_test.t	Test::Builder->curr_test tests
+lib/Test/Simple/t/Builder/details.t	Test::Builder tests
+lib/Test/Simple/t/Builder/has_plan.t	Test::Builder tests
+lib/Test/Simple/t/Builder/has_plan2.t	Test::Builder tests
+lib/Test/Simple/t/Builder/is_fh.t	Test::Builder tests
+lib/Test/Simple/t/Builder/maybe_regex.t	Test::Builder tests
+lib/Test/Simple/t/Builder/no_diag.t	Test::Builder tests
+lib/Test/Simple/t/Builder/no_ending.t	Test::Builder tests
+lib/Test/Simple/t/Builder/no_header.t	Test::Builder tests
+lib/Test/Simple/t/Builder/ok_obj.t	Test::Builder tests
+lib/Test/Simple/t/Builder/output.t	Test::Builder tests
+lib/Test/Simple/t/Builder/reset.t	Test::Builder tests
+lib/Test/Simple/t/Builder/try.t		Test::Builder tests
 lib/Test/Simple/t/circular_data.t	Test::Simple test
 lib/Test/Simple/t/cmp_ok.t	Test::More test
-lib/Test/Simple/t/create.t	Test::Simple test
-lib/Test/Simple/t/curr_test.t	Test::Builder->curr_test tests
-lib/Test/Simple/t/details.t	Test::Builder tests
 lib/Test/Simple/t/diag.t	Test::More diag() test
+lib/Test/Simple/t/died.t	Test::Simple test
 lib/Test/Simple/t/dont_overwrite_die_handler.t	Test::More tests
 lib/Test/Simple/t/eq_set.t	Test::Simple test
 lib/Test/Simple/t/exit.t	Test::Simple test, exit codes
+lib/Test/Simple/t/explain.t	Test::Simple test
 lib/Test/Simple/t/extra_one.t	Test::Simple test
 lib/Test/Simple/t/extra.t	Test::Simple test
 lib/Test/Simple/t/fail-like.t	Test::More test, like() failures
@@ -2887,26 +2900,20 @@ lib/Test/Simple/t/fail.t	Test::Simple test, test failures
 lib/Test/Simple/t/filehandles.t	Test::Simple test, STDOUT can be played with
 lib/Test/Simple/t/fork.t	Test::More fork tests
 lib/Test/Simple/t/harness_active.t	Test::Simple test
-lib/Test/Simple/t/has_plan2.t	Test::More->plan tests
-lib/Test/Simple/t/has_plan.t	Test::Builder->plan tests
 lib/Test/Simple/t/import.t	Test::More test, importing functions
 lib/Test/Simple/t/is_deeply_dne_bug.t	Test::More test
 lib/Test/Simple/t/is_deeply_fail.t	Test::More test, is_deeply()
 lib/Test/Simple/t/is_deeply_with_threads.t	Test::More test
-lib/Test/Simple/t/is_fh.t	Test::Builder test, _is_fh()
 lib/Test/Simple/t/lib/Dummy.pm	Test::More test module
 lib/Test/Simple/t/lib/MyOverload.pm	Test::More test module
 lib/Test/Simple/t/lib/NoExporter.pm	Test::Simple test module
-lib/Test/Simple/t/maybe_regex.t	Test::Builder->maybe_regex() tests
 lib/Test/Simple/t/missing.t	Test::Simple test, missing tests
 lib/Test/Simple/t/More.t	Test::More test, basic stuff
-lib/Test/Simple/t/no_diag.t	Test::Simple test
-lib/Test/Simple/t/no_ending.t	Test::Builder test, no_ending()
-lib/Test/Simple/t/no_header.t	Test::Builder test, no_header()
+lib/Test/Simple/t/new_ok.t	Test::More test
 lib/Test/Simple/t/no_plan.t	Test::Simple test, forgot the plan
+lib/Test/Simple/t/no_tests.t	Test::More test
+lib/Test/Simple/t/note.t	Test::More test
 lib/Test/Simple/TODO		Test::Simple TODO
-lib/Test/Simple/t/ok_obj.t	Test::Builder object tests
-lib/Test/Simple/t/output.t	Test::Builder test, output methods
 lib/Test/Simple/t/overload.t		Test::Simple test
 lib/Test/Simple/t/overload_threads.t	Test::Simple test
 lib/Test/Simple/t/plan_bad.t		Test::Simple test
@@ -2916,22 +2923,20 @@ lib/Test/Simple/t/plan_shouldnt_import.t	Test::Simple test
 lib/Test/Simple/t/plan_skip_all.t	Test::More test, plan() w/skip_all
 lib/Test/Simple/t/plan.t	Test::More test, plan()
 lib/Test/Simple/t/require_ok.t	Test::Simple test
-lib/Test/Simple/t/reset.t	Test::Simple test
 lib/Test/Simple/t/simple.t	Test::Simple test, basic stuff
 lib/Test/Simple/t/skipall.t	Test::More test, skip all tests
 lib/Test/Simple/t/skip.t	Test::More test, SKIP tests
 lib/Test/Simple/t/tbm_doesnt_set_exported_to.t	Test::Builder::Module test
-lib/Test/Simple/t/tbt_01basic.t	Test::Builder::Tester test
-lib/Test/Simple/t/tbt_02fhrestore.t	Test::Builder::Tester test
-lib/Test/Simple/t/tbt_03die.t	Test::Builder::Tester test
-lib/Test/Simple/t/tbt_04line_num.t	Test::Builder::Tester test
-lib/Test/Simple/t/tbt_05faildiag.t	Test::Builder::Tester test
-lib/Test/Simple/t/tbt_06errormess.t	Test::Builder::Tester test
-lib/Test/Simple/t/tbt_07args.t	Test::Builder::Tester test
+lib/Test/Simple/t/Tester/tbt_01basic.t	Test::Builder::Tester test
+lib/Test/Simple/t/Tester/tbt_02fhrestore.t	Test::Builder::Tester test
+lib/Test/Simple/t/Tester/tbt_03die.t	Test::Builder::Tester test
+lib/Test/Simple/t/Tester/tbt_04line_num.t	Test::Builder::Tester test
+lib/Test/Simple/t/Tester/tbt_05faildiag.t	Test::Builder::Tester test
+lib/Test/Simple/t/Tester/tbt_06errormess.t	Test::Builder::Tester test
+lib/Test/Simple/t/Tester/tbt_07args.t	Test::Builder::Tester test
 lib/Test/Simple/t/threads.t	Test::Builder thread-safe checks
 lib/Test/Simple/t/thread_taint.t	Test::Simple test
 lib/Test/Simple/t/todo.t	Test::More test, TODO tests
-lib/Test/Simple/t/try.t		Test::More test
 lib/Test/Simple/t/undef.t	Test::More test, undefs don't cause warnings
 lib/Test/Simple/t/useing.t	Test::More test, compile test
 lib/Test/Simple/t/use_ok.t	Test::More test, use_ok()
