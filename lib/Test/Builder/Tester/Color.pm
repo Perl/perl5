@@ -1,4 +1,5 @@
 package Test::Builder::Tester::Color;
+# $Id: /mirror/googlecode/test-more-trunk/lib/Test/Builder/Tester/Color.pm 67132 2008-10-01T01:11:04.501643Z schwern  $
 
 use strict;
 
@@ -25,8 +26,7 @@ from the command line.
 
 =cut
 
-sub import
-{
+sub import {
     Test::Builder::Tester::color(1);
 }
 

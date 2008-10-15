@@ -1,38 +1,40 @@
 package Test::More;
+# $Id: /mirror/googlecode/test-more-trunk/lib/Test/More.pm 67223 2008-10-15T03:08:18.888155Z schwern  $
 
 use 5.006;
 use strict;
+use warnings;
 
+#---- perlcritic exemptions. ----#
+
+# We use a lot of subroutine prototypes
+## no critic (Subroutines::ProhibitSubroutinePrototypes)
 
 # Can't use Carp because it might cause use_ok() to accidentally succeed
 # even though the module being used forgot to use Carp.  Yes, this
 # actually happened.
 sub _carp {
-    my($file, $line) = (caller(1))[1,2];
-    warn @_, " at $file line $line\n";
+    my( $file, $line ) = ( caller(1) )[ 1, 2 ];
+    return warn @_, " at $file line $line\n";
 }
 
-
-
-use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS $TODO);
-$VERSION = '0.80';
-$VERSION = eval $VERSION;    # make the alpha version come out as a number
+our $VERSION = '0.82';
+$VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 use Test::Builder::Module;
-@ISA    = qw(Test::Builder::Module);
-@EXPORT = qw(ok use_ok require_ok
-             is isnt like unlike is_deeply
-             cmp_ok
-             skip todo todo_skip
-             pass fail
-             eq_array eq_hash eq_set
-             $TODO
-             plan
-             can_ok  isa_ok
-             diag
-             BAIL_OUT
-            );
-
+our @ISA    = qw(Test::Builder::Module);
+our @EXPORT = qw(ok use_ok require_ok
+  is isnt like unlike is_deeply
+  cmp_ok
+  skip todo todo_skip
+  pass fail
+  eq_array eq_hash eq_set
+  $TODO
+  plan
+  can_ok isa_ok new_ok
+  diag note explain
+  BAIL_OUT
+);
 
 =head1 NAME
 
@@ -158,9 +160,8 @@ or for deciding between running the tests at all:
 sub plan {
     my $tb = Test::More->builder;
 
-    $tb->plan(@_);
+    return $tb->plan(@_);
 }
-
 
 # This implements "use Test::More 'no_diag'" but the behavior is
 # deprecated.
@@ -169,7 +170,7 @@ sub import_extra {
     my $list  = shift;
 
     my @other = ();
-    my $idx = 0;
+    my $idx   = 0;
     while( $idx <= $#{$list} ) {
         my $item = $list->[$idx];
 
@@ -184,8 +185,9 @@ sub import_extra {
     }
 
     @$list = @other;
-}
 
+    return;
+}
 
 =head2 Test names
 
@@ -256,10 +258,10 @@ This is the same as Test::Simple's ok() routine.
 =cut
 
 sub ok ($;$) {
-    my($test, $name) = @_;
+    my( $test, $name ) = @_;
     my $tb = Test::More->builder;
 
-    $tb->ok($test, $name);
+    return $tb->ok( $test, $name );
 }
 
 =item B<is>
@@ -325,17 +327,16 @@ function which is an alias of isnt().
 sub is ($$;$) {
     my $tb = Test::More->builder;
 
-    $tb->is_eq(@_);
+    return $tb->is_eq(@_);
 }
 
 sub isnt ($$;$) {
     my $tb = Test::More->builder;
 
-    $tb->isnt_eq(@_);
+    return $tb->isnt_eq(@_);
 }
 
 *isn't = \&isnt;
-
 
 =item B<like>
 
@@ -370,9 +371,8 @@ diagnostics on failure.
 sub like ($$;$) {
     my $tb = Test::More->builder;
 
-    $tb->like(@_);
+    return $tb->like(@_);
 }
-
 
 =item B<unlike>
 
@@ -386,9 +386,8 @@ given pattern.
 sub unlike ($$;$) {
     my $tb = Test::More->builder;
 
-    $tb->unlike(@_);
+    return $tb->unlike(@_);
 }
-
 
 =item B<cmp_ok>
 
@@ -426,9 +425,8 @@ is()'s use of C<eq> will interfere:
 sub cmp_ok($$$;$) {
     my $tb = Test::More->builder;
 
-    $tb->cmp_ok(@_);
+    return $tb->cmp_ok(@_);
 }
-
 
 =item B<can_ok>
 
@@ -460,17 +458,17 @@ as one test.  If you desire otherwise, use:
 =cut
 
 sub can_ok ($@) {
-    my($proto, @methods) = @_;
+    my( $proto, @methods ) = @_;
     my $class = ref $proto || $proto;
     my $tb = Test::More->builder;
 
-    unless( $class ) {
+    unless($class) {
         my $ok = $tb->ok( 0, "->can(...)" );
         $tb->diag('    can_ok() called with empty class or reference');
         return $ok;
     }
 
-    unless( @methods ) {
+    unless(@methods) {
         my $ok = $tb->ok( 0, "$class->can(...)" );
         $tb->diag('    can_ok() called with no methods');
         return $ok;
@@ -478,16 +476,15 @@ sub can_ok ($@) {
 
     my @nok = ();
     foreach my $method (@methods) {
-        $tb->_try(sub { $proto->can($method) }) or push @nok, $method;
+        $tb->_try( sub { $proto->can($method) } ) or push @nok, $method;
     }
 
-    my $name;
-    $name = @methods == 1 ? "$class->can('$methods[0]')" 
-                          : "$class->can(...)";
+    my $name = (@methods == 1) ? "$class->can('$methods[0]')" :
+                                 "$class->can(...)"           ;
 
     my $ok = $tb->ok( !@nok, $name );
 
-    $tb->diag(map "    $class->can('$_') failed\n", @nok);
+    $tb->diag( map "    $class->can('$_') failed\n", @nok );
 
     return $ok;
 }
@@ -522,7 +519,7 @@ you'd like them to be more specific, you can supply an $object_name
 =cut
 
 sub isa_ok ($$;$) {
-    my($object, $class, $obj_name) = @_;
+    my( $object, $class, $obj_name ) = @_;
     my $tb = Test::More->builder;
 
     my $diag;
@@ -536,15 +533,16 @@ sub isa_ok ($$;$) {
     }
     else {
         # We can't use UNIVERSAL::isa because we want to honor isa() overrides
-        my($rslt, $error) = $tb->_try(sub { $object->isa($class) });
-        if( $error ) {
+        my( $rslt, $error ) = $tb->_try( sub { $object->isa($class) } );
+        if($error) {
             if( $error =~ /^Can't call method "isa" on unblessed reference/ ) {
                 # Its an unblessed reference
-                if( !UNIVERSAL::isa($object, $class) ) {
+                if( !UNIVERSAL::isa( $object, $class ) ) {
                     my $ref = ref $object;
                     $diag = "$obj_name isn't a '$class' it's a '$ref'";
                 }
-            } else {
+            }
+            else {
                 die <<WHOA;
 WHOA! I tried to call ->isa on your object and got some weird error.
 Here's the error.
@@ -557,11 +555,9 @@ WHOA
             $diag = "$obj_name isn't a '$class' it's a '$ref'";
         }
     }
-            
-      
 
     my $ok;
-    if( $diag ) {
+    if($diag) {
         $ok = $tb->ok( 0, $name );
         $tb->diag("    $diag\n");
     }
@@ -572,6 +568,49 @@ WHOA
     return $ok;
 }
 
+=item B<new_ok>
+
+  my $obj = new_ok( $class );
+  my $obj = new_ok( $class => \@args );
+  my $obj = new_ok( $class => \@args, $object_name );
+
+A convenience function which combines creating an object and calling
+isa_ok() on that object.
+
+It is basically equivalent to:
+
+    my $obj = $class->new(@args);
+    isa_ok $obj, $class, $object_name;
+
+If @args is not given, an empty list will be used.
+
+This function only works on new() and it assumes new() will return
+just a single object which isa C<$class>.
+
+=cut
+
+sub new_ok {
+    my $tb = Test::More->builder;
+    $tb->croak("new_ok() must be given at least a class") unless @_;
+
+    my( $class, $args, $object_name ) = @_;
+
+    $args ||= [];
+    $object_name = "The object" unless defined $object_name;
+
+    my $obj;
+    my( $success, $error ) = $tb->_try( sub { $obj = $class->new(@$args); 1 } );
+    if($success) {
+        local $Test::Builder::Level = $Test::Builder::Level + 1;
+        isa_ok $obj, $class, $object_name;
+    }
+    else {
+        $tb->ok( 0, "new() died" );
+        $tb->diag("    Error was:  $error");
+    }
+
+    return $obj;
+}
 
 =item B<pass>
 
@@ -592,12 +631,14 @@ Use these very, very, very sparingly.
 
 sub pass (;$) {
     my $tb = Test::More->builder;
-    $tb->ok(1, @_);
+
+    return $tb->ok( 1, @_ );
 }
 
 sub fail (;$) {
     my $tb = Test::More->builder;
-    $tb->ok(0, @_);
+
+    return $tb->ok( 0, @_ );
 }
 
 =back
@@ -652,11 +693,11 @@ because the notion of "compile-time" is relative.  Instead, you want:
 =cut
 
 sub use_ok ($;@) {
-    my($module, @imports) = @_;
+    my( $module, @imports ) = @_;
     @imports = () unless @imports;
     my $tb = Test::More->builder;
 
-    my($pack,$filename,$line) = caller;
+    my( $pack, $filename, $line ) = caller;
 
     my $code;
     if( @imports == 1 and $imports[0] =~ /^\d+(?:\.\d+)?$/ ) {
@@ -676,11 +717,10 @@ use $module \@{\$args[0]};
 USE
     }
 
-
-    my($eval_result, $eval_error) = _eval($code, \@imports);
+    my( $eval_result, $eval_error ) = _eval( $code, \@imports );
     my $ok = $tb->ok( $eval_result, "use $module;" );
-    
-    unless( $ok ) {
+
+    unless($ok) {
         chomp $eval_error;
         $@ =~ s{^BEGIN failed--compilation aborted at .*$}
                 {BEGIN failed--compilation aborted at $filename line $line.}m;
@@ -694,18 +734,22 @@ DIAGNOSTIC
     return $ok;
 }
 
-
 sub _eval {
-    my($code) = shift;
-    my @args = @_;
+    my( $code, @args ) = @_;
 
     # Work around oddities surrounding resetting of $@ by immediately
     # storing it.
-    local($@,$!,$SIG{__DIE__});   # isolate eval
-    my $eval_result = eval $code;
-    my $eval_error  = $@;
+    my( $sigdie, $eval_result, $eval_error );
+    {
+        local( $@, $!, $SIG{__DIE__} );    # isolate eval
+        $eval_result = eval $code;              ## no critic (BuiltinFunctions::ProhibitStringyEval)
+        $eval_error  = $@;
+        $sigdie      = $SIG{__DIE__} || undef;
+    }
+    # make sure that $code got a chance to set $SIG{__DIE__}
+    $SIG{__DIE__} = $sigdie if defined $sigdie;
 
-    return($eval_result, $eval_error);
+    return( $eval_result, $eval_error );
 }
 
 =item B<require_ok>
@@ -733,10 +777,10 @@ require $module;
 1;
 REQUIRE
 
-    my($eval_result, $eval_error) = _eval($code);
+    my( $eval_result, $eval_error ) = _eval($code);
     my $ok = $tb->ok( $eval_result, "require $module;" );
 
-    unless( $ok ) {
+    unless($ok) {
         chomp $eval_error;
         $tb->diag(<<DIAGNOSTIC);
     Tried to require '$module'.
@@ -748,7 +792,6 @@ DIAGNOSTIC
     return $ok;
 }
 
-
 sub _is_module_name {
     my $module = shift;
 
@@ -756,7 +799,8 @@ sub _is_module_name {
     # End with an alphanumeric.
     # The rest is an alphanumeric or ::
     $module =~ s/\b::\b//g;
-    $module =~ /^[a-zA-Z]\w*$/;
+
+    return $module =~ /^[a-zA-Z]\w*$/ ? 1 : 0;
 }
 
 =back
@@ -794,50 +838,50 @@ along these lines.
 
 =cut
 
-use vars qw(@Data_Stack %Refs_Seen);
+our( @Data_Stack, %Refs_Seen );
 my $DNE = bless [], 'Does::Not::Exist';
 
 sub _dne {
-    ref $_[0] eq ref $DNE;
+    return ref $_[0] eq ref $DNE;
 }
 
-
+## no critic (Subroutines::RequireArgUnpacking)
 sub is_deeply {
     my $tb = Test::More->builder;
 
     unless( @_ == 2 or @_ == 3 ) {
-        my $msg = <<WARNING;
+        my $msg = <<'WARNING';
 is_deeply() takes two or three args, you gave %d.
 This usually means you passed an array or hash instead 
 of a reference to it
 WARNING
-        chop $msg;   # clip off newline so carp() will put in line/file
+        chop $msg;    # clip off newline so carp() will put in line/file
 
         _carp sprintf $msg, scalar @_;
 
-	return $tb->ok(0);
+        return $tb->ok(0);
     }
 
-    my($got, $expected, $name) = @_;
+    my( $got, $expected, $name ) = @_;
 
-    $tb->_unoverload_str(\$expected, \$got);
+    $tb->_unoverload_str( \$expected, \$got );
 
     my $ok;
-    if( !ref $got and !ref $expected ) {  		# neither is a reference
-        $ok = $tb->is_eq($got, $expected, $name);
+    if( !ref $got and !ref $expected ) {    # neither is a reference
+        $ok = $tb->is_eq( $got, $expected, $name );
     }
-    elsif( !ref $got xor !ref $expected ) {  	# one's a reference, one isn't
-        $ok = $tb->ok(0, $name);
-	$tb->diag( _format_stack({ vals => [ $got, $expected ] }) );
+    elsif( !ref $got xor !ref $expected ) {    # one's a reference, one isn't
+        $ok = $tb->ok( 0, $name );
+        $tb->diag( _format_stack({ vals => [ $got, $expected ] }) );
     }
-    else {			       		# both references
+    else {                                     # both references
         local @Data_Stack = ();
-        if( _deep_check($got, $expected) ) {
-            $ok = $tb->ok(1, $name);
+        if( _deep_check( $got, $expected ) ) {
+            $ok = $tb->ok( 1, $name );
         }
         else {
-            $ok = $tb->ok(0, $name);
-            $tb->diag(_format_stack(@Data_Stack));
+            $ok = $tb->ok( 0, $name );
+            $tb->diag( _format_stack(@Data_Stack) );
         }
     }
 
@@ -847,11 +891,11 @@ WARNING
 sub _format_stack {
     my(@Stack) = @_;
 
-    my $var = '$FOO';
+    my $var       = '$FOO';
     my $did_arrow = 0;
     foreach my $entry (@Stack) {
         my $type = $entry->{type} || '';
-        my $idx  = $entry->{'idx'};
+        my $idx = $entry->{'idx'};
         if( $type eq 'HASH' ) {
             $var .= "->" unless $did_arrow++;
             $var .= "{$idx}";
@@ -865,18 +909,19 @@ sub _format_stack {
         }
     }
 
-    my @vals = @{$Stack[-1]{vals}}[0,1];
+    my @vals = @{ $Stack[-1]{vals} }[ 0, 1 ];
     my @vars = ();
-    ($vars[0] = $var) =~ s/\$FOO/     \$got/;
-    ($vars[1] = $var) =~ s/\$FOO/\$expected/;
+    ( $vars[0] = $var ) =~ s/\$FOO/     \$got/;
+    ( $vars[1] = $var ) =~ s/\$FOO/\$expected/;
 
     my $out = "Structures begin differing at:\n";
-    foreach my $idx (0..$#vals) {
+    foreach my $idx ( 0 .. $#vals ) {
         my $val = $vals[$idx];
-        $vals[$idx] = !defined $val ? 'undef'          :
-                      _dne($val)    ? "Does not exist" :
-                      ref $val      ? "$val"           :
-                                      "'$val'";
+        $vals[$idx]
+          = !defined $val ? 'undef'
+          : _dne($val)    ? "Does not exist"
+          : ref $val      ? "$val"
+          :                 "'$val'";
     }
 
     $out .= "$vars[0] = $vals[0]\n";
@@ -886,14 +931,13 @@ sub _format_stack {
     return $out;
 }
 
-
 sub _type {
     my $thing = shift;
 
     return '' if !ref $thing;
 
     for my $type (qw(ARRAY HASH REF SCALAR GLOB CODE Regexp)) {
-        return $type if UNIVERSAL::isa($thing, $type);
+        return $type if UNIVERSAL::isa( $thing, $type );
     }
 
     return '';
@@ -919,6 +963,8 @@ Prints a diagnostic message which is guaranteed not to interfere with
 test output.  Like C<print> @diagnostic_message is simply concatenated
 together.
 
+Returns false, so as to preserve failure.
+
 Handy for this sort of thing:
 
     ok( grep(/foo/, @users), "There's a foo user" ) or
@@ -938,14 +984,49 @@ B<NOTE> The exact formatting of the diagnostic output is still
 changing, but it is guaranteed that whatever you throw at it it won't
 interfere with the test.
 
+=item B<note>
+
+  note(@diagnostic_message);
+
+Like diag(), except the message will not be seen when the test is run
+in a harness.  It will only be visible in the verbose TAP stream.
+
+Handy for putting in notes which might be useful for debugging, but
+don't indicate a problem.
+
+    note("Tempfile is $tempfile");
+
 =cut
 
 sub diag {
-    my $tb = Test::More->builder;
-
-    $tb->diag(@_);
+    return Test::More->builder->diag(@_);
 }
 
+sub note {
+    return Test::More->builder->note(@_);
+}
+
+=item B<explain>
+
+  my @dump = explain @diagnostic_message;
+
+Will dump the contents of any references in a human readable format.
+Usually you want to pass this into C<note> or C<dump>.
+
+Handy for things like...
+
+    is_deeply($have, $want) || diag explain $have;
+
+or
+
+    note explain \%args;
+    Some::Class->method(%args);
+
+=cut
+
+sub explain {
+    return Test::More->builder->explain(@_);
+}
 
 =back
 
@@ -1009,9 +1090,9 @@ use TODO.  Read on.
 
 =cut
 
-#'#
+## no critic (Subroutines::RequireFinalReturn)
 sub skip {
-    my($why, $how_many) = @_;
+    my( $why, $how_many ) = @_;
     my $tb = Test::More->builder;
 
     unless( defined $how_many ) {
@@ -1022,18 +1103,18 @@ sub skip {
     }
 
     if( defined $how_many and $how_many =~ /\D/ ) {
-        _carp "skip() was passed a non-numeric number of tests.  Did you get the arguments backwards?";
+        _carp
+          "skip() was passed a non-numeric number of tests.  Did you get the arguments backwards?";
         $how_many = 1;
     }
 
-    for( 1..$how_many ) {
+    for( 1 .. $how_many ) {
         $tb->skip($why);
     }
 
-    local $^W = 0;
+    no warnings 'exiting';
     last SKIP;
 }
-
 
 =item B<TODO: BLOCK>
 
@@ -1097,7 +1178,7 @@ interpret them as passing.
 =cut
 
 sub todo_skip {
-    my($why, $how_many) = @_;
+    my( $why, $how_many ) = @_;
     my $tb = Test::More->builder;
 
     unless( defined $how_many ) {
@@ -1107,11 +1188,11 @@ sub todo_skip {
         $how_many = 1;
     }
 
-    for( 1..$how_many ) {
+    for( 1 .. $how_many ) {
         $tb->todo_skip($why);
     }
 
-    local $^W = 0;
+    no warnings 'exiting';
     last TODO;
 }
 
@@ -1151,7 +1232,7 @@ The test will exit with 255.
 
 sub BAIL_OUT {
     my $reason = shift;
-    my $tb = Test::More->builder;
+    my $tb     = Test::More->builder;
 
     $tb->BAIL_OUT($reason);
 }
@@ -1190,14 +1271,14 @@ multi-level structures are handled correctly.
 
 #'#
 sub eq_array {
-    local @Data_Stack;
+    local @Data_Stack = ();
     _deep_check(@_);
 }
 
-sub _eq_array  {
-    my($a1, $a2) = @_;
+sub _eq_array {
+    my( $a1, $a2 ) = @_;
 
-    if( grep !_type($_) eq 'ARRAY', $a1, $a2 ) {
+    if( grep _type($_) ne 'ARRAY', $a1, $a2 ) {
         warn "eq_array passed a non-array ref";
         return 0;
     }
@@ -1206,12 +1287,12 @@ sub _eq_array  {
 
     my $ok = 1;
     my $max = $#$a1 > $#$a2 ? $#$a1 : $#$a2;
-    for (0..$max) {
+    for( 0 .. $max ) {
         my $e1 = $_ > $#$a1 ? $DNE : $a1->[$_];
         my $e2 = $_ > $#$a2 ? $DNE : $a2->[$_];
 
-        push @Data_Stack, { type => 'ARRAY', idx => $_, vals => [$e1, $e2] };
-        $ok = _deep_check($e1,$e2);
+        push @Data_Stack, { type => 'ARRAY', idx => $_, vals => [ $e1, $e2 ] };
+        $ok = _deep_check( $e1, $e2 );
         pop @Data_Stack if $ok;
 
         last unless $ok;
@@ -1221,7 +1302,7 @@ sub _eq_array  {
 }
 
 sub _deep_check {
-    my($e1, $e2) = @_;
+    my( $e1, $e2 ) = @_;
     my $tb = Test::More->builder;
 
     my $ok = 0;
@@ -1233,27 +1314,27 @@ sub _deep_check {
 
     {
         # Quiet uninitialized value warnings when comparing undefs.
-        local $^W = 0; 
+        no warnings 'uninitialized';
 
-        $tb->_unoverload_str(\$e1, \$e2);
+        $tb->_unoverload_str( \$e1, \$e2 );
 
         # Either they're both references or both not.
-        my $same_ref = !(!ref $e1 xor !ref $e2);
-	my $not_ref  = (!ref $e1 and !ref $e2);
+        my $same_ref = !( !ref $e1 xor !ref $e2 );
+        my $not_ref = ( !ref $e1 and !ref $e2 );
 
         if( defined $e1 xor defined $e2 ) {
             $ok = 0;
         }
-        elsif ( _dne($e1) xor _dne($e2) ) {
+        elsif( _dne($e1) xor _dne($e2) ) {
             $ok = 0;
         }
-        elsif ( $same_ref and ($e1 eq $e2) ) {
+        elsif( $same_ref and( $e1 eq $e2 ) ) {
             $ok = 1;
         }
-	elsif ( $not_ref ) {
-	    push @Data_Stack, { type => '', vals => [$e1, $e2] };
-	    $ok = 0;
-	}
+        elsif($not_ref) {
+            push @Data_Stack, { type => '', vals => [ $e1, $e2 ] };
+            $ok = 0;
+        }
         else {
             if( $Refs_Seen{$e1} ) {
                 return $Refs_Seen{$e1} eq $e2;
@@ -1266,49 +1347,47 @@ sub _deep_check {
             $type = 'DIFFERENT' unless _type($e2) eq $type;
 
             if( $type eq 'DIFFERENT' ) {
-                push @Data_Stack, { type => $type, vals => [$e1, $e2] };
+                push @Data_Stack, { type => $type, vals => [ $e1, $e2 ] };
                 $ok = 0;
             }
             elsif( $type eq 'ARRAY' ) {
-                $ok = _eq_array($e1, $e2);
+                $ok = _eq_array( $e1, $e2 );
             }
             elsif( $type eq 'HASH' ) {
-                $ok = _eq_hash($e1, $e2);
+                $ok = _eq_hash( $e1, $e2 );
             }
             elsif( $type eq 'REF' ) {
-                push @Data_Stack, { type => $type, vals => [$e1, $e2] };
-                $ok = _deep_check($$e1, $$e2);
+                push @Data_Stack, { type => $type, vals => [ $e1, $e2 ] };
+                $ok = _deep_check( $$e1, $$e2 );
                 pop @Data_Stack if $ok;
             }
             elsif( $type eq 'SCALAR' ) {
-                push @Data_Stack, { type => 'REF', vals => [$e1, $e2] };
-                $ok = _deep_check($$e1, $$e2);
+                push @Data_Stack, { type => 'REF', vals => [ $e1, $e2 ] };
+                $ok = _deep_check( $$e1, $$e2 );
                 pop @Data_Stack if $ok;
             }
-            elsif( $type ) {
-                push @Data_Stack, { type => $type, vals => [$e1, $e2] };
+            elsif($type) {
+                push @Data_Stack, { type => $type, vals => [ $e1, $e2 ] };
                 $ok = 0;
             }
-	    else {
-		_whoa(1, "No type in _deep_check");
-	    }
+            else {
+                _whoa( 1, "No type in _deep_check" );
+            }
         }
     }
 
     return $ok;
 }
 
-
 sub _whoa {
-    my($check, $desc) = @_;
-    if( $check ) {
-        die <<WHOA;
+    my( $check, $desc ) = @_;
+    if($check) {
+        die <<"WHOA";
 WHOA!  $desc
 This should never happen!  Please contact the author immediately!
 WHOA
     }
 }
-
 
 =item B<eq_hash>
 
@@ -1320,14 +1399,14 @@ is a deep check.
 =cut
 
 sub eq_hash {
-    local @Data_Stack;
+    local @Data_Stack = ();
     return _deep_check(@_);
 }
 
 sub _eq_hash {
-    my($a1, $a2) = @_;
+    my( $a1, $a2 ) = @_;
 
-    if( grep !_type($_) eq 'HASH', $a1, $a2 ) {
+    if( grep _type($_) ne 'HASH', $a1, $a2 ) {
         warn "eq_hash passed a non-hash ref";
         return 0;
     }
@@ -1336,12 +1415,12 @@ sub _eq_hash {
 
     my $ok = 1;
     my $bigger = keys %$a1 > keys %$a2 ? $a1 : $a2;
-    foreach my $k (keys %$bigger) {
+    foreach my $k ( keys %$bigger ) {
         my $e1 = exists $a1->{$k} ? $a1->{$k} : $DNE;
         my $e2 = exists $a2->{$k} ? $a2->{$k} : $DNE;
 
-        push @Data_Stack, { type => 'HASH', idx => $k, vals => [$e1, $e2] };
-        $ok = _deep_check($e1, $e2);
+        push @Data_Stack, { type => 'HASH', idx => $k, vals => [ $e1, $e2 ] };
+        $ok = _deep_check( $e1, $e2 );
         pop @Data_Stack if $ok;
 
         last unless $ok;
@@ -1376,14 +1455,13 @@ Test::Deep contains much better set comparison functions.
 
 =cut
 
-sub eq_set  {
-    my($a1, $a2) = @_;
+sub eq_set {
+    my( $a1, $a2 ) = @_;
     return 0 unless @$a1 == @$a2;
 
-    # There's faster ways to do this, but this is easiest.
-    local $^W = 0;
+    no warnings 'uninitialized';
 
-    # It really doesn't matter how we sort them, as long as both arrays are 
+    # It really doesn't matter how we sort them, as long as both arrays are
     # sorted with the same algorithm.
     #
     # Ensure that references are not accidentally treated the same as a
@@ -1395,8 +1473,8 @@ sub eq_set  {
     # I don't know how references would be sorted so we just don't sort
     # them.  This means eq_set doesn't really work with refs.
     return eq_array(
-           [grep(ref, @$a1), sort( grep(!ref, @$a1) )],
-           [grep(ref, @$a2), sort( grep(!ref, @$a2) )],
+        [ grep( ref, @$a1 ), sort( grep( !ref, @$a1 ) ) ],
+        [ grep( ref, @$a2 ), sort( grep( !ref, @$a2 ) ) ],
     );
 }
 
@@ -1522,20 +1600,20 @@ L<Test::Simple> if all this confuses you and you just want to write
 some tests.  You can upgrade to Test::More later (it's forward
 compatible).
 
-L<Test> is the old testing module.  Its main benefit is that it has
-been distributed with Perl since 5.004_05.
+L<Test::Harness> is the test runner and output interpreter for Perl.
+It's the thing that powers C<make test> and where the C<prove> utility
+comes from.
 
-L<Test::Harness> for details on how your test results are interpreted
-by Perl.
+L<Test::Legacy> tests written with Test.pm, the original testing
+module, do not play well with other testing libraries.  Test::Legacy
+emulates the Test.pm interface and does play well with others.
 
 L<Test::Differences> for more ways to test complex data structures.
 And it plays well with Test::More.
 
-L<Test::Class> is like XUnit but more perlish.
+L<Test::Class> is like xUnit but more perlish.
 
 L<Test::Deep> gives you more powerful complex data structure testing.
-
-L<Test::Unit> is XUnit style testing.
 
 L<Test::Inline> shows the idea of embedded testing.
 
@@ -1557,7 +1635,7 @@ See F<http://rt.cpan.org> to report and view bugs.
 
 =head1 COPYRIGHT
 
-Copyright 2001-2002, 2004-2006 by Michael G Schwern E<lt>schwern@pobox.comE<gt>.
+Copyright 2001-2008 by Michael G Schwern E<lt>schwern@pobox.comE<gt>.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

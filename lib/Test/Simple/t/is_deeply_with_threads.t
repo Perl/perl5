@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# $Id: /mirror/googlecode/test-more-trunk/t/is_deeply_with_threads.t 60989 2008-09-10T03:05:54.548376Z schwern  $
 
 # Test to see if is_deeply() plays well with threads.
 
@@ -19,12 +20,12 @@ BEGIN {
     unless ( $] >= 5.008001 && $Config{'useithreads'} && 
              eval { require threads; 'threads'->import; 1; }) 
     {
-        print "1..0 # Skip: no working threads\n";
+        print "1..0 # Skip no working threads\n";
         exit 0;
     }
     
     unless ( $ENV{AUTHOR_TESTING} ) {
-        print "1..0 # Skip: many perls have broken threads.  Enable with AUTHOR_TESTING.\n";
+        print "1..0 # Skip many perls have broken threads.  Enable with AUTHOR_TESTING.\n";
         exit 0;
     }
 }

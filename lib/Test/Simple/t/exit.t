@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# $Id: /mirror/googlecode/test-more/t/exit.t 57943 2008-08-18T02:09:22.275428Z brooklyn.kid51  $
 
 # Can't use Test.pm, that's a 5.005 thing.
 package My::Test;
@@ -64,12 +65,12 @@ else {
     *exitstatus = sub { POSIX::WEXITSTATUS($_[0]) }
 }
 
+my $Perl = File::Spec->rel2abs($^X);
+
 chdir 't';
 my $lib = File::Spec->catdir(qw(lib Test Simple sample_tests));
 while( my($test_name, $exit_codes) = each %Tests ) {
     my($exit_code) = $exit_codes->[$IsVMS ? 1 : 0];
-
-    my $Perl = $^X;
 
     if( $^O eq 'VMS' ) {
         # VMS can't use its own $^X in a system call until almost 5.8
