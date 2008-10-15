@@ -14,7 +14,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 13;
+use Test::More tests => 16;
 
 require ExtUtils::MM_Any;
 
@@ -260,7 +260,28 @@ meta-spec:
 YAML
 
     is($mm->metafile_file(@meta), $expected, "META.yml with extra 'no_index' works");
+
+
+    # Make sure YAML.pm can ready our output
+    SKIP: {
+        skip "Need YAML.pm to test if it can load META.yml", 1
+          unless eval { require YAML };
+
+        my $yaml_load = YAML::Load($mm->metafile_file(@meta));
+        is_deeply( $yaml_load, {@meta}, "META.yml can be read by YAML.pm" );
+    }
+
+
+    SKIP: {
+        skip "Need YAML::Tiny to test if it can load META.yml", 2
+          unless eval { require YAML::Tiny };
+
+        my @yaml_load = YAML::Tiny::Load($mm->metafile_file(@meta));
+        is @yaml_load, 1,               "YAML::Tiny saw one document in META.yml";
+        is_deeply( $yaml_load[0], {@meta}, "META.yml can be read by YAML::Tiny" );
+    }
 }
+
 
 {
     my @meta = ( k => 'a : b', 'x : y' => 1 );

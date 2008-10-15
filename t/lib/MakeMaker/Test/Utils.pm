@@ -9,12 +9,12 @@ use vars qw($VERSION @ISA @EXPORT);
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = 0.03;
+$VERSION = 0.04;
 
 @EXPORT = qw(which_perl perl_lib makefile_name makefile_backup
              make make_run run make_macro calibrate_mtime
              setup_mm_test_root
-	     have_compiler
+             have_compiler slurp
             );
 
 my $Is_VMS   = $^O eq 'VMS';
@@ -44,6 +44,8 @@ MakeMaker::Test::Utils - Utility routines for testing MakeMaker
   my $out           = run($cmd);
 
   my $have_compiler = have_compiler();
+
+  my $text          = slurp($filename);
 
 
 =head1 DESCRIPTION
@@ -321,6 +323,27 @@ sub have_compiler {
     return $have_compiler;
 }
 
+=item slurp
+
+  $text = slurp($filename);
+
+Returns the contents of a file if it can be read, otherwise undef.
+Contents of excessively large files are truncated to a couple of
+kilobytes, though.
+
+=cut
+
+sub slurp {
+    my $filename = shift;
+    my $text = undef;
+    local *FH;
+    local $/ = \8192;
+    if (open FH, $filename) {
+        $text = <FH>;
+        close FH;
+    }
+    return $text;
+}
 
 =back
 
