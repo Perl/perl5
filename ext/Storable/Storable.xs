@@ -4567,7 +4567,7 @@ static SV *retrieve_overloaded(pTHX_ stcxt_t *cxt, const char *cname)
 	 * WARNING: breaks RV encapsulation.
 	 */
 
-	sv_upgrade(rv, SVt_RV);
+	SvUPGRADE(rv, SVt_RV);
 	SvRV_set(rv, sv);				/* $rv = \$sv */
 	SvROK_on(rv);
 
