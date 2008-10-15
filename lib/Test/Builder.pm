@@ -5,7 +5,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '0.82';
+our $VERSION = '0.82_01';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 # Make Test::Builder thread-safe for ithreads.
@@ -487,6 +487,7 @@ sub _unoverload_num {
 
     $self->_unoverload( '0+', @_ );
 
+    no warnings 'numeric';
     for my $val (@_) {
         next unless $self->_is_dualvar($$val);
         $$val = $$val + 0;
