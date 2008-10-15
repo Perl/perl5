@@ -4702,6 +4702,9 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	cv_undef((CV*)sv);
 	goto freescalar;
     case SVt_PVHV:
+	if (PL_last_swash_hv == (HV*)sv) {
+	    PL_last_swash_hv = NULL;
+	}
 	hv_undef((HV*)sv);
 	break;
     case SVt_PVAV:
