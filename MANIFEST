@@ -2895,6 +2895,7 @@ lib/Test/Simple/t/is_deeply_with_threads.t	Test::More test
 lib/Test/Simple/t/lib/Dummy.pm	Test::More test module
 lib/Test/Simple/t/lib/MyOverload.pm	Test::More test module
 lib/Test/Simple/t/lib/NoExporter.pm	Test::Simple test module
+lib/Test/Simple/t/lib/SigDie.pm	Test module for Test::More
 lib/Test/Simple/t/missing.t	Test::Simple test, missing tests
 lib/Test/Simple/t/More.t	Test::More test, basic stuff
 lib/Test/Simple/t/new_ok.t	Test::More test
@@ -3758,7 +3759,6 @@ t/lib/mypragma.t		Test the example user pragma
 t/lib/no_load.t			Test that some modules don't load others
 t/lib/proxy_constant_subs.t	Test that Proxy Constant Subs behave correctly
 t/lib/Sans_mypragma.pm			Test module for t/lib/mypragma.t
-t/lib/SigDie.pm			Test module for Test::More
 t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t
 t/lib/strict/subs		Tests of "use strict 'subs'" for strict.t
 t/lib/strict/vars		Tests of "use strict 'vars'" for strict.t
