@@ -3758,6 +3758,7 @@ t/lib/mypragma.t		Test the example user pragma
 t/lib/no_load.t			Test that some modules don't load others
 t/lib/proxy_constant_subs.t	Test that Proxy Constant Subs behave correctly
 t/lib/Sans_mypragma.pm			Test module for t/lib/mypragma.t
+t/lib/SigDie.pm			Test module for Test::More
 t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t
 t/lib/strict/subs		Tests of "use strict 'subs'" for strict.t
 t/lib/strict/vars		Tests of "use strict 'vars'" for strict.t
