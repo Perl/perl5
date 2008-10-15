@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# $Id: /mirror/googlecode/test-more/t/extra_one.t 57943 2008-08-18T02:09:22.275428Z brooklyn.kid51  $
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {
@@ -44,7 +45,7 @@ ok 3
 OUT
 
     My::Test::is($$err, <<ERR);
-# Looks like you planned 1 test but ran 2 extra.
+# Looks like you planned 1 test but ran 3.
 ERR
 
     # Prevent Test::Simple from existing with non-zero

@@ -1,7 +1,8 @@
 package Test::Builder::Tester;
+# $Id: /mirror/googlecode/test-more-trunk/lib/Test/Builder/Tester.pm 67223 2008-10-15T03:08:18.888155Z schwern  $
 
 use strict;
-our $VERSION = "1.13";
+our $VERSION = "1.15";
 
 use Test::Builder;
 use Symbol;
@@ -63,13 +64,12 @@ our @EXPORT = qw(test_out test_err test_fail test_diag test_test line_num);
 # the king of cargo cult programming ;-)
 
 # 5.004's Exporter doesn't have export_to_level.
-sub _export_to_level
-{
-      my $pkg = shift;
-      my $level = shift;
-      (undef) = shift;                  # XXX redundant arg
-      my $callpkg = caller($level);
-      $pkg->export($callpkg, @_);
+sub _export_to_level {
+    my $pkg   = shift;
+    my $level = shift;
+    (undef) = shift;    # XXX redundant arg
+    my $callpkg = caller($level);
+    $pkg->export( $callpkg, @_ );
 }
 
 sub import {
@@ -82,14 +82,14 @@ sub import {
     $t->plan(@plan);
 
     my @imports = ();
-    foreach my $idx (0..$#plan) {
+    foreach my $idx ( 0 .. $#plan ) {
         if( $plan[$idx] eq 'import' ) {
-            @imports = @{$plan[$idx+1]};
+            @imports = @{ $plan[ $idx + 1 ] };
             last;
         }
     }
 
-    __PACKAGE__->_export_to_level(1, __PACKAGE__, @imports);
+    __PACKAGE__->_export_to_level( 1, __PACKAGE__, @imports );
 }
 
 ###
@@ -123,8 +123,7 @@ my $original_harness_state;
 my $original_harness_env;
 
 # function that starts testing and redirects the filehandles for now
-sub _start_testing
-{
+sub _start_testing {
     # even if we're running under Test::Harness pretend we're not
     # for now.  This needed so Test::Builder doesn't add extra spaces
     $original_harness_env = $ENV{HARNESS_ACTIVE} || 0;
@@ -145,7 +144,7 @@ sub _start_testing
     $err->reset();
 
     # remeber that we're testing
-    $testing = 1;
+    $testing     = 1;
     $testing_num = $t->current_test;
     $t->current_test(0);
 
@@ -187,20 +186,18 @@ output filehandles)
 
 =cut
 
-sub test_out
-{
+sub test_out {
     # do we need to do any setup?
     _start_testing() unless $testing;
 
-    $out->expect(@_)
+    $out->expect(@_);
 }
 
-sub test_err
-{
+sub test_err {
     # do we need to do any setup?
     _start_testing() unless $testing;
 
-    $err->expect(@_)
+    $err->expect(@_);
 }
 
 =item test_fail
@@ -229,14 +226,13 @@ more simply as:
 
 =cut
 
-sub test_fail
-{
+sub test_fail {
     # do we need to do any setup?
     _start_testing() unless $testing;
 
     # work out what line we should be on
-    my ($package, $filename, $line) = caller;
-    $line = $line + (shift() || 0); # prevent warnings
+    my( $package, $filename, $line ) = caller;
+    $line = $line + ( shift() || 0 );    # prevent warnings
 
     # expect that on stderr
     $err->expect("#     Failed test ($0 at line $line)");
@@ -272,14 +268,13 @@ without the newlines.
 
 =cut
 
-sub test_diag
-{
+sub test_diag {
     # do we need to do any setup?
     _start_testing() unless $testing;
 
     # expect the same thing, but prepended with "#     "
     local $_;
-    $err->expect(map {"# $_"} @_)
+    $err->expect( map { "# $_" } @_ );
 }
 
 =item test_test
@@ -321,24 +316,23 @@ will function normally and cause success/errors for B<Test::Harness>.
 
 =cut
 
-sub test_test
-{
-   # decode the arguements as described in the pod
-   my $mess;
-   my %args;
-   if (@_ == 1)
-     { $mess = shift }
-   else
-   {
-     %args = @_;
-     $mess = $args{name} if exists($args{name});
-     $mess = $args{title} if exists($args{title});
-     $mess = $args{label} if exists($args{label});
-   }
+sub test_test {
+    # decode the arguements as described in the pod
+    my $mess;
+    my %args;
+    if( @_ == 1 ) {
+        $mess = shift
+    }
+    else {
+        %args = @_;
+        $mess = $args{name} if exists( $args{name} );
+        $mess = $args{title} if exists( $args{title} );
+        $mess = $args{label} if exists( $args{label} );
+    }
 
     # er, are we testing?
     croak "Not testing.  You must declare output with a test function first."
-	unless $testing;
+      unless $testing;
 
     # okay, reconnect the test suite back to the saved handles
     $t->output($original_output_handle);
@@ -353,20 +347,20 @@ sub test_test
     $ENV{HARNESS_ACTIVE} = $original_harness_env;
 
     # check the output we've stashed
-    unless ($t->ok(    ($args{skip_out} || $out->check)
-                    && ($args{skip_err} || $err->check),
-                   $mess))
+    unless( $t->ok( ( $args{skip_out} || $out->check ) &&
+                    ( $args{skip_err} || $err->check ), $mess ) 
+    )
     {
-      # print out the diagnostic information about why this
-      # test failed
+        # print out the diagnostic information about why this
+        # test failed
 
-      local $_;
+        local $_;
 
-      $t->diag(map {"$_\n"} $out->complaint)
-	unless $args{skip_out} || $out->check;
+        $t->diag( map { "$_\n" } $out->complaint )
+          unless $args{skip_out} || $out->check;
 
-      $t->diag(map {"$_\n"} $err->complaint)
-	unless $args{skip_err} || $err->check;
+        $t->diag( map { "$_\n" } $err->complaint )
+          unless $args{skip_err} || $err->check;
     }
 }
 
@@ -382,10 +376,9 @@ C<line_num(+3)> idiom is arguably nicer.
 
 =cut
 
-sub line_num
-{
-    my ($package, $filename, $line) = caller;
-    return $line + (shift() || 0); # prevent warnings
+sub line_num {
+    my( $package, $filename, $line ) = caller;
+    return $line + ( shift() || 0 );    # prevent warnings
 }
 
 =back
@@ -431,10 +424,10 @@ the PERL5LIB.
 =cut
 
 my $color;
-sub color
-{
-  $color = shift if @_;
-  $color;
+
+sub color {
+    $color = shift if @_;
+    $color;
 }
 
 =back
@@ -489,21 +482,18 @@ package Test::Builder::Tester::Tie;
 ##
 # add line(s) to be expected
 
-sub expect
-{
+sub expect {
     my $self = shift;
 
     my @checks = @_;
     foreach my $check (@checks) {
         $check = $self->_translate_Failed_check($check);
-        push @{$self->{wanted}}, ref $check ? $check : "$check\n";
+        push @{ $self->{wanted} }, ref $check ? $check : "$check\n";
     }
 }
 
-
-sub _translate_Failed_check
-{
-    my($self, $check) = @_;
+sub _translate_Failed_check {
+    my( $self, $check ) = @_;
 
     if( $check =~ /\A(.*)#     (Failed .*test) \((.*?) at line (\d+)\)\Z(?!\n)/ ) {
         $check = "/\Q$1\E#\\s+\Q$2\E.*?\\n?.*?\Qat $3\E line \Q$4\E.*\\n?/";
@@ -512,21 +502,19 @@ sub _translate_Failed_check
     return $check;
 }
 
-
 ##
 # return true iff the expected data matches the got data
 
-sub check
-{
+sub check {
     my $self = shift;
 
     # turn off warnings as these might be undef
     local $^W = 0;
 
-    my @checks = @{$self->{wanted}};
-    my $got = $self->{got};
+    my @checks = @{ $self->{wanted} };
+    my $got    = $self->{got};
     foreach my $check (@checks) {
-        $check = "\Q$check\E" unless ($check =~ s,^/(.*)/$,$1, or ref $check);
+        $check = "\Q$check\E" unless( $check =~ s,^/(.*)/$,$1, or ref $check );
         return 0 unless $got =~ s/^$check//;
     }
 
@@ -537,82 +525,71 @@ sub check
 # a complaint message about the inputs not matching (to be
 # used for debugging messages)
 
-sub complaint
-{
-    my $self = shift;
+sub complaint {
+    my $self   = shift;
     my $type   = $self->type;
     my $got    = $self->got;
-    my $wanted = join "\n", @{$self->wanted};
+    my $wanted = join "\n", @{ $self->wanted };
 
     # are we running in colour mode?
-    if (Test::Builder::Tester::color)
-    {
-      # get color
-      eval { require Term::ANSIColor };
-      unless ($@)
-      {
-        # colours
+    if(Test::Builder::Tester::color) {
+        # get color
+        eval { require Term::ANSIColor };
+        unless($@) {
+            # colours
 
-        my $green = Term::ANSIColor::color("black").
-                    Term::ANSIColor::color("on_green");
-        my $red   = Term::ANSIColor::color("black").
-                    Term::ANSIColor::color("on_red");
-        my $reset = Term::ANSIColor::color("reset");
+            my $green = Term::ANSIColor::color("black") . Term::ANSIColor::color("on_green");
+            my $red   = Term::ANSIColor::color("black") . Term::ANSIColor::color("on_red");
+            my $reset = Term::ANSIColor::color("reset");
 
-        # work out where the two strings start to differ
-        my $char = 0;
-        $char++ while substr($got, $char, 1) eq substr($wanted, $char, 1);
+            # work out where the two strings start to differ
+            my $char = 0;
+            $char++ while substr( $got, $char, 1 ) eq substr( $wanted, $char, 1 );
 
-        # get the start string and the two end strings
-        my $start     = $green . substr($wanted, 0,   $char);
-        my $gotend    = $red   . substr($got   , $char) . $reset;
-        my $wantedend = $red   . substr($wanted, $char) . $reset;
+            # get the start string and the two end strings
+            my $start = $green . substr( $wanted, 0, $char );
+            my $gotend    = $red . substr( $got,    $char ) . $reset;
+            my $wantedend = $red . substr( $wanted, $char ) . $reset;
 
-        # make the start turn green on and off
-        $start =~ s/\n/$reset\n$green/g;
+            # make the start turn green on and off
+            $start =~ s/\n/$reset\n$green/g;
 
-        # make the ends turn red on and off
-        $gotend    =~ s/\n/$reset\n$red/g;
-        $wantedend =~ s/\n/$reset\n$red/g;
+            # make the ends turn red on and off
+            $gotend    =~ s/\n/$reset\n$red/g;
+            $wantedend =~ s/\n/$reset\n$red/g;
 
-        # rebuild the strings
-        $got    = $start . $gotend;
-        $wanted = $start . $wantedend;
-      }
+            # rebuild the strings
+            $got    = $start . $gotend;
+            $wanted = $start . $wantedend;
+        }
     }
 
-    return "$type is:\n" .
-           "$got\nnot:\n$wanted\nas expected"
+    return "$type is:\n" . "$got\nnot:\n$wanted\nas expected";
 }
 
 ##
 # forget all expected and got data
 
-sub reset
-{
+sub reset {
     my $self = shift;
     %$self = (
-              type   => $self->{type},
-              got    => '',
-              wanted => [],
-             );
+        type   => $self->{type},
+        got    => '',
+        wanted => [],
+    );
 }
 
-
-sub got
-{
+sub got {
     my $self = shift;
     return $self->{got};
 }
 
-sub wanted
-{
+sub wanted {
     my $self = shift;
     return $self->{wanted};
 }
 
-sub type
-{
+sub type {
     my $self = shift;
     return $self->{type};
 }
@@ -621,26 +598,24 @@ sub type
 # tie interface
 ###
 
-sub PRINT  {
+sub PRINT {
     my $self = shift;
     $self->{got} .= join '', @_;
 }
 
 sub TIEHANDLE {
-    my($class, $type) = @_;
+    my( $class, $type ) = @_;
 
-    my $self = bless {
-                   type => $type
-               }, $class;
+    my $self = bless { type => $type }, $class;
 
     $self->reset;
 
     return $self;
 }
 
-sub READ {}
-sub READLINE {}
-sub GETC {}
-sub FILENO {}
+sub READ     { }
+sub READLINE { }
+sub GETC     { }
+sub FILENO   { }
 
 1;

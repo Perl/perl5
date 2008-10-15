@@ -1,18 +1,18 @@
 package Test::Simple;
+# $Id: /mirror/googlecode/test-more-trunk/lib/Test/Simple.pm 67223 2008-10-15T03:08:18.888155Z schwern  $
 
 use 5.004;
 
-use strict 'vars';
-use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '0.80';
-$VERSION = eval $VERSION;    # make the alpha version come out as a number
+use strict;
+
+our $VERSION = '0.82';
+$VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 use Test::Builder::Module;
-@ISA    = qw(Test::Builder::Module);
-@EXPORT = qw(ok);
+our @ISA    = qw(Test::Builder::Module);
+our @EXPORT = qw(ok);
 
 my $CLASS = __PACKAGE__;
-
 
 =head1 NAME
 
@@ -77,10 +77,9 @@ will do what you mean (fail if stuff is empty)
 
 =cut
 
-sub ok ($;$) {
-    $CLASS->builder->ok(@_);
+sub ok ($;$) {    ## no critic (Subroutines::ProhibitSubroutinePrototypes)
+    return $CLASS->builder->ok(@_);
 }
-
 
 =back
 
@@ -191,23 +190,9 @@ Test::More.  Test::Simple is 100% forward compatible with Test::More
 (i.e. you can just use Test::More instead of Test::Simple in your
 programs and things will still work).
 
-=item L<Test>
-
-The original Perl testing module.
-
-=item L<Test::Unit>
-
-Elaborate unit testing.
-
-=item L<Test::Inline>, L<SelfTest>
-
-Embed tests in your code!
-
-=item L<Test::Harness>
-
-Interprets the output of your test program.
-
 =back
+
+Look in Test::More's SEE ALSO for more testing modules.
 
 
 =head1 AUTHORS
@@ -218,7 +203,7 @@ E<lt>schwern@pobox.comE<gt>, wardrobe by Calvin Klein.
 
 =head1 COPYRIGHT
 
-Copyright 2001, 2002, 2004 by Michael G Schwern E<lt>schwern@pobox.comE<gt>.
+Copyright 2001-2008 by Michael G Schwern E<lt>schwern@pobox.comE<gt>.
 
 This program is free software; you can redistribute it and/or 
 modify it under the same terms as Perl itself.
