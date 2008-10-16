@@ -1037,16 +1037,29 @@ Perl_leave_scope(pTHX_ I32 base)
 		SvFLAGS(sv) |= val;
 	    }
 	    break;
-	    /* These are only saved in mathoms.c */
+
+	    /* This would be a mathom, but Perl_save_svref() calls a static
+	       function, S_save_scalar_at(), so has to stay in this file.  */
 	case SAVEt_SVREF:			/* scalar reference */
 	    value = (SV*)SSPOPPTR;
 	    ptr = SSPOPPTR;
 	    av = NULL; /* what to refcnt_dec */
 	    goto restore_sv;
+
+	    /* These are only saved in mathoms.c */
+	case SAVEt_NSTAB:
+	    gv = (GV*)SSPOPPTR;
+	    (void)sv_clear((SV*)gv);
+	    break;
 	case SAVEt_LONG:			/* long reference */
 	    ptr = SSPOPPTR;
 	    *(long*)ptr = (long)SSPOPLONG;
 	    break;
+	case SAVEt_IV:				/* IV reference */
+	    ptr = SSPOPPTR;
+	    *(IV*)ptr = (IV)SSPOPIV;
+	    break;
+
 	case SAVEt_I16:				/* I16 reference */
 	    ptr = SSPOPPTR;
 	    *(I16*)ptr = (I16)SSPOPINT;
@@ -1054,14 +1067,6 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_I8:				/* I8 reference */
 	    ptr = SSPOPPTR;
 	    *(I8*)ptr = (I8)SSPOPINT;
-	    break;
-	case SAVEt_IV:				/* IV reference */
-	    ptr = SSPOPPTR;
-	    *(IV*)ptr = (IV)SSPOPIV;
-	    break;
-	case SAVEt_NSTAB:
-	    gv = (GV*)SSPOPPTR;
-	    (void)sv_clear((SV*)gv);
 	    break;
 	case SAVEt_DESTRUCTOR:
 	    ptr = SSPOPPTR;
