@@ -412,15 +412,15 @@ Perl_save_sptr(pTHX_ SV **sptr)
 }
 
 void
-Perl_save_padsv(pTHX_ PADOFFSET off)
+Perl_save_padsv_and_mortalize(pTHX_ PADOFFSET off)
 {
     dVAR;
     SSCHECK(4);
     ASSERT_CURPAD_ACTIVE("save_padsv");
-    SSPUSHPTR(PL_curpad[off]);
+    SSPUSHPTR(SvREFCNT_inc_simple_NN(PL_curpad[off]));
     SSPUSHPTR(PL_comppad);
     SSPUSHLONG((long)off);
-    SSPUSHINT(SAVEt_PADSV);
+    SSPUSHINT(SAVEt_PADSV_AND_MORTALIZE);
 }
 
 void
@@ -929,12 +929,18 @@ Perl_leave_scope(pTHX_ I32 base)
 	    else
 		PL_curpad = NULL;
 	    break;
-	case SAVEt_PADSV:
+	case SAVEt_PADSV_AND_MORTALIZE:
 	    {
 		const PADOFFSET off = (PADOFFSET)SSPOPLONG;
+		SV **svp;
 		ptr = SSPOPPTR;
-		if (ptr)
-		    AvARRAY((PAD*)ptr)[off] = (SV*)SSPOPPTR;
+		assert (ptr);
+		svp = AvARRAY((PAD*)ptr) + off;
+		/* This mortalizing used to be done by POPLOOP() via itersave.
+		   But as we have all the information here, we can do it here,
+		   save even having to have itersave in the struct.  */
+		sv_2mortal(*svp);
+		*svp = (SV*)SSPOPPTR;
 	    }
 	    break;
 	case SAVEt_SAVESWITCHSTACK:
@@ -964,6 +970,20 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_LONG:			/* long reference */
 	    ptr = SSPOPPTR;
 	    *(long*)ptr = (long)SSPOPLONG;
+	    break;
+	    /* This case is rendered redundant by the integration of change
+	       33078. See the comment near Perl_save_padsv().  */
+	case SAVEt_PADSV:
+	    {
+		const PADOFFSET off = (PADOFFSET)SSPOPLONG;
+		ptr = SSPOPPTR;
+		if (ptr)
+		    AvARRAY((PAD*)ptr)[off] = (SV*)SSPOPPTR;
+		else {
+		  /* Bug, surely? We need to balance the push with a pop here.
+		   */
+		}
+	    }
 	    break;
 	case SAVEt_I16:				/* I16 reference */
 	    ptr = SSPOPPTR;
@@ -1097,9 +1117,6 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 		PTR2UV(cx->blk_loop.iterary));
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERVAR = 0x%"UVxf"\n",
 		PTR2UV(CxITERVAR(cx)));
-	if (CxITERVAR(cx))
-	    PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERSAVE = 0x%"UVxf"\n",
-		PTR2UV(cx->blk_loop.itersave));
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERLVAL = 0x%"UVxf"\n",
 		PTR2UV(cx->blk_loop.iterlval));
 	break;
@@ -1133,6 +1150,22 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
     PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(cx);
 #endif	/* DEBUGGING */
+}
+
+/* This is rendered a mathom by the integration of change 33078. However, until
+   we have versioned mathom logic in mathoms.c, we can't move it there for
+   5.10.1, as other code in production may have linked to it.  */
+
+void
+Perl_save_padsv(pTHX_ PADOFFSET off)
+{
+    dVAR;
+    SSCHECK(4);
+    ASSERT_CURPAD_ACTIVE("save_padsv");
+    SSPUSHPTR(PL_curpad[off]);
+    SSPUSHPTR(PL_comppad);
+    SSPUSHLONG((long)off);
+    SSPUSHINT(SAVEt_PADSV);
 }
 
 /*

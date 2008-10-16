@@ -777,6 +777,7 @@ Ap	|void	|save_pptr	|NN char** pptr
 Ap	|void	|save_vptr	|NN void* pptr
 Ap	|void	|save_re_context
 Ap	|void	|save_padsv	|PADOFFSET off
+Ap	|void	|save_padsv_and_mortalize|PADOFFSET off
 Ap	|void	|save_sptr	|NN SV** sptr
 Ap	|SV*	|save_svref	|NN SV** sptr
 p	|OP*	|sawparens	|NULLOK OP* o
