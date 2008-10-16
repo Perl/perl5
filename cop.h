@@ -465,14 +465,15 @@ struct block_loop {
 	 : (SV**)NULL)
 #  define CX_ITERDATA_SET(cx,idata)					\
 	CX_CURPAD_SAVE(cx->blk_loop);					\
-	if ((cx->blk_loop.iterdata = (idata)))				\
+	if ((cx->blk_loop.iterdata = (idata)) && SvPADMY(*CxITERVAR(cx))) \
 	    cx->blk_loop.itersave = SvREFCNT_inc(*CxITERVAR(cx));	\
 	else								\
 	    cx->blk_loop.itersave = NULL;
 #else
 #  define CxITERVAR(c)		((c)->blk_loop.itervar)
 #  define CX_ITERDATA_SET(cx,ivar)					\
-	if ((cx->blk_loop.itervar = (SV**)(ivar)))			\
+	if ((cx->blk_loop.itervar = (SV**)(ivar))			\
+	    && SvPADMY(*CxITERVAR(cx)))					\
 	    cx->blk_loop.itersave = SvREFCNT_inc(*CxITERVAR(cx));	\
 	else								\
 	    cx->blk_loop.itersave = NULL;
@@ -502,14 +503,10 @@ struct block_loop {
 #define POPLOOP(cx)							\
 	SvREFCNT_dec(cx->blk_loop.iterlval);				\
 	if (cx->blk_loop.itersave) {					\
-            if (SvPADMY(cx->blk_loop.itersave)) {			\
-		SV ** const s_v_p = CxITERVAR(cx);			\
-		sv_2mortal(*s_v_p);					\
-		*s_v_p = cx->blk_loop.itersave;				\
-	    }								\
-	    else {							\
-		SvREFCNT_dec(cx->blk_loop.itersave);			\
-	    }								\
+	    SV ** const s_v_p = CxITERVAR(cx);				\
+	    assert(SvPADMY(cx->blk_loop.itersave));			\
+	    sv_2mortal(*s_v_p);						\
+	    *s_v_p = cx->blk_loop.itersave;				\
 	}								\
 	if (cx->blk_loop.iterary && cx->blk_loop.iterary != PL_curstack)\
 	    SvREFCNT_dec(cx->blk_loop.iterary);
