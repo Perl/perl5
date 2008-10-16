@@ -993,8 +993,9 @@ Perl_leave_scope(pTHX_ I32 base)
 		if (ptr)
 		    AvARRAY((PAD*)ptr)[off] = (SV*)SSPOPPTR;
 		else {
-		  /* Bug, surely? We need to balance the push with a pop here.
-		   */
+		  /* Can we ever get here?
+		     POPs must balance PUSHes.  */
+		    (void) SSPOPPTR;
 		}
 	    }
 	    break;
