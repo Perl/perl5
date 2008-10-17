@@ -184,6 +184,8 @@ END
 # ----- META.yml output -----
 {
     my $distdir  = 'Min-PerlVers-0.05';
+    $distdir =~ s{\.}{_}g if $Is_VMS;
+
     my $meta_yml = "$distdir/META.yml";
     my @make_out    = run(qq{$make metafile});
     END { rmtree $distdir }
