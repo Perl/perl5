@@ -1166,21 +1166,6 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 #endif	/* DEBUGGING */
 }
 
-/* This is rendered a mathom by the integration of change 33078. However, until
-   we have versioned mathom logic in mathoms.c, we can't move it there for
-   5.10.1, as other code in production may have linked to it.  */
-
-void
-Perl_save_padsv(pTHX_ PADOFFSET off)
-{
-    SSCHECK(4);
-    ASSERT_CURPAD_ACTIVE("save_padsv");
-    SSPUSHPTR(PL_curpad[off]);
-    SSPUSHPTR(PL_comppad);
-    SSPUSHLONG((long)off);
-    SSPUSHINT(SAVEt_PADSV);
-}
-
 /*
  * Local variables:
  * c-indentation-style: bsd

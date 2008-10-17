@@ -1384,6 +1384,18 @@ S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8)
     PERL_UNUSED_ARG(utf8);
     return FALSE;
 }
+
+void
+Perl_save_padsv(pTHX_ PADOFFSET off)
+{
+    SSCHECK(4);
+    ASSERT_CURPAD_ACTIVE("save_padsv");
+    SSPUSHPTR(PL_curpad[off]);
+    SSPUSHPTR(PL_comppad);
+    SSPUSHLONG((long)off);
+    SSPUSHINT(SAVEt_PADSV);
+}
+
 #endif /* NO_MATHOMS */
 
 /*
