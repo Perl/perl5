@@ -462,6 +462,9 @@ struct block_loop {
 #else
     SV **	itervar;
 #endif
+    /* Eliminated in blead by change 33080, but for binary compatibility
+       reasons we can't remove it from the middle of a struct in a maintenance
+       release, so it gets to stay, and be set to NULL.  */
     SV *	itersave;
     SV *	iterlval;
     AV *	iterary;
@@ -479,17 +482,13 @@ struct block_loop {
 	 : (SV**)NULL)
 #  define CX_ITERDATA_SET(cx,idata)					\
 	CX_CURPAD_SAVE(cx->blk_loop);					\
-	if ((cx->blk_loop.iterdata = (idata)))				\
-	    cx->blk_loop.itersave = SvREFCNT_inc(*CxITERVAR(cx));	\
-	else								\
-	    cx->blk_loop.itersave = NULL;
+	cx->blk_loop.itersave = NULL;					\
+	cx->blk_loop.iterdata = (idata);
 #else
 #  define CxITERVAR(c)		((c)->blk_loop.itervar)
 #  define CX_ITERDATA_SET(cx,ivar)					\
-	if ((cx->blk_loop.itervar = (SV**)(ivar)))			\
-	    cx->blk_loop.itersave = SvREFCNT_inc(*CxITERVAR(cx));	\
-	else								\
-	    cx->blk_loop.itersave = NULL;
+	cx->blk_loop.itersave = NULL;					\
+	cx->blk_loop.itervar = (SV**)(ivar);
 #endif
 #define CxLABEL(c)	(0 + (c)->blk_loop.label)
 #define CxHASARGS(c)	(0 + (c)->blk_sub.hasargs)
@@ -508,16 +507,6 @@ struct block_loop {
 
 #define POPLOOP(cx)							\
 	SvREFCNT_dec(cx->blk_loop.iterlval);				\
-	if (CxITERVAR(cx)) {						\
-            if (SvPADMY(cx->blk_loop.itersave)) {			\
-		SV ** const s_v_p = CxITERVAR(cx);			\
-		sv_2mortal(*s_v_p);					\
-		*s_v_p = cx->blk_loop.itersave;				\
-	    }								\
-	    else {							\
-		SvREFCNT_dec(cx->blk_loop.itersave);			\
-	    }								\
-	}								\
 	if (cx->blk_loop.iterary && cx->blk_loop.iterary != PL_curstack)\
 	    SvREFCNT_dec(cx->blk_loop.iterary);
 

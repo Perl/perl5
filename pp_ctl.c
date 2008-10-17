@@ -1696,11 +1696,10 @@ PP(pp_enteriter)
     else
 #endif /* USE_5005THREADS */
     if (PL_op->op_targ) {
+	SAVEPADSVANDMORTALIZE(PL_op->op_targ);
 #ifndef USE_ITHREADS
 	svp = &PAD_SVl(PL_op->op_targ);		/* "my" variable */
-	SAVESPTR(*svp);
 #else
-	SAVEPADSV(PL_op->op_targ);
 	iterdata = INT2PTR(void*, PL_op->op_targ);
 	cxtype |= CXp_PADVAR;
 #endif

@@ -9958,8 +9958,6 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		ncx->blk_loop.oldcomppad
 		    = (PAD*)ptr_table_fetch(PL_ptr_table,
 					    ncx->blk_loop.oldcomppad);
-		ncx->blk_loop.itersave	= sv_dup_inc(ncx->blk_loop.itersave,
-						     param);
 		ncx->blk_loop.iterlval	= sv_dup_inc(ncx->blk_loop.iterlval,
 						     param);
 		ncx->blk_loop.iterary	= av_dup_inc(ncx->blk_loop.iterary,
@@ -10274,13 +10272,13 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    i = POPINT(ss,ix);
 	    TOPINT(nss,ix) = i;
 	    break;
-	case SAVEt_PADSV:
+	case SAVEt_PADSV_AND_MORTALIZE:
 	    longval = (long)POPLONG(ss,ix);
 	    TOPLONG(nss,ix) = longval;
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
 	    sv = (SV*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = sv_dup(sv, param);
+	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
 	    break;
 	case SAVEt_BOOL:
 	    ptr = POPPTR(ss,ix);
@@ -10364,6 +10362,17 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 		    = pv_dup(old_state->re_state_reg_starttry);
 		break;
 	    }
+	case SAVEt_PADSV:
+	    /* Nothing should be using this any more, post the integration of
+	       blead change 33080. But keep it, in case something out there is
+	       generating these on the scope stack.  */
+	    longval = (long)POPLONG(ss,ix);
+	    TOPLONG(nss,ix) = longval;
+	    ptr = POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
+	    sv = (SV*)POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = sv_dup(sv, param);
+	    break;
 	default:
 	    Perl_croak(aTHX_
 		       "panic: ss_dup inconsistency (%"IVdf")", (IV) type);

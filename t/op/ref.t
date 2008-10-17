@@ -8,7 +8,7 @@ BEGIN {
 require 'test.pl';
 use strict qw(refs subs);
 
-plan(175);
+plan(182);
 
 # Test glob operations.
 
@@ -570,6 +570,18 @@ ok (!eval { @$pvbm }, 'PVBM is not an ARRAY ref');
 ok (!eval { %$pvbm }, 'PVBM is not a HASH ref');
 ok (!eval { $pvbm->() }, 'PVBM is not a CODE ref');
 ok (!eval { $rpvbm->foo }, 'PVBM is not an object');
+
+# bug 24254
+is( runperl(stderr => 1, prog => 'map eval qq(exit),1 for 1'), "");
+is( runperl(stderr => 1, prog => 'eval { for (1) { map { die } 2 } };'), "");
+is( runperl(stderr => 1, prog => 'for (125) { map { exit } (213)}'), "");
+is( runperl(stderr => 1, prog => 'map die,4 for 3'), "Died at -e line 1.\n");
+is( runperl(stderr => 1, prog => 'grep die,4 for 3'), "Died at -e line 1.\n");
+is( runperl(stderr => 1, prog => 'for $a (3) {@b=sort {die} 4,5}'), "Died at -e line 1.\n");
+
+# bug 57564
+is( runperl(stderr => 1, prog => 'my $i;for $i (1) { for $i (2) { } }'), "");
+
 
 # Bit of a hack to make test.pl happy. There are 3 more tests after it leaves.
 $test = curr_test();
