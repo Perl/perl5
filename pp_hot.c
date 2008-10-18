@@ -1212,6 +1212,7 @@ PP(pp_qr)
 
     if (pkg) {
 	HV* const stash = gv_stashpv(SvPV_nolen(pkg), GV_ADD);
+	SvREFCNT_dec(pkg);
 	(void)sv_bless(rv, stash);
     }
 
