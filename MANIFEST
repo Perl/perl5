@@ -2126,7 +2126,6 @@ lib/filetest.pm			For "use filetest"
 lib/filetest.t			See if filetest works
 lib/Filter/Simple/Changes	Filter::Simple
 lib/Filter/Simple.pm		Simple frontend to Filter::Util::Call
-lib/Filter/Simple/README	Filter::Simple
 lib/Filter/Simple/t/data.t	See if Filter::Simple works
 lib/Filter/Simple/t/export.t	See if Filter::Simple works
 lib/Filter/Simple/t/filter_only.t	See if Filter::Simple works

@@ -403,14 +403,6 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
-	'Filter::Simple' =>
-		{
-		'MAINTAINER'	=> 'dconway',
-		'FILES'		=> q[lib/Filter/Simple.pm lib/Filter/Simple
-				     t/lib/Filter/Simple],
-		'CPAN'		=> 1,
-		},
-
 	'Filter::Util::Call' =>
 		{
 		'MAINTAINER'	=> 'pmqs',
