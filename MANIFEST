@@ -3483,11 +3483,14 @@ Porting/p4genpatch	Generate patch from p4 change in repository (obsoletes p4desc
 Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
+Porting/README.y2038	Perl notes for the 2038 fix
 Porting/regcharclass.pl	Generate regcharclass.h from inline data
 Porting/repository.pod	How to use the Perl repository
 Porting/sort_perldiag.pl	Keep our diagnostics orderly
 Porting/testall.atom		Cumulative profile with Third Degree
 Porting/thirdclean		Cleanup Third Degree reports
+Porting/timecheck.c		Test program for the 2038 fix
+Porting/timecheck2.c		Test program for the 2038 fix
 Porting/valgrindpp.pl		Summarize valgrind reports
 pp.c				Push/Pop code
 pp_ctl.c			Push/Pop code for control flow
