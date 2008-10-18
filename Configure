@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Fri Oct  3 17:54:11 CEST 2008 [metaconfig 3.5 PL0]
+# Generated on Sat Oct 18 17:13:43 CEST 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -20095,10 +20095,12 @@ int i;
 struct tm *tmp;
 time_t pt;
 
-void gm_check (time_t t)
+void gm_check (time_t t, int min_year, int max_year)
 {
     tmp = gmtime (&t);
-    if (tmp == NULL || tmp->tm_year < -1900)
+    if ( tmp == NULL ||
+	/* Check tm_year overflow */
+	 tmp->tm_year < min_year || tmp->tm_year > max_year)
 	tmp = NULL;
     else
 	pt = t;
@@ -20109,31 +20111,31 @@ int check_max ()
     tmp = NULL;
     pt  = 0;
 #ifdef MAXLONG
-    gm_check (MAXLONG);
+    gm_check (MAXLONG, 69, 0x7fffffff);
 #endif
     if (tmp == NULL || tmp->tm_year < 0) {
 	for (i = 63; i >= 0; i--) {
 	    time_t x = pt | ((time_t)1 << i);
-	    if (x < 0) continue;
-	    gm_check (x);
+	    if (x < 0 || x < pt) continue;
+	    gm_check (x, 69, 0x7fffffff);
 	    }
 	}
     printf ("sGMTIME_max=%ld\n", pt);
     return (0);
-  } /* check_max */
+    } /* check_max */
 
 int check_min ()
 {
     tmp = NULL;
     pt  = 0;
 #ifdef MINLONG
-    gm_check (MINLONG);
+    gm_check (MINLONG, -1900, 70);
 #endif
     if (tmp == NULL) {
 	for (i = 36; i >= 0; i--) {
 	    time_t x = pt - ((time_t)1 << i);
 	    if (x > 0) continue;
-	    gm_check (x);
+	    gm_check (x, -1900, 70);
 	    }
 	}
     printf ("sGMTIME_min=%ld\n", pt);
@@ -20172,13 +20174,15 @@ int i;
 struct tm *tmp;
 time_t pt;
 
-void local_check (time_t t)
+void local_check (time_t t, int min_year, int max_year)
 {
     if (sizeof (time_t) > 4 && t > 0x7ffffffffffff000LL)
 	tmp = NULL;
     else
 	tmp = localtime (&t);
-    if (tmp == NULL || tmp->tm_year < -1900)
+    if ( tmp == NULL ||
+	/* Check tm_year overflow */
+	 tmp->tm_year < min_year || tmp->tm_year > max_year)
 	tmp = NULL;
     else
 	pt = t;
@@ -20189,31 +20193,31 @@ int check_max ()
     tmp = NULL;
     pt  = 0;
 #ifdef MAXLONG
-    local_check (MAXLONG);
+    local_check (MAXLONG, 69, 0x7fffffff);
 #endif
     if (tmp == NULL || tmp->tm_year < 0) {
 	for (i = 63; i >= 0; i--) {
 	    time_t x = pt | ((time_t)1 << i);
-	    if (x < 0) continue;
-	    local_check (x);
+	    if (x < 0 || x < pt) continue;
+	    local_check (x, 69, 0x7fffffff);
 	    }
 	}
     printf ("sLOCALTIME_max=%ld\n", pt);
     return (0);
-  } /* check_max */
+   } /* check_max */
 
 int check_min ()
 {
     tmp = NULL;
     pt  = 0;
 #ifdef MINLONG
-    local_check (MINLONG);
+    local_check (MINLONG, -1900, 70);
 #endif
     if (tmp == NULL) {
 	for (i = 36; i >= 0; i--) {
 	    time_t x = pt - ((time_t)1 << i);
 	    if (x > 0) continue;
-	    local_check (x);
+	    local_check (x, -1900, 70);
 	    }
 	}
     printf ("sLOCALTIME_min=%ld\n", pt);
