@@ -32,7 +32,6 @@ private:
     - ext/Unicode/Normalize
     - ext/Win32
     - ext/Win32API/File
-    - lib/Attribute/Handlers
     - lib/AutoLoader
     - lib/base
     - lib/bignum
@@ -96,7 +95,6 @@ private:
     - lib/Archive/Extract.pm
     - lib/Archive/Tar
     - lib/Archive/Tar.pm
-    - lib/Attribute/Handlers.pm
     - lib/AutoLoader.pm
     - lib/AutoSplit.pm
     - lib/base.pm
@@ -176,6 +174,8 @@ private:
     - lib/ExtUtils/t/make.t
     - lib/ExtUtils/t/maketext_filter.t
     - lib/ExtUtils/t/Manifest.t
+    - lib/ExtUtils/t/metafile_data.t
+    - lib/ExtUtils/t/metafile_file.t
     - lib/ExtUtils/t/Mkbootstrap.t
     - lib/ExtUtils/t/MM_Any.t
     - lib/ExtUtils/t/MM_BeOS.t
