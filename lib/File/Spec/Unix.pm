@@ -3,7 +3,8 @@ package File::Spec::Unix;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '3.2701';
+$VERSION = '3.28_01';
+$VERSION = eval $VERSION;
 
 =head1 NAME
 
@@ -104,7 +105,7 @@ Returns a string representation of the current directory.  "." on UNIX.
 
 =cut
 
-sub curdir () { '.' }
+sub curdir { '.' }
 
 =item devnull
 
@@ -112,7 +113,7 @@ Returns a string representation of the null device. "/dev/null" on UNIX.
 
 =cut
 
-sub devnull () { '/dev/null' }
+sub devnull { '/dev/null' }
 
 =item rootdir
 
@@ -120,7 +121,7 @@ Returns a string representation of the root directory.  "/" on UNIX.
 
 =cut
 
-sub rootdir () { '/' }
+sub rootdir { '/' }
 
 =item tmpdir
 
@@ -169,7 +170,7 @@ Returns a string representation of the parent directory.  ".." on UNIX.
 
 =cut
 
-sub updir () { '..' }
+sub updir { '..' }
 
 =item no_upwards
 
@@ -190,7 +191,7 @@ is not or is significant when comparing file specifications.
 
 =cut
 
-sub case_tolerant () { 0 }
+sub case_tolerant { 0 }
 
 =item file_name_is_absolute
 
