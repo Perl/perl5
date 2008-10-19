@@ -901,6 +901,7 @@ if( @path_h ){
 
         # Remove C and C++ comments
         $src =~ s#/\*[^*]*\*+([^/*][^*]*\*+)*/|("(\\.|[^"\\])*"|'(\\.|[^'\\])*'|.[^/"'\\]*)#$2#gs;
+        $src =~ s#//.*$##gm;
 
 	while ($src =~ /\benum\s*([\w_]*)\s*\{\s([^}]+)\}/gsc) {
 	    my ($enum_name, $enum_body) = ($1, $2);
