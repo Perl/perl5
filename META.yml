@@ -41,7 +41,6 @@ private:
     - ext/Win32API/File
     - lib/Archive/Extract
     - lib/Archive/Tar
-    - lib/Attribute/Handlers
     - lib/AutoLoader
     - lib/base
     - lib/bignum
@@ -89,11 +88,13 @@ private:
     - lib/Object/Accessor
     - lib/Package/Constants
     - lib/Params/Check
+    - lib/parent
     - lib/Pod/Escapes
     - lib/Pod/Perldoc
     - lib/Pod/Simple
     - lib/SelfLoader
     - lib/Switch
+    - lib/TAP
     - lib/Term/ANSIColor
     - lib/Term/UI
     - lib/Test/Builder
@@ -107,10 +108,12 @@ private:
     - lib/Tie/File
     - lib/Tie/RefHash
     - lib/Unicode/Collate
+    - t/lib/data
     - t/lib/Filter/Simple
     - t/lib/MakeMaker
     - t/lib/Math
     - t/lib/sample-tests
+    - t/lib/source_tests
     - t/lib/Test/Simple
     - t/Module_Pluggable
 
@@ -124,9 +127,10 @@ private:
     - ext/Opcode/Safe.pm
     - ext/threads/threads.pm
     - ext/threads/threads.xs
+    - lib/App/Prove.pm
+    - lib/App/Prove/State.pm
     - lib/Archive/Extract.pm
     - lib/Archive/Tar.pm
-    - lib/Attribute/Handlers.pm
     - lib/AutoLoader.pm
     - lib/AutoSplit.pm
     - lib/base.pm
@@ -220,6 +224,8 @@ private:
     - lib/ExtUtils/t/make.t
     - lib/ExtUtils/t/maketext_filter.t
     - lib/ExtUtils/t/Manifest.t
+    - lib/ExtUtils/t/metafile_data.t
+    - lib/ExtUtils/t/metafile_file.t
     - lib/ExtUtils/t/Mkbootstrap.t
     - lib/ExtUtils/t/MM_Any.t
     - lib/ExtUtils/t/MM_BeOS.t
@@ -317,6 +323,7 @@ private:
     - lib/Object/Accessor.pm
     - lib/Package/Constants.pm
     - lib/Params/Check.pm
+    - lib/parent.pm
     - lib/PerlIO/via/QuotedPrint.pm
     - lib/PerlIO/via/t/QuotedPrint.t
     - lib/Pod/Checker.pm
@@ -381,7 +388,11 @@ private:
     - pod/pod2usage.PL
     - pod/podchecker.PL
     - pod/podselect.PL
+    - t/lib/App/Prove/Plugin/Dummy.pm
+    - t/lib/Dev/Null.pm
     - t/lib/filter-util.pl
+    - t/lib/IO/c55Capture.pm
+    - t/lib/NoFork.pm
     - t/lib/TieIn.pm
     - t/lib/TieOut.pm
     - t/pod/emptycmd.t
