@@ -8,7 +8,8 @@ resources:
   bugtracker: http://rt.perl.org/perlbug/
   license: http://dev.perl.org/licenses/
 distribution_type: core
-private:
+generated_by: Porting/makemeta
+no_index:
   directory:
     - ext/Cwd
     - ext/Data/Dumper
