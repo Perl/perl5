@@ -8250,6 +8250,9 @@ parseit:
         *STRING(ret)= (char)value;
         STR_LEN(ret)= 1;
         RExC_emit += STR_SZ(1);
+	if (listsv) {
+	    SvREFCNT_dec(listsv);
+	}
         return ret;
     }
     /* optimize case-insensitive simple patterns (e.g. /[a-z]/i) */
