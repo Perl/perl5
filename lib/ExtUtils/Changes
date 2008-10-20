@@ -1,3 +1,34 @@
+6.48  Mon Oct 20 11:18:13 PDT 2008
+    Test Fixes
+    * Protect against stray environment variables effecting the tests.
+      [rt.cpan.org 14930]
+
+
+6.47_02  Thu Oct 16 16:14:20 PDT 2008
+    Test Fixes
+    * MIN_PERL_VERSION test had some goofs on VMS. [thanks Craig Berry]
+
+
+6.47_01  Tue Oct 14 12:38:05 EDT 2008
+    New Features
+    * Added optional parameter MIN_PERL_VERSION, to define minimal
+      required perl version for dependency checks and to pass on to
+      META.yml and ppd files.        [rt.cpan.org 28374]
+      Thanks to David Golden, Alexandr Ciornii (chorny) and Martin Becker
+
+    Bug Fixes
+    * Guard against a path to Perl with a space in it.
+      From Max Maischein.  [bleadperl@32905]  
+
+    Test Fixes
+    - Small fix for VOS from Paul Green [bleadperl@33259]
+
+    Other
+    * $ExtUtils::MakeMaker::Revision, $ExtUtils::MM_Unix::Revision and 
+      $ExtUtils::MM_VMS::Revision are all now based on $VERSION.  You
+      shouldn't be using them for anything anyway.
+
+
 6.46  Sat Sep 27 17:34:03 EDT 2008
     Bug Fixes
     - Fix META_MERGE for more than one level of hashes.  [rt.cpan.org 39348]
@@ -9,7 +40,7 @@
       1.50 and ExtUtils::Manifest to 1.54
 
     Test Fixes
-    - t/writemakefile_args.t had the wrong skip amoung causing failures
+    - t/writemakefile_args.t had the wrong skip amount causing failures
       when run without version.pm (mostly 5.6 users)
 
 
