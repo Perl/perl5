@@ -403,7 +403,7 @@ upon the file, but will generally be the whole file (up to 2MB), or
 You may use the syntax C<use File::Copy "cp"> to get at the
 "cp" alias for this function. The syntax is I<exactly> the same.
 
-As of version 2.13, on UNIX systems, "copy" will preserve permission
+As of version 2.14, on UNIX systems, "copy" will preserve permission
 bits like the shell utility C<cp> would do.
 
 =item move
