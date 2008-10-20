@@ -1504,7 +1504,7 @@ Mike Guy (E<lt>mjtg@cam.a.ukE<gt>), Dominic Dunlop
 (E<lt>domo@computer.orgE<gt>), Hugo van der Sanden (E<lt>hv@crypt.org<gt>),
 Jarkko Hietaniemi (E<lt>jhi@iki.fiE<gt>), Chris Nandor
 (E<lt>pudge@pobox.comE<gt>), Jon Orwant (E<lt>orwant@media.mit.eduE<gt>,
-Richard Foley (E<lt>richard@rfi.netE<gt>), and Jesse Vincent
+Richard Foley (E<lt>richard.foley@rfi.netE<gt>), and Jesse Vincent
 (E<lt>jesse@bestpractical.com<gt>).
 
 =head1 SEE ALSO
