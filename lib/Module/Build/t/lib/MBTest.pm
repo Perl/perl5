@@ -16,9 +16,10 @@ BEGIN {
   unless ($ENV{PERL_CORE}) {
     push @INC, $t_lib; # Let user's installed version override
   } else {
-    # We change directories, so expand @INC to absolute paths
+    # We change directories, so expand @INC and $^X to absolute paths
     # Also add .
     @INC = (map(File::Spec->rel2abs($_), @INC), ".");
+    $^X = File::Spec->rel2abs($^X);
 
     # we are in 't', go up a level so we don't create t/t/_tmp
     chdir '..' or die "Couldn't chdir to ..";
