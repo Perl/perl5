@@ -527,11 +527,11 @@ sub runperl {
 	# run a fresh perl, so we'll brute force launder everything for you
 	my $sep;
 
-	if (! eval 'use Config; 1') {
+	if (! eval 'require Config; 1') {
 	    warn "test.pl had problems loading Config: $@";
 	    $sep = ':';
 	} else {
-	    $sep = $Config{path_sep};
+	    $sep = $Config::Config{path_sep};
 	}
 
 	my @keys = grep {exists $ENV{$_}} qw(CDPATH IFS ENV BASH_ENV);
@@ -572,11 +572,11 @@ sub which_perl {
 	return $Perl if $^O eq 'VMS';
 
 	my $exe;
-	if (! eval 'use Config; 1') {
+	if (! eval 'require Config; 1') {
 	    warn "test.pl had problems loading Config: $@";
 	    $exe = '';
 	} else {
-	    $exe = $Config{_exe};
+	    $exe = $Config::Config{_exe};
 	}
        $exe = '' unless defined $exe;
 
@@ -586,7 +586,7 @@ sub which_perl {
 
 	if ($Perl =~ /^perl\Q$exe\E$/i) {
 	    my $perl = "perl$exe";
-	    if (! eval 'use File::Spec; 1') {
+	    if (! eval 'require File::Spec; 1') {
 		warn "test.pl had problems loading File::Spec: $@";
 		$Perl = "./$perl";
 	    } else {
@@ -900,7 +900,7 @@ sub watchdog ($)
 
     # Use a watchdog thread because either 'threads' is loaded,
     #   or fork() failed
-    if (eval 'use threads; 1') {
+    if (eval 'require threads; 1') {
         threads->create(sub {
                 # Load POSIX if available
                 eval { require POSIX; };
