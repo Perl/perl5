@@ -105,3 +105,10 @@ Revision history for Perl extension Filter::Simple
     - Fixed INSTALLDIRS=>perl in Makefile.PL (thanks all)
 
     - Fixed other problems caused by de-schwernification
+
+
+0.83    Sat Oct 18 18:51:51 CET 2008
+    
+    - Updated contact details: Maintained by the Perl5-Porters.
+    - Some tiny distribution fixes.
+

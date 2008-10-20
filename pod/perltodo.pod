@@ -871,6 +871,23 @@ also the warning messages (see L<perllexwarn>, C<warnings.pl>).
 These tasks would need C knowledge, and knowledge of how the interpreter works,
 or a willingness to learn.
 
+=head2 error reporting of [$a ; $b]
+
+Using C<;> inside brackets is a syntax error, and we don't propose to change
+that by giving it any meaning. However, it's not reported very helpfully:
+
+    $ perl -e '$a = [$b; $c];'
+    syntax error at -e line 1, near "$b;"
+    syntax error at -e line 1, near "$c]"
+    Execution of -e aborted due to compilation errors.
+
+It should be possible to hook into the tokeniser or the lexer, so that when a
+C<;> is parsed where it is not legal as a statement terminator (ie inside
+C<{}> used as a hashref, C<[]> or C<()>) it issues an error something like
+I<';' isn't legal inside an expression - if you need multiple statements use a
+do {...} block>. See the thread starting at
+http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2008-09/msg00573.html
+
 =head2 UTF-8 revamp
 
 The handling of Unicode is unclean in many places. For example, the regexp
