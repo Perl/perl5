@@ -6,7 +6,7 @@ use warnings;
 
 our(@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 BEGIN { 
     use Exporter   ();
