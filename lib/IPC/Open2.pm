@@ -6,7 +6,7 @@ our ($VERSION, @ISA, @EXPORT);
 require 5.000;
 require Exporter;
 
-$VERSION	= 1.02;
+$VERSION	= 1.03;
 @ISA		= qw(Exporter);
 @EXPORT		= qw(open2);
 
