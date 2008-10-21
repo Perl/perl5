@@ -211,6 +211,14 @@ EOM
 	      exit 1
 	      ;;
 
+	7.*)
+	      # 7.x doesn't install libc_r by default, and Configure
+	      # would fail in the code following
+	      #
+	      # gethostbyaddr_r() appears to have been implemented in 6.x+
+	      ldflags="-pthread $ldflags"
+	      ;;
+
 	*)
 	      if [ ! -r "$lc_r" ]; then
 	      cat <<EOM >&4
