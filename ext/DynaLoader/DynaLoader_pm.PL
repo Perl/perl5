@@ -362,9 +362,7 @@ sub bootstrap {
 	
 	# check for common cases to avoid autoload of dl_findfile
 	my $try = <<$^O-eq-MacOS>> "$dir:$modfname.$dl_dlext" <<|$^O-eq-MacOS>> "$dir/$modfname.$dl_dlext"<</$^O-eq-MacOS>>;
-	last if $file = <<$^O-eq-VMS>>($do_expand) ? dl_expandspec($try) : ((-f $try) && $try);
-	<<|$^O-eq-VMS>>(-f $try) && $try;
-	<</$^O-eq-VMS>>
+	last if $file = ($do_expand) ? dl_expandspec($try) : ((-f $try) && $try);
 	
 	# no luck here, save dir for possible later dl_findfile search
 	push @dirs, $dir;
