@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 46 $
+##  $Revision: 47 $
 ##  $Author: mhx $
-##  $Date: 2008/07/11 14:00:05 +0200 $
+##  $Date: 2008/10/21 23:14:09 +0200 $
 ##
 ################################################################################
 ##
@@ -215,6 +215,8 @@ __UNDEFINED__  SVf             "_"
 
 __UNDEFINED__  UTF8_MAXBYTES   UTF8_MAXLEN
 
+__UNDEFINED__  CPERLscope(x)   x
+
 __UNDEFINED__  PERL_HASH(hash,str,len) \
      STMT_START	{ \
 	const char *s_PeRlHaSh = str; \
@@ -233,6 +235,19 @@ __UNDEFINED__  PERL_HASH(hash,str,len) \
 #  define PERLIO_FUNCS_DECL(funcs) PerlIO_funcs funcs
 #  define PERLIO_FUNCS_CAST(funcs) (funcs)
 # endif
+#endif
+
+/* provide these typedefs for older perls */
+#if { VERSION < 5.9.3 }
+
+# ifdef ARGSproto
+typedef OP* (CPERLscope(*Perl_ppaddr_t))(ARGSproto);
+# else
+typedef OP* (CPERLscope(*Perl_ppaddr_t))(pTHX);
+# endif
+
+typedef OP* (CPERLscope(*Perl_check_t)) (pTHX_ OP*);
+
 #endif
 
 =xsmisc
@@ -382,7 +397,23 @@ SVf(x)
 		XPUSHs(x);
 		XSRETURN(1);
 
-=tests plan => 32
+void
+Perl_ppaddr_t(string)
+	char *string
+	PREINIT:
+		Perl_ppaddr_t lower;
+	PPCODE:
+		lower = PL_ppaddr[OP_LC];
+		PUSHMARK(SP);
+		mXPUSHs(newSVpv(string, 0));
+		PUTBACK;
+		ENTER;
+		(void)*(lower)(aTHXR);
+		SPAGAIN;
+		LEAVE;
+		XSRETURN(1);
+
+=tests plan => 33
 
 use vars qw($my_sv @my_av %my_hv);
 
@@ -447,4 +478,6 @@ ok(Devel::PPPort::PERL_ABS(-13), 13);
 
 ok(Devel::PPPort::SVf(42), $] >= 5.004 ? '[42]' : '42');
 ok(Devel::PPPort::SVf('abc'), $] >= 5.004 ? '[abc]' : 'abc');
+
+ok(&Devel::PPPort::Perl_ppaddr_t("FOO"), "foo");
 

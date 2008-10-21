@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 4 $
+##  $Revision: 5 $
 ##  $Author: mhx $
-##  $Date: 2008/01/04 13:10:54 +0100 $
+##  $Date: 2008/10/21 23:14:47 +0200 $
 ##
 ################################################################################
 ##
@@ -22,6 +22,12 @@ newSVpvn_flags
 
 =implementation
 
+#if { VERSION < 5.6.0 }
+# define D_PPP_CONSTPV_ARG(x)  ((char *) (x))
+#else
+# define D_PPP_CONSTPV_ARG(x)  (x)
+#endif
+
 __UNDEFINED__  newSVpvn(data,len)  ((data)                                              \
                                     ? ((len) ? newSVpv((data), (len)) : newSVpv("", 0)) \
                                     : newSV(0))
@@ -37,7 +43,7 @@ __UNDEFINED__  SVf_UTF8  0
 SV *
 newSVpvn_flags(pTHX_ const char *s, STRLEN len, U32 flags)
 {
-  SV *sv = newSVpvn(s, len);
+  SV *sv = newSVpvn(D_PPP_CONSTPV_ARG(s), len);
   SvFLAGS(sv) |= (flags & SVf_UTF8);
   return (flags & SVs_TEMP) ? sv_2mortal(sv) : sv;
 }

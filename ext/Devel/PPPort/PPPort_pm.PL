@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 61 $
+#  $Revision: 62 $
 #  $Author: mhx $
-#  $Date: 2008/10/12 13:54:21 +0200 $
+#  $Date: 2008/10/21 23:12:30 +0200 $
 #
 ################################################################################
 #
@@ -372,9 +372,9 @@ __DATA__
 #
 ################################################################################
 #
-#  $Revision: 61 $
+#  $Revision: 62 $
 #  $Author: mhx $
-#  $Date: 2008/10/12 13:54:21 +0200 $
+#  $Date: 2008/10/21 23:12:30 +0200 $
 #
 ################################################################################
 #
@@ -535,7 +535,7 @@ package Devel::PPPort;
 use strict;
 use vars qw($VERSION $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.14_02 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.14_03 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 sub _init_data
 {
@@ -602,6 +602,8 @@ __DATA__
 
 %include version
 
+%include threads
+
 %include limits
 
 %include uv
@@ -611,8 +613,6 @@ __DATA__
 %include misc
 
 %include variables
-
-%include threads
 
 %include mPUSH
 
