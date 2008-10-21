@@ -466,6 +466,7 @@ schwern\100pobox.com                    schwern\100gmail.com
 +                                       schwern\100ool-18b93024.dyn.optonline.net
 sebastien\100aperghis.net               maddingue\100free.fr
 +                                       saper\100cpan.org
+shlomif\100vipe.technion.ac.il          shlomif\100iglu.org.il
 simon\100simon-cozens.org               simon\100pembro4.pmb.ox.ac.uk
 +                                       simon\100brecon.co.uk
 +                                       simon\100othersideofthe.earth.li
