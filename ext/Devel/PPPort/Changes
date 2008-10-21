@@ -1,3 +1,13 @@
+3.14_03 - 2008-10-21
+
+    * fix C++ compilation issue with last release
+      (spotted by Nicholas Clark)
+    * added support for the following API
+        Perl_ppaddr_t
+        Perl_check_t
+        CPERLscope
+      (fixes CPAN #40078)
+
 3.14_02 - 2008-10-12
 
     * added support for the following API

@@ -55,7 +55,6 @@ ok(&Devel::PPPort::PL_sv_yes());
 ok(!&Devel::PPPort::PL_sv_no());
 ok(&Devel::PPPort::PL_na("abcd"), 4);
 ok(&Devel::PPPort::PL_Sv(), "mhx");
-ok(defined &Devel::PPPort::PL_rsfp());
 ok(defined &Devel::PPPort::PL_tokenbuf());
 ok($] >= 5.009005 || &Devel::PPPort::PL_parser());
 ok(&Devel::PPPort::PL_hexdigit() =~ /^[0-9a-zA-Z]+$/);

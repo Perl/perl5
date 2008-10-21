@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 17 $
+##  $Revision: 18 $
 ##  $Author: mhx $
-##  $Date: 2008/10/12 20:53:47 +0200 $
+##  $Date: 2008/10/21 23:15:31 +0200 $
 ##
 ################################################################################
 ##
@@ -229,15 +229,21 @@ int dummy_parser_warning(void);
                                     count++;                     \
                                   } STMT_END
 
-#if PERL_BCDVERSION < 0x5006000
+#if { VERSION < 5.004 }
+# define ppp_rsfp_t FILE *
+#else
+# define ppp_rsfp_t PerlIO *
+#endif
+
+#if { VERSION < 5.6.0 }
 # define ppp_expect_t expectation
-#elif PERL_BCDVERSION < 0x5009005
+#elif { VERSION < 5.9.5 }
 # define ppp_expect_t int
 #else
 # define ppp_expect_t U8
 #endif
 
-#if PERL_BCDVERSION < 0x5009005
+#if { VERSION < 5.9.5 }
 # define ppp_lex_state_t U32
 #else
 # define ppp_lex_state_t U8
@@ -290,18 +296,6 @@ PL_Sv()
 	CODE:
 		PL_Sv = newSVpv("mhx", 0);
 		RETVAL = PL_Sv;
-	OUTPUT:
-		RETVAL
-
-SV *
-PL_rsfp()
-        PREINIT:
-                void * volatile my_rsfp;
-		/* no pointer test, as we don't know the exact type */
-	CODE:
-                my_rsfp = PL_rsfp;
-		RETVAL = newSViv(PL_rsfp != 0);
-                PL_rsfp = my_rsfp;
 	OUTPUT:
 		RETVAL
 
@@ -378,6 +372,7 @@ other_variables()
 
 		ppp_PARSERVAR(ppp_expect_t, PL_expect);
 		ppp_PARSERVAR(line_t, PL_copline);
+		ppp_PARSERVAR(ppp_rsfp_t, PL_rsfp);
 		ppp_PARSERVAR(AV *, PL_rsfp_filters);
 		ppp_PARSERVAR(SV *, PL_linestr);
 		ppp_PARSERVAR(char *, PL_bufptr);
@@ -403,7 +398,6 @@ ok(&Devel::PPPort::PL_sv_yes());
 ok(!&Devel::PPPort::PL_sv_no());
 ok(&Devel::PPPort::PL_na("abcd"), 4);
 ok(&Devel::PPPort::PL_Sv(), "mhx");
-ok(defined &Devel::PPPort::PL_rsfp());
 ok(defined &Devel::PPPort::PL_tokenbuf());
 ok($] >= 5.009005 || &Devel::PPPort::PL_parser());
 ok(&Devel::PPPort::PL_hexdigit() =~ /^[0-9a-zA-Z]+$/);
