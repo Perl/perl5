@@ -13,4 +13,5 @@ tie *STDERR, 'Dev::Null';
 ok(1);
 ok(1);
 ok(1);
+$! = 0;
 die "This is a test";
