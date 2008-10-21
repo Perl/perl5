@@ -1,3 +1,57 @@
+0.84  Wed Oct 15 09:06:12 EDT 2008
+    Other
+    * 0.82 accidentally shipped with experimental Mouse dependency.
+
+
+0.82  Tue Oct 14 23:06:56 EDT 2008
+    Bug Fixes
+    - 0.81_01 broke $TODO such that $TODO = '' was considered todo.
+
+
+0.81_02  Tue Sep  9 04:35:40 PDT 2008
+    New Features
+    * Test::Builder->reset_outputs() to reset all the output methods back to
+      their defaults.
+
+    Bug Fixes
+    - Fixed the file and line number reported by like when it gets a bad
+      regex.
+
+    Features Changed
+    - Now preserves the tests' exit code if it exits abnormally, rather than
+      setting it to 255.
+    - Changed the "Looks like your test died" message to
+      "Looks like your test exited with $exit_code"
+    - no_plan now only warns if given an argument.  There were a lot of people
+      doing that, and it's a sensible mistake.  [test-more.googlecode.com 13]
+
+
+0.81_01  Sat Sep  6 15:13:50 PDT 2008
+    New Features
+    * Adam Kennedy bribed me to add new_ok().  The price was one DEFCON license key.
+      [rt.cpan.org 8891]
+    * TODO tests can now start and end with 'todo_start' and 'todo_end'
+      Test::Builder methods. [rt.cpan.org 38018]
+    * Added Test::Builder->in_todo() for a safe way to check if a test is inside a
+      TODO block.  This allows TODO tests with no reason.
+    * Added note() and explain() to both Test::More and Test::Builder.
+      [rt.cpan.org 14764] [test-more.googlecode.com 3]
+
+    Features Changed
+    * Changed the message for extra tests run to show the number of tests run rather than
+      the number extra to avoid the user having to do mental math.
+      [rt.cpan.org 7022]    
+
+    Bug fixes
+    - using a relative path to perl broke tests              [rt.cpan.org 34050]
+    - use_ok() broke $SIG{__DIE__} in the used module        [rt.cpan.org 34065]
+    - diagnostics for isnt() were confusing on failure       [rt.cpan.org 33642]
+    - warnings when MakeMaker's version contained _          [rt.cpan.org 33626]
+    - add explicit test that non-integer plans die correctly [rt.cpan.org 28836]
+      (Thanks to Hans Dieter Pearcey [confound] for fixing the above)
+    - die if no_plan is given an argument                    [rt.cpan.org 27429]
+
+
 0.80  Sun Apr  6 17:25:01 CEST 2008
     Test fixes
     - Completely disable the utf8 test.  It was causing perl to panic on some OS's.
