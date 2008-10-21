@@ -335,6 +335,7 @@ ext/Devel/PPPort/t/MY_CXT.t	Devel::PPPort test file
 ext/Devel/PPPort/t/newCONSTSUB.t	Devel::PPPort test file
 ext/Devel/PPPort/t/newRV.t	Devel::PPPort test file
 ext/Devel/PPPort/t/newSVpv.t	Devel::PPPort test file
+ext/Devel/PPPort/TODO		Devel::PPPort Todo
 ext/Devel/PPPort/t/podtest.t	Devel::PPPort test file
 ext/Devel/PPPort/t/ppphtest.t	Devel::PPPort test file
 ext/Devel/PPPort/t/pvs.t	Devel::PPPort test file
@@ -350,7 +351,6 @@ ext/Devel/PPPort/t/threads.t	Devel::PPPort test file
 ext/Devel/PPPort/t/uv.t		Devel::PPPort test file
 ext/Devel/PPPort/t/variables.t	Devel::PPPort test file
 ext/Devel/PPPort/t/warn.t	Devel::PPPort test file
-ext/Devel/PPPort/TODO		Devel::PPPort Todo
 ext/Devel/PPPort/typemap	Devel::PPPort Typemap
 ext/Digest/MD5/Changes		Digest::MD5 extension changes
 ext/Digest/MD5/hints/dec_osf.pl	Hints for named architecture
@@ -685,12 +685,12 @@ ext/IPC/SysV/README		IPC::SysV README
 ext/IPC/SysV/regen.pl	IPC::SysV file regeneration script
 ext/IPC/SysV/SysV.xs		IPC::SysV extension Perl module
 ext/IPC/SysV/t/ipcsysv.t		IPC::SysV test file
-ext/IPC/SysV/t/pod.t	IPC::SysV test file
-ext/IPC/SysV/t/podcov.t	IPC::SysV test file
 ext/IPC/SysV/t/msg.t		IPC::SysV test file
+ext/IPC/SysV/TODO	IPC::SysV todo file
+ext/IPC/SysV/t/podcov.t	IPC::SysV test file
+ext/IPC/SysV/t/pod.t	IPC::SysV test file
 ext/IPC/SysV/t/sem.t		IPC::SysV test file
 ext/IPC/SysV/t/shm.t	IPC::SysV test file
-ext/IPC/SysV/TODO	IPC::SysV todo file
 ext/IPC/SysV/typemap	IPC::SysV typemap
 ext/List/Util/Changes		Util extension
 ext/List/Util/lib/List/Util.pm	List::Util
@@ -1581,10 +1581,10 @@ lib/ExtUtils/t/INST.t		Check MakeMaker INST_* macros
 lib/ExtUtils/t/Liblist.t	See if ExtUtils::Liblist works
 lib/ExtUtils/t/make.t		See if make detection works
 lib/ExtUtils/t/maketext_filter.t	See if maketext_filter works
+lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
 lib/ExtUtils/t/metafile_data.t	See if META.yml handling works
 lib/ExtUtils/t/metafile_file.t	See if META.yml handling works
 lib/ExtUtils/t/min_perl_version.t	Test the MIN_PERL_VERSION argument to WriteMakefile.
-lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
 lib/ExtUtils/t/Mkbootstrap.t	See if ExtUtils::Mkbootstrap works
 lib/ExtUtils/t/MM_Any.t		See if ExtUtils::MM_Any works
 lib/ExtUtils/t/MM_BeOS.t	See if ExtUtils::MM_BeOS works
@@ -2939,8 +2939,8 @@ t/lib/strict/subs		Tests of "use strict 'subs'" for strict.t
 t/lib/strict/vars		Tests of "use strict 'vars'" for strict.t
 t/lib/Test/Simple/Catch.pm	Utility module for testing Test::Simple
 t/lib/Test/Simple/sample_tests/death_in_eval.plx	for exit.t
-t/lib/Test/Simple/sample_tests/death_with_handler.plx	for exit.t
 t/lib/Test/Simple/sample_tests/death.plx		for exit.t
+t/lib/Test/Simple/sample_tests/death_with_handler.plx	for exit.t
 t/lib/Test/Simple/sample_tests/exit.plx			for exit.t
 t/lib/Test/Simple/sample_tests/extras.plx		for exit.t
 t/lib/Test/Simple/sample_tests/five_fail.plx		for exit.t

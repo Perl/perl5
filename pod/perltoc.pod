@@ -6227,11 +6227,9 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 
 =over 4
 
+=item Smartmatch design issues
+
 =item Remove duplication of test setup.
-
-=item merge common code in installperl and installman
-
-=item common test code for timed bail out
 
 =item POD -E<gt> HTML conversion in the core still sucks
 
@@ -6254,8 +6252,6 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 =item Dual life everything
 
 =item Bundle dual life modules in ext/
-
-=item Improving C<threads::shared>
 
 =item POSIX memory footprint
 
@@ -6284,6 +6280,10 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 =item Cross-compile support
 
 =item roffitall
+
+=item Split "linker" from "compiler"
+
+C<cc> (in F<cc.U>), C<ld> (in F<dlsrc.U>)
 
 =back
 
@@ -6314,6 +6314,8 @@ L<http://perl.com/>, L<http://use.perl.org/>, L<http://www.perlmonks.org/>
 =item -D_FORTIFY_SOURCE=2, -fstack-protector
 
 =item Arenas for GPs? For MAGIC?
+
+=item Shared arenas
 
 =back
 
@@ -6361,6 +6363,8 @@ Perl_gv_fetchmethod_autoload()
 =item Tasks that need a knowledge of the interpreter
 
 =over 4
+
+=item error reporting of [$a ; $b]
 
 =item UTF-8 revamp
 
@@ -9338,6 +9342,8 @@ DJGPP, Pthreads
 
 =item Itanium, Itanium 2 & Madison 6
 
+=item HP-UX versions
+
 =item Building Dynamic Extensions on HP-UX
 
 =item The HP ANSI C Compiler
@@ -10443,6 +10449,8 @@ VARIABLE, cond_broadcast VARIABLE
 
 =item AUTHOR
 
+=item LICENSE
+
 =back
 
 =head2 threads - Perl interpreter-based threads
@@ -10519,14 +10527,16 @@ inside special blocks, Unsafe signals, Perl has been built with
 C<PERL_OLD_SIGNALS> (see C<perl -V>), The environment variable
 C<PERL_SIGNALS> is set to C<unsafe> (see L<perlrun/"PERL_SIGNALS">), The
 module L<Perl::Unsafe::Signals> is used, Returning closures from threads,
-Returning objects from threads, Perl Bugs and the CPAN Version of
-L<threads>
+Returning objects from threads, END blocks in threads, Perl Bugs and the
+CPAN Version of L<threads>
 
 =item REQUIREMENTS
 
 =item SEE ALSO
 
 =item AUTHOR
+
+=item LICENSE
 
 =item ACKNOWLEDGEMENTS
 
@@ -10541,6 +10551,8 @@ L<threads>
 =item DESCRIPTION
 
 =over 4
+
+=item What C<import> does
 
 =item Built-in Attributes
 
@@ -10571,6 +10583,8 @@ FETCH_I<type>_ATTRIBUTES, MODIFY_I<type>_ATTRIBUTES
 =back
 
 =item EXAMPLES
+
+=item MORE EXAMPLES
 
 =item SEE ALSO
 
@@ -10845,11 +10859,13 @@ escapes
 
 =item CAVEATS
 
+=item SEE ALSO
+
 =item BUGS
 
 =item AUTHORS
 
-=item COPYRIGHT
+=item COPYRIGHT & LICENSE
 
 =back
 
@@ -10894,8 +10910,6 @@ escapes
 =item PerlIO layers for C<STD(IN|OUT)>
 
 =item Implicit upgrading for byte strings
-
-=item Side effects
 
 =item Side effects
 
@@ -11045,6 +11059,8 @@ point
 =item SEE ALSO
 
 =item AUTHOR
+
+=item COPYRIGHT AND LICENSE
 
 =back
 
@@ -11269,10 +11285,10 @@ structures between threads
 
 =item FUNCTIONS
 
-share VARIABLE, is_shared VARIABLE, lock VARIABLE, cond_wait VARIABLE,
-cond_wait CONDVAR, LOCKVAR, cond_timedwait VARIABLE, ABS_TIMEOUT,
-cond_timedwait CONDVAR, ABS_TIMEOUT, LOCKVAR, cond_signal VARIABLE,
-cond_broadcast VARIABLE
+share VARIABLE, shared_clone REF, is_shared VARIABLE, lock VARIABLE,
+cond_wait VARIABLE, cond_wait CONDVAR, LOCKVAR, cond_timedwait VARIABLE,
+ABS_TIMEOUT, cond_timedwait CONDVAR, ABS_TIMEOUT, LOCKVAR, cond_signal
+VARIABLE, cond_broadcast VARIABLE
 
 =item OBJECTS
 
@@ -11283,6 +11299,8 @@ cond_broadcast VARIABLE
 =item SEE ALSO
 
 =item AUTHOR
+
+=item LICENSE
 
 =back
 
@@ -13966,10 +13984,10 @@ Dumper
 
 =item Perl API not supported by ppport.h
 
-perl 5.9.5, perl 5.9.4, perl 5.9.3, perl 5.9.2, perl 5.9.1, perl 5.9.0,
-perl 5.8.3, perl 5.8.1, perl 5.8.0, perl 5.7.3, perl 5.7.2, perl 5.7.1,
-perl 5.6.1, perl 5.6.0, perl 5.005_03, perl 5.005, perl 5.004_05, perl
-5.004
+perl 5.11.0, perl 5.10.0, perl 5.9.5, perl 5.9.4, perl 5.9.3, perl 5.9.2,
+perl 5.9.1, perl 5.9.0, perl 5.8.3, perl 5.8.1, perl 5.8.0, perl 5.7.3,
+perl 5.7.2, perl 5.7.1, perl 5.6.1, perl 5.6.0, perl 5.005_03, perl 5.005,
+perl 5.004_05, perl 5.004
 
 =back
 
@@ -14222,7 +14240,7 @@ C<XSLoader::load('Your::Module', $Your::Module::VERSION)>
 
 =item AUTHORS
 
-=item COPYRIGHT
+=item COPYRIGHT & LICENSE
 
 =back
 
@@ -15152,7 +15170,7 @@ arrays
 
 =item How to Import
 
-C<use ModuleName;>, C<use ModuleName ();>, C<use ModuleName qw(...);>
+C<use YourModule;>, C<use YourModule ();>, C<use YourModule qw(...);>
 
 =back
 
@@ -15293,14 +15311,15 @@ IV, UV, NV, PV, PVN, SV, YES, NO, UNDEF
 
 constant_types
 
-XS_constant PACKAGE, TYPES, SUBNAME, C_SUBNAME
+XS_constant PACKAGE, TYPES, XS_SUBNAME, C_SUBNAME
 
 autoload PACKAGE, VERSION, AUTOLOADER
 
 WriteMakefileSnippet
 
 WriteConstants ATTRIBUTE =E<gt> VALUE [, ...], NAME, DEFAULT_TYPE,
-BREAKOUT_AT, NAMES, C_FH, C_FILE, XS_FH, XS_FILE, SUBNAME, C_SUBNAME
+BREAKOUT_AT, NAMES, PROXYSUBS, C_FH, C_FILE, XS_FH, XS_FILE, XS_SUBNAME,
+C_SUBNAME
 
 =over 4
 
@@ -16297,14 +16316,15 @@ INSTALLVENDORARCH, INSTALLVENDORBIN, INSTALLVENDORLIB,
 INSTALLVENDORMAN1DIR, INSTALLVENDORMAN3DIR, INSTALLVENDORSCRIPT,
 INST_ARCHLIB, INST_BIN, INST_LIB, INST_MAN1DIR, INST_MAN3DIR, INST_SCRIPT,
 LD, LDDLFLAGS, LDFROM, LIB, LIBPERL_A, LIBS, LICENSE, LINKTYPE, MAKE,
-MAKEAPERL, MAKEFILE_OLD, MAN1PODS, MAN3PODS, MAP_TARGET, MYEXTLIB, NAME,
-NEEDS_LINKING, NOECHO, NORECURS, NO_META, NO_VC, OBJECT, OPTIMIZE, PERL,
-PERL_CORE, PERLMAINCC, PERL_ARCHLIB, PERL_LIB, PERL_MALLOC_OK, PERLPREFIX,
-PERLRUN, PERLRUNINST, PERL_SRC, PERM_RW, PERM_RWX, PL_FILES, PM, PMLIBDIRS,
-PM_FILTER, POLLUTE, PPM_INSTALL_EXEC, PPM_INSTALL_SCRIPT, PREFIX,
-PREREQ_FATAL, PREREQ_PM, PREREQ_PRINT, PRINT_PREREQ, SITEPREFIX, SIGN,
-SKIP, TYPEMAPS, VENDORPREFIX, VERBINST, VERSION, VERSION_FROM, VERSION_SYM,
-XS, XSOPT, XSPROTOARG, XS_VERSION
+MAKEAPERL, MAKEFILE_OLD, MAN1PODS, MAN3PODS, MAP_TARGET, META_ADD,
+META_MERGE, MIN_PERL_VERSION, MYEXTLIB, NAME, NEEDS_LINKING, NOECHO,
+NORECURS, NO_META, NO_VC, OBJECT, OPTIMIZE, PERL, PERL_CORE, PERLMAINCC,
+PERL_ARCHLIB, PERL_LIB, PERL_MALLOC_OK, PERLPREFIX, PERLRUN, PERLRUNINST,
+PERL_SRC, PERM_RW, PERM_RWX, PL_FILES, PM, PMLIBDIRS, PM_FILTER, POLLUTE,
+PPM_INSTALL_EXEC, PPM_INSTALL_SCRIPT, PREFIX, PREREQ_FATAL, PREREQ_PM,
+PREREQ_PRINT, PRINT_PREREQ, SITEPREFIX, SIGN, SKIP, TYPEMAPS, VENDORPREFIX,
+VERBINST, VERSION, VERSION_FROM, VERSION_SYM, XS, XSOPT, XSPROTOARG,
+XS_VERSION
 
 =item Additional lowercase attributes
 
@@ -16473,6 +16493,8 @@ fullcheck
 skipcheck
 
 maniread
+
+maniskip
 
 manicopy
 
@@ -17364,7 +17386,9 @@ from the other partial filters described in the previous section.
 
 =item AUTHOR
 
-=item COPYRIGHT
+=item CONTACT
+
+=item COPYRIGHT AND LICENSE
 
 =back
 
@@ -18451,7 +18475,7 @@ FLAGS ] ), stat
 
 =item SEE ALSO
 
-=item AUTHOR
+=item AUTHORS
 
 =item COPYRIGHT
 
@@ -18505,13 +18529,13 @@ set ( NAME => VALUE [, NAME => VALUE ...] ), setall ( VALUES ), setval ( N
 
 =item SEE ALSO
 
-=item AUTHOR
+=item AUTHORS
 
 =item COPYRIGHT
 
 =back
 
-=head2 IPC::SysV - SysV IPC constants
+=head2 IPC::SharedMem - SysV Shared Memory IPC object class
 
 =over 4
 
@@ -18519,7 +18543,10 @@ set ( NAME => VALUE [, NAME => VALUE ...] ), setall ( VALUES ), setval ( N
 
 =item DESCRIPTION
 
-ftok( PATH, ID )
+=item METHODS
+
+new ( KEY , SIZE , FLAGS ), id, read ( POS, SIZE ), write ( STRING, POS,
+SIZE ), remove, is_removed, stat, attach ( [FLAG] ), detach, addr
 
 =item SEE ALSO
 
@@ -18529,7 +18556,26 @@ ftok( PATH, ID )
 
 =back
 
-=head2 IPC::SysV::Msg, IPC::Msg - SysV Msg IPC object class
+=head2 IPC::SysV - System V IPC constants and system calls
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+ftok( PATH ), ftok( PATH, ID ), shmat( ID, ADDR, FLAG ), shmdt( ADDR ),
+memread( ADDR, VAR, POS, SIZE ), memwrite( ADDR, STRING, POS, SIZE )
+
+=item SEE ALSO
+
+=item AUTHORS
+
+=item COPYRIGHT
+
+=back
+
+=head2 IPC::SysV::lib::IPC::Msg, IPC::Msg - SysV Msg IPC object class
 
 =over 4
 
@@ -18545,14 +18591,14 @@ FLAGS ] ), stat
 
 =item SEE ALSO
 
-=item AUTHOR
+=item AUTHORS
 
 =item COPYRIGHT
 
 =back
 
-=head2 IPC::SysV::Semaphore, IPC::Semaphore - SysV Semaphore IPC object
-class
+=head2 IPC::SysV::lib::IPC::Semaphore, IPC::Semaphore - SysV Semaphore IPC
+object class
 
 =over 4
 
@@ -18569,7 +18615,49 @@ set ( NAME => VALUE [, NAME => VALUE ...] ), setall ( VALUES ), setval ( N
 
 =item SEE ALSO
 
-=item AUTHOR
+=item AUTHORS
+
+=item COPYRIGHT
+
+=back
+
+=head2 IPC::SysV::lib::IPC::SharedMem, IPC::SharedMem - SysV Shared Memory
+IPC object class
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+new ( KEY , SIZE , FLAGS ), id, read ( POS, SIZE ), write ( STRING, POS,
+SIZE ), remove, is_removed, stat, attach ( [FLAG] ), detach, addr
+
+=item SEE ALSO
+
+=item AUTHORS
+
+=item COPYRIGHT
+
+=back
+
+=head2 IPC::SysV::lib::IPC::SysV, IPC::SysV - System V IPC constants and
+system calls
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+ftok( PATH ), ftok( PATH, ID ), shmat( ID, ADDR, FLAG ), shmdt( ADDR ),
+memread( ADDR, VAR, POS, SIZE ), memwrite( ADDR, STRING, POS, SIZE )
+
+=item SEE ALSO
+
+=item AUTHORS
 
 =item COPYRIGHT
 
@@ -22459,6 +22547,7 @@ B<openlog($ident, $logopt, $facility)>, B<syslog($priority, $message)>,
 B<syslog($priority, $format, @args)>, B<Note>,
 B<setlogmask($mask_priority)>, B<setlogsock($sock_type)>,
 B<setlogsock($sock_type, $stream_location)> (added in Perl 5.004_02),
+B<setlogsock($sock_type, $stream_location, $sock_timeout)> (added in 0.25),
 B<Note>, B<closelog()>
 
 =item THE RULES OF SYS::SYSLOG
@@ -22535,6 +22624,7 @@ B<openlog($ident, $logopt, $facility)>, B<syslog($priority, $message)>,
 B<syslog($priority, $format, @args)>, B<Note>,
 B<setlogmask($mask_priority)>, B<setlogsock($sock_type)>,
 B<setlogsock($sock_type, $stream_location)> (added in Perl 5.004_02),
+B<setlogsock($sock_type, $stream_location, $sock_timeout)> (added in 0.25),
 B<Note>, B<closelog()>
 
 =item THE RULES OF SYS::SYSLOG
@@ -22792,11 +22882,9 @@ B<reset>
 
 =item Setting up tests
 
-B<exported_to>
+B<plan>
 
 =back
-
-B<plan>
 
 B<expected_tests>
 
@@ -22805,6 +22893,8 @@ B<no_plan>
 B<has_plan>
 
 B<skip_all>
+
+B<exported_to>
 
 =over 4
 
@@ -24460,11 +24550,11 @@ Win32::CreateFile(FILE), Win32::DomainName(),
 Win32::ExpandEnvironmentStrings(STRING), Win32::FormatMessage(ERRORCODE),
 Win32::FsType(), Win32::FreeLibrary(HANDLE),
 Win32::GetANSIPathName(FILENAME), Win32::GetArchName(),
-Win32::GetChipName(), Win32::GetCwd(), Win32::GetCurrentThreadId(),
-Win32::GetFileVersion(FILENAME), Win32::GetFolderPath(FOLDER [, CREATE]),
-Win32::GetFullPathName(FILENAME), Win32::GetLastError(),
-Win32::GetLongPathName(PATHNAME), Win32::GetNextAvailDrive(),
-Win32::GetOSVersion(), Win32::GetOSName(),
+Win32::GetChipName(), Win32::GetCwd(), Win32::GetCurrentProcessId(),
+Win32::GetCurrentThreadId(), Win32::GetFileVersion(FILENAME),
+Win32::GetFolderPath(FOLDER [, CREATE]), Win32::GetFullPathName(FILENAME),
+Win32::GetLastError(), Win32::GetLongPathName(PATHNAME),
+Win32::GetNextAvailDrive(), Win32::GetOSVersion(), Win32::GetOSName(),
 Win32::GetShortPathName(PATHNAME), Win32::GetProcAddress(INSTANCE,
 PROCNAME), Win32::GetTickCount(), Win32::GuidGen(), Win32::IsAdminUser(),
 Win32::IsWinNT(), Win32::IsWin95(), Win32::LoadLibrary(LIBNAME),
@@ -24666,7 +24756,7 @@ C<XSLoader::load('Your::Module', $Your::Module::VERSION)>
 
 =item AUTHORS
 
-=item COPYRIGHT
+=item COPYRIGHT & LICENSE
 
 =back
 
