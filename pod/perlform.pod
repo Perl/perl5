@@ -59,7 +59,7 @@ characters for field definitions:
 X<format, picture line>
 X<@> X<^> X<< < >> X<< | >> X<< > >> X<#> X<0> X<.> X<...>
 X<@*> X<^*> X<~> X<~~>
-  
+
    @    start of regular field
    ^    start of special field
    <    pad character for left justification
