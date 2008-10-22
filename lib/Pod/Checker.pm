@@ -867,7 +867,7 @@ sub command {
                   $self->{_list_item_contents} = $1 ? 1 : 0;
                   $arg = $1;
                 }
-                elsif($arg =~ /^\d+\.?\s*(\S*)/) {
+                elsif($arg =~ /^\d+\.?\s+(\S*)/) {
                   $type = 'number';
                   $self->{_list_item_contents} = $1 ? 1 : 0;
                   $arg = $1;
