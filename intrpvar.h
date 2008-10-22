@@ -676,6 +676,10 @@ PERLVARI(Idestroyhook, destroyable_proc_t, MEMBER_TO_FPTR(Perl_sv_destroyable))
 /* Perl_Ibreakable_sub_generation_ptr was too long for VMS, hence "gen"  */
 PERLVARI(Ibreakable_sub_gen, U32, 0)
 
+#ifdef DEBUG_LEAKING_SCALARS
+PERLVARI(Isv_serial, U32, 0) /* SV serial number, used in sv.c */
+#endif
+
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */
 

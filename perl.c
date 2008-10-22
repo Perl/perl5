@@ -2928,7 +2928,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
       "  o  Method and overloading resolution",
       "  c  String/numeric conversions",
       "  P  Print profiling info, preprocessor command for -P, source file input state",
-      "  m  Memory allocation",
+      "  m  Memory and SV allocation",
       "  f  Format processing",
       "  r  Regular expression parsing and execution",
       "  x  Syntax tree dump",

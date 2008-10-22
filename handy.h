@@ -771,9 +771,14 @@ Malloc_t Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int li
 enum mem_log_type {
   MLT_ALLOC,
   MLT_REALLOC,
-  MLT_FREE
+  MLT_FREE,
+  MLT_NEW_SV,
+  MLT_DEL_SV
 };
 #  endif
+/* those are only used in sv.c */
+void Perl_mem_log_new_sv(const SV *sv, const char *filename, const int linenumber, const char *funcname);
+void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumber, const char *funcname);
 # endif
 
 #endif

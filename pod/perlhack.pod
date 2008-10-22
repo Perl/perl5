@@ -3196,6 +3196,27 @@ memory usage, so it shouldn't be used in production environments. It also
 converts C<new_SV()> from a macro into a real function, so you can use
 your favourite debugger to discover where those pesky SVs were allocated.
 
+If you see that you're leaking memory at runtime, but neither valgrind
+nor C<-DDEBUG_LEAKING_SCALARS> will find anything, you're probably
+leaking SVs that are still reachable and will be properly cleaned up
+during destruction of the interpreter. In such cases, using the C<-Dm>
+switch can point you to the source of the leak. If the executable was
+built with C<-DDEBUG_LEAKING_SCALARS>, C<-Dm> will output SV allocations
+in addition to memory allocations. Each SV allocation has a distinct
+serial number that will be written on creation and destruction of the SV. 
+So if you're executing the leaking code in a loop, you need to look for
+SVs that are created, but never destroyed between each cycle. If such an
+SV is found, set a conditional breakpoint within C<new_SV()> and make it
+break only when C<PL_sv_serial> is equal to the serial number of the
+leaking SV. Then you will catch the interpreter in exactly the state
+where the leaking SV is allocated, which is sufficient in many cases to
+find the source of the leak.
+
+As C<-Dm> is using the PerlIO layer for output, it will by itself
+allocate quite a bunch of SVs, which are hidden to avoid recursion.
+You can bypass the PerlIO layer if you use the SV logging provided
+by C<-DPERL_MEM_LOG> instead.
+
 =head2 PERL_MEM_LOG
 
 If compiled with C<-DPERL_MEM_LOG>, all Newx() and Renew() allocations
@@ -3208,6 +3229,17 @@ file and line number (and C function name, if supported by the C compiler).
 This logging is somewhat similar to C<-Dm> but independent of C<-DDEBUGGING>,
 and at a higher level (the C<-Dm> is directly at the point of C<malloc()>,
 while the C<PERL_MEM_LOG> is at the level of C<New()>).
+
+In addition to memory allocations, SV allocations will be logged, just as
+with C<-Dm>. However, since the logging doesn't use PerlIO, all SV allocations
+are logged and no extra SV allocations are introduced by enabling the logging.
+If compiled with C<-DDEBUG_LEAKING_SCALARS>, the serial number for each SV
+allocation is also logged.
+
+You can control the logging from your environment if you compile with
+C<-DPERL_MEM_LOG_ENV>. Then you need to explicitly set C<PERL_MEM_LOG> and/or
+C<PERL_SV_LOG> to a non-zero value to enable logging of memory and/or SV
+allocations.
 
 =head2 Profiling
 

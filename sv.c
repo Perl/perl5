@@ -170,10 +170,24 @@ Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
     }
 }
 
+#ifdef PERL_MEM_LOG
+#  define MEM_LOG_NEW_SV(sv, file, line, func)	\
+	    Perl_mem_log_new_sv(sv, file, line, func)
+#  define MEM_LOG_DEL_SV(sv, file, line, func)	\
+	    Perl_mem_log_del_sv(sv, file, line, func)
+#else
+#  define MEM_LOG_NEW_SV(sv, file, line, func)	NOOP
+#  define MEM_LOG_DEL_SV(sv, file, line, func)	NOOP
+#endif
+
 #ifdef DEBUG_LEAKING_SCALARS
 #  define FREE_SV_DEBUG_FILE(sv) Safefree((sv)->sv_debug_file)
+#  define DEBUG_SV_SERIAL(sv)						    \
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) del_SV\n",    \
+	    PTR2UV(sv), (long)(sv)->sv_debug_serial))
 #else
 #  define FREE_SV_DEBUG_FILE(sv)
+#  define DEBUG_SV_SERIAL(sv)	NOOP
 #endif
 
 #ifdef PERL_POISON
@@ -201,6 +215,8 @@ Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
 #define plant_SV(p) \
     STMT_START {					\
 	const U32 old_flags = SvFLAGS(p);			\
+	MEM_LOG_DEL_SV(p, __FILE__, __LINE__, FUNCTION__);  \
+	DEBUG_SV_SERIAL(p);				\
 	FREE_SV_DEBUG_FILE(p);				\
 	POSION_SV_HEAD(p);				\
 	SvFLAGS(p) = SVTYPEMASK;			\
@@ -246,7 +262,7 @@ S_more_sv(pTHX)
 #ifdef DEBUG_LEAKING_SCALARS
 /* provide a real function for a debugger to play with */
 STATIC SV*
-S_new_SV(pTHX)
+S_new_SV(pTHX_ const char *file, int line, const char *func)
 {
     SV* sv;
 
@@ -267,10 +283,16 @@ S_new_SV(pTHX)
     sv->sv_debug_inpad = 0;
     sv->sv_debug_cloned = 0;
     sv->sv_debug_file = PL_curcop ? savepv(CopFILE(PL_curcop)): NULL;
-    
+
+    sv->sv_debug_serial = PL_sv_serial++;
+
+    MEM_LOG_NEW_SV(sv, file, line, func);
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) new_SV (from %s:%d [%s])\n",
+	    PTR2UV(sv), (long)sv->sv_debug_serial, file, line, func));
+
     return sv;
 }
-#  define new_SV(p) (p)=S_new_SV(aTHX)
+#  define new_SV(p) (p)=S_new_SV(aTHX_ __FILE__, __LINE__, FUNCTION__)
 
 #else
 #  define new_SV(p) \
@@ -282,6 +304,7 @@ S_new_SV(pTHX)
 	SvANY(p) = 0;					\
 	SvREFCNT(p) = 1;				\
 	SvFLAGS(p) = 0;					\
+	MEM_LOG_NEW_SV(p, __FILE__, __LINE__, FUNCTION__);  \
     } STMT_END
 #endif
 
