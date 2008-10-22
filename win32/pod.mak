@@ -553,9 +553,9 @@ realclean:	clean
 
 distclean:	realclean
 
-check:	checkpods
+check:	podchecker
 	@echo "checking..."; \
-	$(PERL) -I../lib checkpods $(POD)
+	$(PERL) -I../lib podchecker $(POD)
 
 # Dependencies.
 pod2latex:	pod2latex.PL ../lib/Config.pm
