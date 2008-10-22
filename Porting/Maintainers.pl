@@ -278,7 +278,8 @@ package Maintainers;
 	'ExtUtils::Constant' =>
 		{
 		'MAINTAINER'	=> 'nwclark',
-		'FILES'		=> q[lib/ExtUtils/Constant.pm lib/ExtUtils/Constant],
+		'FILES'		=> q[lib/ExtUtils/Constant.pm lib/ExtUtils/Constant
+				     lib/ExtUtils/t/Constant.t],
 		'CPAN'		=> 1,
 		},
 
@@ -286,7 +287,9 @@ package Maintainers;
 
 		{
 		'MAINTAINER' => 'yves',
-		'FILES' => q[lib/ExtUtils/{Install,Installed,Packlist}.pm],
+		# MakeMaker has a basic.t too, and we use that.
+		'FILES' => q[lib/ExtUtils/{Install,Installed,Packlist}.pm
+			     lib/ExtUtils/t/{Install,Installapi2,Packlist,can_write_dir}.t],
 		'CPAN' => 1,
 		},
 
@@ -295,7 +298,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'mschwern',
 		'FILES'	=> q[lib/ExtUtils/{Liblist,MakeMaker,Mkbootstrap,Mksymlists,MM*,MY,testlib}.pm
 			lib/ExtUtils/{Command,Liblist,MakeMaker}
-			lib/ExtUtils/t/{[0-9A-LN-Za-z]*,Mkbootstrap,MM_*}.t
+			lib/ExtUtils/t/{[0-9FLV-Zabd-z]*,IN*,Mkbootstrap,MM_*,PL_FILES,cd,config}.t
 			t/lib/MakeMaker t/lib/TieIn.pm t/lib/TieOut.pm],
 		'CPAN'		=> 1,
 		},
