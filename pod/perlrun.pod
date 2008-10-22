@@ -395,7 +395,7 @@ B<-D14> is equivalent to B<-Dtls>):
        16  o  Method and overloading resolution
        32  c  String/numeric conversions
        64  P  Print profiling info, source file input state
-      128  m  Memory allocation
+      128  m  Memory and SV allocation
       256  f  Format processing
       512  r  Regular expression parsing and execution
      1024  x  Syntax tree dump

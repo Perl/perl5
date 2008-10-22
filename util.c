@@ -5519,9 +5519,10 @@ Perl_free_global_struct(pTHX_ struct perl_vars *plvarsp)
  * PERL_MEM_LOG: the Perl_mem_log_..() will be compiled.
  *
  * PERL_MEM_LOG_ENV: if defined, during run time the environment
- * variable PERL_MEM_LOG will be consulted, and if the integer value
- * of that is true, the logging will happen.  (The default is to
- * always log if the PERL_MEM_LOG define was in effect.)
+ * variables PERL_MEM_LOG and PERL_SV_LOG will be consulted, and
+ * if the integer value of that is true, the logging will happen.
+ * (The default is to always log if the PERL_MEM_LOG define was
+ * in effect.)
  *
  * PERL_MEM_LOG_TIMESTAMP: if defined, a timestamp will be logged
  * before every memory logging entry. This can be turned off at run
@@ -5546,14 +5547,23 @@ Perl_free_global_struct(pTHX_ struct perl_vars *plvarsp)
 #endif
 
 #ifdef PERL_MEM_LOG_STDERR
+
+# ifdef DEBUG_LEAKING_SCALARS
+#   define SV_LOG_SERIAL_FMT	    " [%lu]"
+#   define _SV_LOG_SERIAL_ARG(sv)   , (unsigned long) (sv)->sv_debug_serial
+# else
+#   define SV_LOG_SERIAL_FMT
+#   define _SV_LOG_SERIAL_ARG(sv)
+# endif
+
 static void
-S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesize, const char *typename, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)
+S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesize, const char *typename, const SV *sv, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)
 {
 # if defined(PERL_MEM_LOG_ENV) || defined(PERL_MEM_LOG_ENV_FD)
     const char *s;
 # endif
 # ifdef PERL_MEM_LOG_ENV
-    s = PerlEnv_getenv("PERL_MEM_LOG");
+    s = PerlEnv_getenv(mlt < MLT_NEW_SV ? "PERL_MEM_LOG" : "PERL_SV_LOG");
     if (s ? atoi(s) : 0)
 # endif
     {
@@ -5616,6 +5626,14 @@ S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesize, const cha
 			filename, linenumber, funcname,
 			PTR2UV(oldalloc));
 		break;
+	    case MLT_NEW_SV:
+	    case MLT_DEL_SV:
+		len = my_snprintf(buf, sizeof(buf),
+			"%s_SV: %s:%d:%s: %"UVxf SV_LOG_SERIAL_FMT "\n",
+			mlt == MLT_NEW_SV ? "new" : "del",
+			filename, linenumber, funcname,
+			PTR2UV(sv) _SV_LOG_SERIAL_ARG(sv));
+		break;
 	    }
 	    PerlLIO_write(fd, buf, len);
 	}
@@ -5627,7 +5645,7 @@ Malloc_t
 Perl_mem_log_alloc(const UV n, const UV typesize, const char *typename, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)
 {
 #ifdef PERL_MEM_LOG_STDERR
-    mem_log_common(MLT_ALLOC, n, typesize, typename, NULL, newalloc, filename, linenumber, funcname);
+    mem_log_common(MLT_ALLOC, n, typesize, typename, NULL, NULL, newalloc, filename, linenumber, funcname);
 #endif
     return newalloc;
 }
@@ -5636,7 +5654,7 @@ Malloc_t
 Perl_mem_log_realloc(const UV n, const UV typesize, const char *typename, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)
 {
 #ifdef PERL_MEM_LOG_STDERR
-    mem_log_common(MLT_REALLOC, n, typesize, typename, oldalloc, newalloc, filename, linenumber, funcname);
+    mem_log_common(MLT_REALLOC, n, typesize, typename, NULL, oldalloc, newalloc, filename, linenumber, funcname);
 #endif
     return newalloc;
 }
@@ -5645,9 +5663,25 @@ Malloc_t
 Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int linenumber, const char *funcname)
 {
 #ifdef PERL_MEM_LOG_STDERR
-    mem_log_common(MLT_FREE, 0, 0, "", oldalloc, NULL, filename, linenumber, funcname);
+    mem_log_common(MLT_FREE, 0, 0, "", NULL, oldalloc, NULL, filename, linenumber, funcname);
 #endif
     return oldalloc;
+}
+
+void
+Perl_mem_log_new_sv(const SV *sv, const char *filename, const int linenumber, const char *funcname)
+{
+#ifdef PERL_MEM_LOG_STDERR
+    mem_log_common(MLT_NEW_SV, 0, 0, "", sv, NULL, NULL, filename, linenumber, funcname);
+#endif
+}
+
+void
+Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumber, const char *funcname)
+{
+#ifdef PERL_MEM_LOG_STDERR
+    mem_log_common(MLT_DEL_SV, 0, 0, "", sv, NULL, NULL, filename, linenumber, funcname);
+#endif
 }
 
 #endif /* PERL_MEM_LOG */
