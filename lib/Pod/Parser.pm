@@ -990,18 +990,38 @@ sub parse_paragraph {
     #    ## (invoke_callbacks will return true if we do).
     #    return  1  unless $self->invoke_callbacks($cmd, $text, $line_num, $pod_para);
     # }
+
+    # If the last paragraph ended in whitespace, and we're not between verbatim blocks, carp
+    if ($myData{_WHITESPACE} and $myOpts{'-warnings'}
+            and not ($text =~ /^\s+/ and ($myData{_PREVIOUS}||"") eq "verbatim")) {
+        my $errorsub = $self->errorsub();
+        my $line = $line_num - 1;
+        my $errmsg = "*** WARNING: line containing nothing but whitespace".
+                     " in paragraph at line $line in file $myData{_INFILE}\n";
+        (ref $errorsub) and &{$errorsub}($errmsg)
+            or (defined $errorsub) and $self->$errorsub($errmsg)
+                or  warn($errmsg);
+    }
+
     if (length $cmd) {
         ## A command paragraph
         $self->command($cmd, $text, $line_num, $pod_para);
+        $myData{_PREVIOUS} = $cmd;
     }
     elsif ($text =~ /^\s+/) {
         ## Indented text - must be a verbatim paragraph
         $self->verbatim($text, $line_num, $pod_para);
+        $myData{_PREVIOUS} = "verbatim";
     }
     else {
         ## Looks like an ordinary block of text
         $self->textblock($text, $line_num, $pod_para);
+        $myData{_PREVIOUS} = "textblock";
     }
+
+    # Update the whitespace for the next time around
+    $myData{_WHITESPACE} = $text =~ /^[^\S\r\n]+\Z/m ? 1 : 0;
+
     return  1;
 }
 
@@ -1082,17 +1102,6 @@ sub parse_from_filehandle {
         ## If it isnt, then keep iterating until it is.
         next unless (($textline =~ /^([^\S\r\n]*)[\r\n]*$/)
                                      && (length $paragraph));
-
-        ## Issue a warning about any non-empty blank lines
-        if (length($1) > 0 and $myOpts{'-warnings'} and ! $myData{_CUTTING}) {
-            my $errorsub = $self->errorsub();
-            my $file = $self->input_file();
-            my $errmsg = "*** WARNING: line containing nothing but whitespace".
-                         " in paragraph at line $nlines in file $file\n";
-            (ref $errorsub) and &{$errorsub}($errmsg)
-                or (defined $errorsub) and $self->$errorsub($errmsg)
-                    or  warn($errmsg);
-        }
 
         ## Now process the paragraph
         parse_paragraph($self, $paragraph, ($nlines - $plines) + 1);
