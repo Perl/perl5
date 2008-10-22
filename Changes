@@ -28,6 +28,444 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.9		Maintenance release working toward v5.8.9
 --------------
 ____________________________________________________________________________
+[ 34559] By: nicholas				   on 2008/10/22  19:30:58
+	Log: Integrate:
+	     [ 34556]
+	     Integrate:
+	     [ 34542]
+	     Subject: FreeBSD 7 libc_r detection
+	     From: Tony Cook <tony@develop-help.com>
+	     Message-ID: <20081020232630.GA20563@mars.tony.develop-help.com>
+	     Date: Tue, 21 Oct 2008 10:26:30 +1100
+	     
+	     [ 34546]
+	     Future-proof the FreeBSD hints - assume that FreeBSD 8, 9 etc behave
+	     like 7, not 6 and earlier.
+     Branch: maint-5.8/perl
+	  !> hints/freebsd.sh
+____________________________________________________________________________
+[ 34558] By: nicholas				   on 2008/10/22  18:54:54
+	Log: Integrate:
+	     [ 34557]
+	     Integrate:
+	     [ 34548]
+	     Disentangle the ownership of tests in lib/ExtUtils/
+	     
+	     [ 34553]
+	     Add BinGOs to AUTHORS, and a second e-mail address for Shlomi
+     Branch: maint-5.8/perl
+	  !> AUTHORS Porting/Maintainers.pl Porting/checkAUTHORS.pl
+____________________________________________________________________________
+[ 34552] By: nicholas				   on 2008/10/21  19:09:53
+	Log: Integrate:
+	     [ 34522]
+	     Integrate:
+	     [ 34519]
+	     Subject: [perl #59650] File::Copy does not handle file objects sanely
+	     From: "rabbit+bugs@rabbit.us (via RT)" <perlbug-followup@perl.org>
+	     Message-ID: <rt-3.6.HEAD-29762-1223291950-1373.59650-75-0@perl.org>
+	     Date: Mon, 06 Oct 2008 04:19:10 -0700
+	     
+	     Suggested change modified to cope with the hoop-jumping needed to keep
+	     File::Copy working whilst bootstrapping the core build.
+	     
+	     Some tests by me, to try to ensure that (arguablly buggy) IO::Scalar
+	     will still work.
+     Branch: maint-5.8/perl
+	  !> lib/File/Copy.pm lib/File/Copy.t
+____________________________________________________________________________
+[ 34551] By: nicholas				   on 2008/10/21  18:39:11
+	Log: Integrate:
+	     [ 34523]
+	     Integrate:
+	     [ 34513]
+	     Suggestion from Slaven - reverse the part of 23348 that removed the
+	     conditional call to dl_expandspec() on platforms that default
+	     $do_expand to false. autorequire, rightly or wrongly, is relying on
+	     being able to set $do_expand to true.
+     Branch: maint-5.8/perl
+	  !> ext/DynaLoader/DynaLoader_pm.PL
+____________________________________________________________________________
+[ 34550] By: nicholas				   on 2008/10/21  17:02:10
+	Log: Run pod/buildtoc --build-all
+     Branch: maint-5.8/perl
+	   ! MANIFEST pod/perltoc.pod
+____________________________________________________________________________
+[ 34549] By: nicholas				   on 2008/10/21  16:55:53
+	Log: Integrate:
+	     [ 34547]
+	     Integrate:
+	     [ 32905]
+	     Subject: [patch] [Win32] Make Perl build on Win32 when the path contains whitespace
+	     From: Max Maischein <corion@cpan.org>
+	     Date: Mon, 07 Jan 2008 20:48:04 +0100
+	     Message-ID: <478281F4.9000202@cpan.org>
+	     
+	     [ 34482]
+	     Upgrade to ExtUtils-MakeMaker-6.47_01
+	     
+	     [ 34498]
+	     Upgrade to ExtUtils-MakeMaker-6.47_02
+	     
+	     [ 34541]
+	     Upgrade to ExtUtils-MakeMaker-6.48
+     Branch: maint-5.8/perl
+	  +> lib/ExtUtils/t/min_perl_version.t
+	  +> t/lib/MakeMaker/Test/Setup/MPV.pm
+	  !> (integrate 37 files)
+____________________________________________________________________________
+[ 34540] By: nicholas				   on 2008/10/20  20:08:43
+	Log: Integrate:
+	     [ 34534]
+	     Integrate:
+	     [ 34434]
+	     Subject: [PATCH] Loading modules in test.pl
+	     From: "Jerry D. Hedden" <jdhedden@cpan.org>
+	     Date: Tue, 23 Sep 2008 09:40:27 -0400
+	     Message-ID: <1ff86f510809230640y2d5a072g6abff6604f9daa79@mail.gmail.com>
+	     
+	     [ 34528]
+	     Change "use $foo; 1" in evals to "require $foo; 1" to avoid breaking
+	     even more tests if use is borked, but not require.
+     Branch: maint-5.8/perl
+	  !> t/test.pl
+____________________________________________________________________________
+[ 34539] By: nicholas				   on 2008/10/20  19:55:16
+	Log: Integrate:
+	     [ 25261]
+	     Subject: [PATCH] Typos in *.p[lm]
+	     From: "Piotr Fusik" <pfusik@op.pl>
+	     Date: Sun, 31 Jul 2005 12:50:04 +0200
+	     Message-ID: <001401c595bd$dccb5d80$0bd34dd5@piec>
+	     
+	     [the Filter::Simple typo - Damian notes "the complete failure of my
+	     campaign to gain acceptance for the esoteric practice of
+	     concatentation"]
+	     
+	     [ 34533]
+	     Integrate:
+	     [ 34378]
+	     Subject: Re: [PATCH] Revised: Improved documentation for flock() in perlfunc.pod
+	     From: Paul Fenwick <pjf@perltraining.com.au>
+	     Date: Tue, 16 Sep 2008 20:32:39 +1000
+	     Message-ID: <48CF8B47.30803@perltraining.com.au>
+	     
+	     [ 34380]
+	     Kevin J. Woolley has taken over from Gozer.
+	     
+	     [ 34386]
+	     Subject: [PATCH] Re: [perl #59134] Typo in File::stat man pag 
+	     From: Moritz Lenz <moritz@casella.verplant.org>
+	     Date: Sun, 21 Sep 2008 17:50:04 +0200
+	     Message-ID: <20080921154935.4916.qmail@lists.develooper.com>
+	     
+	     [ 34389]
+	     Subject: [PATCH] Re: [perl #59128] Typo in perldsc(1) 
+	     From: Moritz Lenz <moritz@casella.verplant.org>
+	     Date: Sun, 21 Sep 2008 17:47:11 +0200
+	     Message-ID: <48D66C7F.6000602@casella.verplant.org>
+	     
+	     [ 34408]
+	     Subject:  [PATCH] Show using waitpid in IPC::Open[23] SYNOPSIS
+	     From: brian d foy <brian.d.foy@gmail.com>
+	     Date: Sun, 21 Sep 2008 15:23:47 -0500
+	     Message-ID: <210920081523471499%brian.d.foy@gmail.com>
+	     
+	     [ 34435]
+	     Subject: Re: [PATCH] Add open "|-" and open "-|" to perlopentut
+	     From: Shlomi Fish <shlomif@iglu.org.il>
+	     Date: Tue, 23 Sep 2008 19:00:41 +0300
+	     Message-id: <200809231900.41474.shlomif@iglu.org.il>
+	     
+	     [ 34451]
+	     error reporting of [$a ; $b] can be a TODO.
+	     
+	     [ 34454]
+	     It's RISC OS, dammit. Hard space, upper case. Always.
+	     
+	     [ 34463]
+	     Update copyright year to 2008.
+	     
+	     [ 34505]
+	     Damian has transferred Filter::Simple to p5p. Bump its version to 0.83
+	     with the new contact details, and remove the out-of-date README from
+	     core.
+	     
+	     [ 34529]
+	     Bump IPC::Open2's $VERSION. (The docs changed.)
+	     
+	     [ 34531]
+	     Bump the $VERSION of File::stat (documentation changed).
+     Branch: maint-5.8/perl
+	   - lib/Filter/Simple/README
+	  !> MANIFEST Porting/Maintainers.pl Porting/repository.pod README
+	  !> lib/File/stat.pm lib/Filter/Simple.pm
+	  !> lib/Filter/Simple/Changes lib/IPC/Open2.pm lib/IPC/Open3.pm
+	  !> perl.c pod/perldsc.pod pod/perlfunc.pod pod/perlopentut.pod
+	  !> pod/perltodo.pod
+____________________________________________________________________________
+[ 34538] By: nicholas				   on 2008/10/20  19:38:15
+	Log: Integrate:
+	     [ 34530]
+	     Integrate:
+	     [ 34365]
+	     Bump VERSIONs in all non-dual-lived modules that have changed
+	     since 5.8.8, ready for merging into maint-5.8 prior to 5.8.9.
+	     (Many (all?) of these should really have been changed prior to
+	     5.10.0, but better late than never.)
+	     
+	     Also modify cmpVERSION.pl to skip uninstalled test modules whose
+	     VERSIONs don't really matter.
+	     
+	     [ 34369]
+	     Bump $O::VERSION, to reflect change 32626, a doc change that is the only
+	     change to O.pm since 2001.
+	     
+	     [ 34370]
+	     Bump $ExtUtils::Constant::Utils::VERSION.
+     Branch: maint-5.8/perl
+	  !> Porting/cmpVERSION.pl ext/B/O.pm ext/Opcode/ops.pm
+	  !> ext/XS/Typemap/Typemap.pm lib/DBM_Filter/compress.pm
+	  !> lib/DBM_Filter/encode.pm lib/DBM_Filter/int32.pm
+	  !> lib/DBM_Filter/null.pm lib/DBM_Filter/utf8.pm
+	  !> lib/ExtUtils/Constant/Utils.pm lib/File/CheckTree.pm
+	  !> lib/Getopt/Std.pm lib/IPC/Open3.pm lib/PerlIO.pm
+	  !> lib/Tie/Handle.pm lib/Tie/Hash.pm lib/Tie/Scalar.pm
+	  !> lib/blib.pm os2/OS2/Process/Process.pm vms/ext/Stdio/Stdio.pm
+____________________________________________________________________________
+[ 34537] By: nicholas				   on 2008/10/20  19:24:06
+	Log: Integrate:
+	     [ 34527]
+	     Integrate:
+	     [ 34348]
+	     Skip another file in the VERSION comparison program
+	     
+	     [ 34391]
+	     Skip another module from the VERSION comparison checks
+	     
+	     [ 34473]
+	     Make sure expand-macro.pl also works for macros in headers
+	     that are not included by perl.h (like regcomp.h).
+	     
+	     [ 34474]
+	     Make expand-macro.pl accept macro expressions, i.e. macros with
+	     arguments. This makes it much more convenient to get expanded
+	     expressions that can be directly copied to a debugger. This is
+	     optional, so the original behaviour is maintained. Allow to read
+	     the macro name or expression from stdin, which can be useful for
+	     feeding it multi-line macro expressions. Use Pod::Usage and move
+	     the usage to POD section.
+     Branch: maint-5.8/perl
+	  !> Porting/cmpVERSION.pl Porting/expand-macro.pl
+____________________________________________________________________________
+[ 34536] By: nicholas				   on 2008/10/20  19:21:37
+	Log: Integrate:
+	     [ 34532]
+	     Integrate:
+	     [ 34414]
+	     Subject: Couple of mail address fixes
+	     From: Richard Foley <Richard.Foley@rfi.net>
+	     Date: Wed, 24 Sep 2008 14:07:38 +0200
+	     Message-Id: <200809241407.38389.Richard.Foley@rfi.net>
+	     
+	     [ 34457]
+	     All the volunteers who contributed to Paul Fenwick's project to help
+	     write perl589delta.pod, who weren't already in the AUTHORS file.
+	     Big thanks to all of them (including the 6 already in it). Still not
+	     to late to book your place in eternity - contact Paul for details.
+	     
+	     [ 34458]
+	     Most of the AUTHORS file already has hard tabs, so convert the
+	     remaining lines.
+	     
+	     [ 34460]
+	     Correct address.
+	     
+	     [ 34466]
+	     Update Eddy Tan's address.
+	     
+	     [ 34471]
+	     Subject: [PATCH: t/japh/abigail.t] Change of email address.
+	     From: Abigail <abigail@abigail.be>
+	     Date: Tue, 7 Oct 2008 21:56:55 +0200
+	     Message-ID: <20081007195655.GA22986@almanda>
+     Branch: maint-5.8/perl
+	  !> AUTHORS pod/perldebtut.pod t/japh/abigail.t utils/perlbug.PL
+____________________________________________________________________________
+[ 34535] By: nicholas				   on 2008/10/20  19:06:48
+	Log: Integrate:
+	     [ 34525]
+	     Integrate:
+	     [ 34127]
+	     Also dump the SvPVX of PVFMs.
+     Branch: maint-5.8/perl
+	  !> dump.c
+____________________________________________________________________________
+[ 34524] By: nicholas				   on 2008/10/20  12:38:38
+	Log: Integrate:
+	     [ 34515]
+	     Integrate:
+	     [ 34507]
+	     Fix memory leak in // caused by single-char character class
+	     optimization. This was most probably introduced with #28262.
+	     This change fixes perl #59516.
+     Branch: maint-5.8/perl
+	  !> regcomp.c
+____________________________________________________________________________
+[ 34520] By: nicholas				   on 2008/10/19  12:05:37
+	Log: Integrate:
+	     [ 34517]
+	     Integrate:
+	     [ 34510]
+	     Update Porting/makemeta to generate a META.yml compliant with the 1.4
+	     spec. (Add a generated_by, and rename private to no_index.)
+     Branch: maint-5.8/perl
+	  !> META.yml Porting/makemeta
+____________________________________________________________________________
+[ 34518] By: nicholas				   on 2008/10/19  11:58:17
+	Log: Re-run Porting/makemeta
+     Branch: maint-5.8/perl
+	   ! META.yml
+____________________________________________________________________________
+[ 34512] By: nicholas				   on 2008/10/18  20:50:54
+	Log: Correct typo in the description of change 23524.
+     Branch: maint-5.8/perl
+	   ! Changes5.8.6
+____________________________________________________________________________
+[ 34511] By: nicholas				   on 2008/10/18  19:08:20
+	Log: Integrate:
+	     [ 34499]
+	     Integrate:
+	     [ 34481]
+	     From: YAMASHINA Hio <hio@hio.jp>
+	     Subject: Storable.thaw segv on blessed reference to overloaded object
+	     Date: Wed, 15 Oct 2008 17:34:35 +0900
+	     Message-Id: <20081015173435.dd95b362.hio@hio.jp>
+     Branch: maint-5.8/perl
+	  !> ext/Storable/Storable.xs ext/Storable/t/overload.t
+____________________________________________________________________________
+[ 34503] By: nicholas				   on 2008/10/18  13:19:20
+	Log: Get things *building* again with 5005 threads.
+     Branch: maint-5.8/perl
+	   ! perl.h
+____________________________________________________________________________
+[ 34502] By: nicholas				   on 2008/10/17  19:09:06
+	Log: Perl_save_padsv() can move to mathoms.c for 5.8.9, as there were no
+	     mathoms in 5.8.8.
+     Branch: maint-5.8/perl
+	   ! mathoms.c scope.c
+____________________________________________________________________________
+[ 34501] By: nicholas				   on 2008/10/17  16:58:16
+	Log: Integrate:
+	     [ 34492]
+	     Integrate:
+	     [ 33074]
+	     In POPLOOP, if CxITERVAR(cx) is non-NULL, then so is itersave, and
+	     itersave is a less complex expression for the C compiler.
+	     
+	     [ 33075]
+	     Restore the else block accidently eaten by change 33074.
+	     
+	     [ 34493]
+	     Integrate:
+	     [ 33076]
+	     As itersave points to the initial CxITERVAR(), and the state of
+	     SvPADMY() does not change over the duration of the scope, we can
+	     perform conditional actions at loop push time. For the non-pad case,
+	     a reference to the initial CxITERVAR() is already held on the scope
+	     stack thanks to SAVEGENERICSV(*svp); in pp_enteriter. So there is no
+	     need to save another reference to it in itersave - it's not going away.
+	     
+	     [ 34495]
+	     Integrate:
+	     [ 33080]
+	     Investigation reveals that the work of restoring the iterator to the
+	     pad is shared between POPLOOP, using itersave, and the end of scope
+	     restore action requested by Perl_save_padsv(). In fact, the only user
+	     of SAVEt_PADSV is pp_enteriter, and it already provides enough
+	     information to allow it to perform the sv_2mortal() in POPLOOP.
+	     So make it do so. Rather than creating a new routine, use the existing
+	     routine because nothing else (at least nothing else known to Google's
+	     codesearch) uses it. But rename it just in case something we can't see
+	     is being naughty and using our private functions - they will get
+	     link errors against 5.12.
+	     
+	     All this means that itersave is now redundant. So remove it.
+	     This makes struct context 48 bytes on ILP32 platforms with 32bit IVs,
+	     down from 64 bytes in 5.10. 33% more context stack in the same memory.
+	     
+	     [ 33083]
+	     Subject: [PATCH] util.c: some consting
+	     From: Steven Schubiger <schubiger@gmail.com>
+	     Date: Fri, 25 Jan 2008 01:10:52 +0100
+	     Message-ID: <20080125001052.GA29980@refcnt.homeunix.org>
+	     
+	     [ 34171]
+	     Subject: [PATCH] Tests for [perl #57564] and [perl #24524] Refcounting bug
+	     From: Bram <p5p@perl.wizbit.be>
+	     Date: Tue, 05 Aug 2008 19:58:00 +0200
+	     Message-ID: <20080805195800.xq9k9kttwk0kwsk0@horde.wizbit.be>
+	     
+	     
+	     [Modified for maint by
+	     1: Keeping the old Perl_save_padsv()
+	     2: Keeping its save type
+	     3: Not removing itersave from struct block_loop
+	     
+	     The seemingly unrelated change 33083 happened to have the update to
+	     global.sym that I'd missed committing in 33080]
+	     
+	     [ 34496]
+	     Integrate:
+	     [ 34494]
+	     Clarify which save types are in mathoms, which aren't used, and which
+	     still are in use.
+	     
+	     [ 34497]
+	     Fix an (apparent) logic bug for SAVEt_PADSV - whatever happens, the
+	     POPs must balance the PUSHes.
+     Branch: maint-5.8/perl
+	  !> cop.h embed.fnc embed.h global.sym pp_ctl.c proto.h scope.c
+	  !> scope.h sv.c t/op/ref.t
+____________________________________________________________________________
+[ 34489] By: nicholas				   on 2008/10/15  14:37:39
+	Log: Integrate:
+	     [ 34480]
+	     Integrate:
+	     [ 34479]
+	     Yet another [ACGHS]V pointer in the interpreter structure that needs to
+	     be reset if its SV is freed. (see change 22688 (30952)).
+	     A real live bug found by Slaven and Andreas whilst smoking maint-5.8.x.
+	     I guess that we should audit the interpreter structure for any others.
+     Branch: maint-5.8/perl
+	  !> sv.c
+____________________________________________________________________________
+[ 34487] By: nicholas				   on 2008/10/15  14:16:51
+	Log: Fix description of change 28226 inside integration 30115.
+     Branch: maint-5.8/perl
+	   ! Changes
+____________________________________________________________________________
+[ 34478] By: nicholas				   on 2008/10/14  12:17:11
+	Log: Integrate:
+	     [ 34477]
+	     Integrate:
+	     [ 34053]
+	     Fix off-by-one error in sanity check in my_fclose wrapper on VMS.
+     Branch: maint-5.8/perl
+	  !> vms/vms.c
+____________________________________________________________________________
+[ 34476] By: nicholas				   on 2008/10/13  20:46:49
+	Log: Revert the part of 29807 that added an #ifdef PERL_CORE around the
+	     definition of NEWSV(). Modules shouldn't be defining PERL_CORE, but
+	     spare the end users the pain caused by naughty authors.
+     Branch: maint-5.8/perl
+	   ! handy.h
+____________________________________________________________________________
+[ 34468] By: nicholas				   on 2008/10/06  17:11:07
+	Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 34467] By: nicholas				   on 2008/10/06  16:31:35
 	Log: Subject: [PATCH] Invalid read in regdupe in maint-5.8
 	     From: Vincent Pit <perl@profvince.com>
