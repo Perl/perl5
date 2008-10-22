@@ -1678,6 +1678,13 @@ s	|const char *|vdie_croak_common|NULLOK const char *pat|NULLOK va_list *args \
 s	|bool	|vdie_common	|NULLOK const char *message|STRLEN msglen\
 				|I32 utf8|bool warn
 sr	|char *	|write_no_mem
+#if defined(PERL_MEM_LOG) && defined(PERL_MEM_LOG_STDERR)
+sn	|void	|mem_log_common	|enum mem_log_type mlt|const UV n|const UV typesize \
+				|NN const char *typename \
+				|Malloc_t oldalloc|Malloc_t newalloc \
+				|NN const char *filename|const int linenumber \
+				|NN const char *funcname
+#endif
 #endif
 
 #if defined(PERL_IN_NUMERIC_C) || defined(PERL_DECL_PROT)
