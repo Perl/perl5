@@ -2117,7 +2117,7 @@ C<Linux::Pid>.
 X<getpriority> X<priority> X<nice>
 
 Returns the current priority for a process, a process group, or a user.
-(See L<getpriority(2)>.)  Will raise a fatal exception if used on a
+(See C<getpriority(2)>.)  Will raise a fatal exception if used on a
 machine that doesn't implement getpriority(2).
 
 =item getpwnam NAME
@@ -3274,7 +3274,7 @@ See L<perliol> for detailed info on PerlIO.
 You may also, in the Bourne shell tradition, specify an EXPR beginning
 with C<< '>&' >>, in which case the rest of the string is interpreted
 as the name of a filehandle (or file descriptor, if numeric) to be
-duped (as L<dup(2)>) and opened.  You may use C<&> after C<< > >>,
+duped (as C<dup(2)>) and opened.  You may use C<&> after C<< > >>,
 C<<< >> >>>, C<< < >>, C<< +> >>, C<<< +>> >>>, and C<< +< >>.
 The mode you specify should match the mode of the original filehandle.
 (Duping a filehandle does not take into account any existing contents
@@ -3305,7 +3305,7 @@ C<STDERR> using various methods:
 
 If you specify C<< '<&=X' >>, where C<X> is a file descriptor number
 or a filehandle, then Perl will do an equivalent of C's C<fdopen> of
-that file descriptor (and not call L<dup(2)>); this is more
+that file descriptor (and not call C<dup(2)>); this is more
 parsimonious of file descriptors.  For example:
 
     # open for input, reusing the fileno of $fd
@@ -3418,7 +3418,7 @@ but will not work on a filename which happens to have a trailing space, while
 
 will have exactly the opposite restrictions.
 
-If you want a "real" C C<open> (see L<open(2)> on your system), then you
+If you want a "real" C C<open> (see C<open(2)> on your system), then you
 should use the C<sysopen> function, which involves no such magic (but
 may use subtly different filemodes than Perl open(), which is mapped
 to C fopen()).  This is
@@ -5561,7 +5561,7 @@ X<sprintf>
 
 Returns a string formatted by the usual C<printf> conventions of the C
 library function C<sprintf>.  See below for more details
-and see L<sprintf(3)> or L<printf(3)> on your system for an explanation of
+and see C<sprintf(3)> or C<printf(3)> on your system for an explanation of
 the general principles.
 
 For example:

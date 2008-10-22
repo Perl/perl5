@@ -73,7 +73,7 @@ E.g. CCSID 0037 may be referred to as 37 in places.
 Perl can be compiled on platforms that run any of three commonly used EBCDIC
 character sets, listed below.
 
-=head2 13 variant characters
+=head2 The 13 variant characters
 
 Among IBM EBCDIC character code sets there are 13 characters that
 are often mapped to different integer values.  Those characters
