@@ -4643,6 +4643,20 @@ SKIP: {
 	'IsPunct agrees with [:punct:] with explicit Latin1');
 } 
 
+# [perl #60034]
+{
+    my $a = "xyzt" x 8192;
+    local $TODO = "#60034";
+    ok($a =~ /\A(?>[a-z])*\z/, '(?>) does not cause wrongness on long string');
+    my $b = $a . chr 256;
+    chop $b;
+    undef $TODO;
+    iseq($a, $b);
+    $TODO = "#60034";
+    ok($b =~ /\A(?>[a-z])*\z/,
+       '(?>) does not cause wrongness on long string with UTF-8');
+}
+
 
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
@@ -4705,7 +4719,7 @@ iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 4035;
+    $::TestCount = 4038;
     print "1..$::TestCount\n";
 }
 
