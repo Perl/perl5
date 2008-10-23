@@ -672,7 +672,7 @@ name of the array (without the leading C<@>), then the subscript inside
 square brackets.  For example:
 
     @myarray = (5, 50, 500, 5000);
-    print "Element Number 2 is", $myarray[2], "\n";
+    print "The Third Element is", $myarray[2], "\n";
 
 The array indices start with 0. A negative subscript retrieves its 
 value from the end.  In our example, C<$myarray[-1]> would have been 

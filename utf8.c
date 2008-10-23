@@ -44,7 +44,7 @@ Unicode characters as a variable number of bytes, in such a way that
 characters in the ASCII range are unmodified, and a zero byte never appears
 within non-zero characters.
 
-=for apidoc A|U8 *|uvuni_to_utf8_flags|U8 *d|UV uv|UV flags
+=for apidoc uvuni_to_utf8_flags
 
 Adds the UTF-8 representation of the Unicode codepoint C<uv> to the end
 of the string C<d>; C<d> should be have at least C<UTF8_MAXBYTES+1> free
@@ -233,7 +233,7 @@ S_is_utf8_char_slow(const U8 *s, const STRLEN len)
 }
 
 /*
-=for apidoc A|STRLEN|is_utf8_char|U8 *s
+=for apidoc is_utf8_char
 
 Tests if some arbitrary number of bytes begins in a valid UTF-8
 character.  Note that an INVARIANT (i.e. ASCII) character is a valid
@@ -254,7 +254,7 @@ Perl_is_utf8_char(pTHX_ U8 *s)
 }
 
 /*
-=for apidoc A|bool|is_utf8_string|U8 *s|STRLEN len
+=for apidoc is_utf8_string
 
 Returns true if first C<len> bytes of the given string form a valid
 UTF-8 string, false otherwise.  Note that 'a valid UTF-8 string' does
@@ -310,7 +310,7 @@ Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
 /*
 Implemented as a macro in utf8.h
 
-=for apidoc A|bool|is_utf8_string_loc|const U8 *s|STRLEN len|const U8 **ep
+=for apidoc is_utf8_string_loc
 
 Like is_utf8_string() but stores the location of the failure (in the
 case of "utf8ness failure") or the location s+len (in the case of
@@ -318,7 +318,7 @@ case of "utf8ness failure") or the location s+len (in the case of
 
 See also is_utf8_string_loclen() and is_utf8_string().
 
-=for apidoc A|bool|is_utf8_string_loclen|const U8 *s|STRLEN len|const U8 **ep|const STRLEN *el
+=for apidoc is_utf8_string_loclen
 
 Like is_utf8_string() but stores the location of the failure (in the
 case of "utf8ness failure") or the location s+len (in the case of
@@ -375,7 +375,7 @@ Perl_is_utf8_string_loclen(pTHX_ const U8 *s, STRLEN len, const U8 **ep, STRLEN 
 
 /*
 
-=for apidoc A|UV|utf8n_to_uvuni|U8 *s|STRLEN curlen|STRLEN *retlen|U32 flags
+=for apidoc utf8n_to_uvuni
 
 Bottom level UTF-8 decode routine.
 Returns the Unicode code point value of the first character in the string C<s>
@@ -601,7 +601,7 @@ malformed:
 }
 
 /*
-=for apidoc A|UV|utf8_to_uvchr|U8 *s|STRLEN *retlen
+=for apidoc utf8_to_uvchr
 
 Returns the native character value of the first character in the string C<s>
 which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
@@ -621,7 +621,7 @@ Perl_utf8_to_uvchr(pTHX_ U8 *s, STRLEN *retlen)
 }
 
 /*
-=for apidoc A|UV|utf8_to_uvuni|U8 *s|STRLEN *retlen
+=for apidoc utf8_to_uvuni
 
 Returns the Unicode code point of the first character in the string C<s>
 which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
@@ -645,7 +645,7 @@ Perl_utf8_to_uvuni(pTHX_ U8 *s, STRLEN *retlen)
 }
 
 /*
-=for apidoc A|STRLEN|utf8_length|U8 *s|U8 *e
+=for apidoc utf8_length
 
 Return the length of the UTF-8 char encoded string C<s> in characters.
 Stops at C<e> (inclusive).  If C<e E<lt> s> or if the scan would end
@@ -687,7 +687,7 @@ Perl_utf8_length(pTHX_ U8 *s, U8 *e)
 }
 
 /*
-=for apidoc A|IV|utf8_distance|U8 *a|U8 *b
+=for apidoc utf8_distance
 
 Returns the number of UTF-8 characters between the UTF-8 pointers C<a>
 and C<b>.
@@ -705,7 +705,7 @@ Perl_utf8_distance(pTHX_ U8 *a, U8 *b)
 }
 
 /*
-=for apidoc A|U8 *|utf8_hop|U8 *s|I32 off
+=for apidoc utf8_hop
 
 Return the UTF-8 pointer C<s> displaced by C<off> characters, either
 forward or backward.
@@ -740,7 +740,7 @@ Perl_utf8_hop(pTHX_ U8 *s, I32 off)
 }
 
 /*
-=for apidoc A|U8 *|utf8_to_bytes|U8 *s|STRLEN *len
+=for apidoc utf8_to_bytes
 
 Converts a string C<s> of length C<len> from UTF-8 into byte encoding.
 Unlike C<bytes_to_utf8>, this over-writes the original string, and
@@ -783,7 +783,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
 }
 
 /*
-=for apidoc A|U8 *|bytes_from_utf8|const U8 *s|STRLEN *len|bool *is_utf8
+=for apidoc bytes_from_utf8
 
 Converts a string C<s> of length C<len> from UTF-8 into byte encoding.
 Unlike C<utf8_to_bytes> but like C<bytes_to_utf8>, returns a pointer to
@@ -839,7 +839,7 @@ Perl_bytes_from_utf8(pTHX_ U8 *s, STRLEN *len, bool *is_utf8)
 }
 
 /*
-=for apidoc A|U8 *|bytes_to_utf8|U8 *s|STRLEN *len
+=for apidoc bytes_to_utf8
 
 Converts a string C<s> of length C<len> from ASCII into UTF-8 encoding.
 Returns a pointer to the newly-created string, and sets C<len> to
@@ -1330,7 +1330,7 @@ Perl_is_utf8_mark(pTHX_ U8 *p)
 }
 
 /*
-=for apidoc A|UV|to_utf8_case|U8 *p|U8* ustrp|STRLEN *lenp|SV **swash|char *normal|char *special
+=for apidoc to_utf8_case
 
 The "p" contains the pointer to the UTF-8 string encoding
 the character that is being converted.
@@ -1441,7 +1441,7 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 }
 
 /*
-=for apidoc A|UV|to_utf8_upper|U8 *p|U8 *ustrp|STRLEN *lenp
+=for apidoc to_utf8_upper
 
 Convert the UTF-8 encoded character at p to its uppercase version and
 store that in UTF-8 in ustrp and its length in bytes in lenp.  Note
@@ -1461,7 +1461,7 @@ Perl_to_utf8_upper(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
 }
 
 /*
-=for apidoc A|UV|to_utf8_title|U8 *p|U8 *ustrp|STRLEN *lenp
+=for apidoc to_utf8_title
 
 Convert the UTF-8 encoded character at p to its titlecase version and
 store that in UTF-8 in ustrp and its length in bytes in lenp.  Note
@@ -1481,7 +1481,7 @@ Perl_to_utf8_title(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
 }
 
 /*
-=for apidoc A|UV|to_utf8_lower|U8 *p|U8 *ustrp|STRLEN *lenp
+=for apidoc to_utf8_lower
 
 Convert the UTF-8 encoded character at p to its lowercase version and
 store that in UTF-8 in ustrp and its length in bytes in lenp.  Note
@@ -1501,7 +1501,7 @@ Perl_to_utf8_lower(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
 }
 
 /*
-=for apidoc A|UV|to_utf8_fold|U8 *p|U8 *ustrp|STRLEN *lenp
+=for apidoc to_utf8_fold
 
 Convert the UTF-8 encoded character at p to its foldcase version and
 store that in UTF-8 in ustrp and its length in bytes in lenp.  Note
@@ -2041,7 +2041,7 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 }
 
 /*
-=for apidoc A|U8 *|uvchr_to_utf8|U8 *d|UV uv
+=for apidoc uvchr_to_utf8
 
 Adds the UTF-8 representation of the Native codepoint C<uv> to the end
 of the string C<d>; C<d> should be have at least C<UTF8_MAXBYTES+1> free
@@ -2073,7 +2073,7 @@ Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 }
 
 /*
-=for apidoc A|UV|utf8n_to_uvchr|U8 *s|STRLEN curlen|STRLEN *retlen|U32 
+=for apidoc utf8n_to_uvchr
 flags
 
 Returns the native character value of the first character in the string 
@@ -2096,7 +2096,7 @@ Perl_utf8n_to_uvchr(pTHX_ U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 }
 
 /*
-=for apidoc A|char *|pv_uni_display|SV *dsv|U8 *spv|STRLEN len|STRLEN pvlim|UV flags
+=for apidoc pv_uni_display
 
 Build to the scalar dsv a displayable version of the string spv,
 length len, the displayable version being at most pvlim bytes long
@@ -2172,7 +2172,7 @@ Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
 }
 
 /*
-=for apidoc A|char *|sv_uni_display|SV *dsv|SV *ssv|STRLEN pvlim|UV flags
+=for apidoc sv_uni_display
 
 Build to the scalar dsv a displayable version of the scalar sv,
 the displayable version being at most pvlim bytes long
@@ -2192,7 +2192,7 @@ Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
 }
 
 /*
-=for apidoc A|I32|ibcmp_utf8|const char *s1|char **pe1|register UV l1|bool u1|const char *s2|char **pe2|register UV l2|bool u2
+=for apidoc ibcmp_utf8
 
 Return true if the strings s1 and s2 differ case-insensitively, false
 if not (if they are equal case-insensitively).  If u1 is true, the
