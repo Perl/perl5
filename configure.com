@@ -553,6 +553,13 @@ $         basename = -
 $         found = F$SEARCH(dirname + basename)
 $         file_2_find = file_2_find + "," + basename
 $       ENDIF
+$       tildeloc = f$locate("~",basename)
+$       IF (found .EQS. "" .AND. tildeloc .LT. f$length(basename))
+$       THEN
+$         basename[tildeloc,1] := "_"
+$         found = F$SEARCH(dirname + basename)
+$         file_2_find = file_2_find + "," + basename
+$       ENDIF
 $       IF (found .EQS. "")
 $       THEN
 $         WRITE MISSING file_2_find
