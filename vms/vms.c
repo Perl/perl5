@@ -122,7 +122,6 @@ struct item_list_3 {
  */
 #ifdef sys$getdviw
 #undef sys$getdviw
-#endif
 int sys$getdviw
        (unsigned long efn,
 	unsigned short chan,
@@ -132,6 +131,7 @@ int sys$getdviw
 	void * (astadr)(unsigned long),
 	void * astprm,
 	void * nullarg);
+#endif
 
 #if __CRTL_VER >= 70300000 && !defined(__VAX)
 
