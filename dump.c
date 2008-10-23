@@ -161,9 +161,7 @@ Perl_dump_eval(pTHX)
 
 
 /*
-=for apidoc Apd|char*|pv_escape|NN SV *dsv|NN const char const *str\
-               |const STRLEN count|const STRLEN max
-               |STRLEN const *escaped, const U32 flags
+=for apidoc pv_escape
 
 Escapes at most the first "count" chars of pv and puts the results into
 dsv such that the size of the escaped string will not exceed "max" chars
@@ -298,10 +296,7 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
     return SvPVX(dsv);
 }
 /*
-=for apidoc Apd|char *|pv_pretty|NN SV *dsv|NN const char const *str\
-           |const STRLEN count|const STRLEN max\
-           |const char const *start_color| const char const *end_color\
-           |const U32 flags
+=for apidoc pv_pretty
 
 Converts a string into something presentable, handling escaping via
 pv_escape() and supporting quoting and ellipses.
