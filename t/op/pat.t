@@ -3845,6 +3845,17 @@ SKIP: {
 	'IsPunct agrees with [:punct:] with explicit Latin1');
 } 
 
+# [perl #60034]
+{
+    my $a = "xyzt" x 8192;
+    ok($a =~ /\A(?>[a-z])*\z/, '(?>) does not cause wrongness on long string');
+    my $b = $a . chr 256;
+    chop $b;
+    iseq($a, $b);
+    ok($b =~ /\A(?>[a-z])*\z/,
+       '(?>) does not cause wrongness on long string with UTF-8');
+}
+
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
 # Keep the following tests last -- they may crash perl
@@ -3860,4 +3871,4 @@ SKIP: {
 
 # Put new tests above the dotted line about a page above this comment
 
-BEGIN{print "1..1273\n"};
+BEGIN{print "1..1276\n"};

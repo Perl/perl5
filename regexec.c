@@ -3192,7 +3192,8 @@ S_regmatch(pTHX_ regnode *prog)
 	    PL_reginput = locinput;
 	    maxwanted = minmod ? ln : n;
 	    if (maxwanted) {
-		while (PL_reginput < PL_regeol && matches < maxwanted) {
+		while (PL_reginput < PL_regeol && (maxwanted == REG_INFTY
+						   || matches < maxwanted)) {
 		    if (!regmatch(scan))
 			break;
 		    /* on first match, determine length, l */
