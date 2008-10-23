@@ -13617,7 +13617,7 @@ static int set_features
     }
 #endif
 
-#if defined(JPI$_CASE_LOOKUP_PERM) && !defined(__VAX)
+#if defined(JPI$_CASE_LOOKUP_PERM) && defined(PPROP$K_CASE_BLIND) && !defined(__VAX)
 
      /* Report true case tolerance */
     /*----------------------------*/
