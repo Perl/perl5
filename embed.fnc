@@ -1680,7 +1680,7 @@ s	|bool	|vdie_common	|NULLOK const char *message|STRLEN msglen\
 sr	|char *	|write_no_mem
 #if defined(PERL_MEM_LOG) && defined(PERL_MEM_LOG_STDERR)
 sn	|void	|mem_log_common	|enum mem_log_type mlt|const UV n|const UV typesize \
-				|NN const char *typename|NULLOK const SV *sv \
+				|NN const char *type_name|NULLOK const SV *sv \
 				|Malloc_t oldalloc|Malloc_t newalloc \
 				|NN const char *filename|const int linenumber \
 				|NN const char *funcname

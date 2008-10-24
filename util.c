@@ -5557,7 +5557,7 @@ Perl_free_global_struct(pTHX_ struct perl_vars *plvarsp)
 # endif
 
 static void
-S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesize, const char *typename, const SV *sv, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)
+S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesize, const char *type_name, const SV *sv, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)
 {
 # if defined(PERL_MEM_LOG_ENV) || defined(PERL_MEM_LOG_ENV_FD)
     const char *s;
@@ -5613,14 +5613,14 @@ S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesize, const cha
 			"alloc: %s:%d:%s: %"IVdf" %"UVuf
 			" %s = %"IVdf": %"UVxf"\n",
 			filename, linenumber, funcname, n, typesize,
-			typename, n * typesize, PTR2UV(newalloc));
+			type_name, n * typesize, PTR2UV(newalloc));
 		break;
 	    case MLT_REALLOC:
 		len = my_snprintf(buf, sizeof(buf),
 			"realloc: %s:%d:%s: %"IVdf" %"UVuf
 			" %s = %"IVdf": %"UVxf" -> %"UVxf"\n",
 			filename, linenumber, funcname, n, typesize,
-			typename, n * typesize, PTR2UV(oldalloc),
+			type_name, n * typesize, PTR2UV(oldalloc),
 			PTR2UV(newalloc));
 		break;
 	    case MLT_FREE:
@@ -5645,19 +5645,19 @@ S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesize, const cha
 #endif
 
 Malloc_t
-Perl_mem_log_alloc(const UV n, const UV typesize, const char *typename, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)
+Perl_mem_log_alloc(const UV n, const UV typesize, const char *type_name, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)
 {
 #ifdef PERL_MEM_LOG_STDERR
-    mem_log_common(MLT_ALLOC, n, typesize, typename, NULL, NULL, newalloc, filename, linenumber, funcname);
+    mem_log_common(MLT_ALLOC, n, typesize, type_name, NULL, NULL, newalloc, filename, linenumber, funcname);
 #endif
     return newalloc;
 }
 
 Malloc_t
-Perl_mem_log_realloc(const UV n, const UV typesize, const char *typename, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)
+Perl_mem_log_realloc(const UV n, const UV typesize, const char *type_name, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)
 {
 #ifdef PERL_MEM_LOG_STDERR
-    mem_log_common(MLT_REALLOC, n, typesize, typename, NULL, oldalloc, newalloc, filename, linenumber, funcname);
+    mem_log_common(MLT_REALLOC, n, typesize, type_name, NULL, oldalloc, newalloc, filename, linenumber, funcname);
 #endif
     return newalloc;
 }
