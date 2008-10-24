@@ -636,6 +636,8 @@ END_EXTERN_C
 #define PL_sv_objcount		(*Perl_Isv_objcount_ptr(aTHX))
 #undef  PL_sv_root
 #define PL_sv_root		(*Perl_Isv_root_ptr(aTHX))
+#undef  PL_sv_serial
+#define PL_sv_serial		(*Perl_Isv_serial_ptr(aTHX))
 #undef  PL_sv_undef
 #define PL_sv_undef		(*Perl_Isv_undef_ptr(aTHX))
 #undef  PL_sv_yes
