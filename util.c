@@ -5562,6 +5562,9 @@ S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesize, const cha
 # if defined(PERL_MEM_LOG_ENV) || defined(PERL_MEM_LOG_ENV_FD)
     const char *s;
 # endif
+
+    PERL_ARGS_ASSERT_MEM_LOG_COMMON;
+
 # ifdef PERL_MEM_LOG_ENV
     s = PerlEnv_getenv(mlt < MLT_NEW_SV ? "PERL_MEM_LOG" : "PERL_SV_LOG");
     if (s ? atoi(s) : 0)
