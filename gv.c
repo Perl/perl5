@@ -386,7 +386,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     av = (gvp && (gv = *gvp) && isGV_with_GP(gv)) ? GvAV(gv) : NULL;
 
     /* create and re-create @.*::SUPER::ISA on demand */
-    if (!av || !SvMAGIC(av)) {
+    {
 	STRLEN packlen = strlen(hvname);
 
 	if (packlen >= 7 && strEQ(hvname + packlen - 7, "::SUPER")) {
