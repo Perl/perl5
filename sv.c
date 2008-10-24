@@ -195,6 +195,7 @@ Perl_offer_nice_chunk(pTHX_ void *const chunk, const U32 chunk_size)
 
 #ifdef PERL_POISON
 #  define SvARENA_CHAIN(sv)	((sv)->sv_u.svu_rv)
+#  define SvARENA_CHAIN_SET(sv,val)	(sv)->sv_u.svu_rv = (SV *)(val)
 /* Whilst I'd love to do this, it seems that things like to check on
    unreferenced scalars
 #  define POSION_SV_HEAD(sv)	PoisonNew(sv, 1, struct STRUCT_SV)
@@ -203,6 +204,7 @@ Perl_offer_nice_chunk(pTHX_ void *const chunk, const U32 chunk_size)
 				PoisonNew(&SvREFCNT(sv), 1, U32)
 #else
 #  define SvARENA_CHAIN(sv)	SvANY(sv)
+#  define SvARENA_CHAIN_SET(sv,val)	SvANY(sv) = (void *)(val)
 #  define POSION_SV_HEAD(sv)
 #endif
 
@@ -222,7 +224,7 @@ Perl_offer_nice_chunk(pTHX_ void *const chunk, const U32 chunk_size)
 	POSION_SV_HEAD(p);				\
 	SvFLAGS(p) = SVTYPEMASK;			\
 	if (!(old_flags & SVf_BREAK)) {		\
-	    SvARENA_CHAIN(p) = (void *)PL_sv_root;	\
+	    SvARENA_CHAIN_SET(p, PL_sv_root);	\
 	    PL_sv_root = (p);				\
 	}						\
 	--PL_sv_count;					\
@@ -390,7 +392,7 @@ Perl_sv_add_arena(pTHX_ char *const ptr, const U32 size, const U32 flags)
     svend = &sva[SvREFCNT(sva) - 1];
     sv = sva + 1;
     while (sv < svend) {
-	SvARENA_CHAIN(sv) = (void *)(SV*)(sv + 1);
+	SvARENA_CHAIN_SET(sv, (sv + 1));
 #ifdef DEBUGGING
 	SvREFCNT(sv) = 0;
 #endif
@@ -399,7 +401,7 @@ Perl_sv_add_arena(pTHX_ char *const ptr, const U32 size, const U32 flags)
 	SvFLAGS(sv) = SVTYPEMASK;
 	sv++;
     }
-    SvARENA_CHAIN(sv) = 0;
+    SvARENA_CHAIN_SET(sv, 0);
 #ifdef DEBUGGING
     SvREFCNT(sv) = 0;
 #endif
