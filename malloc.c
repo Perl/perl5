@@ -970,7 +970,7 @@ static const char bucket_of[] =
 
 static void	morecore	(register int bucket);
 #  if defined(DEBUGGING)
-static void	botch		(char *diag, char *s, char *file, int line);
+static void	botch		(const char *diag, const char *s, const char *file, int line);
 #  endif
 static void	add_to_chain	(void *p, MEM_SIZE size, MEM_SIZE chip);
 static void*	get_from_chain	(MEM_SIZE size);
@@ -1281,7 +1281,7 @@ emergency_sbrk(MEM_SIZE size)
 #endif	/* defined PERL_EMERGENCY_SBRK */
 
 static void
-write2(char *mess)
+write2(const char *mess)
 {
   write(2, mess, strlen(mess));
 }
@@ -1291,13 +1291,13 @@ write2(char *mess)
 #define	ASSERT(p,diag)   if (!(p)) botch(diag,STRINGIFY(p),__FILE__,__LINE__);
 
 static void
-botch(char *diag, char *s, char *file, int line)
+botch(const char *diag, const char *s, const char *file, int line)
 {
     dVAR;
+    dTHX;
     if (!(PERL_MAYBE_ALIVE && PERL_GET_THX))
 	goto do_write;
     else {
-	dTHX;
 	if (PerlIO_printf(PerlIO_stderr(),
 			  "assertion botched (%s?): %s %s:%d\n",
 			  diag, s, file, line) != 0) {
