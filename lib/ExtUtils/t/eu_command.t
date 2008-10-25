@@ -22,10 +22,8 @@ BEGIN {
     File::Path::rmtree( 'ecmddir' );
 }
 
-BEGIN {
-    use Test::More tests => 41;
-    use File::Spec;
-}
+use Test::More tests => 40;
+use File::Spec;
 
 BEGIN {
     # bad neighbor, but test_f() uses exit()
@@ -56,9 +54,6 @@ BEGIN {
     # the truth value here is reversed -- Perl true is shell false
     @ARGV = ( $Testfile );
     is( test_f(), 1, 'testing non-existent file' );
-
-    @ARGV = ( $Testfile );
-    is( ! test_f(), '', 'testing non-existent file' );
 
     # these are destructive, have to keep setting @ARGV
     @ARGV = ( $Testfile );
@@ -146,7 +141,7 @@ BEGIN {
     SKIP: {
         if ($^O eq 'amigaos' || $^O eq 'os2' || $^O eq 'MSWin32' ||
             $^O eq 'NetWare' || $^O eq 'dos' || $^O eq 'cygwin'  ||
-            $^O eq 'MacOS' || $^O eq 'vos'
+            $^O eq 'MacOS'
            ) {
             skip( "different file permission semantics on $^O", 5);
         }
