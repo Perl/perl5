@@ -1,7 +1,7 @@
 package SelfLoader;
 use 5.008;
 use strict;
-our $VERSION = "1.16";
+our $VERSION = "1.17";
 
 # The following bit of eval-magic is necessary to make this work on
 # perls < 5.009005.
@@ -99,9 +99,9 @@ sub _load_stubs {
     # Protect: fork() shares the file pointer between the parent and the kid
     if(sysseek($fh, tell($fh), 0)) {
       open my $nfh, '<&', $fh or croak "reopen: $!";# dup() the fd
-      close $fh or die "close: $1";                 # autocloses, but be paranoid
+      close $fh or die "close: $!";                 # autocloses, but be paranoid
       open $fh, '<&', $nfh or croak "reopen2: $!";  # dup() the fd "back"
-      close $nfh or die "close after reopen: $1";   # autocloses, but be paranoid
+      close $nfh or die "close after reopen: $!";   # autocloses, but be paranoid
     }
     $Cache{"${currpack}::<DATA"} = 1;   # indicate package is cached
 
