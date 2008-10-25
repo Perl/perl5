@@ -867,13 +867,17 @@ this won't happen.
 Damian Conway (damian@conway.org). The maintainer of this module is now Rafael
 Garcia-Suarez (rgarciasuarez@gmail.com).
 
+Maintainer of the CPAN release is Steffen Mueller (smueller@cpan.org).
+Contact him with technical difficulties with respect to the packaging of the
+CPAN module.
+
 =head1 BUGS
 
 There are undoubtedly serious bugs lurking somewhere in code this funky :-)
 Bug reports and other feedback are most welcome.
 
-=head1 COPYRIGHT
+=head1 COPYRIGHT AND LICENSE
 
-         Copyright (c) 2001, Damian Conway. All Rights Reserved.
+         Copyright (c) 2001-2008, Damian Conway. All Rights Reserved.
        This module is free software. It may be used, redistributed
            and/or modified under the same terms as Perl itself.
