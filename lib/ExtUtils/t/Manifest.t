@@ -35,8 +35,9 @@ sub add_file {
     1 while unlink $file;  # or else we'll get multiple versions on VMS
     open( T, '> '.$file) or return;
     print T $data;
-    ++$Files{$file};
     close T;
+    return 0 unless -e $file;  # exists under the name we gave it ?
+    ++$Files{$file};
 }
 
 sub read_manifest {
