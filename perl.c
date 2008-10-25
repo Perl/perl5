@@ -644,7 +644,7 @@ perl_destruct(pTHXx)
 	    int f;
 	    const char *where;
 	    /* Our success message is an integer 0, and a char 0  */
-	    static const char success[sizeof(int) + 1];
+	    static const char success[sizeof(int) + 1] = {0};
 
 	    close(fd[0]);
 
