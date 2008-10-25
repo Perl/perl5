@@ -109,3 +109,7 @@ Revision history for Perl extension Attribute::Handlers
 	- Don't AUTOLOAD DESTROY (Jerry D Hedden, cpan bug #1911)
 	- A::H is now able to report caller's file and line number
 	  (David Feldman)
+
+0.80	Fri Oct 24 12:06:00 CEST 2008
+        - CPAN release of the Attribute::Handlers version in bleadperl.
+	

@@ -1,5 +1,5 @@
 ==============================================================================
-                Release of version 0.79 of Attribute::Handlers
+                Release of version 0.80 of Attribute::Handlers
 ==============================================================================
 
 
@@ -44,21 +44,14 @@ AUTHOR
     Damian Conway (damian@conway.org)
 
 COPYRIGHT
-             Copyright (c) 2001-2007, Damian Conway. All Rights Reserved.
+             Copyright (c) 2001-2008, Damian Conway. All Rights Reserved.
            This module is free software. It may be used, redistributed
                and/or modified under the same terms as Perl itself.
 
 
-==============================================================================
+CHANGES
 
-0.79
-
-	- The version released with Perl 5.10.0
-	- All interpreted attributes are now passed as array references,
-	  eventually nested.
-	- Don't AUTOLOAD DESTROY (Jerry D Hedden, cpan bug #1911)
-	- A::H is now able to report caller's file and line number
-	  (David Feldman)
+See the included "Changes" file for a change log.
 
 ==============================================================================
 
