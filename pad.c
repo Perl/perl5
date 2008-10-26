@@ -317,7 +317,7 @@ Perl_pad_undef(pTHX_ CV* cv)
 
     ix = AvFILLp(padlist);
     while (ix >= 0) {
-	const SV* const sv = AvARRAY(padlist)[ix--];
+	SV* const sv = AvARRAY(padlist)[ix--];
 	if (sv) {
 	    if (sv == (SV*)PL_comppad_name)
 		PL_comppad_name = NULL;
