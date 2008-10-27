@@ -347,9 +347,9 @@ struct block_format {
 
 #define POPSUB(cx,sv)							\
     STMT_START {							\
-	RETURN_PROBE(GvENAME(CvGV((CV*)cx->blk_sub.cv)),		\
-		CopFILE((COP*)CvSTART((CV*)cx->blk_sub.cv)),		\
-		CopLINE((COP*)CvSTART((CV*)cx->blk_sub.cv)));		\
+	RETURN_PROBE(GvENAME(CvGV((const CV*)cx->blk_sub.cv)),		\
+		CopFILE((COP*)CvSTART((const CV*)cx->blk_sub.cv)),	\
+		CopLINE((COP*)CvSTART((const CV*)cx->blk_sub.cv)));	\
 									\
 	if (CxHASARGS(cx)) {						\
 	    POP_SAVEARRAY();						\
@@ -367,7 +367,7 @@ struct block_format {
 	    }								\
 	}								\
 	sv = MUTABLE_SV(cx->blk_sub.cv);				\
-	if (sv && (CvDEPTH((CV*)sv) = cx->blk_sub.olddepth))		\
+	if (sv && (CvDEPTH((const CV*)sv) = cx->blk_sub.olddepth))	\
 	    sv = NULL;						\
     } STMT_END
 
