@@ -225,7 +225,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define SvREFCNT_inc(sv)		\
     ({					\
-	SV * const _sv = (SV*)(sv);	\
+	SV * const _sv = MUTABLE_SV(sv);	\
 	if (_sv)			\
 	     (SvREFCNT(_sv))++;		\
 	_sv;				\
@@ -234,41 +234,41 @@ perform the upgrade if necessary.  See C<svtype>.
     ({					\
 	if (sv)				\
 	     (SvREFCNT(sv))++;		\
-	(SV *)(sv);				\
+	MUTABLE_SV(sv);				\
     })
 #  define SvREFCNT_inc_NN(sv)		\
     ({					\
-	SV * const _sv = (SV*)(sv);	\
+	SV * const _sv = MUTABLE_SV(sv);	\
 	SvREFCNT(_sv)++;		\
 	_sv;				\
     })
 #  define SvREFCNT_inc_void(sv)		\
     ({					\
-	SV * const _sv = (SV*)(sv);	\
+	SV * const _sv = MUTABLE_SV(sv);	\
 	if (_sv)			\
 	    (void)(SvREFCNT(_sv)++);	\
     })
 #else
 #  define SvREFCNT_inc(sv)	\
-	((PL_Sv=(SV*)(sv)) ? (++(SvREFCNT(PL_Sv)),PL_Sv) : NULL)
+	((PL_Sv=MUTABLE_SV(sv)) ? (++(SvREFCNT(PL_Sv)),PL_Sv) : NULL)
 #  define SvREFCNT_inc_simple(sv) \
-	((sv) ? (SvREFCNT(sv)++,(SV*)(sv)) : NULL)
+	((sv) ? (SvREFCNT(sv)++,MUTABLE_SV(sv)) : NULL)
 #  define SvREFCNT_inc_NN(sv) \
-	(PL_Sv=(SV*)(sv),++(SvREFCNT(PL_Sv)),PL_Sv)
+	(PL_Sv=MUTABLE_SV(sv),++(SvREFCNT(PL_Sv)),PL_Sv)
 #  define SvREFCNT_inc_void(sv) \
-	(void)((PL_Sv=(SV*)(sv)) ? ++(SvREFCNT(PL_Sv)) : 0)
+	(void)((PL_Sv=MUTABLE_SV(sv)) ? ++(SvREFCNT(PL_Sv)) : 0)
 #endif
 
 /* These guys don't need the curly blocks */
 #define SvREFCNT_inc_simple_void(sv)	STMT_START { if (sv) SvREFCNT(sv)++; } STMT_END
-#define SvREFCNT_inc_simple_NN(sv)	(++(SvREFCNT(sv)),(SV*)(sv))
-#define SvREFCNT_inc_void_NN(sv)	(void)(++SvREFCNT((SV*)(sv)))
-#define SvREFCNT_inc_simple_void_NN(sv)	(void)(++SvREFCNT((SV*)(sv)))
+#define SvREFCNT_inc_simple_NN(sv)	(++(SvREFCNT(sv)),MUTABLE_SV(sv))
+#define SvREFCNT_inc_void_NN(sv)	(void)(++SvREFCNT(MUTABLE_SV(sv)))
+#define SvREFCNT_inc_simple_void_NN(sv)	(void)(++SvREFCNT(MUTABLE_SV(sv)))
 
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define SvREFCNT_dec(sv)		\
     ({					\
-	SV * const _sv = (SV*)(sv);	\
+	SV * const _sv = MUTABLE_SV(sv);	\
 	if (_sv) {			\
 	    if (SvREFCNT(_sv)) {	\
 		if (--(SvREFCNT(_sv)) == 0) \
@@ -279,7 +279,7 @@ perform the upgrade if necessary.  See C<svtype>.
 	}				\
     })
 #else
-#define SvREFCNT_dec(sv)	sv_free((SV*)(sv))
+#define SvREFCNT_dec(sv)	sv_free(MUTABLE_SV(sv))
 #endif
 
 #define SVTYPEMASK	0xff
@@ -965,21 +965,21 @@ the scalar's value cannot change unless written to.
 #define SvEVALED_off(sv)	(SvFLAGS(sv) &= ~SVrepl_EVAL)
 
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
-#  define SvVALID(sv)		({ SV *const _svvalid = (SV *) (sv);	\
+#  define SvVALID(sv)		({ SV *const _svvalid = MUTABLE_SV(sv);	\
 				   if (SvFLAGS(_svvalid) & SVpbm_VALID)	\
 				       assert(!isGV_with_GP(_svvalid));	\
 				   (SvFLAGS(_svvalid) & SVpbm_VALID);	\
 				})
-#  define SvVALID_on(sv)	({ SV *const _svvalid = (SV *) (sv);	\
+#  define SvVALID_on(sv)	({ SV *const _svvalid = MUTABLE_SV(sv);	\
 				   assert(!isGV_with_GP(_svvalid));	\
 				   (SvFLAGS(_svvalid) |= SVpbm_VALID);	\
 				})
-#  define SvVALID_off(sv)	({ SV *const _svvalid = (SV *) (sv);	\
+#  define SvVALID_off(sv)	({ SV *const _svvalid = MUTABLE_SV(sv);	\
 				   assert(!isGV_with_GP(_svvalid));	\
 				   (SvFLAGS(_svvalid) &= ~SVpbm_VALID);	\
 				})
 
-#  define SvTAIL(sv)	({ SV *const _svtail = (SV *) (sv);		\
+#  define SvTAIL(sv)	({ SV *const _svtail = MUTABLE_SV(sv);		\
 			    assert(SvTYPE(_svtail) != SVt_PVAV);		\
 			    assert(SvTYPE(_svtail) != SVt_PVHV);		\
 			    (SvFLAGS(sv) & (SVpbm_TAIL|SVpbm_VALID))	\
@@ -1008,17 +1008,17 @@ the scalar's value cannot change unless written to.
 
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define SvPAD_TYPED_on(sv)	({					\
-	    SV *const _svpad = (SV *) (sv);				\
+	    SV *const _svpad = MUTABLE_SV(sv);				\
 	    assert(SvTYPE(_svpad) == SVt_PVMG);				\
 	    (SvFLAGS(_svpad) |= SVpad_NAME|SVpad_TYPED);		\
 	})
 #define SvPAD_OUR_on(sv)	({					\
-	    SV *const _svpad = (SV *) (sv);				\
+	    SV *const _svpad = MUTABLE_SV(sv);				\
 	    assert(SvTYPE(_svpad) == SVt_PVMG);				\
 	    (SvFLAGS(_svpad) |= SVpad_NAME|SVpad_OUR);			\
 	})
 #define SvPAD_STATE_on(sv)	({					\
-	    SV *const _svpad = (SV *) (sv);				\
+	    SV *const _svpad = MUTABLE_SV(sv);				\
 	    assert(SvTYPE(_svpad) == SVt_PVNV || SvTYPE(_svpad) == SVt_PVMG); \
 	    (SvFLAGS(_svpad) |= SVpad_NAME|SVpad_STATE);		\
 	})
@@ -1072,7 +1072,7 @@ the scalar's value cannot change unless written to.
 #  if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 /* These get expanded inside other macros that already use a variable _sv  */
 #    define SvPVX(sv)							\
-	(*({ SV *const _svpvx = (SV *) (sv);				\
+	(*({ const SV *const _svpvx = (const SV *)(sv);			\
 	    assert(SvTYPE(_svpvx) >= SVt_PV);				\
 	    assert(SvTYPE(_svpvx) != SVt_PVAV);				\
 	    assert(SvTYPE(_svpvx) != SVt_PVHV);				\
@@ -1080,35 +1080,35 @@ the scalar's value cannot change unless written to.
 	    &((_svpvx)->sv_u.svu_pv);					\
 	 }))
 #    define SvCUR(sv)							\
-	(*({ SV *const _svcur = (SV *) (sv);				\
+	(*({ const SV *const _svcur = (const SV *)(sv);			\
 	    assert(SvTYPE(_svcur) >= SVt_PV);				\
 	    assert(SvTYPE(_svcur) != SVt_PVAV);				\
 	    assert(SvTYPE(_svcur) != SVt_PVHV);				\
 	    assert(!isGV_with_GP(_svcur));				\
-	    &(((XPV*) SvANY(_svcur))->xpv_cur);				\
+	    &(((XPV*) MUTABLE_PTR(SvANY(_svcur)))->xpv_cur);		\
 	 }))
 #    define SvIVX(sv)							\
-	(*({ SV *const _svivx = (SV *) (sv);				\
+	(*({ const SV *const _svivx = (const SV *)(sv);			\
 	    assert(SvTYPE(_svivx) == SVt_IV || SvTYPE(_svivx) >= SVt_PVIV); \
 	    assert(SvTYPE(_svivx) != SVt_PVAV);				\
 	    assert(SvTYPE(_svivx) != SVt_PVHV);				\
 	    assert(SvTYPE(_svivx) != SVt_PVCV);				\
 	    assert(SvTYPE(_svivx) != SVt_PVFM);				\
 	    assert(!isGV_with_GP(_svivx));				\
-	    &(((XPVIV*) SvANY(_svivx))->xiv_iv);			\
+	    &(((XPVIV*) MUTABLE_PTR(SvANY(_svivx)))->xiv_iv);		\
 	 }))
 #    define SvUVX(sv)							\
-	(*({ SV *const _svuvx = (SV *) (sv);				\
+	(*({ const SV *const _svuvx = (const SV *)(sv);			\
 	    assert(SvTYPE(_svuvx) == SVt_IV || SvTYPE(_svuvx) >= SVt_PVIV); \
 	    assert(SvTYPE(_svuvx) != SVt_PVAV);				\
 	    assert(SvTYPE(_svuvx) != SVt_PVHV);				\
 	    assert(SvTYPE(_svuvx) != SVt_PVCV);				\
 	    assert(SvTYPE(_svuvx) != SVt_PVFM);				\
 	    assert(!isGV_with_GP(_svuvx));				\
-	    &(((XPVUV*) SvANY(_svuvx))->xuv_uv);			\
+	    &(((XPVUV*) MUTABLE_PTR(SvANY(_svuvx)))->xuv_uv);		\
 	 }))
 #    define SvNVX(sv)							\
-	(*({ SV *const _svnvx = (SV *) (sv);				\
+	(*({ const SV *const _svnvx = (const SV *)(sv);			\
 	    assert(SvTYPE(_svnvx) == SVt_NV || SvTYPE(_svnvx) >= SVt_PVNV); \
 	    assert(SvTYPE(_svnvx) != SVt_PVAV);				\
 	    assert(SvTYPE(_svnvx) != SVt_PVHV);				\
@@ -1116,10 +1116,10 @@ the scalar's value cannot change unless written to.
 	    assert(SvTYPE(_svnvx) != SVt_PVFM);				\
 	    assert(SvTYPE(_svnvx) != SVt_PVIO);				\
 	    assert(!isGV_with_GP(_svnvx));				\
-	   &(((XPVNV*) SvANY(_svnvx))->xnv_u.xnv_nv);			\
+	    &(((XPVNV*) MUTABLE_PTR(SvANY(_svnvx)))->xnv_u.xnv_nv);	\
 	 }))
 #    define SvRV(sv)							\
-	(*({ SV *const _svrv = (SV *) (sv);				\
+	(*({ const SV *const _svrv = (const SV *)(sv);			\
 	    assert(SvTYPE(_svrv) >= SVt_PV || SvTYPE(_svrv) == SVt_IV);	\
 	    assert(SvTYPE(_svrv) != SVt_PVAV);				\
 	    assert(SvTYPE(_svrv) != SVt_PVHV);				\
@@ -1129,16 +1129,16 @@ the scalar's value cannot change unless written to.
 	    &((_svrv)->sv_u.svu_rv);					\
 	 }))
 #    define SvMAGIC(sv)							\
-	(*({ SV *const _svmagic = (SV *) (sv);				\
+	(*({ const SV *const _svmagic = (const SV *)(sv);		\
 	    assert(SvTYPE(_svmagic) >= SVt_PVMG);			\
 	    if(SvTYPE(_svmagic) == SVt_PVMG)				\
 		assert(!SvPAD_OUR(_svmagic));				\
-	    &(((XPVMG*) SvANY(_svmagic))->xmg_u.xmg_magic);		\
+	    &(((XPVMG*) MUTABLE_PTR(SvANY(_svmagic)))->xmg_u.xmg_magic); \
 	  }))
 #    define SvSTASH(sv)							\
-	(*({ SV *const _svstash = (SV *) (sv);				\
+	(*({ const SV *const _svstash = (const SV *)(sv);		\
 	    assert(SvTYPE(_svstash) >= SVt_PVMG);			\
-	    &(((XPVMG*) SvANY(_svstash))->xmg_stash);			\
+	    &(((XPVMG*) MUTABLE_PTR(SvANY(_svstash)))->xmg_stash);	\
 	  }))
 #  else
 #    define SvPVX(sv) ((sv)->sv_u.svu_pv)
@@ -1284,26 +1284,26 @@ the scalar's value cannot change unless written to.
 */
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define BmFLAGS(sv)							\
-	(*({ SV *const _bmflags = (SV *) (sv);				\
+	(*({ SV *const _bmflags = MUTABLE_SV(sv);			\
 		assert(SvTYPE(_bmflags) == SVt_PVGV);			\
 		assert(SvVALID(_bmflags));				\
 	    &(((XPVGV*) SvANY(_bmflags))->xnv_u.xbm_s.xbm_flags);	\
 	 }))
 #  define BmRARE(sv)							\
-	(*({ SV *const _bmrare = (SV *) (sv);				\
+	(*({ SV *const _bmrare = MUTABLE_SV(sv);			\
 		assert(SvTYPE(_bmrare) == SVt_PVGV);			\
 		assert(SvVALID(_bmrare));				\
 	    &(((XPVGV*) SvANY(_bmrare))->xnv_u.xbm_s.xbm_rare);		\
 	 }))
 #  define BmUSEFUL(sv)							\
-	(*({ SV *const _bmuseful = (SV *) (sv);				\
+	(*({ SV *const _bmuseful = MUTABLE_SV(sv);			\
 	    assert(SvTYPE(_bmuseful) == SVt_PVGV);			\
 	    assert(SvVALID(_bmuseful));					\
 	    assert(!SvIOK(_bmuseful));					\
 	    &(((XPVGV*) SvANY(_bmuseful))->xiv_u.xivu_i32);		\
 	 }))
 #  define BmPREVIOUS(sv)						\
-    (*({ SV *const _bmprevious = (SV *) (sv);				\
+    (*({ SV *const _bmprevious = MUTABLE_SV(sv);			\
 		assert(SvTYPE(_bmprevious) == SVt_PVGV);		\
 		assert(SvVALID(_bmprevious));				\
 	    &(((XPVGV*) SvANY(_bmprevious))->xnv_u.xbm_s.xbm_previous);	\
@@ -1616,9 +1616,9 @@ Like C<sv_catsv> but doesn't process magic.
 
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 
-#  define SvIVx(sv) ({SV *_sv = (SV*)(sv); SvIV(_sv); })
-#  define SvUVx(sv) ({SV *_sv = (SV*)(sv); SvUV(_sv); })
-#  define SvNVx(sv) ({SV *_sv = (SV*)(sv); SvNV(_sv); })
+#  define SvIVx(sv) ({SV *_sv = MUTABLE_SV(sv); SvIV(_sv); })
+#  define SvUVx(sv) ({SV *_sv = MUTABLE_SV(sv); SvUV(_sv); })
+#  define SvNVx(sv) ({SV *_sv = MUTABLE_SV(sv); SvNV(_sv); })
 #  define SvPVx(sv, lp) ({SV *_sv = (sv); SvPV(_sv, lp); })
 #  define SvPVx_const(sv, lp) ({SV *_sv = (sv); SvPV_const(_sv, lp); })
 #  define SvPVx_nolen(sv) ({SV *_sv = (sv); SvPV_nolen(_sv); })

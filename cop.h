@@ -360,13 +360,13 @@ struct block_format {
 		cx->blk_sub.argarray = newAV();				\
 		av_extend(cx->blk_sub.argarray, fill);			\
 		AvREIFY_only(cx->blk_sub.argarray);			\
-		CX_CURPAD_SV(cx->blk_sub, 0) = (SV*)cx->blk_sub.argarray;	\
+		CX_CURPAD_SV(cx->blk_sub, 0) = MUTABLE_SV(cx->blk_sub.argarray); \
 	    }								\
 	    else {							\
 		CLEAR_ARGARRAY(cx->blk_sub.argarray);			\
 	    }								\
 	}								\
-	sv = (SV*)cx->blk_sub.cv;					\
+	sv = MUTABLE_SV(cx->blk_sub.cv);				\
 	if (sv && (CvDEPTH((CV*)sv) = cx->blk_sub.olddepth))		\
 	    sv = NULL;						\
     } STMT_END

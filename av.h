@@ -88,8 +88,8 @@ Same as C<av_len()>.  Deprecated, use C<av_len()> instead.
 
 #define AvREALISH(av)	(SvFLAGS(av) & (SVpav_REAL|SVpav_REIFY))
                                           
-#define AvFILL(av)	((SvRMAGICAL((SV *) (av))) \
-			  ? mg_size((SV *) av) : AvFILLp(av))
+#define AvFILL(av)	((SvRMAGICAL((const SV *) (av))) \
+			 ? mg_size(MUTABLE_SV(av)) : AvFILLp(av))
 
 #define NEGATIVE_INDICES_VAR "NEGATIVE_INDICES"
 

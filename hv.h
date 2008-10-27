@@ -394,7 +394,7 @@ C<SV*>.
 #define HV_ITERNEXT_WANTPLACEHOLDERS	0x01	/* Don't skip placeholders.  */
 
 #define hv_iternext(hv)	hv_iternext_flags(hv, 0)
-#define hv_magic(hv, gv, how) sv_magic((SV*)(hv), (SV*)(gv), how, NULL, 0)
+#define hv_magic(hv, gv, how) sv_magic(MUTABLE_SV(hv), MUTABLE_SV(gv), how, NULL, 0)
 
 /* available as a function in hv.c */
 #define Perl_sharepvn(sv, len, hash) HEK_KEY(share_hek(sv, len, hash))
@@ -418,8 +418,8 @@ C<SV*>.
     ((HE *) hv_common((hv), (keysv), NULL, 0, 0,			\
 		      ((lval) ? HV_FETCH_LVALUE : 0), NULL, (hash)))
 #define hv_delete_ent(hv, key, flags, hash)				\
-    ((SV *) hv_common((hv), (key), NULL, 0, 0, (flags) | HV_DELETE,	\
-		      NULL, (hash)))
+    (MUTABLE_SV(hv_common((hv), (key), NULL, 0, 0, (flags) | HV_DELETE,	\
+			  NULL, (hash))))
 
 #define hv_store_flags(hv, key, klen, val, hash, flags)			\
     ((SV**) hv_common((hv), NULL, (key), (klen), (flags),		\
@@ -441,8 +441,8 @@ C<SV*>.
 			      : HV_FETCH_JUST_SV, NULL, 0))
 
 #define hv_delete(hv, key, klen, flags)					\
-    ((SV*) hv_common_key_len((hv), (key), (klen),			\
-			     (flags) | HV_DELETE, NULL, 0))
+    (MUTABLE_SV(hv_common_key_len((hv), (key), (klen),			\
+				  (flags) | HV_DELETE, NULL, 0)))
 
 /* This refcounted he structure is used for storing the hints used for lexical
    pragmas. Without threads, it's basically struct he + refcount.
