@@ -151,6 +151,12 @@ char *strcpy(), *strcat();
 #endif
 #endif /* ! STANDARD_C */
 
+#ifdef __cplusplus
+#  define PERL_EXPORT_C extern "C"
+#else
+#  define PERL_EXPORT_C extern
+#endif
+
 #ifdef VMS
 #  include "handy.h"
 #else 
