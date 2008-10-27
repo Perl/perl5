@@ -49,7 +49,7 @@ Null SV pointer. (No longer available when C<PERL_CORE> is defined.)
 #define FALSE (0)
 
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
-#  define MUTABLE_PTR(p) ({ void *_p = (p); (void *) _p; })
+#  define MUTABLE_PTR(p) ({ void *_p = (p); _p; })
 #else
 #  define MUTABLE_PTR(p) ((void *) (p))
 #endif
