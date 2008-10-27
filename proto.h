@@ -192,7 +192,7 @@ PERL_CALLCONV void	Perl_av_fill(pTHX_ AV *av, I32 fill)
 #define PERL_ARGS_ASSERT_AV_FILL	\
 	assert(av)
 
-PERL_CALLCONV I32	Perl_av_len(pTHX_ const AV *av)
+PERL_CALLCONV I32	Perl_av_len(pTHX_ AV *av)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_AV_LEN	\

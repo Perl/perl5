@@ -1895,7 +1895,7 @@ int
 Perl_magic_getarylen(pTHX_ SV *sv, const MAGIC *mg)
 {
     dVAR;
-    const AV * const obj = (AV*)mg->mg_obj;
+    AV * const obj = (AV*)mg->mg_obj;
 
     PERL_ARGS_ASSERT_MAGIC_GETARYLEN;
 

@@ -758,7 +758,7 @@ array is C<av_len(av) + 1>.  Returns -1 if the array is empty.
 */
 
 I32
-Perl_av_len(pTHX_ register const AV *av)
+Perl_av_len(pTHX_ AV *av)
 {
     PERL_ARGS_ASSERT_AV_LEN;
     assert(SvTYPE(av) == SVt_PVAV);
