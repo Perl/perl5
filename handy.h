@@ -46,6 +46,13 @@ Null SV pointer.
 #define TRUE (1)
 #define FALSE (0)
 
+#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#  define MUTABLE_PTR(p) ({ void *_p = (p); (void *) _p; })
+#else
+#  define MUTABLE_PTR(p) ((void *) (p))
+#endif
+
+#define MUTABLE_SV(p)	((SV *)MUTABLE_PTR(p))
 
 /* XXX Configure ought to have a test for a boolean type, if I can
    just figure out all the headers such a test needs.

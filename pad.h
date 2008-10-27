@@ -37,7 +37,7 @@ typedef U64TYPE PADOFFSET;
 
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define COP_SEQ_RANGE_LOW(sv)						\
-	(({ SV *const _sv_cop_seq_range_low = (SV *) (sv);		\
+	(({ const SV *const _sv_cop_seq_range_low = (const SV *) (sv);	\
 	  assert(SvTYPE(_sv_cop_seq_range_low) == SVt_NV		\
 		 || SvTYPE(_sv_cop_seq_range_low) >= SVt_PVNV);		\
 	  assert(SvTYPE(_sv_cop_seq_range_low) != SVt_PVAV);		\
@@ -45,10 +45,10 @@ typedef U64TYPE PADOFFSET;
 	  assert(SvTYPE(_sv_cop_seq_range_low) != SVt_PVCV);		\
 	  assert(SvTYPE(_sv_cop_seq_range_low) != SVt_PVFM);		\
 	  assert(!isGV_with_GP(_sv_cop_seq_range_low));			\
-	  ((XPVNV*) SvANY(_sv_cop_seq_range_low))->xnv_u.xpad_cop_seq.xlow; \
+	  ((XPVNV*) MUTABLE_PTR(SvANY(_sv_cop_seq_range_low)))->xnv_u.xpad_cop_seq.xlow; \
 	 }))
 #  define COP_SEQ_RANGE_HIGH(sv)					\
-	(({ SV *const _sv_cop_seq_range_high = (SV *) (sv);		\
+	(({ const SV *const _sv_cop_seq_range_high = (const SV *) (sv);	\
 	  assert(SvTYPE(_sv_cop_seq_range_high) == SVt_NV 		\
                  || SvTYPE(_sv_cop_seq_range_high) >= SVt_PVNV);	\
 	  assert(SvTYPE(_sv_cop_seq_range_high) != SVt_PVAV);		\
@@ -56,10 +56,10 @@ typedef U64TYPE PADOFFSET;
 	  assert(SvTYPE(_sv_cop_seq_range_high) != SVt_PVCV);		\
 	  assert(SvTYPE(_sv_cop_seq_range_high) != SVt_PVFM);		\
 	  assert(!isGV_with_GP(_sv_cop_seq_range_high));		\
-	  ((XPVNV*) SvANY(_sv_cop_seq_range_high))->xnv_u.xpad_cop_seq.xhigh; \
+	  ((XPVNV*) MUTABLE_PTR(SvANY(_sv_cop_seq_range_high)))->xnv_u.xpad_cop_seq.xhigh; \
 	 }))
 #  define PARENT_PAD_INDEX(sv)						\
-	(({ SV *const _sv_parent_pad_index = (SV *) (sv);		\
+	(({ const SV *const _sv_parent_pad_index = (const SV *) (sv);	\
 	  assert(SvTYPE(_sv_parent_pad_index) == SVt_NV			\
 		 || SvTYPE(_sv_parent_pad_index) >= SVt_PVNV);		\
 	  assert(SvTYPE(_sv_parent_pad_index) != SVt_PVAV);		\
@@ -67,10 +67,10 @@ typedef U64TYPE PADOFFSET;
 	  assert(SvTYPE(_sv_parent_pad_index) != SVt_PVCV);		\
 	  assert(SvTYPE(_sv_parent_pad_index) != SVt_PVFM);		\
 	  assert(!isGV_with_GP(_sv_parent_pad_index));			\
-	  ((XPVNV*) SvANY(_sv_parent_pad_index))->xnv_u.xpad_cop_seq.xlow; \
+	  ((XPVNV*) MUTABLE_PTR(SvANY(_sv_parent_pad_index)))->xnv_u.xpad_cop_seq.xlow; \
 	 }))
 #  define PARENT_FAKELEX_FLAGS(sv)					\
-	(({ SV *const _sv_parent_fakelex_flags = (SV *) (sv);		\
+	(({ const SV *const _sv_parent_fakelex_flags = (const SV *) (sv); \
 	  assert(SvTYPE(_sv_parent_fakelex_flags) == SVt_NV  		\
 		 || SvTYPE(_sv_parent_fakelex_flags) >= SVt_PVNV);	\
 	  assert(SvTYPE(_sv_parent_fakelex_flags) != SVt_PVAV);		\
@@ -78,7 +78,7 @@ typedef U64TYPE PADOFFSET;
 	  assert(SvTYPE(_sv_parent_fakelex_flags) != SVt_PVCV);		\
 	  assert(SvTYPE(_sv_parent_fakelex_flags) != SVt_PVFM);		\
 	  assert(!isGV_with_GP(_sv_parent_fakelex_flags));		\
-	  ((XPVNV*) SvANY(_sv_parent_fakelex_flags))->xnv_u.xpad_cop_seq.xhigh;	\
+	  ((XPVNV*) MUTABLE_PTR(SvANY(_sv_parent_fakelex_flags)))->xnv_u.xpad_cop_seq.xhigh; \
 	 }))
 #else
 #  define COP_SEQ_RANGE_LOW(sv)		\

@@ -48,13 +48,13 @@ struct magic {
 #define MgTAINTEDDIR_off(mg)	(mg->mg_flags &= ~MGf_TAINTEDDIR)
 
 #define MgPV(mg,lp)		((((int)(lp = (mg)->mg_len)) == HEf_SVKEY) ?   \
-				 SvPV((SV*)((mg)->mg_ptr),lp) :		\
+				 SvPV(MUTABLE_SV((mg)->mg_ptr),lp) :	\
 				 (mg)->mg_ptr)
 #define MgPV_const(mg,lp)	((((int)(lp = (mg)->mg_len)) == HEf_SVKEY) ? \
-				 SvPV_const((SV*)((mg)->mg_ptr),lp) :        \
+				 SvPV_const(MUTABLE_SV((mg)->mg_ptr),lp) :   \
 				 (const char*)(mg)->mg_ptr)
-#define MgPV_nolen_const(mg)	(((((int)(mg)->mg_len)) == HEf_SVKEY) ?   \
-				 SvPV_nolen_const((SV*)((mg)->mg_ptr)) :  \
+#define MgPV_nolen_const(mg)	(((((int)(mg)->mg_len)) == HEf_SVKEY) ?	\
+				 SvPV_nolen_const(MUTABLE_SV((mg)->mg_ptr)) : \
 				 (const char*)(mg)->mg_ptr)
 
 #define SvTIED_mg(sv,how) (SvRMAGICAL(sv) ? mg_find((sv),(how)) : NULL)

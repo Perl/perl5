@@ -129,8 +129,8 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 #define SAVEVPTR(s)	save_vptr((void*)&(s))
 #define SAVEPADSV(s)	save_padsv(s)
 #define SAVEPADSVANDMORTALIZE(s)	save_padsv_and_mortalize(s)
-#define SAVEFREESV(s)	save_freesv((SV*)(s))
-#define SAVEMORTALIZESV(s)	save_mortalizesv((SV*)(s))
+#define SAVEFREESV(s)	save_freesv(MUTABLE_SV(s))
+#define SAVEMORTALIZESV(s)	save_mortalizesv(MUTABLE_SV(s))
 #define SAVEFREEOP(o)	save_freeop((OP*)(o))
 #define SAVEFREEPV(p)	save_freepv((char*)(p))
 #define SAVECLEARSV(sv)	save_clearsv((SV**)&(sv))
@@ -175,15 +175,15 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 #define SAVECOMPPAD() \
     STMT_START {						\
 	SSCHECK(2);						\
-	SSPUSHPTR((SV*)PL_comppad);				\
+	SSPUSHPTR(MUTABLE_SV(PL_comppad));			\
 	SSPUSHINT(SAVEt_COMPPAD);				\
     } STMT_END
 
 #define SAVESWITCHSTACK(f,t) \
     STMT_START {					\
 	SSCHECK(3);					\
-	SSPUSHPTR((SV*)(f));				\
-	SSPUSHPTR((SV*)(t));				\
+	SSPUSHPTR(MUTABLE_SV(f));			\
+	SSPUSHPTR(MUTABLE_SV(t));			\
 	SSPUSHINT(SAVEt_SAVESWITCHSTACK);		\
 	SWITCHSTACK((f),(t));				\
 	PL_curstackinfo->si_stack = (t);		\
