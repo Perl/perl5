@@ -171,7 +171,8 @@ use strict;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
-$VERSION = '3.28_01';
+$VERSION = '3.28_03';
+my $xs_version = $VERSION;
 $VERSION = eval $VERSION;
 
 @ISA = qw/ Exporter /;
@@ -205,11 +206,11 @@ if ($^O eq 'os2') {
 eval {
   if ( $] >= 5.006 ) {
     require XSLoader;
-    XSLoader::load( __PACKAGE__, $VERSION );
+    XSLoader::load( __PACKAGE__, $xs_version);
   } else {
     require DynaLoader;
     push @ISA, 'DynaLoader';
-    __PACKAGE__->bootstrap( $VERSION );
+    __PACKAGE__->bootstrap( $xs_version );
   }
 };
 

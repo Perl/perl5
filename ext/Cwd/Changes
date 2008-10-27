@@ -1,5 +1,17 @@
 Revision history for Perl distribution PathTools.
 
+3.28_03 - Mon Oct 27 22:12:11 2008
+
+- In Cwd.pm, pass the un-munged $VERSION to XSLoader/DynaLoader,
+  otherwise development releases fail tests on Win32.
+
+3.28_02 - Mon Oct 27 20:13:11 2008
+
+ - Fixed some issues on QNX/NTO related to paths with double
+   slashes. [Matt Kraai & Nicholas Clark]
+
+3.28_01 - Fri Jul 25 21:18:11 2008
+
  - Fixed and clarified the behavior of splitpath() with a $no_file
    argument on VMS.  [Craig A. Berry, Peter Edwards]
 

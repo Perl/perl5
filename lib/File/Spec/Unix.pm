@@ -3,7 +3,7 @@ package File::Spec::Unix;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '3.28_01';
+$VERSION = '3.28_03';
 $VERSION = eval $VERSION;
 
 =head1 NAME
@@ -50,7 +50,10 @@ sub canonpath {
     # more than two leading slashes shall be treated as a single slash.")
     my $node = '';
     my $double_slashes_special = $^O eq 'qnx' || $^O eq 'nto';
-    if ( $double_slashes_special && $path =~ s{^(//[^/]+)(?:/|\z)}{/}s ) {
+
+
+    if ( $double_slashes_special
+         && ( $path =~ s{^(//[^/]+)/?\z}{}s || $path =~ s{^(//[^/]+)/}{/}s ) ) {
       $node = $1;
     }
     # This used to be
