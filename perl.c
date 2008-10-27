@@ -1878,6 +1878,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef USE_SITECUSTOMIZE
 			     " USE_SITECUSTOMIZE"
 #  endif	       
+#  ifdef USE_FAST_STDIO
+			     " USE_FAST_STDIO"
+#  endif	       
 					     , 0);
 
 		    sv_catpv(opts_prog, PL_bincompat_options);
