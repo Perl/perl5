@@ -210,7 +210,7 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 
 #define PAD_BASE_SV(padlist, po) \
 	(AvARRAY(padlist)[1]) 	\
-	    ? AvARRAY((AV*)(AvARRAY(padlist)[1]))[po] : NULL;
+	? AvARRAY(MUTABLE_AV((AvARRAY(padlist)[1])))[po] : NULL;
 
 
 #define PAD_SET_CUR_NOSAVE(padlist,nth) \
@@ -258,7 +258,7 @@ context block structure (can be used as an lvalue).
 */
 
 #define CX_CURPAD_SAVE(block)  (block).oldcomppad = PL_comppad
-#define CX_CURPAD_SV(block,po) (AvARRAY((AV*)((block).oldcomppad))[po])
+#define CX_CURPAD_SV(block,po) (AvARRAY(MUTABLE_AV(((block).oldcomppad)))[po])
 
 
 /*
@@ -337,7 +337,7 @@ Clone the state variables associated with running and compiling pads.
  * sub's CV or padlist. */
 
 #define PAD_CLONE_VARS(proto_perl, param)				\
-    PL_comppad = (AV *) ptr_table_fetch(PL_ptr_table, proto_perl->Icomppad); \
+    PL_comppad = MUTABLE_AV(ptr_table_fetch(PL_ptr_table, proto_perl->Icomppad)); \
     PL_curpad = PL_comppad ?  AvARRAY(PL_comppad) : NULL;		\
     PL_comppad_name		= av_dup(proto_perl->Icomppad_name, param); \
     PL_comppad_name_fill	= proto_perl->Icomppad_name_fill;	\

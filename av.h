@@ -75,7 +75,7 @@ Same as C<av_len()>.  Deprecated, use C<av_len()> instead.
 #define AvALLOC(av)	(*((SV***)&((XPVAV*)  SvANY(av))->xav_alloc))
 #define AvMAX(av)	((XPVAV*)  SvANY(av))->xav_max
 #define AvFILLp(av)	((XPVAV*)  SvANY(av))->xav_fill
-#define AvARYLEN(av)	(*Perl_av_arylen_p(aTHX_ (AV*)av))
+#define AvARYLEN(av)	(*Perl_av_arylen_p(aTHX_ MUTABLE_AV(av)))
 
 #define AvREAL(av)	(SvFLAGS(av) & SVpav_REAL)
 #define AvREAL_on(av)	(SvFLAGS(av) |= SVpav_REAL)
@@ -101,7 +101,7 @@ Creates a new AV.  The reference count is set to 1.
 =cut
 */
 
-#define newAV()	((AV *)newSV_type(SVt_PVAV))
+#define newAV()	MUTABLE_AV(newSV_type(SVt_PVAV))
 
 /*
  * Local variables:
