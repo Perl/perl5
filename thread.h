@@ -156,7 +156,7 @@
 #define THREAD_RET_CAST(x)	((any_t) x)
 
 #define DETACH(t)		cthread_detach(t->self)
-#define JOIN(t, avp)		(*(avp) = (AV *)cthread_join(t->self))
+#define JOIN(t, avp)		(*(avp) = MUTABLE_AV(cthread_join(t->self)))
 
 #define PERL_SET_CONTEXT(t)	cthread_set_data(cthread_self(), t)
 #define PERL_GET_CONTEXT	cthread_data(cthread_self())
