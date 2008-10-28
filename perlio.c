@@ -3125,8 +3125,15 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	if (getsockopt(fd, SOL_SOCKET, SO_TYPE, (void *) &optval, &optlen) == 0)
 	    invalidate = 1;
 #endif
-	if (PerlIOUnix_refcnt_dec(fd) > 0) /* File descriptor still in use */
+	/* Test for -1, as *BSD stdio (at least) on fclose sets the FILE* such
+	   that a subsequent fileno() on it returns -1. Don't want to croak()
+	   from within PerlIOUnix_refcnt_dec() if some buggy caller code is
+	   trying to close an already closed handle which somehow it still has
+	   a reference to. (via.xs, I'm looking at you).  */
+	if (fd != -1 && PerlIOUnix_refcnt_dec(fd) > 0) {
+	    /* File descriptor still in use */
 	    invalidate = 1;
+	}
 	if (invalidate) {
 	    /* For STD* handles, don't close stdio, since we shared the FILE *, too. */
 	    if (stdio == stdin) /* Some stdios are buggy fflush-ing inputs */
