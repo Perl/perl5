@@ -776,7 +776,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    }
 	    break;
 	case SAVEt_HV:				/* hash reference */
-	    hv = (HV*)SSPOPPTR;
+	    hv = MUTABLE_HV(SSPOPPTR);
 	    gv = (GV*)SSPOPPTR;
 	    if (GvHV(gv)) {
 		SvREFCNT_dec(GvHV(gv));
@@ -819,7 +819,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_HPTR:			/* HV* reference */
 	    ptr = SSPOPPTR;
-	    *(HV**)ptr = (HV*)SSPOPPTR;
+	    *(HV**)ptr = MUTABLE_HV(SSPOPPTR);
 	    break;
 	case SAVEt_APTR:			/* AV* reference */
 	    ptr = SSPOPPTR;
@@ -885,7 +885,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		    av_clear((AV*)sv);
 		    break;
 		case SVt_PVHV:
-		    hv_clear((HV*)sv);
+		    hv_clear(MUTABLE_HV(sv));
 		    break;
 		case SVt_PVCV:
 		    Perl_croak(aTHX_ "panic: leave_scope pad code");
@@ -910,7 +910,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_DELETE:
 	    ptr = SSPOPPTR;
-	    hv = (HV*)ptr;
+	    hv = MUTABLE_HV(ptr);
 	    ptr = SSPOPPTR;
 	    (void)hv_delete(hv, (char*)ptr, (I32)SSPOPINT, G_DISCARD);
 	    SvREFCNT_dec(hv);
@@ -954,7 +954,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_HELEM:		/* hash element */
 	    value = (SV*)SSPOPPTR;
 	    sv = (SV*)SSPOPPTR;
-	    hv = (HV*)SSPOPPTR;
+	    hv = MUTABLE_HV(SSPOPPTR);
 	    ptr = hv_fetch_ent(hv, sv, 1, 0);
 	    SvREFCNT_dec(sv);
 	    if (ptr) {
@@ -983,7 +983,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    PL_compiling.cop_hints_hash = (struct refcounted_he *) SSPOPPTR;
 	    if (PL_hints & HINT_LOCALIZE_HH) {
 		SvREFCNT_dec((SV*)GvHV(PL_hintgv));
-		GvHV(PL_hintgv) = (HV*)SSPOPPTR;
+		GvHV(PL_hintgv) = MUTABLE_HV(SSPOPPTR);
 		assert(GvHV(PL_hintgv));
 	    } else if (!GvHV(PL_hintgv)) {
 		/* Need to add a new one manually, else gv_fetchpv() can

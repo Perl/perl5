@@ -1473,7 +1473,7 @@ Perl_newAV(pTHX)
 HV *
 Perl_newHV(pTHX)
 {
-    HV * const hv = (HV*)newSV_type(SVt_PVHV);
+    HV * const hv = MUTABLE_HV(newSV_type(SVt_PVHV));
     assert(!SvOK(hv));
 
     return hv;

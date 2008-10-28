@@ -90,10 +90,10 @@ Perl_mro_meta_dup(pTHX_ struct mro_meta* smeta, CLONE_PARAMS* param)
 	    = (AV*) SvREFCNT_inc(sv_dup((SV*)newmeta->mro_linear_c3, param));
     if (newmeta->mro_nextmethod)
 	newmeta->mro_nextmethod
-	    = (HV*) SvREFCNT_inc(sv_dup((SV*)newmeta->mro_nextmethod, param));
+	    = MUTABLE_HV(SvREFCNT_inc(sv_dup((SV*)newmeta->mro_nextmethod, param)));
     if (newmeta->isa)
 	newmeta->isa
-	    = (HV*) SvREFCNT_inc(sv_dup((SV*)newmeta->isa, param));
+	    = MUTABLE_HV(SvREFCNT_inc(sv_dup((SV*)newmeta->isa, param)));
 
     return newmeta;
 }
@@ -199,7 +199,7 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
        It's then retained to be re-used as a fast lookup for ->isa(), by adding
        our own name and "UNIVERSAL" to it.  */
 
-    stored = (HV*)sv_2mortal((SV*)newHV());
+    stored = MUTABLE_HV(sv_2mortal((SV*)newHV()));
 
     if(av && AvFILLp(av) >= 0) {
 
@@ -346,7 +346,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
     if(isa && AvFILLp(isa) >= 0) {
         SV** seqs_ptr;
         I32 seqs_items;
-        HV* const tails = (HV*)sv_2mortal((SV*)newHV());
+        HV* const tails = MUTABLE_HV(sv_2mortal((SV*)newHV()));
         AV* const seqs = (AV*)sv_2mortal((SV*)newAV());
         I32* heads;
 
@@ -584,7 +584,7 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
        is UNIVERSAL or one of its parents */
 
     svp = hv_fetch(PL_isarev, stashname, stashname_len, 0);
-    isarev = svp ? (HV*)*svp : NULL;
+    isarev = svp ? MUTABLE_HV(*svp) : NULL;
 
     if((stashname_len == 9 && strEQ(stashname, "UNIVERSAL"))
         || (isarev && hv_exists(isarev, "UNIVERSAL", 9))) {
@@ -646,7 +646,7 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 	   copy&paste [SIN!] the code from newHV() to allow us to upgrade the
 	   new SV from SVt_NULL.  */
 
-        mroisarev = (HV*)HeVAL(he);
+        mroisarev = MUTABLE_HV(HeVAL(he));
 
 	if(SvTYPE(mroisarev) != SVt_PVHV) {
 	    SvREFCNT_dec(mroisarev);
@@ -709,7 +709,7 @@ Perl_mro_method_changed_in(pTHX_ HV *stash)
     const STRLEN stashname_len = HvNAMELEN_get(stash);
 
     SV ** const svp = hv_fetch(PL_isarev, stashname, stashname_len, 0);
-    HV * const isarev = svp ? (HV*)*svp : NULL;
+    HV * const isarev = svp ? MUTABLE_HV(*svp) : NULL;
 
     PERL_ARGS_ASSERT_MRO_METHOD_CHANGED_IN;
 
@@ -900,7 +900,7 @@ XS(XS_mro_get_isarev)
 
     
     he = hv_fetch_ent(PL_isarev, classname, 0, 0);
-    isarev = he ? (HV*)HeVAL(he) : NULL;
+    isarev = he ? MUTABLE_HV(HeVAL(he)) : NULL;
 
     ret_array = newAV();
     if(isarev) {
@@ -933,7 +933,7 @@ XS(XS_mro_is_universal)
     classname_pv = SvPV(classname,classname_len);
 
     he = hv_fetch_ent(PL_isarev, classname, 0, 0);
-    isarev = he ? (HV*)HeVAL(he) : NULL;
+    isarev = he ? MUTABLE_HV(HeVAL(he)) : NULL;
 
     if((classname_len == 9 && strEQ(classname_pv, "UNIVERSAL"))
         || (isarev && hv_exists(isarev, "UNIVERSAL", 9)))

@@ -4835,7 +4835,7 @@ reStudy:
     if (RExC_seen & REG_SEEN_CUTGROUP)
 	r->intflags |= PREGf_CUTGROUP_SEEN;
     if (RExC_paren_names)
-        RXp_PAREN_NAMES(r) = (HV*)SvREFCNT_inc(RExC_paren_names);
+        RXp_PAREN_NAMES(r) = MUTABLE_HV(SvREFCNT_inc(RExC_paren_names));
     else
         RXp_PAREN_NAMES(r) = NULL;
 
@@ -9531,7 +9531,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const r)
 
 #define sv_dup_inc(s,t)	SvREFCNT_inc(sv_dup(s,t))
 #define av_dup_inc(s,t)	(AV*)SvREFCNT_inc(sv_dup((const SV *)s,t))
-#define hv_dup_inc(s,t)	(HV*)SvREFCNT_inc(sv_dup((const SV *)s,t))
+#define hv_dup_inc(s,t)	MUTABLE_HV(SvREFCNT_inc(sv_dup((const SV *)s,t)))
 #define SAVEPVN(p,n)	((p) ? savepvn(p,n) : NULL)
 
 /* 

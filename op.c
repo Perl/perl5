@@ -3346,7 +3346,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	SvREFCNT_dec(transv);
 
 	if (!del && havefinal && rlen)
-	    (void)hv_store((HV*)SvRV(swash), "FINAL", 5,
+	    (void)hv_store(MUTABLE_HV(SvRV(swash)), "FINAL", 5,
 			   newSVuv((UV)final), 0);
 
 	if (grows)

@@ -798,7 +798,7 @@ PP(pp_tie)
     switch(SvTYPE(varsv)) {
 	case SVt_PVHV:
 	    methname = "TIEHASH";
-	    HvEITER_set((HV *)varsv, 0);
+	    HvEITER_set(MUTABLE_HV(varsv), 0);
 	    break;
 	case SVt_PVAV:
 	    methname = "TIEARRAY";
@@ -942,7 +942,7 @@ PP(pp_dbmopen)
     HV* stash;
     GV *gv;
 
-    HV * const hv = (HV*)POPs;
+    HV * const hv = MUTABLE_HV(POPs);
     SV * const sv = newSVpvs_flags("AnyDBM_File", SVs_TEMP);
     stash = gv_stashsv(sv, 0);
     if (!stash || !(gv = gv_fetchmethod(stash, "TIEHASH"))) {
