@@ -53,6 +53,7 @@ Null SV pointer.
 #endif
 
 #define MUTABLE_AV(p)	((AV *)MUTABLE_PTR(p))
+#define MUTABLE_HV(p)	((HV *)MUTABLE_PTR(p))
 #define MUTABLE_SV(p)	((SV *)MUTABLE_PTR(p))
 
 /* XXX Configure ought to have a test for a boolean type, if I can

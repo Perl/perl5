@@ -265,10 +265,10 @@ C<SV*>.
 /* This quite intentionally does no flag checking first. That's your
    responsibility.  */
 #define HvAUX(hv)	((struct xpvhv_aux*)&(HvARRAY(hv)[HvMAX(hv)+1]))
-#define HvRITER(hv)	(*Perl_hv_riter_p(aTHX_ (HV*)(hv)))
-#define HvEITER(hv)	(*Perl_hv_eiter_p(aTHX_ (HV*)(hv)))
-#define HvRITER_set(hv,r)	Perl_hv_riter_set(aTHX_ (HV*)(hv), r)
-#define HvEITER_set(hv,e)	Perl_hv_eiter_set(aTHX_ (HV*)(hv), e)
+#define HvRITER(hv)	(*Perl_hv_riter_p(aTHX_ MUTABLE_HV(hv)))
+#define HvEITER(hv)	(*Perl_hv_eiter_p(aTHX_ MUTABLE_HV(hv)))
+#define HvRITER_set(hv,r)	Perl_hv_riter_set(aTHX_ MUTABLE_HV(hv), r)
+#define HvEITER_set(hv,e)	Perl_hv_eiter_set(aTHX_ MUTABLE_HV(hv), e)
 #define HvRITER_get(hv)	(SvOOK(hv) ? HvAUX(hv)->xhv_riter : -1)
 #define HvEITER_get(hv)	(SvOOK(hv) ? HvAUX(hv)->xhv_eiter : NULL)
 #define HvNAME(hv)	HvNAME_get(hv)
@@ -299,9 +299,9 @@ C<SV*>.
 #define HvKEYS(hv)		HvUSEDKEYS(hv)
 #define HvUSEDKEYS(hv)		(HvTOTALKEYS(hv) - HvPLACEHOLDERS_get(hv))
 #define HvTOTALKEYS(hv)		XHvTOTALKEYS((XPVHV*)  SvANY(hv))
-#define HvPLACEHOLDERS(hv)	(*Perl_hv_placeholders_p(aTHX_ (HV*)hv))
-#define HvPLACEHOLDERS_get(hv)	(SvMAGIC(hv) ? Perl_hv_placeholders_get(aTHX_ (HV*)hv) : 0)
-#define HvPLACEHOLDERS_set(hv,p)	Perl_hv_placeholders_set(aTHX_ (HV*)hv, p)
+#define HvPLACEHOLDERS(hv)	(*Perl_hv_placeholders_p(aTHX_ MUTABLE_HV(hv)))
+#define HvPLACEHOLDERS_get(hv)	(SvMAGIC(hv) ? Perl_hv_placeholders_get(aTHX_ (const HV *)hv) : 0)
+#define HvPLACEHOLDERS_set(hv,p)	Perl_hv_placeholders_set(aTHX_ MUTABLE_HV(hv), p)
 
 #define HvSHAREKEYS(hv)		(SvFLAGS(hv) & SVphv_SHAREKEYS)
 #define HvSHAREKEYS_on(hv)	(SvFLAGS(hv) |= SVphv_SHAREKEYS)
@@ -553,7 +553,7 @@ Creates a new HV.  The reference count is set to 1.
 =cut
 */
 
-#define newHV()	((HV*)newSV_type(SVt_PVHV))
+#define newHV()	MUTABLE_HV(newSV_type(SVt_PVHV))
 
 /*
  * Local variables:
