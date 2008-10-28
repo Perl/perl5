@@ -9508,8 +9508,8 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
 }
 
 #define sv_dup_inc(s,t)	SvREFCNT_inc(sv_dup(s,t))
-#define av_dup_inc(s,t)	(AV*)SvREFCNT_inc(sv_dup((SV*)s,t))
-#define hv_dup_inc(s,t)	(HV*)SvREFCNT_inc(sv_dup((SV*)s,t))
+#define av_dup_inc(s,t)	(AV*)SvREFCNT_inc(sv_dup((const SV *)s,t))
+#define hv_dup_inc(s,t)	(HV*)SvREFCNT_inc(sv_dup((const SV *)s,t))
 #define SAVEPVN(p,n)	((p) ? savepvn(p,n) : NULL)
 
 /* 
