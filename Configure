@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Mon Oct 27 19:29:26 CET 2008 [metaconfig 3.5 PL0]
+# Generated on Tue Oct 28 18:51:20 CET 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -9500,6 +9500,46 @@ esac
 prefixvar=vendorscript
 . ./installprefix
 
+: script used to emit important warnings
+cat >warn <<EOS
+$startsh
+if test \$# -gt 0; then
+	echo "\$@" >msg
+else
+	cat >msg
+fi
+echo "*** WARNING:" >&4
+sed -e 's/^/*** /' <msg >&4
+echo "*** " >&4
+cat msg >>config.msg
+echo " " >>config.msg
+rm -f msg
+EOS
+chmod +x warn
+$eunicefix warn
+
+: see which of string.h or strings.h is needed
+echo " "
+strings=`./findhdr string.h`
+if $test "$strings" && $test -r "$strings"; then
+	echo "Using <string.h> instead of <strings.h>." >&4
+	val="$define"
+else
+	val="$undef"
+	strings=`./findhdr strings.h`
+	if $test "$strings" && $test -r "$strings"; then
+		echo "Using <strings.h> instead of <string.h>." >&4
+	else
+		./warn "No string header found -- You'll surely have problems."
+	fi
+fi
+set i_string
+eval $setvar
+case "$i_string" in
+"$undef") strings=`./findhdr strings.h`;;
+*)	  strings=`./findhdr string.h`;;
+esac
+
 : see if qgcvt exists
 set qgcvt d_qgcvt
 eval $inlibc
@@ -9673,15 +9713,18 @@ char *myname = "sprintf";
 
 #include <stdio.h>
 
-#define I_STDLIB $i_stdlib
+#$i_stdlib I_STDLIB
 #ifdef I_STDLIB
 #include <stdlib.h>
 #endif
+#$i_string I_STRING
+#ifdef I_STRING
+#  include <string.h>
+#else
+#  include <strings.h>
+#endif
 
-int
-checkit(expect, got)
-char *expect;
-char *got;
+int checkit(char *expect, char *got)
 {
     if (strcmp(expect, got)) {
 		printf("%s oddity:  Expected %s, got %s\n",
@@ -12352,46 +12395,6 @@ fi
 set d_open3
 eval $setvar
 $rm_try
-
-: script used to emit important warnings
-cat >warn <<EOS
-$startsh
-if test \$# -gt 0; then
-	echo "\$@" >msg
-else
-	cat >msg
-fi
-echo "*** WARNING:" >&4
-sed -e 's/^/*** /' <msg >&4
-echo "*** " >&4
-cat msg >>config.msg
-echo " " >>config.msg
-rm -f msg
-EOS
-chmod +x warn
-$eunicefix warn
-
-: see which of string.h or strings.h is needed
-echo " "
-strings=`./findhdr string.h`
-if $test "$strings" && $test -r "$strings"; then
-	echo "Using <string.h> instead of <strings.h>." >&4
-	val="$define"
-else
-	val="$undef"
-	strings=`./findhdr strings.h`
-	if $test "$strings" && $test -r "$strings"; then
-		echo "Using <strings.h> instead of <string.h>." >&4
-	else
-		./warn "No string header found -- You'll surely have problems."
-	fi
-fi
-set i_string
-eval $setvar
-case "$i_string" in
-"$undef") strings=`./findhdr strings.h`;;
-*)	  strings=`./findhdr string.h`;;
-esac
 
 : see if this is a sys/file.h system
 val=''
