@@ -298,8 +298,8 @@ struct block_format {
 
 #define PUSHSUB_BASE(cx)						\
 	ENTRY_PROBE(GvENAME(CvGV(cv)),		       			\
-		CopFILE((COP*)CvSTART(cv)),				\
-		CopLINE((COP*)CvSTART(cv)));				\
+		CopFILE((const COP *)CvSTART(cv)),			\
+		CopLINE((const COP *)CvSTART(cv)));			\
 									\
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.olddepth = CvDEPTH(cv);				\
