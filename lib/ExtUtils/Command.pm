@@ -12,9 +12,11 @@ use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 @ISA       = qw(Exporter);
 @EXPORT    = qw(cp rm_f rm_rf mv cat eqtime mkpath touch test_f test_d chmod
                 dos2unix);
-$VERSION = '1.14';
+$VERSION = '1.15';
 
-my $Is_VMS = $^O eq 'VMS';
+my $Is_VMS   = $^O eq 'VMS';
+my $Is_Win32 = $^O eq 'MSWin32';
+
 
 =head1 NAME
 
@@ -210,6 +212,10 @@ sub cp {
     my $nok = 0;
     foreach my $src (@src) {
         $nok ||= !copy($src,$dst);
+
+        # Win32 does not update the mod time of a copied file, just the
+        # created time which make does not look at.
+        utime(time, time, $dst) if $Is_Win32;
     }
     return $nok;
 }
