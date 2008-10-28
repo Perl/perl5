@@ -4713,9 +4713,9 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, const MGVTBL *vtable,
 	how == PERL_MAGIC_qr ||
 	how == PERL_MAGIC_symtab ||
 	(SvTYPE(obj) == SVt_PVGV &&
-	    (GvSV(obj) == sv || GvHV(obj) == (HV*)sv || GvAV(obj) == (AV*)sv ||
-	    GvCV(obj) == (CV*)sv || GvIOp(obj) == (IO*)sv ||
-	    GvFORM(obj) == (CV*)sv)))
+	    (GvSV(obj) == sv || GvHV(obj) == (const HV *)sv
+	     || GvAV(obj) == (const AV *)sv || GvCV(obj) == (const CV *)sv
+	     || GvIOp(obj) == (const IO *)sv || GvFORM(obj) == (const CV *)sv)))
     {
 	mg->mg_obj = obj;
     }
