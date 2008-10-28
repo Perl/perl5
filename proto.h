@@ -6189,7 +6189,7 @@ PERL_CALLCONV I32*	Perl_hv_placeholders_p(pTHX_ HV *hv)
 #define PERL_ARGS_ASSERT_HV_PLACEHOLDERS_P	\
 	assert(hv)
 
-PERL_CALLCONV I32	Perl_hv_placeholders_get(pTHX_ HV *hv)
+PERL_CALLCONV I32	Perl_hv_placeholders_get(pTHX_ const HV *hv)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_HV_PLACEHOLDERS_GET	\

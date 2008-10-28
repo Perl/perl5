@@ -1797,7 +1797,7 @@ poM	|void	|hv_kill_backrefs	|NN HV *hv
 #endif
 Apd	|void	|hv_clear_placeholders	|NN HV *hv
 ApoR	|I32*	|hv_placeholders_p	|NN HV *hv
-ApoR	|I32	|hv_placeholders_get	|NN HV *hv
+ApoR	|I32	|hv_placeholders_get	|NN const HV *hv
 Apo	|void	|hv_placeholders_set	|NN HV *hv|I32 ph
 
 p	|SV*	|magic_scalarpack|NN HV *hv|NN MAGIC *mg
