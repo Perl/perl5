@@ -137,7 +137,7 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 #define SAVESHAREDPV(s)		save_shared_pvref((char**)&(s))
 #define SAVESETSVFLAGS(sv,mask,val)	save_set_svflags(sv,mask,val)
 #define SAVEDELETE(h,k,l) \
-	  save_delete((HV*)(h), (char*)(k), (I32)(l))
+	  save_delete(MUTABLE_HV(h), (char*)(k), (I32)(l))
 #define SAVEDESTRUCTOR(f,p) \
 	  save_destructor((DESTRUCTORFUNC_NOCONTEXT_t)(f), (void*)(p))
 
