@@ -317,7 +317,8 @@ package Maintainers;
 	'ExtUtils::Command' =>
 		{
 		'MAINTAINER'	=> 'rkobes',
-		'FILES'		=> q[lib/ExtUtils/Command.pm],
+		'FILES'		=> q[lib/ExtUtils/Command.pm
+				     lib/ExtUtils/t/{cp,eu_command}.t],
 		'CPAN'		=> 1,
 		},
 
@@ -344,7 +345,7 @@ package Maintainers;
 		'MAINTAINER'	=> 'mschwern',
 		'FILES'	=> q[lib/ExtUtils/{Liblist,MakeMaker,Mkbootstrap,Mksymlists,MM*,MY,testlib}.pm
 			lib/ExtUtils/{Command,Liblist,MakeMaker}
-			lib/ExtUtils/t/{[0-9FLV-Zabd-z]*,IN*,Mkbootstrap,MM_*,PL_FILES,cd,config}.t
+			lib/ExtUtils/t/{[0-9FLV-Zabdf-z]*,IN*,Mkbootstrap,MM_*,PL_FILES,cd,config}.t
 			t/lib/MakeMaker t/lib/TieIn.pm t/lib/TieOut.pm],
 		'CPAN'		=> 1,
 		},

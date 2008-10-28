@@ -601,6 +601,7 @@ if (!$versiononly && $otherperls) {
 	next unless m,^/,;
 	# Use &samepath here because some systems have other dirs linked
 	# to $mainperldir (like SunOS)
+	next unless -d;
 	next if samepath($_, $binexp);
 	next if samepath($_, cwd());
 	next if ($mainperl_is_instperl && samepath($_, $mainperldir));
