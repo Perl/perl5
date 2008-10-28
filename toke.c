@@ -897,8 +897,8 @@ S_incline(pTHX_ const char *s)
 		    gv_init(gv2, PL_defstash, tmpbuf2, tmplen2, FALSE);
 		    /* adjust ${"::_<newfilename"} to store the new file name */
 		    GvSV(gv2) = newSVpvn(tmpbuf2 + 2, tmplen2 - 2);
-		    GvHV(gv2) = (HV*)SvREFCNT_inc(GvHV(*gvp));
-		    GvAV(gv2) = (AV*)SvREFCNT_inc(GvAV(*gvp));
+		    GvHV(gv2) = MUTABLE_HV(SvREFCNT_inc(GvHV(*gvp)));
+		    GvAV(gv2) = MUTABLE_AV(SvREFCNT_inc(GvAV(*gvp)));
 		}
 
 		if (tmpbuf2 != smallbuf) Safefree(tmpbuf2);
