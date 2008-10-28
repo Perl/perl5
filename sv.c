@@ -5186,7 +5186,7 @@ Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
 			   SvTYPE(referrer) == SVt_PVLV) {
 		    /* You lookin' at me?  */
 		    assert(GvSTASH(referrer));
-		    assert(GvSTASH(referrer) == (HV*)sv);
+		    assert(GvSTASH(referrer) == (const HV *)sv);
 		    GvSTASH(referrer) = 0;
 		} else {
 		    Perl_croak(aTHX_
@@ -5510,7 +5510,7 @@ Perl_sv_clear(pTHX_ register SV *const sv)
 	cv_undef((CV*)sv);
 	goto freescalar;
     case SVt_PVHV:
-	if (PL_last_swash_hv == (HV*)sv) {
+	if (PL_last_swash_hv == (const HV *)sv) {
 	    PL_last_swash_hv = NULL;
 	}
 	Perl_hv_kill_backrefs(aTHX_ (HV*)sv);
@@ -10082,16 +10082,16 @@ ptr_table_* functions.
    If this changes, please unmerge ss_dup.  */
 #define sv_dup_inc(s,t)	SvREFCNT_inc(sv_dup(s,t))
 #define sv_dup_inc_NN(s,t)	SvREFCNT_inc_NN(sv_dup(s,t))
-#define av_dup(s,t)	(AV*)sv_dup((SV*)s,t)
-#define av_dup_inc(s,t)	(AV*)SvREFCNT_inc(sv_dup((SV*)s,t))
-#define hv_dup(s,t)	(HV*)sv_dup((SV*)s,t)
-#define hv_dup_inc(s,t)	(HV*)SvREFCNT_inc(sv_dup((SV*)s,t))
+#define av_dup(s,t)	(AV*)sv_dup((const SV *)s,t)
+#define av_dup_inc(s,t)	(AV*)SvREFCNT_inc(sv_dup((const SV *)s,t))
+#define hv_dup(s,t)	(HV*)sv_dup((const SV *)s,t)
+#define hv_dup_inc(s,t)	(HV*)SvREFCNT_inc(sv_dup((const SV *)s,t))
 #define cv_dup(s,t)	(CV*)sv_dup((SV*)s,t)
-#define cv_dup_inc(s,t)	(CV*)SvREFCNT_inc(sv_dup((SV*)s,t))
+#define cv_dup_inc(s,t)	(CV*)SvREFCNT_inc(sv_dup((const SV *)s,t))
 #define io_dup(s,t)	(IO*)sv_dup((SV*)s,t)
-#define io_dup_inc(s,t)	(IO*)SvREFCNT_inc(sv_dup((SV*)s,t))
+#define io_dup_inc(s,t)	(IO*)SvREFCNT_inc(sv_dup((const SV *)s,t))
 #define gv_dup(s,t)	(GV*)sv_dup((SV*)s,t)
-#define gv_dup_inc(s,t)	(GV*)SvREFCNT_inc(sv_dup((SV*)s,t))
+#define gv_dup_inc(s,t)	(GV*)SvREFCNT_inc(sv_dup((const SV *)s,t))
 #define SAVEPV(p)	((p) ? savepv(p) : NULL)
 #define SAVEPVN(p,n)	((p) ? savepvn(p,n) : NULL)
 
@@ -10803,7 +10803,7 @@ Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		}
 		break;
 	    case SVt_PVHV:
-		if (HvARRAY((HV*)sstr)) {
+		if (HvARRAY((const HV *)sstr)) {
 		    STRLEN i = 0;
 		    const bool sharekeys = !!HvSHAREKEYS(sstr);
 		    XPVHV * const dxhv = (XPVHV*)SvANY(dstr);
@@ -11070,9 +11070,9 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
     I32 ix		= proto_perl->Isavestack_ix;
     ANY *nss;
     SV *sv;
-    GV *gv;
-    AV *av;
-    HV *hv;
+    const GV *gv;
+    const AV *av;
+    const HV *hv;
     void* ptr;
     int intval;
     long longval;
@@ -11216,7 +11216,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    TOPPTR(nss,ix) = pv_dup_inc(c);
 	    break;
 	case SAVEt_DELETE:
-	    hv = (HV*)POPPTR(ss,ix);
+	    hv = (const HV *)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = hv_dup_inc(hv, param);
 	    c = (char*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = pv_dup_inc(c);
@@ -11270,7 +11270,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    }
 	    TOPPTR(nss,ix) = ptr;
 	    if (i & HINT_LOCALIZE_HH) {
-		hv = (HV*)POPPTR(ss,ix);
+		hv = (const HV *)POPPTR(ss,ix);
 		TOPPTR(nss,ix) = hv_dup_inc(hv, param);
 	    }
 	    break;
@@ -11382,7 +11382,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 static void
 do_mark_cloneable_stash(pTHX_ SV *const sv)
 {
-    const HEK * const hvname = HvNAME_HEK((HV*)sv);
+    const HEK * const hvname = HvNAME_HEK((const HV *)sv);
     if (hvname) {
 	GV* const cloner = gv_fetchmethod_autoload((HV*)sv, "CLONE_SKIP", 0);
 	SvFLAGS(sv) |= SVphv_CLONEABLE; /* clone objects by default */
