@@ -3208,14 +3208,14 @@ PP(pp_require)
 		I32 first = 0;
 		AV *lav;
 		SV * const req = SvRV(sv);
-		SV * const pv = *hv_fetchs((HV*)req, "original", FALSE);
+		SV * const pv = *hv_fetchs(MUTABLE_HV(req), "original", FALSE);
 
 		/* get the left hand term */
-		lav = (AV *)SvRV(*hv_fetchs((HV*)req, "version", FALSE));
+		lav = (AV *)SvRV(*hv_fetchs(MUTABLE_HV(req), "version", FALSE));
 
 		first  = SvIV(*av_fetch(lav,0,0));
 		if (   first > (int)PERL_REVISION    /* probably 'use 6.0' */
-		    || hv_exists((HV*)req, "qv", 2 ) /* qv style */
+		    || hv_exists(MUTABLE_HV(req), "qv", 2 ) /* qv style */
 		    || av_len(lav) > 1               /* FP with > 3 digits */
 		    || strstr(SvPVX(pv),".0")        /* FP with leading 0 */
 		   ) {
@@ -3639,7 +3639,7 @@ PP(pp_hintseval)
 {
     dVAR;
     dSP;
-    mXPUSHs((SV*)Perl_hv_copy_hints_hv(aTHX_ (HV*)cSVOP_sv));
+    mXPUSHs((SV*)Perl_hv_copy_hints_hv(aTHX_ MUTABLE_HV(cSVOP_sv)));
     RETURN;
 }
 
@@ -3663,7 +3663,7 @@ PP(pp_entereval)
     const int fakelen = 9 + 1;
     
     if (PL_op->op_private & OPpEVAL_HAS_HH) {
-	saved_hh = (HV*) SvREFCNT_inc(POPs);
+	saved_hh = MUTABLE_HV(SvREFCNT_inc(POPs));
     }
     sv = POPs;
 
@@ -4108,7 +4108,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	if (SM_OTHER_REF(PVHV)) {
 	    /* Check that the key-sets are identical */
 	    HE *he;
-	    HV *other_hv = (HV *) SvRV(Other);
+	    HV *other_hv = MUTABLE_HV(SvRV(Other));
 	    bool tied = FALSE;
 	    bool other_tied = FALSE;
 	    U32 this_key_count  = 0,
@@ -4120,27 +4120,27 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    }
 	    else if (SvTIED_mg((SV *) other_hv, PERL_MAGIC_tied)) {
 		HV * const temp = other_hv;
-		other_hv = (HV *) This;
+		other_hv = MUTABLE_HV(This);
 		This  = (SV *) temp;
 		tied = TRUE;
 	    }
 	    if (SvTIED_mg((SV *) other_hv, PERL_MAGIC_tied))
 		other_tied = TRUE;
 	    
-	    if (!tied && HvUSEDKEYS((HV *) This) != HvUSEDKEYS(other_hv))
+	    if (!tied && HvUSEDKEYS((const HV *) This) != HvUSEDKEYS(other_hv))
 	    	RETPUSHNO;
 
 	    /* The hashes have the same number of keys, so it suffices
 	       to check that one is a subset of the other. */
-	    (void) hv_iterinit((HV *) This);
-	    while ( (he = hv_iternext((HV *) This)) ) {
+	    (void) hv_iterinit(MUTABLE_HV(This));
+	    while ( (he = hv_iternext(MUTABLE_HV(This))) ) {
 	    	I32 key_len;
 		char * const key = hv_iterkey(he, &key_len);
 	    	
 	    	++ this_key_count;
 	    	
 	    	if(!hv_exists(other_hv, key, key_len)) {
-	    	    (void) hv_iterinit((HV *) This);	/* reset iterator */
+	    	    (void) hv_iterinit(MUTABLE_HV(This));	/* reset iterator */
 		    RETPUSHNO;
 	    	}
 	    }
@@ -4170,7 +4170,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 
 		if (svp) {	/* ??? When can this not happen? */
 		    key = SvPV(*svp, key_len);
-		    if (hv_exists((HV *) This, key, key_len))
+		    if (hv_exists(MUTABLE_HV(This), key, key_len))
 		        RETPUSHYES;
 		}
 	    }
@@ -4180,10 +4180,10 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    PMOP * const matcher = make_matcher(other_regex);
 	    HE *he;
 
-	    (void) hv_iterinit((HV *) This);
-	    while ( (he = hv_iternext((HV *) This)) ) {
+	    (void) hv_iterinit(MUTABLE_HV(This));
+	    while ( (he = hv_iternext(MUTABLE_HV(This))) ) {
 		if (matcher_matches_sv(matcher, hv_iterkeysv(he))) {
-		    (void) hv_iterinit((HV *) This);
+		    (void) hv_iterinit(MUTABLE_HV(This));
 		    destroy_matcher(matcher);
 		    RETPUSHYES;
 		}
@@ -4192,7 +4192,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    RETPUSHNO;
 	}
 	else {
-	    if (hv_exists_ent((HV *) This, Other, 0))
+	    if (hv_exists_ent(MUTABLE_HV(This), Other, 0))
 		RETPUSHYES;
 	    else
 		RETPUSHNO;

@@ -1753,7 +1753,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		Perl_dump_indent(aTHX_ level, file, "  NAME = \"%s\"\n", hvname);
 	}
 	if (SvOOK(sv)) {
-	    const AV * const backrefs = *Perl_hv_backreferences_p(aTHX_ (HV*)sv);
+	    const AV * const backrefs
+		= *Perl_hv_backreferences_p(aTHX_ MUTABLE_HV(sv));
 	    if (backrefs) {
 		Perl_dump_indent(aTHX_ level, file, "  BACKREFS = 0x%"UVxf"\n",
 				 PTR2UV(backrefs));
@@ -1763,7 +1764,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	}
 	if (nest < maxnest && !HvEITER_get(sv)) { /* Try to preserve iterator */
 	    HE *he;
-	    HV * const hv = (HV*)sv;
+	    HV * const hv = MUTABLE_HV(sv);
 	    int count = maxnest - nest;
 
 	    hv_iterinit(hv);

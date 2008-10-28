@@ -119,7 +119,7 @@ PP(pp_padhv)
 	RETURNOP(do_kv());
     }
     else if (gimme == G_SCALAR) {
-	SV* const sv = Perl_hv_scalar(aTHX_ (HV*)TARG);
+	SV* const sv = Perl_hv_scalar(aTHX_ MUTABLE_HV(TARG));
 	SETs(sv);
     }
     RETURN;
@@ -806,7 +806,7 @@ PP(pp_undef)
 	av_undef((AV*)sv);
 	break;
     case SVt_PVHV:
-	hv_undef((HV*)sv);
+	hv_undef(MUTABLE_HV(sv));
 	break;
     case SVt_PVCV:
 	if (cv_const_sv((CV*)sv) && ckWARN(WARN_MISC))
@@ -4011,7 +4011,7 @@ PP(pp_each)
 {
     dVAR;
     dSP;
-    HV * hash = (HV*)POPs;
+    HV * hash = MUTABLE_HV(POPs);
     HE *entry;
     const I32 gimme = GIMME_V;
 
@@ -4048,7 +4048,7 @@ PP(pp_delete)
 
     if (PL_op->op_private & OPpSLICE) {
 	dMARK; dORIGMARK;
-	HV * const hv = (HV*)POPs;
+	HV * const hv = MUTABLE_HV(POPs);
 	const U32 hvtype = SvTYPE(hv);
 	if (hvtype == SVt_PVHV) {			/* hash element */
 	    while (++MARK <= SP) {
@@ -4079,7 +4079,7 @@ PP(pp_delete)
     }
     else {
 	SV *keysv = POPs;
-	HV * const hv = (HV*)POPs;
+	HV * const hv = MUTABLE_HV(POPs);
 	SV *sv;
 	if (SvTYPE(hv) == SVt_PVHV)
 	    sv = hv_delete_ent(hv, keysv, discard, 0);
@@ -4117,7 +4117,7 @@ PP(pp_exists)
 	RETPUSHNO;
     }
     tmpsv = POPs;
-    hv = (HV*)POPs;
+    hv = MUTABLE_HV(POPs);
     if (SvTYPE(hv) == SVt_PVHV) {
 	if (hv_exists_ent(hv, tmpsv, 0))
 	    RETPUSHYES;
@@ -4137,7 +4137,7 @@ PP(pp_exists)
 PP(pp_hslice)
 {
     dVAR; dSP; dMARK; dORIGMARK;
-    register HV * const hv = (HV*)POPs;
+    register HV * const hv = MUTABLE_HV(POPs);
     register const I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
     const bool localizing = PL_op->op_private & OPpLVAL_INTRO;
     bool other_magic = FALSE;

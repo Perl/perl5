@@ -1516,7 +1516,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         	    = (reg_ac_data*)progi->data->data[ ARG( c ) ];
         	reg_trie_data *trie
 		    = (reg_trie_data*)progi->data->data[ aho->trie ];
-		HV *widecharmap = (HV*) progi->data->data[ aho->trie + 1 ];
+		HV *widecharmap = MUTABLE_HV(progi->data->data[ aho->trie + 1 ]);
 
 		const char *last_start = strend - trie->minlen;
 #ifdef DEBUGGING
@@ -2942,7 +2942,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
                 /* what trie are we using right now */
 		reg_trie_data * const trie
         	    = (reg_trie_data*)rexi->data->data[ ARG( scan ) ];
-		HV * widecharmap = (HV *)rexi->data->data[ ARG( scan ) + 1 ];
+		HV * widecharmap = MUTABLE_HV(rexi->data->data[ ARG( scan ) + 1 ]);
                 U32 state = trie->startstate;
 
         	if (trie->bitmap && trie_type != trie_utf8_fold &&

@@ -5067,7 +5067,7 @@ Perl_sv_add_backref(pTHX_ SV *const tsv, SV *const sv)
     PERL_ARGS_ASSERT_SV_ADD_BACKREF;
 
     if (SvTYPE(tsv) == SVt_PVHV) {
-	AV **const avp = Perl_hv_backreferences_p(aTHX_ (HV*)tsv);
+	AV **const avp = Perl_hv_backreferences_p(aTHX_ MUTABLE_HV(tsv));
 
 	av = *avp;
 	if (!av) {
@@ -5123,7 +5123,7 @@ S_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
     PERL_ARGS_ASSERT_SV_DEL_BACKREF;
 
     if (SvTYPE(tsv) == SVt_PVHV && SvOOK(tsv)) {
-	av = *Perl_hv_backreferences_p(aTHX_ (HV*)tsv);
+	av = *Perl_hv_backreferences_p(aTHX_ MUTABLE_HV(tsv));
 	/* We mustn't attempt to "fix up" the hash here by moving the
 	   backreference array back to the hv_aux structure, as that is stored
 	   in the main HvARRAY(), and hfreentries assumes that no-one
@@ -5513,8 +5513,8 @@ Perl_sv_clear(pTHX_ register SV *const sv)
 	if (PL_last_swash_hv == (const HV *)sv) {
 	    PL_last_swash_hv = NULL;
 	}
-	Perl_hv_kill_backrefs(aTHX_ (HV*)sv);
-	hv_undef((HV*)sv);
+	Perl_hv_kill_backrefs(aTHX_ MUTABLE_HV(sv));
+	hv_undef(MUTABLE_HV(sv));
 	break;
     case SVt_PVAV:
 	if (PL_comppad == (AV*)sv) {
@@ -8477,7 +8477,7 @@ Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
     if (SvTYPE(tmpRef) != SVt_PVIO)
 	++PL_sv_objcount;
     SvUPGRADE(tmpRef, SVt_PVMG);
-    SvSTASH_set(tmpRef, (HV*)SvREFCNT_inc_simple(stash));
+    SvSTASH_set(tmpRef, MUTABLE_HV(SvREFCNT_inc_simple(stash)));
 
     if (Gv_AMG(stash))
 	SvAMAGIC_on(sv);
@@ -9307,7 +9307,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 		 */
 		if (sv_derived_from(vecsv, "version")) {
 		    char *version = savesvpv(vecsv);
-		    if ( hv_exists((HV*)SvRV(vecsv), "alpha", 5 ) ) {
+		    if ( hv_exists(MUTABLE_HV(SvRV(vecsv)), "alpha", 5 ) ) {
 			Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
 			"vector argument not supported with alpha versions");
 			goto unknown;
@@ -10084,8 +10084,8 @@ ptr_table_* functions.
 #define sv_dup_inc_NN(s,t)	SvREFCNT_inc_NN(sv_dup(s,t))
 #define av_dup(s,t)	(AV*)sv_dup((const SV *)s,t)
 #define av_dup_inc(s,t)	(AV*)SvREFCNT_inc(sv_dup((const SV *)s,t))
-#define hv_dup(s,t)	(HV*)sv_dup((const SV *)s,t)
-#define hv_dup_inc(s,t)	(HV*)SvREFCNT_inc(sv_dup((const SV *)s,t))
+#define hv_dup(s,t)	MUTABLE_HV(sv_dup((const SV *)s,t))
+#define hv_dup_inc(s,t)	MUTABLE_HV(SvREFCNT_inc(sv_dup((const SV *)s,t)))
 #define cv_dup(s,t)	(CV*)sv_dup((SV*)s,t)
 #define cv_dup_inc(s,t)	(CV*)SvREFCNT_inc(sv_dup((const SV *)s,t))
 #define io_dup(s,t)	(IO*)sv_dup((SV*)s,t)
@@ -10851,7 +10851,7 @@ Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		    }
 		}
 		else
-		    HvARRAY((HV*)dstr) = NULL;
+		    HvARRAY(MUTABLE_HV(dstr)) = NULL;
 		break;
 	    case SVt_PVCV:
 		if (!(param->flags & CLONEf_COPY_STACKS)) {
@@ -11384,7 +11384,7 @@ do_mark_cloneable_stash(pTHX_ SV *const sv)
 {
     const HEK * const hvname = HvNAME_HEK((const HV *)sv);
     if (hvname) {
-	GV* const cloner = gv_fetchmethod_autoload((HV*)sv, "CLONE_SKIP", 0);
+	GV* const cloner = gv_fetchmethod_autoload(MUTABLE_HV(sv), "CLONE_SKIP", 0);
 	SvFLAGS(sv) |= SVphv_CLONEABLE; /* clone objects by default */
 	if (cloner && GvCV(cloner)) {
 	    dSP;
@@ -12128,7 +12128,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
        identified by sv_dup() above.
     */
     while(av_len(param->stashes) != -1) {
-	HV* const stash = (HV*) av_shift(param->stashes);
+	HV* const stash = MUTABLE_HV(av_shift(param->stashes));
 	GV* const cloner = gv_fetchmethod_autoload(stash, "CLONE", 0);
 	if (cloner && GvCV(cloner)) {
 	    dSP;
@@ -12478,7 +12478,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 
 	/* attempt to find a match within the aggregate */
 	if (hash) {
-	    keysv = find_hash_subscript((HV*)sv, uninit_sv);
+	    keysv = find_hash_subscript((const HV*)sv, uninit_sv);
 	    if (keysv)
 		subscript_type = FUV_SUBSCRIPT_HASH;
 	}
@@ -12578,7 +12578,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 		if (SvMAGICAL(sv))
 		    break;
 		if (obase->op_type == OP_HELEM) {
-		    HE* he = hv_fetch_ent((HV*)sv, cSVOPx_sv(kid), 0, 0);
+		    HE* he = hv_fetch_ent(MUTABLE_HV(sv), cSVOPx_sv(kid), 0, 0);
 		    if (!he || HeVAL(he) != uninit_sv)
 			break;
 		}
@@ -12599,7 +12599,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	    /* index is an expression;
 	     * attempt to find a match within the aggregate */
 	    if (obase->op_type == OP_HELEM) {
-		SV * const keysv = find_hash_subscript((HV*)sv, uninit_sv);
+		SV * const keysv = find_hash_subscript((const HV*)sv, uninit_sv);
 		if (keysv)
 		    return varname(gv, '%', o->op_targ,
 						keysv, 0, FUV_SUBSCRIPT_HASH);

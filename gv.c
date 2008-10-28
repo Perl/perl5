@@ -1511,7 +1511,7 @@ Perl_newIO(pTHX)
     /* unless exists($main::{FileHandle}) and defined(%main::FileHandle::) */
     if (!(iogv && GvHV(iogv) && HvARRAY(GvHV(iogv))))
       iogv = gv_fetchpvs("IO::Handle::", GV_ADD, SVt_PVHV);
-    SvSTASH_set(io, (HV*)SvREFCNT_inc(GvHV(iogv)));
+    SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
     return io;
 }
 
@@ -1922,7 +1922,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 		   Hence we can't use SvAMAGIC_on()
 		*/
 		SvFLAGS(newref) |= SVf_AMAGIC;
-		SvSTASH_set(newref, (HV*)SvREFCNT_inc(SvSTASH(tmpRef)));
+		SvSTASH_set(newref, MUTABLE_HV(SvREFCNT_inc(SvSTASH(tmpRef))));
 		return newref;
 	     }
 	   }

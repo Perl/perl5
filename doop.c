@@ -318,7 +318,7 @@ S_do_trans_simple_utf8(pTHX_ SV * const sv)
 #else
 		    (SV*)cSVOP->op_sv;
 #endif
-    HV* const  hv = (HV*)SvRV(rv);
+    HV* const  hv = MUTABLE_HV(SvRV(rv));
     SV* const * svp = hv_fetchs(hv, "NONE", FALSE);
     const UV none = svp ? SvUV(*svp) : 0x7fffffff;
     const UV extra = none + 1;
@@ -420,7 +420,7 @@ S_do_trans_count_utf8(pTHX_ SV * const sv)
 #else
 		    (SV*)cSVOP->op_sv;
 #endif
-    HV* const hv = (HV*)SvRV(rv);
+    HV* const hv = MUTABLE_HV(SvRV(rv));
     SV* const * const svp = hv_fetchs(hv, "NONE", FALSE);
     const UV none = svp ? SvUV(*svp) : 0x7fffffff;
     const UV extra = none + 1;
@@ -471,7 +471,7 @@ S_do_trans_complex_utf8(pTHX_ SV * const sv)
 #else
 		    (SV*)cSVOP->op_sv;
 #endif
-    HV * const hv = (HV*)SvRV(rv);
+    HV * const hv = MUTABLE_HV(SvRV(rv));
     SV * const *svp = hv_fetchs(hv, "NONE", FALSE);
     const UV none = svp ? SvUV(*svp) : 0x7fffffff;
     const UV extra = none + 1;
@@ -1009,7 +1009,7 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
         return;
     }
     else if (SvTYPE(sv) == SVt_PVHV) {
-	HV* const hv = (HV*)sv;
+	HV* const hv = MUTABLE_HV(sv);
 	HE* entry;
         (void)hv_iterinit(hv);
         while ((entry = hv_iternext(hv)))
@@ -1095,7 +1095,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
         return count;
     }
     else if (SvTYPE(sv) == SVt_PVHV) {
-	HV* const hv = (HV*)sv;
+	HV* const hv = MUTABLE_HV(sv);
 	HE* entry;
         (void)hv_iterinit(hv);
         while ((entry = hv_iternext(hv)))
@@ -1431,7 +1431,7 @@ Perl_do_kv(pTHX)
 {
     dVAR;
     dSP;
-    HV * const hv = (HV*)POPs;
+    HV * const hv = MUTABLE_HV(POPs);
     HV *keys;
     register HE *entry;
     const I32 gimme = GIMME_V;

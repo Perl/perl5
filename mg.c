@@ -1197,11 +1197,11 @@ Perl_magic_set_all_env(pTHX_ SV *sv, MAGIC *mg)
     if (PL_localizing) {
 	HE* entry;
 	my_clearenv();
-	hv_iterinit((HV*)sv);
-	while ((entry = hv_iternext((HV*)sv))) {
+	hv_iterinit(MUTABLE_HV(sv));
+	while ((entry = hv_iternext(MUTABLE_HV(sv)))) {
 	    I32 keylen;
 	    my_setenv(hv_iterkey(entry, &keylen),
-		      SvPV_nolen_const(hv_iterval((HV*)sv, entry)));
+		      SvPV_nolen_const(hv_iterval(MUTABLE_HV(sv), entry)));
 	}
     }
 #endif
@@ -1633,7 +1633,7 @@ Perl_magic_setamagic(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_getnkeys(pTHX_ SV *sv, MAGIC *mg)
 {
-    HV * const hv = (HV*)LvTARG(sv);
+    HV * const hv = MUTABLE_HV(LvTARG(sv));
     I32 i = 0;
 
     PERL_ARGS_ASSERT_MAGIC_GETNKEYS;
@@ -1659,7 +1659,7 @@ Perl_magic_setnkeys(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_SETNKEYS;
     PERL_UNUSED_ARG(mg);
     if (LvTARG(sv)) {
-	hv_ksplit((HV*)LvTARG(sv), SvIV(sv));
+	hv_ksplit(MUTABLE_HV(LvTARG(sv)), SvIV(sv));
     }
     return 0;
 }
@@ -2159,7 +2159,7 @@ Perl_magic_getdefelem(pTHX_ SV *sv, MAGIC *mg)
     if (LvTARGLEN(sv)) {
 	if (mg->mg_obj) {
 	    SV * const ahv = LvTARG(sv);
-	    HE * const he = hv_fetch_ent((HV*)ahv, mg->mg_obj, FALSE, 0);
+	    HE * const he = hv_fetch_ent(MUTABLE_HV(ahv), mg->mg_obj, FALSE, 0);
             if (he)
                 targ = HeVAL(he);
 	}
@@ -2211,7 +2211,7 @@ Perl_vivify_defelem(pTHX_ SV *sv)
 	return;
     if (mg->mg_obj) {
 	SV * const ahv = LvTARG(sv);
-	HE * const he = hv_fetch_ent((HV*)ahv, mg->mg_obj, TRUE, 0);
+	HE * const he = hv_fetch_ent(MUTABLE_HV(ahv), mg->mg_obj, TRUE, 0);
         if (he)
             value = HeVAL(he);
 	if (!value || value == &PL_sv_undef)

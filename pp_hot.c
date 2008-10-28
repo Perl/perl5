@@ -910,7 +910,7 @@ PP(pp_rv2av)
     }
     else if (gimme == G_SCALAR) {
 	dTARGET;
-    TARG = Perl_hv_scalar(aTHX_ (HV*)sv);
+    TARG = Perl_hv_scalar(aTHX_ MUTABLE_HV(sv));
 	SPAGAIN;
 	SETTARG;
     }
@@ -1039,7 +1039,7 @@ PP(pp_aassign)
 	case SVt_PVHV: {				/* normal hash */
 		SV *tmpstr;
 
-		hash = (HV*)sv;
+		hash = MUTABLE_HV(sv);
 		magic = SvMAGICAL(hash) != 0;
 		hv_clear(hash);
 		firsthashrelem = relem;
@@ -1769,7 +1769,7 @@ PP(pp_helem)
     HE* he;
     SV **svp;
     SV * const keysv = POPs;
-    HV * const hv = (HV*)POPs;
+    HV * const hv = MUTABLE_HV(POPs);
     const U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
     const U32 defer = PL_op->op_private & OPpLVAL_DEFER;
     SV *sv;
@@ -3105,7 +3105,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	}
     }
 
-    gv = gv_fetchmethod_flags(stash ? stash : (HV*)packsv, name,
+    gv = gv_fetchmethod_flags(stash ? stash : MUTABLE_HV(packsv), name,
 			      GV_AUTOLOAD | GV_CROAK);
 
     assert(gv);

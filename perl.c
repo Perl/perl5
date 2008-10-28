@@ -3546,7 +3546,7 @@ S_init_main_stash(pTHX)
        of the SvREFCNT_dec, only to add it again with hv_name_set */
     SvREFCNT_dec(GvHV(gv));
     hv_name_set(PL_defstash, "main", 4, 0);
-    GvHV(gv) = (HV*)SvREFCNT_inc_simple(PL_defstash);
+    GvHV(gv) = MUTABLE_HV(SvREFCNT_inc_simple(PL_defstash));
     SvREADONLY_on(gv);
     PL_incgv = gv_HVadd(gv_AVadd(gv_fetchpvs("INC", GV_ADD|GV_NOTQUAL,
 					     SVt_PVAV)));
