@@ -12289,7 +12289,7 @@ Perl_sv_cat_decode(pTHX_ SV *dsv, SV *encoding,
  * If so, return a mortal copy of the key. */
 
 STATIC SV*
-S_find_hash_subscript(pTHX_ HV *hv, SV* val)
+S_find_hash_subscript(pTHX_ const HV *const hv, const SV *const val)
 {
     dVAR;
     register HE **array;
@@ -12325,7 +12325,7 @@ S_find_hash_subscript(pTHX_ HV *hv, SV* val)
  * If so, return the index, otherwise return -1. */
 
 STATIC I32
-S_find_array_subscript(pTHX_ AV *av, SV* val)
+S_find_array_subscript(pTHX_ const AV *const av, const SV *const val)
 {
     dVAR;
 
@@ -12358,8 +12358,8 @@ S_find_array_subscript(pTHX_ AV *av, SV* val)
 #define FUV_SUBSCRIPT_WITHIN	4	/* "within @foo"   */
 
 STATIC SV*
-S_varname(pTHX_ GV *gv, const char gvtype, PADOFFSET targ,
-	SV* keyname, I32 aindex, int subscript_type)
+S_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
+	const SV *const keyname, I32 aindex, int subscript_type)
 {
 
     SV * const name = sv_newmortal();
@@ -12434,13 +12434,13 @@ PL_comppad/PL_curpad points to the currently executing pad.
 */
 
 STATIC SV *
-S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
+S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
+		  bool match)
 {
     dVAR;
     SV *sv;
-    AV *av;
-    GV *gv;
-    OP *o, *o2, *kid;
+    const GV *gv;
+    const OP *o, *o2, *kid;
 
     if (!obase || (match && (!uninit_sv || uninit_sv == &PL_sv_undef ||
 			    uninit_sv == &PL_sv_placeholder)))
@@ -12511,7 +12511,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 	if (obase->op_flags & OPf_SPECIAL) { /* lexical array */
 	    if (match) {
 		SV **svp;
-		av = (AV*)PAD_SV(obase->op_targ);
+		AV *av = (AV*)PAD_SV(obase->op_targ);
 		if (!av || SvRMAGICAL(av))
 		    break;
 		svp = av_fetch(av, (I32)obase->op_private, FALSE);
@@ -12527,7 +12527,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 		break;
 	    if (match) {
 		SV **svp;
-		av = GvAV(gv);
+		AV *const av = GvAV(gv);
 		if (!av || SvRMAGICAL(av))
 		    break;
 		svp = av_fetch(av, (I32)obase->op_private, FALSE);

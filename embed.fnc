@@ -1567,8 +1567,9 @@ s	|void	|sv_unglob	|NN SV *const sv
 s	|void	|not_a_number	|NN SV *const sv
 s	|I32	|visit		|NN SVFUNC_t f|const U32 flags|const U32 mask
 s	|void	|sv_del_backref	|NN SV *const tsv|NN SV *const sv
-sR	|SV *	|varname	|NULLOK GV *gv|const char gvtype|PADOFFSET targ \
-				|NULLOK SV *keyname|I32 aindex|int subscript_type
+sR	|SV *	|varname	|NULLOK const GV *const gv|const char gvtype \
+				|PADOFFSET targ|NULLOK const SV *const keyname \
+				|I32 aindex|int subscript_type
 #  ifdef DEBUGGING
 s	|void	|del_sv	|NN SV *p
 #  endif
@@ -1803,9 +1804,12 @@ Apo	|void	|hv_placeholders_set	|NN HV *hv|I32 ph
 p	|SV*	|magic_scalarpack|NN HV *hv|NN MAGIC *mg
 
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
-s	|SV *	|find_hash_subscript|NULLOK HV *hv|NN SV *val
-s	|I32	|find_array_subscript|NULLOK AV *av|NN SV *val
-sMd	|SV*	|find_uninit_var|NULLOK OP* obase|NULLOK SV* uninit_sv|bool top
+s	|SV *	|find_hash_subscript|NULLOK const HV *const hv \
+		|NN const SV *const val
+s	|I32	|find_array_subscript|NULLOK const AV *const av \
+		|NN const SV *const val
+sMd	|SV*	|find_uninit_var|NULLOK const OP *const obase \
+		|NULLOK const SV *const uninit_sv|bool top
 #endif
 
 #ifdef PERL_NEED_MY_HTOLE16

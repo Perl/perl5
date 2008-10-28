@@ -5552,7 +5552,7 @@ STATIC void	S_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
 #define PERL_ARGS_ASSERT_SV_DEL_BACKREF	\
 	assert(tsv); assert(sv)
 
-STATIC SV *	S_varname(pTHX_ GV *gv, const char gvtype, PADOFFSET targ, SV *keyname, I32 aindex, int subscript_type)
+STATIC SV *	S_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ, const SV *const keyname, I32 aindex, int subscript_type)
 			__attribute__warn_unused_result__;
 
 #  ifdef DEBUGGING
@@ -6209,17 +6209,17 @@ PERL_CALLCONV SV*	Perl_magic_scalarpack(pTHX_ HV *hv, MAGIC *mg)
 
 
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
-STATIC SV *	S_find_hash_subscript(pTHX_ HV *hv, SV *val)
+STATIC SV *	S_find_hash_subscript(pTHX_ const HV *const hv, const SV *const val)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_FIND_HASH_SUBSCRIPT	\
 	assert(val)
 
-STATIC I32	S_find_array_subscript(pTHX_ AV *av, SV *val)
+STATIC I32	S_find_array_subscript(pTHX_ const AV *const av, const SV *const val)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_FIND_ARRAY_SUBSCRIPT	\
 	assert(val)
 
-STATIC SV*	S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool top);
+STATIC SV*	S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv, bool top);
 #endif
 
 #ifdef PERL_NEED_MY_HTOLE16
