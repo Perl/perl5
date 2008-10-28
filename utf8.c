@@ -1740,7 +1740,7 @@ UV
 Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
 {
     dVAR;
-    HV* const hv = (HV*)SvRV(swash);
+    HV *const hv = MUTABLE_HV(SvRV(swash));
     U32 klen;
     U32 off;
     STRLEN slen;
@@ -1863,7 +1863,7 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     SV *swatch;
     U8 *l, *lend, *x, *xend, *s;
     STRLEN lcur, xcur, scur;
-    HV* const hv = (HV*)SvRV(swash);
+    HV *const hv = MUTABLE_HV(SvRV(swash));
     SV** const listsvp = hv_fetchs(hv, "LIST", FALSE);
     SV** const typesvp = hv_fetchs(hv, "TYPE", FALSE);
     SV** const bitssvp = hv_fetchs(hv, "BITS", FALSE);
@@ -2074,7 +2074,7 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 	}
 
 	othersvp = hv_fetch(hv, (char *)namestr, namelen, FALSE);
-	otherhv = (HV*)SvRV(*othersvp);
+	otherhv = MUTABLE_HV(SvRV(*othersvp));
 	otherbitssvp = hv_fetchs(otherhv, "BITS", FALSE);
 	otherbits = (STRLEN)SvUV(*otherbitssvp);
 	if (bits < otherbits)

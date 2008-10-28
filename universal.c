@@ -462,7 +462,7 @@ XS(XS_UNIVERSAL_VERSION)
 	}
 
 	if ( vcmp( req, sv ) > 0 ) {
-	    if ( hv_exists((HV*)SvRV(req), "qv", 2 ) ) {
+	    if ( hv_exists(MUTABLE_HV(SvRV(req)), "qv", 2 ) ) {
 		Perl_croak(aTHX_ "%s version %"SVf" required--"
 		       "this is only version %"SVf"", HvNAME_get(pkg),
 		       SVfARG(vnormal(req)),
@@ -677,7 +677,7 @@ XS(XS_version_is_alpha)
     SP -= items;
     if (sv_derived_from(ST(0), "version")) {
 	SV * const lobj = ST(0);
-	if ( hv_exists((HV*)SvRV(lobj), "alpha", 5 ) )
+	if ( hv_exists(MUTABLE_HV(SvRV(lobj)), "alpha", 5 ) )
 	    XSRETURN_YES;
 	else
 	    XSRETURN_NO;
@@ -884,7 +884,7 @@ XS(XS_Internals_hv_clear_placehold)
     if (items != 1)
 	croak_xs_usage(cv, "hv");
     else {
-	HV * const hv = (HV *) SvRV(ST(0));
+	HV * const hv = MUTABLE_HV(SvRV(ST(0)));
 	hv_clear_placeholders(hv);
 	XSRETURN(0);
     }
@@ -1052,7 +1052,7 @@ XS(XS_Internals_HvREHASH)	/* Subject to change  */
     dXSARGS;
     PERL_UNUSED_ARG(cv);
     if (SvROK(ST(0))) {
-	const HV * const hv = (HV *) SvRV(ST(0));
+	const HV * const hv = (const HV *) SvRV(ST(0));
 	if (items == 1 && SvTYPE(hv) == SVt_PVHV) {
 	    if (HvREHASH(hv))
 		XSRETURN_YES;
