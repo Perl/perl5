@@ -1805,7 +1805,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		do_op_dump(level+1, file, CvROOT(sv));
 	    }
 	} else {
-	    SV * const constant = cv_const_sv((CV *)sv);
+	    SV * const constant = cv_const_sv((const CV *)sv);
 
 	    Perl_dump_indent(aTHX_ level, file, "  XSUB = 0x%"UVxf"\n", PTR2UV(CvXSUB(sv)));
 

@@ -3522,7 +3522,8 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 			/* Redefining a sub - warning is mandatory if
 			   it was a const and its value changed. */
 			if (CvCONST(cv)	&& CvCONST((CV*)sref)
-			    && cv_const_sv(cv) == cv_const_sv((CV*)sref)) {
+			    && cv_const_sv(cv)
+			    == cv_const_sv((const CV *)sref)) {
 			    NOOP;
 			    /* They are 2 constant subroutines generated from
 			       the same constant. This probably means that
@@ -3535,7 +3536,8 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 				 || (CvCONST(cv)
 				     && (!CvCONST((CV*)sref)
 					 || sv_cmp(cv_const_sv(cv),
-						   cv_const_sv((CV*)sref))))) {
+						   cv_const_sv((const CV *)
+							       sref))))) {
 			    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
 					(const char *)
 					(CvCONST(cv)

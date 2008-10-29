@@ -809,7 +809,7 @@ PP(pp_undef)
 	hv_undef(MUTABLE_HV(sv));
 	break;
     case SVt_PVCV:
-	if (cv_const_sv((CV*)sv) && ckWARN(WARN_MISC))
+	if (cv_const_sv((const CV *)sv) && ckWARN(WARN_MISC))
 	    Perl_warner(aTHX_ packWARN(WARN_MISC), "Constant subroutine %s undefined",
 		 CvANON((CV*)sv) ? "(anonymous)" : GvENAME(CvGV((CV*)sv)));
 	/* FALLTHROUGH */
