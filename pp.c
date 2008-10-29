@@ -158,7 +158,7 @@ PP(pp_rv2gv)
 		 * NI-S 1999/05/07
 		 */
 		if (SvREADONLY(sv))
-		    Perl_croak(aTHX_ PL_no_modify);
+		    Perl_croak(aTHX_ "%s", PL_no_modify);
 		if (PL_op->op_private & OPpDEREF) {
 		    GV *gv;
 		    if (cUNOP->op_targ) {
@@ -307,7 +307,7 @@ PP(pp_rv2sv)
 	    else if (gv)
 		sv = save_scalar(gv);
 	    else
-		Perl_croak(aTHX_ PL_no_localize_ref);
+		Perl_croak(aTHX_ "%s", PL_no_localize_ref);
 	}
 	else if (PL_op->op_private & OPpDEREF)
 	    vivify_ref(sv, PL_op->op_private & OPpDEREF);
@@ -881,7 +881,7 @@ PP(pp_predec)
 {
     dSP;
     if (SvTYPE(TOPs) > SVt_PVLV)
-	DIE(aTHX_ PL_no_modify);
+	DIE(aTHX_ "%s", PL_no_modify);
     if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
         && SvIVX(TOPs) != IV_MIN)
     {
@@ -898,7 +898,7 @@ PP(pp_postinc)
 {
     dSP; dTARGET;
     if (SvTYPE(TOPs) > SVt_PVLV)
-	DIE(aTHX_ PL_no_modify);
+	DIE(aTHX_ "%s", PL_no_modify);
     sv_setsv(TARG, TOPs);
     if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
         && SvIVX(TOPs) != IV_MAX)
@@ -920,7 +920,7 @@ PP(pp_postdec)
 {
     dSP; dTARGET;
     if (SvTYPE(TOPs) > SVt_PVLV)
-	DIE(aTHX_ PL_no_modify);
+	DIE(aTHX_ "%s", PL_no_modify);
     sv_setsv(TARG, TOPs);
     if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
         && SvIVX(TOPs) != IV_MIN)

@@ -415,7 +415,7 @@ PP(pp_preinc)
 {
     dSP;
     if (SvTYPE(TOPs) > SVt_PVLV)
-	DIE(aTHX_ PL_no_modify);
+	DIE(aTHX_ "%s", PL_no_modify);
     if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
         && SvIVX(TOPs) != IV_MAX)
     {
@@ -779,7 +779,7 @@ PP(pp_rv2av)
 	}
 	else if (PL_op->op_flags & OPf_MOD
 		&& PL_op->op_private & OPpLVAL_INTRO)
-	    Perl_croak(aTHX_ PL_no_localize_ref);
+	    Perl_croak(aTHX_ "%s", PL_no_localize_ref);
     }
     else {
 	if (SvTYPE(sv) == type || SvTYPE(sv) == SVt_PVAV) {
@@ -941,7 +941,7 @@ S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
 	    }
 	    else
 		err = "Odd number of elements in hash assignment";
-	    Perl_warner(aTHX_ packWARN(WARN_MISC), err);
+	    Perl_warner(aTHX_ packWARN(WARN_MISC), "%s", err);
 	}
 	if (SvTYPE(hash) == SVt_PVAV) {
 	    /* pseudohash */
@@ -2033,7 +2033,7 @@ PP(pp_subst)
     if (SvREADONLY(TARG)
 	|| (SvTYPE(TARG) > SVt_PVLV
 	    && !(SvTYPE(TARG) == SVt_PVGV && SvFAKE(TARG))))
-	DIE(aTHX_ PL_no_modify);
+	DIE(aTHX_ "%s", PL_no_modify);
     PUTBACK;
 
     s = SvPV_mutable(TARG, len);
@@ -3043,7 +3043,7 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
     SvGETMAGIC(sv);
     if (!SvOK(sv)) {
 	if (SvREADONLY(sv))
-	    Perl_croak(aTHX_ PL_no_modify);
+	    Perl_croak(aTHX_ "%s", PL_no_modify);
 	if (SvTYPE(sv) < SVt_RV)
 	    sv_upgrade(sv, SVt_RV);
 	else if (SvTYPE(sv) >= SVt_PV) {

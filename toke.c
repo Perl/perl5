@@ -3750,7 +3750,7 @@ Perl_yylex(pTHX)
 		&& isIDFIRST_lazy_if(s,UTF))
 	    {
 		CopLINE_dec(PL_curcop);
-		Perl_warner(aTHX_ packWARN(WARN_SEMICOLON), PL_warn_nosemi);
+		Perl_warner(aTHX_ packWARN(WARN_SEMICOLON), "%s", PL_warn_nosemi);
 		CopLINE_inc(PL_curcop);
 	    }
 	    BAop(OP_BIT_AND);
@@ -4355,7 +4355,7 @@ Perl_yylex(pTHX)
 		if (PL_expect == XOPERATOR) {
 		    if (PL_bufptr == PL_linestart) {
 			CopLINE_dec(PL_curcop);
-			Perl_warner(aTHX_ packWARN(WARN_SEMICOLON), PL_warn_nosemi);
+			Perl_warner(aTHX_ packWARN(WARN_SEMICOLON), "%s", PL_warn_nosemi);
 			CopLINE_inc(PL_curcop);
 		    }
 		    else
