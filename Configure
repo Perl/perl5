@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Tue Oct 28 18:51:20 CET 2008 [metaconfig 3.5 PL0]
+# Generated on Wed Oct 29 09:08:09 CET 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -8014,6 +8014,7 @@ EOM
     case "$lddlflags" in
     '') case "$osname" in
   			beos) dflt='-nostart' ;;
+  			haiku) dflt='-shared' ;;
 			hpux) dflt='-b';
 			      case "$gccversion" in
 			      '') dflt="$dflt +vnocompatwarnings" ;;
@@ -8107,7 +8108,7 @@ $undef)
 	;;
 *)	case "$useshrplib" in
 	'')	case "$osname" in
-		svr4*|nonstopux|dgux|dynixptx|esix|powerux|beos|cygwin*)
+		svr4*|nonstopux|dgux|dynixptx|esix|powerux|beos|haiku|cygwin*)
 			dflt=y
 			also='Building a shared libperl is required for dynamic loading to work on your system.'
 			;;
@@ -8273,6 +8274,9 @@ if "$useshrplib"; then
 		;;
 	beos)
 		# beos doesn't like the default, either.
+		;;
+	haiku)
+		# Haiku doesn't like the default, either.
 		;;
 	hpux*)
 		# hpux doesn't like the default, either.
