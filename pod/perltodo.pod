@@ -91,13 +91,6 @@ is needed to improve the cross-linking.
 The addition of C<Pod::Simple> and its related modules may make this task
 easier to complete.
 
-=head2 merge checkpods and podchecker
-
-F<pod/checkpods.PL> (and C<make check> in the F<pod/> subdirectory)
-implements a very basic check for pod files, but the errors it discovers
-aren't found by podchecker. Add this check to podchecker, get rid of
-checkpods and have C<make check> use podchecker.
-
 =head2 Parallel testing
 
 (This probably impacts much more than the core: also the Test::Harness
