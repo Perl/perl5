@@ -4733,7 +4733,7 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, const MGVTBL *vtable,
     */
 
     if (how == PERL_MAGIC_tiedscalar && SvTYPE(sv) == SVt_PVIO &&
-        obj && SvROK(obj) && GvIO(SvRV(obj)) == (IO*)sv)
+        obj && SvROK(obj) && GvIO(SvRV(obj)) == (const IO *)sv)
     {
       sv_rvweaken(obj);
     }
@@ -5485,7 +5485,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	    IoIFP(sv) != PerlIO_stdout() &&
 	    IoIFP(sv) != PerlIO_stderr())
 	{
-	    io_close((IO*)sv, FALSE);
+	    io_close(MUTABLE_IO(sv), FALSE);
 	}
 	if (IoDIRP(sv) && !(IoFLAGS(sv) & IOf_FAKE_DIRP))
 	    PerlDir_close(IoDIRP(sv));
@@ -7856,7 +7856,7 @@ Perl_sv_2io(pTHX_ SV *sv)
 
     switch (SvTYPE(sv)) {
     case SVt_PVIO:
-	io = (IO*)sv;
+	io = MUTABLE_IO(sv);
 	break;
     case SVt_PVGV:
 	if (isGV_with_GP(sv)) {
@@ -10054,8 +10054,8 @@ ptr_table_* functions.
 #define hv_dup_inc(s,t)	MUTABLE_HV(SvREFCNT_inc(sv_dup((const SV *)s,t)))
 #define cv_dup(s,t)	MUTABLE_CV(sv_dup((SV*)s,t))
 #define cv_dup_inc(s,t)	MUTABLE_CV(SvREFCNT_inc(sv_dup((const SV *)s,t)))
-#define io_dup(s,t)	(IO*)sv_dup((SV*)s,t)
-#define io_dup_inc(s,t)	(IO*)SvREFCNT_inc(sv_dup((const SV *)s,t))
+#define io_dup(s,t)	MUTABLE_IO(sv_dup((SV*)s,t))
+#define io_dup_inc(s,t)	MUTABLE_IO(SvREFCNT_inc(sv_dup((const SV *)s,t)))
 #define gv_dup(s,t)	(GV*)sv_dup((SV*)s,t)
 #define gv_dup_inc(s,t)	(GV*)SvREFCNT_inc(sv_dup((const SV *)s,t))
 #define SAVEPV(p)	((p) ? savepv(p) : NULL)

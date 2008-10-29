@@ -1317,7 +1317,7 @@ Perl_my_stat(pTHX)
 	    goto do_fstat;
 	}
         else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVIO) {
-            io = (IO*)SvRV(sv);
+            io = MUTABLE_IO(SvRV(sv));
 	    gv = NULL;
             goto do_fstat_have_io;
         }
