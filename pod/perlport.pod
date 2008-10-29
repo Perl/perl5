@@ -815,6 +815,7 @@ are a few of the more popular Unix flavors:
     dgux          dgux       AViiON-dgux
     DYNIX/ptx     dynixptx   i386-dynixptx
     FreeBSD       freebsd    freebsd-i386    
+    Haiku         haiku      BePC-haiku
     Linux         linux      arm-linux
     Linux         linux      i386-linux
     Linux         linux      i586-linux
