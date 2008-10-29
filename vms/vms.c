@@ -9892,6 +9892,19 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
     *cp2 = '\0';
     if (do_tovmsspec(resspec,cp,0,NULL)) { 
       s = vmsspec;
+
+      /* When a UNIX spec with no file type is translated to VMS, */
+      /* A trailing '.' is appended under ODS-5 rules.            */
+      /* Here we do not want that trailing "." as it prevents     */
+      /* Looking for a implied ".exe" type. */
+      if (decc_efs_charset) {
+          int i;
+          i = strlen(vmsspec);
+          if (vmsspec[i-1] == '.') {
+              vmsspec[i-1] = '\0';
+          }
+      }
+
       if (*rest) {
         for (cp2 = vmsspec + strlen(vmsspec);
              *rest && cp2 - vmsspec < sizeof vmsspec;
