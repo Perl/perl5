@@ -338,7 +338,7 @@ sub _create_autobundle
 	CPAN::Shell->autobundle;
 	}
 
-sub _recompile
+sub _recompiling
 	{
 	print "Recompiling dynamically-loaded extensions\n";
 
