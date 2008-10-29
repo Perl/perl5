@@ -8084,7 +8084,7 @@ Perl_ck_subr(pTHX_ OP *o)
 		         const char *p = proto;
 			 const char *const end = proto;
 			 contextclass = 0;
-			 while (*--p != '[');
+			 while (*--p != '[') {}
 			 bad_type(arg, Perl_form(aTHX_ "one of %.*s",
 						 (int)(end - p), p),
 				  gv_ename(namegv), o3);

@@ -204,7 +204,7 @@ dynprep(pTHX_ gptr *list1, gptr *list2, size_t nmemb, const SVCOMPARE_t cmp)
 	    if (r >= t) p = r = t;	/* too short to care about */
 	    else {
 		while (((cmp(aTHX_ *(p-1), *p) > 0) == sense) &&
-		       ((p -= 2) > q));
+		       ((p -= 2) > q)) {}
 		if (p <= q) {
 		    /* b through r is a (long) run.
 		    ** Extend it as far as possible.
