@@ -1813,7 +1813,7 @@ S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
     dVAR; dSP;
     const I32 oldsaveix = PL_savestack_ix;
     const I32 oldscopeix = PL_scopestack_ix;
-    CV * const cv=(CV*)PL_sortcop;
+    CV * const cv=MUTABLE_CV(PL_sortcop);
     I32 result;
 
     PERL_ARGS_ASSERT_SORTCV_XSUB;

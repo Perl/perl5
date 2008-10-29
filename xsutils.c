@@ -77,9 +77,9 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 		case 'l':
 		    if (memEQ(name, "lvalue", 6)) {
 			if (negated)
-			    CvFLAGS((CV*)sv) &= ~CVf_LVALUE;
+			    CvFLAGS(MUTABLE_CV(sv)) &= ~CVf_LVALUE;
 			else
-			    CvFLAGS((CV*)sv) |= CVf_LVALUE;
+			    CvFLAGS(MUTABLE_CV(sv)) |= CVf_LVALUE;
 			continue;
 		    }
 		    break;
@@ -87,18 +87,18 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 		case 'k':
 		    if (memEQ(name, "locked", 6)) {
 			if (negated)
-			    CvFLAGS((CV*)sv) &= ~CVf_LOCKED;
+			    CvFLAGS(MUTABLE_CV(sv)) &= ~CVf_LOCKED;
 			else
-			    CvFLAGS((CV*)sv) |= CVf_LOCKED;
+			    CvFLAGS(MUTABLE_CV(sv)) |= CVf_LOCKED;
 			continue;
 		    }
 		    break;
 		case 'h':
 		    if (memEQ(name, "method", 6)) {
 			if (negated)
-			    CvFLAGS((CV*)sv) &= ~CVf_METHOD;
+			    CvFLAGS(MUTABLE_CV(sv)) &= ~CVf_METHOD;
 			else
-			    CvFLAGS((CV*)sv) |= CVf_METHOD;
+			    CvFLAGS(MUTABLE_CV(sv)) |= CVf_METHOD;
 			continue;
 		    }
 		    break;
@@ -203,7 +203,7 @@ usage:
 
     switch (SvTYPE(sv)) {
     case SVt_PVCV:
-	cvflags = CvFLAGS((CV*)sv);
+	cvflags = CvFLAGS((const CV *)sv);
 	if (cvflags & CVf_LOCKED)
 	    XPUSHs(newSVpvs_flags("locked", SVs_TEMP));
 #ifdef CVf_LVALUE
@@ -212,7 +212,7 @@ usage:
 #endif
 	if (cvflags & CVf_METHOD)
 	    XPUSHs(newSVpvs_flags("method", SVs_TEMP));
-        if (GvUNIQUE(CvGV((CV*)sv)))
+        if (GvUNIQUE(CvGV((const CV *)sv)))
 	    XPUSHs(newSVpvs_flags("unique", SVs_TEMP));
 	break;
     case SVt_PVGV:

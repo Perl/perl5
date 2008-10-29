@@ -2412,7 +2412,7 @@ PP(pp_goto)
 	if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVCV) {
 	    I32 cxix;
 	    register PERL_CONTEXT *cx;
-	    CV* cv = (CV*)SvRV(sv);
+	    CV *cv = MUTABLE_CV(SvRV(sv));
 	    SV** mark;
 	    I32 items = 0;
 	    I32 oldsave;
@@ -2983,13 +2983,13 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     PUSHMARK(SP);
 
     SAVESPTR(PL_compcv);
-    PL_compcv = (CV*)newSV_type(SVt_PVCV);
+    PL_compcv = MUTABLE_CV(newSV_type(SVt_PVCV));
     CvEVAL_on(PL_compcv);
     assert(CxTYPE(&cxstack[cxstack_ix]) == CXt_EVAL);
     cxstack[cxstack_ix].blk_eval.cv = PL_compcv;
 
     CvOUTSIDE_SEQ(PL_compcv) = seq;
-    CvOUTSIDE(PL_compcv) = (CV*)SvREFCNT_inc_simple(outside);
+    CvOUTSIDE(PL_compcv) = MUTABLE_CV(SvREFCNT_inc_simple(outside));
 
     /* set up a scratch pad */
 
