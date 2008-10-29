@@ -13003,14 +13003,41 @@ vmsrealpath_fromperl(pTHX_ CV *cv)
 /*
  * A thin wrapper around decc$symlink to make sure we follow the 
  * standard and do not create a symlink with a zero-length name.
+ *
+ * Also in ODS-2 mode, existing tests assume that the link target
+ * will be converted to UNIX format.
  */
-/*{{{ int my_symlink(const char *path1, const char *path2)*/
-int my_symlink(const char *path1, const char *path2) {
-  if (!path2 || !*path2) {
+/*{{{ int my_symlink(pTHX_ const char *contents, const char *link_name)*/
+int Perl_my_symlink(pTHX_ const char *contents, const char *link_name) {
+  if (!link_name || !*link_name) {
     SETERRNO(ENOENT, SS$_NOSUCHFILE);
     return -1;
   }
-  return symlink(path1, path2);
+
+  if (decc_efs_charset) {
+      return symlink(contents, link_name);
+  } else {
+      int sts;
+      char * utarget;
+
+      /* Unless we are in ODS-5 mode, convert the symlink target to UNIX */
+      /* because in order to work, the symlink target must be in UNIX format */
+
+      /* As symbolic links can hold things other than files, we will only do */
+      /* the conversion in in ODS-2 mode */
+
+      Newx(utarget, VMS_MAXRSS + 1, char);
+      if (do_tounixspec(contents, utarget, 0, NULL) == NULL) {
+
+          /* This should not fail, as an untranslatable filename */
+          /* should be passed through */
+          utarget = (char *)contents;
+      }
+      sts = symlink(utarget, link_name);
+      Safefree(utarget);
+      return sts;
+  }
+
 }
 /*}}}*/
 
@@ -13216,7 +13243,100 @@ mp_do_vms_realpath(pTHX_ const char *filespec, char *outbuf,
 	                if (haslower) __mystrtolower(rslt);
 	            }
 	        }
-	}
++	} else {
++
++	    /* Now for some hacks to deal with backwards and forward */
++	    /* compatibilty */
++	    if (!decc_efs_charset) {
++
++		/* 1. ODS-2 mode wants to do a syntax only translation */
++		rslt = do_rmsexpand(filespec, outbuf,
++				    0, NULL, 0, NULL, utf8_fl);
++
++	    } else {
++		if (decc_filename_unix_report) {
++		    char * dir_name;
++		    char * vms_dir_name;
++		    char * file_name;
++
++		    /* 2. ODS-5 / UNIX report mode should return a failure */
++		    /*    if the parent directory also does not exist */
++		    /*    Otherwise, get the real path for the parent */
++		    /*    and add the child to it.
++
++		    /* basename / dirname only available for VMS 7.0+ */
++		    /* So we may need to implement them as common routines */
++
++		    Newx(dir_name, VMS_MAXRSS + 1, char);
++		    Newx(vms_dir_name, VMS_MAXRSS + 1, char);
++		    dir_name[0] = '\0';
++		    file_name = NULL;
++
++		    /* First try a VMS parse */
++		    sts = vms_split_path
++			  (filespec,
++			   &v_spec,
++			   &v_len,
++			   &r_spec,
++			   &r_len,
++			   &d_spec,
++			   &d_len,
++			   &n_spec,
++			   &n_len,
++			   &e_spec,
++			   &e_len,
++			   &vs_spec,
++			   &vs_len);
++
++		    if (sts == 0) {
++			/* This is VMS */
++
++			int dir_len = v_len + r_len + d_len + n_len;
++			if (dir_len > 0) {
++			   strncpy(dir_name, filespec, dir_len);
++			   dir_name[dir_len] = '\0';
++			   file_name = (char *)&filespec[dir_len + 1];
++			}
++		    } else {
++			/* This must be UNIX */
++			char * tchar;
++
++			tchar = strrchr(filespec, '/');
++
+			if (tchar != NULL) {
+			    int dir_len = tchar - filespec;
+			    strncpy(dir_name, filespec, dir_len);
+			    dir_name[dir_len] = '\0';
+			    file_name = (char *) &filespec[dir_len + 1];
+			}
+		    }
+
+		    /* Dir name is defaulted */
+		    if (dir_name[0] == 0) {
+			dir_name[0] = '.';
+			dir_name[1] = '\0';
+		    }
+
+		    /* Need realpath for the directory */
+		    sts = vms_fid_to_name(vms_dir_name,
+					  VMS_MAXRSS + 1,
+					  dir_name);
+
+		    if (sts == 0) {
+		        /* Now need to pathify it.
+		        char *tdir = do_pathify_dirspec(vms_dir_name,
+							outbuf, utf8_fl);
+
+			/* And now add the original filespec to it */
+			if (file_name != NULL) {
+			    strcat(outbuf, file_name);
+			}
+			return outbuf;
+		    }
+		    Safefree(vms_dir_name);
+		    Safefree(dir_name);
+		}
+            }
 
         Safefree(vms_spec);
     }

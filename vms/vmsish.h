@@ -276,7 +276,7 @@
 #define my_endpwent()		Perl_my_endpwent(aTHX)
 #define my_getlogin		Perl_my_getlogin
 #ifdef HAS_SYMLINK
-#  define my_symlink		Perl_my_symlink
+#  define my_symlink(a, b)	Perl_my_symlink(aTHX_ a, b)
 #endif
 #define init_os_extras		Perl_init_os_extras
 #define vms_realpath(a, b, c)	Perl_vms_realpath(aTHX_ a,b,c)
@@ -970,7 +970,7 @@ FILE *  my_fdopen (int, const char *);
 int     my_fclose (FILE *);
 int     my_fwrite (const void *, size_t, size_t, FILE *);
 #ifdef HAS_SYMLINK
-int     my_symlink(const char *path1, const char *path2);
+int     Perl_my_symlink(pTHX_ const char *path1, const char *path2);
 #endif
 int	Perl_my_flush (pTHX_ FILE *);
 struct passwd *	Perl_my_getpwnam (pTHX_ const char *name);
