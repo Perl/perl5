@@ -1,4 +1,4 @@
-CONVERTERS = pod2html pod2latex pod2man pod2text checkpods \
+CONVERTERS = pod2html pod2latex pod2man pod2text \
 		pod2usage podchecker podselect
 
 HTMLROOT = /	# Change this to fix cross-references in HTML
@@ -569,9 +569,6 @@ pod2man:	pod2man.PL ../lib/Config.pm
 
 pod2text:	pod2text.PL ../lib/Config.pm
 	$(PERL) -I ../lib pod2text.PL
-
-checkpods:	checkpods.PL ../lib/Config.pm
-	$(PERL) -I ../lib checkpods.PL
 
 pod2usage:	pod2usage.PL ../lib/Config.pm
 	$(PERL) -I ../lib pod2usage.PL

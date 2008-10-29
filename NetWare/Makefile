@@ -667,7 +667,6 @@ UTILS		=			\
 		..\utils\c2ph		\
 		..\utils\h2xs		\
 		..\utils\perldoc	\
-		..\pod\checkpods	\
 		..\pod\pod2html		\
 		..\pod\pod2latex	\
 		..\pod\pod2man		\
