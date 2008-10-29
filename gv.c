@@ -1499,7 +1499,7 @@ Perl_newIO(pTHX)
 {
     dVAR;
     GV *iogv;
-    IO * const io = (IO*)newSV_type(SVt_PVIO);
+    IO * const io = MUTABLE_IO(newSV_type(SVt_PVIO));
     /* This used to read SvREFCNT(io) = 1;
        It's not clear why the reference count needed an explicit reset. NWC
     */

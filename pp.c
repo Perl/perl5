@@ -139,7 +139,7 @@ PP(pp_rv2gv)
 	if (SvTYPE(sv) == SVt_PVIO) {
 	    GV * const gv = (GV*) sv_newmortal();
 	    gv_init(gv, 0, "", 0, 0);
-	    GvIOp(gv) = (IO *)sv;
+	    GvIOp(gv) = MUTABLE_IO(sv);
 	    SvREFCNT_inc_void_NN(sv);
 	    sv = (SV*) gv;
 	}

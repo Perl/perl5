@@ -2207,7 +2207,7 @@ PP(pp_truncate)
 		goto do_ftruncate_gv;
 	    }
 	    else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVIO) {
-		io = (IO*) SvRV(sv); /* *main::FRED{IO} for example */
+		io = MUTABLE_IO(SvRV(sv)); /* *main::FRED{IO} for example */
 		goto do_ftruncate_io;
 	    }
 
@@ -2854,7 +2854,7 @@ PP(pp_stat)
                 goto do_fstat_warning_check;
             goto do_fstat;
         } else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVIO) { 
-            io = (IO*)SvRV(sv);
+            io = MUTABLE_IO(SvRV(sv));
             if (PL_op->op_type == OP_LSTAT)
                 goto do_fstat_warning_check;
             goto do_fstat_have_io; 
