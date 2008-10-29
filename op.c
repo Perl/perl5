@@ -5528,7 +5528,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    {
 		Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE), "Runaway prototype");
 	    }
-	    cv_ckproto_len((CV*)gv, NULL, ps, ps_len);
+	    cv_ckproto_len((const CV *)gv, NULL, ps, ps_len);
 	}
 	if (ps)
 	    sv_setpvn((SV*)gv, ps, ps_len);
@@ -6068,7 +6068,7 @@ Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
     if (cv)				/* must reuse cv if autoloaded */
 	cv_undef(cv);
     else {
-	cv = (CV*)newSV_type(SVt_PVCV);
+	cv = MUTABLE_CV(newSV_type(SVt_PVCV));
 	if (name) {
 	    GvCV(gv) = cv;
 	    GvCVGEN(gv) = 0;

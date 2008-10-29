@@ -1733,10 +1733,10 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 	    if (i < DESTROY_amg)
 		have_ovl = 1;
 	} else if (gv) {		/* Autoloaded... */
-	    cv = (CV*)gv;
+	    cv = MUTABLE_CV(gv);
 	    filled = 1;
 	}
-	amt.table[i]=(CV*)SvREFCNT_inc_simple(cv);
+	amt.table[i]=MUTABLE_CV(SvREFCNT_inc_simple(cv));
     }
     if (filled) {
       AMT_AMAGIC_on(&amt);

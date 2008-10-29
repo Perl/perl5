@@ -2137,7 +2137,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	}
     }
 
-    PL_main_cv = PL_compcv = (CV*)newSV_type(SVt_PVCV);
+    PL_main_cv = PL_compcv = MUTABLE_CV(newSV_type(SVt_PVCV));
     CvUNIQUE_on(PL_compcv);
 
     CvPADLIST(PL_compcv) = pad_new(0);
@@ -2684,7 +2684,7 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 	  && (PL_DBcv || (PL_DBcv = GvCV(PL_DBsub)))
 	   /* Try harder, since this may have been a sighandler, thus
 	    * curstash may be meaningless. */
-	  && (SvTYPE(sv) != SVt_PVCV || CvSTASH((CV*)sv) != PL_debstash)
+	  && (SvTYPE(sv) != SVt_PVCV || CvSTASH((const CV *)sv) != PL_debstash)
 	  && !(flags & G_NODEBUG))
 	PL_op->op_private |= OPpENTERSUB_DB;
 
@@ -5228,7 +5228,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
     PERL_ARGS_ASSERT_CALL_LIST;
 
     while (av_len(paramList) >= 0) {
-	cv = (CV*)av_shift(paramList);
+	cv = MUTABLE_CV(av_shift(paramList));
 	if (PL_savebegin) {
 	    if (paramList == PL_beginav) {
 		/* save PL_beginav for compiler */

@@ -5433,7 +5433,7 @@ Perl_yylex(pTHX)
 		    /* Real typeglob, so get the real subroutine: */
 			   ? GvCVu(gv)
 		    /* A proxy for a subroutine in this package? */
-			   : SvOK(gv) ? (CV *) gv : NULL)
+			   : SvOK(gv) ? MUTABLE_CV(gv) : NULL)
 		    : NULL;
 
 		/* See if it's the indirect object for a list operator. */
@@ -12519,12 +12519,12 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
     save_item(PL_subname);
     SAVESPTR(PL_compcv);
 
-    PL_compcv = (CV*)newSV_type(is_format ? SVt_PVFM : SVt_PVCV);
+    PL_compcv = MUTABLE_CV(newSV_type(is_format ? SVt_PVFM : SVt_PVCV));
     CvFLAGS(PL_compcv) |= flags;
 
     PL_subline = CopLINE(PL_curcop);
     CvPADLIST(PL_compcv) = pad_new(padnew_SAVE|padnew_SAVESUB);
-    CvOUTSIDE(PL_compcv) = (CV*)SvREFCNT_inc_simple(outsidecv);
+    CvOUTSIDE(PL_compcv) = MUTABLE_CV(SvREFCNT_inc_simple(outsidecv));
     CvOUTSIDE_SEQ(PL_compcv) = PL_cop_seqmax;
 
     return oldsavestack_ix;

@@ -1305,7 +1305,7 @@ PP(pp_enterwrite)
 	DIE(aTHX_ "Not a format reference");
     }
     if (CvCLONE(cv))
-	cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
+	cv = MUTABLE_CV(sv_2mortal((SV*)cv_clone(cv)));
 
     IoFLAGS(io) &= ~IOf_DIDTOP;
     return doform(cv,gv,PL_op->op_next);
@@ -1396,7 +1396,7 @@ PP(pp_leavewrite)
 		DIE(aTHX_ "Undefined top format called");
 	}
 	if (cv && CvCLONE(cv))
-	    cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
+	    cv = MUTABLE_CV(sv_2mortal((SV*)cv_clone(cv)));
 	return doform(cv, gv, PL_op);
     }
 

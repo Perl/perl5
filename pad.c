@@ -289,7 +289,7 @@ Perl_pad_undef(pTHX_ CV* cv)
 	    if (namesv && namesv != &PL_sv_undef
 		&& *SvPVX_const(namesv) == '&')
 	    {
-		CV * const innercv = (CV*)curpad[ix];
+		CV * const innercv = MUTABLE_CV(curpad[ix]);
 		U32 inner_rc = SvREFCNT(innercv);
 		assert(inner_rc);
 		namepad[ix] = NULL;
@@ -515,10 +515,10 @@ Perl_pad_add_anon(pTHX_ SV* sv, OPCODE op_type)
 
     /* to avoid ref loops, we never have parent + child referencing each
      * other simultaneously */
-    if (CvOUTSIDE((CV*)sv)) {
-	assert(!CvWEAKOUTSIDE((CV*)sv));
-	CvWEAKOUTSIDE_on((CV*)sv);
-	SvREFCNT_dec(CvOUTSIDE((CV*)sv));
+    if (CvOUTSIDE((const CV *)sv)) {
+	assert(!CvWEAKOUTSIDE((const CV *)sv));
+	CvWEAKOUTSIDE_on(MUTABLE_CV(sv));
+	SvREFCNT_dec(CvOUTSIDE(MUTABLE_CV(sv)));
     }
     return ix;
 }
@@ -1490,7 +1490,7 @@ Perl_cv_clone(pTHX_ CV *proto)
     ENTER;
     SAVESPTR(PL_compcv);
 
-    cv = PL_compcv = (CV*)newSV_type(SvTYPE(proto));
+    cv = PL_compcv = MUTABLE_CV(newSV_type(SvTYPE(proto)));
     CvFLAGS(cv) = CvFLAGS(proto) & ~(CVf_CLONE|CVf_WEAKOUTSIDE);
     CvCLONED_on(cv);
 
@@ -1506,7 +1506,7 @@ Perl_cv_clone(pTHX_ CV *proto)
     CvROOT(cv)		= OpREFCNT_inc(CvROOT(proto));
     OP_REFCNT_UNLOCK;
     CvSTART(cv)		= CvSTART(proto);
-    CvOUTSIDE(cv)	= (CV*)SvREFCNT_inc_simple(outside);
+    CvOUTSIDE(cv)	= MUTABLE_CV(SvREFCNT_inc_simple(outside));
     CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(proto);
 
     if (SvPOK(proto))
@@ -1624,7 +1624,7 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
 	if (namesv && namesv != &PL_sv_undef
 	    && *SvPVX_const(namesv) == '&')
 	{
-	    CV * const innercv = (CV*)curpad[ix];
+	    CV * const innercv = MUTABLE_CV(curpad[ix]);
 	    assert(CvWEAKOUTSIDE(innercv));
 	    assert(CvOUTSIDE(innercv) == old_cv);
 	    CvOUTSIDE(innercv) = new_cv;

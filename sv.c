@@ -3508,7 +3508,7 @@ S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr)
     common:
 	if (intro) {
 	    if (stype == SVt_PVCV) {
-		/*if (GvCVGEN(dstr) && (GvCV(dstr) != (CV*)sref || GvCVGEN(dstr))) {*/
+		/*if (GvCVGEN(dstr) && (GvCV(dstr) != (const CV *)sref || GvCVGEN(dstr))) {*/
 		if (GvCVGEN(dstr)) {
 		    SvREFCNT_dec(GvCV(dstr));
 		    GvCV(dstr) = NULL;
@@ -3520,14 +3520,14 @@ S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr)
 	else
 	    dref = *location;
 	if (stype == SVt_PVCV && (*location != sref || GvCVGEN(dstr))) {
-	    CV* const cv = (CV*)*location;
+	    CV* const cv = MUTABLE_CV(*location);
 	    if (cv) {
 		if (!GvCVGEN((GV*)dstr) &&
 		    (CvROOT(cv) || CvXSUB(cv)))
 		    {
 			/* Redefining a sub - warning is mandatory if
 			   it was a const and its value changed. */
-			if (CvCONST(cv)	&& CvCONST((CV*)sref)
+			if (CvCONST(cv)	&& CvCONST((const CV *)sref)
 			    && cv_const_sv(cv) == cv_const_sv((CV*)sref)) {
 			    NOOP;
 			    /* They are 2 constant subroutines generated from
@@ -3539,7 +3539,7 @@ S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr)
 			}
 			else if (ckWARN(WARN_REDEFINE)
 				 || (CvCONST(cv)
-				     && (!CvCONST((CV*)sref)
+				     && (!CvCONST((const CV *)sref)
 					 || sv_cmp(cv_const_sv(cv),
 						   cv_const_sv((CV*)sref))))) {
 			    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
@@ -5496,7 +5496,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	goto freescalar;
     case SVt_PVCV:
     case SVt_PVFM:
-	cv_undef((CV*)sv);
+	cv_undef(MUTABLE_CV(sv));
 	goto freescalar;
     case SVt_PVHV:
 	if (PL_last_swash_hv == (const HV *)sv) {
@@ -7912,7 +7912,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
     case SVt_PVCV:
 	*st = CvSTASH(sv);
 	*gvp = NULL;
-	return (CV*)sv;
+	return MUTABLE_CV(sv);
     case SVt_PVHV:
     case SVt_PVAV:
 	*st = NULL;
@@ -7935,7 +7935,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 
 	    sv = SvRV(sv);
 	    if (SvTYPE(sv) == SVt_PVCV) {
-		cv = (CV*)sv;
+		cv = MUTABLE_CV(sv);
 		*gvp = NULL;
 		*st = CvSTASH(cv);
 		return cv;
@@ -10052,8 +10052,8 @@ ptr_table_* functions.
 #define av_dup_inc(s,t)	(AV*)SvREFCNT_inc(sv_dup((const SV *)s,t))
 #define hv_dup(s,t)	MUTABLE_HV(sv_dup((const SV *)s,t))
 #define hv_dup_inc(s,t)	MUTABLE_HV(SvREFCNT_inc(sv_dup((const SV *)s,t)))
-#define cv_dup(s,t)	(CV*)sv_dup((SV*)s,t)
-#define cv_dup_inc(s,t)	(CV*)SvREFCNT_inc(sv_dup((const SV *)s,t))
+#define cv_dup(s,t)	MUTABLE_CV(sv_dup((SV*)s,t))
+#define cv_dup_inc(s,t)	MUTABLE_CV(SvREFCNT_inc(sv_dup((const SV *)s,t)))
 #define io_dup(s,t)	(IO*)sv_dup((SV*)s,t)
 #define io_dup_inc(s,t)	(IO*)SvREFCNT_inc(sv_dup((const SV *)s,t))
 #define gv_dup(s,t)	(GV*)sv_dup((SV*)s,t)

@@ -379,7 +379,7 @@ PP(pp_rv2cv)
     CV *cv = sv_2cv(TOPs, &stash_unused, &gv, flags);
     if (cv) {
 	if (CvCLONE(cv))
-	    cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
+	    cv = MUTABLE_CV(sv_2mortal((SV*)cv_clone(cv)));
 	if ((PL_op->op_private & OPpLVAL_INTRO)) {
 	    if (gv && GvCV(gv) == cv && (gv = gv_autoload4(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv), FALSE)))
 		cv = GvCV(gv);
@@ -388,10 +388,10 @@ PP(pp_rv2cv)
 	}
     }
     else if ((flags == (GV_ADD|GV_NOEXPAND)) && gv && SvROK(gv)) {
-	cv = (CV*)gv;
+	cv = MUTABLE_CV(gv);
     }    
     else
-	cv = (CV*)&PL_sv_undef;
+	cv = MUTABLE_CV(&PL_sv_undef);
     SETs((SV*)cv);
     RETURN;
 }
@@ -475,9 +475,9 @@ PP(pp_prototype)
 PP(pp_anoncode)
 {
     dVAR; dSP;
-    CV* cv = (CV*)PAD_SV(PL_op->op_targ);
+    CV *cv = MUTABLE_CV(PAD_SV(PL_op->op_targ));
     if (CvCLONE(cv))
-	cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
+	cv = MUTABLE_CV(sv_2mortal((SV*)cv_clone(cv)));
     EXTEND(SP,1);
     PUSHs((SV*)cv);
     RETURN;
@@ -814,14 +814,15 @@ PP(pp_undef)
     case SVt_PVCV:
 	if (cv_const_sv((CV*)sv) && ckWARN(WARN_MISC))
 	    Perl_warner(aTHX_ packWARN(WARN_MISC), "Constant subroutine %s undefined",
-		 CvANON((CV*)sv) ? "(anonymous)" : GvENAME(CvGV((CV*)sv)));
+		 CvANON((const CV *)sv) ? "(anonymous)"
+			: GvENAME(CvGV((const CV *)sv)));
 	/* FALLTHROUGH */
     case SVt_PVFM:
 	{
 	    /* let user-undef'd sub keep its identity */
-	    GV* const gv = CvGV((CV*)sv);
-	    cv_undef((CV*)sv);
-	    CvGV((CV*)sv) = gv;
+	    GV* const gv = CvGV((const CV *)sv);
+	    cv_undef(MUTABLE_CV(sv));
+	    CvGV((const CV *)sv) = gv;
 	}
 	break;
     case SVt_PVGV:

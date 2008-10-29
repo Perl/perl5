@@ -2719,7 +2719,7 @@ PP(pp_entersub)
 	    SV * const * sp = &sv;		/* Used in tryAMAGICunDEREF macro. */
 	    tryAMAGICunDEREF(to_cv);
 	}	
-	cv = (CV*)SvRV(sv);
+	cv = MUTABLE_CV(SvRV(sv));
 	if (SvTYPE(cv) == SVt_PVCV)
 	    break;
 	/* FALL THROUGH */
@@ -2728,7 +2728,7 @@ PP(pp_entersub)
 	DIE(aTHX_ "Not a CODE reference");
 	/* This is the second most common case:  */
     case SVt_PVCV:
-	cv = (CV*)sv;
+	cv = MUTABLE_CV(sv);
 	break;
     }
 
