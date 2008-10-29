@@ -4,7 +4,7 @@ use strict;
 use warnings::register;
 
 use vars qw($VERSION %declared);
-$VERSION = '1.16';
+$VERSION = '1.17';
 
 #=======================================================================
 
