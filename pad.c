@@ -489,7 +489,7 @@ Perl_pad_add_anon(pTHX_ SV* sv, OPCODE op_type)
     PADOFFSET ix;
     SV* const name = newSV_type(SVt_PVNV);
     pad_peg("add_anon");
-    sv_setpvn(name, "&", 1);
+    sv_setpvs(name, "&");
     /* Are these two actually ever read? */
     COP_SEQ_RANGE_HIGH_set(name, ~0);
     COP_SEQ_RANGE_LOW_set(name, 1);

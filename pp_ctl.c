@@ -96,7 +96,7 @@ PP(pp_regcomp)
 	/* multiple args; concatentate them */
 	dMARK; dORIGMARK;
 	tmpstr = PAD_SV(ARGTARG);
-	sv_setpvn(tmpstr, "", 0);
+	sv_setpvs(tmpstr, "");
 	while (++MARK <= SP) {
 	    if (PL_amagic_generation) {
 		SV *sv;
@@ -1145,7 +1145,7 @@ PP(pp_flip)
 		RETURNOP(((LOGOP*)cUNOP->op_first)->op_other);
 	    }
 	}
-	sv_setpvn(TARG, "", 0);
+	sv_setpvs(TARG, "");
 	SETs(targ);
 	RETURN;
     }
@@ -1503,7 +1503,7 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 		SV * const err = ERRSV;
 		const char *e = NULL;
 		if (!SvPOK(err))
-		    sv_setpvn(err,"",0);
+		    sv_setpvs(err,"");
 		else if (SvCUR(err) >= sizeof(prefix)+msglen-1) {
 		    STRLEN len;
 		    e = SvPV_const(err, len);

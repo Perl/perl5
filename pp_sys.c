@@ -328,7 +328,7 @@ PP(pp_backtick)
 	    ENTER;
 	    SAVESPTR(PL_rs);
 	    PL_rs = &PL_sv_undef;
-	    sv_setpvn(TARG, "", 0);	/* note that this preserves previous buffer */
+	    sv_setpvs(TARG, "");	/* note that this preserves previous buffer */
 	    while (sv_gets(TARG, fp, SvCUR(TARG)) != NULL)
 		NOOP;
 	    LEAVE;
@@ -1222,7 +1222,7 @@ PP(pp_getc)
 	RETPUSHUNDEF;
     }
     TAINT;
-    sv_setpvn(TARG, " ", 1);
+    sv_setpvs(TARG, " ");
     *SvPVX(TARG) = PerlIO_getc(IoIFP(GvIOp(gv))); /* should never be EOF */
     if (PerlIO_isutf8(IoIFP(GvIOp(gv)))) {
 	/* Find out how many bytes the char needs */
@@ -1574,7 +1574,7 @@ PP(pp_sysread)
 	goto say_undef;
     bufsv = *++MARK;
     if (! SvOK(bufsv))
-	sv_setpvn(bufsv, "", 0);
+	sv_setpvs(bufsv, "");
     length = SvIVx(*++MARK);
     SETERRNO(0,0);
     if (MARK < SP)
@@ -2018,10 +2018,10 @@ PP(pp_eof)
 		    IoFLAGS(io) &= ~IOf_START;
 		    do_open(gv, "-", 1, FALSE, O_RDONLY, 0, NULL);
 		    if ( GvSV(gv) ) {
-			sv_setpvn(GvSV(gv), "-", 1);
+			sv_setpvs(GvSV(gv), "-");
 		    }
 		    else {
-			GvSV(gv) = newSVpvn("-", 1);
+			GvSV(gv) = newSVpvs("-");
 		    }
 		    SvSETMAGIC(GvSV(gv));
 		}
@@ -2814,7 +2814,7 @@ PP(pp_stat)
 	if (gv != PL_defgv) {
 	    PL_laststype = OP_STAT;
 	    PL_statgv = gv;
-	    sv_setpvn(PL_statname, "", 0);
+	    sv_setpvs(PL_statname, "");
             if(gv) {
                 io = GvIO(gv);
                 do_fstat_have_io:
@@ -3267,7 +3267,7 @@ PP(pp_fttext)
 	else {
 	    PL_statgv = gv;
 	    PL_laststatval = -1;
-	    sv_setpvn(PL_statname, "", 0);
+	    sv_setpvs(PL_statname, "");
 	    io = GvIO(PL_statgv);
 	}
 	if (io && IoIFP(io)) {

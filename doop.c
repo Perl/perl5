@@ -693,7 +693,7 @@ Perl_do_join(pTHX_ register SV *sv, SV *delim, register SV **mark, register SV *
 	++mark;
     }
 
-    sv_setpvn(sv, "", 0);
+    sv_setpvs(sv, "");
     /* sv_setpv retains old UTF8ness [perl #24846] */
     SvUTF8_off(sv);
 
@@ -1028,7 +1028,7 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
 	    }
 	}
 	else
-	    sv_setpvn(astr, "", 0);
+	    sv_setpvs(astr, "");
     }
     else if (s && len) {
 	s += --len;
@@ -1039,7 +1039,7 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
 	SvNIOK_off(sv);
     }
     else
-	sv_setpvn(astr, "", 0);
+	sv_setpvs(astr, "");
     SvSETMAGIC(sv);
 }
 
@@ -1203,7 +1203,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 
 
     if (sv != left || (optype != OP_BIT_AND && !SvOK(sv) && !SvGMAGICAL(sv)))
-	sv_setpvn(sv, "", 0);	/* avoid undef warning on |= and ^= */
+	sv_setpvs(sv, "");	/* avoid undef warning on |= and ^= */
     lsave = lc = SvPV_nomg_const(left, leftlen);
     rsave = rc = SvPV_nomg_const(right, rightlen);
 

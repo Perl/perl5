@@ -3049,13 +3049,13 @@ Perl_same_dirent(pTHX_ const char *a, const char *b)
     if (strNE(a,b))
 	return FALSE;
     if (fa == a)
-	sv_setpvn(tmpsv, ".", 1);
+	sv_setpvs(tmpsv, ".");
     else
 	sv_setpvn(tmpsv, a, fa - a);
     if (PerlLIO_stat(SvPVX_const(tmpsv), &tmpstatbuf1) < 0)
 	return FALSE;
     if (fb == b)
-	sv_setpvn(tmpsv, ".", 1);
+	sv_setpvs(tmpsv, ".");
     else
 	sv_setpvn(tmpsv, b, fb - b);
     if (PerlLIO_stat(SvPVX_const(tmpsv), &tmpstatbuf2) < 0)
@@ -4355,7 +4355,7 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
 	(void)hv_stores((HV *)hv, "original", orig);
     }
     else {
-	(void)hv_stores((HV *)hv, "original", newSVpvn("0",1));
+	(void)hv_stores((HV *)hv, "original", newSVpvs("0"));
 	av_push(av, newSViv(0));
     }
 

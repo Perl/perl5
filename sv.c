@@ -8572,7 +8572,7 @@ Usually used via one of its frontends C<sv_vsetpvf> and C<sv_vsetpvf_mg>.
 void
 Perl_sv_vsetpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *maybe_tainted)
 {
-    sv_setpvn(sv, "", 0);
+    sv_setpvs(sv, "";
     sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, maybe_tainted);
 }
 
@@ -11314,9 +11314,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #endif
     PL_encoding		= sv_dup(proto_perl->Iencoding, param);
 
-    sv_setpvn(PERL_DEBUG_PAD(0), "", 0);	/* For regex debugging. */
-    sv_setpvn(PERL_DEBUG_PAD(1), "", 0);	/* ext/re needs these */
-    sv_setpvn(PERL_DEBUG_PAD(2), "", 0);	/* even without DEBUGGING. */
+    sv_setpvs(PERL_DEBUG_PAD(0), "");	/* For regex debugging. */
+    sv_setpvs(PERL_DEBUG_PAD(1), "");	/* ext/re needs these */
+    sv_setpvs(PERL_DEBUG_PAD(2), "");	/* even without DEBUGGING. */
 
    
     /* RE engine related */
@@ -12274,7 +12274,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 				 : DEFSV))
 	    {
 		sv = sv_newmortal();
-		sv_setpvn(sv, "$_", 2);
+		sv_setpvs(sv, "$_");
 		return sv;
 	    }
 	}

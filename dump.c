@@ -219,7 +219,7 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
 
     if (!(flags & PERL_PV_ESCAPE_NOCLEAR)) {
 	    /* This won't alter the UTF-8 flag */
-	    sv_setpvn(dsv, "", 0);
+	    sv_setpvs(dsv, "");
     }
     
     if ((flags & PERL_PV_ESCAPE_UNI_DETECT) && is_utf8_string((U8*)pv, count))
@@ -330,29 +330,29 @@ Perl_pv_pretty( pTHX_ SV *dsv, char const * const str, const STRLEN count,
     
     if (!(flags & PERL_PV_PRETTY_NOCLEAR)) {
 	    /* This won't alter the UTF-8 flag */
-	    sv_setpvn(dsv, "", 0);
+	    sv_setpvs(dsv, "");
     }
 
     if ( dq == '"' )
-        sv_catpvn(dsv, "\"", 1);
+        sv_catpvs(dsv, "\"");
     else if ( flags & PERL_PV_PRETTY_LTGT )
-        sv_catpvn(dsv, "<", 1);
+        sv_catpvs(dsv, "<");
         
     if ( start_color != NULL ) 
-        Perl_sv_catpv( aTHX_ dsv, start_color);
+        sv_catpv(dsv, start_color);
     
     pv_escape( dsv, str, count, max, &escaped, flags | PERL_PV_ESCAPE_NOCLEAR );    
     
     if ( end_color != NULL ) 
-        Perl_sv_catpv( aTHX_ dsv, end_color);
+        sv_catpv(dsv, end_color);
 
     if ( dq == '"' ) 
-	sv_catpvn( dsv, "\"", 1 );
+	sv_catpvs( dsv, "\"");
     else if ( flags & PERL_PV_PRETTY_LTGT )
-        sv_catpvn( dsv, ">", 1);         
+        sv_catpvs(dsv, ">");         
     
     if ( (flags & PERL_PV_PRETTY_ELLIPSES) && ( escaped < count ) )
-	    sv_catpvn( dsv, "...", 3 );
+	    sv_catpvs(dsv, "...");
  
     return SvPVX(dsv);
 }
@@ -377,7 +377,7 @@ Perl_pv_display(pTHX_ SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pv
 {
     pv_pretty( dsv, pv, cur, pvlim, NULL, NULL, PERL_PV_PRETTY_DUMP);
     if (len > cur && pv[cur] == '\0')
-            sv_catpvn( dsv, "\\0", 2 );
+            sv_catpvs( dsv, "\\0");
     return SvPVX(dsv);
 }
 
@@ -389,7 +389,7 @@ Perl_sv_peek(pTHX_ SV *sv)
     int unref = 0;
     U32 type;
 
-    sv_setpvn(t, "", 0);
+    sv_setpvs(t, "");
   retry:
     if (!sv) {
 	sv_catpv(t, "VOID");
@@ -968,13 +968,13 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 
 #ifdef PERL_MAD
     if (PL_madskills && o->op_madprop) {
-	SV * const tmpsv = newSVpvn("", 0);
+	SV * const tmpsv = newSVpvs("");
 	MADPROP* mp = o->op_madprop;
 	Perl_dump_indent(aTHX_ level, file, "MADPROPS = {\n");
 	level++;
 	while (mp) {
 	    const char tmp = mp->mad_key;
-	    sv_setpvn(tmpsv,"'",1);
+	    sv_setpvs(tmpsv,"'");
 	    if (tmp)
 		sv_catpvn(tmpsv, &tmp, 1);
 	    sv_catpv(tmpsv, "'=");
@@ -1607,7 +1607,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	Perl_dump_indent(aTHX_ level, file, "  FILL = %"IVdf"\n", (IV)AvFILLp(sv));
 	Perl_dump_indent(aTHX_ level, file, "  MAX = %"IVdf"\n", (IV)AvMAX(sv));
 	Perl_dump_indent(aTHX_ level, file, "  ARYLEN = 0x%"UVxf"\n", SvMAGIC(sv) ? PTR2UV(AvARYLEN(sv)) : 0);
-	sv_setpvn(d, "", 0);
+	sv_setpvs(d, "");
 	if (AvREAL(sv))	sv_catpv(d, ",REAL");
 	if (AvREIFY(sv))	sv_catpv(d, ",REIFY");
 	Perl_dump_indent(aTHX_ level, file, "  FLAGS = (%s)\n",
@@ -2162,7 +2162,7 @@ Perl_sv_catxmlpvn(pTHX_ SV *dsv, const char *pv, STRLEN len, int utf8)
     STRLEN dsvcur;
     STRLEN cl;
 
-    sv_catpvn(dsv,"",0);
+    sv_catpvs(dsv,"");
     dsvcur = SvCUR(dsv);	/* in case we have to restart */
 
   retry:
@@ -2286,7 +2286,7 @@ Perl_sv_xmlpeek(pTHX_ SV *sv)
     int unref = 0;
 
     sv_utf8_upgrade(t);
-    sv_setpvn(t, "", 0);
+    sv_setpvs(t, "");
     /* retry: */
     if (!sv) {
 	sv_catpv(t, "VOID=\"\"");
@@ -2532,7 +2532,7 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
     PerlIO_printf(file, " addr=\"0x%"UVxf" => 0x%"UVxf"\"", (UV)o, (UV)o->op_next);
 #endif
     if (o->op_flags) {
-	SV * const tmpsv = newSVpvn("", 0);
+	SV * const tmpsv = newSVpvs("");
 	switch (o->op_flags & OPf_WANT) {
 	case OPf_WANT_VOID:
 	    sv_catpv(tmpsv, ",VOID");
@@ -2563,7 +2563,7 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	SvREFCNT_dec(tmpsv);
     }
     if (o->op_private) {
-	SV * const tmpsv = newSVpvn("", 0);
+	SV * const tmpsv = newSVpvs("");
 	if (PL_opargs[o->op_type] & OA_TARGLEX) {
 	    if (o->op_private & OPpTARGET_MY)
 		sv_catpv(tmpsv, ",TARGET_MY");
@@ -2840,7 +2840,7 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	level++;
 	while (mp) {
 	    char tmp = mp->mad_key;
-	    sv_setpvn(tmpsv,"\"",1);
+	    sv_setpvs(tmpsv,"\"");
 	    if (tmp)
 		sv_catxmlpvn(tmpsv, &tmp, 1, 0);
 	    if ((tmp == '_') || (tmp == '#')) /* '_' '#' whitespace belong to the previous token. */

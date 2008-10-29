@@ -1048,7 +1048,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    if (USE_UTF8_IN_NAMES)
 		SvUTF8_on(err);
 	    qerror(err);
-	    gv = gv_fetchpvn_flags("<none>::", 8, GV_ADDMULTI, SVt_PVHV);
+	    gv = gv_fetchpvs("<none>::", GV_ADDMULTI, SVt_PVHV);
 	    if(!gv) {
 		/* symbol table under destruction */
 		return NULL;
@@ -1138,15 +1138,15 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 			&& AvFILLp(av) == -1)
 			{
 			    const char *pname;
-			    av_push(av, newSVpvn(pname = "NDBM_File",9));
+			    av_push(av, newSVpvs(pname = "NDBM_File"));
 			    gv_stashpvn(pname, 9, GV_ADD);
-			    av_push(av, newSVpvn(pname = "DB_File",7));
+			    av_push(av, newSVpvs(pname = "DB_File"));
 			    gv_stashpvn(pname, 7, GV_ADD);
-			    av_push(av, newSVpvn(pname = "GDBM_File",9));
+			    av_push(av, newSVpvs(pname = "GDBM_File"));
 			    gv_stashpvn(pname, 9, GV_ADD);
-			    av_push(av, newSVpvn(pname = "SDBM_File",9));
+			    av_push(av, newSVpvs(pname = "SDBM_File"));
 			    gv_stashpvn(pname, 9, GV_ADD);
-			    av_push(av, newSVpvn(pname = "ODBM_File",9));
+			    av_push(av, newSVpvs(pname = "ODBM_File"));
 			    gv_stashpvn(pname, 9, GV_ADD);
 			}
 		}
@@ -1353,11 +1353,11 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    break;
 
 	case '\014':	/* $^L */
-	    sv_setpvn(GvSVn(gv),"\f",1);
+	    sv_setpvs(GvSVn(gv),"\f");
 	    PL_formfeed = GvSVn(gv);
 	    break;
 	case ';':
-	    sv_setpvn(GvSVn(gv),"\034",1);
+	    sv_setpvs(GvSVn(gv),"\034");
 	    break;
 	case ']':
 	{

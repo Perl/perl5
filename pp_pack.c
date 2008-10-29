@@ -3559,7 +3559,7 @@ PP(pp_pack)
     register const char *patend = pat + fromlen;
 
     MARK++;
-    sv_setpvn(cat, "", 0);
+    sv_setpvs(cat, "");
     SvUTF8_off(cat);
 
     packlist(cat, pat, patend, MARK, SP + 1);

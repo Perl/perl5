@@ -269,7 +269,7 @@ PP(pp_concat)
 	if (!SvOK(TARG)) {
 	    if (left == right && ckWARN(WARN_UNINITIALIZED))
 		report_uninit(right);
-	    sv_setpvn(left, "", 0);
+	    sv_setpvs(left, "");
 	}
 	(void)SvPV_nomg_const(left, llen);    /* Needed to set UTF8 flag */
 	lbyte = !DO_UTF8(left);
@@ -1570,7 +1570,7 @@ Perl_do_readline(pTHX)
 		    if (av_len(GvAVn(PL_last_in_gv)) < 0) {
 			IoFLAGS(io) &= ~IOf_START;
 			do_open(PL_last_in_gv,"-",1,FALSE,O_RDONLY,0,NULL);
-			sv_setpvn(GvSVn(PL_last_in_gv), "-", 1);
+			sv_setpvs(GvSVn(PL_last_in_gv), "-");
 			SvSETMAGIC(GvSV(PL_last_in_gv));
 			fp = IoIFP(io);
 			goto have_fp;
