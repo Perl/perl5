@@ -1507,6 +1507,9 @@ distclean: realclean
 	-if exist $(LIBDIR)\Encode rmdir /s /q $(LIBDIR)\Encode
 	-if exist $(LIBDIR)\Filter\Util rmdir /s /q $(LIBDIR)\Filter\Util
 	-if exist $(LIBDIR)\Hash rmdir /s /q $(LIBDIR)\Hash
+	-if exist $(LIBDIR)\App rmdir /s /q $(LIBDIR)\App
+	-if exist $(LIBDIR)\Module\Pluggable rmdir /s /q $(LIBDIR)\Module\Pluggable
+	-if exist $(LIBDIR)\TAP rmdir /s /q $(LIBDIR)\TAP
 	-if exist $(LIBDIR)\IO\Compress rmdir /s /q $(LIBDIR)\IO\Compress
 	-if exist $(LIBDIR)\IO\Socket rmdir /s /q $(LIBDIR)\IO\Socket
 	-if exist $(LIBDIR)\IO\Uncompress rmdir /s /q $(LIBDIR)\IO\Uncompress
