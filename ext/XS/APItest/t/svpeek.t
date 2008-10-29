@@ -58,11 +58,10 @@ like (DPeek ($1), qr'^PVMG\("',			' $1');
   is (DPeek (sub {}),	'\CV(__ANON__)',	'sub {}');
 
 { our ($VAR, @VAR, %VAR);
-  open VAR, ">VAR.txt";
+  open VAR, "<", $^X or die "Can't open $^X: $!";
   sub VAR {}
   format VAR =
 .
-  END { unlink "VAR.txt" };
 
   is (DPeek ( $VAR),	'UNDEF',		' $VAR undef');
   is (DPeek (\$VAR),	'\UNDEF',		'\$VAR undef');
