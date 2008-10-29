@@ -1,5 +1,9 @@
 Revision history for Perl distribution PathTools.
 
+3.29 - Wed Oct 29 20:48:11 2008
+
+- Promote to stable release.
+
 3.28_03 - Mon Oct 27 22:12:11 2008
 
 - In Cwd.pm, pass the un-munged $VERSION to XSLoader/DynaLoader,
