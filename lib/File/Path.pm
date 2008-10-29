@@ -17,7 +17,7 @@ BEGIN {
 
 use Exporter ();
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION   = '2.06_06';
+$VERSION   = '2.06_07';
 @ISA     = qw(Exporter);
 @EXPORT  = qw(mkpath rmtree);
 @EXPORT_OK = qw(make_path remove_tree);
@@ -55,12 +55,12 @@ sub _error {
 }
 
 sub make_path {
-    push @_, {} if !@_ or (@_ and !UNIVERSAL::isa($_[-1],'HASH'));
+    push @_, {} unless @_ and UNIVERSAL::isa($_[-1],'HASH');
     goto &mkpath;
 }
 
 sub mkpath {
-    my $old_style = !(@_ > 0 and UNIVERSAL::isa($_[-1],'HASH'));
+    my $old_style = !(@_ and UNIVERSAL::isa($_[-1],'HASH'));
 
     my $arg;
     my $paths;
@@ -69,12 +69,11 @@ sub mkpath {
         my ($verbose, $mode);
         ($paths, $verbose, $mode) = @_;
         $paths = [$paths] unless UNIVERSAL::isa($paths,'ARRAY');
-        $arg->{verbose} = defined $verbose ? $verbose : 0;
+        $arg->{verbose} = $verbose;
         $arg->{mode}    = defined $mode    ? $mode    : 0777;
     }
     else {
             $arg = pop @_;
-        $arg->{verbose} ||= 0;
         $arg->{mode}      = delete $arg->{mask} if exists $arg->{mask};
             $arg->{mode} = 0777 unless exists $arg->{mode};
             ${$arg->{error}} = [] if exists $arg->{error};
@@ -125,12 +124,12 @@ sub _mkpath {
 }
 
 sub remove_tree {
-    push @_, {} if !@_ or (@_ and !UNIVERSAL::isa($_[-1],'HASH'));
+    push @_, {} unless @_ and UNIVERSAL::isa($_[-1],'HASH');
     goto &rmtree;
 }
 
 sub rmtree {
-    my $old_style = !(@_ > 0 and UNIVERSAL::isa($_[-1],'HASH'));
+    my $old_style = !(@_ and UNIVERSAL::isa($_[-1],'HASH'));
 
     my $arg;
     my $paths;
@@ -138,7 +137,7 @@ sub rmtree {
     if ($old_style) {
         my ($verbose, $safe);
         ($paths, $verbose, $safe) = @_;
-        $arg->{verbose} = defined $verbose ? $verbose : 0;
+        $arg->{verbose} = $verbose;
         $arg->{safe}    = defined $safe    ? $safe    : 0;
 
         if (defined($paths) and length($paths)) {
@@ -150,14 +149,9 @@ sub rmtree {
         }
     }
     else {
-        if (@_ > 0 and UNIVERSAL::isa($_[-1],'HASH')) {
             $arg = pop @_;
             ${$arg->{error}}  = [] if exists $arg->{error};
             ${$arg->{result}} = [] if exists $arg->{result};
-        }
-        else {
-            @{$arg}{qw(verbose safe)} = (0, 0);
-        }
         $paths = [@_];
     }
 
@@ -398,79 +392,65 @@ File::Path - Create or remove directory trees
 
 =head1 VERSION
 
-This document describes version 2.06_06 of File::Path, released
-2008-10-05.
+This document describes version 2.06_07 of File::Path, released
+2008-10-29.
 
 =head1 SYNOPSIS
 
-    use File::Path;
+  use File::Path qw(make_path remove_tree);
 
-    # modern
-  make_path( 'foo/bar/baz', '/zug/zwang' );
-  # or
-    mkpath( 'foo/bar/baz', '/zug/zwang', {verbose => 1} );
+  make_path('foo/bar/baz', '/zug/zwang');
+  make_path('foo/bar/baz', '/zug/zwang', {
+      verbose => 1,
+      mode => 0711,
+  });
 
-    rmtree(
-        'foo/bar/baz', '/zug/zwang',
-        { verbose => 1, error  => \my $err_list }
-    );
-  # or
-  remove_tree( 'foo/bar/baz', '/zug/zwang' );
+  remove_tree('foo/bar/baz', '/zug/zwang');
+  remove_tree('foo/bar/baz', '/zug/zwang', {
+      verbose => 1,
+      error  => \my $err_list,
+  });
 
-    # traditional
+  # legacy (interface promoted before v2.0)
+  mkpath('/foo/bar/baz');
+  mkpath('/foo/bar/baz', 1, 0711);
     mkpath(['/foo/bar/baz', 'blurfl/quux'], 1, 0711);
+  rmtree('foo/bar/baz', 1, 1);
     rmtree(['foo/bar/baz', 'blurfl/quux'], 1, 1);
+
+  # legacy (interface promoted before v2.6)
+  mkpath('foo/bar/baz', '/zug/zwang', { verbose => 1, mode => 0711 });
+  rmtree('foo/bar/baz', '/zug/zwang', { verbose => 1, mode => 0711 });
 
 =head1 DESCRIPTION
 
-The C<mkpath> function provides a convenient way to create directories
-of arbitrary depth. Similarly, the C<rmtree> function provides a
-convenient way to delete an entire directory subtree from the
-filesystem, much like the Unix command C<rm -r> or C<del /s> on
-Windows.
+This module provide a convenient way to create directories of
+arbitrary depth and to delete an entire directory subtree from the
+filesystem.
 
-There are two further functions, C<make_path> and C<remove_tree>
-that perform the same task and offer a more intuitive interface.
+The following functions are provided:
 
-=head2 FUNCTIONS
+=over
 
-The modern way of calling C<mkpath> and C<rmtree> is with a list
-of directories to create, or remove, respectively, followed by a
-hash reference containing keys to control the function's behaviour.
+=item make_path( $dir1, $dir2, .... )
 
-=head3 C<make_path>
+=item make_path( $dir1, $dir2, ...., \%opts )
 
-The C<make_path> routine accepts a list of directories to be
-created. Its behaviour may be tuned by an optional hashref
-appearing as the last parameter on the call.
+The C<make_path> function creates the given directories if they don't
+exists before, much like the Unix command C<mkdir -p>.
 
-  my @created = make_path(qw(/tmp /flub /home/nobody));
-  print "created $_\n" for @created;
-
-The function returns the list of files actually created during the
-call.
-
-=head3 C<mkpath>
-
-The C<mkpath> routine will recognise a final hashref in the
-same manner as C<make_path>. If no hashref is present, the
-parameters are interpreted according to the traditional interface
-(see below).
-
-  my @created = mkpath(
-    qw(/tmp /flub /home/nobody),
-    {verbose => 1, mode => 0750},
-  );
-  print "created $_\n" for @created;
+The function accepts a list of directories to be created. Its
+behaviour may be tuned by an optional hashref appearing as the last
+parameter on the call.
 
 The function returns the list of directories actually created during
-the call.
+the call; in scalar context the number of directories created.
 
-The following keys are recognised:
+The following keys are recognised in the option hash:
 
-=over 4
+=over
 
-=item mode
+=item mode => $num
 
 The numeric permissions mode to apply to each created directory
 (defaults to 0777), to be modified by the current C<umask>. If the
@@ -479,14 +459,15 @@ the permissions will not be modified.
 
 C<mask> is recognised as an alias for this parameter.
 
-=item verbose
+=item verbose => $bool
 
 If present, will cause C<mkpath> to print the name of each directory
 as it is created. By default nothing is printed.
 
-=item error
+=item error => \$err
 
-If present, will be interpreted as a reference to a list, and will
+If present, it should be a reference to a scalar.
+This scalar will be made to reference an array, which will
 be used to store any errors that are encountered.  See the ERROR
 HANDLING section for more information.
 
@@ -496,32 +477,40 @@ in an C<eval> block.
 
 =back
 
-=head3 C<remove_tree>
+=item mkpath( $dir, $verbose, $mode )
 
-The C<remove_tree> routine accepts a list of directories to be
+=item mkpath( [$dir1, $dir2,...], $verbose, $mode )
+
+=item mkpath( $dir1, $dir2,..., \%opt )
+
+The mkpath() function provide the legacy interface with a different
+interpretation of the arguments passed.  This function also returns
+the list of directories actually created during the call.
+
+=item remove_tree( $dir1, $dir2, .... )
+
+=item remove_tree( $dir1, $dir2, ...., \%opts )
+
+The C<remove_tree> function deletes the given directories and any
+files and subdirectories they might contain, much like the Unix
+command C<rm -r> or C<del /s> on Windows.
+
+The function accepts a list of directories to be
 removed. Its behaviour may be tuned by an optional hashref
 appearing as the last parameter on the call.
 
-  remove_tree( 'this/dir', 'that/dir' );
+The functions returns the number of files successfully deleted.
 
-=head3 C<rmtree>
+The following keys are recognised in the option hash:
 
-The C<rmtree> routine will recognise a final hashref in the
-same manner as C<remove_tree>. If no hashref is present, the
-parameters are interpreted according to the traditional interface.
+=over
 
-  rmtree( 'mydir', 1 );                 # traditional
-  rmtree( ['mydir'], 1 );               # traditional
-  rmtree( 'mydir', 1, {verbose => 0} ); # modern
-
-=over 4
-
-=item verbose
+=item verbose => $bool
 
 If present, will cause C<rmtree> to print the name of each file as
 it is unlinked. By default nothing is printed.
 
-=item safe
+=item safe => $bool
 
 When set to a true value, will cause C<rmtree> to skip the files
 for which the process lacks the required privileges needed to delete
@@ -530,7 +519,7 @@ will make no attempt to alter file permissions. Thus, if the process
 is interrupted, no filesystem object will be left in a more
 permissive mode.
 
-=item keep_root
+=item keep_root => $bool
 
 When set to a true value, will cause all files and subdirectories
 to be removed, except the initially specified directories. This comes
@@ -538,23 +527,24 @@ in handy when cleaning out an application's scratch directory.
 
   remove_tree( '/tmp', {keep_root => 1} );
 
-=item result
+=item result => \$res
 
-If present, will be interpreted as a reference to a list, and will
-be used to store the list of all files and directories unlinked
-during the call. If nothing is unlinked, a reference to an empty
-list is returned (rather than C<undef>).
+If present, it should be a reference to a scalar.
+This scalar will be made to reference an array, which will
+be used to store all files and directories unlinked
+during the call. If nothing is unlinked, a the array will be empty.
 
   remove_tree( '/tmp', {result => \my $list} );
   print "unlinked $_\n" for @$list;
 
 This is a useful alternative to the C<verbose> key.
 
-=item error
+=item error => \$err
 
-If present, will be interpreted as a reference to a list,
-and will be used to store any errors that are encountered.
-See the ERROR HANDLING section for more information.
+If present, it should be a reference to a scalar.
+This scalar will be made to reference an array, which will
+be used to store any errors that are encountered.  See the ERROR
+HANDLING section for more information.
 
 Removing things is a much more dangerous proposition than
 creating things. As such, there are certain conditions that
@@ -567,105 +557,18 @@ of hand. This is the safest course of action.
 
 =back
 
-=head2 TRADITIONAL INTERFACE
+=item rmtree( $dir )
 
-The old interfaces of C<mkpath> and C<rmtree> take a reference to
-a list of directories (to create or remove), followed by a series
-of positional, numeric, modal parameters that control their behaviour.
-If only one directory is being created or removed, a simple scalar
-may be used instead of the reference.
+=item rmtree( $dir, $verbose, $safe )
 
-  rmtree( ['dir1', 'dir2'], 0, 1 );
-  rmtree( 'dir3', 1, 1 );
+=item rmtree( [$dir1, $dir2,...], $verbose, $safe )
 
-This design made it difficult to add additional functionality, as
-well as posed the problem of what to do when the calling code only
-needs to set the last parameter. Even though the code doesn't care
-how the initial positional parameters are set, the programmer is
-forced to learn what the defaults are, and specify them.
+=item rmtree( $dir1, $dir2,..., \%opt )
 
-Worse, if it turns out in the future that it would make more sense
-to change the default behaviour of the first parameter (for example,
-to avoid a security vulnerability), all existing code will remain
-hard-wired to the wrong defaults.
-
-Finally, a series of numeric parameters are much less self-documenting
-in terms of communicating to the reader what the code is doing. Named
-parameters do not have this problem.
-
-In the traditional API, C<mkpath> takes three arguments:
-
-=over 4
-
-=item *
-
-The name of the path to create, or a reference to a list of paths
-to create,
-
-=item *
-
-a boolean value, which if TRUE will cause C<mkpath> to print the
-name of each directory as it is created (defaults to FALSE), and
-
-=item *
-
-the numeric mode to use when creating the directories (defaults to
-0777), to be modified by the current umask.
+The rmtree() function provide the legacy interface with a different
+interpretation of the arguments passed.
 
 =back
-
-It returns a list of all directories (including intermediates,
-determined using the Unix '/' separator) created. In scalar context
-it returns the number of directories created.
-
-If a system error prevents a directory from being created, then the
-C<mkpath> function throws a fatal error with C<Carp::croak>. This
-error can be trapped with an C<eval> block:
-
-  eval { mkpath($dir) };
-  if ($@) {
-    print "Couldn't create $dir: $@";
-  }
-
-In the traditional API, C<rmtree> takes three arguments:
-
-=over 4
-
-=item *
-
-the root of the subtree to delete, or a reference to a list of
-roots. All of the files and directories below each root, as well
-as the roots themselves, will be deleted. If you want to keep
-the roots themselves, you must use the modern API.
-
-=item *
-
-a boolean value, which if TRUE will cause C<rmtree> to print a
-message each time it examines a file, giving the name of the file,
-and indicating whether it's using C<rmdir> or C<unlink> to remove
-it, or that it's skipping it.  (defaults to FALSE)
-
-=item *
-
-a boolean value, which if TRUE will cause C<rmtree> to skip any
-files to which you do not have delete access (if running under VMS)
-or write access (if running under another OS). This will change
-in the future when a criterion for 'delete permission' under OSs
-other than VMS is settled.  (defaults to FALSE)
-
-=back
-
-C<rmtree> returns the number of files, directories and symlinks
-successfully deleted. Symlinks are simply deleted and not followed.
-
-Note also that the occurrence of errors in C<rmtree> using the
-traditional interface can be determined I<only> by trapping diagnostic
-messages using C<$SIG{__WARN__}>; it is not apparent from the return
-value. (The modern interface may use the C<error> parameter to
-record any problems encountered).
-
-It is not possible to invoke the C<keep_root> functionality through
-the traditional interface.
 
 =head2 ERROR HANDLING
 
