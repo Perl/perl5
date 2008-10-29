@@ -274,12 +274,12 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
     if (size && (count <= MEM_SIZE_MAX / size))
 	total_size = size * count;
     else
-	Perl_croak_nocontext(PL_memory_wrap);
+	Perl_croak_nocontext("%s", PL_memory_wrap);
 #ifdef PERL_TRACK_MEMPOOL
     if (sTHX <= MEM_SIZE_MAX - (MEM_SIZE)total_size)
 	total_size += sTHX;
     else
-	Perl_croak_nocontext(PL_memory_wrap);
+	Perl_croak_nocontext("%s", PL_memory_wrap);
 #endif
 #ifdef HAS_64K_LIMIT
     if (total_size > 0xffff) {

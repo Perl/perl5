@@ -1517,7 +1517,8 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 		    sv_catpvn(err, message, msglen);
 		    if (ckWARN(WARN_MISC)) {
 			const STRLEN start = SvCUR(err)-msglen-sizeof(prefix)+1;
-			Perl_warner(aTHX_ packWARN(WARN_MISC), SvPVX_const(err)+start);
+			Perl_warner(aTHX_ packWARN(WARN_MISC), "%s",
+				SvPVX_const(err)+start);
 		    }
 		}
 	    }

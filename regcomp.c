@@ -1973,7 +1973,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                                     if ( folder )
                                         TRIE_BITMAP_SET(trie, folder[ *ch ]);
                                     DEBUG_OPTIMISE_r(
-                                        PerlIO_printf(Perl_debug_log, (char*)ch)
+                                        PerlIO_printf(Perl_debug_log, "%s", (char*)ch)
                                     );
 				}
 			    }
@@ -4883,7 +4883,7 @@ Perl_reg_named_buff(pTHX_ REGEXP * const rx, SV * const key, SV * const value,
     if (flags & RXapif_FETCH) {
         return reg_named_buff_fetch(rx, key, flags);
     } else if (flags & (RXapif_STORE | RXapif_DELETE | RXapif_CLEAR)) {
-        Perl_croak(aTHX_ PL_no_modify);
+        Perl_croak(aTHX_ "%s", PL_no_modify);
         return NULL;
     } else if (flags & RXapif_EXISTS) {
         return reg_named_buff_exists(rx, key, flags)
@@ -5155,7 +5155,7 @@ Perl_reg_numbered_buff_store(pTHX_ REGEXP * const rx, const I32 paren,
     PERL_UNUSED_ARG(value);
 
     if (!PL_localizing)
-        Perl_croak(aTHX_ PL_no_modify);
+        Perl_croak(aTHX_ "%s", PL_no_modify);
 }
 
 I32

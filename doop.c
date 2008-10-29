@@ -625,7 +625,7 @@ Perl_do_trans(pTHX_ SV *sv)
         if (SvIsCOW(sv))
             sv_force_normal_flags(sv, 0);
         if (SvREADONLY(sv))
-            Perl_croak(aTHX_ PL_no_modify);
+            Perl_croak(aTHX_ "%s", PL_no_modify);
     }
     (void)SvPV_const(sv, len);
     if (!len)
@@ -1000,7 +1000,7 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
 	    sv_force_normal_flags(sv, 0);
         }
         if (SvREADONLY(sv))
-            Perl_croak(aTHX_ PL_no_modify);
+            Perl_croak(aTHX_ "%s", PL_no_modify);
     }
 
     if (PL_encoding && !SvUTF8(sv)) {
@@ -1084,7 +1084,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
 	    sv_force_normal_flags(sv, 0);
         }
         if (SvREADONLY(sv))
-            Perl_croak(aTHX_ PL_no_modify);
+            Perl_croak(aTHX_ "%s", PL_no_modify);
     }
 
     if (PL_encoding) {

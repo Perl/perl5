@@ -2822,7 +2822,7 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
     PUTBACK;
 
     if (croak_on_error && SvTRUE(ERRSV)) {
-	Perl_croak(aTHX_ SvPVx_nolen_const(ERRSV));
+	Perl_croak(aTHX_ "%s", SvPVx_nolen_const(ERRSV));
     }
 
     return sv;
@@ -3266,13 +3266,13 @@ Perl_moreswitches(pTHX_ const char *s)
 	    upg_version(PL_patchlevel, TRUE);
 #if !defined(DGUX)
 	PerlIO_printf(PerlIO_stdout(),
-		Perl_form(aTHX_ "\nThis is perl, %"SVf
+		"\nThis is perl, %"SVf
 #ifdef PERL_PATCHNUM
-			  " DEVEL" STRINGIFY(PERL_PATCHNUM)
+		" DEVEL" STRINGIFY(PERL_PATCHNUM)
 #endif
-			  " built for %s",
-			  SVfARG(vstringify(PL_patchlevel)),
-			  ARCHNAME));
+		" built for %s",
+		SVfARG(vstringify(PL_patchlevel)),
+		ARCHNAME);
 #else /* DGUX */
 /* Adjust verbose output as in the perl that ships with the DG/UX OS from EMC */
 	PerlIO_printf(PerlIO_stdout(),

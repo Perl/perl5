@@ -26,7 +26,7 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 	if (SvROK(arg)) {
 	    if (SvREADONLY(SvRV(arg)) && mode && *mode != 'r') {
 		if (ckWARN(WARN_LAYER))
-		    Perl_warner(aTHX_ packWARN(WARN_LAYER), PL_no_modify);
+		    Perl_warner(aTHX_ packWARN(WARN_LAYER), "%s", PL_no_modify);
 		SETERRNO(EINVAL, SS_IVCHAN);
 		return -1;
 	    }
