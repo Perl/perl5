@@ -1,6 +1,6 @@
 /*    cc_runtime.h
  *
- *    Copyright (C) 1999, 2000, 2001, by Larry Wall and others
+ *    Copyright (C) 1999, 2000, 2001, 2004, 2006, 2008 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
