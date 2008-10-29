@@ -450,7 +450,7 @@ PERL_CALLCONV SV*	Perl_gv_const_sv(pTHX_ GV* gv)
 #define PERL_ARGS_ASSERT_GV_CONST_SV	\
 	assert(gv)
 
-PERL_CALLCONV SV*	Perl_cv_const_sv(pTHX_ CV* cv)
+PERL_CALLCONV SV*	Perl_cv_const_sv(pTHX_ const CV *const cv)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV SV*	Perl_op_const_sv(pTHX_ const OP* o, CV* cv)

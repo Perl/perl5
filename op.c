@@ -5385,7 +5385,7 @@ L<perlsub/"Constant Functions">.
 =cut
 */
 SV *
-Perl_cv_const_sv(pTHX_ CV *cv)
+Perl_cv_const_sv(pTHX_ const CV *const cv)
 {
     PERL_UNUSED_CONTEXT;
     if (!cv)
