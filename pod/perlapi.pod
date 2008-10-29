@@ -237,7 +237,7 @@ X<av_len>
 Returns the highest index in the array.  The number of elements in the
 array is C<av_len(av) + 1>.  Returns -1 if the array is empty.
 
-	I32	av_len(const AV *av)
+	I32	av_len(AV *av)
 
 =for hackers
 Found in file av.c
@@ -836,9 +836,6 @@ Found in file dump.c
 =item pv_escape
 X<pv_escape>
 
-               |const STRLEN count|const STRLEN max
-               |STRLEN const *escaped, const U32 flags
-
 Escapes at most the first "count" chars of pv and puts the results into
 dsv such that the size of the escaped string will not exceed "max" chars
 and will not contain any incomplete escape sequences.
@@ -873,8 +870,6 @@ sequences, whereas '%' is not a particularly common character in patterns.
 
 Returns a pointer to the escaped text as held by dsv.
 
-NOTE: the perl_ form of this function is deprecated.
-
 	char*	pv_escape(SV *dsv, char const * const str, const STRLEN count, const STRLEN max, STRLEN * const escaped, const U32 flags)
 
 =for hackers
@@ -882,10 +877,6 @@ Found in file dump.c
 
 =item pv_pretty
 X<pv_pretty>
-
-           |const STRLEN count|const STRLEN max\
-           |const char const *start_color| const char const *end_color\
-           |const U32 flags
 
 Converts a string into something presentable, handling escaping via
 pv_escape() and supporting quoting and ellipses.
@@ -906,8 +897,6 @@ any quotes or ellipses.
 
 Returns a pointer to the prettified text as held by dsv.
            
-NOTE: the perl_ form of this function is deprecated.
-
 	char*	pv_pretty(SV *dsv, char const * const str, const STRLEN count, const STRLEN max, char const * const start_color, char const * const end_color, const U32 flags)
 
 =for hackers
