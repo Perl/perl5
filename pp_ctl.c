@@ -1976,7 +1976,7 @@ PP(pp_enteriter)
 	    }
 	}
 	else /* SvTYPE(maybe_ary) == SVt_PVAV */ {
-	    cx->blk_loop.state_u.ary.ary = (AV*)maybe_ary;
+	    cx->blk_loop.state_u.ary.ary = MUTABLE_AV(maybe_ary);
 	    SvREFCNT_inc(maybe_ary);
 	    cx->blk_loop.state_u.ary.ix =
 		(PL_op->op_private & OPpITER_REVERSED) ?
@@ -2535,10 +2535,10 @@ PP(pp_goto)
 		PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
 		if (CxHASARGS(cx))
 		{
-		    AV* const av = (AV*)PAD_SVl(0);
+		    AV *const av = MUTABLE_AV(PAD_SVl(0));
 
 		    cx->blk_sub.savearray = GvAV(PL_defgv);
-		    GvAV(PL_defgv) = (AV*)SvREFCNT_inc_simple(av);
+		    GvAV(PL_defgv) = MUTABLE_AV(SvREFCNT_inc_simple(av));
 		    CX_CURPAD_SAVE(cx->blk_sub);
 		    cx->blk_sub.argarray = av;
 
@@ -2906,7 +2906,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
     (*startop)->op_ppaddr = PL_ppaddr[OP_NULL];
     lex_end();
     /* XXX DAPM do this properly one year */
-    *padp = (AV*)SvREFCNT_inc_simple(PL_comppad);
+    *padp = MUTABLE_AV(SvREFCNT_inc_simple(PL_comppad));
     LEAVE;
     if (IN_PERL_COMPILETIME)
 	CopHINTS_set(&PL_compiling, PL_hints);
@@ -3211,7 +3211,7 @@ PP(pp_require)
 		SV * const pv = *hv_fetchs(MUTABLE_HV(req), "original", FALSE);
 
 		/* get the left hand term */
-		lav = (AV *)SvRV(*hv_fetchs(MUTABLE_HV(req), "version", FALSE));
+		lav = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(req), "version", FALSE)));
 
 		first  = SvIV(*av_fetch(lav,0,0));
 		if (   first > (int)PERL_REVISION    /* probably 'use 6.0' */
@@ -3334,7 +3334,7 @@ PP(pp_require)
 		    if (SvTYPE(SvRV(loader)) == SVt_PVAV
 			&& !sv_isobject(loader))
 		    {
-			loader = *av_fetch((AV *)SvRV(loader), 0, TRUE);
+			loader = *av_fetch(MUTABLE_AV(SvRV(loader)), 0, TRUE);
 		    }
 
 		    Perl_sv_setpvf(aTHX_ namesv, "/loader/0x%"UVxf"/%s",
@@ -4159,7 +4159,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		RETPUSHYES;
 	}
 	else if (SM_OTHER_REF(PVAV)) {
-	    AV * const other_av = (AV *) SvRV(Other);
+	    AV * const other_av = MUTABLE_AV(SvRV(Other));
 	    const I32 other_len = av_len(other_av) + 1;
 	    I32 i;
 
@@ -4200,8 +4200,8 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     }
     else if (SM_REF(PVAV)) {
 	if (SM_OTHER_REF(PVAV)) {
-	    AV *other_av = (AV *) SvRV(Other);
-	    if (av_len((AV *) This) != av_len(other_av))
+	    AV *other_av = MUTABLE_AV(SvRV(Other));
+	    if (av_len(MUTABLE_AV(This)) != av_len(other_av))
 		RETPUSHNO;
 	    else {
 	    	I32 i;
@@ -4216,7 +4216,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		    (void) sv_2mortal((SV *) seen_other);
 		}
 		for(i = 0; i <= other_len; ++i) {
-		    SV * const * const this_elem = av_fetch((AV *)This, i, FALSE);
+		    SV * const * const this_elem = av_fetch(MUTABLE_AV(This), i, FALSE);
 		    SV * const * const other_elem = av_fetch(other_av, i, FALSE);
 
 		    if (!this_elem || !other_elem) {
@@ -4252,11 +4252,11 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	}
 	else if (SM_OTHER_REGEX) {
 	    PMOP * const matcher = make_matcher(other_regex);
-	    const I32 this_len = av_len((AV *) This);
+	    const I32 this_len = av_len(MUTABLE_AV(This));
 	    I32 i;
 
 	    for(i = 0; i <= this_len; ++i) {
-		SV * const * const svp = av_fetch((AV *)This, i, FALSE);
+		SV * const * const svp = av_fetch(MUTABLE_AV(This), i, FALSE);
 		if (svp && matcher_matches_sv(matcher, *svp)) {
 		    destroy_matcher(matcher);
 		    RETPUSHYES;
@@ -4268,8 +4268,8 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	else if (SvIOK(Other) || SvNOK(Other)) {
 	    I32 i;
 
-	    for(i = 0; i <= AvFILL((AV *) This); ++i) {
-		SV * const * const svp = av_fetch((AV *)This, i, FALSE);
+	    for(i = 0; i <= AvFILL(MUTABLE_AV(This)); ++i) {
+		SV * const * const svp = av_fetch(MUTABLE_AV(This), i, FALSE);
 		if (!svp)
 		    continue;
 		
@@ -4287,11 +4287,11 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    RETPUSHNO;
 	}
 	else if (SvPOK(Other)) {
-	    const I32 this_len = av_len((AV *) This);
+	    const I32 this_len = av_len(MUTABLE_AV(This));
 	    I32 i;
 
 	    for(i = 0; i <= this_len; ++i) {
-		SV * const * const svp = av_fetch((AV *)This, i, FALSE);
+		SV * const * const svp = av_fetch(MUTABLE_AV(This), i, FALSE);
 		if (!svp)
 		    continue;
 		

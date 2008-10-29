@@ -5085,7 +5085,7 @@ Perl_reg_named_buff_scalar(pTHX_ REGEXP * const r, const U32 flags)
             return newSViv(HvTOTALKEYS(RXp_PAREN_NAMES(rx)));
         } else if (flags & RXapif_ONE) {
             ret = CALLREG_NAMED_BUFF_ALL(r, (flags | RXapif_REGNAMES));
-            av = (AV*)SvRV(ret);
+            av = MUTABLE_AV(SvRV(ret));
             length = av_len(av);
 	    SvREFCNT_dec(ret);
             return newSViv(length + 1);
@@ -9054,13 +9054,13 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	Perl_sv_catpvf(aTHX_ sv, "%d", (int)ARG(o));	/* Parenth number */
 	if ( RXp_PAREN_NAMES(prog) ) {
             if ( k != REF || OP(o) < NREF) {	    
-	        AV *list= (AV *)progi->data->data[progi->name_list_idx];
+	        AV *list= MUTABLE_AV(progi->data->data[progi->name_list_idx]);
 	        SV **name= av_fetch(list, ARG(o), 0 );
 	        if (name)
 	            Perl_sv_catpvf(aTHX_ sv, " '%"SVf"'", SVfARG(*name));
             }	    
             else {
-                AV *list= (AV *)progi->data->data[ progi->name_list_idx ];
+                AV *list= MUTABLE_AV(progi->data->data[ progi->name_list_idx ]);
                 SV *sv_dat=(SV*)progi->data->data[ ARG( o ) ];
                 I32 *nums=(I32*)SvPVX(sv_dat);
                 SV **name= av_fetch(list, nums[0], 0 );
@@ -9433,7 +9433,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
 		Safefree(ri->data->data[n]);
 		break;
 	    case 'p':
-		new_comppad = (AV*)ri->data->data[n];
+		new_comppad = MUTABLE_AV(ri->data->data[n]);
 		break;
 	    case 'o':
 		if (new_comppad == NULL)
@@ -9508,7 +9508,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
 }
 
 #define sv_dup_inc(s,t)	SvREFCNT_inc(sv_dup(s,t))
-#define av_dup_inc(s,t)	(AV*)SvREFCNT_inc(sv_dup((const SV *)s,t))
+#define av_dup_inc(s,t)	MUTABLE_AV(SvREFCNT_inc(sv_dup((const SV *)s,t)))
 #define hv_dup_inc(s,t)	MUTABLE_HV(SvREFCNT_inc(sv_dup((const SV *)s,t)))
 #define SAVEPVN(p,n)	((p) ? savepvn(p,n) : NULL)
 
@@ -9945,7 +9945,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	    const reg_trie_data * const trie =
 	        (reg_trie_data*)ri->data->data[op<AHOCORASICK ? n : ac->trie];
 #ifdef DEBUGGING
-	    AV *const trie_words = (AV *) ri->data->data[n + TRIE_WORDS_OFFSET];
+	    AV *const trie_words = MUTABLE_AV(ri->data->data[n + TRIE_WORDS_OFFSET]);
 #endif
 	    const regnode *nextbranch= NULL;
 	    I32 word_idx;

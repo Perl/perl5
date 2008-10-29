@@ -1661,10 +1661,10 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (AvREIFY(sv))	sv_catpv(d, ",REIFY");
 	Perl_dump_indent(aTHX_ level, file, "  FLAGS = (%s)\n",
 			 SvCUR(d) ? SvPVX_const(d) + 1 : "");
-	if (nest < maxnest && av_len((AV*)sv) >= 0) {
+	if (nest < maxnest && av_len(MUTABLE_AV(sv)) >= 0) {
 	    int count;
-	    for (count = 0; count <=  av_len((AV*)sv) && count < maxnest; count++) {
-		SV** const elt = av_fetch((AV*)sv,count,0);
+	    for (count = 0; count <=  av_len(MUTABLE_AV(sv)) && count < maxnest; count++) {
+		SV** const elt = av_fetch(MUTABLE_AV(sv),count,0);
 
 		Perl_dump_indent(aTHX_ level + 1, file, "Elt No. %"IVdf"\n", (IV)count);
 		if (elt)
@@ -2030,7 +2030,7 @@ Perl_debop(pTHX_ const OP *o)
 	SV *sv;
         if (cv) {
 	    AV * const padlist = CvPADLIST(cv);
-            AV * const comppad = (AV*)(*av_fetch(padlist, 0, FALSE));
+            AV * const comppad = MUTABLE_AV(*av_fetch(padlist, 0, FALSE));
             sv = *av_fetch(comppad, o->op_targ, FALSE);
         } else
             sv = NULL;

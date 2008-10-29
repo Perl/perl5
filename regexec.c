@@ -3099,7 +3099,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		/* only one choice left - just continue */
 		DEBUG_EXECUTE_r({
 		    AV *const trie_words
-			= (AV *) rexi->data->data[ARG(ST.me)+TRIE_WORDS_OFFSET];
+			= MUTABLE_AV(rexi->data->data[ARG(ST.me)+TRIE_WORDS_OFFSET]);
 		    SV ** const tmp = av_fetch( trie_words, 
 		        ST.accept_buff[ 0 ].wordnum-1, 0 );
 		    SV *sv= tmp ? sv_newmortal() : NULL;
@@ -3181,7 +3181,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
 		DEBUG_EXECUTE_r({
 		    AV *const trie_words
-			= (AV *) rexi->data->data[ARG(ST.me)+TRIE_WORDS_OFFSET];
+			= MUTABLE_AV(rexi->data->data[ARG(ST.me)+TRIE_WORDS_OFFSET]);
 		    SV ** const tmp = av_fetch( trie_words, 
 		        ST.accept_buff[ best ].wordnum - 1, 0 );
 		    regnode *nextop=(!ST.jump || !ST.jump[ST.accept_buff[best].wordnum]) ? 
@@ -5686,7 +5686,7 @@ Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool
 
 	if (data->what[n] == 's') {
 	    SV * const rv = (SV*)data->data[n];
-	    AV * const av = (AV*)SvRV((SV*)rv);
+	    AV * const av = MUTABLE_AV(SvRV((SV*)rv));
 	    SV **const ary = AvARRAY(av);
 	    SV **a, **b;
 	
