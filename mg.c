@@ -781,7 +781,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		  if (sys$getmsg(vaxc$errno,&msgdsc.dsc$w_length,&msgdsc,0,0) & 1)
 		       sv_setpvn(sv,msgdsc.dsc$a_pointer,msgdsc.dsc$w_length);
 		  else
-		       sv_setpvn(sv,"",0);
+		       sv_setpvs(sv,"");
 	     }
 #elif defined(OS2)
 	     if (!(_emx_env & 0x200)) {	/* Under DOS */
@@ -804,7 +804,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		       PerlProc_GetOSError(sv, dwErr);
 		  }
 		  else
-		       sv_setpvn(sv, "", 0);
+		       sv_setpvs(sv, "");
 		  SetLastError(dwErr);
 	     }
 #else
@@ -2444,7 +2444,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	       ensure that hints for input are sooner on linked list.  */
 	    tmp = out ? newSVpvn_flags(out + 1, start + len - out - 1,
 				       SVs_TEMP | SvUTF8(sv))
-		: newSVpvn_flags("", 0, SVs_TEMP | SvUTF8(sv));
+		: newSVpvs_flags("", SVs_TEMP | SvUTF8(sv));
 
 	    tmp_he
 		= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints_hash, 

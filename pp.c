@@ -2431,7 +2431,7 @@ PP(pp_negate)
 	    STRLEN len;
 	    const char * const s = SvPV_const(sv, len);
 	    if (isIDFIRST(*s)) {
-		sv_setpvn(TARG, "-", 1);
+		sv_setpvs(TARG, "-");
 		sv_catsv(TARG, sv);
 	    }
 	    else if (*s == '+' || *s == '-') {
@@ -2445,7 +2445,7 @@ PP(pp_negate)
 		if (SvNOK(sv))
 		    sv_setnv(TARG, -SvNV(sv));
 		else {
-		    sv_setpvn(TARG, "-", 1);
+		    sv_setpvs(TARG, "-");
 		    sv_catsv(TARG, sv);
 		}
 	    }

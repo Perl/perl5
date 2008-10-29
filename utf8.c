@@ -2254,7 +2254,7 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim, UV f
 
     PERL_ARGS_ASSERT_PV_UNI_DISPLAY;
 
-    sv_setpvn(dsv, "", 0);
+    sv_setpvs(dsv, "");
     SvUTF8_off(dsv);
     for (s = (const char *)spv, e = s + len; s < e; s += UTF8SKIP(s)) {
 	 UV u;
@@ -2288,7 +2288,7 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim, UV f
 		 }
 		 if (ok) {
 		     const char string = ok;
-		     sv_catpvn(dsv, "\\",    1);
+		     sv_catpvs(dsv, "\\");
 		     sv_catpvn(dsv, &string, 1);
 		 }
 	     }

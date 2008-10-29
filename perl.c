@@ -367,9 +367,9 @@ perl_construct(pTHXx)
     PL_fdpid = newAV();			/* for remembering popen pids by fd */
     PL_modglobal = newHV();		/* pointers to per-interpreter module globals */
     PL_errors = newSVpvs("");
-    sv_setpvn(PERL_DEBUG_PAD(0), "", 0);	/* For regex debugging. */
-    sv_setpvn(PERL_DEBUG_PAD(1), "", 0);	/* ext/re needs these */
-    sv_setpvn(PERL_DEBUG_PAD(2), "", 0);	/* even without DEBUGGING. */
+    sv_setpvs(PERL_DEBUG_PAD(0), "");	/* For regex debugging. */
+    sv_setpvs(PERL_DEBUG_PAD(1), "");	/* ext/re needs these */
+    sv_setpvs(PERL_DEBUG_PAD(2), "");	/* even without DEBUGGING. */
 #ifdef USE_ITHREADS
     /* First entry is a list of empty elements. It needs to be initialised
        else all hell breaks loose in S_find_uninit_var().  */
@@ -1712,7 +1712,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     bool add_read_e_script = FALSE;
 
     SvGROW(linestr_sv, 80);
-    sv_setpvn(linestr_sv,"",0);
+    sv_setpvs(linestr_sv,"");
 
     sv = newSVpvs("");		/* first used for -I flags */
     SAVEFREESV(sv);
@@ -2170,12 +2170,12 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		   U32 out = PL_unicode & PERL_UNICODE_OUT_FLAG;
 		   if (in) {
 			if (out)
-			     sv_setpvn(sv, ":utf8\0:utf8", 11);
+			     sv_setpvs(sv, ":utf8\0:utf8");
 			else
-			     sv_setpvn(sv, ":utf8\0", 6);
+			     sv_setpvs(sv, ":utf8\0");
 		   }
 		   else if (out)
-			sv_setpvn(sv, "\0:utf8", 6);
+			sv_setpvs(sv, "\0:utf8");
 		   SvSETMAGIC(sv);
 	      }
 	 }
@@ -3573,7 +3573,7 @@ S_init_main_stash(pTHX)
     PL_globalstash = GvHV(gv_fetchpvs("CORE::GLOBAL::", GV_ADDMULTI,
 				      SVt_PVHV));
     /* We must init $/ before switches are processed. */
-    sv_setpvn(get_sv("/", TRUE), "\n", 1);
+    sv_setpvs(get_sv("/", TRUE), "\n");
 }
 
 STATIC int
@@ -4546,7 +4546,7 @@ S_init_predump_symbols(pTHX)
     GV *tmpgv;
     IO *io;
 
-    sv_setpvn(get_sv("\"", TRUE), " ", 1);
+    sv_setpvs(get_sv("\"", TRUE), " ");
     PL_stdingv = gv_fetchpvs("STDIN", GV_ADD|GV_NOTQUAL, SVt_PVIO);
     GvMULTI_on(PL_stdingv);
     io = GvIOp(PL_stdingv);
@@ -4633,9 +4633,9 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
     PERL_ARGS_ASSERT_INIT_POSTDUMP_SYMBOLS;
 
     PL_toptarget = newSV_type(SVt_PVFM);
-    sv_setpvn(PL_toptarget, "", 0);
+    sv_setpvs(PL_toptarget, "");
     PL_bodytarget = newSV_type(SVt_PVFM);
-    sv_setpvn(PL_bodytarget, "", 0);
+    sv_setpvs(PL_bodytarget, "");
     PL_formtarget = PL_bodytarget;
 
     TAINT;

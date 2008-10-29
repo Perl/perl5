@@ -212,7 +212,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 		goto say_false;
 	    }
 #endif /* USE_STDIO */
-	    name = SvOK(*svp) ? savesvpv (*svp) : savepvn ("", 0);
+	    name = SvOK(*svp) ? savesvpv (*svp) : savepvs ("");
 	    SAVEFREEPV(name);
 	}
 	else {
@@ -766,7 +766,7 @@ Perl_nextargv(pTHX_ register GV *gv)
 		    const char *star = strchr(PL_inplace, '*');
 		    if (star) {
 			const char *begin = PL_inplace;
-			sv_setpvn(sv, "", 0);
+			sv_setpvs(sv, "");
 			do {
 			    sv_catpvn(sv, begin, star - begin);
 			    sv_catpvn(sv, PL_oldname, oldlen);
@@ -1282,7 +1282,7 @@ Perl_my_stat(pTHX)
         do_fstat_have_io:
         PL_laststype = OP_STAT;
         PL_statgv = gv;
-        sv_setpvn(PL_statname, "", 0);
+        sv_setpvs(PL_statname, "");
         if(io) {
 	    if (IoIFP(io)) {
 	        return (PL_laststatval = PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &PL_statcache));
@@ -2179,7 +2179,7 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
 
     /* suppress warning when reading into undef var --jhi */
     if (! SvOK(mstr))
-	sv_setpvn(mstr, "", 0);
+	sv_setpvs(mstr, "");
     msize = SvIVx(*++mark);
     mtype = (long)SvIVx(*++mark);
     flags = SvIVx(*++mark);
@@ -2288,7 +2288,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 	char *mbuf;
 	/* suppress warning when reading into undef var (tchrist 3/Mar/00) */
 	if (! SvOK(mstr))
-	    sv_setpvn(mstr, "", 0);
+	    sv_setpvs(mstr, "");
 	SvPV_force_nolen(mstr);
 	mbuf = SvGROW(mstr, (STRLEN)msize+1);
 

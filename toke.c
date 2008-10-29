@@ -1119,17 +1119,17 @@ S_skipspace(pTHX_ register char *s)
 	    }
 	    else if (PL_minus_n) {
 #ifdef PERL_MAD
-		sv_catpvn(PL_linestr, ";}", 2);
+		sv_catpvs(PL_linestr, ";}");
 #else
-		sv_setpvn(PL_linestr, ";}", 2);
+		sv_setpvs(PL_linestr, ";}");
 #endif
 		PL_minus_n = 0;
 	    }
 	    else
 #ifdef PERL_MAD
-		sv_catpvn(PL_linestr,";", 1);
+		sv_catpvs(PL_linestr,";");
 #else
-		sv_setpvn(PL_linestr,";", 1);
+		sv_setpvs(PL_linestr,";");
 #endif
 
 	    /* reset variables for next time we lex */
@@ -1319,7 +1319,7 @@ S_curmad(pTHX_ char slot, SV *sv)
 	where = &PL_nexttoke[PL_curforce].next_mad;
 
     if (PL_faketokens)
-	sv_setpvn(sv, "", 0);
+	sv_setpvs(sv, "");
     else {
 	if (!IN_BYTES) {
 	    if (UTF && is_utf8_string((U8*)SvPVX(sv), SvCUR(sv)))
@@ -1846,7 +1846,7 @@ S_sublex_done(pTHX)
 		PL_thiswhite = 0;
 	    }
 	    if (PL_thistoken)
-		sv_setpvn(PL_thistoken,"",0);
+		sv_setpvs(PL_thistoken,"");
 	    else
 		PL_realtokenstart = -1;
 	}
@@ -3768,7 +3768,7 @@ Perl_yylex(pTHX)
 		}
 		PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 		PL_last_lop = PL_last_uni = NULL;
-		sv_setpvn(PL_linestr,"",0);
+		sv_setpvs(PL_linestr,"");
 		TOKEN(';');	/* not infinite loop because rsfp is NULL now */
 	    }
 	    /* If it looks like the start of a BOM or raw UTF-16,
@@ -3804,7 +3804,7 @@ Perl_yylex(pTHX)
 		    sv_catsv(PL_thiswhite, PL_linestr);
 #endif
 		if (*s == '=' && strnEQ(s, "=cut", 4) && !isALPHA(s[4])) {
-		    sv_setpvn(PL_linestr, "", 0);
+		    sv_setpvs(PL_linestr, "");
 		    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 		    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 		    PL_last_lop = PL_last_uni = NULL;
@@ -3992,7 +3992,7 @@ Perl_yylex(pTHX)
 			      /* if we have already added "LINE: while (<>) {",
 			         we must not do it again */
 			{
-			    sv_setpvn(PL_linestr, "", 0);
+			    sv_setpvs(PL_linestr, "");
 			    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 			    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 			    PL_last_lop = PL_last_uni = NULL;
@@ -4091,7 +4091,7 @@ Perl_yylex(pTHX)
 			if (!PL_thiswhite)
 			    PL_thiswhite = newSVpvs("");
 			if (CopLINE(PL_curcop) == 1) {
-			    sv_setpvn(PL_thiswhite, "", 0);
+			    sv_setpvs(PL_thiswhite, "");
 			    PL_faketokens = 0;
 			}
 			sv_catpvn(PL_thiswhite, s, d - s);
@@ -4655,7 +4655,7 @@ Perl_yylex(pTHX)
 		    if (PL_madskills) {
 			if (!PL_thiswhite)
 			    PL_thiswhite = newSVpvs("");
-			sv_catpvn(PL_thiswhite,"}",1);
+			sv_catpvs(PL_thiswhite,"}");
 		    }
 #endif
 		    return yylex();	/* ignore fake brackets */
@@ -6727,7 +6727,7 @@ Perl_yylex(pTHX)
 			Perl_croak(aTHX_ "Missing name in \"my sub\"");
 		    PL_expect = XTERMBLOCK;
 		    attrful = XATTRTERM;
-		    sv_setpvn(PL_subname,"?",1);
+		    sv_setpvs(PL_subname,"?");
 		    have_name = FALSE;
 		}
 
@@ -11410,7 +11410,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	PL_last_lop = PL_last_uni = NULL;
     }
     else
-	sv_setpvn(tmpstr,"",0);   /* avoid "uninitialized" warning */
+	sv_setpvs(tmpstr,"");   /* avoid "uninitialized" warning */
     while (s >= PL_bufend) {	/* multiple line string? */
 #ifdef PERL_MAD
 	if (PL_madskills) {
@@ -12907,7 +12907,7 @@ Perl_scan_vstring(pTHX_ const char *s, const char *const e, SV *sv)
 	if (*s == 'v')
 	    s++;  /* get past 'v' */
 
-	sv_setpvn(sv, "", 0);
+	sv_setpvs(sv, "");
 
 	for (;;) {
 	    /* this is atoi() that tolerates underscores */

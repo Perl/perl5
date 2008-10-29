@@ -504,7 +504,7 @@ XS(XS_version_new)
 	if ( items == 1 || vs == &PL_sv_undef ) { /* no param or explicit undef */
 	    /* create empty object */
 	    vs = sv_newmortal();
-	    sv_setpvn(vs,"",0);
+	    sv_setpvs(vs,"");
 	}
 	else if ( items == 3 ) {
 	    vs = sv_newmortal();

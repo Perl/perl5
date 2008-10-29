@@ -8912,7 +8912,7 @@ Perl_sv_vsetpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 {
     PERL_ARGS_ASSERT_SV_VSETPVFN;
 
-    sv_setpvn(sv, "", 0);
+    sv_setpvs(sv, "");
     sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, maybe_tainted);
 }
 
@@ -11702,9 +11702,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #endif
     PL_encoding		= sv_dup(proto_perl->Iencoding, param);
 
-    sv_setpvn(PERL_DEBUG_PAD(0), "", 0);	/* For regex debugging. */
-    sv_setpvn(PERL_DEBUG_PAD(1), "", 0);	/* ext/re needs these */
-    sv_setpvn(PERL_DEBUG_PAD(2), "", 0);	/* even without DEBUGGING. */
+    sv_setpvs(PERL_DEBUG_PAD(0), "");	/* For regex debugging. */
+    sv_setpvs(PERL_DEBUG_PAD(1), "");	/* ext/re needs these */
+    sv_setpvs(PERL_DEBUG_PAD(2), "");	/* even without DEBUGGING. */
 
    
     /* RE engine related */
@@ -12660,7 +12660,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 				 : DEFSV))
 	    {
 		sv = sv_newmortal();
-		sv_setpvn(sv, "$_", 2);
+		sv_setpvs(sv, "$_");
 		return sv;
 	    }
 	}

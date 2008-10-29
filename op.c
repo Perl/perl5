@@ -5661,7 +5661,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	SvREFCNT_inc_simple_void_NN(const_sv);
 	if (cv) {
 	    assert(!CvROOT(cv) && !CvCONST(cv));
-	    sv_setpvn((SV*)cv, "", 0);  /* prototype is "" */
+	    sv_setpvs((SV*)cv, "");  /* prototype is "" */
 	    CvXSUBANY(cv).any_ptr = const_sv;
 	    CvXSUB(cv) = const_sv_xsub;
 	    CvCONST_on(cv);
@@ -7014,7 +7014,7 @@ Perl_ck_fun(pTHX_ OP *o)
 				namesv = PAD_SVl(targ);
 				SvUPGRADE(namesv, SVt_PV);
 				if (*name != '$')
-				    sv_setpvn(namesv, "$", 1);
+				    sv_setpvs(namesv, "$");
 				sv_catpvn(namesv, name, len);
 			    }
 			}
