@@ -1000,7 +1000,7 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
 
     if (SvTYPE(sv) == SVt_PVAV) {
 	register I32 i;
-	AV* const av = (AV*)sv;
+	AV *const av = MUTABLE_AV(sv);
 	const I32 max = AvFILL(av);
 
 	for (i = 0; i <= max; i++) {
@@ -1086,7 +1086,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
     count = 0;
     if (SvTYPE(sv) == SVt_PVAV) {
 	register I32 i;
-	AV* const av = (AV*)sv;
+	AV *const av = MUTABLE_AV(sv);
 	const I32 max = AvFILL(av);
 
 	for (i = 0; i <= max; i++) {

@@ -78,23 +78,23 @@ PP(pp_padav)
     }
     gimme = GIMME_V;
     if (gimme == G_ARRAY) {
-	const I32 maxarg = AvFILL((AV*)TARG) + 1;
+	const I32 maxarg = AvFILL(MUTABLE_AV(TARG)) + 1;
 	EXTEND(SP, maxarg);
 	if (SvMAGICAL(TARG)) {
 	    U32 i;
 	    for (i=0; i < (U32)maxarg; i++) {
-		SV * const * const svp = av_fetch((AV*)TARG, i, FALSE);
+		SV * const * const svp = av_fetch(MUTABLE_AV(TARG), i, FALSE);
 		SP[i+1] = (svp) ? *svp : &PL_sv_undef;
 	    }
 	}
 	else {
-	    Copy(AvARRAY((AV*)TARG), SP+1, maxarg, SV*);
+	    Copy(AvARRAY((const AV *)TARG), SP+1, maxarg, SV*);
 	}
 	SP += maxarg;
     }
     else if (gimme == G_SCALAR) {
 	SV* const sv = sv_newmortal();
-	const I32 maxarg = AvFILL((AV*)TARG) + 1;
+	const I32 maxarg = AvFILL(MUTABLE_AV(TARG)) + 1;
 	sv_setiv(sv, maxarg);
 	PUSHs(sv);
     }
@@ -319,8 +319,8 @@ PP(pp_rv2sv)
 PP(pp_av2arylen)
 {
     dVAR; dSP;
-    AV * const av = (AV*)TOPs;
-    SV ** const sv = Perl_av_arylen_p(aTHX_ (AV*)av);
+    AV * const av = MUTABLE_AV(TOPs);
+    SV ** const sv = Perl_av_arylen_p(aTHX_ MUTABLE_AV(av));
     if (!*sv) {
 	*sv = newSV_type(SVt_PVMG);
 	sv_magic(*sv, (SV*)av, PERL_MAGIC_arylen, NULL, 0);
@@ -525,8 +525,8 @@ S_refto(pTHX_ SV *sv)
 	    SvREFCNT_inc_void_NN(sv);
     }
     else if (SvTYPE(sv) == SVt_PVAV) {
-	if (!AvREAL((AV*)sv) && AvREIFY((AV*)sv))
-	    av_reify((AV*)sv);
+	if (!AvREAL((const AV *)sv) && AvREIFY((const AV *)sv))
+	    av_reify(MUTABLE_AV(sv));
 	SvTEMP_off(sv);
 	SvREFCNT_inc_void_NN(sv);
     }
@@ -806,7 +806,7 @@ PP(pp_undef)
     case SVt_NULL:
 	break;
     case SVt_PVAV:
-	av_undef((AV*)sv);
+	av_undef(MUTABLE_AV(sv));
 	break;
     case SVt_PVHV:
 	hv_undef(MUTABLE_HV(sv));
@@ -3891,7 +3891,7 @@ PP(pp_quotemeta)
 PP(pp_aslice)
 {
     dVAR; dSP; dMARK; dORIGMARK;
-    register AV* const av = (AV*)POPs;
+    register AV *const av = MUTABLE_AV(POPs);
     register const I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
 
     if (SvTYPE(av) == SVt_PVAV) {
@@ -3985,7 +3985,7 @@ PP(pp_delete)
 	else if (hvtype == SVt_PVAV) {                  /* array element */
             if (PL_op->op_flags & OPf_SPECIAL) {
                 while (++MARK <= SP) {
-                    SV * const sv = av_delete((AV*)hv, SvIV(*MARK), discard);
+                    SV * const sv = av_delete(MUTABLE_AV(hv), SvIV(*MARK), discard);
                     *MARK = sv ? sv : &PL_sv_undef;
                 }
             }
@@ -4011,7 +4011,7 @@ PP(pp_delete)
 	    sv = hv_delete_ent(hv, keysv, discard, 0);
 	else if (SvTYPE(hv) == SVt_PVAV) {
 	    if (PL_op->op_flags & OPf_SPECIAL)
-		sv = av_delete((AV*)hv, SvIV(keysv), discard);
+		sv = av_delete(MUTABLE_AV(hv), SvIV(keysv), discard);
 	    else
 		DIE(aTHX_ "panic: avhv_delete no longer supported");
 	}
@@ -4050,7 +4050,7 @@ PP(pp_exists)
     }
     else if (SvTYPE(hv) == SVt_PVAV) {
 	if (PL_op->op_flags & OPf_SPECIAL) {		/* array element */
-	    if (av_exists((AV*)hv, SvIV(tmpsv)))
+	    if (av_exists(MUTABLE_AV(hv), SvIV(tmpsv)))
 		RETPUSHYES;
 	}
     }
@@ -4228,7 +4228,7 @@ PP(pp_anonhash)
 PP(pp_splice)
 {
     dVAR; dSP; dMARK; dORIGMARK;
-    register AV *ary = (AV*)*++MARK;
+    register AV *ary = MUTABLE_AV(*++MARK);
     register SV **src;
     register SV **dst;
     register I32 i;
@@ -4433,7 +4433,7 @@ PP(pp_splice)
 PP(pp_push)
 {
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
-    register AV * const ary = (AV*)*++MARK;
+    register AV * const ary = MUTABLE_AV(*++MARK);
     const MAGIC * const mg = SvTIED_mg((SV*)ary, PERL_MAGIC_tied);
 
     if (mg) {
@@ -4469,7 +4469,7 @@ PP(pp_shift)
 {
     dVAR;
     dSP;
-    AV * const av = (AV*)POPs;
+    AV * const av = MUTABLE_AV(POPs);
     SV * const sv = PL_op->op_type == OP_SHIFT ? av_shift(av) : av_pop(av);
     EXTEND(SP, 1);
     assert (sv);
@@ -4482,7 +4482,7 @@ PP(pp_shift)
 PP(pp_unshift)
 {
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
-    register AV *ary = (AV*)*++MARK;
+    register AV *ary = MUTABLE_AV(*++MARK);
     const MAGIC * const mg = SvTIED_mg((SV*)ary, PERL_MAGIC_tied);
 
     if (mg) {

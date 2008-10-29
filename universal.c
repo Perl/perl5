@@ -1176,7 +1176,7 @@ XS(XS_re_regnames)
     if (!ret)
         XSRETURN_UNDEF;
 
-    av = (AV*)SvRV(ret);
+    av = MUTABLE_AV(SvRV(ret));
     length = av_len(av);
 
     for (i = 0; i <= length; i++) {

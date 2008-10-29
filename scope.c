@@ -718,7 +718,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    value = (SV*)SSPOPPTR;
 	    gv = (GV*)SSPOPPTR;
 	    ptr = &GvSV(gv);
-	    av = (AV*)gv; /* what to refcnt_dec */
+	    av = MUTABLE_AV(gv); /* what to refcnt_dec */
 	restore_sv:
 	    sv = *(SV**)ptr;
 	    DEBUG_S(PerlIO_printf(Perl_debug_log,
@@ -763,7 +763,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    SvREFCNT_dec(value);
 	    break;
 	case SAVEt_AV:				/* array reference */
-	    av = (AV*)SSPOPPTR;
+	    av = MUTABLE_AV(SSPOPPTR);
 	    gv = (GV*)SSPOPPTR;
 	    if (GvAV(gv)) {
 		SvREFCNT_dec(GvAV(gv));
@@ -823,7 +823,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_APTR:			/* AV* reference */
 	    ptr = SSPOPPTR;
-	    *(AV**)ptr = (AV*)SSPOPPTR;
+	    *(AV**)ptr = MUTABLE_AV(SSPOPPTR);
 	    break;
 	case SAVEt_GP:				/* scalar reference */
 	    ptr = SSPOPPTR;
@@ -882,7 +882,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		case SVt_NULL:
 		    break;
 		case SVt_PVAV:
-		    av_clear((AV*)sv);
+		    av_clear(MUTABLE_AV(sv));
 		    break;
 		case SVt_PVHV:
 		    hv_clear(MUTABLE_HV(sv));
@@ -936,7 +936,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_AELEM:		/* array element */
 	    value = (SV*)SSPOPPTR;
 	    i = SSPOPINT;
-	    av = (AV*)SSPOPPTR;
+	    av = MUTABLE_AV(SSPOPPTR);
 	    ptr = av_fetch(av,i,1);
 	    if (!AvREAL(av) && AvREIFY(av)) /* undo reify guard */
 		SvREFCNT_dec(value);
@@ -963,7 +963,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		    ptr = &HeVAL((HE*)ptr);
 		    if (SvTIED_mg((SV*)hv, PERL_MAGIC_tied))
 			SvREFCNT_inc_void(*(SV**)ptr);
-		    av = (AV*)hv; /* what to refcnt_dec */
+		    av = MUTABLE_AV(hv); /* what to refcnt_dec */
 		    goto restore_sv;
 		}
 	    }
@@ -1031,8 +1031,8 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_SAVESWITCHSTACK:
 	    {
 		dSP;
-		AV* const t = (AV*)SSPOPPTR;
-		AV* const f = (AV*)SSPOPPTR;
+		AV *const t = MUTABLE_AV(SSPOPPTR);
+		AV *const f = MUTABLE_AV(SSPOPPTR);
 		SWITCHSTACK(t,f);
 		PL_curstackinfo->si_stack = f;
 	    }

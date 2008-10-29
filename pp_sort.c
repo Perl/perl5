@@ -1555,7 +1555,7 @@ PP(pp_sort)
     if (priv & OPpSORT_INPLACE) {
 	assert( MARK+1 == SP && *SP && SvTYPE(*SP) == SVt_PVAV);
 	(void)POPMARK; /* remove mark associated with ex-OP_AASSIGN */
-	av = (AV*)(*SP);
+	av = MUTABLE_AV((*SP));
 	max = AvFILL(av) + 1;
 	if (SvMAGICAL(av)) {
 	    MEXTEND(SP, max);
@@ -1665,10 +1665,10 @@ PP(pp_sort)
 
 		    if (hasargs) {
 			/* This is mostly copied from pp_entersub */
-			AV * const av = (AV*)PAD_SVl(0);
+			AV * const av = MUTABLE_AV(PAD_SVl(0));
 
 			cx->blk_sub.savearray = GvAV(PL_defgv);
-			GvAV(PL_defgv) = (AV*)SvREFCNT_inc_simple(av);
+			GvAV(PL_defgv) = MUTABLE_AV(SvREFCNT_inc_simple(av));
 			CX_CURPAD_SAVE(cx->blk_sub);
 			cx->blk_sub.argarray = av;
 		    }

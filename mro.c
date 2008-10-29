@@ -84,10 +84,10 @@ Perl_mro_meta_dup(pTHX_ struct mro_meta* smeta, CLONE_PARAMS* param)
 
     if (newmeta->mro_linear_dfs)
 	newmeta->mro_linear_dfs
-	    = (AV*) SvREFCNT_inc(sv_dup((SV*)newmeta->mro_linear_dfs, param));
+	    = MUTABLE_AV(SvREFCNT_inc(sv_dup((SV*)newmeta->mro_linear_dfs, param)));
     if (newmeta->mro_linear_c3)
 	newmeta->mro_linear_c3
-	    = (AV*) SvREFCNT_inc(sv_dup((SV*)newmeta->mro_linear_c3, param));
+	    = MUTABLE_AV(SvREFCNT_inc(sv_dup((SV*)newmeta->mro_linear_c3, param)));
     if (newmeta->mro_nextmethod)
 	newmeta->mro_nextmethod
 	    = MUTABLE_HV(SvREFCNT_inc(sv_dup((SV*)newmeta->mro_nextmethod, param)));
@@ -183,7 +183,7 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
 
     /* not in cache, make a new one */
 
-    retval = (AV*)sv_2mortal((SV *)newAV());
+    retval = MUTABLE_AV(sv_2mortal((SV *)newAV()));
     /* We use this later in this function, but don't need a reference to it
        beyond the end of this function, so reference count is fine.  */
     our_name = newSVhek(stashhek);
@@ -347,7 +347,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
         SV** seqs_ptr;
         I32 seqs_items;
         HV* const tails = MUTABLE_HV(sv_2mortal((SV*)newHV()));
-        AV* const seqs = (AV*)sv_2mortal((SV*)newAV());
+        AV *const seqs = MUTABLE_AV(sv_2mortal((SV*)newAV()));
         I32* heads;
 
         /* This builds @seqs, which is an array of arrays.
@@ -387,7 +387,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
         seqs_ptr = AvARRAY(seqs);
         seqs_items = AvFILLp(seqs) + 1;
         while(seqs_items--) {
-            AV* const seq = (AV*)*seqs_ptr++;
+            AV *const seq = MUTABLE_AV(*seqs_ptr++);
             I32 seq_items = AvFILLp(seq);
             if(seq_items > 0) {
                 SV** seq_ptr = AvARRAY(seq) + 1;
@@ -421,7 +421,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
             SV** const avptr = AvARRAY(seqs);
             for(s = 0; s <= AvFILLp(seqs); s++) {
                 SV** svp;
-                AV * const seq = (AV*)(avptr[s]);
+                AV * const seq = MUTABLE_AV(avptr[s]);
 		SV* seqhead;
                 if(!seq) continue; /* skip empty seqs */
                 svp = av_fetch(seq, heads[s], 0);

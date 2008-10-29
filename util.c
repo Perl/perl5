@@ -4408,7 +4408,7 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
 	   Compiler in question is:
 	   gcc version 3.3 20030304 (Apple Computer, Inc. build 1640)
 	   for ( len = 2 - len; len > 0; len-- )
-	   av_push((AV *)sv, newSViv(0));
+	   av_push(MUTABLE_AV(sv), newSViv(0));
 	*/
 	len = 2 - len;
 	while (len-- > 0)
@@ -4495,7 +4495,7 @@ Perl_new_version(pTHX_ SV *ver)
 	    (void)hv_stores(MUTABLE_HV(hv), "original", newSVsv(pv));
 	}
 
-	sav = (AV *)SvRV(*hv_fetchs(MUTABLE_HV(ver), "version", FALSE));
+	sav = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(ver), "version", FALSE)));
 	/* This will get reblessed later if a derived class*/
 	for ( key = 0; key <= av_len(sav); key++ )
 	{
@@ -4700,7 +4700,7 @@ Perl_vnumify(pTHX_ SV *vs)
 
 
     /* attempt to retrieve the version array */
-    if ( !(av = (AV *)SvRV(*hv_fetchs(MUTABLE_HV(vs), "version", FALSE)) ) ) {
+    if ( !(av = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(vs), "version", FALSE))) ) ) {
 	sv_catpvs(sv,"0");
 	return sv;
     }
@@ -4773,7 +4773,7 @@ Perl_vnormal(pTHX_ SV *vs)
 
     if ( hv_exists(MUTABLE_HV(vs), "alpha", 5 ) )
 	alpha = TRUE;
-    av = (AV *)SvRV(*hv_fetchs(MUTABLE_HV(vs), "version", FALSE));
+    av = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(vs), "version", FALSE)));
 
     len = av_len(av);
     if ( len == -1 )
@@ -4877,12 +4877,12 @@ Perl_vcmp(pTHX_ SV *lhv, SV *rhv)
 	Perl_croak(aTHX_ "Invalid version object");
 
     /* get the left hand term */
-    lav = (AV *)SvRV(*hv_fetchs(MUTABLE_HV(lhv), "version", FALSE));
+    lav = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(lhv), "version", FALSE)));
     if ( hv_exists(MUTABLE_HV(lhv), "alpha", 5 ) )
 	lalpha = TRUE;
 
     /* and the right hand term */
-    rav = (AV *)SvRV(*hv_fetchs(MUTABLE_HV(rhv), "version", FALSE));
+    rav = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(rhv), "version", FALSE)));
     if ( hv_exists(MUTABLE_HV(rhv), "alpha", 5 ) )
 	ralpha = TRUE;
 

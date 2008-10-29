@@ -214,8 +214,8 @@ Perl_pad_new(pTHX_ int flags)
 
     /* ... then update state variables */
 
-    PL_comppad_name	= (AV*)(*av_fetch(padlist, 0, FALSE));
-    PL_comppad		= (AV*)(*av_fetch(padlist, 1, FALSE));
+    PL_comppad_name	= MUTABLE_AV((*av_fetch(padlist, 0, FALSE)));
+    PL_comppad		= MUTABLE_AV((*av_fetch(padlist, 1, FALSE)));
     PL_curpad		= AvARRAY(PL_comppad);
 
     if (! (flags & padnew_CLONE)) {
@@ -280,9 +280,9 @@ Perl_pad_undef(pTHX_ CV* cv)
     if (!PL_dirty) { /* don't bother during global destruction */
 	CV * const outercv = CvOUTSIDE(cv);
         const U32 seq = CvOUTSIDE_SEQ(cv);
-	AV *  const comppad_name = (AV*)AvARRAY(padlist)[0];
+	AV *  const comppad_name = MUTABLE_AV(AvARRAY(padlist)[0]);
 	SV ** const namepad = AvARRAY(comppad_name);
-	AV *  const comppad = (AV*)AvARRAY(padlist)[1];
+	AV *  const comppad = MUTABLE_AV(AvARRAY(padlist)[1]);
 	SV ** const curpad = AvARRAY(comppad);
 	for (ix = AvFILLp(comppad_name); ix > 0; ix--) {
 	    SV * const namesv = namepad[ix];
@@ -633,7 +633,7 @@ Perl_pad_findmy(pTHX_ const char *name)
      *    our $foo = 0 unless defined $foo;
      * to not give a warning. (Yes, this is a hack) */
 
-    nameav = (AV*)AvARRAY(CvPADLIST(PL_compcv))[0];
+    nameav = MUTABLE_AV(AvARRAY(CvPADLIST(PL_compcv))[0]);
     name_svp = AvARRAY(nameav);
     for (offset = AvFILLp(nameav); offset > 0; offset--) {
         const SV * const namesv = name_svp[offset];
@@ -716,7 +716,7 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 
     if (padlist) { /* not an undef CV */
 	I32 fake_offset = 0;
-        const AV * const nameav = (AV*)AvARRAY(padlist)[0];
+        const AV * const nameav = MUTABLE_AV(AvARRAY(padlist)[0]);
 	SV * const * const name_svp = AvARRAY(nameav);
 
 	for (offset = AvFILLp(nameav); offset > 0; offset--) {
@@ -814,8 +814,8 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 			return offset;
 		    }
 
-		    *out_capture = AvARRAY((AV*)AvARRAY(padlist)[
-				    CvDEPTH(cv) ? CvDEPTH(cv) : 1])[offset];
+		    *out_capture = AvARRAY(MUTABLE_AV(AvARRAY(padlist)[
+				    CvDEPTH(cv) ? CvDEPTH(cv) : 1]))[offset];
 		    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 			"Pad findlex cv=0x%"UVxf" found lex=0x%"UVxf"\n",
 			PTR2UV(cv), PTR2UV(*out_capture)));
@@ -869,8 +869,8 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 	SV *new_namesv;
 	AV *  const ocomppad_name = PL_comppad_name;
 	PAD * const ocomppad = PL_comppad;
-	PL_comppad_name = (AV*)AvARRAY(padlist)[0];
-	PL_comppad = (AV*)AvARRAY(padlist)[1];
+	PL_comppad_name = MUTABLE_AV(AvARRAY(padlist)[0]);
+	PL_comppad = MUTABLE_AV(AvARRAY(padlist)[1]);
 	PL_curpad = AvARRAY(PL_comppad);
 
 	new_offset = pad_add_name(
@@ -1349,8 +1349,8 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
     if (!padlist) {
 	return;
     }
-    pad_name = (AV*)*av_fetch((AV*)padlist, 0, FALSE);
-    pad = (AV*)*av_fetch((AV*)padlist, 1, FALSE);
+    pad_name = MUTABLE_AV(*av_fetch(MUTABLE_AV(padlist), 0, FALSE));
+    pad = MUTABLE_AV(*av_fetch(MUTABLE_AV(padlist), 1, FALSE));
     pname = AvARRAY(pad_name);
     ppad = AvARRAY(pad);
     Perl_dump_indent(aTHX_ level, file,
@@ -1459,8 +1459,8 @@ Perl_cv_clone(pTHX_ CV *proto)
     dVAR;
     I32 ix;
     AV* const protopadlist = CvPADLIST(proto);
-    const AV* const protopad_name = (AV*)*av_fetch(protopadlist, 0, FALSE);
-    const AV* const protopad = (AV*)*av_fetch(protopadlist, 1, FALSE);
+    const AV *const protopad_name = (const AV *)*av_fetch(protopadlist, 0, FALSE);
+    const AV *const protopad = (const AV *)*av_fetch(protopadlist, 1, FALSE);
     SV** const pname = AvARRAY(protopad_name);
     SV** const ppad = AvARRAY(protopad);
     const I32 fname = AvFILLp(protopad_name);
@@ -1611,8 +1611,8 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
 {
     dVAR;
     I32 ix;
-    AV * const comppad_name = (AV*)AvARRAY(padlist)[0];
-    AV * const comppad = (AV*)AvARRAY(padlist)[1];
+    AV * const comppad_name = MUTABLE_AV(AvARRAY(padlist)[0]);
+    AV * const comppad = MUTABLE_AV(AvARRAY(padlist)[1]);
     SV ** const namepad = AvARRAY(comppad_name);
     SV ** const curpad = AvARRAY(comppad);
 
@@ -1654,8 +1654,8 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 	SV** const svp = AvARRAY(padlist);
 	AV* const newpad = newAV();
 	SV** const oldpad = AvARRAY(svp[depth-1]);
-	I32 ix = AvFILLp((AV*)svp[1]);
-        const I32 names_fill = AvFILLp((AV*)svp[0]);
+	I32 ix = AvFILLp((const AV *)svp[1]);
+        const I32 names_fill = AvFILLp((const AV *)svp[0]);
 	SV** const names = AvARRAY(svp[0]);
 	AV *av;
 

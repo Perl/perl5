@@ -360,7 +360,7 @@ Perl_mg_size(pTHX_ SV *sv)
 
     switch(SvTYPE(sv)) {
 	case SVt_PVAV:
-	    return AvFILLp((AV *) sv); /* Fallback to non-tied array */
+	    return AvFILLp((const AV *) sv); /* Fallback to non-tied array */
 	case SVt_PVHV:
 	    /* FIXME */
 	default:
@@ -1605,7 +1605,7 @@ Perl_magic_clearisa(pTHX_ SV *sv, MAGIC *mg)
     /* Bail out if destruction is going on */
     if(PL_dirty) return 0;
 
-    av_clear((AV*)sv);
+    av_clear(MUTABLE_AV(sv));
 
     /* XXX see comments in magic_setisa */
     stash = GvSTASH(
@@ -1897,7 +1897,7 @@ int
 Perl_magic_getarylen(pTHX_ SV *sv, const MAGIC *mg)
 {
     dVAR;
-    const AV * const obj = (AV*)mg->mg_obj;
+    const AV * const obj = MUTABLE_AV(mg->mg_obj);
 
     PERL_ARGS_ASSERT_MAGIC_GETARYLEN;
 
@@ -1913,7 +1913,7 @@ int
 Perl_magic_setarylen(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
-    AV * const obj = (AV*)mg->mg_obj;
+    AV * const obj = MUTABLE_AV(mg->mg_obj);
 
     PERL_ARGS_ASSERT_MAGIC_SETARYLEN;
 
@@ -2166,7 +2166,7 @@ Perl_magic_getdefelem(pTHX_ SV *sv, MAGIC *mg)
                 targ = HeVAL(he);
 	}
 	else {
-	    AV* const av = (AV*)LvTARG(sv);
+	    AV *const av = MUTABLE_AV(LvTARG(sv));
 	    if ((I32)LvTARGOFF(sv) <= AvFILL(av))
 		targ = AvARRAY(av)[LvTARGOFF(sv)];
 	}
@@ -2220,7 +2220,7 @@ Perl_vivify_defelem(pTHX_ SV *sv)
 	    Perl_croak(aTHX_ PL_no_helem_sv, SVfARG(mg->mg_obj));
     }
     else {
-	AV* const av = (AV*)LvTARG(sv);
+	AV *const av = MUTABLE_AV(LvTARG(sv));
 	if ((I32)LvTARGLEN(sv) < 0 && (I32)LvTARGOFF(sv) > AvFILL(av))
 	    LvTARG(sv) = NULL;	/* array can't be extended */
 	else {
@@ -2242,7 +2242,7 @@ int
 Perl_magic_killbackrefs(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MAGIC_KILLBACKREFS;
-    return Perl_sv_kill_backrefs(aTHX_ sv, (AV*)mg->mg_obj);
+    return Perl_sv_kill_backrefs(aTHX_ sv, MUTABLE_AV(mg->mg_obj));
 }
 
 int

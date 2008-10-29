@@ -665,8 +665,8 @@ PP(pp_add)
 PP(pp_aelemfast)
 {
     dVAR; dSP;
-    AV * const av = PL_op->op_flags & OPf_SPECIAL ?
-		(AV*)PAD_SV(PL_op->op_targ) : GvAV(cGVOP_gv);
+    AV * const av = PL_op->op_flags & OPf_SPECIAL
+	? MUTABLE_AV(PAD_SV(PL_op->op_targ)) : GvAV(cGVOP_gv);
     const U32 lval = PL_op->op_flags & OPf_MOD;
     SV** const svp = av_fetch(av, PL_op->op_private, lval);
     SV *sv = (svp ? *svp : &PL_sv_undef);
@@ -890,7 +890,7 @@ PP(pp_rv2av)
     }
 
     if (is_pp_rv2av) {
-	AV *const av = (AV*)sv;
+	AV *const av = MUTABLE_AV(sv);
 	/* The guts of pp_rv2av, with no intenting change to preserve history
 	   (until such time as we get tools that can do blame annotation across
 	   whitespace changes.  */
@@ -1024,7 +1024,7 @@ PP(pp_aassign)
 	sv = *lelem++;
 	switch (SvTYPE(sv)) {
 	case SVt_PVAV:
-	    ary = (AV*)sv;
+	    ary = MUTABLE_AV(sv);
 	    magic = SvMAGICAL(ary) != 0;
 	    av_clear(ary);
 	    av_extend(ary, lastrelem - relem);
@@ -2807,7 +2807,7 @@ try_autoload:
 	SAVECOMPPAD();
 	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
 	if (hasargs) {
-	    AV* const av = (AV*)PAD_SVl(0);
+	    AV *const av = MUTABLE_AV(PAD_SVl(0));
 	    if (AvREAL(av)) {
 		/* @_ is normally not REAL--this should only ever
 		 * happen when DB::sub() calls things that modify @_ */
@@ -2816,7 +2816,7 @@ try_autoload:
 		AvREIFY_on(av);
 	    }
 	    cx->blk_sub.savearray = GvAV(PL_defgv);
-	    GvAV(PL_defgv) = (AV*)SvREFCNT_inc_simple(av);
+	    GvAV(PL_defgv) = MUTABLE_AV(SvREFCNT_inc_simple(av));
 	    CX_CURPAD_SAVE(cx->blk_sub);
 	    cx->blk_sub.argarray = av;
 	    ++MARK;
@@ -2920,7 +2920,7 @@ PP(pp_aelem)
     SV** svp;
     SV* const elemsv = POPs;
     IV elem = SvIV(elemsv);
-    AV* const av = (AV*)POPs;
+    AV *const av = MUTABLE_AV(POPs);
     const U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
     const U32 defer = (PL_op->op_private & OPpLVAL_DEFER) && (elem > av_len(av));
     SV *sv;

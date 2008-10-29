@@ -5074,7 +5074,7 @@ Perl_sv_add_backref(pTHX_ SV *tsv, SV *sv)
 
 	    if (mg) {
 		/* Aha. They've got it stowed in magic.  Bring it back.  */
-		av = (AV*)mg->mg_obj;
+		av = MUTABLE_AV(mg->mg_obj);
 		/* Stop mg_free decreasing the refernce count.  */
 		mg->mg_obj = NULL;
 		/* Stop mg_free even calling the destructor, given that
@@ -5092,7 +5092,7 @@ Perl_sv_add_backref(pTHX_ SV *tsv, SV *sv)
 	const MAGIC *const mg
 	    = SvMAGICAL(tsv) ? mg_find(tsv, PERL_MAGIC_backref) : NULL;
 	if (mg)
-	    av = (AV*)mg->mg_obj;
+	    av = MUTABLE_AV(mg->mg_obj);
 	else {
 	    av = newAV();
 	    AvREAL_off(av);
@@ -5131,7 +5131,7 @@ S_sv_del_backref(pTHX_ SV *tsv, SV *sv)
 	const MAGIC *const mg
 	    = SvMAGICAL(tsv) ? mg_find(tsv, PERL_MAGIC_backref) : NULL;
 	if (mg)
-	    av = (AV *)mg->mg_obj;
+	    av = MUTABLE_AV(mg->mg_obj);
     }
 
     if (!av)
@@ -5506,11 +5506,11 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	hv_undef(MUTABLE_HV(sv));
 	break;
     case SVt_PVAV:
-	if (PL_comppad == (AV*)sv) {
+	if (PL_comppad == MUTABLE_AV(sv)) {
 	    PL_comppad = NULL;
 	    PL_curpad = NULL;
 	}
-	av_undef((AV*)sv);
+	av_undef(MUTABLE_AV(sv));
 	break;
     case SVt_PVLV:
 	if (LvTYPE(sv) == 'T') { /* for tie: return HE to pool */
@@ -10048,8 +10048,8 @@ ptr_table_* functions.
    If this changes, please unmerge ss_dup.  */
 #define sv_dup_inc(s,t)	SvREFCNT_inc(sv_dup(s,t))
 #define sv_dup_inc_NN(s,t)	SvREFCNT_inc_NN(sv_dup(s,t))
-#define av_dup(s,t)	(AV*)sv_dup((const SV *)s,t)
-#define av_dup_inc(s,t)	(AV*)SvREFCNT_inc(sv_dup((const SV *)s,t))
+#define av_dup(s,t)	MUTABLE_AV(sv_dup((const SV *)s,t))
+#define av_dup_inc(s,t)	MUTABLE_AV(SvREFCNT_inc(sv_dup((const SV *)s,t)))
 #define hv_dup(s,t)	MUTABLE_HV(sv_dup((const SV *)s,t))
 #define hv_dup_inc(s,t)	MUTABLE_HV(SvREFCNT_inc(sv_dup((const SV *)s,t)))
 #define cv_dup(s,t)	MUTABLE_CV(sv_dup((SV*)s,t))
@@ -10285,7 +10285,8 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS* param)
 	else if(mg->mg_type == PERL_MAGIC_backref) {
 	    /* The backref AV has its reference count deliberately bumped by
 	       1.  */
-	    nmg->mg_obj = SvREFCNT_inc(av_dup_inc((AV*) mg->mg_obj, param));
+	    nmg->mg_obj
+		= SvREFCNT_inc(av_dup_inc((const AV *) mg->mg_obj, param));
 	}
 	else {
 	    nmg->mg_obj	= (mg->mg_flags & MGf_REFCOUNTED)
@@ -10737,16 +10738,16 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		break;
 	    case SVt_PVAV:
 		/* avoid cloning an empty array */
-		if (AvARRAY((AV *)sstr) && AvFILLp((AV *)sstr) >= 0) {
+		if (AvARRAY((const AV *)sstr) && AvFILLp((const AV *)sstr) >= 0) {
 		    SV **dst_ary, **src_ary;
-		    SSize_t items = AvFILLp((AV*)sstr) + 1;
+		    SSize_t items = AvFILLp((const AV *)sstr) + 1;
 
-		    src_ary = AvARRAY((AV*)sstr);
-		    Newxz(dst_ary, AvMAX((AV*)sstr)+1, SV*);
+		    src_ary = AvARRAY((const AV *)sstr);
+		    Newxz(dst_ary, AvMAX((const AV *)sstr)+1, SV*);
 		    ptr_table_store(PL_ptr_table, src_ary, dst_ary);
-		    AvARRAY((AV*)dstr) = dst_ary;
-		    AvALLOC((AV*)dstr) = dst_ary;
-		    if (AvREAL((AV*)sstr)) {
+		    AvARRAY(MUTABLE_AV(dstr)) = dst_ary;
+		    AvALLOC((const AV *)dstr) = dst_ary;
+		    if (AvREAL((const AV *)sstr)) {
 			while (items-- > 0)
 			    *dst_ary++ = sv_dup_inc(*src_ary++, param);
 		    }
@@ -10754,16 +10755,16 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 			while (items-- > 0)
 			    *dst_ary++ = sv_dup(*src_ary++, param);
 		    }
-		    items = AvMAX((AV*)sstr) - AvFILLp((AV*)sstr);
+		    items = AvMAX((const AV *)sstr) - AvFILLp((const AV *)sstr);
 		    while (items-- > 0) {
 			*dst_ary++ = &PL_sv_undef;
 		    }
 		}
 		else {
-		    AvARRAY((AV*)dstr)	= NULL;
-		    AvALLOC((AV*)dstr)	= (SV**)NULL;
-		    AvMAX(  (AV *)dstr)	= -1;
-		    AvFILLp((AV *)dstr)	= -1;
+		    AvARRAY(MUTABLE_AV(dstr))	= NULL;
+		    AvALLOC(MUTABLE_AV(dstr))	= (SV**)NULL;
+		    AvMAX(  MUTABLE_AV(dstr))	= -1;
+		    AvFILLp(MUTABLE_AV(dstr))	= -1;
 		}
 		break;
 	    case SVt_PVHV:
@@ -10801,8 +10802,8 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 			/* backref array needs refcnt=2; see sv_add_backref */
 			daux->xhv_backreferences =
 			    saux->xhv_backreferences
-				? (AV*) SvREFCNT_inc(
-					sv_dup_inc((SV*)saux->xhv_backreferences, param))
+			    ? MUTABLE_AV(SvREFCNT_inc(
+						      sv_dup_inc((SV*)saux->xhv_backreferences, param)))
 				: 0;
 
                         daux->xhv_mro_meta = saux->xhv_mro_meta
@@ -11206,7 +11207,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
 	    i = POPINT(ss,ix);
 	    TOPINT(nss,ix) = i;
-	    av = (AV*)POPPTR(ss,ix);
+	    av = (const AV *)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = av_dup_inc(av, param);
 	    break;
 	case SAVEt_OP:
@@ -12371,7 +12372,7 @@ S_varname(pTHX_ GV *gv, const char gvtype, PADOFFSET targ,
 
 	if (!cv || !CvPADLIST(cv))
 	    return NULL;
-	av = (AV*)(*av_fetch(CvPADLIST(cv), 0, FALSE));
+	av = MUTABLE_AV((*av_fetch(CvPADLIST(cv), 0, FALSE)));
 	sv = *av_fetch(av, targ, FALSE);
 	sv_setpvn(name, SvPV_nolen_const(sv), SvCUR(sv));
     }
@@ -12466,7 +12467,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 		subscript_type = FUV_SUBSCRIPT_HASH;
 	}
 	else {
-	    index = find_array_subscript((AV*)sv, uninit_sv);
+	    index = find_array_subscript((const AV *)sv, uninit_sv);
 	    if (index >= 0)
 		subscript_type = FUV_SUBSCRIPT_ARRAY;
 	}
@@ -12494,7 +12495,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 	if (obase->op_flags & OPf_SPECIAL) { /* lexical array */
 	    if (match) {
 		SV **svp;
-		av = (AV*)PAD_SV(obase->op_targ);
+		av = MUTABLE_AV(PAD_SV(obase->op_targ));
 		if (!av || SvRMAGICAL(av))
 		    break;
 		svp = av_fetch(av, (I32)obase->op_private, FALSE);
@@ -12566,7 +12567,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 			break;
 		}
 		else {
-		    SV * const * const svp = av_fetch((AV*)sv, SvIV(cSVOPx_sv(kid)), FALSE);
+		    SV * const * const svp = av_fetch(MUTABLE_AV(sv), SvIV(cSVOPx_sv(kid)), FALSE);
 		    if (!svp || *svp != uninit_sv)
 			break;
 		}
@@ -12588,7 +12589,8 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 						keysv, 0, FUV_SUBSCRIPT_HASH);
 	    }
 	    else {
-		const I32 index = find_array_subscript((AV*)sv, uninit_sv);
+		const I32 index
+		    = find_array_subscript((const AV *)sv, uninit_sv);
 		if (index >= 0)
 		    return varname(gv, '@', o->op_targ,
 					NULL, index, FUV_SUBSCRIPT_ARRAY);
