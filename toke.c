@@ -1333,7 +1333,7 @@ S_curmad(pTHX_ char slot, SV *sv)
     /* keep a slot open for the head of the list? */
     if (slot != '_' && *where && (*where)->mad_key == '^') {
 	(*where)->mad_key = slot;
-	sv_free((SV*)((*where)->mad_val));
+	sv_free(MUTABLE_SV(((*where)->mad_val)));
 	(*where)->mad_val = (void*)sv;
     }
     else
@@ -3338,7 +3338,7 @@ Perl_yylex(pTHX)
 	    PL_thismad = PL_nexttoke[PL_lasttoke].next_mad;
 	    PL_nexttoke[PL_lasttoke].next_mad = 0;
 	    if (PL_thismad && PL_thismad->mad_key == '_') {
-		PL_thiswhite = (SV*)PL_thismad->mad_val;
+		PL_thiswhite = MUTABLE_SV(PL_thismad->mad_val);
 		PL_thismad->mad_val = 0;
 		mad_free(PL_thismad);
 		PL_thismad = 0;
@@ -3691,7 +3691,7 @@ Perl_yylex(pTHX)
 		    ++svp;
 		    sv_catpvs(PL_linestr, ";");
 		}
-		sv_free((SV*)PL_preambleav);
+		sv_free(MUTABLE_SV(PL_preambleav));
 		PL_preambleav = NULL;
 	    }
 	    if (PL_minus_E)
@@ -5591,7 +5591,7 @@ Perl_yylex(pTHX)
 			SvPOK(cv))
 		    {
 			STRLEN protolen;
-			const char *proto = SvPV_const((SV*)cv, protolen);
+			const char *proto = SvPV_const(MUTABLE_SV(cv), protolen);
 			if (!protolen)
 			    TERM(FUNC0SUB);
 			if ((*proto == '$' || *proto == '_') && proto[1] == '\0')
@@ -10981,10 +10981,10 @@ S_scan_pat(pTHX_ char *start, I32 type)
 	   matches.  */
 	assert(type != OP_TRANS);
 	if (PL_curstash) {
-	    MAGIC *mg = mg_find((SV*)PL_curstash, PERL_MAGIC_symtab);
+	    MAGIC *mg = mg_find((const SV *)PL_curstash, PERL_MAGIC_symtab);
 	    U32 elements;
 	    if (!mg) {
-		mg = sv_magicext((SV*)PL_curstash, 0, PERL_MAGIC_symtab, 0, 0,
+		mg = sv_magicext(MUTABLE_SV(PL_curstash), 0, PERL_MAGIC_symtab, 0, 0,
 				 0);
 	    }
 	    elements = mg->mg_len / sizeof(PMOP**);
