@@ -4157,7 +4157,7 @@ extern const struct regexp_engine my_reg_engine;
 
 #ifndef PERL_IN_XSUB_RE 
 REGEXP *
-Perl_pregcomp(pTHX_ const SV * const pattern, const U32 flags)
+Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
 {
     dVAR;
     HV * const table = GvHV(PL_hintgv);
@@ -4183,14 +4183,14 @@ Perl_pregcomp(pTHX_ const SV * const pattern, const U32 flags)
 #endif
 
 REGEXP *
-Perl_re_compile(pTHX_ const SV * const pattern, U32 pm_flags)
+Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
 {
     dVAR;
     REGEXP *rx;
     struct regexp *r;
     register regexp_internal *ri;
     STRLEN plen;
-    char*  exp = SvPV((SV*)pattern, plen);
+    char  *exp = SvPV(pattern, plen);
     char* xend = exp + plen;
     regnode *scan;
     I32 flags;
