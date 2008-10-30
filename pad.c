@@ -197,7 +197,7 @@ Perl_pad_new(pTHX_ int flags)
 
         AV * const a0 = newAV();			/* will be @_ */
 	av_extend(a0, 0);
-	av_store(pad, 0, (SV*)a0);
+	av_store(pad, 0, MUTABLE_SV(a0));
 	AvREIFY_only(a0);
     }
     else {
@@ -205,8 +205,8 @@ Perl_pad_new(pTHX_ int flags)
     }
 
     AvREAL_off(padlist);
-    av_store(padlist, 0, (SV*)padname);
-    av_store(padlist, 1, (SV*)pad);
+    av_store(padlist, 0, MUTABLE_SV(padname));
+    av_store(padlist, 1, MUTABLE_SV(pad));
 
     /* ... then update state variables */
 
@@ -319,16 +319,16 @@ Perl_pad_undef(pTHX_ CV* cv)
     while (ix >= 0) {
 	SV* const sv = AvARRAY(padlist)[ix--];
 	if (sv) {
-	    if (sv == (SV*)PL_comppad_name)
+	    if (sv == (const SV *)PL_comppad_name)
 		PL_comppad_name = NULL;
-	    else if (sv == (SV*)PL_comppad) {
+	    else if (sv == (const SV *)PL_comppad) {
 		PL_comppad = NULL;
 		PL_curpad = NULL;
 	    }
 	}
 	SvREFCNT_dec(sv);
     }
-    SvREFCNT_dec((SV*)CvPADLIST(cv));
+    SvREFCNT_dec(MUTABLE_SV(CvPADLIST(cv)));
     CvPADLIST(cv) = NULL;
 }
 
@@ -367,7 +367,7 @@ Perl_pad_add_name(pTHX_ const char *name, HV* typestash, HV* ourstash, bool fake
     if (typestash) {
 	assert(SvTYPE(namesv) == SVt_PVMG);
 	SvPAD_TYPED_on(namesv);
-	SvSTASH_set(namesv, MUTABLE_HV(SvREFCNT_inc_simple_NN((SV*)typestash)));
+	SvSTASH_set(namesv, MUTABLE_HV(SvREFCNT_inc_simple_NN(MUTABLE_SV(typestash))));
     }
     if (ourstash) {
 	SvPAD_OUR_on(namesv);
@@ -396,9 +396,9 @@ Perl_pad_add_name(pTHX_ const char *name, HV* typestash, HV* ourstash, bool fake
 	/* XXX DAPM since slot has been allocated, replace
 	 * av_store with PL_curpad[offset] ? */
 	if (*name == '@')
-	    av_store(PL_comppad, offset, (SV*)newAV());
+	    av_store(PL_comppad, offset, MUTABLE_SV(newAV()));
 	else if (*name == '%')
-	    av_store(PL_comppad, offset, (SV*)newHV());
+	    av_store(PL_comppad, offset, MUTABLE_SV(newHV()));
 	SvPADMY_on(PL_curpad[offset]);
 	DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 	    "Pad addname: %ld \"%s\" new lex=0x%"UVxf"\n",
@@ -827,9 +827,9 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 		}
 		if (!*out_capture) {
 		    if (*name == '@')
-			*out_capture = sv_2mortal((SV*)newAV());
+			*out_capture = sv_2mortal(MUTABLE_SV(newAV()));
 		    else if (*name == '%')
-			*out_capture = sv_2mortal((SV*)newHV());
+			*out_capture = sv_2mortal(MUTABLE_SV(newHV()));
 		    else
 			*out_capture = sv_newmortal();
 		}
@@ -1250,7 +1250,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 	/* XXX DAPM this same bit of code keeps appearing !!! Rationalise? */
 	AV * const av = newAV();			/* Will be @_ */
 	av_extend(av, 0);
-	av_store(PL_comppad, 0, (SV*)av);
+	av_store(PL_comppad, 0, MUTABLE_SV(av));
 	AvREIFY_only(av);
     }
 
@@ -1506,7 +1506,7 @@ Perl_cv_clone(pTHX_ CV *proto)
     CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(proto);
 
     if (SvPOK(proto))
-	sv_setpvn((SV*)cv, SvPVX_const(proto), SvCUR(proto));
+	sv_setpvn(MUTABLE_SV(cv), SvPVX_const(proto), SvCUR(proto));
 
     CvPADLIST(cv) = pad_new(padnew_CLONE|padnew_SAVE);
 
@@ -1542,9 +1542,9 @@ Perl_cv_clone(pTHX_ CV *proto)
                 if (sigil == '&')
 		    sv = SvREFCNT_inc(ppad[ix]);
                 else if (sigil == '@')
-		    sv = (SV*)newAV();
+		    sv = MUTABLE_SV(newAV());
                 else if (sigil == '%')
-		    sv = (SV*)newHV();
+		    sv = MUTABLE_SV(newHV());
 		else
 		    sv = newSV(0);
 		SvPADMY_on(sv);
@@ -1668,9 +1668,9 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 		else {		/* our own lexical */
 		    SV *sv; 
 		    if (sigil == '@')
-			sv = (SV*)newAV();
+			sv = MUTABLE_SV(newAV());
 		    else if (sigil == '%')
-			sv = (SV*)newHV();
+			sv = MUTABLE_SV(newHV());
 		    else
 			sv = newSV(0);
 		    av_store(newpad, ix, sv);
@@ -1689,10 +1689,10 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 	}
 	av = newAV();
 	av_extend(av, 0);
-	av_store(newpad, 0, (SV*)av);
+	av_store(newpad, 0, MUTABLE_SV(av));
 	AvREIFY_only(av);
 
-	av_store(padlist, depth, (SV*)newpad);
+	av_store(padlist, depth, MUTABLE_SV(newpad));
 	AvFILLp(padlist) = depth;
     }
 }

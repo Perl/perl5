@@ -82,16 +82,16 @@ Perl_mro_meta_dup(pTHX_ struct mro_meta* smeta, CLONE_PARAMS* param)
 
     if (newmeta->mro_linear_dfs)
 	newmeta->mro_linear_dfs
-	    = MUTABLE_AV(SvREFCNT_inc(sv_dup((SV*)newmeta->mro_linear_dfs, param)));
+	    = MUTABLE_AV(SvREFCNT_inc(sv_dup((const SV *)newmeta->mro_linear_dfs, param)));
     if (newmeta->mro_linear_c3)
 	newmeta->mro_linear_c3
-	    = MUTABLE_AV(SvREFCNT_inc(sv_dup((SV*)newmeta->mro_linear_c3, param)));
+	    = MUTABLE_AV(SvREFCNT_inc(sv_dup((const SV *)newmeta->mro_linear_c3, param)));
     if (newmeta->mro_nextmethod)
 	newmeta->mro_nextmethod
-	    = MUTABLE_HV(SvREFCNT_inc(sv_dup((SV*)newmeta->mro_nextmethod, param)));
+	    = MUTABLE_HV(SvREFCNT_inc(sv_dup((const SV *)newmeta->mro_nextmethod, param)));
     if (newmeta->isa)
 	newmeta->isa
-	    = MUTABLE_HV(SvREFCNT_inc(sv_dup((SV*)newmeta->isa, param)));
+	    = MUTABLE_HV(SvREFCNT_inc(sv_dup((const SV *)newmeta->isa, param)));
 
     return newmeta;
 }
@@ -181,7 +181,7 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
 
     /* not in cache, make a new one */
 
-    retval = MUTABLE_AV(sv_2mortal((SV *)newAV()));
+    retval = MUTABLE_AV(sv_2mortal(MUTABLE_SV(newAV())));
     /* We use this later in this function, but don't need a reference to it
        beyond the end of this function, so reference count is fine.  */
     our_name = newSVhek(stashhek);
@@ -197,7 +197,7 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, I32 level)
        It's then retained to be re-used as a fast lookup for ->isa(), by adding
        our own name and "UNIVERSAL" to it.  */
 
-    stored = MUTABLE_HV(sv_2mortal((SV*)newHV()));
+    stored = MUTABLE_HV(sv_2mortal(MUTABLE_SV(newHV())));
 
     if(av && AvFILLp(av) >= 0) {
 
@@ -344,8 +344,8 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
     if(isa && AvFILLp(isa) >= 0) {
         SV** seqs_ptr;
         I32 seqs_items;
-        HV* const tails = MUTABLE_HV(sv_2mortal((SV*)newHV()));
-        AV *const seqs = MUTABLE_AV(sv_2mortal((SV*)newAV()));
+        HV* const tails = MUTABLE_HV(sv_2mortal(MUTABLE_SV(newHV())));
+        AV *const seqs = MUTABLE_AV(sv_2mortal(MUTABLE_SV(newAV())));
         I32* heads;
 
         /* This builds @seqs, which is an array of arrays.
@@ -362,15 +362,15 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, I32 level)
                    containing just itself */
                 AV* const isa_lin = newAV();
                 av_push(isa_lin, newSVsv(isa_item));
-                av_push(seqs, (SV*)isa_lin);
+                av_push(seqs, MUTABLE_SV(isa_lin));
             }
             else {
                 /* recursion */
                 AV* const isa_lin = mro_get_linear_isa_c3(isa_item_stash, level + 1);
-                av_push(seqs, SvREFCNT_inc_simple_NN((SV*)isa_lin));
+                av_push(seqs, SvREFCNT_inc_simple_NN(MUTABLE_SV(isa_lin)));
             }
         }
-        av_push(seqs, SvREFCNT_inc_simple_NN((SV*)isa));
+        av_push(seqs, SvREFCNT_inc_simple_NN(MUTABLE_SV(isa)));
 
         /* This builds "heads", which as an array of integer array
            indices, one per seq, which point at the virtual "head"
@@ -566,8 +566,8 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 
     /* wipe out the cached linearizations for this stash */
     meta = HvMROMETA(stash);
-    SvREFCNT_dec((SV*)meta->mro_linear_dfs);
-    SvREFCNT_dec((SV*)meta->mro_linear_c3);
+    SvREFCNT_dec(MUTABLE_SV(meta->mro_linear_dfs));
+    SvREFCNT_dec(MUTABLE_SV(meta->mro_linear_c3));
     meta->mro_linear_dfs = NULL;
     meta->mro_linear_c3 = NULL;
     if (meta->isa) {
@@ -609,8 +609,8 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 
             if(!revstash) continue;
             revmeta = HvMROMETA(revstash);
-            SvREFCNT_dec((SV*)revmeta->mro_linear_dfs);
-            SvREFCNT_dec((SV*)revmeta->mro_linear_c3);
+            SvREFCNT_dec(MUTABLE_SV(revmeta->mro_linear_dfs));
+            SvREFCNT_dec(MUTABLE_SV(revmeta->mro_linear_c3));
             revmeta->mro_linear_dfs = NULL;
             revmeta->mro_linear_c3 = NULL;
             if(!is_universal)
@@ -643,7 +643,7 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 
         mroisarev = MUTABLE_HV(HeVAL(he));
 
-	SvUPGRADE((SV*)mroisarev, SVt_PVHV);
+	SvUPGRADE(MUTABLE_SV(mroisarev), SVt_PVHV);
 
 	/* This hash only ever contains PL_sv_yes. Storing it over itself is
 	   almost as cheap as calling hv_exists, so on aggregate we expect to
@@ -799,7 +799,7 @@ XS(XS_mro_get_linear_isa) {
         /* No stash exists yet, give them just the classname */
         AV* isalin = newAV();
         av_push(isalin, newSVsv(classname));
-        ST(0) = sv_2mortal(newRV_noinc((SV*)isalin));
+        ST(0) = sv_2mortal(newRV_noinc(MUTABLE_SV(isalin)));
         XSRETURN(1);
     }
     else if(items > 1) {
@@ -813,7 +813,7 @@ XS(XS_mro_get_linear_isa) {
         RETVAL = mro_get_linear_isa(class_stash);
     }
 
-    ST(0) = newRV_inc((SV*)RETVAL);
+    ST(0) = newRV_inc(MUTABLE_SV(RETVAL));
     sv_2mortal(ST(0));
     XSRETURN(1);
 }
@@ -900,7 +900,7 @@ XS(XS_mro_get_isarev)
         while((iter = hv_iternext(isarev)))
             av_push(ret_array, newSVsv(hv_iterkeysv(iter)));
     }
-    mXPUSHs(newRV_noinc((SV*)ret_array));
+    mXPUSHs(newRV_noinc(MUTABLE_SV(ret_array)));
 
     PUTBACK;
     return;
@@ -1168,9 +1168,9 @@ XS(XS_mro_nextcan)
                entries, because in C3 the method cache of a parent is not
                valid for the child */
             if (SvTYPE(candidate) == SVt_PVGV && (cand_cv = GvCV(candidate)) && !GvCVGEN(candidate)) {
-                SvREFCNT_inc_simple_void_NN((SV*)cand_cv);
-                (void)hv_store_ent(nmcache, newSVsv(sv), (SV*)cand_cv, 0);
-                mXPUSHs(newRV_inc((SV*)cand_cv));
+                SvREFCNT_inc_simple_void_NN(MUTABLE_SV(cand_cv));
+                (void)hv_store_ent(nmcache, newSVsv(sv), MUTABLE_SV(cand_cv), 0);
+                mXPUSHs(newRV_inc(MUTABLE_SV(cand_cv)));
                 XSRETURN(1);
             }
         }

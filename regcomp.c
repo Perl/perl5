@@ -4329,7 +4329,7 @@ redo_first_pass:
             + (sizeof(STD_PAT_MODS) - 1)
             + (sizeof("(?:)") - 1);
 
-	p = sv_grow((SV *)rx, wraplen + 1);
+	p = sv_grow(MUTABLE_SV(rx), wraplen + 1);
 	SvCUR_set(rx, wraplen);
 	SvPOK_on(rx);
 	SvFLAGS(rx) |= SvUTF8(pattern);
@@ -4990,7 +4990,7 @@ Perl_reg_named_buff_fetch(pTHX_ REGEXP * const r, SV * const namesv,
                     av_push(retarray, ret);
             }
             if (retarray)
-                return newRV_noinc((SV*)retarray);
+                return newRV_noinc(MUTABLE_SV(retarray));
         }
     }
     return NULL;
@@ -5129,7 +5129,7 @@ Perl_reg_named_buff_all(pTHX_ REGEXP * const r, const U32 flags)
         }
     }
 
-    return newRV_noinc((SV*)av);
+    return newRV_noinc(MUTABLE_SV(av));
 }
 
 void
@@ -5269,7 +5269,7 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
             goto getlen;
         } else {
             if (ckWARN(WARN_UNINITIALIZED))
-                report_uninit((SV*)sv);
+                report_uninit((const SV *)sv);
             return 0;
         }
     }
@@ -5637,10 +5637,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                                 "panic: reg_scan_name returned NULL");
                         if (!RExC_paren_names) {
                             RExC_paren_names= newHV();
-                            sv_2mortal((SV*)RExC_paren_names);
+                            sv_2mortal(MUTABLE_SV(RExC_paren_names));
 #ifdef DEBUGGING
                             RExC_paren_name_list= newAV();
-                            sv_2mortal((SV*)RExC_paren_name_list);
+                            sv_2mortal(MUTABLE_SV(RExC_paren_name_list));
 #endif
                         }
                         he_str = hv_fetch_ent( RExC_paren_names, svname, 1, 0 );
@@ -6656,7 +6656,7 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep)
         if (!RExC_charnames) {
             /* make sure our cache is allocated */
             RExC_charnames = newHV();
-            sv_2mortal((SV*)RExC_charnames);
+            sv_2mortal(MUTABLE_SV(RExC_charnames));
         } 
             /* see if we have looked this one up before */
         he_str = hv_fetch_ent( RExC_charnames, sv_name, 0, 0 );
@@ -8390,8 +8390,8 @@ parseit:
 	 * used later (regexec.c:S_reginclass()). */
 	av_store(av, 0, listsv);
 	av_store(av, 1, NULL);
-	av_store(av, 2, (SV*)unicode_alternate);
-	rv = newRV_noinc((SV*)av);
+	av_store(av, 2, MUTABLE_SV(unicode_alternate));
+	rv = newRV_noinc(MUTABLE_SV(av));
 	n = add_data(pRExC_state, 1, "s");
 	RExC_rxi->data->data[n] = (void*)rv;
 	ARG_SET(ret, n);
@@ -9061,7 +9061,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
             }	    
             else {
                 AV *list= MUTABLE_AV(progi->data->data[ progi->name_list_idx ]);
-                SV *sv_dat=(SV*)progi->data->data[ ARG( o ) ];
+                SV *sv_dat= MUTABLE_SV(progi->data->data[ ARG( o ) ]);
                 I32 *nums=(I32*)SvPVX(sv_dat);
                 SV **name= av_fetch(list, nums[0], 0 );
                 I32 n;
@@ -9079,7 +9079,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
     else if (k == VERB) {
         if (!o->flags) 
             Perl_sv_catpvf(aTHX_ sv, ":%"SVf, 
-                SVfARG((SV*)progi->data->data[ ARG( o ) ]));
+			   SVfARG((MUTABLE_SV(progi->data->data[ ARG( o ) ]))));
     } else if (k == LOGICAL)
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);	/* 2: embedded, otherwise 1 */
     else if (k == FOLDCHAR)
@@ -9427,7 +9427,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
 	    case 's':
 	    case 'S':
 	    case 'u':
-		SvREFCNT_dec((SV*)ri->data->data[n]);
+		SvREFCNT_dec(MUTABLE_SV(ri->data->data[n]));
 		break;
 	    case 'f':
 		Safefree(ri->data->data[n]);
@@ -9449,7 +9449,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
                     op_free((OP_4tree*)ri->data->data[n]);
 
 		PAD_RESTORE_LOCAL(old_comppad);
-		SvREFCNT_dec((SV*)new_comppad);
+		SvREFCNT_dec(MUTABLE_SV(new_comppad));
 		new_comppad = NULL;
 		break;
 	    case 'n':
@@ -9654,7 +9654,7 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
 	    case 'S':
 	    case 'p': /* actually an AV, but the dup function is identical.  */
 	    case 'u': /* actually an HV, but the dup function is identical.  */
-		d->data[i] = sv_dup_inc((SV *)ri->data->data[i], param);
+		d->data[i] = sv_dup_inc((const SV *)ri->data->data[i], param);
 		break;
 	    case 'f':
 		/* This is cheating. */

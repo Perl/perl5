@@ -635,7 +635,7 @@ Perl_op_clear(pTHX_ OP *o)
 	    pad_swipe(cPMOPo->op_pmreplrootu.op_pmtargetoff, TRUE);
 	}
 #else
-	SvREFCNT_dec((SV*)cPMOPo->op_pmreplrootu.op_pmtargetgv);
+	SvREFCNT_dec(MUTABLE_SV(cPMOPo->op_pmreplrootu.op_pmtargetgv));
 #endif
 	/* FALL THROUGH */
     case OP_MATCH:
@@ -695,7 +695,7 @@ S_forget_pmop(pTHX_ PMOP *const o
     PERL_ARGS_ASSERT_FORGET_PMOP;
 
     if (pmstash && !SvIS_FREED(pmstash)) {
-	MAGIC * const mg = mg_find((SV*)pmstash, PERL_MAGIC_symtab);
+	MAGIC * const mg = mg_find((const SV *)pmstash, PERL_MAGIC_symtab);
 	if (mg) {
 	    PMOP **const array = (PMOP**) mg->mg_ptr;
 	    U32 count = mg->mg_len / sizeof(PMOP**);
@@ -2029,7 +2029,7 @@ Perl_apply_attrs_string(pTHX_ const char *stashpv, CV *cv,
 				  newSVOP(OP_CONST, 0, newSVpv(stashpv,0)),
 				  prepend_elem(OP_LIST,
 					       newSVOP(OP_CONST, 0,
-						       newRV((SV*)cv)),
+						       newRV(MUTABLE_SV(cv))),
                                                attrs)));
 }
 
@@ -2075,8 +2075,8 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 	    PL_parser->in_my_stash = NULL;
 	    apply_attrs(GvSTASH(gv),
 			(type == OP_RV2SV ? GvSV(gv) :
-			 type == OP_RV2AV ? (SV*)GvAV(gv) :
-			 type == OP_RV2HV ? (SV*)GvHV(gv) : (SV*)gv),
+			 type == OP_RV2AV ? MUTABLE_SV(GvAV(gv)) :
+			 type == OP_RV2HV ? MUTABLE_SV(GvHV(gv)) : MUTABLE_SV(gv)),
 			attrs, FALSE);
 	}
 	o->op_private |= OPpOUR_INTRO;
@@ -2349,9 +2349,9 @@ Perl_newPROG(pTHX_ OP *o)
 	    if (cv) {
 		dSP;
 		PUSHMARK(SP);
-		XPUSHs((SV*)CopFILEGV(&PL_compiling));
+		XPUSHs(MUTABLE_SV(CopFILEGV(&PL_compiling)));
 		PUTBACK;
-		call_sv((SV*)cv, G_DISCARD);
+		call_sv(MUTABLE_SV(cv), G_DISCARD);
 	    }
 	}
     }
@@ -2565,7 +2565,7 @@ Perl_fold_constants(pTHX_ register OP *o)
     if (type == OP_RV2GV)
 	newop = newGVOP(OP_GV, 0, (GV*)sv);
     else
-	newop = newSVOP(OP_CONST, 0, (SV*)sv);
+	newop = newSVOP(OP_CONST, 0, MUTABLE_SV(sv));
     op_getmad(o,newop,'f');
     return newop;
 
@@ -2779,7 +2779,7 @@ Perl_token_getmad(pTHX_ TOKEN* tk, OP* o, char slot)
     /* faked up qw list? */
     if (slot == '(' &&
 	tm->mad_type == MAD_SV &&
-	SvPVX((SV*)tm->mad_val)[0] == 'q')
+	SvPVX((const SV *)tm->mad_val)[0] == 'q')
 	    slot = 'x';
 
     if (o) {
@@ -2970,7 +2970,7 @@ Perl_mad_free(pTHX_ MADPROP* mp)
 	    op_free((OP*)mp->mad_val);
 	break;
     case MAD_SV:
-	sv_free((SV*)mp->mad_val);
+	sv_free(MUTABLE_SV(mp->mad_val));
 	break;
     default:
 	PerlIO_printf(PerlIO_stderr(), "Unrecognized mad\n");
@@ -3348,7 +3348,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	PerlMemShared_free(cPVOPo->op_pv);
 	cPVOPo->op_pv = NULL;
 
-	swash = (SV*)swash_init("utf8", "", listsv, bits, none);
+	swash = MUTABLE_SV(swash_init("utf8", "", listsv, bits, none));
 #ifdef USE_ITHREADS
 	cPADOPo->op_padix = pad_alloc(OP_TRANS, SVs_PADTMP);
 	SvREFCNT_dec(PAD_SVl(cPADOPo->op_padix));
@@ -5313,7 +5313,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 	CvSTART(cv) = NULL;
 	LEAVE;
     }
-    SvPOK_off((SV*)cv);		/* forget prototype */
+    SvPOK_off(MUTABLE_SV(cv));		/* forget prototype */
     CvGV(cv) = NULL;
 
     pad_undef(cv);
@@ -5325,7 +5325,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 	CvOUTSIDE(cv) = NULL;
     }
     if (CvCONST(cv)) {
-	SvREFCNT_dec((SV*)CvXSUBANY(cv).any_ptr);
+	SvREFCNT_dec(MUTABLE_SV(CvXSUBANY(cv).any_ptr));
 	CvCONST_off(cv);
     }
     if (CvISXSUB(cv) && CvXSUB(cv)) {
@@ -5392,7 +5392,7 @@ Perl_cv_const_sv(pTHX_ const CV *const cv)
 	return NULL;
     if (!(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM))
 	return NULL;
-    return CvCONST(cv) ? (SV*)CvXSUBANY(cv).any_ptr : NULL;
+    return CvCONST(cv) ? MUTABLE_SV(CvXSUBANY(cv).any_ptr) : NULL;
 }
 
 /* op_const_sv:  examine an optree to determine whether it's in-lineable.
@@ -5564,7 +5564,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     if (SvTYPE(gv) != SVt_PVGV) {	/* Maybe prototype now, and had at
 					   maximum a prototype before. */
 	if (SvTYPE(gv) > SVt_NULL) {
-	    if (!SvPOK((SV*)gv) && !(SvIOK((SV*)gv) && SvIVX((SV*)gv) == -1)
+	    if (!SvPOK((const SV *)gv)
+		&& !(SvIOK((const SV *)gv) && SvIVX((const SV *)gv) == -1)
 		&& ckWARN_d(WARN_PROTOTYPE))
 	    {
 		Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE), "Runaway prototype");
@@ -5572,9 +5573,9 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    cv_ckproto_len((const CV *)gv, NULL, ps, ps_len);
 	}
 	if (ps)
-	    sv_setpvn((SV*)gv, ps, ps_len);
+	    sv_setpvn(MUTABLE_SV(gv), ps, ps_len);
 	else
-	    sv_setiv((SV*)gv, -1);
+	    sv_setiv(MUTABLE_SV(gv), -1);
 
 	SvREFCNT_dec(PL_compcv);
 	cv = PL_compcv = NULL;
@@ -5661,7 +5662,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	SvREFCNT_inc_simple_void_NN(const_sv);
 	if (cv) {
 	    assert(!CvROOT(cv) && !CvCONST(cv));
-	    sv_setpvs((SV*)cv, "");  /* prototype is "" */
+	    sv_setpvs(MUTABLE_SV(cv), "");  /* prototype is "" */
 	    CvXSUBANY(cv).any_ptr = const_sv;
 	    CvXSUB(cv) = const_sv_xsub;
 	    CvCONST_on(cv);
@@ -5697,7 +5698,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		    || block->op_type == OP_NULL
 #endif
 		    )) {
-	    rcv = (SV*)cv;
+	    rcv = MUTABLE_SV(cv);
 	    /* Might have had built-in attributes applied -- propagate them. */
 	    CvFLAGS(cv) |= (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS);
 	    if (CvGV(cv) && GvSTASH(CvGV(cv)))
@@ -5709,7 +5710,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	}
 	else {
 	    /* possibly about to re-define existing subr -- ignore old cv */
-	    rcv = (SV*)PL_compcv;
+	    rcv = MUTABLE_SV(PL_compcv);
 	    if (name && GvSTASH(gv))
 		stash = GvSTASH(gv);
 	    else
@@ -5755,7 +5756,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    GvCV(gv) = cv;
 	    if (PL_madskills) {
 		if (strEQ(name, "import")) {
-		    PL_formfeed = (SV*)cv;
+		    PL_formfeed = MUTABLE_SV(cv);
 		    Perl_warner(aTHX_ packWARN(WARN_VOID), "%lx\n", (long)cv);
 		}
 	    }
@@ -5768,7 +5769,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     CvSTASH(cv) = PL_curstash;
 
     if (ps)
-	sv_setpvn((SV*)cv, ps, ps_len);
+	sv_setpvn(MUTABLE_SV(cv), ps, ps_len);
 
     if (PL_parser && PL_parser->error_count) {
 	op_free(block);
@@ -5851,7 +5852,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		    PUSHMARK(SP);
 		    XPUSHs(tmpstr);
 		    PUTBACK;
-		    call_sv((SV*)pcv, G_DISCARD);
+		    call_sv(MUTABLE_SV(pcv), G_DISCARD);
 		}
 	    }
 	}
@@ -5884,7 +5885,7 @@ S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
 	    SAVECOPLINE(&PL_compiling);
 
 	    DEBUG_x( dump_sub(gv) );
-	    Perl_av_create_and_push(aTHX_ &PL_beginav, (SV*)cv);
+	    Perl_av_create_and_push(aTHX_ &PL_beginav, MUTABLE_SV(cv));
 	    GvCV(gv) = 0;		/* cv has been hijacked */
 	    call_list(oldscope, PL_beginav);
 
@@ -5898,13 +5899,13 @@ S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
 	if (*name == 'E') {
 	    if strEQ(name, "END") {
 		DEBUG_x( dump_sub(gv) );
-		Perl_av_create_and_unshift_one(aTHX_ &PL_endav, (SV*)cv);
+		Perl_av_create_and_unshift_one(aTHX_ &PL_endav, MUTABLE_SV(cv));
 	    } else
 		return;
 	} else if (*name == 'U') {
 	    if (strEQ(name, "UNITCHECK")) {
 		/* It's never too late to run a unitcheck block */
-		Perl_av_create_and_unshift_one(aTHX_ &PL_unitcheckav, (SV*)cv);
+		Perl_av_create_and_unshift_one(aTHX_ &PL_unitcheckav, MUTABLE_SV(cv));
 	    }
 	    else
 		return;
@@ -5913,7 +5914,7 @@ S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
 		if (PL_main_start && ckWARN(WARN_VOID))
 		    Perl_warner(aTHX_ packWARN(WARN_VOID),
 				"Too late to run CHECK block");
-		Perl_av_create_and_unshift_one(aTHX_ &PL_checkav, (SV*)cv);
+		Perl_av_create_and_unshift_one(aTHX_ &PL_checkav, MUTABLE_SV(cv));
 	    }
 	    else
 		return;
@@ -5922,7 +5923,7 @@ S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
 		if (PL_main_start && ckWARN(WARN_VOID))
 		    Perl_warner(aTHX_ packWARN(WARN_VOID),
 				"Too late to run INIT block");
-		Perl_av_create_and_push(aTHX_ &PL_initav, (SV*)cv);
+		Perl_av_create_and_push(aTHX_ &PL_initav, MUTABLE_SV(cv));
 	    }
 	    else
 		return;
@@ -6028,7 +6029,7 @@ Perl_newXS_flags(pTHX_ const char *name, XSUBADDR_t subaddr,
 	}
 
 	/* This gets free()d.  :-)  */
-	sv_usepvn_flags((SV*)cv, proto_and_file, proto_and_file_len,
+	sv_usepvn_flags(MUTABLE_SV(cv), proto_and_file, proto_and_file_len,
 			SV_HAS_TRAILING_NUL);
 	if (proto) {
 	    /* This gives us the correct prototype, rather than one with the
@@ -6039,7 +6040,7 @@ Perl_newXS_flags(pTHX_ const char *name, XSUBADDR_t subaddr,
 	}
 	CvFILE(cv) = proto_and_file + proto_len;
     } else {
-	sv_setpv((SV *)cv, proto);
+	sv_setpv(MUTABLE_SV(cv), proto);
     }
     return cv;
 }
@@ -6210,7 +6211,7 @@ Perl_newANONATTRSUB(pTHX_ I32 floor, OP *proto, OP *attrs, OP *block)
 {
     return newUNOP(OP_REFGEN, 0,
 	newSVOP(OP_ANONCODE, 0,
-		(SV*)newATTRSUB(floor, 0, proto, attrs, block)));
+		MUTABLE_SV(newATTRSUB(floor, 0, proto, attrs, block))));
 }
 
 OP *
@@ -6558,7 +6559,7 @@ Perl_ck_eval(pTHX_ OP *o)
     if ((PL_hints & HINT_LOCALIZE_HH) != 0 && GvHV(PL_hintgv)) {
 	/* Store a copy of %^H that pp_entereval can pick up. */
 	OP *hhop = newSVOP(OP_HINTSEVAL, 0,
-			   (SV*)Perl_hv_copy_hints_hv(aTHX_ GvHV(PL_hintgv)));
+			   MUTABLE_SV(Perl_hv_copy_hints_hv(aTHX_ GvHV(PL_hintgv))));
 	cUNOPo->op_first->op_sibling = hhop;
 	o->op_private |= OPpEVAL_HAS_HH;
     }
@@ -6734,7 +6735,7 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 	    kPADOP->op_padix = pad_alloc(OP_GV, SVs_PADTMP);
 	    SvREFCNT_dec(PAD_SVl(kPADOP->op_padix));
 	    GvIN_PAD_on(gv);
-	    PAD_SETSV(kPADOP->op_padix, (SV*) SvREFCNT_inc_simple_NN(gv));
+	    PAD_SETSV(kPADOP->op_padix, MUTABLE_SV(SvREFCNT_inc_simple_NN(gv)));
 #else
 	    kid->op_sv = SvREFCNT_inc_simple_NN(gv);
 #endif
@@ -7097,7 +7098,7 @@ Perl_ck_glob(pTHX_ OP *o)
 	gv = gv_fetchpvs("CORE::GLOBAL::glob", 0, SVt_PVCV);
 	glob_gv = gv_fetchpvs("File::Glob::csh_glob", 0, SVt_PVCV);
 	GvCV(gv) = GvCV(glob_gv);
-	SvREFCNT_inc_void((SV*)GvCV(gv));
+	SvREFCNT_inc_void(MUTABLE_SV(GvCV(gv)));
 	GvIMPORTED_CV_on(gv);
 	LEAVE;
     }
@@ -7961,7 +7962,7 @@ Perl_ck_subr(pTHX_ OP *o)
 		if (SvPOK(cv)) {
 		    STRLEN len;
 		    namegv = CvANON(cv) ? gv : CvGV(cv);
-		    proto = SvPV((SV*)cv, len);
+		    proto = SvPV(MUTABLE_SV(cv), len);
 		    proto_end = proto + len;
 		}
 	    }
@@ -8952,7 +8953,7 @@ const_sv_xsub(pTHX_ CV* cv)
 #endif
     }
     EXTEND(sp, 1);
-    ST(0) = (SV*)XSANY.any_ptr;
+    ST(0) = MUTABLE_SV(XSANY.any_ptr);
     XSRETURN(1);
 }
 

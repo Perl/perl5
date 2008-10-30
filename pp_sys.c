@@ -483,7 +483,7 @@ PP(pp_die)
 		    PUSHs(file);
  		    PUSHs(line);
 		    PUTBACK;
-		    call_sv((SV*)GvCV(gv),
+		    call_sv(MUTABLE_SV(GvCV(gv)),
 			    G_SCALAR|G_EVAL|G_KEEPERR);
 		    sv_setsv(error,*PL_stack_sp--);
 		}
@@ -532,11 +532,11 @@ PP(pp_open)
 	    Perl_warner(aTHX_ packWARN2(WARN_IO, WARN_DEPRECATED),
 		    "Opening dirhandle %s also as a file", GvENAME(gv));
 
-	mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
+	mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    /* Method's args are same as ours ... */
 	    /* ... except handle is replaced by the object */
-	    *MARK-- = SvTIED_obj((SV*)io, mg);
+	    *MARK-- = SvTIED_obj(MUTABLE_SV(io), mg);
 	    PUSHMARK(MARK);
 	    PUTBACK;
 	    ENTER;
@@ -574,10 +574,10 @@ PP(pp_close)
     if (gv) {
 	IO * const io = GvIO(gv);
 	if (io) {
-	    MAGIC * const mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
+	    MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	    if (mg) {
 		PUSHMARK(SP);
-		XPUSHs(SvTIED_obj((SV*)io, mg));
+		XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 		PUTBACK;
 		ENTER;
 		call_method("CLOSE", G_SCALAR);
@@ -664,10 +664,10 @@ PP(pp_fileno)
     gv = (GV*)POPs;
 
     if (gv && (io = GvIO(gv))
-	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
+	&& (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar)))
     {
 	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj((SV*)io, mg));
+	XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 	PUTBACK;
 	ENTER;
 	call_method("FILENO", G_SCALAR);
@@ -737,10 +737,10 @@ PP(pp_binmode)
     gv = (GV*)POPs;
 
     if (gv && (io = GvIO(gv))) {
-	MAGIC * const mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
+	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    PUSHMARK(SP);
-	    XPUSHs(SvTIED_obj((SV*)io, mg));
+	    XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 	    if (discp)
 		XPUSHs(discp);
 	    PUTBACK;
@@ -818,7 +818,7 @@ PP(pp_tie)
 		   slot of the GP rather than the GV itself. AMS 20010812 */
 		if (!GvIOp(varsv))
 		    GvIOp(varsv) = newIO();
-		varsv = (SV *)GvIOp(varsv);
+		varsv = MUTABLE_SV(GvIOp(varsv));
 		break;
 	    }
 	    /* FALL THROUGH */
@@ -856,7 +856,7 @@ PP(pp_tie)
 	while (items--)
 	    PUSHs(*MARK++);
 	PUTBACK;
-	call_sv((SV*)GvCV(gv), G_SCALAR);
+	call_sv(MUTABLE_SV(GvCV(gv)), G_SCALAR);
     }
     SPAGAIN;
 
@@ -886,7 +886,7 @@ PP(pp_untie)
     const char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
 		? PERL_MAGIC_tied : PERL_MAGIC_tiedscalar;
 
-    if (isGV_with_GP(sv) && !(sv = (SV *)GvIOp(sv)))
+    if (isGV_with_GP(sv) && !(sv = MUTABLE_SV(GvIOp(sv))))
 	RETPUSHYES;
 
     if ((mg = SvTIED_mg(sv, how))) {
@@ -896,11 +896,11 @@ PP(pp_untie)
 	    CV *cv;
 	    if (gv && isGV(gv) && (cv = GvCV(gv))) {
 	       PUSHMARK(SP);
-	       XPUSHs(SvTIED_obj((SV*)gv, mg));
+	       XPUSHs(SvTIED_obj(MUTABLE_SV(gv), mg));
 	       mXPUSHi(SvREFCNT(obj) - 1);
 	       PUTBACK;
 	       ENTER;
-	       call_sv((SV *)cv, G_VOID);
+	       call_sv(MUTABLE_SV(cv), G_VOID);
 	       LEAVE;
 	       SPAGAIN;
             }
@@ -924,7 +924,7 @@ PP(pp_tied)
     const char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
 		? PERL_MAGIC_tied : PERL_MAGIC_tiedscalar;
 
-    if (isGV_with_GP(sv) && !(sv = (SV *)GvIOp(sv)))
+    if (isGV_with_GP(sv) && !(sv = MUTABLE_SV(GvIOp(sv))))
 	RETPUSHUNDEF;
 
     if ((mg = SvTIED_mg(sv, how))) {
@@ -967,7 +967,7 @@ PP(pp_dbmopen)
 	mPUSHu(O_RDWR);
     PUSHs(right);
     PUTBACK;
-    call_sv((SV*)GvCV(gv), G_SCALAR);
+    call_sv(MUTABLE_SV(GvCV(gv)), G_SCALAR);
     SPAGAIN;
 
     if (!sv_isobject(TOPs)) {
@@ -978,13 +978,13 @@ PP(pp_dbmopen)
 	mPUSHu(O_RDONLY);
 	PUSHs(right);
 	PUTBACK;
-	call_sv((SV*)GvCV(gv), G_SCALAR);
+	call_sv(MUTABLE_SV(GvCV(gv)), G_SCALAR);
 	SPAGAIN;
     }
 
     if (sv_isobject(TOPs)) {
-	sv_unmagic((SV *) hv, PERL_MAGIC_tied);
-	sv_magic((SV*)hv, TOPs, PERL_MAGIC_tied, NULL, 0);
+	sv_unmagic(MUTABLE_SV(hv), PERL_MAGIC_tied);
+	sv_magic(MUTABLE_SV(hv), TOPs, PERL_MAGIC_tied, NULL, 0);
     }
     LEAVE;
     RETURN;
@@ -1183,7 +1183,7 @@ PP(pp_select)
 	    XPUSHTARG;
 	}
 	else {
-	    mXPUSHs(newRV((SV*)egv));
+	    mXPUSHs(newRV(MUTABLE_SV(egv)));
 	}
     }
 
@@ -1203,11 +1203,11 @@ PP(pp_getc)
     GV * const gv = (MAXARG==0) ? PL_stdingv : (GV*)POPs;
 
     if (gv && (io = GvIO(gv))) {
-	MAGIC * const mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
+	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    const I32 gimme = GIMME_V;
 	    PUSHMARK(SP);
-	    XPUSHs(SvTIED_obj((SV*)io, mg));
+	    XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 	    PUTBACK;
 	    ENTER;
 	    call_method("GETC", gimme);
@@ -1306,7 +1306,7 @@ PP(pp_enterwrite)
 	DIE(aTHX_ "Not a format reference");
     }
     if (CvCLONE(cv))
-	cv = MUTABLE_CV(sv_2mortal((SV*)cv_clone(cv)));
+	cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
 
     IoFLAGS(io) &= ~IOf_DIDTOP;
     return doform(cv,gv,PL_op->op_next);
@@ -1397,7 +1397,7 @@ PP(pp_leavewrite)
 		DIE(aTHX_ "Undefined top format called");
 	}
 	if (cv && CvCLONE(cv))
-	    cv = MUTABLE_CV(sv_2mortal((SV*)cv_clone(cv)));
+	    cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
 	return doform(cv, gv, PL_op);
     }
 
@@ -1450,7 +1450,7 @@ PP(pp_prtf)
     GV * const gv = (PL_op->op_flags & OPf_STACKED) ? (GV*)*++MARK : PL_defoutgv;
 
     if (gv && (io = GvIO(gv))) {
-	MAGIC * const mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
+	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    if (MARK == ORIGMARK) {
 		MEXTEND(SP, 1);
@@ -1459,7 +1459,7 @@ PP(pp_prtf)
 		++SP;
 	    }
 	    PUSHMARK(MARK - 1);
-	    *MARK = SvTIED_obj((SV*)io, mg);
+	    *MARK = SvTIED_obj(MUTABLE_SV(io), mg);
 	    PUTBACK;
 	    ENTER;
 	    call_method("PRINTF", G_SCALAR);
@@ -1559,11 +1559,11 @@ PP(pp_sysread)
     if ((PL_op->op_type == OP_READ || PL_op->op_type == OP_SYSREAD)
 	&& gv && (io = GvIO(gv)) )
     {
-	const MAGIC * mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
+	const MAGIC * mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    SV *sv;
 	    PUSHMARK(MARK-1);
-	    *MARK = SvTIED_obj((SV*)io, mg);
+	    *MARK = SvTIED_obj(MUTABLE_SV(io), mg);
 	    ENTER;
 	    call_method("READ", G_SCALAR);
 	    LEAVE;
@@ -1804,7 +1804,7 @@ PP(pp_send)
     GV *const gv = (GV*)*++MARK;
     if (PL_op->op_type == OP_SYSWRITE
 	&& gv && (io = GvIO(gv))) {
-	MAGIC * const mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
+	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    SV *sv;
 
@@ -1816,7 +1816,7 @@ PP(pp_send)
 	    }
 
 	    PUSHMARK(ORIGMARK);
-	    *(ORIGMARK+1) = SvTIED_obj((SV*)io, mg);
+	    *(ORIGMARK+1) = SvTIED_obj(MUTABLE_SV(io), mg);
 	    ENTER;
 	    call_method("WRITE", G_SCALAR);
 	    LEAVE;
@@ -2043,9 +2043,9 @@ PP(pp_eof)
     if (gv) {
 	IO * const io = GvIO(gv);
 	MAGIC * mg;
-	if (io && (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar))) {
+	if (io && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar))) {
 	    PUSHMARK(SP);
-	    XPUSHs(SvTIED_obj((SV*)io, mg));
+	    XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 	    PUTBACK;
 	    ENTER;
 	    call_method("EOF", G_SCALAR);
@@ -2070,10 +2070,10 @@ PP(pp_tell)
     gv = PL_last_in_gv;
 
     if (gv && (io = GvIO(gv))) {
-	MAGIC * const mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
+	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    PUSHMARK(SP);
-	    XPUSHs(SvTIED_obj((SV*)io, mg));
+	    XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 	    PUTBACK;
 	    ENTER;
 	    call_method("TELL", G_SCALAR);
@@ -2105,10 +2105,10 @@ PP(pp_sysseek)
     IO *io;
 
     if (gv && (io = GvIO(gv))) {
-	MAGIC * const mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
+	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    PUSHMARK(SP);
-	    XPUSHs(SvTIED_obj((SV*)io, mg));
+	    XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 #if LSEEKSIZE > IVSIZE
 	    mXPUSHn((NV) offset);
 #else

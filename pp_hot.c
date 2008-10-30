@@ -89,7 +89,7 @@ PP(pp_stringify)
 PP(pp_gv)
 {
     dVAR; dSP;
-    XPUSHs((SV*)cGVOP_gv);
+    XPUSHs(MUTABLE_SV(cGVOP_gv));
     RETURN;
 }
 
@@ -136,7 +136,7 @@ PP(pp_sassign)
 		   The gv becomes a(nother) reference to the constant.  */
 		SV *const value = SvRV(cv);
 
-		SvUPGRADE((SV *)gv, SVt_IV);
+		SvUPGRADE(MUTABLE_SV(gv), SVt_IV);
 		SvPCS_IMPORTED_on(gv);
 		SvRV_set(gv, value);
 		SvREFCNT_inc_simple_void(value);
@@ -148,7 +148,7 @@ PP(pp_sassign)
 	/* Need to fix things up.  */
 	if (gv_type != SVt_PVGV) {
 	    /* Need to fix GV.  */
-	    right = (SV*)gv_fetchsv(right, GV_ADD, SVt_PVGV);
+	    right = MUTABLE_SV(gv_fetchsv(right, GV_ADD, SVt_PVGV));
 	}
 
 	if (!got_coderef) {
@@ -162,8 +162,8 @@ PP(pp_sassign)
 		   all sorts of fun as the reference to our new sub is
 		   donated to the GV that we're about to assign to.
 		*/
-		SvRV_set(left, (SV *)newCONSTSUB(GvSTASH(right), NULL,
-						 SvRV(cv)));
+		SvRV_set(left, MUTABLE_SV(newCONSTSUB(GvSTASH(right), NULL,
+						      SvRV(cv))));
 		SvREFCNT_dec(cv);
 		LEAVE;
 	    } else {
@@ -188,7 +188,7 @@ PP(pp_sassign)
 
 		SvREFCNT_inc_void(source);
 		SvREFCNT_dec(upgraded);
-		SvRV_set(left, (SV *)source);
+		SvRV_set(left, MUTABLE_SV(source));
 	    }
 	}
 
@@ -312,7 +312,7 @@ PP(pp_readline)
 	    PL_last_in_gv = (GV*)SvRV(PL_last_in_gv);
 	else {
 	    dSP;
-	    XPUSHs((SV*)PL_last_in_gv);
+	    XPUSHs(MUTABLE_SV(PL_last_in_gv));
 	    PUTBACK;
 	    pp_rv2gv();
 	    PL_last_in_gv = (GV*)(*PL_stack_sp--);
@@ -685,7 +685,7 @@ PP(pp_pushre)
     Copy(&PL_op, &LvTARGOFF(sv), 1, OP*);
     XPUSHs(sv);
 #else
-    XPUSHs((SV*)PL_op);
+    XPUSHs(MUTABLE_SV(PL_op));
 #endif
     RETURN;
 }
@@ -701,7 +701,7 @@ PP(pp_print)
     GV * const gv = (PL_op->op_flags & OPf_STACKED) ? (GV*)*++MARK : PL_defoutgv;
 
     if (gv && (io = GvIO(gv))
-	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
+	&& (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar)))
     {
       had_magic:
 	if (MARK == ORIGMARK) {
@@ -714,7 +714,7 @@ PP(pp_print)
 	    ++SP;
 	}
 	PUSHMARK(MARK - 1);
-	*MARK = SvTIED_obj((SV*)io, mg);
+	*MARK = SvTIED_obj(MUTABLE_SV(io), mg);
 	PUTBACK;
 	ENTER;
 	if( PL_op->op_type == OP_SAY ) {
@@ -732,7 +732,7 @@ PP(pp_print)
     }
     if (!(io = GvIO(gv))) {
         if ((GvEGV(gv)) && (io = GvIO(GvEGV(gv)))
-	    && (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
+	    && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar)))
             goto had_magic;
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
@@ -857,9 +857,9 @@ PP(pp_rv2av)
 	    else {
 		gv = (GV*)sv;
 	    }
-	    sv = is_pp_rv2av ? (SV*)GvAVn(gv) : (SV*)GvHVn(gv);
+	    sv = is_pp_rv2av ? MUTABLE_SV(GvAVn(gv)) : MUTABLE_SV(GvHVn(gv));
 	    if (PL_op->op_private & OPpLVAL_INTRO)
-		sv = is_pp_rv2av ? (SV*)save_ary(gv) : (SV*)save_hash(gv);
+		sv = is_pp_rv2av ? MUTABLE_SV(save_ary(gv)) : MUTABLE_SV(save_hash(gv));
 	    if (PL_op->op_flags & OPf_REF) {
 		SETs(sv);
 		RETURN;
@@ -1034,7 +1034,7 @@ PP(pp_aassign)
 		TAINT_NOT;
 	    }
 	    if (PL_delaymagic & DM_ARRAY)
-		SvSETMAGIC((SV*)ary);
+		SvSETMAGIC(MUTABLE_SV(ary));
 	    break;
 	case SVt_PVHV: {				/* normal hash */
 		SV *tmpstr;
@@ -1207,7 +1207,7 @@ PP(pp_qr)
     /* This RV is about to own a reference to the regexp. (In addition to the
        reference already owned by the PMOP.  */
     ReREFCNT_inc(rx);
-    SvRV_set(rv, (SV*) rx);
+    SvRV_set(rv, MUTABLE_SV(rx));
     SvROK_on(rv);
 
     if (pkg) {
@@ -1544,10 +1544,10 @@ Perl_do_readline(pTHX)
     const I32 gimme = GIMME_V;
 
     if (io) {
-	MAGIC * const mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
+	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    PUSHMARK(SP);
-	    XPUSHs(SvTIED_obj((SV*)io, mg));
+	    XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 	    PUTBACK;
 	    ENTER;
 	    call_method("READLINE", gimme);
@@ -1785,12 +1785,12 @@ PP(pp_helem)
 	/* does the element we're localizing already exist? */
 	preeminent = /* can we determine whether it exists? */
 	    (    !SvRMAGICAL(hv)
-		|| mg_find((SV*)hv, PERL_MAGIC_env)
-		|| (     (mg = mg_find((SV*)hv, PERL_MAGIC_tied))
+		|| mg_find((const SV *)hv, PERL_MAGIC_env)
+		|| (     (mg = mg_find((const SV *)hv, PERL_MAGIC_tied))
 			/* Try to preserve the existenceness of a tied hash
 			* element by using EXISTS and DELETE if possible.
 			* Fallback to FETCH and STORE otherwise */
-		    && (stash = SvSTASH(SvRV(SvTIED_obj((SV*)hv, mg))))
+		    && (stash = SvSTASH(SvRV(SvTIED_obj(MUTABLE_SV(hv), mg))))
 		    && gv_fetchmethod_autoload(stash, "EXISTS", TRUE)
 		    && gv_fetchmethod_autoload(stash, "DELETE", TRUE)
 		)
@@ -2973,10 +2973,10 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
 	    SvRV_set(sv, newSV(0));
 	    break;
 	case OPpDEREF_AV:
-	    SvRV_set(sv, (SV*)newAV());
+	    SvRV_set(sv, MUTABLE_SV(newAV()));
 	    break;
 	case OPpDEREF_HV:
-	    SvRV_set(sv, (SV*)newHV());
+	    SvRV_set(sv, MUTABLE_SV(newHV()));
 	    break;
 	}
 	SvROK_on(sv);
@@ -3032,7 +3032,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 
     SvGETMAGIC(sv);
     if (SvROK(sv))
-	ob = (SV*)SvRV(sv);
+	ob = MUTABLE_SV(SvRV(sv));
     else {
 	GV* iogv;
 
@@ -3048,7 +3048,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	if (!SvOK(sv) ||
 	    !(packname) ||
 	    !(iogv = gv_fetchsv(sv, 0, SVt_PVIO)) ||
-	    !(ob=(SV*)GvIO(iogv)))
+	    !(ob=MUTABLE_SV(GvIO(iogv))))
 	{
 	    /* this isn't the name of a filehandle either */
 	    if (!packname ||
@@ -3072,14 +3072,14 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	    goto fetch;
 	}
 	/* it _is_ a filehandle name -- replace with a reference */
-	*(PL_stack_base + TOPMARK + 1) = sv_2mortal(newRV((SV*)iogv));
+	*(PL_stack_base + TOPMARK + 1) = sv_2mortal(newRV(MUTABLE_SV(iogv)));
     }
 
     /* if we got here, ob should be a reference or a glob */
     if (!ob || !(SvOBJECT(ob)
 		 || (SvTYPE(ob) == SVt_PVGV 
 		     && isGV_with_GP(ob)
-		     && (ob = (SV*)GvIO((GV*)ob))
+		     && (ob = MUTABLE_SV(GvIO((GV*)ob)))
 		     && SvOBJECT(ob))))
     {
 	Perl_croak(aTHX_ "Can't call method \"%s\" on unblessed reference",
@@ -3101,7 +3101,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	    if (isGV(gv) && GvCV(gv) &&
 		(!GvCVGEN(gv) || GvCVGEN(gv)
                   == (PL_sub_generation + HvMROMETA(stash)->cache_gen)))
-		return (SV*)GvCV(gv);
+		return MUTABLE_SV(GvCV(gv));
 	}
     }
 
@@ -3110,7 +3110,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 
     assert(gv);
 
-    return isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv;
+    return isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv);
 }
 
 /*

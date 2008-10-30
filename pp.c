@@ -141,7 +141,7 @@ PP(pp_rv2gv)
 	    gv_init(gv, 0, "", 0, 0);
 	    GvIOp(gv) = MUTABLE_IO(sv);
 	    SvREFCNT_inc_void_NN(sv);
-	    sv = (SV*) gv;
+	    sv = MUTABLE_SV(gv);
 	}
 	else if (!isGV_with_GP(sv))
 	    DIE(aTHX_ "Not a GLOB reference");
@@ -173,7 +173,7 @@ PP(pp_rv2gv)
 			gv = newGVgen(name);
 		    }
 		    prepare_SV_for_RV(sv);
-		    SvRV_set(sv, (SV*)gv);
+		    SvRV_set(sv, MUTABLE_SV(gv));
 		    SvROK_on(sv);
 		    SvSETMAGIC(sv);
 		    goto wasref;
@@ -188,10 +188,11 @@ PP(pp_rv2gv)
 	    if ((PL_op->op_flags & OPf_SPECIAL) &&
 		!(PL_op->op_flags & OPf_MOD))
 	    {
-		SV * const temp = (SV*)gv_fetchsv(sv, 0, SVt_PVGV);
+		SV * const temp = MUTABLE_SV(gv_fetchsv(sv, 0, SVt_PVGV));
 		if (!temp
 		    && (!is_gv_magical_sv(sv,0)
-			|| !(sv = (SV*)gv_fetchsv(sv, GV_ADD, SVt_PVGV)))) {
+			|| !(sv = MUTABLE_SV(gv_fetchsv(sv, GV_ADD,
+							SVt_PVGV))))) {
 		    RETSETUNDEF;
 		}
 		sv = temp;
@@ -206,7 +207,7 @@ PP(pp_rv2gv)
 		       things.  */
 		    RETURN;
 		}
-		sv = (SV*)gv_fetchsv(sv, GV_ADD, SVt_PVGV);
+		sv = MUTABLE_SV(gv_fetchsv(sv, GV_ADD, SVt_PVGV));
 	    }
 	}
     }
@@ -320,7 +321,7 @@ PP(pp_av2arylen)
     SV ** const sv = Perl_av_arylen_p(aTHX_ MUTABLE_AV(av));
     if (!*sv) {
 	*sv = newSV_type(SVt_PVMG);
-	sv_magic(*sv, (SV*)av, PERL_MAGIC_arylen, NULL, 0);
+	sv_magic(*sv, MUTABLE_SV(av), PERL_MAGIC_arylen, NULL, 0);
     }
     SETs(*sv);
     RETURN;
@@ -376,7 +377,7 @@ PP(pp_rv2cv)
     CV *cv = sv_2cv(TOPs, &stash_unused, &gv, flags);
     if (cv) {
 	if (CvCLONE(cv))
-	    cv = MUTABLE_CV(sv_2mortal((SV*)cv_clone(cv)));
+	    cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
 	if ((PL_op->op_private & OPpLVAL_INTRO)) {
 	    if (gv && GvCV(gv) == cv && (gv = gv_autoload4(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv), FALSE)))
 		cv = GvCV(gv);
@@ -389,7 +390,7 @@ PP(pp_rv2cv)
     }    
     else
 	cv = MUTABLE_CV(&PL_sv_undef);
-    SETs((SV*)cv);
+    SETs(MUTABLE_SV(cv));
     RETURN;
 }
 
@@ -474,9 +475,9 @@ PP(pp_anoncode)
     dVAR; dSP;
     CV *cv = MUTABLE_CV(PAD_SV(PL_op->op_targ));
     if (CvCLONE(cv))
-	cv = MUTABLE_CV(sv_2mortal((SV*)cv_clone(cv)));
+	cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
     EXTEND(SP,1);
-    PUSHs((SV*)cv);
+    PUSHs(MUTABLE_SV(cv));
     RETURN;
 }
 
@@ -598,33 +599,33 @@ PP(pp_gelem)
 	switch (*elem) {
 	case 'A':
 	    if (strEQ(second_letter, "RRAY"))
-		tmpRef = (SV*)GvAV(gv);
+		tmpRef = MUTABLE_SV(GvAV(gv));
 	    break;
 	case 'C':
 	    if (strEQ(second_letter, "ODE"))
-		tmpRef = (SV*)GvCVu(gv);
+		tmpRef = MUTABLE_SV(GvCVu(gv));
 	    break;
 	case 'F':
 	    if (strEQ(second_letter, "ILEHANDLE")) {
 		/* finally deprecated in 5.8.0 */
 		deprecate("*glob{FILEHANDLE}");
-		tmpRef = (SV*)GvIOp(gv);
+		tmpRef = MUTABLE_SV(GvIOp(gv));
 	    }
 	    else
 		if (strEQ(second_letter, "ORMAT"))
-		    tmpRef = (SV*)GvFORM(gv);
+		    tmpRef = MUTABLE_SV(GvFORM(gv));
 	    break;
 	case 'G':
 	    if (strEQ(second_letter, "LOB"))
-		tmpRef = (SV*)gv;
+		tmpRef = MUTABLE_SV(gv);
 	    break;
 	case 'H':
 	    if (strEQ(second_letter, "ASH"))
-		tmpRef = (SV*)GvHV(gv);
+		tmpRef = MUTABLE_SV(GvHV(gv));
 	    break;
 	case 'I':
 	    if (*second_letter == 'O' && !elem[2])
-		tmpRef = (SV*)GvIOp(gv);
+		tmpRef = MUTABLE_SV(GvIOp(gv));
 	    break;
 	case 'N':
 	    if (strEQ(second_letter, "AME"))
@@ -1549,7 +1550,7 @@ PP(pp_repeat)
 	    }
 	    MARK++;
 	    repeatcpy((char*)(MARK + items), (char*)MARK,
-		items * sizeof(SV*), count - 1);
+		items * sizeof(const SV *), count - 1);
 	    SP += max;
 	}
 	else if (count <= 0)
@@ -4147,12 +4148,12 @@ PP(pp_hslice)
         MAGIC *mg;
         HV *stash;
 
-        other_magic = mg_find((SV*)hv, PERL_MAGIC_env) ||
-            ((mg = mg_find((SV*)hv, PERL_MAGIC_tied))
+        other_magic = mg_find((const SV *)hv, PERL_MAGIC_env) ||
+            ((mg = mg_find((const SV *)hv, PERL_MAGIC_tied))
              /* Try to preserve the existenceness of a tied hash
               * element by using EXISTS and DELETE if possible.
               * Fallback to FETCH and STORE otherwise */
-             && (stash = SvSTASH(SvRV(SvTIED_obj((SV*)hv, mg))))
+             && (stash = SvSTASH(SvRV(SvTIED_obj(MUTABLE_SV(hv), mg))))
              && gv_fetchmethod_autoload(stash, "EXISTS", TRUE)
              && gv_fetchmethod_autoload(stash, "DELETE", TRUE));
     }
@@ -4273,7 +4274,7 @@ PP(pp_anonlist)
 {
     dVAR; dSP; dMARK; dORIGMARK;
     const I32 items = SP - MARK;
-    SV * const av = (SV *) av_make(items, MARK+1);
+    SV * const av = MUTABLE_SV(av_make(items, MARK+1));
     SP = ORIGMARK;		/* av_make() might realloc stack_sp */
     mXPUSHs((PL_op->op_flags & OPf_SPECIAL)
 	    ? newRV_noinc(av) : av);
@@ -4296,7 +4297,7 @@ PP(pp_anonhash)
     }
     SP = ORIGMARK;
     mXPUSHs((PL_op->op_flags & OPf_SPECIAL)
-	    ? newRV_noinc((SV*) hv) : (SV*) hv);
+	    ? newRV_noinc(MUTABLE_SV(hv)) : MUTABLE_SV(hv));
     RETURN;
 }
 
@@ -4312,10 +4313,10 @@ PP(pp_splice)
     I32 newlen;
     I32 after;
     I32 diff;
-    const MAGIC * const mg = SvTIED_mg((SV*)ary, PERL_MAGIC_tied);
+    const MAGIC * const mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied);
 
     if (mg) {
-	*MARK-- = SvTIED_obj((SV*)ary, mg);
+	*MARK-- = SvTIED_obj(MUTABLE_SV(ary), mg);
 	PUSHMARK(MARK);
 	PUTBACK;
 	ENTER;
@@ -4509,10 +4510,10 @@ PP(pp_push)
 {
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
     register AV * const ary = MUTABLE_AV(*++MARK);
-    const MAGIC * const mg = SvTIED_mg((SV*)ary, PERL_MAGIC_tied);
+    const MAGIC * const mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied);
 
     if (mg) {
-	*MARK-- = SvTIED_obj((SV*)ary, mg);
+	*MARK-- = SvTIED_obj(MUTABLE_SV(ary), mg);
 	PUSHMARK(MARK);
 	PUTBACK;
 	ENTER;
@@ -4531,7 +4532,7 @@ PP(pp_push)
 	    av_store(ary, AvFILLp(ary)+1, sv);
 	}
 	if (PL_delaymagic & DM_ARRAY)
-	    mg_set((SV*)ary);
+	    mg_set(MUTABLE_SV(ary));
 
 	PL_delaymagic = 0;
 	SP = ORIGMARK;
@@ -4558,10 +4559,10 @@ PP(pp_unshift)
 {
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
     register AV *ary = MUTABLE_AV(*++MARK);
-    const MAGIC * const mg = SvTIED_mg((SV*)ary, PERL_MAGIC_tied);
+    const MAGIC * const mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied);
 
     if (mg) {
-	*MARK-- = SvTIED_obj((SV*)ary, mg);
+	*MARK-- = SvTIED_obj(MUTABLE_SV(ary), mg);
 	PUSHMARK(MARK);
 	PUTBACK;
 	ENTER;
@@ -4720,9 +4721,9 @@ PP(pp_split)
 	av_extend(ary,0);
 	av_clear(ary);
 	SPAGAIN;
-	if ((mg = SvTIED_mg((SV*)ary, PERL_MAGIC_tied))) {
+	if ((mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied))) {
 	    PUSHMARK(SP);
-	    XPUSHs(SvTIED_obj((SV*)ary, mg));
+	    XPUSHs(SvTIED_obj(MUTABLE_SV(ary), mg));
 	}
 	else {
 	    if (!AvREAL(ary)) {
@@ -4977,7 +4978,7 @@ PP(pp_split)
 	if (!mg) {
 	    if (SvSMAGICAL(ary)) {
 		PUTBACK;
-		mg_set((SV*)ary);
+		mg_set(MUTABLE_SV(ary));
 		SPAGAIN;
 	    }
 	    if (gimme == G_ARRAY) {
