@@ -5,9 +5,9 @@
 #
 ################################################################################
 #
-#  $Revision: 32 $
+#  $Revision: 33 $
 #  $Author: mhx $
-#  $Date: 2008/10/12 20:50:38 +0200 $
+#  $Date: 2008/10/30 01:47:30 +0100 $
 #
 ################################################################################
 #
@@ -157,6 +157,9 @@ print OUT <<HEAD;
 #define NEED_newCONSTSUB
 #define NEED_newRV_noinc
 #define NEED_newSVpvn_share
+#define NEED_pv_display
+#define NEED_pv_escape
+#define NEED_pv_pretty
 #define NEED_sv_2pv_flags
 #define NEED_sv_2pvbyte
 #define NEED_sv_catpvf_mg

@@ -1,3 +1,33 @@
+3.14_04 - 2008-10-30
+
+    * added support for the following API
+        isALNUMC  [depend]
+        isASCII
+        isBLANK
+        isCNTRL
+        isGRAPH
+        isPRINT
+        isPSXSPC
+        isPUNCT
+        isXDIGIT
+        PERL_PV_ESCAPE_ALL
+        PERL_PV_ESCAPE_FIRSTCHAR
+        PERL_PV_ESCAPE_NOBACKSLASH
+        PERL_PV_ESCAPE_NOCLEAR
+        PERL_PV_ESCAPE_QUOTE
+        PERL_PV_ESCAPE_RE
+        PERL_PV_ESCAPE_UNI
+        PERL_PV_ESCAPE_UNI_DETECT
+        PERL_PV_PRETTY_DUMP
+        PERL_PV_PRETTY_ELLIPSES
+        PERL_PV_PRETTY_LTGT
+        PERL_PV_PRETTY_NOCLEAR
+        PERL_PV_PRETTY_QUOTE
+        PERL_PV_PRETTY_REGPROP
+        pv_display
+        pv_escape
+        pv_pretty
+
 3.14_03 - 2008-10-21
 
     * fix C++ compilation issue with last release
