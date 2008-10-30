@@ -360,9 +360,6 @@ Perl_pv_pretty( pTHX_ SV *dsv, char const * const str, const STRLEN count,
 /*
 =for apidoc pv_display
 
-  char *pv_display(SV *dsv, const char *pv, STRLEN cur, STRLEN len,
-                   STRLEN pvlim, U32 flags)
-
 Similar to
 
   pv_escape(dsv,pv,cur,pvlim,PERL_PV_ESCAPE_QUOTE);
