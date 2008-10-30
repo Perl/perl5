@@ -5,7 +5,8 @@ use strict;
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '3.2701';
+$VERSION = '3.29';
+$VERSION = eval $VERSION;
 
 @ISA = qw(File::Spec::Unix);
 
@@ -41,7 +42,7 @@ sub devnull {
     return "nul";
 }
 
-sub rootdir () { '\\' }
+sub rootdir { '\\' }
 
 
 =item tmpdir
@@ -87,7 +88,7 @@ Default: 1
 
 =cut
 
-sub case_tolerant () {
+sub case_tolerant {
   eval { require Win32API::File; } or return 1;
   my $drive = shift || "C:";
   my $osFsType = "\0"x256;
@@ -375,9 +376,10 @@ implementation of these methods, not the semantics.
 =cut
 
 
-sub _canon_cat(@)				# @path -> path
+sub _canon_cat				# @path -> path
 {
-    my $first  = shift;
+    my ($first, @rest) = @_;
+
     my $volume = $first =~ s{ \A ([A-Za-z]:) ([\\/]?) }{}x	# drive letter
     	       ? ucfirst( $1 ).( $2 ? "\\" : "" )
 	       : $first =~ s{ \A (?:\\\\|//) ([^\\/]+)
@@ -387,7 +389,7 @@ sub _canon_cat(@)				# @path -> path
 	       : $first =~ s{ \A [\\/] }{}x			# root dir
 	       ? "\\"
 	       : "";
-    my $path   = join "\\", $first, @_;
+    my $path   = join "\\", $first, @rest;
 
     $path =~ tr#\\/#\\\\#s;		# xx/yy --> xx\yy & xx\\yy --> xx\yy
 

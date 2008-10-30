@@ -4,7 +4,8 @@ use strict;
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '3.2701';
+$VERSION = '3.29';
+$VERSION = eval $VERSION;
 
 @ISA = qw(File::Spec::Unix);
 
@@ -242,16 +243,34 @@ sub file_name_is_absolute {
 
 =item splitpath (override)
 
-Splits using VMS syntax.
+    ($volume,$directories,$file) = File::Spec->splitpath( $path );
+    ($volume,$directories,$file) = File::Spec->splitpath( $path, $no_file );
+
+Passing a true value for C<$no_file> indicates that the path being
+split only contains directory components, even on systems where you
+can usually (when not supporting a foreign syntax) tell the difference
+between directories and files at a glance.
 
 =cut
 
 sub splitpath {
-    my($self,$path) = @_;
-    my($dev,$dir,$file) = ('','','');
-
-    vmsify($path) =~ /(.+:)?([\[<].*[\]>])?(.*)/s;
-    return ($1 || '',$2 || '',$3);
+    my($self,$path, $nofile) = @_;
+    my($dev,$dir,$file)      = ('','','');
+    my $vmsify_path          = vmsify($path);
+    if ( $nofile ){
+        #vmsify('d1/d2/d3') returns '[.d1.d2]d3'
+        #vmsify('/d1/d2/d3') returns 'd1:[d2]d3'
+        if( $vmsify_path =~ /(.*)\](.+)/ ){
+            $vmsify_path = $1.'.'.$2.']';
+        }
+        $vmsify_path =~ /(.+:)?(.*)/s;
+        $dir = defined $2 ? $2 : ''; # dir can be '0'
+        return ($1 || '',$dir,$file);
+    }
+    else {
+        $vmsify_path =~ /(.+:)?([\[<].*[\]>])?(.*)/s;
+        return ($1 || '',$2 || '',$3);
+    }
 }
 
 =item splitdir (override)
@@ -470,7 +489,7 @@ sub eliminate_macros {
 sub fixpath {
     my($self,$path,$force_path) = @_;
     return '' unless $path;
-    $self = bless {} unless ref $self;
+    $self = bless {}, $self unless ref $self;
     my($fixedpath,$prefix,$name);
 
     if ($path =~ /\s/) {
