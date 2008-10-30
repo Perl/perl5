@@ -1156,6 +1156,7 @@ _cleaner2:
 	rm -f preload lib/re.pm
 	rm -f testcompile compilelog
 	rm -rf lib/Encode lib/Hash lib/re
+	rm -rf lib/Module/Pluggable
 	rm -f lib/ExtUtils/ParseXS/t/XSTest.c
 	rm -f lib/ExtUtils/ParseXS/t/XSTest$(OBJ_EXT)
 	rm -f lib/ExtUtils/ParseXS/t/XSTest$(DLSUFFIX)
