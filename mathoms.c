@@ -610,7 +610,7 @@ Perl_hv_magic(pTHX_ HV *hv, GV *gv, int how)
 {
     PERL_ARGS_ASSERT_HV_MAGIC;
 
-    sv_magic((SV*)hv, (SV*)gv, how, NULL, 0);
+    sv_magic(MUTABLE_SV(hv), MUTABLE_SV(gv), how, NULL, 0);
 }
 
 AV *
@@ -1361,8 +1361,8 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 {
     PERL_ARGS_ASSERT_HV_DELETE_ENT;
 
-    return (SV *) hv_common(hv, keysv, NULL, 0, 0, flags | HV_DELETE, NULL,
-			    hash);
+    return MUTABLE_SV(hv_common(hv, keysv, NULL, 0, 0, flags | HV_DELETE, NULL,
+				hash));
 }
 
 SV**
@@ -1444,8 +1444,8 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 flags)
 	klen = klen_i32;
 	k_flags = 0;
     }
-    return (SV *) hv_common(hv, NULL, key, klen, k_flags, flags | HV_DELETE,
-			    NULL, 0);
+    return MUTABLE_SV(hv_common(hv, NULL, key, klen, k_flags, flags | HV_DELETE,
+				NULL, 0));
 }
 
 /* Functions after here were made mathoms post 5.10.0 but pre 5.8.9 */

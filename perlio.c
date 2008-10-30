@@ -807,7 +807,7 @@ PerlIO_find_layer(pTHX_ const char *name, STRLEN len, int load)
 	    SAVEINT(PL_in_load_module);
 	    if (cv) {
 		SAVEGENERICSV(PL_warnhook);
-		PL_warnhook = (SV *) (SvREFCNT_inc_simple_NN(cv));
+		PL_warnhook = MUTABLE_SV((SvREFCNT_inc_simple_NN(cv)));
 	    }
 	    PL_in_load_module++;
 	    /*
@@ -881,7 +881,7 @@ XS(XS_io_MODIFY_SCALAR_ATTRIBUTES)
     MAGIC *mg;
     int count = 0;
     int i;
-    sv_magic(sv, (SV *) av, PERL_MAGIC_ext, NULL, 0);
+    sv_magic(sv, MUTABLE_SV(av), PERL_MAGIC_ext, NULL, 0);
     SvRMAGICAL_off(sv);
     mg = mg_find(sv, PERL_MAGIC_ext);
     mg->mg_virtual = &perlio_vtab;

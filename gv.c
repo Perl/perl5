@@ -47,7 +47,7 @@ Perl_gv_SVadd(pTHX_ GV *gv)
 {
     PERL_ARGS_ASSERT_GV_SVADD;
 
-    if (!gv || SvTYPE((SV*)gv) != SVt_PVGV)
+    if (!gv || SvTYPE((const SV *)gv) != SVt_PVGV)
 	Perl_croak(aTHX_ "Bad symbol for scalar");
     if (!GvSV(gv))
 	GvSV(gv) = newSV(0);
@@ -60,7 +60,7 @@ Perl_gv_AVadd(pTHX_ register GV *gv)
 {
     PERL_ARGS_ASSERT_GV_AVADD;
 
-    if (!gv || SvTYPE((SV*)gv) != SVt_PVGV)
+    if (!gv || SvTYPE((const SV *)gv) != SVt_PVGV)
 	Perl_croak(aTHX_ "Bad symbol for array");
     if (!GvAV(gv))
 	GvAV(gv) = newAV();
@@ -72,7 +72,7 @@ Perl_gv_HVadd(pTHX_ register GV *gv)
 {
     PERL_ARGS_ASSERT_GV_HVADD;
 
-    if (!gv || SvTYPE((SV*)gv) != SVt_PVGV)
+    if (!gv || SvTYPE((const SV *)gv) != SVt_PVGV)
 	Perl_croak(aTHX_ "Bad symbol for hash");
     if (!GvHV(gv))
 	GvHV(gv) = newHV();
@@ -86,7 +86,7 @@ Perl_gv_IOadd(pTHX_ register GV *gv)
 
     PERL_ARGS_ASSERT_GV_IOADD;
 
-    if (!gv || SvTYPE((SV*)gv) != SVt_PVGV) {
+    if (!gv || SvTYPE((const SV *)gv) != SVt_PVGV) {
 
         /*
          * if it walks like a dirhandle, then let's assume that
@@ -258,7 +258,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     if (old_type < SVt_PVGV) {
 	if (old_type >= SVt_PV)
 	    SvCUR_set(gv, 0);
-	sv_upgrade((SV*)gv, SVt_PVGV);
+	sv_upgrade(MUTABLE_SV(gv), SVt_PVGV);
     }
     if (SvLEN(gv)) {
 	if (proto) {
@@ -274,7 +274,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     GvGP(gv) = Perl_newGP(aTHX_ gv);
     GvSTASH(gv) = stash;
     if (stash)
-	Perl_sv_add_backref(aTHX_ (SV*)stash, (SV*)gv);
+	Perl_sv_add_backref(aTHX_ MUTABLE_SV(stash), MUTABLE_SV(gv));
     gv_name_set(gv, name, len, GV_ADD);
     if (multi || doproto)              /* doproto means it _was_ mentioned */
 	GvMULTI_on(gv);
@@ -299,7 +299,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 	CvFILE_set_from_cop(GvCV(gv), PL_curcop);
 	CvSTASH(GvCV(gv)) = PL_curstash;
 	if (proto) {
-	    sv_usepvn_flags((SV*)GvCV(gv), proto, protolen,
+	    sv_usepvn_flags(MUTABLE_SV(GvCV(gv)), proto, protolen,
 			    SV_HAS_TRAILING_NUL);
 	}
     }
@@ -590,7 +590,7 @@ S_gv_get_super_pkg(pTHX_ const char* name, I32 namelen)
     gv_init(gv, stash, "ISA", 3, TRUE);
     superisa = GvAVn(gv);
     GvMULTI_on(gv);
-    sv_magic((SV*)superisa, (SV*)gv, PERL_MAGIC_isa, NULL, 0);
+    sv_magic(MUTABLE_SV(superisa), MUTABLE_SV(gv), PERL_MAGIC_isa, NULL, 0);
 #ifdef USE_ITHREADS
     av_push(superisa, newSVpv(CopSTASHPV(PL_curcop), 0));
 #else
@@ -709,7 +709,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 	return NULL;
     if (stash) {
 	if (SvTYPE(stash) < SVt_PVHV) {
-	    packname = SvPV_const((SV*)stash, packname_len);
+	    packname = SvPV_const(MUTABLE_SV(stash), packname_len);
 	    stash = NULL;
 	}
 	else {
@@ -1174,7 +1174,8 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		if (strEQ(name2, "SA")) {
 		    AV* const av = GvAVn(gv);
 		    GvMULTI_on(gv);
-		    sv_magic((SV*)av, (SV*)gv, PERL_MAGIC_isa, NULL, 0);
+		    sv_magic(MUTABLE_SV(av), MUTABLE_SV(gv), PERL_MAGIC_isa,
+			     NULL, 0);
 		    /* NOTE: No support for tied ISA */
 		    if ((add & GV_ADDMULTI) && strEQ(nambeg,"AnyDBM_File::ISA")
 			&& AvFILLp(av) == -1)
@@ -1311,7 +1312,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    GvMULTI_on(gv);
 	    /* If %! has been used, automatically load Errno.pm. */
 
-	    sv_magic(GvSVn(gv), (SV*)gv, PERL_MAGIC_sv, name, len);
+	    sv_magic(GvSVn(gv), MUTABLE_SV(gv), PERL_MAGIC_sv, name, len);
 
             /* magicalization must be done before require_tie_mod is called */
 	    if (sv_type == SVt_PVHV || sv_type == SVt_PVGV)
@@ -1323,10 +1324,10 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	GvMULTI_on(gv); /* no used once warnings here */
         {
             AV* const av = GvAVn(gv);
-	    SV* const avc = (*name == '+') ? (SV*)av : NULL;
+	    SV* const avc = (*name == '+') ? MUTABLE_SV(av) : NULL;
 
-	    sv_magic((SV*)av, avc, PERL_MAGIC_regdata, NULL, 0);
-            sv_magic(GvSVn(gv), (SV*)gv, PERL_MAGIC_sv, name, len);
+	    sv_magic(MUTABLE_SV(av), avc, PERL_MAGIC_regdata, NULL, 0);
+            sv_magic(GvSVn(gv), MUTABLE_SV(gv), PERL_MAGIC_sv, name, len);
             if (avc)
                 SvREADONLY_on(GvSVn(gv));
             SvREADONLY_on(av);
@@ -1390,7 +1391,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	case '\024':	/* $^T */
 	case '\027':	/* $^W */
 	magicalize:
-	    sv_magic(GvSVn(gv), (SV*)gv, PERL_MAGIC_sv, name, len);
+	    sv_magic(GvSVn(gv), MUTABLE_SV(gv), PERL_MAGIC_sv, name, len);
 	    break;
 
 	case '\014':	/* $^L */
@@ -1615,7 +1616,7 @@ Perl_magic_freeovrld(pTHX_ SV *sv, MAGIC *mg)
 	for (i = 1; i < NofAMmeth; i++) {
 	    CV * const cv = amtp->table[i];
 	    if (cv) {
-		SvREFCNT_dec((SV *) cv);
+		SvREFCNT_dec(MUTABLE_SV(cv));
 		amtp->table[i] = NULL;
 	    }
 	}
@@ -1629,7 +1630,7 @@ bool
 Perl_Gv_AMupdate(pTHX_ HV *stash)
 {
   dVAR;
-  MAGIC* const mg = mg_find((SV*)stash, PERL_MAGIC_overload_table);
+  MAGIC* const mg = mg_find((const SV *)stash, PERL_MAGIC_overload_table);
   AMT amt;
   const struct mro_meta* stash_meta = HvMROMETA(stash);
   U32 newgen;
@@ -1643,7 +1644,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 	  && amtp->was_ok_sub == newgen) {
 	  return (bool)AMT_OVERLOADED(amtp);
       }
-      sv_unmagic((SV*)stash, PERL_MAGIC_overload_table);
+      sv_unmagic(MUTABLE_SV(stash), PERL_MAGIC_overload_table);
   }
 
   DEBUG_o( Perl_deb(aTHX_ "Recalcing overload magic in package %s\n",HvNAME_get(stash)) );
@@ -1742,7 +1743,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
       AMT_AMAGIC_on(&amt);
       if (have_ovl)
 	  AMT_OVERLOADED_on(&amt);
-      sv_magic((SV*)stash, 0, PERL_MAGIC_overload_table,
+      sv_magic(MUTABLE_SV(stash), 0, PERL_MAGIC_overload_table,
 						(char*)&amt, sizeof(AMT));
       return have_ovl;
     }
@@ -1750,7 +1751,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
   /* Here we have no table: */
   /* no_table: */
   AMT_AMAGIC_off(&amt);
-  sv_magic((SV*)stash, 0, PERL_MAGIC_overload_table,
+  sv_magic(MUTABLE_SV(stash), 0, PERL_MAGIC_overload_table,
 						(char*)&amt, sizeof(AMTS));
   return FALSE;
 }
@@ -1771,11 +1772,11 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
     stash_meta = HvMROMETA(stash);
     newgen = PL_sub_generation + stash_meta->pkg_gen + stash_meta->cache_gen;
 
-    mg = mg_find((SV*)stash, PERL_MAGIC_overload_table);
+    mg = mg_find((const SV *)stash, PERL_MAGIC_overload_table);
     if (!mg) {
       do_update:
 	Gv_AMupdate(stash);
-	mg = mg_find((SV*)stash, PERL_MAGIC_overload_table);
+	mg = mg_find((const SV *)stash, PERL_MAGIC_overload_table);
     }
     assert(mg);
     amtp = (AMT*)mg->mg_ptr;
@@ -1822,7 +1823,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 
   if (!(AMGf_noleft & flags) && SvAMAGIC(left)
       && (stash = SvSTASH(SvRV(left)))
-      && (mg = mg_find((SV*)stash, PERL_MAGIC_overload_table))
+      && (mg = mg_find((const SV *)stash, PERL_MAGIC_overload_table))
       && (ocvp = cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr)
 			? (oamtp = amtp = (AMT*)mg->mg_ptr)->table
 			: NULL))
@@ -1946,7 +1947,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	 if (!cv) goto not_found;
     } else if (!(AMGf_noright & flags) && SvAMAGIC(right)
 	       && (stash = SvSTASH(SvRV(right)))
-	       && (mg = mg_find((SV*)stash, PERL_MAGIC_overload_table))
+	       && (mg = mg_find((const SV *)stash, PERL_MAGIC_overload_table))
 	       && (cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr)
 			  ? (amtp = (AMT*)mg->mg_ptr)->table
 			  : NULL))
@@ -2120,7 +2121,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
       PUSHs(newSVpvn_flags(AMG_id2name(method + assignshift),
 			   AMG_id2namelen(method + assignshift), SVs_TEMP));
     }
-    PUSHs((SV*)cv);
+    PUSHs(MUTABLE_SV(cv));
     PUTBACK;
 
     if ((PL_op = PL_ppaddr[OP_ENTERSUB](aTHX)))

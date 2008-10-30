@@ -161,7 +161,7 @@ static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 
 #define CALL_LIST_BODY(cv) \
     PUSHMARK(PL_stack_sp); \
-    call_sv((SV*)(cv), G_EVAL|G_DISCARD);
+    call_sv(MUTABLE_SV((cv)), G_EVAL|G_DISCARD);
 
 static void
 S_init_tls_and_interp(PerlInterpreter *my_perl)
@@ -920,7 +920,7 @@ perl_destruct(pTHXx)
     PL_regex_pad = NULL;
 #endif
 
-    SvREFCNT_dec((SV*) PL_stashcache);
+    SvREFCNT_dec(MUTABLE_SV(PL_stashcache));
     PL_stashcache = NULL;
 
     /* loosen bonds of global variables */
@@ -1233,7 +1233,7 @@ perl_destruct(pTHXx)
 	SV* sv;
 	register SV* svend;
 
-	for (sva = PL_sv_arenaroot; sva; sva = (SV*)SvANY(sva)) {
+	for (sva = PL_sv_arenaroot; sva; sva = MUTABLE_SV(SvANY(sva))) {
 	    svend = &sva[SvREFCNT(sva)];
 	    for (sv = sva + 1; sv < svend; ++sv) {
 		if (SvTYPE(sv) != SVTYPEMASK) {
@@ -2612,7 +2612,7 @@ Perl_call_pv(pTHX_ const char *sub_name, I32 flags)
 {
     PERL_ARGS_ASSERT_CALL_PV;
 
-    return call_sv((SV*)get_cv(sub_name, TRUE), flags);
+    return call_sv(MUTABLE_SV(get_cv(sub_name, TRUE)), flags);
 }
 
 /*
@@ -2931,7 +2931,7 @@ Perl_magicname(pTHX_ const char *sym, const char *name, I32 namlen)
     PERL_ARGS_ASSERT_MAGICNAME;
 
     if (gv)
-	sv_magic(GvSV(gv), (SV*)gv, PERL_MAGIC_sv, name, namlen);
+	sv_magic(GvSV(gv), MUTABLE_SV(gv), PERL_MAGIC_sv, name, namlen);
 }
 
 STATIC void
@@ -5232,15 +5232,15 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	if (PL_savebegin) {
 	    if (paramList == PL_beginav) {
 		/* save PL_beginav for compiler */
-		Perl_av_create_and_push(aTHX_ &PL_beginav_save, (SV*)cv);
+		Perl_av_create_and_push(aTHX_ &PL_beginav_save, MUTABLE_SV(cv));
 	    }
 	    else if (paramList == PL_checkav) {
 		/* save PL_checkav for compiler */
-		Perl_av_create_and_push(aTHX_ &PL_checkav_save, (SV*)cv);
+		Perl_av_create_and_push(aTHX_ &PL_checkav_save, MUTABLE_SV(cv));
 	    }
 	    else if (paramList == PL_unitcheckav) {
 		/* save PL_unitcheckav for compiler */
-		Perl_av_create_and_push(aTHX_ &PL_unitcheckav_save, (SV*)cv);
+		Perl_av_create_and_push(aTHX_ &PL_unitcheckav_save, MUTABLE_SV(cv));
 	    }
 	} else {
 	    if (!PL_madskills)

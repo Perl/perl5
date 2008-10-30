@@ -318,7 +318,7 @@ S_do_trans_simple_utf8(pTHX_ SV * const sv)
 #ifdef USE_ITHREADS
 		    PAD_SVl(cPADOP->op_padix);
 #else
-		    (SV*)cSVOP->op_sv;
+		    MUTABLE_SV(cSVOP->op_sv);
 #endif
     HV* const  hv = MUTABLE_HV(SvRV(rv));
     SV* const * svp = hv_fetchs(hv, "NONE", FALSE);
@@ -420,7 +420,7 @@ S_do_trans_count_utf8(pTHX_ SV * const sv)
 #ifdef USE_ITHREADS
 		    PAD_SVl(cPADOP->op_padix);
 #else
-		    (SV*)cSVOP->op_sv;
+		    MUTABLE_SV(cSVOP->op_sv);
 #endif
     HV* const hv = MUTABLE_HV(SvRV(rv));
     SV* const * const svp = hv_fetchs(hv, "NONE", FALSE);
@@ -471,7 +471,7 @@ S_do_trans_complex_utf8(pTHX_ SV * const sv)
 #ifdef USE_ITHREADS
 		    PAD_SVl(cPADOP->op_padix);
 #else
-		    (SV*)cSVOP->op_sv;
+		    MUTABLE_SV(cSVOP->op_sv);
 #endif
     HV * const hv = MUTABLE_HV(SvRV(rv));
     SV * const *svp = hv_fetchs(hv, "NONE", FALSE);
@@ -1004,7 +1004,7 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
 	const I32 max = AvFILL(av);
 
 	for (i = 0; i <= max; i++) {
-	    sv = (SV*)av_fetch(av, i, FALSE);
+	    sv = MUTABLE_SV(av_fetch(av, i, FALSE));
 	    if (sv && ((sv = *(SV**)sv), sv != &PL_sv_undef))
 		do_chop(astr, sv);
 	}
@@ -1090,7 +1090,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
 	const I32 max = AvFILL(av);
 
 	for (i = 0; i <= max; i++) {
-	    sv = (SV*)av_fetch(av, i, FALSE);
+	    sv = MUTABLE_SV(av_fetch(av, i, FALSE));
 	    if (sv && ((sv = *(SV**)sv), sv != &PL_sv_undef))
 		count += do_chomp(sv);
 	}
@@ -1467,7 +1467,7 @@ Perl_do_kv(pTHX)
 		sv_magic(TARG, NULL, PERL_MAGIC_nkeys, NULL, 0);
 	    }
 	    LvTYPE(TARG) = 'k';
-	    if (LvTARG(TARG) != (SV*)keys) {
+	    if (LvTARG(TARG) != (const SV *)keys) {
 		if (LvTARG(TARG))
 		    SvREFCNT_dec(LvTARG(TARG));
 		LvTARG(TARG) = SvREFCNT_inc_simple(keys);
@@ -1476,7 +1476,7 @@ Perl_do_kv(pTHX)
 	    RETURN;
 	}
 
-	if (! SvTIED_mg((SV*)keys, PERL_MAGIC_tied) )
+	if (! SvTIED_mg((const SV *)keys, PERL_MAGIC_tied) )
 	{
 	    i = HvKEYS(keys);
 	}

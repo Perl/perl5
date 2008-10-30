@@ -526,7 +526,7 @@ Perl_mg_free(pTHX_ SV *sv)
 	    if (mg->mg_len > 0 || mg->mg_type == PERL_MAGIC_utf8)
 		Safefree(mg->mg_ptr);
 	    else if (mg->mg_len == HEf_SVKEY)
-		SvREFCNT_dec((SV*)mg->mg_ptr);
+		SvREFCNT_dec(MUTABLE_SV(mg->mg_ptr));
 	}
 	if (mg->mg_flags & MGf_REFCOUNTED)
 	    SvREFCNT_dec(mg->mg_obj);
@@ -1643,7 +1643,7 @@ Perl_magic_getnkeys(pTHX_ SV *sv, MAGIC *mg)
 
     if (hv) {
          (void) hv_iterinit(hv);
-         if (! SvTIED_mg((SV*)hv, PERL_MAGIC_tied))
+         if (! SvTIED_mg((const SV *)hv, PERL_MAGIC_tied))
 	     i = HvKEYS(hv);
          else {
 	     while (hv_iternext(hv))
@@ -1683,7 +1683,7 @@ S_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, I32 flags, int
 	    if (mg->mg_len >= 0)
 		mPUSHp(mg->mg_ptr, mg->mg_len);
 	    else if (mg->mg_len == HEf_SVKEY)
-		PUSHs((SV*)mg->mg_ptr);
+		PUSHs(MUTABLE_SV(mg->mg_ptr));
 	}
 	else if (mg->mg_type == PERL_MAGIC_tiedelem) {
 	    mPUSHi(mg->mg_len);
@@ -1835,8 +1835,8 @@ Perl_magic_scalarpack(pTHX_ HV *hv, MAGIC *mg)
 {
     dVAR; dSP;
     SV *retval;
-    SV * const tied = SvTIED_obj((SV*)hv, mg);
-    HV * const pkg = SvSTASH((SV*)SvRV(tied));
+    SV * const tied = SvTIED_obj(MUTABLE_SV(hv), mg);
+    HV * const pkg = SvSTASH((const SV *)SvRV(tied));
    
     PERL_ARGS_ASSERT_MAGIC_SCALARPACK;
 
@@ -1847,7 +1847,7 @@ Perl_magic_scalarpack(pTHX_ HV *hv, MAGIC *mg)
             return &PL_sv_yes;
         /* no xhv_eiter so now use FIRSTKEY */
         key = sv_newmortal();
-        magic_nextpack((SV*)hv, mg, key);
+        magic_nextpack(MUTABLE_SV(hv), mg, key);
         HvEITER_set(hv, NULL);     /* need to reset iterator */
         return SvOK(key) ? &PL_sv_yes : &PL_sv_no;
     }
@@ -2966,7 +2966,7 @@ Perl_sighandler(int sig)
 	 if (sigaction(sig, 0, &oact) == 0 && oact.sa_flags & SA_SIGINFO) {
 	      if (sip) {
 		   HV *sih = newHV();
-		   SV *rv  = newRV_noinc((SV*)sih);
+		   SV *rv  = newRV_noinc(MUTABLE_SV(sih));
 		   /* The siginfo fields signo, code, errno, pid, uid,
 		    * addr, status, and band are defined by POSIX/SUSv3. */
 		   (void)hv_stores(sih, "signo", newSViv(sip->si_signo));
@@ -2980,7 +2980,7 @@ Perl_sighandler(int sig)
 		   hv_stores(sih, "band",       newSViv(sip->si_band));
 #endif
 		   EXTEND(SP, 2);
-		   PUSHs((SV*)rv);
+		   PUSHs(rv);
 		   mPUSHp((char *)sip, sizeof(*sip));
 	      }
 
@@ -2989,7 +2989,7 @@ Perl_sighandler(int sig)
 #endif
     PUTBACK;
 
-    call_sv((SV*)cv, G_DISCARD|G_EVAL);
+    call_sv(MUTABLE_SV(cv), G_DISCARD|G_EVAL);
 
     POPSTACK;
     if (SvTRUE(ERRSV)) {
@@ -3115,7 +3115,7 @@ int
 Perl_magic_sethint(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
-    SV *key = (mg->mg_len == HEf_SVKEY) ? (SV *)mg->mg_ptr
+    SV *key = (mg->mg_len == HEf_SVKEY) ? MUTABLE_SV(mg->mg_ptr)
 	: newSVpvn_flags(mg->mg_ptr, mg->mg_len, SVs_TEMP);
 
     PERL_ARGS_ASSERT_MAGIC_SETHINT;
@@ -3157,7 +3157,7 @@ Perl_magic_clearhint(pTHX_ SV *sv, MAGIC *mg)
     PL_hints |= HINT_LOCALIZE_HH;
     PL_compiling.cop_hints_hash
 	= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints_hash,
-				 (SV *)mg->mg_ptr, &PL_sv_placeholder);
+				 MUTABLE_SV(mg->mg_ptr), &PL_sv_placeholder);
     return 0;
 }
 

@@ -1764,8 +1764,8 @@ PP(pp_caller)
 
     PUSHs(cx->blk_oldcop->cop_hints_hash ?
 	  sv_2mortal(newRV_noinc(
-	    (SV*)Perl_refcounted_he_chain_2hv(aTHX_
-					      cx->blk_oldcop->cop_hints_hash)))
+				 MUTABLE_SV(Perl_refcounted_he_chain_2hv(aTHX_
+					      cx->blk_oldcop->cop_hints_hash))))
 	  : &PL_sv_undef);
     RETURN;
 }
@@ -2428,7 +2428,7 @@ PP(pp_goto)
 		    av = newAV();
 		    av_extend(av, items-1);
 		    AvREIFY_only(av);
-		    PAD_SVl(0) = (SV*)(cx->blk_sub.argarray = av);
+		    PAD_SVl(0) = MUTABLE_SV(cx->blk_sub.argarray = av);
 		}
 	    }
 	    else if (CvISXSUB(cv)) {	/* put GvAV(defgv) back onto stack */
@@ -2531,7 +2531,7 @@ PP(pp_goto)
 			CV * const gotocv = get_cv("DB::goto", FALSE);
 			if (gotocv) {
 			    PUSHMARK( PL_stack_sp );
-			    call_sv((SV*)gotocv, G_SCALAR | G_NODEBUG);
+			    call_sv(MUTABLE_SV(gotocv), G_SCALAR | G_NODEBUG);
 			    PL_stack_sp--;
 			}
 		    }
@@ -3052,9 +3052,9 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	if (cv) {
 	    dSP;
 	    PUSHMARK(SP);
-	    XPUSHs((SV*)CopFILEGV(&PL_compiling));
+	    XPUSHs(MUTABLE_SV(CopFILEGV(&PL_compiling)));
 	    PUTBACK;
-	    call_sv((SV*)cv, G_DISCARD);
+	    call_sv(MUTABLE_SV(cv), G_DISCARD);
 	}
     }
 
@@ -3276,7 +3276,7 @@ PP(pp_require)
 	    for (i = 0; i <= AvFILL(ar); i++) {
 		SV * const dirsv = *av_fetch(ar, i, TRUE);
 
-		if (SvTIED_mg((SV*)ar, PERL_MAGIC_tied))
+		if (SvTIED_mg((const SV *)ar, PERL_MAGIC_tied))
 		    mg_get(dirsv);
 		if (SvROK(dirsv)) {
 		    int count;
@@ -4073,13 +4073,13 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    if (SvTIED_mg(This, PERL_MAGIC_tied)) {
 		tied = TRUE;
 	    }
-	    else if (SvTIED_mg((SV *) other_hv, PERL_MAGIC_tied)) {
+	    else if (SvTIED_mg((const SV *)other_hv, PERL_MAGIC_tied)) {
 		HV * const temp = other_hv;
 		other_hv = MUTABLE_HV(This);
-		This  = (SV *) temp;
+		This  = MUTABLE_SV(temp);
 		tied = TRUE;
 	    }
-	    if (SvTIED_mg((SV *) other_hv, PERL_MAGIC_tied))
+	    if (SvTIED_mg((const SV *)other_hv, PERL_MAGIC_tied))
 		other_tied = TRUE;
 	    
 	    if (!tied && HvUSEDKEYS((const HV *) This) != HvUSEDKEYS(other_hv))
@@ -4164,11 +4164,11 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 
 		if (NULL == seen_this) {
 		    seen_this = newHV();
-		    (void) sv_2mortal((SV *) seen_this);
+		    (void) sv_2mortal(MUTABLE_SV(seen_this));
 		}
 		if (NULL == seen_other) {
 		    seen_this = newHV();
-		    (void) sv_2mortal((SV *) seen_other);
+		    (void) sv_2mortal(MUTABLE_SV(seen_other));
 		}
 		for(i = 0; i <= other_len; ++i) {
 		    SV * const * const this_elem = av_fetch(MUTABLE_AV(This), i, FALSE);
@@ -4693,8 +4693,8 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
     dVAR;
     SV * const datasv = FILTER_DATA(idx);
     const int filter_has_file = IoLINES(datasv);
-    SV * const filter_state = (SV *)IoTOP_GV(datasv);
-    SV * const filter_sub = (SV *)IoBOTTOM_GV(datasv);
+    SV * const filter_state = MUTABLE_SV(IoTOP_GV(datasv));
+    SV * const filter_sub = MUTABLE_SV(IoBOTTOM_GV(datasv));
     int status = 0;
     SV *upstream;
     STRLEN got_len;
@@ -4714,7 +4714,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
        not sure where the trouble is yet.  XXX */
 
     if (IoFMT_GV(datasv)) {
-	SV *const cache = (SV *)IoFMT_GV(datasv);
+	SV *const cache = MUTABLE_SV(IoFMT_GV(datasv));
 	if (SvOK(cache)) {
 	    STRLEN cache_len;
 	    const char *cache_p = SvPV(cache, cache_len);
@@ -4813,7 +4813,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
     if (prune_from) {
 	/* Oh. Too long. Stuff some in our cache.  */
 	STRLEN cached_len = got_p + got_len - prune_from;
-	SV *cache = (SV *)IoFMT_GV(datasv);
+	SV *cache = MUTABLE_SV(IoFMT_GV(datasv));
 
 	if (!cache) {
 	    IoFMT_GV(datasv) = (GV*) (cache = newSV(got_len - umaxlen));
