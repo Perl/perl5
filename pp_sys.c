@@ -2935,7 +2935,7 @@ PP(pp_stat)
  * Else, discard it from the stack and continue. --rgs
  */
 #define STACKED_FTEST_CHECK if (PL_op->op_private & OPpFT_STACKED) { \
-	if (TOPs == &PL_sv_no || TOPs == &PL_sv_undef) { RETURN; } \
+	if (!SvTRUE(TOPs)) { RETURN; } \
 	else { (void)POPs; PUTBACK; } \
     }
 
