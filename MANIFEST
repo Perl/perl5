@@ -280,6 +280,7 @@ ext/Devel/PPPort/parts/inc/ppphbin	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/ppphdoc	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/ppphtest	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/pvs	Devel::PPPort include
+ext/Devel/PPPort/parts/inc/pv_tools	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/shared_pv	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/snprintf	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/sprintf	Devel::PPPort include
@@ -354,6 +355,7 @@ ext/Devel/PPPort/TODO		Devel::PPPort Todo
 ext/Devel/PPPort/t/podtest.t	Devel::PPPort test file
 ext/Devel/PPPort/t/ppphtest.t	Devel::PPPort test file
 ext/Devel/PPPort/t/pvs.t	Devel::PPPort test file
+ext/Devel/PPPort/t/pv_tools.t	Devel::PPPort test file
 ext/Devel/PPPort/t/shared_pv.t	Devel::PPPort test file
 ext/Devel/PPPort/t/snprintf.t	Devel::PPPort test file
 ext/Devel/PPPort/t/sprintf.t	Devel::PPPort test file

@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 47 $
+##  $Revision: 48 $
 ##  $Author: mhx $
-##  $Date: 2008/10/21 23:14:09 +0200 $
+##  $Date: 2008/10/30 01:46:33 +0100 $
 ##
 ################################################################################
 ##
@@ -248,6 +248,34 @@ typedef OP* (CPERLscope(*Perl_ppaddr_t))(pTHX);
 
 typedef OP* (CPERLscope(*Perl_check_t)) (pTHX_ OP*);
 
+#endif
+
+__UNDEFINED__ isPSXSPC(c)	(isSPACE(c) || (c) == '\v')
+__UNDEFINED__ isBLANK(c)	((c) == ' ' || (c) == '\t')
+#ifdef EBCDIC
+__UNDEFINED__ isALNUMC(c)	isalnum(c)
+__UNDEFINED__ isASCII(c)	isascii(c)
+__UNDEFINED__ isCNTRL(c)	iscntrl(c)
+__UNDEFINED__ isGRAPH(c)	isgraph(c)
+__UNDEFINED__ isPRINT(c)	isprint(c)
+__UNDEFINED__ isPUNCT(c)	ispunct(c)
+__UNDEFINED__ isXDIGIT(c)	isxdigit(c)
+#else
+# if { VERSION < 5.10.0 }
+/* Hint: isPRINT
+ * The implementation in older perl versions includes all of the
+ * isSPACE() characters, which is wrong. The version provided by
+ * Devel::PPPort always overrides a present buggy version.
+ */
+#  undef isPRINT
+# endif
+__UNDEFINED__ isALNUMC(c)	(isALPHA(c) || isDIGIT(c))
+__UNDEFINED__ isASCII(c)	((c) <= 127)
+__UNDEFINED__ isCNTRL(c)	((c) < ' ' || (c) == 127)
+__UNDEFINED__ isGRAPH(c)	(isALNUM(c) || isPUNCT(c))
+__UNDEFINED__ isPRINT(c)	(((c) >= 32 && (c) < 127))
+__UNDEFINED__ isPUNCT(c)	(((c) >= 33 && (c) <= 47) || ((c) >= 58 && (c) <= 64)  || ((c) >= 91 && (c) <= 96) || ((c) >= 123 && (c) <= 126))
+__UNDEFINED__ isXDIGIT(c)	(isDIGIT(c) || ((c) >= 'a' && (c) <= 'f') || ((c) >= 'A' && (c) <= 'F'))
 #endif
 
 =xsmisc
