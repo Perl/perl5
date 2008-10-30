@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Aug  8 16:16:43 CEST 2008 [metaconfig 3.5 PL0]
+# Generated on Tue Oct 28 18:51:20 CET 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -207,6 +207,7 @@ run=''
 targetarch=''
 to=''
 usecrosscompile=''
+extern_C=''
 mistrustnm=''
 perllibs=''
 dynamic_ext=''
@@ -7641,6 +7642,10 @@ case "$3" in
 -a) tf=libc.tmp; tdc="[]";;
 *) tlook="^$1\$"; tf=libc.list; tdc="()";;
 esac;
+case "$d_cplusplus" in
+    $define)	extern_C="extern \"C\""	;;
+    *)		extern_C="extern"	;;
+esac;
 tx=yes;
 case "$reuseval-$4" in
 true-) ;;
@@ -7649,20 +7654,17 @@ esac;
 case "$tx" in
 yes)
 	tval=false;
-	case "$d_cplusplus" in
-		$define) extern_C=\"C\";;
-	esac;
 	if $test "$runnm" = true; then
 		if $contains $tlook $tf >/dev/null 2>&1; then
 			tval=true;
 		elif $test "$mistrustnm" = compile -o "$mistrustnm" = run; then
-			echo "extern $extern_C void *$1$tdc; void *(*(p()))$tdc { return &$1; } int main() { if(p()) return(0); else return(1); }"> try.c;
+			echo "$extern_C void *$1$tdc; void *(*(p()))$tdc { return &$1; } int main() { if(p()) return(0); else return(1); }"> try.c;
 			$cc -o try $optimize $ccflags $ldflags try.c >/dev/null 2>&1 $libs && tval=true;
 			$test "$mistrustnm" = run -a -x try && { $run ./try$_exe >/dev/null 2>&1 || tval=false; };
 			$rm_try;
 		fi;
 	else
-		echo "extern $extern_C void *$1$tdc; void *(*(p()))$tdc { return &$1; } int main() { if(p()) return(0); else return(1); }"> try.c;
+		echo "$extern_C void *$1$tdc; void *(*(p()))$tdc { return &$1; } int main() { if(p()) return(0); else return(1); }"> try.c;
 		$cc -o try $optimize $ccflags $ldflags try.c $libs >/dev/null 2>&1 && tval=true;
 		$rm_try;
 	fi;
@@ -9330,6 +9332,46 @@ esac
 prefixvar=vendorscript
 . ./installprefix
 
+: script used to emit important warnings
+cat >warn <<EOS
+$startsh
+if test \$# -gt 0; then
+	echo "\$@" >msg
+else
+	cat >msg
+fi
+echo "*** WARNING:" >&4
+sed -e 's/^/*** /' <msg >&4
+echo "*** " >&4
+cat msg >>config.msg
+echo " " >>config.msg
+rm -f msg
+EOS
+chmod +x warn
+$eunicefix warn
+
+: see which of string.h or strings.h is needed
+echo " "
+strings=`./findhdr string.h`
+if $test "$strings" && $test -r "$strings"; then
+	echo "Using <string.h> instead of <strings.h>." >&4
+	val="$define"
+else
+	val="$undef"
+	strings=`./findhdr strings.h`
+	if $test "$strings" && $test -r "$strings"; then
+		echo "Using <strings.h> instead of <string.h>." >&4
+	else
+		./warn "No string header found -- You'll surely have problems."
+	fi
+fi
+set i_string
+eval $setvar
+case "$i_string" in
+"$undef") strings=`./findhdr strings.h`;;
+*)	  strings=`./findhdr string.h`;;
+esac
+
 : see if qgcvt exists
 set qgcvt d_qgcvt
 eval $inlibc
@@ -9502,15 +9544,18 @@ char *myname = "sprintf";
 
 #include <stdio.h>
 
-#define I_STDLIB $i_stdlib
+#$i_stdlib I_STDLIB
 #ifdef I_STDLIB
 #include <stdlib.h>
 #endif
+#$i_string I_STRING
+#ifdef I_STRING
+#  include <string.h>
+#else
+#  include <strings.h>
+#endif
 
-int
-checkit(expect, got)
-char *expect;
-char *got;
+int checkit(char *expect, char *got)
 {
     if (strcmp(expect, got)) {
 		printf("%s oddity:  Expected %s, got %s\n",
@@ -9992,19 +10037,19 @@ case "$d_asctime_r" in
 	define)
 	case "$asctime_r_proto" in
 	''|0) try='char* asctime_r(const struct tm*, char*);'
-	./protochk "extern $try" $hdrs && asctime_r_proto=B_SB ;;
+	./protochk "$extern_C $try" $hdrs && asctime_r_proto=B_SB ;;
 	esac
 	case "$asctime_r_proto" in
 	''|0) try='char* asctime_r(const struct tm*, char*, int);'
-	./protochk "extern $try" $hdrs && asctime_r_proto=B_SBI ;;
+	./protochk "$extern_C $try" $hdrs && asctime_r_proto=B_SBI ;;
 	esac
 	case "$asctime_r_proto" in
 	''|0) try='int asctime_r(const struct tm*, char*);'
-	./protochk "extern $try" $hdrs && asctime_r_proto=I_SB ;;
+	./protochk "$extern_C $try" $hdrs && asctime_r_proto=I_SB ;;
 	esac
 	case "$asctime_r_proto" in
 	''|0) try='int asctime_r(const struct tm*, char*, int);'
-	./protochk "extern $try" $hdrs && asctime_r_proto=I_SBI ;;
+	./protochk "$extern_C $try" $hdrs && asctime_r_proto=I_SBI ;;
 	esac
 	case "$asctime_r_proto" in
 	''|0)	d_asctime_r=undef
@@ -11136,11 +11181,11 @@ case "$d_crypt_r" in
 	define)
 	case "$crypt_r_proto" in
 	''|0) try='char* crypt_r(const char*, const char*, struct crypt_data*);'
-	./protochk "extern $try" $hdrs && crypt_r_proto=B_CCS ;;
+	./protochk "$extern_C $try" $hdrs && crypt_r_proto=B_CCS ;;
 	esac
 	case "$crypt_r_proto" in
 	''|0) try='char* crypt_r(const char*, const char*, CRYPTD*);'
-	./protochk "extern $try" $hdrs && crypt_r_proto=B_CCD ;;
+	./protochk "$extern_C $try" $hdrs && crypt_r_proto=B_CCD ;;
 	esac
 	case "$crypt_r_proto" in
 	''|0)	d_crypt_r=undef
@@ -11197,7 +11242,7 @@ case "$d_ctermid_r" in
 	define)
 	case "$ctermid_r_proto" in
 	''|0) try='char* ctermid_r(char*);'
-	./protochk "extern $try" $hdrs && ctermid_r_proto=B_B ;;
+	./protochk "$extern_C $try" $hdrs && ctermid_r_proto=B_B ;;
 	esac
 	case "$ctermid_r_proto" in
 	''|0)	d_ctermid_r=undef
@@ -11238,19 +11283,19 @@ case "$d_ctime_r" in
 	define)
 	case "$ctime_r_proto" in
 	''|0) try='char* ctime_r(const time_t*, char*);'
-	./protochk "extern $try" $hdrs && ctime_r_proto=B_SB ;;
+	./protochk "$extern_C $try" $hdrs && ctime_r_proto=B_SB ;;
 	esac
 	case "$ctime_r_proto" in
 	''|0) try='char* ctime_r(const time_t*, char*, int);'
-	./protochk "extern $try" $hdrs && ctime_r_proto=B_SBI ;;
+	./protochk "$extern_C $try" $hdrs && ctime_r_proto=B_SBI ;;
 	esac
 	case "$ctime_r_proto" in
 	''|0) try='int ctime_r(const time_t*, char*);'
-	./protochk "extern $try" $hdrs && ctime_r_proto=I_SB ;;
+	./protochk "$extern_C $try" $hdrs && ctime_r_proto=I_SB ;;
 	esac
 	case "$ctime_r_proto" in
 	''|0) try='int ctime_r(const time_t*, char*, int);'
-	./protochk "extern $try" $hdrs && ctime_r_proto=I_SBI ;;
+	./protochk "$extern_C $try" $hdrs && ctime_r_proto=I_SBI ;;
 	esac
 	case "$ctime_r_proto" in
 	''|0)	d_ctime_r=undef
@@ -11655,7 +11700,7 @@ case "$d_drand48_r" in
 	define)
 	case "$drand48_r_proto" in
 	''|0) try='int drand48_r(struct drand48_data*, double*);'
-	./protochk "extern $try" $hdrs && drand48_r_proto=I_ST ;;
+	./protochk "$extern_C $try" $hdrs && drand48_r_proto=I_ST ;;
 	esac
 	case "$drand48_r_proto" in
 	''|0)	d_drand48_r=undef
@@ -11738,11 +11783,11 @@ case "$d_endgrent_r" in
 	define)
 	case "$endgrent_r_proto" in
 	''|0) try='int endgrent_r(FILE**);'
-	./protochk "extern $try" $hdrs && endgrent_r_proto=I_H ;;
+	./protochk "$extern_C $try" $hdrs && endgrent_r_proto=I_H ;;
 	esac
 	case "$endgrent_r_proto" in
 	''|0) try='void endgrent_r(FILE**);'
-	./protochk "extern $try" $hdrs && endgrent_r_proto=V_H ;;
+	./protochk "$extern_C $try" $hdrs && endgrent_r_proto=V_H ;;
 	esac
 	case "$endgrent_r_proto" in
 	''|0)	d_endgrent_r=undef
@@ -11791,11 +11836,11 @@ case "$d_endhostent_r" in
 	define)
 	case "$endhostent_r_proto" in
 	''|0) try='int endhostent_r(struct hostent_data*);'
-	./protochk "extern $try" $hdrs && endhostent_r_proto=I_D ;;
+	./protochk "$extern_C $try" $hdrs && endhostent_r_proto=I_D ;;
 	esac
 	case "$endhostent_r_proto" in
 	''|0) try='void endhostent_r(struct hostent_data*);'
-	./protochk "extern $try" $hdrs && endhostent_r_proto=V_D ;;
+	./protochk "$extern_C $try" $hdrs && endhostent_r_proto=V_D ;;
 	esac
 	case "$endhostent_r_proto" in
 	''|0)	d_endhostent_r=undef
@@ -11840,11 +11885,11 @@ case "$d_endnetent_r" in
 	define)
 	case "$endnetent_r_proto" in
 	''|0) try='int endnetent_r(struct netent_data*);'
-	./protochk "extern $try" $hdrs && endnetent_r_proto=I_D ;;
+	./protochk "$extern_C $try" $hdrs && endnetent_r_proto=I_D ;;
 	esac
 	case "$endnetent_r_proto" in
 	''|0) try='void endnetent_r(struct netent_data*);'
-	./protochk "extern $try" $hdrs && endnetent_r_proto=V_D ;;
+	./protochk "$extern_C $try" $hdrs && endnetent_r_proto=V_D ;;
 	esac
 	case "$endnetent_r_proto" in
 	''|0)	d_endnetent_r=undef
@@ -11889,11 +11934,11 @@ case "$d_endprotoent_r" in
 	define)
 	case "$endprotoent_r_proto" in
 	''|0) try='int endprotoent_r(struct protoent_data*);'
-	./protochk "extern $try" $hdrs && endprotoent_r_proto=I_D ;;
+	./protochk "$extern_C $try" $hdrs && endprotoent_r_proto=I_D ;;
 	esac
 	case "$endprotoent_r_proto" in
 	''|0) try='void endprotoent_r(struct protoent_data*);'
-	./protochk "extern $try" $hdrs && endprotoent_r_proto=V_D ;;
+	./protochk "$extern_C $try" $hdrs && endprotoent_r_proto=V_D ;;
 	esac
 	case "$endprotoent_r_proto" in
 	''|0)	d_endprotoent_r=undef
@@ -12026,11 +12071,11 @@ case "$d_endpwent_r" in
 	define)
 	case "$endpwent_r_proto" in
 	''|0) try='int endpwent_r(FILE**);'
-	./protochk "extern $try" $hdrs && endpwent_r_proto=I_H ;;
+	./protochk "$extern_C $try" $hdrs && endpwent_r_proto=I_H ;;
 	esac
 	case "$endpwent_r_proto" in
 	''|0) try='void endpwent_r(FILE**);'
-	./protochk "extern $try" $hdrs && endpwent_r_proto=V_H ;;
+	./protochk "$extern_C $try" $hdrs && endpwent_r_proto=V_H ;;
 	esac
 	case "$endpwent_r_proto" in
 	''|0)	d_endpwent_r=undef
@@ -12075,11 +12120,11 @@ case "$d_endservent_r" in
 	define)
 	case "$endservent_r_proto" in
 	''|0) try='int endservent_r(struct servent_data*);'
-	./protochk "extern $try" $hdrs && endservent_r_proto=I_D ;;
+	./protochk "$extern_C $try" $hdrs && endservent_r_proto=I_D ;;
 	esac
 	case "$endservent_r_proto" in
 	''|0) try='void endservent_r(struct servent_data*);'
-	./protochk "extern $try" $hdrs && endservent_r_proto=V_D ;;
+	./protochk "$extern_C $try" $hdrs && endservent_r_proto=V_D ;;
 	esac
 	case "$endservent_r_proto" in
 	''|0)	d_endservent_r=undef
@@ -12157,28 +12202,6 @@ fi
 set d_open3
 eval $setvar
 $rm_try
-
-: see which of string.h or strings.h is needed
-echo " "
-strings=`./findhdr string.h`
-if $test "$strings" && $test -r "$strings"; then
-	echo "Using <string.h> instead of <strings.h>." >&4
-	val="$define"
-else
-	val="$undef"
-	strings=`./findhdr strings.h`
-	if $test "$strings" && $test -r "$strings"; then
-		echo "Using <strings.h> instead of <string.h>." >&4
-	else
-		echo "No string header found -- You'll surely have problems." >&4
-	fi
-fi
-set i_string
-eval $setvar
-case "$i_string" in
-"$undef") strings=`./findhdr strings.h`;;
-*)	  strings=`./findhdr string.h`;;
-esac
 
 : see if this is a sys/file.h system
 val=''
@@ -13099,27 +13122,27 @@ case "$d_getgrent_r" in
 	define)
 	case "$getgrent_r_proto" in
 	''|0) try='int getgrent_r(struct group*, char*, size_t, struct group**);'
-	./protochk "extern $try" $hdrs && getgrent_r_proto=I_SBWR ;;
+	./protochk "$extern_C $try" $hdrs && getgrent_r_proto=I_SBWR ;;
 	esac
 	case "$getgrent_r_proto" in
 	''|0) try='int getgrent_r(struct group*, char*, int, struct group**);'
-	./protochk "extern $try" $hdrs && getgrent_r_proto=I_SBIR ;;
+	./protochk "$extern_C $try" $hdrs && getgrent_r_proto=I_SBIR ;;
 	esac
 	case "$getgrent_r_proto" in
 	''|0) try='struct group* getgrent_r(struct group*, char*, size_t);'
-	./protochk "extern $try" $hdrs && getgrent_r_proto=S_SBW ;;
+	./protochk "$extern_C $try" $hdrs && getgrent_r_proto=S_SBW ;;
 	esac
 	case "$getgrent_r_proto" in
 	''|0) try='struct group* getgrent_r(struct group*, char*, int);'
-	./protochk "extern $try" $hdrs && getgrent_r_proto=S_SBI ;;
+	./protochk "$extern_C $try" $hdrs && getgrent_r_proto=S_SBI ;;
 	esac
 	case "$getgrent_r_proto" in
 	''|0) try='int getgrent_r(struct group*, char*, int);'
-	./protochk "extern $try" $hdrs && getgrent_r_proto=I_SBI ;;
+	./protochk "$extern_C $try" $hdrs && getgrent_r_proto=I_SBI ;;
 	esac
 	case "$getgrent_r_proto" in
 	''|0) try='int getgrent_r(struct group*, char*, int, FILE**);'
-	./protochk "extern $try" $hdrs && getgrent_r_proto=I_SBIH ;;
+	./protochk "$extern_C $try" $hdrs && getgrent_r_proto=I_SBIH ;;
 	esac
 	case "$getgrent_r_proto" in
 	''|0)	d_getgrent_r=undef
@@ -13160,19 +13183,19 @@ case "$d_getgrgid_r" in
 	define)
 	case "$getgrgid_r_proto" in
 	''|0) try='int getgrgid_r(gid_t, struct group*, char*, size_t, struct group**);'
-	./protochk "extern $try" $hdrs && getgrgid_r_proto=I_TSBWR ;;
+	./protochk "$extern_C $try" $hdrs && getgrgid_r_proto=I_TSBWR ;;
 	esac
 	case "$getgrgid_r_proto" in
 	''|0) try='int getgrgid_r(gid_t, struct group*, char*, int, struct group**);'
-	./protochk "extern $try" $hdrs && getgrgid_r_proto=I_TSBIR ;;
+	./protochk "$extern_C $try" $hdrs && getgrgid_r_proto=I_TSBIR ;;
 	esac
 	case "$getgrgid_r_proto" in
 	''|0) try='int getgrgid_r(gid_t, struct group*, char*, int);'
-	./protochk "extern $try" $hdrs && getgrgid_r_proto=I_TSBI ;;
+	./protochk "$extern_C $try" $hdrs && getgrgid_r_proto=I_TSBI ;;
 	esac
 	case "$getgrgid_r_proto" in
 	''|0) try='struct group* getgrgid_r(gid_t, struct group*, char*, int);'
-	./protochk "extern $try" $hdrs && getgrgid_r_proto=S_TSBI ;;
+	./protochk "$extern_C $try" $hdrs && getgrgid_r_proto=S_TSBI ;;
 	esac
 	case "$getgrgid_r_proto" in
 	''|0)	d_getgrgid_r=undef
@@ -13213,23 +13236,23 @@ case "$d_getgrnam_r" in
 	define)
 	case "$getgrnam_r_proto" in
 	''|0) try='int getgrnam_r(const char*, struct group*, char*, size_t, struct group**);'
-	./protochk "extern $try" $hdrs && getgrnam_r_proto=I_CSBWR ;;
+	./protochk "$extern_C $try" $hdrs && getgrnam_r_proto=I_CSBWR ;;
 	esac
 	case "$getgrnam_r_proto" in
 	''|0) try='int getgrnam_r(const char*, struct group*, char*, int, struct group**);'
-	./protochk "extern $try" $hdrs && getgrnam_r_proto=I_CSBIR ;;
+	./protochk "$extern_C $try" $hdrs && getgrnam_r_proto=I_CSBIR ;;
 	esac
 	case "$getgrnam_r_proto" in
 	''|0) try='struct group* getgrnam_r(const char*, char*, int);'
-	./protochk "extern $try" $hdrs && getgrnam_r_proto=S_CBI ;;
+	./protochk "$extern_C $try" $hdrs && getgrnam_r_proto=S_CBI ;;
 	esac
 	case "$getgrnam_r_proto" in
 	''|0) try='int getgrnam_r(const char*, struct group*, char*, int);'
-	./protochk "extern $try" $hdrs && getgrnam_r_proto=I_CSBI ;;
+	./protochk "$extern_C $try" $hdrs && getgrnam_r_proto=I_CSBI ;;
 	esac
 	case "$getgrnam_r_proto" in
 	''|0) try='struct group* getgrnam_r(const char*, struct group*, char*, int);'
-	./protochk "extern $try" $hdrs && getgrnam_r_proto=S_CSBI ;;
+	./protochk "$extern_C $try" $hdrs && getgrnam_r_proto=S_CSBI ;;
 	esac
 	case "$getgrnam_r_proto" in
 	''|0)	d_getgrnam_r=undef
@@ -13367,47 +13390,47 @@ case "$d_gethostbyaddr_r" in
 	define)
 	case "$gethostbyaddr_r_proto" in
 	''|0) try='int gethostbyaddr_r(const char*, size_t, int, struct hostent*, char*, size_t, struct hostent**, int*);'
-	./protochk "extern $try" $hdrs && gethostbyaddr_r_proto=I_CWISBWRE ;;
+	./protochk "$extern_C $try" $hdrs && gethostbyaddr_r_proto=I_CWISBWRE ;;
 	esac
 	case "$gethostbyaddr_r_proto" in
 	''|0) try='struct hostent* gethostbyaddr_r(const char*, size_t, int, struct hostent*, char*, size_t, int, int*);'
-	./protochk "extern $try" $hdrs && gethostbyaddr_r_proto=S_CWISBWIE ;;
+	./protochk "$extern_C $try" $hdrs && gethostbyaddr_r_proto=S_CWISBWIE ;;
 	esac
 	case "$gethostbyaddr_r_proto" in
 	''|0) try='struct hostent* gethostbyaddr_r(const char*, size_t, int, struct hostent*, char*, int, int*);'
-	./protochk "extern $try" $hdrs && gethostbyaddr_r_proto=S_CWISBIE ;;
+	./protochk "$extern_C $try" $hdrs && gethostbyaddr_r_proto=S_CWISBIE ;;
 	esac
 	case "$gethostbyaddr_r_proto" in
 	''|0) try='struct hostent* gethostbyaddr_r(const void*, size_t, int, struct hostent*, char*, int, int*);'
-	./protochk "extern $try" $hdrs && gethostbyaddr_r_proto=S_TWISBIE ;;
+	./protochk "$extern_C $try" $hdrs && gethostbyaddr_r_proto=S_TWISBIE ;;
 	esac
 	case "$gethostbyaddr_r_proto" in
 	''|0) try='struct hostent* gethostbyaddr_r(const char*, int, int, struct hostent*, char*, int, int*);'
-	./protochk "extern $try" $hdrs && gethostbyaddr_r_proto=S_CIISBIE ;;
+	./protochk "$extern_C $try" $hdrs && gethostbyaddr_r_proto=S_CIISBIE ;;
 	esac
 	case "$gethostbyaddr_r_proto" in
 	''|0) try='struct hostent* gethostbyaddr_r(const char*, struct hostent*, char*, int, int*);'
-	./protochk "extern $try" $hdrs && gethostbyaddr_r_proto=S_CSBIE ;;
+	./protochk "$extern_C $try" $hdrs && gethostbyaddr_r_proto=S_CSBIE ;;
 	esac
 	case "$gethostbyaddr_r_proto" in
 	''|0) try='struct hostent* gethostbyaddr_r(const void*, struct hostent*, char*, int, int*);'
-	./protochk "extern $try" $hdrs && gethostbyaddr_r_proto=S_TSBIE ;;
+	./protochk "$extern_C $try" $hdrs && gethostbyaddr_r_proto=S_TSBIE ;;
 	esac
 	case "$gethostbyaddr_r_proto" in
 	''|0) try='int gethostbyaddr_r(const char*, size_t, int, struct hostent*, struct hostent_data*);'
-	./protochk "extern $try" $hdrs && gethostbyaddr_r_proto=I_CWISD ;;
+	./protochk "$extern_C $try" $hdrs && gethostbyaddr_r_proto=I_CWISD ;;
 	esac
 	case "$gethostbyaddr_r_proto" in
 	''|0) try='int gethostbyaddr_r(const char*, int, int, struct hostent*, struct hostent_data*);'
-	./protochk "extern $try" $hdrs && gethostbyaddr_r_proto=I_CIISD ;;
+	./protochk "$extern_C $try" $hdrs && gethostbyaddr_r_proto=I_CIISD ;;
 	esac
 	case "$gethostbyaddr_r_proto" in
 	''|0) try='int gethostbyaddr_r(const char*, int, int);'
-	./protochk "extern $try" $hdrs && gethostbyaddr_r_proto=I_CII ;;
+	./protochk "$extern_C $try" $hdrs && gethostbyaddr_r_proto=I_CII ;;
 	esac
 	case "$gethostbyaddr_r_proto" in
 	''|0) try='int gethostbyaddr_r(const void*, socklen_t, int, struct hostent*, char*, size_t, struct hostent**, int*);'
-	./protochk "extern $try" $hdrs && gethostbyaddr_r_proto=I_TsISBWRE ;;
+	./protochk "$extern_C $try" $hdrs && gethostbyaddr_r_proto=I_TsISBWRE ;;
 	esac
 	case "$gethostbyaddr_r_proto" in
 	''|0)	d_gethostbyaddr_r=undef
@@ -13448,15 +13471,15 @@ case "$d_gethostbyname_r" in
 	define)
 	case "$gethostbyname_r_proto" in
 	''|0) try='int gethostbyname_r(const char*, struct hostent*, char*, size_t, struct hostent**, int*);'
-	./protochk "extern $try" $hdrs && gethostbyname_r_proto=I_CSBWRE ;;
+	./protochk "$extern_C $try" $hdrs && gethostbyname_r_proto=I_CSBWRE ;;
 	esac
 	case "$gethostbyname_r_proto" in
 	''|0) try='struct hostent* gethostbyname_r(const char*, struct hostent*, char*, int, int*);'
-	./protochk "extern $try" $hdrs && gethostbyname_r_proto=S_CSBIE ;;
+	./protochk "$extern_C $try" $hdrs && gethostbyname_r_proto=S_CSBIE ;;
 	esac
 	case "$gethostbyname_r_proto" in
 	''|0) try='int gethostbyname_r(const char*, struct hostent*, struct hostent_data*);'
-	./protochk "extern $try" $hdrs && gethostbyname_r_proto=I_CSD ;;
+	./protochk "$extern_C $try" $hdrs && gethostbyname_r_proto=I_CSD ;;
 	esac
 	case "$gethostbyname_r_proto" in
 	''|0)	d_gethostbyname_r=undef
@@ -13497,27 +13520,27 @@ case "$d_gethostent_r" in
 	define)
 	case "$gethostent_r_proto" in
 	''|0) try='int gethostent_r(struct hostent*, char*, size_t, struct hostent**, int*);'
-	./protochk "extern $try" $hdrs && gethostent_r_proto=I_SBWRE ;;
+	./protochk "$extern_C $try" $hdrs && gethostent_r_proto=I_SBWRE ;;
 	esac
 	case "$gethostent_r_proto" in
 	''|0) try='int gethostent_r(struct hostent*, char*, int, int*);'
-	./protochk "extern $try" $hdrs && gethostent_r_proto=I_SBIE ;;
+	./protochk "$extern_C $try" $hdrs && gethostent_r_proto=I_SBIE ;;
 	esac
 	case "$gethostent_r_proto" in
 	''|0) try='struct hostent* gethostent_r(struct hostent*, char*, int, int*);'
-	./protochk "extern $try" $hdrs && gethostent_r_proto=S_SBIE ;;
+	./protochk "$extern_C $try" $hdrs && gethostent_r_proto=S_SBIE ;;
 	esac
 	case "$gethostent_r_proto" in
 	''|0) try='struct hostent* gethostent_r(struct hostent*, char*, int);'
-	./protochk "extern $try" $hdrs && gethostent_r_proto=S_SBI ;;
+	./protochk "$extern_C $try" $hdrs && gethostent_r_proto=S_SBI ;;
 	esac
 	case "$gethostent_r_proto" in
 	''|0) try='int gethostent_r(struct hostent*, char*, int);'
-	./protochk "extern $try" $hdrs && gethostent_r_proto=I_SBI ;;
+	./protochk "$extern_C $try" $hdrs && gethostent_r_proto=I_SBI ;;
 	esac
 	case "$gethostent_r_proto" in
 	''|0) try='int gethostent_r(struct hostent*, struct hostent_data*);'
-	./protochk "extern $try" $hdrs && gethostent_r_proto=I_SD ;;
+	./protochk "$extern_C $try" $hdrs && gethostent_r_proto=I_SD ;;
 	esac
 	case "$gethostent_r_proto" in
 	''|0)	d_gethostent_r=undef
@@ -13571,19 +13594,19 @@ case "$d_getlogin_r" in
 	define)
 	case "$getlogin_r_proto" in
 	''|0) try='int getlogin_r(char*, size_t);'
-	./protochk "extern $try" $hdrs && getlogin_r_proto=I_BW ;;
+	./protochk "$extern_C $try" $hdrs && getlogin_r_proto=I_BW ;;
 	esac
 	case "$getlogin_r_proto" in
 	''|0) try='int getlogin_r(char*, int);'
-	./protochk "extern $try" $hdrs && getlogin_r_proto=I_BI ;;
+	./protochk "$extern_C $try" $hdrs && getlogin_r_proto=I_BI ;;
 	esac
 	case "$getlogin_r_proto" in
 	''|0) try='char* getlogin_r(char*, size_t);'
-	./protochk "extern $try" $hdrs && getlogin_r_proto=B_BW ;;
+	./protochk "$extern_C $try" $hdrs && getlogin_r_proto=B_BW ;;
 	esac
 	case "$getlogin_r_proto" in
 	''|0) try='char* getlogin_r(char*, int);'
-	./protochk "extern $try" $hdrs && getlogin_r_proto=B_BI ;;
+	./protochk "$extern_C $try" $hdrs && getlogin_r_proto=B_BI ;;
 	esac
 	case "$getlogin_r_proto" in
 	''|0)	d_getlogin_r=undef
@@ -13644,35 +13667,35 @@ case "$d_getnetbyaddr_r" in
 	define)
 	case "$getnetbyaddr_r_proto" in
 	''|0) try='int getnetbyaddr_r(unsigned long, int, struct netent*, char*, size_t, struct netent**, int*);'
-	./protochk "extern $try" $hdrs && getnetbyaddr_r_proto=I_UISBWRE ;;
+	./protochk "$extern_C $try" $hdrs && getnetbyaddr_r_proto=I_UISBWRE ;;
 	esac
 	case "$getnetbyaddr_r_proto" in
 	''|0) try='int getnetbyaddr_r(long, int, struct netent*, char*, int);'
-	./protochk "extern $try" $hdrs && getnetbyaddr_r_proto=I_LISBI ;;
+	./protochk "$extern_C $try" $hdrs && getnetbyaddr_r_proto=I_LISBI ;;
 	esac
 	case "$getnetbyaddr_r_proto" in
 	''|0) try='struct netent* getnetbyaddr_r(in_addr_t, int, struct netent*, char*, int);'
-	./protochk "extern $try" $hdrs && getnetbyaddr_r_proto=S_TISBI ;;
+	./protochk "$extern_C $try" $hdrs && getnetbyaddr_r_proto=S_TISBI ;;
 	esac
 	case "$getnetbyaddr_r_proto" in
 	''|0) try='struct netent* getnetbyaddr_r(long, int, struct netent*, char*, int);'
-	./protochk "extern $try" $hdrs && getnetbyaddr_r_proto=S_LISBI ;;
+	./protochk "$extern_C $try" $hdrs && getnetbyaddr_r_proto=S_LISBI ;;
 	esac
 	case "$getnetbyaddr_r_proto" in
 	''|0) try='int getnetbyaddr_r(in_addr_t, int, struct netent*, struct netent_data*);'
-	./protochk "extern $try" $hdrs && getnetbyaddr_r_proto=I_TISD ;;
+	./protochk "$extern_C $try" $hdrs && getnetbyaddr_r_proto=I_TISD ;;
 	esac
 	case "$getnetbyaddr_r_proto" in
 	''|0) try='int getnetbyaddr_r(long, int, struct netent*, struct netent_data*);'
-	./protochk "extern $try" $hdrs && getnetbyaddr_r_proto=I_LISD ;;
+	./protochk "$extern_C $try" $hdrs && getnetbyaddr_r_proto=I_LISD ;;
 	esac
 	case "$getnetbyaddr_r_proto" in
 	''|0) try='int getnetbyaddr_r(int, int, struct netent*, struct netent_data*);'
-	./protochk "extern $try" $hdrs && getnetbyaddr_r_proto=I_IISD ;;
+	./protochk "$extern_C $try" $hdrs && getnetbyaddr_r_proto=I_IISD ;;
 	esac
 	case "$getnetbyaddr_r_proto" in
 	''|0) try='int getnetbyaddr_r(uint32_t, int, struct netent*, char*, size_t, struct netent**, int*);'
-	./protochk "extern $try" $hdrs && getnetbyaddr_r_proto=I_uISBWRE ;;
+	./protochk "$extern_C $try" $hdrs && getnetbyaddr_r_proto=I_uISBWRE ;;
 	esac
 	case "$getnetbyaddr_r_proto" in
 	''|0)	d_getnetbyaddr_r=undef
@@ -13713,19 +13736,19 @@ case "$d_getnetbyname_r" in
 	define)
 	case "$getnetbyname_r_proto" in
 	''|0) try='int getnetbyname_r(const char*, struct netent*, char*, size_t, struct netent**, int*);'
-	./protochk "extern $try" $hdrs && getnetbyname_r_proto=I_CSBWRE ;;
+	./protochk "$extern_C $try" $hdrs && getnetbyname_r_proto=I_CSBWRE ;;
 	esac
 	case "$getnetbyname_r_proto" in
 	''|0) try='int getnetbyname_r(const char*, struct netent*, char*, int);'
-	./protochk "extern $try" $hdrs && getnetbyname_r_proto=I_CSBI ;;
+	./protochk "$extern_C $try" $hdrs && getnetbyname_r_proto=I_CSBI ;;
 	esac
 	case "$getnetbyname_r_proto" in
 	''|0) try='struct netent* getnetbyname_r(const char*, struct netent*, char*, int);'
-	./protochk "extern $try" $hdrs && getnetbyname_r_proto=S_CSBI ;;
+	./protochk "$extern_C $try" $hdrs && getnetbyname_r_proto=S_CSBI ;;
 	esac
 	case "$getnetbyname_r_proto" in
 	''|0) try='int getnetbyname_r(const char*, struct netent*, struct netent_data*);'
-	./protochk "extern $try" $hdrs && getnetbyname_r_proto=I_CSD ;;
+	./protochk "$extern_C $try" $hdrs && getnetbyname_r_proto=I_CSD ;;
 	esac
 	case "$getnetbyname_r_proto" in
 	''|0)	d_getnetbyname_r=undef
@@ -13766,27 +13789,27 @@ case "$d_getnetent_r" in
 	define)
 	case "$getnetent_r_proto" in
 	''|0) try='int getnetent_r(struct netent*, char*, size_t, struct netent**, int*);'
-	./protochk "extern $try" $hdrs && getnetent_r_proto=I_SBWRE ;;
+	./protochk "$extern_C $try" $hdrs && getnetent_r_proto=I_SBWRE ;;
 	esac
 	case "$getnetent_r_proto" in
 	''|0) try='int getnetent_r(struct netent*, char*, int, int*);'
-	./protochk "extern $try" $hdrs && getnetent_r_proto=I_SBIE ;;
+	./protochk "$extern_C $try" $hdrs && getnetent_r_proto=I_SBIE ;;
 	esac
 	case "$getnetent_r_proto" in
 	''|0) try='struct netent* getnetent_r(struct netent*, char*, int, int*);'
-	./protochk "extern $try" $hdrs && getnetent_r_proto=S_SBIE ;;
+	./protochk "$extern_C $try" $hdrs && getnetent_r_proto=S_SBIE ;;
 	esac
 	case "$getnetent_r_proto" in
 	''|0) try='struct netent* getnetent_r(struct netent*, char*, int);'
-	./protochk "extern $try" $hdrs && getnetent_r_proto=S_SBI ;;
+	./protochk "$extern_C $try" $hdrs && getnetent_r_proto=S_SBI ;;
 	esac
 	case "$getnetent_r_proto" in
 	''|0) try='int getnetent_r(struct netent*, char*, int);'
-	./protochk "extern $try" $hdrs && getnetent_r_proto=I_SBI ;;
+	./protochk "$extern_C $try" $hdrs && getnetent_r_proto=I_SBI ;;
 	esac
 	case "$getnetent_r_proto" in
 	''|0) try='int getnetent_r(struct netent*, struct netent_data*);'
-	./protochk "extern $try" $hdrs && getnetent_r_proto=I_SD ;;
+	./protochk "$extern_C $try" $hdrs && getnetent_r_proto=I_SD ;;
 	esac
 	case "$getnetent_r_proto" in
 	''|0)	d_getnetent_r=undef
@@ -13865,15 +13888,15 @@ case "$d_getprotobyname_r" in
 	define)
 	case "$getprotobyname_r_proto" in
 	''|0) try='int getprotobyname_r(const char*, struct protoent*, char*, size_t, struct protoent**);'
-	./protochk "extern $try" $hdrs && getprotobyname_r_proto=I_CSBWR ;;
+	./protochk "$extern_C $try" $hdrs && getprotobyname_r_proto=I_CSBWR ;;
 	esac
 	case "$getprotobyname_r_proto" in
 	''|0) try='struct protoent* getprotobyname_r(const char*, struct protoent*, char*, int);'
-	./protochk "extern $try" $hdrs && getprotobyname_r_proto=S_CSBI ;;
+	./protochk "$extern_C $try" $hdrs && getprotobyname_r_proto=S_CSBI ;;
 	esac
 	case "$getprotobyname_r_proto" in
 	''|0) try='int getprotobyname_r(const char*, struct protoent*, struct protoent_data*);'
-	./protochk "extern $try" $hdrs && getprotobyname_r_proto=I_CSD ;;
+	./protochk "$extern_C $try" $hdrs && getprotobyname_r_proto=I_CSD ;;
 	esac
 	case "$getprotobyname_r_proto" in
 	''|0)	d_getprotobyname_r=undef
@@ -13914,15 +13937,15 @@ case "$d_getprotobynumber_r" in
 	define)
 	case "$getprotobynumber_r_proto" in
 	''|0) try='int getprotobynumber_r(int, struct protoent*, char*, size_t, struct protoent**);'
-	./protochk "extern $try" $hdrs && getprotobynumber_r_proto=I_ISBWR ;;
+	./protochk "$extern_C $try" $hdrs && getprotobynumber_r_proto=I_ISBWR ;;
 	esac
 	case "$getprotobynumber_r_proto" in
 	''|0) try='struct protoent* getprotobynumber_r(int, struct protoent*, char*, int);'
-	./protochk "extern $try" $hdrs && getprotobynumber_r_proto=S_ISBI ;;
+	./protochk "$extern_C $try" $hdrs && getprotobynumber_r_proto=S_ISBI ;;
 	esac
 	case "$getprotobynumber_r_proto" in
 	''|0) try='int getprotobynumber_r(int, struct protoent*, struct protoent_data*);'
-	./protochk "extern $try" $hdrs && getprotobynumber_r_proto=I_ISD ;;
+	./protochk "$extern_C $try" $hdrs && getprotobynumber_r_proto=I_ISD ;;
 	esac
 	case "$getprotobynumber_r_proto" in
 	''|0)	d_getprotobynumber_r=undef
@@ -13963,19 +13986,19 @@ case "$d_getprotoent_r" in
 	define)
 	case "$getprotoent_r_proto" in
 	''|0) try='int getprotoent_r(struct protoent*, char*, size_t, struct protoent**);'
-	./protochk "extern $try" $hdrs && getprotoent_r_proto=I_SBWR ;;
+	./protochk "$extern_C $try" $hdrs && getprotoent_r_proto=I_SBWR ;;
 	esac
 	case "$getprotoent_r_proto" in
 	''|0) try='int getprotoent_r(struct protoent*, char*, int);'
-	./protochk "extern $try" $hdrs && getprotoent_r_proto=I_SBI ;;
+	./protochk "$extern_C $try" $hdrs && getprotoent_r_proto=I_SBI ;;
 	esac
 	case "$getprotoent_r_proto" in
 	''|0) try='struct protoent* getprotoent_r(struct protoent*, char*, int);'
-	./protochk "extern $try" $hdrs && getprotoent_r_proto=S_SBI ;;
+	./protochk "$extern_C $try" $hdrs && getprotoent_r_proto=S_SBI ;;
 	esac
 	case "$getprotoent_r_proto" in
 	''|0) try='int getprotoent_r(struct protoent*, struct protoent_data*);'
-	./protochk "extern $try" $hdrs && getprotoent_r_proto=I_SD ;;
+	./protochk "$extern_C $try" $hdrs && getprotoent_r_proto=I_SD ;;
 	esac
 	case "$getprotoent_r_proto" in
 	''|0)	d_getprotoent_r=undef
@@ -14029,27 +14052,27 @@ case "$d_getpwent_r" in
 	define)
 	case "$getpwent_r_proto" in
 	''|0) try='int getpwent_r(struct passwd*, char*, size_t, struct passwd**);'
-	./protochk "extern $try" $hdrs && getpwent_r_proto=I_SBWR ;;
+	./protochk "$extern_C $try" $hdrs && getpwent_r_proto=I_SBWR ;;
 	esac
 	case "$getpwent_r_proto" in
 	''|0) try='int getpwent_r(struct passwd*, char*, int, struct passwd**);'
-	./protochk "extern $try" $hdrs && getpwent_r_proto=I_SBIR ;;
+	./protochk "$extern_C $try" $hdrs && getpwent_r_proto=I_SBIR ;;
 	esac
 	case "$getpwent_r_proto" in
 	''|0) try='struct passwd* getpwent_r(struct passwd*, char*, size_t);'
-	./protochk "extern $try" $hdrs && getpwent_r_proto=S_SBW ;;
+	./protochk "$extern_C $try" $hdrs && getpwent_r_proto=S_SBW ;;
 	esac
 	case "$getpwent_r_proto" in
 	''|0) try='struct passwd* getpwent_r(struct passwd*, char*, int);'
-	./protochk "extern $try" $hdrs && getpwent_r_proto=S_SBI ;;
+	./protochk "$extern_C $try" $hdrs && getpwent_r_proto=S_SBI ;;
 	esac
 	case "$getpwent_r_proto" in
 	''|0) try='int getpwent_r(struct passwd*, char*, int);'
-	./protochk "extern $try" $hdrs && getpwent_r_proto=I_SBI ;;
+	./protochk "$extern_C $try" $hdrs && getpwent_r_proto=I_SBI ;;
 	esac
 	case "$getpwent_r_proto" in
 	''|0) try='int getpwent_r(struct passwd*, char*, int, FILE**);'
-	./protochk "extern $try" $hdrs && getpwent_r_proto=I_SBIH ;;
+	./protochk "$extern_C $try" $hdrs && getpwent_r_proto=I_SBIH ;;
 	esac
 	case "$getpwent_r_proto" in
 	''|0)	d_getpwent_r=undef
@@ -14090,19 +14113,19 @@ case "$d_getpwnam_r" in
 	define)
 	case "$getpwnam_r_proto" in
 	''|0) try='int getpwnam_r(const char*, struct passwd*, char*, size_t, struct passwd**);'
-	./protochk "extern $try" $hdrs && getpwnam_r_proto=I_CSBWR ;;
+	./protochk "$extern_C $try" $hdrs && getpwnam_r_proto=I_CSBWR ;;
 	esac
 	case "$getpwnam_r_proto" in
 	''|0) try='int getpwnam_r(const char*, struct passwd*, char*, int, struct passwd**);'
-	./protochk "extern $try" $hdrs && getpwnam_r_proto=I_CSBIR ;;
+	./protochk "$extern_C $try" $hdrs && getpwnam_r_proto=I_CSBIR ;;
 	esac
 	case "$getpwnam_r_proto" in
 	''|0) try='struct passwd* getpwnam_r(const char*, struct passwd*, char*, int);'
-	./protochk "extern $try" $hdrs && getpwnam_r_proto=S_CSBI ;;
+	./protochk "$extern_C $try" $hdrs && getpwnam_r_proto=S_CSBI ;;
 	esac
 	case "$getpwnam_r_proto" in
 	''|0) try='int getpwnam_r(const char*, struct passwd*, char*, int);'
-	./protochk "extern $try" $hdrs && getpwnam_r_proto=I_CSBI ;;
+	./protochk "$extern_C $try" $hdrs && getpwnam_r_proto=I_CSBI ;;
 	esac
 	case "$getpwnam_r_proto" in
 	''|0)	d_getpwnam_r=undef
@@ -14143,19 +14166,19 @@ case "$d_getpwuid_r" in
 	define)
 	case "$getpwuid_r_proto" in
 	''|0) try='int getpwuid_r(uid_t, struct passwd*, char*, size_t, struct passwd**);'
-	./protochk "extern $try" $hdrs && getpwuid_r_proto=I_TSBWR ;;
+	./protochk "$extern_C $try" $hdrs && getpwuid_r_proto=I_TSBWR ;;
 	esac
 	case "$getpwuid_r_proto" in
 	''|0) try='int getpwuid_r(uid_t, struct passwd*, char*, int, struct passwd**);'
-	./protochk "extern $try" $hdrs && getpwuid_r_proto=I_TSBIR ;;
+	./protochk "$extern_C $try" $hdrs && getpwuid_r_proto=I_TSBIR ;;
 	esac
 	case "$getpwuid_r_proto" in
 	''|0) try='int getpwuid_r(uid_t, struct passwd*, char*, int);'
-	./protochk "extern $try" $hdrs && getpwuid_r_proto=I_TSBI ;;
+	./protochk "$extern_C $try" $hdrs && getpwuid_r_proto=I_TSBI ;;
 	esac
 	case "$getpwuid_r_proto" in
 	''|0) try='struct passwd* getpwuid_r(uid_t, struct passwd*, char*, int);'
-	./protochk "extern $try" $hdrs && getpwuid_r_proto=S_TSBI ;;
+	./protochk "$extern_C $try" $hdrs && getpwuid_r_proto=S_TSBI ;;
 	esac
 	case "$getpwuid_r_proto" in
 	''|0)	d_getpwuid_r=undef
@@ -14209,15 +14232,15 @@ case "$d_getservbyname_r" in
 	define)
 	case "$getservbyname_r_proto" in
 	''|0) try='int getservbyname_r(const char*, const char*, struct servent*, char*, size_t, struct servent**);'
-	./protochk "extern $try" $hdrs && getservbyname_r_proto=I_CCSBWR ;;
+	./protochk "$extern_C $try" $hdrs && getservbyname_r_proto=I_CCSBWR ;;
 	esac
 	case "$getservbyname_r_proto" in
 	''|0) try='struct servent* getservbyname_r(const char*, const char*, struct servent*, char*, int);'
-	./protochk "extern $try" $hdrs && getservbyname_r_proto=S_CCSBI ;;
+	./protochk "$extern_C $try" $hdrs && getservbyname_r_proto=S_CCSBI ;;
 	esac
 	case "$getservbyname_r_proto" in
 	''|0) try='int getservbyname_r(const char*, const char*, struct servent*, struct servent_data*);'
-	./protochk "extern $try" $hdrs && getservbyname_r_proto=I_CCSD ;;
+	./protochk "$extern_C $try" $hdrs && getservbyname_r_proto=I_CCSD ;;
 	esac
 	case "$getservbyname_r_proto" in
 	''|0)	d_getservbyname_r=undef
@@ -14258,15 +14281,15 @@ case "$d_getservbyport_r" in
 	define)
 	case "$getservbyport_r_proto" in
 	''|0) try='int getservbyport_r(int, const char*, struct servent*, char*, size_t, struct servent**);'
-	./protochk "extern $try" $hdrs && getservbyport_r_proto=I_ICSBWR ;;
+	./protochk "$extern_C $try" $hdrs && getservbyport_r_proto=I_ICSBWR ;;
 	esac
 	case "$getservbyport_r_proto" in
 	''|0) try='struct servent* getservbyport_r(int, const char*, struct servent*, char*, int);'
-	./protochk "extern $try" $hdrs && getservbyport_r_proto=S_ICSBI ;;
+	./protochk "$extern_C $try" $hdrs && getservbyport_r_proto=S_ICSBI ;;
 	esac
 	case "$getservbyport_r_proto" in
 	''|0) try='int getservbyport_r(int, const char*, struct servent*, struct servent_data*);'
-	./protochk "extern $try" $hdrs && getservbyport_r_proto=I_ICSD ;;
+	./protochk "$extern_C $try" $hdrs && getservbyport_r_proto=I_ICSD ;;
 	esac
 	case "$getservbyport_r_proto" in
 	''|0)	d_getservbyport_r=undef
@@ -14307,19 +14330,19 @@ case "$d_getservent_r" in
 	define)
 	case "$getservent_r_proto" in
 	''|0) try='int getservent_r(struct servent*, char*, size_t, struct servent**);'
-	./protochk "extern $try" $hdrs && getservent_r_proto=I_SBWR ;;
+	./protochk "$extern_C $try" $hdrs && getservent_r_proto=I_SBWR ;;
 	esac
 	case "$getservent_r_proto" in
 	''|0) try='int getservent_r(struct servent*, char*, int);'
-	./protochk "extern $try" $hdrs && getservent_r_proto=I_SBI ;;
+	./protochk "$extern_C $try" $hdrs && getservent_r_proto=I_SBI ;;
 	esac
 	case "$getservent_r_proto" in
 	''|0) try='struct servent* getservent_r(struct servent*, char*, int);'
-	./protochk "extern $try" $hdrs && getservent_r_proto=S_SBI ;;
+	./protochk "$extern_C $try" $hdrs && getservent_r_proto=S_SBI ;;
 	esac
 	case "$getservent_r_proto" in
 	''|0) try='int getservent_r(struct servent*, struct servent_data*);'
-	./protochk "extern $try" $hdrs && getservent_r_proto=I_SD ;;
+	./protochk "$extern_C $try" $hdrs && getservent_r_proto=I_SD ;;
 	esac
 	case "$getservent_r_proto" in
 	''|0)	d_getservent_r=undef
@@ -14373,11 +14396,11 @@ case "$d_getspnam_r" in
 	define)
 	case "$getspnam_r_proto" in
 	''|0) try='int getspnam_r(const char*, struct spwd*, char*, size_t, struct spwd**);'
-	./protochk "extern $try" $hdrs && getspnam_r_proto=I_CSBWR ;;
+	./protochk "$extern_C $try" $hdrs && getspnam_r_proto=I_CSBWR ;;
 	esac
 	case "$getspnam_r_proto" in
 	''|0) try='struct spwd* getspnam_r(const char*, struct spwd*, char*, int);'
-	./protochk "extern $try" $hdrs && getspnam_r_proto=S_CSBI ;;
+	./protochk "$extern_C $try" $hdrs && getspnam_r_proto=S_CSBI ;;
 	esac
 	case "$getspnam_r_proto" in
 	''|0)	d_getspnam_r=undef
@@ -14437,11 +14460,11 @@ case "$d_gmtime_r" in
 	define)
 	case "$gmtime_r_proto" in
 	''|0) try='struct tm* gmtime_r(const time_t*, struct tm*);'
-	./protochk "extern $try" $hdrs && gmtime_r_proto=S_TS ;;
+	./protochk "$extern_C $try" $hdrs && gmtime_r_proto=S_TS ;;
 	esac
 	case "$gmtime_r_proto" in
 	''|0) try='int gmtime_r(const time_t*, struct tm*);'
-	./protochk "extern $try" $hdrs && gmtime_r_proto=I_TS ;;
+	./protochk "$extern_C $try" $hdrs && gmtime_r_proto=I_TS ;;
 	esac
 	case "$gmtime_r_proto" in
 	''|0)	d_gmtime_r=undef
@@ -14717,11 +14740,11 @@ case "$d_localtime_r" in
 	define)
 	case "$localtime_r_proto" in
 	''|0) try='struct tm* localtime_r(const time_t*, struct tm*);'
-	./protochk "extern $try" $hdrs && localtime_r_proto=S_TS ;;
+	./protochk "$extern_C $try" $hdrs && localtime_r_proto=S_TS ;;
 	esac
 	case "$localtime_r_proto" in
 	''|0) try='int localtime_r(const time_t*, struct tm*);'
-	./protochk "extern $try" $hdrs && localtime_r_proto=I_TS ;;
+	./protochk "$extern_C $try" $hdrs && localtime_r_proto=I_TS ;;
 	esac
 	case "$localtime_r_proto" in
 	''|0)	d_localtime_r=undef
@@ -14753,11 +14776,32 @@ REENTRANT_PROTO*)
 /*  Does our libc's localtime_r call tzset ?
  *  return 0 if so, 1 otherwise.
  */
-#include <sys/types.h>
-#include <unistd.h>
-#include <time.h>
-#include <string.h>
-#include <malloc.h>
+#$i_systypes	I_SYS_TYPES
+#$i_unistd	I_UNISTD
+#$i_time	I_TIME
+#$i_stdlib	I_STDLIB
+#$i_string	I_STRING
+#$i_malloc	I_MALLOC
+#ifdef I_SYS_TYPES
+#  include <sys/types.h>
+#endif
+#ifdef I_UNISTD
+#  include <unistd.h>
+#endif
+#ifdef I_TIME
+#  include <time.h>
+#endif
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#ifdef I_STRING
+#  include <string.h>
+#else
+#  include <strings.h>
+#endif
+#ifdef I_MALLOC
+#  include <malloc.h>
+#endif
 int main()
 {
     time_t t = time(0L);
@@ -15763,15 +15807,15 @@ case "$d_random_r" in
 	define)
 	case "$random_r_proto" in
 	''|0) try='int random_r(int*, struct random_data*);'
-	./protochk "extern $try" $hdrs && random_r_proto=I_iS ;;
+	./protochk "$extern_C $try" $hdrs && random_r_proto=I_iS ;;
 	esac
 	case "$random_r_proto" in
 	''|0) try='int random_r(long*, struct random_data*);'
-	./protochk "extern $try" $hdrs && random_r_proto=I_lS ;;
+	./protochk "$extern_C $try" $hdrs && random_r_proto=I_lS ;;
 	esac
 	case "$random_r_proto" in
 	''|0) try='int random_r(struct random_data*, int32_t*);'
-	./protochk "extern $try" $hdrs && random_r_proto=I_St ;;
+	./protochk "$extern_C $try" $hdrs && random_r_proto=I_St ;;
 	esac
 	case "$random_r_proto" in
 	''|0)	d_random_r=undef
@@ -15822,11 +15866,11 @@ case "$d_readdir64_r" in
 	define)
 	case "$readdir64_r_proto" in
 	''|0) try='int readdir64_r(DIR*, struct dirent64*, struct dirent64**);'
-	./protochk "extern $try" $hdrs && readdir64_r_proto=I_TSR ;;
+	./protochk "$extern_C $try" $hdrs && readdir64_r_proto=I_TSR ;;
 	esac
 	case "$readdir64_r_proto" in
 	''|0) try='int readdir64_r(DIR*, struct dirent64*);'
-	./protochk "extern $try" $hdrs && readdir64_r_proto=I_TS ;;
+	./protochk "$extern_C $try" $hdrs && readdir64_r_proto=I_TS ;;
 	esac
 	case "$readdir64_r_proto" in
 	''|0)	d_readdir64_r=undef
@@ -15867,11 +15911,11 @@ case "$d_readdir_r" in
 	define)
 	case "$readdir_r_proto" in
 	''|0) try='int readdir_r(DIR*, struct dirent*, struct dirent**);'
-	./protochk "extern $try" $hdrs && readdir_r_proto=I_TSR ;;
+	./protochk "$extern_C $try" $hdrs && readdir_r_proto=I_TSR ;;
 	esac
 	case "$readdir_r_proto" in
 	''|0) try='int readdir_r(DIR*, struct dirent*);'
-	./protochk "extern $try" $hdrs && readdir_r_proto=I_TS ;;
+	./protochk "$extern_C $try" $hdrs && readdir_r_proto=I_TS ;;
 	esac
 	case "$readdir_r_proto" in
 	''|0)	d_readdir_r=undef
@@ -16423,11 +16467,11 @@ case "$d_setgrent_r" in
 	define)
 	case "$setgrent_r_proto" in
 	''|0) try='int setgrent_r(FILE**);'
-	./protochk "extern $try" $hdrs && setgrent_r_proto=I_H ;;
+	./protochk "$extern_C $try" $hdrs && setgrent_r_proto=I_H ;;
 	esac
 	case "$setgrent_r_proto" in
 	''|0) try='void setgrent_r(FILE**);'
-	./protochk "extern $try" $hdrs && setgrent_r_proto=V_H ;;
+	./protochk "$extern_C $try" $hdrs && setgrent_r_proto=V_H ;;
 	esac
 	case "$setgrent_r_proto" in
 	''|0)	d_setgrent_r=undef
@@ -16472,11 +16516,11 @@ case "$d_sethostent_r" in
 	define)
 	case "$sethostent_r_proto" in
 	''|0) try='int sethostent_r(int, struct hostent_data*);'
-	./protochk "extern $try" $hdrs && sethostent_r_proto=I_ID ;;
+	./protochk "$extern_C $try" $hdrs && sethostent_r_proto=I_ID ;;
 	esac
 	case "$sethostent_r_proto" in
 	''|0) try='void sethostent_r(int, struct hostent_data*);'
-	./protochk "extern $try" $hdrs && sethostent_r_proto=V_ID ;;
+	./protochk "$extern_C $try" $hdrs && sethostent_r_proto=V_ID ;;
 	esac
 	case "$sethostent_r_proto" in
 	''|0)	d_sethostent_r=undef
@@ -16533,7 +16577,7 @@ case "$d_setlocale_r" in
 	define)
 	case "$setlocale_r_proto" in
 	''|0) try='int setlocale_r(int, const char*, char*, int);'
-	./protochk "extern $try" $hdrs && setlocale_r_proto=I_ICBI ;;
+	./protochk "$extern_C $try" $hdrs && setlocale_r_proto=I_ICBI ;;
 	esac
 	case "$setlocale_r_proto" in
 	''|0)	d_setlocale_r=undef
@@ -16578,11 +16622,11 @@ case "$d_setnetent_r" in
 	define)
 	case "$setnetent_r_proto" in
 	''|0) try='int setnetent_r(int, struct netent_data*);'
-	./protochk "extern $try" $hdrs && setnetent_r_proto=I_ID ;;
+	./protochk "$extern_C $try" $hdrs && setnetent_r_proto=I_ID ;;
 	esac
 	case "$setnetent_r_proto" in
 	''|0) try='void setnetent_r(int, struct netent_data*);'
-	./protochk "extern $try" $hdrs && setnetent_r_proto=V_ID ;;
+	./protochk "$extern_C $try" $hdrs && setnetent_r_proto=V_ID ;;
 	esac
 	case "$setnetent_r_proto" in
 	''|0)	d_setnetent_r=undef
@@ -16643,11 +16687,11 @@ case "$d_setprotoent_r" in
 	define)
 	case "$setprotoent_r_proto" in
 	''|0) try='int setprotoent_r(int, struct protoent_data*);'
-	./protochk "extern $try" $hdrs && setprotoent_r_proto=I_ID ;;
+	./protochk "$extern_C $try" $hdrs && setprotoent_r_proto=I_ID ;;
 	esac
 	case "$setprotoent_r_proto" in
 	''|0) try='void setprotoent_r(int, struct protoent_data*);'
-	./protochk "extern $try" $hdrs && setprotoent_r_proto=V_ID ;;
+	./protochk "$extern_C $try" $hdrs && setprotoent_r_proto=V_ID ;;
 	esac
 	case "$setprotoent_r_proto" in
 	''|0)	d_setprotoent_r=undef
@@ -16692,11 +16736,11 @@ case "$d_setpwent_r" in
 	define)
 	case "$setpwent_r_proto" in
 	''|0) try='int setpwent_r(FILE**);'
-	./protochk "extern $try" $hdrs && setpwent_r_proto=I_H ;;
+	./protochk "$extern_C $try" $hdrs && setpwent_r_proto=I_H ;;
 	esac
 	case "$setpwent_r_proto" in
 	''|0) try='void setpwent_r(FILE**);'
-	./protochk "extern $try" $hdrs && setpwent_r_proto=V_H ;;
+	./protochk "$extern_C $try" $hdrs && setpwent_r_proto=V_H ;;
 	esac
 	case "$setpwent_r_proto" in
 	''|0)	d_setpwent_r=undef
@@ -16761,11 +16805,11 @@ case "$d_setservent_r" in
 	define)
 	case "$setservent_r_proto" in
 	''|0) try='int setservent_r(int, struct servent_data*);'
-	./protochk "extern $try" $hdrs && setservent_r_proto=I_ID ;;
+	./protochk "$extern_C $try" $hdrs && setservent_r_proto=I_ID ;;
 	esac
 	case "$setservent_r_proto" in
 	''|0) try='void setservent_r(int, struct servent_data*);'
-	./protochk "extern $try" $hdrs && setservent_r_proto=V_ID ;;
+	./protochk "$extern_C $try" $hdrs && setservent_r_proto=V_ID ;;
 	esac
 	case "$setservent_r_proto" in
 	''|0)	d_setservent_r=undef
@@ -17242,7 +17286,7 @@ case "$d_srand48_r" in
 	define)
 	case "$srand48_r_proto" in
 	''|0) try='int srand48_r(long, struct drand48_data*);'
-	./protochk "extern $try" $hdrs && srand48_r_proto=I_LS ;;
+	./protochk "$extern_C $try" $hdrs && srand48_r_proto=I_LS ;;
 	esac
 	case "$srand48_r_proto" in
 	''|0)	d_srand48_r=undef
@@ -17283,7 +17327,7 @@ case "$d_srandom_r" in
 	define)
 	case "$srandom_r_proto" in
 	''|0) try='int srandom_r(unsigned int, struct random_data*);'
-	./protochk "extern $try" $hdrs && srandom_r_proto=I_TS ;;
+	./protochk "$extern_C $try" $hdrs && srandom_r_proto=I_TS ;;
 	esac
 	case "$srandom_r_proto" in
 	''|0)	d_srandom_r=undef
@@ -17487,15 +17531,15 @@ case "$d_strerror_r" in
 	define)
 	case "$strerror_r_proto" in
 	''|0) try='int strerror_r(int, char*, size_t);'
-	./protochk "extern $try" $hdrs && strerror_r_proto=I_IBW ;;
+	./protochk "$extern_C $try" $hdrs && strerror_r_proto=I_IBW ;;
 	esac
 	case "$strerror_r_proto" in
 	''|0) try='int strerror_r(int, char*, int);'
-	./protochk "extern $try" $hdrs && strerror_r_proto=I_IBI ;;
+	./protochk "$extern_C $try" $hdrs && strerror_r_proto=I_IBI ;;
 	esac
 	case "$strerror_r_proto" in
 	''|0) try='char* strerror_r(int, char*, size_t);'
-	./protochk "extern $try" $hdrs && strerror_r_proto=B_IBW ;;
+	./protochk "$extern_C $try" $hdrs && strerror_r_proto=B_IBW ;;
 	esac
 	case "$strerror_r_proto" in
 	''|0)	d_strerror_r=undef
@@ -17893,7 +17937,7 @@ case "$d_tmpnam_r" in
 	define)
 	case "$tmpnam_r_proto" in
 	''|0) try='char* tmpnam_r(char*);'
-	./protochk "extern $try" $hdrs && tmpnam_r_proto=B_B ;;
+	./protochk "$extern_C $try" $hdrs && tmpnam_r_proto=B_B ;;
 	esac
 	case "$tmpnam_r_proto" in
 	''|0)	d_tmpnam_r=undef
@@ -17938,15 +17982,15 @@ case "$d_ttyname_r" in
 	define)
 	case "$ttyname_r_proto" in
 	''|0) try='int ttyname_r(int, char*, size_t);'
-	./protochk "extern $try" $hdrs && ttyname_r_proto=I_IBW ;;
+	./protochk "$extern_C $try" $hdrs && ttyname_r_proto=I_IBW ;;
 	esac
 	case "$ttyname_r_proto" in
 	''|0) try='int ttyname_r(int, char*, int);'
-	./protochk "extern $try" $hdrs && ttyname_r_proto=I_IBI ;;
+	./protochk "$extern_C $try" $hdrs && ttyname_r_proto=I_IBI ;;
 	esac
 	case "$ttyname_r_proto" in
 	''|0) try='char* ttyname_r(int, char*, int);'
-	./protochk "extern $try" $hdrs && ttyname_r_proto=B_IBI ;;
+	./protochk "$extern_C $try" $hdrs && ttyname_r_proto=B_IBI ;;
 	esac
 	case "$ttyname_r_proto" in
 	''|0)	d_ttyname_r=undef
@@ -19545,7 +19589,7 @@ EOM
 		for xxx in in_addr_t 'const void *' 'const char *' 'void *' 'char *'; do
 			for yyy in size_t long int; do
 				case "$netdb_host_type" in
-				'')	try="extern struct hostent *gethostbyaddr($xxx, $yyy, int);"
+				'')	try="$extern_C struct hostent *gethostbyaddr($xxx, $yyy, int);"
 					if ./protochk "$try" $hdrs; then
 						echo "Your system accepts $xxx for the first arg."
 						echo "...and $yyy for the second arg."
@@ -19594,7 +19638,7 @@ EOM
 			$i_unistd unistd.h"
 		for xxx in "const char *" "char *"; do
 			case "$netdb_name_type" in
-			'')	try="extern struct hostent *gethostbyname($xxx);"
+			'')	try="$extern_C struct hostent *gethostbyname($xxx);"
 				if ./protochk "$try" $hdrs; then
 					echo "Your system accepts $xxx."
 					netdb_name_type="$xxx"
@@ -19632,7 +19676,7 @@ EOM
 			$i_unistd unistd.h"
 		for xxx in in_addr_t "unsigned long" long "unsigned int" int; do
 			case "$netdb_net_type" in
-			'')	try="extern struct netent *getnetbyaddr($xxx, int);"
+			'')	try="$extern_C struct netent *getnetbyaddr($xxx, int);"
 				if ./protochk "$try" $hdrs; then
 					echo "Your system accepts $xxx."
 					netdb_net_type="$xxx"
@@ -19768,7 +19812,7 @@ EOM
 			for nfd in 'int' 'size_t' 'unsigned long' 'unsigned' ; do
 				for tmo in 'struct timeval *' 'const struct timeval *'; do
 					case "$val" in
-					'')	try="extern select _(($nfd, $xxx, $xxx, $xxx, $tmo));"
+					'')	try="$extern_C select _(($nfd, $xxx, $xxx, $xxx, $tmo));"
 						if ./protochk "$try" $hdrs; then
 							echo "Your system accepts $xxx."
 							val="$xxx"
@@ -20255,7 +20299,7 @@ EOM
 	yyy="$yyy $sizetype int long unsigned"
 	for xxx in $yyy; do
 		case "$socksizetype" in
-		'')	try="extern int accept(int, struct sockaddr *, $xxx *);"
+		'')	try="$extern_C int accept(int, struct sockaddr *, $xxx *);"
 			case "$usesocks" in
 			"$define")
 				if ./protochk "$try" $i_systypes sys/types.h $d_socket sys/socket.h literal '#define INCLUDE_PROTOTYPES' $i_socks socks.h.; then
@@ -22042,6 +22086,7 @@ eunicefix='$eunicefix'
 exe_ext='$exe_ext'
 expr='$expr'
 extensions='$extensions'
+extern_C='$extern_C'
 extras='$extras'
 fflushNULL='$fflushNULL'
 fflushall='$fflushall'
