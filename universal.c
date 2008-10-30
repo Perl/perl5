@@ -368,7 +368,7 @@ XS(XS_UNIVERSAL_can)
     rv = &PL_sv_undef;
 
     if (SvROK(sv)) {
-        sv = (SV*)SvRV(sv);
+        sv = MUTABLE_SV(SvRV(sv));
         if (SvOBJECT(sv))
             pkg = SvSTASH(sv);
     }
@@ -379,7 +379,7 @@ XS(XS_UNIVERSAL_can)
     if (pkg) {
 	GV * const gv = gv_fetchmethod_autoload(pkg, name, FALSE);
         if (gv && isGV(gv))
-	    rv = sv_2mortal(newRV((SV*)GvCV(gv)));
+	    rv = sv_2mortal(newRV(MUTABLE_SV(GvCV(gv))));
     }
 
     ST(0) = rv;
@@ -418,7 +418,7 @@ XS(XS_UNIVERSAL_VERSION)
     PERL_UNUSED_ARG(cv);
 
     if (SvROK(ST(0))) {
-        sv = (SV*)SvRV(ST(0));
+        sv = MUTABLE_SV(SvRV(ST(0)));
         if (!SvOBJECT(sv))
             Perl_croak(aTHX_ "Cannot find version of an unblessed reference");
         pkg = SvSTASH(sv);
@@ -438,7 +438,7 @@ XS(XS_UNIVERSAL_VERSION)
         undef = NULL;
     }
     else {
-        sv = (SV*)&PL_sv_undef;
+        sv = &PL_sv_undef;
         undef = "(undef)";
     }
 
@@ -1253,7 +1253,7 @@ XS(XS_re_regexp_pattern)
             /* Scalar, so use the string that Perl would return */
             /* return the pattern in (?msix:..) format */
 #if PERL_VERSION >= 11
-            pattern = sv_2mortal(newSVsv((SV*)re));
+            pattern = sv_2mortal(newSVsv(MUTABLE_SV(re)));
 #else
             pattern = newSVpvn_flags(RX_WRAPPED(re), RX_WRAPLEN(re),
 				     (RX_UTF8(re) ? SVf_UTF8 : 0) | SVs_TEMP);
@@ -1302,7 +1302,7 @@ XS(XS_Tie_Hash_NamedCapture_FETCH)
 
     SP -= items;
 
-    flags = (U32)INT2PTR(IV,SvIV(SvRV((SV*)ST(0))));
+    flags = (U32)INT2PTR(IV,SvIV(SvRV(MUTABLE_SV(ST(0)))));
     ret = CALLREG_NAMED_BUFF_FETCH(rx, ST(1), flags);
 
     SPAGAIN;
@@ -1336,7 +1336,7 @@ XS(XS_Tie_Hash_NamedCapture_STORE)
 
     SP -= items;
 
-    flags = (U32)INT2PTR(IV,SvIV(SvRV((SV*)ST(0))));
+    flags = (U32)INT2PTR(IV,SvIV(SvRV(MUTABLE_SV(ST(0)))));
     CALLREG_NAMED_BUFF_STORE(rx,ST(1), ST(2), flags);
 }
 
@@ -1355,7 +1355,7 @@ XS(XS_Tie_Hash_NamedCapture_DELETE)
 
     SP -= items;
 
-    flags = (U32)INT2PTR(IV,SvIV(SvRV((SV*)ST(0))));
+    flags = (U32)INT2PTR(IV,SvIV(SvRV(MUTABLE_SV(ST(0)))));
     CALLREG_NAMED_BUFF_DELETE(rx, ST(1), flags);
 }
 
@@ -1376,7 +1376,7 @@ XS(XS_Tie_Hash_NamedCapture_CLEAR)
 
     SP -= items;
 
-    flags = (U32)INT2PTR(IV,SvIV(SvRV((SV*)ST(0))));
+    flags = (U32)INT2PTR(IV,SvIV(SvRV(MUTABLE_SV(ST(0)))));
     CALLREG_NAMED_BUFF_CLEAR(rx, flags);
 }
 
@@ -1398,7 +1398,7 @@ XS(XS_Tie_Hash_NamedCapture_EXISTS)
 
     SP -= items;
 
-    flags = (U32)INT2PTR(IV,SvIV(SvRV((SV*)ST(0))));
+    flags = (U32)INT2PTR(IV,SvIV(SvRV(MUTABLE_SV(ST(0)))));
     ret = CALLREG_NAMED_BUFF_EXISTS(rx, ST(1), flags);
 
     SPAGAIN;
@@ -1426,7 +1426,7 @@ XS(XS_Tie_Hash_NamedCapture_FIRSTK)
 
     SP -= items;
 
-    flags = (U32)INT2PTR(IV,SvIV(SvRV((SV*)ST(0))));
+    flags = (U32)INT2PTR(IV,SvIV(SvRV(MUTABLE_SV(ST(0)))));
     ret = CALLREG_NAMED_BUFF_FIRSTKEY(rx, flags);
 
     SPAGAIN;
@@ -1458,7 +1458,7 @@ XS(XS_Tie_Hash_NamedCapture_NEXTK)
 
     SP -= items;
 
-    flags = (U32)INT2PTR(IV,SvIV(SvRV((SV*)ST(0))));
+    flags = (U32)INT2PTR(IV,SvIV(SvRV(MUTABLE_SV(ST(0)))));
     ret = CALLREG_NAMED_BUFF_NEXTKEY(rx, ST(1), flags);
 
     SPAGAIN;
@@ -1489,7 +1489,7 @@ XS(XS_Tie_Hash_NamedCapture_SCALAR)
 
     SP -= items;
 
-    flags = (U32)INT2PTR(IV,SvIV(SvRV((SV*)ST(0))));
+    flags = (U32)INT2PTR(IV,SvIV(SvRV(MUTABLE_SV(ST(0)))));
     ret = CALLREG_NAMED_BUFF_SCALAR(rx, flags);
 
     SPAGAIN;

@@ -1245,7 +1245,7 @@ Perl_write_to_stderr(pTHX_ const char* message, int msglen)
 
     if (PL_stderrgv && SvREFCNT(PL_stderrgv) 
 	&& (io = GvIO(PL_stderrgv))
-	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar))) 
+	&& (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar))) 
     {
 	dSP;
 	ENTER;
@@ -1259,7 +1259,7 @@ Perl_write_to_stderr(pTHX_ const char* message, int msglen)
 
 	PUSHMARK(SP);
 	EXTEND(SP,2);
-	PUSHs(SvTIED_obj((SV*)io, mg));
+	PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 	mPUSHp(message, msglen);
 	PUTBACK;
 	call_method("PRINT", G_SCALAR);
@@ -1326,7 +1326,7 @@ S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8, bool warn)
 	PUSHMARK(SP);
 	XPUSHs(msg);
 	PUTBACK;
-	call_sv((SV*)cv, G_DISCARD);
+	call_sv(MUTABLE_SV(cv), G_DISCARD);
 	POPSTACK;
 	LEAVE;
 	return TRUE;
@@ -4435,7 +4435,7 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
     }
 
     /* And finally, store the AV in the hash */
-    (void)hv_stores(MUTABLE_HV(hv), "version", newRV_noinc((SV *)av));
+    (void)hv_stores(MUTABLE_HV(hv), "version", newRV_noinc(MUTABLE_SV(av)));
 
     /* fix RT#19517 - special case 'undef' as string */
     if ( *s == 'u' && strEQ(s,"undef") ) {
@@ -4503,7 +4503,7 @@ Perl_new_version(pTHX_ SV *ver)
 	    av_push(av, newSViv(rev));
 	}
 
-	(void)hv_stores(MUTABLE_HV(hv), "version", newRV_noinc((SV *)av));
+	(void)hv_stores(MUTABLE_HV(hv), "version", newRV_noinc(MUTABLE_SV(av)));
 	return rv;
     }
 #ifdef SvVOK
@@ -6014,7 +6014,7 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
 		 !( (SvTYPE(*svp) == SVt_PVGV) && (GvCV((GV*)*svp) == cv) )))) {
 	    /* Use GV from the stack as a fallback. */
 	    /* GV is potentially non-unique, or contain different CV. */
-	    SV * const tmp = newRV((SV*)cv);
+	    SV * const tmp = newRV(MUTABLE_SV(cv));
 	    sv_setsv(dbsv, tmp);
 	    SvREFCNT_dec(tmp);
 	}
@@ -6057,7 +6057,7 @@ Perl_get_re_arg(pTHX_ SV *sv) {
         if (SvMAGICAL(sv))
             mg_get(sv);
         if (SvROK(sv) &&
-            (tmpsv = (SV*)SvRV(sv)) &&            /* assign deliberate */
+            (tmpsv = MUTABLE_SV(SvRV(sv))) &&            /* assign deliberate */
             SvTYPE(tmpsv) == SVt_PVMG &&
             (mg = mg_find(tmpsv, PERL_MAGIC_qr))) /* assign deliberate */
         {

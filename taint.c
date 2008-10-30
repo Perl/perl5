@@ -99,7 +99,7 @@ Perl_taint_env(pTHX)
     /* If there's no %ENV hash of if it's not magical, croak, because
      * it probably doesn't reflect the actual environment */
     if (!GvHV(PL_envgv) || !(SvRMAGICAL(GvHV(PL_envgv))
-	    && mg_find((SV*)GvHV(PL_envgv), PERL_MAGIC_env))) {
+	    && mg_find((const SV *)GvHV(PL_envgv), PERL_MAGIC_env))) {
 	const bool was_tainted = PL_tainted;
 	const char * const name = GvENAME(PL_envgv);
 	PL_tainted = TRUE;
