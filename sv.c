@@ -12835,7 +12835,7 @@ Print appropriate "Use of uninitialized variable" warning
 */
 
 void
-Perl_report_uninit(pTHX_ SV* uninit_sv)
+Perl_report_uninit(pTHX_ const SV *uninit_sv)
 {
     dVAR;
     if (PL_op) {
