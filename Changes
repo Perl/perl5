@@ -28,6 +28,25 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.9		Maintenance release working toward v5.8.9
 --------------
 ____________________________________________________________________________
+[ 34689] By: nicholas				   on 2008/10/31  15:09:42
+	Log: Rework the pseudohash tests so that they skip on 5.10.0 and later, and
+	     don't expose any syntax that 5.10.0 chokes on.
+     Branch: maint-5.8/perl
+	   ! lib/constant.t
+____________________________________________________________________________
+[ 34688] By: nicholas				   on 2008/10/31  14:10:54
+	Log: Fix discrepancy created by the conflict resolution of merge 34681.
+	     t/harness is not as exacting as t/TEST, when it comes to test numbers
+	     being in order. (TEST's favourite muppet clearly is Count von Count.
+	     No idea which harness likes best)
+     Branch: maint-5.8/perl
+	   ! lib/constant.t
+____________________________________________________________________________
+[ 34687] By: nicholas				   on 2008/10/31  11:54:37
+	Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 34686] By: nicholas				   on 2008/10/31  11:25:35
 	Log: Run pod/buildtoc --build-all
      Branch: maint-5.8/perl
