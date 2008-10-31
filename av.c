@@ -134,7 +134,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 		   the current lazy system of only writing to it if our caller
 		   has a need for more space. NWC  */
 		newmax = Perl_safesysmalloc_size((void*)AvALLOC(av)) /
-		    sizeof(SV*) - 1;
+		    sizeof(const SV *) - 1;
 
 		if (key <= newmax) 
 		    goto resized;
@@ -145,20 +145,21 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
 		Renew(AvALLOC(av),newmax+1, SV*);
 #else
-		bytes = (newmax + 1) * sizeof(SV*);
+		bytes = (newmax + 1) * sizeof(const SV *);
 #define MALLOC_OVERHEAD 16
 		itmp = MALLOC_OVERHEAD;
 		while ((MEM_SIZE)(itmp - MALLOC_OVERHEAD) < bytes)
 		    itmp += itmp;
 		itmp -= MALLOC_OVERHEAD;
-		itmp /= sizeof(SV*);
+		itmp /= sizeof(const SV *);
 		assert(itmp > newmax);
 		newmax = itmp - 1;
 		assert(newmax >= AvMAX(av));
 		Newx(ary, newmax+1, SV*);
 		Copy(AvALLOC(av), ary, AvMAX(av)+1, SV*);
 		if (AvMAX(av) > 64)
-		    offer_nice_chunk(AvALLOC(av), (AvMAX(av)+1) * sizeof(SV*));
+		    offer_nice_chunk(AvALLOC(av),
+				     (AvMAX(av)+1) * sizeof(const SV *));
 		else
 		    Safefree(AvALLOC(av));
 		AvALLOC(av) = ary;
