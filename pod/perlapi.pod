@@ -279,7 +279,8 @@ Found in file av.c
 =item av_shift
 X<av_shift>
 
-Shifts an SV off the beginning of the array.
+Shifts an SV off the beginning of the array. Returns C<&PL_sv_undef> if the 
+array is empty.
 
 	SV*	av_shift(AV* ar)
 
@@ -803,9 +804,6 @@ Found in file perl.c
 
 =item pv_display
 X<pv_display>
-
-  char *pv_display(SV *dsv, const char *pv, STRLEN cur, STRLEN len,
-                   STRLEN pvlim, U32 flags)
 
 Similar to
 
