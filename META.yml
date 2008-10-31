@@ -43,7 +43,6 @@ no_index:
     - lib/ExtUtils/Constant
     - lib/File/Spec
     - lib/File/Temp
-    - lib/Filter/Simple
     - lib/Getopt/Long
     - lib/I18N/LangTags
     - lib/Locale/Maketext/t
@@ -71,7 +70,6 @@ no_index:
     - lib/Tie/File
     - lib/Tie/RefHash
     - lib/Unicode/Collate
-    - t/lib/Filter/Simple
     - t/lib/MakeMaker
     - t/lib/Math
     - t/lib/sample-tests
@@ -159,8 +157,8 @@ no_index:
     - lib/ExtUtils/t/cd.t
     - lib/ExtUtils/t/config.t
     - lib/ExtUtils/t/Constant.t
+    - lib/ExtUtils/t/cp.t
     - lib/ExtUtils/t/dir_target.t
-    - lib/ExtUtils/t/Embed.t
     - lib/ExtUtils/t/eu_command.t
     - lib/ExtUtils/t/FIRST_MAKEFILE.t
     - lib/ExtUtils/t/fixin.t
@@ -170,13 +168,13 @@ no_index:
     - lib/ExtUtils/t/Install.t
     - lib/ExtUtils/t/INSTALL_BASE.t
     - lib/ExtUtils/t/Installapi2.t
-    - lib/ExtUtils/t/Installed.t
     - lib/ExtUtils/t/Liblist.t
     - lib/ExtUtils/t/make.t
     - lib/ExtUtils/t/maketext_filter.t
     - lib/ExtUtils/t/Manifest.t
     - lib/ExtUtils/t/metafile_data.t
     - lib/ExtUtils/t/metafile_file.t
+    - lib/ExtUtils/t/min_perl_version.t
     - lib/ExtUtils/t/Mkbootstrap.t
     - lib/ExtUtils/t/MM_Any.t
     - lib/ExtUtils/t/MM_BeOS.t
@@ -214,7 +212,6 @@ no_index:
     - lib/File/Path.t
     - lib/File/Spec.pm
     - lib/File/Temp.pm
-    - lib/Filter/Simple.pm
     - lib/Getopt/Long.pm
     - lib/I18N/LangTags.pm
     - lib/if.pm
