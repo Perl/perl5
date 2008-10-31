@@ -137,7 +137,7 @@ PP(pp_rv2gv)
 
 	sv = SvRV(sv);
 	if (SvTYPE(sv) == SVt_PVIO) {
-	    GV * const gv = (GV*) sv_newmortal();
+	    GV * const gv = MUTABLE_GV(sv_newmortal());
 	    gv_init(gv, 0, "", 0, 0);
 	    GvIOp(gv) = MUTABLE_IO(sv);
 	    SvREFCNT_inc_void_NN(sv);
@@ -165,7 +165,7 @@ PP(pp_rv2gv)
 			STRLEN len;
 			SV * const namesv = PAD_SV(cUNOP->op_targ);
 			const char * const name = SvPV(namesv, len);
-			gv = (GV*)newSV(0);
+			gv = MUTABLE_GV(newSV(0));
 			gv_init(gv, CopSTASH(PL_curcop), name, len, 0);
 		    }
 		    else {
@@ -212,7 +212,7 @@ PP(pp_rv2gv)
 	}
     }
     if (PL_op->op_private & OPpLVAL_INTRO)
-	save_gp((GV*)sv, !(PL_op->op_flags & OPf_SPECIAL));
+	save_gp(MUTABLE_GV(sv), !(PL_op->op_flags & OPf_SPECIAL));
     SETs(sv);
     RETURN;
 }
@@ -284,7 +284,7 @@ PP(pp_rv2sv)
 	}
     }
     else {
-	gv = (GV*)sv;
+	gv = MUTABLE_GV(sv);
 
 	if (!isGV_with_GP(gv)) {
 	    if (SvGMAGICAL(sv)) {
@@ -301,7 +301,7 @@ PP(pp_rv2sv)
     if (PL_op->op_flags & OPf_MOD) {
 	if (PL_op->op_private & OPpLVAL_INTRO) {
 	    if (cUNOP->op_first->op_type == OP_NULL)
-		sv = save_scalar((GV*)TOPs);
+		sv = save_scalar(MUTABLE_GV(TOPs));
 	    else if (gv)
 		sv = save_scalar(gv);
 	    else
@@ -589,7 +589,7 @@ PP(pp_gelem)
 
     SV *sv = POPs;
     const char * const elem = SvPV_nolen_const(sv);
-    GV * const gv = (GV*)POPs;
+    GV * const gv = MUTABLE_GV(POPs);
     SV * tmpRef = NULL;
 
     sv = NULL;
@@ -833,18 +833,19 @@ PP(pp_undef)
             HV *stash;
 
             /* undef *Foo:: */
-            if((stash = GvHV((GV*)sv)) && HvNAME_get(stash))
+            if((stash = GvHV((const GV *)sv)) && HvNAME_get(stash))
                 mro_isa_changed_in(stash);
             /* undef *Pkg::meth_name ... */
-            else if(GvCVu((GV*)sv) && (stash = GvSTASH((GV*)sv)) && HvNAME_get(stash))
+            else if(GvCVu((const GV *)sv) && (stash = GvSTASH((const GV *)sv))
+		    && HvNAME_get(stash))
                 mro_method_changed_in(stash);
 
-	    gp_free((GV*)sv);
+	    gp_free(MUTABLE_GV(sv));
 	    Newxz(gp, 1, GP);
 	    GvGP(sv) = gp_ref(gp);
 	    GvSV(sv) = newSV(0);
 	    GvLINE(sv) = CopLINE(PL_curcop);
-	    GvEGV(sv) = (GV*)sv;
+	    GvEGV(sv) = MUTABLE_GV(sv);
 	    GvMULTI_on(sv);
 	    break;
 	}
@@ -4178,7 +4179,7 @@ PP(pp_hslice)
             }
             if (localizing) {
 		if (HvNAME_get(hv) && isGV(*svp))
-		    save_gp((GV*)*svp, !(PL_op->op_flags & OPf_SPECIAL));
+		    save_gp(MUTABLE_GV(*svp), !(PL_op->op_flags & OPf_SPECIAL));
 		else {
 		    if (preeminent)
 			save_helem(hv, keysv, svp);
@@ -4704,7 +4705,7 @@ PP(pp_split)
 
 #ifdef USE_ITHREADS
     if (pm->op_pmreplrootu.op_pmtargetoff) {
-	ary = GvAVn((GV*)PAD_SVl(pm->op_pmreplrootu.op_pmtargetoff));
+	ary = GvAVn(MUTABLE_GV(PAD_SVl(pm->op_pmreplrootu.op_pmtargetoff)));
     }
 #else
     if (pm->op_pmreplrootu.op_pmtargetgv) {

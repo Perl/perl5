@@ -669,7 +669,7 @@ Perl_gv_fetchmethod_flags(pTHX_ HV *stash, const char *name, U32 flags)
     gv = gv_fetchmeth(stash, name, nend - name, 0);
     if (!gv) {
 	if (strEQ(name,"import") || strEQ(name,"unimport"))
-	    gv = (GV*)&PL_sv_yes;
+	    gv = MUTABLE_GV(&PL_sv_yes);
 	else if (autoload)
 	    gv = gv_autoload4(ostash, name, nend - name, TRUE);
 	if (!gv && do_croak) {
@@ -996,7 +996,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		tmpbuf[len++] = ':';
 		gvp = (GV**)hv_fetch(stash,tmpbuf,len,add);
 		gv = gvp ? *gvp : NULL;
-		if (gv && gv != (GV*)&PL_sv_undef) {
+		if (gv && gv != (const GV *)&PL_sv_undef) {
 		    if (SvTYPE(gv) != SVt_PVGV)
 			gv_init(gv, stash, tmpbuf, len, (add & GV_ADDMULTI));
 		    else
@@ -1004,7 +1004,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		}
 		if (tmpbuf != smallbuf)
 		    Safefree(tmpbuf);
-		if (!gv || gv == (GV*)&PL_sv_undef)
+		if (!gv || gv == (const GV *)&PL_sv_undef)
 		    return NULL;
 
 		if (!(stash = GvHV(gv)))
@@ -1019,7 +1019,8 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    name_cursor++;
 	    name = name_cursor;
 	    if (name == name_end)
-		return gv ? gv : (GV*)*hv_fetchs(PL_defstash, "main::", TRUE);
+		return gv
+		    ? gv : MUTABLE_GV(*hv_fetchs(PL_defstash, "main::", TRUE));
 	}
     }
     len = name_cursor - name;
@@ -1080,7 +1081,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		{
 		    gvp = (GV**)hv_fetch(stash,name,len,0);
 		    if (!gvp ||
-			*gvp == (GV*)&PL_sv_undef ||
+			*gvp == (const GV *)&PL_sv_undef ||
 			SvTYPE(*gvp) != SVt_PVGV)
 		    {
 			stash = NULL;
@@ -1135,7 +1136,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	return NULL;
 
     gvp = (GV**)hv_fetch(stash,name,len,add);
-    if (!gvp || *gvp == (GV*)&PL_sv_undef)
+    if (!gvp || *gvp == (const GV *)&PL_sv_undef)
 	return NULL;
     gv = *gvp;
     if (SvTYPE(gv) == SVt_PVGV) {
@@ -1532,14 +1533,14 @@ Perl_gv_check(pTHX_ const HV *stash)
             register GV *gv;
             HV *hv;
 	    if (HeKEY(entry)[HeKLEN(entry)-1] == ':' &&
-		(gv = (GV*)HeVAL(entry)) && isGV(gv) && (hv = GvHV(gv)))
+		(gv = MUTABLE_GV(HeVAL(entry))) && isGV(gv) && (hv = GvHV(gv)))
 	    {
 		if (hv != PL_defstash && hv != stash)
 		     gv_check(hv);              /* nested package */
 	    }
 	    else if (isALPHA(*HeKEY(entry))) {
                 const char *file;
-		gv = (GV*)HeVAL(entry);
+		gv = MUTABLE_GV(HeVAL(entry));
 		if (SvTYPE(gv) != SVt_PVGV || GvMULTI(gv))
 		    continue;
 		file = GvFILE(gv);

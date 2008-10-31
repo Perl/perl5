@@ -710,7 +710,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_SV:				/* scalar reference */
 	    value = MUTABLE_SV(SSPOPPTR);
-	    gv = (GV*)SSPOPPTR;
+	    gv = MUTABLE_GV(SSPOPPTR);
 	    ptr = &GvSV(gv);
 	    av = MUTABLE_AV(gv); /* what to refcnt_dec */
 	restore_sv:
@@ -754,7 +754,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_AV:				/* array reference */
 	    av = MUTABLE_AV(SSPOPPTR);
-	    gv = (GV*)SSPOPPTR;
+	    gv = MUTABLE_GV(SSPOPPTR);
 	    if (GvAV(gv)) {
 		SvREFCNT_dec(GvAV(gv));
 	    }
@@ -767,7 +767,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_HV:				/* hash reference */
 	    hv = MUTABLE_HV(SSPOPPTR);
-	    gv = (GV*)SSPOPPTR;
+	    gv = MUTABLE_GV(SSPOPPTR);
 	    if (GvHV(gv)) {
 		SvREFCNT_dec(GvHV(gv));
 	    }
@@ -817,7 +817,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_GP:				/* scalar reference */
 	    ptr = SSPOPPTR;
-	    gv = (GV*)SSPOPPTR;
+	    gv = MUTABLE_GV(SSPOPPTR);
 	    gp_free(gv);
 	    GvGP(gv) = (GP*)ptr;
             /* putting a method back into circulation ("local")*/
@@ -1048,7 +1048,7 @@ Perl_leave_scope(pTHX_ I32 base)
 
 	    /* These are only saved in mathoms.c */
 	case SAVEt_NSTAB:
-	    gv = (GV*)SSPOPPTR;
+	    gv = MUTABLE_GV(SSPOPPTR);
 	    (void)sv_clear(MUTABLE_SV(gv));
 	    break;
 	case SAVEt_LONG:			/* long reference */

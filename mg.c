@@ -919,7 +919,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '5': case '6': case '7': case '8': case '9': case '&':
 	    if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 		/*
-		 * Pre-threads, this was paren = atoi(GvENAME((GV*)mg->mg_obj));
+		 * Pre-threads, this was paren = atoi(GvENAME((const GV *)mg->mg_obj));
 		 * XXX Does the new way break anything?
 		 */
 		paren = atoi(mg->mg_ptr); /* $& is in [0] */
@@ -1582,8 +1582,8 @@ Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)
        calls this same magic */
     stash = GvSTASH(
         SvTYPE(mg->mg_obj) == SVt_PVGV
-            ? (GV*)mg->mg_obj
-            : (GV*)mg_find(mg->mg_obj, PERL_MAGIC_isa)->mg_obj
+            ? (const GV *)mg->mg_obj
+            : (const GV *)mg_find(mg->mg_obj, PERL_MAGIC_isa)->mg_obj
     );
 
     if (stash)
@@ -1608,8 +1608,8 @@ Perl_magic_clearisa(pTHX_ SV *sv, MAGIC *mg)
     /* XXX see comments in magic_setisa */
     stash = GvSTASH(
         SvTYPE(mg->mg_obj) == SVt_PVGV
-            ? (GV*)mg->mg_obj
-            : (GV*)mg_find(mg->mg_obj, PERL_MAGIC_isa)->mg_obj
+            ? (const GV *)mg->mg_obj
+            : (const GV *)mg_find(mg->mg_obj, PERL_MAGIC_isa)->mg_obj
     );
 
     if (stash)

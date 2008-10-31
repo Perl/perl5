@@ -180,7 +180,7 @@ PP(pp_sassign)
 		   So change the reference so that it points to the subroutine
 		   of that typeglob, as that's what they were after all along.
 		*/
-		GV *const upgraded = (GV *) cv;
+		GV *const upgraded = MUTABLE_GV(cv);
 		CV *const source = GvCV(upgraded);
 
 		assert(source);
@@ -306,16 +306,16 @@ PP(pp_readline)
 {
     dVAR;
     tryAMAGICunTARGET(iter, 0);
-    PL_last_in_gv = (GV*)(*PL_stack_sp--);
+    PL_last_in_gv = MUTABLE_GV(*PL_stack_sp--);
     if (!isGV_with_GP(PL_last_in_gv)) {
 	if (SvROK(PL_last_in_gv) && isGV_with_GP(SvRV(PL_last_in_gv)))
-	    PL_last_in_gv = (GV*)SvRV(PL_last_in_gv);
+	    PL_last_in_gv = MUTABLE_GV(SvRV(PL_last_in_gv));
 	else {
 	    dSP;
 	    XPUSHs(MUTABLE_SV(PL_last_in_gv));
 	    PUTBACK;
 	    pp_rv2gv();
-	    PL_last_in_gv = (GV*)(*PL_stack_sp--);
+	    PL_last_in_gv = MUTABLE_GV(*PL_stack_sp--);
 	}
     }
     return do_readline();
@@ -698,7 +698,8 @@ PP(pp_print)
     IO *io;
     register PerlIO *fp;
     MAGIC *mg;
-    GV * const gv = (PL_op->op_flags & OPf_STACKED) ? (GV*)*++MARK : PL_defoutgv;
+    GV * const gv
+	= (PL_op->op_flags & OPf_STACKED) ? MUTABLE_GV(*++MARK) : PL_defoutgv;
 
     if (gv && (io = GvIO(gv))
 	&& (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar)))
@@ -855,7 +856,7 @@ PP(pp_rv2av)
 		    RETURN;
 	    }
 	    else {
-		gv = (GV*)sv;
+		gv = MUTABLE_GV(sv);
 	    }
 	    sv = is_pp_rv2av ? MUTABLE_SV(GvAVn(gv)) : MUTABLE_SV(GvHVn(gv));
 	    if (PL_op->op_private & OPpLVAL_INTRO)
@@ -1817,7 +1818,7 @@ PP(pp_helem)
 	}
 	if (PL_op->op_private & OPpLVAL_INTRO) {
 	    if (HvNAME_get(hv) && isGV(*svp))
-		save_gp((GV*)*svp, !(PL_op->op_flags & OPf_SPECIAL));
+		save_gp(MUTABLE_GV(*svp), !(PL_op->op_flags & OPf_SPECIAL));
 	    else {
 		if (!preeminent) {
 		    STRLEN keylen;
@@ -2668,7 +2669,7 @@ PP(pp_entersub)
     case SVt_PVGV:
 	if (!isGV_with_GP(sv))
 	    DIE(aTHX_ "Not a CODE reference");
-	if (!(cv = GvCVu((GV*)sv))) {
+	if (!(cv = GvCVu((const GV *)sv))) {
 	    HV *stash;
 	    cv = sv_2cv(sv, &stash, &gv, 0);
 	}
@@ -3079,7 +3080,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     if (!ob || !(SvOBJECT(ob)
 		 || (SvTYPE(ob) == SVt_PVGV 
 		     && isGV_with_GP(ob)
-		     && (ob = MUTABLE_SV(GvIO((GV*)ob)))
+		     && (ob = MUTABLE_SV(GvIO((const GV *)ob)))
 		     && SvOBJECT(ob))))
     {
 	Perl_croak(aTHX_ "Can't call method \"%s\" on unblessed reference",
@@ -3097,7 +3098,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     if (hashp) {
 	const HE* const he = hv_fetch_ent(stash, meth, 0, *hashp);
 	if (he) {
-	    gv = (GV*)HeVAL(he);
+	    gv = MUTABLE_GV(HeVAL(he));
 	    if (isGV(gv) && GvCV(gv) &&
 		(!GvCVGEN(gv) || GvCVGEN(gv)
                   == (PL_sub_generation + HvMROMETA(stash)->cache_gen)))

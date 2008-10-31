@@ -832,7 +832,7 @@ static int
 perlio_mg_set(pTHX_ SV *sv, MAGIC *mg)
 {
     if (SvROK(sv)) {
-	IO * const io = GvIOn((GV *) SvRV(sv));
+	IO * const io = GvIOn(MUTABLE_GV(SvRV(sv)));
 	PerlIO * const ifp = IoIFP(io);
 	PerlIO * const ofp = IoOFP(io);
 	Perl_warn(aTHX_ "set %" SVf " %p %p %p",
@@ -845,7 +845,7 @@ static int
 perlio_mg_get(pTHX_ SV *sv, MAGIC *mg)
 {
     if (SvROK(sv)) {
-	IO * const io = GvIOn((GV *) SvRV(sv));
+	IO * const io = GvIOn(MUTABLE_GV(SvRV(sv)));
 	PerlIO * const ifp = IoIFP(io);
 	PerlIO * const ofp = IoOFP(io);
 	Perl_warn(aTHX_ "get %" SVf " %p %p %p",
