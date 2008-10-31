@@ -11409,7 +11409,7 @@ warnings::warnif($object, $message)
 
 =item DESCRIPTION
 
-[0], [1], [2], [3], [4], [5], [6], [7]
+[0], [1], [2], [3], [4], [5]
 
 =over 4
 
@@ -12695,6 +12695,8 @@ and the C<fforce> pragma, Lockfile, Signals
 
 =item Integrating local directories
 
+=item Redirection
+
 =back
 
 =item CONFIGURATION
@@ -12737,8 +12739,9 @@ cwd, getcwd, fastcwd, backtickcwd
 =item Language Specs
 
 comment [scalar], cpanconfig [hash], depends [hash] *** EXPERIMENTAL
-FEATURE ***, disabled [boolean], goto [string], install [hash], make
-[hash], match [hash], patches [array], pl [hash], test [hash]
+FEATURE ***, disabled [boolean], features [array] *** EXPERIMENTAL FEATURE
+***, goto [string], install [hash], make [hash], match [hash], patches
+[array], pl [hash], test [hash]
 
 =item Processing Instructions
 
@@ -12773,21 +12776,21 @@ CPAN::Distribution::containsmods(), CPAN::Distribution::cvs_import(),
 CPAN::Distribution::dir(), CPAN::Distribution::force($method,@args),
 CPAN::Distribution::get(), CPAN::Distribution::install(),
 CPAN::Distribution::install_tested(), CPAN::Distribution::isa_perl(),
-CPAN::Distribution::is_tested(), CPAN::Distribution::look(),
-CPAN::Distribution::make(), CPAN::Distribution::perldoc(),
-CPAN::Distribution::prefs(), CPAN::Distribution::prereq_pm(),
-CPAN::Distribution::readme(), CPAN::Distribution::reports(),
-CPAN::Distribution::read_yaml(), CPAN::Distribution::test(),
-CPAN::Distribution::uptodate(), CPAN::Index::force_reload(),
-CPAN::Index::reload(), CPAN::InfoObj::dump(), CPAN::Module::as_glimpse(),
-CPAN::Module::as_string(), CPAN::Module::clean(),
-CPAN::Module::cpan_file(), CPAN::Module::cpan_version(),
-CPAN::Module::cvs_import(), CPAN::Module::description(),
-CPAN::Module::distribution(), CPAN::Module::dslip_status(),
-CPAN::Module::force($method,@args), CPAN::Module::get(),
-CPAN::Module::inst_file(), CPAN::Module::available_file(),
-CPAN::Module::inst_version(), CPAN::Module::available_version(),
-CPAN::Module::install(), CPAN::Module::look(), CPAN::Module::make(),
+CPAN::Distribution::look(), CPAN::Distribution::make(),
+CPAN::Distribution::perldoc(), CPAN::Distribution::prefs(),
+CPAN::Distribution::prereq_pm(), CPAN::Distribution::readme(),
+CPAN::Distribution::reports(), CPAN::Distribution::read_yaml(),
+CPAN::Distribution::test(), CPAN::Distribution::uptodate(),
+CPAN::Index::force_reload(), CPAN::Index::reload(), CPAN::InfoObj::dump(),
+CPAN::Module::as_glimpse(), CPAN::Module::as_string(),
+CPAN::Module::clean(), CPAN::Module::cpan_file(),
+CPAN::Module::cpan_version(), CPAN::Module::cvs_import(),
+CPAN::Module::description(), CPAN::Module::distribution(),
+CPAN::Module::dslip_status(), CPAN::Module::force($method,@args),
+CPAN::Module::get(), CPAN::Module::inst_file(),
+CPAN::Module::available_file(), CPAN::Module::inst_version(),
+CPAN::Module::available_version(), CPAN::Module::install(),
+CPAN::Module::look(), CPAN::Module::make(),
 CPAN::Module::manpage_headline(), CPAN::Module::perldoc(),
 CPAN::Module::readme(), CPAN::Module::reports(), CPAN::Module::test(),
 CPAN::Module::uptodate(), CPAN::Module::userid()
@@ -12846,7 +12849,8 @@ http firewall, ftp firewall, One way visibility, SOCKS, IP Masquerade
 
 =item FAQ
 
-1), 2), 3), 4), 5), 6), 7), 8), 9), 10), 11), 12), 13), 14), 15), 16)
+1), 2), 3), 4), 5), 6), 7), 8), 9), 10), 11), 12), 13), 14), 15), 16), 17),
+18)
 
 =item COMPATIBILITY
 
@@ -12894,6 +12898,37 @@ http firewall, ftp firewall, One way visibility, SOCKS, IP Masquerade
 
 =back
 
+=head2 CPAN::Distroprefs -- read and match distroprefs
+
+=over 4
+
+=item SYNOPSIS 
+
+=item DESCRIPTION
+
+=item INTERFACE
+
+a CPAN::Distroprefs::Result object, C<undef>, indicating that no prefs
+files remain to be found
+
+=item RESULTS
+
+=over 4
+
+=item Common
+
+=item Errors
+
+=item Successes
+
+=back
+
+=item PREFS 
+
+=item LICENSE
+
+=back
+
 =head2 CPAN::FirstTime - Utility for CPAN::Config file Initialization
 
 =over 4
@@ -12907,14 +12942,17 @@ http firewall, ftp firewall, One way visibility, SOCKS, IP Masquerade
 auto_commit, build_cache, build_dir, build_dir_reuse,
 build_requires_install_policy, cache_metadata, check_sigs, colorize_output,
 colorize_print, colorize_warn, colorize_debug, commandnumber_in_prompt,
-ftp_passive, getcwd, histfile, histsize, inactivity_timeout, index_expire,
-inhibit_startup_message, keep_source_where, load_module_verbosity,
-makepl_arg, make_arg, make_install_arg, make_install_make_command,
-mbuildpl_arg, mbuild_arg, mbuild_install_arg, mbuild_install_build_command,
-pager, prefer_installer, prefs_dir, prerequisites_policy,
-randomize_urllist, scan_cache, shell, show_unparsable_versions,
-show_upload_date, show_zero_versions, tar_verbosity, term_is_latin,
-term_ornaments, test_report, use_sqlite, yaml_load_code, yaml_module
+connect_to_internet_ok, ftp_passive, ftpstats_period, ftpstats_size,
+getcwd, halt_on_failure, histfile, histsize, inactivity_timeout,
+index_expire, inhibit_startup_message, keep_source_where,
+load_module_verbosity, makepl_arg, make_arg, make_install_arg,
+make_install_make_command, mbuildpl_arg, mbuild_arg, mbuild_install_arg,
+mbuild_install_build_command, pager, prefer_installer, prefs_dir,
+prerequisites_policy, randomize_urllist, scan_cache, shell,
+show_unparsable_versions, show_upload_date, show_zero_versions,
+tar_verbosity, term_is_latin, term_ornaments, test_report,
+perl5lib_verbosity, trust_test_report_history, use_sqlite, yaml_load_code,
+yaml_module
 
 =over 4
 
@@ -13236,7 +13274,7 @@ C<doublesize>, C<drand01>, C<drand48_r_proto>, C<dynamic_ext>
 C<eagain>, C<ebcdic>, C<echo>, C<egrep>, C<emacs>, C<endgrent_r_proto>,
 C<endhostent_r_proto>, C<endnetent_r_proto>, C<endprotoent_r_proto>,
 C<endpwent_r_proto>, C<endservent_r_proto>, C<eunicefix>, C<exe_ext>,
-C<expr>, C<extensions>, C<extras>
+C<expr>, C<extensions>, C<extern_C>, C<extras>
 
 =over 4
 
