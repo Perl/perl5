@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 3 $
+##  $Revision: 4 $
 ##  $Author: mhx $
-##  $Date: 2008/10/30 19:42:36 +0100 $
+##  $Date: 2008/10/31 08:15:55 +0100 $
 ##
 ################################################################################
 ##
@@ -231,11 +231,11 @@ pv_pretty()
 		ST(3) = sv_2mortal(newSVpv(rv, 0));
 		ST(4) = sv_newmortal();
 		rv = pv_pretty(ST(4), "N\303\275 Batter\303\255",
-				16, 20, NULL, NULL, PERL_PV_ESCAPE_UNI_DETECT);
+				12, 20, NULL, NULL, PERL_PV_ESCAPE_UNI_DETECT);
 		ST(5) = sv_2mortal(newSVpv(rv, 0));
 		ST(6) = sv_newmortal();
 		rv = pv_pretty(ST(6), "\303\201g\303\246tis Byrjun",
-				16, 20, NULL, NULL, PERL_PV_ESCAPE_UNI_DETECT|PERL_PV_PRETTY_ELLIPSES);
+				15, 18, NULL, NULL, PERL_PV_ESCAPE_UNI_DETECT|PERL_PV_PRETTY_ELLIPSES);
 		ST(7) = sv_2mortal(newSVpv(rv, 0));
 		XSRETURN(8);
 
@@ -268,9 +268,9 @@ ok($r[0], "foobarbaz");
 ok($r[2], $r[3]);
 ok($r[2], '<leftpv_p\retty\nright>');
 ok($r[4], $r[5]);
-ok($r[4], $uni ? 'N\375 Batter\355\0' : 'N\303\275 Batter\303');
+ok($r[4], $uni ? 'N\375 Batter\355' : 'N\303\275 Batter\303');
 ok($r[6], $r[7]);
-ok($r[6], $uni ? '\\301g\\346tis Byrjun...' : '\303\201g\303\246tis...');
+ok($r[6], $uni ? '\301g\346tis Byrju...' : '\303\201g\303\246t...');
 
 @r = &Devel::PPPort::pv_display();
 ok($r[0], $r[1]);
