@@ -28,6 +28,328 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.9		Maintenance release working toward v5.8.9
 --------------
 ____________________________________________________________________________
+[ 34686] By: nicholas				   on 2008/10/31  11:25:35
+	Log: Run pod/buildtoc --build-all
+     Branch: maint-5.8/perl
+	   ! MANIFEST pod/perltoc.pod
+____________________________________________________________________________
+[ 34685] By: nicholas				   on 2008/10/31  11:24:11
+	Log: Run regen.pl.
+     Branch: maint-5.8/perl
+	   ! pod/perlapi.pod
+____________________________________________________________________________
+[ 34684] By: nicholas				   on 2008/10/31  11:21:09
+	Log: Run porting/makemeta
+     Branch: maint-5.8/perl
+	   ! META.yml
+____________________________________________________________________________
+[ 34683] By: nicholas				   on 2008/10/31  11:19:41
+	Log: Integrate:
+	     [ 34659]
+	     Integrate:
+	     [ 34566]
+	     Subject: [PATCH blead DOC] Re: [perl #60022] Typo in perldata
+	     From: Daniel Frederick Crisman <daniel@crisman.org>
+	     Date: Thu, 23 Oct 2008 20:14:56 -0400
+	     Message-ID: <20081024001456.GA4137@fury.crisman.org>
+	     
+	     Change from cardinal to ordinal numbering to avoid confusion.
+	     
+	     [ 34642]
+	     Remove redundant API definitions from '=for apidoc' sections.
+	     Those are already in embed.fnc, and most of them were already
+	     outdated. This also fixes the docs for pv_escape and pv_pretty.
+	     
+	     [ 34664]
+	     Integrate:
+	     [ 34649]
+	     Remove redundant (and wrong) prototype for pv_display()
+	     from its apidoc section.
+     Branch: maint-5.8/perl
+	  !> dump.c pod/perlapi.pod pod/perldata.pod utf8.c
+____________________________________________________________________________
+[ 34682] By: nicholas				   on 2008/10/31  10:49:43
+	Log: Integrate:
+	     [ 34665]
+	     Integrate:
+	     [ 34638]
+	     Upgrade to CPAN-1.9301.
+     Branch: maint-5.8/perl
+	  +> lib/CPAN/API/HOWTO.pod lib/CPAN/Distroprefs.pm
+	   - lib/CPAN/API/HOWTO.pm
+	  !> MANIFEST lib/CPAN.pm lib/CPAN/Debug.pm lib/CPAN/FirstTime.pm
+	  !> lib/CPAN/HandleConfig.pm lib/CPAN/Kwalify.pm
+	  !> lib/CPAN/Kwalify/distroprefs.dd
+	  !> lib/CPAN/Kwalify/distroprefs.yml lib/CPAN/Nox.pm
+	  !> lib/CPAN/Queue.pm lib/CPAN/Tarzip.pm lib/CPAN/bin/cpan
+	  !> lib/CPAN/t/02nox.t lib/CPAN/t/03pkgs.t
+	  !> lib/CPAN/t/11mirroredby.t
+____________________________________________________________________________
+[ 34681] By: nicholas				   on 2008/10/31  10:27:18
+	Log: Integrate:
+	     [ 34663]
+	     Integrate:
+	     [ 34648]
+	     Subject: Fwd: CPAN Upload: S/SA/SAPER/constant-1.17.tar.gz
+	     From: Sébastien Aperghis-Tramoni <maddingue@free.fr>
+	     Message-Id: <93213472-1B76-43A2-AACB-2BBFF901C5A7@free.fr>
+	     Date: Wed, 29 Oct 2008 22:58:52 +0100
+     Branch: maint-5.8/perl
+	  !> lib/constant.pm lib/constant.t
+____________________________________________________________________________
+[ 34680] By: nicholas				   on 2008/10/31  10:02:48
+	Log: Integrate:
+	     [ 34658]
+	     Integrate:
+	     [ 34554]
+	     Jerry spotted that as a result of change 34483 which upgrades blead to
+	     Test::Simple 0.82, lib/DB.t is now issuing a warning. His original
+	     suggestion was ok(!defined ...) - he, Merijn and I independently
+	     refined this to isnt(..., undef)
+	     
+	     [ 34639]
+	     Avoid leaving a VAR.txt after testing terminates on any platform where
+	     you can't unlink an open file by instead opening $^X for read to get a
+	     file handle for test purposes.
+     Branch: maint-5.8/perl
+	  !> ext/XS/APItest/t/svpeek.t lib/DB.t
+____________________________________________________________________________
+[ 34674] By: nicholas				   on 2008/10/30  23:13:19
+	Log: Integrate:
+	     [ 34657]
+	     Integrate:
+	     [ 34514]
+	     Upgrade PathTools to 3.28_01
+	     
+	     [ 34543]
+	     Cwd.xs won't load in development releases, unless we munge the
+	     XS_VERSION.
+	     
+	     [ 34606]
+	     Upgrade Cwd.xs to the Cwd.xs in PathTools 3.26_01:
+	     
+	     - abs_path() on Unix(ish) platforms has been upgraded to a much later
+	     version of the underlying C code from BSD. [Michael Schwern]
+	     
+	     - If strlcpy() and strlcat() aren't available on the user's system,
+	     we now use ppport.h to provide them, so our C code works. [Steve
+	     Peters]
+	     
+	     This unwinds change 32710 (consting from Robin Barker of the old code)
+	     
+	     [ 34607]
+	     Grab the second half of r10084 for cwd.t, which wasn't in change 33042.
+	     Update the Changes file with changes from 3.26 to 3.28_01 inclusive.
+	     
+	     [ 34609]
+	     Upgrade to PathTools 3.28_03.
+	     
+	     [ 34611]
+	     After the upgrade to 3.28_03 we need to revert change 34543.
+	     
+	     [ 34643]
+	     Upgrade to PathTools 3.29.
+     Branch: maint-5.8/perl
+	  !> ext/Cwd/Changes ext/Cwd/Cwd.xs ext/Cwd/Makefile.PL
+	  !> ext/Cwd/t/cwd.t ext/Cwd/t/win32.t lib/Cwd.pm lib/File/Spec.pm
+	  !> lib/File/Spec/Cygwin.pm lib/File/Spec/Epoc.pm
+	  !> lib/File/Spec/Functions.pm lib/File/Spec/Mac.pm
+	  !> lib/File/Spec/OS2.pm lib/File/Spec/Unix.pm
+	  !> lib/File/Spec/VMS.pm lib/File/Spec/Win32.pm
+	  !> lib/File/Spec/t/Spec.t
+____________________________________________________________________________
+[ 34662] By: nicholas				   on 2008/10/30  13:03:53
+	Log: Integrate:
+	     [ 34640]
+	     make distclean patch from Andy Armstrong.
+	     (Distclean isn't perfect yet because there's a spurious directory tree
+	     created but not cleaned up by ext/Test/Harness/t/harness.t, but Andy is
+	     working on fixing the cause)
+	     No idea about the state of play of disclean on VMS - I couldn't see how
+	     or where to add the three extra directories to it.
+	     
+	     [direct to 5.8.x because the parts that aren't yet relevant to 5.10.x
+	     will become so once the move of Test::Harness to ext/ is merged]
+     Branch: maint-5.8/perl
+	  !> Makefile.SH win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 34656] By: nicholas				   on 2008/10/30  08:26:54
+	Log: Integrate:
+	     [ 34644]
+	     Integrate:
+	     [ 34600]
+	     No, it's not a const SV* if we subsequently call
+	     SvREFCNT_dec() on it.
+     Branch: maint-5.8/perl
+	  !> pad.c
+____________________________________________________________________________
+[ 34655] By: nicholas				   on 2008/10/30  08:03:15
+	Log: Integrate:
+	     [ 34641]
+	     Integrate:
+	     [ 34602]
+	     Subject: [PATCH: Configure] Fix prototype detection for C++
+	     From: Marcus Holland-Moritz <mhx-perl@gmx.net>
+	     Date: Sun, 26 Oct 2008 21:41:13 +0100
+	     Message-ID: <20081026214113.0a5dc1a3@r2d2>
+	     
+	     [ 34617]
+	     Subject: fix for failed Gconvert detection under C++
+	     From: Tony Cook <tony@develop-help.com>
+	     Date: Tue, 28 Oct 2008 22:24:05 +1100
+	     Message-ID: <20081028112405.GA14163@mars.tony.develop-help.com>
+	     
+	     
+	     [This also sucks in the hunk of 33547 that creates ./warn]
+     Branch: maint-5.8/perl
+	  !> Configure Porting/Glossary
+____________________________________________________________________________
+[ 34636] By: nicholas				   on 2008/10/29  16:03:41
+	Log: Integrate:
+	     [ 34635]
+	     Integrate:
+	     [ 34589]
+	     lib/ExtUtils/t/eu_command.t belongs to ExtUtils-Command, and so does
+	     the about to be committed lib/ExtUtils/t/cp.t
+	     
+	     [ 34620]
+	     Subject: installperl patchlet
+	     From: andreas.koenig.7os6VVqR@franz.ak.mind.de (Andreas J. Koenig)
+	     Message-ID: <87k5btpdef.fsf@k75.linux.bogus>
+	     Date: Tue, 28 Oct 2008 05:11:20 +0100
+     Branch: maint-5.8/perl
+	  !> Porting/Maintainers.pl installperl
+____________________________________________________________________________
+[ 34633] By: nicholas				   on 2008/10/29  08:22:26
+	Log: Integrate:
+	     [ 32237]
+	     Fix up copyright years for files modified in 2007.
+	     
+	     [ 34599]
+	     Integrate:
+	     [ 34585]
+	     Update copyright years.
+	     
+	     [ 34586]
+	     Update copyright year in embed.pl, and everything that it builds.
+	     
+	     
+	     [plus fix an error in av.h introduced in 30927 when resolving 29670 -
+	     2006, not 2005. av.h's 2005 editing was change 24542, which was never
+	     merged to 5.8.x]
+     Branch: maint-5.8/perl
+	  !> (integrate 65 files)
+____________________________________________________________________________
+[ 34625] By: nicholas				   on 2008/10/28  20:28:32
+	Log: Integrate:
+	     [ 34614]
+	     Integrate:
+	     [ 34590]
+	     Upgrade to ExtUtils::Command 1.15
+	     
+	     [ 34591]
+	     Upgrade to ExtUtils::Manifest 1.55.
+     Branch: maint-5.8/perl
+	  +> lib/ExtUtils/t/cp.t
+	  !> MANIFEST lib/ExtUtils/Command.pm lib/ExtUtils/Manifest.pm
+	  !> lib/ExtUtils/t/Manifest.t lib/ExtUtils/t/eu_command.t
+____________________________________________________________________________
+[ 34616] By: nicholas				   on 2008/10/28  12:39:20
+	Log: Integrate:
+	     [ 34601]
+	     Integrate:
+	     [ 34595]
+	     USE_FAST_STDIO can affect behaviour, so list it in -V
+	     
+	     [ 34596]
+	     Cope with brain damage in PerlIO::via, which will let you fclose() the
+	     same FILE * twice, thanks to it calling out to Perl space inside the
+	     close call tree, with the underlying PerlIO * already closed, but not
+	     unlinked.
+     Branch: maint-5.8/perl
+	  !> perl.c perlio.c
+____________________________________________________________________________
+[ 34597] By: nicholas				   on 2008/10/26  19:05:49
+	Log: Integrate:
+	     [ 34592]
+	     Integrate:
+	     [ 34575]
+	     Make C++ compilers happy #2: const POD without initializer
+	     is an error for g++, even when static.
+	     
+	     [ 34579]
+	     Make C++ compilers happy #5: jump to 'do_write' crossed
+	     initialization in dTHX.
+	     
+	     Plus some consting, which also makes C++ happier.
+     Branch: maint-5.8/perl
+	  !> malloc.c perl.c
+____________________________________________________________________________
+[ 34594] By: nicholas				   on 2008/10/25  21:54:55
+	Log: Integrate:
+	     [ 34582]
+	     Integrate:
+	     [ 34573]
+	     Upgrade to SelfLoader 1.17.
+	     
+	     [ 34588]
+	     Integrate:
+	     [ 34583]
+	     Upgrade to lib.pm 0.61.
+     Branch: maint-5.8/perl
+	  !> lib/SelfLoader.pm lib/lib.t lib/lib_pm.PL
+____________________________________________________________________________
+[ 34580] By: nicholas				   on 2008/10/25  08:34:19
+	Log: Subject: Re: [perl #60034] (?>) causes wrongness on long string
+	     From: Vincent Pit <perl@profvince.com>
+	     Message-ID: <48FFABE4.2030507@profvince.com>
+	     Date: Thu, 23 Oct 2008 00:40:36 +0200
+     Branch: maint-5.8/perl
+	   ! regexec.c t/op/pat.t
+____________________________________________________________________________
+[ 34578] By: nicholas				   on 2008/10/24  21:57:53
+	Log: Subject: Re: changed method caching of SUPER (was Re: perl@34559)
+	     From: Dave Mitchell <davem@iabyn.com>
+	     Message-ID: <20081024152235.GF21915@iabyn.com>
+	     Date: Fri, 24 Oct 2008 16:22:35 +0100
+     Branch: maint-5.8/perl
+	   ! gv.c
+____________________________________________________________________________
+[ 34572] By: nicholas				   on 2008/10/24  20:56:48
+	Log: Revert Attribute::Handlers to the version that shipped with 5.8.8.
+	     Then add that Rafael is now the maintainer, and bump the $VERSION to
+	     0.78_03 to reflect this difference. I don't feel comfortable shipping
+	     a moderately different Attribute::Handlers, when it hasn't been on
+	     CPAN to shake other peoples' bugs out, and can be put (back) on CPAN,
+	     so that modules that know they need it can explicitly depend on it.
+     Branch: maint-5.8/perl
+	   - lib/Attribute/Handlers/t/constants.t
+	   - lib/Attribute/Handlers/t/data_convert.t
+	   - lib/Attribute/Handlers/t/linerep.t
+	   ! MANIFEST lib/Attribute/Handlers.pm
+	   ! lib/Attribute/Handlers/Changes lib/Attribute/Handlers/README
+	   ! lib/Attribute/Handlers/t/multi.t
+____________________________________________________________________________
+[ 34565] By: nicholas				   on 2008/10/23  22:50:23
+	Log: Integrate:
+	     [ 34563]
+	     Integrate:
+	     [ 34561]
+	     Handle a filename with a tilde in it.  Otherwise the build dies
+	     on Bar.pm~ at MANIFEST check time when building on an ODS-2 volume.
+     Branch: maint-5.8/perl
+	  !> configure.com
+____________________________________________________________________________
+[ 34564] By: craigb				   on 2008/10/23  21:50:53
+	Log: First two hunks from 30402 adapted for 5.8.
+     Branch: maint-5.8/perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 34560] By: nicholas				   on 2008/10/22  19:56:00
+	Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 34559] By: nicholas				   on 2008/10/22  19:30:58
 	Log: Integrate:
 	     [ 34556]
