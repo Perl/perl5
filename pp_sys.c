@@ -387,7 +387,7 @@ PP(pp_glob)
 #endif /* !VMS */
 
     SAVESPTR(PL_last_in_gv);	/* We don't want this to be permanent. */
-    PL_last_in_gv = (GV*)*PL_stack_sp--;
+    PL_last_in_gv = MUTABLE_GV(*PL_stack_sp--);
 
     SAVESPTR(PL_rs);		/* This is not permanent, either. */
     PL_rs = newSVpvs_flags("\000", SVs_TEMP);
@@ -521,7 +521,7 @@ PP(pp_open)
     STRLEN len;
     bool  ok;
 
-    GV * const gv = (GV *)*++MARK;
+    GV * const gv = MUTABLE_GV(*++MARK);
 
     if (!isGV(gv))
 	DIE(aTHX_ PL_no_usym, "filehandle");
@@ -571,7 +571,7 @@ PP(pp_open)
 PP(pp_close)
 {
     dVAR; dSP;
-    GV * const gv = (MAXARG == 0) ? PL_defoutgv : (GV*)POPs;
+    GV * const gv = (MAXARG == 0) ? PL_defoutgv : MUTABLE_GV(POPs);
 
     if (gv) {
 	IO * const io = GvIO(gv);
@@ -603,8 +603,8 @@ PP(pp_pipe_op)
     register IO *wstio;
     int fd[2];
 
-    GV * const wgv = (GV*)POPs;
-    GV * const rgv = (GV*)POPs;
+    GV * const wgv = MUTABLE_GV(POPs);
+    GV * const rgv = MUTABLE_GV(POPs);
 
     if (!rgv || !wgv)
 	goto badexit;
@@ -663,7 +663,7 @@ PP(pp_fileno)
 
     if (MAXARG < 1)
 	RETPUSHUNDEF;
-    gv = (GV*)POPs;
+    gv = MUTABLE_GV(POPs);
 
     if (gv && (io = GvIO(gv))
 	&& (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar)))
@@ -736,7 +736,7 @@ PP(pp_binmode)
 	discp = POPs;
     }
 
-    gv = (GV*)POPs;
+    gv = MUTABLE_GV(POPs);
 
     if (gv && (io = GvIO(gv))) {
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
@@ -806,7 +806,7 @@ PP(pp_tie)
 	case SVt_PVGV:
 	    if (isGV_with_GP(varsv)) {
 #ifdef GV_UNIQUE_CHECK
-		if (GvUNIQUE((GV*)varsv)) {
+		if (GvUNIQUE((const GV *)varsv)) {
 		    Perl_croak(aTHX_ "Attempt to tie unique GV");
 		}
 #endif
@@ -1166,7 +1166,7 @@ PP(pp_select)
 {
     dVAR; dSP; dTARGET;
     HV *hv;
-    GV * const newdefout = (PL_op->op_private > 0) ? ((GV *) POPs) : NULL;
+    GV * const newdefout = (PL_op->op_private > 0) ? (MUTABLE_GV(POPs)) : NULL;
     GV * egv = GvEGV(PL_defoutgv);
 
     if (!egv)
@@ -1198,7 +1198,7 @@ PP(pp_getc)
 {
     dVAR; dSP; dTARGET;
     IO *io = NULL;
-    GV * const gv = (MAXARG==0) ? PL_stdingv : (GV*)POPs;
+    GV * const gv = (MAXARG==0) ? PL_stdingv : MUTABLE_GV(POPs);
 
     if (gv && (io = GvIO(gv))) {
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
@@ -1275,7 +1275,7 @@ PP(pp_enterwrite)
     if (MAXARG == 0)
 	gv = PL_defoutgv;
     else {
-	gv = (GV*)POPs;
+	gv = MUTABLE_GV(POPs);
 	if (!gv)
 	    gv = PL_defoutgv;
     }
@@ -1446,7 +1446,8 @@ PP(pp_prtf)
     PerlIO *fp;
     SV *sv;
 
-    GV * const gv = (PL_op->op_flags & OPf_STACKED) ? (GV*)*++MARK : PL_defoutgv;
+    GV * const gv
+	= (PL_op->op_flags & OPf_STACKED) ? MUTABLE_GV(*++MARK) : PL_defoutgv;
 
     if (gv && (io = GvIO(gv))) {
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
@@ -1518,7 +1519,7 @@ PP(pp_sysopen)
     const int perm = (MAXARG > 3) ? POPi : 0666;
     const int mode = POPi;
     SV * const sv = POPs;
-    GV * const gv = (GV *)POPs;
+    GV * const gv = MUTABLE_GV(POPs);
     STRLEN len;
 
     /* Need TIEHANDLE method ? */
@@ -1554,7 +1555,7 @@ PP(pp_sysread)
     STRLEN charskip = 0;
     STRLEN skip = 0;
 
-    GV * const gv = (GV*)*++MARK;
+    GV * const gv = MUTABLE_GV(*++MARK);
     if ((PL_op->op_type == OP_READ || PL_op->op_type == OP_SYSREAD)
 	&& gv && (io = GvIO(gv)) )
     {
@@ -1800,7 +1801,7 @@ PP(pp_send)
     bool doing_utf8;
     U8 *tmpbuf = NULL;
     
-    GV *const gv = (GV*)*++MARK;
+    GV *const gv = MUTABLE_GV(*++MARK);
     if (PL_op->op_type == OP_SYSWRITE
 	&& gv && (io = GvIO(gv))) {
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
@@ -2037,7 +2038,7 @@ PP(pp_eof)
 	    gv = PL_last_in_gv;			/* eof */
     }
     else
-	gv = PL_last_in_gv = (GV*)POPs;		/* eof(FH) */
+	gv = PL_last_in_gv = MUTABLE_GV(POPs);	/* eof(FH) */
 
     if (gv) {
 	IO * const io = GvIO(gv);
@@ -2065,7 +2066,7 @@ PP(pp_tell)
     IO *io;
 
     if (MAXARG != 0)
-	PL_last_in_gv = (GV*)POPs;
+	PL_last_in_gv = MUTABLE_GV(POPs);
     gv = PL_last_in_gv;
 
     if (gv && (io = GvIO(gv))) {
@@ -2100,7 +2101,7 @@ PP(pp_sysseek)
     const Off_t offset = (Off_t)SvIVx(POPs);
 #endif
 
-    GV * const gv = PL_last_in_gv = (GV*)POPs;
+    GV * const gv = PL_last_in_gv = MUTABLE_GV(POPs);
     IO *io;
 
     if (gv && (io = GvIO(gv))) {
@@ -2198,11 +2199,11 @@ PP(pp_truncate)
 	    const char *name;
 
 	    if (isGV_with_GP(sv)) {
-	        tmpgv = (GV*)sv;		/* *main::FRED for example */
+	        tmpgv = MUTABLE_GV(sv);		/* *main::FRED for example */
 		goto do_ftruncate_gv;
 	    }
 	    else if (SvROK(sv) && isGV_with_GP(SvRV(sv))) {
-	        tmpgv = (GV*) SvRV(sv);	/* \*main::FRED for example */
+	        tmpgv = MUTABLE_GV(SvRV(sv));	/* \*main::FRED for example */
 		goto do_ftruncate_gv;
 	    }
 	    else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVIO) {
@@ -2244,7 +2245,7 @@ PP(pp_ioctl)
     SV * const argsv = POPs;
     const unsigned int func = POPu;
     const int optype = PL_op->op_type;
-    GV * const gv = (GV*)POPs;
+    GV * const gv = MUTABLE_GV(POPs);
     IO * const io = gv ? GvIOn(gv) : NULL;
     char *s;
     IV retval;
@@ -2321,7 +2322,7 @@ PP(pp_flock)
     IO *io = NULL;
     PerlIO *fp;
     const int argtype = POPi;
-    GV * const gv = (MAXARG == 0) ? PL_last_in_gv : (GV*)POPs;
+    GV * const gv = (MAXARG == 0) ? PL_last_in_gv : MUTABLE_GV(POPs);
 
     if (gv && (io = GvIO(gv)))
 	fp = IoIFP(io);
@@ -2356,7 +2357,7 @@ PP(pp_socket)
     const int protocol = POPi;
     const int type = POPi;
     const int domain = POPi;
-    GV * const gv = (GV*)POPs;
+    GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = gv ? GvIOn(gv) : NULL;
     int fd;
 
@@ -2406,8 +2407,8 @@ PP(pp_sockpair)
     const int protocol = POPi;
     const int type = POPi;
     const int domain = POPi;
-    GV * const gv2 = (GV*)POPs;
-    GV * const gv1 = (GV*)POPs;
+    GV * const gv2 = MUTABLE_GV(POPs);
+    GV * const gv1 = MUTABLE_GV(POPs);
     register IO * const io1 = gv1 ? GvIOn(gv1) : NULL;
     register IO * const io2 = gv2 ? GvIOn(gv2) : NULL;
     int fd[2];
@@ -2467,7 +2468,7 @@ PP(pp_bind)
     SV * const addrsv = POPs;
     /* OK, so on what platform does bind modify addr?  */
     const char *addr;
-    GV * const gv = (GV*)POPs;
+    GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = GvIOn(gv);
     STRLEN len;
 
@@ -2496,7 +2497,7 @@ PP(pp_connect)
 #ifdef HAS_SOCKET
     dVAR; dSP;
     SV * const addrsv = POPs;
-    GV * const gv = (GV*)POPs;
+    GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = GvIOn(gv);
     const char *addr;
     STRLEN len;
@@ -2526,7 +2527,7 @@ PP(pp_listen)
 #ifdef HAS_SOCKET
     dVAR; dSP;
     const int backlog = POPi;
-    GV * const gv = (GV*)POPs;
+    GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = gv ? GvIOn(gv) : NULL;
 
     if (!gv || !io || !IoIFP(io))
@@ -2559,8 +2560,8 @@ PP(pp_accept)
 #else
     Sock_size_t len = sizeof namebuf;
 #endif
-    GV * const ggv = (GV*)POPs;
-    GV * const ngv = (GV*)POPs;
+    GV * const ggv = MUTABLE_GV(POPs);
+    GV * const ngv = MUTABLE_GV(POPs);
     int fd;
 
     if (!ngv)
@@ -2631,7 +2632,7 @@ PP(pp_shutdown)
 #ifdef HAS_SOCKET
     dVAR; dSP; dTARGET;
     const int how = POPi;
-    GV * const gv = (GV*)POPs;
+    GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = GvIOn(gv);
 
     if (!io || !IoIFP(io))
@@ -2658,7 +2659,7 @@ PP(pp_ssockopt)
     SV * const sv = (optype == OP_GSOCKOPT) ? sv_2mortal(newSV(257)) : POPs;
     const unsigned int optname = (unsigned int) POPi;
     const unsigned int lvl = (unsigned int) POPi;
-    GV * const gv = (GV*)POPs;
+    GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = GvIOn(gv);
     int fd;
     Sock_size_t len;
@@ -2732,7 +2733,7 @@ PP(pp_getpeername)
 #ifdef HAS_SOCKET
     dVAR; dSP;
     const int optype = PL_op->op_type;
-    GV * const gv = (GV*)POPs;
+    GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = GvIOn(gv);
     Sock_size_t len;
     SV *sv;
@@ -2845,10 +2846,10 @@ PP(pp_stat)
     else {
 	SV* const sv = POPs;
 	if (isGV_with_GP(sv)) {
-	    gv = (GV*)sv;
+	    gv = MUTABLE_GV(sv);
 	    goto do_fstat;
 	} else if(SvROK(sv) && isGV_with_GP(SvRV(sv))) {
-            gv = (GV*)SvRV(sv);
+            gv = MUTABLE_GV(SvRV(sv));
             if (PL_op->op_type == OP_LSTAT)
                 goto do_fstat_warning_check;
             goto do_fstat;
@@ -3203,9 +3204,9 @@ PP(pp_fttty)
     if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP_gv;
     else if (isGV(TOPs))
-	gv = (GV*)POPs;
+	gv = MUTABLE_GV(POPs);
     else if (SvROK(TOPs) && isGV(SvRV(TOPs)))
-	gv = (GV*)SvRV(POPs);
+	gv = MUTABLE_GV(SvRV(POPs));
     else
 	gv = gv_fetchsv(tmpsv = POPs, 0, SVt_PVIO);
 
@@ -3252,9 +3253,9 @@ PP(pp_fttext)
     if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP_gv;
     else if (isGV(TOPs))
-	gv = (GV*)POPs;
+	gv = MUTABLE_GV(POPs);
     else if (SvROK(TOPs) && isGV(SvRV(TOPs)))
-	gv = (GV*)SvRV(POPs);
+	gv = MUTABLE_GV(SvRV(POPs));
     else
 	gv = NULL;
 
@@ -3404,10 +3405,10 @@ PP(pp_chdir)
 	    gv = gv_fetchsv(sv, 0, SVt_PVIO);
 	}
         else if (isGV_with_GP(sv)) {
-	    gv = (GV*)sv;
+	    gv = MUTABLE_GV(sv);
         }
 	else if (SvROK(sv) && isGV_with_GP(SvRV(sv))) {
-            gv = (GV*)SvRV(sv);
+            gv = MUTABLE_GV(SvRV(sv));
         }
         else {
 	    tmps = SvPV_nolen_const(sv);
@@ -3760,7 +3761,7 @@ PP(pp_open_dir)
 #if defined(Direntry_t) && defined(HAS_READDIR)
     dVAR; dSP;
     const char * const dirname = POPpconstx;
-    GV * const gv = (GV*)POPs;
+    GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = GvIOn(gv);
 
     if (!io)
@@ -3797,7 +3798,7 @@ PP(pp_readdir)
 
     SV *sv;
     const I32 gimme = GIMME;
-    GV * const gv = (GV *)POPs;
+    GV * const gv = MUTABLE_GV(POPs);
     register const Direntry_t *dp;
     register IO * const io = GvIOn(gv);
 
@@ -3851,7 +3852,7 @@ PP(pp_telldir)
 # if !defined(HAS_TELLDIR_PROTO) || defined(NEED_TELLDIR_PROTO)
     long telldir (DIR *);
 # endif
-    GV * const gv = (GV*)POPs;
+    GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = GvIOn(gv);
 
     if (!io || !IoDIRP(io)) {
@@ -3878,7 +3879,7 @@ PP(pp_seekdir)
 #if defined(HAS_SEEKDIR) || defined(seekdir)
     dVAR; dSP;
     const long along = POPl;
-    GV * const gv = (GV*)POPs;
+    GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = GvIOn(gv);
 
     if (!io || !IoDIRP(io)) {
@@ -3904,7 +3905,7 @@ PP(pp_rewinddir)
 {
 #if defined(HAS_REWINDDIR) || defined(rewinddir)
     dVAR; dSP;
-    GV * const gv = (GV*)POPs;
+    GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = GvIOn(gv);
 
     if (!io || !IoDIRP(io)) {
@@ -3929,7 +3930,7 @@ PP(pp_closedir)
 {
 #if defined(Direntry_t) && defined(HAS_READDIR)
     dVAR; dSP;
-    GV * const gv = (GV*)POPs;
+    GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = GvIOn(gv);
 
     if (!io || !IoDIRP(io)) {

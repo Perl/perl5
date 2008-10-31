@@ -951,11 +951,11 @@ XS(XS_PerlIO_get_layers)
 	}
 
 	sv = POPs;
-	gv = (GV*)sv;
+	gv = MUTABLE_GV(sv);
 
 	if (!isGV(sv)) {
 	     if (SvROK(sv) && isGV(SvRV(sv)))
-		  gv = (GV*)SvRV(sv);
+		  gv = MUTABLE_GV(SvRV(sv));
 	     else if (SvPOKp(sv))
 		  gv = gv_fetchsv(sv, 0, SVt_PVIO);
 	}

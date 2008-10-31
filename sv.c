@@ -2268,7 +2268,7 @@ S_sv_2iuv_common(pTHX_ SV *sv)
     }
     else  {
 	if (isGV_with_GP(sv))
-	    return glob_2number((GV *)sv);
+	    return glob_2number(MUTABLE_GV(sv));
 
 	if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 	    if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
@@ -2639,7 +2639,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     }
     else  {
 	if (isGV_with_GP(sv)) {
-	    glob_2number((GV *)sv);
+	    glob_2number(MUTABLE_GV(sv));
 	    return 0.0;
 	}
 
@@ -2977,7 +2977,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
     }
     else {
 	if (isGV_with_GP(sv))
-	    return glob_2pv((GV *)sv, lp);
+	    return glob_2pv(MUTABLE_GV(sv), lp);
 
 	if (!PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP) && ckWARN(WARN_UNINITIALIZED))
 	    report_uninit(sv);
@@ -3409,17 +3409,17 @@ S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
 	GvSTASH(dstr) = GvSTASH(sstr);
 	if (GvSTASH(dstr))
 	    Perl_sv_add_backref(aTHX_ MUTABLE_SV(GvSTASH(dstr)), dstr);
-	gv_name_set((GV *)dstr, name, len, GV_ADD);
+	gv_name_set(MUTABLE_GV(dstr), name, len, GV_ADD);
 	SvFAKE_on(dstr);	/* can coerce to non-glob */
     }
 
 #ifdef GV_UNIQUE_CHECK
-    if (GvUNIQUE((GV*)dstr)) {
+    if (GvUNIQUE((const GV *)dstr)) {
 	Perl_croak(aTHX_ "%s", PL_no_modify);
     }
 #endif
 
-    if(GvGP((GV*)sstr)) {
+    if(GvGP(MUTABLE_GV(sstr))) {
         /* If source has method cache entry, clear it */
         if(GvCVGEN(sstr)) {
             SvREFCNT_dec(GvCV(sstr));
@@ -3428,20 +3428,20 @@ S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
         }
         /* If source has a real method, then a method is
            going to change */
-        else if(GvCV((GV*)sstr)) {
+        else if(GvCV((const GV *)sstr)) {
             mro_changes = 1;
         }
     }
 
     /* If dest already had a real method, that's a change as well */
-    if(!mro_changes && GvGP((GV*)dstr) && GvCVu((GV*)dstr)) {
+    if(!mro_changes && GvGP(MUTABLE_GV(dstr)) && GvCVu((const GV *)dstr)) {
         mro_changes = 1;
     }
 
-    if(strEQ(GvNAME((GV*)dstr),"ISA"))
+    if(strEQ(GvNAME((const GV *)dstr),"ISA"))
         mro_changes = 2;
 
-    gp_free((GV*)dstr);
+    gp_free(MUTABLE_GV(dstr));
     isGV_with_GP_off(dstr);
     (void)SvOK_off(dstr);
     isGV_with_GP_on(dstr);
@@ -3473,7 +3473,7 @@ S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr)
     PERL_ARGS_ASSERT_GLOB_ASSIGN_REF;
 
 #ifdef GV_UNIQUE_CHECK
-    if (GvUNIQUE((GV*)dstr)) {
+    if (GvUNIQUE((const GV *)dstr)) {
 	Perl_croak(aTHX_ "%s", PL_no_modify);
     }
 #endif
@@ -3481,7 +3481,7 @@ S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr)
     if (intro) {
 	GvINTRO_off(dstr);	/* one-shot flag */
 	GvLINE(dstr) = CopLINE(PL_curcop);
-	GvEGV(dstr) = (GV*)dstr;
+	GvEGV(dstr) = MUTABLE_GV(dstr);
     }
     GvMULTI_on(dstr);
     switch (stype) {
@@ -3522,7 +3522,7 @@ S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr)
 	if (stype == SVt_PVCV && (*location != sref || GvCVGEN(dstr))) {
 	    CV* const cv = MUTABLE_CV(*location);
 	    if (cv) {
-		if (!GvCVGEN((GV*)dstr) &&
+		if (!GvCVGEN((const GV *)dstr) &&
 		    (CvROOT(cv) || CvXSUB(cv)))
 		    {
 			/* Redefining a sub - warning is mandatory if
@@ -3547,12 +3547,12 @@ S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr)
 					(CvCONST(cv)
 					 ? "Constant subroutine %s::%s redefined"
 					 : "Subroutine %s::%s redefined"),
-					HvNAME_get(GvSTASH((GV*)dstr)),
-					GvENAME((GV*)dstr));
+					HvNAME_get(GvSTASH((const GV *)dstr)),
+					GvENAME(MUTABLE_GV(dstr)));
 			}
 		    }
 		if (!intro)
-		    cv_ckproto_len(cv, (GV*)dstr,
+		    cv_ckproto_len(cv, (const GV *)dstr,
 				   SvPOK(sref) ? SvPVX_const(sref) : NULL,
 				   SvPOK(sref) ? SvCUR(sref) : 0);
 	    }
@@ -3803,7 +3803,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    GV *gv = gv_fetchsv(sstr, GV_ADD, SVt_PVGV);
 	    if (dstr != (const SV *)gv) {
 		if (GvGP(dstr))
-		    gp_free((GV*)dstr);
+		    gp_free(MUTABLE_GV(dstr));
 		GvGP(dstr) = gp_ref(GvGP(gv));
 	    }
 	}
@@ -3993,7 +3993,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    /* FAKE globs can get coerced, so need to turn this off
 	       temporarily if it is on.  */
 	    SvFAKE_off(sstr);
-	    gv_efullname3(dstr, (GV *)sstr, "*");
+	    gv_efullname3(dstr, MUTABLE_GV(sstr), "*");
 	    SvFLAGS(sstr) |= wasfake;
 	}
 	else
@@ -5526,9 +5526,10 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	    SvREFCNT_dec(LvTARG(sv));
     case SVt_PVGV:
 	if (isGV_with_GP(sv)) {
-            if(GvCVu((GV*)sv) && (stash = GvSTASH((GV*)sv)) && HvNAME_get(stash))
+            if(GvCVu((const GV *)sv) && (stash = GvSTASH(MUTABLE_GV(sv)))
+	       && HvNAME_get(stash))
                 mro_method_changed_in(stash);
-	    gp_free((GV*)sv);
+	    gp_free(MUTABLE_GV(sv));
 	    if (GvNAME_HEK(sv))
 		unshare_hek(GvNAME_HEK(sv));
 	    /* If we're in a stash, we don't own a reference to it. However it does
@@ -5539,7 +5540,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	/* FIXME. There are probably more unreferenced pointers to SVs in the
 	   interpreter struct that we should check and tidy in a similar
 	   fashion to this:  */
-	if ((GV*)sv == PL_last_in_gv)
+	if ((const GV *)sv == PL_last_in_gv)
 	    PL_last_in_gv = NULL;
     case SVt_PVMG:
     case SVt_PVNV:
@@ -7803,7 +7804,7 @@ Perl_sv_reset(pTHX_ register const char *s, HV *stash)
 
 		if (!todo[(U8)*HeKEY(entry)])
 		    continue;
-		gv = (GV*)HeVAL(entry);
+		gv = MUTABLE_GV(HeVAL(entry));
 		sv = GvSV(gv);
 		if (sv) {
 		    if (SvTHINKFIRST(sv)) {
@@ -7864,7 +7865,7 @@ Perl_sv_2io(pTHX_ SV *sv)
 	break;
     case SVt_PVGV:
 	if (isGV_with_GP(sv)) {
-	    gv = (GV*)sv;
+	    gv = MUTABLE_GV(sv);
 	    io = GvIO(gv);
 	    if (!io)
 		Perl_croak(aTHX_ "Bad filehandle: %s", GvNAME(gv));
@@ -7924,7 +7925,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 	return NULL;
     case SVt_PVGV:
 	if (isGV_with_GP(sv)) {
-	    gv = (GV*)sv;
+	    gv = MUTABLE_GV(sv);
 	    *gvp = gv;
 	    *st = GvESTASH(gv);
 	    goto fix_gv;
@@ -7945,13 +7946,13 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 		return cv;
 	    }
 	    else if(isGV_with_GP(sv))
-		gv = (GV*)sv;
+		gv = MUTABLE_GV(sv);
 	    else
 		Perl_croak(aTHX_ "Not a subroutine reference");
 	}
 	else if (isGV_with_GP(sv)) {
 	    SvGETMAGIC(sv);
-	    gv = (GV*)sv;
+	    gv = MUTABLE_GV(sv);
 	}
 	else
 	    gv = gv_fetchsv(sv, lref, SVt_PVCV); /* Calls get magic */
@@ -8480,12 +8481,13 @@ S_sv_unglob(pTHX_ SV *sv)
 
     assert(SvTYPE(sv) == SVt_PVGV);
     SvFAKE_off(sv);
-    gv_efullname3(temp, (GV *) sv, "*");
+    gv_efullname3(temp, MUTABLE_GV(sv), "*");
 
     if (GvGP(sv)) {
-        if(GvCVu((GV*)sv) && (stash = GvSTASH((GV*)sv)) && HvNAME_get(stash))
+        if(GvCVu((const GV *)sv) && (stash = GvSTASH(MUTABLE_GV(sv)))
+	   && HvNAME_get(stash))
             mro_method_changed_in(stash);
-	gp_free((GV*)sv);
+	gp_free(MUTABLE_GV(sv));
     }
     if (GvSTASH(sv)) {
 	sv_del_backref(MUTABLE_SV(GvSTASH(sv)), sv);
@@ -10060,8 +10062,8 @@ ptr_table_* functions.
 #define cv_dup_inc(s,t)	MUTABLE_CV(SvREFCNT_inc(sv_dup((const SV *)s,t)))
 #define io_dup(s,t)	MUTABLE_IO(sv_dup((const SV *)s,t))
 #define io_dup_inc(s,t)	MUTABLE_IO(SvREFCNT_inc(sv_dup((const SV *)s,t)))
-#define gv_dup(s,t)	(GV*)sv_dup((const SV *)s,t)
-#define gv_dup_inc(s,t)	(GV*)SvREFCNT_inc(sv_dup((const SV *)s,t))
+#define gv_dup(s,t)	MUTABLE_GV(sv_dup((const SV *)s,t))
+#define gv_dup_inc(s,t)	MUTABLE_GV(SvREFCNT_inc(sv_dup((const SV *)s,t)))
 #define SAVEPV(p)	((p) ? savepv(p) : NULL)
 #define SAVEPVN(p,n)	((p) ? savepvn(p,n) : NULL)
 
@@ -10625,7 +10627,7 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		break;
 
 	    case SVt_PVGV:
-		if (GvUNIQUE((GV*)sstr)) {
+		if (GvUNIQUE((const GV *)sstr)) {
 		    NOOP;   /* Do sharing here, and fall through */
 		}
 	    case SVt_PVIO:
@@ -10910,7 +10912,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 	    case CXt_LOOP:
 		ncx->blk_loop.iterdata	= (CxPADLOOP(ncx)
 					   ? ncx->blk_loop.iterdata
-					   : gv_dup((GV*)ncx->blk_loop.iterdata,
+					   : gv_dup((const GV *)ncx->blk_loop.iterdata,
 						    param));
 		ncx->blk_loop.oldcomppad
 		    = (PAD*)ptr_table_fetch(PL_ptr_table,
@@ -11141,7 +11143,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    gp = (GP*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = gp = gp_dup(gp, param);
 	    (void)GpREFCNT_inc(gp);
-	    gv = (GV*)POPPTR(ss,ix);
+	    gv = (const GV *)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = gv_dup_inc(gv, param);
             break;
 	case SAVEt_FREEOP:

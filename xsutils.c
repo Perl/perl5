@@ -262,8 +262,8 @@ usage:
 		stash = CvSTASH(sv);
 	    break;
 	case SVt_PVGV:
-	    if (isGV_with_GP(sv) && GvGP(sv) && GvESTASH((GV*)sv))
-		stash = GvESTASH((GV*)sv);
+	    if (isGV_with_GP(sv) && GvGP(sv) && GvESTASH(MUTABLE_GV(sv)))
+		stash = GvESTASH(MUTABLE_GV(sv));
 	    break;
 	default:
 	    break;

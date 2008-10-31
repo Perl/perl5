@@ -1868,7 +1868,7 @@ PP(pp_enteriter)
 #endif
     }
     else {
-	GV * const gv = (GV*)POPs;
+	GV * const gv = MUTABLE_GV(POPs);
 	svp = &GvSV(gv);			/* symbol table variable */
 	SAVEGENERICSV(*svp);
 	*svp = newSV(0);
@@ -3335,7 +3335,7 @@ PP(pp_require)
 			}
 
 			if (isGV_with_GP(arg)) {
-			    IO * const io = GvIO((GV *)arg);
+			    IO * const io = GvIO((const GV *)arg);
 
 			    ++filter_has_file;
 
@@ -3553,9 +3553,9 @@ PP(pp_require)
     if (filter_sub || filter_cache) {
 	SV * const datasv = filter_add(S_run_user_filter, NULL);
 	IoLINES(datasv) = filter_has_file;
-	IoTOP_GV(datasv) = (GV *)filter_state;
-	IoBOTTOM_GV(datasv) = (GV *)filter_sub;
-	IoFMT_GV(datasv) = (GV *)filter_cache;
+	IoTOP_GV(datasv) = MUTABLE_GV(filter_state);
+	IoBOTTOM_GV(datasv) = MUTABLE_GV(filter_sub);
+	IoFMT_GV(datasv) = MUTABLE_GV(filter_cache);
     }
 
     /* switch to eval mode */
@@ -4816,7 +4816,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	SV *cache = MUTABLE_SV(IoFMT_GV(datasv));
 
 	if (!cache) {
-	    IoFMT_GV(datasv) = (GV*) (cache = newSV(got_len - umaxlen));
+	    IoFMT_GV(datasv) = MUTABLE_GV((cache = newSV(got_len - umaxlen)));
 	} else if (SvOK(cache)) {
 	    /* Cache should be empty.  */
 	    assert(!SvCUR(cache));

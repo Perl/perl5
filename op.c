@@ -2548,7 +2548,7 @@ Perl_fold_constants(pTHX_ register OP *o)
 #endif
     assert(sv);
     if (type == OP_RV2GV)
-	newop = newGVOP(OP_GV, 0, (GV*)sv);
+	newop = newGVOP(OP_GV, 0, MUTABLE_GV(sv));
     else
 	newop = newSVOP(OP_CONST, 0, MUTABLE_SV(sv));
     op_getmad(o,newop,'f');
@@ -4231,7 +4231,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		    else if (curop->op_type == OP_PUSHRE) {
 #ifdef USE_ITHREADS
 			if (((PMOP*)curop)->op_pmreplrootu.op_pmtargetoff) {
-			    GV *const gv = (GV*)PAD_SVl(((PMOP*)curop)->op_pmreplrootu.op_pmtargetoff);
+			    GV *const gv = MUTABLE_GV(PAD_SVl(((PMOP*)curop)->op_pmreplrootu.op_pmtargetoff));
 			    if (gv == PL_defgv
 				|| (int)GvASSIGN_GENERATION(gv) == PL_generation)
 				break;
@@ -4279,7 +4279,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 			cPADOPx(tmpop)->op_padix = 0;	/* steal it */
 #else
 			pm->op_pmreplrootu.op_pmtargetgv
-			    = (GV*)cSVOPx(tmpop)->op_sv;
+			    = MUTABLE_GV(cSVOPx(tmpop)->op_sv);
 			cSVOPx(tmpop)->op_sv = NULL;	/* steal it */
 #endif
 			pm->op_pmflags |= PMf_ONCE;
