@@ -19,6 +19,9 @@ use strict;
 use Test::More tests => 101;
 my $TB = Test::More->builder;
 
+my $no_pseudohashes;
+$no_pseudohashes = "pseudohash related test" unless $] < 5.010;
+
 BEGIN { use_ok('constant'); }
 
 use constant PI		=> 4 * atan2 1, 1;
@@ -125,13 +128,24 @@ my $output = $TB->output ;
 print $output ${+CSCALAR};
 print $output CHASH->{foo};
 print $output CARRAY->[1];
-print $output CPHASH->{foo};
+
+$TB->current_test($curr_test+3);
+
+SKIP: {
+    skip $no_pseudohashes, 1 if $no_pseudohashes;
+    # You can't even think about this post 5.8.x. Well, you can. But you get
+    # Constant is not a HASH reference at ...
+    eval 'print $output CPHASH->{foo}; 1' or die $@;
+}
 print $output CCODE->($curr_test+5);
 
 $TB->current_test($curr_test+5);
 
-eval q{ CPHASH->{bar} };
-like $@, qr/^No such pseudo-hash field/, "test missing pseudo-hash field";
+SKIP: {
+    skip $no_pseudohashes, 1 if $no_pseudohashes;
+    eval q{ CPHASH->{bar} };
+    like $@, qr/^No such pseudo-hash field/, "test missing pseudo-hash field";
+}
 
 eval q{ CCODE->{foo} };
 ok scalar($@ =~ /^Constant is not a HASH/);
@@ -271,11 +285,15 @@ is @{+FAMILY}, THREE;
 is @{+FAMILY}, @{RFAM->[0]};
 is FAMILY->[2], RFAM->[0]->[2];
 is AGES->{FAMILY->[1]}, 28;
-{ no warnings 'deprecated'; is PHFAM->{John}, AGES->{John}; }
-is PHFAM->[3], AGES->{FAMILY->[2]};
-is @{+PHFAM}, SPIT->(THREE+1);
+SKIP: {
+    skip $no_pseudohashes, 4 if $no_pseudohashes;
+    eval "no warnings 'deprecated'; is PHFAM->{John}, AGES->{John}; 1"
+	or die $@;
+    is PHFAM->[3], AGES->{FAMILY->[2]};
+    is @{+PHFAM}, SPIT->(THREE+1);
+    is AGES->{FAMILY->[THREE-1]}, PHFAM->[THREE];
+}
 is THREE**3, SPIT->(@{+FAMILY}**3);
-is AGES->{FAMILY->[THREE-1]}, PHFAM->[THREE];
 
 # Allow name of digits/underscores only if it begins with underscore
 {
