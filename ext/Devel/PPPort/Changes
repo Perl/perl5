@@ -1,3 +1,8 @@
+3.14_05 - 2008-10-31
+
+    * fix stupid bugs in pv_pretty tests (only the
+      tests were broken, ppport.h was find)
+
 3.14_04 - 2008-10-30
 
     * added support for the following API

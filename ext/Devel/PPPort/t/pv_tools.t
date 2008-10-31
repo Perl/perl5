@@ -61,9 +61,9 @@ ok($r[0], "foobarbaz");
 ok($r[2], $r[3]);
 ok($r[2], '<leftpv_p\retty\nright>');
 ok($r[4], $r[5]);
-ok($r[4], $uni ? 'N\375 Batter\355\0' : 'N\303\275 Batter\303');
+ok($r[4], $uni ? 'N\375 Batter\355' : 'N\303\275 Batter\303');
 ok($r[6], $r[7]);
-ok($r[6], $uni ? '\\301g\\346tis Byrjun...' : '\303\201g\303\246tis...');
+ok($r[6], $uni ? '\301g\346tis Byrju...' : '\303\201g\303\246t...');
 
 @r = &Devel::PPPort::pv_display();
 ok($r[0], $r[1]);
