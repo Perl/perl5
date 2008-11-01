@@ -18,6 +18,7 @@ package Maintainers;
 	'arandal'       => 'Allison Randal <allison@perl.org>',
 	'audreyt'	=> 'Audrey Tang <cpan@audreyt.org>',
 	'avar'		=> 'Ævar Arnfjörð Bjarmason <avar@cpan.org>',
+	'chorny'	=> "Alexandr Ciornii <alexchorny\100gmail.com>",
 	'corion'	=> 'Max Maischein <corion@corion.net>',
 	'craig'		=> 'Craig Berry <craigberry@mac.com>',
 	'dankogai'	=> 'Dan Kogai <dankogai@cpan.org>',
@@ -825,6 +826,13 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'dmanura',
 		'FILES'		=> q[lib/Text/Balanced.pm lib/Text/Balanced],
+		'CPAN'		=> 1,
+		},
+
+	'Text::ParseWords' =>
+		{
+		'MAINTAINER'	=> 'chorny',
+		'FILES'		=> q[lib/Text/ParseWords{.pm,.t,}],
 		'CPAN'		=> 1,
 		},
 
