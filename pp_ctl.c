@@ -3725,11 +3725,12 @@ PP(pp_entereval)
 
     /* prepare to compile string */
 
-    if (PERLDB_LINE && PL_curstash != PL_debstash)
+    if (PERLDB_SAVESRC && PL_curstash != PL_debstash)
 	save_lines(CopFILEAV(&PL_compiling), PL_parser->linestr);
     PUTBACK;
     ok = doeval(gimme, NULL, runcv, seq);
-    if (PERLDB_INTER && was != (I32)PL_sub_generation /* Some subs defined here. */
+    if ((PERLDB_LINE || PERLDB_SAVESRC)
+	&& was != (I32)PL_sub_generation /* Some subs defined here. */
 	&& ok) {
 	/* Copy in anything fake and short. */
 	my_strlcpy(safestr, fakestr, fakelen);
