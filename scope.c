@@ -9,8 +9,10 @@
  */
 
 /*
- * "For the fashion of Minas Tirith was such that it was built on seven
- * levels..."
+ * For the fashion of Minas Tirith was such that it was built on seven
+ * levels...
+ *
+ *     [p.751 of _The Lord of the Rings_, V/i: "Minas Tirith"]
  */
 
 /* This file contains functions to manipulate several of Perl's stacks;

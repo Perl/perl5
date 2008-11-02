@@ -9,7 +9,9 @@
  */
 
 /*
- * "'So that was the job I felt I had to do when I started,' thought Sam."
+ *  'So that was the job I felt I had to do when I started,' thought Sam.
+ *
+ *     [p.934 of _The Lord of the Rings_, VI/iii: "Mount Doom"]
  */
 
 /* This file contains some common functions needed to carry out certain

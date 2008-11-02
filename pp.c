@@ -9,8 +9,11 @@
  */
 
 /*
- * "It's a big house this, and very peculiar.  Always a bit more to discover,
- * and no knowing what you'll find around a corner.  And Elves, sir!" --Samwise
+ * 'It's a big house this, and very peculiar.  Always a bit more
+ *  to discover, and no knowing what you'll find round a corner.
+ *  And Elves, sir!'                            --Samwise Gamgee
+ *
+ *     [p.225 of _The Lord of the Rings_, II/i: "Many Meetings"]
  */
 
 /* This file contains general pp ("push/pop") functions that execute the

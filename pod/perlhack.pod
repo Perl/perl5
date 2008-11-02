@@ -3584,7 +3584,63 @@ activity as well, and probably sooner than you'd think.
 If you can do these things, you've started on the long road to Perl porting.
 Thanks for wanting to help make Perl better - and happy hacking!
 
+=head2 Metaphoric Quotations
+
+If you recognized the quote about the Road above, you're in luck.
+
+Most software projects begin each file with a literal description of each
+file's purpose.  Perl instead begins each with a literary allusion to that
+file's purpose.
+
+Like chapters in many books, all top-level Perl source files (along with a
+few others here and there) begin with an epigramic inscription that alludes,
+indirectly and metaphorically, to the material you're about to read.
+
+Quotations are taken from writings of J.R.R Tolkien pertaining to his
+Legendarium, almost always from I<The Lord of the Rings>.  Chapters and
+page numbers are given using the following editions:
+
+=over 4
+
+=item * 
+
+I<The Hobbit>, by J.R.R. Tolkien.  The hardcover, 70th-anniversary
+edition of 2007 was used, published in the UK by Harper Collins Publishers
+and in the US by the Houghton Mifflin Company.
+
+=item *
+
+I<The Lord of the Rings>, by J.R.R. Tolkien.  The hardcover,
+50th-anniversary edition of 2004 was used, published in the UK by Harper
+Collins Publishers and in the US by the Houghton Mifflin Company.
+
+=item *
+
+I<The Lays of Beleriand>, by J.R.R. Tolkien and published posthumously by his
+son and literary executor, C.J.R. Tolkien, being the 3rd of the 12 volumes
+in Christopher's mammoth I<History of Middle Earth>.  Page numbers derive
+from the hardcover edition, first published in 1983 by George Allen &
+Unwin; no page numbers changed for the special 3-volume omnibus edition of
+2002 or the various trade-paper editions, all again now by Harper Collins
+or Houghton Mifflin.
+
+=back
+
+Other JRRT books fair game for quotes would thus include I<The Adventures of
+Tom Bombadil>, I<The Silmarillion>, I<Unfinished Tales>, and I<The Tale of
+the Children of Hurin>, all but the first posthumously assembled by CJRT.
+But I<The Lord of the Rings> itself is perfectly fine and probably best to
+quote from, provided you can find a suitable quote there.
+
+So if you were to supply a new, complete, top-level source file to add to
+Perl, you should conform to this peculiar practice by yourself selecting an
+appropriate quotation from Tolkien, retaining the original spelling and
+punctuation and using the same format the rest of the quotes are in.
+Indirect and oblique is just fine; remember, it's a metaphor, so being meta
+is, after all, what it's for.
+
 =head1 AUTHOR
 
 This document was written by Nathan Torkington, and is maintained by
 the perl5-porters mailing list.
+

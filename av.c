@@ -9,8 +9,10 @@
  */
 
 /*
- * "...for the Entwives desired order, and plenty, and peace (by which they
- * meant that things should remain where they had set them)." --Treebeard
+ * '...for the Entwives desired order, and plenty, and peace (by which they
+ *  meant that things should remain where they had set them).' --Treebeard
+ *
+ *     [p.476 of _The Lord of the Rings_, III/iv: "Treebeard"]
  */
 
 /*

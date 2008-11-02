@@ -2,7 +2,9 @@
  */
 
 /*
- * "A fair jaw-cracker dwarf-language must be."  --Samwise Gamgee
+ * 'A fair jaw-cracker dwarf-language must be.'            --Samwise Gamgee
+ *
+ *     [p.285 of _The Lord of the Rings_, II/iii: "The Ring Goes South"]
  */
 
 /* This file contains functions for compiling a regular expression.  See

@@ -9,16 +9,23 @@
  */
 
 /*
- * 'What a fix!' said Sam. 'That's the one place in all the lands we've ever
- * heard of that we don't want to see any closer; and that's the one place
- * we're trying to get to!  And that's just where we can't get, nohow.'
+ * 'What a fix!' said Sam.  'That's the one place in all the lands we've ever
+ *  heard of that we don't want to see any closer; and that's the one place
+ *  we're trying to get to!  And that's just where we can't get, nohow.'
+ *
+ *     [p.603 of _The Lord of the Rings_, IV/I: "The Taming of Sméagol"]
  *
  * 'Well do I understand your speech,' he answered in the same language;
  * 'yet few strangers do so.  Why then do you not speak in the Common Tongue,
- * as is the custom in the West, if you wish to be answered?'
+ *  as is the custom in the West, if you wish to be answered?'
+ *                           --Gandalf, addressing Théoden's door wardens
+ *
+ *     [p.508 of _The Lord of the Rings_, III/vi: "The King of the Golden Hall"]
  *
  * ...the travellers perceived that the floor was paved with stones of many
  * hues; branching runes and strange devices intertwined beneath their feet.
+ *
+ *     [p.512 of _The Lord of the Rings_, III/vi: "The King of the Golden Hall"]
  */
 
 #include "EXTERN.h"

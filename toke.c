@@ -9,7 +9,9 @@
  */
 
 /*
- *   "It all comes from here, the stench and the peril."  --Frodo
+ *  'It all comes from here, the stench and the peril.'    --Frodo
+ *
+ *     [p.719 of _The Lord of the Rings_, IV/ix: "Shelob's Lair"]
  */
 
 /*

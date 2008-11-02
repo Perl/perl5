@@ -9,8 +9,10 @@
  */
 
 /*
- *   ...they shuffled back towards the rear of the line. 'No, not at the
- *   rear!'  the slave-driver shouted. 'Three files up. And stay there...
+ *   ...they shuffled back towards the rear of the line.  'No, not at the
+ *   rear!' the slave-driver shouted.  'Three files up. And stay there...
+ *
+ *     [p.931 of _The Lord of the Rings_, VI/ii: "The Land of Shadow"]
  */
 
 /* This file contains pp ("push/pop") functions that

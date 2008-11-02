@@ -9,13 +9,15 @@
  */
 
 /*
- * A Elbereth Gilthoniel,
- * silivren penna míriel
- * o menel aglar elenath!
- * Na-chaered palan-díriel
- * o galadhremmin ennorath,
- * Fanuilos, le linnathon
- * nef aear, si nef aearon!
+ *      A Elbereth Gilthoniel,
+ *      silivren penna míriel
+ *      o menel aglar elenath!
+ *      Na-chaered palan-díriel
+ *      o galadhremmin ennorath,
+ *      Fanuilos, le linnathon
+ *      nef aear, si nef aearon!
+ *
+ *     [p.238 of _The Lord of the Rings_, II/i: "Many Meetings"]
  */
 
 /* utility functions for handling locale-specific stuff like what

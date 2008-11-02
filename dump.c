@@ -9,8 +9,10 @@
  */
 
 /*
- * "'You have talked long in your sleep, Frodo,' said Gandalf gently, 'and
- * it has not been hard for me to read your mind and memory.'"
+ *  'You have talked long in your sleep, Frodo,' said Gandalf gently, 'and
+ *   it has not been hard for me to read your mind and memory.'
+ *
+ *     [p.220 of _The Lord of the Rings_, II/i: "Many Meetings"]
  */
 
 /* This file contains utility routines to dump the contents of SV and OP

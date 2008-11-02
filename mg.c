@@ -9,8 +9,10 @@
  */
 
 /*
- * "Sam sat on the ground and put his head in his hands.  'I wish I had never
- * come here, and I don't want to see no more magic,' he said, and fell silent."
+ *  Sam sat on the ground and put his head in his hands.  'I wish I had never
+ *  come here, and I don't want to see no more magic,' he said, and fell silent.
+ *
+ *     [p.363 of _The Lord of the Rings_, II/vii: "The Mirror of Galadriel"]
  */
 
 /*
