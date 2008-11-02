@@ -1332,7 +1332,7 @@ XS(XS_Tie_Hash_NamedCapture_STORE)
 
     if (!rx) {
         if (!PL_localizing)
-            Perl_croak(aTHX_ PL_no_modify);
+            Perl_croak(aTHX_ "%s", PL_no_modify);
         else
             XSRETURN_UNDEF;
     }
@@ -1354,7 +1354,7 @@ XS(XS_Tie_Hash_NamedCapture_DELETE)
 	croak_xs_usage(cv, "$key, $flags");
 
     if (!rx)
-        Perl_croak(aTHX_ PL_no_modify);
+        Perl_croak(aTHX_ "%s", PL_no_modify);
 
     SP -= items;
 
@@ -1375,7 +1375,7 @@ XS(XS_Tie_Hash_NamedCapture_CLEAR)
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
     if (!rx)
-        Perl_croak(aTHX_ PL_no_modify);
+        Perl_croak(aTHX_ "%s", PL_no_modify);
 
     SP -= items;
 

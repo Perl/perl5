@@ -612,7 +612,7 @@ Perl_magic_regdatum_set(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_REGDATUM_SET;
     PERL_UNUSED_ARG(sv);
     PERL_UNUSED_ARG(mg);
-    Perl_croak(aTHX_ PL_no_modify);
+    Perl_croak(aTHX_ "%s", PL_no_modify);
     NORETURN_FUNCTION_END;
 }
 
@@ -2358,7 +2358,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
              * set without a previous pattern match. Unless it's C<local $1>
              */
             if (!PL_localizing) {
-                Perl_croak(aTHX_ PL_no_modify);
+                Perl_croak(aTHX_ "%s", PL_no_modify);
             }
         }
     case '\001':	/* ^A */

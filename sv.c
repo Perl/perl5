@@ -3291,7 +3291,7 @@ Perl_sv_utf8_encode(pTHX_ register SV *const sv)
         sv_force_normal_flags(sv, 0);
     }
     if (SvREADONLY(sv)) {
-	Perl_croak(aTHX_ PL_no_modify);
+	Perl_croak(aTHX_ "%s", PL_no_modify);
     }
     (void) sv_utf8_upgrade(sv);
     SvUTF8_off(sv);
@@ -3409,7 +3409,7 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
 
 #ifdef GV_UNIQUE_CHECK
     if (GvUNIQUE((const GV *)dstr)) {
-	Perl_croak(aTHX_ PL_no_modify);
+	Perl_croak(aTHX_ "%s", PL_no_modify);
     }
 #endif
 
@@ -3468,7 +3468,7 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 
 #ifdef GV_UNIQUE_CHECK
     if (GvUNIQUE((const GV *)dstr)) {
-	Perl_croak(aTHX_ PL_no_modify);
+	Perl_croak(aTHX_ "%s", PL_no_modify);
     }
 #endif
 
@@ -4375,7 +4375,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *const sv, const U32 flags)
             }
 	}
 	else if (IN_PERL_RUNTIME)
-	    Perl_croak(aTHX_ PL_no_modify);
+	    Perl_croak(aTHX_ "%s", PL_no_modify);
         /* At this point I believe that I can drop the global SV mutex.  */
     }
 #else
@@ -4393,7 +4393,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *const sv, const U32 flags)
 	    unshare_hek(SvSHARED_HEK_FROM_PV(pvx));
 	}
 	else if (IN_PERL_RUNTIME)
-	    Perl_croak(aTHX_ PL_no_modify);
+	    Perl_croak(aTHX_ "%s", PL_no_modify);
     }
 #endif
     if (SvROK(sv))
@@ -4806,7 +4806,7 @@ Perl_sv_magic(pTHX_ register SV *const sv, SV *const obj, const int how,
 	    && how != PERL_MAGIC_backref
 	   )
 	{
-	    Perl_croak(aTHX_ PL_no_modify);
+	    Perl_croak(aTHX_ "%s", PL_no_modify);
 	}
     }
     if (SvMAGICAL(sv) || (how == PERL_MAGIC_taint && SvTYPE(sv) >= SVt_PVMG)) {
@@ -7024,7 +7024,7 @@ Perl_sv_inc(pTHX_ register SV *const sv)
 	    sv_force_normal_flags(sv, 0);
 	if (SvREADONLY(sv)) {
 	    if (IN_PERL_RUNTIME)
-		Perl_croak(aTHX_ PL_no_modify);
+		Perl_croak(aTHX_ "%s", PL_no_modify);
 	}
 	if (SvROK(sv)) {
 	    IV i;
@@ -7187,7 +7187,7 @@ Perl_sv_dec(pTHX_ register SV *const sv)
 	    sv_force_normal_flags(sv, 0);
 	if (SvREADONLY(sv)) {
 	    if (IN_PERL_RUNTIME)
-		Perl_croak(aTHX_ PL_no_modify);
+		Perl_croak(aTHX_ "%s", PL_no_modify);
 	}
 	if (SvROK(sv)) {
 	    IV i;
@@ -8473,7 +8473,7 @@ Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
 	if (SvIsCOW(tmpRef))
 	    sv_force_normal_flags(tmpRef, 0);
 	if (SvREADONLY(tmpRef))
-	    Perl_croak(aTHX_ PL_no_modify);
+	    Perl_croak(aTHX_ "%s", PL_no_modify);
 	if (SvOBJECT(tmpRef)) {
 	    if (SvTYPE(tmpRef) != SVt_PVIO)
 		--PL_sv_objcount;
@@ -10003,13 +10003,13 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 
 	have = esignlen + zeros + elen;
 	if (have < zeros)
-	    Perl_croak_nocontext(PL_memory_wrap);
+	    Perl_croak_nocontext("%s", PL_memory_wrap);
 
 	need = (have > width ? have : width);
 	gap = need - have;
 
 	if (need >= (((STRLEN)~0) - SvCUR(sv) - dotstrlen - 1))
-	    Perl_croak_nocontext(PL_memory_wrap);
+	    Perl_croak_nocontext("%s", PL_memory_wrap);
 	SvGROW(sv, SvCUR(sv) + need + dotstrlen + 1);
 	p = SvEND(sv);
 	if (esignlen && fill == '0') {
