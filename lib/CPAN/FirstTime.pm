@@ -19,7 +19,7 @@ use File::Basename ();
 use File::Path ();
 use File::Spec ();
 use vars qw($VERSION $urllist);
-$VERSION = "5.5";
+$VERSION = "5.5_01";
 
 =head1 NAME
 
@@ -1198,7 +1198,7 @@ substitute. You can then revisit this dialog with
     #= MIRRORED.BY and conf_sites()
     #
 
-    my_yn_prompt("connect_to_internet_ok" => 0, $matcher);
+    my_yn_prompt("connect_to_internet_ok" => 1, $matcher);
     if ($matcher) {
         if ("urllist" =~ $matcher) {
             # conf_sites would go into endless loop with the smash prompt
