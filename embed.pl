@@ -50,7 +50,9 @@ EOW
 
 Up to the threshold of the door there mounted a flight of twenty-seven
 broad stairs, hewn by some unknown art of the same black stone.  This
-was the only entrance to the tower.
+was the only entrance to the tower; ...
+
+    [p.577 of _The Lord of the Rings_, III/x: "The Voice of Saruman"]
 
 
 EOW

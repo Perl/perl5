@@ -9,8 +9,10 @@
  */
 
 /*
- * "Which order shall we go in?" said Frodo. "Eldest first, or quickest first?
- *  You'll be last either way, Master Peregrin."
+ * 'Which order shall we go in?' said Frodo.  'Eldest first, or quickest first?
+ *  You'll be last either way, Master Peregrin.'
+ *
+ *     [p.101 of _The Lord of the Rings_, I/iii: "A Conspiracy Unmasked"]
  */
 
 /*

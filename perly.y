@@ -10,8 +10,12 @@
 
 /*
  * 'I see,' laughed Strider.  'I look foul and feel fair.  Is that it?
- * All that is gold does not glitter, not all those who wander are lost.'
+ *  All that is gold does not glitter, not all those who wander are lost.'
  *
+ *     [p.171 of _The Lord of the Rings_, I/x: "Strider"]
+ */
+
+/*
  * This file holds the grammar for the Perl language. If edited, you need
  * to run regen_perly.pl, which re-creates the files perly.h, perly.tab
  * and perly.act which are derived from this.

@@ -12,14 +12,15 @@
  */
 
 /*
- *               Yet small as was their hunted band
- *               still fell and fearless was each hand,
- *               and strong deeds they wrought yet oft,
- *               and loved the woods, whose ways more soft
- *               them seemed than thralls of that black throne
- *               to live and languish in halls of stone.
+ *   Yet small as was their hunted band
+ *   still fell and fearless was each hand,
+ *   and strong deeds they wrought yet oft,
+ *   and loved the woods, whose ways more soft
+ *   them seemed than thralls of that black throne
+ *   to live and languish in halls of stone.
+ *        "The Lay of Leithian", Canto II, lines 135-40
  *
- *                           The Lay of Leithian, 135-40
+ *     [p.162 of _The Lays of Beleriand_]
  */
  
 #include <acedef.h>

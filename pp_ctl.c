@@ -9,12 +9,14 @@
  */
 
 /*
- * Now far ahead the Road has gone,
- * And I must follow, if I can,
- * Pursuing it with eager feet,
- * Until it joins some larger way
- * Where many paths and errands meet.
- * And whither then?  I cannot say.
+ *      Now far ahead the Road has gone,
+ *          And I must follow, if I can,
+ *      Pursuing it with eager feet,
+ *          Until it joins some larger way
+ *      Where many paths and errands meet.
+ *          And whither then?  I cannot say.
+ *
+ *     [Bilbo on p.35 of _The Lord of the Rings_, I/i: "A Long-Expected Party"]
  */
 
 /* This file contains control-oriented pp ("push/pop") functions that

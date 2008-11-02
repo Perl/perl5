@@ -3,7 +3,9 @@
  */
 
 /*
- * "'The Chamber of Records,' said Gimli. 'I guess that is where we now stand.'"
+ * 'The Chamber of Records,' said Gimli.  'I guess that is where we now stand.'
+ *
+ *     [p.321 of _The Lord of the Rings_, II/v: "The Bridge of Khazad-Dûm"]
  */
 
 /* This file contains Perl's own implementation of the malloc library.

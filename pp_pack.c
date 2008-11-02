@@ -14,6 +14,8 @@
  * wooden spoon, a short two-pronged fork and some skewers were stowed; and
  * hidden at the bottom of the pack in a flat wooden box a dwindling treasure,
  * some salt.
+ *
+ *     [p.653 of _The Lord of the Rings_, IV/iv: "Of Herbs and Stewed Rabbit"]
  */
 
 /* This file contains pp ("push/pop") functions that

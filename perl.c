@@ -9,7 +9,11 @@
  */
 
 /*
- * "A ship then new they built for him/of mithril and of elven glass" --Bilbo
+ *      A ship then new they built for him
+ *      of mithril and of elven-glass
+ *              --from Bilbo's song of Eärendil
+ *
+ *     [p.236 of _The Lord of the Rings_, II/i: "Many Meetings"]
  */
 
 /* This file contains the top-level functions that are used to create, use

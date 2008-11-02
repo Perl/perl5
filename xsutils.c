@@ -9,8 +9,10 @@
  */
 
 /*
- * "Perilous to us all are the devices of an art deeper than we possess
- * ourselves." --Gandalf
+ * 'Perilous to us all are the devices of an art deeper than we possess
+ *  ourselves.'                                            --Gandalf
+ *
+ *     [p.597 of _The Lord of the Rings_, III/xi: "The Palantír"]
  */
 
 

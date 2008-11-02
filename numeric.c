@@ -9,8 +9,10 @@
  */
 
 /*
- * "That only makes eleven (plus one mislaid) and not fourteen, unless
- * wizards count differently to other people."
+ * "That only makes eleven (plus one mislaid) and not fourteen,
+ *  unless wizards count differently to other people."  --Beorn
+ *
+ *     [p.115 of _The Hobbit_: "Queer Lodgings"]
  */
 
 /*
