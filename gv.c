@@ -1213,17 +1213,16 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		    if ((add & GV_ADDMULTI) && strEQ(nambeg,"AnyDBM_File::ISA")
 			&& AvFILLp(av) == -1)
 			{
-			    const char *pname;
-			    av_push(av, newSVpvs(pname = "NDBM_File"));
-			    gv_stashpvn(pname, 9, GV_ADD);
-			    av_push(av, newSVpvs(pname = "DB_File"));
-			    gv_stashpvn(pname, 7, GV_ADD);
-			    av_push(av, newSVpvs(pname = "GDBM_File"));
-			    gv_stashpvn(pname, 9, GV_ADD);
-			    av_push(av, newSVpvs(pname = "SDBM_File"));
-			    gv_stashpvn(pname, 9, GV_ADD);
-			    av_push(av, newSVpvs(pname = "ODBM_File"));
-			    gv_stashpvn(pname, 9, GV_ADD);
+			    av_push(av, newSVpvs("NDBM_File"));
+			    gv_stashpvs("NDBM_File", GV_ADD);
+			    av_push(av, newSVpvs("DB_File"));
+			    gv_stashpvs("DB_File", GV_ADD);
+			    av_push(av, newSVpvs("GDBM_File"));
+			    gv_stashpvs("GDBM_File", GV_ADD);
+			    av_push(av, newSVpvs("SDBM_File"));
+			    gv_stashpvs("SDBM_File", GV_ADD);
+			    av_push(av, newSVpvs("ODBM_File"));
+			    gv_stashpvs("ODBM_File", GV_ADD);
 			}
 		}
 		break;
