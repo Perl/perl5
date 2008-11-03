@@ -876,6 +876,24 @@ d_Gconvert (d_gconvert.U):
 	call-back unit so that long doubles can be formatted without
 	loss of precision.
 
+d_gdbm_ndbm_h_uses_prototypes (i_ndbm.U):
+	This variable conditionally defines the NDBM_H_USES_PROTOTYPES symbol,
+	which indicates that the gdbm-ndbm.h include file uses real ANSI C
+	prototypes instead of K&R style function declarations. K&R style
+	declarations are unsupported in C++, so the include file requires
+	special handling when using a C++ compiler and this variable is
+	undefined. Consult the different d_*ndbm_h_uses_prototypes variables
+	to get the same information for alternative ndbm.h include files.
+
+d_gdbmndbm_h_uses_prototypes (i_ndbm.U):
+	This variable conditionally defines the NDBM_H_USES_PROTOTYPES symbol,
+	which indicates that the gdbm/ndbm.h include file uses real ANSI C
+	prototypes instead of K&R style function declarations. K&R style
+	declarations are unsupported in C++, so the include file requires
+	special handling when using a C++ compiler and this variable is
+	undefined. Consult the different d_*ndbm_h_uses_prototypes variables
+	to get the same information for alternative ndbm.h include files.
+
 d_getcwd (d_getcwd.U):
 	This variable conditionally defines the HAS_GETCWD symbol, which
 	indicates to the C program that the getcwd() routine is available
@@ -1460,6 +1478,15 @@ d_ndbm (i_ndbm.U):
 	to find out the actual include location.  Sometimes, a system has the
 	header file but not the library.  This variable will only be set if
 	the system has both.
+
+d_ndbm_h_uses_prototypes (i_ndbm.U):
+	This variable conditionally defines the NDBM_H_USES_PROTOTYPES symbol,
+	which indicates that the ndbm.h include file uses real ANSI C
+	prototypes instead of K&R style function declarations. K&R style
+	declarations are unsupported in C++, so the include file requires
+	special handling when using a C++ compiler and this variable is
+	undefined. Consult the different d_*ndbm_h_uses_prototypes variables
+	to get the same information for alternative ndbm.h include files.
 
 d_nice (d_nice.U):
 	This variable conditionally defines the HAS_NICE symbol, which

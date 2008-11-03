@@ -25,7 +25,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Wed Oct 29 09:08:09 CET 2008 [metaconfig 3.5 PL0]
+# Generated on Thu Nov  6 21:06:19 CET 2008 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -881,7 +881,10 @@ i_mallocmalloc=''
 i_math=''
 i_memory=''
 i_mntent=''
+d_gdbm_ndbm_h_uses_prototypes=''
+d_gdbmndbm_h_uses_prototypes=''
 d_ndbm=''
+d_ndbm_h_uses_prototypes=''
 i_gdbm_ndbm=''
 i_gdbmndbm=''
 i_ndbm=''
@@ -13283,6 +13286,60 @@ else
 fi
 $rm_try
 
+: see if ndbm.h is available
+set ndbm.h i_ndbm
+eval $inhdr
+: Compatibility location for RedHat 7.1
+set gdbm/ndbm.h i_gdbmndbm
+eval $inhdr
+: Compatibility location for Debian 4.0
+set gdbm-ndbm.h i_gdbm_ndbm
+eval $inhdr
+
+val="$undef"
+if $test "$i_ndbm" = "$define" -o "$i_gdbmndbm" = "$define" -o "$i_gdbm_ndbm" = "$define"; then
+	: see if dbm_open exists
+	set dbm_open d_dbm_open
+	eval $inlibc
+	case "$d_dbm_open" in
+	$undef)
+		i_ndbm="$undef"
+		i_gdbmndbm="$undef"
+		i_gdbm_ndbm="$undef"
+		echo "We won't be including <ndbm.h>"
+		val="$undef"
+		;;
+	*) val="$define"
+	   ;;
+	esac
+fi
+set d_ndbm
+eval $setvar
+
+ndbm_hdr_protochk='name=$1; hdr=$2;
+eval "ihdr=\$""i_$name";
+val="$undef";
+if $test "$ihdr" = "$define"; then
+	$echo "Checking if your <$hdr> uses prototypes..." >&4;
+	case "$d_cplusplus" in
+	$define) ./protochk "$extern_C void dbm_close(DBM *);" literal "extern \"C\" {" $ihdr $hdr literal "}" && val="$define" ;;
+	*) ./protochk "$extern_C void dbm_close(int, int);" $ihdr $hdr || val="$define" ;;
+	esac;
+	case "$val" in
+	$define) $echo "Your <$hdr> seems to have prototypes";;
+	*) $echo "Your <$hdr> does not seem to have prototypes";;
+	esac;
+fi;
+set "d_${name}_h_uses_prototypes";
+eval $setvar'
+
+set ndbm ndbm.h
+eval $ndbm_hdr_protochk
+set gdbmndbm gdbm/ndbm.h
+eval $ndbm_hdr_protochk
+set gdbm_ndbm gdbm-ndbm.h
+eval $ndbm_hdr_protochk
+
 : see if getcwd exists
 set getcwd d_getcwd
 eval $inlibc
@@ -21044,35 +21101,6 @@ val="$t_gdbm"
 set i_gdbm
 eval $setvar
 
-: see if ndbm.h is available
-set ndbm.h i_ndbm
-eval $inhdr
-: Compatibility location for RedHat 7.1
-set gdbm/ndbm.h i_gdbmndbm
-eval $inhdr
-: Compatibility location for Debian 4.0
-set gdbm-ndbm.h i_gdbm_ndbm
-eval $inhdr
-
-if $test "$i_ndbm" = "$define" -o "$i_gdbmndbm" = "$define" -o "$i_gdbm_ndbm" = "$define"; then
-	: see if dbm_open exists
-	set dbm_open d_dbm_open
-	eval $inlibc
-	case "$d_dbm_open" in
-	$undef)
-		i_ndbm="$undef"
-		i_gdbmndbm="$undef"
-		i_gdbm_ndbm="$undef"
-		echo "We won't be including <ndbm.h>"
-	    val="$undef"
-		;;
-	*) val="$define"
-	   ;;
-	esac
-fi
-set d_ndbm
-eval $setvar
-
 : see if this is a ieeefp.h system
 case "$i_ieeefp" in
 '' ) set ieeefp.h i_ieeefp
@@ -22198,6 +22226,8 @@ d_fsync='$d_fsync'
 d_ftello='$d_ftello'
 d_ftime='$d_ftime'
 d_futimes='$d_futimes'
+d_gdbm_ndbm_h_uses_prototypes='$d_gdbm_ndbm_h_uses_prototypes'
+d_gdbmndbm_h_uses_prototypes='$d_gdbmndbm_h_uses_prototypes'
 d_getcwd='$d_getcwd'
 d_getespwnam='$d_getespwnam'
 d_getfsstat='$d_getfsstat'
@@ -22322,6 +22352,7 @@ d_msync='$d_msync'
 d_munmap='$d_munmap'
 d_mymalloc='$d_mymalloc'
 d_ndbm='$d_ndbm'
+d_ndbm_h_uses_prototypes='$d_ndbm_h_uses_prototypes'
 d_nice='$d_nice'
 d_nl_langinfo='$d_nl_langinfo'
 d_nv_preserves_uv='$d_nv_preserves_uv'
