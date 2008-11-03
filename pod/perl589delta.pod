@@ -13,11 +13,1026 @@ There are no changes incompatible with 5.8.8.
 
 =head1 Core Enhancements
 
+readpipe() (and thus `` and qx//) can now be overridden.
+
+Nicholas Clark allowed symbolic references to have embedded NULs. The new
+public function C<get_cvn_flags> can be used in extensions if you have to
+handle them.
+
+It's now possible to call C<stat> and the C<-X> filestat operators on
+dirhandles. When the situation is ambiguous, it favours the file handle
+semantics. They also treat C<*FILE{IO}> filehandles like C<*FILE> filehandles.
+
+Added B<perlthanks> which is just like C<perlbug> but allows the user to
+send a note of gratitude to the authors and maintainers of Perl. [33532]
+
+Updated Unicode definitions to 5.1.0.
+
+The Campaign for the Elimination of strlen() has successfully eliminated
+many calls to strlen().
+
+A very stubborn compiler warning in S_emulate_eaccess was killed six
+times.
+
+=head1 New Platforms
+
+Compile support added for:
+
+=over
+
+=item *
+
+RISC OS 
+
+=item *
+
+Cray XT4/Catamount
+
+=back
+
 =head1 Modules and Pragmata
+
+=head2 New Modules
+
+=over
+
+=item *
+
+C<Module::Pluggable> is a simple framework to create modules that accept
+pluggable sub-modules. The bundled version is 3.7. [33505]
+
+=item *
+
+C<Module::CoreList> is a hash of hashes that is keyed on perl version as
+indicated in $]. The bundled version is 2.12 (31561)
+
+=back
+
+=head2 Updated Modules
+
+=over
+
+=item *
+
+C<attributes> upgraded to version 0.09
+
+=item *
+
+C<ANSIColor> upgraded to version 1.11
+
+=item *
+
+C<Archive::Extract> upgraded to version 0.26
+
+=item *
+
+C<Attribute::Handlers> upgraded to version 0.79
+
+=item *
+
+C<AutoLoader> upgraded to version 5.66
+
+=item *
+
+C<AutoSplit> upgraded to 1.06
+
+=item *
+
+C<autouse> upgraded to version 1.06
+
+=item *
+
+C<B> upgraded from 1.09_01 to 1.19
+
+=over
+
+=item *
+
+consting and PMOP handling fixes.
+
+=item *
+
+export B_sub_generation(), B::NV::COP_SEQ_RANGE_LOW(),
+B::NV::COP_SEQ_RANGE_HIGH(), B::NV::PARENT_PAD_INDEX(),
+B::NV::PARENT_FAKELEX_FLAGS()
+
+=item *
+
+fix B::PV::PVBM. It was missing the last table entry before.
+
+=item *
+
+B::BM::PREVIOUS returns now U32, not U16.
+
+=item *
+
+add B::GV::isGV_with_GP() returning always TRUE
+
+=item *
+
+B::CV::START and B:CV::ROOT return now NULL on an XSUB,
+B::CV::XSUB and B::CV::XSUBANY return 0 on a non-XSUB.
+
+=item *
+
+New type B::HE added with methods VAL, HASH, SVKEY_force
+
+=item *
+
+The B::GVf_IMPORTED_CV flag is now set correctly when a proxy
+constant subroutine is imported.
+
+=back
+
+=item *
+
+C<B::C> upgraded to 1.05
+
+=item *
+
+C<B::Concise> upgraded to 0.74
+
+=over
+
+=item *
+
+Supports option B<-src>, i.e. the rendering of each statement (starting with
+the nextstate OP) will be preceded by the 1st line of source code that
+generates it.
+
+=item *
+
+Support option B<-stash="somepackage">, i.e. "somepackage" will be required,
+then the stash is inspected, and each function is rendered.
+
+=item *
+
+Now has a documentation of detailed hint symbols.
+
+=back
+
+=item *
+
+C<B::Debug> upgraded to version 1.05
+
+=item *
+
+C<B::Deparse> upgraded to version 0.82
+
+=item *
+
+C<B::Lint> upgraded to version 1.11
+
+=item *
+
+C<B::Terse> upgraded to version 1.04
+
+=item *
+
+C<base> upgraded to version 2.13
+
+=item *
+
+C<Benchmark> upgraded to version 1.10
+
+=item *
+
+C<bignum> upgraded to 0.20
+
+=item *
+
+C<Carp> upgraded to version 1.09
+
+=item *
+
+C<CGI> upgraded to version 3.35 [33568] 
+
+=item *
+
+C<constant> upgraded to version 1.15
+
+=item *
+
+C<CPAN> upgraded to version 1.9205 (32280)
+
+=item *
+
+C<Cwd> upgraded to version 3.27 with C const-ing and some platform specific
+improvements (including for VMS).
+
+=item *
+
+C<Data::Dumper> upgraded to version 2.121_13
+
+=over
+
+=item *
+
+Performance enhancements (28963)
+
+=item *
+
+Fixes hash iterator current position with the pure Perl version #40668 (29224)
+
+=back
+
+=item *
+
+C<DB> upgraded to version 1.30
+
+=over
+
+=item *
+
+Andreas J. Koenig contributed two functions to save and load the debugger
+history.
+
+=back
+
+=item *
+
+C<DB_File> upgraded to version 1.817 [33583]
+
+=item *
+
+C<Devel::DProf> upgraded to version 20080331.00.
+
+=item *
+
+C<Devel::Peek> upgraded to version 1.04
+
+=item *
+
+C<Devel::PPPort> upgraded to version 3.14_01
+
+=item *
+
+C<diagnostics> upgraded to version 1.16
+
+=item *
+
+C<Digest> upgraded to version 1.15
+
+=item *
+
+C<Digest::SHA> upgraded to version 5.46
+
+=item *
+
+C<DirHandle> upgraded to version 1.02
+
+=over
+
+=item *
+
+Now localize C<$.>, C<$@>, C<$!>, C<$^E>, and C<$?> before closing directory
+handle to suppress warning about already being closed.
+
+=back
+
+=item *
+
+C<DynaLoader> upgraded to version 1.09 and can now dynamically load a loadable
+object from a file with a non-default file extension.
+
+=item *
+
+C<Embed> upgraded to version 1.28
+
+=item *
+
+C<Encode> upgraded to version 2.24 [33493]
+
+=item *
+
+C<Encode::Alias> includes a fix for encoding "646" (aka ASCII) on Solaris.
+
+=item *
+
+C<File::Basename> upgraded to version 2.76
+
+=item *
+
+C<File::Find> upgraded to version 1.11
+
+=item *
+
+C<File::Glob> upgraded to version 1.06
+
+=item *
+
+C<encoding> upgraded to version 0.11
+
+=item *
+
+C<Errno> upgraded to version 1.10
+
+=item *
+
+C<Exporter> upgraded to version 5.60
+
+=item *
+
+C<ExtUtils::Command> upgraded to version 1.14
+
+=item *
+
+C<ExtUtils::Constant> upgraded to version 0.04
+
+=item *
+
+C<ExtUtils::Constant::ProxySubs> upgraded to version 0.06
+
+=item *
+
+C<ExtUtils::Install> upgraded to version 1.51 [33567]
+
+=item *
+
+C<ExtUtils::MakeMaker> upgraded to version 6.44 [33396]
+
+=over
+
+=item *
+
+Support for INSTALLSITESCRIPT and INSTALLVENDORSCRIPT 
+configuration. [26536]
+
+=back
+
+=item *
+
+C<ExtUtils::Manifest> upgraded to version 1.51
+
+=item *
+
+C<ExtUtils::ParseXS> upgraded to version 2.19 [33392]
+
+=item *
+
+C<Fatal> upgraded to version 1.06
+
+=item *
+
+C<Time::Local> upgraded to version 1.18
+
+=over
+
+=item *
+
+Allows to make fatal built-ins in CORE::GLOBAL.
+
+=back
+
+=item *
+
+C<fields> upgraded to version 2.12
+
+=item *
+
+C<File::Basename> upgraded to version 2.77
+
+=item *
+
+C<File::Copy> now uses 3-arg open.
+
+C<File::Copy> upgraded to 2.11
+
+=item *
+
+C<File::Find> upgraded to version 1.13
+
+=item *
+
+C<File::Glob> upgraded to version 1.06
+
+=over
+
+=item *
+
+Fixes spurious results with brackets inside braces.
+
+=back
+
+=item *
+
+C<File::Path> upgraded to version 2.04
+
+=item *
+
+C<File::Spec>, C<File::Spec::Epoc>, C<File::Spec::Mac>,
+C<File::Spec::Functions> C<File::Spec::Unix>, C<File::Spec::VMS>,
+C<File::Spec::Win32> upgraded to version 3.2701 with improved handling of bad
+arguments and some platform specific improvements (Including for VMS and
+Cygwin) including an optimization on C<abs2rel()> when handling both relative
+arguments.
+
+=item *
+
+C<File::Spec::Unix> upgraded to version 1.5_01
+
+=item *
+
+C<File::Temp> upgraded to version 0.20
+
+=item * 
+
+C<FindBin> upgraded to version 1.49
+
+=item *
+
+C<FileCache> upgraded to version 1.07
+
+=item *
+
+C<GDBM_File> upgraded to version 1.09
+
+=item *
+
+C<Getopt::Long> upgraded to version 2.37 (32009)
+
+=item *
+
+C<Hash::Util> upgraded to version 0.07
+
+=item *
+
+C<IPC::SysV> upgraded to version 2.00
+
+=item *
+
+C<lib> upgraded to version 0.56
+
+=over
+
+=item *
+
+Avoid warning about loading F<.par> files
+
+=back
+
+=item *
+
+C<libnet> upgraded to version 1.20
+
+=item *
+
+C<Locale::Maketext> upgraded to 1.13
+
+=item *
+
+C<Math::BigFloat> upgraded to version 1.54
+
+=item *
+
+C<Math::BigInt> upgraded to version 1.82
+
+=item *
+
+C<Math::BigRat> upgraded to version 0.22
+
+=over 4
+
+=item *
+
+Implements new C<as_float> method.
+
+=back
+
+=item *
+
+C<Math::Complex>, C<Math::Trig> upgraded to version 1.54.
+
+=item *
+
+C<Module::Pluggable> upgraded to version 3.8 [33552]
+
+=item *
+
+C<Net::Ping> upgraded to version 2.35 [33242]
+
+=item *
+
+C<NEXT> upgraded to version 0.61 [34007]
+
+=over
+
+=item *
+
+Fix several bugs with L<NEXT> when working with C<AUTOLOAD>, C<eval> block, and
+within overloaded stringification.
+
+=back
+
+=item *
+
+C<NDBM_File> upgraded to version 1.07
+
+=over
+
+=item *
+
+Improve g++ handling for systems using GDBM compatibility headers.
+
+=back
+
+=item *
+
+C<Opcode::Safe> upgraded to version 2.14
+
+=item *
+
+C<open> upgraded to 1.06
+
+=item *
+
+C<PathTools> upgraded to version 3.2501
+
+=item *
+
+C<PerlIO::scalar> upgraded to version 0.06
+
+=over 4
+
+=item *
+
+[perl #40267] PerlIO::scalar doesn't respect readonly-ness
+
+=back
+
+=item *
+
+C<PerlIO::via> upgraded to version 0.05
+
+=item *
+
+C<Pod::Html> upgraded to version 1.09 [33536]
+
+=item *
+
+C<Pod::Parser> upgraded to version 1.35
+
+=item *
+
+C<Pod::Perldoc> is now maintained by Hakim Cassimally (osfameron).
+
+=item * 
+
+C<Pod::Usage> upgraded to version 1.35 [30187]
+
+=item *
+
+C<POSIX::remove> can removes empty directories.
+
+=item *
+
+C<POSIX> imports previously duplicated constants from C<Fcntl>, version bumped from 1.14 to 1.15.
+
+=item *
+
+C<POSIX::setlocale> safer to call multiple times.
+
+=item *
+
+C<re> gains the regmust() function.
+
+=item *
+
+C<SDBM_File> upgraded to version 1.06
+
+=over
+
+=item *
+
+Improve g++ handling for systems using GDBM compatibility headers.
+
+=back
+
+=item *
+
+L<SelfLoader> upgraded to version 1.15
+
+=item *
+
+L<Shell> upgraded to version 0.72
+
+=item *
+
+L<sigtrap> upgraded to version 1.04
+
+=item *
+
+C<Socket> upgraded to version 1.81
+
+=over
+
+=item *
+
+This fixes an optimistic use of C<gethostbyname()>.
+
+=back
+
+=item *
+
+C<Storable> upgraded to 2.18
+
+=item *
+
+C<Switch> upgraded to version 2.13
+
+=item *
+
+C<Sys-Syslog> upraded to version 0.24
+
+=item *
+
+C<Term::ANSIColor> upgraded to version 1.12 (31036)
+
+=item *
+
+C<Term::Cap> upgraded to version 1.11 (32143, 32301)
+
+=item *
+
+C<Term::ReadLine> upgraded to version 1.03 (31862)
+
+=item *
+
+C<Test::Builder> upgraded to version 0.72 (32371)
+
+=item *
+
+C<Test::Builder::Module> upgraded to version 0.72 (32371)
+
+=item *
+
+C<Test::Builder::Tester> upgraded to version 1.09 (32371)
+
+=item *
+
+C<Test::More> upgraded to version 0.72 (32371)
+
+=item *
+
+C<Test::Simple> upgraded to version 0.72 (32371)
+
+=item *
+
+C<Test::Harness> upgraded version to 2.64
+
+=over
+
+=item *
+
+This made it able to handle newlines.
+
+=back
+
+=item *
+
+C<Text::Balanced> upgraded to version 1.98 (32984)
+
+=item *
+
+C<Text::ParseWords> upgraded to version 3.26
+
+=item *
+
+C<Text::Soundex> upgraded to version 3.02
+
+=item *
+
+C<Text::Tabs> upgraded to version 2007.1117
+
+=item *
+
+C<Text::Wrap> upgraded to version 2006.1117
+
+=item *
+
+C<Thread> upgraded to version 2.01 [32470]
+
+=item *
+
+C<Thread::Semaphore> upgraded to version 2.07 [33361]
+
+=item *
+
+C<Thread::Queue> upgraded to version 2.06 [33362]
+
+=item *
+
+C<Tie::Memoize> upgraded to version 1.1
+
+=over
+
+=item *
+
+Tie::Memoize::EXISTS now correctly caches its results.
+
+=back
+
+C<Tie::RefHash> upgraded to version 1.38
+
+=item *
+
+C<Time::gmtime> upgraded to version 1.03
+
+=item *
+
+C<Time::HiRes> upgraded to version 1.9715 with various build improvements 
+(including VMS (31752)) and minor platform-specific bug fixes (including 
+for HP-UX 11 ia64)
+
+=item *
+
+C<threads> upgraded to 1.61
+
+=item *
+
+C<threads::shared> upgraded to version 1.21
+
+=over
+
+=item *
+
+User locks are now stored in a safer manner.
+
+=item *
+
+New function C<shared_clone> creates a copy of an object leaving
+shared elements as-is and deep-cloning non-shared elements.
+
+=back
+
+=item *
+
+C<Thread::Queue> upgraded to version 2.08
+
+=item *
+
+C<Thread::Semaphore> upgraded to version 2.08
+
+=item *
+
+C<Unicode::Normalize> upgraded to version 1.01
+
+=item *
+
+C<Unicode::UCD> upgraded to version 0.25
+
+=item *
+
+C<Win32> upgraded to version 0.38
+
+=over 4
+
+=item *
+
+Added new function C<GetCurrentProcessId()> which returns the regular Window
+process identifier of the current process, even when called from within a fork.
+
+=back
+
+=item *
+
+C<XSLoader> upgraded to version 0.08
+
+=item *
+
+C<XS::APItest> and C<XS::Typemap> are for internal use only and hence
+no longer installed.
+
+=back
 
 =head1 Utility Changes
 
+=over 4
+
+=item *
+
+C<h2ph> now attempts to deal sensibly with the difference in path implications
+between C<""> and C<<E<lt>E<gt>>> quoting in C<#include> statements.
+
+=item *
+
+C<h2ph> generates correct correct code for C<#if defined A || defined B> now
+(perl #39130)
+
+=item *
+
+C<h2xs> won't define an empty string as a constant (perl #25366)
+
+=item *
+
+C<h2xs> has examples for h2xs -X (31175)
+
+=item *
+
+The Emacs perl mode (emacs/cperl-mode.el) has been updated to version
+5.23.
+
+=item *
+
+C<perlbug> now checks if you're reporting about a non-core module and suggests
+you report it to the CPAN author instead.
+
+=item *
+
+Added C<uupacktool.pl> (handles binary files in source tree).
+
+=item *
+
+Added C<add-package.pl> (adds/updates CPAN modules that are part of Core).
+
+=back
+
 =head1 New Documentation
+
+As usual, the documentation received its share of corrections, clarifications
+and other nitfixes. More C<< X<...> >> tags were added for indexing.
+
+L<CORE> documents the pseudo-namespace for Perl's core routines.
+
+L<perlbot> fixed C<ref> returns an empty string (not undef) when used on a
+string (#31685)
+
+L<perlcheat> is updated with better details on C<\w>, C<\d>, and C<\s>.
+
+L<perlcommunity> provides an overview of the Perl Community along with further
+resources.
+
+L<perldebug> is updated with information on how to call the debugger.
+
+L<perldiag> documentation updated with I<subroutine with an ampersand> on the
+argument to C<exists()> and C<delete()> and also several terminology updates on
+warnings.
+
+L<perlfork> documents the limitation of exec() inside pseudo-processes.
+
+L<perlfunc>:
+
+=over
+
+=item *
+
+Documentation is fixed in section C<caller> and C<pop>. 
+
+=item * 
+
+Added example of C<gethostbyname>. 
+
+=item * 
+
+Better wording in C<prototype> and C<split>. 
+
+=item *
+
+Function C<alarm()> now mentions C<Time::HiRes::ualarm> in preference
+to C<select()>.
+
+=item *
+
+Regarding precedence in C<-X>, filetest operators are the same as unary
+operators, but not regarding parsing and parentheses (spotted by Eirik Berg
+Hanssen).
+
+=back
+
+L<perlglossary> adds I<deprecated modules and features> and I<to be dropped modules>.
+
+L<perlhack> has been updated and added resources on smoke testing.
+
+L<perllocale> documentation is adjusted for the number of localization and
+C<POSIX::setlocale()> to fix debian bug in RT #379463.
+
+L<perlmodlib> is updated with C<CPAN::API::HOWTO> and
+C<Sys::Syslog::win32::Win32> 
+
+L<perlop> adds C</k> modifier in section C<s/PATTERN/REPLACEMENT/egimosxk>
+
+L<perlre> documentation updated to reflect the differences between
+C<[[:xxxxx:]]> and C<\p{IsXxxxx}> matches. Also added section on C</g> and
+C</c> modifiers.
+
+L<perlreguts> describe the internals of the regular expressions engine. It has
+been contributed by Yves Orton.
+
+L<perlrebackslash> describes all perl regular expression backslash and escape
+sequences.
+
+L<perlrecharclass> describes the syntax and use of character classes in
+Perl Regular Expressions.
+
+L<perlrun> is updated to clarify on the hash seed I<PERL_HASH_SEED>. Also more
+information in option B<-x> and B<-u>.
+
+L<perlsub> example is updated to use lexical variable on opendir syntax.
+
+L<perltoc> the table of content is updated with several new documentation and
+cleaned up unnecessary noises.
+
+L<perlunicode> is updated in section user defined properties.
+
+L<perluniintro> have been updated in the example of detecting data that's not
+valid in particular encoding. 
+
+L<perlunitut> is a tutorial written by Juerd Waalboer on Unicode-related
+terminology and how to correctly handle Unicode in Perl scripts.
+
+L<perlvar> and L<perlre> add items C<${^PREMATCH}>, C<${^MATCH}>, and
+C<${^`POSTMATCH}> and also C</k> modifier.
+
+L<perlvar> fixes confusion about real GID C<$(> and effective GID C<$)>. 
+
+Perl thread tutorial example is fixed in section
+L<perlthrtut/Queues: Passing Data Around> and L<perlothrtut>.
+
+The Perl FAQs (F<perlfaq1>..F<perlfaq9>) have been updated.
+
+L<reverse> function documentation received scalar context examples.
+
+L<perltodo> is updated with:
+
+=over
+
+=item *
+
+removed section L<Ordering of "global" variables|perltodo>.
+
+=item *
+
+removed section L<The roadmap to 5.10|perltodo>.
+
+=item *
+
+added B<-Duse32bit*>.
+
+=item *
+
+added L<__FUNCTION__ for MSVC|perltodo>.
+
+=item *
+
+added more detail about @INC order.
+
+=item *
+
+added section L<merge common code in installperl and installman|perltodo>.
+
+=item *
+
+added section L<merge checkpods and podchecker|perltodo>.
+
+=item *
+
+added section L<Investigate PADTMP hash pessimisation|perltodo>.
+
+=item *
+
+added C<does()> built-in and L<Tied filehandles and write() don't mix|perltodo>.
+
+=item *
+
+added section L<Unicode and lcE<sol>uc operators|perltodo>.
+
+=item *
+
+added section L<perltodo/Optimize away empty destructors>.
+
+=item *
+
+Maybe the default order of directories in C<@INC> should be modified to support
+upgrade core (dual-life) modules without overwriting files.
+
+=item *
+
+Todo for perl 5.12, virtualize operating system access.
+
+=back
+
+L<perlhack> documentation extensively improved by Jarkko Hietaniemi and others.
+
+L<perltoot> provides information on modifying C<@UNIVERSAL::ISA>.
+
+L<perlport> documentation extended to include different C<kill(-9, ...)>
+semantics on Windows. It also clearly states C<dump()> is not supported on Win32
+and cygwin.
+
+=head1 Changes to Existing Documentation
+
+=over 4
+
+=item *
+
+L<perltodo> was, of course, extensively modified; with the notable marking of the srlcpy/strcat 
+to my_strlcpy/my_strcat update as a TODONE.
+
+=item *
+
+L<INSTALL> has been updated and modernized.
+
+=back
 
 =head1 Performance Enhancements
 
@@ -42,21 +1057,970 @@ code is compatible with it, as this configuration may give useful performance
 improvements. For existing installations we would not recommend changing to
 this configuration unless thorough testing is performed before deployment.
 
+=item *
+
+Reblessing an object from a class that doesn't use overloads to one
+that does (or vice versa) is now faster. (31996, 32019, 32025).
+
+=item *
+
+C<diagnostics> no longer uses C<$&>, which results in large speedups
+for regexp matching in all code using it.
+
+=item *
+
+Regular expressions classes of a single character are now treated the same as
+if the character had been used as a literal, meaning that code that uses
+char-classes as an escaping mechanism will see a speedup. (Yves Orton)
+
+=item *
+
+Regular expression introduces C</k> modifier for matching along with new perl
+variables C<${^PREMATCH}>, C<${^MATCH}>, C<${^POSTMATCH}> which are equivalent
+to C<$`>, C<$&> and C<$'>, B<except> that they are only guaranteed to be
+defined after a successful match that was executed with the C</k> (keep-copy)
+modifier. The use of these variables incurs no global performance penalty,
+unlike their punctuation char equivalents (#32263).
+
+=item *
+
+Creating anonymous array and hash references (ie. C<[]> and C<{}>) now incurs
+no more overhead than creating an anonymous list or hash. Nicholas Clark provid
+changes with a saving of two ops and one stack push, measured as a 6.4% improve 
+
+=item *
+
+Substitutions with repeated right hand expressions (ie. C<s///ge>) are now more
+efficient.
+
+
+=item *
+
+Stopped memory leak on long /etc/groups entries
+
+=item *
+
+Recursive regexes now possible.  Possessive quantifiers and named captures are 
+now possible within the regex engine.
+
+=item *
+
+The MY_CXT API has been made more efficient (and an explicit interpeter argument
+variant has been added).
+
 =back
 
 =head1 Installation and Configuration Improvements
 
+F<g++> support was tuned, especially for FreeBSD.
+
+C<Configure> is now better at removing temporary files. Tom Callaway
+(from RedHat) also contributed patches that completes the set of flags
+passed to the compiler and the linker. Especially, C<-fPIC> is now
+enabled on linux. It will also croak when your F</dev/null> isn't a device.
+
+There are improved hints for DEC/OSF, VOS (33425), Cygwin (33484).
+
+Many compilation warnings were cleaned up (33415, 33417, 33418, 33419,
+33420, 33421, 33427, 33428, 33429, 33435, 33436, 33441, 33444, 33479,
+33590, 31347, 31073, 31074, 31075)
+
+Added C<d_pseudofork> to C<Configure> which is a new configuration variable,
+available as C<$Config{d_pseudofork}> in the L<Config> module, has been added,
+to distinguish real fork() support from fake pseudofork used on Windows
+platforms.
+
+L<ptar> and L<ptardiff> are no longer installed to C<$installbin>
+
+C<Config.pod> and C<config.sh> are now placed correctly for cross-compilation.
+
+'unexpand -a' spaces converted to tabs to create smaller Changes files.
+
+$Config{useshrplib} is now 'true' rather than 'yes' when using a shared perl
+library.
+
+C<installman> now works with C<-Duserelocatableinc> and C<DESTDIR>.
+
+C<installperl> no longer installs:
+
+=over 4
+
+=item *
+
+static library files of statically linked extensions when a shared perl library
+is being used. (They are not needed, also see L<Windows> specific reasons).
+
+=item *
+
+C<SIGNATURE> and C<PAUSE*.pub> (CPAN files)
+
+=item *
+
+C<NOTES> and C<PATCHING> (ExtUtils files)
+
+=item *
+
+C<perlld> and C<ld2> (Cygwin files)
+
+=back
+
+=head2 Platform Specific Changes
+
+=head3 FreeBSD
+
+=over 4
+
+=item *
+
+Drop C<-std=c89> and C<-ansi> if using 'long long' as the main integral type.
+
+In FreeBSD 6.2 (and perhaps other releases), headers do not declare a required
+function if this is not done.
+
+=back
+
+=head3 Solaris
+
+=over 4
+
+=item *
+
+Starting with Solaris 10, we don't want versioned shared libraries because
+those often indicate a private use only library.  Especially badly that would
+break things with L<SUNWbdb> (Berkeley DB) being installed.
+
+If Solaris 10 is detected set C<ignore_versioned_solibs=y>.
+
+=back
+
+=head3 VMS
+
+=over 4
+
+=item *
+
+Allow IEEE math to be deselected on OpenVMS I64 (but it remains the default).
+
+=item *
+
+Record IEEE usage in C<config.h>
+
+=item *
+
+Help older VMS compilers by using C<ccflags> when building C<munchconfig.exe>.
+
+=item * 
+
+Don't try to build old L<Thread> extension on VMS when C<-Duseithreads> has
+been chosen. (31104)
+
+=item * 
+
+Better suppression logic for not building L<Thread> extension (31226).
+
+=item * 
+
+Fix the case of C<$Config{perl_patchlevel}> (31544) (but keep setting
+C<$Config{PERL_PATCHLEVEL}> and grab the value from a C<MAINTXXX> or 
+C<SMOKEXXX> line in patchlevel.h if present. (31597)).
+
+=item *
+
+Passing a raw string of "NaN" to L<nawk(1)> causes a core dump - so the string
+has been changed to "*NaN*" (31975)
+
+=item *
+
+Removed F<vms/genconfig.pl> and references to it (obsolete as of change 1084).
+
+=back
+
+=head3 Windows
+
+=over 4
+
+=item *
+
+When using a shared perl library C<installperl> no longer installs static
+library files, import library files and export library files (of statically
+linked extensions) and empty bootstrap files (of dynamically linked
+extensions).
+
+This fixes a problem building PAR-Packer on Win32 with a debug build of perl.
+
+=back
+
 =head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Overloading flags are now stored on the referent instead of the reference.
+Previously taking a new, unrelated reference to an object could result in
+the original (blessed) reference being able to access the overload while
+the new reference could not.  (Test added in 32016).
+
+=item *
+
+C<encoding> pragma now correctly ignores anything following an C<@> character in
+the C<LC_ALL> and C<LANG> environment variables. (RT # 49646)
+
+=item *
+
+Magic is no longer invoked twice by the expression C<\&$x>
+
+=item *
+
+A segfault observed with some gcc 3.3 optimisations is resolved.
+
+=item *
+
+A possible segfault when L<unpack> used in scalar context with C<()> groups
+is resolved. (RT #50256)
+
+=item *
+
+Resolved issue where C<$!> could be changed by a signal handler interrupting
+a C<system()> call.
+
+=item *
+
+Fixed problems with split, unicode /\s+/ and / \0/.
+
+=item *
+
+Fixed bug RT #37886, unsafe dereferencations were allowed in the argument of
+C<defined()> even under the influence of C<use strict 'refs'>.
+
+=item *
+
+Fixed a long-standing bug that caused incorrect line numbers to be
+reported in error messages about elsif blocks.
+
+=item *
+
+The tokenizer no longer treats =cute (and other words beginning
+with =cut) as a synonym for =cut.
+
+=item *
+
+Fixed bug RT #43207, where lc()/uc() inside sort affected the return
+value.
+
+=item *
+
+Fixed bug RT #45337, where using certain UTF-8 patterns in a regex led
+to a panic.
+
+=item *
+
+Fixed bug RT #45607, where *{"BONK"} = \&{"BONK"} didn't work correctly.
+
+=item *
+
+The "Unrecognised character 'x'" error now specifies in which column the
+unrecognised character actually occurred.
+
+=item *
+
+Fixed bug on RT #43010, now C<B::Deparse> handles ''->(), ::(), sub :: {}, 
+etc correctly (31268). All bugs in parsing these kind of syntax are now fixed:
+
+=over
+
+=item *
+
+perl -MO=Deparse -e '"my %h = "->()'
+
+=item *
+
+perl -MO=Deparse -e '::->()'
+
+=item *
+
+perl -MO=Deparse -e 'sub :: {}'
+
+=item *
+
+perl -MO=Deparse -e 'package a; sub a::b::c {}'
+
+=item *
+
+perl -MO=Deparse -e 'sub the::main::road {}'
+
+=back
+
+=item * 
+
+Fix MRO behaviour when one undefs C<@ISA> (32542)
+
+=item *
+
+Fixed bug RT #35878, croaking from a XSUB called via goto &xsub corrupts perl
+internals.
+
+=item * 
+
+Fix descriptor leak caused by change (30633) to C<PerlIO_exportFILE> (32224)
+
+=item *
+
+Fixed bug RT #32539, C<DynaLoader.o> is moved into C<libperl.so> to avoid the need to
+statically link DynaLoader into the stub perl executable and make C<libperl.so>
+provides all codes needed to get a functional embedded perl interpreter runs.
+
+=item *
+
+Fix bug 36267 so that assigning to a tied hash doesn't change the
+underlying hash (27636)
+
+=item *
+
+Fix bug RT #6006, regex replaces using large replacement variables fail some of
+the time, i.e. when substitution contains something like C<${10}> (note the
+bracket) instead of just C<$10> (29616 - 29619).
+
+=item *
+
+Fix bug RT #55302, a long existed bug when using C<B::CC> on threaded perl which
+uses eval will cause syntax error.
+
+=item *
+
+Fix bug #45053, newCONSTSUB() is now thread safe.
+
+=item *
+
+Fix bug #42839 - the unicode swatch cache is now used (the lookup had a key
+mismatch).
+
+=item *
+
+Fix bug #40641 - fixed encoding of unicode characters in regular expressions.
+
+=back
+
+=head2 Platform Specific Fixes
+
+=head3 Darwin / MacOS X
+
+=over 4
+
+=item *
+
+Various improvements to 64 bit builds.
+
+=item *
+
+Mutex protection added in PerlIOStdio_close to avoid race conditions.  May
+fix threads free.t and blocks.t failures on OS X on 5.8.x (33502).
+
+=item *
+
+Added forked terminal support to debugger under MacOSX (29415)
+
+=item *
+
+L<perl5db.pl> has been updated for Mac OS X 10.5 (as there is now a direct
+accessor for the tty device name) to update the window title.
+
+=back
+
+=head3 Windows
+
+=over 4
+
+=item *
+
+C<File::Find> used to fail when the target dir is a bare drive letter and
+C<no_chdir> is 1 (the default is 0). (RT #41555)
+
+C<Win32API::File> added to the core
+
+=item *
+
+A build problem with specifying C<USE_MULTI> and C<USE_ITHREADS> but without
+C<USE_IMP_SYS> has been fixed.
+
+=item *
+
+The process id is no longer truncated to 16 bits on some Windows platforms
+( L<http://bugs.activestate.com/show_bug.cgi?id=72443> )
+
+=item *
+
+Various improvements to the win32 build process, includding support for Visual C++ 2005 Express Edition (aka Visual C++ 8.x). Also you should now have an icon for perl.exe if built with MinGW or Borland. 
+
+=item *
+
+Improvements to the perl-static.exe build process.
+
+=item *
+
+Add Win32 makefile option to link all extensions statically.
+
+=item *
+
+Merge WinCE into Win32 directory (30281-30284, 20862)
+
+=item *
+
+Fixed bug RT #54828 in C<perlio.c> when calling C<Binmode()> on Win32 and Cgywin
+may cause segmentation fault.
+
+=back
+
+=head3 VMS
+
+=over 4
+
+=item *
+
+Fixed PerlIO::Scalar in-memory file record-style reads.
+
+=item *
+
+Make pipe shutdown on VMS care about whether PerlIO has already shut down (33005)
+
+=item *
+
+Fix VMS exit handling broken in Test::Harness 2.64 (33008)
+
+=item *
+
+Fix fcntl locking capability test in C<configure.com> (31756)
+
+=item *
+
+Replaced C<shrplib='define'> with C<useshrplib='true'> on VMS.
+
+=item *
+
+Fix missing C<PerlIO_releaseFILE> in C<VMS::Stdio::getname> (31384)
+
+=back
+
+=head3 OS/2
+
+=over 4
+
+=item *
+
+A build problem with specifying C<USE_MULTI> and C<USE_ITHREADS> but without
+C<USE_IMP_SYS> has been fixed.
+
+=item *
+
+C<OS2::REXX> upgraded to version 1.04
+
+=back
+
+=head3 Tru64
+
+=over 4
+
+=item *
+
+Aligned floating point build policies for cc and gcc. 
+
+=back
+
+=head3 RedHat Linux
+
+=over 4
+
+=item *
+
+Revisited a patch from 5.6.1 for RH7.2 for Intel's icc (RT #7916), added an aditional check for $Config{gccversion}.
+
+=back
+
+=head3 Windows and OS/2
+
+=over 4
+
+=item *
+
+A build problem with specifying C<USE_MULTI> and C<USE_ITHREADS> but without
+C<USE_IMP_SYS> has been fixed.
+
+=back
+
+=head3 Solaris/i386
+
+=over 4
+
+=item *
+
+Use -DPTR_IS_LONG when using 64 bit integers (27001)
+
+=back
+
+=head3 Symbian
+
+=over 4
+
+=item *
+
+Added support for Symbian series 90.
+
+=back
+
+=head2 Smaller fixes
+
+=over 4
+
+=item *
+
+It's now possible to overload C<eq> when using C<nomethod>.
+
+=item *
+
+Various problems using L<overload> with 64-bit ints corrected (identified
+in new tests).
+
+=item *
+
+The reference count of PerlIO file descriptors is now correctly handled.
+
+=item *
+
+On VMS, escaped dots will be preserved when converted to UNIX syntax.
+
+=item *
+
+L<B::Deparse> has been instructed on:
+
+=over
+
+=item *
+
+how to properly deparse C<print readpipe $x, $y>.
+
+=item *
+
+B<not> to deparse C<$^H{v_string}>, which is automatically set by the internals.
+
+=back
+
+=item *
+
+C<keys %+> no longer throws an C<'ambiguous'> warning.
+
+=item * 
+
+C<index> works faster now if the search string is stored in UTF-8 but actually
+fits into Latin-1.
+
+=item * 
+
+Reduced number of calls to C<getpeername> in L<IO::Socket> (29129).
+
+=item *
+
+C<chr(65535)> ought to be allowed in regexes.
+
+=item *
+
+L<ExtUtils::MakeMaker> now detects DragonFlyBSD as a BSDish operating system (33006)
+
+=item * 
+
+Using C<#!perl -d> could trigger an assertion, which has been fixed (30075).
+
+=item *
+
+Don't stringify tied code references in C<@INC> when calling C<require>.
+(30068)
+
+=item *
+
+Code references in C<@INC> report the correct file name when C<__FILE__> is
+used (30068).
+
+=item *
+
+Width and precion in sprintf didn't handle wide characters correctly (30058).
+
+=item *
+
+List slices with indices out of range now work more consistently (30026).
+
+=item *
+
+The C<-s> switch on the shebang line is again capable of parsing options with
+arguments of the form C<-foo=bar> (29865).
+
+=item *
+
+tr/// is now threadsafe (29765)
+
+=item *
+
+De-duplicate C<@EXPORT> (26459)
+
+=item *
+
+C<pod2html> will label anchors more consistently (32079) and handles nested
+definition lists better (32727).
+
+=item *
+
+No longer segfaults when your locale charset is not utf8 with
+C<use open ':locale'> and printing Unicode characters to STDERR (30213)
+
+=item *
+
+L<threads> cleanup veto has been extended to include C<perl_free> and
+C<perl_destruct> (29827)
+
+C<PL_veto_cleanup> now happens on all platforms, not
+just UNIX (31971)
+
+=item *
+
+C<B> now can compile outside of the perl source tree.
+
+=item *
+
+On some systems, changes to C<$ENV{TZ}> would not always be
+respected by the underlying calls to C<localtime_r>.  Perl now
+forces the inspection of the environment on these systems.  (29213)
+
+=item *
+
+Calling C<dump()> from Win32 and cygwin now gives a proper fatal error (26947).
+
+=item *
+
+Avoid a segfault for perl built without C<PERL_DONT_CREATE_GVSV> defined
+when writing to C<$ARGV>. (32472, 32473)
+
+=item *
+
+The special variable C<$^R> is now more consistently set when executing
+regexps using the C<(?{...})> construct.  In particular, it will still
+be set even if backreferences or optional sub-patterns C<(?:...)?> are
+used.  (30100)
+
+=item *
+
+Avoid a subtle problem which caused L<SQL::Translator> to mistakenly
+see a proxy constant subroutines as a GV (typeglob structure). (32172)
+
+=back
 
 =head1 New or Changed Diagnostics
 
+=head2 Maximal count of pending signals (%s) exceeded
+
+This new fatal error occurs when the perl process has to abort due to
+too many pending signals, which is bound to prevent perl from being
+able to handle further incoming signals safely.
+
+=head2 Panic: attempt to call %s in %s
+
+This new fatal error occurs when a file test operator is used that is 
+not availble on the current platfom (25987).
+
+=head2 Can't upgrade %s (%d) to %d
+
+This error now reports the type of things that made the upgrade fail (27253).
+
+=head2 %s argument is not a HASH or ARRAY element or a subroutine
+
+This error, thrown if an invalid argument is provided to C<exists> now
+correctly includes "or a subroutine". (RT #38955)
+
+=head2 Cannot make the non-overridable builtin %s fatal
+
+This error in L<Fatal> previously did not show the name of the builtin in
+question (now represented by %s above).
+
+=head2 Offset outside string
+
+Changed to add the seek operation and is now included in the default warnings
+pragma (28903).
+
+=head2 Invalid escape in the specified encoding in regex; marked by <-- HERE in m/%s/
+
+New error, introduced as part of the fix to RT #40641 to handle encoding
+of unicode characters in regular expression comments.
+
+=head2 FETCHSIZE returned a negative value
+
+New error indicating that a tied array has claimed to have a negative
+number of elements (31116).
+
 =head1 Changed Internals
+
+The new API function C<newSV_type> can be used to replace more efficiently the
+common idiom
+
+    sv = newSV(0);
+    sv_upgrade(sv, type);
+
+A C<sigbit> public function was added to test the sign of a NV. It maps to the
+system one when available.
+
+C<av_reify>, C<lex_end>, C<mod>, C<op_clear>, C<pop_return>,
+C<qerror>, C<setdefout>, C<vivify_defelem> and C<yylex> are now
+visible to perl core extensions. This was required by L<Data::Alias>.
+
+C<find_runcv> is now visible to perl core extensions. This was required to
+allow L<Sub::Current> to work on Windows.
+
+C<set> magic on localizing/assigning to a magic variable will now only
+trigger for I<container magics>, i.e. it will for C<%ENV> or C<%SIG>
+but not for C<$#array>.
+
+Display the process id as part of the trace output if running with C<-Dv> (33039)
+
+A lot of small improvents in the code base were made due to reports from
+the Coverity static code analyzer.
+
+C<ptr_table> functions are now available in unthreaded perl.
+
+Corrected use and documentation of C<gv_stashpv>, C<gv_stashpvn>, C<gv_stashsv>
+functions (last parameter is a bitmask, not boolean).
+
+C<PERL_SYS_INIT>, C<PERL_SYS_INIT3> and C<PERL_SYS_TERM> macros have been
+changed into functions (31970).
+
+Machine generated C<B::Asmdata> via C<bytecode.pl> is now more warnings free and
+read C<@optype> and C<@specialsv_name> from ext/B/B.pm (#32264, #32266)
+
+C<PERLSYS_TERM> no longer requires a context (32216). In C<PerlIO_teardown>
+is now also called without a context (32215), and debugging output in this
+function has been disabled because this requires that an interpreter is present
+(32235).
+
+Reorder global variable in C<intrpvar.h> saves another 40 bytes from the
+interpreter structure (#31034). Also delete C<thrdvar.h> and move its contents
+to C<intrpvar.h> (#31245).
+
+Support for B<assertions> and B<-A> is now removed from C<XS> module and in
+C<ext> (#31333). 
+
+"Bake" the values of C<PERL_REVISION>, C<PERL_VERSION> and C<PERL_SUBVERSION>
+into global variables (and hence a shared perl library). Additionally under
+C<MULTIPLICITY> record the size of the interpreter structure (total, and for
+this version) and under C<PERL_GLOBAL_STRUCT> the size of the global variables
+structure. Coupled with PL_bincompat_options this will allow 5.10.1 (and
+later), when compiled with a shared perl library, to perform sanity checks in
+C<main()> to verify that the shared library is indeed binary compatible.
+
+All compile time options which affect binary compatability have been grouped
+together into a global variable (C<PL_bincompat_options>). This will allow
+comparisons to be made in the future.
 
 =head1 New Tests
 
+=over 4
+
+=item *
+
+Regression tests for anchored regexes using C<\s> that failed to set C<$&>
+(30073).
+
+=item * 
+
+Regression tests for sprintf with 64 bit semantics (30058).
+
+=item *
+
+Tests for L<overload> for 64-bit ints (32141).
+
+=item *
+
+Tests for tainting and C<open> with C<|-> as second argument (30048).
+
+=item *
+
+C<exit> can now be called in expressions that the optimizer constant-folds
+(29976).
+
+=item *
+
+Test smallbuf overflow in S_incline (30024)
+
+=item *
+
+Tests for mathematical functions in L<POSIX>
+
+=item *
+
+Verify POSIX::AUTOLOAD works (29592)
+
+=item *
+
+Remove C<DynaLoader> from C<1_compile.t> as it's now part of C<libperl.so>
+(27549, 27566, 28226, 28227, 28228, 28274, 28308). Also skip failure test on
+these patforms: VMS, darwin, OpenBSD, and cygwin (28333, 28840, 29253, 29707).
+
+=item *
+
+Added bitflip hash tests (31914, 31915)
+
+=item *
+
+Tests for C<hv_delete>, C<hv_exists>, C<hv_fetch>, C<hv_store> (31905, 31912)
+
+=item *
+
+Test disabling key conversion in hash lookups (31923)
+
+=back
+
+=over 4
+
+=item *
+
+Significantly improved testing for C<$/> usage with PerlIO::Scalar in-memory
+files.
+
+=item *
+
+Test both C<MY_CXT> and C<MY_CXT_INTERP> in the CXT API.
+
+=item *
+
+Added test to run regex substitution C<s///> under taint mode (29618).
+
+=item *
+
+Tests for L<Thread>.
+
+=item *
+
+Regression tests for L<base> manipulation of C<@ISA> under certain
+inheritance conditions. (32469)
+
+=item *
+
+Test that L<base> does not mask C<SIGDIE>. (32469)
+
+=item *
+
+Test that L<base> does not confuse the version. (32469)
+
+=item *
+
+Test that inheriting from a base with protected fields generates a warning.
+(32469)
+
+=item *
+
+Test that L<base> can coexist with a L<consant> called C<FIELDS>. (31420)
+
+=item *
+
+Test that L<Carp::cluck> correctly reports undef values. (31858)
+
+=item *
+
+Test that C<$@> is correctly localised in L<Locale::Maketext>. (25547)
+
+=item *
+
+B<TODO> test for "C<goto()> from an if to an else doesn't undo local". (RT #43403)
+
+=back
+
+=head1 Changed Tests
+
+=over 4
+
+=item *
+
+C<setlocale()> tests have been re-enabled for Windows XP onwards. (31491)
+
+=item *
+
+C<commonsense.t> tests no longer require that C<DB_File> or C<*DBM_File> are
+included. (31528)
+
+=item *
+
+Printing to C<stdout> by C<TabsWrap> tests has been consolidated to avoid
+problems with VMS pipes. (31646)
+
+=item *
+
+C<t/op/stat.t> tests will now test hard links on VMS if they are supported.
+(31665, 31666)
+
+=back
+
 =head1 Known Problems
 
-=head1 Platform Specific Problems
+None.
+
+=head1 Platform Specific Notes
+
+=head2 Win32
+
+C<readdir()>, C<cwd()>, C<$^X> and C<@INC> now use the alternate (short)
+filename if the long name is outside the current codepage (Jan Dubois).
+
+=head3 Updated Modules
+
+=over 4
+
+=item *
+
+C<Win32> upgraded to version 0.38. Now has a documented 'WinVista' response
+from GetOSName and support for Vista's privilege elevation in C<IsAdminUser>.
+Support for Unicode characters in path names. Improved cygwin and Win64
+compatibility. 
+
+=item *
+
+C<Win32API> updated to 0.1001_01 (30411)
+
+=item *
+
+C<killpg()> support added to C<MSWin32> (Jan Dubois).
+
+=item *
+
+C<File::Spec::Win32> upgraded to version 3.2701 (see above).
+
+=back
+
+=head2 OS/2
+
+=head3 Updated Modules
+
+=over 4
+
+=item *
+
+C<OS2::Process>: Ilya Zakharevich has added and documented several C<Window*> and
+C<Clipbrd*> functions.
+
+=item *
+
+C<OS2::REXX::DLL>, C<OS2::REXX> updated to version 1.03
+
+=back
+
+=head2 VMS
+
+=head3 Updated Modules
+
+=over 4
+
+=item *
+
+C<File::Spec::VMS> upgraded to version 3.2701 (see above).
+
+=item *
+
+C<VMS::XSSymSet> upgraded to 1.1 (31236).
+
+=back
 
 =head1 Reporting Bugs
 
@@ -83,3 +2047,4 @@ The F<README> file for general stuff.
 The F<Artistic> and F<Copying> files for copyright information.
 
 =cut
+
