@@ -1,12 +1,22 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#undef NDBM_HEADER_USES_PROTOTYPES
 #if defined(I_GDBM_NDBM)
 #  include <gdbm-ndbm.h> /* Debian compatibility version */
+#  ifdef GDBM_NDBM_H_USES_PROTOTYPES
+#    define NDBM_HEADER_USES_PROTOTYPES
+#  endif
 #elif defined(I_GDBMNDBM)
 #  include <gdbm/ndbm.h> /* RedHat compatibility version */
+#  ifdef GDBMNDBM_H_USES_PROTOTYPES
+#    define NDBM_HEADER_USES_PROTOTYPES
+#  endif
 #elif defined(I_NDBM)
-#include <ndbm.h>
+#  include <ndbm.h>
+#  ifdef NDBM_H_USES_PROTOTYPES
+#    define NDBM_HEADER_USES_PROTOTYPES
+#  endif
 #endif
 
 typedef struct {
@@ -23,7 +33,7 @@ typedef datum datum_key ;
 typedef datum datum_value ;
 
 
-#if defined(__cplusplus) && defined(HAS_GDBM)
+#if defined(__cplusplus) && !defined(NDBM_HEADER_USES_PROTOTYPES)
 /* gdbm's header file used for compatibility with gdbm */
 /* isn't compatible to C++ syntax, so we need these */
 /* declarations to make everyone happy. */
