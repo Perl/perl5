@@ -1181,7 +1181,7 @@ S_skipspace(pTHX_ register char *s)
 	/* debugger active and we're not compiling the debugger code,
 	 * so store the line into the debugger's array of lines
 	 */
-	if (PERLDB_LINE && PL_curstash != PL_debstash)
+	if ((PERLDB_LINE || PERLDB_SAVESRC) && PL_curstash != PL_debstash)
 	    update_debugger_info(NULL, PL_bufptr, PL_bufend - PL_bufptr);
     }
 
@@ -3734,7 +3734,7 @@ Perl_yylex(pTHX)
 	    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 	    PL_last_lop = PL_last_uni = NULL;
-	    if (PERLDB_LINE && PL_curstash != PL_debstash)
+	    if ((PERLDB_LINE || PERLDB_SAVESRC) && PL_curstash != PL_debstash)
 		update_debugger_info(PL_linestr, NULL, 0);
 	    goto retry;
 	}
@@ -3816,7 +3816,7 @@ Perl_yylex(pTHX)
 	    incline(s);
 	} while (PL_doextract);
 	PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = s;
-	if (PERLDB_LINE && PL_curstash != PL_debstash)
+	if ((PERLDB_LINE || PERLDB_SAVESRC) && PL_curstash != PL_debstash)
 	    update_debugger_info(PL_linestr, NULL, 0);
 	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 	PL_last_lop = PL_last_uni = NULL;
@@ -3989,7 +3989,7 @@ Perl_yylex(pTHX)
 			    } while (argc && argv[0][0] == '-' && argv[0][1]);
 			    init_argv_symbols(argc,argv);
 			}
-			if ((PERLDB_LINE && !oldpdb) ||
+			if (((PERLDB_LINE || PERLDB_SAVESRC) && !oldpdb) ||
 			    ((PL_minus_n || PL_minus_p) && !(oldn || oldp)))
 			      /* if we have already added "LINE: while (<>) {",
 			         we must not do it again */
@@ -3999,7 +3999,7 @@ Perl_yylex(pTHX)
 			    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 			    PL_last_lop = PL_last_uni = NULL;
 			    PL_preambled = FALSE;
-			    if (PERLDB_LINE)
+			    if (PERLDB_LINE || PERLDB_SAVESRC)
 				(void)gv_fetchfile(PL_origfilename);
 			    goto retry;
 			}
@@ -11449,7 +11449,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	else if (PL_bufend - PL_linestart == 1 && PL_bufend[-1] == '\r')
 	    PL_bufend[-1] = '\n';
 #endif
-	if (PERLDB_LINE && PL_curstash != PL_debstash)
+	if ((PERLDB_LINE || PERLDB_SAVESRC) && PL_curstash != PL_debstash)
 	    update_debugger_info(PL_linestr, NULL, 0);
 	if (*s == term && memEQ(s,PL_tokenbuf,len)) {
 	    STRLEN off = PL_bufend - 1 - SvPVX_const(PL_linestr);
@@ -11948,7 +11948,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 	CopLINE_inc(PL_curcop);
 
 	/* update debugger info */
-	if (PERLDB_LINE && PL_curstash != PL_debstash)
+	if ((PERLDB_LINE || PERLDB_SAVESRC) && PL_curstash != PL_debstash)
 	    update_debugger_info(PL_linestr, NULL, 0);
 
 	/* having changed the buffer, we must update PL_bufend */
