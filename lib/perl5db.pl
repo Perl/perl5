@@ -8703,8 +8703,12 @@ BEGIN {
         PERLDBf_GOTO      => 0x80,     # Report goto: call DB::goto
         PERLDBf_NAMEEVAL  => 0x100,    # Informative names for evals
         PERLDBf_NAMEANON  => 0x200,    # Informative names for anon subs
+        PERLDBf_SAVESRC   => 0x400,    # Save source lines into @{"_<$filename"}
         PERLDB_ALL        => 0x33f,    # No _NONAME, _GOTO
     );
+    # PERLDBf_LINE also enables the actions of PERLDBf_SAVESRC, so the debugger
+    # doesn't need to set it. It's provided for the benefit of profilers and
+    # other code analysers.
 
     %DollarCaretP_flags_r = reverse %DollarCaretP_flags;
 }

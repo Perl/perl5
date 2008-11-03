@@ -3703,7 +3703,8 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 #endif
     CopSTASH_set(cop, PL_curstash);
 
-    if (PERLDB_LINE && PL_curstash != PL_debstash) {
+    if ((PERLDB_LINE || PERLDB_SAVESRC) && PL_curstash != PL_debstash) {
+	/* this line can have a breakpoint - store the cop in IV */
 	AV *av = CopFILEAVx(PL_curcop);
 	if (av) {
 	    SV * const * const svp = av_fetch(av, (I32)CopLINE(cop), FALSE);

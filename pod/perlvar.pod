@@ -1146,7 +1146,8 @@ Debug subroutine enter/exit.
 
 =item 0x02
 
-Line-by-line debugging.
+Line-by-line debugging. Causes DB::DB() subroutine to be called for each
+statement executed. Also causes saving source code lines (like 0x400).
 
 =item 0x04
 
@@ -1183,12 +1184,13 @@ were compiled.
 
 =item 0x400
 
-Debug assertion subroutines enter/exit.
+Save source code lines into C<@{"_<$filename"}>.
 
 =back
 
 Some bits may be relevant at compile-time only, some at
 run-time only.  This is a new mechanism and the details may change.
+See also L<perldebguts>.
 
 =item $LAST_REGEXP_CODE_RESULT
 
