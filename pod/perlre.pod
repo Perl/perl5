@@ -63,12 +63,6 @@ X</x>
 
 Extend your pattern's legibility by permitting whitespace and comments.
 
-=item p
-X</p> X<regex, preserve> X<regexp, preserve>
-
-Preserve the string matched such that ${^PREMATCH}, {$^MATCH}, and
-${^POSTMATCH} are available for use after matching.
-
 =item g and c
 X</g> X</c>
 

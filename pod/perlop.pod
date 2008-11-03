@@ -1083,8 +1083,6 @@ Options are:
     s	Treat string as single line. (Make . match a newline)
     i	Do case-insensitive pattern matching.
     x	Use extended regular expressions.
-    p	When matching preserve a copy of the matched string so
-        that ${^PREMATCH}, ${^MATCH}, ${^POSTMATCH} will be defined.
     o	Compile pattern only once.
 
 If a precompiled pattern is embedded in a larger pattern then the effect
