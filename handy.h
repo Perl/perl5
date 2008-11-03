@@ -301,7 +301,7 @@ and omits the hash parameter.
 */
 
 /* concatenating with "" ensures that only literal strings are accepted as argument */
-#define STR_WITH_LEN(s)  (s ""), (sizeof(s)-1)
+#define STR_WITH_LEN(s)  ("" s ""), (sizeof(s)-1)
 
 /* note that STR_WITH_LEN() can't be used as argument to macros or functions that
  * under some configurations might be macros, which means that it requires the full
