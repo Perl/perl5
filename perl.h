@@ -5297,7 +5297,8 @@ typedef struct am_table_short AMTS;
 #define PERLDB_ALL		(PERLDBf_SUB	| PERLDBf_LINE	|	\
 				 PERLDBf_NOOPT	| PERLDBf_INTER	|	\
 				 PERLDBf_SUBLINE| PERLDBf_SINGLE|	\
-				 PERLDBf_NAMEEVAL| PERLDBf_NAMEANON )
+				 PERLDBf_NAMEEVAL| PERLDBf_NAMEANON |   \
+				 PERLDBf_SAVESRC)
 					/* No _NONAME, _GOTO, _ASSERTION */
 #define PERLDBf_SUB		0x01	/* Debug sub enter/exit */
 #define PERLDBf_LINE		0x02	/* Keep line # */
@@ -5310,6 +5311,7 @@ typedef struct am_table_short AMTS;
 #define PERLDBf_GOTO		0x80	/* Report goto: call DB::goto */
 #define PERLDBf_NAMEEVAL	0x100	/* Informative names for evals */
 #define PERLDBf_NAMEANON	0x200	/* Informative names for anon subs */
+#define PERLDBf_SAVESRC  	0x400	/* Save source lines into @{"_<$filename"} */
 
 #define PERLDB_SUB	(PL_perldb && (PL_perldb & PERLDBf_SUB))
 #define PERLDB_LINE	(PL_perldb && (PL_perldb & PERLDBf_LINE))
@@ -5322,6 +5324,7 @@ typedef struct am_table_short AMTS;
 #define PERLDB_NAMEEVAL	(PL_perldb && (PL_perldb & PERLDBf_NAMEEVAL))
 #define PERLDB_NAMEANON	(PL_perldb && (PL_perldb & PERLDBf_NAMEANON))
 #define PERLDB_ASSERTION (PL_perldb && (PL_perldb & PERLDBf_ASSERTION))
+#define PERLDB_SAVESRC 	(PL_perldb && (PL_perldb & PERLDBf_SAVESRC))
 
 #ifdef USE_LOCALE_NUMERIC
 
