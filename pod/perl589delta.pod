@@ -13,26 +13,25 @@ There are no changes incompatible with 5.8.8.
 
 =head1 Core Enhancements
 
-readpipe() (and thus `` and qx//) can now be overridden.
+=head2 Unicode Character Database 5.1.0.
 
-Nicholas Clark allowed symbolic references to have embedded NULs. The new
-public function C<get_cvn_flags> can be used in extensions if you have to
-handle them.
+The copy of the Unicode Character Database included in Perl 5.8 has
+been updated to 5.1.0 from 4.1.0 See
+L<http://www.unicode.org/versions/Unicode5.1.0/#NotableChanges> for the
+notable changes.
 
-It's now possible to call C<stat> and the C<-X> filestat operators on
-dirhandles. When the situation is ambiguous, it favours the file handle
-semantics. They also treat C<*FILE{IO}> filehandles like C<*FILE> filehandles.
+=head2 stat and -X on directory handles
 
-Added B<perlthanks> which is just like C<perlbug> but allows the user to
-send a note of gratitude to the authors and maintainers of Perl. [33532]
+It is now possible to call C<stat> and the C<-X> filestat operators on
+directory handles. As both directory and file handles are barewords, there is
+there can be amiguities over which was intended. In these situations the file
+handle semantics are preferred. Both also treat C<*FILE{IO}> filehandles like
+C<*FILE> filehandles.
 
-Updated Unicode definitions to 5.1.0.
+=head2 readpipe() is now overridable
 
-The Campaign for the Elimination of strlen() has successfully eliminated
-many calls to strlen().
-
-A very stubborn compiler warning in S_emulate_eaccess was killed six
-times.
+The built-in function readpipe() is now overridable. Overriding it permits
+also to override its operator counterpart, C<qx//> (a.k.a. C<``>).
 
 =head1 New Platforms
 
@@ -59,12 +58,12 @@ Cray XT4/Catamount
 =item *
 
 C<Module::Pluggable> is a simple framework to create modules that accept
-pluggable sub-modules. The bundled version is 3.7. [33505]
+pluggable sub-modules. The bundled version is 3.8
 
 =item *
 
 C<Module::CoreList> is a hash of hashes that is keyed on perl version as
-indicated in $]. The bundled version is 2.12 (31561)
+indicated in $]. The bundled version is 2.12
 
 =back
 
@@ -157,7 +156,7 @@ C<B::Concise> upgraded to 0.74
 =item *
 
 Supports option B<-src>, i.e. the rendering of each statement (starting with
-the nextstate OP) will be preceded by the 1st line of source code that
+the nextstate OP) will be preceded by the first line of source code that
 generates it.
 
 =item *
@@ -205,7 +204,7 @@ C<Carp> upgraded to version 1.09
 
 =item *
 
-C<CGI> upgraded to version 3.35 [33568] 
+C<CGI> upgraded to version 3.35
 
 =item *
 
@@ -213,11 +212,11 @@ C<constant> upgraded to version 1.15
 
 =item *
 
-C<CPAN> upgraded to version 1.9205 (32280)
+C<CPAN> upgraded to version 1.9205
 
 =item *
 
-C<Cwd> upgraded to version 3.27 with C const-ing and some platform specific
+C<Cwd> upgraded to version 3.27 with some platform specific
 improvements (including for VMS).
 
 =item *
@@ -301,7 +300,7 @@ C<Embed> upgraded to version 1.28
 
 =item *
 
-C<Encode> upgraded to version 2.24 [33493]
+C<Encode> upgraded to version 2.24
 
 =item *
 
@@ -345,18 +344,18 @@ C<ExtUtils::Constant::ProxySubs> upgraded to version 0.06
 
 =item *
 
-C<ExtUtils::Install> upgraded to version 1.51 [33567]
+C<ExtUtils::Install> upgraded to version 1.51
 
 =item *
 
-C<ExtUtils::MakeMaker> upgraded to version 6.44 [33396]
+C<ExtUtils::MakeMaker> upgraded to version 6.44
 
 =over
 
 =item *
 
-Support for INSTALLSITESCRIPT and INSTALLVENDORSCRIPT 
-configuration. [26536]
+Support for C<INSTALLSITESCRIPT> and C<INSTALLVENDORSCRIPT>
+configuration.
 
 =back
 
@@ -366,7 +365,7 @@ C<ExtUtils::Manifest> upgraded to version 1.51
 
 =item *
 
-C<ExtUtils::ParseXS> upgraded to version 2.19 [33392]
+C<ExtUtils::ParseXS> upgraded to version 2.19
 
 =item *
 
@@ -394,9 +393,15 @@ C<File::Basename> upgraded to version 2.77
 
 =item *
 
-C<File::Copy> now uses 3-arg open.
-
 C<File::Copy> upgraded to 2.11
+
+=over 4
+
+=item *
+
+Now uses 3-arg open.
+
+=back
 
 =item *
 
@@ -449,7 +454,7 @@ C<GDBM_File> upgraded to version 1.09
 
 =item *
 
-C<Getopt::Long> upgraded to version 2.37 (32009)
+C<Getopt::Long> upgraded to version 2.37
 
 =item *
 
@@ -505,15 +510,15 @@ C<Math::Complex>, C<Math::Trig> upgraded to version 1.54.
 
 =item *
 
-C<Module::Pluggable> upgraded to version 3.8 [33552]
+C<Module::Pluggable> upgraded to version 3.8
 
 =item *
 
-C<Net::Ping> upgraded to version 2.35 [33242]
+C<Net::Ping> upgraded to version 2.35
 
 =item *
 
-C<NEXT> upgraded to version 0.61 [34007]
+C<NEXT> upgraded to version 0.61
 
 =over
 
@@ -566,7 +571,7 @@ C<PerlIO::via> upgraded to version 0.05
 
 =item *
 
-C<Pod::Html> upgraded to version 1.09 [33536]
+C<Pod::Html> upgraded to version 1.09
 
 =item *
 
@@ -578,19 +583,27 @@ C<Pod::Perldoc> is now maintained by Hakim Cassimally (osfameron).
 
 =item * 
 
-C<Pod::Usage> upgraded to version 1.35 [30187]
+C<Pod::Usage> upgraded to version 1.35
+
+=item *
+
+C<POSIX> upgraded to version 1.15
+
+=over
+
+=item *
+
+C<POSIX> constants that duplicate those in C<Fcntl> are now imported from
+C<Fcntl> and re-exported, rather than being duplicated by C<POSIX>
 
 =item *
 
 C<POSIX::remove> can removes empty directories.
 
 =item *
-
-C<POSIX> imports previously duplicated constants from C<Fcntl>, version bumped from 1.14 to 1.15.
-
-=item *
-
 C<POSIX::setlocale> safer to call multiple times.
+
+=back
 
 =item *
 
@@ -634,7 +647,7 @@ This fixes an optimistic use of C<gethostbyname()>.
 
 =item *
 
-C<Storable> upgraded to 2.18
+C<Storable> upgraded to 2.19
 
 =item *
 
@@ -646,35 +659,35 @@ C<Sys-Syslog> upraded to version 0.24
 
 =item *
 
-C<Term::ANSIColor> upgraded to version 1.12 (31036)
+C<Term::ANSIColor> upgraded to version 1.12
 
 =item *
 
-C<Term::Cap> upgraded to version 1.11 (32143, 32301)
+C<Term::Cap> upgraded to version 1.11
 
 =item *
 
-C<Term::ReadLine> upgraded to version 1.03 (31862)
+C<Term::ReadLine> upgraded to version 1.03
 
 =item *
 
-C<Test::Builder> upgraded to version 0.72 (32371)
+C<Test::Builder> upgraded to version 0.72
 
 =item *
 
-C<Test::Builder::Module> upgraded to version 0.72 (32371)
+C<Test::Builder::Module> upgraded to version 0.72
 
 =item *
 
-C<Test::Builder::Tester> upgraded to version 1.09 (32371)
+C<Test::Builder::Tester> upgraded to version 1.09
 
 =item *
 
-C<Test::More> upgraded to version 0.72 (32371)
+C<Test::More> upgraded to version 0.72
 
 =item *
 
-C<Test::Simple> upgraded to version 0.72 (32371)
+C<Test::Simple> upgraded to version 0.72
 
 =item *
 
@@ -690,7 +703,7 @@ This made it able to handle newlines.
 
 =item *
 
-C<Text::Balanced> upgraded to version 1.98 (32984)
+C<Text::Balanced> upgraded to version 1.98
 
 =item *
 
@@ -710,15 +723,15 @@ C<Text::Wrap> upgraded to version 2006.1117
 
 =item *
 
-C<Thread> upgraded to version 2.01 [32470]
+C<Thread> upgraded to version 2.01
 
 =item *
 
-C<Thread::Semaphore> upgraded to version 2.07 [33361]
+C<Thread::Semaphore> upgraded to version 2.07
 
 =item *
 
-C<Thread::Queue> upgraded to version 2.06 [33362]
+C<Thread::Queue> upgraded to version 2.06
 
 =item *
 
@@ -807,43 +820,45 @@ no longer installed.
 
 =head1 Utility Changes
 
+=head2 F<perlthanks>
+
+Perl 5.8.9 adds a new utility F<perlthanks>, which is a variant of F<perlbug>,
+but for sending non-bug-reports authors and maintainers of Perl. Getting
+nothing bug reports can become a bit demoralising - we'll see if this changes
+things.
+
+=head2 F<perlbug>
+
+F<perlbug> now checks if you're reporting about a non-core module and suggests
+you report it to the CPAN author instead.
+
+=head2 F<h2xs>
+
+=over
+
+=item *
+
+won't define an empty string as a constant [RT #25366]
+
+=item *
+
+has examples for C<h2xs -X>
+
+=back
+
+=head2 F<h2ph>
+
 =over 4
 
 =item *
 
-C<h2ph> now attempts to deal sensibly with the difference in path implications
+now attempts to deal sensibly with the difference in path implications
 between C<""> and C<<E<lt>E<gt>>> quoting in C<#include> statements.
 
 =item *
 
-C<h2ph> generates correct correct code for C<#if defined A || defined B> now
-(perl #39130)
-
-=item *
-
-C<h2xs> won't define an empty string as a constant (perl #25366)
-
-=item *
-
-C<h2xs> has examples for h2xs -X (31175)
-
-=item *
-
-The Emacs perl mode (emacs/cperl-mode.el) has been updated to version
-5.23.
-
-=item *
-
-C<perlbug> now checks if you're reporting about a non-core module and suggests
-you report it to the CPAN author instead.
-
-=item *
-
-Added C<uupacktool.pl> (handles binary files in source tree).
-
-=item *
-
-Added C<add-package.pl> (adds/updates CPAN modules that are part of Core).
+generates correct correct code for C<#if defined A || defined B> now
+[RT #39130]
 
 =back
 
@@ -909,8 +924,6 @@ C<POSIX::setlocale()> to fix debian bug in RT #379463.
 L<perlmodlib> is updated with C<CPAN::API::HOWTO> and
 C<Sys::Syslog::win32::Win32> 
 
-L<perlop> adds C</k> modifier in section C<s/PATTERN/REPLACEMENT/egimosxk>
-
 L<perlre> documentation updated to reflect the differences between
 C<[[:xxxxx:]]> and C<\p{IsXxxxx}> matches. Also added section on C</g> and
 C</c> modifiers.
@@ -941,7 +954,7 @@ L<perlunitut> is a tutorial written by Juerd Waalboer on Unicode-related
 terminology and how to correctly handle Unicode in Perl scripts.
 
 L<perlvar> and L<perlre> add items C<${^PREMATCH}>, C<${^MATCH}>, and
-C<${^`POSTMATCH}> and also C</k> modifier.
+C<${^`POSTMATCH}>.
 
 L<perlvar> fixes confusion about real GID C<$(> and effective GID C<$)>. 
 
@@ -951,65 +964,6 @@ L<perlthrtut/Queues: Passing Data Around> and L<perlothrtut>.
 The Perl FAQs (F<perlfaq1>..F<perlfaq9>) have been updated.
 
 L<reverse> function documentation received scalar context examples.
-
-L<perltodo> is updated with:
-
-=over
-
-=item *
-
-removed section L<Ordering of "global" variables|perltodo>.
-
-=item *
-
-removed section L<The roadmap to 5.10|perltodo>.
-
-=item *
-
-added B<-Duse32bit*>.
-
-=item *
-
-added L<__FUNCTION__ for MSVC|perltodo>.
-
-=item *
-
-added more detail about @INC order.
-
-=item *
-
-added section L<merge common code in installperl and installman|perltodo>.
-
-=item *
-
-added section L<merge checkpods and podchecker|perltodo>.
-
-=item *
-
-added section L<Investigate PADTMP hash pessimisation|perltodo>.
-
-=item *
-
-added C<does()> built-in and L<Tied filehandles and write() don't mix|perltodo>.
-
-=item *
-
-added section L<Unicode and lcE<sol>uc operators|perltodo>.
-
-=item *
-
-added section L<perltodo/Optimize away empty destructors>.
-
-=item *
-
-Maybe the default order of directories in C<@INC> should be modified to support
-upgrade core (dual-life) modules without overwriting files.
-
-=item *
-
-Todo for perl 5.12, virtualize operating system access.
-
-=back
 
 L<perlhack> documentation extensively improved by Jarkko Hietaniemi and others.
 
@@ -1022,11 +976,6 @@ and cygwin.
 =head1 Changes to Existing Documentation
 
 =over 4
-
-=item *
-
-L<perltodo> was, of course, extensively modified; with the notable marking of the srlcpy/strcat 
-to my_strlcpy/my_strcat update as a TODONE.
 
 =item *
 
@@ -1075,12 +1024,11 @@ char-classes as an escaping mechanism will see a speedup. (Yves Orton)
 
 =item *
 
-Regular expression introduces C</k> modifier for matching along with new perl
-variables C<${^PREMATCH}>, C<${^MATCH}>, C<${^POSTMATCH}> which are equivalent
-to C<$`>, C<$&> and C<$'>, B<except> that they are only guaranteed to be
-defined after a successful match that was executed with the C</k> (keep-copy)
-modifier. The use of these variables incurs no global performance penalty,
-unlike their punctuation char equivalents (#32263).
+Many calls to C<strlen()> have been eliminated, either because the length was
+already known, or by adopting or enhancing APIs that pass lengths.
+
+A very stubborn compiler warning in S_emulate_eaccess was killed six
+times.
 
 =item *
 
@@ -1090,23 +1038,7 @@ changes with a saving of two ops and one stack push, measured as a 6.4% improve
 
 =item *
 
-Substitutions with repeated right hand expressions (ie. C<s///ge>) are now more
-efficient.
-
-
-=item *
-
 Stopped memory leak on long /etc/groups entries
-
-=item *
-
-Recursive regexes now possible.  Possessive quantifiers and named captures are 
-now possible within the regex engine.
-
-=item *
-
-The MY_CXT API has been made more efficient (and an explicit interpeter argument
-variant has been added).
 
 =back
 
@@ -1129,8 +1061,6 @@ Added C<d_pseudofork> to C<Configure> which is a new configuration variable,
 available as C<$Config{d_pseudofork}> in the L<Config> module, has been added,
 to distinguish real fork() support from fake pseudofork used on Windows
 platforms.
-
-L<ptar> and L<ptardiff> are no longer installed to C<$installbin>
 
 C<Config.pod> and C<config.sh> are now placed correctly for cross-compilation.
 
@@ -1226,7 +1156,7 @@ C<SMOKEXXX> line in patchlevel.h if present. (31597)).
 
 =item *
 
-Passing a raw string of "NaN" to L<nawk(1)> causes a core dump - so the string
+Passing a raw string of "NaN" to L<nawk> causes a core dump - so the string
 has been changed to "*NaN*" (31975)
 
 =item *
@@ -1255,6 +1185,8 @@ This fixes a problem building PAR-Packer on Win32 with a debug build of perl.
 =over 4
 
 =item *
+
+=for fixme
 
 Overloading flags are now stored on the referent instead of the reference.
 Previously taking a new, unrelated reference to an object could result in
@@ -1292,11 +1224,6 @@ Fixed problems with split, unicode /\s+/ and / \0/.
 
 Fixed bug RT #37886, unsafe dereferencations were allowed in the argument of
 C<defined()> even under the influence of C<use strict 'refs'>.
-
-=item *
-
-Fixed a long-standing bug that caused incorrect line numbers to be
-reported in error messages about elsif blocks.
 
 =item *
 
@@ -1350,10 +1277,6 @@ perl -MO=Deparse -e 'package a; sub a::b::c {}'
 perl -MO=Deparse -e 'sub the::main::road {}'
 
 =back
-
-=item * 
-
-Fix MRO behaviour when one undefs C<@ISA> (32542)
 
 =item *
 
@@ -1557,16 +1480,6 @@ Use -DPTR_IS_LONG when using 64 bit integers (27001)
 
 =back
 
-=head3 Symbian
-
-=over 4
-
-=item *
-
-Added support for Symbian series 90.
-
-=back
-
 =head2 Smaller fixes
 
 =over 4
@@ -1616,6 +1529,8 @@ fits into Latin-1.
 =item * 
 
 Reduced number of calls to C<getpeername> in L<IO::Socket> (29129).
+
+=for fixme
 
 =item *
 
@@ -1796,13 +1711,6 @@ is now also called without a context (32215), and debugging output in this
 function has been disabled because this requires that an interpreter is present
 (32235).
 
-Reorder global variable in C<intrpvar.h> saves another 40 bytes from the
-interpreter structure (#31034). Also delete C<thrdvar.h> and move its contents
-to C<intrpvar.h> (#31245).
-
-Support for B<assertions> and B<-A> is now removed from C<XS> module and in
-C<ext> (#31333). 
-
 "Bake" the values of C<PERL_REVISION>, C<PERL_VERSION> and C<PERL_SUBVERSION>
 into global variables (and hence a shared perl library). Additionally under
 C<MULTIPLICITY> record the size of the interpreter structure (total, and for
@@ -1814,6 +1722,10 @@ C<main()> to verify that the shared library is indeed binary compatible.
 All compile time options which affect binary compatability have been grouped
 together into a global variable (C<PL_bincompat_options>). This will allow
 comparisons to be made in the future.
+
+Nicholas Clark allowed symbolic references to have embedded NULs. The new
+public function C<get_cvn_flags> can be used in extensions if you have to
+handle them.
 
 =head1 New Tests
 
@@ -2047,4 +1959,8 @@ The F<README> file for general stuff.
 The F<Artistic> and F<Copying> files for copyright information.
 
 =cut
+
+=for rehoming
+The Emacs perl mode (F<emacs/cperl-mode.el>) has been updated to version
+5.23.
 
