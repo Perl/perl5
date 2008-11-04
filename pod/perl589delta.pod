@@ -9,7 +9,8 @@ the 5.8.9 release.
 
 =head1 Incompatible Changes
 
-There are no changes incompatible with 5.8.8.
+There are no changes intentionally incompatible with 5.8.8. If any exist,
+they are bugs and reports are welcome.
 
 =head1 Core Enhancements
 
@@ -28,10 +29,63 @@ there can be amiguities over which was intended. In these situations the file
 handle semantics are preferred. Both also treat C<*FILE{IO}> filehandles like
 C<*FILE> filehandles.
 
+=head2 Source filters in @INC
+
+It's possible to enhance the mechanism of subroutine hooks in @INC by
+adding a source filter on top of the filehandle opened and returned by the
+hook. This feature was planned a long time ago, but wasn't quite working
+until now. See L<perlfunc/require> for details. (Nicholas Clark)
+
+=head2 Exceptions in constant folding
+
+The constant folding routine is now wrapped in an exception handler, and
+if folding throws an exception (such as attempting to evaluate 0/0), perl
+now retains the current optree, rather than aborting the whole program.
+Without this change, programs would not compile if they had expressions that
+happened to generate exceptions, even though those expressions were in code
+that could never be reached at runtime. (Nicholas Clark, Dave Mitchell)
+
+=head2 C<no VERSION>
+
+You can now use C<no> followed by a version number to specify that you
+want to use a version of perl older than the specified one.
+
+=head2 Improved internal UTF-8 caching code
+
+The code that caches calculated UTF-8 byte offsets for character offsets for
+a string has been re-writtten. Several bugs have been located and eliminated,
+and the code now makes better use of the information it has, so should be
+faster. In particular, it doesn't scan to the end of a string before
+calculating an offset within the string, which should speed up some operations
+on long strings. It is now possible to disable the caching code at run time,
+to verify that it is not the cause of suspected problems.
+
+=head2 New internal variables
+
+=over 4
+
+=item C<${^CHILD_ERROR_NATIVE}>
+
+This variable gives the native status returned by the last pipe close,
+backtick command, successful call to wait() or waitpid(), or from the
+system() operator. See L<perlvar> for details. (Contributed by Gisle Aas.)
+
+=item ${^UTF8CACHE}
+
+This variable controls the state of the internal UTF-8 offset caching code.
+1 for on (the default), 0 for off, -1 to debug the caching code by checking
+all its results against linear scans, and panicking on any discrepancy.
+
+=back
+
 =head2 readpipe() is now overridable
 
 The built-in function readpipe() is now overridable. Overriding it permits
 also to override its operator counterpart, C<qx//> (a.k.a. C<``>).
+
+=head2 simple exception handling macros
+
+FIXME 23911 Add simple exception handling macros for XS writers.
 
 =head1 New Platforms
 
@@ -601,7 +655,13 @@ C<Fcntl> and re-exported, rather than being duplicated by C<POSIX>
 C<POSIX::remove> can removes empty directories.
 
 =item *
+
 C<POSIX::setlocale> safer to call multiple times.
+
+=item *
+
+C<POSIX::SigRt> added, which provides access to POSIX realtime signal
+functionality on systems that support it.
 
 =back
 
@@ -1044,6 +1104,32 @@ Stopped memory leak on long /etc/groups entries
 
 =head1 Installation and Configuration Improvements
 
+=head2 Relocatable installations
+
+There is now Configure support for creating a relocatable perl tree. If
+you Configure with C<-Duserelocatableinc>, then the paths in @INC (and
+everything else in %Config) can be optionally located via the path of the
+perl executable.
+
+That means that, if the string C<".../"> is found at the start of any
+path, it's substituted with the directory of $^X. So, the relocation can
+be configured on a per-directory basis, although the default with
+C<-Duserelocatableinc> is that everything is relocated. The initial
+install is done to the original configured prefix.
+
+=head2 Compilation improvements
+
+=over 4
+
+=item Parallel build
+
+Parallel makes should work properly now, although there may still be problems
+if C<make test> is instructed to run in parallel.
+
+=back
+
+=head2 FIXME
+
 F<g++> support was tuned, especially for FreeBSD.
 
 C<Configure> is now better at removing temporary files. Tom Callaway
@@ -1182,7 +1268,47 @@ This fixes a problem building PAR-Packer on Win32 with a debug build of perl.
 
 =head1 Selected Bug Fixes
 
-=over 4
+=for FIXME
+
+=over
+
+=item *
+
+UTF-8
+
+Change 28169 - a lot of UTF-8 overloading
+
+=item *
+
+Calling CORE::require()
+
+C<CORE::require> and C<CORE::do> were always parsed as C<require> and C<do>
+when they were overridden. This is now fixed.
+
+=item *
+
+Magic
+
+Some of the bitwise ops were not checking whether their arguments were magical
+before using them. [RT #24816]
+
+Dave's copy fixes.
+
+	     [ 26569]
+	     add svt_local slot to magic vtable, and fix local $shared
+	     [ 26735]
+	     document svt_copy, svt_dup and svt_local vtable slots
+
+=item *
+
+Encoding neutral unpack on numeric types. 23966/27963
+
+=item *
+
+while (my $x ...) { ...; redo } shouldn't undef $x.
+In the presence of 'my' in the conditional of a while(), until(),
+or for(;;) loop, add an extra scope to the body so that redo
+doesn't undef the lexical [24412/27978]
 
 =item *
 
