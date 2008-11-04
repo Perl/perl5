@@ -97,7 +97,11 @@ FIXME C<MY_CXT> and C<MY_CXT_INTERP>
 
 =item *
 
-C<-D> log runops loop entry and exit, and jump level popping.
+C<-Dl> log runops loop entry and exit, and jump level popping.
+
+=item *
+
+C<-Dv> display the process id as part of the trace output.
 
 =back
 
@@ -1298,6 +1302,7 @@ This fixes a problem building PAR-Packer on Win32 with a debug build of perl.
 UTF-8
 
 Change 28169 - a lot of UTF-8 overloading
+And tie.
 
 =item *
 
@@ -1829,6 +1834,10 @@ common idiom
     sv = newSV(0);
     sv_upgrade(sv, type);
 
+=for fixme newSVpvn_flags()
+
+=for fixme mPUSHs() and mXPUSHs (and we fixed bugs)
+
 A C<sigbit> public function was added to test the sign of a NV. It maps to the
 system one when available.
 
@@ -1842,8 +1851,6 @@ allow L<Sub::Current> to work on Windows.
 C<set> magic on localizing/assigning to a magic variable will now only
 trigger for I<container magics>, i.e. it will for C<%ENV> or C<%SIG>
 but not for C<$#array>.
-
-Display the process id as part of the trace output if running with C<-Dv> (33039)
 
 A lot of small improvents in the code base were made due to reports from
 the Coverity static code analyzer.
@@ -1879,6 +1886,20 @@ comparisons to be made in the future.
 Nicholas Clark allowed symbolic references to have embedded NULs. The new
 public function C<get_cvn_flags> can be used in extensions if you have to
 handle them.
+
+=for fixme
+
+Lots of cleanup
+sprintf
+sv_upgrade direct
+areneas
+
+=head2 Macro cleanups
+
+The core code, and XS code in F<ext> that is not dual-lived on CPAN, no longer
+uses the macros C<PL_na>, C<NEWSV()>, C<Null()>, C<Nullav>, C<Nullcv>,
+C<Nullhv>, C<Nullhv> I<etc>. Their use is discouraged in new code,
+particularly C<PL_na>, which is a small performance hit.
 
 =head1 New Tests
 
