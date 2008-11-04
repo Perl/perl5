@@ -87,6 +87,20 @@ also to override its operator counterpart, C<qx//> (a.k.a. C<``>).
 
 FIXME 23911 Add simple exception handling macros for XS writers.
 
+=head2 compatibility backport of 5.10.0's extension context marcos
+
+FIXME C<MY_CXT> and C<MY_CXT_INTERP>
+
+=head2 -D option enhancements 
+
+=over
+
+=item *
+
+C<-D> log runops loop entry and exit, and jump level popping.
+
+=back
+
 =head1 New Platforms
 
 Compile support added for:
@@ -821,11 +835,18 @@ for HP-UX 11 ia64)
 
 C<threads> upgraded to 1.61
 
+=for fixme Many improvements. 
+
 =item *
 
 C<threads::shared> upgraded to version 1.21
 
 =over
+
+=item *
+
+Smaller and quicker implementation that eliminates one internal structure and
+the consequent level of indirection.
 
 =item *
 
@@ -1277,6 +1298,12 @@ This fixes a problem building PAR-Packer on Win32 with a debug build of perl.
 UTF-8
 
 Change 28169 - a lot of UTF-8 overloading
+
+=item *
+
+PerlIO fd reference counting. 30269
+
+Fixes inconsistencies. API now doesn't leak C<FILE *>
 
 =item *
 
