@@ -2190,6 +2190,18 @@ internally--<> is just a synonym for <ARGV>, which
 is magical.  (The pseudo code above doesn't work because it treats
 <ARGV> as non-magical.)
 
+Since the null filehandle uses the two argument form of L<perlfunc/open>
+it interprets special characters, so if you have a script like this:
+
+    while (<>) {
+        print;
+    }
+
+and call it with C<perl dangerous.pl 'rm -rfv *|'>, it actually opens a
+pipe, executes the C<rm> command and reads C<rm>'s output from that pipe.
+If you want all items in C<@ARGV> to be interpreted as file names, you
+can use the module C<ARGV::readonly> from CPAN.
+
 You can modify @ARGV before the first <> as long as the array ends up
 containing the list of filenames you really want.  Line numbers (C<$.>)
 continue as though the input were one big happy file.  See the example

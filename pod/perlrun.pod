@@ -652,6 +652,10 @@ Note that the lines are not printed by default.  See B<-p> to have
 lines printed.  If a file named by an argument cannot be opened for
 some reason, Perl warns you about it and moves on to the next file.
 
+Also note that C<< <> >> passes command line arguments to
+L<perlfunc/open>, which doesn't necessarily interpret them as file names.
+See  L<perlop> for possible security implications.
+
 Here is an efficient way to delete all files that haven't been modified for
 at least a week:
 
