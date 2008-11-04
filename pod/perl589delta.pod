@@ -113,6 +113,10 @@ Compile support added for:
 
 =item *
 
+MirOS BSD
+
+=item *
+
 RISC OS 
 
 =item *
@@ -272,15 +276,15 @@ C<bignum> upgraded to 0.20
 
 =item *
 
-C<Carp> upgraded to version 1.09
+C<Carp> upgraded to version 1.10
 
 =item *
 
-C<CGI> upgraded to version 3.35
+C<CGI> upgraded to version 3.42
 
 =item *
 
-C<constant> upgraded to version 1.15
+C<constant> upgraded to version 1.17
 
 =item *
 
@@ -372,7 +376,7 @@ C<Embed> upgraded to version 1.28
 
 =item *
 
-C<Encode> upgraded to version 2.24
+C<Encode> upgraded to version 2.26
 
 =item *
 
@@ -400,7 +404,7 @@ C<Errno> upgraded to version 1.10
 
 =item *
 
-C<Exporter> upgraded to version 5.60
+C<Exporter> upgraded to version 5.63
 
 =item *
 
@@ -433,7 +437,7 @@ configuration.
 
 =item *
 
-C<ExtUtils::Manifest> upgraded to version 1.51
+C<ExtUtils::Manifest> upgraded to version 1.54
 
 =item *
 
@@ -733,7 +737,7 @@ C<Switch> upgraded to version 2.13
 
 =item *
 
-C<Sys-Syslog> upraded to version 0.24
+C<Sys-Syslog> upraded to version 0.27
 
 =item *
 
@@ -749,23 +753,15 @@ C<Term::ReadLine> upgraded to version 1.03
 
 =item *
 
-C<Test::Builder> upgraded to version 0.72
+C<Test::Builder> upgraded to version 0.80
 
 =item *
 
-C<Test::Builder::Module> upgraded to version 0.72
+C<Test::More> upgraded to version 0.80
 
 =item *
 
-C<Test::Builder::Tester> upgraded to version 1.09
-
-=item *
-
-C<Test::More> upgraded to version 0.72
-
-=item *
-
-C<Test::Simple> upgraded to version 0.72
+C<Test::Simple> upgraded to version 0.80
 
 =item *
 
@@ -805,11 +801,11 @@ C<Thread> upgraded to version 2.01
 
 =item *
 
-C<Thread::Semaphore> upgraded to version 2.07
+C<Thread::Semaphore> upgraded to version 2.09
 
 =item *
 
-C<Thread::Queue> upgraded to version 2.06
+C<Thread::Queue> upgraded to version 2.11
 
 =item *
 
@@ -894,7 +890,7 @@ process identifier of the current process, even when called from within a fork.
 
 =item *
 
-C<XSLoader> upgraded to version 0.08
+C<XSLoader> upgraded to version 0.10
 
 =item *
 
@@ -1303,6 +1299,7 @@ UTF-8
 
 Change 28169 - a lot of UTF-8 overloading
 And tie.
+$@
 
 =item *
 
