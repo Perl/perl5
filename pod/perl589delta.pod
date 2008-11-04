@@ -161,10 +161,6 @@ C<Archive::Extract> upgraded to version 0.26
 
 =item *
 
-C<Attribute::Handlers> upgraded to version 0.79
-
-=item *
-
 C<AutoLoader> upgraded to version 5.66
 
 =item *
@@ -288,11 +284,11 @@ C<constant> upgraded to version 1.17
 
 =item *
 
-C<CPAN> upgraded to version 1.9205
+C<CPAN> upgraded to version 1.9301
 
 =item *
 
-C<Cwd> upgraded to version 3.27 with some platform specific
+C<Cwd> upgraded to version 3.29 with some platform specific
 improvements (including for VMS).
 
 =item *
@@ -408,7 +404,7 @@ C<Exporter> upgraded to version 5.63
 
 =item *
 
-C<ExtUtils::Command> upgraded to version 1.14
+C<ExtUtils::Command> upgraded to version 1.15
 
 =item *
 
@@ -424,7 +420,7 @@ C<ExtUtils::Install> upgraded to version 1.51
 
 =item *
 
-C<ExtUtils::MakeMaker> upgraded to version 6.44
+C<ExtUtils::MakeMaker> upgraded to version 6.48
 
 =over
 
@@ -437,7 +433,7 @@ configuration.
 
 =item *
 
-C<ExtUtils::Manifest> upgraded to version 1.54
+C<ExtUtils::Manifest> upgraded to version 1.55
 
 =item *
 
@@ -501,9 +497,7 @@ C<File::Path> upgraded to version 2.04
 
 =item *
 
-C<File::Spec>, C<File::Spec::Epoc>, C<File::Spec::Mac>,
-C<File::Spec::Functions> C<File::Spec::Unix>, C<File::Spec::VMS>,
-C<File::Spec::Win32> upgraded to version 3.2701 with improved handling of bad
+C<File::Spec> upgraded to version 3.29 with improved handling of bad
 arguments and some platform specific improvements (Including for VMS and
 Cygwin) including an optimization on C<abs2rel()> when handling both relative
 arguments.
@@ -542,7 +536,7 @@ C<IPC::SysV> upgraded to version 2.00
 
 =item *
 
-C<lib> upgraded to version 0.56
+C<lib> upgraded to version 0.61
 
 =over
 
@@ -705,7 +699,7 @@ Improve g++ handling for systems using GDBM compatibility headers.
 
 =item *
 
-L<SelfLoader> upgraded to version 1.15
+L<SelfLoader> upgraded to version 1.17
 
 =item *
 
