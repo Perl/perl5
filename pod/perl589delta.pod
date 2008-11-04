@@ -2141,6 +2141,12 @@ C<VMS::XSSymSet> upgraded to 1.1 (31236).
 
 =back
 
+=head1 Obituary
+
+Nick Ing-Simmons, long time Perl hacker, author of the C<Tk> and C<Encode>
+modules, F<perlio.c> in the core, and 5.003_02 pumpking, died of a heart
+attack on 25th September 2006. He will be missed.
+
 =head1 Reporting Bugs
 
 If you find what you think is a bug, you might check the articles
