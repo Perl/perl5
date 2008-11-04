@@ -1394,6 +1394,12 @@ doesn't undef the lexical [24412/27978]
 
 =item *
 
+strict propagates inside string evals.
+
+IIRC no warnings 'subclass' works properly now too
+
+=item *
+
 =for fixme
 
 Overloading flags are now stored on the referent instead of the reference.
