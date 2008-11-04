@@ -396,7 +396,7 @@ details.
 
 This variable gives the native status returned by the last pipe close,
 backtick command, successful call to wait() or waitpid(), or from the
-system() operator. See L<perlrun> for details. (Contributed by Gisle Aas.)
+system() operator. See L<perlvar> for details. (Contributed by Gisle Aas.)
 
 =item C<${^RE_TRIE_MAXBUF}>
 
