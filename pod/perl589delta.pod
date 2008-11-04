@@ -807,6 +807,23 @@ C<Thread::Semaphore> upgraded to version 2.09
 
 C<Thread::Queue> upgraded to version 2.11
 
+=over
+
+=item *
+
+Added capability to add complex structures (e.g., hash of hashes) to queues.
+
+=item *
+
+Added capability to dequeue multiple items at once
+
+=item *
+
+Added new methods to inspect and manipulate queues:  C<peek>, C<insert> and
+C<extract>
+
+=back
+
 =item *
 
 C<Tie::Memoize> upgraded to version 1.1
@@ -833,13 +850,34 @@ for HP-UX 11 ia64)
 
 =item *
 
-C<threads> upgraded to 1.61
+C<threads> upgraded to 1.71
 
-=for fixme Many improvements. 
+=over
 
 =item *
 
-C<threads::shared> upgraded to version 1.21
+New thread state information methods: C<is_running>, C<is_detached>
+and C<is_joinable>.  C<list> method enhanced to return running or joinable
+threads.
+
+=item *
+
+New thread signal method: C<kill>
+
+=item *
+
+Added capability to specify thread stack size
+
+=item *
+
+Added capability to control thread exiting behavior.  Added a new C<exit>
+method.
+
+=back
+
+=item *
+
+C<threads::shared> upgraded to version 1.26
 
 =over
 
@@ -856,6 +894,10 @@ User locks are now stored in a safer manner.
 
 New function C<shared_clone> creates a copy of an object leaving
 shared elements as-is and deep-cloning non-shared elements.
+
+=item *
+
+Added new C<is_shared> method.
 
 =back
 
