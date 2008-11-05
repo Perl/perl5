@@ -1339,14 +1339,58 @@ before using them. [RT #24816]
 
 Magic is no longer invoked twice by the expression C<\&$x>
 
+=head2 Reblessing overloaded objects now works
+
+Internaly, perl object-ness is on the referenant, not the reference, even
+though methods can only be called via a reference. However, the original
+implementation of overloading stored flags related to overloading on the
+reference, relying on the flags being copied when the reference was copied,
+or set at the creation of a new reference. This manifests in a bug - if you
+rebless an object from a class that has overloading, into one that does not,
+then any other existing references think that they (still) point to an
+overloaded object, choose these C code paths, and then throw errors.
+Analagously, blessing into an overloaded class when other references exist will
+result in them not using overloading.
+
+The implementation has been fixed for 5.10, but this fix changes the semantics
+of flag bits, so is not binary compatible, so can't be applied to 5.8.9.
+However, 5.8.9 has a work-around that implements the same bug fix. If the
+referant has multiple references, then all the other references are located and
+corrected. A full search is avoided whenever possible by scanning lexicals
+outwards from the current subroutine, and the argument stack.
+
+A certain well known Linux vendor applied incomplete versions of this bug fix
+to their F</usr/bin/perl> and then prematurely closed bug reports about
+performance issues without consulting back upstream. This not being enough,
+they then proceded to ignore the necessary fixes to these unreleased changes
+for 11 months, until massive pressure was applied by their long-suffering
+paying customers, catalysed by the failings being featured on a prominent blog
+and slashdot.
+
+=head2 C<strict> now propagates correctly into string evals
+
+Under 5.8.8 and earlier:
+
+    $ perl -e 'use strict; eval "use foo bar" or die $@'
+    Can't locate foo.pm in @INC (@INC contains: ... .) at (eval 1) line 2.
+    BEGIN failed--compilation aborted at (eval 1) line 2.
+
+Under 5.8.9 and later:
+
+    $ ./perl -Ilib -e 'use strict; eval "use foo bar" or die $@'
+    Bareword "bar" not allowed while "strict subs" in use at (eval 1) line 1.
+
+This may cause problems with programs that parse the error message and rely
+on the buggy behaviour.
+
 =head2 Other fixes
 
 =over
 
 =item *
 
-The tokenizer no longer treats =cute (and other words beginning
-with =cut) as a synonym for =cut.
+The tokenizer no longer treats C<=cute> (and other words beginning
+with C<=cut>) as a synonym for C<=cut>.
 
 =item *
 
@@ -1425,27 +1469,6 @@ bracket) instead of just C<$10>.
 =item *
 
 Fix bug RT #45053, newCONSTSUB() is now thread safe.
-
-=item *
-
-strict propagates inside string evals.
-
-IIRC no warnings 'subclass' works properly now too
-
-=item *
-
-=for fixme
-
-Overloading flags are now stored on the referent instead of the reference.
-Previously taking a new, unrelated reference to an object could result in
-the original (blessed) reference being able to access the overload while
-the new reference could not.  (Test added in 32016).
-
-=item *
-
-Reblessing an object from a class that doesn't use overloads to one
-that does (or vice versa) is now faster. (31996, 32019, 32025).
-
 
 =back
 
@@ -1953,13 +1976,12 @@ C<t/op/stat.t> tests will now test hard links on VMS if they are supported.
 
 =head1 Known Problems
 
-=for fixme
+There are no known new bugs.
 
-strict in evals
-warnings
-many bug fixes present in 5.10.0 can't be backported
-
-None.
+However, programs that rely on bugs that have been fixed will have problems.
+Also, many bug fixes present in 5.10.0 can't be backported to the 5.8.x
+branch, because they require changes that are binary incompatible, or because
+the code changes are too large and hence too risky to incorporate.
 
 =head1 Platform Specific Notes
 
