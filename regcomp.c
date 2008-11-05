@@ -6617,20 +6617,30 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep)
             | PERL_SCAN_DISALLOW_PREFIX
             | (SIZE_ONLY ? PERL_SCAN_SILENT_ILLDIGIT : 0);
         UV cp;
-	char string;
         len = (STRLEN)(endbrace - name - 2);
         cp = grok_hex(name + 2, &len, &fl, NULL);
         if ( len != (STRLEN)(endbrace - name - 2) ) {
             cp = 0xFFFD;
         }    
-        if (cp > 0xff)
-            RExC_utf8 = 1;
         if ( valuep ) {
+	    if (cp > 0xff) RExC_utf8 = 1;
             *valuep = cp;
             return NULL;
         }
-	string = (char)cp;
-        sv_str= newSVpvn(&string, 1);
+
+	/* Need to convert to utf8 if either: won't fit into a byte, or the re
+	 * is going to be in utf8 and the representation changes under utf8. */
+	if (cp > 0xff || (RExC_utf8 && ! UNI_IS_INVARIANT(cp))) {
+	    U8 string[UTF8_MAXBYTES+1];
+	    U8 *tmps;
+	    RExC_utf8 = 1;
+	    tmps = uvuni_to_utf8(string, cp);
+	    sv_str = newSVpvn_utf8((char*)string, tmps - string, TRUE);
+	} else {    /* Otherwise, no need for utf8, can skip that step */
+	    char string;
+	    string = (char)cp;
+	    sv_str= newSVpvn(&string, 1);
+	}
     } else {
         /* fetch the charnames handler for this scope */
         HV * const table = GvHV(PL_hintgv);
@@ -6809,7 +6819,7 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep)
         Set_Node_Cur_Length(ret); /* MJD */
         RExC_parse--; 
         nextchar(pRExC_state);
-    } else {
+    } else {	/* zero length */
         ret = reg_node(pRExC_state,NOTHING);
     }
     if (!cached) {
