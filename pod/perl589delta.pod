@@ -1979,9 +1979,17 @@ C<t/op/stat.t> tests will now test hard links on VMS if they are supported.
 There are no known new bugs.
 
 However, programs that rely on bugs that have been fixed will have problems.
-Also, many bug fixes present in 5.10.0 can't be backported to the 5.8.x
+Also, many bug fixes present in 5.10.0 can't be back-ported to the 5.8.x
 branch, because they require changes that are binary incompatible, or because
 the code changes are too large and hence too risky to incorporate.
+
+We have only limited volunteer labour, and the maintenance burden is getting
+increasingly complex. Hence this will be the last significant release of the
+5.8.x series. Any future releases of 5.8.x will likely only be to deal with
+security issues, and platform build failures. Hence you should look to
+migrating to 5.10.x, if you have not started already. Alternatively, if business
+requirements constrain you to continue to use 5.8.x, you may wish to consider
+commercial support from firms such as ActiveState.
 
 =head1 Platform Specific Notes
 
