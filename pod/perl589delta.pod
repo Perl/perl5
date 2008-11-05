@@ -157,6 +157,10 @@ pluggable sub-modules. The bundled version is 3.8
 C<Module::CoreList> is a hash of hashes that is keyed on perl version as
 indicated in C<$]>. The bundled version is 2.12
 
+=item *
+
+C<Win32API::File> now available in core on Microsoft Windows.
+
 =back
 
 =head2 Updated Modules
@@ -255,6 +259,30 @@ C<B::Debug> upgraded to version 1.05
 =item *
 
 C<B::Deparse> upgraded to version 0.87
+
+=over 4
+
+=item *
+
+properly deparse C<print readpipe $x, $y>.
+
+=item *
+
+now handles C<''->()>, C<::()>, C<sub :: {}>, I<etc.> correctly [RT #43010].
+All bugs in parsing these kinds of syntax are now fixed:
+
+    perl -MO=Deparse -e '"my %h = "->()'
+    perl -MO=Deparse -e '::->()'
+    perl -MO=Deparse -e 'sub :: {}'
+    perl -MO=Deparse -e 'package a; sub a::b::c {}'
+    perl -MO=Deparse -e 'sub the::main::road {}'
+
+=item *
+
+does B<not> deparse C<$^H{v_string}>, which is automatically set by the
+internals.
+
+=back
 
 =item *
 
@@ -499,6 +527,12 @@ C<Getopt::Long> upgraded to version 2.37
 =item *
 
 C<Hash::Util> upgraded to version 0.06
+
+=item *
+
+C<IO> upgraded to version 1.23
+
+Reduced number of calls to C<getpeername> in C<IO::Socket>.
 
 =item *
 
@@ -1088,6 +1122,11 @@ changes with a saving of two ops and one stack push, measured as a 6.4% improve
 Many calls to C<strlen()> have been eliminated, either because the length was
 already known, or by adopting or enhancing APIs that pass lengths.
 
+=item * 
+
+C<index> is now faster if the search string is stored in UTF-8 but only contains
+characters in the Latin-1 range.
+
 =back
 
 =head1 Installation and Configuration Improvements
@@ -1230,7 +1269,7 @@ been chosen.
 =item *
 
 Passing a raw string of "NaN" to L<nawk> causes a core dump - so the string
-has been changed to "*NaN*" (31975)
+has been changed to "*NaN*"
 
 =back
 
@@ -1240,12 +1279,33 @@ has been changed to "*NaN*" (31975)
 
 =item *
 
-When using a shared perl library C<installperl> no longer installs static
+When using a shared perl library F<installperl> no longer installs static
 library files, import library files and export library files (of statically
 linked extensions) and empty bootstrap files (of dynamically linked
 extensions).
 
 This fixes a problem building PAR-Packer on Win32 with a debug build of perl.
+
+=item *
+
+Various improvements to the win32 build process, includding support for Visual
+C++ 2005 Express Edition (aka Visual C++ 8.x).
+
+=item * 
+
+F<perl.exe> will now have an icon if built with MinGW or Borland. 
+
+=item *
+
+Improvements to the perl-static.exe build process.
+
+=item *
+
+Add Win32 makefile option to link all extensions statically.
+
+=item *
+
+The F<WinCE> directory has been merged into the F<Win32> directory.
 
 =back
 
@@ -1386,35 +1446,6 @@ unrecognised character actually occurred.
 
 =item *
 
-Fixed bug on RT #43010, now C<B::Deparse> handles ''->(), ::(), sub :: {}, 
-etc correctly (31268). All bugs in parsing these kind of syntax are now fixed:
-
-=over
-
-=item *
-
-perl -MO=Deparse -e '"my %h = "->()'
-
-=item *
-
-perl -MO=Deparse -e '::->()'
-
-=item *
-
-perl -MO=Deparse -e 'sub :: {}'
-
-=item *
-
-perl -MO=Deparse -e 'package a; sub a::b::c {}'
-
-=item *
-
-perl -MO=Deparse -e 'sub the::main::road {}'
-
-=back
-
-=item *
-
 Fixed bug RT #35878, croaking from a XSUB called via goto &xsub corrupts perl
 internals.
 
@@ -1471,17 +1502,13 @@ Various improvements to 64 bit builds.
 
 =item *
 
-Mutex protection added in PerlIOStdio_close to avoid race conditions.  May
-fix threads free.t and blocks.t failures on OS X on 5.8.x (33502).
+Mutex protection added in C<PerlIOStdio_close> to avoid race conditions.
+Hopefully this fixes failures in the threads tests F<free.t> and F<blocks.t>.
 
 =item *
 
-Added forked terminal support to debugger under MacOSX (29415)
-
-=item *
-
-L<perl5db.pl> has been updated for Mac OS X 10.5 (as there is now a direct
-accessor for the tty device name) to update the window title.
+Added forked terminal support to the debugger, with the ability to update the
+window title.
 
 =back
 
@@ -1493,8 +1520,6 @@ accessor for the tty device name) to update the window title.
 
 C<File::Find> used to fail when the target dir is a bare drive letter and
 C<no_chdir> is 1 (the default is 0). (RT #41555)
-
-C<Win32API::File> added to the core
 
 =item *
 
@@ -1508,23 +1533,7 @@ The process id is no longer truncated to 16 bits on some Windows platforms
 
 =item *
 
-Various improvements to the win32 build process, includding support for Visual C++ 2005 Express Edition (aka Visual C++ 8.x). Also you should now have an icon for perl.exe if built with MinGW or Borland. 
-
-=item *
-
-Improvements to the perl-static.exe build process.
-
-=item *
-
-Add Win32 makefile option to link all extensions statically.
-
-=item *
-
-Merge WinCE into Win32 directory (30281-30284, 20862)
-
-=item *
-
-Fixed bug RT #54828 in C<perlio.c> when calling C<Binmode()> on Win32 and Cgywin
+Fixed bug RT #54828 in C<perlio.c> when calling C<binmode> on Win32 and Cgywin
 may cause segmentation fault.
 
 =back
@@ -1535,27 +1544,23 @@ may cause segmentation fault.
 
 =item *
 
-Fixed PerlIO::Scalar in-memory file record-style reads.
+Fixed C<PerlIO::Scalar> in-memory file record-style reads.
 
 =item *
 
-Make pipe shutdown on VMS care about whether PerlIO has already shut down (33005)
+pipe shutdown at process exit should now be more robust.
 
 =item *
 
-Fix VMS exit handling broken in Test::Harness 2.64 (33008)
+Bugs in VMS exit handling tickled by C<Test::Harness> 2.64 have been fixed.
 
 =item *
 
-Fix fcntl locking capability test in C<configure.com> (31756)
+Fix fcntl locking capability test in C<configure.com>.
 
 =item *
 
 Replaced C<shrplib='define'> with C<useshrplib='true'> on VMS.
-
-=item *
-
-Fix missing C<PerlIO_releaseFILE> in C<VMS::Stdio::getname> (31384)
 
 =back
 
@@ -1580,7 +1585,7 @@ C<OS2::REXX> upgraded to version 1.04
 
 =item *
 
-Aligned floating point build policies for cc and gcc. 
+Aligned floating point build policies for F<cc> and F<gcc>.
 
 =back
 
@@ -1590,18 +1595,8 @@ Aligned floating point build policies for cc and gcc.
 
 =item *
 
-Revisited a patch from 5.6.1 for RH7.2 for Intel's icc (RT #7916), added an aditional check for $Config{gccversion}.
-
-=back
-
-=head3 Windows and OS/2
-
-=over 4
-
-=item *
-
-A build problem with specifying C<USE_MULTI> and C<USE_ITHREADS> but without
-C<USE_IMP_SYS> has been fixed.
+Revisited a patch from 5.6.1 for RH7.2 for Intel's F<icc> (RT #7916), added an
+aditional check for C<$Config{gccversion}>.
 
 =back
 
@@ -1621,7 +1616,7 @@ Use -DPTR_IS_LONG when using 64 bit integers (27001)
 
 =item *
 
-It's now possible to overload C<eq> when using C<nomethod>.
+It is now possible to overload C<eq> when using C<nomethod>.
 
 =item *
 
@@ -1638,42 +1633,13 @@ On VMS, escaped dots will be preserved when converted to UNIX syntax.
 
 =item *
 
-L<B::Deparse> has been instructed on:
-
-=over
-
-=item *
-
-how to properly deparse C<print readpipe $x, $y>.
-
-=item *
-
-B<not> to deparse C<$^H{v_string}>, which is automatically set by the internals.
-
-=back
-
-=item *
-
 C<keys %+> no longer throws an C<'ambiguous'> warning.
-
-=item * 
-
-C<index> works faster now if the search string is stored in UTF-8 but actually
-fits into Latin-1.
-
-=item * 
-
-Reduced number of calls to C<getpeername> in L<IO::Socket> (29129).
 
 =for fixme
 
 =item *
 
 C<chr(65535)> ought to be allowed in regexes.
-
-=item *
-
-L<ExtUtils::MakeMaker> now detects DragonFlyBSD as a BSDish operating system (33006)
 
 =item * 
 
@@ -1682,12 +1648,11 @@ Using C<#!perl -d> could trigger an assertion, which has been fixed (30075).
 =item *
 
 Don't stringify tied code references in C<@INC> when calling C<require>.
-(30068)
 
 =item *
 
 Code references in C<@INC> report the correct file name when C<__FILE__> is
-used (30068).
+used.
 
 =item *
 
@@ -1730,10 +1695,6 @@ just UNIX (31971)
 
 =item *
 
-C<B> now can compile outside of the perl source tree.
-
-=item *
-
 On some systems, changes to C<$ENV{TZ}> would not always be
 respected by the underlying calls to C<localtime_r>.  Perl now
 forces the inspection of the environment on these systems.  (29213)
@@ -1753,11 +1714,6 @@ The special variable C<$^R> is now more consistently set when executing
 regexps using the C<(?{...})> construct.  In particular, it will still
 be set even if backreferences or optional sub-patterns C<(?:...)?> are
 used.  (30100)
-
-=item *
-
-Avoid a subtle problem which caused L<SQL::Translator> to mistakenly
-see a proxy constant subroutines as a GV (typeglob structure). (32172)
 
 =back
 
@@ -1805,25 +1761,35 @@ number of elements (31116).
 
 =head1 Changed Internals
 
-The new API function C<newSV_type> can be used to replace more efficiently the
-common idiom
+The new API macro C<newSVpvs()> can be used in place of constructions such as
+C<newSVpvn("ISA", 3)>. It takes a single string constant, and at C compile
+time determins its length.
+
+The new API function C<newSV_type> can be used as a more efficient replacement
+of the common idiom
 
     sv = newSV(0);
     sv_upgrade(sv, type);
 
-=for fixme newSVpvn_flags()
+Similarly C<newSVpvn_flags()> can be used to combine C<newSVpv()> with
+C<sv_2mortal()> or the equivalent C<sv_newmortal()> with C<sv_setpvn()>
 
-=for fixme mPUSHs() and mXPUSHs (and we fixed bugs)
+Two new macros C<mPUSHs()> and C<mXPUSHs()> are added, to make it easier to
+push mortal SVs onto the stack. They were then used to fix several bugs where
+values on the stack had not been mortalised.
 
 A C<sigbit> public function was added to test the sign of a NV. It maps to the
 system one when available.
 
 C<av_reify>, C<lex_end>, C<mod>, C<op_clear>, C<pop_return>,
 C<qerror>, C<setdefout>, C<vivify_defelem> and C<yylex> are now
-visible to perl core extensions. This was required by L<Data::Alias>.
+visible to perl core extensions. This was required by C<Data::Alias>.
 
 C<find_runcv> is now visible to perl core extensions. This was required to
-allow L<Sub::Current> to work on Windows.
+allow C<Sub::Current> to work on Windows.
+
+C<ptr_table*> functions are now available in unthreaded perl. C<Storable>
+takes advantage of this.
 
 C<set> magic on localizing/assigning to a magic variable will now only
 trigger for I<container magics>, i.e. it will for C<%ENV> or C<%SIG>
@@ -1832,37 +1798,30 @@ but not for C<$#array>.
 A lot of small improvents in the code base were made due to reports from
 the Coverity static code analyzer.
 
-C<ptr_table> functions are now available in unthreaded perl.
-
 Corrected use and documentation of C<gv_stashpv>, C<gv_stashpvn>, C<gv_stashsv>
 functions (last parameter is a bitmask, not boolean).
 
 C<PERL_SYS_INIT>, C<PERL_SYS_INIT3> and C<PERL_SYS_TERM> macros have been
-changed into functions (31970).
+changed into functions.
 
-Machine generated C<B::Asmdata> via C<bytecode.pl> is now more warnings free and
-read C<@optype> and C<@specialsv_name> from ext/B/B.pm (#32264, #32266)
-
-C<PERLSYS_TERM> no longer requires a context (32216). In C<PerlIO_teardown>
-is now also called without a context (32215), and debugging output in this
-function has been disabled because this requires that an interpreter is present
-(32235).
-
-"Bake" the values of C<PERL_REVISION>, C<PERL_VERSION> and C<PERL_SUBVERSION>
-into global variables (and hence a shared perl library). Additionally under
-C<MULTIPLICITY> record the size of the interpreter structure (total, and for
-this version) and under C<PERL_GLOBAL_STRUCT> the size of the global variables
-structure. Coupled with PL_bincompat_options this will allow 5.10.1 (and
-later), when compiled with a shared perl library, to perform sanity checks in
-C<main()> to verify that the shared library is indeed binary compatible.
+C<PERLSYS_TERM> no longer requires a context. In C<PerlIO_teardown>
+is now also called without a context, and debugging output in this
+function has been disabled because that required that an interpreter was
+present, an invalid assumption at termination time.
 
 All compile time options which affect binary compatability have been grouped
-together into a global variable (C<PL_bincompat_options>). This will allow
-comparisons to be made in the future.
+together into a global variable (C<PL_bincompat_options>).
 
-Nicholas Clark allowed symbolic references to have embedded NULs. The new
-public function C<get_cvn_flags> can be used in extensions if you have to
-handle them.
+The values of C<PERL_REVISION>, C<PERL_VERSION> and C<PERL_SUBVERSION> are
+now backed into global variables (and hence into any shared perl library).
+Additionally under C<MULTIPLICITY>, the perl executable now record the size of
+the interpreter structure (total, and for this version). Coupled with
+PL_bincompat_options this will allow 5.8.10 (and later), when compiled with a
+shared perl library, to perform sanity checks in C<main()> to verify that the
+shared library is indeed binary compatible.
+
+Symbolic references can now have embedded NULs. The new public function
+C<get_cvn_flags> can be used in extensions if you have to handle them.
 
 =for fixme
 
@@ -1940,7 +1899,7 @@ Test disabling key conversion in hash lookups (31923)
 
 =item *
 
-Significantly improved testing for C<$/> usage with PerlIO::Scalar in-memory
+Significantly improved testing for C<$/> usage with C<PerlIO::Scalar> in-memory
 files.
 
 =item *
@@ -2018,6 +1977,12 @@ C<t/op/stat.t> tests will now test hard links on VMS if they are supported.
 
 =head1 Known Problems
 
+=for fixme
+
+strict in evals
+warnings
+many bug fixes present in 5.10.0 can't be backported
+
 None.
 
 =head1 Platform Specific Notes
@@ -2040,7 +2005,7 @@ compatibility.
 
 =item *
 
-C<Win32API> updated to 0.1001_01 (30411)
+C<Win32API> updated to 0.1001_01
 
 =item *
 
@@ -2048,7 +2013,7 @@ C<killpg()> support added to C<MSWin32> (Jan Dubois).
 
 =item *
 
-C<File::Spec::Win32> upgraded to version 3.2701 (see above).
+C<File::Spec::Win32> upgraded to version 3.2701
 
 =back
 
@@ -2077,11 +2042,11 @@ C<OS2::REXX::DLL>, C<OS2::REXX> updated to version 1.03
 
 =item *
 
-C<File::Spec::VMS> upgraded to version 3.2701 (see above).
+C<File::Spec::VMS> upgraded to version 3.2701
 
 =item *
 
-C<VMS::XSSymSet> upgraded to 1.1 (31236).
+C<VMS::XSSymSet> upgraded to 1.1.
 
 =back
 
