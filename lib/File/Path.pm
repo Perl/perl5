@@ -17,13 +17,13 @@ BEGIN {
 
 use Exporter ();
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION   = '2.06_07';
-@ISA     = qw(Exporter);
-@EXPORT  = qw(mkpath rmtree);
+$VERSION   = '2.06_08';
+@ISA       = qw(Exporter);
+@EXPORT    = qw(mkpath rmtree);
 @EXPORT_OK = qw(make_path remove_tree);
 
-my $Is_VMS   = $^O eq 'VMS';
-my $Is_MacOS = $^O eq 'MacOS';
+my $Is_VMS     = $^O eq 'VMS';
+my $Is_MacOS   = $^O eq 'MacOS';
 
 # These OSes complain if you want to remove a file that you have no
 # write permission to:
@@ -70,13 +70,13 @@ sub mkpath {
         ($paths, $verbose, $mode) = @_;
         $paths = [$paths] unless UNIVERSAL::isa($paths,'ARRAY');
         $arg->{verbose} = $verbose;
-        $arg->{mode}    = defined $mode    ? $mode    : 0777;
+        $arg->{mode}    = defined $mode ? $mode : 0777;
     }
     else {
-            $arg = pop @_;
+        $arg = pop @_;
         $arg->{mode}      = delete $arg->{mask} if exists $arg->{mask};
-            $arg->{mode} = 0777 unless exists $arg->{mode};
-            ${$arg->{error}} = [] if exists $arg->{error};
+        $arg->{mode}      = 0777 unless exists $arg->{mode};
+        ${$arg->{error}}  = [] if exists $arg->{error};
         $paths = [@_];
     }
     return _mkpath($arg, $paths);
@@ -149,9 +149,9 @@ sub rmtree {
         }
     }
     else {
-            $arg = pop @_;
-            ${$arg->{error}}  = [] if exists $arg->{error};
-            ${$arg->{result}} = [] if exists $arg->{result};
+        $arg = pop @_;
+        ${$arg->{error}}  = [] if exists $arg->{error};
+        ${$arg->{result}} = [] if exists $arg->{result};
         $paths = [@_];
     }
 
@@ -169,7 +169,11 @@ sub rmtree {
         # need to fixup case and map \ to / on Windows
         my $ortho_root = $^O eq 'MSWin32' ? _slash_lc($p)          : $p;
         my $ortho_cwd  = $^O eq 'MSWin32' ? _slash_lc($arg->{cwd}) : $arg->{cwd};
-        if ($ortho_root eq substr($ortho_cwd, 0, length($ortho_root))) {
+        my $ortho_root_length = length($ortho_root);
+        $ortho_root_length-- if $^O eq 'VMS'; # don't compare '.' with ']'
+        if ($ortho_root_length
+            && (substr($ortho_root, 0, $ortho_root_length) 
+             eq substr($ortho_cwd, 0, $ortho_root_length))) {
             local $! = 0;
             _error($arg, "cannot remove path when cwd is $arg->{cwd}", $p);
             next;
@@ -320,8 +324,8 @@ sub _rmtree {
                     next ROOT_DIR;
                 }
                 if ($Force_Writeable and !chmod $perm | 0700, $root) {
-                        _error($arg, "cannot make directory writeable", $canon);
-                    }
+                    _error($arg, "cannot make directory writeable", $canon);
+                }
                 print "rmdir $root\n" if $arg->{verbose};
                 if (rmdir $root) {
                     push @{${$arg->{result}}}, $root if $arg->{result};
@@ -339,7 +343,7 @@ sub _rmtree {
         else {
             # not a directory
             $root = VMS::Filespec::vmsify("./$root")
-                if $Is_VMS 
+                if $Is_VMS
                    && !File::Spec->file_name_is_absolute($root)
                    && ($root !~ m/(?<!\^)[\]>]+/);  # not already in VMS syntax
 
@@ -353,8 +357,8 @@ sub _rmtree {
 
             my $nperm = $perm & 07777 | 0600;
             if ($Force_Writeable and $nperm != $perm and not chmod $nperm, $root) {
-                    _error($arg, "cannot make file writeable", $canon);
-                }
+                _error($arg, "cannot make file writeable", $canon);
+            }
             print "unlink $canon\n" if $arg->{verbose};
             # delete all versions under VMS
             for (;;) {
@@ -392,8 +396,8 @@ File::Path - Create or remove directory trees
 
 =head1 VERSION
 
-This document describes version 2.06_07 of File::Path, released
-2008-10-29.
+This document describes version 2.06_08 of File::Path, released
+2008-11-05.
 
 =head1 SYNOPSIS
 
@@ -411,14 +415,14 @@ This document describes version 2.06_07 of File::Path, released
       error  => \my $err_list,
   });
 
-  # legacy (interface promoted before v2.0)
+  # legacy (interface promoted before v2.00)
   mkpath('/foo/bar/baz');
   mkpath('/foo/bar/baz', 1, 0711);
-    mkpath(['/foo/bar/baz', 'blurfl/quux'], 1, 0711);
+  mkpath(['/foo/bar/baz', 'blurfl/quux'], 1, 0711);
   rmtree('foo/bar/baz', 1, 1);
-    rmtree(['foo/bar/baz', 'blurfl/quux'], 1, 1);
+  rmtree(['foo/bar/baz', 'blurfl/quux'], 1, 1);
 
-  # legacy (interface promoted before v2.6)
+  # legacy (interface promoted before v2.06)
   mkpath('foo/bar/baz', '/zug/zwang', { verbose => 1, mode => 0711 });
   rmtree('foo/bar/baz', '/zug/zwang', { verbose => 1, mode => 0711 });
 
@@ -461,7 +465,7 @@ C<mask> is recognised as an alias for this parameter.
 
 =item verbose => $bool
 
-If present, will cause C<mkpath> to print the name of each directory
+If present, will cause C<make_path> to print the name of each directory
 as it is created. By default nothing is printed.
 
 =item error => \$err
@@ -476,6 +480,8 @@ a fatal error that will cause the program will halt, unless trapped
 in an C<eval> block.
 
 =back
+
+=item mkpath( $dir )
 
 =item mkpath( $dir, $verbose, $mode )
 
@@ -507,12 +513,12 @@ The following keys are recognised in the option hash:
 
 =item verbose => $bool
 
-If present, will cause C<rmtree> to print the name of each file as
+If present, will cause C<remove_tree> to print the name of each file as
 it is unlinked. By default nothing is printed.
 
 =item safe => $bool
 
-When set to a true value, will cause C<rmtree> to skip the files
+When set to a true value, will cause C<remove_tree> to skip the files
 for which the process lacks the required privileges needed to delete
 files, such as delete privileges on VMS. In other words, the code
 will make no attempt to alter file permissions. Thus, if the process
@@ -548,7 +554,7 @@ HANDLING section for more information.
 
 Removing things is a much more dangerous proposition than
 creating things. As such, there are certain conditions that
-C<rmtree> may encounter that are so dangerous that the only
+C<remove_tree> may encounter that are so dangerous that the only
 sane action left is to kill the program.
 
 Use C<error> to trap all that is reasonable (problems with
@@ -572,9 +578,19 @@ interpretation of the arguments passed.
 
 =head2 ERROR HANDLING
 
-If C<mkpath> or C<rmtree> encounter an error, a diagnostic message
-will be printed to C<STDERR> via C<carp> (for non-fatal errors),
-or via C<croak> (for fatal errors).
+=over 4
+
+=item B<NOTE:>
+
+The following error handling mechanism is considered
+experimental and is subject to change pending feedback from
+users.
+
+=back
+
+If C<make_path> or C<remove_tree> encounter an error, a diagnostic
+message will be printed to C<STDERR> via C<carp> (for non-fatal
+errors), or via C<croak> (for fatal errors).
 
 If this behaviour is not desirable, the C<error> attribute may be
 used to hold a reference to a variable, which will be used to store
@@ -591,7 +607,7 @@ C<$!>). An example usage looks like:
 
 If no errors are encountered, C<$err> will point to an empty list
 (thus there is no need to test for C<undef>). If a general error
-is encountered (for instance, C<rmtree> attempts to remove a directory
+is encountered (for instance, C<remove_tree> attempts to remove a directory
 tree that does not exist), the diagnostic key will be empty, only
 the value will be set:
 
@@ -640,7 +656,7 @@ See the following pages for more information:
 
 Additionally, unless the C<safe> parameter is set (or the
 third parameter in the traditional interface is TRUE), should a
-C<rmtree> be interrupted, files that were originally in read-only
+C<remove_tree> be interrupted, files that were originally in read-only
 mode may now have their permissions set to a read-write (or "delete
 OK") mode.
 
@@ -679,26 +695,26 @@ you have exceeded your filesystem's maximum path length.
 
 =item cannot fetch initial working directory: [errmsg]
 
-C<rmtree> attempted to determine the initial directory by calling
+C<remove_tree> attempted to determine the initial directory by calling
 C<Cwd::getcwd>, but the call failed for some reason. No attempt
 will be made to delete anything.
 
 =item cannot stat initial working directory: [errmsg]
 
-C<rmtree> attempted to stat the initial directory (after having
+C<remove_tree> attempted to stat the initial directory (after having
 successfully obtained its name via C<getcwd>), however, the call
 failed for some reason. No attempt will be made to delete anything.
 
 =item cannot chdir to [dir]: [errmsg]
 
-C<rmtree> attempted to set the working directory in order to
+C<remove_tree> attempted to set the working directory in order to
 begin deleting the objects therein, but was unsuccessful. This is
 usually a permissions issue. The routine will continue to delete
 other things, but this directory will be left intact.
 
 =item directory [dir] changed before chdir, expected dev=[n] ino=[n], actual dev=[n] ino=[n], aborting. (FATAL)
 
-C<rmtree> recorded the device and inode of a directory, and then
+C<remove_tree> recorded the device and inode of a directory, and then
 moved into it. It then performed a C<stat> on the current directory
 and detected that the device and inode were no longer the same. As
 this is at the heart of the race condition problem, the program
@@ -706,14 +722,14 @@ will die at this point.
 
 =item cannot make directory [dir] read+writeable: [errmsg]
 
-C<rmtree> attempted to change the permissions on the current directory
+C<remove_tree> attempted to change the permissions on the current directory
 to ensure that subsequent unlinkings would not run into problems,
 but was unable to do so. The permissions remain as they were, and
 the program will carry on, doing the best it can.
 
 =item cannot read [dir]: [errmsg]
 
-C<rmtree> tried to read the contents of the directory in order
+C<remove_tree> tried to read the contents of the directory in order
 to acquire the names of the directory entries to be unlinked, but
 was unsuccessful. This is usually a permissions issue. The
 program will continue, but the files in this directory will remain
@@ -721,7 +737,7 @@ after the call.
 
 =item cannot reset chmod [dir]: [errmsg]
 
-C<rmtree>, after having deleted everything in a directory, attempted
+C<remove_tree>, after having deleted everything in a directory, attempted
 to restore its permissions to the original state but failed. The
 directory may wind up being left behind.
 
@@ -736,55 +752,55 @@ outside the directory tree to be removed.
 
 =item cannot chdir to [parent-dir] from [child-dir]: [errmsg], aborting. (FATAL)
 
-C<rmtree>, after having deleted everything and restored the permissions
+C<remove_tree>, after having deleted everything and restored the permissions
 of a directory, was unable to chdir back to the parent. The program
 halts to avoid a race condition from occurring.
 
 =item cannot stat prior working directory [dir]: [errmsg], aborting. (FATAL)
 
-C<rmtree> was unable to stat the parent directory after have returned
+C<remove_tree> was unable to stat the parent directory after have returned
 from the child. Since there is no way of knowing if we returned to
 where we think we should be (by comparing device and inode) the only
 way out is to C<croak>.
 
 =item previous directory [parent-dir] changed before entering [child-dir], expected dev=[n] ino=[n], actual dev=[n] ino=[n], aborting. (FATAL)
 
-When C<rmtree> returned from deleting files in a child directory, a
+When C<remove_tree> returned from deleting files in a child directory, a
 check revealed that the parent directory it returned to wasn't the one
 it started out from. This is considered a sign of malicious activity.
 
 =item cannot make directory [dir] writeable: [errmsg]
 
 Just before removing a directory (after having successfully removed
-everything it contained), C<rmtree> attempted to set the permissions
+everything it contained), C<remove_tree> attempted to set the permissions
 on the directory to ensure it could be removed and failed. Program
 execution continues, but the directory may possibly not be deleted.
 
 =item cannot remove directory [dir]: [errmsg]
 
-C<rmtree> attempted to remove a directory, but failed. This may because
+C<remove_tree> attempted to remove a directory, but failed. This may because
 some objects that were unable to be removed remain in the directory, or
 a permissions issue. The directory will be left behind.
 
 =item cannot restore permissions of [dir] to [0nnn]: [errmsg]
 
-After having failed to remove a directory, C<rmtree> was unable to
+After having failed to remove a directory, C<remove_tree> was unable to
 restore its permissions from a permissive state back to a possibly
 more restrictive setting. (Permissions given in octal).
 
 =item cannot make file [file] writeable: [errmsg]
 
-C<rmtree> attempted to force the permissions of a file to ensure it
+C<remove_tree> attempted to force the permissions of a file to ensure it
 could be deleted, but failed to do so. It will, however, still attempt
 to unlink the file.
 
 =item cannot unlink file [file]: [errmsg]
 
-C<rmtree> failed to remove a file. Probably a permissions issue.
+C<remove_tree> failed to remove a file. Probably a permissions issue.
 
 =item cannot restore permissions of [file] to [0nnn]: [errmsg]
 
-After having failed to remove a file, C<rmtree> was also unable
+After having failed to remove a file, C<remove_tree> was also unable
 to restore the permissions on the file to a possibly less permissive
 setting. (Permissions given in octal).
 
