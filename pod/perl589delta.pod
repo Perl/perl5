@@ -1127,6 +1127,11 @@ already known, or by adopting or enhancing APIs that pass lengths.
 C<index> is now faster if the search string is stored in UTF-8 but only contains
 characters in the Latin-1 range.
 
+=item *
+
+The Unicode swatch cache inside the regexp engine is now used. (the lookup had
+a key mismatch, present since the initial implementation). [RT #42839]
+
 =back
 
 =head1 Installation and Configuration Improvements
@@ -1298,27 +1303,50 @@ The F<WinCE> directory has been merged into the F<Win32> directory.
 
 =head1 Selected Bug Fixes
 
-=for FIXME
+=head2 Unicode
+
+Many many bugs related to the internal Unicode implementation (UTF-8) have
+been fixed. In particular, long standing bugs related to returning Unicode
+via C<tie>, overloading or C<$@> are now gone, some of which were never
+reported.
+
+C<unpack> will internally convert the string back from UTF-8 on numeric types.
+This is a compramise between the full consistency now in 5.10, and the current
+behaviour, which is often used as a "feature" on string types.
+
+Using C<:crlf> and C<UTF-16> IO layers together will now work.
+
+Fixed problems with C<split>, Unicode C</\s+/> and C</ \0/>.
+
+Fixed bug RT #40641 - encoding of Unicode characters in regular expressions.
+
+Fixed a bug where using certain patterns in a regex led to a panic.
+[RT #45337]
+
+=head2 PerlIO
+
+Inconsistencies have been fixed in the reference counting PerlIO uses to keep
+track of Unix file descriptors, and the API used by XS code to manage getting
+and releasing C<FILE *>s
+
+=head2 Magic
+
+Several bugs have been fixed in Magic, the internal system used to implement
+features such as C<tie> and threads sharing.
+
+Some of the bitwise ops were not checking whether their arguments were magical
+before using them. [RT #24816]
+
+Magic is no longer invoked twice by the expression C<\&$x>
+
+=head2 Other fixes
 
 =over
 
 =item *
 
-UTF-8
-
-Change 28169 - a lot of UTF-8 overloading
-And tie.
-$@
-
-=item *
-
-PerlIO fd reference counting. 30269
-
-Fixes inconsistencies. API now doesn't leak C<FILE *>
-
-pushing :crlf after :utf8
-
-[ http://groups.google.com/group/perl.perl5.porters/browse_thread/thread/24f9169bd222c4e6/47fb435abc165e16#47fb435abc165e16 ]
+The tokenizer no longer treats =cute (and other words beginning
+with =cut) as a synonym for =cut.
 
 =item *
 
@@ -1329,32 +1357,74 @@ when they were overridden. This is now fixed.
 
 =item *
 
-Magic
-
-Some of the bitwise ops were not checking whether their arguments were magical
-before using them. [RT #24816]
-
-Dave's copy fixes.
-
-	     [ 26569]
-	     add svt_local slot to magic vtable, and fix local $shared
-	     [ 26735]
-	     document svt_copy, svt_dup and svt_local vtable slots
-
-http://public.activestate.com/cgi-bin/perlbrowse/p/30232
-
-Stopped memory leak on long /etc/groups entries
+Stopped memory leak on long F</etc/groups> entries.
 
 =item *
 
-Encoding neutral unpack on numeric types. 23966/27963
+C<while (my $x ...) { ...; redo }> shouldn't C<undef $x>.
+
+In the presence of C<my> in the conditional of a C<while()>, C<until()>,
+or C<for(;;)> loop, we now add an extra scope to the body so that C<redo>
+doesn't C<undef> the lexical.
 
 =item *
 
-while (my $x ...) { ...; redo } shouldn't undef $x.
-In the presence of 'my' in the conditional of a while(), until(),
-or for(;;) loop, add an extra scope to the body so that redo
-doesn't undef the lexical [24412/27978]
+The C<encoding> pragma now correctly ignores anything following an C<@> 
+character in the C<LC_ALL> and C<LANG> environment variables. [RT # 49646]
+
+=item *
+
+A segfault observed with some gcc 3.3 optimisations is resolved.
+
+=item *
+
+A possible segfault when L<unpack> used in scalar context with C<()> groups
+is resolved. [RT #50256]
+
+=item *
+
+Resolved issue where C<$!> could be changed by a signal handler interrupting
+a C<system()> call.
+
+=item *
+
+Fixed bug RT #37886, unsafe dereferencations were allowed in the argument of
+C<defined()> even under the influence of C<use strict 'refs'>.
+
+=item *
+
+Fixed bug RT #43207, where C<lc>/C<uc> inside C<sort> affected the return
+value.
+
+=item *
+
+Fixed bug RT #45607, where C<*{"BONK"} = \&{"BONK"}> didn't work correctly.
+
+=item *
+
+Fixed bug RT #35878, croaking from a XSUB called via C<goto &xsub> corrupts perl
+internals.
+
+=item *
+
+Fixed bug RT #32539, C<DynaLoader.o> is moved into C<libperl.so> to avoid the need to
+statically link DynaLoader into the stub perl executable and make C<libperl.so>
+provides all codes needed to get a functional embedded perl interpreter runs.
+
+=item *
+
+Fix bug RT #36267 so that assigning to a tied hash doesn't change the
+underlying hash.
+
+=item *
+
+Fix bug RT #6006, regex replaces using large replacement variables fail some of
+the time, I<i.e.> when substitution contains something like C<${10}> (note the
+bracket) instead of just C<$10>.
+
+=item *
+
+Fix bug RT #45053, newCONSTSUB() is now thread safe.
 
 =item *
 
@@ -1376,106 +1446,6 @@ the new reference could not.  (Test added in 32016).
 Reblessing an object from a class that doesn't use overloads to one
 that does (or vice versa) is now faster. (31996, 32019, 32025).
 
-
-=item *
-
-C<encoding> pragma now correctly ignores anything following an C<@> character in
-the C<LC_ALL> and C<LANG> environment variables. (RT # 49646)
-
-=item *
-
-Magic is no longer invoked twice by the expression C<\&$x>
-
-=item *
-
-A segfault observed with some gcc 3.3 optimisations is resolved.
-
-=item *
-
-A possible segfault when L<unpack> used in scalar context with C<()> groups
-is resolved. (RT #50256)
-
-=item *
-
-Resolved issue where C<$!> could be changed by a signal handler interrupting
-a C<system()> call.
-
-=item *
-
-Fixed problems with split, unicode /\s+/ and / \0/.
-
-=item *
-
-Fixed bug RT #37886, unsafe dereferencations were allowed in the argument of
-C<defined()> even under the influence of C<use strict 'refs'>.
-
-=item *
-
-The tokenizer no longer treats =cute (and other words beginning
-with =cut) as a synonym for =cut.
-
-=item *
-
-Fixed bug RT #43207, where lc()/uc() inside sort affected the return
-value.
-
-=item *
-
-Fixed bug RT #45337, where using certain UTF-8 patterns in a regex led
-to a panic.
-
-=item *
-
-Fixed bug RT #45607, where *{"BONK"} = \&{"BONK"} didn't work correctly.
-
-=item *
-
-The "Unrecognised character 'x'" error now specifies in which column the
-unrecognised character actually occurred.
-
-=item *
-
-Fixed bug RT #35878, croaking from a XSUB called via goto &xsub corrupts perl
-internals.
-
-=item * 
-
-Fix descriptor leak caused by change (30633) to C<PerlIO_exportFILE> (32224)
-
-=item *
-
-Fixed bug RT #32539, C<DynaLoader.o> is moved into C<libperl.so> to avoid the need to
-statically link DynaLoader into the stub perl executable and make C<libperl.so>
-provides all codes needed to get a functional embedded perl interpreter runs.
-
-=item *
-
-Fix bug 36267 so that assigning to a tied hash doesn't change the
-underlying hash (27636)
-
-=item *
-
-Fix bug RT #6006, regex replaces using large replacement variables fail some of
-the time, i.e. when substitution contains something like C<${10}> (note the
-bracket) instead of just C<$10> (29616 - 29619).
-
-=item *
-
-Fix bug RT #55302, a long existed bug when using C<B::CC> on threaded perl which
-uses eval will cause syntax error.
-
-=item *
-
-Fix bug #45053, newCONSTSUB() is now thread safe.
-
-=item *
-
-Fix bug #42839 - the unicode swatch cache is now used (the lookup had a key
-mismatch).
-
-=item *
-
-Fix bug #40641 - fixed encoding of unicode characters in regular expressions.
 
 =back
 
@@ -1526,6 +1496,18 @@ Fixed bug RT #54828 in C<perlio.c> when calling C<binmode> on Win32 and Cgywin
 may cause segmentation fault.
 
 =back
+
+Magic
+
+
+Dave's copy fixes.
+
+	     [ 26569]
+	     add svt_local slot to magic vtable, and fix local $shared
+	     [ 26735]
+	     document svt_copy, svt_dup and svt_local vtable slots
+
+http://public.activestate.com/cgi-bin/perlbrowse/p/30232
 
 =head3 VMS
 
@@ -1741,12 +1723,17 @@ pragma (28903).
 =head2 Invalid escape in the specified encoding in regex; marked by <-- HERE in m/%s/
 
 New error, introduced as part of the fix to RT #40641 to handle encoding
-of unicode characters in regular expression comments.
+of Unicode characters in regular expression comments.
 
 =head2 FETCHSIZE returned a negative value
 
 New error indicating that a tied array has claimed to have a negative
-number of elements (31116).
+number of elements.
+
+=for fixme
+
+The "Unrecognised character 'x'" error now specifies in which column the
+unrecognised character actually occurred.
 
 =head1 Changed Internals
 
