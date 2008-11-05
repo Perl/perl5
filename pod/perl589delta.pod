@@ -24,10 +24,10 @@ notable changes.
 =head2 stat and -X on directory handles
 
 It is now possible to call C<stat> and the C<-X> filestat operators on
-directory handles. As both directory and file handles are barewords, there is
-there can be amiguities over which was intended. In these situations the file
-handle semantics are preferred. Both also treat C<*FILE{IO}> filehandles like
-C<*FILE> filehandles.
+directory handles. As both directory and file handles are barewords, there
+can be amiguities over which was intended. In these situations the file
+handle semantics are preferred. Both also treat C<*FILE{IO}> filehandles
+like C<*FILE> filehandles.
 
 =head2 Source filters in @INC
 
@@ -67,8 +67,8 @@ to verify that it is not the cause of suspected problems.
 =item C<${^CHILD_ERROR_NATIVE}>
 
 This variable gives the native status returned by the last pipe close,
-backtick command, successful call to wait() or waitpid(), or from the
-system() operator. See L<perlvar> for details. (Contributed by Gisle Aas.)
+backtick command, successful call to C<wait> or C<waitpid>, or from the
+C<system> operator. See L<perlvar> for details. (Contributed by Gisle Aas.)
 
 =item ${^UTF8CACHE}
 
@@ -78,22 +78,25 @@ all its results against linear scans, and panicking on any discrepancy.
 
 =back
 
-=head2 readpipe() is now overridable
+=head2 C<readpipe> is now overridable
 
-The built-in function readpipe() is now overridable. Overriding it permits
+The built-in function C<readpipe> is now overridable. Overriding it permits
 also to override its operator counterpart, C<qx//> (a.k.a. C<``>).
 
 =head2 simple exception handling macros
 
-FIXME 23911 Add simple exception handling macros for XS writers.
-
-=head2 compatibility backport of 5.10.0's extension context marcos
-
-FIXME C<MY_CXT> and C<MY_CXT_INTERP>
+Perl 5.8.9 (and 5.10.0 onwards) now provides a couple of macros to do very
+basic exception handling in XS modules. You can use these macros if you call
+code that may croak, but you need to do some cleanup before giving control
+back to Perl. See L<perlguts/Exception Handling> for more details.
 
 =head2 -D option enhancements 
 
 =over
+
+=item *
+
+C<-Dq> suppresses the I<EXECUTING...> message when running under C<-D>
 
 =item *
 
@@ -147,7 +150,7 @@ pluggable sub-modules. The bundled version is 3.8
 =item *
 
 C<Module::CoreList> is a hash of hashes that is keyed on perl version as
-indicated in $]. The bundled version is 2.12
+indicated in C<$]>. The bundled version is 2.12
 
 =back
 
@@ -161,15 +164,7 @@ C<attributes> upgraded to version 0.09
 
 =item *
 
-C<ANSIColor> upgraded to version 1.11
-
-=item *
-
-C<Archive::Extract> upgraded to version 0.26
-
-=item *
-
-C<AutoLoader> upgraded to version 5.66
+C<AutoLoader> upgraded to version 5.67
 
 =item *
 
@@ -229,7 +224,7 @@ C<B::C> upgraded to 1.05
 
 =item *
 
-C<B::Concise> upgraded to 0.74
+C<B::Concise> upgraded to 0.76
 
 =over
 
@@ -256,7 +251,7 @@ C<B::Debug> upgraded to version 1.05
 
 =item *
 
-C<B::Deparse> upgraded to version 0.82
+C<B::Deparse> upgraded to version 0.87
 
 =item *
 
@@ -264,7 +259,7 @@ C<B::Lint> upgraded to version 1.11
 
 =item *
 
-C<B::Terse> upgraded to version 1.04
+C<B::Terse> upgraded to version 1.05
 
 =item *
 
@@ -276,7 +271,7 @@ C<Benchmark> upgraded to version 1.10
 
 =item *
 
-C<bignum> upgraded to 0.20
+C<bignum> upgraded to 0.23
 
 =item *
 
@@ -301,7 +296,7 @@ improvements (including for VMS).
 
 =item *
 
-C<Data::Dumper> upgraded to version 2.121_13
+C<Data::Dumper> upgraded to version 2.121_17
 
 =over
 
@@ -317,20 +312,7 @@ Fixes hash iterator current position with the pure Perl version #40668 (29224)
 
 =item *
 
-C<DB> upgraded to version 1.30
-
-=over
-
-=item *
-
-Andreas J. Koenig contributed two functions to save and load the debugger
-history.
-
-=back
-
-=item *
-
-C<DB_File> upgraded to version 1.817 [33583]
+C<DB_File> upgraded to version 1.817
 
 =item *
 
@@ -342,7 +324,7 @@ C<Devel::Peek> upgraded to version 1.04
 
 =item *
 
-C<Devel::PPPort> upgraded to version 3.14_01
+C<Devel::PPPort> upgraded to version 3.14
 
 =item *
 
@@ -351,10 +333,6 @@ C<diagnostics> upgraded to version 1.16
 =item *
 
 C<Digest> upgraded to version 1.15
-
-=item *
-
-C<Digest::SHA> upgraded to version 5.46
 
 =item *
 
@@ -371,36 +349,28 @@ handle to suppress warning about already being closed.
 
 =item *
 
-C<DynaLoader> upgraded to version 1.09 and can now dynamically load a loadable
-object from a file with a non-default file extension.
+C<DynaLoader> upgraded to version 1.09
 
-=item *
-
-C<Embed> upgraded to version 1.28
+DynaLoader can now dynamically load a loadable object from a file with a
+non-default file extension.
 
 =item *
 
 C<Encode> upgraded to version 2.26
 
-=item *
-
 C<Encode::Alias> includes a fix for encoding "646" (aka ASCII) on Solaris.
 
 =item *
 
-C<File::Basename> upgraded to version 2.76
+C<File::Basename> upgraded to version 2.77
 
 =item *
 
-C<File::Find> upgraded to version 1.11
+C<File::Find> upgraded to version 1.13
 
 =item *
 
 C<File::Glob> upgraded to version 1.06
-
-=item *
-
-C<encoding> upgraded to version 0.11
 
 =item *
 
@@ -421,6 +391,10 @@ C<ExtUtils::Constant> upgraded to version 0.04
 =item *
 
 C<ExtUtils::Constant::ProxySubs> upgraded to version 0.06
+
+=item *
+
+C<ExtUtils::Embed> upgraded to version 1.28
 
 =item *
 
@@ -630,6 +604,10 @@ C<open> upgraded to 1.06
 =item *
 
 C<PathTools> upgraded to version 3.2501
+
+=item *
+
+C<PerlIO::encoding> upgraded to version 0.11
 
 =item *
 
@@ -944,6 +922,11 @@ no longer installed.
 =back
 
 =head1 Utility Changes
+
+=head2 debugger upgraded to version 1.30
+
+Andreas J. Koenig contributed two functions to save and load the debugger
+history.
 
 =head2 F<perlthanks>
 
