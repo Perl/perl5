@@ -374,11 +374,7 @@ C<ExtUtils::Command> upgraded to version 1.15
 
 =item *
 
-C<ExtUtils::Constant> upgraded to version 0.04
-
-=item *
-
-C<ExtUtils::Constant::ProxySubs> upgraded to version 0.06
+C<ExtUtils::Constant> upgraded to version 0.21
 
 =item *
 
@@ -426,20 +422,6 @@ Allows built-ins in CORE::GLOBAL to be made fatal.
 C<File::Basename> upgraded to version 2.77
 
 =item *
-
-C<File::Find> upgraded to version 1.13
-
-=item *
-
-C<File::Glob> upgraded to version 1.06
-
-=item *
-
-C<fields> upgraded to version 2.12
-
-=item *
-
-C<File::Basename> upgraded to version 2.77
 
 =item *
 
@@ -502,7 +484,7 @@ C<Getopt::Long> upgraded to version 2.37
 
 =item *
 
-C<Hash::Util> upgraded to version 0.07
+C<Hash::Util> upgraded to version 0.06
 
 =item *
 
@@ -530,11 +512,11 @@ C<Locale::Maketext> upgraded to 1.13
 
 =item *
 
-C<Math::BigFloat> upgraded to version 1.54
+C<Math::BigFloat> upgraded to version 1.60
 
 =item *
 
-C<Math::BigInt> upgraded to version 1.82
+C<Math::BigInt> upgraded to version 1.89
 
 =item *
 
@@ -587,10 +569,6 @@ C<open> upgraded to 1.06
 
 =item *
 
-C<PathTools> upgraded to version 3.2501
-
-=item *
-
 C<PerlIO::encoding> upgraded to version 0.11
 
 =item *
@@ -616,10 +594,6 @@ C<Pod::Html> upgraded to version 1.09
 =item *
 
 C<Pod::Parser> upgraded to version 1.35
-
-=item *
-
-C<Pod::Perldoc> is now maintained by Hakim Cassimally (osfameron).
 
 =item * 
 
@@ -653,7 +627,7 @@ functionality on systems that support it.
 
 =item *
 
-C<re> gains the regmust() function.
+C<re> upgraded to 0.06_01 
 
 =item *
 
@@ -713,7 +687,7 @@ C<Term::ANSIColor> upgraded to version 1.12
 
 =item *
 
-C<Term::Cap> upgraded to version 1.11
+C<Term::Cap> upgraded to version 1.12
 
 =item *
 
@@ -749,11 +723,11 @@ C<Text::Balanced> upgraded to version 1.98
 
 =item *
 
-C<Text::ParseWords> upgraded to version 3.26
+C<Text::ParseWords> upgraded to version 3.27
 
 =item *
 
-C<Text::Soundex> upgraded to version 3.02
+C<Text::Soundex> upgraded to version 3.03
 
 =item *
 
@@ -812,7 +786,7 @@ C<Time::gmtime> upgraded to version 1.03
 
 =item *
 
-C<Time::Local> upgraded to version 1.18
+C<Time::Local> upgraded to version 1.1901
 
 =item *
 
@@ -875,7 +849,7 @@ Added new C<is_shared> method.
 
 =item *
 
-C<Unicode::Normalize> upgraded to version 1.01
+C<Unicode::Normalize> upgraded to version 1.02
 
 =item *
 
