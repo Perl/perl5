@@ -362,18 +362,6 @@ C<Encode::Alias> includes a fix for encoding "646" (aka ASCII) on Solaris.
 
 =item *
 
-C<File::Basename> upgraded to version 2.77
-
-=item *
-
-C<File::Find> upgraded to version 1.13
-
-=item *
-
-C<File::Glob> upgraded to version 1.06
-
-=item *
-
 C<Errno> upgraded to version 1.10
 
 =item *
@@ -425,17 +413,25 @@ C<ExtUtils::ParseXS> upgraded to version 2.19
 
 C<Fatal> upgraded to version 1.06
 
-=item *
-
-C<Time::Local> upgraded to version 1.18
-
 =over
 
 =item *
 
-Allows to make fatal built-ins in CORE::GLOBAL.
+Allows built-ins in CORE::GLOBAL to be made fatal.
 
 =back
+
+=item *
+
+C<File::Basename> upgraded to version 2.77
+
+=item *
+
+C<File::Find> upgraded to version 1.13
+
+=item *
+
+C<File::Glob> upgraded to version 1.06
 
 =item *
 
@@ -483,10 +479,6 @@ C<File::Spec> upgraded to version 3.29 with improved handling of bad
 arguments and some platform specific improvements (Including for VMS and
 Cygwin) including an optimization on C<abs2rel()> when handling both relative
 arguments.
-
-=item *
-
-C<File::Spec::Unix> upgraded to version 1.5_01
 
 =item *
 
@@ -562,7 +554,15 @@ C<Math::Complex>, C<Math::Trig> upgraded to version 1.54.
 
 =item *
 
-C<Module::Pluggable> upgraded to version 3.8
+C<NDBM_File> upgraded to version 1.07
+
+=over
+
+=item *
+
+Improve g++ handling for systems using GDBM compatibility headers.
+
+=back
 
 =item *
 
@@ -580,22 +580,6 @@ Fix several bugs with L<NEXT> when working with C<AUTOLOAD>, C<eval> block, and
 within overloaded stringification.
 
 =back
-
-=item *
-
-C<NDBM_File> upgraded to version 1.07
-
-=over
-
-=item *
-
-Improve g++ handling for systems using GDBM compatibility headers.
-
-=back
-
-=item *
-
-C<Opcode::Safe> upgraded to version 2.14
 
 =item *
 
@@ -673,6 +657,10 @@ C<re> gains the regmust() function.
 
 =item *
 
+C<Safe> upgraded to version 2.16
+
+=item *
+
 C<SDBM_File> upgraded to version 1.06
 
 =over
@@ -717,7 +705,7 @@ C<Switch> upgraded to version 2.13
 
 =item *
 
-C<Sys-Syslog> upraded to version 0.27
+C<Sys::Syslog> upraded to version 0.27
 
 =item *
 
@@ -737,14 +725,6 @@ C<Test::Builder> upgraded to version 0.80
 
 =item *
 
-C<Test::More> upgraded to version 0.80
-
-=item *
-
-C<Test::Simple> upgraded to version 0.80
-
-=item *
-
 C<Test::Harness> upgraded version to 2.64
 
 =over
@@ -754,6 +734,14 @@ C<Test::Harness> upgraded version to 2.64
 This made it able to handle newlines.
 
 =back
+
+=item *
+
+C<Test::More> upgraded to version 0.80
+
+=item *
+
+C<Test::Simple> upgraded to version 0.80
 
 =item *
 
@@ -824,6 +812,10 @@ C<Time::gmtime> upgraded to version 1.03
 
 =item *
 
+C<Time::Local> upgraded to version 1.18
+
+=item *
+
 C<Time::HiRes> upgraded to version 1.9715 with various build improvements 
 (including VMS (31752)) and minor platform-specific bug fixes (including 
 for HP-UX 11 ia64)
@@ -880,14 +872,6 @@ shared elements as-is and deep-cloning non-shared elements.
 Added new C<is_shared> method.
 
 =back
-
-=item *
-
-C<Thread::Queue> upgraded to version 2.08
-
-=item *
-
-C<Thread::Semaphore> upgraded to version 2.08
 
 =item *
 
