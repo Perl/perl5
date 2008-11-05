@@ -60,6 +60,11 @@ calculating an offset within the string, which should speed up some operations
 on long strings. It is now possible to disable the caching code at run time,
 to verify that it is not the cause of suspected problems.
 
+=head2 Runtime relocatable installations
+
+There is now Configure support for creating a perl tree that is relocatable
+at run time. see L</Relocatable installations>.
+
 =head2 New internal variables
 
 =over 4
@@ -182,39 +187,37 @@ C<B> upgraded from 1.09_01 to 1.19
 
 =item *
 
-consting and PMOP handling fixes.
+provides new PAD related abstraction macros C<B::NV::COP_SEQ_RANGE_LOW>,
+C<B::NV::COP_SEQ_RANGE_HIGH>, C<B::NV::PARENT_PAD_INDEX>,
+C<B::NV::PARENT_FAKELEX_FLAGS>, which hides the diffence in storage in
+5.10.0 and later.
 
 =item *
 
-export B_sub_generation(), B::NV::COP_SEQ_RANGE_LOW(),
-B::NV::COP_SEQ_RANGE_HIGH(), B::NV::PARENT_PAD_INDEX(),
-B::NV::PARENT_FAKELEX_FLAGS()
+provides C<B::sub_generation>, which exposes C<PL_sub_generation>
 
 =item *
 
-fix B::PV::PVBM. It was missing the last table entry before.
+provides C<B::GV::isGV_with_GP>, which on pre-5.10 perls always returns true.
 
 =item *
 
-B::BM::PREVIOUS returns now U32, not U16.
+New type C<B::HE> added with methods C<VAL>, C<HASH> and C<SVKEY_force>
 
 =item *
 
-add B::GV::isGV_with_GP() returning always TRUE
-
-=item *
-
-B::CV::START and B:CV::ROOT return now NULL on an XSUB,
-B::CV::XSUB and B::CV::XSUBANY return 0 on a non-XSUB.
-
-=item *
-
-New type B::HE added with methods VAL, HASH, SVKEY_force
-
-=item *
-
-The B::GVf_IMPORTED_CV flag is now set correctly when a proxy
+The C<B::GVf_IMPORTED_CV> flag is now set correctly when a proxy
 constant subroutine is imported.
+
+=item *
+
+bugs fixed in the handling of C<PMOP>s.
+
+=item *
+
+C<B::BM::PREVIOUS> returns now C<U32>, not C<U16>.
+C<B::CV::START> and C<B:CV::ROOT> return now NULL on an XSUB,
+C<B::CV::XSUB> and C<B::CV::XSUBANY> return 0 on a non-XSUB.
 
 =back
 
@@ -230,18 +233,18 @@ C<B::Concise> upgraded to 0.76
 
 =item *
 
-Supports option B<-src>, i.e. the rendering of each statement (starting with
-the nextstate OP) will be preceded by the first line of source code that
+new option B<-src> causes the rendering of each statement (starting with
+the nextstate OP) to be preceded by the first line of source code that
 generates it.
 
 =item *
 
-Support option B<-stash="somepackage">, i.e. "somepackage" will be required,
-then the stash is inspected, and each function is rendered.
+new option B<-stash="somepackage">, C<require>s "somepackage", and then renders
+each function defined in its namespace.
 
 =item *
 
-Now has a documentation of detailed hint symbols.
+Now has documentation of detailed hint symbols.
 
 =back
 
@@ -302,11 +305,12 @@ C<Data::Dumper> upgraded to version 2.121_17
 
 =item *
 
-Performance enhancements (28963)
+Fixes hash iterator current position with the pure Perl version #40668
 
 =item *
 
-Fixes hash iterator current position with the pure Perl version #40668 (29224)
+Performance enhancements, which will be most evident on platforms where
+repeated calls to C's C<realloc> are slow, such as Win32.
 
 =back
 
@@ -342,8 +346,9 @@ C<DirHandle> upgraded to version 1.02
 
 =item *
 
-Now localize C<$.>, C<$@>, C<$!>, C<$^E>, and C<$?> before closing directory
-handle to suppress warning about already being closed.
+Now localises C<$.>, C<$@>, C<$!>, C<$^E>, and C<$?> before closing the
+directory handle to suppress leaking any side effects of warnings about it
+already being closed.
 
 =back
 
@@ -358,7 +363,8 @@ non-default file extension.
 
 C<Encode> upgraded to version 2.26
 
-C<Encode::Alias> includes a fix for encoding "646" (aka ASCII) on Solaris.
+C<Encode::Alias> includes a fix for encoding "646" on Solaris (better known as
+ASCII) .
 
 =item *
 
@@ -413,15 +419,13 @@ C<Fatal> upgraded to version 1.06
 
 =item *
 
-Allows built-ins in CORE::GLOBAL to be made fatal.
+Allows built-ins in C<CORE::GLOBAL> to be made fatal.
 
 =back
 
 =item *
 
 C<File::Basename> upgraded to version 2.77
-
-=item *
 
 =item *
 
@@ -457,10 +461,20 @@ C<File::Path> upgraded to version 2.04
 
 =item *
 
-C<File::Spec> upgraded to version 3.29 with improved handling of bad
-arguments and some platform specific improvements (Including for VMS and
-Cygwin) including an optimization on C<abs2rel()> when handling both relative
-arguments.
+C<File::Spec> upgraded to version 3.29
+
+=over 4
+
+=item *
+
+improved handling of bad arguments
+
+=item *
+
+some platform specific improvements (including for VMS and Cygwin), with
+an optimization on C<abs2rel()> when handling both relative arguments.
+
+=back
 
 =item *
 
@@ -612,7 +626,7 @@ C<Fcntl> and re-exported, rather than being duplicated by C<POSIX>
 
 =item *
 
-C<POSIX::remove> can removes empty directories.
+C<POSIX::remove> can remove empty directories.
 
 =item *
 
@@ -627,7 +641,7 @@ functionality on systems that support it.
 
 =item *
 
-C<re> upgraded to 0.06_01 
+C<re> upgraded to version 0.06_01
 
 =item *
 
@@ -636,14 +650,6 @@ C<Safe> upgraded to version 2.16
 =item *
 
 C<SDBM_File> upgraded to version 1.06
-
-=over
-
-=item *
-
-Improve g++ handling for systems using GDBM compatibility headers.
-
-=back
 
 =item *
 
@@ -774,7 +780,7 @@ C<Tie::Memoize> upgraded to version 1.1
 
 =item *
 
-Tie::Memoize::EXISTS now correctly caches its results.
+C<Tie::Memoize::EXISTS> now correctly caches its results.
 
 =back
 
@@ -791,7 +797,7 @@ C<Time::Local> upgraded to version 1.1901
 =item *
 
 C<Time::HiRes> upgraded to version 1.9715 with various build improvements 
-(including VMS (31752)) and minor platform-specific bug fixes (including 
+(including VMS) and minor platform-specific bug fixes (including
 for HP-UX 11 ia64)
 
 =item *
@@ -923,7 +929,7 @@ between C<""> and C<<E<lt>E<gt>>> quoting in C<#include> statements.
 
 =item *
 
-generates correct correct code for C<#if defined A || defined B> now
+now generates correct correct code for C<#if defined A || defined B>
 [RT #39130]
 
 =back
@@ -933,15 +939,28 @@ generates correct correct code for C<#if defined A || defined B> now
 As usual, the documentation received its share of corrections, clarifications
 and other nitfixes. More C<< X<...> >> tags were added for indexing.
 
-L<CORE> documents the pseudo-namespace for Perl's core routines.
+L<perlunitut> is a tutorial written by Juerd Waalboer on Unicode-related
+terminology and how to correctly handle Unicode in Perl scripts.
 
-L<perlbot> fixed C<ref> returns an empty string (not undef) when used on a
-string (#31685)
+L<perlunicode> is updated in section user defined properties.
 
-L<perlcheat> is updated with better details on C<\w>, C<\d>, and C<\s>.
+L<perluniintro> have been updated in the example of detecting data that is not
+valid in particular encoding. 
 
 L<perlcommunity> provides an overview of the Perl Community along with further
 resources.
+
+L<CORE> documents the pseudo-namespace for Perl's core routines.
+
+=head1 Changes to Existing Documentation
+
+L<perlglossary> adds I<deprecated modules and features> and I<to be dropped modules>.
+
+L<perlhack> has been updated and added resources on smoke testing.
+
+The Perl FAQs (F<perlfaq1>..F<perlfaq9>) have been updated.
+
+L<perlcheat> is updated with better details on C<\w>, C<\d>, and C<\s>.
 
 L<perldebug> is updated with information on how to call the debugger.
 
@@ -959,14 +978,6 @@ L<perlfunc>:
 
 Documentation is fixed in section C<caller> and C<pop>. 
 
-=item * 
-
-Added example of C<gethostbyname>. 
-
-=item * 
-
-Better wording in C<prototype> and C<split>. 
-
 =item *
 
 Function C<alarm()> now mentions C<Time::HiRes::ualarm> in preference
@@ -978,11 +989,11 @@ Regarding precedence in C<-X>, filetest operators are the same as unary
 operators, but not regarding parsing and parentheses (spotted by Eirik Berg
 Hanssen).
 
+=item *
+
+L<reverse> function documentation received scalar context examples.
+
 =back
-
-L<perlglossary> adds I<deprecated modules and features> and I<to be dropped modules>.
-
-L<perlhack> has been updated and added resources on smoke testing.
 
 L<perllocale> documentation is adjusted for the number of localization and
 C<POSIX::setlocale()> to fix debian bug in RT #379463.
@@ -1011,25 +1022,10 @@ L<perlsub> example is updated to use lexical variable on opendir syntax.
 L<perltoc> the table of content is updated with several new documentation and
 cleaned up unnecessary noises.
 
-L<perlunicode> is updated in section user defined properties.
-
-L<perluniintro> have been updated in the example of detecting data that's not
-valid in particular encoding. 
-
-L<perlunitut> is a tutorial written by Juerd Waalboer on Unicode-related
-terminology and how to correctly handle Unicode in Perl scripts.
-
-L<perlvar> and L<perlre> add items C<${^PREMATCH}>, C<${^MATCH}>, and
-C<${^`POSTMATCH}>.
-
 L<perlvar> fixes confusion about real GID C<$(> and effective GID C<$)>. 
 
 Perl thread tutorial example is fixed in section
 L<perlthrtut/Queues: Passing Data Around> and L<perlothrtut>.
-
-The Perl FAQs (F<perlfaq1>..F<perlfaq9>) have been updated.
-
-L<reverse> function documentation received scalar context examples.
 
 L<perlhack> documentation extensively improved by Jarkko Hietaniemi and others.
 
@@ -1038,8 +1034,6 @@ L<perltoot> provides information on modifying C<@UNIVERSAL::ISA>.
 L<perlport> documentation extended to include different C<kill(-9, ...)>
 semantics on Windows. It also clearly states C<dump()> is not supported on Win32
 and cygwin.
-
-=head1 Changes to Existing Documentation
 
 =over 4
 
@@ -1074,11 +1068,6 @@ this configuration unless thorough testing is performed before deployment.
 
 =item *
 
-Reblessing an object from a class that doesn't use overloads to one
-that does (or vice versa) is now faster. (31996, 32019, 32025).
-
-=item *
-
 C<diagnostics> no longer uses C<$&>, which results in large speedups
 for regexp matching in all code using it.
 
@@ -1090,21 +1079,14 @@ char-classes as an escaping mechanism will see a speedup. (Yves Orton)
 
 =item *
 
-Many calls to C<strlen()> have been eliminated, either because the length was
-already known, or by adopting or enhancing APIs that pass lengths.
-
-A very stubborn compiler warning in S_emulate_eaccess was killed six
-times.
-
-=item *
-
 Creating anonymous array and hash references (ie. C<[]> and C<{}>) now incurs
 no more overhead than creating an anonymous list or hash. Nicholas Clark provid
 changes with a saving of two ops and one stack push, measured as a 6.4% improve 
 
 =item *
 
-Stopped memory leak on long /etc/groups entries
+Many calls to C<strlen()> have been eliminated, either because the length was
+already known, or by adopting or enhancing APIs that pass lengths.
 
 =back
 
@@ -1115,13 +1097,14 @@ Stopped memory leak on long /etc/groups entries
 There is now Configure support for creating a relocatable perl tree. If
 you Configure with C<-Duserelocatableinc>, then the paths in @INC (and
 everything else in %Config) can be optionally located via the path of the
-perl executable.
+F<perl> executable.
 
-That means that, if the string C<".../"> is found at the start of any
-path, it's substituted with the directory of $^X. So, the relocation can
-be configured on a per-directory basis, although the default with
-C<-Duserelocatableinc> is that everything is relocated. The initial
-install is done to the original configured prefix.
+At start time, if any paths in C<@INC> or C<Config> that C<Configure> marked
+as relocatable (by starting them with C<".../">), then they are prefixed the
+directory of C<$^X>. This allows the relocation can be configured on a
+per-directory basis, although the default with C<-Duserelocatableinc> is that
+everything is relocated. The initial install is done to the original configured
+prefix.
 
 =head2 Compilation improvements
 
@@ -1135,6 +1118,11 @@ if C<make test> is instructed to run in parallel.
 =back
 
 =head2 FIXME
+
+A very stubborn compiler warning in S_emulate_eaccess was killed six
+times.
+
+Stopped memory leak on long /etc/groups entries
 
 Integrate mkppport. All ppport.h files in the core will now
 be autogenerated at build time (and removed during cleanup).
@@ -1197,7 +1185,7 @@ C<perlld> and C<ld2> (Cygwin files)
 
 =item *
 
-Drop C<-std=c89> and C<-ansi> if using 'long long' as the main integral type.
+Drop C<-std=c89> and C<-ansi> if using C<long long> as the main integral type.
 
 In FreeBSD 6.2 (and perhaps other releases), headers do not declare a required
 function if this is not done.
@@ -1210,9 +1198,9 @@ function if this is not done.
 
 =item *
 
-Starting with Solaris 10, we don't want versioned shared libraries because
-those often indicate a private use only library.  Especially badly that would
-break things with L<SUNWbdb> (Berkeley DB) being installed.
+Starting with Solaris 10, we do not want versioned shared libraries, because
+those often indicate a private use only library. These problems could often
+be triggered when L<SUNWbdb> (Berkeley DB) was installed.
 
 If Solaris 10 is detected set C<ignore_versioned_solibs=y>.
 
@@ -1237,26 +1225,12 @@ Help older VMS compilers by using C<ccflags> when building C<munchconfig.exe>.
 =item * 
 
 Don't try to build old L<Thread> extension on VMS when C<-Duseithreads> has
-been chosen. (31104)
-
-=item * 
-
-Better suppression logic for not building L<Thread> extension (31226).
-
-=item * 
-
-Fix the case of C<$Config{perl_patchlevel}> (31544) (but keep setting
-C<$Config{PERL_PATCHLEVEL}> and grab the value from a C<MAINTXXX> or 
-C<SMOKEXXX> line in patchlevel.h if present. (31597)).
+been chosen.
 
 =item *
 
 Passing a raw string of "NaN" to L<nawk> causes a core dump - so the string
 has been changed to "*NaN*" (31975)
-
-=item *
-
-Removed F<vms/genconfig.pl> and references to it (obsolete as of change 1084).
 
 =back
 
@@ -1347,6 +1321,12 @@ Overloading flags are now stored on the referent instead of the reference.
 Previously taking a new, unrelated reference to an object could result in
 the original (blessed) reference being able to access the overload while
 the new reference could not.  (Test added in 32016).
+
+=item *
+
+Reblessing an object from a class that doesn't use overloads to one
+that does (or vice versa) is now faster. (31996, 32019, 32025).
+
 
 =item *
 
