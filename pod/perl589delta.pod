@@ -2088,7 +2088,7 @@ The F<Artistic> and F<Copying> files for copyright information.
 
 =cut
 
-=for rehoming
+=fixme rehoming
+
 The Emacs perl mode (F<emacs/cperl-mode.el>) has been updated to version
 5.23.
-
