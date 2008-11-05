@@ -48,8 +48,10 @@ ok( grep(/^Writing $makefile for Big::Dummy/,
 
 my $make = make_run();
 run("$make");   # this is necessary due to a dmake bug.
-my $install_out = run("$make install");
-is( $?, 0, '  make install exited normally' ) || diag $install_out;
+# Test 'make install VERBINST=1'
+my $make_install_verbinst = make_macro($make, 'install', VERBINST => 1);
+my $install_out = run($make_install_verbinst);
+is( $?, 0, 'install' ) || diag $install_out;
 like( $install_out, qr/^Installing /m );
 like( $install_out, qr/^Writing /m );
 

@@ -1,7 +1,7 @@
 package ExtUtils::MM_Any;
 
 use strict;
-our $VERSION = '6.48';
+our $VERSION = '6.48_01';
 
 use Carp;
 use File::Spec;
@@ -354,7 +354,7 @@ to do some normalization on the information from %Config or the user.
 sub make {
     my $self = shift;
 
-    my $make = lc $self->{MAKE};
+    my $make = lc($self->{MAKE}|| '');
 
     # Truncate anything like foomake6 to just foomake.
     $make =~ s/^(\w+make).*/$1/;

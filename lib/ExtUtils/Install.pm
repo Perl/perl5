@@ -38,11 +38,11 @@ ExtUtils::Install - install files from here to there
     
 =head1 VERSION
 
-1.51
+1.50_04
 
 =cut
 
-$VERSION = '1.50_01';
+$VERSION = '1.50_04';
 $VERSION = eval $VERSION;
 
 =pod
@@ -816,7 +816,7 @@ sub install { #XXX OS-SPECIFIC
     if ($pack{'write'}) {
         $dir = install_rooted_dir(dirname($pack{'write'}));
         _mkpath( $dir, 0, 0755, $verbose, $dry_run );
-        print "Writing $pack{'write'}\n";
+        print "Writing $pack{'write'}\n" if $verbose;
         $packlist->write(install_rooted_file($pack{'write'})) unless $dry_run;
     }
 
@@ -957,6 +957,13 @@ sub install_default {
   my $INST_SCRIPT = File::Spec->catdir($Curdir,'blib','script');
   my $INST_MAN1DIR = File::Spec->catdir($Curdir,'blib','man1');
   my $INST_MAN3DIR = File::Spec->catdir($Curdir,'blib','man3');
+
+  my @INST_HTML;
+  if($Config{installhtmldir}) {
+      my $INST_HTMLDIR = File::Spec->catdir($Curdir,'blib','html');
+      @INST_HTML = ($INST_HTMLDIR => $Config{installhtmldir});
+  }
+
   install({
            read => "$Config{sitearchexp}/auto/$FULLEXT/.packlist",
            write => "$Config{installsitearch}/auto/$FULLEXT/.packlist",
@@ -968,6 +975,7 @@ sub install_default {
            $INST_SCRIPT => $Config{installscript},
            $INST_MAN1DIR => $Config{installman1dir},
            $INST_MAN3DIR => $Config{installman3dir},
+	   @INST_HTML,
           },1,0,0);
 }
 
