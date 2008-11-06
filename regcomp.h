@@ -317,9 +317,9 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 #define ANYOF_NALNUM	 1
 #define ANYOF_SPACE	 2	/* \s */
 #define ANYOF_NSPACE	 3
-#define ANYOF_DIGIT	 4
+#define ANYOF_DIGIT	 4	/* \d */
 #define ANYOF_NDIGIT	 5
-#define ANYOF_ALNUMC	 6	/* isalnum(3), utf8::IsAlnum, ALNUMC */
+#define ANYOF_ALNUMC	 6	/* [[:alnum:]] isalnum(3), utf8::IsAlnum, ALNUMC */
 #define ANYOF_NALNUMC	 7
 #define ANYOF_ALPHA	 8
 #define ANYOF_NALPHA	 9

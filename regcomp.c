@@ -8973,6 +8973,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
     else if (k == ANYOF) {
 	int i, rangestart = -1;
 	const U8 flags = ANYOF_FLAGS(o);
+	int do_sep = 0;
 
 	/* Should be synchronized with * ANYOF_ #xdefines in regcomp.h */
 	static const char * const anyofs[] = {
@@ -8988,8 +8989,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	    "[:^alpha:]",
 	    "[:ascii:]",
 	    "[:^ascii:]",
-	    "[:ctrl:]",
-	    "[:^ctrl:]",
+	    "[:cntrl:]",
+	    "[:^cntrl:]",
 	    "[:graph:]",
 	    "[:^graph:]",
 	    "[:lower:]",
@@ -9028,14 +9029,26 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 		    sv_catpvs(sv, "-");
 		    put_byte(sv, i - 1);
 		}
+		do_sep = 1;
 		rangestart = -1;
 	    }
 	}
-
+        if (do_sep) {
+            sv_catpvs(sv,"][");
+            do_sep = 0;
+        }
+            
 	if (o->flags & ANYOF_CLASS)
 	    for (i = 0; i < (int)(sizeof(anyofs)/sizeof(char*)); i++)
-		if (ANYOF_CLASS_TEST(o,i))
+		if (ANYOF_CLASS_TEST(o,i)) {
 		    sv_catpv(sv, anyofs[i]);
+		    do_sep = 1;
+		}
+        
+        if (do_sep) {
+            sv_catpvs(sv,"][");
+            do_sep = 0;
+        }
 
 	if (flags & ANYOF_UNICODE)
 	    sv_catpvs(sv, "{unicode}");
@@ -9049,7 +9062,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	    if (lv) {
 		if (sw) {
 		    U8 s[UTF8_MAXBYTES_CASE+1];
-		
+
 		    for (i = 0; i <= 256; i++) { /* just the first 256 */
 			uvchr_to_utf8(s, i);
 			
