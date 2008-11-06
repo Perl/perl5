@@ -1120,7 +1120,11 @@ changes with a saving of two ops and one stack push, measured as a 6.4% improve
 =item *
 
 Many calls to C<strlen()> have been eliminated, either because the length was
-already known, or by adopting or enhancing APIs that pass lengths.
+already known, or by adopting or enhancing APIs that pass lengths. This has
+been aided by the adoption of a C<my_sprintf()> wrapper, which returns the
+correct C89 value - the length of the formatted string. Previously we could
+not rely on the return value of C<sprintf()>, because on some ancient but
+extant platforms it still returns C<char *>.
 
 =item * 
 
@@ -1753,6 +1757,10 @@ silently exiting.)
 
 =head1 Changed Internals
 
+C<set> magic on localizing/assigning to a magic variable will now only
+trigger for I<container magics>, i.e. it will for C<%ENV> or C<%SIG>
+but not for C<$#array>.
+
 The new API macro C<newSVpvs()> can be used in place of constructions such as
 C<newSVpvn("ISA", 3)>. It takes a single string constant, and at C compile
 time determins its length.
@@ -1783,9 +1791,12 @@ allow C<Sub::Current> to work on Windows.
 C<ptr_table*> functions are now available in unthreaded perl. C<Storable>
 takes advantage of this.
 
-C<set> magic on localizing/assigning to a magic variable will now only
-trigger for I<container magics>, i.e. it will for C<%ENV> or C<%SIG>
-but not for C<$#array>.
+There have been many small cleanups made to the internals. In particular,
+C<sv_upgrade()> has been simplified considerably, with a straight-through
+code path that uses C<memset> and C<memcpy> to initialise the new body,
+rather than assignment via multiple temporary variables. It has also
+benefitted from simplification and de-duplication of the arena management
+code.
 
 A lot of small improvents in the code base were made due to reports from
 the Coverity static code analyzer.
@@ -1814,13 +1825,6 @@ shared library is indeed binary compatible.
 
 Symbolic references can now have embedded NULs. The new public function
 C<get_cvn_flags> can be used in extensions if you have to handle them.
-
-=for fixme
-
-Lots of cleanup
-sprintf
-sv_upgrade direct
-areneas
 
 =head2 Macro cleanups
 
