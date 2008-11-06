@@ -13,6 +13,7 @@
 # 	y	expect a match
 # 	n	expect no match
 # 	c	expect an error
+#	T	the test is a TODO (can be combined with y/n/c)
 #	B	test exposes a known bug in Perl, should be skipped
 #	b	test exposes a known bug in Perl, should be skipped if noamp
 #	t	test exposes a bug with threading, TODO if qr_embed_thr
@@ -102,16 +103,19 @@ foreach (@tests) {
     my ($pat, $subject, $result, $repl, $expect, $reason) = split(/\t/,$_,6);
     $reason = '' unless defined $reason;
     my $input = join(':',$pat,$subject,$result,$repl,$expect);
-    $pat = "'$pat'" unless $pat =~ /^[:'\/]/;
+    # the double '' below keeps simple syntax highlighters from going crazy
+    $pat = "'$pat'" unless $pat =~ /^[:''\/]/; 
     $pat =~ s/(\$\{\w+\})/$1/eeg;
     $pat =~ s/\\n/\n/g;
     $subject = eval qq("$subject"); die $@ if $@;
     $expect  = eval qq("$expect"); die $@ if $@;
     $expect = $repl = '-' if $skip_amp and $input =~ /\$[&\`\']/;
-    my $todo = $qr_embed_thr && ($result =~ s/t//);
+    my $todo_qr = $qr_embed_thr && ($result =~ s/t//);
     my $skip = ($skip_amp ? ($result =~ s/B//i) : ($result =~ s/B//));
     $reason = 'skipping $&' if $reason eq  '' && $skip_amp;
     $result =~ s/B//i unless $skip;
+    my $todo= $result =~ s/T// ? " # TODO" : "";
+    
 
     for my $study ('', 'study $subject', 'utf8::upgrade($subject)',
 		   'utf8::upgrade($subject); study $subject') {
@@ -165,39 +169,39 @@ EOFCODE
 	}
 	chomp( my $err = $@ );
 	if ($result eq 'c') {
-	    if ($err !~ m!^\Q$expect!) { print "not ok $test (compile) $input => `$err'\n"; next TEST }
+	    if ($err !~ m!^\Q$expect!) { print "not ok $test$todo (compile) $input => `$err'\n"; next TEST }
 	    last;  # no need to study a syntax error
 	}
 	elsif ( $skip ) {
 	    print "ok $test # skipped", length($reason) ? " $reason" : '', "\n";
 	    next TEST;
 	}
-	elsif ( $todo ) {
+	elsif ( $todo_qr ) {
 	    print "not ok $test # TODO", length($reason) ? " - $reason" : '', "\n";
 	    next TEST;
 	}
 	elsif ($@) {
-	    print "not ok $test $input => error `$err'\n$code\n$@\n"; next TEST;
+	    print "not ok $test$todo $input => error `$err'\n$code\n$@\n"; next TEST;
 	}
 	elsif ($result =~ /^n/) {
-	    if ($match) { print "not ok $test ($study) $input => false positive\n"; next TEST }
+	    if ($match) { print "not ok $test$todo ($study) $input => false positive\n"; next TEST }
 	}
 	else {
 	    if (!$match || $got ne $expect) {
 	        eval { require Data::Dumper };
 		if ($@) {
-		    print "not ok $test ($study) $input => `$got', match=$match\n$code\n";
+		    print "not ok $test$todo ($study) $input => `$got', match=$match\n$code\n";
 		}
 		else { # better diagnostics
 		    my $s = Data::Dumper->new([$subject],['subject'])->Useqq(1)->Dump;
 		    my $g = Data::Dumper->new([$got],['got'])->Useqq(1)->Dump;
-		    print "not ok $test ($study) $input => `$got', match=$match\n$s\n$g\n$code\n";
+		    print "not ok $test$todo ($study) $input => `$got', match=$match\n$s\n$g\n$code\n";
 		}
 		next TEST;
 	    }
 	}
     }
-    print "ok $test\n";
+    print "ok $test$todo\n";
 }
 
 1;

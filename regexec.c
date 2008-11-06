@@ -4983,7 +4983,8 @@ NULL
 	  do_ifmatch:
 	    ST.me = scan;
 	    ST.logical = logical;
-	    logical = 0;
+	    logical = 0; /* XXX: reset state of logical once it has been saved into ST */
+	    
 	    /* execute body of (?...A) */
 	    PUSH_YES_STATE_GOTO(IFMATCH_A, NEXTOPER(NEXTOPER(scan)));
 	    /* NOTREACHED */
