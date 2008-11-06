@@ -1342,12 +1342,21 @@ and releasing C<FILE *>s
 =head2 Magic
 
 Several bugs have been fixed in Magic, the internal system used to implement
-features such as C<tie> and threads sharing.
+features such as C<tie>, tainting and threads sharing.
 
 Some of the bitwise ops were not checking whether their arguments were magical
 before using them. [RT #24816]
 
 Magic is no longer invoked twice by the expression C<\&$x>
+
+A bug with assigning large numbers and tainting has been resolved.
+[RT #40708]
+
+A new entry has been added to the MAGIC vtable - C<svt_local>. This is used
+when copying magic to the new value during C<local>. This allows problems
+with localising shared variables. 
+
+For the implementation details, see L<perlguts/Magic Virtual Tables>.
 
 =head2 Reblessing overloaded objects now works
 
@@ -1529,19 +1538,6 @@ Fixed bug RT #54828 in C<perlio.c> when calling C<binmode> on Win32 and Cgywin
 may cause segmentation fault.
 
 =back
-
-Magic
-
-=for fixme
-
-Dave's copy fixes.
-
-	     [ 26569]
-	     add svt_local slot to magic vtable, and fix local $shared
-	     [ 26735]
-	     document svt_copy, svt_dup and svt_local vtable slots
-
-http://public.activestate.com/cgi-bin/perlbrowse/p/30232
 
 =head3 VMS
 
