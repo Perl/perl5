@@ -3,20 +3,26 @@
 #include "XSUB.h"
 #undef NDBM_HEADER_USES_PROTOTYPES
 #if defined(I_GDBM_NDBM)
-#  include <gdbm-ndbm.h> /* Debian compatibility version */
 #  ifdef GDBM_NDBM_H_USES_PROTOTYPES
 #    define NDBM_HEADER_USES_PROTOTYPES
+START_EXTERN_C
 #  endif
+#  include <gdbm-ndbm.h> /* Debian compatibility version */
 #elif defined(I_GDBMNDBM)
-#  include <gdbm/ndbm.h> /* RedHat compatibility version */
 #  ifdef GDBMNDBM_H_USES_PROTOTYPES
 #    define NDBM_HEADER_USES_PROTOTYPES
+START_EXTERN_C
 #  endif
+#  include <gdbm/ndbm.h> /* RedHat compatibility version */
 #elif defined(I_NDBM)
-#  include <ndbm.h>
 #  ifdef NDBM_H_USES_PROTOTYPES
 #    define NDBM_HEADER_USES_PROTOTYPES
+START_EXTERN_C
 #  endif
+#  include <ndbm.h>
+#endif
+#ifdef NDBM_HEADER_USES_PROTOTYPES
+END_EXTERN_C
 #endif
 
 typedef struct {
