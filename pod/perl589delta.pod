@@ -333,7 +333,7 @@ C<Data::Dumper> upgraded to version 2.121_17
 
 =item *
 
-Fixes hash iterator current position with the pure Perl version #40668
+Fixes hash iterator current position with the pure Perl version [RT #40668]
 
 =item *
 
@@ -627,7 +627,7 @@ C<PerlIO::scalar> upgraded to version 0.06
 
 =item *
 
-[perl #40267] PerlIO::scalar doesn't respect readonly-ness
+[RT #40267] PerlIO::scalar doesn't respect readonly-ness
 
 =back
 
@@ -1030,7 +1030,7 @@ L<reverse> function documentation received scalar context examples.
 =back
 
 L<perllocale> documentation is adjusted for the number of localization and
-C<POSIX::setlocale()> to fix debian bug in RT #379463.
+C<POSIX::setlocale()> to fix Debian bug #379463.
 
 L<perlmodlib> is updated with C<CPAN::API::HOWTO> and
 C<Sys::Syslog::win32::Win32> 
@@ -1511,7 +1511,7 @@ window title.
 =item *
 
 C<File::Find> used to fail when the target dir is a bare drive letter and
-C<no_chdir> is 1 (the default is 0). (RT #41555)
+C<no_chdir> is 1 (the default is 0). [RT #41555]
 
 =item *
 
@@ -1532,6 +1532,7 @@ may cause segmentation fault.
 
 Magic
 
+=for fixme
 
 Dave's copy fixes.
 
@@ -1610,7 +1611,7 @@ aditional check for C<$Config{gccversion}>.
 
 =item *
 
-Use -DPTR_IS_LONG when using 64 bit integers (27001)
+Use -DPTR_IS_LONG when using 64 bit integers
 
 =back
 
@@ -1708,9 +1709,9 @@ able to handle further incoming signals safely.
 
 =head2 Panic: attempt to call %s in %s
 
-This new fatal error occurs when a file test operator is used that is 
-not availble on the current platfom (25987).
-
+This new fatal error occurs when the ACL version file test operator is used
+where it is not available on the current platform. Earlier checks mean that
+it should never be possible to get this.
 
 =head2 FETCHSIZE returned a negative value
 
